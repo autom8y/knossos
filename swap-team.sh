@@ -24,6 +24,9 @@ readonly MANIFEST_VERSION="1.0"
 # Orphan handling mode (set by flags)
 ORPHAN_MODE=""  # "", "keep", "remove", "promote"
 
+# Force swap even if already on target team
+FORCE_SWAP=0
+
 # Colors for output (if terminal supports it)
 if [[ -t 1 ]]; then
     readonly RED='\033[0;31m'
@@ -575,7 +578,8 @@ Commands:
   --list         List all available team packs
   (no args)      Show current active team
 
-Orphan Handling Options (for non-interactive use):
+Options:
+  --force, -f    Force swap even if already on target team
   --keep-all     Preserve orphan agents in project
   --remove-all   Remove orphan agents (backup available)
   --promote-all  Move orphan agents to ~/.claude/agents/
@@ -597,11 +601,12 @@ Exit Codes:
   5  Orphan conflict (non-interactive without flag)
 
 Examples:
-  ./swap-team.sh dev-pack           # Switch to dev-pack (interactive prompts)
-  ./swap-team.sh                    # Show current team
-  ./swap-team.sh --list             # List available teams
+  ./swap-team.sh dev-pack               # Switch to dev-pack (interactive prompts)
+  ./swap-team.sh                        # Show current team
+  ./swap-team.sh --list                 # List available teams
   ./swap-team.sh dev-pack --keep-all    # Keep all orphans during swap
   ./swap-team.sh dev-pack --remove-all  # Remove all orphans during swap
+  ./swap-team.sh dev-pack --force       # Re-swap even if already on dev-pack
 
 EOF
 }
@@ -851,13 +856,14 @@ perform_swap() {
 
     log_debug "Starting swap to $team_name"
 
-    # Check if already active (idempotency)
-    if [[ -f ".claude/ACTIVE_TEAM" ]]; then
+    # Check if already active (idempotency, unless --force)
+    if [[ -f ".claude/ACTIVE_TEAM" ]] && [[ "$FORCE_SWAP" -eq 0 ]]; then
         local current
         current=$(cat .claude/ACTIVE_TEAM | tr -d '[:space:]')
 
         if [[ "$current" == "$team_name" ]]; then
             log "Already using $team_name (no changes needed)"
+            log "Use --force to re-swap anyway"
             exit "$EXIT_SUCCESS"
         fi
     fi
@@ -942,6 +948,10 @@ main() {
                 ;;
             --promote-all)
                 ORPHAN_MODE="promote"
+                shift
+                ;;
+            --force|-f)
+                FORCE_SWAP=1
                 shift
                 ;;
             -*)
