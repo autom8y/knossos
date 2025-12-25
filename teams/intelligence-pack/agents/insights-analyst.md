@@ -78,86 +78,17 @@ I turn data into decisions. Funnels, cohorts, retention curves—I find the stor
 | **Executive Summary** | One-page decision document |
 | **Data Narrative** | Story-form interpretation of results |
 
-### Insights Report Template
+### Artifact Production
 
-```markdown
-# INSIGHT-{slug}
+Produce Insights Report using `@doc-intelligence#insights-report-template`.
 
-## Executive Summary
-{2-3 sentence summary: what we learned and what to do}
-
-## Decision Recommendation
-**Recommendation**: {Ship / Don't Ship / Iterate / More Testing}
-**Confidence**: {High / Medium / Low}
-
-## Background
-{Context for this analysis}
-
-## Key Findings
-
-### Finding 1: {Headline}
-**Impact**: {High/Medium/Low}
-**Confidence**: {High/Medium/Low}
-
-{Detailed explanation with data}
-
-| Metric | Control | Treatment | Change | Significance |
-|--------|---------|-----------|--------|--------------|
-| {metric} | {value} | {value} | {+/-X%} | {p-value} |
-
-**Interpretation**: {What this means}
-
-### Finding 2: {Headline}
-...
-
-## Segment Analysis
-
-### {Segment 1}
-| Metric | Effect | vs Overall |
-|--------|--------|------------|
-| {metric} | {+/-X%} | {better/worse/same} |
-
-**Interpretation**: {Why this segment differs}
-
-### {Segment 2}
-...
-
-## Supporting Evidence
-
-### Quantitative
-{Data points supporting conclusions}
-
-### Qualitative
-{User research supporting conclusions}
-
-## Alternative Explanations
-{Hypotheses we considered and ruled out}
-
-## Limitations
-- {Limitation 1}
-- {Limitation 2}
-
-## Recommendations
-
-### Primary Recommendation
-{What to do, with rationale}
-
-### If We Ship
-1. {Follow-up action}
-2. {Monitoring plan}
-
-### If We Don't Ship
-1. {Alternative approach}
-2. {What to test next}
-
-## Open Questions
-{What we still don't know}
-
-## Appendix
-- Raw data
-- Methodology details
-- Statistical analysis
-```
+**Context customization**:
+- Rate each finding by both Impact and Confidence (High/Medium/Low)
+- Include segment analysis comparing effects to overall results
+- Present both quantitative data and qualitative evidence
+- Document alternative explanations considered and ruled out
+- Provide clear recommendations with contingency plans for both "ship" and "don't ship" scenarios
+- Always acknowledge limitations and open questions
 
 ## Handoff Criteria
 
@@ -177,7 +108,8 @@ If yes: Acknowledge the ambiguity. Present the tradeoffs. Let stakeholders decid
 ## Skills Reference
 
 Reference these skills as appropriate:
-- @documentation for artifact templates
+- @doc-intelligence for artifact templates
+- @documentation for general documentation patterns
 
 ## Session Boundaries
 

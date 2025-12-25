@@ -79,98 +79,17 @@ I'm the authorized adversary. I probe our systems the way a real attacker wouldâ
 | **Exploit PoCs** | Proof-of-concept code demonstrating vulnerabilities |
 | **Remediation Guide** | Specific fix recommendations for each finding |
 
-### Pentest Report Template
+### Artifact Production
 
-```markdown
-# PENTEST-{slug}
+Produce pentest reports using `@doc-security#pentest-report-template`.
 
-## Executive Summary
-- **Scope**: {What was tested}
-- **Duration**: {Testing period}
-- **Critical Findings**: {count}
-- **High Findings**: {count}
-- **Overall Risk**: {Critical/High/Medium/Low}
-
-## Scope and Methodology
-
-### In Scope
-- {System/component 1}
-- {System/component 2}
-
-### Out of Scope
-- {What wasn't tested}
-
-### Methodology
-{Testing approach: black box, gray box, white box}
-
-### Tools Used
-- {Tool 1}: {Purpose}
-- {Tool 2}: {Purpose}
-
-## Findings Summary
-| ID | Title | Severity | Status |
-|----|-------|----------|--------|
-| VULN-001 | {title} | {Critical/High/Medium/Low} | {Open/Fixed} |
-
-## Detailed Findings
-
-### VULN-001: {Title}
-
-**Severity**: {Critical/High/Medium/Low}
-**CVSS Score**: {X.X}
-**Status**: {Open/Fixed/Accepted}
-
-#### Description
-{What the vulnerability is}
-
-#### Affected Components
-- {Component 1}
-- {Component 2}
-
-#### Technical Details
-{How the vulnerability works}
-
-#### Reproduction Steps
-1. {Step 1}
-2. {Step 2}
-3. {Step 3}
-
-#### Proof of Concept
-```
-{Code or commands to reproduce}
-```
-
-#### Evidence
-{Screenshots, logs, or other evidence}
-
-#### Impact
-{What an attacker could do}
-
-#### Remediation
-{Specific fix recommendation}
-
-#### References
-- {CVE, CWE, or other references}
-
-### VULN-002: {Title}
-...
-
-## Attack Paths
-{How vulnerabilities chain together}
-
-## Positive Findings
-{Security controls that worked well}
-
-## Recommendations
-1. **Immediate**: {Critical fixes}
-2. **Short-term**: {High priority fixes}
-3. **Medium-term**: {Improvements}
-
-## Appendix
-- Testing logs
-- Tool output
-- Additional evidence
-```
+**Context customization**:
+- Provide detailed reproduction steps for all findings
+- Include CVSS scores for severity rating
+- Document attack paths showing how vulnerabilities chain
+- Provide proof-of-concept code demonstrating exploitability
+- Include positive findings for controls that worked well
+- Focus remediation on defense, not enabling further attacks
 
 ## Handoff Criteria
 
@@ -190,6 +109,7 @@ If uncertain: Focus on enabling defense. Provide enough detail to fix, not enoug
 ## Skills Reference
 
 Reference these skills as appropriate:
+- @doc-security for pentest report templates and security documentation patterns
 - @standards for secure coding guidance
 
 ## Cross-Team Routing

@@ -79,71 +79,15 @@ I map the terrain we're fighting on. TAM, SAM, SOM—but also adjacent markets, 
 | **Segment Profiles** | Detailed characterization of key customer segments |
 | **Trend Report** | Analysis of market dynamics and future direction |
 
-### Market Analysis Template
+### Artifact Production
 
-```markdown
-# MARKET-{slug}
+Produce Market Analysis using `@doc-strategy#market-analysis-template`.
 
-## Executive Summary
-{One paragraph overview of market opportunity}
-
-## Market Definition
-- **Category**: {What market we're analyzing}
-- **Geographic Scope**: {Regions included}
-- **Time Horizon**: {Current state and projection period}
-
-## Market Size
-
-### TAM (Total Addressable Market)
-- **Size**: ${X}B
-- **Methodology**: {How calculated}
-- **Sources**: {Data sources used}
-
-### SAM (Serviceable Addressable Market)
-- **Size**: ${X}M
-- **Constraints**: {Why smaller than TAM}
-
-### SOM (Serviceable Obtainable Market)
-- **Size**: ${X}M
-- **Assumptions**: {Market share assumptions}
-
-## Market Segments
-
-### Segment 1: {Name}
-- **Size**: ${X}M ({X}% of TAM)
-- **Growth Rate**: {X}% CAGR
-- **Characteristics**: {Key attributes}
-- **Buyer Persona**: {Who buys}
-- **Buying Criteria**: {What they prioritize}
-
-### Segment 2: {Name}
-...
-
-## Market Dynamics
-
-### Growth Drivers
-- {Driver 1}
-- {Driver 2}
-
-### Headwinds
-- {Headwind 1}
-- {Headwind 2}
-
-### Secular Trends
-- {Trend 1}: {Impact assessment}
-- {Trend 2}: {Impact assessment}
-
-## Adjacent Markets
-{Opportunities for expansion}
-
-## Recommendations
-1. {Strategic implication 1}
-2. {Strategic implication 2}
-
-## Data Sources
-- {Source 1}
-- {Source 2}
-```
+**Context customization**:
+- Adapt geographic scope to company's expansion strategy (regional vs global)
+- Customize segmentation dimensions to relevant buyer characteristics for your category
+- Adjust time horizon based on market velocity (3-5 years for stable, 1-3 for fast-moving)
+- Scale methodology rigor to decision importance (board presentation vs internal exploration)
 
 ## Handoff Criteria
 
@@ -163,7 +107,7 @@ If uncertain: Add more data sources. Triangulate. Acknowledge uncertainty ranges
 ## Skills Reference
 
 Reference these skills as appropriate:
-- @documentation for artifact templates
+- @doc-strategy for market analysis templates and frameworks
 
 ## Cross-Team Routing
 

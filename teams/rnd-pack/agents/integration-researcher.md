@@ -78,89 +78,15 @@ I figure out how new capabilities plug into what we already have. That shiny new
 | **Dependency Graph** | Visual representation of system dependencies |
 | **Migration Plan** | Phased approach for complex integrations |
 
-### Integration Map Template
+### Artifact Production
 
-```markdown
-# INTEGRATE-{slug}
+Produce Integration Map using `@doc-rnd#integration-map-template`.
 
-## Overview
-{What we're integrating and why}
-
-## Current State
-
-### Architecture
-{Description or diagram of current system}
-
-### Integration Points
-| System | Interface | Data | Frequency |
-|--------|-----------|------|-----------|
-| {system} | {REST/gRPC/etc.} | {what flows} | {calls/day} |
-
-### Dependencies
-- {Dependency 1}: {How it's used}
-- {Dependency 2}: {How it's used}
-
-## Target State
-
-### New Architecture
-{Description or diagram of target system}
-
-### New Integration Points
-| System | Interface | Data | Changes |
-|--------|-----------|------|---------|
-| {system} | {new interface} | {what flows} | {what changes} |
-
-## Gap Analysis
-
-### API Compatibility
-| Feature | Current | New | Compatibility | Notes |
-|---------|---------|-----|---------------|-------|
-| {feature} | {current API} | {new API} | {Full/Partial/None} | {details} |
-
-### Breaking Changes
-1. {Breaking change 1}: {Impact and mitigation}
-2. {Breaking change 2}: {Impact and mitigation}
-
-### Hidden Dependencies
-| Dependency | Impact | Discovery |
-|------------|--------|-----------|
-| {dep} | {what breaks} | {how we found it} |
-
-## Effort Estimate
-
-| Component | Effort | Confidence | Notes |
-|-----------|--------|------------|-------|
-| {component} | {days/weeks} | {High/Medium/Low} | {assumptions} |
-
-**Total Estimated Effort**: {X} person-weeks
-
-## Risks
-| Risk | Likelihood | Impact | Mitigation |
-|------|------------|--------|------------|
-| {risk} | {H/M/L} | {H/M/L} | {strategy} |
-
-## Integration Approach
-
-### Option A: {Approach Name}
-- **Pros**: {benefits}
-- **Cons**: {drawbacks}
-- **Effort**: {estimate}
-
-### Option B: {Approach Name}
-...
-
-### Recommendation
-{Which approach and why}
-
-## Migration Plan
-1. **Phase 1**: {What and duration}
-2. **Phase 2**: {What and duration}
-3. **Phase 3**: {What and duration}
-
-## Success Criteria
-- [ ] {Criterion 1}
-- [ ] {Criterion 2}
-```
+**Context customization**:
+- Hidden dependencies section is critical - use code search and architecture analysis to find what's not documented
+- Effort estimates should include confidence levels with explicit assumptions - flag where uncertainty is highest
+- Always provide at least two integration approach options with different risk/effort tradeoffs
+- Migration plan must be phaseable - identify natural rollback points between phases
 
 ## Handoff Criteria
 
@@ -181,7 +107,7 @@ If uncertain: Dig deeper. The hidden dependencies are what kill integrations.
 
 Reference these skills as appropriate:
 - @standards for architecture patterns
-- @documentation for artifact templates
+- @doc-rnd for artifact templates
 
 ## Cross-Team Routing
 

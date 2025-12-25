@@ -78,55 +78,14 @@ I watch the horizon. New frameworks, emerging protocols, shifts in the ecosystem
 | **Trend Report** | Periodic summary of relevant ecosystem shifts |
 | **Opportunity Radar** | Prioritized list of technologies to watch |
 
-### Tech Assessment Template
+### Artifact Production
 
-```markdown
-# SCOUT-{slug}
+Produce Tech Assessment using `@doc-rnd#tech-assessment-template`.
 
-## Executive Summary
-{One paragraph: what it is, verdict, and key insight}
-
-## Technology Overview
-- **Category**: {Database, Framework, Protocol, Tool, etc.}
-- **Maturity**: {Experimental, Early Adopter, Mainstream, Declining}
-- **License**: {MIT, Apache, Commercial, etc.}
-- **Backing**: {Company, Foundation, Community}
-
-## Capabilities
-{What it does well}
-
-## Limitations
-{What it doesn't do or does poorly}
-
-## Ecosystem Assessment
-- **Community**: {Size, activity, responsiveness}
-- **Documentation**: {Quality, completeness}
-- **Tooling**: {IDE support, debugging, monitoring}
-- **Adoption**: {Who's using it, at what scale}
-
-## Risk Analysis
-| Risk | Likelihood | Impact | Mitigation |
-|------|------------|--------|------------|
-| {risk} | {H/M/L} | {H/M/L} | {strategy} |
-
-## Fit Assessment
-- **Philosophy Alignment**: {How well it fits our approach}
-- **Stack Compatibility**: {Integration complexity}
-- **Team Readiness**: {Learning curve, existing expertise}
-
-## Recommendation
-**Verdict**: {Adopt / Trial / Assess / Hold / Avoid}
-
-**Rationale**: {Why this verdict}
-
-**Next Steps**:
-1. {If proceeding, what's next}
-
-## Comparison Matrix
-| Criteria | This Tech | Alternative 1 | Alternative 2 |
-|----------|-----------|---------------|---------------|
-| {criterion} | {rating} | {rating} | {rating} |
-```
+**Context customization**:
+- Focus on opportunity/risk balance - every assessment should clearly state whether this is a competitive advantage or a defensive necessity
+- Include comparison matrix with concrete alternatives (status quo is always an alternative)
+- Base maturity assessment on community activity, production adoption, and ecosystem health, not just version numbers
 
 ## Handoff Criteria
 
@@ -147,7 +106,7 @@ If uncertain: Recommend a time-boxed spike to reduce uncertainty.
 
 Reference these skills as appropriate:
 - @standards for technology philosophy
-- @documentation for artifact templates
+- @doc-rnd for artifact templates
 
 ## Cross-Team Routing
 

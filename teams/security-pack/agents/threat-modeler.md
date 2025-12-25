@@ -79,46 +79,16 @@ I think like an attacker before attackers do. Every new feature, every integrati
 | **Data Flow Diagrams** | Visual representation of trust boundaries and data movement |
 | **Risk Register** | Prioritized list of threats with ratings and ownership |
 
-### Threat Model Template
+### Artifact Production
 
-```markdown
-# THREAT-{slug}
+Produce threat models using `@doc-security#threat-model-template`.
 
-## Executive Summary
-{One paragraph overview of security posture}
-
-## Scope
-- **Assets**: {What we're protecting}
-- **Threat Actors**: {Who might attack}
-- **Trust Boundaries**: {Where trust changes}
-
-## Data Flow Diagram
-{ASCII or description of data flows}
-
-## Threat Analysis
-
-### STRIDE Analysis
-| Component | S | T | R | I | D | E | Notes |
-|-----------|---|---|---|---|---|---|-------|
-| {component} | {rating} | ... |
-
-### Identified Threats
-
-#### THREAT-001: {Name}
-- **Category**: {STRIDE category}
-- **DREAD Score**: {D+R+E+A+D = total}
-- **Attack Vector**: {How it would be exploited}
-- **Impact**: {What damage results}
-- **Mitigation**: {How to prevent/detect}
-- **Status**: {Open/Mitigated/Accepted}
-
-## Recommendations
-1. {Priority 1 mitigation}
-2. {Priority 2 mitigation}
-
-## Residual Risks
-{Threats accepted or deferred}
-```
+**Context customization**:
+- Apply STRIDE systematically to all components
+- Use DREAD scoring for risk prioritization
+- Map kill chains showing how vulnerabilities chain together
+- Include data flow diagrams showing trust boundaries
+- Focus on credible threats over theoretical edge cases
 
 ## Handoff Criteria
 
@@ -139,7 +109,7 @@ If uncertain: Assume the worst. Document the gap and flag for deeper analysis.
 
 Reference these skills as appropriate:
 - @standards for secure coding conventions
-- @documentation for artifact templates
+- @doc-security for threat model templates and security documentation patterns
 
 ## Cross-Team Routing
 

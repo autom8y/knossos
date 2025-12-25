@@ -80,60 +80,16 @@ I translate regulations into engineering requirements. SOC 2, GDPR, HIPAA, whate
 | **Control Matrix** | Mapping of controls to implementations |
 | **Evidence Guide** | How to generate and collect audit evidence |
 
-### Compliance Requirements Template
+### Artifact Production
 
-```markdown
-# COMPLY-{slug}
+Produce compliance requirements using `@doc-security#compliance-requirements-template`.
 
-## Overview
-{What feature/system and which regulations}
-
-## Applicable Regulations
-
-### {Regulation 1, e.g., SOC 2}
-- **Relevant Criteria**: {CC6.1, CC7.2, etc.}
-- **Scope**: {What's covered}
-
-### {Regulation 2, e.g., GDPR}
-- **Relevant Articles**: {Art. 6, Art. 32, etc.}
-- **Scope**: {What's covered}
-
-## Control Requirements
-
-### {Control Category, e.g., Access Control}
-
-#### CTRL-001: {Control Name}
-- **Regulation**: {Source requirement}
-- **Requirement**: {What must be true}
-- **Implementation**: {How to achieve}
-- **Evidence**: {What proves compliance}
-- **Testing**: {How to validate}
-
-#### CTRL-002: {Control Name}
-...
-
-## Data Classification
-| Data Element | Classification | Retention | Encryption |
-|--------------|---------------|-----------|------------|
-| {element} | {PII/Sensitive/Public} | {period} | {at-rest/in-transit} |
-
-## Gap Analysis
-| Control | Current State | Gap | Remediation | Priority |
-|---------|--------------|-----|-------------|----------|
-| {control} | {state} | {gap} | {fix} | {P1/P2/P3} |
-
-## Implementation Checklist
-- [ ] {Requirement 1}
-- [ ] {Requirement 2}
-
-## Evidence Collection
-| Control | Evidence Type | Collection Method | Frequency |
-|---------|--------------|-------------------|-----------|
-| {control} | {logs/configs/screenshots} | {automated/manual} | {continuous/quarterly} |
-
-## Audit Readiness
-{Steps to prepare for audit}
-```
+**Context customization**:
+- Map regulations to specific technical controls (SOC 2, GDPR, HIPAA, PCI)
+- Define evidence collection mechanisms for automated proof
+- Create control matrices showing requirement-to-implementation mapping
+- Include data classification for proper handling requirements
+- Provide gap analysis with remediation priorities
 
 ## Handoff Criteria
 
@@ -153,7 +109,7 @@ If uncertain: Document the gap. Create a remediation plan with timeline.
 ## Skills Reference
 
 Reference these skills as appropriate:
-- @documentation for artifact templates
+- @doc-security for compliance templates and security documentation patterns
 - @standards for security conventions
 
 ## Cross-Team Routing

@@ -78,65 +78,16 @@ I talk to humans. Surveys, interviews, usability sessions—I capture the 'why' 
 | **Interview Guide** | Questions and protocol for user interviews |
 | **Usability Report** | Findings from usability testing sessions |
 
-### Research Findings Template
+### Artifact Production
 
-```markdown
-# RESEARCH-{slug}
+Produce Research Findings using `@doc-intelligence#research-findings-template`.
 
-## Executive Summary
-{Key findings in 2-3 sentences}
-
-## Research Questions
-1. {Question this research answers}
-2. {Additional question}
-
-## Methodology
-- **Method**: {Interviews, Usability Testing, Survey, etc.}
-- **Participants**: {N participants, criteria}
-- **Duration**: {Session length, study duration}
-
-## Participant Profile
-| ID | Segment | Key Characteristics |
-|----|---------|---------------------|
-| P1 | {segment} | {relevant attributes} |
-
-## Key Findings
-
-### Finding 1: {Headline}
-**Confidence**: {High/Medium/Low}
-
-**Evidence**:
-> "{Direct quote from participant}" - P3
-
-> "{Another quote}" - P7
-
-**Observation**: {What we saw/heard}
-
-**Implication**: {What this means for product}
-
-### Finding 2: {Headline}
-...
-
-## Themes
-| Theme | Frequency | Sentiment | Evidence |
-|-------|-----------|-----------|----------|
-| {theme} | {X/N participants} | {Positive/Negative/Mixed} | {summary} |
-
-## Connection to Quantitative Data
-{How these findings explain or contextualize analytics}
-
-## Recommendations
-1. {Actionable recommendation}
-2. {Another recommendation}
-
-## Open Questions
-{What we still don't know}
-
-## Appendix
-- Interview guide
-- Session recordings (links)
-- Raw notes
-```
+**Context customization**:
+- Include participant profile table with ID, segment, and key characteristics
+- Provide direct quotes as evidence for each finding
+- Connect qualitative findings to quantitative data from analytics
+- Rate confidence level for each finding (High/Medium/Low)
+- Include interview guide and session links in appendix
 
 ## Handoff Criteria
 
@@ -156,7 +107,8 @@ If uncertain: Add more evidence. Triangulate with quantitative data. Acknowledge
 ## Skills Reference
 
 Reference these skills as appropriate:
-- @documentation for artifact templates
+- @doc-intelligence for artifact templates
+- @documentation for general documentation patterns
 
 ## Cross-Team Routing
 
