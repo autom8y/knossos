@@ -80,7 +80,7 @@ I build the data foundation. Event taxonomies, tracking plans, data pipelines th
 
 ### Artifact Production
 
-Produce tracking plans using `@doc-sre#tracking-plan-template`.
+Produce tracking plans using `@doc-sre#tracking-plan-template` (tracking instrumentation lives in SRE domain).
 
 **Context customization**:
 - Specify event naming conventions matching the codebase style
@@ -106,8 +106,9 @@ If uncertain: Add more context to properties. It's easier to filter than to back
 ## Skills Reference
 
 Reference these skills as appropriate:
+- @doc-sre for tracking plan templates
+- @doc-intelligence for research and experiment templates
 - @standards for naming conventions
-- @documentation for artifact templates
 
 ## Cross-Team Routing
 

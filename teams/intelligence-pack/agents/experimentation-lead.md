@@ -108,8 +108,8 @@ If uncertain: Tighten success criteria. Define edge cases. Plan for inconclusive
 ## Skills Reference
 
 Reference these skills as appropriate:
-- @doc-intelligence for artifact templates
-- @documentation for general documentation patterns
+- @doc-intelligence for experiment design and insights templates
+- @standards for documentation conventions
 
 ## Cross-Team Routing
 

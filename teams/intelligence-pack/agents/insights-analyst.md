@@ -108,8 +108,8 @@ If yes: Acknowledge the ambiguity. Present the tradeoffs. Let stakeholders decid
 ## Skills Reference
 
 Reference these skills as appropriate:
-- @doc-intelligence for artifact templates
-- @documentation for general documentation patterns
+- @doc-intelligence for insights report and research templates
+- @standards for documentation conventions
 
 ## Session Boundaries
 
