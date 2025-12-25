@@ -825,22 +825,10 @@ swap_agents() {
     log_debug "Swap phase completed successfully"
 }
 
-# Preserve global agents (always available regardless of team)
-preserve_global_agents() {
-    local global_agents_dir=".claude/global-agents"
-
-    if [[ -d "$global_agents_dir" ]]; then
-        local global_count
-        global_count=$(find "$global_agents_dir" -maxdepth 1 -name "*.md" -type f 2>/dev/null | wc -l | tr -d ' ')
-
-        if [[ "$global_count" -gt 0 ]]; then
-            log_debug "Copying $global_count global agent(s) to .claude/agents/"
-            cp "$global_agents_dir"/*.md .claude/agents/ 2>/dev/null || {
-                log_warning "Failed to copy global agents (team agents still swapped successfully)"
-            }
-        fi
-    fi
-}
+# DEPRECATED: preserve_global_agents() removed
+# Global agents now live at ~/.claude/agents/ (user-level) and are loaded
+# automatically by Claude Code. No need to copy them to project agents.
+# See: cem install-user for user-level agent installation.
 
 # Update active team state
 update_active_team() {
@@ -907,7 +895,6 @@ perform_swap() {
     restore_kept_agents
     cleanup_stash
 
-    preserve_global_agents
     update_active_team "$team_name"
 
     # Write manifest with current state
