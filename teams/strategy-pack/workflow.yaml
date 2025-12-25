@@ -1,0 +1,51 @@
+name: strategy-pack
+workflow_type: sequential
+description: Market research, competitive analysis, business modeling, and strategic planning
+
+entry_point:
+  agent: market-researcher
+  artifact:
+    type: market-analysis
+    path_template: docs/strategy/MARKET-{slug}.md
+
+phases:
+  - name: market-research
+    agent: market-researcher
+    produces: market-analysis
+    next: competitive-analysis
+
+  - name: competitive-analysis
+    agent: competitive-analyst
+    produces: competitive-intel
+    next: business-modeling
+    condition: "complexity >= STRATEGIC"
+
+  - name: business-modeling
+    agent: business-model-analyst
+    produces: financial-model
+    next: strategic-planning
+
+  - name: strategic-planning
+    agent: roadmap-strategist
+    produces: strategic-roadmap
+    next: null
+
+complexity_levels:
+  - name: TACTICAL
+    scope: "Single decision, existing market data"
+    phases: [business-modeling, strategic-planning]
+
+  - name: STRATEGIC
+    scope: "New market entry, major product bet"
+    phases: [market-research, competitive-analysis, business-modeling, strategic-planning]
+
+  - name: TRANSFORMATION
+    scope: "Business model change, company pivot"
+    phases: [market-research, competitive-analysis, business-modeling, strategic-planning]
+
+# Agent roles for command mapping:
+# /architect   → competitive-analyst
+# /build       → business-model-analyst
+# /qa          → roadmap-strategist
+# /hotfix      → (N/A - strategy team)
+# /code-review → (N/A - strategy team)

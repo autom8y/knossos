@@ -1,0 +1,51 @@
+name: security-pack
+workflow_type: sequential
+description: Security assessment, compliance mapping, penetration testing, and review
+
+entry_point:
+  agent: threat-modeler
+  artifact:
+    type: threat-model
+    path_template: docs/security/THREAT-{slug}.md
+
+phases:
+  - name: threat-modeling
+    agent: threat-modeler
+    produces: threat-model
+    next: compliance-design
+
+  - name: compliance-design
+    agent: compliance-architect
+    produces: compliance-requirements
+    next: penetration-testing
+    condition: "complexity >= FEATURE"
+
+  - name: penetration-testing
+    agent: penetration-tester
+    produces: pentest-report
+    next: security-review
+
+  - name: security-review
+    agent: security-reviewer
+    produces: security-signoff
+    next: null
+
+complexity_levels:
+  - name: PATCH
+    scope: "Single file change, no auth/crypto/PII impact"
+    phases: [penetration-testing, security-review]
+
+  - name: FEATURE
+    scope: "New endpoints, data handling, session management"
+    phases: [threat-modeling, compliance-design, penetration-testing, security-review]
+
+  - name: SYSTEM
+    scope: "Auth systems, cryptography, external integrations, PII processing"
+    phases: [threat-modeling, compliance-design, penetration-testing, security-review]
+
+# Agent roles for command mapping:
+# /architect   → compliance-architect
+# /build       → penetration-tester
+# /qa          → security-reviewer
+# /hotfix      → penetration-tester (fast path)
+# /code-review → security-reviewer

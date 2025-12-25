@@ -1,0 +1,52 @@
+name: 10x-dev-pack
+workflow_type: sequential
+description: Full development lifecycle (PRD → TDD → Code → QA)
+
+entry_point:
+  agent: requirements-analyst
+  artifact:
+    type: prd
+    path_template: docs/requirements/PRD-{slug}.md
+
+phases:
+  - name: requirements
+    agent: requirements-analyst
+    produces: prd
+    next: design
+
+  - name: design
+    agent: architect
+    produces: tdd
+    next: implementation
+    condition: "complexity >= MODULE"
+
+  - name: implementation
+    agent: principal-engineer
+    produces: code
+    next: validation
+
+  - name: validation
+    agent: qa-adversary
+    produces: test-plan
+    next: null
+
+complexity_levels:
+  - name: SCRIPT
+    scope: "Single file, <200 LOC"
+    phases: [requirements, implementation, validation]
+  - name: MODULE
+    scope: "Multiple files, <2000 LOC"
+    phases: [requirements, design, implementation, validation]
+  - name: SERVICE
+    scope: "APIs, persistence"
+    phases: [requirements, design, implementation, validation]
+  - name: PLATFORM
+    scope: "Multi-service"
+    phases: [requirements, design, implementation, validation]
+
+# Agent roles for command mapping:
+# /architect  → architect
+# /build      → principal-engineer
+# /qa         → qa-adversary
+# /hotfix     → principal-engineer (fast path)
+# /code-review → qa-adversary (review mode)

@@ -1,0 +1,51 @@
+name: intelligence-pack
+workflow_type: sequential
+description: Product analytics, user research, experimentation, and insights synthesis
+
+entry_point:
+  agent: analytics-engineer
+  artifact:
+    type: tracking-plan
+    path_template: docs/intelligence/TRACK-{slug}.md
+
+phases:
+  - name: instrumentation
+    agent: analytics-engineer
+    produces: tracking-plan
+    next: research
+
+  - name: research
+    agent: user-researcher
+    produces: research-findings
+    next: experimentation
+    condition: "complexity >= FEATURE"
+
+  - name: experimentation
+    agent: experimentation-lead
+    produces: experiment-design
+    next: synthesis
+
+  - name: synthesis
+    agent: insights-analyst
+    produces: insights-report
+    next: null
+
+complexity_levels:
+  - name: METRIC
+    scope: "Single metric analysis, existing event data"
+    phases: [experimentation, synthesis]
+
+  - name: FEATURE
+    scope: "New feature instrumentation, user journey analysis"
+    phases: [instrumentation, research, experimentation, synthesis]
+
+  - name: INITIATIVE
+    scope: "Cross-feature analysis, strategic product decisions"
+    phases: [instrumentation, research, experimentation, synthesis]
+
+# Agent roles for command mapping:
+# /architect   → experimentation-lead
+# /build       → analytics-engineer
+# /qa          → insights-analyst
+# /hotfix      → (N/A - research team)
+# /code-review → (N/A - research team)

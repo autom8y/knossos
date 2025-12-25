@@ -1,0 +1,65 @@
+name: ecosystem-pack
+version: "1.0.0"
+workflow_type: sequential
+description: Ecosystem infrastructure lifecycle (Gap Analysis → Design → Implementation → Documentation → Validation)
+
+entry_point:
+  agent: ecosystem-analyst
+  artifact:
+    type: gap-analysis
+    path_template: docs/ecosystem/GAP-{slug}.md
+
+phases:
+  - name: analysis
+    agent: ecosystem-analyst
+    produces: gap-analysis
+    next: design
+
+  - name: design
+    agent: context-architect
+    produces: context-design
+    next: implementation
+    condition: "complexity >= MODULE"
+
+  - name: implementation
+    agent: integration-engineer
+    produces: implementation
+    next: documentation
+
+  - name: documentation
+    agent: documentation-engineer
+    produces: migration-runbook
+    next: validation
+    condition: "complexity >= MODULE"
+
+  - name: validation
+    agent: compatibility-tester
+    produces: compatibility-report
+    next: null
+
+complexity_levels:
+  - name: PATCH
+    scope: "Single file/config change, no schema impact"
+    phases: [analysis, implementation, validation]
+  - name: MODULE
+    scope: "Single system (CEM or skeleton or roster)"
+    phases: [analysis, design, implementation, documentation, validation]
+  - name: SYSTEM
+    scope: "Multi-system change affecting CEM + skeleton + roster"
+    phases: [analysis, design, implementation, documentation, validation]
+  - name: MIGRATION
+    scope: "Cross-satellite rollout requiring coordination"
+    phases: [analysis, design, implementation, documentation, validation]
+
+# Agent roles for command mapping:
+# /ecosystem          → ecosystem-analyst (full pipeline)
+# /ecosystem-analyze  → ecosystem-analyst (analysis only)
+# /ecosystem-design   → context-architect (design only)
+# /ecosystem-implement → integration-engineer (implementation only)
+# /ecosystem-document → documentation-engineer (documentation only)
+# /ecosystem-validate → compatibility-tester (validation only)
+# /cem-debug         → ecosystem-analyst (CEM diagnostic focus)
+# /hook-design       → context-architect (new hook patterns)
+# /skill-design      → context-architect (new skill patterns)
+# /satellite-scaffold → integration-engineer (new satellite setup)
+# /migration-plan    → documentation-engineer (breaking change rollouts)

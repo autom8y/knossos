@@ -1,0 +1,44 @@
+# Workflow Schema for Team Packs
+# Each team pack must have a workflow.yaml matching this structure
+# This file serves as documentation and validation reference
+
+schema_version: "1.0"
+
+required_fields:
+  - name           # Team pack name (must match directory)
+  - workflow_type  # sequential | parallel | hybrid
+  - description    # What this team does
+  - entry_point    # First agent and artifact
+  - phases         # Ordered workflow phases
+  - complexity_levels  # Team-specific complexity tiers
+
+field_definitions:
+
+  entry_point:
+    agent: string            # Agent filename (without .md)
+    artifact:
+      type: string           # Artifact type (prd, audit-report, etc.)
+      path_template: string  # Path with {slug} placeholder
+
+  phases:
+    - name: string           # Phase identifier (requirements, design, etc.)
+      agent: string          # Agent for this phase
+      produces: string       # Artifact type produced
+      next: string | null    # Next phase name, or null if final
+      condition: string      # Optional: when to include (e.g., "complexity >= MODULE")
+
+  complexity_levels:
+    - name: string           # Level name (SCRIPT, PAGE, SPOT, etc.)
+      scope: string          # Human description of scope
+      phases: [string]       # Which phases apply at this level
+
+# Workflow types:
+#   sequential - Phases execute in order, each depends on previous
+#   parallel   - Multiple phases can execute simultaneously
+#   hybrid     - Mix of sequential and parallel (specify in phases)
+
+# Example validation rules:
+#   - entry_point.agent must exist in phases[0].agent
+#   - All phase.next values must reference valid phase names or be null
+#   - complexity_levels.phases must reference valid phase names
+#   - Agent names must match files in team's agents/ directory
