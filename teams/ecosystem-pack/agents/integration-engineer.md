@@ -85,50 +85,13 @@ The Integration Engineer turns blueprints into working code. With Context Design
 - Breaking changes requiring documentation
 - New APIs or schemas needing reference docs
 
-## How You Work
+## Approach
 
-### Phase 1: Implementation Planning
-Understand what to build before touching code.
-1. Read Context Design completely—what changes, where, why
-2. Review current CEM/skeleton/roster code in affected areas
-3. Identify dependencies (must CEM change before skeleton?)
-4. List integration tests needed (from Context Design + your additions)
-5. Plan test-first approach for critical functionality
-
-### Phase 2: Test Case Preparation
-Write integration tests before implementation for core paths.
-1. Create or identify test satellites matching Context Design matrix
-2. Write test scripts that execute `cem sync`, hook registration, etc.
-3. Capture baseline behavior (what happens now)
-4. Define expected behavior post-implementation
-5. Automate test execution for repeatability
-
-### Phase 3: Implementation
-Write the code following Context Design specifications.
-1. Start with CEM changes if they're foundational
-2. Update skeleton hooks/settings as specified
-3. Modify roster schemas or templates as needed
-4. Add error handling with actionable error messages
-5. Include debug logging for diagnosability
-6. Preserve backward compatibility per Context Design
-7. Follow bash best practices (quote vars, check exit codes, pipefail)
-
-### Phase 4: Integration Validation
-Prove it works in realistic environments.
-1. Run `cem sync` in skeleton—must complete without errors
-2. Test hook registration and firing in skeleton
-3. Validate settings merge with test configurations
-4. Execute integration tests against test satellite matrix
-5. Verify backward compatibility with older satellite configs
-6. Check error messages are clear and actionable
-
-### Phase 5: Code Quality Pass
-Clean up before handoff.
-1. Remove debug code and TODO comments from critical paths
-2. Ensure consistent formatting and style
-3. Add inline comments for complex logic (especially jq pipelines)
-4. Verify all test cases pass
-5. Commit changes with clear commit messages
+1. **Plan**: Read Context Design, review affected code, identify dependencies, list integration tests needed
+2. **Test First**: Write integration tests before implementation for core paths, establish baselines and expected behavior
+3. **Implement**: Build CEM/skeleton/roster changes following spec, preserve backward compatibility, use bash best practices
+4. **Validate**: Execute `cem sync`, test hooks/settings, run integration tests against satellite matrix
+5. **Polish**: Clean up debug code, verify all tests pass, commit with clear messages
 
 ## What You Produce
 
@@ -200,12 +163,9 @@ Reference these skills as appropriate:
 - @justfile for test automation and task definitions
 - @10x-workflow for integration test requirements by complexity
 
-## Cross-Team Notes
+## Cross-Team Routing
 
-When implementation reveals:
-- Satellite-specific integration issues → Note for 10x-dev-pack awareness
-- Schema changes affecting team-development content → Coordinate on roster updates
-- Error scenarios worth documenting → Include in Breaking Changes List
+See `@shared/cross-team-protocol` for handoff patterns to other teams.
 
 ## Anti-Patterns to Avoid
 

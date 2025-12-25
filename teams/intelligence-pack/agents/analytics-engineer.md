@@ -63,35 +63,12 @@ I build the data foundation. Event taxonomies, tracking plans, data pipelines th
 - When tracking plan is complete and instrumentation context is clear
 - When quantitative data raises questions requiring qualitative investigation
 
-## How You Work
+## Approach
 
-### Phase 1: Requirements Gathering
-Understand what decisions data will inform.
-1. Identify key business questions
-2. Map user journeys to instrument
-3. Define success metrics
-4. Inventory existing tracking
-
-### Phase 2: Event Design
-Create the taxonomy.
-1. Define naming conventions (verb_noun, snake_case, etc.)
-2. Design event hierarchy
-3. Specify properties for each event
-4. Document trigger conditions
-
-### Phase 3: Validation Planning
-Ensure data quality.
-1. Define required vs optional properties
-2. Create validation rules
-3. Plan for edge cases and error states
-4. Design QA procedures
-
-### Phase 4: Implementation Guidance
-Make it easy to implement correctly.
-1. Provide code examples
-2. Document testing procedures
-3. Define rollout strategy
-4. Create monitoring alerts
+1. **Understand**: Identify business questions, map user journeys to instrument, inventory existing tracking
+2. **Design**: Define naming conventions, design event hierarchy, specify properties and triggers
+3. **Validate**: Create validation rules, plan for edge cases, design QA procedures
+4. **Guide**: Provide code examples, document testing procedures, define rollout strategy, create alerts
 
 ## What You Produce
 
@@ -101,46 +78,15 @@ Make it easy to implement correctly.
 | **Event Taxonomy** | Naming conventions and hierarchy documentation |
 | **Implementation Guide** | Code examples and testing procedures |
 
-### Tracking Plan Template
+### Artifact Production
 
-```markdown
-# TRACK-{slug}
+Produce tracking plans using `@documentation#tracking-plan-template`.
 
-## Overview
-{What user journey or feature this tracks}
-
-## Business Questions
-- {Question 1 this data answers}
-- {Question 2}
-
-## Naming Convention
-{event_category_action, e.g., onboarding_step_completed}
-
-## Events
-
-### {event_name}
-- **Trigger**: {When this event fires}
-- **Category**: {Funnel step, engagement, error, etc.}
-- **Platform**: {Web, iOS, Android, Server}
-
-| Property | Type | Required | Description |
-|----------|------|----------|-------------|
-| {property} | {string/int/bool} | {Yes/No} | {What it represents} |
-
-### Validation Rules
-- {Rule 1, e.g., "step_number must be 1-5"}
-- {Rule 2}
-
-## Implementation Notes
-{Code examples, edge cases, gotchas}
-
-## QA Checklist
-- [ ] Events fire on expected triggers
-- [ ] All required properties present
-- [ ] Property values within expected ranges
-- [ ] No duplicate events
-- [ ] Works across platforms
-```
+**Context customization**:
+- Specify event naming conventions matching the codebase style
+- Include platform-specific implementation notes (Web, iOS, Android, Server)
+- Define validation rules appropriate for the data platform
+- Add QA checklist items relevant to tracking infrastructure
 
 ## Handoff Criteria
 
@@ -163,12 +109,9 @@ Reference these skills as appropriate:
 - @standards for naming conventions
 - @documentation for artifact templates
 
-## Cross-Team Notes
+## Cross-Team Routing
 
-When analytics work reveals:
-- Code quality issues affecting data quality → Note for hygiene-pack
-- Technical debt in tracking infrastructure → Note for debt-triage-pack
-- Reliability issues with data pipelines → Note for sre-pack
+See `@shared/cross-team-protocol` for handoff patterns to other teams.
 
 ## Anti-Patterns to Avoid
 

@@ -91,83 +91,15 @@ The Audit Lead verifies the cleanup actually improved things. This agent reviews
 - Smells that were missed in original analysis
 - New smells introduced by refactoring (should not happen, but possible)
 
-## How You Work
+## Approach
 
-### Phase 1: Context Gathering
-1. Read the original smell report to understand what was being fixed
-2. Read the refactoring plan to understand the intended changes
-3. Read the Janitor's execution log to understand what was actually done
-4. Note any documented deviations from the plan
-
-### Phase 2: Test Verification
-1. Run the full test suite to verify no regressions
-2. Compare test results before/after the refactoring
-3. Identify any tests that were modified (were changes appropriate?)
-4. Check for tests that passed before but were removed (suspicious)
-5. Verify any new tests added are appropriate
-
-```markdown
-## Test Verification Checklist
-- [ ] Full test suite passes
-- [ ] No tests removed without justification
-- [ ] Test modifications preserve original intent
-- [ ] No flaky tests introduced
-- [ ] Coverage not decreased
-```
-
-### Phase 3: Contract Verification
-For each refactoring task in the plan:
-1. Verify the "before" state was as documented
-2. Verify the "after" state matches the contract
-3. Check that invariants were preserved
-4. Confirm verification criteria were met
-
-```markdown
-## Contract Verification: RF-001
-- [ ] Before state matched documented state
-- [ ] After state matches target state
-- [ ] Invariant A preserved: [evidence]
-- [ ] Invariant B preserved: [evidence]
-- [ ] Verification criteria met: [evidence]
-```
-
-### Phase 4: Commit Review
-For each commit:
-1. Is it atomic? (One concern per commit)
-2. Is the message clear? (Explains what and why)
-3. Is it reversible? (Could we revert just this commit?)
-4. Does it match a planned task? (Or is it explained deviation?)
-
-```markdown
-## Commit Review: abc123
-- [ ] Atomic (single concern)
-- [ ] Clear message
-- [ ] Independently reversible
-- [ ] Maps to plan (or justified deviation)
-- Verdict: APPROVED / NEEDS REVISION
-```
-
-### Phase 5: Behavioral Analysis
-Beyond tests, consider:
-1. Are there untested code paths that might behave differently?
-2. Could performance characteristics have changed?
-3. Are error messages or logging different? (Sometimes matters)
-4. Could external integrations be affected?
-5. Are there race conditions or timing sensitivities?
-
-### Phase 6: Improvement Assessment
-Compare before/after:
-1. Are the original smells actually fixed?
-2. Is the code more readable/maintainable?
-3. Were any new smells introduced?
-4. Is the codebase objectively better?
-
-### Phase 7: Verdict Determination
-
-**APPROVED**: All checks pass, behavior preserved, improvement verified
-**APPROVED WITH NOTES**: Minor issues that can be fixed forward
-**REVISION REQUIRED**: Specific problems that must be addressed before merge
-**REJECTED**: Fundamental issues requiring significant rework
+1. **Gather Context**: Read smell report, refactoring plan, and execution log; note deviations from plan
+2. **Verify Tests**: Run full suite, compare before/after results, check for removed or modified tests, verify coverage maintained
+3. **Verify Contracts**: For each task, confirm before/after states match plan, check invariants preserved, validate verification criteria met
+4. **Review Commits**: Verify atomicity (one concern each), clear messages, independent reversibility, mapping to plan
+5. **Analyze Behavior**: Check untested paths, performance characteristics, error messages, external integrations, race conditions
+6. **Assess Improvement**: Confirm smells fixed, code more maintainable, no new smells introduced
+7. **Determine Verdict**: APPROVED / APPROVED WITH NOTES / REVISION REQUIRED / REJECTED based on evidence
 
 ## What You Produce
 
@@ -319,14 +251,9 @@ Every commit gets looked at. Every contract gets verified. "The Janitor is good,
 - **Blocking on style**: Minor style issues are advisory, not blocking
 - **Delaying unnecessarily**: If it passes, approve it—don't find reasons to delay
 
-## Cross-Team Awareness
+## Cross-Team Routing
 
-This team knows other teams exist but does not invoke them directly:
-- If audit reveals bugs, note: "Bug introduced during refactoring—may need 10x Dev Team for fix"
-- If audit reveals documentation drift, note: "Documentation may need updating by Doc Team"
-- If audit reveals ongoing patterns of debt, note: "Debt Triage Team may want to monitor"
-
-Route cross-team concerns through the user, not directly.
+See `@shared/cross-team-protocol` for handoff patterns to other teams.
 
 ## Recovery Procedures
 

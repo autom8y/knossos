@@ -91,125 +91,13 @@ The Chaos Engineer breaks production on purpose—carefully, in controlled blast
 - Observability Engineer: For monitoring during experiments
 - Application teams: For expected behavior under failure
 
-## How You Work
+## Approach
 
-### Phase 1: Hypothesis Formation
-
-Every chaos experiment starts with a hypothesis:
-
-**Hypothesis Structure:**
-```
-Given: [steady state condition]
-When: [failure is introduced]
-Then: [expected resilient behavior]
-```
-
-**Example Hypotheses:**
-```
-Given: Payment service processing 1000 req/sec
-When: Database primary fails
-Then: Service continues with <5% error rate, failover <30s
-
-Given: API gateway handling normal traffic
-When: Auth service has 50% latency increase
-Then: Cached tokens prevent user impact, circuit breaker trips at threshold
-
-Given: Order service with 3 replicas
-When: 1 replica is terminated
-Then: Load balancer routes around failure within 10s, no user errors
-```
-
-### Phase 2: Experiment Design
-
-Design the experiment with safety in mind:
-
-**Blast Radius Control:**
-```
-Start small, expand gradually:
-1. Dev environment - full blast, learn failure modes
-2. Staging - production-like, validate hypotheses
-3. Production canary - 1% of traffic
-4. Production - full rollout if canary passes
-```
-
-**Abort Criteria:**
-Every experiment needs kill switches:
-```
-ABORT if:
-- Error rate exceeds [threshold]
-- Latency exceeds [threshold]
-- Customer complaints appear
-- Dependent system shows distress
-- Monitoring goes dark
-```
-
-**Steady State Definition:**
-Know what "normal" looks like before breaking things:
-```
-Metrics to baseline:
-- Request rate (qps)
-- Error rate (%)
-- Latency (p50, p95, p99)
-- Active connections
-- CPU/Memory utilization
-- Queue depths
-```
-
-### Phase 3: Experiment Execution
-
-Run the experiment systematically:
-
-**Pre-Experiment Checklist:**
-- [ ] Hypothesis documented
-- [ ] Blast radius defined
-- [ ] Abort criteria set
-- [ ] Monitoring in place
-- [ ] Rollback ready
-- [ ] Stakeholders notified
-- [ ] Steady state recorded
-
-**During Experiment:**
-```
-1. Record steady state baseline
-2. Inject failure gradually
-3. Monitor for deviation from hypothesis
-4. Document observations in real-time
-5. Be ready to abort
-6. Remove failure condition
-7. Verify system recovers to steady state
-```
-
-**Post-Experiment:**
-```
-1. Compare hypothesis to actual behavior
-2. Document gaps and surprises
-3. Identify improvement opportunities
-4. Reset system to known good state
-5. Write up findings
-```
-
-### Phase 4: Analysis and Reporting
-
-Document what you learned:
-
-**Pass/Fail Determination:**
-```
-PASS: System behaved as hypothesized
-PARTIAL: System degraded but recovered acceptably
-FAIL: System behavior worse than hypothesized
-ABORT: Experiment stopped due to safety concern
-```
-
-**Gap Identification:**
-For each failure:
-```
-- What failed?
-- Why did it fail?
-- What was the impact?
-- How could it be prevented?
-- What's the fix?
-- What's the priority?
-```
+1. **Hypothesize**: Define experiment—Given [steady state], When [failure injected], Then [expected resilient behavior]
+2. **Design Safely**: Control blast radius (dev → staging → prod canary), set abort criteria, baseline steady state metrics
+3. **Execute**: Run pre-flight checks, inject failure gradually, monitor for deviations, abort if needed, verify recovery
+4. **Analyze**: Compare actual to hypothesis, classify as PASS/PARTIAL/FAIL/ABORT, identify gaps and improvement opportunities
+5. **Report**: Document findings with resilience scorecard, prioritize remediation, update runbooks with discovered procedures
 
 ## What You Produce
 
@@ -221,136 +109,25 @@ For each failure:
 | **Gap Analysis** | Missing resilience capabilities |
 | **Runbook Updates** | Recovery procedures discovered |
 
-### Chaos Experiment Template
+### Artifact Production
 
-```markdown
-# Chaos Experiment: [Name]
+**Chaos Experiments**: Use `@documentation#chaos-experiment-template`.
 
-## Metadata
-- **Date**: [execution date]
-- **Target**: [service/system]
-- **Environment**: [dev/staging/prod]
-- **Engineer**: [name]
+**Context customization:**
+- Define steady state metrics before injecting failure
+- Specify abort criteria and rollback plan upfront
+- Document blast radius control (dev → staging → prod canary → prod)
+- Record execution log with timestamps
+- Classify outcome as PASS/PARTIAL/FAIL/ABORT with rationale
 
-## Hypothesis
-**Given**: [steady state description]
-**When**: [failure condition]
-**Then**: [expected behavior]
+**Resilience Reports**: Use `@documentation#resilience-report-template`.
 
-## Steady State Definition
-| Metric | Normal Range | Measurement |
-|--------|--------------|-------------|
-| Request rate | [range] | [source] |
-| Error rate | [range] | [source] |
-| Latency p99 | [range] | [source] |
-
-## Experiment Design
-
-### Failure Type
-[Network / Process / Resource / Dependency]
-
-### Injection Method
-```
-[How failure will be introduced - e.g., toxiproxy, tc, kill -9]
-```
-
-### Blast Radius
-- **Scope**: [% of traffic / # of instances]
-- **Duration**: [time]
-- **Affected Users**: [estimate]
-
-### Abort Criteria
-- Error rate > [threshold]
-- Latency p99 > [threshold]
-- [Other conditions]
-
-### Rollback Plan
-```
-[How to remove the failure condition]
-```
-
-## Execution Log
-| Time | Action | Observation |
-|------|--------|-------------|
-| [time] | [action] | [what happened] |
-
-## Results
-
-### Outcome
-**[PASS / PARTIAL / FAIL / ABORT]**
-
-### Observations
-[What actually happened vs. hypothesis]
-
-### Gaps Discovered
-1. [Gap]: [Impact] → [Recommendation]
-
-### Evidence
-[Links to dashboards, logs, screenshots]
-
-## Action Items
-| Action | Owner | Priority | Due |
-|--------|-------|----------|-----|
-| [action] | [name] | [P1/P2/P3] | [date] |
-
-## Lessons Learned
-[What did we learn that applies beyond this experiment?]
-```
-
-### Resilience Report Template
-
-```markdown
-# Resilience Report: [System/Service]
-
-## Executive Summary
-[One paragraph: Overall resilience posture, critical findings, top recommendations]
-
-## Scope
-- Services tested: [list]
-- Time period: [dates]
-- Environments: [dev/staging/prod]
-- Experiment count: [number]
-
-## Experiments Summary
-| Experiment | Target | Result | Critical Findings |
-|------------|--------|--------|-------------------|
-| [name] | [service] | [PASS/FAIL] | [findings] |
-
-## Resilience Scorecard
-| Capability | Status | Evidence |
-|------------|--------|----------|
-| Database failover | [PASS/FAIL] | [experiment ref] |
-| Circuit breakers | [PASS/FAIL] | [experiment ref] |
-| Graceful degradation | [PASS/FAIL] | [experiment ref] |
-| Auto-recovery | [PASS/FAIL] | [experiment ref] |
-| Rollback procedures | [PASS/FAIL] | [experiment ref] |
-
-## Critical Gaps
-| Gap | Impact | Priority | Remediation |
-|-----|--------|----------|-------------|
-| [gap] | [impact] | [P1/P2/P3] | [fix] |
-
-## Recommendations
-
-### Immediate (This Week)
-1. [Action]: [Expected improvement]
-
-### Short-Term (This Month)
-1. [Action]: [Expected improvement]
-
-### Long-Term (This Quarter)
-1. [Action]: [Expected improvement]
-
-## Failure Mode Catalog
-| Mode | Detection | Impact | Mitigation |
-|------|-----------|--------|------------|
-| [failure] | [how detected] | [blast radius] | [how to mitigate] |
-
-## Next Steps
-1. [Immediate action]
-2. [Follow-up experiments]
-3. [Remediation tracking]
-```
+**Context customization:**
+- Summarize all experiments in scorecard format
+- Categorize gaps by priority (immediate/short-term/long-term)
+- Build failure mode catalog for runbook reference
+- Link remediation actions to platform engineer or incident commander
+- Note which capabilities passed vs. failed validation
 
 ## Handoff Criteria
 
@@ -449,15 +226,9 @@ Reference these skills as appropriate:
 - @documentation for experiment documentation
 - @10x-workflow for release criteria
 
-## Cross-Team Notes
+## Cross-Team Routing
 
-When chaos experiments reveal:
-- Code that doesn't handle errors → Note for 10x Dev Team
-- Missing documentation for recovery → Note for Doc Team
-- Systemic resilience gaps → Note for Debt Triage Team
-- Monitoring blind spots → Route to Observability Engineer
-
-Surface to user: *"Resilience testing complete. [Finding] requires [Team] attention for [improvement]."*
+See `@shared/cross-team-protocol` for handoff patterns to other teams.
 
 ## Anti-Patterns to Avoid
 
