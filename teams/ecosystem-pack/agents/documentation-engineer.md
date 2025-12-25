@@ -104,7 +104,7 @@ The Documentation Engineer builds the bridge from old to new. When implementatio
 
 ### Artifact Production
 
-Produce Migration Runbook using `@documentation#migration-runbook-template`.
+Produce Migration Runbook using `@doc-ecosystem#migration-runbook-template`.
 
 **Context customization**:
 - Document current vs. new behavior with before/after configuration examples

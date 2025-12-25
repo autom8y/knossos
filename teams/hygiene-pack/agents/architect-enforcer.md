@@ -97,7 +97,7 @@ The Architect Enforcer takes the smell report and evaluates it through an archit
 
 ### Artifact Production
 
-Produce Refactoring Plan using `@documentation#refactoring-plan-template`.
+Produce Refactoring Plan using `@doc-ecosystem#refactoring-plan-template`.
 
 **Context customization**:
 - Document architectural assessment of boundary health and root causes

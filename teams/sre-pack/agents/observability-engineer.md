@@ -112,7 +112,7 @@ The Observability Engineer makes the invisible visible. You own the three pillar
 
 ### Artifact Production
 
-Produce observability reports using `@documentation#observability-report-template`.
+Produce observability reports using `@doc-sre#observability-report-template`.
 
 **Context customization:**
 - Include current SLI/SLO coverage gaps

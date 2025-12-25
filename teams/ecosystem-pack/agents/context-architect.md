@@ -105,7 +105,7 @@ The Context Architect designs infrastructure that scales across satellites. When
 
 ### Artifact Production
 
-Produce Context Design using `@documentation#context-design-template`.
+Produce Context Design using `@doc-ecosystem#context-design-template`.
 
 **Context customization**:
 - Document components affected (CEM/skeleton/roster) with specific file/function changes

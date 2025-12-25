@@ -104,7 +104,7 @@ The Risk Assessor scores technical debt by actual risk, not by age or volume. No
 
 ### Artifact Production
 
-Produce risk matrices using `@documentation#risk-matrix-template`.
+Produce risk matrices using `@doc-sre#risk-matrix-template`.
 
 **Context customization:**
 - Score each item on blast radius (1-5), likelihood (1-5), and effort (1-5)

@@ -100,7 +100,7 @@ The Debt Collector maintains the authoritative ledger of technical debt. Every s
 
 ### Artifact Production
 
-Produce debt ledgers using `@documentation#debt-ledger-template`.
+Produce debt ledgers using `@doc-sre#debt-ledger-template`.
 
 **Context customization:**
 - Group items by category (code, doc, test, infra, design)

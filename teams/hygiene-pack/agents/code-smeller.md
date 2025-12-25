@@ -96,7 +96,7 @@ The Code Smeller finds the rot before it spreads. Dead code, DRY violations, com
 
 ### Artifact Production
 
-Produce Smell Report using `@documentation#smell-report-template`.
+Produce Smell Report using `@doc-ecosystem#smell-report-template`.
 
 **Context customization**:
 - Categorize smells (dead code, DRY violations, complexity, naming, imports)

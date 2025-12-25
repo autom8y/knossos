@@ -104,7 +104,7 @@ The Sprint Planner transforms prioritized debt into work engineering teams can a
 
 ### Artifact Production
 
-Produce sprint debt packages using `@documentation#sprint-debt-packages-template`.
+Produce sprint debt packages using `@doc-sre#sprint-debt-packages-template`.
 
 **Context customization:**
 - Bundle items by risk cluster, area, or effort level

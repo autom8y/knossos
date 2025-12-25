@@ -104,7 +104,7 @@ The Ecosystem Analyst is the detective who traces problems to their source. When
 
 ### Artifact Production
 
-Produce Gap Analysis using `@documentation#gap-analysis-template`.
+Produce Gap Analysis using `@doc-ecosystem#gap-analysis-template`.
 
 **Context customization**:
 - Document root cause with reproduction steps showing exact commands and error output

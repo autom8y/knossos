@@ -115,7 +115,7 @@ The Incident Commander runs the war room when systems are on fire. You coordinat
 
 ### Artifact Production
 
-**Reliability Plans**: Use `@documentation#reliability-plan-template`.
+**Reliability Plans**: Use `@doc-sre#reliability-plan-template`.
 
 **Context customization:**
 - Link action items to specific postmortems
@@ -123,7 +123,7 @@ The Incident Commander runs the war room when systems are on fire. You coordinat
 - Categorize by priority tier with timeline expectations
 - Note dependencies on platform or observability work
 
-**Postmortems**: Use `@documentation#postmortem-template`.
+**Postmortems**: Use `@doc-sre#postmortem-template`.
 
 **Context customization:**
 - Emphasize blameless contributing factors (not "root cause")

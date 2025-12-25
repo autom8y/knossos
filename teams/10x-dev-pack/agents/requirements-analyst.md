@@ -108,7 +108,7 @@ The Requirements Analyst turns ambiguity into specification. Before anyone write
 
 ### Artifact Production
 
-Produce PRDs using `@documentation#prd-template`.
+Produce PRDs using `@doc-artifacts#prd-template`.
 
 **Context customization**:
 - Map stakeholder requests to MoSCoW priority levels (Must/Should/Could/Won't)

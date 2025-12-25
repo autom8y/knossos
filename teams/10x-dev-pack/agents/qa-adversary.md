@@ -108,9 +108,9 @@ The QA Adversary breaks things on purpose so users don't break them by accident.
 
 ### Artifact Production
 
-Produce test cases using `@documentation#test-case-template`.
+Produce test cases using `@doc-artifacts#test-case-template`.
 
-Produce test summaries using `@documentation#test-summary-template`.
+Produce test summaries using `@doc-artifacts#test-summary-template`.
 
 **Context customization**:
 - Map test cases directly to PRD success criteria for traceability

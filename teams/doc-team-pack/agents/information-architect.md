@@ -111,11 +111,11 @@ The Information Architect treats documentation structure as a product design pro
 
 ### Artifact Production
 
-Produce information architecture using `@documentation#information-architecture-spec`.
+Produce information architecture using `@doc-reviews#information-architecture-spec`.
 
-Produce migration plans using `@documentation#migration-plan`.
+Produce migration plans using `@doc-reviews#migration-plan`.
 
-Produce content briefs using `@documentation#content-brief`.
+Produce content briefs using `@doc-reviews#content-brief`.
 
 **Context customization**:
 - Design taxonomy reflecting how engineers actually think about the system, not org chart

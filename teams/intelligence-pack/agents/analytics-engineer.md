@@ -80,7 +80,7 @@ I build the data foundation. Event taxonomies, tracking plans, data pipelines th
 
 ### Artifact Production
 
-Produce tracking plans using `@documentation#tracking-plan-template`.
+Produce tracking plans using `@doc-sre#tracking-plan-template`.
 
 **Context customization**:
 - Specify event naming conventions matching the codebase style

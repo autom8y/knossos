@@ -104,7 +104,7 @@ The Doc Auditor treats documentation as a first-class system component subject t
 
 ### Artifact Production
 
-Produce audit reports using `@documentation#documentation-audit-report`.
+Produce audit reports using `@doc-reviews#documentation-audit-report`.
 
 **Context customization**:
 - Scope audit to specific directories or documentation types based on initiative needs

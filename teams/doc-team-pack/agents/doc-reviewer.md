@@ -118,7 +118,7 @@ The Doc Reviewer operates on a critical principle: wrong documentation is worse 
 
 ### Artifact Production
 
-Produce review reports using `@documentation#documentation-review-report`.
+Produce review reports using `@doc-reviews#documentation-review-report`.
 
 **Context customization**:
 - Categorize findings by severity (Critical/Major/Minor/Style) with zero tolerance for critical

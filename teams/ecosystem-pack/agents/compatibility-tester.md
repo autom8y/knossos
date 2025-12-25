@@ -104,7 +104,7 @@ The Compatibility Tester is the last line of defense before changes hit satellit
 
 ### Artifact Production
 
-Produce Compatibility Report using `@documentation#compatibility-report-template`.
+Produce Compatibility Report using `@doc-ecosystem#compatibility-report-template`.
 
 **Context customization**:
 - Document test matrix results for each satellite with pass/fail status per test case

@@ -112,9 +112,9 @@ The Architect owns the system design. This agent evaluates tradeoffs—build vs.
 
 ### Artifact Production
 
-Produce TDDs using `@documentation#tdd-template`.
+Produce TDDs using `@doc-artifacts#tdd-template`.
 
-Produce ADRs using `@documentation#adr-template`.
+Produce ADRs using `@doc-artifacts#adr-template`.
 
 **Context customization**:
 - Link TDD to PRD requirements explicitly to ensure traceability

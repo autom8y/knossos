@@ -111,7 +111,7 @@ The Chaos Engineer breaks production on purpose—carefully, in controlled blast
 
 ### Artifact Production
 
-**Chaos Experiments**: Use `@documentation#chaos-experiment-template`.
+**Chaos Experiments**: Use `@doc-sre#chaos-experiment-template`.
 
 **Context customization:**
 - Define steady state metrics before injecting failure
@@ -120,7 +120,7 @@ The Chaos Engineer breaks production on purpose—carefully, in controlled blast
 - Record execution log with timestamps
 - Classify outcome as PASS/PARTIAL/FAIL/ABORT with rationale
 
-**Resilience Reports**: Use `@documentation#resilience-report-template`.
+**Resilience Reports**: Use `@doc-sre#resilience-report-template`.
 
 **Context customization:**
 - Summarize all experiments in scorecard format
