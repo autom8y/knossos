@@ -835,6 +835,121 @@ swap_agents() {
 # automatically by Claude Code. No need to copy them to project agents.
 # See: cem install-user for user-level agent installation.
 
+# ============================================================================
+# CLAUDE.md Update Functions
+# ============================================================================
+
+# Update CLAUDE.md to reflect current team's agents
+# This ensures Claude Code's context matches the swapped agents
+update_claude_md() {
+    local team_name="$1"
+    local claude_md=".claude/CLAUDE.md"
+
+    if [[ ! -f "$claude_md" ]]; then
+        log_debug "No CLAUDE.md found, skipping update"
+        return 0
+    fi
+
+    log_debug "Updating CLAUDE.md for team $team_name"
+
+    # Create temp files for agent data
+    local agent_list_file agent_table_file temp_file
+    agent_list_file=$(mktemp)
+    agent_table_file=$(mktemp)
+    temp_file=$(mktemp)
+
+    # Build agent list from current .claude/agents/
+    for agent_file in .claude/agents/*.md; do
+        [[ -f "$agent_file" ]] || continue
+
+        local basename name desc role produces
+        basename=$(basename "$agent_file" .md)
+
+        # Extract name from YAML frontmatter
+        name=$(sed -n '/^---$/,/^---$/p' "$agent_file" | grep "^name:" | head -1 | sed 's/^name:[[:space:]]*//')
+
+        # Extract first line of description
+        desc=$(sed -n '/^---$/,/^---$/p' "$agent_file" | grep -A1 "^description:" | tail -1 | sed 's/^[[:space:]]*//' | head -c 50)
+
+        # Clean up description (remove trailing pipe if multiline indicator)
+        desc=$(echo "$desc" | tr -d '\n' | sed 's/|$//')
+
+        # Build agent list for Agent Configurations section
+        echo "- \`${basename}.md\` - ${desc}" >> "$agent_list_file"
+
+        # Map common agent names to roles and produces for table
+        produces="Artifacts"
+        case "$basename" in
+            orchestrator) role="Coordinates multi-phase workflows"; produces="Work breakdown" ;;
+            requirements-analyst) role="Clarifies intent, defines success"; produces="PRD" ;;
+            architect) role="Designs solutions, makes decisions"; produces="TDD, ADRs" ;;
+            principal-engineer) role="Implements with craft"; produces="Code" ;;
+            qa-adversary) role="Validates, finds problems"; produces="Test reports" ;;
+            *) role="${desc:0:40}"; produces="Artifacts" ;;
+        esac
+
+        echo "| **${name:-$basename}** | ${role} | ${produces} |" >> "$agent_table_file"
+    done
+
+    # Count agents for header
+    local agent_count
+    agent_count=$(find .claude/agents/ -name "*.md" 2>/dev/null | wc -l | tr -d ' ')
+
+    # Update Quick Start section using sed
+    # First, copy everything before the table (BSD-compatible: use awk instead of head -n -1)
+    local before_table_line
+    before_table_line=$(grep -n "^This project uses a [0-9]*-agent" "$claude_md" | head -1 | cut -d: -f1)
+    if [[ -n "$before_table_line" ]] && [[ "$before_table_line" -gt 1 ]]; then
+        head -n $((before_table_line - 1)) "$claude_md" > "$temp_file"
+    else
+        : > "$temp_file"  # Empty file
+    fi
+
+    # Add new header and table
+    echo "This project uses a ${agent_count}-agent workflow (${team_name}):" >> "$temp_file"
+    echo "" >> "$temp_file"
+    echo "| Agent | Role | Produces |" >> "$temp_file"
+    echo "| ----- | ---- | -------- |" >> "$temp_file"
+    cat "$agent_table_file" >> "$temp_file"
+    echo "" >> "$temp_file"
+
+    # Find where the old table ends and copy from there
+    local table_end_line
+    table_end_line=$(grep -n "^\*\*New here" "$claude_md" | head -1 | cut -d: -f1)
+    if [[ -n "$table_end_line" ]]; then
+        sed -n "${table_end_line},\$p" "$claude_md" >> "$temp_file"
+    fi
+
+    # Now update the Agent Configurations section
+    local config_start config_end
+    config_start=$(grep -n "^## Agent Configurations" "$temp_file" | head -1 | cut -d: -f1)
+    config_end=$(sed -n "${config_start},\$p" "$temp_file" | grep -n "^## " | sed -n '2p' | cut -d: -f1)
+
+    if [[ -n "$config_start" ]]; then
+        # Copy everything before Agent Configurations
+        head -n "$config_start" "$temp_file" > "$claude_md"
+        echo "" >> "$claude_md"
+        echo "Full agent prompts live in \`.claude/agents/\`:" >> "$claude_md"
+        echo "" >> "$claude_md"
+        cat "$agent_list_file" >> "$claude_md"
+        echo "" >> "$claude_md"
+
+        # Copy everything after Agent Configurations section
+        if [[ -n "$config_end" ]]; then
+            local skip_lines=$((config_start + config_end - 1))
+            tail -n +"$skip_lines" "$temp_file" >> "$claude_md"
+        fi
+    else
+        # No Agent Configurations section, just use temp_file as-is
+        cp "$temp_file" "$claude_md"
+    fi
+
+    # Cleanup
+    rm -f "$agent_list_file" "$agent_table_file" "$temp_file"
+
+    log_debug "CLAUDE.md updated with $agent_count agents"
+}
+
 # Update active team state
 update_active_team() {
     local team_name="$1"
@@ -905,6 +1020,9 @@ perform_swap() {
 
     # Write manifest with current state
     write_manifest "$team_name"
+
+    # Update CLAUDE.md to reflect new team's agents
+    update_claude_md "$team_name"
 
     # Success - show workflow info if available
     local workflow_file="$ROSTER_HOME/teams/$team_name/workflow.yaml"
