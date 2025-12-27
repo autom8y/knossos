@@ -24,8 +24,11 @@ readonly MANIFEST_VERSION="1.0"
 # Orphan handling mode (set by flags)
 ORPHAN_MODE=""  # "", "keep", "remove", "promote"
 
-# Force swap even if already on target team
-FORCE_SWAP=0
+# Refresh mode: re-pull agents even if already on target team
+REFRESH_MODE=0
+
+# Dry-run mode: preview changes without applying
+DRY_RUN_MODE=0
 
 # Colors for output (if terminal supports it)
 if [[ -t 1 ]]; then
@@ -579,7 +582,8 @@ Commands:
   (no args)      Show current active team
 
 Options:
-  --force, -f    Force swap even if already on target team
+  --refresh, -r  Refresh agents from roster (even if already on team)
+  --dry-run      Preview changes without applying (use with --refresh)
   --keep-all     Preserve orphan agents in project
   --remove-all   Remove orphan agents (backup available)
   --promote-all  Move orphan agents to ~/.claude/agents/
@@ -606,7 +610,9 @@ Examples:
   ./swap-team.sh --list                 # List available teams
   ./swap-team.sh dev-pack --keep-all    # Keep all orphans during swap
   ./swap-team.sh dev-pack --remove-all  # Remove all orphans during swap
-  ./swap-team.sh dev-pack --force       # Re-swap even if already on dev-pack
+  ./swap-team.sh --refresh              # Refresh current team from roster
+  ./swap-team.sh dev-pack --refresh     # Refresh even if already on dev-pack
+  ./swap-team.sh --refresh --dry-run    # Preview what refresh would change
 
 EOF
 }
@@ -1089,20 +1095,61 @@ update_active_team() {
     log_debug "State updated to $team_name"
 }
 
+# Preview what refresh would change (for --dry-run)
+preview_refresh() {
+    local team_name="$1"
+    local source_dir="$ROSTER_HOME/teams/$team_name/agents"
+
+    log "Dry-run: Would refresh $team_name"
+    echo ""
+    echo "Agent changes:"
+
+    for agent_file in "$source_dir"/*.md; do
+        [[ -f "$agent_file" ]] || continue
+        local agent_name
+        agent_name=$(basename "$agent_file")
+
+        if [[ -f ".claude/agents/$agent_name" ]]; then
+            if diff -q ".claude/agents/$agent_name" "$agent_file" >/dev/null 2>&1; then
+                echo "  = $agent_name (unchanged)"
+            else
+                echo "  ~ $agent_name (modified in roster)"
+            fi
+        else
+            echo "  + $agent_name (new)"
+        fi
+    done
+
+    # Check for agents that would become orphans
+    if [[ -d ".claude/agents" ]]; then
+        for local_agent in .claude/agents/*.md; do
+            [[ -f "$local_agent" ]] || continue
+            local agent_name
+            agent_name=$(basename "$local_agent")
+            if [[ ! -f "$source_dir/$agent_name" ]]; then
+                echo "  ? $agent_name (orphan - not in roster)"
+            fi
+        done
+    fi
+
+    echo ""
+    echo "No changes made (--dry-run mode)"
+}
+
 # Main swap orchestration
 perform_swap() {
     local team_name="$1"
 
     log_debug "Starting swap to $team_name"
 
-    # Check if already active (idempotency, unless --force)
-    if [[ -f ".claude/ACTIVE_TEAM" ]] && [[ "$FORCE_SWAP" -eq 0 ]]; then
+    # Check if already active (idempotency, unless --refresh)
+    if [[ -f ".claude/ACTIVE_TEAM" ]] && [[ "$REFRESH_MODE" -eq 0 ]]; then
         local current
         current=$(cat .claude/ACTIVE_TEAM | tr -d '[:space:]')
 
         if [[ "$current" == "$team_name" ]]; then
             log "Already using $team_name (no changes needed)"
-            log "Use --force to re-swap anyway"
+            log "Use --refresh to pull latest from roster"
             exit "$EXIT_SUCCESS"
         fi
     fi
@@ -1111,6 +1158,12 @@ perform_swap() {
     local agent_count
     agent_count=$(validate_pack "$team_name")
     validate_project
+
+    # Dry-run mode: preview changes and exit
+    if [[ "$DRY_RUN_MODE" -eq 1 ]]; then
+        preview_refresh "$team_name"
+        exit "$EXIT_SUCCESS"
+    fi
 
     # Detect orphan agents (current agents not in target team)
     detect_orphans "$team_name"
@@ -1195,8 +1248,13 @@ main() {
                 ORPHAN_MODE="promote"
                 shift
                 ;;
-            --force|-f)
-                FORCE_SWAP=1
+            --refresh|-r)
+                REFRESH_MODE=1
+                shift
+                ;;
+            --dry-run)
+                DRY_RUN_MODE=1
+                REFRESH_MODE=1  # dry-run implies refresh
                 shift
                 ;;
             -*)
@@ -1219,8 +1277,20 @@ main() {
 
     # Handle the command
     if [[ -z "$team_name" ]]; then
-        # No team specified - query current team
-        query_current_team
+        if [[ "$REFRESH_MODE" -eq 1 ]]; then
+            # Refresh mode without team name - refresh current team
+            if [[ -f ".claude/ACTIVE_TEAM" ]]; then
+                team_name=$(cat .claude/ACTIVE_TEAM | tr -d '[:space:]')
+                log "Refreshing current team: $team_name"
+                perform_swap "$team_name"
+            else
+                log_error "No team active. Specify a team name to refresh."
+                exit "$EXIT_INVALID_ARGS"
+            fi
+        else
+            # No team specified and not refresh mode - query current team
+            query_current_team
+        fi
     else
         # Team pack name - perform swap
         perform_swap "$team_name"
