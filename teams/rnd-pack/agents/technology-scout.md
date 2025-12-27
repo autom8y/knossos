@@ -15,7 +15,7 @@ description: |
   user: "Should we look at using Turso for our edge data needs?"
   assistant: "I'll produce SCOUT-turso-evaluation.md covering: capabilities, maturity, ecosystem, risks, and a recommendation with business case."
   </example>
-tools: Bash, Glob, Grep, Read, Write, WebSearch, WebFetch, TodoWrite
+tools: Bash, Edit, Glob, Grep, Read, Write, WebSearch, WebFetch, TodoWrite
 model: claude-sonnet-4-5
 color: orange
 ---

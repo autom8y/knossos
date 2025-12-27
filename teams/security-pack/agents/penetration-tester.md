@@ -15,7 +15,7 @@ description: |
   user: "We've implemented the new auth system. Is it actually secure?"
   assistant: "I'll produce PENTEST-auth-system.md documenting attack attempts, findings, and remediation guidance."
   </example>
-tools: Bash, Glob, Grep, Read, Write, TodoWrite
+tools: Bash, Edit, Glob, Grep, Read, Write, TodoWrite
 model: claude-opus-4-5
 color: green
 ---

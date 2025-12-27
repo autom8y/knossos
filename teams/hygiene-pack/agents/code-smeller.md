@@ -25,7 +25,7 @@ description: |
   user: "We have two weeks for cleanup. What gives us the best ROI?"
   assistant: "I'll run the Code Smeller to produce a prioritized report—you'll know exactly where to focus."
   </example>
-tools: Bash, Glob, Grep, Read, TodoWrite
+tools: Bash, Glob, Grep, Read, Write, TodoWrite
 model: claude-sonnet-4-5
 color: orange
 ---

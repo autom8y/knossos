@@ -15,7 +15,7 @@ description: |
   user: "We're adding Google OAuth login. What should we watch for?"
   assistant: "I'll produce a THREAT-oauth-integration.md covering: token handling risks, session fixation, redirect URI validation, scope creep, and supply chain risks from OAuth libraries."
   </example>
-tools: Bash, Glob, Grep, Read, Write, WebSearch, WebFetch, TodoWrite
+tools: Bash, Edit, Glob, Grep, Read, Write, WebSearch, WebFetch, TodoWrite
 model: claude-opus-4-5
 color: orange
 ---

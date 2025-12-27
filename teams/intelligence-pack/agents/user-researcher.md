@@ -15,7 +15,7 @@ description: |
   user: "Users are dropping off in the new onboarding. Analytics show step 3 is the problem. Why?"
   assistant: "I'll produce RESEARCH-onboarding-dropoff.md with interview guide, usability test plan, and synthesis of findings."
   </example>
-tools: Bash, Glob, Grep, Read, Write, WebSearch, TodoWrite
+tools: Bash, Edit, Glob, Grep, Read, Write, WebSearch, TodoWrite
 model: claude-opus-4-5
 color: pink
 ---
