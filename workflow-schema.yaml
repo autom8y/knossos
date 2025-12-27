@@ -1,44 +1,542 @@
 # Workflow Schema for Team Packs
-# Each team pack must have a workflow.yaml matching this structure
-# This file serves as documentation and validation reference
+# Version: 1.1.0
+# Last Updated: 2025-12-25
+#
+# Each team pack must have a workflow.yaml matching this structure.
+# This file serves as both documentation and validation reference.
+#
+# Human-readable guide: skeleton/.claude/skills/team-development/schema/team-pack-schema.md
 
-schema_version: "1.0"
+schema_version: "1.1"
+
+# =============================================================================
+# REQUIRED FIELDS
+# =============================================================================
+# Every workflow.yaml must include these top-level fields:
 
 required_fields:
-  - name           # Team pack name (must match directory)
-  - workflow_type  # sequential | parallel | hybrid
-  - description    # What this team does
-  - entry_point    # First agent and artifact
-  - phases         # Ordered workflow phases
-  - complexity_levels  # Team-specific complexity tiers
+  - name              # Team pack identifier (must match directory name)
+  - workflow_type     # Execution model: sequential | parallel | hybrid
+  - description       # Human-readable purpose description
+  - entry_point       # First agent and initial artifact definition
+  - phases            # Ordered workflow phase definitions
+  - complexity_levels # Team-specific complexity tiers
+
+# =============================================================================
+# OPTIONAL FIELDS
+# =============================================================================
+# These fields enhance the team pack but are not required:
+
+optional_fields:
+  - version           # Semantic version (e.g., "1.0.0")
+  - commands          # Team-specific slash commands
+
+# =============================================================================
+# FIELD DEFINITIONS
+# =============================================================================
 
 field_definitions:
 
-  entry_point:
-    agent: string            # Agent filename (without .md)
-    artifact:
-      type: string           # Artifact type (prd, audit-report, etc.)
-      path_template: string  # Path with {slug} placeholder
+  # ---------------------------------------------------------------------------
+  # name
+  # ---------------------------------------------------------------------------
+  name:
+    type: string
+    required: true
+    description: |
+      Unique identifier for this team pack. Must exactly match the parent
+      directory name in teams/<name>/.
+    constraints:
+      - format: kebab-case (lowercase with hyphens)
+      - suffix: must end with "-pack"
+      - uniqueness: must be unique across all team packs
+    validation:
+      - pattern: "^[a-z][a-z0-9]*(-[a-z0-9]+)*-pack$"
+      - matches_directory: true
+    examples:
+      valid:
+        - "10x-dev-pack"
+        - "ecosystem-pack"
+        - "security-pack"
+        - "sre-pack"
+      invalid:
+        - "10xDevPack"          # camelCase not allowed
+        - "my_team"             # underscores not allowed, missing -pack
+        - "MyTeamPack"          # uppercase not allowed
 
+  # ---------------------------------------------------------------------------
+  # version
+  # ---------------------------------------------------------------------------
+  version:
+    type: string
+    required: false
+    description: |
+      Semantic version for the team pack. Use to track breaking changes
+      in phase structure or agent roles.
+    constraints:
+      - format: semantic versioning (MAJOR.MINOR.PATCH)
+    default: null  # Implicit v1.0.0 when not specified
+    when_to_increment:
+      major: "Breaking changes to phase structure or agent roles"
+      minor: "New optional fields, additional phases"
+      patch: "Documentation updates, bug fixes"
+    examples:
+      - "1.0.0"
+      - "2.1.0"
+      - "1.0.1"
+
+  # ---------------------------------------------------------------------------
+  # workflow_type
+  # ---------------------------------------------------------------------------
+  workflow_type:
+    type: enum
+    required: true
+    description: |
+      Defines how phases execute relative to each other.
+    allowed_values:
+      sequential:
+        description: "Phases execute in order; each depends on previous"
+        use_when: "Standard workflows with artifact dependencies"
+      parallel:
+        description: "Multiple phases can execute simultaneously"
+        use_when: "Independent analysis tasks"
+      hybrid:
+        description: "Mix of sequential and parallel execution"
+        use_when: "Complex workflows with parallel sub-trees"
+    examples:
+      - "sequential"  # Most common
+      - "parallel"
+      - "hybrid"
+
+  # ---------------------------------------------------------------------------
+  # description
+  # ---------------------------------------------------------------------------
+  description:
+    type: string
+    required: true
+    description: |
+      Human-readable description of what this team does. Should follow
+      the pattern: <Domain> lifecycle (<Phase1> -> <Phase2> -> ...)
+    constraints:
+      - max_length: ~100 characters recommended
+      - format: "Descriptive phrase with phase flow"
+    examples:
+      - "Full development lifecycle (PRD -> TDD -> Code -> QA)"
+      - "Security assessment, compliance mapping, penetration testing, and review"
+      - "Documentation lifecycle (Audit -> Structure -> Write -> Review)"
+
+  # ---------------------------------------------------------------------------
+  # entry_point
+  # ---------------------------------------------------------------------------
+  entry_point:
+    type: object
+    required: true
+    description: |
+      Defines where the workflow begins and what initial artifact is produced.
+      The entry_point.agent must match phases[0].agent.
+    fields:
+      agent:
+        type: string
+        required: true
+        description: "First agent to invoke (filename without .md extension)"
+        constraints:
+          - must_exist: "agents/<agent>.md"
+          - must_equal: "phases[0].agent"
+        examples:
+          - "requirements-analyst"
+          - "ecosystem-analyst"
+          - "threat-modeler"
+
+      artifact:
+        type: object
+        required: true
+        description: "Initial artifact produced by entry point agent"
+        fields:
+          type:
+            type: string
+            required: true
+            description: "Artifact type identifier"
+            constraints:
+              - format: "lowercase, hyphenated"
+              - must_equal: "phases[0].produces"
+            examples:
+              - "prd"
+              - "gap-analysis"
+              - "threat-model"
+              - "audit-report"
+
+          path_template:
+            type: string
+            required: true
+            description: "File path template with {slug} placeholder"
+            constraints:
+              - must_contain: "{slug}"
+              - format: "relative path from project root"
+            examples:
+              - "docs/requirements/PRD-{slug}.md"
+              - "docs/ecosystem/GAP-{slug}.md"
+              - "docs/security/THREAT-{slug}.md"
+
+  # ---------------------------------------------------------------------------
+  # phases
+  # ---------------------------------------------------------------------------
   phases:
-    - name: string           # Phase identifier (requirements, design, etc.)
-      agent: string          # Agent for this phase
-      produces: string       # Artifact type produced
-      next: string | null    # Next phase name, or null if final
-      condition: string      # Optional: when to include (e.g., "complexity >= MODULE")
+    type: array
+    required: true
+    description: |
+      Ordered list of workflow phases defining the execution pipeline.
+      Last phase must have next: null to indicate terminal state.
+    item_type: object
+    constraints:
+      - min_items: 1
+      - exactly_one_terminal: true  # Exactly one phase must have next: null
+      - no_circular_refs: true      # Phase graph must be acyclic
+    item_fields:
+      name:
+        type: string
+        required: true
+        description: "Unique phase identifier"
+        constraints:
+          - format: "lowercase, hyphenated"
+          - uniqueness: "must be unique within phases array"
+        examples:
+          - "requirements"
+          - "design"
+          - "implementation"
+          - "validation"
+
+      agent:
+        type: string
+        required: true
+        description: "Agent responsible for this phase"
+        constraints:
+          - must_exist: "agents/<agent>.md"
+        examples:
+          - "requirements-analyst"
+          - "architect"
+          - "principal-engineer"
+          - "qa-adversary"
+
+      produces:
+        type: string
+        required: true
+        description: "Artifact type produced by this phase"
+        constraints:
+          - format: "lowercase, hyphenated"
+        examples:
+          - "prd"
+          - "tdd"
+          - "code"
+          - "test-plan"
+
+      next:
+        type: string | null
+        required: true
+        description: "Next phase name, or null if terminal"
+        constraints:
+          - if_string: "must reference valid phase name"
+          - if_null: "indicates terminal phase"
+        examples:
+          - "design"
+          - "implementation"
+          - null
+
+      condition:
+        type: string
+        required: false
+        description: "Condition for including this phase"
+        default: null  # Always include
+        format: |
+          - "complexity >= <LEVEL>": Include at or above specified level
+          - "complexity == <LEVEL>": Include only at exact level
+        examples:
+          - "complexity >= MODULE"
+          - "complexity >= SERVICE"
+          - "complexity == SYSTEM"
+
+  # ---------------------------------------------------------------------------
+  # complexity_levels
+  # ---------------------------------------------------------------------------
+  complexity_levels:
+    type: array
+    required: true
+    description: |
+      Team-specific complexity tiers that control which phases execute.
+      Should be ordered from smallest to largest scope.
+    item_type: object
+    constraints:
+      - min_items: 1
+      - ordered: "ascending by scope (smallest to largest)"
+    item_fields:
+      name:
+        type: string
+        required: true
+        description: "Complexity level identifier"
+        constraints:
+          - format: "UPPERCASE"
+          - uniqueness: "must be unique within complexity_levels"
+        common_patterns:
+          development: ["SCRIPT", "MODULE", "SERVICE", "PLATFORM"]
+          documentation: ["PAGE", "SECTION", "SITE"]
+          security: ["PATCH", "FEATURE", "SYSTEM"]
+          infrastructure: ["PATCH", "MODULE", "SYSTEM", "MIGRATION"]
+          strategy: ["TACTICAL", "STRATEGIC", "TRANSFORMATION"]
+
+      scope:
+        type: string
+        required: true
+        description: "Human-readable description of what this level covers"
+        examples:
+          - "Single file, <200 LOC"
+          - "Multiple files, <2000 LOC"
+          - "APIs, persistence"
+          - "Multi-service"
+
+      phases:
+        type: array
+        required: true
+        description: "Which phases execute at this complexity level"
+        item_type: string
+        constraints:
+          - all_items: "must reference valid phase names"
+          - not_empty: true
+        examples:
+          - ["requirements", "implementation", "validation"]
+          - ["requirements", "design", "implementation", "validation"]
+
+  # ---------------------------------------------------------------------------
+  # commands
+  # ---------------------------------------------------------------------------
+  commands:
+    type: array
+    required: false
+    description: |
+      Team-specific slash commands synced to satellite.
+    item_type: object
+    default: []
+    item_fields:
+      name:
+        type: string
+        required: true
+        description: "Command name (invoked as /<name>)"
+        constraints:
+          - format: "lowercase, no spaces, may include hyphens"
+        examples:
+          - "consolidate"
+          - "security-scan"
+          - "quick-audit"
+
+      file:
+        type: string
+        required: true
+        description: "Command definition file"
+        constraints:
+          - must_exist: "commands/<file>"
+        examples:
+          - "consolidate.md"
+          - "security-scan.md"
+
+      description:
+        type: string
+        required: true
+        description: "Brief description for help output"
+        examples:
+          - "Consolidate documentation into numbered artifacts"
+          - "Run security scan on codebase"
+
+      primary_agent:
+        type: string
+        required: false
+        description: "Agent that primarily handles this command"
+        constraints:
+          - must_exist: "agents/<agent>.md"
+        default: "entry_point.agent"
+        examples:
+          - "ecosystem-analyst"
+          - "threat-modeler"
+
+      workflow_phase:
+        type: string
+        required: false
+        description: "Which phase(s) this command triggers"
+        allowed_values:
+          - "all"           # Orchestrates full pipeline
+          - "<phase_name>"  # Only runs specified phase
+        default: "all"
+        examples:
+          - "all"
+          - "analysis"
+          - "validation"
+
+# =============================================================================
+# VALIDATION RULES
+# =============================================================================
+
+validation_rules:
+
+  file_structure:
+    - rule: "workflow.yaml exists in team directory"
+      path: "teams/<name>/workflow.yaml"
+    - rule: "workflow.md exists in team directory"
+      path: "teams/<name>/workflow.md"
+    - rule: "README.md exists in team directory"
+      path: "teams/<name>/README.md"
+    - rule: "agents/ directory exists with at least one .md file"
+      path: "teams/<name>/agents/*.md"
+
+  name_matching:
+    - rule: "name field matches directory name"
+      check: "name == basename(dirname(workflow.yaml))"
+
+  entry_point_consistency:
+    - rule: "entry_point.agent matches phases[0].agent"
+      check: "entry_point.agent == phases[0].agent"
+    - rule: "entry_point.artifact.type matches phases[0].produces"
+      check: "entry_point.artifact.type == phases[0].produces"
+    - rule: "path_template contains {slug}"
+      check: "'{slug}' in entry_point.artifact.path_template"
+
+  phase_graph:
+    - rule: "All phase.next values reference valid phase names or are null"
+      check: "phases[*].next in [phases[*].name, null]"
+    - rule: "Exactly one phase has next: null"
+      check: "count(phases[*].next == null) == 1"
+    - rule: "No circular phase references"
+      check: "phase_graph.is_acyclic()"
+    - rule: "All agents exist in agents/ directory"
+      check: "file_exists(agents/{phases[*].agent}.md)"
 
   complexity_levels:
-    - name: string           # Level name (SCRIPT, PAGE, SPOT, etc.)
-      scope: string          # Human description of scope
-      phases: [string]       # Which phases apply at this level
+    - rule: "All phase references are valid"
+      check: "complexity_levels[*].phases[*] in phases[*].name"
+    - rule: "Level names are unique"
+      check: "unique(complexity_levels[*].name)"
+    - rule: "At least one level defined"
+      check: "length(complexity_levels) >= 1"
 
-# Workflow types:
-#   sequential - Phases execute in order, each depends on previous
-#   parallel   - Multiple phases can execute simultaneously
-#   hybrid     - Mix of sequential and parallel (specify in phases)
+  commands:
+    - rule: "Command files exist"
+      check: "file_exists(commands/{commands[*].file})"
+    - rule: "Primary agents exist"
+      check: "file_exists(agents/{commands[*].primary_agent}.md)"
+    - rule: "Command names are unique"
+      check: "unique(commands[*].name)"
 
-# Example validation rules:
-#   - entry_point.agent must exist in phases[0].agent
-#   - All phase.next values must reference valid phase names or be null
-#   - complexity_levels.phases must reference valid phase names
-#   - Agent names must match files in team's agents/ directory
+# =============================================================================
+# COMMON ARTIFACT TYPES
+# =============================================================================
+
+common_artifact_types:
+  # Development
+  prd: "Product Requirements Document"
+  tdd: "Technical Design Document"
+  code: "Implementation code"
+  test-plan: "Test specifications"
+
+  # Infrastructure
+  gap-analysis: "Problem diagnosis and root cause"
+  context-design: "Architecture blueprint"
+  implementation: "Working implementation"
+  migration-runbook: "Migration documentation"
+  compatibility-report: "Validation results"
+
+  # Documentation
+  audit-report: "Documentation audit findings"
+  doc-structure: "Information architecture"
+  documentation: "Written documentation"
+  review-signoff: "Editorial approval"
+
+  # Security
+  threat-model: "Threat analysis"
+  compliance-requirements: "Compliance mapping"
+  pentest-report: "Penetration test findings"
+  security-signoff: "Security approval"
+
+  # Other
+  debt-ledger: "Technical debt inventory"
+  risk-report: "Risk assessment"
+  sprint-plan: "Sprint planning output"
+  observability-report: "Observability analysis"
+  reliability-plan: "Reliability requirements"
+
+# =============================================================================
+# EXAMPLES
+# =============================================================================
+
+examples:
+
+  minimal_valid:
+    name: simple-pack
+    workflow_type: sequential
+    description: "Minimal valid workflow"
+
+    entry_point:
+      agent: worker
+      artifact:
+        type: output
+        path_template: docs/{slug}.md
+
+    phases:
+      - name: work
+        agent: worker
+        produces: output
+        next: null
+
+    complexity_levels:
+      - name: DEFAULT
+        scope: "All work"
+        phases: [work]
+
+  complete:
+    name: complete-pack
+    version: "1.0.0"
+    workflow_type: sequential
+    description: "Complete example with all fields"
+
+    entry_point:
+      agent: analyst
+      artifact:
+        type: analysis-report
+        path_template: docs/analysis/REPORT-{slug}.md
+
+    phases:
+      - name: analysis
+        agent: analyst
+        produces: analysis-report
+        next: design
+
+      - name: design
+        agent: architect
+        produces: design-doc
+        next: implementation
+        condition: "complexity >= MODULE"
+
+      - name: implementation
+        agent: engineer
+        produces: code
+        next: validation
+
+      - name: validation
+        agent: tester
+        produces: test-report
+        next: null
+
+    complexity_levels:
+      - name: PATCH
+        scope: "Single file change"
+        phases: [analysis, implementation, validation]
+
+      - name: MODULE
+        scope: "Multiple files"
+        phases: [analysis, design, implementation, validation]
+
+      - name: SYSTEM
+        scope: "Cross-system change"
+        phases: [analysis, design, implementation, validation]
+
+    commands:
+      - name: quick-scan
+        file: quick-scan.md
+        description: "Run quick analysis only"
+        primary_agent: analyst
+        workflow_phase: analysis

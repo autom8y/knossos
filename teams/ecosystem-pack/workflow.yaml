@@ -63,3 +63,11 @@ complexity_levels:
 # /skill-design      → context-architect (new skill patterns)
 # /satellite-scaffold → integration-engineer (new satellite setup)
 # /migration-plan    → documentation-engineer (breaking change rollouts)
+
+# Team-specific commands (synced on team swap):
+commands:
+  - name: consolidate
+    file: consolidate.md
+    description: "Consolidate documentation into numbered artifacts"
+    primary_agent: ecosystem-analyst
+    workflow_phase: all  # Orchestrates full pipeline

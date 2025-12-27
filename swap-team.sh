@@ -836,6 +836,130 @@ swap_agents() {
 # See: cem install-user for user-level agent installation.
 
 # ============================================================================
+# Team Commands Functions
+# ============================================================================
+
+# Backup current team commands (if any exist)
+backup_team_commands() {
+    log_debug "Checking for team commands to backup"
+
+    local backup_dir=".claude/commands.backup"
+
+    # Check if any team commands exist (marked by .team-command file)
+    if [[ ! -d ".claude/commands" ]] || [[ ! -f ".claude/commands/.team-commands" ]]; then
+        log_debug "No team commands to backup"
+        return 0
+    fi
+
+    # Remove old backup if exists
+    if [[ -d "$backup_dir" ]]; then
+        log_debug "Removing old commands backup"
+        rm -rf "$backup_dir" || {
+            log_warning "Failed to remove old commands backup"
+        }
+    fi
+
+    # Read list of team commands and backup
+    mkdir -p "$backup_dir"
+    while IFS= read -r cmd_file; do
+        [[ -z "$cmd_file" ]] && continue
+        if [[ -f ".claude/commands/$cmd_file" ]]; then
+            cp ".claude/commands/$cmd_file" "$backup_dir/$cmd_file"
+            log_debug "Backed up command: $cmd_file"
+        fi
+    done < ".claude/commands/.team-commands"
+
+    log_debug "Team commands backed up"
+}
+
+# Remove team commands from previous team
+remove_team_commands() {
+    log_debug "Removing team commands from previous team"
+
+    if [[ ! -f ".claude/commands/.team-commands" ]]; then
+        log_debug "No team commands marker found"
+        return 0
+    fi
+
+    # Read list and remove each command
+    while IFS= read -r cmd_file; do
+        [[ -z "$cmd_file" ]] && continue
+        if [[ -f ".claude/commands/$cmd_file" ]]; then
+            rm -f ".claude/commands/$cmd_file"
+            log_debug "Removed team command: $cmd_file"
+        fi
+    done < ".claude/commands/.team-commands"
+
+    # Remove the marker file
+    rm -f ".claude/commands/.team-commands"
+
+    log_debug "Team commands removed"
+}
+
+# Sync team-specific commands to project
+# Team commands are copied to .claude/commands/ with a marker file
+swap_commands() {
+    local team_name="$1"
+    local source_dir="$ROSTER_HOME/teams/$team_name/commands"
+
+    log_debug "Checking for team commands in $source_dir"
+
+    # Ensure commands directory exists
+    mkdir -p ".claude/commands"
+
+    # Backup and remove previous team commands
+    backup_team_commands
+    remove_team_commands
+
+    # Check if team has commands
+    if [[ ! -d "$source_dir" ]]; then
+        log_debug "Team $team_name has no commands/ directory"
+        return 0
+    fi
+
+    local cmd_count
+    cmd_count=$(find "$source_dir" -maxdepth 1 -name "*.md" -type f 2>/dev/null | wc -l | tr -d ' ')
+
+    if [[ "$cmd_count" -eq 0 ]]; then
+        log_debug "Team $team_name has no command files"
+        return 0
+    fi
+
+    log_debug "Syncing $cmd_count command(s) from $team_name"
+
+    # Create marker file to track which commands belong to this team
+    local marker_file=".claude/commands/.team-commands"
+    : > "$marker_file"
+
+    # Copy each command and record in marker
+    for cmd_file in "$source_dir"/*.md; do
+        [[ -f "$cmd_file" ]] || continue
+
+        local cmd_name
+        cmd_name=$(basename "$cmd_file")
+
+        # Check for collision with existing project command
+        if [[ -f ".claude/commands/$cmd_name" ]] && ! grep -q "^$cmd_name$" "$marker_file" 2>/dev/null; then
+            # Not a team command, this is a project command - skip with warning
+            log_warning "Skipped: $cmd_name (project command exists)"
+            continue
+        fi
+
+        cp "$cmd_file" ".claude/commands/$cmd_name"
+        echo "$cmd_name" >> "$marker_file"
+        log_debug "Synced command: $cmd_name"
+    done
+
+    # Count successfully synced commands
+    local synced_count
+    synced_count=$(wc -l < "$marker_file" | tr -d ' ')
+
+    if [[ "$synced_count" -gt 0 ]]; then
+        log "Synced: $synced_count team command(s)"
+    fi
+}
+
+# ============================================================================
 # CLAUDE.md Update Functions
 # ============================================================================
 
@@ -1023,6 +1147,9 @@ perform_swap() {
 
     # Update CLAUDE.md to reflect new team's agents
     update_claude_md "$team_name"
+
+    # Sync team-specific commands
+    swap_commands "$team_name"
 
     # Success - show workflow info if available
     local workflow_file="$ROSTER_HOME/teams/$team_name/workflow.yaml"
