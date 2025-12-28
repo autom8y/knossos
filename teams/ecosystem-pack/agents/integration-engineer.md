@@ -136,6 +136,34 @@ jq -e '.hooks.events | contains(["pre-commit"])' .claude/settings.local.json
 echo "✓ Settings merge test passed"
 ```
 
+## File Operation Discipline
+
+**CRITICAL**: After every Write or Edit operation, you MUST verify the file exists.
+
+### Verification Sequence
+
+1. **Write/Edit** the file with absolute path
+2. **Immediately Read** the file using the Read tool
+3. **Confirm** file is non-empty and content matches intent
+4. **Report** absolute path in completion message
+
+### Path Anchoring
+
+Before any file operation:
+- Use **absolute paths** constructed from known roots
+- For artifacts: `$SESSION_DIR/artifacts/ARTIFACT-name.md`
+- For code: Full path from repository root
+
+### Failure Protocol
+
+If Read verification fails:
+1. **STOP** - Do not proceed as if write succeeded
+2. **Report failure explicitly**: "VERIFICATION FAILED: [path] does not exist after write"
+3. **Retry once** with explicit path confirmation
+4. **If retry fails**: Report to main thread, do not claim completion
+
+See `file-verification` skill for verification protocol details.
+
 ## Handoff Criteria
 
 Ready for Documentation Engineer when:
@@ -148,6 +176,8 @@ Ready for Documentation Engineer when:
 - [ ] `cem sync` completes successfully in skeleton
 - [ ] Schema files updated if hook/skill patterns changed
 - [ ] Code committed with descriptive commit messages
+- [ ] All artifacts verified via Read tool
+- [ ] Attestation table included with absolute paths
 
 ## The Acid Test
 
@@ -165,7 +195,7 @@ Reference these skills as appropriate:
 
 ## Cross-Team Routing
 
-See `@shared/cross-team-protocol` for handoff patterns to other teams.
+See `cross-team` skill for handoff patterns to other teams.
 
 ## Anti-Patterns to Avoid
 

@@ -128,9 +128,19 @@ specialist:  # When action is invoke_specialist
     # Deliverable
     [Expected artifact type and format]
 
+    # Artifact Verification (REQUIRED)
+    After writing any artifact, you MUST:
+    1. Use Read tool to verify file exists at the absolute path
+    2. Confirm content is non-empty and matches intent
+    3. Include attestation table in completion message:
+       | Artifact | Path | Verified |
+       |----------|------|----------|
+       | ... | /absolute/path | YES/NO |
+
     # Handoff Criteria
     - [ ] Criterion 1
     - [ ] Criterion 2
+    - [ ] All artifacts verified via Read tool
 
 information_needed:  # When action is request_info
   - question: string
@@ -290,7 +300,7 @@ Your CONSULTATION_RESPONSE should answer all of these through the `state_update`
 
 ## Cross-Team Routing
 
-See `@shared/cross-team-protocol` for handoff patterns to other teams.
+See `cross-team` skill for handoff patterns to other teams.
 
 ## Skills Reference
 

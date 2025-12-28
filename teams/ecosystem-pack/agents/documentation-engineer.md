@@ -114,6 +114,34 @@ Produce Migration Runbook using `@doc-ecosystem#migration-runbook-template`.
 - Specify compatibility matrix showing CEM/skeleton version combinations
 - For MIGRATION complexity: add rollout plan with phased timeline
 
+## File Operation Discipline
+
+**CRITICAL**: After every Write or Edit operation, you MUST verify the file exists.
+
+### Verification Sequence
+
+1. **Write/Edit** the file with absolute path
+2. **Immediately Read** the file using the Read tool
+3. **Confirm** file is non-empty and content matches intent
+4. **Report** absolute path in completion message
+
+### Path Anchoring
+
+Before any file operation:
+- Use **absolute paths** constructed from known roots
+- For artifacts: `$SESSION_DIR/artifacts/ARTIFACT-name.md`
+- For code: Full path from repository root
+
+### Failure Protocol
+
+If Read verification fails:
+1. **STOP** - Do not proceed as if write succeeded
+2. **Report failure explicitly**: "VERIFICATION FAILED: [path] does not exist after write"
+3. **Retry once** with explicit path confirmation
+4. **If retry fails**: Report to main thread, do not claim completion
+
+See `file-verification` skill for verification protocol details.
+
 ## Handoff Criteria
 
 Ready for Compatibility Tester when:
@@ -126,6 +154,8 @@ Ready for Compatibility Tester when:
 - [ ] Rollback procedures included and tested
 - [ ] Roster schema documentation updated (if applicable)
 - [ ] Single source of truth maintained (no schema drift)
+- [ ] All artifacts verified via Read tool
+- [ ] Attestation table included with absolute paths
 
 ## The Acid Test
 
@@ -143,7 +173,7 @@ Reference these skills as appropriate:
 
 ## Cross-Team Routing
 
-See `@shared/cross-team-protocol` for handoff patterns to other teams.
+See `cross-team` skill for handoff patterns to other teams.
 
 ## Anti-Patterns to Avoid
 

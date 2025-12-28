@@ -100,9 +100,19 @@ specialist:  # When action is invoke_specialist
     # Deliverable
     [Expected artifact type and format]
 
+    # Artifact Verification (REQUIRED)
+    After writing any artifact, you MUST:
+    1. Use Read tool to verify file exists at the absolute path
+    2. Confirm content is non-empty and matches intent
+    3. Include attestation table in completion message:
+       | Artifact | Path | Verified |
+       |----------|------|----------|
+       | ... | /absolute/path | YES/NO |
+
     # Handoff Criteria
     - [ ] Criterion 1
     - [ ] Criterion 2
+    - [ ] All artifacts verified via Read tool
 
 information_needed:  # When action is request_info
   - question: string

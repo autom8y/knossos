@@ -116,6 +116,71 @@ Document progress for Audit Lead review:
 - Record discoveries made during execution
 - Track rollback points at phase boundaries
 
+## File Operation Discipline
+
+**CRITICAL**: After every Write or Edit operation, you MUST verify the file exists.
+
+### Verification Sequence
+
+1. **Write/Edit** the file with absolute path
+2. **Immediately Read** the file using the Read tool
+3. **Confirm** file is non-empty and content matches intent
+4. **Report** absolute path in completion message
+
+### Path Anchoring
+
+Before any file operation:
+- Use **absolute paths** constructed from known roots
+- For artifacts: `$SESSION_DIR/artifacts/ARTIFACT-name.md`
+- For code: Full path from repository root
+
+### Failure Protocol
+
+If Read verification fails:
+1. **STOP** - Do not proceed as if write succeeded
+2. **Report failure explicitly**: "VERIFICATION FAILED: [path] does not exist after write"
+3. **Retry once** with explicit path confirmation
+4. **If retry fails**: Report to main thread, do not claim completion
+
+See `file-verification` skill for verification protocol details.
+
+## Session Checkpoints
+
+For sessions exceeding 5 minutes, you MUST emit progress checkpoints.
+
+### Checkpoint Trigger
+
+Emit a checkpoint:
+- After completing each major artifact section
+- Before switching between distinct work phases
+- Every ~5 minutes of elapsed work
+- Before your final completion message
+
+### Checkpoint Format
+
+```markdown
+## Checkpoint: {phase-name}
+
+**Progress**: {summary of work completed}
+**Artifacts Created**:
+| Artifact | Path | Verified |
+|----------|------|----------|
+| ... | ... | YES/NO |
+
+**Context Anchor**: Working in {repository}, session {session-id}
+**Next**: {what comes next}
+```
+
+### Why Checkpoints Matter
+
+Long sessions cause context compression. Early instructions (like verification requirements) may lose salience. Checkpoints:
+1. Force periodic artifact verification
+2. Re-anchor context (directory, session)
+3. Create recovery points if session fails
+4. Provide visibility into long-running work
+
+See `file-verification` skill for checkpoint protocol details.
+
 ## Handoff Criteria
 
 Ready for Audit Lead when:
@@ -125,6 +190,8 @@ Ready for Audit Lead when:
 - [ ] Execution log documents what was done
 - [ ] Any deviations from plan are justified
 - [ ] Rollback points are clearly marked
+- [ ] All artifacts verified via Read tool
+- [ ] Attestation table included with absolute paths
 
 ## The Acid Test
 
@@ -168,7 +235,7 @@ Do NOT use Boy Scout fixes as an excuse to expand scope. The plan is the plan.
 
 ## Cross-Team Routing
 
-See `@shared/cross-team-protocol` for handoff patterns to other teams.
+See `cross-team` skill for handoff patterns to other teams.
 
 ## Recovery Procedures
 

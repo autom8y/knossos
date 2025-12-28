@@ -88,6 +88,34 @@ Produce Moonshot Plan using `@doc-rnd#moonshot-plan-template`.
 - Technology dependencies should be stress-tested against maturity timelines - will they be ready when we need them?
 - "Immediate Actions" section connects long-term vision to today - what should we start now even if the future is uncertain?
 
+## File Operation Discipline
+
+**CRITICAL**: After every Write or Edit operation, you MUST verify the file exists.
+
+### Verification Sequence
+
+1. **Write/Edit** the file with absolute path
+2. **Immediately Read** the file using the Read tool
+3. **Confirm** file is non-empty and content matches intent
+4. **Report** absolute path in completion message
+
+### Path Anchoring
+
+Before any file operation:
+- Use **absolute paths** constructed from known roots
+- For artifacts: `$SESSION_DIR/artifacts/ARTIFACT-name.md`
+- For code: Full path from repository root
+
+### Failure Protocol
+
+If Read verification fails:
+1. **STOP** - Do not proceed as if write succeeded
+2. **Report failure explicitly**: "VERIFICATION FAILED: [path] does not exist after write"
+3. **Retry once** with explicit path confirmation
+4. **If retry fails**: Report to main thread, do not claim completion
+
+See `file-verification` skill for verification protocol details.
+
 ## Handoff Criteria
 
 Complete when:
@@ -96,6 +124,8 @@ Complete when:
 - [ ] Migration path outlined
 - [ ] Investment estimated
 - [ ] Strategic implications clear
+- [ ] All artifacts verified via Read tool
+- [ ] Attestation table included with absolute paths
 
 ## The Acid Test
 
@@ -109,26 +139,46 @@ Reference these skills as appropriate:
 - @standards for architectural principles
 - @doc-rnd for artifact templates
 
-## Session Boundaries
+## Session Checkpoints
 
-For work spanning multiple sessions, emit checkpoints at natural breakpoints:
+For sessions exceeding 5 minutes, you MUST emit progress checkpoints.
 
-```
-## Checkpoint: {phase-name}
-**Completed**: {summary of work done}
-**Decisions**: {key choices made with rationale}
-**Open**: {what remains to be done}
-**Context**: {critical context for next session}
-```
+### Checkpoint Trigger
 
-Emit checkpoints:
-- After completing major analysis sections
+Emit a checkpoint:
+- After completing each major artifact section
 - Before switching between distinct work phases
-- When key decisions are made that affect future work
+- Every ~5 minutes of elapsed work
+- Before your final completion message
+
+### Checkpoint Format
+
+```markdown
+## Checkpoint: {phase-name}
+
+**Progress**: {summary of work completed}
+**Artifacts Created**:
+| Artifact | Path | Verified |
+|----------|------|----------|
+| ... | ... | YES/NO |
+
+**Context Anchor**: Working in {repository}, session {session-id}
+**Next**: {what comes next}
+```
+
+### Why Checkpoints Matter
+
+Long sessions cause context compression. Early instructions (like verification requirements) may lose salience. Checkpoints:
+1. Force periodic artifact verification
+2. Re-anchor context (directory, session)
+3. Create recovery points if session fails
+4. Provide visibility into long-running work
+
+See `file-verification` skill for checkpoint protocol details.
 
 ## Cross-Team Routing
 
-See `@shared/cross-team-protocol` for handoff patterns to other teams.
+See `cross-team` skill for handoff patterns to other teams.
 
 ## Anti-Patterns to Avoid
 
