@@ -291,10 +291,10 @@ Place custom playbooks in `playbooks/` directory within this skill.
 
 ## Cross-References
 
-- **Workflow Skill**: @10x-workflow for detailed workflow info
-- **Standards Skill**: @standards for code conventions
-- **Prompting Skill**: @prompting for invocation patterns
-- **Team Development**: @team-development for creating new teams
+- **Standards Skill**: See `standards` skill for code conventions
+- **Prompting Skill**: See `prompting` skill for invocation patterns
+- **Team Development**: See `team-development` skill (available with forge-pack team)
+- **Workflow Info**: Team-specific workflows are documented in each team pack's skills
 
 ---
 
@@ -313,7 +313,7 @@ The Consultant's knowledge base MUST stay synchronized with ecosystem changes.
 
 ### Synchronization Guide
 
-See `.claude/skills/team-development/patterns/consultant-sync.md` for:
+See the `team-development` skill (available with forge-pack) for:
 - Step-by-step update instructions
 - File-by-file update matrix
 - Validation commands

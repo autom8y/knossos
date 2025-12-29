@@ -96,9 +96,9 @@ Act as Engineer, prototype to answer: {question}
 
 ## Cross-Skill Integration
 
-- [10x-workflow](../10x-workflow/SKILL.md) - Pipeline flow, quality gates
-- [documentation](../documentation/SKILL.md) - PRD/TDD/ADR templates
+- [orchestration](../orchestration/SKILL.md) - Consultation loop and pipeline flow
 - [standards](../standards/SKILL.md) - Code conventions
+- Team-specific skills - Each team provides documentation templates and workflow definitions
 
 ## When Patterns Don't Fit
 

@@ -472,10 +472,9 @@ Build pipeline will:
 
 ## Related Skills
 
-- `@documentation` - Templates for PRDs, TDDs, ADRs
-- `@standards` - Naming conventions and code style
-- `@10x-workflow` - Phase coordination and handoff protocols
-- `@agent-prompt-engineering` - Writing effective agent prompts
+- `standards` - Naming conventions and code style
+- `agent-prompt-engineering` - Writing effective agent prompts (available with forge-pack)
+- Team-specific skills - Each team defines its own documentation templates and workflow protocols
 
 ## Quick Reference
 

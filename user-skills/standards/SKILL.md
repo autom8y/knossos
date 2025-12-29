@@ -246,6 +246,6 @@ For complete shell environment documentation, see [SHELL.md](../../../docs/SHELL
 ## Cross-Skill Integration
 
 - [prompting](../prompting/SKILL.md) - Implementation prompts reference these
-- [10x-workflow](../10x-workflow/SKILL.md) - Principal Engineer enforces these
 - [justfile](../justfile/SKILL.md) - Task automation patterns and recipes
-- [claude-md-architecture](../claude-md-architecture/SKILL.md) - Content placement for CLAUDE.md (what belongs where)
+- `claude-md-architecture` - Content placement for CLAUDE.md (available with ecosystem-pack)
+- Team workflows - Principal Engineer role enforces these standards during implementation

@@ -66,17 +66,17 @@ Sessions -1 and 0 are **pre-work** - Orchestrator ingestion only. Real work begi
 | Agent hierarchy & behavior rules | [shared-principles.md](shared-principles.md) |
 | Session -1 execution details | [session-minus-1-protocol.md](session-minus-1-protocol.md) |
 | Session 0 execution details | [session-0-protocol.md](session-0-protocol.md) |
-| Workflow definition | [10x-workflow](../10x-workflow/SKILL.md) |
+| Workflow definition | Active team's workflow (see ACTIVE_WORKFLOW.yaml) |
 | Agent invocation patterns | [prompting](../prompting/SKILL.md) |
 
 ## Related Skills
 
 | Skill | Purpose |
 |-------|---------|
-| [start-ref](../start-ref/skill.md) | Direct session start (scope already validated) |
-| [10x-workflow](../10x-workflow/SKILL.md) | Defines the workflow (do not repeat) |
-| [documentation](../documentation/SKILL.md) | Templates for specialists |
+| [start-ref](../start-ref/SKILL.md) | Direct session start (scope already validated) |
 | [prompting](../prompting/SKILL.md) | Agent invocation patterns |
+| Team workflows | Each team defines its own workflow in ACTIVE_WORKFLOW.yaml |
+| Team documentation | Templates available via team-specific skills |
 
 ## Archived Templates
 
