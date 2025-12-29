@@ -124,6 +124,6 @@ cem update --version 2.0.1
 | 2.1.x | Compatible | Compatible | Recommended |
 | 2.2.x | Deprecated | Compatible | skeleton v1.x EOL in 3.0 |
 
-## Skills Reference
+## Related Skills
 
-Use `@documentation` for runbook template. Use `@ecosystem-ref` for compatibility conventions. Use `@10x-workflow` for rollout planning by complexity.
+`doc-ecosystem` (runbook template), `ecosystem-ref` (compatibility conventions), `10x-workflow` (rollout planning by complexity).

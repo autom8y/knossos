@@ -110,6 +110,6 @@ jq -e '.hooks.events | length > 2' \
 echo "PASS: Settings merge preserves local arrays"
 ```
 
-## Skills Reference
+## Related Skills
 
-Use `@ecosystem-ref` for CEM/skeleton/roster patterns. Use `@standards` for bash conventions. Use `@justfile` for test automation.
+`ecosystem-ref` (CEM/skeleton/roster patterns), `standards` (bash conventions), `justfile` (test automation).

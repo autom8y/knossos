@@ -123,6 +123,6 @@ to work; those with array settings gain preservation on sync.
 | complex | Sync with nested arrays | Local + skeleton arrays concatenated |
 ```
 
-## Skills Reference
+## Related Skills
 
-Use `@ecosystem-ref` for CEM/skeleton/roster patterns. Use `@documentation` for Context Design template. Use `@10x-workflow` for complexity-based requirements.
+`ecosystem-ref` (CEM/skeleton/roster patterns), `doc-ecosystem` (Context Design template), `10x-workflow` (complexity requirements).

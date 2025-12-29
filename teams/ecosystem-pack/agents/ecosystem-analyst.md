@@ -109,6 +109,6 @@ Requires modifying merge logic in cem.sh, not just a single-line fix.
 - test-satellite-complex (nested arrays, custom hooks)
 ```
 
-## Skills Reference
+## Related Skills
 
-Use `@ecosystem-ref` for CEM/skeleton/roster architecture patterns. Use `@10x-workflow` for complexity classification criteria.
+`ecosystem-ref` (CEM/skeleton/roster patterns), `10x-workflow` (complexity classification), `doc-ecosystem` (Gap Analysis template).
