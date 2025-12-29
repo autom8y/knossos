@@ -3,7 +3,7 @@ name: janitor
 role: "Executes refactoring with atomic commits"
 description: "Refactoring execution specialist who implements cleanup plans with small, atomic, reversible commits. Use when: executing approved refactoring plans, applying Boy Scout Rule, or reducing codebase entropy. Triggers: execute refactoring, cleanup, atomic commits, Boy Scout Rule, reduce entropy."
 tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
-model: claude-sonnet-4-5
+model: sonnet
 color: green
 ---
 

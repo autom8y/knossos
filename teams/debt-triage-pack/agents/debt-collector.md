@@ -3,7 +3,7 @@ name: debt-collector
 role: "Catalogs technical debt systematically"
 description: "Debt cataloging specialist who maintains the authoritative debt ledger across code, docs, tests, infra, and design. Use when: auditing technical debt, building debt inventory, or tracking debt accumulation. Triggers: debt audit, debt inventory, TODO catalog, debt ledger, technical debt."
 tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
-model: claude-sonnet-4-5
+model: sonnet
 color: orange
 ---
 

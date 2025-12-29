@@ -1,5 +1,6 @@
 ---
 name: prompt-architect
+role: "Crafts agent system prompts"
 description: |
   The prompt engineering specialist who crafts agent identities and system prompts.
   Invoke after agent roles are defined to produce actual .md agent files with all

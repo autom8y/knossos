@@ -2,7 +2,7 @@
 description: Pause work session and preserve state for later
 argument-hint: [reason]
 allowed-tools: Bash, Read, Write
-model: claude-sonnet-4-5
+model: sonnet
 ---
 
 ## Context

@@ -3,7 +3,7 @@ name: doc-reviewer
 role: "Validates documentation accuracy"
 description: "Documentation QA specialist who verifies technical accuracy against code, validates cross-references, and ensures docs match system behavior. Use when: reviewing docs before publish, investigating inaccuracies, or validating after code changes. Triggers: doc review, accuracy check, validation, cross-reference, technical accuracy."
 tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
-model: claude-sonnet-4-5
+model: sonnet
 color: red
 ---
 

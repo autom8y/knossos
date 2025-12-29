@@ -1,5 +1,6 @@
 ---
 name: agent-curator
+role: "Integrates teams into catalog"
 description: |
   The integration specialist who finalizes teams for roster deployment.
   Invoke after validation passes to complete integration, versioning, and
@@ -27,7 +28,7 @@ description: |
   replacement team..."
   </example>
 tools: Bash, Glob, Grep, Read, Write, Edit, Task, TodoWrite
-model: claude-sonnet-4-5
+model: sonnet
 color: blue
 ---
 

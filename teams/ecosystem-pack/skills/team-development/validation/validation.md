@@ -26,7 +26,7 @@
 - [ ] YAML frontmatter between `---` markers
 - [ ] `name` matches filename (without .md)
 - [ ] `description` includes role summary, triggers, example
-- [ ] `model` is valid (`claude-opus-4-5`, `claude-sonnet-4-5`, `claude-haiku-4-5`)
+- [ ] `model` is valid (`opus`, `sonnet`, `haiku`)
 - [ ] `color` is unique within team
 - [ ] All 11 sections present (see agent-template.md)
 

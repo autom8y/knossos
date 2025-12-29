@@ -3,7 +3,7 @@ name: prototype-engineer
 role: "Builds decision-ready prototypes"
 description: "Rapid prototyping specialist who builds working demos to prove feasibility and de-risk technical bets. Produces throwaway code with explicit shortcuts documented. Use when: validating technology hands-on, demonstrating concepts, or resolving technical uncertainty. Triggers: prototype, POC, proof of concept, demo, feasibility validation, spike."
 tools: Bash, Glob, Grep, Read, Edit, Write, NotebookEdit, TodoWrite, Skill
-model: claude-sonnet-4-5
+model: sonnet
 color: green
 ---
 

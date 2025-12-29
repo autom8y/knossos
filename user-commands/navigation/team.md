@@ -1,7 +1,7 @@
 ---
 description: Switch agent team packs or list available teams
 argument-hint: [pack-name] [--list] [--force] [--keep-all|--remove-all|--promote-all]
-model: claude-sonnet-4-5
+model: sonnet
 ---
 
 ## Context

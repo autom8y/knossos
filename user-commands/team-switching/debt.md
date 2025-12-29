@@ -1,7 +1,7 @@
 ---
 description: Quick switch to debt-triage-pack (technical debt workflow)
 allowed-tools: Bash, Read
-model: claude-sonnet-4-5
+model: sonnet
 ---
 
 ## Context

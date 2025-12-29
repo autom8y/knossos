@@ -854,6 +854,19 @@ swap_agents() {
         exit "$EXIT_SWAP_FAILURE"
     }
 
+    # Check for same-name conflicts with user-level agents
+    local user_agents_dir="$HOME/.claude/agents"
+    if [[ -d "$user_agents_dir" ]]; then
+        for agent_file in .claude/agents/*.md; do
+            [[ -f "$agent_file" ]] || continue
+            local agent_name
+            agent_name=$(basename "$agent_file")
+            if [[ -f "$user_agents_dir/$agent_name" ]]; then
+                log_warning "Team agent '$agent_name' shadows user-level agent in ~/.claude/agents/"
+            fi
+        done
+    fi
+
     # Verify copy completed
     local dest_count
     dest_count=$(find .claude/agents -maxdepth 1 -name "*.md" -type f 2>/dev/null | wc -l | tr -d ' ')
@@ -1134,6 +1147,138 @@ swap_skills() {
 }
 
 # ============================================================================
+# Team Hooks Functions (Phase 2: Unified Sync)
+# ============================================================================
+
+# Backup current team hooks (if any exist)
+backup_team_hooks() {
+    log_debug "Checking for team hooks to backup"
+
+    local backup_dir=".claude/hooks.backup"
+
+    # Check if any team hooks exist (marked by .team-hooks file)
+    if [[ ! -d ".claude/hooks" ]] || [[ ! -f ".claude/hooks/.team-hooks" ]]; then
+        log_debug "No team hooks to backup"
+        return 0
+    fi
+
+    # Remove old backup if exists
+    if [[ -d "$backup_dir" ]]; then
+        log_debug "Removing old hooks backup"
+        rm -rf "$backup_dir" || {
+            log_warning "Failed to remove old hooks backup"
+        }
+    fi
+
+    # Read list of team hooks and backup
+    mkdir -p "$backup_dir"
+    while IFS= read -r hook_file; do
+        [[ -z "$hook_file" ]] && continue
+        if [[ -f ".claude/hooks/$hook_file" ]]; then
+            cp ".claude/hooks/$hook_file" "$backup_dir/$hook_file"
+            log_debug "Backed up hook: $hook_file"
+        fi
+    done < ".claude/hooks/.team-hooks"
+
+    log_debug "Team hooks backed up"
+}
+
+# Remove team hooks from previous team
+remove_team_hooks() {
+    log_debug "Removing team hooks from previous team"
+
+    if [[ ! -f ".claude/hooks/.team-hooks" ]]; then
+        log_debug "No team hooks marker found"
+        return 0
+    fi
+
+    # Read list and remove each hook file
+    while IFS= read -r hook_file; do
+        [[ -z "$hook_file" ]] && continue
+        if [[ -f ".claude/hooks/$hook_file" ]]; then
+            rm -f ".claude/hooks/$hook_file"
+            log_debug "Removed team hook: $hook_file"
+        fi
+    done < ".claude/hooks/.team-hooks"
+
+    # Remove the marker file
+    rm -f ".claude/hooks/.team-hooks"
+
+    log_debug "Team hooks removed"
+}
+
+# Sync team-specific hooks to project
+# Team hooks are copied to .claude/hooks/ with a marker file
+swap_hooks() {
+    local team_name="$1"
+    local source_dir="$ROSTER_HOME/teams/$team_name/hooks"
+
+    log_debug "Checking for team hooks in $source_dir"
+
+    # Ensure hooks directory exists
+    mkdir -p ".claude/hooks"
+
+    # Backup and remove previous team hooks
+    backup_team_hooks
+    remove_team_hooks
+
+    # Check if team has hooks
+    if [[ ! -d "$source_dir" ]]; then
+        log_debug "Team $team_name has no hooks/ directory"
+        return 0
+    fi
+
+    local hook_count
+    hook_count=$(find "$source_dir" -maxdepth 1 -type f 2>/dev/null | wc -l | tr -d ' ')
+
+    if [[ "$hook_count" -eq 0 ]]; then
+        log_debug "Team $team_name has no hook files"
+        return 0
+    fi
+
+    log_debug "Syncing $hook_count hook(s) from $team_name"
+
+    # Create marker file to track which hooks belong to this team
+    local marker_file=".claude/hooks/.team-hooks"
+    : > "$marker_file"
+
+    # Copy each hook file and record in marker
+    for hook_file in "$source_dir"/*; do
+        [[ -f "$hook_file" ]] || continue
+
+        local hook_name
+        hook_name=$(basename "$hook_file")
+
+        # Skip hidden files (like .gitkeep)
+        [[ "$hook_name" == .* ]] && continue
+
+        # Check for collision with user-level hook
+        if [[ -f "$HOME/.claude/hooks/$hook_name" ]]; then
+            log_warning "Team hook $hook_name shadows user-level hook in ~/.claude/hooks/"
+        fi
+
+        # Check for collision with existing project hook (not from team)
+        if [[ -f ".claude/hooks/$hook_name" ]] && ! grep -q "^$hook_name$" "$marker_file" 2>/dev/null; then
+            # Exists but not from team - this is a project hook
+            log_warning "Skipped: $hook_name (project hook exists)"
+            continue
+        fi
+
+        cp "$hook_file" ".claude/hooks/$hook_name"
+        echo "$hook_name" >> "$marker_file"
+        log_debug "Synced hook: $hook_name"
+    done
+
+    # Count successfully synced hooks
+    local synced_count
+    synced_count=$(wc -l < "$marker_file" | tr -d ' ')
+
+    if [[ "$synced_count" -gt 0 ]]; then
+        log "Synced: $synced_count team hook(s)"
+    fi
+}
+
+# ============================================================================
 # CLAUDE.md Update Functions
 # ============================================================================
 
@@ -1408,6 +1553,9 @@ perform_swap() {
     # Sync team-specific skills (Phase 2: Unified Sync)
     swap_skills "$team_name"
 
+    # Sync team hooks
+    swap_hooks "$team_name"
+
     # Write manifest with current state (after commands synced so we capture them)
     write_manifest "$team_name"
 
@@ -1426,6 +1574,12 @@ perform_swap() {
     else
         log "Switched to $team_name ($agent_count agents loaded)"
     fi
+
+    # Restart warning - Claude Code scans agents at session startup only
+    log ""
+    log "NOTE: Restart Claude Code session (/exit then claude) for agent changes to take effect."
+    log "      The /agents command will show stale agents until session restart."
+
     exit "$EXIT_SUCCESS"
 }
 

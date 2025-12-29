@@ -78,7 +78,7 @@ description: |
   Invoke when auditing debt, inventorying issues, or starting debt triage.
   Produces debt-ledger.
 tools: Bash, Glob, Grep, Read, TodoWrite
-model: claude-haiku-4-5
+model: haiku
 color: orange
 ---
 
@@ -90,7 +90,7 @@ description: |
   Invoke when prioritizing debt, assessing risk, or ranking issues.
   Produces risk-report.
 tools: Bash, Glob, Grep, Read, TodoWrite
-model: claude-sonnet-4-5
+model: sonnet
 color: cyan
 ---
 
@@ -102,7 +102,7 @@ description: |
   Invoke when planning sprints, scheduling debt work, or creating paydown plans.
   Produces sprint-plan.
 tools: Bash, Glob, Grep, Read, Write, TodoWrite
-model: claude-sonnet-4-5
+model: sonnet
 color: pink
 ---
 ```
@@ -230,7 +230,7 @@ description: |
   Invoke for complex projects, PLATFORM complexity, or multi-sprint work.
   Manages handoffs between agents.
 tools: Bash, Glob, Grep, Read, Write, Task, TodoWrite
-model: claude-opus-4-5
+model: opus
 color: purple
 ---
 
@@ -242,7 +242,7 @@ description: |
   Invoke when starting features, defining scope, or writing PRDs.
   Produces prd.
 tools: Bash, Glob, Grep, Read, Write, WebFetch, WebSearch, AskUserQuestion, TodoWrite
-model: claude-opus-4-5
+model: opus
 color: pink
 ---
 
@@ -254,7 +254,7 @@ description: |
   Invoke for system design, API design, or technical planning.
   Produces tdd, adr.
 tools: Bash, Glob, Grep, Read, Write, TodoWrite
-model: claude-opus-4-5
+model: opus
 color: cyan
 ---
 
@@ -266,7 +266,7 @@ description: |
   Invoke for coding, refactoring, or building features.
   Produces code.
 tools: Bash, Glob, Grep, Read, Edit, Write, NotebookEdit, Task, TodoWrite
-model: claude-sonnet-4-5
+model: sonnet
 color: green
 ---
 
@@ -278,7 +278,7 @@ description: |
   Invoke for testing, code review, or quality validation.
   Produces test-plan.
 tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite
-model: claude-opus-4-5
+model: opus
 color: red
 ---
 ```

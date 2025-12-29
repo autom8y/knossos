@@ -2,7 +2,7 @@
 description: Create pull request with comprehensive description
 argument-hint: [title] [--base=BRANCH]
 allowed-tools: Bash, Read, Glob, Grep
-model: claude-sonnet-4-5
+model: sonnet
 ---
 
 ## Context

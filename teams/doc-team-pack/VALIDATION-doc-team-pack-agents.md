@@ -21,11 +21,11 @@ All agents have valid YAML frontmatter with required fields:
 
 | Agent | name | role | description | tools | model | color |
 |-------|------|------|-------------|-------|-------|-------|
-| doc-auditor | ✓ | ✓ | ✓ | ✓ | claude-sonnet-4-5 | blue |
-| doc-reviewer | ✓ | ✓ | ✓ | ✓ | claude-sonnet-4-5 | red |
-| information-architect | ✓ | ✓ | ✓ | ✓ | claude-opus-4-5 | cyan |
-| orchestrator | ✓ | ✓ | ✓ | ✓ | claude-opus-4-5 | blue |
-| tech-writer | ✓ | ✓ | ✓ | ✓ | claude-sonnet-4-5 | blue |
+| doc-auditor | ✓ | ✓ | ✓ | ✓ | sonnet | blue |
+| doc-reviewer | ✓ | ✓ | ✓ | ✓ | sonnet | red |
+| information-architect | ✓ | ✓ | ✓ | ✓ | opus | cyan |
+| orchestrator | ✓ | ✓ | ✓ | ✓ | opus | blue |
+| tech-writer | ✓ | ✓ | ✓ | ✓ | sonnet | blue |
 
 ## Section Presence Validation
 

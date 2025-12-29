@@ -1,0 +1,392 @@
+name: Validate Orchestrators
+
+on:
+  pull_request:
+    paths:
+      - 'teams/*/orchestrator.yaml'
+      - 'teams/*/agents/orchestrator.md'
+      - 'schemas/orchestrator.yaml.schema.json'
+      - 'templates/orchestrator-*.sh'
+      - '.github/workflows/validate-orchestrators.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'teams/*/orchestrator.yaml'
+      - 'teams/*/agents/orchestrator.md'
+      - 'schemas/orchestrator.yaml.schema.json'
+      - 'templates/orchestrator-*.sh'
+  workflow_dispatch:
+    inputs:
+      teams:
+        description: 'Specific teams to validate (comma-separated, or "all")'
+        required: false
+        default: 'all'
+
+jobs:
+  detect-changes:
+    name: Detect Changed Orchestrators
+    runs-on: ubuntu-latest
+    outputs:
+      changed-yaml: ${{ steps.detect.outputs.changed-yaml }}
+      changed-md: ${{ steps.detect.outputs.changed-md }}
+      yaml-teams: ${{ steps.detect.outputs.yaml-teams }}
+      md-teams: ${{ steps.detect.outputs.md-teams }}
+      has-changes: ${{ steps.detect.outputs.has-changes }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect Changed Files
+        id: detect
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            TEAMS_INPUT="${{ github.event.inputs.teams }}"
+            if [[ "$TEAMS_INPUT" == "all" ]]; then
+              YAML_FILES=$(find teams -name "orchestrator.yaml" | sort)
+              MD_FILES=$(find teams -name "orchestrator.md" -path "*/agents/*" | sort)
+            else
+              YAML_FILES=""
+              MD_FILES=""
+              IFS=',' read -ra TEAMS <<< "$TEAMS_INPUT"
+              for team in "${TEAMS[@]}"; do
+                team=$(echo "$team" | xargs)  # trim whitespace
+                [[ -f "teams/$team/orchestrator.yaml" ]] && YAML_FILES="$YAML_FILES teams/$team/orchestrator.yaml"
+                [[ -f "teams/$team/agents/orchestrator.md" ]] && MD_FILES="$MD_FILES teams/$team/agents/orchestrator.md"
+              done
+            fi
+          else
+            YAML_FILES=$(git diff --name-only "${{ github.event.pull_request.base.sha || 'origin/main' }}" HEAD | grep 'teams/.*/orchestrator\.yaml' || true)
+            MD_FILES=$(git diff --name-only "${{ github.event.pull_request.base.sha || 'origin/main' }}" HEAD | grep 'teams/.*/agents/orchestrator\.md' || true)
+          fi
+
+          # Output arrays as JSON
+          YAML_JSON=$(echo "$YAML_FILES" | jq -R -s 'split("\n") | map(select(length > 0))')
+          MD_JSON=$(echo "$MD_FILES" | jq -R -s 'split("\n") | map(select(length > 0))')
+
+          YAML_TEAMS=$(echo "$YAML_FILES" | sed -E 's|teams/([^/]+)/.*|\1|' | sort -u | jq -R -s 'split("\n") | map(select(length > 0))')
+          MD_TEAMS=$(echo "$MD_FILES" | sed -E 's|teams/([^/]+)/.*|\1|' | sort -u | jq -R -s 'split("\n") | map(select(length > 0))')
+
+          HAS_CHANGES="false"
+          [[ -n "$YAML_FILES" ]] || [[ -n "$MD_FILES" ]] && HAS_CHANGES="true"
+
+          echo "changed-yaml=$YAML_JSON" >> $GITHUB_OUTPUT
+          echo "changed-md=$MD_JSON" >> $GITHUB_OUTPUT
+          echo "yaml-teams=$YAML_TEAMS" >> $GITHUB_OUTPUT
+          echo "md-teams=$MD_TEAMS" >> $GITHUB_OUTPUT
+          echo "has-changes=$HAS_CHANGES" >> $GITHUB_OUTPUT
+
+          echo "Changed YAML files: $(echo "$YAML_FILES" | wc -l)"
+          echo "Changed MD files: $(echo "$MD_FILES" | wc -l)"
+
+  setup:
+    name: Setup Environment
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Dependencies
+        run: |
+          # Install required tools
+          sudo apt-get update
+          sudo apt-get install -y jq
+
+          # Check for yq
+          if ! command -v yq &> /dev/null; then
+            curl -sLo /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+            chmod +x /usr/local/bin/yq
+          fi
+
+          # Verify all tools
+          echo "Checking dependencies..."
+          for tool in jq yq bash grep sed awk; do
+            if command -v "$tool" &> /dev/null; then
+              echo "✓ $tool: $(command -v $tool)"
+            else
+              echo "✗ $tool: NOT FOUND"
+              exit 1
+            fi
+          done
+
+      - name: Verify Generator Scripts
+        run: |
+          [[ -f templates/orchestrator-generate.sh ]] || { echo "Generator not found"; exit 1; }
+          [[ -f templates/validate-orchestrator.sh ]] || { echo "Validator not found"; exit 1; }
+          [[ -f schemas/orchestrator.yaml.schema.json ]] || { echo "Schema not found"; exit 1; }
+          chmod +x templates/orchestrator-*.sh
+          echo "✓ All required scripts and schemas present"
+
+  validate-yaml:
+    name: Validate YAML Configuration
+    needs: [detect-changes, setup]
+    if: needs.detect-changes.outputs.has-changes == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq
+          if ! command -v yq &> /dev/null; then
+            curl -sLo /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+            chmod +x /usr/local/bin/yq
+          fi
+          chmod +x templates/orchestrator-*.sh
+
+      - name: Validate YAML Schema
+        run: |
+          YAML_FILES='${{ needs.detect-changes.outputs.changed-yaml }}'
+          FAILED=0
+
+          if [[ "$YAML_FILES" == "[]" ]]; then
+            echo "No YAML files to validate"
+            exit 0
+          fi
+
+          echo "$YAML_FILES" | jq -r '.[]' | while read -r yaml_file; do
+            if [[ -z "$yaml_file" ]]; then continue; fi
+
+            echo "Validating: $yaml_file"
+
+            # Extract team name
+            TEAM=$(echo "$yaml_file" | sed -E 's|teams/([^/]+)/.*|\1|')
+
+            # Run validator in validate-only mode
+            if ! ./templates/orchestrator-generate.sh "$TEAM" --validate-only; then
+              echo "❌ FAILED: $yaml_file"
+              FAILED=$((FAILED + 1))
+            else
+              echo "✓ PASSED: $yaml_file"
+            fi
+          done
+
+          if [[ $FAILED -gt 0 ]]; then
+            echo ""
+            echo "❌ Validation failed for $FAILED file(s)"
+            exit 1
+          fi
+
+  generate-orchestrators:
+    name: Generate Orchestrators from YAML
+    needs: [detect-changes, setup, validate-yaml]
+    if: needs.detect-changes.outputs.has-changes == 'true' && success()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq
+          if ! command -v yq &> /dev/null; then
+            curl -sLo /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+            chmod +x /usr/local/bin/yq
+          fi
+          chmod +x templates/orchestrator-*.sh
+
+      - name: Generate from YAML
+        run: |
+          YAML_TEAMS='${{ needs.detect-changes.outputs.yaml-teams }}'
+          FAILED=0
+
+          if [[ "$YAML_TEAMS" == "[]" ]]; then
+            echo "No YAML changes detected"
+            exit 0
+          fi
+
+          echo "$YAML_TEAMS" | jq -r '.[]' | while read -r team; do
+            if [[ -z "$team" ]]; then continue; fi
+
+            echo "Generating: $team"
+
+            # Generate orchestrator.md from YAML
+            if ! ./templates/orchestrator-generate.sh "$team" --force; then
+              echo "❌ FAILED to generate: $team"
+              exit 1
+            else
+              echo "✓ GENERATED: $team"
+            fi
+          done
+
+      - name: Upload Generated Artifacts
+        if: success()
+        uses: actions/upload-artifact@v3
+        with:
+          name: generated-orchestrators
+          path: teams/*/agents/orchestrator.md
+          retention-days: 7
+
+  compare-orchestrators:
+    name: Compare Generated vs Committed
+    needs: [detect-changes, setup, validate-yaml, generate-orchestrators]
+    if: needs.detect-changes.outputs.has-changes == 'true' && success()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq diffutils
+          if ! command -v yq &> /dev/null; then
+            curl -sLo /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+            chmod +x /usr/local/bin/yq
+          fi
+          chmod +x templates/orchestrator-*.sh
+
+      - name: Compare Generated Files
+        run: |
+          YAML_TEAMS='${{ needs.detect-changes.outputs.yaml-teams }}'
+          MISMATCHES=0
+
+          if [[ "$YAML_TEAMS" == "[]" ]]; then
+            echo "No YAML teams to compare"
+            exit 0
+          fi
+
+          mkdir -p /tmp/generated
+
+          echo "$YAML_TEAMS" | jq -r '.[]' | while read -r team; do
+            if [[ -z "$team" ]]; then continue; fi
+
+            COMMITTED="teams/$team/agents/orchestrator.md"
+            GENERATED="/tmp/generated/orchestrator-$team.md"
+
+            echo "Comparing: $team"
+
+            # Generate to temp file
+            ./templates/orchestrator-generate.sh "$team" --dry-run > "$GENERATED" 2>/dev/null || {
+              echo "❌ Failed to generate: $team"
+              exit 1
+            }
+
+            # Extract just the content (skip dry-run header)
+            tail -n +4 "$GENERATED" | head -n -2 > "$GENERATED.content"
+
+            if [[ ! -f "$COMMITTED" ]]; then
+              echo "❌ Committed file missing: $COMMITTED"
+              exit 1
+            fi
+
+            # Compare
+            if ! diff -q "$COMMITTED" "$GENERATED.content" > /dev/null; then
+              LINES_DIFF=$(diff "$COMMITTED" "$GENERATED.content" | wc -l)
+              echo "⚠️  MISMATCH: $team ($LINES_DIFF lines differ)"
+              echo "   Generated: $GENERATED.content"
+              echo "   Run: ./templates/orchestrator-generate.sh $team --force && git add teams/$team/agents/orchestrator.md"
+              MISMATCHES=$((MISMATCHES + 1))
+            else
+              echo "✓ MATCH: $team (100% synchronized)"
+            fi
+          done
+
+          if [[ $MISMATCHES -gt 0 ]]; then
+            echo ""
+            echo "❌ Found $MISMATCHES mismatch(es)"
+            exit 1
+          fi
+
+  validate-generated:
+    name: Validate Generated Orchestrators
+    needs: [detect-changes, setup, generate-orchestrators]
+    if: needs.detect-changes.outputs.has-changes == 'true' && success()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download Generated Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: generated-orchestrators
+          path: generated-orchestrators
+
+      - name: Validate Orchestrator Markdown
+        run: |
+          chmod +x templates/validate-orchestrator.sh
+
+          FAILED=0
+          find generated-orchestrators -name "*.md" | while read -r md_file; do
+            echo "Validating: $md_file"
+
+            if ! ./templates/validate-orchestrator.sh "$md_file"; then
+              echo "❌ FAILED: $md_file"
+              FAILED=$((FAILED + 1))
+            else
+              echo "✓ PASSED: $md_file"
+            fi
+          done
+
+          if [[ $FAILED -gt 0 ]]; then
+            echo ""
+            echo "❌ Validation failed for $FAILED orchestrator(s)"
+            exit 1
+          fi
+
+  report:
+    name: Validation Report
+    needs: [detect-changes, validate-yaml, generate-orchestrators, compare-orchestrators, validate-generated]
+    if: always() && needs.detect-changes.outputs.has-changes == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate Summary
+        run: |
+          echo "## Orchestrator Validation Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "### Results" >> $GITHUB_STEP_SUMMARY
+
+          if [[ "${{ needs.validate-yaml.result }}" == "success" ]]; then
+            echo "✓ **YAML Validation**: PASSED" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✗ **YAML Validation**: FAILED" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [[ "${{ needs.generate-orchestrators.result }}" == "success" ]]; then
+            echo "✓ **Generation**: PASSED" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✗ **Generation**: FAILED" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [[ "${{ needs.compare-orchestrators.result }}" == "success" ]]; then
+            echo "✓ **Comparison**: PASSED" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✗ **Comparison**: FAILED" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [[ "${{ needs.validate-generated.result }}" == "success" ]]; then
+            echo "✓ **Markdown Validation**: PASSED" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✗ **Markdown Validation**: FAILED" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Actions" >> $GITHUB_STEP_SUMMARY
+          echo "If comparison failed, regenerate with:" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
+          echo "cd ${{ github.workspace }}" >> $GITHUB_STEP_SUMMARY
+          echo "./templates/orchestrator-generate.sh <team> --force" >> $GITHUB_STEP_SUMMARY
+          echo "git add teams/<team>/agents/orchestrator.md" >> $GITHUB_STEP_SUMMARY
+          echo "git commit --amend" >> $GITHUB_STEP_SUMMARY
+          echo "git push -f  # Only if not shared" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+
+      - name: Check Status
+        run: |
+          FAILED=0
+
+          [[ "${{ needs.validate-yaml.result }}" == "success" ]] || FAILED=$((FAILED + 1))
+          [[ "${{ needs.generate-orchestrators.result }}" == "success" ]] || FAILED=$((FAILED + 1))
+          [[ "${{ needs.compare-orchestrators.result }}" == "success" ]] || FAILED=$((FAILED + 1))
+          [[ "${{ needs.validate-generated.result }}" == "success" ]] || FAILED=$((FAILED + 1))
+
+          if [[ $FAILED -gt 0 ]]; then
+            echo "❌ Orchestrator validation FAILED ($FAILED stage(s))"
+            exit 1
+          else
+            echo "✓ All orchestrator validation checks PASSED"
+            exit 0
+          fi

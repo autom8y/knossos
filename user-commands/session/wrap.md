@@ -2,7 +2,7 @@
 description: Complete session with quality gates and summary
 argument-hint: [--skip-checks] [--no-archive]
 allowed-tools: Bash, Read, Write, Task, Glob
-model: claude-sonnet-4-5
+model: sonnet
 ---
 
 ## Context

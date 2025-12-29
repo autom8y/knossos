@@ -1,7 +1,7 @@
 ---
 description: Quick switch to doc-team-pack (documentation workflow)
 allowed-tools: Bash, Read
-model: claude-sonnet-4-5
+model: sonnet
 ---
 
 ## Context

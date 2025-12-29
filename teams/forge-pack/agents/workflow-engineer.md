@@ -1,5 +1,6 @@
 ---
 name: workflow-engineer
+role: "Wires agents into workflows"
 description: |
   The orchestration specialist who wires agents into cohesive workflows.
   Invoke after agent prompts are ready to create workflow.yaml configuration

@@ -1,0 +1,167 @@
+# Compatibility Report: Team Resource Cleanup and Forge-pack Frontmatter Hotfix
+
+**Date**: 2025-12-29
+**Complexity**: PATCH
+**Tester**: Compatibility Tester (ecosystem-pack)
+**Satellite**: skeleton_claude (standard complexity)
+
+---
+
+## Summary
+
+| Metric | Value |
+|--------|-------|
+| Total Tests | 4 |
+| Passed | 4 |
+| Failed | 0 |
+| Warnings | 2 |
+
+**Recommendation**: **GO** - All tests pass. Ready for release.
+
+---
+
+## Test Matrix Results
+
+### Test 1: Forge-pack Agent Frontmatter
+**Status**: PASS
+
+All 7 forge-pack agents have the `role:` field in YAML frontmatter:
+
+| Agent | role: Field | Value |
+|-------|-------------|-------|
+| prompt-architect.md | PRESENT | "Crafts agent system prompts" |
+| platform-engineer.md | PRESENT | "Implements team packs in roster" |
+| eval-specialist.md | PRESENT | "Validates teams before deployment" |
+| agent-designer.md | PRESENT | "Designs agent roles and contracts" |
+| workflow-engineer.md | PRESENT | "Wires agents into workflows" |
+| agent-curator.md | PRESENT | "Integrates teams into catalog" |
+| orchestrator.md | PRESENT | "Coordinates agent team creation" |
+
+**Verification**: All agents displayed role in swap-team.sh roster output.
+
+---
+
+### Test 2: Hooks Sync Functions
+**Status**: PASS
+
+Verified swap-team.sh contains all required hooks sync functions:
+
+| Function | Line | Status |
+|----------|------|--------|
+| `backup_team_hooks()` | 1154-1183 | PRESENT |
+| `remove_team_hooks()` | 1186-1208 | PRESENT |
+| `swap_hooks()` | 1212-1279 | PRESENT |
+| `swap_hooks` call in `perform_swap()` | 1557 | PRESENT |
+
+**Implementation Pattern**: Follows skills sync pattern exactly:
+1. Creates `.claude/hooks/` directory if needed
+2. Backs up existing team hooks via `.team-hooks` marker
+3. Removes previous team hooks
+4. Copies new team hooks from roster
+5. Tracks installed hooks in `.team-hooks` marker
+6. Returns 0 gracefully if team has no hooks/ directory
+
+---
+
+### Test 3: Team Swap Cycle
+**Status**: PASS
+
+Executed full swap cycle in skeleton_claude satellite:
+
+| Step | Team | Result | Notes |
+|------|------|--------|-------|
+| 1 | forge-pack | SUCCESS | 7 agents, 6 phases, 3 commands synced |
+| 2 | 10x-dev-pack | SUCCESS | 5 agents, 4 phases, 13 skills synced |
+| 3 | ecosystem-pack | SUCCESS | 6 agents, 5 phases, 4 skills synced |
+
+**Observations**:
+- All agents displayed correctly with role in roster table
+- forge-pack synced 3 team commands
+- 10x-dev-pack synced 13 team skills (no hooks, as expected)
+- ecosystem-pack synced 4 team skills, 1 command
+
+---
+
+### Test 4: Edge Cases
+**Status**: PASS
+
+| Edge Case | Result |
+|-----------|--------|
+| Syntax validation (`bash -n swap-team.sh`) | PASS |
+| Team with no hooks/ directory (10x-dev-pack) | PASS - Returns 0, no error |
+| Team with no hooks/ directory (forge-pack) | PASS - Returns 0, no error |
+
+**Verification**: swap_hooks() properly checks for directory existence and returns early without error.
+
+---
+
+## Warnings (Non-blocking)
+
+### Warning 1: Shadow Agent
+```
+[Roster] Warning: Team agent 'requirements-analyst.md' shadows user-level agent in ~/.claude/agents/
+```
+**Assessment**: Expected behavior. User-level agent exists at `~/.claude/agents/requirements-analyst.md`. Team agent takes precedence at project level.
+
+### Warning 2: Skipped Commands
+```
+[Roster] Warning: Skipped: pr.md (project command exists)
+[Roster] Warning: Skipped: spike.md (project command exists)
+```
+**Assessment**: Expected behavior. Project-level commands have precedence over team commands.
+
+---
+
+## Defect Summary
+
+| Severity | Count | Details |
+|----------|-------|---------|
+| P0 (Blocker) | 0 | None |
+| P1 (Critical) | 0 | None |
+| P2 (Major) | 0 | None |
+| P3 (Minor) | 0 | None |
+
+---
+
+## Backward Compatibility
+
+| Component | Compatible | Notes |
+|-----------|------------|-------|
+| swap-team.sh API | YES | No breaking changes to CLI |
+| Existing team packs | YES | Works with/without hooks/ directory |
+| ACTIVE_TEAM state | YES | Format unchanged |
+| AGENT_MANIFEST.json | YES | Schema unchanged |
+| Marker files (.team-*) | YES | Pattern extended to hooks, consistent |
+
+---
+
+## Files Changed (Verified)
+
+| File | Change Type |
+|------|-------------|
+| `/Users/tomtenuta/Code/roster/teams/forge-pack/agents/*.md` | Added `role:` field |
+| `/Users/tomtenuta/Code/roster/swap-team.sh` | Added hooks sync functions |
+
+---
+
+## Rollout Recommendation
+
+**Status**: APPROVED
+
+**Rationale**:
+1. All 4 test categories pass without failures
+2. No P0/P1 defects blocking release
+3. Backward compatibility confirmed - teams without hooks/ work correctly
+4. Implementation follows established patterns (skills sync)
+5. Warnings are expected behaviors, not errors
+
+**Release Checklist**:
+- [x] Forge-pack agent frontmatter validated (7/7 agents)
+- [x] Hooks sync functions present and tested
+- [x] Team swap cycle completes successfully
+- [x] Edge cases handled gracefully
+- [x] No open defects
+
+---
+
+*Report generated by Compatibility Tester - ecosystem-pack*

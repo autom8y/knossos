@@ -110,7 +110,7 @@ Each team has a quick-switch command:
 ---
 description: Quick switch to {team-name} ({workflow description})
 allowed-tools: Bash, Read
-model: claude-haiku-4-5
+model: haiku
 ---
 
 ## Behavior

@@ -1,5 +1,6 @@
 ---
 name: eval-specialist
+role: "Validates teams before deployment"
 description: |
   The validation specialist who tests teams and agents before production use.
   Invoke after team is built to run validation suite, or directly via /eval-agent

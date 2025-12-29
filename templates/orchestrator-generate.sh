@@ -493,6 +493,9 @@ validate_substitution() {
 generate_team() {
     local team="$1"
 
+    # Normalize team name: strip "teams/" prefix if present
+    team="${team#teams/}"
+
     log_info "Processing team: $team"
 
     CONFIG="$ROSTER_HOME/teams/$team/orchestrator.yaml"

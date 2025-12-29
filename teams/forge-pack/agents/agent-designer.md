@@ -1,5 +1,6 @@
 ---
 name: agent-designer
+role: "Designs agent roles and contracts"
 description: |
   The team architecture specialist who designs agent roles, boundaries, and contracts.
   Invoke when creating a new team pack, adding agents to existing teams, or restructuring

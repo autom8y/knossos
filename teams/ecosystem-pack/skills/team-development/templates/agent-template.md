@@ -27,7 +27,7 @@ description: | # [REQUIRED] Multi-line description block
   [Additional examples for complex agents - aim for 2-3 total]
 
 tools: [REQUIRED] # Comma-separated list from: Bash, Glob, Grep, Read, Edit, Write, Task, TodoWrite
-model: [OPTIONAL] # claude-opus-4-5 | claude-sonnet-4-5 | claude-haiku-4 (default: claude-sonnet-4-5)
+model: [OPTIONAL] # opus | sonnet | claude-haiku-4 (default: sonnet)
 color: [OPTIONAL] # purple | pink | cyan | green | red | orange | blue (for UI display)
 ---
 ```
@@ -394,11 +394,11 @@ Optional sections (Behavioral Constraints, Consultation Protocol) may appear bet
 
 | Agent Type | Recommended Model | Rationale |
 |------------|-------------------|-----------|
-| Orchestrator | `claude-opus-4-5` | Complex coordination, multi-phase planning |
-| Analyst/Architect | `claude-opus-4-5` | Deep analysis, design decisions |
-| Engineer | `claude-sonnet-4-5` | Implementation, balanced speed/quality |
-| Documentation | `claude-sonnet-4-5` | Content creation, moderate complexity |
-| Tester | `claude-opus-4-5` | Judgment calls on quality gates |
+| Orchestrator | `opus` | Complex coordination, multi-phase planning |
+| Analyst/Architect | `opus` | Deep analysis, design decisions |
+| Engineer | `sonnet` | Implementation, balanced speed/quality |
+| Documentation | `sonnet` | Content creation, moderate complexity |
+| Tester | `opus` | Judgment calls on quality gates |
 
 ---
 
@@ -439,7 +439,7 @@ description: |
   assistant: "Creating agent definition following canonical template with review-focused responsibilities."
   </example>
 tools: Read, Edit, Write
-model: claude-sonnet-4-5
+model: sonnet
 color: blue
 ---
 

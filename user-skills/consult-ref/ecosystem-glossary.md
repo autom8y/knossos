@@ -169,7 +169,7 @@ Script that swaps agent files when changing teams.
 
 ## Models
 
-### opus (claude-opus-4-5)
+### opus (opus)
 Used for complex reasoning, design, analysis, review.
 
 ### sonnet

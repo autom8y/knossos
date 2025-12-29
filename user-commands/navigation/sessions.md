@@ -2,7 +2,7 @@
 description: List and manage active sessions
 argument-hint: [--list] [--switch ID] [--cleanup] [--all]
 allowed-tools: Bash, Read, Write
-model: claude-sonnet-4-5
+model: sonnet
 ---
 
 ## Context

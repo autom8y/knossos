@@ -18,7 +18,7 @@ name: orchestrator
 role: "..."
 description: "..."
 tools: Read, Skill
-model: claude-opus-4-5
+model: opus
 color: <color>
 ---
 ```
@@ -31,7 +31,7 @@ color: <color>
 | `role` | YES | string | Human-readable one-liner (no pipes or quotes) |
 | `description` | YES | string | May be quoted single-line or YAML pipe multiline |
 | `tools` | YES | string | Always "Read, Skill" (canonical) |
-| `model` | YES | string | Always "claude-opus-4-5" (canonical) |
+| `model` | YES | string | Always "opus" (canonical) |
 | `color` | YES | string | Valid hex (#RRGGBB) or named color |
 
 ### Parsing Assumptions from swap-team.sh

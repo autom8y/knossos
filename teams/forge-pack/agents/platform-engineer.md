@@ -1,5 +1,6 @@
 ---
 name: platform-engineer
+role: "Implements team packs in roster"
 description: |
   The infrastructure specialist who implements team packs in the roster system.
   Invoke after workflow is designed to create actual files and directories.
@@ -26,7 +27,7 @@ description: |
   ~/Code/roster/teams/security-pack/agents/ and verify the team still loads..."
   </example>
 tools: Bash, Glob, Grep, Read, Write, Edit, Task, TodoWrite
-model: claude-sonnet-4-5
+model: sonnet
 color: orange
 ---
 

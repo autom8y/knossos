@@ -2,7 +2,7 @@
 description: Resume a parked work session with full context
 argument-hint: [--session=ID] [--agent=NAME]
 allowed-tools: Bash, Read, Write, Task
-model: claude-sonnet-4-5
+model: sonnet
 ---
 
 ## Context

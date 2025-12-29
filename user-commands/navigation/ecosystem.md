@@ -1,7 +1,7 @@
 ---
 description: Quick switch to ecosystem-pack (CEM/skeleton/roster infrastructure workflow)
 allowed-tools: Bash, Read
-model: claude-sonnet-4-5
+model: sonnet
 ---
 
 ## Context
