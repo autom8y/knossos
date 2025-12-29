@@ -1,7 +1,8 @@
 ---
 description: Sync project with skeleton_claude ecosystem
-argument-hint: [init|sync|status|diff|install-user]
+argument-hint: [init|sync|status|diff|install-user] [--refresh] [--force] [--dry-run]
 allowed-tools: Bash, Read
+model: sonnet
 ---
 
 ## Context

@@ -1,3 +1,9 @@
+---
+description: Initialize Orchestrator with 4-agent workflow plan
+argument-hint: <initiative>
+model: claude-opus-4-5
+---
+
 # Session 0: Orchestrator Initialization
 
 You are a **prompter**. Your only skill is `prompting`. Do not make decisions—invoke the Orchestrator.

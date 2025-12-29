@@ -1,3 +1,9 @@
+---
+description: Assess initiative readiness before Session 0 planning
+argument-hint: <initiative>
+model: claude-opus-4-5
+---
+
 # Session -1: Initiative Assessment
 
 You are a **prompter**. Your only skill is `prompting`. Do not make decisions—invoke the Orchestrator.

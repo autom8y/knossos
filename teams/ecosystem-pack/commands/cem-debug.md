@@ -1,5 +1,6 @@
 ---
 description: Diagnose CEM sync issues and conflicts (Ecosystem Analyst with CEM focus)
+argument-hint: [issue-description]
 allowed-tools: Bash, Read, Grep, Glob
 model: claude-opus-4-5
 ---

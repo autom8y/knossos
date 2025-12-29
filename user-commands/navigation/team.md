@@ -1,6 +1,7 @@
 ---
 description: Switch agent team packs or list available teams
-argument-hint: [pack-name] [--list] [--force] [--keep-all|--remove-all|--promote-all]
+argument-hint: [pack-name] [--list] [--update] [--dry-run] [--keep-all|--remove-all|--promote-all]
+allowed-tools: Bash, Read
 model: sonnet
 ---
 
@@ -43,7 +44,8 @@ When switching teams, agents that exist in the current project but not in the ta
 | Apply to all | a | Apply same choice to remaining orphans |
 
 For CI/scripts (non-interactive), use flags:
-- `--force`, `-f`: Re-swap even if already on target team
+- `--update`, `-u`: Pull latest agent definitions from roster even if already on team
+- `--dry-run`: Preview changes without applying
 - `--keep-all`: Preserve all orphan agents in project
 - `--remove-all`: Remove all orphans (backup available)
 - `--promote-all`: Move all orphans to user-level
@@ -55,7 +57,7 @@ Team swaps track agent provenance in `.claude/AGENT_MANIFEST.json`:
 - **origin**: Which team pack installed this agent
 - **installed_at**: Timestamp of installation
 
-**Note**: Team context (phase→agent routing) is automatically injected into every session via the session-context hook.
+**Note**: Team context (phase->agent routing) is automatically injected into every session via the session-context hook.
 
 ## Examples
 
@@ -65,7 +67,7 @@ Team swaps track agent provenance in `.claude/AGENT_MANIFEST.json`:
 /team 10x-dev-pack              # Switch (prompts for orphans)
 /team hygiene-pack --keep-all   # Switch, keep all orphans
 /team debt-pack --promote-all   # Switch, promote orphans to user-level
-/team doc-team-pack --force     # Re-swap even if already on team
+/team doc-team-pack --update    # Update even if already on team
 ```
 
 ## Reference
