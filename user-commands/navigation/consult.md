@@ -10,7 +10,13 @@ model: claude-opus-4-5
 Auto-injected by SessionStart hook (project, team, session, git).
 
 **Active team**: !`cat .claude/ACTIVE_TEAM 2>/dev/null || echo "none"`
-**Available teams**: !`ls ~/Code/roster/teams/ 2>/dev/null | tr '\n' ' '`
+**Available teams**: !`ls ${ROSTER_HOME:-~/Code/roster}/teams/ 2>/dev/null | tr '\n' ' '`
+
+## Pre-flight
+
+1. **Knowledge base accessible**:
+   - Verify `${ROSTER_HOME:-~/Code/roster}/teams/` exists
+   - If missing: WARN "Roster not found at expected location."
 
 ## Your Task
 

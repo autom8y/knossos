@@ -15,6 +15,17 @@ Auto-injected by SessionStart hook (project, team, session, git).
 - Branch: !`git branch --show-current 2>/dev/null || echo "detached"`
 - Last 3 commits: !`git log --oneline -3 2>/dev/null || echo "no commits"`
 
+## Pre-flight
+
+1. **Repository check**:
+   - Verify in git repository
+   - If not: ERROR "Not in a git repository."
+
+2. **Git state**:
+   - Check for staged changes: `git diff --cached --quiet`
+   - If no staged changes: Check for unstaged changes
+   - If neither: ERROR "Nothing to commit. Stage changes with git add first."
+
 ## Your Task
 
 Create a git commit with an AI-generated message. $ARGUMENTS

@@ -7,7 +7,7 @@ model: claude-sonnet-4-5
 ## Context
 Auto-injected by SessionStart hook (project, team, session, git).
 
-**Available teams**: !`ls ~/Code/roster/teams/`
+**Available teams**: !`ls ${ROSTER_HOME:-~/Code/roster}/teams/`
 
 ## Your Task
 
@@ -20,11 +20,11 @@ Manage agent team packs. $ARGUMENTS
 2. Show: "Active team: {name}" or "No team active"
 
 **If `--list` or `-l`:**
-1. Execute: `~/Code/roster/swap-team.sh --list`
+1. Execute: `${ROSTER_HOME:-~/Code/roster}/swap-team.sh --list`
 2. Display all available team packs
 
 **If `<pack-name>` provided:**
-1. Execute: `~/Code/roster/swap-team.sh <pack-name> [flags]`
+1. Execute: `${ROSTER_HOME:-~/Code/roster}/swap-team.sh <pack-name> [flags]`
 2. If orphan agents exist (agents in current team but not in target):
    - **Interactive (TTY)**: Prompt user for each orphan agent
    - **Non-interactive**: Require `--keep-all`, `--remove-all`, or `--promote-all` flag

@@ -11,6 +11,12 @@ Auto-injected by SessionStart hook (project, team, session, git, workflow).
 **Review-specific**:
 - Recent PRs: !`gh pr list --limit 5 2>/dev/null || echo "gh CLI not available"`
 
+## Pre-flight
+
+1. **Changes to review**:
+   - Check git status for uncommitted changes OR PR reference provided in $ARGUMENTS
+   - If neither: ERROR "No changes to review. Provide PR number or ensure uncommitted changes exist."
+
 ## Your Task
 
 Review changes with structured, categorized feedback. $ARGUMENTS

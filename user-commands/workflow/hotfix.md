@@ -8,6 +8,16 @@ model: claude-opus-4-5
 ## Context
 Auto-injected by SessionStart hook (project, team, session, git, workflow).
 
+## Pre-flight
+
+1. **Workflow required**:
+   - Verify `.claude/ACTIVE_WORKFLOW.yaml` exists
+   - If missing: ERROR "No active workflow. Use /team to select a team first."
+
+2. **Team context**:
+   - Verify `.claude/ACTIVE_TEAM` exists
+   - If missing: ERROR "No team active. Use /team <pack-name> to select a team."
+
 ## Your Task
 
 Execute a rapid fix for an urgent issue. $ARGUMENTS

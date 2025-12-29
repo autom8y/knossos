@@ -8,6 +8,12 @@ model: claude-opus-4-5
 ## Context
 Auto-injected by SessionStart hook (project, team, session, git).
 
+## Pre-flight
+
+1. **Arguments required**:
+   - Parse `$ARGUMENTS` for spike topic
+   - If empty: ERROR "Spike topic required. Usage: /spike 'exploration topic'"
+
 ## Your Task
 
 Conduct time-boxed research to answer a technical question. $ARGUMENTS

@@ -73,7 +73,7 @@ This atomically:
 
 If user specified `--team=NAME` and it differs from Active Team:
 ```bash
-~/Code/roster/swap-team.sh <team-name>
+${ROSTER_HOME:-~/Code/roster}/swap-team.sh <team-name>
 ```
 
 ### 5. Invoke Entry Point Agent

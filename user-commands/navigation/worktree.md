@@ -9,6 +9,15 @@ model: claude-sonnet-4-5
 
 Git worktrees provide true filesystem isolation for parallel Claude sessions. Each worktree has its own `.claude/` directory with independent agents, sessions, sprints, and team configuration.
 
+## Pre-flight
+
+1. **Git repository required**:
+   - Verify in git repository: `git rev-parse --git-dir`
+   - If not: ERROR "Not in a git repository. Worktrees require git."
+
+2. **Git worktree support**:
+   - Check git version supports worktrees (2.5+)
+
 ## Your Task
 
 $ARGUMENTS

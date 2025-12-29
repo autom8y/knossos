@@ -8,6 +8,16 @@ model: claude-opus-4-5
 ## Context
 Auto-injected by SessionStart hook (project, team, session, git, workflow).
 
+## Pre-flight
+
+1. **Session context** (recommended):
+   - Check Session Status in context above
+   - If no session: WARN "No active session. Consider /start for tracked workflow."
+
+2. **Prerequisites check**:
+   - Verify implementation exists to validate
+   - If missing: WARN "No implementation found. Consider /build first."
+
 ## Your Task
 
 Validate implementation against requirements. Testing and validation only. $ARGUMENTS
