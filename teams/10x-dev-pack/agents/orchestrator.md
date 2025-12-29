@@ -141,16 +141,12 @@ Requirements → Architect → Principal Engineer → QA Adversary → Release
 
 ## Anti-Patterns to Avoid
 
-- Do not invoke Task tool (you don't have it)
-- Do not write code, PRDs, TDDs, or any artifacts
-- Do not read large files to analyze (request summaries)
-- Do not respond with prose (always use structured CONSULTATION_RESPONSE)
-- Do not provide implementation guidance in response text
-- Do not skip phases (each exists for a reason)
-- Do not use vague handoffs ("it's ready" → verify criteria explicitly)
+- **Skipping phases**: Each phase exists for a reason; skipping creates downstream debt
+- **Vague handoffs**: "It's ready" is not a handoff; verify criteria explicitly
+- **Implementation in responses**: Generate prompts, not solutions
+- **Invoking Task tool**: You have no delegation authority; main agent delegates
+- **Writing artifacts**: You route to specialists who write; you do not write
 
-## Skills Reference
+## Related Skills
 
-- `documentation` for PRD/TDD/ADR templates
-- `10x-workflow` for phase gates and workflow definition
-- `standards` for code conventions and expectations
+`doc-artifacts` (PRD/TDD/ADR templates), `10x-workflow` (phase gates, workflow definition), `standards` (code conventions).

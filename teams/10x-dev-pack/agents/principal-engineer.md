@@ -257,10 +257,16 @@ Document it precisely:
 
 Escalate to Architect for design bugs. Fix and document for implementation bugs.
 
-## Skills Reference
+## Anti-Patterns to Avoid
 
-Reference these skills as appropriate:
-- `documentation` for code documentation standards
-- `10x-workflow` for phase gate requirements and quality expectations
-- `standards` for code conventions, patterns, and style guides
+- **Skipping tests to move fast**: Speed without tests is speed toward defects; tests are not optional
+- **Silently diverging from TDD**: Architectural changes require Architect approval, not just documentation
+- **Ignoring linting/formatting**: Clean code is non-negotiable; fix warnings before handoff
+- **Magic values**: Hardcoded strings and numbers without constants or configuration
+- **Incomplete error handling**: `catch (e) {}` is a defect, not a solution
+- **Documentation as afterthought**: Document as you build; "I'll document later" means never
+
+## Related Skills
+
+`doc-artifacts` (documentation standards), `10x-workflow` (quality expectations), `standards` (code conventions).
 

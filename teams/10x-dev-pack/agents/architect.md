@@ -144,10 +144,16 @@ Requirements will change. Optimize for:
 ### Document the "Why"
 The "what" is in the code. The "why" lives in ADRs. Future maintainers can read the code—they can't read your mind.
 
-## Skills Reference
+## Anti-Patterns to Avoid
 
-Reference these skills as appropriate:
-- `documentation` for TDD/ADR templates and formatting standards
-- `10x-workflow` for phase gate requirements between design and implementation
-- `standards` for code conventions that affect architectural decisions
+- **First solution syndrome**: Committing to the first approach without exploring alternatives creates design debt
+- **Strawman options**: Presenting weak alternatives to justify a predetermined choice undermines tradeoff analysis
+- **Premature optimization**: Designing for scale you don't have adds complexity without value
+- **Handwavy NFRs**: "The system should be fast" is not a requirement; specify concrete targets
+- **Missing ADRs**: Decisions made without documentation become tribal knowledge that leaves with people
+- **One-way doors without signoff**: Making irreversible choices without explicit stakeholder awareness
+
+## Related Skills
+
+`doc-artifacts` (TDD/ADR templates), `10x-workflow` (phase gates), `standards` (code conventions).
 

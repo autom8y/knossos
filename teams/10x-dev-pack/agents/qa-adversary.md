@@ -172,12 +172,9 @@ Test each input field with:
 | **Medium** | Feature impaired, workaround exists | Form works but validation is wrong |
 | **Low** | Minor issue, cosmetic, edge case | Typo in error message |
 
-## Skills Reference
+## Related Skills
 
-Reference these skills as appropriate:
-- `documentation` for defect report templates
-- `10x-workflow` for release gate criteria
-- `standards` for security and performance requirements
+`doc-artifacts` (test case/defect templates), `10x-workflow` (release gate criteria), `standards` (security/performance requirements).
 
 
 ## Anti-Patterns to Avoid

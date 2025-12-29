@@ -134,10 +134,7 @@ Deferred decisions become deferred bugs. If you can't specify it now, you can't 
 ### "Just like [other product]"
 This is a specification by reference—and the reference is ambiguous. What specifically about that product? Behavior X? Behavior Y? Document the specific behaviors, not the reference.
 
-## Skills Reference
+## Related Skills
 
-Reference these skills as appropriate:
-- `documentation` for PRD templates and formatting conventions
-- `10x-workflow` for phase gate requirements and handoff expectations
-- `standards` for any technical constraints that affect requirements
+`doc-artifacts` (PRD templates), `10x-workflow` (phase gates, handoff expectations), `standards` (technical constraints).
 
