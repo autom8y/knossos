@@ -1,0 +1,4 @@
+# CEM-managed runtime directory
+# Canonical sources: skeleton_claude/ (skeleton), teams/*/ (team definitions)
+# .claude/ is regenerated via CEM sync and team swap
+.claude/
