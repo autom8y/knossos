@@ -1,0 +1,321 @@
+ORCHESTRATOR TEMPLATING SYSTEM - INTEGRATION DIAGRAM
+====================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         ORCHESTRATOR TEMPLATING ECOSYSTEM                   │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+DEVELOPER WORKFLOW
+──────────────────────────────────────────────────────────────────────────────
+
+   Developer Creates Team
+          │
+          ├─→ [1] Create orchestrator.yaml
+          │        team metadata, routing, handoff criteria, skills
+          │        Location: teams/{team}/orchestrator.yaml
+          │        Format: YAML (human-readable config)
+          │
+          ├─→ [2] Run Generator
+          │        /Users/tomtenuta/Code/roster/templates/orchestrator-generate.sh
+          │        Input: orchestrator.yaml + workflow.yaml
+          │        Output: orchestrator.md (production ready)
+          │
+          ├─→ [3] Validate Output
+          │        /Users/tomtenuta/Code/roster/templates/validate-orchestrator.sh
+          │        Checks: 10 structural and semantic rules
+          │        Exit: 0 (success) or 2-3 (failure)
+          │
+          ├─→ [4] Review Generated File
+          │        orchestrator.md looks correct?
+          │        Specialists and routing preserved?
+          │
+          ├─→ [5] Commit Both Files
+          │        git add orchestrator.yaml orchestrator.md
+          │        Both files committed to maintain consistency
+          │
+          └─→ [6] Test Team Activation
+                   ./swap-team.sh my-team
+                   Frontmatter parses?
+                   Team active?
+
+
+SYSTEM ARCHITECTURE
+──────────────────────────────────────────────────────────────────────────────
+
+     ┌──────────────────────────┐
+     │  orchestrator.yaml       │  Team Configuration (DURABLE)
+     │  - team metadata         │  └─→ Human-readable, semantic spec
+     │  - routing               │      Version-controllable
+     │  - handoff criteria      │      Team owns and evolves
+     │  - skills references     │
+     └──────────────────────────┘
+                  │
+                  │  Input
+                  │
+     ┌────────────┴──────────────────────────────────────┐
+     │                                                    │
+     │                                                    ▼
+     │                  ┌──────────────────────────────────────┐
+     │                  │  orchestrator-base.md.tpl             │
+     │                  │  (Canonical Template)                │
+     │                  │  - Consultation Protocol (frozen)    │
+     │                  │  - Domain Authority framework        │
+     │                  │  - Placeholders for team specifics   │
+     │                  └──────────────────────────────────────┘
+     │                            │
+     │                            │  Template
+     │                            │
+     │    ┌─────────────────┬─────┴────────────┬─────────────────┐
+     │    │                 │                  │                 │
+     ▼    ▼                 ▼                  ▼                 ▼
+┌──────────────────────────────────────────────────────────────────────┐
+│          orchestrator-generate.sh (GENERATOR)                        │
+│  ─────────────────────────────────────────────────────────────────  │
+│  Purpose: Merge template + config → production orchestrator.md      │
+│                                                                      │
+│  Process:                                                            │
+│  1. Parse orchestrator.yaml                                         │
+│  2. Parse workflow.yaml (specialist definitions)                    │
+│  3. Validate specialist names                                       │
+│  4. Read template                                                   │
+│  5. Substitute all {{PLACEHOLDER}} values                           │
+│  6. Generate routing table markdown                                 │
+│  7. Generate handoff criteria sections                              │
+│  8. Write orchestrator.md                                           │
+│                                                                      │
+│  Input validation: specialists exist in workflow.yaml               │
+│  Output: orchestrator.md (ready to commit)                          │
+└──────────────────────────────────────────────────────────────────────┘
+                  │
+                  │  Generated Output
+                  │
+                  ▼
+     ┌──────────────────────────────┐
+     │  orchestrator.md             │  Production Orchestrator (DISPOSABLE)
+     │  - Generated from config     │  └─→ Can be regenerated anytime
+     │  - Valid YAML frontmatter    │      Checked into git for consistency
+     │  - All sections present      │      Used by agents, CEM, swap-team.sh
+     │  - No placeholders           │
+     └──────────────────────────────┘
+                  │
+                  │  Validation
+                  │
+                  ▼
+     ┌──────────────────────────────────────────────┐
+     │  validate-orchestrator.sh                    │
+     │  (POST-GENERATION VALIDATOR)                │
+     │  ──────────────────────────────────────────  │
+     │  Rule 1:  File exists and readable           │
+     │  Rule 2:  No unreplaced placeholders         │
+     │  Rule 3:  Valid YAML frontmatter             │
+     │  Rule 4:  All required sections present      │
+     │  Rule 5:  Specialist names consistent       │
+     │  Rule 6:  No duplicate sections              │
+     │  Rule 7:  Handoff criteria in checkbox fmt  │
+     │  Rule 8:  Consultation Protocol present     │
+     │  Rule 9:  Skill references valid             │
+     │  Rule 10: Markdown syntax valid              │
+     │  ──────────────────────────────────────────  │
+     │  Exit: 0 (success) or 2-3 (failure)          │
+     └──────────────────────────────────────────────┘
+
+
+INTEGRATION POINTS
+──────────────────────────────────────────────────────────────────────────────
+
+orchestrator.md ─→ swap-team.sh
+                   Reads frontmatter
+                   Validates format
+                   Parses: name, role, description, model, color, tools
+                   └─→ Activates team (symlinks to active agent position)
+
+orchestrator.md ─→ CEM Sync
+                   Distributes across satellites
+                   Validates: markdown syntax, YAML frontmatter
+                   Tracks in AGENT_MANIFEST
+                   └─→ Makes orchestrator available on all satellites
+
+orchestrator.md ─→ AGENT_MANIFEST
+                   Discovered by agent scanning
+                   Registered as "orchestrator" agent
+                   Source: "team", Origin: team name
+                   └─→ Agent discovery and team activation
+
+workflow.yaml ─→ orchestrator-generate.sh
+                   Generator validates specialist names
+                   Source of specialist definitions
+                   └─→ Ensures routing table references valid agents
+
+orchestrator.yaml ← schema validation
+                   Checked against JSON schema
+                   Ensures required fields present
+                   Validates specialist count (3-6)
+                   └─→ Prevents invalid configurations
+
+
+TEAM PERSPECTIVE
+──────────────────────────────────────────────────────────────────────────────
+
+Day 1: Create New Team
+   ├─→ Create orchestrator.yaml (copy template, edit)
+   ├─→ Run orchestrator-generate.sh my-team
+   ├─→ Run validator
+   ├─→ git add + git commit
+   ├─→ ./swap-team.sh my-team
+   └─→ Test works!
+
+Later: Update Team's Routing
+   ├─→ Edit orchestrator.yaml (add specialist, change routing)
+   ├─→ Run orchestrator-generate.sh my-team
+   ├─→ Run validator
+   ├─→ git add + git commit
+   └─→ New routing takes effect
+
+Later: Update All Teams (New Protocol)
+   ├─→ Edit orchestrator-base.md.tpl (add section, improve wording)
+   ├─→ for team in all_teams; orchestrator-generate.sh $team; done
+   ├─→ for team in all_teams; validate $team; done
+   ├─→ Review diffs (all should be cosmetic)
+   ├─→ git add + git commit (all orchestrators)
+   └─→ All teams get improvement automatically
+
+
+ECOSYSTEM INTEGRATION
+──────────────────────────────────────────────────────────────────────────────
+
+                    ┌─────────────────────────┐
+                    │   AGENT ECOSYSTEM       │
+                    │                         │
+                    │ swap-team.sh            │
+                    │ AGENT_MANIFEST.json     │
+                    │ CEM Sync                │
+                    │ workflow.yaml           │
+                    └─────────────────────────┘
+                              │
+                    ┌─────────┴──────────┐
+                    │                    │
+                    ▼                    ▼
+         ┌──────────────────┐  ┌────────────────────┐
+         │ Orchestrator     │  │ Other Agent Files  │
+         │ (generated)      │  │ (hand-written)     │
+         │                  │  │                    │
+         │ Coordinates      │  │ Tech Writer        │
+         │ multi-phase      │  │ Janitor            │
+         │ work via         │  │ Analyst            │
+         │ consultation     │  │ etc.               │
+         │ protocol         │  │                    │
+         └──────────────────┘  └────────────────────┘
+                    │                    │
+                    └─────────┬──────────┘
+                              │
+                              ▼
+                     ┌──────────────────┐
+                     │  Main Agent      │
+                     │  (Coordinator)   │
+                     │                  │
+                     │ Receives         │
+                     │ consultation     │
+                     │ requests,        │
+                     │ routes to        │
+                     │ specialists      │
+                     └──────────────────┘
+
+
+DATA FLOW SUMMARY
+──────────────────────────────────────────────────────────────────────────────
+
+User/Developer
+      │
+      ├─→ orchestrator.yaml ──┐
+      │                        │
+      │   workflow.yaml ───────┼─→ orchestrator-generate.sh
+      │                        │
+      │   template ────────────┘
+      │
+      ├─→ Validation
+      │
+      ├─→ Review Diff
+      │
+      └─→ Git Commit
+             │
+             ├─→ orchestrator.yaml (checked in)
+             │
+             └─→ orchestrator.md (checked in)
+                   │
+                   ├─→ swap-team.sh (parses frontmatter)
+                   │
+                   ├─→ CEM Sync (distributes to satellites)
+                   │
+                   └─→ Agent activation (team runs)
+
+
+KEY PRINCIPLES
+──────────────────────────────────────────────────────────────────────────────
+
+1. YAML is Source of Truth
+   └─→ orchestrator.yaml contains team's design decisions
+       orchestrator.md is generated (can be regenerated anytime)
+
+2. Template is Shared Protocol
+   └─→ All orchestrators use same template
+       Changes to protocol benefit all teams at once
+
+3. Generation is Deterministic
+   └─→ Same YAML + Same template = Same .md file
+       Easy to validate and test
+
+4. Validation Happens at Two Levels
+   └─→ Schema validation (YAML structure)
+       Post-generation validation (markdown quality)
+
+5. No Manual Edits to Generated Files
+   └─→ Edit YAML, not .md
+       Regenerate when ready
+       Durable abstraction: YAML survives implementation changes
+
+
+EVOLUTION ROADMAP
+──────────────────────────────────────────────────────────────────────────────
+
+Phase 4 (Current): Foundation
+   ✓ Template architecture working
+   ✓ All 11 teams validated
+   ✓ Generator and validator complete
+   └─→ Ready for adoption
+
+Phase 5: Enhancement
+   □ CI integration (validate on commit)
+   □ Schema enhancements
+   □ Error messages improvement
+   └─→ Makes adoption easier
+
+Phase 5+: Scaling
+   □ Nested orchestrators (for 7+ specialists)
+   □ Multi-team coordination
+   □ Cross-org pattern sharing
+   └─→ Enables new team structures
+
+
+FILE LOCATIONS SUMMARY
+──────────────────────────────────────────────────────────────────────────────
+
+Generator:
+  /Users/tomtenuta/Code/roster/templates/orchestrator-generate.sh
+
+Validator:
+  /Users/tomtenuta/Code/roster/templates/validate-orchestrator.sh
+
+Template:
+  /Users/tomtenuta/Code/roster/templates/orchestrator-base.md.tpl
+
+Schema:
+  /Users/tomtenuta/Code/roster/schemas/orchestrator.yaml.schema.json
+
+Team Configs:
+  /Users/tomtenuta/Code/skeleton_claude/.claude/teams/{team-name}/orchestrator.yaml
+
+Generated Agents:
+  /Users/tomtenuta/Code/skeleton_claude/.claude/teams/{team-name}/agents/orchestrator.md
+
+This Skill Documentation:
+  /Users/tomtenuta/Code/skeleton_claude/.claude/skills/orchestrator-templates/
