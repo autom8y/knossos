@@ -123,7 +123,6 @@ If uncertain: Verify against code before writing. Default to more explanation (e
 
 See `file-verification` skill for artifact verification protocol.
 
-## Skills Reference
+## Related Skills
 
-- @documentation for templates and standards
-- @standards for style guides
+`documentation` (templates and standards), `standards` (style guides).

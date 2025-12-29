@@ -197,7 +197,6 @@ When type: "failure":
 - **Vague handoffs**: Criteria must be explicitly verified
 - **Ignoring complexity**: PAGE work doesn't need architecture; SITE work does
 
-## Skills Reference
+## Related Skills
 
-- @documentation for templates
-- @standards for conventions
+`documentation` (templates), `standards` (conventions).
