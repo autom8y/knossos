@@ -14,21 +14,9 @@ Switch to the Strategy Team pack and display the team roster.
 
 ## Behavior
 
-1. Execute: `~/Code/roster/swap-team.sh strategy-pack`
-
-2. Display team roster:
-
-**strategy-pack** (4 agents):
-
-| Agent | Role |
-|-------|------|
-| market-researcher | Maps market terrain and trends |
-| competitive-analyst | Tracks competitors and predicts moves |
-| business-model-analyst | Stress-tests unit economics |
-| roadmap-strategist | Connects vision to execution |
-
-3. If an active session exists (hook-injected context shows session info):
-   - The active_team is automatically updated via team-validator hook
+1. Execute: `${ROSTER_HOME:-~/Code/roster}/swap-team.sh strategy-pack`
+2. Display the roster output from swap-team.sh (agents and their roles)
+3. If SESSION_CONTEXT exists, update `active_team` to `strategy-pack`
 
 ## When to Use
 

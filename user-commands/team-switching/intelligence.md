@@ -14,21 +14,9 @@ Switch to the Product Intelligence Team pack and display the team roster.
 
 ## Behavior
 
-1. Execute: `~/Code/roster/swap-team.sh intelligence-pack`
-
-2. Display team roster:
-
-**intelligence-pack** (4 agents):
-
-| Agent | Role |
-|-------|------|
-| analytics-engineer | Builds data foundation and tracking |
-| user-researcher | Captures qualitative insights |
-| experimentation-lead | Designs A/B tests and experiments |
-| insights-analyst | Synthesizes data into decisions |
-
-3. If an active session exists (hook-injected context shows session info):
-   - The active_team is automatically updated via team-validator hook
+1. Execute: `${ROSTER_HOME:-~/Code/roster}/swap-team.sh intelligence-pack`
+2. Display the roster output from swap-team.sh (agents and their roles)
+3. If SESSION_CONTEXT exists, update `active_team` to `intelligence-pack`
 
 ## When to Use
 

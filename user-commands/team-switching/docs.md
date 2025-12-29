@@ -13,17 +13,8 @@ Switch to the documentation team pack and display the team roster.
 
 ## Behavior
 
-1. Execute: `~/Code/roster/swap-team.sh doc-team-pack`
-2. Display team roster:
-
-**doc-team-pack** (4 agents):
-| Agent | Role |
-|-------|------|
-| doc-auditor | Inventories docs, finds rot and gaps |
-| information-architect | Designs taxonomy and navigation |
-| tech-writer | Writes clear, scannable documentation |
-| doc-reviewer | Verifies accuracy against codebase |
-
+1. Execute: `${ROSTER_HOME:-~/Code/roster}/swap-team.sh doc-team-pack`
+2. Display the roster output from swap-team.sh (agents and their roles)
 3. If SESSION_CONTEXT exists, update `active_team` to `doc-team-pack`
 
 ## When to Use

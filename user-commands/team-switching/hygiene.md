@@ -13,17 +13,8 @@ Switch to the code hygiene team pack and display the team roster.
 
 ## Behavior
 
-1. Execute: `~/Code/roster/swap-team.sh hygiene-pack`
-2. Display team roster:
-
-**hygiene-pack** (4 agents):
-| Agent | Role |
-|-------|------|
-| code-smeller | Finds rot, DRY violations, complexity hotspots |
-| architect-enforcer | Evaluates smells through architectural lens |
-| janitor | Executes refactoring with atomic commits |
-| audit-lead | Verifies cleanup, signs off on changes |
-
+1. Execute: `${ROSTER_HOME:-~/Code/roster}/swap-team.sh hygiene-pack`
+2. Display the roster output from swap-team.sh (agents and their roles)
 3. If SESSION_CONTEXT exists, update `active_team` to `hygiene-pack`
 
 ## When to Use

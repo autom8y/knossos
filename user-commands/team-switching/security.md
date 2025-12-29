@@ -14,21 +14,9 @@ Switch to the Security Team pack and display the team roster.
 
 ## Behavior
 
-1. Execute: `~/Code/roster/swap-team.sh security-pack`
-
-2. Display team roster:
-
-**security-pack** (4 agents):
-
-| Agent | Role |
-|-------|------|
-| threat-modeler | Maps attack vectors with STRIDE/DREAD |
-| compliance-architect | Translates regulations to requirements |
-| penetration-tester | Probes systems for vulnerabilities |
-| security-reviewer | Final gate before merge |
-
-3. If an active session exists (hook-injected context shows session info):
-   - The active_team is automatically updated via team-validator hook
+1. Execute: `${ROSTER_HOME:-~/Code/roster}/swap-team.sh security-pack`
+2. Display the roster output from swap-team.sh (agents and their roles)
+3. If SESSION_CONTEXT exists, update `active_team` to `security-pack`
 
 ## When to Use
 

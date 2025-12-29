@@ -13,18 +13,8 @@ Switch to the ecosystem infrastructure team pack and display the team roster.
 
 ## Behavior
 
-1. Execute: `~/Code/roster/swap-team.sh ecosystem-pack`
-2. Display team roster:
-
-**ecosystem-pack** (5 agents):
-| Agent | Role |
-|-------|------|
-| ecosystem-analyst | Diagnoses ecosystem problems, produces Gap Analysis |
-| context-architect | Designs context solutions (hooks, skills, CEM behavior) |
-| integration-engineer | Implements CEM/skeleton/roster changes |
-| documentation-engineer | Documents migration paths and compatibility |
-| compatibility-tester | Validates across satellite matrix |
-
+1. Execute: `${ROSTER_HOME:-~/Code/roster}/swap-team.sh ecosystem-pack`
+2. Display the roster output from swap-team.sh (agents and their roles)
 3. If SESSION_CONTEXT exists, update `active_team` to `ecosystem-pack`
 
 ## When to Use
