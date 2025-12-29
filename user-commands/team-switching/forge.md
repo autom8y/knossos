@@ -7,9 +7,7 @@ model: sonnet
 
 ## Your Task
 
-Display information about The Forge - the meta-team for creating and maintaining agent teams.
-
-**Arguments**: $ARGUMENTS
+Display information about The Forge - the meta-team for creating and maintaining agent teams. $ARGUMENTS
 
 ## Behavior
 
