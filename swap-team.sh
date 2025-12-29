@@ -386,6 +386,9 @@ format_orphan() {
 declare -a AGENTS_TO_KEEP=()
 declare -a AGENTS_TO_PROMOTE=()
 declare -a AGENTS_TO_REMOVE=()
+declare -a ORPHAN_SKILLS=()
+declare -a ORPHAN_COMMANDS=()
+declare -a ORPHAN_HOOKS=()
 
 # Stash agents to keep (before swap clears .claude/agents/)
 stash_kept_agents() {
@@ -956,6 +959,89 @@ remove_team_commands() {
     log_debug "Team commands removed"
 }
 
+# Check if a command belongs to ANY team pack
+is_team_command() {
+    local cmd_name="$1"
+    find "$ROSTER_HOME/teams" -path "*/commands/$cmd_name" -type f 2>/dev/null | grep -q .
+}
+
+# Get which team a command belongs to
+get_command_team() {
+    local cmd_name="$1"
+    local match
+    match=$(find "$ROSTER_HOME/teams" -path "*/commands/$cmd_name" -type f 2>/dev/null | head -1)
+    if [[ -n "$match" ]]; then
+        echo "$match" | sed 's|.*/teams/\([^/]*\)/commands/.*|\1|'
+    fi
+}
+
+# Detect orphan commands - commands from OTHER teams that shouldn't be here
+detect_command_orphans() {
+    local incoming_team="$1"
+    local incoming_cmds_dir="$ROSTER_HOME/teams/$incoming_team/commands"
+
+    ORPHAN_COMMANDS=()
+
+    [[ -d ".claude/commands" ]] || return 0
+
+    for cmd_path in .claude/commands/*.md; do
+        [[ -f "$cmd_path" ]] || continue
+        local cmd_name
+        cmd_name=$(basename "$cmd_path")
+
+        # Is this command in the incoming team?
+        if [[ -f "$incoming_cmds_dir/$cmd_name" ]]; then
+            continue
+        fi
+
+        # Is this command from ANY team pack?
+        if is_team_command "$cmd_name"; then
+            local origin_team
+            origin_team=$(get_command_team "$cmd_name")
+            ORPHAN_COMMANDS+=("$cmd_name:$origin_team")
+            log_debug "Orphan command detected: $cmd_name (from $origin_team)"
+        fi
+    done
+
+    log_debug "Total orphan commands: ${#ORPHAN_COMMANDS[@]}"
+}
+
+# Remove orphan commands based on ORPHAN_MODE
+remove_orphan_commands() {
+    if [[ ${#ORPHAN_COMMANDS[@]} -eq 0 ]]; then
+        return 0
+    fi
+
+    local backup_dir=".claude/commands.orphan-backup"
+
+    for orphan in "${ORPHAN_COMMANDS[@]}"; do
+        local cmd_name origin_team
+        cmd_name=$(echo "$orphan" | cut -d: -f1)
+        origin_team=$(echo "$orphan" | cut -d: -f2)
+
+        case "$ORPHAN_MODE" in
+            "remove")
+                mkdir -p "$backup_dir"
+                if [[ -f ".claude/commands/$cmd_name" ]]; then
+                    cp ".claude/commands/$cmd_name" "$backup_dir/$cmd_name"
+                    rm ".claude/commands/$cmd_name"
+                    log "Removed orphan command: $cmd_name (was from $origin_team)"
+                fi
+                ;;
+            "keep")
+                log "Keeping orphan command: $cmd_name (from $origin_team)"
+                ;;
+            *)
+                log_debug "Keeping orphan command: $cmd_name (no disposition)"
+                ;;
+        esac
+    done
+
+    if [[ "$ORPHAN_MODE" == "remove" ]] && [[ -d "$backup_dir" ]]; then
+        log "Orphan command backups saved to: $backup_dir"
+    fi
+}
+
 # Sync team-specific commands to project
 # Team commands are copied to .claude/commands/ with a marker file
 swap_commands() {
@@ -1054,6 +1140,94 @@ backup_team_skills() {
     done < ".claude/skills/.team-skills"
 
     log_debug "Team skills backed up"
+}
+
+# Check if a skill belongs to ANY team pack (not skeleton)
+is_team_skill() {
+    local skill_name="$1"
+    find "$ROSTER_HOME/teams" -path "*/skills/$skill_name" -type d 2>/dev/null | grep -q .
+}
+
+# Get which team a skill belongs to
+get_skill_team() {
+    local skill_name="$1"
+    local match
+    match=$(find "$ROSTER_HOME/teams" -path "*/skills/$skill_name" -type d 2>/dev/null | head -1)
+    if [[ -n "$match" ]]; then
+        echo "$match" | sed 's|.*/teams/\([^/]*\)/skills/.*|\1|'
+    fi
+}
+
+# Detect orphan skills - skills from OTHER teams that shouldn't be here
+# Usage: detect_skill_orphans "incoming-team-name"
+detect_skill_orphans() {
+    local incoming_team="$1"
+    local incoming_skills_dir="$ROSTER_HOME/teams/$incoming_team/skills"
+
+    ORPHAN_SKILLS=()
+
+    # Check each skill in .claude/skills/
+    for skill_path in .claude/skills/*/; do
+        [[ -d "$skill_path" ]] || continue
+        local skill_name
+        skill_name=$(basename "$skill_path")
+
+        # Skip hidden files/dirs
+        [[ "$skill_name" == .* ]] && continue
+
+        # Is this skill in the incoming team?
+        if [[ -d "$incoming_skills_dir/$skill_name" ]]; then
+            continue  # Will be updated by swap_skills
+        fi
+
+        # Is this skill from ANY team pack?
+        if is_team_skill "$skill_name"; then
+            local origin_team
+            origin_team=$(get_skill_team "$skill_name")
+            ORPHAN_SKILLS+=("$skill_name:$origin_team")
+            log_debug "Orphan skill detected: $skill_name (from $origin_team)"
+        fi
+    done
+
+    log_debug "Total orphan skills: ${#ORPHAN_SKILLS[@]}"
+}
+
+# Remove orphan skills based on ORPHAN_MODE
+remove_orphan_skills() {
+    if [[ ${#ORPHAN_SKILLS[@]} -eq 0 ]]; then
+        return 0
+    fi
+
+    local backup_dir=".claude/skills.orphan-backup"
+
+    for orphan in "${ORPHAN_SKILLS[@]}"; do
+        local skill_name origin_team
+        skill_name=$(echo "$orphan" | cut -d: -f1)
+        origin_team=$(echo "$orphan" | cut -d: -f2)
+
+        case "$ORPHAN_MODE" in
+            "remove")
+                # Backup before removing
+                mkdir -p "$backup_dir"
+                if [[ -d ".claude/skills/$skill_name" ]]; then
+                    cp -rp ".claude/skills/$skill_name" "$backup_dir/$skill_name"
+                    rm -rf ".claude/skills/$skill_name"
+                    log "Removed orphan skill: $skill_name (was from $origin_team)"
+                fi
+                ;;
+            "keep")
+                log "Keeping orphan skill: $skill_name (from $origin_team)"
+                ;;
+            *)
+                # Default: keep (safe)
+                log_debug "Keeping orphan skill: $skill_name (no disposition)"
+                ;;
+        esac
+    done
+
+    if [[ "$ORPHAN_MODE" == "remove" ]] && [[ -d "$backup_dir" ]]; then
+        log "Orphan skill backups saved to: $backup_dir"
+    fi
 }
 
 # Remove team skills from previous team
@@ -1206,6 +1380,93 @@ remove_team_hooks() {
     rm -f ".claude/hooks/.team-hooks"
 
     log_debug "Team hooks removed"
+}
+
+# Check if a hook belongs to ANY team pack
+is_team_hook() {
+    local hook_name="$1"
+    find "$ROSTER_HOME/teams" -path "*/hooks/$hook_name" -type f 2>/dev/null | grep -q .
+}
+
+# Get which team a hook belongs to
+get_hook_team() {
+    local hook_name="$1"
+    local match
+    match=$(find "$ROSTER_HOME/teams" -path "*/hooks/$hook_name" -type f 2>/dev/null | head -1)
+    if [[ -n "$match" ]]; then
+        echo "$match" | sed 's|.*/teams/\([^/]*\)/hooks/.*|\1|'
+    fi
+}
+
+# Detect orphan hooks - hooks from OTHER teams
+detect_hook_orphans() {
+    local incoming_team="$1"
+    local incoming_hooks_dir="$ROSTER_HOME/teams/$incoming_team/hooks"
+
+    ORPHAN_HOOKS=()
+
+    [[ -d ".claude/hooks" ]] || return 0
+
+    for hook_path in .claude/hooks/*; do
+        [[ -f "$hook_path" ]] || continue
+        local hook_name
+        hook_name=$(basename "$hook_path")
+
+        # Skip marker files and lib directory
+        [[ "$hook_name" == .* ]] && continue
+        [[ "$hook_name" == "lib" ]] && continue
+
+        # Is this hook in the incoming team?
+        if [[ -f "$incoming_hooks_dir/$hook_name" ]]; then
+            continue
+        fi
+
+        # Is this hook from ANY team pack?
+        if is_team_hook "$hook_name"; then
+            local origin_team
+            origin_team=$(get_hook_team "$hook_name")
+            ORPHAN_HOOKS+=("$hook_name:$origin_team")
+            log_debug "Orphan hook detected: $hook_name (from $origin_team)"
+        fi
+    done
+
+    log_debug "Total orphan hooks: ${#ORPHAN_HOOKS[@]}"
+}
+
+# Remove orphan hooks based on ORPHAN_MODE
+remove_orphan_hooks() {
+    if [[ ${#ORPHAN_HOOKS[@]} -eq 0 ]]; then
+        return 0
+    fi
+
+    local backup_dir=".claude/hooks.orphan-backup"
+
+    for orphan in "${ORPHAN_HOOKS[@]}"; do
+        local hook_name origin_team
+        hook_name=$(echo "$orphan" | cut -d: -f1)
+        origin_team=$(echo "$orphan" | cut -d: -f2)
+
+        case "$ORPHAN_MODE" in
+            "remove")
+                mkdir -p "$backup_dir"
+                if [[ -f ".claude/hooks/$hook_name" ]]; then
+                    cp ".claude/hooks/$hook_name" "$backup_dir/$hook_name"
+                    rm ".claude/hooks/$hook_name"
+                    log "Removed orphan hook: $hook_name (was from $origin_team)"
+                fi
+                ;;
+            "keep")
+                log "Keeping orphan hook: $hook_name (from $origin_team)"
+                ;;
+            *)
+                log_debug "Keeping orphan hook: $hook_name (no disposition)"
+                ;;
+        esac
+    done
+
+    if [[ "$ORPHAN_MODE" == "remove" ]] && [[ -d "$backup_dir" ]]; then
+        log "Orphan hook backups saved to: $backup_dir"
+    fi
 }
 
 # Sync team-specific hooks to project
@@ -1482,6 +1743,58 @@ preview_refresh() {
         done
     fi
 
+    # Check for orphan commands (commands from other teams)
+    echo ""
+    echo "Command orphans (from other teams):"
+    detect_command_orphans "$team_name"
+    if [[ ${#ORPHAN_COMMANDS[@]} -gt 0 ]]; then
+        for orphan in "${ORPHAN_COMMANDS[@]}"; do
+            local cmd_name origin_team
+            cmd_name=$(echo "$orphan" | cut -d: -f1)
+            origin_team=$(echo "$orphan" | cut -d: -f2)
+            echo "  ? $cmd_name (from $origin_team)"
+        done
+    else
+        echo "  (none)"
+    fi
+
+    # Check for orphan skills (skills from other teams)
+    echo ""
+    echo "Skill orphans (from other teams):"
+    detect_skill_orphans "$team_name"
+    if [[ ${#ORPHAN_SKILLS[@]} -gt 0 ]]; then
+        for orphan in "${ORPHAN_SKILLS[@]}"; do
+            local skill_name origin_team
+            skill_name=$(echo "$orphan" | cut -d: -f1)
+            origin_team=$(echo "$orphan" | cut -d: -f2)
+            echo "  ? $skill_name (from $origin_team)"
+        done
+    else
+        echo "  (none)"
+    fi
+
+    # Check for orphan hooks (hooks from other teams)
+    echo ""
+    echo "Hook orphans (from other teams):"
+    detect_hook_orphans "$team_name"
+    if [[ ${#ORPHAN_HOOKS[@]} -gt 0 ]]; then
+        for orphan in "${ORPHAN_HOOKS[@]}"; do
+            local hook_name origin_team
+            hook_name=$(echo "$orphan" | cut -d: -f1)
+            origin_team=$(echo "$orphan" | cut -d: -f2)
+            echo "  ? $hook_name (from $origin_team)"
+        done
+    else
+        echo "  (none)"
+    fi
+
+    # Summary of orphans
+    local total_orphans=$((${#ORPHAN_COMMANDS[@]} + ${#ORPHAN_SKILLS[@]} + ${#ORPHAN_HOOKS[@]}))
+    if [[ $total_orphans -gt 0 ]]; then
+        echo ""
+        echo "Use --remove-all to clean up $total_orphans orphan(s)"
+    fi
+
     echo ""
     echo "No changes made (--dry-run mode)"
 }
@@ -1548,11 +1861,63 @@ perform_swap() {
     # Update CLAUDE.md to reflect new team's agents
     update_claude_md "$team_name"
 
+    # Detect and handle orphan commands (commands from other teams)
+    detect_command_orphans "$team_name"
+    if [[ ${#ORPHAN_COMMANDS[@]} -gt 0 ]]; then
+        if [[ -z "$ORPHAN_MODE" ]]; then
+            log_warning "Found ${#ORPHAN_COMMANDS[@]} orphan command(s) from other teams:"
+            for orphan in "${ORPHAN_COMMANDS[@]}"; do
+                local cmd_name origin_team
+                cmd_name=$(echo "$orphan" | cut -d: -f1)
+                origin_team=$(echo "$orphan" | cut -d: -f2)
+                echo "  - $cmd_name (from $origin_team)"
+            done
+            log "Use --remove-all to clean up orphan commands"
+        else
+            remove_orphan_commands
+        fi
+    fi
+
     # Sync team-specific commands
     swap_commands "$team_name"
 
+    # Detect and handle orphan skills (skills from other teams)
+    detect_skill_orphans "$team_name"
+    if [[ ${#ORPHAN_SKILLS[@]} -gt 0 ]]; then
+        if [[ -z "$ORPHAN_MODE" ]]; then
+            # Non-interactive mode without flags - warn but don't block
+            log_warning "Found ${#ORPHAN_SKILLS[@]} orphan skill(s) from other teams:"
+            for orphan in "${ORPHAN_SKILLS[@]}"; do
+                local skill_name origin_team
+                skill_name=$(echo "$orphan" | cut -d: -f1)
+                origin_team=$(echo "$orphan" | cut -d: -f2)
+                echo "  - $skill_name (from $origin_team)"
+            done
+            log "Use --remove-all to clean up orphan skills"
+        else
+            remove_orphan_skills
+        fi
+    fi
+
     # Sync team-specific skills (Phase 2: Unified Sync)
     swap_skills "$team_name"
+
+    # Detect and handle orphan hooks (hooks from other teams)
+    detect_hook_orphans "$team_name"
+    if [[ ${#ORPHAN_HOOKS[@]} -gt 0 ]]; then
+        if [[ -z "$ORPHAN_MODE" ]]; then
+            log_warning "Found ${#ORPHAN_HOOKS[@]} orphan hook(s) from other teams:"
+            for orphan in "${ORPHAN_HOOKS[@]}"; do
+                local hook_name origin_team
+                hook_name=$(echo "$orphan" | cut -d: -f1)
+                origin_team=$(echo "$orphan" | cut -d: -f2)
+                echo "  - $hook_name (from $origin_team)"
+            done
+            log "Use --remove-all to clean up orphan hooks"
+        else
+            remove_orphan_hooks
+        fi
+    fi
 
     # Sync team hooks
     swap_hooks "$team_name"

@@ -37,6 +37,8 @@ readonly EXIT_SYNC_FAILURE=3
 
 # Mode flags
 DRY_RUN_MODE=0
+ADOPT_MODE=0
+CLEANUP_MODE=0
 
 # Colors for output (if terminal supports it)
 if [[ -t 1 ]]; then
@@ -133,7 +135,17 @@ is_roster_managed() {
         return 1
     fi
 
-    # Check if skill exists in manifest with source=roster
+    # Use jq if available for reliable JSON parsing
+    if command -v jq >/dev/null 2>&1; then
+        local source
+        source=$(echo "$manifest" | jq -r --arg name "$skill_name" '.skills[$name].source // empty' 2>/dev/null)
+        if [[ "$source" == "roster" || "$source" == "roster-diverged" ]]; then
+            return 0
+        fi
+        return 1
+    fi
+
+    # Fallback to grep-based parsing
     local skill_block
     skill_block=$(echo "$manifest" | grep -A4 "\"$skill_name\":" 2>/dev/null | head -5)
 
@@ -144,11 +156,113 @@ is_roster_managed() {
     local source
     source=$(echo "$skill_block" | grep '"source"' | sed 's/.*"source":[[:space:]]*"\([^"]*\)".*/\1/')
 
-    if [[ "$source" == "roster" ]]; then
+    if [[ "$source" == "roster" || "$source" == "roster-diverged" ]]; then
         return 0
     fi
 
     return 1
+}
+
+# Add or update a single manifest entry for a skill
+# Usage: add_to_manifest skill_name source_type checksum file_count
+add_to_manifest() {
+    local skill_name="$1"
+    local source_type="$2"
+    local checksum="$3"
+    local file_count="$4"
+    local timestamp
+    timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+    # Ensure manifest exists
+    if [[ ! -f "$USER_MANIFEST_FILE" ]]; then
+        init_manifest
+    fi
+
+    # Read current manifest
+    local manifest
+    manifest=$(read_manifest)
+
+    # Use jq to add/update entry
+    if command -v jq >/dev/null 2>&1; then
+        local updated
+        updated=$(echo "$manifest" | jq --arg name "$skill_name" \
+            --arg src "$source_type" \
+            --arg ts "$timestamp" \
+            --arg cs "$checksum" \
+            --argjson fc "$file_count" \
+            '.skills[$name] = {"source": $src, "installed_at": $ts, "checksum": $cs, "file_count": $fc}')
+        echo "$updated" > "$USER_MANIFEST_FILE"
+    else
+        log_warning "jq not available, cannot update manifest entry for $skill_name"
+    fi
+}
+
+# Recover manifest entries from existing skill directories that match roster sources
+recover_manifest() {
+    log_info "Recovering manifest from existing skills..."
+
+    local target_dir="$USER_SKILLS_DIR"
+    local recovered=0
+    local diverged=0
+
+    # Ensure source directory exists
+    if [[ ! -d "$SOURCE_DIR" ]]; then
+        log_error "Source directory not found: $SOURCE_DIR"
+        return 1
+    fi
+
+    # Process each skill directory in target
+    for target_skill in "$target_dir"/*/; do
+        [[ -d "$target_skill" ]] || continue
+
+        # Remove trailing slash
+        target_skill="${target_skill%/}"
+        local skill_name
+        skill_name=$(basename "$target_skill")
+
+        # Skip if not a valid skill (no SKILL.md)
+        [[ -f "$target_skill/SKILL.md" ]] || continue
+
+        # Skip if already in manifest as roster-managed
+        if is_roster_managed "$skill_name"; then
+            log_debug "Already managed: $skill_name"
+            continue
+        fi
+
+        # Check if this skill exists in roster source
+        local source_skill="$SOURCE_DIR/$skill_name"
+        if [[ -d "$source_skill" && -f "$source_skill/SKILL.md" ]]; then
+            local source_checksum target_checksum source_file_count target_file_count
+            source_checksum=$(calculate_skill_checksum "$source_skill")
+            target_checksum=$(calculate_skill_checksum "$target_skill")
+            source_file_count=$(count_skill_files "$source_skill")
+            target_file_count=$(count_skill_files "$target_skill")
+
+            if [[ "$source_checksum" == "$target_checksum" ]]; then
+                # Exact match - adopt as roster-managed
+                if [[ "$DRY_RUN_MODE" -eq 1 ]]; then
+                    log_info "Would adopt: $skill_name (exact match, $target_file_count files)"
+                else
+                    add_to_manifest "$skill_name" "roster" "$target_checksum" "$target_file_count"
+                    log_success "Adopted: $skill_name (exact match, $target_file_count files)"
+                fi
+                ((recovered++)) || true
+            else
+                # Diverged - mark as roster-diverged to preserve user changes
+                if [[ "$DRY_RUN_MODE" -eq 1 ]]; then
+                    log_info "Would adopt (diverged): $skill_name (local modifications preserved)"
+                else
+                    add_to_manifest "$skill_name" "roster-diverged" "$target_checksum" "$target_file_count"
+                    log_warning "Adopted (diverged): $skill_name (local modifications preserved)"
+                fi
+                ((diverged++)) || true
+            fi
+        else
+            log_debug "Not in roster: $skill_name (user-created)"
+        fi
+    done
+
+    log_info "Recovery complete: $recovered adopted, $diverged diverged"
 }
 
 # Get checksum from manifest for a skill
@@ -162,6 +276,13 @@ get_manifest_checksum() {
         return
     fi
 
+    # Use jq if available for reliable JSON parsing
+    if command -v jq >/dev/null 2>&1; then
+        echo "$manifest" | jq -r --arg name "$skill_name" '.skills[$name].checksum // empty' 2>/dev/null
+        return
+    fi
+
+    # Fallback to grep-based parsing
     local skill_block
     skill_block=$(echo "$manifest" | grep -A5 "\"$skill_name\":" 2>/dev/null | head -6)
 
@@ -526,6 +647,7 @@ Syncs roster user-skills to ~/.claude/skills/
 Options:
   --dry-run      Preview changes without applying
   --status       Show sync status without making changes
+  --adopt        Recover manifest from existing skills (bootstrap/repair)
   --help, -h     Show this help message
 
 Behavior:
@@ -539,6 +661,18 @@ Updates use rsync --delete to ensure clean sync within each skill directory.
 The manifest at ~/.claude/USER_SKILL_MANIFEST.json tracks which skills
 were installed from roster, allowing safe updates while preserving
 user-created skills.
+
+Adopt Mode (--adopt):
+  Scans existing skills in ~/.claude/skills/ and matches them against
+  roster sources. Skills that match are adopted into the manifest:
+  - Exact matches: marked as "roster" (fully managed)
+  - Diverged skills: marked as "roster-diverged" (preserves local changes)
+  - User-created: not added to manifest (remain user-owned)
+
+  Use --adopt when:
+  - First-time setup with existing skills
+  - Manifest was deleted or corrupted
+  - Skills were installed before manifest tracking existed
 
 Environment Variables:
   ROSTER_HOME    Roster repository location (default: ~/Code/roster)
@@ -554,6 +688,8 @@ Examples:
   ./sync-user-skills.sh              # Sync user-skills
   ./sync-user-skills.sh --dry-run    # Preview what would change
   ./sync-user-skills.sh --status     # Show current sync status
+  ./sync-user-skills.sh --adopt      # Recover manifest from existing skills
+  ./sync-user-skills.sh --adopt --dry-run  # Preview adopt results
 
 EOF
 }
@@ -565,6 +701,10 @@ main() {
         case "$1" in
             --dry-run)
                 DRY_RUN_MODE=1
+                shift
+                ;;
+            --adopt|--recover-manifest)
+                ADOPT_MODE=1
                 shift
                 ;;
             --status)
@@ -587,6 +727,17 @@ main() {
                 ;;
         esac
     done
+
+    # Run manifest recovery if adopt mode is enabled
+    if [[ "$ADOPT_MODE" -eq 1 ]]; then
+        # Ensure target directory exists before recovery
+        mkdir -p "$USER_SKILLS_DIR"
+        # Initialize manifest if needed
+        if [[ ! -f "$USER_MANIFEST_FILE" ]]; then
+            init_manifest
+        fi
+        recover_manifest
+    fi
 
     # Perform sync
     perform_sync

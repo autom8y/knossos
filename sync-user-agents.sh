@@ -35,6 +35,7 @@ readonly EXIT_SYNC_FAILURE=3
 
 # Mode flags
 DRY_RUN_MODE=0
+ADOPT_MODE=0
 
 # Colors for output (if terminal supports it)
 if [[ -t 1 ]]; then
@@ -159,7 +160,17 @@ is_roster_managed() {
         return 1
     fi
 
-    # Check if agent exists in manifest with source=roster
+    # Use jq if available for reliable JSON parsing
+    if command -v jq >/dev/null 2>&1; then
+        local source
+        source=$(echo "$manifest" | jq -r --arg name "$agent_name" '.agents[$name].source // empty' 2>/dev/null)
+        if [[ "$source" == "roster" || "$source" == "roster-diverged" ]]; then
+            return 0
+        fi
+        return 1
+    fi
+
+    # Fallback to grep-based parsing
     local agent_block
     agent_block=$(echo "$manifest" | grep -A3 "\"$agent_name\":" 2>/dev/null | head -4)
 
@@ -170,11 +181,103 @@ is_roster_managed() {
     local source
     source=$(echo "$agent_block" | grep '"source"' | sed 's/.*"source":[[:space:]]*"\([^"]*\)".*/\1/')
 
-    if [[ "$source" == "roster" ]]; then
+    if [[ "$source" == "roster" || "$source" == "roster-diverged" ]]; then
         return 0
     fi
 
     return 1
+}
+
+# Add or update a single manifest entry for an agent
+# Usage: add_to_manifest agent_name source_type checksum
+add_to_manifest() {
+    local agent_name="$1"
+    local source_type="$2"
+    local checksum="$3"
+    local timestamp
+    timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+    # Ensure manifest exists
+    if [[ ! -f "$USER_MANIFEST_FILE" ]]; then
+        init_manifest
+    fi
+
+    # Read current manifest
+    local manifest
+    manifest=$(read_manifest)
+
+    # Use jq to add/update entry
+    if command -v jq >/dev/null 2>&1; then
+        local updated
+        updated=$(echo "$manifest" | jq --arg name "$agent_name" \
+            --arg src "$source_type" \
+            --arg ts "$timestamp" \
+            --arg cs "$checksum" \
+            '.agents[$name] = {"source": $src, "installed_at": $ts, "checksum": $cs}')
+        echo "$updated" > "$USER_MANIFEST_FILE"
+    else
+        log_warning "jq not available, cannot update manifest entry for $agent_name"
+    fi
+}
+
+# Recover manifest entries from existing agent files that match roster sources
+recover_manifest() {
+    log_info "Recovering manifest from existing agents..."
+
+    local target_dir="$USER_AGENTS_DIR"
+    local recovered=0
+    local diverged=0
+
+    # Ensure source directory exists
+    if [[ ! -d "$SOURCE_DIR" ]]; then
+        log_error "Source directory not found: $SOURCE_DIR"
+        return 1
+    fi
+
+    # Process each agent in target directory
+    for target_file in "$target_dir"/*.md; do
+        [[ -f "$target_file" ]] || continue
+        local agent_name
+        agent_name=$(basename "$target_file")
+
+        # Skip if already in manifest as roster-managed
+        if is_roster_managed "$agent_name"; then
+            log_debug "Already managed: $agent_name"
+            continue
+        fi
+
+        # Check if this agent exists in roster source
+        local source_file="$SOURCE_DIR/$agent_name"
+        if [[ -f "$source_file" ]]; then
+            local source_checksum target_checksum
+            source_checksum=$(calculate_checksum "$source_file")
+            target_checksum=$(calculate_checksum "$target_file")
+
+            if [[ "$source_checksum" == "$target_checksum" ]]; then
+                # Exact match - adopt as roster-managed
+                if [[ "$DRY_RUN_MODE" -eq 1 ]]; then
+                    log_info "Would adopt: $agent_name (exact match)"
+                else
+                    add_to_manifest "$agent_name" "roster" "$target_checksum"
+                    log_success "Adopted: $agent_name (exact match)"
+                fi
+                ((recovered++)) || true
+            else
+                # Diverged - mark as roster-diverged to preserve user changes
+                if [[ "$DRY_RUN_MODE" -eq 1 ]]; then
+                    log_info "Would adopt (diverged): $agent_name (local modifications preserved)"
+                else
+                    add_to_manifest "$agent_name" "roster-diverged" "$target_checksum"
+                    log_warning "Adopted (diverged): $agent_name (local modifications preserved)"
+                fi
+                ((diverged++)) || true
+            fi
+        else
+            log_debug "Not in roster: $agent_name (user-created)"
+        fi
+    done
+
+    log_info "Recovery complete: $recovered adopted, $diverged diverged"
 }
 
 # Get checksum from manifest for an agent
@@ -188,6 +291,13 @@ get_manifest_checksum() {
         return
     fi
 
+    # Use jq if available for reliable JSON parsing
+    if command -v jq >/dev/null 2>&1; then
+        echo "$manifest" | jq -r --arg name "$agent_name" '.agents[$name].checksum // empty' 2>/dev/null
+        return
+    fi
+
+    # Fallback to grep-based parsing
     local agent_block
     agent_block=$(echo "$manifest" | grep -A4 "\"$agent_name\":" 2>/dev/null | head -5)
 
@@ -518,6 +628,7 @@ Syncs roster user-agents to ~/.claude/agents/
 Options:
   --dry-run      Preview changes without applying
   --status       Show sync status without making changes
+  --adopt        Recover manifest from existing agents (bootstrap/repair)
   --help, -h     Show this help message
 
 Behavior:
@@ -528,6 +639,18 @@ Behavior:
 The manifest at ~/.claude/USER_AGENT_MANIFEST.json tracks which agents
 were installed from roster, allowing safe updates while preserving
 user-created agents.
+
+Adopt Mode (--adopt):
+  Scans existing agents in ~/.claude/agents/ and matches them against
+  roster sources. Agents that match are adopted into the manifest:
+  - Exact matches: marked as "roster" (fully managed)
+  - Diverged files: marked as "roster-diverged" (preserves local changes)
+  - User-created: not added to manifest (remain user-owned)
+
+  Use --adopt when:
+  - First-time setup with existing agents
+  - Manifest was deleted or corrupted
+  - Agents were installed before manifest tracking existed
 
 Environment Variables:
   ROSTER_HOME    Roster repository location (default: ~/Code/roster)
@@ -543,6 +666,8 @@ Examples:
   ./sync-user-agents.sh              # Sync user-agents
   ./sync-user-agents.sh --dry-run    # Preview what would change
   ./sync-user-agents.sh --status     # Show current sync status
+  ./sync-user-agents.sh --adopt      # Recover manifest from existing agents
+  ./sync-user-agents.sh --adopt --dry-run  # Preview adopt results
 
 EOF
 }
@@ -554,6 +679,10 @@ main() {
         case "$1" in
             --dry-run)
                 DRY_RUN_MODE=1
+                shift
+                ;;
+            --adopt|--recover-manifest)
+                ADOPT_MODE=1
                 shift
                 ;;
             --status)
@@ -576,6 +705,17 @@ main() {
                 ;;
         esac
     done
+
+    # Run manifest recovery if adopt mode is enabled
+    if [[ "$ADOPT_MODE" -eq 1 ]]; then
+        # Ensure target directory exists before recovery
+        mkdir -p "$USER_AGENTS_DIR"
+        # Initialize manifest if needed
+        if [[ ! -f "$USER_MANIFEST_FILE" ]]; then
+            init_manifest
+        fi
+        recover_manifest
+    fi
 
     # Perform sync
     perform_sync

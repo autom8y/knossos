@@ -36,6 +36,8 @@ readonly EXIT_SYNC_FAILURE=3
 
 # Mode flags
 DRY_RUN_MODE=0
+ADOPT_MODE=0
+CLEANUP_MODE=0
 
 # Colors for output (if terminal supports it)
 if [[ -t 1 ]]; then
@@ -138,6 +140,106 @@ get_team_for_command() {
 }
 
 # ============================================================================
+# Team-Level Orphan Cleanup
+# ============================================================================
+
+# Clean up commands at user-level that should only exist at team-level
+# These are commands that:
+#   1. Exist in ~/.claude/commands/
+#   2. Do NOT exist in roster/user-commands/
+#   3. DO exist in roster/teams/*/commands/ (team-level resources)
+cleanup_team_orphans() {
+    log_info "Scanning for team-level commands that leaked to user-level..."
+
+    local target_dir="$USER_COMMANDS_DIR"
+    local backup_dir="$HOME/.claude/.backup/commands"
+    local cleaned=0
+    local skipped=0
+
+    # Process each command in user-level directory
+    for target_file in "$target_dir"/*.md; do
+        [[ -f "$target_file" ]] || continue
+        local cmd_name
+        cmd_name=$(basename "$target_file")
+
+        # Check if this command exists in roster/user-commands/ (legitimate user-level)
+        local found_in_user_commands=false
+        for category_dir in "$SOURCE_DIR"/*/; do
+            [[ -d "$category_dir" ]] || continue
+            if [[ -f "$category_dir/$cmd_name" ]]; then
+                found_in_user_commands=true
+                break
+            fi
+        done
+
+        if [[ "$found_in_user_commands" == true ]]; then
+            log_debug "Keeping: $cmd_name (in user-commands)"
+            continue
+        fi
+
+        # Not in user-commands - check if it's a team-level command
+        if is_team_command "$cmd_name"; then
+            local teams
+            teams=$(get_team_for_command "$cmd_name")
+
+            if [[ "$DRY_RUN_MODE" -eq 1 ]]; then
+                log_info "Would remove: $cmd_name (team-level from: $teams)"
+            else
+                # Backup before removing
+                mkdir -p "$backup_dir"
+                cp "$target_file" "$backup_dir/$cmd_name.$(date +%Y%m%d%H%M%S).bak"
+
+                # Remove the file
+                rm "$target_file"
+                log_success "Removed: $cmd_name (team-level from: $teams)"
+                log_debug "  Backup: $backup_dir/$cmd_name.*.bak"
+
+                # Remove from manifest if present
+                if is_roster_managed "$cmd_name"; then
+                    remove_from_manifest "$cmd_name"
+                fi
+            fi
+            ((cleaned++)) || true
+        else
+            # Not in user-commands AND not a team command = truly user-created
+            log_debug "Keeping: $cmd_name (user-created, not from any roster source)"
+            ((skipped++)) || true
+        fi
+    done
+
+    echo ""
+    if [[ "$DRY_RUN_MODE" -eq 1 ]]; then
+        log "Cleanup preview:"
+    else
+        log "Cleanup complete:"
+    fi
+    echo "  Removed:   $cleaned (team-level commands)"
+    echo "  Preserved: $skipped (user-created commands)"
+
+    if [[ "$cleaned" -gt 0 ]] && [[ "$DRY_RUN_MODE" -eq 0 ]]; then
+        log_info "Backups saved to: $backup_dir"
+    fi
+}
+
+# Remove an entry from the manifest
+remove_from_manifest() {
+    local cmd_name="$1"
+
+    if [[ ! -f "$USER_MANIFEST_FILE" ]]; then
+        return
+    fi
+
+    if command -v jq >/dev/null 2>&1; then
+        local updated
+        updated=$(cat "$USER_MANIFEST_FILE" | jq --arg name "$cmd_name" 'del(.commands[$name])')
+        echo "$updated" > "$USER_MANIFEST_FILE"
+        log_debug "Removed from manifest: $cmd_name"
+    else
+        log_warning "jq not available, cannot remove $cmd_name from manifest"
+    fi
+}
+
+# ============================================================================
 # Manifest Functions
 # ============================================================================
 
@@ -160,7 +262,17 @@ is_roster_managed() {
         return 1
     fi
 
-    # Check if command exists in manifest with source=roster
+    # Use jq if available for reliable JSON parsing
+    if command -v jq >/dev/null 2>&1; then
+        local source
+        source=$(echo "$manifest" | jq -r --arg name "$cmd_name" '.commands[$name].source // empty' 2>/dev/null)
+        if [[ "$source" == "roster" || "$source" == "roster-diverged" ]]; then
+            return 0
+        fi
+        return 1
+    fi
+
+    # Fallback to grep-based parsing
     local cmd_block
     cmd_block=$(echo "$manifest" | grep -A4 "\"$cmd_name\":" 2>/dev/null | head -5)
 
@@ -171,11 +283,132 @@ is_roster_managed() {
     local source
     source=$(echo "$cmd_block" | grep '"source"' | sed 's/.*"source":[[:space:]]*"\([^"]*\)".*/\1/')
 
-    if [[ "$source" == "roster" ]]; then
+    if [[ "$source" == "roster" || "$source" == "roster-diverged" ]]; then
         return 0
     fi
 
     return 1
+}
+
+# Add or update a single manifest entry
+# Usage: add_to_manifest cmd_name source category checksum
+add_to_manifest() {
+    local cmd_name="$1"
+    local source_type="$2"
+    local category="$3"
+    local checksum="$4"
+    local timestamp
+    timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+    # Ensure manifest exists
+    if [[ ! -f "$USER_MANIFEST_FILE" ]]; then
+        init_manifest
+    fi
+
+    # Read current manifest
+    local manifest
+    manifest=$(read_manifest)
+
+    # Check if command already exists in manifest
+    if echo "$manifest" | grep -q "\"$cmd_name\":"; then
+        # Update existing entry using jq if available, else use sed
+        if command -v jq >/dev/null 2>&1; then
+            local updated
+            updated=$(echo "$manifest" | jq --arg name "$cmd_name" \
+                --arg src "$source_type" \
+                --arg cat "$category" \
+                --arg ts "$timestamp" \
+                --arg cs "$checksum" \
+                '.commands[$name] = {"source": $src, "category": $cat, "installed_at": $ts, "checksum": $cs}')
+            echo "$updated" > "$USER_MANIFEST_FILE"
+        else
+            log_warning "jq not available, cannot update manifest entry for $cmd_name"
+        fi
+    else
+        # Add new entry - need to insert before closing brace
+        if command -v jq >/dev/null 2>&1; then
+            local updated
+            updated=$(echo "$manifest" | jq --arg name "$cmd_name" \
+                --arg src "$source_type" \
+                --arg cat "$category" \
+                --arg ts "$timestamp" \
+                --arg cs "$checksum" \
+                '.commands[$name] = {"source": $src, "category": $cat, "installed_at": $ts, "checksum": $cs}')
+            echo "$updated" > "$USER_MANIFEST_FILE"
+        else
+            log_warning "jq not available, cannot add manifest entry for $cmd_name"
+        fi
+    fi
+}
+
+# Recover manifest entries from existing files that match roster sources
+recover_manifest() {
+    log_info "Recovering manifest from existing commands..."
+
+    local target_dir="$USER_COMMANDS_DIR"
+    local recovered=0
+    local diverged=0
+
+    # Ensure source directory exists
+    if [[ ! -d "$SOURCE_DIR" ]]; then
+        log_error "Source directory not found: $SOURCE_DIR"
+        return 1
+    fi
+
+    # Process each command in target directory
+    for target_file in "$target_dir"/*.md; do
+        [[ -f "$target_file" ]] || continue
+        local cmd_name
+        cmd_name=$(basename "$target_file")
+
+        # Skip if already in manifest as roster-managed
+        if is_roster_managed "$cmd_name"; then
+            log_debug "Already managed: $cmd_name"
+            continue
+        fi
+
+        # Search for matching source file in roster (check all category subdirectories)
+        local source_file=""
+        local category=""
+        for category_dir in "$SOURCE_DIR"/*/; do
+            [[ -d "$category_dir" ]] || continue
+            if [[ -f "$category_dir/$cmd_name" ]]; then
+                source_file="$category_dir/$cmd_name"
+                category=$(basename "$category_dir")
+                break
+            fi
+        done
+
+        if [[ -n "$source_file" && -f "$source_file" ]]; then
+            local source_checksum target_checksum
+            source_checksum=$(calculate_checksum "$source_file")
+            target_checksum=$(calculate_checksum "$target_file")
+
+            if [[ "$source_checksum" == "$target_checksum" ]]; then
+                # Exact match - adopt as roster-managed
+                if [[ "$DRY_RUN_MODE" -eq 1 ]]; then
+                    log_info "Would adopt: $cmd_name (exact match)"
+                else
+                    add_to_manifest "$cmd_name" "roster" "$category" "$target_checksum"
+                    log_success "Adopted: $cmd_name (exact match)"
+                fi
+                ((recovered++)) || true
+            else
+                # Diverged - mark as roster-diverged to preserve user changes
+                if [[ "$DRY_RUN_MODE" -eq 1 ]]; then
+                    log_info "Would adopt (diverged): $cmd_name (local modifications preserved)"
+                else
+                    add_to_manifest "$cmd_name" "roster-diverged" "$category" "$target_checksum"
+                    log_warning "Adopted (diverged): $cmd_name (local modifications preserved)"
+                fi
+                ((diverged++)) || true
+            fi
+        else
+            log_debug "Not in roster: $cmd_name (user-created)"
+        fi
+    done
+
+    log_info "Recovery complete: $recovered adopted, $diverged diverged"
 }
 
 # Get checksum from manifest for a command
@@ -189,6 +422,13 @@ get_manifest_checksum() {
         return
     fi
 
+    # Use jq if available for reliable JSON parsing
+    if command -v jq >/dev/null 2>&1; then
+        echo "$manifest" | jq -r --arg name "$cmd_name" '.commands[$name].checksum // empty' 2>/dev/null
+        return
+    fi
+
+    # Fallback to grep-based parsing
     local cmd_block
     cmd_block=$(echo "$manifest" | grep -A5 "\"$cmd_name\":" 2>/dev/null | head -6)
 
@@ -382,9 +622,13 @@ perform_sync() {
     local manifest
     manifest=$(read_manifest)
     if [[ -n "$manifest" ]]; then
-        # Extract existing commands from manifest
+        # Extract existing commands from manifest using jq if available
         local existing_commands
-        existing_commands=$(echo "$manifest" | grep -o '"[^"]*\.md":' | tr -d '":' || true)
+        if command -v jq >/dev/null 2>&1; then
+            existing_commands=$(echo "$manifest" | jq -r '.commands | keys[]' 2>/dev/null || true)
+        else
+            existing_commands=$(echo "$manifest" | grep -o '"[^"]*\.md":' | tr -d '":' || true)
+        fi
 
         for existing in $existing_commands; do
             # Check if this command is still in source
@@ -401,9 +645,13 @@ perform_sync() {
                 # so we know it came from roster originally
                 local checksum
                 checksum=$(calculate_checksum "$USER_COMMANDS_DIR/$existing")
-                # Get existing category from manifest
+                # Get existing category from manifest using jq if available
                 local existing_category
-                existing_category=$(echo "$manifest" | grep -A3 "\"$existing\":" | grep '"category"' | sed 's/.*"category":[[:space:]]*"\([^"]*\)".*/\1/' || echo "unknown")
+                if command -v jq >/dev/null 2>&1; then
+                    existing_category=$(echo "$manifest" | jq -r --arg name "$existing" '.commands[$name].category // "unknown"' 2>/dev/null)
+                else
+                    existing_category=$(echo "$manifest" | grep -A3 "\"$existing\":" | grep '"category"' | sed 's/.*"category":[[:space:]]*"\([^"]*\)".*/\1/' || echo "unknown")
+                fi
                 manifest_entries+=("$existing:$checksum:$existing_category")
                 log_debug "Preserved manifest entry: $existing (no longer in roster)"
             fi
@@ -561,6 +809,8 @@ Syncs roster user-commands to ~/.claude/commands/
 Options:
   --dry-run      Preview changes without applying
   --status       Show sync status without making changes
+  --adopt        Recover manifest from existing commands (bootstrap/repair)
+  --cleanup      Remove team-level commands that leaked to user-level
   --help, -h     Show this help message
 
 Behavior:
@@ -572,6 +822,33 @@ Behavior:
 The manifest at ~/.claude/USER_COMMAND_MANIFEST.json tracks which commands
 were installed from roster, allowing safe updates while preserving
 user-created commands.
+
+Adopt Mode (--adopt):
+  Scans existing commands in ~/.claude/commands/ and matches them against
+  roster sources. Commands that match are adopted into the manifest:
+  - Exact matches: marked as "roster" (fully managed)
+  - Diverged files: marked as "roster-diverged" (preserves local changes)
+  - User-created: not added to manifest (remain user-owned)
+
+  Use --adopt when:
+  - First-time setup with existing commands
+  - Manifest was deleted or corrupted
+  - Commands were installed before manifest tracking existed
+
+Cleanup Mode (--cleanup):
+  Scans commands in ~/.claude/commands/ and removes any that:
+  - Do NOT exist in roster/user-commands/ (not user-level resources)
+  - DO exist in roster/teams/*/commands/ (team-level resources)
+
+  Team-level commands should only exist in .claude/commands/ (per-project)
+  when that team is active, not in ~/.claude/commands/ (user-level global).
+
+  Use --cleanup when:
+  - Team commands leaked to user-level directory
+  - Cleaning up after switching teams
+  - Resetting to clean user-level state
+
+  Backups are saved to ~/.claude/.backup/commands/ before removal.
 
 Source Structure:
   roster/user-commands/
@@ -596,6 +873,10 @@ Examples:
   ./sync-user-commands.sh              # Sync user-commands
   ./sync-user-commands.sh --dry-run    # Preview what would change
   ./sync-user-commands.sh --status     # Show current sync status
+  ./sync-user-commands.sh --adopt      # Recover manifest from existing files
+  ./sync-user-commands.sh --adopt --dry-run  # Preview adopt results
+  ./sync-user-commands.sh --cleanup    # Remove team-level leaks
+  ./sync-user-commands.sh --cleanup --dry-run  # Preview cleanup
 
 EOF
 }
@@ -607,6 +888,14 @@ main() {
         case "$1" in
             --dry-run)
                 DRY_RUN_MODE=1
+                shift
+                ;;
+            --adopt|--recover-manifest)
+                ADOPT_MODE=1
+                shift
+                ;;
+            --cleanup)
+                CLEANUP_MODE=1
                 shift
                 ;;
             --status)
@@ -629,6 +918,23 @@ main() {
                 ;;
         esac
     done
+
+    # Ensure target directory exists
+    mkdir -p "$USER_COMMANDS_DIR"
+
+    # Run cleanup if enabled (removes team-level commands from user-level)
+    if [[ "$CLEANUP_MODE" -eq 1 ]]; then
+        cleanup_team_orphans
+    fi
+
+    # Run manifest recovery if adopt mode is enabled
+    if [[ "$ADOPT_MODE" -eq 1 ]]; then
+        # Initialize manifest if needed
+        if [[ ! -f "$USER_MANIFEST_FILE" ]]; then
+            init_manifest
+        fi
+        recover_manifest
+    fi
 
     # Perform sync
     perform_sync
