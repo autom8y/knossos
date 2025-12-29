@@ -22,11 +22,11 @@ Technical debt management lifecycle for cataloging, risk assessment, and sprint 
 
 ## Agents
 
-| Agent | Role | Model | Artifact |
-|-------|------|-------|----------|
-| debt-collector | Catalogs all forms of debt with precision | claude-haiku-4-5 | Debt Ledger |
-| risk-assessor | Scores debt by blast radius, likelihood, effort | claude-opus-4-5 | Risk Report |
-| sprint-planner | Packages prioritized debt into actionable work units | claude-sonnet-4-5 | Sprint Plan |
+| Agent | Role | Artifact |
+|-------|------|----------|
+| debt-collector | Catalogs all forms of debt with precision | Debt Ledger |
+| risk-assessor | Scores debt by blast radius, likelihood, effort | Risk Report |
+| sprint-planner | Packages prioritized debt into actionable work units | Sprint Plan |
 
 ## Workflow
 

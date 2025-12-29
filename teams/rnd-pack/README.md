@@ -20,12 +20,12 @@ Technology scouting, integration analysis, prototyping, and future architecture.
 
 ## Agents
 
-| Agent | Role | Model | Artifact |
-|-------|------|-------|----------|
-| technology-scout | Watches technology horizon for opportunities | claude-sonnet-4-5 | tech-assessment |
-| integration-researcher | Maps how new tech integrates with existing systems | claude-sonnet-4-5 | integration-map |
-| prototype-engineer | Builds throwaway code that enables decisions | claude-sonnet-4-5 | prototype |
-| moonshot-architect | Designs systems for futures that haven't happened | claude-opus-4-5 | moonshot-plan |
+| Agent | Role | Artifact |
+|-------|------|----------|
+| technology-scout | Watches technology horizon for opportunities | tech-assessment |
+| integration-researcher | Maps how new tech integrates with existing systems | integration-map |
+| prototype-engineer | Builds throwaway code that enables decisions | prototype |
+| moonshot-architect | Designs systems for futures that haven't happened | moonshot-plan |
 
 ## Workflow
 

@@ -20,12 +20,12 @@ Security assessment, compliance mapping, penetration testing, and review for sys
 
 ## Agents
 
-| Agent | Role | Model | Artifact |
-|-------|------|-------|----------|
-| threat-modeler | Maps attack vectors and threat landscapes | claude-opus-4-5 | threat-model |
-| compliance-architect | Translates regulations into engineering requirements | claude-opus-4-5 | compliance-requirements |
-| penetration-tester | Probes systems for vulnerabilities like an authorized adversary | claude-opus-4-5 | pentest-report |
-| security-reviewer | Final security gate before code merges | claude-opus-4-5 | security-signoff |
+| Agent | Role | Artifact |
+|-------|------|----------|
+| threat-modeler | Maps attack vectors and threat landscapes | threat-model |
+| compliance-architect | Translates regulations into engineering requirements | compliance-requirements |
+| penetration-tester | Probes systems for vulnerabilities like an authorized adversary | pentest-report |
+| security-reviewer | Final security gate before code merges | security-signoff |
 
 ## Workflow
 

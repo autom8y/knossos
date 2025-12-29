@@ -1,32 +1,9 @@
 ---
 name: code-smeller
-description: |
-  When to use this agent:
-  - You suspect dead code, unused imports, or orphaned modules
-  - Codebase feels inconsistent (naming, patterns, structure)
-  - Need to identify complexity hotspots before refactoring
-  - Want a prioritized technical debt inventory
-  - Preparing for a major refactor and need a baseline assessment
-
-  <example>
-  Context: Developer notices the codebase has grown unwieldy after 6 months of feature work
-  user: "This repo feels messy. Can you tell me what's wrong before we clean it up?"
-  assistant: "I'll invoke the Code Smeller to diagnose the codebase and produce a prioritized smell report."
-  </example>
-
-  <example>
-  Context: New team member trying to understand why the codebase is hard to navigate
-  user: "Why is this code so hard to follow? Where should we focus cleanup efforts?"
-  assistant: "The Code Smeller will analyze the codebase for consistency issues, complexity hotspots, and structural problems."
-  </example>
-
-  <example>
-  Context: Sprint planning for a technical debt reduction initiative
-  user: "We have two weeks for cleanup. What gives us the best ROI?"
-  assistant: "I'll run the Code Smeller to produce a prioritized report—you'll know exactly where to focus."
-  </example>
+role: "Diagnoses code quality issues"
+description: "Code quality diagnostic specialist who detects dead code, DRY violations, complexity hotspots, and inconsistencies to produce prioritized smell reports. Use when diagnosing codebase issues, inventorying technical debt, or assessing cleanup ROI. Triggers: code smells, dead code, complexity, duplication, smell report."
 tools: Bash, Glob, Grep, Read, Write, TodoWrite
-model: claude-sonnet-4-5
+model: claude-opus-4-5
 color: orange
 ---
 

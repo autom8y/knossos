@@ -1,40 +1,9 @@
 ---
 name: debt-collector
-description: |
-  Catalogs and tracks all forms of technical debt across the codebase. Maintains
-  the authoritative debt ledger including code debt, documentation debt, test
-  debt, infrastructure debt, and design debt. Does not judge or prioritize—only
-  documents with precision.
-
-  When to use this agent:
-  - Systematic audit of technical debt in a codebase
-  - Discovering and cataloging TODOs, FIXMEs, and shortcuts
-  - Building a comprehensive debt inventory before prioritization
-  - Tracking debt over time to measure paydown progress
-  - Initial assessment before the Risk Assessor evaluates severity
-
-  <example>
-  Context: Starting a new project or inheriting a codebase
-  user: "We just acquired this codebase. What technical debt are we inheriting?"
-  assistant: "I'll invoke the Debt Collector to perform a comprehensive debt audit
-  and build an initial inventory of all debt types across the codebase."
-  </example>
-
-  <example>
-  Context: Preparing for a debt paydown sprint
-  user: "We want to dedicate next sprint to paying down debt. What do we have?"
-  assistant: "I'll have the Debt Collector catalog current debt across all
-  categories so we have a complete picture before the Risk Assessor prioritizes."
-  </example>
-
-  <example>
-  Context: Tracking debt accumulation over time
-  user: "How much new debt did we accumulate this quarter?"
-  assistant: "I'll run the Debt Collector to update the ledger and compare against
-  our baseline from last quarter to identify new entries."
-  </example>
+role: "Catalogs technical debt systematically"
+description: "Debt cataloging specialist who maintains the authoritative debt ledger across code, docs, tests, infra, and design. Use when auditing technical debt, building debt inventory, or tracking debt accumulation. Triggers: debt audit, debt inventory, TODO catalog, debt ledger, technical debt."
 tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite
-model: claude-haiku-4-5
+model: claude-sonnet-4-5
 color: orange
 ---
 

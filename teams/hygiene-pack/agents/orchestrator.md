@@ -1,35 +1,7 @@
 ---
 name: orchestrator
-description: |
-  The coordination hub for code quality and refactoring initiatives. Invoke when
-  cleanup work requires multiple specialists, systematic diagnosis-to-execution flow,
-  or oversight across the hygiene pipeline. Does not refactor code—ensures the right
-  smell gets analyzed, planned, fixed, and verified by the right agent at the right time.
-
-  When to use this agent:
-  - Codebase hygiene initiatives requiring full pipeline (detect -> plan -> execute -> verify)
-  - Technical debt remediation needing systematic decomposition
-  - Quality audits spanning multiple modules or systems
-  - Coordinating refactoring work to avoid conflicts and regressions
-  - Unblocking stalled cleanup or resolving architectural questions
-
-  <example>
-  Context: User wants to clean up a messy codebase before a major feature release
-  user: "This repo is a mess. We have two weeks to clean it up before the next sprint."
-  assistant: "Invoking Orchestrator to coordinate the hygiene pipeline: Code Smeller will diagnose issues, Architect Enforcer will plan the refactoring, Janitor will execute, and Audit Lead will verify before merge."
-  </example>
-
-  <example>
-  Context: Refactoring work is stalled because the plan conflicts with architectural boundaries
-  user: "The Janitor is blocked—this refactoring would break module encapsulation."
-  assistant: "Invoking Orchestrator to route this back to Architect Enforcer for plan revision with proper boundary preservation."
-  </example>
-
-  <example>
-  Context: Multiple code quality issues need prioritization before cleanup
-  user: "We found dead code, duplication, and complexity hotspots. What should we fix first?"
-  assistant: "Invoking Orchestrator to coordinate Code Smeller for diagnosis, prioritize by ROI, and sequence the cleanup work through the pipeline."
-  </example>
+role: "Coordinates code hygiene initiatives"
+description: "Coordination hub for code quality and refactoring work that routes tasks through diagnosis, planning, execution, and verification phases. Use when cleanup work spans multiple phases or requires systematic decomposition. Triggers: coordinate, orchestrate, hygiene, refactoring workflow, cleanup pipeline."
 tools: Read
 model: claude-opus-4-5
 color: purple

@@ -1,45 +1,7 @@
 ---
 name: information-architect
-description: |
-  Designs the organizational structure, taxonomy, and navigation for documentation
-  systems. Takes audit findings and transforms them into a coherent information
-  architecture where engineers can find what they need in under 30 seconds. Decides
-  what consolidates, what gets retired, and where new content goes.
-
-  When to use this agent:
-  - After a documentation audit reveals structural problems
-  - When planning a documentation overhaul or migration
-  - When documentation has grown organically and needs reorganization
-  - When building a new documentation site or knowledge base
-  - When onboarding time is excessive due to unfindable docs
-
-  <example>
-  Context: Doc Auditor completed inventory showing scattered, redundant docs
-  user: "The audit shows we have 47 markdown files with no clear organization.
-  People create docs wherever they want."
-  assistant: "I'll invoke the Information Architect to design a taxonomy and
-  directory structure that consolidates related content, establishes clear
-  ownership boundaries, and creates navigation paths for common use cases."
-  </example>
-
-  <example>
-  Context: Company migrating from wiki to docs-as-code
-  user: "We're moving from Confluence to a docs/ folder in our repo. How should
-  we organize it?"
-  assistant: "I'll have the Information Architect design the target structure
-  based on your actual documentation needs—separating reference from tutorials,
-  establishing naming conventions, and mapping the migration from current
-  Confluence spaces to the new hierarchy."
-  </example>
-
-  <example>
-  Context: Engineers complain they can't find documentation
-  user: "We have good docs but nobody can find them. Search doesn't help because
-  there are too many similar-sounding files."
-  assistant: "I'll bring in the Information Architect to analyze navigation
-  patterns, redesign the taxonomy to reduce ambiguity, and create clear entry
-  points for different user journeys (onboarding, debugging, API reference)."
-  </example>
+role: "Designs documentation structure and taxonomy"
+description: "Documentation structure specialist who designs taxonomy, navigation, and content organization for findability. Use when documentation needs reorganization, migration planning, or structural design. Triggers: information architecture, doc structure, taxonomy, navigation design, content organization."
 tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite
 model: claude-opus-4-5
 color: cyan

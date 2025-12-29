@@ -22,12 +22,12 @@ Documentation lifecycle management from content audit through quality review.
 
 ## Agents
 
-| Agent | Role | Model | Artifact |
-|-------|------|-------|----------|
-| doc-auditor | Inventory existing docs, identify gaps | sonnet-4-5 | Audit report |
-| information-architect | Design doc structure and taxonomy | opus-4-5 | Doc structure |
-| tech-writer | Write clear, accessible documentation | sonnet-4-5 | Documentation |
-| doc-reviewer | Verify technical accuracy against code | haiku-4-5 | Review signoff |
+| Agent | Role | Artifact |
+|-------|------|----------|
+| doc-auditor | Inventory existing docs, identify gaps | Audit report |
+| information-architect | Design doc structure and taxonomy | Doc structure |
+| tech-writer | Write clear, accessible documentation | Documentation |
+| doc-reviewer | Verify technical accuracy against code | Review signoff |
 
 ## Workflow
 

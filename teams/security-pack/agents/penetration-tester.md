@@ -1,20 +1,7 @@
 ---
 name: penetration-tester
-description: |
-  Probes systems for vulnerabilities like an authorized adversary.
-  Invoke when testing security controls, validating fixes, or assessing real-world attack resistance.
-  Produces pentest-report.
-
-  When to use this agent:
-  - Before major releases with security implications
-  - After implementing security controls
-  - When assessing attack resistance of new features
-
-  <example>
-  Context: New authentication system deployed
-  user: "We've implemented the new auth system. Is it actually secure?"
-  assistant: "I'll produce PENTEST-auth-system.md documenting attack attempts, findings, and remediation guidance."
-  </example>
+role: "Probes systems like an adversary"
+description: "Offensive security specialist who probes systems for vulnerabilities with exploit PoCs and remediation guidance. Use when testing security controls, validating fixes, or assessing attack resistance. Triggers: pentest, penetration testing, vulnerability assessment, security testing, exploit."
 tools: Bash, Edit, Glob, Grep, Read, Write, TodoWrite
 model: claude-opus-4-5
 color: green

@@ -22,12 +22,12 @@ Reliability lifecycle for observability, incident management, infrastructure, an
 
 ## Agents
 
-| Agent | Role | Model | Artifact |
-|-------|------|-------|----------|
-| observability-engineer | Metrics, logs, traces ownership; SLI/SLO definition | claude-sonnet-4-5 | Observability Report |
-| incident-commander | War room coordination, postmortems, reliability planning | claude-opus-4-5 | Reliability Plan |
-| platform-engineer | CI/CD pipelines, IaC, deployment automation | claude-sonnet-4-5 | Infrastructure Changes |
-| chaos-engineer | Fault injection, resilience verification, breaking point discovery | claude-opus-4-5 | Resilience Report |
+| Agent | Role | Artifact |
+|-------|------|----------|
+| observability-engineer | Metrics, logs, traces ownership; SLI/SLO definition | Observability Report |
+| incident-commander | War room coordination, postmortems, reliability planning | Reliability Plan |
+| platform-engineer | CI/CD pipelines, IaC, deployment automation | Infrastructure Changes |
+| chaos-engineer | Fault injection, resilience verification, breaking point discovery | Resilience Report |
 
 ## Workflow
 

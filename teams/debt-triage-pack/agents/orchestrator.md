@@ -1,10 +1,7 @@
 ---
 name: orchestrator
-description: |
-  Coordinates debt-triage-pack workflow through collection, assessment, and planning
-  phases. Routes work between debt-collector, risk-assessor, and sprint-planner based
-  on complexity level. Ensures comprehensive debt management from discovery to
-  actionable sprint plans.
+role: "Coordinates debt triage workflow"
+description: "Coordination hub for debt management that routes work through collection, assessment, and planning phases. Use when managing technical debt across phases or coordinating debt paydown efforts. Triggers: coordinate, orchestrate, debt triage, debt workflow, prioritize debt."
 tools: Read
 model: claude-opus-4-5
 color: blue

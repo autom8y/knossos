@@ -20,12 +20,12 @@ Product analytics, user research, experimentation, and insights synthesis.
 
 ## Agents
 
-| Agent | Role | Model | Artifact |
-|-------|------|-------|----------|
-| analytics-engineer | Builds data foundation and tracking plans | claude-sonnet-4-5 | tracking-plan |
-| user-researcher | Captures qualitative 'why' behind user behavior | claude-opus-4-5 | research-findings |
-| experimentation-lead | Designs rigorous A/B tests and experiments | claude-opus-4-5 | experiment-design |
-| insights-analyst | Synthesizes data into actionable recommendations | claude-opus-4-5 | insights-report |
+| Agent | Role | Artifact |
+|-------|------|----------|
+| analytics-engineer | Builds data foundation and tracking plans | tracking-plan |
+| user-researcher | Captures qualitative 'why' behind user behavior | research-findings |
+| experimentation-lead | Designs rigorous A/B tests and experiments | experiment-design |
+| insights-analyst | Synthesizes data into actionable recommendations | insights-report |
 
 ## Workflow
 

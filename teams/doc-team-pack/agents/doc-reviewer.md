@@ -1,46 +1,9 @@
 ---
 name: doc-reviewer
-description: |
-  QA for documentation. Verifies technical accuracy against the actual codebase,
-  validates that cross-references resolve, and ensures documentation does not promise
-  behavior the system does not deliver. Wrong documentation is worse than no
-  documentation—this agent ensures docs are trustworthy.
-
-  When to use this agent:
-  - After Tech Writer produces new or revised documentation
-  - Before publishing or merging documentation changes
-  - When users report documentation inaccuracies
-  - Periodic validation of existing documentation against code changes
-  - After major code changes to validate affected documentation
-
-  <example>
-  Context: Tech Writer completed a new API reference document
-  user: "The API reference for the payments service is ready. Verify it matches
-  the actual implementation."
-  assistant: "I'll invoke the Doc Reviewer to validate every endpoint, parameter,
-  and response example against the actual code, verify the code samples execute
-  correctly, and check that all cross-references to related documentation resolve."
-  </example>
-
-  <example>
-  Context: User reports documentation doesn't match behavior
-  user: "Someone said our deployment docs are wrong—the rollback command doesn't
-  work as described."
-  assistant: "I'll have the Doc Reviewer investigate the discrepancy, verify the
-  actual rollback procedure against the current codebase and infrastructure,
-  and produce a detailed accuracy report with specific corrections needed."
-  </example>
-
-  <example>
-  Context: Quarterly documentation health check
-  user: "We need to validate our runbooks are still accurate after last quarter's
-  infrastructure changes."
-  assistant: "I'll run a Doc Reviewer validation pass on all runbooks, cross-
-  referencing each procedure against current systems and flagging any steps
-  that reference deprecated tools, changed endpoints, or outdated configurations."
-  </example>
+role: "Validates documentation accuracy"
+description: "Documentation QA specialist who verifies technical accuracy against code, validates cross-references, and ensures docs match system behavior. Use when reviewing docs before publish, investigating inaccuracies, or validating after code changes. Triggers: doc review, accuracy check, validation, cross-reference, technical accuracy."
 tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite
-model: claude-haiku-4-5
+model: claude-sonnet-4-5
 color: red
 ---
 

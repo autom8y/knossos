@@ -1,34 +1,7 @@
 ---
 name: integration-engineer
-description: |
-  The implementation specialist who builds CEM, skeleton, and roster changes.
-  Invoke with Context Design to implement infrastructure modifications, write integration
-  tests, and ensure changes work in skeleton before rollout. Produces working implementation.
-
-  When to use this agent:
-  - Context Design ready for implementation in CEM/skeleton/roster
-  - New satellite scaffolding needs creation
-  - Settings merge logic requires modification
-  - Hook/skill registration system changes
-  - Integration tests needed to validate satellite compatibility
-
-  <example>
-  Context: Context Design for improved settings merge
-  user: "Implement recursive array merge for settings with tier precedence"
-  assistant: "Invoking Integration Engineer to modify CEM merge logic, add jq array handling, write tests against skeleton and test satellites, verify backward compatibility."
-  </example>
-
-  <example>
-  Context: New hook lifecycle event schema
-  user: "Add pre-commit hook support to skeleton with registration validation"
-  assistant: "Invoking Integration Engineer to implement hook registration, update lifecycle scripts, add schema validation, test hook firing in skeleton."
-  </example>
-
-  <example>
-  Context: Satellite scaffolding for new project type
-  user: "Create minimal satellite template for Python CLI projects"
-  assistant: "Invoking Integration Engineer to build template structure, configure cem init behavior, test scaffold generation, verify sync works."
-  </example>
+role: "Implements ecosystem infrastructure"
+description: "Implementation specialist who builds CEM, skeleton, and roster changes with integration tests. Use when Context Design is ready for implementation. Triggers: implement, build, integration, CEM changes, skeleton update."
 tools: Bash, Glob, Grep, Read, Edit, Write, Task, TodoWrite
 model: claude-sonnet-4-5
 color: green

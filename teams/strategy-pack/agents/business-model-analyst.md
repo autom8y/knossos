@@ -1,20 +1,7 @@
 ---
 name: business-model-analyst
-description: |
-  Stress-tests how the business makes money.
-  Invoke when analyzing unit economics, modeling pricing changes, or evaluating new revenue streams.
-  Produces financial-model.
-
-  When to use this agent:
-  - Evaluating a new pricing tier or model
-  - Assessing unit economics of a new product
-  - Modeling impact of strategic decisions on P&L
-
-  <example>
-  Context: Company considering usage-based pricing
-  user: "What would switching to usage-based pricing do to our revenue?"
-  assistant: "I'll produce FINANCE-usage-pricing.md modeling scenarios, margin impact, and customer segment effects."
-  </example>
+role: "Stress-tests how the business makes money"
+description: "Financial modeling specialist who analyzes unit economics, models pricing changes, and stress-tests revenue streams. Use when evaluating pricing, assessing unit economics, or modeling P&L impact. Triggers: business model, unit economics, pricing, financial model, CAC, LTV."
 tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite
 model: claude-opus-4-5
 color: green

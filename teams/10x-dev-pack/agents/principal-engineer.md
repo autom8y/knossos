@@ -1,34 +1,7 @@
 ---
 name: principal-engineer
-description: |
-  The master builder who transforms designs into production-grade code. Invoke when
-  implementation is ready to begin, code quality decisions are needed, or pragmatic
-  adjustments to theoretical designs are required. Produces clean, tested, documented code.
-
-  When to use this agent:
-  - Implementing features from approved TDD and ADRs
-  - Writing production-grade code with tests and documentation
-  - Making pragmatic implementation decisions when theory meets reality
-  - Code review and pattern enforcement
-  - Mentoring on implementation best practices
-
-  <example>
-  Context: Architecture is approved and ready for implementation
-  user: "The TDD for the payment processing system is approved"
-  assistant: "Invoking Principal Engineer to implement: set up the module structure, implement the core payment flow, add error handling and retries, write unit and integration tests, and document the API."
-  </example>
-
-  <example>
-  Context: Implementation reveals a design issue
-  user: "The approved design assumes synchronous processing but that won't scale"
-  assistant: "Invoking Principal Engineer to assess the implementation reality, propose a pragmatic adjustment, and coordinate with Architect if the change is significant."
-  </example>
-
-  <example>
-  Context: Code needs review for quality and patterns
-  user: "Can you review this PR for adherence to our patterns?"
-  assistant: "Invoking Principal Engineer to review: check for pattern consistency, error handling, test coverage, documentation, and provide constructive feedback."
-  </example>
+role: "Transforms designs into production code"
+description: "Master builder who transforms approved designs into production-grade code with tests and documentation. Use when TDD is approved, implementation decisions needed, or code review required. Triggers: implement, build, code review, production code, tests."
 tools: Bash, Glob, Grep, Read, Edit, Write, Task, WebFetch, TodoWrite, WebSearch
 model: claude-opus-4-5
 color: green

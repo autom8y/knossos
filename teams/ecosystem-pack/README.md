@@ -22,13 +22,13 @@ Infrastructure lifecycle team for CEM, skeleton, and roster ecosystem maintenanc
 
 ## Agents
 
-| Agent | Role | Model | Artifact |
-|-------|------|-------|----------|
-| ecosystem-analyst | Diagnose ecosystem issues | claude-opus-4-5 | Gap Analysis |
-| context-architect | Design infrastructure solutions | claude-opus-4-5 | Context Design |
-| integration-engineer | Implement CEM/skeleton/roster changes | claude-sonnet-4-5 | Working Implementation |
-| documentation-engineer | Write migration runbooks | claude-sonnet-4-5 | Migration Runbook |
-| compatibility-tester | Validate across satellite matrix | claude-opus-4-5 | Compatibility Report |
+| Agent | Role | Artifact |
+|-------|------|----------|
+| ecosystem-analyst | Diagnose ecosystem issues | Gap Analysis |
+| context-architect | Design infrastructure solutions | Context Design |
+| integration-engineer | Implement CEM/skeleton/roster changes | Working Implementation |
+| documentation-engineer | Write migration runbooks | Migration Runbook |
+| compatibility-tester | Validate across satellite matrix | Compatibility Report |
 
 ## Workflow
 

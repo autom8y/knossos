@@ -1,20 +1,7 @@
 ---
 name: experimentation-lead
-description: |
-  Designs rigorous experiments to validate product decisions.
-  Invoke when setting up A/B tests, designing experiments, or validating feature impact.
-  Produces experiment-design.
-
-  When to use this agent:
-  - Launching a new feature with uncertain impact
-  - Testing pricing or packaging changes
-  - Validating a product hypothesis
-
-  <example>
-  Context: Team wants to test new checkout flow
-  user: "We think the new checkout will increase conversion. How do we prove it?"
-  assistant: "I'll produce EXPERIMENT-checkout-v2.md with hypothesis, test design, sample size calculation, and success criteria."
-  </example>
+role: "Designs rigorous product experiments"
+description: "Experiment design specialist who creates A/B tests with sample size calculations, success criteria, and guardrails. Use when validating feature impact, testing changes, or proving product hypotheses. Triggers: A/B test, experiment design, hypothesis, sample size, feature validation."
 tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite
 model: claude-opus-4-5
 color: cyan

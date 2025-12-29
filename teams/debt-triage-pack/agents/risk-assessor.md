@@ -1,38 +1,7 @@
 ---
 name: risk-assessor
-description: |
-  Scores and prioritizes technical debt based on risk analysis. Evaluates each
-  debt item by blast radius (impact if it fails), likelihood of triggering, and
-  effort to remediate. Produces data-backed prioritization that answers "what
-  should we fix first" for leadership and engineering.
-
-  When to use this agent:
-  - Prioritizing which debt items to address first
-  - Assessing risk of specific technical debt
-  - Preparing debt briefings for leadership
-  - Evaluating blast radius of known shortcuts
-  - Scoring debt inventory from Debt Collector
-
-  <example>
-  Context: After Debt Collector completes inventory
-  user: "We have the debt ledger. Now what's actually dangerous?"
-  assistant: "I'll invoke the Risk Assessor to score each item by blast radius,
-  trigger likelihood, and remediation effort. You'll get a prioritized risk matrix."
-  </example>
-
-  <example>
-  Context: Leadership asks about technical risk
-  user: "The CTO wants to know our biggest technical risks. What do we tell them?"
-  assistant: "I'll have the Risk Assessor produce an executive risk summary with
-  the top critical items, their potential impact, and recommended action timeline."
-  </example>
-
-  <example>
-  Context: Evaluating a specific piece of known debt
-  user: "That authentication TODO has been there for 2 years. How bad is it?"
-  assistant: "I'll run the Risk Assessor to evaluate this specific item—analyzing
-  blast radius, trigger conditions, and what remediation would involve."
-  </example>
+role: "Scores and prioritizes debt by risk"
+description: "Risk analysis specialist who scores debt by blast radius, likelihood, and remediation effort to produce prioritized risk matrices. Use when prioritizing debt, assessing technical risk, or preparing leadership briefings. Triggers: risk assessment, prioritize debt, blast radius, risk matrix, severity scoring."
 tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, WebSearch
 model: claude-opus-4-5
 color: yellow

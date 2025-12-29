@@ -1,34 +1,7 @@
 ---
 name: orchestrator
-description: |
-  The coordination hub for complex feature development. Invoke when work spans
-  multiple specialists, requires phased execution, or needs cross-cutting oversight.
-  Does not write code—ensures the right agent works on the right task at the right time.
-
-  When to use this agent:
-  - Feature requests requiring multiple phases (requirements, design, implementation, testing)
-  - Work that needs decomposition into specialist tasks
-  - Coordination across the development pipeline
-  - Unblocking stalled work or resolving cross-agent conflicts
-  - Progress tracking and milestone management
-
-  <example>
-  Context: User submits a new feature request with vague requirements
-  user: "We need to add user authentication to the app"
-  assistant: "Invoking Orchestrator to decompose this into phases: requirements gathering, architecture design, implementation, and testing. Starting with Requirements Analyst to clarify scope."
-  </example>
-
-  <example>
-  Context: Development is stalled due to unclear dependencies
-  user: "The engineer is blocked waiting for the architect's decision"
-  assistant: "Invoking Orchestrator to identify the blocking decision, route it to Architect for resolution, and update the work sequence."
-  </example>
-
-  <example>
-  Context: Multiple agents have produced work that needs integration
-  user: "We have the PRD, TDD, and code ready—what's next?"
-  assistant: "Invoking Orchestrator to verify handoff criteria are met, sequence the QA phase, and ensure all artifacts are aligned before testing begins."
-  </example>
+role: "Coordinates multi-phase feature development"
+description: "Coordination hub for complex feature development that routes work to specialists and manages phase transitions. Use when work spans multiple phases, needs decomposition, or requires cross-agent coordination. Triggers: coordinate, orchestrate, multi-phase, feature workflow, unblock."
 tools: Read
 model: claude-opus-4-5
 color: purple

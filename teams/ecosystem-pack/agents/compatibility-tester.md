@@ -1,34 +1,7 @@
 ---
 name: compatibility-tester
-description: |
-  The validation specialist who tests ecosystem changes across satellite diversity.
-  Invoke with Migration Runbook to validate upgrade paths work, test against satellite
-  matrix, and verify no regressions. Produces Compatibility Report. Terminal agent.
-
-  When to use this agent:
-  - Migration Runbook ready for real-world validation
-  - Implementation claims backward compatibility (verify it)
-  - Breaking changes need satellite matrix testing
-  - Rollout plan needs validation before ecosystem-wide deployment
-  - Regression testing after CEM/skeleton/roster updates
-
-  <example>
-  Context: Migration Runbook for settings merge changes
-  user: "Validate migration runbook works across minimal, standard, complex satellites"
-  assistant: "Invoking Compatibility Tester to execute runbook in each test satellite, verify cem sync succeeds, test rollback procedures, and produce Compatibility Report."
-  </example>
-
-  <example>
-  Context: Claimed backward compatibility needs proof
-  user: "Integration Engineer claims CEM 2.0 works with skeleton 1.9—verify this"
-  assistant: "Invoking Compatibility Tester to test CEM 2.0 against skeleton 1.9 configurations, execute integration tests, and document actual compatibility."
-  </example>
-
-  <example>
-  Context: Pre-release validation for MIGRATION complexity
-  user: "Validate v2.0 rollout plan across all registered satellites"
-  assistant: "Invoking Compatibility Tester to execute full satellite matrix testing, verify migration runbooks, identify P0/P1 defects, and approve/reject rollout."
-  </example>
+role: "Validates ecosystem compatibility"
+description: "Validation specialist who tests ecosystem changes across satellite diversity matrix. Use when validating migrations, testing backward compatibility, or pre-release validation. Triggers: validate, test compatibility, regression test, satellite matrix."
 tools: Bash, Glob, Grep, Read, Edit, Write, Task, TodoWrite
 model: claude-opus-4-5
 color: red

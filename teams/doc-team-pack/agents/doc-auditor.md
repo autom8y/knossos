@@ -1,41 +1,7 @@
 ---
 name: doc-auditor
-description: |
-  Inventories all existing documentation across a codebase—READMEs, ADRs, inline comments,
-  runbooks, wiki pages, and API docs—to identify staleness, redundancy, gaps, and
-  inconsistencies. Use this agent before writing new documentation to understand what
-  already exists and what needs attention.
-
-  When to use this agent:
-  - Starting a documentation improvement initiative
-  - Before writing new docs (to avoid duplication)
-  - After major refactoring (to find stale references)
-  - During onboarding reviews (to assess doc quality)
-  - When engineers complain they "can't find anything"
-
-  <example>
-  Context: Team wants to improve documentation but doesn't know where to start
-  user: "Our docs are a mess. We have stuff everywhere and nobody knows what's current."
-  assistant: "I'll invoke the Doc Auditor to inventory your documentation landscape,
-  identify what's stale or redundant, and map the gaps. This gives us a foundation
-  before any writing begins."
-  </example>
-
-  <example>
-  Context: Major service refactoring just completed
-  user: "We just split the monolith into three services. What docs need updating?"
-  assistant: "I'll have the Doc Auditor scan for all references to the old monolith
-  architecture, identify docs that reference deprecated endpoints or removed modules,
-  and flag runbooks that describe workflows that no longer exist."
-  </example>
-
-  <example>
-  Context: New engineer struggling with onboarding
-  user: "New hires keep asking the same questions. I think our docs are incomplete."
-  assistant: "I'll run a Doc Auditor pass focused on onboarding pathways—checking
-  whether setup guides exist, if they reference current tooling, and where the
-  knowledge gaps appear based on common questions."
-  </example>
+role: "Inventories and assesses documentation"
+description: "Documentation auditing specialist who inventories existing docs to identify staleness, redundancy, and gaps. Use when starting doc initiatives, assessing doc quality, or finding stale references after refactoring. Triggers: doc audit, inventory, staleness, documentation gaps, doc assessment."
 tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite
 model: claude-sonnet-4-5
 color: blue

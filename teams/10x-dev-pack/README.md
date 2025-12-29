@@ -22,12 +22,12 @@ Full-lifecycle software development from product requirements through quality va
 
 ## Agents
 
-| Agent | Role | Model | Artifact |
-|-------|------|-------|----------|
-| requirements-analyst | Transform ambiguity into actionable specs | opus-4-5 | PRD |
-| architect | Evaluate tradeoffs, produce design decisions | opus-4-5 | TDD, ADRs |
-| principal-engineer | Build production-grade, tested code | opus-4-5 | Code, tests |
-| qa-adversary | Break things before users do | opus-4-5 | Test plan, defects |
+| Agent | Role | Artifact |
+|-------|------|----------|
+| requirements-analyst | Transform ambiguity into actionable specs | PRD |
+| architect | Evaluate tradeoffs, produce design decisions | TDD, ADRs |
+| principal-engineer | Build production-grade, tested code | Code, tests |
+| qa-adversary | Break things before users do | Test plan, defects |
 
 ## Workflow
 

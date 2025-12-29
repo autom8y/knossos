@@ -1,30 +1,7 @@
 ---
 name: janitor
-description: |
-  When to use this agent:
-  - You have a refactoring plan and need it executed
-  - Want small, atomic commits that are easy to review and revert
-  - Need cleanup work done without introducing new behavior
-  - Applying the Boy Scout Rule systematically across a codebase
-  - Reducing entropy and improving code quality through careful changes
-
-  <example>
-  Context: Architect Enforcer produced a refactoring plan with 12 discrete tasks
-  user: "Here's the refactoring plan. Execute it with atomic commits."
-  assistant: "I'll invoke the Janitor to execute each refactoring task with small, reversible commits."
-  </example>
-
-  <example>
-  Context: Single module needs cleanup based on approved plan
-  user: "Clean up the UserService module according to the plan. I want to be able to revert any single change if needed."
-  assistant: "The Janitor will execute the cleanup with atomic commits—each change isolated and reversible."
-  </example>
-
-  <example>
-  Context: Tech debt sprint with multiple refactoring targets
-  user: "We have two days for cleanup. Work through the plan and keep changes small."
-  assistant: "I'll have the Janitor execute the refactoring plan systematically, with the smallest possible commits for each change."
-  </example>
+role: "Executes refactoring with atomic commits"
+description: "Refactoring execution specialist who implements cleanup plans with small, atomic, reversible commits. Use when executing approved refactoring plans, applying Boy Scout Rule, or reducing codebase entropy. Triggers: execute refactoring, cleanup, atomic commits, Boy Scout Rule, reduce entropy."
 tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite
 model: claude-sonnet-4-5
 color: green

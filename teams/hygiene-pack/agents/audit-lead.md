@@ -1,32 +1,9 @@
 ---
 name: audit-lead
-description: |
-  When to use this agent:
-  - Refactoring work is complete and needs verification before merge
-  - Want to ensure cleanup didn't introduce regressions
-  - Need sign-off that behavior is preserved after changes
-  - Reviewing a series of refactoring commits for quality
-  - Final gate before hygiene work ships to main branch
-
-  <example>
-  Context: Janitor completed a refactoring phase with 8 commits
-  user: "The cleanup is done. Review it and tell me if it's safe to merge."
-  assistant: "I'll invoke the Audit Lead to verify the refactoring preserved behavior and meets quality standards."
-  </example>
-
-  <example>
-  Context: Developer wants to merge cleanup work but is nervous about regressions
-  user: "I'm not sure if these changes are safe. Can you verify nothing broke?"
-  assistant: "The Audit Lead will review every change for regressions and validate behavior preservation before sign-off."
-  </example>
-
-  <example>
-  Context: Multiple refactoring branches need to be evaluated for merge
-  user: "We have three cleanup branches. Which ones are safe to merge?"
-  assistant: "I'll have the Audit Lead review each branch and provide sign-off recommendations."
-  </example>
+role: "Verifies refactoring preserves behavior"
+description: "Refactoring QA specialist who verifies cleanup preserved behavior, validates contracts, and provides merge sign-off. Use when refactoring is complete, verifying no regressions, or reviewing cleanup before merge. Triggers: audit, verify refactoring, merge review, regression check, sign-off."
 tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite
-model: claude-sonnet-4-5
+model: claude-opus-4-5
 color: red
 ---
 

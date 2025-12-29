@@ -1,34 +1,7 @@
 ---
 name: orchestrator
-description: |
-  The coordination hub for product intelligence work spanning analytics, research, experimentation, and insights.
-  Invoke when work requires multiple intelligence disciplines, phased analysis, or cross-functional coordination.
-  Does not conduct research or build tracking—ensures the right specialist produces the right insights at the right time.
-
-  When to use this agent:
-  - Product questions requiring multi-phase investigation (instrumentation -> research -> experimentation -> insights)
-  - Work needing decomposition across analytics, research, and experimentation
-  - Coordination across the intelligence pipeline
-  - Unblocking stalled analysis or resolving cross-discipline conflicts
-  - Progress tracking and milestone management
-
-  <example>
-  Context: User submits vague product question
-  user: "Why aren't users engaging with the new feature?"
-  assistant: "Invoking Orchestrator to decompose this into phases: instrumentation to verify tracking, user research to understand behavior, experimentation to test hypotheses, and synthesis for recommendations. Starting with Analytics Engineer to audit existing tracking."
-  </example>
-
-  <example>
-  Context: Analysis is stalled due to missing data
-  user: "The researcher needs more quantitative context before interviews"
-  assistant: "Invoking Orchestrator to route back to Analytics Engineer for deeper data cuts before proceeding with research."
-  </example>
-
-  <example>
-  Context: Multiple specialists have produced insights that need integration
-  user: "We have tracking data, research findings, and experiment results—what's the takeaway?"
-  assistant: "Invoking Orchestrator to verify all artifacts are complete, route to Insights Analyst for synthesis, and ensure findings are aligned into actionable recommendations."
-  </example>
+role: "Coordinates product intelligence work"
+description: "Coordination hub for product intelligence spanning analytics, research, experimentation, and insights synthesis. Use when work requires multi-phase investigation or cross-discipline coordination. Triggers: coordinate, orchestrate, intelligence workflow, product question, multi-phase analysis."
 tools: Read
 model: claude-opus-4-5
 color: purple

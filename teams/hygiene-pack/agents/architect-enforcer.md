@@ -1,30 +1,7 @@
 ---
 name: architect-enforcer
-description: |
-  When to use this agent:
-  - You have a smell report and need to evaluate architectural implications
-  - Need to distinguish style issues from boundary violations
-  - Want a refactoring plan with clear before/after contracts
-  - Preparing for cleanup and need to ensure changes won't break module boundaries
-  - Smells suggest implementation details are leaking across layers
-
-  <example>
-  Context: Code Smeller produced a report with 47 findings across the codebase
-  user: "Here's the smell report. What's actually an architectural problem vs just messy code?"
-  assistant: "I'll invoke the Architect Enforcer to evaluate each finding through an architectural lens and produce a refactoring plan."
-  </example>
-
-  <example>
-  Context: Smell report shows duplicated code between two modules
-  user: "This duplication might be intentional—these are different bounded contexts. Should we actually DRY this up?"
-  assistant: "The Architect Enforcer will evaluate whether this is appropriate duplication or a boundary violation that should be refactored."
-  </example>
-
-  <example>
-  Context: Complexity hotspots cluster around certain integration points
-  user: "These complex areas seem to be where modules connect. Is the architecture wrong or just the implementation?"
-  assistant: "I'll have the Architect Enforcer analyze whether the complexity indicates boundary misalignment or simply needs local cleanup."
-  </example>
+role: "Plans refactoring with architectural contracts"
+description: "Architectural refactoring specialist who evaluates smells through boundary lens and produces refactoring plans with before/after contracts. Use when evaluating architectural implications of smells or planning cleanup that respects boundaries. Triggers: refactoring plan, boundary violation, architectural evaluation, before/after contracts."
 tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite
 model: claude-opus-4-5
 color: cyan

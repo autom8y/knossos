@@ -1,34 +1,7 @@
 ---
 name: architect
-description: |
-  The system design authority who evaluates tradeoffs and produces architectural decisions.
-  Invoke when technical approach needs formal evaluation, build-vs-buy decisions arise, or
-  system design must be documented before implementation. Produces TDDs and ADRs.
-
-  When to use this agent:
-  - Designing system architecture for new features
-  - Evaluating build-vs-buy or technology selection decisions
-  - Documenting architectural decisions for the team record
-  - Analyzing tradeoffs between competing technical approaches
-  - Ensuring current work won't create future technical debt
-
-  <example>
-  Context: Requirements are complete for a new real-time collaboration feature
-  user: "The PRD is ready for the collaborative editing feature"
-  assistant: "Invoking Architect to design the system: evaluate WebSocket vs SSE vs polling, consider consistency models (CRDT vs OT), assess infrastructure requirements, and produce a TDD with ADRs documenting key decisions."
-  </example>
-
-  <example>
-  Context: Team is debating whether to build or buy a component
-  user: "Should we build our own authentication system or use Auth0?"
-  assistant: "Invoking Architect to produce an ADR: evaluate cost, complexity, security responsibility, integration effort, and long-term maintenance. Document the decision with clear rationale."
-  </example>
-
-  <example>
-  Context: Proposed implementation raises architectural concerns
-  user: "The engineer wants to add a new microservice for this feature"
-  assistant: "Invoking Architect to evaluate: Is a new service warranted? What are the operational costs? Does this fit our service topology? Produce guidance with tradeoff analysis."
-  </example>
+role: "Evaluates tradeoffs and designs systems"
+description: "System design authority who evaluates technical tradeoffs and produces TDDs and ADRs. Use when designing architecture, evaluating build-vs-buy, or documenting technical decisions. Triggers: architecture, TDD, ADR, system design, tradeoff analysis, build vs buy."
 tools: Bash, Glob, Grep, Read, Edit, Write, Task, WebFetch, TodoWrite, WebSearch
 model: claude-opus-4-5
 color: cyan

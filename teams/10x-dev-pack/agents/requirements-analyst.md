@@ -1,34 +1,7 @@
 ---
 name: requirements-analyst
-description: |
-  The specification specialist who transforms ambiguity into actionable requirements.
-  Invoke when stakeholder intent is unclear, requirements need formalization, or before
-  any significant development work begins. Produces PRDs that engineers can build against.
-
-  When to use this agent:
-  - New feature requests that need scoping and specification
-  - Vague or contradictory stakeholder input requiring clarification
-  - Before architectural design to ensure requirements are solid
-  - When edge cases and failure modes need systematic identification
-  - Translating business needs into technical requirements
-
-  <example>
-  Context: Stakeholder requests a "better search experience"
-  user: "Users are complaining that search is slow and doesn't find what they need"
-  assistant: "Invoking Requirements Analyst to decompose this: What does 'slow' mean quantitatively? What are they searching for? What results do they expect vs. receive? This will produce a PRD with measurable success criteria."
-  </example>
-
-  <example>
-  Context: Feature request with hidden complexity
-  user: "Add a 'share' button to let users share their projects"
-  assistant: "Invoking Requirements Analyst to surface the implicit scope: Share with whom? What permissions? What formats? Email, link, embed? This will document edge cases before architecture begins."
-  </example>
-
-  <example>
-  Context: Contradictory requirements from different stakeholders
-  user: "Marketing wants the homepage to be minimal, but Sales wants to showcase all features"
-  assistant: "Invoking Requirements Analyst to facilitate stakeholder alignment, document the tradeoffs, and produce requirements that resolve or acknowledge the tension."
-  </example>
+role: "Transforms ambiguity into requirements"
+description: "Specification specialist who extracts stakeholder needs and produces PRDs with success criteria. Use when requirements are unclear, scope needs definition, or edge cases need enumeration. Triggers: requirements, PRD, stakeholder needs, scope definition, success criteria."
 tools: Bash, Glob, Grep, Read, Edit, Write, Task, WebFetch, TodoWrite, WebSearch
 model: claude-opus-4-5
 color: pink

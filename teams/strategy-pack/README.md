@@ -20,12 +20,12 @@ Market research, competitive analysis, business modeling, and strategic planning
 
 ## Agents
 
-| Agent | Role | Model | Artifact |
-|-------|------|-------|----------|
-| market-researcher | Maps market terrain and identifies opportunities | claude-sonnet-4-5 | market-analysis |
-| competitive-analyst | Tracks competitors and predicts market moves | claude-opus-4-5 | competitive-intel |
-| business-model-analyst | Stress-tests how the business makes money | claude-opus-4-5 | financial-model |
-| roadmap-strategist | Connects company vision to quarterly execution | claude-opus-4-5 | strategic-roadmap |
+| Agent | Role | Artifact |
+|-------|------|----------|
+| market-researcher | Maps market terrain and identifies opportunities | market-analysis |
+| competitive-analyst | Tracks competitors and predicts market moves | competitive-intel |
+| business-model-analyst | Stress-tests how the business makes money | financial-model |
+| roadmap-strategist | Connects company vision to quarterly execution | strategic-roadmap |
 
 ## Workflow
 

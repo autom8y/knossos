@@ -998,24 +998,60 @@ update_claude_md() {
         # Extract name from YAML frontmatter
         name=$(sed -n '/^---$/,/^---$/p' "$agent_file" | grep "^name:" | head -1 | sed 's/^name:[[:space:]]*//')
 
-        # Extract first line of description
-        desc=$(sed -n '/^---$/,/^---$/p' "$agent_file" | grep -A1 "^description:" | tail -1 | sed 's/^[[:space:]]*//' | head -c 50)
+        # Extract description - handle both single-line and multiline YAML (for Agent Configurations list)
+        local raw_desc
+        local desc_line
+        desc_line=$(sed -n '/^---$/,/^---$/p' "$agent_file" | grep "^description:")
+        # Check if value is on same line (single-line) or next line (multiline with |)
+        if echo "$desc_line" | grep -q 'description:[[:space:]]*["|'"'"']'; then
+            # Single-line: description: "value" or description: 'value'
+            raw_desc=$(echo "$desc_line" | sed 's/^description:[[:space:]]*//' | sed 's/^["'"'"']//' | sed 's/["'"'"']$//')
+        elif echo "$desc_line" | grep -q 'description:[[:space:]]*|'; then
+            # Multiline: description: | followed by indented text
+            raw_desc=$(sed -n '/^---$/,/^---$/p' "$agent_file" | grep -A1 "^description:" | tail -1 | sed 's/^[[:space:]]*//')
+        else
+            # Fallback: try same line without quotes
+            raw_desc=$(echo "$desc_line" | sed 's/^description:[[:space:]]*//')
+        fi
 
-        # Clean up description (remove trailing pipe if multiline indicator)
-        desc=$(echo "$desc" | tr -d '\n' | sed 's/|$//')
+        # Find first sentence (up to first period) or take full line
+        if [[ "$raw_desc" == *"."* ]]; then
+            desc=$(echo "$raw_desc" | sed 's/\([^.]*\.\).*/\1/')
+        else
+            desc="$raw_desc"
+        fi
+
+        # Truncate to 80 chars at word boundary for Agent Configurations
+        if [[ ${#desc} -gt 80 ]]; then
+            desc=$(echo "$desc" | cut -c1-80 | sed 's/[[:space:]][^[:space:]]*$//')
+        fi
+
+        # Extract role field for Quick Start table
+        local role_field
+        role_field=$(sed -n '/^---$/,/^---$/p' "$agent_file" | grep "^role:" | head -1 | sed 's/^role:[[:space:]]*//' | sed 's/^["'"'"']//' | sed 's/["'"'"']$//')
 
         # Build agent list for Agent Configurations section
         echo "- \`${basename}.md\` - ${desc}" >> "$agent_list_file"
 
-        # Map common agent names to roles and produces for table
+        # Use role field if available, otherwise fallback to first 50 chars of desc
+        if [[ -n "$role_field" ]]; then
+            role="$role_field"
+        else
+            if [[ ${#desc} -gt 50 ]]; then
+                role=$(echo "$desc" | cut -c1-50 | sed 's/[[:space:]][^[:space:]]*$//')
+            else
+                role="$desc"
+            fi
+        fi
+
+        # Map common agent names to produces for table
         produces="Artifacts"
         case "$basename" in
-            orchestrator) role="Coordinates multi-phase workflows"; produces="Work breakdown" ;;
-            requirements-analyst) role="Clarifies intent, defines success"; produces="PRD" ;;
-            architect) role="Designs solutions, makes decisions"; produces="TDD, ADRs" ;;
-            principal-engineer) role="Implements with craft"; produces="Code" ;;
-            qa-adversary) role="Validates, finds problems"; produces="Test reports" ;;
-            *) role="${desc:0:40}"; produces="Artifacts" ;;
+            orchestrator) produces="Work breakdown" ;;
+            requirements-analyst) produces="PRD" ;;
+            architect) produces="TDD, ADRs" ;;
+            principal-engineer) produces="Code" ;;
+            qa-adversary) produces="Test reports" ;;
         esac
 
         echo "| **${name:-$basename}** | ${role} | ${produces} |" >> "$agent_table_file"

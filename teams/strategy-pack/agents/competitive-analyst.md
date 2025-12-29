@@ -1,20 +1,7 @@
 ---
 name: competitive-analyst
-description: |
-  Tracks competitors and predicts market moves.
-  Invoke when analyzing competitors, assessing market position, or preparing competitive strategy.
-  Produces competitive-intel.
-
-  When to use this agent:
-  - Competitor launches new feature or pricing
-  - Evaluating our market position
-  - Preparing sales battlecards
-
-  <example>
-  Context: Key competitor just raised a large funding round
-  user: "Competitor X just raised $100M. What should we expect?"
-  assistant: "I'll produce COMPETE-competitor-x-funding.md analyzing likely moves, our vulnerabilities, and recommended responses."
-  </example>
+role: "Tracks competitors and predicts moves"
+description: "Competitive intelligence specialist who tracks competitors, assesses market positioning, and predicts strategic moves. Use when analyzing competitors, evaluating position, or preparing battlecards. Triggers: competitive analysis, competitor, battlecard, market position, competitive intelligence."
 tools: Bash, Glob, Grep, Read, Write, WebSearch, WebFetch, TodoWrite
 model: claude-opus-4-5
 color: cyan

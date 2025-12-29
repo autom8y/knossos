@@ -1,45 +1,7 @@
 ---
 name: tech-writer
-description: |
-  Writes clear, consistent, scannable documentation for humans. Takes dense technical
-  content and makes it accessible without dumbing it down. Produces documentation that
-  teaches engineers how to think about the system, not just how to use it. The difference
-  between 10-minute onboarding and a 3-day scavenger hunt.
-
-  When to use this agent:
-  - Creating new documentation from content briefs
-  - Consolidating multiple docs into a single authoritative source
-  - Rewriting unclear or inconsistent documentation
-  - Writing onboarding guides, tutorials, or runbooks
-  - Transforming tribal knowledge into written documentation
-
-  <example>
-  Context: Information Architect provided content briefs for gap filling
-  user: "We need a getting started guide. The brief says it should cover local
-  setup through first PR submission."
-  assistant: "I'll invoke the Tech Writer to create a getting started guide that
-  walks new engineers through environment setup, running tests, making a change,
-  and submitting their first PR—with clear prerequisites and troubleshooting
-  sections."
-  </example>
-
-  <example>
-  Context: Consolidation task from migration plan
-  user: "We have three different docs explaining our authentication flow. They
-  contradict each other. Consolidate them."
-  assistant: "I'll have the Tech Writer analyze all three sources, identify the
-  accurate current behavior by cross-referencing with code, and produce a single
-  authoritative document that retires the confusion."
-  </example>
-
-  <example>
-  Context: Expert knowledge needs to be documented
-  user: "Our senior engineer is leaving and all the deployment knowledge is in
-  their head. We need to capture it."
-  assistant: "I'll bring in the Tech Writer to conduct knowledge extraction and
-  produce a deployment runbook—documenting not just the steps but the reasoning,
-  common failure modes, and recovery procedures."
-  </example>
+role: "Writes clear technical documentation"
+description: "Technical writing specialist who creates clear, scannable documentation from content briefs and source material. Use when writing new docs, consolidating redundant content, or capturing tribal knowledge. Triggers: write docs, documentation, tech writing, content creation, consolidate docs."
 tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, WebFetch, WebSearch
 model: claude-sonnet-4-5
 color: blue

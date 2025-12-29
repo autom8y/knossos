@@ -22,12 +22,12 @@ Code quality lifecycle team for systematic cleanup and refactoring.
 
 ## Agents
 
-| Agent | Role | Model | Artifact |
-|-------|------|-------|----------|
-| code-smeller | Diagnose code quality issues | claude-sonnet-4-5 | Smell Report |
-| architect-enforcer | Plan refactoring with contracts | claude-opus-4-5 | Refactoring Plan |
-| janitor | Execute cleanup atomically | claude-sonnet-4-5 | Commit Stream |
-| audit-lead | Verify behavior preservation | claude-sonnet-4-5 | Audit Report |
+| Agent | Role | Artifact |
+|-------|------|----------|
+| code-smeller | Diagnose code quality issues | Smell Report |
+| architect-enforcer | Plan refactoring with contracts | Refactoring Plan |
+| janitor | Execute cleanup atomically | Commit Stream |
+| audit-lead | Verify behavior preservation | Audit Report |
 
 ## Workflow
 

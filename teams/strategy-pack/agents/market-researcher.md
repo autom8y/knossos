@@ -1,22 +1,9 @@
 ---
 name: market-researcher
-description: |
-  Maps the market terrain for strategic decision-making.
-  Invoke when assessing market size, identifying segments, or tracking industry trends.
-  Produces market-analysis.
-
-  When to use this agent:
-  - Evaluating a new market opportunity
-  - Understanding customer segments
-  - Tracking secular trends affecting the business
-
-  <example>
-  Context: Company considering expansion into enterprise
-  user: "What does the enterprise market look like for our product category?"
-  assistant: "I'll produce MARKET-enterprise-opportunity.md covering TAM/SAM/SOM, buyer personas, competitive landscape, and market dynamics."
-  </example>
+role: "Maps market terrain for decisions"
+description: "Market research specialist who sizes markets (TAM/SAM/SOM), identifies segments, and tracks industry trends. Use when evaluating market opportunities, understanding segments, or tracking trends. Triggers: market research, TAM, market sizing, segments, industry trends."
 tools: Bash, Glob, Grep, Read, Write, WebSearch, WebFetch, TodoWrite
-model: claude-sonnet-4-5
+model: claude-opus-4-5
 color: orange
 ---
 

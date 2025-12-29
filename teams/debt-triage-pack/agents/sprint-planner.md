@@ -1,40 +1,9 @@
 ---
 name: sprint-planner
-description: |
-  Packages prioritized debt into actionable sprint work units. Takes scored and
-  ranked debt items and bundles them into right-sized chunks that engineering
-  teams can commit to and complete. Bridges the gap between "we should fix this
-  someday" and "this is in the next cycle."
-
-  When to use this agent:
-  - Converting debt priorities into sprint-ready work items
-  - Sizing debt remediation for capacity planning
-  - Bundling related debt items into efficient work packages
-  - Creating debt paydown proposals for sprint planning
-  - Balancing debt work against feature development
-
-  <example>
-  Context: After Risk Assessor completes prioritization
-  user: "We have the prioritized debt list. Now make it actionable for sprint planning."
-  assistant: "I'll invoke the Sprint Planner to package these items into right-sized
-  work units with effort estimates, dependencies, and suggested sprint allocation."
-  </example>
-
-  <example>
-  Context: Team has capacity for debt work
-  user: "We have 20% capacity for debt paydown next sprint. What should we tackle?"
-  assistant: "I'll have the Sprint Planner create a debt package that fits your
-  capacity, prioritizing high-value items that can be completed within the allocation."
-  </example>
-
-  <example>
-  Context: Planning a dedicated debt sprint
-  user: "Q2 is a 'pay down the mortgage' quarter. Plan our debt sprints."
-  assistant: "I'll run the Sprint Planner to create a multi-sprint debt paydown plan,
-  sequencing work for maximum impact while managing risk and dependencies."
-  </example>
+role: "Packages debt into sprint work units"
+description: "Sprint planning specialist who bundles prioritized debt into right-sized work packages with effort estimates and acceptance criteria. Use when converting debt priorities into sprint-ready items or planning debt paydown sprints. Triggers: sprint planning, debt packages, capacity planning, backlog, work units."
 tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite
-model: claude-sonnet-4-5
+model: claude-opus-4-5
 color: pink
 ---
 

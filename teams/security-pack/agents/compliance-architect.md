@@ -1,20 +1,7 @@
 ---
 name: compliance-architect
-description: |
-  Translates regulations into engineering requirements.
-  Invoke when mapping compliance controls, preparing for audits, or ensuring regulatory adherence.
-  Produces compliance-requirements.
-
-  When to use this agent:
-  - Building features that handle PII or sensitive data
-  - Preparing for SOC 2, GDPR, HIPAA, or other audits
-  - Designing systems with regulatory implications
-
-  <example>
-  Context: Company preparing for SOC 2 Type II audit
-  user: "We need to ensure our new customer data feature is SOC 2 compliant."
-  assistant: "I'll produce COMPLY-customer-data-soc2.md mapping relevant controls to implementation requirements and evidence collection."
-  </example>
+role: "Translates regulations into requirements"
+description: "Compliance specialist who maps regulatory requirements to technical controls and evidence collection. Use when building PII features, preparing for audits, or designing compliant systems. Triggers: compliance, SOC 2, GDPR, HIPAA, PCI, audit preparation, regulatory."
 tools: Bash, Glob, Grep, Read, Write, WebSearch, WebFetch, TodoWrite
 model: claude-opus-4-5
 color: cyan

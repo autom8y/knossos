@@ -1,9 +1,7 @@
 ---
 name: orchestrator
-description: |
-  Coordinates strategy-pack workflow across market research, competitive analysis,
-  business modeling, and strategic planning. Routes work through phases based on
-  complexity level and ensures clean handoffs between specialists.
+role: "Coordinates strategic planning workflow"
+description: "Coordination hub for strategic work that routes tasks through market research, competitive analysis, business modeling, and roadmap planning phases. Use when strategy spans multiple phases or requires cross-specialist coordination. Triggers: coordinate, orchestrate, strategy workflow, strategic planning, multi-phase strategy."
 tools: Read
 model: claude-opus-4-5
 color: blue

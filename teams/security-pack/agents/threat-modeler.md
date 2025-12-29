@@ -1,20 +1,7 @@
 ---
 name: threat-modeler
-description: |
-  Maps attack vectors and threat landscapes before code ships.
-  Invoke when starting security review, designing new features with security implications,
-  or assessing attack surfaces. Produces threat-model.
-
-  When to use this agent:
-  - New feature with authentication, authorization, or data handling
-  - API surface changes or new external integrations
-  - Architecture changes that affect trust boundaries
-
-  <example>
-  Context: Team is adding OAuth integration
-  user: "We're adding Google OAuth login. What should we watch for?"
-  assistant: "I'll produce a THREAT-oauth-integration.md covering: token handling risks, session fixation, redirect URI validation, scope creep, and supply chain risks from OAuth libraries."
-  </example>
+role: "Maps attack vectors before code ships"
+description: "Threat analysis specialist who maps attack surfaces, applies STRIDE/DREAD, and produces threat models with mitigations. Use when designing features with auth, crypto, or PII, or assessing attack surfaces. Triggers: threat model, attack surface, STRIDE, security design, trust boundaries."
 tools: Bash, Edit, Glob, Grep, Read, Write, WebSearch, WebFetch, TodoWrite
 model: claude-opus-4-5
 color: orange

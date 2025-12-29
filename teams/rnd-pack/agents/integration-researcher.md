@@ -1,22 +1,9 @@
 ---
 name: integration-researcher
-description: |
-  Maps how new technologies integrate with existing systems.
-  Invoke when evaluating integration complexity, dependency analysis, or migration planning.
-  Produces integration-map.
-
-  When to use this agent:
-  - New technology needs to work with existing stack
-  - Evaluating migration or replacement costs
-  - Identifying hidden dependencies
-
-  <example>
-  Context: Team evaluating new AI model provider
-  user: "How hard would it be to switch from OpenAI to Anthropic APIs?"
-  assistant: "I'll produce INTEGRATE-anthropic-migration.md mapping current usage, API differences, and integration effort."
-  </example>
+role: "Maps technology integration paths"
+description: "Integration analysis specialist who maps how new technologies connect with existing systems and surfaces hidden dependencies. Use when evaluating integration complexity, planning migrations, or identifying dependencies. Triggers: integration analysis, dependency mapping, migration planning, API compatibility, integration effort."
 tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite
-model: claude-sonnet-4-5
+model: claude-opus-4-5
 color: cyan
 ---
 
