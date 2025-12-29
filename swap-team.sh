@@ -24,8 +24,8 @@ readonly MANIFEST_VERSION="1.1"
 # Orphan handling mode (set by flags)
 ORPHAN_MODE=""  # "", "keep", "remove", "promote"
 
-# Refresh mode: re-pull agents even if already on target team
-REFRESH_MODE=0
+# Update mode: re-pull agents even if already on target team
+UPDATE_MODE=0
 
 # Dry-run mode: preview changes without applying
 DRY_RUN_MODE=0
@@ -622,8 +622,9 @@ Commands:
   (no args)      Show current active team
 
 Options:
-  --refresh, -r  Refresh agents from roster (even if already on team)
-  --dry-run      Preview changes without applying (use with --refresh)
+  --update, -u   Update agents from roster (even if already on team)
+  --refresh, -r  [DEPRECATED] Alias for --update
+  --dry-run      Preview changes without applying (use with --update)
   --keep-all     Preserve orphan agents in project
   --remove-all   Remove orphan agents (backup available)
   --promote-all  Move orphan agents to ~/.claude/agents/
@@ -650,9 +651,9 @@ Examples:
   ./swap-team.sh --list                 # List available teams
   ./swap-team.sh dev-pack --keep-all    # Keep all orphans during swap
   ./swap-team.sh dev-pack --remove-all  # Remove all orphans during swap
-  ./swap-team.sh --refresh              # Refresh current team from roster
-  ./swap-team.sh dev-pack --refresh     # Refresh even if already on dev-pack
-  ./swap-team.sh --refresh --dry-run    # Preview what refresh would change
+  ./swap-team.sh --update               # Update current team from roster
+  ./swap-team.sh dev-pack --update      # Update even if already on dev-pack
+  ./swap-team.sh --update --dry-run     # Preview what update would change
 
 EOF
 }
@@ -1492,13 +1493,13 @@ perform_swap() {
     log_debug "Starting swap to $team_name"
 
     # Check if already active (idempotency, unless --refresh)
-    if [[ -f ".claude/ACTIVE_TEAM" ]] && [[ "$REFRESH_MODE" -eq 0 ]]; then
+    if [[ -f ".claude/ACTIVE_TEAM" ]] && [[ "$UPDATE_MODE" -eq 0 ]]; then
         local current
         current=$(cat .claude/ACTIVE_TEAM | tr -d '[:space:]')
 
         if [[ "$current" == "$team_name" ]]; then
             log "Already using $team_name (no changes needed)"
-            log "Use --refresh to pull latest from roster"
+            log "Use --update to pull latest from roster"
             exit "$EXIT_SUCCESS"
         fi
     fi
@@ -1612,13 +1613,17 @@ main() {
                 ORPHAN_MODE="promote"
                 shift
                 ;;
-            --refresh|-r)
-                REFRESH_MODE=1
+            --update|-u|--refresh|-r)
+                UPDATE_MODE=1
+                # Deprecation warning for --refresh
+                if [[ "$1" == "--refresh" || "$1" == "-r" ]]; then
+                    log_warning "Flag --refresh/-r is deprecated. Use --update/-u instead."
+                fi
                 shift
                 ;;
             --dry-run)
                 DRY_RUN_MODE=1
-                REFRESH_MODE=1  # dry-run implies refresh
+                UPDATE_MODE=1  # dry-run implies update
                 shift
                 ;;
             -*)
@@ -1641,18 +1646,18 @@ main() {
 
     # Handle the command
     if [[ -z "$team_name" ]]; then
-        if [[ "$REFRESH_MODE" -eq 1 ]]; then
-            # Refresh mode without team name - refresh current team
+        if [[ "$UPDATE_MODE" -eq 1 ]]; then
+            # Update mode without team name - update current team
             if [[ -f ".claude/ACTIVE_TEAM" ]]; then
                 team_name=$(cat .claude/ACTIVE_TEAM | tr -d '[:space:]')
-                log "Refreshing current team: $team_name"
+                log "Updating current team: $team_name"
                 perform_swap "$team_name"
             else
-                log_error "No team active. Specify a team name to refresh."
+                log_error "No team active. Specify a team name to update."
                 exit "$EXIT_INVALID_ARGS"
             fi
         else
-            # No team specified and not refresh mode - query current team
+            # No team specified and not update mode - query current team
             query_current_team
         fi
     else

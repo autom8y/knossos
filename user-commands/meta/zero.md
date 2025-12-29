@@ -1,7 +1,7 @@
 ---
 description: Initialize Orchestrator with 4-agent workflow plan
 argument-hint: <initiative>
-model: claude-opus-4-5
+model: opus
 ---
 
 # Session 0: Orchestrator Initialization

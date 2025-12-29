@@ -1,7 +1,7 @@
 ---
 description: Assess initiative readiness before Session 0 planning
 argument-hint: <initiative>
-model: claude-opus-4-5
+model: opus
 ---
 
 # Session -1: Initiative Assessment
