@@ -44,7 +44,7 @@ Prompt user for sprint details if not provided:
 
 ### 2. Create Sprint Context
 
-Generate `$SESSION_DIR/SPRINT_CONTEXT.md` file (session-scoped):
+Use the Write tool to create `$SESSION_DIR/SPRINT_CONTEXT.md` with this exact YAML frontmatter format:
 
 ```yaml
 ---
@@ -70,6 +70,7 @@ tasks:
 blockers: []
 completed_tasks: 0
 total_tasks: 0
+context_version: "1.0"
 ---
 
 ## Sprint Goal
@@ -84,6 +85,8 @@ total_tasks: 0
 
 (To be filled at sprint completion)
 ```
+
+CRITICAL: The file MUST start with `---` on line 1. See sprint-context-schema.md for full field definitions.
 
 ### 3. Task Breakdown
 

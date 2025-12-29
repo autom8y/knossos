@@ -34,7 +34,7 @@ Prompt user for any missing parameters:
 
 ### 4. Create SESSION_CONTEXT
 
-Generate `.claude/sessions/{session_id}/SESSION_CONTEXT.md` file with metadata:
+Use the Write tool to create `.claude/sessions/{session_id}/SESSION_CONTEXT.md` with this exact YAML frontmatter format:
 
 ```yaml
 ---
@@ -49,8 +49,23 @@ artifacts: []
 blockers: []
 next_steps:
   - "Review PRD when complete"
+context_version: "1.0"
 ---
+
+# Session: {initiative}
+
+## Artifacts
+- PRD: pending
+- TDD: pending
+
+## Blockers
+None yet.
+
+## Next Steps
+1. Complete requirements gathering
 ```
+
+CRITICAL: The file MUST start with `---` on line 1. Without proper YAML frontmatter, session tracking will fail.
 
 See [session-context-schema](../session-common/session-context-schema.md) for field definitions.
 

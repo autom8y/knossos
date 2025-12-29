@@ -29,7 +29,15 @@ Plan and execute a sprint with multiple coordinated tasks. $ARGUMENTS
    - Task list (prompt if not provided)
    - Duration/timebox
 
-2. **Create SPRINT_CONTEXT** in session directory (`$SESSION_DIR/SPRINT_CONTEXT.md`):
+2. **Create SPRINT_CONTEXT** using the Write tool:
+
+   Path: `$SESSION_DIR/SPRINT_CONTEXT.md`
+
+   IMPORTANT: Use Write tool with YAML frontmatter format. The file MUST start with `---` on line 1.
+
+   See `sprint-context-schema.md` in roster/user-skills/session-common/ for required fields and validation rules.
+
+   Required fields:
    - Sprint metadata (links to session)
    - Task breakdown with status
    - Dependencies between tasks

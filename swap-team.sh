@@ -1881,10 +1881,30 @@ perform_swap() {
             # Warn user about team change
             log_warning "Active session detected: $current_session"
             log_warning "Session team will be updated to: $team_name"
-            # Update the active_team field in SESSION_CONTEXT.md
-            sed -i '' "s/^active_team: .*/active_team: \"$team_name\"/" \
-                ".claude/sessions/$current_session/SESSION_CONTEXT.md" 2>/dev/null || true
-            log "Session team updated to: $team_name"
+
+            local session_file=".claude/sessions/$current_session/SESSION_CONTEXT.md"
+
+            # Validate SESSION_CONTEXT format before mutation
+            # Check for YAML frontmatter structure (opening --- on line 1)
+            local first_line
+            first_line=$(head -n 1 "$session_file")
+            if [[ "$first_line" != "---" ]]; then
+                log_warning "Cannot update session - SESSION_CONTEXT missing YAML frontmatter"
+                log_warning "ACTIVE_TEAM updated but session state may be inconsistent"
+            else
+                # Check for active_team field exists
+                if ! grep -q "^active_team:" "$session_file" 2>/dev/null; then
+                    log_warning "Cannot update session - active_team field not found"
+                    log_warning "ACTIVE_TEAM updated but session state may be inconsistent"
+                else
+                    # Safe to mutate
+                    if sed -i '' "s/^active_team: .*/active_team: \"$team_name\"/" "$session_file"; then
+                        log "Session team updated to: $team_name"
+                    else
+                        log_warning "Failed to update active_team in SESSION_CONTEXT"
+                    fi
+                fi
+            fi
         fi
     fi
 
