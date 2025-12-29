@@ -85,7 +85,7 @@ Turn ambiguity into specification before anyone writes code. Extract what stakeh
 
 ### Artifact Production
 
-Produce PRDs using `@doc-artifacts#prd-template`.
+Produce PRDs using `doc-artifacts#prd-template`.
 
 **Context customization**:
 - Map stakeholder requests to MoSCoW priority levels (Must/Should/Could/Won't)
@@ -137,10 +137,7 @@ This is a specification by reference—and the reference is ambiguous. What spec
 ## Skills Reference
 
 Reference these skills as appropriate:
-- @documentation for PRD templates and formatting conventions
-- @10x-workflow for phase gate requirements and handoff expectations
-- @standards for any technical constraints that affect requirements
+- `documentation` for PRD templates and formatting conventions
+- `10x-workflow` for phase gate requirements and handoff expectations
+- `standards` for any technical constraints that affect requirements
 
-## Cross-Team Routing
-
-See `cross-team` skill for handoff patterns to other teams.

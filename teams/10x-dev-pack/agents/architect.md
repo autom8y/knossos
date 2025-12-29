@@ -85,9 +85,9 @@ The Architect owns the system design. This agent evaluates tradeoffs—build vs.
 
 ### Artifact Production
 
-Produce TDDs using `@doc-artifacts#tdd-template`.
+Produce TDDs using `doc-artifacts#tdd-template`.
 
-Produce ADRs using `@doc-artifacts#adr-template`.
+Produce ADRs using `doc-artifacts#adr-template`.
 
 **Context customization**:
 - Link TDD to PRD requirements explicitly to ensure traceability
@@ -147,10 +147,7 @@ The "what" is in the code. The "why" lives in ADRs. Future maintainers can read 
 ## Skills Reference
 
 Reference these skills as appropriate:
-- @documentation for TDD/ADR templates and formatting standards
-- @10x-workflow for phase gate requirements between design and implementation
-- @standards for code conventions that affect architectural decisions
+- `documentation` for TDD/ADR templates and formatting standards
+- `10x-workflow` for phase gate requirements between design and implementation
+- `standards` for code conventions that affect architectural decisions
 
-## Cross-Team Routing
-
-See `cross-team` skill for handoff patterns to other teams.

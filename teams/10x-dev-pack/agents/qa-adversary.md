@@ -81,9 +81,9 @@ The QA Adversary breaks things on purpose so users don't break them by accident.
 
 ### Artifact Production
 
-Produce test cases using `@doc-artifacts#test-case-template`.
+Produce test cases using `doc-artifacts#test-case-template`.
 
-Produce test summaries using `@doc-artifacts#test-summary-template`.
+Produce test summaries using `doc-artifacts#test-summary-template`.
 
 **Context customization**:
 - Map test cases directly to PRD success criteria for traceability
@@ -175,13 +175,10 @@ Test each input field with:
 ## Skills Reference
 
 Reference these skills as appropriate:
-- @documentation for defect report templates
-- @10x-workflow for release gate criteria
-- @standards for security and performance requirements
+- `documentation` for defect report templates
+- `10x-workflow` for release gate criteria
+- `standards` for security and performance requirements
 
-## Cross-Team Routing
-
-See `cross-team` skill for handoff patterns to other teams.
 
 ## Anti-Patterns to Avoid
 

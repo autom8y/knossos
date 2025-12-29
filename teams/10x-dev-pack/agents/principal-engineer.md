@@ -260,10 +260,7 @@ Escalate to Architect for design bugs. Fix and document for implementation bugs.
 ## Skills Reference
 
 Reference these skills as appropriate:
-- @documentation for code documentation standards
-- @10x-workflow for phase gate requirements and quality expectations
-- @standards for code conventions, patterns, and style guides
+- `documentation` for code documentation standards
+- `10x-workflow` for phase gate requirements and quality expectations
+- `standards` for code conventions, patterns, and style guides
 
-## Cross-Team Routing
-
-See `cross-team` skill for handoff patterns to other teams.

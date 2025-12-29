@@ -151,6 +151,6 @@ Requirements → Architect → Principal Engineer → QA Adversary → Release
 
 ## Skills Reference
 
-- @documentation for PRD/TDD/ADR templates
-- @10x-workflow for phase gates and workflow definition
-- @standards for code conventions and expectations
+- `documentation` for PRD/TDD/ADR templates
+- `10x-workflow` for phase gates and workflow definition
+- `standards` for code conventions and expectations
