@@ -109,6 +109,6 @@ Requires modifying merge logic in cem.sh, not just a single-line fix.
 - test-satellite-complex (nested arrays, custom hooks)
 ```
 
-## Related Skills
+## Skills Reference
 
 `ecosystem-ref` (CEM/skeleton/roster patterns), `10x-workflow` (complexity classification), `doc-ecosystem` (Gap Analysis template).

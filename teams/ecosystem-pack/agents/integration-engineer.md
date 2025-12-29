@@ -110,6 +110,6 @@ jq -e '.hooks.events | length > 2' \
 echo "PASS: Settings merge preserves local arrays"
 ```
 
-## Related Skills
+## Skills Reference
 
 `ecosystem-ref` (CEM/skeleton/roster patterns), `standards` (bash conventions), `justfile` (test automation).

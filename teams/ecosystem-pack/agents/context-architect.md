@@ -123,6 +123,6 @@ to work; those with array settings gain preservation on sync.
 | complex | Sync with nested arrays | Local + skeleton arrays concatenated |
 ```
 
-## Related Skills
+## Skills Reference
 
 `ecosystem-ref` (CEM/skeleton/roster patterns), `doc-ecosystem` (Context Design template), `10x-workflow` (complexity requirements).

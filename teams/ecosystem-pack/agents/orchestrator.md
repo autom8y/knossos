@@ -194,6 +194,6 @@ throughline:
   rationale: Cannot design solution without confirmed root cause
 ```
 
-## Related Skills
+## Skills Reference
 
 `ecosystem-ref` (CEM/skeleton/roster patterns), `doc-ecosystem` (artifact templates), `10x-workflow` (phase requirements).

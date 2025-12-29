@@ -128,6 +128,6 @@ P1 defect D001 blocks release. Fix required before rollout.
 | SYSTEM | +test-legacy, test-production-like | New component needs broad validation |
 | MIGRATION | All satellites | Breaking change requires full coverage |
 
-## Related Skills
+## Skills Reference
 
 `ecosystem-ref` (satellite matrix definitions), `10x-workflow` (complexity-based testing), `standards` (defect classification).
