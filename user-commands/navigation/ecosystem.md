@@ -1,5 +1,6 @@
 ---
 description: Quick switch to ecosystem-pack (CEM/skeleton/roster infrastructure workflow)
+argument-hint: [--update] [--dry-run] [--keep-all|--remove-all|--promote-all]
 allowed-tools: Bash, Read
 model: sonnet
 ---
@@ -9,13 +10,23 @@ Auto-injected by SessionStart hook (project, team, session, git).
 
 ## Your Task
 
-Switch to the ecosystem infrastructure team pack and display the team roster.
+Switch to the ecosystem infrastructure team pack and display the team roster. $ARGUMENTS
 
 ## Behavior
 
-1. Execute: `${ROSTER_HOME:-~/Code/roster}/swap-team.sh ecosystem-pack`
+1. Execute: `${ROSTER_HOME:-~/Code/roster}/swap-team.sh ecosystem-pack $ARGUMENTS`
 2. Display the roster output from swap-team.sh (agents and their roles)
 3. If SESSION_CONTEXT exists, update `active_team` to `ecosystem-pack`
+
+## Flags
+
+| Flag | Short | Description | Handled By |
+|------|-------|-------------|------------|
+| `--update` | `-u` | Pull latest agent definitions from roster even if already on team | swap-team.sh |
+| `--dry-run` | - | Preview changes without applying | swap-team.sh |
+| `--keep-all` | - | Preserve all orphan agents in project | swap-team.sh |
+| `--remove-all` | - | Remove all orphans (backup available) | swap-team.sh |
+| `--promote-all` | - | Move all orphans to user-level | swap-team.sh |
 
 ## When to Use
 
@@ -36,7 +47,7 @@ Switch to the ecosystem infrastructure team pack and display the team roster.
 
 ## Complexity Levels
 
-- **PATCH**: Single file change, no schema impact (Analysis → Implementation → Validation)
+- **PATCH**: Single file change, no schema impact (Analysis -> Implementation -> Validation)
 - **MODULE**: Single system change (CEM or skeleton or roster) - all phases
 - **SYSTEM**: Multi-system change - all phases + ADRs
 - **MIGRATION**: Cross-satellite rollout - all phases + extended validation
