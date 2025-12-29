@@ -1,0 +1,73 @@
+name: forge-pack
+version: "1.0.0"
+workflow_type: sequential
+description: Agent team creation lifecycle (Design → Prompts → Workflow → Platform → Catalog → Validation)
+
+entry_point:
+  agent: agent-designer
+  artifact:
+    type: team-spec
+    path_template: docs/forge/TEAM-SPEC-{slug}.md
+
+phases:
+  - name: design
+    agent: agent-designer
+    produces: team-spec
+    next: prompts
+
+  - name: prompts
+    agent: prompt-architect
+    produces: agent-files
+    next: workflow
+
+  - name: workflow
+    agent: workflow-engineer
+    produces: workflow-config
+    next: platform
+
+  - name: platform
+    agent: platform-engineer
+    produces: roster-integration
+    next: catalog
+    condition: "complexity >= MODULE"
+
+  - name: catalog
+    agent: agent-curator
+    produces: knowledge-update
+    next: validation
+    condition: "complexity >= MODULE"
+
+  - name: validation
+    agent: eval-specialist
+    produces: eval-report
+    next: null
+
+complexity_levels:
+  - name: AGENT
+    scope: "Single agent addition to existing team"
+    phases: [design, prompts, validation]
+  - name: MODULE
+    scope: "New team pack with 3-5 agents"
+    phases: [design, prompts, workflow, platform, catalog, validation]
+  - name: SYSTEM
+    scope: "Major team redesign or cross-team refactor"
+    phases: [design, prompts, workflow, platform, catalog, validation]
+
+# Agent roles for command mapping:
+# /forge           → agent-designer (full pipeline)
+# /forge-design    → agent-designer (design only)
+# /forge-prompt    → prompt-architect (prompts only)
+# /forge-workflow  → workflow-engineer (workflow only)
+# /forge-platform  → platform-engineer (platform only)
+# /forge-catalog   → agent-curator (catalog only)
+# /forge-eval      → eval-specialist (validation only)
+# /new-team        → agent-designer (alias for /forge)
+# /new-agent       → agent-designer + prompt-architect (reduced scope)
+
+# Team-specific commands (synced on team swap):
+commands:
+  - name: forge
+    file: forge.md
+    description: "Create new agent teams from scratch"
+    primary_agent: agent-designer
+    workflow_phase: all
