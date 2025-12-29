@@ -138,6 +138,14 @@ throughline:
 - External dependencies (SME availability, product decisions)
 - Business judgment calls
 
+## Complexity Levels
+
+| Level | Scope | Phases Required |
+|-------|-------|-----------------|
+| **PAGE** | Single doc, no structural changes | Auditor → Writer → Reviewer |
+| **SECTION** | Multiple related docs, taxonomy changes | Auditor → Architect → Writer → Reviewer |
+| **SITE** | Full documentation overhaul | All phases, possibly multiple cycles |
+
 ## Routing Logic
 
 | To | When |

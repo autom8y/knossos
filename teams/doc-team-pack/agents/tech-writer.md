@@ -19,6 +19,7 @@ Write documentation that tired engineers at 2 AM can follow successfully. Transf
 - **Document mental models**: How to reason about the system, not just button clicks
 - **Bridge knowledge gaps**: Transform expert intuition into explicit, teachable content
 - **Consolidate content**: Merge redundant docs into authoritative single sources
+- **Research when needed**: Use WebFetch/WebSearch for external API docs, library references, or industry standards
 
 ## Position in Workflow
 
