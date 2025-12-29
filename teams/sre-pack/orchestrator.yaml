@@ -1,0 +1,49 @@
+# Orchestrator configuration for sre-pack
+# Used by generate-orchestrator.sh to produce orchestrator.md
+
+team:
+  name: sre-pack
+  domain: site reliability engineering
+  color: orange
+
+frontmatter:
+  role: "Coordinates reliability engineering initiatives"
+  description: |
+    Routes reliability work through observation, coordination, implementation, and resilience verification phases. Use when: improving system reliability requires comprehensive observability and chaos engineering. Triggers: coordinate, orchestrate, reliability workflow, incident response, SLO improvement.
+
+routing:
+  observability-engineer: "Observability and monitoring assessment needed"
+  incident-commander: "Observability complete, reliability plan needed"
+  platform-engineer: "Reliability plan ready, infrastructure changes needed"
+  chaos-engineer: "Implementation complete, resilience testing needed"
+
+workflow_position:
+  upstream: "Reliability concern or incident from operations"
+  downstream: "Infrastructure improvements and resilience reports"
+
+handoff_criteria:
+  observation:
+    - "Observability gaps identified"
+    - "Monitoring dashboard created"
+    - "SLO/SLI baseline established"
+  coordination:
+    - "Reliability plan documented"
+    - "Runbook created"
+    - "Escalation procedures defined"
+  implementation:
+    - "Infrastructure changes deployed"
+    - "Monitoring verified"
+    - "Rollback plan documented"
+  resilience:
+    - "Chaos tests executed"
+    - "Failure scenarios validated"
+    - "System resilience confirmed"
+
+skills:
+  - "@observability for monitoring patterns"
+  - "@incident-response for runbook creation"
+  - "@chaos-engineering for resilience testing"
+
+antipatterns: []
+
+cross_team_protocol: ""

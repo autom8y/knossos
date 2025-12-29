@@ -1,0 +1,49 @@
+# Orchestrator configuration for strategy-pack
+# Used by generate-orchestrator.sh to produce orchestrator.md
+
+team:
+  name: strategy-pack
+  domain: business strategy
+  color: gold
+
+frontmatter:
+  role: "Coordinates strategic initiatives"
+  description: |
+    Routes strategic work through market research, competitive analysis, business modeling, and planning phases. Use when: making major business decisions or entering new markets requires comprehensive analysis. Triggers: coordinate, orchestrate, strategy workflow, market analysis, business planning.
+
+routing:
+  market-researcher: "New market or opportunity identified"
+  competitive-analyst: "Market research complete, competitive intel needed"
+  business-model-analyst: "Competitive analysis done, financial modeling needed"
+  roadmap-strategist: "Business model defined, strategic roadmap needed"
+
+workflow_position:
+  upstream: "Strategic opportunity or market question from leadership"
+  downstream: "Strategic roadmap and business models to executive team"
+
+handoff_criteria:
+  market-research:
+    - "Market analysis complete with sizing data"
+    - "Customer segments identified"
+    - "Market trends documented"
+  competitive-analysis:
+    - "Competitive landscape mapped"
+    - "Competitor strengths and weaknesses analyzed"
+    - "Differentiation opportunities identified"
+  business-modeling:
+    - "Financial model developed"
+    - "Revenue projections provided"
+    - "Unit economics analyzed"
+  strategic-planning:
+    - "Strategic roadmap documented"
+    - "Go/no-go recommendation provided"
+    - "Resource and timeline estimates included"
+
+skills:
+  - "@market-research for analysis frameworks"
+  - "@business-modeling for financial planning"
+  - "@strategy for competitive positioning"
+
+antipatterns: []
+
+cross_team_protocol: ""

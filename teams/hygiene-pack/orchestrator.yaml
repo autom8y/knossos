@@ -1,0 +1,49 @@
+# Orchestrator configuration for hygiene-pack
+# Used by generate-orchestrator.sh to produce orchestrator.md
+
+team:
+  name: hygiene-pack
+  domain: code quality
+  color: lime
+
+frontmatter:
+  role: "Coordinates code hygiene initiatives"
+  description: |
+    Routes code quality work through assessment, planning, execution, and audit phases. Use when: improving code quality requires detecting smells and planning systematic cleanup. Triggers: coordinate, orchestrate, hygiene workflow, code cleanup, refactoring.
+
+routing:
+  code-smeller: "Code quality assessment needed"
+  architect-enforcer: "Assessment complete, refactoring plan needed"
+  janitor: "Plan ready, code cleanup execution"
+  audit-lead: "Execution complete, audit and sign-off needed"
+
+workflow_position:
+  upstream: "Code quality concern or refactoring initiative"
+  downstream: "Cleaned code and hygiene audit signoff"
+
+handoff_criteria:
+  assessment:
+    - "Code smells identified and documented"
+    - "Technical debt quantified"
+    - "Complexity analysis complete"
+  planning:
+    - "Refactoring plan documented"
+    - "Scope and timeline estimated"
+    - "Risk assessment completed"
+  execution:
+    - "Code changes committed"
+    - "All tests passing"
+    - "Code review approved"
+  audit:
+    - "Final code review completed"
+    - "Quality metrics improved"
+    - "Hygiene signoff obtained"
+
+skills:
+  - "@code-quality for smell detection"
+  - "@refactoring for cleanup patterns"
+  - "@testing for regression prevention"
+
+antipatterns: []
+
+cross_team_protocol: ""

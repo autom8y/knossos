@@ -1,0 +1,426 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Orchestrator YAML Schema",
+  "description": "Canonical schema for orchestrator.yaml configuration files that drive orchestrator.md generation. Each team pack uses one orchestrator.yaml to parameterize the generation of their orchestrator.md agent.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "team",
+    "frontmatter",
+    "routing",
+    "workflow_position",
+    "handoff_criteria",
+    "skills"
+  ],
+  "properties": {
+    "_comment": {
+      "type": "string",
+      "description": "Optional file header comment. Generator ignores this."
+    },
+    "team": {
+      "type": "object",
+      "description": "Team metadata used for frontmatter and template context.",
+      "additionalProperties": false,
+      "required": ["name", "domain", "color"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Team pack name (lowercase with hyphens, must match directory name)",
+          "pattern": "^[a-z0-9-]+$",
+          "examples": ["rnd-pack", "security-pack", "ecosystem-pack"]
+        },
+        "domain": {
+          "type": "string",
+          "description": "Human-readable domain this team operates in",
+          "examples": [
+            "technology exploration",
+            "security assessment",
+            "documentation lifecycle",
+            "ecosystem infrastructure"
+          ]
+        },
+        "color": {
+          "type": "string",
+          "description": "Hex color or named color for team branding in orchestrator.md frontmatter",
+          "pattern": "^(#[0-9a-f]{6}|[a-z]+)$",
+          "examples": ["purple", "red", "blue", "green", "#ff5733"]
+        }
+      }
+    },
+    "frontmatter": {
+      "type": "object",
+      "description": "Values that populate the YAML frontmatter of generated orchestrator.md",
+      "additionalProperties": false,
+      "required": ["role", "description"],
+      "properties": {
+        "role": {
+          "type": "string",
+          "description": "One-line role summary for frontmatter 'role' field",
+          "examples": [
+            "Coordinates technology exploration phases",
+            "Coordinates security initiatives",
+            "Coordinates ecosystem-pack phases"
+          ]
+        },
+        "description": {
+          "type": "string",
+          "description": "Multi-line description for frontmatter 'description' field. May use YAML pipe syntax (|) for multiline.",
+          "examples": [
+            "Stateless advisor that routes work through rnd-pack specialists. Does not execute—provides structured directives for the main agent to invoke specialists.",
+            "Coordinates ecosystem-pack phases for CEM/skeleton/roster infrastructure work. Use when: work spans multiple phases or requires cross-component coordination."
+          ]
+        }
+      }
+    },
+    "routing": {
+      "type": "object",
+      "description": "Specialist routing rules. Maps specialist names (from workflow.yaml phases) to 'when' conditions.",
+      "additionalProperties": false,
+      "minProperties": 3,
+      "maxProperties": 6,
+      "patternProperties": {
+        "^[a-z0-9-]+$": {
+          "type": "string",
+          "description": "Routing condition for this specialist (when to invoke them). Specialist names must match workflow.yaml phase agents."
+        }
+      },
+      "examples": [
+        {
+          "technology-scout": "New tech request, emerging trends, build vs buy",
+          "integration-researcher": "Tech assessment complete, need dependency mapping",
+          "prototype-engineer": "Integration map complete, need feasibility validation",
+          "moonshot-architect": "Prototype complete, need long-term architecture"
+        },
+        {
+          "ecosystem-analyst": "Initial phase, gap analysis needed",
+          "context-architect": "Gap analysis complete, architecture design needed",
+          "integration-engineer": "Design phase complete, implementation needed",
+          "documentation-engineer": "Implementation complete, runbook needed",
+          "compatibility-tester": "Documentation complete, validation needed"
+        }
+      ]
+    },
+    "workflow_position": {
+      "type": "object",
+      "description": "Describes this orchestrator's position in the larger workflow ecosystem.",
+      "additionalProperties": false,
+      "required": ["upstream", "downstream"],
+      "properties": {
+        "upstream": {
+          "type": "string",
+          "description": "What feeds into this orchestrator (entry points, triggers)"
+        },
+        "downstream": {
+          "type": "string",
+          "description": "Where artifacts from this orchestrator flow (which systems consume output)"
+        }
+      },
+      "examples": [
+        {
+          "upstream": "User request, SessionStart hook context",
+          "downstream": "Specialists execute; artifacts flow to session context"
+        }
+      ]
+    },
+    "handoff_criteria": {
+      "type": "object",
+      "description": "Phase-specific handoff criteria (checklist items) that verify readiness for phase transitions. Keys are phase names from workflow.yaml.",
+      "additionalProperties": false,
+      "patternProperties": {
+        "^[a-z0-9-]+$": {
+          "type": "array",
+          "description": "Array of handoff criteria (checklist items) for this phase",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "description": "Concrete, verifiable criterion for phase completion"
+          }
+        }
+      },
+      "examples": [
+        {
+          "scouting": [
+            "Tech assessment document complete with verdict",
+            "Key risks and mitigations identified",
+            "Complexity recommendation provided"
+          ],
+          "integration-analysis": [
+            "Integration map documents all dependencies",
+            "POC scope defined with time box",
+            "Risk areas for prototype identified"
+          ]
+        }
+      ]
+    },
+    "skills": {
+      "type": "array",
+      "description": "Skill references this orchestrator should mention. Format: '@skill-name for description' or '@skill-name'",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "pattern": "^@[a-z0-9-]+ .+",
+        "description": "Skill reference with optional description"
+      },
+      "examples": [
+        ["@doc-rnd for artifact templates", "@standards for technology philosophy"],
+        ["@ecosystem-ref for CEM/skeleton/roster patterns", "@10x-workflow for complexity assessment"]
+      ]
+    },
+    "antipatterns": {
+      "type": "array",
+      "description": "OPTIONAL: Team-specific anti-patterns to add beyond the canonical defaults. Empty array means use canonical only.",
+      "items": {
+        "type": "string",
+        "description": "Team-specific anti-pattern warning"
+      },
+      "examples": [
+        ["Treating PATCH complexity as MODULE (it's not)", "Skipping compliance review for 'quick' changes"],
+        []
+      ]
+    },
+    "cross_team_protocol": {
+      "type": "string",
+      "description": "OPTIONAL: Cross-team handoff protocol if this team acts as a hub (e.g., ecosystem-pack coordinates with other packs). Empty string means no special protocol.",
+      "examples": [
+        "Ecosystem-pack acts as hub for infrastructure changes. When escalating to user, also notify infrastructure-team lead.",
+        ""
+      ]
+    },
+    "extension_points": {
+      "type": "object",
+      "description": "OPTIONAL: Which sections of the generated orchestrator.md can teams customize.",
+      "additionalProperties": false,
+      "properties": {
+        "team_examples": {
+          "type": "boolean",
+          "description": "Can teams add team-specific examples to the Consultation Protocol section?"
+        },
+        "custom_antipatterns": {
+          "type": "boolean",
+          "description": "Can teams add custom anti-patterns beyond canonical ones?"
+        },
+        "routing_nuances": {
+          "type": "boolean",
+          "description": "Can teams add team-specific routing nuances to the Routing Criteria section?"
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "team": {
+        "name": "rnd-pack",
+        "domain": "technology exploration",
+        "color": "purple"
+      },
+      "frontmatter": {
+        "role": "Coordinates technology exploration phases",
+        "description": "Stateless advisor that routes work through rnd-pack specialists. Does not execute—provides structured directives for the main agent to invoke specialists. Use when: exploration spans multiple phases or requires coordination. Triggers: coordinate, orchestrate, R&D workflow, technology exploration, innovation pipeline."
+      },
+      "routing": {
+        "technology-scout": "New tech request, emerging trends, build vs buy",
+        "integration-researcher": "Tech assessment complete, need dependency mapping",
+        "prototype-engineer": "Integration map complete, need feasibility validation",
+        "moonshot-architect": "Prototype complete, need long-term architecture"
+      },
+      "workflow_position": {
+        "upstream": "User request, SessionStart hook context",
+        "downstream": "Specialists execute; artifacts flow to session context"
+      },
+      "handoff_criteria": {
+        "scouting": [
+          "Tech assessment document complete with verdict",
+          "Key risks and mitigations identified",
+          "Complexity recommendation provided"
+        ],
+        "integration-analysis": [
+          "Integration map documents all dependencies",
+          "POC scope defined with time box",
+          "Risk areas for prototype identified"
+        ],
+        "prototyping": [
+          "Working prototype demonstrates core capability",
+          "Deliberate shortcuts documented",
+          "Go/no-go recommendation provided"
+        ],
+        "future-architecture": [
+          "Long-term architecture documented",
+          "Migration path from prototype defined",
+          "Future dependencies identified"
+        ]
+      },
+      "skills": [
+        "@doc-rnd for artifact templates",
+        "@standards for technology philosophy",
+        "@cross-team for handoff patterns to other teams"
+      ],
+      "antipatterns": [],
+      "cross_team_protocol": ""
+    },
+    {
+      "team": {
+        "name": "ecosystem-pack",
+        "domain": "ecosystem infrastructure",
+        "color": "#8B00FF"
+      },
+      "frontmatter": {
+        "role": "Coordinates ecosystem-pack phases",
+        "description": "Coordinates ecosystem-pack phases for CEM/skeleton/roster infrastructure work. Use when: work spans multiple phases or requires cross-component coordination. Triggers: coordinate, orchestrate, multi-phase, ecosystem workflow."
+      },
+      "routing": {
+        "ecosystem-analyst": "Initial phase, gap analysis needed",
+        "context-architect": "Gap analysis complete, architecture design needed",
+        "integration-engineer": "Design phase complete, implementation needed",
+        "documentation-engineer": "Implementation complete, runbook needed",
+        "compatibility-tester": "Documentation complete, validation needed"
+      },
+      "workflow_position": {
+        "upstream": "User request via /ecosystem or phase-specific command",
+        "downstream": "Implementation artifacts, runbooks, and compatibility reports to session"
+      },
+      "handoff_criteria": {
+        "analysis": [
+          "Gap analysis document identifies root cause",
+          "Affected components clearly mapped",
+          "Complexity level determined"
+        ],
+        "design": [
+          "Architecture blueprint documented with rationale",
+          "Schema changes specified at file/function level",
+          "Backward compatibility classified (COMPATIBLE or BREAKING)",
+          "Migration path included for breaking changes"
+        ],
+        "implementation": [
+          "All artifacts pass validation checks",
+          "Integration tests pass for all satellite configurations",
+          "CEM checksum validation passed"
+        ],
+        "documentation": [
+          "Migration runbook is clear and step-by-step",
+          "All integration points documented",
+          "Rollback procedures included"
+        ],
+        "validation": [
+          "Compatibility report covers all affected satellites",
+          "Integration test matrix executed successfully",
+          "Sign-off criteria met"
+        ]
+      },
+      "skills": [
+        "@ecosystem-ref for CEM/skeleton/roster patterns",
+        "@documentation for schema conventions",
+        "@10x-workflow for complexity assessment",
+        "@standards for naming conventions"
+      ],
+      "antipatterns": [
+        "Skipping backward compatibility analysis (every change affects satellites)",
+        "Designing without considering all 10 teams",
+        "Making schema changes without versioning strategy"
+      ],
+      "cross_team_protocol": "Ecosystem-pack coordinates with all other packs. When escalating infrastructure changes to user, notify all active team leads."
+    },
+    {
+      "team": {
+        "name": "security-pack",
+        "domain": "security assessment",
+        "color": "red"
+      },
+      "frontmatter": {
+        "role": "Coordinates security initiatives",
+        "description": "Coordinates security-pack phases for security work. Routes tasks through threat modeling, compliance, penetration testing, and review phases. Use when: security work spans multiple phases or requires cross-functional coordination. Triggers: coordinate, orchestrate, security workflow, security assessment, multi-phase security."
+      },
+      "routing": {
+        "threat-modeler": "Security concern raised, threat model needed",
+        "compliance-architect": "Threat model complete, compliance requirements needed",
+        "penetration-tester": "Compliance design complete, security testing needed",
+        "security-reviewer": "Penetration testing complete, final review needed"
+      },
+      "workflow_position": {
+        "upstream": "User security request or /security trigger",
+        "downstream": "Security signoff artifacts feed to deployment gates"
+      },
+      "handoff_criteria": {
+        "threat-modeling": [
+          "Threat model document complete with identified threats",
+          "Attack vectors documented",
+          "Threat severity ratings assigned"
+        ],
+        "compliance-design": [
+          "Compliance requirements mapped to regulations",
+          "Control mappings documented",
+          "Compliance gaps identified"
+        ],
+        "penetration-testing": [
+          "Penetration test complete",
+          "Vulnerabilities reported with severity and remediation",
+          "Test coverage documented"
+        ],
+        "security-review": [
+          "Security signoff obtained",
+          "All findings addressed or risk-accepted",
+          "Deployment approval granted"
+        ]
+      },
+      "skills": [
+        "@security-standards for threat modeling conventions",
+        "@compliance for regulatory mappings",
+        "@10x-workflow for complexity determination in security context"
+      ],
+      "antipatterns": [
+        "Treating PATCH as SYSTEM (different scope requires different phases)",
+        "Skipping threat modeling for 'simple' features",
+        "Accepting unmitigated CRITICAL vulnerabilities"
+      ],
+      "cross_team_protocol": ""
+    },
+    {
+      "team": {
+        "name": "doc-team-pack",
+        "domain": "documentation lifecycle",
+        "color": "green"
+      },
+      "frontmatter": {
+        "role": "Coordinates documentation workflow",
+        "description": "Routes documentation work through audit, architecture, writing, and review phases. Use when: documentation spans multiple pages or requires structural planning. Triggers: coordinate, orchestrate, doc workflow, documentation planning."
+      },
+      "routing": {
+        "doc-auditor": "Documentation audit needed",
+        "information-architect": "Audit complete, structure needed",
+        "tech-writer": "Structure ready, writing phase",
+        "doc-reviewer": "Writing complete, review needed"
+      },
+      "workflow_position": {
+        "upstream": "Doc request or /docs trigger",
+        "downstream": "Final documentation artifacts to repository"
+      },
+      "handoff_criteria": {
+        "audit": [
+          "Current documentation state inventoried",
+          "Gaps identified with priority",
+          "Complexity scope determined"
+        ],
+        "architecture": [
+          "Information architecture document created",
+          "Structure aligns with user mental models",
+          "Navigation plan documented"
+        ],
+        "writing": [
+          "All sections drafted and integrated",
+          "Examples provided for complex topics",
+          "Links verified"
+        ],
+        "review": [
+          "Technical accuracy verified",
+          "Writing quality approved",
+          "Ready for publication"
+        ]
+      },
+      "skills": [
+        "@documentation for structure templates",
+        "@standards for writing conventions"
+      ],
+      "antipatterns": [],
+      "cross_team_protocol": ""
+    }
+  ]
+}
