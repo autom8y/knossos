@@ -63,6 +63,13 @@ log_debug() {
 }
 
 # ============================================================================
+# Library Imports
+# ============================================================================
+
+# Source roster utilities for dynamic roster generation
+source "$ROSTER_HOME/lib/roster-utils.sh"
+
+# ============================================================================
 # Manifest Functions
 # ============================================================================
 
@@ -1403,6 +1410,9 @@ perform_swap() {
 
     # Write manifest with current state (after commands synced so we capture them)
     write_manifest "$team_name"
+
+    # Display team roster (dynamic generation from agent frontmatter)
+    generate_roster "$team_name"
 
     # Success - show workflow info if available
     local workflow_file="$ROSTER_HOME/teams/$team_name/workflow.yaml"
