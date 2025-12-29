@@ -29,6 +29,7 @@ UPDATE_MODE=0
 
 # Dry-run mode: preview changes without applying
 DRY_RUN_MODE=0
+RESET_MODE=0
 
 # Colors for output (if terminal supports it)
 if [[ -t 1 ]]; then
@@ -95,18 +96,19 @@ get_agent_from_manifest() {
         return
     fi
 
-    # Extract source and origin for this agent using grep/sed (no jq dependency)
-    local agent_block
-    agent_block=$(echo "$manifest" | grep -A3 "\"$agent_name\":" | head -4)
+    # Extract the line containing this agent (handles single-line JSON format)
+    local agent_line
+    agent_line=$(echo "$manifest" | grep "\"$agent_name\":")
 
-    if [[ -z "$agent_block" ]]; then
+    if [[ -z "$agent_line" ]]; then
         echo ""
         return
     fi
 
+    # Extract source and origin from the single line
     local source origin
-    source=$(echo "$agent_block" | grep '"source"' | sed 's/.*"source": *"\([^"]*\)".*/\1/')
-    origin=$(echo "$agent_block" | grep '"origin"' | sed 's/.*"origin": *"\([^"]*\)".*/\1/')
+    source=$(echo "$agent_line" | sed 's/.*"source": *"\([^"]*\)".*/\1/')
+    origin=$(echo "$agent_line" | sed 's/.*"origin": *"\([^"]*\)".*/\1/')
 
     echo "$source:$origin"
 }
@@ -622,14 +624,15 @@ Usage: swap-team.sh [OPTIONS] [COMMAND]
 Commands:
   <pack-name>    Switch to specified team pack
   --list         List all available team packs
+  --reset        Reset to skeleton baseline (remove all team resources)
   (no args)      Show current active team
 
 Options:
   --update, -u   Update agents from roster (even if already on team)
   --refresh, -r  [DEPRECATED] Alias for --update
-  --dry-run      Preview changes without applying (use with --update)
+  --dry-run      Preview changes without applying
   --keep-all     Preserve orphan agents in project
-  --remove-all   Remove orphan agents (backup available)
+  --remove-all   Remove orphan agents/commands/skills/hooks (backup available)
   --promote-all  Move orphan agents to ~/.claude/agents/
 
 When switching teams interactively, you'll be prompted for each orphan agent
@@ -657,6 +660,8 @@ Examples:
   ./swap-team.sh --update               # Update current team from roster
   ./swap-team.sh dev-pack --update      # Update even if already on dev-pack
   ./swap-team.sh --update --dry-run     # Preview what update would change
+  ./swap-team.sh --reset                # Reset to skeleton baseline
+  ./swap-team.sh --reset --dry-run      # Preview what reset would remove
 
 EOF
 }
@@ -1638,8 +1643,13 @@ update_claude_md() {
 
     # Update Quick Start section using sed
     # First, copy everything before the table (BSD-compatible: use awk instead of head -n -1)
+    # Handle both team mode ("This project uses...") and skeleton mode ("No team currently active")
     local before_table_line
-    before_table_line=$(grep -n "^This project uses a [0-9]*-agent" "$claude_md" | head -1 | cut -d: -f1)
+    before_table_line=$(grep -n "^This project uses a [0-9]*-agent" "$claude_md" 2>/dev/null | head -1 | cut -d: -f1 || true)
+    if [[ -z "$before_table_line" ]]; then
+        # Check for skeleton mode pattern
+        before_table_line=$(grep -n "^No team currently active" "$claude_md" 2>/dev/null | head -1 | cut -d: -f1 || true)
+    fi
     if [[ -n "$before_table_line" ]] && [[ "$before_table_line" -gt 1 ]]; then
         head -n $((before_table_line - 1)) "$claude_md" > "$temp_file"
     else
@@ -1655,8 +1665,13 @@ update_claude_md() {
     echo "" >> "$temp_file"
 
     # Find where the old table ends and copy from there
+    # Handle both team mode ("**New here") and skeleton mode ("**Get started")
     local table_end_line
-    table_end_line=$(grep -n "^\*\*New here" "$claude_md" | head -1 | cut -d: -f1)
+    table_end_line=$(grep -n "^\*\*New here" "$claude_md" 2>/dev/null | head -1 | cut -d: -f1 || true)
+    if [[ -z "$table_end_line" ]]; then
+        # Check for skeleton mode pattern
+        table_end_line=$(grep -n "^\*\*Get started" "$claude_md" 2>/dev/null | head -1 | cut -d: -f1 || true)
+    fi
     if [[ -n "$table_end_line" ]]; then
         sed -n "${table_end_line},\$p" "$claude_md" >> "$temp_file"
     fi
@@ -1949,6 +1964,276 @@ perform_swap() {
     exit "$EXIT_SUCCESS"
 }
 
+# ============================================================================
+# Reset to Skeleton Baseline
+# ============================================================================
+
+# Preview what reset would remove (for --dry-run with --reset)
+preview_reset() {
+    log "Dry-run: Would reset to skeleton baseline"
+    echo ""
+
+    # Check for team agents (those marked as "team" in manifest)
+    echo "Team agents to remove:"
+    local team_agent_count=0
+    if [[ -f "$MANIFEST_FILE" ]] && [[ -d ".claude/agents" ]]; then
+        local manifest
+        manifest=$(read_manifest)
+        for agent_file in .claude/agents/*.md; do
+            [[ -f "$agent_file" ]] || continue
+            local agent_name
+            agent_name=$(basename "$agent_file")
+            local info
+            info=$(get_agent_from_manifest "$agent_name")
+            local source
+            source=$(echo "$info" | cut -d: -f1)
+            if [[ "$source" == "team" ]]; then
+                local origin
+                origin=$(echo "$info" | cut -d: -f2)
+                echo "  - $agent_name (from $origin)"
+                ((team_agent_count++)) || true
+            fi
+        done
+    fi
+    if [[ "$team_agent_count" -eq 0 ]]; then
+        echo "  (none)"
+    fi
+
+    # Check for team commands
+    echo ""
+    echo "Team commands to remove:"
+    if [[ -f ".claude/commands/.team-commands" ]]; then
+        while IFS= read -r cmd; do
+            [[ -z "$cmd" ]] && continue
+            echo "  - $cmd"
+        done < ".claude/commands/.team-commands"
+    else
+        echo "  (none)"
+    fi
+
+    # Check for team skills
+    echo ""
+    echo "Team skills to remove:"
+    if [[ -f ".claude/skills/.team-skills" ]]; then
+        while IFS= read -r skill; do
+            [[ -z "$skill" ]] && continue
+            echo "  - $skill"
+        done < ".claude/skills/.team-skills"
+    else
+        echo "  (none)"
+    fi
+
+    # Check for team hooks
+    echo ""
+    echo "Team hooks to remove:"
+    if [[ -f ".claude/hooks/.team-hooks" ]]; then
+        while IFS= read -r hook; do
+            [[ -z "$hook" ]] && continue
+            echo "  - $hook"
+        done < ".claude/hooks/.team-hooks"
+    else
+        echo "  (none)"
+    fi
+
+    # Show what will be cleared
+    echo ""
+    if [[ -f ".claude/ACTIVE_TEAM" ]]; then
+        local current
+        current=$(cat .claude/ACTIVE_TEAM 2>/dev/null | tr -d '[:space:]')
+        echo "Would clear: ACTIVE_TEAM (currently: $current)"
+    fi
+    echo "Would regenerate: CLAUDE.md (skeleton baseline)"
+
+    echo ""
+    echo "No changes made (--dry-run mode)"
+}
+
+# Remove team agents only (preserve user-added agents)
+remove_team_agents() {
+    log_debug "Removing team agents (preserving user-added)"
+
+    if [[ ! -f "$MANIFEST_FILE" ]] || [[ ! -d ".claude/agents" ]]; then
+        log_debug "No manifest or agents directory"
+        return 0
+    fi
+
+    local removed=0
+    local manifest
+    manifest=$(read_manifest)
+
+    for agent_file in .claude/agents/*.md; do
+        [[ -f "$agent_file" ]] || continue
+        local agent_name
+        agent_name=$(basename "$agent_file")
+
+        local info
+        info=$(get_agent_from_manifest "$agent_name")
+        local source
+        source=$(echo "$info" | cut -d: -f1)
+
+        if [[ "$source" == "team" ]]; then
+            rm -f "$agent_file"
+            log_debug "Removed team agent: $agent_name"
+            ((removed++)) || true
+        else
+            log_debug "Preserved: $agent_name (source: $source)"
+        fi
+    done
+
+    log "Removed: $removed team agent(s)"
+
+    # Clear manifest (will be regenerated if user agents remain)
+    rm -f "$MANIFEST_FILE"
+
+    # Regenerate manifest for remaining user agents
+    if [[ -d ".claude/agents" ]]; then
+        local remaining
+        remaining=$(find .claude/agents -maxdepth 1 -name "*.md" -type f 2>/dev/null | wc -l | tr -d ' ')
+        if [[ "$remaining" -gt 0 ]]; then
+            log_debug "Regenerating manifest for $remaining remaining agent(s)"
+            init_manifest_from_existing
+        fi
+    fi
+}
+
+# Regenerate CLAUDE.md for skeleton baseline (no active team)
+regenerate_skeleton_claude_md() {
+    local claude_md=".claude/CLAUDE.md"
+
+    [[ -f "$claude_md" ]] || return 0
+
+    log_debug "Regenerating CLAUDE.md for skeleton baseline"
+
+    # Write replacement content to temp files (avoids awk multiline string issues)
+    local qs_file ac_file
+    qs_file=$(mktemp)
+    ac_file=$(mktemp)
+
+    cat > "$qs_file" << 'QSEOF'
+## Quick Start
+
+No team currently active. Available commands:
+
+| Command | Description |
+|---------|-------------|
+| `/team <pack-name>` | Switch to a team pack |
+| `/team --list` | List available teams |
+| `/consult` | Get guidance on which team to use |
+
+**Get started**: Run `/consult` to find the right team for your task.
+QSEOF
+
+    cat > "$ac_file" << 'ACEOF'
+## Agent Configurations
+
+No team agents loaded. Switch to a team pack to load agents.
+ACEOF
+
+    # Update sections (handles PRESERVE comment and ## heading on separate lines)
+    if grep -q "<!-- PRESERVE: satellite-owned" "$claude_md" 2>/dev/null; then
+        awk -v qs_file="$qs_file" -v ac_file="$ac_file" '
+        # Track when we see a PRESERVE comment
+        /<!-- PRESERVE: satellite-owned/ {
+            preserve_line = 1
+            print $0
+            next
+        }
+        # If previous line was PRESERVE and this is Quick Start, replace section
+        preserve_line && /^## Quick Start/ {
+            in_qs_section = 1
+            preserve_line = 0
+            while ((getline line < qs_file) > 0) print line
+            close(qs_file)
+            next
+        }
+        # If previous line was PRESERVE and this is Agent Configurations, replace section
+        preserve_line && /^## Agent Configurations/ {
+            in_ac_section = 1
+            preserve_line = 0
+            while ((getline line < ac_file) > 0) print line
+            close(ac_file)
+            next
+        }
+        # Reset preserve flag if next line is not a known section
+        preserve_line {
+            preserve_line = 0
+        }
+        # End Quick Start section at next section marker or ## heading
+        in_qs_section && /^<!-- (SYNC|PRESERVE):/ {
+            in_qs_section = 0
+        }
+        in_qs_section && /^##[^#]/ {
+            in_qs_section = 0
+        }
+        # End Agent Configurations section at next section marker or ## heading
+        in_ac_section && /^<!-- (SYNC|PRESERVE):/ {
+            in_ac_section = 0
+        }
+        in_ac_section && /^##[^#]/ {
+            in_ac_section = 0
+        }
+        # Print lines not in replaced sections
+        !in_qs_section && !in_ac_section { print }
+        ' "$claude_md" > "$claude_md.tmp" && mv "$claude_md.tmp" "$claude_md"
+    fi
+
+    # Cleanup temp files
+    rm -f "$qs_file" "$ac_file"
+
+    log_debug "CLAUDE.md regenerated for skeleton baseline"
+}
+
+# Perform reset to skeleton baseline
+perform_reset() {
+    log_debug "Starting reset to skeleton baseline"
+
+    # Validate we're in a project
+    validate_project
+
+    # Check if dry-run mode
+    if [[ "$DRY_RUN_MODE" -eq 1 ]]; then
+        preview_reset
+        return 0
+    fi
+
+    # Get current team for reporting
+    local current_team=""
+    if [[ -f ".claude/ACTIVE_TEAM" ]]; then
+        current_team=$(cat .claude/ACTIVE_TEAM 2>/dev/null | tr -d '[:space:]')
+    fi
+
+    if [[ -z "$current_team" ]]; then
+        log "No team active. Already at skeleton baseline."
+        return 0
+    fi
+
+    log "Resetting from $current_team to skeleton baseline..."
+
+    # Backup current state
+    backup_current_agents
+
+    # Remove team resources using existing functions
+    remove_team_agents
+    remove_team_commands
+    remove_team_skills
+    remove_team_hooks
+
+    # Clear ACTIVE_TEAM
+    rm -f ".claude/ACTIVE_TEAM"
+    rm -f ".claude/ACTIVE_WORKFLOW.yaml"
+    log "Cleared: ACTIVE_TEAM"
+
+    # Regenerate CLAUDE.md
+    regenerate_skeleton_claude_md
+    log "Regenerated: CLAUDE.md (skeleton baseline)"
+
+    echo ""
+    log "Reset complete. Skeleton baseline active."
+    log ""
+    log "To switch to a team: ~/Code/roster/swap-team.sh <team-name>"
+    log "To list teams:       ~/Code/roster/swap-team.sh --list"
+}
+
 # Main entry point
 main() {
     local team_name=""
@@ -1991,6 +2276,10 @@ main() {
                 UPDATE_MODE=1  # dry-run implies update
                 shift
                 ;;
+            --reset|--skeleton)
+                RESET_MODE=1
+                shift
+                ;;
             -*)
                 log_error "Unknown option: $1"
                 usage
@@ -2008,6 +2297,12 @@ main() {
                 ;;
         esac
     done
+
+    # Handle reset mode first (takes precedence)
+    if [[ "$RESET_MODE" -eq 1 ]]; then
+        perform_reset
+        exit "$EXIT_SUCCESS"
+    fi
 
     # Handle the command
     if [[ -z "$team_name" ]]; then
