@@ -1,0 +1,123 @@
+# /handoff Behavior Specification
+
+> Full step-by-step sequence for transferring work between agents.
+
+## Behavior Sequence
+
+### 1. Pre-flight Validation
+
+- **Check for active session**: Verify session exists (uses `get_session_dir()` from session-utils.sh)
+  - If missing → Error: "No active session to hand off. Use `/start` to begin"
+- **Check not parked**: Verify `parked_at` field not set
+  - If parked → Error: "Session is parked. Use `/resume` before handing off"
+- **Validate target agent**: Check `.claude/agents/{agent}.md` exists in current team
+  - If not found → Error: "Agent '{agent}' not found in active team '{team}'"
+- **Check for same agent handoff**: Compare to `last_agent` field
+  - If same → Warning: "Already working with {agent}. Continuing without handoff..."
+
+See [session-validation](../session-common/session-validation.md) for validation patterns.
+
+### 2. Generate Handoff Note
+
+Create structured handoff note. See [handoff-notes.md](handoff-notes.md) for templates.
+
+Note includes:
+- Transition header (current → target)
+- Timestamp and handoff reason
+- Artifacts produced since last handoff
+- Decisions made (ADRs, key choices)
+- Current state (progress, blockers, questions)
+- Context-specific guidance for target agent
+- Recommended next steps
+
+### 3. Append Handoff Note to SESSION_CONTEXT
+
+Add handoff note to SESSION_CONTEXT body, preserving chronological history.
+
+### 4. Update SESSION_CONTEXT Metadata
+
+Update YAML frontmatter:
+
+```yaml
+---
+last_agent: "{target-agent}"
+handoff_count: {increment or set to 1}
+last_handoff_at: "2025-12-24T15:45:00Z"
+current_phase: "{inferred from target agent}"
+---
+```
+
+**Phase inference**:
+| Agent | Phase |
+|-------|-------|
+| requirements-analyst | requirements |
+| architect | design |
+| principal-engineer | implementation |
+| qa-adversary | validation |
+
+See [session-context-schema](../session-common/session-context-schema.md) for field definitions.
+
+### 5. Invoke Target Agent
+
+Use Task tool to invoke target agent with:
+- Full SESSION_CONTEXT content
+- Generated handoff note
+- List of all artifacts with paths
+- Explicit next steps
+
+### 6. Confirmation
+
+Display confirmation message with:
+- Transition summary
+- New phase and handoff count
+- Artifact summary
+- Next steps for target agent
+
+---
+
+## State Changes
+
+### Fields Modified
+
+| Field | Value | Description |
+|-------|-------|-------------|
+| `last_agent` | Target agent name | Agent now working on session |
+| `handoff_count` | Incremented | Total handoffs in this session |
+| `last_handoff_at` | ISO timestamp | When handoff occurred |
+| `current_phase` | Inferred from target | Current workflow phase |
+
+### Content Additions
+
+- Complete handoff note appended to SESSION_CONTEXT body
+- Chronological handoff history preserved
+
+---
+
+## Error Cases
+
+| Error | Condition | Resolution |
+|-------|-----------|------------|
+| No active session | No session for current project | Use `/start` to begin a session |
+| Session parked | `parked_at` field set | Use `/resume` first, then `/handoff` |
+| Invalid agent | Agent not in roster | Use valid agent name or `/roster` to list |
+| Agent not in team | Agent file missing | Check active team, switch if needed |
+| Missing parameter | No agent specified | Provide: `/handoff <agent-name>` |
+
+---
+
+## Design Notes
+
+### Why Count Handoffs?
+
+`handoff_count` reveals:
+1. **Workflow health**: Normal sessions have 2-4 handoffs
+2. **Ping-pong issues**: High counts (>6) indicate unclear requirements
+3. **Rework patterns**: QA → Engineer loops show quality hotspots
+
+### Why Infer Phase from Agent?
+
+Phases map naturally to agents, keeping session state synchronized with actual workflow progression.
+
+### Auto-generated vs Custom Notes
+
+Auto-generated notes provide structure; custom notes add exception context, urgency flags, or external dependencies.
