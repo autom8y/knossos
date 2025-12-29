@@ -1873,6 +1873,21 @@ perform_swap() {
 
     update_active_team "$team_name"
 
+    # Update session team if active session exists
+    if [[ -f ".claude/sessions/.current-session" && -x ".claude/hooks/lib/session-manager.sh" ]]; then
+        local current_session
+        current_session=$(cat ".claude/sessions/.current-session" 2>/dev/null)
+        if [[ -n "$current_session" && -f ".claude/sessions/$current_session/SESSION_CONTEXT.md" ]]; then
+            # Warn user about team change
+            log_warning "Active session detected: $current_session"
+            log_warning "Session team will be updated to: $team_name"
+            # Update the active_team field in SESSION_CONTEXT.md
+            sed -i '' "s/^active_team: .*/active_team: \"$team_name\"/" \
+                ".claude/sessions/$current_session/SESSION_CONTEXT.md" 2>/dev/null || true
+            log "Session team updated to: $team_name"
+        fi
+    fi
+
     # Update CLAUDE.md to reflect new team's agents
     update_claude_md "$team_name"
 
