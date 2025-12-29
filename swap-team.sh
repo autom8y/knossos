@@ -19,7 +19,7 @@ readonly EXIT_ORPHAN_CONFLICT=5
 
 # Manifest file path
 readonly MANIFEST_FILE=".claude/AGENT_MANIFEST.json"
-readonly MANIFEST_VERSION="1.0"
+readonly MANIFEST_VERSION="1.1"
 
 # Orphan handling mode (set by flags)
 ORPHAN_MODE=""  # "", "keep", "remove", "promote"
@@ -162,7 +162,36 @@ write_manifest() {
         done
     fi
 
-    # Close JSON
+    # Close agents section, add comma for commands
+    echo "" >> "$MANIFEST_FILE"
+    echo "  }," >> "$MANIFEST_FILE"
+
+    # Add commands section
+    echo "  \"commands\": {" >> "$MANIFEST_FILE"
+
+    # Read team commands from marker file
+    local first_cmd=true
+    if [[ -f ".claude/commands/.team-commands" ]]; then
+        while IFS= read -r cmd_file; do
+            [[ -z "$cmd_file" ]] && continue
+
+            if [[ "$first_cmd" == true ]]; then
+                first_cmd=false
+            else
+                echo "," >> "$MANIFEST_FILE"
+            fi
+
+            {
+                echo -n "    \"$cmd_file\": {"
+                echo -n "\"source\": \"team\", "
+                echo -n "\"origin\": \"$team_name\", "
+                echo -n "\"installed_at\": \"$timestamp\""
+                echo -n "}"
+            } >> "$MANIFEST_FILE"
+        done < ".claude/commands/.team-commands"
+    fi
+
+    # Close commands and JSON
     {
         echo ""
         echo "  }"
@@ -217,9 +246,13 @@ init_manifest_from_existing() {
         done
     fi
 
-    # Close JSON
+    # Close agents section, add comma for commands
+    echo "" >> "$MANIFEST_FILE"
+    echo "  }," >> "$MANIFEST_FILE"
+
+    # Add empty commands section (no team commands during init)
     {
-        echo ""
+        echo "  \"commands\": {"
         echo "  }"
         echo "}"
     } >> "$MANIFEST_FILE"
@@ -966,6 +999,134 @@ swap_commands() {
 }
 
 # ============================================================================
+# Team Skills Functions (Phase 2: Unified Sync)
+# ============================================================================
+
+# Backup current team skills (if any exist)
+backup_team_skills() {
+    log_debug "Checking for team skills to backup"
+
+    local backup_dir=".claude/skills.backup"
+
+    # Check if any team skills exist (marked by .team-skills file)
+    if [[ ! -d ".claude/skills" ]] || [[ ! -f ".claude/skills/.team-skills" ]]; then
+        log_debug "No team skills to backup"
+        return 0
+    fi
+
+    # Remove old backup if exists
+    if [[ -d "$backup_dir" ]]; then
+        log_debug "Removing old skills backup"
+        rm -rf "$backup_dir" || {
+            log_warning "Failed to remove old skills backup"
+        }
+    fi
+
+    # Read list of team skills and backup
+    mkdir -p "$backup_dir"
+    while IFS= read -r skill_dir; do
+        [[ -z "$skill_dir" ]] && continue
+        if [[ -d ".claude/skills/$skill_dir" ]]; then
+            cp -rp ".claude/skills/$skill_dir" "$backup_dir/$skill_dir"
+            log_debug "Backed up skill: $skill_dir"
+        fi
+    done < ".claude/skills/.team-skills"
+
+    log_debug "Team skills backed up"
+}
+
+# Remove team skills from previous team
+remove_team_skills() {
+    log_debug "Removing team skills from previous team"
+
+    if [[ ! -f ".claude/skills/.team-skills" ]]; then
+        log_debug "No team skills marker found"
+        return 0
+    fi
+
+    # Read list and remove each skill directory
+    while IFS= read -r skill_dir; do
+        [[ -z "$skill_dir" ]] && continue
+        if [[ -d ".claude/skills/$skill_dir" ]]; then
+            rm -rf ".claude/skills/$skill_dir"
+            log_debug "Removed team skill: $skill_dir"
+        fi
+    done < ".claude/skills/.team-skills"
+
+    # Remove the marker file
+    rm -f ".claude/skills/.team-skills"
+
+    log_debug "Team skills removed"
+}
+
+# Sync team-specific skills to project
+# Team skills are copied to .claude/skills/ with a marker file
+# Skills from team layer overlay skeleton skills (team wins on collision)
+swap_skills() {
+    local team_name="$1"
+    local source_dir="$ROSTER_HOME/teams/$team_name/skills"
+
+    log_debug "Checking for team skills in $source_dir"
+
+    # Ensure skills directory exists
+    mkdir -p ".claude/skills"
+
+    # Backup and remove previous team skills
+    backup_team_skills
+    remove_team_skills
+
+    # Check if team has skills
+    if [[ ! -d "$source_dir" ]]; then
+        log_debug "Team $team_name has no skills/ directory"
+        return 0
+    fi
+
+    # Count skill directories (each skill is a directory)
+    local skill_count
+    skill_count=$(find "$source_dir" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l | tr -d ' ')
+
+    if [[ "$skill_count" -eq 0 ]]; then
+        log_debug "Team $team_name has no skill directories"
+        return 0
+    fi
+
+    log_debug "Syncing $skill_count skill(s) from $team_name"
+
+    # Create marker file to track which skills belong to this team
+    local marker_file=".claude/skills/.team-skills"
+    : > "$marker_file"
+
+    # Copy each skill directory and record in marker
+    for skill_path in "$source_dir"/*/; do
+        [[ -d "$skill_path" ]] || continue
+
+        local skill_name
+        skill_name=$(basename "$skill_path")
+
+        # Check for collision with existing skeleton skill
+        # Team wins: overwrite with warning
+        if [[ -d ".claude/skills/$skill_name" ]] && ! grep -q "^$skill_name$" "$marker_file" 2>/dev/null; then
+            # Exists but not from team - this is a skeleton skill
+            log_warning "Team skill $skill_name overrides skeleton skill"
+            rm -rf ".claude/skills/$skill_name"
+        fi
+
+        # Copy skill directory
+        cp -rp "$skill_path" ".claude/skills/$skill_name"
+        echo "$skill_name" >> "$marker_file"
+        log_debug "Synced skill: $skill_name"
+    done
+
+    # Count successfully synced skills
+    local synced_count
+    synced_count=$(wc -l < "$marker_file" | tr -d ' ')
+
+    if [[ "$synced_count" -gt 0 ]]; then
+        log "Synced: $synced_count team skill(s)"
+    fi
+}
+
+# ============================================================================
 # CLAUDE.md Update Functions
 # ============================================================================
 
@@ -1231,14 +1392,17 @@ perform_swap() {
 
     update_active_team "$team_name"
 
-    # Write manifest with current state
-    write_manifest "$team_name"
-
     # Update CLAUDE.md to reflect new team's agents
     update_claude_md "$team_name"
 
     # Sync team-specific commands
     swap_commands "$team_name"
+
+    # Sync team-specific skills (Phase 2: Unified Sync)
+    swap_skills "$team_name"
+
+    # Write manifest with current state (after commands synced so we capture them)
+    write_manifest "$team_name"
 
     # Success - show workflow info if available
     local workflow_file="$ROSTER_HOME/teams/$team_name/workflow.yaml"
