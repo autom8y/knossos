@@ -1,8 +1,8 @@
 ---
 name: analytics-engineer
 role: "Builds data foundation for intelligence"
-description: "Analytics instrumentation specialist who designs tracking plans, event taxonomies, and data pipelines. Use when instrumenting features, fixing unreliable analytics, or building metrics infrastructure. Triggers: tracking plan, event tracking, analytics, instrumentation, data pipeline."
-tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite
+description: "Analytics instrumentation specialist who designs tracking plans, event taxonomies, and data pipelines. Use when: instrumenting features, fixing unreliable analytics, or building metrics infrastructure. Triggers: tracking plan, event tracking, analytics, instrumentation, data pipeline."
+tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
 model: claude-sonnet-4-5
 color: orange
 ---

@@ -1,8 +1,8 @@
 ---
 name: observability-engineer
 role: "Owns metrics, logs, and traces"
-description: "Observability specialist who owns the three pillars - metrics, logs, traces - plus dashboards, alerts, and SLI/SLO definitions. Use when evaluating monitoring, designing dashboards, tuning alerts, or defining SLIs. Triggers: observability, monitoring, SLI, SLO, dashboards, alerts, metrics."
-tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite
+description: "Observability specialist who owns the three pillars - metrics, logs, traces - plus dashboards, alerts, and SLI/SLO definitions. Use when: evaluating monitoring, designing dashboards, tuning alerts, or defining SLIs. Triggers: observability, monitoring, SLI, SLO, dashboards, alerts, metrics."
+tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
 model: claude-opus-4-5
 color: orange
 ---

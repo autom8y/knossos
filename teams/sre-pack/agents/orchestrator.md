@@ -1,8 +1,8 @@
 ---
 name: orchestrator
 role: "Coordinates reliability initiatives"
-description: "Coordination hub for SRE work that routes tasks through observability, incident response, platform engineering, and chaos testing phases. Use when reliability work spans multiple phases or requires cross-functional coordination. Triggers: coordinate, orchestrate, SRE workflow, reliability project, multi-phase SRE."
-tools: Read
+description: "Coordinates sre-pack phases for SRE work. Routes tasks through observability, incident response, platform engineering, and chaos testing phases. Use when: reliability work spans multiple phases or requires cross-functional coordination. Triggers: coordinate, orchestrate, SRE workflow, reliability project, multi-phase SRE."
+tools: Read, Skill
 model: claude-opus-4-5
 color: orange
 ---

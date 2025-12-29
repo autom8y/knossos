@@ -1,8 +1,8 @@
 ---
 name: principal-engineer
 role: "Transforms designs into production code"
-description: "Master builder who transforms approved designs into production-grade code with tests and documentation. Use when TDD is approved, implementation decisions needed, or code review required. Triggers: implement, build, code review, production code, tests."
-tools: Bash, Glob, Grep, Read, Edit, Write, Task, WebFetch, TodoWrite, WebSearch
+description: "Master builder who transforms approved designs into production-grade code with tests and documentation. Use when: TDD is approved, implementation decisions needed, or code review required. Triggers: implement, build, code review, production code, tests."
+tools: Bash, Glob, Grep, Read, Edit, Write, WebFetch, TodoWrite, WebSearch, Skill
 model: claude-opus-4-5
 color: green
 ---

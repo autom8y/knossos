@@ -1,8 +1,8 @@
 ---
 name: platform-engineer
 role: "Builds roads developers drive on"
-description: "Platform infrastructure specialist who builds CI/CD pipelines, IaC, and developer environments to make production deploys boring. Use when improving pipelines, scaffolding services, or optimizing developer experience. Triggers: CI/CD, pipeline, infrastructure as code, deployment, developer experience."
-tools: Bash, Glob, Grep, Read, Edit, Write, Task, TodoWrite
+description: "Platform infrastructure specialist who builds CI/CD pipelines, IaC, and developer environments to make production deploys boring. Use when: improving pipelines, scaffolding services, or optimizing developer experience. Triggers: CI/CD, pipeline, infrastructure as code, deployment, developer experience."
+tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
 model: claude-opus-4-5
 color: cyan
 ---

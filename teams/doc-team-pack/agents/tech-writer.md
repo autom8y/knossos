@@ -1,8 +1,8 @@
 ---
 name: tech-writer
 role: "Writes clear technical documentation"
-description: "Technical writing specialist who creates clear, scannable documentation from content briefs and source material. Use when writing new docs, consolidating redundant content, or capturing tribal knowledge. Triggers: write docs, documentation, tech writing, content creation, consolidate docs."
-tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, WebFetch, WebSearch
+description: "Technical writing specialist who creates clear, scannable documentation from content briefs and source material. Use when: writing new docs, consolidating redundant content, or capturing tribal knowledge. Triggers: write docs, documentation, tech writing, content creation, consolidate docs."
+tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, WebFetch, WebSearch, Skill
 model: claude-sonnet-4-5
 color: blue
 ---

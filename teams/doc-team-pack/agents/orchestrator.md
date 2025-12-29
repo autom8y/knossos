@@ -1,8 +1,8 @@
 ---
 name: orchestrator
 role: "Coordinates documentation initiatives"
-description: "Coordination hub for documentation projects that routes work through audit, architecture, writing, and review phases. Use when documentation work spans multiple phases or requires cross-specialist coordination. Triggers: coordinate, orchestrate, documentation project, doc workflow, multi-phase docs."
-tools: Read
+description: "Coordinates doc-team-pack phases for documentation projects. Routes work through audit, architecture, writing, and review phases. Use when: documentation work spans multiple phases or requires cross-specialist coordination. Triggers: coordinate, orchestrate, documentation project, doc workflow, multi-phase docs."
+tools: Read, Skill
 model: claude-opus-4-5
 color: blue
 ---

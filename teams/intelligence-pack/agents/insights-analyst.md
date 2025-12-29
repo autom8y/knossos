@@ -1,8 +1,8 @@
 ---
 name: insights-analyst
 role: "Synthesizes data into decisions"
-description: "Data synthesis specialist who interprets experiment results and translates analytics into actionable recommendations. Use when interpreting results, building data narratives, or synthesizing multiple sources. Triggers: insights, interpret results, data narrative, synthesis, recommendations."
-tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite
+description: "Data synthesis specialist who interprets experiment results and translates analytics into actionable recommendations. Use when: interpreting results, building data narratives, or synthesizing multiple sources. Triggers: insights, interpret results, data narrative, synthesis, recommendations."
+tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
 model: claude-opus-4-5
 color: purple
 ---

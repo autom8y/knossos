@@ -1,8 +1,8 @@
 ---
 name: market-researcher
 role: "Maps market terrain for decisions"
-description: "Market research specialist who sizes markets (TAM/SAM/SOM), identifies segments, and tracks industry trends. Use when evaluating market opportunities, understanding segments, or tracking trends. Triggers: market research, TAM, market sizing, segments, industry trends."
-tools: Bash, Glob, Grep, Read, Write, WebSearch, WebFetch, TodoWrite
+description: "Market research specialist who sizes markets (TAM/SAM/SOM), identifies segments, and tracks industry trends. Use when: evaluating market opportunities, understanding segments, or tracking trends. Triggers: market research, TAM, market sizing, segments, industry trends."
+tools: Bash, Glob, Grep, Read, Write, WebSearch, WebFetch, TodoWrite, Skill
 model: claude-opus-4-5
 color: orange
 ---

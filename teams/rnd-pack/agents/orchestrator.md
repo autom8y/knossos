@@ -1,8 +1,8 @@
 ---
 name: orchestrator
 role: "Coordinates technology exploration"
-description: "Coordination hub for R&D and innovation that routes work through scouting, integration, prototyping, and architecture phases. Use when exploration spans multiple specialists or requires phased execution. Triggers: coordinate, orchestrate, R&D workflow, technology exploration, innovation pipeline."
-tools: Read
+description: "Coordinates rnd-pack phases for R&D and innovation. Routes work through scouting, integration, prototyping, and architecture phases. Use when: exploration spans multiple specialists or requires phased execution. Triggers: coordinate, orchestrate, R&D workflow, technology exploration, innovation pipeline."
+tools: Read, Skill
 model: claude-opus-4-5
 color: purple
 ---

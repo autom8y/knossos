@@ -1,8 +1,8 @@
 ---
 name: orchestrator
 role: "Coordinates code hygiene initiatives"
-description: "Coordination hub for code quality and refactoring work that routes tasks through diagnosis, planning, execution, and verification phases. Use when cleanup work spans multiple phases or requires systematic decomposition. Triggers: coordinate, orchestrate, hygiene, refactoring workflow, cleanup pipeline."
-tools: Read
+description: "Coordinates hygiene-pack phases for code quality and refactoring work. Routes tasks through diagnosis, planning, execution, and verification phases. Use when: cleanup work spans multiple phases or requires systematic decomposition. Triggers: coordinate, orchestrate, hygiene, refactoring workflow, cleanup pipeline."
+tools: Read, Skill
 model: claude-opus-4-5
 color: purple
 ---

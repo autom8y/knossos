@@ -1,8 +1,8 @@
 ---
 name: sprint-planner
 role: "Packages debt into sprint work units"
-description: "Sprint planning specialist who bundles prioritized debt into right-sized work packages with effort estimates and acceptance criteria. Use when converting debt priorities into sprint-ready items or planning debt paydown sprints. Triggers: sprint planning, debt packages, capacity planning, backlog, work units."
-tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite
+description: "Sprint planning specialist who bundles prioritized debt into right-sized work packages with effort estimates and acceptance criteria. Use when: converting debt priorities into sprint-ready items or planning debt paydown sprints. Triggers: sprint planning, debt packages, capacity planning, backlog, work units."
+tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
 model: claude-opus-4-5
 color: pink
 ---

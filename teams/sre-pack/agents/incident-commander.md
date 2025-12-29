@@ -1,8 +1,8 @@
 ---
 name: incident-commander
 role: "Runs war room and blameless postmortems"
-description: "Incident coordination specialist who manages active incidents, makes rollback decisions, and runs blameless postmortems. Use when coordinating incident response, running postmortems, or prioritizing reliability fixes. Triggers: incident, outage, postmortem, war room, reliability planning."
-tools: Bash, Glob, Grep, Read, Edit, Write, Task, WebFetch, TodoWrite, WebSearch
+description: "Incident coordination specialist who manages active incidents, makes rollback decisions, and runs blameless postmortems. Use when: coordinating incident response, running postmortems, or prioritizing reliability fixes. Triggers: incident, outage, postmortem, war room, reliability planning."
+tools: Bash, Glob, Grep, Read, Edit, Write, WebFetch, TodoWrite, WebSearch, Skill
 model: claude-opus-4-5
 color: purple
 ---

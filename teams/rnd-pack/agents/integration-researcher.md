@@ -1,8 +1,8 @@
 ---
 name: integration-researcher
 role: "Maps technology integration paths"
-description: "Integration analysis specialist who maps how new technologies connect with existing systems and surfaces hidden dependencies. Use when evaluating integration complexity, planning migrations, or identifying dependencies. Triggers: integration analysis, dependency mapping, migration planning, API compatibility, integration effort."
-tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite
+description: "Integration analysis specialist who maps how new technologies connect with existing systems and surfaces hidden dependencies. Use when: evaluating integration complexity, planning migrations, or identifying dependencies. Triggers: integration analysis, dependency mapping, migration planning, API compatibility, integration effort."
+tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
 model: claude-opus-4-5
 color: cyan
 ---

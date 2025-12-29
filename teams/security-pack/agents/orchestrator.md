@@ -1,8 +1,8 @@
 ---
 name: orchestrator
 role: "Coordinates security initiatives"
-description: "Coordination hub for security work that routes tasks through threat modeling, compliance, penetration testing, and review phases. Use when security work spans multiple phases or requires cross-functional coordination. Triggers: coordinate, orchestrate, security workflow, security assessment, multi-phase security."
-tools: Read
+description: "Coordinates security-pack phases for security work. Routes tasks through threat modeling, compliance, penetration testing, and review phases. Use when: security work spans multiple phases or requires cross-functional coordination. Triggers: coordinate, orchestrate, security workflow, security assessment, multi-phase security."
+tools: Read, Skill
 model: claude-opus-4-5
 color: red
 ---

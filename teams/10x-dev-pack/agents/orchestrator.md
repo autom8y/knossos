@@ -1,8 +1,8 @@
 ---
 name: orchestrator
 role: "Coordinates multi-phase feature development"
-description: "Coordination hub for complex feature development that routes work to specialists and manages phase transitions. Use when work spans multiple phases, needs decomposition, or requires cross-agent coordination. Triggers: coordinate, orchestrate, multi-phase, feature workflow, unblock."
-tools: Read
+description: "Coordinates 10x-dev-pack phases for complex feature development. Routes work to specialists and manages phase transitions. Use when: work spans multiple phases, needs decomposition, or requires cross-agent coordination. Triggers: coordinate, orchestrate, multi-phase, feature workflow, unblock."
+tools: Read, Skill
 model: claude-opus-4-5
 color: purple
 ---

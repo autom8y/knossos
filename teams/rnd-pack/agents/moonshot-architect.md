@@ -1,8 +1,8 @@
 ---
 name: moonshot-architect
 role: "Designs systems for future scenarios"
-description: "Long-term architecture specialist who designs systems for 2+ year horizons and stress-tests assumptions against paradigm shifts. Use when planning long-term architecture, evaluating future scenarios, or preparing for major technology changes. Triggers: moonshot, future architecture, paradigm shift, long-term planning, scenario planning."
-tools: Bash, Glob, Grep, Read, Write, WebSearch, TodoWrite
+description: "Long-term architecture specialist who designs systems for 2+ year horizons and stress-tests assumptions against paradigm shifts. Use when: planning long-term architecture, evaluating future scenarios, or preparing for major technology changes. Triggers: moonshot, future architecture, paradigm shift, long-term planning, scenario planning."
+tools: Bash, Glob, Grep, Read, Write, WebSearch, TodoWrite, Skill
 model: claude-opus-4-5
 color: purple
 ---

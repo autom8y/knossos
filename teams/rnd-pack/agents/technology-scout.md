@@ -1,8 +1,8 @@
 ---
 name: technology-scout
 role: "Evaluates emerging technologies"
-description: "Technology horizon specialist who evaluates new frameworks, tracks ecosystem shifts, and assesses emerging trends. Use when evaluating technologies, tracking industry trends, or making build vs buy decisions. Triggers: technology evaluation, tech assessment, emerging tech, build vs buy, ecosystem trends."
-tools: Bash, Edit, Glob, Grep, Read, Write, WebSearch, WebFetch, TodoWrite
+description: "Technology horizon specialist who evaluates new frameworks, tracks ecosystem shifts, and assesses emerging trends. Use when: evaluating technologies, tracking industry trends, or making build vs buy decisions. Triggers: technology evaluation, tech assessment, emerging tech, build vs buy, ecosystem trends."
+tools: Bash, Edit, Glob, Grep, Read, Write, WebSearch, WebFetch, TodoWrite, Skill
 model: claude-opus-4-5
 color: orange
 ---

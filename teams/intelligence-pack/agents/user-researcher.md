@@ -1,8 +1,8 @@
 ---
 name: user-researcher
 role: "Captures qualitative why behind behavior"
-description: "User research specialist who designs interviews, runs usability tests, and synthesizes qualitative findings. Use when analytics show unexpected behavior, designing features, or validating assumptions. Triggers: user research, interviews, usability, qualitative, why users."
-tools: Bash, Edit, Glob, Grep, Read, Write, WebSearch, TodoWrite
+description: "User research specialist who designs interviews, runs usability tests, and synthesizes qualitative findings. Use when: analytics show unexpected behavior, designing features, or validating assumptions. Triggers: user research, interviews, usability, qualitative, why users."
+tools: Bash, Edit, Glob, Grep, Read, Write, WebSearch, TodoWrite, Skill
 model: claude-opus-4-5
 color: pink
 ---

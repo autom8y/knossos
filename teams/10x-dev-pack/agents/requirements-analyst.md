@@ -1,8 +1,8 @@
 ---
 name: requirements-analyst
 role: "Transforms ambiguity into requirements"
-description: "Specification specialist who extracts stakeholder needs and produces PRDs with success criteria. Use when requirements are unclear, scope needs definition, or edge cases need enumeration. Triggers: requirements, PRD, stakeholder needs, scope definition, success criteria."
-tools: Bash, Glob, Grep, Read, Edit, Write, Task, WebFetch, TodoWrite, WebSearch
+description: "Specification specialist who extracts stakeholder needs and produces PRDs with success criteria. Use when: requirements are unclear, scope needs definition, or edge cases need enumeration. Triggers: requirements, PRD, stakeholder needs, scope definition, success criteria."
+tools: Bash, Glob, Grep, Read, Edit, Write, WebFetch, TodoWrite, WebSearch, Skill
 model: claude-opus-4-5
 color: pink
 ---

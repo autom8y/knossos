@@ -1,8 +1,8 @@
 ---
 name: orchestrator
 role: "Coordinates ecosystem-pack phases"
-description: "Coordination hub for CEM/skeleton/roster infrastructure work. Use when work spans multiple phases or requires cross-component coordination. Triggers: coordinate, orchestrate, multi-phase, ecosystem workflow."
-tools: Read
+description: "Coordinates ecosystem-pack phases for CEM/skeleton/roster infrastructure work. Use when: work spans multiple phases or requires cross-component coordination. Triggers: coordinate, orchestrate, multi-phase, ecosystem workflow."
+tools: Read, Skill
 model: claude-opus-4-5
 color: purple
 ---

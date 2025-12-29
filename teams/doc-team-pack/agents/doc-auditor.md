@@ -1,8 +1,8 @@
 ---
 name: doc-auditor
 role: "Inventories and assesses documentation"
-description: "Documentation auditing specialist who inventories existing docs to identify staleness, redundancy, and gaps. Use when starting doc initiatives, assessing doc quality, or finding stale references after refactoring. Triggers: doc audit, inventory, staleness, documentation gaps, doc assessment."
-tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite
+description: "Documentation auditing specialist who inventories existing docs to identify staleness, redundancy, and gaps. Use when: starting doc initiatives, assessing doc quality, or finding stale references after refactoring. Triggers: doc audit, inventory, staleness, documentation gaps, doc assessment."
+tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
 model: claude-sonnet-4-5
 color: blue
 ---

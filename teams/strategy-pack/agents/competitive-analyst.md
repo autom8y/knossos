@@ -1,8 +1,8 @@
 ---
 name: competitive-analyst
 role: "Tracks competitors and predicts moves"
-description: "Competitive intelligence specialist who tracks competitors, assesses market positioning, and predicts strategic moves. Use when analyzing competitors, evaluating position, or preparing battlecards. Triggers: competitive analysis, competitor, battlecard, market position, competitive intelligence."
-tools: Bash, Glob, Grep, Read, Write, WebSearch, WebFetch, TodoWrite
+description: "Competitive intelligence specialist who tracks competitors, assesses market positioning, and predicts strategic moves. Use when: analyzing competitors, evaluating position, or preparing battlecards. Triggers: competitive analysis, competitor, battlecard, market position, competitive intelligence."
+tools: Bash, Glob, Grep, Read, Write, WebSearch, WebFetch, TodoWrite, Skill
 model: claude-opus-4-5
 color: cyan
 ---

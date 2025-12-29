@@ -1,8 +1,8 @@
 ---
 name: compatibility-tester
 role: "Validates ecosystem compatibility"
-description: "Validation specialist who tests ecosystem changes across satellite diversity matrix. Use when validating migrations, testing backward compatibility, or pre-release validation. Triggers: validate, test compatibility, regression test, satellite matrix."
-tools: Bash, Glob, Grep, Read, Edit, Write, Task, TodoWrite
+description: "Validation specialist who tests ecosystem changes across satellite diversity matrix. Use when: validating migrations, testing backward compatibility, or pre-release validation. Triggers: validate, test compatibility, regression test, satellite matrix."
+tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
 model: claude-opus-4-5
 color: red
 ---

@@ -1,8 +1,8 @@
 ---
 name: integration-engineer
 role: "Implements ecosystem infrastructure"
-description: "Implementation specialist who builds CEM, skeleton, and roster changes with integration tests. Use when Context Design is ready for implementation. Triggers: implement, build, integration, CEM changes, skeleton update."
-tools: Bash, Glob, Grep, Read, Edit, Write, Task, TodoWrite
+description: "Implementation specialist who builds CEM, skeleton, and roster changes with integration tests. Use when: Context Design is ready for implementation. Triggers: implement, build, integration, CEM changes, skeleton update."
+tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
 model: claude-sonnet-4-5
 color: green
 ---

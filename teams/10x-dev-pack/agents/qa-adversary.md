@@ -1,8 +1,8 @@
 ---
 name: qa-adversary
 role: "Breaks things so users don't"
-description: "Adversarial tester who breaks implementations on purpose through edge cases, security probes, and stress testing. Use when testing before release, verifying edge cases, or validating success criteria. Triggers: QA, testing, edge cases, security testing, stress test, defects."
-tools: Bash, Glob, Grep, Read, Edit, Write, Task, WebFetch, TodoWrite, WebSearch
+description: "Adversarial tester who breaks implementations on purpose through edge cases, security probes, and stress testing. Use when: testing before release, verifying edge cases, or validating success criteria. Triggers: QA, testing, edge cases, security testing, stress test, defects."
+tools: Bash, Glob, Grep, Read, Edit, Write, WebFetch, TodoWrite, WebSearch, Skill
 model: claude-opus-4-5
 color: red
 ---

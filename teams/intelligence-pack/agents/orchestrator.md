@@ -1,8 +1,8 @@
 ---
 name: orchestrator
 role: "Coordinates product intelligence work"
-description: "Coordination hub for product intelligence spanning analytics, research, experimentation, and insights synthesis. Use when work requires multi-phase investigation or cross-discipline coordination. Triggers: coordinate, orchestrate, intelligence workflow, product question, multi-phase analysis."
-tools: Read
+description: "Coordinates intelligence-pack phases for product intelligence spanning analytics, research, experimentation, and insights synthesis. Use when: work requires multi-phase investigation or cross-discipline coordination. Triggers: coordinate, orchestrate, intelligence workflow, product question, multi-phase analysis."
+tools: Read, Skill
 model: claude-opus-4-5
 color: purple
 ---
