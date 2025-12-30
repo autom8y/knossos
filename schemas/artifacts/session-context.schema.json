@@ -48,8 +48,21 @@
     "completed_at": {
       "$ref": "common.schema.json#/$defs/iso8601_timestamp"
     },
+    "parked_at": {
+      "$ref": "common.schema.json#/$defs/iso8601_timestamp",
+      "description": "Timestamp when session was manually parked"
+    },
+    "parked_reason": {
+      "type": "string",
+      "description": "Reason for manual session parking"
+    },
+    "parked_git_status": {
+      "type": "string",
+      "description": "Git working tree status at time of manual park (e.g., 'clean', 'uncommitted changes')"
+    },
     "auto_parked_at": {
-      "$ref": "common.schema.json#/$defs/iso8601_timestamp"
+      "$ref": "common.schema.json#/$defs/iso8601_timestamp",
+      "description": "Timestamp when session was automatically parked"
     },
     "auto_parked_reason": {
       "type": "string",

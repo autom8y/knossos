@@ -16,6 +16,8 @@ source "$(dirname "${BASH_SOURCE[0]}")/session-core.sh"
 
 # Get current session state
 # Returns: ACTIVE, PARKED, AUTO_PARKED, or NONE
+# Note: This infers state from presence of park fields, not from reading the status field.
+# The status field (canonical) is managed separately and may have values like "ACTIVE", "PARKED", "ARCHIVED".
 get_session_state() {
     local session_id="${1:-$(get_session_id)}"
 

@@ -73,6 +73,13 @@ extract_session_fields() {
         complexity=$({ grep -m1 "^complexity:" "$ctx_file" 2>/dev/null || true; } | cut -d: -f2- | tr -d ' "')
         current_phase=$({ grep -m1 "^current_phase:" "$ctx_file" 2>/dev/null || true; } | cut -d: -f2- | tr -d ' "')
 
+        # Read status field (canonical), fallback to session_state (legacy) for backward compatibility
+        local explicit_state=$({ grep -m1 "^status:" "$ctx_file" 2>/dev/null || grep -m1 "^session_state:" "$ctx_file" 2>/dev/null || true; } | cut -d: -f2- | tr -d ' "')
+        if [[ -n "$explicit_state" ]]; then
+            session_state="$explicit_state"
+        fi
+
+        # Override with PARKED if park fields present
         if grep -qE "^(parked_at|auto_parked_at):" "$ctx_file" 2>/dev/null; then
             parked="true"
             session_state="PARKED"
@@ -158,7 +165,7 @@ cmd_status() {
   "session_id": $(json_string "$session_id"),
   "session_dir": $(json_string "$session_dir"),
   "has_session": $has_session,
-  "session_state": "$session_state",
+  "status": "$session_state",
   "initiative": $(json_string "$initiative"),
   "complexity": $(json_string "$complexity"),
   "current_phase": $(json_string "$current_phase"),
@@ -588,8 +595,8 @@ mutate_park() {
     awk -v ts="$timestamp" -v reason="$reason" -v git="$git_status" '
         /^---$/ && ++count == 2 {
             print "parked_at: \"" ts "\""
-            print "park_reason: \"" reason "\""
-            print "git_status_at_park: \"" git "\""
+            print "parked_reason: \"" reason "\""
+            print "parked_git_status: \"" git "\""
         }
         { print }
     ' "$file" > "${file}.tmp" && mv "${file}.tmp" "$file"
@@ -608,12 +615,15 @@ mutate_resume() {
     fi
 
     # Remove park metadata and add resumed_at
+    # Delete both old (git_status_at_park, park_reason) and new (parked_git_status, parked_reason) field names
     sed -i.bak \
         -e '/^parked_at:/d' \
         -e '/^park_reason:/d' \
+        -e '/^parked_reason:/d' \
+        -e '/^git_status_at_park:/d' \
+        -e '/^parked_git_status:/d' \
         -e '/^auto_parked_at:/d' \
         -e '/^auto_parked_reason:/d' \
-        -e '/^git_status_at_park:/d' \
         "$file" && rm -f "${file}.bak"
 
     # Add resumed_at
