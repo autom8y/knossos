@@ -5,7 +5,8 @@
 #
 # Part of Ecosystem v2 refactoring
 
-set -euo pipefail
+# NOTE: Libraries should not impose shell options on sourcing scripts
+# Hooks that need fail-fast can set their own 'set -euo pipefail'
 
 # =============================================================================
 # Configuration
