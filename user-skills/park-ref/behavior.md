@@ -30,28 +30,37 @@ Gather current session state:
 Create a human-readable summary of session state at park time.
 See [parking-summary.md](parking-summary.md) for template.
 
-### 4. Update SESSION_CONTEXT
+### 4. Invoke state-mate for Park Mutation
 
-Add park metadata to SESSION_CONTEXT YAML frontmatter:
+Use Task tool to invoke state-mate agent:
 
-```yaml
----
-# ... existing fields ...
-parked_at: "2025-12-24T15:30:00Z"
-parked_reason: "{user-provided or 'Manual park'}"
-parked_phase: "{current_phase}"
-parked_git_status: "{clean|dirty}"
-parked_uncommitted_files: 3  # if applicable
----
+```
+Task(state-mate, "park_session reason='{user_reason}'
+
+Session Context:
+- Session ID: {session_id}
+- Session Path: .claude/sessions/{session_id}/SESSION_CONTEXT.md")
 ```
 
-Append parking summary to SESSION_CONTEXT body (preserves existing content).
+**Expected Response** (JSON):
+```json
+{
+  "success": true,
+  "operation": "park_session",
+  "message": "Session parked successfully",
+  "state_before": { "session_state": "ACTIVE" },
+  "state_after": { "session_state": "PARKED", "parked_at": "..." }
+}
+```
 
-See [session-context-schema](../session-common/session-context-schema.md) for field definitions.
+**Error Handling**:
+- If state-mate returns `success: false`, surface the error message to user
+- If state-mate is unavailable, surface error: "State management unavailable. Session not parked."
 
-### 5. Save SESSION_CONTEXT
+### 5. Confirm Result
 
-Write updated SESSION_CONTEXT to `.claude/sessions/{session_id}/SESSION_CONTEXT.md` file.
+Parse state-mate JSON response and display confirmation to user.
+Do NOT attempt direct file writes--state-mate handles all mutations.
 
 ### 6. Confirmation
 

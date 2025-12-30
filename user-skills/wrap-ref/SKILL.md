@@ -45,10 +45,11 @@ Finishing work?
 **Actions**:
 1. Run quality gates (unless --skip-checks)
 2. Offer final QA review (if last_agent ≠ qa)
-3. Generate session summary
-4. Archive SESSION_CONTEXT
-5. Update session index
-6. Display confirmation
+3. Invoke state-mate agent for wrap mutation (transitions session to ARCHIVED state)
+4. Generate session summary
+5. Archive session directory
+6. Update session index
+7. Display confirmation
 
 **Creates**:
 - `/docs/sessions/SUMMARY-{session_id}.md`

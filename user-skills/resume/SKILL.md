@@ -36,9 +36,8 @@ Have a parked session?
 2. Validate team consistency
 3. Check git status changes
 4. Confirm/select agent
-5. Remove park metadata from SESSION_CONTEXT
-6. Invoke agent with full context
-7. Update resume metadata
+5. Invoke state-mate agent for resume mutation (removes park metadata, adds resume metadata)
+6. Invoke selected agent with full context
 
 **State Changes**:
 | Field | Action |

@@ -33,7 +33,40 @@ If `last_agent` is not `qa-adversary`:
 - If yes: Invoke QA Adversary via Task tool
 - Wait for response; abort if issues found
 
-### 4. Generate Session Summary
+### 4. Invoke state-mate for Wrap Mutation
+
+Use Task tool to invoke state-mate agent:
+
+```
+Task(state-mate, "wrap_session
+
+Session Context:
+- Session ID: {session_id}
+- Session Path: .claude/sessions/{session_id}/SESSION_CONTEXT.md")
+```
+
+**Expected Response** (JSON):
+```json
+{
+  "success": true,
+  "operation": "wrap_session",
+  "message": "Session wrapped successfully",
+  "state_before": { "session_state": "ACTIVE" },
+  "state_after": { "session_state": "ARCHIVED", "completed_at": "..." }
+}
+```
+
+**Prerequisites Enforced by state-mate**:
+- Session must be ACTIVE (not PARKED)
+- If PARKED, state-mate returns LIFECYCLE_VIOLATION with hint to resume first
+- `--override=reason` can bypass prerequisites if explicitly requested
+
+**Error Handling**:
+- If quality gates fail (checked by skill BEFORE invoking state-mate), offer options
+- If state-mate returns LIFECYCLE_VIOLATION, show hint from response
+- If PARKED, offer to auto-invoke `/resume` then retry wrap
+
+### 5. Generate Session Summary
 
 Create comprehensive summary. See [session-summary.md](session-summary.md).
 
@@ -45,21 +78,21 @@ Summary includes:
 - Workflow history (handoffs, parks)
 - Next session starting point
 
-### 5. Archive or Delete SESSION_CONTEXT
+### 6. Archive Session Directory
 
-**If `--archive` (default)**:
-- Move to `.claude/.archive/sessions/{session_id}/`
-- Preserves full session history
+After successful state-mate wrap, perform archival:
+```bash
+mkdir -p ".claude/.archive/sessions"
+mv ".claude/sessions/{session_id}" ".claude/.archive/sessions/"
+```
 
-**If not `--archive`**:
-- Delete session directory
-- Session state removed (summary still available)
+Note: Archival is file system operation, not state mutation. Performed by skill after state-mate confirms wrap.
 
-### 6. Save Session Summary
+### 7. Save Session Summary
 
 Write to `/docs/sessions/SUMMARY-{session_id}.md`
 
-### 7. Update Session Index
+### 8. Update Session Index
 
 Append entry to `/docs/sessions/INDEX.md`:
 ```markdown
@@ -68,7 +101,7 @@ Append entry to `/docs/sessions/INDEX.md`:
 
 Create index if it doesn't exist.
 
-### 8. Confirmation
+### 9. Confirmation
 
 Display:
 - Session name and duration

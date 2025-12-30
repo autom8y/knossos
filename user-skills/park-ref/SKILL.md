@@ -34,9 +34,8 @@ Need to stop working?
 **Actions**:
 1. Capture git status, phase, artifacts, blockers
 2. Generate parking summary
-3. Add park metadata to SESSION_CONTEXT frontmatter
-4. Append parking summary to SESSION_CONTEXT body
-5. Display confirmation with resume instructions
+3. Invoke state-mate agent for park mutation (adds park metadata to SESSION_CONTEXT)
+4. Display confirmation with resume instructions
 
 **State Changes**:
 | Field | Value |

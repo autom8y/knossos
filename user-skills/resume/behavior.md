@@ -38,36 +38,52 @@ Confirm which agent to continue with:
 - Override: `--agent=NAME` parameter
 - Validate agent exists in current team
 
-### 5. Remove Park Metadata
+### 5. Invoke state-mate for Resume Mutation
 
-Update SESSION_CONTEXT by removing:
-```yaml
-# Remove these fields:
-parked_at
-parked_reason
-parked_phase
-parked_git_status
-parked_uncommitted_files
+Use Task tool to invoke state-mate agent:
+
+```
+Task(state-mate, "resume_session
+
+Session Context:
+- Session ID: {session_id}
+- Session Path: .claude/sessions/{session_id}/SESSION_CONTEXT.md")
 ```
 
-See [session-context-schema](../session-common/session-context-schema.md) for field definitions.
+**Expected Response** (JSON):
+```json
+{
+  "success": true,
+  "operation": "resume_session",
+  "message": "Session resumed successfully",
+  "state_before": { "session_state": "PARKED" },
+  "state_after": { "session_state": "ACTIVE", "resumed_at": "..." }
+}
+```
 
-### 6. Invoke Selected Agent
+**Error Handling**:
+- If state-mate returns `success: false` (e.g., session not parked), surface error
+- If LIFECYCLE_VIOLATION, show allowed transitions from state-mate response
+
+### 6. Update Agent Selection (Post-Resume)
+
+After successful resume, if agent override was specified, invoke:
+
+```
+Task(state-mate, "update_field last_agent='{selected_agent}'
+
+Session Context:
+- Session ID: {session_id}
+- Session Path: .claude/sessions/{session_id}/SESSION_CONTEXT.md")
+```
+
+### 7. Invoke Selected Agent
 
 Use Task tool to invoke agent with full session context:
 - Initiative, complexity, phase
 - Park duration and reason
 - Artifacts, blockers, questions
 - Next steps
-
-### 7. Update SESSION_CONTEXT
-
-Add resume metadata:
-```yaml
-resumed_at: "ISO timestamp"
-resume_count: {increment or set to 1}
-last_agent: "{selected-agent}"
-```
 
 ### 8. Confirmation
 
