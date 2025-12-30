@@ -254,14 +254,10 @@ list_stale_sessions() {
 
         # Check parked and stale
         if grep -qE "^(parked_at|auto_parked_at):" "$session_file" 2>/dev/null; then
-            # Temporarily set session to check staleness
-            local sid
-            sid=$(basename "$dir")
-            CLAUDE_SESSION_ID="$sid"
+            # Check staleness for parked sessions
             if is_session_stale "$hours"; then
                 echo "$dir"
             fi
-            unset CLAUDE_SESSION_ID
         fi
     done
 }

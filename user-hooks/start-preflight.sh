@@ -37,7 +37,6 @@ fi
 
 # Get session state
 SESSION_ID=$(get_session_id)
-SESSION_DIR=$(get_session_dir)
 HAS_SESSION="false"
 PARKED="false"
 INITIATIVE=""
@@ -92,7 +91,6 @@ EOF
         fi
     else
         ACTIVE_TEAM=$(cat ".claude/ACTIVE_TEAM" 2>/dev/null || echo "none")
-        SUGGESTED_ID=$(generate_session_id)
 
         # Extract complexity from /start command if present
         COMPLEXITY=""
