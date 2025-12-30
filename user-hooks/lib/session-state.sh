@@ -171,11 +171,13 @@ validate_session_id_format() {
 # Update last_accessed_at in SESSION_CONTEXT.md
 # Uses atomic_write to prevent corruption on interrupted writes (STATE-004)
 touch_session() {
-    local session_dir=$(get_session_dir)
+    local session_dir
+    session_dir=$(get_session_dir)
     local session_file="$session_dir/SESSION_CONTEXT.md"
     [ -f "$session_file" ] || return 1
 
-    local timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+    local timestamp
+    timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
     local updated_content
 
     # Update or add last_accessed_at in frontmatter
@@ -198,12 +200,14 @@ touch_session() {
 # Check if session is stale (not accessed in N hours, default 24)
 is_session_stale() {
     local hours="${1:-24}"
-    local session_dir=$(get_session_dir)
+    local session_dir
+    session_dir=$(get_session_dir)
     local session_file="$session_dir/SESSION_CONTEXT.md"
     [ -f "$session_file" ] || return 1
 
     # Use get_yaml_field for proper handling of quoted/unquoted timestamps
-    local last_access=$(get_yaml_field "$session_file" "last_accessed_at")
+    local last_access
+    last_access=$(get_yaml_field "$session_file" "last_accessed_at")
     [ -z "$last_access" ] && return 0  # No timestamp = stale
 
     # Convert to epoch and compare (portable across macOS/Linux)
@@ -251,7 +255,8 @@ list_stale_sessions() {
         # Check parked and stale
         if grep -qE "^(parked_at|auto_parked_at):" "$session_file" 2>/dev/null; then
             # Temporarily set session to check staleness
-            local sid=$(basename "$dir")
+            local sid
+            sid=$(basename "$dir")
             CLAUDE_SESSION_ID="$sid"
             if is_session_stale "$hours"; then
                 echo "$dir"
