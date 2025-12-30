@@ -85,7 +85,7 @@ if [[ "$COMMAND" =~ (^|[[:space:]/])swap-team\.sh[[:space:]] ]]; then
         if [[ ! -d "$ROSTER_DIR/$TARGET_TEAM" ]]; then
             echo "Team pack '$TARGET_TEAM' not found in $ROSTER_DIR" >&2
             echo "Available teams:" >&2
-            ls -1 "$ROSTER_DIR" 2>/dev/null | sed 's/^/  - /' >&2 || echo "  (none found)" >&2
+            find "$ROSTER_DIR" -maxdepth 1 -type d -name "*-pack" -exec basename {} \; 2>/dev/null | sort | sed 's/^/  - /' >&2 || echo "  (none found)" >&2
             log_end 2 2>/dev/null || true
             exit 2  # Block the command
         fi
