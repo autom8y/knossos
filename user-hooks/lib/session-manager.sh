@@ -41,7 +41,8 @@ is_parked() {
 # Get workflow entry agent from ACTIVE_WORKFLOW.yaml
 get_workflow_entry() {
     if [[ -f ".claude/ACTIVE_WORKFLOW.yaml" ]]; then
-        { grep -A2 "^entry_point:" .claude/ACTIVE_WORKFLOW.yaml 2>/dev/null || true; } | grep "agent:" | head -1 | awk '{print $2}' || echo ""
+        # Entire pipeline protected: any failure returns empty string
+        { grep -A2 "^entry_point:" .claude/ACTIVE_WORKFLOW.yaml 2>/dev/null | grep "agent:" | head -1 | awk '{print $2}'; } 2>/dev/null || echo ""
     else
         echo ""
     fi
@@ -50,7 +51,8 @@ get_workflow_entry() {
 # Get workflow name
 get_workflow_name() {
     if [[ -f ".claude/ACTIVE_WORKFLOW.yaml" ]]; then
-        { grep "^name:" .claude/ACTIVE_WORKFLOW.yaml 2>/dev/null || true; } | awk '{print $2}' || echo ""
+        # Entire pipeline protected: any failure returns empty string
+        { grep "^name:" .claude/ACTIVE_WORKFLOW.yaml 2>/dev/null | awk '{print $2}'; } 2>/dev/null || echo ""
     else
         echo ""
     fi
@@ -184,7 +186,7 @@ cmd_create() {
     mkdir -p "$SESSIONS_DIR" 2>/dev/null
     while ! mkdir "$lockfile" 2>/dev/null; do
         if [ $waited -ge $lock_timeout ]; then
-            echo '{"success": false, "error": "Timeout waiting for session lock"}'
+            echo '{"success": false, "error": "Timeout waiting for session lock"}' >&2
             exit 1
         fi
         sleep 1
@@ -196,7 +198,7 @@ cmd_create() {
     # Validate no existing session
     if has_session; then
         if is_parked; then
-            cat <<EOF
+            cat >&2 <<EOF
 {
   "success": false,
   "error": "Session already exists (parked). Use /continue to resume or /wrap to finalize.",
@@ -204,7 +206,7 @@ cmd_create() {
 }
 EOF
         else
-            cat <<EOF
+            cat >&2 <<EOF
 {
   "success": false,
   "error": "Session already active. Use /park first or /wrap to finalize.",
@@ -222,20 +224,20 @@ EOF
 
     # Create directories atomically - rollback on failure
     mkdir -p "$session_dir" || {
-        echo '{"success": false, "error": "Failed to create session directory"}'
+        echo '{"success": false, "error": "Failed to create session directory"}' >&2
         exit 1
     }
 
     mkdir -p "$TTY_MAP_DIR" || {
         rm -rf "$session_dir"
-        echo '{"success": false, "error": "Failed to create TTY map directory"}'
+        echo '{"success": false, "error": "Failed to create TTY map directory"}' >&2
         exit 1
     }
 
     # Map TTY to session
     echo "$session_id" > "$TTY_MAP_DIR/$tty_hash" || {
         rm -rf "$session_dir"
-        echo '{"success": false, "error": "Failed to create TTY mapping"}'
+        echo '{"success": false, "error": "Failed to create TTY mapping"}' >&2
         exit 1
     }
 
@@ -267,7 +269,7 @@ CONTEXT
     if ! validate_session_context "$session_dir/SESSION_CONTEXT.md" 2>/dev/null; then
         rm -rf "$session_dir"
         rm -f "$TTY_MAP_DIR/$tty_hash"
-        echo '{"success": false, "error": "Failed to validate SESSION_CONTEXT.md"}'
+        echo '{"success": false, "error": "Failed to validate SESSION_CONTEXT.md"}' >&2
         exit 1
     fi
 
@@ -329,13 +331,13 @@ cmd_transition() {
     local to_phase="${2:-}"
 
     if [[ -z "$from_phase" || -z "$to_phase" ]]; then
-        echo '{"success": false, "error": "Usage: transition <from_phase> <to_phase>"}'
+        echo '{"success": false, "error": "Usage: transition <from_phase> <to_phase>"}' >&2
         exit 1
     fi
 
     local session_id=$(get_session_id)
     if [[ -z "$session_id" ]]; then
-        echo '{"success": false, "error": "No active session found"}'
+        echo '{"success": false, "error": "No active session found"}' >&2
         exit 1
     fi
 
@@ -343,7 +345,7 @@ cmd_transition() {
     local ctx_file="$session_dir/SESSION_CONTEXT.md"
 
     if [[ ! -f "$ctx_file" ]]; then
-        echo '{"success": false, "error": "SESSION_CONTEXT.md not found"}'
+        echo '{"success": false, "error": "SESSION_CONTEXT.md not found"}' >&2
         exit 1
     fi
 
@@ -394,7 +396,7 @@ cmd_transition() {
         done
         artifacts_json+="]"
 
-        cat <<EOF
+        cat >&2 <<EOF
 {
   "success": false,
   "error": "$error_msg",
@@ -456,7 +458,7 @@ cmd_mutate() {
     shift || true
 
     if [[ -z "$operation" ]]; then
-        echo '{"success": false, "error": "Operation required: park|resume|wrap|handoff"}'
+        echo '{"success": false, "error": "Operation required: park|resume|wrap|handoff"}' >&2
         exit 1
     fi
 
@@ -467,7 +469,7 @@ cmd_mutate() {
     mkdir -p "$SESSIONS_DIR" 2>/dev/null
     while ! mkdir "$lockfile" 2>/dev/null; do
         if [ $waited -ge $lock_timeout ]; then
-            echo '{"success": false, "error": "Timeout waiting for mutation lock"}'
+            echo '{"success": false, "error": "Timeout waiting for mutation lock"}' >&2
             exit 1
         fi
         sleep 1
@@ -479,7 +481,7 @@ cmd_mutate() {
     # Get current session
     local session_id=$(get_session_id)
     if [[ -z "$session_id" ]]; then
-        echo '{"success": false, "error": "No active session for this terminal"}'
+        echo '{"success": false, "error": "No active session for this terminal"}' >&2
         exit 1
     fi
 
@@ -487,14 +489,14 @@ cmd_mutate() {
     local session_file="$session_dir/SESSION_CONTEXT.md"
 
     if [[ ! -f "$session_file" ]]; then
-        echo '{"success": false, "error": "SESSION_CONTEXT.md not found"}'
+        echo '{"success": false, "error": "SESSION_CONTEXT.md not found"}' >&2
         exit 1
     fi
 
     # Create backup before mutation
     local backup_file="$session_dir/.SESSION_CONTEXT.backup"
     cp "$session_file" "$backup_file" || {
-        echo '{"success": false, "error": "Failed to create backup"}'
+        echo '{"success": false, "error": "Failed to create backup"}' >&2
         exit 1
     }
 
@@ -523,7 +525,7 @@ cmd_mutate() {
             result=$(mutate_handoff "$session_file" "$from_agent" "$to_agent" "$notes" "$timestamp")
             ;;
         *)
-            echo '{"success": false, "error": "Unknown operation: '"$operation"'"}'
+            echo '{"success": false, "error": "Unknown operation: '"$operation"'"}' >&2
             rm -f "$backup_file"
             exit 1
             ;;
@@ -534,7 +536,7 @@ cmd_mutate() {
         # Rollback on validation failure
         mv "$backup_file" "$session_file"
         echo "$timestamp | $session_id | $operation | ROLLBACK | VALIDATION_FAILED" >> "$audit_log"
-        echo '{"success": false, "error": "Validation failed, rolled back changes"}'
+        echo '{"success": false, "error": "Validation failed, rolled back changes"}' >&2
         exit 1
     fi
 
@@ -556,7 +558,7 @@ mutate_park() {
 
     # Check not already parked
     if grep -qE "^(parked_at|auto_parked_at):" "$file" 2>/dev/null; then
-        echo '{"success": false, "error": "Session already parked"}'
+        echo '{"success": false, "error": "Session already parked"}' >&2
         return 1
     fi
 
@@ -586,7 +588,7 @@ mutate_resume() {
 
     # Check is parked
     if ! grep -qE "^(parked_at|auto_parked_at):" "$file" 2>/dev/null; then
-        echo '{"success": false, "error": "Session not parked"}'
+        echo '{"success": false, "error": "Session not parked"}' >&2
         return 1
     fi
 
