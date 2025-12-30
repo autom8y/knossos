@@ -36,7 +36,7 @@ description: |
   commands organized by category: Session, Team Management, Workflows, Operations."
   </example>
 tools: Bash, Glob, Grep, Read, Task, WebSearch
-model: claude-opus-4-5
+model: opus
 color: cyan
 ---
 

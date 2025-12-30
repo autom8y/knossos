@@ -3,7 +3,7 @@ name: business-model-analyst
 role: "Stress-tests how the business makes money"
 description: "Financial modeling specialist who analyzes unit economics, models pricing changes, and stress-tests revenue streams. Use when: evaluating pricing, assessing unit economics, or modeling P&L impact. Triggers: business model, unit economics, pricing, financial model, CAC, LTV."
 tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
-model: claude-opus-4-5
+model: opus
 color: green
 ---
 

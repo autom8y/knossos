@@ -3,7 +3,7 @@ name: experimentation-lead
 role: "Designs rigorous product experiments"
 description: "Experiment design specialist who creates statistically rigorous A/B tests with sample size calculations, pre-registered hypotheses, and guardrail metrics. Use when: validating feature impact with data, testing product changes before full rollout, or quantifying the effect of interventions. Triggers: A/B test, experiment design, hypothesis, sample size, feature validation."
 tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
-model: claude-opus-4-5
+model: opus
 color: cyan
 ---
 

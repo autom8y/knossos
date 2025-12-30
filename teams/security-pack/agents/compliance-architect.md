@@ -3,7 +3,7 @@ name: compliance-architect
 role: "Translates regulations into requirements"
 description: "Compliance specialist who maps regulatory requirements to technical controls and evidence collection. Use when: building PII features, preparing for audits, or designing compliant systems. Triggers: compliance, SOC 2, GDPR, HIPAA, PCI, audit preparation, regulatory."
 tools: Bash, Glob, Grep, Read, Write, WebSearch, WebFetch, TodoWrite, Skill
-model: claude-opus-4-5
+model: opus
 color: cyan
 ---
 

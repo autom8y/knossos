@@ -3,7 +3,7 @@ name: ecosystem-analyst
 role: "Traces ecosystem issues to root causes"
 description: "Diagnostic specialist who traces CEM/skeleton/roster problems to root causes and produces Gap Analysis. Use when: satellites fail sync, hooks don't fire, or infrastructure needs scoping. Triggers: ecosystem issue, sync failure, root cause, gap analysis."
 tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
-model: claude-opus-4-5
+model: opus
 color: orange
 ---
 

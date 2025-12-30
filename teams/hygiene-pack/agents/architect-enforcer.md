@@ -3,7 +3,7 @@ name: architect-enforcer
 role: "Plans refactoring with architectural contracts"
 description: "Architectural refactoring specialist who evaluates smells through boundary lens and produces refactoring plans with before/after contracts. Use when: evaluating architectural implications of smells or planning cleanup that respects boundaries. Triggers: refactoring plan, boundary violation, architectural evaluation, before/after contracts."
 tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
-model: claude-opus-4-5
+model: opus
 color: cyan
 ---
 

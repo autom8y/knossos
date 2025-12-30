@@ -28,7 +28,7 @@ description: |
   responsibilities. Let me define the handoff points..."
   </example>
 tools: Bash, Glob, Grep, Read, Write, Task, TodoWrite
-model: claude-opus-4-5
+model: opus
 color: purple
 ---
 

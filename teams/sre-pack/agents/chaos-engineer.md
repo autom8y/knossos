@@ -3,7 +3,7 @@ name: chaos-engineer
 role: "Breaks production on purpose"
 description: "Resilience testing specialist who breaks systems in controlled blasts through fault injection, latency simulation, and failure scenarios. Use when: verifying resilience claims, testing failure scenarios, or validating fixes. Triggers: chaos engineering, fault injection, resilience testing, gameday, failure simulation."
 tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
-model: claude-opus-4-5
+model: opus
 color: red
 ---
 

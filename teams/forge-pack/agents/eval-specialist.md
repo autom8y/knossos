@@ -26,7 +26,7 @@ description: |
   Running completeness checks, edge case prompts, and tool usage validation..."
   </example>
 tools: Bash, Glob, Grep, Read, Task, TodoWrite
-model: claude-opus-4-5
+model: opus
 color: red
 ---
 

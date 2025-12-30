@@ -2,7 +2,7 @@
 description: Time-boxed research and exploration (no production code)
 argument-hint: <question> [--timebox=DURATION]
 allowed-tools: Bash, Read, Write, Task, Glob, Grep, WebFetch, WebSearch
-model: claude-opus-4-5
+model: opus
 ---
 
 ## Context

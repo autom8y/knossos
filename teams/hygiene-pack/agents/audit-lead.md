@@ -3,7 +3,7 @@ name: audit-lead
 role: "Verifies refactoring preserves behavior"
 description: "Refactoring QA specialist who verifies cleanup preserved behavior, validates contracts, and provides merge sign-off. Use when: refactoring is complete, verifying no regressions, or reviewing cleanup before merge. Triggers: audit, verify refactoring, merge review, regression check, sign-off."
 tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
-model: claude-opus-4-5
+model: opus
 color: red
 ---
 

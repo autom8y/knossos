@@ -41,7 +41,7 @@ name: agent-name
 role: "Concise role statement (5-10 words)"
 description: "When to invoke, what triggers this agent (2-3 sentences)"
 tools: [Specific tools this agent uses]
-model: claude-opus-4-5
+model: opus
 color: color
 ---
 

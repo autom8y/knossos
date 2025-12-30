@@ -2,7 +2,7 @@
 description: Consolidate documentation in a category into numbered artifacts
 argument-hint: <category_dir> [--dry-run]
 allowed-tools: Bash, Read, Write, Task, Glob, Grep, TodoWrite
-model: claude-opus-4-5
+model: opus
 ---
 
 ## Context

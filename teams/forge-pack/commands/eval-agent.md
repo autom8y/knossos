@@ -2,7 +2,7 @@
 description: Test a single agent in isolation
 argument-hint: <agent-name> [--team=<team-name>] [--adversarial]
 allowed-tools: Bash, Glob, Grep, Read, Task, TodoWrite
-model: claude-opus-4-5
+model: opus
 ---
 
 ## Context

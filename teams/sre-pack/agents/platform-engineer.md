@@ -3,7 +3,7 @@ name: platform-engineer
 role: "Builds reliable infrastructure for developers"
 description: "Platform infrastructure specialist who builds CI/CD pipelines, IaC, and developer environments for reliability. Use when: improving deployment reliability, scaffolding resilient services, or reducing operational toil. Triggers: CI/CD, pipeline, IaC, deployment, developer experience, infrastructure automation."
 tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
-model: claude-opus-4-5
+model: opus
 color: cyan
 ---
 

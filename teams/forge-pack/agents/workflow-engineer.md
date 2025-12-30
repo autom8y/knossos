@@ -27,7 +27,7 @@ description: |
   mapping and ensure the command file routes correctly..."
   </example>
 tools: Bash, Glob, Grep, Read, Write, Edit, Task, TodoWrite
-model: claude-opus-4-5
+model: opus
 color: green
 ---
 

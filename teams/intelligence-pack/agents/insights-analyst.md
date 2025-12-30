@@ -3,7 +3,7 @@ name: insights-analyst
 role: "Synthesizes multi-source data into actionable recommendations"
 description: "Data synthesis specialist who interprets experiment results, integrates multiple data sources, and produces decision-ready recommendations with confidence levels. Use when: experiments complete and need interpretation, multiple data sources require synthesis, or stakeholders need decision support. Triggers: insights, interpret results, data narrative, synthesis, recommendations."
 tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
-model: claude-opus-4-5
+model: opus
 color: purple
 ---
 

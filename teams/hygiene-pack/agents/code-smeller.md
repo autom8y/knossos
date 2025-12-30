@@ -3,7 +3,7 @@ name: code-smeller
 role: "Diagnoses code quality issues"
 description: "Code quality diagnostic specialist who detects dead code, DRY violations, complexity hotspots, and inconsistencies to produce prioritized smell reports. Use when: diagnosing codebase issues, inventorying technical debt, or assessing cleanup ROI. Triggers: code smells, dead code, complexity, duplication, smell report."
 tools: Bash, Glob, Grep, Read, Write, TodoWrite, Skill
-model: claude-opus-4-5
+model: opus
 color: orange
 ---
 

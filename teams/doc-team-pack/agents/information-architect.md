@@ -3,7 +3,7 @@ name: information-architect
 role: "Designs documentation structure and taxonomy"
 description: "Documentation structure specialist who designs taxonomy, navigation, and content organization for findability. Use when: documentation needs reorganization, migration planning, or structural design. Triggers: information architecture, doc structure, taxonomy, navigation design, content organization."
 tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
-model: claude-opus-4-5
+model: opus
 color: cyan
 ---
 

@@ -3,7 +3,7 @@ name: security-reviewer
 role: "Final security gate before merge"
 description: "Security review specialist who reviews PRs with security implications and provides merge approval. Use when: PRs touch auth, crypto, PII, or external input, or releases need security signoff. Triggers: security review, security approval, merge review, security signoff, code security."
 tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
-model: claude-opus-4-5
+model: opus
 color: red
 ---
 
