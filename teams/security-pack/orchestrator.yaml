@@ -58,5 +58,5 @@ antipatterns:
   - "Skipping threat modeling for 'simple' features"
   - "Accepting unmitigated CRITICAL vulnerabilities"
 
-# Cross-team protocol (empty for security-pack - not a hub team)
-cross_team_protocol: ""
+# Cross-team protocol (security-pack is a hub team)
+cross_team_protocol: "Escalate infrastructure security to sre-pack. Coordinate with ecosystem-pack on security hooks."

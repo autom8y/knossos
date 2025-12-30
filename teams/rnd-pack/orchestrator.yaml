@@ -52,8 +52,11 @@ skills:
   - "@standards for technology philosophy"
   - "@cross-team for handoff patterns to other teams"
 
-# Team-specific anti-patterns (empty for rnd-pack - uses defaults)
-antipatterns: []
+# Team-specific anti-patterns
+antipatterns:
+  - "Premature optimization during spikes (explore first, optimize later)"
+  - "Over-engineering prototypes (deliberate shortcuts are expected)"
+  - "Skipping feasibility gates (every spike needs a go/no-go)"
 
 # Cross-team protocol (empty for rnd-pack - not a hub team)
 cross_team_protocol: ""

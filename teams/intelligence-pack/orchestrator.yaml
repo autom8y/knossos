@@ -44,6 +44,9 @@ skills:
   - "@experimentation for testing patterns"
   - "@research for user insight extraction"
 
-antipatterns: []
+antipatterns:
+  - "Insights without actionability (every insight needs a recommendation)"
+  - "Skipping sample size validation (risk of false conclusions)"
+  - "Reporting without recommendations (analysis must drive decisions)"
 
-cross_team_protocol: ""
+cross_team_protocol: "Share actionable insights with strategy-pack. Coordinate experiment designs with relevant product teams."

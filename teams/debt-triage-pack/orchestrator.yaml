@@ -39,6 +39,9 @@ skills:
   - "@risk-assessment for prioritization"
   - "@project-planning for execution roadmaps"
 
-antipatterns: []
+antipatterns:
+  - "Treating all debt equally (must prioritize by impact)"
+  - "Skipping risk assessment before paydown"
+  - "Debt without business context (need ROI justification)"
 
 cross_team_protocol: ""

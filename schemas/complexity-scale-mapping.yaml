@@ -1,0 +1,119 @@
+# Complexity Scale Mapping
+# Maps team-specific complexity levels to meta-scale for cross-team coordination
+
+schema_version: "1.0"
+
+meta_scale:
+  description: "Universal 4-tier complexity scale for cross-team communication"
+  tiers:
+    - name: PATCH
+      description: "Single file/config change, minimal coordination"
+      typical_phases: 1-2
+      typical_duration: "< 1 day"
+
+    - name: MODULE
+      description: "Single component/service, standard lifecycle"
+      typical_phases: 3-4
+      typical_duration: "1-5 days"
+
+    - name: SYSTEM
+      description: "Multiple components, cross-cutting concerns"
+      typical_phases: 4-5
+      typical_duration: "1-2 weeks"
+
+    - name: PLATFORM
+      description: "Architectural change, ecosystem-wide impact"
+      typical_phases: 5+
+      typical_duration: "2+ weeks"
+
+team_mappings:
+  # Development teams
+  10x-dev-pack:
+    SCRIPT: PATCH
+    MODULE: MODULE
+    SERVICE: SYSTEM
+    PLATFORM: PLATFORM
+
+  # Ecosystem teams
+  ecosystem-pack:
+    PATCH: PATCH
+    MODULE: MODULE
+    SYSTEM: SYSTEM
+    MIGRATION: PLATFORM
+
+  # Security teams
+  security-pack:
+    PATCH: PATCH
+    MODULE: MODULE
+    SERVICE: SYSTEM
+    PLATFORM: PLATFORM
+
+  # Research teams
+  rnd-pack:
+    SPIKE: PATCH
+    EXPLORATION: MODULE
+    PROTOTYPE: SYSTEM
+    PLATFORM_RESEARCH: PLATFORM
+
+  # Documentation teams
+  doc-team-pack:
+    PAGE: PATCH
+    SECTION: MODULE
+    GUIDE: SYSTEM
+    DOCUMENTATION_SYSTEM: PLATFORM
+
+  # Hygiene teams
+  hygiene-pack:
+    LINT_FIX: PATCH
+    REFACTOR: MODULE
+    CLEANUP: SYSTEM
+    MIGRATION: PLATFORM
+
+  # Debt teams
+  debt-triage-pack:
+    QUICK_WIN: PATCH
+    FOCUSED: MODULE
+    STRATEGIC: SYSTEM
+    ARCHITECTURAL: PLATFORM
+
+  # SRE teams
+  sre-pack:
+    INCIDENT: PATCH
+    IMPROVEMENT: MODULE
+    RELIABILITY: SYSTEM
+    PLATFORM_SRE: PLATFORM
+
+  # Intelligence teams
+  intelligence-pack:
+    QUERY: PATCH
+    ANALYSIS: MODULE
+    RESEARCH: SYSTEM
+    PLATFORM_ANALYTICS: PLATFORM
+
+  # Strategy teams
+  strategy-pack:
+    INSIGHT: PATCH
+    INITIATIVE: MODULE
+    STRATEGY: SYSTEM
+    VISION: PLATFORM
+
+  # Forge teams
+  forge-pack:
+    AGENT_FIX: PATCH
+    AGENT: MODULE
+    TEAM: SYSTEM
+    ECOSYSTEM: PLATFORM
+
+# Cross-team routing rules
+routing_rules:
+  - description: "PLATFORM complexity requires orchestrator consultation"
+    condition: "meta_complexity == PLATFORM"
+    action: "invoke_orchestrator before specialist"
+
+  - description: "Cross-team work requires hub team notification"
+    condition: "affects_multiple_teams == true"
+    action: "notify ecosystem-pack or forge-pack"
+
+  - description: "Security-critical work requires security-pack review"
+    condition: "security_impact == true and meta_complexity >= MODULE"
+    action: "route through security-pack after implementation"

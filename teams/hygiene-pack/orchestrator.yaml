@@ -44,6 +44,9 @@ skills:
   - "@refactoring for cleanup patterns"
   - "@testing for regression prevention"
 
-antipatterns: []
+antipatterns:
+  - "Refactoring without tests (risk of regression)"
+  - "Overfitting to single codebase style"
+  - "Ignoring performance implications of changes"
 
 cross_team_protocol: ""

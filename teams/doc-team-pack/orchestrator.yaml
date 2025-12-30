@@ -43,6 +43,9 @@ skills:
   - "@documentation for structure templates"
   - "@standards for writing conventions"
 
-antipatterns: []
+antipatterns:
+  - "Starting writing without audience analysis"
+  - "Writing before structure is approved"
+  - "Skipping technical accuracy review"
 
 cross_team_protocol: ""

@@ -44,6 +44,9 @@ skills:
   - "@business-modeling for financial planning"
   - "@strategy for competitive positioning"
 
-antipatterns: []
+antipatterns:
+  - "Analysis paralysis (set timebox, decide with available data)"
+  - "Ignoring competitive response (competitors will react)"
+  - "Strategy without execution path (every strategy needs implementation plan)"
 
 cross_team_protocol: ""

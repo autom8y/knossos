@@ -54,6 +54,9 @@ skills:
   - "@workflow-design for orchestration"
   - "@platform-integration for roster patterns"
 
-antipatterns: []
+antipatterns:
+  - "Creating agents without workflow context (agents must fit team lifecycle)"
+  - "Skipping prompt validation (prompts must be tested before deployment)"
+  - "Agent proliferation (consolidate similar roles, avoid agent sprawl)"
 
-cross_team_protocol: ""
+cross_team_protocol: "Notify ecosystem-pack of roster changes affecting CEM/skeleton. Coordinate with target team on agent specifications."

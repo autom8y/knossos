@@ -14,7 +14,7 @@ ROSTER_HOME="${ROSTER_HOME:-$HOME/Code/roster}"
 TEAM="${1:-rnd-pack}"
 DRY_RUN="${2:-}"
 
-TEMPLATE="$ROSTER_HOME/templates/orchestrator-base.md.tpl"
+TEMPLATE="$ROSTER_HOME/templates/base-orchestrator.md"
 CONFIG="$ROSTER_HOME/teams/$TEAM/orchestrator.yaml"
 WORKFLOW="$ROSTER_HOME/teams/$TEAM/workflow.yaml"
 OUTPUT="$ROSTER_HOME/teams/$TEAM/agents/orchestrator.md"
@@ -41,6 +41,7 @@ echo "  Output: $OUTPUT"
 ROLE=$(yq '.frontmatter.role' "$CONFIG")
 DESCRIPTION=$(yq '.frontmatter.description' "$CONFIG" | tr '\n' ' ' | sed 's/  */ /g' | sed 's/ *$//')
 COLOR=$(yq '.team.color' "$CONFIG")
+TEAM_NAME=$(yq '.team.name' "$CONFIG")
 
 # --- Extract values from workflow.yaml ---
 
@@ -63,32 +64,62 @@ generate_workflow_diagram() {
     local agents=($SPECIALISTS)
     local num_agents=${#agents[@]}
 
-    # Build a simple linear diagram
+    # Header (common to all)
     echo "                    +-----------------+"
     echo "                    |   ORCHESTRATOR  |"
     echo "                    +--------+--------+"
     echo "                             |"
 
-    if [[ $num_agents -eq 4 ]]; then
-        # 4-agent layout (like rnd-pack)
-        echo "        +--------------------+--------------------+"
-        echo "        v                    v                    v"
-        printf "+---------------+   +---------------+   +---------------+\n"
-        printf "|  %-11s |-->|  %-11s |-->|   %-10s |\n" "$(echo ${agents[0]} | cut -d'-' -f1)" "$(echo ${agents[1]} | cut -d'-' -f1)" "$(echo ${agents[2]} | cut -d'-' -f1)"
-        printf "|  %-11s |   |  %-11s |   |   %-10s |\n" "$(echo ${agents[0]} | cut -d'-' -f2-)" "$(echo ${agents[1]} | cut -d'-' -f2-)" "$(echo ${agents[2]} | cut -d'-' -f2-)"
-        printf "+---------------+   +---------------+   +---------------+\n"
-        echo "                                              |"
-        echo "                                              v"
-        echo "                                       +---------------+"
-        printf "                                       |   %-10s |\n" "$(echo ${agents[3]} | cut -d'-' -f1)"
-        printf "                                       |   %-10s |\n" "$(echo ${agents[3]} | cut -d'-' -f2-)"
-        echo "                                       +---------------+"
-    else
-        # Fallback: simple vertical list
-        for agent in "${agents[@]}"; do
-            echo "        +-> $agent"
-        done
-    fi
+    case $num_agents in
+        1|2|3)
+            # Simple horizontal layout
+            local sep="        "
+            for agent in "${agents[@]}"; do
+                echo "${sep}+-> $agent"
+            done
+            ;;
+        4)
+            # 2x2 grid layout
+            echo "        +----------+----------+"
+            echo "        v          v          v"
+            printf "   %-14s %-14s %-14s\n" "${agents[0]}" "${agents[1]}" "${agents[2]}"
+            echo "        |          |          |"
+            echo "        +----------+----------+"
+            echo "                   |"
+            echo "                   v"
+            printf "              %-14s\n" "${agents[3]}"
+            ;;
+        5)
+            # Top row: 3, Bottom row: 2
+            echo "   +-----------+-----------+-----------+"
+            echo "   v           v           v           "
+            printf "%-12s %-12s %-12s\n" "${agents[0]}" "${agents[1]}" "${agents[2]}"
+            echo "   |           |           |           "
+            echo "   +-----------+-----------+           "
+            echo "               |                       "
+            echo "       +-------+-------+               "
+            echo "       v               v               "
+            printf "   %-12s     %-12s\n" "${agents[3]}" "${agents[4]}"
+            ;;
+        6)
+            # 2 rows of 3
+            echo "   +-----------+-----------+-----------+"
+            echo "   v           v           v           "
+            printf "%-12s %-12s %-12s\n" "${agents[0]}" "${agents[1]}" "${agents[2]}"
+            echo "   |           |           |           "
+            echo "   +-----------+-----------+-----------+"
+            echo "   v           v           v           "
+            printf "%-12s %-12s %-12s\n" "${agents[3]}" "${agents[4]}" "${agents[5]}"
+            ;;
+        *)
+            # 7+ agents: compact list with count
+            echo "        +--- ${num_agents} specialists ---+"
+            for agent in "${agents[@]}"; do
+                echo "        | $agent"
+            done
+            echo "        +------------------------+"
+            ;;
+    esac
 }
 
 WORKFLOW_DIAGRAM=$(generate_workflow_diagram)
@@ -115,6 +146,69 @@ generate_skills_reference() {
 
 SKILLS_REFERENCE=$(generate_skills_reference)
 
+# --- Generate handoff criteria ---
+
+generate_handoff_criteria() {
+    local phases
+    phases=$(yq '.phases[].name' "$WORKFLOW")
+
+    echo "| Phase | Criteria |"
+    echo "|-------|----------|"
+
+    for phase in $phases; do
+        local criteria
+        criteria=$(yq ".handoff_criteria.$phase[]" "$CONFIG" 2>/dev/null | \
+            sed 's/^/- /' | tr '\n' '<br>')
+        if [[ -n "$criteria" ]]; then
+            echo "| $phase | ${criteria%<br>} |"
+        fi
+    done
+}
+
+HANDOFF_CRITERIA=$(generate_handoff_criteria)
+
+# --- Generate cross-team protocol (conditional) ---
+
+generate_cross_team_protocol() {
+    local protocol
+    protocol=$(yq '.cross_team_protocol' "$CONFIG" | tr -d '"')
+
+    if [[ -n "$protocol" && "$protocol" != "null" && "$protocol" != "" ]]; then
+        cat <<EOF
+
+## Cross-Team Protocol
+
+$protocol
+
+When routing cross-team concerns:
+1. Identify the affected team(s)
+2. Include current session context in handoff
+3. Notify user of cross-team escalation
+4. Track resolution in throughline
+EOF
+    fi
+}
+
+CROSS_TEAM_PROTOCOL=$(generate_cross_team_protocol)
+
+# --- Generate team-specific antipatterns (conditional) ---
+
+generate_team_antipatterns() {
+    local antipatterns
+    antipatterns=$(yq '.antipatterns[]' "$CONFIG" 2>/dev/null)
+
+    if [[ -n "$antipatterns" ]]; then
+        echo ""
+        echo "### Team-Specific Anti-Patterns"
+        echo ""
+        yq '.antipatterns[]' "$CONFIG" | while read -r pattern; do
+            echo "- **$pattern**"
+        done
+    fi
+}
+
+TEAM_ANTIPATTERNS=$(generate_team_antipatterns)
+
 # --- Perform substitutions ---
 
 # Read template
@@ -125,6 +219,7 @@ CONTENT="${CONTENT//\{\{ROLE\}\}/$ROLE}"
 CONTENT="${CONTENT//\{\{COLOR\}\}/$COLOR}"
 CONTENT="${CONTENT//\{\{COMPLEXITY_ENUM\}\}/$COMPLEXITY_ENUM}"
 CONTENT="${CONTENT//\{\{SPECIALIST_ENUM\}\}/$SPECIALIST_ENUM}"
+CONTENT="${CONTENT//\{\{TEAM_NAME\}\}/$TEAM_NAME}"
 
 # Multi-line substitutions need special handling
 # POC: Use sed for these
@@ -180,6 +275,58 @@ awk -v file="$SKILLS_FILE" '
 ' "$TMPFILE" > "${TMPFILE}.new"
 mv "${TMPFILE}.new" "$TMPFILE"
 rm -f "$SKILLS_FILE"
+
+# Handoff criteria
+HANDOFF_FILE=$(mktemp)
+echo "$HANDOFF_CRITERIA" > "$HANDOFF_FILE"
+awk -v file="$HANDOFF_FILE" '
+/\{\{HANDOFF_CRITERIA\}\}/ {
+    while ((getline line < file) > 0) print line
+    close(file)
+    next
+}
+{ print }
+' "$TMPFILE" > "${TMPFILE}.new"
+mv "${TMPFILE}.new" "$TMPFILE"
+rm -f "$HANDOFF_FILE"
+
+# Cross-team protocol (conditional)
+if [[ -n "$CROSS_TEAM_PROTOCOL" ]]; then
+    PROTOCOL_FILE=$(mktemp)
+    echo "$CROSS_TEAM_PROTOCOL" > "$PROTOCOL_FILE"
+    awk -v file="$PROTOCOL_FILE" '
+    /\{\{CROSS_TEAM_PROTOCOL\}\}/ {
+        while ((getline line < file) > 0) print line
+        close(file)
+        next
+    }
+    { print }
+    ' "$TMPFILE" > "${TMPFILE}.new"
+    mv "${TMPFILE}.new" "$TMPFILE"
+    rm -f "$PROTOCOL_FILE"
+else
+    # Remove placeholder line entirely
+    sed -i '' '/\{\{CROSS_TEAM_PROTOCOL\}\}/d' "$TMPFILE"
+fi
+
+# Team-specific antipatterns (conditional)
+if [[ -n "$TEAM_ANTIPATTERNS" ]]; then
+    ANTIPATTERNS_FILE=$(mktemp)
+    echo "$TEAM_ANTIPATTERNS" > "$ANTIPATTERNS_FILE"
+    awk -v file="$ANTIPATTERNS_FILE" '
+    /\{\{TEAM_SPECIFIC_ANTIPATTERNS\}\}/ {
+        while ((getline line < file) > 0) print line
+        close(file)
+        next
+    }
+    { print }
+    ' "$TMPFILE" > "${TMPFILE}.new"
+    mv "${TMPFILE}.new" "$TMPFILE"
+    rm -f "$ANTIPATTERNS_FILE"
+else
+    # Remove placeholder line entirely
+    sed -i '' '/\{\{TEAM_SPECIFIC_ANTIPATTERNS\}\}/d' "$TMPFILE"
+fi
 
 # --- Output ---
 

@@ -8,6 +8,10 @@
 # CONSULTATION_RESPONSE
 # Output from orchestrator after analyzing CONSULTATION_REQUEST
 
+request_id: string           # Echo from request for correlation
+  required: true
+  validation: "Must match request.request_id"
+
 directive:
   action: enum               # What the main agent should do next
     values:
@@ -15,6 +19,17 @@ directive:
       - request_info         # Need more information to decide
       - await_user           # Need user input to proceed
       - complete             # Initiative is complete
+  confidence: number         # Certainty in this directive
+    range: [0.5, 1.0]
+    required: false          # Default: 1.0 (high confidence)
+    interpretation:
+      0.9-1.0: "High - clear next step"
+      0.7-0.89: "Medium - probable next step, minor ambiguity"
+      0.5-0.69: "Low - significant ambiguity, consider clarification"
+    behavior: |
+      When confidence < 0.7:
+      - Main agent should consider requesting_info before proceeding
+      - throughline.rationale should explain uncertainty source
 
 specialist:                  # When action is invoke_specialist
   name: string               # Specialist agent identifier

@@ -44,6 +44,9 @@ skills:
   - "@incident-response for runbook creation"
   - "@chaos-engineering for resilience testing"
 
-antipatterns: []
+antipatterns:
+  - "Creating alerts without runbooks (every alert needs response procedure)"
+  - "Skipping capacity planning (risk of cascading failures)"
+  - "Ignoring blast radius (changes must consider failure domains)"
 
 cross_team_protocol: ""

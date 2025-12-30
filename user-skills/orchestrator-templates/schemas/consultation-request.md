@@ -8,6 +8,12 @@
 # CONSULTATION_REQUEST
 # Input to orchestrator for routing decisions
 
+request_id: string           # UUID v4 for correlation
+  format: "uuid"
+  required: true
+  example: "550e8400-e29b-41d4-a716-446655440000"
+  purpose: "Correlate request with response across multi-consultation sessions"
+
 type: enum                   # Request type
   values:
     - initial                # First consultation for initiative
@@ -32,10 +38,24 @@ state:
 results:                     # For checkpoint/failure types
   phase_completed: string    # Phase that just finished
   artifact_summary: string   # Brief description of output
+    format: "<artifact_type> <artifact_id>: <key_outcome> (<metric>)"
+    maxLength: 100
+    examples:
+      - "PRD PRD-user-auth: 3 success criteria, all testable"
+      - "TDD TDD-user-auth: 4 components, 2 API contracts"
+      - "Gap Analysis GAP-orchestrator: 18 issues identified (3 P0)"
+    anti_pattern: "Completed the requirements phase (too vague)"
   handoff_criteria_met: array  # Which criteria passed
     - criterion_id: string   # prd-001, tdd-002, etc.
       status: enum           # PASS | FAIL | SKIP
-  failure_reason: string     # Why phase failed (if applicable)
+  failure_reason: string     # Human-readable failure description
+  failure_pattern: enum      # Machine-readable failure category
+    values:
+      - blocker              # External dependency blocking progress
+      - scope                # Scope too large or unclear
+      - capacity             # Agent lacks capability for task
+      - underspecified       # Insufficient context to proceed
+    required: false          # Only present for type: failure
 
 context_summary: string      # 200 words max, key context
 ```
