@@ -8,74 +8,63 @@ set -euo pipefail
 
 SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 
+# Source primitives for shared functions (json_extract, auto_approve)
+# shellcheck source=lib/primitives.sh
+source "$SCRIPT_DIR/lib/primitives.sh" 2>/dev/null || true
+
 # Source logging library
 source "$SCRIPT_DIR/lib/logging.sh" 2>/dev/null && log_init "team-validator" && log_start || true
 
 # Read JSON input from stdin
 INPUT=$(cat)
-COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
-
-# Helper function to output permission decision
-auto_approve() {
-  local reason="$1"
-  cat <<EOF
-{
-  "hookSpecificOutput": {
-    "hookEventName": "PreToolUse",
-    "permissionDecision": "allow",
-    "permissionDecisionReason": "$reason"
-  }
-}
-EOF
-  exit 0
-}
+COMMAND=$(json_extract "$INPUT" '.tool_input.command')
 
 # Auto-approve safe patterns used in slash commands
 # These are read-only operations used for context injection
 
 # List operations (ls)
 if [[ "$COMMAND" =~ ^ls[[:space:]] ]] || [[ "$COMMAND" == "ls" ]]; then
-  auto_approve "Safe ls command for context"
+  auto_approve "Safe ls command for context" "log_end"
 fi
 
 # Git read operations
 if [[ "$COMMAND" =~ ^git[[:space:]]+(status|branch|log|diff|symbolic-ref|rev-list|rev-parse|remote|config|show) ]]; then
-  auto_approve "Safe git read command for context"
+  auto_approve "Safe git read command for context" "log_end"
 fi
 
 # GitHub CLI read operations
 if [[ "$COMMAND" =~ ^gh[[:space:]]+(pr|issue)[[:space:]]+(list|view|status) ]]; then
-  auto_approve "Safe gh read command for context"
+  auto_approve "Safe gh read command for context" "log_end"
 fi
 
 # Cat for reading files
 if [[ "$COMMAND" =~ ^cat[[:space:]] ]]; then
-  auto_approve "Safe cat command for context"
+  auto_approve "Safe cat command for context" "log_end"
 fi
 
 # Head/tail for reading files
 if [[ "$COMMAND" =~ ^(head|tail)[[:space:]] ]]; then
-  auto_approve "Safe head/tail command for context"
+  auto_approve "Safe head/tail command for context" "log_end"
 fi
 
 # Test/existence checks
 if [[ "$COMMAND" =~ ^test[[:space:]] ]] || [[ "$COMMAND" =~ ^\[[[:space:]] ]]; then
-  auto_approve "Safe test command for context"
+  auto_approve "Safe test command for context" "log_end"
 fi
 
 # Sed for text processing (typically used with pipes from git)
 if [[ "$COMMAND" =~ ^sed[[:space:]] ]]; then
-  auto_approve "Safe sed command for context"
+  auto_approve "Safe sed command for context" "log_end"
 fi
 
 # Echo for output
 if [[ "$COMMAND" =~ ^echo[[:space:]] ]]; then
-  auto_approve "Safe echo command for context"
+  auto_approve "Safe echo command for context" "log_end"
 fi
 
 # Piped commands starting with safe operations
 if [[ "$COMMAND" =~ ^(git|gh|ls|cat|head|tail)[[:space:]].*\| ]]; then
-  auto_approve "Safe piped command for context"
+  auto_approve "Safe piped command for context" "log_end"
 fi
 
 # Only validate actual swap-team.sh invocations (not mentions in commit messages, etc.)
