@@ -20,7 +20,7 @@ Resume a parked work session with full context restoration. $ARGUMENTS
 
 ```bash
 # Check for existing TTY mapping (uses portable hash from session-manager)
-TTY_HASH=$(.claude/hooks/lib/session-manager.sh tty-hash | grep -o '"tty_hash": "[^"]*"' | cut -d'"' -f4)
+TTY_HASH=$(hooks/lib/session-manager.sh tty-hash | grep -o '"tty_hash": "[^"]*"' | cut -d'"' -f4)
 MAPPED_SESSION=$(cat ".claude/sessions/.tty-map/$TTY_HASH" 2>/dev/null)
 
 # List parked sessions if no mapping
@@ -58,7 +58,7 @@ fi
 
 4. **Execute atomic resume mutation**:
    ```bash
-   .claude/hooks/lib/session-manager.sh mutate resume
+   hooks/lib/session-manager.sh mutate resume
    ```
    This will:
    - Acquire lock to prevent race conditions

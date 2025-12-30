@@ -1874,7 +1874,11 @@ perform_swap() {
     update_active_team "$team_name"
 
     # Update session team if active session exists
-    if [[ -f ".claude/sessions/.current-session" && -x ".claude/hooks/lib/session-manager.sh" ]]; then
+    # Check both user-level and project-level for session-manager.sh
+    local session_mgr=""
+    [[ -x "$HOME/.claude/hooks/lib/session-manager.sh" ]] && session_mgr="$HOME/.claude/hooks/lib/session-manager.sh"
+    [[ -x ".claude/hooks/lib/session-manager.sh" ]] && session_mgr=".claude/hooks/lib/session-manager.sh"
+    if [[ -f ".claude/sessions/.current-session" && -n "$session_mgr" ]]; then
         local current_session
         current_session=$(cat ".claude/sessions/.current-session" 2>/dev/null)
         if [[ -n "$current_session" && -f ".claude/sessions/$current_session/SESSION_CONTEXT.md" ]]; then

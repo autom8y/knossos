@@ -93,7 +93,7 @@ Switch this terminal to a different session:
 
 ```bash
 # Uses portable hash from session-manager
-TTY_HASH=$(.claude/hooks/lib/session-manager.sh tty-hash | grep -o '"tty_hash": "[^"]*"' | cut -d'"' -f4)
+TTY_HASH=$(hooks/lib/session-manager.sh tty-hash | grep -o '"tty_hash": "[^"]*"' | cut -d'"' -f4)
 echo "$SESSION_ID" > ".claude/sessions/.tty-map/$TTY_HASH"
 ```
 

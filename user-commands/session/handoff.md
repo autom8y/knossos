@@ -42,7 +42,7 @@ Hand off work to a different agent with full context transfer. $ARGUMENTS
    FROM_AGENT="requirements-analyst"  # Get from SESSION_CONTEXT
    TO_AGENT="$1"
    NOTES="${2:-Agent handoff}"
-   .claude/hooks/lib/session-manager.sh mutate handoff "$FROM_AGENT" "$TO_AGENT" "$NOTES"
+   hooks/lib/session-manager.sh mutate handoff "$FROM_AGENT" "$TO_AGENT" "$NOTES"
    ```
    This will:
    - Acquire lock to prevent race conditions

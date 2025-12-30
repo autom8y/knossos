@@ -16,7 +16,7 @@ Complete the current work session with quality validation and archival. $ARGUMEN
 
 ```bash
 # Uses portable hash from session-manager
-TTY_HASH=$(.claude/hooks/lib/session-manager.sh tty-hash | grep -o '"tty_hash": "[^"]*"' | cut -d'"' -f4)
+TTY_HASH=$(hooks/lib/session-manager.sh tty-hash | grep -o '"tty_hash": "[^"]*"' | cut -d'"' -f4)
 SESSION_ID=$(cat ".claude/sessions/.tty-map/$TTY_HASH" 2>/dev/null)
 SESSION_DIR=".claude/sessions/$SESSION_ID"
 ```
@@ -46,7 +46,7 @@ SESSION_DIR=".claude/sessions/$SESSION_ID"
    ```bash
    ARCHIVE="true"
    [[ "$1" == "--no-archive" ]] && ARCHIVE="false"
-   .claude/hooks/lib/session-manager.sh mutate wrap "$ARCHIVE"
+   hooks/lib/session-manager.sh mutate wrap "$ARCHIVE"
    ```
    This will:
    - Acquire lock to prevent race conditions

@@ -29,7 +29,7 @@ $ARGUMENTS
 Create a new isolated worktree:
 
 ```bash
-.claude/hooks/lib/worktree-manager.sh create "$NAME" --team="$TEAM"
+hooks/lib/worktree-manager.sh create "$NAME" --team="$TEAM"
 ```
 
 **What happens:**
@@ -48,7 +48,7 @@ Create a new isolated worktree:
 Show all worktrees:
 
 ```bash
-.claude/hooks/lib/worktree-manager.sh list
+hooks/lib/worktree-manager.sh list
 ```
 
 Display as table:
@@ -59,7 +59,7 @@ Display as table:
 Detailed worktree info:
 
 ```bash
-.claude/hooks/lib/worktree-manager.sh status "$ID"
+hooks/lib/worktree-manager.sh status "$ID"
 ```
 
 ### remove <id> [--force]
@@ -67,7 +67,7 @@ Detailed worktree info:
 Remove a worktree:
 
 ```bash
-.claude/hooks/lib/worktree-manager.sh remove "$ID" [--force]
+hooks/lib/worktree-manager.sh remove "$ID" [--force]
 ```
 
 **Pre-checks:**
@@ -79,7 +79,7 @@ Remove a worktree:
 Remove stale worktrees (7+ days old, no changes):
 
 ```bash
-.claude/hooks/lib/worktree-manager.sh cleanup [--force]
+hooks/lib/worktree-manager.sh cleanup [--force]
 ```
 
 ### gc
@@ -87,7 +87,7 @@ Remove stale worktrees (7+ days old, no changes):
 Garbage collect orphaned refs:
 
 ```bash
-.claude/hooks/lib/worktree-manager.sh gc
+hooks/lib/worktree-manager.sh gc
 ```
 
 ## Examples

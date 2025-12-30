@@ -17,7 +17,7 @@ Pause the current work session and save state for later resumption. $ARGUMENTS
 This terminal's session is resolved via TTY mapping:
 ```bash
 # Uses portable hash from session-manager
-TTY_HASH=$(.claude/hooks/lib/session-manager.sh tty-hash | grep -o '"tty_hash": "[^"]*"' | cut -d'"' -f4)
+TTY_HASH=$(hooks/lib/session-manager.sh tty-hash | grep -o '"tty_hash": "[^"]*"' | cut -d'"' -f4)
 SESSION_ID=$(cat ".claude/sessions/.tty-map/$TTY_HASH" 2>/dev/null)
 SESSION_DIR=".claude/sessions/$SESSION_ID"
 SESSION_FILE="$SESSION_DIR/SESSION_CONTEXT.md"
@@ -40,7 +40,7 @@ SESSION_FILE="$SESSION_DIR/SESSION_CONTEXT.md"
 2. **Execute atomic park mutation**:
    ```bash
    REASON="${1:-Manual park}"
-   .claude/hooks/lib/session-manager.sh mutate park "$REASON"
+   hooks/lib/session-manager.sh mutate park "$REASON"
    ```
    This will:
    - Acquire lock to prevent race conditions

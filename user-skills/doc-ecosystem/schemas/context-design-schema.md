@@ -138,7 +138,7 @@ work_packages:
     name: "Centralized Validation Function"
     description: "Create single validate_session_context() in session-state.sh"
     files:
-      - path: ".claude/hooks/lib/session-state.sh"
+      - path: "hooks/lib/session-state.sh"
         action: modify
         description: "Add validate_session_context() function"
       - path: "roster/user-skills/session-common/session-context-schema.md"

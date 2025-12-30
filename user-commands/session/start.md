@@ -60,7 +60,7 @@ If not provided in arguments, ask the user:
 ### 3. Create Session (ONE command)
 
 ```bash
-.claude/hooks/lib/session-manager.sh create "<initiative>" "<complexity>" "<team>"
+hooks/lib/session-manager.sh create "<initiative>" "<complexity>" "<team>"
 ```
 
 This atomically:
