@@ -274,151 +274,19 @@ commands:
 
 ## Validation Function
 
-```bash
-# In workflow-validator.sh
-# Usage: validate_workflow_yaml "/path/to/workflow.yaml"
-# Returns:
-#   0 = valid
-#   1 = file not found
-#   2 = invalid YAML syntax
-#   3 = missing required field (field name in stderr)
-#   4 = field validation failed (details in stderr)
-#   5 = business rule violation (details in stderr)
+Validates workflow YAML files against schema requirements including required fields, enum values, and business rules (phase references, back-route integrity).
 
-validate_workflow_yaml() {
-    local file="$1"
-    local required_fields=("name" "workflow_type" "description" "entry_point" "phases" "complexity_levels")
+**Function**: `validate_workflow_yaml()`
 
-    # Check file exists
-    [ -f "$file" ] || { echo "File not found: $file" >&2; return 1; }
+**Implementation**: Hook-based validation logic (implementation location TBD - likely `/skeleton_claude/.claude/hooks/lib/workflow-validator.sh` or similar)
 
-    # Validate YAML syntax
-    if ! yq '.' "$file" > /dev/null 2>&1; then
-        echo "Invalid YAML syntax" >&2
-        return 2
-    fi
-
-    # Check required top-level fields
-    local missing=()
-    for field in "${required_fields[@]}"; do
-        if ! yq -e ".$field" "$file" > /dev/null 2>&1; then
-            missing+=("$field")
-        fi
-    done
-
-    if [ ${#missing[@]} -gt 0 ]; then
-        echo "Missing required fields: ${missing[*]}" >&2
-        return 3
-    fi
-
-    # Validate workflow_type enum
-    local workflow_type
-    workflow_type=$(yq '.workflow_type' "$file" | tr -d '"')
-    if [[ ! "$workflow_type" =~ ^(sequential|parallel|hybrid)$ ]]; then
-        echo "Invalid workflow_type: Must be sequential, parallel, or hybrid" >&2
-        return 4
-    fi
-
-    # Validate entry_point has required subfields
-    if ! yq -e '.entry_point.agent' "$file" > /dev/null 2>&1; then
-        echo "Missing field: entry_point.agent" >&2
-        return 3
-    fi
-    if ! yq -e '.entry_point.artifact.type' "$file" > /dev/null 2>&1; then
-        echo "Missing field: entry_point.artifact.type" >&2
-        return 3
-    fi
-    if ! yq -e '.entry_point.artifact.path_template' "$file" > /dev/null 2>&1; then
-        echo "Missing field: entry_point.artifact.path_template" >&2
-        return 3
-    fi
-
-    # Validate path_template contains {slug}
-    local path_template
-    path_template=$(yq '.entry_point.artifact.path_template' "$file" | tr -d '"')
-    if [[ ! "$path_template" =~ \{slug\} ]]; then
-        echo "Invalid path_template: Must contain {slug} placeholder" >&2
-        return 4
-    fi
-
-    # Validate phases array has at least one entry
-    local phase_count
-    phase_count=$(yq '.phases | length' "$file")
-    if [[ "$phase_count" -lt 1 ]]; then
-        echo "Business rule violation: phases must have at least one entry" >&2
-        return 5
-    fi
-
-    # Collect phase names for cross-validation
-    local phase_names=()
-    for i in $(seq 0 $((phase_count - 1))); do
-        local phase_name
-        phase_name=$(yq ".phases[$i].name" "$file" | tr -d '"')
-        phase_names+=("$phase_name")
-    done
-
-    # Validate each phase has required fields
-    local phase_fields=("name" "agent" "produces")
-    for i in $(seq 0 $((phase_count - 1))); do
-        for field in "${phase_fields[@]}"; do
-            if ! yq -e ".phases[$i].$field" "$file" > /dev/null 2>&1; then
-                echo "Missing field in phases[$i]: $field" >&2
-                return 3
-            fi
-        done
-    done
-
-    # Validate entry_point.agent references valid phase
-    local entry_agent
-    entry_agent=$(yq '.entry_point.agent' "$file" | tr -d '"')
-    local found_entry_agent=false
-    for i in $(seq 0 $((phase_count - 1))); do
-        local agent
-        agent=$(yq ".phases[$i].agent" "$file" | tr -d '"')
-        if [[ "$agent" == "$entry_agent" ]]; then
-            found_entry_agent=true
-            break
-        fi
-    done
-    if [[ "$found_entry_agent" == "false" ]]; then
-        echo "Business rule violation: entry_point.agent '$entry_agent' not found in phases" >&2
-        return 5
-    fi
-
-    # Validate complexity_levels has at least one entry
-    local level_count
-    level_count=$(yq '.complexity_levels | length' "$file")
-    if [[ "$level_count" -lt 1 ]]; then
-        echo "Business rule violation: complexity_levels must have at least one entry" >&2
-        return 5
-    fi
-
-    # Validate back_routes if present
-    if yq -e '.back_routes' "$file" > /dev/null 2>&1; then
-        local route_count
-        route_count=$(yq '.back_routes | length' "$file")
-        for i in $(seq 0 $((route_count - 1))); do
-            local source_phase target_phase
-            source_phase=$(yq ".back_routes[$i].source_phase" "$file" | tr -d '"')
-            target_phase=$(yq ".back_routes[$i].target_phase" "$file" | tr -d '"')
-
-            # Validate source_phase exists
-            if [[ ! " ${phase_names[*]} " =~ " ${source_phase} " ]]; then
-                echo "Invalid back_routes[$i].source_phase: '$source_phase' not in phases" >&2
-                return 4
-            fi
-
-            # Validate target_phase exists
-            if [[ ! " ${phase_names[*]} " =~ " ${target_phase} " ]]; then
-                echo "Invalid back_routes[$i].target_phase: '$target_phase' not in phases" >&2
-                return 4
-            fi
-        done
-    fi
-
-    return 0
-}
-```
+**Exit Codes**:
+- 0 = valid
+- 1 = file not found
+- 2 = invalid YAML syntax
+- 3 = missing required field
+- 4 = field validation failed
+- 5 = business rule violation
 
 ### Error Code Reference
 
