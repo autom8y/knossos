@@ -15,7 +15,8 @@ set -euo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/config.sh"
 
 # Get calling hook name from first argument or BASH_SOURCE
-HOOK_NAME="${1:-${BASH_SOURCE[1]##*/}}"
+HOOK_NAME="${1:-${BASH_SOURCE[1]:-unknown}}"
+HOOK_NAME="${HOOK_NAME##*/}"
 HOOK_NAME="${HOOK_NAME%.sh}"
 
 # =============================================================================
