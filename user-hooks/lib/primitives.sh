@@ -28,22 +28,6 @@ md5_portable() {
 }
 
 # =============================================================================
-# Portable Date Functions
-# =============================================================================
-
-# Portable date function for 7 days ago (works on macOS and Linux)
-date_portable_7days_ago() {
-  local format="${1:-%Y%m%d}"
-  if date -v-7d +%Y%m%d >/dev/null 2>&1; then
-    # macOS (BSD date)
-    date -v-7d +"$format"
-  else
-    # Linux (GNU date)
-    date -d "7 days ago" +"$format"
-  fi
-}
-
-# =============================================================================
 # YAML Parsing
 # =============================================================================
 
@@ -166,15 +150,6 @@ atomic_write() {
     fi
 
     return 0
-}
-
-# Atomic write from stdin (for piped content)
-# Usage: echo "content" | atomic_write_stdin "destination_file"
-atomic_write_stdin() {
-    local dest_file="$1"
-    local content
-    content=$(cat)
-    atomic_write "$dest_file" "$content"
 }
 
 # =============================================================================
