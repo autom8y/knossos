@@ -43,10 +43,10 @@ skills:
 EOF
 
 # Step 2: Generate orchestrator.md
-/Users/tomtenuta/Code/roster/templates/orchestrator-generate.sh my-team
+/roster/templates/orchestrator-generate.sh my-team
 
 # Step 3: Validate
-/Users/tomtenuta/Code/roster/templates/validate-orchestrator.sh \
+/roster/templates/validate-orchestrator.sh \
   .claude/teams/my-team/agents/orchestrator.md
 
 # Step 4: Commit
@@ -64,17 +64,17 @@ grep "^role:" .claude/agents/orchestrator.md
 
 ```bash
 # Step 1: Edit template
-nano /Users/tomtenuta/Code/roster/templates/orchestrator-base.md.tpl
+nano /roster/templates/orchestrator-base.md.tpl
 
 # Step 2: Regenerate all
 for team in .claude/teams/*/; do
-  /Users/tomtenuta/Code/roster/templates/orchestrator-generate.sh $(basename "$team")
+  /roster/templates/orchestrator-generate.sh $(basename "$team")
 done
 
 # Step 3: Validate all
 validation_failed=0
 for md in .claude/teams/*/agents/orchestrator.md; do
-  /Users/tomtenuta/Code/roster/templates/validate-orchestrator.sh "$md" || \
+  /roster/templates/validate-orchestrator.sh "$md" || \
     validation_failed=$((validation_failed + 1))
 done
 [ $validation_failed -eq 0 ] && echo "All passed" || echo "$validation_failed failed"
@@ -99,7 +99,7 @@ yq '.phases[].agent' .claude/teams/my-team/workflow.yaml
 nano .claude/teams/my-team/orchestrator.yaml
 
 # Regenerate
-/Users/tomtenuta/Code/roster/templates/orchestrator-generate.sh my-team
+/roster/templates/orchestrator-generate.sh my-team
 ```
 
 ### Validation Error: "No placeholders replaced"
@@ -107,7 +107,7 @@ nano .claude/teams/my-team/orchestrator.yaml
 ```bash
 # Delete bad file, regenerate
 rm .claude/teams/my-team/agents/orchestrator.md
-/Users/tomtenuta/Code/roster/templates/orchestrator-generate.sh my-team
+/roster/templates/orchestrator-generate.sh my-team
 
 # If still fails, check YAML
 yq . .claude/teams/my-team/orchestrator.yaml > /dev/null
@@ -121,10 +121,10 @@ head -10 .claude/teams/my-team/agents/orchestrator.md
 
 # Regenerate if malformed
 rm .claude/teams/my-team/agents/orchestrator.md
-/Users/tomtenuta/Code/roster/templates/orchestrator-generate.sh my-team
+/roster/templates/orchestrator-generate.sh my-team
 
 # Validate
-/Users/tomtenuta/Code/roster/templates/validate-orchestrator.sh \
+/roster/templates/validate-orchestrator.sh \
   .claude/teams/my-team/agents/orchestrator.md
 ```
 
@@ -171,11 +171,11 @@ extension_points:
 
 | Purpose | Location |
 |---------|----------|
-| Skill docs | `/Users/tomtenuta/Code/skeleton_claude/.claude/skills/orchestrator-templates/` |
-| Generator | `/Users/tomtenuta/Code/roster/templates/orchestrator-generate.sh` |
-| Validator | `/Users/tomtenuta/Code/roster/templates/validate-orchestrator.sh` |
-| Template | `/Users/tomtenuta/Code/roster/templates/orchestrator-base.md.tpl` |
-| Schema | `/Users/tomtenuta/Code/roster/schemas/orchestrator.yaml.schema.json` |
+| Skill docs | `/skeleton_claude/.claude/skills/orchestrator-templates/` |
+| Generator | `/roster/templates/orchestrator-generate.sh` |
+| Validator | `/roster/templates/validate-orchestrator.sh` |
+| Template | `/roster/templates/orchestrator-base.md.tpl` |
+| Schema | `/roster/schemas/orchestrator.yaml.schema.json` |
 | Team config | `.claude/teams/{team-name}/orchestrator.yaml` |
 | Generated | `.claude/teams/{team-name}/agents/orchestrator.md` |
 
@@ -198,13 +198,13 @@ extension_points:
 
 ```bash
 # Validate single file
-/Users/tomtenuta/Code/roster/templates/validate-orchestrator.sh path/to/orchestrator.md
+/roster/templates/validate-orchestrator.sh path/to/orchestrator.md
 
 # Validate YAML
 yq . path/to/orchestrator.yaml
 
 # Generate with force
-/Users/tomtenuta/Code/roster/templates/orchestrator-generate.sh my-team --force
+/roster/templates/orchestrator-generate.sh my-team --force
 
 # Check specialist names match
 diff <(yq '.phases[].agent' workflow.yaml | sort) \

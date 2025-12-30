@@ -1,7 +1,7 @@
 # Test Report: Team Swap Cycle Validation
 
 **Test Date**: 2025-12-29
-**Script Under Test**: `/Users/tomtenuta/Code/roster/swap-team.sh`
+**Script Under Test**: `/roster/swap-team.sh`
 **Tester**: QA Adversary
 **Test Environment**: macOS Darwin 25.1.0
 
@@ -59,7 +59,7 @@ All 11 team packs successfully complete the swap cycle with proper agent cleanup
 **Expected**: Error with helpful list of valid teams
 **Result**: PASS (blocked by pre-tool hook before script)
 ```
-Team pack 'nonexistent-pack' not found in /Users/tomtenuta/Code/roster/teams
+Team pack 'nonexistent-pack' not found in /roster/teams
 Available teams: [lists all 11 valid teams]
 ```
 
@@ -150,7 +150,7 @@ forge-pack agents display empty Role column in roster table because agent frontm
 ```
 
 **Root Cause**:
-`/Users/tomtenuta/Code/roster/teams/forge-pack/agents/*.md` files have `description:` but no `role:` field in YAML frontmatter. The script falls back to description but multiline descriptions are not parsed correctly.
+`/roster/teams/forge-pack/agents/*.md` files have `description:` but no `role:` field in YAML frontmatter. The script falls back to description but multiline descriptions are not parsed correctly.
 
 **Impact**: Cosmetic only - swap functionality unaffected.
 
@@ -208,6 +208,6 @@ forge-pack agents display empty Role column in roster table because agent frontm
 
 - macOS Darwin 25.1.0
 - bash (via swap-team.sh shebang)
-- ROSTER_HOME: /Users/tomtenuta/Code/roster
+- ROSTER_HOME: /roster
 - Test directory: /tmp/roster-swap-test (cleaned up)
 - User-level agents present: consultant.md, context-engineer.md, requirements-analyst.md, technology-scout.md

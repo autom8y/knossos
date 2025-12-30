@@ -103,7 +103,7 @@ Generated orchestrator.md files are placed in `.claude/agents/` alongside other 
 ### File Placement
 
 ```
-/Users/tomtenuta/Code/roster/teams/{team-name}/agents/orchestrator.md
+/roster/teams/{team-name}/agents/orchestrator.md
 ```
 
 ### CEM Validation Requirements
@@ -266,10 +266,10 @@ When implementing the generator integration:
 
 | File | Role | Owner |
 |---|---|---|
-| `/Users/tomtenuta/Code/roster/templates/orchestrator-base.md.tpl` | Template with placeholders | Shared (frozen after Phase 1) |
-| `/Users/tomtenuta/Code/roster/teams/{team}/orchestrator.yaml` | Team-specific config | Each team |
-| `/Users/tomtenuta/Code/roster/templates/generate-orchestrator.sh` | Generator script | Integration Engineer (Phase 2) |
-| `/Users/tomtenuta/Code/roster/templates/validate-orchestrator.sh` | Validation script | Integration Engineer (Phase 2) |
-| `/Users/tomtenuta/Code/roster/swap-team.sh` | Team swapper (no changes) | Existing (no modifications) |
-| `/Users/tomtenuta/Code/roster/teams/{team}/workflow.yaml` | Team workflow definition | Each team |
-| `/Users/tomtenuta/Code/roster/teams/{team}/agents/orchestrator.md` | Generated output | Generated (do not edit) |
+| `/roster/templates/orchestrator-base.md.tpl` | Template with placeholders | Shared (frozen after Phase 1) |
+| `/roster/teams/{team}/orchestrator.yaml` | Team-specific config | Each team |
+| `/roster/templates/generate-orchestrator.sh` | Generator script | Integration Engineer (Phase 2) |
+| `/roster/templates/validate-orchestrator.sh` | Validation script | Integration Engineer (Phase 2) |
+| `/roster/swap-team.sh` | Team swapper (no changes) | Existing (no modifications) |
+| `/roster/teams/{team}/workflow.yaml` | Team workflow definition | Each team |
+| `/roster/teams/{team}/agents/orchestrator.md` | Generated output | Generated (do not edit) |

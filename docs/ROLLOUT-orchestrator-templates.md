@@ -59,7 +59,7 @@
 1. **Team-Driven Migration**
    - Teams that want to adopt run:
      ```bash
-     cd /Users/tomtenuta/Code/roster
+     cd /roster
      ./scripts/orchestrator-migrate.sh <team-name>
      ```
    - Script extracts orchestrator.yaml from existing orchestrator.md

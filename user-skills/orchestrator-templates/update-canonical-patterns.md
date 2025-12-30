@@ -87,7 +87,7 @@ Ask yourself:
 
 ### Step 2.1: Locate the Template
 
-**File**: `/Users/tomtenuta/Code/roster/templates/orchestrator-base.md.tpl`
+**File**: `/roster/templates/orchestrator-base.md.tpl`
 
 Open and familiarize yourself with structure:
 - Lines 1-10: Frontmatter
@@ -122,15 +122,15 @@ After editing, verify:
 
 ```bash
 # Check template is valid Markdown
-head -20 /Users/tomtenuta/Code/roster/templates/orchestrator-base.md.tpl
-tail -20 /Users/tomtenuta/Code/roster/templates/orchestrator-base.md.tpl
+head -20 /roster/templates/orchestrator-base.md.tpl
+tail -20 /roster/templates/orchestrator-base.md.tpl
 
 # Count section headers
-grep "^## " /Users/tomtenuta/Code/roster/templates/orchestrator-base.md.tpl | wc -l
+grep "^## " /roster/templates/orchestrator-base.md.tpl | wc -l
 # Should be 9-10 sections
 
 # Verify no unclosed code blocks
-grep "^" /Users/tomtenuta/Code/roster/templates/orchestrator-base.md.tpl | \
+grep "^" /roster/templates/orchestrator-base.md.tpl | \
   grep -c '```' | xargs -I {} expr {} % 2
 # Should output 0 (even count of backticks)
 ```
@@ -142,7 +142,7 @@ grep "^" /Users/tomtenuta/Code/roster/templates/orchestrator-base.md.tpl | \
 Before regenerating, create a backup:
 
 ```bash
-cd /Users/tomtenuta/Code/skeleton_claude
+cd /skeleton_claude
 
 # Backup all orchestrator.md files
 mkdir -p /tmp/orchestrator-backup
@@ -162,7 +162,7 @@ Use batch regeneration command:
 for team in .claude/teams/*/; do
   team_name=$(basename "$team")
   echo "Regenerating $team_name..."
-  /Users/tomtenuta/Code/roster/templates/orchestrator-generate.sh "$team_name"
+  /roster/templates/orchestrator-generate.sh "$team_name"
 done
 
 # Verify all succeeded
@@ -178,7 +178,7 @@ find .claude/teams -name "orchestrator.md" -exec grep -l "{{" {} \;
 validation_failed=0
 for team_md in .claude/teams/*/agents/orchestrator.md; do
   echo "Validating $team_md..."
-  if ! /Users/tomtenuta/Code/roster/templates/validate-orchestrator.sh "$team_md"; then
+  if ! /roster/templates/validate-orchestrator.sh "$team_md"; then
     validation_failed=$((validation_failed + 1))
     echo "FAILED: $team_md"
   fi
@@ -322,7 +322,7 @@ grep "^- @" .claude/teams/*/agents/orchestrator.md | head -20
 ### Step 6.1: Stage Files
 
 ```bash
-cd /Users/tomtenuta/Code/skeleton_claude
+cd /skeleton_claude
 
 # Stage only orchestrator.md files (not YAML, which shouldn't change)
 git add .claude/teams/*/agents/orchestrator.md
@@ -428,11 +428,11 @@ Steps:
 **Command sequence**:
 ```bash
 # Edit template
-nano /Users/tomtenuta/Code/roster/templates/orchestrator-base.md.tpl
+nano /roster/templates/orchestrator-base.md.tpl
 
 # Regenerate
 for team in .claude/teams/*/; do
-  /Users/tomtenuta/Code/roster/templates/orchestrator-generate.sh $(basename "$team")
+  /roster/templates/orchestrator-generate.sh $(basename "$team")
 done
 
 # Review sample
@@ -465,16 +465,16 @@ mkdir -p /tmp/orch-backup
 cp -r .claude/teams/*/agents/orchestrator.md /tmp/orch-backup/
 
 # Edit template - add new section with placeholder
-nano /Users/tomtenuta/Code/roster/templates/orchestrator-base.md.tpl
+nano /roster/templates/orchestrator-base.md.tpl
 
 # Regenerate all
 for team in .claude/teams/*/; do
-  /Users/tomtenuta/Code/roster/templates/orchestrator-generate.sh $(basename "$team")
+  /roster/templates/orchestrator-generate.sh $(basename "$team")
 done
 
 # Validate all
 for md in .claude/teams/*/agents/orchestrator.md; do
-  /Users/tomtenuta/Code/roster/templates/validate-orchestrator.sh "$md" || exit 1
+  /roster/templates/validate-orchestrator.sh "$md" || exit 1
 done
 
 # Spot-check diffs
@@ -545,7 +545,7 @@ git diff .claude/teams/rnd-pack/agents/orchestrator.md | grep "^+" | head -20
 **Solution**:
 ```bash
 # Review template changes
-git diff /Users/tomtenuta/Code/roster/templates/orchestrator-base.md.tpl
+git diff /roster/templates/orchestrator-base.md.tpl
 
 # Check for common errors:
 # - Unclosed code blocks
@@ -553,7 +553,7 @@ git diff /Users/tomtenuta/Code/roster/templates/orchestrator-base.md.tpl
 # - Missing colons in YAML
 
 # Revert and try again
-git checkout /Users/tomtenuta/Code/roster/templates/orchestrator-base.md.tpl
+git checkout /roster/templates/orchestrator-base.md.tpl
 ```
 
 ### Issue: Specialist names changed in output
@@ -580,11 +580,11 @@ If something goes wrong:
 cp /tmp/orchestrator-backup/* .claude/teams/*/agents/orchestrator.md
 
 # Revert template
-git checkout /Users/tomtenuta/Code/roster/templates/orchestrator-base.md.tpl
+git checkout /roster/templates/orchestrator-base.md.tpl
 
 # Verify
 for md in .claude/teams/*/agents/orchestrator.md; do
-  /Users/tomtenuta/Code/roster/templates/validate-orchestrator.sh "$md" || exit 1
+  /roster/templates/validate-orchestrator.sh "$md" || exit 1
 done
 ```
 

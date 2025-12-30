@@ -191,11 +191,11 @@ The orchestrator template system is ready for production use.
 
 | Artifact | Absolute Path | Status |
 |----------|---------------|--------|
-| Generator | `/Users/tomtenuta/Code/roster/templates/orchestrator-generate.sh` | Verified |
-| Validator | `/Users/tomtenuta/Code/roster/templates/validate-orchestrator.sh` | Verified |
-| Template | `/Users/tomtenuta/Code/roster/templates/orchestrator-base.md.tpl` | Verified |
-| Schema | `/Users/tomtenuta/Code/roster/schemas/orchestrator.yaml.schema.json` | Verified |
-| Test Report | `/Users/tomtenuta/Code/roster/docs/qa/QA-OrchestratorTemplateSystem-TestReport.md` | Created |
+| Generator | `/roster/templates/orchestrator-generate.sh` | Verified |
+| Validator | `/roster/templates/validate-orchestrator.sh` | Verified |
+| Template | `/roster/templates/orchestrator-base.md.tpl` | Verified |
+| Schema | `/roster/schemas/orchestrator.yaml.schema.json` | Verified |
+| Test Report | `/roster/docs/qa/QA-OrchestratorTemplateSystem-TestReport.md` | Created |
 
 ---
 

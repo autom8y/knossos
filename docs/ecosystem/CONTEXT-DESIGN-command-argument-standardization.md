@@ -406,7 +406,7 @@ alias swap='~/Code/roster/swap-team.sh --update'
 
 ### swap-team.sh Changes
 
-**File**: `/Users/tomtenuta/Code/roster/swap-team.sh`
+**File**: `/roster/swap-team.sh`
 
 #### Change 1: Variable rename (line 28)
 ```bash

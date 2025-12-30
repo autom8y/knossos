@@ -92,7 +92,7 @@ The command ecosystem has three distinct architectural boundaries:
 
 #### RF-001: Add frontmatter to minus-1.md
 
-**File**: `/Users/tomtenuta/Code/roster/user-commands/meta/minus-1.md`
+**File**: `/roster/user-commands/meta/minus-1.md`
 
 **Before State** (lines 1-2):
 ```markdown
@@ -130,7 +130,7 @@ You are a **prompter**...
 
 #### RF-002: Add frontmatter to zero.md
 
-**File**: `/Users/tomtenuta/Code/roster/user-commands/meta/zero.md`
+**File**: `/roster/user-commands/meta/zero.md`
 
 **Before State** (lines 1-2):
 ```markdown
@@ -168,7 +168,7 @@ You are a **prompter**...
 
 #### RF-003: Add frontmatter to one.md
 
-**File**: `/Users/tomtenuta/Code/roster/user-commands/meta/one.md`
+**File**: `/roster/user-commands/meta/one.md`
 
 **Before State** (lines 1-2):
 ```markdown
@@ -207,7 +207,7 @@ You are a **prompter**...
 
 #### RF-004: Add model to sync.md
 
-**File**: `/Users/tomtenuta/Code/roster/user-commands/cem/sync.md`
+**File**: `/roster/user-commands/cem/sync.md`
 
 **Before State** (lines 1-5):
 ```yaml
@@ -244,7 +244,7 @@ model: sonnet
 
 #### RF-005: Add allowed-tools to team.md
 
-**File**: `/Users/tomtenuta/Code/roster/user-commands/navigation/team.md`
+**File**: `/roster/user-commands/navigation/team.md`
 
 **Before State** (lines 1-5):
 ```yaml
@@ -279,7 +279,7 @@ model: sonnet
 
 #### RF-006: Add argument-hint to cem-debug.md
 
-**File**: `/Users/tomtenuta/Code/roster/teams/ecosystem-pack/commands/cem-debug.md`
+**File**: `/roster/teams/ecosystem-pack/commands/cem-debug.md`
 
 **Before State** (lines 1-5):
 ```yaml
@@ -384,7 +384,7 @@ All 11 files in this phase follow the same transformation pattern.
 
 #### RF-017: Fix $ARGUMENTS placement in forge.md
 
-**File**: `/Users/tomtenuta/Code/roster/user-commands/team-switching/forge.md`
+**File**: `/roster/user-commands/team-switching/forge.md`
 
 **Before State** (lines 8-12):
 ```markdown

@@ -454,7 +454,7 @@ git push
 **Steps**:
 ```bash
 # For the team:
-cd /Users/tomtenuta/Code/roster/teams/<team>
+cd /roster/teams/<team>
 
 # Delete YAML config
 rm orchestrator.yaml

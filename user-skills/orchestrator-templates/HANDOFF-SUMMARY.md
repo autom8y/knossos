@@ -13,7 +13,7 @@
 
 ### 1. Complete Skill Documentation Package
 
-**Location**: `/Users/tomtenuta/Code/skeleton_claude/.claude/skills/orchestrator-templates/`
+**Location**: `/skeleton_claude/.claude/skills/orchestrator-templates/`
 
 **Files created** (10 comprehensive guides):
 - SKILL.md (1500 words) - Main entry point explaining purpose and usage

@@ -16,12 +16,12 @@ DEVELOPER WORKFLOW
           │        Format: YAML (human-readable config)
           │
           ├─→ [2] Run Generator
-          │        /Users/tomtenuta/Code/roster/templates/orchestrator-generate.sh
+          │        /roster/templates/orchestrator-generate.sh
           │        Input: orchestrator.yaml + workflow.yaml
           │        Output: orchestrator.md (production ready)
           │
           ├─→ [3] Validate Output
-          │        /Users/tomtenuta/Code/roster/templates/validate-orchestrator.sh
+          │        /roster/templates/validate-orchestrator.sh
           │        Checks: 10 structural and semantic rules
           │        Exit: 0 (success) or 2-3 (failure)
           │
@@ -300,22 +300,22 @@ FILE LOCATIONS SUMMARY
 ──────────────────────────────────────────────────────────────────────────────
 
 Generator:
-  /Users/tomtenuta/Code/roster/templates/orchestrator-generate.sh
+  /roster/templates/orchestrator-generate.sh
 
 Validator:
-  /Users/tomtenuta/Code/roster/templates/validate-orchestrator.sh
+  /roster/templates/validate-orchestrator.sh
 
 Template:
-  /Users/tomtenuta/Code/roster/templates/orchestrator-base.md.tpl
+  /roster/templates/orchestrator-base.md.tpl
 
 Schema:
-  /Users/tomtenuta/Code/roster/schemas/orchestrator.yaml.schema.json
+  /roster/schemas/orchestrator.yaml.schema.json
 
 Team Configs:
-  /Users/tomtenuta/Code/skeleton_claude/.claude/teams/{team-name}/orchestrator.yaml
+  /skeleton_claude/.claude/teams/{team-name}/orchestrator.yaml
 
 Generated Agents:
-  /Users/tomtenuta/Code/skeleton_claude/.claude/teams/{team-name}/agents/orchestrator.md
+  /skeleton_claude/.claude/teams/{team-name}/agents/orchestrator.md
 
 This Skill Documentation:
-  /Users/tomtenuta/Code/skeleton_claude/.claude/skills/orchestrator-templates/
+  /skeleton_claude/.claude/skills/orchestrator-templates/

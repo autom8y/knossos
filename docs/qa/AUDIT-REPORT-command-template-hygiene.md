@@ -162,4 +162,4 @@ These items were explicitly deferred in the refactoring plan and do not block th
 
 The Command Template Standardization sprint has successfully achieved its objectives. All team-switching commands now follow a consistent pattern, deprecated flags have been removed from the correct scope, and behavior has been preserved where required.
 
-**Attestation**: This audit was conducted by examining all 32 command files in `/Users/tomtenuta/Code/roster/user-commands/` using grep pattern matching and direct file reading. All findings are based on actual file contents as of 2025-12-29.
+**Attestation**: This audit was conducted by examining all 32 command files in `/roster/user-commands/` using grep pattern matching and direct file reading. All findings are based on actual file contents as of 2025-12-29.

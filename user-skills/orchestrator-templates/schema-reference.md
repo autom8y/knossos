@@ -4,9 +4,9 @@
 
 ## File Locations
 
-**Template location**: `/Users/tomtenuta/Code/skeleton_claude/.claude/teams/{team-name}/orchestrator.yaml`
+**Template location**: `/skeleton_claude/.claude/teams/{team-name}/orchestrator.yaml`
 
-**Example location**: `/Users/tomtenuta/Code/skeleton_claude/.claude/teams/rnd-pack/orchestrator.yaml`
+**Example location**: `/skeleton_claude/.claude/teams/rnd-pack/orchestrator.yaml`
 
 ## Schema Overview
 
@@ -345,7 +345,7 @@ Each extension point creates a new section in the generated orchestrator.
 
 For validation purposes, the official schema is:
 
-**Location**: `/Users/tomtenuta/Code/roster/schemas/orchestrator.yaml.schema.json`
+**Location**: `/roster/schemas/orchestrator.yaml.schema.json`
 
 Key constraints:
 - Required fields: team, frontmatter, routing, workflow_position, handoff_criteria, skills

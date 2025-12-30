@@ -127,7 +127,7 @@ Technical reference for CI/CD teams:
 ## Files Created
 
 ```
-/Users/tomtenuta/Code/roster/
+/roster/
 ├── .github/workflows/
 │   └── validate-orchestrators.yml          (14 KB - GitHub Actions workflow)
 ├── .githooks/

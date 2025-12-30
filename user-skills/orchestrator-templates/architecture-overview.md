@@ -95,7 +95,7 @@ Separate the parts that are the same from the parts that differ:
 - `<!-- STABLE: ... -->` - Can refine per team
 - `<!-- EXTENSION: ... -->` - Teams can customize
 
-**File location**: `/Users/tomtenuta/Code/roster/templates/orchestrator-base.md.tpl`
+**File location**: `/roster/templates/orchestrator-base.md.tpl`
 
 **Size**: ~140 lines
 
@@ -117,7 +117,7 @@ Separate the parts that are the same from the parts that differ:
 - Skill format: @skill-name with description
 - Handoff criteria: must exist for each specialist
 
-**File location**: `/Users/tomtenuta/Code/roster/schemas/orchestrator.yaml.schema.json`
+**File location**: `/roster/schemas/orchestrator.yaml.schema.json`
 
 **Status**: Complete. Not expected to change.
 
@@ -145,7 +145,7 @@ orchestrator.yaml + workflow.yaml + template
     └─→ Write orchestrator.md
 ```
 
-**File location**: `/Users/tomtenuta/Code/roster/templates/orchestrator-generate.sh`
+**File location**: `/roster/templates/orchestrator-generate.sh`
 
 **Status**: Production-ready (Phase 3 validated on all 11 teams)
 
@@ -171,7 +171,7 @@ orchestrator.yaml + workflow.yaml + template
 - 2: Structural validation failed
 - 3: Semantic validation failed
 
-**File location**: `/Users/tomtenuta/Code/roster/templates/validate-orchestrator.sh`
+**File location**: `/roster/templates/validate-orchestrator.sh`
 
 **Status**: Production-ready (Phase 3 tested on all 11 teams)
 

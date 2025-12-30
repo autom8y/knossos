@@ -31,7 +31,7 @@
 
 ## swap-team.sh Actual Flags
 
-From analysis of `/Users/tomtenuta/Code/roster/swap-team.sh` (lines 1587-1661):
+From analysis of `/roster/swap-team.sh` (lines 1587-1661):
 
 | Flag | Short | Purpose | Lines |
 |------|-------|---------|-------|
@@ -147,17 +147,17 @@ From analysis of `/Users/tomtenuta/Code/roster/swap-team.sh` (lines 1587-1661):
 **Severity**: HIGH - User confusion, commands promise functionality that doesn't exist
 
 **Affected Commands** (11 total):
-- `/Users/tomtenuta/Code/roster/user-commands/team-switching/10x.md`
-- `/Users/tomtenuta/Code/roster/user-commands/team-switching/debt.md`
-- `/Users/tomtenuta/Code/roster/user-commands/team-switching/docs.md`
-- `/Users/tomtenuta/Code/roster/user-commands/team-switching/hygiene.md`
-- `/Users/tomtenuta/Code/roster/user-commands/team-switching/intelligence.md`
-- `/Users/tomtenuta/Code/roster/user-commands/team-switching/rnd.md`
-- `/Users/tomtenuta/Code/roster/user-commands/team-switching/security.md`
-- `/Users/tomtenuta/Code/roster/user-commands/team-switching/sre.md`
-- `/Users/tomtenuta/Code/roster/user-commands/team-switching/strategy.md`
-- `/Users/tomtenuta/Code/roster/user-commands/navigation/ecosystem.md`
-- `/Users/tomtenuta/Code/roster/user-commands/navigation/team.md`
+- `/roster/user-commands/team-switching/10x.md`
+- `/roster/user-commands/team-switching/debt.md`
+- `/roster/user-commands/team-switching/docs.md`
+- `/roster/user-commands/team-switching/hygiene.md`
+- `/roster/user-commands/team-switching/intelligence.md`
+- `/roster/user-commands/team-switching/rnd.md`
+- `/roster/user-commands/team-switching/security.md`
+- `/roster/user-commands/team-switching/sre.md`
+- `/roster/user-commands/team-switching/strategy.md`
+- `/roster/user-commands/navigation/ecosystem.md`
+- `/roster/user-commands/navigation/team.md`
 
 **Evidence**: Line 1624-1629 in swap-team.sh shows unknown flags cause exit:
 ```bash
@@ -185,10 +185,10 @@ cd /any/satellite/project
 **Severity**: LOW - Cosmetic inconsistency
 
 **Affected Commands** (3 total):
-- `/Users/tomtenuta/Code/roster/user-commands/cem/sync.md` - Missing argument-hint
-- `/Users/tomtenuta/Code/roster/user-commands/meta/minus-1.md` - Missing (different pattern)
-- `/Users/tomtenuta/Code/roster/user-commands/meta/one.md` - Missing (different pattern)
-- `/Users/tomtenuta/Code/roster/user-commands/meta/zero.md` - Missing (different pattern)
+- `/roster/user-commands/cem/sync.md` - Missing argument-hint
+- `/roster/user-commands/meta/minus-1.md` - Missing (different pattern)
+- `/roster/user-commands/meta/one.md` - Missing (different pattern)
+- `/roster/user-commands/meta/zero.md` - Missing (different pattern)
 
 **Note**: Meta commands use `{TAG}` instead of `$ARGUMENTS` - this is intentional for their prompter pattern. Only sync.md needs an argument-hint added.
 
@@ -196,7 +196,7 @@ cd /any/satellite/project
 
 **Severity**: MEDIUM - Confusion between /team and team-switching commands
 
-**Location**: `/Users/tomtenuta/Code/roster/user-commands/navigation/team.md`
+**Location**: `/roster/user-commands/navigation/team.md`
 
 **Issue**: team.md documents these flags:
 - `--force`, `-f` - Not in swap-team.sh
@@ -311,7 +311,7 @@ Commands to validate after changes:
 ## Appendix: swap-team.sh Flag Parsing Code
 
 ```bash
-# Lines 1587-1661 from /Users/tomtenuta/Code/roster/swap-team.sh
+# Lines 1587-1661 from /roster/swap-team.sh
 main() {
     local team_name=""
 

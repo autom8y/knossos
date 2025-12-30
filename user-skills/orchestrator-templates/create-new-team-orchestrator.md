@@ -9,8 +9,8 @@
 
 ## Prerequisites
 
-- [ ] You have a team directory created: `/Users/tomtenuta/Code/skeleton_claude/.claude/teams/my-team/`
-- [ ] You have a workflow.yaml with your team's specialists: `/Users/tomtenuta/Code/skeleton_claude/.claude/teams/my-team/workflow.yaml`
+- [ ] You have a team directory created: `/skeleton_claude/.claude/teams/my-team/`
+- [ ] You have a workflow.yaml with your team's specialists: `/skeleton_claude/.claude/teams/my-team/workflow.yaml`
 - [ ] You know the team's: name, domain, color, and specialist roles
 - [ ] You have access to generator and validator scripts
 
@@ -18,10 +18,10 @@
 
 ### Step 1.1: Create the File
 
-Create `/Users/tomtenuta/Code/skeleton_claude/.claude/teams/my-team/orchestrator.yaml`:
+Create `/skeleton_claude/.claude/teams/my-team/orchestrator.yaml`:
 
 ```bash
-touch /Users/tomtenuta/Code/skeleton_claude/.claude/teams/my-team/orchestrator.yaml
+touch /skeleton_claude/.claude/teams/my-team/orchestrator.yaml
 ```
 
 ### Step 1.2: Add Team Metadata
@@ -83,7 +83,7 @@ routing:
 
 **Check your workflow.yaml**:
 ```bash
-grep "agent:" /Users/tomtenuta/Code/skeleton_claude/.claude/teams/my-team/workflow.yaml
+grep "agent:" /skeleton_claude/.claude/teams/my-team/workflow.yaml
 ```
 
 This shows exact specialist names. Use those names, not variations.
@@ -200,16 +200,16 @@ skills:
 ### Step 2.1: Run the Generator
 
 ```bash
-cd /Users/tomtenuta/Code/skeleton_claude
-/Users/tomtenuta/Code/roster/templates/orchestrator-generate.sh my-team
+cd /skeleton_claude
+/roster/templates/orchestrator-generate.sh my-team
 ```
 
 **Expected output**:
 ```
 Generating orchestrator for my-team...
-Template: /Users/tomtenuta/Code/roster/templates/orchestrator-base.md.tpl
-Config: /Users/tomtenuta/Code/skeleton_claude/.claude/teams/my-team/orchestrator.yaml
-Output: /Users/tomtenuta/Code/skeleton_claude/.claude/teams/my-team/agents/orchestrator.md
+Template: /roster/templates/orchestrator-base.md.tpl
+Config: /skeleton_claude/.claude/teams/my-team/orchestrator.yaml
+Output: /skeleton_claude/.claude/teams/my-team/agents/orchestrator.md
 Generation complete!
 ```
 
@@ -223,7 +223,7 @@ If generator fails:
 - Fix and retry
 
 **Error: "Template file not found"**
-- Verify template exists: `/Users/tomtenuta/Code/roster/templates/orchestrator-base.md.tpl`
+- Verify template exists: `/roster/templates/orchestrator-base.md.tpl`
 - Check file permissions
 - Try again
 
@@ -237,8 +237,8 @@ If generator fails:
 ### Step 3.1: Run Validation
 
 ```bash
-/Users/tomtenuta/Code/roster/templates/validate-orchestrator.sh \
-  /Users/tomtenuta/Code/skeleton_claude/.claude/teams/my-team/agents/orchestrator.md
+/roster/templates/validate-orchestrator.sh \
+  /skeleton_claude/.claude/teams/my-team/agents/orchestrator.md
 ```
 
 **Expected output**:
@@ -278,7 +278,7 @@ ERROR: Found 2 unreplaced placeholder(s)
 ### Step 4.1: Preview the File
 
 ```bash
-head -80 /Users/tomtenuta/Code/skeleton_claude/.claude/teams/my-team/agents/orchestrator.md
+head -80 /skeleton_claude/.claude/teams/my-team/agents/orchestrator.md
 ```
 
 **Check these sections**:
@@ -322,11 +322,11 @@ Verify specialist names match workflow.yaml exactly:
 ```bash
 # Show specialists in YAML
 echo "=== orchestrator.yaml routing ==="
-yq '.routing | keys[]' /Users/tomtenuta/Code/skeleton_claude/.claude/teams/my-team/orchestrator.yaml | sort
+yq '.routing | keys[]' /skeleton_claude/.claude/teams/my-team/orchestrator.yaml | sort
 
 # Show specialists in generated orchestrator
 echo "=== Generated routing table ==="
-grep "^|.*→" /Users/tomtenuta/Code/skeleton_claude/.claude/teams/my-team/agents/orchestrator.md | awk '{print $3}' | sort | uniq
+grep "^|.*→" /skeleton_claude/.claude/teams/my-team/agents/orchestrator.md | awk '{print $3}' | sort | uniq
 ```
 
 **These should match.**
@@ -336,7 +336,7 @@ grep "^|.*→" /Users/tomtenuta/Code/skeleton_claude/.claude/teams/my-team/agent
 ### Step 5.1: Stage Both Files
 
 ```bash
-cd /Users/tomtenuta/Code/skeleton_claude
+cd /skeleton_claude
 git add .claude/teams/my-team/orchestrator.yaml
 git add .claude/teams/my-team/agents/orchestrator.md
 ```
@@ -418,7 +418,7 @@ All your specialists should appear.
 **Fix**:
 ```bash
 # Check exact names in workflow.yaml
-yq '.phases[] | .agent' /Users/tomtenuta/Code/skeleton_claude/.claude/teams/my-team/workflow.yaml
+yq '.phases[] | .agent' /skeleton_claude/.claude/teams/my-team/workflow.yaml
 
 # Update orchestrator.yaml routing to match exactly
 # Then regenerate
@@ -431,13 +431,13 @@ yq '.phases[] | .agent' /Users/tomtenuta/Code/skeleton_claude/.claude/teams/my-t
 **Fix**:
 ```bash
 # Verify orchestrator.yaml syntax
-yq . /Users/tomtenuta/Code/skeleton_claude/.claude/teams/my-team/orchestrator.yaml
+yq . /skeleton_claude/.claude/teams/my-team/orchestrator.yaml
 
 # Try manual validation
-head -20 /Users/tomtenuta/Code/skeleton_claude/.claude/teams/my-team/agents/orchestrator.md
+head -20 /skeleton_claude/.claude/teams/my-team/agents/orchestrator.md
 
 # Regenerate
-/Users/tomtenuta/Code/roster/templates/orchestrator-generate.sh my-team
+/roster/templates/orchestrator-generate.sh my-team
 ```
 
 ### Issue: Frontmatter in generated file is wrong
@@ -447,7 +447,7 @@ head -20 /Users/tomtenuta/Code/skeleton_claude/.claude/teams/my-team/agents/orch
 **Fix**:
 ```bash
 # Review your orchestrator.yaml team section
-yq '.team' /Users/tomtenuta/Code/skeleton_claude/.claude/teams/my-team/orchestrator.yaml
+yq '.team' /skeleton_claude/.claude/teams/my-team/orchestrator.yaml
 
 # All fields required and valid:
 # - name: lowercase-hyphens
@@ -511,7 +511,7 @@ After successful creation:
 
 For reference, here's a real example of doc-team-pack configuration:
 
-**File**: `/Users/tomtenuta/Code/skeleton_claude/.claude/teams/doc-team-pack/orchestrator.yaml`
+**File**: `/skeleton_claude/.claude/teams/doc-team-pack/orchestrator.yaml`
 
 ```yaml
 team:

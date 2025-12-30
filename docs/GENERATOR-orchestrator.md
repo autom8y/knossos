@@ -4,7 +4,7 @@
 
 **Last Updated**: 2025-12-29
 **Status**: Production (Phase 2 Complete)
-**Location**: `/Users/tomtenuta/Code/roster/templates/orchestrator-generate.sh`
+**Location**: `/roster/templates/orchestrator-generate.sh`
 
 ---
 
@@ -34,7 +34,7 @@ The `orchestrator-generate.sh` generator creates production-ready orchestrator.m
 ### Generate Single Team
 
 ```bash
-cd /Users/tomtenuta/Code/roster
+cd /roster
 
 # Generate with validation
 ./templates/orchestrator-generate.sh rnd-pack
@@ -107,7 +107,7 @@ cd /Users/tomtenuta/Code/roster
 
 Each team has an `orchestrator.yaml` file that defines its orchestrator.md generation parameters.
 
-**Location**: `/Users/tomtenuta/Code/roster/teams/<team>/orchestrator.yaml`
+**Location**: `/roster/teams/<team>/orchestrator.yaml`
 
 **Structure**:
 
@@ -156,13 +156,13 @@ antipatterns:
 cross_team_protocol: "Description of how team coordinates with others"
 ```
 
-**Example**: `/Users/tomtenuta/Code/roster/teams/rnd-pack/orchestrator.yaml`
+**Example**: `/roster/teams/rnd-pack/orchestrator.yaml`
 
 ### workflow.yaml
 
 Each team also has a `workflow.yaml` that defines phases, specialists, and complexity levels.
 
-**Location**: `/Users/tomtenuta/Code/roster/teams/<team>/workflow.yaml`
+**Location**: `/roster/teams/<team>/workflow.yaml`
 
 **Key Sections**:
 - `phases[]`: Array of phase names and agent names
@@ -181,17 +181,17 @@ The generator uses workflow.yaml to:
 ### Example 1: Single Team Generation with Validation
 
 ```bash
-$ cd /Users/tomtenuta/Code/roster
+$ cd /roster
 $ ./templates/orchestrator-generate.sh doc-team-pack
 
 OK: All dependencies found
 OK: All required files exist
 
 INFO: Processing team: doc-team-pack
-OK: Schema validation passed: /Users/tomtenuta/Code/roster/teams/doc-team-pack/orchestrator.yaml
-OK: Workflow references validated: /Users/tomtenuta/Code/roster/teams/doc-team-pack/orchestrator.yaml -> /Users/tomtenuta/Code/roster/teams/doc-team-pack/workflow.yaml
+OK: Schema validation passed: /roster/teams/doc-team-pack/orchestrator.yaml
+OK: Workflow references validated: /roster/teams/doc-team-pack/orchestrator.yaml -> /roster/teams/doc-team-pack/workflow.yaml
 INFO: Generating: doc-team-pack
-OK: Generated: /Users/tomtenuta/Code/roster/teams/doc-team-pack/agents/orchestrator.md
+OK: Generated: /roster/teams/doc-team-pack/agents/orchestrator.md
 ```
 
 ### Example 2: Dry-Run Preview
@@ -266,10 +266,10 @@ INFO: Batch generating 11 teams
 
 ... (validation for all teams) ...
 INFO: Generating: rnd-pack
-OK: Generated: /Users/tomtenuta/Code/roster/teams/rnd-pack/agents/orchestrator.md
+OK: Generated: /roster/teams/rnd-pack/agents/orchestrator.md
 
 INFO: Generating: security-pack
-OK: Generated: /Users/tomtenuta/Code/roster/teams/security-pack/agents/orchestrator.md
+OK: Generated: /roster/teams/security-pack/agents/orchestrator.md
 
 ... (9 more teams) ...
 
@@ -301,7 +301,7 @@ apt-get install yq jq
 
 **Error**:
 ```
-ERROR: Config file not found: /Users/tomtenuta/Code/roster/teams/my-team/orchestrator.yaml
+ERROR: Config file not found: /roster/teams/my-team/orchestrator.yaml
 ```
 
 **Cause**: Team directory exists but no orchestrator.yaml file
@@ -317,13 +317,13 @@ ERROR: Missing required field in orchestrator.yaml: routing
 
 **Cause**: orchestrator.yaml missing required top-level field
 
-**Solution**: Check orchestrator.yaml against schema at `/Users/tomtenuta/Code/roster/schemas/orchestrator.yaml.schema.json`
+**Solution**: Check orchestrator.yaml against schema at `/roster/schemas/orchestrator.yaml.schema.json`
 
 ### Specialist Not Found in Workflow
 
 **Error**:
 ```
-ERROR: Specialist 'bad-specialist-name' not found in workflow.yaml: /Users/tomtenuta/Code/roster/teams/my-team/workflow.yaml
+ERROR: Specialist 'bad-specialist-name' not found in workflow.yaml: /roster/teams/my-team/workflow.yaml
 ```
 
 **Cause**: orchestrator.yaml references specialist that doesn't exist in workflow.yaml
@@ -344,7 +344,7 @@ ERROR: Post-generation validation failed: /var/folders/.../tmp.xyz
 **Diagnosis**:
 ```bash
 # Run validator directly to see what failed
-./templates/validate-orchestrator.sh /Users/tomtenuta/Code/roster/teams/my-team/agents/orchestrator.md
+./templates/validate-orchestrator.sh /roster/teams/my-team/agents/orchestrator.md
 ```
 
 **Common Causes**:
@@ -356,7 +356,7 @@ ERROR: Post-generation validation failed: /var/folders/.../tmp.xyz
 
 **Error**:
 ```
-ERROR: Output file exists: /Users/tomtenuta/Code/roster/teams/rnd-pack/agents/orchestrator.md (use --force to overwrite)
+ERROR: Output file exists: /roster/teams/rnd-pack/agents/orchestrator.md (use --force to overwrite)
 ```
 
 **Cause**: orchestrator.md already exists and --force not specified
@@ -367,7 +367,7 @@ ERROR: Output file exists: /Users/tomtenuta/Code/roster/teams/rnd-pack/agents/or
 ./templates/orchestrator-generate.sh rnd-pack --force
 
 # Option 2: Delete existing file first
-rm /Users/tomtenuta/Code/roster/teams/rnd-pack/agents/orchestrator.md
+rm /roster/teams/rnd-pack/agents/orchestrator.md
 ./templates/orchestrator-generate.sh rnd-pack
 ```
 
@@ -456,7 +456,7 @@ cross_team_protocol: "Ecosystem-pack acts as hub for infrastructure changes. Whe
 ### Run Integration Tests
 
 ```bash
-cd /Users/tomtenuta/Code/roster
+cd /roster
 
 # Test file generation for 5 teams
 bash << 'EOF'
@@ -486,12 +486,12 @@ EOF
 
 | File | Purpose | Status |
 |------|---------|--------|
-| `/Users/tomtenuta/Code/roster/templates/orchestrator-generate.sh` | Production generator | Complete |
-| `/Users/tomtenuta/Code/roster/templates/orchestrator-base.md.tpl` | Canonical template | Complete |
-| `/Users/tomtenuta/Code/roster/templates/validate-orchestrator.sh` | Validation script (10 rules) | Complete |
-| `/Users/tomtenuta/Code/roster/schemas/orchestrator.yaml.schema.json` | JSON Schema | Complete |
-| `/Users/tomtenuta/Code/roster/teams/*/orchestrator.yaml` | Team configs (11 total) | Complete |
-| `/Users/tomtenuta/Code/roster/teams/*/agents/orchestrator.md` | Generated agents (11 total) | Generated |
+| `/roster/templates/orchestrator-generate.sh` | Production generator | Complete |
+| `/roster/templates/orchestrator-base.md.tpl` | Canonical template | Complete |
+| `/roster/templates/validate-orchestrator.sh` | Validation script (10 rules) | Complete |
+| `/roster/schemas/orchestrator.yaml.schema.json` | JSON Schema | Complete |
+| `/roster/teams/*/orchestrator.yaml` | Team configs (11 total) | Complete |
+| `/roster/teams/*/agents/orchestrator.md` | Generated agents (11 total) | Generated |
 
 ---
 
@@ -528,10 +528,10 @@ EOF
 
 ## See Also
 
-- **Schema Reference**: `/Users/tomtenuta/Code/roster/schemas/orchestrator.yaml.schema.json`
-- **Validation Rules**: `/Users/tomtenuta/Code/roster/templates/validate-orchestrator.sh`
-- **Context Design**: `/Users/tomtenuta/Code/skeleton_claude/docs/ecosystem/CONTEXT-orchestrator-template-schema.md`
-- **Integration Points**: `/Users/tomtenuta/Code/roster/schemas/INTEGRATION-POINTS.md`
+- **Schema Reference**: `/roster/schemas/orchestrator.yaml.schema.json`
+- **Validation Rules**: `/roster/templates/validate-orchestrator.sh`
+- **Context Design**: `/skeleton_claude/docs/ecosystem/CONTEXT-orchestrator-template-schema.md`
+- **Integration Points**: `/roster/schemas/INTEGRATION-POINTS.md`
 
 ---
 

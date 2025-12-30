@@ -26,7 +26,7 @@ Orchestrators can now be generated automatically from simple YAML configuration 
 Look for your team's orchestrator.yaml:
 
 ```bash
-ls /Users/tomtenuta/Code/roster/teams/<YOUR-TEAM>/orchestrator.yaml
+ls /roster/teams/<YOUR-TEAM>/orchestrator.yaml
 ```
 
 If it exists, you're already set up (skip to Step 3).
@@ -36,7 +36,7 @@ If it exists, you're already set up (skip to Step 3).
 If you only have orchestrator.md (no YAML yet), migrate it:
 
 ```bash
-cd /Users/tomtenuta/Code/roster
+cd /roster
 
 # Migrate your team
 ./scripts/orchestrator-migrate.sh <YOUR-TEAM>
@@ -56,8 +56,8 @@ Optional but recommended: Install local validation:
 
 ```bash
 # Copy hook to your repository
-cp /Users/tomtenuta/Code/roster/.githooks/pre-commit-orchestrator /Users/tomtenuta/Code/roster/.git/hooks/pre-commit
-chmod +x /Users/tomtenuta/Code/roster/.git/hooks/pre-commit
+cp /roster/.githooks/pre-commit-orchestrator /roster/.git/hooks/pre-commit
+chmod +x /roster/.git/hooks/pre-commit
 ```
 
 Now when you commit, the hook automatically:
@@ -211,7 +211,7 @@ If you prefer to keep hand-writing your orchestrator:
 
 ```bash
 # Delete the YAML file
-cd /Users/tomtenuta/Code/roster/teams/<YOUR-TEAM>
+cd /roster/teams/<YOUR-TEAM>
 rm orchestrator.yaml
 
 # Update your manifest to say "user" (not generated)
@@ -234,7 +234,7 @@ CI will skip validation for your team.
 **Fix**: Make sure orchestrator.yaml has all required sections. Compare to an example:
 
 ```bash
-cat /Users/tomtenuta/Code/roster/schemas/orchestrator.yaml.schema.json | jq '.examples[0]'
+cat /roster/schemas/orchestrator.yaml.schema.json | jq '.examples[0]'
 ```
 
 ### Q: Generation produces different output than my current orchestrator.md
@@ -323,4 +323,4 @@ nano orchestrator.yaml
 
 **Questions?** Reach out to [contact] or post in [channel].
 
-**Learn More**: `/Users/tomtenuta/Code/roster/docs/@orchestrator-templates`
+**Learn More**: `/roster/docs/@orchestrator-templates`

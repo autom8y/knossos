@@ -139,8 +139,8 @@ Executed full swap cycle in skeleton_claude satellite:
 
 | File | Change Type |
 |------|-------------|
-| `/Users/tomtenuta/Code/roster/teams/forge-pack/agents/*.md` | Added `role:` field |
-| `/Users/tomtenuta/Code/roster/swap-team.sh` | Added hooks sync functions |
+| `/roster/teams/forge-pack/agents/*.md` | Added `role:` field |
+| `/roster/swap-team.sh` | Added hooks sync functions |
 
 ---
 

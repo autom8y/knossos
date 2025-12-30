@@ -101,7 +101,7 @@ The template contains the protocol once. YAML contains the variation. Generator 
 
 ### Phase 1: Design Your Team's Configuration
 
-Create `/Users/tomtenuta/Code/skeleton_claude/.claude/teams/my-team/orchestrator.yaml`:
+Create `/skeleton_claude/.claude/teams/my-team/orchestrator.yaml`:
 
 ```yaml
 team:
@@ -138,11 +138,11 @@ skills:
 
 ```bash
 # Generate orchestrator.md from your YAML config
-/Users/tomtenuta/Code/roster/templates/orchestrator-generate.sh my-team
+/roster/templates/orchestrator-generate.sh my-team
 
 # Validate the generated file
-/Users/tomtenuta/Code/roster/templates/validate-orchestrator.sh \
-  /Users/tomtenuta/Code/skeleton_claude/.claude/teams/my-team/agents/orchestrator.md
+/roster/templates/validate-orchestrator.sh \
+  /skeleton_claude/.claude/teams/my-team/agents/orchestrator.md
 ```
 
 ### Phase 3: Commit Both Files
@@ -177,7 +177,7 @@ Tracked: Yes (check into git)
 
 **orchestrator-base.md.tpl** (canonical template)
 ```
-Location: /Users/tomtenuta/Code/roster/templates/orchestrator-base.md.tpl
+Location: /roster/templates/orchestrator-base.md.tpl
 Purpose: Shared protocol and structure
 Tracked: Yes (part of roster)
 ```
@@ -363,7 +363,7 @@ routing:
 **Cause**: Template file not found or not readable
 
 **Solution**:
-1. Verify template exists: `/Users/tomtenuta/Code/roster/templates/orchestrator-base.md.tpl`
+1. Verify template exists: `/roster/templates/orchestrator-base.md.tpl`
 2. Check file permissions (should be readable)
 3. Verify generator has correct path to template
 4. Try manual generation test
@@ -481,9 +481,9 @@ Build pipeline will:
 | Task | Command |
 |------|---------|
 | Create new team | `cp -r .claude/teams/doc-team-pack .claude/teams/my-team && edit orchestrator.yaml` |
-| Generate orchestrator.md | `/Users/tomtenuta/Code/roster/templates/orchestrator-generate.sh my-team` |
-| Validate output | `/Users/tomtenuta/Code/roster/templates/validate-orchestrator.sh .claude/teams/my-team/agents/orchestrator.md` |
-| Update template | Edit `/Users/tomtenuta/Code/roster/templates/orchestrator-base.md.tpl` then regenerate all teams |
+| Generate orchestrator.md | `/roster/templates/orchestrator-generate.sh my-team` |
+| Validate output | `/roster/templates/validate-orchestrator.sh .claude/teams/my-team/agents/orchestrator.md` |
+| Update template | Edit `/roster/templates/orchestrator-base.md.tpl` then regenerate all teams |
 | View current team | `cat .claude/ACTIVE_TEAM` |
 | Switch teams | `./swap-team.sh my-team` |
 

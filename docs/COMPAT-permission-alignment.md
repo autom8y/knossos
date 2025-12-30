@@ -140,7 +140,7 @@ Each agent was analyzed to verify the added tool is justified by artifact produc
 
 ### 4. Schema Compliance
 
-**Schema Checked**: `/Users/tomtenuta/Code/roster/workflow-schema.yaml`
+**Schema Checked**: `/roster/workflow-schema.yaml`
 
 **Analysis**: The workflow-schema.yaml defines structure for `workflow.yaml` files (phases, complexity levels, commands), not agent frontmatter. Agent frontmatter follows a convention but has no formal schema validation.
 
@@ -164,11 +164,11 @@ Each agent was analyzed to verify the added tool is justified by artifact produc
 ## File Locations Verified
 
 ```
-/Users/tomtenuta/Code/roster/teams/hygiene-pack/agents/code-smeller.md
-/Users/tomtenuta/Code/roster/teams/intelligence-pack/agents/user-researcher.md
-/Users/tomtenuta/Code/roster/teams/rnd-pack/agents/technology-scout.md
-/Users/tomtenuta/Code/roster/teams/security-pack/agents/penetration-tester.md
-/Users/tomtenuta/Code/roster/teams/security-pack/agents/threat-modeler.md
+/roster/teams/hygiene-pack/agents/code-smeller.md
+/roster/teams/intelligence-pack/agents/user-researcher.md
+/roster/teams/rnd-pack/agents/technology-scout.md
+/roster/teams/security-pack/agents/penetration-tester.md
+/roster/teams/security-pack/agents/threat-modeler.md
 ```
 
 **Note**: The task description referenced paths under `packs/` but the actual files are located under `teams/`. This is a documentation discrepancy, not a defect in the changes themselves.
