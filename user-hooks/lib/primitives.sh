@@ -176,3 +176,26 @@ atomic_write_stdin() {
     content=$(cat)
     atomic_write "$dest_file" "$content"
 }
+
+# =============================================================================
+# JSON Extraction
+# =============================================================================
+
+# Extract value from JSON string with automatic jq/grep fallback
+# Usage: json_extract "$json_string" ".path.to.field"
+# Returns: extracted value or empty string
+json_extract() {
+    local json="$1"
+    local path="$2"
+
+    # Try jq first (fast and reliable)
+    if command -v jq >/dev/null 2>&1; then
+        echo "$json" | jq -r "$path // empty" 2>/dev/null || echo ""
+        return
+    fi
+
+    # Fallback: grep-based for simple paths
+    # Handles: .field_name (top-level) and .parent.child (nested)
+    local field="${path##*.}"  # Get last component
+    echo "$json" | grep -o "\"$field\": *\"[^\"]*\"" 2>/dev/null | head -1 | cut -d'"' -f4 || echo ""
+}
