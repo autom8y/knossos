@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://roster.local/schemas/artifacts/session-context.schema.json",
+  "title": "SESSION_CONTEXT Schema",
+  "description": "Schema for SESSION_CONTEXT.md YAML frontmatter",
+  "type": "object",
+
+  "required": [
+    "session_id",
+    "created_at",
+    "initiative",
+    "complexity",
+    "active_team",
+    "current_phase"
+  ],
+
+  "properties": {
+    "session_id": {
+      "$ref": "common.schema.json#/$defs/session_id"
+    },
+    "session_state": {
+      "$ref": "common.schema.json#/$defs/session_status_enum",
+      "description": "Current session state (prefer 'status' for new sessions)"
+    },
+    "status": {
+      "$ref": "common.schema.json#/$defs/session_status_enum",
+      "description": "Current session status (canonical field)"
+    },
+    "created_at": {
+      "$ref": "common.schema.json#/$defs/iso8601_timestamp"
+    },
+    "initiative": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Initiative or feature being worked on"
+    },
+    "complexity": {
+      "$ref": "common.schema.json#/$defs/complexity_enum"
+    },
+    "active_team": {
+      "$ref": "common.schema.json#/$defs/team_name"
+    },
+    "current_phase": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Current workflow phase (e.g., requirements, design, implementation)"
+    },
+    "completed_at": {
+      "$ref": "common.schema.json#/$defs/iso8601_timestamp"
+    },
+    "auto_parked_at": {
+      "$ref": "common.schema.json#/$defs/iso8601_timestamp"
+    },
+    "auto_parked_reason": {
+      "type": "string",
+      "description": "Reason for automatic session parking"
+    },
+    "resumed_at": {
+      "$ref": "common.schema.json#/$defs/iso8601_timestamp"
+    },
+    "schema_version": {
+      "$ref": "common.schema.json#/$defs/schema_version",
+      "default": "1.0"
+    }
+  },
+
+  "additionalProperties": true,
+
+  "examples": [
+    {
+      "session_id": "session-20251229-181045-b06b3bb8",
+      "status": "ACTIVE",
+      "created_at": "2025-12-29T23:10:45Z",
+      "initiative": "Artifact Schema Standardization",
+      "complexity": "SYSTEM",
+      "active_team": "ecosystem-pack",
+      "current_phase": "design",
+      "schema_version": "1.0"
+    }
+  ]
+}

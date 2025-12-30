@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://roster.local/schemas/artifacts/ecosystem/migration-runbook.schema.json",
+  "title": "Migration Runbook Artifact Schema",
+  "description": "Schema for MIGRATION-RUNBOOK-*.md ecosystem migration documents",
+  "type": "object",
+
+  "required": [
+    "type",
+    "initiative",
+    "created",
+    "author",
+    "status"
+  ],
+
+  "properties": {
+    "type": {
+      "const": "migration-runbook",
+      "description": "Artifact type identifier"
+    },
+    "artifact_id": {
+      "type": "string",
+      "pattern": "^MIGRATION-RUNBOOK-[a-z0-9-]+$",
+      "description": "Migration runbook artifact identifier"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "description": "Migration runbook title"
+    },
+    "initiative": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Initiative or project this migration supports"
+    },
+    "created": {
+      "$ref": "../common.schema.json#/$defs/iso8601_date",
+      "description": "Date of runbook creation"
+    },
+    "author": {
+      "$ref": "../common.schema.json#/$defs/agent_name",
+      "description": "Agent that created the runbook"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "ready", "in_progress", "completed", "superseded"],
+      "description": "Current status of migration"
+    },
+    "depends_on": {
+      "type": "array",
+      "items": { "$ref": "../common.schema.json#/$defs/artifact_reference" },
+      "description": "References to prior artifacts (context design, gap analysis, etc.)"
+    },
+    "affected_satellites": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "List of satellite repositories affected by this migration"
+    },
+    "breaking_changes": {
+      "type": "boolean",
+      "description": "Whether this migration includes breaking changes"
+    },
+    "rollback_plan": {
+      "type": "boolean",
+      "description": "Whether a rollback plan is documented"
+    },
+    "complexity": {
+      "$ref": "../common.schema.json#/$defs/complexity_enum",
+      "description": "Migration complexity assessment"
+    },
+    "schema_version": {
+      "$ref": "../common.schema.json#/$defs/schema_version",
+      "default": "1.0"
+    }
+  },
+
+  "additionalProperties": true,
+
+  "examples": [
+    {
+      "type": "migration-runbook",
+      "artifact_id": "MIGRATION-RUNBOOK-artifact-schemas",
+      "title": "Artifact Schema Migration Runbook",
+      "initiative": "artifact-schema-standardization",
+      "created": "2025-12-29",
+      "author": "documentation-engineer",
+      "status": "ready",
+      "depends_on": ["CONTEXT-DESIGN-artifact-schemas", "GAP-artifact-schema-coverage"],
+      "affected_satellites": ["skeleton_claude", "roster", "all-satellites"],
+      "breaking_changes": false,
+      "rollback_plan": true,
+      "complexity": "MODULE",
+      "schema_version": "1.0"
+    }
+  ]
+}

@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://roster.local/schemas/artifacts/ecosystem/compatibility-report.schema.json",
+  "title": "Compatibility Report Artifact Schema",
+  "description": "Schema for COMPATIBILITY-REPORT-*.md ecosystem compatibility validation documents",
+  "type": "object",
+
+  "required": [
+    "type",
+    "initiative",
+    "created",
+    "author",
+    "status"
+  ],
+
+  "properties": {
+    "type": {
+      "const": "compatibility-report",
+      "description": "Artifact type identifier"
+    },
+    "artifact_id": {
+      "type": "string",
+      "pattern": "^COMPATIBILITY-REPORT-[a-z0-9-]+$",
+      "description": "Compatibility report artifact identifier"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "description": "Compatibility report title"
+    },
+    "initiative": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Initiative or project this report validates"
+    },
+    "created": {
+      "$ref": "../common.schema.json#/$defs/iso8601_date",
+      "description": "Date of report creation"
+    },
+    "author": {
+      "$ref": "../common.schema.json#/$defs/agent_name",
+      "description": "Agent that created the report"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "testing", "passed", "failed", "blocked"],
+      "description": "Current status of compatibility testing"
+    },
+    "depends_on": {
+      "type": "array",
+      "items": { "$ref": "../common.schema.json#/$defs/artifact_reference" },
+      "description": "References to prior artifacts being validated"
+    },
+    "test_matrix": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "satellite": { "type": "string" },
+          "version": { "type": "string" },
+          "status": { "enum": ["pass", "fail", "skip", "pending"] }
+        }
+      },
+      "description": "Satellite compatibility test results"
+    },
+    "blocking_issues": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "List of blocking compatibility issues"
+    },
+    "complexity": {
+      "$ref": "../common.schema.json#/$defs/complexity_enum",
+      "description": "Validation complexity assessment"
+    },
+    "schema_version": {
+      "$ref": "../common.schema.json#/$defs/schema_version",
+      "default": "1.0"
+    }
+  },
+
+  "additionalProperties": true,
+
+  "examples": [
+    {
+      "type": "compatibility-report",
+      "artifact_id": "COMPATIBILITY-REPORT-artifact-schemas",
+      "title": "Artifact Schema Compatibility Report",
+      "initiative": "artifact-schema-standardization",
+      "created": "2025-12-29",
+      "author": "compatibility-tester",
+      "status": "passed",
+      "depends_on": ["MIGRATION-RUNBOOK-artifact-schemas", "CONTEXT-DESIGN-artifact-schemas"],
+      "test_matrix": [
+        { "satellite": "skeleton_claude", "version": "main", "status": "pass" },
+        { "satellite": "roster", "version": "main", "status": "pass" }
+      ],
+      "blocking_issues": [],
+      "complexity": "MODULE",
+      "schema_version": "1.0"
+    }
+  ]
+}

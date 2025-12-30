@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://roster.local/schemas/artifacts/ecosystem/gap-analysis.schema.json",
+  "title": "Gap Analysis Artifact Schema",
+  "description": "Schema for GAP-*.md ecosystem analysis documents",
+  "type": "object",
+
+  "required": [
+    "type",
+    "initiative",
+    "created",
+    "author",
+    "status"
+  ],
+
+  "properties": {
+    "type": {
+      "const": "gap-analysis",
+      "description": "Artifact type identifier"
+    },
+    "artifact_id": {
+      "type": "string",
+      "pattern": "^GAP-[a-z0-9-]+$",
+      "description": "Gap analysis artifact identifier"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "description": "Gap analysis title"
+    },
+    "initiative": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Initiative or project this analysis supports"
+    },
+    "created": {
+      "$ref": "../common.schema.json#/$defs/iso8601_date",
+      "description": "Date of gap analysis creation"
+    },
+    "author": {
+      "$ref": "../common.schema.json#/$defs/agent_name",
+      "description": "Agent that created the analysis"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "complete", "superseded"],
+      "description": "Current status of gap analysis"
+    },
+    "affected_systems": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "List of systems affected by identified gaps"
+    },
+    "complexity": {
+      "$ref": "../common.schema.json#/$defs/complexity_enum",
+      "description": "Overall complexity assessment"
+    },
+    "schema_version": {
+      "$ref": "../common.schema.json#/$defs/schema_version",
+      "default": "1.0"
+    }
+  },
+
+  "additionalProperties": true,
+
+  "examples": [
+    {
+      "type": "gap-analysis",
+      "artifact_id": "GAP-artifact-schema-coverage",
+      "title": "Artifact Schema Coverage Gap Analysis",
+      "initiative": "artifact-schema-standardization",
+      "created": "2025-12-29",
+      "author": "ecosystem-analyst",
+      "status": "complete",
+      "affected_systems": ["roster", "skeleton", "CEM"],
+      "complexity": "MODULE",
+      "schema_version": "1.0"
+    }
+  ]
+}

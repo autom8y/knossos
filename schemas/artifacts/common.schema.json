@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://roster.local/schemas/artifacts/common.schema.json",
+  "title": "Common Artifact Definitions",
+  "description": "Shared field definitions for all artifact schemas",
+
+  "$defs": {
+    "iso8601_timestamp": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?(Z|[+-][0-9]{2}:[0-9]{2})?$",
+      "description": "ISO 8601 timestamp (e.g., 2025-12-29T21:00:00Z)"
+    },
+
+    "iso8601_date": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+      "description": "ISO 8601 date (e.g., 2025-12-29)"
+    },
+
+    "session_id": {
+      "type": "string",
+      "pattern": "^session-[0-9]{8}-[0-9]{6}-[a-f0-9]{8}$",
+      "description": "Session identifier (e.g., session-20251229-181045-b06b3bb8)"
+    },
+
+    "sprint_id": {
+      "type": "string",
+      "pattern": "^sprint-[a-z0-9-]+-[0-9]{8}$",
+      "description": "Sprint identifier (e.g., sprint-artifact-schemas-20251229)"
+    },
+
+    "artifact_id_prd": {
+      "type": "string",
+      "pattern": "^PRD-[a-z0-9-]+$",
+      "description": "PRD artifact identifier"
+    },
+
+    "artifact_id_tdd": {
+      "type": "string",
+      "pattern": "^TDD-[a-z0-9-]+$",
+      "description": "TDD artifact identifier"
+    },
+
+    "artifact_id_adr": {
+      "type": "string",
+      "pattern": "^ADR-[0-9]+$",
+      "description": "ADR artifact identifier (numeric only)"
+    },
+
+    "artifact_id_test": {
+      "type": "string",
+      "pattern": "^TEST-[a-z0-9-]+$",
+      "description": "Test Plan artifact identifier"
+    },
+
+    "complexity_enum": {
+      "type": "string",
+      "enum": ["PATCH", "MODULE", "SYSTEM", "INITIATIVE", "MIGRATION"],
+      "description": "Work complexity level"
+    },
+
+    "session_status_enum": {
+      "type": "string",
+      "enum": ["ACTIVE", "PARKED", "COMPLETED", "ARCHIVED"],
+      "description": "Session lifecycle status"
+    },
+
+    "sprint_status_enum": {
+      "type": "string",
+      "enum": ["active", "completed", "blocked", "cancelled"],
+      "description": "Sprint status (lowercase for consistency)"
+    },
+
+    "workflow_status_enum": {
+      "type": "string",
+      "enum": ["draft", "in_review", "approved", "superseded"],
+      "description": "Workflow artifact status"
+    },
+
+    "adr_status_enum": {
+      "type": "string",
+      "enum": ["proposed", "accepted", "deprecated", "superseded"],
+      "description": "ADR-specific status values"
+    },
+
+    "team_name": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+-pack$",
+      "description": "Team pack name (e.g., ecosystem-pack, security-pack)"
+    },
+
+    "schema_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+(\\.[0-9]+)?$",
+      "description": "Semantic version for schema (e.g., 1.0, 1.0.0)"
+    },
+
+    "agent_name": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$",
+      "description": "Agent identifier (e.g., ecosystem-analyst, context-architect)"
+    },
+
+    "artifact_reference": {
+      "type": "string",
+      "pattern": "^(PRD|TDD|ADR|TEST|GAP|CONTEXT-DESIGN|MIGRATION-RUNBOOK|COMPATIBILITY-REPORT)-[a-z0-9-]+(\\.md)?$",
+      "description": "Reference to another artifact"
+    }
+  }
+}

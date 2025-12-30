@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://roster.local/schemas/artifacts/adr.schema.json",
+  "title": "ADR Schema",
+  "description": "Schema for Architecture Decision Record YAML frontmatter",
+  "type": "object",
+
+  "required": [
+    "artifact_id",
+    "title",
+    "status",
+    "date"
+  ],
+
+  "properties": {
+    "artifact_id": {
+      "$ref": "common.schema.json#/$defs/artifact_id_adr"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "description": "Decision title"
+    },
+    "status": {
+      "$ref": "common.schema.json#/$defs/adr_status_enum"
+    },
+    "date": {
+      "$ref": "common.schema.json#/$defs/iso8601_date"
+    },
+    "author": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Primary decision author"
+    },
+    "deciders": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "List of people involved in decision"
+    },
+    "related": {
+      "type": "array",
+      "items": { "$ref": "common.schema.json#/$defs/artifact_reference" },
+      "description": "Related artifact references"
+    },
+    "superseded_by": {
+      "$ref": "common.schema.json#/$defs/artifact_id_adr",
+      "description": "ADR that supersedes this one"
+    },
+    "schema_version": {
+      "$ref": "common.schema.json#/$defs/schema_version",
+      "default": "1.0"
+    }
+  },
+
+  "additionalProperties": true,
+
+  "if": {
+    "properties": {
+      "status": { "const": "superseded" }
+    }
+  },
+  "then": {
+    "required": ["superseded_by"]
+  },
+
+  "examples": [
+    {
+      "artifact_id": "ADR-0010",
+      "title": "Use JSON Schema for Artifact Validation",
+      "status": "accepted",
+      "date": "2025-12-29",
+      "author": "context-architect",
+      "deciders": ["ecosystem-pack"],
+      "related": ["PRD-artifact-schema-standardization"],
+      "schema_version": "1.0"
+    }
+  ]
+}

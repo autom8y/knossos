@@ -1,0 +1,150 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://roster.local/schemas/artifacts/sprint-context.schema.json",
+  "title": "SPRINT_CONTEXT Schema",
+  "description": "Schema for SPRINT_CONTEXT.md YAML frontmatter",
+  "type": "object",
+
+  "required": [
+    "sprint_id",
+    "sprint_name",
+    "complexity",
+    "active_team",
+    "status",
+    "created_at"
+  ],
+
+  "properties": {
+    "sprint_id": {
+      "$ref": "common.schema.json#/$defs/sprint_id"
+    },
+    "session_id": {
+      "oneOf": [
+        { "$ref": "common.schema.json#/$defs/session_id" },
+        { "$ref": "common.schema.json#/$defs/sprint_id" }
+      ],
+      "description": "Parent session or self-reference for standalone sprints"
+    },
+    "sprint_name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Human-readable sprint name"
+    },
+    "sprint_goal": {
+      "type": "string",
+      "description": "Sprint objective statement"
+    },
+    "initiative": {
+      "type": "string",
+      "description": "Parent initiative (can be inferred from session)"
+    },
+    "complexity": {
+      "$ref": "common.schema.json#/$defs/complexity_enum"
+    },
+    "active_team": {
+      "$ref": "common.schema.json#/$defs/team_name"
+    },
+    "team": {
+      "$ref": "common.schema.json#/$defs/team_name",
+      "description": "Alias for active_team (deprecated, use active_team)"
+    },
+    "workflow": {
+      "type": "string",
+      "enum": ["sequential", "parallel", "hybrid"],
+      "default": "sequential",
+      "description": "Task execution model"
+    },
+    "status": {
+      "$ref": "common.schema.json#/$defs/sprint_status_enum"
+    },
+    "created_at": {
+      "$ref": "common.schema.json#/$defs/iso8601_timestamp"
+    },
+    "created": {
+      "$ref": "common.schema.json#/$defs/iso8601_timestamp",
+      "description": "Alias for created_at (deprecated, use created_at)"
+    },
+    "parent_session": {
+      "$ref": "common.schema.json#/$defs/session_id"
+    },
+    "tasks": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/sprint_task"
+      },
+      "description": "Sprint task list"
+    },
+    "completed_tasks": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "total_tasks": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "context_version": {
+      "$ref": "common.schema.json#/$defs/schema_version",
+      "description": "Alias for schema_version (deprecated)"
+    },
+    "schema_version": {
+      "$ref": "common.schema.json#/$defs/schema_version",
+      "default": "1.0"
+    }
+  },
+
+  "$defs": {
+    "sprint_task": {
+      "type": "object",
+      "required": ["id", "name", "status"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^task-[0-9]{3}$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "type": "string",
+          "enum": ["pending", "in_progress", "completed", "blocked", "skipped"]
+        },
+        "complexity": {
+          "$ref": "common.schema.json#/$defs/complexity_enum"
+        },
+        "artifacts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string" },
+              "path": { "type": "string" },
+              "status": { "type": "string" }
+            }
+          }
+        },
+        "completed_at": {
+          "$ref": "common.schema.json#/$defs/iso8601_timestamp"
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+
+  "additionalProperties": true,
+
+  "examples": [
+    {
+      "sprint_id": "sprint-artifact-schemas-20251229",
+      "sprint_name": "Artifact Schema Standardization",
+      "initiative": "artifact-schema-standardization",
+      "complexity": "SYSTEM",
+      "active_team": "ecosystem-pack",
+      "workflow": "sequential",
+      "status": "active",
+      "created_at": "2025-12-29T20:00:00Z",
+      "parent_session": "session-20251229-185610-1abe7ed6",
+      "schema_version": "1.0"
+    }
+  ]
+}

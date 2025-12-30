@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://roster.local/schemas/artifacts/ecosystem/context-design.schema.json",
+  "title": "Context Design Artifact Schema",
+  "description": "Schema for CONTEXT-DESIGN-*.md ecosystem infrastructure design documents",
+  "type": "object",
+
+  "required": [
+    "type",
+    "initiative",
+    "created",
+    "author",
+    "status",
+    "gap_analysis"
+  ],
+
+  "properties": {
+    "type": {
+      "const": "context-design",
+      "description": "Artifact type identifier"
+    },
+    "artifact_id": {
+      "type": "string",
+      "pattern": "^CONTEXT-DESIGN-[a-z0-9-]+$",
+      "description": "Context design artifact identifier"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "description": "Context design title"
+    },
+    "initiative": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Initiative or project this design supports"
+    },
+    "created": {
+      "$ref": "../common.schema.json#/$defs/iso8601_date",
+      "description": "Date of context design creation"
+    },
+    "author": {
+      "$ref": "../common.schema.json#/$defs/agent_name",
+      "description": "Agent that created the design"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "in_review", "approved", "superseded"],
+      "description": "Current status of context design"
+    },
+    "gap_analysis": {
+      "$ref": "../common.schema.json#/$defs/artifact_reference",
+      "description": "Reference to gap analysis artifact this design addresses"
+    },
+    "affected_systems": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "List of systems this design modifies"
+    },
+    "complexity": {
+      "$ref": "../common.schema.json#/$defs/complexity_enum",
+      "description": "Design complexity assessment"
+    },
+    "schema_version": {
+      "$ref": "../common.schema.json#/$defs/schema_version",
+      "default": "1.0"
+    }
+  },
+
+  "additionalProperties": true,
+
+  "examples": [
+    {
+      "type": "context-design",
+      "artifact_id": "CONTEXT-DESIGN-artifact-schemas",
+      "title": "Artifact Schema Registry Design",
+      "initiative": "artifact-schema-standardization",
+      "created": "2025-12-29",
+      "author": "context-architect",
+      "status": "approved",
+      "gap_analysis": "GAP-artifact-schema-coverage",
+      "affected_systems": ["roster", "skeleton"],
+      "complexity": "MODULE",
+      "schema_version": "1.0"
+    }
+  ]
+}
