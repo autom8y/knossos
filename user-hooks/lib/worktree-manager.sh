@@ -22,6 +22,16 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 # Source configuration (provides SKELETON_HOME, ROSTER_HOME, etc.)
 source "$SCRIPT_DIR/config.sh"
 
+# Source session-state for is_worktree (with fallback)
+source "$SCRIPT_DIR/session-state.sh" 2>/dev/null || {
+    # Minimal fallback if session-state.sh unavailable
+    is_worktree() {
+        local git_dir
+        git_dir=$(git rev-parse --git-dir 2>/dev/null) || return 1
+        [[ -f "$git_dir" ]] && grep -q "^gitdir:" "$git_dir" 2>/dev/null
+    }
+}
+
 # Ensure we're in a git repository
 ensure_git_repo() {
     if ! git rev-parse --git-dir >/dev/null 2>&1; then
@@ -38,12 +48,6 @@ get_project_root() {
 # Generate worktree ID
 generate_worktree_id() {
     echo "wt-$(date +%Y%m%d-%H%M%S)-$(openssl rand -hex 4)"
-}
-
-# Check if in a worktree (not main)
-is_worktree() {
-    local git_dir=$(git rev-parse --git-dir 2>/dev/null)
-    [[ -f "$git_dir" ]] && grep -q "^gitdir:" "$git_dir" 2>/dev/null
 }
 
 # Get worktrees directory
