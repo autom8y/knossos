@@ -89,6 +89,10 @@ get_shell_session_id() {
   echo "$combined"
 }
 
+# DEPRECATED: TTY mapping is unreliable in Claude Code due to PPID changes.
+# Prefer .current-session file or CLAUDE_SESSION_ID env var for session resolution.
+# This function is retained for backward compatibility only (~5% reliable in Claude Code).
+#
 # Get TTY hash for terminal identification
 # Includes shell session ID to prevent collision on terminal reuse
 get_tty_hash() {

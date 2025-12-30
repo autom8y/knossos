@@ -40,6 +40,8 @@ get_session_id() {
   local project_dir="${CLAUDE_PROJECT_DIR:-.}"
   local tty_map="$project_dir/.claude/sessions/.tty-map/$tty_hash"
   if [ -f "$tty_map" ]; then
+    # DEPRECATION WARNING: TTY mapping is unreliable (~5% reliability in Claude Code)
+    echo "[WARNING] Using deprecated TTY mapping for session resolution. Consider setting .current-session file or CLAUDE_SESSION_ID env var." >&2
     cat "$tty_map"
     return
   fi
