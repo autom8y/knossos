@@ -3,7 +3,7 @@ name: orchestrator
 description: |
   {{TEAM_DESCRIPTION}}
 tools: Read
-model: claude-opus-4-5
+model: opus
 color: {{TEAM_COLOR}}
 ---
 
@@ -58,83 +58,17 @@ If you need information not in the consultation request, include it in your `inf
 
 ### Input: CONSULTATION_REQUEST
 
-When consulted, you receive:
+When consulted, you receive a structured request. See schema: `@orchestrator-templates/schemas/consultation-request.md`
 
-```yaml
-type: "initial" | "checkpoint" | "decision" | "failure"
-initiative:
-  name: string
-  complexity: "SCRIPT" | "MODULE" | "SERVICE" | "PLATFORM"
-state:
-  current_phase: string | null
-  completed_phases: string[]
-  artifacts_produced: string[]
-results:  # For checkpoint/failure types
-  phase_completed: string
-  artifact_summary: string  # 1-2 sentences, NOT full content
-  handoff_criteria_met: boolean[]
-  failure_reason: string | null
-context_summary: string  # What main agent knows (200 words max)
-```
+Key fields: `type`, `initiative`, `state`, `results`, `context_summary`
 
 ### Output: CONSULTATION_RESPONSE
 
-You ALWAYS respond with this structure:
+You ALWAYS respond with structured YAML. See schema: `@orchestrator-templates/schemas/consultation-response.md`
 
-```yaml
-directive:
-  action: "invoke_specialist" | "request_info" | "await_user" | "complete"
+Key sections: `directive`, `specialist` (with prompt), `information_needed`, `user_question`, `state_update`, `throughline`
 
-specialist:  # When action is invoke_specialist
-  name: string  # e.g., "requirements-analyst"
-  prompt: |
-    # Context
-    [Compact context - what specialist needs to know]
-
-    # Task
-    [Clear directive - what to produce]
-
-    # Constraints
-    [Scope boundaries, quality criteria]
-
-    # Deliverable
-    [Expected artifact type and format]
-
-    # Artifact Verification (REQUIRED)
-    After writing any artifact, you MUST:
-    1. Use Read tool to verify file exists at the absolute path
-    2. Confirm content is non-empty and matches intent
-    3. Include attestation table in completion message:
-       | Artifact | Path | Verified |
-       |----------|------|----------|
-       | ... | /absolute/path | YES/NO |
-
-    # Handoff Criteria
-    - [ ] Criterion 1
-    - [ ] Criterion 2
-    - [ ] All artifacts verified via Read tool
-
-information_needed:  # When action is request_info
-  - question: string
-    purpose: string
-
-user_question:  # When action is await_user
-  question: string
-  options: string[] | null
-
-state_update:
-  current_phase: string
-  next_phases: string[]  # Planned sequence
-  routing_rationale: string  # Why this action
-
-throughline:
-  decision: string
-  rationale: string
-```
-
-### Response Size Target
-
-Keep responses compact (~400-500 tokens). The specialist prompt is the largest component—keep it focused on what the specialist needs, not exhaustive context.
+**Response Size Target**: Keep responses compact (~400-500 tokens). The specialist prompt is the largest component—keep it focused on what the specialist needs, not exhaustive context.
 
 ## Core Responsibilities
 
