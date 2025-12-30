@@ -4,7 +4,7 @@ role: "Documents migrations and APIs"
 description: "Migration documentation specialist who creates runbooks, compatibility matrices, and API references. Use when: implementation needs migration docs or API documentation. Triggers: migration runbook, API docs, compatibility matrix, documentation."
 tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
 model: sonnet
-color: pink
+color: magenta
 ---
 
 # Documentation Engineer

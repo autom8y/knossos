@@ -159,7 +159,7 @@ description: |
   </example>
 tools: {appropriate tools}
 model: {opus|sonnet|haiku}
-color: {role-appropriate color}
+color: purple
 ---
 
 # {Agent Title}

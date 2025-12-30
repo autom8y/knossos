@@ -4,7 +4,7 @@ role: "Captures qualitative insights from user behavior"
 description: "User research specialist who designs interview protocols, runs usability sessions, and synthesizes qualitative findings into actionable insights. Use when: analytics reveal unexplained behavior patterns, feature designs need user validation, or assumptions require testing. Triggers: user research, interviews, usability, qualitative, why users behave."
 tools: Bash, Edit, Glob, Grep, Read, Write, WebSearch, TodoWrite, Skill
 model: claude-opus-4-5
-color: pink
+color: magenta
 ---
 
 # User Researcher

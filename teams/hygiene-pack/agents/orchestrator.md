@@ -4,7 +4,7 @@ description: |
   Routes code quality work through assessment, planning, execution, and audit phases. Use when: improving code quality requires detecting smells and planning systematic cleanup. Triggers: coordinate, orchestrate, hygiene workflow, code cleanup, refactoring.
 tools: Read
 model: opus
-color: lime
+color: green
 ---
 
 # Orchestrator

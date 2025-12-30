@@ -4,7 +4,7 @@ description: |
   Routes debt management work through collection, assessment, and planning phases. Use when: identifying and prioritizing technical debt for systematic paydown. Triggers: coordinate, orchestrate, debt workflow, technical debt assessment, sprint planning.
 tools: Read
 model: opus
-color: brown
+color: orange
 ---
 
 # Orchestrator

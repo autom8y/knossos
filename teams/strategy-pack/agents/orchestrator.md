@@ -4,7 +4,7 @@ description: |
   Routes strategic work through market research, competitive analysis, business modeling, and planning phases. Use when: making major business decisions or entering new markets requires comprehensive analysis. Triggers: coordinate, orchestrate, strategy workflow, market analysis, business planning.
 tools: Read
 model: opus
-color: gold
+color: yellow
 ---
 
 # Orchestrator

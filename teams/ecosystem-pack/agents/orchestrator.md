@@ -4,7 +4,7 @@ description: |
   Coordinates ecosystem-pack phases for CEM/skeleton/roster infrastructure work. Use when: work spans multiple phases or requires cross-component coordination. Triggers: coordinate, orchestrate, multi-phase, ecosystem workflow.
 tools: Read
 model: opus
-color: #8B00FF
+color: purple
 ---
 
 # Orchestrator
