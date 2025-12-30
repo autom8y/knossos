@@ -755,6 +755,7 @@ case "${1:-help}" in
     suggest-id) cmd_suggest_id ;;
     cleanup)    cmd_cleanup ;;
     mutate)     shift; cmd_mutate "$@" ;;
+    resume|park|wrap|handoff) cmd_mutate "$1" "${2:-}" "${3:-}" ;;
     help|--help|-h) cmd_help ;;
     *)
         echo "{\"error\": \"Unknown command: $1\"}" >&2
