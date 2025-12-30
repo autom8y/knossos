@@ -199,3 +199,32 @@ json_extract() {
     local field="${path##*.}"  # Get last component
     echo "$json" | grep -o "\"$field\": *\"[^\"]*\"" 2>/dev/null | head -1 | cut -d'"' -f4 || echo ""
 }
+
+# =============================================================================
+# Hook Permission Helpers
+# =============================================================================
+
+# Output PreToolUse auto-approve JSON and exit
+# Usage: auto_approve "reason" [log_function]
+# Note: Calls exit 0 - does not return
+auto_approve() {
+    local reason="$1"
+    local log_func="${2:-}"
+
+    cat <<EOF
+{
+  "hookSpecificOutput": {
+    "hookEventName": "PreToolUse",
+    "permissionDecision": "allow",
+    "permissionDecisionReason": "$reason"
+  }
+}
+EOF
+
+    # Call optional log function (e.g., log_end)
+    if [[ -n "$log_func" ]] && declare -F "$log_func" >/dev/null 2>&1; then
+        "$log_func" 0 2>/dev/null || true
+    fi
+
+    exit 0
+}
