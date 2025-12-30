@@ -2,7 +2,7 @@
 description: Display The Forge meta-team overview and available commands
 argument-hint: [--agents|--workflow|--commands]
 allowed-tools: Read, Glob
-model: sonnet
+model: haiku
 ---
 
 ## Your Task

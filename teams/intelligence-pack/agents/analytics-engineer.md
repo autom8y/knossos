@@ -3,7 +3,7 @@ name: analytics-engineer
 role: "Builds reliable data infrastructure for product decisions"
 description: "Analytics instrumentation specialist who designs tracking plans, event taxonomies, and data pipelines that answer business questions. Use when: instrumenting new features, auditing unreliable analytics, or establishing metrics infrastructure. Triggers: tracking plan, event tracking, analytics, instrumentation, data pipeline, event taxonomy."
 tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
-model: sonnet
+model: opus
 color: orange
 ---
 

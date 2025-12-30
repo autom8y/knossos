@@ -2,7 +2,7 @@
 description: Quick switch to rnd-pack (innovation lab workflow)
 argument-hint: [--update] [--dry-run] [--keep-all|--remove-all|--promote-all]
 allowed-tools: Bash, Read
-model: sonnet
+model: haiku
 ---
 
 ## Context

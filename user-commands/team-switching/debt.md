@@ -2,7 +2,7 @@
 description: Quick switch to debt-triage-pack (technical debt workflow)
 argument-hint: [--update] [--dry-run] [--keep-all|--remove-all|--promote-all]
 allowed-tools: Bash, Read
-model: sonnet
+model: haiku
 ---
 
 ## Context

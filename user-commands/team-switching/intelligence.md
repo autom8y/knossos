@@ -2,7 +2,7 @@
 description: Quick switch to intelligence-pack (product analytics workflow)
 argument-hint: [--update] [--dry-run] [--keep-all|--remove-all|--promote-all]
 allowed-tools: Bash, Read
-model: sonnet
+model: haiku
 ---
 
 ## Context
