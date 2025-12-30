@@ -193,7 +193,7 @@ cmd_create() {
         ((waited++))
     done
     # Ensure lock is released on exit
-    trap "rm -rf '$lockfile'" EXIT
+    trap 'rm -rf "$lockfile"' EXIT
 
     # Validate no existing session
     if has_session; then
@@ -476,7 +476,7 @@ cmd_mutate() {
         ((waited++))
     done
     # Ensure lock is released on exit
-    trap "rm -rf '$lockfile'" EXIT
+    trap 'rm -rf "$lockfile"' EXIT
 
     # Get current session
     local session_id=$(get_session_id)
