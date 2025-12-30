@@ -7,6 +7,7 @@ set -euo pipefail
 SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 
 # Source logging library
+# shellcheck source=lib/logging.sh
 source "$SCRIPT_DIR/lib/logging.sh" 2>/dev/null && log_init "start-preflight" && log_start || true
 
 # Check if this is a session lifecycle command
@@ -23,6 +24,7 @@ cd "$PROJECT_DIR" 2>/dev/null || exit 0
 SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 
 # Source session utilities
+# shellcheck source=lib/session-utils.sh
 source "$SCRIPT_DIR/lib/session-utils.sh" 2>/dev/null || exit 0
 
 # Detect worktree context

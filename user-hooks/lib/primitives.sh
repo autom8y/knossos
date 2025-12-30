@@ -6,6 +6,7 @@
 # Part of Ecosystem v2 refactoring (RF-002)
 
 # Source configuration first
+# shellcheck source=config.sh
 source "$(dirname "${BASH_SOURCE[0]}")/config.sh"
 
 # =============================================================================

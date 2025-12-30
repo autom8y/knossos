@@ -13,6 +13,7 @@ SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 source "$SCRIPT_DIR/lib/primitives.sh" 2>/dev/null || true
 
 # Source logging library
+# shellcheck source=lib/logging.sh
 source "$SCRIPT_DIR/lib/logging.sh" 2>/dev/null && log_init "team-validator" && log_start || true
 
 # Read JSON input from stdin
@@ -105,6 +106,7 @@ PROJECT_DIR="${CLAUDE_PROJECT_DIR:-.}"
 cd "$PROJECT_DIR" 2>/dev/null || true
 
 # Source session utilities for proper path resolution
+# shellcheck source=lib/session-utils.sh
 source .claude/hooks/lib/session-utils.sh 2>/dev/null || true
 
 # Get session directory using multi-session architecture

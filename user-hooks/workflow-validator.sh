@@ -9,6 +9,7 @@ set -euo pipefail
 SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 
 # Source logging library
+# shellcheck source=lib/logging.sh
 source "$SCRIPT_DIR/lib/logging.sh" 2>/dev/null && log_init "workflow-validator" && log_start || true
 
 # Read JSON input from stdin

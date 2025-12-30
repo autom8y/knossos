@@ -20,9 +20,11 @@ set -euo pipefail
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # Source configuration (provides SKELETON_HOME, ROSTER_HOME, etc.)
+# shellcheck source=config.sh
 source "$SCRIPT_DIR/config.sh"
 
 # Source session-state for is_worktree (with fallback)
+# shellcheck source=session-state.sh
 source "$SCRIPT_DIR/session-state.sh" 2>/dev/null || {
     # Minimal fallback if session-state.sh unavailable
     is_worktree() {

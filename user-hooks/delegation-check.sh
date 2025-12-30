@@ -7,9 +7,11 @@ set -euo pipefail
 SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 
 # Source logging if available
+# shellcheck source=lib/logging.sh
 source "$SCRIPT_DIR/lib/logging.sh" 2>/dev/null && log_init "delegation-check" && log_start || true
 
 # Source session utilities for get_session_dir()
+# shellcheck source=lib/session-utils.sh
 source "$SCRIPT_DIR/lib/session-utils.sh" 2>/dev/null || true
 
 # Read JSON input from stdin

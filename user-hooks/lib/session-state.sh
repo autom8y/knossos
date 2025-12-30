@@ -7,6 +7,7 @@
 
 # Source session-core (which sources primitives -> config)
 # Provides: get_session_id, get_session_dir, get_current_session, atomic_write, etc.
+# shellcheck source=session-core.sh
 source "$(dirname "${BASH_SOURCE[0]}")/session-core.sh"
 
 # =============================================================================

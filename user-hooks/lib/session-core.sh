@@ -7,6 +7,7 @@
 
 # Source primitives (which sources config.sh)
 # Provides: md5_portable, get_tty_hash, get_shell_session_id, atomic_write, atomic_write_stdin
+# shellcheck source=$(dirname
 source "$(dirname "${BASH_SOURCE[0]}")/primitives.sh"
 
 # =============================================================================

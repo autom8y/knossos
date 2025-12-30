@@ -23,6 +23,7 @@ source "$SCRIPT_DIR/lib/config.sh" 2>/dev/null || {
 source "$SCRIPT_DIR/lib/primitives.sh" 2>/dev/null || true
 
 # Source logging (optional - failures are OK)
+# shellcheck source=lib/logging.sh
 source "$SCRIPT_DIR/lib/logging.sh" 2>/dev/null && log_init "command-validator" && log_start || true
 
 # =============================================================================

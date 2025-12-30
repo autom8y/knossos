@@ -8,6 +8,7 @@ set -euo pipefail
 SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 
 # Source logging library (optional)
+# shellcheck source=lib/logging.sh
 source "$SCRIPT_DIR/lib/logging.sh" 2>/dev/null && log_init "commit-tracker" && log_start || true
 
 # Read JSON input from stdin
@@ -46,6 +47,7 @@ PROJECT_DIR="${CLAUDE_PROJECT_DIR:-.}"
 cd "$PROJECT_DIR" 2>/dev/null || exit 0
 
 # Source session utilities
+# shellcheck source=lib/session-utils.sh
 source .claude/hooks/lib/session-utils.sh 2>/dev/null || exit 0
 
 SESSION_DIR=$(get_session_dir)

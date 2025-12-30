@@ -18,6 +18,7 @@ PROJECT_DIR="${CLAUDE_PROJECT_DIR:-.}"
 cd "$PROJECT_DIR" 2>/dev/null || exit 1
 
 # Source session utilities
+# shellcheck source=session-utils.sh
 source "$SCRIPT_DIR/session-utils.sh" 2>/dev/null || {
     echo '{"error": "Failed to source session-utils.sh"}' >&2
     exit 1

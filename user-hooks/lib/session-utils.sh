@@ -17,6 +17,7 @@
 
 # Source session-state.sh which brings in the full dependency chain
 # This provides all functions that were previously defined in this file
+# shellcheck source=$(dirname
 source "$(dirname "${BASH_SOURCE[0]}")/session-state.sh"
 
 # =============================================================================

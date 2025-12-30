@@ -8,11 +8,13 @@ set -euo pipefail
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # Source logging library
+# shellcheck source=lib/logging.sh
 source "$SCRIPT_DIR/lib/logging.sh" 2>/dev/null && log_init "session-audit" && log_start || true
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-.}"
 cd "$PROJECT_DIR" 2>/dev/null || exit 0
 
 # Source session utilities for validation
+# shellcheck source=lib/session-utils.sh
 source "$SCRIPT_DIR/lib/session-utils.sh" 2>/dev/null || exit 0
 
 AUDIT_DIR=".claude/sessions/.audit"

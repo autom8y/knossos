@@ -13,6 +13,7 @@
 # =============================================================================
 
 # Source configuration (provides HOOKS_LOG_DIR, HOOKS_LOG_FILE, etc.)
+# shellcheck source=config.sh
 source "$(dirname "${BASH_SOURCE[0]}")/config.sh"
 
 # Get calling hook name from first argument or BASH_SOURCE
