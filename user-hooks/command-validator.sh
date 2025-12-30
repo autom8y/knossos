@@ -18,6 +18,10 @@ source "$SCRIPT_DIR/lib/config.sh" 2>/dev/null || {
     CLAUDE_PROJECT_DIR="${CLAUDE_PROJECT_DIR:-.}"
 }
 
+# Source primitives for shared functions (json_extract, auto_approve)
+# shellcheck source=lib/primitives.sh
+source "$SCRIPT_DIR/lib/primitives.sh" 2>/dev/null || true
+
 # Source logging (optional - failures are OK)
 source "$SCRIPT_DIR/lib/logging.sh" 2>/dev/null && log_init "command-validator" && log_start || true
 
@@ -26,29 +30,10 @@ source "$SCRIPT_DIR/lib/logging.sh" 2>/dev/null && log_init "command-validator" 
 # =============================================================================
 
 INPUT=$(cat 2>/dev/null) || INPUT=""
-COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null) || COMMAND=""
+COMMAND=$(json_extract "$INPUT" '.tool_input.command') || COMMAND=""
 
 # Empty command = nothing to validate
 [[ -z "$COMMAND" ]] && exit 0
-
-# =============================================================================
-# Helper Functions
-# =============================================================================
-
-auto_approve() {
-    local reason="$1"
-    cat <<EOF
-{
-  "hookSpecificOutput": {
-    "hookEventName": "PreToolUse",
-    "permissionDecision": "allow",
-    "permissionDecisionReason": "$reason"
-  }
-}
-EOF
-    log_end 0 2>/dev/null || true
-    exit 0
-}
 
 # =============================================================================
 # FAST PATH: Auto-approve safe read-only commands
@@ -56,31 +41,31 @@ EOF
 # =============================================================================
 
 # List operations (ls)
-[[ "$COMMAND" =~ ^ls[[:space:]] ]] || [[ "$COMMAND" == "ls" ]] && auto_approve "Safe ls command"
+[[ "$COMMAND" =~ ^ls[[:space:]] ]] || [[ "$COMMAND" == "ls" ]] && auto_approve "Safe ls command" "log_end"
 
 # Git read operations
-[[ "$COMMAND" =~ ^git[[:space:]]+(status|branch|log|diff|symbolic-ref|rev-list|rev-parse|remote|config|show) ]] && auto_approve "Safe git read command"
+[[ "$COMMAND" =~ ^git[[:space:]]+(status|branch|log|diff|symbolic-ref|rev-list|rev-parse|remote|config|show) ]] && auto_approve "Safe git read command" "log_end"
 
 # GitHub CLI read operations
-[[ "$COMMAND" =~ ^gh[[:space:]]+(pr|issue)[[:space:]]+(list|view|status) ]] && auto_approve "Safe gh read command"
+[[ "$COMMAND" =~ ^gh[[:space:]]+(pr|issue)[[:space:]]+(list|view|status) ]] && auto_approve "Safe gh read command" "log_end"
 
 # Cat for reading files
-[[ "$COMMAND" =~ ^cat[[:space:]] ]] && auto_approve "Safe cat command"
+[[ "$COMMAND" =~ ^cat[[:space:]] ]] && auto_approve "Safe cat command" "log_end"
 
 # Head/tail for reading files
-[[ "$COMMAND" =~ ^(head|tail)[[:space:]] ]] && auto_approve "Safe head/tail command"
+[[ "$COMMAND" =~ ^(head|tail)[[:space:]] ]] && auto_approve "Safe head/tail command" "log_end"
 
 # Test/existence checks
-[[ "$COMMAND" =~ ^test[[:space:]] ]] || [[ "$COMMAND" =~ ^\[[[:space:]] ]] && auto_approve "Safe test command"
+[[ "$COMMAND" =~ ^test[[:space:]] ]] || [[ "$COMMAND" =~ ^\[[[:space:]] ]] && auto_approve "Safe test command" "log_end"
 
 # Sed for text processing
-[[ "$COMMAND" =~ ^sed[[:space:]] ]] && auto_approve "Safe sed command"
+[[ "$COMMAND" =~ ^sed[[:space:]] ]] && auto_approve "Safe sed command" "log_end"
 
 # Echo for output
-[[ "$COMMAND" =~ ^echo[[:space:]] ]] && auto_approve "Safe echo command"
+[[ "$COMMAND" =~ ^echo[[:space:]] ]] && auto_approve "Safe echo command" "log_end"
 
 # Piped commands starting with safe operations
-[[ "$COMMAND" =~ ^(git|gh|ls|cat|head|tail)[[:space:]].*\| ]] && auto_approve "Safe piped command"
+[[ "$COMMAND" =~ ^(git|gh|ls|cat|head|tail)[[:space:]].*\| ]] && auto_approve "Safe piped command" "log_end"
 
 # =============================================================================
 # TEAM VALIDATION
