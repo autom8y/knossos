@@ -32,11 +32,7 @@ has_session() {
     [[ -n "$session_id" && -d "$SESSIONS_DIR/$session_id" ]]
 }
 
-# Check if session is parked
-is_parked() {
-    local session_dir=$(get_session_dir)
-    [[ -n "$session_dir" ]] && grep -qE "^(parked_at|auto_parked_at):" "$session_dir/SESSION_CONTEXT.md" 2>/dev/null
-}
+# NOTE: is_parked() provided by session-state.sh via session-utils.sh
 
 # Get workflow entry agent from ACTIVE_WORKFLOW.yaml
 get_workflow_entry() {
