@@ -28,7 +28,8 @@ TTY_MAP_DIR="$SESSIONS_DIR/.tty-map"
 
 # Check if current terminal has an active session
 has_session() {
-    local session_id=$(get_session_id)
+    local session_id
+    session_id=$(get_session_id)
     [[ -n "$session_id" && -d "$SESSIONS_DIR/$session_id" ]]
 }
 
@@ -114,8 +115,10 @@ json_string() {
 
 # Output full session status as JSON
 cmd_status() {
-    local tty_hash=$(get_tty_hash)
-    local session_id=$(get_session_id)
+    local tty_hash
+    tty_hash=$(get_tty_hash)
+    local session_id
+    session_id=$(get_session_id)
     local has_session="false"
     local session_state="IDLE"
     local session_dir=""
@@ -130,13 +133,18 @@ cmd_status() {
     fi
 
     # Team and workflow
-    local active_team=$(cat ".claude/ACTIVE_TEAM" 2>/dev/null || echo "none")
-    local workflow_name=$(get_workflow_name)
-    local workflow_entry=$(get_workflow_entry)
+    local active_team
+    active_team=$(cat ".claude/ACTIVE_TEAM" 2>/dev/null || echo "none")
+    local workflow_name
+    workflow_name=$(get_workflow_name)
+    local workflow_entry
+    workflow_entry=$(get_workflow_entry)
 
     # Git status
-    local git_branch=$(git branch --show-current 2>/dev/null || echo "not a git repo")
-    local git_status_count=$(git status --short 2>/dev/null | wc -l | tr -d ' ')
+    local git_branch
+    git_branch=$(git branch --show-current 2>/dev/null || echo "not a git repo")
+    local git_status_count
+    git_status_count=$(git status --short 2>/dev/null | wc -l | tr -d ' ')
 
     # Worktree info
     local in_worktree wt_id wt_name wt_team
@@ -213,10 +221,13 @@ EOF
         exit 1
     fi
 
-    local session_id=$(generate_session_id)
+    local session_id
+    session_id=$(generate_session_id)
     local session_dir="$SESSIONS_DIR/$session_id"
-    local tty_hash=$(get_tty_hash)
-    local timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+    local tty_hash
+    tty_hash=$(get_tty_hash)
+    local timestamp
+    timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
     # Create directories atomically - rollback on failure
     mkdir -p "$session_dir" || {
@@ -277,7 +288,8 @@ CONTEXT
     fi
 
     # Get workflow entry for response
-    local entry_agent=$(get_workflow_entry)
+    local entry_agent
+    entry_agent=$(get_workflow_entry)
 
     cat <<EOF
 {
@@ -316,7 +328,8 @@ cmd_suggest_id() {
 
 # Cleanup stale TTY mappings
 cmd_cleanup() {
-    local cleaned=$(cleanup_stale_mappings)
+    local cleaned
+    cleaned=$(cleanup_stale_mappings)
     echo "{\"cleaned\": $cleaned}"
 }
 
@@ -331,13 +344,15 @@ cmd_transition() {
         exit 1
     fi
 
-    local session_id=$(get_session_id)
+    local session_id
+    session_id=$(get_session_id)
     if [[ -z "$session_id" ]]; then
         echo '{"success": false, "error": "No active session found"}' >&2
         exit 1
     fi
 
-    local session_dir=$(get_session_dir)
+    local session_dir
+    session_dir=$(get_session_dir)
     local ctx_file="$session_dir/SESSION_CONTEXT.md"
 
     if [[ ! -f "$ctx_file" ]]; then
@@ -406,7 +421,8 @@ EOF
     fi
 
     # Update current_phase in SESSION_CONTEXT
-    local timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+    local timestamp
+    timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
     # Use sed to update the current_phase field in the frontmatter
     if grep -q "^current_phase:" "$ctx_file"; then
@@ -475,7 +491,8 @@ cmd_mutate() {
     trap 'rm -rf "$lockfile"' EXIT
 
     # Get current session
-    local session_id=$(get_session_id)
+    local session_id
+    session_id=$(get_session_id)
     if [[ -z "$session_id" ]]; then
         echo '{"success": false, "error": "No active session for this terminal"}' >&2
         exit 1
@@ -496,7 +513,8 @@ cmd_mutate() {
         exit 1
     }
 
-    local timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+    local timestamp
+    timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
     local audit_log="$SESSIONS_DIR/.audit/session-mutations.log"
     mkdir -p "$SESSIONS_DIR/.audit" 2>/dev/null
 
@@ -630,7 +648,8 @@ mutate_wrap() {
     ' "$file" > "${file}.tmp" && mv "${file}.tmp" "$file"
 
     # Archive if requested
-    local session_id=$(basename "$session_dir")
+    local session_id
+    session_id=$(basename "$session_dir")
     if [[ "$archive" == "true" ]]; then
         mkdir -p ".claude/.archive/sessions" 2>/dev/null
         # Only archive if not already there
@@ -640,7 +659,8 @@ mutate_wrap() {
     fi
 
     # Clear TTY mapping (legacy)
-    local tty_hash=$(get_tty_hash)
+    local tty_hash
+    tty_hash=$(get_tty_hash)
     rm -f "$SESSIONS_DIR/.tty-map/$tty_hash"
 
     # Clear file-based current session
@@ -669,7 +689,8 @@ mutate_handoff() {
     fi
 
     # Increment handoff_count
-    local current_count=$({ grep "^handoff_count:" "$file" 2>/dev/null || true; } | awk '{print $2}')
+    local current_count
+    current_count=$({ grep "^handoff_count:" "$file" 2>/dev/null || true; } | awk '{print $2}')
     [[ -z "$current_count" ]] && current_count=0
     local new_count=$((current_count + 1))
     if grep -q "^handoff_count:" "$file" 2>/dev/null; then
