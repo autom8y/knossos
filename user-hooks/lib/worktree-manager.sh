@@ -52,7 +52,8 @@ generate_worktree_id() {
 
 # Get worktrees directory
 get_worktrees_dir() {
-    local root=$(get_project_root)
+    local root
+    root=$(get_project_root)
     echo "$root/worktrees"
 }
 
@@ -64,7 +65,8 @@ get_worktrees_dir() {
 # Returns: worktree path on success, exits with JSON error on failure
 resolve_worktree() {
     local wt_id="$1"
-    local wt_dir=$(get_worktrees_dir)
+    local wt_dir
+    wt_dir=$(get_worktrees_dir)
     local wt_path="$wt_dir/$wt_id"
 
     # Validate ID format
@@ -98,7 +100,8 @@ check_uncommitted() {
     status_output=$(git -C "$wt_path" status --porcelain 2>/dev/null)
 
     if [[ -n "$status_output" ]]; then
-        local count=$(echo "$status_output" | wc -l | tr -d ' ')
+        local count
+        count=$(echo "$status_output" | wc -l | tr -d ' ')
         echo "$count"
         return 1
     fi
@@ -134,7 +137,8 @@ get_pathspec_exclusion() {
 
 # Ensure worktrees directory exists with .gitignore
 ensure_worktrees_dir() {
-    local wt_dir=$(get_worktrees_dir)
+    local wt_dir
+    wt_dir=$(get_worktrees_dir)
     mkdir -p "$wt_dir"
 
     if [[ ! -f "$wt_dir/.gitignore" ]]; then
@@ -194,14 +198,18 @@ cmd_create() {
 
     # Get current team if not specified
     if [[ -z "$team" ]]; then
-        local root=$(get_project_root)
+        local root
+        root=$(get_project_root)
         team=$(cat "$root/.claude/ACTIVE_TEAM" 2>/dev/null || echo "")
     fi
 
-    local wt_id=$(generate_worktree_id)
-    local wt_dir=$(get_worktrees_dir)
+    local wt_id
+    wt_id=$(generate_worktree_id)
+    local wt_dir
+    wt_dir=$(get_worktrees_dir)
     local wt_path="$wt_dir/$wt_id"
-    local timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+    local timestamp
+    timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
     ensure_worktrees_dir
 
@@ -286,7 +294,8 @@ EOF
 cmd_list() {
     ensure_git_repo
 
-    local wt_dir=$(get_worktrees_dir)
+    local wt_dir
+    wt_dir=$(get_worktrees_dir)
     local count=0
 
     echo "{"
@@ -297,7 +306,8 @@ cmd_list() {
         [[ -d "$wt" ]] || continue
         ((count++)) || true
 
-        local wt_id=$(basename "$wt")
+        local wt_id
+        wt_id=$(basename "$wt")
         local meta_file="$wt/.claude/.worktree-meta.json"
         local name="unknown"
         local team="unknown"
@@ -317,7 +327,8 @@ cmd_list() {
 
         # Check session status
         local session_status="none"
-        local session_dir=$(find "$wt/.claude/sessions" -maxdepth 1 -type d -name "session-*" 2>/dev/null | head -1)
+        local session_dir
+        session_dir=$(find "$wt/.claude/sessions" -maxdepth 1 -type d -name "session-*" 2>/dev/null | head -1)
         if [[ -n "$session_dir" ]]; then
             if grep -q "parked_at:\|auto_parked_at:" "$session_dir/SESSION_CONTEXT.md" 2>/dev/null; then
                 session_status="parked"
@@ -353,7 +364,8 @@ cmd_status() {
     ensure_git_repo
 
     local target_id="${1:-}"
-    local wt_dir=$(get_worktrees_dir)
+    local wt_dir
+    wt_dir=$(get_worktrees_dir)
 
     if [[ -n "$target_id" ]]; then
         # Specific worktree
@@ -387,7 +399,8 @@ cmd_remove() {
         exit 1
     fi
 
-    local wt_dir=$(get_worktrees_dir)
+    local wt_dir
+    wt_dir=$(get_worktrees_dir)
     local wt_path="$wt_dir/$target_id"
 
     if [[ ! -d "$wt_path" ]]; then
@@ -417,10 +430,12 @@ cmd_cleanup() {
     ensure_git_repo
 
     local force="${1:-}"
-    local wt_dir=$(get_worktrees_dir)
+    local wt_dir
+    wt_dir=$(get_worktrees_dir)
     local cutoff_days=7
     local cutoff_seconds=$((cutoff_days * 24 * 60 * 60))
-    local now=$(date +%s)
+    local now
+    now=$(date +%s)
     local removed=0
     local skipped=0
     local skipped_reasons=""
@@ -428,7 +443,8 @@ cmd_cleanup() {
     for wt in "$wt_dir"/wt-*; do
         [[ -d "$wt" ]] || continue
 
-        local wt_id=$(basename "$wt")
+        local wt_id
+        wt_id=$(basename "$wt")
 
         # Get modification time
         local mtime
@@ -502,7 +518,8 @@ cmd_gc() {
     git worktree prune 2>/dev/null || true
 
     # Count remaining
-    local wt_dir=$(get_worktrees_dir)
+    local wt_dir
+    wt_dir=$(get_worktrees_dir)
     local count=0
     for wt in "$wt_dir"/wt-*; do
         [[ -d "$wt" ]] && ((count++)) || true
