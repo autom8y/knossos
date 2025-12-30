@@ -54,16 +54,18 @@ else
 fi
 
 # Logging functions
+# IMPORTANT: All log functions MUST output to stderr to avoid polluting
+# captured stdout in functions that return data via echo
 log() {
-    echo "[User-Skills] $*"
+    echo "[User-Skills] $*" >&2
 }
 
 log_success() {
-    echo -e "[User-Skills] ${GREEN}$*${NC}"
+    echo -e "[User-Skills] ${GREEN}$*${NC}" >&2
 }
 
 log_info() {
-    echo -e "[User-Skills] ${BLUE}$*${NC}"
+    echo -e "[User-Skills] ${BLUE}$*${NC}" >&2
 }
 
 log_warning() {

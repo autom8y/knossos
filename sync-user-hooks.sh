@@ -53,16 +53,18 @@ else
 fi
 
 # Logging functions
+# IMPORTANT: All log functions MUST output to stderr to avoid polluting
+# captured stdout in functions like sync_file() that return data via echo
 log() {
-    echo "[User-Hooks] $*"
+    echo "[User-Hooks] $*" >&2
 }
 
 log_success() {
-    echo -e "[User-Hooks] ${GREEN}$*${NC}"
+    echo -e "[User-Hooks] ${GREEN}$*${NC}" >&2
 }
 
 log_info() {
-    echo -e "[User-Hooks] ${BLUE}$*${NC}"
+    echo -e "[User-Hooks] ${BLUE}$*${NC}" >&2
 }
 
 log_warning() {
@@ -573,9 +575,9 @@ perform_sync() {
         hook_name=$(basename "$source_file")
         local target_file="$USER_HOOKS_DIR/$hook_name"
 
-        local entry_result
-        entry_result=$(sync_file "$source_file" "$target_file" "$hook_name" "root" "manifest_entries")
-        local sync_status=$?
+        local entry_result sync_status
+        entry_result=$(sync_file "$source_file" "$target_file" "$hook_name" "root" "manifest_entries") || sync_status=$?
+        sync_status=${sync_status:-0}
 
         if [[ -n "$entry_result" ]]; then
             manifest_entries+=("$entry_result")
@@ -599,9 +601,9 @@ perform_sync() {
             local hook_name="lib/$file_name"
             local target_file="$USER_HOOKS_DIR/lib/$file_name"
 
-            local entry_result
-            entry_result=$(sync_file "$source_file" "$target_file" "$hook_name" "lib" "manifest_entries")
-            local sync_status=$?
+            local entry_result sync_status
+            entry_result=$(sync_file "$source_file" "$target_file" "$hook_name" "lib" "manifest_entries") || sync_status=$?
+            sync_status=${sync_status:-0}
 
             if [[ -n "$entry_result" ]]; then
                 manifest_entries+=("$entry_result")
@@ -660,8 +662,8 @@ perform_sync() {
         write_manifest "${manifest_entries[@]:-}"
     fi
 
-    # Summary
-    echo ""
+    # Summary (all output to stderr to keep stdout clean for data)
+    echo "" >&2
     if [[ "$DRY_RUN_MODE" -eq 1 ]]; then
         log "Dry-run complete:"
     else
@@ -669,11 +671,11 @@ perform_sync() {
     fi
 
     local total=$((added + updated + unchanged + skipped))
-    echo "  Added:     $added"
-    echo "  Updated:   $updated"
-    echo "  Unchanged: $unchanged"
-    echo "  Skipped:   $skipped (user-created)"
-    echo "  Total:     $total hook(s) processed"
+    echo "  Added:     $added" >&2
+    echo "  Updated:   $updated" >&2
+    echo "  Unchanged: $unchanged" >&2
+    echo "  Skipped:   $skipped (user-created)" >&2
+    echo "  Total:     $total hook(s) processed" >&2
 }
 
 # Show sync status
