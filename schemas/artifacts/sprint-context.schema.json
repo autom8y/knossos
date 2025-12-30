@@ -89,6 +89,18 @@
     "schema_version": {
       "$ref": "common.schema.json#/$defs/schema_version",
       "default": "1.0"
+    },
+    "depends_on": {
+      "type": "array",
+      "items": {
+        "$ref": "common.schema.json#/$defs/sprint_id"
+      },
+      "default": [],
+      "description": "Sprint IDs that must complete before this sprint can complete. Used for parallel sprint dependency tracking."
+    },
+    "parent_sprint": {
+      "$ref": "common.schema.json#/$defs/sprint_id",
+      "description": "Parent sprint for nested sprint hierarchies (optional). Used for organizing sub-sprints under a parent sprint."
     }
   },
 

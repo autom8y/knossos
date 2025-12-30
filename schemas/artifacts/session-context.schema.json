@@ -61,6 +61,11 @@
     "schema_version": {
       "$ref": "common.schema.json#/$defs/schema_version",
       "default": "1.0"
+    },
+    "state_mate_agent_id": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{8}$",
+      "description": "Unique identifier for state-mate agent instance, persisted across context compaction. Generated on first mutation, used to verify continuity."
     }
   },
 
