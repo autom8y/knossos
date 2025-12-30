@@ -2,7 +2,7 @@
 description: Get ecosystem guidance, team recommendations, and command-flows
 argument-hint: [query] [--playbook=NAME] [--team] [--commands]
 allowed-tools: Bash, Read, Grep, Glob, Task
-model: claude-opus-4-5
+model: opus
 ---
 
 ## Context

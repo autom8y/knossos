@@ -213,7 +213,7 @@ name: orchestrator
 role: "Coordinates security initiatives"
 description: "Coordinates security-pack phases for security work. Routes tasks ..."
 tools: Read, Skill
-model: claude-opus-4-5
+model: opus
 color: red
 ---
 

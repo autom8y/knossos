@@ -3,7 +3,7 @@ name: orchestrator
 role: "{{ROLE}}"
 description: "{{DESCRIPTION}}"
 tools: Read, Skill
-model: claude-opus-4-5
+model: opus
 color: {{COLOR}}
 ---
 

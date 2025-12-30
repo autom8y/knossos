@@ -2,7 +2,7 @@
 description: Structured review with categorized feedback
 argument-hint: <pr-number-or-branch> [--focus=AREA]
 allowed-tools: Bash, Read, Glob, Grep
-model: claude-opus-4-5
+model: opus
 ---
 
 ## Context

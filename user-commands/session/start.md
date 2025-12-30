@@ -2,7 +2,7 @@
 description: Initialize a new work session
 argument-hint: <initiative> [--complexity=LEVEL] [--team=PACK]
 allowed-tools: Bash, Read, Task
-model: claude-opus-4-5
+model: opus
 ---
 
 ## Pre-computed Context

@@ -2,7 +2,7 @@
 description: Design-only session producing design artifacts (no implementation)
 argument-hint: <feature-description> [--complexity=LEVEL]
 allowed-tools: Bash, Read, Write, Task, Glob, Grep
-model: claude-opus-4-5
+model: opus
 ---
 
 ## Context

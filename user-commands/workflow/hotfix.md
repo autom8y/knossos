@@ -2,7 +2,7 @@
 description: Rapid fix workflow for urgent issues
 argument-hint: <issue-description> [--severity=LEVEL]
 allowed-tools: Bash, Read, Write, Task, Glob, Grep
-model: claude-opus-4-5
+model: opus
 ---
 
 ## Context

@@ -2,7 +2,7 @@
 description: Transfer work to a different agent with context
 argument-hint: <agent-name> [notes]
 allowed-tools: Bash, Read, Write, Task
-model: claude-opus-4-5
+model: opus
 ---
 
 ## Context

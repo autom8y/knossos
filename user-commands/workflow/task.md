@@ -2,7 +2,7 @@
 description: Single task full lifecycle through team workflow phases
 argument-hint: <task-description> [--complexity=LEVEL]
 allowed-tools: Bash, Read, Write, Task, Glob, Grep
-model: claude-opus-4-5
+model: opus
 ---
 
 ## Context

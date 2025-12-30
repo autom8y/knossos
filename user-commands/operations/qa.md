@@ -2,7 +2,7 @@
 description: Validation-only with review and approval
 argument-hint: <feature-name> [--requirements=PATH]
 allowed-tools: Bash, Read, Write, Task, Glob, Grep
-model: claude-opus-4-5
+model: opus
 ---
 
 ## Context
