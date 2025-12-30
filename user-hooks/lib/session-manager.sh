@@ -204,8 +204,8 @@ cmd_create() {
         sleep 1
         ((waited++))
     done
-    # Ensure lock is released on exit
-    trap 'rm -rf "$lockfile"' EXIT
+    # Ensure lock is released on exit (use double quotes to expand lockfile now)
+    trap "rm -rf '$lockfile'" EXIT
 
     # Validate no existing session
     if has_session; then
@@ -495,8 +495,8 @@ cmd_mutate() {
         sleep 1
         ((waited++))
     done
-    # Ensure lock is released on exit
-    trap 'rm -rf "$lockfile"' EXIT
+    # Ensure lock is released on exit (use double quotes to expand lockfile now)
+    trap "rm -rf '$lockfile'" EXIT
 
     # Get current session
     local session_id
@@ -614,8 +614,9 @@ mutate_resume() {
         return 1
     fi
 
-    # Remove park metadata and add resumed_at
+    # Remove park metadata, update state to ACTIVE, and add resumed_at
     # Delete both old (git_status_at_park, park_reason) and new (parked_git_status, parked_reason) field names
+    # Update session_state/status from PARKED to ACTIVE
     sed -i.bak \
         -e '/^parked_at:/d' \
         -e '/^park_reason:/d' \
@@ -624,6 +625,8 @@ mutate_resume() {
         -e '/^parked_git_status:/d' \
         -e '/^auto_parked_at:/d' \
         -e '/^auto_parked_reason:/d' \
+        -e 's/^session_state: *"*PARKED"*/session_state: "ACTIVE"/' \
+        -e 's/^status: *"*PARKED"*/status: "ACTIVE"/' \
         "$file" && rm -f "${file}.bak"
 
     # Add resumed_at
