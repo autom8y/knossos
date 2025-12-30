@@ -6,7 +6,7 @@
 # Part of Ecosystem v2 refactoring (RF-004)
 
 # Source primitives (which sources config.sh)
-# Provides: md5_portable, get_tty_hash, get_shell_session_id, atomic_write, atomic_write_stdin
+# Provides: md5_portable, atomic_write
 # shellcheck source=$(dirname
 source "$(dirname "${BASH_SOURCE[0]}")/primitives.sh"
 
@@ -17,7 +17,6 @@ source "$(dirname "${BASH_SOURCE[0]}")/primitives.sh"
 # Get current session ID using priority chain:
 # 1. CLAUDE_SESSION_ID environment variable (explicit override)
 # 2. File-based .current-session (stable across CLI invocations)
-# 3. TTY-based mapping (legacy, for backward compatibility)
 get_session_id() {
   # Priority 1: Explicit environment variable (always highest priority)
   if [ -n "${CLAUDE_SESSION_ID:-}" ]; then
@@ -30,19 +29,6 @@ get_session_id() {
   current_session=$(get_current_session)
   if [ -n "$current_session" ]; then
     echo "$current_session"
-    return
-  fi
-
-  # Priority 3: TTY-based mapping (legacy, for backward compatibility)
-  # Note: This is unreliable in Claude Code due to PPID instability
-  # Retained for environments where TERM_SESSION_ID is stable (e.g., VS Code)
-  local tty_hash=$(get_tty_hash)
-  local project_dir="${CLAUDE_PROJECT_DIR:-.}"
-  local tty_map="$project_dir/.claude/sessions/.tty-map/$tty_hash"
-  if [ -f "$tty_map" ]; then
-    # DEPRECATION WARNING: TTY mapping is unreliable (~5% reliability in Claude Code)
-    echo "[WARNING] Using deprecated TTY mapping for session resolution. Consider setting .current-session file or CLAUDE_SESSION_ID env var." >&2
-    cat "$tty_map"
     return
   fi
 
@@ -75,8 +61,7 @@ generate_session_id() {
 # File-Based Current Session (Primary Session Association)
 # =============================================================================
 # These functions provide stable session association that persists across
-# Claude Code invocations. Unlike TTY-based mapping (which changes with each
-# `claude` CLI run), file-based association uses the filesystem as stable state.
+# Claude Code invocations using the filesystem as stable state.
 
 # Set the current session for this project
 # Usage: set_current_session "session-20251227-145523-dafb3260"
@@ -163,39 +148,6 @@ clear_current_session() {
     local current_file="$project_dir/.claude/sessions/.current-session"
     rm -f "$current_file" 2>/dev/null
     return 0
-}
-
-# =============================================================================
-# TTY-Based Session Mapping (Legacy)
-# =============================================================================
-# These functions are retained for backward compatibility but file-based
-# association (above) is preferred.
-
-# Map TTY to session (legacy)
-# Usage: map_tty_to_session "session-id"
-map_tty_to_session() {
-  local session_id="$1"
-  local tty_hash=$(get_tty_hash)
-  local project_dir="${CLAUDE_PROJECT_DIR:-.}"
-  mkdir -p "$project_dir/.claude/sessions/.tty-map"
-  echo "$session_id" > "$project_dir/.claude/sessions/.tty-map/$tty_hash"
-}
-
-# Alias for backward compatibility
-set_session_for_tty() {
-  map_tty_to_session "$@"
-}
-
-# Remove TTY mapping (legacy)
-unmap_tty() {
-  local tty_hash=$(get_tty_hash)
-  local project_dir="${CLAUDE_PROJECT_DIR:-.}"
-  rm -f "$project_dir/.claude/sessions/.tty-map/$tty_hash"
-}
-
-# Alias for backward compatibility
-clear_session_for_tty() {
-  unmap_tty
 }
 
 # =============================================================================

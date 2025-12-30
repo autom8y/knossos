@@ -6,9 +6,7 @@
 #   status              - Output JSON with full session state
 #   create <init> <complexity> [team] - Create new session
 #   exists              - Exit 0 if session exists, 1 otherwise
-#   tty-hash            - Output TTY hash for current terminal
 #   suggest-id          - Output suggested session ID
-#   cleanup             - Remove orphaned TTY mappings
 
 set -euo pipefail
 
@@ -25,7 +23,6 @@ source "$SCRIPT_DIR/session-utils.sh" 2>/dev/null || {
 }
 
 SESSIONS_DIR=".claude/sessions"
-TTY_MAP_DIR="$SESSIONS_DIR/.tty-map"
 
 # Check if current terminal has an active session
 has_session() {
@@ -123,8 +120,6 @@ json_string() {
 
 # Output full session status as JSON
 cmd_status() {
-    local tty_hash
-    tty_hash=$(get_tty_hash)
     local session_id
     session_id=$(get_session_id)
     local has_session="false"
@@ -161,7 +156,6 @@ cmd_status() {
     # Generate JSON
     cat <<EOF
 {
-  "tty_hash": "$tty_hash",
   "session_id": $(json_string "$session_id"),
   "session_dir": $(json_string "$session_dir"),
   "has_session": $has_session,
@@ -232,27 +226,12 @@ EOF
     local session_id
     session_id=$(generate_session_id)
     local session_dir="$SESSIONS_DIR/$session_id"
-    local tty_hash
-    tty_hash=$(get_tty_hash)
     local timestamp
     timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
-    # Create directories atomically - rollback on failure
+    # Create session directory
     mkdir -p "$session_dir" || {
         echo '{"success": false, "error": "Failed to create session directory"}' >&2
-        exit 1
-    }
-
-    mkdir -p "$TTY_MAP_DIR" || {
-        rm -rf "$session_dir"
-        echo '{"success": false, "error": "Failed to create TTY map directory"}' >&2
-        exit 1
-    }
-
-    # Map TTY to session
-    echo "$session_id" > "$TTY_MAP_DIR/$tty_hash" || {
-        rm -rf "$session_dir"
-        echo '{"success": false, "error": "Failed to create TTY mapping"}' >&2
         exit 1
     }
 
@@ -283,7 +262,6 @@ CONTEXT
     # Validate the created file
     if ! validate_session_context "$session_dir/SESSION_CONTEXT.md" 2>/dev/null; then
         rm -rf "$session_dir"
-        rm -f "$TTY_MAP_DIR/$tty_hash"
         echo '{"success": false, "error": "Failed to validate SESSION_CONTEXT.md"}' >&2
         exit 1
     fi
@@ -304,7 +282,6 @@ CONTEXT
   "success": true,
   "session_id": "$session_id",
   "session_dir": "$session_dir",
-  "tty_hash": "$tty_hash",
   "initiative": "$initiative",
   "complexity": "$complexity",
   "team": "$team",
@@ -324,21 +301,9 @@ cmd_exists() {
     fi
 }
 
-# Output TTY hash
-cmd_tty_hash() {
-    echo "{\"tty_hash\": \"$(get_tty_hash)\"}"
-}
-
 # Output suggested session ID
 cmd_suggest_id() {
     echo "{\"suggested_id\": \"$(generate_session_id)\"}"
-}
-
-# Cleanup stale TTY mappings
-cmd_cleanup() {
-    local cleaned
-    cleaned=$(cleanup_stale_mappings)
-    echo "{\"cleaned\": $cleaned}"
 }
 
 # Phase transition handler with artifact validation
@@ -672,11 +637,6 @@ mutate_wrap() {
         fi
     fi
 
-    # Clear TTY mapping (legacy)
-    local tty_hash
-    tty_hash=$(get_tty_hash)
-    rm -f "$SESSIONS_DIR/.tty-map/$tty_hash"
-
     # Clear file-based current session
     clear_current_session
 
@@ -739,9 +699,7 @@ Commands:
   create <init> <complexity> [team]   Create new session
   exists              Check if session exists (exit code)
   transition <from> <to>   Transition between workflow phases with validation
-  tty-hash            Show TTY hash for this terminal
   suggest-id          Generate new session ID
-  cleanup             Remove orphaned TTY mappings
   mutate <op> [args]  Atomic session mutations (park|resume|wrap|handoff)
   help                Show this help
 
@@ -754,7 +712,6 @@ Examples:
   session-manager.sh mutate park "Going to lunch"
   session-manager.sh mutate resume
   session-manager.sh mutate handoff architect principal-engineer "Design approved"
-  session-manager.sh cleanup
 EOF
 }
 
@@ -764,9 +721,7 @@ case "${1:-help}" in
     create)     cmd_create "${2:-}" "${3:-}" "${4:-}" ;;
     exists)     cmd_exists ;;
     transition) cmd_transition "${2:-}" "${3:-}" ;;
-    tty-hash)   cmd_tty_hash ;;
     suggest-id) cmd_suggest_id ;;
-    cleanup)    cmd_cleanup ;;
     mutate)     shift; cmd_mutate "$@" ;;
     resume|park|wrap|handoff) cmd_mutate "$1" "${2:-}" "${3:-}" ;;
     help|--help|-h) cmd_help ;;

@@ -56,63 +56,10 @@ get_yaml_field() {
 }
 
 # =============================================================================
-# TTY/Terminal Identification
+# NOTE: TTY/Terminal Identification functions removed (2024-12-30)
+# TTY mapping was unreliable in Claude Code (~5% reliability) due to PPID changes.
+# Session resolution now uses .current-session file exclusively.
 # =============================================================================
-
-# Get or create a unique session identifier for the current shell
-# This persists for the life of the shell and prevents TTY reuse collisions
-get_shell_session_id() {
-  # If we already have a shell session ID, use it
-  if [ -n "${_CLAUDE_SHELL_SID:-}" ]; then
-    echo "$_CLAUDE_SHELL_SID"
-    return
-  fi
-
-  # Generate a new one based on shell PID and start time
-  # This is unique per shell instance, even if TTY is reused
-  local shell_pid="${PPID:-$$}"
-  local shell_start=""
-
-  # Get shell start time (cross-platform)
-  if [ "$(uname)" = "Darwin" ]; then
-    # macOS: use ps to get process start time
-    shell_start=$(ps -p "$shell_pid" -o lstart= 2>/dev/null | tr -d ' ' || echo "")
-  else
-    # Linux: use /proc for process start time
-    if [ -f "/proc/$shell_pid/stat" ]; then
-      shell_start=$(cut -d' ' -f22 "/proc/$shell_pid/stat" 2>/dev/null || echo "")
-    fi
-  fi
-
-  # Combine PID + start time for uniqueness
-  local combined="${shell_pid}-${shell_start:-$(date +%s)}"
-  echo "$combined"
-}
-
-# DEPRECATED: TTY mapping is unreliable in Claude Code due to PPID changes.
-# Prefer .current-session file or CLAUDE_SESSION_ID env var for session resolution.
-# This function is retained for backward compatibility only (~5% reliable in Claude Code).
-#
-# Get TTY hash for terminal identification
-# Includes shell session ID to prevent collision on terminal reuse
-get_tty_hash() {
-  # Use TTY path or terminal session ID, hashed for filesystem safety
-  # Include shell session ID (PID + start time) to prevent collision on terminal reuse
-  #
-  # The hash includes:
-  # - TTY device path (or TERM_SESSION_ID)
-  # - Parent PID (shell PID)
-  # - Shell start time (via get_shell_session_id)
-  #
-  # This ensures that even if a terminal window is closed and reopened with
-  # the same TTY path, the hash will be different because either:
-  # - The shell PID is different, OR
-  # - The shell start time is different
-  local tty_id="${TTY:-${TERM_SESSION_ID:-unknown}}"
-  local shell_session
-  shell_session=$(get_shell_session_id)
-  md5_portable "${tty_id}-${shell_session}"
-}
 
 # =============================================================================
 # Atomic File Operations

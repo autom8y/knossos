@@ -234,7 +234,7 @@ is_session_stale() {
 # Session Listing
 # =============================================================================
 
-# List all session directories (excluding .tty-map)
+# List all session directories
 list_sessions() {
     find .claude/sessions -maxdepth 1 -type d -name "session-*" 2>/dev/null | sort
 }
@@ -263,59 +263,6 @@ list_stale_sessions() {
             fi
         fi
     done
-}
-
-# =============================================================================
-# Cleanup
-# =============================================================================
-
-# Remove TTY mappings that are orphaned OR older than 24 hours
-# Addresses STATE-002: No cleanup for orphaned TTY mappings
-cleanup_stale_mappings() {
-    local max_age_hours="${1:-24}"
-    local project_dir="${CLAUDE_PROJECT_DIR:-.}"
-    local map_dir="$project_dir/.claude/sessions/.tty-map"
-    local cleaned=0
-
-    [ -d "$map_dir" ] || return 0
-
-    # Calculate cutoff time
-    local now_epoch cutoff_epoch
-    now_epoch=$(date +%s)
-    cutoff_epoch=$((now_epoch - (max_age_hours * 3600)))
-
-    for map_file in "$map_dir"/*; do
-        [ -f "$map_file" ] || continue
-
-        local should_remove=0
-        local session_id
-        session_id=$(cat "$map_file" 2>/dev/null)
-
-        # Check 1: Points to non-existent session (orphaned)
-        if [ -n "$session_id" ] && [ ! -d "$project_dir/.claude/sessions/$session_id" ]; then
-            should_remove=1
-        fi
-
-        # Check 2: Map file is older than max_age_hours
-        if [ "$should_remove" -eq 0 ]; then
-            local file_mtime
-            if [ "$(uname)" = "Darwin" ]; then
-                file_mtime=$(stat -f%m "$map_file" 2>/dev/null)
-            else
-                file_mtime=$(stat -c%Y "$map_file" 2>/dev/null)
-            fi
-            if [ -n "$file_mtime" ] && [ "$file_mtime" -lt "$cutoff_epoch" ]; then
-                should_remove=1
-            fi
-        fi
-
-        if [ "$should_remove" -eq 1 ]; then
-            rm -f "$map_file"
-            ((cleaned++)) || true
-        fi
-    done
-
-    echo "$cleaned"
 }
 
 # =============================================================================
