@@ -49,3 +49,25 @@ complexity_levels:
 # /qa          → roadmap-strategist
 # /hotfix      → (N/A - strategy team)
 # /code-review → (N/A - strategy team)
+
+back_routes:
+  - source_phase: strategic-planning
+    trigger: "fail(acceptance_criteria)"
+    target_phase: market-research
+    target_agent: market-researcher
+    requires_user_confirmation: true
+    condition: "Failure is requirement gap, not implementation bug"
+
+  - source_phase: strategic-planning
+    trigger: "fail(implementation)"
+    target_phase: business-modeling
+    target_agent: business-model-analyst
+    requires_user_confirmation: false
+    condition: "Failure is implementation bug"
+
+  - source_phase: business-modeling
+    trigger: "design_conflict"
+    target_phase: competitive-analysis
+    target_agent: competitive-analyst
+    requires_user_confirmation: false
+    condition: "Implementation reveals design flaw"

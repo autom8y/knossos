@@ -47,3 +47,25 @@ complexity_levels:
 # /qa         → doc-reviewer
 # /hotfix     → tech-writer (fast path)
 # /code-review → doc-reviewer (review mode)
+
+back_routes:
+  - source_phase: review
+    trigger: "fail(acceptance_criteria)"
+    target_phase: audit
+    target_agent: doc-auditor
+    requires_user_confirmation: true
+    condition: "Failure is requirement gap, not implementation issue"
+
+  - source_phase: review
+    trigger: "fail(implementation)"
+    target_phase: writing
+    target_agent: tech-writer
+    requires_user_confirmation: false
+    condition: "Failure is writing quality issue"
+
+  - source_phase: writing
+    trigger: "design_conflict"
+    target_phase: architecture
+    target_agent: information-architect
+    requires_user_confirmation: false
+    condition: "Writing reveals architecture flaw"

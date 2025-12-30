@@ -49,3 +49,25 @@ complexity_levels:
 # /qa          → security-reviewer
 # /hotfix      → penetration-tester (fast path)
 # /code-review → security-reviewer
+
+back_routes:
+  - source_phase: security-review
+    trigger: "fail(acceptance_criteria)"
+    target_phase: threat-modeling
+    target_agent: threat-modeler
+    requires_user_confirmation: true
+    condition: "Failure is requirement gap, not implementation bug"
+
+  - source_phase: security-review
+    trigger: "fail(implementation)"
+    target_phase: penetration-testing
+    target_agent: penetration-tester
+    requires_user_confirmation: false
+    condition: "Failure is implementation bug"
+
+  - source_phase: penetration-testing
+    trigger: "design_conflict"
+    target_phase: compliance-design
+    target_agent: compliance-architect
+    requires_user_confirmation: false
+    condition: "Implementation reveals design flaw"

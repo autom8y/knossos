@@ -71,3 +71,25 @@ commands:
     description: "Consolidate documentation into numbered artifacts"
     primary_agent: ecosystem-analyst
     workflow_phase: all  # Orchestrates full pipeline
+
+back_routes:
+  - source_phase: validation
+    trigger: "fail(acceptance_criteria)"
+    target_phase: analysis
+    target_agent: ecosystem-analyst
+    requires_user_confirmation: true
+    condition: "Failure is requirement gap, not implementation bug"
+
+  - source_phase: validation
+    trigger: "fail(implementation)"
+    target_phase: implementation
+    target_agent: integration-engineer
+    requires_user_confirmation: false
+    condition: "Failure is implementation bug"
+
+  - source_phase: implementation
+    trigger: "design_conflict"
+    target_phase: design
+    target_agent: context-architect
+    requires_user_confirmation: false
+    condition: "Implementation reveals design flaw"

@@ -1,0 +1,440 @@
+# Handoff Criteria Schema
+# Defines machine-verifiable criteria for phase transitions
+# Used by orchestrator to validate handoffs without prose interpretation
+
+schema_version: "1.0"
+
+# Artifact type definitions with handoff criteria
+artifact_types:
+
+  # ============================================================================
+  # Core Workflow Artifacts (10x-dev-pack)
+  # ============================================================================
+
+  prd:
+    phase: requirements
+    description: "Product Requirements Document"
+    criteria:
+      - id: prd-001
+        description: "PRD has valid artifact_id"
+        validation: "artifact_id matches pattern ^PRD-[a-z0-9-]+$"
+        blocking: true
+      - id: prd-002
+        description: "PRD has at least one success criterion"
+        validation: "count(success_criteria) >= 1"
+        blocking: true
+      - id: prd-003
+        description: "All success criteria are marked testable"
+        validation: "all(success_criteria.testable == true)"
+        blocking: false
+      - id: prd-004
+        description: "PRD status is approved"
+        validation: "status == 'approved'"
+        blocking: true
+      - id: prd-005
+        description: "PRD has complexity classification"
+        validation: "complexity in ['SCRIPT', 'MODULE', 'SERVICE', 'PLATFORM']"
+        blocking: true
+
+  tdd:
+    phase: design
+    description: "Technical Design Document"
+    criteria:
+      - id: tdd-001
+        description: "TDD has valid artifact_id"
+        validation: "artifact_id matches pattern ^TDD-[a-z0-9-]+$"
+        blocking: true
+      - id: tdd-002
+        description: "TDD references source PRD"
+        validation: "prd_ref is not null and prd_ref matches pattern ^PRD-[a-z0-9-]+$"
+        blocking: true
+      - id: tdd-003
+        description: "TDD has at least one component"
+        validation: "count(components) >= 1"
+        blocking: true
+      - id: tdd-004
+        description: "TDD status is approved"
+        validation: "status == 'approved'"
+        blocking: true
+      - id: tdd-005
+        description: "Each component has name, type, and description"
+        validation: "all(components has name, type, description)"
+        blocking: true
+      - id: tdd-006
+        description: "API contracts defined (if applicable)"
+        validation: "complexity >= 'SERVICE' implies count(api_contracts) >= 1"
+        blocking: false
+
+  adr:
+    phase: design
+    description: "Architecture Decision Record"
+    criteria:
+      - id: adr-001
+        description: "ADR has valid artifact_id"
+        validation: "artifact_id matches pattern ^ADR-[0-9]+$"
+        blocking: true
+      - id: adr-002
+        description: "ADR has context explaining why decision needed"
+        validation: "context is not null and length(context) >= 20"
+        blocking: true
+      - id: adr-003
+        description: "ADR has clear decision statement"
+        validation: "decision is not null and length(decision) >= 20"
+        blocking: true
+      - id: adr-004
+        description: "ADR has at least one consequence"
+        validation: "count(consequences) >= 1"
+        blocking: true
+      - id: adr-005
+        description: "ADR status is accepted"
+        validation: "status == 'accepted'"
+        blocking: true
+      - id: adr-006
+        description: "Supersession chain is consistent"
+        validation: "status == 'superseded' implies superseded_by is not null"
+        blocking: true
+
+  test-plan:
+    phase: validation
+    description: "Test Plan"
+    criteria:
+      - id: test-001
+        description: "Test plan has valid artifact_id"
+        validation: "artifact_id matches pattern ^TEST-[a-z0-9-]+$"
+        blocking: true
+      - id: test-002
+        description: "Test plan references source PRD"
+        validation: "prd_ref is not null and prd_ref matches pattern ^PRD-[a-z0-9-]+$"
+        blocking: true
+      - id: test-003
+        description: "Coverage matrix includes all PRD success criteria"
+        validation: "all PRD success_criteria have coverage entry"
+        blocking: true
+      - id: test-004
+        description: "At least one test case defined"
+        validation: "count(test_cases) >= 1"
+        blocking: true
+      - id: test-005
+        description: "No must-have criteria with coverage: none"
+        validation: "no coverage_matrix entry for must-have has coverage_type: none"
+        blocking: true
+      - id: test-006
+        description: "Test plan status is ready or passed"
+        validation: "status in ['ready', 'passed']"
+        blocking: true
+
+  # ============================================================================
+  # Ecosystem Artifacts (ecosystem-pack)
+  # ============================================================================
+
+  gap-analysis:
+    phase: analysis
+    description: "Gap Analysis Document"
+    criteria:
+      - id: gap-001
+        description: "Type is gap-analysis"
+        validation: "type == 'gap-analysis'"
+        blocking: true
+      - id: gap-002
+        description: "Affected systems specified"
+        validation: "count(affected_systems) >= 1 and all in ['skeleton', 'roster', 'CEM']"
+        blocking: true
+      - id: gap-003
+        description: "Issue count is accurate"
+        validation: "issue_count == critical_count + high_count + medium_count"
+        blocking: false
+      - id: gap-004
+        description: "At least one success criterion defined"
+        validation: "count(success_criteria) >= 1"
+        blocking: true
+      - id: gap-005
+        description: "Status is ready-for-design"
+        validation: "status == 'ready-for-design'"
+        blocking: true
+      - id: gap-006
+        description: "Complexity classification matches scope"
+        validation: "complexity in ['PATCH', 'MODULE', 'SYSTEM', 'MIGRATION']"
+        blocking: true
+
+  context-design:
+    phase: design
+    description: "Context Design Document"
+    criteria:
+      - id: cd-001
+        description: "Type is context-design"
+        validation: "type == 'context-design'"
+        blocking: true
+      - id: cd-002
+        description: "References source Gap Analysis"
+        validation: "gap_analysis is not null"
+        blocking: true
+      - id: cd-003
+        description: "At least one work package defined"
+        validation: "count(work_packages) >= 1"
+        blocking: true
+      - id: cd-004
+        description: "All work packages have file-level changes"
+        validation: "all(work_packages.files is not empty)"
+        blocking: true
+      - id: cd-005
+        description: "No TBD or unresolved items"
+        validation: "document does not contain 'TBD' or 'TODO'"
+        blocking: true
+      - id: cd-006
+        description: "Status is ready-for-implementation"
+        validation: "status == 'ready-for-implementation'"
+        blocking: true
+      - id: cd-007
+        description: "Backward compatibility assessed"
+        validation: "backward_compatible is boolean"
+        blocking: true
+      - id: cd-008
+        description: "Breaking changes have migration path"
+        validation: "backward_compatible == false implies migration_required == true"
+        blocking: true
+
+  migration-runbook:
+    phase: documentation
+    description: "Migration Runbook"
+    criteria:
+      - id: mr-001
+        description: "Type is migration-runbook"
+        validation: "type == 'migration-runbook'"
+        blocking: true
+      - id: mr-002
+        description: "Version information provided"
+        validation: "source_version and target_version are not null"
+        blocking: true
+      - id: mr-003
+        description: "At least one migration step defined"
+        validation: "count(steps) >= 1"
+        blocking: true
+      - id: mr-004
+        description: "All steps have verification"
+        validation: "all(steps.verification is not null)"
+        blocking: true
+      - id: mr-005
+        description: "Rollback steps defined"
+        validation: "count(rollback_steps) >= 1"
+        blocking: true
+      - id: mr-006
+        description: "Verification checks defined"
+        validation: "count(verification) >= 1"
+        blocking: true
+      - id: mr-007
+        description: "Risk level assessed"
+        validation: "risk_level in ['low', 'medium', 'high', 'critical']"
+        blocking: true
+
+  compatibility-report:
+    phase: validation
+    description: "Compatibility Report"
+    criteria:
+      - id: cr-001
+        description: "Type is compatibility-report"
+        validation: "type == 'compatibility-report'"
+        blocking: true
+      - id: cr-002
+        description: "Test matrix includes satellite diversity"
+        validation: "count(test_matrix) >= 3"
+        blocking: false
+      - id: cr-003
+        description: "Test counts are consistent"
+        validation: "total_tests == passed_tests + failed_tests + skipped_tests"
+        blocking: true
+      - id: cr-004
+        description: "Failures have resolution paths"
+        validation: "all(failures.resolution is not null)"
+        blocking: false
+      - id: cr-005
+        description: "Overall status reflects test results"
+        validation: "(failed_tests == 0 implies overall_status == 'pass') and (failed_tests > 0 implies overall_status in ['fail', 'partial'])"
+        blocking: true
+      - id: cr-006
+        description: "Context design referenced"
+        validation: "context_design is not null"
+        blocking: true
+
+  # ============================================================================
+  # Consolidation Artifacts
+  # ============================================================================
+
+  manifest:
+    phase: discovery
+    description: "Consolidation Manifest"
+    criteria:
+      - id: mf-001
+        description: "Schema version specified"
+        validation: "schema_version is not null"
+        blocking: true
+      - id: mf-002
+        description: "At least one file cataloged"
+        validation: "count(files) >= 1"
+        blocking: true
+      - id: mf-003
+        description: "At least one topic identified"
+        validation: "count(topics) >= 1"
+        blocking: true
+      - id: mf-004
+        description: "Each topic has primary source"
+        validation: "all(topics.primary_source is not null)"
+        blocking: true
+
+  extraction:
+    phase: extraction
+    description: "Topic Extraction"
+    criteria:
+      - id: ex-001
+        description: "Topic ID is kebab-case"
+        validation: "topic.id matches pattern ^[a-z][a-z0-9-]*$"
+        blocking: true
+      - id: ex-002
+        description: "At least one source analyzed"
+        validation: "count(sources) >= 1"
+        blocking: true
+      - id: ex-003
+        description: "At least one canonical section"
+        validation: "count(canonical_sections) >= 1"
+        blocking: true
+      - id: ex-004
+        description: "Conflicts documented (may be empty)"
+        validation: "conflicts is array"
+        blocking: true
+      - id: ex-005
+        description: "No blocking conflicts unresolved"
+        validation: "no conflicts with severity == 'blocking' and status == 'unresolved'"
+        blocking: true
+
+  checkpoint:
+    phase: synthesis
+    description: "Consolidation Checkpoint"
+    criteria:
+      - id: cp-001
+        description: "Phase is valid"
+        validation: "status.phase in ['discovery', 'extraction', 'synthesis', 'review', 'complete']"
+        blocking: true
+      - id: cp-002
+        description: "Activity log has entries"
+        validation: "count(activity_log) >= 1"
+        blocking: true
+      - id: cp-003
+        description: "Concepts populated after extraction"
+        validation: "status.phase in ['synthesis', 'review', 'complete'] implies count(concepts) >= 1"
+        blocking: true
+
+  # ============================================================================
+  # Workflow Artifacts
+  # ============================================================================
+
+  workflow:
+    phase: configuration
+    description: "Workflow YAML"
+    criteria:
+      - id: wf-001
+        description: "Name is kebab-case"
+        validation: "name matches pattern ^[a-z][a-z0-9-]*$"
+        blocking: true
+      - id: wf-002
+        description: "Workflow type is valid"
+        validation: "workflow_type in ['sequential', 'parallel', 'hybrid']"
+        blocking: true
+      - id: wf-003
+        description: "At least one phase defined"
+        validation: "count(phases) >= 1"
+        blocking: true
+      - id: wf-004
+        description: "At least one complexity level"
+        validation: "count(complexity_levels) >= 1"
+        blocking: true
+      - id: wf-005
+        description: "Entry point agent exists in phases"
+        validation: "entry_point.agent in phases[*].agent"
+        blocking: true
+      - id: wf-006
+        description: "Path template contains slug placeholder"
+        validation: "entry_point.artifact.path_template contains '{slug}'"
+        blocking: true
+
+# ============================================================================
+# Validation Rules
+# ============================================================================
+
+validation:
+  # Error codes for validation functions
+  error_codes:
+    0: "valid"
+    1: "file_not_found"
+    2: "invalid_yaml_syntax"
+    3: "missing_required_field"
+    4: "field_validation_failed"
+    5: "blocking_criterion_failed"
+
+  # Validation function template
+  function_template: |
+    validate_handoff() {
+        local artifact_path="$1"
+        local artifact_type="$2"
+        local criteria_file="${ROSTER_DIR}/schemas/handoff-criteria-schema.yaml"
+
+        # Load criteria for artifact type
+        local criteria
+        criteria=$(yq ".artifact_types.$artifact_type.criteria" "$criteria_file")
+
+        # Check each blocking criterion
+        local blocking_failed=()
+        while IFS= read -r criterion; do
+            local id description validation blocking
+            id=$(echo "$criterion" | yq '.id')
+            blocking=$(echo "$criterion" | yq '.blocking')
+
+            if [[ "$blocking" == "true" ]]; then
+                if ! evaluate_criterion "$artifact_path" "$validation"; then
+                    blocking_failed+=("$id: $description")
+                fi
+            fi
+        done <<< "$criteria"
+
+        if [ ${#blocking_failed[@]} -gt 0 ]; then
+            echo "Blocking criteria failed:" >&2
+            printf '%s\n' "${blocking_failed[@]}" >&2
+            return 5
+        fi
+
+        return 0
+    }
+
+# ============================================================================
+# Handoff Verification Protocol
+# ============================================================================
+
+protocol:
+  description: "Steps for orchestrator to verify handoff readiness"
+  steps:
+    - step: 1
+      action: "Load artifact frontmatter"
+      detail: "Parse YAML between --- delimiters"
+    - step: 2
+      action: "Identify artifact type"
+      detail: "Match against artifact_types keys"
+    - step: 3
+      action: "Load criteria for type"
+      detail: "Get criteria array from schema"
+    - step: 4
+      action: "Evaluate blocking criteria"
+      detail: "Check each with blocking: true"
+    - step: 5
+      action: "Report results"
+      detail: "Return 0 if all blocking pass, 5 if any fail"
+
+  example: |
+    # Orchestrator validates PRD before handoff to design phase:
+    CONSULTATION_REQUEST:
+      type: checkpoint
+      results:
+        phase_completed: requirements
+        artifact_summary: "PRD-user-auth created with 3 success criteria"
+        handoff_criteria_met:
+          - prd-001: PASS  # artifact_id valid
+          - prd-002: PASS  # has success criteria
+          - prd-004: PASS  # status approved
+          - prd-005: PASS  # complexity set

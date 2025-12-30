@@ -37,3 +37,25 @@ complexity_levels:
 # /build      → sprint-planner (planning is the "build" output)
 # /qa         → risk-assessor (validation role)
 # Note: This team has 3 agents, not 4. Some commands may not apply.
+
+back_routes:
+  - source_phase: planning
+    trigger: "fail(acceptance_criteria)"
+    target_phase: collection
+    target_agent: debt-collector
+    requires_user_confirmation: true
+    condition: "Failure is requirement gap, not implementation bug"
+
+  - source_phase: planning
+    trigger: "fail(implementation)"
+    target_phase: assessment
+    target_agent: risk-assessor
+    requires_user_confirmation: false
+    condition: "Failure is assessment issue"
+
+  - source_phase: assessment
+    trigger: "design_conflict"
+    target_phase: collection
+    target_agent: debt-collector
+    requires_user_confirmation: false
+    condition: "Assessment reveals missing debt items"

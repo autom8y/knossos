@@ -49,3 +49,25 @@ complexity_levels:
 # /qa          → moonshot-architect
 # /hotfix      → (N/A - R&D team)
 # /code-review → (N/A - R&D team)
+
+back_routes:
+  - source_phase: future-architecture
+    trigger: "fail(acceptance_criteria)"
+    target_phase: scouting
+    target_agent: technology-scout
+    requires_user_confirmation: true
+    condition: "Failure is requirement gap, not implementation bug"
+
+  - source_phase: future-architecture
+    trigger: "fail(implementation)"
+    target_phase: prototyping
+    target_agent: prototype-engineer
+    requires_user_confirmation: false
+    condition: "Failure is implementation bug"
+
+  - source_phase: prototyping
+    trigger: "design_conflict"
+    target_phase: integration-analysis
+    target_agent: integration-researcher
+    requires_user_confirmation: false
+    condition: "Implementation reveals design flaw"

@@ -49,3 +49,25 @@ complexity_levels:
 # /qa          → insights-analyst
 # /hotfix      → (N/A - research team)
 # /code-review → (N/A - research team)
+
+back_routes:
+  - source_phase: synthesis
+    trigger: "fail(acceptance_criteria)"
+    target_phase: instrumentation
+    target_agent: analytics-engineer
+    requires_user_confirmation: true
+    condition: "Failure is requirement gap, not implementation bug"
+
+  - source_phase: synthesis
+    trigger: "fail(implementation)"
+    target_phase: experimentation
+    target_agent: experimentation-lead
+    requires_user_confirmation: false
+    condition: "Failure is implementation bug"
+
+  - source_phase: experimentation
+    trigger: "design_conflict"
+    target_phase: research
+    target_agent: user-researcher
+    requires_user_confirmation: false
+    condition: "Implementation reveals design flaw"

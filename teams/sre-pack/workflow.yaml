@@ -50,3 +50,25 @@ complexity_levels:
 # /qa         → chaos-engineer
 # /hotfix     → incident-commander (fast path)
 # /code-review → chaos-engineer (review mode)
+
+back_routes:
+  - source_phase: resilience
+    trigger: "fail(acceptance_criteria)"
+    target_phase: observation
+    target_agent: observability-engineer
+    requires_user_confirmation: true
+    condition: "Failure is requirement gap, not implementation bug"
+
+  - source_phase: resilience
+    trigger: "fail(implementation)"
+    target_phase: implementation
+    target_agent: platform-engineer
+    requires_user_confirmation: false
+    condition: "Failure is implementation bug"
+
+  - source_phase: implementation
+    trigger: "design_conflict"
+    target_phase: coordination
+    target_agent: incident-commander
+    requires_user_confirmation: false
+    condition: "Implementation reveals design flaw"

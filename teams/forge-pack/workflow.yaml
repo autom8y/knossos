@@ -71,3 +71,25 @@ commands:
     description: "Create new agent teams from scratch"
     primary_agent: agent-designer
     workflow_phase: all
+
+back_routes:
+  - source_phase: validation
+    trigger: "fail(acceptance_criteria)"
+    target_phase: design
+    target_agent: agent-designer
+    requires_user_confirmation: true
+    condition: "Failure is requirement gap, not implementation bug"
+
+  - source_phase: validation
+    trigger: "fail(implementation)"
+    target_phase: workflow
+    target_agent: workflow-engineer
+    requires_user_confirmation: false
+    condition: "Failure is implementation bug"
+
+  - source_phase: workflow
+    trigger: "design_conflict"
+    target_phase: prompts
+    target_agent: prompt-architect
+    requires_user_confirmation: false
+    condition: "Implementation reveals design flaw"
