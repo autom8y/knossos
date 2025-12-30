@@ -28,7 +28,7 @@ description: |
   reduction without losing clarity..."
   </example>
 tools: Bash, Glob, Grep, Read, Write, Edit, Task, TodoWrite
-model: claude-opus-4-5
+model: opus
 color: cyan
 ---
 
@@ -158,7 +158,7 @@ description: |
   assistant: "{Response}"
   </example>
 tools: {appropriate tools}
-model: claude-{opus|sonnet|haiku}-4-5
+model: {opus|sonnet|haiku}
 color: {role-appropriate color}
 ---
 

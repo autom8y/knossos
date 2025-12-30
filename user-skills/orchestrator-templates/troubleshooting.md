@@ -297,7 +297,7 @@ head -10 /Users/tomtenuta/Code/skeleton_claude/.claude/teams/my-team/agents/orch
 # role: "Your role"
 # description: "Your description"
 # tools: Read, Skill
-# model: claude-opus-4-5
+# model: opus
 # color: your-color
 # ---
 

@@ -15,7 +15,7 @@ description: |                          # REQUIRED, multi-line
   {Produces}
   {Examples}
 tools: {comma-separated list}           # REQUIRED
-model: claude-{opus|sonnet|haiku}-4-5   # REQUIRED
+model: {opus|sonnet|haiku}              # REQUIRED
 color: {color name}                     # REQUIRED
 ---
 ```

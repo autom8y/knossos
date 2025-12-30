@@ -43,6 +43,10 @@ DESCRIPTION=$(yq '.frontmatter.description' "$CONFIG" | tr '\n' ' ' | sed 's/  *
 COLOR=$(yq '.team.color' "$CONFIG")
 TEAM_NAME=$(yq '.team.name' "$CONFIG")
 
+# Workflow position (upstream/downstream)
+UPSTREAM_SOURCES=$(yq '.workflow_position.upstream' "$CONFIG" | tr -d '"')
+DOWNSTREAM_AGENTS=$(yq '.workflow_position.downstream' "$CONFIG" | tr -d '"')
+
 # --- Extract values from workflow.yaml ---
 
 # Get specialist names from phases (in workflow order, not sorted)
@@ -124,17 +128,23 @@ generate_workflow_diagram() {
 
 WORKFLOW_DIAGRAM=$(generate_workflow_diagram)
 
-# --- Generate routing table ---
+# --- Generate phase routing section ---
 
-generate_routing_table() {
+generate_phase_routing() {
     local agents=($SPECIALISTS)
+
+    echo "## Phase Routing"
+    echo ""
+    echo "| Specialist | Route When |"
+    echo "|------------|------------|"
+
     for agent in "${agents[@]}"; do
-        local condition=$(yq ".routing[\"$agent\"]" "$CONFIG")
+        local condition=$(yq ".routing[\"$agent\"]" "$CONFIG" | tr -d '"')
         echo "| $agent | $condition |"
     done
 }
 
-ROUTING_TABLE=$(generate_routing_table)
+PHASE_ROUTING=$(generate_phase_routing)
 
 # --- Generate skills reference ---
 
@@ -216,10 +226,12 @@ CONTENT=$(cat "$TEMPLATE")
 
 # Simple substitutions
 CONTENT="${CONTENT//\{\{ROLE\}\}/$ROLE}"
-CONTENT="${CONTENT//\{\{COLOR\}\}/$COLOR}"
+CONTENT="${CONTENT//\{\{TEAM_COLOR\}\}/$COLOR}"
 CONTENT="${CONTENT//\{\{COMPLEXITY_ENUM\}\}/$COMPLEXITY_ENUM}"
 CONTENT="${CONTENT//\{\{SPECIALIST_ENUM\}\}/$SPECIALIST_ENUM}"
 CONTENT="${CONTENT//\{\{TEAM_NAME\}\}/$TEAM_NAME}"
+CONTENT="${CONTENT//\{\{UPSTREAM_SOURCES\}\}/$UPSTREAM_SOURCES}"
+CONTENT="${CONTENT//\{\{DOWNSTREAM_AGENTS\}\}/$DOWNSTREAM_AGENTS}"
 
 # Multi-line substitutions need special handling
 # POC: Use sed for these
@@ -228,9 +240,9 @@ CONTENT="${CONTENT//\{\{TEAM_NAME\}\}/$TEAM_NAME}"
 TMPFILE=$(mktemp)
 echo "$CONTENT" > "$TMPFILE"
 
-# Replace DESCRIPTION (may have special chars)
+# Replace TEAM_DESCRIPTION (may have special chars)
 DESCRIPTION_ESCAPED=$(echo "$DESCRIPTION" | sed 's/[&/\]/\\&/g')
-sed -i '' "s|{{DESCRIPTION}}|$DESCRIPTION_ESCAPED|g" "$TMPFILE"
+sed -i '' "s|{{TEAM_DESCRIPTION}}|$DESCRIPTION_ESCAPED|g" "$TMPFILE"
 
 # Replace multi-line blocks
 # Workflow diagram
@@ -290,6 +302,20 @@ awk -v file="$HANDOFF_FILE" '
 mv "${TMPFILE}.new" "$TMPFILE"
 rm -f "$HANDOFF_FILE"
 
+# Phase routing
+ROUTING_FILE=$(mktemp)
+echo "$PHASE_ROUTING" > "$ROUTING_FILE"
+awk -v file="$ROUTING_FILE" '
+/\{\{PHASE_ROUTING\}\}/ {
+    while ((getline line < file) > 0) print line
+    close(file)
+    next
+}
+{ print }
+' "$TMPFILE" > "${TMPFILE}.new"
+mv "${TMPFILE}.new" "$TMPFILE"
+rm -f "$ROUTING_FILE"
+
 # Cross-team protocol (conditional)
 if [[ -n "$CROSS_TEAM_PROTOCOL" ]]; then
     PROTOCOL_FILE=$(mktemp)
@@ -306,7 +332,7 @@ if [[ -n "$CROSS_TEAM_PROTOCOL" ]]; then
     rm -f "$PROTOCOL_FILE"
 else
     # Remove placeholder line entirely
-    sed -i '' '/\{\{CROSS_TEAM_PROTOCOL\}\}/d' "$TMPFILE"
+    sed -i '' '/{{CROSS_TEAM_PROTOCOL}}/d' "$TMPFILE"
 fi
 
 # Team-specific antipatterns (conditional)
@@ -325,7 +351,7 @@ if [[ -n "$TEAM_ANTIPATTERNS" ]]; then
     rm -f "$ANTIPATTERNS_FILE"
 else
     # Remove placeholder line entirely
-    sed -i '' '/\{\{TEAM_SPECIFIC_ANTIPATTERNS\}\}/d' "$TMPFILE"
+    sed -i '' '/{{TEAM_SPECIFIC_ANTIPATTERNS}}/d' "$TMPFILE"
 fi
 
 # --- Output ---

@@ -319,7 +319,7 @@ Generated orchestrator.md is treated like any other agent file:
 The AGENT_MANIFEST automatically tracks orchestrator.md:
 - Source: "team"
 - Origin: Your team name
-- Model: claude-opus-4-5
+- Model: opus
 
 **Note**: No manual edits needed. Standard agent discovery handles it.
 
@@ -385,7 +385,7 @@ routing:
    role: "..."
    description: "..."
    tools: Read, Skill
-   model: claude-opus-4-5
+   model: opus
    color: purple
    ---
    ```

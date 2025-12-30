@@ -290,7 +290,7 @@ name: orchestrator
 role: "Your role here"
 description: "Your description here"
 tools: Read, Skill
-model: claude-opus-4-5
+model: opus
 color: your-color
 ---
 ```

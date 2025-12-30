@@ -27,7 +27,7 @@ description: |
   assistant: "{How agent responds or what it produces}"
   </example>
 tools: Bash, Glob, Grep, Read, Edit, Write, Task, TodoWrite
-model: claude-{opus|sonnet|haiku}-4-5  # opus=coordination/architecture, sonnet=implementation, haiku=boilerplate
+model: {opus|sonnet|haiku}  # opus=coordination/architecture, sonnet=implementation, haiku=boilerplate
 color: {purple|pink|cyan|green|red|orange|blue}
 ---
 ```

@@ -261,7 +261,7 @@ name: orchestrator
 role: "Team role description"
 description: "Team description"
 tools: Read, Skill
-model: claude-opus-4-5
+model: opus
 color: team-color
 ---
 ```
@@ -326,7 +326,7 @@ routing:
     "orchestrator": {
       "source": "team",
       "origin": "my-team",
-      "model": "claude-opus-4-5"
+      "model": "opus"
     }
   }
 }
