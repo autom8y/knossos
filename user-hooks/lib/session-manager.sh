@@ -22,6 +22,20 @@ source "$SCRIPT_DIR/session-utils.sh" 2>/dev/null || {
     exit 1
 }
 
+# Source session FSM for state transitions
+# shellcheck source=session-fsm.sh
+source "$SCRIPT_DIR/session-fsm.sh" 2>/dev/null || {
+    echo '{"error": "Failed to source session-fsm.sh"}' >&2
+    exit 1
+}
+
+# Source session migration for auto-migration
+# shellcheck source=session-migrate.sh
+source "$SCRIPT_DIR/session-migrate.sh" 2>/dev/null || {
+    echo '{"error": "Failed to source session-migrate.sh"}' >&2
+    exit 1
+}
+
 SESSIONS_DIR=".claude/sessions"
 
 # Check if current terminal has an active session
@@ -131,8 +145,20 @@ cmd_status() {
     if [[ -n "$session_id" && -d "$SESSIONS_DIR/$session_id" ]]; then
         has_session="true"
         session_dir="$SESSIONS_DIR/$session_id"
-        read -r session_state initiative complexity current_phase parked \
+
+        # Auto-migrate v1 sessions on first access
+        auto_migrate_if_needed "$session_id" 2>/dev/null || true
+
+        # Use FSM to get authoritative state
+        session_state=$(fsm_get_state "$session_id")
+        [[ "$session_state" == "NONE" ]] && session_state="IDLE"
+
+        # Extract other fields from context file
+        read -r _ initiative complexity current_phase parked \
             < <(extract_session_fields "$session_dir/SESSION_CONTEXT.md")
+
+        # Set parked based on FSM state
+        [[ "$session_state" == "PARKED" ]] && parked="true" || parked="false"
     fi
 
     # Team and workflow
@@ -223,48 +249,17 @@ EOF
         exit 1
     fi
 
+    # Use FSM to create session (handles schema v2, validation, events)
     local session_id
-    session_id=$(generate_session_id)
-    local session_dir="$SESSIONS_DIR/$session_id"
-    local timestamp
-    timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+    session_id=$(fsm_create_session "$initiative" "$complexity" "$team")
 
-    # Create session directory
-    mkdir -p "$session_dir" || {
-        echo '{"success": false, "error": "Failed to create session directory"}' >&2
-        exit 1
-    }
-
-    # Create SESSION_CONTEXT.md
-    cat > "$session_dir/SESSION_CONTEXT.md" <<CONTEXT
----
-session_id: "$session_id"
-created_at: "$timestamp"
-initiative: "$initiative"
-complexity: "$complexity"
-active_team: "$team"
-current_phase: "requirements"
----
-
-# Session: $initiative
-
-## Artifacts
-- PRD: pending
-- TDD: pending
-
-## Blockers
-None yet.
-
-## Next Steps
-1. Complete requirements gathering
-CONTEXT
-
-    # Validate the created file
-    if ! validate_session_context "$session_dir/SESSION_CONTEXT.md" 2>/dev/null; then
-        rm -rf "$session_dir"
-        echo '{"success": false, "error": "Failed to validate SESSION_CONTEXT.md"}' >&2
+    # Check if FSM creation succeeded
+    if [[ -z "$session_id" || "$session_id" == *"error"* ]]; then
+        echo '{"success": false, "error": "Failed to create session via FSM"}' >&2
         exit 1
     fi
+
+    local session_dir="$SESSIONS_DIR/$session_id"
 
     # Set as current session (file-based, stable across CLI invocations)
     if ! set_current_session "$session_id"; then
@@ -285,7 +280,8 @@ CONTEXT
   "initiative": "$initiative",
   "complexity": "$complexity",
   "team": "$team",
-  "entry_agent": "${entry_agent:-requirements-analyst}"
+  "entry_agent": "${entry_agent:-requirements-analyst}",
+  "schema_version": "2.0"
 }
 EOF
 }
@@ -447,22 +443,6 @@ cmd_mutate() {
         exit 1
     fi
 
-    # Acquire lock to prevent race conditions
-    local lockfile="$SESSIONS_DIR/.mutate.lock"
-    local lock_timeout=10
-    local waited=0
-    mkdir -p "$SESSIONS_DIR" 2>/dev/null
-    while ! mkdir "$lockfile" 2>/dev/null; do
-        if [ $waited -ge $lock_timeout ]; then
-            echo '{"success": false, "error": "Timeout waiting for mutation lock"}' >&2
-            exit 1
-        fi
-        sleep 1
-        ((waited++))
-    done
-    # Ensure lock is released on exit (use double quotes to expand lockfile now)
-    trap "rm -rf '$lockfile'" EXIT
-
     # Get current session
     local session_id
     session_id=$(get_session_id)
@@ -479,31 +459,27 @@ cmd_mutate() {
         exit 1
     fi
 
-    # Create backup before mutation
-    local backup_file="$session_dir/.SESSION_CONTEXT.backup"
-    cp "$session_file" "$backup_file" || {
-        echo '{"success": false, "error": "Failed to create backup"}' >&2
-        exit 1
-    }
+    # Auto-migrate v1 sessions on first access
+    auto_migrate_if_needed "$session_id" 2>/dev/null || true
 
     local timestamp
     timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
     local audit_log="$SESSIONS_DIR/.audit/session-mutations.log"
     mkdir -p "$SESSIONS_DIR/.audit" 2>/dev/null
 
-    # Execute operation
+    # Execute operation using FSM for state transitions
     local result=""
     case "$operation" in
         park)
             local reason="${1:-Manual park}"
-            result=$(mutate_park "$session_file" "$reason" "$timestamp")
+            result=$(mutate_park_fsm "$session_id" "$reason")
             ;;
         resume)
-            result=$(mutate_resume "$session_file" "$timestamp")
+            result=$(mutate_resume_fsm "$session_id")
             ;;
         wrap)
             local archive="${1:-true}"
-            result=$(mutate_wrap "$session_file" "$session_dir" "$archive" "$timestamp")
+            result=$(mutate_wrap_fsm "$session_id" "$archive")
             ;;
         handoff)
             local from_agent="${1:-}"
@@ -513,135 +489,153 @@ cmd_mutate() {
             ;;
         *)
             echo '{"success": false, "error": "Unknown operation: '"$operation"'"}' >&2
-            rm -f "$backup_file"
             exit 1
             ;;
     esac
 
-    # Validate result
-    if ! validate_session_context "$session_file" 2>/dev/null; then
-        # Rollback on validation failure
-        mv "$backup_file" "$session_file"
-        echo "$timestamp | $session_id | $operation | ROLLBACK | VALIDATION_FAILED" >> "$audit_log"
-        echo '{"success": false, "error": "Validation failed, rolled back changes"}' >&2
-        exit 1
-    fi
-
     # Log to audit trail
-    echo "$timestamp | $session_id | $operation | COMPLETE | SUCCESS" >> "$audit_log"
-
-    # Remove backup on success
-    rm -f "$backup_file"
+    if [[ "$result" == *'"success": true'* ]]; then
+        echo "$timestamp | $session_id | $operation | COMPLETE | SUCCESS" >> "$audit_log"
+    else
+        echo "$timestamp | $session_id | $operation | FAILED" >> "$audit_log"
+    fi
 
     echo "$result"
 }
 
-# Mutation operations
+# =============================================================================
+# FSM-based Mutation Operations
+# =============================================================================
 
-mutate_park() {
-    local file="$1"
-    local reason="$2"
-    local timestamp="$3"
+# Park session using FSM transition (ACTIVE -> PARKED)
+mutate_park_fsm() {
+    local session_id="$1"
+    local reason="${2:-Manual park}"
 
-    # Check not already parked
-    if grep -qE "^(parked_at|auto_parked_at):" "$file" 2>/dev/null; then
+    # Get current state
+    local current_state
+    current_state=$(fsm_get_state "$session_id")
+
+    # Validate current state
+    if [[ "$current_state" == "PARKED" ]]; then
         echo '{"success": false, "error": "Session already parked"}' >&2
         return 1
     fi
 
-    # Get git status
+    if [[ "$current_state" == "ARCHIVED" ]]; then
+        echo '{"success": false, "error": "Cannot park archived session"}' >&2
+        return 1
+    fi
+
+    if [[ "$current_state" == "NONE" ]]; then
+        echo '{"success": false, "error": "Session not found"}' >&2
+        return 1
+    fi
+
+    # Build metadata
     local git_status="clean"
     if [[ -n "$(git status --short 2>/dev/null)" ]]; then
         git_status="uncommitted changes"
     fi
+    local metadata="{\"reason\":\"$reason\",\"git_status\":\"$git_status\"}"
 
-    # Add park metadata to frontmatter
-    # Insert before closing ---
-    awk -v ts="$timestamp" -v reason="$reason" -v git="$git_status" '
-        /^---$/ && ++count == 2 {
-            print "parked_at: \"" ts "\""
-            print "parked_reason: \"" reason "\""
-            print "parked_git_status: \"" git "\""
-        }
-        { print }
-    ' "$file" > "${file}.tmp" && mv "${file}.tmp" "$file"
+    # Execute FSM transition
+    local fsm_result
+    fsm_result=$(fsm_transition "$session_id" "PARKED" "$metadata")
 
-    echo '{"success": true, "operation": "park", "timestamp": "'"$timestamp"'", "reason": "'"$reason"'"}'
+    # Check result
+    if [[ "$fsm_result" == *'"success": true'* ]]; then
+        local timestamp
+        timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+        echo '{"success": true, "operation": "park", "timestamp": "'"$timestamp"'", "reason": "'"$reason"'"}'
+    else
+        echo "$fsm_result"
+        return 1
+    fi
 }
 
-mutate_resume() {
-    local file="$1"
-    local timestamp="$2"
+# Resume session using FSM transition (PARKED -> ACTIVE)
+mutate_resume_fsm() {
+    local session_id="$1"
 
-    # Check is parked
-    if ! grep -qE "^(parked_at|auto_parked_at):" "$file" 2>/dev/null; then
+    # Get current state
+    local current_state
+    current_state=$(fsm_get_state "$session_id")
+
+    # Validate current state
+    if [[ "$current_state" != "PARKED" ]]; then
         echo '{"success": false, "error": "Session not parked"}' >&2
         return 1
     fi
 
-    # Remove park metadata, update state to ACTIVE, and add resumed_at
-    # Delete both old (git_status_at_park, park_reason) and new (parked_git_status, parked_reason) field names
-    # Update session_state/status from PARKED to ACTIVE
-    sed -i.bak \
-        -e '/^parked_at:/d' \
-        -e '/^park_reason:/d' \
-        -e '/^parked_reason:/d' \
-        -e '/^git_status_at_park:/d' \
-        -e '/^parked_git_status:/d' \
-        -e '/^auto_parked_at:/d' \
-        -e '/^auto_parked_reason:/d' \
-        -e 's/^session_state: *"*PARKED"*/session_state: "ACTIVE"/' \
-        -e 's/^status: *"*PARKED"*/status: "ACTIVE"/' \
-        "$file" && rm -f "${file}.bak"
+    # Execute FSM transition
+    local fsm_result
+    fsm_result=$(fsm_transition "$session_id" "ACTIVE" "{}")
 
-    # Add resumed_at
-    awk -v ts="$timestamp" '
-        /^---$/ && ++count == 2 {
-            print "resumed_at: \"" ts "\""
-        }
-        { print }
-    ' "$file" > "${file}.tmp" && mv "${file}.tmp" "$file"
-
-    # Ensure file-based current session is set (may have been cleared by another session)
-    local session_id
-    session_id=$(grep "^session_id:" "$file" 2>/dev/null | cut -d'"' -f2)
-    if [ -n "$session_id" ]; then
+    # Check result
+    if [[ "$fsm_result" == *'"success": true'* ]]; then
+        # Ensure file-based current session is set
         set_current_session "$session_id" 2>/dev/null || true
-    fi
 
-    echo '{"success": true, "operation": "resume", "timestamp": "'"$timestamp"'"}'
+        local timestamp
+        timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+        echo '{"success": true, "operation": "resume", "timestamp": "'"$timestamp"'"}'
+    else
+        echo "$fsm_result"
+        return 1
+    fi
 }
 
-mutate_wrap() {
-    local file="$1"
-    local session_dir="$2"
-    local archive="$3"
-    local timestamp="$4"
+# Wrap/archive session using FSM transition (ACTIVE/PARKED -> ARCHIVED)
+mutate_wrap_fsm() {
+    local session_id="$1"
+    local archive="${2:-true}"
+    local session_dir="$SESSIONS_DIR/$session_id"
 
-    # Add completed_at to frontmatter
-    awk -v ts="$timestamp" '
-        /^---$/ && ++count == 2 {
-            print "completed_at: \"" ts "\""
-        }
-        { print }
-    ' "$file" > "${file}.tmp" && mv "${file}.tmp" "$file"
+    # Get current state
+    local current_state
+    current_state=$(fsm_get_state "$session_id")
 
-    # Archive if requested
-    local session_id
-    session_id=$(basename "$session_dir")
-    if [[ "$archive" == "true" ]]; then
-        mkdir -p ".claude/.archive/sessions" 2>/dev/null
-        # Only archive if not already there
-        if [[ ! -d ".claude/.archive/sessions/$session_id" ]]; then
-            mv "$session_dir" ".claude/.archive/sessions/$session_id"
+    # Validate current state
+    if [[ "$current_state" == "ARCHIVED" ]]; then
+        echo '{"success": false, "error": "Session already archived"}' >&2
+        return 1
+    fi
+
+    if [[ "$current_state" == "NONE" ]]; then
+        echo '{"success": false, "error": "Session not found"}' >&2
+        return 1
+    fi
+
+    # Execute FSM transition
+    local fsm_result
+    fsm_result=$(fsm_transition "$session_id" "ARCHIVED" "{}")
+
+    # Check result
+    if [[ "$fsm_result" == *'"success": true'* ]]; then
+        # Archive if requested
+        if [[ "$archive" == "true" ]]; then
+            mkdir -p ".claude/.archive/sessions" 2>/dev/null
+            if [[ ! -d ".claude/.archive/sessions/$session_id" ]]; then
+                mv "$session_dir" ".claude/.archive/sessions/$session_id" 2>/dev/null || true
+            fi
         fi
+
+        # Clear file-based current session
+        clear_current_session
+
+        local timestamp
+        timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+        echo '{"success": true, "operation": "wrap", "timestamp": "'"$timestamp"'", "archived": '"$archive"'}'
+    else
+        echo "$fsm_result"
+        return 1
     fi
-
-    # Clear file-based current session
-    clear_current_session
-
-    echo '{"success": true, "operation": "wrap", "timestamp": "'"$timestamp"'", "archived": '"$archive"'}'
 }
+
+# =============================================================================
+# Legacy Mutation Operations (handoff has no FSM equivalent)
+# =============================================================================
 
 mutate_handoff() {
     local file="$1"

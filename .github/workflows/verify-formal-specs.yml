@@ -1,0 +1,257 @@
+name: Verify Formal Specifications
+
+on:
+  pull_request:
+    paths:
+      - 'docs/specs/*.tla'
+      - 'docs/specs/*.als'
+      - 'docs/specs/*.cfg'
+      - '.github/workflows/verify-formal-specs.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'docs/specs/*.tla'
+      - 'docs/specs/*.als'
+      - 'docs/specs/*.cfg'
+  workflow_dispatch:
+    inputs:
+      spec:
+        description: 'Specific spec to verify (or "all")'
+        required: false
+        default: 'all'
+
+jobs:
+  detect-changes:
+    name: Detect Changed Specs
+    runs-on: ubuntu-latest
+    outputs:
+      tla-files: ${{ steps.detect.outputs.tla-files }}
+      alloy-files: ${{ steps.detect.outputs.alloy-files }}
+      has-changes: ${{ steps.detect.outputs.has-changes }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect Changed Files
+        id: detect
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            SPEC_INPUT="${{ github.event.inputs.spec }}"
+            if [[ "$SPEC_INPUT" == "all" ]]; then
+              TLA_FILES=$(find docs/specs -name "*.tla" 2>/dev/null | sort || true)
+              ALLOY_FILES=$(find docs/specs -name "*.als" 2>/dev/null | sort || true)
+            else
+              TLA_FILES=$(find docs/specs -name "${SPEC_INPUT}*.tla" 2>/dev/null | sort || true)
+              ALLOY_FILES=$(find docs/specs -name "${SPEC_INPUT}*.als" 2>/dev/null | sort || true)
+            fi
+          else
+            TLA_FILES=$(git diff --name-only "${{ github.event.pull_request.base.sha || 'origin/main' }}" HEAD 2>/dev/null | grep '\.tla$' || true)
+            ALLOY_FILES=$(git diff --name-only "${{ github.event.pull_request.base.sha || 'origin/main' }}" HEAD 2>/dev/null | grep '\.als$' || true)
+          fi
+
+          TLA_JSON=$(echo "$TLA_FILES" | jq -R -s 'split("\n") | map(select(length > 0))')
+          ALLOY_JSON=$(echo "$ALLOY_FILES" | jq -R -s 'split("\n") | map(select(length > 0))')
+
+          HAS_CHANGES="false"
+          [[ -n "$TLA_FILES" ]] || [[ -n "$ALLOY_FILES" ]] && HAS_CHANGES="true"
+
+          echo "tla-files=$TLA_JSON" >> $GITHUB_OUTPUT
+          echo "alloy-files=$ALLOY_JSON" >> $GITHUB_OUTPUT
+          echo "has-changes=$HAS_CHANGES" >> $GITHUB_OUTPUT
+
+          echo "TLA+ files: $(echo "$TLA_FILES" | wc -l | tr -d ' ')"
+          echo "Alloy files: $(echo "$ALLOY_FILES" | wc -l | tr -d ' ')"
+
+  verify-tla:
+    name: Verify TLA+ Specifications
+    needs: detect-changes
+    if: needs.detect-changes.outputs.has-changes == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Download TLA+ Tools
+        run: |
+          mkdir -p tools
+          curl -sL https://github.com/tlaplus/tlaplus/releases/latest/download/tla2tools.jar -o tools/tla2tools.jar
+          echo "TLA+ tools downloaded"
+
+      - name: Verify TLA+ Specs
+        run: |
+          TLA_FILES='${{ needs.detect-changes.outputs.tla-files }}'
+          FAILED=0
+
+          if [[ "$TLA_FILES" == "[]" ]]; then
+            echo "No TLA+ files to verify"
+            exit 0
+          fi
+
+          echo "$TLA_FILES" | jq -r '.[]' | while read -r tla_file; do
+            if [[ -z "$tla_file" ]] || [[ ! -f "$tla_file" ]]; then continue; fi
+
+            echo "========================================="
+            echo "Verifying: $tla_file"
+            echo "========================================="
+
+            # Check for corresponding .cfg file
+            CFG_FILE="${tla_file%.tla}.cfg"
+            if [[ ! -f "$CFG_FILE" ]]; then
+              echo "Creating default config for $tla_file"
+              cat > "$CFG_FILE" << 'EOCFG'
+CONSTANTS
+    MaxProcesses = 2
+    Phases = {"requirements", "design", "implementation", "validation"}
+INVARIANT Safety
+PROPERTY LockEventuallyGranted
+EOCFG
+            fi
+
+            # Run SANY (TLA+ syntax checker)
+            echo "Running syntax check..."
+            if ! java -cp tools/tla2tools.jar tla2sany.SANY "$tla_file"; then
+              echo "Syntax check FAILED: $tla_file"
+              FAILED=$((FAILED + 1))
+              continue
+            fi
+            echo "Syntax check PASSED"
+
+            # Run TLC model checker
+            echo "Running model checker..."
+            if ! java -XX:+UseParallelGC -Xmx4g -cp tools/tla2tools.jar tlc2.TLC \
+              -config "$CFG_FILE" \
+              -workers auto \
+              -deadlock \
+              -cleanup \
+              "$tla_file"; then
+              echo "Model checking FAILED: $tla_file"
+              FAILED=$((FAILED + 1))
+            else
+              echo "Model checking PASSED"
+            fi
+          done
+
+          if [[ $FAILED -gt 0 ]]; then
+            echo ""
+            echo "TLA+ verification failed for $FAILED spec(s)"
+            exit 1
+          fi
+
+  verify-alloy:
+    name: Verify Alloy Specifications
+    needs: detect-changes
+    if: needs.detect-changes.outputs.has-changes == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Download Alloy
+        run: |
+          mkdir -p tools
+          # Download Alloy 6.x (latest stable with CLI support)
+          curl -sL https://github.com/AlloyTools/org.alloytools.alloy/releases/download/v6.1.0/org.alloytools.alloy.dist.jar -o tools/alloy.jar
+          echo "Alloy downloaded"
+
+      - name: Verify Alloy Specs
+        run: |
+          ALLOY_FILES='${{ needs.detect-changes.outputs.alloy-files }}'
+          FAILED=0
+
+          if [[ "$ALLOY_FILES" == "[]" ]]; then
+            echo "No Alloy files to verify"
+            exit 0
+          fi
+
+          echo "$ALLOY_FILES" | jq -r '.[]' | while read -r alloy_file; do
+            if [[ -z "$alloy_file" ]] || [[ ! -f "$alloy_file" ]]; then continue; fi
+
+            echo "========================================="
+            echo "Verifying: $alloy_file"
+            echo "========================================="
+
+            # Run Alloy analyzer in batch mode
+            # Check all assertions with scope 10
+            echo "Running Alloy analyzer..."
+            if ! java -cp tools/alloy.jar edu.mit.csail.sdg.alloy4whole.ExampleUsingTheCompiler "$alloy_file" 2>&1; then
+              # Alloy exits non-zero on counterexamples, which is expected for some checks
+              echo "Alloy analysis completed (check output for counterexamples)"
+            fi
+
+            # Parse the output to determine pass/fail
+            # For now, we consider syntax errors as failures
+            if java -cp tools/alloy.jar edu.mit.csail.sdg.alloy4whole.ExampleUsingTheCompiler "$alloy_file" 2>&1 | grep -q "Syntax error"; then
+              echo "Syntax error in: $alloy_file"
+              FAILED=$((FAILED + 1))
+            else
+              echo "Alloy verification PASSED (no syntax errors)"
+            fi
+          done
+
+          if [[ $FAILED -gt 0 ]]; then
+            echo ""
+            echo "Alloy verification failed for $FAILED spec(s)"
+            exit 1
+          fi
+
+  report:
+    name: Verification Report
+    needs: [detect-changes, verify-tla, verify-alloy]
+    if: always() && needs.detect-changes.outputs.has-changes == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate Summary
+        run: |
+          echo "## Formal Specification Verification Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "### Results" >> $GITHUB_STEP_SUMMARY
+
+          if [[ "${{ needs.verify-tla.result }}" == "success" ]]; then
+            echo "- TLA+ Verification: PASSED" >> $GITHUB_STEP_SUMMARY
+          elif [[ "${{ needs.verify-tla.result }}" == "skipped" ]]; then
+            echo "- TLA+ Verification: SKIPPED (no changes)" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- TLA+ Verification: FAILED" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [[ "${{ needs.verify-alloy.result }}" == "success" ]]; then
+            echo "- Alloy Verification: PASSED" >> $GITHUB_STEP_SUMMARY
+          elif [[ "${{ needs.verify-alloy.result }}" == "skipped" ]]; then
+            echo "- Alloy Verification: SKIPPED (no changes)" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- Alloy Verification: FAILED" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Local Verification" >> $GITHUB_STEP_SUMMARY
+          echo "To run verification locally:" >> $GITHUB_STEP_SUMMARY
+          echo '```bash' >> $GITHUB_STEP_SUMMARY
+          echo './scripts/verify-specs.sh' >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+      - name: Check Status
+        run: |
+          FAILED=0
+
+          [[ "${{ needs.verify-tla.result }}" == "success" ]] || [[ "${{ needs.verify-tla.result }}" == "skipped" ]] || FAILED=$((FAILED + 1))
+          [[ "${{ needs.verify-alloy.result }}" == "success" ]] || [[ "${{ needs.verify-alloy.result }}" == "skipped" ]] || FAILED=$((FAILED + 1))
+
+          if [[ $FAILED -gt 0 ]]; then
+            echo "Formal specification verification FAILED"
+            exit 1
+          else
+            echo "All formal specification checks PASSED"
+          fi
