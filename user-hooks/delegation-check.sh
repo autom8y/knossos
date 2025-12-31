@@ -58,23 +58,11 @@ if echo "$FILE_PATH" | grep -qE "$ALLOWED_PATHS"; then
   exit 0
 fi
 
-# Emit warning to stderr (becomes context for Claude)
+# Emit condensed warning to stderr (becomes context for Claude)
 cat >&2 <<EOF
-
-[DELEGATION WARNING]
-====================
-Active workflow detected: $WORKFLOW_NAME
-Tool attempted: $TOOL_NAME on $FILE_PATH
-
-The main thread should delegate implementation to specialists via Task tool.
-Direct Edit/Write of code files during active workflow violates the Coach pattern.
-
-If this is intentional (user override), proceed.
-If accidental, cancel and use Task tool to invoke the appropriate specialist.
-
-See: .claude/skills/orchestration/main-thread-guide.md
-====================
-
+[DELEGATION] Workflow active ($WORKFLOW_NAME): $TOOL_NAME on $FILE_PATH
+  -> Use Task tool to delegate, or proceed if intentional override.
+  -> See: .claude/skills/orchestration/main-thread-guide.md
 EOF
 
 # Allow the operation (warning only, not blocking)

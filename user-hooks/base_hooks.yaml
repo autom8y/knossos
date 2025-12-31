@@ -1,0 +1,83 @@
+# Base Hooks Registration
+# These hooks are applied to all team packs
+# Team-specific hooks.yaml will append to these registrations
+#
+# Schema version: 1.0
+# See TDD-hook-parity-scope2.md for schema documentation
+
+schema_version: "1.0"
+
+hooks:
+  # ===========================================================================
+  # SessionStart Hooks
+  # ===========================================================================
+  - event: SessionStart
+    matcher: "startup|resume"
+    path: session-context.sh
+    timeout: 10
+    description: "Injects session context on startup and resume"
+
+  - event: SessionStart
+    matcher: "startup|resume"
+    path: coach-mode.sh
+    timeout: 5
+    description: "Activates coach mode guidance"
+
+  # ===========================================================================
+  # Stop Hooks
+  # ===========================================================================
+  - event: Stop
+    path: auto-park.sh
+    timeout: 5
+    description: "Auto-parks session on stop"
+
+  # ===========================================================================
+  # PostToolUse Hooks
+  # ===========================================================================
+  - event: PostToolUse
+    matcher: "Write"
+    path: artifact-tracker.sh
+    timeout: 5
+    description: "Tracks written artifacts"
+
+  - event: PostToolUse
+    matcher: "Write"
+    path: session-audit.sh
+    timeout: 5
+    description: "Audits session file writes"
+
+  - event: PostToolUse
+    matcher: "Bash"
+    path: commit-tracker.sh
+    timeout: 5
+    description: "Tracks git commits"
+
+  # ===========================================================================
+  # PreToolUse Hooks
+  # ===========================================================================
+  - event: PreToolUse
+    matcher: "Bash"
+    path: command-validator.sh
+    timeout: 5
+    description: "Validates bash commands"
+
+  - event: PreToolUse
+    matcher: "Edit|Write"
+    path: session-write-guard.sh
+    timeout: 3
+    description: "Guards session context writes"
+
+  - event: PreToolUse
+    matcher: "Edit|Write"
+    path: delegation-check.sh
+    timeout: 3
+    description: "Checks for delegation requirements"
+
+  # ===========================================================================
+  # UserPromptSubmit Hooks
+  # ===========================================================================
+  - event: UserPromptSubmit
+    matcher: "^/"
+    path: start-preflight.sh
+    timeout: 5
+    description: "Preflight check for slash commands"

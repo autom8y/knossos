@@ -1,6 +1,6 @@
 #!/bin/bash
-# SessionStart hook - comprehensive context injection
-# Pre-computes EVERYTHING Claude needs for session management
+# SessionStart hook - context injection (condensed by default)
+# Outputs essential session context; use --verbose or ROSTER_VERBOSE=1 for full output
 # Output becomes Claude context on session start
 
 set -euo pipefail
@@ -10,6 +10,14 @@ cd "$PROJECT_DIR" 2>/dev/null || exit 0
 
 SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 
+# Parse arguments for --verbose
+VERBOSE=false
+for arg in "$@"; do
+    [[ "$arg" == "--verbose" ]] && VERBOSE=true
+done
+# Also check environment variable (for hooks that can't pass args)
+[[ "${ROSTER_VERBOSE:-}" == "1" || "${ROSTER_VERBOSE:-}" == "true" ]] && VERBOSE=true
+
 # Library Resolution - per ADR-0002
 HOOKS_LIB="${CLAUDE_PROJECT_DIR:-.}/.claude/hooks/lib"
 source "$HOOKS_LIB/logging.sh" 2>/dev/null && log_init "session-context" && log_start || true
@@ -18,11 +26,9 @@ START_TIME=$(get_time_ms 2>/dev/null || echo 0)
 # Source session utilities
 source "$HOOKS_LIB/session-utils.sh" 2>/dev/null || {
     # Fallback if session-utils not available
-    echo "## Project Context (fallback mode)"
+    echo "## Session Context (fallback mode)"
     echo "- **Project**: $(pwd)"
     echo "- **Status**: Session utilities not initialized"
-    echo ""
-    echo "*Run \`cem init\` to set up the Claude ecosystem.*"
     exit 0
 }
 
@@ -117,13 +123,64 @@ else
     WORKFLOW_DISPLAY="none"
 fi
 
-# Artifacts discovery (fast version)
-PRDS=$(find docs/requirements -maxdepth 1 -name "PRD-*.md" 2>/dev/null | wc -l | tr -d ' ')
-TDDS=$(find docs/design -maxdepth 1 -name "TDD-*.md" 2>/dev/null | wc -l | tr -d ' ')
-ADRS=$(find docs/design -maxdepth 1 -name "ADR-*.md" 2>/dev/null | wc -l | tr -d ' ')
+# =============================================================================
+# Output Functions
+# =============================================================================
 
-# Output comprehensive context as markdown
-cat <<EOF
+output_condensed_context() {
+    # Build compact session display
+    local session_display="none"
+    if [[ "$HAS_SESSION" == "true" ]]; then
+        local short_id="${SESSION_ID:0:23}"
+        local state_badge="$SESSION_STATE"
+        [[ "$PARKED" == "true" ]] && state_badge="PARKED"
+        session_display="$short_id ($state_badge)"
+    fi
+
+    # Truncate initiative to 30 chars
+    local initiative_display="none"
+    if [[ "$INITIATIVE" != "null" && -n "$INITIATIVE" ]]; then
+        initiative_display="${INITIATIVE:0:30}"
+        [[ ${#INITIATIVE} -gt 30 ]] && initiative_display="${initiative_display}..."
+    fi
+
+    cat <<EOF
+## Session Context
+
+| | |
+|---|---|
+| **Team** | $ACTIVE_TEAM |
+| **Session** | $session_display |
+| **Initiative** | $initiative_display |
+| **Git** | $GIT_DISPLAY |
+EOF
+
+    # Add worktree row only if in worktree
+    if [[ "$IS_WORKTREE" == "true" ]]; then
+        echo "| **Worktree** | $WORKTREE_ID |"
+    fi
+
+    echo ""
+
+    # Inline commands based on state
+    if [[ "$HAS_SESSION" == "true" ]]; then
+        if [[ "$PARKED" == "true" ]]; then
+            echo "**Commands**: \`/resume\` | \`/wrap\` | \`/status\`"
+        else
+            echo "**Commands**: \`/park\` | \`/handoff <agent>\` | \`/wrap\` | \`/status\`"
+        fi
+    else
+        echo "**Commands**: \`/start <initiative>\` | \`/status\`"
+    fi
+}
+
+output_verbose_context() {
+    # Artifacts discovery (only needed for verbose output)
+    local PRDS=$(find docs/requirements -maxdepth 1 -name "PRD-*.md" 2>/dev/null | wc -l | tr -d ' ')
+    local TDDS=$(find docs/design -maxdepth 1 -name "TDD-*.md" 2>/dev/null | wc -l | tr -d ' ')
+    local ADRS=$(find docs/design -maxdepth 1 -name "ADR-*.md" 2>/dev/null | wc -l | tr -d ' ')
+
+    cat <<EOF
 ## Project Context (auto-loaded)
 
 | Property | Value |
@@ -163,52 +220,61 @@ cat <<EOF
 **Session Commands**:
 EOF
 
-# Provide context-appropriate guidance
-if [[ "$HAS_SESSION" == "true" ]]; then
-    if [[ "$PARKED" == "true" ]]; then
-        cat <<EOF
-- \`/continue\` - Resume parked session "$INITIATIVE"
+    # Provide context-appropriate guidance
+    if [[ "$HAS_SESSION" == "true" ]]; then
+        if [[ "$PARKED" == "true" ]]; then
+            cat <<EOF
+- \`/resume\` - Resume parked session "$INITIATIVE"
 - \`/wrap\` - Finalize and archive session
 - \`/sessions\` - List all sessions
 EOF
-    else
-        cat <<EOF
+        else
+            cat <<EOF
 - \`/park\` - Pause current session
 - \`/handoff <agent>\` - Transfer to another agent
 - \`/wrap\` - Finalize session
 EOF
-    fi
-else
-    cat <<EOF
+        fi
+    else
+        cat <<EOF
 - \`/start <initiative>\` - Create new session (ready!)
 - \`/sessions\` - List existing sessions
 - \`/worktree create <name>\` - Start isolated parallel work
 EOF
-fi
+    fi
 
-# Add worktree-specific guidance
-if [[ "$IS_WORKTREE" == "true" ]]; then
-    cat <<EOF
+    # Add worktree-specific guidance
+    if [[ "$IS_WORKTREE" == "true" ]]; then
+        cat <<EOF
 
 **Worktree Note**: You are in an isolated worktree. Changes here don't affect the main project.
 - \`/worktree list\` - See all worktrees
 - \`/wrap\` will offer to remove this worktree when done
 EOF
-fi
-
-# Note: Coach Mode reminder moved to coach-mode.sh hook (RF-008)
-
-# Team routing context (if team is active)
-# Note: ROSTER_HOME is defined in config.sh (sourced via session-utils.sh)
-if [[ -f ".claude/ACTIVE_TEAM" ]]; then
-    TEAM_CONTEXT=$("$ROSTER_HOME/generate-team-context.sh" 2>/dev/null || echo "")
-    if [[ -n "$TEAM_CONTEXT" ]]; then
-        echo ""
-        echo "$TEAM_CONTEXT"
     fi
-fi
 
-echo ""
+    # Team routing context (if team is active)
+    # Note: ROSTER_HOME is defined in config.sh (sourced via session-utils.sh)
+    if [[ -f ".claude/ACTIVE_TEAM" ]]; then
+        local TEAM_CONTEXT=$("$ROSTER_HOME/generate-team-context.sh" 2>/dev/null || echo "")
+        if [[ -n "$TEAM_CONTEXT" ]]; then
+            echo ""
+            echo "$TEAM_CONTEXT"
+        fi
+    fi
+
+    echo ""
+}
+
+# =============================================================================
+# Main Output
+# =============================================================================
+
+if [[ "$VERBOSE" == "true" ]]; then
+    output_verbose_context
+else
+    output_condensed_context
+fi
 
 # Log completion
 if [[ "$START_TIME" != "0" ]]; then
