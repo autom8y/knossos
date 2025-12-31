@@ -7,9 +7,9 @@ set -euo pipefail
 
 SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 
-# Source logging library
-# shellcheck source=lib/logging.sh
-source "$SCRIPT_DIR/lib/logging.sh" 2>/dev/null && log_init "artifact-tracker" && log_start || true
+# Library Resolution - per ADR-0002
+HOOKS_LIB="${CLAUDE_PROJECT_DIR:-.}/.claude/hooks/lib"
+source "$HOOKS_LIB/logging.sh" 2>/dev/null && log_init "artifact-tracker" && log_start || true
 
 # Read JSON input from stdin
 INPUT=$(cat)
@@ -30,14 +30,14 @@ PROJECT_DIR="${CLAUDE_PROJECT_DIR:-.}"
 cd "$PROJECT_DIR" 2>/dev/null || true
 
 # Source session utilities
-# shellcheck source=lib/session-utils.sh
-source .claude/hooks/lib/session-utils.sh 2>/dev/null || exit 0
+source "$HOOKS_LIB/session-utils.sh" 2>/dev/null || { log_end 1 2>/dev/null; exit 0; }
 
 SESSION_DIR=$(get_session_dir)
 TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
 # Only track if session exists
 if [ -z "$SESSION_DIR" ] || [ ! -d "$SESSION_DIR" ]; then
+  log_end 0 2>/dev/null || true
   exit 0
 fi
 
@@ -86,6 +86,7 @@ if [[ "$TOOL_NAME" == "Write" && -n "$FILE_PATH" ]]; then
     fi
 
     echo "{\"systemMessage\": \"Artifact tracked: $TYPE ($BASENAME)\"}"
+    log_end 0 2>/dev/null || true
     exit 0
   fi
 fi
@@ -122,6 +123,7 @@ HANDOFF
     fi
 
     echo "{\"systemMessage\": \"Agent invocation tracked: $AGENT_MENTIONED\"}"
+    log_end 0 2>/dev/null || true
     exit 0
   fi
 fi
@@ -132,6 +134,7 @@ if [[ "$TOOL_NAME" == "Write" && "$FILE_PATH" =~ SESSION_CONTEXT\.md && -n "$TOO
   if [[ "$TOOL_OUTPUT" =~ "Handoff:" || "$TOOL_OUTPUT" =~ "→" ]]; then
     echo "$TIMESTAMP | HANDOFF_DETECTED | $FILE_PATH" >> "$HANDOFFS_LOG"
     echo "{\"systemMessage\": \"Handoff activity tracked\"}"
+    log_end 0 2>/dev/null || true
     exit 0
   fi
 fi

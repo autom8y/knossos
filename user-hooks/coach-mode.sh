@@ -10,9 +10,9 @@
 
 SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 
-# Source ONLY config.sh - no logic, only variable definitions
-# shellcheck source=lib/config.sh
-source "$SCRIPT_DIR/lib/config.sh" 2>/dev/null || {
+# Library Resolution - per ADR-0002
+HOOKS_LIB="${CLAUDE_PROJECT_DIR:-.}/.claude/hooks/lib"
+source "$HOOKS_LIB/config.sh" 2>/dev/null || {
     CLAUDE_PROJECT_DIR="${CLAUDE_PROJECT_DIR:-.}"
     SESSIONS_DIR="$CLAUDE_PROJECT_DIR/.claude/sessions"
     CURRENT_SESSION_FILE="$SESSIONS_DIR/.current-session"

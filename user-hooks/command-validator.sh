@@ -10,31 +10,45 @@
 
 SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 
-# Source ONLY config.sh - it has no logic, only variable definitions
-# shellcheck source=lib/config.sh
-source "$SCRIPT_DIR/lib/config.sh" 2>/dev/null || {
+# Library Resolution - per ADR-0002
+HOOKS_LIB="${CLAUDE_PROJECT_DIR:-.}/.claude/hooks/lib"
+source "$HOOKS_LIB/config.sh" 2>/dev/null || {
     # If even config.sh fails, set minimal defaults
     ROSTER_HOME="${ROSTER_HOME:-$HOME/Code/roster}"
     CLAUDE_PROJECT_DIR="${CLAUDE_PROJECT_DIR:-.}"
 }
 
-# Source primitives for shared functions (json_extract, auto_approve)
-# shellcheck source=lib/primitives.sh
-source "$SCRIPT_DIR/lib/primitives.sh" 2>/dev/null || true
-
 # Source logging (optional - failures are OK)
-# shellcheck source=lib/logging.sh
-source "$SCRIPT_DIR/lib/logging.sh" 2>/dev/null && log_init "command-validator" && log_start || true
+source "$HOOKS_LIB/logging.sh" 2>/dev/null && log_init "command-validator" && log_start || true
 
 # =============================================================================
 # Input Handling (defensive - never crash on malformed input)
 # =============================================================================
 
 INPUT=$(cat 2>/dev/null) || INPUT=""
-COMMAND=$(json_extract "$INPUT" '.tool_input.command') || COMMAND=""
+COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null) || COMMAND=""
 
 # Empty command = nothing to validate
 [[ -z "$COMMAND" ]] && exit 0
+
+# =============================================================================
+# Helper Functions
+# =============================================================================
+
+auto_approve() {
+    local reason="$1"
+    cat <<EOF
+{
+  "hookSpecificOutput": {
+    "hookEventName": "PreToolUse",
+    "permissionDecision": "allow",
+    "permissionDecisionReason": "$reason"
+  }
+}
+EOF
+    log_end 0 2>/dev/null || true
+    exit 0
+}
 
 # =============================================================================
 # FAST PATH: Auto-approve safe read-only commands
@@ -42,31 +56,31 @@ COMMAND=$(json_extract "$INPUT" '.tool_input.command') || COMMAND=""
 # =============================================================================
 
 # List operations (ls)
-[[ "$COMMAND" =~ ^ls[[:space:]] ]] || [[ "$COMMAND" == "ls" ]] && auto_approve "Safe ls command" "log_end"
+[[ "$COMMAND" =~ ^ls[[:space:]] ]] || [[ "$COMMAND" == "ls" ]] && auto_approve "Safe ls command"
 
 # Git read operations
-[[ "$COMMAND" =~ ^git[[:space:]]+(status|branch|log|diff|symbolic-ref|rev-list|rev-parse|remote|config|show) ]] && auto_approve "Safe git read command" "log_end"
+[[ "$COMMAND" =~ ^git[[:space:]]+(status|branch|log|diff|symbolic-ref|rev-list|rev-parse|remote|config|show) ]] && auto_approve "Safe git read command"
 
 # GitHub CLI read operations
-[[ "$COMMAND" =~ ^gh[[:space:]]+(pr|issue)[[:space:]]+(list|view|status) ]] && auto_approve "Safe gh read command" "log_end"
+[[ "$COMMAND" =~ ^gh[[:space:]]+(pr|issue)[[:space:]]+(list|view|status) ]] && auto_approve "Safe gh read command"
 
 # Cat for reading files
-[[ "$COMMAND" =~ ^cat[[:space:]] ]] && auto_approve "Safe cat command" "log_end"
+[[ "$COMMAND" =~ ^cat[[:space:]] ]] && auto_approve "Safe cat command"
 
 # Head/tail for reading files
-[[ "$COMMAND" =~ ^(head|tail)[[:space:]] ]] && auto_approve "Safe head/tail command" "log_end"
+[[ "$COMMAND" =~ ^(head|tail)[[:space:]] ]] && auto_approve "Safe head/tail command"
 
 # Test/existence checks
-[[ "$COMMAND" =~ ^test[[:space:]] ]] || [[ "$COMMAND" =~ ^\[[[:space:]] ]] && auto_approve "Safe test command" "log_end"
+[[ "$COMMAND" =~ ^test[[:space:]] ]] || [[ "$COMMAND" =~ ^\[[[:space:]] ]] && auto_approve "Safe test command"
 
 # Sed for text processing
-[[ "$COMMAND" =~ ^sed[[:space:]] ]] && auto_approve "Safe sed command" "log_end"
+[[ "$COMMAND" =~ ^sed[[:space:]] ]] && auto_approve "Safe sed command"
 
 # Echo for output
-[[ "$COMMAND" =~ ^echo[[:space:]] ]] && auto_approve "Safe echo command" "log_end"
+[[ "$COMMAND" =~ ^echo[[:space:]] ]] && auto_approve "Safe echo command"
 
 # Piped commands starting with safe operations
-[[ "$COMMAND" =~ ^(git|gh|ls|cat|head|tail)[[:space:]].*\| ]] && auto_approve "Safe piped command" "log_end"
+[[ "$COMMAND" =~ ^(git|gh|ls|cat|head|tail)[[:space:]].*\| ]] && auto_approve "Safe piped command"
 
 # =============================================================================
 # TEAM VALIDATION
@@ -86,7 +100,7 @@ if [[ "$COMMAND" =~ (^|[[:space:]/])swap-team\.sh[[:space:]] ]]; then
         if [[ ! -d "$ROSTER_DIR/$TARGET_TEAM" ]]; then
             echo "Team pack '$TARGET_TEAM' not found in $ROSTER_DIR" >&2
             echo "Available teams:" >&2
-            find "$ROSTER_DIR" -maxdepth 1 -type d -name "*-pack" -exec basename {} \; 2>/dev/null | sort | sed 's/^/  - /' >&2 || echo "  (none found)" >&2
+            ls -1 "$ROSTER_DIR" 2>/dev/null | sed 's/^/  - /' >&2 || echo "  (none found)" >&2
             log_end 2 2>/dev/null || true
             exit 2  # Block the command
         fi

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 #
-# sync-user-hooks.sh - Sync roster user-hooks to ~/.claude/hooks/
+# sync-user-hooks.sh - Sync roster hooks to ~/.claude/hooks/
 #
-# Syncs hooks from roster/user-hooks/ to the user-level hooks directory.
+# Syncs hooks from roster/hooks/ (canonical source) to user-level ~/.claude/hooks/.
 # Behavior:
 #   - Additive: Never removes existing hooks from ~/.claude/hooks/
 #   - Overwrites: Only hooks previously installed from roster (tracked in manifest)
@@ -10,7 +10,7 @@
 #   - Nested: Handles lib/ subdirectory preserving structure
 #
 # Usage:
-#   ./sync-user-hooks.sh              # Sync user-hooks to ~/.claude/hooks/
+#   ./sync-user-hooks.sh              # Sync hooks to ~/.claude/hooks/
 #   ./sync-user-hooks.sh --dry-run    # Preview changes without applying
 #   ./sync-user-hooks.sh --status     # Show sync status
 #   ./sync-user-hooks.sh --help       # Show usage
@@ -567,7 +567,7 @@ perform_sync() {
     local skipped=0
     local unchanged=0
 
-    # Process root-level hooks (*.sh files directly in user-hooks/)
+    # Process root-level hooks (*.sh files directly in .claude/hooks/)
     for source_file in "$SOURCE_DIR"/*.sh; do
         [[ -f "$source_file" ]] || continue
 
@@ -842,7 +842,7 @@ usage() {
     cat <<EOF
 Usage: sync-user-hooks.sh [OPTIONS]
 
-Syncs roster user-hooks to ~/.claude/hooks/
+Syncs roster hooks to ~/.claude/hooks/
 
 Options:
   --dry-run      Preview changes without applying
@@ -878,7 +878,7 @@ Force Mode (--force):
   as this will replace any local modifications.
 
 Source Structure:
-  roster/user-hooks/
+  roster/.claude/hooks/
     *.sh             # Root-level hooks (artifact-tracker, session-context, etc.)
     lib/             # Shared hook utilities
       config.sh
@@ -898,7 +898,7 @@ Exit Codes:
   3  Sync failure
 
 Examples:
-  ./sync-user-hooks.sh              # Sync user-hooks
+  ./sync-user-hooks.sh              # Sync hooks
   ./sync-user-hooks.sh --dry-run    # Preview what would change
   ./sync-user-hooks.sh --status     # Show current sync status
   ./sync-user-hooks.sh --adopt      # Recover manifest from existing files

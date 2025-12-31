@@ -10,14 +10,13 @@ cd "$PROJECT_DIR" 2>/dev/null || exit 0
 
 SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 
-# Source logging library
-# shellcheck source=lib/logging.sh
-source "$SCRIPT_DIR/lib/logging.sh" 2>/dev/null && log_init "session-context" && log_start || true
+# Library Resolution - per ADR-0002
+HOOKS_LIB="${CLAUDE_PROJECT_DIR:-.}/.claude/hooks/lib"
+source "$HOOKS_LIB/logging.sh" 2>/dev/null && log_init "session-context" && log_start || true
 START_TIME=$(get_time_ms 2>/dev/null || echo 0)
 
 # Source session utilities
-# shellcheck source=lib/session-utils.sh
-source "$SCRIPT_DIR/lib/session-utils.sh" 2>/dev/null || {
+source "$HOOKS_LIB/session-utils.sh" 2>/dev/null || {
     # Fallback if session-utils not available
     echo "## Project Context (fallback mode)"
     echo "- **Project**: $(pwd)"

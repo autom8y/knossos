@@ -6,13 +6,12 @@ set -euo pipefail
 
 SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 
-# Source logging if available
-# shellcheck source=lib/logging.sh
-source "$SCRIPT_DIR/lib/logging.sh" 2>/dev/null && log_init "delegation-check" && log_start || true
+# Library Resolution - per ADR-0002
+HOOKS_LIB="${CLAUDE_PROJECT_DIR:-.}/.claude/hooks/lib"
+source "$HOOKS_LIB/logging.sh" 2>/dev/null && log_init "delegation-check" && log_start || true
 
 # Source session utilities for get_session_dir()
-# shellcheck source=lib/session-utils.sh
-source "$SCRIPT_DIR/lib/session-utils.sh" 2>/dev/null || true
+source "$HOOKS_LIB/session-utils.sh" 2>/dev/null || { log_end 1 2>/dev/null; exit 0; }
 
 # Read JSON input from stdin
 INPUT=$(cat)

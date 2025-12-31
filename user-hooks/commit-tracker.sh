@@ -7,9 +7,9 @@ set -euo pipefail
 
 SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 
-# Source logging library (optional)
-# shellcheck source=lib/logging.sh
-source "$SCRIPT_DIR/lib/logging.sh" 2>/dev/null && log_init "commit-tracker" && log_start || true
+# Library Resolution - per ADR-0002
+HOOKS_LIB="${CLAUDE_PROJECT_DIR:-.}/.claude/hooks/lib"
+source "$HOOKS_LIB/logging.sh" 2>/dev/null && log_init "commit-tracker" && log_start || true
 
 # Read JSON input from stdin
 INPUT=$(cat)
@@ -28,11 +28,13 @@ fi
 
 # Only process Bash tool with git commit commands
 if [[ "$TOOL_NAME" != "Bash" ]]; then
+  log_end 0 2>/dev/null || true
   exit 0
 fi
 
 # Check if this is a git commit command
 if [[ ! "$TOOL_COMMAND" =~ git[[:space:]]+commit ]]; then
+  log_end 0 2>/dev/null || true
   exit 0
 fi
 
@@ -40,6 +42,7 @@ fi
 # Pattern: "[branch hash] message" OR "create mode" lines
 if [[ ! "$TOOL_OUTPUT" =~ \[[^]]+[[:space:]][a-f0-9]+\] ]]; then
   # Commit may have failed or was aborted
+  log_end 0 2>/dev/null || true
   exit 0
 fi
 
@@ -47,8 +50,7 @@ PROJECT_DIR="${CLAUDE_PROJECT_DIR:-.}"
 cd "$PROJECT_DIR" 2>/dev/null || exit 0
 
 # Source session utilities
-# shellcheck source=lib/session-utils.sh
-source .claude/hooks/lib/session-utils.sh 2>/dev/null || exit 0
+source "$HOOKS_LIB/session-utils.sh" 2>/dev/null || { log_end 1 2>/dev/null; exit 0; }
 
 SESSION_DIR=$(get_session_dir)
 TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
@@ -57,6 +59,7 @@ SHORT_TIME=$(date +"%H:%M")
 # Only track if session exists
 if [ -z "$SESSION_DIR" ] || [ ! -d "$SESSION_DIR" ]; then
   # No session active - commit still works, just not tracked
+  log_end 0 2>/dev/null || true
   exit 0
 fi
 
@@ -64,12 +67,18 @@ fi
 # Format: "[branch hash] message"
 COMMIT_LINE=$(echo "$TOOL_OUTPUT" | grep -E '^\[[^]]+\]' | head -1)
 if [ -z "$COMMIT_LINE" ]; then
+  log_end 0 2>/dev/null || true
   exit 0
 fi
 
 # Parse: [branch hash] message
 COMMIT_HASH=$(echo "$COMMIT_LINE" | sed 's/^\[[^]]*[[:space:]]\([a-f0-9]*\)\].*/\1/')
 COMMIT_MSG=$(echo "$COMMIT_LINE" | sed 's/^\[[^]]*\][[:space:]]*//')
+
+if [ -z "$COMMIT_HASH" ]; then
+  log_end 0 2>/dev/null || true
+  exit 0
+fi
 
 # Truncate message for log (50 chars max)
 COMMIT_MSG_SHORT="${COMMIT_MSG:0:50}"

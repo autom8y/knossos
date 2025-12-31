@@ -6,9 +6,9 @@ set -euo pipefail
 
 SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 
-# Source logging library
-# shellcheck source=lib/logging.sh
-source "$SCRIPT_DIR/lib/logging.sh" 2>/dev/null && log_init "start-preflight" && log_start || true
+# Library Resolution - per ADR-0002
+HOOKS_LIB="${CLAUDE_PROJECT_DIR:-.}/.claude/hooks/lib"
+source "$HOOKS_LIB/logging.sh" 2>/dev/null && log_init "start-preflight" && log_start || true
 
 # Check if this is a session lifecycle command
 USER_PROMPT="${CLAUDE_USER_PROMPT:-}"
@@ -24,8 +24,7 @@ cd "$PROJECT_DIR" 2>/dev/null || exit 0
 SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 
 # Source session utilities
-# shellcheck source=lib/session-utils.sh
-source "$SCRIPT_DIR/lib/session-utils.sh" 2>/dev/null || exit 0
+source "$HOOKS_LIB/session-utils.sh" 2>/dev/null || { log_end 1 2>/dev/null; exit 0; }
 
 # Detect worktree context
 IN_WORKTREE="false"
@@ -39,6 +38,7 @@ fi
 
 # Get session state
 SESSION_ID=$(get_session_id)
+SESSION_DIR=$(get_session_dir)
 HAS_SESSION="false"
 PARKED="false"
 INITIATIVE=""
@@ -93,6 +93,7 @@ EOF
         fi
     else
         ACTIVE_TEAM=$(cat ".claude/ACTIVE_TEAM" 2>/dev/null || echo "none")
+        SUGGESTED_ID=$(generate_session_id)
 
         # Extract complexity from /start command if present
         COMPLEXITY=""

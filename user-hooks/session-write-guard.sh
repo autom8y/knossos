@@ -10,8 +10,9 @@
 
 set -euo pipefail
 
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-source "$SCRIPT_DIR/lib/logging.sh" 2>/dev/null && log_init "session-write-guard" || true
+# Library Resolution - per ADR-0002
+HOOKS_LIB="${CLAUDE_PROJECT_DIR:-.}/.claude/hooks/lib"
+source "$HOOKS_LIB/logging.sh" 2>/dev/null && log_init "session-write-guard" || true
 
 # Environment variables from Claude Code hook framework
 TOOL_NAME="${CLAUDE_HOOK_TOOL_NAME:-}"

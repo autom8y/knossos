@@ -7,30 +7,32 @@ set -euo pipefail
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-.}"
 SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 
-# Source logging library
-# shellcheck source=lib/logging.sh
-source "$SCRIPT_DIR/lib/logging.sh" 2>/dev/null && log_init "auto-park" && log_start || true
+# Library Resolution - per ADR-0002
+HOOKS_LIB="${CLAUDE_PROJECT_DIR:-.}/.claude/hooks/lib"
+source "$HOOKS_LIB/logging.sh" 2>/dev/null && log_init "auto-park" && log_start || true
 
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-.}"
 cd "$PROJECT_DIR" 2>/dev/null || true
 
 # Source session utilities
-# shellcheck source=lib/session-utils.sh
-source .claude/hooks/lib/session-utils.sh 2>/dev/null
+source "$HOOKS_LIB/session-utils.sh" 2>/dev/null || { log_end 1 2>/dev/null; exit 0; }
 
 SESSION_DIR=$(get_session_dir)
 SESSION_FILE="$SESSION_DIR/SESSION_CONTEXT.md"
 
 # Only act if session exists
 if [ -z "$SESSION_DIR" ] || [ ! -f "$SESSION_FILE" ]; then
+  log_end 0 2>/dev/null || true
   exit 0
 fi
 
 # Check if already parked (manual or auto)
 if grep -q "^parked_at:" "$SESSION_FILE" 2>/dev/null; then
+  log_end 0 2>/dev/null || true
   exit 0
 fi
 if grep -q "^auto_parked_at:" "$SESSION_FILE" 2>/dev/null; then
+  log_end 0 2>/dev/null || true
   exit 0
 fi
 

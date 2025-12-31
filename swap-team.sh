@@ -34,7 +34,7 @@ readonly PHASE_COMPLETED="COMPLETED"
 
 # Manifest file path
 readonly MANIFEST_FILE=".claude/AGENT_MANIFEST.json"
-readonly MANIFEST_VERSION="1.1"
+readonly MANIFEST_VERSION="1.2"
 
 # Orphan handling mode (set by flags)
 ORPHAN_MODE=""  # "", "keep", "remove", "promote"
@@ -1085,7 +1085,49 @@ write_manifest() {
         done < ".claude/commands/.team-commands"
     fi
 
-    # Close commands and JSON
+    # Close commands section, add comma for hooks
+    echo "" >> "$MANIFEST_FILE"
+    echo "  }," >> "$MANIFEST_FILE"
+
+    # Add hooks section
+    echo "  \"hooks\": {" >> "$MANIFEST_FILE"
+
+    local first_hook=true
+
+    # Track hooks (base from user-hooks, team from .team-hooks marker)
+    if [[ -d ".claude/hooks" ]]; then
+        for hook_file in .claude/hooks/*.sh; do
+            [[ ! -f "$hook_file" ]] && continue
+
+            local hook_name
+            hook_name=$(basename "$hook_file")
+
+            # Determine source: team if in marker, base otherwise
+            local source="base"
+            local origin="user-hooks"
+
+            if [[ -f ".claude/hooks/.team-hooks" ]] && grep -q "^$hook_name$" ".claude/hooks/.team-hooks" 2>/dev/null; then
+                source="team"
+                origin="$team_name"
+            fi
+
+            if [[ "$first_hook" == true ]]; then
+                first_hook=false
+            else
+                echo "," >> "$MANIFEST_FILE"
+            fi
+
+            {
+                echo -n "    \"$hook_name\": {"
+                echo -n "\"source\": \"$source\", "
+                echo -n "\"origin\": \"$origin\", "
+                echo -n "\"installed_at\": \"$timestamp\""
+                echo -n "}"
+            } >> "$MANIFEST_FILE"
+        done
+    fi
+
+    # Close hooks and JSON
     {
         echo ""
         echo "  }"
@@ -2449,69 +2491,104 @@ remove_orphan_hooks() {
     fi
 }
 
-# Sync team-specific hooks to project
-# Team hooks are copied to .claude/hooks/ with a marker file
+# Sync base hooks AND team-specific hooks to project
+# Base hooks provide foundation, team hooks can override
 swap_hooks() {
     local team_name="$1"
-    local source_dir="$ROSTER_HOME/teams/$team_name/hooks"
+    local base_hooks_dir="$ROSTER_HOME/user-hooks"
+    local team_hooks_dir="$ROSTER_HOME/teams/$team_name/hooks"
 
-    log_debug "Checking for team hooks in $source_dir"
+    log_debug "Syncing hooks: base=$base_hooks_dir, team=$team_hooks_dir"
 
     # Ensure hooks directory exists
     mkdir -p ".claude/hooks"
+    mkdir -p ".claude/hooks/lib"
 
     # Backup and remove previous team hooks
     backup_team_hooks
     remove_team_hooks
 
-    # Check if team has hooks
-    if [[ ! -d "$source_dir" ]]; then
+    # =========================================================================
+    # PHASE 1: Install base hooks from roster/user-hooks/
+    # =========================================================================
+    if [[ ! -d "$base_hooks_dir" ]]; then
+        log_warning "Base hooks directory not found: $base_hooks_dir"
+        # Continue anyway - team hooks may still work
+    else
+        log_debug "Installing base hooks from $base_hooks_dir"
+
+        # Copy root-level hooks
+        for hook_file in "$base_hooks_dir"/*.sh; do
+            [[ -f "$hook_file" ]] || continue
+            local hook_name
+            hook_name=$(basename "$hook_file")
+
+            # Skip hidden files
+            [[ "$hook_name" == .* ]] && continue
+
+            cp "$hook_file" ".claude/hooks/$hook_name"
+            chmod +x ".claude/hooks/$hook_name"
+            log_debug "Installed base hook: $hook_name"
+        done
+
+        # Copy lib/ directory contents
+        if [[ -d "$base_hooks_dir/lib" ]]; then
+            for lib_file in "$base_hooks_dir/lib"/*.sh; do
+                [[ -f "$lib_file" ]] || continue
+                local lib_name
+                lib_name=$(basename "$lib_file")
+
+                cp "$lib_file" ".claude/hooks/lib/$lib_name"
+                chmod +x ".claude/hooks/lib/$lib_name" 2>/dev/null || true
+                log_debug "Installed lib: $lib_name"
+            done
+        fi
+    fi
+
+    # =========================================================================
+    # PHASE 2: Overlay team hooks (if team has hooks directory)
+    # =========================================================================
+    if [[ ! -d "$team_hooks_dir" ]]; then
         log_debug "Team $team_name has no hooks/ directory"
         return 0
     fi
 
     local hook_count
-    hook_count=$(find "$source_dir" -maxdepth 1 -type f 2>/dev/null | wc -l | tr -d ' ')
+    hook_count=$(find "$team_hooks_dir" -maxdepth 1 -type f -name "*.sh" 2>/dev/null | wc -l | tr -d ' ')
 
     if [[ "$hook_count" -eq 0 ]]; then
         log_debug "Team $team_name has no hook files"
         return 0
     fi
 
-    log_debug "Syncing $hook_count hook(s) from $team_name"
+    log_debug "Overlaying $hook_count hook(s) from team $team_name"
 
-    # Create marker file to track which hooks belong to this team
+    # Create marker file to track team hooks
     local marker_file=".claude/hooks/.team-hooks"
     : > "$marker_file"
 
-    # Copy each hook file and record in marker
-    for hook_file in "$source_dir"/*; do
+    # Copy each team hook (may override base hooks)
+    for hook_file in "$team_hooks_dir"/*.sh; do
         [[ -f "$hook_file" ]] || continue
 
         local hook_name
         hook_name=$(basename "$hook_file")
 
-        # Skip hidden files (like .gitkeep)
+        # Skip hidden files
         [[ "$hook_name" == .* ]] && continue
 
-        # Check for collision with user-level hook
-        if [[ -f "$HOME/.claude/hooks/$hook_name" ]]; then
-            log_warning "Team hook $hook_name shadows user-level hook in ~/.claude/hooks/"
-        fi
-
-        # Check for collision with existing project hook (not from team)
-        if [[ -f ".claude/hooks/$hook_name" ]] && ! grep -q "^$hook_name$" "$marker_file" 2>/dev/null; then
-            # Exists but not from team - this is a project hook
-            log_warning "Skipped: $hook_name (project hook exists)"
-            continue
+        # Check for collision with base hook
+        if [[ -f ".claude/hooks/$hook_name" ]]; then
+            log_warning "Team hook overrides base: $hook_name"
         fi
 
         cp "$hook_file" ".claude/hooks/$hook_name"
+        chmod +x ".claude/hooks/$hook_name"
         echo "$hook_name" >> "$marker_file"
-        log_debug "Synced hook: $hook_name"
+        log_debug "Installed team hook: $hook_name"
     done
 
-    # Count successfully synced hooks
+    # Count successfully synced team hooks
     local synced_count
     synced_count=$(wc -l < "$marker_file" | tr -d ' ')
 
