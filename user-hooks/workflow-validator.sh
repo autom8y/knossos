@@ -22,7 +22,7 @@ if [[ "$COMMAND" != *"swap-team"* ]] && [[ "$COMMAND" != *"ACTIVE_WORKFLOW"* ]];
 fi
 
 # Extract target team from swap-team.sh command
-# Handles: swap-team.sh teamname, ~/Code/roster/swap-team.sh teamname
+# Handles: swap-team.sh teamname, $ROSTER_HOME/swap-team.sh teamname
 if [[ "$COMMAND" == *"swap-team"* ]]; then
   TARGET_TEAM=$(echo "$COMMAND" | grep -oE 'swap-team\.sh[[:space:]]+([^[:space:]|&;]+)' | awk '{print $2}')
 

@@ -11,8 +11,8 @@ description: "Strategy team reference with market research, competitive analysis
 
 | Component | Location | Purpose |
 |-----------|----------|---------|
-| Agents | `~/Code/roster/teams/strategy-pack/agents/` | Agent prompts |
-| Workflow | `~/Code/roster/teams/strategy-pack/workflow.yaml` | Phase configuration |
+| Agents | `$ROSTER_HOME/teams/strategy-pack/agents/` | Agent prompts |
+| Workflow | `$ROSTER_HOME/teams/strategy-pack/workflow.yaml` | Phase configuration |
 | Switch | `/strategy` | Activate this team |
 
 ## Team Roster

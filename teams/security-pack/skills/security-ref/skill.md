@@ -11,8 +11,8 @@ description: "Security team reference with threat modeling, compliance architect
 
 | Component | Location | Purpose |
 |-----------|----------|---------|
-| Agents | `~/Code/roster/teams/security-pack/agents/` | Agent prompts |
-| Workflow | `~/Code/roster/teams/security-pack/workflow.yaml` | Phase configuration |
+| Agents | `$ROSTER_HOME/teams/security-pack/agents/` | Agent prompts |
+| Workflow | `$ROSTER_HOME/teams/security-pack/workflow.yaml` | Phase configuration |
 | Switch | `/security` | Activate this team |
 
 ## Team Roster

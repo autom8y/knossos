@@ -11,8 +11,8 @@ description: "Product Intelligence team reference with analytics, user research,
 
 | Component | Location | Purpose |
 |-----------|----------|---------|
-| Agents | `~/Code/roster/teams/intelligence-pack/agents/` | Agent prompts |
-| Workflow | `~/Code/roster/teams/intelligence-pack/workflow.yaml` | Phase configuration |
+| Agents | `$ROSTER_HOME/teams/intelligence-pack/agents/` | Agent prompts |
+| Workflow | `$ROSTER_HOME/teams/intelligence-pack/workflow.yaml` | Phase configuration |
 | Switch | `/intelligence` | Activate this team |
 
 ## Team Roster

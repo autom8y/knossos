@@ -14,7 +14,7 @@
 
 ### Key Paths
 - Skeleton: `$SKELETON_HOME` or `~/Code/skeleton_claude`
-- Roster: `$ROSTER_HOME` or `~/Code/roster`
+- Roster: `$ROSTER_HOME` or `$ROSTER_HOME`
 - Manifest: `.claude/.cem/manifest.json`
 - State: `.claude/.cem/`
 

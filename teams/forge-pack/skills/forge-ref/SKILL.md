@@ -254,7 +254,7 @@ Templates are documented inline in this skill and agent prompts.
 ### "swap-team.sh fails"
 
 Check:
-- Team directory exists at `~/Code/roster/teams/{name}/`
+- Team directory exists at `$ROSTER_HOME/teams/{name}/`
 - agents/ subdirectory has .md files
 - workflow.yaml exists
 - File permissions are correct

@@ -57,7 +57,7 @@ Each agent hands off to the next when their handoff criteria are met.
 ### 4. Completion
 
 When Agent Curator finishes, the team is:
-- Deployed to `~/Code/roster/teams/{team-name}-pack/`
+- Deployed to `$ROSTER_HOME/teams/{team-name}-pack/`
 - Discoverable via `/consult`
 - Ready for use via `/{team-name}` or `/team {team-name}-pack`
 

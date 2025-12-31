@@ -28,7 +28,7 @@ Prompt user for any missing parameters:
 ### 3. Team Context Setup
 
 - If `--team` specified and differs from ACTIVE_TEAM:
-  - Invoke `~/Code/roster/swap-team.sh <team-name>` via Bash tool
+  - Invoke `$ROSTER_HOME/swap-team.sh <team-name>` via Bash tool
   - Verify ACTIVE_TEAM file updated
   - Confirm: "Switched to {team} for this session"
 
@@ -139,6 +139,6 @@ Display confirmation message with:
 |-------|-----------|------------|
 | Session already active | Active session for current project | Use `/wrap` to complete current session or `/resume` to continue it |
 | Invalid team name | Team not found in roster | Use `/roster` to list available teams |
-| Roster system unavailable | `~/Code/roster/` not found | Set ROSTER_HOME environment variable or check installation |
+| Roster system unavailable | `$ROSTER_HOME/` not found | Set ROSTER_HOME environment variable or check installation |
 | PRD creation failed | Analyst unable to produce PRD | Review error, provide more context, retry |
 | Missing parameters | User cancels prompts | Command aborted, no state changed |

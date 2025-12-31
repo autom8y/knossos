@@ -16,6 +16,21 @@ readonly EXIT_VALIDATION_FAILURE=2
 readonly EXIT_BACKUP_FAILURE=3
 readonly EXIT_SWAP_FAILURE=4
 readonly EXIT_ORPHAN_CONFLICT=5
+readonly EXIT_RECOVERY_REQUIRED=6
+
+# Transaction safety constants
+readonly JOURNAL_FILE=".claude/.swap-journal"
+readonly JOURNAL_VERSION="1.0"
+readonly STAGING_DIR=".claude/.swap-staging"
+readonly SWAP_BACKUP_DIR=".claude/.swap-backup"
+
+# Transaction phases
+readonly PHASE_PREPARING="PREPARING"
+readonly PHASE_BACKING="BACKING"
+readonly PHASE_STAGING="STAGING"
+readonly PHASE_VERIFYING="VERIFYING"
+readonly PHASE_COMMITTING="COMMITTING"
+readonly PHASE_COMPLETED="COMPLETED"
 
 # Manifest file path
 readonly MANIFEST_FILE=".claude/AGENT_MANIFEST.json"
@@ -30,6 +45,11 @@ UPDATE_MODE=0
 # Dry-run mode: preview changes without applying
 DRY_RUN_MODE=0
 RESET_MODE=0
+
+# Recovery modes
+AUTO_RECOVER=0
+RECOVER_MODE=0
+VERIFY_MODE=0
 
 # Colors for output (if terminal supports it)
 if [[ -t 1 ]]; then
@@ -61,6 +81,871 @@ log_debug() {
     if [[ "$ROSTER_DEBUG" == "1" ]]; then
         echo "[Roster DEBUG] $*" >&2
     fi
+}
+
+# ============================================================================
+# Transaction Safety Functions
+# ============================================================================
+
+# Write content atomically using temp file + rename pattern
+# Usage: write_atomic "target_path" "content"
+write_atomic() {
+    local target="$1"
+    local content="$2"
+    local temp="${target}.tmp.$$"
+
+    # Ensure parent directory exists
+    local parent_dir
+    parent_dir=$(dirname "$target")
+    mkdir -p "$parent_dir" || {
+        log_error "Cannot create directory: $parent_dir"
+        return 1
+    }
+
+    # Write to temp file
+    printf '%s' "$content" > "$temp" || {
+        rm -f "$temp" 2>/dev/null
+        log_error "Failed to write temp file: $temp"
+        return 1
+    }
+
+    # Sync to disk (best effort)
+    sync "$temp" 2>/dev/null || true
+
+    # Atomic rename
+    mv "$temp" "$target" || {
+        rm -f "$temp" 2>/dev/null
+        log_error "Failed to rename temp file to: $target"
+        return 1
+    }
+
+    return 0
+}
+
+# Create a new journal entry for swap operation
+# Usage: create_journal "source_team" "target_team"
+create_journal() {
+    local source_team="$1"
+    local target_team="$2"
+    local timestamp
+    timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+    # Check if journal already exists (concurrent swap protection)
+    if [[ -f "$JOURNAL_FILE" ]]; then
+        local existing_pid
+        existing_pid=$(jq -r '.pid // "unknown"' "$JOURNAL_FILE" 2>/dev/null)
+        log_error "Swap already in progress (journal exists, PID: $existing_pid)"
+        log "Use --recover to handle the interrupted swap"
+        return 1
+    fi
+
+    # Format source_team for JSON (null if empty, quoted string otherwise)
+    local source_team_json="null"
+    if [[ -n "$source_team" ]]; then
+        source_team_json="\"$source_team\""
+    fi
+
+    local journal_content
+    journal_content=$(cat <<EOF
+{
+  "version": "$JOURNAL_VERSION",
+  "started_at": "$timestamp",
+  "phase": "$PHASE_PREPARING",
+  "source_team": $source_team_json,
+  "target_team": "$target_team",
+  "backup_location": {
+    "agents": "$SWAP_BACKUP_DIR/agents",
+    "manifest": "$SWAP_BACKUP_DIR/AGENT_MANIFEST.json",
+    "active_team": "$SWAP_BACKUP_DIR/ACTIVE_TEAM",
+    "workflow": "$SWAP_BACKUP_DIR/ACTIVE_WORKFLOW.yaml",
+    "commands": null,
+    "skills": null,
+    "hooks": null
+  },
+  "staging_location": "$STAGING_DIR",
+  "checksums": {},
+  "pid": $$,
+  "error": null
+}
+EOF
+)
+
+    write_atomic "$JOURNAL_FILE" "$journal_content" || {
+        log_error "Failed to create swap journal"
+        return 1
+    }
+
+    log_debug "Journal created: $source_team -> $target_team"
+    return 0
+}
+
+# Update journal phase
+# Usage: update_journal_phase "PHASE_NAME"
+update_journal_phase() {
+    local new_phase="$1"
+
+    if [[ ! -f "$JOURNAL_FILE" ]]; then
+        log_error "Cannot update phase: journal does not exist"
+        return 1
+    fi
+
+    local updated
+    updated=$(jq --arg phase "$new_phase" '.phase = $phase' "$JOURNAL_FILE") || {
+        log_error "Failed to parse journal for phase update"
+        return 1
+    }
+
+    write_atomic "$JOURNAL_FILE" "$updated" || {
+        log_error "Failed to update journal phase to: $new_phase"
+        return 1
+    }
+
+    log_debug "Journal phase updated: $new_phase"
+    return 0
+}
+
+# Update journal backup locations for resources
+# Usage: update_journal_backups "commands" "$path" | update_journal_backups "skills" "$path" ...
+update_journal_backups() {
+    local resource_type="$1"
+    local backup_path="$2"
+
+    if [[ ! -f "$JOURNAL_FILE" ]]; then
+        return 1
+    fi
+
+    local updated
+    updated=$(jq --arg type "$resource_type" --arg path "$backup_path" \
+        '.backup_location[$type] = $path' "$JOURNAL_FILE") || return 1
+
+    write_atomic "$JOURNAL_FILE" "$updated"
+}
+
+# Update journal with error message
+# Usage: update_journal_error "error message"
+update_journal_error() {
+    local error_msg="$1"
+
+    if [[ ! -f "$JOURNAL_FILE" ]]; then
+        return 1
+    fi
+
+    local updated
+    updated=$(jq --arg err "$error_msg" '.error = $err' "$JOURNAL_FILE") || return 1
+
+    write_atomic "$JOURNAL_FILE" "$updated"
+}
+
+# Read journal field
+# Usage: get_journal_field "field_name"
+get_journal_field() {
+    local field="$1"
+
+    if [[ ! -f "$JOURNAL_FILE" ]]; then
+        echo ""
+        return 1
+    fi
+
+    jq -r ".$field // empty" "$JOURNAL_FILE" 2>/dev/null
+}
+
+# Get current journal phase
+get_journal_phase() {
+    get_journal_field "phase"
+}
+
+# Delete journal (on successful completion)
+delete_journal() {
+    if [[ -f "$JOURNAL_FILE" ]]; then
+        rm -f "$JOURNAL_FILE"
+        log_debug "Journal deleted"
+    fi
+}
+
+# Check if journal exists
+journal_exists() {
+    [[ -f "$JOURNAL_FILE" ]]
+}
+
+# ============================================================================
+# Staging Functions
+# ============================================================================
+
+# Create staging directory structure
+create_staging() {
+    log_debug "Creating staging directory: $STAGING_DIR"
+
+    # Clean any existing staging
+    rm -rf "$STAGING_DIR" 2>/dev/null
+
+    mkdir -p "$STAGING_DIR" || {
+        log_error "Failed to create staging directory"
+        return 1
+    }
+
+    return 0
+}
+
+# Clean up staging directory
+cleanup_staging() {
+    if [[ -d "$STAGING_DIR" ]]; then
+        rm -rf "$STAGING_DIR"
+        log_debug "Staging directory cleaned up"
+    fi
+}
+
+# Stage agents from team pack
+# Usage: stage_agents "team_name"
+stage_agents() {
+    local team_name="$1"
+    local source_dir="$ROSTER_HOME/teams/$team_name/agents"
+    local staging_agents="$STAGING_DIR/agents"
+
+    if [[ ! -d "$source_dir" ]]; then
+        log_error "Source agents directory not found: $source_dir"
+        return 1
+    fi
+
+    mkdir -p "$staging_agents" || return 1
+
+    cp -rp "$source_dir"/* "$staging_agents/" || {
+        log_error "Failed to stage agents"
+        return 1
+    }
+
+    log_debug "Staged agents to: $staging_agents"
+    return 0
+}
+
+# Stage workflow file
+# Usage: stage_workflow "team_name"
+stage_workflow() {
+    local team_name="$1"
+    local source_file="$ROSTER_HOME/teams/$team_name/workflow.yaml"
+
+    if [[ -f "$source_file" ]]; then
+        cp "$source_file" "$STAGING_DIR/ACTIVE_WORKFLOW.yaml" || {
+            log_warning "Failed to stage workflow.yaml"
+            return 1
+        }
+        log_debug "Staged workflow.yaml"
+    fi
+
+    return 0
+}
+
+# Stage ACTIVE_TEAM file
+# Usage: stage_active_team "team_name"
+stage_active_team() {
+    local team_name="$1"
+
+    echo -n "$team_name" > "$STAGING_DIR/ACTIVE_TEAM" || {
+        log_error "Failed to stage ACTIVE_TEAM"
+        return 1
+    }
+
+    log_debug "Staged ACTIVE_TEAM: $team_name"
+    return 0
+}
+
+# Verify staging directory integrity
+# Usage: verify_staging "expected_agent_count"
+verify_staging() {
+    local expected_count="$1"
+
+    # Verify staging directory exists
+    if [[ ! -d "$STAGING_DIR" ]]; then
+        log_error "Staging directory missing"
+        return 1
+    fi
+
+    # Verify agents staged
+    if [[ ! -d "$STAGING_DIR/agents" ]]; then
+        log_error "Staged agents directory missing"
+        return 1
+    fi
+
+    # Verify agent count
+    local actual_count
+    actual_count=$(find "$STAGING_DIR/agents" -maxdepth 1 -name "*.md" -type f 2>/dev/null | wc -l | tr -d ' ')
+
+    if [[ "$actual_count" -ne "$expected_count" ]]; then
+        log_error "Staging verification failed: expected $expected_count agents, found $actual_count"
+        return 1
+    fi
+
+    # Verify ACTIVE_TEAM staged
+    if [[ ! -f "$STAGING_DIR/ACTIVE_TEAM" ]]; then
+        log_error "Staged ACTIVE_TEAM missing"
+        return 1
+    fi
+
+    log_debug "Staging verified: $actual_count agents"
+    return 0
+}
+
+# ============================================================================
+# Comprehensive Backup Functions
+# ============================================================================
+
+# Create comprehensive backup for transaction safety
+# Usage: create_swap_backup
+create_swap_backup() {
+    log_debug "Creating comprehensive backup in $SWAP_BACKUP_DIR"
+
+    # Clean any existing swap backup
+    rm -rf "$SWAP_BACKUP_DIR" 2>/dev/null
+
+    mkdir -p "$SWAP_BACKUP_DIR" || {
+        log_error "Failed to create swap backup directory"
+        return 1
+    }
+
+    # Backup agents if they exist
+    if [[ -d ".claude/agents" ]] && [[ -n "$(ls -A .claude/agents 2>/dev/null)" ]]; then
+        cp -rp .claude/agents "$SWAP_BACKUP_DIR/agents" || {
+            log_error "Failed to backup agents"
+            return 1
+        }
+        log_debug "Backed up agents"
+    fi
+
+    # Backup ACTIVE_TEAM if exists
+    if [[ -f ".claude/ACTIVE_TEAM" ]]; then
+        cp .claude/ACTIVE_TEAM "$SWAP_BACKUP_DIR/ACTIVE_TEAM" || {
+            log_error "Failed to backup ACTIVE_TEAM"
+            return 1
+        }
+        log_debug "Backed up ACTIVE_TEAM"
+    fi
+
+    # Backup AGENT_MANIFEST.json if exists
+    if [[ -f "$MANIFEST_FILE" ]]; then
+        cp "$MANIFEST_FILE" "$SWAP_BACKUP_DIR/AGENT_MANIFEST.json" || {
+            log_warning "Failed to backup manifest"
+        }
+        log_debug "Backed up manifest"
+    fi
+
+    # Backup ACTIVE_WORKFLOW.yaml if exists
+    if [[ -f ".claude/ACTIVE_WORKFLOW.yaml" ]]; then
+        cp .claude/ACTIVE_WORKFLOW.yaml "$SWAP_BACKUP_DIR/ACTIVE_WORKFLOW.yaml" || {
+            log_warning "Failed to backup workflow"
+        }
+        log_debug "Backed up workflow"
+    fi
+
+    # Backup commands if team commands exist
+    if [[ -f ".claude/commands/.team-commands" ]]; then
+        mkdir -p "$SWAP_BACKUP_DIR/commands"
+        while IFS= read -r cmd_file; do
+            [[ -z "$cmd_file" ]] && continue
+            if [[ -f ".claude/commands/$cmd_file" ]]; then
+                cp ".claude/commands/$cmd_file" "$SWAP_BACKUP_DIR/commands/$cmd_file"
+            fi
+        done < ".claude/commands/.team-commands"
+        cp ".claude/commands/.team-commands" "$SWAP_BACKUP_DIR/commands/.team-commands"
+        update_journal_backups "commands" "$SWAP_BACKUP_DIR/commands"
+        log_debug "Backed up team commands"
+    fi
+
+    # Backup skills if team skills exist
+    if [[ -f ".claude/skills/.team-skills" ]]; then
+        mkdir -p "$SWAP_BACKUP_DIR/skills"
+        while IFS= read -r skill_dir; do
+            [[ -z "$skill_dir" ]] && continue
+            if [[ -d ".claude/skills/$skill_dir" ]]; then
+                cp -rp ".claude/skills/$skill_dir" "$SWAP_BACKUP_DIR/skills/$skill_dir"
+            fi
+        done < ".claude/skills/.team-skills"
+        cp ".claude/skills/.team-skills" "$SWAP_BACKUP_DIR/skills/.team-skills"
+        update_journal_backups "skills" "$SWAP_BACKUP_DIR/skills"
+        log_debug "Backed up team skills"
+    fi
+
+    # Backup hooks if team hooks exist
+    if [[ -f ".claude/hooks/.team-hooks" ]]; then
+        mkdir -p "$SWAP_BACKUP_DIR/hooks"
+        while IFS= read -r hook_file; do
+            [[ -z "$hook_file" ]] && continue
+            if [[ -f ".claude/hooks/$hook_file" ]]; then
+                cp ".claude/hooks/$hook_file" "$SWAP_BACKUP_DIR/hooks/$hook_file"
+            fi
+        done < ".claude/hooks/.team-hooks"
+        cp ".claude/hooks/.team-hooks" "$SWAP_BACKUP_DIR/hooks/.team-hooks"
+        update_journal_backups "hooks" "$SWAP_BACKUP_DIR/hooks"
+        log_debug "Backed up team hooks"
+    fi
+
+    log_debug "Comprehensive backup complete"
+    return 0
+}
+
+# Clean up swap backup (after successful swap)
+cleanup_swap_backup() {
+    if [[ -d "$SWAP_BACKUP_DIR" ]]; then
+        rm -rf "$SWAP_BACKUP_DIR"
+        log_debug "Swap backup cleaned up"
+    fi
+}
+
+# Verify backup integrity for recovery
+# Usage: verify_backup_integrity
+verify_backup_integrity() {
+    if [[ ! -d "$SWAP_BACKUP_DIR" ]]; then
+        log_debug "Backup directory missing"
+        return 1
+    fi
+
+    # For virgin swap, backup may not have agents
+    if [[ -d "$SWAP_BACKUP_DIR/agents" ]]; then
+        local agent_count
+        agent_count=$(find "$SWAP_BACKUP_DIR/agents" -maxdepth 1 -name "*.md" -type f 2>/dev/null | wc -l | tr -d ' ')
+        if [[ "$agent_count" -eq 0 ]]; then
+            log_debug "Backup has no agent files (may be virgin swap)"
+        fi
+    fi
+
+    # Check if this was a virgin swap (source_team is null in journal)
+    local was_virgin="false"
+    if [[ -f "$JOURNAL_FILE" ]]; then
+        local source_team
+        source_team=$(jq -r '.source_team // "null"' "$JOURNAL_FILE" 2>/dev/null)
+        if [[ "$source_team" == "null" ]]; then
+            was_virgin="true"
+        fi
+    fi
+
+    # For non-virgin swap, we need ACTIVE_TEAM in backup
+    if [[ "$was_virgin" != "true" ]] && [[ ! -f "$SWAP_BACKUP_DIR/ACTIVE_TEAM" ]]; then
+        log_debug "Backup missing ACTIVE_TEAM (non-virgin swap)"
+        return 1
+    fi
+
+    return 0
+}
+
+# ============================================================================
+# Rollback Functions
+# ============================================================================
+
+# Rollback swap operation to previous state
+rollback_swap() {
+    log "Rolling back swap operation..."
+
+    # Verify backup exists and is valid
+    if [[ ! -d "$SWAP_BACKUP_DIR" ]]; then
+        log_error "Cannot rollback: backup directory missing"
+        log "Manual recovery required. Check $STAGING_DIR for new state."
+        return 1
+    fi
+
+    # Restore agents
+    if [[ -d "$SWAP_BACKUP_DIR/agents" ]]; then
+        rm -rf .claude/agents 2>/dev/null
+        cp -rp "$SWAP_BACKUP_DIR/agents" .claude/agents || {
+            log_error "Failed to restore agents"
+            return 1
+        }
+        log_debug "Restored agents"
+    fi
+
+    # Restore ACTIVE_WORKFLOW.yaml
+    if [[ -f "$SWAP_BACKUP_DIR/ACTIVE_WORKFLOW.yaml" ]]; then
+        cp "$SWAP_BACKUP_DIR/ACTIVE_WORKFLOW.yaml" .claude/ACTIVE_WORKFLOW.yaml
+        log_debug "Restored workflow"
+    else
+        rm -f .claude/ACTIVE_WORKFLOW.yaml 2>/dev/null
+    fi
+
+    # Restore AGENT_MANIFEST.json
+    if [[ -f "$SWAP_BACKUP_DIR/AGENT_MANIFEST.json" ]]; then
+        cp "$SWAP_BACKUP_DIR/AGENT_MANIFEST.json" "$MANIFEST_FILE"
+        log_debug "Restored manifest"
+    else
+        rm -f "$MANIFEST_FILE" 2>/dev/null
+    fi
+
+    # Restore ACTIVE_TEAM (LAST - this is the rollback commit point)
+    if [[ -f "$SWAP_BACKUP_DIR/ACTIVE_TEAM" ]]; then
+        cp "$SWAP_BACKUP_DIR/ACTIVE_TEAM" .claude/ACTIVE_TEAM
+        log_debug "Restored ACTIVE_TEAM"
+    else
+        # Virgin swap had no ACTIVE_TEAM - remove it
+        rm -f .claude/ACTIVE_TEAM
+        log_debug "Removed ACTIVE_TEAM (virgin swap rollback)"
+    fi
+
+    # Restore commands if backed up
+    if [[ -d "$SWAP_BACKUP_DIR/commands" ]]; then
+        # Remove current team commands
+        if [[ -f ".claude/commands/.team-commands" ]]; then
+            while IFS= read -r cmd_file; do
+                [[ -z "$cmd_file" ]] && continue
+                rm -f ".claude/commands/$cmd_file"
+            done < ".claude/commands/.team-commands"
+        fi
+
+        # Restore backed up commands
+        for cmd_file in "$SWAP_BACKUP_DIR/commands"/*.md; do
+            [[ -f "$cmd_file" ]] || continue
+            cp "$cmd_file" ".claude/commands/$(basename "$cmd_file")"
+        done
+        if [[ -f "$SWAP_BACKUP_DIR/commands/.team-commands" ]]; then
+            cp "$SWAP_BACKUP_DIR/commands/.team-commands" ".claude/commands/.team-commands"
+        fi
+        log_debug "Restored commands"
+    fi
+
+    # Restore skills if backed up
+    if [[ -d "$SWAP_BACKUP_DIR/skills" ]]; then
+        # Remove current team skills
+        if [[ -f ".claude/skills/.team-skills" ]]; then
+            while IFS= read -r skill_dir; do
+                [[ -z "$skill_dir" ]] && continue
+                rm -rf ".claude/skills/$skill_dir"
+            done < ".claude/skills/.team-skills"
+        fi
+
+        # Restore backed up skills
+        for skill_path in "$SWAP_BACKUP_DIR/skills"/*/; do
+            [[ -d "$skill_path" ]] || continue
+            local skill_name
+            skill_name=$(basename "$skill_path")
+            [[ "$skill_name" == "." ]] && continue
+            cp -rp "$skill_path" ".claude/skills/$skill_name"
+        done
+        if [[ -f "$SWAP_BACKUP_DIR/skills/.team-skills" ]]; then
+            cp "$SWAP_BACKUP_DIR/skills/.team-skills" ".claude/skills/.team-skills"
+        fi
+        log_debug "Restored skills"
+    fi
+
+    # Restore hooks if backed up
+    if [[ -d "$SWAP_BACKUP_DIR/hooks" ]]; then
+        # Remove current team hooks
+        if [[ -f ".claude/hooks/.team-hooks" ]]; then
+            while IFS= read -r hook_file; do
+                [[ -z "$hook_file" ]] && continue
+                rm -f ".claude/hooks/$hook_file"
+            done < ".claude/hooks/.team-hooks"
+        fi
+
+        # Restore backed up hooks
+        for hook_file in "$SWAP_BACKUP_DIR/hooks"/*; do
+            [[ -f "$hook_file" ]] || continue
+            local hook_name
+            hook_name=$(basename "$hook_file")
+            [[ "$hook_name" == ".team-hooks" ]] && continue
+            cp "$hook_file" ".claude/hooks/$hook_name"
+        done
+        if [[ -f "$SWAP_BACKUP_DIR/hooks/.team-hooks" ]]; then
+            cp "$SWAP_BACKUP_DIR/hooks/.team-hooks" ".claude/hooks/.team-hooks"
+        fi
+        log_debug "Restored hooks"
+    fi
+
+    # Cleanup staging and backup
+    cleanup_staging
+    cleanup_swap_backup
+    delete_journal
+
+    log "Rollback complete. Previous state restored."
+    return 0
+}
+
+# ============================================================================
+# Signal Handling
+# ============================================================================
+
+# Global flag to prevent re-entrant signal handling
+SIGNAL_HANDLING=0
+
+# Handle interrupt signals (SIGTERM, SIGINT, SIGHUP)
+handle_interrupt() {
+    if [[ "$SIGNAL_HANDLING" -eq 1 ]]; then
+        return
+    fi
+    SIGNAL_HANDLING=1
+
+    log_warning "Swap interrupted by signal"
+
+    # Check current phase from journal
+    local phase
+    phase=$(get_journal_phase)
+
+    case "$phase" in
+        "$PHASE_PREPARING"|"$PHASE_BACKING"|"")
+            log "No changes made. Exiting."
+            cleanup_staging
+            delete_journal
+            ;;
+        "$PHASE_STAGING"|"$PHASE_VERIFYING")
+            log "Rolling back partial changes..."
+            rollback_swap
+            ;;
+        "$PHASE_COMMITTING")
+            log_warning "Interrupted during commit - state may be inconsistent"
+            log "Run with --recover to check and restore state"
+            # Don't delete journal - needed for recovery
+            ;;
+        "$PHASE_COMPLETED")
+            log "Swap was completed. Cleaning up."
+            cleanup_staging
+            cleanup_swap_backup
+            delete_journal
+            ;;
+    esac
+
+    exit "$EXIT_SWAP_FAILURE"
+}
+
+# Handle normal exit
+handle_exit() {
+    # Cleanup temp files on normal exit
+    rm -f ".claude/.swap-journal.tmp" 2>/dev/null
+    rm -f "$STAGING_DIR"/*.tmp.$$ 2>/dev/null
+}
+
+# Set up signal handlers
+setup_signal_handlers() {
+    trap 'handle_interrupt' SIGINT SIGTERM SIGHUP
+    trap 'handle_exit' EXIT
+}
+
+# ============================================================================
+# Recovery Functions
+# ============================================================================
+
+# Check for journal on startup and handle recovery
+# Returns: 0 if ok to proceed, 1 if recovery needed
+check_journal_recovery() {
+    if [[ ! -f "$JOURNAL_FILE" ]]; then
+        return 0  # No recovery needed
+    fi
+
+    log_warning "Incomplete swap detected from previous run"
+
+    # Read journal details
+    local phase source target
+    phase=$(jq -r '.phase // "unknown"' "$JOURNAL_FILE" 2>/dev/null)
+    source=$(jq -r '.source_team // "none"' "$JOURNAL_FILE" 2>/dev/null)
+    target=$(jq -r '.target_team // "unknown"' "$JOURNAL_FILE" 2>/dev/null)
+
+    log "  Previous: $source -> $target"
+    log "  Phase: $phase"
+
+    # Check if swap completed but cleanup didn't finish
+    if [[ "$phase" == "$PHASE_COMPLETED" ]]; then
+        log "Previous swap completed. Cleaning up..."
+        cleanup_staging
+        cleanup_swap_backup
+        delete_journal
+        return 0
+    fi
+
+    # Check backup validity
+    local backup_valid=false
+    if verify_backup_integrity; then
+        backup_valid=true
+    fi
+
+    if [[ "$backup_valid" == "false" ]]; then
+        log_error "Backup is missing or corrupted"
+        log "Manual intervention required:"
+        log "  1. Check $STAGING_DIR for new state"
+        log "  2. Check $SWAP_BACKUP_DIR for old state"
+        log "  3. Manually restore desired state"
+        log "  4. Delete $JOURNAL_FILE when done"
+        exit "$EXIT_RECOVERY_REQUIRED"
+    fi
+
+    # Interactive vs non-interactive recovery
+    if [[ -t 0 ]]; then
+        prompt_recovery_action "$source" "$target" "$phase"
+    elif [[ "$AUTO_RECOVER" -eq 1 ]]; then
+        log "Auto-recovery enabled. Rolling back..."
+        rollback_swap
+        return 0
+    else
+        log_error "Non-interactive mode. Use --auto-recover to enable automatic rollback"
+        log "Or manually resolve with: swap-team.sh --recover"
+        exit "$EXIT_RECOVERY_REQUIRED"
+    fi
+
+    return 0
+}
+
+# Interactive recovery prompt
+prompt_recovery_action() {
+    local source="$1" target="$2" phase="$3"
+
+    echo ""
+    echo "Recovery Options:"
+    echo "  [r] Rollback to previous state ($source)"
+    echo "  [c] Continue swap to $target (may fail)"
+    echo "  [a] Abort (leave as-is for manual recovery)"
+    echo ""
+
+    local choice
+    while true; do
+        read -r -p "Choice [r/c/a]: " choice < /dev/tty
+        case "$choice" in
+            r|R)
+                rollback_swap
+                return 0
+                ;;
+            c|C)
+                continue_interrupted_swap "$phase" "$target"
+                return $?
+                ;;
+            a|A)
+                log "Aborted. Journal preserved for manual recovery."
+                exit "$EXIT_SUCCESS"
+                ;;
+            *)
+                echo "Invalid choice. Enter r, c, or a."
+                ;;
+        esac
+    done
+}
+
+# Attempt to continue an interrupted swap
+continue_interrupted_swap() {
+    local phase="$1"
+    local target_team="$2"
+
+    log "Attempting to continue swap from phase: $phase"
+
+    case "$phase" in
+        "$PHASE_STAGING")
+            # Need to re-stage and continue
+            log_warning "Re-staging is not fully implemented. Recommend rollback."
+            return 1
+            ;;
+        "$PHASE_VERIFYING"|"$PHASE_COMMITTING")
+            # Try to complete the commit
+            if [[ -d "$STAGING_DIR" ]]; then
+                log "Attempting to complete commit from staging..."
+                commit_staged_resources "$target_team"
+                return $?
+            else
+                log_error "Staging directory missing. Cannot continue."
+                return 1
+            fi
+            ;;
+        *)
+            log_error "Cannot continue from phase: $phase"
+            return 1
+            ;;
+    esac
+}
+
+# Verify current state consistency
+verify_state_consistency() {
+    local errors=0
+
+    log "Verifying state consistency..."
+
+    # Check ACTIVE_TEAM exists
+    if [[ ! -f ".claude/ACTIVE_TEAM" ]]; then
+        log_warning "No ACTIVE_TEAM file (virgin state or corrupted)"
+        ((errors++)) || true
+    else
+        local active_team
+        active_team=$(cat .claude/ACTIVE_TEAM | tr -d '[:space:]')
+
+        # Check agents directory exists
+        if [[ ! -d ".claude/agents" ]]; then
+            log_error "ACTIVE_TEAM is $active_team but no agents directory exists"
+            ((errors++)) || true
+        else
+            local agent_count
+            agent_count=$(find .claude/agents -maxdepth 1 -name "*.md" -type f 2>/dev/null | wc -l | tr -d ' ')
+            if [[ "$agent_count" -eq 0 ]]; then
+                log_error "ACTIVE_TEAM is $active_team but no agent files found"
+                ((errors++)) || true
+            fi
+        fi
+
+        # Check manifest matches ACTIVE_TEAM
+        if [[ -f "$MANIFEST_FILE" ]]; then
+            local manifest_team
+            manifest_team=$(jq -r '.active_team // "unknown"' "$MANIFEST_FILE" 2>/dev/null)
+            if [[ "$manifest_team" != "$active_team" ]]; then
+                log_error "ACTIVE_TEAM ($active_team) does not match manifest ($manifest_team)"
+                ((errors++)) || true
+            fi
+        fi
+
+        # Check team pack exists in roster
+        if [[ ! -d "$ROSTER_HOME/teams/$active_team" ]]; then
+            log_warning "Active team $active_team not found in roster (may be orphaned)"
+        fi
+    fi
+
+    # Check for orphaned journal
+    if [[ -f "$JOURNAL_FILE" ]]; then
+        log_warning "Swap journal exists - incomplete swap detected"
+        local phase
+        phase=$(get_journal_phase)
+        log "  Phase: $phase"
+        ((errors++)) || true
+    fi
+
+    # Check for orphaned staging
+    if [[ -d "$STAGING_DIR" ]]; then
+        log_warning "Staging directory exists - incomplete swap detected"
+        ((errors++)) || true
+    fi
+
+    if [[ "$errors" -eq 0 ]]; then
+        log "State is consistent"
+        return 0
+    else
+        log_error "Found $errors consistency issue(s)"
+        return 1
+    fi
+}
+
+# ============================================================================
+# Commit Functions
+# ============================================================================
+
+# Commit staged resources to live directories
+# This is the atomic commit phase
+# Usage: commit_staged_resources "team_name"
+commit_staged_resources() {
+    local team_name="$1"
+
+    log_debug "Committing staged resources..."
+
+    update_journal_phase "$PHASE_COMMITTING"
+
+    # 1. Remove live directories (fast operations)
+    rm -rf .claude/agents 2>/dev/null
+
+    # 2. Move staged agents to live (atomic rename on same filesystem)
+    if [[ -d "$STAGING_DIR/agents" ]]; then
+        mv "$STAGING_DIR/agents" .claude/agents || {
+            log_error "Failed to commit agents"
+            update_journal_error "Failed to commit agents"
+            return 1
+        }
+    fi
+
+    # 3. Move workflow atomically
+    if [[ -f "$STAGING_DIR/ACTIVE_WORKFLOW.yaml" ]]; then
+        mv "$STAGING_DIR/ACTIVE_WORKFLOW.yaml" .claude/ACTIVE_WORKFLOW.yaml || {
+            log_warning "Failed to commit workflow"
+        }
+    fi
+
+    # Note: ACTIVE_TEAM is committed LAST (after manifest is written)
+    # This happens in the main perform_swap flow
+
+    log_debug "Core resources committed"
+    return 0
 }
 
 # ============================================================================
@@ -625,6 +1510,8 @@ Commands:
   <pack-name>    Switch to specified team pack
   --list         List all available team packs
   --reset        Reset to skeleton baseline (remove all team resources)
+  --verify       Verify current state consistency
+  --recover      Interactive recovery from interrupted swap
   (no args)      Show current active team
 
 Options:
@@ -634,14 +1521,16 @@ Options:
   --keep-all     Preserve orphan agents in project
   --remove-all   Remove orphan agents/commands/skills/hooks (backup available)
   --promote-all  Move orphan agents to ~/.claude/agents/
+  --auto-recover Automatically rollback if interrupted swap detected (for CI/CD)
 
 When switching teams interactively, you'll be prompted for each orphan agent
 (agents in current team but not in target team). In non-interactive mode
 (scripts, CI), you must specify one of the orphan handling flags.
 
 Environment Variables:
-  ROSTER_HOME    Roster repository location (default: ~/Code/roster)
-  ROSTER_DEBUG   Enable debug logging (set to 1)
+  ROSTER_HOME         Roster repository location (default: ~/Code/roster)
+  ROSTER_DEBUG        Enable debug logging (set to 1)
+  ROSTER_AUTO_RECOVER Enable auto-recovery in non-interactive mode (set to 1)
 
 Exit Codes:
   0  Success
@@ -650,6 +1539,7 @@ Exit Codes:
   3  Backup failure
   4  Swap failure
   5  Orphan conflict (non-interactive without flag)
+  6  Recovery required (interrupted swap, manual intervention needed)
 
 Examples:
   ./swap-team.sh dev-pack               # Switch to dev-pack (interactive prompts)
@@ -662,8 +1552,78 @@ Examples:
   ./swap-team.sh --update --dry-run     # Preview what update would change
   ./swap-team.sh --reset                # Reset to skeleton baseline
   ./swap-team.sh --reset --dry-run      # Preview what reset would remove
+  ./swap-team.sh --verify               # Check state consistency
+  ./swap-team.sh --recover              # Recover from interrupted swap
+  ./swap-team.sh --auto-recover dev-pack # CI/CD mode with auto-rollback
 
 EOF
+}
+
+# Known valid Claude Code tools
+# REQ-3.3: Tool validation for agent declarations
+VALID_TOOLS="Bash Glob Grep Read Write Edit WebFetch WebSearch TodoWrite Task Skill NotebookEdit AskUserQuestion"
+
+# Validate tools field in agent frontmatter
+# Returns 0 if valid or no tools field, 1 if invalid tools found
+validate_agent_tools() {
+    local agent_file="$1"
+    local agent_name
+    agent_name=$(basename "$agent_file" .md)
+
+    # Extract tools field from YAML frontmatter
+    local tools_line
+    tools_line=$(sed -n '/^---$/,/^---$/p' "$agent_file" | grep "^tools:" | head -1)
+
+    if [[ -z "$tools_line" ]]; then
+        # No tools field - acceptable (agent won't have tool restrictions)
+        return 0
+    fi
+
+    # Parse comma-separated tools (POSIX-compatible approach)
+    local tools
+    tools=$(echo "$tools_line" | sed 's/^tools:[[:space:]]*//')
+
+    local invalid_tools=""
+
+    # Split on comma and space, process each tool
+    echo "$tools" | tr ',' '\n' | while read -r tool; do
+        # Trim whitespace
+        tool=$(echo "$tool" | tr -d '[:space:]')
+
+        # Skip empty entries
+        [[ -z "$tool" ]] && continue
+
+        if [[ ! " $VALID_TOOLS " =~ " $tool " ]]; then
+            # Use a temp file to communicate from subshell
+            echo "$tool" >> /tmp/.swap-team-invalid-tools-$$
+        fi
+    done
+
+    # Check if any invalid tools were found
+    if [[ -f /tmp/.swap-team-invalid-tools-$$ ]]; then
+        invalid_tools=$(cat /tmp/.swap-team-invalid-tools-$$)
+        rm -f /tmp/.swap-team-invalid-tools-$$
+        log_warning "Invalid tools in ${agent_name}.md: $invalid_tools"
+        return 1
+    fi
+
+    return 0
+}
+
+# Validate all agent tools in a team pack
+# Returns count of agents with invalid tools (0 = all valid)
+validate_pack_tools() {
+    local pack_dir="$1"
+    local invalid_count=0
+
+    for agent_file in "$pack_dir/agents"/*.md; do
+        [[ -f "$agent_file" ]] || continue
+        if ! validate_agent_tools "$agent_file"; then
+            ((invalid_count++)) || true
+        fi
+    done
+
+    echo "$invalid_count"
 }
 
 # Validate team pack exists and has required structure
@@ -698,6 +1658,21 @@ validate_pack() {
     # Check workflow.yaml exists
     if [[ ! -f "$pack_dir/workflow.yaml" ]]; then
         log_warning "Team pack '$team_name' missing workflow.yaml (commands may fail)"
+    fi
+
+    # Check for missing directories (REQ-3.4)
+    if [[ ! -d "$pack_dir/commands" ]]; then
+        log_warning "Team pack '$team_name' missing commands/ (run normalize-team-structure.sh)"
+    fi
+    if [[ ! -d "$pack_dir/skills" ]]; then
+        log_warning "Team pack '$team_name' missing skills/ (run normalize-team-structure.sh)"
+    fi
+
+    # Validate agent tools (REQ-3.3)
+    local invalid_tool_count
+    invalid_tool_count=$(validate_pack_tools "$pack_dir")
+    if [[ "$invalid_tool_count" -gt 0 ]]; then
+        log_warning "$invalid_tool_count agent(s) have invalid tools declarations"
     fi
 
     log_debug "Pack validation passed: $agent_count agents found"
@@ -1549,7 +2524,92 @@ swap_hooks() {
 # CLAUDE.md Update Functions
 # ============================================================================
 
+# REQ-3.1: Get produces field from workflow.yaml for an agent
+# Reads directly from roster source instead of hardcoded mapping
+get_produces_from_workflow() {
+    local team_name="$1"
+    local agent_name="$2"
+    local workflow_file="$ROSTER_HOME/teams/$team_name/workflow.yaml"
+
+    if [[ ! -f "$workflow_file" ]]; then
+        echo "Artifacts"  # Fallback
+        return
+    fi
+
+    # Extract produces for agent from workflow.yaml phases section
+    # Uses awk for reliable parsing of YAML structure
+    local produces
+    produces=$(awk -v agent="$agent_name" '
+        /^phases:/ { in_phases = 1; next }
+        /^[a-z_]+:/ && !/^[[:space:]]/ { in_phases = 0 }
+        in_phases && /agent:/ && $0 ~ agent {
+            found_agent = 1
+            next
+        }
+        in_phases && found_agent && /produces:/ {
+            gsub(/.*produces:[[:space:]]*/, "")
+            gsub(/[[:space:]]*$/, "")
+            print
+            exit
+        }
+        in_phases && found_agent && /^[[:space:]]*-[[:space:]]/ {
+            # New phase started without finding produces
+            found_agent = 0
+        }
+    ' "$workflow_file")
+
+    if [[ -n "$produces" ]]; then
+        # Capitalize first letter and format (e.g., "prd" -> "PRD", "tdd" -> "TDD", "code" -> "Code")
+        case "$produces" in
+            prd|PRD) echo "PRD" ;;
+            tdd|TDD) echo "TDD" ;;
+            adr|ADR) echo "ADR" ;;
+            code) echo "Code" ;;
+            test-plan|test_plan) echo "Test reports" ;;
+            *)
+                # Capitalize first letter
+                echo "$(echo "${produces:0:1}" | tr '[:lower:]' '[:upper:]')${produces:1}"
+                ;;
+        esac
+    else
+        echo "Artifacts"  # Fallback
+    fi
+}
+
+# REQ-3.1: Get all phases from workflow.yaml in order
+# Returns list of "agent:produces" pairs in workflow order
+get_workflow_phases() {
+    local team_name="$1"
+    local workflow_file="$ROSTER_HOME/teams/$team_name/workflow.yaml"
+
+    if [[ ! -f "$workflow_file" ]]; then
+        return
+    fi
+
+    # Parse phases section - extract agent and produces for each phase
+    # This is a simple parser that works with the standard workflow.yaml format
+    awk '
+        /^phases:/ { in_phases = 1; next }
+        /^[a-z_]+:/ && !/^[[:space:]]/ { in_phases = 0 }
+        in_phases && /agent:/ {
+            gsub(/.*agent:[[:space:]]*/, "")
+            gsub(/[[:space:]]*$/, "")
+            agent = $0
+        }
+        in_phases && /produces:/ {
+            gsub(/.*produces:[[:space:]]*/, "")
+            gsub(/[[:space:]]*$/, "")
+            produces = $0
+            if (agent != "") {
+                print agent ":" produces
+                agent = ""
+            }
+        }
+    ' "$workflow_file"
+}
+
 # Update CLAUDE.md to reflect current team's agents
+# REQ-3.1: Reads from roster source instead of disk state after copy
 # This ensures Claude Code's context matches the swapped agents
 update_claude_md() {
     local team_name="$1"
@@ -1562,14 +2622,17 @@ update_claude_md() {
 
     log_debug "Updating CLAUDE.md for team $team_name"
 
+    # REQ-3.1: Read from roster source directly, not disk state after copy
+    local source_agents="$ROSTER_HOME/teams/$team_name/agents"
+
     # Create temp files for agent data
     local agent_list_file agent_table_file temp_file
     agent_list_file=$(mktemp)
     agent_table_file=$(mktemp)
     temp_file=$(mktemp)
 
-    # Build agent list from current .claude/agents/
-    for agent_file in .claude/agents/*.md; do
+    # REQ-3.1: Build agent list from roster source, not .claude/agents/
+    for agent_file in "$source_agents"/*.md; do
         [[ -f "$agent_file" ]] || continue
 
         local basename name desc role produces
@@ -1624,22 +2687,20 @@ update_claude_md() {
             fi
         fi
 
-        # Map common agent names to produces for table
-        produces="Artifacts"
-        case "$basename" in
-            orchestrator) produces="Work breakdown" ;;
-            requirements-analyst) produces="PRD" ;;
-            architect) produces="TDD, ADRs" ;;
-            principal-engineer) produces="Code" ;;
-            qa-adversary) produces="Test reports" ;;
-        esac
+        # REQ-3.1: Get produces from workflow.yaml instead of hardcoded case statement
+        produces=$(get_produces_from_workflow "$team_name" "$basename")
+
+        # Special case for orchestrator (not in phases but always present)
+        if [[ "$basename" == "orchestrator" && "$produces" == "Artifacts" ]]; then
+            produces="Work breakdown"
+        fi
 
         echo "| **${name:-$basename}** | ${role} | ${produces} |" >> "$agent_table_file"
     done
 
-    # Count agents for header
+    # REQ-3.1: Count agents from roster source, not disk
     local agent_count
-    agent_count=$(find .claude/agents/ -name "*.md" 2>/dev/null | wc -l | tr -d ' ')
+    agent_count=$(find "$source_agents" -maxdepth 1 -name "*.md" -type f 2>/dev/null | wc -l | tr -d ' ')
 
     # Update Quick Start section using sed
     # First, copy everything before the table (BSD-compatible: use awk instead of head -n -1)
@@ -1820,12 +2881,21 @@ perform_swap() {
 
     log_debug "Starting swap to $team_name"
 
-    # Check if already active (idempotency, unless --refresh)
-    if [[ -f ".claude/ACTIVE_TEAM" ]] && [[ "$UPDATE_MODE" -eq 0 ]]; then
-        local current
-        current=$(cat .claude/ACTIVE_TEAM | tr -d '[:space:]')
+    # Set up signal handlers for graceful interruption
+    setup_signal_handlers
 
-        if [[ "$current" == "$team_name" ]]; then
+    # Check for recovery from interrupted swap
+    check_journal_recovery
+
+    # Get current team (before swap) for journal
+    local source_team=""
+    if [[ -f ".claude/ACTIVE_TEAM" ]]; then
+        source_team=$(cat .claude/ACTIVE_TEAM | tr -d '[:space:]')
+    fi
+
+    # Check if already active (idempotency, unless --update)
+    if [[ -n "$source_team" ]] && [[ "$UPDATE_MODE" -eq 0 ]]; then
+        if [[ "$source_team" == "$team_name" ]]; then
             log "Already using $team_name (no changes needed)"
             log "Use --update to pull latest from roster"
             exit "$EXIT_SUCCESS"
@@ -1842,6 +2912,13 @@ perform_swap() {
         preview_refresh "$team_name"
         exit "$EXIT_SUCCESS"
     fi
+
+    # =========================================================================
+    # PHASE: PREPARING - Create journal and validate
+    # =========================================================================
+    create_journal "$source_team" "$team_name" || {
+        exit "$EXIT_SWAP_FAILURE"
+    }
 
     # Detect orphan agents (current agents not in target team)
     detect_orphans "$team_name"
@@ -1863,57 +2940,72 @@ perform_swap() {
         fi
     fi
 
-    # Perform swap with backup
+    # =========================================================================
+    # PHASE: BACKING - Create comprehensive backup
+    # =========================================================================
+    update_journal_phase "$PHASE_BACKING"
+
+    # Create comprehensive backup for rollback (new transaction-safe backup)
+    create_swap_backup || {
+        log_error "Failed to create swap backup"
+        delete_journal
+        exit "$EXIT_BACKUP_FAILURE"
+    }
+
+    # Also create legacy backup for backward compatibility
     backup_current_agents
-    swap_agents "$team_name" "$agent_count"
 
-    # Restore kept agents after swap
-    restore_kept_agents
-    cleanup_stash
+    # =========================================================================
+    # PHASE: STAGING - Prepare all resources in staging directory
+    # =========================================================================
+    update_journal_phase "$PHASE_STAGING"
 
-    update_active_team "$team_name"
+    create_staging || {
+        log_error "Failed to create staging directory"
+        rollback_swap
+        exit "$EXIT_SWAP_FAILURE"
+    }
 
-    # Update session team if active session exists
-    # Check both user-level and project-level for session-manager.sh
-    local session_mgr=""
-    [[ -x "$HOME/.claude/hooks/lib/session-manager.sh" ]] && session_mgr="$HOME/.claude/hooks/lib/session-manager.sh"
-    [[ -x ".claude/hooks/lib/session-manager.sh" ]] && session_mgr=".claude/hooks/lib/session-manager.sh"
-    if [[ -f ".claude/sessions/.current-session" && -n "$session_mgr" ]]; then
-        local current_session
-        current_session=$(cat ".claude/sessions/.current-session" 2>/dev/null)
-        if [[ -n "$current_session" && -f ".claude/sessions/$current_session/SESSION_CONTEXT.md" ]]; then
-            # Warn user about team change
-            log_warning "Active session detected: $current_session"
-            log_warning "Session team will be updated to: $team_name"
+    # Stage agents
+    stage_agents "$team_name" || {
+        log_error "Failed to stage agents"
+        rollback_swap
+        exit "$EXIT_SWAP_FAILURE"
+    }
 
-            local session_file=".claude/sessions/$current_session/SESSION_CONTEXT.md"
+    # Stage workflow
+    stage_workflow "$team_name"
 
-            # Validate SESSION_CONTEXT format before mutation
-            # Check for YAML frontmatter structure (opening --- on line 1)
-            local first_line
-            first_line=$(head -n 1 "$session_file")
-            if [[ "$first_line" != "---" ]]; then
-                log_warning "Cannot update session - SESSION_CONTEXT missing YAML frontmatter"
-                log_warning "ACTIVE_TEAM updated but session state may be inconsistent"
-            else
-                # Check for active_team field exists
-                if ! grep -q "^active_team:" "$session_file" 2>/dev/null; then
-                    log_warning "Cannot update session - active_team field not found"
-                    log_warning "ACTIVE_TEAM updated but session state may be inconsistent"
-                else
-                    # Safe to mutate
-                    if sed -i '' "s/^active_team: .*/active_team: \"$team_name\"/" "$session_file"; then
-                        log "Session team updated to: $team_name"
-                    else
-                        log_warning "Failed to update active_team in SESSION_CONTEXT"
-                    fi
-                fi
-            fi
-        fi
-    fi
+    # Stage ACTIVE_TEAM (prepared but committed last)
+    stage_active_team "$team_name" || {
+        log_error "Failed to stage ACTIVE_TEAM"
+        rollback_swap
+        exit "$EXIT_SWAP_FAILURE"
+    }
 
-    # Update CLAUDE.md to reflect new team's agents
-    update_claude_md "$team_name"
+    # =========================================================================
+    # PHASE: VERIFYING - Verify staging integrity
+    # =========================================================================
+    update_journal_phase "$PHASE_VERIFYING"
+
+    verify_staging "$agent_count" || {
+        log_error "Staging verification failed"
+        rollback_swap
+        exit "$EXIT_SWAP_FAILURE"
+    }
+
+    # =========================================================================
+    # PHASE: COMMITTING - Atomic commit of staged resources
+    # =========================================================================
+    commit_staged_resources "$team_name" || {
+        log_error "Commit failed - attempting rollback"
+        rollback_swap
+        exit "$EXIT_SWAP_FAILURE"
+    }
+
+    # =========================================================================
+    # PART 1 OF COMMIT: Commands, Skills, Hooks (still rollback-able)
+    # =========================================================================
 
     # Detect and handle orphan commands (commands from other teams)
     detect_command_orphans "$team_name"
@@ -1976,8 +3068,95 @@ perform_swap() {
     # Sync team hooks
     swap_hooks "$team_name"
 
+    # =========================================================================
+    # PART 2 OF COMMIT: Manifest and ACTIVE_TEAM (the actual commit)
+    # =========================================================================
     # Write manifest with current state (after commands synced so we capture them)
+    # IMPORTANT: Manifest must be written BEFORE ACTIVE_TEAM
     write_manifest "$team_name"
+
+    # =========================================================================
+    # FINAL COMMIT: Write ACTIVE_TEAM (LAST - this is the commit point)
+    # =========================================================================
+    # ACTIVE_TEAM is the commit indicator - if it contains the new team name,
+    # the swap is considered complete. Writing it LAST ensures all resources
+    # are in place first.
+    if [[ -f "$STAGING_DIR/ACTIVE_TEAM" ]]; then
+        mv "$STAGING_DIR/ACTIVE_TEAM" .claude/ACTIVE_TEAM || {
+            log_error "Failed to commit ACTIVE_TEAM"
+            update_journal_error "Failed to commit ACTIVE_TEAM"
+            rollback_swap
+            exit "$EXIT_SWAP_FAILURE"
+        }
+    else
+        # Fallback if staging was already cleaned up
+        echo -n "$team_name" > .claude/ACTIVE_TEAM || {
+            log_error "Failed to write ACTIVE_TEAM"
+            rollback_swap
+            exit "$EXIT_SWAP_FAILURE"
+        }
+    fi
+
+    # =========================================================================
+    # PHASE: COMPLETED - Transaction is committed
+    # =========================================================================
+    update_journal_phase "$PHASE_COMPLETED"
+
+    # Clean up staging and backup (swap successful)
+    cleanup_staging
+    cleanup_swap_backup
+    delete_journal
+
+    # =========================================================================
+    # POST-COMMIT OPERATIONS (Non-critical, swap is already complete)
+    # =========================================================================
+    # These operations are best-effort. If they fail, the swap is still valid.
+
+    # Restore kept agents after swap
+    restore_kept_agents
+    cleanup_stash
+
+    # Update session team if active session exists (non-critical)
+    # Check both user-level and project-level for session-manager.sh
+    local session_mgr=""
+    [[ -x "$HOME/.claude/hooks/lib/session-manager.sh" ]] && session_mgr="$HOME/.claude/hooks/lib/session-manager.sh"
+    [[ -x ".claude/hooks/lib/session-manager.sh" ]] && session_mgr=".claude/hooks/lib/session-manager.sh"
+    if [[ -f ".claude/sessions/.current-session" && -n "$session_mgr" ]]; then
+        local current_session
+        current_session=$(cat ".claude/sessions/.current-session" 2>/dev/null)
+        if [[ -n "$current_session" && -f ".claude/sessions/$current_session/SESSION_CONTEXT.md" ]]; then
+            # Warn user about team change
+            log_warning "Active session detected: $current_session"
+            log_warning "Session team will be updated to: $team_name"
+
+            local session_file=".claude/sessions/$current_session/SESSION_CONTEXT.md"
+
+            # Validate SESSION_CONTEXT format before mutation
+            # Check for YAML frontmatter structure (opening --- on line 1)
+            local first_line
+            first_line=$(head -n 1 "$session_file")
+            if [[ "$first_line" != "---" ]]; then
+                log_warning "Cannot update session - SESSION_CONTEXT missing YAML frontmatter"
+                log_warning "ACTIVE_TEAM updated but session state may be inconsistent"
+            else
+                # Check for active_team field exists
+                if ! grep -q "^active_team:" "$session_file" 2>/dev/null; then
+                    log_warning "Cannot update session - active_team field not found"
+                    log_warning "ACTIVE_TEAM updated but session state may be inconsistent"
+                else
+                    # Safe to mutate
+                    if sed -i '' "s/^active_team: .*/active_team: \"$team_name\"/" "$session_file"; then
+                        log "Session team updated to: $team_name"
+                    else
+                        log_warning "Failed to update active_team in SESSION_CONTEXT"
+                    fi
+                fi
+            fi
+        fi
+    fi
+
+    # Update CLAUDE.md to reflect new team's agents (non-critical)
+    update_claude_md "$team_name" || log_warning "CLAUDE.md update failed (non-critical)"
 
     # Display team roster (dynamic generation from agent frontmatter)
     generate_roster "$team_name"
@@ -2269,13 +3448,18 @@ perform_reset() {
     echo ""
     log "Reset complete. Skeleton baseline active."
     log ""
-    log "To switch to a team: ~/Code/roster/swap-team.sh <team-name>"
-    log "To list teams:       ~/Code/roster/swap-team.sh --list"
+    log "To switch to a team: $ROSTER_HOME/swap-team.sh <team-name>"
+    log "To list teams:       $ROSTER_HOME/swap-team.sh --list"
 }
 
 # Main entry point
 main() {
     local team_name=""
+
+    # Check environment variable for auto-recover
+    if [[ "${ROSTER_AUTO_RECOVER:-0}" == "1" ]]; then
+        AUTO_RECOVER=1
+    fi
 
     # Parse arguments
     while [[ $# -gt 0 ]]; do
@@ -2319,6 +3503,18 @@ main() {
                 RESET_MODE=1
                 shift
                 ;;
+            --auto-recover)
+                AUTO_RECOVER=1
+                shift
+                ;;
+            --recover)
+                RECOVER_MODE=1
+                shift
+                ;;
+            --verify)
+                VERIFY_MODE=1
+                shift
+                ;;
             -*)
                 log_error "Unknown option: $1"
                 usage
@@ -2337,7 +3533,30 @@ main() {
         esac
     done
 
-    # Handle reset mode first (takes precedence)
+    # Handle --verify mode (takes precedence)
+    if [[ "$VERIFY_MODE" -eq 1 ]]; then
+        verify_state_consistency
+        exit $?
+    fi
+
+    # Handle --recover mode (takes precedence)
+    if [[ "$RECOVER_MODE" -eq 1 ]]; then
+        if [[ ! -f "$JOURNAL_FILE" ]]; then
+            log "No interrupted swap detected. State is clean."
+            exit "$EXIT_SUCCESS"
+        fi
+        # Force interactive recovery
+        if [[ -t 0 ]]; then
+            check_journal_recovery
+        else
+            log_error "Recovery mode requires interactive terminal"
+            log "Use --auto-recover for non-interactive recovery"
+            exit "$EXIT_INVALID_ARGS"
+        fi
+        exit "$EXIT_SUCCESS"
+    fi
+
+    # Handle reset mode (takes precedence)
     if [[ "$RESET_MODE" -eq 1 ]]; then
         perform_reset
         exit "$EXIT_SUCCESS"

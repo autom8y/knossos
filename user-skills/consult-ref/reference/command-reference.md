@@ -89,7 +89,7 @@
 | `/ecosystem` | ecosystem-pack |
 
 All quick switches:
-- Invoke `~/Code/roster/swap-team.sh`
+- Invoke `$ROSTER_HOME/swap-team.sh`
 - Show team roster after switch
 - Ready for workflow commands
 

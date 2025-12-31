@@ -37,7 +37,7 @@ Or if skeleton is in the default location:
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `ROSTER_HOME` | `~/Code/roster` | Path to this repository |
+| `ROSTER_HOME` | `$ROSTER_HOME` | Path to this repository |
 | `SKELETON_HOME` | `~/Code/skeleton_claude` | Path to skeleton repository |
 
 ## Team Pack Structure

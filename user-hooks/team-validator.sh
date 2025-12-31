@@ -75,7 +75,7 @@ if [[ ! "$COMMAND" =~ (^|[[:space:]/])swap-team\.sh[[:space:]] ]]; then
 fi
 
 # Extract target team from command
-# Handles: swap-team.sh teamname, ~/Code/roster/swap-team.sh teamname
+# Handles: swap-team.sh teamname, $ROSTER_HOME/swap-team.sh teamname
 # The regex ensures we're matching an actual invocation, not text in a string
 TARGET_TEAM=$(echo "$COMMAND" | grep -oE '(^|[[:space:]/])swap-team\.sh[[:space:]]+([a-z0-9-]+-pack)' | grep -oE '[a-z0-9-]+-pack')
 

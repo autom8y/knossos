@@ -114,7 +114,7 @@ model: haiku
 ---
 
 ## Behavior
-1. Execute: `~/Code/roster/swap-team.sh {team-name}`
+1. Execute: `$ROSTER_HOME/swap-team.sh {team-name}`
 2. Display team roster
 3. Update SESSION_CONTEXT if active
 ```
@@ -221,7 +221,7 @@ Update the total command count at the top of COMMAND_REGISTRY.md.
 ### Pre-Flight Checks
 ```bash
 # Verify command mappings work
-~/Code/roster/swap-team.sh {team-name}
+$ROSTER_HOME/swap-team.sh {team-name}
 
 # Test /architect routing
 grep -B1 "produces: tdd" .claude/ACTIVE_WORKFLOW.yaml

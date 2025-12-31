@@ -11,8 +11,8 @@ description: "Innovation Lab (R&D) reference with technology scouting, prototypi
 
 | Component | Location | Purpose |
 |-----------|----------|---------|
-| Agents | `~/Code/roster/teams/rnd-pack/agents/` | Agent prompts |
-| Workflow | `~/Code/roster/teams/rnd-pack/workflow.yaml` | Phase configuration |
+| Agents | `$ROSTER_HOME/teams/rnd-pack/agents/` | Agent prompts |
+| Workflow | `$ROSTER_HOME/teams/rnd-pack/workflow.yaml` | Phase configuration |
 | Switch | `/rnd` | Activate this team |
 
 ## Team Roster

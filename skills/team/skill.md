@@ -18,7 +18,7 @@ Swap Claude Code agent team packs for different workflows.
 
 ## Implementation
 
-This skill invokes the swap-team.sh script located at ~/Code/roster/.
+This skill invokes the swap-team.sh script located at $ROSTER_HOME/.
 
 ## Instructions
 
@@ -30,7 +30,7 @@ When the user invokes `/team`, execute the swap-team.sh script with the provided
 
 Always use the Bash tool to execute:
 ```bash
-~/Code/roster/swap-team.sh [args]
+$ROSTER_HOME/swap-team.sh [args]
 ```
 
 Display the script output to the user. The script handles all validation, backup, and swap operations.

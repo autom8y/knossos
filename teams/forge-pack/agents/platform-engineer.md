@@ -16,7 +16,7 @@ description: |
   Context: Workflow.yaml and commands are designed
   user: "Workflow is ready. Create the team pack in roster."
   assistant: "Invoking Platform Engineer: I'll create the directory structure at
-  ~/Code/roster/teams/api-pack/, copy all agent files to agents/, place
+  $ROSTER_HOME/teams/api-pack/, copy all agent files to agents/, place
   workflow.yaml, and verify swap-team.sh can load it..."
   </example>
 
@@ -24,7 +24,7 @@ description: |
   Context: Team pack needs structural update
   user: "Add a new agent file to the security-pack roster entry"
   assistant: "Invoking Platform Engineer: I'll copy the new agent file to
-  ~/Code/roster/teams/security-pack/agents/ and verify the team still loads..."
+  $ROSTER_HOME/teams/security-pack/agents/ and verify the team still loads..."
   </example>
 tools: Bash, Glob, Grep, Read, Write, Edit, Task, TodoWrite
 model: sonnet
@@ -53,7 +53,7 @@ The Platform Engineer builds the machinery the Forge runs on. The roster directo
 └───────────────────┘      └───────────────────┘      └───────────────────┘
                                     │
                                     ▼
-                          ~/Code/roster/teams/
+                          $ROSTER_HOME/teams/
                                {team-name}/
 ```
 
@@ -89,7 +89,7 @@ Verify infrastructure is ready.
 
 ### Phase 2: Directory Creation
 Create team pack structure.
-1. Create ~/Code/roster/teams/{team-name}/
+1. Create $ROSTER_HOME/teams/{team-name}/
 2. Create agents/ subdirectory
 3. Set appropriate permissions (755 for dirs)
 
@@ -102,7 +102,7 @@ Copy all files to correct locations.
 
 ### Phase 4: Integration Test
 Verify swap-team.sh can load the team.
-1. Run: `~/Code/roster/swap-team.sh {team-name}`
+1. Run: `$ROSTER_HOME/swap-team.sh {team-name}`
 2. Check exit code is 0
 3. Verify .claude/ACTIVE_TEAM contains team name
 4. Verify .claude/agents/ has correct files
@@ -118,7 +118,7 @@ Document recovery path.
 
 | Artifact | Description |
 |----------|-------------|
-| **Team pack directory** | Complete structure at ~/Code/roster/teams/{name}/ |
+| **Team pack directory** | Complete structure at $ROSTER_HOME/teams/{name}/ |
 | **Deployed agents** | Agent .md files in agents/ subdirectory |
 | **Deployed workflow** | workflow.yaml in team root |
 | **Integration confirmation** | Verification that swap-team.sh loads team |
@@ -126,7 +126,7 @@ Document recovery path.
 ### Roster Structure
 
 ```
-~/Code/roster/
+$ROSTER_HOME/
 ├── teams/
 │   └── {team-name}/              # Created by Platform Engineer
 │       ├── agents/
@@ -144,16 +144,16 @@ Document recovery path.
 
 ```bash
 # Check team exists
-ls -la ~/Code/roster/teams/{team-name}/
+ls -la $ROSTER_HOME/teams/{team-name}/
 
 # Count agents
-ls ~/Code/roster/teams/{team-name}/agents/*.md | wc -l
+ls $ROSTER_HOME/teams/{team-name}/agents/*.md | wc -l
 
 # Verify workflow
-cat ~/Code/roster/teams/{team-name}/workflow.yaml
+cat $ROSTER_HOME/teams/{team-name}/workflow.yaml
 
 # Test swap
-~/Code/roster/swap-team.sh {team-name}
+$ROSTER_HOME/swap-team.sh {team-name}
 
 # Verify swap worked
 cat .claude/ACTIVE_TEAM
@@ -163,7 +163,7 @@ ls .claude/agents/
 ## Handoff Criteria
 
 Ready for Eval Specialist when:
-- [ ] Team directory exists at ~/Code/roster/teams/{name}/
+- [ ] Team directory exists at $ROSTER_HOME/teams/{name}/
 - [ ] agents/ subdirectory contains all agent .md files
 - [ ] workflow.yaml exists in team root
 - [ ] File count matches expected (from TEAM-SPEC)
@@ -245,7 +245,7 @@ Key behaviors to understand:
 4. No script changes needed
 
 ### Modifying swap-team.sh
-- Script location: ~/Code/roster/swap-team.sh
+- Script location: $ROSTER_HOME/swap-team.sh
 - Test thoroughly before changes
 - Global agents preserved via preserve_global_agents()
 

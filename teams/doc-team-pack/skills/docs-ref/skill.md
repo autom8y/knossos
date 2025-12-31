@@ -34,7 +34,7 @@ No parameters required. This command:
 Execute via Bash tool:
 
 ```bash
-~/Code/roster/swap-team.sh doc-team-pack
+$ROSTER_HOME/swap-team.sh doc-team-pack
 ```
 
 ### 2. Display Team Roster
@@ -269,7 +269,7 @@ If swap fails:
 [Roster] Use '/team --list' to see available packs
 ```
 
-**Resolution**: Verify roster installation at `~/Code/roster/`
+**Resolution**: Verify roster installation at `$ROSTER_HOME/`
 
 ---
 
@@ -310,7 +310,7 @@ The documentation skill provides templates, this team provides specialized agent
 ## Related Documentation
 
 - [COMMAND_REGISTRY.md](../../COMMAND_REGISTRY.md) - All registered commands
-- [swap-team.sh](~/Code/roster/swap-team.sh) - Roster swap implementation
+- [swap-team.sh]($ROSTER_HOME/swap-team.sh) - Roster swap implementation
 
 ---
 

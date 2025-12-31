@@ -184,7 +184,7 @@ allowed-tools: Bash, Read
 Switch to {team-name} and display the roster.
 
 ## Behavior
-1. Execute: `~/Code/roster/swap-team.sh {team-name}`
+1. Execute: `$ROSTER_HOME/swap-team.sh {team-name}`
 2. Display agent roster table
 3. Show workflow phases
 4. Update SESSION_CONTEXT if active session

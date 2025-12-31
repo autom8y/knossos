@@ -25,7 +25,7 @@ Test the agent: $ARGUMENTS
 
 Find agent file at:
 - `.claude/agents/{agent-name}.md` (if in active team)
-- `~/Code/roster/teams/{team-name}/agents/{agent-name}.md` (if team specified)
+- `$ROSTER_HOME/teams/{team-name}/agents/{agent-name}.md` (if team specified)
 - `~/.claude/agents/{agent-name}.md` (if global agent)
 
 If not found, report error with available agents.

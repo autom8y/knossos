@@ -171,7 +171,7 @@ From analysis of `/roster/swap-team.sh` (lines 1587-1661):
 **Reproduction**:
 ```bash
 cd /any/satellite/project
-~/Code/roster/swap-team.sh 10x-dev-pack --force
+$ROSTER_HOME/swap-team.sh 10x-dev-pack --force
 # Result: [Roster] Error: Unknown option: --force
 ```
 

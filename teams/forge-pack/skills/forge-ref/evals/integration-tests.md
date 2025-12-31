@@ -19,7 +19,7 @@
 ORIGINAL_TEAM=$(cat .claude/ACTIVE_TEAM 2>/dev/null || echo "none")
 
 # Attempt swap
-~/Code/roster/swap-team.sh {team-name}
+$ROSTER_HOME/swap-team.sh {team-name}
 EXIT_CODE=$?
 
 # Verify
@@ -30,7 +30,7 @@ cat .claude/ACTIVE_WORKFLOW.yaml
 
 # Restore
 if [ "$ORIGINAL_TEAM" != "none" ]; then
-  ~/Code/roster/swap-team.sh "$ORIGINAL_TEAM"
+  $ROSTER_HOME/swap-team.sh "$ORIGINAL_TEAM"
 fi
 ```
 
@@ -226,6 +226,6 @@ echo "**Date**: $(date -Iseconds)" >> $RESULTS
 
 # Swap test
 echo "## Swap Test" >> $RESULTS
-~/Code/roster/swap-team.sh "$TEAM" 2>&1 | tee -a $RESULTS
+$ROSTER_HOME/swap-team.sh "$TEAM" 2>&1 | tee -a $RESULTS
 # ... continue with other tests
 ```

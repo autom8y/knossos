@@ -160,7 +160,7 @@ Agents that persist across team swaps (Consultant).
 Each terminal gets its own session context.
 
 ### Roster
-The external repository containing team packs (`~/Code/roster/`).
+The external repository containing team packs (`$ROSTER_HOME/`).
 
 ### swap-team.sh
 Script that swaps agent files when changing teams.

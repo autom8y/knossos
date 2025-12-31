@@ -381,10 +381,10 @@ This change is backward compatible:
 Users can update their scripts/aliases at their convenience:
 ```bash
 # Before
-alias swap='~/Code/roster/swap-team.sh --refresh'
+alias swap='$ROSTER_HOME/swap-team.sh --refresh'
 
 # After
-alias swap='~/Code/roster/swap-team.sh --update'
+alias swap='$ROSTER_HOME/swap-team.sh --update'
 ```
 
 ---

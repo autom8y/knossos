@@ -23,8 +23,8 @@ Validate the team pack: $ARGUMENTS
 ### 2. Locate Team
 
 Check team exists at:
-- `~/Code/roster/teams/{team-name}/` or
-- `~/Code/roster/teams/{team-name}-pack/`
+- `$ROSTER_HOME/teams/{team-name}/` or
+- `$ROSTER_HOME/teams/{team-name}-pack/`
 
 If not found, report error and suggest checking team name.
 
@@ -33,7 +33,7 @@ If not found, report error and suggest checking team name.
 Use the Task tool to invoke the eval-specialist agent:
 
 ```
-"Validate the team pack at ~/Code/roster/teams/{team-name}/.
+"Validate the team pack at $ROSTER_HOME/teams/{team-name}/.
 
 Run the full validation suite:
 1. Structure Validation - Check all files exist

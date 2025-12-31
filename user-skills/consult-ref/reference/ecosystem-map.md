@@ -314,7 +314,7 @@ The Forge is a 6-agent meta-team for creating and maintaining other teams:
 
 | Component | Location |
 |-----------|----------|
-| Team packs | `~/Code/roster/teams/{pack}/` |
+| Team packs | `$ROSTER_HOME/teams/{pack}/` |
 | Active agents | `.claude/agents/` |
 | Global agents | `~/.claude/agents/` |
 | Commands | `.claude/commands/` |

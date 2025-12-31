@@ -15,7 +15,7 @@ This skill codifies the patterns discovered from building 5 teams (10x-dev-pack,
 
 | Component | Location | Key Decisions |
 |-----------|----------|---------------|
-| Team Pack | `~/Code/roster/teams/{name}-pack/` | Name, agent count, domain |
+| Team Pack | `$ROSTER_HOME/teams/{name}-pack/` | Name, agent count, domain |
 | Workflow | `workflow.yaml` | Phases, complexity levels, entry point |
 | Agents | `agents/*.md` | Role, model, color, tools |
 | Command | `.claude/commands/{name}.md` | Quick-switch integration |
@@ -152,7 +152,7 @@ To create a new team:
 
 ```bash
 # 1. Create directory structure
-mkdir -p ~/Code/roster/teams/{name}-pack/agents
+mkdir -p $ROSTER_HOME/teams/{name}-pack/agents
 
 # 2. Copy and fill templates
 # - workflow.yaml from templates/workflow.yaml.template
@@ -166,7 +166,7 @@ mkdir -p ~/Code/roster/teams/{name}-pack/agents
 # - Add to COMMAND_REGISTRY.md
 
 # 5. Validate
-~/Code/roster/swap-team.sh {name}-pack
+$ROSTER_HOME/swap-team.sh {name}-pack
 ```
 
 See [validation/validation.md](validation/validation.md) for full pre-flight checks.

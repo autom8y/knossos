@@ -34,7 +34,7 @@ No parameters required. This command:
 Execute via Bash tool:
 
 ```bash
-~/Code/roster/swap-team.sh sre-pack
+$ROSTER_HOME/swap-team.sh sre-pack
 ```
 
 ### 2. Display Team Roster

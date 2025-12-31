@@ -307,20 +307,20 @@ Currently 0 haiku. Potential candidates for simple tasks:
 
 ```
 Agents:
-├── ~/Code/roster/teams/*/agents/*.md      (team agents)
-├── ~/Code/roster/user-agents/*.md          (user-level agents)
+├── $ROSTER_HOME/teams/*/agents/*.md      (team agents)
+├── $ROSTER_HOME/user-agents/*.md          (user-level agents)
 └── ~/.claude/agents/*.md                   (global installed)
 
 Commands:
-├── ~/Code/roster/user-commands/*/*.md      (user commands)
-└── ~/Code/roster/teams/*/commands/*.md     (team commands)
+├── $ROSTER_HOME/user-commands/*/*.md      (user commands)
+└── $ROSTER_HOME/teams/*/commands/*.md     (team commands)
 
 Hooks:
-└── ~/Code/roster/.claude/hooks/*.sh        (no model logic)
+└── $ROSTER_HOME/.claude/hooks/*.sh        (no model logic)
 
 Skills:
-├── ~/Code/roster/.claude/skills/*/         (active skills)
-└── ~/Code/roster/teams/*/skills/*/         (team skills)
+├── $ROSTER_HOME/.claude/skills/*/         (active skills)
+└── $ROSTER_HOME/teams/*/skills/*/         (team skills)
 ```
 
 ---

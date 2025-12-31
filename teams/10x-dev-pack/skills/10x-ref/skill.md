@@ -34,7 +34,7 @@ No parameters required. This command:
 Execute via Bash tool:
 
 ```bash
-~/Code/roster/swap-team.sh 10x-dev-pack
+$ROSTER_HOME/swap-team.sh 10x-dev-pack
 ```
 
 ### 2. Display Team Roster
@@ -268,7 +268,7 @@ If swap fails (unlikely - this is a core team):
 [Roster] Use '/team --list' to see available packs
 ```
 
-**Resolution**: Verify roster installation at `~/Code/roster/`
+**Resolution**: Verify roster installation at `$ROSTER_HOME/`
 
 ---
 
@@ -287,7 +287,7 @@ If swap fails (unlikely - this is a core team):
 
 - [10x-workflow skill](../10x-workflow/SKILL.md) - Agent coordination patterns
 - [COMMAND_REGISTRY.md](../../COMMAND_REGISTRY.md) - All registered commands
-- [swap-team.sh](~/Code/roster/swap-team.sh) - Roster swap implementation
+- [swap-team.sh]($ROSTER_HOME/swap-team.sh) - Roster swap implementation
 
 ---
 
