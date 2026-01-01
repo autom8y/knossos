@@ -91,5 +91,5 @@ Need to switch agents?
 - [behavior.md](behavior.md) - Full step-by-step sequence
 - [examples.md](examples.md) - Usage scenarios
 - [handoff-notes.md](handoff-notes.md) - Transition-specific templates
-- [session-context-schema](../session-common/session-context-schema.md) - Field definitions
-- [session-phases](../session-common/session-phases.md) - Phase transitions
+- [session-context-schema](../../session-common/session-context-schema.md) - Field definitions
+- [session-phases](../../session-common/session-phases.md) - Phase transitions

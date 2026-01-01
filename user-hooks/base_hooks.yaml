@@ -4,6 +4,7 @@
 #
 # Schema version: 1.0
 # See TDD-hook-parity-scope2.md for schema documentation
+# Priority: Lower values execute first (range: 1-100)
 
 schema_version: "1.0"
 
@@ -15,12 +16,14 @@ hooks:
     matcher: "startup|resume"
     path: session-context.sh
     timeout: 10
+    priority: 10
     description: "Injects session context on startup and resume"
 
   - event: SessionStart
     matcher: "startup|resume"
     path: coach-mode.sh
     timeout: 5
+    priority: 20
     description: "Activates coach mode guidance"
 
   # ===========================================================================
@@ -29,6 +32,7 @@ hooks:
   - event: Stop
     path: auto-park.sh
     timeout: 5
+    priority: 10
     description: "Auto-parks session on stop"
 
   # ===========================================================================
@@ -38,18 +42,21 @@ hooks:
     matcher: "Write"
     path: artifact-tracker.sh
     timeout: 5
+    priority: 10
     description: "Tracks written artifacts"
 
   - event: PostToolUse
     matcher: "Write"
     path: session-audit.sh
     timeout: 5
+    priority: 20
     description: "Audits session file writes"
 
   - event: PostToolUse
     matcher: "Bash"
     path: commit-tracker.sh
     timeout: 5
+    priority: 10
     description: "Tracks git commits"
 
   # ===========================================================================
@@ -59,18 +66,21 @@ hooks:
     matcher: "Bash"
     path: command-validator.sh
     timeout: 5
+    priority: 10
     description: "Validates bash commands"
 
   - event: PreToolUse
     matcher: "Edit|Write"
     path: session-write-guard.sh
     timeout: 3
+    priority: 5
     description: "Guards session context writes"
 
   - event: PreToolUse
     matcher: "Edit|Write"
     path: delegation-check.sh
     timeout: 3
+    priority: 15
     description: "Checks for delegation requirements"
 
   # ===========================================================================
@@ -80,4 +90,5 @@ hooks:
     matcher: "^/"
     path: start-preflight.sh
     timeout: 5
+    priority: 10
     description: "Preflight check for slash commands"

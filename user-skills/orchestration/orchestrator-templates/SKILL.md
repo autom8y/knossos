@@ -56,167 +56,102 @@ You're designing a new team structure and want to understand how orchestrator te
 
 ## Core Concept: Durable Abstractions
 
-### The Problem
+Hand-written orchestrators mix **unchanging protocol** with **team-specific details**. When protocol evolves, you update 10+ files manually with high risk of inconsistency.
 
-Hand-written orchestrators encode both **unchanging protocol** and **team-specific details**:
-
-```markdown
-# Orchestrator
-
-## Consultation Protocol
-[50 lines of canonical protocol - IDENTICAL across all orchestrators]
-
-## Routing Decisions
-[20 lines of team-specific routing - DIFFERENT per team]
-```
-
-When consultation protocol evolves, you must update 10+ files manually. Risk of inconsistency is high.
-
-### The Solution
-
-Separate **canonical protocol** (template) from **team specifics** (YAML data):
+**The solution**: Separate canonical protocol (template) from team specifics (YAML):
 
 ```yaml
-# orchestrator.yaml
+# orchestrator.yaml - team owns this
 team:
   name: rnd-pack
 routing:
   integration-researcher: "Needs research on technologies"
   technology-scout: "Evaluates emerging tools"
   prototype-engineer: "Builds working demo"
-  moonshot-architect: "Designs long-term architecture"
 ```
 
-The template contains the protocol once. YAML contains the variation. Generator merges them.
+Template contains protocol once. YAML contains variation. Generator merges them.
 
-### Why This Matters
-
-1. **One place to update**: Change consultation protocol once in template
-2. **Consistent contracts**: All orchestrators have identical protocol section
-3. **No copy-paste**: Reduces maintenance burden by 80%
-4. **Team specialization**: Each team focuses on their routing logic, not protocol details
-5. **Evolution-safe**: Adding new section works for all teams simultaneously
+**Benefits**:
+- Update protocol once, affects all teams
+- Consistent contracts across orchestrators
+- 80% reduction in maintenance burden
+- Teams focus on routing logic, not protocol details
 
 ## Workflow
 
-### Phase 1: Design Your Team's Configuration
+### 1. Design Configuration
 
-Create `/skeleton_claude/.claude/teams/my-team/orchestrator.yaml`:
+Create `teams/my-team/orchestrator.yaml`:
 
 ```yaml
 team:
   name: my-team
-  domain: "Describe what your team does"
+  domain: "What your team does"
   color: purple
 
 frontmatter:
-  role: "One-line role summary"
-  description: "Multi-line description of consultation role"
+  role: "One-line role"
+  description: "Multi-line description"
 
 routing:
-  specialist-one: "When to route to specialist one"
-  specialist-two: "When to route to specialist two"
-  specialist-three: "When to route to specialist three"
-
-workflow_position:
-  upstream: "Which team comes before yours"
-  downstream: "Which team comes after yours"
+  specialist-one: "When to route here"
+  specialist-two: "When to route here"
 
 handoff_criteria:
   specialist-one:
     - "Criterion 1"
-    - "Criterion 2"
-  specialist-two:
-    - "Criterion 1"
+    - "Artifacts verified via Read tool"
 
 skills:
   - "@skill-one brief description"
-  - "@skill-two brief description"
 ```
 
-### Phase 2: Run the Generator
+See [schema-reference.md](schema-reference.md) for complete field reference.
+
+### 2. Generate & Validate
 
 ```bash
-# Generate orchestrator.md from your YAML config
+# Generate
 /roster/templates/orchestrator-generate.sh my-team
 
-# Validate the generated file
+# Validate
 /roster/templates/validate-orchestrator.sh \
-  /skeleton_claude/.claude/teams/my-team/agents/orchestrator.md
+  teams/my-team/agents/orchestrator.md
 ```
 
-### Phase 3: Commit Both Files
+### 3. Commit & Activate
 
 ```bash
-git add teams/my-team/orchestrator.yaml
-git add teams/my-team/agents/orchestrator.md
-git commit -m "feat: add my-team orchestrator configuration and generated agent"
-```
-
-### Phase 4: Swap Team to Verify
-
-```bash
-# Activate your team
+git add teams/my-team/orchestrator.yaml teams/my-team/agents/orchestrator.md
+git commit -m "feat: add my-team orchestrator"
 ./swap-team.sh my-team
-
-# Verify orchestrator loads correctly
-echo "Testing orchestrator role..."
-grep "^role:" .claude/agents/orchestrator.md
 ```
+
+See [create-new-team-orchestrator.md](create-new-team-orchestrator.md) for detailed walkthrough.
 
 ## File Structure
 
-### Input Files
-
-**orchestrator.yaml** (your team's configuration)
-```
-Location: teams/{team-name}/orchestrator.yaml
-Purpose: Team-specific configuration (durable spec)
-Tracked: Yes (check into git)
-```
-
-**orchestrator-base.md.tpl** (canonical template)
-```
-Location: /roster/templates/orchestrator-base.md.tpl
-Purpose: Shared protocol and structure
-Tracked: Yes (part of roster)
-```
-
-**workflow.yaml** (phase and specialist definitions)
-```
-Location: teams/{team-name}/workflow.yaml
-Purpose: Phase sequence and specialist details (read-only reference)
-Tracked: Yes
-```
-
-### Output Files
-
-**orchestrator.md** (generated agent)
-```
-Location: teams/{team-name}/agents/orchestrator.md
-Purpose: Production-ready orchestrator agent
-Tracked: Yes (check into git for consistency)
-Generated: By orchestrator-generate.sh
-```
+| File | Location | Purpose |
+|------|----------|---------|
+| **orchestrator.yaml** | `teams/{team}/orchestrator.yaml` | Team config (durable) |
+| **orchestrator-base.md.tpl** | `/roster/templates/` | Canonical template |
+| **workflow.yaml** | `teams/{team}/workflow.yaml` | Phase definitions (reference) |
+| **orchestrator.md** | `teams/{team}/agents/orchestrator.md` | Generated agent (production) |
 
 ## Generator Behavior
 
-### What the Generator Does
+**Does**:
+- Reads orchestrator.yaml, workflow.yaml, template
+- Substitutes placeholders with team data
+- Validates output (no unreplaced placeholders)
+- Writes orchestrator.md
 
-1. **Reads** orchestrator.yaml (your configuration)
-2. **Reads** workflow.yaml (specialist and phase definitions)
-3. **Reads** orchestrator-base.md.tpl (canonical template)
-4. **Substitutes** placeholders in template with your data
-5. **Validates** output (no unreplaced placeholders)
-6. **Writes** orchestrator.md
-
-### What the Generator Doesn't Do
-
+**Doesn't**:
 - Edit YAML files
-- Remove old orchestrator.md versions
-- Automatically commit to git
+- Auto-commit to git
 - Update AGENT_MANIFEST
-- Run validation (that's a separate step)
+- Run validation (separate step)
 
 ## Validation Rules
 
@@ -240,275 +175,64 @@ After generation, run `validate-orchestrator.sh` to verify:
 
 ## Common Patterns
 
-### Pattern 1: Linear Pipeline (4-5 Specialists)
+**Linear Pipeline** (4-5 specialists): analyst → designer → implementer → reviewer
+- Example teams: rnd-pack, security-pack, doc-team-pack
 
-Most teams follow a linear sequence:
+**Hub Coordination** (5+ specialists): analyzer coordinates multiple parallel paths
+- Example teams: ecosystem-pack
 
-```yaml
-routing:
-  analyst: "Diagnoses root cause"
-  designer: "Creates solution plan"
-  implementer: "Executes implementation"
-  reviewer: "Validates completed work"
-```
+**Domain-Specific Complexity**: Generator pulls complexity enum from workflow.yaml
+- Security: PATCH | FEATURE | SYSTEM
+- Documentation: PAGE | SECTION | SITE
 
-**Example teams**: rnd-pack, security-pack, doc-team-pack
-
-### Pattern 2: Hub Coordination (5+ Specialists)
-
-Some teams have a hub that coordinates multiple paths:
-
-```yaml
-routing:
-  analyzer: "Identifies gaps and inconsistencies"
-  architect: "Designs solution"
-  engineer: "Implements across ecosystem"
-  reviewer: "Validates solution quality"
-  tester: "Tests compatibility"
-```
-
-**Example teams**: ecosystem-pack
-
-### Pattern 3: Domain-Specific Complexity
-
-Security teams use different complexity enums than documentation teams:
-
-```yaml
-# In orchestrator.yaml, complexity comes from workflow.yaml
-# workflow.yaml defines PATCH | FEATURE | SYSTEM for security
-# workflow.yaml defines PAGE | SECTION | SITE for documentation
-```
-
-Generator automatically pulls correct complexity values from your workflow.yaml.
+See [architecture-overview.md](architecture-overview.md) for pattern details.
 
 ## Integration Points
 
-### swap-team.sh (Team Activation)
+**swap-team.sh**: Reads frontmatter, extracts name/role/description, symlinks orchestrator.md
 
-When you run `swap-team.sh my-team`, the script:
-1. Reads frontmatter from orchestrator.md
-2. Extracts name, role, description, model
-3. Symlinks orchestrator.md into active agent position
+**workflow.yaml**: Generator validates specialists in routing exist in workflow.yaml phases
 
-**Requirement**: Generated frontmatter must parse cleanly via grep/sed. Validation ensures this.
+**CEM Sync**: Generated orchestrator.md treated as standard agent file (no special handling)
 
-### workflow.yaml (Specialist Definitions)
+**AGENT_MANIFEST**: Automatically tracks orchestrator.md (no manual edits needed)
 
-The generator validates that each specialist in your routing table exists in workflow.yaml:
+See [architecture-overview.md](architecture-overview.md) for integration details.
 
-```yaml
-# orchestrator.yaml
-routing:
-  integration-researcher: "..."  # Must exist in workflow.yaml phases
-```
+## Troubleshooting Quick Reference
 
-If specialist doesn't exist, generator exits with error.
+**Specialist not found**: Update orchestrator.yaml routing to match workflow.yaml phase names exactly
 
-### CEM Sync (File Distribution)
+**Unreplaced placeholders**: Verify orchestrator.yaml is valid YAML with all required fields
 
-Generated orchestrator.md is treated like any other agent file:
-- Standard Markdown format
-- Valid YAML frontmatter
-- Passes all CEM validation
-- No special handling required
+**Frontmatter parsing fails**: Run validation, check frontmatter format matches schema
 
-**Optional**: CEM can track `generated: true` in AGENT_MANIFEST for auditing (Phase 5).
+**Large diff after template update**: Normal if canonical sections changed, regenerate all teams
 
-### AGENT_MANIFEST (Agent Registry)
+**Team-specific content lost**: Use `extension_points` in YAML for custom content
 
-The AGENT_MANIFEST automatically tracks orchestrator.md:
-- Source: "team"
-- Origin: Your team name
-- Model: opus
+See [troubleshooting.md](troubleshooting.md) for 25+ detailed scenarios with solutions.
 
-**Note**: No manual edits needed. Standard agent discovery handles it.
+## Future Enhancements
 
-## Troubleshooting
+**Template versioning**: Enable v1 → v2 migrations with schema version field
 
-### Issue: Generator fails with "Specialist not found"
+**CI integration**: Validate YAML against schema, verify generated files match
 
-**Cause**: orchestrator.yaml references specialist not in workflow.yaml
-
-**Solution**:
-1. Open your workflow.yaml
-2. Check phases[] for correct agent name
-3. Update orchestrator.yaml routing to match
-4. Re-run generator
-
-**Example**:
-```yaml
-# WRONG: workflow.yaml has "technology-scout"
-routing:
-  tech-scout: "..."
-
-# RIGHT:
-routing:
-  technology-scout: "..."
-```
-
-### Issue: Generated file has unreplaced placeholders
-
-**Cause**: Generator script encountered error during substitution
-
-**Solution**:
-1. Check error output from generator
-2. Verify orchestrator.yaml is valid YAML
-3. Verify all required fields present
-4. Try regenerating with verbose flag (if available)
-
-**Prevention**: Run validation immediately after generation.
-
-### Issue: Validation fails with "No placeholders replaced"
-
-**Cause**: Template file not found or not readable
-
-**Solution**:
-1. Verify template exists: `/roster/templates/orchestrator-base.md.tpl`
-2. Check file permissions (should be readable)
-3. Verify generator has correct path to template
-4. Try manual generation test
-
-### Issue: Frontmatter parsing fails in swap-team.sh
-
-**Cause**: Generated frontmatter doesn't match swap-team.sh expectations
-
-**Solution**:
-1. Run validation: `validate-orchestrator.sh orchestrator.md`
-2. Check frontmatter section manually:
-   ```bash
-   head -10 orchestrator.md
-   ```
-3. Ensure lines match format:
-   ```
-   ---
-   name: orchestrator
-   role: "..."
-   description: "..."
-   tools: Read, Skill
-   model: opus
-   color: purple
-   ---
-   ```
-
-### Issue: Diff shows 30-40% changes after update
-
-**Cause**: Template evolved; all teams need regeneration
-
-**Is this normal?** Yes, if you updated:
-- Canonical sections (Consultation Protocol)
-- Required section structure
-- Placeholder content
-
-**Solution**:
-1. Review diff to understand changes
-2. Regenerate all teams: `orchestrator-generate.sh --all`
-3. Spot-check 2-3 teams
-4. Commit all changes together
-
-**Prevention**: Document template changes in commit message.
-
-### Issue: My team-specific examples disappeared
-
-**Cause**: Examples live in template, not YAML config
-
-**Solution**: Use `extension_points` in orchestrator.yaml to add team-specific content:
-
-```yaml
-extension_points:
-  examples: |
-    ### Team-Specific Example
-    [Your custom example here]
-```
-
-### Issue: How do I customize anti-patterns for my team?
-
-**Solution**: Add to orchestrator.yaml:
-
-```yaml
-antipatterns:
-  - "Team-specific anti-pattern 1"
-  - "Team-specific anti-pattern 2"
-```
-
-These are appended to canonical anti-patterns.
-
-### Issue: Can I rollback to hand-written orchestrator?
-
-**Solution**: Yes, but not recommended:
-
-1. Delete orchestrator.yaml
-2. Keep orchestrator.md (or restore from git history)
-3. Update AGENT_MANIFEST source from "generated" to "manual"
-4. Test with swap-team.sh
-
-**Better approach**: Fix the YAML config and regenerate instead.
-
-## Evolution Path (Phase 5 and Beyond)
-
-### Template Versioning (Future)
-
-When orchestrator pattern evolves, we may add versioning:
-
-```yaml
-# orchestrator.yaml
-template_version: 1  # Enables migrations to v2, v3, etc.
-```
-
-### Migration Strategy (Phase 5)
-
-When migration needed:
-```bash
-./migrate-orchestrator.yaml v1 v2 teams/my-team
-./orchestrator-generate.sh my-team
-```
-
-### CI Integration (Phase 5)
-
-Build pipeline will:
-1. Validate all orchestrator.yaml files against schema
-2. Regenerate all orchestrator.md files
-3. Verify no changes (developer didn't commit modified .md directly)
-4. Fail build if inconsistencies detected
+See [architecture-overview.md](architecture-overview.md) for roadmap details.
 
 ## Related Skills
 
+- `orchestration` - Phase coordination and handoff protocols
+- `documentation` - Templates for PRDs, TDDs, ADRs
 - `standards` - Naming conventions and code style
-- `agent-prompt-engineering` - Writing effective agent prompts (available with forge-pack)
-- Team-specific skills - Each team defines its own documentation templates and workflow protocols
 
 ## Quick Reference
 
-| Task | Command |
-|------|---------|
-| Create new team | `cp -r .claude/teams/doc-team-pack .claude/teams/my-team && edit orchestrator.yaml` |
-| Generate orchestrator.md | `/roster/templates/orchestrator-generate.sh my-team` |
-| Validate output | `/roster/templates/validate-orchestrator.sh .claude/teams/my-team/agents/orchestrator.md` |
-| Update template | Edit `/roster/templates/orchestrator-base.md.tpl` then regenerate all teams |
-| View current team | `cat .claude/ACTIVE_TEAM` |
-| Switch teams | `./swap-team.sh my-team` |
-
-## FAQ
-
-**Q: Can I have a team without an orchestrator?**
-A: Orchestrators are required for multi-phase teams. Single-phase teams don't need one.
-
-**Q: What happens if I edit orchestrator.md directly instead of updating YAML?**
-A: Changes will be lost on next regeneration. Always edit orchestrator.yaml instead.
-
-**Q: Can I customize specific sections while keeping others generated?**
-A: Not with this system (by design). If you need customization, use extension_points in YAML.
-
-**Q: Is the generated orchestrator.md checked into git?**
-A: Yes. Both orchestrator.yaml AND orchestrator.md should be committed together.
-
-**Q: What if I need to add a new specialist halfway through?**
-A: Update orchestrator.yaml routing table, re-run generator, validate, and commit.
-
-**Q: How often should we update the template?**
-A: Whenever you discover a pattern all orchestrators should follow. Typically once per quarter.
+See [QUICK-REFERENCE.md](QUICK-REFERENCE.md) for commands and FAQ.
 
 ---
 
 **Last Updated**: 2025-12-29
-**Status**: Production (Phase 4 complete)
-**Maintenance**: Coordinate template changes through orchestrator-templates skill
+**Status**: Production
+

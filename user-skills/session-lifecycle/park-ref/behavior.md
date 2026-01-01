@@ -6,12 +6,11 @@
 
 ### 1. Pre-flight Validation
 
-- **Check for active session**: Verify session exists (uses `get_session_dir()` from session-utils.sh)
-  - If missing → Error: "No active session to park. Use `/start` to begin a session"
-- **Check if already parked**: Verify `parked_at` field not already set
-  - If set → Error: "Session already parked at {timestamp}. Use `/resume` to continue"
+Apply [Session Resolution Pattern](../shared-sections/session-resolution.md):
+- Requires: Active session (not parked)
+- Verb: "park"
 
-See [session-validation](../session-common/session-validation.md) for validation patterns.
+See [session-validation](../../session-common/session-validation.md) for validation patterns.
 
 ### 2. Capture Current Work State
 
@@ -32,30 +31,11 @@ See [parking-summary.md](parking-summary.md) for template.
 
 ### 4. Invoke state-mate for Park Mutation
 
-Use Task tool to invoke state-mate agent:
+Apply [state-mate Invocation Pattern](../shared-sections/state-mate-invocation.md):
+- Operation: `park_session reason='{user_reason}'`
+- Post-action: Display parking summary
 
-```
-Task(state-mate, "park_session reason='{user_reason}'
-
-Session Context:
-- Session ID: {session_id}
-- Session Path: .claude/sessions/{session_id}/SESSION_CONTEXT.md")
-```
-
-**Expected Response** (JSON):
-```json
-{
-  "success": true,
-  "operation": "park_session",
-  "message": "Session parked successfully",
-  "state_before": { "session_state": "ACTIVE" },
-  "state_after": { "session_state": "PARKED", "parked_at": "..." }
-}
-```
-
-**Error Handling**:
-- If state-mate returns `success: false`, surface the error message to user
-- If state-mate is unavailable, surface error: "State management unavailable. Session not parked."
+See pattern documentation for response handling and error types.
 
 ### 5. Confirm Result
 

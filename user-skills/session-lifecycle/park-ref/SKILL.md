@@ -79,5 +79,5 @@ Need to stop working?
 - [behavior.md](behavior.md) - Full step-by-step sequence
 - [examples.md](examples.md) - Usage scenarios
 - [parking-summary.md](parking-summary.md) - Summary template
-- [session-context-schema](../session-common/session-context-schema.md) - Field definitions
-- [session-validation](../session-common/session-validation.md) - Pre-flight patterns
+- [session-context-schema](../../session-common/session-context-schema.md) - Field definitions
+- [session-validation](../../session-common/session-validation.md) - Pre-flight patterns

@@ -6,13 +6,12 @@
 
 ### 1. Pre-flight Validation
 
-- **Check for active session**: Verify session exists
-  - If missing → Error: "No active session to wrap"
-- **Check not parked**: Verify `parked_at` not set
-  - If parked → Warning: "Session is parked. Resume before wrapping? [y/n]"
-  - If yes → Auto-invoke `/resume`, then continue wrap
+Apply [Session Resolution Pattern](../shared-sections/session-resolution.md):
+- Requires: Active session (not parked)
+- Verb: "wrap"
+- Auto-resume offer: Yes (offer to resume if parked)
 
-See [session-validation](../session-common/session-validation.md) for patterns.
+See [session-validation](../../session-common/session-validation.md) for patterns.
 
 ### 2. Run Quality Gates (unless --skip-checks)
 
@@ -35,36 +34,20 @@ If `last_agent` is not `qa-adversary`:
 
 ### 4. Invoke state-mate for Wrap Mutation
 
-Use Task tool to invoke state-mate agent:
-
-```
-Task(state-mate, "wrap_session
-
-Session Context:
-- Session ID: {session_id}
-- Session Path: .claude/sessions/{session_id}/SESSION_CONTEXT.md")
-```
-
-**Expected Response** (JSON):
-```json
-{
-  "success": true,
-  "operation": "wrap_session",
-  "message": "Session wrapped successfully",
-  "state_before": { "session_state": "ACTIVE" },
-  "state_after": { "session_state": "ARCHIVED", "completed_at": "..." }
-}
-```
+Apply [state-mate Invocation Pattern](../shared-sections/state-mate-invocation.md):
+- Operation: `wrap_session`
+- Post-action: Archive session directory, generate summary
 
 **Prerequisites Enforced by state-mate**:
 - Session must be ACTIVE (not PARKED)
 - If PARKED, state-mate returns LIFECYCLE_VIOLATION with hint to resume first
 - `--override=reason` can bypass prerequisites if explicitly requested
 
-**Error Handling**:
+**Additional Error Handling**:
 - If quality gates fail (checked by skill BEFORE invoking state-mate), offer options
-- If state-mate returns LIFECYCLE_VIOLATION, show hint from response
 - If PARKED, offer to auto-invoke `/resume` then retry wrap
+
+See pattern documentation for response handling and error types.
 
 ### 5. Generate Session Summary
 

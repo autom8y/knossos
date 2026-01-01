@@ -6,12 +6,15 @@
 
 ### 1. Pre-flight Validation
 
-- **Check for existing session**: Verify no active session for current project (uses `get_session_id()` from session-utils.sh)
-  - If exists → Error: "Session already active. Use `/resume` or `/wrap` first"
-- **Validate team pack** (if specified): Check team exists in roster
-  - If invalid → Error: "Team '{name}' not found. Use `/roster` to list available teams"
+Apply [Session Resolution Pattern](../shared-sections/session-resolution.md) (inverse):
+- Requires: NO existing session
+- Error if session exists: "Session already active. Use `/resume` or `/wrap` first"
 
-See [session-validation](../session-common/session-validation.md) for validation patterns.
+Apply [Workflow Resolution Pattern](../shared-sections/workflow-resolution.md):
+- Target team: User-specified or current ACTIVE_TEAM
+- Validate team exists in roster
+
+See [session-validation](../../session-common/session-validation.md) for validation patterns.
 
 ### 2. Gather Session Parameters
 
@@ -67,7 +70,7 @@ None yet.
 
 CRITICAL: The file MUST start with `---` on line 1. Without proper YAML frontmatter, session tracking will fail.
 
-See [session-context-schema](../session-common/session-context-schema.md) for field definitions.
+See [session-context-schema](../../session-common/session-context-schema.md) for field definitions.
 
 ### 5. Invoke Requirements Analyst
 

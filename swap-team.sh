@@ -2517,7 +2517,7 @@ swap_hooks() {
     else
         log_debug "Installing base hooks from $base_hooks_dir"
 
-        # Copy root-level hooks
+        # Copy root-level hooks (if any exist)
         for hook_file in "$base_hooks_dir"/*.sh; do
             [[ -f "$hook_file" ]] || continue
             local hook_name
@@ -2531,8 +2531,36 @@ swap_hooks() {
             log_debug "Installed base hook: $hook_name"
         done
 
+        # Copy categorical subdirectories (context-injection, session-guards, tracking, validation)
+        for category_dir in "$base_hooks_dir"/*/; do
+            [[ -d "$category_dir" ]] || continue
+            local category_name
+            category_name=$(basename "$category_dir")
+
+            # Skip lib directory (handled separately below)
+            [[ "$category_name" == "lib" ]] && continue
+
+            # Create category directory in destination
+            mkdir -p ".claude/hooks/$category_name"
+
+            # Copy all .sh files from this category
+            for hook_file in "$category_dir"/*.sh; do
+                [[ -f "$hook_file" ]] || continue
+                local hook_name
+                hook_name=$(basename "$hook_file")
+
+                # Skip hidden files
+                [[ "$hook_name" == .* ]] && continue
+
+                cp "$hook_file" ".claude/hooks/$category_name/$hook_name"
+                chmod +x ".claude/hooks/$category_name/$hook_name"
+                log_debug "Installed $category_name hook: $hook_name"
+            done
+        done
+
         # Copy lib/ directory contents
         if [[ -d "$base_hooks_dir/lib" ]]; then
+            mkdir -p ".claude/hooks/lib"
             for lib_file in "$base_hooks_dir/lib"/*.sh; do
                 [[ -f "$lib_file" ]] || continue
                 local lib_name
@@ -2542,6 +2570,12 @@ swap_hooks() {
                 chmod +x ".claude/hooks/lib/$lib_name" 2>/dev/null || true
                 log_debug "Installed lib: $lib_name"
             done
+        fi
+
+        # Copy base_hooks.yaml if it exists
+        if [[ -f "$base_hooks_dir/base_hooks.yaml" ]]; then
+            cp "$base_hooks_dir/base_hooks.yaml" ".claude/hooks/base_hooks.yaml"
+            log_debug "Installed base_hooks.yaml"
         fi
     fi
 

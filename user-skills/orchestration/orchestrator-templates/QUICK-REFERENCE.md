@@ -232,6 +232,26 @@ Before considering orchestrator complete:
 - [ ] Both files committed to git
 - [ ] Team activation works (swap-team.sh)
 
+## FAQ
+
+**Can I have a team without an orchestrator?**
+- Orchestrators required for multi-phase teams. Single-phase teams don't need one.
+
+**What if I edit orchestrator.md directly?**
+- Changes lost on next regeneration. Always edit orchestrator.yaml instead.
+
+**Can I customize specific sections?**
+- Not by design. Use `extension_points` in YAML for custom content.
+
+**Is orchestrator.md checked into git?**
+- Yes. Commit both orchestrator.yaml AND orchestrator.md together.
+
+**How do I add a new specialist?**
+- Update orchestrator.yaml routing, re-run generator, validate, commit.
+
+**How often should we update the template?**
+- When you discover a pattern all orchestrators should follow. Typically quarterly.
+
 ## Where to Get Help
 
 | Question | Reference |
@@ -246,4 +266,4 @@ Before considering orchestrator complete:
 
 ---
 
-Print this card, tape it to your monitor, save it locally. You'll reference it often.
+**Quick Reference Card** - Print, tape to monitor, save locally.

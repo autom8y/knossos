@@ -27,7 +27,13 @@ readonly ROSTER_DEBUG="${ROSTER_DEBUG:-0}"
 readonly USER_HOOKS_DIR="$HOME/.claude/hooks"
 readonly USER_MANIFEST_FILE="$HOME/.claude/USER_HOOKS_MANIFEST.json"
 readonly SOURCE_DIR="$ROSTER_HOME/user-hooks"
-readonly MANIFEST_VERSION="1.0"
+readonly MANIFEST_VERSION="1.1"
+
+# Root exceptions (items that stay at root level, not in categories)
+readonly ROOT_EXCEPTIONS="lib"
+
+# Valid categories for hooks
+readonly HOOK_CATEGORIES="context-injection session-guards validation tracking"
 
 readonly EXIT_SUCCESS=0
 readonly EXIT_INVALID_ARGS=1
@@ -193,12 +199,13 @@ is_roster_managed() {
 }
 
 # Add or update a single manifest entry
-# Usage: add_to_manifest hook_name source location checksum
+# Usage: add_to_manifest hook_name source location checksum category
 add_to_manifest() {
     local hook_name="$1"
     local source_type="$2"
     local location="$3"
     local checksum="$4"
+    local category="${5:-root}"
     local timestamp
     timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
@@ -211,35 +218,19 @@ add_to_manifest() {
     local manifest
     manifest=$(read_manifest)
 
-    # Check if hook already exists in manifest
-    if echo "$manifest" | grep -q "\"$hook_name\":"; then
-        # Update existing entry using jq if available
-        if command -v jq >/dev/null 2>&1; then
-            local updated
-            updated=$(echo "$manifest" | jq --arg name "$hook_name" \
-                --arg src "$source_type" \
-                --arg loc "$location" \
-                --arg ts "$timestamp" \
-                --arg cs "$checksum" \
-                '.hooks[$name] = {"source": $src, "location": $loc, "installed_at": $ts, "checksum": $cs}')
-            echo "$updated" > "$USER_MANIFEST_FILE"
-        else
-            log_warning "jq not available, cannot update manifest entry for $hook_name"
-        fi
+    # Use jq to add/update entry
+    if command -v jq >/dev/null 2>&1; then
+        local updated
+        updated=$(echo "$manifest" | jq --arg name "$hook_name" \
+            --arg src "$source_type" \
+            --arg loc "$location" \
+            --arg ts "$timestamp" \
+            --arg cs "$checksum" \
+            --arg cat "$category" \
+            '.hooks[$name] = {"source": $src, "location": $loc, "installed_at": $ts, "checksum": $cs, "category": $cat}')
+        echo "$updated" > "$USER_MANIFEST_FILE"
     else
-        # Add new entry
-        if command -v jq >/dev/null 2>&1; then
-            local updated
-            updated=$(echo "$manifest" | jq --arg name "$hook_name" \
-                --arg src "$source_type" \
-                --arg loc "$location" \
-                --arg ts "$timestamp" \
-                --arg cs "$checksum" \
-                '.hooks[$name] = {"source": $src, "location": $loc, "installed_at": $ts, "checksum": $cs}')
-            echo "$updated" > "$USER_MANIFEST_FILE"
-        else
-            log_warning "jq not available, cannot add manifest entry for $hook_name"
-        fi
+        log_warning "jq not available, cannot update manifest entry for $hook_name"
     fi
 }
 
@@ -308,6 +299,33 @@ EOF
     log_debug "Initialized empty manifest at $USER_MANIFEST_FILE"
 }
 
+# Find source hook path and category for a hook name
+# Returns: "source_path:category" or empty if not found
+find_source_hook() {
+    local hook_name="$1"
+
+    # Check lib/ first (root exception) - hook_name includes lib/ prefix
+    if [[ "$hook_name" == lib/* ]]; then
+        local file_name="${hook_name#lib/}"
+        local source_file="$SOURCE_DIR/lib/$file_name"
+        if [[ -f "$source_file" ]]; then
+            echo "$source_file:root"
+            return 0
+        fi
+    else
+        # Check category directories
+        for category in $HOOK_CATEGORIES; do
+            local source_file="$SOURCE_DIR/$category/$hook_name"
+            if [[ -f "$source_file" ]]; then
+                echo "$source_file:$category"
+                return 0
+            fi
+        done
+    fi
+
+    return 1
+}
+
 # Recover manifest entries from existing files that match roster sources
 recover_manifest() {
     log_info "Recovering manifest from existing hooks..."
@@ -322,7 +340,7 @@ recover_manifest() {
         return 1
     fi
 
-    # Process root-level hooks
+    # Process root-level hooks (in flat destination)
     for target_file in "$target_dir"/*.sh; do
         [[ -f "$target_file" ]] || continue
         local hook_name
@@ -334,9 +352,13 @@ recover_manifest() {
             continue
         fi
 
-        # Check if source exists in roster
-        local source_file="$SOURCE_DIR/$hook_name"
-        if [[ -f "$source_file" ]]; then
+        # Check if source exists in roster (now categorical)
+        local source_info
+        if source_info=$(find_source_hook "$hook_name"); then
+            local source_file category
+            source_file=$(echo "$source_info" | cut -d: -f1)
+            category=$(echo "$source_info" | cut -d: -f2)
+
             local source_checksum target_checksum
             source_checksum=$(calculate_checksum "$source_file")
             target_checksum=$(calculate_checksum "$target_file")
@@ -344,10 +366,10 @@ recover_manifest() {
             if [[ "$source_checksum" == "$target_checksum" ]]; then
                 # Exact match - adopt as roster-managed
                 if [[ "$DRY_RUN_MODE" -eq 1 ]]; then
-                    log_info "Would adopt: $hook_name (exact match)"
+                    log_info "Would adopt: $hook_name (exact match, category: $category)"
                 else
-                    add_to_manifest "$hook_name" "roster" "root" "$target_checksum"
-                    log_success "Adopted: $hook_name (exact match)"
+                    add_to_manifest "$hook_name" "roster" "root" "$target_checksum" "$category"
+                    log_success "Adopted: $hook_name (exact match, category: $category)"
                 fi
                 ((recovered++)) || true
             else
@@ -355,7 +377,7 @@ recover_manifest() {
                 if [[ "$DRY_RUN_MODE" -eq 1 ]]; then
                     log_info "Would adopt (diverged): $hook_name (local modifications preserved)"
                 else
-                    add_to_manifest "$hook_name" "roster-diverged" "root" "$target_checksum"
+                    add_to_manifest "$hook_name" "roster-diverged" "root" "$target_checksum" "$category"
                     log_warning "Adopted (diverged): $hook_name (local modifications preserved)"
                 fi
                 ((diverged++)) || true
@@ -379,8 +401,12 @@ recover_manifest() {
             fi
 
             # Check if source exists in roster
-            local source_file="$SOURCE_DIR/$hook_name"
-            if [[ -f "$source_file" ]]; then
+            local source_info
+            if source_info=$(find_source_hook "$hook_name"); then
+                local source_file category
+                source_file=$(echo "$source_info" | cut -d: -f1)
+                category=$(echo "$source_info" | cut -d: -f2)
+
                 local source_checksum target_checksum
                 source_checksum=$(calculate_checksum "$source_file")
                 target_checksum=$(calculate_checksum "$target_file")
@@ -389,7 +415,7 @@ recover_manifest() {
                     if [[ "$DRY_RUN_MODE" -eq 1 ]]; then
                         log_info "Would adopt: $hook_name (exact match)"
                     else
-                        add_to_manifest "$hook_name" "roster" "lib" "$target_checksum"
+                        add_to_manifest "$hook_name" "roster" "lib" "$target_checksum" "$category"
                         log_success "Adopted: $hook_name (exact match)"
                     fi
                     ((recovered++)) || true
@@ -397,7 +423,7 @@ recover_manifest() {
                     if [[ "$DRY_RUN_MODE" -eq 1 ]]; then
                         log_info "Would adopt (diverged): $hook_name (local modifications preserved)"
                     else
-                        add_to_manifest "$hook_name" "roster-diverged" "lib" "$target_checksum"
+                        add_to_manifest "$hook_name" "roster-diverged" "lib" "$target_checksum" "$category"
                         log_warning "Adopted (diverged): $hook_name (local modifications preserved)"
                     fi
                     ((diverged++)) || true
@@ -412,7 +438,7 @@ recover_manifest() {
 }
 
 # Write manifest with current roster-managed hooks
-# Usage: write_manifest "hook1:checksum1:location1" "hook2:checksum2:location2" ...
+# Usage: write_manifest "hook1:checksum1:location1:category1" "hook2:checksum2:location2:category2" ...
 write_manifest() {
     local timestamp
     timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
@@ -433,10 +459,12 @@ write_manifest() {
         # Skip empty entries
         [[ -z "$entry" ]] && continue
 
-        local hook_name checksum location
+        local hook_name checksum location category
         hook_name=$(echo "$entry" | cut -d: -f1)
         checksum=$(echo "$entry" | cut -d: -f2)
         location=$(echo "$entry" | cut -d: -f3)
+        category=$(echo "$entry" | cut -d: -f4)
+        category="${category:-root}"
 
         # Skip entries with empty hook name
         [[ -z "$hook_name" ]] && continue
@@ -454,7 +482,8 @@ write_manifest() {
             echo -n "\"source\": \"roster\", "
             echo -n "\"location\": \"$location\", "
             echo -n "\"installed_at\": \"$timestamp\", "
-            echo -n "\"checksum\": \"$checksum\""
+            echo -n "\"checksum\": \"$checksum\", "
+            echo -n "\"category\": \"$category\""
             echo -n "}"
         } >> "$USER_MANIFEST_FILE"
     done
@@ -473,19 +502,38 @@ write_manifest() {
 # Sync Functions
 # ============================================================================
 
+# Check if a directory name is a root exception
+is_root_exception() {
+    local name="$1"
+    for exception in $ROOT_EXCEPTIONS; do
+        [[ "$name" == "$exception" ]] && return 0
+    done
+    return 1
+}
+
+# Check if a directory name is a valid category
+is_valid_category() {
+    local name="$1"
+    for category in $HOOK_CATEGORIES; do
+        [[ "$name" == "$category" ]] && return 0
+    done
+    return 1
+}
+
 # Sync a single file from source to target
 # Returns: 0=added, 1=updated, 2=unchanged, 3=skipped
+# Outputs: manifest entry string (hook_name:checksum:location:category)
 sync_file() {
     local source_file="$1"
     local target_file="$2"
     local hook_name="$3"
     local location="$4"
-    local manifest_entries_ref="$5"
+    local category="$5"
 
     local source_checksum
     source_checksum=$(calculate_checksum "$source_file")
 
-    log_debug "Processing: $hook_name (location: $location, checksum: ${source_checksum:0:8}...)"
+    log_debug "Processing: $hook_name (location: $location, category: $category, checksum: ${source_checksum:0:8}...)"
 
     # Check for team collision
     if is_team_hook "$(basename "$hook_name")"; then
@@ -505,7 +553,7 @@ sync_file() {
             if [[ "$source_checksum" == "$manifest_checksum" ]]; then
                 # No change needed
                 log_debug "Unchanged: $hook_name"
-                echo "$hook_name:$source_checksum:$location"
+                echo "$hook_name:$source_checksum:$location:$category"
                 return 2  # unchanged
             else
                 # Update needed
@@ -516,7 +564,7 @@ sync_file() {
                     chmod +x "$target_file"
                     log_success "Updated: $hook_name"
                 fi
-                echo "$hook_name:$source_checksum:$location"
+                echo "$hook_name:$source_checksum:$location:$category"
                 return 1  # updated
             fi
         else
@@ -535,7 +583,7 @@ sync_file() {
             chmod +x "$target_file"
             log_success "Added: $hook_name"
         fi
-        echo "$hook_name:$source_checksum:$location"
+        echo "$hook_name:$source_checksum:$location:$category"
         return 0  # added
     fi
 }
@@ -567,31 +615,7 @@ perform_sync() {
     local skipped=0
     local unchanged=0
 
-    # Process root-level hooks (*.sh files directly in .claude/hooks/)
-    for source_file in "$SOURCE_DIR"/*.sh; do
-        [[ -f "$source_file" ]] || continue
-
-        local hook_name
-        hook_name=$(basename "$source_file")
-        local target_file="$USER_HOOKS_DIR/$hook_name"
-
-        local entry_result sync_status
-        entry_result=$(sync_file "$source_file" "$target_file" "$hook_name" "root" "manifest_entries") || sync_status=$?
-        sync_status=${sync_status:-0}
-
-        if [[ -n "$entry_result" ]]; then
-            manifest_entries+=("$entry_result")
-        fi
-
-        case $sync_status in
-            0) ((added++)) || true ;;
-            1) ((updated++)) || true ;;
-            2) ((unchanged++)) || true ;;
-            3) ((skipped++)) || true ;;
-        esac
-    done
-
-    # Process lib/ subdirectory (preserving structure)
+    # Phase 1: Process lib/ subdirectory (root exception, preserving structure)
     if [[ -d "$SOURCE_DIR/lib" ]]; then
         for source_file in "$SOURCE_DIR/lib"/*.sh; do
             [[ -f "$source_file" ]] || continue
@@ -602,7 +626,7 @@ perform_sync() {
             local target_file="$USER_HOOKS_DIR/lib/$file_name"
 
             local entry_result sync_status
-            entry_result=$(sync_file "$source_file" "$target_file" "$hook_name" "lib" "manifest_entries") || sync_status=$?
+            entry_result=$(sync_file "$source_file" "$target_file" "$hook_name" "lib" "root") || sync_status=$?
             sync_status=${sync_status:-0}
 
             if [[ -n "$entry_result" ]]; then
@@ -617,6 +641,48 @@ perform_sync() {
             esac
         done
     fi
+
+    # Phase 2: Process categorized hooks (hooks inside category directories)
+    for category_dir in "$SOURCE_DIR"/*/; do
+        [[ -d "$category_dir" ]] || continue
+        local category
+        category=$(basename "${category_dir%/}")
+
+        # Skip root exceptions (already processed)
+        if is_root_exception "$category"; then
+            continue
+        fi
+
+        # Skip if not a valid category
+        if ! is_valid_category "$category"; then
+            log_warning "Skipping unknown directory: $category (not a valid category)"
+            continue
+        fi
+
+        # Process each hook in this category
+        for source_file in "$category_dir"/*.sh; do
+            [[ -f "$source_file" ]] || continue
+
+            local hook_name
+            hook_name=$(basename "$source_file")
+            local target_file="$USER_HOOKS_DIR/$hook_name"
+
+            local entry_result sync_status
+            entry_result=$(sync_file "$source_file" "$target_file" "$hook_name" "root" "$category") || sync_status=$?
+            sync_status=${sync_status:-0}
+
+            if [[ -n "$entry_result" ]]; then
+                manifest_entries+=("$entry_result")
+            fi
+
+            case $sync_status in
+                0) ((added++)) || true ;;
+                1) ((updated++)) || true ;;
+                2) ((unchanged++)) || true ;;
+                3) ((skipped++)) || true ;;
+            esac
+        done
+    done
 
     # Preserve existing roster-managed hooks that are no longer in source
     local manifest
@@ -678,36 +744,69 @@ perform_sync() {
     echo "  Total:     $total hook(s) processed" >&2
 }
 
+# Count total hooks in categorical source structure
+count_source_hooks() {
+    local count=0
+
+    # Count lib/ hooks (root exception)
+    if [[ -d "$SOURCE_DIR/lib" ]]; then
+        for f in "$SOURCE_DIR/lib"/*.sh; do
+            [[ -f "$f" ]] && ((count++)) || true
+        done
+    fi
+
+    # Count categorized hooks
+    for category in $HOOK_CATEGORIES; do
+        local category_dir="$SOURCE_DIR/$category"
+        [[ -d "$category_dir" ]] || continue
+        for f in "$category_dir"/*.sh; do
+            [[ -f "$f" ]] && ((count++)) || true
+        done
+    done
+
+    echo "$count"
+}
+
 # Show sync status
 show_status() {
     echo "User-Hooks Sync Status"
     echo "======================"
     echo ""
-    echo "Source:  $SOURCE_DIR"
-    echo "Target:  $USER_HOOKS_DIR"
+    echo "Source:  $SOURCE_DIR (categorical)"
+    echo "Target:  $USER_HOOKS_DIR (flat)"
     echo ""
 
-    # Check source - count root and lib
+    # Check source - count by category
     if [[ -d "$SOURCE_DIR" ]]; then
-        local root_count=0
-        local lib_count=0
+        local source_count
+        source_count=$(count_source_hooks)
+        echo "Roster hooks:    $source_count"
 
-        root_count=$(find "$SOURCE_DIR" -maxdepth 1 -name "*.sh" -type f 2>/dev/null | wc -l | tr -d ' ')
+        # Show breakdown by category
         if [[ -d "$SOURCE_DIR/lib" ]]; then
-            lib_count=$(find "$SOURCE_DIR/lib" -maxdepth 1 -name "*.sh" -type f 2>/dev/null | wc -l | tr -d ' ')
+            local lib_count=0
+            for f in "$SOURCE_DIR/lib"/*.sh; do
+                [[ -f "$f" ]] && ((lib_count++)) || true
+            done
+            [[ "$lib_count" -gt 0 ]] && echo "  lib (root): $lib_count"
         fi
 
-        local source_count=$((root_count + lib_count))
-        echo "Roster hooks:    $source_count"
-        echo "  root:          $root_count"
-        echo "  lib/:          $lib_count"
+        for category in $HOOK_CATEGORIES; do
+            local category_dir="$SOURCE_DIR/$category"
+            [[ -d "$category_dir" ]] || continue
+            local cat_count=0
+            for f in "$category_dir"/*.sh; do
+                [[ -f "$f" ]] && ((cat_count++)) || true
+            done
+            [[ "$cat_count" -gt 0 ]] && echo "  $category: $cat_count"
+        done
     else
         echo "Roster hooks:    (directory not found)"
     fi
 
     echo ""
 
-    # Check target
+    # Check target (flat)
     if [[ -d "$USER_HOOKS_DIR" ]]; then
         local target_root=0
         local target_lib=0
@@ -743,34 +842,10 @@ show_status() {
         echo "Hook Status:"
         echo "------------"
 
-        # Check root-level hooks
-        for source_file in "$SOURCE_DIR"/*.sh; do
-            [[ -f "$source_file" ]] || continue
+        # Track hooks we've seen from source
+        local source_hooks=()
 
-            local hook_name
-            hook_name=$(basename "$source_file")
-            local target_file="$USER_HOOKS_DIR/$hook_name"
-
-            if [[ -f "$target_file" ]]; then
-                if is_roster_managed "$hook_name"; then
-                    local source_checksum manifest_checksum
-                    source_checksum=$(calculate_checksum "$source_file")
-                    manifest_checksum=$(get_manifest_checksum "$hook_name")
-
-                    if [[ "$source_checksum" == "$manifest_checksum" ]]; then
-                        echo "  [=] $hook_name (up to date)"
-                    else
-                        echo "  [~] $hook_name (update available)"
-                    fi
-                else
-                    echo "  [!] $hook_name (user-created, would skip)"
-                fi
-            else
-                echo "  [+] $hook_name (would add)"
-            fi
-        done
-
-        # Check lib/ hooks
+        # Check lib/ hooks (root exception)
         if [[ -d "$SOURCE_DIR/lib" ]]; then
             for source_file in "$SOURCE_DIR/lib"/*.sh; do
                 [[ -f "$source_file" ]] || continue
@@ -778,6 +853,7 @@ show_status() {
                 local file_name hook_name
                 file_name=$(basename "$source_file")
                 hook_name="lib/$file_name"
+                source_hooks+=("$hook_name")
                 local target_file="$USER_HOOKS_DIR/lib/$file_name"
 
                 if [[ -f "$target_file" ]]; then
@@ -787,18 +863,51 @@ show_status() {
                         manifest_checksum=$(get_manifest_checksum "$hook_name")
 
                         if [[ "$source_checksum" == "$manifest_checksum" ]]; then
-                            echo "  [=] $hook_name (up to date)"
+                            echo "  [=] $hook_name (root, up to date)"
                         else
-                            echo "  [~] $hook_name (update available)"
+                            echo "  [~] $hook_name (root, update available)"
                         fi
                     else
-                        echo "  [!] $hook_name (user-created, would skip)"
+                        echo "  [!] $hook_name (root, user-created, would skip)"
                     fi
                 else
-                    echo "  [+] $hook_name (would add)"
+                    echo "  [+] $hook_name (root, would add)"
                 fi
             done
         fi
+
+        # Check categorized hooks
+        for category in $HOOK_CATEGORIES; do
+            local category_dir="$SOURCE_DIR/$category"
+            [[ -d "$category_dir" ]] || continue
+
+            for source_file in "$category_dir"/*.sh; do
+                [[ -f "$source_file" ]] || continue
+
+                local hook_name
+                hook_name=$(basename "$source_file")
+                source_hooks+=("$hook_name")
+                local target_file="$USER_HOOKS_DIR/$hook_name"
+
+                if [[ -f "$target_file" ]]; then
+                    if is_roster_managed "$hook_name"; then
+                        local source_checksum manifest_checksum
+                        source_checksum=$(calculate_checksum "$source_file")
+                        manifest_checksum=$(get_manifest_checksum "$hook_name")
+
+                        if [[ "$source_checksum" == "$manifest_checksum" ]]; then
+                            echo "  [=] $hook_name ($category, up to date)"
+                        else
+                            echo "  [~] $hook_name ($category, update available)"
+                        fi
+                    else
+                        echo "  [!] $hook_name ($category, user-created, would skip)"
+                    fi
+                else
+                    echo "  [+] $hook_name ($category, would add)"
+                fi
+            done
+        done
 
         # Check for user hooks not in roster
         for target_file in "$USER_HOOKS_DIR"/*.sh; do
@@ -807,7 +916,13 @@ show_status() {
             local hook_name
             hook_name=$(basename "$target_file")
 
-            if [[ ! -f "$SOURCE_DIR/$hook_name" ]]; then
+            # Check if this hook was in source
+            local in_source=false
+            for src in "${source_hooks[@]:-}"; do
+                [[ "$src" == "$hook_name" ]] && in_source=true && break
+            done
+
+            if [[ "$in_source" == false ]]; then
                 if is_roster_managed "$hook_name"; then
                     echo "  [-] $hook_name (was from roster, now removed from source)"
                 else
@@ -825,7 +940,13 @@ show_status() {
                 file_name=$(basename "$target_file")
                 hook_name="lib/$file_name"
 
-                if [[ ! -f "$SOURCE_DIR/lib/$file_name" ]]; then
+                # Check if this hook was in source
+                local in_source=false
+                for src in "${source_hooks[@]:-}"; do
+                    [[ "$src" == "$hook_name" ]] && in_source=true && break
+                done
+
+                if [[ "$in_source" == false ]]; then
                     if is_roster_managed "$hook_name"; then
                         echo "  [-] $hook_name (was from roster, now removed from source)"
                     else

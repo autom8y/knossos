@@ -6,16 +6,19 @@
 
 ### 1. Pre-flight Validation
 
-- **Check for active session**: Verify session exists (uses `get_session_dir()` from session-utils.sh)
-  - If missing → Error: "No active session to hand off. Use `/start` to begin"
-- **Check not parked**: Verify `parked_at` field not set
-  - If parked → Error: "Session is parked. Use `/resume` before handing off"
-- **Validate target agent**: Check `.claude/agents/{agent}.md` exists in current team
-  - If not found → Error: "Agent '{agent}' not found in active team '{team}'"
+Apply [Session Resolution Pattern](../shared-sections/session-resolution.md):
+- Requires: Active session (not parked)
+- Verb: "hand off"
+
+Apply [Workflow Resolution Pattern](../shared-sections/workflow-resolution.md):
+- Target agent: User-specified agent name
+- Validate agent exists in current team
+
+**Additional Check**:
 - **Check for same agent handoff**: Compare to `last_agent` field
   - If same → Warning: "Already working with {agent}. Continuing without handoff..."
 
-See [session-validation](../session-common/session-validation.md) for validation patterns.
+See [session-validation](../../session-common/session-validation.md) for validation patterns.
 
 ### 2. Generate Handoff Note
 
@@ -55,7 +58,7 @@ current_phase: "{inferred from target agent}"
 | principal-engineer | implementation |
 | qa-adversary | validation |
 
-See [session-context-schema](../session-common/session-context-schema.md) for field definitions.
+See [session-context-schema](../../session-common/session-context-schema.md) for field definitions.
 
 ### 5. Invoke Target Agent
 

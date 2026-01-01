@@ -396,7 +396,7 @@ EOF
     "Task(state-mate, 'transition_phase from=design to=implementation')",
     "Task(state-mate, '--dry-run mark_complete task-001 artifact=...')"
   ],
-  "documentation": ".claude/agents/state-mate.md"
+  "documentation": "user-agents/state-mate.md"
 }
 ```
 
@@ -408,7 +408,7 @@ EOF
   "reason": "Direct writes to *_CONTEXT.md files are blocked. Use state-mate for state mutations.",
   "instruction": "Task(state-mate, 'your mutation request')",
   "example": "Task(state-mate, 'mark_complete task-001 artifact=docs/design/TDD-foo.md')",
-  "documentation": ".claude/agents/state-mate.md"
+  "documentation": "user-agents/state-mate.md"
 }
 ```
 

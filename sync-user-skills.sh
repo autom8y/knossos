@@ -28,7 +28,13 @@ readonly ROSTER_DEBUG="${ROSTER_DEBUG:-0}"
 readonly USER_SKILLS_DIR="$HOME/.claude/skills"
 readonly USER_MANIFEST_FILE="$HOME/.claude/USER_SKILL_MANIFEST.json"
 readonly SOURCE_DIR="$ROSTER_HOME/user-skills"
-readonly MANIFEST_VERSION="1.0"
+readonly MANIFEST_VERSION="1.1"
+
+# Root exceptions (skills that stay at root level, not in categories)
+readonly ROOT_EXCEPTIONS="session-common"
+
+# Valid categories for skills
+readonly SKILL_CATEGORIES="session-lifecycle orchestration operations documentation guidance"
 
 readonly EXIT_SUCCESS=0
 readonly EXIT_INVALID_ARGS=1
@@ -166,12 +172,13 @@ is_roster_managed() {
 }
 
 # Add or update a single manifest entry for a skill
-# Usage: add_to_manifest skill_name source_type checksum file_count
+# Usage: add_to_manifest skill_name source_type checksum file_count category
 add_to_manifest() {
     local skill_name="$1"
     local source_type="$2"
     local checksum="$3"
     local file_count="$4"
+    local category="${5:-root}"
     local timestamp
     timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
@@ -192,11 +199,35 @@ add_to_manifest() {
             --arg ts "$timestamp" \
             --arg cs "$checksum" \
             --argjson fc "$file_count" \
-            '.skills[$name] = {"source": $src, "installed_at": $ts, "checksum": $cs, "file_count": $fc}')
+            --arg cat "$category" \
+            '.skills[$name] = {"source": $src, "installed_at": $ts, "checksum": $cs, "file_count": $fc, "category": $cat}')
         echo "$updated" > "$USER_MANIFEST_FILE"
     else
         log_warning "jq not available, cannot update manifest entry for $skill_name"
     fi
+}
+
+# Find source skill path and category for a skill name
+# Returns: "source_path:category" or empty if not found
+find_source_skill() {
+    local skill_name="$1"
+
+    # Check root exceptions first
+    if is_root_exception "$skill_name" && [[ -d "$SOURCE_DIR/$skill_name" && -f "$SOURCE_DIR/$skill_name/SKILL.md" ]]; then
+        echo "$SOURCE_DIR/$skill_name:root"
+        return 0
+    fi
+
+    # Check category directories
+    for category in $SKILL_CATEGORIES; do
+        local skill_path="$SOURCE_DIR/$category/$skill_name"
+        if [[ -d "$skill_path" && -f "$skill_path/SKILL.md" ]]; then
+            echo "$skill_path:$category"
+            return 0
+        fi
+    done
+
+    return 1
 }
 
 # Recover manifest entries from existing skill directories that match roster sources
@@ -213,7 +244,7 @@ recover_manifest() {
         return 1
     fi
 
-    # Process each skill directory in target
+    # Process each skill directory in target (flat destination)
     for target_skill in "$target_dir"/*/; do
         [[ -d "$target_skill" ]] || continue
 
@@ -231,9 +262,13 @@ recover_manifest() {
             continue
         fi
 
-        # Check if this skill exists in roster source
-        local source_skill="$SOURCE_DIR/$skill_name"
-        if [[ -d "$source_skill" && -f "$source_skill/SKILL.md" ]]; then
+        # Check if this skill exists in roster source (now categorical)
+        local source_info
+        if source_info=$(find_source_skill "$skill_name"); then
+            local source_skill category
+            source_skill=$(echo "$source_info" | cut -d: -f1)
+            category=$(echo "$source_info" | cut -d: -f2)
+
             local source_checksum target_checksum source_file_count target_file_count
             source_checksum=$(calculate_skill_checksum "$source_skill")
             target_checksum=$(calculate_skill_checksum "$target_skill")
@@ -243,10 +278,10 @@ recover_manifest() {
             if [[ "$source_checksum" == "$target_checksum" ]]; then
                 # Exact match - adopt as roster-managed
                 if [[ "$DRY_RUN_MODE" -eq 1 ]]; then
-                    log_info "Would adopt: $skill_name (exact match, $target_file_count files)"
+                    log_info "Would adopt: $skill_name (exact match, $target_file_count files, category: $category)"
                 else
-                    add_to_manifest "$skill_name" "roster" "$target_checksum" "$target_file_count"
-                    log_success "Adopted: $skill_name (exact match, $target_file_count files)"
+                    add_to_manifest "$skill_name" "roster" "$target_checksum" "$target_file_count" "$category"
+                    log_success "Adopted: $skill_name (exact match, $target_file_count files, category: $category)"
                 fi
                 ((recovered++)) || true
             else
@@ -254,7 +289,7 @@ recover_manifest() {
                 if [[ "$DRY_RUN_MODE" -eq 1 ]]; then
                     log_info "Would adopt (diverged): $skill_name (local modifications preserved)"
                 else
-                    add_to_manifest "$skill_name" "roster-diverged" "$target_checksum" "$target_file_count"
+                    add_to_manifest "$skill_name" "roster-diverged" "$target_checksum" "$target_file_count" "$category"
                     log_warning "Adopted (diverged): $skill_name (local modifications preserved)"
                 fi
                 ((diverged++)) || true
@@ -337,7 +372,7 @@ EOF
 }
 
 # Write manifest with current roster-managed skills
-# Usage: write_manifest "skill1:checksum1:count1" "skill2:checksum2:count2" ...
+# Usage: write_manifest "skill1:checksum1:count1:category1" "skill2:checksum2:count2:category2" ...
 write_manifest() {
     local timestamp
     timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
@@ -358,10 +393,12 @@ write_manifest() {
         # Skip empty entries
         [[ -z "$entry" ]] && continue
 
-        local skill_name checksum file_count
+        local skill_name checksum file_count category
         skill_name=$(echo "$entry" | cut -d: -f1)
         checksum=$(echo "$entry" | cut -d: -f2)
         file_count=$(echo "$entry" | cut -d: -f3)
+        category=$(echo "$entry" | cut -d: -f4)
+        category="${category:-root}"
 
         # Skip entries with empty skill name
         [[ -z "$skill_name" ]] && continue
@@ -379,7 +416,8 @@ write_manifest() {
             echo -n "\"source\": \"roster\", "
             echo -n "\"installed_at\": \"$timestamp\", "
             echo -n "\"checksum\": \"$checksum\", "
-            echo -n "\"file_count\": $file_count"
+            echo -n "\"file_count\": $file_count, "
+            echo -n "\"category\": \"$category\""
             echo -n "}"
         } >> "$USER_MANIFEST_FILE"
     done
@@ -397,6 +435,86 @@ write_manifest() {
 # ============================================================================
 # Sync Functions
 # ============================================================================
+
+# Check if a directory name is a root exception
+is_root_exception() {
+    local name="$1"
+    for exception in $ROOT_EXCEPTIONS; do
+        [[ "$name" == "$exception" ]] && return 0
+    done
+    return 1
+}
+
+# Check if a directory name is a valid category
+is_valid_category() {
+    local name="$1"
+    for category in $SKILL_CATEGORIES; do
+        [[ "$name" == "$category" ]] && return 0
+    done
+    return 1
+}
+
+# Sync a single skill from source to flat destination
+# Usage: sync_skill source_skill_path category
+# Outputs: manifest entry string (skill_name:checksum:file_count:category)
+# Returns: 0=added, 1=updated, 2=unchanged, 3=skipped
+sync_skill() {
+    local source_skill="$1"
+    local category="$2"
+
+    local skill_name
+    skill_name=$(basename "$source_skill")
+    local target_skill="$USER_SKILLS_DIR/$skill_name"
+    local source_checksum
+    source_checksum=$(calculate_skill_checksum "$source_skill")
+    local source_file_count
+    source_file_count=$(count_skill_files "$source_skill")
+
+    log_debug "Processing: $skill_name (category: $category, checksum: ${source_checksum:0:8}..., files: $source_file_count)"
+
+    if [[ -d "$target_skill" ]]; then
+        # Target exists - check if we can overwrite
+        if is_roster_managed "$skill_name"; then
+            # Roster-managed: check if update needed
+            local manifest_checksum
+            manifest_checksum=$(get_manifest_checksum "$skill_name")
+
+            if [[ "$source_checksum" == "$manifest_checksum" ]]; then
+                # No change needed
+                log_debug "Unchanged: $skill_name"
+                echo "$skill_name:$source_checksum:$source_file_count:$category"
+                return 2  # unchanged
+            else
+                # Update needed - use rsync with delete for clean update
+                if [[ "$DRY_RUN_MODE" -eq 1 ]]; then
+                    local manifest_file_count
+                    manifest_file_count=$(get_manifest_file_count "$skill_name")
+                    log_info "Would update: $skill_name ($manifest_file_count -> $source_file_count files)"
+                else
+                    rsync -a --delete "$source_skill/" "$target_skill/"
+                    log_success "Updated: $skill_name ($source_file_count files)"
+                fi
+                echo "$skill_name:$source_checksum:$source_file_count:$category"
+                return 1  # updated
+            fi
+        else
+            # User-created: skip with warning
+            log_warning "Skipped: $skill_name (user-created, not overwriting)"
+            return 3  # skipped
+        fi
+    else
+        # Target doesn't exist - add new skill
+        if [[ "$DRY_RUN_MODE" -eq 1 ]]; then
+            log_info "Would add: $skill_name ($source_file_count files)"
+        else
+            mkdir -p "$target_skill"
+            rsync -a "$source_skill/" "$target_skill/"
+            log_success "Added: $skill_name ($source_file_count files)"
+        fi
+        echo "$skill_name:$source_checksum:$source_file_count:$category"
+        return 0  # added
+    fi
+}
 
 # Perform the sync operation
 perform_sync() {
@@ -425,69 +543,75 @@ perform_sync() {
     local skipped=0
     local unchanged=0
 
-    # Process each skill directory in source
+    # Phase 1: Process root-level exceptions (skills that stay at root)
     for source_skill_path in "$SOURCE_DIR"/*/; do
-        # Skip if not a directory
         [[ -d "$source_skill_path" ]] || continue
+        local dir_name
+        dir_name=$(basename "${source_skill_path%/}")
 
-        # Remove trailing slash for consistent handling
-        local source_skill="${source_skill_path%/}"
+        # Only process root exceptions here
+        if ! is_root_exception "$dir_name"; then
+            continue
+        fi
 
         # Skip if no SKILL.md file (not a valid skill)
-        [[ -f "${source_skill}/SKILL.md" ]] || continue
+        [[ -f "${source_skill_path}SKILL.md" ]] || continue
 
-        local skill_name
-        skill_name=$(basename "$source_skill")
-        local target_skill="$USER_SKILLS_DIR/$skill_name"
-        local source_checksum
-        source_checksum=$(calculate_skill_checksum "$source_skill")
-        local source_file_count
-        source_file_count=$(count_skill_files "$source_skill")
+        local entry_result sync_status
+        entry_result=$(sync_skill "${source_skill_path%/}" "root") || sync_status=$?
+        sync_status=${sync_status:-0}
 
-        log_debug "Processing: $skill_name (checksum: ${source_checksum:0:8}..., files: $source_file_count)"
-
-        if [[ -d "$target_skill" ]]; then
-            # Target exists - check if we can overwrite
-            if is_roster_managed "$skill_name"; then
-                # Roster-managed: check if update needed
-                local manifest_checksum
-                manifest_checksum=$(get_manifest_checksum "$skill_name")
-
-                if [[ "$source_checksum" == "$manifest_checksum" ]]; then
-                    # No change needed
-                    log_debug "Unchanged: $skill_name"
-                    ((unchanged++)) || true
-                    manifest_entries+=("$skill_name:$source_checksum:$source_file_count")
-                else
-                    # Update needed - use rsync with delete for clean update
-                    if [[ "$DRY_RUN_MODE" -eq 1 ]]; then
-                        local manifest_file_count
-                        manifest_file_count=$(get_manifest_file_count "$skill_name")
-                        log_info "Would update: $skill_name ($manifest_file_count -> $source_file_count files)"
-                    else
-                        rsync -a --delete "$source_skill" "$USER_SKILLS_DIR/"
-                        log_success "Updated: $skill_name ($source_file_count files)"
-                    fi
-                    ((updated++)) || true
-                    manifest_entries+=("$skill_name:$source_checksum:$source_file_count")
-                fi
-            else
-                # User-created: skip with warning
-                log_warning "Skipped: $skill_name (user-created, not overwriting)"
-                ((skipped++)) || true
-                # Do NOT add to manifest - preserve user ownership
-            fi
-        else
-            # Target doesn't exist - add new skill
-            if [[ "$DRY_RUN_MODE" -eq 1 ]]; then
-                log_info "Would add: $skill_name ($source_file_count files)"
-            else
-                rsync -a "$source_skill" "$USER_SKILLS_DIR/"
-                log_success "Added: $skill_name ($source_file_count files)"
-            fi
-            ((added++)) || true
-            manifest_entries+=("$skill_name:$source_checksum:$source_file_count")
+        if [[ -n "$entry_result" ]]; then
+            manifest_entries+=("$entry_result")
         fi
+
+        case $sync_status in
+            0) ((added++)) || true ;;
+            1) ((updated++)) || true ;;
+            2) ((unchanged++)) || true ;;
+            3) ((skipped++)) || true ;;
+        esac
+    done
+
+    # Phase 2: Process categorized skills (skills inside category directories)
+    for category_dir in "$SOURCE_DIR"/*/; do
+        [[ -d "$category_dir" ]] || continue
+        local category
+        category=$(basename "${category_dir%/}")
+
+        # Skip root exceptions (already processed)
+        if is_root_exception "$category"; then
+            continue
+        fi
+
+        # Skip if not a valid category
+        if ! is_valid_category "$category"; then
+            log_warning "Skipping unknown directory: $category (not a valid category)"
+            continue
+        fi
+
+        # Process each skill in this category
+        for source_skill_path in "$category_dir"/*/; do
+            [[ -d "$source_skill_path" ]] || continue
+
+            # Skip if no SKILL.md file (not a valid skill)
+            [[ -f "${source_skill_path}SKILL.md" ]] || continue
+
+            local entry_result sync_status
+            entry_result=$(sync_skill "${source_skill_path%/}" "$category") || sync_status=$?
+            sync_status=${sync_status:-0}
+
+            if [[ -n "$entry_result" ]]; then
+                manifest_entries+=("$entry_result")
+            fi
+
+            case $sync_status in
+                0) ((added++)) || true ;;
+                1) ((updated++)) || true ;;
+                2) ((unchanged++)) || true ;;
+                3) ((skipped++)) || true ;;
+            esac
+        done
     done
 
     # Preserve existing roster-managed skills that are no longer in source
@@ -543,23 +667,78 @@ perform_sync() {
     echo "  Total:     $total skill(s) processed"
 }
 
+# Count total skills in categorical source structure
+count_source_skills() {
+    local count=0
+
+    # Count root exceptions
+    for dir in "$SOURCE_DIR"/*/; do
+        [[ -d "$dir" ]] || continue
+        local name
+        name=$(basename "${dir%/}")
+        if is_root_exception "$name" && [[ -f "${dir}SKILL.md" ]]; then
+            ((count++)) || true
+        fi
+    done
+
+    # Count categorized skills
+    for category in $SKILL_CATEGORIES; do
+        local category_dir="$SOURCE_DIR/$category"
+        [[ -d "$category_dir" ]] || continue
+        for skill_dir in "$category_dir"/*/; do
+            [[ -d "$skill_dir" ]] || continue
+            [[ -f "${skill_dir}SKILL.md" ]] || continue
+            ((count++)) || true
+        done
+    done
+
+    echo "$count"
+}
+
 # Show sync status
 show_status() {
     echo "User-Skills Sync Status"
     echo "======================="
     echo ""
-    echo "Source:  $SOURCE_DIR"
-    echo "Target:  $USER_SKILLS_DIR"
+    echo "Source:  $SOURCE_DIR (categorical)"
+    echo "Target:  $USER_SKILLS_DIR (flat)"
     echo ""
 
     # Check source
     if [[ -d "$SOURCE_DIR" ]]; then
         local source_count
-        source_count=$(find "$SOURCE_DIR" -maxdepth 1 -type d -name "*" ! -path "$SOURCE_DIR" 2>/dev/null | wc -l | tr -d ' ')
+        source_count=$(count_source_skills)
         echo "Roster skills:  $source_count"
+
+        # Show breakdown by category
+        for category in root $SKILL_CATEGORIES; do
+            local cat_count=0
+            if [[ "$category" == "root" ]]; then
+                for dir in "$SOURCE_DIR"/*/; do
+                    [[ -d "$dir" ]] || continue
+                    local name
+                    name=$(basename "${dir%/}")
+                    if is_root_exception "$name" && [[ -f "${dir}SKILL.md" ]]; then
+                        ((cat_count++)) || true
+                    fi
+                done
+            else
+                local category_dir="$SOURCE_DIR/$category"
+                if [[ -d "$category_dir" ]]; then
+                    for skill_dir in "$category_dir"/*/; do
+                        [[ -d "$skill_dir" ]] || continue
+                        [[ -f "${skill_dir}SKILL.md" ]] || continue
+                        ((cat_count++)) || true
+                    done
+                fi
+            fi
+            [[ "$cat_count" -gt 0 ]] && echo "  $category: $cat_count"
+        done
     else
         echo "Roster skills:  (directory not found)"
     fi
+
+    echo ""
 
     # Check target
     if [[ -d "$USER_SKILLS_DIR" ]]; then
@@ -588,13 +767,19 @@ show_status() {
         echo "Skill Status:"
         echo "-------------"
 
-        # Check each source skill
+        # Track skills we've seen from source
+        local source_skills=()
+
+        # Check root exception skills
         for source_skill in "$SOURCE_DIR"/*/; do
             [[ -d "$source_skill" ]] || continue
+            local dir_name
+            dir_name=$(basename "${source_skill%/}")
+            is_root_exception "$dir_name" || continue
             [[ -f "${source_skill}SKILL.md" ]] || continue
 
-            local skill_name
-            skill_name=$(basename "$source_skill")
+            local skill_name="$dir_name"
+            source_skills+=("$skill_name")
             local target_skill="$USER_SKILLS_DIR/$skill_name"
 
             if [[ -d "$target_skill" ]]; then
@@ -605,20 +790,59 @@ show_status() {
                     source_file_count=$(count_skill_files "$source_skill")
 
                     if [[ "$source_checksum" == "$manifest_checksum" ]]; then
-                        echo "  [=] $skill_name (up to date, $source_file_count files)"
+                        echo "  [=] $skill_name (root, up to date, $source_file_count files)"
                     else
                         local manifest_file_count
                         manifest_file_count=$(get_manifest_file_count "$skill_name")
-                        echo "  [~] $skill_name (update available, $manifest_file_count -> $source_file_count files)"
+                        echo "  [~] $skill_name (root, update available, $manifest_file_count -> $source_file_count files)"
                     fi
                 else
-                    echo "  [!] $skill_name (user-created, would skip)"
+                    echo "  [!] $skill_name (root, user-created, would skip)"
                 fi
             else
                 local source_file_count
                 source_file_count=$(count_skill_files "$source_skill")
-                echo "  [+] $skill_name (would add, $source_file_count files)"
+                echo "  [+] $skill_name (root, would add, $source_file_count files)"
             fi
+        done
+
+        # Check categorized skills
+        for category in $SKILL_CATEGORIES; do
+            local category_dir="$SOURCE_DIR/$category"
+            [[ -d "$category_dir" ]] || continue
+
+            for source_skill in "$category_dir"/*/; do
+                [[ -d "$source_skill" ]] || continue
+                [[ -f "${source_skill}SKILL.md" ]] || continue
+
+                local skill_name
+                skill_name=$(basename "$source_skill")
+                source_skills+=("$skill_name")
+                local target_skill="$USER_SKILLS_DIR/$skill_name"
+
+                if [[ -d "$target_skill" ]]; then
+                    if is_roster_managed "$skill_name"; then
+                        local source_checksum manifest_checksum source_file_count
+                        source_checksum=$(calculate_skill_checksum "$source_skill")
+                        manifest_checksum=$(get_manifest_checksum "$skill_name")
+                        source_file_count=$(count_skill_files "$source_skill")
+
+                        if [[ "$source_checksum" == "$manifest_checksum" ]]; then
+                            echo "  [=] $skill_name ($category, up to date, $source_file_count files)"
+                        else
+                            local manifest_file_count
+                            manifest_file_count=$(get_manifest_file_count "$skill_name")
+                            echo "  [~] $skill_name ($category, update available, $manifest_file_count -> $source_file_count files)"
+                        fi
+                    else
+                        echo "  [!] $skill_name ($category, user-created, would skip)"
+                    fi
+                else
+                    local source_file_count
+                    source_file_count=$(count_skill_files "$source_skill")
+                    echo "  [+] $skill_name ($category, would add, $source_file_count files)"
+                fi
+            done
         done
 
         # Check for user skills not in roster
@@ -628,7 +852,13 @@ show_status() {
             local skill_name
             skill_name=$(basename "$target_skill")
 
-            if [[ ! -d "$SOURCE_DIR/$skill_name" ]]; then
+            # Check if this skill was in source
+            local in_source=false
+            for src in "${source_skills[@]:-}"; do
+                [[ "$src" == "$skill_name" ]] && in_source=true && break
+            done
+
+            if [[ "$in_source" == false ]]; then
                 if is_roster_managed "$skill_name"; then
                     echo "  [-] $skill_name (was from roster, now removed from source)"
                 else
@@ -656,13 +886,15 @@ Behavior:
   - Additive:   Never removes existing skills from ~/.claude/skills/
   - Overwrites: Only skills previously installed from roster
   - Preserves:  User-created skills not from roster
+  - Flattens:   Categorical source structure -> flat destination
 
 Skills are directories containing SKILL.md and supporting files.
-Updates use rsync --delete to ensure clean sync within each skill directory.
+Source uses categorical organization (session-lifecycle/, orchestration/, etc.)
+Destination is flat for Claude Code compatibility.
 
 The manifest at ~/.claude/USER_SKILL_MANIFEST.json tracks which skills
 were installed from roster, allowing safe updates while preserving
-user-created skills.
+user-created skills. Manifest includes category metadata for provenance.
 
 Adopt Mode (--adopt):
   Scans existing skills in ~/.claude/skills/ and matches them against

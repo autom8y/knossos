@@ -95,4 +95,4 @@ Finishing work?
 - [quality-gates.md](quality-gates.md) - All gate definitions
 - [examples.md](examples.md) - Usage scenarios
 - [session-summary.md](session-summary.md) - Summary template
-- [session-context-schema](../session-common/session-context-schema.md) - Field definitions
+- [session-context-schema](../../session-common/session-context-schema.md) - Field definitions

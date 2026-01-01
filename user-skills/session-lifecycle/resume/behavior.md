@@ -6,12 +6,11 @@
 
 ### 1. Pre-flight Validation
 
-- **Check for parked session**: Verify session exists (uses `get_session_dir()`)
-  - If missing → Error: "No parked session found. Use `/start` to begin"
-- **Check park status**: Verify `parked_at` field is set
-  - If not set → Error: "Session is already active (not parked). Continue working"
+Apply [Session Resolution Pattern](../shared-sections/session-resolution.md):
+- Requires: Parked session
+- Verb: "resume"
 
-See [session-validation](../session-common/session-validation.md) for validation patterns.
+See [session-validation](../../session-common/session-validation.md) for validation patterns.
 
 ### 2. Load and Display Session Summary
 
@@ -23,47 +22,28 @@ Read SESSION_CONTEXT and display:
 
 ### 3. Validate Context
 
-Perform context validation checks. See [validation-checks.md](validation-checks.md) for details.
+Apply [Workflow Resolution Pattern](../shared-sections/workflow-resolution.md):
+- Team consistency: Compare ACTIVE_TEAM to session.active_team
+- Allow override: Yes (user can continue with different team)
 
-**Team Consistency Check**: Compare `ACTIVE_TEAM` to `session.active_team`
-- If mismatch: Offer to switch back or continue
+See [validation-checks.md](validation-checks.md) for details.
 
 **Git Status Check**: Compare current status to `parked_git_status`
 - If new changes: Surface and offer to review diff
 
 ### 4. Agent Selection
 
-Confirm which agent to continue with:
-- Default: `last_agent` from SESSION_CONTEXT
-- Override: `--agent=NAME` parameter
+Apply [Workflow Resolution Pattern](../shared-sections/workflow-resolution.md):
+- Target agent: Default to `last_agent` or override with `--agent=NAME`
 - Validate agent exists in current team
 
 ### 5. Invoke state-mate for Resume Mutation
 
-Use Task tool to invoke state-mate agent:
+Apply [state-mate Invocation Pattern](../shared-sections/state-mate-invocation.md):
+- Operation: `resume_session`
+- Post-action: Invoke selected agent with full session context
 
-```
-Task(state-mate, "resume_session
-
-Session Context:
-- Session ID: {session_id}
-- Session Path: .claude/sessions/{session_id}/SESSION_CONTEXT.md")
-```
-
-**Expected Response** (JSON):
-```json
-{
-  "success": true,
-  "operation": "resume_session",
-  "message": "Session resumed successfully",
-  "state_before": { "session_state": "PARKED" },
-  "state_after": { "session_state": "ACTIVE", "resumed_at": "..." }
-}
-```
-
-**Error Handling**:
-- If state-mate returns `success: false` (e.g., session not parked), surface error
-- If LIFECYCLE_VIOLATION, show allowed transitions from state-mate response
+See pattern documentation for response handling and error types.
 
 ### 6. Update Agent Selection (Post-Resume)
 
