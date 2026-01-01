@@ -1,0 +1,42 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Orchestrator Frontmatter Schema",
+  "description": "Validation schema for orchestrator.yaml frontmatter section",
+  "type": "object",
+  "properties": {
+    "frontmatter": {
+      "type": "object",
+      "required": ["role", "description", "tools", "model", "color"],
+      "properties": {
+        "role": {
+          "type": "string",
+          "maxLength": 80,
+          "description": "One-line role description (max 80 characters)"
+        },
+        "description": {
+          "type": "string",
+          "pattern": ".*Use when:.*Triggers:.*",
+          "description": "Multi-line description with use conditions and triggers. Must contain 'Use when:' and 'Triggers:'"
+        },
+        "tools": {
+          "type": "string",
+          "enum": ["Read"],
+          "description": "Orchestrators always have Read-only access",
+          "default": "Read"
+        },
+        "model": {
+          "type": "string",
+          "enum": ["opus", "sonnet"],
+          "description": "LLM model to use for orchestrator",
+          "default": "opus"
+        },
+        "color": {
+          "type": "string",
+          "description": "CSS color name or hex code for UI representation"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": ["frontmatter"]
+}
