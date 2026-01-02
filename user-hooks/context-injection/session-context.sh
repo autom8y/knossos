@@ -85,6 +85,7 @@ GIT_CHANGES=$(parse_json "git_changes" "0")
 SUGGESTED_ID=$(parse_json "suggested_session_id" "")
 WORKFLOW_ACTIVE=$(parse_json_bool "workflow_active" "false")
 WORKFLOW_MODE=$(parse_json "workflow_mode" "none")
+EXECUTION_MODE=$(parse_json "execution_mode" "unknown")
 
 # Git display
 if [[ "$GIT_CHANGES" == "0" ]]; then
@@ -151,6 +152,7 @@ output_condensed_context() {
 | | |
 |---|---|
 | **Team** | $ACTIVE_TEAM |
+| **Mode** | $EXECUTION_MODE |
 | **Session** | $session_display |
 | **Initiative** | $initiative_display |
 | **Git** | $GIT_DISPLAY |

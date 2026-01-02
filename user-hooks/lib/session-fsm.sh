@@ -242,10 +242,13 @@ _fsm_validate_context() {
     # Validate schema version
     local version
     version=$(grep -m1 "^schema_version:" "$ctx_file" 2>/dev/null | cut -d: -f2- | tr -d ' "' || echo "")
-    if [[ "$version" != "2.0" ]]; then
-        echo "Validation failed: Unsupported schema version: '$version' (expected 2.0)" >&2
-        return 1
-    fi
+    case "$version" in
+        2.0|2.1) ;;  # Accept both versions
+        *)
+            echo "Validation failed: Unsupported schema version: '$version' (expected 2.0 or 2.1)" >&2
+            return 1
+            ;;
+    esac
 
     return 0
 }
@@ -613,7 +616,7 @@ fsm_transition() {
     # Validate result (only for v2 sessions)
     local schema_version
     schema_version=$(grep -m1 "^schema_version:" "$ctx_file" 2>/dev/null | cut -d: -f2- | tr -d ' "' || echo "")
-    if [[ "$schema_version" == "2.0" ]]; then
+    if [[ "$schema_version" == "2.0" || "$schema_version" == "2.1" ]]; then
         if ! _fsm_validate_context "$ctx_file"; then
             # Rollback
             if [[ -f "$backup_file" ]]; then
@@ -640,10 +643,21 @@ fsm_transition() {
 # Usage: fsm_create_session <initiative> <complexity> [team]
 # Returns: session_id on success
 # Exit code: 0 on success, 1 on failure
+# Note: If team is empty/none/null, creates a cross-cutting session
 fsm_create_session() {
     local initiative="$1"
     local complexity="$2"
-    local team="${3:-10x-dev-pack}"
+    local team="${3:-}"
+
+    # If team not specified, check ACTIVE_TEAM file
+    if [[ -z "$team" ]]; then
+        team=$(cat ".claude/ACTIVE_TEAM" 2>/dev/null || echo "")
+    fi
+
+    # Normalize empty/none to explicit marker for cross-cutting
+    if [[ -z "$team" || "$team" == "none" ]]; then
+        team="none"
+    fi
 
     if [[ -z "$initiative" || -z "$complexity" ]]; then
         echo '{"success": false, "error": "initiative and complexity required"}' >&2
@@ -666,16 +680,25 @@ fsm_create_session() {
     local timestamp
     timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
-    # Create SESSION_CONTEXT.md with v2 schema
+    # Compute team field value (null for cross-cutting, quoted string otherwise)
+    local team_field_value
+    if [[ "$team" == "none" ]]; then
+        team_field_value="null"
+    else
+        team_field_value="\"$team\""
+    fi
+
+    # Create SESSION_CONTEXT.md with v2.1 schema
     cat > "$ctx_file" <<CONTEXT
 ---
-schema_version: "2.0"
+schema_version: "2.1"
 session_id: "$session_id"
 status: "ACTIVE"
 created_at: "$timestamp"
 initiative: "$initiative"
 complexity: "$complexity"
 active_team: "$team"
+team: $team_field_value
 current_phase: "requirements"
 ---
 

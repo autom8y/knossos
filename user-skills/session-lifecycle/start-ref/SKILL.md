@@ -20,7 +20,7 @@ Starting work?
 ## Usage
 
 ```bash
-/start [initiative-name] [--complexity=LEVEL] [--team=PACK]
+/start [initiative-name] [--complexity=LEVEL] [--team=PACK] [--no-team]
 ```
 
 | Parameter | Required | Default | Description |
@@ -28,8 +28,11 @@ Starting work?
 | `initiative-name` | No* | Prompted | Name of feature/task |
 | `--complexity` | No* | Prompted | SCRIPT \| MODULE \| SERVICE \| PLATFORM |
 | `--team` | No | ACTIVE_TEAM | Team pack for session |
+| `--no-team` | No | false | Create cross-cutting session (no orchestration) |
 
 *If not provided, user will be prompted interactively.
+
+**Note**: When `--no-team` is specified or no team is active, the session operates in **cross-cutting mode**: direct execution with session tracking, no orchestrator required. See `orchestration/execution-mode.md`.
 
 ## Complexity Levels
 

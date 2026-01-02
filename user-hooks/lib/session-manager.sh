@@ -38,6 +38,81 @@ source "$SCRIPT_DIR/session-migrate.sh" 2>/dev/null || {
 
 SESSIONS_DIR=".claude/sessions"
 
+# =============================================================================
+# Execution Mode Detection (FR-1.2)
+# =============================================================================
+# Returns: "native" | "orchestrated" | "cross-cutting"
+# Performance requirement: <50ms
+# Error handling: Falls back to "cross-cutting" on any detection failure (NFR-2)
+
+execution_mode() {
+    local session_id
+    session_id=$(get_session_id 2>/dev/null) || {
+        echo "native"
+        return 0
+    }
+
+    # No session = native mode
+    if [[ -z "$session_id" ]]; then
+        echo "native"
+        return 0
+    fi
+
+    # Session exists - check if directory and context file exist
+    local session_dir="$SESSIONS_DIR/$session_id"
+    local ctx_file="$session_dir/SESSION_CONTEXT.md"
+
+    if [[ ! -f "$ctx_file" ]]; then
+        # Session ID set but no context file = corrupted, fallback to native
+        echo "native"
+        return 0
+    fi
+
+    # Get session status via FSM (authoritative)
+    local status
+    status=$(fsm_get_state "$session_id" 2>/dev/null) || status="ACTIVE"
+
+    # Parked sessions are cross-cutting regardless of team
+    if [[ "$status" == "PARKED" ]]; then
+        echo "cross-cutting"
+        return 0
+    fi
+
+    # Archived sessions should not be active (edge case)
+    if [[ "$status" == "ARCHIVED" ]]; then
+        echo "native"
+        return 0
+    fi
+
+    # Session is ACTIVE - check team configuration
+    local active_team
+    active_team=$(cat ".claude/ACTIVE_TEAM" 2>/dev/null || echo "none")
+
+    # Also check team field in session context for cross-cutting sessions
+    if [[ "$active_team" == "none" || -z "$active_team" ]]; then
+        # Check if team is explicitly null in SESSION_CONTEXT
+        local ctx_team
+        ctx_team=$(grep -m1 "^active_team:" "$ctx_file" 2>/dev/null | cut -d: -f2- | tr -d ' "')
+        if [[ -z "$ctx_team" || "$ctx_team" == "none" || "$ctx_team" == "null" ]]; then
+            echo "cross-cutting"
+            return 0
+        fi
+        active_team="$ctx_team"
+    fi
+
+    # Verify team pack exists
+    local team_pack_dir="${ROSTER_HOME:-$HOME/.config/roster}/teams/$active_team"
+    if [[ ! -d "$team_pack_dir" ]]; then
+        # Team configured but pack missing - error state, but fallback gracefully
+        echo "cross-cutting"
+        return 0
+    fi
+
+    # All conditions met: ACTIVE session + valid team = orchestrated
+    echo "orchestrated"
+    return 0
+}
+
 # Check if current terminal has an active session
 has_session() {
     local session_id
@@ -179,6 +254,10 @@ cmd_status() {
     local in_worktree wt_id wt_name wt_team
     read -r in_worktree wt_id wt_name wt_team < <(extract_worktree_fields)
 
+    # Execution mode
+    local exec_mode
+    exec_mode=$(execution_mode 2>/dev/null || echo "unknown")
+
     # Generate JSON
     cat <<EOF
 {
@@ -191,6 +270,7 @@ cmd_status() {
   "current_phase": $(json_string "$current_phase"),
   "parked": $parked,
   "active_team": "$active_team",
+  "execution_mode": "$exec_mode",
   "workflow_name": "${workflow_name:-null}",
   "workflow_entry": "${workflow_entry:-null}",
   "git_branch": "$git_branch",
@@ -281,7 +361,7 @@ EOF
   "complexity": "$complexity",
   "team": "$team",
   "entry_agent": "${entry_agent:-requirements-analyst}",
-  "schema_version": "2.0"
+  "schema_version": "2.1"
 }
 EOF
 }

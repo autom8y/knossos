@@ -11,10 +11,28 @@ description: "Transfer work from one agent to another within active session. Use
 
 ```
 Need to switch agents?
+├─ Check execution mode first:
+│   ├─ Orchestrated mode → proceed with handoff
+│   ├─ Cross-cutting mode → ERROR (no orchestrator available)
+│   └─ Native mode → ERROR (no session active)
 ├─ Phase transition (design → implementation) → /handoff engineer
 ├─ Session is parked → /resume first, then /handoff
 ├─ Want to pause work → /park (not /handoff)
 └─ Want to switch teams → /team, then new /start
+```
+
+**Mode Check**: `/handoff` requires orchestrated mode. If in cross-cutting mode:
+```
+Error: /handoff requires orchestrated mode.
+
+Current mode: cross-cutting
+To enable orchestration:
+  1. Use /team <pack-name> to activate a team
+  2. Or start a new session with a team: /start "initiative"
+
+Alternatively, in cross-cutting mode:
+  - Execute directly (no delegation needed)
+  - Use /consult for routing guidance
 ```
 
 ## Usage
@@ -67,8 +85,11 @@ Need to switch agents?
 
 ## Prerequisites
 
+- **Orchestrated mode** (session ACTIVE + team configured)
 - Active session (not parked)
 - Target agent exists in current team
+
+**Note**: Cross-cutting mode does not support `/handoff` - use direct execution instead.
 
 ## Success Criteria
 
