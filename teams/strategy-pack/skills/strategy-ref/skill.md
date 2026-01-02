@@ -19,7 +19,7 @@ description: "Strategy team reference with market research, competitive analysis
 
 | Agent | Model | Role | Produces |
 |-------|-------|------|----------|
-| **market-researcher** | sonnet | Maps market terrain and trends | market-analysis |
+| **market-researcher** | opus | Maps market terrain and trends | market-analysis |
 | **competitive-analyst** | opus | Tracks competitors and predicts moves | competitive-intel |
 | **business-model-analyst** | opus | Stress-tests unit economics | financial-model |
 | **roadmap-strategist** | opus | Connects vision to execution | strategic-roadmap |

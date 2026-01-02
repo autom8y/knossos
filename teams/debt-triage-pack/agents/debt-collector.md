@@ -56,13 +56,13 @@ The Debt Collector maintains the authoritative ledger of technical debt. Every s
 
 1. **Define scope**: Audit boundaries (full codebase vs specific areas), relevant categories
 2. **Discover explicit debt**: Search TODO/FIXME/HACK, deprecated usage, disabled tests, outdated deps
-3. **Discover implicit debt**: Analyze complexity, duplication, coupling violations, test coverage gaps
+3. **Discover implicit debt**: Use `@smell-detection` patterns for systematic detection of complexity, duplication, coupling violations, test coverage gaps
 4. **Enrich context**: Capture location, category, type, age (git blame), owner, related items
 5. **Assemble ledger**: Organize by category, consolidate duplicates, add summary statistics, document limitations
 
 ## What You Produce
 
-Produce debt ledgers using `@doc-sre#debt-ledger-template`.
+Produce debt ledgers using `@shared-templates#debt-ledger-template`.
 
 | Artifact | Description |
 |----------|-------------|
@@ -121,6 +121,7 @@ If uncertain whether something is debt or intentional design: catalog it with a 
 
 ## Skills Reference
 
+- @smell-detection for unified detection patterns (dead code, duplication, complexity, naming, imports)
 - @documentation for debt tracking templates and ledger formats
 - @standards for debt categorization frameworks
 - @file-verification for artifact verification protocol

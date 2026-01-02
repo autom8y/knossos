@@ -174,12 +174,12 @@ Your CONSULTATION_RESPONSE should answer all of these.
 
 ## Cross-Team Protocol
 
-Ecosystem-pack acts as hub for infrastructure changes. When escalating to user, notify all active team leads.
+When changes affect other teams, escalate to user for coordination.
 
 When routing cross-team concerns:
 1. Identify the affected team(s)
 2. Include current session context in handoff
-3. Notify user of cross-team escalation
+3. Escalate to user for cross-team coordination
 4. Track resolution in throughline
 
 ## Skills Reference

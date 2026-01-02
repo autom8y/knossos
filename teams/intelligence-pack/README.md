@@ -36,6 +36,29 @@ See `workflow.md` for phase flow and complexity levels.
 - **FEATURE**: New feature instrumentation, user journey analysis
 - **INITIATIVE**: Cross-feature analysis, strategic product decisions
 
+## When to Use Intelligence vs Strategy
+
+**Core distinction**: Intelligence looks **inward** (our users, our product). Strategy looks **outward** (market, competitors, positioning).
+
+| Question | Team | Why |
+|----------|------|-----|
+| "How do users navigate our checkout flow?" | Intelligence | User behavior within our product |
+| "What's the market opportunity in healthcare?" | Strategy | External market analysis |
+| "Which features drive retention?" | Intelligence | Our product's impact on our users |
+| "How should we position against Competitor X?" | Strategy | Competitive positioning |
+| "What do our NPS scores tell us?" | Intelligence | Our user sentiment |
+| "Should we expand to the enterprise segment?" | Strategy | Market entry decision |
+| "What caused the conversion drop last week?" | Intelligence | Our funnel analysis |
+| "What pricing model do competitors use?" | Strategy | External competitive intel |
+| "How do power users differ from churned users?" | Intelligence | Our user segmentation |
+| "What's our TAM in the European market?" | Strategy | External market sizing |
+
+**Handoff triggers**:
+- Intelligence -> Strategy: Insights about user needs that suggest market opportunities
+- Strategy -> Intelligence: Strategic hypotheses that need user validation
+
+See also: [strategy-pack README](../strategy-pack/README.md#when-to-use-strategy-vs-intelligence)
+
 ## Related Teams
 
 - **strategy-pack**: Hand off for business case development and strategic planning

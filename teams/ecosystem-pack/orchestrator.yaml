@@ -65,5 +65,5 @@ antipatterns:
   - "Designing without considering all 10 teams"
   - "Making schema changes without versioning strategy"
 
-# Cross-team protocol (hub team - coordinates with others)
-cross_team_protocol: "Ecosystem-pack acts as hub for infrastructure changes. When escalating to user, notify all active team leads."
+# Cross-team protocol
+cross_team_protocol: "When changes affect other teams, escalate to user for coordination."

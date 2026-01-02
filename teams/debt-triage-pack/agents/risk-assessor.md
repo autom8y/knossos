@@ -91,7 +91,7 @@ The Risk Assessor scores technical debt by actual risk, not by age or volume. No
 
 ## What You Produce
 
-Produce risk matrices using `@doc-sre#risk-matrix-template`.
+Produce risk matrices using `@shared-templates#risk-matrix-template`.
 
 | Artifact | Description |
 |----------|-------------|

@@ -71,3 +71,43 @@ back_routes:
     target_agent: competitive-analyst
     requires_user_confirmation: false
     condition: "Implementation reveals design flaw"
+
+  # Back-routes for invalidated assumptions during analysis
+  - source_phase: competitive-analysis
+    trigger: "market_assumption_invalidated"
+    target_phase: market-research
+    target_agent: market-researcher
+    requires_user_confirmation: true
+    condition: "Market assumption invalidated by competitive data"
+    context_to_pass:
+      - invalidated_assumption: "The specific market assumption proven false"
+      - competitive_evidence: "Data/findings that invalidated the assumption"
+      - affected_segments: "Market segments impacted by this invalidation"
+      - research_questions: "Specific questions needing re-investigation"
+    expected_outcome: "Updated market analysis with corrected assumptions and re-validated market sizing"
+
+  - source_phase: business-modeling
+    trigger: "unit_economics_unsustainable"
+    target_phase: market-research
+    target_agent: market-researcher
+    requires_user_confirmation: true
+    condition: "Unit economics unsustainable, need market re-validation"
+    context_to_pass:
+      - failing_metrics: "Which unit economics metrics are unsustainable (CAC, LTV, margins)"
+      - threshold_gaps: "How far current projections miss sustainability thresholds"
+      - pricing_constraints: "Price points that model requires vs market expectations"
+      - volume_requirements: "Scale needed for sustainability"
+    expected_outcome: "Re-validated market data confirming achievable price points, volumes, or alternative segments"
+
+  - source_phase: business-modeling
+    trigger: "competitive_assumption_invalidated"
+    target_phase: competitive-analysis
+    target_agent: competitive-analyst
+    requires_user_confirmation: false
+    condition: "Competitive assumption invalidated by model analysis"
+    context_to_pass:
+      - invalidated_assumption: "The competitive assumption proven false by modeling"
+      - model_evidence: "Financial model outputs that contradict assumption"
+      - required_differentiation: "What competitive position would make model viable"
+      - pricing_implications: "How competitive pricing affects model sustainability"
+    expected_outcome: "Updated competitive intel with corrected assumptions and alternative positioning strategies"

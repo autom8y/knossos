@@ -90,13 +90,69 @@ Items larger than XL: split or require spike first.
 
 ## What You Produce
 
-Produce sprint packages using `@doc-sre#sprint-debt-packages-template`.
+Produce sprint packages using `@shared-templates#sprint-debt-packages-template`.
 
 | Artifact | Description |
 |----------|-------------|
 | **Sprint Plan** | Ordered backlog with effort estimates and dependencies |
 | **Package Cards** | Individual work units with acceptance criteria |
 | **Capacity Model** | What-if planning for different scenarios |
+| **HANDOFF** | Cross-team handoff to hygiene-pack for execution |
+
+### Hygiene-Pack HANDOFF
+
+After sprint planning is complete, produce a HANDOFF artifact for hygiene-pack execution. This bridges planning (debt-triage-pack) to execution (hygiene-pack).
+
+**When to produce**: After sprint packages are finalized and ready for execution.
+
+**HANDOFF Format** (see `cross-team-handoff` skill for full schema):
+
+```yaml
+---
+source_team: debt-triage-pack
+target_team: hygiene-pack
+handoff_type: execution
+created: [YYYY-MM-DD]
+initiative: [Sprint/initiative name]
+priority: [critical|high|medium|low]
+---
+
+## Context
+[Sprint planning summary - what was prioritized, why, capacity assumptions]
+
+## Source Artifacts
+- Risk Matrix: [path to risk assessment]
+- Sprint Plan: [path to sprint plan document]
+- Debt Catalog: [path if relevant]
+
+## Items
+
+### PKG-001: [Package Title]
+- **Priority**: [Critical|High|Medium|Low]
+- **Size**: [XS|S|M|L|XL] ([hours estimate])
+- **Summary**: [What needs to be done]
+- **Acceptance Criteria**:
+  - [ ] [Specific, testable criterion]
+  - [ ] [Another criterion]
+- **Dependencies**: [None or list]
+
+### PKG-002: [Package Title]
+[repeat for each package]
+
+## Notes for Target Team
+- Sequencing recommendations (what to start first)
+- Dependencies between packages
+- Risk clusters or areas needing extra care
+- Estimated total effort and confidence level
+- Sprint boundaries and deadlines if applicable
+```
+
+**Content Requirements**:
+- Each package includes size estimate with confidence level
+- Acceptance criteria are specific and testable
+- Dependencies between packages are explicit
+- Sequencing guidance helps hygiene-pack plan work order
+- Total capacity requirements stated upfront
 
 ## Example: Sprint Package
 
@@ -125,6 +181,7 @@ Ready for sprint planning when:
 - [ ] Acceptance criteria defined for every package
 - [ ] Total allocation validated against stated capacity
 - [ ] Deferred items documented with rationale
+- [ ] HANDOFF artifact produced for hygiene-pack execution
 - [ ] All artifacts verified via Read tool
 
 ## The Acid Test
@@ -154,3 +211,4 @@ When work completes, capture:
 - @standards for estimation frameworks and capacity planning
 - @file-verification for artifact verification protocol
 - @cross-team for handoff patterns to other teams
+- @cross-team-handoff for HANDOFF artifact schema and examples

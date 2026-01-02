@@ -66,6 +66,91 @@ Transform strategy into executable roadmaps. Prioritize initiatives using explic
 | **Strategic Roadmap** | Prioritized plan with timeline and resource allocation |
 | **Prioritization Matrix** | Scored ranking of initiatives with rationale |
 | **OKR Framework** | Objectives and key results aligned to strategy |
+| **HANDOFF** | Cross-team handoff for implementation of strategic initiatives |
+
+### HANDOFF Production
+
+When strategic initiatives are ready for execution, produce a HANDOFF artifact using the `cross-team-handoff` schema.
+
+**Target Team**: 10x-dev-pack (implementation)
+
+Strategic initiatives flow to 10x-dev-pack when:
+- Initiative has been prioritized and resourced
+- Timeline and milestones are defined
+- OKRs provide measurable success criteria
+- Dependencies are mapped and sequenced
+
+**HANDOFF Example** (to 10x-dev-pack):
+```yaml
+---
+source_team: strategy-pack
+target_team: 10x-dev-pack
+handoff_type: implementation
+created: 2026-01-02
+initiative: Q1 Enterprise Expansion
+priority: high
+---
+
+## Context
+
+Q1 strategic roadmap prioritized enterprise tier as highest-value initiative. Resource allocation confirmed (3 engineers, Jan-Feb). OKRs established with measurable key results.
+
+## Source Artifacts
+- docs/strategy/ROADMAP-Q1-2026.md
+- docs/strategy/PRIORITIZATION-enterprise-analysis.md
+- docs/strategy/OKR-Q1-2026.md
+
+## Items
+
+### IMP-001: Enterprise tier implementation
+- **Priority**: High (Rank #1 in Q1 roadmap)
+- **Summary**: Build enterprise-grade subscription tier with team features
+- **Strategic Rationale**:
+  - RICE score: 30 (highest among Q1 candidates)
+  - Revenue impact: Path to $100K MRR by Q2
+  - Market timing: Competitor gaps in enterprise segment
+- **OKR Alignment**:
+  - O1: Accelerate revenue growth
+  - KR1: Launch enterprise tier by Feb 15
+  - KR2: Sign 5 enterprise customers by Mar 31
+- **Resource Allocation**: 3 engineers, 6 weeks
+- **Dependencies**: Auth system (complete), billing integration (in progress)
+- **Acceptance Criteria**:
+  - Team management (invite, roles, permissions)
+  - SSO integration (SAML, OAuth)
+  - Usage-based billing
+  - Admin dashboard
+
+### IMP-002: API v2 quick win
+- **Priority**: Medium (Rank #2 in Q1 roadmap)
+- **Summary**: Modernize API for developer experience
+- **Strategic Rationale**:
+  - RICE score: 150 (quick win, high reach)
+  - Developer ecosystem enablement
+- **OKR Alignment**:
+  - O2: Improve developer adoption
+  - KR1: API v2 launched by Jan 31
+- **Resource Allocation**: 2 engineers, 3 weeks
+- **Dependencies**: None
+- **Acceptance Criteria**:
+  - RESTful design following OpenAPI 3.0
+  - Rate limiting and authentication
+  - Interactive documentation
+
+## Notes for Target Team
+
+Enterprise tier is the critical path to Q2 revenue targets. API v2 is a quick win that unblocks future mobile initiative (deferred to Q2). Recommend parallel execution with separate engineering tracks.
+
+Stakeholder contact: @product-lead for enterprise requirements clarification.
+```
+
+**Content Guidelines for Strategic HANDOFFs**:
+
+1. **Strategic Rationale**: Always include the "why" from roadmap prioritization
+2. **OKR Alignment**: Connect implementation to measurable business outcomes
+3. **Resource Allocation**: Specify committed resources and timeline
+4. **Dependencies**: Map what must complete first
+5. **Acceptance Criteria**: Translate strategic requirements to implementable specs
 
 ### Artifact Production
 

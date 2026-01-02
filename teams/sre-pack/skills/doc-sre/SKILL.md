@@ -1,6 +1,6 @@
 ---
 name: doc-sre
-description: "SRE, reliability, debt triage, and analytics templates for observability, incidents, chaos engineering, and technical debt workflows. Use when: planning reliability improvements, documenting incidents, conducting chaos experiments, tracking technical debt, analyzing observability gaps, planning analytics tracking. Triggers: observability, reliability, postmortem, incident, chaos experiment, chaos engineering, technical debt, debt ledger, debt triage, risk matrix, sprint debt, tracking plan, analytics, SLO, SLI, MTTR."
+description: "SRE, reliability, and analytics templates for observability, incidents, and chaos engineering workflows. Use when: planning reliability improvements, documenting incidents, conducting chaos experiments, analyzing observability gaps, planning analytics tracking. Triggers: observability, reliability, postmortem, incident, chaos experiment, chaos engineering, tracking plan, analytics, SLO, SLI, MTTR. Note: Technical debt templates (debt ledger, risk matrix, sprint debt) moved to @shared-templates."
 ---
 
 # SRE & Analytics Documentation Templates
@@ -15,8 +15,16 @@ This skill provides templates for:
 - **Reliability Planning**: [Reliability Plan](#reliability-plan-template)
 - **Incident Management**: [Postmortem](#postmortem-template)
 - **Chaos Engineering**: [Chaos Experiment](#chaos-experiment-template), [Resilience Report](#resilience-report-template)
-- **Technical Debt**: [Debt Ledger](#debt-ledger-template), [Risk Matrix](#risk-matrix-template), [Sprint Debt Packages](#sprint-debt-packages-template)
 - **Analytics**: [Tracking Plan](#tracking-plan-template)
+
+> **Note**: Technical Debt templates (Debt Ledger, Risk Matrix, Sprint Debt Packages) have moved to `@shared-templates` for cross-team use.
+
+## Migrated Templates
+
+The following templates have moved to `@shared-templates` for cross-team use:
+- Debt Ledger → `@shared-templates#debt-ledger-template`
+- Risk Matrix → `@shared-templates#risk-matrix-template`
+- Sprint Debt Packages → `@shared-templates#sprint-debt-packages-template`
 
 ---
 
@@ -325,176 +333,6 @@ This skill provides templates for:
 
 ---
 
-## Debt Ledger Template {#debt-ledger-template}
-
-```markdown
-# Technical Debt Ledger
-Generated: [date]
-Scope: [what was audited]
-Audit Type: [full | incremental | targeted]
-
-## Summary
-| Category    | Count | New Since Last | Notes           |
-|-------------|-------|----------------|-----------------|
-| Code Debt   | XX    | +X             |                 |
-| Doc Debt    | XX    | +X             |                 |
-| Test Debt   | XX    | +X             |                 |
-| Infra Debt  | XX    | +X             |                 |
-| Design Debt | XX    | +X             |                 |
-
-## Code Debt
-
-### Shortcuts and TODOs
-| ID   | Location           | Description              | Age    | Owner   |
-|------|-------------------|--------------------------|--------|---------|
-| C001 | src/auth/login.js | TODO: Add rate limiting  | 6 mo   | @team-a |
-
-### Complexity Issues
-[Similar table format]
-
-### Deprecated Usage
-[Similar table format]
-
-## Doc Debt
-[Category sections continue...]
-
-## Test Debt
-[Category sections continue...]
-
-## Infra Debt
-[Category sections continue...]
-
-## Design Debt
-[Category sections continue...]
-
-## Audit Notes
-- Areas not covered: [list]
-- Items requiring clarification: [list]
-- Recommended follow-up: [list]
-```
-
----
-
-## Risk Matrix Template {#risk-matrix-template}
-
-```markdown
-# Debt Risk Assessment
-Generated: [date]
-Ledger Version: [ref]
-Items Assessed: [count]
-
-## Executive Summary
-- Critical items requiring immediate attention: [count]
-- High priority items for near-term planning: [count]
-- Total estimated remediation effort: [range]
-- Top recommendation: [brief statement]
-
-## Risk Matrix
-
-### Critical Priority (Address Immediately)
-| ID   | Description          | Blast | Likelihood | Effort | Score | Recommendation    |
-|------|---------------------|-------|------------|--------|-------|-------------------|
-| C003 | Auth rate limiting  | 5     | 4          | 2      | 10.0  | Sprint 1, P0      |
-
-### High Priority (This Sprint/Next Sprint)
-[Similar table format]
-
-### Medium Priority (This Quarter)
-[Similar table format]
-
-### Low Priority (Opportunistic)
-[Similar table format]
-
-## Quick Wins
-Items with high value (Blast * Likelihood >= 6) and low effort (Effort <= 2):
-| ID   | Description          | Impact | Effort | Why Quick Win           |
-|------|---------------------|--------|--------|-------------------------|
-| T012 | Flaky test in CI    | 4      | 1      | 30-min fix, blocks PRs  |
-
-## Risk Clusters
-Related items that should be addressed together:
-1. Authentication cluster: C003, C007, C012 (shared security surface)
-2. Database cluster: I004, I005 (related connection issues)
-
-## Deferred Items (Rationale)
-Items intentionally not prioritized and why:
-- D001: Legacy module scheduled for deprecation in Q3
-- C042: Covered by upcoming feature rewrite
-
-## Assessment Notes
-- Items requiring additional context: [list]
-- External dependencies affecting priority: [list]
-- Assumptions made: [list]
-```
-
----
-
-## Sprint Debt Packages Template {#sprint-debt-packages-template}
-
-```markdown
-# Debt Sprint Plan
-Generated: [date]
-Risk Matrix Version: [ref]
-Planning Horizon: [X sprints]
-Capacity Assumption: [X points/hours per sprint for debt]
-
-## Sprint [N] Debt Allocation
-
-### Package: [Title]
-**Summary**: [What this package accomplishes]
-**Effort**: [T-shirt size] ([X-Y hours/points])
-**Confidence**: [High/Medium/Low]
-
-**Items Included:**
-| ID   | Description          | Individual Effort | Priority |
-|------|---------------------|-------------------|----------|
-| C003 | Auth rate limiting  | M (4-6h)          | Critical |
-| C007 | Session timeout fix | S (2-3h)          | High     |
-
-**Dependencies:**
-- Requires: None
-- Blocks: Package "API Security Hardening" in Sprint N+1
-
-**Skills Required:** Backend security, auth system familiarity
-
-**Acceptance Criteria:**
-- [ ] Rate limiting implemented with configurable thresholds
-- [ ] Session timeout correctly enforced across all auth paths
-- [ ] Tests added covering new security behaviors
-- [ ] Security review completed
-
-**Remediation Risk:** Medium - Auth changes require careful testing
-
----
-
-### Package: [Quick Wins Bundle]
-[Similar format for additional packages]
-
----
-
-## Sprint [N+1] Debt Allocation
-[Continue for each sprint in horizon]
-
-## Capacity Summary
-| Sprint | Available | Allocated | Buffer | Remaining |
-|--------|-----------|-----------|--------|-----------|
-| N      | 40h       | 32h       | 6h     | 2h        |
-| N+1    | 40h       | 28h       | 6h     | 6h        |
-
-## Deferred to Future Sprints
-| ID   | Description          | Reason for Deferral          |
-|------|---------------------|------------------------------|
-| I004 | DB connection pool  | Needs architect input first  |
-
-## Assumptions & Constraints
-- Sprint length: 2 weeks
-- Debt allocation: 20% of capacity
-- Team composition: [description]
-- External dependencies: [list]
-```
-
----
-
 ## Tracking Plan Template {#tracking-plan-template}
 
 ```markdown
@@ -547,10 +385,9 @@ Capacity Assumption: [X points/hours per sprint for debt]
 **Postmortem**: After any production incident (severity 2+)
 **Chaos Experiment**: Before running any chaos engineering test
 **Resilience Report**: After series of chaos experiments to assess overall posture
-**Debt Ledger**: Regular audits (quarterly or on-demand) of technical debt
-**Risk Matrix**: After debt ledger to prioritize remediation
-**Sprint Debt Packages**: Planning sprints with debt allocation
 **Tracking Plan**: Before implementing new analytics events
+
+> **For debt workflows**: Use `@shared-templates` for Debt Ledger, Risk Matrix, and Sprint Debt Packages templates.
 
 ### Integration with Development Workflow
 
@@ -559,8 +396,9 @@ These templates complement the core development workflow (PRD/TDD/ADR/Test Plan)
 - **Observability Reports** → inform TDD non-functional requirements
 - **Postmortems** → generate ADRs for architectural changes
 - **Chaos Experiments** → validate TDD reliability assumptions
-- **Debt Ledgers** → inform refactoring PRDs
 - **Tracking Plans** → become requirements in feature PRDs
+
+For debt-related workflows (Debt Ledgers, Risk Matrices, Sprint Debt Packages), see `@shared-templates`.
 
 ### Related Skills
 

@@ -3,10 +3,60 @@ workflow_type: sequential
 description: Security assessment, compliance mapping, penetration testing, and review
 
 entry_point:
-  agent: threat-modeler
-  artifact:
-    type: threat-model
-    path_template: docs/security/THREAT-{slug}.md
+  # Default entry for standalone security workflows
+  default:
+    agent: threat-modeler
+    artifact:
+      type: threat-model
+      path_template: docs/security/THREAT-{slug}.md
+
+  # Consultation entry for cross-team invocation (e.g., from 10x-dev-pack)
+  consultation:
+    agent: threat-modeler
+    mode: advisory
+    artifact:
+      type: security-review
+      path_template: docs/security/REVIEW-{slug}.md
+
+# External consultation support
+# Allows other teams (primarily 10x-dev-pack) to invoke threat-modeler
+# for design review without running full security workflow
+external_consultation:
+  enabled: true
+  allowed_invokers:
+    - team: 10x-dev-pack
+      agents: [architect, orchestrator]
+    - team: sre-pack
+      agents: [incident-commander]
+
+  # Pre-implementation phase for design review
+  pre_implementation:
+    agent: threat-modeler
+    mode: advisory  # Produces recommendations, not blocking
+    inputs:
+      - tdd_draft: "Draft Technical Design Document"
+      - security_domains: "Identified security-sensitive areas"
+      - complexity: "Work complexity level"
+    outputs:
+      - security_recommendations: "Specific security guidance for TDD"
+      - threat_considerations: "Threats to address in design"
+      - compliance_flags: "Relevant compliance requirements"
+    artifact:
+      type: security-advisory
+      path_template: docs/security/ADVISORY-{slug}.md
+
+  # Consultation flow (does not continue to full security phases)
+  consultation_phases:
+    - name: design-review
+      agent: threat-modeler
+      produces: security-advisory
+      next: null  # Advisory only, returns to caller
+
+  # Full handoff option (continue with security workflow)
+  handoff_to_full_workflow:
+    trigger: "advisory.severity == 'critical' OR advisory.requires_pentest == true"
+    description: "Critical findings trigger full security workflow"
+    next_phase: threat-modeling
 
 phases:
   - name: threat-modeling
