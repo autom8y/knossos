@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
 #
-# install-hooks.sh - Install hooks from roster/hooks/ to a target .claude/hooks/
+# install-hooks.sh - Install hooks from roster/user-hooks/ to a target .claude/hooks/
 #
-# Installs hooks from roster/hooks/ (canonical source) to a target location.
+# Installs hooks from roster/user-hooks/ (canonical source) to a target location.
 # Works for both user-level (~/.claude/hooks/) and project-level (.claude/hooks/).
+#
+# Source Structure: Categorical subdirectories (context-injection/, session-guards/, etc.)
+# Target Structure: Flat with lib/ subdirectory preserved
 #
 # Usage:
 #   ./install-hooks.sh                         # Install to current project
@@ -18,6 +21,9 @@ set -euo pipefail
 
 readonly ROSTER_HOME="${ROSTER_HOME:-$HOME/Code/roster}"
 readonly SOURCE_DIR="$ROSTER_HOME/user-hooks"
+
+# Valid categories for hooks
+readonly HOOK_CATEGORIES="context-injection session-guards validation tracking"
 
 # Colors for output
 RED='\033[0;31m'
@@ -42,7 +48,10 @@ while [[ $# -gt 0 ]]; do
         --help|-h)
             echo "Usage: $0 [--dry-run] [project-path]"
             echo ""
-            echo "Syncs hooks from roster/hooks/ to project .claude/hooks/"
+            echo "Syncs hooks from roster/user-hooks/ to project .claude/hooks/"
+            echo ""
+            echo "Source Structure: Categorical subdirectories (context-injection/, session-guards/, etc.)"
+            echo "Target Structure: Flat with lib/ subdirectory preserved"
             echo ""
             echo "Options:"
             echo "  --dry-run    Preview changes without applying"
@@ -78,8 +87,8 @@ if [[ ! -d "$TARGET_PROJECT/.claude" ]]; then
     exit 1
 fi
 
-log_info "Syncing hooks from: $SOURCE_DIR"
-log_info "Syncing hooks to:   $TARGET_HOOKS"
+log_info "Syncing hooks from: $SOURCE_DIR (categorical)"
+log_info "Syncing hooks to:   $TARGET_HOOKS (flat)"
 
 if [[ $DRY_RUN -eq 1 ]]; then
     log_warn "DRY RUN - no changes will be made"
@@ -105,40 +114,49 @@ if [[ ! -d "$TARGET_HOOKS/lib" ]]; then
     fi
 fi
 
-# Sync hook files
-sync_count=0
-for hook in "$SOURCE_DIR"/*.sh; do
-    if [[ -f "$hook" ]]; then
-        hook_name=$(basename "$hook")
-        target_file="$TARGET_HOOKS/$hook_name"
-
-        if [[ $DRY_RUN -eq 0 ]]; then
-            cp "$hook" "$target_file"
-            chmod +x "$target_file"
-            log_info "Synced: $hook_name"
-        else
-            log_info "Would sync: $hook_name"
-        fi
-        sync_count=$((sync_count + 1))
-    fi
-done
-
-# Sync library files
+# Sync library files (root exception - preserves structure)
 lib_count=0
-for lib in "$SOURCE_DIR/lib"/*.sh; do
-    if [[ -f "$lib" ]]; then
-        lib_name=$(basename "$lib")
-        target_file="$TARGET_HOOKS/lib/$lib_name"
+if [[ -d "$SOURCE_DIR/lib" ]]; then
+    for lib in "$SOURCE_DIR/lib"/*.sh; do
+        if [[ -f "$lib" ]]; then
+            lib_name=$(basename "$lib")
+            target_file="$TARGET_HOOKS/lib/$lib_name"
 
-        if [[ $DRY_RUN -eq 0 ]]; then
-            cp "$lib" "$target_file"
-            chmod +x "$target_file" 2>/dev/null || true
-            log_info "Synced lib: $lib_name"
-        else
-            log_info "Would sync lib: $lib_name"
+            if [[ $DRY_RUN -eq 0 ]]; then
+                cp "$lib" "$target_file"
+                chmod +x "$target_file" 2>/dev/null || true
+                log_info "Synced lib: $lib_name"
+            else
+                log_info "Would sync lib: $lib_name"
+            fi
+            lib_count=$((lib_count + 1))
         fi
-        lib_count=$((lib_count + 1))
+    done
+fi
+
+# Sync categorized hook files (flattened to root)
+sync_count=0
+for category in $HOOK_CATEGORIES; do
+    category_dir="$SOURCE_DIR/$category"
+    if [[ ! -d "$category_dir" ]]; then
+        continue
     fi
+
+    for hook in "$category_dir"/*.sh; do
+        if [[ -f "$hook" ]]; then
+            hook_name=$(basename "$hook")
+            target_file="$TARGET_HOOKS/$hook_name"
+
+            if [[ $DRY_RUN -eq 0 ]]; then
+                cp "$hook" "$target_file"
+                chmod +x "$target_file"
+                log_info "Synced: $hook_name (from $category)"
+            else
+                log_info "Would sync: $hook_name (from $category)"
+            fi
+            sync_count=$((sync_count + 1))
+        fi
+    done
 done
 
 echo ""

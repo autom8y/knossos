@@ -14,14 +14,14 @@ hooks:
   # ===========================================================================
   - event: SessionStart
     matcher: "startup|resume"
-    path: session-context.sh
+    path: context-injection/session-context.sh
     timeout: 10
     priority: 10
     description: "Injects session context on startup and resume"
 
   - event: SessionStart
     matcher: "startup|resume"
-    path: coach-mode.sh
+    path: context-injection/coach-mode.sh
     timeout: 5
     priority: 20
     description: "Activates coach mode guidance"
@@ -30,7 +30,7 @@ hooks:
   # Stop Hooks
   # ===========================================================================
   - event: Stop
-    path: auto-park.sh
+    path: session-guards/auto-park.sh
     timeout: 5
     priority: 10
     description: "Auto-parks session on stop"
@@ -40,21 +40,21 @@ hooks:
   # ===========================================================================
   - event: PostToolUse
     matcher: "Write"
-    path: artifact-tracker.sh
+    path: tracking/artifact-tracker.sh
     timeout: 5
     priority: 10
     description: "Tracks written artifacts"
 
   - event: PostToolUse
     matcher: "Write"
-    path: session-audit.sh
+    path: tracking/session-audit.sh
     timeout: 5
     priority: 20
     description: "Audits session file writes"
 
   - event: PostToolUse
     matcher: "Bash"
-    path: commit-tracker.sh
+    path: tracking/commit-tracker.sh
     timeout: 5
     priority: 10
     description: "Tracks git commits"
@@ -64,28 +64,28 @@ hooks:
   # ===========================================================================
   - event: PreToolUse
     matcher: "Bash"
-    path: command-validator.sh
+    path: validation/command-validator.sh
     timeout: 5
     priority: 10
     description: "Validates bash commands"
 
   - event: PreToolUse
     matcher: "Edit|Write"
-    path: session-write-guard.sh
+    path: session-guards/session-write-guard.sh
     timeout: 3
     priority: 5
     description: "Guards session context writes"
 
   - event: PreToolUse
     matcher: "Edit|Write"
-    path: delegation-check.sh
+    path: validation/delegation-check.sh
     timeout: 3
     priority: 15
     description: "Checks for delegation requirements"
 
   - event: PreToolUse
     matcher: "Task"
-    path: orchestrator-bypass-check.sh
+    path: validation/orchestrator-bypass-check.sh
     timeout: 3
     priority: 20
     description: "Warns when invoking specialists without orchestrator consultation"
@@ -96,14 +96,14 @@ hooks:
   # Orchestrator routing for workflow commands (priority 5, before preflight)
   - event: UserPromptSubmit
     matcher: "^/(start|sprint|task)"
-    path: orchestrator-router.sh
+    path: validation/orchestrator-router.sh
     timeout: 5
     priority: 5
     description: "Injects orchestrator routing context for workflow commands"
 
   - event: UserPromptSubmit
     matcher: "^/"
-    path: start-preflight.sh
+    path: session-guards/start-preflight.sh
     timeout: 5
     priority: 10
     description: "Preflight check for slash commands"
