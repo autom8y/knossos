@@ -95,12 +95,34 @@ EOF
         ACTIVE_TEAM=$(cat ".claude/ACTIVE_TEAM" 2>/dev/null || echo "none")
         SUGGESTED_ID=$(generate_session_id)
 
-        # Extract complexity from /start command if present
-        COMPLEXITY=""
-        if [[ "$USER_PROMPT" =~ /start[[:space:]]+\"[^\"]+\"[[:space:]]+([A-Z]+) ]]; then
-            COMPLEXITY="${BASH_REMATCH[1]}"
-        elif [[ "$USER_PROMPT" =~ /start[[:space:]]+[^[:space:]]+[[:space:]]+([A-Z]+) ]]; then
-            COMPLEXITY="${BASH_REMATCH[1]}"
+        # Extract initiative and complexity from /start command
+        # Format: /start "initiative name" COMPLEXITY or /start initiative COMPLEXITY
+        INITIATIVE=$(echo "$USER_PROMPT" | sed 's|^/start[[:space:]]*||')
+        COMPLEXITY="MODULE"  # Default
+
+        # Check for complexity at end of command
+        if [[ "$INITIATIVE" =~ (.+)[[:space:]]+(FUNCTION|MODULE|SERVICE|PLATFORM)[[:space:]]*$ ]]; then
+            COMPLEXITY="${BASH_REMATCH[2]}"
+            INITIATIVE="${BASH_REMATCH[1]}"
+        fi
+
+        # Clean up initiative (remove quotes if present)
+        INITIATIVE=$(echo "$INITIATIVE" | sed 's/^"//;s/"$//' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+        [[ -z "$INITIATIVE" ]] && INITIATIVE="Unnamed initiative"
+
+        # Trigger session creation via session-manager.sh (hook-triggered)
+        SESSION_CREATE_RESULT=$("$HOOKS_LIB/session-manager.sh" create "$INITIATIVE" "$COMPLEXITY" "$ACTIVE_TEAM" 2>&1)
+        SESSION_CREATE_SUCCESS=$?
+
+        if [[ $SESSION_CREATE_SUCCESS -eq 0 ]]; then
+            # Extract session_id from JSON result
+            CREATED_SESSION_ID=$(echo "$SESSION_CREATE_RESULT" | grep -o '"session_id": *"[^"]*"' | cut -d'"' -f4)
+
+            # Log as hook-triggered creation (audit trail differentiation)
+            AUDIT_LOG="$PROJECT_DIR/.claude/sessions/.audit/session-mutations.log"
+            mkdir -p "$(dirname "$AUDIT_LOG")" 2>/dev/null
+            TIMESTAMP=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+            echo "$TIMESTAMP | $CREATED_SESSION_ID | CREATE | hook | start-preflight.sh" >> "$AUDIT_LOG"
         fi
 
         # Generate complexity warning if PLATFORM
@@ -120,6 +142,14 @@ This is informational only - you may proceed with /start if appropriate.
 "
         fi
 
+        # Build session creation status message
+        SESSION_STATUS_MSG=""
+        if [[ $SESSION_CREATE_SUCCESS -eq 0 ]]; then
+            SESSION_STATUS_MSG="Session created: **$CREATED_SESSION_ID**"
+        else
+            SESSION_STATUS_MSG="Session creation warning (proceeding): $SESSION_CREATE_RESULT"
+        fi
+
         if [[ "$IN_WORKTREE" == "true" ]]; then
             cat <<EOF
 
@@ -129,14 +159,15 @@ This is informational only - you may proceed with /start if appropriate.
 | Property | Value |
 |----------|-------|
 | Team | $ACTIVE_TEAM |
-| Status | No active session |
+| Initiative | $INITIATIVE |
+| Complexity | $COMPLEXITY |
 | Worktree | $WORKTREE_ID |
 | Expected Team | ${WORKTREE_TEAM:-$ACTIVE_TEAM} |
 
 **Worktree Context**: Sessions here are isolated from main project.
 Use \`/wrap\` when done to finalize and optionally remove worktree.
 ${COMPLEXITY_WARNING}
-Proceeding with session creation...
+$SESSION_STATUS_MSG
 
 ---
 EOF
@@ -144,14 +175,15 @@ EOF
             cat <<EOF
 
 ---
-**Preflight Check**: Ready for new session
+**Preflight Check**: Session Created (Hook-Triggered)
 
 | Property | Value |
 |----------|-------|
 | Team | $ACTIVE_TEAM |
-| Status | No active session |
+| Initiative | $INITIATIVE |
+| Complexity | $COMPLEXITY |
 ${COMPLEXITY_WARNING}
-Proceeding with session creation...
+$SESSION_STATUS_MSG
 
 ---
 EOF

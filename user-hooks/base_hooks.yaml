@@ -83,9 +83,24 @@ hooks:
     priority: 15
     description: "Checks for delegation requirements"
 
+  - event: PreToolUse
+    matcher: "Task"
+    path: orchestrator-bypass-check.sh
+    timeout: 3
+    priority: 20
+    description: "Warns when invoking specialists without orchestrator consultation"
+
   # ===========================================================================
   # UserPromptSubmit Hooks
   # ===========================================================================
+  # Orchestrator routing for workflow commands (priority 5, before preflight)
+  - event: UserPromptSubmit
+    matcher: "^/(start|sprint|task)"
+    path: orchestrator-router.sh
+    timeout: 5
+    priority: 5
+    description: "Injects orchestrator routing context for workflow commands"
+
   - event: UserPromptSubmit
     matcher: "^/"
     path: start-preflight.sh

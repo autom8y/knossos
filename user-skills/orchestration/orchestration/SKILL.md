@@ -27,6 +27,7 @@ Do NOT use this skill to get loop diagrams or schemas directly--it is a routing 
 | Command implementation | `command-integration.md` | How /task, /sprint, /consolidate use the loop |
 | Specialist output | `specialist-returns.md` | What specialists return (P3 format) |
 | Execution mode | `execution-mode.md` | When to delegate vs. execute directly |
+| Entry pattern | `entry-pattern.md` | How /start, /sprint, /task route through hooks |
 
 ## File Ownership
 

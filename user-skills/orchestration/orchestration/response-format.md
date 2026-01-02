@@ -39,6 +39,12 @@ state_update:
   current_phase: string
   next_phases: string[]           # Planned sequence
   routing_rationale: string       # Why this action
+  trigger_hooks: boolean          # Optional: Let hooks handle mutations (default: true)
+  expected_transitions:           # Optional: Expected state changes
+    - type: "session_state" | "phase" | "artifact"
+      from: string | null
+      to: string
+      artifact_path: string | null  # For type: artifact
 
 throughline:
   decision: string                # What was decided
@@ -183,6 +189,41 @@ This creates a decision trail across consultations.
 | Specialist prompt | 200-300 tokens |
 | State update + throughline | 100-150 tokens |
 
+## State Update Extensions
+
+### trigger_hooks (Optional)
+
+When `true` (default), signals to the main agent that hooks will handle state mutations automatically. The main agent should NOT invoke state-mate directly.
+
+When `false`, direct state-mate invocations are acceptable (typically for orchestrator-less teams).
+
+### expected_transitions (Optional)
+
+Array of state changes the orchestrator expects to occur. Hooks can use this for coordination.
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `type` | enum | Yes | Type of state change: session_state, phase, artifact |
+| `from` | string | No | Current state (null for creation) |
+| `to` | string | Yes | Target state |
+| `artifact_path` | string | No | For artifact type, expected file path |
+
+**Example**:
+```yaml
+state_update:
+  current_phase: requirements
+  next_phases: [design, implementation, validation]
+  routing_rationale: "Initial phase - requirements gathering needed first"
+  trigger_hooks: true
+  expected_transitions:
+    - type: phase
+      from: null
+      to: requirements
+    - type: artifact
+      to: registered
+      artifact_path: docs/requirements/PRD-dark-mode.md
+```
+
 ## Validation Rules
 
 1. `directive.action` must be one of the four valid values
@@ -191,6 +232,10 @@ This creates a decision trail across consultations.
 4. `user_question` required when action is `await_user`
 5. `state_update` and `throughline` always required
 6. `specialist.prompt` must include all five sections
+7. `trigger_hooks` must be boolean if present
+8. `expected_transitions` array elements must have valid `type` enum
+9. `expected_transitions[].to` is required
+10. `expected_transitions[].artifact_path` required when type is "artifact"
 
 ## See Also
 
