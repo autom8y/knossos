@@ -41,8 +41,8 @@ if [[ -n "$CLEANUP_COUNT" && "$CLEANUP_COUNT" -gt 0 ]]; then
 fi
 
 # Get full session status via session-manager
-if [[ -x "$SCRIPT_DIR/lib/session-manager.sh" ]]; then
-    SESSION_JSON=$("$SCRIPT_DIR/lib/session-manager.sh" status 2>/dev/null || echo '{}')
+if [[ -x "$HOOKS_LIB/session-manager.sh" ]]; then
+    SESSION_JSON=$("$HOOKS_LIB/session-manager.sh" status 2>/dev/null || echo '{}')
 else
     SESSION_JSON='{}'
 fi
