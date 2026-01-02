@@ -151,3 +151,11 @@ Ready for [next phase] when:
 | Skipping verification for speed | Creates hallucinated artifacts | Always verify, no exceptions |
 | Claiming partial success | Downstream depends on full artifacts | Either fully verified or failed |
 | Verifying different file than written | Proves nothing | Verify EXACT path from Write |
+
+## Progressive Disclosure
+
+This skill is intentionally self-contained as a quick reference protocol. All verification patterns are documented inline for immediate agent access without additional file loads.
+
+**Related Skills**:
+- [cross-team](../cross-team/SKILL.md) - Cross-team routing protocol
+- [prompting](../prompting/SKILL.md) - Agent invocation patterns

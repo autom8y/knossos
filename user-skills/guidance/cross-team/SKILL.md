@@ -40,3 +40,12 @@ Teams collaborate through the user, not directly. This ensures:
 - Proper context transfer between domains
 - User visibility into cross-cutting concerns
 - No conflicts or duplicated work
+
+## Progressive Disclosure
+
+This skill is intentionally minimal as a routing protocol. Cross-team coordination patterns are simple: complete your work, document the concern, route to user.
+
+**Related Skills**:
+- [team-discovery](../team-discovery/SKILL.md) - Available teams and capabilities
+- [file-verification](../file-verification/SKILL.md) - Artifact verification before handoff
+- [prompting](../prompting/SKILL.md) - Agent invocation patterns

@@ -15,10 +15,10 @@ Provides canonical schemas and templates for core development artifacts. Each sc
 
 | Schema | Pattern | Purpose | Author |
 |--------|---------|---------|--------|
-| `prd-schema.md` | `docs/requirements/PRD-*.md` | Product requirements | requirements-analyst |
-| `tdd-schema.md` | `docs/design/TDD-*.md` | Technical design | architect |
-| `adr-schema.md` | `docs/design/ADR-*.md` | Architecture decisions | architect |
-| `test-plan-schema.md` | `docs/testing/TEST-*.md` | Test plans | qa-adversary |
+| [prd-schema.md](schemas/prd-schema.md) | `docs/requirements/PRD-*.md` | Product requirements | requirements-analyst |
+| [tdd-schema.md](schemas/tdd-schema.md) | `docs/design/TDD-*.md` | Technical design | architect |
+| [adr-schema.md](schemas/adr-schema.md) | `docs/design/ADR-*.md` | Architecture decisions | architect |
+| [test-plan-schema.md](schemas/test-plan-schema.md) | `docs/testing/TEST-*.md` | Test plans | qa-adversary |
 
 ## When to Use
 
@@ -63,8 +63,15 @@ Each schema includes a bash validation function in `artifact-validator.sh`. Retu
 - `4`: Missing required field
 - `5`: Field validation failed
 
+## Progressive Disclosure
+
+- [prd-schema.md](schemas/prd-schema.md) - PRD structure, required fields, validation
+- [tdd-schema.md](schemas/tdd-schema.md) - TDD structure, component definitions
+- [adr-schema.md](schemas/adr-schema.md) - ADR format, decision records
+- [test-plan-schema.md](schemas/test-plan-schema.md) - Test plan structure, coverage matrix
+
 ## Related Skills
 
-- `documentation` - Documentation standards routing
-- `orchestration` - Workflow coordination
-- `prompting` - Agent invocation patterns
+- [documentation](../documentation/SKILL.md) - Documentation standards routing
+- [orchestration](../../orchestration/orchestration/SKILL.md) - Workflow coordination
+- [prompting](../../guidance/prompting/SKILL.md) - Agent invocation patterns

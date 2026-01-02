@@ -1,3 +1,8 @@
+---
+name: ecosystem-ref
+description: "Quick reference for CEM/skeleton/roster ecosystem patterns. Use when: working with CEM commands, swap-team.sh, manifest schema, three-tier layering. Triggers: CEM, cem sync, swap-team, roster, skeleton, manifest, ecosystem patterns."
+---
+
 # ecosystem-ref
 
 > Quick reference for CEM/skeleton/roster ecosystem patterns.
@@ -89,3 +94,9 @@ skeleton (base) -> team (overlay) -> satellite (local)
 CEM_DEBUG=1 cem sync          # Verbose CEM output
 ROSTER_DEBUG=1 swap-team.sh   # Verbose roster output
 ```
+
+## Progressive Disclosure
+
+- [doc-ecosystem skill](../doc-ecosystem/SKILL.md) - Templates for ecosystem documentation
+- [claude-md-architecture skill](../claude-md-architecture/SKILL.md) - CLAUDE.md architecture patterns
+- [CEM source](../../../../CEM/) - CEM implementation (if available locally)

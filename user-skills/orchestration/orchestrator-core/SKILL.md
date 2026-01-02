@@ -1,5 +1,6 @@
 ---
-version: "1.0.0"
+name: orchestrator-core
+description: "Core orchestrator patterns, consultation protocols, and response formats. Use when: building orchestrator agents, understanding consultation loop, defining specialist prompts. Triggers: orchestrator protocol, consultation request, consultation response, specialist routing, phase decomposition."
 ---
 
 # Orchestrator Core Protocol
@@ -54,8 +55,8 @@ If you need information not in the consultation request, include it in your `inf
 ## Consultation Protocol
 
 See schemas:
-- @orchestrator-core/schemas/consultation-request
-- @orchestrator-core/schemas/consultation-response
+- [consultation-request.md](schemas/consultation-request.md) - Request format for orchestrator consultations
+- [consultation-response.md](schemas/consultation-response.md) - Response format with directives
 
 **Response Size Target**: Keep responses compact (~400-500 tokens).
 
@@ -127,3 +128,10 @@ Your CONSULTATION_RESPONSE should answer all of these.
 - **Scope creep tolerance**: New scope is new work; update state_update.next_phases
 - **Vague handoffs**: "It's ready" is not valid—criteria must be explicit in specialist prompt
 - **Micromanaging**: Let specialists own their domains; you provide prompts, not implementation guidance
+
+## Progressive Disclosure
+
+- [consultation-request.md](schemas/consultation-request.md) - Full request schema with fields
+- [consultation-response.md](schemas/consultation-response.md) - Full response schema with directives
+- [orchestration skill](../orchestration/SKILL.md) - Phase coordination and routing hub
+- [orchestrator-templates skill](../orchestrator-templates/SKILL.md) - Template generation for team orchestrators

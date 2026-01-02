@@ -1,3 +1,8 @@
+---
+name: orchestrator-templates
+description: "Durable abstraction layer for agent orchestrator generation via YAML specs and templates. Use when: creating team orchestrators, updating canonical templates, troubleshooting generation. Triggers: orchestrator template, orchestrator.yaml, orchestrator generation, team orchestrator, orchestrator-base.md.tpl."
+---
+
 # Orchestrator Templates Skill
 
 > Master the durable abstraction layer for agent orchestrator generation.
