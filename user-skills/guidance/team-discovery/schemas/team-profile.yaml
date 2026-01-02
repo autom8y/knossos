@@ -1,0 +1,34 @@
+# Schema: team-profile.yaml
+# Describes the structure that team-discovery extracts from orchestrator.yaml
+
+team_profile:
+  name: string           # Required: team pack name (e.g., "10x-dev-pack")
+  domain: string         # Required: team specialization (e.g., "software development")
+  description: string    # Required: from orchestrator.yaml frontmatter.description
+  role: string           # Required: from orchestrator.yaml frontmatter.role
+  quick_switch: string   # Derived: "/" + first word of name (e.g., "/10x")
+  status: enum           # Derived: "active" | "dormant" based on presence
+
+  routing:               # From orchestrator.yaml routing section
+    conditions: map[string]string  # specialist -> condition
+
+  workflow_position:     # From orchestrator.yaml workflow_position
+    upstream: string
+    downstream: string
+
+  agents: list[string]   # Derived: filenames from teams/{name}/agents/*.md
+  agent_count: integer   # Derived: count of agents
+
+  skills: list[string]   # From orchestrator.yaml skills array
+
+  complexity_levels: list[string]  # From workflow.yaml complexities (if available)
+
+  use_cases:             # From orchestrator.yaml routing (rephrased for user intent)
+    - pattern: string    # Natural language query pattern
+      matches: boolean   # Whether this team handles it
+
+# Validation rules:
+# - name must match directory name in teams/
+# - quick_switch derived from name pattern (debt-triage-pack -> /debt)
+# - agent_count must match actual agent files
+# - All required fields must be present

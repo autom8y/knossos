@@ -59,6 +59,26 @@ Team swaps track agent provenance in `.claude/AGENT_MANIFEST.json`:
 
 **Note**: Team context (phase->agent routing) is automatically injected into every session via the session-context hook.
 
+## Quick Switch Commands
+
+Quick-switch commands are derived from team names:
+
+| Team | Quick Switch | Domain |
+|------|--------------|--------|
+| 10x-dev-pack | `/10x` | Full feature development |
+| debt-triage-pack | `/debt` | Technical debt management |
+| doc-team-pack | `/docs` | Documentation workflows |
+| ecosystem-pack | `/ecosystem` | CEM/skeleton/roster infrastructure |
+| forge-pack | `/forge` | Team pack creation |
+| hygiene-pack | `/hygiene` | Code quality, refactoring |
+| intelligence-pack | `/intelligence` | Analytics, research |
+| rnd-pack | `/rnd` | Exploration, prototyping |
+| security-pack | `/security` | Security assessment |
+| sre-pack | `/sre` | Operations, reliability |
+| strategy-pack | `/strategy` | Business analysis |
+
+**Note**: Use `team-discovery` skill for programmatic team metadata access.
+
 ## Examples
 
 ```bash

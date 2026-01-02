@@ -5,6 +5,17 @@ allowed-tools: Bash, Read, Grep, Glob, Task
 model: opus
 ---
 
+## Cognitive Load Absorber Role
+
+`/consult` is the designated entry point for users who are confused, overwhelmed, or unsure where to start. When users don't know which team, workflow, or command to use, `/consult` absorbs that cognitive load by:
+
+1. **Parsing natural language intent** - Understanding what the user wants to accomplish
+2. **Matching to ecosystem capabilities** - Identifying the right team, workflow, and complexity
+3. **Providing actionable patterns** - Referencing `prompting` skill for exact invocation commands
+4. **Explaining the journey** - Referencing `10x-workflow` for phase transitions and quality gates
+
+**Key principle**: Users describe outcomes; `/consult` handles routing complexity.
+
 ## Context
 
 Auto-injected by SessionStart hook (project, team, session, git).
@@ -26,16 +37,18 @@ Provide ecosystem guidance and recommendations. $ARGUMENTS
 
 ### No arguments (general help)
 1. Summarize current ecosystem state (active team, session status)
-2. Display the 9 teams with brief descriptions
+2. Display teams dynamically (use `team-discovery` skill for current count)
 3. List common starting points based on user goals
 4. Point to playbook library for detailed workflows
 
 ### Query provided (e.g., `/consult "improve code quality"`)
 1. Parse user intent using knowledge base
-2. Consult `~/.claude/knowledge/consultant/routing/intent-patterns.md`
+2. Use `team-discovery` skill to match intent to team routing conditions
 3. Match to appropriate team and workflow
-4. Provide command-flow with phases and decision points
-5. Offer alternatives if multiple valid approaches exist
+4. **Reference invocation patterns**: Use `prompting` skill to retrieve exact copy-paste patterns
+5. **Reference workflow context**: Use `10x-workflow` skill for phase/gate information
+6. Provide command-flow with phases and decision points
+7. Offer alternatives if multiple valid approaches exist
 
 ### `--playbook=NAME` flag
 1. Load playbook from `~/.claude/knowledge/consultant/playbooks/curated/{NAME}.md`
@@ -43,20 +56,23 @@ Provide ecosystem guidance and recommendations. $ARGUMENTS
 3. If not found, list available playbooks
 
 ### `--team` flag
-Display all 9 teams:
+Display all teams dynamically (use `team-discovery` skill):
 ```
 | Team              | Command       | Best For                           |
 |-------------------|---------------|------------------------------------|
 | 10x-dev-pack      | /10x          | Full feature development lifecycle |
-| doc-team-pack     | /docs         | Documentation, technical writing   |
-| hygiene-pack      | /hygiene      | Code quality, refactoring          |
 | debt-triage-pack  | /debt         | Technical debt prioritization      |
-| sre-pack          | /sre          | Operations, reliability            |
-| security-pack     | /security     | Security assessment, compliance    |
+| doc-team-pack     | /docs         | Documentation, technical writing   |
+| ecosystem-pack    | /ecosystem    | CEM/skeleton/roster infrastructure |
+| forge-pack        | /forge        | Team pack creation and validation  |
+| hygiene-pack      | /hygiene      | Code quality, refactoring          |
 | intelligence-pack | /intelligence | Analytics, A/B testing, research   |
 | rnd-pack          | /rnd          | Exploration, prototyping           |
+| security-pack     | /security     | Security assessment, compliance    |
+| sre-pack          | /sre          | Operations, reliability            |
 | strategy-pack     | /strategy     | Market research, business analysis |
 ```
+**Note**: This list reflects current roster inventory. Use `team-discovery` skill for programmatic access.
 
 ### `--commands` flag
 Display all commands by category:
@@ -95,12 +111,41 @@ Always structure responses as:
 /consult --commands
 ```
 
+## Skill Reference Patterns
+
+`/consult` references other skills to provide accurate, current information:
+
+### Referencing prompting Skill
+
+When providing invocation patterns, retrieve patterns from:
+- `prompting/SKILL.md` - Agent invocation quick reference
+- `prompting/patterns/discovery.md` - PRD creation, session initialization
+- `prompting/patterns/implementation.md` - TDD, coding, testing
+
+**Pattern**: Instead of generating ad-hoc commands, extract from `prompting` skill.
+
+### Referencing 10x-workflow Skill
+
+When explaining workflow journeys, retrieve context from:
+- `10x-workflow/SKILL.md` - Agent routing, complexity calibration
+- `10x-workflow/lifecycle.md` - Phase protocol (PLAN -> CLARIFY -> EXECUTE -> VERIFY -> HANDOFF)
+- `10x-workflow/quality-gates.md` - Gate criteria per phase
+
+**Pattern**: Include quality gate expectations when describing phase transitions.
+
+### Referencing team-discovery Skill
+
+When recommending teams, retrieve current team inventory from:
+- `team-discovery` skill for dynamic team list
+- `team-discovery/schemas/team-profile.yaml` for profile structure
+
+**Pattern**: Never hardcode team counts or capabilities; always read from `team-discovery`.
+
 ## Knowledge Sources
 
-- `~/.claude/knowledge/consultant/ecosystem-map.md` - System overview
-- `~/.claude/knowledge/consultant/routing/` - Intent matching
-- `~/.claude/knowledge/consultant/team-profiles/` - Deep team knowledge
-- `~/.claude/knowledge/consultant/playbooks/curated/` - Pre-built workflows
+- `$ROSTER_HOME/teams/*/orchestrator.yaml` - Team profiles (via team-discovery)
+- `prompting` skill - Invocation patterns
+- `10x-workflow` skill - Phase transitions and quality gates
 
 ## Reference
 
