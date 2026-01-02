@@ -21,10 +21,10 @@ hooks:
 
   - event: SessionStart
     matcher: "startup|resume"
-    path: context-injection/coach-mode.sh
+    path: context-injection/orchestrated-mode.sh
     timeout: 5
     priority: 20
-    description: "Activates coach mode guidance"
+    description: "Activates orchestrated mode guidance"
 
   # ===========================================================================
   # Stop Hooks
