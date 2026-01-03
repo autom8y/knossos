@@ -97,8 +97,91 @@ require_yq() {
 # Returns: 0 always (empty output for missing/invalid file)
 # Side effects: Logs warnings for invalid entries
 parse_hooks_yaml() {
-    # TODO: Implement in RF-019
-    return 0
+    local yaml_file="$1"
+
+    # File doesn't exist - return empty
+    if [[ ! -f "$yaml_file" ]]; then
+        return 0
+    fi
+
+    # Validate schema version
+    local schema_version
+    schema_version=$(yq -r '.schema_version // ""' "$yaml_file" 2>/dev/null)
+    if [[ -n "$schema_version" ]] && [[ "$schema_version" != "1.0" ]]; then
+        log_warning "Unknown schema version: $schema_version (expected 1.0)"
+    fi
+
+    # Get hook count
+    local hook_count
+    hook_count=$(yq -r '.hooks | length' "$yaml_file" 2>/dev/null)
+    if [[ -z "$hook_count" ]] || [[ "$hook_count" -eq 0 ]]; then
+        return 0
+    fi
+
+    # Process each hook entry
+    local i
+    for ((i=0; i<hook_count; i++)); do
+        local event matcher path timeout
+
+        event=$(yq -r ".hooks[$i].event // \"\"" "$yaml_file")
+        matcher=$(yq -r ".hooks[$i].matcher // \"\"" "$yaml_file")
+        path=$(yq -r ".hooks[$i].path // \"\"" "$yaml_file")
+        timeout=$(yq -r ".hooks[$i].timeout // 5" "$yaml_file")
+
+        # Validate event type
+        case "$event" in
+            SessionStart|Stop|PreToolUse|PostToolUse|UserPromptSubmit)
+                ;;
+            *)
+                log_warning "Invalid event type: $event (skipping)"
+                continue
+                ;;
+        esac
+
+        # Validate matcher requirement for PreToolUse and PostToolUse
+        if [[ "$event" == "PreToolUse" || "$event" == "PostToolUse" ]]; then
+            if [[ -z "$matcher" ]]; then
+                log_warning "Event $event requires matcher (skipping: $path)"
+                continue
+            fi
+        fi
+
+        # Validate path is provided
+        if [[ -z "$path" ]]; then
+            log_warning "Hook entry $i missing path (skipping)"
+            continue
+        fi
+
+        # Validate matcher syntax (check regex compiles without error)
+        if [[ -n "$matcher" ]]; then
+            # Use grep -E with a test string to validate regex syntax
+            # We check exit code 0 or 1 (valid regex), 2 means syntax error
+            echo "test" | grep -E "$matcher" >/dev/null 2>&1
+            local grep_exit=$?
+            if [[ $grep_exit -eq 2 ]]; then
+                log_warning "Invalid matcher regex: $matcher (skipping: $path)"
+                continue
+            fi
+        fi
+
+        # Clamp timeout to valid range
+        if [[ "$timeout" -gt 60 ]]; then
+            log_warning "Timeout $timeout exceeds 60s limit, clamping to 60 (hook: $path)"
+            timeout=60
+        fi
+        if [[ "$timeout" -lt 1 ]]; then
+            timeout=5
+        fi
+
+        # Emit registration record (JSON-lines format)
+        # Use jq to properly escape strings
+        jq -n -c \
+            --arg event "$event" \
+            --arg matcher "$matcher" \
+            --arg path "$path" \
+            --argjson timeout "$timeout" \
+            '{event: $event, matcher: $matcher, path: $path, timeout: $timeout}'
+    done
 }
 
 # ============================================================================
