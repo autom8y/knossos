@@ -55,6 +55,10 @@ VERIFY_MODE=0
 SYNC_FIRST_MODE=0     # --sync-first: run roster-sync before team apply
 AUTO_SYNC_MODE=0      # --auto-sync: conditionally sync if roster has updates
 
+# Orphan backup cleanup modes
+CLEANUP_ORPHANS_MODE=0    # --cleanup-orphans: manual cleanup of old orphan backups
+AUTO_CLEANUP_MODE=0       # --auto-cleanup: automatic cleanup during swap
+
 # Colors for output (if terminal supports it)
 if [[ -t 1 ]]; then
     readonly RED='\033[0;31m'
@@ -1561,15 +1565,17 @@ Commands:
   (no args)      Show current active team
 
 Options:
-  --update, -u   Update agents from roster (even if already on team)
-  --refresh, -r  [DEPRECATED] Alias for --update
-  --dry-run      Preview changes without applying
-  --keep-all     Preserve orphan agents in project
-  --remove-all   Remove orphan agents/commands/skills/hooks (backup available)
-  --promote-all  Move orphan agents to ~/.claude/agents/
-  --auto-recover Automatically rollback if interrupted swap detected (for CI/CD)
-  --sync-first   Run roster-sync before applying team (waterfall pattern)
-  --auto-sync    Conditionally sync if roster has updates available
+  --update, -u       Update agents from roster (even if already on team)
+  --refresh, -r      [DEPRECATED] Alias for --update
+  --dry-run          Preview changes without applying
+  --keep-all         Preserve orphan agents in project
+  --remove-all       Remove orphan agents/commands/skills/hooks (backup available)
+  --promote-all      Move orphan agents to ~/.claude/agents/
+  --auto-recover     Automatically rollback if interrupted swap detected (for CI/CD)
+  --sync-first       Run roster-sync before applying team (waterfall pattern)
+  --auto-sync        Conditionally sync if roster has updates available
+  --cleanup-orphans  Clean up old orphan backup directories (keep last 3)
+  --auto-cleanup     Automatically clean orphan backups during swap
 
 When switching teams interactively, you'll be prompted for each orphan agent
 (agents in current team but not in target team). In non-interactive mode
@@ -1605,6 +1611,8 @@ Examples:
   ./swap-team.sh --auto-recover dev-pack # CI/CD mode with auto-rollback
   ./swap-team.sh dev-pack --sync-first  # Sync infrastructure then apply team
   ./swap-team.sh dev-pack --auto-sync   # Sync only if roster has updates
+  ./swap-team.sh --cleanup-orphans      # Clean up old orphan backups
+  ./swap-team.sh dev-pack --auto-cleanup # Swap team and auto-clean orphan backups
 
 EOF
 }
@@ -1758,6 +1766,112 @@ validate_project() {
     fi
 
     log_debug "Project validation passed"
+}
+
+# Validate workflow.yaml schema for a team pack
+# Checks required fields: name, workflow_type, phases
+# Returns 0 if valid or file doesn't exist, 1 if validation fails
+validate_workflow_yaml() {
+    local team_name="$1"
+    local workflow_file="$ROSTER_HOME/teams/$team_name/workflow.yaml"
+
+    # Skip if workflow.yaml doesn't exist (optional file)
+    if [[ ! -f "$workflow_file" ]]; then
+        log_debug "No workflow.yaml for $team_name (optional)"
+        return 0
+    fi
+
+    log_debug "Validating workflow.yaml schema for $team_name"
+
+    # Check required field: name
+    if ! grep -q "^name:" "$workflow_file"; then
+        log_error "workflow.yaml missing required field: name"
+        return 1
+    fi
+
+    # Check required field: workflow_type
+    if ! grep -q "^workflow_type:" "$workflow_file"; then
+        log_error "workflow.yaml missing required field: workflow_type"
+        return 1
+    fi
+
+    # Check required field: phases
+    if ! grep -q "^phases:" "$workflow_file"; then
+        log_error "workflow.yaml missing required field: phases"
+        return 1
+    fi
+
+    # Validate that phases is a list (has at least one item with "- name:")
+    if ! grep -A 1 "^phases:" "$workflow_file" | grep -q "  - name:"; then
+        log_error "workflow.yaml phases must be a non-empty list"
+        return 1
+    fi
+
+    log_debug "workflow.yaml schema validation passed"
+    return 0
+}
+
+# Validate orchestrator.yaml schema for a team pack
+# Checks required fields: team, routing
+# Returns 0 if valid or file doesn't exist, 1 if validation fails
+validate_orchestrator_yaml() {
+    local team_name="$1"
+    local orchestrator_file="$ROSTER_HOME/teams/$team_name/orchestrator.yaml"
+
+    # Skip if orchestrator.yaml doesn't exist (optional file)
+    if [[ ! -f "$orchestrator_file" ]]; then
+        log_debug "No orchestrator.yaml for $team_name (optional)"
+        return 0
+    fi
+
+    log_debug "Validating orchestrator.yaml schema for $team_name"
+
+    # Check required field: team
+    if ! grep -q "^team:" "$orchestrator_file"; then
+        log_error "orchestrator.yaml missing required field: team"
+        return 1
+    fi
+
+    # Check required nested field: team.name
+    if ! grep -A 3 "^team:" "$orchestrator_file" | grep -q "  name:"; then
+        log_error "orchestrator.yaml missing required field: team.name"
+        return 1
+    fi
+
+    # Check required field: routing
+    if ! grep -q "^routing:" "$orchestrator_file"; then
+        log_error "orchestrator.yaml missing required field: routing"
+        return 1
+    fi
+
+    log_debug "orchestrator.yaml schema validation passed"
+    return 0
+}
+
+# Validate team pack schemas before swap
+# Called during PHASE_PREPARING to catch schema issues early
+# Returns 0 if all schemas valid, 1 if any validation fails
+validate_team_schemas() {
+    local team_name="$1"
+
+    log_debug "Validating team schemas for $team_name"
+
+    # Validate workflow.yaml if present
+    if ! validate_workflow_yaml "$team_name"; then
+        log_error "Schema validation failed for workflow.yaml"
+        log_error "Team pack $team_name has invalid configuration"
+        return 1
+    fi
+
+    # Validate orchestrator.yaml if present
+    if ! validate_orchestrator_yaml "$team_name"; then
+        log_error "Schema validation failed for orchestrator.yaml"
+        log_error "Team pack $team_name has invalid configuration"
+        return 1
+    fi
+
+    log_debug "Team schema validation passed"
+    return 0
 }
 
 # Query current active team
@@ -2070,6 +2184,55 @@ remove_orphan_commands() {
     if [[ "$ORPHAN_MODE" == "remove" ]] && [[ -d "$backup_dir" ]]; then
         log "Orphan command backups saved to: $backup_dir"
     fi
+}
+
+# Check for collisions between user commands and team commands
+# Warns about conflicts but allows user commands to win (non-blocking)
+# Called before team commands are staged to inform user of potential conflicts
+check_user_command_collisions() {
+    local team_name="$1"
+    local source_dir="$ROSTER_HOME/teams/$team_name/commands"
+
+    # Skip if team has no commands directory
+    if [[ ! -d "$source_dir" ]]; then
+        log_debug "No team commands to check for collisions"
+        return 0
+    fi
+
+    # Skip if no user commands exist
+    if [[ ! -d "$HOME/.claude/commands" ]]; then
+        log_debug "No user commands directory, skipping collision check"
+        return 0
+    fi
+
+    local collision_count=0
+    local collisions=()
+
+    # Check each team command against user commands
+    for team_cmd in "$source_dir"/*.md; do
+        [[ -f "$team_cmd" ]] || continue
+
+        local cmd_name
+        cmd_name=$(basename "$team_cmd")
+
+        # Check if user command with same name exists
+        if [[ -f "$HOME/.claude/commands/$cmd_name" ]]; then
+            collisions+=("$cmd_name")
+            ((collision_count++))
+        fi
+    done
+
+    # Warn about collisions if any found
+    if [[ $collision_count -gt 0 ]]; then
+        log_warning "Command collision(s) detected: $collision_count command(s)"
+        log_warning "User commands (in ~/.claude/commands/) will take precedence:"
+        for cmd in "${collisions[@]}"; do
+            log_warning "  - $cmd"
+        done
+        log_warning "Team commands with same names will be skipped during sync"
+    fi
+
+    return 0
 }
 
 # Sync team-specific commands to project
@@ -2735,6 +2898,68 @@ swap_hooks() {
     if [[ "$synced_count" -gt 0 ]]; then
         log "Synced: $synced_count team hook(s)"
     fi
+}
+
+# ============================================================================
+# Orphan Backup Cleanup Functions
+# ============================================================================
+
+# Clean up old orphan backup directories, keeping only the last N backups per type
+# Usage: cleanup_orphan_backups [keep_count]
+cleanup_orphan_backups() {
+    local keep_count="${1:-3}"  # Default: keep last 3 backups per type
+    local backup_types=("agents" "commands" "skills" "hooks")
+    local cleaned_count=0
+
+    log_debug "Cleaning orphan backups (keeping last $keep_count per type)"
+
+    for backup_type in "${backup_types[@]}"; do
+        local backup_base_dir=".claude/${backup_type}.orphan-backup"
+
+        # Skip if backup directory doesn't exist
+        if [[ ! -d "$backup_base_dir" ]]; then
+            log_debug "No orphan backups for $backup_type"
+            continue
+        fi
+
+        # Find all timestamped backup subdirectories, sorted by modification time (newest first)
+        # Format: .claude/{type}.orphan-backup/{timestamp}-{team}/
+        # Use portable approach compatible with both GNU and BSD find
+        local backup_dirs=()
+        while IFS= read -r backup_dir; do
+            backup_dirs+=("$backup_dir")
+        done < <(find "$backup_base_dir" -mindepth 1 -maxdepth 1 -type d -exec stat -f '%m %N' {} \; 2>/dev/null | sort -rn | cut -d' ' -f2- || \
+                 find "$backup_base_dir" -mindepth 1 -maxdepth 1 -type d -exec stat -c '%Y %n' {} \; 2>/dev/null | sort -rn | cut -d' ' -f2-)
+
+        local total_backups=${#backup_dirs[@]}
+
+        # Skip if we have fewer backups than the keep count
+        if [[ $total_backups -le $keep_count ]]; then
+            log_debug "Only $total_backups ${backup_type} backup(s), keeping all"
+            continue
+        fi
+
+        # Remove backups beyond the keep count
+        local to_remove=$((total_backups - keep_count))
+        log_debug "Found $total_backups ${backup_type} backup(s), removing $to_remove oldest"
+
+        for ((i = keep_count; i < total_backups; i++)); do
+            local old_backup="${backup_dirs[$i]}"
+            if [[ -d "$old_backup" ]]; then
+                rm -rf "$old_backup"
+                ((cleaned_count++))
+                log_debug "Removed old backup: $(basename "$old_backup")"
+            fi
+        done
+    done
+
+    if [[ $cleaned_count -gt 0 ]]; then
+        log "Cleaned up $cleaned_count old orphan backup(s)"
+    else
+        log_debug "No orphan backups to clean up"
+    fi
+
+    return 0
 }
 
 # ============================================================================
@@ -3755,6 +3980,12 @@ perform_swap() {
     agent_count=$(validate_pack "$team_name")
     validate_project
 
+    # Validate team schemas (workflow.yaml, orchestrator.yaml) before swap
+    validate_team_schemas "$team_name" || {
+        log_error "Team schema validation failed, aborting swap"
+        exit "$EXIT_VALIDATION_FAILURE"
+    }
+
     # Dry-run mode: preview changes and exit
     if [[ "$DRY_RUN_MODE" -eq 1 ]]; then
         preview_refresh "$team_name"
@@ -3871,6 +4102,9 @@ perform_swap() {
             remove_orphan_commands
         fi
     fi
+
+    # Check for user command collisions before syncing team commands
+    check_user_command_collisions "$team_name"
 
     # Sync team-specific commands
     swap_commands "$team_name"
@@ -4014,6 +4248,11 @@ perform_swap() {
 
     # Update CLAUDE.md to reflect new team's agents (non-critical)
     update_claude_md "$team_name" || log_warning "CLAUDE.md update failed (non-critical)"
+
+    # Auto-cleanup orphan backups if flag enabled (non-critical)
+    if [[ "$AUTO_CLEANUP_MODE" -eq 1 ]]; then
+        cleanup_orphan_backups || log_warning "Orphan backup cleanup failed (non-critical)"
+    fi
 
     # Display team roster (dynamic generation from agent frontmatter)
     generate_roster "$team_name"
@@ -4380,6 +4619,14 @@ main() {
                 AUTO_SYNC_MODE=1
                 shift
                 ;;
+            --cleanup-orphans)
+                CLEANUP_ORPHANS_MODE=1
+                shift
+                ;;
+            --auto-cleanup)
+                AUTO_CLEANUP_MODE=1
+                shift
+                ;;
             -*)
                 log_error "Unknown option: $1"
                 usage
@@ -4424,6 +4671,12 @@ main() {
     # Handle reset mode (takes precedence)
     if [[ "$RESET_MODE" -eq 1 ]]; then
         perform_reset
+        exit "$EXIT_SUCCESS"
+    fi
+
+    # Handle cleanup-orphans mode (takes precedence)
+    if [[ "$CLEANUP_ORPHANS_MODE" -eq 1 ]]; then
+        cleanup_orphan_backups
         exit "$EXIT_SUCCESS"
     fi
 
