@@ -294,9 +294,93 @@ merge_with_preserved() {
 # Output: Claude Code settings.local.json hooks object to stdout
 # Returns: 0 always (empty {} for no registrations)
 generate_hooks_json() {
-    # TODO: Implement in RF-022
-    echo "{}"
-    return 0
+    local registrations="$1"
+
+    # If no registrations, return empty object
+    if [[ -z "$registrations" ]]; then
+        echo "{}"
+        return 0
+    fi
+
+    # Convert JSON-lines to JSON array
+    local all_hooks
+    all_hooks=$(echo "$registrations" | jq -s '.' 2>/dev/null)
+    if [[ -z "$all_hooks" ]] || [[ "$all_hooks" == "null" ]]; then
+        echo "{}"
+        return 0
+    fi
+
+    # Group by event type and build Claude Code format
+    local events=("SessionStart" "Stop" "PreToolUse" "PostToolUse" "UserPromptSubmit")
+    local result="{}"
+
+    for event in "${events[@]}"; do
+        # Filter hooks for this event
+        local event_hooks
+        event_hooks=$(echo "$all_hooks" | jq -c "[.[] | select(.event == \"$event\")]")
+
+        local count
+        count=$(echo "$event_hooks" | jq 'length')
+        [[ "$count" -eq 0 ]] && continue
+
+        # Get unique matchers for this event (preserve order)
+        local matchers
+        matchers=$(echo "$event_hooks" | jq -r '.[].matcher' | awk '!seen[$0]++')
+
+        # Build entries for this event
+        local event_entries="[]"
+
+        while IFS= read -r matcher; do
+            # Get all hooks for this matcher
+            local matcher_hooks
+            if [[ -z "$matcher" ]]; then
+                matcher_hooks=$(echo "$event_hooks" | jq -c "[.[] | select(.matcher == \"\")]")
+            else
+                matcher_hooks=$(echo "$event_hooks" | jq -c --arg m "$matcher" '[.[] | select(.matcher == $m)]')
+            fi
+
+            local hook_count
+            hook_count=$(echo "$matcher_hooks" | jq 'length')
+            [[ "$hook_count" -eq 0 ]] && continue
+
+            # Build hooks array for this matcher
+            local hooks_array="[]"
+            local j
+            for ((j=0; j<hook_count; j++)); do
+                local path timeout
+                path=$(echo "$matcher_hooks" | jq -r ".[$j].path")
+                timeout=$(echo "$matcher_hooks" | jq -r ".[$j].timeout")
+
+                local hook_obj
+                hook_obj=$(jq -n -c \
+                    --arg path "\$CLAUDE_PROJECT_DIR/.claude/hooks/$path" \
+                    --argjson timeout "$timeout" \
+                    '{type: "command", command: $path, timeout: $timeout}')
+
+                hooks_array=$(echo "$hooks_array" | jq -c ". + [$hook_obj]")
+            done
+
+            # Build entry object
+            local entry
+            if [[ -n "$matcher" ]]; then
+                entry=$(jq -n -c \
+                    --arg matcher "$matcher" \
+                    --argjson hooks "$hooks_array" \
+                    '{matcher: $matcher, hooks: $hooks}')
+            else
+                entry=$(jq -n -c \
+                    --argjson hooks "$hooks_array" \
+                    '{hooks: $hooks}')
+            fi
+
+            event_entries=$(echo "$event_entries" | jq -c ". + [$entry]")
+        done <<< "$matchers"
+
+        # Add event entries to result
+        result=$(echo "$result" | jq -c --argjson entries "$event_entries" ".\"$event\" = \$entries")
+    done
+
+    echo "$result"
 }
 
 # ============================================================================
