@@ -320,6 +320,7 @@ readonly COMMIT_STEP_SHARED_SKILLS="shared_skills"
 readonly COMMIT_STEP_HOOKS="hooks"
 readonly COMMIT_STEP_HOOK_REGISTRATIONS="hook_registrations"
 readonly COMMIT_STEP_MANIFEST="manifest"
+readonly COMMIT_STEP_CEM_MANIFEST="cem_manifest"
 readonly COMMIT_STEP_ACTIVE_TEAM="active_team"  # Point-of-no-return
 
 # Initialize commit steps tracking in journal
@@ -341,6 +342,7 @@ init_commit_steps() {
         "hooks": false,
         "hook_registrations": false,
         "manifest": false,
+        "cem_manifest": false,
         "active_team": false
     }' "$JOURNAL_FILE") || {
         log_error "Failed to parse journal for commit steps init"

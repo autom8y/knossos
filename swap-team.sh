@@ -635,6 +635,17 @@ complete_partial_commit() {
         fi
     fi
 
+    # CEM manifest update (critical for roster-sync staleness tracking)
+    if ! is_commit_step_done "$COMMIT_STEP_CEM_MANIFEST"; then
+        log "Completing: CEM manifest update"
+        if update_cem_manifest_team "$target_team"; then
+            mark_commit_step "$COMMIT_STEP_CEM_MANIFEST"
+        else
+            log_warning "CEM manifest update failed during recovery"
+            # Continue anyway - ACTIVE_TEAM is already committed
+        fi
+    fi
+
     # Mark as completed
     update_journal_phase "$PHASE_COMPLETED"
 
@@ -3205,6 +3216,16 @@ perform_swap() {
     # Mark point-of-no-return - after this, recovery must complete forward
     mark_commit_step "$COMMIT_STEP_ACTIVE_TEAM"
 
+    # Update CEM manifest team section (critical for roster-sync staleness tracking)
+    # This must succeed before completing the transaction
+    if ! update_cem_manifest_team "$team_name"; then
+        log_error "Failed to update CEM manifest team section"
+        update_journal_error "CEM manifest update failed"
+        rollback_swap
+        exit "$EXIT_SWAP_FAILURE"
+    fi
+    mark_commit_step "$COMMIT_STEP_CEM_MANIFEST"
+
     # =========================================================================
     # PHASE: COMPLETED - Transaction is committed
     # =========================================================================
@@ -3225,9 +3246,6 @@ perform_swap() {
     # Restore kept agents after swap
     restore_kept_agents
     cleanup_stash
-
-    # Update CEM manifest team section (for roster-sync staleness tracking)
-    update_cem_manifest_team "$team_name"
 
     # Update session team if active session exists (non-critical)
     # Check both user-level and project-level for session-manager.sh
