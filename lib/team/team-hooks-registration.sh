@@ -266,8 +266,11 @@ extract_non_roster_hooks() {
 # Output: Combined JSON-lines to stdout (base first, then team)
 # Returns: 0 always
 merge_hook_registrations() {
-    # TODO: Implement in RF-021
-    return 0
+    local base_registrations="$1"
+    local team_registrations="$2"
+
+    # Combine all registrations (base first, team second)
+    printf '%s\n%s' "$base_registrations" "$team_registrations" | grep -v '^$' || true
 }
 
 # Merge generated hooks with preserved user hooks
