@@ -69,8 +69,36 @@ fi
 #   $2 - content: Content to write
 # Returns: 0 on success, 1 on failure
 write_atomic() {
-    # Function stub - to be implemented
-    return 1
+    local target="$1"
+    local content="$2"
+    local temp="${target}.tmp.$$"
+
+    # Ensure parent directory exists
+    local parent_dir
+    parent_dir=$(dirname "$target")
+    mkdir -p "$parent_dir" || {
+        log_error "Cannot create directory: $parent_dir"
+        return 1
+    }
+
+    # Write to temp file
+    printf '%s' "$content" > "$temp" || {
+        rm -f "$temp" 2>/dev/null
+        log_error "Failed to write temp file: $temp"
+        return 1
+    }
+
+    # Sync to disk (best effort)
+    sync "$temp" 2>/dev/null || true
+
+    # Atomic rename
+    mv "$temp" "$target" || {
+        rm -f "$temp" 2>/dev/null
+        log_error "Failed to rename temp file to: $target"
+        return 1
+    }
+
+    return 0
 }
 
 # ============================================================================
