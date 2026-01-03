@@ -225,6 +225,10 @@ rollback_swap() {
     cleanup_staging
     cleanup_swap_backup
 
+    # Clean up agent stash to prevent orphan accumulation on failed swaps
+    # Without this, restore_kept_agents runs on every subsequent swap attempt
+    cleanup_stash
+
     log "Rollback complete. Previous state restored."
     return 0
 }
@@ -254,6 +258,7 @@ handle_interrupt() {
             log "No changes made. Exiting."
             delete_journal
             cleanup_staging
+            cleanup_stash  # Clean up any stashed agents from orphan handling
             ;;
         "$PHASE_STAGING"|"$PHASE_VERIFYING")
             log "Rolling back partial changes..."
