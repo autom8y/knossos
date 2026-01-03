@@ -1326,9 +1326,6 @@ format_orphan() {
 declare -a AGENTS_TO_KEEP=()
 declare -a AGENTS_TO_PROMOTE=()
 declare -a AGENTS_TO_REMOVE=()
-declare -a ORPHAN_SKILLS=()
-declare -a ORPHAN_COMMANDS=()
-declare -a ORPHAN_HOOKS=()
 
 # Stash agents to keep (before swap clears .claude/agents/)
 stash_kept_agents() {
@@ -3729,14 +3726,12 @@ preview_refresh() {
     # Check for orphan commands (commands from other teams)
     echo ""
     echo "Command orphans (from other teams):"
-    detect_command_orphans "$team_name"
-    if [[ ${#ORPHAN_COMMANDS[@]} -gt 0 ]]; then
-        for orphan in "${ORPHAN_COMMANDS[@]}"; do
-            local cmd_name origin_team
-            cmd_name=$(echo "$orphan" | cut -d: -f1)
-            origin_team=$(echo "$orphan" | cut -d: -f2)
+    local orphan_commands
+    orphan_commands=$(detect_resource_orphans "commands" ".claude/commands" "$team_name" "f" "*.md")
+    if [[ -n "$orphan_commands" ]]; then
+        while IFS=: read -r cmd_name origin_team; do
             echo "  ? $cmd_name (from $origin_team)"
-        done
+        done <<< "$orphan_commands"
     else
         echo "  (none)"
     fi
@@ -3744,14 +3739,12 @@ preview_refresh() {
     # Check for orphan skills (skills from other teams)
     echo ""
     echo "Skill orphans (from other teams):"
-    detect_skill_orphans "$team_name"
-    if [[ ${#ORPHAN_SKILLS[@]} -gt 0 ]]; then
-        for orphan in "${ORPHAN_SKILLS[@]}"; do
-            local skill_name origin_team
-            skill_name=$(echo "$orphan" | cut -d: -f1)
-            origin_team=$(echo "$orphan" | cut -d: -f2)
+    local orphan_skills
+    orphan_skills=$(detect_resource_orphans "skills" ".claude/skills" "$team_name" "d" "*/")
+    if [[ -n "$orphan_skills" ]]; then
+        while IFS=: read -r skill_name origin_team; do
             echo "  ? $skill_name (from $origin_team)"
-        done
+        done <<< "$orphan_skills"
     else
         echo "  (none)"
     fi
@@ -3759,20 +3752,22 @@ preview_refresh() {
     # Check for orphan hooks (hooks from other teams)
     echo ""
     echo "Hook orphans (from other teams):"
-    detect_hook_orphans "$team_name"
-    if [[ ${#ORPHAN_HOOKS[@]} -gt 0 ]]; then
-        for orphan in "${ORPHAN_HOOKS[@]}"; do
-            local hook_name origin_team
-            hook_name=$(echo "$orphan" | cut -d: -f1)
-            origin_team=$(echo "$orphan" | cut -d: -f2)
+    local orphan_hooks
+    orphan_hooks=$(detect_resource_orphans "hooks" ".claude/hooks" "$team_name" "f" "*")
+    if [[ -n "$orphan_hooks" ]]; then
+        while IFS=: read -r hook_name origin_team; do
             echo "  ? $hook_name (from $origin_team)"
-        done
+        done <<< "$orphan_hooks"
     else
         echo "  (none)"
     fi
 
     # Summary of orphans
-    local total_orphans=$((${#ORPHAN_COMMANDS[@]} + ${#ORPHAN_SKILLS[@]} + ${#ORPHAN_HOOKS[@]}))
+    local cmd_count skill_count hook_count
+    cmd_count=$(echo "$orphan_commands" | grep -c . || echo 0)
+    skill_count=$(echo "$orphan_skills" | grep -c . || echo 0)
+    hook_count=$(echo "$orphan_hooks" | grep -c . || echo 0)
+    local total_orphans=$((cmd_count + skill_count + hook_count))
     if [[ $total_orphans -gt 0 ]]; then
         echo ""
         echo "Use --remove-all to clean up $total_orphans orphan(s)"
@@ -4115,19 +4110,19 @@ perform_swap() {
     # =========================================================================
 
     # Detect and handle orphan commands (commands from other teams)
-    detect_command_orphans "$team_name"
-    if [[ ${#ORPHAN_COMMANDS[@]} -gt 0 ]]; then
+    local orphan_commands
+    orphan_commands=$(detect_resource_orphans "commands" ".claude/commands" "$team_name" "f" "*.md")
+    if [[ -n "$orphan_commands" ]]; then
         if [[ -z "$ORPHAN_MODE" ]]; then
-            log_warning "Found ${#ORPHAN_COMMANDS[@]} orphan command(s) from other teams:"
-            for orphan in "${ORPHAN_COMMANDS[@]}"; do
-                local cmd_name origin_team
-                cmd_name=$(echo "$orphan" | cut -d: -f1)
-                origin_team=$(echo "$orphan" | cut -d: -f2)
+            local orphan_count
+            orphan_count=$(echo "$orphan_commands" | wc -l | tr -d ' ')
+            log_warning "Found ${orphan_count} orphan command(s) from other teams:"
+            while IFS=: read -r cmd_name origin_team; do
                 echo "  - $cmd_name (from $origin_team)"
-            done
+            done <<< "$orphan_commands"
             log "Use --remove-all to clean up orphan commands"
         else
-            remove_orphan_commands
+            echo "$orphan_commands" | remove_resource_orphans "commands" ".claude/commands" "$ORPHAN_MODE" "f"
         fi
     fi
 
@@ -4138,20 +4133,20 @@ perform_swap() {
     swap_commands "$team_name"
 
     # Detect and handle orphan skills (skills from other teams)
-    detect_skill_orphans "$team_name"
-    if [[ ${#ORPHAN_SKILLS[@]} -gt 0 ]]; then
+    local orphan_skills
+    orphan_skills=$(detect_resource_orphans "skills" ".claude/skills" "$team_name" "d" "*/")
+    if [[ -n "$orphan_skills" ]]; then
         if [[ -z "$ORPHAN_MODE" ]]; then
             # Non-interactive mode without flags - warn but don't block
-            log_warning "Found ${#ORPHAN_SKILLS[@]} orphan skill(s) from other teams:"
-            for orphan in "${ORPHAN_SKILLS[@]}"; do
-                local skill_name origin_team
-                skill_name=$(echo "$orphan" | cut -d: -f1)
-                origin_team=$(echo "$orphan" | cut -d: -f2)
+            local orphan_count
+            orphan_count=$(echo "$orphan_skills" | wc -l | tr -d ' ')
+            log_warning "Found ${orphan_count} orphan skill(s) from other teams:"
+            while IFS=: read -r skill_name origin_team; do
                 echo "  - $skill_name (from $origin_team)"
-            done
+            done <<< "$orphan_skills"
             log "Use --remove-all to clean up orphan skills"
         else
-            remove_orphan_skills
+            echo "$orphan_skills" | remove_resource_orphans "skills" ".claude/skills" "$ORPHAN_MODE" "d"
         fi
     fi
 
@@ -4162,19 +4157,19 @@ perform_swap() {
     sync_shared_skills
 
     # Detect and handle orphan hooks (hooks from other teams)
-    detect_hook_orphans "$team_name"
-    if [[ ${#ORPHAN_HOOKS[@]} -gt 0 ]]; then
+    local orphan_hooks
+    orphan_hooks=$(detect_resource_orphans "hooks" ".claude/hooks" "$team_name" "f" "*")
+    if [[ -n "$orphan_hooks" ]]; then
         if [[ -z "$ORPHAN_MODE" ]]; then
-            log_warning "Found ${#ORPHAN_HOOKS[@]} orphan hook(s) from other teams:"
-            for orphan in "${ORPHAN_HOOKS[@]}"; do
-                local hook_name origin_team
-                hook_name=$(echo "$orphan" | cut -d: -f1)
-                origin_team=$(echo "$orphan" | cut -d: -f2)
+            local orphan_count
+            orphan_count=$(echo "$orphan_hooks" | wc -l | tr -d ' ')
+            log_warning "Found ${orphan_count} orphan hook(s) from other teams:"
+            while IFS=: read -r hook_name origin_team; do
                 echo "  - $hook_name (from $origin_team)"
-            done
+            done <<< "$orphan_hooks"
             log "Use --remove-all to clean up orphan hooks"
         else
-            remove_orphan_hooks
+            echo "$orphan_hooks" | remove_resource_orphans "hooks" ".claude/hooks" "$ORPHAN_MODE" "f"
         fi
     fi
 
