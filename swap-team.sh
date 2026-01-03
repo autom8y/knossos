@@ -59,6 +59,11 @@ AUTO_SYNC_MODE=0      # --auto-sync: conditionally sync if roster has updates
 CLEANUP_ORPHANS_MODE=0    # --cleanup-orphans: manual cleanup of old orphan backups
 AUTO_CLEANUP_MODE=0       # --auto-cleanup: automatic cleanup during swap
 
+# Interactive mode: "auto" (default), "yes" (force prompts), "no" (force auto-select)
+# --interactive forces prompts even without TTY
+# --no-interactive forces auto-selection even with TTY
+INTERACTIVE_MODE="auto"
+
 # Colors for output (if terminal supports it)
 if [[ -t 1 ]]; then
     readonly RED='\033[0;31m'
@@ -89,6 +94,27 @@ log_debug() {
     if [[ "$ROSTER_DEBUG" == "1" ]]; then
         echo "[Roster DEBUG] $*" >&2
     fi
+}
+
+# Check if running in interactive mode
+# Returns: 0 if interactive (prompts allowed), 1 if non-interactive
+# Logic:
+#   --interactive forces interactive (returns 0) even without TTY
+#   --no-interactive forces non-interactive (returns 1) even with TTY
+#   "auto" (default) uses TTY detection: [[ -t 0 ]]
+is_interactive() {
+    case "$INTERACTIVE_MODE" in
+        "yes")
+            return 0
+            ;;
+        "no")
+            return 1
+            ;;
+        "auto"|*)
+            [[ -t 0 ]]
+            return $?
+            ;;
+    esac
 }
 
 # ============================================================================
@@ -350,7 +376,7 @@ check_journal_recovery() {
     fi
 
     # Interactive vs non-interactive recovery
-    if [[ -t 0 ]]; then
+    if is_interactive; then
         prompt_recovery_action "$source" "$target" "$phase" "$past_ponr"
     elif [[ "$AUTO_RECOVER" -eq 1 ]]; then
         if [[ "$past_ponr" == "true" ]]; then
@@ -1160,8 +1186,8 @@ cleanup_stash() {
 prompt_disposition() {
     local team_name="$1"
 
-    # Check if we're in an interactive terminal
-    if [[ ! -t 0 ]]; then
+    # Check if we're in an interactive mode
+    if ! is_interactive; then
         # Non-interactive - error if no flag set
         if [[ -z "$ORPHAN_MODE" ]]; then
             log_error "Orphan agents detected in non-interactive mode."
@@ -1317,10 +1343,18 @@ Options:
   --auto-sync        Conditionally sync if roster has updates available
   --cleanup-orphans  Clean up old orphan backup directories (keep last 3)
   --auto-cleanup     Automatically clean orphan backups during swap
+  --interactive      Force interactive prompts even without TTY (for containers)
+  --no-interactive   Force non-interactive mode even with TTY (alias: --batch)
 
 When switching teams interactively, you'll be prompted for each orphan agent
 (agents in current team but not in target team). In non-interactive mode
 (scripts, CI), you must specify one of the orphan handling flags.
+
+Interactive Mode:
+  By default, TTY auto-detection determines prompting behavior. This can be
+  unreliable in containers, CI, or when piping. Use --interactive to force
+  prompts (requires /dev/tty access), or --no-interactive to skip prompts
+  and require explicit flags like --keep-all for orphan handling.
 
 Environment Variables:
   ROSTER_HOME         Roster repository location (default: ~/Code/roster)
@@ -1354,6 +1388,8 @@ Examples:
   ./swap-team.sh dev-pack --auto-sync   # Sync only if roster has updates
   ./swap-team.sh --cleanup-orphans      # Clean up old orphan backups
   ./swap-team.sh dev-pack --auto-cleanup # Swap team and auto-clean orphan backups
+  echo "team" | ./swap-team.sh --interactive --keep-all # Force prompts in pipe
+  ./swap-team.sh dev-pack --no-interactive --keep-all   # Skip TTY check in CI
 
 EOF
 }
@@ -3539,6 +3575,14 @@ main() {
                 AUTO_CLEANUP_MODE=1
                 shift
                 ;;
+            --interactive)
+                INTERACTIVE_MODE="yes"
+                shift
+                ;;
+            --no-interactive|--batch)
+                INTERACTIVE_MODE="no"
+                shift
+                ;;
             -*)
                 log_error "Unknown option: $1"
                 usage
@@ -3570,10 +3614,10 @@ main() {
             exit "$EXIT_SUCCESS"
         fi
         # Force interactive recovery
-        if [[ -t 0 ]]; then
+        if is_interactive; then
             check_journal_recovery
         else
-            log_error "Recovery mode requires interactive terminal"
+            log_error "Recovery mode requires interactive terminal (or use --interactive)"
             log "Use --auto-recover for non-interactive recovery"
             exit "$EXIT_INVALID_ARGS"
         fi
