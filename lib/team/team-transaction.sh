@@ -269,6 +269,124 @@ journal_exists() {
 }
 
 # ============================================================================
+# Commit Step Tracking
+# ============================================================================
+# Commit steps track sub-operations within the COMMITTING phase.
+# This enables recovery to determine what completed and what remains.
+#
+# Steps are stored in journal.commit_steps as an object:
+#   { "agents": true, "workflow": true, "commands": false, ... }
+#
+# The point-of-no-return is when "active_team" step is marked complete.
+# Before that point: rollback to backup
+# After that point: complete the remaining steps
+
+# Commit step constants
+readonly COMMIT_STEP_AGENTS="agents"
+readonly COMMIT_STEP_WORKFLOW="workflow"
+readonly COMMIT_STEP_COMMANDS="commands"
+readonly COMMIT_STEP_SKILLS="skills"
+readonly COMMIT_STEP_SHARED_SKILLS="shared_skills"
+readonly COMMIT_STEP_HOOKS="hooks"
+readonly COMMIT_STEP_HOOK_REGISTRATIONS="hook_registrations"
+readonly COMMIT_STEP_MANIFEST="manifest"
+readonly COMMIT_STEP_ACTIVE_TEAM="active_team"  # Point-of-no-return
+
+# Initialize commit steps tracking in journal
+# Called when entering COMMITTING phase
+# Returns: 0 on success, 1 if journal missing
+init_commit_steps() {
+    if [[ ! -f "$JOURNAL_FILE" ]]; then
+        log_error "Cannot init commit steps: journal does not exist"
+        return 1
+    fi
+
+    local updated
+    updated=$(jq '.commit_steps = {
+        "agents": false,
+        "workflow": false,
+        "commands": false,
+        "skills": false,
+        "shared_skills": false,
+        "hooks": false,
+        "hook_registrations": false,
+        "manifest": false,
+        "active_team": false
+    }' "$JOURNAL_FILE") || {
+        log_error "Failed to parse journal for commit steps init"
+        return 1
+    }
+
+    write_atomic "$JOURNAL_FILE" "$updated" || {
+        log_error "Failed to init commit steps in journal"
+        return 1
+    }
+
+    log_debug "Commit steps initialized"
+    return 0
+}
+
+# Mark a commit step as completed
+# Parameters:
+#   $1 - step: Step name (COMMIT_STEP_* constant)
+# Returns: 0 on success, 1 if journal missing or update fails
+mark_commit_step() {
+    local step="$1"
+
+    if [[ ! -f "$JOURNAL_FILE" ]]; then
+        log_error "Cannot mark commit step: journal does not exist"
+        return 1
+    fi
+
+    local updated
+    updated=$(jq --arg step "$step" '.commit_steps[$step] = true' "$JOURNAL_FILE") || {
+        log_error "Failed to parse journal for commit step update"
+        return 1
+    }
+
+    write_atomic "$JOURNAL_FILE" "$updated" || {
+        log_error "Failed to mark commit step: $step"
+        return 1
+    }
+
+    log_debug "Commit step completed: $step"
+    return 0
+}
+
+# Check if a commit step is completed
+# Parameters:
+#   $1 - step: Step name to check
+# Returns: 0 if completed, 1 if not completed or journal missing
+is_commit_step_done() {
+    local step="$1"
+
+    if [[ ! -f "$JOURNAL_FILE" ]]; then
+        return 1
+    fi
+
+    local result
+    result=$(jq -r --arg step "$step" '.commit_steps[$step] // false' "$JOURNAL_FILE" 2>/dev/null)
+    [[ "$result" == "true" ]]
+}
+
+# Check if we're past the point-of-no-return (ACTIVE_TEAM written)
+# Returns: 0 if past point-of-no-return, 1 if before
+is_past_point_of_no_return() {
+    is_commit_step_done "$COMMIT_STEP_ACTIVE_TEAM"
+}
+
+# Get list of incomplete commit steps
+# Outputs: Space-separated list of incomplete steps
+get_incomplete_commit_steps() {
+    if [[ ! -f "$JOURNAL_FILE" ]]; then
+        echo ""
+        return 1
+    fi
+
+    jq -r '.commit_steps | to_entries | map(select(.value == false)) | .[].key' "$JOURNAL_FILE" 2>/dev/null | tr '\n' ' '
+}
+
+# ============================================================================
 # Staging Operations
 # ============================================================================
 

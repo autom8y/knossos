@@ -318,28 +318,42 @@ check_journal_recovery() {
         return 0
     fi
 
-    # Check backup validity
-    local backup_valid=false
-    if verify_backup_integrity; then
-        backup_valid=true
+    # Check if we're past point-of-no-return in COMMITTING phase
+    local past_ponr=false
+    if [[ "$phase" == "$PHASE_COMMITTING" ]] && is_past_point_of_no_return; then
+        past_ponr=true
+        log_warning "Past point-of-no-return. Must complete forward (cannot rollback)."
     fi
 
-    if [[ "$backup_valid" == "false" ]]; then
-        log_error "Backup is missing or corrupted"
-        log "Manual intervention required:"
-        log "  1. Check $STAGING_DIR for new state"
-        log "  2. Check $SWAP_BACKUP_DIR for old state"
-        log "  3. Manually restore desired state"
-        log "  4. Delete $JOURNAL_FILE when done"
-        exit "$EXIT_RECOVERY_REQUIRED"
+    # Check backup validity (only needed if rollback is an option)
+    local backup_valid=false
+    if [[ "$past_ponr" != "true" ]]; then
+        if verify_backup_integrity; then
+            backup_valid=true
+        fi
+
+        if [[ "$backup_valid" == "false" ]]; then
+            log_error "Backup is missing or corrupted"
+            log "Manual intervention required:"
+            log "  1. Check $STAGING_DIR for new state"
+            log "  2. Check $SWAP_BACKUP_DIR for old state"
+            log "  3. Manually restore desired state"
+            log "  4. Delete $JOURNAL_FILE when done"
+            exit "$EXIT_RECOVERY_REQUIRED"
+        fi
     fi
 
     # Interactive vs non-interactive recovery
     if [[ -t 0 ]]; then
-        prompt_recovery_action "$source" "$target" "$phase"
+        prompt_recovery_action "$source" "$target" "$phase" "$past_ponr"
     elif [[ "$AUTO_RECOVER" -eq 1 ]]; then
-        log "Auto-recovery enabled. Rolling back..."
-        rollback_swap
+        if [[ "$past_ponr" == "true" ]]; then
+            log "Auto-recovery: completing forward (past point-of-no-return)..."
+            complete_partial_commit "$target"
+        else
+            log "Auto-recovery enabled. Rolling back..."
+            rollback_swap
+        fi
         return 0
     else
         log_error "Non-interactive mode. Use --auto-recover to enable automatic rollback"
@@ -351,37 +365,70 @@ check_journal_recovery() {
 }
 
 # Interactive recovery prompt
+# Parameters:
+#   $1 - source: Source team
+#   $2 - target: Target team
+#   $3 - phase: Current phase
+#   $4 - past_ponr: "true" if past point-of-no-return
 prompt_recovery_action() {
-    local source="$1" target="$2" phase="$3"
+    local source="$1" target="$2" phase="$3" past_ponr="${4:-false}"
 
     echo ""
-    echo "Recovery Options:"
-    echo "  [r] Rollback to previous state ($source)"
-    echo "  [c] Continue swap to $target (may fail)"
-    echo "  [a] Abort (leave as-is for manual recovery)"
-    echo ""
+    if [[ "$past_ponr" == "true" ]]; then
+        echo "Recovery Options (past point-of-no-return):"
+        echo "  [c] Complete swap to $target (recommended)"
+        echo "  [a] Abort (leave as-is for manual recovery)"
+        echo ""
+        echo "Note: Rollback is not available because ACTIVE_TEAM was already written."
+        echo ""
 
-    local choice
-    while true; do
-        read -r -p "Choice [r/c/a]: " choice < /dev/tty
-        case "$choice" in
-            r|R)
-                rollback_swap
-                return 0
-                ;;
-            c|C)
-                continue_interrupted_swap "$phase" "$target"
-                return $?
-                ;;
-            a|A)
-                log "Aborted. Journal preserved for manual recovery."
-                exit "$EXIT_SUCCESS"
-                ;;
-            *)
-                echo "Invalid choice. Enter r, c, or a."
-                ;;
-        esac
-    done
+        local choice
+        while true; do
+            read -r -p "Choice [c/a]: " choice < /dev/tty
+            case "$choice" in
+                c|C)
+                    complete_partial_commit "$target"
+                    return $?
+                    ;;
+                a|A)
+                    log "Aborted. Journal preserved for manual recovery."
+                    log_warning "System may be in inconsistent state."
+                    exit "$EXIT_SUCCESS"
+                    ;;
+                *)
+                    echo "Invalid choice. Enter c or a."
+                    ;;
+            esac
+        done
+    else
+        echo "Recovery Options:"
+        echo "  [r] Rollback to previous state ($source)"
+        echo "  [c] Continue swap to $target (may fail)"
+        echo "  [a] Abort (leave as-is for manual recovery)"
+        echo ""
+
+        local choice
+        while true; do
+            read -r -p "Choice [r/c/a]: " choice < /dev/tty
+            case "$choice" in
+                r|R)
+                    rollback_swap
+                    return 0
+                    ;;
+                c|C)
+                    continue_interrupted_swap "$phase" "$target"
+                    return $?
+                    ;;
+                a|A)
+                    log "Aborted. Journal preserved for manual recovery."
+                    exit "$EXIT_SUCCESS"
+                    ;;
+                *)
+                    echo "Invalid choice. Enter r, c, or a."
+                    ;;
+            esac
+        done
+    fi
 }
 
 # Attempt to continue an interrupted swap
@@ -397,8 +444,8 @@ continue_interrupted_swap() {
             log_warning "Re-staging is not fully implemented. Recommend rollback."
             return 1
             ;;
-        "$PHASE_VERIFYING"|"$PHASE_COMMITTING")
-            # Try to complete the commit
+        "$PHASE_VERIFYING")
+            # Verification phase - can restart from staging
             if [[ -d "$STAGING_DIR" ]]; then
                 log "Attempting to complete commit from staging..."
                 commit_staged_resources "$target_team"
@@ -408,11 +455,118 @@ continue_interrupted_swap() {
                 return 1
             fi
             ;;
+        "$PHASE_COMMITTING")
+            # Partial commit - check point-of-no-return
+            recover_partial_commit "$target_team"
+            return $?
+            ;;
         *)
             log_error "Cannot continue from phase: $phase"
             return 1
             ;;
     esac
+}
+
+# Recover from a partial COMMITTING phase
+# Checks point-of-no-return and either rolls back or completes forward
+# Parameters:
+#   $1 - target_team: Team being swapped to
+# Returns: 0 on success, 1 on failure
+recover_partial_commit() {
+    local target_team="$1"
+
+    log "Recovering from partial commit..."
+
+    # Check if we're past the point-of-no-return (ACTIVE_TEAM written)
+    if is_past_point_of_no_return; then
+        log "Past point-of-no-return. Completing swap forward..."
+        complete_partial_commit "$target_team"
+        return $?
+    else
+        log "Before point-of-no-return. Safe to rollback."
+        # Show which steps completed for diagnostics
+        local incomplete
+        incomplete=$(get_incomplete_commit_steps)
+        if [[ -n "$incomplete" ]]; then
+            log_debug "Incomplete steps: $incomplete"
+        fi
+        return 1  # Signal that rollback is the recommended action
+    fi
+}
+
+# Complete a partial commit after point-of-no-return
+# Runs only the steps that haven't completed yet
+# Parameters:
+#   $1 - target_team: Team being swapped to
+# Returns: 0 on success, 1 on failure
+complete_partial_commit() {
+    local target_team="$1"
+
+    log "Completing partial commit..."
+
+    # Run incomplete steps in order
+    # Note: agents and workflow are handled by commit_staged_resources
+    # We only need to handle steps after that point
+
+    if ! is_commit_step_done "$COMMIT_STEP_COMMANDS"; then
+        log "Completing: commands sync"
+        swap_commands "$target_team"
+        mark_commit_step "$COMMIT_STEP_COMMANDS"
+    fi
+
+    if ! is_commit_step_done "$COMMIT_STEP_SKILLS"; then
+        log "Completing: skills sync"
+        swap_skills "$target_team"
+        mark_commit_step "$COMMIT_STEP_SKILLS"
+    fi
+
+    if ! is_commit_step_done "$COMMIT_STEP_SHARED_SKILLS"; then
+        log "Completing: shared skills sync"
+        sync_shared_skills
+        mark_commit_step "$COMMIT_STEP_SHARED_SKILLS"
+    fi
+
+    if ! is_commit_step_done "$COMMIT_STEP_HOOKS"; then
+        log "Completing: hooks sync"
+        swap_hooks "$target_team"
+        mark_commit_step "$COMMIT_STEP_HOOKS"
+    fi
+
+    if ! is_commit_step_done "$COMMIT_STEP_HOOK_REGISTRATIONS"; then
+        log "Completing: hook registrations"
+        swap_hook_registrations "$target_team"
+        mark_commit_step "$COMMIT_STEP_HOOK_REGISTRATIONS"
+    fi
+
+    if ! is_commit_step_done "$COMMIT_STEP_MANIFEST"; then
+        log "Completing: manifest write"
+        write_manifest "$target_team"
+        mark_commit_step "$COMMIT_STEP_MANIFEST"
+    fi
+
+    # ACTIVE_TEAM should already be written (that's what got us past point-of-no-return)
+    # But verify and fix if somehow missing
+    if ! is_commit_step_done "$COMMIT_STEP_ACTIVE_TEAM"; then
+        log_warning "ACTIVE_TEAM step not marked but we're past point-of-no-return"
+        if [[ -f ".claude/ACTIVE_TEAM" ]]; then
+            local current_team
+            current_team=$(cat .claude/ACTIVE_TEAM | tr -d '[:space:]')
+            if [[ "$current_team" == "$target_team" ]]; then
+                mark_commit_step "$COMMIT_STEP_ACTIVE_TEAM"
+            fi
+        fi
+    fi
+
+    # Mark as completed
+    update_journal_phase "$PHASE_COMPLETED"
+
+    # Clean up
+    cleanup_staging
+    cleanup_swap_backup
+    delete_journal
+
+    log "Partial commit recovery complete"
+    return 0
 }
 
 # Verify current state consistency
@@ -496,6 +650,12 @@ commit_staged_resources() {
 
     update_journal_phase "$PHASE_COMMITTING"
 
+    # Initialize commit step tracking for recovery
+    init_commit_steps || {
+        log_error "Failed to initialize commit step tracking"
+        return 1
+    }
+
     # 1. Remove live directories (fast operations)
     rm -rf .claude/agents 2>/dev/null
 
@@ -507,6 +667,7 @@ commit_staged_resources() {
             return 1
         }
     fi
+    mark_commit_step "$COMMIT_STEP_AGENTS"
 
     # 3. Move workflow atomically
     if [[ -f "$STAGING_DIR/ACTIVE_WORKFLOW.yaml" ]]; then
@@ -514,6 +675,7 @@ commit_staged_resources() {
             log_warning "Failed to commit workflow"
         }
     fi
+    mark_commit_step "$COMMIT_STEP_WORKFLOW"
 
     # Note: ACTIVE_TEAM is committed LAST (after manifest is written)
     # This happens in the main perform_swap flow
@@ -2841,6 +3003,7 @@ perform_swap() {
 
     # Sync team-specific commands
     swap_commands "$team_name"
+    mark_commit_step "$COMMIT_STEP_COMMANDS"
 
     # Detect and handle orphan skills (skills from other teams)
     local orphan_skills
@@ -2862,9 +3025,11 @@ perform_swap() {
 
     # Sync team-specific skills (Phase 2: Unified Sync)
     swap_skills "$team_name"
+    mark_commit_step "$COMMIT_STEP_SKILLS"
 
     # Sync shared skills (always active, team-privileged override)
     sync_shared_skills
+    mark_commit_step "$COMMIT_STEP_SHARED_SKILLS"
 
     # Detect and handle orphan hooks (hooks from other teams)
     local orphan_hooks
@@ -2885,9 +3050,11 @@ perform_swap() {
 
     # Sync team hooks
     swap_hooks "$team_name"
+    mark_commit_step "$COMMIT_STEP_HOOKS"
 
     # Update hook registrations in settings.local.json (Scope 2)
     swap_hook_registrations "$team_name"
+    mark_commit_step "$COMMIT_STEP_HOOK_REGISTRATIONS"
 
     # =========================================================================
     # PART 2 OF COMMIT: Manifest and ACTIVE_TEAM (the actual commit)
@@ -2895,13 +3062,14 @@ perform_swap() {
     # Write manifest with current state (after commands synced so we capture them)
     # IMPORTANT: Manifest must be written BEFORE ACTIVE_TEAM
     write_manifest "$team_name"
+    mark_commit_step "$COMMIT_STEP_MANIFEST"
 
     # =========================================================================
     # FINAL COMMIT: Write ACTIVE_TEAM (LAST - this is the commit point)
     # =========================================================================
     # ACTIVE_TEAM is the commit indicator - if it contains the new team name,
     # the swap is considered complete. Writing it LAST ensures all resources
-    # are in place first.
+    # are in place first. This is the POINT-OF-NO-RETURN.
     if [[ -f "$STAGING_DIR/ACTIVE_TEAM" ]]; then
         mv "$STAGING_DIR/ACTIVE_TEAM" .claude/ACTIVE_TEAM || {
             log_error "Failed to commit ACTIVE_TEAM"
@@ -2917,6 +3085,8 @@ perform_swap() {
             exit "$EXIT_SWAP_FAILURE"
         }
     fi
+    # Mark point-of-no-return - after this, recovery must complete forward
+    mark_commit_step "$COMMIT_STEP_ACTIVE_TEAM"
 
     # =========================================================================
     # PHASE: COMPLETED - Transaction is committed
