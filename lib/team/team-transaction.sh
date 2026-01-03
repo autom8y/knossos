@@ -410,22 +410,139 @@ verify_staging() {
 # Requires: SWAP_BACKUP_DIR, MANIFEST_FILE (for backup path in journal)
 # Side effects: Updates journal with backup locations
 create_swap_backup() {
-    # Function stub - to be implemented
-    return 1
+    log_debug "Creating comprehensive backup in $SWAP_BACKUP_DIR"
+
+    # Clean any existing swap backup
+    rm -rf "$SWAP_BACKUP_DIR" 2>/dev/null
+
+    mkdir -p "$SWAP_BACKUP_DIR" || {
+        log_error "Failed to create swap backup directory"
+        return 1
+    }
+
+    # Backup agents if they exist
+    if [[ -d ".claude/agents" ]] && [[ -n "$(ls -A .claude/agents 2>/dev/null)" ]]; then
+        cp -rp .claude/agents "$SWAP_BACKUP_DIR/agents" || {
+            log_error "Failed to backup agents"
+            return 1
+        }
+        log_debug "Backed up agents"
+    fi
+
+    # Backup ACTIVE_TEAM if exists
+    if [[ -f ".claude/ACTIVE_TEAM" ]]; then
+        cp .claude/ACTIVE_TEAM "$SWAP_BACKUP_DIR/ACTIVE_TEAM" || {
+            log_error "Failed to backup ACTIVE_TEAM"
+            return 1
+        }
+        log_debug "Backed up ACTIVE_TEAM"
+    fi
+
+    # Backup AGENT_MANIFEST.json if exists
+    if [[ -f "$MANIFEST_FILE" ]]; then
+        cp "$MANIFEST_FILE" "$SWAP_BACKUP_DIR/AGENT_MANIFEST.json" || {
+            log_warning "Failed to backup manifest"
+        }
+        log_debug "Backed up manifest"
+    fi
+
+    # Backup ACTIVE_WORKFLOW.yaml if exists
+    if [[ -f ".claude/ACTIVE_WORKFLOW.yaml" ]]; then
+        cp .claude/ACTIVE_WORKFLOW.yaml "$SWAP_BACKUP_DIR/ACTIVE_WORKFLOW.yaml" || {
+            log_warning "Failed to backup workflow"
+        }
+        log_debug "Backed up workflow"
+    fi
+
+    # Backup commands if team commands exist
+    if [[ -f ".claude/commands/.team-commands" ]]; then
+        mkdir -p "$SWAP_BACKUP_DIR/commands"
+        while IFS= read -r cmd_file; do
+            [[ -z "$cmd_file" ]] && continue
+            if [[ -f ".claude/commands/$cmd_file" ]]; then
+                cp ".claude/commands/$cmd_file" "$SWAP_BACKUP_DIR/commands/$cmd_file"
+            fi
+        done < ".claude/commands/.team-commands"
+        cp ".claude/commands/.team-commands" "$SWAP_BACKUP_DIR/commands/.team-commands"
+        update_journal_backups "commands" "$SWAP_BACKUP_DIR/commands"
+        log_debug "Backed up team commands"
+    fi
+
+    # Backup skills if team skills exist
+    if [[ -f ".claude/skills/.team-skills" ]]; then
+        mkdir -p "$SWAP_BACKUP_DIR/skills"
+        while IFS= read -r skill_dir; do
+            [[ -z "$skill_dir" ]] && continue
+            if [[ -d ".claude/skills/$skill_dir" ]]; then
+                cp -rp ".claude/skills/$skill_dir" "$SWAP_BACKUP_DIR/skills/$skill_dir"
+            fi
+        done < ".claude/skills/.team-skills"
+        cp ".claude/skills/.team-skills" "$SWAP_BACKUP_DIR/skills/.team-skills"
+        update_journal_backups "skills" "$SWAP_BACKUP_DIR/skills"
+        log_debug "Backed up team skills"
+    fi
+
+    # Backup hooks if team hooks exist
+    if [[ -f ".claude/hooks/.team-hooks" ]]; then
+        mkdir -p "$SWAP_BACKUP_DIR/hooks"
+        while IFS= read -r hook_file; do
+            [[ -z "$hook_file" ]] && continue
+            if [[ -f ".claude/hooks/$hook_file" ]]; then
+                cp ".claude/hooks/$hook_file" "$SWAP_BACKUP_DIR/hooks/$hook_file"
+            fi
+        done < ".claude/hooks/.team-hooks"
+        cp ".claude/hooks/.team-hooks" "$SWAP_BACKUP_DIR/hooks/.team-hooks"
+        update_journal_backups "hooks" "$SWAP_BACKUP_DIR/hooks"
+        log_debug "Backed up team hooks"
+    fi
+
+    log_debug "Comprehensive backup complete"
+    return 0
 }
 
 # Clean up swap backup (after successful swap)
 # Returns: 0 always
 # Side effects: Removes SWAP_BACKUP_DIR if exists
 cleanup_swap_backup() {
-    # Function stub - to be implemented
-    return 0
+    if [[ -d "$SWAP_BACKUP_DIR" ]]; then
+        rm -rf "$SWAP_BACKUP_DIR"
+        log_debug "Swap backup cleaned up"
+    fi
 }
 
 # Verify backup integrity for recovery
 # Returns: 0 if backup valid, 1 if missing/corrupted
 # Requires: SWAP_BACKUP_DIR, JOURNAL_FILE (for virgin swap check)
 verify_backup_integrity() {
-    # Function stub - to be implemented
-    return 1
+    if [[ ! -d "$SWAP_BACKUP_DIR" ]]; then
+        log_debug "Backup directory missing"
+        return 1
+    fi
+
+    # For virgin swap, backup may not have agents
+    if [[ -d "$SWAP_BACKUP_DIR/agents" ]]; then
+        local agent_count
+        agent_count=$(find "$SWAP_BACKUP_DIR/agents" -maxdepth 1 -name "*.md" -type f 2>/dev/null | wc -l | tr -d ' ')
+        if [[ "$agent_count" -eq 0 ]]; then
+            log_debug "Backup has no agent files (may be virgin swap)"
+        fi
+    fi
+
+    # Check if this was a virgin swap (source_team is null in journal)
+    local was_virgin="false"
+    if [[ -f "$JOURNAL_FILE" ]]; then
+        local source_team
+        source_team=$(jq -r '.source_team // "null"' "$JOURNAL_FILE" 2>/dev/null)
+        if [[ "$source_team" == "null" ]]; then
+            was_virgin="true"
+        fi
+    fi
+
+    # For non-virgin swap, we need ACTIVE_TEAM in backup
+    if [[ "$was_virgin" != "true" ]] && [[ ! -f "$SWAP_BACKUP_DIR/ACTIVE_TEAM" ]]; then
+        log_debug "Backup missing ACTIVE_TEAM (non-virgin swap)"
+        return 1
+    fi
+
+    return 0
 }
