@@ -1,0 +1,209 @@
+#!/usr/bin/env python3
+"""
+analyze-hook-timing - CLI percentile reporter for hook timing data
+
+Analyzes JSONL timing data automatically collected by hooks-init.sh.
+All hooks using hooks_init() and hooks_finalize() automatically log timing
+to ~/.claude/hook-timing.jsonl.
+
+Usage:
+    analyze-hook-timing                    # Default report
+    analyze-hook-timing --file path/to.jsonl
+    analyze-hook-timing --hook canary      # Filter to specific hook
+    analyze-hook-timing --threshold 500    # Custom slow threshold (default 1000ms)
+    analyze-hook-timing --json             # Output as JSON for programmatic use
+
+Output:
+    - Summary table with p50/p95/p99 percentiles per hook
+    - List of slow events (>threshold)
+"""
+
+import argparse
+import json
+import sys
+from collections import defaultdict
+from pathlib import Path
+from typing import Any
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Analyze hook timing data from JSONL log"
+    )
+    parser.add_argument(
+        "--file", "-f",
+        type=Path,
+        default=Path.home() / ".claude" / "hook-timing.jsonl",
+        help="Path to timing JSONL file (default: ~/.claude/hook-timing.jsonl)"
+    )
+    parser.add_argument(
+        "--hook", "-H",
+        type=str,
+        default=None,
+        help="Filter to specific hook name"
+    )
+    parser.add_argument(
+        "--threshold", "-t",
+        type=int,
+        default=1000,
+        help="Threshold in ms for 'slow' events (default: 1000)"
+    )
+    parser.add_argument(
+        "--json", "-j",
+        action="store_true",
+        help="Output as JSON instead of table"
+    )
+    parser.add_argument(
+        "--last", "-n",
+        type=int,
+        default=None,
+        help="Only analyze last N events"
+    )
+    return parser.parse_args()
+
+
+def load_events(file_path: Path, hook_filter: str | None = None, last_n: int | None = None) -> list[dict[str, Any]]:
+    """Load and parse JSONL events, optionally filtering by hook name."""
+    if not file_path.exists():
+        return []
+
+    events = []
+    with open(file_path, "r") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                event = json.loads(line)
+                if hook_filter is None or event.get("hook") == hook_filter:
+                    events.append(event)
+            except json.JSONDecodeError:
+                # Skip malformed lines silently
+                continue
+
+    if last_n is not None:
+        events = events[-last_n:]
+
+    return events
+
+
+def percentile(sorted_values: list[float], p: float) -> float:
+    """Calculate percentile from sorted list."""
+    if not sorted_values:
+        return 0.0
+    k = (len(sorted_values) - 1) * (p / 100)
+    f = int(k)
+    c = f + 1
+    if c >= len(sorted_values):
+        return sorted_values[-1]
+    return sorted_values[f] + (k - f) * (sorted_values[c] - sorted_values[f])
+
+
+def calculate_stats(events: list[dict[str, Any]]) -> dict[str, dict[str, float]]:
+    """Calculate statistics per hook."""
+    # Group durations by hook
+    by_hook: dict[str, list[int]] = defaultdict(list)
+    for event in events:
+        hook = event.get("hook", "unknown")
+        duration = event.get("duration_ms", 0)
+        by_hook[hook].append(duration)
+
+    # Calculate stats per hook
+    stats = {}
+    for hook, durations in by_hook.items():
+        sorted_durations = sorted(durations)
+        stats[hook] = {
+            "count": len(durations),
+            "min": min(durations),
+            "max": max(durations),
+            "mean": sum(durations) / len(durations),
+            "p50": percentile(sorted_durations, 50),
+            "p95": percentile(sorted_durations, 95),
+            "p99": percentile(sorted_durations, 99),
+        }
+
+    return stats
+
+
+def find_slow_events(events: list[dict[str, Any]], threshold: int) -> list[dict[str, Any]]:
+    """Find events exceeding threshold."""
+    return [e for e in events if e.get("duration_ms", 0) > threshold]
+
+
+def print_table(stats: dict[str, dict[str, float]], slow_events: list[dict[str, Any]], threshold: int) -> None:
+    """Print human-readable summary table."""
+    if not stats:
+        print("No timing data found.")
+        return
+
+    # Header
+    print("\n" + "=" * 80)
+    print("HOOK TIMING SUMMARY")
+    print("=" * 80)
+    print(f"{'Hook':<25} {'Count':>8} {'Min':>8} {'P50':>8} {'P95':>8} {'P99':>8} {'Max':>8}")
+    print("-" * 80)
+
+    # Rows sorted by p95 descending (slowest first)
+    for hook in sorted(stats.keys(), key=lambda h: stats[h]["p95"], reverse=True):
+        s = stats[hook]
+        print(f"{hook:<25} {s['count']:>8} {s['min']:>7.0f}ms {s['p50']:>7.0f}ms {s['p95']:>7.0f}ms {s['p99']:>7.0f}ms {s['max']:>7.0f}ms")
+
+    print("-" * 80)
+
+    # Slow events
+    if slow_events:
+        print(f"\nSLOW EVENTS (>{threshold}ms):")
+        print("-" * 80)
+        # Show most recent first, limit to 20
+        for event in reversed(slow_events[-20:]):
+            print(f"  {event.get('ts', 'unknown')}: {event.get('hook', 'unknown')} took {event.get('duration_ms', 0)}ms (exit={event.get('exit_code', '?')})")
+        if len(slow_events) > 20:
+            print(f"  ... and {len(slow_events) - 20} more")
+    else:
+        print(f"\nNo slow events (>{threshold}ms) found.")
+
+    print()
+
+
+def print_json(stats: dict[str, dict[str, float]], slow_events: list[dict[str, Any]], threshold: int) -> None:
+    """Print JSON output for programmatic use."""
+    output = {
+        "stats": stats,
+        "slow_threshold_ms": threshold,
+        "slow_count": len(slow_events),
+        "slow_events": slow_events[-50:],  # Limit to 50 for JSON output
+    }
+    print(json.dumps(output, indent=2))
+
+
+def main() -> int:
+    args = parse_args()
+
+    # Load events
+    events = load_events(args.file, args.hook, args.last)
+
+    if not events:
+        if args.json:
+            print(json.dumps({"error": "No events found", "file": str(args.file)}))
+        else:
+            print(f"No timing events found in {args.file}")
+            print("Timing is automatically collected by hooks using hooks_init().")
+        return 1
+
+    # Calculate stats and find slow events
+    stats = calculate_stats(events)
+    slow_events = find_slow_events(events, args.threshold)
+
+    # Output
+    if args.json:
+        print_json(stats, slow_events, args.threshold)
+    else:
+        print_table(stats, slow_events, args.threshold)
+        print(f"Total events analyzed: {len(events)}")
+        print(f"Data file: {args.file}")
+
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
