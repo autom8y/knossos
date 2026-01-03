@@ -963,6 +963,9 @@ commit_staged_resources() {
 # Source roster utilities for dynamic roster generation
 source "$ROSTER_HOME/lib/roster-utils.sh"
 
+# Source team resource operations
+source "$ROSTER_HOME/lib/team/team-resource.sh"
+
 # ============================================================================
 # Manifest Functions
 # ============================================================================
@@ -2041,6 +2044,31 @@ swap_agents() {
 # Global agents now live at ~/.claude/agents/ (user-level) and are loaded
 # automatically by Claude Code. No need to copy them to project agents.
 # See: cem install-user for user-level agent installation.
+
+# ============================================================================
+# Team Resource Wrapper Functions (for backward compatibility)
+# ============================================================================
+# These wrappers call the generic functions from lib/team/team-resource.sh
+
+# Backup wrappers
+backup_team_commands() { backup_team_resource "commands" ".claude/commands" ".team-commands" "f"; }
+backup_team_skills()   { backup_team_resource "skills" ".claude/skills" ".team-skills" "d"; }
+backup_team_hooks()    { backup_team_resource "hooks" ".claude/hooks" ".team-hooks" "f"; }
+
+# Remove wrappers
+remove_team_commands() { remove_team_resource "commands" ".claude/commands" ".team-commands" "f"; }
+remove_team_skills()   { remove_team_resource "skills" ".claude/skills" ".team-skills" "d"; }
+remove_team_hooks()    { remove_team_resource "hooks" ".claude/hooks" ".team-hooks" "f"; }
+
+# Team membership check wrappers
+is_team_command() { is_resource_from_team "$1" "commands" "f"; }
+is_team_skill()   { is_resource_from_team "$1" "skills" "d"; }
+is_team_hook()    { is_resource_from_team "$1" "hooks" "f"; }
+
+# Team origin lookup wrappers
+get_command_team() { get_resource_team "$1" "commands" "f"; }
+get_skill_team()   { get_resource_team "$1" "skills" "d"; }
+get_hook_team()    { get_resource_team "$1" "hooks" "f"; }
 
 # ============================================================================
 # Team Commands Functions
