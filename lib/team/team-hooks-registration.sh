@@ -445,7 +445,8 @@ swap_hook_registrations() {
     fi
 
     # Ensure settings file exists with valid JSON
-    if [[ ! -f "$settings_file" ]]; then
+    # Note: -s checks non-zero size; jq empty passes on empty files (bug)
+    if [[ ! -f "$settings_file" ]] || [[ ! -s "$settings_file" ]]; then
         echo '{}' > "$settings_file"
     fi
 
