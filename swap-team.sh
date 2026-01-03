@@ -2602,6 +2602,12 @@ preview_refresh() {
     local team_name="$1"
     local source_dir="$ROSTER_HOME/teams/$team_name/agents"
 
+    # Get current team for scoped orphan detection (RF-005)
+    local current_team=""
+    if [[ -f ".claude/ACTIVE_TEAM" ]]; then
+        current_team=$(cat .claude/ACTIVE_TEAM | tr -d '[:space:]')
+    fi
+
     log "Dry-run: Would refresh $team_name"
     echo ""
     echo "Agent changes:"
@@ -2635,10 +2641,11 @@ preview_refresh() {
     fi
 
     # Check for orphan commands (commands from other teams)
+    # Pass current_team to scope detection to previous team only (RF-005)
     echo ""
     echo "Command orphans (from other teams):"
     local orphan_commands
-    orphan_commands=$(detect_resource_orphans "commands" ".claude/commands" "$team_name" "f" "*.md")
+    orphan_commands=$(detect_resource_orphans "commands" ".claude/commands" "$team_name" "f" "*.md" "$current_team")
     if [[ -n "$orphan_commands" ]]; then
         while IFS=: read -r cmd_name origin_team; do
             echo "  ? $cmd_name (from $origin_team)"
@@ -2648,10 +2655,11 @@ preview_refresh() {
     fi
 
     # Check for orphan skills (skills from other teams)
+    # Pass current_team to scope detection to previous team only (RF-005)
     echo ""
     echo "Skill orphans (from other teams):"
     local orphan_skills
-    orphan_skills=$(detect_resource_orphans "skills" ".claude/skills" "$team_name" "d" "*/")
+    orphan_skills=$(detect_resource_orphans "skills" ".claude/skills" "$team_name" "d" "*/" "$current_team")
     if [[ -n "$orphan_skills" ]]; then
         while IFS=: read -r skill_name origin_team; do
             echo "  ? $skill_name (from $origin_team)"
@@ -2661,10 +2669,11 @@ preview_refresh() {
     fi
 
     # Check for orphan hooks (hooks from other teams)
+    # Pass current_team to scope detection to previous team only (RF-005)
     echo ""
     echo "Hook orphans (from other teams):"
     local orphan_hooks
-    orphan_hooks=$(detect_resource_orphans "hooks" ".claude/hooks" "$team_name" "f" "*")
+    orphan_hooks=$(detect_resource_orphans "hooks" ".claude/hooks" "$team_name" "f" "*" "$current_team")
     if [[ -n "$orphan_hooks" ]]; then
         while IFS=: read -r hook_name origin_team; do
             echo "  ? $hook_name (from $origin_team)"
@@ -3025,8 +3034,9 @@ perform_swap() {
     # =========================================================================
 
     # Detect and handle orphan commands (commands from other teams)
+    # Pass source_team to scope detection to previous team only (RF-005)
     local orphan_commands
-    orphan_commands=$(detect_resource_orphans "commands" ".claude/commands" "$team_name" "f" "*.md")
+    orphan_commands=$(detect_resource_orphans "commands" ".claude/commands" "$team_name" "f" "*.md" "$source_team")
     if [[ -n "$orphan_commands" ]]; then
         if [[ -z "$ORPHAN_MODE" ]]; then
             local orphan_count
@@ -3049,8 +3059,9 @@ perform_swap() {
     mark_commit_step "$COMMIT_STEP_COMMANDS"
 
     # Detect and handle orphan skills (skills from other teams)
+    # Pass source_team to scope detection to previous team only (RF-005)
     local orphan_skills
-    orphan_skills=$(detect_resource_orphans "skills" ".claude/skills" "$team_name" "d" "*/")
+    orphan_skills=$(detect_resource_orphans "skills" ".claude/skills" "$team_name" "d" "*/" "$source_team")
     if [[ -n "$orphan_skills" ]]; then
         if [[ -z "$ORPHAN_MODE" ]]; then
             # Non-interactive mode without flags - warn but don't block
@@ -3075,8 +3086,9 @@ perform_swap() {
     mark_commit_step "$COMMIT_STEP_SHARED_SKILLS"
 
     # Detect and handle orphan hooks (hooks from other teams)
+    # Pass source_team to scope detection to previous team only (RF-005)
     local orphan_hooks
-    orphan_hooks=$(detect_resource_orphans "hooks" ".claude/hooks" "$team_name" "f" "*")
+    orphan_hooks=$(detect_resource_orphans "hooks" ".claude/hooks" "$team_name" "f" "*" "$source_team")
     if [[ -n "$orphan_hooks" ]]; then
         if [[ -z "$ORPHAN_MODE" ]]; then
             local orphan_count

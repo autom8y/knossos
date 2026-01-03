@@ -48,12 +48,14 @@ fi
 # Team Membership Checks
 # ============================================================================
 
-# Check if a resource belongs to ANY team pack in ROSTER_HOME/teams/
+# Check if a resource belongs to a team pack in ROSTER_HOME/teams/
 #
 # Parameters:
 #   $1 - resource_name: basename of resource (e.g., "commit.md", "qa-ref")
 #   $2 - resource_type: "commands" | "skills" | "hooks"
 #   $3 - find_type:     "f" (file) | "d" (directory)
+#   $4 - team_scope:    (optional) space-separated list of team names to check
+#                       If empty, checks ALL teams (legacy behavior)
 #
 # Returns: 0 if resource is from a team, 1 otherwise
 #
@@ -62,8 +64,24 @@ is_resource_from_team() {
     local resource_name="$1"
     local resource_type="$2"
     local find_type="$3"
+    local team_scope="${4:-}"
 
-    find "$ROSTER_HOME/teams" -path "*/${resource_type}/$resource_name" -type "$find_type" 2>/dev/null | grep -q .
+    if [[ -z "$team_scope" ]]; then
+        # Legacy behavior: check ALL teams
+        find "$ROSTER_HOME/teams" -path "*/${resource_type}/$resource_name" -type "$find_type" 2>/dev/null | grep -q .
+    else
+        # Scoped behavior: check only specified teams
+        local team
+        for team in $team_scope; do
+            local check_path="$ROSTER_HOME/teams/$team/$resource_type/$resource_name"
+            if [[ "$find_type" == "d" ]] && [[ -d "$check_path" ]]; then
+                return 0
+            elif [[ "$find_type" == "f" ]] && [[ -f "$check_path" ]]; then
+                return 0
+            fi
+        done
+        return 1
+    fi
 }
 
 # Get the team name that owns a specific resource
@@ -72,6 +90,8 @@ is_resource_from_team() {
 #   $1 - resource_name: basename of resource
 #   $2 - resource_type: "commands" | "skills" | "hooks"
 #   $3 - find_type:     "f" (file) | "d" (directory)
+#   $4 - team_scope:    (optional) space-separated list of team names to check
+#                       If empty, checks ALL teams (legacy behavior)
 #
 # Outputs: team name to stdout, empty if not found
 #
@@ -80,11 +100,28 @@ get_resource_team() {
     local resource_name="$1"
     local resource_type="$2"
     local find_type="$3"
-    local match
+    local team_scope="${4:-}"
 
-    match=$(find "$ROSTER_HOME/teams" -path "*/${resource_type}/$resource_name" -type "$find_type" 2>/dev/null | head -1)
-    if [[ -n "$match" ]]; then
-        echo "$match" | sed 's|.*/teams/\([^/]*\)/'"$resource_type"'/.*|\1|'
+    if [[ -z "$team_scope" ]]; then
+        # Legacy behavior: check ALL teams
+        local match
+        match=$(find "$ROSTER_HOME/teams" -path "*/${resource_type}/$resource_name" -type "$find_type" 2>/dev/null | head -1)
+        if [[ -n "$match" ]]; then
+            echo "$match" | sed 's|.*/teams/\([^/]*\)/'"$resource_type"'/.*|\1|'
+        fi
+    else
+        # Scoped behavior: check only specified teams
+        local team
+        for team in $team_scope; do
+            local check_path="$ROSTER_HOME/teams/$team/$resource_type/$resource_name"
+            if [[ "$find_type" == "d" ]] && [[ -d "$check_path" ]]; then
+                echo "$team"
+                return 0
+            elif [[ "$find_type" == "f" ]] && [[ -f "$check_path" ]]; then
+                echo "$team"
+                return 0
+            fi
+        done
     fi
 }
 
@@ -218,6 +255,9 @@ remove_team_resource() {
 #   $3 - incoming_team:     name of team being swapped in
 #   $4 - find_type:         "f" (file) | "d" (directory)
 #   $5 - glob_pattern:      "*.md" | "*/" | "*" (for find pattern)
+#   $6 - previous_team:     (optional) name of the previous team
+#                           If provided, only flags orphans from this team
+#                           If empty, checks ALL teams (legacy behavior)
 #
 # Outputs: One "resource_name:origin_team" per line to stdout
 #
@@ -230,9 +270,19 @@ detect_resource_orphans() {
     local incoming_team="$3"
     local find_type="$4"
     local glob_pattern="$5"
+    local previous_team="${6:-}"
 
     local incoming_resource_dir="$ROSTER_HOME/teams/$incoming_team/$resource_type"
     local orphan_count=0
+
+    # Build team scope for orphan detection
+    # If previous_team is provided, only check that team (scoped detection)
+    # Otherwise, check all teams (legacy behavior)
+    local team_scope=""
+    if [[ -n "$previous_team" ]]; then
+        team_scope="$previous_team"
+        log_debug "Orphan detection scoped to previous team: $previous_team"
+    fi
 
     # Return if resource directory doesn't exist
     [[ -d "$resource_dir" ]] || return 0
@@ -260,10 +310,10 @@ detect_resource_orphans() {
             continue
         fi
 
-        # Is this resource from ANY team pack?
-        if is_resource_from_team "$resource_name" "$resource_type" "$find_type"; then
+        # Is this resource from a team pack (scoped or all)?
+        if is_resource_from_team "$resource_name" "$resource_type" "$find_type" "$team_scope"; then
             local origin_team
-            origin_team=$(get_resource_team "$resource_name" "$resource_type" "$find_type")
+            origin_team=$(get_resource_team "$resource_name" "$resource_type" "$find_type" "$team_scope")
             echo "$resource_name:$origin_team"
             orphan_count=$((orphan_count + 1))
             log_debug "Orphan ${resource_type%s} detected: $resource_name (from $origin_team)"
