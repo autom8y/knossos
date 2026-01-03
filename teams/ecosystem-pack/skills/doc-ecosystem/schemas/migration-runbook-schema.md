@@ -170,8 +170,8 @@ prerequisites:
     verification: "Confirm backup exists at known location"
 steps:
   - number: 1
-    action: "Pull latest skeleton changes"
-    verification: "git log shows latest skeleton commit"
+    action: "Pull latest roster changes"
+    verification: "git log shows latest roster commit"
     command: "git pull origin main"
   - number: 2
     action: "Run CEM sync to update hooks"
@@ -223,7 +223,7 @@ This runbook guides satellite owners through migrating from session schema v1.0 
 
 ## Migration Steps
 
-### Step 1: Pull Latest Skeleton Changes
+### Step 1: Pull Latest Roster Changes
 
 ```bash
 git pull origin main

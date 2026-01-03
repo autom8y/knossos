@@ -29,7 +29,7 @@ Invoke the Ecosystem Analyst agent with CEM diagnostic focus to trace sync failu
    - Exact reproduction steps
    - Root cause (specific CEM component and line of code if possible)
    - Success criteria (what "fixed" looks like)
-   - Affected systems (CEM only, or CEM + skeleton + roster?)
+   - Affected systems (CEM only, or CEM + roster?)
 
 ## When to Use
 

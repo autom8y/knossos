@@ -67,7 +67,7 @@
           "description": "Multi-line description for frontmatter 'description' field. May use YAML pipe syntax (|) for multiline.",
           "examples": [
             "Stateless advisor that routes work through rnd-pack specialists. Does not execute—provides structured directives for the main agent to invoke specialists.",
-            "Coordinates ecosystem-pack phases for CEM/skeleton/roster infrastructure work. Use when: work spans multiple phases or requires cross-component coordination."
+            "Coordinates ecosystem-pack phases for CEM/roster infrastructure work. Use when: work spans multiple phases or requires cross-component coordination."
           ]
         }
       }
@@ -163,7 +163,7 @@
       },
       "examples": [
         ["@doc-rnd for artifact templates", "@standards for technology philosophy"],
-        ["@ecosystem-ref for CEM/skeleton/roster patterns", "@10x-workflow for complexity assessment"]
+        ["@ecosystem-ref for CEM/roster patterns", "@10x-workflow for complexity assessment"]
       ]
     },
     "antipatterns": {
@@ -265,7 +265,7 @@
       },
       "frontmatter": {
         "role": "Coordinates ecosystem-pack phases",
-        "description": "Coordinates ecosystem-pack phases for CEM/skeleton/roster infrastructure work. Use when: work spans multiple phases or requires cross-component coordination. Triggers: coordinate, orchestrate, multi-phase, ecosystem workflow."
+        "description": "Coordinates ecosystem-pack phases for CEM/roster infrastructure work. Use when: work spans multiple phases or requires cross-component coordination. Triggers: coordinate, orchestrate, multi-phase, ecosystem workflow."
       },
       "routing": {
         "ecosystem-analyst": "Initial phase, gap analysis needed",
@@ -307,7 +307,7 @@
         ]
       },
       "skills": [
-        "@ecosystem-ref for CEM/skeleton/roster patterns",
+        "@ecosystem-ref for CEM/roster patterns",
         "@documentation for schema conventions",
         "@10x-workflow for complexity assessment",
         "@standards for naming conventions"

@@ -9,7 +9,7 @@
 **Affects**: [All satellites | Satellites with X configuration]
 **Breaking**: [YES | NO]
 **CEM Version**: [version]
-**skeleton Version**: [version]
+**roster Version**: [version]
 
 [2-3 sentences describing what changed and why satellite owners care]
 
@@ -51,10 +51,10 @@ git pull origin main
 cem --version  # Should show vX.Y.Z
 ```
 
-### 2. Update skeleton
+### 2. Sync roster changes
 ```bash
-cd /path/to/skeleton
-cem sync  # Pulls latest skeleton changes
+cd /path/to/satellite
+roster-sync sync  # Pulls latest roster changes
 ```
 
 ### 3. Migrate Settings
@@ -94,8 +94,8 @@ cem sync --force  # Reset to pre-migration state
 **Solution**: [fix]
 
 ## Compatibility
-| CEM | skeleton | Status |
-|-----|----------|--------|
+| CEM | roster | Status |
+|-----|--------|--------|
 | 2.0 | 2.0 | Fully supported |
 | 2.0 | 1.9 | Backward compatible |
 | 1.9 | 2.0 | Unsupported--upgrade CEM first |

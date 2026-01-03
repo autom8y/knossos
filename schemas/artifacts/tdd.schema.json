@@ -84,7 +84,7 @@
       "author": "architect",
       "components": [
         { "name": "schema-registry", "responsibility": "Host JSON Schema files", "owner": "roster" },
-        { "name": "schema-validator", "responsibility": "Validate frontmatter", "owner": "skeleton" }
+        { "name": "schema-validator", "responsibility": "Validate frontmatter", "owner": "roster" }
       ],
       "schema_version": "1.0"
     }

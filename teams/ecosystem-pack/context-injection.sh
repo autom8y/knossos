@@ -1,6 +1,6 @@
 #!/bin/bash
 # Ecosystem-Pack Context Injection
-# Provides CEM sync status, skeleton reference, and drift detection for ecosystem work
+# Provides CEM sync status, roster reference, and drift detection for ecosystem work
 #
 # Called by: session-context.sh via team-context-loader.sh
 # Output: Markdown table with ecosystem status
@@ -34,7 +34,7 @@ inject_team_context() {
     fi
     output+="| **CEM Sync** | $cem_status ($cem_timestamp) |"$'\n'
 
-    # Roster Reference (replaces skeleton_claude dependency - Sprint 4 migration)
+    # Roster Reference
     local roster_ref="unknown"
     local roster_home="${ROSTER_HOME:-$HOME/Code/roster}"
     if [[ -d "$roster_home/.git" ]]; then
@@ -46,7 +46,7 @@ inject_team_context() {
 
     # Drift Detection
     local drift_status="clean"
-    # Check if local .claude/ differs from skeleton (simplified check)
+    # Check if local .claude/ differs from roster (simplified check)
     if [[ -f "$project_dir/.claude/.local-overrides" ]]; then
         local override_count=$(wc -l < "$project_dir/.claude/.local-overrides" 2>/dev/null | tr -d ' ')
         drift_status="$override_count local overrides"

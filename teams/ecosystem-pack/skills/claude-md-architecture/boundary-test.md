@@ -67,13 +67,13 @@ A practical checklist for determining if content belongs in CLAUDE.md. Before ad
 
 ### Question 4: Propagation Test
 
-> "Should changes to this content flow between skeleton and satellites?"
+> "Should changes to this content flow between roster and satellites?"
 
 | Answer | Sync Behavior | Section Type |
 |--------|---------------|--------------|
-| Yes, skeleton -> satellites | SYNC | Infrastructure section |
+| Yes, roster -> satellites | SYNC | Infrastructure section |
 | No, satellite-only | PRESERVE | Identity/Extension section |
-| Regenerated from roster | REGENERATE | Team configuration |
+| Regenerated from ACTIVE_TEAM | REGENERATE | Team configuration |
 
 **Use this to determine section ownership**:
 - Infrastructure docs (skills, hooks, routing) = SYNC
@@ -132,7 +132,7 @@ A practical checklist for determining if content belongs in CLAUDE.md. Before ad
                               +------------+              |
                                                +----------+----------+
                                                |          |          |
-                                            SKELETON   ROSTER   SATELLITE
+                                            ROSTER      TEAM    SATELLITE
                                                |          |          |
                                                v          v          v
                                              SYNC     REGENERATE  PRESERVE
@@ -207,7 +207,7 @@ Copy this checklist before any CLAUDE.md modification:
 - [ ] No dates, timestamps, or "currently" language
 - [ ] No git state or file status references
 - [ ] No session-specific information
-- [ ] Owner correctly identified (skeleton/satellite/roster)
+- [ ] Owner correctly identified (roster/team/satellite)
 - [ ] Correct sync behavior specified (SYNC/PRESERVE/REGENERATE/PROJECT)
 ```
 

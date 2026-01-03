@@ -79,7 +79,7 @@
       "author": "context-architect",
       "status": "approved",
       "gap_analysis": "GAP-artifact-schema-coverage",
-      "affected_systems": ["roster", "skeleton"],
+      "affected_systems": ["roster", "CEM"],
       "complexity": "MODULE",
       "schema_version": "1.0"
     }

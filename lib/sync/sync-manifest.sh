@@ -257,11 +257,11 @@ update_manifest_roster() {
 }
 
 # ============================================================================
-# Manifest Migration (per TDD 6)
+# Manifest Version Validation
 # ============================================================================
 
-# Check if migration is needed and perform it
-# Returns: 0 if already current or migrated, 1 on error
+# Check manifest version and require v3
+# Returns: 0 if v3, 1 on error (legacy versions no longer supported)
 migrate_manifest_if_needed() {
     local manifest_file="${SYNC_MANIFEST_FILE:-.claude/.cem/manifest.json}"
 
@@ -275,121 +275,15 @@ migrate_manifest_if_needed() {
     schema_version=$(echo "$manifest" | jq -r '.schema_version // 1')
 
     case "$schema_version" in
-        1)
-            sync_log "Migrating manifest from v1 to v3..."
-            migrate_v1_to_v3 "$manifest_file"
-            ;;
-        2)
-            sync_log "Migrating manifest from v2 to v3..."
-            migrate_v2_to_v3 "$manifest_file"
-            ;;
         3)
-            sync_log_debug "Manifest already at v3"
+            sync_log_debug "Manifest at v3"
             return 0
             ;;
         *)
-            sync_log_error "Unknown manifest schema version: $schema_version"
+            sync_log_error "Legacy manifest v$schema_version found. Delete .claude/.cem/manifest.json and run 'roster-sync init' to create fresh v3 manifest."
             return 1
             ;;
     esac
-}
-
-# Migrate v1 (flat skeleton structure) to v3 (nested roster structure)
-migrate_v1_to_v3() {
-    local manifest_file="$1"
-
-    # Create backup
-    cp "$manifest_file" "${manifest_file}.v1.backup" || {
-        sync_log_error "Failed to backup v1 manifest"
-        return 1
-    }
-    sync_log "Backup created: ${manifest_file}.v1.backup"
-
-    # Perform migration
-    local migrated
-    migrated=$(jq '
-        # Migration timestamp
-        (now | strftime("%Y-%m-%dT%H:%M:%SZ")) as $now |
-
-        {
-            schema_version: 3,
-            roster: {
-                path: (.skeleton_path // .roster_path // null),
-                commit: (.skeleton_commit // .roster_commit // null),
-                ref: (.skeleton_ref // .roster_ref // "main"),
-                last_sync: (.last_sync // $now)
-            },
-            team: (if .team then {
-                name: .team.name,
-                checksum: (.team.checksum // null),
-                last_refresh: (.team.last_refresh // null),
-                roster_path: (.team.roster_path // null)
-            } else null end),
-            managed_files: [(.managed_files // [])[] | {
-                path: .path,
-                strategy: (.strategy // "copy-replace"),
-                checksum: .checksum,
-                source: "roster",
-                added_at: (.added_at // .last_sync // $now),
-                last_sync: (.last_sync // $now)
-            }],
-            orphans: [],
-            migration: {
-                migrated_from: 1,
-                migrated_at: $now,
-                skeleton_path: (.skeleton_path // null)
-            }
-        }
-    ' "$manifest_file") || {
-        sync_log_error "v1 migration failed"
-        return 1
-    }
-
-    write_manifest "$migrated"
-    sync_log "Migration v1 -> v3 complete"
-}
-
-# Migrate v2 (skeleton nested structure) to v3 (roster structure)
-migrate_v2_to_v3() {
-    local manifest_file="$1"
-
-    # Create backup
-    cp "$manifest_file" "${manifest_file}.v2.backup" || {
-        sync_log_error "Failed to backup v2 manifest"
-        return 1
-    }
-    sync_log "Backup created: ${manifest_file}.v2.backup"
-
-    # Perform migration
-    local migrated
-    migrated=$(jq '
-        # Migration timestamp
-        (now | strftime("%Y-%m-%dT%H:%M:%SZ")) as $now |
-
-        {
-            schema_version: 3,
-            roster: {
-                path: (.skeleton.path // null),
-                commit: (.skeleton.commit // null),
-                ref: (.skeleton.ref // "main"),
-                last_sync: (.skeleton.last_sync // $now)
-            },
-            team: .team,
-            managed_files: (.managed_files // []),
-            orphans: [],
-            migration: {
-                migrated_from: 2,
-                migrated_at: $now,
-                skeleton_path: (.skeleton.path // null)
-            }
-        }
-    ' "$manifest_file") || {
-        sync_log_error "v2 migration failed"
-        return 1
-    }
-
-    write_manifest "$migrated"
-    sync_log "Migration v2 -> v3 complete"
 }
 
 # ============================================================================

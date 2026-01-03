@@ -92,8 +92,8 @@
       "status": "passed",
       "depends_on": ["MIGRATION-RUNBOOK-artifact-schemas", "CONTEXT-DESIGN-artifact-schemas"],
       "test_matrix": [
-        { "satellite": "skeleton_claude", "version": "main", "status": "pass" },
-        { "satellite": "roster", "version": "main", "status": "pass" }
+        { "satellite": "roster", "version": "main", "status": "pass" },
+        { "satellite": "test-baseline", "version": "main", "status": "pass" }
       ],
       "blocking_issues": [],
       "complexity": "MODULE",

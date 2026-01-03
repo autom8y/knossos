@@ -1,7 +1,7 @@
 ---
 name: orchestrator
 description: |
-  Coordinates ecosystem-pack phases for CEM/skeleton/roster infrastructure work. Use when: work spans multiple phases or requires cross-component coordination. Triggers: coordinate, orchestrate, multi-phase, ecosystem workflow.
+  Coordinates ecosystem-pack phases for CEM/roster infrastructure work. Use when: work spans multiple phases or requires cross-component coordination. Triggers: coordinate, orchestrate, multi-phase, ecosystem workflow.
 tools: Read
 model: opus
 color: purple
@@ -185,7 +185,7 @@ When routing cross-team concerns:
 ## Skills Reference
 
 Reference these skills as appropriate:
-- @ecosystem-ref for CEM/skeleton/roster patterns
+- @ecosystem-ref for CEM/roster patterns
 - @documentation for schema conventions
 - @10x-workflow for complexity assessment
 - @standards for naming conventions

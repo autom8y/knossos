@@ -5,7 +5,7 @@
 # Replaces CEM (Claude Ecosystem Manager) with roster-native functionality.
 # Manages ecosystem file synchronization between roster and satellite projects.
 #
-# Part of: Skeleton Deprecation & CEM Migration (TDD-cem-replacement)
+# Part of: CEM Migration (TDD-cem-replacement)
 #
 # Usage:
 #   roster-sync <command> [options]
@@ -757,13 +757,13 @@ cmd_validate() {
         warnings=$((warnings + 1))
     fi
 
-    # Check required fields (support v1, v2, and v3 schemas)
+    # Check required fields (v3 schema only)
     local roster_path roster_commit
-    roster_path=$(echo "$manifest" | jq -r '.roster.path // .skeleton.path // .skeleton_path // empty')
-    roster_commit=$(echo "$manifest" | jq -r '.roster.commit // .skeleton.commit // .skeleton_commit // empty')
+    roster_path=$(echo "$manifest" | jq -r '.roster.path // empty')
+    roster_commit=$(echo "$manifest" | jq -r '.roster.commit // empty')
 
     if [[ -z "$roster_path" ]]; then
-        log_error "Missing required field: roster.path (or skeleton.path for v2)"
+        log_error "Missing required field: roster.path"
         errors=$((errors + 1))
     elif [[ ! -d "$roster_path" ]]; then
         log_warning "Roster path does not exist: $roster_path"
@@ -948,9 +948,9 @@ cmd_repair() {
         # Preserve roster info from old manifest
         old_manifest=$(cat "$manifest_file" 2>/dev/null || echo "{}")
         if echo "$old_manifest" | jq -e . >/dev/null 2>&1; then
-            old_roster_path=$(echo "$old_manifest" | jq -r '.roster.path // .skeleton.path // .skeleton_path // empty')
-            old_roster_commit=$(echo "$old_manifest" | jq -r '.roster.commit // .skeleton.commit // .skeleton_commit // empty')
-            old_roster_ref=$(echo "$old_manifest" | jq -r '.roster.ref // .skeleton.ref // .skeleton_ref // "main"')
+            old_roster_path=$(echo "$old_manifest" | jq -r '.roster.path // empty')
+            old_roster_commit=$(echo "$old_manifest" | jq -r '.roster.commit // empty')
+            old_roster_ref=$(echo "$old_manifest" | jq -r '.roster.ref // "main"')
         fi
     fi
 

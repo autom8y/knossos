@@ -26,10 +26,10 @@ $ROSTER_HOME/roster-sync sync --dry-run   # Preview changes
 
 | Old (CEM) | New (roster-sync) |
 |-----------|-------------------|
-| `~/Code/skeleton_claude/cem sync` | `$ROSTER_HOME/roster-sync sync` |
-| `~/Code/skeleton_claude/cem init` | `$ROSTER_HOME/roster-sync init` |
-| `~/Code/skeleton_claude/cem status` | `$ROSTER_HOME/roster-sync status` |
-| `~/Code/skeleton_claude/cem diff` | `$ROSTER_HOME/roster-sync diff` |
+| `cem sync` | `$ROSTER_HOME/roster-sync sync` |
+| `cem init` | `$ROSTER_HOME/roster-sync init` |
+| `cem status` | `$ROSTER_HOME/roster-sync status` |
+| `cem diff` | `$ROSTER_HOME/roster-sync diff` |
 
 ## Legacy Behavior (Forwarding)
 

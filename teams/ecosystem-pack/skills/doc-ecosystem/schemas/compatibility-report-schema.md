@@ -77,7 +77,7 @@ schema_version: "1.0"      # Must be "1.0" for this version
 
 ```yaml
 test_matrix:
-  - satellite: string      # "skeleton", "minimal-satellite", "heavy-custom"
+  - satellite: string      # "roster", "minimal-satellite", "heavy-custom"
     configuration: string  # "default", "custom-hooks", "worktree"
     status: enum           # pass | fail | skipped
     notes: string          # (optional) Additional context
@@ -142,7 +142,7 @@ passed_tests: 3
 failed_tests: 1
 skipped_tests: 0
 test_matrix:
-  - satellite: skeleton
+  - satellite: roster
     configuration: canonical
     status: pass
     tests_run: 12
@@ -191,14 +191,14 @@ Compatibility testing for session schema v2.0 migration completed with 3/4 confi
 
 | Satellite | Type | Configuration |
 |-----------|------|---------------|
-| skeleton | Canonical | Default (no overrides) |
+| roster | Canonical | Default (no overrides) |
 | minimal-satellite | Minimal | No hooks, no agents |
 | heavy-customization | Custom | Custom hooks, custom agents |
 | worktree-satellite | Worktree | Created via /worktree |
 
 ## Results by Satellite
 
-### skeleton (PASS)
+### roster (PASS)
 
 All 12 tests passed:
 - Session creation
@@ -211,7 +211,7 @@ All 12 tests passed:
 ### minimal-satellite (PASS)
 
 All 8 tests passed:
-- Schema inheritance from skeleton
+- Schema inheritance from roster
 - Default hooks work
 - No regression in basic functionality
 
@@ -263,8 +263,8 @@ All 6 tests passed:
 Tests were executed using:
 
 ```bash
-# Skeleton
-just test-session-schema --satellite=skeleton
+# Roster (canonical baseline)
+just test-session-schema --satellite=roster
 
 # Minimal
 just test-session-schema --satellite=minimal-satellite
@@ -375,7 +375,7 @@ COMPATIBILITY-REPORT-{slug}.md
 
 Compatibility testing MUST include:
 
-1. **Canonical** (skeleton itself) - baseline validation
+1. **Canonical** (roster itself) - baseline validation
 2. **Minimal** (no customizations) - inheritance verification
 3. **Standard** (typical usage) - common configuration
 4. **Heavy** (extensive customizations) - edge case coverage

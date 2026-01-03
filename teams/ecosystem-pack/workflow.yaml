@@ -42,10 +42,10 @@ complexity_levels:
     scope: "Single file/config change, no schema impact"
     phases: [analysis, implementation, validation]
   - name: MODULE
-    scope: "Single system (CEM or skeleton or roster)"
+    scope: "Single system (CEM or roster)"
     phases: [analysis, design, implementation, documentation, validation]
   - name: SYSTEM
-    scope: "Multi-system change affecting CEM + skeleton + roster"
+    scope: "Multi-system change affecting CEM + roster"
     phases: [analysis, design, implementation, documentation, validation]
   - name: MIGRATION
     scope: "Cross-satellite rollout requiring coordination"

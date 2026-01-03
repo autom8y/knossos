@@ -6,15 +6,15 @@ CLAUDE.md sections have explicit owners that determine sync behavior. This docum
 
 ## Ownership Categories
 
-### SYNC Sections (Skeleton-Owned)
+### SYNC Sections (Roster-Owned)
 
-Content that comes from skeleton and overwrites satellite content during sync.
+Content that comes from roster and overwrites satellite content during sync.
 
 **Characteristics**:
-- Source of truth: Skeleton's CLAUDE.md
+- Source of truth: Roster's templates
 - Change frequency: When ecosystem patterns evolve
 - Satellite modifications: Not allowed (use `## Project:*` to extend)
-- Propagation: Skeleton -> All satellites
+- Propagation: Roster -> All satellites
 
 **Examples**:
 
@@ -26,7 +26,7 @@ Content that comes from skeleton and overwrites satellite content during sync.
 | `## Dynamic Context Syntax` | How `!` commands work |
 | `## Getting Help` | Navigation reference |
 
-**Rule**: If content describes HOW THE ECOSYSTEM WORKS, it syncs from skeleton.
+**Rule**: If content describes HOW THE ECOSYSTEM WORKS, it syncs from roster.
 
 ---
 
@@ -37,7 +37,7 @@ Content that satellites own and CEM never overwrites.
 **Characteristics**:
 - Source of truth: Satellite itself
 - Change frequency: When project scope evolves
-- Skeleton modifications: Ignored for this section
+- Roster modifications: Ignored for this section
 - Propagation: Never (satellite-specific)
 
 **Examples**:
@@ -46,7 +46,7 @@ Content that satellites own and CEM never overwrites.
 |---------|---------|
 | `## Quick Start` | Satellite's team (regenerated from roster if missing) |
 | `## Agent Configurations` | Satellite's agents (regenerated from roster if missing) |
-| Custom sections not matching skeleton | Project-specific content |
+| Custom sections not matching roster | Project-specific content |
 | Unknown sections | Default to preserve for safety |
 
 **Rule**: If content describes WHAT THIS PROJECT IS, satellite owns it.
@@ -55,7 +55,7 @@ Content that satellites own and CEM never overwrites.
 
 ### PROJECT Sections (Satellite Extensions)
 
-Content that extends skeleton patterns without conflicting. Uses `## Project:*` namespace.
+Content that extends roster patterns without conflicting. Uses `## Project:*` namespace.
 
 **Characteristics**:
 - Source of truth: Satellite
@@ -83,12 +83,12 @@ This project deploys via GitHub Actions to AWS ECS.
 
 ### REGENERATE Sections (Roster-Derived)
 
-Content derived from roster state (ACTIVE_TEAM file + agents/ directory), not copied from skeleton.
+Content derived from roster state (ACTIVE_TEAM file + agents/ directory).
 
 **Characteristics**:
 - Source of truth: ACTIVE_TEAM + agents/
 - Regeneration trigger: `swap-team.sh` or CEM sync with missing content
-- Never copied from skeleton: Satellite team != skeleton team
+- Generated locally: Each satellite has its own team
 - Represents: Which agents are available in THIS project
 
 **Examples**:
@@ -110,7 +110,7 @@ ELSE:
   Leave empty (satellite needs to configure team)
 ```
 
-**Rule**: Team content ALWAYS comes from satellite's own roster, never from skeleton.
+**Rule**: Team content ALWAYS comes from satellite's own ACTIVE_TEAM + agents/.
 
 ---
 
@@ -120,14 +120,14 @@ Complete mapping of sections to owners and sync behavior:
 
 | Section Header | Owner | Sync Behavior | Notes |
 |----------------|-------|---------------|-------|
-| `# CLAUDE.md` | Skeleton | SYNC | Title and tagline |
-| `## Quick Start` | Roster | PRESERVE/REGENERATE | From satellite's ACTIVE_TEAM |
-| `## Agent Routing` | Skeleton | SYNC | Infrastructure |
-| `## Skills Architecture` | Skeleton | SYNC | Infrastructure |
-| `## Agent Configurations` | Roster | PRESERVE/REGENERATE | From satellite's agents/ |
-| `## Hooks` | Skeleton | SYNC | Infrastructure |
-| `## Dynamic Context Syntax` | Skeleton | SYNC | Infrastructure |
-| `## Getting Help` | Skeleton | SYNC | Infrastructure |
+| `# CLAUDE.md` | Roster | SYNC | Title and tagline |
+| `## Quick Start` | Team | PRESERVE/REGENERATE | From satellite's ACTIVE_TEAM |
+| `## Agent Routing` | Roster | SYNC | Infrastructure |
+| `## Skills Architecture` | Roster | SYNC | Infrastructure |
+| `## Agent Configurations` | Team | PRESERVE/REGENERATE | From satellite's agents/ |
+| `## Hooks` | Roster | SYNC | Infrastructure |
+| `## Dynamic Context Syntax` | Roster | SYNC | Infrastructure |
+| `## Getting Help` | Roster | SYNC | Infrastructure |
 | `## Project:*` | Satellite | PRESERVE | Unlimited extensions |
 | `## (unknown)` | Satellite | PRESERVE | Default to preserve |
 
@@ -143,7 +143,7 @@ What does this content describe?
    - Skill activation rules
    - Hook behavior
    - Dynamic context syntax
-   └─> Skeleton-owned, SYNC
+   └─> Roster-owned, SYNC
 
 2. WHAT this project is?
    - Project-specific conventions
@@ -169,7 +169,7 @@ What does this content describe?
 
 ## The Sync Contract
 
-### Skeleton PROVIDES
+### Roster PROVIDES
 
 1. **Workflow Infrastructure**: Agent routing, handoff protocols, phase transitions
 2. **Capability Documentation**: Skills architecture, hooks documentation, dynamic context
@@ -185,15 +185,15 @@ What does this content describe?
 
 1. **Session State**: Current task, work in progress, parked session info
 2. **Transient Context**: Git state, file modification status, worktree context
-3. **Team Content from Wrong Source**: Never copy skeleton's team to satellite
+3. **Team Content from Wrong Source**: Team content comes from satellite's own ACTIVE_TEAM
 
 ---
 
-## Anti-Pattern: Copying Skeleton Team
+## Anti-Pattern: Wrong Team Content Source
 
 **Wrong**:
 ```markdown
-# satellite CLAUDE.md (after CEM sync)
+# satellite CLAUDE.md (after sync)
 
 ## Quick Start
 
@@ -205,8 +205,8 @@ This project uses a 6-agent workflow (ecosystem-pack):
 **Why wrong**: Satellite has its own team (e.g., doc-team-pack). Team content should come from satellite's ACTIVE_TEAM + agents/.
 
 **Correct approach**:
-- Team sections are PRESERVE (keep satellite content) or REGENERATE (rebuild from satellite's roster)
-- Never SYNC (copy from skeleton)
+- Team sections are PRESERVE (keep satellite content) or REGENERATE (rebuild from satellite's own ACTIVE_TEAM)
+- Never sync team content from roster's source templates
 
 ---
 
@@ -229,7 +229,7 @@ Use HTML comments to mark section ownership. CEM uses these markers to determine
 ### Format
 
 ```markdown
-<!-- SYNC: skeleton-owned -->
+<!-- SYNC: roster-owned -->
 ## Section Name
 
 <!-- PRESERVE: satellite-owned, regenerated from ACTIVE_TEAM + agents/ -->
@@ -246,7 +246,7 @@ Use HTML comments to mark section ownership. CEM uses these markers to determine
 
 | Marker | Meaning |
 |--------|---------|
-| `<!-- SYNC: skeleton-owned -->` | Section syncs from skeleton, overwrites satellite |
+| `<!-- SYNC: roster-owned -->` | Section syncs from roster, overwrites satellite |
 | `<!-- PRESERVE: satellite-owned -->` | Section preserved from satellite, never overwritten |
 | `<!-- PRESERVE: satellite-owned, regenerated from ACTIVE_TEAM + agents/ -->` | Preserved, with note about regeneration source |
 
@@ -263,13 +263,13 @@ Use HTML comments to mark section ownership. CEM uses these markers to determine
 This project uses a 5-agent workflow (doc-team-pack):
 ...
 
-<!-- SYNC: skeleton-owned -->
+<!-- SYNC: roster-owned -->
 ## Agent Routing
 
 Before implementing work, check:
 ...
 
-<!-- SYNC: skeleton-owned -->
+<!-- SYNC: roster-owned -->
 ## Skills Architecture
 
 Skills provide domain knowledge on-demand.

@@ -137,7 +137,7 @@ artifact_types:
         blocking: true
       - id: gap-002
         description: "Affected systems specified"
-        validation: "count(affected_systems) >= 1 and all in ['skeleton', 'roster', 'CEM']"
+        validation: "count(affected_systems) >= 1 and all in ['roster', 'CEM']"
         blocking: true
       - id: gap-003
         description: "Issue count is accurate"

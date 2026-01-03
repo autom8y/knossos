@@ -4,7 +4,7 @@
 
 ## Current State Summary
 
-Ecosystem-pack is a **5-agent infrastructure team** handling CEM, skeleton, and roster patterns. The audit revealed it's well-documented but claims more scope than it actually needs:
+Ecosystem-pack is a **5-agent infrastructure team** handling CEM and roster patterns. The audit revealed it's well-documented but claims more scope than it actually needs:
 
 - Claims "hub team" status with cross-team coordination → but no mechanism exists
 - Defines satellite diversity matrix for testing → but doesn't actually work on satellites
@@ -36,13 +36,13 @@ Ecosystem-pack is a **5-agent infrastructure team** handling CEM, skeleton, and 
 
 **Decision**: Ditch satellite diversity matrix concept entirely.
 
-**Rationale**: Ecosystem-pack doesn't work on satellite projects. Satellites just sync from the ecosystem. The testing matrix (skeleton, test-minimal, test-complex, test-legacy, test-production-like) adds complexity without value.
+**Rationale**: Ecosystem-pack doesn't work on satellite projects. Satellites just sync from the ecosystem. The testing matrix (test-baseline, test-minimal, test-complex, test-legacy, test-production-like) adds complexity without value.
 
 **Changes required:**
 - [ ] Update `agents/compatibility-tester.md`: Remove satellite matrix references
 - [ ] Remove complexity-based satellite selection from workflow
 - [ ] Update `skills/doc-ecosystem/SKILL.md`: Remove satellite testing templates
-- [ ] Simplify to: "Test in skeleton, verify sync works"
+- [ ] Simplify to: "Test in test satellite, verify roster-sync works"
 
 **What to keep:**
 - CEM sync validation (does `cem sync` succeed?)
@@ -94,7 +94,7 @@ Ecosystem-pack is a **5-agent infrastructure team** handling CEM, skeleton, and 
 
 ### What Ecosystem-Pack Actually Does Well
 1. Gap Analysis for infrastructure bugs
-2. Context Design for CEM/skeleton changes
+2. Context Design for CEM/roster changes
 3. Migration Runbooks for breaking changes
 4. CLAUDE.md architecture governance (claude-md-architecture skill)
 
@@ -104,7 +104,7 @@ Ecosystem-pack is a **5-agent infrastructure team** handling CEM, skeleton, and 
 3. Orchestrated-only execution (too rigid)
 
 ### Recommended Focus
-- **Core**: CEM, skeleton, roster infrastructure changes
+- **Core**: CEM and roster infrastructure changes
 - **Secondary**: CLAUDE.md governance
 - **Remove**: Cross-team coordination, satellite testing matrix
 

@@ -73,7 +73,7 @@
       "created": "2025-12-29",
       "author": "ecosystem-analyst",
       "status": "complete",
-      "affected_systems": ["roster", "skeleton", "CEM"],
+      "affected_systems": ["roster", "CEM"],
       "complexity": "MODULE",
       "schema_version": "1.0"
     }

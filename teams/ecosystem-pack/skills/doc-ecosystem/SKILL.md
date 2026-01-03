@@ -72,6 +72,6 @@ This skill provides templates for ecosystem-level documentation: CEM/satellite s
 
 ## Related Skills
 
-- [ecosystem-ref](../ecosystem-ref/SKILL.md) - CEM/skeleton/roster quick reference
+- [ecosystem-ref](../ecosystem-ref/SKILL.md) - CEM/roster quick reference
 - [documentation](../../../../user-skills/documentation/documentation/SKILL.md) - Core artifact templates (PRD, TDD, ADR)
 - [standards](../../../../user-skills/documentation/standards/SKILL.md) - Code conventions and repository structure

@@ -11,9 +11,8 @@
 ## Architecture
 
 ### Components Affected
-- **CEM**: [what changes, why]
-- **skeleton**: [what changes, why]
-- **roster**: [what changes, why]
+- **CEM** (lib/sync, roster-sync): [what changes, why]
+- **roster** (user-*, teams/*): [what changes, why]
 
 ### Design Decisions
 [Key architectural choices and rationale]
@@ -36,16 +35,12 @@ lifecycle:
 
 ## Implementation Specification
 
-### CEM Changes
+### CEM Changes (lib/sync)
 **File**: `path/to/file`
 **Function**: `function_name`
 **Changes**: [detailed specification]
 
-### skeleton Changes
-**File**: `path/to/file`
-**Changes**: [detailed specification]
-
-### roster Changes
+### roster Changes (user-*, teams/*)
 **Location**: `path/to/content`
 **Changes**: [detailed specification]
 
@@ -61,8 +56,8 @@ lifecycle:
 - Version N+1: Old pattern removed
 
 **Compatibility Matrix**:
-| CEM Version | skeleton Version | Status |
-|-------------|------------------|--------|
+| CEM Version | roster Version | Status |
+|-------------|----------------|--------|
 | 2.0 | 2.0 | Supported |
 | 2.0 | 1.9 | Backward compatible |
 
@@ -70,7 +65,7 @@ lifecycle:
 
 | Satellite | Test Case | Expected Outcome | Validates |
 |-----------|-----------|------------------|-----------|
-| skeleton | `cem sync` | No conflicts | Basic compatibility |
+| test-baseline | `roster-sync` | No conflicts | Basic compatibility |
 | [satellite-2] | Hook registration | Fires on event | Schema enforcement |
 
 ## Notes for Integration Engineer

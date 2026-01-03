@@ -2,7 +2,7 @@
 
 > "Session-specific knowledge should NOT be in CLAUDE.md. CLAUDE.md should just maintain alignment with the active team to ensure standardized workflows are followed."
 
-These six principles govern all CLAUDE.md architecture decisions across the skeleton/satellite ecosystem.
+These six principles govern all CLAUDE.md architecture decisions across the roster/satellite ecosystem.
 
 ---
 
@@ -42,7 +42,7 @@ This project uses a {N}-agent workflow ({team-name}).
 {routing guidance: when to invoke which agent}
 ```
 
-Everything else is either infrastructure documentation (synced from skeleton) or project extensions (satellite-owned).
+Everything else is either infrastructure documentation (synced from roster) or project extensions (satellite-owned).
 
 ---
 
@@ -54,7 +54,7 @@ If content changes more than once per session, it does not belong in CLAUDE.md.
 
 | Tier | Change Frequency | In CLAUDE.md? | Examples |
 |------|------------------|---------------|----------|
-| **STATIC** | Once (at init) | Rarely needed | Skeleton source reference |
+| **STATIC** | Once (at init) | Rarely needed | Roster source reference |
 | **STABLE** | Weeks/months | **Yes** | Team, skills, workflow |
 | **DYNAMIC** | Days/weekly | **No** | Current initiative |
 | **EPHEMERAL** | Minutes/hourly | **No** | Git state, current task |
@@ -89,11 +89,11 @@ Each concern has exactly one owner. Content placement follows ownership.
 
 | Concern | Owner | In CLAUDE.md? | Sync Behavior |
 |---------|-------|---------------|---------------|
-| **Ecosystem Infrastructure** | Skeleton | Yes | SYNC |
+| **Ecosystem Infrastructure** | Roster | Yes | SYNC |
 | **Project Identity** | Satellite | Yes | PRESERVE |
-| **Team Configuration** | Roster | Yes | REGENERATE |
+| **Team Configuration** | Team | Yes | REGENERATE |
 | **Session State** | Session | **No** | N/A |
-| **Workflow Guidance** | Skeleton | Yes | SYNC |
+| **Workflow Guidance** | Roster | Yes | SYNC |
 
 ### The Critical Distinction
 
@@ -109,7 +109,7 @@ Session state is injected by hooks at session start. It appears in Claude's cont
 
 | Test | Answer | Result |
 |------|--------|--------|
-| Skeleton | SYNC |
+| Roster | SYNC |
 | Satellite | PRESERVE or PROJECT |
 | ACTIVE_TEAM + agents/ | REGENERATE |
 | Session files | NOT IN CLAUDE.md |
@@ -139,7 +139,7 @@ Hooks inject ephemeral context at session start. It appears in Claude's view but
 |  (.claude/CLAUDE.md)                                             |
 |  - Team configuration (from roster)                              |
 |  - Project identity (satellite-owned)                            |
-|  - Ecosystem infrastructure (synced from skeleton)               |
+|  - Ecosystem infrastructure (synced from roster)                 |
 +-----------------------------------------------------------------+
                             |
                             | supplements
@@ -189,9 +189,9 @@ Each piece of content has one owner, one sync behavior, one location.
 
 | Content | Owner | Sync | Location |
 |---------|-------|------|----------|
-| Skills Architecture table | Skeleton | SYNC | CLAUDE.md |
+| Skills Architecture table | Roster | SYNC | CLAUDE.md |
 | Project-specific conventions | Satellite | PRESERVE | CLAUDE.md (## Project:*) |
-| Quick Start agent table | Roster | REGENERATE | CLAUDE.md |
+| Quick Start agent table | Team | REGENERATE | CLAUDE.md |
 | Current initiative | Session | N/A | SESSION_CONTEXT |
 | Git state | Hooks | N/A | Hook output only |
 
@@ -260,10 +260,10 @@ Key architectural decisions and their rationale:
 | Decision | Rationale |
 |----------|-----------|
 | Session state excluded from CLAUDE.md | Changes too frequently, creates maintenance burden |
-| Team sections regenerated, not copied | Satellites have their own teams, skeleton team is irrelevant |
+| Team sections regenerated, not copied | Satellites have their own teams from ACTIVE_TEAM |
 | Hooks inject transient context | Separation of stable (file) vs ephemeral (context) |
 | PRESERVE as default for unknown sections | Encourages experimentation, safer than deletion |
-| `## Project:*` pattern for extensions | Clear namespace, prevents conflicts with skeleton sections |
+| `## Project:*` pattern for extensions | Clear namespace, prevents conflicts with roster sections |
 
 ---
 

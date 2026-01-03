@@ -11,7 +11,7 @@ description: "First principles for CLAUDE.md architecture. Use when: modifying C
 
 Activate this skill when:
 
-- Modifying any CLAUDE.md content (skeleton or satellite)
+- Modifying any CLAUDE.md content (roster or satellite)
 - Making CEM sync decisions (SYNC vs PRESERVE vs REGENERATE)
 - Determining where content belongs (CLAUDE.md vs SESSION_CONTEXT vs hooks)
 - Validating proposed CLAUDE.md changes
@@ -132,9 +132,9 @@ CLAUDE.md excludes: DYNAMIC + EPHEMERAL content (changes daily/hourly)
 
 | Owner | Sync Behavior | Examples |
 |-------|---------------|----------|
-| Skeleton | SYNC | Skills docs, hooks docs, workflow patterns |
+| Roster | SYNC | Skills docs, hooks docs, workflow patterns |
 | Satellite | PRESERVE | Project extensions, custom sections |
-| Roster | REGENERATE | Quick Start, Agent Configurations |
+| Team | REGENERATE | Quick Start, Agent Configurations |
 | Session | NOT IN CLAUDE.md | Current task, git state, handoff context |
 
 ---
@@ -143,9 +143,9 @@ CLAUDE.md excludes: DYNAMIC + EPHEMERAL content (changes daily/hourly)
 
 What belongs in each CLAUDE.md section:
 
-### Skeleton-Owned Sections (SYNC)
+### Roster-Owned Sections (SYNC)
 
-These sections sync from skeleton to all satellites. Content describes ecosystem infrastructure.
+These sections sync from roster to all satellites. Content describes ecosystem infrastructure.
 
 | Section | Purpose | Content Pattern |
 |---------|---------|-----------------|
@@ -169,7 +169,7 @@ These sections are never overwritten by CEM sync. Content is project-specific.
 | **Quick Start** | Orient to current team | Team name, agent table (regenerated from roster) |
 | **Agent Configurations** | List available agents | Agent-to-file mapping (regenerated from roster) |
 | **Project:\*** namespace | Project extensions | Any project-specific patterns |
-| Custom sections | Satellite additions | Not matching skeleton section names |
+| Custom sections | Satellite additions | Not matching roster section names |
 
 **Tone for PRESERVE sections:** Contextual. Describes this specific project's configuration.
 
@@ -224,7 +224,7 @@ New content to add to CLAUDE.md?
            v
   Who owns this content?
      /        |        \
- SKELETON   ROSTER   SATELLITE
+  ROSTER    TEAM    SATELLITE
     |         |          |
     v         v          v
   SYNC    REGENERATE  PRESERVE
@@ -242,7 +242,7 @@ Before modifying CLAUDE.md:
 - [ ] Content passes Scope Test (project-wide, not session-specific)
 - [ ] No dates, timestamps, or "currently" language
 - [ ] No git state or file status references
-- [ ] Correct owner identified (skeleton/satellite/roster)
+- [ ] Correct owner identified (roster/team/satellite)
 - [ ] Correct sync behavior specified (SYNC/PRESERVE/REGENERATE)
 - [ ] **Descriptive tone** (no global MUST mandates in entry sections)
 - [ ] **Conditional guidance** where behavior varies by context
@@ -272,7 +272,7 @@ After making changes:
 
 1. **Verify marker placement**: Ownership marker immediately precedes section header
 2. **Validate stability**: Content passes "accurate in 1 month" test
-3. **Check propagation intent**: SYNC content should be skeleton-owned infrastructure only
+3. **Check propagation intent**: SYNC content should be roster-owned infrastructure only
 4. **No session state leaked**: No dates, "currently", git state, or task references
 5. **Descriptive tone verified**: No global MUST mandates in entry sections
 
@@ -281,7 +281,7 @@ After making changes:
 | Scenario | Pre-Flight | Post-Flight |
 |----------|------------|-------------|
 | Add project extension | Check `## Project:*` namespace available | Verify PRESERVE marker added |
-| Update workflow routing | Confirm this is skeleton content | Ensure SYNC marker preserved, descriptive tone |
+| Update workflow routing | Confirm this is roster content | Ensure SYNC marker preserved, descriptive tone |
 | Fix team configuration | Read ACTIVE_TEAM + agents/ | Verify regeneration source noted |
 | Remove stale content | Confirm it fails decay test | Verify no orphaned references |
 | Convert prescriptive to descriptive | Identify MUST mandates | Verify conditional tables used |

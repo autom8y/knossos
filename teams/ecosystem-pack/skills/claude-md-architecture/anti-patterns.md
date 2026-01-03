@@ -14,7 +14,7 @@ What NOT to put in CLAUDE.md. Each anti-pattern includes the violation, why it's
 | 4 | Personal preferences in project | User-specific, causes team conflicts | ~/.claude/CLAUDE.md |
 | 5 | Hardcoded dynamic values | Sprint/velocity/blockers become stale quickly | Project management tools |
 | 6 | Session history | CLAUDE.md is not a changelog | .claude/sessions/ |
-| 7 | Skeleton team in satellites | Satellite has its own team | Regenerate from satellite roster |
+| 7 | Roster team in satellites | Satellite has its own team | Regenerate from satellite's ACTIVE_TEAM |
 | 8 | "Last updated" timestamps | Immediately stale, git provides this | Git history |
 | 9 | Task lists/checkboxes | Session-scoped, better tools exist | TodoWrite, issue tracker |
 | 10 | Environment configuration | Security risk, varies by machine | .env files, secret managers |
@@ -84,13 +84,13 @@ What NOT to put in CLAUDE.md. Each anti-pattern includes the violation, why it's
 
 ---
 
-### 7. Copying Skeleton Team to Satellites
+### 7. Copying Roster Team to Satellites
 
 **Violation**: Satellite Quick Start shows `ecosystem-pack` agents instead of satellite's own team.
 
-**Why wrong**: Satellite has its own team, skeleton team is irrelevant, creates incorrect routing.
+**Why wrong**: Satellite has its own team, roster's team is irrelevant, creates incorrect routing.
 
-**Correct**: Team sections are PRESERVE or REGENERATE from satellite's roster, never SYNC.
+**Correct**: Team sections are PRESERVE or REGENERATE from satellite's own ACTIVE_TEAM, never SYNC.
 
 ---
 
@@ -150,7 +150,7 @@ Rules:
 | "Currently working on X" | Session state | SESSION_CONTEXT |
 | "Last updated: DATE" | Stale metadata | Git history |
 | "Git branch: X" | Changes constantly | Hook output |
-| Skeleton team in satellite | Wrong team source | Regenerate from ACTIVE_TEAM |
+| Roster team in satellite | Wrong team source | Regenerate from satellite's ACTIVE_TEAM |
 | Personal preferences | Wrong scope | ~/.claude/CLAUDE.md |
 | Sprint/initiative details | Too dynamic | PRD, session files |
 | Task checkboxes | Session-scoped | TodoWrite, issue tracker |

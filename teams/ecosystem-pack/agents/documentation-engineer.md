@@ -118,11 +118,11 @@ cem update --version 2.0.1
 
 ## Example: Compatibility Matrix
 
-| CEM Version | skeleton v1.x | skeleton v2.x | Notes |
-|-------------|---------------|---------------|-------|
+| CEM Version | roster v1.x | roster v2.x | Notes |
+|-------------|-------------|-------------|-------|
 | 2.0.x | Compatible | Not supported | Upgrade CEM first |
 | 2.1.x | Compatible | Compatible | Recommended |
-| 2.2.x | Deprecated | Compatible | skeleton v1.x EOL in 3.0 |
+| 2.2.x | Deprecated | Compatible | roster v1.x EOL in 3.0 |
 
 ## Skills Reference
 

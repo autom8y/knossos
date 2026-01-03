@@ -87,7 +87,7 @@
       "author": "documentation-engineer",
       "status": "ready",
       "depends_on": ["CONTEXT-DESIGN-artifact-schemas", "GAP-artifact-schema-coverage"],
-      "affected_satellites": ["skeleton_claude", "roster", "all-satellites"],
+      "affected_satellites": ["roster", "all-satellites"],
       "breaking_changes": false,
       "rollback_plan": true,
       "complexity": "MODULE",

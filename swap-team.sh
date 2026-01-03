@@ -3012,7 +3012,7 @@ perform_swap() {
 }
 
 # ============================================================================
-# Reset to Skeleton Baseline
+# Reset to Baseline (No Team)
 # ============================================================================
 
 # Preview what reset would remove (for --dry-run with --reset)

@@ -13,7 +13,6 @@
 #
 # Markers:
 #   <!-- SYNC: roster-owned -->       - Always take roster version
-#   <!-- SYNC: skeleton-owned -->     - Legacy, same as roster-owned
 #   <!-- PRESERVE: satellite-owned --> - Keep satellite version
 #
 # Special Sections:
@@ -29,7 +28,6 @@ readonly _MERGE_DOCS_LOADED=1
 # ============================================================================
 
 readonly SYNC_MARKER_ROSTER="<!-- SYNC: roster-owned -->"
-readonly SYNC_MARKER_SKELETON="<!-- SYNC: skeleton-owned -->"
 readonly PRESERVE_MARKER="<!-- PRESERVE: satellite-owned -->"
 
 # Sections that should be preserved by default if they exist locally

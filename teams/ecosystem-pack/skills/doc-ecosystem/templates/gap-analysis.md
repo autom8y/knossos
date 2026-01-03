@@ -13,25 +13,24 @@
 2. [Expected vs. actual behavior]
 
 ## Root Cause
-**Component**: [CEM | skeleton | roster]
+**Component**: [CEM | roster]
 **File**: [path/to/file:line]
 **Issue**: [technical explanation]
 
 ## Success Criteria
 - [ ] [Concrete, testable criterion]
-- [ ] [e.g., "cem sync completes without errors"]
+- [ ] [e.g., "roster-sync completes without errors"]
 
 ## Affected Systems
-- [x] CEM
-- [ ] skeleton
-- [ ] roster
+- [ ] CEM (lib/sync, roster-sync)
+- [ ] roster (user-*, teams/*)
 
 ## Recommended Complexity
 **Level**: [PATCH | MODULE | SYSTEM | MIGRATION]
 **Rationale**: [why this complexity]
 
 ## Test Satellites
-- skeleton (always)
+- test-baseline (always)
 - [other satellites based on issue characteristics]
 
 ## Notes for Context Architect
