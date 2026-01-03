@@ -231,7 +231,46 @@ detect_resource_orphans() {
     local find_type="$4"
     local glob_pattern="$5"
 
-    # Stub - to be implemented in RF-005
+    local incoming_resource_dir="$ROSTER_HOME/teams/$incoming_team/$resource_type"
+    local orphan_count=0
+
+    # Return if resource directory doesn't exist
+    [[ -d "$resource_dir" ]] || return 0
+
+    # Iterate over resources using glob pattern
+    for resource_path in $resource_dir/$glob_pattern; do
+        # Check if path exists (glob may not match anything)
+        if [[ "$find_type" == "d" ]]; then
+            [[ -d "$resource_path" ]] || continue
+        else
+            [[ -f "$resource_path" ]] || continue
+        fi
+
+        local resource_name
+        resource_name=$(basename "$resource_path")
+
+        # Skip hidden files/dirs and special directories
+        [[ "$resource_name" == .* ]] && continue
+        [[ "$resource_name" == "lib" ]] && continue
+
+        # Is this resource in the incoming team? If so, skip (not an orphan)
+        if [[ "$find_type" == "d" ]] && [[ -d "$incoming_resource_dir/$resource_name" ]]; then
+            continue
+        elif [[ "$find_type" == "f" ]] && [[ -f "$incoming_resource_dir/$resource_name" ]]; then
+            continue
+        fi
+
+        # Is this resource from ANY team pack?
+        if is_resource_from_team "$resource_name" "$resource_type" "$find_type"; then
+            local origin_team
+            origin_team=$(get_resource_team "$resource_name" "$resource_type" "$find_type")
+            echo "$resource_name:$origin_team"
+            orphan_count=$((orphan_count + 1))
+            log_debug "Orphan ${resource_type%s} detected: $resource_name (from $origin_team)"
+        fi
+    done
+
+    log_debug "Total orphan ${resource_type}: $orphan_count"
     return 0
 }
 

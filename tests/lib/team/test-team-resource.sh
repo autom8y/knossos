@@ -458,6 +458,168 @@ test_remove_team_resource_removes_marker() {
 }
 
 # ============================================================================
+# Tests for detect_resource_orphans() - RF-005
+# ============================================================================
+
+test_detect_resource_orphans_commands() {
+    run_test "detect_resource_orphans detects command orphans"
+
+    # Setup: project with orphan command from team-a, swapping to team-b
+    local project_dir="$TEST_TMP/project-detect-orphans-cmd"
+    local cmd_dir="$project_dir/.claude/commands"
+    mkdir -p "$cmd_dir"
+    echo "orphan from team-a" > "$cmd_dir/cmd-a.md"
+
+    # Act: detect orphans (incoming team is team-b)
+    cd "$project_dir"
+    local result
+    result=$(detect_resource_orphans "commands" ".claude/commands" "team-b" "f" "*.md")
+
+    # Assert: should detect cmd-a.md as orphan from team-a
+    if [[ "$result" == "cmd-a.md:team-a" ]]; then
+        test_pass "detected command orphan with correct origin team"
+    else
+        test_fail "detect_resource_orphans" "cmd-a.md:team-a" "$result"
+    fi
+}
+
+test_detect_resource_orphans_skills() {
+    run_test "detect_resource_orphans detects skill orphans"
+
+    # Setup: project with orphan skill from team-b, swapping to team-a
+    local project_dir="$TEST_TMP/project-detect-orphans-skill"
+    local skill_dir="$project_dir/.claude/skills"
+    mkdir -p "$skill_dir/skill-b"
+    echo "orphan skill" > "$skill_dir/skill-b/skill.md"
+
+    # Act: detect orphans (incoming team is team-a)
+    cd "$project_dir"
+    local result
+    result=$(detect_resource_orphans "skills" ".claude/skills" "team-a" "d" "*/")
+
+    # Assert: should detect skill-b as orphan from team-b
+    if [[ "$result" == "skill-b:team-b" ]]; then
+        test_pass "detected skill orphan with correct origin team"
+    else
+        test_fail "detect_resource_orphans" "skill-b:team-b" "$result"
+    fi
+}
+
+test_detect_resource_orphans_hooks() {
+    run_test "detect_resource_orphans detects hook orphans"
+
+    # Setup: project with orphan hook from team-a, swapping to team-b
+    local project_dir="$TEST_TMP/project-detect-orphans-hook"
+    local hook_dir="$project_dir/.claude/hooks"
+    mkdir -p "$hook_dir"
+    echo "orphan hook" > "$hook_dir/hook-a.sh"
+
+    # Act: detect orphans (incoming team is team-b)
+    cd "$project_dir"
+    local result
+    result=$(detect_resource_orphans "hooks" ".claude/hooks" "team-b" "f" "*")
+
+    # Assert: should detect hook-a.sh as orphan from team-a
+    if [[ "$result" == "hook-a.sh:team-a" ]]; then
+        test_pass "detected hook orphan with correct origin team"
+    else
+        test_fail "detect_resource_orphans" "hook-a.sh:team-a" "$result"
+    fi
+}
+
+test_detect_resource_orphans_skips_incoming() {
+    run_test "detect_resource_orphans skips resources from incoming team"
+
+    # Setup: project with command from team-a, swapping to team-a (should not be orphan)
+    local project_dir="$TEST_TMP/project-detect-no-orphan"
+    local cmd_dir="$project_dir/.claude/commands"
+    mkdir -p "$cmd_dir"
+    echo "team-a command" > "$cmd_dir/cmd-a.md"
+
+    # Act: detect orphans (incoming team is team-a - same as resource)
+    cd "$project_dir"
+    local result
+    result=$(detect_resource_orphans "commands" ".claude/commands" "team-a" "f" "*.md")
+
+    # Assert: should return empty (no orphans)
+    if [[ -z "$result" ]]; then
+        test_pass "correctly skipped resource from incoming team"
+    else
+        test_fail "detect_resource_orphans" "(empty)" "$result"
+    fi
+}
+
+test_detect_resource_orphans_skips_non_team() {
+    run_test "detect_resource_orphans skips non-team resources"
+
+    # Setup: project with user-created command (not from any team)
+    local project_dir="$TEST_TMP/project-detect-user-cmd"
+    local cmd_dir="$project_dir/.claude/commands"
+    mkdir -p "$cmd_dir"
+    echo "user command" > "$cmd_dir/user-custom.md"
+
+    # Act: detect orphans (incoming team is team-a)
+    cd "$project_dir"
+    local result
+    result=$(detect_resource_orphans "commands" ".claude/commands" "team-a" "f" "*.md")
+
+    # Assert: should return empty (user commands are not orphans)
+    if [[ -z "$result" ]]; then
+        test_pass "correctly skipped non-team resource"
+    else
+        test_fail "detect_resource_orphans" "(empty)" "$result"
+    fi
+}
+
+test_detect_resource_orphans_multiple() {
+    run_test "detect_resource_orphans detects multiple orphans"
+
+    # Setup: project with orphans from both teams, swapping to new team
+    local project_dir="$TEST_TMP/project-detect-multiple"
+    local cmd_dir="$project_dir/.claude/commands"
+    mkdir -p "$cmd_dir"
+    echo "from team-a" > "$cmd_dir/cmd-a.md"
+    echo "from team-b" > "$cmd_dir/cmd-b.md"
+    echo "user command" > "$cmd_dir/user.md"
+
+    # Act: detect orphans (incoming team is neither team-a nor team-b)
+    # Create a third team for this test
+    mkdir -p "$TEST_TMP/mock-roster/teams/team-c/commands"
+    cd "$project_dir"
+    local result
+    result=$(detect_resource_orphans "commands" ".claude/commands" "team-c" "f" "*.md")
+
+    # Assert: should detect both cmd-a.md and cmd-b.md (but not user.md)
+    local count
+    count=$(echo "$result" | grep -c "^cmd-[ab]\.md:team-[ab]$" || true)
+    if [[ $count -eq 2 ]]; then
+        test_pass "detected multiple orphans, skipped non-team resource"
+    else
+        test_fail "detect_resource_orphans" "2 orphans" "$count orphans found: $result"
+    fi
+}
+
+test_detect_resource_orphans_no_directory() {
+    run_test "detect_resource_orphans returns empty when resource directory doesn't exist"
+
+    # Setup: project without commands directory
+    local project_dir="$TEST_TMP/project-no-cmd-dir"
+    mkdir -p "$project_dir"
+
+    # Act: detect orphans on non-existent directory
+    cd "$project_dir"
+    local result
+    result=$(detect_resource_orphans "commands" ".claude/commands" "team-a" "f" "*.md")
+
+    # Assert: should return empty
+    if [[ -z "$result" ]]; then
+        test_pass "returned empty for non-existent directory"
+    else
+        test_fail "detect_resource_orphans" "(empty)" "$result"
+    fi
+}
+
+# ============================================================================
 # Main test runner
 # ============================================================================
 
@@ -495,6 +657,15 @@ main() {
     test_remove_team_resource_hooks
     test_remove_team_resource_no_marker
     test_remove_team_resource_removes_marker
+
+    # RF-005: detect_resource_orphans tests
+    test_detect_resource_orphans_commands
+    test_detect_resource_orphans_skills
+    test_detect_resource_orphans_hooks
+    test_detect_resource_orphans_skips_incoming
+    test_detect_resource_orphans_skips_non_team
+    test_detect_resource_orphans_multiple
+    test_detect_resource_orphans_no_directory
 
     teardown
 
