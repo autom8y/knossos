@@ -299,6 +299,49 @@ remove_resource_orphans() {
     local orphan_mode="$3"
     local find_type="$4"
 
-    # Stub - to be implemented in RF-006
+    local backup_dir="${resource_dir}.orphan-backup"
+    local orphan_count=0
+
+    # Read orphan list from stdin (one "name:team" per line)
+    while IFS=: read -r resource_name origin_team; do
+        # Skip empty lines
+        [[ -z "$resource_name" ]] && continue
+
+        orphan_count=$((orphan_count + 1))
+        local resource_path="${resource_dir}/${resource_name}"
+
+        case "$orphan_mode" in
+            "remove")
+                # Create backup directory if it doesn't exist
+                mkdir -p "$backup_dir"
+
+                # Backup and remove based on resource type
+                if [[ "$find_type" == "d" ]] && [[ -d "$resource_path" ]]; then
+                    # For directories (skills), use recursive copy
+                    cp -rp "$resource_path" "$backup_dir/$resource_name"
+                    rm -rf "$resource_path"
+                    log "Removed orphan ${resource_type%s}: $resource_name (was from $origin_team)"
+                elif [[ "$find_type" == "f" ]] && [[ -f "$resource_path" ]]; then
+                    # For files (commands, hooks), use simple copy
+                    cp "$resource_path" "$backup_dir/$resource_name"
+                    rm -f "$resource_path"
+                    log "Removed orphan ${resource_type%s}: $resource_name (was from $origin_team)"
+                fi
+                ;;
+            "keep")
+                log "Keeping orphan ${resource_type%s}: $resource_name (from $origin_team)"
+                ;;
+            *)
+                # Default: keep silently (no explicit mode set)
+                log_debug "Keeping orphan ${resource_type%s}: $resource_name (no disposition)"
+                ;;
+        esac
+    done
+
+    # Log summary if backups were created
+    if [[ "$orphan_mode" == "remove" ]] && [[ -d "$backup_dir" ]]; then
+        log "Orphan ${resource_type%s} backups saved to: $backup_dir"
+    fi
+
     return 0
 }

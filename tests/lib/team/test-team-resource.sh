@@ -620,6 +620,200 @@ test_detect_resource_orphans_no_directory() {
 }
 
 # ============================================================================
+# Tests for remove_resource_orphans() - RF-006
+# ============================================================================
+
+test_remove_resource_orphans_remove_mode_commands() {
+    run_test "remove_resource_orphans removes and backs up commands in remove mode"
+
+    # Setup: project with orphan command
+    local project_dir="$TEST_TMP/project-remove-orphan-cmd"
+    local cmd_dir="$project_dir/.claude/commands"
+    mkdir -p "$cmd_dir"
+    echo "orphan content" > "$cmd_dir/cmd-a.md"
+
+    # Act: pipe orphan list to remove function (remove mode)
+    cd "$project_dir"
+    echo "cmd-a.md:team-a" | remove_resource_orphans "commands" ".claude/commands" "remove" "f" 2>/dev/null
+
+    # Assert: file removed, backup created
+    if [[ ! -f "$cmd_dir/cmd-a.md" ]] && \
+       [[ -f "$cmd_dir.orphan-backup/cmd-a.md" ]]; then
+        test_pass "removed command and created backup"
+    else
+        test_fail "remove_resource_orphans" "file removed, backup exists" "file still present or backup missing"
+    fi
+}
+
+test_remove_resource_orphans_remove_mode_skills() {
+    run_test "remove_resource_orphans removes and backs up skills in remove mode"
+
+    # Setup: project with orphan skill
+    local project_dir="$TEST_TMP/project-remove-orphan-skill"
+    local skill_dir="$project_dir/.claude/skills"
+    mkdir -p "$skill_dir/skill-b/subdir"
+    echo "orphan skill content" > "$skill_dir/skill-b/skill.md"
+    echo "nested file" > "$skill_dir/skill-b/subdir/nested.txt"
+
+    # Act: pipe orphan list to remove function (remove mode)
+    cd "$project_dir"
+    echo "skill-b:team-b" | remove_resource_orphans "skills" ".claude/skills" "remove" "d" 2>/dev/null
+
+    # Assert: directory removed, backup created with recursive structure
+    if [[ ! -d "$skill_dir/skill-b" ]] && \
+       [[ -d "$skill_dir.orphan-backup/skill-b" ]] && \
+       [[ -f "$skill_dir.orphan-backup/skill-b/skill.md" ]] && \
+       [[ -f "$skill_dir.orphan-backup/skill-b/subdir/nested.txt" ]]; then
+        test_pass "removed skill directory and created recursive backup"
+    else
+        test_fail "remove_resource_orphans" "directory removed, backup with structure" "directory still present or backup incomplete"
+    fi
+}
+
+test_remove_resource_orphans_remove_mode_hooks() {
+    run_test "remove_resource_orphans removes and backs up hooks in remove mode"
+
+    # Setup: project with orphan hook
+    local project_dir="$TEST_TMP/project-remove-orphan-hook"
+    local hook_dir="$project_dir/.claude/hooks"
+    mkdir -p "$hook_dir"
+    echo "#!/bin/bash" > "$hook_dir/hook-a.sh"
+
+    # Act: pipe orphan list to remove function (remove mode)
+    cd "$project_dir"
+    echo "hook-a.sh:team-a" | remove_resource_orphans "hooks" ".claude/hooks" "remove" "f" 2>/dev/null
+
+    # Assert: file removed, backup created
+    if [[ ! -f "$hook_dir/hook-a.sh" ]] && \
+       [[ -f "$hook_dir.orphan-backup/hook-a.sh" ]]; then
+        test_pass "removed hook and created backup"
+    else
+        test_fail "remove_resource_orphans" "file removed, backup exists" "file still present or backup missing"
+    fi
+}
+
+test_remove_resource_orphans_keep_mode() {
+    run_test "remove_resource_orphans preserves resources in keep mode"
+
+    # Setup: project with orphan command
+    local project_dir="$TEST_TMP/project-keep-orphan"
+    local cmd_dir="$project_dir/.claude/commands"
+    mkdir -p "$cmd_dir"
+    echo "keep this" > "$cmd_dir/cmd-a.md"
+
+    # Act: pipe orphan list to remove function (keep mode)
+    cd "$project_dir"
+    echo "cmd-a.md:team-a" | remove_resource_orphans "commands" ".claude/commands" "keep" "f" 2>/dev/null
+
+    # Assert: file still exists, no backup created
+    if [[ -f "$cmd_dir/cmd-a.md" ]] && \
+       [[ ! -d "$cmd_dir.orphan-backup" ]]; then
+        test_pass "preserved resource, no backup created"
+    else
+        test_fail "remove_resource_orphans" "file preserved, no backup" "file removed or backup created"
+    fi
+}
+
+test_remove_resource_orphans_empty_mode() {
+    run_test "remove_resource_orphans preserves resources when mode is empty"
+
+    # Setup: project with orphan command
+    local project_dir="$TEST_TMP/project-empty-mode"
+    local cmd_dir="$project_dir/.claude/commands"
+    mkdir -p "$cmd_dir"
+    echo "keep this too" > "$cmd_dir/cmd-b.md"
+
+    # Act: pipe orphan list to remove function (empty mode)
+    cd "$project_dir"
+    echo "cmd-b.md:team-b" | remove_resource_orphans "commands" ".claude/commands" "" "f" 2>/dev/null
+
+    # Assert: file still exists, no backup created
+    if [[ -f "$cmd_dir/cmd-b.md" ]] && \
+       [[ ! -d "$cmd_dir.orphan-backup" ]]; then
+        test_pass "preserved resource with empty mode"
+    else
+        test_fail "remove_resource_orphans" "file preserved, no backup" "file removed or backup created"
+    fi
+}
+
+test_remove_resource_orphans_multiple() {
+    run_test "remove_resource_orphans handles multiple orphans"
+
+    # Setup: project with multiple orphan commands
+    local project_dir="$TEST_TMP/project-remove-multiple"
+    local cmd_dir="$project_dir/.claude/commands"
+    mkdir -p "$cmd_dir"
+    echo "orphan 1" > "$cmd_dir/cmd-a.md"
+    echo "orphan 2" > "$cmd_dir/cmd-b.md"
+    echo "orphan 3" > "$cmd_dir/other.md"
+
+    # Act: pipe multiple orphans to remove function
+    cd "$project_dir"
+    {
+        echo "cmd-a.md:team-a"
+        echo "cmd-b.md:team-b"
+        echo "other.md:team-a"
+    } | remove_resource_orphans "commands" ".claude/commands" "remove" "f" 2>/dev/null
+
+    # Assert: all files removed, all backed up
+    if [[ ! -f "$cmd_dir/cmd-a.md" ]] && \
+       [[ ! -f "$cmd_dir/cmd-b.md" ]] && \
+       [[ ! -f "$cmd_dir/other.md" ]] && \
+       [[ -f "$cmd_dir.orphan-backup/cmd-a.md" ]] && \
+       [[ -f "$cmd_dir.orphan-backup/cmd-b.md" ]] && \
+       [[ -f "$cmd_dir.orphan-backup/other.md" ]]; then
+        test_pass "removed and backed up all orphans"
+    else
+        test_fail "remove_resource_orphans" "all removed, all backed up" "some files remain or backups missing"
+    fi
+}
+
+test_remove_resource_orphans_empty_input() {
+    run_test "remove_resource_orphans handles empty input gracefully"
+
+    # Setup: project with commands
+    local project_dir="$TEST_TMP/project-empty-input"
+    local cmd_dir="$project_dir/.claude/commands"
+    mkdir -p "$cmd_dir"
+    echo "content" > "$cmd_dir/cmd-a.md"
+
+    # Act: pipe empty input to remove function
+    cd "$project_dir"
+    echo "" | remove_resource_orphans "commands" ".claude/commands" "remove" "f" 2>/dev/null
+
+    # Assert: no changes, no backup directory created
+    if [[ -f "$cmd_dir/cmd-a.md" ]] && \
+       [[ ! -d "$cmd_dir.orphan-backup" ]]; then
+        test_pass "handled empty input without creating backup"
+    else
+        test_fail "remove_resource_orphans" "no changes" "unexpected changes or backup created"
+    fi
+}
+
+test_remove_resource_orphans_piped_from_detect() {
+    run_test "remove_resource_orphans works piped from detect_resource_orphans"
+
+    # Setup: project with orphan from team-a, swapping to team-b
+    local project_dir="$TEST_TMP/project-pipe-test"
+    local cmd_dir="$project_dir/.claude/commands"
+    mkdir -p "$cmd_dir"
+    echo "orphan from team-a" > "$cmd_dir/cmd-a.md"
+
+    # Act: pipe detect output directly to remove
+    cd "$project_dir"
+    detect_resource_orphans "commands" ".claude/commands" "team-b" "f" "*.md" \
+        | remove_resource_orphans "commands" ".claude/commands" "remove" "f" 2>/dev/null
+
+    # Assert: orphan detected and removed
+    if [[ ! -f "$cmd_dir/cmd-a.md" ]] && \
+       [[ -f "$cmd_dir.orphan-backup/cmd-a.md" ]]; then
+        test_pass "piped workflow works end-to-end"
+    else
+        test_fail "remove_resource_orphans" "orphan removed via pipe" "orphan still present or backup missing"
+    fi
+}
+
+# ============================================================================
 # Main test runner
 # ============================================================================
 
@@ -666,6 +860,16 @@ main() {
     test_detect_resource_orphans_skips_non_team
     test_detect_resource_orphans_multiple
     test_detect_resource_orphans_no_directory
+
+    # RF-006: remove_resource_orphans tests
+    test_remove_resource_orphans_remove_mode_commands
+    test_remove_resource_orphans_remove_mode_skills
+    test_remove_resource_orphans_remove_mode_hooks
+    test_remove_resource_orphans_keep_mode
+    test_remove_resource_orphans_empty_mode
+    test_remove_resource_orphans_multiple
+    test_remove_resource_orphans_empty_input
+    test_remove_resource_orphans_piped_from_detect
 
     teardown
 
