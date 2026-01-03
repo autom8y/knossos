@@ -6,7 +6,7 @@
 # Works for both user-level (~/.claude/hooks/) and project-level (.claude/hooks/).
 #
 # Source Structure: Categorical subdirectories (context-injection/, session-guards/, etc.)
-# Target Structure: Flat with lib/ subdirectory preserved
+# Target Structure: Categorical with lib/ subdirectory preserved
 #
 # Usage:
 #   ./install-hooks.sh                         # Install to current project
@@ -51,7 +51,7 @@ while [[ $# -gt 0 ]]; do
             echo "Syncs hooks from roster/user-hooks/ to project .claude/hooks/"
             echo ""
             echo "Source Structure: Categorical subdirectories (context-injection/, session-guards/, etc.)"
-            echo "Target Structure: Flat with lib/ subdirectory preserved"
+            echo "Target Structure: Categorical with lib/ subdirectory preserved"
             echo ""
             echo "Options:"
             echo "  --dry-run    Preview changes without applying"
@@ -88,7 +88,7 @@ if [[ ! -d "$TARGET_PROJECT/.claude" ]]; then
 fi
 
 log_info "Syncing hooks from: $SOURCE_DIR (categorical)"
-log_info "Syncing hooks to:   $TARGET_HOOKS (flat)"
+log_info "Syncing hooks to:   $TARGET_HOOKS (categorical)"
 
 if [[ $DRY_RUN -eq 1 ]]; then
     log_warn "DRY RUN - no changes will be made"
@@ -134,7 +134,7 @@ if [[ -d "$SOURCE_DIR/lib" ]]; then
     done
 fi
 
-# Sync categorized hook files (flattened to root)
+# Sync categorized hook files (preserve categorical subdirectories)
 sync_count=0
 for category in $HOOK_CATEGORIES; do
     category_dir="$SOURCE_DIR/$category"
@@ -142,17 +142,25 @@ for category in $HOOK_CATEGORIES; do
         continue
     fi
 
+    # Create category subdirectory if needed
+    target_category_dir="$TARGET_HOOKS/$category"
+    if [[ ! -d "$target_category_dir" ]]; then
+        if [[ $DRY_RUN -eq 0 ]]; then
+            mkdir -p "$target_category_dir"
+        fi
+    fi
+
     for hook in "$category_dir"/*.sh; do
         if [[ -f "$hook" ]]; then
             hook_name=$(basename "$hook")
-            target_file="$TARGET_HOOKS/$hook_name"
+            target_file="$TARGET_HOOKS/$category/$hook_name"
 
             if [[ $DRY_RUN -eq 0 ]]; then
                 cp "$hook" "$target_file"
                 chmod +x "$target_file"
-                log_info "Synced: $hook_name (from $category)"
+                log_info "Synced: $category/$hook_name"
             else
-                log_info "Would sync: $hook_name (from $category)"
+                log_info "Would sync: $category/$hook_name"
             fi
             sync_count=$((sync_count + 1))
         fi
