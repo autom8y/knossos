@@ -431,6 +431,107 @@ generate_hooks_json() {
 #   ROSTER_HOME - Must be set
 #   DRY_RUN_MODE - If 1, prints preview without writing
 swap_hook_registrations() {
-    # TODO: Implement in RF-024
-    return 1
+    local team_name="$1"
+    local settings_file=".claude/settings.local.json"
+    local base_hooks_yaml="$ROSTER_HOME/user-hooks/base_hooks.yaml"
+    local team_hooks_yaml="$ROSTER_HOME/teams/$team_name/hooks.yaml"
+
+    log_debug "Updating hook registrations for team: $team_name"
+
+    # Require yq for YAML parsing
+    if ! require_yq; then
+        log_error "Cannot update hook registrations without yq"
+        return 1
+    fi
+
+    # Ensure settings file exists with valid JSON
+    if [[ ! -f "$settings_file" ]]; then
+        echo '{}' > "$settings_file"
+    fi
+
+    # Validate JSON before proceeding
+    if ! jq empty "$settings_file" 2>/dev/null; then
+        log_error "Invalid JSON in $settings_file, backing up and creating fresh"
+        mv "$settings_file" "${settings_file}.corrupt.$(date +%s)"
+        echo '{}' > "$settings_file"
+    fi
+
+    # Dry-run mode: preview changes
+    if [[ "$DRY_RUN_MODE" -eq 1 ]]; then
+        log "Hook registrations preview (dry-run):"
+    fi
+
+    # Step 1: Extract non-roster hooks for preservation
+    local preserved_hooks
+    preserved_hooks=$(extract_non_roster_hooks "$settings_file")
+    local preserved_count
+    preserved_count=$(echo "$preserved_hooks" | jq '[.[] | length] | add // 0')
+    if [[ "$preserved_count" -gt 0 ]]; then
+        log_debug "Preserved $preserved_count non-roster hook entries"
+    fi
+
+    # Step 2: Parse base hooks
+    local base_registrations=""
+    if [[ -f "$base_hooks_yaml" ]]; then
+        base_registrations=$(parse_hooks_yaml "$base_hooks_yaml")
+        local base_count
+        base_count=$(echo "$base_registrations" | grep -c '^{' 2>/dev/null || echo 0)
+        log_debug "Parsed $base_count base hook registrations"
+    else
+        log_warning "Base hooks file not found: $base_hooks_yaml"
+    fi
+
+    # Step 3: Parse team hooks (optional)
+    local team_registrations=""
+    if [[ -f "$team_hooks_yaml" ]]; then
+        team_registrations=$(parse_hooks_yaml "$team_hooks_yaml")
+        local team_count
+        team_count=$(echo "$team_registrations" | grep -c '^{' 2>/dev/null || echo 0)
+        log_debug "Parsed $team_count team hook registrations"
+    else
+        log_debug "No team hooks.yaml for $team_name"
+    fi
+
+    # Step 4: Merge registrations (base first, team second)
+    local merged_registrations
+    merged_registrations=$(merge_hook_registrations "$base_registrations" "$team_registrations")
+
+    # Step 5: Generate hooks JSON
+    local generated_hooks
+    generated_hooks=$(generate_hooks_json "$merged_registrations")
+
+    # Step 6: Merge with preserved hooks
+    local final_hooks
+    final_hooks=$(merge_with_preserved "$generated_hooks" "$preserved_hooks")
+
+    # Dry-run mode: show what would be written
+    if [[ "$DRY_RUN_MODE" -eq 1 ]]; then
+        echo "$final_hooks" | jq '.'
+        return 0
+    fi
+
+    # Step 7: Update settings.local.json
+    local temp_file="${settings_file}.tmp.$$"
+    if ! jq --argjson hooks "$final_hooks" '.hooks = $hooks' "$settings_file" > "$temp_file" 2>/dev/null; then
+        rm -f "$temp_file"
+        log_error "Failed to generate updated settings.local.json"
+        return 1
+    fi
+
+    # Validate generated JSON
+    if ! jq empty "$temp_file" 2>/dev/null; then
+        rm -f "$temp_file"
+        log_error "Generated invalid JSON, hook registrations not updated"
+        return 1
+    fi
+
+    # Atomic rename
+    mv "$temp_file" "$settings_file" || {
+        rm -f "$temp_file"
+        log_error "Failed to update settings.local.json"
+        return 1
+    }
+
+    log "Updated hook registrations in settings.local.json"
+    return 0
 }
