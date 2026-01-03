@@ -175,8 +175,35 @@ remove_team_resource() {
     local marker_file="$3"
     local find_type="$4"
 
-    # Stub - to be implemented in RF-004
-    return 0
+    log_debug "Removing team ${resource_type} from previous team"
+
+    local marker_path="${resource_dir}/${marker_file}"
+
+    if [[ ! -f "$marker_path" ]]; then
+        log_debug "No team ${resource_type} marker found"
+        return 0
+    fi
+
+    # Read list and remove each resource
+    while IFS= read -r resource_name; do
+        [[ -z "$resource_name" ]] && continue
+        local resource_path="${resource_dir}/${resource_name}"
+
+        if [[ "$find_type" == "d" ]] && [[ -d "$resource_path" ]]; then
+            # For directories (skills), use rm -rf
+            rm -rf "$resource_path"
+            log_debug "Removed team ${resource_type%s}: $resource_name"
+        elif [[ "$find_type" == "f" ]] && [[ -f "$resource_path" ]]; then
+            # For files (commands, hooks), use rm -f
+            rm -f "$resource_path"
+            log_debug "Removed team ${resource_type%s}: $resource_name"
+        fi
+    done < "$marker_path"
+
+    # Remove the marker file
+    rm -f "$marker_path"
+
+    log_debug "Team ${resource_type} removed"
 }
 
 # ============================================================================

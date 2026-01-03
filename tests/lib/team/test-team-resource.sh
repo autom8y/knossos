@@ -341,6 +341,123 @@ test_backup_team_resource_removes_old_backup() {
 }
 
 # ============================================================================
+# Tests for remove_team_resource() - RF-004
+# ============================================================================
+
+test_remove_team_resource_commands() {
+    run_test "remove_team_resource removes commands (files)"
+
+    # Setup: create commands with marker
+    local project_dir="$TEST_TMP/project-remove-commands"
+    local cmd_dir="$project_dir/.claude/commands"
+    mkdir -p "$cmd_dir"
+    echo "cmd-a.md" > "$cmd_dir/.team-commands"
+    echo "cmd-b.md" >> "$cmd_dir/.team-commands"
+    echo "content" > "$cmd_dir/cmd-a.md"
+    echo "content" > "$cmd_dir/cmd-b.md"
+
+    # Act: remove commands
+    cd "$project_dir"
+    remove_team_resource "commands" ".claude/commands" ".team-commands" "f"
+
+    # Assert: files and marker removed
+    if [[ ! -f "$cmd_dir/cmd-a.md" ]] && \
+       [[ ! -f "$cmd_dir/cmd-b.md" ]] && \
+       [[ ! -f "$cmd_dir/.team-commands" ]]; then
+        test_pass "removed command files and marker"
+    else
+        test_fail "remove_team_resource" "all files removed" "files still present"
+    fi
+}
+
+test_remove_team_resource_skills() {
+    run_test "remove_team_resource removes skills (directories)"
+
+    # Setup: create skills with marker
+    local project_dir="$TEST_TMP/project-remove-skills"
+    local skill_dir="$project_dir/.claude/skills"
+    mkdir -p "$skill_dir/skill-a/subdir"
+    mkdir -p "$skill_dir/skill-b"
+    echo "skill-a" > "$skill_dir/.team-skills"
+    echo "skill-b" >> "$skill_dir/.team-skills"
+    echo "content" > "$skill_dir/skill-a/skill.md"
+
+    # Act: remove skills
+    cd "$project_dir"
+    remove_team_resource "skills" ".claude/skills" ".team-skills" "d"
+
+    # Assert: directories and marker removed
+    if [[ ! -d "$skill_dir/skill-a" ]] && \
+       [[ ! -d "$skill_dir/skill-b" ]] && \
+       [[ ! -f "$skill_dir/.team-skills" ]]; then
+        test_pass "removed skill directories and marker"
+    else
+        test_fail "remove_team_resource" "all directories removed" "directories still present"
+    fi
+}
+
+test_remove_team_resource_hooks() {
+    run_test "remove_team_resource removes hooks (files)"
+
+    # Setup: create hooks with marker
+    local project_dir="$TEST_TMP/project-remove-hooks"
+    local hook_dir="$project_dir/.claude/hooks"
+    mkdir -p "$hook_dir"
+    echo "hook-a.sh" > "$hook_dir/.team-hooks"
+    echo "#!/bin/bash" > "$hook_dir/hook-a.sh"
+
+    # Act: remove hooks
+    cd "$project_dir"
+    remove_team_resource "hooks" ".claude/hooks" ".team-hooks" "f"
+
+    # Assert: file and marker removed
+    if [[ ! -f "$hook_dir/hook-a.sh" ]] && \
+       [[ ! -f "$hook_dir/.team-hooks" ]]; then
+        test_pass "removed hook file and marker"
+    else
+        test_fail "remove_team_resource" "all files removed" "files still present"
+    fi
+}
+
+test_remove_team_resource_no_marker() {
+    run_test "remove_team_resource returns 0 when no marker file exists"
+
+    # Setup: create directory without marker
+    local project_dir="$TEST_TMP/project-remove-no-marker"
+    mkdir -p "$project_dir/.claude/commands"
+
+    # Act: remove with no marker
+    cd "$project_dir"
+    if remove_team_resource "commands" ".claude/commands" ".team-commands" "f"; then
+        test_pass "returned 0 when no marker present"
+    else
+        test_fail "remove_team_resource" "return 0" "non-zero return"
+    fi
+}
+
+test_remove_team_resource_removes_marker() {
+    run_test "remove_team_resource removes marker file after resources"
+
+    # Setup: create command with marker
+    local project_dir="$TEST_TMP/project-remove-marker"
+    local cmd_dir="$project_dir/.claude/commands"
+    mkdir -p "$cmd_dir"
+    echo "cmd-a.md" > "$cmd_dir/.team-commands"
+    echo "content" > "$cmd_dir/cmd-a.md"
+
+    # Act: remove
+    cd "$project_dir"
+    remove_team_resource "commands" ".claude/commands" ".team-commands" "f"
+
+    # Assert: marker file is gone
+    if [[ ! -f "$cmd_dir/.team-commands" ]]; then
+        test_pass "marker file removed"
+    else
+        test_fail "remove_team_resource" "marker removed" "marker still present"
+    fi
+}
+
+# ============================================================================
 # Main test runner
 # ============================================================================
 
@@ -371,6 +488,13 @@ main() {
     test_backup_team_resource_hooks
     test_backup_team_resource_no_marker
     test_backup_team_resource_removes_old_backup
+
+    # RF-004: remove_team_resource tests
+    test_remove_team_resource_commands
+    test_remove_team_resource_skills
+    test_remove_team_resource_hooks
+    test_remove_team_resource_no_marker
+    test_remove_team_resource_removes_marker
 
     teardown
 
