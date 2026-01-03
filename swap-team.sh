@@ -535,6 +535,9 @@ source "$ROSTER_HOME/lib/team/team-transaction.sh"
 # Source team resource operations
 source "$ROSTER_HOME/lib/team/team-resource.sh"
 
+# Source hook registration infrastructure
+source "$ROSTER_HOME/lib/team/team-hooks-registration.sh"
+
 # ============================================================================
 # Manifest Functions
 # ============================================================================
