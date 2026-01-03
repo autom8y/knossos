@@ -280,8 +280,38 @@ merge_hook_registrations() {
 # Output: Combined hooks JSON object to stdout
 # Returns: 0 always
 merge_with_preserved() {
-    # TODO: Implement in RF-023
-    return 0
+    local generated="$1"
+    local preserved="$2"
+
+    # If no preserved hooks, return generated
+    if [[ -z "$preserved" ]] || [[ "$preserved" == "{}" ]]; then
+        echo "$generated"
+        return 0
+    fi
+
+    # For each event type, append preserved entries to generated
+    local merged="$generated"
+    local events=("SessionStart" "Stop" "PreToolUse" "PostToolUse" "UserPromptSubmit")
+
+    for event in "${events[@]}"; do
+        local preserved_entries
+        preserved_entries=$(echo "$preserved" | jq -c ".\"$event\" // []")
+
+        local preserved_count
+        preserved_count=$(echo "$preserved_entries" | jq 'length')
+        [[ "$preserved_count" -eq 0 ]] && continue
+
+        # Append preserved entries to generated event
+        local generated_entries
+        generated_entries=$(echo "$merged" | jq -c ".\"$event\" // []")
+
+        local combined
+        combined=$(jq -n -c --argjson gen "$generated_entries" --argjson pres "$preserved_entries" '$gen + $pres')
+
+        merged=$(echo "$merged" | jq -c --argjson entries "$combined" ".\"$event\" = \$entries")
+    done
+
+    echo "$merged"
 }
 
 # ============================================================================
