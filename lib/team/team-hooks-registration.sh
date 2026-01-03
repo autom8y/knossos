@@ -195,9 +195,64 @@ parse_hooks_yaml() {
 # Output: JSON object with preserved hooks by event type to stdout
 # Returns: 0 always (empty {} for missing file)
 extract_non_roster_hooks() {
-    # TODO: Implement in RF-020
-    echo "{}"
-    return 0
+    local settings_file="$1"
+
+    # File doesn't exist - return empty object
+    if [[ ! -f "$settings_file" ]]; then
+        echo "{}"
+        return 0
+    fi
+
+    # Read current hooks section
+    local current_hooks
+    current_hooks=$(jq '.hooks // {}' "$settings_file" 2>/dev/null)
+    if [[ -z "$current_hooks" ]] || [[ "$current_hooks" == "null" ]]; then
+        echo "{}"
+        return 0
+    fi
+
+    # For each event type, filter out roster-managed hooks
+    # Roster hooks contain ".claude/hooks/" in the command path
+    local preserved="{}"
+    local events=("SessionStart" "Stop" "PreToolUse" "PostToolUse" "UserPromptSubmit")
+
+    for event in "${events[@]}"; do
+        local event_entries
+        event_entries=$(echo "$current_hooks" | jq -c ".\"$event\" // []")
+
+        local entry_count
+        entry_count=$(echo "$event_entries" | jq 'length')
+        [[ "$entry_count" -eq 0 ]] && continue
+
+        local filtered_entries="[]"
+        local i
+        for ((i=0; i<entry_count; i++)); do
+            local entry
+            entry=$(echo "$event_entries" | jq -c ".[$i]")
+
+            # Filter hooks array within entry to exclude roster-managed ones
+            local filtered_hooks
+            filtered_hooks=$(echo "$entry" | jq -c '[.hooks // [] | .[] | select(.command | contains(".claude/hooks/") | not)]')
+
+            local filtered_count
+            filtered_count=$(echo "$filtered_hooks" | jq 'length')
+
+            if [[ "$filtered_count" -gt 0 ]]; then
+                # Update entry with filtered hooks
+                local new_entry
+                new_entry=$(echo "$entry" | jq -c ".hooks = $filtered_hooks")
+                filtered_entries=$(echo "$filtered_entries" | jq -c ". + [$new_entry]")
+            fi
+        done
+
+        local filtered_len
+        filtered_len=$(echo "$filtered_entries" | jq 'length')
+        if [[ "$filtered_len" -gt 0 ]]; then
+            preserved=$(echo "$preserved" | jq -c ".\"$event\" = $filtered_entries")
+        fi
+    done
+
+    echo "$preserved"
 }
 
 # ============================================================================
