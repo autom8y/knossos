@@ -61,7 +61,7 @@ Before migrating a team, ensure:
 
 1. **Read current orchestrator**
    ```bash
-   cat /skeleton_claude/.claude/teams/my-team/agents/orchestrator.md | head -80
+   cat teams/my-team/agents/orchestrator.md | head -80
    ```
 
 2. **Extract team metadata**
@@ -87,14 +87,14 @@ Before migrating a team, ensure:
    ```bash
    # Use create-new-team-orchestrator guide
    # Or copy from example team and modify
-   cp /skeleton_claude/.claude/teams/doc-team-pack/orchestrator.yaml \
-      /skeleton_claude/.claude/teams/my-team/orchestrator.yaml
+   cp teams/doc-team-pack/orchestrator.yaml \
+      teams/my-team/orchestrator.yaml
 
    # Edit to match your extracted configuration
-   nano /skeleton_claude/.claude/teams/my-team/orchestrator.yaml
+   nano teams/my-team/orchestrator.yaml
    ```
 
-**Output**: `/skeleton_claude/.claude/teams/my-team/orchestrator.yaml` (ready to generate from)
+**Output**: `teams/my-team/orchestrator.yaml` (ready to generate from)
 
 ### Phase 3: Generation (Day 2 - 5 minutes)
 
@@ -110,7 +110,7 @@ Before migrating a team, ensure:
 2. **Run validator**
    ```bash
    /roster/templates/validate-orchestrator.sh \
-     /skeleton_claude/.claude/teams/my-team/agents/orchestrator.md
+     teams/my-team/agents/orchestrator.md
    ```
 
 3. **Verify success**
@@ -118,7 +118,7 @@ Before migrating a team, ensure:
    VALIDATION PASSED (exit code 0)
    ```
 
-**Output**: `/skeleton_claude/.claude/teams/my-team/agents/orchestrator.md` (regenerated)
+**Output**: `teams/my-team/agents/orchestrator.md` (regenerated)
 
 ### Phase 4: Comparison (Day 2-3 - 15 minutes)
 
@@ -128,14 +128,14 @@ Before migrating a team, ensure:
 
 1. **Backup original**
    ```bash
-   cp /skeleton_claude/.claude/teams/my-team/agents/orchestrator.md \
-      /skeleton_claude/.claude/teams/my-team/agents/orchestrator.md.original
+   cp teams/my-team/agents/orchestrator.md \
+      teams/my-team/agents/orchestrator.md.original
    ```
 
 2. **Review diff**
    ```bash
-   git diff /skeleton_claude/.claude/teams/my-team/agents/orchestrator.md.original \
-            /skeleton_claude/.claude/teams/my-team/agents/orchestrator.md
+   git diff teams/my-team/agents/orchestrator.md.original \
+            teams/my-team/agents/orchestrator.md
    ```
 
 3. **What to look for**:
@@ -191,7 +191,7 @@ Before migrating a team, ensure:
 **Only if you chose Path A above.**
 
 ```bash
-cd /skeleton_claude
+cd $ROSTER_HOME
 
 # Stage both files
 git add .claude/teams/my-team/orchestrator.yaml
@@ -238,14 +238,14 @@ If anything goes wrong during migration:
 
 ```bash
 # 1. Restore original orchestrator.md
-cp /skeleton_claude/.claude/teams/my-team/agents/orchestrator.md.original \
-   /skeleton_claude/.claude/teams/my-team/agents/orchestrator.md
+cp teams/my-team/agents/orchestrator.md.original \
+   teams/my-team/agents/orchestrator.md
 
 # 2. Remove YAML config
-rm /skeleton_claude/.claude/teams/my-team/orchestrator.yaml
+rm teams/my-team/orchestrator.yaml
 
 # 3. Verify restoration
-head -10 /skeleton_claude/.claude/teams/my-team/agents/orchestrator.md
+head -10 teams/my-team/agents/orchestrator.md
 
 # 4. Don't commit anything
 # (your original .md file is unchanged in git)

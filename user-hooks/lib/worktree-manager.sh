@@ -19,7 +19,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-# Source configuration (provides SKELETON_HOME, ROSTER_HOME, etc.)
+# Source configuration (provides ROSTER_HOME, etc.)
 # shellcheck source=config.sh
 source "$SCRIPT_DIR/config.sh"
 
@@ -221,31 +221,31 @@ cmd_create() {
         exit 1
     fi
 
-    # Sync CEM in worktree (worktrees inherit .claude/ from parent, so use sync not init)
-    if [[ ! -x "$SKELETON_HOME/cem" ]]; then
+    # Sync ecosystem in worktree (worktrees inherit .claude/ from parent, so use sync not init)
+    if [[ ! -x "$ROSTER_HOME/roster-sync" ]]; then
         git worktree remove --force "$wt_path" 2>/dev/null || true
-        echo '{"error": "CEM not found at '"$SKELETON_HOME/cem"'. Cannot create worktree without ecosystem. Run: chmod +x $SKELETON_HOME/cem"}' >&2
+        echo '{"error": "roster-sync not found at '"$ROSTER_HOME/roster-sync"'. Cannot create worktree without ecosystem."}' >&2
         exit 1
     fi
 
-    # Worktrees inherit .claude/ from git, so check if CEM is already initialized
+    # Worktrees inherit .claude/ from git, so check if already initialized
     # If yes, use sync. If no manifest exists, use init.
-    local cem_output
+    local sync_output
     if [[ -f "$wt_path/.claude/.cem/manifest.json" ]]; then
         # Already initialized - just sync to get latest
-        if ! cem_output=$(cd "$wt_path" && "$SKELETON_HOME/cem" sync 2>&1); then
+        if ! sync_output=$(cd "$wt_path" && "$ROSTER_HOME/roster-sync" sync 2>&1); then
             # Sync failed - try force reinit
-            if ! cem_output=$(cd "$wt_path" && "$SKELETON_HOME/cem" init --force 2>&1); then
+            if ! sync_output=$(cd "$wt_path" && "$ROSTER_HOME/roster-sync" init --force 2>&1); then
                 git worktree remove --force "$wt_path" 2>/dev/null || true
-                echo '{"error": "CEM sync/init failed in worktree. Details: '"${cem_output:-unknown}"'"}' >&2
+                echo '{"error": "roster-sync sync/init failed in worktree. Details: '"${sync_output:-unknown}"'"}' >&2
                 exit 1
             fi
         fi
     else
         # Not initialized - run init
-        if ! cem_output=$(cd "$wt_path" && "$SKELETON_HOME/cem" init 2>&1); then
+        if ! sync_output=$(cd "$wt_path" && "$ROSTER_HOME/roster-sync" init 2>&1); then
             git worktree remove --force "$wt_path" 2>/dev/null || true
-            echo '{"error": "CEM init failed in worktree. Details: '"${cem_output:-unknown}"'"}' >&2
+            echo '{"error": "roster-sync init failed in worktree. Details: '"${sync_output:-unknown}"'"}' >&2
             exit 1
         fi
     fi

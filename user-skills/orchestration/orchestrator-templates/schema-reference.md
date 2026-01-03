@@ -4,9 +4,9 @@
 
 ## File Locations
 
-**Template location**: `/skeleton_claude/.claude/teams/{team-name}/orchestrator.yaml`
+**Template location**: `teams/{team-name}/orchestrator.yaml`
 
-**Example location**: `/skeleton_claude/.claude/teams/rnd-pack/orchestrator.yaml`
+**Example location**: `teams/rnd-pack/orchestrator.yaml`
 
 ## Schema Overview
 

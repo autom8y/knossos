@@ -25,21 +25,21 @@ ls worktrees/
 git rev-parse HEAD
 ```
 
-### "Failed to initialize CEM in worktree"
+### "Failed to initialize ecosystem in worktree"
 
-**Cause:** CEM script not found or failed.
+**Cause:** Roster sync scripts not found or failed.
 
 **Check:**
-- Is `$HOME/Code/skeleton_claude/cem` executable?
-- Does skeleton_claude exist?
+- Is `$ROSTER_HOME` set correctly?
+- Do the sync scripts exist and are executable?
 
 **Fix:**
 ```bash
-# Verify CEM exists
-ls -la $HOME/Code/skeleton_claude/cem
+# Verify roster exists
+ls -la $ROSTER_HOME/sync-user-agents.sh
 
 # Make executable if needed
-chmod +x $HOME/Code/skeleton_claude/cem
+chmod +x $ROSTER_HOME/sync-*.sh
 ```
 
 ### "Worktree has uncommitted changes"

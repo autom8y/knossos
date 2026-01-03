@@ -143,7 +143,7 @@ schema_version: "1.0"
 
 ## Executive Summary
 
-Deep audit identified 5 issues in session state validation across skeleton_claude hooks.
+Deep audit identified 5 issues in session state validation across hooks.
 
 ## Root Cause Chain
 

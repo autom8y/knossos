@@ -14,7 +14,7 @@ export CLAUDE_PROJECT_DIR="${CLAUDE_PROJECT_DIR:-.}"
 
 # External repository paths
 export ROSTER_HOME="${ROSTER_HOME:-$HOME/Code/roster}"
-export SKELETON_HOME="${SKELETON_HOME:-$HOME/Code/skeleton_claude}"
+# Note: SKELETON_HOME deprecated - roster is now standalone (Sprint 4 migration)
 
 # Session paths
 export SESSIONS_DIR="$CLAUDE_PROJECT_DIR/.claude/sessions"

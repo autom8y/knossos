@@ -171,13 +171,13 @@ extension_points:
 
 | Purpose | Location |
 |---------|----------|
-| Skill docs | `/skeleton_claude/.claude/skills/orchestrator-templates/` |
-| Generator | `/roster/templates/orchestrator-generate.sh` |
-| Validator | `/roster/templates/validate-orchestrator.sh` |
-| Template | `/roster/templates/orchestrator-base.md.tpl` |
-| Schema | `/roster/schemas/orchestrator.yaml.schema.json` |
-| Team config | `.claude/teams/{team-name}/orchestrator.yaml` |
-| Generated | `.claude/teams/{team-name}/agents/orchestrator.md` |
+| Skill docs | `user-skills/orchestration/orchestrator-templates/` |
+| Generator | `templates/orchestrator-generate.sh` |
+| Validator | `templates/validate-orchestrator.sh` |
+| Template | `templates/orchestrator-base.md.tpl` |
+| Schema | `schemas/orchestrator.yaml.schema.json` |
+| Team config | `teams/{team-name}/orchestrator.yaml` |
+| Generated | `teams/{team-name}/agents/orchestrator.md` |
 
 ## Validation Rules (10)
 

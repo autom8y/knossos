@@ -15,7 +15,7 @@ Create a new isolated worktree with full ecosystem initialization.
 
 **What Happens:**
 1. Creates git worktree with detached HEAD (no branch pollution)
-2. Initializes CEM (fresh sync from skeleton_claude)
+2. Initializes ecosystem (fresh sync from roster)
 3. Sets team if specified via swap-team.sh
 4. Creates initial session via session-manager.sh
 5. Returns path for user to `cd` into

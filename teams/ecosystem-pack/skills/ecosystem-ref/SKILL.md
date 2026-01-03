@@ -1,36 +1,39 @@
 ---
 name: ecosystem-ref
-description: "Quick reference for CEM/skeleton/roster ecosystem patterns. Use when: working with CEM commands, swap-team.sh, manifest schema, three-tier layering. Triggers: CEM, cem sync, swap-team, roster, skeleton, manifest, ecosystem patterns."
+description: "Quick reference for roster ecosystem patterns. Use when: working with roster-sync, swap-team.sh, manifest schema, team management. Triggers: roster-sync, swap-team, roster, manifest, ecosystem patterns."
 ---
 
 # ecosystem-ref
 
-> Quick reference for CEM/skeleton/roster ecosystem patterns.
+> Quick reference for roster ecosystem patterns.
 
-## CEM (Claude Ecosystem Manager)
+## roster-sync (Ecosystem Manager)
 
-### File Strategies
-| Strategy | Behavior | Used For |
-|----------|----------|----------|
-| `copy-replace` | Skeleton overwrites satellite | commands/, hooks/, knowledge/ |
-| `merge-dir` | Union content, preserve satellite-specific | skills/ |
-| `merge-settings` | Deep merge arrays (permissions, MCP servers) | settings.local.json |
-| `merge-docs` | Section-aware merge with markers | CLAUDE.md |
+Roster-sync manages synchronization between roster repository and user/project Claude configurations.
+
+### Sync Scripts
+| Script | Purpose | Target |
+|--------|---------|--------|
+| `sync-user-agents.sh` | Sync agents to user config | `~/.claude/agents/` |
+| `sync-user-commands.sh` | Sync commands to user config | `~/.claude/commands/` |
+| `sync-user-skills.sh` | Sync skills to user config | `~/.claude/skills/` |
+| `swap-team.sh` | Switch active team pack | `.claude/agents/` |
 
 ### Key Paths
-- Skeleton: `$SKELETON_HOME` or `~/Code/skeleton_claude`
-- Roster: `$ROSTER_HOME` or `$ROSTER_HOME`
-- Manifest: `.claude/.cem/manifest.json`
-- State: `.claude/.cem/`
+- Roster: `$ROSTER_HOME` or `~/Code/roster`
+- User Agents: `~/.claude/agents/`
+- User Commands: `~/.claude/commands/`
+- User Skills: `~/.claude/skills/`
+- Team Manifest: `.claude/TEAM_MANIFEST.json`
 
 ### Common Commands
 ```bash
-cem init              # Initialize satellite from skeleton
-cem sync              # Pull skeleton updates
-cem sync --refresh    # Sync + refresh active team
-cem validate          # Check manifest integrity
-cem repair            # Rebuild manifest from .claude/
-cem status            # Show sync status
+./sync-user-agents.sh          # Sync user-agents to ~/.claude/agents/
+./sync-user-commands.sh        # Sync user-commands to ~/.claude/commands/
+./sync-user-skills.sh          # Sync user-skills to ~/.claude/skills/
+./swap-team.sh <pack>          # Switch active team pack
+./swap-team.sh --list          # List available team packs
+./swap-team.sh --refresh       # Refresh current team
 ```
 
 ## Roster (Team Pack Manager)
@@ -59,39 +62,34 @@ Orphan = agent from previous team not in new team.
 - Interactive: k/p/r per agent (keep/promote/remove)
 - Non-interactive: `--keep-all`, `--remove-all`, `--promote-all`
 
-## Three-Tier Layering
+## Two-Tier Layering
 
 ```
-skeleton (base) -> team (overlay) -> satellite (local)
+roster (base) -> project (local overlay)
 ```
 
 | Layer | Source | Precedence |
 |-------|--------|------------|
-| Skeleton | `$SKELETON_HOME/.claude/` | Base |
-| Team | `$ROSTER_HOME/teams/{name}/` | Overlay (wins collisions) |
-| Satellite | `.claude/user-*/`, `.claude/PROJECT.md` | Preserved (never touched) |
+| Roster | `$ROSTER_HOME/teams/{name}/` | Base agents and skills |
+| Project | `.claude/agents/`, `.claude/skills/` | Local overrides |
 
-## Manifest Schema v2
+## Team Manifest Schema
 
 ```json
 {
-  "schema_version": 2,
-  "skeleton": { "path": "", "commit": "", "ref": "", "last_sync": "" },
+  "schema_version": 1,
   "team": { "name": "", "last_swap": "" },
   "managed": {
-    "skills": [],
-    "commands": [],
     "agents": [],
-    "hooks": []
-  },
-  "preserved": { ... }
+    "commands": [],
+    "skills": []
+  }
 }
 ```
 
 ## Debugging
 
 ```bash
-CEM_DEBUG=1 cem sync          # Verbose CEM output
 ROSTER_DEBUG=1 swap-team.sh   # Verbose roster output
 ```
 
@@ -99,4 +97,3 @@ ROSTER_DEBUG=1 swap-team.sh   # Verbose roster output
 
 - [doc-ecosystem skill](../doc-ecosystem/SKILL.md) - Templates for ecosystem documentation
 - [claude-md-architecture skill](../claude-md-architecture/SKILL.md) - CLAUDE.md architecture patterns
-- [CEM source](../../../../CEM/) - CEM implementation (if available locally)

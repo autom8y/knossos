@@ -51,6 +51,10 @@ AUTO_RECOVER=0
 RECOVER_MODE=0
 VERIFY_MODE=0
 
+# roster-sync integration modes
+SYNC_FIRST_MODE=0     # --sync-first: run roster-sync before team apply
+AUTO_SYNC_MODE=0      # --auto-sync: conditionally sync if roster has updates
+
 # Colors for output (if terminal supports it)
 if [[ -t 1 ]]; then
     readonly RED='\033[0;31m'
@@ -1551,7 +1555,7 @@ Usage: swap-team.sh [OPTIONS] [COMMAND]
 Commands:
   <pack-name>    Switch to specified team pack
   --list         List all available team packs
-  --reset        Reset to skeleton baseline (remove all team resources)
+  --reset        Reset to baseline (remove all team resources)
   --verify       Verify current state consistency
   --recover      Interactive recovery from interrupted swap
   (no args)      Show current active team
@@ -1564,6 +1568,8 @@ Options:
   --remove-all   Remove orphan agents/commands/skills/hooks (backup available)
   --promote-all  Move orphan agents to ~/.claude/agents/
   --auto-recover Automatically rollback if interrupted swap detected (for CI/CD)
+  --sync-first   Run roster-sync before applying team (waterfall pattern)
+  --auto-sync    Conditionally sync if roster has updates available
 
 When switching teams interactively, you'll be prompted for each orphan agent
 (agents in current team but not in target team). In non-interactive mode
@@ -1592,11 +1598,13 @@ Examples:
   ./swap-team.sh --update               # Update current team from roster
   ./swap-team.sh dev-pack --update      # Update even if already on dev-pack
   ./swap-team.sh --update --dry-run     # Preview what update would change
-  ./swap-team.sh --reset                # Reset to skeleton baseline
+  ./swap-team.sh --reset                # Reset to baseline (no team)
   ./swap-team.sh --reset --dry-run      # Preview what reset would remove
   ./swap-team.sh --verify               # Check state consistency
   ./swap-team.sh --recover              # Recover from interrupted swap
   ./swap-team.sh --auto-recover dev-pack # CI/CD mode with auto-rollback
+  ./swap-team.sh dev-pack --sync-first  # Sync infrastructure then apply team
+  ./swap-team.sh dev-pack --auto-sync   # Sync only if roster has updates
 
 EOF
 }
@@ -2164,7 +2172,7 @@ backup_team_skills() {
     log_debug "Team skills backed up"
 }
 
-# Check if a skill belongs to ANY team pack (not skeleton)
+# Check if a skill belongs to ANY team pack (not baseline)
 is_team_skill() {
     local skill_name="$1"
     find "$ROSTER_HOME/teams" -path "*/skills/$skill_name" -type d 2>/dev/null | grep -q .
@@ -2278,7 +2286,7 @@ remove_team_skills() {
 
 # Sync team-specific skills to project
 # Team skills are copied to .claude/skills/ with a marker file
-# Skills from team layer overlay skeleton skills (team wins on collision)
+# Skills from team layer overlay baseline skills (team wins on collision)
 swap_skills() {
     local team_name="$1"
     local source_dir="$ROSTER_HOME/teams/$team_name/skills"
@@ -2320,11 +2328,11 @@ swap_skills() {
         local skill_name
         skill_name=$(basename "$skill_path")
 
-        # Check for collision with existing skeleton skill
+        # Check for collision with existing baseline skill
         # Team wins: overwrite with warning
         if [[ -d ".claude/skills/$skill_name" ]] && ! grep -q "^$skill_name$" "$marker_file" 2>/dev/null; then
-            # Exists but not from team - this is a skeleton skill
-            log_warning "Team skill $skill_name overrides skeleton skill"
+            # Exists but not from team - this is a baseline skill
+            log_warning "Team skill $skill_name overrides baseline skill"
             rm -rf ".claude/skills/$skill_name"
         fi
 
@@ -2419,10 +2427,10 @@ sync_shared_skills() {
             continue  # Skip this shared skill
         fi
 
-        # Check for collision with existing skeleton skill
-        # Shared wins over skeleton (but loses to team, checked above)
+        # Check for collision with existing baseline skill
+        # Shared wins over baseline (but loses to team, checked above)
         if [[ -d ".claude/skills/$skill_name" ]]; then
-            log_debug "Shared skill $skill_name overrides skeleton skill"
+            log_debug "Shared skill $skill_name overrides baseline skill"
             rm -rf ".claude/skills/$skill_name"
         fi
 
@@ -3350,11 +3358,11 @@ update_claude_md() {
 
     # Update Quick Start section using sed
     # First, copy everything before the table (BSD-compatible: use awk instead of head -n -1)
-    # Handle both team mode ("This project uses...") and skeleton mode ("No team currently active")
+    # Handle both team mode ("This project uses...") and baseline mode ("No team currently active")
     local before_table_line
     before_table_line=$(grep -n "^This project uses a [0-9]*-agent" "$claude_md" 2>/dev/null | head -1 | cut -d: -f1 || true)
     if [[ -z "$before_table_line" ]]; then
-        # Check for skeleton mode pattern
+        # Check for baseline mode pattern
         before_table_line=$(grep -n "^No team currently active" "$claude_md" 2>/dev/null | head -1 | cut -d: -f1 || true)
     fi
     if [[ -n "$before_table_line" ]] && [[ "$before_table_line" -gt 1 ]]; then
@@ -3372,11 +3380,11 @@ update_claude_md() {
     echo "" >> "$temp_file"
 
     # Find where the old table ends and copy from there
-    # Handle both team mode ("**New here") and skeleton mode ("**Get started")
+    # Handle both team mode ("**New here") and baseline mode ("**Get started")
     local table_end_line
     table_end_line=$(grep -n "^\*\*New here" "$claude_md" 2>/dev/null | head -1 | cut -d: -f1 || true)
     if [[ -z "$table_end_line" ]]; then
-        # Check for skeleton mode pattern
+        # Check for baseline mode pattern
         table_end_line=$(grep -n "^\*\*Get started" "$claude_md" 2>/dev/null | head -1 | cut -d: -f1 || true)
     fi
     if [[ -n "$table_end_line" ]]; then
@@ -3530,6 +3538,169 @@ preview_refresh() {
     echo "No changes made (--dry-run mode)"
 }
 
+# ============================================================================
+# roster-sync Integration (Waterfall Pattern)
+# ============================================================================
+
+# Check if roster-sync is available
+# Returns: 0 if available, 1 if not
+roster_sync_available() {
+    local roster_sync="$ROSTER_HOME/roster-sync"
+    [[ -x "$roster_sync" ]]
+}
+
+# Check if roster has updates compared to manifest
+# Uses roster-sync's logic via sync-core.sh if available
+# Returns: 0 if updates available, 1 if up to date
+roster_has_updates() {
+    # Source sync-core if not already loaded (for roster_has_updates function)
+    local sync_lib="$ROSTER_HOME/lib/sync"
+    if [[ -d "$sync_lib" ]]; then
+        # Need to source dependencies first
+        if [[ ! -f "$sync_lib/sync-config.sh" ]]; then
+            log_debug "sync-config.sh not found, assuming updates available"
+            return 0
+        fi
+
+        # Source in order
+        source "$sync_lib/sync-config.sh" 2>/dev/null || true
+        source "$sync_lib/sync-checksum.sh" 2>/dev/null || true
+        source "$sync_lib/sync-manifest.sh" 2>/dev/null || true
+        source "$sync_lib/sync-core.sh" 2>/dev/null || true
+
+        # Check if roster_has_updates function exists now
+        if type roster_has_updates_internal &>/dev/null 2>&1; then
+            roster_has_updates_internal
+            return $?
+        fi
+    fi
+
+    # Fallback: compare roster git commit with manifest
+    local manifest_file=".claude/.cem/manifest.json"
+    if [[ ! -f "$manifest_file" ]]; then
+        log_debug "No manifest found, assuming updates available"
+        return 0  # No manifest means first sync needed
+    fi
+
+    local current_commit manifest_commit
+    current_commit=$(git -C "$ROSTER_HOME" rev-parse HEAD 2>/dev/null)
+    manifest_commit=$(jq -r '.roster.commit // empty' "$manifest_file" 2>/dev/null)
+
+    if [[ -z "$current_commit" ]]; then
+        log_debug "Cannot determine roster commit"
+        return 0  # Assume updates available
+    fi
+
+    if [[ "$current_commit" != "$manifest_commit" ]]; then
+        log_debug "Roster has updates: $manifest_commit -> $current_commit"
+        return 0  # Updates available
+    fi
+
+    log_debug "Roster is up to date"
+    return 1  # Up to date
+}
+
+# Run roster-sync before team apply (waterfall pattern)
+# Usage: run_roster_sync_waterfall [--force]
+# Returns: 0 on success, non-zero on failure
+run_roster_sync_waterfall() {
+    local force_flag=""
+    [[ "${1:-}" == "--force" ]] && force_flag="--force"
+
+    local roster_sync="$ROSTER_HOME/roster-sync"
+
+    if [[ ! -x "$roster_sync" ]]; then
+        log_warning "roster-sync not found, skipping infrastructure sync"
+        return 0
+    fi
+
+    log "Syncing infrastructure before team apply..."
+
+    # Run roster-sync sync (without --refresh to avoid recursion)
+    local sync_output
+    local sync_exit
+    if [[ -n "$force_flag" ]]; then
+        sync_output=$("$roster_sync" sync $force_flag 2>&1) || sync_exit=$?
+    else
+        sync_output=$("$roster_sync" sync 2>&1) || sync_exit=$?
+    fi
+    sync_exit=${sync_exit:-0}
+
+    if [[ $sync_exit -ne 0 ]]; then
+        log_error "roster-sync failed (exit $sync_exit)"
+        echo "$sync_output" >&2
+        return $sync_exit
+    fi
+
+    log_debug "roster-sync completed successfully"
+    # Show summary if there were updates
+    if [[ "$sync_output" == *"Updated:"* || "$sync_output" == *"Merging:"* ]]; then
+        log "Infrastructure sync completed"
+    else
+        log "Infrastructure already up to date"
+    fi
+
+    return 0
+}
+
+# Update CEM manifest team section after swap
+# Usage: update_cem_manifest_team "team_name"
+update_cem_manifest_team() {
+    local team_name="$1"
+    local manifest_file=".claude/.cem/manifest.json"
+
+    # Skip if no manifest exists (roster-sync not initialized)
+    if [[ ! -f "$manifest_file" ]]; then
+        log_debug "No CEM manifest found, skipping team section update"
+        return 0
+    fi
+
+    # Compute team directory checksum for staleness detection
+    local team_dir="$ROSTER_HOME/teams/$team_name"
+    local team_checksum=""
+    if [[ -d "$team_dir" ]]; then
+        # Use tar to create stable checksum of team directory contents
+        team_checksum=$(find "$team_dir" -type f -exec cat {} \; 2>/dev/null | shasum -a 256 | awk '{print $1}')
+    fi
+
+    local timestamp
+    timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+    # Update manifest team section using jq
+    local updated
+    updated=$(jq \
+        --arg name "$team_name" \
+        --arg checksum "$team_checksum" \
+        --arg roster_path "$team_dir" \
+        --arg timestamp "$timestamp" '
+        .team = {
+            name: $name,
+            checksum: (if $checksum != "" then $checksum else null end),
+            last_refresh: $timestamp,
+            roster_path: $roster_path
+        }
+    ' "$manifest_file") || {
+        log_warning "Failed to update CEM manifest team section"
+        return 1
+    }
+
+    # Write atomically
+    local temp_file="${manifest_file}.tmp.$$"
+    echo "$updated" > "$temp_file" || {
+        rm -f "$temp_file"
+        log_warning "Failed to write updated manifest"
+        return 1
+    }
+    mv "$temp_file" "$manifest_file" || {
+        rm -f "$temp_file"
+        log_warning "Failed to rename manifest"
+        return 1
+    }
+
+    log_debug "Updated CEM manifest team section: $team_name"
+    return 0
+}
+
 # Main swap orchestration
 perform_swap() {
     local team_name="$1"
@@ -3541,6 +3712,28 @@ perform_swap() {
 
     # Check for recovery from interrupted swap
     check_journal_recovery
+
+    # =========================================================================
+    # WATERFALL SYNC: roster-sync integration (--sync-first or --auto-sync)
+    # =========================================================================
+    if [[ "$SYNC_FIRST_MODE" -eq 1 ]]; then
+        # --sync-first: Always run roster-sync before team apply
+        run_roster_sync_waterfall || {
+            log_error "Infrastructure sync failed, aborting team swap"
+            exit "$EXIT_SWAP_FAILURE"
+        }
+    elif [[ "$AUTO_SYNC_MODE" -eq 1 ]]; then
+        # --auto-sync: Only sync if roster has updates
+        if roster_has_updates; then
+            log "Roster updates detected, syncing infrastructure..."
+            run_roster_sync_waterfall || {
+                log_error "Infrastructure sync failed, aborting team swap"
+                exit "$EXIT_SWAP_FAILURE"
+            }
+        else
+            log_debug "No roster updates, skipping infrastructure sync"
+        fi
+    fi
 
     # Get current team (before swap) for journal
     local source_team=""
@@ -3777,6 +3970,9 @@ perform_swap() {
     restore_kept_agents
     cleanup_stash
 
+    # Update CEM manifest team section (for roster-sync staleness tracking)
+    update_cem_manifest_team "$team_name"
+
     # Update session team if active session exists (non-critical)
     # Check both user-level and project-level for session-manager.sh
     local session_mgr=""
@@ -3849,7 +4045,7 @@ perform_swap() {
 
 # Preview what reset would remove (for --dry-run with --reset)
 preview_reset() {
-    log "Dry-run: Would reset to skeleton baseline"
+    log "Dry-run: Would reset to baseline (no team)"
     echo ""
 
     # Check for team agents (those marked as "team" in manifest)
@@ -3921,7 +4117,7 @@ preview_reset() {
         current=$(cat .claude/ACTIVE_TEAM 2>/dev/null | tr -d '[:space:]')
         echo "Would clear: ACTIVE_TEAM (currently: $current)"
     fi
-    echo "Would regenerate: CLAUDE.md (skeleton baseline)"
+    echo "Would regenerate: CLAUDE.md (baseline)"
 
     echo ""
     echo "No changes made (--dry-run mode)"
@@ -3975,13 +4171,13 @@ remove_team_agents() {
     fi
 }
 
-# Regenerate CLAUDE.md for skeleton baseline (no active team)
-regenerate_skeleton_claude_md() {
+# Regenerate CLAUDE.md for baseline (no active team)
+regenerate_baseline_claude_md() {
     local claude_md=".claude/CLAUDE.md"
 
     [[ -f "$claude_md" ]] || return 0
 
-    log_debug "Regenerating CLAUDE.md for skeleton baseline"
+    log_debug "Regenerating CLAUDE.md for baseline (no team)"
 
     # Write replacement content to temp files (avoids awk multiline string issues)
     local qs_file ac_file
@@ -4059,12 +4255,12 @@ ACEOF
     # Cleanup temp files
     rm -f "$qs_file" "$ac_file"
 
-    log_debug "CLAUDE.md regenerated for skeleton baseline"
+    log_debug "CLAUDE.md regenerated for baseline"
 }
 
-# Perform reset to skeleton baseline
+# Perform reset to baseline (no team)
 perform_reset() {
-    log_debug "Starting reset to skeleton baseline"
+    log_debug "Starting reset to baseline"
 
     # Validate we're in a project
     validate_project
@@ -4082,11 +4278,11 @@ perform_reset() {
     fi
 
     if [[ -z "$current_team" ]]; then
-        log "No team active. Already at skeleton baseline."
+        log "No team active. Already at baseline."
         return 0
     fi
 
-    log "Resetting from $current_team to skeleton baseline..."
+    log "Resetting from $current_team to baseline..."
 
     # Backup current state
     backup_current_agents
@@ -4103,11 +4299,11 @@ perform_reset() {
     log "Cleared: ACTIVE_TEAM"
 
     # Regenerate CLAUDE.md
-    regenerate_skeleton_claude_md
-    log "Regenerated: CLAUDE.md (skeleton baseline)"
+    regenerate_baseline_claude_md
+    log "Regenerated: CLAUDE.md (baseline)"
 
     echo ""
-    log "Reset complete. Skeleton baseline active."
+    log "Reset complete. Baseline active (no team)."
     log ""
     log "To switch to a team: $ROSTER_HOME/swap-team.sh <team-name>"
     log "To list teams:       $ROSTER_HOME/swap-team.sh --list"
@@ -4160,7 +4356,7 @@ main() {
                 UPDATE_MODE=1  # dry-run implies update
                 shift
                 ;;
-            --reset|--skeleton)
+            --reset)
                 RESET_MODE=1
                 shift
                 ;;
@@ -4174,6 +4370,14 @@ main() {
                 ;;
             --verify)
                 VERIFY_MODE=1
+                shift
+                ;;
+            --sync-first)
+                SYNC_FIRST_MODE=1
+                shift
+                ;;
+            --auto-sync)
+                AUTO_SYNC_MODE=1
                 shift
                 ;;
             -*)

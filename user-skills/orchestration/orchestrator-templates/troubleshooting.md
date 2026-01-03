@@ -35,15 +35,15 @@ Your orchestrator.yaml has syntax errors or missing required fields.
 
 ```bash
 # Check file exists
-ls -la /skeleton_claude/.claude/teams/my-team/orchestrator.yaml
+ls -la teams/my-team/orchestrator.yaml
 
 # Validate YAML syntax
-yq . /skeleton_claude/.claude/teams/my-team/orchestrator.yaml
+yq . teams/my-team/orchestrator.yaml
 
 # Check required fields
-yq '.team.name' /skeleton_claude/.claude/teams/my-team/orchestrator.yaml
-yq '.frontmatter.role' /skeleton_claude/.claude/teams/my-team/orchestrator.yaml
-yq '.routing | keys' /skeleton_claude/.claude/teams/my-team/orchestrator.yaml
+yq '.team.name' teams/my-team/orchestrator.yaml
+yq '.frontmatter.role' teams/my-team/orchestrator.yaml
+yq '.routing | keys' teams/my-team/orchestrator.yaml
 ```
 
 ### Solutions
@@ -51,11 +51,11 @@ yq '.routing | keys' /skeleton_claude/.claude/teams/my-team/orchestrator.yaml
 **If file doesn't exist**:
 ```bash
 # Create from template
-cp /skeleton_claude/.claude/teams/doc-team-pack/orchestrator.yaml \
-   /skeleton_claude/.claude/teams/my-team/orchestrator.yaml
+cp teams/doc-team-pack/orchestrator.yaml \
+   teams/my-team/orchestrator.yaml
 
 # Edit with your values
-nano /skeleton_claude/.claude/teams/my-team/orchestrator.yaml
+nano teams/my-team/orchestrator.yaml
 ```
 
 **If YAML syntax error**:
@@ -70,18 +70,18 @@ nano /skeleton_claude/.claude/teams/my-team/orchestrator.yaml
 # https://www.yamllint.com/
 
 # Fix and retry
-yq . /skeleton_claude/.claude/teams/my-team/orchestrator.yaml
+yq . teams/my-team/orchestrator.yaml
 ```
 
 **If required field missing**:
 ```bash
 # Check what's missing
-yq keys /skeleton_claude/.claude/teams/my-team/orchestrator.yaml
+yq keys teams/my-team/orchestrator.yaml
 
 # Required: team, frontmatter, routing, workflow_position, handoff_criteria, skills
 
 # Add missing section
-cat >> /skeleton_claude/.claude/teams/my-team/orchestrator.yaml << 'EOF'
+cat >> teams/my-team/orchestrator.yaml << 'EOF'
 skills:
   - "@skill-one brief description"
 EOF
@@ -106,7 +106,7 @@ Generator encountered error during template substitution.
 
 ```bash
 # Check what placeholders remain
-grep "{{" /skeleton_claude/.claude/teams/my-team/agents/orchestrator.md
+grep "{{" teams/my-team/agents/orchestrator.md
 
 # Run generator with debugging
 bash -x /roster/templates/orchestrator-generate.sh my-team 2>&1 | tail -50
@@ -134,7 +134,7 @@ chmod 644 /roster/templates/orchestrator-base.md.tpl
 
 ```bash
 # Validate orchestrator.yaml again
-yq . /skeleton_claude/.claude/teams/my-team/orchestrator.yaml > /dev/null
+yq . teams/my-team/orchestrator.yaml > /dev/null
 if [ $? -ne 0 ]; then
   echo "YAML is invalid"
   # Fix issues shown above in Section 1
@@ -145,14 +145,14 @@ fi
 
 ```bash
 # Delete bad output and retry
-rm /skeleton_claude/.claude/teams/my-team/agents/orchestrator.md
+rm teams/my-team/agents/orchestrator.md
 
 # Regenerate
 /roster/templates/orchestrator-generate.sh my-team
 
 # Validate
 /roster/templates/validate-orchestrator.sh \
-  /skeleton_claude/.claude/teams/my-team/agents/orchestrator.md
+  teams/my-team/agents/orchestrator.md
 ```
 
 ## Section 3: Validation Failures
@@ -182,7 +182,7 @@ File does not have proper --- delimiters
 **Diagnosis**:
 ```bash
 # Check frontmatter structure
-head -15 /skeleton_claude/.claude/teams/my-team/agents/orchestrator.md
+head -15 teams/my-team/agents/orchestrator.md
 
 # Should look like:
 # ---
@@ -195,11 +195,11 @@ head -15 /skeleton_claude/.claude/teams/my-team/agents/orchestrator.md
 **Solution**:
 ```bash
 # If frontmatter is missing delimiters, regenerate
-rm /skeleton_claude/.claude/teams/my-team/agents/orchestrator.md
+rm teams/my-team/agents/orchestrator.md
 /roster/templates/orchestrator-generate.sh my-team
 
 # If still broken, check orchestrator.yaml:
-yq '.frontmatter' /skeleton_claude/.claude/teams/my-team/orchestrator.yaml
+yq '.frontmatter' teams/my-team/orchestrator.yaml
 ```
 
 ### Symptom 3c: Missing required sections
@@ -216,7 +216,7 @@ Missing: Routing Decisions
 **Diagnosis**:
 ```bash
 # List sections in generated file
-grep "^## " /skeleton_claude/.claude/teams/my-team/agents/orchestrator.md
+grep "^## " teams/my-team/agents/orchestrator.md
 
 # Should have 9-10 sections including:
 # - Consultation Role
@@ -235,7 +235,7 @@ wc -l /roster/templates/orchestrator-base.md.tpl
 # Should be 130-150 lines
 
 # Regenerate
-rm /skeleton_claude/.claude/teams/my-team/agents/orchestrator.md
+rm teams/my-team/agents/orchestrator.md
 /roster/templates/orchestrator-generate.sh my-team
 ```
 
@@ -252,18 +252,18 @@ Unbalanced code block fences
 **Diagnosis**:
 ```bash
 # Count backticks
-grep -o '```' /skeleton_claude/.claude/teams/my-team/agents/orchestrator.md | wc -l
+grep -o '```' teams/my-team/agents/orchestrator.md | wc -l
 # Should be even number
 
 # Find problematic areas
-grep -n "^" /skeleton_claude/.claude/teams/my-team/agents/orchestrator.md | \
+grep -n "^" teams/my-team/agents/orchestrator.md | \
   grep -B2 -A2 '```' | head -20
 ```
 
 **Solution**:
 ```bash
 # Regenerate (usually fixes this)
-rm /skeleton_claude/.claude/teams/my-team/agents/orchestrator.md
+rm teams/my-team/agents/orchestrator.md
 /roster/templates/orchestrator-generate.sh my-team
 
 # If still broken, check template
@@ -289,7 +289,7 @@ Frontmatter doesn't match format swap-team.sh expects.
 
 ```bash
 # Show actual frontmatter
-head -10 /skeleton_claude/.claude/teams/my-team/agents/orchestrator.md
+head -10 teams/my-team/agents/orchestrator.md
 
 # Should be:
 # ---
@@ -302,7 +302,7 @@ head -10 /skeleton_claude/.claude/teams/my-team/agents/orchestrator.md
 # ---
 
 # Test if grep can parse it
-sed -n '/^---$/,/^---$/p' /skeleton_claude/.claude/teams/my-team/agents/orchestrator.md | \
+sed -n '/^---$/,/^---$/p' teams/my-team/agents/orchestrator.md | \
   grep "^name:" | sed 's/^name:[[:space:]]*//'
 ```
 
@@ -312,7 +312,7 @@ sed -n '/^---$/,/^---$/p' /skeleton_claude/.claude/teams/my-team/agents/orchestr
 
 1. Regenerate clean file:
 ```bash
-rm /skeleton_claude/.claude/teams/my-team/agents/orchestrator.md
+rm teams/my-team/agents/orchestrator.md
 /roster/templates/orchestrator-generate.sh my-team
 ```
 
@@ -325,7 +325,7 @@ frontmatter:
 
 3. Verify no special characters in role/description that break grep:
 ```bash
-yq '.frontmatter.role' /skeleton_claude/.claude/teams/my-team/orchestrator.yaml | \
+yq '.frontmatter.role' teams/my-team/orchestrator.yaml | \
   grep -E '[$\`"'\''|]'
 # If any matches, those characters need escaping
 ```
@@ -352,12 +352,12 @@ Specialist names in orchestrator.yaml don't match workflow.yaml exactly.
 ```bash
 # Get specialist names from workflow.yaml
 echo "=== workflow.yaml specialists ==="
-yq '.phases[].agent' /skeleton_claude/.claude/teams/my-team/workflow.yaml | sort
+yq '.phases[].agent' teams/my-team/workflow.yaml | sort
 
 # Get specialist names from orchestrator.yaml
 echo ""
 echo "=== orchestrator.yaml specialists ==="
-yq '.routing | keys[]' /skeleton_claude/.claude/teams/my-team/orchestrator.yaml | sort
+yq '.routing | keys[]' teams/my-team/orchestrator.yaml | sort
 
 # Compare
 echo ""
@@ -402,11 +402,11 @@ handoff_criteria:
 # Interactive check
 team="my-team"
 echo "Workflow agents:"
-yq '.phases[] | {agent, description}' /skeleton_claude/.claude/teams/$team/workflow.yaml
+yq '.phases[] | {agent, description}' teams/$team/workflow.yaml
 
 echo ""
 echo "Current orchestrator routing:"
-yq '.routing' /skeleton_claude/.claude/teams/$team/orchestrator.yaml
+yq '.routing' teams/$team/orchestrator.yaml
 ```
 
 ## Section 6: Output Differs from Expected
@@ -590,13 +590,13 @@ Generated orchestrator not in expected location or structure.
 
 ```bash
 # Check file exists
-ls -la /skeleton_claude/.claude/teams/my-team/agents/orchestrator.md
+ls -la teams/my-team/agents/orchestrator.md
 
 # Check frontmatter
-head -10 /skeleton_claude/.claude/teams/my-team/agents/orchestrator.md
+head -10 teams/my-team/agents/orchestrator.md
 
 # Check name field
-grep "^name:" /skeleton_claude/.claude/teams/my-team/agents/orchestrator.md
+grep "^name:" teams/my-team/agents/orchestrator.md
 # Must be exactly: name: orchestrator
 ```
 
@@ -612,10 +612,10 @@ The generated file always has `name: orchestrator` (hardcoded in template). If i
 
 ```bash
 # File must be here:
-/skeleton_claude/.claude/teams/{team-name}/agents/orchestrator.md
+teams/{team-name}/agents/orchestrator.md
 
 # Verify directory exists
-mkdir -p /skeleton_claude/.claude/teams/my-team/agents
+mkdir -p teams/my-team/agents
 
 # Regenerate
 /roster/templates/orchestrator-generate.sh my-team
@@ -627,15 +627,15 @@ Before detailed troubleshooting, try:
 
 ```bash
 # 1. Delete and regenerate
-rm /skeleton_claude/.claude/teams/my-team/agents/orchestrator.md
+rm teams/my-team/agents/orchestrator.md
 /roster/templates/orchestrator-generate.sh my-team
 
 # 2. Validate output
 /roster/templates/validate-orchestrator.sh \
-  /skeleton_claude/.claude/teams/my-team/agents/orchestrator.md
+  teams/my-team/agents/orchestrator.md
 
 # 3. Check YAML syntax
-yq . /skeleton_claude/.claude/teams/my-team/orchestrator.yaml > /dev/null
+yq . teams/my-team/orchestrator.yaml > /dev/null
 
 # 4. Test team activation
 ./swap-team.sh my-team

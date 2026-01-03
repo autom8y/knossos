@@ -542,7 +542,7 @@ log_override_consumed() {
 | File | Change |
 |------|--------|
 | `.claude/skills/orchestration/execution-mode.md` | Add Complexity Gating section |
-| `.claude/user-agents/state-mate.md` | Add orchestrator override commands |
+| `user-agents/state-mate.md` | Add orchestrator override commands (syncs to ~/.claude/agents/) |
 | `user-skills/session-common/session-context-schema.md` | Add orchestrator_override field |
 
 ### New Functions/Exports
@@ -764,7 +764,7 @@ Add to `schemas/artifacts/session-context.schema.json`:
 
 | File | Action | Description |
 |------|--------|-------------|
-| `.claude/user-agents/state-mate.md` | modify | Add override enable/disable commands |
+| `user-agents/state-mate.md` | modify | Add override enable/disable commands (syncs to ~/.claude/agents/) |
 | `schemas/artifacts/session-context.schema.json` | modify | Add orchestrator_override field |
 | `user-skills/session-common/session-context-schema.md` | modify | Document new field |
 

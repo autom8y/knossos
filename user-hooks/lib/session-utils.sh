@@ -65,7 +65,6 @@ source "$(dirname "${BASH_SOURCE[0]}")/session-state.sh"
 # Configuration available via config.sh (transitive):
 #   - CLAUDE_PROJECT_DIR
 #   - ROSTER_HOME
-#   - SKELETON_HOME
 #   - SESSIONS_DIR
 #   - CURRENT_SESSION_FILE
 #   - LOCK_DIR

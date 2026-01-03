@@ -34,15 +34,15 @@ inject_team_context() {
     fi
     output+="| **CEM Sync** | $cem_status ($cem_timestamp) |"$'\n'
 
-    # Skeleton Reference
-    local skeleton_ref="unknown"
-    local skeleton_home="${SKELETON_HOME:-$HOME/Code/skeleton_claude}"
-    if [[ -d "$skeleton_home/.git" ]]; then
-        skeleton_ref=$(cd "$skeleton_home" && git rev-parse --short HEAD 2>/dev/null || echo "unknown")
-        local skeleton_branch=$(cd "$skeleton_home" && git branch --show-current 2>/dev/null || echo "detached")
-        skeleton_ref="$skeleton_branch@$skeleton_ref"
+    # Roster Reference (replaces skeleton_claude dependency - Sprint 4 migration)
+    local roster_ref="unknown"
+    local roster_home="${ROSTER_HOME:-$HOME/Code/roster}"
+    if [[ -d "$roster_home/.git" ]]; then
+        roster_ref=$(cd "$roster_home" && git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+        local roster_branch=$(cd "$roster_home" && git branch --show-current 2>/dev/null || echo "detached")
+        roster_ref="$roster_branch@$roster_ref"
     fi
-    output+="| **Skeleton Ref** | $skeleton_ref |"$'\n'
+    output+="| **Roster Ref** | $roster_ref |"$'\n'
 
     # Drift Detection
     local drift_status="clean"

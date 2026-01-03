@@ -142,7 +142,7 @@ grep "^" /roster/templates/orchestrator-base.md.tpl | \
 Before regenerating, create a backup:
 
 ```bash
-cd /skeleton_claude
+cd $ROSTER_HOME
 
 # Backup all orchestrator.md files
 mkdir -p /tmp/orchestrator-backup
@@ -322,7 +322,7 @@ grep "^- @" .claude/teams/*/agents/orchestrator.md | head -20
 ### Step 6.1: Stage Files
 
 ```bash
-cd /skeleton_claude
+cd $ROSTER_HOME
 
 # Stage only orchestrator.md files (not YAML, which shouldn't change)
 git add .claude/teams/*/agents/orchestrator.md

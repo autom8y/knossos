@@ -301,7 +301,7 @@ git reset --hard HEAD~1
 ## Support
 
 If issues persist after troubleshooting:
-1. Open issue in skeleton_claude repository
+1. Open issue in roster repository
 2. Include: error message, session file content, git log
 ```
 

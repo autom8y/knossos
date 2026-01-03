@@ -2,13 +2,32 @@
 
 ## Scripts
 
-- `swap-team.sh` - Switch active team pack
-- `sync-user-agents.sh` - Sync roster user-agents to ~/.claude/agents/
-- `sync-user-commands.sh` - Sync roster user-commands to ~/.claude/commands/
-- `sync-user-skills.sh` - Sync roster user-skills to ~/.claude/skills/
-- `generate-team-context.sh` - Output team routing table (used by session hooks)
-- `load-workflow.sh` - Load workflow.yaml for a team
-- `get-workflow-field.sh` - Extract specific workflow fields
+### User-Level Sync (roster -> ~/.claude/)
+
+| Script | Source | Target |
+|--------|--------|--------|
+| `sync-user-agents.sh` | `user-agents/` | `~/.claude/agents/` |
+| `sync-user-commands.sh` | `user-commands/` | `~/.claude/commands/` |
+| `sync-user-skills.sh` | `user-skills/` | `~/.claude/skills/` |
+| `sync-user-hooks.sh` | `user-hooks/` | `~/.claude/hooks/` |
+
+### Team/Project Management
+
+| Script | Purpose |
+|--------|---------|
+| `swap-team.sh` | Switch active team pack (syncs to `.claude/`) |
+| `generate-team-context.sh` | Output team routing table (used by session hooks) |
+| `load-workflow.sh` | Load workflow.yaml for a team |
+| `get-workflow-field.sh` | Extract specific workflow fields |
+
+### Architecture Note
+
+User-level content (`user-*/`) syncs to `~/.claude/` (global, available in all projects).
+Team-level content (`teams/{pack}/`) syncs to `.claude/` (project-specific via swap-team).
+
+**Important**: NO `.claude/user-*` directories should exist in satellite projects. These were stale migration artifacts.
+
+See [docs/INTEGRATION.md](docs/INTEGRATION.md) for full artifact architecture details.
 
 ## Usage
 

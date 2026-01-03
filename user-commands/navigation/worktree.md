@@ -34,7 +34,7 @@ hooks/lib/worktree-manager.sh create "$NAME" --team="$TEAM"
 
 **What happens:**
 1. Creates git worktree with detached HEAD (no branch pollution)
-2. Initializes CEM (fresh sync from skeleton_claude)
+2. Initializes ecosystem (fresh sync from roster)
 3. Sets team if specified
 4. Creates initial session
 5. Returns path for user to `cd` into

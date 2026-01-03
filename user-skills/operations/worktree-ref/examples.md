@@ -89,19 +89,19 @@ session-20251224-143052-a1b2 | ACTIVE | feature-auth | 2025-12-24T14:30:52Z
   session-20251224-150000-c3d4 | ACTIVE | billing-sprint
 ```
 
-### With CEM
+### With Roster
 
-`cem status` detects and displays worktree info:
+Worktree status can be checked via metadata:
 
 ```
-Claude Ecosystem Status
+Worktree Status
 ------------------------
 
 [WORKTREE]    wt-20251224-150000-xyz
 Name:         billing-sprint
 Team:         10x-dev-pack
 
-Skeleton:     /Users/user/Code/skeleton_claude
+Roster:       /Users/user/Code/roster
 ...
 ```
 

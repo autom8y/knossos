@@ -342,15 +342,24 @@ get_manifest_file_count() {
         return
     fi
 
-    local skill_block
-    skill_block=$(echo "$manifest" | grep -A5 "\"$skill_name\":" 2>/dev/null | head -6)
+    # Use jq if available for reliable JSON parsing
+    if command -v jq >/dev/null 2>&1; then
+        local file_count
+        file_count=$(echo "$manifest" | jq -r --arg name "$skill_name" '.skills[$name].file_count // 0' 2>/dev/null)
+        echo "$file_count"
+        return
+    fi
 
-    if [[ -z "$skill_block" ]]; then
+    # Fallback to grep-based parsing (note: returns first match only)
+    local skill_line
+    skill_line=$(echo "$manifest" | grep "\"$skill_name\":" 2>/dev/null | head -1)
+
+    if [[ -z "$skill_line" ]]; then
         echo "0"
         return
     fi
 
-    echo "$skill_block" | grep '"file_count"' | sed 's/.*"file_count":[[:space:]]*\([0-9]*\).*/\1/'
+    echo "$skill_line" | sed 's/.*"file_count":[[:space:]]*\([0-9]*\).*/\1/'
 }
 
 # Initialize empty manifest

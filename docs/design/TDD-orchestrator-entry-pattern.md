@@ -495,7 +495,7 @@ Task(state-mate, \"<your mutation request>\")
 - \`Task(state-mate, \"transition to design phase\")\`
 - \`Task(state-mate, \"register artifact docs/PRD-foo.md\")\`
 
-See \`.claude/user-agents/state-mate.md\` for full documentation."
+See \`~/.claude/agents/state-mate.md\` for full documentation (synced from roster/user-agents/)."
 
 fi
 
