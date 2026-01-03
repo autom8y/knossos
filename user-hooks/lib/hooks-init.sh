@@ -39,6 +39,23 @@ hooks_init() {
     source "$lib_dir/logging.sh" 2>/dev/null || true
     source "$lib_dir/primitives.sh" 2>/dev/null || true
 
+    # ==========================================================================
+    # OPTIMIZATION: Cache session directory on first resolution
+    # Subsequent hooks in same process/subshell reuse cached value
+    # Saves ~10-15ms per get_session_dir() call
+    # ==========================================================================
+    if [[ -z "${CACHED_SESSION_DIR:-}" ]]; then
+        # Only attempt if session-core functions are available
+        if type get_session_dir &>/dev/null; then
+            export CACHED_SESSION_DIR
+            CACHED_SESSION_DIR=$(get_session_dir 2>/dev/null || echo "")
+        fi
+    fi
+
+    # Capture start time for duration tracking (always-on timing)
+    export HOOK_START_TIME_MS
+    HOOK_START_TIME_MS=$(get_time_ms 2>/dev/null || echo 0)
+
     # Initialize logging
     log_init "$hook_name" 2>/dev/null || true
     log_start 2>/dev/null || true
@@ -80,12 +97,21 @@ _hooks_handle_error() {
     local exit_code="$1"
     local line_number="$2"
     local command="$3"
+    local duration_ms=""
+
+    # Calculate duration if start time was captured
+    if [[ -n "${HOOK_START_TIME_MS:-}" && "$HOOK_START_TIME_MS" != "0" ]]; then
+        duration_ms=$(calc_duration_ms "$HOOK_START_TIME_MS" 2>/dev/null || echo "")
+    fi
 
     # Log the error
     log_error "Hook failed at line $line_number: $command (exit $exit_code)" 2>/dev/null || true
 
-    # Log completion with error
-    log_end "$exit_code" 2>/dev/null || true
+    # Log completion with error and duration
+    log_end "$exit_code" "$duration_ms" 2>/dev/null || true
+
+    # Log to JSONL timing file
+    _timing_log_jsonl "$exit_code" "$duration_ms" 2>/dev/null || true
 
     # Exit 0 to prevent hook from blocking Claude
     exit 0
@@ -117,6 +143,27 @@ safe_source() {
 }
 
 # =============================================================================
+# Cached Session Directory Access
+# =============================================================================
+
+# Get session directory with caching
+# Usage: get_cached_session_dir
+# Returns: Session directory path or empty string
+# Note: Falls back to get_session_dir if cache miss
+get_cached_session_dir() {
+    if [[ -n "${CACHED_SESSION_DIR:-}" ]]; then
+        echo "$CACHED_SESSION_DIR"
+    elif type get_session_dir &>/dev/null; then
+        # Cache miss but function available - resolve and cache
+        CACHED_SESSION_DIR=$(get_session_dir 2>/dev/null || echo "")
+        export CACHED_SESSION_DIR
+        echo "$CACHED_SESSION_DIR"
+    else
+        echo ""
+    fi
+}
+
+# =============================================================================
 # Explicit Finalization for DEFENSIVE Hooks
 # =============================================================================
 
@@ -128,5 +175,60 @@ safe_source() {
 
 hooks_finalize() {
     local exit_code="${1:-0}"
-    log_end "$exit_code" 2>/dev/null || true
+    local duration_ms=""
+
+    # Calculate duration if start time was captured
+    if [[ -n "${HOOK_START_TIME_MS:-}" && "$HOOK_START_TIME_MS" != "0" ]]; then
+        duration_ms=$(calc_duration_ms "$HOOK_START_TIME_MS" 2>/dev/null || echo "")
+    fi
+
+    # Log to standard hooks.log with duration
+    log_end "$exit_code" "$duration_ms" 2>/dev/null || true
+
+    # Log to JSONL timing file for analysis
+    _timing_log_jsonl "$exit_code" "$duration_ms" 2>/dev/null || true
+}
+
+# Internal: Log timing data to JSONL file for analysis
+# Format: {"ts":"ISO8601","hook":"name","duration_ms":N,"exit_code":N}
+#
+# OPTIMIZATION: Opt-in timing via HOOK_TIMING_ENABLE environment variable
+# Set HOOK_TIMING_ENABLE=1 to collect timing data for analysis
+# Default (unset or not "1"): No timing overhead, immediate return
+_timing_log_jsonl() {
+    # Opt-in guard: skip all timing work unless explicitly enabled
+    # This eliminates I/O overhead in production (default = disabled)
+    [[ "${HOOK_TIMING_ENABLE:-}" != "1" ]] && return 0
+
+    local exit_code="${1:-0}"
+    local duration_ms="${2:-}"
+
+    # Skip if no duration captured
+    [[ -z "$duration_ms" ]] && return 0
+
+    local timing_file="${HOOK_TIMING_FILE:-$HOME/.claude/hook-timing.jsonl}"
+    local timing_dir
+    timing_dir=$(dirname "$timing_file")
+
+    # Ensure directory exists
+    mkdir -p "$timing_dir" 2>/dev/null || return 0
+
+    # Build JSON line
+    local ts
+    ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+    local json_line="{\"ts\":\"$ts\",\"hook\":\"${HOOK_NAME:-unknown}\",\"duration_ms\":$duration_ms,\"exit_code\":$exit_code}"
+
+    # Append to file
+    echo "$json_line" >> "$timing_file" 2>/dev/null || true
+
+    # Rolling retention: keep last 1000 entries
+    if [[ -f "$timing_file" ]]; then
+        local line_count
+        line_count=$(wc -l < "$timing_file" 2>/dev/null | tr -d ' ')
+        if [[ "$line_count" -gt 1100 ]]; then
+            local temp_file
+            temp_file=$(mktemp)
+            tail -1000 "$timing_file" > "$temp_file" 2>/dev/null && mv "$temp_file" "$timing_file" 2>/dev/null || rm -f "$temp_file"
+        fi
+    fi
 }
