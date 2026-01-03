@@ -963,6 +963,9 @@ commit_staged_resources() {
 # Source roster utilities for dynamic roster generation
 source "$ROSTER_HOME/lib/roster-utils.sh"
 
+# Source transaction infrastructure for team swaps
+source "$ROSTER_HOME/lib/team/team-transaction.sh"
+
 # Source team resource operations
 source "$ROSTER_HOME/lib/team/team-resource.sh"
 
