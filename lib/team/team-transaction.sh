@@ -276,16 +276,27 @@ journal_exists() {
 # Returns: 0 on success, 1 on failure
 # Side effects: Creates STAGING_DIR, removes any existing staging
 create_staging() {
-    # Function stub - to be implemented
-    return 1
+    log_debug "Creating staging directory: $STAGING_DIR"
+
+    # Clean any existing staging
+    rm -rf "$STAGING_DIR" 2>/dev/null
+
+    mkdir -p "$STAGING_DIR" || {
+        log_error "Failed to create staging directory"
+        return 1
+    }
+
+    return 0
 }
 
 # Clean up staging directory
 # Returns: 0 always
 # Side effects: Removes STAGING_DIR if exists
 cleanup_staging() {
-    # Function stub - to be implemented
-    return 0
+    if [[ -d "$STAGING_DIR" ]]; then
+        rm -rf "$STAGING_DIR"
+        log_debug "Staging directory cleaned up"
+    fi
 }
 
 # Stage agents from team pack
@@ -294,8 +305,24 @@ cleanup_staging() {
 # Returns: 0 on success, 1 on failure
 # Requires: ROSTER_HOME, STAGING_DIR
 stage_agents() {
-    # Function stub - to be implemented
-    return 1
+    local team_name="$1"
+    local source_dir="$ROSTER_HOME/teams/$team_name/agents"
+    local staging_agents="$STAGING_DIR/agents"
+
+    if [[ ! -d "$source_dir" ]]; then
+        log_error "Source agents directory not found: $source_dir"
+        return 1
+    fi
+
+    mkdir -p "$staging_agents" || return 1
+
+    cp -rp "$source_dir"/* "$staging_agents/" || {
+        log_error "Failed to stage agents"
+        return 1
+    }
+
+    log_debug "Staged agents to: $staging_agents"
+    return 0
 }
 
 # Stage workflow file
@@ -304,8 +331,18 @@ stage_agents() {
 # Returns: 0 on success, 1 on failure (warning if no workflow.yaml)
 # Requires: ROSTER_HOME, STAGING_DIR
 stage_workflow() {
-    # Function stub - to be implemented
-    return 1
+    local team_name="$1"
+    local source_file="$ROSTER_HOME/teams/$team_name/workflow.yaml"
+
+    if [[ -f "$source_file" ]]; then
+        cp "$source_file" "$STAGING_DIR/ACTIVE_WORKFLOW.yaml" || {
+            log_warning "Failed to stage workflow.yaml"
+            return 1
+        }
+        log_debug "Staged workflow.yaml"
+    fi
+
+    return 0
 }
 
 # Stage ACTIVE_TEAM file
@@ -314,8 +351,15 @@ stage_workflow() {
 # Returns: 0 on success, 1 on failure
 # Requires: STAGING_DIR
 stage_active_team() {
-    # Function stub - to be implemented
-    return 1
+    local team_name="$1"
+
+    echo -n "$team_name" > "$STAGING_DIR/ACTIVE_TEAM" || {
+        log_error "Failed to stage ACTIVE_TEAM"
+        return 1
+    }
+
+    log_debug "Staged ACTIVE_TEAM: $team_name"
+    return 0
 }
 
 # Verify staging directory integrity
@@ -324,8 +368,37 @@ stage_active_team() {
 # Returns: 0 on success, 1 on verification failure
 # Requires: STAGING_DIR
 verify_staging() {
-    # Function stub - to be implemented
-    return 1
+    local expected_count="$1"
+
+    # Verify staging directory exists
+    if [[ ! -d "$STAGING_DIR" ]]; then
+        log_error "Staging directory missing"
+        return 1
+    fi
+
+    # Verify agents staged
+    if [[ ! -d "$STAGING_DIR/agents" ]]; then
+        log_error "Staged agents directory missing"
+        return 1
+    fi
+
+    # Verify agent count
+    local actual_count
+    actual_count=$(find "$STAGING_DIR/agents" -maxdepth 1 -name "*.md" -type f 2>/dev/null | wc -l | tr -d ' ')
+
+    if [[ "$actual_count" -ne "$expected_count" ]]; then
+        log_error "Staging verification failed: expected $expected_count agents, found $actual_count"
+        return 1
+    fi
+
+    # Verify ACTIVE_TEAM staged
+    if [[ ! -f "$STAGING_DIR/ACTIVE_TEAM" ]]; then
+        log_error "Staged ACTIVE_TEAM missing"
+        return 1
+    fi
+
+    log_debug "Staging verified: $actual_count agents"
+    return 0
 }
 
 # ============================================================================
