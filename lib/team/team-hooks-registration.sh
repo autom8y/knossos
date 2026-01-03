@@ -64,8 +64,25 @@ fi
 # Returns: 0 if yq v4+ available, 1 otherwise
 # Side effects: Logs error if not available
 require_yq() {
-    # TODO: Implement in RF-018
-    return 1
+    if ! command -v yq &>/dev/null; then
+        log_error "yq is required but not installed"
+        log_error "Install with: brew install yq (macOS) or pip install yq"
+        return 1
+    fi
+
+    # Check for yq v4+ (mikefarah/yq)
+    local yq_version
+    yq_version=$(yq --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+' | head -1)
+    local major_version
+    major_version=$(echo "$yq_version" | cut -d. -f1)
+
+    if [[ -z "$major_version" ]] || [[ "$major_version" -lt 4 ]]; then
+        log_error "yq v4+ is required (found: $yq_version)"
+        log_error "Install with: brew install yq"
+        return 1
+    fi
+
+    return 0
 }
 
 # ============================================================================
