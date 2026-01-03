@@ -526,6 +526,46 @@ recover_partial_commit() {
     fi
 }
 
+# Check if manifest is stale (doesn't match journal's expected timestamp)
+# Returns: 0 if manifest is stale or missing, 1 if manifest is current
+# Note: Used during recovery to detect if manifest was written before crash (RF-006)
+is_manifest_stale() {
+    # No manifest file = stale (needs regeneration)
+    if [[ ! -f "$MANIFEST_FILE" ]]; then
+        log_debug "Manifest missing - considered stale"
+        return 0
+    fi
+
+    # Get expected timestamp from journal
+    local journal_ts
+    journal_ts=$(get_journal_manifest_timestamp)
+
+    # No journal timestamp recorded = manifest not yet written in this transaction
+    if [[ -z "$journal_ts" ]]; then
+        log_debug "No manifest timestamp in journal - manifest is stale"
+        return 0
+    fi
+
+    # Get actual timestamp from manifest
+    local manifest_ts
+    manifest_ts=$(jq -r '.written_at // empty' "$MANIFEST_FILE" 2>/dev/null)
+
+    # No written_at in manifest = old format, consider stale
+    if [[ -z "$manifest_ts" ]]; then
+        log_debug "Manifest has no written_at field - considered stale"
+        return 0
+    fi
+
+    # Compare timestamps
+    if [[ "$manifest_ts" != "$journal_ts" ]]; then
+        log_debug "Manifest timestamp mismatch: manifest=$manifest_ts, journal=$journal_ts"
+        return 0  # Stale
+    fi
+
+    log_debug "Manifest timestamp matches journal - manifest is current"
+    return 1  # Not stale
+}
+
 # Complete a partial commit after point-of-no-return
 # Runs only the steps that haven't completed yet
 # Parameters:
@@ -570,10 +610,16 @@ complete_partial_commit() {
         mark_commit_step "$COMMIT_STEP_HOOK_REGISTRATIONS"
     fi
 
+    # Check manifest: either not done, or done but stale (RF-006)
+    # Staleness detection catches case where crash left manifest from old state
     if ! is_commit_step_done "$COMMIT_STEP_MANIFEST"; then
         log "Completing: manifest write"
         write_manifest "$target_team"
         mark_commit_step "$COMMIT_STEP_MANIFEST"
+    elif is_manifest_stale; then
+        log_warning "Manifest is stale - regenerating"
+        write_manifest "$target_team"
+        # Step already marked done, but manifest is now current
     fi
 
     # ACTIVE_TEAM should already be written (that's what got us past point-of-no-return)
@@ -636,6 +682,13 @@ verify_state_consistency() {
             if [[ "$manifest_team" != "$active_team" ]]; then
                 log_error "ACTIVE_TEAM ($active_team) does not match manifest ($manifest_team)"
                 ((errors++)) || true
+            fi
+
+            # Check manifest has timestamp (RF-006 versioning)
+            local manifest_ts
+            manifest_ts=$(jq -r '.written_at // empty' "$MANIFEST_FILE" 2>/dev/null)
+            if [[ -z "$manifest_ts" ]]; then
+                log_warning "Manifest missing written_at timestamp (pre-RF-006 format)"
             fi
         fi
 
@@ -778,6 +831,8 @@ get_agent_from_manifest() {
 
 # Write manifest with current agent state
 # Usage: write_manifest "team-name"
+# Note: Records written_at timestamp in both manifest and journal for
+#       staleness detection during recovery (RF-006)
 write_manifest() {
     local team_name="$1"
     local timestamp
@@ -787,12 +842,13 @@ write_manifest() {
     manifest_dir=$(dirname "$MANIFEST_FILE")
     mkdir -p "$manifest_dir"
 
-    # Start JSON
+    # Start JSON - include written_at for staleness detection during recovery
     {
         echo "{"
         echo "  \"manifest_version\": \"$MANIFEST_VERSION\","
         echo "  \"active_team\": \"$team_name\","
         echo "  \"last_swap\": \"$timestamp\","
+        echo "  \"written_at\": \"$timestamp\","
         echo "  \"agents\": {"
     } > "$MANIFEST_FILE"
 
@@ -912,7 +968,13 @@ write_manifest() {
         echo "}"
     } >> "$MANIFEST_FILE"
 
-    log_debug "Manifest written: $MANIFEST_FILE"
+    # Record manifest timestamp in journal for staleness detection during recovery
+    # This allows recovery to detect if manifest is from before/after the crash
+    if [[ -f "$JOURNAL_FILE" ]]; then
+        update_journal_manifest_timestamp "$timestamp"
+    fi
+
+    log_debug "Manifest written: $MANIFEST_FILE (written_at: $timestamp)"
 }
 
 # Initialize manifest for first-time use (treats existing agents as unknown/user)

@@ -230,6 +230,36 @@ update_journal_error() {
     write_atomic "$JOURNAL_FILE" "$updated"
 }
 
+# Record manifest write timestamp in journal
+# Parameters:
+#   $1 - timestamp: ISO 8601 timestamp when manifest was written
+# Returns: 0 on success, 1 if journal missing
+# Note: Used for staleness detection during recovery
+update_journal_manifest_timestamp() {
+    local timestamp="$1"
+
+    if [[ ! -f "$JOURNAL_FILE" ]]; then
+        return 1
+    fi
+
+    local updated
+    updated=$(jq --arg ts "$timestamp" '.manifest_written_at = $ts' "$JOURNAL_FILE") || return 1
+
+    write_atomic "$JOURNAL_FILE" "$updated"
+}
+
+# Get manifest write timestamp from journal
+# Outputs: Timestamp to stdout, empty if not found
+# Returns: 0 always (empty output for missing field)
+get_journal_manifest_timestamp() {
+    if [[ ! -f "$JOURNAL_FILE" ]]; then
+        echo ""
+        return 1
+    fi
+
+    jq -r '.manifest_written_at // empty' "$JOURNAL_FILE" 2>/dev/null
+}
+
 # Read arbitrary journal field
 # Parameters:
 #   $1 - field: Field name in journal JSON
