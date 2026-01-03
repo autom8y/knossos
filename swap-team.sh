@@ -2344,6 +2344,104 @@ swap_skills() {
 }
 
 # ============================================================================
+# Shared Skills Functions
+# ============================================================================
+
+# Remove shared skills from previous sync
+remove_shared_skills() {
+    log_debug "Removing shared skills from previous sync"
+
+    if [[ ! -f ".claude/.shared-skills" ]]; then
+        log_debug "No shared skills marker found"
+        return 0
+    fi
+
+    # Read list and remove each skill directory
+    while IFS= read -r skill_dir; do
+        [[ -z "$skill_dir" ]] && continue
+        if [[ -d ".claude/skills/$skill_dir" ]]; then
+            rm -rf ".claude/skills/$skill_dir"
+            log_debug "Removed shared skill: $skill_dir"
+        fi
+    done < ".claude/.shared-skills"
+
+    # Remove the marker file
+    rm -f ".claude/.shared-skills"
+
+    log_debug "Shared skills removed"
+}
+
+# Sync shared skills to project
+# Shared skills are copied to .claude/skills/ with a marker file
+# Team skills win over shared skills (team-privileged override)
+sync_shared_skills() {
+    local source_dir="$ROSTER_HOME/teams/shared/skills"
+
+    log_debug "Checking for shared skills in $source_dir"
+
+    # Ensure skills directory exists
+    mkdir -p ".claude/skills"
+
+    # Remove previous shared skills
+    remove_shared_skills
+
+    # Check if shared skills exist
+    if [[ ! -d "$source_dir" ]]; then
+        log_debug "No shared skills directory found"
+        return 0
+    fi
+
+    # Count skill directories (each skill is a directory)
+    local skill_count
+    skill_count=$(find "$source_dir" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l | tr -d ' ')
+
+    if [[ "$skill_count" -eq 0 ]]; then
+        log_debug "No shared skill directories found"
+        return 0
+    fi
+
+    log_debug "Syncing $skill_count shared skill(s)"
+
+    # Create marker file to track which skills are from shared
+    local marker_file=".claude/.shared-skills"
+    : > "$marker_file"
+
+    # Copy each skill directory and record in marker
+    for skill_path in "$source_dir"/*/; do
+        [[ -d "$skill_path" ]] || continue
+
+        local skill_name
+        skill_name=$(basename "$skill_path")
+
+        # Check if team has same skill (team-privileged override)
+        if [[ -f ".claude/skills/.team-skills" ]] && grep -q "^$skill_name$" ".claude/skills/.team-skills" 2>/dev/null; then
+            log_debug "Team skill $skill_name overrides shared skill"
+            continue  # Skip this shared skill
+        fi
+
+        # Check for collision with existing skeleton skill
+        # Shared wins over skeleton (but loses to team, checked above)
+        if [[ -d ".claude/skills/$skill_name" ]]; then
+            log_debug "Shared skill $skill_name overrides skeleton skill"
+            rm -rf ".claude/skills/$skill_name"
+        fi
+
+        # Copy skill directory (flattened - no subdirectory)
+        cp -rp "$skill_path" ".claude/skills/$skill_name"
+        echo "$skill_name" >> "$marker_file"
+        log_debug "Synced shared skill: $skill_name"
+    done
+
+    # Count successfully synced skills
+    local synced_count
+    synced_count=$(wc -l < "$marker_file" | tr -d ' ')
+
+    if [[ "$synced_count" -gt 0 ]]; then
+        log "Synced: $synced_count shared skill(s)"
+    fi
+}
+
+# ============================================================================
 # Team Hooks Functions (Phase 2: Unified Sync)
 # ============================================================================
 
@@ -3604,6 +3702,9 @@ perform_swap() {
 
     # Sync team-specific skills (Phase 2: Unified Sync)
     swap_skills "$team_name"
+
+    # Sync shared skills (always active, team-privileged override)
+    sync_shared_skills
 
     # Detect and handle orphan hooks (hooks from other teams)
     detect_hook_orphans "$team_name"
