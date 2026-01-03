@@ -112,8 +112,58 @@ write_atomic() {
 # Returns: 0 on success, 1 if journal already exists (concurrent swap)
 # Requires: JOURNAL_FILE, JOURNAL_VERSION, SWAP_BACKUP_DIR, STAGING_DIR
 create_journal() {
-    # Function stub - to be implemented
-    return 1
+    local source_team="$1"
+    local target_team="$2"
+    local timestamp
+    timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+    # Check if journal already exists (concurrent swap protection)
+    if [[ -f "$JOURNAL_FILE" ]]; then
+        local existing_pid
+        existing_pid=$(jq -r '.pid // "unknown"' "$JOURNAL_FILE" 2>/dev/null)
+        log_error "Swap already in progress (journal exists, PID: $existing_pid)"
+        log "Use --recover to handle the interrupted swap"
+        return 1
+    fi
+
+    # Format source_team for JSON (null if empty, quoted string otherwise)
+    local source_team_json="null"
+    if [[ -n "$source_team" ]]; then
+        source_team_json="\"$source_team\""
+    fi
+
+    local journal_content
+    journal_content=$(cat <<EOF
+{
+  "version": "$JOURNAL_VERSION",
+  "started_at": "$timestamp",
+  "phase": "$PHASE_PREPARING",
+  "source_team": $source_team_json,
+  "target_team": "$target_team",
+  "backup_location": {
+    "agents": "$SWAP_BACKUP_DIR/agents",
+    "manifest": "$SWAP_BACKUP_DIR/AGENT_MANIFEST.json",
+    "active_team": "$SWAP_BACKUP_DIR/ACTIVE_TEAM",
+    "workflow": "$SWAP_BACKUP_DIR/ACTIVE_WORKFLOW.yaml",
+    "commands": null,
+    "skills": null,
+    "hooks": null
+  },
+  "staging_location": "$STAGING_DIR",
+  "checksums": {},
+  "pid": $$,
+  "error": null
+}
+EOF
+)
+
+    write_atomic "$JOURNAL_FILE" "$journal_content" || {
+        log_error "Failed to create swap journal"
+        return 1
+    }
+
+    log_debug "Journal created: $source_team -> $target_team"
+    return 0
 }
 
 # Update journal phase
@@ -121,8 +171,26 @@ create_journal() {
 #   $1 - new_phase: Phase name (PHASE_* constant)
 # Returns: 0 on success, 1 if journal missing
 update_journal_phase() {
-    # Function stub - to be implemented
-    return 1
+    local new_phase="$1"
+
+    if [[ ! -f "$JOURNAL_FILE" ]]; then
+        log_error "Cannot update phase: journal does not exist"
+        return 1
+    fi
+
+    local updated
+    updated=$(jq --arg phase "$new_phase" '.phase = $phase' "$JOURNAL_FILE") || {
+        log_error "Failed to parse journal for phase update"
+        return 1
+    }
+
+    write_atomic "$JOURNAL_FILE" "$updated" || {
+        log_error "Failed to update journal phase to: $new_phase"
+        return 1
+    }
+
+    log_debug "Journal phase updated: $new_phase"
+    return 0
 }
 
 # Update journal backup locations for resources
@@ -131,8 +199,18 @@ update_journal_phase() {
 #   $2 - backup_path: Path to backup directory
 # Returns: 0 on success, 1 if journal missing
 update_journal_backups() {
-    # Function stub - to be implemented
-    return 1
+    local resource_type="$1"
+    local backup_path="$2"
+
+    if [[ ! -f "$JOURNAL_FILE" ]]; then
+        return 1
+    fi
+
+    local updated
+    updated=$(jq --arg type "$resource_type" --arg path "$backup_path" \
+        '.backup_location[$type] = $path' "$JOURNAL_FILE") || return 1
+
+    write_atomic "$JOURNAL_FILE" "$updated"
 }
 
 # Update journal with error message
@@ -140,8 +218,16 @@ update_journal_backups() {
 #   $1 - error_msg: Error message to record
 # Returns: 0 on success, 1 if journal missing
 update_journal_error() {
-    # Function stub - to be implemented
-    return 1
+    local error_msg="$1"
+
+    if [[ ! -f "$JOURNAL_FILE" ]]; then
+        return 1
+    fi
+
+    local updated
+    updated=$(jq --arg err "$error_msg" '.error = $err' "$JOURNAL_FILE") || return 1
+
+    write_atomic "$JOURNAL_FILE" "$updated"
 }
 
 # Read arbitrary journal field
@@ -150,30 +236,36 @@ update_journal_error() {
 # Outputs: Field value to stdout, empty if not found
 # Returns: 0 always (empty output for missing field)
 get_journal_field() {
-    # Function stub - to be implemented
-    echo ""
+    local field="$1"
+
+    if [[ ! -f "$JOURNAL_FILE" ]]; then
+        echo ""
+        return 1
+    fi
+
+    jq -r ".$field // empty" "$JOURNAL_FILE" 2>/dev/null
 }
 
 # Get current journal phase
 # Outputs: Phase name to stdout
 # Returns: 0 on success, 1 if journal missing
 get_journal_phase() {
-    # Function stub - to be implemented
-    return 1
+    get_journal_field "phase"
 }
 
 # Delete journal (on successful completion)
 # Returns: 0 always
 delete_journal() {
-    # Function stub - to be implemented
-    return 0
+    if [[ -f "$JOURNAL_FILE" ]]; then
+        rm -f "$JOURNAL_FILE"
+        log_debug "Journal deleted"
+    fi
 }
 
 # Check if journal exists
 # Returns: 0 if exists, 1 otherwise
 journal_exists() {
-    # Function stub - to be implemented
-    return 1
+    [[ -f "$JOURNAL_FILE" ]]
 }
 
 # ============================================================================
