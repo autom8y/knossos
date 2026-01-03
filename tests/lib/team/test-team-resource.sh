@@ -216,6 +216,131 @@ test_get_resource_team_multiple_teams() {
 }
 
 # ============================================================================
+# Tests for backup_team_resource() - RF-003
+# ============================================================================
+
+test_backup_team_resource_commands() {
+    run_test "backup_team_resource backs up commands (files)"
+
+    # Setup: create commands directory with marker
+    local cmd_dir="$TEST_TMP/project/.claude/commands"
+    mkdir -p "$cmd_dir"
+    echo "cmd-a.md" > "$cmd_dir/.team-commands"
+    echo "cmd-b.md" >> "$cmd_dir/.team-commands"
+    echo "test command content" > "$cmd_dir/cmd-a.md"
+    echo "another command" > "$cmd_dir/cmd-b.md"
+
+    # Act: backup commands
+    cd "$TEST_TMP/project"
+    backup_team_resource "commands" ".claude/commands" ".team-commands" "f"
+
+    # Assert: backup directory exists with files
+    if [[ -d "$cmd_dir.backup" ]] && \
+       [[ -f "$cmd_dir.backup/cmd-a.md" ]] && \
+       [[ -f "$cmd_dir.backup/cmd-b.md" ]]; then
+        test_pass "backed up command files to .backup directory"
+    else
+        test_fail "backup_team_resource" "backup directory with files" "missing files or directory"
+    fi
+}
+
+test_backup_team_resource_skills() {
+    run_test "backup_team_resource backs up skills (directories)"
+
+    # Setup: create skills directory with marker
+    local skill_dir="$TEST_TMP/project/.claude/skills"
+    mkdir -p "$skill_dir/skill-a/subdir"
+    mkdir -p "$skill_dir/skill-b"
+    echo "skill-a" > "$skill_dir/.team-skills"
+    echo "skill-b" >> "$skill_dir/.team-skills"
+    echo "content" > "$skill_dir/skill-a/skill.md"
+    echo "nested" > "$skill_dir/skill-a/subdir/file.txt"
+
+    # Act: backup skills
+    cd "$TEST_TMP/project"
+    backup_team_resource "skills" ".claude/skills" ".team-skills" "d"
+
+    # Assert: backup directory exists with recursive copy
+    if [[ -d "$skill_dir.backup/skill-a" ]] && \
+       [[ -d "$skill_dir.backup/skill-b" ]] && \
+       [[ -f "$skill_dir.backup/skill-a/skill.md" ]] && \
+       [[ -f "$skill_dir.backup/skill-a/subdir/file.txt" ]]; then
+        test_pass "backed up skill directories recursively"
+    else
+        test_fail "backup_team_resource" "backup directory with recursive structure" "missing structure"
+    fi
+}
+
+test_backup_team_resource_hooks() {
+    run_test "backup_team_resource backs up hooks (files)"
+
+    # Setup: create hooks directory with marker
+    local hook_dir="$TEST_TMP/project/.claude/hooks"
+    mkdir -p "$hook_dir"
+    echo "hook-a.sh" > "$hook_dir/.team-hooks"
+    echo "#!/bin/bash" > "$hook_dir/hook-a.sh"
+
+    # Act: backup hooks
+    cd "$TEST_TMP/project"
+    backup_team_resource "hooks" ".claude/hooks" ".team-hooks" "f"
+
+    # Assert: backup directory exists with file
+    if [[ -d "$hook_dir.backup" ]] && \
+       [[ -f "$hook_dir.backup/hook-a.sh" ]]; then
+        test_pass "backed up hook files"
+    else
+        test_fail "backup_team_resource" "backup directory with hook file" "missing file or directory"
+    fi
+}
+
+test_backup_team_resource_no_marker() {
+    run_test "backup_team_resource returns 0 when no marker file exists"
+
+    # Setup: create directory without marker (use unique subdir)
+    local project_dir="$TEST_TMP/project-no-marker"
+    mkdir -p "$project_dir/.claude/commands"
+
+    # Act: backup with no marker
+    cd "$project_dir"
+    if backup_team_resource "commands" ".claude/commands" ".team-commands" "f"; then
+        # Assert: no backup directory created
+        if [[ ! -d "$project_dir/.claude/commands.backup" ]]; then
+            test_pass "returned 0 and did not create backup"
+        else
+            test_fail "backup_team_resource" "no backup directory" "backup directory created"
+        fi
+    else
+        test_fail "backup_team_resource" "return 0" "non-zero return"
+    fi
+}
+
+test_backup_team_resource_removes_old_backup() {
+    run_test "backup_team_resource removes old backup before creating new one"
+
+    # Setup: create old backup with old files
+    local cmd_dir="$TEST_TMP/project/.claude/commands"
+    mkdir -p "$cmd_dir.backup"
+    echo "old content" > "$cmd_dir.backup/old-file.md"
+
+    # Setup: create new commands to backup
+    mkdir -p "$cmd_dir"
+    echo "new-cmd.md" > "$cmd_dir/.team-commands"
+    echo "new content" > "$cmd_dir/new-cmd.md"
+
+    # Act: backup (should remove old backup first)
+    cd "$TEST_TMP/project"
+    backup_team_resource "commands" ".claude/commands" ".team-commands" "f"
+
+    # Assert: old file gone, new file present
+    if [[ ! -f "$cmd_dir.backup/old-file.md" ]] && \
+       [[ -f "$cmd_dir.backup/new-cmd.md" ]]; then
+        test_pass "removed old backup and created new one"
+    else
+        test_fail "backup_team_resource" "clean backup directory" "old files still present"
+    fi
+}
+
+# ============================================================================
 # Main test runner
 # ============================================================================
 
@@ -239,6 +364,13 @@ main() {
     test_get_resource_team_hook
     test_get_resource_team_not_found
     test_get_resource_team_multiple_teams
+
+    # RF-003: backup_team_resource tests
+    test_backup_team_resource_commands
+    test_backup_team_resource_skills
+    test_backup_team_resource_hooks
+    test_backup_team_resource_no_marker
+    test_backup_team_resource_removes_old_backup
 
     teardown
 

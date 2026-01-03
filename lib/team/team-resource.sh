@@ -25,6 +25,26 @@
 readonly _TEAM_RESOURCE_LOADED=1
 
 # ============================================================================
+# Logging Stubs (overridden when sourced from swap-team.sh)
+# ============================================================================
+
+# These stub implementations provide basic logging when team-resource.sh
+# is used standalone (e.g., in unit tests). When sourced from swap-team.sh,
+# these are overridden by the full logging implementation.
+
+if ! type log_debug >/dev/null 2>&1; then
+    log_debug() {
+        echo "[DEBUG] $*" >&2
+    }
+fi
+
+if ! type log_warning >/dev/null 2>&1; then
+    log_warning() {
+        echo "[WARNING] $*" >&2
+    }
+fi
+
+# ============================================================================
 # Team Membership Checks
 # ============================================================================
 
@@ -92,8 +112,43 @@ backup_team_resource() {
     local marker_file="$3"
     local find_type="$4"
 
-    # Stub - to be implemented in RF-003
-    return 0
+    log_debug "Checking for team ${resource_type} to backup"
+
+    local backup_dir="${resource_dir}.backup"
+    local marker_path="${resource_dir}/${marker_file}"
+
+    # Check if any team resources exist (marked by marker file)
+    if [[ ! -d "$resource_dir" ]] || [[ ! -f "$marker_path" ]]; then
+        log_debug "No team ${resource_type} to backup"
+        return 0
+    fi
+
+    # Remove old backup if exists
+    if [[ -d "$backup_dir" ]]; then
+        log_debug "Removing old ${resource_type} backup"
+        rm -rf "$backup_dir" || {
+            log_warning "Failed to remove old ${resource_type} backup"
+        }
+    fi
+
+    # Read list of team resources and backup
+    mkdir -p "$backup_dir"
+    while IFS= read -r resource_name; do
+        [[ -z "$resource_name" ]] && continue
+        local resource_path="${resource_dir}/${resource_name}"
+
+        if [[ "$find_type" == "d" ]] && [[ -d "$resource_path" ]]; then
+            # For directories (skills), use recursive copy with preservation
+            cp -rp "$resource_path" "${backup_dir}/${resource_name}"
+            log_debug "Backed up ${resource_type%s}: $resource_name"
+        elif [[ "$find_type" == "f" ]] && [[ -f "$resource_path" ]]; then
+            # For files (commands, hooks), use simple copy
+            cp "$resource_path" "${backup_dir}/${resource_name}"
+            log_debug "Backed up ${resource_type%s}: $resource_name"
+        fi
+    done < "$marker_path"
+
+    log_debug "Team ${resource_type} backed up"
 }
 
 # ============================================================================
