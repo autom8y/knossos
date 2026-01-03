@@ -219,10 +219,11 @@ rollback_swap() {
         log_debug "Restored hooks"
     fi
 
-    # Cleanup staging and backup
+    # Delete journal first to mark transaction complete, then best-effort cleanup
+    # This prevents orphaned journal if process dies during cleanup
+    delete_journal
     cleanup_staging
     cleanup_swap_backup
-    delete_journal
 
     log "Rollback complete. Previous state restored."
     return 0
@@ -251,8 +252,8 @@ handle_interrupt() {
     case "$phase" in
         "$PHASE_PREPARING"|"$PHASE_BACKING"|"")
             log "No changes made. Exiting."
-            cleanup_staging
             delete_journal
+            cleanup_staging
             ;;
         "$PHASE_STAGING"|"$PHASE_VERIFYING")
             log "Rolling back partial changes..."
@@ -265,9 +266,9 @@ handle_interrupt() {
             ;;
         "$PHASE_COMPLETED")
             log "Swap was completed. Cleaning up."
+            delete_journal
             cleanup_staging
             cleanup_swap_backup
-            delete_journal
             ;;
     esac
 
@@ -312,9 +313,9 @@ check_journal_recovery() {
     # Check if swap completed but cleanup didn't finish
     if [[ "$phase" == "$PHASE_COMPLETED" ]]; then
         log "Previous swap completed. Cleaning up..."
+        delete_journal
         cleanup_staging
         cleanup_swap_backup
-        delete_journal
         return 0
     fi
 
@@ -560,10 +561,11 @@ complete_partial_commit() {
     # Mark as completed
     update_journal_phase "$PHASE_COMPLETED"
 
-    # Clean up
+    # Delete journal first to mark transaction complete, then best-effort cleanup
+    # This prevents orphaned journal if process dies during cleanup
+    delete_journal
     cleanup_staging
     cleanup_swap_backup
-    delete_journal
 
     log "Partial commit recovery complete"
     return 0
@@ -3093,10 +3095,12 @@ perform_swap() {
     # =========================================================================
     update_journal_phase "$PHASE_COMPLETED"
 
-    # Clean up staging and backup (swap successful)
+    # Delete journal first to mark transaction complete, then best-effort cleanup
+    # This ordering prevents orphaned journal if process dies during cleanup
+    # Staging and backup cleanup are best-effort (orphaned dirs don't block future swaps)
+    delete_journal
     cleanup_staging
     cleanup_swap_backup
-    delete_journal
 
     # =========================================================================
     # POST-COMMIT OPERATIONS (Non-critical, swap is already complete)
