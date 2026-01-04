@@ -181,7 +181,7 @@ sync_log() {
     if declare -F log >/dev/null 2>&1; then
         log "$@"
     else
-        echo "[roster-sync] $*"
+        echo "[roster-sync] $*" >&2
     fi
 }
 
