@@ -240,6 +240,20 @@ resolve_conflict() {
         return 1
     fi
 
+    # Pre-flight check: skip cp if files are already identical (fixes BSD cp error)
+    if [[ -f "$local_file" ]]; then
+        local roster_checksum local_checksum
+        roster_checksum=$(compute_checksum "$roster_file")
+        local_checksum=$(compute_checksum "$local_file")
+
+        if [[ "$roster_checksum" == "$local_checksum" ]]; then
+            sync_log_debug "Files already identical, skipping copy: $local_file"
+            # Update manifest to reflect current state
+            set_manifest_checksum "$filename" "$roster_checksum"
+            return 0
+        fi
+    fi
+
     # Always create backup of local version
     # Note: We capture output via subshell, so we must increment counters here
     # (create_conflict_backup's counter updates are lost in the subshell)
