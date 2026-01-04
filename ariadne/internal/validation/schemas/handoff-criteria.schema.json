@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "embed:///schemas/handoff-criteria.schema.json",
+  "title": "Handoff Criteria Schema",
+  "description": "Schema for handoff criteria definitions used in phase transitions",
+  "type": "object",
+
+  "patternProperties": {
+    "^(requirements|design|implementation|validation)$": {
+      "type": "object",
+      "description": "Phase-specific handoff criteria",
+      "patternProperties": {
+        "^(prd|tdd|adr|test-plan)$": {
+          "$ref": "#/$defs/artifact_criteria"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+
+  "additionalProperties": false,
+
+  "$defs": {
+    "artifact_criteria": {
+      "type": "object",
+      "description": "Criteria for a specific artifact type within a phase",
+      "properties": {
+        "blocking": {
+          "type": "array",
+          "description": "Criteria that must pass for handoff to succeed",
+          "items": {
+            "$ref": "#/$defs/criterion"
+          }
+        },
+        "non_blocking": {
+          "type": "array",
+          "description": "Criteria that generate warnings but don't block handoff",
+          "items": {
+            "$ref": "#/$defs/criterion"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "criterion": {
+      "type": "object",
+      "description": "A single validation criterion",
+      "required": ["field", "message"],
+      "properties": {
+        "field": {
+          "type": "string",
+          "description": "The frontmatter field to validate",
+          "minLength": 1
+        },
+        "message": {
+          "type": "string",
+          "description": "Message to display if criterion is not met",
+          "minLength": 1
+        },
+        "non_empty": {
+          "type": "boolean",
+          "description": "If true, field must be non-empty (not just present)",
+          "default": false
+        },
+        "min_items": {
+          "type": "integer",
+          "description": "Minimum number of items (for array fields)",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

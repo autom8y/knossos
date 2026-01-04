@@ -9,10 +9,14 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
+	"github.com/autom8y/ariadne/internal/cmd/handoff"
+	"github.com/autom8y/ariadne/internal/cmd/hook"
 	"github.com/autom8y/ariadne/internal/cmd/manifest"
 	"github.com/autom8y/ariadne/internal/cmd/session"
 	"github.com/autom8y/ariadne/internal/cmd/sync"
 	"github.com/autom8y/ariadne/internal/cmd/team"
+	"github.com/autom8y/ariadne/internal/cmd/validate"
+	"github.com/autom8y/ariadne/internal/cmd/worktree"
 	"github.com/autom8y/ariadne/internal/errors"
 	"github.com/autom8y/ariadne/internal/output"
 	"github.com/autom8y/ariadne/internal/paths"
@@ -103,6 +107,10 @@ func init() {
 	rootCmd.AddCommand(team.NewTeamCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
 	rootCmd.AddCommand(manifest.NewManifestCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
 	rootCmd.AddCommand(sync.NewSyncCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
+	rootCmd.AddCommand(validate.NewValidateCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
+	rootCmd.AddCommand(handoff.NewHandoffCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir, &globalOpts.SessionID))
+	rootCmd.AddCommand(worktree.NewWorktreeCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
+	rootCmd.AddCommand(hook.NewHookCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir, &globalOpts.SessionID))
 	rootCmd.AddCommand(versionCmd)
 }
 
@@ -178,6 +186,25 @@ func needsProject(cmd *cobra.Command) bool {
 	// All sync commands need project
 	if cmd.Parent() != nil && cmd.Parent().Name() == "sync" {
 		return true
+	}
+	// All validate commands need project
+	if cmd.Parent() != nil && cmd.Parent().Name() == "validate" {
+		return true
+	}
+	// All handoff commands need project
+	if cmd.Parent() != nil && cmd.Parent().Name() == "handoff" {
+		return true
+	}
+	// All worktree commands need project
+	if cmd.Parent() != nil && cmd.Parent().Name() == "worktree" {
+		return true
+	}
+	// Hook commands do NOT require project (they handle missing project gracefully)
+	if cmd.Parent() != nil && cmd.Parent().Name() == "hook" {
+		return false
+	}
+	if cmd.Name() == "hook" {
+		return false
 	}
 	return true
 }

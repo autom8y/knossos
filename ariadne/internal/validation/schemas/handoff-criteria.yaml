@@ -1,0 +1,99 @@
+# Handoff Criteria Definitions
+# Defines blocking and non-blocking criteria for phase transitions.
+# Blocking criteria must pass for handoff to succeed.
+# Non-blocking criteria generate warnings only.
+
+requirements:
+  prd:
+    blocking:
+      - field: artifact_id
+        message: "PRD must have artifact_id"
+        non_empty: true
+      - field: title
+        message: "PRD must have title"
+        non_empty: true
+      - field: status
+        message: "PRD must have status"
+        non_empty: true
+      - field: success_criteria
+        message: "PRD must define success criteria"
+        min_items: 1
+    non_blocking:
+      - field: stakeholders
+        message: "PRD should list stakeholders"
+      - field: complexity
+        message: "PRD should specify complexity level"
+
+design:
+  tdd:
+    blocking:
+      - field: artifact_id
+        message: "TDD must have artifact_id"
+        non_empty: true
+      - field: title
+        message: "TDD must have title"
+        non_empty: true
+      - field: status
+        message: "TDD must have status"
+        non_empty: true
+      - field: prd_ref
+        message: "TDD must reference a PRD"
+        non_empty: true
+      - field: implementation_plan
+        message: "TDD must have implementation plan"
+    non_blocking:
+      - field: components
+        message: "TDD should list components"
+      - field: dependencies
+        message: "TDD should document dependencies"
+  adr:
+    blocking:
+      - field: artifact_id
+        message: "ADR must have artifact_id"
+        non_empty: true
+      - field: title
+        message: "ADR must have title"
+        non_empty: true
+      - field: status
+        message: "ADR must have status"
+        non_empty: true
+      - field: date
+        message: "ADR must have date"
+        non_empty: true
+    non_blocking:
+      - field: context
+        message: "ADR should document context"
+      - field: consequences
+        message: "ADR should list consequences"
+
+implementation:
+  tdd:
+    blocking:
+      - field: artifact_id
+        message: "TDD must have artifact_id"
+        non_empty: true
+      - field: status
+        message: "TDD must have approved status for implementation"
+        non_empty: true
+    non_blocking:
+      - field: test_coverage
+        message: "TDD should specify test coverage requirements"
+
+validation:
+  test-plan:
+    blocking:
+      - field: artifact_id
+        message: "Test plan must have artifact_id"
+        non_empty: true
+      - field: title
+        message: "Test plan must have title"
+        non_empty: true
+      - field: status
+        message: "Test plan must have status"
+        non_empty: true
+    non_blocking:
+      - field: test_cases
+        message: "Test plan should define test cases"
+        min_items: 1
+      - field: coverage_targets
+        message: "Test plan should specify coverage targets"

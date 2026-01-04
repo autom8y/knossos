@@ -3,11 +3,9 @@
 package validation
 
 import (
-	"bytes"
 	"embed"
 	"encoding/json"
 	"fmt"
-	"io"
 	"regexp"
 	"strings"
 
@@ -28,19 +26,31 @@ type Validator struct {
 // embedLoader implements jsonschema.URLLoader for embedded files.
 type embedLoader struct{}
 
-func (l *embedLoader) Load(url string) (io.ReadCloser, error) {
+// Load loads a JSON schema from the embedded filesystem.
+// It decodes the JSON and returns the decoded value.
+func (l *embedLoader) Load(url string) (any, error) {
 	// URL format: embed:///schemas/name.json
 	path := strings.TrimPrefix(url, "embed:///")
 	data, err := schemaFS.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("schema not found: %s", path)
 	}
-	return io.NopCloser(bytes.NewReader(data)), nil
+
+	// Decode JSON
+	var v any
+	if err := json.Unmarshal(data, &v); err != nil {
+		return nil, fmt.Errorf("invalid JSON in schema %s: %w", path, err)
+	}
+
+	return v, nil
 }
 
 // NewValidator creates a new schema validator.
 func NewValidator() (*Validator, error) {
 	compiler := jsonschema.NewCompiler()
+
+	// Register the embed loader for embed:// URLs
+	compiler.UseLoader(&embedLoader{})
 
 	// Register all embedded schemas
 	entries, err := schemaFS.ReadDir("schemas")
@@ -58,8 +68,14 @@ func NewValidator() (*Validator, error) {
 			return nil, errors.Wrap(errors.CodeGeneralError, "failed to read schema: "+entry.Name(), err)
 		}
 
+		// Decode JSON for AddResource
+		var v any
+		if err := json.Unmarshal(data, &v); err != nil {
+			return nil, errors.Wrap(errors.CodeGeneralError, "invalid JSON in schema: "+entry.Name(), err)
+		}
+
 		url := "embed:///schemas/" + entry.Name()
-		if err := compiler.AddResource(url, bytes.NewReader(data)); err != nil {
+		if err := compiler.AddResource(url, v); err != nil {
 			return nil, errors.Wrap(errors.CodeGeneralError, "failed to add schema: "+entry.Name(), err)
 		}
 	}
@@ -76,10 +92,11 @@ func (v *Validator) getSchema(name string) (*jsonschema.Schema, error) {
 		return s, nil
 	}
 
-	url := fmt.Sprintf("embed:///schemas/%s.json", name)
+	url := fmt.Sprintf("embed:///schemas/%s.schema.json", name)
 	s, err := v.compiler.Compile(url)
 	if err != nil {
-		return nil, errors.Wrap(errors.CodeGeneralError, "failed to compile schema: "+name, err)
+		return nil, errors.NewWithDetails(errors.CodeGeneralError, "failed to compile schema: "+name,
+			map[string]interface{}{"url": url, "error": err.Error()})
 	}
 
 	v.schemas[name] = s

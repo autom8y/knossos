@@ -1,0 +1,4 @@
+{
+  "command": "git status",
+  "description": "Show working tree status"
+}

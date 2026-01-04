@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "embed:///schemas/test-plan.schema.json",
+  "title": "Test Plan Schema",
+  "description": "Schema for Test Plan YAML frontmatter",
+  "type": "object",
+
+  "required": [
+    "artifact_id",
+    "title",
+    "status"
+  ],
+
+  "properties": {
+    "artifact_id": {
+      "type": "string",
+      "pattern": "^(TEST|TP)-[a-z0-9-]+$",
+      "description": "Test Plan artifact identifier (TEST-* or TP-*)"
+    },
+    "test_id": {
+      "type": "string",
+      "pattern": "^(TEST|TP)-[a-z0-9-]+$",
+      "description": "Alias for artifact_id (deprecated, use artifact_id)"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "description": "Test plan title"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "in_review", "approved", "in_progress", "completed", "blocked"],
+      "description": "Current status of test plan"
+    },
+    "prd_ref": {
+      "$ref": "embed:///schemas/common.schema.json#/$defs/artifact_id_prd",
+      "description": "Reference to parent PRD"
+    },
+    "tdd_ref": {
+      "$ref": "embed:///schemas/common.schema.json#/$defs/artifact_id_tdd",
+      "description": "Reference to parent TDD"
+    },
+    "created_at": {
+      "$ref": "embed:///schemas/common.schema.json#/$defs/iso8601_timestamp"
+    },
+    "updated_at": {
+      "$ref": "embed:///schemas/common.schema.json#/$defs/iso8601_timestamp"
+    },
+    "author": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Document author (typically QA/Adversary agent)"
+    },
+    "test_cases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "description": { "type": "string" },
+          "priority": { "enum": ["high", "medium", "low"] },
+          "status": { "enum": ["pending", "pass", "fail", "skip"] }
+        }
+      },
+      "description": "Test case definitions"
+    },
+    "coverage": {
+      "type": "object",
+      "properties": {
+        "functional": { "type": "number", "minimum": 0, "maximum": 100 },
+        "integration": { "type": "number", "minimum": 0, "maximum": 100 },
+        "performance": { "type": "number", "minimum": 0, "maximum": 100 }
+      },
+      "description": "Test coverage percentages"
+    },
+    "environment": {
+      "type": "string",
+      "description": "Test environment requirements"
+    },
+    "schema_version": {
+      "$ref": "embed:///schemas/common.schema.json#/$defs/schema_version",
+      "default": "1.0"
+    }
+  },
+
+  "additionalProperties": true
+}

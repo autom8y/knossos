@@ -159,6 +159,11 @@ func (r *Resolver) TeamOrchestratorFile(teamName string) string {
 	return filepath.Join(r.TeamDir(teamName), "orchestrator.yaml")
 }
 
+// TeamContextFile returns the path to a team's context.yaml file.
+func (r *Resolver) TeamContextFile(teamName string) string {
+	return filepath.Join(r.TeamDir(teamName), "context.yaml")
+}
+
 // TransitionsLog returns the path to the global transitions log.
 func (r *Resolver) TransitionsLog() string {
 	return filepath.Join(r.AuditDir(), "transitions.log")

@@ -1,0 +1,22 @@
+---
+schema_version: "2.1"
+session_id: session-20260104-120000-abcd1234
+status: active
+created_at: "2026-01-04T12:00:00Z"
+initiative: Test Initiative
+complexity: medium
+active_team: ecosystem-pack
+current_phase: implementation
+---
+
+# Session: Test Initiative
+
+## Artifacts
+- PRD: complete
+- TDD: in-progress
+
+## Blockers
+None yet.
+
+## Next Steps
+1. Complete implementation

@@ -1,0 +1,175 @@
+// Package hook implements the ari hook commands.
+package hook
+
+import (
+	"os/exec"
+	"strings"
+	"time"
+
+	"github.com/spf13/cobra"
+
+	"github.com/autom8y/ariadne/internal/hook"
+	"github.com/autom8y/ariadne/internal/paths"
+	"github.com/autom8y/ariadne/internal/session"
+)
+
+// AutoparkOutput represents the output of the autopark hook.
+type AutoparkOutput struct {
+	SessionID      string `json:"session_id,omitempty"`
+	Status         string `json:"status,omitempty"`
+	PreviousStatus string `json:"previous_status,omitempty"`
+	AutoParkedAt   string `json:"auto_parked_at,omitempty"`
+	WasParked      bool   `json:"was_parked"`
+	Message        string `json:"message,omitempty"`
+}
+
+// Text implements output.Textable for text output.
+func (a AutoparkOutput) Text() string {
+	if !a.WasParked {
+		return a.Message
+	}
+	return "Session auto-parked: " + a.SessionID
+}
+
+// newAutoparkCmd creates the autopark hook subcommand.
+func newAutoparkCmd(ctx *cmdContext) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "autopark",
+		Short: "Auto-park session on Stop event",
+		Long: `Automatically transitions active sessions to PARKED on Claude Code Stop.
+
+This hook is triggered on Stop events. It:
+- Checks for an active session
+- Transitions from ACTIVE to PARKED if applicable
+- Records auto_parked_at timestamp
+- Gracefully no-ops if no active session
+
+Performance: <100ms target execution time.`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runAutopark(ctx)
+		},
+	}
+
+	return cmd
+}
+
+func runAutopark(ctx *cmdContext) error {
+	printer := ctx.getPrinter()
+
+	// Early exit if hooks disabled
+	if ctx.shouldEarlyExit() {
+		return outputNoPark(printer, "hooks disabled")
+	}
+
+	// Get hook environment
+	hookEnv := ctx.getHookEnv()
+
+	// Verify this is a Stop event (or allow for testing without event)
+	if hookEnv.Event != "" && hookEnv.Event != hook.EventStop {
+		printer.VerboseLog("debug", "skipping autopark hook for non-Stop event",
+			map[string]interface{}{"event": string(hookEnv.Event)})
+		return outputNoPark(printer, "not a Stop event")
+	}
+
+	// Get resolver for path lookups
+	resolver := ctx.getResolver()
+	if resolver.ProjectRoot() == "" {
+		// Try to discover project from environment
+		if hookEnv.ProjectDir != "" {
+			resolver = paths.NewResolver(hookEnv.ProjectDir)
+		} else {
+			return outputNoPark(printer, "no project context")
+		}
+	}
+
+	// Get current session ID
+	sessionID, err := ctx.getCurrentSessionID()
+	if err != nil {
+		printer.VerboseLog("warn", "failed to read current session", map[string]interface{}{"error": err.Error()})
+		return outputNoPark(printer, "no active session")
+	}
+
+	if sessionID == "" {
+		return outputNoPark(printer, "no active session")
+	}
+
+	// Trim any whitespace/newlines from session ID
+	sessionID = strings.TrimSpace(sessionID)
+
+	// Load session context
+	ctxPath := resolver.SessionContextFile(sessionID)
+	sessCtx, err := session.LoadContext(ctxPath)
+	if err != nil {
+		printer.VerboseLog("warn", "failed to load session context",
+			map[string]interface{}{"session_id": sessionID, "error": err.Error()})
+		return outputNoPark(printer, "could not load session")
+	}
+
+	// Only park if currently ACTIVE
+	if sessCtx.Status != session.StatusActive {
+		return outputNoPark(printer, "session not active (status: "+string(sessCtx.Status)+")")
+	}
+
+	// Validate transition using FSM
+	fsm := session.NewFSM()
+	if !fsm.CanTransition(sessCtx.Status, session.StatusParked) {
+		return outputNoPark(printer, "invalid transition from "+string(sessCtx.Status))
+	}
+
+	// Record previous status
+	previousStatus := sessCtx.Status
+
+	// Update session state
+	now := time.Now().UTC()
+	sessCtx.Status = session.StatusParked
+	sessCtx.ParkedAt = &now
+	sessCtx.ParkedReason = "auto-parked on Stop"
+
+	// Save session context
+	if err := sessCtx.Save(ctxPath); err != nil {
+		printer.VerboseLog("error", "failed to save session context",
+			map[string]interface{}{"session_id": sessionID, "error": err.Error()})
+		return outputNoPark(printer, "failed to save session")
+	}
+
+	// Log git status for audit purposes
+	gitStatus := getGitStatusQuick()
+	printer.VerboseLog("info", "session auto-parked", map[string]interface{}{
+		"session_id": sessionID,
+		"git_status": gitStatus,
+	})
+
+	// Build output
+	result := AutoparkOutput{
+		SessionID:      sessionID,
+		Status:         string(session.StatusParked),
+		PreviousStatus: string(previousStatus),
+		AutoParkedAt:   now.Format(time.RFC3339),
+		WasParked:      true,
+		Message:        "Session auto-parked",
+	}
+
+	return printer.Print(result)
+}
+
+// outputNoPark outputs a no-op response when parking didn't occur.
+func outputNoPark(printer interface{ Print(interface{}) error }, reason string) error {
+	result := AutoparkOutput{
+		WasParked: false,
+		Message:   reason,
+	}
+	return printer.Print(result)
+}
+
+// getGitStatusQuick returns a quick git status for logging.
+func getGitStatusQuick() string {
+	cmd := exec.Command("git", "status", "--short")
+	out, err := cmd.Output()
+	if err != nil {
+		return "unknown"
+	}
+	if strings.TrimSpace(string(out)) == "" {
+		return "clean"
+	}
+	return "uncommitted"
+}

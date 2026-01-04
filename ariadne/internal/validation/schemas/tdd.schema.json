@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "embed:///schemas/tdd.schema.json",
+  "title": "TDD Schema",
+  "description": "Schema for Technical Design Document YAML frontmatter",
+  "type": "object",
+
+  "required": [
+    "artifact_id",
+    "title",
+    "status",
+    "prd_ref"
+  ],
+
+  "properties": {
+    "artifact_id": {
+      "$ref": "embed:///schemas/common.schema.json#/$defs/artifact_id_tdd"
+    },
+    "tdd_id": {
+      "$ref": "embed:///schemas/common.schema.json#/$defs/artifact_id_tdd",
+      "description": "Alias for artifact_id (deprecated, use artifact_id)"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "description": "TDD title"
+    },
+    "status": {
+      "$ref": "embed:///schemas/common.schema.json#/$defs/workflow_status_enum"
+    },
+    "prd_ref": {
+      "$ref": "embed:///schemas/common.schema.json#/$defs/artifact_id_prd",
+      "description": "Reference to parent PRD"
+    },
+    "created_at": {
+      "$ref": "embed:///schemas/common.schema.json#/$defs/iso8601_timestamp"
+    },
+    "updated_at": {
+      "$ref": "embed:///schemas/common.schema.json#/$defs/iso8601_timestamp"
+    },
+    "author": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Document author"
+    },
+    "components": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "responsibility": { "type": "string" },
+          "owner": { "type": "string" }
+        }
+      },
+      "description": "Component breakdown"
+    },
+    "related_tdds": {
+      "type": "array",
+      "items": { "$ref": "embed:///schemas/common.schema.json#/$defs/artifact_id_tdd" },
+      "description": "Related TDD references"
+    },
+    "related_adrs": {
+      "type": "array",
+      "items": { "$ref": "embed:///schemas/common.schema.json#/$defs/artifact_id_adr" },
+      "description": "Related ADR references"
+    },
+    "schema_version": {
+      "$ref": "embed:///schemas/common.schema.json#/$defs/schema_version",
+      "default": "1.0"
+    }
+  },
+
+  "additionalProperties": true
+}

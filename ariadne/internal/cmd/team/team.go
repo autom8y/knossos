@@ -3,6 +3,7 @@ package team
 
 import (
 	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -37,6 +38,8 @@ func NewTeamCmd(outputFlag *string, verboseFlag *bool, projectDir *string) *cobr
 	cmd.AddCommand(newStatusCmd(ctx))
 	cmd.AddCommand(newSwitchCmd(ctx))
 	cmd.AddCommand(newValidateCmd(ctx))
+	cmd.AddCommand(newContextCmd(ctx))
+	cmd.AddCommand(newMigrateContextCmd(ctx))
 
 	return cmd
 }
@@ -90,5 +93,5 @@ func (c *cmdContext) getActiveTeam() string {
 	if err != nil {
 		return ""
 	}
-	return string(data)
+	return strings.TrimSpace(string(data))
 }

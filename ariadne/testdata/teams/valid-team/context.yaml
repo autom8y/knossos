@@ -1,0 +1,17 @@
+schema_version: "1.0"
+team_name: valid-team
+display_name: Valid Test Team
+description: A valid test team with multiple agents
+domain: testing
+
+context_rows:
+  - key: Status
+    value: Testing
+  - key: Environment
+    value: Test
+  - key: Coverage
+    value: Full
+
+metadata:
+  created_by: test
+  purpose: unit testing
