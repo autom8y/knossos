@@ -3,8 +3,8 @@ workflow_type: sequential
 description: Full development lifecycle (PRD → TDD → Code → QA)
 
 entry_point:
+  agent: requirements-analyst
   # Default entry point - can be overridden based on work type
-  default: requirements-analyst
 
   # Dynamic entry selection based on work type
   # Use --entry flag or specify work_type in session init
@@ -18,7 +18,7 @@ entry_point:
     hotfix: principal-engineer
 
   # Entry point artifacts by agent
-  artifacts:
+  artifact_templates:
     requirements-analyst:
       type: prd
       path_template: docs/requirements/PRD-{slug}.md

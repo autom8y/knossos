@@ -1,0 +1,12 @@
+name: minimal-team
+workflow_type: sequential
+description: A minimal test team
+
+entry_point:
+  agent: solo-agent
+
+phases:
+  - name: solo
+    agent: solo-agent
+    produces: solo-output
+    next: null

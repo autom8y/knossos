@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Agent Manifest",
+  "description": "Tracks installed agents and their sources",
+  "type": "object",
+  "required": ["version", "generated_at", "active_team", "agents"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Manifest schema version"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the manifest was last generated"
+    },
+    "active_team": {
+      "type": "string",
+      "description": "Currently active team pack"
+    },
+    "agents": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["source", "checksum", "installed_at"],
+        "properties": {
+          "source": {
+            "type": "string",
+            "enum": ["team", "project"],
+            "description": "Source of the agent"
+          },
+          "origin": {
+            "type": "string",
+            "description": "Team name if source is team"
+          },
+          "checksum": {
+            "type": "string",
+            "description": "File checksum for integrity"
+          },
+          "installed_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the agent was installed"
+          },
+          "orphaned": {
+            "type": "boolean",
+            "description": "Whether agent is orphaned"
+          }
+        }
+      },
+      "description": "Map of agent filename to entry"
+    },
+    "orphans": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of orphaned agent names"
+    }
+  }
+}

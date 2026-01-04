@@ -1,0 +1,104 @@
+package session
+
+import (
+	"time"
+
+	"github.com/spf13/cobra"
+
+	"github.com/autom8y/ariadne/internal/errors"
+	"github.com/autom8y/ariadne/internal/lock"
+	"github.com/autom8y/ariadne/internal/output"
+	"github.com/autom8y/ariadne/internal/session"
+)
+
+func newResumeCmd(ctx *cmdContext) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "resume",
+		Short: "Resume a parked session",
+		Long:  `Resumes a parked session (PARKED -> ACTIVE).`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runResume(ctx)
+		},
+	}
+
+	return cmd
+}
+
+func runResume(ctx *cmdContext) error {
+	printer := ctx.getPrinter()
+	resolver := ctx.getResolver()
+	lockMgr := ctx.getLockManager()
+	fsm := session.NewFSM()
+
+	sessionID, err := ctx.getSessionID()
+	if err != nil {
+		printer.PrintError(errors.Wrap(errors.CodeGeneralError, "failed to get session ID", err))
+		return err
+	}
+
+	if sessionID == "" {
+		err := errors.ErrSessionNotFound("")
+		printer.PrintError(err)
+		return err
+	}
+
+	// Acquire exclusive lock
+	sessionLock, err := lockMgr.Acquire(sessionID, lock.Exclusive, lock.DefaultTimeout)
+	if err != nil {
+		printer.PrintError(err)
+		return err
+	}
+	defer sessionLock.Release()
+
+	// Load session context
+	ctxPath := resolver.SessionContextFile(sessionID)
+	sessCtx, err := session.LoadContext(ctxPath)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			err = errors.ErrSessionNotFound(sessionID)
+		}
+		printer.PrintError(err)
+		return err
+	}
+
+	// Validate transition
+	if err := fsm.ValidateTransition(sessCtx.Status, session.StatusActive); err != nil {
+		printer.PrintError(err)
+		return err
+	}
+
+	// Update context
+	now := time.Now().UTC()
+	previousStatus := sessCtx.Status
+	sessCtx.Status = session.StatusActive
+	sessCtx.ResumedAt = &now
+	sessCtx.ParkedAt = nil
+	sessCtx.ParkedReason = ""
+
+	// Save context
+	if err := sessCtx.Save(ctxPath); err != nil {
+		printer.PrintError(err)
+		return err
+	}
+
+	// Set as current session
+	if err := ctx.setCurrentSessionID(sessionID); err != nil {
+		printer.VerboseLog("warn", "failed to set current session", map[string]interface{}{"error": err.Error()})
+	}
+
+	// Emit event
+	emitter := ctx.getEventEmitter(sessionID)
+	if err := emitter.EmitResumed(sessionID); err != nil {
+		printer.VerboseLog("warn", "failed to emit resume event", map[string]interface{}{"error": err.Error()})
+	}
+
+	// Output result
+	result := output.TransitionOutput{
+		SessionID:      sessionID,
+		Status:         string(session.StatusActive),
+		PreviousStatus: string(previousStatus),
+		ResumedAt:      now.Format(time.RFC3339),
+	}
+
+	return printer.PrintSuccess(result)
+}

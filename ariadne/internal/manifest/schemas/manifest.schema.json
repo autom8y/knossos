@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Claude Extension Manifest",
+  "description": "Project-level configuration for Claude Code workflows",
+  "type": "object",
+  "required": ["version"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+$",
+      "description": "Manifest schema version"
+    },
+    "project": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Project name"
+        },
+        "description": {
+          "type": "string",
+          "description": "Project description"
+        },
+        "repository": {
+          "type": "string",
+          "format": "uri",
+          "description": "Project repository URL"
+        }
+      }
+    },
+    "teams": {
+      "type": "object",
+      "properties": {
+        "default": {
+          "type": "string",
+          "description": "Default team pack name"
+        },
+        "available": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of available team pack names"
+        },
+        "discovery": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Paths to search for team packs"
+        }
+      }
+    },
+    "paths": {
+      "type": "object",
+      "properties": {
+        "sessions": {
+          "type": "string",
+          "description": "Path to sessions directory"
+        },
+        "agents": {
+          "type": "string",
+          "description": "Path to agents directory"
+        },
+        "skills": {
+          "type": "string",
+          "description": "Path to skills directory"
+        },
+        "hooks": {
+          "type": "string",
+          "description": "Path to hooks directory"
+        }
+      }
+    },
+    "schemas": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "Schema version overrides"
+    },
+    "settings": {
+      "type": "object",
+      "properties": {
+        "auto_park_on_stop": {
+          "type": "boolean",
+          "description": "Automatically park session on stop"
+        },
+        "require_session": {
+          "type": "boolean",
+          "description": "Require active session for operations"
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

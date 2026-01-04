@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "embed:///schemas/session-context.schema.json",
+  "title": "SESSION_CONTEXT Schema",
+  "description": "Schema for SESSION_CONTEXT.md YAML frontmatter (v2.1)",
+  "type": "object",
+
+  "required": [
+    "session_id",
+    "status",
+    "created_at",
+    "initiative",
+    "complexity",
+    "active_team",
+    "current_phase"
+  ],
+
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+(\\.[0-9]+)?$",
+      "default": "2.1",
+      "description": "Schema version (e.g., 2.1)"
+    },
+    "session_id": {
+      "type": "string",
+      "pattern": "^session-[0-9]{8}-[0-9]{6}-[a-f0-9]{8}$",
+      "description": "Session identifier (e.g., session-20260104-160414-563c681e)"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["ACTIVE", "PARKED", "ARCHIVED"],
+      "description": "Current session status (canonical field)"
+    },
+    "created_at": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?(Z|[+-][0-9]{2}:[0-9]{2})?$",
+      "description": "ISO 8601 timestamp"
+    },
+    "initiative": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Initiative or feature being worked on"
+    },
+    "complexity": {
+      "type": "string",
+      "enum": ["PATCH", "MODULE", "SYSTEM", "INITIATIVE", "MIGRATION"],
+      "description": "Work complexity level"
+    },
+    "active_team": {
+      "type": "string",
+      "description": "Active team pack name"
+    },
+    "team": {
+      "oneOf": [
+        {"type": "string"},
+        {"type": "null"}
+      ],
+      "description": "Team pack name (null for cross-cutting sessions)"
+    },
+    "current_phase": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Current workflow phase"
+    },
+    "parked_at": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?(Z|[+-][0-9]{2}:[0-9]{2})?$",
+      "description": "Timestamp when session was parked"
+    },
+    "parked_reason": {
+      "type": "string",
+      "description": "Reason for parking the session"
+    },
+    "archived_at": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?(Z|[+-][0-9]{2}:[0-9]{2})?$",
+      "description": "Timestamp when session was archived"
+    },
+    "resumed_at": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?(Z|[+-][0-9]{2}:[0-9]{2})?$",
+      "description": "Timestamp when session was last resumed"
+    }
+  },
+
+  "additionalProperties": true
+}

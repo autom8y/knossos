@@ -1,0 +1,17 @@
+name: valid-team
+workflow_type: sequential
+description: A valid test team with multiple agents
+
+entry_point:
+  agent: agent-a
+
+phases:
+  - name: phase1
+    agent: agent-a
+    produces: output-a
+    next: phase2
+
+  - name: phase2
+    agent: agent-b
+    produces: output-b
+    next: null
