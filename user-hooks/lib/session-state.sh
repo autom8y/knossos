@@ -164,7 +164,7 @@ validate_session_context() {
 # Returns: 0 if valid format, 1 if invalid
 validate_session_id_format() {
     local session_id="$1"
-    [[ "$session_id" =~ ^session-[0-9]{8}-[0-9]{6}-[a-f0-9]{8}$ ]]
+    [[ "$session_id" =~ ^session-.+ ]]
 }
 
 # =============================================================================

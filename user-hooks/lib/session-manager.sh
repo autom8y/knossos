@@ -298,14 +298,29 @@ cmd_create() {
     mkdir -p "$SESSIONS_DIR" 2>/dev/null
     while ! mkdir "$lockfile" 2>/dev/null; do
         if [ $waited -ge $lock_timeout ]; then
-            echo '{"success": false, "error": "Timeout waiting for session lock"}' >&2
+            # Timeout waiting for lock - check if it's stale
+            if [[ -f "$lockfile/pid" ]]; then
+                local lock_pid
+                lock_pid=$(cat "$lockfile/pid" 2>/dev/null)
+                if [[ -n "$lock_pid" ]] && ! kill -0 "$lock_pid" 2>/dev/null; then
+                    # Process is dead, stale lock detected
+                    rm -rf "$lockfile" 2>/dev/null
+                    # Retry lock acquisition
+                    if mkdir "$lockfile" 2>/dev/null; then
+                        break
+                    fi
+                fi
+            fi
+            # Still can't acquire, return error
+            echo '{"success": false, "error": "Timeout waiting for session lock (stale lock cleanup failed)"}' >&2
             exit 1
         fi
         sleep 1
-        ((waited++))
+        ((waited++)) || true
     done
-    # Ensure lock is released on exit (use double quotes to expand lockfile now)
-    trap "rm -rf '$lockfile'" EXIT
+    # FIXED: Use proper trap quoting + store PID for stale detection
+    trap "rm -rf \"$lockfile\"" EXIT INT TERM
+    echo "$$" > "$lockfile/pid"
 
     # Validate no existing session
     if has_session; then
@@ -340,6 +355,12 @@ EOF
     fi
 
     local session_dir="$SESSIONS_DIR/$session_id"
+
+    # FIXED (LOCK-001, RACE-001): Post-creation verification
+    if [[ ! -d "$session_dir" ]] || [[ ! -f "$session_dir/SESSION_CONTEXT.md" ]]; then
+        echo '{"success": false, "error": "Session creation failed: directory or context file missing"}' >&2
+        exit 1
+    fi
 
     # Set as current session (file-based, stable across CLI invocations)
     if ! set_current_session "$session_id"; then

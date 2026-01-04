@@ -70,7 +70,7 @@ _get_field_with_spaces() {
     grep -m1 "^${field}:" "$file" 2>/dev/null | cut -d: -f2- | sed 's/^ *//; s/^"//; s/"$//' || true
 }
 
-# Check if file is v1 schema (missing schema_version or not 2.0)
+# Check if file is v1 schema (missing schema_version or not 2.0/2.1)
 _is_v1_session() {
     local ctx_file="$1"
 
@@ -81,7 +81,7 @@ _is_v1_session() {
     local version
     version=$(_get_field "$ctx_file" "schema_version")
 
-    [[ -z "$version" || "$version" != "2.0" ]]
+    [[ -z "$version" || ("$version" != "2.0" && "$version" != "2.1") ]]
 }
 
 # =============================================================================
@@ -215,22 +215,38 @@ _extract_park_metadata_to_events() {
     fi
 }
 
-# Transform v1 context file to v2 schema
+# Transform v1 context file to v2.1 schema
 _transform_to_v2() {
     local ctx_file="$1"
     local new_status="$2"
     local temp_file="${ctx_file}.tmp.$$"
 
+    # Determine team value from active_team field
+    local active_team
+    active_team=$(_get_field "$ctx_file" "active_team")
+    local team_value="null"
+    if [[ -n "$active_team" && "$active_team" != "none" ]]; then
+        team_value="\"$active_team\""
+    fi
+
+    # Check for auto_parked_at to merge
+    local auto_parked_at
+    auto_parked_at=$(_get_field "$ctx_file" "auto_parked_at")
+    local has_parked_at
+    has_parked_at=$(grep -c "^parked_at:" "$ctx_file" 2>/dev/null || echo "0")
+
     # Use awk to process the file:
-    # - Add schema_version and status fields
+    # - Add schema_version (2.1), status, and team fields
+    # - Merge auto_parked_at into parked_at if needed
     # - Remove legacy fields
     # - Preserve body content
-    awk -v status="$new_status" '
+    awk -v status="$new_status" -v team="$team_value" -v auto_ts="$auto_parked_at" -v has_parked="$has_parked_at" '
     BEGIN {
         in_frontmatter = 0
         frontmatter_count = 0
         version_written = 0
         status_written = 0
+        team_written = 0
     }
 
     /^---$/ {
@@ -241,9 +257,15 @@ _transform_to_v2() {
             next
         }
         if (frontmatter_count == 2) {
-            # Add v2 fields before closing ---
-            if (!version_written) print "schema_version: \"2.0\""
+            # Add v2.1 fields before closing ---
+            if (!version_written) print "schema_version: \"2.1\""
             if (!status_written) print "status: \"" status "\""
+            if (!team_written) print "team: " team
+            # If auto_parked_at exists and no parked_at, merge it
+            if (auto_ts != "" && has_parked == "0") {
+                print "parked_at: \"" auto_ts "\""
+                print "parked_auto: true"
+            }
             in_frontmatter = 0
             print
             next
@@ -253,10 +275,7 @@ _transform_to_v2() {
     in_frontmatter {
         # Skip legacy fields that are being removed
         if (/^session_state:/) next
-        if (/^parked_at:/) next
         if (/^auto_parked_at:/) next
-        if (/^park_reason:/) next
-        if (/^parked_reason:/) next
         if (/^auto_parked_reason:/) next
         if (/^git_status_at_park:/) next
         if (/^parked_git_status:/) next
@@ -264,6 +283,7 @@ _transform_to_v2() {
         # Track if we see existing v2 fields
         if (/^schema_version:/) { version_written = 1 }
         if (/^status:/) { status_written = 1 }
+        if (/^team:/) { team_written = 1 }
     }
 
     { print }
@@ -278,15 +298,15 @@ _transform_to_v2() {
     fi
 }
 
-# Validate migrated session meets v2 requirements
+# Validate migrated session meets v2.1 requirements
 _validate_migrated_session() {
     local ctx_file="$1"
 
-    # Check schema_version is 2.0
+    # Check schema_version is 2.0 or 2.1
     local version
     version=$(_get_field "$ctx_file" "schema_version")
-    if [[ "$version" != "2.0" ]]; then
-        _log_error "Missing schema_version: 2.0"
+    if [[ "$version" != "2.0" && "$version" != "2.1" ]]; then
+        _log_error "Missing schema_version: 2.0 or 2.1"
         return 1
     fi
 
@@ -302,7 +322,7 @@ _validate_migrated_session() {
             ;;
     esac
 
-    # Check required fields
+    # Check required fields (team is optional for v2.1)
     local required_fields=("session_id" "created_at" "initiative" "complexity" "active_team" "current_phase")
     for field in "${required_fields[@]}"; do
         if ! grep -q "^${field}:" "$ctx_file" 2>/dev/null; then
@@ -322,13 +342,13 @@ _emit_migration_event() {
     local timestamp
     timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
-    local event="{\"timestamp\":\"$timestamp\",\"event\":\"SCHEMA_MIGRATED\",\"from_version\":\"1.0\",\"to_version\":\"2.0\",\"derived_status\":\"$new_status\"}"
+    local event="{\"timestamp\":\"$timestamp\",\"event\":\"SCHEMA_MIGRATED\",\"from_version\":\"1.0\",\"to_version\":\"2.1\",\"derived_status\":\"$new_status\"}"
     echo "$event" >> "$events_file"
 
     # Also log to audit trail
     local audit_dir="$SESSIONS_DIR/.audit"
     mkdir -p "$audit_dir" 2>/dev/null
-    echo "$timestamp | MIGRATE | $session_id | v1 -> v2 | status=$new_status" >> "$audit_dir/migrations.log"
+    echo "$timestamp | MIGRATE | $session_id | v1 -> v2.1 | status=$new_status" >> "$audit_dir/migrations.log"
 }
 
 # =============================================================================
@@ -482,7 +502,7 @@ _report_single_status() {
     [[ -f "$backup_file" ]] && has_backup="true"
 
     local schema="v1"
-    [[ "$version" == "2.0" ]] && schema="v2"
+    [[ "$version" == "2.0" || "$version" == "2.1" ]] && schema="v2"
 
     cat <<EOF
 {
@@ -592,16 +612,16 @@ Examples:
   ./session-migrate.sh rollback --batch
 
 Migration Details:
-  v1 -> v2 Field Changes:
-    - Adds: schema_version: "2.0", status: "{ACTIVE|PARKED|ARCHIVED}"
-    - Removes: session_state, parked_at, auto_parked_at, park_reason,
-               parked_reason, auto_parked_reason, git_status_at_park,
-               parked_git_status
-    - Preserves: All other fields and body content
+  v1 -> v2.1 Field Changes:
+    - Adds: schema_version: "2.1", status: "{ACTIVE|PARKED|ARCHIVED}", team: {value|null}
+    - Removes: session_state, auto_parked_at, auto_parked_reason,
+               git_status_at_park, parked_git_status
+    - Merges: auto_parked_at → parked_at (with parked_auto: true)
+    - Preserves: All other fields (including parked_at, parked_reason) and body content
     - Creates: events.jsonl with park events (if applicable)
     - Creates: SESSION_CONTEXT.md.v1.backup
 
-  State Derivation (v1 -> v2):
+  State Derivation (v1 -> v2.1):
     - completed_at present -> ARCHIVED
     - parked_at or auto_parked_at present -> PARKED
     - Neither -> ACTIVE

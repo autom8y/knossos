@@ -29,6 +29,11 @@ FILE_PATH="${CLAUDE_HOOK_FILE_PATH:-}"
 # Early exit: Not a context file
 [[ ! "$FILE_PATH" =~ _CONTEXT\.md$ ]] && exit 0
 
+# FIXED (state-mate Bypass): Allow state-mate to write via environment marker
+if [[ "${STATE_MATE_BYPASS:-}" == "true" ]]; then
+    exit 0  # Allow write
+fi
+
 # =============================================================================
 # FULL INITIALIZATION (only for Write/Edit to *_CONTEXT.md)
 # =============================================================================
