@@ -548,7 +548,7 @@ process_copy_replace() {
                 ;;
             "$CLASSIFY_CONFLICT")
                 sync_log_warning "Conflict: $item (local modified, roster updated)"
-                ((conflicts++))
+                ((conflicts++)) || true
 
                 # Use resolve_conflict which handles backup and optional force
                 resolve_conflict "$roster_file" "$local_file" "$item" "$force"
@@ -597,7 +597,7 @@ process_merge_items() {
         # Dispatch to appropriate merge strategy
         if ! dispatch_merge_strategy "$strategy" "$roster_file" "$local_file" "$local_file"; then
             sync_log_error "Merge failed: $file"
-            ((errors++))
+            ((errors++)) || true
             continue
         fi
 

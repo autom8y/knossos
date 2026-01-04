@@ -379,7 +379,7 @@ validate_claude_md() {
 
     if ! grep -q "^# CLAUDE.md" "$file" 2>/dev/null; then
         sync_log_warning "CLAUDE.md missing title header"
-        ((missing++))
+        ((missing++)) || true
     fi
 
     # Check markers are properly closed

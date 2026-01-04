@@ -316,7 +316,7 @@ validate_manifest() {
     version=$(echo "$manifest" | jq -r '.schema_version // 1')
     if [[ "$version" -lt 1 || "$version" -gt 3 ]]; then
         sync_log_error "Invalid schema version: $version"
-        ((errors++))
+        ((errors++)) || true
     fi
 
     # Check required fields based on version
@@ -326,12 +326,12 @@ validate_manifest() {
             roster_path=$(echo "$manifest" | jq -r '.roster.path // empty')
             if [[ -z "$roster_path" ]]; then
                 sync_log_warning "Missing roster.path"
-                ((warnings++))
+                ((warnings++)) || true
             fi
             ;;
         1|2)
             sync_log_warning "Schema version $version - consider migrating to v3"
-            ((warnings++))
+            ((warnings++)) || true
             ;;
     esac
 
@@ -345,7 +345,7 @@ validate_manifest() {
 
         if [[ ! -f "$file_path" ]]; then
             sync_log_warning "Managed file missing: $file_path"
-            ((warnings++))
+            ((warnings++)) || true
             continue
         fi
 

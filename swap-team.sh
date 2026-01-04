@@ -1307,7 +1307,7 @@ prompt_disposition() {
     local idx=1
     for orphan in "${ORPHAN_AGENTS[@]}"; do
         echo "  $idx. $(format_orphan "$orphan")"
-        ((idx++))
+        ((idx++)) || true
     done
 
     echo ""
@@ -1953,7 +1953,7 @@ check_user_command_collisions() {
         # Check if user command with same name exists
         if [[ -f "$HOME/.claude/commands/$cmd_name" ]]; then
             collisions+=("$cmd_name")
-            ((collision_count++))
+            ((collision_count++)) || true
         fi
     done
 
@@ -2393,7 +2393,7 @@ cleanup_orphan_backups() {
             local old_backup="${backup_dirs[$i]}"
             if [[ -d "$old_backup" ]]; then
                 rm -rf "$old_backup"
-                ((cleaned_count++))
+                ((cleaned_count++)) || true
                 log_debug "Removed old backup: $(basename "$old_backup")"
             fi
         done
