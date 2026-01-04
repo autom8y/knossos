@@ -597,7 +597,7 @@ fsm_transition() {
     fi
 
     # Create backup
-    local backup_file="${ctx_file}.backup"
+    local backup_file="${ctx_file}.backup.$$"
     if [[ -f "$ctx_file" ]]; then
         cp "$ctx_file" "$backup_file"
     fi
