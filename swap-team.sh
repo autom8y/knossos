@@ -3217,12 +3217,13 @@ perform_swap() {
     mark_commit_step "$COMMIT_STEP_ACTIVE_TEAM"
 
     # Update CEM manifest team section (critical for roster-sync staleness tracking)
-    # This must succeed before completing the transaction
+    # Note: This is after point-of-no-return, so failure cannot trigger rollback
+    # Instead, log warning and continue - CEM staleness is recoverable via roster-sync
     if ! update_cem_manifest_team "$team_name"; then
-        log_error "Failed to update CEM manifest team section"
-        update_journal_error "CEM manifest update failed"
-        rollback_swap
-        exit "$EXIT_SWAP_FAILURE"
+        log_warning "Failed to update CEM manifest team section"
+        log_warning "CEM manifest may be stale - run roster-sync to update"
+        # Cannot rollback - we're past point-of-no-return (ACTIVE_TEAM written)
+        # Continue with swap completion - CEM staleness is recoverable
     fi
     mark_commit_step "$COMMIT_STEP_CEM_MANIFEST"
 
