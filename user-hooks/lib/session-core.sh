@@ -74,8 +74,8 @@ set_current_session() {
         return 1
     fi
 
-    # Validate session ID format
-    if [[ ! "$session_id" =~ ^session-[0-9]{8}-[0-9]{6}-[a-f0-9]{8}$ ]]; then
+    # Validate session ID format (relaxed to allow extended formats)
+    if [[ ! "$session_id" =~ ^session-.+ ]]; then
         echo "Error: Invalid session_id format: $session_id" >&2
         return 1
     fi
@@ -121,8 +121,8 @@ get_current_session() {
         return 0
     fi
 
-    # Validate format
-    if [[ ! "$session_id" =~ ^session-[0-9]{8}-[0-9]{6}-[a-f0-9]{8}$ ]]; then
+    # Validate format (relaxed to allow extended formats)
+    if [[ ! "$session_id" =~ ^session-.+ ]]; then
         # Invalid format - clear stale file
         rm -f "$current_file" 2>/dev/null
         echo ""
