@@ -3729,6 +3729,17 @@ main() {
         exit "$EXIT_SUCCESS"
     fi
 
+    # Handle --auto-recover mode (takes precedence for recovery)
+    if [[ "$AUTO_RECOVER" -eq 1 ]] && [[ -z "$team_name" ]]; then
+        if [[ ! -f "$JOURNAL_FILE" ]]; then
+            log "No interrupted swap detected. State is clean."
+            exit "$EXIT_SUCCESS"
+        fi
+        # Trigger recovery with auto-recover flag enabled
+        check_journal_recovery
+        exit "$EXIT_SUCCESS"
+    fi
+
     # Handle the command
     if [[ -z "$team_name" ]]; then
         if [[ "$UPDATE_MODE" -eq 1 ]]; then
