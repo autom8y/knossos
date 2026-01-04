@@ -305,7 +305,7 @@ cmd_create() {
         ((waited++))
     done
     # Ensure lock is released on exit (use double quotes to expand lockfile now)
-    trap "rm -rf '$lockfile'" EXIT
+    trap "rm -rf \"$lockfile\"" EXIT
 
     # Validate no existing session
     if has_session; then
