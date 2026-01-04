@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
+	"github.com/autom8y/ariadne/internal/cmd/artifact"
 	"github.com/autom8y/ariadne/internal/cmd/handoff"
 	"github.com/autom8y/ariadne/internal/cmd/hook"
 	"github.com/autom8y/ariadne/internal/cmd/manifest"
@@ -111,6 +112,7 @@ func init() {
 	rootCmd.AddCommand(handoff.NewHandoffCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir, &globalOpts.SessionID))
 	rootCmd.AddCommand(worktree.NewWorktreeCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
 	rootCmd.AddCommand(hook.NewHookCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir, &globalOpts.SessionID))
+	rootCmd.AddCommand(artifact.NewArtifactCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir, &globalOpts.SessionID))
 	rootCmd.AddCommand(versionCmd)
 }
 
@@ -205,6 +207,10 @@ func needsProject(cmd *cobra.Command) bool {
 	}
 	if cmd.Name() == "hook" {
 		return false
+	}
+	// All artifact commands need project
+	if cmd.Parent() != nil && cmd.Parent().Name() == "artifact" {
+		return true
 	}
 	return true
 }

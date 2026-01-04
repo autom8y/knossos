@@ -12,14 +12,15 @@ const FeatureFlagEnvVar = "USE_ARI_HOOKS"
 
 // Claude Code hook environment variable names.
 const (
-	EnvHookEvent     = "CLAUDE_HOOK_EVENT"      // Hook event type (PreToolUse, PostToolUse, etc.)
-	EnvToolName      = "CLAUDE_TOOL_NAME"       // Name of the tool being used
-	EnvToolInput     = "CLAUDE_TOOL_INPUT"      // JSON input to the tool
-	EnvSessionID     = "CLAUDE_SESSION_ID"      // Claude session identifier
-	EnvProjectDir    = "CLAUDE_PROJECT_DIR"     // Project root directory
-	EnvConversation  = "CLAUDE_CONVERSATION_ID" // Conversation identifier
-	EnvUserMessage   = "CLAUDE_USER_MESSAGE"    // User message that triggered the action
-	EnvAssistantText = "CLAUDE_ASSISTANT_TEXT"  // Assistant response text
+	EnvHookEvent     = "CLAUDE_HOOK_EVENT"       // Hook event type (PreToolUse, PostToolUse, etc.)
+	EnvToolName      = "CLAUDE_TOOL_NAME"        // Name of the tool being used
+	EnvToolInput     = "CLAUDE_TOOL_INPUT"       // JSON input to the tool
+	EnvToolResult    = "CLAUDE_HOOK_TOOL_RESULT" // Tool result/output (PostToolUse only)
+	EnvSessionID     = "CLAUDE_SESSION_ID"       // Claude session identifier
+	EnvProjectDir    = "CLAUDE_PROJECT_DIR"      // Project root directory
+	EnvConversation  = "CLAUDE_CONVERSATION_ID"  // Conversation identifier
+	EnvUserMessage   = "CLAUDE_USER_MESSAGE"     // User message that triggered the action
+	EnvAssistantText = "CLAUDE_ASSISTANT_TEXT"   // Assistant response text
 )
 
 // HookEvent represents the type of hook event.
@@ -40,8 +41,9 @@ type Env struct {
 	Event HookEvent
 
 	// Tool information (for PreToolUse/PostToolUse)
-	ToolName  string
-	ToolInput string
+	ToolName   string
+	ToolInput  string
+	ToolResult string // Tool output/result (PostToolUse only)
 
 	// Session context
 	SessionID      string
@@ -59,6 +61,7 @@ func ParseEnv() *Env {
 		Event:          HookEvent(os.Getenv(EnvHookEvent)),
 		ToolName:       os.Getenv(EnvToolName),
 		ToolInput:      os.Getenv(EnvToolInput),
+		ToolResult:     os.Getenv(EnvToolResult),
 		SessionID:      os.Getenv(EnvSessionID),
 		ProjectDir:     os.Getenv(EnvProjectDir),
 		ConversationID: os.Getenv(EnvConversation),

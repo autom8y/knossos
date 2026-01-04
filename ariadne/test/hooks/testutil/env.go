@@ -18,6 +18,7 @@ type HookEnv struct {
 	Event          string
 	ToolName       string
 	ToolInput      string
+	ToolResult     string // Tool result/output (PostToolUse only)
 	SessionID      string
 	ProjectDir     string
 	ConversationID string
@@ -38,14 +39,15 @@ func SetupEnv(t *testing.T, env *HookEnv) *EnvSetup {
 
 	// Capture and set each environment variable
 	vars := map[string]string{
-		"CLAUDE_HOOK_EVENT":      env.Event,
-		"CLAUDE_TOOL_NAME":       env.ToolName,
-		"CLAUDE_TOOL_INPUT":      env.ToolInput,
-		"CLAUDE_SESSION_ID":      env.SessionID,
-		"CLAUDE_PROJECT_DIR":     env.ProjectDir,
-		"CLAUDE_CONVERSATION_ID": env.ConversationID,
-		"CLAUDE_USER_MESSAGE":    env.UserMessage,
-		"CLAUDE_ASSISTANT_TEXT":  env.AssistantText,
+		"CLAUDE_HOOK_EVENT":       env.Event,
+		"CLAUDE_TOOL_NAME":        env.ToolName,
+		"CLAUDE_TOOL_INPUT":       env.ToolInput,
+		"CLAUDE_HOOK_TOOL_RESULT": env.ToolResult,
+		"CLAUDE_SESSION_ID":       env.SessionID,
+		"CLAUDE_PROJECT_DIR":      env.ProjectDir,
+		"CLAUDE_CONVERSATION_ID":  env.ConversationID,
+		"CLAUDE_USER_MESSAGE":     env.UserMessage,
+		"CLAUDE_ASSISTANT_TEXT":   env.AssistantText,
 	}
 
 	if env.UseAriHooks {
@@ -154,6 +156,12 @@ func (h HookEnv) WithSession(sessionID, projectDir string) HookEnv {
 // WithToolInput sets the tool input JSON.
 func (h HookEnv) WithToolInput(input string) HookEnv {
 	h.ToolInput = input
+	return h
+}
+
+// WithToolResult sets the tool result output.
+func (h HookEnv) WithToolResult(result string) HookEnv {
+	h.ToolResult = result
 	return h
 }
 

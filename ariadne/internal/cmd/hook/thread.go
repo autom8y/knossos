@@ -115,6 +115,21 @@ func runThread(ctx *cmdContext) error {
 		return outputNotRecorded(printer, "write failed: "+err.Error())
 	}
 
+	// Check if this is an orchestrator Task completion and record throughline stamp
+	if hookEnv.ToolName == "Task" && hookEnv.ToolResult != "" {
+		if throughline := threadcontract.ExtractThroughline(hookEnv.ToolResult); throughline != nil {
+			// Record decision stamp (fail silently - don't break hook if stamp fails)
+			if err := threadcontract.RecordStamp(sessionDir, throughline.Decision, throughline.Rationale, nil); err != nil {
+				printer.VerboseLog("warn", "failed to record orchestrator stamp",
+					map[string]interface{}{"error": err.Error()})
+				// Continue - stamp failure is not critical
+			} else {
+				printer.VerboseLog("debug", "recorded orchestrator decision stamp",
+					map[string]interface{}{"decision": throughline.Decision})
+			}
+		}
+	}
+
 	// Check triggers after recording
 	eventsPath := threadcontract.GetEventsPath(sessionDir)
 	triggerConfig := threadcontract.DefaultTriggerConfig()
@@ -217,6 +232,21 @@ func runThreadWithPrinter(ctx *cmdContext, printer *output.Printer) error {
 		printer.VerboseLog("error", "failed to record tool event",
 			map[string]interface{}{"error": err.Error()})
 		return outputNotRecordedWithPrinter(printer, "write failed: "+err.Error())
+	}
+
+	// Check if this is an orchestrator Task completion and record throughline stamp
+	if hookEnv.ToolName == "Task" && hookEnv.ToolResult != "" {
+		if throughline := threadcontract.ExtractThroughline(hookEnv.ToolResult); throughline != nil {
+			// Record decision stamp (fail silently - don't break hook if stamp fails)
+			if err := threadcontract.RecordStamp(sessionDir, throughline.Decision, throughline.Rationale, nil); err != nil {
+				printer.VerboseLog("warn", "failed to record orchestrator stamp",
+					map[string]interface{}{"error": err.Error()})
+				// Continue - stamp failure is not critical
+			} else {
+				printer.VerboseLog("debug", "recorded orchestrator decision stamp",
+					map[string]interface{}{"decision": throughline.Decision})
+			}
+		}
 	}
 
 	// Check triggers after recording
