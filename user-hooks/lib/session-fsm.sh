@@ -79,20 +79,19 @@ _fsm_lock_shared() {
 
     if command -v flock >/dev/null 2>&1; then
         # flock supports shared locks (-s)
-        # Use a unique file descriptor per session
+        # Use automatic FD allocation (bash 4.1+) - FIXED (LOCK-003)
         local fd
-        fd=$((200 + $(echo "$session_id" | cksum | cut -d' ' -f1) % 50))
-
-        # Create lock file if needed
-        eval "exec $fd>\"$lock_file\""
-        if flock -s -w "$timeout" "$fd" 2>/dev/null; then
-            # Store fd for later release
-            _FSM_LOCK_FDS["$session_id"]="$fd"
-            return 0
-        else
-            eval "exec $fd>&-" 2>/dev/null || true
-            return 1
+        if exec {fd}>"$lock_file" 2>/dev/null; then
+            if flock -s -w "$timeout" "$fd" 2>/dev/null; then
+                # Store fd for later release
+                _FSM_LOCK_FDS["$session_id"]="$fd"
+                return 0
+            else
+                exec {fd}>&- 2>/dev/null || true
+                return 1
+            fi
         fi
+        return 1
     else
         # Fallback: mkdir-based locking doesn't support shared mode
         # Treat shared as exclusive (conservative but correct)
@@ -117,20 +116,20 @@ _fsm_lock_exclusive() {
 
     if command -v flock >/dev/null 2>&1; then
         # Use flock for exclusive lock (-x)
+        # Use automatic FD allocation (bash 4.1+) - FIXED (LOCK-003)
         local fd
-        fd=$((200 + $(echo "$session_id" | cksum | cut -d' ' -f1) % 50))
-
-        # Create lock file if needed
-        eval "exec $fd>\"$lock_file\""
-        if flock -x -w "$timeout" "$fd" 2>/dev/null; then
-            # Write PID to lock file for debugging
-            echo "$$" >&"$fd"
-            _FSM_LOCK_FDS["$session_id"]="$fd"
-            return 0
-        else
-            eval "exec $fd>&-" 2>/dev/null || true
-            return 1
+        if exec {fd}>"$lock_file" 2>/dev/null; then
+            if flock -x -w "$timeout" "$fd" 2>/dev/null; then
+                # Write PID to lock file for debugging
+                echo "$$" >&"$fd"
+                _FSM_LOCK_FDS["$session_id"]="$fd"
+                return 0
+            else
+                exec {fd}>&- 2>/dev/null || true
+                return 1
+            fi
         fi
+        return 1
     else
         # Fallback: mkdir-based locking (portable)
         local elapsed=0

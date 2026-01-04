@@ -90,11 +90,34 @@ set_current_session() {
         return 1
     }
 
-    # Write atomically using existing atomic_write function
-    if ! atomic_write "$current_file" "$session_id"; then
+    # FIXED (STATE-001): Handle case where .current-session is a directory
+    if [[ -d "$current_file" ]]; then
+        # This is an error state - remove the directory
+        rm -rf "$current_file" 2>/dev/null || {
+            echo "Error: .current-session is a directory and cannot be removed" >&2
+            return 1
+        }
+    fi
+
+    # FIXED (STATE-001): Use atomic file replacement with mv -f
+    local temp_file
+    temp_file=$(mktemp "$sessions_dir/.current-session.XXXXXX") || {
+        echo "Error: Cannot create temp file" >&2
+        return 1
+    }
+
+    printf '%s' "$session_id" > "$temp_file" || {
+        rm -f "$temp_file"
+        echo "Error: Cannot write to temp file" >&2
+        return 1
+    }
+
+    # Use mv -f to force replacement
+    mv -f "$temp_file" "$current_file" || {
+        rm -f "$temp_file"
         echo "Error: Failed to write current session file" >&2
         return 1
-    fi
+    }
 
     return 0
 }

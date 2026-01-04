@@ -305,7 +305,7 @@ cmd_create() {
         ((waited++))
     done
     # Ensure lock is released on exit (use double quotes to expand lockfile now)
-    trap "rm -rf \"$lockfile\"" EXIT
+    trap "rm -rf \"$lockfile\"" EXIT INT TERM
 
     # Validate no existing session
     if has_session; then
@@ -340,6 +340,12 @@ EOF
     fi
 
     local session_dir="$SESSIONS_DIR/$session_id"
+
+    # FIXED (LOCK-001, RACE-001): Post-creation verification
+    if [[ ! -d "$session_dir" ]] || [[ ! -f "$session_dir/SESSION_CONTEXT.md" ]]; then
+        echo '{"success": false, "error": "Session creation failed: directory or context file missing"}' >&2
+        exit 1
+    fi
 
     # Set as current session (file-based, stable across CLI invocations)
     if ! set_current_session "$session_id"; then
