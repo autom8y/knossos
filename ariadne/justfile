@@ -1,5 +1,12 @@
 # Ariadne build automation
 # Use: just <recipe>
+#
+# NOTE: CGO_ENABLED=0 is required for all build/test commands to avoid
+# macOS dyld issues (missing LC_UUID load command) that cause test binaries
+# to abort. This is a known Go/macOS compatibility issue with CGO-linked
+# test binaries. Linux CI runs without this limitation.
+#
+# See: .github/workflows/ariadne-tests.yml for CI configuration
 
 # Default recipe - build the binary
 default: build

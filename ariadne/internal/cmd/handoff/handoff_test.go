@@ -1035,3 +1035,1119 @@ func readEventsFile(path string) ([]threadcontract.Event, error) {
 
 	return events, nil
 }
+
+// ============================================================================
+// Additional Integration Tests - Prepare Command Edge Cases
+// ============================================================================
+
+// TestPrepare_ValidHandoffSequences verifies all valid handoff sequences are accepted.
+func TestPrepare_ValidHandoffSequences(t *testing.T) {
+	validTransitions := []struct {
+		from string
+		to   string
+		desc string
+	}{
+		{"requirements-analyst", "architect", "standard: req -> arch"},
+		{"architect", "principal-engineer", "standard: arch -> pe"},
+		{"principal-engineer", "qa-adversary", "standard: pe -> qa"},
+		{"qa-adversary", "orchestrator", "completion: qa -> orch"},
+		{"qa-adversary", "architect", "rework: qa -> arch"},
+		{"orchestrator", "requirements-analyst", "delegate: orch -> req"},
+		{"orchestrator", "architect", "delegate: orch -> arch"},
+		{"orchestrator", "principal-engineer", "delegate: orch -> pe"},
+		{"orchestrator", "qa-adversary", "delegate: orch -> qa"},
+	}
+
+	for _, tc := range validTransitions {
+		t.Run(tc.from+"_to_"+tc.to, func(t *testing.T) {
+			tmpDir := t.TempDir()
+			projectDir := tmpDir
+
+			sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+			sessionID := "session-20260105-valid-" + tc.from + "-" + tc.to
+			sessionDir := filepath.Join(sessionsDir, sessionID)
+			locksDir := filepath.Join(sessionsDir, ".locks")
+			auditDir := filepath.Join(sessionsDir, ".audit")
+
+			if err := os.MkdirAll(sessionDir, 0755); err != nil {
+				t.Fatalf("Failed to create session dir: %v", err)
+			}
+			if err := os.MkdirAll(locksDir, 0755); err != nil {
+				t.Fatalf("Failed to create locks dir: %v", err)
+			}
+			if err := os.MkdirAll(auditDir, 0755); err != nil {
+				t.Fatalf("Failed to create audit dir: %v", err)
+			}
+
+			createdAt := time.Now().UTC().Add(-1 * time.Hour)
+			contextContent := `---
+schema_version: "2.1"
+session_id: ` + sessionID + `
+status: ACTIVE
+initiative: Test Valid Handoff
+complexity: MODULE
+created_at: ` + createdAt.Format(time.RFC3339) + `
+active_team: 10x-dev-pack
+current_phase: design
+---
+
+# Session Context
+`
+			if err := os.WriteFile(filepath.Join(sessionDir, "SESSION_CONTEXT.md"), []byte(contextContent), 0644); err != nil {
+				t.Fatalf("Failed to write SESSION_CONTEXT.md: %v", err)
+			}
+
+			if err := os.WriteFile(filepath.Join(sessionsDir, ".current-session"), []byte(sessionID), 0644); err != nil {
+				t.Fatalf("Failed to write .current-session: %v", err)
+			}
+
+			outputFormat := "json"
+			verbose := false
+			ctx := &cmdContext{
+				output:     &outputFormat,
+				verbose:    &verbose,
+				projectDir: &projectDir,
+			}
+
+			opts := prepareOptions{
+				fromAgent: tc.from,
+				toAgent:   tc.to,
+			}
+
+			err := runPrepare(ctx, opts)
+			if err != nil {
+				t.Errorf("runPrepare should succeed for valid handoff %s -> %s (%s): %v", tc.from, tc.to, tc.desc, err)
+			}
+		})
+	}
+}
+
+// TestPrepare_NoActiveSession verifies error when no session exists.
+func TestPrepare_NoActiveSession(t *testing.T) {
+	tmpDir := t.TempDir()
+	projectDir := tmpDir
+
+	if err := os.MkdirAll(filepath.Join(projectDir, ".claude", "sessions"), 0755); err != nil {
+		t.Fatalf("Failed to create sessions dir: %v", err)
+	}
+
+	outputFormat := "json"
+	verbose := false
+	ctx := &cmdContext{
+		output:     &outputFormat,
+		verbose:    &verbose,
+		projectDir: &projectDir,
+	}
+
+	opts := prepareOptions{
+		fromAgent: "architect",
+		toAgent:   "principal-engineer",
+	}
+
+	err := runPrepare(ctx, opts)
+	if err == nil {
+		t.Error("runPrepare should fail when no session exists")
+	}
+}
+
+// TestPrepare_ParkedSession verifies error when session is not ACTIVE.
+func TestPrepare_ParkedSession(t *testing.T) {
+	tmpDir := t.TempDir()
+	projectDir := tmpDir
+
+	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionID := "session-20260105-parked-test"
+	sessionDir := filepath.Join(sessionsDir, sessionID)
+	locksDir := filepath.Join(sessionsDir, ".locks")
+	auditDir := filepath.Join(sessionsDir, ".audit")
+
+	if err := os.MkdirAll(sessionDir, 0755); err != nil {
+		t.Fatalf("Failed to create session dir: %v", err)
+	}
+	if err := os.MkdirAll(locksDir, 0755); err != nil {
+		t.Fatalf("Failed to create locks dir: %v", err)
+	}
+	if err := os.MkdirAll(auditDir, 0755); err != nil {
+		t.Fatalf("Failed to create audit dir: %v", err)
+	}
+
+	createdAt := time.Now().UTC().Add(-1 * time.Hour)
+	contextContent := `---
+schema_version: "2.1"
+session_id: ` + sessionID + `
+status: PARKED
+initiative: Test Parked Session
+complexity: MODULE
+created_at: ` + createdAt.Format(time.RFC3339) + `
+active_team: 10x-dev-pack
+current_phase: design
+---
+
+# Session Context
+`
+	if err := os.WriteFile(filepath.Join(sessionDir, "SESSION_CONTEXT.md"), []byte(contextContent), 0644); err != nil {
+		t.Fatalf("Failed to write SESSION_CONTEXT.md: %v", err)
+	}
+
+	if err := os.WriteFile(filepath.Join(sessionsDir, ".current-session"), []byte(sessionID), 0644); err != nil {
+		t.Fatalf("Failed to write .current-session: %v", err)
+	}
+
+	outputFormat := "json"
+	verbose := false
+	ctx := &cmdContext{
+		output:     &outputFormat,
+		verbose:    &verbose,
+		projectDir: &projectDir,
+	}
+
+	opts := prepareOptions{
+		fromAgent: "architect",
+		toAgent:   "principal-engineer",
+	}
+
+	err := runPrepare(ctx, opts)
+	if err == nil {
+		t.Error("runPrepare should fail when session is PARKED")
+	}
+	if err != nil && !strings.Contains(err.Error(), "ACTIVE") {
+		t.Errorf("Expected error about ACTIVE status, got: %v", err)
+	}
+}
+
+// TestPrepare_UnknownAgent verifies error for unknown agent names.
+func TestPrepare_UnknownAgent(t *testing.T) {
+	testCases := []struct {
+		name      string
+		fromAgent string
+		toAgent   string
+		errorMsg  string
+	}{
+		{
+			name:      "unknown from agent",
+			fromAgent: "unknown-agent",
+			toAgent:   "principal-engineer",
+			errorMsg:  "invalid source agent",
+		},
+		{
+			name:      "unknown to agent",
+			fromAgent: "architect",
+			toAgent:   "unknown-agent",
+			errorMsg:  "invalid target agent",
+		},
+		{
+			name:      "both unknown",
+			fromAgent: "foo",
+			toAgent:   "bar",
+			errorMsg:  "invalid source agent", // from is checked first
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			tmpDir := t.TempDir()
+			projectDir := tmpDir
+
+			sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+			sessionID := "session-20260105-unknown-" + tc.name
+			sessionDir := filepath.Join(sessionsDir, sessionID)
+			locksDir := filepath.Join(sessionsDir, ".locks")
+			auditDir := filepath.Join(sessionsDir, ".audit")
+
+			if err := os.MkdirAll(sessionDir, 0755); err != nil {
+				t.Fatalf("Failed to create session dir: %v", err)
+			}
+			if err := os.MkdirAll(locksDir, 0755); err != nil {
+				t.Fatalf("Failed to create locks dir: %v", err)
+			}
+			if err := os.MkdirAll(auditDir, 0755); err != nil {
+				t.Fatalf("Failed to create audit dir: %v", err)
+			}
+
+			createdAt := time.Now().UTC().Add(-1 * time.Hour)
+			contextContent := `---
+schema_version: "2.1"
+session_id: ` + sessionID + `
+status: ACTIVE
+initiative: Test Unknown Agent
+complexity: MODULE
+created_at: ` + createdAt.Format(time.RFC3339) + `
+active_team: 10x-dev-pack
+current_phase: design
+---
+
+# Session Context
+`
+			if err := os.WriteFile(filepath.Join(sessionDir, "SESSION_CONTEXT.md"), []byte(contextContent), 0644); err != nil {
+				t.Fatalf("Failed to write SESSION_CONTEXT.md: %v", err)
+			}
+
+			if err := os.WriteFile(filepath.Join(sessionsDir, ".current-session"), []byte(sessionID), 0644); err != nil {
+				t.Fatalf("Failed to write .current-session: %v", err)
+			}
+
+			outputFormat := "json"
+			verbose := false
+			ctx := &cmdContext{
+				output:     &outputFormat,
+				verbose:    &verbose,
+				projectDir: &projectDir,
+			}
+
+			opts := prepareOptions{
+				fromAgent: tc.fromAgent,
+				toAgent:   tc.toAgent,
+			}
+
+			err := runPrepare(ctx, opts)
+			if err == nil {
+				t.Errorf("runPrepare should fail for unknown agent: %s", tc.name)
+			}
+			if err != nil && !strings.Contains(err.Error(), tc.errorMsg) {
+				t.Errorf("Expected error containing %q, got: %v", tc.errorMsg, err)
+			}
+		})
+	}
+}
+
+// TestPrepare_WithArtifactID verifies artifact ID is included in output.
+func TestPrepare_WithArtifactID(t *testing.T) {
+	tmpDir := t.TempDir()
+	projectDir := tmpDir
+
+	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionID := "session-20260105-artifact-test"
+	sessionDir := filepath.Join(sessionsDir, sessionID)
+	locksDir := filepath.Join(sessionsDir, ".locks")
+	auditDir := filepath.Join(sessionsDir, ".audit")
+
+	if err := os.MkdirAll(sessionDir, 0755); err != nil {
+		t.Fatalf("Failed to create session dir: %v", err)
+	}
+	if err := os.MkdirAll(locksDir, 0755); err != nil {
+		t.Fatalf("Failed to create locks dir: %v", err)
+	}
+	if err := os.MkdirAll(auditDir, 0755); err != nil {
+		t.Fatalf("Failed to create audit dir: %v", err)
+	}
+
+	createdAt := time.Now().UTC().Add(-1 * time.Hour)
+	contextContent := `---
+schema_version: "2.1"
+session_id: ` + sessionID + `
+status: ACTIVE
+initiative: Test Artifact ID
+complexity: MODULE
+created_at: ` + createdAt.Format(time.RFC3339) + `
+active_team: 10x-dev-pack
+current_phase: design
+---
+
+# Session Context
+`
+	if err := os.WriteFile(filepath.Join(sessionDir, "SESSION_CONTEXT.md"), []byte(contextContent), 0644); err != nil {
+		t.Fatalf("Failed to write SESSION_CONTEXT.md: %v", err)
+	}
+
+	if err := os.WriteFile(filepath.Join(sessionsDir, ".current-session"), []byte(sessionID), 0644); err != nil {
+		t.Fatalf("Failed to write .current-session: %v", err)
+	}
+
+	outputFormat := "json"
+	verbose := true
+	ctx := &cmdContext{
+		output:     &outputFormat,
+		verbose:    &verbose,
+		projectDir: &projectDir,
+	}
+
+	opts := prepareOptions{
+		fromAgent:  "architect",
+		toAgent:    "principal-engineer",
+		artifactID: "TDD-user-auth-feature",
+	}
+
+	err := runPrepare(ctx, opts)
+	if err != nil {
+		t.Fatalf("runPrepare failed: %v", err)
+	}
+
+	// Verify task_end event has artifact in metadata
+	eventsPath := filepath.Join(sessionDir, "events.jsonl")
+	events, err := readEventsFile(eventsPath)
+	if err != nil {
+		t.Fatalf("Failed to read events: %v", err)
+	}
+
+	for _, event := range events {
+		if event.Type == threadcontract.EventTypeTaskEnd {
+			artifacts, ok := event.Meta["artifacts"].([]interface{})
+			if !ok {
+				t.Error("task_end event missing artifacts in meta")
+				continue
+			}
+			found := false
+			for _, a := range artifacts {
+				if a.(string) == "TDD-user-auth-feature" {
+					found = true
+					break
+				}
+			}
+			if !found {
+				t.Error("artifact ID not found in task_end event artifacts")
+			}
+		}
+	}
+}
+
+// ============================================================================
+// Additional Integration Tests - Execute Command Edge Cases
+// ============================================================================
+
+// TestExecute_NoActiveSession verifies error when no session exists.
+func TestExecute_NoActiveSession(t *testing.T) {
+	tmpDir := t.TempDir()
+	projectDir := tmpDir
+
+	if err := os.MkdirAll(filepath.Join(projectDir, ".claude", "sessions"), 0755); err != nil {
+		t.Fatalf("Failed to create sessions dir: %v", err)
+	}
+
+	outputFormat := "json"
+	verbose := false
+	ctx := &cmdContext{
+		output:     &outputFormat,
+		verbose:    &verbose,
+		projectDir: &projectDir,
+	}
+
+	opts := executeOptions{
+		artifactID: "TDD-test",
+		toAgent:    "principal-engineer",
+	}
+
+	err := runExecute(ctx, opts)
+	if err == nil {
+		t.Error("runExecute should fail when no session exists")
+	}
+}
+
+// TestExecute_ParkedSession verifies error when session is not ACTIVE.
+func TestExecute_ParkedSession(t *testing.T) {
+	tmpDir := t.TempDir()
+	projectDir := tmpDir
+
+	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionID := "session-20260105-exec-parked"
+	sessionDir := filepath.Join(sessionsDir, sessionID)
+	locksDir := filepath.Join(sessionsDir, ".locks")
+	auditDir := filepath.Join(sessionsDir, ".audit")
+
+	if err := os.MkdirAll(sessionDir, 0755); err != nil {
+		t.Fatalf("Failed to create session dir: %v", err)
+	}
+	if err := os.MkdirAll(locksDir, 0755); err != nil {
+		t.Fatalf("Failed to create locks dir: %v", err)
+	}
+	if err := os.MkdirAll(auditDir, 0755); err != nil {
+		t.Fatalf("Failed to create audit dir: %v", err)
+	}
+
+	createdAt := time.Now().UTC().Add(-1 * time.Hour)
+	contextContent := `---
+schema_version: "2.1"
+session_id: ` + sessionID + `
+status: PARKED
+initiative: Test Execute Parked
+complexity: MODULE
+created_at: ` + createdAt.Format(time.RFC3339) + `
+active_team: 10x-dev-pack
+current_phase: design
+---
+
+# Session Context
+`
+	if err := os.WriteFile(filepath.Join(sessionDir, "SESSION_CONTEXT.md"), []byte(contextContent), 0644); err != nil {
+		t.Fatalf("Failed to write SESSION_CONTEXT.md: %v", err)
+	}
+
+	if err := os.WriteFile(filepath.Join(sessionsDir, ".current-session"), []byte(sessionID), 0644); err != nil {
+		t.Fatalf("Failed to write .current-session: %v", err)
+	}
+
+	outputFormat := "json"
+	verbose := false
+	ctx := &cmdContext{
+		output:     &outputFormat,
+		verbose:    &verbose,
+		projectDir: &projectDir,
+	}
+
+	opts := executeOptions{
+		artifactID: "TDD-test",
+		toAgent:    "principal-engineer",
+	}
+
+	err := runExecute(ctx, opts)
+	if err == nil {
+		t.Error("runExecute should fail when session is PARKED")
+	}
+}
+
+// TestExecute_AllTargetAgents verifies execute works for all valid target agents.
+func TestExecute_AllTargetAgents(t *testing.T) {
+	agents := []struct {
+		agent       string
+		targetPhase string
+	}{
+		{"requirements-analyst", "requirements"},
+		{"architect", "design"},
+		{"principal-engineer", "implementation"},
+		{"qa-adversary", "validation"},
+		{"orchestrator", "orchestration"},
+	}
+
+	for _, tc := range agents {
+		t.Run(tc.agent, func(t *testing.T) {
+			tmpDir := t.TempDir()
+			projectDir := tmpDir
+
+			sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+			sessionID := "session-20260105-exec-" + tc.agent
+			sessionDir := filepath.Join(sessionsDir, sessionID)
+			locksDir := filepath.Join(sessionsDir, ".locks")
+			auditDir := filepath.Join(sessionsDir, ".audit")
+
+			if err := os.MkdirAll(sessionDir, 0755); err != nil {
+				t.Fatalf("Failed to create session dir: %v", err)
+			}
+			if err := os.MkdirAll(locksDir, 0755); err != nil {
+				t.Fatalf("Failed to create locks dir: %v", err)
+			}
+			if err := os.MkdirAll(auditDir, 0755); err != nil {
+				t.Fatalf("Failed to create audit dir: %v", err)
+			}
+
+			createdAt := time.Now().UTC().Add(-1 * time.Hour)
+			contextContent := `---
+schema_version: "2.1"
+session_id: ` + sessionID + `
+status: ACTIVE
+initiative: Test Execute All Agents
+complexity: MODULE
+created_at: ` + createdAt.Format(time.RFC3339) + `
+active_team: 10x-dev-pack
+current_phase: design
+---
+
+# Session Context
+`
+			if err := os.WriteFile(filepath.Join(sessionDir, "SESSION_CONTEXT.md"), []byte(contextContent), 0644); err != nil {
+				t.Fatalf("Failed to write SESSION_CONTEXT.md: %v", err)
+			}
+
+			if err := os.WriteFile(filepath.Join(sessionsDir, ".current-session"), []byte(sessionID), 0644); err != nil {
+				t.Fatalf("Failed to write .current-session: %v", err)
+			}
+
+			outputFormat := "json"
+			verbose := false
+			ctx := &cmdContext{
+				output:     &outputFormat,
+				verbose:    &verbose,
+				projectDir: &projectDir,
+			}
+
+			opts := executeOptions{
+				artifactID: "TDD-test-" + tc.agent,
+				toAgent:    tc.agent,
+			}
+
+			err := runExecute(ctx, opts)
+			if err != nil {
+				t.Fatalf("runExecute failed for agent %s: %v", tc.agent, err)
+			}
+
+			// Verify task_start event has correct agent and target phase
+			eventsPath := filepath.Join(sessionDir, "events.jsonl")
+			events, err := readEventsFile(eventsPath)
+			if err != nil {
+				t.Fatalf("Failed to read events: %v", err)
+			}
+
+			foundTaskStart := false
+			for _, event := range events {
+				if event.Type == threadcontract.EventTypeTaskStart {
+					foundTaskStart = true
+					agent, ok := event.Meta["agent"].(string)
+					if !ok {
+						t.Error("task_start missing agent")
+						continue
+					}
+					if agent != tc.agent {
+						t.Errorf("task_start agent = %q, want %q", agent, tc.agent)
+					}
+				}
+			}
+			if !foundTaskStart {
+				t.Error("No task_start event found")
+			}
+		})
+	}
+}
+
+// TestExecute_VerifyEventStructure verifies the complete event structure.
+func TestExecute_VerifyEventStructure(t *testing.T) {
+	tmpDir := t.TempDir()
+	projectDir := tmpDir
+
+	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionID := "session-20260105-exec-struct"
+	sessionDir := filepath.Join(sessionsDir, sessionID)
+	locksDir := filepath.Join(sessionsDir, ".locks")
+	auditDir := filepath.Join(sessionsDir, ".audit")
+
+	if err := os.MkdirAll(sessionDir, 0755); err != nil {
+		t.Fatalf("Failed to create session dir: %v", err)
+	}
+	if err := os.MkdirAll(locksDir, 0755); err != nil {
+		t.Fatalf("Failed to create locks dir: %v", err)
+	}
+	if err := os.MkdirAll(auditDir, 0755); err != nil {
+		t.Fatalf("Failed to create audit dir: %v", err)
+	}
+
+	createdAt := time.Now().UTC().Add(-1 * time.Hour)
+	contextContent := `---
+schema_version: "2.1"
+session_id: ` + sessionID + `
+status: ACTIVE
+initiative: Test Execute Structure
+complexity: MODULE
+created_at: ` + createdAt.Format(time.RFC3339) + `
+active_team: 10x-dev-pack
+current_phase: design
+---
+
+# Session Context
+`
+	if err := os.WriteFile(filepath.Join(sessionDir, "SESSION_CONTEXT.md"), []byte(contextContent), 0644); err != nil {
+		t.Fatalf("Failed to write SESSION_CONTEXT.md: %v", err)
+	}
+
+	if err := os.WriteFile(filepath.Join(sessionsDir, ".current-session"), []byte(sessionID), 0644); err != nil {
+		t.Fatalf("Failed to write .current-session: %v", err)
+	}
+
+	outputFormat := "json"
+	verbose := false
+	ctx := &cmdContext{
+		output:     &outputFormat,
+		verbose:    &verbose,
+		projectDir: &projectDir,
+	}
+
+	opts := executeOptions{
+		artifactID: "TDD-full-structure",
+		toAgent:    "principal-engineer",
+	}
+
+	err := runExecute(ctx, opts)
+	if err != nil {
+		t.Fatalf("runExecute failed: %v", err)
+	}
+
+	// Read events.jsonl and verify complete structure
+	eventsPath := filepath.Join(sessionDir, "events.jsonl")
+	content, err := os.ReadFile(eventsPath)
+	if err != nil {
+		t.Fatalf("Failed to read events.jsonl: %v", err)
+	}
+
+	// Verify HANDOFF_EXECUTED event
+	if !strings.Contains(string(content), "HANDOFF_EXECUTED") {
+		t.Error("events.jsonl missing HANDOFF_EXECUTED event")
+	}
+	if !strings.Contains(string(content), "TDD-full-structure") {
+		t.Error("events.jsonl missing artifact_id")
+	}
+	if !strings.Contains(string(content), "implementation") {
+		t.Error("events.jsonl missing target_phase")
+	}
+}
+
+// ============================================================================
+// Additional Integration Tests - Status Command Edge Cases
+// ============================================================================
+
+// TestStatus_WithHandoffHistory verifies status reflects handoff history.
+func TestStatus_WithHandoffHistory(t *testing.T) {
+	tmpDir := t.TempDir()
+	projectDir := tmpDir
+
+	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionID := "session-20260105-status-hist"
+	sessionDir := filepath.Join(sessionsDir, sessionID)
+	locksDir := filepath.Join(sessionsDir, ".locks")
+	auditDir := filepath.Join(sessionsDir, ".audit")
+
+	if err := os.MkdirAll(sessionDir, 0755); err != nil {
+		t.Fatalf("Failed to create session dir: %v", err)
+	}
+	if err := os.MkdirAll(locksDir, 0755); err != nil {
+		t.Fatalf("Failed to create locks dir: %v", err)
+	}
+	if err := os.MkdirAll(auditDir, 0755); err != nil {
+		t.Fatalf("Failed to create audit dir: %v", err)
+	}
+
+	createdAt := time.Now().UTC().Add(-2 * time.Hour)
+	contextContent := `---
+schema_version: "2.1"
+session_id: ` + sessionID + `
+status: ACTIVE
+initiative: Test Status With History
+complexity: MODULE
+created_at: ` + createdAt.Format(time.RFC3339) + `
+active_team: 10x-dev-pack
+current_phase: implementation
+---
+
+# Session Context
+`
+	if err := os.WriteFile(filepath.Join(sessionDir, "SESSION_CONTEXT.md"), []byte(contextContent), 0644); err != nil {
+		t.Fatalf("Failed to write SESSION_CONTEXT.md: %v", err)
+	}
+
+	if err := os.WriteFile(filepath.Join(sessionsDir, ".current-session"), []byte(sessionID), 0644); err != nil {
+		t.Fatalf("Failed to write .current-session: %v", err)
+	}
+
+	// Seed events with handoffs
+	eventsPath := filepath.Join(sessionDir, "events.jsonl")
+	events := []string{
+		`{"ts":"2026-01-05T13:00:00.000Z","type":"task_start","summary":"Task delegated to architect","meta":{"agent":"architect","description":"Design TDD","parent_session":"` + sessionID + `"}}`,
+		`{"ts":"2026-01-05T13:30:00.000Z","type":"task_end","summary":"Task completed by architect","meta":{"agent":"architect","status":"success","parent_session":"` + sessionID + `"}}`,
+		`{"timestamp":"2026-01-05T13:30:01.000Z","event":"HANDOFF_EXECUTED","to":"principal-engineer","metadata":{"artifact_id":"TDD-test","from_phase":"design","target_phase":"implementation"}}`,
+		`{"ts":"2026-01-05T13:30:02.000Z","type":"task_start","summary":"Task delegated to principal-engineer","meta":{"agent":"principal-engineer","description":"Implement","parent_session":"` + sessionID + `"}}`,
+	}
+	if err := os.WriteFile(eventsPath, []byte(strings.Join(events, "\n")+"\n"), 0644); err != nil {
+		t.Fatalf("Failed to write events.jsonl: %v", err)
+	}
+
+	outputFormat := "json"
+	verbose := false
+	ctx := &cmdContext{
+		output:     &outputFormat,
+		verbose:    &verbose,
+		projectDir: &projectDir,
+	}
+
+	err := runStatus(ctx)
+	if err != nil {
+		t.Fatalf("runStatus failed: %v", err)
+	}
+	// Status command outputs to stdout; test verifies no error on valid data
+}
+
+// TestStatus_AllPhases verifies next expected handoff for all phases.
+func TestStatus_AllPhases(t *testing.T) {
+	phases := []struct {
+		phase    string
+		expected string
+	}{
+		{"requirements", "requirements-analyst -> architect"},
+		{"design", "architect -> principal-engineer"},
+		{"implementation", "principal-engineer -> qa-adversary"},
+		{"validation", "qa-adversary -> orchestrator (complete)"},
+		{"qa", "qa-adversary -> orchestrator (complete)"},
+	}
+
+	for _, tc := range phases {
+		t.Run(tc.phase, func(t *testing.T) {
+			tmpDir := t.TempDir()
+			projectDir := tmpDir
+
+			sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+			sessionID := "session-20260105-phase-" + tc.phase
+			sessionDir := filepath.Join(sessionsDir, sessionID)
+			locksDir := filepath.Join(sessionsDir, ".locks")
+			auditDir := filepath.Join(sessionsDir, ".audit")
+
+			if err := os.MkdirAll(sessionDir, 0755); err != nil {
+				t.Fatalf("Failed to create session dir: %v", err)
+			}
+			if err := os.MkdirAll(locksDir, 0755); err != nil {
+				t.Fatalf("Failed to create locks dir: %v", err)
+			}
+			if err := os.MkdirAll(auditDir, 0755); err != nil {
+				t.Fatalf("Failed to create audit dir: %v", err)
+			}
+
+			createdAt := time.Now().UTC().Add(-1 * time.Hour)
+			contextContent := `---
+schema_version: "2.1"
+session_id: ` + sessionID + `
+status: ACTIVE
+initiative: Test Phase Status
+complexity: MODULE
+created_at: ` + createdAt.Format(time.RFC3339) + `
+active_team: 10x-dev-pack
+current_phase: ` + tc.phase + `
+---
+
+# Session Context
+`
+			if err := os.WriteFile(filepath.Join(sessionDir, "SESSION_CONTEXT.md"), []byte(contextContent), 0644); err != nil {
+				t.Fatalf("Failed to write SESSION_CONTEXT.md: %v", err)
+			}
+
+			if err := os.WriteFile(filepath.Join(sessionsDir, ".current-session"), []byte(sessionID), 0644); err != nil {
+				t.Fatalf("Failed to write .current-session: %v", err)
+			}
+
+			outputFormat := "json"
+			verbose := false
+			ctx := &cmdContext{
+				output:     &outputFormat,
+				verbose:    &verbose,
+				projectDir: &projectDir,
+			}
+
+			err := runStatus(ctx)
+			if err != nil {
+				t.Fatalf("runStatus failed for phase %s: %v", tc.phase, err)
+			}
+		})
+	}
+}
+
+// ============================================================================
+// Additional Integration Tests - History Command Edge Cases
+// ============================================================================
+
+// TestHistory_WithLimit verifies limit parameter works correctly.
+func TestHistory_WithLimit(t *testing.T) {
+	tmpDir := t.TempDir()
+	projectDir := tmpDir
+
+	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionID := "session-20260105-hist-limit"
+	sessionDir := filepath.Join(sessionsDir, sessionID)
+	locksDir := filepath.Join(sessionsDir, ".locks")
+	auditDir := filepath.Join(sessionsDir, ".audit")
+
+	if err := os.MkdirAll(sessionDir, 0755); err != nil {
+		t.Fatalf("Failed to create session dir: %v", err)
+	}
+	if err := os.MkdirAll(locksDir, 0755); err != nil {
+		t.Fatalf("Failed to create locks dir: %v", err)
+	}
+	if err := os.MkdirAll(auditDir, 0755); err != nil {
+		t.Fatalf("Failed to create audit dir: %v", err)
+	}
+
+	createdAt := time.Now().UTC().Add(-3 * time.Hour)
+	contextContent := `---
+schema_version: "2.1"
+session_id: ` + sessionID + `
+status: ACTIVE
+initiative: Test History Limit
+complexity: MODULE
+created_at: ` + createdAt.Format(time.RFC3339) + `
+active_team: 10x-dev-pack
+current_phase: validation
+---
+
+# Session Context
+`
+	if err := os.WriteFile(filepath.Join(sessionDir, "SESSION_CONTEXT.md"), []byte(contextContent), 0644); err != nil {
+		t.Fatalf("Failed to write SESSION_CONTEXT.md: %v", err)
+	}
+
+	if err := os.WriteFile(filepath.Join(sessionsDir, ".current-session"), []byte(sessionID), 0644); err != nil {
+		t.Fatalf("Failed to write .current-session: %v", err)
+	}
+
+	// Seed many events
+	eventsPath := filepath.Join(sessionDir, "events.jsonl")
+	events := []string{
+		`{"ts":"2026-01-05T12:00:00.000Z","type":"task_start","summary":"Task 1","meta":{"agent":"requirements-analyst","parent_session":"` + sessionID + `"}}`,
+		`{"ts":"2026-01-05T12:30:00.000Z","type":"task_end","summary":"End 1","meta":{"agent":"requirements-analyst","status":"success","parent_session":"` + sessionID + `"}}`,
+		`{"ts":"2026-01-05T13:00:00.000Z","type":"task_start","summary":"Task 2","meta":{"agent":"architect","parent_session":"` + sessionID + `"}}`,
+		`{"ts":"2026-01-05T13:30:00.000Z","type":"task_end","summary":"End 2","meta":{"agent":"architect","status":"success","parent_session":"` + sessionID + `"}}`,
+		`{"ts":"2026-01-05T14:00:00.000Z","type":"task_start","summary":"Task 3","meta":{"agent":"principal-engineer","parent_session":"` + sessionID + `"}}`,
+		`{"ts":"2026-01-05T14:30:00.000Z","type":"task_end","summary":"End 3","meta":{"agent":"principal-engineer","status":"success","parent_session":"` + sessionID + `"}}`,
+	}
+	if err := os.WriteFile(eventsPath, []byte(strings.Join(events, "\n")+"\n"), 0644); err != nil {
+		t.Fatalf("Failed to write events.jsonl: %v", err)
+	}
+
+	outputFormat := "json"
+	verbose := false
+	ctx := &cmdContext{
+		output:     &outputFormat,
+		verbose:    &verbose,
+		projectDir: &projectDir,
+	}
+
+	opts := historyOptions{
+		limit: 2,
+	}
+
+	err := runHistory(ctx, opts)
+	if err != nil {
+		t.Fatalf("runHistory with limit failed: %v", err)
+	}
+	// Outputs to stdout; test verifies no error
+}
+
+// TestHistory_PhaseTransitionEvents verifies PHASE_TRANSITIONED events are included.
+func TestHistory_PhaseTransitionEvents(t *testing.T) {
+	tmpDir := t.TempDir()
+	projectDir := tmpDir
+
+	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionID := "session-20260105-hist-phase"
+	sessionDir := filepath.Join(sessionsDir, sessionID)
+	locksDir := filepath.Join(sessionsDir, ".locks")
+	auditDir := filepath.Join(sessionsDir, ".audit")
+
+	if err := os.MkdirAll(sessionDir, 0755); err != nil {
+		t.Fatalf("Failed to create session dir: %v", err)
+	}
+	if err := os.MkdirAll(locksDir, 0755); err != nil {
+		t.Fatalf("Failed to create locks dir: %v", err)
+	}
+	if err := os.MkdirAll(auditDir, 0755); err != nil {
+		t.Fatalf("Failed to create audit dir: %v", err)
+	}
+
+	createdAt := time.Now().UTC().Add(-1 * time.Hour)
+	contextContent := `---
+schema_version: "2.1"
+session_id: ` + sessionID + `
+status: ACTIVE
+initiative: Test Phase Transitions
+complexity: MODULE
+created_at: ` + createdAt.Format(time.RFC3339) + `
+active_team: 10x-dev-pack
+current_phase: implementation
+---
+
+# Session Context
+`
+	if err := os.WriteFile(filepath.Join(sessionDir, "SESSION_CONTEXT.md"), []byte(contextContent), 0644); err != nil {
+		t.Fatalf("Failed to write SESSION_CONTEXT.md: %v", err)
+	}
+
+	if err := os.WriteFile(filepath.Join(sessionsDir, ".current-session"), []byte(sessionID), 0644); err != nil {
+		t.Fatalf("Failed to write .current-session: %v", err)
+	}
+
+	// Include PHASE_TRANSITIONED event
+	eventsPath := filepath.Join(sessionDir, "events.jsonl")
+	events := []string{
+		`{"timestamp":"2026-01-05T13:00:00.000Z","event":"PHASE_TRANSITIONED","from_phase":"design","to_phase":"implementation"}`,
+		`{"ts":"2026-01-05T13:00:01.000Z","type":"task_start","summary":"Implementation started","meta":{"agent":"principal-engineer","parent_session":"` + sessionID + `"}}`,
+	}
+	if err := os.WriteFile(eventsPath, []byte(strings.Join(events, "\n")+"\n"), 0644); err != nil {
+		t.Fatalf("Failed to write events.jsonl: %v", err)
+	}
+
+	outputFormat := "json"
+	verbose := false
+	ctx := &cmdContext{
+		output:     &outputFormat,
+		verbose:    &verbose,
+		projectDir: &projectDir,
+	}
+
+	opts := historyOptions{
+		limit: 0,
+	}
+
+	err := runHistory(ctx, opts)
+	if err != nil {
+		t.Fatalf("runHistory with phase transitions failed: %v", err)
+	}
+}
+
+// TestHistory_NoSession verifies error when no session exists.
+func TestHistory_NoSession(t *testing.T) {
+	tmpDir := t.TempDir()
+	projectDir := tmpDir
+
+	if err := os.MkdirAll(filepath.Join(projectDir, ".claude", "sessions"), 0755); err != nil {
+		t.Fatalf("Failed to create sessions dir: %v", err)
+	}
+
+	outputFormat := "json"
+	verbose := false
+	ctx := &cmdContext{
+		output:     &outputFormat,
+		verbose:    &verbose,
+		projectDir: &projectDir,
+	}
+
+	opts := historyOptions{
+		limit: 0,
+	}
+
+	err := runHistory(ctx, opts)
+	if err == nil {
+		t.Error("runHistory should fail when no session exists")
+	}
+}
+
+// ============================================================================
+// Additional Integration Tests - Concurrent and Session ID Override
+// ============================================================================
+
+// TestPrepare_WithExplicitSessionID verifies explicit session ID override.
+func TestPrepare_WithExplicitSessionID(t *testing.T) {
+	tmpDir := t.TempDir()
+	projectDir := tmpDir
+
+	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+
+	// Create two sessions
+	session1ID := "session-20260105-explicit-1"
+	session2ID := "session-20260105-explicit-2"
+
+	for _, sessionID := range []string{session1ID, session2ID} {
+		sessionDir := filepath.Join(sessionsDir, sessionID)
+		locksDir := filepath.Join(sessionsDir, ".locks")
+		auditDir := filepath.Join(sessionsDir, ".audit")
+
+		if err := os.MkdirAll(sessionDir, 0755); err != nil {
+			t.Fatalf("Failed to create session dir: %v", err)
+		}
+		if err := os.MkdirAll(locksDir, 0755); err != nil {
+			t.Fatalf("Failed to create locks dir: %v", err)
+		}
+		if err := os.MkdirAll(auditDir, 0755); err != nil {
+			t.Fatalf("Failed to create audit dir: %v", err)
+		}
+
+		createdAt := time.Now().UTC().Add(-1 * time.Hour)
+		contextContent := `---
+schema_version: "2.1"
+session_id: ` + sessionID + `
+status: ACTIVE
+initiative: Test Explicit Session ID
+complexity: MODULE
+created_at: ` + createdAt.Format(time.RFC3339) + `
+active_team: 10x-dev-pack
+current_phase: design
+---
+
+# Session Context
+`
+		if err := os.WriteFile(filepath.Join(sessionDir, "SESSION_CONTEXT.md"), []byte(contextContent), 0644); err != nil {
+			t.Fatalf("Failed to write SESSION_CONTEXT.md: %v", err)
+		}
+	}
+
+	// Set current-session to session1
+	if err := os.WriteFile(filepath.Join(sessionsDir, ".current-session"), []byte(session1ID), 0644); err != nil {
+		t.Fatalf("Failed to write .current-session: %v", err)
+	}
+
+	// But explicitly use session2
+	outputFormat := "json"
+	verbose := false
+	ctx := &cmdContext{
+		output:     &outputFormat,
+		verbose:    &verbose,
+		projectDir: &projectDir,
+		sessionID:  &session2ID,
+	}
+
+	opts := prepareOptions{
+		fromAgent: "architect",
+		toAgent:   "principal-engineer",
+	}
+
+	err := runPrepare(ctx, opts)
+	if err != nil {
+		t.Fatalf("runPrepare failed with explicit session ID: %v", err)
+	}
+
+	// Verify events were written to session2, not session1
+	session1Events := filepath.Join(sessionsDir, session1ID, "events.jsonl")
+	session2Events := filepath.Join(sessionsDir, session2ID, "events.jsonl")
+
+	if _, err := os.Stat(session1Events); !os.IsNotExist(err) {
+		content, _ := os.ReadFile(session1Events)
+		if len(content) > 0 {
+			t.Error("Events should not be written to session1")
+		}
+	}
+
+	if _, err := os.Stat(session2Events); os.IsNotExist(err) {
+		t.Error("Events should be written to session2")
+	}
+}
+
+// TestExecute_CompletedSession verifies error when session is COMPLETED.
+func TestExecute_CompletedSession(t *testing.T) {
+	tmpDir := t.TempDir()
+	projectDir := tmpDir
+
+	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionID := "session-20260105-exec-completed"
+	sessionDir := filepath.Join(sessionsDir, sessionID)
+	locksDir := filepath.Join(sessionsDir, ".locks")
+	auditDir := filepath.Join(sessionsDir, ".audit")
+
+	if err := os.MkdirAll(sessionDir, 0755); err != nil {
+		t.Fatalf("Failed to create session dir: %v", err)
+	}
+	if err := os.MkdirAll(locksDir, 0755); err != nil {
+		t.Fatalf("Failed to create locks dir: %v", err)
+	}
+	if err := os.MkdirAll(auditDir, 0755); err != nil {
+		t.Fatalf("Failed to create audit dir: %v", err)
+	}
+
+	createdAt := time.Now().UTC().Add(-2 * time.Hour)
+	contextContent := `---
+schema_version: "2.1"
+session_id: ` + sessionID + `
+status: COMPLETED
+initiative: Test Execute Completed
+complexity: MODULE
+created_at: ` + createdAt.Format(time.RFC3339) + `
+active_team: 10x-dev-pack
+current_phase: validation
+---
+
+# Session Context
+`
+	if err := os.WriteFile(filepath.Join(sessionDir, "SESSION_CONTEXT.md"), []byte(contextContent), 0644); err != nil {
+		t.Fatalf("Failed to write SESSION_CONTEXT.md: %v", err)
+	}
+
+	if err := os.WriteFile(filepath.Join(sessionsDir, ".current-session"), []byte(sessionID), 0644); err != nil {
+		t.Fatalf("Failed to write .current-session: %v", err)
+	}
+
+	outputFormat := "json"
+	verbose := false
+	ctx := &cmdContext{
+		output:     &outputFormat,
+		verbose:    &verbose,
+		projectDir: &projectDir,
+	}
+
+	opts := executeOptions{
+		artifactID: "TDD-test",
+		toAgent:    "orchestrator",
+	}
+
+	err := runExecute(ctx, opts)
+	if err == nil {
+		t.Error("runExecute should fail when session is COMPLETED")
+	}
+}

@@ -2,8 +2,8 @@
 
 | Field | Value |
 |-------|-------|
-| **Status** | Proposed |
-| **Date** | 2026-01-04 |
+| **Status** | Accepted |
+| **Date** | 2026-01-05 |
 | **Deciders** | Architecture Team |
 | **Supersedes** | N/A |
 | **Superseded by** | N/A |
@@ -359,3 +359,16 @@ ari validate handoff --type=prd --show-criteria
 | Date | Author | Change |
 |------|--------|--------|
 | 2026-01-04 | Claude Code | Initial proposal for handoff schema embedding |
+| 2026-01-05 | Claude Code | Accepted: Implementation verified in ariadne/internal/validation/handoff.go |
+
+## Implementation Notes
+
+The implementation follows Option 1 (`go:embed`) as proposed, with the following minor deviations:
+
+1. **Schema filename**: The embedded schema is named `handoff-criteria.yaml` rather than `handoff-criteria-schema.yaml` (simplified naming).
+
+2. **Simplified DSL**: Rather than implementing the full DSL interpreter proposed in the ADR, the implementation uses a declarative criteria structure with `field`, `message`, `non_empty`, and `min_items` attributes. This simplification provides adequate validation coverage without the complexity of a custom expression parser.
+
+3. **Schema format**: A JSON schema (`handoff-criteria.schema.json`) was also added alongside the YAML criteria file for additional validation tooling support.
+
+4. **Integration**: The `HandoffValidator` integrates with `ArtifactValidator` to parse frontmatter before applying handoff criteria, providing end-to-end validation via `ValidateHandoffFile()`.
