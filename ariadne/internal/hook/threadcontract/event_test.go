@@ -652,3 +652,196 @@ func TestSailsGeneratedData_EmptyReasons(t *testing.T) {
 		t.Errorf("Meta.reasons length = %d, want 0", len(reasons))
 	}
 }
+
+func TestNewSailsGeneratedEvent_WithEvidencePaths(t *testing.T) {
+	data := SailsGeneratedData{
+		Color:        "WHITE",
+		ComputedBase: "WHITE",
+		Reasons:      []string{"all required proofs present and passing"},
+		FilePath:     ".claude/sessions/session-20260105-143000-abc12345/WHITE_SAILS.yaml",
+		EvidencePaths: &EvidencePaths{
+			Tests: ".claude/sessions/session-20260105-143000-abc12345/test-output.log",
+			Build: ".claude/sessions/session-20260105-143000-abc12345/build-output.log",
+			Lint:  ".claude/sessions/session-20260105-143000-abc12345/lint-output.log",
+		},
+	}
+
+	event := NewSailsGeneratedEvent("session-20260105-143000-abc12345", data)
+
+	// Check type
+	if event.Type != EventTypeSailsGenerated {
+		t.Errorf("Type = %v, want %v", event.Type, EventTypeSailsGenerated)
+	}
+
+	// Check evidence_paths in meta
+	evidencePaths, ok := event.Meta["evidence_paths"].(map[string]string)
+	if !ok {
+		t.Fatal("Meta.evidence_paths is not a map[string]string")
+	}
+
+	if evidencePaths["tests"] != ".claude/sessions/session-20260105-143000-abc12345/test-output.log" {
+		t.Errorf("evidence_paths.tests = %v, want test-output.log path", evidencePaths["tests"])
+	}
+	if evidencePaths["build"] != ".claude/sessions/session-20260105-143000-abc12345/build-output.log" {
+		t.Errorf("evidence_paths.build = %v, want build-output.log path", evidencePaths["build"])
+	}
+	if evidencePaths["lint"] != ".claude/sessions/session-20260105-143000-abc12345/lint-output.log" {
+		t.Errorf("evidence_paths.lint = %v, want lint-output.log path", evidencePaths["lint"])
+	}
+}
+
+func TestNewSailsGeneratedEvent_WithAllEvidencePaths(t *testing.T) {
+	data := SailsGeneratedData{
+		Color:        "WHITE",
+		ComputedBase: "WHITE",
+		Reasons:      []string{"all proofs passing"},
+		FilePath:     ".claude/sessions/session-test/WHITE_SAILS.yaml",
+		EvidencePaths: &EvidencePaths{
+			Tests:       ".claude/sessions/session-test/test-output.log",
+			Build:       ".claude/sessions/session-test/build-output.log",
+			Lint:        ".claude/sessions/session-test/lint-output.log",
+			Adversarial: ".claude/sessions/session-test/adversarial-output.log",
+			Integration: ".claude/sessions/session-test/integration-output.log",
+		},
+	}
+
+	event := NewSailsGeneratedEvent("session-test", data)
+
+	evidencePaths, ok := event.Meta["evidence_paths"].(map[string]string)
+	if !ok {
+		t.Fatal("Meta.evidence_paths is not a map[string]string")
+	}
+
+	// Check all five evidence paths
+	if evidencePaths["tests"] == "" {
+		t.Error("evidence_paths.tests should not be empty")
+	}
+	if evidencePaths["build"] == "" {
+		t.Error("evidence_paths.build should not be empty")
+	}
+	if evidencePaths["lint"] == "" {
+		t.Error("evidence_paths.lint should not be empty")
+	}
+	if evidencePaths["adversarial"] == "" {
+		t.Error("evidence_paths.adversarial should not be empty")
+	}
+	if evidencePaths["integration"] == "" {
+		t.Error("evidence_paths.integration should not be empty")
+	}
+}
+
+func TestNewSailsGeneratedEvent_NoEvidencePaths(t *testing.T) {
+	// Test without evidence paths (nil)
+	data := SailsGeneratedData{
+		Color:         "GRAY",
+		ComputedBase:  "GRAY",
+		Reasons:       []string{"missing proofs"},
+		FilePath:      ".claude/sessions/session-test/WHITE_SAILS.yaml",
+		EvidencePaths: nil,
+	}
+
+	event := NewSailsGeneratedEvent("session-test", data)
+
+	// evidence_paths should not be in meta
+	if _, exists := event.Meta["evidence_paths"]; exists {
+		t.Error("Meta should not contain evidence_paths when EvidencePaths is nil")
+	}
+}
+
+func TestNewSailsGeneratedEvent_EmptyEvidencePaths(t *testing.T) {
+	// Test with empty evidence paths struct (no paths set)
+	data := SailsGeneratedData{
+		Color:         "GRAY",
+		ComputedBase:  "GRAY",
+		Reasons:       []string{"proofs not found"},
+		FilePath:      ".claude/sessions/session-test/WHITE_SAILS.yaml",
+		EvidencePaths: &EvidencePaths{},
+	}
+
+	event := NewSailsGeneratedEvent("session-test", data)
+
+	// evidence_paths should not be in meta when all paths are empty
+	if _, exists := event.Meta["evidence_paths"]; exists {
+		t.Error("Meta should not contain evidence_paths when all paths are empty strings")
+	}
+}
+
+func TestNewSailsGeneratedEvent_PartialEvidencePaths(t *testing.T) {
+	// Test with only some evidence paths set
+	data := SailsGeneratedData{
+		Color:        "WHITE",
+		ComputedBase: "WHITE",
+		Reasons:      []string{"required proofs passing"},
+		FilePath:     ".claude/sessions/session-test/WHITE_SAILS.yaml",
+		EvidencePaths: &EvidencePaths{
+			Tests: ".claude/sessions/session-test/test-output.log",
+			Build: ".claude/sessions/session-test/build-output.log",
+			// Lint, Adversarial, Integration are empty
+		},
+	}
+
+	event := NewSailsGeneratedEvent("session-test", data)
+
+	evidencePaths, ok := event.Meta["evidence_paths"].(map[string]string)
+	if !ok {
+		t.Fatal("Meta.evidence_paths is not a map[string]string")
+	}
+
+	// Should have tests and build
+	if evidencePaths["tests"] == "" {
+		t.Error("evidence_paths.tests should not be empty")
+	}
+	if evidencePaths["build"] == "" {
+		t.Error("evidence_paths.build should not be empty")
+	}
+
+	// Should NOT have lint, adversarial, integration (empty strings omitted)
+	if _, exists := evidencePaths["lint"]; exists {
+		t.Error("evidence_paths should not contain lint when it's empty")
+	}
+	if _, exists := evidencePaths["adversarial"]; exists {
+		t.Error("evidence_paths should not contain adversarial when it's empty")
+	}
+	if _, exists := evidencePaths["integration"]; exists {
+		t.Error("evidence_paths should not contain integration when it's empty")
+	}
+}
+
+func TestArtifactType_WhiteSails(t *testing.T) {
+	// Test that ArtifactTypeWhiteSails is defined correctly
+	if ArtifactTypeWhiteSails != "white_sails" {
+		t.Errorf("ArtifactTypeWhiteSails = %v, want 'white_sails'", ArtifactTypeWhiteSails)
+	}
+}
+
+func TestArtifactType_Count(t *testing.T) {
+	// Test that we have 6 artifact types total
+	artifactTypes := []ArtifactType{
+		ArtifactTypePRD,
+		ArtifactTypeTDD,
+		ArtifactTypeADR,
+		ArtifactTypeTestPlan,
+		ArtifactTypeCode,
+		ArtifactTypeWhiteSails,
+	}
+
+	if len(artifactTypes) != 6 {
+		t.Errorf("Expected 6 artifact types, got %d", len(artifactTypes))
+	}
+
+	// Verify each type has correct value
+	expected := map[ArtifactType]string{
+		ArtifactTypePRD:        "prd",
+		ArtifactTypeTDD:        "tdd",
+		ArtifactTypeADR:        "adr",
+		ArtifactTypeTestPlan:   "test_plan",
+		ArtifactTypeCode:       "code",
+		ArtifactTypeWhiteSails: "white_sails",
+	}
+
+	for artType, val := range expected {
+		if string(artType) != val {
+			t.Errorf("%v = %v, want %v", artType, string(artType), val)
+		}
+	}
+}

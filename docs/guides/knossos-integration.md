@@ -107,6 +107,24 @@ ari hook route
 ari hook validate
 ```
 
+### Handoff Commands
+
+Agent handoffs enable workflow phase transitions with proper event tracking:
+
+```bash
+# Prepare handoff (validates readiness, emits task_end)
+ari handoff prepare --from architect --to principal-engineer
+
+# Execute handoff (triggers transition, emits task_start)
+ari handoff execute --from architect --to principal-engineer
+
+# Query current handoff state
+ari handoff status
+
+# View handoff history from events.jsonl
+ari handoff history
+```
+
 ### Sails Commands
 
 ```bash
@@ -172,6 +190,10 @@ Ariadne-specific:
 |----------|-------------|
 | `USE_ARI_HOOKS` | Feature flag: 1=enabled (default), 0=disabled |
 | `ARIADNE_BIN` | Path to ari binary (for development) |
+| `ARIADNE_MSG_WARN` | Cognitive budget warning threshold (default: 250) |
+| `ARIADNE_MSG_PARK` | Cognitive budget park suggestion threshold |
+| `ARIADNE_BUDGET_DISABLE` | Set to 1 to disable cognitive budget tracking |
+| `ARIADNE_SESSION_KEY` | Override session key for budget tracking (testing) |
 
 ### Performance Targets
 
@@ -201,6 +223,19 @@ The Thread Contract v2 records significant events to `events.jsonl` in the sessi
 | `decision` | Significant decision made |
 | `context_switch` | Context change (new file, new task) |
 | `sails_generated` | White Sails confidence signal generated |
+| `handoff_prepared` | Agent handoff validated and ready |
+| `handoff_executed` | Agent handoff completed |
+
+### Artifact Types
+
+| Type | Description |
+|------|-------------|
+| `prd` | Product Requirements Document |
+| `tdd` | Technical Design Document |
+| `adr` | Architecture Decision Record |
+| `test_plan` | Test Plan |
+| `code` | Source Code |
+| `white_sails` | White Sails quality gate artifact |
 
 ### Event Format
 
@@ -212,6 +247,53 @@ The Thread Contract v2 records significant events to `events.jsonl` in the sessi
   "file_path": "/path/to/file.go",
   "session_id": "session-20260105-143000-abc12345"
 }
+```
+
+### sails_generated Event with Evidence
+
+The `sails_generated` event includes evidence paths from WHITE_SAILS.yaml:
+
+```json
+{
+  "ts": "2026-01-05T14:30:00Z",
+  "type": "sails_generated",
+  "meta": {
+    "color": "white",
+    "computed_base": "green",
+    "session_id": "session-20260105-143000-abc12345",
+    "file_path": ".claude/sessions/.../WHITE_SAILS.yaml",
+    "evidence_paths": {
+      "tests": "ariadne/internal/..._test.go",
+      "build": "ariadne/ari",
+      "lint": "ariadne/.golangci.yml"
+    }
+  }
+}
+```
+
+## Cognitive Budget
+
+The cognitive budget system tracks tool usage per CLI invocation and warns when approaching context limits.
+
+### Configuration
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `ARIADNE_MSG_WARN` | 250 | Emit warning when tool count reaches this threshold |
+| `ARIADNE_MSG_PARK` | - | Suggest /park when reaching this threshold |
+| `ARIADNE_BUDGET_DISABLE` | 0 | Set to 1 to disable tracking entirely |
+
+### Behavior
+
+- Counter increments on each PostToolUse hook execution
+- Scoped per-CLI-invocation (not per-Knossos-session)
+- Warnings emitted to stderr (non-blocking)
+- State stored in `/tmp/ariadne-msg-count-{session-key}`
+
+### Example Warning
+
+```
+[COGNITIVE_BUDGET] Tool count 250 reached warn threshold. Consider /park to preserve context.
 ```
 
 ## State Management

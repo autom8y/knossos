@@ -95,11 +95,33 @@ func runWrap(ctx *cmdContext, opts wrapOptions) error {
 		if writerErr != nil {
 			printer.VerboseLog("warn", "failed to create event writer for sails", map[string]interface{}{"error": writerErr.Error()})
 		} else {
+			// Build evidence paths from collected proofs
+			var evidencePaths *threadcontract.EvidencePaths
+			if sailsResult.Proofs != nil {
+				evidencePaths = &threadcontract.EvidencePaths{}
+				if proof, ok := sailsResult.Proofs["tests"]; ok && proof.EvidencePath != "" {
+					evidencePaths.Tests = proof.EvidencePath
+				}
+				if proof, ok := sailsResult.Proofs["build"]; ok && proof.EvidencePath != "" {
+					evidencePaths.Build = proof.EvidencePath
+				}
+				if proof, ok := sailsResult.Proofs["lint"]; ok && proof.EvidencePath != "" {
+					evidencePaths.Lint = proof.EvidencePath
+				}
+				if proof, ok := sailsResult.Proofs["adversarial"]; ok && proof.EvidencePath != "" {
+					evidencePaths.Adversarial = proof.EvidencePath
+				}
+				if proof, ok := sailsResult.Proofs["integration"]; ok && proof.EvidencePath != "" {
+					evidencePaths.Integration = proof.EvidencePath
+				}
+			}
+
 			sailsEvent := threadcontract.NewSailsGeneratedEvent(sessionID, threadcontract.SailsGeneratedData{
-				Color:        string(sailsResult.Color),
-				ComputedBase: string(sailsResult.ComputedBase),
-				Reasons:      sailsResult.Reasons,
-				FilePath:     sailsResult.FilePath,
+				Color:         string(sailsResult.Color),
+				ComputedBase:  string(sailsResult.ComputedBase),
+				Reasons:       sailsResult.Reasons,
+				FilePath:      sailsResult.FilePath,
+				EvidencePaths: evidencePaths,
 			})
 			if writeErr := writer.Write(sailsEvent); writeErr != nil {
 				printer.VerboseLog("warn", "failed to emit sails event", map[string]interface{}{"error": writeErr.Error()})

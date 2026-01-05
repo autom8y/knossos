@@ -31,11 +31,12 @@ type ArtifactType string
 
 // Artifact types for tracking deliverables produced during Claude Code sessions.
 const (
-	ArtifactTypePRD      ArtifactType = "prd"
-	ArtifactTypeTDD      ArtifactType = "tdd"
-	ArtifactTypeADR      ArtifactType = "adr"
-	ArtifactTypeTestPlan ArtifactType = "test_plan"
-	ArtifactTypeCode     ArtifactType = "code"
+	ArtifactTypePRD        ArtifactType = "prd"
+	ArtifactTypeTDD        ArtifactType = "tdd"
+	ArtifactTypeADR        ArtifactType = "adr"
+	ArtifactTypeTestPlan   ArtifactType = "test_plan"
+	ArtifactTypeCode       ArtifactType = "code"
+	ArtifactTypeWhiteSails ArtifactType = "white_sails"
 )
 
 // Event represents a thread event in the events.jsonl log.
@@ -135,6 +136,25 @@ func NewContextSwitchEvent(summary string, path string, meta map[string]interfac
 	}
 }
 
+// EvidencePaths contains paths to proof evidence files from WHITE_SAILS.yaml.
+// These paths link the sails_generated event to the actual proof artifacts.
+type EvidencePaths struct {
+	// Tests is the path to test output evidence (e.g., test-output.log).
+	Tests string `json:"tests,omitempty"`
+
+	// Build is the path to build output evidence (e.g., build-output.log).
+	Build string `json:"build,omitempty"`
+
+	// Lint is the path to lint output evidence (e.g., lint-output.log).
+	Lint string `json:"lint,omitempty"`
+
+	// Adversarial is the path to adversarial test evidence (optional).
+	Adversarial string `json:"adversarial,omitempty"`
+
+	// Integration is the path to integration test evidence (optional).
+	Integration string `json:"integration,omitempty"`
+}
+
 // SailsGeneratedData contains the data for a SAILS_GENERATED event.
 // This captures the White Sails confidence signal generation per TDD 5.4.
 type SailsGeneratedData struct {
@@ -149,6 +169,10 @@ type SailsGeneratedData struct {
 
 	// FilePath is the path to the generated WHITE_SAILS.yaml.
 	FilePath string
+
+	// EvidencePaths contains paths to the proof evidence files.
+	// These reflect the WHITE_SAILS.yaml proof file paths.
+	EvidencePaths *EvidencePaths
 }
 
 // NewSailsGeneratedEvent creates an event for White Sails generation.
@@ -160,6 +184,7 @@ type SailsGeneratedData struct {
 //   - Computed base color (before modifiers)
 //   - Reasons array explaining the color determination
 //   - File path to WHITE_SAILS.yaml
+//   - Evidence paths from WHITE_SAILS.yaml proofs (tests, build, lint)
 func NewSailsGeneratedEvent(sessionID string, data SailsGeneratedData) Event {
 	meta := map[string]interface{}{
 		"session_id":    sessionID,
@@ -167,6 +192,29 @@ func NewSailsGeneratedEvent(sessionID string, data SailsGeneratedData) Event {
 		"computed_base": data.ComputedBase,
 		"reasons":       data.Reasons,
 		"file_path":     data.FilePath,
+	}
+
+	// Add evidence_paths to meta if provided
+	if data.EvidencePaths != nil {
+		evidencePaths := make(map[string]string)
+		if data.EvidencePaths.Tests != "" {
+			evidencePaths["tests"] = data.EvidencePaths.Tests
+		}
+		if data.EvidencePaths.Build != "" {
+			evidencePaths["build"] = data.EvidencePaths.Build
+		}
+		if data.EvidencePaths.Lint != "" {
+			evidencePaths["lint"] = data.EvidencePaths.Lint
+		}
+		if data.EvidencePaths.Adversarial != "" {
+			evidencePaths["adversarial"] = data.EvidencePaths.Adversarial
+		}
+		if data.EvidencePaths.Integration != "" {
+			evidencePaths["integration"] = data.EvidencePaths.Integration
+		}
+		if len(evidencePaths) > 0 {
+			meta["evidence_paths"] = evidencePaths
+		}
 	}
 
 	summary := "Generated WHITE_SAILS: " + data.Color
