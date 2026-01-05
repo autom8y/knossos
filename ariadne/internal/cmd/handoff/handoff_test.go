@@ -459,6 +459,292 @@ current_phase: design
 	}
 }
 
+// TestPrepare_SelfHandoff verifies that self-handoff is rejected (C3 edge case).
+func TestPrepare_SelfHandoff(t *testing.T) {
+	agents := []string{"requirements-analyst", "architect", "principal-engineer", "qa-adversary", "orchestrator"}
+
+	for _, agent := range agents {
+		t.Run(agent, func(t *testing.T) {
+			// Create temporary project structure
+			tmpDir := t.TempDir()
+			projectDir := tmpDir
+
+			// Create .claude/sessions directory structure
+			sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+			sessionID := "session-20260105-self-" + agent
+			sessionDir := filepath.Join(sessionsDir, sessionID)
+			locksDir := filepath.Join(sessionsDir, ".locks")
+			auditDir := filepath.Join(sessionsDir, ".audit")
+
+			if err := os.MkdirAll(sessionDir, 0755); err != nil {
+				t.Fatalf("Failed to create session dir: %v", err)
+			}
+			if err := os.MkdirAll(locksDir, 0755); err != nil {
+				t.Fatalf("Failed to create locks dir: %v", err)
+			}
+			if err := os.MkdirAll(auditDir, 0755); err != nil {
+				t.Fatalf("Failed to create audit dir: %v", err)
+			}
+
+			// Create SESSION_CONTEXT.md with ACTIVE status
+			createdAt := time.Now().UTC().Add(-1 * time.Hour)
+			contextContent := `---
+schema_version: "2.1"
+session_id: ` + sessionID + `
+status: ACTIVE
+initiative: Test Self Handoff
+complexity: MODULE
+created_at: ` + createdAt.Format(time.RFC3339) + `
+active_team: 10x-dev-pack
+current_phase: design
+---
+
+# Session Context
+`
+			if err := os.WriteFile(filepath.Join(sessionDir, "SESSION_CONTEXT.md"), []byte(contextContent), 0644); err != nil {
+				t.Fatalf("Failed to write SESSION_CONTEXT.md: %v", err)
+			}
+
+			// Create current-session file
+			if err := os.WriteFile(filepath.Join(sessionsDir, ".current-session"), []byte(sessionID), 0644); err != nil {
+				t.Fatalf("Failed to write .current-session: %v", err)
+			}
+
+			// Run prepare command with self-handoff
+			outputFormat := "json"
+			verbose := false
+			ctx := &cmdContext{
+				output:     &outputFormat,
+				verbose:    &verbose,
+				projectDir: &projectDir,
+			}
+
+			opts := prepareOptions{
+				fromAgent: agent,
+				toAgent:   agent, // Self-handoff
+			}
+
+			err := runPrepare(ctx, opts)
+			if err == nil {
+				t.Errorf("runPrepare should fail for self-handoff %s -> %s", agent, agent)
+			}
+
+			// Verify error message indicates self-handoff is not allowed
+			if err != nil && !strings.Contains(err.Error(), "self-handoff not allowed") {
+				t.Errorf("Expected error about self-handoff, got: %v", err)
+			}
+		})
+	}
+}
+
+// TestPrepare_AllInvalidSequences verifies all 11 invalid handoff sequences are rejected (C3 edge case).
+func TestPrepare_AllInvalidSequences(t *testing.T) {
+	// Define all invalid transitions (11 total as per C3 requirements)
+	invalidTransitions := []struct {
+		from string
+		to   string
+		desc string
+	}{
+		{"requirements-analyst", "principal-engineer", "skip architect"},
+		{"requirements-analyst", "qa-adversary", "skip architect and principal-engineer"},
+		{"requirements-analyst", "orchestrator", "invalid backward"},
+		{"architect", "qa-adversary", "skip principal-engineer"},
+		{"architect", "requirements-analyst", "invalid backward"},
+		{"architect", "orchestrator", "invalid sideways"},
+		{"principal-engineer", "requirements-analyst", "invalid backward"},
+		{"principal-engineer", "architect", "invalid backward"},
+		{"principal-engineer", "orchestrator", "invalid sideways"},
+		{"qa-adversary", "requirements-analyst", "invalid backward (qa can't go to req)"},
+		{"qa-adversary", "principal-engineer", "invalid backward"},
+	}
+
+	for _, tc := range invalidTransitions {
+		t.Run(tc.from+"_to_"+tc.to, func(t *testing.T) {
+			// Create temporary project structure
+			tmpDir := t.TempDir()
+			projectDir := tmpDir
+
+			// Create .claude/sessions directory structure
+			sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+			sessionID := "session-20260105-inv-" + tc.from + "-" + tc.to
+			sessionDir := filepath.Join(sessionsDir, sessionID)
+			locksDir := filepath.Join(sessionsDir, ".locks")
+			auditDir := filepath.Join(sessionsDir, ".audit")
+
+			if err := os.MkdirAll(sessionDir, 0755); err != nil {
+				t.Fatalf("Failed to create session dir: %v", err)
+			}
+			if err := os.MkdirAll(locksDir, 0755); err != nil {
+				t.Fatalf("Failed to create locks dir: %v", err)
+			}
+			if err := os.MkdirAll(auditDir, 0755); err != nil {
+				t.Fatalf("Failed to create audit dir: %v", err)
+			}
+
+			// Create SESSION_CONTEXT.md with ACTIVE status
+			createdAt := time.Now().UTC().Add(-1 * time.Hour)
+			contextContent := `---
+schema_version: "2.1"
+session_id: ` + sessionID + `
+status: ACTIVE
+initiative: Test Invalid Handoff Sequence
+complexity: MODULE
+created_at: ` + createdAt.Format(time.RFC3339) + `
+active_team: 10x-dev-pack
+current_phase: design
+---
+
+# Session Context
+`
+			if err := os.WriteFile(filepath.Join(sessionDir, "SESSION_CONTEXT.md"), []byte(contextContent), 0644); err != nil {
+				t.Fatalf("Failed to write SESSION_CONTEXT.md: %v", err)
+			}
+
+			// Create current-session file
+			if err := os.WriteFile(filepath.Join(sessionsDir, ".current-session"), []byte(sessionID), 0644); err != nil {
+				t.Fatalf("Failed to write .current-session: %v", err)
+			}
+
+			// Run prepare command with invalid sequence
+			outputFormat := "json"
+			verbose := false
+			ctx := &cmdContext{
+				output:     &outputFormat,
+				verbose:    &verbose,
+				projectDir: &projectDir,
+			}
+
+			opts := prepareOptions{
+				fromAgent: tc.from,
+				toAgent:   tc.to,
+			}
+
+			err := runPrepare(ctx, opts)
+			if err == nil {
+				t.Errorf("runPrepare should fail for invalid handoff %s -> %s (%s)", tc.from, tc.to, tc.desc)
+			}
+
+			// Verify error message indicates invalid sequence
+			if err != nil && !strings.Contains(err.Error(), "invalid handoff sequence") {
+				t.Errorf("Expected error about invalid handoff sequence for %s -> %s, got: %v", tc.from, tc.to, err)
+			}
+		})
+	}
+}
+
+// TestPrepare_CrossTeamValidation verifies agents must exist in active_team (C3 edge case).
+func TestPrepare_CrossTeamValidation(t *testing.T) {
+	testCases := []struct {
+		name       string
+		activeTeam string
+		fromAgent  string
+		toAgent    string
+		shouldFail bool
+		errorMsg   string
+	}{
+		{
+			name:       "valid agents in 10x-dev-pack",
+			activeTeam: "10x-dev-pack",
+			fromAgent:  "architect",
+			toAgent:    "principal-engineer",
+			shouldFail: false,
+		},
+		{
+			name:       "invalid from agent not in team",
+			activeTeam: "consultant-pack",
+			fromAgent:  "architect",
+			toAgent:    "orchestrator",
+			shouldFail: true,
+			errorMsg:   "source agent not in active team",
+		},
+		{
+			name:       "invalid to agent not in team",
+			activeTeam: "consultant-pack",
+			fromAgent:  "orchestrator",
+			toAgent:    "architect",
+			shouldFail: true,
+			errorMsg:   "target agent not in active team",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			// Create temporary project structure
+			tmpDir := t.TempDir()
+			projectDir := tmpDir
+
+			// Create .claude/sessions directory structure
+			sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+			sessionID := "session-20260105-team-" + tc.name
+			sessionDir := filepath.Join(sessionsDir, sessionID)
+			locksDir := filepath.Join(sessionsDir, ".locks")
+			auditDir := filepath.Join(sessionsDir, ".audit")
+
+			if err := os.MkdirAll(sessionDir, 0755); err != nil {
+				t.Fatalf("Failed to create session dir: %v", err)
+			}
+			if err := os.MkdirAll(locksDir, 0755); err != nil {
+				t.Fatalf("Failed to create locks dir: %v", err)
+			}
+			if err := os.MkdirAll(auditDir, 0755); err != nil {
+				t.Fatalf("Failed to create audit dir: %v", err)
+			}
+
+			// Create SESSION_CONTEXT.md with ACTIVE status and specific team
+			createdAt := time.Now().UTC().Add(-1 * time.Hour)
+			contextContent := `---
+schema_version: "2.1"
+session_id: ` + sessionID + `
+status: ACTIVE
+initiative: Test Cross-Team Validation
+complexity: MODULE
+created_at: ` + createdAt.Format(time.RFC3339) + `
+active_team: ` + tc.activeTeam + `
+current_phase: design
+---
+
+# Session Context
+`
+			if err := os.WriteFile(filepath.Join(sessionDir, "SESSION_CONTEXT.md"), []byte(contextContent), 0644); err != nil {
+				t.Fatalf("Failed to write SESSION_CONTEXT.md: %v", err)
+			}
+
+			// Create current-session file
+			if err := os.WriteFile(filepath.Join(sessionsDir, ".current-session"), []byte(sessionID), 0644); err != nil {
+				t.Fatalf("Failed to write .current-session: %v", err)
+			}
+
+			// Run prepare command
+			outputFormat := "json"
+			verbose := false
+			ctx := &cmdContext{
+				output:     &outputFormat,
+				verbose:    &verbose,
+				projectDir: &projectDir,
+			}
+
+			opts := prepareOptions{
+				fromAgent: tc.fromAgent,
+				toAgent:   tc.toAgent,
+			}
+
+			err := runPrepare(ctx, opts)
+			if tc.shouldFail {
+				if err == nil {
+					t.Errorf("runPrepare should fail for cross-team validation: %s", tc.name)
+				}
+				if err != nil && !strings.Contains(err.Error(), tc.errorMsg) {
+					t.Errorf("Expected error containing %q, got: %v", tc.errorMsg, err)
+				}
+			} else {
+				if err != nil {
+					t.Errorf("runPrepare should succeed for valid team agents: %v", err)
+				}
+			}
+		})
+	}
+}
+
 // TestStatus_NoSession verifies that status returns error when no session exists.
 func TestStatus_NoSession(t *testing.T) {
 	// Create temporary project structure with no session
@@ -550,6 +836,94 @@ current_phase: requirements
 	err := runHistory(ctx, opts)
 	if err != nil {
 		t.Fatalf("runHistory should not fail with empty/missing events: %v", err)
+	}
+}
+
+// TestExecute_DryRunValidation verifies that execute --dry-run still validates (C3 edge case).
+func TestExecute_DryRunValidation(t *testing.T) {
+	// Create temporary project structure
+	tmpDir := t.TempDir()
+	projectDir := tmpDir
+
+	// Create .claude/sessions directory structure
+	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionID := "session-20260105-dryval-1234"
+	sessionDir := filepath.Join(sessionsDir, sessionID)
+	locksDir := filepath.Join(sessionsDir, ".locks")
+	auditDir := filepath.Join(sessionsDir, ".audit")
+
+	if err := os.MkdirAll(sessionDir, 0755); err != nil {
+		t.Fatalf("Failed to create session dir: %v", err)
+	}
+	if err := os.MkdirAll(locksDir, 0755); err != nil {
+		t.Fatalf("Failed to create locks dir: %v", err)
+	}
+	if err := os.MkdirAll(auditDir, 0755); err != nil {
+		t.Fatalf("Failed to create audit dir: %v", err)
+	}
+
+	// Create SESSION_CONTEXT.md with ACTIVE status
+	createdAt := time.Now().UTC().Add(-1 * time.Hour)
+	contextContent := `---
+schema_version: "2.1"
+session_id: ` + sessionID + `
+status: ACTIVE
+initiative: Test Dry Run Validation
+complexity: MODULE
+created_at: ` + createdAt.Format(time.RFC3339) + `
+active_team: 10x-dev-pack
+current_phase: design
+---
+
+# Session Context
+`
+	if err := os.WriteFile(filepath.Join(sessionDir, "SESSION_CONTEXT.md"), []byte(contextContent), 0644); err != nil {
+		t.Fatalf("Failed to write SESSION_CONTEXT.md: %v", err)
+	}
+
+	// Create current-session file
+	if err := os.WriteFile(filepath.Join(sessionsDir, ".current-session"), []byte(sessionID), 0644); err != nil {
+		t.Fatalf("Failed to write .current-session: %v", err)
+	}
+
+	// Test 1: dry-run with invalid agent should fail validation
+	outputFormat := "json"
+	verbose := false
+	ctx := &cmdContext{
+		output:     &outputFormat,
+		verbose:    &verbose,
+		projectDir: &projectDir,
+	}
+
+	opts := executeOptions{
+		artifactID: "TDD-dry-run-test",
+		toAgent:    "invalid-agent", // Invalid agent
+		dryRun:     true,
+	}
+
+	err := runExecute(ctx, opts)
+	if err == nil {
+		t.Error("runExecute with dry-run should fail validation for invalid agent")
+	}
+	if err != nil && !strings.Contains(err.Error(), "invalid target agent") {
+		t.Errorf("Expected error about invalid agent, got: %v", err)
+	}
+
+	// Test 2: dry-run with valid agent should succeed but not emit events
+	opts.toAgent = "principal-engineer"
+	err = runExecute(ctx, opts)
+	if err != nil {
+		t.Fatalf("runExecute with dry-run and valid agent should succeed: %v", err)
+	}
+
+	// Verify no events were written
+	eventsPath := filepath.Join(sessionDir, "events.jsonl")
+	if _, err := os.Stat(eventsPath); !os.IsNotExist(err) {
+		// File exists, check if it's empty
+		content, _ := os.ReadFile(eventsPath)
+		if len(content) > 0 {
+			t.Error("Dry-run should not create events in events.jsonl")
+		}
 	}
 }
 

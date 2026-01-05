@@ -107,6 +107,44 @@ func runPrepare(ctx *cmdContext, opts prepareOptions) error {
 		return err
 	}
 
+	// Prevent self-handoff (C3 edge case)
+	if opts.fromAgent == opts.toAgent {
+		err := errors.NewWithDetails(errors.CodeLifecycleViolation, "self-handoff not allowed",
+			map[string]interface{}{
+				"agent": opts.fromAgent,
+				"hint":  "Handoff requires a different agent. Cannot handoff to self.",
+			})
+		printer.PrintError(err)
+		return err
+	}
+
+	// Validate agents exist in active team (C3 cross-team validation)
+	if sessCtx.ActiveTeam != "" {
+		teamAgents := getTeamAgents(sessCtx.ActiveTeam)
+		if teamAgents != nil {
+			if !isValidAgent(opts.fromAgent, teamAgents) {
+				err := errors.NewWithDetails(errors.CodeUsageError, "source agent not in active team",
+					map[string]interface{}{
+						"from":        opts.fromAgent,
+						"active_team": sessCtx.ActiveTeam,
+						"team_agents": teamAgents,
+					})
+				printer.PrintError(err)
+				return err
+			}
+			if !isValidAgent(opts.toAgent, teamAgents) {
+				err := errors.NewWithDetails(errors.CodeUsageError, "target agent not in active team",
+					map[string]interface{}{
+						"to":          opts.toAgent,
+						"active_team": sessCtx.ActiveTeam,
+						"team_agents": teamAgents,
+					})
+				printer.PrintError(err)
+				return err
+			}
+		}
+	}
+
 	// Validate handoff sequence
 	if !isValidHandoffSequence(opts.fromAgent, opts.toAgent) {
 		err := errors.NewWithDetails(errors.CodeLifecycleViolation, "invalid handoff sequence",
@@ -307,3 +345,18 @@ func (h HandoffPrepareOutput) Text() string {
 
 // Ensure Textable interface is implemented
 var _ output.Textable = HandoffPrepareOutput{}
+
+// getTeamAgents returns the list of agents for a given team.
+// Returns nil if team is unknown (allowing fallback to universal agent list).
+func getTeamAgents(team string) []string {
+	teamRoster := map[string][]string{
+		"10x-dev-pack": {
+			"requirements-analyst", "architect", "principal-engineer", "qa-adversary", "orchestrator",
+		},
+		"consultant-pack": {
+			"orchestrator",
+		},
+		// Add more teams as needed
+	}
+	return teamRoster[team]
+}

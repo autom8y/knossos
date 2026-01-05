@@ -72,6 +72,9 @@ func runStatus(ctx *cmdContext) error {
 		printer.VerboseLog("warn", "failed to read events", map[string]interface{}{"error": err.Error()})
 	}
 
+	// Filter events by sessionID to avoid cross-session contamination (C3 edge case)
+	events = filterEventsBySession(events, sessionID)
+
 	// Determine current agent from most recent task_start event
 	currentAgent := determineCurrentAgent(events, sessCtx.CurrentPhase)
 
@@ -124,6 +127,30 @@ func readAllEvents(path string) ([]GenericEvent, error) {
 	}
 
 	return events, scanner.Err()
+}
+
+// filterEventsBySession filters events to only those belonging to the given session.
+// This prevents cross-session contamination (C3 edge case).
+func filterEventsBySession(events []GenericEvent, sessionID string) []GenericEvent {
+	var filtered []GenericEvent
+	for _, e := range events {
+		// Check if event belongs to this session
+		// For thread contract events, check parent_session in meta
+		if e.Type != "" && e.Meta != nil {
+			if parentSession, ok := e.Meta["parent_session"].(string); ok {
+				if parentSession == sessionID {
+					filtered = append(filtered, e)
+				}
+				continue
+			}
+		}
+		// For session events (HANDOFF_EXECUTED, etc.), we assume they're in the correct file
+		// but we could also check metadata if needed
+		if e.Event != "" {
+			filtered = append(filtered, e)
+		}
+	}
+	return filtered
 }
 
 // GenericEvent represents either a session event or a thread contract event.
