@@ -85,7 +85,9 @@ Note: This hook only performs detection/routing, not execution.
 
 Performance: <5ms target execution time (simple string prefix matching).`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runRoute(ctx)
+			return ctx.withTimeout(func() error {
+				return runRoute(ctx)
+			})
 		},
 	}
 

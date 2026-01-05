@@ -61,7 +61,9 @@ and debugging.
 
 Performance: <100ms target execution time.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runThread(ctx)
+			return ctx.withTimeout(func() error {
+				return runThread(ctx)
+			})
 		},
 	}
 

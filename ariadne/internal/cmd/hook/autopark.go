@@ -46,7 +46,9 @@ This hook is triggered on Stop events. It:
 
 Performance: <100ms target execution time.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runAutopark(ctx)
+			return ctx.withTimeout(func() error {
+				return runAutopark(ctx)
+			})
 		},
 	}
 

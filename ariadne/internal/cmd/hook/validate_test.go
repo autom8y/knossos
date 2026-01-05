@@ -13,42 +13,71 @@ import (
 
 func TestParseCommand(t *testing.T) {
 	tests := []struct {
-		name      string
-		toolInput string
-		want      string
+		name          string
+		toolInput     string
+		want          string
+		expectWarning bool
 	}{
 		{
-			name:      "valid Bash input",
-			toolInput: `{"command": "ls -la", "description": "List files"}`,
-			want:      "ls -la",
+			name:          "valid Bash input",
+			toolInput:     `{"command": "ls -la", "description": "List files"}`,
+			want:          "ls -la",
+			expectWarning: false,
 		},
 		{
-			name:      "empty input",
-			toolInput: "",
-			want:      "",
+			name:          "empty input",
+			toolInput:     "",
+			want:          "",
+			expectWarning: false,
 		},
 		{
-			name:      "invalid JSON",
-			toolInput: "not json",
-			want:      "",
+			name:          "invalid JSON",
+			toolInput:     "not json",
+			want:          "",
+			expectWarning: true,
 		},
 		{
-			name:      "no command field",
-			toolInput: `{"description": "just a description"}`,
-			want:      "",
+			name:          "malformed JSON - unterminated",
+			toolInput:     `{"command": "ls -la"`,
+			want:          "",
+			expectWarning: true,
 		},
 		{
-			name:      "complex command",
-			toolInput: `{"command": "git push --force origin main", "description": "Force push"}`,
-			want:      "git push --force origin main",
+			name:          "malformed JSON - trailing comma",
+			toolInput:     `{"command": "ls", }`,
+			want:          "",
+			expectWarning: true,
+		},
+		{
+			name:          "no command field",
+			toolInput:     `{"description": "just a description"}`,
+			want:          "",
+			expectWarning: false,
+		},
+		{
+			name:          "complex command",
+			toolInput:     `{"command": "git push --force origin main", "description": "Force push"}`,
+			want:          "git push --force origin main",
+			expectWarning: false,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := parseCommand(tt.toolInput)
+			var stdout, stderr bytes.Buffer
+			printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, true) // verbose=true to capture warnings
+
+			result := parseCommand(printer, tt.toolInput)
 			if result != tt.want {
 				t.Errorf("parseCommand(%q) = %q, want %q", tt.toolInput, result, tt.want)
+			}
+
+			// Check if warning was logged when expected
+			if tt.expectWarning {
+				stderrStr := stderr.String()
+				if !bytes.Contains([]byte(stderrStr), []byte("failed to parse tool input JSON")) {
+					t.Errorf("Expected warning log for malformed JSON, but got no warning. stderr: %s", stderrStr)
+				}
 			}
 		})
 	}

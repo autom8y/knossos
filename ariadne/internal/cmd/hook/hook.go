@@ -3,6 +3,8 @@
 package hook
 
 import (
+	"context"
+	"fmt"
 	"os"
 	"time"
 
@@ -138,4 +140,25 @@ func (c *cmdContext) getCurrentSessionID() (string, error) {
 		return "", err
 	}
 	return string(data), nil
+}
+
+// withTimeout wraps a command execution function with context.WithTimeout.
+// This ensures all hook commands respect the configured timeout.
+func (c *cmdContext) withTimeout(fn func() error) error {
+	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
+	defer cancel()
+
+	// Create a channel to signal completion
+	done := make(chan error, 1)
+
+	go func() {
+		done <- fn()
+	}()
+
+	select {
+	case err := <-done:
+		return err
+	case <-ctx.Done():
+		return fmt.Errorf("hook operation timed out after %v", c.timeout)
+	}
 }

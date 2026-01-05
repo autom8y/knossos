@@ -58,7 +58,9 @@ Output is formatted as a markdown table suitable for Claude context.
 
 Performance: <100ms target execution time.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runContext(ctx)
+			return ctx.withTimeout(func() error {
+				return runContext(ctx)
+			})
 		},
 	}
 

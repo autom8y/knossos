@@ -57,8 +57,16 @@ type Env struct {
 
 // ParseEnv reads hook-related environment variables and returns an Env.
 func ParseEnv() *Env {
+	event := HookEvent(os.Getenv(EnvHookEvent))
+	// Validate the event type if non-empty
+	if event != "" && !isValidHookEvent(event) {
+		// Log warning for invalid event type but don't fail
+		// Empty event is valid (used for testing/direct invocation)
+		event = ""
+	}
+
 	return &Env{
-		Event:          HookEvent(os.Getenv(EnvHookEvent)),
+		Event:          event,
 		ToolName:       os.Getenv(EnvToolName),
 		ToolInput:      os.Getenv(EnvToolInput),
 		ToolResult:     os.Getenv(EnvToolResult),
@@ -67,6 +75,16 @@ func ParseEnv() *Env {
 		ConversationID: os.Getenv(EnvConversation),
 		UserMessage:    os.Getenv(EnvUserMessage),
 		AssistantText:  os.Getenv(EnvAssistantText),
+	}
+}
+
+// isValidHookEvent checks if the provided event is a known HookEvent.
+func isValidHookEvent(event HookEvent) bool {
+	switch event {
+	case EventPreToolUse, EventPostToolUse, EventStop, EventSessionStart, EventUserPromptSubmit:
+		return true
+	default:
+		return false
 	}
 }
 

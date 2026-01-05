@@ -10,6 +10,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/autom8y/ariadne/internal/hook"
+	"github.com/autom8y/ariadne/internal/output"
 )
 
 // ValidateDecision represents the decision for a bash command validation.
@@ -82,7 +83,9 @@ Output (stdout JSON):
 
 Performance: <5ms for passthrough path.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runValidate(ctx)
+			return ctx.withTimeout(func() error {
+				return runValidate(ctx)
+			})
 		},
 	}
 
@@ -120,7 +123,7 @@ func runValidate(ctx *cmdContext) error {
 	}
 
 	// Parse command from tool input
-	command := parseCommand(hookEnv.ToolInput)
+	command := parseCommand(printer, hookEnv.ToolInput)
 	if command == "" {
 		printer.VerboseLog("debug", "no command in tool input", nil)
 		return outputValidateAllow(printer)
@@ -135,7 +138,7 @@ func runValidate(ctx *cmdContext) error {
 }
 
 // parseCommand extracts command from JSON tool input.
-func parseCommand(toolInput string) string {
+func parseCommand(printer *output.Printer, toolInput string) string {
 	if toolInput == "" {
 		return ""
 	}
@@ -144,7 +147,9 @@ func parseCommand(toolInput string) string {
 	if err := json.Unmarshal([]byte(toolInput), &input); err != nil {
 		// Try the map form
 		var mapInput map[string]interface{}
-		if err := json.Unmarshal([]byte(toolInput), &mapInput); err != nil {
+		if err2 := json.Unmarshal([]byte(toolInput), &mapInput); err2 != nil {
+			printer.VerboseLog("warn", "failed to parse tool input JSON",
+				map[string]interface{}{"error": err.Error(), "error2": err2.Error(), "input": toolInput})
 			return ""
 		}
 		if cmd, ok := mapInput["command"].(string); ok {
@@ -238,10 +243,11 @@ func runValidateWithPrinter(ctx *cmdContext, printer interface{ Print(interface{
 	}
 
 	// Parse command from tool input
-	command := parseCommand(hookEnv.ToolInput)
+	testPrinter := printer.(*output.Printer)
+	command := parseCommand(testPrinter, hookEnv.ToolInput)
 	if command == "" && stdinInput != "" {
 		// Try stdin input for testing
-		command = parseCommand(stdinInput)
+		command = parseCommand(testPrinter, stdinInput)
 	}
 
 	if command == "" {

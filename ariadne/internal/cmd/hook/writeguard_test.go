@@ -66,42 +66,71 @@ func TestIsProtectedFile(t *testing.T) {
 
 func TestParseFilePath(t *testing.T) {
 	tests := []struct {
-		name      string
-		toolInput string
-		want      string
+		name          string
+		toolInput     string
+		want          string
+		expectWarning bool
 	}{
 		{
-			name:      "valid Write input",
-			toolInput: `{"file_path": "/tmp/test.txt", "content": "hello"}`,
-			want:      "/tmp/test.txt",
+			name:          "valid Write input",
+			toolInput:     `{"file_path": "/tmp/test.txt", "content": "hello"}`,
+			want:          "/tmp/test.txt",
+			expectWarning: false,
 		},
 		{
-			name:      "valid Edit input",
-			toolInput: `{"file_path": "/tmp/test.txt", "old_string": "hello", "new_string": "world"}`,
-			want:      "/tmp/test.txt",
+			name:          "valid Edit input",
+			toolInput:     `{"file_path": "/tmp/test.txt", "old_string": "hello", "new_string": "world"}`,
+			want:          "/tmp/test.txt",
+			expectWarning: false,
 		},
 		{
-			name:      "empty input",
-			toolInput: "",
-			want:      "",
+			name:          "empty input",
+			toolInput:     "",
+			want:          "",
+			expectWarning: false,
 		},
 		{
-			name:      "invalid JSON",
-			toolInput: "not json",
-			want:      "",
+			name:          "invalid JSON",
+			toolInput:     "not json",
+			want:          "",
+			expectWarning: true,
 		},
 		{
-			name:      "no file_path field",
-			toolInput: `{"other": "value"}`,
-			want:      "",
+			name:          "malformed JSON - unterminated string",
+			toolInput:     `{"file_path": "/tmp/test.txt`,
+			want:          "",
+			expectWarning: true,
+		},
+		{
+			name:          "malformed JSON - invalid escape",
+			toolInput:     `{"file_path": "\x"}`,
+			want:          "",
+			expectWarning: true,
+		},
+		{
+			name:          "no file_path field",
+			toolInput:     `{"other": "value"}`,
+			want:          "",
+			expectWarning: false,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := parseFilePath(tt.toolInput)
+			var stdout, stderr bytes.Buffer
+			printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, true) // verbose=true to capture warnings
+
+			result := parseFilePath(printer, tt.toolInput)
 			if result != tt.want {
 				t.Errorf("parseFilePath(%q) = %q, want %q", tt.toolInput, result, tt.want)
+			}
+
+			// Check if warning was logged when expected
+			if tt.expectWarning {
+				stderrStr := stderr.String()
+				if !bytes.Contains([]byte(stderrStr), []byte("failed to parse tool input JSON")) {
+					t.Errorf("Expected warning log for malformed JSON, but got no warning. stderr: %s", stderrStr)
+				}
 			}
 		})
 	}
@@ -457,10 +486,10 @@ func runWriteguardWithPrinter(ctx *cmdContext, printer *output.Printer, stdinInp
 	}
 
 	// Parse file path from tool input
-	filePath := parseFilePath(hookEnv.ToolInput)
+	filePath := parseFilePath(printer, hookEnv.ToolInput)
 	if filePath == "" && stdinInput != "" {
 		// Try stdin input for testing
-		filePath = parseFilePath(stdinInput)
+		filePath = parseFilePath(printer, stdinInput)
 	}
 
 	if filePath == "" {
