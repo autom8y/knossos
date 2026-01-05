@@ -1,7 +1,10 @@
 package session
 
 import (
+	"fmt"
 	"os"
+	"os/exec"
+	"path/filepath"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -16,6 +19,9 @@ import (
 type createOptions struct {
 	complexity string
 	team       string
+	seed       bool
+	seedPrefix string
+	seedKeep   bool
 }
 
 func newCreateCmd(ctx *cmdContext) *cobra.Command {
@@ -35,11 +41,22 @@ func newCreateCmd(ctx *cmdContext) *cobra.Command {
 		"Complexity level: PATCH, MODULE, SYSTEM, INITIATIVE, MIGRATION")
 	cmd.Flags().StringVarP(&opts.team, "team", "t", "",
 		"Team pack to activate (default: from ACTIVE_TEAM)")
+	cmd.Flags().BoolVar(&opts.seed, "seed", false,
+		"Create session in ephemeral worktree, park it, and copy to main repo")
+	cmd.Flags().StringVar(&opts.seedPrefix, "seed-prefix", "/tmp/roster-seed-",
+		"Custom prefix for ephemeral worktree path")
+	cmd.Flags().BoolVar(&opts.seedKeep, "seed-keep", false,
+		"Keep worktree after seeding (for debugging)")
 
 	return cmd
 }
 
 func runCreate(ctx *cmdContext, initiative string, opts createOptions) error {
+	// If seed mode is enabled, delegate to seeded creation flow
+	if opts.seed {
+		return runCreateSeeded(ctx, initiative, opts)
+	}
+
 	printer := ctx.getPrinter()
 	resolver := ctx.getResolver()
 	lockMgr := ctx.getLockManager()
@@ -145,6 +162,216 @@ func runCreate(ctx *cmdContext, initiative string, opts createOptions) error {
 	}
 
 	return printer.Print(result)
+}
+
+// runCreateSeeded creates a session in an ephemeral worktree, parks it immediately,
+// and copies it to the main repo's sessions directory. This enables parallel session
+// preparation without hitting the single-session-per-terminal constraint.
+func runCreateSeeded(ctx *cmdContext, initiative string, opts createOptions) error {
+	printer := ctx.getPrinter()
+	resolver := ctx.getResolver()
+
+	// Get team from flag or ACTIVE_TEAM file
+	team := opts.team
+	if team == "" {
+		team = ctx.getActiveTeam()
+	}
+
+	// Validate complexity
+	if !isValidComplexity(opts.complexity) {
+		err := errors.New(errors.CodeUsageError, "invalid complexity: must be PATCH, MODULE, SYSTEM, INITIATIVE, or MIGRATION")
+		printer.PrintError(err)
+		return err
+	}
+
+	// Generate unique worktree path
+	worktreePath := fmt.Sprintf("%s%d-%d", opts.seedPrefix, time.Now().Unix(), os.Getpid())
+
+	// Get the main repo's project root for later use
+	mainProjectRoot := resolver.ProjectRoot()
+
+	// Create ephemeral worktree
+	printer.VerboseLog("info", "creating ephemeral worktree", map[string]interface{}{"path": worktreePath})
+	if err := createWorktree(worktreePath); err != nil {
+		err := errors.Wrap(errors.CodeGeneralError, "failed to create worktree", err)
+		printer.PrintError(err)
+		return err
+	}
+
+	// Ensure cleanup of worktree unless --seed-keep is set
+	cleanupWorktree := func() {
+		if opts.seedKeep {
+			printer.VerboseLog("info", "keeping worktree for debugging", map[string]interface{}{"path": worktreePath})
+			return
+		}
+		printer.VerboseLog("info", "removing ephemeral worktree", map[string]interface{}{"path": worktreePath})
+		removeWorktree(worktreePath)
+	}
+
+	// Create a resolver for the worktree
+	worktreeResolver := paths.NewResolver(worktreePath)
+
+	// Ensure sessions directory exists in worktree
+	if err := paths.EnsureDir(worktreeResolver.SessionsDir()); err != nil {
+		cleanupWorktree()
+		err := errors.Wrap(errors.CodeGeneralError, "failed to create sessions directory in worktree", err)
+		printer.PrintError(err)
+		return err
+	}
+
+	// Ensure locks directory exists in worktree
+	if err := paths.EnsureDir(worktreeResolver.LocksDir()); err != nil {
+		cleanupWorktree()
+		err := errors.Wrap(errors.CodeGeneralError, "failed to create locks directory in worktree", err)
+		printer.PrintError(err)
+		return err
+	}
+
+	// Create new session context (starts as ACTIVE)
+	newCtx := session.NewContext(initiative, opts.complexity, team)
+	worktreeSessionDir := worktreeResolver.SessionDir(newCtx.SessionID)
+
+	// Create session directory in worktree
+	if err := paths.EnsureDir(worktreeSessionDir); err != nil {
+		cleanupWorktree()
+		err := errors.Wrap(errors.CodeGeneralError, "failed to create session directory in worktree", err)
+		printer.PrintError(err)
+		return err
+	}
+
+	// Immediately transition to PARKED status (seeded sessions start parked)
+	now := time.Now().UTC()
+	newCtx.Status = session.StatusParked
+	newCtx.ParkedAt = &now
+	newCtx.ParkedReason = "Seeded for parallel execution"
+
+	// Save context in worktree
+	worktreeCtxPath := worktreeResolver.SessionContextFile(newCtx.SessionID)
+	if err := newCtx.Save(worktreeCtxPath); err != nil {
+		os.RemoveAll(worktreeSessionDir)
+		cleanupWorktree()
+		printer.PrintError(err)
+		return err
+	}
+
+	// Copy session from worktree to main repo
+	mainSessionsDir := resolver.SessionsDir()
+	if err := paths.EnsureDir(mainSessionsDir); err != nil {
+		cleanupWorktree()
+		err := errors.Wrap(errors.CodeGeneralError, "failed to ensure main sessions directory", err)
+		printer.PrintError(err)
+		return err
+	}
+
+	mainSessionDir := resolver.SessionDir(newCtx.SessionID)
+	printer.VerboseLog("info", "copying session to main repo", map[string]interface{}{
+		"from": worktreeSessionDir,
+		"to":   mainSessionDir,
+	})
+
+	if err := copyDir(worktreeSessionDir, mainSessionDir); err != nil {
+		// On copy failure, keep worktree for debugging unless explicitly asked to remove
+		if !opts.seedKeep {
+			printer.VerboseLog("warn", "copy failed, keeping worktree for debugging", map[string]interface{}{
+				"path":  worktreePath,
+				"error": err.Error(),
+			})
+		}
+		err := errors.Wrap(errors.CodeGeneralError, "failed to copy session to main repo", err)
+		printer.PrintError(err)
+		return err
+	}
+
+	// Cleanup worktree (respects --seed-keep)
+	cleanupWorktree()
+
+	// Output result with seeding information
+	result := output.SeedCreateOutput{
+		SessionID:   newCtx.SessionID,
+		Status:      string(newCtx.Status),
+		Seeded:      true,
+		SeededTo:    mainSessionDir,
+		ParkReason:  newCtx.ParkedReason,
+		Initiative:  initiative,
+		Complexity:  opts.complexity,
+		Team:        team,
+		CreatedAt:   newCtx.CreatedAt.Format(time.RFC3339),
+		ParkedAt:    newCtx.ParkedAt.Format(time.RFC3339),
+		ProjectRoot: mainProjectRoot,
+	}
+
+	return printer.Print(result)
+}
+
+// createWorktree creates an ephemeral git worktree at the given path.
+func createWorktree(path string) error {
+	cmd := exec.Command("git", "worktree", "add", path, "--detach", "HEAD")
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
+}
+
+// removeWorktree removes a git worktree.
+func removeWorktree(path string) error {
+	// First try normal remove
+	cmd := exec.Command("git", "worktree", "remove", path)
+	if err := cmd.Run(); err != nil {
+		// If normal remove fails, try force remove
+		cmd = exec.Command("git", "worktree", "remove", path, "--force")
+		return cmd.Run()
+	}
+	return nil
+}
+
+// copyDir recursively copies a directory from src to dst.
+func copyDir(src, dst string) error {
+	// Get source directory info
+	srcInfo, err := os.Stat(src)
+	if err != nil {
+		return err
+	}
+
+	// Create destination directory
+	if err := os.MkdirAll(dst, srcInfo.Mode()); err != nil {
+		return err
+	}
+
+	// Read source directory entries
+	entries, err := os.ReadDir(src)
+	if err != nil {
+		return err
+	}
+
+	for _, entry := range entries {
+		srcPath := filepath.Join(src, entry.Name())
+		dstPath := filepath.Join(dst, entry.Name())
+
+		if entry.IsDir() {
+			if err := copyDir(srcPath, dstPath); err != nil {
+				return err
+			}
+		} else {
+			if err := copyFile(srcPath, dstPath); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+// copyFile copies a single file from src to dst.
+func copyFile(src, dst string) error {
+	srcInfo, err := os.Stat(src)
+	if err != nil {
+		return err
+	}
+
+	content, err := os.ReadFile(src)
+	if err != nil {
+		return err
+	}
+
+	return os.WriteFile(dst, content, srcInfo.Mode())
 }
 
 func isValidComplexity(c string) bool {

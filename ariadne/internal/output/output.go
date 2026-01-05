@@ -266,6 +266,35 @@ func (c CreateOutput) Text() string {
 	return b.String()
 }
 
+// SeedCreateOutput represents session creation result when using --seed mode.
+// The session is created in an ephemeral worktree and seeded (copied) to the main repo.
+type SeedCreateOutput struct {
+	SessionID   string `json:"session_id"`
+	Status      string `json:"status"`
+	Seeded      bool   `json:"seeded"`
+	SeededTo    string `json:"seeded_to"`
+	ParkReason  string `json:"park_reason"`
+	Initiative  string `json:"initiative"`
+	Complexity  string `json:"complexity"`
+	Team        string `json:"team"`
+	CreatedAt   string `json:"created_at"`
+	ParkedAt    string `json:"parked_at"`
+	ProjectRoot string `json:"project_root,omitempty"`
+}
+
+// Text implements Textable for SeedCreateOutput.
+func (s SeedCreateOutput) Text() string {
+	var b strings.Builder
+	b.WriteString(fmt.Sprintf("Seeded session: %s\n", s.SessionID))
+	b.WriteString(fmt.Sprintf("Status: %s\n", s.Status))
+	b.WriteString(fmt.Sprintf("Initiative: %s\n", s.Initiative))
+	b.WriteString(fmt.Sprintf("Complexity: %s\n", s.Complexity))
+	b.WriteString(fmt.Sprintf("Team: %s\n", s.Team))
+	b.WriteString(fmt.Sprintf("Seeded to: %s\n", s.SeededTo))
+	b.WriteString(fmt.Sprintf("Park reason: %s\n", s.ParkReason))
+	return b.String()
+}
+
 // SessionListOutput represents session list for JSON output.
 type SessionListOutput struct {
 	Sessions       []SessionSummary `json:"sessions"`

@@ -76,6 +76,9 @@ ari session park "reason for parking"
 # Resume a parked session
 ari session resume <session-id>
 
+# Create seeded session for parallel execution
+ari session create "feature-name" --complexity MODULE --seed
+
 # Transition session state
 ari session transition <new-state>
 
@@ -377,6 +380,8 @@ Ariadne uses structured error codes:
 ## Related Resources
 
 - [White Sails Guide](white-sails.md) - Confidence signaling system
+- [Parallel Sessions Guide](parallel-sessions.md) - Session seeding for parallel execution
 - [User Preferences](user-preferences.md) - Configure Claude Code behavior
 - [ADR-0001](../decisions/ADR-0001-session-state-machine-redesign.md) - Session FSM design
 - [ADR-0005](../decisions/ADR-0005-state-mate-centralized-state-authority.md) - state-mate authority
+- [ADR-0010](../decisions/ADR-0010-worktree-session-seeding.md) - Worktree session seeding
