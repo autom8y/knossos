@@ -29,9 +29,14 @@ FILE_PATH="${CLAUDE_HOOK_FILE_PATH:-}"
 # Early exit: Not a context file
 [[ ! "$FILE_PATH" =~ _CONTEXT\.md$ ]] && exit 0
 
-# FIXED (state-mate Bypass): Allow state-mate to write via environment marker
+# STATE_MATE_BYPASS: Reserved for future use
+# Currently unused because state mutations happen through:
+# 1. Native ariadne commands (ari session wrap, park, resume) - bypass hooks via Go file I/O
+# 2. session-manager.sh mutate commands - bypass hooks via direct bash writes
+# This guard only protects against Claude Code's Write/Edit tools.
+# See: ariadne/internal/cmd/session/wrap.go for native command bypass design
 if [[ "${STATE_MATE_BYPASS:-}" == "true" ]]; then
-    exit 0  # Allow write
+    exit 0  # Allow write (reserved for future state-mate agent)
 fi
 
 # =============================================================================

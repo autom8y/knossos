@@ -373,3 +373,199 @@ created_at: 2025-01-05T12:00:00Z
 		t.Errorf("Expected status ARCHIVED, got %s", ctx2.Status)
 	}
 }
+
+// TestWrapWithQAUpgrade verifies QA upgrade extraction from SESSION_CONTEXT.md.
+func TestWrapWithQAUpgrade(t *testing.T) {
+	tmpDir := t.TempDir()
+	projectDir := tmpDir
+
+	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionID := "session-20250105-120003-qa123456"
+	sessionDir := filepath.Join(sessionsDir, sessionID)
+	locksDir := filepath.Join(sessionsDir, ".locks")
+	auditDir := filepath.Join(sessionsDir, ".audit")
+
+	if err := os.MkdirAll(sessionDir, 0755); err != nil {
+		t.Fatalf("Failed to create session dir: %v", err)
+	}
+	if err := os.MkdirAll(locksDir, 0755); err != nil {
+		t.Fatalf("Failed to create locks dir: %v", err)
+	}
+	if err := os.MkdirAll(auditDir, 0755); err != nil {
+		t.Fatalf("Failed to create audit dir: %v", err)
+	}
+
+	// Create SESSION_CONTEXT.md with QA Upgrade section
+	contextContent := `---
+schema_version: "1.0"
+session_id: ` + sessionID + `
+status: ACTIVE
+initiative: Test QA Initiative
+complexity: MODULE
+created_at: 2025-01-05T12:00:00Z
+---
+
+# Session Context
+
+## QA Upgrade
+- qa_session_id: session-20250105-110000-qa999999
+- upgraded_at: 2025-01-05T11:00:00Z
+- constraint_resolution_log: docs/qa-resolution.md
+- adversarial_tests_added:
+  - tests/adversarial/edge_case_test.go
+  - tests/adversarial/boundary_test.go
+`
+	if err := os.WriteFile(filepath.Join(sessionDir, "SESSION_CONTEXT.md"), []byte(contextContent), 0644); err != nil {
+		t.Fatalf("Failed to write SESSION_CONTEXT.md: %v", err)
+	}
+
+	if err := os.WriteFile(filepath.Join(sessionsDir, ".current-session"), []byte(sessionID), 0644); err != nil {
+		t.Fatalf("Failed to write .current-session: %v", err)
+	}
+
+	// Create passing test proofs
+	testLog := `=== RUN   TestExample
+--- PASS: TestExample (0.00s)
+PASS
+ok  	example.com/pkg	0.123s
+exit code: 0`
+	if err := os.WriteFile(filepath.Join(sessionDir, "test-output.log"), []byte(testLog), 0644); err != nil {
+		t.Fatalf("Failed to write test log: %v", err)
+	}
+
+	buildLog := `Build successful
+exit code: 0`
+	if err := os.WriteFile(filepath.Join(sessionDir, "build-output.log"), []byte(buildLog), 0644); err != nil {
+		t.Fatalf("Failed to write build log: %v", err)
+	}
+
+	outputFormat := "json"
+	verbose := true
+	ctx := &cmdContext{
+		output:     &outputFormat,
+		verbose:    &verbose,
+		projectDir: &projectDir,
+	}
+
+	opts := wrapOptions{
+		noArchive: true,
+	}
+
+	err := runWrap(ctx, opts)
+	if err != nil {
+		t.Fatalf("runWrap failed: %v", err)
+	}
+
+	// Verify WHITE_SAILS.yaml contains QA upgrade info
+	sailsPath := filepath.Join(sessionDir, "WHITE_SAILS.yaml")
+	sailsContent, err := os.ReadFile(sailsPath)
+	if err != nil {
+		t.Fatalf("Failed to read WHITE_SAILS.yaml: %v", err)
+	}
+
+	sailsStr := string(sailsContent)
+	if !strings.Contains(sailsStr, "qa_session_id:") {
+		t.Error("WHITE_SAILS.yaml missing qa_session_id from QA upgrade")
+	}
+	if !strings.Contains(sailsStr, "session-20250105-110000-qa999999") {
+		t.Error("WHITE_SAILS.yaml missing correct QA session ID")
+	}
+	if !strings.Contains(sailsStr, "upgraded_at:") {
+		t.Error("WHITE_SAILS.yaml missing upgraded_at timestamp")
+	}
+	if !strings.Contains(sailsStr, "adversarial_tests_added:") {
+		t.Error("WHITE_SAILS.yaml missing adversarial_tests_added list")
+	}
+}
+
+// TestWrapEmitsSessionEndWithBudget verifies session_end event includes cognitive budget.
+func TestWrapEmitsSessionEndWithBudget(t *testing.T) {
+	tmpDir := t.TempDir()
+	projectDir := tmpDir
+
+	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionID := "session-20250105-120004-budget123"
+	sessionDir := filepath.Join(sessionsDir, sessionID)
+	locksDir := filepath.Join(sessionsDir, ".locks")
+	auditDir := filepath.Join(sessionsDir, ".audit")
+
+	if err := os.MkdirAll(sessionDir, 0755); err != nil {
+		t.Fatalf("Failed to create session dir: %v", err)
+	}
+	if err := os.MkdirAll(locksDir, 0755); err != nil {
+		t.Fatalf("Failed to create locks dir: %v", err)
+	}
+	if err := os.MkdirAll(auditDir, 0755); err != nil {
+		t.Fatalf("Failed to create audit dir: %v", err)
+	}
+
+	contextContent := `---
+schema_version: "1.0"
+session_id: ` + sessionID + `
+status: ACTIVE
+initiative: Test Budget Tracking
+complexity: MODULE
+created_at: 2025-01-05T12:00:00Z
+---
+
+# Session Context
+`
+	if err := os.WriteFile(filepath.Join(sessionDir, "SESSION_CONTEXT.md"), []byte(contextContent), 0644); err != nil {
+		t.Fatalf("Failed to write SESSION_CONTEXT.md: %v", err)
+	}
+
+	if err := os.WriteFile(filepath.Join(sessionsDir, ".current-session"), []byte(sessionID), 0644); err != nil {
+		t.Fatalf("Failed to write .current-session: %v", err)
+	}
+
+	// Create THREAD_RECORD.ndjson with some tool events
+	threadRecord := `{"timestamp":"2025-01-05T12:00:01Z","type":"tool_call","tool":"Read"}
+{"timestamp":"2025-01-05T12:00:02Z","type":"tool_call","tool":"Bash"}
+{"timestamp":"2025-01-05T12:00:03Z","type":"tool_call","tool":"Write"}
+`
+	if err := os.WriteFile(filepath.Join(sessionDir, "THREAD_RECORD.ndjson"), []byte(threadRecord), 0644); err != nil {
+		t.Fatalf("Failed to write THREAD_RECORD.ndjson: %v", err)
+	}
+
+	// Create minimal proofs
+	testLog := `PASS
+exit code: 0`
+	if err := os.WriteFile(filepath.Join(sessionDir, "test-output.log"), []byte(testLog), 0644); err != nil {
+		t.Fatalf("Failed to write test log: %v", err)
+	}
+
+	outputFormat := "json"
+	verbose := true
+	ctx := &cmdContext{
+		output:     &outputFormat,
+		verbose:    &verbose,
+		projectDir: &projectDir,
+	}
+
+	opts := wrapOptions{
+		noArchive: true,
+	}
+
+	err := runWrap(ctx, opts)
+	if err != nil {
+		t.Fatalf("runWrap failed: %v", err)
+	}
+
+	// Verify events.jsonl contains session_end with cognitive_budget
+	eventsPath := filepath.Join(sessionDir, "events.jsonl")
+	eventsContent, err := os.ReadFile(eventsPath)
+	if err != nil {
+		t.Fatalf("Failed to read events.jsonl: %v", err)
+	}
+
+	eventsStr := string(eventsContent)
+	if !strings.Contains(eventsStr, "session_end") {
+		t.Error("events.jsonl missing session_end event")
+	}
+	if !strings.Contains(eventsStr, "cognitive_budget") {
+		t.Error("events.jsonl session_end event missing cognitive_budget field")
+	}
+	if !strings.Contains(eventsStr, "total_tool_calls") {
+		t.Error("events.jsonl session_end event missing total_tool_calls in budget")
+	}
+}

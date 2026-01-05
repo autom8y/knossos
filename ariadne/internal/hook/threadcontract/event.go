@@ -305,15 +305,32 @@ func NewSessionStartEvent(sessionID, initiative, complexity, team string) Event 
 //   - status: Completion status (e.g., "completed", "parked", "abandoned")
 //   - durationMs: Total session duration in milliseconds
 func NewSessionEndEvent(sessionID, status string, durationMs int64) Event {
+	return NewSessionEndEventWithBudget(sessionID, status, durationMs, nil)
+}
+
+// NewSessionEndEventWithBudget creates a session_end event with optional cognitive budget metadata.
+// Parameters:
+//   - sessionID: Session identifier
+//   - status: Completion status (e.g., "completed", "parked", "abandoned")
+//   - durationMs: Total session duration in milliseconds
+//   - budget: Optional cognitive budget data (tool calls, message count, etc.)
+func NewSessionEndEventWithBudget(sessionID, status string, durationMs int64, budget map[string]interface{}) Event {
+	meta := map[string]interface{}{
+		"session_id":  sessionID,
+		"status":      status,
+		"duration_ms": durationMs,
+	}
+
+	// Add budget metadata if provided
+	if budget != nil && len(budget) > 0 {
+		meta["cognitive_budget"] = budget
+	}
+
 	return Event{
 		Timestamp: timestamp(),
 		Type:      EventTypeSessionEnd,
 		Summary:   "Session ended: " + status,
-		Meta: map[string]interface{}{
-			"session_id":  sessionID,
-			"status":      status,
-			"duration_ms": durationMs,
-		},
+		Meta:      meta,
 	}
 }
 

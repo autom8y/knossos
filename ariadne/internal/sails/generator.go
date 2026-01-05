@@ -259,7 +259,7 @@ func (g *Generator) loadSessionContext() (sessionID, complexity, sessionType str
 	modifiers = extractModifiers(ctx.Body)
 
 	// QA upgrade would be extracted if present (typically from a QA session)
-	qaUpgrade = nil // TODO: Add QA upgrade extraction if needed
+	qaUpgrade = extractQAUpgrade(ctx.Body)
 
 	return sessionID, complexity, sessionType, openQuestions, modifiers, qaUpgrade, nil
 }
@@ -505,6 +505,91 @@ func extractModifiers(body string) []Modifier {
 	}
 
 	return modifiers
+}
+
+// extractQAUpgrade extracts QA upgrade information from the SESSION_CONTEXT.md body.
+// Format:
+// ## QA Upgrade
+// - qa_session_id: session-20260105-123456-qa
+// - upgraded_at: 2026-01-05T12:34:56Z
+// - constraint_resolution_log: path/to/log.md
+// - adversarial_tests_added:
+//   - tests/adversarial/test1.go
+//   - tests/adversarial/test2.go
+func extractQAUpgrade(body string) *QAUpgrade {
+	// Pattern to find QA Upgrade section
+	qaUpgradePattern := regexp.MustCompile(`(?i)##\s*QA\s*Upgrade\s*\n`)
+	match := qaUpgradePattern.FindStringIndex(body)
+	if match == nil {
+		return nil
+	}
+
+	// Extract content after the header until the next section or end
+	startIdx := match[1]
+	remaining := body[startIdx:]
+
+	// Find the next section header (## Something)
+	nextSectionPattern := regexp.MustCompile(`\n##\s+`)
+	nextMatch := nextSectionPattern.FindStringIndex(remaining)
+
+	var sectionContent string
+	if nextMatch != nil {
+		sectionContent = remaining[:nextMatch[0]]
+	} else {
+		sectionContent = remaining
+	}
+
+	upgrade := &QAUpgrade{}
+	hasData := false
+
+	// Extract qa_session_id
+	qaSessionIDPattern := regexp.MustCompile(`(?m)^[\s]*[-*]\s*qa_session_id:\s*(.+)$`)
+	if m := qaSessionIDPattern.FindStringSubmatch(sectionContent); m != nil && len(m) > 1 {
+		upgrade.QASessionID = strings.TrimSpace(m[1])
+		hasData = true
+	}
+
+	// Extract upgraded_at timestamp
+	upgradedAtPattern := regexp.MustCompile(`(?m)^[\s]*[-*]\s*upgraded_at:\s*(.+)$`)
+	if m := upgradedAtPattern.FindStringSubmatch(sectionContent); m != nil && len(m) > 1 {
+		timestampStr := strings.TrimSpace(m[1])
+		if t, err := time.Parse(time.RFC3339, timestampStr); err == nil {
+			upgrade.UpgradedAt = &t
+			hasData = true
+		}
+	}
+
+	// Extract constraint_resolution_log
+	logPattern := regexp.MustCompile(`(?m)^[\s]*[-*]\s*constraint_resolution_log:\s*(.+)$`)
+	if m := logPattern.FindStringSubmatch(sectionContent); m != nil && len(m) > 1 {
+		upgrade.ConstraintResolutionLog = strings.TrimSpace(m[1])
+		hasData = true
+	}
+
+	// Extract adversarial_tests_added (multi-line list)
+	testsPattern := regexp.MustCompile(`(?m)^[\s]*[-*]\s*adversarial_tests_added:\s*$`)
+	if testsMatch := testsPattern.FindStringIndex(sectionContent); testsMatch != nil {
+		// Find all indented list items after adversarial_tests_added
+		afterTests := sectionContent[testsMatch[1]:]
+		testItemPattern := regexp.MustCompile(`(?m)^[\s]{2,}[-*]\s*(.+)$`)
+		testMatches := testItemPattern.FindAllStringSubmatch(afterTests, -1)
+		for _, tm := range testMatches {
+			if len(tm) > 1 {
+				testPath := strings.TrimSpace(tm[1])
+				if testPath != "" {
+					upgrade.AdversarialTestsAdded = append(upgrade.AdversarialTestsAdded, testPath)
+					hasData = true
+				}
+			}
+		}
+	}
+
+	// Return nil if no data was found
+	if !hasData {
+		return nil
+	}
+
+	return upgrade
 }
 
 // GeneratorFromProject creates a Generator for the current session in a project.

@@ -16,8 +16,7 @@ import (
 )
 
 type wrapOptions struct {
-	skipChecks bool
-	noArchive  bool
+	noArchive bool
 }
 
 func newWrapCmd(ctx *cmdContext) *cobra.Command {
@@ -32,7 +31,6 @@ func newWrapCmd(ctx *cmdContext) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().BoolVar(&opts.skipChecks, "skip-checks", false, "Skip quality gate checks")
 	cmd.Flags().BoolVar(&opts.noArchive, "no-archive", false, "Don't move to archive directory")
 
 	return cmd
@@ -136,6 +134,12 @@ func runWrap(ctx *cmdContext, opts wrapOptions) error {
 	sessCtx.ArchivedAt = &now
 
 	// Save context
+	// Note: This direct save bypasses the state-mate write guard by design.
+	// The write guard (user-hooks/session-guards/session-write-guard.sh) only
+	// protects against Claude Code's Write/Edit tools via PreToolUse hooks.
+	// Native ariadne commands like `ari session wrap` are the authorized mutation
+	// path and bypass the guard through direct Go file I/O (os.WriteFile).
+	// See: user-hooks/session-guards/session-write-guard.sh lines 32-35
 	if err := sessCtx.Save(ctxPath); err != nil {
 		printer.PrintError(err)
 		return err
@@ -156,7 +160,17 @@ func runWrap(ctx *cmdContext, opts wrapOptions) error {
 	tcWriter, err := threadcontract.NewEventWriter(sessionDir)
 	if err == nil {
 		durationMs := time.Since(sessCtx.CreatedAt).Milliseconds()
-		sessionEndEvent := threadcontract.NewSessionEndEvent(sessionID, "completed", durationMs)
+
+		// Collect cognitive budget metadata if available
+		budget := collectCognitiveBudget(sessionDir)
+
+		var sessionEndEvent threadcontract.Event
+		if budget != nil {
+			sessionEndEvent = threadcontract.NewSessionEndEventWithBudget(sessionID, "completed", durationMs, budget)
+		} else {
+			sessionEndEvent = threadcontract.NewSessionEndEvent(sessionID, "completed", durationMs)
+		}
+
 		if err := tcWriter.Write(sessionEndEvent); err != nil {
 			printer.VerboseLog("warn", "failed to emit session_end event", map[string]interface{}{"error": err.Error()})
 		}
@@ -201,4 +215,52 @@ func runWrap(ctx *cmdContext, opts wrapOptions) error {
 	}
 
 	return printer.PrintSuccess(result)
+}
+
+// collectCognitiveBudget attempts to collect cognitive budget metadata from the session.
+// Returns nil if THREAD_RECORD.ndjson doesn't exist or cannot be read.
+// Future: Integrate with ARIADNE_MSG_WARN/ARIADNE_MSG_PARK thresholds.
+func collectCognitiveBudget(sessionDir string) map[string]interface{} {
+	threadRecordPath := sessionDir + "/THREAD_RECORD.ndjson"
+
+	// Check if file exists
+	if _, err := os.Stat(threadRecordPath); os.IsNotExist(err) {
+		return nil
+	}
+
+	// Read and count tool events
+	file, err := os.Open(threadRecordPath)
+	if err != nil {
+		return nil
+	}
+	defer file.Close()
+
+	toolCounts := make(map[string]int)
+	totalEvents := 0
+
+	// Simple line-by-line count (NDJSON format)
+	// Future: Parse JSON to get more detailed metrics
+	scanner := os.NewFile(file.Fd(), threadRecordPath)
+	buffer := make([]byte, 4096)
+	for {
+		n, err := scanner.Read(buffer)
+		if err != nil {
+			break
+		}
+		for i := 0; i < n; i++ {
+			if buffer[i] == '\n' {
+				totalEvents++
+			}
+		}
+	}
+
+	// Return basic budget data
+	// Future enhancements:
+	// - Parse individual events to categorize by tool type
+	// - Track message count vs thresholds (ARIADNE_MSG_WARN)
+	// - Include park suggestions if threshold exceeded
+	return map[string]interface{}{
+		"total_tool_calls": totalEvents,
+		"tool_counts":      toolCounts, // Placeholder for future detailed counts
+	}
 }
