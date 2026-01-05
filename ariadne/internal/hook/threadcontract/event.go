@@ -2,19 +2,40 @@
 // "Theseus has amnesia; the Thread remembers" - events.jsonl provides the factual route through decisions.
 package threadcontract
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 // EventType represents the type of thread event.
 type EventType string
 
 // Thread event types for tracking Claude Code activity.
 const (
-	EventTypeToolCall       EventType = "tool_call"
-	EventTypeFileChange     EventType = "file_change"
-	EventTypeCommand        EventType = "command"
-	EventTypeDecision       EventType = "decision"
-	EventTypeContextSwitch  EventType = "context_switch"
-	EventTypeSailsGenerated EventType = "sails_generated"
+	EventTypeToolCall        EventType = "tool_call"
+	EventTypeFileChange      EventType = "file_change"
+	EventTypeCommand         EventType = "command"
+	EventTypeDecision        EventType = "decision"
+	EventTypeContextSwitch   EventType = "context_switch"
+	EventTypeSailsGenerated  EventType = "sails_generated"
+	EventTypeTaskStart       EventType = "task_start"
+	EventTypeTaskEnd         EventType = "task_end"
+	EventTypeSessionStart    EventType = "session_start"
+	EventTypeSessionEnd      EventType = "session_end"
+	EventTypeArtifactCreated EventType = "artifact_created"
+	EventTypeError           EventType = "error"
+)
+
+// ArtifactType represents the type of artifact created during a session.
+type ArtifactType string
+
+// Artifact types for tracking deliverables produced during Claude Code sessions.
+const (
+	ArtifactTypePRD      ArtifactType = "prd"
+	ArtifactTypeTDD      ArtifactType = "tdd"
+	ArtifactTypeADR      ArtifactType = "adr"
+	ArtifactTypeTestPlan ArtifactType = "test_plan"
+	ArtifactTypeCode     ArtifactType = "code"
 )
 
 // Event represents a thread event in the events.jsonl log.
@@ -159,6 +180,139 @@ func NewSailsGeneratedEvent(sessionID string, data SailsGeneratedData) Event {
 		Path:      data.FilePath,
 		Summary:   summary,
 		Meta:      meta,
+	}
+}
+
+// NewTaskStartEvent creates an event for Task tool delegation to a sub-agent.
+// This marks the beginning of a delegated task for handoff protocol tracking.
+//
+// Parameters:
+//   - agentName: The specialist agent receiving the task (e.g., "architect", "qa-adversary")
+//   - taskDescription: The task description passed to the agent
+//   - parentSessionID: The session ID of the parent/orchestrator session
+func NewTaskStartEvent(agentName, taskDescription, parentSessionID string) Event {
+	return Event{
+		Timestamp: timestamp(),
+		Type:      EventTypeTaskStart,
+		Summary:   "Task delegated to " + agentName,
+		Meta: map[string]interface{}{
+			"agent":          agentName,
+			"description":    taskDescription,
+			"parent_session": parentSessionID,
+		},
+	}
+}
+
+// NewTaskEndEvent creates an event for Task tool completion.
+// This marks the end of a delegated task and captures the throughline for handoff protocol.
+//
+// Parameters:
+//   - agentName: The specialist agent that completed the task
+//   - status: Completion status (e.g., "success", "failed", "blocked")
+//   - throughline: The extracted throughline summary from the task result
+//   - artifacts: List of artifact paths produced by the task
+//   - durationMs: Task execution duration in milliseconds
+func NewTaskEndEvent(agentName, status, throughline string, artifacts []string, durationMs int64) Event {
+	return Event{
+		Timestamp: timestamp(),
+		Type:      EventTypeTaskEnd,
+		Summary:   "Task completed by " + agentName + ": " + status,
+		Meta: map[string]interface{}{
+			"agent":       agentName,
+			"status":      status,
+			"throughline": throughline,
+			"artifacts":   artifacts,
+			"duration_ms": durationMs,
+		},
+	}
+}
+
+// NewSessionStartEvent creates an event for session initialization.
+// This marks the beginning of a tracked Claude Code session.
+//
+// Parameters:
+//   - sessionID: The unique session identifier
+//   - initiative: The initiative or goal for this session
+//   - complexity: Complexity rating (trivial, standard, complex, critical)
+//   - team: The active team pack (e.g., "10x-dev-pack")
+func NewSessionStartEvent(sessionID, initiative, complexity, team string) Event {
+	return Event{
+		Timestamp: timestamp(),
+		Type:      EventTypeSessionStart,
+		Summary:   "Session started: " + initiative + " (" + complexity + ")",
+		Meta: map[string]interface{}{
+			"session_id": sessionID,
+			"initiative": initiative,
+			"complexity": complexity,
+			"team":       team,
+		},
+	}
+}
+
+// NewSessionEndEvent creates an event for session completion.
+// This marks the end of a tracked Claude Code session.
+//
+// Parameters:
+//   - sessionID: The unique session identifier
+//   - status: Completion status (e.g., "completed", "parked", "abandoned")
+//   - durationMs: Total session duration in milliseconds
+func NewSessionEndEvent(sessionID, status string, durationMs int64) Event {
+	return Event{
+		Timestamp: timestamp(),
+		Type:      EventTypeSessionEnd,
+		Summary:   "Session ended: " + status,
+		Meta: map[string]interface{}{
+			"session_id":  sessionID,
+			"status":      status,
+			"duration_ms": durationMs,
+		},
+	}
+}
+
+// NewArtifactCreatedEvent creates an event for artifact creation.
+// This captures semantic artifact creation for handoff validation, distinct from file_change
+// which only tracks raw file modifications.
+//
+// Parameters:
+//   - artifactType: The type of artifact (prd, tdd, adr, test_plan, code)
+//   - path: Absolute path to the created artifact
+//   - phase: The workflow phase during which the artifact was created
+//   - validatesAgainst: Reference to the artifact this validates against (e.g., PRD path for TDD)
+func NewArtifactCreatedEvent(artifactType ArtifactType, path, phase string, validatesAgainst string) Event {
+	return Event{
+		Timestamp: timestamp(),
+		Type:      EventTypeArtifactCreated,
+		Path:      path,
+		Summary:   fmt.Sprintf("Artifact created: %s (%s)", artifactType, phase),
+		Meta: map[string]interface{}{
+			"artifact_type":     string(artifactType),
+			"phase":             phase,
+			"validates_against": validatesAgainst,
+		},
+	}
+}
+
+// NewErrorEvent creates an event for structured error capture.
+// This provides dedicated error tracking with recovery guidance for handoff protocols.
+//
+// Parameters:
+//   - errorCode: A structured error code (e.g., "VALIDATION_FAILED", "DEPENDENCY_MISSING")
+//   - message: Human-readable error message
+//   - context: Additional context about where/why the error occurred
+//   - recoverable: Whether the error is recoverable without human intervention
+//   - suggestedAction: Recommended action to resolve the error
+func NewErrorEvent(errorCode, message, context string, recoverable bool, suggestedAction string) Event {
+	return Event{
+		Timestamp: timestamp(),
+		Type:      EventTypeError,
+		Summary:   fmt.Sprintf("Error: %s - %s", errorCode, message),
+		Meta: map[string]interface{}{
+			"error_code":       errorCode,
+			"message":          message,
+			"context":          context,
+			"recoverable":      recoverable,
+			"suggested_action": suggestedAction,
+		},
 	}
 }
 

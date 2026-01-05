@@ -5,9 +5,15 @@ import (
 	"os"
 	"path/filepath"
 	"sync"
+	"time"
 
 	"github.com/autom8y/ariadne/internal/errors"
 )
+
+// DefaultFlushInterval is the default interval for BufferedEventWriter flush operations.
+// Events are buffered and written in batches at this interval for improved performance.
+// Set to under 10 seconds per design requirements (acceptable loss window on crash).
+const DefaultFlushInterval = 5 * time.Second
 
 // EventsFileName is the standard name for the thread events log.
 const EventsFileName = "events.jsonl"
@@ -117,4 +123,158 @@ func (w *EventWriter) Close() error {
 // Path returns the path to the events file.
 func (w *EventWriter) Path() string {
 	return w.filePath
+}
+
+// BufferedEventWriter provides async event writing with periodic flush.
+// Events are buffered in memory and flushed to disk at configurable intervals.
+// This provides better performance than synchronous writes while accepting
+// a bounded data loss window (up to flushInterval) on crash.
+//
+// Usage:
+//
+//	w := NewBufferedEventWriter(sessionDir, 5*time.Second)
+//	w.Write(event) // Non-blocking, returns immediately
+//	// ... later
+//	w.Close() // Ensures final flush before shutdown
+type BufferedEventWriter struct {
+	sessionDir    string
+	events        []Event
+	mu            sync.Mutex
+	done          chan struct{}
+	flushed       chan struct{} // Signals final flush complete
+	closed        bool
+	ticker        *time.Ticker
+	flushInterval time.Duration
+	flushErr      error // Last flush error, for diagnostic purposes
+}
+
+// NewBufferedEventWriter creates a writer that buffers events and flushes periodically.
+// The flushInterval determines how often buffered events are written to disk.
+// Use DefaultFlushInterval for the standard 5-second interval.
+//
+// The writer starts a background goroutine that must be stopped by calling Close().
+func NewBufferedEventWriter(sessionDir string, flushInterval time.Duration) *BufferedEventWriter {
+	w := &BufferedEventWriter{
+		sessionDir:    sessionDir,
+		events:        make([]Event, 0, 100),
+		done:          make(chan struct{}),
+		flushed:       make(chan struct{}),
+		flushInterval: flushInterval,
+	}
+	w.ticker = time.NewTicker(flushInterval)
+	go w.flushLoop()
+	return w
+}
+
+// flushLoop runs in a background goroutine, periodically flushing buffered events.
+func (w *BufferedEventWriter) flushLoop() {
+	for {
+		select {
+		case <-w.ticker.C:
+			_ = w.Flush() // Errors are stored in w.flushErr for diagnostics
+		case <-w.done:
+			w.ticker.Stop()
+			_ = w.Flush() // Final flush on close
+			close(w.flushed)
+			return
+		}
+	}
+}
+
+// Write buffers an event for async flush. This method is non-blocking and returns immediately.
+// Thread-safe: multiple goroutines can call Write concurrently.
+func (w *BufferedEventWriter) Write(event Event) {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+
+	if w.closed {
+		return // Silently drop writes after close
+	}
+
+	w.events = append(w.events, event)
+}
+
+// Flush writes all buffered events to disk.
+// This is called automatically by the background goroutine, but can also be called
+// manually if immediate persistence is required.
+// Thread-safe: can be called concurrently with Write.
+func (w *BufferedEventWriter) Flush() error {
+	w.mu.Lock()
+	if len(w.events) == 0 {
+		w.mu.Unlock()
+		return nil
+	}
+
+	// Swap buffer to minimize lock hold time
+	toFlush := w.events
+	w.events = make([]Event, 0, 100)
+	w.mu.Unlock()
+
+	// Use existing EventWriter for atomic batch write
+	syncWriter, err := NewEventWriter(w.sessionDir)
+	if err != nil {
+		w.mu.Lock()
+		w.flushErr = err
+		// Re-queue events that failed to flush (prepend to preserve order)
+		w.events = append(toFlush, w.events...)
+		w.mu.Unlock()
+		return err
+	}
+	defer syncWriter.Close()
+
+	err = syncWriter.WriteMultiple(toFlush)
+	if err != nil {
+		w.mu.Lock()
+		w.flushErr = err
+		// Re-queue events that failed to flush
+		w.events = append(toFlush, w.events...)
+		w.mu.Unlock()
+	}
+	return err
+}
+
+// Close stops the background flush goroutine and performs a final flush.
+// After Close returns, all buffered events will have been written to disk
+// (or an error will be returned if the final flush failed).
+// Close is idempotent - calling it multiple times is safe.
+func (w *BufferedEventWriter) Close() error {
+	w.mu.Lock()
+	if w.closed {
+		w.mu.Unlock()
+		return nil
+	}
+	w.closed = true
+	w.mu.Unlock()
+
+	close(w.done)
+
+	// Wait for the final flush to complete
+	<-w.flushed
+
+	// Return any flush error that occurred
+	w.mu.Lock()
+	err := w.flushErr
+	w.mu.Unlock()
+	return err
+}
+
+// Path returns the path to the events file.
+func (w *BufferedEventWriter) Path() string {
+	return filepath.Join(w.sessionDir, EventsFileName)
+}
+
+// FlushError returns the last error from a background flush operation, if any.
+// This is useful for diagnostics when async writes may have failed.
+func (w *BufferedEventWriter) FlushError() error {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	return w.flushErr
+}
+
+// Len returns the number of events currently buffered (not yet flushed).
+// Useful for testing and diagnostics.
+func (w *BufferedEventWriter) Len() int {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	return len(w.events)
 }

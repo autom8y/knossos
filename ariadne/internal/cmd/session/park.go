@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/autom8y/ariadne/internal/errors"
+	"github.com/autom8y/ariadne/internal/hook/threadcontract"
 	"github.com/autom8y/ariadne/internal/lock"
 	"github.com/autom8y/ariadne/internal/output"
 	"github.com/autom8y/ariadne/internal/session"
@@ -97,6 +98,17 @@ func runPark(ctx *cmdContext, opts parkOptions) error {
 	emitter := ctx.getEventEmitter(sessionID)
 	if err := emitter.EmitParked(sessionID, opts.reason, gitStatus); err != nil {
 		printer.VerboseLog("warn", "failed to emit park event", map[string]interface{}{"error": err.Error()})
+	}
+
+	// Emit Thread Contract session_end event
+	sessionDir := resolver.SessionDir(sessionID)
+	tcWriter, err := threadcontract.NewEventWriter(sessionDir)
+	if err == nil {
+		durationMs := time.Since(sessCtx.CreatedAt).Milliseconds()
+		sessionEndEvent := threadcontract.NewSessionEndEvent(sessionID, "parked", durationMs)
+		if err := tcWriter.Write(sessionEndEvent); err != nil {
+			printer.VerboseLog("warn", "failed to emit session_end event", map[string]interface{}{"error": err.Error()})
+		}
 	}
 
 	// Output result

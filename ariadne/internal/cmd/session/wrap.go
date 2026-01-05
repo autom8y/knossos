@@ -130,6 +130,16 @@ func runWrap(ctx *cmdContext, opts wrapOptions) error {
 		printer.VerboseLog("warn", "failed to emit archive event", map[string]interface{}{"error": err.Error()})
 	}
 
+	// Emit Thread Contract session_end event
+	tcWriter, err := threadcontract.NewEventWriter(sessionDir)
+	if err == nil {
+		durationMs := time.Since(sessCtx.CreatedAt).Milliseconds()
+		sessionEndEvent := threadcontract.NewSessionEndEvent(sessionID, "completed", durationMs)
+		if err := tcWriter.Write(sessionEndEvent); err != nil {
+			printer.VerboseLog("warn", "failed to emit session_end event", map[string]interface{}{"error": err.Error()})
+		}
+	}
+
 	// Move to archive if requested
 	var archivePath string
 	archived := false
