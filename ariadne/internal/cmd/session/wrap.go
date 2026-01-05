@@ -7,9 +7,11 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/autom8y/ariadne/internal/errors"
+	"github.com/autom8y/ariadne/internal/hook/threadcontract"
 	"github.com/autom8y/ariadne/internal/lock"
 	"github.com/autom8y/ariadne/internal/output"
 	"github.com/autom8y/ariadne/internal/paths"
+	"github.com/autom8y/ariadne/internal/sails"
 	"github.com/autom8y/ariadne/internal/session"
 )
 
@@ -80,6 +82,31 @@ func runWrap(ctx *cmdContext, opts wrapOptions) error {
 		return err
 	}
 
+	// Generate White Sails confidence signal before archiving
+	var sailsResult *sails.GenerateResult
+	sailsGen := sails.NewGenerator(sessionDir)
+	sailsResult, sailsErr := sailsGen.Generate()
+	if sailsErr != nil {
+		// Don't block wrap on sails generation failure - warn and continue
+		printer.VerboseLog("warn", "failed to generate sails", map[string]interface{}{"error": sailsErr.Error()})
+	} else {
+		// Emit SAILS_GENERATED event to Thread Contract
+		writer, writerErr := threadcontract.NewEventWriter(sessionDir)
+		if writerErr != nil {
+			printer.VerboseLog("warn", "failed to create event writer for sails", map[string]interface{}{"error": writerErr.Error()})
+		} else {
+			sailsEvent := threadcontract.NewSailsGeneratedEvent(sessionID, threadcontract.SailsGeneratedData{
+				Color:        string(sailsResult.Color),
+				ComputedBase: string(sailsResult.ComputedBase),
+				Reasons:      sailsResult.Reasons,
+				FilePath:     sailsResult.FilePath,
+			})
+			if writeErr := writer.Write(sailsEvent); writeErr != nil {
+				printer.VerboseLog("warn", "failed to emit sails event", map[string]interface{}{"error": writeErr.Error()})
+			}
+		}
+	}
+
 	// Update context
 	now := time.Now().UTC()
 	previousStatus := sessCtx.Status
@@ -131,6 +158,14 @@ func runWrap(ctx *cmdContext, opts wrapOptions) error {
 		ArchivedAt:     now.Format(time.RFC3339),
 		Archived:       archived,
 		ArchivePath:    archivePath,
+	}
+
+	// Add sails information to output if generation succeeded
+	if sailsResult != nil {
+		result.SailsColor = string(sailsResult.Color)
+		result.SailsBase = string(sailsResult.ComputedBase)
+		result.SailsReasons = sailsResult.Reasons
+		result.SailsPath = sailsResult.FilePath
 	}
 
 	return printer.PrintSuccess(result)

@@ -1,0 +1,213 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "embed:///schemas/white-sails.schema.json",
+  "title": "WHITE_SAILS Schema",
+  "description": "Session confidence signal per Knossos Doctrine v2",
+  "type": "object",
+
+  "required": [
+    "schema_version",
+    "session_id",
+    "generated_at",
+    "color",
+    "computed_base",
+    "proofs",
+    "open_questions"
+  ],
+
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+(\\.[0-9]+)?$",
+      "default": "1.0",
+      "description": "Schema version (e.g., 1.0)"
+    },
+
+    "session_id": {
+      "type": "string",
+      "pattern": "^session-[0-9]{8}-[0-9]{6}-[a-f0-9]{8}$",
+      "description": "Session identifier (e.g., session-20260105-143000-abc12345)"
+    },
+
+    "generated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp when sails were generated"
+    },
+
+    "color": {
+      "type": "string",
+      "enum": ["WHITE", "GRAY", "BLACK"],
+      "description": "Final confidence signal after modifiers"
+    },
+
+    "computed_base": {
+      "type": "string",
+      "enum": ["WHITE", "GRAY", "BLACK"],
+      "description": "Computed color before human modifiers"
+    },
+
+    "proofs": {
+      "type": "object",
+      "description": "Verification proof items for tests, build, lint, and optional extensions",
+      "required": ["tests", "build", "lint"],
+      "properties": {
+        "tests": {
+          "$ref": "#/$defs/proof_item",
+          "description": "Test execution proof"
+        },
+        "build": {
+          "$ref": "#/$defs/proof_item",
+          "description": "Build execution proof"
+        },
+        "lint": {
+          "$ref": "#/$defs/proof_item",
+          "description": "Lint execution proof"
+        },
+        "adversarial": {
+          "$ref": "#/$defs/proof_item",
+          "description": "QA adversarial testing proof (required for gray->white upgrade)"
+        },
+        "integration": {
+          "$ref": "#/$defs/proof_item",
+          "description": "Integration test proof (required for SERVICE+ complexity)"
+        }
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/proof_item"
+      }
+    },
+
+    "open_questions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "description": "Any open question = gray ceiling"
+    },
+
+    "modifiers": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/modifier"
+      },
+      "description": "Human-declared adjustments with justification"
+    },
+
+    "complexity": {
+      "type": "string",
+      "enum": ["PATCH", "MODULE", "SYSTEM", "INITIATIVE", "MIGRATION"],
+      "description": "Complexity tier affects proof thresholds"
+    },
+
+    "type": {
+      "type": "string",
+      "enum": ["standard", "spike", "hotfix"],
+      "default": "standard",
+      "description": "Session type affects color ceiling"
+    },
+
+    "qa_upgrade": {
+      "type": "object",
+      "description": "Present only if QA upgraded gray->white",
+      "required": ["upgraded_at", "qa_session_id", "constraint_resolution_log"],
+      "properties": {
+        "upgraded_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when QA upgrade was applied"
+        },
+        "qa_session_id": {
+          "type": "string",
+          "pattern": "^session-[0-9]{8}-[0-9]{6}-[a-f0-9]{8}$",
+          "description": "Session ID of the QA session that performed the upgrade"
+        },
+        "original_session_id": {
+          "type": "string",
+          "pattern": "^session-[0-9]{8}-[0-9]{6}-[a-f0-9]{8}$",
+          "description": "Session ID of the original session being upgraded (for QA session sails)"
+        },
+        "constraint_resolution_log": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Path to QA findings document"
+        },
+        "adversarial_tests_added": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": "New tests added by QA"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+
+  "additionalProperties": false,
+
+  "$defs": {
+    "proof_item": {
+      "type": "object",
+      "description": "A verification proof with status and evidence",
+      "required": ["status"],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["PASS", "FAIL", "SKIP", "UNKNOWN"],
+          "description": "Proof status: PASS (verified), FAIL (failed), SKIP (intentionally skipped), UNKNOWN (not collected)"
+        },
+        "evidence_path": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Path to output file or log"
+        },
+        "summary": {
+          "type": "string",
+          "description": "Human-readable summary of the proof"
+        },
+        "exit_code": {
+          "type": "integer",
+          "description": "Exit code of the verification command"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the proof was collected"
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "modifier": {
+      "type": "object",
+      "description": "A human-declared color adjustment with required justification",
+      "required": ["type", "justification", "applied_by"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["DOWNGRADE_TO_GRAY", "DOWNGRADE_TO_BLACK", "HUMAN_OVERRIDE_GRAY"],
+          "description": "Modifier type: only downgrades allowed (no self-upgrade)"
+        },
+        "justification": {
+          "type": "string",
+          "minLength": 10,
+          "description": "Why this modifier is applied (minimum 10 characters)"
+        },
+        "applied_by": {
+          "type": "string",
+          "enum": ["agent", "human"],
+          "description": "Who applied the modifier"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the modifier was applied"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

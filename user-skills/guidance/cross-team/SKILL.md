@@ -1,21 +1,63 @@
 ---
 name: cross-team
-description: "Protocol for routing cross-team concerns to specialist teams. Use when work spans team boundaries or requires specialist handoff. Triggers: cross-team, handoff, team routing, specialist coordination, multi-team."
+description: "Cross-team handoff protocols. Use when: completing work that routes to SRE, Security, or Documentation teams. Triggers: handoff, wrap, /wrap, team transition, deployment ready."
 ---
 
-# Cross-Team Protocol
+# Cross-Team Handoff Protocols
 
-## When to Surface Cross-Team Concerns
+> Artifact checklists for formal work transfer between teams.
 
-When work reveals concerns that fall outside your team's domain expertise, surface them to the user. Common triggers:
+## When to Use
 
-- **Hygiene Team**: Codebase cleanup, linting issues, formatting drift, test coverage gaps
-- **SRE Team**: Production reliability, observability gaps, incident response, infrastructure resilience
-- **Security Team**: Vulnerability remediation, compliance requirements, security incident response
-- **Debt Triage Team**: Technical debt prioritization, legacy system remediation, architectural decay
-- **Doc Team**: Documentation-focused work beyond technical specs (user guides, runbooks, external docs)
+Use these routes when 10x development work is complete and requires handoff to specialist teams:
 
-## How to Route
+| Situation | Route |
+|-----------|-------|
+| Feature ready for production deployment | [10x-to-sre](routes/10x-to-sre.md) |
+| Security-sensitive code requires review | [10x-to-security](routes/10x-to-security.md) |
+| Feature documentation needed | [10x-to-doc](routes/10x-to-doc.md) |
+
+## Decision Tree
+
+```
+Feature implementation complete?
++-- No -> Continue development, use /park if pausing
++-- Yes -> Continue below
+
+Does it need production deployment?
++-- Yes -> 10x-to-sre route (always required for SERVICE+ complexity)
++-- No -> Continue below
+
+Does it have security implications?
++-- Auth/authz, crypto, secrets, user data, external input?
++-- Yes -> 10x-to-security route
++-- No -> Continue below
+
+Does it need user-facing documentation?
++-- New feature, API changes, config changes?
++-- Yes -> 10x-to-doc route
++-- No -> Proceed to /wrap
+```
+
+## Route Summary
+
+| Route | Target Team | Required For | Validation |
+|-------|-------------|--------------|------------|
+| [10x-to-sre](routes/10x-to-sre.md) | sre-pack | SERVICE+ complexity, any production deploy | `ari hook handoff-validate --route=sre` |
+| [10x-to-security](routes/10x-to-security.md) | security-pack | Auth, crypto, secrets, external input handling | `ari hook handoff-validate --route=security` |
+| [10x-to-doc](routes/10x-to-doc.md) | doc-team-pack | User-facing features, API changes, config changes | `ari hook handoff-validate --route=doc` |
+
+## Integration with /wrap
+
+The `/wrap` command integrates with these routes:
+
+1. During wrap, quality gates check if cross-team handoff is required
+2. If complexity >= SERVICE with production deployment, SRE handoff is flagged
+3. Use `--skip-handoff` to bypass (logged, not recommended for production work)
+
+See [validation.md](validation.md) for hook integration details.
+
+## Cross-Team Protocol
 
 **Never invoke other teams directly.** Cross-team coordination flows through the user.
 
@@ -24,7 +66,7 @@ When you identify a cross-team concern:
 2. Document the cross-team concern with specific context
 3. Surface to the user: *"This may benefit from involving the [Team Name] for [specific reason]. Suggest next step: [concrete action]."*
 
-## Example Handoff
+### Example Handoff
 
 ```
 "The feature implementation is complete and tests pass. However, I've identified
@@ -33,19 +75,17 @@ consolidated. This may benefit from involving the Hygiene Team for refactoring
 assessment. Suggest next step: Create hygiene ticket for DRY violation review."
 ```
 
-## Cross-Team Collaboration
-
-Teams collaborate through the user, not directly. This ensures:
-- Clear accountability for who owns what
-- Proper context transfer between domains
-- User visibility into cross-cutting concerns
-- No conflicts or duplicated work
-
 ## Progressive Disclosure
 
-This skill is intentionally minimal as a routing protocol. Cross-team coordination patterns are simple: complete your work, document the concern, route to user.
+- [routes/10x-to-sre.md](routes/10x-to-sre.md) - SRE deployment handoff checklist
+- [routes/10x-to-security.md](routes/10x-to-security.md) - Security review handoff checklist
+- [routes/10x-to-doc.md](routes/10x-to-doc.md) - Documentation handoff checklist
+- [validation.md](validation.md) - Hook integration specification
 
-**Related Skills**:
-- [team-discovery](../team-discovery/SKILL.md) - Available teams and capabilities
-- [file-verification](../file-verification/SKILL.md) - Artifact verification before handoff
-- [prompting](../prompting/SKILL.md) - Agent invocation patterns
+## Related Skills
+
+| Skill | When to Use |
+|-------|-------------|
+| [cross-team-handoff](../cross-team-handoff/SKILL.md) | HANDOFF artifact schema for formal transfers |
+| [wrap-ref](../wrap-ref/skill.md) | Session completion with quality gates |
+| [handoff-ref](../handoff-ref/skill.md) | Within-team agent transitions |

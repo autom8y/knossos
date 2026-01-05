@@ -324,18 +324,67 @@ func (l SessionListOutput) Text() string {
 
 // TransitionOutput represents a state transition result.
 type TransitionOutput struct {
-	SessionID     string `json:"session_id"`
-	Status        string `json:"status,omitempty"`
-	PreviousStatus string `json:"previous_status,omitempty"`
-	FromPhase     string `json:"from_phase,omitempty"`
-	ToPhase       string `json:"to_phase,omitempty"`
-	TransitionedAt string `json:"transitioned_at,omitempty"`
-	ParkedAt      string `json:"parked_at,omitempty"`
-	ParkedReason  string `json:"parked_reason,omitempty"`
-	ResumedAt     string `json:"resumed_at,omitempty"`
-	ArchivedAt    string `json:"archived_at,omitempty"`
-	Archived      bool   `json:"archived,omitempty"`
-	ArchivePath   string `json:"archive_path,omitempty"`
+	SessionID      string   `json:"session_id"`
+	Status         string   `json:"status,omitempty"`
+	PreviousStatus string   `json:"previous_status,omitempty"`
+	FromPhase      string   `json:"from_phase,omitempty"`
+	ToPhase        string   `json:"to_phase,omitempty"`
+	TransitionedAt string   `json:"transitioned_at,omitempty"`
+	ParkedAt       string   `json:"parked_at,omitempty"`
+	ParkedReason   string   `json:"parked_reason,omitempty"`
+	ResumedAt      string   `json:"resumed_at,omitempty"`
+	ArchivedAt     string   `json:"archived_at,omitempty"`
+	Archived       bool     `json:"archived,omitempty"`
+	ArchivePath    string   `json:"archive_path,omitempty"`
+	SailsColor     string   `json:"sails_color,omitempty"`
+	SailsBase      string   `json:"sails_base,omitempty"`
+	SailsReasons   []string `json:"sails_reasons,omitempty"`
+	SailsPath      string   `json:"sails_path,omitempty"`
+}
+
+// Text implements Textable for TransitionOutput.
+// Displays wrap summary with sails color and appropriate warnings.
+func (t TransitionOutput) Text() string {
+	if t.Status != "ARCHIVED" {
+		return ""
+	}
+
+	var b strings.Builder
+	b.WriteString(fmt.Sprintf("Session %s archived\n", t.SessionID))
+
+	// Display sails color with appropriate formatting
+	if t.SailsColor != "" {
+		b.WriteString(fmt.Sprintf("Sails: %s", t.SailsColor))
+		if t.SailsBase != "" && t.SailsBase != t.SailsColor {
+			b.WriteString(fmt.Sprintf(" (base: %s)", t.SailsBase))
+		}
+		b.WriteString("\n")
+
+		// Display warnings based on color
+		switch t.SailsColor {
+		case "BLACK":
+			b.WriteString("\nWARNING: BLACK sails - known failures detected.\n")
+			b.WriteString("Do NOT ship this session to production.\n")
+			if len(t.SailsReasons) > 0 {
+				b.WriteString("Reasons:\n")
+				for _, reason := range t.SailsReasons {
+					b.WriteString(fmt.Sprintf("  - %s\n", reason))
+				}
+			}
+		case "GRAY":
+			b.WriteString("\nINFO: GRAY sails - confidence unknown.\n")
+			b.WriteString("Consider QA review before shipping.\n")
+			b.WriteString("Use /qa to run adversarial testing and upgrade to WHITE.\n")
+		case "WHITE":
+			b.WriteString("\nShip with confidence.\n")
+		}
+	}
+
+	if t.Archived && t.ArchivePath != "" {
+		b.WriteString(fmt.Sprintf("Archived to: %s\n", t.ArchivePath))
+	}
+
+	return b.String()
 }
 
 // AuditOutput represents audit log output.
@@ -348,13 +397,13 @@ type AuditOutput struct {
 
 // AuditEvent represents a single audit event.
 type AuditEvent struct {
-	Timestamp   string                 `json:"timestamp"`
-	Event       string                 `json:"event"`
-	From        string                 `json:"from,omitempty"`
-	To          string                 `json:"to,omitempty"`
-	FromPhase   string                 `json:"from_phase,omitempty"`
-	ToPhase     string                 `json:"to_phase,omitempty"`
-	Metadata    map[string]interface{} `json:"metadata,omitempty"`
+	Timestamp string                 `json:"timestamp"`
+	Event     string                 `json:"event"`
+	From      string                 `json:"from,omitempty"`
+	To        string                 `json:"to,omitempty"`
+	FromPhase string                 `json:"from_phase,omitempty"`
+	ToPhase   string                 `json:"to_phase,omitempty"`
+	Metadata  map[string]interface{} `json:"metadata,omitempty"`
 }
 
 // AuditFilters shows which filters were applied.
@@ -407,13 +456,13 @@ type LockOutput struct {
 
 // MigrateOutput represents migration result.
 type MigrateOutput struct {
-	Migrated       []MigrationResult `json:"migrated"`
-	Skipped        []SkipResult      `json:"skipped"`
-	Failed         []FailResult      `json:"failed"`
-	TotalMigrated  int               `json:"total_migrated"`
-	TotalSkipped   int               `json:"total_skipped"`
-	TotalFailed    int               `json:"total_failed"`
-	DryRun         bool              `json:"dry_run"`
+	Migrated      []MigrationResult `json:"migrated"`
+	Skipped       []SkipResult      `json:"skipped"`
+	Failed        []FailResult      `json:"failed"`
+	TotalMigrated int               `json:"total_migrated"`
+	TotalSkipped  int               `json:"total_skipped"`
+	TotalFailed   int               `json:"total_failed"`
+	DryRun        bool              `json:"dry_run"`
 }
 
 // MigrationResult describes a successful migration.

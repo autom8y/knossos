@@ -13,6 +13,7 @@ import (
 	"github.com/autom8y/ariadne/internal/cmd/handoff"
 	"github.com/autom8y/ariadne/internal/cmd/hook"
 	"github.com/autom8y/ariadne/internal/cmd/manifest"
+	"github.com/autom8y/ariadne/internal/cmd/sails"
 	"github.com/autom8y/ariadne/internal/cmd/session"
 	"github.com/autom8y/ariadne/internal/cmd/sync"
 	"github.com/autom8y/ariadne/internal/cmd/team"
@@ -113,6 +114,7 @@ func init() {
 	rootCmd.AddCommand(worktree.NewWorktreeCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
 	rootCmd.AddCommand(hook.NewHookCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir, &globalOpts.SessionID))
 	rootCmd.AddCommand(artifact.NewArtifactCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir, &globalOpts.SessionID))
+	rootCmd.AddCommand(sails.NewSailsCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir, &globalOpts.SessionID))
 	rootCmd.AddCommand(versionCmd)
 }
 
@@ -211,6 +213,13 @@ func needsProject(cmd *cobra.Command) bool {
 	// All artifact commands need project
 	if cmd.Parent() != nil && cmd.Parent().Name() == "artifact" {
 		return true
+	}
+	// Sails commands handle missing project gracefully (can check arbitrary paths)
+	if cmd.Parent() != nil && cmd.Parent().Name() == "sails" {
+		return false
+	}
+	if cmd.Name() == "sails" {
+		return false
 	}
 	return true
 }

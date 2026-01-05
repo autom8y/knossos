@@ -9,11 +9,12 @@ type EventType string
 
 // Thread event types for tracking Claude Code activity.
 const (
-	EventTypeToolCall      EventType = "tool_call"
-	EventTypeFileChange    EventType = "file_change"
-	EventTypeCommand       EventType = "command"
-	EventTypeDecision      EventType = "decision"
-	EventTypeContextSwitch EventType = "context_switch"
+	EventTypeToolCall       EventType = "tool_call"
+	EventTypeFileChange     EventType = "file_change"
+	EventTypeCommand        EventType = "command"
+	EventTypeDecision       EventType = "decision"
+	EventTypeContextSwitch  EventType = "context_switch"
+	EventTypeSailsGenerated EventType = "sails_generated"
 )
 
 // Event represents a thread event in the events.jsonl log.
@@ -108,6 +109,54 @@ func NewContextSwitchEvent(summary string, path string, meta map[string]interfac
 		Timestamp: timestamp(),
 		Type:      EventTypeContextSwitch,
 		Path:      path,
+		Summary:   summary,
+		Meta:      meta,
+	}
+}
+
+// SailsGeneratedData contains the data for a SAILS_GENERATED event.
+// This captures the White Sails confidence signal generation per TDD 5.4.
+type SailsGeneratedData struct {
+	// Color is the final confidence signal (WHITE, GRAY, BLACK).
+	Color string
+
+	// ComputedBase is the computed color before human modifiers.
+	ComputedBase string
+
+	// Reasons explains why this color was computed.
+	Reasons []string
+
+	// FilePath is the path to the generated WHITE_SAILS.yaml.
+	FilePath string
+}
+
+// NewSailsGeneratedEvent creates an event for White Sails generation.
+// This event is emitted when a session's confidence signal (WHITE_SAILS.yaml) is generated.
+//
+// Per TDD Section 5.4, the event captures:
+//   - Session ID
+//   - Final color (WHITE/GRAY/BLACK)
+//   - Computed base color (before modifiers)
+//   - Reasons array explaining the color determination
+//   - File path to WHITE_SAILS.yaml
+func NewSailsGeneratedEvent(sessionID string, data SailsGeneratedData) Event {
+	meta := map[string]interface{}{
+		"session_id":    sessionID,
+		"color":         data.Color,
+		"computed_base": data.ComputedBase,
+		"reasons":       data.Reasons,
+		"file_path":     data.FilePath,
+	}
+
+	summary := "Generated WHITE_SAILS: " + data.Color
+	if data.Color != data.ComputedBase {
+		summary += " (base: " + data.ComputedBase + ")"
+	}
+
+	return Event{
+		Timestamp: timestamp(),
+		Type:      EventTypeSailsGenerated,
+		Path:      data.FilePath,
 		Summary:   summary,
 		Meta:      meta,
 	}

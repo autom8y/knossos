@@ -17,6 +17,7 @@ func TestEventType_Constants(t *testing.T) {
 		{EventTypeCommand, "command"},
 		{EventTypeDecision, "decision"},
 		{EventTypeContextSwitch, "context_switch"},
+		{EventTypeSailsGenerated, "sails_generated"},
 	}
 
 	for _, tt := range tests {
@@ -434,5 +435,220 @@ func TestStamp_ToEvent_MinimalFields(t *testing.T) {
 	// rejected should not be in meta when empty
 	if _, exists := event.Meta["rejected"]; exists {
 		t.Error("Meta.rejected should not exist when stamp.Rejected is empty")
+	}
+}
+
+func TestEventTypeSailsGenerated_Constant(t *testing.T) {
+	if string(EventTypeSailsGenerated) != "sails_generated" {
+		t.Errorf("EventTypeSailsGenerated = %q, want %q", EventTypeSailsGenerated, "sails_generated")
+	}
+}
+
+func TestNewSailsGeneratedEvent(t *testing.T) {
+	data := SailsGeneratedData{
+		Color:        "WHITE",
+		ComputedBase: "WHITE",
+		Reasons:      []string{"all required proofs present and passing"},
+		FilePath:     ".claude/sessions/session-20260105-143000-abc12345/WHITE_SAILS.yaml",
+	}
+
+	event := NewSailsGeneratedEvent("session-20260105-143000-abc12345", data)
+
+	// Check event type
+	if event.Type != EventTypeSailsGenerated {
+		t.Errorf("Type = %v, want %v", event.Type, EventTypeSailsGenerated)
+	}
+
+	// Check path
+	if event.Path != data.FilePath {
+		t.Errorf("Path = %v, want %v", event.Path, data.FilePath)
+	}
+
+	// Check summary (same color as base)
+	expectedSummary := "Generated WHITE_SAILS: WHITE"
+	if event.Summary != expectedSummary {
+		t.Errorf("Summary = %v, want %v", event.Summary, expectedSummary)
+	}
+
+	// Check timestamp is set
+	if event.Timestamp == "" {
+		t.Error("Timestamp should not be empty")
+	}
+
+	// Check meta fields
+	if event.Meta["session_id"] != "session-20260105-143000-abc12345" {
+		t.Errorf("Meta.session_id = %v, want 'session-20260105-143000-abc12345'", event.Meta["session_id"])
+	}
+	if event.Meta["color"] != "WHITE" {
+		t.Errorf("Meta.color = %v, want 'WHITE'", event.Meta["color"])
+	}
+	if event.Meta["computed_base"] != "WHITE" {
+		t.Errorf("Meta.computed_base = %v, want 'WHITE'", event.Meta["computed_base"])
+	}
+	if event.Meta["file_path"] != data.FilePath {
+		t.Errorf("Meta.file_path = %v, want %v", event.Meta["file_path"], data.FilePath)
+	}
+
+	// Check reasons
+	reasons, ok := event.Meta["reasons"].([]string)
+	if !ok {
+		t.Fatal("Meta.reasons is not a []string")
+	}
+	if len(reasons) != 1 {
+		t.Errorf("Meta.reasons length = %d, want 1", len(reasons))
+	}
+	if reasons[0] != "all required proofs present and passing" {
+		t.Errorf("Meta.reasons[0] = %v, want 'all required proofs present and passing'", reasons[0])
+	}
+}
+
+func TestNewSailsGeneratedEvent_WithModifier(t *testing.T) {
+	// Test when color differs from computed base (modifier applied)
+	data := SailsGeneratedData{
+		Color:        "GRAY",
+		ComputedBase: "WHITE",
+		Reasons: []string{
+			"all required proofs present and passing",
+			"modifier DOWNGRADE_TO_GRAY applied: Changed retry logic in payment flow",
+		},
+		FilePath: ".claude/sessions/session-20260105-143000-def67890/WHITE_SAILS.yaml",
+	}
+
+	event := NewSailsGeneratedEvent("session-20260105-143000-def67890", data)
+
+	// Check summary includes both colors when they differ
+	expectedSummary := "Generated WHITE_SAILS: GRAY (base: WHITE)"
+	if event.Summary != expectedSummary {
+		t.Errorf("Summary = %v, want %v", event.Summary, expectedSummary)
+	}
+
+	if event.Meta["color"] != "GRAY" {
+		t.Errorf("Meta.color = %v, want 'GRAY'", event.Meta["color"])
+	}
+	if event.Meta["computed_base"] != "WHITE" {
+		t.Errorf("Meta.computed_base = %v, want 'WHITE'", event.Meta["computed_base"])
+	}
+
+	reasons, ok := event.Meta["reasons"].([]string)
+	if !ok {
+		t.Fatal("Meta.reasons is not a []string")
+	}
+	if len(reasons) != 2 {
+		t.Errorf("Meta.reasons length = %d, want 2", len(reasons))
+	}
+}
+
+func TestNewSailsGeneratedEvent_Gray(t *testing.T) {
+	// Test GRAY result (open questions)
+	data := SailsGeneratedData{
+		Color:        "GRAY",
+		ComputedBase: "GRAY",
+		Reasons:      []string{"open questions present: gray ceiling applied"},
+		FilePath:     ".claude/sessions/session-20260105-160000-ghi11111/WHITE_SAILS.yaml",
+	}
+
+	event := NewSailsGeneratedEvent("session-20260105-160000-ghi11111", data)
+
+	// Summary should not include "(base: X)" when colors match
+	expectedSummary := "Generated WHITE_SAILS: GRAY"
+	if event.Summary != expectedSummary {
+		t.Errorf("Summary = %v, want %v", event.Summary, expectedSummary)
+	}
+
+	if event.Meta["color"] != "GRAY" {
+		t.Errorf("Meta.color = %v, want 'GRAY'", event.Meta["color"])
+	}
+	if event.Meta["computed_base"] != "GRAY" {
+		t.Errorf("Meta.computed_base = %v, want 'GRAY'", event.Meta["computed_base"])
+	}
+}
+
+func TestNewSailsGeneratedEvent_Black(t *testing.T) {
+	// Test BLACK result (test failure)
+	data := SailsGeneratedData{
+		Color:        "BLACK",
+		ComputedBase: "BLACK",
+		Reasons:      []string{"proof 'tests' has status FAIL"},
+		FilePath:     ".claude/sessions/session-20260105-170000-jkl22222/WHITE_SAILS.yaml",
+	}
+
+	event := NewSailsGeneratedEvent("session-20260105-170000-jkl22222", data)
+
+	expectedSummary := "Generated WHITE_SAILS: BLACK"
+	if event.Summary != expectedSummary {
+		t.Errorf("Summary = %v, want %v", event.Summary, expectedSummary)
+	}
+
+	if event.Meta["color"] != "BLACK" {
+		t.Errorf("Meta.color = %v, want 'BLACK'", event.Meta["color"])
+	}
+}
+
+func TestNewSailsGeneratedEvent_JSONMarshaling(t *testing.T) {
+	data := SailsGeneratedData{
+		Color:        "WHITE",
+		ComputedBase: "WHITE",
+		Reasons:      []string{"all required proofs present and passing"},
+		FilePath:     ".claude/sessions/session-20260105-143000-abc12345/WHITE_SAILS.yaml",
+	}
+
+	event := NewSailsGeneratedEvent("session-20260105-143000-abc12345", data)
+
+	// Marshal to JSON
+	jsonData, err := json.Marshal(event)
+	if err != nil {
+		t.Fatalf("Failed to marshal event: %v", err)
+	}
+
+	// Unmarshal to verify structure
+	var raw map[string]interface{}
+	if err := json.Unmarshal(jsonData, &raw); err != nil {
+		t.Fatalf("Failed to unmarshal JSON: %v", err)
+	}
+
+	// Check type in JSON
+	if raw["type"] != "sails_generated" {
+		t.Errorf("type = %v, want 'sails_generated'", raw["type"])
+	}
+
+	// Check meta is present
+	meta, ok := raw["meta"].(map[string]interface{})
+	if !ok {
+		t.Fatal("meta is not a map")
+	}
+	if meta["color"] != "WHITE" {
+		t.Errorf("meta.color = %v, want 'WHITE'", meta["color"])
+	}
+	if meta["computed_base"] != "WHITE" {
+		t.Errorf("meta.computed_base = %v, want 'WHITE'", meta["computed_base"])
+	}
+
+	// Check reasons array in JSON
+	reasons, ok := meta["reasons"].([]interface{})
+	if !ok {
+		t.Fatal("meta.reasons is not a slice")
+	}
+	if len(reasons) != 1 {
+		t.Errorf("meta.reasons length = %d, want 1", len(reasons))
+	}
+}
+
+func TestSailsGeneratedData_EmptyReasons(t *testing.T) {
+	// Test with empty reasons array
+	data := SailsGeneratedData{
+		Color:        "WHITE",
+		ComputedBase: "WHITE",
+		Reasons:      []string{},
+		FilePath:     ".claude/sessions/session-20260105-143000-xyz99999/WHITE_SAILS.yaml",
+	}
+
+	event := NewSailsGeneratedEvent("session-20260105-143000-xyz99999", data)
+
+	reasons, ok := event.Meta["reasons"].([]string)
+	if !ok {
+		t.Fatal("Meta.reasons is not a []string")
+	}
+	if len(reasons) != 0 {
+		t.Errorf("Meta.reasons length = %d, want 0", len(reasons))
 	}
 }
