@@ -23,7 +23,8 @@ readonly ROSTER_HOME="${ROSTER_HOME:-$HOME/Code/roster}"
 readonly SOURCE_DIR="$ROSTER_HOME/user-hooks"
 
 # Valid categories for hooks
-readonly HOOK_CATEGORIES="context-injection session-guards validation tracking"
+# Note: 'ari' contains thin wrappers that dispatch to the ari binary
+readonly HOOK_CATEGORIES="context-injection session-guards validation tracking ari"
 
 # Colors for output
 RED='\033[0;31m'
@@ -165,6 +166,17 @@ for category in $HOOK_CATEGORIES; do
             sync_count=$((sync_count + 1))
         fi
     done
+
+    # Sync hooks.yaml if present (hook registration manifest)
+    if [[ -f "$category_dir/hooks.yaml" ]]; then
+        target_yaml="$TARGET_HOOKS/$category/hooks.yaml"
+        if [[ $DRY_RUN -eq 0 ]]; then
+            cp "$category_dir/hooks.yaml" "$target_yaml"
+            log_info "Synced: $category/hooks.yaml"
+        else
+            log_info "Would sync: $category/hooks.yaml"
+        fi
+    fi
 done
 
 echo ""

@@ -1,0 +1,80 @@
+# Ari Hook Wrappers Configuration
+# Thin bash wrappers that dispatch to ari binary for smart hook logic
+#
+# Schema version: 1.0
+# These hooks provide fast early-exit checks in bash (<5ms) before
+# dispatching to the Go-based ari binary for full processing.
+#
+# Binary Resolution (per ADR-0002):
+# 1. ARIADNE_BIN environment variable (explicit override)
+# 2. PATH lookup for 'ari' command (installed binary)
+# 3. Project-relative: ${CLAUDE_PROJECT_DIR}/ariadne/ari (development)
+# 4. Graceful exit if binary unavailable (RECOVERABLE category)
+#
+# Priority: Lower values execute first (range: 1-100)
+# All ari hooks use priority 1-10 to run before legacy bash hooks
+
+schema_version: "1.0"
+
+hooks:
+  # ===========================================================================
+  # SessionStart Hooks
+  # ===========================================================================
+  - event: SessionStart
+    matcher: "startup|resume"
+    path: ari/context.sh
+    timeout: 10
+    priority: 5
+    description: "Injects session context via ari hook context"
+
+  # ===========================================================================
+  # Stop Hooks
+  # ===========================================================================
+  - event: Stop
+    path: ari/autopark.sh
+    timeout: 5
+    priority: 5
+    description: "Auto-parks session on stop via ari hook autopark"
+
+  # ===========================================================================
+  # PreToolUse Hooks
+  # ===========================================================================
+  - event: PreToolUse
+    matcher: "Edit|Write"
+    path: ari/writeguard.sh
+    timeout: 3
+    priority: 3
+    description: "Guards session context writes via ari hook writeguard"
+
+  - event: PreToolUse
+    matcher: "Bash"
+    path: ari/validate.sh
+    timeout: 5
+    priority: 5
+    description: "Validates bash commands via ari hook validate"
+
+  # ===========================================================================
+  # PostToolUse Hooks
+  # ===========================================================================
+  - event: PostToolUse
+    matcher: "Edit|Write|Bash"
+    path: ari/thread.sh
+    timeout: 5
+    priority: 5
+    description: "Tracks artifacts and commits via ari hook thread"
+
+  - event: PostToolUse
+    path: ari/cognitive-budget.sh
+    timeout: 3
+    priority: 90
+    description: "Tracks tool use count for cognitive budget warnings"
+
+  # ===========================================================================
+  # UserPromptSubmit Hooks
+  # ===========================================================================
+  - event: UserPromptSubmit
+    matcher: "^/"
+    path: ari/route.sh
+    timeout: 5
+    priority: 3
+    description: "Routes slash commands via ari hook route"
