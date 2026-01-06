@@ -14,9 +14,9 @@ Switch to the ecosystem infrastructure team pack and display the team roster. $A
 
 ## Behavior
 
-1. Execute: `${ROSTER_HOME:-~/Code/roster}/swap-team.sh ecosystem-pack $ARGUMENTS`
-2. Display the roster output from swap-team.sh (agents and their roles)
-3. If SESSION_CONTEXT exists, update `active_team` to `ecosystem-pack`
+1. Execute: `${KNOSSOS_HOME:-~/Code/roster}/swap-rite.sh ecosystem-pack $ARGUMENTS`
+2. Display the roster output from swap-rite.sh (agents and their roles)
+3. If SESSION_CONTEXT exists, update `active_rite` to `ecosystem-pack`
 
 ## Flags
 

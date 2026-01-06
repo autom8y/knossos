@@ -14,7 +14,7 @@ Switch to the Strategy Team pack and display the rite roster. $ARGUMENTS
 
 ## Behavior
 
-1. Execute: `${ROSTER_HOME:-~/Code/roster}/swap-rite.sh strategy-pack $ARGUMENTS`
+1. Execute: `${KNOSSOS_HOME:-~/Code/roster}/swap-rite.sh strategy-pack $ARGUMENTS`
 2. Display the roster output from swap-rite.sh (agents and their roles)
 3. If SESSION_CONTEXT exists, update `active_rite` to `strategy-pack`
 

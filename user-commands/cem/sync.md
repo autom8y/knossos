@@ -16,9 +16,9 @@ Execute roster-sync to synchronize project with roster ecosystem. $ARGUMENTS
 
 1. **Execute roster-sync** using standard path resolution:
    ```bash
-   ${ROSTER_HOME:-~/Code/roster}/roster-sync [command] $ARGUMENTS
+   ${KNOSSOS_HOME:-~/Code/roster}/roster-sync [command] $ARGUMENTS
    ```
-   This expands to `$ROSTER_HOME/roster-sync` if set, otherwise `~/Code/roster/roster-sync`
+   This expands to `$KNOSSOS_HOME/roster-sync` if set, otherwise `~/Code/roster/roster-sync`
 
 2. **Pass through all arguments**:
    - Command: sync, init, status, diff, validate, repair
@@ -28,7 +28,7 @@ Execute roster-sync to synchronize project with roster ecosystem. $ARGUMENTS
 3. **Handle errors**:
    - If roster-sync not found at `~/Code/roster/roster-sync`:
      - ERROR: "roster-sync not found. Expected location: ~/Code/roster/roster-sync"
-     - Suggest: "Clone roster repository to ~/Code/roster or set ROSTER_HOME"
+     - Suggest: "Clone roster repository to ~/Code/roster or set KNOSSOS_HOME"
    - If execution fails: Display stderr for debugging
 
 ## Common Commands

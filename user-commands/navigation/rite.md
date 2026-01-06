@@ -8,7 +8,7 @@ model: sonnet
 ## Context
 Auto-injected by SessionStart hook (project, rite, session, git).
 
-**Available rites**: !`ls ${ROSTER_HOME:-~/Code/roster}/rites/`
+**Available rites**: !`ls ${KNOSSOS_HOME:-~/Code/roster}/rites/`
 
 ## Your Task
 
@@ -21,11 +21,11 @@ Manage agent rite packs. $ARGUMENTS
 2. Show: "Active rite: {name}" or "No rite active"
 
 **If `--list` or `-l`:**
-1. Execute: `${ROSTER_HOME:-~/Code/roster}/swap-rite.sh --list`
+1. Execute: `${KNOSSOS_HOME:-~/Code/roster}/swap-rite.sh --list`
 2. Display all available rite packs
 
 **If `<pack-name>` provided:**
-1. Execute: `${ROSTER_HOME:-~/Code/roster}/swap-rite.sh <pack-name> [flags]`
+1. Execute: `${KNOSSOS_HOME:-~/Code/roster}/swap-rite.sh <pack-name> [flags]`
 2. If orphan agents exist (agents in current rite but not in target):
    - **Interactive (TTY)**: Prompt user for each orphan agent
    - **Non-interactive**: Require `--keep-all`, `--remove-all`, or `--promote-all` flag

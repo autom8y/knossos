@@ -21,12 +21,12 @@ model: opus
 Auto-injected by SessionStart hook (project, team, session, git).
 
 **Active team**: !`cat .claude/ACTIVE_RITE 2>/dev/null || echo "none"`
-**Available teams**: !`ls ${ROSTER_HOME:-~/Code/roster}/teams/ 2>/dev/null | tr '\n' ' '`
+**Available teams**: !`ls ${KNOSSOS_HOME:-~/Code/roster}/teams/ 2>/dev/null | tr '\n' ' '`
 
 ## Pre-flight
 
 1. **Knowledge base accessible**:
-   - Verify `${ROSTER_HOME:-~/Code/roster}/teams/` exists
+   - Verify `${KNOSSOS_HOME:-~/Code/roster}/teams/` exists
    - If missing: WARN "Roster not found at expected location."
 
 ## Your Task
@@ -143,7 +143,7 @@ When recommending teams, retrieve current team inventory from:
 
 ## Knowledge Sources
 
-- `$ROSTER_HOME/teams/*/orchestrator.yaml` - Team profiles (via team-discovery)
+- `$KNOSSOS_HOME/teams/*/orchestrator.yaml` - Team profiles (via team-discovery)
 - `prompting` skill - Invocation patterns
 - `10x-workflow` skill - Phase transitions and quality gates
 
