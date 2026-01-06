@@ -158,16 +158,6 @@ func readActiveRite(resolver *paths.Resolver) string {
 	return ""
 }
 
-// readActiveTeam is deprecated. Use readActiveRite instead.
-// Kept for backward compatibility.
-func readActiveTeam(path string) string {
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return ""
-	}
-	return strings.TrimSpace(string(data))
-}
-
 // determineExecutionMode determines the execution mode based on session and team.
 func determineExecutionMode(sessCtx *session.Context, activeTeam string) string {
 	// No session = native mode

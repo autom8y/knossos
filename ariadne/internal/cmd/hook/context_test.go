@@ -408,8 +408,8 @@ func runContextWithPrinter(ctx *cmdContext, printer *output.Printer) error {
 		return outputNoSession(printer)
 	}
 
-	// Read active team
-	activeTeam := readActiveTeam(resolver.ActiveTeamFile())
+	// Read active rite
+	activeTeam := readActiveRite(resolver)
 	if activeTeam == "" {
 		activeTeam = sessCtx.ActiveRite
 	}

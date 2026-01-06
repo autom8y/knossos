@@ -50,7 +50,7 @@ func runContext(ctx *cmdContext, opts contextOptions) error {
 	if teamName == "" {
 		teamName = ctx.getActiveTeam()
 		if teamName == "" {
-			printer.PrintLine("No active team. Use --team flag to specify a team.")
+			printer.PrintLine("No active rite. Use --rite flag to specify a rite.")
 			return nil
 		}
 	}

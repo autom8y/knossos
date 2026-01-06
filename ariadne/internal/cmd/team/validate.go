@@ -43,7 +43,7 @@ func runValidate(ctx *cmdContext, opts validateOptions) error {
 	if teamName == "" {
 		teamName = discovery.ActiveTeamName()
 		if teamName == "" {
-			err := errors.New(errors.CodeFileNotFound, "No active team set. Use --team to specify.")
+			err := errors.New(errors.CodeFileNotFound, "No active rite set. Use --rite to specify.")
 			printer.PrintError(err)
 			return err
 		}
