@@ -153,14 +153,14 @@ func (m *Manager) Create(opts CreateOptions) (*Worktree, error) {
 		}
 	}
 
-	// Try to set team if specified
+	// Try to set rite if specified
 	if team != "" && team != "none" {
 		if rosterHome != "" {
-			swapTeamPath := filepath.Join(rosterHome, "swap-team.sh")
-			if _, err := os.Stat(swapTeamPath); err == nil {
-				cmd := exec.Command(swapTeamPath, team)
+			swapRitePath := filepath.Join(rosterHome, "swap-rite.sh")
+			if _, err := os.Stat(swapRitePath); err == nil {
+				cmd := exec.Command(swapRitePath, team)
 				cmd.Dir = wtPath
-				cmd.Run() // Ignore errors, team setup is optional
+				cmd.Run() // Ignore errors, rite setup is optional
 			}
 		}
 	}

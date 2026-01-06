@@ -86,12 +86,12 @@ func (m *Manager) Switch(idOrName string, opts SwitchOptions) (*Worktree, error)
 			os.WriteFile(activeRitePath, []byte(wt.Team+"\n"), 0644)
 		}
 
-		// Also try to run swap-team.sh if available
+		// Also try to run swap-rite.sh if available
 		rosterHome := os.Getenv("ROSTER_HOME")
 		if rosterHome != "" {
-			swapTeamPath := filepath.Join(rosterHome, "swap-team.sh")
-			if _, err := os.Stat(swapTeamPath); err == nil {
-				cmd := exec.Command(swapTeamPath, wt.Team)
+			swapRitePath := filepath.Join(rosterHome, "swap-rite.sh")
+			if _, err := os.Stat(swapRitePath); err == nil {
+				cmd := exec.Command(swapRitePath, wt.Team)
 				cmd.Dir = wt.Path
 				cmd.Run() // Ignore errors
 			}
@@ -173,7 +173,7 @@ func (m *Manager) Clone(sourceIDOrName, newName string, opts CloneOptions) (*Wor
 		}
 	}
 
-	// Try to run roster-sync and swap-team
+	// Try to run roster-sync and swap-rite
 	m.setupWorktreeEcosystem(wtPath, team)
 
 	return &wt, nil
@@ -657,7 +657,7 @@ func copySessionContext(sourcePath, targetPath string) error {
 	return nil
 }
 
-// setupWorktreeEcosystem runs roster-sync and swap-team for a worktree.
+// setupWorktreeEcosystem runs roster-sync and swap-rite for a worktree.
 func (m *Manager) setupWorktreeEcosystem(wtPath, team string) {
 	rosterHome := os.Getenv("ROSTER_HOME")
 	if rosterHome == "" {
@@ -679,11 +679,11 @@ func (m *Manager) setupWorktreeEcosystem(wtPath, team string) {
 		}
 	}
 
-	// Run swap-team if team specified
+	// Run swap-rite if rite specified
 	if team != "" && team != "none" {
-		swapTeamPath := filepath.Join(rosterHome, "swap-team.sh")
-		if _, err := os.Stat(swapTeamPath); err == nil {
-			cmd := exec.Command(swapTeamPath, team)
+		swapRitePath := filepath.Join(rosterHome, "swap-rite.sh")
+		if _, err := os.Stat(swapRitePath); err == nil {
+			cmd := exec.Command(swapRitePath, team)
 			cmd.Dir = wtPath
 			cmd.Run()
 		}
