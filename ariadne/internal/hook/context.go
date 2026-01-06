@@ -56,15 +56,10 @@ func LoadContext(env *Env) (*Context, error) {
 	ctx.ClaudeDir = filepath.Join(projectRoot, ".claude")
 	ctx.resolver = paths.NewResolver(projectRoot)
 
-	// Load active rite with backward compatibility
+	// Load active rite
 	ritePath := ctx.resolver.ActiveRiteFile()
 	if data, err := os.ReadFile(ritePath); err == nil {
 		ctx.ActiveRite = string(data)
-	} else if os.IsNotExist(err) {
-		// Fall back to legacy ACTIVE_TEAM file
-		if data, err := os.ReadFile(ctx.resolver.ActiveTeamFile()); err == nil {
-			ctx.ActiveRite = string(data)
-		}
 	}
 
 	// Determine execution mode based on rite

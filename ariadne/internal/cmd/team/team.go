@@ -89,19 +89,13 @@ func (c *cmdContext) getValidator() *team.Validator {
 	return team.NewValidator(resolver)
 }
 
-// getActiveTeam reads the active rite from ACTIVE_RITE file with backward compatibility.
+// getActiveTeam reads the active rite from ACTIVE_RITE file.
 func (c *cmdContext) getActiveTeam() string {
 	resolver := c.getResolver()
 
-	// Try new ACTIVE_RITE first
 	ritePath := resolver.ActiveRiteFile()
 	if data, err := os.ReadFile(ritePath); err == nil {
 		return strings.TrimSpace(string(data))
-	} else if os.IsNotExist(err) {
-		// Fall back to legacy ACTIVE_TEAM file
-		if data, err := os.ReadFile(resolver.ActiveTeamFile()); err == nil {
-			return strings.TrimSpace(string(data))
-		}
 	}
 
 	return ""

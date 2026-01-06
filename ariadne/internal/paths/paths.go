@@ -109,12 +109,6 @@ func (r *Resolver) ActiveRiteFile() string {
 	return filepath.Join(r.ClaudeDir(), "ACTIVE_RITE")
 }
 
-// ActiveTeamFile returns the path to the legacy ACTIVE_TEAM file.
-// Deprecated: Use ActiveRiteFile instead. This exists for backward compatibility.
-func (r *Resolver) ActiveTeamFile() string {
-	return filepath.Join(r.ClaudeDir(), "ACTIVE_TEAM")
-}
-
 // ActiveWorkflowFile returns the path to the ACTIVE_WORKFLOW.yaml file.
 func (r *Resolver) ActiveWorkflowFile() string {
 	return filepath.Join(r.ClaudeDir(), "ACTIVE_WORKFLOW.yaml")
@@ -145,15 +139,9 @@ func (r *Resolver) RitesDir() string {
 	return filepath.Join(r.projectRoot, "rites")
 }
 
-// TeamsDir returns the path to the project's teams/ directory.
-// Deprecated: Use RitesDir instead. This exists for backward compatibility.
-func (r *Resolver) TeamsDir() string {
-	return r.RitesDir()
-}
-
 // TeamDir returns the path to a specific team directory.
 func (r *Resolver) TeamDir(teamName string) string {
-	return filepath.Join(r.TeamsDir(), teamName)
+	return filepath.Join(r.RitesDir(), teamName)
 }
 
 // TeamAgentsDir returns the path to a team's agents/ directory.
@@ -240,12 +228,6 @@ func CacheDir() string {
 // DataDir returns the XDG data directory for ariadne.
 func DataDir() string {
 	return filepath.Join(xdg.DataHome, "ariadne")
-}
-
-// UserTeamsDir returns the user-level teams directory.
-// Deprecated: Use UserRitesDir instead. This exists for backward compatibility.
-func UserTeamsDir() string {
-	return UserRitesDir()
 }
 
 // UserRitesDir returns the user-level rites directory.

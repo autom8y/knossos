@@ -148,17 +148,11 @@ func outputNoSession(printer *output.Printer) error {
 	return printer.Print(result)
 }
 
-// readActiveRite reads the ACTIVE_RITE file with backward compatibility.
+// readActiveRite reads the ACTIVE_RITE file.
 func readActiveRite(resolver *paths.Resolver) string {
-	// Try new ACTIVE_RITE first
 	ritePath := resolver.ActiveRiteFile()
 	if data, err := os.ReadFile(ritePath); err == nil {
 		return strings.TrimSpace(string(data))
-	} else if os.IsNotExist(err) {
-		// Fall back to legacy ACTIVE_TEAM file
-		if data, err := os.ReadFile(resolver.ActiveTeamFile()); err == nil {
-			return strings.TrimSpace(string(data))
-		}
 	}
 
 	return ""

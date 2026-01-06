@@ -28,8 +28,8 @@ type ContextLoader struct {
 // NewContextLoader creates a new context loader using the paths resolver.
 func NewContextLoader(resolver *paths.Resolver) *ContextLoader {
 	return &ContextLoader{
-		teamsDir: resolver.TeamsDir(),
-		userDir:  paths.UserTeamsDir(),
+		teamsDir: resolver.RitesDir(),
+		userDir:  paths.UserRitesDir(),
 		cache:    make(map[string]*TeamContext),
 	}
 }

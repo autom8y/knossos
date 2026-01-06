@@ -32,19 +32,14 @@ type Discovery struct {
 // NewDiscovery creates a new team discovery instance.
 func NewDiscovery(resolver *paths.Resolver) *Discovery {
 	d := &Discovery{
-		projectTeamsDir: resolver.TeamsDir(),
-		userTeamsDir:    paths.UserTeamsDir(),
+		projectTeamsDir: resolver.RitesDir(),
+		userTeamsDir:    paths.UserRitesDir(),
 	}
 
-	// Read active rite with backward compatibility
+	// Read active rite
 	ritePath := resolver.ActiveRiteFile()
 	if data, err := os.ReadFile(ritePath); err == nil {
 		d.activeTeam = strings.TrimSpace(string(data))
-	} else if os.IsNotExist(err) {
-		// Fall back to legacy ACTIVE_TEAM file
-		if data, err := os.ReadFile(resolver.ActiveTeamFile()); err == nil {
-			d.activeTeam = strings.TrimSpace(string(data))
-		}
 	}
 
 	return d
