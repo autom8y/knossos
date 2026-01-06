@@ -1,5 +1,5 @@
-// Package threadcontract provides Thread Contract v2 event recording for Claude Code hooks.
-// "Theseus has amnesia; the Thread remembers" - events.jsonl provides the factual route through decisions.
+// Package clewcontract provides Clew Contract v2 event recording for Claude Code hooks.
+// "Theseus has amnesia; the Clew remembers" - events.jsonl provides the factual route through decisions.
 package clewcontract
 
 import (
@@ -7,10 +7,10 @@ import (
 	"time"
 )
 
-// EventType represents the type of thread event.
+// EventType represents the type of clew event.
 type EventType string
 
-// Thread event types for tracking Claude Code activity.
+// Clew event types for tracking Claude Code activity.
 const (
 	EventTypeToolCall        EventType = "tool_call"
 	EventTypeFileChange      EventType = "file_change"
@@ -41,7 +41,7 @@ const (
 	ArtifactTypeWhiteSails ArtifactType = "white_sails"
 )
 
-// Event represents a thread event in the events.jsonl log.
+// Event represents a clew event in the events.jsonl log.
 // Each event captures a discrete action during a Claude Code session.
 type Event struct {
 	// Timestamp in RFC3339 format with milliseconds

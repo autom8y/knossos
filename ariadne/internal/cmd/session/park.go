@@ -100,7 +100,7 @@ func runPark(ctx *cmdContext, opts parkOptions) error {
 		printer.VerboseLog("warn", "failed to emit park event", map[string]interface{}{"error": err.Error()})
 	}
 
-	// Emit Thread Contract session_end event
+	// Emit Clew Contract session_end event
 	sessionDir := resolver.SessionDir(sessionID)
 	tcWriter, err := clewcontract.NewEventWriter(sessionDir)
 	if err == nil {

@@ -180,7 +180,7 @@ func (g *gateOutput) String() string {
 
 	// Contract violations (if any)
 	if len(g.ContractViolations) > 0 {
-		b.WriteString("\nThread Contract Violations:\n")
+		b.WriteString("\nClew Contract Violations:\n")
 		for _, v := range g.ContractViolations {
 			severityLabel := "ERROR"
 			if v.Severity == "warning" {

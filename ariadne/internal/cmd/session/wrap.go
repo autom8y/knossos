@@ -109,7 +109,7 @@ func runWrap(ctx *cmdContext, opts wrapOptions) error {
 			})
 		}
 
-		// Emit SAILS_GENERATED event to Thread Contract
+		// Emit SAILS_GENERATED event to Clew Contract
 		writer, writerErr := clewcontract.NewEventWriter(sessionDir)
 		if writerErr != nil {
 			printer.VerboseLog("warn", "failed to create event writer for sails", map[string]interface{}{"error": writerErr.Error()})
@@ -177,7 +177,7 @@ func runWrap(ctx *cmdContext, opts wrapOptions) error {
 		printer.VerboseLog("warn", "failed to emit archive event", map[string]interface{}{"error": err.Error()})
 	}
 
-	// Emit Thread Contract session_end event
+	// Emit Clew Contract session_end event
 	tcWriter, err := clewcontract.NewEventWriter(sessionDir)
 	if err == nil {
 		durationMs := time.Since(sessCtx.CreatedAt).Milliseconds()

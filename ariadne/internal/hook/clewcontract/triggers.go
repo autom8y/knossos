@@ -1,4 +1,4 @@
-// Package threadcontract provides Thread Contract v2 event recording for Claude Code hooks.
+// Package clewcontract provides Clew Contract v2 event recording for Claude Code hooks.
 package clewcontract
 
 import (

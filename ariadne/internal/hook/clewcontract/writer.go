@@ -15,10 +15,10 @@ import (
 // Set to under 10 seconds per design requirements (acceptable loss window on crash).
 const DefaultFlushInterval = 5 * time.Second
 
-// EventsFileName is the standard name for the thread events log.
+// EventsFileName is the standard name for the clew events log.
 const EventsFileName = "events.jsonl"
 
-// EventWriter provides thread-safe append-only JSONL writing for thread events.
+// EventWriter provides thread-safe append-only JSONL writing for clew events.
 type EventWriter struct {
 	mu       sync.Mutex
 	filePath string

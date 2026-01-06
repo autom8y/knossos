@@ -103,7 +103,7 @@ func runStatus(ctx *cmdContext) error {
 	return printer.Print(result)
 }
 
-// readAllEvents reads both session events and thread contract events from events.jsonl.
+// readAllEvents reads both session events and clew contract events from events.jsonl.
 func readAllEvents(path string) ([]GenericEvent, error) {
 	file, err := os.Open(path)
 	if err != nil {
@@ -135,7 +135,7 @@ func filterEventsBySession(events []GenericEvent, sessionID string) []GenericEve
 	var filtered []GenericEvent
 	for _, e := range events {
 		// Check if event belongs to this session
-		// For thread contract events, check parent_session in meta
+		// For clew contract events, check parent_session in meta
 		if e.Type != "" && e.Meta != nil {
 			if parentSession, ok := e.Meta["parent_session"].(string); ok {
 				if parentSession == sessionID {
@@ -153,7 +153,7 @@ func filterEventsBySession(events []GenericEvent, sessionID string) []GenericEve
 	return filtered
 }
 
-// GenericEvent represents either a session event or a thread contract event.
+// GenericEvent represents either a session event or a clew contract event.
 type GenericEvent struct {
 	// Session event fields
 	Timestamp string                 `json:"timestamp,omitempty"`
@@ -164,7 +164,7 @@ type GenericEvent struct {
 	ToPhase   string                 `json:"to_phase,omitempty"`
 	Metadata  map[string]interface{} `json:"metadata,omitempty"`
 
-	// Thread contract event fields
+	// Clew contract event fields
 	Ts      string                 `json:"ts,omitempty"`
 	Type    string                 `json:"type,omitempty"`
 	Tool    string                 `json:"tool,omitempty"`

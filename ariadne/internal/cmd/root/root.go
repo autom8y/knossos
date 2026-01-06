@@ -62,7 +62,7 @@ var rootCmd = &cobra.Command{
 	Short: "Ariadne - Claude Code workflow harness",
 	Long: `Ariadne (ari) manages sessions, rites, manifests, and sync for Claude Code agentic workflows.
 
-The thread that makes the maze survivable.`,
+The clew that makes the maze survivable.`,
 	SilenceUsage:  true,
 	SilenceErrors: true,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
