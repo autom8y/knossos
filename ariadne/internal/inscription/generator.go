@@ -531,7 +531,7 @@ Task(moirai, "Mark the PRD task complete with artifact at docs/requirements/PRD-
 
 **Direct writes blocked**: PreToolUse hook intercepts ` + "`Write`" + `/` + "`Edit`" + ` to ` + "`*_CONTEXT.md`" + ` and instructs use of Moirai.
 
-**Full documentation**: See ` + "`user-agents/moirai.md`" + ` and ` + "`docs/philosophy/knossos-doctrine.md`" + `
+**Full documentation**: See ` + "`user-agents/moirai.md`" + ` and ` + "`docs/philosophy/knossos-doctrine.md`"
 }
 
 func (g *Generator) getDefaultSlashCommandsContent() string {
