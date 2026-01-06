@@ -1016,25 +1016,25 @@ is_team_stale() {
     return 1  # Fresh
 }
 
-# Refresh active team via swap-team.sh
+# Refresh active rite via swap-rite.sh
 refresh_active_team() {
     local active_team_file=".claude/ACTIVE_RITE"
 
     if [[ ! -f "$active_team_file" ]]; then
-        sync_log_debug "No active team to refresh"
+        sync_log_debug "No active rite to refresh"
         return 0
     fi
 
     local team_name
     team_name=$(cat "$active_team_file")
 
-    sync_log "Refreshing team: $team_name"
+    sync_log "Refreshing rite: $team_name"
 
-    local swap_team="${ROSTER_HOME:-}/swap-team.sh"
-    if [[ -x "$swap_team" ]]; then
-        "$swap_team" "$team_name" --update
+    local swap_rite="${ROSTER_HOME:-}/swap-rite.sh"
+    if [[ -x "$swap_rite" ]]; then
+        "$swap_rite" "$team_name" --update
     else
-        sync_log_warning "swap-team.sh not found: $swap_team"
+        sync_log_warning "swap-rite.sh not found: $swap_rite"
         return 1
     fi
 }
