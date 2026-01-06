@@ -99,7 +99,7 @@ user-commands/
   operations/    # architect, build, qa, code-review, commit (5)
   navigation/    # consult, team, worktree, sessions, ecosystem (5)
   meta/          # minus-1, zero, one (3)
-  team-switching/ # 10x, docs, hygiene, debt, sre, security, intelligence, rnd, strategy, forge (10)
+  rite-switching/ # 10x, docs, hygiene, debt, sre, security, intelligence, rnd, strategy, forge (10)
 ```
 
 **Team Commands:**

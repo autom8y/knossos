@@ -102,7 +102,7 @@ The manifest preserves category as metadata:
 | `operations` | architect, build, qa, code-review, commit | Keep unchanged |
 | `navigation` | consult, team, worktree, sessions, ecosystem | Keep unchanged |
 | `meta` | minus-1, zero, one | Keep unchanged |
-| `team-switching` | 10x, docs, hygiene, debt, sre, security, intelligence, rnd, strategy, forge | Keep unchanged |
+| `rite-switching` | 10x, docs, hygiene, debt, sre, security, intelligence, rnd, strategy, forge | Keep unchanged |
 | `cem` | sync | Keep unchanged |
 
 ### Hook Categories (Event/Purpose-Based)
@@ -301,7 +301,7 @@ Version 1.1.0 adds skills and hooks sections with category tracking:
 | operations | architect, build, qa, code-review, commit | 5 |
 | navigation | consult, team, worktree, sessions, ecosystem | 5 |
 | meta | minus-1, zero, one | 3 |
-| team-switching | 10x, docs, hygiene, debt, sre, security, intelligence, rnd, strategy, forge | 10 |
+| rite-switching | 10x, docs, hygiene, debt, sre, security, intelligence, rnd, strategy, forge | 10 |
 | cem | sync | 1 |
 
 ### Hooks (10 hooks + lib/, 4 categories + 1 root)

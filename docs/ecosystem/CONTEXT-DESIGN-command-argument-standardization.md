@@ -186,7 +186,7 @@ Full documentation: `.claude/skills/<skill>/skill.md`
 
 ### $ARGUMENTS Placement Rules
 
-1. **For pass-through commands** (team-switching): Place after first sentence
+1. **For pass-through commands** (rite-switching): Place after first sentence
    ```markdown
    ## Your Task
    Switch to the 10x development team pack. $ARGUMENTS
@@ -228,7 +228,7 @@ When a command accepts flags, document them in a standardized table:
 
 ### Pass-Through vs Internal Handling
 
-**Pass-through** (team-switching commands):
+**Pass-through** (rite-switching commands):
 - Flags passed directly to `swap-team.sh $ARGUMENTS`
 - Document flags that swap-team.sh accepts
 - Command markdown does not parse flags
@@ -242,7 +242,7 @@ When a command accepts flags, document them in a standardized table:
 
 | Category | Pass-through | Internal |
 |----------|--------------|----------|
-| team-switching | Yes | No |
+| rite-switching | Yes | No |
 | session | No | Yes |
 | workflow | No | Yes |
 | operations | No | Yes |
@@ -252,7 +252,7 @@ When a command accepts flags, document them in a standardized table:
 
 ## Command Categories and Their Patterns
 
-### Category: team-switching
+### Category: rite-switching
 
 **Pattern**: Pass-through all $ARGUMENTS to swap-team.sh
 
@@ -294,7 +294,7 @@ Switch to the {team-name} team pack. $ARGUMENTS
 Full documentation: `.claude/skills/{skill}/skill.md`
 ```
 
-**Required Changes for team-switching commands**:
+**Required Changes for rite-switching commands**:
 1. Replace `--force` with `--update` in argument-hint
 2. Replace `--refresh` with `--update` in documentation
 3. Add standardized Flags section
@@ -446,9 +446,9 @@ Update any messages mentioning `--refresh` to say `--update`.
 
 ### user-commands Changes
 
-**Files affected**: All files in `user-commands/team-switching/` and `user-commands/navigation/team.md`
+**Files affected**: All files in `user-commands/rite-switching/` and `user-commands/navigation/team.md`
 
-#### Pattern for team-switching commands:
+#### Pattern for rite-switching commands:
 1. Change `argument-hint:` from `[--refresh] [--force]` to `[--update] [--keep-all|--remove-all|--promote-all]`
 2. Add Flags section with standard table
 3. Update any `--refresh` mentions in Behavior to `--update`
@@ -504,16 +504,16 @@ Commands requiring `--force`/`--refresh` to `--update` change:
 
 | File | Current argument-hint | Target argument-hint |
 |------|----------------------|---------------------|
-| `team-switching/10x.md` | `[--refresh] [--force]` | `[--update] [--keep-all\|--remove-all\|--promote-all]` |
-| `team-switching/hygiene.md` | Same | Same |
-| `team-switching/docs.md` | Same | Same |
-| `team-switching/debt.md` | Same | Same |
-| `team-switching/sre.md` | Same | Same |
-| `team-switching/security.md` | Same | Same |
-| `team-switching/intelligence.md` | Same | Same |
-| `team-switching/rnd.md` | Same | Same |
-| `team-switching/strategy.md` | Same | Same |
-| `team-switching/forge.md` | Same | Same |
+| `rite-switching/10x.md` | `[--refresh] [--force]` | `[--update] [--keep-all\|--remove-all\|--promote-all]` |
+| `rite-switching/hygiene.md` | Same | Same |
+| `rite-switching/docs.md` | Same | Same |
+| `rite-switching/debt.md` | Same | Same |
+| `rite-switching/sre.md` | Same | Same |
+| `rite-switching/security.md` | Same | Same |
+| `rite-switching/intelligence.md` | Same | Same |
+| `rite-switching/rnd.md` | Same | Same |
+| `rite-switching/strategy.md` | Same | Same |
+| `rite-switching/forge.md` | Same | Same |
 | `navigation/team.md` | `[--list] [--force] [--keep-all\|...]` | `[--list] [--update] [--dry-run] [--keep-all\|...]` |
 
 Commands NOT requiring changes (no swap-team.sh interaction):

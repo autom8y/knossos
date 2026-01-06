@@ -49,13 +49,13 @@ From analysis of `/roster/swap-team.sh` (lines 1587-1661):
 |------|---------------------------|
 | `--force` | 10x.md, debt.md, docs.md, hygiene.md, intelligence.md, rnd.md, security.md, sre.md, strategy.md, ecosystem.md, team.md |
 
-**Root Cause**: The `--force` flag appears to be a legacy or planned feature that was never implemented. The team-switching commands document it, but swap-team.sh does not accept it.
+**Root Cause**: The `--force` flag appears to be a legacy or planned feature that was never implemented. The rite-switching commands document it, but swap-team.sh does not accept it.
 
 ---
 
 ## Command Inventory
 
-### team-switching/ (10 commands)
+### rite-switching/ (10 commands)
 
 | Command | argument-hint | $ARGUMENTS in Task | Pass-through | Flags Accurate | Deprecated Flags |
 |---------|--------------|-------------------|--------------|----------------|------------------|
@@ -70,7 +70,7 @@ From analysis of `/roster/swap-team.sh` (lines 1587-1661):
 | sre.md | Y | Y | Y | **N** | --force (invalid) |
 | strategy.md | Y | Y | Y | **N** | --force (invalid) |
 
-**Pattern**: All team-switching commands (except forge.md) have identical structure and all document the non-existent `--force` flag.
+**Pattern**: All rite-switching commands (except forge.md) have identical structure and all document the non-existent `--force` flag.
 
 **Note on forge.md**: This is a different type of command - it displays Forge meta-team info, not a team swap. It uses `--agents`, `--workflow`, `--commands` flags which are handled internally.
 
@@ -108,7 +108,7 @@ From analysis of `/roster/swap-team.sh` (lines 1587-1661):
 | team.md | Y | Y | **N** | **N** | --force (invalid) |
 | worktree.md | Y | Y | **N** | Y | None |
 
-**Note**: ecosystem.md follows the same pattern as team-switching commands (it's actually a team switcher).
+**Note**: ecosystem.md follows the same pattern as rite-switching commands (it's actually a team switcher).
 
 ### workflow/ (3 commands)
 
@@ -147,15 +147,15 @@ From analysis of `/roster/swap-team.sh` (lines 1587-1661):
 **Severity**: HIGH - User confusion, commands promise functionality that doesn't exist
 
 **Affected Commands** (11 total):
-- `/roster/user-commands/team-switching/10x.md`
-- `/roster/user-commands/team-switching/debt.md`
-- `/roster/user-commands/team-switching/docs.md`
-- `/roster/user-commands/team-switching/hygiene.md`
-- `/roster/user-commands/team-switching/intelligence.md`
-- `/roster/user-commands/team-switching/rnd.md`
-- `/roster/user-commands/team-switching/security.md`
-- `/roster/user-commands/team-switching/sre.md`
-- `/roster/user-commands/team-switching/strategy.md`
+- `/roster/user-commands/rite-switching/10x.md`
+- `/roster/user-commands/rite-switching/debt.md`
+- `/roster/user-commands/rite-switching/docs.md`
+- `/roster/user-commands/rite-switching/hygiene.md`
+- `/roster/user-commands/rite-switching/intelligence.md`
+- `/roster/user-commands/rite-switching/rnd.md`
+- `/roster/user-commands/rite-switching/security.md`
+- `/roster/user-commands/rite-switching/sre.md`
+- `/roster/user-commands/rite-switching/strategy.md`
 - `/roster/user-commands/navigation/ecosystem.md`
 - `/roster/user-commands/navigation/team.md`
 
@@ -194,7 +194,7 @@ $ROSTER_HOME/swap-team.sh 10x-dev-pack --force
 
 ### Issue 3: team.md Documents Flags Inconsistently
 
-**Severity**: MEDIUM - Confusion between /team and team-switching commands
+**Severity**: MEDIUM - Confusion between /team and rite-switching commands
 
 **Location**: `/roster/user-commands/navigation/team.md`
 
@@ -221,7 +221,7 @@ But it does NOT document:
 2. Keep `--refresh` documentation
 3. Optionally add `--dry-run` to documentation
 
-**Template Change** (for team-switching commands):
+**Template Change** (for rite-switching commands):
 ```yaml
 ---
 argument-hint: [--refresh] [--dry-run] [--keep-all|--remove-all|--promote-all]
@@ -261,7 +261,7 @@ After implementation, these criteria should be met:
 
 1. [ ] No command documents `--force` flag (0 instances)
 2. [ ] All non-meta commands have `argument-hint` in frontmatter
-3. [ ] All team-switching commands document only flags that exist in swap-team.sh
+3. [ ] All rite-switching commands document only flags that exist in swap-team.sh
 4. [ ] team.md documents all orphan handling flags correctly
 5. [ ] Running `grep -r "\-\-force" user-commands/` returns 0 results
 

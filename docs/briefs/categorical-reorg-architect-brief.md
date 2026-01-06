@@ -61,7 +61,7 @@ workflow/:       task, sprint, hotfix
 operations/:     architect, build, qa, code-review, commit
 navigation/:     consult, team, worktree, sessions, ecosystem
 meta/:           minus-1, zero, one
-team-switching/: 10x, docs, hygiene, debt, sre, security, intelligence, rnd, strategy, forge
+rite-switching/: 10x, docs, hygiene, debt, sre, security, intelligence, rnd, strategy, forge
 cem/:            sync
 ```
 
@@ -91,7 +91,7 @@ Lib (10):  config, logging, primitives, session-core, session-state,
 ### 2. Command Categories (Workflow-Based)
 - Are current 7 categories optimal?
 - Should any be merged? (e.g., `meta/` into `navigation/`)
-- Should any be split? (e.g., `team-switching/` is large at 10 commands)
+- Should any be split? (e.g., `rite-switching/` is large at 10 commands)
 
 ### 3. Hook Categories
 - Event-based: `session-events/`, `tool-events/`, `lifecycle-events/`

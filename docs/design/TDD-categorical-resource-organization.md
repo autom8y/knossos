@@ -93,7 +93,7 @@ Commands use existing 7 categories, validated and optimized.
 | `operations` | Individual operation commands | architect, build, qa, code-review, commit | 5 | Keep |
 | `navigation` | Ecosystem navigation and discovery | consult, team, worktree, sessions, ecosystem | 5 | Keep |
 | `meta` | Initialization and scoping commands | minus-1, zero, one | 3 | Keep |
-| `team-switching` | Team pack activation shortcuts | 10x, docs, hygiene, debt, sre, security, intelligence, rnd, strategy, forge | 10 | Keep |
+| `rite-switching` | Team pack activation shortcuts | 10x, docs, hygiene, debt, sre, security, intelligence, rnd, strategy, forge | 10 | Keep |
 | `cem` | Claude Ecosystem Management tooling | sync | 1 | Keep |
 
 **Total: 32 commands (31 + sync)**
@@ -258,7 +258,7 @@ user-commands/
     minus-1.md
     zero.md
     one.md
-  team-switching/
+  rite-switching/
     10x.md
     docs.md
     hygiene.md
@@ -461,7 +461,7 @@ No changes needed. Current implementation is the reference pattern.
 
 | Pillar | Valid Categories |
 |--------|------------------|
-| Commands | session, workflow, operations, navigation, meta, team-switching, cem |
+| Commands | session, workflow, operations, navigation, meta, rite-switching, cem |
 | Skills | session-lifecycle, orchestration, operations, documentation, guidance, root |
 | Hooks | context-injection, session-guards, validation, tracking, root |
 

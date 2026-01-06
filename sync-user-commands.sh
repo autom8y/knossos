@@ -859,7 +859,7 @@ Source Structure:
     operations/    # architect, build, qa, code-review, commit
     navigation/    # consult, team, worktree, sessions, ecosystem
     meta/          # minus-1, zero, one
-    team-switching/ # 10x, docs, hygiene, debt, sre, security, etc.
+    rite-switching/ # 10x, docs, hygiene, debt, sre, security, etc.
 
 Environment Variables:
   ROSTER_HOME    Roster repository location (default: ~/Code/roster)
