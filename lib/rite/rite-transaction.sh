@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 #
-# team-transaction.sh - Transaction Infrastructure for Team Swaps
+# rite-transaction.sh - Transaction Infrastructure for Rite Swaps
 #
 # Provides atomic write, journal management, staging, and backup
-# operations for swap-team.sh transaction safety.
+# operations for swap-rite.sh transaction safety.
 #
-# Part of: roster team-swap infrastructure
+# Part of: roster rite-swap infrastructure
 #
 # Usage:
-#   source "$ROSTER_HOME/lib/team/team-transaction.sh"
-#   create_journal "$source_team" "$target_team"
-#   create_staging && stage_agents "$team_name" && verify_staging "$count"
+#   source "$ROSTER_HOME/lib/rite/rite-transaction.sh"
+#   create_journal "$source_rite" "$target_rite"
+#   create_staging && stage_agents "$rite_name" && verify_staging "$count"
 #
 # Dependencies:
 #   - jq (for JSON manipulation)
@@ -18,8 +18,8 @@
 #   - Constants: JOURNAL_FILE, STAGING_DIR, SWAP_BACKUP_DIR, etc.
 
 # Guard against re-sourcing
-[[ -n "${_TEAM_TRANSACTION_LOADED:-}" ]] && return 0
-readonly _TEAM_TRANSACTION_LOADED=1
+[[ -n "${_RITE_TRANSACTION_LOADED:-}" ]] && return 0
+readonly _RITE_TRANSACTION_LOADED=1
 
 # ============================================================================
 # Module Constants (if not defined by caller)
@@ -40,7 +40,7 @@ readonly _TEAM_TRANSACTION_LOADED=1
 : "${PHASE_COMPLETED:=COMPLETED}"
 
 # ============================================================================
-# Logging Stubs (overridden when sourced from swap-team.sh)
+# Logging Stubs (overridden when sourced from swap-rite.sh)
 # ============================================================================
 
 if ! type log >/dev/null 2>&1; then

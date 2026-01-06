@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 #
-# team-hooks-registration.sh - Hook Registration for settings.local.json
+# rite-hooks-registration.sh - Hook Registration for settings.local.json
 #
 # Parses hooks.yaml files and generates Claude Code hook registrations
 # in settings.local.json while preserving user-defined hooks.
 #
-# Part of: roster team-swap infrastructure
+# Part of: roster rite-swap infrastructure
 #
 # Usage:
-#   source "$ROSTER_HOME/lib/team/team-hooks-registration.sh"
-#   swap_hook_registrations "team-name"
+#   source "$ROSTER_HOME/lib/rite/rite-hooks-registration.sh"
+#   swap_hook_registrations "rite-name"
 #
 # Dependencies:
 #   - yq v4+ (for YAML parsing)
@@ -21,15 +21,15 @@
 #   DRY_RUN_MODE - If set to 1, preview changes without writing
 
 # Guard against re-sourcing
-[[ -n "${_TEAM_HOOKS_REGISTRATION_LOADED:-}" ]] && return 0
-readonly _TEAM_HOOKS_REGISTRATION_LOADED=1
+[[ -n "${_RITE_HOOKS_REGISTRATION_LOADED:-}" ]] && return 0
+readonly _RITE_HOOKS_REGISTRATION_LOADED=1
 
 # ============================================================================
-# Logging Stubs (overridden when sourced from swap-team.sh)
+# Logging Stubs (overridden when sourced from swap-rite.sh)
 # ============================================================================
 
-# These stub implementations provide basic logging when team-hooks-registration.sh
-# is used standalone (e.g., in unit tests). When sourced from swap-team.sh,
+# These stub implementations provide basic logging when rite-hooks-registration.sh
+# is used standalone (e.g., in unit tests). When sourced from swap-rite.sh,
 # these are overridden by the full logging implementation.
 
 if ! type log >/dev/null 2>&1; then

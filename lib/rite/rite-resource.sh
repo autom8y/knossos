@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 #
-# team-resource.sh - Generic Team Resource Operations
+# rite-resource.sh - Generic Rite Resource Operations
 #
-# Consolidates backup, removal, orphan detection, and team membership
+# Consolidates backup, removal, orphan detection, and rite membership
 # checks for commands, skills, and hooks into parameterized functions.
 #
-# Part of: roster team-swap infrastructure
+# Part of: roster rite-swap infrastructure
 #
 # Usage:
-#   source "$ROSTER_HOME/lib/team/team-resource.sh"
-#   backup_team_resource "commands" ".claude/commands" ".team-commands" "f"
-#   detect_resource_orphans "commands" ".claude/commands" "my-team" "f" "*.md"
+#   source "$ROSTER_HOME/lib/rite/rite-resource.sh"
+#   backup_rite_resource "commands" ".claude/commands" ".rite-commands" "f"
+#   detect_resource_orphans "commands" ".claude/commands" "my-rite" "f" "*.md"
 #
 # Functions:
 #   is_resource_from_team     - Check if resource belongs to any team
@@ -21,15 +21,15 @@
 #   remove_resource_orphans   - Remove orphaned resources with backup
 
 # Guard against re-sourcing
-[[ -n "${_TEAM_RESOURCE_LOADED:-}" ]] && return 0
-readonly _TEAM_RESOURCE_LOADED=1
+[[ -n "${_RITE_RESOURCE_LOADED:-}" ]] && return 0
+readonly _RITE_RESOURCE_LOADED=1
 
 # ============================================================================
-# Logging Stubs (overridden when sourced from swap-team.sh)
+# Logging Stubs (overridden when sourced from swap-rite.sh)
 # ============================================================================
 
-# These stub implementations provide basic logging when team-resource.sh
-# is used standalone (e.g., in unit tests). When sourced from swap-team.sh,
+# These stub implementations provide basic logging when rite-resource.sh
+# is used standalone (e.g., in unit tests). When sourced from swap-rite.sh,
 # these are overridden by the full logging implementation.
 
 if ! type log_debug >/dev/null 2>&1; then
