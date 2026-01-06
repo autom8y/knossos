@@ -1,40 +1,40 @@
 ---
-name: team-ref
-description: "Switch agent team packs or list available teams via roster system. Use when: changing active team, listing available packs, checking current team status. Triggers: /team, switch team, change team pack, team management, roster."
+name: rite-ref
+description: "Switch agent rite packs or list available rites via roster system. Use when: changing active rite, listing available packs, checking current rite status. Triggers: /rite, switch rite, change rite pack, rite management, roster."
 ---
 
-# /team - Agent Team Pack Switcher
+# /rite - Agent Rite Pack Switcher
 
-> **Category**: Team Management | **Phase**: Team Switching
+> **Category**: Rite Management | **Phase**: Rite Switching
 
 ## Purpose
 
-Switch between agent team packs to access specialized workflows. Each team pack provides a curated set of agents optimized for specific types of work (development, documentation, code hygiene, technical debt).
+Switch between agent rite packs to access specialized workflows. Each rite pack provides a curated set of agents optimized for specific types of work (development, documentation, code hygiene, technical debt).
 
-This command integrates with the roster system at `$ROSTER_HOME/` and updates the active team context for the current project.
+This command integrates with the roster system at `$ROSTER_HOME/` and updates the active rite context for the current project.
 
 ---
 
 ## Usage
 
 ```bash
-/team                 # Show current active team
-/team <pack-name>     # Switch to specified team pack
-/team --list          # List all available team packs
+/rite                 # Show current active rite
+/rite <pack-name>     # Switch to specified rite pack
+/rite --list          # List all available rite packs
 ```
 
 ### Parameters
 
 | Parameter | Required | Description |
 |-----------|----------|-------------|
-| `pack-name` | No | Name of team pack to switch to |
-| `--list` | No | List all available team packs |
+| `pack-name` | No | Name of rite pack to switch to |
+| `--list` | No | List all available rite packs |
 
 ---
 
 ## Behavior
 
-When `/team` is invoked, the following sequence occurs:
+When `/rite` is invoked, the following sequence occurs:
 
 ### 1. Parse Arguments
 
