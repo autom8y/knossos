@@ -542,16 +542,16 @@ SETTINGS_EOF
         team_checksum=$(compute_content_checksum "$team_name")
         manifest=$(update_manifest_team "$manifest" "$team_name" "$team_checksum")
 
-        # Call swap-team.sh to apply team agents/skills/commands
-        local swap_team="$ROSTER_HOME/swap-team.sh"
-        if [[ -x "$swap_team" ]]; then
-            log "  Applying team resources..."
-            "$swap_team" "$team_name" --quiet 2>/dev/null || {
-                log_warning "Team application completed with warnings (non-fatal)"
+        # Call swap-rite.sh to apply rite agents/skills/commands
+        local swap_rite="$ROSTER_HOME/swap-rite.sh"
+        if [[ -x "$swap_rite" ]]; then
+            log "  Applying rite resources..."
+            "$swap_rite" "$team_name" --quiet 2>/dev/null || {
+                log_warning "Rite application completed with warnings (non-fatal)"
             }
         else
-            log_warning "swap-team.sh not found at $swap_team"
-            log_warning "Team ACTIVE_TEAM set but agents not applied"
+            log_warning "swap-rite.sh not found at $swap_rite"
+            log_warning "Active rite set but agents not applied"
         fi
     fi
 
