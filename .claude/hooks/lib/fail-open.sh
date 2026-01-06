@@ -187,8 +187,8 @@ log_bypass() {
         json_line="{\"timestamp\":\"$timestamp\",\"event\":\"moirai-bypass\",\"hook\":\"$hook\",\"bypass_mechanism\":\"$bypass_mechanism\",\"file_path\":\"$escaped_path\",\"context\":$context}"
     fi
 
-    # Append to Moirai bypass audit log (legacy log name kept for continuity)
-    echo "$json_line" >> "$AUDIT_DIR/state-mate-bypass.jsonl" 2>/dev/null || true
+    # Append to Moirai bypass audit log
+    echo "$json_line" >> "$AUDIT_DIR/moirai-bypass.jsonl" 2>/dev/null || true
 
     return 0
 }

@@ -1,4 +1,4 @@
-# ADR-0005: State-Mate Centralized State Mutation Authority
+# ADR-0005: Moirai Centralized State Mutation Authority
 
 | Field | Value |
 |-------|-------|
@@ -49,7 +49,7 @@ ADR-0001 (Session State Machine Redesign) established the formal state machine:
                      (direct wrap)
 ```
 
-ADR-0001 specified that `state-mate` would serve as the "policy engine" for mutations, but did not fully define the enforcement mechanism. This ADR completes that architecture.
+ADR-0001 specified that `moirai` would serve as the "policy engine" for mutations, but did not fully define the enforcement mechanism. This ADR completes that architecture.
 
 ### Forces
 
@@ -61,21 +61,21 @@ ADR-0001 specified that `state-mate` would serve as the "policy engine" for muta
 
 ## Decision
 
-We establish **state-mate** as the sole authority for all mutations to `*_CONTEXT.md` files, enforced by a PreToolUse hook that blocks direct writes.
+We establish **moirai** as the sole authority for all mutations to `*_CONTEXT.md` files, enforced by a PreToolUse hook that blocks direct writes.
 
-### 1. state-mate Agent Authority
+### 1. Moirai Agent Authority
 
-The `state-mate` agent (defined in `user-agents/state-mate.md`) is the exclusive interface for context file mutations:
+The `moirai` agent (defined in `user-agents/moirai.md`) is the exclusive interface for context file mutations:
 
 ```
-Task(state-mate, "mark_complete task-001 artifact=docs/requirements/PRD-foo.md
+Task(moirai, "mark_complete task-001 artifact=docs/requirements/PRD-foo.md
 
 Session Context:
 - Session ID: session-20251231-120000-abcd1234
 - Session Path: .claude/sessions/session-20251231-120000-abcd1234/SESSION_CONTEXT.md")
 ```
 
-state-mate provides:
+moirai provides:
 
 | Capability | Description |
 |------------|-------------|
@@ -106,11 +106,11 @@ fi
 The hook provides context-aware error messages:
 
 - **Active workflow**: Directs user to appropriate slash commands (`/park`, `/wrap`, `/handoff`)
-- **No workflow**: Directs user to invoke state-mate via Task tool
+- **No workflow**: Directs user to invoke moirai via Task tool
 
 ### 3. Operations Interface
 
-state-mate accepts both natural language and structured commands:
+moirai accepts both natural language and structured commands:
 
 **Low-Level CRUD Operations:**
 
@@ -132,7 +132,7 @@ state-mate accepts both natural language and structured commands:
 
 ### 4. Control Flags
 
-For exceptional circumstances, state-mate provides control flags:
+For exceptional circumstances, moirai provides control flags:
 
 | Flag | Effect | Use Case |
 |------|--------|----------|
@@ -142,7 +142,7 @@ For exceptional circumstances, state-mate provides control flags:
 
 Example:
 ```
-Task(state-mate, "--override=reason='Data recovery from corrupted state' transition_phase from=requirements to=implementation")
+Task(moirai, "--override=reason='Data recovery from corrupted state' transition_phase from=requirements to=implementation")
 ```
 
 ### 5. Audit Trail
@@ -161,7 +161,7 @@ Example entries:
 
 ### 6. Response Format
 
-state-mate returns structured JSON for all operations:
+moirai returns structured JSON for all operations:
 
 **Success:**
 ```json
@@ -200,15 +200,15 @@ state-mate returns structured JSON for all operations:
 
 ### Negative
 
-1. **No Quick Direct Edits**: Cannot manually fix a typo in context files without going through state-mate
-2. **Learning Curve**: Developers must learn state-mate invocation pattern
+1. **No Quick Direct Edits**: Cannot manually fix a typo in context files without going through moirai
+2. **Learning Curve**: Developers must learn moirai invocation pattern
 3. **Hook Dependency**: System requires hook to be properly installed and configured
 4. **Additional Latency**: Mutations route through Task tool invocation rather than direct file write
 
 ### Neutral
 
 1. **Debugging Context Files**: Can still Read context files directly for inspection
-2. **Schema Evolution**: Schema changes require coordinated update to state-mate validation
+2. **Schema Evolution**: Schema changes require coordinated update to moirai validation
 3. **Hook Bypass**: Malicious or misconfigured environments could disable hook (defense in depth, not absolute)
 
 ## Implementation
@@ -217,7 +217,7 @@ state-mate returns structured JSON for all operations:
 
 | Component | Path | Purpose |
 |-----------|------|---------|
-| state-mate agent | `user-agents/state-mate.md` | Agent definition with operations |
+| moirai agent | `user-agents/moirai.md` | Agent definition with operations |
 | Write guard hook | `.claude/hooks/session-guards/session-write-guard.sh` | PreToolUse interceptor |
 | Session schemas | `schemas/artifacts/session-context.schema.json` | Validation schema |
 | Sprint schemas | `schemas/artifacts/sprint-context.schema.json` | Validation schema |
@@ -242,9 +242,9 @@ The write guard is registered in `.claude/settings.json`:
 
 ### Integration with Session Manager
 
-state-mate complements (does not replace) `session-manager.sh`:
+moirai complements (does not replace) `session-manager.sh`:
 
-| Concern | session-manager.sh | state-mate |
+| Concern | session-manager.sh | moirai |
 |---------|-------------------|------------|
 | Session creation | `create` command | Read-only (must exist) |
 | Session query | `status` command | Read-only |
@@ -255,13 +255,13 @@ state-mate complements (does not replace) `session-manager.sh`:
 
 ## Related Decisions
 
-- **ADR-0001**: Session State Machine Redesign (defines FSM that state-mate enforces)
+- **ADR-0001**: Session State Machine Redesign (defines FSM that moirai enforces)
 - **ADR-0002**: Hook Library Resolution Architecture (defines hook installation pattern)
 
 ## References
 
-- state-mate agent: `user-agents/state-mate.md`
+- moirai agent: `user-agents/moirai.md`
 - Session write guard hook: `.claude/hooks/session-guards/session-write-guard.sh`
 - Session schemas: `schemas/artifacts/session-context.schema.json`
 - CLAUDE.md state management section: `.claude/CLAUDE.md` (lines 81-120)
-- Invocation patterns: `user-skills/session-lifecycle/shared-sections/state-mate-invocation.md`
+- Invocation patterns: `user-skills/session-lifecycle/shared-sections/moirai-invocation.md`
