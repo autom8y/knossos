@@ -555,7 +555,7 @@ test_create_swap_backup_updates_journal() {
 
     cd "$TEST_TMP"
     mkdir -p .claude/commands
-    echo "cmd.md" > .claude/commands/.team-commands
+    echo "cmd.md" > .claude/commands/.rite-commands
     echo "# Command" > .claude/commands/cmd.md
 
     create_journal "source" "target" 2>/dev/null

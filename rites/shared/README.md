@@ -39,4 +39,4 @@ This ensures teams can override shared primitives with specialized versions.
 
 ## Tracking
 
-Shared skill sync state is tracked via `.claude/.shared-skills` marker file, separate from the `.claude/.team-skills` marker used for active team content.
+Shared skill sync state is tracked via `.claude/.shared-skills` marker file, separate from the `.claude/.rite-skills` marker used for active rite content.

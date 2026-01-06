@@ -2,7 +2,7 @@
 #
 # swap-rite.sh - Agent Rite Pack Management System
 #
-# Swaps Claude Code agent rite packs with atomic-ish operations.
+# Swaps Claude Code agent rites (pantheons) with atomic-ish operations.
 # See TDD-0003 for design details.
 
 set -euo pipefail
@@ -183,11 +183,11 @@ rollback_swap() {
     # Restore commands if backed up
     if [[ -d "$SWAP_BACKUP_DIR/commands" ]]; then
         # Remove current team commands
-        if [[ -f ".claude/commands/.team-commands" ]]; then
+        if [[ -f ".claude/commands/.rite-commands" ]]; then
             while IFS= read -r cmd_file; do
                 [[ -z "$cmd_file" ]] && continue
                 rm -f ".claude/commands/$cmd_file"
-            done < ".claude/commands/.team-commands"
+            done < ".claude/commands/.rite-commands"
         fi
 
         # Restore backed up commands
@@ -195,8 +195,8 @@ rollback_swap() {
             [[ -f "$cmd_file" ]] || continue
             cp "$cmd_file" ".claude/commands/$(basename "$cmd_file")"
         done
-        if [[ -f "$SWAP_BACKUP_DIR/commands/.team-commands" ]]; then
-            cp "$SWAP_BACKUP_DIR/commands/.team-commands" ".claude/commands/.team-commands"
+        if [[ -f "$SWAP_BACKUP_DIR/commands/.rite-commands" ]]; then
+            cp "$SWAP_BACKUP_DIR/commands/.rite-commands" ".claude/commands/.rite-commands"
         fi
         log_debug "Restored commands"
     fi
@@ -204,11 +204,11 @@ rollback_swap() {
     # Restore skills if backed up
     if [[ -d "$SWAP_BACKUP_DIR/skills" ]]; then
         # Remove current team skills
-        if [[ -f ".claude/skills/.team-skills" ]]; then
+        if [[ -f ".claude/skills/.rite-skills" ]]; then
             while IFS= read -r skill_dir; do
                 [[ -z "$skill_dir" ]] && continue
                 rm -rf ".claude/skills/$skill_dir"
-            done < ".claude/skills/.team-skills"
+            done < ".claude/skills/.rite-skills"
         fi
 
         # Restore backed up skills
@@ -219,8 +219,8 @@ rollback_swap() {
             [[ "$skill_name" == "." ]] && continue
             cp -rp "$skill_path" ".claude/skills/$skill_name"
         done
-        if [[ -f "$SWAP_BACKUP_DIR/skills/.team-skills" ]]; then
-            cp "$SWAP_BACKUP_DIR/skills/.team-skills" ".claude/skills/.team-skills"
+        if [[ -f "$SWAP_BACKUP_DIR/skills/.rite-skills" ]]; then
+            cp "$SWAP_BACKUP_DIR/skills/.rite-skills" ".claude/skills/.rite-skills"
         fi
         log_debug "Restored skills"
     fi
@@ -228,11 +228,11 @@ rollback_swap() {
     # Restore hooks if backed up
     if [[ -d "$SWAP_BACKUP_DIR/hooks" ]]; then
         # Remove current team hooks
-        if [[ -f ".claude/hooks/.team-hooks" ]]; then
+        if [[ -f ".claude/hooks/.rite-hooks" ]]; then
             while IFS= read -r hook_file; do
                 [[ -z "$hook_file" ]] && continue
                 rm -f ".claude/hooks/$hook_file"
-            done < ".claude/hooks/.team-hooks"
+            done < ".claude/hooks/.rite-hooks"
         fi
 
         # Restore backed up hooks
@@ -240,11 +240,11 @@ rollback_swap() {
             [[ -f "$hook_file" ]] || continue
             local hook_name
             hook_name=$(basename "$hook_file")
-            [[ "$hook_name" == ".team-hooks" ]] && continue
+            [[ "$hook_name" == ".rite-hooks" ]] && continue
             cp "$hook_file" ".claude/hooks/$hook_name"
         done
-        if [[ -f "$SWAP_BACKUP_DIR/hooks/.team-hooks" ]]; then
-            cp "$SWAP_BACKUP_DIR/hooks/.team-hooks" ".claude/hooks/.team-hooks"
+        if [[ -f "$SWAP_BACKUP_DIR/hooks/.rite-hooks" ]]; then
+            cp "$SWAP_BACKUP_DIR/hooks/.rite-hooks" ".claude/hooks/.rite-hooks"
         fi
         log_debug "Restored hooks"
     fi
@@ -915,7 +915,7 @@ write_manifest() {
 
     # Read team commands from marker file
     local first_cmd=true
-    if [[ -f ".claude/commands/.team-commands" ]]; then
+    if [[ -f ".claude/commands/.rite-commands" ]]; then
         while IFS= read -r cmd_file; do
             [[ -z "$cmd_file" ]] && continue
 
@@ -932,7 +932,7 @@ write_manifest() {
                 echo -n "\"installed_at\": \"$timestamp\""
                 echo -n "}"
             } >> "$MANIFEST_FILE"
-        done < ".claude/commands/.team-commands"
+        done < ".claude/commands/.rite-commands"
     fi
 
     # Close commands section, add comma for hooks
@@ -944,7 +944,7 @@ write_manifest() {
 
     local first_hook=true
 
-    # Track hooks (base from user-hooks, team from .team-hooks marker)
+    # Track hooks (base from user-hooks, team from .rite-hooks marker)
     if [[ -d ".claude/hooks" ]]; then
         for hook_file in .claude/hooks/*.sh; do
             [[ ! -f "$hook_file" ]] && continue
@@ -956,7 +956,7 @@ write_manifest() {
             local source="base"
             local origin="user-hooks"
 
-            if [[ -f ".claude/hooks/.team-hooks" ]] && grep -q "^$hook_name$" ".claude/hooks/.team-hooks" 2>/dev/null; then
+            if [[ -f ".claude/hooks/.rite-hooks" ]] && grep -q "^$hook_name$" ".claude/hooks/.rite-hooks" 2>/dev/null; then
                 source="team"
                 origin="$team_name"
             fi
@@ -1410,22 +1410,22 @@ Commands:
   (no args)      Show current active rite
 
 Options:
-  --update, -u       Update agents from roster (even if already on team)
+  --update, -u       Update agents from roster (even if already on rite)
   --refresh, -r      [DEPRECATED] Alias for --update
   --dry-run          Preview changes without applying
   --keep-all         Preserve orphan agents in project
   --remove-all       Remove orphan agents/commands/skills/hooks (backup available)
   --promote-all      Move orphan agents to ~/.claude/agents/
   --auto-recover     Automatically rollback if interrupted swap detected (for CI/CD)
-  --sync-first       Run roster-sync before applying team (waterfall pattern)
+  --sync-first       Run roster-sync before applying rite (waterfall pattern)
   --auto-sync        Conditionally sync if roster has updates available
   --cleanup-orphans  Clean up old orphan backup directories (keep last 3)
   --auto-cleanup     Automatically clean orphan backups during swap
   --interactive      Force interactive prompts even without TTY (for containers)
   --no-interactive   Force non-interactive mode even with TTY (alias: --batch)
 
-When switching teams interactively, you'll be prompted for each orphan agent
-(agents in current team but not in target team). In non-interactive mode
+When switching rites interactively, you'll be prompted for each orphan agent
+(agents in current rite but not in target rite). In non-interactive mode
 (scripts, CI), you must specify one of the orphan handling flags.
 
 Interactive Mode:
@@ -1456,14 +1456,14 @@ Examples:
   ./swap-rite.sh dev-pack --keep-all    # Keep all orphans during swap
   ./swap-rite.sh dev-pack --remove-all  # Remove all orphans during swap
   ./swap-rite.sh --update               # Update current rite from roster
-  ./swap-rite.sh dev-pack --update      # Update even if already on dev-pack
+  ./swap-rite.sh dev-pack --update      # Update even if already on dev rite
   ./swap-rite.sh --update --dry-run     # Preview what update would change
   ./swap-rite.sh --reset                # Reset to baseline (no rite)
   ./swap-rite.sh --reset --dry-run      # Preview what reset would remove
   ./swap-rite.sh --verify               # Check state consistency
   ./swap-rite.sh --recover              # Recover from interrupted swap
   ./swap-rite.sh --auto-recover dev-pack # CI/CD mode with auto-rollback
-  ./swap-rite.sh dev-pack --sync-first  # Sync infrastructure then apply rite
+  ./swap-rite.sh dev-pack --sync-first  # Sync infrastructure then apply
   ./swap-rite.sh dev-pack --auto-sync   # Sync only if roster has updates
   ./swap-rite.sh --cleanup-orphans      # Clean up old orphan backups
   ./swap-rite.sh dev-pack --auto-cleanup # Swap rite and auto-clean orphan backups
@@ -1565,21 +1565,21 @@ validate_pack() {
     agent_count=$(find "$pack_dir/agents" -maxdepth 1 -name "*.md" -type f 2>/dev/null | wc -l | tr -d ' ')
 
     if [[ "$agent_count" -eq 0 ]]; then
-        log_error "Team pack '$team_name' has no agent files (.md)"
+        log_error "Rite '$team_name' has no agent files (.md)"
         exit "$EXIT_VALIDATION_FAILURE"
     fi
 
     # Check workflow.yaml exists
     if [[ ! -f "$pack_dir/workflow.yaml" ]]; then
-        log_warning "Team pack '$team_name' missing workflow.yaml (commands may fail)"
+        log_warning "Rite '$team_name' missing workflow.yaml (commands may fail)"
     fi
 
     # Check for missing directories (REQ-3.4)
     if [[ ! -d "$pack_dir/commands" ]]; then
-        log_warning "Team pack '$team_name' missing commands/ (run normalize-team-structure.sh)"
+        log_warning "Rite '$team_name' missing commands/ (run normalize-rite-structure.sh)"
     fi
     if [[ ! -d "$pack_dir/skills" ]]; then
-        log_warning "Team pack '$team_name' missing skills/ (run normalize-team-structure.sh)"
+        log_warning "Rite '$team_name' missing skills/ (run normalize-rite-structure.sh)"
     fi
 
     # Validate agent tools (REQ-3.3)
@@ -1704,38 +1704,38 @@ validate_orchestrator_yaml() {
     return 0
 }
 
-# Validate team pack schemas before swap
+# Validate rite schemas before swap
 # Called during PHASE_PREPARING to catch schema issues early
 # Returns 0 if all schemas valid, 1 if any validation fails
-validate_team_schemas() {
+validate_rite_schemas() {
     local team_name="$1"
 
-    log_debug "Validating team schemas for $team_name"
+    log_debug "Validating rite schemas for $team_name"
 
     # Validate workflow.yaml if present
     if ! validate_workflow_yaml "$team_name"; then
         log_error "Schema validation failed for workflow.yaml"
-        log_error "Team pack $team_name has invalid configuration"
+        log_error "Rite $team_name has invalid configuration"
         return 1
     fi
 
     # Validate orchestrator.yaml if present
     if ! validate_orchestrator_yaml "$team_name"; then
         log_error "Schema validation failed for orchestrator.yaml"
-        log_error "Team pack $team_name has invalid configuration"
+        log_error "Rite $team_name has invalid configuration"
         return 1
     fi
 
-    log_debug "Team schema validation passed"
+    log_debug "Rite schema validation passed"
     return 0
 }
 
-# Query current active team
-query_current_team() {
-    log_debug "Querying current team"
+# Query current active rite
+query_current_rite() {
+    log_debug "Querying current rite"
 
     if [[ ! -f ".claude/ACTIVE_RITE" ]]; then
-        log "No team active (virgin project)"
+        log "No rite active (virgin project)"
         exit "$EXIT_SUCCESS"
     fi
 
@@ -1747,56 +1747,56 @@ query_current_team() {
         exit "$EXIT_INVALID_ARGS"
     fi
 
-    # Check if team still exists in roster
+    # Check if rite still exists in roster
     if [[ ! -d "$KNOSSOS_HOME/rites/$current" ]]; then
-        log_warning "Active team '$current' not found in roster (orphaned state)"
-        log "Consider swapping to a valid team"
+        log_warning "Active rite '$current' not found in roster (orphaned state)"
+        log "Consider swapping to a valid rite"
     else
-        log "Active team: $current"
+        log "Active rite: $current"
     fi
 
     exit "$EXIT_SUCCESS"
 }
 
-# List all available team packs
-list_teams() {
-    log_debug "Listing available teams"
+# List all available rites
+list_rites() {
+    log_debug "Listing available rites"
 
-    local teams_dir="$KNOSSOS_HOME/rites"
+    local rites_dir="$KNOSSOS_HOME/rites"
 
-    if [[ ! -d "$teams_dir" ]]; then
-        log_error "Roster teams directory not found: $teams_dir"
+    if [[ ! -d "$rites_dir" ]]; then
+        log_error "Roster rites directory not found: $rites_dir"
         exit "$EXIT_VALIDATION_FAILURE"
     fi
 
-    local teams=()
-    local has_teams=false
+    local rites=()
+    local has_rites=false
 
     # Find all directories with agents/ subdirectory
-    while IFS= read -r -d '' pack_dir; do
-        local pack_name
-        pack_name=$(basename "$pack_dir")
+    while IFS= read -r -d '' rite_dir; do
+        local rite_name
+        rite_name=$(basename "$rite_dir")
 
-        # Validate pack has agents/
-        if [[ -d "$pack_dir/agents" ]]; then
+        # Validate rite has agents/
+        if [[ -d "$rite_dir/agents" ]]; then
             local agent_count
-            agent_count=$(find "$pack_dir/agents" -maxdepth 1 -name "*.md" -type f 2>/dev/null | wc -l | tr -d ' ')
+            agent_count=$(find "$rite_dir/agents" -maxdepth 1 -name "*.md" -type f 2>/dev/null | wc -l | tr -d ' ')
 
             if [[ "$agent_count" -gt 0 ]]; then
-                teams+=("$pack_name")
-                has_teams=true
+                rites+=("$rite_name")
+                has_rites=true
             fi
         fi
-    done < <(find "$teams_dir" -mindepth 1 -maxdepth 1 -type d -print0 2>/dev/null)
+    done < <(find "$rites_dir" -mindepth 1 -maxdepth 1 -type d -print0 2>/dev/null)
 
-    if [[ "$has_teams" == false ]]; then
-        log "No teams available"
+    if [[ "$has_rites" == false ]]; then
+        log "No rites available"
         exit "$EXIT_SUCCESS"
     fi
 
-    log "Available teams:"
-    for team in "${teams[@]}"; do
-        echo "  - $team"
+    log "Available rites:"
+    for rite in "${rites[@]}"; do
+        echo "  - $rite"
     done
 
     exit "$EXIT_SUCCESS"
@@ -1904,24 +1904,24 @@ swap_agents() {
 # These wrappers call the generic functions from lib/team/team-resource.sh
 
 # Backup wrappers
-backup_team_commands() { backup_team_resource "commands" ".claude/commands" ".team-commands" "f"; }
-backup_team_skills()   { backup_team_resource "skills" ".claude/skills" ".team-skills" "d"; }
-backup_team_hooks()    { backup_team_resource "hooks" ".claude/hooks" ".team-hooks" "f"; }
+backup_rite_commands() { backup_rite_resource "commands" ".claude/commands" ".rite-commands" "f"; }
+backup_rite_skills()   { backup_rite_resource "skills" ".claude/skills" ".rite-skills" "d"; }
+backup_rite_hooks()    { backup_rite_resource "hooks" ".claude/hooks" ".rite-hooks" "f"; }
 
 # Remove wrappers
-remove_team_commands() { remove_team_resource "commands" ".claude/commands" ".team-commands" "f"; }
-remove_team_skills()   { remove_team_resource "skills" ".claude/skills" ".team-skills" "d"; }
-remove_team_hooks()    { remove_team_resource "hooks" ".claude/hooks" ".team-hooks" "f"; }
+remove_rite_commands() { remove_rite_resource "commands" ".claude/commands" ".rite-commands" "f"; }
+remove_rite_skills()   { remove_rite_resource "skills" ".claude/skills" ".rite-skills" "d"; }
+remove_rite_hooks()    { remove_rite_resource "hooks" ".claude/hooks" ".rite-hooks" "f"; }
 
-# Team membership check wrappers
-is_team_command() { is_resource_from_team "$1" "commands" "f"; }
-is_team_skill()   { is_resource_from_team "$1" "skills" "d"; }
-is_team_hook()    { is_resource_from_team "$1" "hooks" "f"; }
+# Rite membership check wrappers
+is_rite_command() { is_resource_from_rite "$1" "commands" "f"; }
+is_rite_skill()   { is_resource_from_rite "$1" "skills" "d"; }
+is_rite_hook()    { is_resource_from_rite "$1" "hooks" "f"; }
 
-# Team origin lookup wrappers
-get_command_team() { get_resource_team "$1" "commands" "f"; }
-get_skill_team()   { get_resource_team "$1" "skills" "d"; }
-get_hook_team()    { get_resource_team "$1" "hooks" "f"; }
+# Rite origin lookup wrappers
+get_command_rite() { get_resource_rite "$1" "commands" "f"; }
+get_skill_rite()   { get_resource_rite "$1" "skills" "d"; }
+get_hook_rite()    { get_resource_rite "$1" "hooks" "f"; }
 
 # ============================================================================
 # Team Commands Functions
@@ -2008,7 +2008,7 @@ swap_commands() {
     log_debug "Syncing $cmd_count command(s) from $team_name"
 
     # Create marker file to track which commands belong to this team
-    local marker_file=".claude/commands/.team-commands"
+    local marker_file=".claude/commands/.rite-commands"
     : > "$marker_file"
 
     # Copy each command and record in marker
@@ -2077,7 +2077,7 @@ swap_skills() {
     log_debug "Syncing $skill_count skill(s) from $team_name"
 
     # Create marker file to track which skills belong to this team
-    local marker_file=".claude/skills/.team-skills"
+    local marker_file=".claude/skills/.rite-skills"
     : > "$marker_file"
 
     # Copy each skill directory and record in marker
@@ -2181,7 +2181,7 @@ sync_shared_skills() {
         skill_name=$(basename "$skill_path")
 
         # Check if team has same skill (team-privileged override)
-        if [[ -f ".claude/skills/.team-skills" ]] && grep -q "^$skill_name$" ".claude/skills/.team-skills" 2>/dev/null; then
+        if [[ -f ".claude/skills/.rite-skills" ]] && grep -q "^$skill_name$" ".claude/skills/.rite-skills" 2>/dev/null; then
             log_debug "Team skill $skill_name overrides shared skill"
             continue  # Skip this shared skill
         fi
@@ -2319,7 +2319,7 @@ swap_hooks() {
     log_debug "Overlaying $hook_count hook(s) from team $team_name"
 
     # Create marker file to track team hooks
-    local marker_file=".claude/hooks/.team-hooks"
+    local marker_file=".claude/hooks/.rite-hooks"
     : > "$marker_file"
 
     # Copy each team hook (may override base hooks)
@@ -3283,17 +3283,17 @@ perform_swap() {
                     log_warning "ACTIVE_RITE updated but session state may be inconsistent"
                 else
                     # Safe to mutate
-                    if sed -i '' "s/^active_team: .*/active_team: \"$team_name\"/" "$session_file"; then
-                        log "Session team updated to: $team_name"
+                    if sed -i '' "s/^active_rite: .*/active_rite: \"$team_name\"/" "$session_file"; then
+                        log "Session rite updated to: $team_name"
                     else
-                        log_warning "Failed to update active_team in SESSION_CONTEXT"
+                        log_warning "Failed to update active_rite in SESSION_CONTEXT"
                     fi
                 fi
             fi
         fi
     fi
 
-    # Update CLAUDE.md to reflect new team's agents (non-critical)
+    # Update CLAUDE.md to reflect new rite's agents (non-critical)
     update_claude_md "$team_name" || log_warning "CLAUDE.md update failed (non-critical)"
 
     # Auto-cleanup orphan backups if flag enabled (non-critical)
@@ -3301,7 +3301,7 @@ perform_swap() {
         cleanup_orphan_backups || log_warning "Orphan backup cleanup failed (non-critical)"
     fi
 
-    # Display team roster (dynamic generation from agent frontmatter)
+    # Display rite pantheon (dynamic generation from agent frontmatter)
     generate_roster "$team_name"
 
     # Success - show workflow info if available
@@ -3326,16 +3326,16 @@ perform_swap() {
 }
 
 # ============================================================================
-# Reset to Baseline (No Team)
+# Reset to Baseline (No Rite)
 # ============================================================================
 
 # Preview what reset would remove (for --dry-run with --reset)
 preview_reset() {
-    log "Dry-run: Would reset to baseline (no team)"
+    log "Dry-run: Would reset to baseline (no rite)"
     echo ""
 
-    # Check for team agents (those marked as "team" in manifest)
-    echo "Team agents to remove:"
+    # Check for rite agents (those marked as "rite" in manifest)
+    echo "Rite agents to remove:"
     local team_agent_count=0
     if [[ -f "$MANIFEST_FILE" ]] && [[ -d ".claude/agents" ]]; then
         local manifest
@@ -3363,11 +3363,11 @@ preview_reset() {
     # Check for team commands
     echo ""
     echo "Team commands to remove:"
-    if [[ -f ".claude/commands/.team-commands" ]]; then
+    if [[ -f ".claude/commands/.rite-commands" ]]; then
         while IFS= read -r cmd; do
             [[ -z "$cmd" ]] && continue
             echo "  - $cmd"
-        done < ".claude/commands/.team-commands"
+        done < ".claude/commands/.rite-commands"
     else
         echo "  (none)"
     fi
@@ -3375,11 +3375,11 @@ preview_reset() {
     # Check for team skills
     echo ""
     echo "Team skills to remove:"
-    if [[ -f ".claude/skills/.team-skills" ]]; then
+    if [[ -f ".claude/skills/.rite-skills" ]]; then
         while IFS= read -r skill; do
             [[ -z "$skill" ]] && continue
             echo "  - $skill"
-        done < ".claude/skills/.team-skills"
+        done < ".claude/skills/.rite-skills"
     else
         echo "  (none)"
     fi
@@ -3387,11 +3387,11 @@ preview_reset() {
     # Check for team hooks
     echo ""
     echo "Team hooks to remove:"
-    if [[ -f ".claude/hooks/.team-hooks" ]]; then
+    if [[ -f ".claude/hooks/.rite-hooks" ]]; then
         while IFS= read -r hook; do
             [[ -z "$hook" ]] && continue
             echo "  - $hook"
-        done < ".claude/hooks/.team-hooks"
+        done < ".claude/hooks/.rite-hooks"
     else
         echo "  (none)"
     fi

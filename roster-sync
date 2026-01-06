@@ -249,11 +249,11 @@ COMMANDS:
 GLOBAL OPTIONS:
     --force, -f       Overwrite local changes (resolve conflicts)
     --dry-run, -n     Preview changes without applying
-    --refresh, -r     Also refresh active team after sync
+    --refresh, -r     Also refresh active rite after sync
     --prune, -p       Remove orphaned files no longer in roster
-    --auto-refresh    Auto-refresh team if it has updates
+    --auto-refresh    Auto-refresh rite if it has updates
     --verbose, -V     Show detailed output
-    --team, -t        Include team validation (validate command)
+    --rite, -t        Include rite validation (validate command)
     --debug, -d       Enable debug output
     -h, --help        Show this help message
     -v, --version     Show version information
@@ -265,7 +265,7 @@ EXAMPLES:
     # Sync updates from roster
     roster-sync sync
 
-    # Sync with team refresh
+    # Sync with rite refresh
     roster-sync sync --refresh
 
     # Force sync, overwriting local conflicts
@@ -280,8 +280,8 @@ EXAMPLES:
     # Validate manifest
     roster-sync validate
 
-    # Validate with team check and verbose output
-    roster-sync validate --team --verbose
+    # Validate with rite check and verbose output
+    roster-sync validate --rite --verbose
 
     # Repair manifest (dry-run)
     roster-sync repair --dry-run
@@ -685,14 +685,14 @@ cmd_sync() {
         if [[ "$FLAG_DRY_RUN" != "1" ]]; then
             refresh_active_rite
         else
-            log "DRY-RUN: Would refresh team"
+            log "DRY-RUN: Would refresh rite"
         fi
     elif [[ "$FLAG_AUTO_REFRESH" == "1" ]]; then
         if is_team_stale; then
             if [[ "$FLAG_DRY_RUN" != "1" ]]; then
                 refresh_active_rite
             else
-                log "DRY-RUN: Would auto-refresh stale team"
+                log "DRY-RUN: Would auto-refresh stale rite"
             fi
         fi
     fi

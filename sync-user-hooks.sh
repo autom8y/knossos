@@ -539,12 +539,12 @@ sync_file() {
 
     log_debug "Processing: $hook_name (location: $location, category: $category, checksum: ${source_checksum:0:8}...)"
 
-    # Check for team collision
-    if is_team_hook "$(basename "$hook_name")"; then
-        local teams
-        teams=$(get_team_for_hook "$(basename "$hook_name")")
-        log_warning "Collision: $hook_name exists in team pack(s): $teams"
-        log_warning "  Team hook will override when that team is active"
+    # Check for rite collision
+    if is_rite_hook "$(basename "$hook_name")"; then
+        local rites
+        rites=$(get_rite_for_hook "$(basename "$hook_name")")
+        log_warning "Collision: $hook_name exists in rite(s): $rites"
+        log_warning "  Rite hook will override when that rite is active"
     fi
 
     if [[ -f "$target_file" ]]; then

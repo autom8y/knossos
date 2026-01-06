@@ -13,10 +13,10 @@
 #   detect_resource_orphans "commands" ".claude/commands" "my-rite" "f" "*.md"
 #
 # Functions:
-#   is_resource_from_team     - Check if resource belongs to any rite
-#   get_resource_team         - Get rite name that owns a resource
-#   backup_team_resource      - Backup rite-owned resources before swap
-#   remove_team_resource      - Remove rite-owned resources
+#   is_resource_from_rite     - Check if resource belongs to any rite
+#   get_resource_rite         - Get rite name that owns a resource
+#   backup_rite_resource      - Backup rite-owned resources before swap
+#   remove_rite_resource      - Remove rite-owned resources
 #   detect_resource_orphans   - Detect orphaned resources from other rites
 #   remove_resource_orphans   - Remove orphaned resources with backup
 
@@ -48,32 +48,32 @@ fi
 # Rite Membership Checks
 # ============================================================================
 
-# Check if a resource belongs to a rite pack in ROSTER_HOME/rites/
+# Check if a resource belongs to a rite in KNOSSOS_HOME/rites/
 #
 # Parameters:
 #   $1 - resource_name: basename of resource (e.g., "commit.md", "qa-ref")
 #   $2 - resource_type: "commands" | "skills" | "hooks"
 #   $3 - find_type:     "f" (file) | "d" (directory)
-#   $4 - team_scope:    (optional) space-separated list of rite names to check
-#                       If empty, checks ALL rites (legacy behavior)
+#   $4 - rite_scope:    (optional) space-separated list of rite names to check
+#                       If empty, checks ALL rites
 #
 # Returns: 0 if resource is from a rite, 1 otherwise
 #
-# Requires: ROSTER_HOME environment variable
-is_resource_from_team() {
+# Requires: KNOSSOS_HOME environment variable
+is_resource_from_rite() {
     local resource_name="$1"
     local resource_type="$2"
     local find_type="$3"
-    local team_scope="${4:-}"
+    local rite_scope="${4:-}"
 
-    if [[ -z "$team_scope" ]]; then
-        # Legacy behavior: check ALL rites
+    if [[ -z "$rite_scope" ]]; then
+        # Check ALL rites
         find "$KNOSSOS_HOME/rites" -path "*/${resource_type}/$resource_name" -type "$find_type" 2>/dev/null | grep -q .
     else
         # Scoped behavior: check only specified rites
-        local team
-        for team in $team_scope; do
-            local check_path="$KNOSSOS_HOME/rites/$team/$resource_type/$resource_name"
+        local rite
+        for rite in $rite_scope; do
+            local check_path="$KNOSSOS_HOME/rites/$rite/$resource_type/$resource_name"
             if [[ "$find_type" == "d" ]] && [[ -d "$check_path" ]]; then
                 return 0
             elif [[ "$find_type" == "f" ]] && [[ -f "$check_path" ]]; then
@@ -90,35 +90,35 @@ is_resource_from_team() {
 #   $1 - resource_name: basename of resource
 #   $2 - resource_type: "commands" | "skills" | "hooks"
 #   $3 - find_type:     "f" (file) | "d" (directory)
-#   $4 - team_scope:    (optional) space-separated list of rite names to check
-#                       If empty, checks ALL rites (legacy behavior)
+#   $4 - rite_scope:    (optional) space-separated list of rite names to check
+#                       If empty, checks ALL rites
 #
 # Outputs: rite name to stdout, empty if not found
 #
-# Requires: ROSTER_HOME environment variable
-get_resource_team() {
+# Requires: KNOSSOS_HOME environment variable
+get_resource_rite() {
     local resource_name="$1"
     local resource_type="$2"
     local find_type="$3"
-    local team_scope="${4:-}"
+    local rite_scope="${4:-}"
 
-    if [[ -z "$team_scope" ]]; then
-        # Legacy behavior: check ALL teams
+    if [[ -z "$rite_scope" ]]; then
+        # Check ALL rites
         local match
         match=$(find "$KNOSSOS_HOME/rites" -path "*/${resource_type}/$resource_name" -type "$find_type" 2>/dev/null | head -1)
         if [[ -n "$match" ]]; then
             echo "$match" | sed 's|.*/rites/\([^/]*\)/'"$resource_type"'/.*|\1|'
         fi
     else
-        # Scoped behavior: check only specified teams
-        local team
-        for team in $team_scope; do
-            local check_path="$KNOSSOS_HOME/rites/$team/$resource_type/$resource_name"
+        # Scoped behavior: check only specified rites
+        local rite
+        for rite in $rite_scope; do
+            local check_path="$KNOSSOS_HOME/rites/$rite/$resource_type/$resource_name"
             if [[ "$find_type" == "d" ]] && [[ -d "$check_path" ]]; then
-                echo "$team"
+                echo "$rite"
                 return 0
             elif [[ "$find_type" == "f" ]] && [[ -f "$check_path" ]]; then
-                echo "$team"
+                echo "$rite"
                 return 0
             fi
         done
@@ -134,7 +134,7 @@ get_resource_team() {
 # Parameters:
 #   $1 - resource_type: "commands" | "skills" | "hooks"
 #   $2 - resource_dir:  ".claude/commands" | ".claude/skills" | ".claude/hooks"
-#   $3 - marker_file:   ".team-commands" | ".team-skills" | ".team-hooks"
+#   $3 - marker_file:   ".rite-commands" | ".rite-skills" | ".rite-hooks"
 #   $4 - find_type:     "f" (file) | "d" (directory)
 #
 # Returns: 0 on success, 0 if nothing to backup
@@ -143,7 +143,7 @@ get_resource_team() {
 #   - Creates ${resource_dir}.backup/ directory
 #   - Copies rite resources to backup
 #   - Logs via log_debug()
-backup_team_resource() {
+backup_rite_resource() {
     local resource_type="$1"
     local resource_dir="$2"
     local marker_file="$3"
@@ -197,7 +197,7 @@ backup_team_resource() {
 # Parameters:
 #   $1 - resource_type: "commands" | "skills" | "hooks"
 #   $2 - resource_dir:  ".claude/commands" | ".claude/skills" | ".claude/hooks"
-#   $3 - marker_file:   ".team-commands" | ".team-skills" | ".team-hooks"
+#   $3 - marker_file:   ".rite-commands" | ".rite-skills" | ".rite-hooks"
 #   $4 - find_type:     "f" (file) | "d" (directory)
 #
 # Returns: 0 on success
@@ -206,7 +206,7 @@ backup_team_resource() {
 #   - Removes resources listed in marker file
 #   - Removes marker file itself
 #   - Logs via log_debug()
-remove_team_resource() {
+remove_rite_resource() {
     local resource_type="$1"
     local resource_dir="$2"
     local marker_file="$3"
@@ -252,12 +252,12 @@ remove_team_resource() {
 # Parameters:
 #   $1 - resource_type:     "commands" | "skills" | "hooks"
 #   $2 - resource_dir:      ".claude/commands" | ".claude/skills" | ".claude/hooks"
-#   $3 - incoming_team:     name of rite being swapped in
+#   $3 - incoming_rite:     name of rite being swapped in
 #   $4 - find_type:         "f" (file) | "d" (directory)
 #   $5 - glob_pattern:      "*.md" | "*/" | "*" (for find pattern)
-#   $6 - previous_team:     (optional) name of the previous rite
+#   $6 - previous_rite:     (optional) name of the previous rite
 #                           If provided, only flags orphans from this rite
-#                           If empty, checks ALL rites (legacy behavior)
+#                           If empty, checks ALL rites
 #
 # Outputs: One "resource_name:origin_rite" per line to stdout
 #
@@ -267,21 +267,21 @@ remove_team_resource() {
 detect_resource_orphans() {
     local resource_type="$1"
     local resource_dir="$2"
-    local incoming_team="$3"
+    local incoming_rite="$3"
     local find_type="$4"
     local glob_pattern="$5"
-    local previous_team="${6:-}"
+    local previous_rite="${6:-}"
 
-    local incoming_resource_dir="$KNOSSOS_HOME/rites/$incoming_team/$resource_type"
+    local incoming_resource_dir="$KNOSSOS_HOME/rites/$incoming_rite/$resource_type"
     local orphan_count=0
 
     # Build rite scope for orphan detection
-    # If previous_team is provided, only check that rite (scoped detection)
-    # Otherwise, check all rites (legacy behavior)
-    local team_scope=""
-    if [[ -n "$previous_team" ]]; then
-        team_scope="$previous_team"
-        log_debug "Orphan detection scoped to previous rite: $previous_team"
+    # If previous_rite is provided, only check that rite (scoped detection)
+    # Otherwise, check all rites
+    local rite_scope=""
+    if [[ -n "$previous_rite" ]]; then
+        rite_scope="$previous_rite"
+        log_debug "Orphan detection scoped to previous rite: $previous_rite"
     fi
 
     # Return if resource directory doesn't exist
@@ -310,13 +310,13 @@ detect_resource_orphans() {
             continue
         fi
 
-        # Is this resource from a rite pack (scoped or all)?
-        if is_resource_from_team "$resource_name" "$resource_type" "$find_type" "$team_scope"; then
-            local origin_team
-            origin_team=$(get_resource_team "$resource_name" "$resource_type" "$find_type" "$team_scope")
-            echo "$resource_name:$origin_team"
+        # Is this resource from a rite (scoped or all)?
+        if is_resource_from_rite "$resource_name" "$resource_type" "$find_type" "$rite_scope"; then
+            local origin_rite
+            origin_rite=$(get_resource_rite "$resource_name" "$resource_type" "$find_type" "$rite_scope")
+            echo "$resource_name:$origin_rite"
             orphan_count=$((orphan_count + 1))
-            log_debug "Orphan ${resource_type%s} detected: $resource_name (from $origin_team)"
+            log_debug "Orphan ${resource_type%s} detected: $resource_name (from $origin_rite)"
         fi
     done
 

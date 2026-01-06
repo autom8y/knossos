@@ -1025,14 +1025,14 @@ refresh_active_rite() {
         return 0
     fi
 
-    local team_name
-    team_name=$(cat "$active_team_file")
+    local rite_name
+    rite_name=$(cat "$active_team_file")
 
-    sync_log "Refreshing rite: $team_name"
+    sync_log "Refreshing rite: $rite_name"
 
     local swap_rite="${KNOSSOS_HOME:-}/swap-rite.sh"
     if [[ -x "$swap_rite" ]]; then
-        "$swap_rite" "$team_name" --update
+        "$swap_rite" "$rite_name" --update
     else
         sync_log_warning "swap-rite.sh not found: $swap_rite"
         return 1

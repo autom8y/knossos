@@ -1,18 +1,18 @@
 #!/usr/bin/env bash
 #
-# test-team-resource.sh - Unit tests for team-resource.sh
+# test-rite-resource.sh - Unit tests for rite-resource.sh
 #
-# Tests generic team resource operations including membership checks,
+# Tests generic rite resource operations including membership checks,
 # backup, removal, and orphan detection.
 
 set -euo pipefail
 
 # Test setup
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ROSTER_HOME="${ROSTER_HOME:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
+KNOSSOS_HOME="${KNOSSOS_HOME:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 
 # Source dependencies
-source "$ROSTER_HOME/lib/team/team-resource.sh"
+source "$KNOSSOS_HOME/lib/rite/rite-resource.sh"
 
 # Test counters
 TESTS_RUN=0
@@ -58,28 +58,28 @@ setup() {
     TEST_TMP=$(mktemp -d)
     echo "Test temp dir: $TEST_TMP"
 
-    # Create mock team structure for testing
-    mkdir -p "$TEST_TMP/mock-roster/teams/team-a/commands"
-    mkdir -p "$TEST_TMP/mock-roster/teams/team-a/skills"
-    mkdir -p "$TEST_TMP/mock-roster/teams/team-a/hooks"
-    mkdir -p "$TEST_TMP/mock-roster/teams/team-b/commands"
-    mkdir -p "$TEST_TMP/mock-roster/teams/team-b/skills"
-    mkdir -p "$TEST_TMP/mock-roster/teams/team-b/hooks"
+    # Create mock rite structure for testing
+    mkdir -p "$TEST_TMP/mock-knossos/rites/team-a/commands"
+    mkdir -p "$TEST_TMP/mock-knossos/rites/team-a/skills"
+    mkdir -p "$TEST_TMP/mock-knossos/rites/team-a/hooks"
+    mkdir -p "$TEST_TMP/mock-knossos/rites/team-b/commands"
+    mkdir -p "$TEST_TMP/mock-knossos/rites/team-b/skills"
+    mkdir -p "$TEST_TMP/mock-knossos/rites/team-b/hooks"
 
     # Create mock commands (files)
-    touch "$TEST_TMP/mock-roster/teams/team-a/commands/cmd-a.md"
-    touch "$TEST_TMP/mock-roster/teams/team-b/commands/cmd-b.md"
+    touch "$TEST_TMP/mock-knossos/rites/team-a/commands/cmd-a.md"
+    touch "$TEST_TMP/mock-knossos/rites/team-b/commands/cmd-b.md"
 
     # Create mock skills (directories)
-    mkdir -p "$TEST_TMP/mock-roster/teams/team-a/skills/skill-a"
-    mkdir -p "$TEST_TMP/mock-roster/teams/team-b/skills/skill-b"
+    mkdir -p "$TEST_TMP/mock-knossos/rites/team-a/skills/skill-a"
+    mkdir -p "$TEST_TMP/mock-knossos/rites/team-b/skills/skill-b"
 
     # Create mock hooks (files)
-    touch "$TEST_TMP/mock-roster/teams/team-a/hooks/hook-a.sh"
-    touch "$TEST_TMP/mock-roster/teams/team-b/hooks/hook-b.sh"
+    touch "$TEST_TMP/mock-knossos/rites/team-a/hooks/hook-a.sh"
+    touch "$TEST_TMP/mock-knossos/rites/team-b/hooks/hook-b.sh"
 
-    # Override ROSTER_HOME for tests
-    ROSTER_HOME="$TEST_TMP/mock-roster"
+    # Override KNOSSOS_HOME for tests
+    KNOSSOS_HOME="$TEST_TMP/mock-knossos"
 }
 
 teardown() {
@@ -87,152 +87,152 @@ teardown() {
 }
 
 # ============================================================================
-# Tests for is_resource_from_team()
+# Tests for is_resource_from_rite()
 # ============================================================================
 
-test_is_resource_from_team_command() {
-    run_test "is_resource_from_team finds command file"
+test_is_resource_from_rite_command() {
+    run_test "is_resource_from_rite finds command file"
 
-    if is_resource_from_team "cmd-a.md" "commands" "f"; then
+    if is_resource_from_rite "cmd-a.md" "commands" "f"; then
         test_pass "found team-a command"
     else
-        test_fail "is_resource_from_team" "success (return 0)" "failure (return 1)"
+        test_fail "is_resource_from_rite" "success (return 0)" "failure (return 1)"
     fi
 }
 
-test_is_resource_from_team_skill() {
-    run_test "is_resource_from_team finds skill directory"
+test_is_resource_from_rite_skill() {
+    run_test "is_resource_from_rite finds skill directory"
 
-    if is_resource_from_team "skill-a" "skills" "d"; then
+    if is_resource_from_rite "skill-a" "skills" "d"; then
         test_pass "found team-a skill"
     else
-        test_fail "is_resource_from_team" "success (return 0)" "failure (return 1)"
+        test_fail "is_resource_from_rite" "success (return 0)" "failure (return 1)"
     fi
 }
 
-test_is_resource_from_team_hook() {
-    run_test "is_resource_from_team finds hook file"
+test_is_resource_from_rite_hook() {
+    run_test "is_resource_from_rite finds hook file"
 
-    if is_resource_from_team "hook-b.sh" "hooks" "f"; then
+    if is_resource_from_rite "hook-b.sh" "hooks" "f"; then
         test_pass "found team-b hook"
     else
-        test_fail "is_resource_from_team" "success (return 0)" "failure (return 1)"
+        test_fail "is_resource_from_rite" "success (return 0)" "failure (return 1)"
     fi
 }
 
-test_is_resource_from_team_not_found() {
-    run_test "is_resource_from_team returns false for non-team resource"
+test_is_resource_from_rite_not_found() {
+    run_test "is_resource_from_rite returns false for non-team resource"
 
-    if is_resource_from_team "nonexistent.md" "commands" "f"; then
-        test_fail "is_resource_from_team" "failure (return 1)" "success (return 0)"
+    if is_resource_from_rite "nonexistent.md" "commands" "f"; then
+        test_fail "is_resource_from_rite" "failure (return 1)" "success (return 0)"
     else
         test_pass "correctly returned false for nonexistent resource"
     fi
 }
 
-test_is_resource_from_team_wrong_type() {
-    run_test "is_resource_from_team returns false when find type doesn't match"
+test_is_resource_from_rite_wrong_type() {
+    run_test "is_resource_from_rite returns false when find type doesn't match"
 
     # skill-a is a directory, but we're looking for a file
-    if is_resource_from_team "skill-a" "skills" "f"; then
-        test_fail "is_resource_from_team" "failure (return 1)" "success (return 0)"
+    if is_resource_from_rite "skill-a" "skills" "f"; then
+        test_fail "is_resource_from_rite" "failure (return 1)" "success (return 0)"
     else
         test_pass "correctly returned false when type doesn't match"
     fi
 }
 
 # ============================================================================
-# Tests for get_resource_team()
+# Tests for get_resource_rite()
 # ============================================================================
 
-test_get_resource_team_command() {
-    run_test "get_resource_team returns correct team for command"
+test_get_resource_rite_command() {
+    run_test "get_resource_rite returns correct team for command"
 
     local result
-    result=$(get_resource_team "cmd-a.md" "commands" "f")
+    result=$(get_resource_rite "cmd-a.md" "commands" "f")
 
     if [[ "$result" == "team-a" ]]; then
         test_pass "returned correct team name: team-a"
     else
-        test_fail "get_resource_team" "team-a" "$result"
+        test_fail "get_resource_rite" "team-a" "$result"
     fi
 }
 
-test_get_resource_team_skill() {
-    run_test "get_resource_team returns correct team for skill"
+test_get_resource_rite_skill() {
+    run_test "get_resource_rite returns correct team for skill"
 
     local result
-    result=$(get_resource_team "skill-b" "skills" "d")
+    result=$(get_resource_rite "skill-b" "skills" "d")
 
     if [[ "$result" == "team-b" ]]; then
         test_pass "returned correct team name: team-b"
     else
-        test_fail "get_resource_team" "team-b" "$result"
+        test_fail "get_resource_rite" "team-b" "$result"
     fi
 }
 
-test_get_resource_team_hook() {
-    run_test "get_resource_team returns correct team for hook"
+test_get_resource_rite_hook() {
+    run_test "get_resource_rite returns correct team for hook"
 
     local result
-    result=$(get_resource_team "hook-a.sh" "hooks" "f")
+    result=$(get_resource_rite "hook-a.sh" "hooks" "f")
 
     if [[ "$result" == "team-a" ]]; then
         test_pass "returned correct team name: team-a"
     else
-        test_fail "get_resource_team" "team-a" "$result"
+        test_fail "get_resource_rite" "team-a" "$result"
     fi
 }
 
-test_get_resource_team_not_found() {
-    run_test "get_resource_team returns empty for non-team resource"
+test_get_resource_rite_not_found() {
+    run_test "get_resource_rite returns empty for non-team resource"
 
     local result
-    result=$(get_resource_team "nonexistent.md" "commands" "f")
+    result=$(get_resource_rite "nonexistent.md" "commands" "f")
 
     if [[ -z "$result" ]]; then
         test_pass "returned empty string for nonexistent resource"
     else
-        test_fail "get_resource_team" "(empty)" "$result"
+        test_fail "get_resource_rite" "(empty)" "$result"
     fi
 }
 
-test_get_resource_team_multiple_teams() {
-    run_test "get_resource_team returns first match when resource exists in multiple teams"
+test_get_resource_rite_multiple_teams() {
+    run_test "get_resource_rite returns first match when resource exists in multiple teams"
 
     # Create same command in both teams
-    touch "$TEST_TMP/mock-roster/teams/team-a/commands/shared.md"
-    touch "$TEST_TMP/mock-roster/teams/team-b/commands/shared.md"
+    touch "$TEST_TMP/mock-knossos/rites/team-a/commands/shared.md"
+    touch "$TEST_TMP/mock-knossos/rites/team-b/commands/shared.md"
 
     local result
-    result=$(get_resource_team "shared.md" "commands" "f")
+    result=$(get_resource_rite "shared.md" "commands" "f")
 
     # Should return one of them (behavior: first match from find)
     if [[ "$result" == "team-a" ]] || [[ "$result" == "team-b" ]]; then
         test_pass "returned a team name: $result"
     else
-        test_fail "get_resource_team" "team-a or team-b" "$result"
+        test_fail "get_resource_rite" "team-a or team-b" "$result"
     fi
 }
 
 # ============================================================================
-# Tests for backup_team_resource() - RF-003
+# Tests for backup_rite_resource() - RF-003
 # ============================================================================
 
-test_backup_team_resource_commands() {
-    run_test "backup_team_resource backs up commands (files)"
+test_backup_rite_resource_commands() {
+    run_test "backup_rite_resource backs up commands (files)"
 
     # Setup: create commands directory with marker
     local cmd_dir="$TEST_TMP/project/.claude/commands"
     mkdir -p "$cmd_dir"
-    echo "cmd-a.md" > "$cmd_dir/.team-commands"
-    echo "cmd-b.md" >> "$cmd_dir/.team-commands"
+    echo "cmd-a.md" > "$cmd_dir/.rite-commands"
+    echo "cmd-b.md" >> "$cmd_dir/.rite-commands"
     echo "test command content" > "$cmd_dir/cmd-a.md"
     echo "another command" > "$cmd_dir/cmd-b.md"
 
     # Act: backup commands
     cd "$TEST_TMP/project"
-    backup_team_resource "commands" ".claude/commands" ".team-commands" "f"
+    backup_rite_resource "commands" ".claude/commands" ".rite-commands" "f"
 
     # Assert: backup directory exists with files
     if [[ -d "$cmd_dir.backup" ]] && \
@@ -240,25 +240,25 @@ test_backup_team_resource_commands() {
        [[ -f "$cmd_dir.backup/cmd-b.md" ]]; then
         test_pass "backed up command files to .backup directory"
     else
-        test_fail "backup_team_resource" "backup directory with files" "missing files or directory"
+        test_fail "backup_rite_resource" "backup directory with files" "missing files or directory"
     fi
 }
 
-test_backup_team_resource_skills() {
-    run_test "backup_team_resource backs up skills (directories)"
+test_backup_rite_resource_skills() {
+    run_test "backup_rite_resource backs up skills (directories)"
 
     # Setup: create skills directory with marker
     local skill_dir="$TEST_TMP/project/.claude/skills"
     mkdir -p "$skill_dir/skill-a/subdir"
     mkdir -p "$skill_dir/skill-b"
-    echo "skill-a" > "$skill_dir/.team-skills"
-    echo "skill-b" >> "$skill_dir/.team-skills"
+    echo "skill-a" > "$skill_dir/.rite-skills"
+    echo "skill-b" >> "$skill_dir/.rite-skills"
     echo "content" > "$skill_dir/skill-a/skill.md"
     echo "nested" > "$skill_dir/skill-a/subdir/file.txt"
 
     # Act: backup skills
     cd "$TEST_TMP/project"
-    backup_team_resource "skills" ".claude/skills" ".team-skills" "d"
+    backup_rite_resource "skills" ".claude/skills" ".rite-skills" "d"
 
     # Assert: backup directory exists with recursive copy
     if [[ -d "$skill_dir.backup/skill-a" ]] && \
@@ -267,34 +267,34 @@ test_backup_team_resource_skills() {
        [[ -f "$skill_dir.backup/skill-a/subdir/file.txt" ]]; then
         test_pass "backed up skill directories recursively"
     else
-        test_fail "backup_team_resource" "backup directory with recursive structure" "missing structure"
+        test_fail "backup_rite_resource" "backup directory with recursive structure" "missing structure"
     fi
 }
 
-test_backup_team_resource_hooks() {
-    run_test "backup_team_resource backs up hooks (files)"
+test_backup_rite_resource_hooks() {
+    run_test "backup_rite_resource backs up hooks (files)"
 
     # Setup: create hooks directory with marker
     local hook_dir="$TEST_TMP/project/.claude/hooks"
     mkdir -p "$hook_dir"
-    echo "hook-a.sh" > "$hook_dir/.team-hooks"
+    echo "hook-a.sh" > "$hook_dir/.rite-hooks"
     echo "#!/bin/bash" > "$hook_dir/hook-a.sh"
 
     # Act: backup hooks
     cd "$TEST_TMP/project"
-    backup_team_resource "hooks" ".claude/hooks" ".team-hooks" "f"
+    backup_rite_resource "hooks" ".claude/hooks" ".rite-hooks" "f"
 
     # Assert: backup directory exists with file
     if [[ -d "$hook_dir.backup" ]] && \
        [[ -f "$hook_dir.backup/hook-a.sh" ]]; then
         test_pass "backed up hook files"
     else
-        test_fail "backup_team_resource" "backup directory with hook file" "missing file or directory"
+        test_fail "backup_rite_resource" "backup directory with hook file" "missing file or directory"
     fi
 }
 
-test_backup_team_resource_no_marker() {
-    run_test "backup_team_resource returns 0 when no marker file exists"
+test_backup_rite_resource_no_marker() {
+    run_test "backup_rite_resource returns 0 when no marker file exists"
 
     # Setup: create directory without marker (use unique subdir)
     local project_dir="$TEST_TMP/project-no-marker"
@@ -302,20 +302,20 @@ test_backup_team_resource_no_marker() {
 
     # Act: backup with no marker
     cd "$project_dir"
-    if backup_team_resource "commands" ".claude/commands" ".team-commands" "f"; then
+    if backup_rite_resource "commands" ".claude/commands" ".rite-commands" "f"; then
         # Assert: no backup directory created
         if [[ ! -d "$project_dir/.claude/commands.backup" ]]; then
             test_pass "returned 0 and did not create backup"
         else
-            test_fail "backup_team_resource" "no backup directory" "backup directory created"
+            test_fail "backup_rite_resource" "no backup directory" "backup directory created"
         fi
     else
-        test_fail "backup_team_resource" "return 0" "non-zero return"
+        test_fail "backup_rite_resource" "return 0" "non-zero return"
     fi
 }
 
-test_backup_team_resource_removes_old_backup() {
-    run_test "backup_team_resource removes old backup before creating new one"
+test_backup_rite_resource_removes_old_backup() {
+    run_test "backup_rite_resource removes old backup before creating new one"
 
     # Setup: create old backup with old files
     local cmd_dir="$TEST_TMP/project/.claude/commands"
@@ -324,103 +324,103 @@ test_backup_team_resource_removes_old_backup() {
 
     # Setup: create new commands to backup
     mkdir -p "$cmd_dir"
-    echo "new-cmd.md" > "$cmd_dir/.team-commands"
+    echo "new-cmd.md" > "$cmd_dir/.rite-commands"
     echo "new content" > "$cmd_dir/new-cmd.md"
 
     # Act: backup (should remove old backup first)
     cd "$TEST_TMP/project"
-    backup_team_resource "commands" ".claude/commands" ".team-commands" "f"
+    backup_rite_resource "commands" ".claude/commands" ".rite-commands" "f"
 
     # Assert: old file gone, new file present
     if [[ ! -f "$cmd_dir.backup/old-file.md" ]] && \
        [[ -f "$cmd_dir.backup/new-cmd.md" ]]; then
         test_pass "removed old backup and created new one"
     else
-        test_fail "backup_team_resource" "clean backup directory" "old files still present"
+        test_fail "backup_rite_resource" "clean backup directory" "old files still present"
     fi
 }
 
 # ============================================================================
-# Tests for remove_team_resource() - RF-004
+# Tests for remove_rite_resource() - RF-004
 # ============================================================================
 
-test_remove_team_resource_commands() {
-    run_test "remove_team_resource removes commands (files)"
+test_remove_rite_resource_commands() {
+    run_test "remove_rite_resource removes commands (files)"
 
     # Setup: create commands with marker
     local project_dir="$TEST_TMP/project-remove-commands"
     local cmd_dir="$project_dir/.claude/commands"
     mkdir -p "$cmd_dir"
-    echo "cmd-a.md" > "$cmd_dir/.team-commands"
-    echo "cmd-b.md" >> "$cmd_dir/.team-commands"
+    echo "cmd-a.md" > "$cmd_dir/.rite-commands"
+    echo "cmd-b.md" >> "$cmd_dir/.rite-commands"
     echo "content" > "$cmd_dir/cmd-a.md"
     echo "content" > "$cmd_dir/cmd-b.md"
 
     # Act: remove commands
     cd "$project_dir"
-    remove_team_resource "commands" ".claude/commands" ".team-commands" "f"
+    remove_rite_resource "commands" ".claude/commands" ".rite-commands" "f"
 
     # Assert: files and marker removed
     if [[ ! -f "$cmd_dir/cmd-a.md" ]] && \
        [[ ! -f "$cmd_dir/cmd-b.md" ]] && \
-       [[ ! -f "$cmd_dir/.team-commands" ]]; then
+       [[ ! -f "$cmd_dir/.rite-commands" ]]; then
         test_pass "removed command files and marker"
     else
-        test_fail "remove_team_resource" "all files removed" "files still present"
+        test_fail "remove_rite_resource" "all files removed" "files still present"
     fi
 }
 
-test_remove_team_resource_skills() {
-    run_test "remove_team_resource removes skills (directories)"
+test_remove_rite_resource_skills() {
+    run_test "remove_rite_resource removes skills (directories)"
 
     # Setup: create skills with marker
     local project_dir="$TEST_TMP/project-remove-skills"
     local skill_dir="$project_dir/.claude/skills"
     mkdir -p "$skill_dir/skill-a/subdir"
     mkdir -p "$skill_dir/skill-b"
-    echo "skill-a" > "$skill_dir/.team-skills"
-    echo "skill-b" >> "$skill_dir/.team-skills"
+    echo "skill-a" > "$skill_dir/.rite-skills"
+    echo "skill-b" >> "$skill_dir/.rite-skills"
     echo "content" > "$skill_dir/skill-a/skill.md"
 
     # Act: remove skills
     cd "$project_dir"
-    remove_team_resource "skills" ".claude/skills" ".team-skills" "d"
+    remove_rite_resource "skills" ".claude/skills" ".rite-skills" "d"
 
     # Assert: directories and marker removed
     if [[ ! -d "$skill_dir/skill-a" ]] && \
        [[ ! -d "$skill_dir/skill-b" ]] && \
-       [[ ! -f "$skill_dir/.team-skills" ]]; then
+       [[ ! -f "$skill_dir/.rite-skills" ]]; then
         test_pass "removed skill directories and marker"
     else
-        test_fail "remove_team_resource" "all directories removed" "directories still present"
+        test_fail "remove_rite_resource" "all directories removed" "directories still present"
     fi
 }
 
-test_remove_team_resource_hooks() {
-    run_test "remove_team_resource removes hooks (files)"
+test_remove_rite_resource_hooks() {
+    run_test "remove_rite_resource removes hooks (files)"
 
     # Setup: create hooks with marker
     local project_dir="$TEST_TMP/project-remove-hooks"
     local hook_dir="$project_dir/.claude/hooks"
     mkdir -p "$hook_dir"
-    echo "hook-a.sh" > "$hook_dir/.team-hooks"
+    echo "hook-a.sh" > "$hook_dir/.rite-hooks"
     echo "#!/bin/bash" > "$hook_dir/hook-a.sh"
 
     # Act: remove hooks
     cd "$project_dir"
-    remove_team_resource "hooks" ".claude/hooks" ".team-hooks" "f"
+    remove_rite_resource "hooks" ".claude/hooks" ".rite-hooks" "f"
 
     # Assert: file and marker removed
     if [[ ! -f "$hook_dir/hook-a.sh" ]] && \
-       [[ ! -f "$hook_dir/.team-hooks" ]]; then
+       [[ ! -f "$hook_dir/.rite-hooks" ]]; then
         test_pass "removed hook file and marker"
     else
-        test_fail "remove_team_resource" "all files removed" "files still present"
+        test_fail "remove_rite_resource" "all files removed" "files still present"
     fi
 }
 
-test_remove_team_resource_no_marker() {
-    run_test "remove_team_resource returns 0 when no marker file exists"
+test_remove_rite_resource_no_marker() {
+    run_test "remove_rite_resource returns 0 when no marker file exists"
 
     # Setup: create directory without marker
     local project_dir="$TEST_TMP/project-remove-no-marker"
@@ -428,32 +428,32 @@ test_remove_team_resource_no_marker() {
 
     # Act: remove with no marker
     cd "$project_dir"
-    if remove_team_resource "commands" ".claude/commands" ".team-commands" "f"; then
+    if remove_rite_resource "commands" ".claude/commands" ".rite-commands" "f"; then
         test_pass "returned 0 when no marker present"
     else
-        test_fail "remove_team_resource" "return 0" "non-zero return"
+        test_fail "remove_rite_resource" "return 0" "non-zero return"
     fi
 }
 
-test_remove_team_resource_removes_marker() {
-    run_test "remove_team_resource removes marker file after resources"
+test_remove_rite_resource_removes_marker() {
+    run_test "remove_rite_resource removes marker file after resources"
 
     # Setup: create command with marker
     local project_dir="$TEST_TMP/project-remove-marker"
     local cmd_dir="$project_dir/.claude/commands"
     mkdir -p "$cmd_dir"
-    echo "cmd-a.md" > "$cmd_dir/.team-commands"
+    echo "cmd-a.md" > "$cmd_dir/.rite-commands"
     echo "content" > "$cmd_dir/cmd-a.md"
 
     # Act: remove
     cd "$project_dir"
-    remove_team_resource "commands" ".claude/commands" ".team-commands" "f"
+    remove_rite_resource "commands" ".claude/commands" ".rite-commands" "f"
 
     # Assert: marker file is gone
-    if [[ ! -f "$cmd_dir/.team-commands" ]]; then
+    if [[ ! -f "$cmd_dir/.rite-commands" ]]; then
         test_pass "marker file removed"
     else
-        test_fail "remove_team_resource" "marker removed" "marker still present"
+        test_fail "remove_rite_resource" "marker removed" "marker still present"
     fi
 }
 
@@ -584,7 +584,7 @@ test_detect_resource_orphans_multiple() {
 
     # Act: detect orphans (incoming team is neither team-a nor team-b)
     # Create a third team for this test
-    mkdir -p "$TEST_TMP/mock-roster/teams/team-c/commands"
+    mkdir -p "$TEST_TMP/mock-knossos/rites/team-c/commands"
     cd "$project_dir"
     local result
     result=$(detect_resource_orphans "commands" ".claude/commands" "team-c" "f" "*.md")
@@ -826,31 +826,31 @@ main() {
     setup
 
     # Run all tests
-    test_is_resource_from_team_command
-    test_is_resource_from_team_skill
-    test_is_resource_from_team_hook
-    test_is_resource_from_team_not_found
-    test_is_resource_from_team_wrong_type
+    test_is_resource_from_rite_command
+    test_is_resource_from_rite_skill
+    test_is_resource_from_rite_hook
+    test_is_resource_from_rite_not_found
+    test_is_resource_from_rite_wrong_type
 
-    test_get_resource_team_command
-    test_get_resource_team_skill
-    test_get_resource_team_hook
-    test_get_resource_team_not_found
-    test_get_resource_team_multiple_teams
+    test_get_resource_rite_command
+    test_get_resource_rite_skill
+    test_get_resource_rite_hook
+    test_get_resource_rite_not_found
+    test_get_resource_rite_multiple_teams
 
-    # RF-003: backup_team_resource tests
-    test_backup_team_resource_commands
-    test_backup_team_resource_skills
-    test_backup_team_resource_hooks
-    test_backup_team_resource_no_marker
-    test_backup_team_resource_removes_old_backup
+    # RF-003: backup_rite_resource tests
+    test_backup_rite_resource_commands
+    test_backup_rite_resource_skills
+    test_backup_rite_resource_hooks
+    test_backup_rite_resource_no_marker
+    test_backup_rite_resource_removes_old_backup
 
-    # RF-004: remove_team_resource tests
-    test_remove_team_resource_commands
-    test_remove_team_resource_skills
-    test_remove_team_resource_hooks
-    test_remove_team_resource_no_marker
-    test_remove_team_resource_removes_marker
+    # RF-004: remove_rite_resource tests
+    test_remove_rite_resource_commands
+    test_remove_rite_resource_skills
+    test_remove_rite_resource_hooks
+    test_remove_rite_resource_no_marker
+    test_remove_rite_resource_removes_marker
 
     # RF-005: detect_resource_orphans tests
     test_detect_resource_orphans_commands

@@ -183,13 +183,13 @@ cleanup_rite_orphans() {
             continue
         fi
 
-        # Not in user-commands - check if it's a team-level command
-        if is_team_command "$cmd_name"; then
-            local teams
-            teams=$(get_team_for_command "$cmd_name")
+        # Not in user-commands - check if it's a rite-level command
+        if is_rite_command "$cmd_name"; then
+            local rites
+            rites=$(get_rite_for_command "$cmd_name")
 
             if [[ "$DRY_RUN_MODE" -eq 1 ]]; then
-                log_info "Would remove: $cmd_name (team-level from: $teams)"
+                log_info "Would remove: $cmd_name (rite-level from: $rites)"
             else
                 # Backup before removing
                 mkdir -p "$backup_dir"
@@ -197,7 +197,7 @@ cleanup_rite_orphans() {
 
                 # Remove the file
                 rm "$target_file"
-                log_success "Removed: $cmd_name (team-level from: $teams)"
+                log_success "Removed: $cmd_name (rite-level from: $rites)"
                 log_debug "  Backup: $backup_dir/$cmd_name.*.bak"
 
                 # Remove from manifest if present
@@ -571,12 +571,12 @@ perform_sync() {
 
             log_debug "Processing: $cmd_name (category: $category, checksum: ${source_checksum:0:8}...)"
 
-            # Check for team collision (user command with same name as team command)
-            if is_team_command "$cmd_name"; then
-                local teams
-                teams=$(get_team_for_command "$cmd_name")
-                log_warning "Collision: $cmd_name exists in team pack(s): $teams"
-                log_warning "  Team command will override when that team is active"
+            # Check for rite collision (user command with same name as rite command)
+            if is_rite_command "$cmd_name"; then
+                local rites
+                rites=$(get_rite_for_command "$cmd_name")
+                log_warning "Collision: $cmd_name exists in rite(s): $rites"
+                log_warning "  Rite command will override when that rite is active"
             fi
 
             if [[ -f "$target_file" ]]; then
