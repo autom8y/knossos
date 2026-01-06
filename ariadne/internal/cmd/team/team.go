@@ -2,6 +2,7 @@
 package team
 
 import (
+	"fmt"
 	"os"
 	"strings"
 
@@ -34,6 +35,9 @@ func NewTeamCmd(outputFlag *string, verboseFlag *bool, projectDir *string) *cobr
 
 This command provides backward compatibility for team operations.
 For new rite composition features (invoke/release), use 'ari rite'.`,
+		PersistentPreRun: func(cmd *cobra.Command, args []string) {
+			fmt.Fprintln(os.Stderr, "Warning: 'ari team' is deprecated. Use 'ari rite' instead.")
+		},
 	}
 
 	// Add subcommands
