@@ -29,12 +29,6 @@ source "$SCRIPT_DIR/session-fsm.sh" 2>/dev/null || {
     exit 1
 }
 
-# Source session migration for auto-migration
-# shellcheck source=session-migrate.sh
-source "$SCRIPT_DIR/session-migrate.sh" 2>/dev/null || {
-    echo '{"error": "Failed to source session-migrate.sh"}' >&2
-    exit 1
-}
 
 SESSIONS_DIR=".claude/sessions"
 
@@ -86,15 +80,13 @@ execution_mode() {
 
     # Session is ACTIVE - check rite configuration
     local active_rite
-    active_rite=$(cat ".claude/ACTIVE_RITE" 2>/dev/null || cat ".claude/ACTIVE_TEAM" 2>/dev/null || echo "none")
+    active_rite=$(cat ".claude/ACTIVE_RITE" 2>/dev/null || echo "none")
 
     # Also check rite field in session context for cross-cutting sessions
     if [[ "$active_rite" == "none" || -z "$active_rite" ]]; then
-        # Check if rite is explicitly null in SESSION_CONTEXT (try active_rite first, then legacy active_team)
+        # Check if rite is explicitly null in SESSION_CONTEXT
         local ctx_rite
         ctx_rite=$(grep -m1 "^active_rite:" "$ctx_file" 2>/dev/null | cut -d: -f2- | tr -d ' "')
-        # Fallback to legacy field name for backward compatibility
-        [[ -z "$ctx_rite" ]] && ctx_rite=$(grep -m1 "^active_team:" "$ctx_file" 2>/dev/null | cut -d: -f2- | tr -d ' "')
         if [[ -z "$ctx_rite" || "$ctx_rite" == "none" || "$ctx_rite" == "null" ]]; then
             echo "cross-cutting"
             return 0
@@ -223,9 +215,6 @@ cmd_status() {
         has_session="true"
         session_dir="$SESSIONS_DIR/$session_id"
 
-        # Auto-migrate v1 sessions on first access
-        auto_migrate_if_needed "$session_id" 2>/dev/null || true
-
         # Use FSM to get authoritative state
         session_state=$(fsm_get_state "$session_id")
         [[ "$session_state" == "NONE" ]] && session_state="IDLE"
@@ -240,7 +229,7 @@ cmd_status() {
 
     # Rite and workflow
     local active_rite
-    active_rite=$(cat ".claude/ACTIVE_RITE" 2>/dev/null || cat ".claude/ACTIVE_TEAM" 2>/dev/null || echo "none")
+    active_rite=$(cat ".claude/ACTIVE_RITE" 2>/dev/null || echo "none")
     local workflow_name
     workflow_name=$(get_workflow_name)
     local workflow_entry
@@ -291,7 +280,7 @@ EOF
 cmd_create() {
     local initiative="${1:-unnamed}"
     local complexity="${2:-MODULE}"
-    local team="${3:-$(cat ".claude/ACTIVE_RITE" 2>/dev/null || cat ".claude/ACTIVE_TEAM" 2>/dev/null || echo "none")}"
+    local team="${3:-$(cat ".claude/ACTIVE_RITE" 2>/dev/null || echo "none")}"
 
     # Acquire lock to prevent race conditions during session creation
     local lockfile="$SESSIONS_DIR/.create.lock"
@@ -567,9 +556,6 @@ cmd_mutate() {
         echo '{"success": false, "error": "SESSION_CONTEXT.md not found"}' >&2
         exit 1
     fi
-
-    # Auto-migrate v1 sessions on first access
-    auto_migrate_if_needed "$session_id" 2>/dev/null || true
 
     local timestamp
     timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")

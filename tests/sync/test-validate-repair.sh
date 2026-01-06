@@ -258,7 +258,7 @@ test_validate_with_team_flag() {
     mkdir -p "$project_dir/.claude/.cem"
     create_test_manifest "$project_dir"
 
-    # Create ACTIVE_TEAM file
+    # Create ACTIVE_RITE file
     echo "10x-dev-pack" > "$project_dir/.claude/ACTIVE_RITE"
 
     local exit_code=0

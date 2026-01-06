@@ -926,7 +926,7 @@ handle_orphans() {
 
 # Get current roster git commit
 get_roster_commit() {
-    local roster_path="${KNOSSOS_HOME:-${ROSTER_HOME:-$HOME/Code/roster}}"
+    local roster_path="${KNOSSOS_HOME:-$HOME/Code/roster}"
 
     if [[ -d "$roster_path/.git" ]]; then
         git -C "$roster_path" rev-parse HEAD 2>/dev/null
@@ -937,7 +937,7 @@ get_roster_commit() {
 
 # Get current roster git ref (branch)
 get_roster_ref() {
-    local roster_path="${KNOSSOS_HOME:-${ROSTER_HOME:-$HOME/Code/roster}}"
+    local roster_path="${KNOSSOS_HOME:-$HOME/Code/roster}"
 
     if [[ -d "$roster_path/.git" ]]; then
         git -C "$roster_path" rev-parse --abbrev-ref HEAD 2>/dev/null
@@ -1038,6 +1038,3 @@ refresh_active_rite() {
         return 1
     fi
 }
-
-# Backward compatibility alias (deprecated)
-refresh_active_team() { refresh_active_rite "$@"; }

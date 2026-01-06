@@ -14,7 +14,7 @@ HOOKS_LIB="${CLAUDE_PROJECT_DIR:-.}/.claude/hooks/lib"
 # Absolute fallback if hooks-init.sh itself fails
 source "$HOOKS_LIB/hooks-init.sh" 2>/dev/null || {
     # Minimal fallback - set defaults and continue
-    KNOSSOS_HOME="${KNOSSOS_HOME:-${ROSTER_HOME:-$HOME/Code/roster}}"
+    KNOSSOS_HOME="${KNOSSOS_HOME:-$HOME/Code/roster}"
     CLAUDE_PROJECT_DIR="${CLAUDE_PROJECT_DIR:-.}"
     exit 0
 }

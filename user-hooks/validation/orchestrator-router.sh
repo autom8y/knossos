@@ -50,8 +50,8 @@ fi
 # Clean up initiative (remove quotes if present)
 INITIATIVE=$(echo "$INITIATIVE" | sed 's/^"//;s/"$//' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
 
-# Get active rite (with backward compatibility fallback)
-ACTIVE_RITE=$(cat ".claude/ACTIVE_RITE" 2>/dev/null || cat ".claude/ACTIVE_TEAM" 2>/dev/null || echo "none")
+# Get active rite
+ACTIVE_RITE=$(cat ".claude/ACTIVE_RITE" 2>/dev/null || echo "none")
 
 # Check for existing session
 SESSION_ID=$(get_session_id 2>/dev/null || echo "")

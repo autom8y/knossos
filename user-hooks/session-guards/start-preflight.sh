@@ -110,7 +110,7 @@ EOF
         fi
 
         # No orchestrator - create session and output status
-        ACTIVE_RITE=$(cat ".claude/ACTIVE_RITE" 2>/dev/null || cat ".claude/ACTIVE_TEAM" 2>/dev/null || echo "none")
+        ACTIVE_RITE=$(cat ".claude/ACTIVE_RITE" 2>/dev/null || echo "none")
         SUGGESTED_ID=$(generate_session_id)
 
         # Extract initiative and complexity from /start command

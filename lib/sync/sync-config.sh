@@ -76,7 +76,7 @@ EOF
 # These are satellite-owned or session-specific
 get_ignore_items() {
     cat <<'EOF'
-ACTIVE_TEAM
+ACTIVE_RITE
 ACTIVE_WORKFLOW.yaml
 sessions
 agents

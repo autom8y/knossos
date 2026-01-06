@@ -377,7 +377,7 @@ update_manifest_team() {
     local manifest="$1"
     local team_name="$2"
     local checksum="${3:-}"
-    local roster_path="${KNOSSOS_HOME:-${ROSTER_HOME:-}}"
+    local roster_path="${KNOSSOS_HOME:-}"
     local timestamp
 
     timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")

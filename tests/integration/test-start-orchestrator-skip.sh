@@ -31,7 +31,7 @@ echo "--------------------------------------------------------------------------
 # Create orchestrator.md
 echo "# Orchestrator" > .claude/agents/orchestrator.md
 
-# Create ACTIVE_TEAM
+# Create ACTIVE_RITE
 echo "ecosystem-pack" > .claude/ACTIVE_RITE
 
 # Create session via session-manager

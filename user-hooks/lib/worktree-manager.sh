@@ -204,7 +204,7 @@ cmd_create() {
     if [[ -z "$rite" ]]; then
         local root
         root=$(get_project_root)
-        rite=$(cat "$root/.claude/ACTIVE_RITE" 2>/dev/null || cat "$root/.claude/ACTIVE_TEAM" 2>/dev/null || echo "")
+        rite=$(cat "$root/.claude/ACTIVE_RITE" 2>/dev/null || echo "")
     fi
 
     local wt_id

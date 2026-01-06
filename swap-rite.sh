@@ -171,10 +171,8 @@ rollback_swap() {
     fi
 
     # Restore ACTIVE_RITE (LAST - this is the rollback commit point)
-    # Note: Check ACTIVE_TEAM for backward compat with old backups
-    if [[ -f "$SWAP_BACKUP_DIR/ACTIVE_RITE" ]] || [[ -f "$SWAP_BACKUP_DIR/ACTIVE_TEAM" ]]; then
-        cp "$SWAP_BACKUP_DIR/ACTIVE_RITE" .claude/ACTIVE_RITE 2>/dev/null || \
-            cp "$SWAP_BACKUP_DIR/ACTIVE_TEAM" .claude/ACTIVE_RITE
+    if [[ -f "$SWAP_BACKUP_DIR/ACTIVE_RITE" ]]; then
+        cp "$SWAP_BACKUP_DIR/ACTIVE_RITE" .claude/ACTIVE_RITE
         log_debug "Restored ACTIVE_RITE"
     else
         # Virgin swap had no ACTIVE_RITE - remove it

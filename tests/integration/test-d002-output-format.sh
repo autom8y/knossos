@@ -17,7 +17,7 @@ mkdir -p "$TEST_DIR/user-hooks/validation"
 # Create orchestrator.md (indicates orchestrator is present)
 echo "# Orchestrator" > "$TEST_DIR/.claude/agents/orchestrator.md"
 
-# Create ACTIVE_TEAM
+# Create ACTIVE_RITE
 echo "ecosystem-pack" > "$TEST_DIR/.claude/ACTIVE_RITE"
 
 # Copy library dependencies

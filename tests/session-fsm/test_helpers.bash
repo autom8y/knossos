@@ -59,8 +59,8 @@ setup_test_environment() {
     git config user.email "test@test.com" 2>/dev/null || true
     git config user.name "Test" 2>/dev/null || true
 
-    # Create ACTIVE_TEAM file
-    echo "10x-dev-pack" > "$TEST_PROJECT_DIR/.claude/ACTIVE_TEAM"
+    # Create ACTIVE_RITE file
+    echo "10x-dev-pack" > "$TEST_PROJECT_DIR/.claude/ACTIVE_RITE"
 }
 
 # Cleanup test environment

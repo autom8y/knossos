@@ -32,7 +32,7 @@ setup() {
     setup_test_environment
 
     # Create ecosystem-pack team structure (orchestrator present)
-    echo "ecosystem-pack" > "$TEST_PROJECT_DIR/.claude/ACTIVE_TEAM"
+    echo "ecosystem-pack" > "$TEST_PROJECT_DIR/.claude/ACTIVE_RITE"
     mkdir -p "$TEST_PROJECT_DIR/.claude/agents"
     echo "# Orchestrator Agent" > "$TEST_PROJECT_DIR/.claude/agents/orchestrator.md"
 

@@ -42,15 +42,15 @@ load_rite_context() {
     local rite_script
     local output=""
 
-    # Read active rite (with backward compatibility fallback to ACTIVE_TEAM)
-    active_rite=$(cat ".claude/ACTIVE_RITE" 2>/dev/null || cat ".claude/ACTIVE_TEAM" 2>/dev/null || echo "")
+    # Read active rite
+    active_rite=$(cat ".claude/ACTIVE_RITE" 2>/dev/null || echo "")
     if [[ -z "$active_rite" || "$active_rite" == "none" ]]; then
         # No rite active - nothing to inject
         return 0
     fi
 
     # Resolve rite context script path
-    local roster_home="${KNOSSOS_HOME:-${ROSTER_HOME:-$HOME/Code/roster}}"
+    local roster_home="${KNOSSOS_HOME:-$HOME/Code/roster}"
     rite_script="$roster_home/rites/$active_rite/$RITE_CONTEXT_SCRIPT_NAME"
 
     # Check if rite has context script
@@ -124,11 +124,3 @@ is_file_stale() {
 
     [[ $age_seconds -gt $max_age_seconds ]]
 }
-
-# =============================================================================
-# Backward Compatibility Aliases
-# =============================================================================
-
-# Backward compatibility alias
-load_team_context() { load_rite_context "$@"; }
-team_context_row() { rite_context_row "$@"; }

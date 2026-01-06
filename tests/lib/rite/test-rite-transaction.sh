@@ -450,21 +450,21 @@ test_stage_workflow() {
     fi
 }
 
-test_stage_active_team() {
-    run_test "stage_active_team creates ACTIVE_TEAM file"
+test_stage_active_rite() {
+    run_test "stage_active_rite creates ACTIVE_RITE file"
 
     create_staging
 
-    if stage_active_team "test-team"; then
+    if stage_active_rite "test-rite"; then
         local content
-        content=$(cat "$STAGING_DIR/ACTIVE_TEAM" 2>/dev/null || echo "")
-        if [[ "$content" == "test-team" ]]; then
-            test_pass "ACTIVE_TEAM file created with correct content"
+        content=$(cat "$STAGING_DIR/ACTIVE_RITE" 2>/dev/null || echo "")
+        if [[ "$content" == "test-rite" ]]; then
+            test_pass "ACTIVE_RITE file created with correct content"
         else
-            test_fail "stage_active_team" "test-team" "$content"
+            test_fail "stage_active_rite" "test-rite" "$content"
         fi
     else
-        test_fail "stage_active_team" "return 0" "non-zero return"
+        test_fail "stage_active_rite" "return 0" "non-zero return"
     fi
 }
 
@@ -473,7 +473,7 @@ test_verify_staging_success() {
 
     create_staging
     stage_agents "test-team" 2>/dev/null
-    stage_active_team "test-team" 2>/dev/null
+    stage_active_rite "test-team" 2>/dev/null
 
     if verify_staging 2; then
         test_pass "staging verified successfully"
@@ -506,17 +506,17 @@ test_verify_staging_missing_dir() {
     fi
 }
 
-test_verify_staging_missing_active_team() {
-    run_test "verify_staging fails on missing ACTIVE_TEAM"
+test_verify_staging_missing_active_rite() {
+    run_test "verify_staging fails on missing ACTIVE_RITE"
 
     create_staging
     stage_agents "test-team" 2>/dev/null
-    # Don't stage ACTIVE_TEAM
+    # Don't stage ACTIVE_RITE
 
     if verify_staging 2 2>/dev/null; then
-        test_fail "verify_staging" "return 1 (missing ACTIVE_TEAM)" "return 0"
+        test_fail "verify_staging" "return 1 (missing ACTIVE_RITE)" "return 0"
     else
-        test_pass "correctly failed on missing ACTIVE_TEAM"
+        test_pass "correctly failed on missing ACTIVE_RITE"
     fi
 }
 
@@ -539,7 +539,7 @@ test_create_swap_backup() {
 
     if create_swap_backup 2>/dev/null; then
         if [[ -d "$SWAP_BACKUP_DIR/agents" ]] && \
-           [[ -f "$SWAP_BACKUP_DIR/ACTIVE_TEAM" ]] && \
+           [[ -f "$SWAP_BACKUP_DIR/ACTIVE_RITE" ]] && \
            [[ -f "$SWAP_BACKUP_DIR/AGENT_MANIFEST.json" ]]; then
             test_pass "created complete backup"
         else
@@ -590,7 +590,7 @@ test_verify_backup_integrity_valid() {
     cd "$TEST_TMP"
     mkdir -p "$SWAP_BACKUP_DIR/agents"
     echo "# Agent" > "$SWAP_BACKUP_DIR/agents/test.md"
-    echo "test-team" > "$SWAP_BACKUP_DIR/ACTIVE_TEAM"
+    echo "test-team" > "$SWAP_BACKUP_DIR/ACTIVE_RITE"
 
     create_journal "source" "target" 2>/dev/null
 
@@ -615,12 +615,12 @@ test_verify_backup_virgin_swap() {
     run_test "verify_backup_integrity handles virgin swap case"
 
     mkdir -p "$SWAP_BACKUP_DIR"
-    # Virgin swap: no ACTIVE_TEAM in backup
+    # Virgin swap: no ACTIVE_RITE in backup
 
     create_journal "" "target-team" 2>/dev/null
 
     if verify_backup_integrity; then
-        test_pass "correctly handled virgin swap (no ACTIVE_TEAM required)"
+        test_pass "correctly handled virgin swap (no ACTIVE_RITE required)"
     else
         test_fail "verify_backup_integrity" "return 0 (virgin)" "return 1"
     fi

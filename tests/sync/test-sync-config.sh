@@ -94,10 +94,10 @@ test_ignore_items() {
     local items
     items=$(get_ignore_items)
 
-    if echo "$items" | grep -q "ACTIVE_TEAM"; then
-        test_pass "ACTIVE_TEAM in ignore list"
+    if echo "$items" | grep -q "ACTIVE_RITE"; then
+        test_pass "ACTIVE_RITE in ignore list"
     else
-        test_fail "ACTIVE_TEAM in ignore" "present" "missing"
+        test_fail "ACTIVE_RITE in ignore" "present" "missing"
     fi
 
     if echo "$items" | grep -q "sessions"; then
@@ -116,10 +116,10 @@ test_ignore_items() {
 test_is_ignored() {
     run_test "is_ignored function"
 
-    if is_ignored "ACTIVE_TEAM"; then
-        test_pass "ACTIVE_TEAM is ignored"
+    if is_ignored "ACTIVE_RITE"; then
+        test_pass "ACTIVE_RITE is ignored"
     else
-        test_fail "is_ignored ACTIVE_TEAM" "true" "false"
+        test_fail "is_ignored ACTIVE_RITE" "true" "false"
     fi
 
     if is_ignored "sessions"; then

@@ -13,16 +13,7 @@
 export CLAUDE_PROJECT_DIR="${CLAUDE_PROJECT_DIR:-.}"
 
 # External repository paths - Knossos platform location
-# KNOSSOS_HOME is primary, ROSTER_HOME provides backward compatibility
-if [[ -n "${KNOSSOS_HOME:-}" ]]; then
-    export KNOSSOS_HOME
-elif [[ -n "${ROSTER_HOME:-}" ]]; then
-    # Deprecated: ROSTER_HOME → KNOSSOS_HOME
-    export KNOSSOS_HOME="$ROSTER_HOME"
-else
-    export KNOSSOS_HOME="$HOME/Code/roster"
-fi
-# Note: SKELETON_HOME deprecated - roster is now standalone (Sprint 4 migration)
+export KNOSSOS_HOME="${KNOSSOS_HOME:-$HOME/Code/roster}"
 
 # Session paths
 export SESSIONS_DIR="$CLAUDE_PROJECT_DIR/.claude/sessions"

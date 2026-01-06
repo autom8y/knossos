@@ -1,14 +1,12 @@
 ---
 name: moirai
 description: |
-  The Moirai Router--the unified interface to the three Fates. Maintains backward
-  compatibility with moirai and state-mate aliases by parsing operations and
-  delegating to the appropriate Fate (Clotho, Lachesis, or Atropos).
+  The Moirai Router--the unified interface to the three Fates. Parses operations
+  and delegates to the appropriate Fate (Clotho, Lachesis, or Atropos).
 tools: Read, Task
 model: sonnet
 color: indigo
 aliases:
-  - state-mate
   - fates
 ---
 

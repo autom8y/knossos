@@ -316,7 +316,7 @@ remove_preferences_file() {
 
     # Set up minimal session environment
     mkdir -p "$TEST_PROJECT_DIR/.claude/agents"
-    echo "ecosystem-pack" > "$TEST_PROJECT_DIR/.claude/ACTIVE_TEAM"
+    echo "ecosystem-pack" > "$TEST_PROJECT_DIR/.claude/ACTIVE_RITE"
 
     # Run session-context hook with verbose flag
     cd "$TEST_PROJECT_DIR"
@@ -479,7 +479,7 @@ EOF
 
     # Set up minimal session environment
     mkdir -p "$TEST_PROJECT_DIR/.claude/agents"
-    echo "ecosystem-pack" > "$TEST_PROJECT_DIR/.claude/ACTIVE_TEAM"
+    echo "ecosystem-pack" > "$TEST_PROJECT_DIR/.claude/ACTIVE_RITE"
 
     # Run session-context hook
     cd "$TEST_PROJECT_DIR"

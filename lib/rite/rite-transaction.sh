@@ -579,13 +579,13 @@ create_swap_backup() {
         log_debug "Backed up agents"
     fi
 
-    # Backup ACTIVE_TEAM if exists
+    # Backup ACTIVE_RITE if exists
     if [[ -f ".claude/ACTIVE_RITE" ]]; then
-        cp .claude/ACTIVE_RITE "$SWAP_BACKUP_DIR/ACTIVE_TEAM" || {
-            log_error "Failed to backup ACTIVE_TEAM"
+        cp .claude/ACTIVE_RITE "$SWAP_BACKUP_DIR/ACTIVE_RITE" || {
+            log_error "Failed to backup ACTIVE_RITE"
             return 1
         }
-        log_debug "Backed up ACTIVE_TEAM"
+        log_debug "Backed up ACTIVE_RITE"
     fi
 
     # Backup AGENT_MANIFEST.json if exists
@@ -689,7 +689,7 @@ verify_backup_integrity() {
     fi
 
     # For non-virgin swap, we need ACTIVE_RITE in backup
-    if [[ "$was_virgin" != "true" ]] && [[ ! -f "$SWAP_BACKUP_DIR/ACTIVE_TEAM" ]]; then
+    if [[ "$was_virgin" != "true" ]] && [[ ! -f "$SWAP_BACKUP_DIR/ACTIVE_RITE" ]]; then
         log_debug "Backup missing ACTIVE_RITE (non-virgin swap)"
         return 1
     fi

@@ -131,7 +131,7 @@ detect_resource_orphans "skills" ".claude/skills" "hygiene-pack" "d" "*/" \
 | `cleanup_staging` | - | 0 always | Clean up staging directory |
 | `stage_agents` | team_name | 0 on success | Stage agents from team pack |
 | `stage_workflow` | team_name | 0 on success | Stage workflow.yaml file |
-| `stage_active_team` | team_name | 0 on success | Stage ACTIVE_TEAM file |
+| `stage_active_rite` | rite_name | 0 on success | Stage ACTIVE_RITE file |
 | `verify_staging` | expected_count | 0 on success | Verify staging directory integrity |
 
 ##### Backup Operations
@@ -146,18 +146,18 @@ detect_resource_orphans "skills" ".claude/skills" "hygiene-pack" "d" "*/" \
 
 ```bash
 # Source the module
-source "$ROSTER_HOME/lib/team/team-transaction.sh"
+source "$KNOSSOS_HOME/lib/rite/rite-transaction.sh"
 
 # Transaction flow example
-create_journal "$current_team" "$target_team"
+create_journal "$current_rite" "$target_rite"
 update_journal_phase "$PHASE_BACKING"
 
 create_swap_backup
 update_journal_phase "$PHASE_STAGING"
 
 create_staging
-stage_agents "$target_team"
-stage_active_team "$target_team"
+stage_agents "$target_rite"
+stage_active_rite "$target_rite"
 verify_staging "$expected_agent_count"
 update_journal_phase "$PHASE_COMMITTING"
 

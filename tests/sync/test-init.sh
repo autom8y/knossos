@@ -354,17 +354,17 @@ test_init_with_team_flag() {
         test_fail "exit code" "0" "$exit_code"
     fi
 
-    # Check ACTIVE_TEAM file created
+    # Check ACTIVE_RITE file created
     if [[ -f "$TEST_PROJECT/.claude/ACTIVE_RITE" ]]; then
-        local active_team
-        active_team=$(cat "$TEST_PROJECT/.claude/ACTIVE_RITE")
-        if [[ "$active_team" == "$team_name" ]]; then
-            test_pass "ACTIVE_TEAM set to $team_name"
+        local active_rite
+        active_rite=$(cat "$TEST_PROJECT/.claude/ACTIVE_RITE")
+        if [[ "$active_rite" == "$team_name" ]]; then
+            test_pass "ACTIVE_RITE set to $team_name"
         else
-            test_fail "ACTIVE_TEAM content" "$team_name" "$active_team"
+            test_fail "ACTIVE_RITE content" "$team_name" "$active_rite"
         fi
     else
-        test_fail "ACTIVE_TEAM file" "exists" "missing"
+        test_fail "ACTIVE_RITE file" "exists" "missing"
     fi
 
     # Check manifest has team info

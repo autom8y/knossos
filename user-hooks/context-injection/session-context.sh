@@ -77,7 +77,7 @@ INITIATIVE=$(parse_json "initiative" "null")
 COMPLEXITY=$(parse_json "complexity" "null")
 CURRENT_PHASE=$(parse_json "current_phase" "null")
 PARKED=$(parse_json_bool "parked" "false")
-ACTIVE_TEAM=$(parse_json "active_team" "none")
+ACTIVE_RITE=$(parse_json "active_rite" "none")
 WORKFLOW_NAME=$(parse_json "workflow_name" "null")
 WORKFLOW_ENTRY=$(parse_json "workflow_entry" "null")
 GIT_BRANCH=$(parse_json "git_branch" "unknown")
@@ -151,7 +151,7 @@ output_condensed_context() {
 
 | | |
 |---|---|
-| **Team** | $ACTIVE_TEAM |
+| **Rite** | $ACTIVE_RITE |
 | **Mode** | $EXECUTION_MODE |
 | **Session** | $session_display |
 | **Initiative** | $initiative_display |
@@ -190,7 +190,7 @@ output_verbose_context() {
 |----------|-------|
 | **Project** | $(pwd) |
 | **Worktree** | $WORKTREE_DISPLAY |
-| **Active Team** | $ACTIVE_TEAM |
+| **Active Rite** | $ACTIVE_RITE |
 | **Workflow** | $WORKFLOW_DISPLAY |
 | **Git** | $GIT_DISPLAY |
 
