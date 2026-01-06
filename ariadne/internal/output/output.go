@@ -263,7 +263,7 @@ type CreateOutput struct {
 	Status        string `json:"status"`
 	Initiative    string `json:"initiative"`
 	Complexity    string `json:"complexity"`
-	Team          string `json:"team"`
+	Team          string `json:"rite"`
 	CreatedAt     string `json:"created_at"`
 	SchemaVersion string `json:"schema_version"`
 }
@@ -288,7 +288,7 @@ type SeedCreateOutput struct {
 	ParkReason  string `json:"park_reason"`
 	Initiative  string `json:"initiative"`
 	Complexity  string `json:"complexity"`
-	Team        string `json:"team"`
+	Team        string `json:"rite"`
 	CreatedAt   string `json:"created_at"`
 	ParkedAt    string `json:"parked_at"`
 	ProjectRoot string `json:"project_root,omitempty"`

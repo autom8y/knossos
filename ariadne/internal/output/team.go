@@ -65,7 +65,7 @@ func (l TeamListOutput) Text() string {
 
 // TeamStatusOutput represents detailed team status.
 type TeamStatusOutput struct {
-	Team           string        `json:"team"`
+	Team           string        `json:"rite"`
 	IsActive       bool          `json:"is_active"`
 	Path           string        `json:"path"`
 	Description    string        `json:"description"`
@@ -139,8 +139,8 @@ func (s TeamStatusOutput) Text() string {
 
 // TeamSwitchOutput represents team switch result.
 type TeamSwitchOutput struct {
-	Team               string                    `json:"team"`
-	PreviousTeam       string                    `json:"previous_team"`
+	Team               string                    `json:"rite"`
+	PreviousTeam       string                    `json:"previous_rite"`
 	SwitchedAt         string                    `json:"switched_at"`
 	AgentsInstalled    []string                  `json:"agents_installed"`
 	OrphansHandled     *OrphanHandleResult       `json:"orphans_handled,omitempty"`
@@ -200,7 +200,7 @@ func (s TeamSwitchDryRunOutput) Text() string {
 
 // TeamValidateOutput represents validation result.
 type TeamValidateOutput struct {
-	Team     string               `json:"team"`
+	Team     string               `json:"rite"`
 	Valid    bool                 `json:"valid"`
 	Checks   []ValidationCheckOut `json:"checks"`
 	Errors   int                  `json:"errors"`
