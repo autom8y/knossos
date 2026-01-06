@@ -175,13 +175,13 @@ Report defects in SESSION_CONTEXT blockers array if found.")
 
 ---
 
-### state-mate
+### moirai
 
 **When**: Any session state mutation (park, resume, wrap)
 
 **Invocation**:
 ```markdown
-Task(state-mate, "{operation}
+Task(moirai, "{operation}
 
 Session Context:
 - Session ID: {session_id}
@@ -196,7 +196,7 @@ Session Context:
 
 **Expected Response**: JSON with success/failure and state changes
 
-See: [state-mate Invocation Pattern](../shared-sections/state-mate-invocation.md)
+See: [Moirai Invocation Pattern](../shared-sections/state-mate-invocation.md)
 
 **Duration**: < 1 second
 
@@ -244,7 +244,7 @@ Agent unable to complete:
 - ✗ Pass stale artifact references
 - ✗ Omit complexity (agents adjust behavior)
 - ✗ Forget to specify output paths
-- ✗ Update SESSION_CONTEXT directly (use state-mate)
+- ✗ Update SESSION_CONTEXT directly (use moirai)
 
 ## Handoff Context
 
@@ -301,8 +301,8 @@ Read({artifact_path})
 # 2. Verify artifact completeness (section headers, required content)
 Grep("## ", {artifact_path})
 
-# 3. Update SESSION_CONTEXT via state-mate
-Task(state-mate, "append_artifact type='{type}' path='{path}' status='draft'
+# 3. Update SESSION_CONTEXT via moirai
+Task(moirai, "append_artifact type='{type}' path='{path}' status='draft'
 
 Session Context:
 - Session ID: {session_id}
@@ -334,5 +334,5 @@ If agent invocation times out (rare):
 
 - [Session Context Schema](session-context-schema.md) - Field definitions for context passing
 - [Session Phases](session-phases.md) - Agent-to-phase mapping
-- [state-mate Invocation](../shared-sections/state-mate-invocation.md) - State mutation pattern
+- [Moirai Invocation](../shared-sections/state-mate-invocation.md) - State mutation pattern
 - [Handoff Notes](../handoff-ref/handoff-notes.md) - Transition-specific context

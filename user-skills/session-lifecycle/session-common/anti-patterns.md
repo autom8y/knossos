@@ -32,12 +32,12 @@ This document catalogs anti-patterns observed across all session-lifecycle comma
 
 **Symptoms**:
 - PreToolUse hook blocks operation
-- Error: "Use state-mate agent for SESSION_CONTEXT mutations"
+- Error: "Use moirai agent for SESSION_CONTEXT mutations"
 - Inconsistent session state
 
 **Fix**:
-- Always use state-mate agent via Task tool
-- Follow [state-mate invocation pattern](../shared-sections/state-mate-invocation.md)
+- Always use moirai agent via Task tool
+- Follow [moirai invocation pattern](../shared-sections/state-mate-invocation.md)
 
 **Prevention**: PreToolUse hook enforces this rule
 

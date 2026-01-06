@@ -36,7 +36,7 @@ Have a parked session?
 2. Validate team consistency
 3. Check git status changes
 4. Confirm/select agent
-5. Invoke state-mate agent for resume mutation (removes park metadata, adds resume metadata)
+5. Invoke moirai agent for resume mutation (removes park metadata, adds resume metadata)
 6. Invoke selected agent with full context
 
 **State Changes**:

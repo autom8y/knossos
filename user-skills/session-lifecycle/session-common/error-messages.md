@@ -522,26 +522,26 @@ Continue with handoff? [y/n]:
 
 ---
 
-## state-mate Errors
+## Moirai Errors
 
 ### Lifecycle Violation
 
-**When**: state-mate rejects operation due to invalid state transition
+**When**: Moirai rejects operation due to invalid state transition
 
 ```
 ✗ Lifecycle Violation
 
-{state_mate_message}
+{moirai_message}
 
 Current state: {current_state}
 Attempted operation: {operation}
 
-{state_mate_hint}
+{moirai_hint}
 
 Related: {suggested_commands}
 ```
 
-**Variables**: `{state_mate_message}`, `{current_state}`, `{operation}`, `{state_mate_hint}`, `{suggested_commands}`
+**Variables**: `{moirai_message}`, `{current_state}`, `{operation}`, `{moirai_hint}`, `{suggested_commands}`
 
 **Code**: `LIFECYCLE_VIOLATION`
 
@@ -549,45 +549,45 @@ Related: {suggested_commands}
 
 ### Validation Error
 
-**When**: state-mate detects invalid field or value
+**When**: Moirai detects invalid field or value
 
 ```
 ✗ Validation Error
 
-{state_mate_message}
+{moirai_message}
 
 Field: {field}
 Value: {value}
 Expected: {expected}
 
 Resolution:
-{state_mate_hint}
+{moirai_hint}
 
 Related: {suggested_commands}
 ```
 
-**Variables**: `{state_mate_message}`, `{field}`, `{value}`, `{expected}`, `{state_mate_hint}`, `{suggested_commands}`
+**Variables**: `{moirai_message}`, `{field}`, `{value}`, `{expected}`, `{moirai_hint}`, `{suggested_commands}`
 
 **Code**: `VALIDATION_ERROR`
 
 ---
 
-### state-mate Unavailable
+### Moirai Unavailable
 
-**When**: state-mate agent doesn't respond
+**When**: Moirai agent doesn't respond
 
 ```
-✗ state-mate Unavailable
+✗ Moirai Unavailable
 
-Session state mutations require state-mate agent.
+Session state mutations require Moirai agent.
 
 Checks:
-- state-mate agent file: {agent_file_exists}
+- Moirai agent file: {agent_file_exists}
 - Task tool available: {task_available}
 
 Resolution:
 - Check agent configuration
-- Verify state-mate.md exists
+- Verify moirai.md exists
 - Retry operation
 
 If issue persists, contact support.
@@ -597,7 +597,7 @@ Related: /status, /help
 
 **Variables**: `{agent_file_exists}`, `{task_available}`
 
-**Code**: `STATE_MATE_UNAVAILABLE`
+**Code**: `MOIRAI_UNAVAILABLE`
 
 ---
 
@@ -648,9 +648,9 @@ Continue wrap without validation? [y/n]:
 | UNCOMMITTED_CHANGES | No | park, wrap |
 | STALE_SESSION | No | resume |
 | HIGH_HANDOFF_COUNT | No | handoff |
-| LIFECYCLE_VIOLATION | Yes | Any (via state-mate) |
-| VALIDATION_ERROR | Yes | Any (via state-mate) |
-| STATE_MATE_UNAVAILABLE | Yes | park, resume, wrap |
+| LIFECYCLE_VIOLATION | Yes | Any (via moirai) |
+| VALIDATION_ERROR | Yes | Any (via moirai) |
+| MOIRAI_UNAVAILABLE | Yes | park, resume, wrap |
 | SKIP_CHECKS | No | wrap |
 
 *Unless --skip-checks used

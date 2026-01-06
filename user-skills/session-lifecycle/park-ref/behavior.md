@@ -48,7 +48,7 @@ The Moirai will route to **Lachesis** (the Measurer), who will:
 
 **Note**: `state-mate` alias is supported for backward compatibility.
 
-See [state-mate Invocation Pattern](../shared-sections/state-mate-invocation.md) for response handling and error types.
+See [Moirai Invocation Pattern](../shared-sections/state-mate-invocation.md) for response handling and error types.
 
 ### 5. Confirm Result
 
