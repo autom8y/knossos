@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # normalize-team-structure.sh
-# Creates missing required directories in team packs with .gitkeep files
+# Creates missing required directories in rite packs with .gitkeep files
 #
 # Usage: normalize-team-structure.sh [--dry-run]
 #
@@ -8,8 +8,10 @@
 
 set -euo pipefail
 
-ROSTER_HOME="${ROSTER_HOME:-$HOME/Code/roster}"
-TEAMS_DIR="$ROSTER_HOME/rites"
+# Source Knossos home resolution (handles ROSTER_HOME deprecation)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/../lib/knossos-home.sh"
+RITES_DIR="$KNOSSOS_HOME/rites"
 
 # Required directories (empty with .gitkeep if no content)
 REQUIRED_DIRS="commands skills"
@@ -59,13 +61,13 @@ main() {
     fi
     echo ""
 
-    if [[ ! -d "$TEAMS_DIR" ]]; then
-        echo "Error: Teams directory not found: $TEAMS_DIR"
+    if [[ ! -d "$RITES_DIR" ]]; then
+        echo "Error: Teams directory not found: $RITES_DIR"
         echo "Set ROSTER_HOME environment variable to your roster repository"
         exit 1
     fi
 
-    for team_dir in "$TEAMS_DIR"/*/; do
+    for team_dir in "$RITES_DIR"/*/; do
         [[ -d "$team_dir" ]] || continue
         normalize_team "$team_dir"
     done

@@ -6,7 +6,9 @@
 #   ./get-workflow-field.sh name
 #   ./get-workflow-field.sh description
 
-ROSTER_HOME="${ROSTER_HOME:-$HOME/Code/roster}"
+# Source Knossos home resolution (handles ROSTER_HOME deprecation)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/lib/knossos-home.sh"
 FIELD="$1"
 TEAM="${2:-$(cat .claude/ACTIVE_RITE 2>/dev/null)}"
 
@@ -22,7 +24,7 @@ if [ -z "$TEAM" ]; then
   exit 1
 fi
 
-WORKFLOW_FILE="$ROSTER_HOME/rites/$TEAM/workflow.yaml"
+WORKFLOW_FILE="$KNOSSOS_HOME/rites/$TEAM/workflow.yaml"
 
 if [ ! -f "$WORKFLOW_FILE" ]; then
   exit 1

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # fix-hardcoded-paths.sh
-# Replaces hardcoded ~/Code/roster paths with $ROSTER_HOME
+# Replaces hardcoded ~/Code/roster paths with $KNOSSOS_HOME
 #
 # Usage: fix-hardcoded-paths.sh [--dry-run] [--no-backup]
 #
@@ -8,13 +8,15 @@
 #
 # EXCEPTIONS (paths NOT replaced):
 # - Default value documentation (e.g., "default: ~/Code/roster")
-# - Already using variable fallback pattern (e.g., "${ROSTER_HOME:-~/Code/roster}")
+# - Already using variable fallback pattern (e.g., "${KNOSSOS_HOME:-~/Code/roster}")
 # - Archive/backup directories (.archive, .backup)
 # - Session artifacts (transient data)
 
 set -euo pipefail
 
-ROSTER_HOME="${ROSTER_HOME:-$HOME/Code/roster}"
+# Source Knossos home resolution (handles ROSTER_HOME deprecation)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/../lib/knossos-home.sh"
 DRY_RUN=false
 NO_BACKUP=false
 CHANGES_MADE=0

@@ -926,7 +926,7 @@ handle_orphans() {
 
 # Get current roster git commit
 get_roster_commit() {
-    local roster_path="${ROSTER_HOME:-$HOME/Code/roster}"
+    local roster_path="${KNOSSOS_HOME:-${ROSTER_HOME:-$HOME/Code/roster}}"
 
     if [[ -d "$roster_path/.git" ]]; then
         git -C "$roster_path" rev-parse HEAD 2>/dev/null
@@ -937,7 +937,7 @@ get_roster_commit() {
 
 # Get current roster git ref (branch)
 get_roster_ref() {
-    local roster_path="${ROSTER_HOME:-$HOME/Code/roster}"
+    local roster_path="${KNOSSOS_HOME:-${ROSTER_HOME:-$HOME/Code/roster}}"
 
     if [[ -d "$roster_path/.git" ]]; then
         git -C "$roster_path" rev-parse --abbrev-ref HEAD 2>/dev/null
@@ -982,7 +982,7 @@ is_team_stale() {
     local team_name
     team_name=$(cat "$active_team_file")
 
-    local team_dir="${ROSTER_HOME:-}/rites/$team_name"
+    local team_dir="${KNOSSOS_HOME:-}/rites/$team_name"
     if [[ ! -d "$team_dir" ]]; then
         sync_log_debug "Rite directory not found: $team_dir"
         return 1
@@ -1030,7 +1030,7 @@ refresh_active_team() {
 
     sync_log "Refreshing rite: $team_name"
 
-    local swap_rite="${ROSTER_HOME:-}/swap-rite.sh"
+    local swap_rite="${KNOSSOS_HOME:-}/swap-rite.sh"
     if [[ -x "$swap_rite" ]]; then
         "$swap_rite" "$team_name" --update
     else

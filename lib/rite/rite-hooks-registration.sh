@@ -428,7 +428,7 @@ generate_hooks_json() {
 #   - Creates settings.local.json if missing
 #   - Backs up corrupted settings.local.json
 # Environment:
-#   ROSTER_HOME - Must be set
+#   KNOSSOS_HOME - Must be set (ROSTER_HOME deprecated)
 #   DRY_RUN_MODE - If 1, prints preview without writing
 swap_hook_registrations() {
     local team_name="$1"
