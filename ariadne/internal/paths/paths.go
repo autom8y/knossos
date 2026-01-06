@@ -140,26 +140,31 @@ func (r *Resolver) RitesDir() string {
 }
 
 // TeamDir returns the path to a specific team directory.
+// Deprecated: Use RiteDir instead.
 func (r *Resolver) TeamDir(teamName string) string {
 	return filepath.Join(r.RitesDir(), teamName)
 }
 
 // TeamAgentsDir returns the path to a team's agents/ directory.
+// Deprecated: Use RiteAgentsDir instead.
 func (r *Resolver) TeamAgentsDir(teamName string) string {
 	return filepath.Join(r.TeamDir(teamName), "agents")
 }
 
 // TeamWorkflowFile returns the path to a team's workflow.yaml file.
+// Deprecated: Use RiteWorkflowFile instead.
 func (r *Resolver) TeamWorkflowFile(teamName string) string {
 	return filepath.Join(r.TeamDir(teamName), "workflow.yaml")
 }
 
 // TeamOrchestratorFile returns the path to a team's orchestrator.yaml file.
+// Deprecated: Use RiteOrchestratorFile instead.
 func (r *Resolver) TeamOrchestratorFile(teamName string) string {
 	return filepath.Join(r.TeamDir(teamName), "orchestrator.yaml")
 }
 
 // TeamContextFile returns the path to a team's context.yaml file.
+// Deprecated: Use RiteContextFile instead.
 func (r *Resolver) TeamContextFile(teamName string) string {
 	return filepath.Join(r.TeamDir(teamName), "context.yaml")
 }
