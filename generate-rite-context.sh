@@ -1,22 +1,22 @@
 #!/bin/bash
-# Generate team routing context for session injection
-# Usage: ./generate-team-context.sh [team-name]
-# Output: Markdown routing table for specified team
-# Exit 0 with no output if team/workflow not found (graceful degradation)
+# Generate rite routing context for session injection
+# Usage: ./generate-rite-context.sh [rite-name]
+# Output: Markdown routing table for specified rite
+# Exit 0 with no output if rite/workflow not found (graceful degradation)
 
 set -e
 
-# Source Knossos home resolution (handles ROSTER_HOME deprecation)
+# Source Knossos home resolution
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/lib/knossos-home.sh"
-TEAM="${1:-$(cat .claude/ACTIVE_RITE 2>/dev/null || echo "")}"
+RITE="${1:-$(cat .claude/ACTIVE_RITE 2>/dev/null || echo "")}"
 
-# Exit gracefully if no team
-if [[ -z "$TEAM" ]]; then
+# Exit gracefully if no rite
+if [[ -z "$RITE" ]]; then
     exit 0
 fi
 
-WORKFLOW_FILE="$KNOSSOS_HOME/rites/$TEAM/workflow.yaml"
+WORKFLOW_FILE="$KNOSSOS_HOME/rites/$RITE/workflow.yaml"
 
 # Exit gracefully if workflow doesn't exist
 if [[ ! -f "$WORKFLOW_FILE" ]]; then

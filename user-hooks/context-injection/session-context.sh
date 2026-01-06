@@ -256,13 +256,13 @@ EOF
 EOF
     fi
 
-    # Team routing context (if team is active)
-    # Note: ROSTER_HOME is defined in config.sh (sourced via session-utils.sh)
+    # Rite routing context (if rite is active)
+    # Note: KNOSSOS_HOME is defined in config.sh (sourced via session-utils.sh)
     if [[ -f ".claude/ACTIVE_RITE" ]]; then
-        local TEAM_CONTEXT=$("$ROSTER_HOME/generate-team-context.sh" 2>/dev/null || echo "")
-        if [[ -n "$TEAM_CONTEXT" ]]; then
+        local RITE_CONTEXT=$("$KNOSSOS_HOME/generate-rite-context.sh" 2>/dev/null || echo "")
+        if [[ -n "$RITE_CONTEXT" ]]; then
             echo ""
-            echo "$TEAM_CONTEXT"
+            echo "$RITE_CONTEXT"
         fi
     fi
 

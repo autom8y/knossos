@@ -1,5 +1,5 @@
 #!/bin/bash
-# Integration test for team-context-loader.sh
+# Integration test for rite-context-loader.sh
 # Tests all scenarios from Context Design test matrix
 
 set -euo pipefail
@@ -75,81 +75,81 @@ setup_satellite() {
     mkdir -p "$TEST_DIR/.claude"
     cd "$TEST_DIR"
     export CLAUDE_PROJECT_DIR="$TEST_DIR"
-    export ROSTER_HOME="$SCRIPT_DIR"
+    export KNOSSOS_HOME="$SCRIPT_DIR"
 }
 
-# Test 1: No team active (ACTIVE_TEAM = none)
-test_no_team() {
+# Test 1: No rite active (ACTIVE_RITE = none)
+test_no_rite() {
     setup_satellite
     echo "none" > .claude/ACTIVE_RITE
 
-    source "$SCRIPT_DIR/.claude/hooks/lib/team-context-loader.sh"
-    local output=$(load_team_context)
+    source "$SCRIPT_DIR/user-hooks/lib/rite-context-loader.sh"
+    local output=$(load_rite_context)
 
-    assert_empty "No team active returns empty" "$output"
+    assert_empty "No rite active returns empty" "$output"
 }
 
-# Test 2: Team without context script (10x-dev-pack has no context-injection.sh)
-test_team_no_script() {
+# Test 2: Rite without context script (10x-dev-pack has no context-injection.sh)
+test_rite_no_script() {
     setup_satellite
 
-    # Use a team that exists but has no context-injection.sh
+    # Use a rite that exists but has no context-injection.sh
     echo "10x-dev-pack" > .claude/ACTIVE_RITE
 
-    # Make sure the team exists but script doesn't
-    mkdir -p "$SCRIPT_DIR/teams/10x-dev-pack"
+    # Make sure the rite exists but script doesn't
+    mkdir -p "$SCRIPT_DIR/rites/10x-dev-pack"
 
-    source "$SCRIPT_DIR/.claude/hooks/lib/team-context-loader.sh"
-    local output=$(load_team_context)
+    source "$SCRIPT_DIR/user-hooks/lib/rite-context-loader.sh"
+    local output=$(load_rite_context)
 
-    assert_empty "Team without script returns empty" "$output"
+    assert_empty "Rite without script returns empty" "$output"
 }
 
-# Test 3: Team with context script produces output
-test_team_with_script() {
+# Test 3: Rite with context script produces output
+test_rite_with_script() {
     setup_satellite
     echo "ecosystem-pack" > .claude/ACTIVE_RITE
 
-    source "$SCRIPT_DIR/.claude/hooks/lib/team-context-loader.sh"
-    local output=$(load_team_context)
+    source "$SCRIPT_DIR/user-hooks/lib/rite-context-loader.sh"
+    local output=$(load_rite_context)
 
-    assert_contains "Team with script produces output" "$output" "CEM Sync"
+    assert_contains "Rite with script produces output" "$output" "CEM Sync"
     assert_contains "Output contains skeleton ref" "$output" "Skeleton Ref"
 }
 
 # Test 4: Script exists but not executable (should still work, bash doesn't require +x for sourcing)
 test_script_not_executable() {
     setup_satellite
-    echo "test-team" > .claude/ACTIVE_RITE
+    echo "test-rite" > .claude/ACTIVE_RITE
 
-    # Create test team with non-executable script
-    mkdir -p "$SCRIPT_DIR/teams/test-team"
-    cat > "$SCRIPT_DIR/teams/test-team/context-injection.sh" <<'EOF'
+    # Create test rite with non-executable script
+    mkdir -p "$SCRIPT_DIR/rites/test-rite"
+    cat > "$SCRIPT_DIR/rites/test-rite/context-injection.sh" <<'EOF'
 #!/bin/bash
 inject_team_context() {
     echo "| **Test** | pass |"
 }
 EOF
-    chmod -x "$SCRIPT_DIR/teams/test-team/context-injection.sh"
+    chmod -x "$SCRIPT_DIR/rites/test-rite/context-injection.sh"
 
-    source "$SCRIPT_DIR/.claude/hooks/lib/team-context-loader.sh"
-    local output=$(load_team_context)
+    source "$SCRIPT_DIR/user-hooks/lib/rite-context-loader.sh"
+    local output=$(load_rite_context)
 
     # Should still work (bash doesn't require +x for sourcing)
     assert_contains "Non-executable script works" "$output" "Test"
 
     # Cleanup
-    rm -rf "$SCRIPT_DIR/teams/test-team"
+    rm -rf "$SCRIPT_DIR/rites/test-rite"
 }
 
 # Test 5: Function missing from script (graceful degradation)
 test_missing_function() {
     setup_satellite
-    echo "test-team-broken" > .claude/ACTIVE_RITE
+    echo "test-rite-broken" > .claude/ACTIVE_RITE
 
-    # Create test team with script missing the required function
-    mkdir -p "$SCRIPT_DIR/teams/test-team-broken"
-    cat > "$SCRIPT_DIR/teams/test-team-broken/context-injection.sh" <<'EOF'
+    # Create test rite with script missing the required function
+    mkdir -p "$SCRIPT_DIR/rites/test-rite-broken"
+    cat > "$SCRIPT_DIR/rites/test-rite-broken/context-injection.sh" <<'EOF'
 #!/bin/bash
 # No inject_team_context function defined
 some_other_function() {
@@ -157,23 +157,23 @@ some_other_function() {
 }
 EOF
 
-    source "$SCRIPT_DIR/.claude/hooks/lib/team-context-loader.sh"
-    local output=$(load_team_context)
+    source "$SCRIPT_DIR/user-hooks/lib/rite-context-loader.sh"
+    local output=$(load_rite_context)
 
     assert_empty "Missing function returns empty" "$output"
 
     # Cleanup
-    rm -rf "$SCRIPT_DIR/teams/test-team-broken"
+    rm -rf "$SCRIPT_DIR/rites/test-rite-broken"
 }
 
 # Test 6: Function outputs nothing (normal case)
 test_empty_output() {
     setup_satellite
-    echo "test-team-empty" > .claude/ACTIVE_RITE
+    echo "test-rite-empty" > .claude/ACTIVE_RITE
 
-    # Create test team with empty output
-    mkdir -p "$SCRIPT_DIR/teams/test-team-empty"
-    cat > "$SCRIPT_DIR/teams/test-team-empty/context-injection.sh" <<'EOF'
+    # Create test rite with empty output
+    mkdir -p "$SCRIPT_DIR/rites/test-rite-empty"
+    cat > "$SCRIPT_DIR/rites/test-rite-empty/context-injection.sh" <<'EOF'
 #!/bin/bash
 inject_team_context() {
     # Intentionally output nothing
@@ -181,37 +181,37 @@ inject_team_context() {
 }
 EOF
 
-    source "$SCRIPT_DIR/.claude/hooks/lib/team-context-loader.sh"
-    local output=$(load_team_context)
+    source "$SCRIPT_DIR/user-hooks/lib/rite-context-loader.sh"
+    local output=$(load_rite_context)
 
     assert_empty "Empty function output is normal" "$output"
 
     # Cleanup
-    rm -rf "$SCRIPT_DIR/teams/test-team-empty"
+    rm -rf "$SCRIPT_DIR/rites/test-rite-empty"
 }
 
-# Test 7: ROSTER_HOME not set (fallback to default)
-test_roster_home_fallback() {
+# Test 7: KNOSSOS_HOME not set (fallback to default)
+test_knossos_home_fallback() {
     setup_satellite
     echo "ecosystem-pack" > .claude/ACTIVE_RITE
 
-    # Unset ROSTER_HOME to test fallback
-    local original_roster_home="${ROSTER_HOME:-}"
-    unset ROSTER_HOME
+    # Unset KNOSSOS_HOME to test fallback
+    local original_knossos_home="${KNOSSOS_HOME:-}"
+    unset KNOSSOS_HOME
 
-    source "$SCRIPT_DIR/.claude/hooks/lib/team-context-loader.sh"
-    local output=$(load_team_context)
+    source "$SCRIPT_DIR/user-hooks/lib/rite-context-loader.sh"
+    local output=$(load_rite_context)
 
     # Should use default ~/Code/roster, so output depends on if that exists
     # For this test, we just verify it doesn't crash
     local exit_code=0
-    load_team_context >/dev/null 2>&1 || exit_code=$?
+    load_rite_context >/dev/null 2>&1 || exit_code=$?
 
-    assert_success "ROSTER_HOME fallback doesn't crash" "$exit_code" "0"
+    assert_success "KNOSSOS_HOME fallback doesn't crash" "$exit_code" "0"
 
     # Restore
-    if [[ -n "$original_roster_home" ]]; then
-        export ROSTER_HOME="$original_roster_home"
+    if [[ -n "$original_knossos_home" ]]; then
+        export KNOSSOS_HOME="$original_knossos_home"
     fi
 }
 
@@ -222,10 +222,10 @@ test_session_context_integration() {
     export CLAUDE_PROJECT_DIR="$SCRIPT_DIR"
 
     # Run session-context hook in roster itself
-    local output=$("$SCRIPT_DIR/.claude/hooks/context-injection/session-context.sh" 2>/dev/null || echo "HOOK_FAILED")
+    local output=$("$SCRIPT_DIR/user-hooks/context-injection/session-context.sh" 2>/dev/null || echo "HOOK_FAILED")
 
-    # Should either contain team context OR run successfully
-    # (team context only appears if ecosystem-pack is active)
+    # Should either contain rite context OR run successfully
+    # (rite context only appears if ecosystem-pack is active)
     local exit_code=0
     if [[ "$output" != "HOOK_FAILED" ]]; then
         exit_code=0
@@ -238,17 +238,17 @@ test_session_context_integration() {
 
 # Run all tests
 echo ""
-echo -e "${YELLOW}Running Team Context Loader Integration Tests${NC}"
+echo -e "${YELLOW}Running Rite Context Loader Integration Tests${NC}"
 echo "================================================"
 echo ""
 
-test_no_team
-test_team_no_script
-test_team_with_script
+test_no_rite
+test_rite_no_script
+test_rite_with_script
 test_script_not_executable
 test_missing_function
 test_empty_output
-test_roster_home_fallback
+test_knossos_home_fallback
 test_session_context_integration
 
 # Summary
