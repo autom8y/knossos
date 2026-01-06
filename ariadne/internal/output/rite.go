@@ -311,8 +311,8 @@ func (r RiteReleaseOutput) Text() string {
 
 // RiteSwapOutput represents swap result.
 type RiteSwapOutput struct {
-	Team               string                   `json:"team"`
-	PreviousTeam       string                   `json:"previous_team"`
+	Rite               string                   `json:"rite"`
+	PreviousRite       string                   `json:"previous_rite"`
 	SwitchedAt         string                   `json:"switched_at"`
 	AgentsInstalled    []string                 `json:"agents_installed"`
 	OrphansHandled     *OrphanHandleResult      `json:"orphans_handled,omitempty"`

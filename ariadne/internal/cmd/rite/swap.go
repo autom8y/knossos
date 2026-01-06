@@ -105,8 +105,8 @@ func runSwap(ctx *cmdContext, riteName string, opts swapOptions) error {
 
 	// Build output
 	out := output.RiteSwapOutput{
-		Team:                result.Rite,
-		PreviousTeam:        result.PreviousRite,
+		Rite:                result.Rite,
+		PreviousRite:        result.PreviousRite,
 		SwitchedAt:          result.SwitchedAt.Format(time.RFC3339),
 		AgentsInstalled:     result.AgentsInstalled,
 		ClaudeMDUpdated:     result.ClaudeMDUpdated,

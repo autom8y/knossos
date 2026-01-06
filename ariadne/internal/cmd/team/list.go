@@ -61,7 +61,7 @@ func runList(ctx *cmdContext, opts listOptions) error {
 	result := output.TeamListOutput{
 		Teams:      summaries,
 		Total:      len(teams),
-		ActiveTeam: discovery.ActiveRiteName(),
+		ActiveRite: discovery.ActiveRiteName(),
 	}
 
 	return printer.Print(result)

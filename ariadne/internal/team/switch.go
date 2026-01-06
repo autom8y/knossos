@@ -43,8 +43,8 @@ func (o *SwitchOptions) OrphanStrategy() string {
 
 // SwitchResult represents the result of a rite switch.
 type SwitchResult struct {
-	Rite               string             `json:"team"` // Keep JSON tag for backward compatibility
-	PreviousRite       string             `json:"previous_team"` // Keep JSON tag for backward compatibility
+	Rite               string             `json:"rite"`
+	PreviousRite       string             `json:"previous_rite"`
 	SwitchedAt         time.Time          `json:"switched_at"`
 	AgentsInstalled    []string           `json:"agents_installed"`
 	OrphansHandled     *OrphanResult      `json:"orphans_handled,omitempty"`
@@ -73,7 +73,7 @@ type OrphanResult struct {
 type DryRunResult struct {
 	DryRun                 bool     `json:"dry_run"`
 	WouldSwitchTo          string   `json:"would_switch_to"`
-	CurrentTeam            string   `json:"current_team"`
+	CurrentRite            string   `json:"current_rite"`
 	WouldInstall           []string `json:"would_install"`
 	OrphansDetected        []string `json:"orphans_detected"`
 	OrphanStrategyRequired bool     `json:"orphan_strategy_required"`

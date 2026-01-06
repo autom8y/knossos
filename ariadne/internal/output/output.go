@@ -218,7 +218,7 @@ type StatusOutput struct {
 	Initiative    string `json:"initiative,omitempty"`
 	Complexity    string `json:"complexity,omitempty"`
 	CurrentPhase  string `json:"current_phase,omitempty"`
-	ActiveTeam    string `json:"active_team,omitempty"`
+	ActiveRite    string `json:"active_rite,omitempty"`
 	ExecutionMode string `json:"execution_mode,omitempty"`
 	CreatedAt     string `json:"created_at,omitempty"`
 	SchemaVersion string `json:"schema_version,omitempty"`
@@ -238,7 +238,7 @@ func (s StatusOutput) Text() string {
 	b.WriteString(fmt.Sprintf("Status: %s\n", s.Status))
 	b.WriteString(fmt.Sprintf("Initiative: %s\n", s.Initiative))
 	b.WriteString(fmt.Sprintf("Phase: %s\n", s.CurrentPhase))
-	b.WriteString(fmt.Sprintf("Team: %s\n", s.ActiveTeam))
+	b.WriteString(fmt.Sprintf("Team: %s\n", s.ActiveRite))
 	b.WriteString(fmt.Sprintf("Mode: %s\n", s.ExecutionMode))
 	if s.GitBranch != "" {
 		b.WriteString(fmt.Sprintf("Branch: %s (%d changes)\n", s.GitBranch, s.GitChanges))

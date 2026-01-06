@@ -13,7 +13,7 @@ import (
 type TeamListOutput struct {
 	Teams      []TeamSummary `json:"teams"`
 	Total      int           `json:"total"`
-	ActiveTeam string        `json:"active_team,omitempty"`
+	ActiveRite string        `json:"active_rite,omitempty"`
 }
 
 // TeamSummary is a brief team entry for listing.
@@ -175,7 +175,7 @@ func (s TeamSwitchOutput) Text() string {
 type TeamSwitchDryRunOutput struct {
 	DryRun                 bool     `json:"dry_run"`
 	WouldSwitchTo          string   `json:"would_switch_to"`
-	CurrentTeam            string   `json:"current_team"`
+	CurrentRite            string   `json:"current_rite"`
 	WouldInstall           []string `json:"would_install"`
 	OrphansDetected        []string `json:"orphans_detected"`
 	OrphanStrategyRequired bool     `json:"orphan_strategy_required"`
@@ -187,7 +187,7 @@ func (s TeamSwitchDryRunOutput) Text() string {
 	var b strings.Builder
 	b.WriteString("[DRY RUN]\n")
 	b.WriteString(fmt.Sprintf("Would switch to: %s\n", s.WouldSwitchTo))
-	b.WriteString(fmt.Sprintf("Current team: %s\n", s.CurrentTeam))
+	b.WriteString(fmt.Sprintf("Current team: %s\n", s.CurrentRite))
 	b.WriteString(fmt.Sprintf("Would install: %s\n", strings.Join(s.WouldInstall, ", ")))
 	if len(s.OrphansDetected) > 0 {
 		b.WriteString(fmt.Sprintf("Orphans detected: %s\n", strings.Join(s.OrphansDetected, ", ")))

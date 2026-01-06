@@ -16,7 +16,7 @@ const ManifestVersion = "1.2"
 type Manifest struct {
 	Version     string                `json:"version"`
 	GeneratedAt time.Time             `json:"generated_at"`
-	ActiveRite  string                `json:"active_team"` // Keep JSON tag for backward compatibility
+	ActiveRite  string                `json:"active_rite"`
 	Agents      map[string]AgentEntry `json:"agents"`
 	Orphans     []string              `json:"orphans"`
 }

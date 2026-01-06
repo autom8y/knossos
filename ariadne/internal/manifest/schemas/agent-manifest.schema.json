@@ -3,7 +3,7 @@
   "title": "Agent Manifest",
   "description": "Tracks installed agents and their sources",
   "type": "object",
-  "required": ["version", "generated_at", "active_team", "agents"],
+  "required": ["version", "generated_at", "active_rite", "agents"],
   "properties": {
     "version": {
       "type": "string",
@@ -14,9 +14,9 @@
       "format": "date-time",
       "description": "When the manifest was last generated"
     },
-    "active_team": {
+    "active_rite": {
       "type": "string",
-      "description": "Currently active team pack"
+      "description": "Currently active rite pack"
     },
     "agents": {
       "type": "object",

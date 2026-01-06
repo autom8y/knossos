@@ -108,7 +108,7 @@ func runStatus(ctx *cmdContext) error {
 		Initiative:    sessCtx.Initiative,
 		Complexity:    sessCtx.Complexity,
 		CurrentPhase:  sessCtx.CurrentPhase,
-		ActiveTeam:    sessCtx.ActiveRite,
+		ActiveRite:    sessCtx.ActiveRite,
 		ExecutionMode: executionMode,
 		CreatedAt:     sessCtx.CreatedAt.Format("2006-01-02T15:04:05Z"),
 		SchemaVersion: sessCtx.SchemaVersion,

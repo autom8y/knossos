@@ -11,7 +11,7 @@
     "created_at",
     "initiative",
     "complexity",
-    "active_team",
+    "active_rite",
     "current_phase"
   ],
 
@@ -47,9 +47,9 @@
       "enum": ["PATCH", "MODULE", "SYSTEM", "INITIATIVE", "MIGRATION"],
       "description": "Work complexity level"
     },
-    "active_team": {
+    "active_rite": {
       "type": "string",
-      "description": "Active team pack name"
+      "description": "Active rite pack name"
     },
     "team": {
       "oneOf": [

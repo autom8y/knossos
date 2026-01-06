@@ -90,7 +90,7 @@ func runStatus(ctx *cmdContext) error {
 		SessionStatus: string(sessCtx.Status),
 		CurrentPhase:  sessCtx.CurrentPhase,
 		CurrentAgent:  currentAgent,
-		ActiveTeam:    sessCtx.ActiveRite,
+		ActiveRite:    sessCtx.ActiveRite,
 		HandoffCount:  handoffCount,
 		LastHandoff:   lastHandoff,
 		Initiative:    sessCtx.Initiative,
@@ -312,7 +312,7 @@ type HandoffStatusOutput struct {
 	SessionStatus       string          `json:"session_status"`
 	CurrentPhase        string          `json:"current_phase"`
 	CurrentAgent        string          `json:"current_agent"`
-	ActiveTeam          string          `json:"active_team"`
+	ActiveRite          string          `json:"active_rite"`
 	Initiative          string          `json:"initiative"`
 	CreatedAt           string          `json:"created_at"`
 	HandoffCount        int             `json:"handoff_count"`
@@ -326,7 +326,7 @@ func (h HandoffStatusOutput) Text() string {
 	b.WriteString(fmt.Sprintf("Session: %s\n", h.SessionID))
 	b.WriteString(fmt.Sprintf("Status: %s\n", h.SessionStatus))
 	b.WriteString(fmt.Sprintf("Initiative: %s\n", h.Initiative))
-	b.WriteString(fmt.Sprintf("Team: %s\n", h.ActiveTeam))
+	b.WriteString(fmt.Sprintf("Team: %s\n", h.ActiveRite))
 	b.WriteString("\n")
 	b.WriteString(fmt.Sprintf("Current Phase: %s\n", h.CurrentPhase))
 	b.WriteString(fmt.Sprintf("Current Agent: %s\n", h.CurrentAgent))

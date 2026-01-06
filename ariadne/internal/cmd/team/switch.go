@@ -151,7 +151,7 @@ func runDryRun(ctx *cmdContext, riteName string, opts team.SwitchOptions, printe
 	out := output.TeamSwitchDryRunOutput{
 		DryRun:                 true,
 		WouldSwitchTo:          riteName,
-		CurrentTeam:            manifest.ActiveRite,
+		CurrentRite:            manifest.ActiveRite,
 		WouldInstall:           agents,
 		OrphansDetected:        orphans,
 		OrphanStrategyRequired: len(orphans) > 0 && !opts.HasOrphanStrategy(),
