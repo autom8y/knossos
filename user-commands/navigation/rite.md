@@ -1,40 +1,40 @@
 ---
-description: Switch agent team packs or list available teams
+description: Switch agent rite packs or list available rites
 argument-hint: [pack-name] [--list] [--update] [--dry-run] [--keep-all|--remove-all|--promote-all]
 allowed-tools: Bash, Read
 model: sonnet
 ---
 
 ## Context
-Auto-injected by SessionStart hook (project, team, session, git).
+Auto-injected by SessionStart hook (project, rite, session, git).
 
-**Available teams**: !`ls ${ROSTER_HOME:-~/Code/roster}/teams/`
+**Available rites**: !`ls ${ROSTER_HOME:-~/Code/roster}/rites/`
 
 ## Your Task
 
-Manage agent team packs. $ARGUMENTS
+Manage agent rite packs. $ARGUMENTS
 
 ## Behavior
 
-**If no arguments or querying current team:**
-1. Read `.claude/ACTIVE_RITE` and display current team
-2. Show: "Active team: {name}" or "No team active"
+**If no arguments or querying current rite:**
+1. Read `.claude/ACTIVE_RITE` and display current rite
+2. Show: "Active rite: {name}" or "No rite active"
 
 **If `--list` or `-l`:**
-1. Execute: `${ROSTER_HOME:-~/Code/roster}/swap-team.sh --list`
-2. Display all available team packs
+1. Execute: `${ROSTER_HOME:-~/Code/roster}/swap-rite.sh --list`
+2. Display all available rite packs
 
 **If `<pack-name>` provided:**
-1. Execute: `${ROSTER_HOME:-~/Code/roster}/swap-team.sh <pack-name> [flags]`
-2. If orphan agents exist (agents in current team but not in target):
+1. Execute: `${ROSTER_HOME:-~/Code/roster}/swap-rite.sh <pack-name> [flags]`
+2. If orphan agents exist (agents in current rite but not in target):
    - **Interactive (TTY)**: Prompt user for each orphan agent
    - **Non-interactive**: Require `--keep-all`, `--remove-all`, or `--promote-all` flag
 3. Show confirmation with agent count
-4. If SESSION_CONTEXT exists, update `active_team` field
+4. If SESSION_CONTEXT exists, update `active_rite` field
 
 ## Orphan Agent Handling
 
-When switching teams, agents that exist in the current project but not in the target team are called "orphans". You'll be prompted to choose for each:
+When switching rites, agents that exist in the current project but not in the target rite are called "orphans". You'll be prompted to choose for each:
 
 | Choice | Key | Effect |
 |--------|-----|--------|
