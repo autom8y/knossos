@@ -86,7 +86,7 @@ Performance Targets:
 	cmd.AddCommand(newWriteguardCmd(ctx))
 	cmd.AddCommand(newRouteCmd(ctx))
 	cmd.AddCommand(newValidateCmd(ctx))
-	cmd.AddCommand(newThreadCmd(ctx))
+	cmd.AddCommand(newClewCmd(ctx))
 
 	return cmd
 }

@@ -12,15 +12,15 @@ import (
 	"github.com/autom8y/ariadne/test/hooks/testutil"
 )
 
-func TestThreadOutput_Text(t *testing.T) {
+func TestClewOutput_Text(t *testing.T) {
 	tests := []struct {
 		name     string
-		output   ThreadOutput
+		output   ClewOutput
 		expected string
 	}{
 		{
 			name: "recorded successfully",
-			output: ThreadOutput{
+			output: ClewOutput{
 				Recorded:   true,
 				EventsFile: "/path/to/events.jsonl",
 			},
@@ -28,7 +28,7 @@ func TestThreadOutput_Text(t *testing.T) {
 		},
 		{
 			name: "not recorded with reason",
-			output: ThreadOutput{
+			output: ClewOutput{
 				Recorded: false,
 				Reason:   "no active session",
 			},
@@ -46,7 +46,7 @@ func TestThreadOutput_Text(t *testing.T) {
 	}
 }
 
-func TestRunThread_HooksDisabled(t *testing.T) {
+func TestRunClew_HooksDisabled(t *testing.T) {
 	// Clear environment to disable hooks
 	testutil.SetupEnv(t, &testutil.HookEnv{
 		Event:       "PostToolUse",
@@ -64,12 +64,12 @@ func TestRunThread_HooksDisabled(t *testing.T) {
 		verbose: &verboseFlag,
 	}
 
-	err := runThreadWithPrinter(ctx, printer)
+	err := runClewWithPrinter(ctx, printer)
 	if err != nil {
 		t.Fatalf("runThread() error = %v", err)
 	}
 
-	var result ThreadOutput
+	var result ClewOutput
 	if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
 		t.Fatalf("Failed to parse output: %v\nOutput: %s", err, stdout.String())
 	}
@@ -82,7 +82,7 @@ func TestRunThread_HooksDisabled(t *testing.T) {
 	}
 }
 
-func TestRunThread_WrongEventType(t *testing.T) {
+func TestRunClew_WrongEventType(t *testing.T) {
 	testutil.SetupEnv(t, &testutil.HookEnv{
 		Event:       "SessionStart",
 		ToolName:    "Edit",
@@ -99,12 +99,12 @@ func TestRunThread_WrongEventType(t *testing.T) {
 		verbose: &verboseFlag,
 	}
 
-	err := runThreadWithPrinter(ctx, printer)
+	err := runClewWithPrinter(ctx, printer)
 	if err != nil {
 		t.Fatalf("runThread() error = %v", err)
 	}
 
-	var result ThreadOutput
+	var result ClewOutput
 	if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
 		t.Fatalf("Failed to parse output: %v\nOutput: %s", err, stdout.String())
 	}
@@ -117,7 +117,7 @@ func TestRunThread_WrongEventType(t *testing.T) {
 	}
 }
 
-func TestRunThread_NoActiveSession(t *testing.T) {
+func TestRunClew_NoActiveSession(t *testing.T) {
 	// Create temp project dir without session
 	tmpDir := t.TempDir()
 
@@ -141,12 +141,12 @@ func TestRunThread_NoActiveSession(t *testing.T) {
 		projectDir: &projectDir,
 	}
 
-	err := runThreadWithPrinter(ctx, printer)
+	err := runClewWithPrinter(ctx, printer)
 	if err != nil {
 		t.Fatalf("runThread() error = %v", err)
 	}
 
-	var result ThreadOutput
+	var result ClewOutput
 	if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
 		t.Fatalf("Failed to parse output: %v\nOutput: %s", err, stdout.String())
 	}
@@ -159,7 +159,7 @@ func TestRunThread_NoActiveSession(t *testing.T) {
 	}
 }
 
-func TestRunThread_WithActiveSession(t *testing.T) {
+func TestRunClew_WithActiveSession(t *testing.T) {
 	// Create temp project structure with session
 	tmpDir := t.TempDir()
 	claudeDir := filepath.Join(tmpDir, ".claude")
@@ -198,12 +198,12 @@ func TestRunThread_WithActiveSession(t *testing.T) {
 		projectDir: &projectDir,
 	}
 
-	err := runThreadWithPrinter(ctx, printer)
+	err := runClewWithPrinter(ctx, printer)
 	if err != nil {
 		t.Fatalf("runThread() error = %v", err)
 	}
 
-	var result ThreadOutput
+	var result ClewOutput
 	if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
 		t.Fatalf("Failed to parse output: %v\nOutput: %s", err, stdout.String())
 	}
@@ -219,7 +219,7 @@ func TestRunThread_WithActiveSession(t *testing.T) {
 	}
 }
 
-func TestRunThread_OrchestratorStamping(t *testing.T) {
+func TestRunClew_OrchestratorStamping(t *testing.T) {
 	// Create temp project structure with session
 	tmpDir := t.TempDir()
 	claudeDir := filepath.Join(tmpDir, ".claude")
@@ -279,12 +279,12 @@ throughline:
 		projectDir: &projectDir,
 	}
 
-	err := runThreadWithPrinter(ctx, printer)
+	err := runClewWithPrinter(ctx, printer)
 	if err != nil {
 		t.Fatalf("runThread() error = %v", err)
 	}
 
-	var result ThreadOutput
+	var result ClewOutput
 	if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
 		t.Fatalf("Failed to parse output: %v\nOutput: %s", err, stdout.String())
 	}
@@ -322,7 +322,7 @@ throughline:
 	}
 }
 
-func TestRunThread_NonOrchestratorTask(t *testing.T) {
+func TestRunClew_NonOrchestratorTask(t *testing.T) {
 	// Create temp project structure with session
 	tmpDir := t.TempDir()
 	claudeDir := filepath.Join(tmpDir, ".claude")
@@ -369,12 +369,12 @@ Files modified:
 		projectDir: &projectDir,
 	}
 
-	err := runThreadWithPrinter(ctx, printer)
+	err := runClewWithPrinter(ctx, printer)
 	if err != nil {
 		t.Fatalf("runThread() error = %v", err)
 	}
 
-	var result ThreadOutput
+	var result ClewOutput
 	if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
 		t.Fatalf("Failed to parse output: %v\nOutput: %s", err, stdout.String())
 	}

@@ -12,24 +12,24 @@ import (
 	"github.com/autom8y/ariadne/internal/output"
 )
 
-// ThreadTriggerOutput represents the trigger detection result in thread output.
-type ThreadTriggerOutput struct {
+// ClewTriggerOutput represents the trigger detection result in clew output.
+type ClewTriggerOutput struct {
 	Triggered bool   `json:"triggered"`
 	Type      string `json:"type,omitempty"`
 	Reason    string `json:"reason,omitempty"`
 	Suggest   string `json:"suggest,omitempty"`
 }
 
-// ThreadOutput represents the output of the thread hook.
-type ThreadOutput struct {
-	Recorded   bool                 `json:"recorded"`
-	Reason     string               `json:"reason,omitempty"`
-	EventsFile string               `json:"events_file,omitempty"`
-	Trigger    *ThreadTriggerOutput `json:"trigger,omitempty"`
+// ClewOutput represents the output of the clew hook.
+type ClewOutput struct {
+	Recorded   bool               `json:"recorded"`
+	Reason     string             `json:"reason,omitempty"`
+	EventsFile string             `json:"events_file,omitempty"`
+	Trigger    *ClewTriggerOutput `json:"trigger,omitempty"`
 }
 
 // Text implements output.Textable for text output.
-func (t ThreadOutput) Text() string {
+func (t ClewOutput) Text() string {
 	if t.Recorded {
 		msg := "Event recorded to " + t.EventsFile
 		if t.Trigger != nil && t.Trigger.Triggered {
@@ -40,12 +40,12 @@ func (t ThreadOutput) Text() string {
 	return "Not recorded: " + t.Reason
 }
 
-// newThreadCmd creates the thread hook subcommand.
-func newThreadCmd(ctx *cmdContext) *cobra.Command {
+// newClewCmd creates the clew hook subcommand.
+func newClewCmd(ctx *cmdContext) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "thread",
+		Use:   "clew",
 		Short: "Record tool events on PostToolUse",
-		Long: `Records tool events to events.jsonl for Thread Contract v2.
+		Long: `Records tool events to events.jsonl for Clew Contract v2.
 
 This hook is triggered on PostToolUse events. It:
 - Reads CLAUDE_HOOK_TOOL_INPUT environment variable
@@ -53,16 +53,16 @@ This hook is triggered on PostToolUse events. It:
 - Calls RecordToolEvent to write to events.jsonl
 - Returns JSON: {"recorded": true} or {"recorded": false, "reason": "..."}
 
-The thread hook implements the "Thread Contract" pattern:
-"Theseus has amnesia; the Thread remembers"
+The clew hook implements the "Clew Contract" pattern:
+"Theseus has amnesia; the Clew remembers"
 
 Events provide the factual route through decisions for session recovery
-and debugging.
+and debugging. (Ariadne gave Theseus a CLEW - ball of thread - to navigate the labyrinth)
 
 Performance: <100ms target execution time.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return ctx.withTimeout(func() error {
-				return runThread(ctx)
+				return runClew(ctx)
 			})
 		},
 	}
@@ -70,7 +70,7 @@ Performance: <100ms target execution time.`,
 	return cmd
 }
 
-func runThread(ctx *cmdContext) error {
+func runClew(ctx *cmdContext) error {
 	printer := ctx.getPrinter()
 
 	// Early exit if hooks disabled
@@ -83,7 +83,7 @@ func runThread(ctx *cmdContext) error {
 
 	// Verify this is a PostToolUse event (or allow for testing without event)
 	if hookEnv.Event != "" && hookEnv.Event != hook.EventPostToolUse {
-		printer.VerboseLog("debug", "skipping thread hook for non-PostToolUse event",
+		printer.VerboseLog("debug", "skipping clew hook for non-PostToolUse event",
 			map[string]interface{}{"event": string(hookEnv.Event)})
 		return outputNotRecorded(printer, "not a PostToolUse event")
 	}
@@ -138,14 +138,14 @@ func runThread(ctx *cmdContext) error {
 	triggerResult := clewcontract.CheckTriggers(eventsPath, event, triggerConfig)
 
 	// Build output
-	result := ThreadOutput{
+	result := ClewOutput{
 		Recorded:   true,
 		EventsFile: eventsPath,
 	}
 
 	// Include trigger if triggered
 	if triggerResult.Triggered {
-		result.Trigger = &ThreadTriggerOutput{
+		result.Trigger = &ClewTriggerOutput{
 			Triggered: true,
 			Type:      string(triggerResult.Type),
 			Reason:    triggerResult.Reason,
@@ -183,15 +183,15 @@ func getSessionDir(ctx *cmdContext, hookEnv *hook.Env) string {
 
 // outputNotRecorded outputs the not-recorded response.
 func outputNotRecorded(printer *output.Printer, reason string) error {
-	result := ThreadOutput{
+	result := ClewOutput{
 		Recorded: false,
 		Reason:   reason,
 	}
 	return printer.Print(result)
 }
 
-// runThreadWithPrinter is a helper that uses an injected printer for testing.
-func runThreadWithPrinter(ctx *cmdContext, printer *output.Printer) error {
+// runClewWithPrinter is a helper that uses an injected printer for testing.
+func runClewWithPrinter(ctx *cmdContext, printer *output.Printer) error {
 	// Early exit if hooks disabled
 	if ctx.shouldEarlyExit() {
 		return outputNotRecordedWithPrinter(printer, "hooks disabled")
@@ -202,7 +202,7 @@ func runThreadWithPrinter(ctx *cmdContext, printer *output.Printer) error {
 
 	// Verify this is a PostToolUse event (or allow for testing without event)
 	if hookEnv.Event != "" && hookEnv.Event != hook.EventPostToolUse {
-		printer.VerboseLog("debug", "skipping thread hook for non-PostToolUse event",
+		printer.VerboseLog("debug", "skipping clew hook for non-PostToolUse event",
 			map[string]interface{}{"event": string(hookEnv.Event)})
 		return outputNotRecordedWithPrinter(printer, "not a PostToolUse event")
 	}
@@ -257,14 +257,14 @@ func runThreadWithPrinter(ctx *cmdContext, printer *output.Printer) error {
 	triggerResult := clewcontract.CheckTriggers(eventsPath, event, triggerConfig)
 
 	// Build output
-	result := ThreadOutput{
+	result := ClewOutput{
 		Recorded:   true,
 		EventsFile: eventsPath,
 	}
 
 	// Include trigger if triggered
 	if triggerResult.Triggered {
-		result.Trigger = &ThreadTriggerOutput{
+		result.Trigger = &ClewTriggerOutput{
 			Triggered: true,
 			Type:      string(triggerResult.Type),
 			Reason:    triggerResult.Reason,
@@ -277,7 +277,7 @@ func runThreadWithPrinter(ctx *cmdContext, printer *output.Printer) error {
 
 // outputNotRecordedWithPrinter outputs the not-recorded response with an injected printer.
 func outputNotRecordedWithPrinter(printer *output.Printer, reason string) error {
-	result := ThreadOutput{
+	result := ClewOutput{
 		Recorded: false,
 		Reason:   reason,
 	}
