@@ -221,12 +221,13 @@ _transform_to_v2() {
     local new_status="$2"
     local temp_file="${ctx_file}.tmp.$$"
 
-    # Determine team value from active_team field
-    local active_team
-    active_team=$(_get_field "$ctx_file" "active_team")
-    local team_value="null"
-    if [[ -n "$active_team" && "$active_team" != "none" ]]; then
-        team_value="\"$active_team\""
+    # Determine rite value from active_rite field (or legacy active_team for backward compat)
+    local active_rite
+    active_rite=$(_get_field "$ctx_file" "active_rite")
+    [[ -z "$active_rite" ]] && active_rite=$(_get_field "$ctx_file" "active_team")
+    local rite_value="null"
+    if [[ -n "$active_rite" && "$active_rite" != "none" ]]; then
+        rite_value="\"$active_rite\""
     fi
 
     # Check for auto_parked_at to merge
@@ -236,17 +237,17 @@ _transform_to_v2() {
     has_parked_at=$(grep -c "^parked_at:" "$ctx_file" 2>/dev/null || echo "0")
 
     # Use awk to process the file:
-    # - Add schema_version (2.1), status, and team fields
+    # - Add schema_version (2.1), status, and rite fields
     # - Merge auto_parked_at into parked_at if needed
     # - Remove legacy fields
     # - Preserve body content
-    awk -v status="$new_status" -v team="$team_value" -v auto_ts="$auto_parked_at" -v has_parked="$has_parked_at" '
+    awk -v status="$new_status" -v rite="$rite_value" -v auto_ts="$auto_parked_at" -v has_parked="$has_parked_at" '
     BEGIN {
         in_frontmatter = 0
         frontmatter_count = 0
         version_written = 0
         status_written = 0
-        team_written = 0
+        rite_written = 0
     }
 
     /^---$/ {
@@ -260,7 +261,7 @@ _transform_to_v2() {
             # Add v2.1 fields before closing ---
             if (!version_written) print "schema_version: \"2.1\""
             if (!status_written) print "status: \"" status "\""
-            if (!team_written) print "team: " team
+            if (!rite_written) print "rite: " rite
             # If auto_parked_at exists and no parked_at, merge it
             if (auto_ts != "" && has_parked == "0") {
                 print "parked_at: \"" auto_ts "\""
@@ -283,7 +284,8 @@ _transform_to_v2() {
         # Track if we see existing v2 fields
         if (/^schema_version:/) { version_written = 1 }
         if (/^status:/) { status_written = 1 }
-        if (/^team:/) { team_written = 1 }
+        if (/^rite:/) { rite_written = 1 }
+        if (/^team:/) { rite_written = 1 }  # Also count legacy team field
     }
 
     { print }
@@ -322,14 +324,20 @@ _validate_migrated_session() {
             ;;
     esac
 
-    # Check required fields (team is optional for v2.1)
-    local required_fields=("session_id" "created_at" "initiative" "complexity" "active_team" "current_phase")
+    # Check required fields (rite is optional for v2.1, accepts both active_rite and legacy active_team)
+    local required_fields=("session_id" "created_at" "initiative" "complexity" "current_phase")
     for field in "${required_fields[@]}"; do
         if ! grep -q "^${field}:" "$ctx_file" 2>/dev/null; then
             _log_error "Missing required field: $field"
             return 1
         fi
     done
+
+    # Check for active_rite OR active_team (backward compat)
+    if ! grep -q "^active_rite:" "$ctx_file" 2>/dev/null && ! grep -q "^active_team:" "$ctx_file" 2>/dev/null; then
+        _log_error "Missing required field: active_rite"
+        return 1
+    fi
 
     return 0
 }

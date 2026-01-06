@@ -143,7 +143,7 @@ create_journal() {
   "backup_location": {
     "agents": "$SWAP_BACKUP_DIR/agents",
     "manifest": "$SWAP_BACKUP_DIR/AGENT_MANIFEST.json",
-    "active_team": "$SWAP_BACKUP_DIR/ACTIVE_TEAM",
+    "active_rite": "$SWAP_BACKUP_DIR/ACTIVE_RITE",
     "workflow": "$SWAP_BACKUP_DIR/ACTIVE_WORKFLOW.yaml",
     "commands": null,
     "skills": null,
@@ -307,7 +307,7 @@ journal_exists() {
 # Steps are stored in journal.commit_steps as an object:
 #   { "agents": true, "workflow": true, "commands": false, ... }
 #
-# The point-of-no-return is when "active_team" step is marked complete.
+# The point-of-no-return is when "active_rite" step is marked complete.
 # Before that point: rollback to backup
 # After that point: complete the remaining steps
 
@@ -321,7 +321,7 @@ readonly COMMIT_STEP_HOOKS="hooks"
 readonly COMMIT_STEP_HOOK_REGISTRATIONS="hook_registrations"
 readonly COMMIT_STEP_MANIFEST="manifest"
 readonly COMMIT_STEP_CEM_MANIFEST="cem_manifest"
-readonly COMMIT_STEP_ACTIVE_TEAM="active_team"  # Point-of-no-return
+readonly COMMIT_STEP_ACTIVE_RITE="active_rite"  # Point-of-no-return
 
 # Initialize commit steps tracking in journal
 # Called when entering COMMITTING phase
@@ -343,7 +343,7 @@ init_commit_steps() {
         "hook_registrations": false,
         "manifest": false,
         "cem_manifest": false,
-        "active_team": false
+        "active_rite": false
     }' "$JOURNAL_FILE") || {
         log_error "Failed to parse journal for commit steps init"
         return 1
@@ -495,20 +495,20 @@ stage_workflow() {
     return 0
 }
 
-# Stage ACTIVE_TEAM file
+# Stage ACTIVE_RITE file
 # Parameters:
-#   $1 - team_name: Rite name to write
+#   $1 - rite_name: Rite name to write
 # Returns: 0 on success, 1 on failure
 # Requires: STAGING_DIR
-stage_active_team() {
-    local team_name="$1"
+stage_active_rite() {
+    local rite_name="$1"
 
-    echo -n "$team_name" > "$STAGING_DIR/ACTIVE_TEAM" || {
-        log_error "Failed to stage ACTIVE_TEAM"
+    echo -n "$rite_name" > "$STAGING_DIR/ACTIVE_RITE" || {
+        log_error "Failed to stage ACTIVE_RITE"
         return 1
     }
 
-    log_debug "Staged ACTIVE_TEAM: $team_name"
+    log_debug "Staged ACTIVE_RITE: $rite_name"
     return 0
 }
 

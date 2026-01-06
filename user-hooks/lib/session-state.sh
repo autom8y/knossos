@@ -138,9 +138,10 @@ get_complexity() {
 # Validate SESSION_CONTEXT.md has required fields
 # Usage: validate_session_context "path/to/SESSION_CONTEXT.md"
 # Returns: 0 if valid, 1 if missing required fields
+# Note: Accepts both active_rite (new) and active_team (legacy) for backward compatibility
 validate_session_context() {
     local file="$1"
-    local required_fields=("session_id" "created_at" "initiative" "complexity" "active_team" "current_phase")
+    local required_fields=("session_id" "created_at" "initiative" "complexity" "current_phase")
     local missing=()
 
     [ -f "$file" ] || { echo "File not found: $file" >&2; return 1; }
@@ -150,6 +151,11 @@ validate_session_context() {
             missing+=("$field")
         fi
     done
+
+    # Check for active_rite OR active_team (backward compat)
+    if ! grep -q "^active_rite:" "$file" 2>/dev/null && ! grep -q "^active_team:" "$file" 2>/dev/null; then
+        missing+=("active_rite")
+    fi
 
     if [ ${#missing[@]} -gt 0 ]; then
         echo "Missing required fields: ${missing[*]}" >&2
@@ -270,34 +276,34 @@ list_stale_sessions() {
 # =============================================================================
 # This is THE ONLY place for team updates (consolidates 3 locations)
 
-# Atomic team update: sync ACTIVE_RITE and SESSION_CONTEXT.active_team together
-# Usage: atomic_team_update "new_team_name"
+# Atomic rite update: sync ACTIVE_RITE file and SESSION_CONTEXT.active_rite together
+# Usage: atomic_rite_update "new_rite_name"
 # Returns: 0 on success, 1 on failure
-atomic_team_update() {
-    local new_team="$1"
+atomic_rite_update() {
+    local new_rite="$1"
     local project_dir="${CLAUDE_PROJECT_DIR:-.}"
-    local active_team_file="$project_dir/.claude/ACTIVE_RITE"
+    local active_rite_file="$project_dir/.claude/ACTIVE_RITE"
     local session_dir
     session_dir=$(get_session_dir)
 
-    if [ -z "$new_team" ]; then
-        echo "Error: Team name required" >&2
+    if [ -z "$new_rite" ]; then
+        echo "Error: Rite name required" >&2
         return 1
     fi
 
     # Acquire lock to prevent race conditions
-    if ! acquire_session_lock "team_update"; then
-        echo "Error: Could not acquire lock for team update" >&2
+    if ! acquire_session_lock "rite_update"; then
+        echo "Error: Could not acquire lock for rite update" >&2
         return 1
     fi
 
     # Trap to ensure lock release on error
-    trap 'release_session_lock "team_update"' EXIT
+    trap 'release_session_lock "rite_update"' EXIT
 
     local success=1
 
-    # Update ACTIVE_RITE atomically
-    if atomic_write "$active_team_file" "$new_team"; then
+    # Update ACTIVE_RITE file atomically
+    if atomic_write "$active_rite_file" "$new_rite"; then
         success=0
 
         # Update SESSION_CONTEXT.md if session exists
@@ -305,14 +311,17 @@ atomic_team_update() {
             local session_file="$session_dir/SESSION_CONTEXT.md"
             local temp_content
 
-            # Read current content and update active_team field
-            if grep -q "^active_team:" "$session_file" 2>/dev/null; then
-                temp_content=$(sed "s/^active_team:.*/active_team: \"$new_team\"/" "$session_file")
+            # Read current content and update active_rite field (migrate from active_team if present)
+            if grep -q "^active_rite:" "$session_file" 2>/dev/null; then
+                temp_content=$(sed "s/^active_rite:.*/active_rite: \"$new_rite\"/" "$session_file")
+            elif grep -q "^active_team:" "$session_file" 2>/dev/null; then
+                # Migrate: replace active_team with active_rite
+                temp_content=$(sed "s/^active_team:.*/active_rite: \"$new_rite\"/" "$session_file")
             else
-                # Insert active_team before closing --- of frontmatter
-                temp_content=$(awk -v team="$new_team" '
+                # Insert active_rite before closing --- of frontmatter
+                temp_content=$(awk -v rite="$new_rite" '
                     /^---$/ && ++count == 2 {
-                        print "active_team: \"" team "\""
+                        print "active_rite: \"" rite "\""
                     }
                     { print }
                 ' "$session_file")

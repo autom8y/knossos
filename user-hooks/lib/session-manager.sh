@@ -90,9 +90,11 @@ execution_mode() {
 
     # Also check rite field in session context for cross-cutting sessions
     if [[ "$active_rite" == "none" || -z "$active_rite" ]]; then
-        # Check if rite is explicitly null in SESSION_CONTEXT
+        # Check if rite is explicitly null in SESSION_CONTEXT (try active_rite first, then legacy active_team)
         local ctx_rite
-        ctx_rite=$(grep -m1 "^active_team:" "$ctx_file" 2>/dev/null | cut -d: -f2- | tr -d ' "')
+        ctx_rite=$(grep -m1 "^active_rite:" "$ctx_file" 2>/dev/null | cut -d: -f2- | tr -d ' "')
+        # Fallback to legacy field name for backward compatibility
+        [[ -z "$ctx_rite" ]] && ctx_rite=$(grep -m1 "^active_team:" "$ctx_file" 2>/dev/null | cut -d: -f2- | tr -d ' "')
         if [[ -z "$ctx_rite" || "$ctx_rite" == "none" || "$ctx_rite" == "null" ]]; then
             echo "cross-cutting"
             return 0
@@ -269,7 +271,7 @@ cmd_status() {
   "complexity": $(json_string "$complexity"),
   "current_phase": $(json_string "$current_phase"),
   "parked": $parked,
-  "active_team": "$active_rite",
+  "active_rite": "$active_rite",
   "execution_mode": "$exec_mode",
   "workflow_name": "${workflow_name:-null}",
   "workflow_entry": "${workflow_entry:-null}",
@@ -500,10 +502,16 @@ EOF
         sed -i.bak "s/^current_phase:.*$/current_phase: \"$to_phase\"/" "$ctx_file"
         rm -f "$ctx_file.bak"
     else
-        # Add field after active_team (insert before closing ---)
-        sed -i.bak "/^active_team:/a\\
+        # Add field after active_rite (or active_team for backward compat)
+        if grep -q "^active_rite:" "$ctx_file" 2>/dev/null; then
+            sed -i.bak "/^active_rite:/a\\
 current_phase: \"$to_phase\"
 " "$ctx_file"
+        else
+            sed -i.bak "/^active_team:/a\\
+current_phase: \"$to_phase\"
+" "$ctx_file"
+        fi
         rm -f "$ctx_file.bak"
     fi
 

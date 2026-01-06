@@ -210,9 +210,9 @@ _fsm_validate_context() {
         return 1
     fi
 
-    # Required fields for v2 schema
+    # Required fields for v2 schema (active_rite OR active_team for backward compat)
     local required_fields=("schema_version" "session_id" "status" "created_at"
-                           "initiative" "complexity" "active_team" "current_phase")
+                           "initiative" "complexity" "current_phase")
     local missing=()
 
     for field in "${required_fields[@]}"; do
@@ -220,6 +220,11 @@ _fsm_validate_context() {
             missing+=("$field")
         fi
     done
+
+    # Check for active_rite OR active_team (backward compat)
+    if ! grep -q "^active_rite:" "$ctx_file" 2>/dev/null && ! grep -q "^active_team:" "$ctx_file" 2>/dev/null; then
+        missing+=("active_rite")
+    fi
 
     if [[ ${#missing[@]} -gt 0 ]]; then
         echo "Validation failed: Missing required fields: ${missing[*]}" >&2
@@ -696,8 +701,8 @@ status: "ACTIVE"
 created_at: "$timestamp"
 initiative: "$initiative"
 complexity: "$complexity"
-active_team: "$team"
-team: $team_field_value
+active_rite: "$team"
+rite: $team_field_value
 current_phase: "requirements"
 ---
 
