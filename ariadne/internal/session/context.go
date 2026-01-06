@@ -42,7 +42,6 @@ type contextYAML struct {
 	Initiative    string  `yaml:"initiative"`
 	Complexity    string  `yaml:"complexity"`
 	ActiveRite    string  `yaml:"active_rite"`
-	ActiveTeam    string  `yaml:"active_team"` // Deprecated: for backward compatibility
 	Team          *string `yaml:"team,omitempty"`
 	CurrentPhase  string  `yaml:"current_phase"`
 	ParkedAt      string  `yaml:"parked_at,omitempty"`
@@ -82,20 +81,14 @@ func ParseContext(content []byte) (*Context, error) {
 		return nil, errors.Wrap(errors.CodeSchemaInvalid, "invalid YAML frontmatter", err)
 	}
 
-	// Convert to Context with backward compatibility
-	activeRite := yamlData.ActiveRite
-	if activeRite == "" && yamlData.ActiveTeam != "" {
-		// Fall back to legacy active_team field
-		activeRite = yamlData.ActiveTeam
-	}
-
+	// Convert to Context
 	ctx := &Context{
 		SchemaVersion: yamlData.SchemaVersion,
 		SessionID:     yamlData.SessionID,
 		Status:        Status(yamlData.Status),
 		Initiative:    yamlData.Initiative,
 		Complexity:    yamlData.Complexity,
-		ActiveRite:    activeRite,
+		ActiveRite:    yamlData.ActiveRite,
 		Team:          yamlData.Team,
 		CurrentPhase:  yamlData.CurrentPhase,
 		ParkedReason:  yamlData.ParkedReason,
