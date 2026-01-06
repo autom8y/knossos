@@ -14,7 +14,7 @@ import (
 )
 
 type statusOptions struct {
-	teamName string
+	riteName string
 }
 
 func newStatusCmd(ctx *cmdContext) *cobra.Command {
@@ -29,8 +29,8 @@ func newStatusCmd(ctx *cmdContext) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVarP(&opts.teamName, "rite", "r", "", "Rite to query status for (default: active)")
-	cmd.Flags().StringVarP(&opts.teamName, "team", "t", "", "Deprecated: use --rite instead")
+	cmd.Flags().StringVarP(&opts.riteName, "rite", "r", "", "Rite to query status for (default: active)")
+	cmd.Flags().StringVarP(&opts.riteName, "team", "t", "", "Deprecated: use --rite instead")
 
 	cmd.Flags().MarkDeprecated("team", "use --rite instead")
 
@@ -42,19 +42,19 @@ func runStatus(ctx *cmdContext, opts statusOptions) error {
 	discovery := ctx.getDiscovery()
 	resolver := ctx.getResolver()
 
-	// Get team name (from flag or active)
-	teamName := opts.teamName
-	if teamName == "" {
-		teamName = discovery.ActiveRiteName()
-		if teamName == "" {
+	// Get rite name (from flag or active)
+	riteName := opts.riteName
+	if riteName == "" {
+		riteName = discovery.ActiveRiteName()
+		if riteName == "" {
 			err := errors.New(errors.CodeFileNotFound, "No active team set")
 			printer.PrintError(err)
 			return err
 		}
 	}
 
-	// Get team info
-	t, err := discovery.Get(teamName)
+	// Get rite info
+	t, err := discovery.Get(riteName)
 	if err != nil {
 		printer.PrintError(err)
 		return err
@@ -74,16 +74,16 @@ func runStatus(ctx *cmdContext, opts statusOptions) error {
 
 	// Check manifest validity
 	manifest, manifestErr := team.LoadManifest(resolver.AgentManifestFile())
-	manifestValid := manifestErr == nil && manifest.ActiveRite == teamName
+	manifestValid := manifestErr == nil && manifest.ActiveRite == riteName
 
 	// Check CLAUDE.md sync
 	updater := team.NewClaudeMDUpdater(resolver.ClaudeMDFile())
-	claudeMDSynced := updater.IsSynced(teamName)
+	claudeMDSynced := updater.IsSynced(riteName)
 
 	// Get orphans if any
 	var orphans []string
 	if manifestErr == nil {
-		orphans = manifest.DetectOrphans(teamName)
+		orphans = manifest.DetectOrphans(riteName)
 	}
 
 	result := output.TeamStatusOutput{

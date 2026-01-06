@@ -42,7 +42,7 @@ func newSwitchCmd(ctx *cmdContext) *cobra.Command {
 	return cmd
 }
 
-func runSwitch(ctx *cmdContext, teamName string, opts switchOptions) error {
+func runSwitch(ctx *cmdContext, riteName string, opts switchOptions) error {
 	printer := ctx.getPrinter()
 	switcher := ctx.getSwitcher()
 	discovery := ctx.getDiscovery()
@@ -66,7 +66,7 @@ func runSwitch(ctx *cmdContext, teamName string, opts switchOptions) error {
 	}
 
 	switchOpts := team.SwitchOptions{
-		TargetRite: teamName,
+		TargetRite: riteName,
 		RemoveAll:  opts.removeAll,
 		KeepAll:    opts.keepAll,
 		PromoteAll: opts.promoteAll,
@@ -77,7 +77,7 @@ func runSwitch(ctx *cmdContext, teamName string, opts switchOptions) error {
 
 	// Handle dry-run specially
 	if opts.dryRun {
-		return runDryRun(ctx, teamName, switchOpts, printer, discovery)
+		return runDryRun(ctx, riteName, switchOpts, printer, discovery)
 	}
 
 	// Execute switch
@@ -121,11 +121,11 @@ func runSwitch(ctx *cmdContext, teamName string, opts switchOptions) error {
 	return printer.PrintSuccess(out)
 }
 
-func runDryRun(ctx *cmdContext, teamName string, opts team.SwitchOptions, printer *output.Printer, discovery *team.Discovery) error {
+func runDryRun(ctx *cmdContext, riteName string, opts team.SwitchOptions, printer *output.Printer, discovery *team.Discovery) error {
 	resolver := ctx.getResolver()
 
-	// Get target team
-	targetRite, err := discovery.Get(teamName)
+	// Get target rite
+	targetRite, err := discovery.Get(riteName)
 	if err != nil {
 		printer.PrintError(err)
 		return err
@@ -140,7 +140,7 @@ func runDryRun(ctx *cmdContext, teamName string, opts team.SwitchOptions, printe
 	}
 
 	// Detect orphans
-	orphans := manifest.DetectOrphans(teamName)
+	orphans := manifest.DetectOrphans(riteName)
 
 	// Build agent list
 	agents := make([]string, len(targetRite.Agents))
@@ -150,7 +150,7 @@ func runDryRun(ctx *cmdContext, teamName string, opts team.SwitchOptions, printe
 
 	out := output.TeamSwitchDryRunOutput{
 		DryRun:                 true,
-		WouldSwitchTo:          teamName,
+		WouldSwitchTo:          riteName,
 		CurrentTeam:            manifest.ActiveRite,
 		WouldInstall:           agents,
 		OrphansDetected:        orphans,

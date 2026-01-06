@@ -8,7 +8,7 @@ import (
 )
 
 type validateOptions struct {
-	teamName string
+	riteName string
 	fix      bool
 }
 
@@ -24,8 +24,8 @@ func newValidateCmd(ctx *cmdContext) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVarP(&opts.teamName, "rite", "r", "", "Rite to validate (default: active)")
-	cmd.Flags().StringVarP(&opts.teamName, "team", "t", "", "Deprecated: use --rite instead")
+	cmd.Flags().StringVarP(&opts.riteName, "rite", "r", "", "Rite to validate (default: active)")
+	cmd.Flags().StringVarP(&opts.riteName, "team", "t", "", "Deprecated: use --rite instead")
 	cmd.Flags().BoolVar(&opts.fix, "fix", false, "Attempt automatic repairs")
 
 	cmd.Flags().MarkDeprecated("team", "use --rite instead")
@@ -38,11 +38,11 @@ func runValidate(ctx *cmdContext, opts validateOptions) error {
 	validator := ctx.getValidator()
 	discovery := ctx.getDiscovery()
 
-	// Get team name (from flag or active)
-	teamName := opts.teamName
-	if teamName == "" {
-		teamName = discovery.ActiveRiteName()
-		if teamName == "" {
+	// Get rite name (from flag or active)
+	riteName := opts.riteName
+	if riteName == "" {
+		riteName = discovery.ActiveRiteName()
+		if riteName == "" {
 			err := errors.New(errors.CodeFileNotFound, "No active rite set. Use --rite to specify.")
 			printer.PrintError(err)
 			return err
@@ -50,7 +50,7 @@ func runValidate(ctx *cmdContext, opts validateOptions) error {
 	}
 
 	// Run validation
-	result, err := validator.Validate(teamName)
+	result, err := validator.Validate(riteName)
 	if err != nil {
 		printer.PrintError(err)
 		return err
@@ -58,11 +58,11 @@ func runValidate(ctx *cmdContext, opts validateOptions) error {
 
 	// Apply fixes if requested
 	if opts.fix && len(result.Fixable) > 0 {
-		if err := validator.Fix(teamName); err != nil {
+		if err := validator.Fix(riteName); err != nil {
 			printer.VerboseLog("warn", "Fix failed", map[string]interface{}{"error": err.Error()})
 		}
 		// Re-validate after fix
-		result, _ = validator.Validate(teamName)
+		result, _ = validator.Validate(riteName)
 	}
 
 	// Build output

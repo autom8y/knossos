@@ -7,7 +7,7 @@ import (
 )
 
 type contextOptions struct {
-	teamName string
+	riteName string
 	format   string
 }
 
@@ -32,8 +32,8 @@ Examples:
 		},
 	}
 
-	cmd.Flags().StringVarP(&opts.teamName, "rite", "r", "", "Rite name (defaults to active rite)")
-	cmd.Flags().StringVarP(&opts.teamName, "team", "t", "", "Deprecated: use --rite instead")
+	cmd.Flags().StringVarP(&opts.riteName, "rite", "r", "", "Rite name (defaults to active rite)")
+	cmd.Flags().StringVarP(&opts.riteName, "team", "t", "", "Deprecated: use --rite instead")
 	cmd.Flags().StringVarP(&opts.format, "format", "f", "markdown", "Output format: markdown, json, yaml")
 
 	cmd.Flags().MarkDeprecated("team", "use --rite instead")
@@ -45,11 +45,11 @@ func runContext(ctx *cmdContext, opts contextOptions) error {
 	printer := ctx.getPrinter()
 	resolver := ctx.getResolver()
 
-	// Determine team name
-	teamName := opts.teamName
-	if teamName == "" {
-		teamName = ctx.getActiveRite()
-		if teamName == "" {
+	// Determine rite name
+	riteName := opts.riteName
+	if riteName == "" {
+		riteName = ctx.getActiveRite()
+		if riteName == "" {
 			printer.PrintLine("No active rite. Use --rite flag to specify a rite.")
 			return nil
 		}
@@ -59,7 +59,7 @@ func runContext(ctx *cmdContext, opts contextOptions) error {
 	loader := team.NewContextLoader(resolver)
 
 	// Load the context
-	teamCtx, err := loader.Load(teamName)
+	riteCtx, err := loader.Load(riteName)
 	if err != nil {
 		printer.PrintError(err)
 		return err
@@ -68,14 +68,14 @@ func runContext(ctx *cmdContext, opts contextOptions) error {
 	// Build output based on format
 	switch opts.format {
 	case "json":
-		return printer.Print(teamContextToOutput(teamCtx, loader.HasContextFile(teamName)))
+		return printer.Print(teamContextToOutput(riteCtx, loader.HasContextFile(riteName)))
 	case "yaml":
-		return printer.Print(teamContextToOutput(teamCtx, loader.HasContextFile(teamName)))
+		return printer.Print(teamContextToOutput(riteCtx, loader.HasContextFile(riteName)))
 	default:
 		// Markdown format - raw output
-		markdown := teamCtx.ToMarkdown()
+		markdown := riteCtx.ToMarkdown()
 		if markdown == "" {
-			printer.PrintLine("No context rows defined for team: " + teamName)
+			printer.PrintLine("No context rows defined for rite: " + riteName)
 			return nil
 		}
 		printer.PrintText(markdown)
