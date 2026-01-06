@@ -26,13 +26,13 @@ fi
 # =============================================================================
 
 # Load rite-specific context if available
-# Arguments: None (uses ACTIVE_RITE file and ROSTER_HOME)
+# Arguments: None (uses ACTIVE_RITE file and KNOSSOS_HOME)
 # Output: Markdown content to stdout (may be empty)
 # Returns: 0 always (errors logged, not propagated)
 #
 # Contract:
 #   - Reads ACTIVE_RITE from .claude/ACTIVE_RITE
-#   - Looks for $ROSTER_HOME/rites/$ACTIVE_RITE/context-injection.sh
+#   - Looks for $KNOSSOS_HOME/rites/$ACTIVE_RITE/context-injection.sh
 #   - Sources script and calls inject_team_context()
 #   - Returns function output on stdout
 #   - Never fails (RECOVERABLE pattern)
@@ -50,7 +50,7 @@ load_rite_context() {
     fi
 
     # Resolve rite context script path
-    local roster_home="${ROSTER_HOME:-$HOME/Code/roster}"
+    local roster_home="${KNOSSOS_HOME:-${ROSTER_HOME:-$HOME/Code/roster}}"
     rite_script="$roster_home/rites/$active_rite/$RITE_CONTEXT_SCRIPT_NAME"
 
     # Check if rite has context script

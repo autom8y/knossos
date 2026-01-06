@@ -103,7 +103,7 @@ execution_mode() {
     fi
 
     # Verify rite pack exists
-    local rite_pack_dir="${ROSTER_HOME:-$HOME/.config/roster}/rites/$active_rite"
+    local rite_pack_dir="${KNOSSOS_HOME:-$HOME/Code/roster}/rites/$active_rite"
     if [[ ! -d "$rite_pack_dir" ]]; then
         # Rite configured but pack missing - error state, but fallback gracefully
         echo "cross-cutting"

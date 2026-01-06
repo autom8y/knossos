@@ -14,7 +14,7 @@ HOOKS_LIB="${CLAUDE_PROJECT_DIR:-.}/.claude/hooks/lib"
 # Absolute fallback if hooks-init.sh itself fails
 source "$HOOKS_LIB/hooks-init.sh" 2>/dev/null || {
     # Minimal fallback - set defaults and continue
-    ROSTER_HOME="${ROSTER_HOME:-$HOME/Code/roster}"
+    KNOSSOS_HOME="${KNOSSOS_HOME:-${ROSTER_HOME:-$HOME/Code/roster}}"
     CLAUDE_PROJECT_DIR="${CLAUDE_PROJECT_DIR:-.}"
     exit 0
 }
@@ -94,7 +94,7 @@ if [[ "$COMMAND" =~ (^|[[:space:]/])swap-rite\.sh[[:space:]] ]]; then
 
     # Skip validation for --list or no argument
     if [[ -n "$TARGET_TEAM" ]] && [[ "$TARGET_TEAM" != "--list" ]]; then
-        ROSTER_DIR="$ROSTER_HOME/rites"
+        ROSTER_DIR="$KNOSSOS_HOME/rites"
 
         # Validate team pack exists
         if [[ ! -d "$ROSTER_DIR/$TARGET_TEAM" ]]; then
@@ -165,7 +165,7 @@ if [[ "$COMMAND" == *"swap-rite"* ]] || [[ "$COMMAND" == *"ACTIVE_WORKFLOW"* ]];
 
         # Skip validation for --list or no argument
         if [[ -n "$TARGET_TEAM" ]] && [[ "$TARGET_TEAM" != "--list" ]]; then
-            ROSTER_DIR="$ROSTER_HOME/rites"
+            ROSTER_DIR="$KNOSSOS_HOME/rites"
             WORKFLOW_FILE="$ROSTER_DIR/$TARGET_TEAM/workflow.yaml"
         fi
     elif [[ "$COMMAND" == *"ACTIVE_WORKFLOW"* ]]; then
