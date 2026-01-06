@@ -541,9 +541,9 @@ verify_staging() {
         return 1
     fi
 
-    # Verify ACTIVE_TEAM staged
-    if [[ ! -f "$STAGING_DIR/ACTIVE_TEAM" ]]; then
-        log_error "Staged ACTIVE_TEAM missing"
+    # Verify ACTIVE_RITE staged
+    if [[ ! -f "$STAGING_DIR/ACTIVE_RITE" ]]; then
+        log_error "Staged ACTIVE_RITE missing"
         return 1
     fi
 
