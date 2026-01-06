@@ -1503,14 +1503,14 @@ validate_agent_tools() {
 
         if [[ ! " $VALID_TOOLS " =~ " $tool " ]]; then
             # Use a temp file to communicate from subshell
-            echo "$tool" >> /tmp/.swap-team-invalid-tools-$$
+            echo "$tool" >> /tmp/.swap-rite-invalid-tools-$$
         fi
     done
 
     # Check if any invalid tools were found
-    if [[ -f /tmp/.swap-team-invalid-tools-$$ ]]; then
-        invalid_tools=$(cat /tmp/.swap-team-invalid-tools-$$)
-        rm -f /tmp/.swap-team-invalid-tools-$$
+    if [[ -f /tmp/.swap-rite-invalid-tools-$$ ]]; then
+        invalid_tools=$(cat /tmp/.swap-rite-invalid-tools-$$)
+        rm -f /tmp/.swap-rite-invalid-tools-$$
         log_warning "Invalid tools in ${agent_name}.md: $invalid_tools"
         return 1
     fi
@@ -1543,8 +1543,8 @@ validate_pack() {
 
     # Check pack directory exists
     if [[ ! -d "$pack_dir" ]]; then
-        log_error "Team pack '$team_name' not found in $ROSTER_HOME/rites/"
-        log "Use './swap-team.sh --list' to see available packs"
+        log_error "Rite pack '$team_name' not found in $ROSTER_HOME/rites/"
+        log "Use './swap-rite.sh --list' to see available packs"
         exit "$EXIT_VALIDATION_FAILURE"
     fi
 
@@ -3583,10 +3583,10 @@ perform_reset() {
     log "Regenerated: CLAUDE.md (baseline)"
 
     echo ""
-    log "Reset complete. Baseline active (no team)."
+    log "Reset complete. Baseline active (no rite)."
     log ""
-    log "To switch to a team: $ROSTER_HOME/swap-team.sh <team-name>"
-    log "To list teams:       $ROSTER_HOME/swap-team.sh --list"
+    log "To switch to a rite: $ROSTER_HOME/swap-rite.sh <rite-name>"
+    log "To list rites:       $ROSTER_HOME/swap-rite.sh --list"
 }
 
 # Main entry point
