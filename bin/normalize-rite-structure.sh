@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
-# normalize-team-structure.sh
-# Creates missing required directories in rite packs with .gitkeep files
+# normalize-rite-structure.sh
+# Creates missing required directories in rites with .gitkeep files
 #
-# Usage: normalize-team-structure.sh [--dry-run]
+# Usage: normalize-rite-structure.sh [--dry-run]
 #
 # Part of REQ-3.4: Missing Commands Directory Structure
 
 set -euo pipefail
 
-# Source Knossos home resolution (handles ROSTER_HOME deprecation)
+# Source Knossos home resolution
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/../lib/knossos-home.sh"
 RITES_DIR="$KNOSSOS_HOME/rites"
@@ -34,19 +34,19 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-normalize_team() {
-    local team_dir="$1"
-    local team_name
-    team_name=$(basename "$team_dir")
+normalize_rite() {
+    local rite_dir="$1"
+    local rite_name
+    rite_name=$(basename "$rite_dir")
 
     for dir in $REQUIRED_DIRS; do
-        if [[ ! -d "$team_dir/$dir" ]]; then
+        if [[ ! -d "$rite_dir/$dir" ]]; then
             if $DRY_RUN; then
-                echo "[DRY-RUN] Would create: $team_name/$dir/"
+                echo "[DRY-RUN] Would create: $rite_name/$dir/"
             else
-                mkdir -p "$team_dir/$dir"
-                touch "$team_dir/$dir/.gitkeep"
-                echo "Created: $team_name/$dir/"
+                mkdir -p "$rite_dir/$dir"
+                touch "$rite_dir/$dir/.gitkeep"
+                echo "Created: $rite_name/$dir/"
             fi
             ((CHANGES_MADE++)) || true
         fi
@@ -55,21 +55,21 @@ normalize_team() {
 
 main() {
     if $DRY_RUN; then
-        echo "Dry-run: Checking team pack structure..."
+        echo "Dry-run: Checking rite structure..."
     else
-        echo "Normalizing team pack structure..."
+        echo "Normalizing rite structure..."
     fi
     echo ""
 
     if [[ ! -d "$RITES_DIR" ]]; then
-        echo "Error: Teams directory not found: $RITES_DIR"
-        echo "Set ROSTER_HOME environment variable to your roster repository"
+        echo "Error: Rites directory not found: $RITES_DIR"
+        echo "Set KNOSSOS_HOME environment variable to your roster repository"
         exit 1
     fi
 
-    for team_dir in "$RITES_DIR"/*/; do
-        [[ -d "$team_dir" ]] || continue
-        normalize_team "$team_dir"
+    for rite_dir in "$RITES_DIR"/*/; do
+        [[ -d "$rite_dir" ]] || continue
+        normalize_rite "$rite_dir"
     done
 
     echo ""
@@ -79,7 +79,7 @@ main() {
         if [[ $CHANGES_MADE -gt 0 ]]; then
             echo "Complete. $CHANGES_MADE directories created."
         else
-            echo "Complete. All teams already have required directories."
+            echo "Complete. All rites already have required directories."
         fi
     fi
 }

@@ -12,18 +12,20 @@ import (
 
 // Rite represents a discovered rite.
 type Rite struct {
-	Name        string   `json:"name"`
-	DisplayName string   `json:"display_name,omitempty"`
-	Description string   `json:"description,omitempty"`
-	Form        RiteForm `json:"form"`
-	Path        string   `json:"path"`
-	Agents      []string `json:"agents,omitempty"`
-	AgentCount  int      `json:"agent_count"`
-	Skills      []string `json:"skills,omitempty"`
-	SkillCount  int      `json:"skill_count"`
-	HasWorkflow bool     `json:"has_workflow"`
-	Active      bool     `json:"active"`
-	Source      string   `json:"source"` // "project" or "user"
+	Name         string   `json:"name"`
+	DisplayName  string   `json:"display_name,omitempty"`
+	Description  string   `json:"description,omitempty"`
+	Form         RiteForm `json:"form"`
+	Path         string   `json:"path"`
+	Agents       []string `json:"agents,omitempty"`
+	AgentCount   int      `json:"agent_count"`
+	Skills       []string `json:"skills,omitempty"`
+	SkillCount   int      `json:"skill_count"`
+	HasWorkflow  bool     `json:"has_workflow"`
+	WorkflowType string   `json:"workflow_type,omitempty"`
+	EntryPoint   string   `json:"entry_point,omitempty"`
+	Active       bool     `json:"active"`
+	Source       string   `json:"source"` // "project" or "user"
 }
 
 // Discovery locates available rites.

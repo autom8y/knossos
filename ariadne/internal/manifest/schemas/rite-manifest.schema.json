@@ -1,23 +1,23 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Team Pack Manifest",
-  "description": "Configuration for a team pack defining agents and workflows",
+  "title": "Rite Manifest",
+  "description": "Configuration for a rite defining agents and workflows",
   "type": "object",
   "required": ["version", "name", "workflow", "agents"],
   "properties": {
     "version": {
       "type": "string",
       "pattern": "^[0-9]+\\.[0-9]+$",
-      "description": "Team manifest schema version"
+      "description": "Rite manifest schema version"
     },
     "name": {
       "type": "string",
       "pattern": "^[a-z0-9-]+$",
-      "description": "Team pack name (lowercase, alphanumeric with hyphens)"
+      "description": "Rite name (lowercase, alphanumeric with hyphens)"
     },
     "description": {
       "type": "string",
-      "description": "Team pack description"
+      "description": "Rite description"
     },
     "workflow": {
       "type": "object",
@@ -58,7 +58,7 @@
           }
         }
       },
-      "description": "List of agents in this team"
+      "description": "List of agents in this rite"
     },
     "skills": {
       "type": "array",

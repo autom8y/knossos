@@ -19,7 +19,6 @@ import (
 	"github.com/autom8y/ariadne/internal/cmd/sails"
 	"github.com/autom8y/ariadne/internal/cmd/session"
 	"github.com/autom8y/ariadne/internal/cmd/sync"
-	"github.com/autom8y/ariadne/internal/cmd/team"
 	"github.com/autom8y/ariadne/internal/cmd/tribute"
 	"github.com/autom8y/ariadne/internal/cmd/validate"
 	"github.com/autom8y/ariadne/internal/cmd/worktree"
@@ -110,7 +109,6 @@ func init() {
 
 	// Add subcommands
 	rootCmd.AddCommand(session.NewSessionCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir, &globalOpts.SessionID))
-	rootCmd.AddCommand(team.NewTeamCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
 	rootCmd.AddCommand(manifest.NewManifestCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
 	rootCmd.AddCommand(inscription.NewInscriptionCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
 	rootCmd.AddCommand(sync.NewSyncCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
@@ -185,10 +183,6 @@ func needsProject(cmd *cobra.Command) bool {
 	}
 	// All session commands need project
 	if cmd.Parent() != nil && cmd.Parent().Name() == "session" {
-		return true
-	}
-	// All team commands need project
-	if cmd.Parent() != nil && cmd.Parent().Name() == "team" {
 		return true
 	}
 	// All manifest commands need project

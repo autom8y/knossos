@@ -967,20 +967,20 @@ roster_has_updates() {
 }
 
 # ============================================================================
-# Team Freshness
+# Rite Freshness
 # ============================================================================
 
-# Check if active team needs refresh
+# Check if active rite needs refresh
 # Returns: 0 if stale, 1 if fresh
-is_team_stale() {
-    local active_team_file=".claude/ACTIVE_RITE"
+is_rite_stale() {
+    local active_rite_file=".claude/ACTIVE_RITE"
 
-    if [[ ! -f "$active_team_file" ]]; then
-        return 1  # No team, not stale
+    if [[ ! -f "$active_rite_file" ]]; then
+        return 1  # No rite, not stale
     fi
 
     local team_name
-    team_name=$(cat "$active_team_file")
+    team_name=$(cat "$active_rite_file")
 
     local team_dir="${KNOSSOS_HOME:-}/rites/$team_name"
     if [[ ! -d "$team_dir" ]]; then

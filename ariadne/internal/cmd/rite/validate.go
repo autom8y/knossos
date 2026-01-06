@@ -1,4 +1,4 @@
-package team
+package rite
 
 import (
 	"github.com/spf13/cobra"

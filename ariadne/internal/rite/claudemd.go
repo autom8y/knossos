@@ -1,4 +1,4 @@
-package team
+package rite
 
 import (
 	"bufio"

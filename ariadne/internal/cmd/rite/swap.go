@@ -8,7 +8,6 @@ import (
 	"github.com/autom8y/ariadne/internal/errors"
 	"github.com/autom8y/ariadne/internal/output"
 	ritelib "github.com/autom8y/ariadne/internal/rite"
-	"github.com/autom8y/ariadne/internal/team"
 )
 
 type swapOptions struct {
@@ -86,9 +85,9 @@ func runSwap(ctx *cmdContext, riteName string, opts swapOptions) error {
 	}
 
 	// Use team switcher for the actual swap (backward compatibility)
-	switcher := team.NewSwitcher(resolver)
+	switcher := ritelib.NewSwitcher(resolver)
 
-	switchOpts := team.SwitchOptions{
+	switchOpts := ritelib.SwitchOptions{
 		TargetRite: riteName,
 		RemoveAll:  opts.removeAll,
 		KeepAll:    opts.keepAll,

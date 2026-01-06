@@ -1,9 +1,9 @@
-package team
+package rite
 
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/autom8y/ariadne/internal/team"
+	ritelib "github.com/autom8y/ariadne/internal/rite"
 )
 
 type contextOptions struct {
@@ -56,7 +56,7 @@ func runContext(ctx *cmdContext, opts contextOptions) error {
 	}
 
 	// Create context loader
-	loader := team.NewContextLoader(resolver)
+	loader := ritelib.NewContextLoader(resolver)
 
 	// Load the context
 	riteCtx, err := loader.Load(riteName)
@@ -101,7 +101,7 @@ type ContextRowOut struct {
 	Value string `json:"value" yaml:"value"`
 }
 
-func teamContextToOutput(tc *team.RiteContext, hasContextFile bool) TeamContextOutput {
+func teamContextToOutput(tc *ritelib.RiteContext, hasContextFile bool) TeamContextOutput {
 	rows := make([]ContextRowOut, len(tc.ContextRows))
 	for i, r := range tc.ContextRows {
 		rows[i] = ContextRowOut{

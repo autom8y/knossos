@@ -1,6 +1,6 @@
 // Package team implements team pack discovery, management, and switching for Ariadne.
 // This file contains the context loader for YAML-based team context injection.
-package team
+package rite
 
 import (
 	"os"

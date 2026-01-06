@@ -368,12 +368,12 @@ validate_manifest() {
 }
 
 # ============================================================================
-# Team Management
+# Rite Management
 # ============================================================================
 
-# Update team info in manifest
-# Usage: manifest=$(update_manifest_team "$manifest" "team_name" "checksum")
-update_manifest_team() {
+# Update rite info in manifest
+# Usage: manifest=$(update_manifest_rite "$manifest" "team_name" "checksum")
+update_manifest_rite() {
     local manifest="$1"
     local team_name="$2"
     local checksum="${3:-}"
@@ -395,8 +395,8 @@ update_manifest_team() {
         }'
 }
 
-# Clear team from manifest (reset to no team)
-clear_manifest_team() {
+# Clear rite from manifest (reset to no rite)
+clear_manifest_rite() {
     local manifest="$1"
     echo "$manifest" | jq '.team = null'
 }

@@ -44,6 +44,9 @@ Rites are composable practice bundles. The invoke operation is additive
 	cmd.AddCommand(newInvokeCmd(ctx))
 	cmd.AddCommand(newReleaseCmd(ctx))
 	cmd.AddCommand(newSwapCmd(ctx))
+	cmd.AddCommand(newContextCmd(ctx))
+	cmd.AddCommand(newStatusCmd(ctx))
+	cmd.AddCommand(newValidateCmd(ctx))
 
 	return cmd
 }
@@ -82,6 +85,12 @@ func (c *cmdContext) getDiscovery() *rite.Discovery {
 func (c *cmdContext) getInvoker() *rite.Invoker {
 	resolver := c.getResolver()
 	return rite.NewInvoker(resolver)
+}
+
+// getValidator creates a rite validator.
+func (c *cmdContext) getValidator() *rite.Validator {
+	resolver := c.getResolver()
+	return rite.NewValidator(resolver)
 }
 
 // getActiveRite reads the active rite from ACTIVE_RITE file.

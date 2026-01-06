@@ -1,4 +1,4 @@
-package team
+package rite
 
 import (
 	"os"
@@ -10,7 +10,7 @@ import (
 	"github.com/autom8y/ariadne/internal/errors"
 	"github.com/autom8y/ariadne/internal/output"
 	"github.com/autom8y/ariadne/internal/paths"
-	"github.com/autom8y/ariadne/internal/team"
+	ritelib "github.com/autom8y/ariadne/internal/rite"
 )
 
 type statusOptions struct {
@@ -62,7 +62,7 @@ func runStatus(ctx *cmdContext, opts statusOptions) error {
 
 	// Load workflow for phase info
 	workflowPath := filepath.Join(t.Path, "workflow.yaml")
-	workflow, err := team.LoadWorkflow(workflowPath)
+	workflow, err := ritelib.LoadWorkflow(workflowPath)
 	if err != nil {
 		wrappedErr := errors.Wrap(errors.CodeGeneralError, "failed to load workflow", err)
 		printer.PrintError(wrappedErr)
@@ -73,11 +73,11 @@ func runStatus(ctx *cmdContext, opts statusOptions) error {
 	agents := buildAgentStatusList(t, workflow, resolver)
 
 	// Check manifest validity
-	manifest, manifestErr := team.LoadManifest(resolver.AgentManifestFile())
+	manifest, manifestErr := ritelib.LoadAgentManifest(resolver.AgentManifestFile())
 	manifestValid := manifestErr == nil && manifest.ActiveRite == riteName
 
 	// Check CLAUDE.md sync
-	updater := team.NewClaudeMDUpdater(resolver.ClaudeMDFile())
+	updater := ritelib.NewClaudeMDUpdater(resolver.ClaudeMDFile())
 	claudeMDSynced := updater.IsSynced(riteName)
 
 	// Get orphans if any
@@ -103,7 +103,7 @@ func runStatus(ctx *cmdContext, opts statusOptions) error {
 	return printer.Print(result)
 }
 
-func buildAgentStatusList(t *team.Rite, workflow *team.Workflow, resolver *paths.Resolver) []output.AgentStatus {
+func buildAgentStatusList(t *ritelib.Rite, workflow *ritelib.Workflow, resolver *paths.Resolver) []output.AgentStatus {
 	infos := workflow.GetAgentInfo()
 	agents := make([]output.AgentStatus, 0, len(infos))
 

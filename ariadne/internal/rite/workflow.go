@@ -1,5 +1,5 @@
 // Package team implements team pack discovery, management, and switching for Ariadne.
-package team
+package rite
 
 import (
 	"os"

@@ -324,12 +324,12 @@ EOF
     fi
 }
 
-test_update_manifest_team() {
-    run_test "update_manifest_team function"
+test_update_manifest_rite() {
+    run_test "update_manifest_rite function"
 
     local manifest
     manifest=$(create_manifest "/test" "abc" "main")
-    manifest=$(update_manifest_team "$manifest" "custom-team" "teamhash")
+    manifest=$(update_manifest_rite "$manifest" "custom-team" "teamhash")
 
     local team_name
     team_name=$(echo "$manifest" | jq -r '.team.name')
@@ -390,7 +390,7 @@ test_update_manifest_roster
 test_get_manifest_version
 test_migrate_v1_to_v3
 test_migrate_v2_to_v3
-test_update_manifest_team
+test_update_manifest_rite
 test_add_manifest_orphan
 
 teardown

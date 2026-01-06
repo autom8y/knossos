@@ -105,7 +105,7 @@ calculate_checksum() {
 }
 
 # ============================================================================
-# Team Collision Detection
+# Rite Collision Detection
 # ============================================================================
 
 # Check if an agent name exists in any rite pack
@@ -432,12 +432,12 @@ perform_sync() {
 
         log_debug "Processing: $agent_name (checksum: ${source_checksum:0:8}...)"
 
-        # Check for team collision (user agent with same name as team agent)
-        if is_team_agent "$agent_name"; then
-            local teams
-            teams=$(get_team_for_agent "$agent_name")
-            log_warning "Collision: $agent_name exists in team pack(s): $teams"
-            log_warning "  User-level agent will be shadowed when that team is active"
+        # Check for rite collision (user agent with same name as rite agent)
+        if is_rite_agent "$agent_name"; then
+            local rites
+            rites=$(get_rite_for_agent "$agent_name")
+            log_warning "Collision: $agent_name exists in rite(s): $rites"
+            log_warning "  User-level agent will be shadowed when that rite is active"
         fi
 
         if [[ -f "$target_file" ]]; then

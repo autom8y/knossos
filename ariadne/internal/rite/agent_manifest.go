@@ -1,4 +1,4 @@
-package team
+package rite
 
 import (
 	"crypto/sha256"
@@ -9,11 +9,11 @@ import (
 	"time"
 )
 
-// ManifestVersion is the current manifest schema version.
-const ManifestVersion = "1.2"
+// AgentManifestVersion is the current agent manifest schema version.
+const AgentManifestVersion = "1.2"
 
-// Manifest represents the AGENT_MANIFEST.json file.
-type Manifest struct {
+// AgentManifest represents the AGENT_MANIFEST.json file.
+type AgentManifest struct {
 	Version     string                `json:"version"`
 	GeneratedAt time.Time             `json:"generated_at"`
 	ActiveRite  string                `json:"active_rite"`
@@ -30,27 +30,27 @@ type AgentEntry struct {
 	Orphaned    bool      `json:"orphaned,omitempty"`
 }
 
-// NewEmptyManifest creates a new empty manifest.
-func NewEmptyManifest() *Manifest {
-	return &Manifest{
-		Version:     ManifestVersion,
+// NewEmptyAgentManifest creates a new empty agent manifest.
+func NewEmptyAgentManifest() *AgentManifest {
+	return &AgentManifest{
+		Version:     AgentManifestVersion,
 		GeneratedAt: time.Now().UTC(),
 		Agents:      make(map[string]AgentEntry),
 		Orphans:     []string{},
 	}
 }
 
-// LoadManifest reads a manifest from the given path.
-func LoadManifest(path string) (*Manifest, error) {
+// LoadAgentManifest reads an agent manifest from the given path.
+func LoadAgentManifest(path string) (*AgentManifest, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return NewEmptyManifest(), nil
+			return NewEmptyAgentManifest(), nil
 		}
 		return nil, err
 	}
 
-	var m Manifest
+	var m AgentManifest
 	if err := json.Unmarshal(data, &m); err != nil {
 		return nil, err
 	}
@@ -67,7 +67,7 @@ func LoadManifest(path string) (*Manifest, error) {
 }
 
 // Save writes the manifest to the given path.
-func (m *Manifest) Save(path string) error {
+func (m *AgentManifest) Save(path string) error {
 	m.GeneratedAt = time.Now().UTC()
 
 	data, err := json.MarshalIndent(m, "", "  ")
@@ -79,7 +79,7 @@ func (m *Manifest) Save(path string) error {
 }
 
 // DetectOrphans finds agents not belonging to the target rite.
-func (m *Manifest) DetectOrphans(targetRite string) []string {
+func (m *AgentManifest) DetectOrphans(targetRite string) []string {
 	var orphans []string
 	for name, entry := range m.Agents {
 		if entry.Source == "team" && entry.Origin != targetRite {
@@ -90,7 +90,7 @@ func (m *Manifest) DetectOrphans(targetRite string) []string {
 }
 
 // AddAgent adds or updates an agent entry.
-func (m *Manifest) AddAgent(name string, source, riteName, checksum string) {
+func (m *AgentManifest) AddAgent(name string, source, riteName, checksum string) {
 	m.Agents[name] = AgentEntry{
 		Source:      source,
 		Origin:      riteName,
@@ -100,12 +100,12 @@ func (m *Manifest) AddAgent(name string, source, riteName, checksum string) {
 }
 
 // RemoveAgent removes an agent entry.
-func (m *Manifest) RemoveAgent(name string) {
+func (m *AgentManifest) RemoveAgent(name string) {
 	delete(m.Agents, name)
 }
 
 // MarkOrphaned marks an agent as orphaned.
-func (m *Manifest) MarkOrphaned(name string) {
+func (m *AgentManifest) MarkOrphaned(name string) {
 	if entry, ok := m.Agents[name]; ok {
 		entry.Orphaned = true
 		m.Agents[name] = entry
@@ -124,7 +124,7 @@ func (m *Manifest) MarkOrphaned(name string) {
 }
 
 // PromoteToProject changes an agent's source from team to project.
-func (m *Manifest) PromoteToProject(name string) {
+func (m *AgentManifest) PromoteToProject(name string) {
 	if entry, ok := m.Agents[name]; ok {
 		entry.Source = "project"
 		entry.Origin = ""
@@ -142,7 +142,7 @@ func (m *Manifest) PromoteToProject(name string) {
 }
 
 // ClearOrphans removes all orphan markers.
-func (m *Manifest) ClearOrphans() {
+func (m *AgentManifest) ClearOrphans() {
 	for name, entry := range m.Agents {
 		if entry.Orphaned {
 			entry.Orphaned = false
@@ -153,12 +153,12 @@ func (m *Manifest) ClearOrphans() {
 }
 
 // SetActiveRite updates the active rite in the manifest.
-func (m *Manifest) SetActiveRite(riteName string) {
+func (m *AgentManifest) SetActiveRite(riteName string) {
 	m.ActiveRite = riteName
 }
 
 // GetInstalledAgents returns the list of installed agent filenames.
-func (m *Manifest) GetInstalledAgents() []string {
+func (m *AgentManifest) GetInstalledAgents() []string {
 	agents := make([]string, 0, len(m.Agents))
 	for name := range m.Agents {
 		agents = append(agents, name)
@@ -167,7 +167,7 @@ func (m *Manifest) GetInstalledAgents() []string {
 }
 
 // GetRiteAgents returns agents from a specific rite.
-func (m *Manifest) GetRiteAgents(riteName string) []string {
+func (m *AgentManifest) GetRiteAgents(riteName string) []string {
 	var agents []string
 	for name, entry := range m.Agents {
 		if entry.Source == "team" && entry.Origin == riteName {
@@ -178,7 +178,7 @@ func (m *Manifest) GetRiteAgents(riteName string) []string {
 }
 
 // IsFromRite checks if an agent is from a specific rite.
-func (m *Manifest) IsFromRite(agentName, riteName string) bool {
+func (m *AgentManifest) IsFromRite(agentName, riteName string) bool {
 	entry, ok := m.Agents[agentName]
 	if !ok {
 		return false

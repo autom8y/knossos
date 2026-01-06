@@ -1,6 +1,6 @@
 // Package team implements team pack discovery, management, and switching for Ariadne.
 // This file contains team context types for YAML-based context injection per ADR-0007.
-package team
+package rite
 
 import (
 	"fmt"

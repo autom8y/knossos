@@ -1,4 +1,4 @@
-package team
+package rite
 
 import (
 	"os"
@@ -210,7 +210,7 @@ func (v *Validator) checkManifestSync(result *ValidationResult, rite *Rite) {
 		return
 	}
 
-	manifest, err := LoadManifest(v.resolver.AgentManifestFile())
+	manifest, err := LoadAgentManifest(v.resolver.AgentManifestFile())
 	if err != nil {
 		result.Checks = append(result.Checks, ValidationCheck{
 			Check:   "MANIFEST_SYNC",
@@ -364,4 +364,20 @@ func (v *Validator) Fix(teamName string) error {
 	}
 
 	return nil
+}
+
+// listAgentFiles returns a list of agent filenames in a directory.
+func listAgentFiles(dir string) ([]string, error) {
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return nil, err
+	}
+
+	var files []string
+	for _, entry := range entries {
+		if !entry.IsDir() && filepath.Ext(entry.Name()) == ".md" {
+			files = append(files, entry.Name())
+		}
+	}
+	return files, nil
 }

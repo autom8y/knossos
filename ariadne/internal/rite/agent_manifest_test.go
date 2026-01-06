@@ -1,4 +1,4 @@
-package team
+package rite
 
 import (
 	"os"
@@ -8,10 +8,10 @@ import (
 )
 
 func TestNewEmptyManifest(t *testing.T) {
-	m := NewEmptyManifest()
+	m := NewEmptyAgentManifest()
 
-	if m.Version != ManifestVersion {
-		t.Errorf("Version = %q, want %q", m.Version, ManifestVersion)
+	if m.Version != AgentManifestVersion {
+		t.Errorf("Version = %q, want %q", m.Version, AgentManifestVersion)
 	}
 
 	if m.Agents == nil {
@@ -28,7 +28,7 @@ func TestManifest_SaveLoad(t *testing.T) {
 	manifestPath := filepath.Join(tmpDir, "AGENT_MANIFEST.json")
 
 	// Create and save manifest
-	m := NewEmptyManifest()
+	m := NewEmptyAgentManifest()
 	m.ActiveRite = "test-team"
 	m.AddAgent("agent-a.md", "team", "test-team", "sha256:abc123")
 
@@ -37,9 +37,9 @@ func TestManifest_SaveLoad(t *testing.T) {
 	}
 
 	// Load and verify
-	loaded, err := LoadManifest(manifestPath)
+	loaded, err := LoadAgentManifest(manifestPath)
 	if err != nil {
-		t.Fatalf("LoadManifest() error = %v", err)
+		t.Fatalf("LoadAgentManifest() error = %v", err)
 	}
 
 	if loaded.ActiveRite != "test-team" {
@@ -70,22 +70,22 @@ func TestManifest_LoadNonExistent(t *testing.T) {
 	tmpDir := t.TempDir()
 	manifestPath := filepath.Join(tmpDir, "does-not-exist.json")
 
-	m, err := LoadManifest(manifestPath)
+	m, err := LoadAgentManifest(manifestPath)
 	if err != nil {
-		t.Fatalf("LoadManifest() error = %v (should return empty manifest)", err)
+		t.Fatalf("LoadAgentManifest() error = %v (should return empty manifest)", err)
 	}
 
 	if m == nil {
-		t.Fatal("LoadManifest() returned nil for non-existent file")
+		t.Fatal("LoadAgentManifest() returned nil for non-existent file")
 	}
 
-	if m.Version != ManifestVersion {
-		t.Errorf("Version = %q, want %q", m.Version, ManifestVersion)
+	if m.Version != AgentManifestVersion {
+		t.Errorf("Version = %q, want %q", m.Version, AgentManifestVersion)
 	}
 }
 
 func TestManifest_DetectOrphans(t *testing.T) {
-	m := NewEmptyManifest()
+	m := NewEmptyAgentManifest()
 	m.ActiveRite = "team-a"
 	m.AddAgent("agent-a.md", "team", "team-a", "sha256:a")
 	m.AddAgent("agent-b.md", "team", "team-a", "sha256:b")
@@ -120,7 +120,7 @@ func TestManifest_DetectOrphans(t *testing.T) {
 }
 
 func TestManifest_MarkOrphaned(t *testing.T) {
-	m := NewEmptyManifest()
+	m := NewEmptyAgentManifest()
 	m.AddAgent("agent-a.md", "team", "team-a", "sha256:a")
 
 	m.MarkOrphaned("agent-a.md")
@@ -136,7 +136,7 @@ func TestManifest_MarkOrphaned(t *testing.T) {
 }
 
 func TestManifest_PromoteToProject(t *testing.T) {
-	m := NewEmptyManifest()
+	m := NewEmptyAgentManifest()
 	m.AddAgent("agent-a.md", "team", "team-a", "sha256:a")
 	m.MarkOrphaned("agent-a.md")
 
@@ -159,7 +159,7 @@ func TestManifest_PromoteToProject(t *testing.T) {
 }
 
 func TestManifest_RemoveAgent(t *testing.T) {
-	m := NewEmptyManifest()
+	m := NewEmptyAgentManifest()
 	m.AddAgent("agent-a.md", "team", "team-a", "sha256:a")
 
 	if len(m.Agents) != 1 {
@@ -174,7 +174,7 @@ func TestManifest_RemoveAgent(t *testing.T) {
 }
 
 func TestManifest_GetRiteAgents(t *testing.T) {
-	m := NewEmptyManifest()
+	m := NewEmptyAgentManifest()
 	m.AddAgent("agent-a.md", "team", "team-a", "sha256:a")
 	m.AddAgent("agent-b.md", "team", "team-a", "sha256:b")
 	m.AddAgent("agent-c.md", "team", "team-b", "sha256:c")
@@ -216,7 +216,7 @@ func TestComputeChecksum(t *testing.T) {
 }
 
 func TestManifest_AgentEntry_InstalledAt(t *testing.T) {
-	m := NewEmptyManifest()
+	m := NewEmptyAgentManifest()
 	before := time.Now().Add(-time.Second)
 	m.AddAgent("agent.md", "team", "test", "sha256:x")
 	after := time.Now().Add(time.Second)

@@ -1,4 +1,4 @@
-package team
+package rite
 
 import (
 	"io"
@@ -103,7 +103,7 @@ func (s *Switcher) Switch(opts SwitchOptions) (*SwitchResult, error) {
 	}
 
 	// 2. Load current manifest
-	manifest, err := LoadManifest(s.resolver.AgentManifestFile())
+	manifest, err := LoadAgentManifest(s.resolver.AgentManifestFile())
 	if err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to load manifest", err)
 	}
@@ -154,7 +154,7 @@ func (s *Switcher) Switch(opts SwitchOptions) (*SwitchResult, error) {
 }
 
 // dryRunResult returns what would happen without making changes.
-func (s *Switcher) dryRunResult(rite *Rite, manifest *Manifest, orphans []string, opts SwitchOptions) (*SwitchResult, error) {
+func (s *Switcher) dryRunResult(rite *Rite, manifest *AgentManifest, orphans []string, opts SwitchOptions) (*SwitchResult, error) {
 	// This is a bit of a hack - return DryRunResult through a wrapper
 	// The actual implementation will populate the proper structure
 	agents := make([]string, len(rite.Agents))
@@ -182,7 +182,7 @@ func (s *Switcher) dryRunResult(rite *Rite, manifest *Manifest, orphans []string
 }
 
 // executeSwitch performs the actual switch operation.
-func (s *Switcher) executeSwitch(rite *Rite, manifest *Manifest, orphans []string, opts SwitchOptions) (*SwitchResult, error) {
+func (s *Switcher) executeSwitch(rite *Rite, manifest *AgentManifest, orphans []string, opts SwitchOptions) (*SwitchResult, error) {
 	// 1. Handle orphans
 	if len(orphans) > 0 {
 		if err := s.handleOrphans(manifest, orphans, opts); err != nil {
@@ -301,7 +301,7 @@ func (s *Switcher) executeSwitch(rite *Rite, manifest *Manifest, orphans []strin
 }
 
 // handleOrphans processes orphaned agents according to the strategy.
-func (s *Switcher) handleOrphans(manifest *Manifest, orphans []string, opts SwitchOptions) error {
+func (s *Switcher) handleOrphans(manifest *AgentManifest, orphans []string, opts SwitchOptions) error {
 	agentsDir := s.resolver.AgentsDir()
 
 	for _, orphan := range orphans {
