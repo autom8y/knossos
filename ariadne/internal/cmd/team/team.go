@@ -42,7 +42,6 @@ For new rite composition features (invoke/release), use 'ari rite'.`,
 	cmd.AddCommand(newSwitchCmd(ctx))
 	cmd.AddCommand(newValidateCmd(ctx))
 	cmd.AddCommand(newContextCmd(ctx))
-	cmd.AddCommand(newMigrateContextCmd(ctx))
 
 	return cmd
 }
