@@ -74,7 +74,7 @@ Entry → Design → Execute → Validate
 
 ### Variations
 
-**doc-team-pack:**
+**doc-rite:**
 ```
 Audit → Architecture → Writing → Review
 ```
@@ -184,7 +184,7 @@ Teams note when work belongs elsewhere:
 ## Cross-Team Notes
 
 When {finding} reveals:
-- Documentation gaps → Note for doc-team-pack
+- Documentation gaps → Note for doc-rite
 - Code quality issues → Note for hygiene-pack
 - Technical debt → Note for debt-triage-pack
 ```

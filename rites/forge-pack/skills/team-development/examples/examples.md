@@ -1,6 +1,6 @@
 # Team Examples
 
-> Reference implementations for team pack patterns.
+> Reference implementations for rite patterns.
 
 ## 3-Agent Team: debt-triage-pack
 

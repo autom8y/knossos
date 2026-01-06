@@ -74,7 +74,7 @@ complexity_levels:
 
 **Pattern**: SCRIPT skips design (too small to need TDD).
 
-### Documentation (doc-team-pack)
+### Documentation (doc-rite)
 ```yaml
 complexity_levels:
   - name: PAGE

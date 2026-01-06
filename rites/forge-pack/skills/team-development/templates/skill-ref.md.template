@@ -1,36 +1,36 @@
 # Reference Skill Template
-# Copy to: .claude/skills/{team-name}-ref/skill.md
+# Copy to: .claude/skills/{rite-name}-ref/skill.md
 # Replace all {placeholders} with actual values
 
 # =============================================================================
 # INSTRUCTIONS
 # =============================================================================
-# 1. Create directory: .claude/skills/{team-name}-ref/
-# 2. Copy this file to: .claude/skills/{team-name}-ref/skill.md
+# 1. Create directory: .claude/skills/{rite-name}-ref/
+# 2. Copy this file to: .claude/skills/{rite-name}-ref/skill.md
 # 3. Replace all {placeholders}
-# 4. Skill will be discoverable via @{team-name}-ref
+# 4. Skill will be discoverable via @{rite-name}-ref
 # =============================================================================
 
 ---
-name: {team-name}-ref
+name: {rite-name}-ref
 description: |
-  Reference documentation for {Team Display Name}.
-  Use when: learning about {team-name} agents, understanding the {domain} workflow,
-  invoking {team-name} agents. Triggers: {team-name}, {domain} team, {agent-1},
+  Reference documentation for {Rite Display Name}.
+  Use when: learning about {rite-name} agents, understanding the {domain} workflow,
+  invoking {rite-name} agents. Triggers: {rite-name}, {domain} rite, {agent-1},
   {agent-2}, {agent-3}, {agent-4}.
 ---
 
-# {Team Display Name}
+# {Rite Display Name}
 
-> {One-line tagline describing the team's purpose}
+> {One-line tagline describing the rite's purpose}
 
 ## Quick Reference
 
 | Component | Location | Purpose |
 |-----------|----------|---------|
-| Agents | `~/Code/roster/teams/{team-name}/agents/` | Agent prompts |
-| Workflow | `~/Code/roster/teams/{team-name}/workflow.yaml` | Phase configuration |
-| Switch | `/{team-name}` | Activate this team |
+| Agents | `~/Code/roster/rites/{rite-name}/agents/` | Agent prompts |
+| Workflow | `~/Code/roster/rites/{rite-name}/workflow.yaml` | Phase configuration |
+| Switch | `/{rite-name}` | Activate this rite |
 
 ## Team Roster
 
@@ -71,23 +71,23 @@ description: |
 
 | Command | Maps To | Use When |
 |---------|---------|----------|
-| `/{team-name}` | Team switch | Activating this team |
+| `/{rite-name}` | Rite switch | Activating this rite |
 | `/architect` | {design-agent} | Design-only work |
 | `/build` | {implementation-agent} | Implementation-only |
 | `/qa` | {validation-agent} | Validation-only |
 | `/hotfix` | {fast-path-agent} | Urgent fixes |
 | `/code-review` | {review-agent} | Code review |
 
-## When to Use This Team
+## When to Use This Rite
 
-**Use {team-name} when:**
+**Use {rite-name} when:**
 - {Use case 1}
 - {Use case 2}
 - {Use case 3}
 
-**Don't use {team-name} when:**
-- {Anti-use case 1} → Use {other-team} instead
-- {Anti-use case 2} → Use {other-team} instead
+**Don't use {rite-name} when:**
+- {Anti-use case 1} → Use {other-rite} instead
+- {Anti-use case 2} → Use {other-rite} instead
 
 ## Agent Summaries
 
@@ -144,5 +144,5 @@ description: |
 ## Cross-References
 
 - **Related Skills**: @10x-workflow, @documentation, @standards
-- **Team Packs**: {related-team-1}, {related-team-2}
+- **Rites**: {related-rite-1}, {related-rite-2}
 - **Commands**: See COMMAND_REGISTRY.md

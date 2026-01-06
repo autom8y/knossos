@@ -55,7 +55,7 @@ grep -B1 "next: null" .claude/ACTIVE_WORKFLOW.yaml | grep "agent:"
 # /code-review → qa-adversary (review mode)
 ```
 
-### doc-team-pack
+### doc-rite
 ```yaml
 # /architect  → information-architect
 # /build      → tech-writer
@@ -100,7 +100,7 @@ Each team has a quick-switch command:
 | Command | Team | Action |
 |---------|------|--------|
 | `/10x` | 10x-dev-pack | Switch and show roster |
-| `/docs` | doc-team-pack | Switch and show roster |
+| `/docs` | doc-rite | Switch and show roster |
 | `/hygiene` | hygiene-pack | Switch and show roster |
 | `/debt` | debt-triage-pack | Switch and show roster |
 | `/sre` | sre-pack | Switch and show roster |
@@ -144,7 +144,7 @@ ENTRY_AGENT=$(grep -A2 "^entry_point:" .claude/ACTIVE_WORKFLOW.yaml | grep "agen
 Document mappings in workflow.yaml:
 
 ```yaml
-name: my-team-pack
+name: my-rite
 workflow_type: sequential
 
 # ... phases ...

@@ -1,13 +1,13 @@
 ---
 name: team-development
-description: "Design and implement agent team packs for the roster ecosystem. Use when: creating new teams, designing workflows, writing agent prompts, integrating with slash commands. Triggers: new team, team pack, workflow design, agent creation, roster integration."
+description: "Design and implement agent rites for the roster ecosystem. Use when: creating new rites, designing workflows, writing agent prompts, integrating with slash commands. Triggers: new rite, rite development, workflow design, agent creation, roster integration."
 ---
 
 # Team Development
 
-> Design agent teams that work. Build workflows that flow.
+> Design agent rites that work. Build workflows that flow.
 
-This skill codifies the patterns discovered from building 5 teams (10x-dev-pack, doc-team-pack, hygiene-pack, debt-triage-pack, sre-pack) into reusable templates and decision frameworks.
+This skill codifies the patterns discovered from building rites (10x-dev-pack, doc-team-pack, hygiene-pack, debt-triage-pack, sre-pack) into reusable templates and decision frameworks.
 
 ---
 
@@ -15,7 +15,7 @@ This skill codifies the patterns discovered from building 5 teams (10x-dev-pack,
 
 | Component | Location | Key Decisions |
 |-----------|----------|---------------|
-| Team Pack | `$ROSTER_HOME/teams/{name}-pack/` | Name, agent count, domain |
+| Rite | `$ROSTER_HOME/rites/{name}/` | Name, agent count, domain |
 | Workflow | `workflow.yaml` | Phases, complexity levels, entry point |
 | Agents | `agents/*.md` | Role, model, color, tools |
 | Command | `.claude/commands/{name}.md` | Quick-switch integration |
@@ -23,10 +23,10 @@ This skill codifies the patterns discovered from building 5 teams (10x-dev-pack,
 
 ---
 
-## Team Creation Checklist
+## Rite Creation Checklist
 
 ```
-1. [ ] Define team domain and purpose
+1. [ ] Define rite domain and purpose
 2. [ ] Design workflow phases (3-4 typical)
 3. [ ] Identify agent roles (3-5 agents)
 4. [ ] Create workflow.yaml
@@ -34,7 +34,7 @@ This skill codifies the patterns discovered from building 5 teams (10x-dev-pack,
 6. [ ] Create quick-switch command
 7. [ ] Create reference skill
 8. [ ] Update COMMAND_REGISTRY.md
-9. [ ] Validate with swap-team.sh
+9. [ ] Validate with swap-rite.sh
 10. [ ] **Update Consultant knowledge base** (REQUIRED)
 ```
 
@@ -46,10 +46,10 @@ This skill codifies the patterns discovered from building 5 teams (10x-dev-pack,
 
 ### How Many Agents?
 
-| Count | Team Type | Examples |
+| Count | Rite Type | Examples |
 |-------|-----------|----------|
 | 3 | Focused/specialized | debt-triage-pack |
-| 4 | Standard teams | doc-team, hygiene, sre |
+| 4 | Standard rites | doc-team, hygiene, sre |
 | 5 | Full lifecycle | 10x-dev-pack |
 
 ### Model and Color Assignment
@@ -73,7 +73,7 @@ See [@agent-prompt-engineering](../agent-prompt-engineering/SKILL.md#model-and-c
 
 | Term | Definition |
 |------|------------|
-| **Team Pack** | Directory containing agents and workflow for a specialized domain |
+| **Rite** | Directory containing agents and workflow for a specialized domain |
 | **Workflow** | Sequential pipeline of phases producing artifacts |
 | **Phase** | Single step in workflow, owned by one agent |
 | **Agent** | Specialized prompt with defined role, tools, and authority |
@@ -106,9 +106,9 @@ Complete team implementations:
 
 ---
 
-## Existing Teams Reference
+## Existing Rites Reference
 
-| Team | Agents | Workflow | Entry Agent |
+| Rite | Agents | Workflow | Entry Agent |
 |------|--------|----------|-------------|
 | 10x-dev-pack | 5 | Requirements → Design → Implementation → Validation | requirements-analyst |
 | doc-team-pack | 4 | Audit → Architecture → Writing → Review | doc-auditor |
@@ -120,7 +120,7 @@ Complete team implementations:
 | rnd-pack | 4 | Scouting → Integration → Prototyping → Future Architecture | technology-scout |
 | strategy-pack | 4 | Market Research → Competitive Analysis → Business Modeling → Planning | market-researcher |
 
-*See roster repository for current team/agent counts.*
+*See roster repository for current rite/agent counts.*
 
 ---
 
@@ -130,7 +130,7 @@ Complete team implementations:
 - @documentation for artifact templates (PRD, TDD, ADR)
 - @standards for naming conventions and code patterns
 - @prompting for agent invocation patterns
-- **@consult-ref for ecosystem navigation** (MUST update when adding teams)
+- **@consult-ref for ecosystem navigation** (MUST update when adding rites)
 
 ---
 
@@ -138,9 +138,9 @@ Complete team implementations:
 
 > **CRITICAL**: The Consultant agent is the ecosystem's navigation system. Stale data = wrong user guidance.
 
-When creating or modifying teams, update the Consultant's knowledge base. See [patterns/consultant-sync.md](patterns/consultant-sync.md) for:
+When creating or modifying rites, update the Consultant's knowledge base. See [patterns/consultant-sync.md](patterns/consultant-sync.md) for:
 - Synchronization matrix (what files to update for each change type)
-- Step-by-step procedures for adding teams, agents, and playbooks
+- Step-by-step procedures for adding rites, agents, and playbooks
 - Verification commands
 - Common issues and fixes
 
@@ -148,11 +148,11 @@ When creating or modifying teams, update the Consultant's knowledge base. See [p
 
 ## Quick Start
 
-To create a new team:
+To create a new rite:
 
 ```bash
 # 1. Create directory structure
-mkdir -p $ROSTER_HOME/teams/{name}-pack/agents
+mkdir -p $ROSTER_HOME/rites/{name}/agents
 
 # 2. Copy and fill templates
 # - workflow.yaml from templates/workflow.yaml.template
@@ -166,7 +166,7 @@ mkdir -p $ROSTER_HOME/teams/{name}-pack/agents
 # - Add to COMMAND_REGISTRY.md
 
 # 5. Validate
-$ROSTER_HOME/swap-team.sh {name}-pack
+$ROSTER_HOME/swap-rite.sh {name}
 ```
 
 See [validation/validation.md](validation/validation.md) for full pre-flight checks.

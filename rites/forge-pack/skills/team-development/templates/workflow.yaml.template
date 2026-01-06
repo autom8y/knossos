@@ -1,17 +1,17 @@
 # Workflow Configuration Template
-# Copy to: ~/Code/roster/teams/{team-name}/workflow.yaml
+# Copy to: ~/Code/roster/rites/{rite-name}/workflow.yaml
 # Replace all {placeholders} with actual values
 
 # =============================================================================
 # INSTRUCTIONS
 # =============================================================================
-# 1. Copy this file to your team directory
+# 1. Copy this file to your rite directory
 # 2. Replace all {placeholders} with actual values
 # 3. Ensure agent names match files in agents/ directory
-# 4. Validate with: ~/Code/roster/swap-team.sh {team-name}
+# 4. Validate with: ~/Code/roster/swap-rite.sh {rite-name}
 # =============================================================================
 
-name: {team-name}
+name: {rite-name}
 workflow_type: sequential
 description: {One-line description of what this team does}
 

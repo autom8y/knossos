@@ -1,25 +1,25 @@
-# Team Pack Schema
+# Rite Schema
 
-> Complete schema for workflow.yaml files in team pack definitions.
+> Complete schema for workflow.yaml files in rite definitions.
 
 ## Overview
 
-A **team pack** defines a specialized AI team with agents, workflow, complexity levels, and command mappings. Team packs live in `roster/teams/<team-name>/` and sync to satellites via CEM.
+A **rite** defines a specialized AI practice with agents, workflow, complexity levels, and command mappings. Rites live in `roster/rites/<rite-name>/` and sync to satellites via CEM.
 
 ## File Structure
 
 ```
-teams/<team-name>/
-├── workflow.yaml      # Required: Team configuration
+rites/<rite-name>/
+├── workflow.yaml      # Required: Rite configuration
 ├── workflow.md        # Required: Human-readable documentation
-├── README.md          # Required: Team overview
+├── README.md          # Required: Rite overview
 ├── agents/            # Required: Agent definitions
 │   └── *.md
-└── commands/          # Optional: Team-specific commands
+└── commands/          # Optional: Rite-specific commands
     └── *.md
 ```
 
-**Naming**: Directory must be lowercase kebab-case ending with `-pack` (e.g., `10x-dev-pack`).
+**Naming**: Directory must be lowercase kebab-case (e.g., `hygiene-pack`, `10x-dev-pack`).
 
 ---
 
@@ -27,7 +27,7 @@ teams/<team-name>/
 
 | Field | Required | Type | Description |
 |-------|----------|------|-------------|
-| `name` | Yes | string | Kebab-case, ends with `-pack`, matches directory |
+| `name` | Yes | string | Kebab-case, matches directory |
 | `version` | No | string | Semantic version (e.g., "1.0.0") |
 | `workflow_type` | Yes | enum | `sequential`, `parallel`, or `hybrid` |
 | `description` | Yes | string | Brief lifecycle description (~100 chars) |
@@ -103,7 +103,7 @@ phases:
 
 ## complexity_levels (required)
 
-Team-specific complexity tiers controlling phase execution.
+Rite-specific complexity tiers controlling phase execution.
 
 | Field | Required | Type | Description |
 |-------|----------|------|-------------|
@@ -135,7 +135,7 @@ complexity_levels:
 
 ## commands (optional)
 
-Team-specific slash commands.
+Rite-specific slash commands.
 
 | Field | Required | Type | Description |
 |-------|----------|------|-------------|
@@ -200,7 +200,7 @@ Document standard command mappings:
 
 | Anti-Pattern | Problem | Fix |
 |--------------|---------|-----|
-| Name mismatch | `name: ecosystemPack` in `teams/ecosystem-pack/` | Use exact directory name |
+| Name mismatch | `name: ecosystemPack` in `rites/ecosystem-pack/` | Use exact directory name |
 | Orphan phase | Phase unreachable from entry | Ensure all phases linked via `next` |
 | Missing terminal | No `next: null` phase | Add terminal phase |
 | Agent mismatch | `agent: architect` but file is `software-architect.md` | Match filename exactly |
@@ -214,7 +214,7 @@ Document standard command mappings:
 ### Minimal Valid workflow.yaml
 
 ```yaml
-name: my-team-pack
+name: my-rite
 workflow_type: sequential
 description: Brief description
 
@@ -239,7 +239,7 @@ complexity_levels:
 ### Complete Example
 
 ```yaml
-name: full-team-pack
+name: full-rite
 version: "1.0.0"
 workflow_type: sequential
 description: Complete example with all fields

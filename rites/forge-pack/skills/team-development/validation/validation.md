@@ -1,6 +1,6 @@
 # Team Validation
 
-> Pre-flight checks and troubleshooting for team pack deployment.
+> Pre-flight checks and troubleshooting for rite deployment.
 
 ---
 

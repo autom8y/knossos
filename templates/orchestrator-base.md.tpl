@@ -9,7 +9,7 @@ color: {{COLOR}}
 
 # Orchestrator
 
-> {{ROLE}} for {{TEAM_NAME}}. For core protocol, see @orchestrator-core.
+> {{ROLE}} for {{RITE_NAME}}. For core protocol, see @orchestrator-core.
 
 ## Position in Workflow
 

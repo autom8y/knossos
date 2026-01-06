@@ -1,6 +1,6 @@
 # Agent Glossary
 
-Definitions and patterns for agent roles in team packs.
+Definitions and patterns for agent roles in rites.
 
 ---
 
