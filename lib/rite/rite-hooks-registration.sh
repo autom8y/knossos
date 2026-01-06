@@ -434,7 +434,7 @@ swap_hook_registrations() {
     local team_name="$1"
     local settings_file=".claude/settings.local.json"
     local base_hooks_yaml="$ROSTER_HOME/user-hooks/base_hooks.yaml"
-    local team_hooks_yaml="$ROSTER_HOME/teams/$team_name/hooks.yaml"
+    local team_hooks_yaml="$ROSTER_HOME/rites/$team_name/hooks.yaml"
 
     log_debug "Updating hook registrations for rite: $team_name"
 

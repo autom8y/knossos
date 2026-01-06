@@ -94,7 +94,7 @@ if [[ "$COMMAND" =~ (^|[[:space:]/])swap-team\.sh[[:space:]] ]]; then
 
     # Skip validation for --list or no argument
     if [[ -n "$TARGET_TEAM" ]] && [[ "$TARGET_TEAM" != "--list" ]]; then
-        ROSTER_DIR="$ROSTER_HOME/teams"
+        ROSTER_DIR="$ROSTER_HOME/rites"
 
         # Validate team pack exists
         if [[ ! -d "$ROSTER_DIR/$TARGET_TEAM" ]]; then
@@ -165,7 +165,7 @@ if [[ "$COMMAND" == *"swap-team"* ]] || [[ "$COMMAND" == *"ACTIVE_WORKFLOW"* ]];
 
         # Skip validation for --list or no argument
         if [[ -n "$TARGET_TEAM" ]] && [[ "$TARGET_TEAM" != "--list" ]]; then
-            ROSTER_DIR="$ROSTER_HOME/teams"
+            ROSTER_DIR="$ROSTER_HOME/rites"
             WORKFLOW_FILE="$ROSTER_DIR/$TARGET_TEAM/workflow.yaml"
         fi
     elif [[ "$COMMAND" == *"ACTIVE_WORKFLOW"* ]]; then

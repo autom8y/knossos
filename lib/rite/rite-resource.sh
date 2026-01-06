@@ -68,12 +68,12 @@ is_resource_from_team() {
 
     if [[ -z "$team_scope" ]]; then
         # Legacy behavior: check ALL rites
-        find "$ROSTER_HOME/teams" -path "*/${resource_type}/$resource_name" -type "$find_type" 2>/dev/null | grep -q .
+        find "$ROSTER_HOME/rites" -path "*/${resource_type}/$resource_name" -type "$find_type" 2>/dev/null | grep -q .
     else
         # Scoped behavior: check only specified rites
         local team
         for team in $team_scope; do
-            local check_path="$ROSTER_HOME/teams/$team/$resource_type/$resource_name"
+            local check_path="$ROSTER_HOME/rites/$team/$resource_type/$resource_name"
             if [[ "$find_type" == "d" ]] && [[ -d "$check_path" ]]; then
                 return 0
             elif [[ "$find_type" == "f" ]] && [[ -f "$check_path" ]]; then
@@ -105,15 +105,15 @@ get_resource_team() {
     if [[ -z "$team_scope" ]]; then
         # Legacy behavior: check ALL teams
         local match
-        match=$(find "$ROSTER_HOME/teams" -path "*/${resource_type}/$resource_name" -type "$find_type" 2>/dev/null | head -1)
+        match=$(find "$ROSTER_HOME/rites" -path "*/${resource_type}/$resource_name" -type "$find_type" 2>/dev/null | head -1)
         if [[ -n "$match" ]]; then
-            echo "$match" | sed 's|.*/teams/\([^/]*\)/'"$resource_type"'/.*|\1|'
+            echo "$match" | sed 's|.*/rites/\([^/]*\)/'"$resource_type"'/.*|\1|'
         fi
     else
         # Scoped behavior: check only specified teams
         local team
         for team in $team_scope; do
-            local check_path="$ROSTER_HOME/teams/$team/$resource_type/$resource_name"
+            local check_path="$ROSTER_HOME/rites/$team/$resource_type/$resource_name"
             if [[ "$find_type" == "d" ]] && [[ -d "$check_path" ]]; then
                 echo "$team"
                 return 0
@@ -272,7 +272,7 @@ detect_resource_orphans() {
     local glob_pattern="$5"
     local previous_team="${6:-}"
 
-    local incoming_resource_dir="$ROSTER_HOME/teams/$incoming_team/$resource_type"
+    local incoming_resource_dir="$ROSTER_HOME/rites/$incoming_team/$resource_type"
     local orphan_count=0
 
     # Build rite scope for orphan detection

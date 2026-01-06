@@ -456,7 +456,7 @@ cleanup_staging() {
 # Requires: ROSTER_HOME, STAGING_DIR
 stage_agents() {
     local team_name="$1"
-    local source_dir="$ROSTER_HOME/teams/$team_name/agents"
+    local source_dir="$ROSTER_HOME/rites/$team_name/agents"
     local staging_agents="$STAGING_DIR/agents"
 
     if [[ ! -d "$source_dir" ]]; then
@@ -482,7 +482,7 @@ stage_agents() {
 # Requires: ROSTER_HOME, STAGING_DIR
 stage_workflow() {
     local team_name="$1"
-    local source_file="$ROSTER_HOME/teams/$team_name/workflow.yaml"
+    local source_file="$ROSTER_HOME/rites/$team_name/workflow.yaml"
 
     if [[ -f "$source_file" ]]; then
         cp "$source_file" "$STAGING_DIR/ACTIVE_WORKFLOW.yaml" || {
