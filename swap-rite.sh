@@ -3075,9 +3075,9 @@ perform_swap() {
     # Stage workflow
     stage_workflow "$team_name"
 
-    # Stage ACTIVE_TEAM (prepared but committed last)
-    stage_active_team "$team_name" || {
-        log_error "Failed to stage ACTIVE_TEAM"
+    # Stage active_rite (prepared but committed last)
+    stage_active_rite "$team_name" || {
+        log_error "Failed to stage active_rite"
         rollback_swap
         exit "$EXIT_SWAP_FAILURE"
     }
