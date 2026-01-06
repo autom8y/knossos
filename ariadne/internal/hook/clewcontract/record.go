@@ -7,7 +7,7 @@ import (
 )
 
 // RecordToolEvent records a tool event from a Claude Code hook invocation.
-// This is the primary integration point for the `ari hook thread` command.
+// This is the primary integration point for the `ari hook clew` command.
 //
 // Parameters:
 //   - sessionDir: Path to the session directory containing events.jsonl
@@ -30,7 +30,7 @@ func RecordToolEvent(sessionDir string, env *hook.Env, toolInput *hook.ToolInput
 }
 
 // BuildEventFromToolInput creates an Event from hook context.
-// This is exported for trigger checking in the thread command.
+// This is exported for trigger checking in the clew command.
 func BuildEventFromToolInput(env *hook.Env, toolInput *hook.ToolInput) Event {
 	tool := env.ToolName
 	path := toolInput.GetEffectivePath()

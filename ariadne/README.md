@@ -1,6 +1,6 @@
 # Ariadne CLI
 
-> The thread that navigates the Knossos labyrinth
+> The clew that navigates the Knossos labyrinth
 
 Ariadne (`ari`) is the command-line interface for the Knossos agentic workflow platform. It provides session management, hook infrastructure, quality gates, and agent handoff operations for Claude Code workflows.
 
@@ -87,7 +87,7 @@ Hooks integrate with Claude Code's hook system for automatic context injection a
 | Command | Description |
 |---------|-------------|
 | `ari hook context` | Context injection (SessionStart) |
-| `ari hook thread` | Thread event tracking (PostToolUse) |
+| `ari hook clew` | Clew event tracking (PostToolUse) |
 | `ari hook autopark` | Auto-park detection (PostToolUse) |
 | `ari hook writeguard` | Write guard validation (PreToolUse) |
 | `ari hook route` | Orchestrator routing (PreToolUse) |

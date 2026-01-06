@@ -436,7 +436,7 @@ ari session wrap --force
 1. Collects proofs from session directory
 2. Computes sails color via algorithm
 3. Writes WHITE_SAILS.yaml
-4. Emits SAILS_GENERATED event to THREAD_RECORD.ndjson
+4. Emits SAILS_GENERATED event to CLEW_RECORD.ndjson
 5. **Blocks if BLACK sails** (unless --force)
 6. Updates SESSION_CONTEXT.md to ARCHIVED
 7. Moves session to archive directory

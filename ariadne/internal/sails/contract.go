@@ -12,7 +12,7 @@ import (
 	"github.com/autom8y/ariadne/internal/hook/clewcontract"
 )
 
-// ContractViolation represents a single thread contract violation.
+// ContractViolation represents a single clew contract violation.
 type ContractViolation struct {
 	// Type is the category of violation
 	Type string `json:"type" yaml:"type"`
@@ -40,7 +40,7 @@ func ValidateClewContract(sessionDir string) ([]ContractViolation, error) {
 	// Check if events.jsonl exists
 	if _, err := os.Stat(eventsPath); err != nil {
 		if os.IsNotExist(err) {
-			// No events file is not a violation - it means no thread contract to validate
+			// No events file is not a violation - it means no clew contract to validate
 			return nil, nil
 		}
 		return nil, fmt.Errorf("failed to access events.jsonl: %w", err)

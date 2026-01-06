@@ -37,7 +37,7 @@ The new system provides 7 thin bash wrappers that dispatch to the Go binary:
 | autopark.sh | Stop | Auto-parks session via `ari hook autopark` |
 | writeguard.sh | PreToolUse (Edit/Write) | Guards session context writes via `ari hook writeguard` |
 | validate.sh | PreToolUse (Bash) | Validates bash commands via `ari hook validate` |
-| thread.sh | PostToolUse | Tracks artifacts and commits via `ari hook thread` |
+| thread.sh | PostToolUse | Tracks artifacts and commits via `ari hook clew` |
 | route.sh | UserPromptSubmit | Routes slash commands via `ari hook route` |
 | cognitive-budget.sh | PostToolUse | Tracks cognitive budget via `ari hook budget` |
 
@@ -51,7 +51,7 @@ The MANIFEST.md documents the complete replacement mapping:
 | auto-park.sh | `ari hook autopark` | Replaced |
 | session-write-guard.sh | `ari hook writeguard` | Replaced |
 | command-validator.sh | `ari hook validate` | Replaced |
-| artifact-tracker.sh + commit-tracker.sh + session-audit.sh | `ari hook thread` | Replaced |
+| artifact-tracker.sh + commit-tracker.sh + session-audit.sh | `ari hook clew` | Replaced |
 | start-preflight.sh + orchestrator-router.sh | `ari hook route` | Replaced |
 | delegation-check.sh | REMOVED | Deprecated (poor workflow enforcement) |
 | orchestrator-bypass-check.sh | REMOVED | Deprecated (rearchitected) |
@@ -183,7 +183,7 @@ After Phase 2, this environment variable will have no effect:
 2. **Cleaner repository**: ~5,700 LOC of deprecated code removed
 3. **Faster hooks**: Go implementation is consistently faster than bash
 4. **Better testing**: Go hooks have unit tests; bash hooks did not
-5. **Thread Contract v2**: Unified event tracking architecture
+5. **Clew Contract v2**: Unified event tracking architecture
 
 ### Negative
 
@@ -223,7 +223,7 @@ After Phase 2, this environment variable will have no effect:
 ## References
 
 - MANIFEST.md: `.claude/hooks/.deprecated/MANIFEST.md`
-- Thread Contract v2: PRD-ariadne.md Section 3.2
+- Clew Contract v2: PRD-ariadne.md Section 3.2
 - Ariadne implementation: `ariadne/internal/cmd/hook/`
 - hooks.yaml configuration: `.claude/hooks/ari/hooks.yaml`
 

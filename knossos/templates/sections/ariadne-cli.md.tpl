@@ -12,7 +12,7 @@ ari session status
 ari session park "reason"
 
 # Hook operations
-ari hook thread
+ari hook clew
 ari hook context
 
 # Quality gates

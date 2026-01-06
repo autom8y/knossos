@@ -1,5 +1,5 @@
 #!/bin/bash
-# Integration test for thread contract validation in sails check
+# Integration test for clew contract validation in sails check
 # Tests that contract violations are detected and degrade WHITE to GRAY
 
 set -euo pipefail
@@ -54,7 +54,7 @@ if [ ! -f "$ARI" ]; then
     just build
 fi
 
-echo "=== Thread Contract Validation Integration Tests ==="
+echo "=== Clew Contract Validation Integration Tests ==="
 echo
 
 # Test 1: WHITE sails with valid events should pass
@@ -119,7 +119,7 @@ exit_code=$?
 assert_exit_code 134 $exit_code "WHITE sails with violations should fail gate (non-zero exit)"
 assert_contains "$output" "FAIL: Quality gate failed" "Output should show FAIL"
 assert_contains "$output" "Color:.*GRAY" "Color should be downgraded to GRAY"
-assert_contains "$output" "Thread Contract Violations" "Output should show contract violations section"
+assert_contains "$output" "Clew Contract Violations" "Output should show contract violations section"
 assert_contains "$output" "task_orphaned_end" "Output should show task_orphaned_end violation"
 echo
 
@@ -180,7 +180,7 @@ output=$("$ARI" sails check "$TEST_DIR" 2>&1 || true)
 exit_code=$?
 assert_exit_code 134 $exit_code "GRAY sails should fail gate"
 assert_contains "$output" "Color:.*GRAY" "Color should remain GRAY"
-assert_contains "$output" "Thread Contract Violations" "Output should show contract violations"
+assert_contains "$output" "Clew Contract Violations" "Output should show contract violations"
 echo
 
 # Test 5: No events.jsonl should not affect sails

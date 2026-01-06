@@ -257,7 +257,7 @@ func (g *Generator) lookupTerminology(term string) string {
 	// Default terminology definitions
 	terminology := map[string]string{
 		"knossos":     "The platform (the labyrinth itself)",
-		"ariadne":     "CLI binary (`ari`) - the thread ensuring return",
+		"ariadne":     "CLI binary (`ari`) - the clew ensuring return",
 		"theseus":     "Claude Code agent - the navigator with amnesia",
 		"moirai":      "Session lifecycle agent - the Fates who spin, measure, and cut",
 		"white-sails": "Confidence signal - honest return indicator",
@@ -403,7 +403,7 @@ The naming reflects Greek mythology (see ` + "`docs/philosophy/knossos-doctrine.
 | Myth | Component | Function |
 |------|-----------|----------|
 | **Knossos** | The platform | The labyrinth itself |
-| **Ariadne** | CLI binary (` + "`ari`" + `) | The thread ensuring return |
+| **Ariadne** | CLI binary (` + "`ari`" + `) | The clew ensuring return |
 | **Theseus** | Claude Code agent | The navigator with amnesia |
 | **Moirai** | Session lifecycle agent | The Fates who spin, measure, and cut |
 | **White Sails** | Confidence signal | Honest return indicator |
@@ -450,7 +450,7 @@ ari session status
 ari session park "reason"
 
 # Hook operations
-ari hook thread
+ari hook clew
 ari hook context
 
 # Quality gates

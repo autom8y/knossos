@@ -321,7 +321,7 @@ proofs:
 	// Verify that reasons mention the downgrade
 	foundDowngradeReason := false
 	for _, reason := range result.Reasons {
-		if reason == "thread contract violations present: downgraded to GRAY" {
+		if reason == "clew contract violations present: downgraded to GRAY" {
 			foundDowngradeReason = true
 			break
 		}

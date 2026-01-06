@@ -30,7 +30,7 @@ Per Knossos Doctrine, "Theseus has amnesia; the Clew remembers." The clew contra
    - Tests valid sequences, handoff violations, task violations
    - Tests color degradation behavior
 
-3. **`tests/integration/test-thread-contract-validation.sh`**
+3. **`tests/integration/test-clew-contract-validation.sh`**
    - Integration test script
    - End-to-end validation of sails check behavior
    - Tests multiple violation scenarios
@@ -39,7 +39,7 @@ Per Knossos Doctrine, "Theseus has amnesia; the Clew remembers." The clew contra
 
 1. **`ariadne/internal/sails/gate.go`**
    - Added `ContractViolations` field to `GateResult`
-   - Integrated `ValidateThreadContract()` call in `CheckGate()`
+   - Integrated `ValidateClewContract()` call in `CheckGate()`
    - Apply color degradation: WHITE → GRAY if violations present
    - BLACK and GRAY colors remain unchanged
 
@@ -113,7 +113,7 @@ Reasons:
   - clew contract violations present: downgraded to GRAY
   - clew contract has violations (see contract_violations)
 
-Thread Contract Violations:
+Clew Contract Violations:
   [ERROR] task_orphaned_end: task_end for task_id task-001 at event 5 has no preceding task_start
   [ERROR] handoff_unprepared: handoff_executed from agent-a to agent-b at event 12 has no preceding handoff_prepared
 ```
@@ -154,7 +154,7 @@ Run the sails package tests:
 
 ```bash
 cd ariadne
-go test ./internal/sails/... -v -run TestValidateThreadContract
+go test ./internal/sails/... -v -run TestValidateClewContract
 go test ./internal/sails/... -v -run TestCheckGate_Contract
 ```
 
@@ -163,7 +163,7 @@ go test ./internal/sails/... -v -run TestCheckGate_Contract
 Run the integration test script:
 
 ```bash
-./tests/integration/test-thread-contract-validation.sh
+./tests/integration/test-clew-contract-validation.sh
 ```
 
 Test coverage:
@@ -218,14 +218,14 @@ Potential improvements for future waves:
 
 ## References
 
-- **Knossos Doctrine v2**: Section VI (Thread Contract)
-- **Wave 2 Plan**: Task T1-004 (Thread Contract Validation)
+- **Knossos Doctrine v2**: Section VI (Clew Contract)
+- **Wave 2 Plan**: Task T1-004 (Clew Contract Validation)
 - **White Sails TDD**: Section 7 (Quality Gate Check)
-- **Hook Implementation**: `ariadne/internal/hook/threadcontract/`
+- **Hook Implementation**: `ariadne/internal/hook/clewcontract/`
 
 ## Related Commands
 
-- `ari hook thread`: Record thread events to events.jsonl
+- `ari hook clew`: Record clew events to events.jsonl
 - `ari sails generate`: Generate WHITE_SAILS.yaml
 - `ari sails check`: Validate quality gate (includes clew contract)
 

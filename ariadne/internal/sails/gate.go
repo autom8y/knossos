@@ -95,11 +95,11 @@ func CheckGate(sessionPath string) (*GateResult, error) {
 		return nil, errors.Wrap(errors.CodeParseError, "failed to parse WHITE_SAILS.yaml", err)
 	}
 
-	// Validate thread contract from events.jsonl
+	// Validate clew contract from events.jsonl
 	violations, err := ValidateClewContract(sessionDir)
 	if err != nil {
 		// Log the error but don't fail the gate check
-		// Thread contract validation is best-effort
+		// Clew contract validation is best-effort
 		violations = nil
 	}
 
@@ -107,9 +107,9 @@ func CheckGate(sessionPath string) (*GateResult, error) {
 	color := Color(sails.Color)
 	computedBase := Color(sails.ComputedBase)
 
-	// Apply thread contract violations to color
+	// Apply clew contract violations to color
 	if len(violations) > 0 {
-		// Thread contract violations degrade to GRAY minimum
+		// Clew contract violations degrade to GRAY minimum
 		if color == ColorWhite {
 			color = ColorGray
 		}
@@ -146,12 +146,12 @@ func CheckGate(sessionPath string) (*GateResult, error) {
 		result.Reasons = append(result.Reasons, "unknown sails color: "+string(sails.Color))
 	}
 
-	// Add reason for thread contract violations
+	// Add reason for clew contract violations
 	if len(violations) > 0 {
 		if Color(sails.Color) == ColorWhite {
-			result.Reasons = append(result.Reasons, "thread contract violations present: downgraded to GRAY")
+			result.Reasons = append(result.Reasons, "clew contract violations present: downgraded to GRAY")
 		}
-		result.Reasons = append(result.Reasons, "thread contract has violations (see contract_violations)")
+		result.Reasons = append(result.Reasons, "clew contract has violations (see contract_violations)")
 	}
 
 	return result, nil

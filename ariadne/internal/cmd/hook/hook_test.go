@@ -305,7 +305,7 @@ func TestNewHookCmd_SubcommandRegistration(t *testing.T) {
 	cmd := NewHookCmd(&outputFlag, &verboseFlag, &projectDir, &sessionID)
 
 	// Verify all subcommands are registered
-	subcommands := []string{"context", "autopark", "writeguard", "route", "validate", "thread"}
+	subcommands := []string{"context", "autopark", "writeguard", "route", "validate", "clew"}
 
 	for _, name := range subcommands {
 		t.Run(name, func(t *testing.T) {

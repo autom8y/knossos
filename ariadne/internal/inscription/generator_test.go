@@ -265,7 +265,7 @@ func TestGenerator_LookupTerminology(t *testing.T) {
 		want string
 	}{
 		{"knossos", "labyrinth"},
-		{"ariadne", "thread"},
+		{"ariadne", "clew"},
 		{"theseus", "amnesia"},
 		{"unknown", "unknown"}, // Returns term if not found
 	}

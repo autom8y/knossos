@@ -239,18 +239,25 @@ func runWrap(ctx *cmdContext, opts wrapOptions) error {
 }
 
 // collectCognitiveBudget attempts to collect cognitive budget metadata from the session.
-// Returns nil if THREAD_RECORD.ndjson doesn't exist or cannot be read.
+// Returns nil if CLEW_RECORD.ndjson doesn't exist or cannot be read.
+// Falls back to THREAD_RECORD.ndjson for legacy sessions.
 // Future: Integrate with ARIADNE_MSG_WARN/ARIADNE_MSG_PARK thresholds.
 func collectCognitiveBudget(sessionDir string) map[string]interface{} {
+	// Try new path first, fall back to legacy path
+	clewRecordPath := sessionDir + "/CLEW_RECORD.ndjson"
 	threadRecordPath := sessionDir + "/THREAD_RECORD.ndjson"
 
-	// Check if file exists
-	if _, err := os.Stat(threadRecordPath); os.IsNotExist(err) {
-		return nil
+	recordPath := clewRecordPath
+	if _, err := os.Stat(clewRecordPath); os.IsNotExist(err) {
+		// Fall back to legacy path for backwards compatibility
+		if _, err := os.Stat(threadRecordPath); os.IsNotExist(err) {
+			return nil
+		}
+		recordPath = threadRecordPath
 	}
 
 	// Read and count tool events
-	file, err := os.Open(threadRecordPath)
+	file, err := os.Open(recordPath)
 	if err != nil {
 		return nil
 	}
@@ -261,7 +268,7 @@ func collectCognitiveBudget(sessionDir string) map[string]interface{} {
 
 	// Simple line-by-line count (NDJSON format)
 	// Future: Parse JSON to get more detailed metrics
-	scanner := os.NewFile(file.Fd(), threadRecordPath)
+	scanner := os.NewFile(file.Fd(), recordPath)
 	buffer := make([]byte, 4096)
 	for {
 		n, err := scanner.Read(buffer)
