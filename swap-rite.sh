@@ -389,7 +389,7 @@ check_journal_recovery() {
         return 0
     else
         log_error "Non-interactive mode. Use --auto-recover to enable automatic rollback"
-        log "Or manually resolve with: swap-team.sh --recover"
+        log "Or manually resolve with: swap-rite.sh --recover"
         exit "$EXIT_RECOVERY_REQUIRED"
     fi
 
@@ -1394,15 +1394,15 @@ prompt_disposition() {
 # Usage information
 usage() {
     cat <<EOF
-Usage: swap-team.sh [OPTIONS] [COMMAND]
+Usage: swap-rite.sh [OPTIONS] [COMMAND]
 
 Commands:
-  <pack-name>    Switch to specified team pack
-  --list         List all available team packs
-  --reset        Reset to baseline (remove all team resources)
+  <pack-name>    Switch to specified rite pack
+  --list         List all available rite packs
+  --reset        Reset to baseline (remove all rite resources)
   --verify       Verify current state consistency
   --recover      Interactive recovery from interrupted swap
-  (no args)      Show current active team
+  (no args)      Show current active rite
 
 Options:
   --update, -u       Update agents from roster (even if already on team)
@@ -1444,25 +1444,25 @@ Exit Codes:
   6  Recovery required (interrupted swap, manual intervention needed)
 
 Examples:
-  ./swap-team.sh dev-pack               # Switch to dev-pack (interactive prompts)
-  ./swap-team.sh                        # Show current team
-  ./swap-team.sh --list                 # List available teams
-  ./swap-team.sh dev-pack --keep-all    # Keep all orphans during swap
-  ./swap-team.sh dev-pack --remove-all  # Remove all orphans during swap
-  ./swap-team.sh --update               # Update current team from roster
-  ./swap-team.sh dev-pack --update      # Update even if already on dev-pack
-  ./swap-team.sh --update --dry-run     # Preview what update would change
-  ./swap-team.sh --reset                # Reset to baseline (no team)
-  ./swap-team.sh --reset --dry-run      # Preview what reset would remove
-  ./swap-team.sh --verify               # Check state consistency
-  ./swap-team.sh --recover              # Recover from interrupted swap
-  ./swap-team.sh --auto-recover dev-pack # CI/CD mode with auto-rollback
-  ./swap-team.sh dev-pack --sync-first  # Sync infrastructure then apply team
-  ./swap-team.sh dev-pack --auto-sync   # Sync only if roster has updates
-  ./swap-team.sh --cleanup-orphans      # Clean up old orphan backups
-  ./swap-team.sh dev-pack --auto-cleanup # Swap team and auto-clean orphan backups
-  echo "team" | ./swap-team.sh --interactive --keep-all # Force prompts in pipe
-  ./swap-team.sh dev-pack --no-interactive --keep-all   # Skip TTY check in CI
+  ./swap-rite.sh dev-pack               # Switch to dev-pack (interactive prompts)
+  ./swap-rite.sh                        # Show current rite
+  ./swap-rite.sh --list                 # List available rites
+  ./swap-rite.sh dev-pack --keep-all    # Keep all orphans during swap
+  ./swap-rite.sh dev-pack --remove-all  # Remove all orphans during swap
+  ./swap-rite.sh --update               # Update current rite from roster
+  ./swap-rite.sh dev-pack --update      # Update even if already on dev-pack
+  ./swap-rite.sh --update --dry-run     # Preview what update would change
+  ./swap-rite.sh --reset                # Reset to baseline (no rite)
+  ./swap-rite.sh --reset --dry-run      # Preview what reset would remove
+  ./swap-rite.sh --verify               # Check state consistency
+  ./swap-rite.sh --recover              # Recover from interrupted swap
+  ./swap-rite.sh --auto-recover dev-pack # CI/CD mode with auto-rollback
+  ./swap-rite.sh dev-pack --sync-first  # Sync infrastructure then apply rite
+  ./swap-rite.sh dev-pack --auto-sync   # Sync only if roster has updates
+  ./swap-rite.sh --cleanup-orphans      # Clean up old orphan backups
+  ./swap-rite.sh dev-pack --auto-cleanup # Swap rite and auto-clean orphan backups
+  echo "rite" | ./swap-rite.sh --interactive --keep-all # Force prompts in pipe
+  ./swap-rite.sh dev-pack --no-interactive --keep-all   # Skip TTY check in CI
 
 EOF
 }
