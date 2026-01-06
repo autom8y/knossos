@@ -31,15 +31,23 @@
 set -euo pipefail
 
 # ============================================================================
+# Home Resolution
+# ============================================================================
+
+# Source Knossos home resolution (handles ROSTER_HOME deprecation)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/lib/knossos-home.sh"
+
+# ============================================================================
 # Constants
 # ============================================================================
 
-readonly ROSTER_HOME="${ROSTER_HOME:-$HOME/Code/roster}"
+readonly KNOSSOS_HOME  # Already set by knossos-home.sh
 readonly ROSTER_SYNC_VERSION="1.0.0"
 readonly ROSTER_SYNC_DEBUG="${ROSTER_SYNC_DEBUG:-0}"
 
 # Source library modules in dependency order
-readonly SYNC_LIB="$ROSTER_HOME/lib/sync"
+readonly SYNC_LIB="$KNOSSOS_HOME/lib/sync"
 
 # ============================================================================
 # Logging
@@ -107,7 +115,7 @@ check_dependencies() {
 load_sync_library() {
     if [[ ! -d "$SYNC_LIB" ]]; then
         log_error "Sync library not found: $SYNC_LIB"
-        log_error "Ensure ROSTER_HOME is set correctly: $ROSTER_HOME"
+        log_error "Ensure ROSTER_HOME is set correctly: $KNOSSOS_HOME"
         exit 1
     fi
 
@@ -300,7 +308,7 @@ EOF
 show_version() {
     echo "roster-sync $ROSTER_SYNC_VERSION"
     echo "Schema version: 3"
-    echo "ROSTER_HOME: $ROSTER_HOME"
+    echo "ROSTER_HOME: $KNOSSOS_HOME"
 }
 
 # ============================================================================
@@ -359,9 +367,9 @@ cmd_init() {
     log "Initializing project with roster ecosystem..."
     log "  Project: $project_path"
 
-    # 1. Validate roster exists at $ROSTER_HOME
-    if [[ ! -d "$ROSTER_HOME" ]]; then
-        log_error "Roster not found: $ROSTER_HOME"
+    # 1. Validate roster exists at $KNOSSOS_HOME
+    if [[ ! -d "$KNOSSOS_HOME" ]]; then
+        log_error "Roster not found: $KNOSSOS_HOME"
         log_error "Set ROSTER_HOME environment variable"
         return "$EXIT_SYNC_INIT_FAILED"
     fi
@@ -379,7 +387,7 @@ cmd_init() {
 
     # Validate not in roster itself
     local roster_realpath project_realpath
-    roster_realpath=$(cd "$ROSTER_HOME" && pwd -P)
+    roster_realpath=$(cd "$KNOSSOS_HOME" && pwd -P)
     project_realpath=$(cd "$project_path" && pwd -P)
 
     if [[ "$project_realpath" == "$roster_realpath" || "$project_realpath" == "$roster_realpath/"* ]]; then
@@ -403,11 +411,11 @@ cmd_init() {
 
     # Validate team if specified
     if [[ -n "$team_name" ]]; then
-        local team_dir="$ROSTER_HOME/teams/$team_name"
+        local team_dir="$KNOSSOS_HOME/teams/$team_name"
         if [[ ! -d "$team_dir" ]]; then
             log_error "Team not found: $team_name"
             log_error "Available teams:"
-            ls "$ROSTER_HOME/teams/" 2>/dev/null | while read -r t; do
+            ls "$KNOSSOS_HOME/teams/" 2>/dev/null | while read -r t; do
                 log_error "  - $t"
             done
             return "$EXIT_SYNC_INIT_FAILED"
@@ -417,7 +425,7 @@ cmd_init() {
 
     if [[ "$FLAG_DRY_RUN" == "1" ]]; then
         log "DRY-RUN: Would initialize project"
-        log "  Roster: $ROSTER_HOME"
+        log "  Roster: $KNOSSOS_HOME"
         log "  Target: $project_path"
         [[ -n "$team_name" ]] && log "  Team: $team_name"
         return 0
@@ -450,7 +458,7 @@ cmd_init() {
 
     # Create manifest
     local manifest
-    manifest=$(create_manifest "$ROSTER_HOME" "$roster_commit" "$roster_ref")
+    manifest=$(create_manifest "$KNOSSOS_HOME" "$roster_commit" "$roster_ref")
 
     # 7. Process COPY-REPLACE items (roster-owned files)
     local item roster_file local_file checksum
@@ -458,7 +466,7 @@ cmd_init() {
     while IFS= read -r item; do
         [[ -z "$item" ]] && continue
 
-        roster_file="$ROSTER_HOME/.claude/$item"
+        roster_file="$KNOSSOS_HOME/.claude/$item"
         local_file=".claude/$item"
 
         if [[ ! -f "$roster_file" ]]; then
@@ -493,7 +501,7 @@ cmd_init() {
 
         item="${line%%:*}"
         strategy="${line#*:}"
-        roster_file="$ROSTER_HOME/.claude/$item"
+        roster_file="$KNOSSOS_HOME/.claude/$item"
         local_file=".claude/$item"
 
         if [[ ! -f "$roster_file" ]]; then
@@ -545,7 +553,7 @@ SETTINGS_EOF
         manifest=$(update_manifest_team "$manifest" "$team_name" "$team_checksum")
 
         # Call swap-rite.sh to apply rite agents/skills/commands
-        local swap_rite="$ROSTER_HOME/swap-rite.sh"
+        local swap_rite="$KNOSSOS_HOME/swap-rite.sh"
         if [[ -x "$swap_rite" ]]; then
             log "  Applying rite resources..."
             "$swap_rite" "$team_name" 2>/dev/null || {
@@ -624,7 +632,7 @@ cmd_sync() {
         log "DRY-RUN: Would process copy-replace items"
         conflicts=0
     else
-        conflicts=$(process_copy_replace "$ROSTER_HOME/.claude" ".claude" "$FLAG_FORCE")
+        conflicts=$(process_copy_replace "$KNOSSOS_HOME/.claude" ".claude" "$FLAG_FORCE")
     fi
 
     # Process merge items
@@ -633,7 +641,7 @@ cmd_sync() {
         log "DRY-RUN: Would process merge items"
         merge_errors=0
     else
-        merge_errors=$(process_merge_items "$ROSTER_HOME/.claude" ".claude" "$FLAG_FORCE")
+        merge_errors=$(process_merge_items "$KNOSSOS_HOME/.claude" ".claude" "$FLAG_FORCE")
     fi
 
     # Update manifest with new roster info
@@ -647,7 +655,7 @@ cmd_sync() {
     if [[ "$FLAG_PRUNE" == "1" ]]; then
         log "Checking for orphaned files..."
         local orphans
-        orphans=$(detect_orphans "$ROSTER_HOME/.claude")
+        orphans=$(detect_orphans "$KNOSSOS_HOME/.claude")
 
         if [[ -n "$orphans" ]]; then
             log "Orphaned files detected:"
@@ -930,8 +938,8 @@ cmd_repair() {
     fi
 
     # Validate roster is accessible
-    if [[ ! -d "$ROSTER_HOME" ]]; then
-        log_error "Roster not found: $ROSTER_HOME"
+    if [[ ! -d "$KNOSSOS_HOME" ]]; then
+        log_error "Roster not found: $KNOSSOS_HOME"
         log "  Set ROSTER_HOME environment variable"
         return "$EXIT_SYNC_INVALID_MANIFEST"
     fi
@@ -969,7 +977,7 @@ cmd_repair() {
     local roster_commit roster_ref roster_path
     roster_commit=$(get_roster_commit)
     roster_ref=$(get_roster_ref)
-    roster_path="$ROSTER_HOME"
+    roster_path="$KNOSSOS_HOME"
 
     # Preserve old roster info if current roster seems different
     if [[ -n "$old_roster_path" && "$old_roster_path" != "$roster_path" ]]; then
@@ -986,7 +994,7 @@ cmd_repair() {
         [[ -z "$item" ]] && continue
 
         local_file=".claude/$item"
-        roster_file="$ROSTER_HOME/.claude/$item"
+        roster_file="$KNOSSOS_HOME/.claude/$item"
 
         if [[ ! -f "$local_file" ]]; then
             # File missing - try to restore from roster
@@ -1017,7 +1025,7 @@ cmd_repair() {
         item="${line%%:*}"
         strategy="${line#*:}"
         local_file=".claude/$item"
-        roster_file="$ROSTER_HOME/.claude/$item"
+        roster_file="$KNOSSOS_HOME/.claude/$item"
 
         if [[ ! -f "$local_file" ]]; then
             # File missing - try to restore from roster
@@ -1128,7 +1136,7 @@ repair_preview_missing_files() {
     while IFS= read -r item; do
         [[ -z "$item" ]] && continue
         local_file=".claude/$item"
-        roster_file="$ROSTER_HOME/.claude/$item"
+        roster_file="$KNOSSOS_HOME/.claude/$item"
 
         if [[ ! -f "$local_file" && -f "$roster_file" ]]; then
             log "    + $item (from roster)"
@@ -1141,7 +1149,7 @@ repair_preview_missing_files() {
         [[ -z "$line" ]] && continue
         item="${line%%:*}"
         local_file=".claude/$item"
-        roster_file="$ROSTER_HOME/.claude/$item"
+        roster_file="$KNOSSOS_HOME/.claude/$item"
 
         if [[ ! -f "$local_file" && -f "$roster_file" ]]; then
             log "    + $item (from roster)"
@@ -1289,7 +1297,7 @@ cmd_diff() {
         local roster_file=".claude/$specific_file"
         local local_file=".claude/$specific_file"
 
-        if [[ ! -f "$ROSTER_HOME/$roster_file" ]]; then
+        if [[ ! -f "$KNOSSOS_HOME/$roster_file" ]]; then
             log_error "File not found in roster: $specific_file"
             return 1
         fi
@@ -1299,7 +1307,7 @@ cmd_diff() {
             return 1
         fi
 
-        diff -u "$ROSTER_HOME/$roster_file" "$local_file" || true
+        diff -u "$KNOSSOS_HOME/$roster_file" "$local_file" || true
     else
         # Diff all managed files
         log "Comparing managed files with roster..."
@@ -1309,7 +1317,7 @@ cmd_diff() {
         while IFS= read -r item; do
             [[ -z "$item" ]] && continue
 
-            roster_file="$ROSTER_HOME/.claude/$item"
+            roster_file="$KNOSSOS_HOME/.claude/$item"
             local_file=".claude/$item"
 
             if [[ ! -f "$roster_file" ]]; then

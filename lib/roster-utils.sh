@@ -6,7 +6,7 @@
 # and workflow.yaml files. Designed to be sourced by swap-rite.sh.
 #
 # Usage:
-#   source "$ROSTER_HOME/lib/roster-utils.sh"
+#   source "$KNOSSOS_HOME/lib/roster-utils.sh"
 #   generate_roster "10x-dev-pack"
 #
 # Functions:
@@ -122,8 +122,8 @@ get_produces() {
 # Output: Formatted markdown table to stdout
 generate_roster() {
     local team_name="$1"
-    local agents_dir="$ROSTER_HOME/rites/$team_name/agents"
-    local workflow_file="$ROSTER_HOME/rites/$team_name/workflow.yaml"
+    local agents_dir="$KNOSSOS_HOME/rites/$team_name/agents"
+    local workflow_file="$KNOSSOS_HOME/rites/$team_name/workflow.yaml"
 
     if [[ ! -d "$agents_dir" ]]; then
         echo "Error: Agents directory not found: $agents_dir" >&2

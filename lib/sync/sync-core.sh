@@ -8,7 +8,7 @@
 # Part of: roster-sync (TDD-cem-replacement)
 #
 # Usage:
-#   source "$ROSTER_HOME/lib/sync/sync-core.sh"
+#   source "$KNOSSOS_HOME/lib/sync/sync-core.sh"
 #   classification=$(classify_file "COMMAND_REGISTRY.md")
 #
 # Functions:

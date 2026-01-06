@@ -8,7 +8,7 @@
 # Part of: roster-sync (TDD-cem-replacement)
 #
 # Usage:
-#   source "$ROSTER_HOME/lib/sync/sync-config.sh"
+#   source "$KNOSSOS_HOME/lib/sync/sync-config.sh"
 #
 # Functions:
 #   get_copy_replace_items  - Files completely replaced from roster

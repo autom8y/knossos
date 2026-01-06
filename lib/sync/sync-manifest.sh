@@ -8,7 +8,7 @@
 # Part of: roster-sync (TDD-cem-replacement)
 #
 # Usage:
-#   source "$ROSTER_HOME/lib/sync/sync-manifest.sh"
+#   source "$KNOSSOS_HOME/lib/sync/sync-manifest.sh"
 #   manifest=$(read_manifest)
 #   migrate_manifest_if_needed
 #   write_manifest "$manifest"

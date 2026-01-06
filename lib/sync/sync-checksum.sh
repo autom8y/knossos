@@ -8,7 +8,7 @@
 # Part of: roster-sync (TDD-cem-replacement)
 #
 # Usage:
-#   source "$ROSTER_HOME/lib/sync/sync-checksum.sh"
+#   source "$KNOSSOS_HOME/lib/sync/sync-checksum.sh"
 #   init_checksum_cache
 #   compute_checksum "/path/to/file"
 #   save_checksum_cache

@@ -8,7 +8,7 @@
 # Part of: roster rite-swap infrastructure
 #
 # Usage:
-#   source "$ROSTER_HOME/lib/rite/rite-hooks-registration.sh"
+#   source "$KNOSSOS_HOME/lib/rite/rite-hooks-registration.sh"
 #   swap_hook_registrations "rite-name"
 #
 # Dependencies:
@@ -17,7 +17,7 @@
 #   - Logging functions (log, log_debug, log_warning, log_error)
 #
 # Environment:
-#   ROSTER_HOME - Path to roster installation
+#   KNOSSOS_HOME - Path to Knossos platform (formerly ROSTER_HOME)
 #   DRY_RUN_MODE - If set to 1, preview changes without writing
 
 # Guard against re-sourcing
@@ -433,8 +433,8 @@ generate_hooks_json() {
 swap_hook_registrations() {
     local team_name="$1"
     local settings_file=".claude/settings.local.json"
-    local base_hooks_yaml="$ROSTER_HOME/user-hooks/base_hooks.yaml"
-    local team_hooks_yaml="$ROSTER_HOME/rites/$team_name/hooks.yaml"
+    local base_hooks_yaml="$KNOSSOS_HOME/user-hooks/base_hooks.yaml"
+    local team_hooks_yaml="$KNOSSOS_HOME/rites/$team_name/hooks.yaml"
 
     log_debug "Updating hook registrations for rite: $team_name"
 
