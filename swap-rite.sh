@@ -622,15 +622,15 @@ complete_partial_commit() {
         # Step already marked done, but manifest is now current
     fi
 
-    # ACTIVE_TEAM should already be written (that's what got us past point-of-no-return)
+    # ACTIVE_RITE should already be written (that's what got us past point-of-no-return)
     # But verify and fix if somehow missing
-    if ! is_commit_step_done "$COMMIT_STEP_ACTIVE_TEAM"; then
-        log_warning "ACTIVE_TEAM step not marked but we're past point-of-no-return"
+    if ! is_commit_step_done "$COMMIT_STEP_ACTIVE_RITE"; then
+        log_warning "ACTIVE_RITE step not marked but we're past point-of-no-return"
         if [[ -f ".claude/ACTIVE_RITE" ]]; then
             local current_team
             current_team=$(cat .claude/ACTIVE_RITE | tr -d '[:space:]')
             if [[ "$current_team" == "$target_team" ]]; then
-                mark_commit_step "$COMMIT_STEP_ACTIVE_TEAM"
+                mark_commit_step "$COMMIT_STEP_ACTIVE_RITE"
             fi
         fi
     fi
@@ -3185,36 +3185,36 @@ perform_swap() {
     mark_commit_step "$COMMIT_STEP_HOOK_REGISTRATIONS"
 
     # =========================================================================
-    # PART 2 OF COMMIT: Manifest and ACTIVE_TEAM (the actual commit)
+    # PART 2 OF COMMIT: Manifest and ACTIVE_RITE (the actual commit)
     # =========================================================================
     # Write manifest with current state (after commands synced so we capture them)
-    # IMPORTANT: Manifest must be written BEFORE ACTIVE_TEAM
+    # IMPORTANT: Manifest must be written BEFORE ACTIVE_RITE
     write_manifest "$team_name"
     mark_commit_step "$COMMIT_STEP_MANIFEST"
 
     # =========================================================================
-    # FINAL COMMIT: Write ACTIVE_TEAM (LAST - this is the commit point)
+    # FINAL COMMIT: Write ACTIVE_RITE (LAST - this is the commit point)
     # =========================================================================
-    # ACTIVE_TEAM is the commit indicator - if it contains the new team name,
+    # ACTIVE_RITE is the commit indicator - if it contains the new rite name,
     # the swap is considered complete. Writing it LAST ensures all resources
     # are in place first. This is the POINT-OF-NO-RETURN.
-    if [[ -f "$STAGING_DIR/ACTIVE_TEAM" ]]; then
-        mv "$STAGING_DIR/ACTIVE_TEAM" .claude/ACTIVE_RITE || {
-            log_error "Failed to commit ACTIVE_TEAM"
-            update_journal_error "Failed to commit ACTIVE_TEAM"
+    if [[ -f "$STAGING_DIR/ACTIVE_RITE" ]]; then
+        mv "$STAGING_DIR/ACTIVE_RITE" .claude/ACTIVE_RITE || {
+            log_error "Failed to commit ACTIVE_RITE"
+            update_journal_error "Failed to commit ACTIVE_RITE"
             rollback_swap
             exit "$EXIT_SWAP_FAILURE"
         }
     else
         # Fallback if staging was already cleaned up
         echo -n "$team_name" > .claude/ACTIVE_RITE || {
-            log_error "Failed to write ACTIVE_TEAM"
+            log_error "Failed to write ACTIVE_RITE"
             rollback_swap
             exit "$EXIT_SWAP_FAILURE"
         }
     fi
     # Mark point-of-no-return - after this, recovery must complete forward
-    mark_commit_step "$COMMIT_STEP_ACTIVE_TEAM"
+    mark_commit_step "$COMMIT_STEP_ACTIVE_RITE"
 
     # Update CEM manifest team section (critical for roster-sync staleness tracking)
     # Note: This is after point-of-no-return, so failure cannot trigger rollback

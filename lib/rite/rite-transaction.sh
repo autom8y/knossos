@@ -401,10 +401,10 @@ is_commit_step_done() {
     [[ "$result" == "true" ]]
 }
 
-# Check if we're past the point-of-no-return (ACTIVE_TEAM written)
+# Check if we're past the point-of-no-return (ACTIVE_RITE written)
 # Returns: 0 if past point-of-no-return, 1 if before
 is_past_point_of_no_return() {
-    is_commit_step_done "$COMMIT_STEP_ACTIVE_TEAM"
+    is_commit_step_done "$COMMIT_STEP_ACTIVE_RITE"
 }
 
 # Get list of incomplete commit steps
