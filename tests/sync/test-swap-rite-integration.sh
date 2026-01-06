@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 #
-# test-swap-team-integration.sh - Integration tests for swap-team.sh with roster-sync
+# test-swap-rite-integration.sh - Integration tests for swap-rite.sh with roster-sync
 #
 # Tests the waterfall sync pattern and manifest team section updates per task-016:
 #   - --sync-first flag triggers roster-sync before team apply
 #   - --auto-sync conditionally syncs if roster has updates
 #   - manifest.json team section updated on swap
-#   - No regression in existing swap-team.sh behavior
+#   - No regression in existing swap-rite.sh behavior
 #
 # Part of: roster-sync integration (task-016)
 
@@ -104,7 +104,7 @@ test_help_includes_new_flags() {
     run_test "Help includes --sync-first and --auto-sync flags"
 
     local output
-    output=$("$ROSTER_HOME/swap-team.sh" --help 2>&1 || true)
+    output=$("$ROSTER_HOME/swap-rite.sh" --help 2>&1 || true)
 
     if echo "$output" | grep -q -- "--sync-first"; then
         test_pass "--sync-first flag in help"
@@ -130,8 +130,8 @@ test_roster_has_updates_no_manifest() {
     # Source the function we're testing
     cd "$TEST_PROJECT"
 
-    # Source swap-team.sh to get the function (won't execute main)
-    source "$ROSTER_HOME/swap-team.sh" 2>/dev/null <<< "" || true
+    # Source swap-rite.sh to get the function (won't execute main)
+    source "$ROSTER_HOME/swap-rite.sh" 2>/dev/null <<< "" || true
 
     if roster_has_updates; then
         test_pass "Returns true (updates available) when no manifest"
@@ -147,8 +147,8 @@ test_roster_has_updates_stale_manifest() {
 
     cd "$TEST_PROJECT"
 
-    # Source swap-team.sh to get the function
-    source "$ROSTER_HOME/swap-team.sh" 2>/dev/null <<< "" || true
+    # Source swap-rite.sh to get the function
+    source "$ROSTER_HOME/swap-rite.sh" 2>/dev/null <<< "" || true
 
     if roster_has_updates; then
         test_pass "Returns true (updates available) with stale manifest"
@@ -167,8 +167,8 @@ test_roster_has_updates_current_manifest() {
 
     cd "$TEST_PROJECT"
 
-    # Source swap-team.sh to get the function
-    source "$ROSTER_HOME/swap-team.sh" 2>/dev/null <<< "" || true
+    # Source swap-rite.sh to get the function
+    source "$ROSTER_HOME/swap-rite.sh" 2>/dev/null <<< "" || true
 
     if ! roster_has_updates; then
         test_pass "Returns false (up to date) with current manifest"
@@ -191,8 +191,8 @@ test_update_cem_manifest_team_creates_team_section() {
 
     cd "$TEST_PROJECT"
 
-    # Source swap-team.sh
-    source "$ROSTER_HOME/swap-team.sh" 2>/dev/null <<< "" || true
+    # Source swap-rite.sh
+    source "$ROSTER_HOME/swap-rite.sh" 2>/dev/null <<< "" || true
 
     # Call the function
     update_cem_manifest_team "10x-dev-pack"
@@ -241,8 +241,8 @@ test_update_cem_manifest_no_manifest() {
 
     cd "$TEST_PROJECT"
 
-    # Source swap-team.sh
-    source "$ROSTER_HOME/swap-team.sh" 2>/dev/null <<< "" || true
+    # Source swap-rite.sh
+    source "$ROSTER_HOME/swap-rite.sh" 2>/dev/null <<< "" || true
 
     # Call the function - should not fail
     if update_cem_manifest_team "10x-dev-pack" 2>/dev/null; then
@@ -268,8 +268,8 @@ test_roster_sync_available() {
 
     cd "$TEST_PROJECT"
 
-    # Source swap-team.sh
-    source "$ROSTER_HOME/swap-team.sh" 2>/dev/null <<< "" || true
+    # Source swap-rite.sh
+    source "$ROSTER_HOME/swap-rite.sh" 2>/dev/null <<< "" || true
 
     if [[ -x "$ROSTER_HOME/roster-sync" ]]; then
         if roster_sync_available; then
@@ -296,7 +296,7 @@ test_existing_flags_still_work() {
 
     # Test --list works
     local output
-    output=$("$ROSTER_HOME/swap-team.sh" --list 2>&1) || true
+    output=$("$ROSTER_HOME/swap-rite.sh" --list 2>&1) || true
 
     if echo "$output" | grep -q "Available teams"; then
         test_pass "--list flag works"
@@ -317,7 +317,7 @@ test_swap_without_new_flags() {
 
     # Dry-run swap to test the flow without actually swapping
     local output
-    output=$("$ROSTER_HOME/swap-team.sh" "10x-dev-pack" --dry-run 2>&1) || true
+    output=$("$ROSTER_HOME/swap-rite.sh" "10x-dev-pack" --dry-run 2>&1) || true
 
     # Should show preview output, not an error about flags
     if echo "$output" | grep -qi "error.*sync\|unknown.*option"; then
@@ -333,7 +333,7 @@ test_swap_without_new_flags() {
 
 main() {
     echo "=========================================="
-    echo "swap-team.sh + roster-sync Integration Tests"
+    echo "swap-rite.sh + roster-sync Integration Tests"
     echo "=========================================="
     echo ""
     echo "ROSTER_HOME: $ROSTER_HOME"
