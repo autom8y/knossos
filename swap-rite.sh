@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 #
-# swap-team.sh - Agent Team Pack Management System
+# swap-rite.sh - Agent Rite Pack Management System
 #
-# Swaps Claude Code agent team packs with atomic-ish operations.
+# Swaps Claude Code agent rite packs with atomic-ish operations.
 # See TDD-0003 for design details.
 
 set -euo pipefail
