@@ -66,7 +66,7 @@ func runSwitch(ctx *cmdContext, teamName string, opts switchOptions) error {
 	}
 
 	switchOpts := team.SwitchOptions{
-		TargetTeam: teamName,
+		TargetRite: teamName,
 		RemoveAll:  opts.removeAll,
 		KeepAll:    opts.keepAll,
 		PromoteAll: opts.promoteAll,
@@ -89,8 +89,8 @@ func runSwitch(ctx *cmdContext, teamName string, opts switchOptions) error {
 
 	// Build output
 	out := output.TeamSwitchOutput{
-		Team:               result.Team,
-		PreviousTeam:       result.PreviousTeam,
+		Team:               result.Rite,
+		PreviousTeam:       result.PreviousRite,
 		SwitchedAt:         result.SwitchedAt.Format(time.RFC3339),
 		AgentsInstalled:    result.AgentsInstalled,
 		ClaudeMDUpdated:    result.ClaudeMDUpdated,
@@ -125,7 +125,7 @@ func runDryRun(ctx *cmdContext, teamName string, opts team.SwitchOptions, printe
 	resolver := ctx.getResolver()
 
 	// Get target team
-	targetTeam, err := discovery.Get(teamName)
+	targetRite, err := discovery.Get(teamName)
 	if err != nil {
 		printer.PrintError(err)
 		return err
@@ -143,15 +143,15 @@ func runDryRun(ctx *cmdContext, teamName string, opts team.SwitchOptions, printe
 	orphans := manifest.DetectOrphans(teamName)
 
 	// Build agent list
-	agents := make([]string, len(targetTeam.Agents))
-	for i, a := range targetTeam.Agents {
+	agents := make([]string, len(targetRite.Agents))
+	for i, a := range targetRite.Agents {
 		agents[i] = a + ".md"
 	}
 
 	out := output.TeamSwitchDryRunOutput{
 		DryRun:                 true,
 		WouldSwitchTo:          teamName,
-		CurrentTeam:            manifest.ActiveTeam,
+		CurrentTeam:            manifest.ActiveRite,
 		WouldInstall:           agents,
 		OrphansDetected:        orphans,
 		OrphanStrategyRequired: len(orphans) > 0 && !opts.HasOrphanStrategy(),

@@ -11,15 +11,15 @@ import (
 	"github.com/autom8y/ariadne/internal/paths"
 )
 
-// SwitchOptions configures team switch behavior.
+// SwitchOptions configures rite switch behavior.
 type SwitchOptions struct {
-	TargetTeam string
+	TargetRite string
 	RemoveAll  bool
 	KeepAll    bool
 	PromoteAll bool
 	Update     bool
 	DryRun     bool
-	NoSync     bool // Skip inscription sync on team switch
+	NoSync     bool // Skip inscription sync on rite switch
 }
 
 // HasOrphanStrategy returns true if an orphan handling flag is set.
@@ -41,10 +41,10 @@ func (o *SwitchOptions) OrphanStrategy() string {
 	return ""
 }
 
-// SwitchResult represents the result of a team switch.
+// SwitchResult represents the result of a rite switch.
 type SwitchResult struct {
-	Team               string             `json:"team"`
-	PreviousTeam       string             `json:"previous_team"`
+	Rite               string             `json:"team"` // Keep JSON tag for backward compatibility
+	PreviousRite       string             `json:"previous_team"` // Keep JSON tag for backward compatibility
 	SwitchedAt         time.Time          `json:"switched_at"`
 	AgentsInstalled    []string           `json:"agents_installed"`
 	OrphansHandled     *OrphanResult      `json:"orphans_handled,omitempty"`
@@ -94,10 +94,10 @@ func NewSwitcher(resolver *paths.Resolver) *Switcher {
 	}
 }
 
-// Switch performs a team switch.
+// Switch performs a rite switch.
 func (s *Switcher) Switch(opts SwitchOptions) (*SwitchResult, error) {
-	// 1. Validate target team exists
-	team, err := s.discovery.Get(opts.TargetTeam)
+	// 1. Validate target rite exists
+	rite, err := s.discovery.Get(opts.TargetRite)
 	if err != nil {
 		return nil, err
 	}
@@ -108,25 +108,25 @@ func (s *Switcher) Switch(opts SwitchOptions) (*SwitchResult, error) {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to load manifest", err)
 	}
 
-	previousTeam := manifest.ActiveTeam
+	previousRite := manifest.ActiveRite
 
 	// 3. Detect orphans
-	orphans := manifest.DetectOrphans(opts.TargetTeam)
+	orphans := manifest.DetectOrphans(opts.TargetRite)
 	if len(orphans) > 0 && !opts.HasOrphanStrategy() {
-		return nil, errors.ErrOrphanConflict(orphans, previousTeam, opts.TargetTeam)
+		return nil, errors.ErrOrphanConflict(orphans, previousRite, opts.TargetRite)
 	}
 
 	// 4. Dry run check
 	if opts.DryRun {
-		return s.dryRunResult(team, manifest, orphans, opts)
+		return s.dryRunResult(rite, manifest, orphans, opts)
 	}
 
-	// 5. Check if already on target team and not forcing update
-	if previousTeam == opts.TargetTeam && !opts.Update {
+	// 5. Check if already on target rite and not forcing update
+	if previousRite == opts.TargetRite && !opts.Update {
 		// Return success with no changes
 		return &SwitchResult{
-			Team:            opts.TargetTeam,
-			PreviousTeam:    previousTeam,
+			Rite:            opts.TargetRite,
+			PreviousRite:    previousRite,
 			SwitchedAt:      time.Now().UTC(),
 			AgentsInstalled: []string{},
 			ClaudeMDUpdated: false,
@@ -141,7 +141,7 @@ func (s *Switcher) Switch(opts SwitchOptions) (*SwitchResult, error) {
 	}
 
 	// 7. Execute switch with rollback on failure
-	result, err := s.executeSwitch(team, manifest, orphans, opts)
+	result, err := s.executeSwitch(rite, manifest, orphans, opts)
 	if err != nil {
 		s.restoreBackup(backup)
 		return nil, errors.Wrap(errors.CodeSwitchAborted, "switch failed, restored backup", err)
@@ -154,17 +154,17 @@ func (s *Switcher) Switch(opts SwitchOptions) (*SwitchResult, error) {
 }
 
 // dryRunResult returns what would happen without making changes.
-func (s *Switcher) dryRunResult(team *Team, manifest *Manifest, orphans []string, opts SwitchOptions) (*SwitchResult, error) {
+func (s *Switcher) dryRunResult(rite *Rite, manifest *Manifest, orphans []string, opts SwitchOptions) (*SwitchResult, error) {
 	// This is a bit of a hack - return DryRunResult through a wrapper
 	// The actual implementation will populate the proper structure
-	agents := make([]string, len(team.Agents))
-	for i, a := range team.Agents {
+	agents := make([]string, len(rite.Agents))
+	for i, a := range rite.Agents {
 		agents[i] = a + ".md"
 	}
 
 	result := &SwitchResult{
-		Team:            opts.TargetTeam,
-		PreviousTeam:    manifest.ActiveTeam,
+		Rite:            opts.TargetRite,
+		PreviousRite:    manifest.ActiveRite,
 		SwitchedAt:      time.Now().UTC(),
 		AgentsInstalled: agents,
 		ClaudeMDUpdated: false,
@@ -182,7 +182,7 @@ func (s *Switcher) dryRunResult(team *Team, manifest *Manifest, orphans []string
 }
 
 // executeSwitch performs the actual switch operation.
-func (s *Switcher) executeSwitch(team *Team, manifest *Manifest, orphans []string, opts SwitchOptions) (*SwitchResult, error) {
+func (s *Switcher) executeSwitch(rite *Rite, manifest *Manifest, orphans []string, opts SwitchOptions) (*SwitchResult, error) {
 	// 1. Handle orphans
 	if len(orphans) > 0 {
 		if err := s.handleOrphans(manifest, orphans, opts); err != nil {
@@ -190,18 +190,18 @@ func (s *Switcher) executeSwitch(team *Team, manifest *Manifest, orphans []strin
 		}
 	}
 
-	// 2. Copy agents from team to .claude/agents/
+	// 2. Copy agents from rite to .claude/agents/
 	agentsDir := s.resolver.AgentsDir()
 	if err := paths.EnsureDir(agentsDir); err != nil {
 		return nil, err
 	}
 
 	var installedAgents []string
-	teamAgentsDir := s.resolver.TeamAgentsDir(opts.TargetTeam)
+	riteAgentsDir := s.resolver.TeamAgentsDir(opts.TargetRite)
 
-	entries, err := os.ReadDir(teamAgentsDir)
+	entries, err := os.ReadDir(riteAgentsDir)
 	if err != nil {
-		return nil, errors.Wrap(errors.CodeGeneralError, "failed to read team agents", err)
+		return nil, errors.Wrap(errors.CodeGeneralError, "failed to read rite agents", err)
 	}
 
 	for _, entry := range entries {
@@ -212,7 +212,7 @@ func (s *Switcher) executeSwitch(team *Team, manifest *Manifest, orphans []strin
 			continue
 		}
 
-		srcPath := filepath.Join(teamAgentsDir, entry.Name())
+		srcPath := filepath.Join(riteAgentsDir, entry.Name())
 		dstPath := filepath.Join(agentsDir, entry.Name())
 
 		if err := copyFile(srcPath, dstPath); err != nil {
@@ -221,24 +221,24 @@ func (s *Switcher) executeSwitch(team *Team, manifest *Manifest, orphans []strin
 
 		// Compute checksum and add to manifest
 		checksum, _ := ComputeChecksum(dstPath)
-		manifest.AddAgent(entry.Name(), "team", opts.TargetTeam, checksum)
+		manifest.AddAgent(entry.Name(), "team", opts.TargetRite, checksum)
 		installedAgents = append(installedAgents, entry.Name())
 	}
 
 	// 3. Update ACTIVE_RITE file
-	if err := os.WriteFile(s.resolver.ActiveRiteFile(), []byte(opts.TargetTeam), 0644); err != nil {
+	if err := os.WriteFile(s.resolver.ActiveRiteFile(), []byte(opts.TargetRite), 0644); err != nil {
 		return nil, errors.Wrap(errors.CodePermissionDenied, "failed to write ACTIVE_RITE", err)
 	}
 
 	// 4. Copy workflow.yaml to ACTIVE_WORKFLOW.yaml
-	workflowSrc := s.resolver.TeamWorkflowFile(opts.TargetTeam)
+	workflowSrc := s.resolver.TeamWorkflowFile(opts.TargetRite)
 	workflowDst := s.resolver.ActiveWorkflowFile()
 	if err := copyFile(workflowSrc, workflowDst); err != nil {
 		// Non-critical, just log
 	}
 
 	// 5. Update manifest
-	manifest.SetActiveTeam(opts.TargetTeam)
+	manifest.SetActiveTeam(opts.TargetRite)
 	manifest.ClearOrphans()
 	if err := manifest.Save(s.resolver.AgentManifestFile()); err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to save manifest", err)
@@ -246,8 +246,8 @@ func (s *Switcher) executeSwitch(team *Team, manifest *Manifest, orphans []strin
 
 	// 6. Build result structure
 	result := &SwitchResult{
-		Team:            opts.TargetTeam,
-		PreviousTeam:    manifest.ActiveTeam,
+		Rite:            opts.TargetRite,
+		PreviousRite:    manifest.ActiveRite,
 		SwitchedAt:      time.Now().UTC(),
 		AgentsInstalled: installedAgents,
 		ClaudeMDUpdated: false,
@@ -265,7 +265,7 @@ func (s *Switcher) executeSwitch(team *Team, manifest *Manifest, orphans []strin
 	if !opts.NoSync {
 		pipeline := inscription.NewPipeline(s.resolver.ProjectRoot())
 		syncResult, err := pipeline.Sync(inscription.SyncOptions{
-			RiteName: opts.TargetTeam,
+			RiteName: opts.TargetRite,
 		})
 		if err != nil {
 			// Log warning but don't fail the switch
@@ -292,7 +292,7 @@ func (s *Switcher) executeSwitch(team *Team, manifest *Manifest, orphans []strin
 	} else {
 		// Fallback to legacy ClaudeMDUpdater if inscription sync is skipped
 		updater := NewClaudeMDUpdater(s.resolver.ClaudeMDFile())
-		if err := updater.UpdateForTeam(team); err == nil {
+		if err := updater.UpdateForTeam(rite); err == nil {
 			result.ClaudeMDUpdated = true
 		}
 	}

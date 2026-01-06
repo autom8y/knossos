@@ -29,7 +29,7 @@ func TestManifest_SaveLoad(t *testing.T) {
 
 	// Create and save manifest
 	m := NewEmptyManifest()
-	m.ActiveTeam = "test-team"
+	m.ActiveRite = "test-team"
 	m.AddAgent("agent-a.md", "team", "test-team", "sha256:abc123")
 
 	if err := m.Save(manifestPath); err != nil {
@@ -42,8 +42,8 @@ func TestManifest_SaveLoad(t *testing.T) {
 		t.Fatalf("LoadManifest() error = %v", err)
 	}
 
-	if loaded.ActiveTeam != "test-team" {
-		t.Errorf("ActiveTeam = %q, want %q", loaded.ActiveTeam, "test-team")
+	if loaded.ActiveRite != "test-team" {
+		t.Errorf("ActiveTeam = %q, want %q", loaded.ActiveRite, "test-team")
 	}
 
 	if len(loaded.Agents) != 1 {
@@ -86,7 +86,7 @@ func TestManifest_LoadNonExistent(t *testing.T) {
 
 func TestManifest_DetectOrphans(t *testing.T) {
 	m := NewEmptyManifest()
-	m.ActiveTeam = "team-a"
+	m.ActiveRite = "team-a"
 	m.AddAgent("agent-a.md", "team", "team-a", "sha256:a")
 	m.AddAgent("agent-b.md", "team", "team-a", "sha256:b")
 	m.AddAgent("agent-c.md", "team", "team-b", "sha256:c")

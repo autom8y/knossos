@@ -7,11 +7,11 @@ import (
 	"strings"
 )
 
-// TeamContext represents the context injection configuration for a team.
-// This is the Go representation of rites/{team}/context.yaml files.
-type TeamContext struct {
+// RiteContext represents the context injection configuration for a rite.
+// This is the Go representation of rites/{rite}/context.yaml files.
+type RiteContext struct {
 	SchemaVersion string            `yaml:"schema_version" json:"schema_version"`
-	TeamName      string            `yaml:"team_name" json:"team_name"`
+	TeamName      string            `yaml:"team_name" json:"team_name"` // Keep field name for YAML compatibility
 	DisplayName   string            `yaml:"display_name,omitempty" json:"display_name,omitempty"`
 	Description   string            `yaml:"description,omitempty" json:"description,omitempty"`
 	Domain        string            `yaml:"domain,omitempty" json:"domain,omitempty"`
@@ -25,11 +25,11 @@ type ContextRow struct {
 	Value string `yaml:"value" json:"value"`
 }
 
-// ToMarkdown renders the team context as a markdown table.
+// ToMarkdown renders the rite context as a markdown table.
 // Format matches the existing bash output:
 // | **Key** | Value |
-func (tc *TeamContext) ToMarkdown() string {
-	if tc == nil || len(tc.ContextRows) == 0 {
+func (rc *RiteContext) ToMarkdown() string {
+	if rc == nil || len(rc.ContextRows) == 0 {
 		return ""
 	}
 
@@ -40,34 +40,34 @@ func (tc *TeamContext) ToMarkdown() string {
 	b.WriteString("|---|---|\n")
 
 	// Write context rows
-	for _, row := range tc.ContextRows {
+	for _, row := range rc.ContextRows {
 		b.WriteString(fmt.Sprintf("| **%s** | %s |\n", row.Key, row.Value))
 	}
 
 	return b.String()
 }
 
-// NewTeamContext creates a new TeamContext with default values.
-func NewTeamContext(teamName string) *TeamContext {
-	return &TeamContext{
+// NewTeamContext creates a new RiteContext with default values.
+func NewTeamContext(riteName string) *RiteContext {
+	return &RiteContext{
 		SchemaVersion: "1.0",
-		TeamName:      teamName,
+		TeamName:      riteName,
 		ContextRows:   []ContextRow{},
 		Metadata:      make(map[string]string),
 	}
 }
 
-// AddRow adds a context row to the TeamContext.
-func (tc *TeamContext) AddRow(key, value string) {
-	tc.ContextRows = append(tc.ContextRows, ContextRow{
+// AddRow adds a context row to the RiteContext.
+func (rc *RiteContext) AddRow(key, value string) {
+	rc.ContextRows = append(rc.ContextRows, ContextRow{
 		Key:   key,
 		Value: value,
 	})
 }
 
 // GetRow returns the value for a given key, or empty string if not found.
-func (tc *TeamContext) GetRow(key string) string {
-	for _, row := range tc.ContextRows {
+func (rc *RiteContext) GetRow(key string) string {
+	for _, row := range rc.ContextRows {
 		if row.Key == key {
 			return row.Value
 		}
@@ -76,16 +76,16 @@ func (tc *TeamContext) GetRow(key string) string {
 }
 
 // HasRows returns true if the context has any rows.
-func (tc *TeamContext) HasRows() bool {
-	return len(tc.ContextRows) > 0
+func (rc *RiteContext) HasRows() bool {
+	return len(rc.ContextRows) > 0
 }
 
-// Validate checks that the TeamContext has required fields.
-func (tc *TeamContext) Validate() error {
-	if tc.TeamName == "" {
+// Validate checks that the RiteContext has required fields.
+func (rc *RiteContext) Validate() error {
+	if rc.TeamName == "" {
 		return fmt.Errorf("team_name is required")
 	}
-	if tc.SchemaVersion == "" {
+	if rc.SchemaVersion == "" {
 		return fmt.Errorf("schema_version is required")
 	}
 	return nil

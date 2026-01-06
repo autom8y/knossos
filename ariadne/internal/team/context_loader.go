@@ -22,7 +22,7 @@ type ContextLoader struct {
 	userDir  string
 
 	mu    sync.RWMutex
-	cache map[string]*TeamContext
+	cache map[string]*RiteContext
 }
 
 // NewContextLoader creates a new context loader using the paths resolver.
@@ -30,7 +30,7 @@ func NewContextLoader(resolver *paths.Resolver) *ContextLoader {
 	return &ContextLoader{
 		teamsDir: resolver.RitesDir(),
 		userDir:  paths.UserRitesDir(),
-		cache:    make(map[string]*TeamContext),
+		cache:    make(map[string]*RiteContext),
 	}
 }
 
@@ -39,7 +39,7 @@ func NewContextLoaderWithPaths(teamsDir, userDir string) *ContextLoader {
 	return &ContextLoader{
 		teamsDir: teamsDir,
 		userDir:  userDir,
-		cache:    make(map[string]*TeamContext),
+		cache:    make(map[string]*RiteContext),
 	}
 }
 
@@ -48,7 +48,7 @@ func NewContextLoaderWithPaths(teamsDir, userDir string) *ContextLoader {
 // 1. User rites directory ($XDG_DATA_HOME/ariadne/rites/{team}/context.yaml)
 // 2. Project rites directory (rites/{team}/context.yaml)
 // 3. Fallback: generates context from orchestrator.yaml
-func (cl *ContextLoader) Load(teamName string) (*TeamContext, error) {
+func (cl *ContextLoader) Load(teamName string) (*RiteContext, error) {
 	if teamName == "" {
 		return nil, errors.New(errors.CodeUsageError, "team name is required")
 	}
@@ -76,7 +76,7 @@ func (cl *ContextLoader) Load(teamName string) (*TeamContext, error) {
 }
 
 // loadFromFiles attempts to load context from YAML files or fallback to orchestrator.
-func (cl *ContextLoader) loadFromFiles(teamName string) (*TeamContext, error) {
+func (cl *ContextLoader) loadFromFiles(teamName string) (*RiteContext, error) {
 	// Try user teams directory first (higher priority)
 	if cl.userDir != "" {
 		contextPath := filepath.Join(cl.userDir, teamName, ContextFileName)
@@ -97,14 +97,14 @@ func (cl *ContextLoader) loadFromFiles(teamName string) (*TeamContext, error) {
 	return cl.generateFromOrchestrator(teamName)
 }
 
-// loadFromYAML loads a TeamContext from a YAML file.
-func (cl *ContextLoader) loadFromYAML(path string) (*TeamContext, error) {
+// loadFromYAML loads a RiteContext from a YAML file.
+func (cl *ContextLoader) loadFromYAML(path string) (*RiteContext, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
 
-	var ctx TeamContext
+	var ctx RiteContext
 	if err := yaml.Unmarshal(data, &ctx); err != nil {
 		return nil, errors.ErrParseError(path, "YAML", err)
 	}
@@ -117,9 +117,9 @@ func (cl *ContextLoader) loadFromYAML(path string) (*TeamContext, error) {
 	return &ctx, nil
 }
 
-// generateFromOrchestrator creates a TeamContext from an orchestrator.yaml file.
+// generateFromOrchestrator creates a RiteContext from an orchestrator.yaml file.
 // This provides backward compatibility when no context.yaml exists.
-func (cl *ContextLoader) generateFromOrchestrator(teamName string) (*TeamContext, error) {
+func (cl *ContextLoader) generateFromOrchestrator(teamName string) (*RiteContext, error) {
 	// Try to find orchestrator.yaml
 	var orchestratorPath string
 	var found bool
@@ -213,7 +213,7 @@ func (cl *ContextLoader) Invalidate(teamName string) {
 // InvalidateAll clears the entire cache.
 func (cl *ContextLoader) InvalidateAll() {
 	cl.mu.Lock()
-	cl.cache = make(map[string]*TeamContext)
+	cl.cache = make(map[string]*RiteContext)
 	cl.mu.Unlock()
 }
 
@@ -269,8 +269,8 @@ func (cl *ContextLoader) HasContextFile(teamName string) bool {
 	return false
 }
 
-// SaveContext writes a TeamContext to the team's context.yaml file.
-func (cl *ContextLoader) SaveContext(ctx *TeamContext) error {
+// SaveContext writes a RiteContext to the team's context.yaml file.
+func (cl *ContextLoader) SaveContext(ctx *RiteContext) error {
 	if err := ctx.Validate(); err != nil {
 		return err
 	}

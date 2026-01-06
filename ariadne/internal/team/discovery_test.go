@@ -34,24 +34,24 @@ func TestDiscovery_List(t *testing.T) {
 	}
 
 	// Find valid-team
-	var validTeam *Team
-	for _, team := range teams {
-		if team.Name == "valid-team" {
-			validTeam = &team
+	var validRite *Rite
+	for _,  rite := range teams {
+		if rite.Name == "valid-team" {
+			validRite = &rite
 			break
 		}
 	}
 
-	if validTeam == nil {
+	if validRite == nil {
 		t.Fatal("valid-team not found in list")
 	}
 
-	if validTeam.AgentCount != 2 {
-		t.Errorf("valid-team.AgentCount = %d, want 2", validTeam.AgentCount)
+	if validRite.AgentCount != 2 {
+		t.Errorf("valid-team.AgentCount = %d, want 2", validRite.AgentCount)
 	}
 
-	if validTeam.EntryPoint != "agent-a" {
-		t.Errorf("valid-team.EntryPoint = %q, want %q", validTeam.EntryPoint, "agent-a")
+	if validRite.EntryPoint != "agent-a" {
+		t.Errorf("valid-team.EntryPoint = %q, want %q", validRite.EntryPoint, "agent-a")
 	}
 }
 
@@ -136,12 +136,12 @@ func TestDiscovery_ActiveTeam(t *testing.T) {
 	teams, _ := d.List()
 
 	// Check that valid-team is marked active
-	for _, team := range teams {
-		if team.Name == "valid-team" && !team.Active {
-			t.Error("valid-team.Active = false, want true")
+	for _,  rite := range teams {
+		if rite.Name == "valid-team" && !rite.Active {
+			t.Error("valid-rite.Active = false, want true")
 		}
-		if team.Name == "minimal-team" && team.Active {
-			t.Error("minimal-team.Active = true, want false")
+		if rite.Name == "minimal-team" && rite.Active {
+			t.Error("minimal-rite.Active = true, want false")
 		}
 	}
 

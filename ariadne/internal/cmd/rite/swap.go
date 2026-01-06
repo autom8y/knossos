@@ -89,7 +89,7 @@ func runSwap(ctx *cmdContext, riteName string, opts swapOptions) error {
 	switcher := team.NewSwitcher(resolver)
 
 	switchOpts := team.SwitchOptions{
-		TargetTeam: riteName,
+		TargetRite: riteName,
 		RemoveAll:  opts.removeAll,
 		KeepAll:    opts.keepAll,
 		PromoteAll: opts.promoteAll,
@@ -105,8 +105,8 @@ func runSwap(ctx *cmdContext, riteName string, opts swapOptions) error {
 
 	// Build output
 	out := output.RiteSwapOutput{
-		Team:                result.Team,
-		PreviousTeam:        result.PreviousTeam,
+		Team:                result.Rite,
+		PreviousTeam:        result.PreviousRite,
 		SwitchedAt:          result.SwitchedAt.Format(time.RFC3339),
 		AgentsInstalled:     result.AgentsInstalled,
 		ClaudeMDUpdated:     result.ClaudeMDUpdated,

@@ -16,7 +16,7 @@ const ManifestVersion = "1.2"
 type Manifest struct {
 	Version     string                `json:"version"`
 	GeneratedAt time.Time             `json:"generated_at"`
-	ActiveTeam  string                `json:"active_team"`
+	ActiveRite  string                `json:"active_team"` // Keep JSON tag for backward compatibility
 	Agents      map[string]AgentEntry `json:"agents"`
 	Orphans     []string              `json:"orphans"`
 }
@@ -78,11 +78,11 @@ func (m *Manifest) Save(path string) error {
 	return os.WriteFile(path, data, 0644)
 }
 
-// DetectOrphans finds agents not belonging to the target team.
-func (m *Manifest) DetectOrphans(targetTeam string) []string {
+// DetectOrphans finds agents not belonging to the target rite.
+func (m *Manifest) DetectOrphans(targetRite string) []string {
 	var orphans []string
 	for name, entry := range m.Agents {
-		if entry.Source == "team" && entry.Origin != targetTeam {
+		if entry.Source == "team" && entry.Origin != targetRite {
 			orphans = append(orphans, name)
 		}
 	}
@@ -90,10 +90,10 @@ func (m *Manifest) DetectOrphans(targetTeam string) []string {
 }
 
 // AddAgent adds or updates an agent entry.
-func (m *Manifest) AddAgent(name string, source, teamName, checksum string) {
+func (m *Manifest) AddAgent(name string, source, riteName, checksum string) {
 	m.Agents[name] = AgentEntry{
 		Source:      source,
-		Origin:      teamName,
+		Origin:      riteName,
 		Checksum:    checksum,
 		InstalledAt: time.Now().UTC(),
 	}
@@ -152,9 +152,9 @@ func (m *Manifest) ClearOrphans() {
 	m.Orphans = []string{}
 }
 
-// SetActiveTeam updates the active team in the manifest.
-func (m *Manifest) SetActiveTeam(teamName string) {
-	m.ActiveTeam = teamName
+// SetActiveTeam updates the active rite in the manifest.
+func (m *Manifest) SetActiveTeam(riteName string) {
+	m.ActiveRite = riteName
 }
 
 // GetInstalledAgents returns the list of installed agent filenames.
@@ -166,24 +166,24 @@ func (m *Manifest) GetInstalledAgents() []string {
 	return agents
 }
 
-// GetTeamAgents returns agents from a specific team.
-func (m *Manifest) GetTeamAgents(teamName string) []string {
+// GetTeamAgents returns agents from a specific rite.
+func (m *Manifest) GetTeamAgents(riteName string) []string {
 	var agents []string
 	for name, entry := range m.Agents {
-		if entry.Source == "team" && entry.Origin == teamName {
+		if entry.Source == "team" && entry.Origin == riteName {
 			agents = append(agents, name)
 		}
 	}
 	return agents
 }
 
-// IsFromTeam checks if an agent is from a specific team.
-func (m *Manifest) IsFromTeam(agentName, teamName string) bool {
+// IsFromTeam checks if an agent is from a specific rite.
+func (m *Manifest) IsFromTeam(agentName, riteName string) bool {
 	entry, ok := m.Agents[agentName]
 	if !ok {
 		return false
 	}
-	return entry.Source == "team" && entry.Origin == teamName
+	return entry.Source == "team" && entry.Origin == riteName
 }
 
 // ComputeChecksum calculates a SHA-256 checksum for a file.

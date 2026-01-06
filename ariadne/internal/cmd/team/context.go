@@ -101,7 +101,7 @@ type ContextRowOut struct {
 	Value string `json:"value" yaml:"value"`
 }
 
-func teamContextToOutput(tc *team.TeamContext, hasContextFile bool) TeamContextOutput {
+func teamContextToOutput(tc *team.RiteContext, hasContextFile bool) TeamContextOutput {
 	rows := make([]ContextRowOut, len(tc.ContextRows))
 	for i, r := range tc.ContextRows {
 		rows[i] = ContextRowOut{

@@ -10,8 +10,8 @@ import (
 	"github.com/autom8y/ariadne/internal/paths"
 )
 
-// Team represents a discovered team pack.
-type Team struct {
+// Rite represents a discovered rite (practice bundle).
+type Rite struct {
 	Name         string   `json:"name"`
 	Path         string   `json:"path"`
 	Description  string   `json:"description"`
@@ -22,11 +22,11 @@ type Team struct {
 	Active       bool     `json:"active"`
 }
 
-// Discovery locates available team packs.
+// Discovery locates available rites (practice bundles).
 type Discovery struct {
 	projectTeamsDir string
 	userTeamsDir    string
-	activeTeam      string
+	activeRite      string
 }
 
 // NewDiscovery creates a new team discovery instance.
@@ -39,132 +39,132 @@ func NewDiscovery(resolver *paths.Resolver) *Discovery {
 	// Read active rite
 	ritePath := resolver.ActiveRiteFile()
 	if data, err := os.ReadFile(ritePath); err == nil {
-		d.activeTeam = strings.TrimSpace(string(data))
+		d.activeRite = strings.TrimSpace(string(data))
 	}
 
 	return d
 }
 
 // NewDiscoveryWithPaths creates a discovery with explicit paths.
-func NewDiscoveryWithPaths(projectTeamsDir, userTeamsDir, activeTeam string) *Discovery {
+func NewDiscoveryWithPaths(projectTeamsDir, userTeamsDir, activeRite string) *Discovery {
 	return &Discovery{
 		projectTeamsDir: projectTeamsDir,
 		userTeamsDir:    userTeamsDir,
-		activeTeam:      activeTeam,
+		activeRite:      activeRite,
 	}
 }
 
-// List returns all available teams.
-func (d *Discovery) List() ([]Team, error) {
-	var teams []Team
+// List returns all available rites.
+func (d *Discovery) List() ([]Rite, error) {
+	var rites []Rite
 
-	// Scan project teams/
-	if projectTeams, err := d.scanDir(d.projectTeamsDir); err == nil {
-		teams = append(teams, projectTeams...)
+	// Scan project rites
+	if projectRites, err := d.scanDir(d.projectTeamsDir); err == nil {
+		rites = append(rites, projectRites...)
 	}
 
-	// Scan user teams if present
+	// Scan user rites if present
 	if d.userTeamsDir != "" {
-		if userTeams, err := d.scanDir(d.userTeamsDir); err == nil {
-			// User teams override project teams with same name
-			teamMap := make(map[string]Team)
-			for _, t := range teams {
-				teamMap[t.Name] = t
+		if userRites, err := d.scanDir(d.userTeamsDir); err == nil {
+			// User rites override project rites with same name
+			riteMap := make(map[string]Rite)
+			for _, r := range rites {
+				riteMap[r.Name] = r
 			}
-			for _, t := range userTeams {
-				teamMap[t.Name] = t
+			for _, r := range userRites {
+				riteMap[r.Name] = r
 			}
-			teams = make([]Team, 0, len(teamMap))
-			for _, t := range teamMap {
-				teams = append(teams, t)
+			rites = make([]Rite, 0, len(riteMap))
+			for _, r := range riteMap {
+				rites = append(rites, r)
 			}
 		}
 	}
 
 	// Sort by name
-	sort.Slice(teams, func(i, j int) bool {
-		return teams[i].Name < teams[j].Name
+	sort.Slice(rites, func(i, j int) bool {
+		return rites[i].Name < rites[j].Name
 	})
 
-	// Mark active team
-	for i := range teams {
-		teams[i].Active = teams[i].Name == d.activeTeam
+	// Mark active rite
+	for i := range rites {
+		rites[i].Active = rites[i].Name == d.activeRite
 	}
 
-	return teams, nil
+	return rites, nil
 }
 
-// Get returns a specific team by name.
-func (d *Discovery) Get(name string) (*Team, error) {
-	teams, err := d.List()
+// Get returns a specific rite by name.
+func (d *Discovery) Get(name string) (*Rite, error) {
+	rites, err := d.List()
 	if err != nil {
 		return nil, err
 	}
 
-	for _, t := range teams {
-		if t.Name == name {
-			return &t, nil
+	for _, r := range rites {
+		if r.Name == name {
+			return &r, nil
 		}
 	}
 
 	return nil, errors.ErrTeamNotFound(name)
 }
 
-// GetActive returns the currently active team.
-func (d *Discovery) GetActive() (*Team, error) {
-	if d.activeTeam == "" {
-		return nil, errors.New(errors.CodeFileNotFound, "No active team set")
+// GetActive returns the currently active rite.
+func (d *Discovery) GetActive() (*Rite, error) {
+	if d.activeRite == "" {
+		return nil, errors.New(errors.CodeFileNotFound, "No active rite set")
 	}
-	return d.Get(d.activeTeam)
+	return d.Get(d.activeRite)
 }
 
-// ActiveTeamName returns the name of the active team.
+// ActiveTeamName returns the name of the active rite.
 func (d *Discovery) ActiveTeamName() string {
-	return d.activeTeam
+	return d.activeRite
 }
 
-// Exists checks if a team exists.
+// Exists checks if a rite exists.
 func (d *Discovery) Exists(name string) bool {
 	_, err := d.Get(name)
 	return err == nil
 }
 
-// scanDir scans a directory for team packs.
-func (d *Discovery) scanDir(dir string) ([]Team, error) {
+// scanDir scans a directory for rites.
+func (d *Discovery) scanDir(dir string) ([]Rite, error) {
 	entries, err := os.ReadDir(dir)
 	if err != nil {
 		return nil, err
 	}
 
-	var teams []Team
+	var rites []Rite
 	for _, entry := range entries {
 		if !entry.IsDir() {
 			continue
 		}
 
-		teamPath := filepath.Join(dir, entry.Name())
-		team, err := d.loadTeam(teamPath)
+		ritePath := filepath.Join(dir, entry.Name())
+		rite, err := d.loadTeam(ritePath)
 		if err != nil {
-			// Skip invalid teams (missing workflow.yaml, etc.)
+			// Skip invalid rites (missing workflow.yaml, etc.)
 			continue
 		}
 
-		teams = append(teams, *team)
+		rites = append(rites, *rite)
 	}
 
-	return teams, nil
+	return rites, nil
 }
 
-// loadTeam loads a team from a directory.
-func (d *Discovery) loadTeam(teamPath string) (*Team, error) {
-	workflowPath := filepath.Join(teamPath, "workflow.yaml")
+// loadTeam loads a rite from a directory.
+func (d *Discovery) loadTeam(ritePath string) (*Rite, error) {
+	workflowPath := filepath.Join(ritePath, "workflow.yaml")
 	workflow, err := LoadWorkflow(workflowPath)
 	if err != nil {
 		return nil, err
 	}
 
 	// Count agents in agents/ directory
-	agentsDir := filepath.Join(teamPath, "agents")
+	agentsDir := filepath.Join(ritePath, "agents")
 	agents, err := listAgentFiles(agentsDir)
 	if err != nil {
 		agents = []string{}
@@ -176,9 +176,9 @@ func (d *Discovery) loadTeam(teamPath string) (*Team, error) {
 		agentNames[i] = strings.TrimSuffix(a, ".md")
 	}
 
-	team := &Team{
+	rite := &Rite{
 		Name:         workflow.Name,
-		Path:         teamPath,
+		Path:         ritePath,
 		Description:  workflow.Description,
 		Agents:       agentNames,
 		AgentCount:   len(agents),
@@ -187,11 +187,11 @@ func (d *Discovery) loadTeam(teamPath string) (*Team, error) {
 	}
 
 	// If workflow name is empty, use directory name
-	if team.Name == "" {
-		team.Name = filepath.Base(teamPath)
+	if rite.Name == "" {
+		rite.Name = filepath.Base(ritePath)
 	}
 
-	return team, nil
+	return rite, nil
 }
 
 // listAgentFiles returns the list of .md files in the agents directory.

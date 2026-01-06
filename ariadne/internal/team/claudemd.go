@@ -18,28 +18,28 @@ func NewClaudeMDUpdater(path string) *ClaudeMDUpdater {
 	return &ClaudeMDUpdater{path: path}
 }
 
-// UpdateForTeam regenerates satellite sections for a team.
-func (u *ClaudeMDUpdater) UpdateForTeam(team *Team) error {
+// UpdateForTeam regenerates satellite sections for a rite.
+func (u *ClaudeMDUpdater) UpdateForTeam(rite *Rite) error {
 	content, err := os.ReadFile(u.path)
 	if err != nil {
 		return fmt.Errorf("reading CLAUDE.md: %w", err)
 	}
 
 	// Load workflow for agent info
-	workflowPath := filepath.Join(team.Path, "workflow.yaml")
+	workflowPath := filepath.Join(rite.Path, "workflow.yaml")
 	workflow, err := LoadWorkflow(workflowPath)
 	if err != nil {
 		return fmt.Errorf("loading workflow: %w", err)
 	}
 
 	// Read agent descriptions from files
-	agentInfos := u.loadAgentInfos(team, workflow)
+	agentInfos := u.loadAgentInfos(rite, workflow)
 
 	// Update Quick Start section
-	content = u.updateQuickStartSection(content, team, agentInfos)
+	content = u.updateQuickStartSection(content, rite, agentInfos)
 
 	// Update Agent Configurations section
-	content = u.updateAgentConfigsSection(content, team, agentInfos)
+	content = u.updateAgentConfigsSection(content, rite, agentInfos)
 
 	return os.WriteFile(u.path, content, 0644)
 }
@@ -54,12 +54,12 @@ type agentFileInfo struct {
 }
 
 // loadAgentInfos reads agent metadata from files.
-func (u *ClaudeMDUpdater) loadAgentInfos(team *Team, workflow *Workflow) []agentFileInfo {
+func (u *ClaudeMDUpdater) loadAgentInfos(rite *Rite, workflow *Workflow) []agentFileInfo {
 	// Start with workflow info
 	workflowInfos := workflow.GetAgentInfo()
 
 	infos := make([]agentFileInfo, 0, len(workflowInfos))
-	agentsDir := filepath.Join(team.Path, "agents")
+	agentsDir := filepath.Join(rite.Path, "agents")
 
 	for _, wi := range workflowInfos {
 		info := agentFileInfo{
@@ -127,7 +127,7 @@ func (u *ClaudeMDUpdater) extractAgentDescription(path string) string {
 }
 
 // updateQuickStartSection updates the Quick Start table.
-func (u *ClaudeMDUpdater) updateQuickStartSection(content []byte, team *Team, agents []agentFileInfo) []byte {
+func (u *ClaudeMDUpdater) updateQuickStartSection(content []byte, rite *Rite, agents []agentFileInfo) []byte {
 	lines := strings.Split(string(content), "\n")
 	var result []string
 
@@ -166,7 +166,7 @@ func (u *ClaudeMDUpdater) updateQuickStartSection(content []byte, team *Team, ag
 			if strings.Contains(line, "PRESERVE") {
 				result = append(result, line)
 				// Generate new content
-				result = append(result, u.generateQuickStartContent(team, agents)...)
+				result = append(result, u.generateQuickStartContent(rite, agents)...)
 				skipToNextSection = true
 				// Skip until next section
 				continue
@@ -177,12 +177,12 @@ func (u *ClaudeMDUpdater) updateQuickStartSection(content []byte, team *Team, ag
 				continue
 			}
 
-			// Check if this is the start of team info line
+			// Check if this is the start of rite info line
 			if strings.HasPrefix(line, "This project uses") {
 				// Start of generated content - skip until we find the table or blank lines
 				skipToNextSection = true
 				// Insert new content
-				result = append(result, u.generateQuickStartContent(team, agents)...)
+				result = append(result, u.generateQuickStartContent(rite, agents)...)
 				continue
 			}
 		}
@@ -222,10 +222,10 @@ func (u *ClaudeMDUpdater) updateQuickStartSection(content []byte, team *Team, ag
 }
 
 // generateQuickStartContent creates the Quick Start table markdown.
-func (u *ClaudeMDUpdater) generateQuickStartContent(team *Team, agents []agentFileInfo) []string {
+func (u *ClaudeMDUpdater) generateQuickStartContent(rite *Rite, agents []agentFileInfo) []string {
 	var lines []string
 
-	lines = append(lines, fmt.Sprintf("This project uses a %d-agent workflow (%s):", team.AgentCount, team.Name))
+	lines = append(lines, fmt.Sprintf("This project uses a %d-agent workflow (%s):", rite.AgentCount, rite.Name))
 	lines = append(lines, "")
 	lines = append(lines, "| Agent | Role | Produces |")
 	lines = append(lines, "| ----- | ---- | -------- |")
@@ -248,7 +248,7 @@ func (u *ClaudeMDUpdater) generateQuickStartContent(team *Team, agents []agentFi
 }
 
 // updateAgentConfigsSection updates the Agent Configurations section.
-func (u *ClaudeMDUpdater) updateAgentConfigsSection(content []byte, team *Team, agents []agentFileInfo) []byte {
+func (u *ClaudeMDUpdater) updateAgentConfigsSection(content []byte, rite *Rite, agents []agentFileInfo) []byte {
 	lines := strings.Split(string(content), "\n")
 	var result []string
 
@@ -304,13 +304,13 @@ func (u *ClaudeMDUpdater) updateAgentConfigsSection(content []byte, team *Team, 
 	return []byte(strings.Join(result, "\n"))
 }
 
-// IsSynced checks if CLAUDE.md satellites are in sync with the active team.
-func (u *ClaudeMDUpdater) IsSynced(teamName string) bool {
+// IsSynced checks if CLAUDE.md satellites are in sync with the active rite.
+func (u *ClaudeMDUpdater) IsSynced(riteName string) bool {
 	content, err := os.ReadFile(u.path)
 	if err != nil {
 		return false
 	}
 
-	// Simple check: team name appears in Quick Start section
-	return strings.Contains(string(content), teamName)
+	// Simple check: rite name appears in Quick Start section
+	return strings.Contains(string(content), riteName)
 }

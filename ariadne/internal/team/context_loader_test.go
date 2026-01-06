@@ -21,10 +21,10 @@ func getTestDataPath(t *testing.T) string {
 	return absPath
 }
 
-func TestTeamContext_ToMarkdown(t *testing.T) {
+func TestRiteContext_ToMarkdown(t *testing.T) {
 	tests := []struct {
 		name string
-		ctx  *TeamContext
+		ctx  *RiteContext
 		want string
 	}{
 		{
@@ -39,7 +39,7 @@ func TestTeamContext_ToMarkdown(t *testing.T) {
 		},
 		{
 			name: "single row",
-			ctx: &TeamContext{
+			ctx: &RiteContext{
 				SchemaVersion: "1.0",
 				TeamName:      "test-team",
 				ContextRows: []ContextRow{
@@ -50,7 +50,7 @@ func TestTeamContext_ToMarkdown(t *testing.T) {
 		},
 		{
 			name: "multiple rows",
-			ctx: &TeamContext{
+			ctx: &RiteContext{
 				SchemaVersion: "1.0",
 				TeamName:      "test-team",
 				ContextRows: []ContextRow{
@@ -73,15 +73,15 @@ func TestTeamContext_ToMarkdown(t *testing.T) {
 	}
 }
 
-func TestTeamContext_Validate(t *testing.T) {
+func TestRiteContext_Validate(t *testing.T) {
 	tests := []struct {
 		name    string
-		ctx     *TeamContext
+		ctx     *RiteContext
 		wantErr bool
 	}{
 		{
 			name: "valid context",
-			ctx: &TeamContext{
+			ctx: &RiteContext{
 				SchemaVersion: "1.0",
 				TeamName:      "test-team",
 			},
@@ -89,14 +89,14 @@ func TestTeamContext_Validate(t *testing.T) {
 		},
 		{
 			name: "missing team name",
-			ctx: &TeamContext{
+			ctx: &RiteContext{
 				SchemaVersion: "1.0",
 			},
 			wantErr: true,
 		},
 		{
 			name: "missing schema version",
-			ctx: &TeamContext{
+			ctx: &RiteContext{
 				TeamName: "test-team",
 			},
 			wantErr: true,
@@ -113,7 +113,7 @@ func TestTeamContext_Validate(t *testing.T) {
 	}
 }
 
-func TestTeamContext_AddRow(t *testing.T) {
+func TestRiteContext_AddRow(t *testing.T) {
 	ctx := NewTeamContext("test-team")
 
 	ctx.AddRow("Key1", "Value1")
@@ -132,7 +132,7 @@ func TestTeamContext_AddRow(t *testing.T) {
 	}
 }
 
-func TestTeamContext_HasRows(t *testing.T) {
+func TestRiteContext_HasRows(t *testing.T) {
 	ctx := NewTeamContext("test-team")
 
 	if ctx.HasRows() {
@@ -448,7 +448,7 @@ func TestContextLoader_SaveContext_InvalidContext(t *testing.T) {
 	loader := NewContextLoaderWithPaths(teamsDir, "")
 
 	// Context without required fields
-	ctx := &TeamContext{}
+	ctx := &RiteContext{}
 
 	if err := loader.SaveContext(ctx); err == nil {
 		t.Error("SaveContext() with invalid context should return error")

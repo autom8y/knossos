@@ -74,7 +74,7 @@ func runStatus(ctx *cmdContext, opts statusOptions) error {
 
 	// Check manifest validity
 	manifest, manifestErr := team.LoadManifest(resolver.AgentManifestFile())
-	manifestValid := manifestErr == nil && manifest.ActiveTeam == teamName
+	manifestValid := manifestErr == nil && manifest.ActiveRite == teamName
 
 	// Check CLAUDE.md sync
 	updater := team.NewClaudeMDUpdater(resolver.ClaudeMDFile())
@@ -103,7 +103,7 @@ func runStatus(ctx *cmdContext, opts statusOptions) error {
 	return printer.Print(result)
 }
 
-func buildAgentStatusList(t *team.Team, workflow *team.Workflow, resolver *paths.Resolver) []output.AgentStatus {
+func buildAgentStatusList(t *team.Rite, workflow *team.Workflow, resolver *paths.Resolver) []output.AgentStatus {
 	infos := workflow.GetAgentInfo()
 	agents := make([]output.AgentStatus, 0, len(infos))
 

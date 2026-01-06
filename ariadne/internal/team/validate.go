@@ -86,8 +86,8 @@ func (v *Validator) Validate(teamName string) (*ValidationResult, error) {
 }
 
 // checkTeamExists verifies the team directory exists.
-func (v *Validator) checkTeamExists(result *ValidationResult, team *Team) {
-	if _, err := os.Stat(team.Path); os.IsNotExist(err) {
+func (v *Validator) checkTeamExists(result *ValidationResult, rite *Rite) {
+	if _, err := os.Stat(rite.Path); os.IsNotExist(err) {
 		result.Checks = append(result.Checks, ValidationCheck{
 			Check:   "TEAM_EXISTS",
 			Status:  CheckFail,
@@ -104,8 +104,8 @@ func (v *Validator) checkTeamExists(result *ValidationResult, team *Team) {
 }
 
 // checkAgentsDir verifies the agents/ subdirectory exists.
-func (v *Validator) checkAgentsDir(result *ValidationResult, team *Team) {
-	agentsDir := filepath.Join(team.Path, "agents")
+func (v *Validator) checkAgentsDir(result *ValidationResult, rite *Rite) {
+	agentsDir := filepath.Join(rite.Path, "agents")
 	if _, err := os.Stat(agentsDir); os.IsNotExist(err) {
 		result.Checks = append(result.Checks, ValidationCheck{
 			Check:   "AGENTS_DIR",
@@ -123,8 +123,8 @@ func (v *Validator) checkAgentsDir(result *ValidationResult, team *Team) {
 }
 
 // checkWorkflowYAML verifies workflow.yaml exists and is valid.
-func (v *Validator) checkWorkflowYAML(result *ValidationResult, team *Team) {
-	workflowPath := filepath.Join(team.Path, "workflow.yaml")
+func (v *Validator) checkWorkflowYAML(result *ValidationResult, rite *Rite) {
+	workflowPath := filepath.Join(rite.Path, "workflow.yaml")
 	workflow, err := LoadWorkflow(workflowPath)
 	if err != nil {
 		result.Checks = append(result.Checks, ValidationCheck{
@@ -161,11 +161,11 @@ func (v *Validator) checkWorkflowYAML(result *ValidationResult, team *Team) {
 }
 
 // checkAgentFiles verifies all referenced agents have .md files.
-func (v *Validator) checkAgentFiles(result *ValidationResult, team *Team) {
-	agentsDir := filepath.Join(team.Path, "agents")
+func (v *Validator) checkAgentFiles(result *ValidationResult, rite *Rite) {
+	agentsDir := filepath.Join(rite.Path, "agents")
 
 	// Get expected agents from workflow
-	workflowPath := filepath.Join(team.Path, "workflow.yaml")
+	workflowPath := filepath.Join(rite.Path, "workflow.yaml")
 	workflow, err := LoadWorkflow(workflowPath)
 	if err != nil {
 		// Already reported in checkWorkflowYAML
@@ -199,9 +199,9 @@ func (v *Validator) checkAgentFiles(result *ValidationResult, team *Team) {
 }
 
 // checkManifestSync verifies AGENT_MANIFEST.json matches installed agents.
-func (v *Validator) checkManifestSync(result *ValidationResult, team *Team) {
+func (v *Validator) checkManifestSync(result *ValidationResult, rite *Rite) {
 	// Only check if this is the active team
-	if !team.Active {
+	if !rite.Active {
 		result.Checks = append(result.Checks, ValidationCheck{
 			Check:   "MANIFEST_SYNC",
 			Status:  CheckPass,
@@ -223,11 +223,11 @@ func (v *Validator) checkManifestSync(result *ValidationResult, team *Team) {
 	}
 
 	// Check if manifest's active team matches
-	if manifest.ActiveTeam != team.Name {
+	if manifest.ActiveRite != rite.Name {
 		result.Checks = append(result.Checks, ValidationCheck{
 			Check:   "MANIFEST_SYNC",
 			Status:  CheckWarn,
-			Message: "Manifest active team mismatch: " + manifest.ActiveTeam,
+			Message: "Manifest active team mismatch: " + manifest.ActiveRite,
 		})
 		result.Warnings++
 		result.Fixable = append(result.Fixable, "MANIFEST_SYNC")
@@ -237,7 +237,7 @@ func (v *Validator) checkManifestSync(result *ValidationResult, team *Team) {
 	// Check installed agents match manifest
 	agentsDir := v.resolver.AgentsDir()
 	installedFiles, _ := listAgentFiles(agentsDir)
-	manifestAgents := manifest.GetTeamAgents(team.Name)
+	manifestAgents := manifest.GetTeamAgents(rite.Name)
 
 	// Quick check for count mismatch
 	if len(installedFiles) != len(manifestAgents) {
@@ -259,9 +259,9 @@ func (v *Validator) checkManifestSync(result *ValidationResult, team *Team) {
 }
 
 // checkClaudeMDSync verifies CLAUDE.md satellite sections match active team.
-func (v *Validator) checkClaudeMDSync(result *ValidationResult, team *Team) {
+func (v *Validator) checkClaudeMDSync(result *ValidationResult, rite *Rite) {
 	// Only check if this is the active team
-	if !team.Active {
+	if !rite.Active {
 		result.Checks = append(result.Checks, ValidationCheck{
 			Check:   "CLAUDE_MD_SYNC",
 			Status:  CheckPass,
@@ -284,7 +284,7 @@ func (v *Validator) checkClaudeMDSync(result *ValidationResult, team *Team) {
 	}
 
 	// Check if team name appears in Quick Start section
-	if !strings.Contains(string(content), team.Name) {
+	if !strings.Contains(string(content), rite.Name) {
 		result.Checks = append(result.Checks, ValidationCheck{
 			Check:   "CLAUDE_MD_SYNC",
 			Status:  CheckWarn,
@@ -303,8 +303,8 @@ func (v *Validator) checkClaudeMDSync(result *ValidationResult, team *Team) {
 }
 
 // checkValidEntryPoint verifies the entry point agent exists.
-func (v *Validator) checkValidEntryPoint(result *ValidationResult, team *Team) {
-	if team.EntryPoint == "" {
+func (v *Validator) checkValidEntryPoint(result *ValidationResult, rite *Rite) {
+	if rite.EntryPoint == "" {
 		result.Checks = append(result.Checks, ValidationCheck{
 			Check:   "VALID_ENTRY_POINT",
 			Status:  CheckWarn,
@@ -314,12 +314,12 @@ func (v *Validator) checkValidEntryPoint(result *ValidationResult, team *Team) {
 		return
 	}
 
-	agentFile := filepath.Join(team.Path, "agents", team.EntryPoint+".md")
+	agentFile := filepath.Join(rite.Path, "agents", rite.EntryPoint+".md")
 	if _, err := os.Stat(agentFile); os.IsNotExist(err) {
 		result.Checks = append(result.Checks, ValidationCheck{
 			Check:   "VALID_ENTRY_POINT",
 			Status:  CheckFail,
-			Message: "Entry point agent not found: " + team.EntryPoint,
+			Message: "Entry point agent not found: " + rite.EntryPoint,
 		})
 		result.Errors++
 		return
@@ -328,7 +328,7 @@ func (v *Validator) checkValidEntryPoint(result *ValidationResult, team *Team) {
 	result.Checks = append(result.Checks, ValidationCheck{
 		Check:   "VALID_ENTRY_POINT",
 		Status:  CheckPass,
-		Message: "Entry point '" + team.EntryPoint + "' exists",
+		Message: "Entry point '" + rite.EntryPoint + "' exists",
 	})
 }
 
