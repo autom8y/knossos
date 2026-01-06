@@ -175,7 +175,7 @@ func TestRunWriteguard_BypassEnvVar(t *testing.T) {
 		ToolInput:   `{"file_path": ".claude/sessions/test/SESSION_CONTEXT.md"}`,
 		UseAriHooks: true,
 	})
-	env.SetVar("STATE_MATE_BYPASS", "1")
+	env.SetVar("MOIRAI_BYPASS", "1")
 
 	var stdout, stderr bytes.Buffer
 	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)

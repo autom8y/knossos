@@ -28,7 +28,7 @@ type ToolInput struct {
 }
 
 // BypassEnvVar is the environment variable to bypass writeguard.
-const BypassEnvVar = "STATE_MATE_BYPASS"
+const BypassEnvVar = "MOIRAI_BYPASS"
 
 // Protected file patterns for context files.
 var protectedPatterns = []string{
@@ -47,7 +47,7 @@ This hook is triggered on PreToolUse events for Write/Edit tools. It:
 - Checks if the target file is a protected context file (*_CONTEXT.md)
 - Returns {"decision": "block", "reason": "..."} to prevent the write
 - Returns {"decision": "allow"} for all other files
-- Respects STATE_MATE_BYPASS env var for override
+- Respects MOIRAI_BYPASS env var for override
 
 Input (stdin JSON):
   {"tool_name": "Write", "file_path": ".claude/sessions/.../SESSION_CONTEXT.md"}
