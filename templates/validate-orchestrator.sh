@@ -16,8 +16,11 @@ set -euo pipefail
 
 # Configuration
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-readonly ROSTER_HOME="${ROSTER_HOME:-$HOME/Code/roster}"
-readonly SCHEMA_FILE="$ROSTER_HOME/schemas/orchestrator.yaml.schema.json"
+
+# Source Knossos home resolution (handles ROSTER_HOME deprecation)
+source "$SCRIPT_DIR/../lib/knossos-home.sh"
+
+readonly SCHEMA_FILE="$KNOSSOS_HOME/schemas/orchestrator.yaml.schema.json"
 
 ORCHESTRATOR_FILE="${1:-}"
 STRICT_MODE="${2:-}"

@@ -23,11 +23,13 @@ set -euo pipefail
 # ============================================================================
 
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-readonly ROSTER_HOME="${ROSTER_HOME:-$HOME/Code/roster}"
 
-TEMPLATE="$ROSTER_HOME/templates/orchestrator-base.md.tpl"
-SCHEMA="$ROSTER_HOME/schemas/orchestrator.yaml.schema.json"
-VALIDATOR="$ROSTER_HOME/templates/validate-orchestrator.sh"
+# Source Knossos home resolution (handles KNOSSOS_HOME deprecation)
+source "$SCRIPT_DIR/../lib/knossos-home.sh"
+
+TEMPLATE="$KNOSSOS_HOME/templates/orchestrator-base.md.tpl"
+SCHEMA="$KNOSSOS_HOME/schemas/orchestrator.yaml.schema.json"
+VALIDATOR="$KNOSSOS_HOME/templates/validate-orchestrator.sh"
 
 # Initialize cleanup variables
 TMPFILE=""
@@ -99,7 +101,7 @@ EXAMPLES:
   ./orchestrator-generate.sh security-pack --force
 
 ENVIRONMENT:
-  ROSTER_HOME     Root directory for roster (default: ~/Code/roster)
+  KNOSSOS_HOME     Root directory for roster (default: ~/Code/roster)
 
 EOF
 }
@@ -498,9 +500,9 @@ generate_team() {
 
     log_info "Processing team: $team"
 
-    CONFIG="$ROSTER_HOME/rites/$team/orchestrator.yaml"
-    WORKFLOW="$ROSTER_HOME/rites/$team/workflow.yaml"
-    OUTPUT="$ROSTER_HOME/rites/$team/agents/orchestrator.md"
+    CONFIG="$KNOSSOS_HOME/rites/$team/orchestrator.yaml"
+    WORKFLOW="$KNOSSOS_HOME/rites/$team/workflow.yaml"
+    OUTPUT="$KNOSSOS_HOME/rites/$team/agents/orchestrator.md"
 
     # Validation phase
     validate_schema "$CONFIG" || return 1
@@ -568,10 +570,10 @@ batch_generate_all_teams() {
     while IFS= read -r team_dir; do
         local team=$(basename "$team_dir")
         teams+=("$team")
-    done < <(find "$ROSTER_HOME/rites" -maxdepth 1 -type d -name "*-pack" | sort)
+    done < <(find "$KNOSSOS_HOME/rites" -maxdepth 1 -type d -name "*-pack" | sort)
 
     if [[ ${#teams[@]} -eq 0 ]]; then
-        log_error "No teams found in $ROSTER_HOME/rites"
+        log_error "No teams found in $KNOSSOS_HOME/rites"
         return 1
     fi
 

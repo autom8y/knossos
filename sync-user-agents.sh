@@ -15,17 +15,21 @@
 #   ./sync-user-agents.sh --help       # Show usage
 #
 # Environment Variables:
-#   ROSTER_HOME    Roster repository location (default: ~/Code/roster)
+#   KNOSSOS_HOME   Knossos platform location (default: ~/Code/roster)
+#   ROSTER_HOME    Deprecated - use KNOSSOS_HOME instead
 #   ROSTER_DEBUG   Enable debug logging (set to 1)
 
 set -euo pipefail
 
+# Source Knossos home resolution (handles ROSTER_HOME deprecation)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/lib/knossos-home.sh"
+
 # Constants
-readonly ROSTER_HOME="${ROSTER_HOME:-$HOME/Code/roster}"
 readonly ROSTER_DEBUG="${ROSTER_DEBUG:-0}"
 readonly USER_AGENTS_DIR="$HOME/.claude/agents"
 readonly USER_MANIFEST_FILE="$HOME/.claude/USER_AGENT_MANIFEST.json"
-readonly SOURCE_DIR="$ROSTER_HOME/user-agents"
+readonly SOURCE_DIR="$KNOSSOS_HOME/user-agents"
 readonly MANIFEST_VERSION="1.0"
 
 readonly EXIT_SUCCESS=0
@@ -108,7 +112,7 @@ calculate_checksum() {
 # Returns 0 if found in a rite (collision), 1 if not found
 is_rite_agent() {
     local agent_name="$1"
-    local roster_rites="${ROSTER_HOME}/rites"
+    local roster_rites="${KNOSSOS_HOME}/rites"
 
     if [[ ! -d "$roster_rites" ]]; then
         return 1
@@ -125,7 +129,7 @@ is_rite_agent() {
 # Get which rite(s) contain an agent
 get_rite_for_agent() {
     local agent_name="$1"
-    local roster_rites="${ROSTER_HOME}/rites"
+    local roster_rites="${KNOSSOS_HOME}/rites"
 
     if [[ ! -d "$roster_rites" ]]; then
         echo ""

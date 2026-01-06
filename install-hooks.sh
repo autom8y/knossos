@@ -15,12 +15,16 @@
 #   ./install-hooks.sh --dry-run               # Preview changes
 #
 # Environment Variables:
-#   ROSTER_HOME    Roster repository location (default: ~/Code/roster)
+#   KNOSSOS_HOME   Knossos platform location (default: ~/Code/roster)
+#   ROSTER_HOME    Deprecated - use KNOSSOS_HOME instead
 
 set -euo pipefail
 
-readonly ROSTER_HOME="${ROSTER_HOME:-$HOME/Code/roster}"
-readonly SOURCE_DIR="$ROSTER_HOME/user-hooks"
+# Source Knossos home resolution (handles ROSTER_HOME deprecation)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/lib/knossos-home.sh"
+
+readonly SOURCE_DIR="$KNOSSOS_HOME/user-hooks"
 
 # Valid categories for hooks
 # Note: 'ari' contains thin wrappers that dispatch to the ari binary

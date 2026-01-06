@@ -16,17 +16,21 @@
 #   ./sync-user-commands.sh --help       # Show usage
 #
 # Environment Variables:
-#   ROSTER_HOME    Roster repository location (default: ~/Code/roster)
+#   KNOSSOS_HOME   Knossos platform location (default: ~/Code/roster)
+#   ROSTER_HOME    Deprecated - use KNOSSOS_HOME instead
 #   ROSTER_DEBUG   Enable debug logging (set to 1)
 
 set -euo pipefail
 
+# Source Knossos home resolution (handles ROSTER_HOME deprecation)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/lib/knossos-home.sh"
+
 # Constants
-readonly ROSTER_HOME="${ROSTER_HOME:-$HOME/Code/roster}"
 readonly ROSTER_DEBUG="${ROSTER_DEBUG:-0}"
 readonly USER_COMMANDS_DIR="$HOME/.claude/commands"
 readonly USER_MANIFEST_FILE="$HOME/.claude/USER_COMMAND_MANIFEST.json"
-readonly SOURCE_DIR="$ROSTER_HOME/user-commands"
+readonly SOURCE_DIR="$KNOSSOS_HOME/user-commands"
 readonly MANIFEST_VERSION="1.0"
 
 readonly EXIT_SUCCESS=0
@@ -110,7 +114,7 @@ calculate_checksum() {
 # Returns 0 if found in a rite (collision), 1 if not found
 is_rite_command() {
     local cmd_name="$1"
-    local roster_rites="${ROSTER_HOME}/rites"
+    local roster_rites="${KNOSSOS_HOME}/rites"
 
     if [[ ! -d "$roster_rites" ]]; then
         return 1
@@ -127,7 +131,7 @@ is_rite_command() {
 # Get which rite(s) contain a command
 get_rite_for_command() {
     local cmd_name="$1"
-    local roster_rites="${ROSTER_HOME}/rites"
+    local roster_rites="${KNOSSOS_HOME}/rites"
 
     if [[ ! -d "$roster_rites" ]]; then
         echo ""

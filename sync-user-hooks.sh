@@ -16,17 +16,21 @@
 #   ./sync-user-hooks.sh --help       # Show usage
 #
 # Environment Variables:
-#   ROSTER_HOME    Roster repository location (default: ~/Code/roster)
+#   KNOSSOS_HOME   Knossos platform location (default: ~/Code/roster)
+#   ROSTER_HOME    Deprecated - use KNOSSOS_HOME instead
 #   ROSTER_DEBUG   Enable debug logging (set to 1)
 
 set -euo pipefail
 
+# Source Knossos home resolution (handles ROSTER_HOME deprecation)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/lib/knossos-home.sh"
+
 # Constants
-readonly ROSTER_HOME="${ROSTER_HOME:-$HOME/Code/roster}"
 readonly ROSTER_DEBUG="${ROSTER_DEBUG:-0}"
 readonly USER_HOOKS_DIR="$HOME/.claude/hooks"
 readonly USER_MANIFEST_FILE="$HOME/.claude/USER_HOOKS_MANIFEST.json"
-readonly SOURCE_DIR="$ROSTER_HOME/user-hooks"
+readonly SOURCE_DIR="$KNOSSOS_HOME/user-hooks"
 readonly MANIFEST_VERSION="1.1"
 
 # Root exceptions (items that stay at root level, not in categories)
@@ -116,7 +120,7 @@ calculate_checksum() {
 # Returns 0 if found in a rite (collision), 1 if not found
 is_rite_hook() {
     local hook_name="$1"
-    local roster_rites="${ROSTER_HOME}/rites"
+    local roster_rites="${KNOSSOS_HOME}/rites"
 
     if [[ ! -d "$roster_rites" ]]; then
         return 1
@@ -133,7 +137,7 @@ is_rite_hook() {
 # Get which rite(s) contain a hook
 get_rite_for_hook() {
     local hook_name="$1"
-    local roster_rites="${ROSTER_HOME}/rites"
+    local roster_rites="${KNOSSOS_HOME}/rites"
 
     if [[ ! -d "$roster_rites" ]]; then
         echo ""

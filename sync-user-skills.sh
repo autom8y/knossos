@@ -17,17 +17,21 @@
 #   ./sync-user-skills.sh --help       # Show usage
 #
 # Environment Variables:
-#   ROSTER_HOME    Roster repository location (default: ~/Code/roster)
+#   KNOSSOS_HOME   Knossos platform location (default: ~/Code/roster)
+#   ROSTER_HOME    Deprecated - use KNOSSOS_HOME instead
 #   ROSTER_DEBUG   Enable debug logging (set to 1)
 
 set -euo pipefail
 
+# Source Knossos home resolution (handles ROSTER_HOME deprecation)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/lib/knossos-home.sh"
+
 # Constants
-readonly ROSTER_HOME="${ROSTER_HOME:-$HOME/Code/roster}"
 readonly ROSTER_DEBUG="${ROSTER_DEBUG:-0}"
 readonly USER_SKILLS_DIR="$HOME/.claude/skills"
 readonly USER_MANIFEST_FILE="$HOME/.claude/USER_SKILL_MANIFEST.json"
-readonly SOURCE_DIR="$ROSTER_HOME/user-skills"
+readonly SOURCE_DIR="$KNOSSOS_HOME/user-skills"
 readonly MANIFEST_VERSION="1.1"
 
 # Root exceptions (skills that stay at root level, not in categories)

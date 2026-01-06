@@ -10,14 +10,17 @@
 
 set -e
 
-ROSTER_HOME="${ROSTER_HOME:-$HOME/Code/roster}"
+# Source Knossos home resolution (handles ROSTER_HOME deprecation)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/../lib/knossos-home.sh"
+
 TEAM="${1:-rnd-pack}"
 DRY_RUN="${2:-}"
 
-TEMPLATE="$ROSTER_HOME/templates/base-orchestrator.md"
-CONFIG="$ROSTER_HOME/rites/$TEAM/orchestrator.yaml"
-WORKFLOW="$ROSTER_HOME/rites/$TEAM/workflow.yaml"
-OUTPUT="$ROSTER_HOME/rites/$TEAM/agents/orchestrator.md"
+TEMPLATE="$KNOSSOS_HOME/templates/base-orchestrator.md"
+CONFIG="$KNOSSOS_HOME/rites/$TEAM/orchestrator.yaml"
+WORKFLOW="$KNOSSOS_HOME/rites/$TEAM/workflow.yaml"
+OUTPUT="$KNOSSOS_HOME/rites/$TEAM/agents/orchestrator.md"
 
 # Check dependencies
 if ! command -v yq &> /dev/null; then
