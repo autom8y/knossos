@@ -96,7 +96,7 @@ func CheckGate(sessionPath string) (*GateResult, error) {
 	}
 
 	// Validate thread contract from events.jsonl
-	violations, err := ValidateThreadContract(sessionDir)
+	violations, err := ValidateClewContract(sessionDir)
 	if err != nil {
 		// Log the error but don't fail the gate check
 		// Thread contract validation is best-effort

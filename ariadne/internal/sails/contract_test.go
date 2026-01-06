@@ -9,8 +9,8 @@ import (
 	"github.com/autom8y/ariadne/internal/hook/clewcontract"
 )
 
-// TestValidateThreadContract_ValidSequences tests that valid event sequences pass validation.
-func TestValidateThreadContract_ValidSequences(t *testing.T) {
+// TestValidateClewContract_ValidSequences tests that valid event sequences pass validation.
+func TestValidateClewContract_ValidSequences(t *testing.T) {
 	tests := []struct {
 		name   string
 		events []clewcontract.Event
@@ -61,20 +61,20 @@ func TestValidateThreadContract_ValidSequences(t *testing.T) {
 			writeEventsFile(t, eventsPath, tt.events)
 
 			// Validate
-			violations, err := ValidateThreadContract(tempDir)
+			violations, err := ValidateClewContract(tempDir)
 			if err != nil {
-				t.Fatalf("ValidateThreadContract() error = %v", err)
+				t.Fatalf("ValidateClewContract() error = %v", err)
 			}
 
 			if len(violations) > 0 {
-				t.Errorf("ValidateThreadContract() expected no violations, got %d: %+v", len(violations), violations)
+				t.Errorf("ValidateClewContract() expected no violations, got %d: %+v", len(violations), violations)
 			}
 		})
 	}
 }
 
-// TestValidateThreadContract_HandoffViolations tests handoff-related violations.
-func TestValidateThreadContract_HandoffViolations(t *testing.T) {
+// TestValidateClewContract_HandoffViolations tests handoff-related violations.
+func TestValidateClewContract_HandoffViolations(t *testing.T) {
 	tests := []struct {
 		name              string
 		events            []clewcontract.Event
@@ -116,13 +116,13 @@ func TestValidateThreadContract_HandoffViolations(t *testing.T) {
 			writeEventsFile(t, eventsPath, tt.events)
 
 			// Validate
-			violations, err := ValidateThreadContract(tempDir)
+			violations, err := ValidateClewContract(tempDir)
 			if err != nil {
-				t.Fatalf("ValidateThreadContract() error = %v", err)
+				t.Fatalf("ValidateClewContract() error = %v", err)
 			}
 
 			if len(violations) == 0 {
-				t.Fatalf("ValidateThreadContract() expected violations, got none")
+				t.Fatalf("ValidateClewContract() expected violations, got none")
 			}
 
 			// Check that the expected violation type is present
@@ -135,14 +135,14 @@ func TestValidateThreadContract_HandoffViolations(t *testing.T) {
 			}
 
 			if !found {
-				t.Errorf("ValidateThreadContract() expected violation type %q, got violations: %+v", tt.expectedViolation, violations)
+				t.Errorf("ValidateClewContract() expected violation type %q, got violations: %+v", tt.expectedViolation, violations)
 			}
 		})
 	}
 }
 
-// TestValidateThreadContract_TaskViolations tests task lifecycle violations.
-func TestValidateThreadContract_TaskViolations(t *testing.T) {
+// TestValidateClewContract_TaskViolations tests task lifecycle violations.
+func TestValidateClewContract_TaskViolations(t *testing.T) {
 	tests := []struct {
 		name              string
 		events            []clewcontract.Event
@@ -203,13 +203,13 @@ func TestValidateThreadContract_TaskViolations(t *testing.T) {
 			writeEventsFile(t, eventsPath, tt.events)
 
 			// Validate
-			violations, err := ValidateThreadContract(tempDir)
+			violations, err := ValidateClewContract(tempDir)
 			if err != nil {
-				t.Fatalf("ValidateThreadContract() error = %v", err)
+				t.Fatalf("ValidateClewContract() error = %v", err)
 			}
 
 			if len(violations) == 0 {
-				t.Fatalf("ValidateThreadContract() expected violations, got none")
+				t.Fatalf("ValidateClewContract() expected violations, got none")
 			}
 
 			// Check that the expected violation type is present
@@ -222,31 +222,31 @@ func TestValidateThreadContract_TaskViolations(t *testing.T) {
 			}
 
 			if !found {
-				t.Errorf("ValidateThreadContract() expected violation type %q, got violations: %+v", tt.expectedViolation, violations)
+				t.Errorf("ValidateClewContract() expected violation type %q, got violations: %+v", tt.expectedViolation, violations)
 			}
 		})
 	}
 }
 
-// TestValidateThreadContract_NoEventsFile tests behavior when events.jsonl doesn't exist.
-func TestValidateThreadContract_NoEventsFile(t *testing.T) {
+// TestValidateClewContract_NoEventsFile tests behavior when events.jsonl doesn't exist.
+func TestValidateClewContract_NoEventsFile(t *testing.T) {
 	// Create temporary directory without events.jsonl
 	tempDir := t.TempDir()
 
 	// Validate
-	violations, err := ValidateThreadContract(tempDir)
+	violations, err := ValidateClewContract(tempDir)
 	if err != nil {
-		t.Fatalf("ValidateThreadContract() error = %v", err)
+		t.Fatalf("ValidateClewContract() error = %v", err)
 	}
 
 	// No events file should not be a violation
 	if len(violations) > 0 {
-		t.Errorf("ValidateThreadContract() expected no violations for missing events.jsonl, got %d: %+v", len(violations), violations)
+		t.Errorf("ValidateClewContract() expected no violations for missing events.jsonl, got %d: %+v", len(violations), violations)
 	}
 }
 
-// TestValidateThreadContract_MalformedJSON tests behavior with malformed events.jsonl.
-func TestValidateThreadContract_MalformedJSON(t *testing.T) {
+// TestValidateClewContract_MalformedJSON tests behavior with malformed events.jsonl.
+func TestValidateClewContract_MalformedJSON(t *testing.T) {
 	// Create temporary directory with malformed events.jsonl
 	tempDir := t.TempDir()
 	eventsPath := filepath.Join(tempDir, "events.jsonl")
@@ -258,9 +258,9 @@ func TestValidateThreadContract_MalformedJSON(t *testing.T) {
 	}
 
 	// Validate
-	_, err = ValidateThreadContract(tempDir)
+	_, err = ValidateClewContract(tempDir)
 	if err == nil {
-		t.Error("ValidateThreadContract() expected error for malformed JSON, got nil")
+		t.Error("ValidateClewContract() expected error for malformed JSON, got nil")
 	}
 }
 

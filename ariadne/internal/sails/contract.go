@@ -27,14 +27,14 @@ type ContractViolation struct {
 	RelatedEvents []int `json:"related_events,omitempty" yaml:"related_events,omitempty"`
 }
 
-// ValidateThreadContract validates the thread contract from events.jsonl.
+// ValidateClewContract validates the clew contract from events.jsonl.
 // This checks for:
 // - Handoff sequences: handoff_prepared must precede handoff_executed for same agent pair
 // - Task lifecycle: task_start must precede task_end for same task_id
 // - Session lifecycle: session_start should exist in the thread
 //
 // Returns a list of violations (empty if contract is valid).
-func ValidateThreadContract(sessionDir string) ([]ContractViolation, error) {
+func ValidateClewContract(sessionDir string) ([]ContractViolation, error) {
 	eventsPath := filepath.Join(sessionDir, "events.jsonl")
 
 	// Check if events.jsonl exists
