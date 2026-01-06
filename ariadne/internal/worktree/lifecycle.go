@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/autom8y/ariadne/internal/config"
 	"github.com/autom8y/ariadne/internal/errors"
 )
 
@@ -133,9 +134,9 @@ func (m *Manager) Create(opts CreateOptions) (*Worktree, error) {
 	}
 
 	// Try to run roster-sync if available
-	rosterHome := os.Getenv("ROSTER_HOME")
-	if rosterHome != "" {
-		syncPath := filepath.Join(rosterHome, "roster-sync")
+	knossosHome := config.KnossosHome()
+	if knossosHome != "" {
+		syncPath := filepath.Join(knossosHome, "roster-sync")
 		if _, err := os.Stat(syncPath); err == nil {
 			// First check if .claude/.cem/manifest.json exists
 			manifestPath := filepath.Join(wtPath, ".claude", ".cem", "manifest.json")
@@ -155,8 +156,8 @@ func (m *Manager) Create(opts CreateOptions) (*Worktree, error) {
 
 	// Try to set rite if specified
 	if team != "" && team != "none" {
-		if rosterHome != "" {
-			swapRitePath := filepath.Join(rosterHome, "swap-rite.sh")
+		if knossosHome != "" {
+			swapRitePath := filepath.Join(knossosHome, "swap-rite.sh")
 			if _, err := os.Stat(swapRitePath); err == nil {
 				cmd := exec.Command(swapRitePath, team)
 				cmd.Dir = wtPath

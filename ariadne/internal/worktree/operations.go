@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/autom8y/ariadne/internal/config"
 	"github.com/autom8y/ariadne/internal/errors"
 )
 
@@ -87,9 +88,9 @@ func (m *Manager) Switch(idOrName string, opts SwitchOptions) (*Worktree, error)
 		}
 
 		// Also try to run swap-rite.sh if available
-		rosterHome := os.Getenv("ROSTER_HOME")
-		if rosterHome != "" {
-			swapRitePath := filepath.Join(rosterHome, "swap-rite.sh")
+		knossosHome := config.KnossosHome()
+		if knossosHome != "" {
+			swapRitePath := filepath.Join(knossosHome, "swap-rite.sh")
 			if _, err := os.Stat(swapRitePath); err == nil {
 				cmd := exec.Command(swapRitePath, wt.Team)
 				cmd.Dir = wt.Path
@@ -659,13 +660,13 @@ func copySessionContext(sourcePath, targetPath string) error {
 
 // setupWorktreeEcosystem runs roster-sync and swap-rite for a worktree.
 func (m *Manager) setupWorktreeEcosystem(wtPath, team string) {
-	rosterHome := os.Getenv("ROSTER_HOME")
-	if rosterHome == "" {
+	knossosHome := config.KnossosHome()
+	if knossosHome == "" {
 		return
 	}
 
 	// Run roster-sync init or sync
-	syncPath := filepath.Join(rosterHome, "roster-sync")
+	syncPath := filepath.Join(knossosHome, "roster-sync")
 	if _, err := os.Stat(syncPath); err == nil {
 		manifestPath := filepath.Join(wtPath, ".claude", ".cem", "manifest.json")
 		if _, err := os.Stat(manifestPath); err == nil {
@@ -681,7 +682,7 @@ func (m *Manager) setupWorktreeEcosystem(wtPath, team string) {
 
 	// Run swap-rite if rite specified
 	if team != "" && team != "none" {
-		swapRitePath := filepath.Join(rosterHome, "swap-rite.sh")
+		swapRitePath := filepath.Join(knossosHome, "swap-rite.sh")
 		if _, err := os.Stat(swapRitePath); err == nil {
 			cmd := exec.Command(swapRitePath, team)
 			cmd.Dir = wtPath
