@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# test-team-transaction.sh - Unit tests for team-transaction.sh
+# test-rite-transaction.sh - Unit tests for rite-transaction.sh
 #
 # Tests transaction infrastructure including atomic writes, journal
 # management, staging operations, and backup creation.
@@ -9,10 +9,10 @@ set -euo pipefail
 
 # Test setup
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ROSTER_HOME="${ROSTER_HOME:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
+KNOSSOS_HOME="${KNOSSOS_HOME:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 
 # Source dependencies
-source "$ROSTER_HOME/lib/team/team-transaction.sh"
+source "$KNOSSOS_HOME/lib/rite/rite-transaction.sh"
 
 # Test counters
 TESTS_RUN=0
@@ -177,9 +177,9 @@ test_create_journal() {
             local version
             version=$(jq -r '.version' "$JOURNAL_FILE")
             local source
-            source=$(jq -r '.source_team' "$JOURNAL_FILE")
+            source=$(jq -r '.source_rite' "$JOURNAL_FILE")
             local target
-            target=$(jq -r '.target_team' "$JOURNAL_FILE")
+            target=$(jq -r '.target_rite' "$JOURNAL_FILE")
             local phase
             phase=$(jq -r '.phase' "$JOURNAL_FILE")
 
@@ -207,11 +207,11 @@ test_create_journal_virgin_swap() {
 
     if create_journal "" "target-team"; then
         local source
-        source=$(jq -r '.source_team' "$JOURNAL_FILE")
+        source=$(jq -r '.source_rite' "$JOURNAL_FILE")
         if [[ "$source" == "null" ]]; then
-            test_pass "virgin swap: source_team is null"
+            test_pass "virgin swap: source_rite is null"
         else
-            test_fail "create_journal" "source_team: null" "source_team: $source"
+            test_fail "create_journal" "source_rite: null" "source_rite: $source"
         fi
     else
         test_fail "create_journal" "return 0" "non-zero return"
@@ -304,7 +304,7 @@ test_get_journal_field() {
     create_journal "source-team" "target-team" 2>/dev/null
 
     local result
-    result=$(get_journal_field "target_team")
+    result=$(get_journal_field "target_rite")
 
     if [[ "$result" == "target-team" ]]; then
         test_pass "returned correct field value"

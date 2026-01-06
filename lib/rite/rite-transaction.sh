@@ -107,13 +107,13 @@ write_atomic() {
 
 # Create a new journal entry for swap operation
 # Parameters:
-#   $1 - source_team: Current rite (empty string for virgin swap)
-#   $2 - target_team: Rite being swapped to
+#   $1 - source_rite: Current rite (empty string for virgin swap)
+#   $2 - target_rite: Rite being swapped to
 # Returns: 0 on success, 1 if journal already exists (concurrent swap)
 # Requires: JOURNAL_FILE, JOURNAL_VERSION, SWAP_BACKUP_DIR, STAGING_DIR
 create_journal() {
-    local source_team="$1"
-    local target_team="$2"
+    local source_rite="$1"
+    local target_rite="$2"
     local timestamp
     timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
@@ -126,10 +126,10 @@ create_journal() {
         return 1
     fi
 
-    # Format source_team for JSON (null if empty, quoted string otherwise)
-    local source_team_json="null"
-    if [[ -n "$source_team" ]]; then
-        source_team_json="\"$source_team\""
+    # Format source_rite for JSON (null if empty, quoted string otherwise)
+    local source_rite_json="null"
+    if [[ -n "$source_rite" ]]; then
+        source_rite_json="\"$source_rite\""
     fi
 
     local journal_content
@@ -138,8 +138,8 @@ create_journal() {
   "version": "$JOURNAL_VERSION",
   "started_at": "$timestamp",
   "phase": "$PHASE_PREPARING",
-  "source_team": $source_team_json,
-  "target_team": "$target_team",
+  "source_rite": $source_rite_json,
+  "target_rite": "$target_rite",
   "backup_location": {
     "agents": "$SWAP_BACKUP_DIR/agents",
     "manifest": "$SWAP_BACKUP_DIR/AGENT_MANIFEST.json",
@@ -162,7 +162,7 @@ EOF
         return 1
     }
 
-    log_debug "Journal created: $source_team -> $target_team"
+    log_debug "Journal created: $source_rite -> $target_rite"
     return 0
 }
 
@@ -678,12 +678,12 @@ verify_backup_integrity() {
         fi
     fi
 
-    # Check if this was a virgin swap (source_team is null in journal)
+    # Check if this was a virgin swap (source_rite is null in journal)
     local was_virgin="false"
     if [[ -f "$JOURNAL_FILE" ]]; then
-        local source_team
-        source_team=$(jq -r '.source_team // "null"' "$JOURNAL_FILE" 2>/dev/null)
-        if [[ "$source_team" == "null" ]]; then
+        local source_rite
+        source_rite=$(jq -r '.source_rite // "null"' "$JOURNAL_FILE" 2>/dev/null)
+        if [[ "$source_rite" == "null" ]]; then
             was_virgin="true"
         fi
     fi

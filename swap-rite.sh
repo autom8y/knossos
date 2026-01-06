@@ -43,7 +43,7 @@ readonly MANIFEST_VERSION="1.2"
 # Orphan handling mode (set by flags)
 ORPHAN_MODE=""  # "", "keep", "remove", "promote"
 
-# Update mode: re-pull agents even if already on target team
+# Update mode: re-pull agents even if already on target rite
 UPDATE_MODE=0
 
 # Dry-run mode: preview changes without applying
@@ -56,7 +56,7 @@ RECOVER_MODE=0
 VERIFY_MODE=0
 
 # roster-sync integration modes
-SYNC_FIRST_MODE=0     # --sync-first: run roster-sync before team apply
+SYNC_FIRST_MODE=0     # --sync-first: run roster-sync before rite apply
 AUTO_SYNC_MODE=0      # --auto-sync: conditionally sync if roster has updates
 
 # Orphan backup cleanup modes
@@ -126,7 +126,7 @@ is_interactive() {
 # ============================================================================
 
 # Transaction infrastructure functions (write_atomic, journal CRUD, staging,
-# and backup operations) are now provided by lib/team/team-transaction.sh
+# and backup operations) are now provided by lib/rite/rite-transaction.sh
 # See that module for implementation details.
 
 # ============================================================================
@@ -182,7 +182,7 @@ rollback_swap() {
 
     # Restore commands if backed up
     if [[ -d "$SWAP_BACKUP_DIR/commands" ]]; then
-        # Remove current team commands
+        # Remove current rite commands
         if [[ -f ".claude/commands/.rite-commands" ]]; then
             while IFS= read -r cmd_file; do
                 [[ -z "$cmd_file" ]] && continue
@@ -203,7 +203,7 @@ rollback_swap() {
 
     # Restore skills if backed up
     if [[ -d "$SWAP_BACKUP_DIR/skills" ]]; then
-        # Remove current team skills
+        # Remove current rite skills
         if [[ -f ".claude/skills/.rite-skills" ]]; then
             while IFS= read -r skill_dir; do
                 [[ -z "$skill_dir" ]] && continue
@@ -227,7 +227,7 @@ rollback_swap() {
 
     # Restore hooks if backed up
     if [[ -d "$SWAP_BACKUP_DIR/hooks" ]]; then
-        # Remove current team hooks
+        # Remove current rite hooks
         if [[ -f ".claude/hooks/.rite-hooks" ]]; then
             while IFS= read -r hook_file; do
                 [[ -z "$hook_file" ]] && continue
@@ -339,8 +339,8 @@ check_journal_recovery() {
     # Read journal details
     local phase source target
     phase=$(jq -r '.phase // "unknown"' "$JOURNAL_FILE" 2>/dev/null)
-    source=$(jq -r '.source_team // "none"' "$JOURNAL_FILE" 2>/dev/null)
-    target=$(jq -r '.target_team // "unknown"' "$JOURNAL_FILE" 2>/dev/null)
+    source=$(jq -r '.source_rite // "none"' "$JOURNAL_FILE" 2>/dev/null)
+    target=$(jq -r '.target_rite // "unknown"' "$JOURNAL_FILE" 2>/dev/null)
 
     log "  Previous: $source -> $target"
     log "  Phase: $phase"
@@ -402,7 +402,7 @@ check_journal_recovery() {
 
 # Interactive recovery prompt
 # Parameters:
-#   $1 - source: Source team
+#   $1 - source: Source rite
 #   $2 - target: Target team
 #   $3 - phase: Current phase
 #   $4 - past_ponr: "true" if past point-of-no-return
@@ -470,7 +470,7 @@ prompt_recovery_action() {
 # Attempt to continue an interrupted swap
 continue_interrupted_swap() {
     local phase="$1"
-    local target_team="$2"
+    local target_rite="$2"
 
     log "Attempting to continue swap from phase: $phase"
 
@@ -484,7 +484,7 @@ continue_interrupted_swap() {
             # Verification phase - can restart from staging
             if [[ -d "$STAGING_DIR" ]]; then
                 log "Attempting to complete commit from staging..."
-                commit_staged_resources "$target_team"
+                commit_staged_resources "$target_rite"
                 return $?
             else
                 log_error "Staging directory missing. Cannot continue."
@@ -493,7 +493,7 @@ continue_interrupted_swap() {
             ;;
         "$PHASE_COMMITTING")
             # Partial commit - check point-of-no-return
-            recover_partial_commit "$target_team"
+            recover_partial_commit "$target_rite"
             return $?
             ;;
         *)
@@ -506,17 +506,17 @@ continue_interrupted_swap() {
 # Recover from a partial COMMITTING phase
 # Checks point-of-no-return and either rolls back or completes forward
 # Parameters:
-#   $1 - target_team: Team being swapped to
+#   $1 - target_rite: Rite being swapped to
 # Returns: 0 on success, 1 on failure
 recover_partial_commit() {
-    local target_team="$1"
+    local target_rite="$1"
 
     log "Recovering from partial commit..."
 
     # Check if we're past the point-of-no-return (ACTIVE_RITE written)
     if is_past_point_of_no_return; then
         log "Past point-of-no-return. Completing swap forward..."
-        complete_partial_commit "$target_team"
+        complete_partial_commit "$target_rite"
         return $?
     else
         log "Before point-of-no-return. Safe to rollback."
@@ -573,10 +573,10 @@ is_manifest_stale() {
 # Complete a partial commit after point-of-no-return
 # Runs only the steps that haven't completed yet
 # Parameters:
-#   $1 - target_team: Team being swapped to
+#   $1 - target_rite: Rite being swapped to
 # Returns: 0 on success, 1 on failure
 complete_partial_commit() {
-    local target_team="$1"
+    local target_rite="$1"
 
     log "Completing partial commit..."
 
@@ -586,13 +586,13 @@ complete_partial_commit() {
 
     if ! is_commit_step_done "$COMMIT_STEP_COMMANDS"; then
         log "Completing: commands sync"
-        swap_commands "$target_team"
+        swap_commands "$target_rite"
         mark_commit_step "$COMMIT_STEP_COMMANDS"
     fi
 
     if ! is_commit_step_done "$COMMIT_STEP_SKILLS"; then
         log "Completing: skills sync"
-        swap_skills "$target_team"
+        swap_skills "$target_rite"
         mark_commit_step "$COMMIT_STEP_SKILLS"
     fi
 
@@ -604,13 +604,13 @@ complete_partial_commit() {
 
     if ! is_commit_step_done "$COMMIT_STEP_HOOKS"; then
         log "Completing: hooks sync"
-        swap_hooks "$target_team"
+        swap_hooks "$target_rite"
         mark_commit_step "$COMMIT_STEP_HOOKS"
     fi
 
     if ! is_commit_step_done "$COMMIT_STEP_HOOK_REGISTRATIONS"; then
         log "Completing: hook registrations"
-        swap_hook_registrations "$target_team"
+        swap_hook_registrations "$target_rite"
         mark_commit_step "$COMMIT_STEP_HOOK_REGISTRATIONS"
     fi
 
@@ -618,11 +618,11 @@ complete_partial_commit() {
     # Staleness detection catches case where crash left manifest from old state
     if ! is_commit_step_done "$COMMIT_STEP_MANIFEST"; then
         log "Completing: manifest write"
-        write_manifest "$target_team"
+        write_manifest "$target_rite"
         mark_commit_step "$COMMIT_STEP_MANIFEST"
     elif is_manifest_stale; then
         log_warning "Manifest is stale - regenerating"
-        write_manifest "$target_team"
+        write_manifest "$target_rite"
         # Step already marked done, but manifest is now current
     fi
 
@@ -631,9 +631,9 @@ complete_partial_commit() {
     if ! is_commit_step_done "$COMMIT_STEP_ACTIVE_RITE"; then
         log_warning "ACTIVE_RITE step not marked but we're past point-of-no-return"
         if [[ -f ".claude/ACTIVE_RITE" ]]; then
-            local current_team
-            current_team=$(cat .claude/ACTIVE_RITE | tr -d '[:space:]')
-            if [[ "$current_team" == "$target_team" ]]; then
+            local current_rite
+            current_rite=$(cat .claude/ACTIVE_RITE | tr -d '[:space:]')
+            if [[ "$current_rite" == "$target_rite" ]]; then
                 mark_commit_step "$COMMIT_STEP_ACTIVE_RITE"
             fi
         fi
@@ -642,7 +642,7 @@ complete_partial_commit() {
     # CEM manifest update (critical for roster-sync staleness tracking)
     if ! is_commit_step_done "$COMMIT_STEP_CEM_MANIFEST"; then
         log "Completing: CEM manifest update"
-        if update_cem_manifest_team "$target_team"; then
+        if update_cem_manifest_rite "$target_rite"; then
             mark_commit_step "$COMMIT_STEP_CEM_MANIFEST"
         else
             log_warning "CEM manifest update failed during recovery"
@@ -674,28 +674,28 @@ verify_state_consistency() {
         log_warning "No ACTIVE_RITE file (virgin state or corrupted)"
         ((errors++)) || true
     else
-        local active_team
-        active_team=$(cat .claude/ACTIVE_RITE | tr -d '[:space:]')
+        local active_rite
+        active_rite=$(cat .claude/ACTIVE_RITE | tr -d '[:space:]')
 
         # Check agents directory exists
         if [[ ! -d ".claude/agents" ]]; then
-            log_error "ACTIVE_RITE is $active_team but no agents directory exists"
+            log_error "ACTIVE_RITE is $active_rite but no agents directory exists"
             ((errors++)) || true
         else
             local agent_count
             agent_count=$(find .claude/agents -maxdepth 1 -name "*.md" -type f 2>/dev/null | wc -l | tr -d ' ')
             if [[ "$agent_count" -eq 0 ]]; then
-                log_error "ACTIVE_RITE is $active_team but no agent files found"
+                log_error "ACTIVE_RITE is $active_rite but no agent files found"
                 ((errors++)) || true
             fi
         fi
 
         # Check manifest matches ACTIVE_RITE
         if [[ -f "$MANIFEST_FILE" ]]; then
-            local manifest_team
-            manifest_team=$(jq -r '.active_team // "unknown"' "$MANIFEST_FILE" 2>/dev/null)
-            if [[ "$manifest_team" != "$active_team" ]]; then
-                log_error "ACTIVE_RITE ($active_team) does not match manifest ($manifest_team)"
+            local manifest_rite
+            manifest_rite=$(jq -r '.active_rite // "unknown"' "$MANIFEST_FILE" 2>/dev/null)
+            if [[ "$manifest_rite" != "$active_rite" ]]; then
+                log_error "ACTIVE_RITE ($active_rite) does not match manifest ($manifest_rite)"
                 ((errors++)) || true
             fi
 
@@ -707,9 +707,9 @@ verify_state_consistency() {
             fi
         fi
 
-        # Check team pack exists in roster
-        if [[ ! -d "$KNOSSOS_HOME/rites/$active_team" ]]; then
-            log_warning "Active team $active_team not found in roster (may be orphaned)"
+        # Check rite exists in roster
+        if [[ ! -d "$KNOSSOS_HOME/rites/$active_rite" ]]; then
+            log_warning "Active rite $active_rite not found in roster (may be orphaned)"
         fi
     fi
 
@@ -862,7 +862,6 @@ write_manifest() {
         echo "{"
         echo "  \"manifest_version\": \"$MANIFEST_VERSION\","
         echo "  \"active_rite\": \"$team_name\","
-        echo "  \"active_team\": \"$team_name\","
         echo "  \"last_swap\": \"$timestamp\","
         echo "  \"written_at\": \"$timestamp\","
         echo "  \"agents\": {"
@@ -878,7 +877,7 @@ write_manifest() {
             agent_name=$(basename "$agent_file")
 
             # Determine source: check if it came from the team or is user-added
-            local source="team"
+            local source="rite"
             local origin="$team_name"
 
             # Check if this was a kept user agent (marked by stash)
@@ -913,7 +912,7 @@ write_manifest() {
     # Add commands section
     echo "  \"commands\": {" >> "$MANIFEST_FILE"
 
-    # Read team commands from marker file
+    # Read rite commands from marker file
     local first_cmd=true
     if [[ -f ".claude/commands/.rite-commands" ]]; then
         while IFS= read -r cmd_file; do
@@ -927,7 +926,7 @@ write_manifest() {
 
             {
                 echo -n "    \"$cmd_file\": {"
-                echo -n "\"source\": \"team\", "
+                echo -n "\"source\": \"rite\", "
                 echo -n "\"origin\": \"$team_name\", "
                 echo -n "\"installed_at\": \"$timestamp\""
                 echo -n "}"
@@ -957,7 +956,7 @@ write_manifest() {
             local origin="user-hooks"
 
             if [[ -f ".claude/hooks/.rite-hooks" ]] && grep -q "^$hook_name$" ".claude/hooks/.rite-hooks" 2>/dev/null; then
-                source="team"
+                source="rite"
                 origin="$team_name"
             fi
 
@@ -1006,7 +1005,7 @@ init_manifest_from_existing() {
     {
         echo "{"
         echo "  \"manifest_version\": \"$MANIFEST_VERSION\","
-        echo "  \"active_team\": \"unknown\","
+        echo "  \"active_rite\": \"unknown\","
         echo "  \"last_swap\": \"$timestamp\","
         echo "  \"agents\": {"
     } > "$MANIFEST_FILE"
@@ -1042,7 +1041,7 @@ init_manifest_from_existing() {
     echo "" >> "$MANIFEST_FILE"
     echo "  }," >> "$MANIFEST_FILE"
 
-    # Add empty commands section (no team commands during init)
+    # Add empty commands section (no rite commands during init)
     {
         echo "  \"commands\": {"
         echo "  }"
@@ -1056,7 +1055,7 @@ init_manifest_from_existing() {
 # Orphan Detection Functions
 # ============================================================================
 
-# List agents in incoming team pack
+# List agents in incoming rite pack
 # Usage: list_incoming_agents "team-name"
 # Output: One agent filename per line
 list_incoming_agents() {
@@ -1081,7 +1080,7 @@ list_current_agents() {
     fi
 }
 
-# Detect orphan agents (current agents not in incoming team)
+# Detect orphan agents (current agents not in incoming rite)
 # Usage: detect_orphans "team-name"
 # Sets ORPHAN_AGENTS array with orphan info: "agent.md:source:origin"
 detect_orphans() {
@@ -1110,7 +1109,7 @@ detect_orphans() {
     while IFS= read -r agent; do
         [[ -z "$agent" ]] && continue
 
-        # Is this agent in the incoming team?
+        # Is this agent in the incoming rite?
         local is_incoming=false
         for inc_agent in "${incoming_agents[@]:-}"; do
             if [[ "$agent" == "$inc_agent" ]]; then
@@ -1299,13 +1298,13 @@ prompt_disposition() {
     fi
 
     # Interactive mode
-    local current_team="unknown"
+    local current_rite="unknown"
     if [[ -f ".claude/ACTIVE_RITE" ]]; then
-        current_team=$(cat .claude/ACTIVE_RITE | tr -d '[:space:]')
+        current_rite=$(cat .claude/ACTIVE_RITE | tr -d '[:space:]')
     fi
 
     echo ""
-    echo -e "${YELLOW}[Roster]${NC} Switching from $current_team to $team_name..."
+    echo -e "${YELLOW}[Roster]${NC} Switching from $current_rite to $team_name..."
     echo -e "${YELLOW}[Roster]${NC} Found ${#ORPHAN_AGENTS[@]} agent(s) not in $team_name:"
     echo ""
 
@@ -1524,7 +1523,7 @@ validate_agent_tools() {
     return 0
 }
 
-# Validate all agent tools in a team pack
+# Validate all agent tools in a rite
 # Returns count of agents with invalid tools (0 = all valid)
 validate_pack_tools() {
     local pack_dir="$1"
@@ -1540,7 +1539,7 @@ validate_pack_tools() {
     echo "$invalid_count"
 }
 
-# Validate team pack exists and has required structure
+# Validate rite exists and has required structure
 validate_pack() {
     local team_name="$1"
     local pack_dir="$KNOSSOS_HOME/rites/$team_name"
@@ -1556,7 +1555,7 @@ validate_pack() {
 
     # Check agents/ subdirectory exists
     if [[ ! -d "$pack_dir/agents" ]]; then
-        log_error "Team pack '$team_name' missing agents/ directory"
+        log_error "Rite '$team_name' missing agents/ directory"
         exit "$EXIT_VALIDATION_FAILURE"
     fi
 
@@ -1624,7 +1623,7 @@ validate_project() {
     log_debug "Project validation passed"
 }
 
-# Validate workflow.yaml schema for a team pack
+# Validate workflow.yaml schema for a rite
 # Checks required fields: name, workflow_type, phases
 # Returns 0 if valid or file doesn't exist, 1 if validation fails
 validate_workflow_yaml() {
@@ -1667,7 +1666,7 @@ validate_workflow_yaml() {
     return 0
 }
 
-# Validate orchestrator.yaml schema for a team pack
+# Validate orchestrator.yaml schema for a rite
 # Checks required fields: team, routing
 # Returns 0 if valid or file doesn't exist, 1 if validation fails
 validate_orchestrator_yaml() {
@@ -1866,7 +1865,7 @@ swap_agents() {
             local agent_name
             agent_name=$(basename "$agent_file")
             if [[ -f "$user_agents_dir/$agent_name" ]]; then
-                log_warning "Team agent '$agent_name' shadows user-level agent in ~/.claude/agents/"
+                log_warning "Rite agent '$agent_name' shadows user-level agent in ~/.claude/agents/"
             fi
         done
     fi
@@ -1899,7 +1898,7 @@ swap_agents() {
 # See: cem install-user for user-level agent installation.
 
 # ============================================================================
-# Team Resource Wrapper Functions (for backward compatibility)
+# Rite Resource Wrapper Functions (for backward compatibility)
 # ============================================================================
 # These wrappers call the generic functions from lib/team/team-resource.sh
 
@@ -1924,19 +1923,19 @@ get_skill_rite()   { get_resource_rite "$1" "skills" "d"; }
 get_hook_rite()    { get_resource_rite "$1" "hooks" "f"; }
 
 # ============================================================================
-# Team Commands Functions
+# Rite Commands Functions
 # ============================================================================
 
-# Check for collisions between user commands and team commands
+# Check for collisions between user commands and rite commands
 # Warns about conflicts but allows user commands to win (non-blocking)
-# Called before team commands are staged to inform user of potential conflicts
+# Called before rite commands are staged to inform user of potential conflicts
 check_user_command_collisions() {
     local team_name="$1"
     local source_dir="$KNOSSOS_HOME/rites/$team_name/commands"
 
     # Skip if team has no commands directory
     if [[ ! -d "$source_dir" ]]; then
-        log_debug "No team commands to check for collisions"
+        log_debug "No rite commands to check for collisions"
         return 0
     fi
 
@@ -1970,30 +1969,30 @@ check_user_command_collisions() {
         for cmd in "${collisions[@]}"; do
             log_warning "  - $cmd"
         done
-        log_warning "Team commands with same names will be skipped during sync"
+        log_warning "Rite commands with same names will be skipped during sync"
     fi
 
     return 0
 }
 
 # Sync team-specific commands to project
-# Team commands are copied to .claude/commands/ with a marker file
+# Rite commands are copied to .claude/commands/ with a marker file
 swap_commands() {
     local team_name="$1"
     local source_dir="$KNOSSOS_HOME/rites/$team_name/commands"
 
-    log_debug "Checking for team commands in $source_dir"
+    log_debug "Checking for rite commands in $source_dir"
 
     # Ensure commands directory exists
     mkdir -p ".claude/commands"
 
-    # Backup and remove previous team commands
+    # Backup and remove previous rite commands
     backup_team_commands
     remove_team_commands
 
     # Check if team has commands
     if [[ ! -d "$source_dir" ]]; then
-        log_debug "Team $team_name has no commands/ directory"
+        log_debug "Rite $team_name has no commands/ directory"
         return 0
     fi
 
@@ -2001,7 +2000,7 @@ swap_commands() {
     cmd_count=$(find "$source_dir" -maxdepth 1 -name "*.md" -type f 2>/dev/null | wc -l | tr -d ' ')
 
     if [[ "$cmd_count" -eq 0 ]]; then
-        log_debug "Team $team_name has no command files"
+        log_debug "Rite $team_name has no command files"
         return 0
     fi
 
@@ -2040,11 +2039,11 @@ swap_commands() {
 }
 
 # ============================================================================
-# Team Skills Functions (Phase 2: Unified Sync)
+# Rite Skills Functions (Phase 2: Unified Sync)
 # ============================================================================
 
 # Sync team-specific skills to project
-# Team skills are copied to .claude/skills/ with a marker file
+# Rite skills are copied to .claude/skills/ with a marker file
 # Skills from team layer overlay baseline skills (team wins on collision)
 swap_skills() {
     local team_name="$1"
@@ -2061,7 +2060,7 @@ swap_skills() {
 
     # Check if team has skills
     if [[ ! -d "$source_dir" ]]; then
-        log_debug "Team $team_name has no skills/ directory"
+        log_debug "Rite $team_name has no skills/ directory"
         return 0
     fi
 
@@ -2070,7 +2069,7 @@ swap_skills() {
     skill_count=$(find "$source_dir" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l | tr -d ' ')
 
     if [[ "$skill_count" -eq 0 ]]; then
-        log_debug "Team $team_name has no skill directories"
+        log_debug "Rite $team_name has no skill directories"
         return 0
     fi
 
@@ -2088,10 +2087,10 @@ swap_skills() {
         skill_name=$(basename "$skill_path")
 
         # Check for collision with existing baseline skill
-        # Team wins: overwrite with warning
+        # Rite wins: overwrite with warning
         if [[ -d ".claude/skills/$skill_name" ]] && ! grep -q "^$skill_name$" "$marker_file" 2>/dev/null; then
             # Exists but not from team - this is a baseline skill
-            log_warning "Team skill $skill_name overrides baseline skill"
+            log_warning "Rite skill $skill_name overrides baseline skill"
             rm -rf ".claude/skills/$skill_name"
         fi
 
@@ -2140,7 +2139,7 @@ remove_shared_skills() {
 
 # Sync shared skills to project
 # Shared skills are copied to .claude/skills/ with a marker file
-# Team skills win over shared skills (team-privileged override)
+# Rite skills win over shared skills (team-privileged override)
 sync_shared_skills() {
     local source_dir="$KNOSSOS_HOME/rites/shared/skills"
 
@@ -2182,7 +2181,7 @@ sync_shared_skills() {
 
         # Check if team has same skill (team-privileged override)
         if [[ -f ".claude/skills/.rite-skills" ]] && grep -q "^$skill_name$" ".claude/skills/.rite-skills" 2>/dev/null; then
-            log_debug "Team skill $skill_name overrides shared skill"
+            log_debug "Rite skill $skill_name overrides shared skill"
             continue  # Skip this shared skill
         fi
 
@@ -2209,7 +2208,7 @@ sync_shared_skills() {
 }
 
 # ============================================================================
-# Team Hooks Functions (Phase 2: Unified Sync)
+# Rite Hooks Functions (Phase 2: Unified Sync)
 # ============================================================================
 
 # Sync base hooks AND team-specific hooks to project
@@ -2304,7 +2303,7 @@ swap_hooks() {
     # PHASE 2: Overlay team hooks (if team has hooks directory)
     # =========================================================================
     if [[ ! -d "$team_hooks_dir" ]]; then
-        log_debug "Team $team_name has no hooks/ directory"
+        log_debug "Rite $team_name has no hooks/ directory"
         return 0
     fi
 
@@ -2312,7 +2311,7 @@ swap_hooks() {
     hook_count=$(find "$team_hooks_dir" -maxdepth 1 -type f -name "*.sh" 2>/dev/null | wc -l | tr -d ' ')
 
     if [[ "$hook_count" -eq 0 ]]; then
-        log_debug "Team $team_name has no hook files"
+        log_debug "Rite $team_name has no hook files"
         return 0
     fi
 
@@ -2334,7 +2333,7 @@ swap_hooks() {
 
         # Check for collision with base hook
         if [[ -f ".claude/hooks/$hook_name" ]]; then
-            log_warning "Team hook overrides base: $hook_name"
+            log_warning "Rite hook overrides base: $hook_name"
         fi
 
         cp "$hook_file" ".claude/hooks/$hook_name"
@@ -2682,9 +2681,9 @@ preview_refresh() {
     local source_dir="$KNOSSOS_HOME/rites/$team_name/agents"
 
     # Get current team for scoped orphan detection (RF-005)
-    local current_team=""
+    local current_rite=""
     if [[ -f ".claude/ACTIVE_RITE" ]]; then
-        current_team=$(cat .claude/ACTIVE_RITE | tr -d '[:space:]')
+        current_rite=$(cat .claude/ACTIVE_RITE | tr -d '[:space:]')
     fi
 
     log "Dry-run: Would refresh $team_name"
@@ -2720,11 +2719,11 @@ preview_refresh() {
     fi
 
     # Check for orphan commands (commands from other teams)
-    # Pass current_team to scope detection to previous team only (RF-005)
+    # Pass current_rite to scope detection to previous team only (RF-005)
     echo ""
     echo "Command orphans (from other teams):"
     local orphan_commands
-    orphan_commands=$(detect_resource_orphans "commands" ".claude/commands" "$team_name" "f" "*.md" "$current_team")
+    orphan_commands=$(detect_resource_orphans "commands" ".claude/commands" "$team_name" "f" "*.md" "$current_rite")
     if [[ -n "$orphan_commands" ]]; then
         while IFS=: read -r cmd_name origin_team; do
             echo "  ? $cmd_name (from $origin_team)"
@@ -2734,11 +2733,11 @@ preview_refresh() {
     fi
 
     # Check for orphan skills (skills from other teams)
-    # Pass current_team to scope detection to previous team only (RF-005)
+    # Pass current_rite to scope detection to previous team only (RF-005)
     echo ""
     echo "Skill orphans (from other teams):"
     local orphan_skills
-    orphan_skills=$(detect_resource_orphans "skills" ".claude/skills" "$team_name" "d" "*/" "$current_team")
+    orphan_skills=$(detect_resource_orphans "skills" ".claude/skills" "$team_name" "d" "*/" "$current_rite")
     if [[ -n "$orphan_skills" ]]; then
         while IFS=: read -r skill_name origin_team; do
             echo "  ? $skill_name (from $origin_team)"
@@ -2748,11 +2747,11 @@ preview_refresh() {
     fi
 
     # Check for orphan hooks (hooks from other teams)
-    # Pass current_team to scope detection to previous team only (RF-005)
+    # Pass current_rite to scope detection to previous team only (RF-005)
     echo ""
     echo "Hook orphans (from other teams):"
     local orphan_hooks
-    orphan_hooks=$(detect_resource_orphans "hooks" ".claude/hooks" "$team_name" "f" "*" "$current_team")
+    orphan_hooks=$(detect_resource_orphans "hooks" ".claude/hooks" "$team_name" "f" "*" "$current_rite")
     if [[ -n "$orphan_hooks" ]]; then
         while IFS=: read -r hook_name origin_team; do
             echo "  ? $hook_name (from $origin_team)"
@@ -2851,7 +2850,7 @@ roster_has_updates() {
     return 1  # Up to date
 }
 
-# Run roster-sync before team apply (waterfall pattern)
+# Run roster-sync before rite apply (waterfall pattern)
 # Usage: run_roster_sync_waterfall [--force]
 # Returns: 0 on success, non-zero on failure
 run_roster_sync_waterfall() {
@@ -2865,7 +2864,7 @@ run_roster_sync_waterfall() {
         return 0
     fi
 
-    log "Syncing infrastructure before team apply..."
+    log "Syncing infrastructure before rite apply..."
 
     # Run roster-sync sync (without --refresh to avoid recursion)
     local sync_output
@@ -2895,8 +2894,8 @@ run_roster_sync_waterfall() {
 }
 
 # Update CEM manifest team section after swap
-# Usage: update_cem_manifest_team "team_name"
-update_cem_manifest_team() {
+# Usage: update_cem_manifest_rite "team_name"
+update_cem_manifest_rite() {
     local team_name="$1"
     local manifest_file=".claude/.cem/manifest.json"
 
@@ -2968,7 +2967,7 @@ perform_swap() {
     # WATERFALL SYNC: roster-sync integration (--sync-first or --auto-sync)
     # =========================================================================
     if [[ "$SYNC_FIRST_MODE" -eq 1 ]]; then
-        # --sync-first: Always run roster-sync before team apply
+        # --sync-first: Always run roster-sync before rite apply
         run_roster_sync_waterfall || {
             log_error "Infrastructure sync failed, aborting team swap"
             exit "$EXIT_SWAP_FAILURE"
@@ -2987,14 +2986,14 @@ perform_swap() {
     fi
 
     # Get current team (before swap) for journal
-    local source_team=""
+    local source_rite=""
     if [[ -f ".claude/ACTIVE_RITE" ]]; then
-        source_team=$(cat .claude/ACTIVE_RITE | tr -d '[:space:]')
+        source_rite=$(cat .claude/ACTIVE_RITE | tr -d '[:space:]')
     fi
 
     # Check if already active (idempotency, unless --update)
-    if [[ -n "$source_team" ]] && [[ "$UPDATE_MODE" -eq 0 ]]; then
-        if [[ "$source_team" == "$team_name" ]]; then
+    if [[ -n "$source_rite" ]] && [[ "$UPDATE_MODE" -eq 0 ]]; then
+        if [[ "$source_rite" == "$team_name" ]]; then
             log "Already using $team_name (no changes needed)"
             log "Use --update to pull latest from roster"
             exit "$EXIT_SUCCESS"
@@ -3007,8 +3006,8 @@ perform_swap() {
     validate_project
 
     # Validate team schemas (workflow.yaml, orchestrator.yaml) before swap
-    validate_team_schemas "$team_name" || {
-        log_error "Team schema validation failed, aborting swap"
+    validate_rite_schemas "$team_name" || {
+        log_error "Rite schema validation failed, aborting swap"
         exit "$EXIT_VALIDATION_FAILURE"
     }
 
@@ -3021,11 +3020,11 @@ perform_swap() {
     # =========================================================================
     # PHASE: PREPARING - Create journal and validate
     # =========================================================================
-    create_journal "$source_team" "$team_name" || {
+    create_journal "$source_rite" "$team_name" || {
         exit "$EXIT_SWAP_FAILURE"
     }
 
-    # Detect orphan agents (current agents not in target team)
+    # Detect orphan agents (current agents not in target rite)
     detect_orphans "$team_name"
 
     # Handle orphans if any exist
@@ -3113,9 +3112,9 @@ perform_swap() {
     # =========================================================================
 
     # Detect and handle orphan commands (commands from other teams)
-    # Pass source_team to scope detection to previous team only (RF-005)
+    # Pass source_rite to scope detection to previous team only (RF-005)
     local orphan_commands
-    orphan_commands=$(detect_resource_orphans "commands" ".claude/commands" "$team_name" "f" "*.md" "$source_team")
+    orphan_commands=$(detect_resource_orphans "commands" ".claude/commands" "$team_name" "f" "*.md" "$source_rite")
     if [[ -n "$orphan_commands" ]]; then
         if [[ -z "$ORPHAN_MODE" ]]; then
             local orphan_count
@@ -3130,7 +3129,7 @@ perform_swap() {
         fi
     fi
 
-    # Check for user command collisions before syncing team commands
+    # Check for user command collisions before syncing rite commands
     check_user_command_collisions "$team_name"
 
     # Sync team-specific commands
@@ -3138,9 +3137,9 @@ perform_swap() {
     mark_commit_step "$COMMIT_STEP_COMMANDS"
 
     # Detect and handle orphan skills (skills from other teams)
-    # Pass source_team to scope detection to previous team only (RF-005)
+    # Pass source_rite to scope detection to previous team only (RF-005)
     local orphan_skills
-    orphan_skills=$(detect_resource_orphans "skills" ".claude/skills" "$team_name" "d" "*/" "$source_team")
+    orphan_skills=$(detect_resource_orphans "skills" ".claude/skills" "$team_name" "d" "*/" "$source_rite")
     if [[ -n "$orphan_skills" ]]; then
         if [[ -z "$ORPHAN_MODE" ]]; then
             # Non-interactive mode without flags - warn but don't block
@@ -3165,9 +3164,9 @@ perform_swap() {
     mark_commit_step "$COMMIT_STEP_SHARED_SKILLS"
 
     # Detect and handle orphan hooks (hooks from other teams)
-    # Pass source_team to scope detection to previous team only (RF-005)
+    # Pass source_rite to scope detection to previous team only (RF-005)
     local orphan_hooks
-    orphan_hooks=$(detect_resource_orphans "hooks" ".claude/hooks" "$team_name" "f" "*" "$source_team")
+    orphan_hooks=$(detect_resource_orphans "hooks" ".claude/hooks" "$team_name" "f" "*" "$source_rite")
     if [[ -n "$orphan_hooks" ]]; then
         if [[ -z "$ORPHAN_MODE" ]]; then
             local orphan_count
@@ -3225,7 +3224,7 @@ perform_swap() {
     # Update CEM manifest team section (critical for roster-sync staleness tracking)
     # Note: This is after point-of-no-return, so failure cannot trigger rollback
     # Instead, log warning and continue - CEM staleness is recoverable via roster-sync
-    if ! update_cem_manifest_team "$team_name"; then
+    if ! update_cem_manifest_rite "$team_name"; then
         log_warning "Failed to update CEM manifest team section"
         log_warning "CEM manifest may be stale - run roster-sync to update"
         # Cannot rollback - we're past point-of-no-return (ACTIVE_RITE written)
@@ -3277,7 +3276,7 @@ perform_swap() {
                 log_warning "Cannot update session - SESSION_CONTEXT missing YAML frontmatter"
                 log_warning "ACTIVE_RITE updated but session state may be inconsistent"
             else
-                # Check for active_rite field exists (with active_team fallback)
+                # Check for active_rite field exists (with active_rite fallback)
                 if ! grep -qE "^active_(rite|team):" "$session_file" 2>/dev/null; then
                     log_warning "Cannot update session - active_rite field not found"
                     log_warning "ACTIVE_RITE updated but session state may be inconsistent"
@@ -3360,9 +3359,9 @@ preview_reset() {
         echo "  (none)"
     fi
 
-    # Check for team commands
+    # Check for rite commands
     echo ""
-    echo "Team commands to remove:"
+    echo "Rite commands to remove:"
     if [[ -f ".claude/commands/.rite-commands" ]]; then
         while IFS= read -r cmd; do
             [[ -z "$cmd" ]] && continue
@@ -3374,7 +3373,7 @@ preview_reset() {
 
     # Check for team skills
     echo ""
-    echo "Team skills to remove:"
+    echo "Rite skills to remove:"
     if [[ -f ".claude/skills/.rite-skills" ]]; then
         while IFS= read -r skill; do
             [[ -z "$skill" ]] && continue
@@ -3386,7 +3385,7 @@ preview_reset() {
 
     # Check for team hooks
     echo ""
-    echo "Team hooks to remove:"
+    echo "Rite hooks to remove:"
     if [[ -f ".claude/hooks/.rite-hooks" ]]; then
         while IFS= read -r hook; do
             [[ -z "$hook" ]] && continue
@@ -3477,7 +3476,7 @@ No team currently active. Available commands:
 
 | Command | Description |
 |---------|-------------|
-| `/team <pack-name>` | Switch to a team pack |
+| `/team <pack-name>` | Switch to a rite |
 | `/team --list` | List available teams |
 | `/consult` | Get guidance on which team to use |
 
@@ -3487,7 +3486,7 @@ QSEOF
     cat > "$ac_file" << 'ACEOF'
 ## Agent Configurations
 
-No team agents loaded. Switch to a team pack to load agents.
+No team agents loaded. Switch to a rite to load agents.
 ACEOF
 
     # Update sections (handles PRESERVE comment and ## heading on separate lines)
@@ -3558,17 +3557,17 @@ perform_reset() {
     fi
 
     # Get current team for reporting
-    local current_team=""
+    local current_rite=""
     if [[ -f ".claude/ACTIVE_RITE" ]]; then
-        current_team=$(cat .claude/ACTIVE_RITE 2>/dev/null | tr -d '[:space:]')
+        current_rite=$(cat .claude/ACTIVE_RITE 2>/dev/null | tr -d '[:space:]')
     fi
 
-    if [[ -z "$current_team" ]]; then
+    if [[ -z "$current_rite" ]]; then
         log "No team active. Already at baseline."
         return 0
     fi
 
-    log "Resetting from $current_team to baseline..."
+    log "Resetting from $current_rite to baseline..."
 
     # Backup current state
     backup_current_agents
@@ -3760,10 +3759,10 @@ main() {
             fi
         else
             # No team specified and not update mode - query current team
-            query_current_team
+            query_current_rite
         fi
     else
-        # Team pack name - perform swap
+        # Rite name - perform swap
         perform_swap "$team_name"
     fi
 }
