@@ -181,6 +181,7 @@ parse_global_flags() {
             --team=*)
                 # For init command: pass through with value
                 FLAG_TEAM=1
+                log_warning "The --team flag is deprecated; use --rite instead"
                 args+=("$1")
                 shift
                 ;;
@@ -188,6 +189,7 @@ parse_global_flags() {
                 # Check if next arg looks like a value (for init) or is a flag/command
                 if [[ $# -gt 1 && "${2:-}" != -* && "${2:-}" != "init" && "${2:-}" != "sync" && "${2:-}" != "validate" && "${2:-}" != "repair" && "${2:-}" != "status" && "${2:-}" != "diff" ]]; then
                     # Has a value - pass through for init command
+                    log_warning "The --team flag is deprecated; use --rite instead"
                     args+=("$1" "$2")
                     shift 2
                 else

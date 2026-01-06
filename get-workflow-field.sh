@@ -18,7 +18,7 @@ if [ -z "$FIELD" ]; then
 fi
 
 if [ -z "$TEAM" ]; then
-  echo "Error: No team specified and no ACTIVE_TEAM found" >&2
+  echo "Error: No team specified and no ACTIVE_RITE found" >&2
   exit 1
 fi
 

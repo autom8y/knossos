@@ -665,9 +665,9 @@ verify_state_consistency() {
 
     log "Verifying state consistency..."
 
-    # Check ACTIVE_TEAM exists
+    # Check ACTIVE_RITE exists
     if [[ ! -f ".claude/ACTIVE_RITE" ]]; then
-        log_warning "No ACTIVE_TEAM file (virgin state or corrupted)"
+        log_warning "No ACTIVE_RITE file (virgin state or corrupted)"
         ((errors++)) || true
     else
         local active_team
@@ -675,13 +675,13 @@ verify_state_consistency() {
 
         # Check agents directory exists
         if [[ ! -d ".claude/agents" ]]; then
-            log_error "ACTIVE_TEAM is $active_team but no agents directory exists"
+            log_error "ACTIVE_RITE is $active_team but no agents directory exists"
             ((errors++)) || true
         else
             local agent_count
             agent_count=$(find .claude/agents -maxdepth 1 -name "*.md" -type f 2>/dev/null | wc -l | tr -d ' ')
             if [[ "$agent_count" -eq 0 ]]; then
-                log_error "ACTIVE_TEAM is $active_team but no agent files found"
+                log_error "ACTIVE_RITE is $active_team but no agent files found"
                 ((errors++)) || true
             fi
         fi
@@ -857,6 +857,7 @@ write_manifest() {
     {
         echo "{"
         echo "  \"manifest_version\": \"$MANIFEST_VERSION\","
+        echo "  \"active_rite\": \"$team_name\","
         echo "  \"active_team\": \"$team_name\","
         echo "  \"last_swap\": \"$timestamp\","
         echo "  \"written_at\": \"$timestamp\","

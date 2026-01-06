@@ -688,9 +688,9 @@ verify_backup_integrity() {
         fi
     fi
 
-    # For non-virgin swap, we need ACTIVE_TEAM in backup
+    # For non-virgin swap, we need ACTIVE_RITE in backup
     if [[ "$was_virgin" != "true" ]] && [[ ! -f "$SWAP_BACKUP_DIR/ACTIVE_TEAM" ]]; then
-        log_debug "Backup missing ACTIVE_TEAM (non-virgin swap)"
+        log_debug "Backup missing ACTIVE_RITE (non-virgin swap)"
         return 1
     fi
 
