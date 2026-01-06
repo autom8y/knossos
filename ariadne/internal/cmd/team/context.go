@@ -48,7 +48,7 @@ func runContext(ctx *cmdContext, opts contextOptions) error {
 	// Determine team name
 	teamName := opts.teamName
 	if teamName == "" {
-		teamName = ctx.getActiveTeam()
+		teamName = ctx.getActiveRite()
 		if teamName == "" {
 			printer.PrintLine("No active rite. Use --rite flag to specify a rite.")
 			return nil

@@ -45,7 +45,7 @@ func runStatus(ctx *cmdContext, opts statusOptions) error {
 	// Get team name (from flag or active)
 	teamName := opts.teamName
 	if teamName == "" {
-		teamName = discovery.ActiveTeamName()
+		teamName = discovery.ActiveRiteName()
 		if teamName == "" {
 			err := errors.New(errors.CodeFileNotFound, "No active team set")
 			printer.PrintError(err)

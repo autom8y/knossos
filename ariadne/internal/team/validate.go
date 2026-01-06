@@ -237,7 +237,7 @@ func (v *Validator) checkManifestSync(result *ValidationResult, rite *Rite) {
 	// Check installed agents match manifest
 	agentsDir := v.resolver.AgentsDir()
 	installedFiles, _ := listAgentFiles(agentsDir)
-	manifestAgents := manifest.GetTeamAgents(rite.Name)
+	manifestAgents := manifest.GetRiteAgents(rite.Name)
 
 	// Quick check for count mismatch
 	if len(installedFiles) != len(manifestAgents) {

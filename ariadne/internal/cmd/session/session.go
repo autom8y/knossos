@@ -129,8 +129,8 @@ func (c *cmdContext) clearCurrentSessionID() error {
 	return err
 }
 
-// getActiveTeam reads the active rite from ACTIVE_RITE file.
-func (c *cmdContext) getActiveTeam() string {
+// getActiveRite reads the active rite from ACTIVE_RITE file.
+func (c *cmdContext) getActiveRite() string {
 	resolver := c.getResolver()
 
 	ritePath := resolver.ActiveRiteFile()

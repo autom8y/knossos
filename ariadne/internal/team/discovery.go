@@ -118,8 +118,8 @@ func (d *Discovery) GetActive() (*Rite, error) {
 	return d.Get(d.activeRite)
 }
 
-// ActiveTeamName returns the name of the active rite.
-func (d *Discovery) ActiveTeamName() string {
+// ActiveRiteName returns the name of the active rite.
+func (d *Discovery) ActiveRiteName() string {
 	return d.activeRite
 }
 

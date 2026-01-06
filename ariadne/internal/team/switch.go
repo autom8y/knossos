@@ -238,7 +238,7 @@ func (s *Switcher) executeSwitch(rite *Rite, manifest *Manifest, orphans []strin
 	}
 
 	// 5. Update manifest
-	manifest.SetActiveTeam(opts.TargetRite)
+	manifest.SetActiveRite(opts.TargetRite)
 	manifest.ClearOrphans()
 	if err := manifest.Save(s.resolver.AgentManifestFile()); err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to save manifest", err)

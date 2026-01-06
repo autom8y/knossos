@@ -68,7 +68,7 @@ func runCreate(ctx *cmdContext, initiative string, opts createOptions) error {
 	// Get team from flag or ACTIVE_RITE file
 	team := opts.team
 	if team == "" {
-		team = ctx.getActiveTeam()
+		team = ctx.getActiveRite()
 	}
 
 	// Validate complexity
@@ -178,7 +178,7 @@ func runCreateSeeded(ctx *cmdContext, initiative string, opts createOptions) err
 	// Get team from flag or ACTIVE_RITE file
 	team := opts.team
 	if team == "" {
-		team = ctx.getActiveTeam()
+		team = ctx.getActiveRite()
 	}
 
 	// Validate complexity

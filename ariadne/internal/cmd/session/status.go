@@ -80,7 +80,7 @@ func runStatus(ctx *cmdContext) error {
 	}
 
 	// Determine execution mode
-	executionMode := deriveExecutionMode(sessCtx, ctx.getActiveTeam())
+	executionMode := deriveExecutionMode(sessCtx, ctx.getActiveRite())
 
 	// Get git info
 	gitBranch, gitChanges := getGitInfo()

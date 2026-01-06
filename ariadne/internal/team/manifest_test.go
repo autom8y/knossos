@@ -173,17 +173,17 @@ func TestManifest_RemoveAgent(t *testing.T) {
 	}
 }
 
-func TestManifest_GetTeamAgents(t *testing.T) {
+func TestManifest_GetRiteAgents(t *testing.T) {
 	m := NewEmptyManifest()
 	m.AddAgent("agent-a.md", "team", "team-a", "sha256:a")
 	m.AddAgent("agent-b.md", "team", "team-a", "sha256:b")
 	m.AddAgent("agent-c.md", "team", "team-b", "sha256:c")
 	m.AddAgent("project-agent.md", "project", "", "sha256:d")
 
-	agents := m.GetTeamAgents("team-a")
+	agents := m.GetRiteAgents("team-a")
 
 	if len(agents) != 2 {
-		t.Errorf("GetTeamAgents(team-a) returned %d agents, want 2", len(agents))
+		t.Errorf("GetRiteAgents(team-a) returned %d agents, want 2", len(agents))
 	}
 }
 

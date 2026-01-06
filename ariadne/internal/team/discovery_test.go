@@ -145,7 +145,7 @@ func TestDiscovery_ActiveTeam(t *testing.T) {
 		}
 	}
 
-	if d.ActiveTeamName() != "valid-team" {
-		t.Errorf("ActiveTeamName() = %q, want %q", d.ActiveTeamName(), "valid-team")
+	if d.ActiveRiteName() != "valid-team" {
+		t.Errorf("ActiveRiteName() = %q, want %q", d.ActiveRiteName(), "valid-team")
 	}
 }

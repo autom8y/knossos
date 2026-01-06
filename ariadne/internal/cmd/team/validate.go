@@ -41,7 +41,7 @@ func runValidate(ctx *cmdContext, opts validateOptions) error {
 	// Get team name (from flag or active)
 	teamName := opts.teamName
 	if teamName == "" {
-		teamName = discovery.ActiveTeamName()
+		teamName = discovery.ActiveRiteName()
 		if teamName == "" {
 			err := errors.New(errors.CodeFileNotFound, "No active rite set. Use --rite to specify.")
 			printer.PrintError(err)

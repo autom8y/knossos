@@ -88,8 +88,8 @@ func (c *cmdContext) getValidator() *team.Validator {
 	return team.NewValidator(resolver)
 }
 
-// getActiveTeam reads the active rite from ACTIVE_RITE file.
-func (c *cmdContext) getActiveTeam() string {
+// getActiveRite reads the active rite from ACTIVE_RITE file.
+func (c *cmdContext) getActiveRite() string {
 	resolver := c.getResolver()
 
 	ritePath := resolver.ActiveRiteFile()

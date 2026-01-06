@@ -152,8 +152,8 @@ func (m *Manifest) ClearOrphans() {
 	m.Orphans = []string{}
 }
 
-// SetActiveTeam updates the active rite in the manifest.
-func (m *Manifest) SetActiveTeam(riteName string) {
+// SetActiveRite updates the active rite in the manifest.
+func (m *Manifest) SetActiveRite(riteName string) {
 	m.ActiveRite = riteName
 }
 
@@ -166,8 +166,8 @@ func (m *Manifest) GetInstalledAgents() []string {
 	return agents
 }
 
-// GetTeamAgents returns agents from a specific rite.
-func (m *Manifest) GetTeamAgents(riteName string) []string {
+// GetRiteAgents returns agents from a specific rite.
+func (m *Manifest) GetRiteAgents(riteName string) []string {
 	var agents []string
 	for name, entry := range m.Agents {
 		if entry.Source == "team" && entry.Origin == riteName {
@@ -177,8 +177,8 @@ func (m *Manifest) GetTeamAgents(riteName string) []string {
 	return agents
 }
 
-// IsFromTeam checks if an agent is from a specific rite.
-func (m *Manifest) IsFromTeam(agentName, riteName string) bool {
+// IsFromRite checks if an agent is from a specific rite.
+func (m *Manifest) IsFromRite(agentName, riteName string) bool {
 	entry, ok := m.Agents[agentName]
 	if !ok {
 		return false
