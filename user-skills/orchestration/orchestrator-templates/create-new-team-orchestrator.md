@@ -200,7 +200,7 @@ skills:
 ### Step 2.1: Run the Generator
 
 ```bash
-cd $ROSTER_HOME
+cd $KNOSSOS_HOME
 /roster/templates/orchestrator-generate.sh my-team
 ```
 
@@ -336,7 +336,7 @@ grep "^|.*→" teams/my-team/agents/orchestrator.md | awk '{print $3}' | sort | 
 ### Step 5.1: Stage Both Files
 
 ```bash
-cd $ROSTER_HOME
+cd $KNOSSOS_HOME
 git add .claude/teams/my-team/orchestrator.yaml
 git add .claude/teams/my-team/agents/orchestrator.md
 ```

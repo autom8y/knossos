@@ -170,7 +170,7 @@ Available teams:
 
 Resolution:
 - Choose team from list above
-- Check ROSTER_HOME: {roster_home}
+- Check KNOSSOS_HOME: {roster_home}
 - Use /team to see team details
 
 Related: /team, /roster
@@ -184,7 +184,7 @@ Related: /team, /roster
 
 ### Roster System Unavailable
 
-**When**: ROSTER_HOME not set or invalid
+**When**: KNOSSOS_HOME not set or invalid
 
 ```
 ✗ Roster System Unavailable
@@ -192,13 +192,13 @@ Related: /team, /roster
 Roster system not found or configured.
 
 Checks:
-- ROSTER_HOME: {roster_home_value}
+- KNOSSOS_HOME: {roster_home_value}
 - Directory exists: {exists}
 
 Resolution:
-- Set ROSTER_HOME environment variable
+- Set KNOSSOS_HOME environment variable
 - Point to roster installation directory
-- Example: export ROSTER_HOME=~/Code/roster
+- Example: export KNOSSOS_HOME=~/Code/roster
 
 Related: /help, /status
 ```

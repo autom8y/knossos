@@ -118,11 +118,11 @@ Continue working or use /park to pause.
 
 **Implementation**:
 ```bash
-if [[ -z "$ROSTER_HOME" ]]; then
+if [[ -z "$KNOSSOS_HOME" ]]; then
   ERROR: Roster system not configured
 fi
 
-team_dir="$ROSTER_HOME/teams/$target_team"
+team_dir="$KNOSSOS_HOME/teams/$target_team"
 if [[ ! -d "$team_dir" ]]; then
   ERROR: Team not found
 fi
@@ -139,7 +139,7 @@ Team '{team}' not found.
 Available teams:
 {list from roster}
 
-Use /team to switch or check ROSTER_HOME.
+Use /team to switch or check KNOSSOS_HOME.
 ```
 
 ### Check: Team Consistency

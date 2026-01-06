@@ -13,7 +13,7 @@ Commands that invoke agents or switch teams:
 
 | Check | Method | Pass | Fail |
 |-------|--------|------|------|
-| Team exists | `$ROSTER_HOME/teams/{team}` exists | Directory exists | Error: Team not found |
+| Team exists | `$KNOSSOS_HOME/teams/{team}` exists | Directory exists | Error: Team not found |
 | Team matches session | Compare ACTIVE_RITE to session.active_team | Match | Warning + prompt |
 | Agent exists | `.claude/agents/{agent}.md` exists | File exists | Error: Agent not found |
 
@@ -46,7 +46,7 @@ Commands that invoke agents or switch teams:
 | Team not found | "Team '{name}' not found. Use `/roster` to list available teams." |
 | Team mismatch | "Session team ({session_team}) differs from active team ({active_team})." |
 | Agent not found | "Agent '{agent}' not found in team '{team}'." |
-| Roster unavailable | "Roster system unavailable. Set ROSTER_HOME or check installation." |
+| Roster unavailable | "Roster system unavailable. Set KNOSSOS_HOME or check installation." |
 
 ## Customization Points
 

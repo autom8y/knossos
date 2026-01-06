@@ -17,7 +17,7 @@ This skill provides read-only team metadata. It does not switch teams.
 
 ### List All Teams
 
-Read all orchestrator.yaml files from `$ROSTER_HOME/teams/*/orchestrator.yaml` and extract:
+Read all orchestrator.yaml files from `$KNOSSOS_HOME/teams/*/orchestrator.yaml` and extract:
 - Team name, domain, description
 - Quick-switch command
 - Agent roster (from teams/{name}/agents/*.md)
@@ -32,8 +32,8 @@ Given a user query, compare against team routing conditions:
 
 ## Data Source
 
-**Primary**: `$ROSTER_HOME/teams/*/orchestrator.yaml`
-**Supplementary**: `$ROSTER_HOME/teams/*/README.md` for use cases
+**Primary**: `$KNOSSOS_HOME/teams/*/orchestrator.yaml`
+**Supplementary**: `$KNOSSOS_HOME/teams/*/README.md` for use cases
 
 ### Current Team Inventory
 
@@ -41,12 +41,12 @@ Given a user query, compare against team routing conditions:
 
 To get current team count:
 ```bash
-ls -d $ROSTER_HOME/teams/*-pack | wc -l
+ls -d $KNOSSOS_HOME/teams/*-pack | wc -l
 ```
 
 To list team names:
 ```bash
-ls -d $ROSTER_HOME/teams/*-pack | xargs -n1 basename
+ls -d $KNOSSOS_HOME/teams/*-pack | xargs -n1 basename
 ```
 
 ## Schema Reference

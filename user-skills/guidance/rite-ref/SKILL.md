@@ -11,7 +11,7 @@ description: "Switch agent rite packs or list available rites via roster system.
 
 Switch between agent rite packs to access specialized workflows. Each rite pack provides a curated set of agents optimized for specific types of work (development, documentation, code hygiene, technical debt).
 
-This command integrates with the roster system at `$ROSTER_HOME/` and updates the active rite context for the current project.
+This command integrates with the roster system at `$KNOSSOS_HOME/` and updates the active rite context for the current project.
 
 ---
 
@@ -49,7 +49,7 @@ Determine operation mode:
 Execute the swap-team.sh script via Bash tool:
 
 ```bash
-$ROSTER_HOME/swap-team.sh [args]
+$KNOSSOS_HOME/swap-team.sh [args]
 ```
 
 The script handles:
@@ -81,13 +81,13 @@ If a session is active (`.claude/sessions/{session_id}/SESSION_CONTEXT.md` exist
 
 ## Available Team Packs
 
-Team packs are discovered dynamically from `$ROSTER_HOME/teams/`. Reference the `team-discovery` skill for structured metadata access.
+Team packs are discovered dynamically from `$KNOSSOS_HOME/teams/`. Reference the `team-discovery` skill for structured metadata access.
 
 ### Current Inventory
 
 To list all teams at runtime:
 ```bash
-ls -d $ROSTER_HOME/teams/*-pack 2>/dev/null | xargs -n1 basename
+ls -d $KNOSSOS_HOME/teams/*-pack 2>/dev/null | xargs -n1 basename
 ```
 
 As of this writing, the roster contains 11 teams:
@@ -103,7 +103,7 @@ As of this writing, the roster contains 11 teams:
 - sre-pack (operations/reliability)
 - strategy-pack (business analysis)
 
-**Important**: This list is informational. For current, accurate team data, use `team-discovery` skill or read directly from `$ROSTER_HOME/teams/*/orchestrator.yaml`.
+**Important**: This list is informational. For current, accurate team data, use `team-discovery` skill or read directly from `$KNOSSOS_HOME/teams/*/orchestrator.yaml`.
 
 ### Team Details
 
@@ -264,7 +264,7 @@ No changes made (--dry-run mode)
 
 Output:
 ```
-[Roster] Error: Team pack 'nonexistent-pack' not found in $ROSTER_HOME/teams/
+[Roster] Error: Team pack 'nonexistent-pack' not found in $KNOSSOS_HOME/teams/
 [Roster] Use './swap-team.sh --list' to see available packs
 ```
 
@@ -305,8 +305,8 @@ If file copy fails or count mismatch:
 
 ## Prerequisites
 
-- Roster system installed at `$ROSTER_HOME/`
-- At least one team pack exists in `$ROSTER_HOME/teams/`
+- Roster system installed at `$KNOSSOS_HOME/`
+- At least one team pack exists in `$KNOSSOS_HOME/teams/`
 - `.claude/` directory exists and is writable (created automatically if missing)
 
 ---
@@ -388,8 +388,8 @@ These commands invoke `/team {pack-name}` internally and display team roster aft
 
 ## Related Documentation
 
-- [swap-team.sh]($ROSTER_HOME/swap-team.sh) - Roster swap script
-- [TDD-roster-system.md]($ROSTER_HOME/docs/design/TDD-0003-team-swap.md) - Roster design
+- [swap-team.sh]($KNOSSOS_HOME/swap-team.sh) - Roster swap script
+- [TDD-roster-system.md]($KNOSSOS_HOME/docs/design/TDD-0003-team-swap.md) - Roster design
 - [COMMAND_REGISTRY.md](../../COMMAND_REGISTRY.md) - All registered commands
 
 ---
@@ -410,7 +410,7 @@ If any step fails, previous agents can be restored from backup.
 
 ### Team Pack Structure
 
-Each team pack in `$ROSTER_HOME/teams/` has:
+Each team pack in `$KNOSSOS_HOME/teams/` has:
 
 ```
 team-name/
@@ -435,7 +435,7 @@ This command is session-aware:
 The roster location can be customized:
 
 ```bash
-export ROSTER_HOME=/custom/path/to/roster
+export KNOSSOS_HOME=/custom/path/to/roster
 /team --list
 ```
 

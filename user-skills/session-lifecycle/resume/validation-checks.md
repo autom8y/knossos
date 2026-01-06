@@ -34,7 +34,7 @@ Options:
 Choice [1/2/3]:
 ```
 
-**Option 1**: Invoke `$ROSTER_HOME/swap-team.sh {session.active_team}`
+**Option 1**: Invoke `$KNOSSOS_HOME/swap-team.sh {session.active_team}`
 **Option 2**: Continue with potential agent mismatch
 **Option 3**: Abort resume
 

@@ -30,16 +30,16 @@ git rev-parse HEAD
 **Cause:** Roster sync scripts not found or failed.
 
 **Check:**
-- Is `$ROSTER_HOME` set correctly?
+- Is `$KNOSSOS_HOME` set correctly?
 - Do the sync scripts exist and are executable?
 
 **Fix:**
 ```bash
 # Verify roster exists
-ls -la $ROSTER_HOME/sync-user-agents.sh
+ls -la $KNOSSOS_HOME/sync-user-agents.sh
 
 # Make executable if needed
-chmod +x $ROSTER_HOME/sync-*.sh
+chmod +x $KNOSSOS_HOME/sync-*.sh
 ```
 
 ### "Worktree has uncommitted changes"

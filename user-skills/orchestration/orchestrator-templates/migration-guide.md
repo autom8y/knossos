@@ -191,7 +191,7 @@ Before migrating a team, ensure:
 **Only if you chose Path A above.**
 
 ```bash
-cd $ROSTER_HOME
+cd $KNOSSOS_HOME
 
 # Stage both files
 git add .claude/teams/my-team/orchestrator.yaml
