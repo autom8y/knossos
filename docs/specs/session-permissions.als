@@ -63,7 +63,7 @@ abstract sig Agent {
 one sig RequirementsAnalyst, Architect, PrincipalEngineer, QAAdversary extends Agent {}
 
 // Special agents
-one sig StateMate, Orchestrator, Hook extends Agent {}
+one sig Moirai, Orchestrator, Hook extends Agent {}
 
 // System actor (for automated operations)
 one sig System extends Agent {}
@@ -102,7 +102,7 @@ fact WorkflowParticipantCapabilities {
 
 /**
  * State managers can perform state transitions
- * This is primarily state-mate
+ * This is primarily moirai
  */
 fact StateManagerCapabilities {
     StateManager.canPerform = CreateSession + ParkSession + ResumeSession + ArchiveSession +
@@ -153,10 +153,10 @@ fact WorkflowAgentRoles {
 }
 
 /**
- * state-mate is the primary state manager
+ * moirai is the primary state manager
  */
-fact StateMateRoles {
-    StateMate.roles = StateManager + PhaseOwner + Observer
+fact MoiraiRoles {
+    Moirai.roles = StateManager + PhaseOwner + Observer
 }
 
 /**
@@ -170,7 +170,7 @@ fact OrchestratorRoles {
  * Hooks have limited state management for fast-path operations
  */
 fact HookRoles {
-    // Hooks can read and emit events, but complex mutations go to state-mate
+    // Hooks can read and emit events, but complex mutations go to moirai
     Hook.roles = Observer
 }
 
@@ -220,17 +220,17 @@ pred ownsPhase[a: Agent, p: Phase] {
 // =============================================================================
 
 /**
- * Only state-mate should perform state transitions in production
+ * Only moirai should perform state transitions in production
  * (Hooks may have fallback capability but prefer delegation)
  */
 fact StateTransitionAuthority {
     all a: Agent |
         (CreateSession + ParkSession + ResumeSession + ArchiveSession) & (a.roles.canPerform) != none
-        implies a in (StateMate + System)
+        implies a in (Moirai + System)
 }
 
 /**
- * Phase transitions should be initiated by phase owners or state-mate
+ * Phase transitions should be initiated by phase owners or moirai
  */
 fact PhaseTransitionAuthority {
     all a: Agent |
@@ -282,10 +282,10 @@ assert ArchivedImmutable {
 }
 
 /**
- * state-mate can perform all necessary state management operations
+ * moirai can perform all necessary state management operations
  */
-assert StateMateComplete {
-    CreateSession + ParkSession + ResumeSession + ArchiveSession in StateMate.roles.canPerform
+assert MoiraiComplete {
+    CreateSession + ParkSession + ResumeSession + ArchiveSession in Moirai.roles.canPerform
 }
 
 /**
@@ -339,7 +339,7 @@ assert OperationsRespectState {
 // =============================================================================
 
 /**
- * Delegation: hooks can delegate to state-mate
+ * Delegation: hooks can delegate to moirai
  */
 sig DelegationRequest {
     from: Agent,
@@ -361,12 +361,12 @@ fact ValidDelegation {
 }
 
 /**
- * Hooks delegate complex operations to state-mate
+ * Hooks delegate complex operations to moirai
  */
-assert HooksDelegateToStateMate {
+assert HooksDelegateToMoirai {
     all d: DelegationRequest |
         d.from = Hook and d.operation in (CreateSession + ParkSession + ResumeSession + ArchiveSession)
-        implies d.to = StateMate
+        implies d.to = Moirai
 }
 
 // =============================================================================
@@ -402,7 +402,7 @@ pred validPhaseTransition[r: PhaseTransitionRequest] {
  */
 pred canInitiateTransition[r: PhaseTransitionRequest] {
     ownsPhase[r.initiator, r.fromPhase] or
-    r.initiator in (Orchestrator + StateMate)
+    r.initiator in (Orchestrator + Moirai)
 }
 
 assert PhaseTransitionsAuthorized {
@@ -419,10 +419,10 @@ check NoEmptyRoles for 10
 check RolesHaveOperations for 10
 check ObserversReadOnly for 10
 check ArchivedImmutable for 10
-check StateMateComplete for 10
+check MoiraiComplete for 10
 check UniquePhaseOwnership for 10
 check OperationsRespectState for 10
-check HooksDelegateToStateMate for 10
+check HooksDelegateToMoirai for 10
 
 // Find example configurations
 run {} for 5
