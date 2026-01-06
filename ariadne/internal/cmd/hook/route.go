@@ -19,7 +19,7 @@ const (
 	CategoryOrchestrator CommandCategory = "orchestrator"
 	CategoryInitiative   CommandCategory = "initiative"
 	CategoryGit          CommandCategory = "git"
-	CategoryThread       CommandCategory = "thread"
+	CategoryClew         CommandCategory = "clew"
 )
 
 // RouteOutput represents the output of the route hook.
@@ -59,7 +59,7 @@ var commandMapping = map[string]CommandCategory{
 	"/sprint":  CategoryInitiative,
 	"/commit":  CategoryGit,
 	"/pr":      CategoryGit,
-	"/stamp":   CategoryThread,
+	"/stamp":   CategoryClew,
 }
 
 // newRouteCmd creates the route hook subcommand.

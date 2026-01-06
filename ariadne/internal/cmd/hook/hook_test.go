@@ -505,7 +505,7 @@ func TestIntegration_RouteHook_AllCategories(t *testing.T) {
 		{"/sprint Q1 work", "/sprint", CategoryInitiative},
 		{"/commit Fix bug", "/commit", CategoryGit},
 		{"/pr", "/pr", CategoryGit},
-		{"/stamp Chose PostgreSQL", "/stamp", CategoryThread},
+		{"/stamp Chose PostgreSQL", "/stamp", CategoryClew},
 	}
 
 	for _, tc := range commands {

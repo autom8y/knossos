@@ -135,14 +135,14 @@ func TestParseSlashCommand(t *testing.T) {
 			message:          "/stamp Use PostgreSQL over MongoDB for ACID compliance",
 			expectedCommand:  "/stamp",
 			expectedArgs:     "Use PostgreSQL over MongoDB for ACID compliance",
-			expectedCategory: CategoryThread,
+			expectedCategory: CategoryClew,
 		},
 		{
 			name:             "stamp without args",
 			message:          "/stamp",
 			expectedCommand:  "/stamp",
 			expectedArgs:     "",
-			expectedCategory: CategoryThread,
+			expectedCategory: CategoryClew,
 		},
 		// Case insensitivity
 		{
@@ -456,8 +456,8 @@ func TestRunRoute_ThreadCommands(t *testing.T) {
 	if result.Command != "/stamp" {
 		t.Errorf("Command = %q, want %q", result.Command, "/stamp")
 	}
-	if result.Category != CategoryThread {
-		t.Errorf("Category = %q, want %q", result.Category, CategoryThread)
+	if result.Category != CategoryClew {
+		t.Errorf("Category = %q, want %q", result.Category, CategoryClew)
 	}
 	if result.Args != "Chose PostgreSQL for ACID compliance" {
 		t.Errorf("Args = %q, want %q", result.Args, "Chose PostgreSQL for ACID compliance")
