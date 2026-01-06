@@ -140,9 +140,15 @@ func (r *Resolver) ClaudeMDFile() string {
 	return filepath.Join(r.ClaudeDir(), "CLAUDE.md")
 }
 
+// RitesDir returns the path to the project's rites/ directory.
+func (r *Resolver) RitesDir() string {
+	return filepath.Join(r.projectRoot, "rites")
+}
+
 // TeamsDir returns the path to the project's teams/ directory.
+// Deprecated: Use RitesDir instead. This exists for backward compatibility.
 func (r *Resolver) TeamsDir() string {
-	return filepath.Join(r.projectRoot, "teams")
+	return r.RitesDir()
 }
 
 // TeamDir returns the path to a specific team directory.
@@ -186,7 +192,7 @@ func (r *Resolver) InvocationStateFile() string {
 // Checks project rites first, then user rites.
 func (r *Resolver) RiteDir(riteName string) string {
 	// Check project rites first
-	projectPath := filepath.Join(r.TeamsDir(), riteName)
+	projectPath := filepath.Join(r.RitesDir(), riteName)
 	if _, err := os.Stat(filepath.Join(projectPath, "rite.yaml")); err == nil {
 		return projectPath
 	}
