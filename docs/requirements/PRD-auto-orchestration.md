@@ -224,7 +224,7 @@ The parallel model allows:
 
 - **FR-4.2**: Orchestrator MUST delegate state changes to state-mate rather than mutating directly.
   - When orchestrator determines phase transition is needed, it outputs instruction for state-mate invocation
-  - Pattern: `Task(state-mate, "transition_phase from=requirements to=design...")`
+  - Pattern: `Task(moirai, "transition_phase from=requirements to=design...")`
 
 - **FR-4.3**: Hook output MAY include parallel Task invocations for both agents when appropriate.
   - Example: `/start` could output both orchestrator invocation AND state-mate initialization if needed

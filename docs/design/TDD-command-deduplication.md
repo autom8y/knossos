@@ -319,7 +319,7 @@ Commands that mutate SESSION_CONTEXT:
 ## Task Invocation Template
 
 ```
-Task(state-mate, "{operation}
+Task(moirai, "{operation}
 
 Session Context:
 - Session ID: {session_id}
@@ -379,7 +379,7 @@ Session Context:
    session_path=".claude/sessions/${session_id}/SESSION_CONTEXT.md"
 
 2. Invoke state-mate via Task tool:
-   Task(state-mate, "{operation}
+   Task(moirai, "{operation}
 
    Session Context:
    - Session ID: {session_id}

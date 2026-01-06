@@ -168,7 +168,7 @@ PreToolUse Hook (session-write-guard.sh)
 
 When state-mate is invoked:
 ```
-Task(state-mate, "mutation request")
+Task(moirai, "mutation request")
     |
     v
 state-mate agent reads SESSION_CONTEXT.md
@@ -270,7 +270,7 @@ Main thread invokes: Task(specialist, "phase work...")
 Specialist completes, returns artifact path
     |
     v
-Orchestrator marks phase complete via Task(state-mate, "...")
+Orchestrator marks phase complete via Task(moirai, "...")
     |
     v
 Hooks track: artifact-tracker.sh logs artifact

@@ -23,7 +23,7 @@ When users invoke `/start`, `/sprint`, or `/task`, the main agent too frequently
 
 1. Manages SESSION_CONTEXT mutations directly instead of delegating through state-mate
 2. Attempts to orchestrate work itself rather than consulting the Orchestrator first
-3. Invokes state-mate via explicit `Task(state-mate, ...)` calls rather than having hooks trigger it
+3. Invokes state-mate via explicit `Task(moirai, ...)` calls rather than having hooks trigger it
 
 This blurs the separation between:
 - **Orchestrator**: Routing and phase coordination (stateless advisor)
@@ -73,7 +73,7 @@ As a user in an active workflow, I want state mutations to occur automatically v
 - Session creation on `/start` is triggered by a hook, not direct main agent action
 - Phase transitions trigger hooks that invoke state-mate
 - Artifact registration happens via PostToolUse hooks
-- When orchestrator is present, state-mate is invoked via hooks rather than explicit `Task(state-mate, ...)`
+- When orchestrator is present, state-mate is invoked via hooks rather than explicit `Task(moirai, ...)`
 - Teams without orchestrators may invoke state-mate directly (this is valid for orchestrator-less workflows)
 
 ### US-3: Clear Separation of Concerns
@@ -126,7 +126,7 @@ Extend `session-write-guard.sh` to:
 - Block direct writes to `*_CONTEXT.md` with instruction to let hooks handle it
 - Provide clear error message explaining the hook-based mutation pattern
 
-**Current Behavior**: `session-write-guard.sh` blocks writes and suggests `Task(state-mate, ...)`.
+**Current Behavior**: `session-write-guard.sh` blocks writes and suggests `Task(moirai, ...)`.
 **Desired Behavior**: During active workflows, the error should instead say: "State mutations are handled automatically by hooks during active workflows. If you need an explicit mutation, use the appropriate command (e.g., `/park`, `/wrap`)."
 
 #### FR-4: Orchestrator Directive for state-mate Coordination
@@ -202,7 +202,7 @@ Create a script that generates visual diagrams (Mermaid or ASCII) showing the cu
 ### NFR-3: Backwards Compatibility
 
 - Existing sessions created without the new pattern must continue to work
-- Direct `Task(state-mate, ...)` calls must still work for edge cases (escape hatch)
+- Direct `Task(moirai, ...)` calls must still work for edge cases (escape hatch)
 - Documentation must note when direct invocation is acceptable
 
 ### NFR-4: Maintainability
@@ -223,7 +223,7 @@ Create a script that generates visual diagrams (Mermaid or ASCII) showing the cu
 | `/start` when session already exists | Pre-flight hook blocks, suggests `/resume` or `/wrap` |
 | Orchestrator consultation times out | Fall back to direct execution with warning in session log |
 | state-mate hook fails during session creation | Log error, allow session creation to proceed, mark as degraded |
-| User explicitly calls `Task(state-mate, ...)` | Allowed but logged as `direct` invocation for audit |
+| User explicitly calls `Task(moirai, ...)` | Allowed but logged as `direct` invocation for audit |
 | `/sprint` with zero tasks defined | Orchestrator returns guidance to define tasks, no specialist invoked |
 | Hook disabled or missing | Graceful degradation; main agent executes directly (legacy mode) |
 | Multiple `/start` commands in rapid succession | First wins; subsequent blocked by session-exists guard |
@@ -234,7 +234,7 @@ Create a script that generates visual diagrams (Mermaid or ASCII) showing the cu
 ## Success Criteria
 
 - [ ] `/start`, `/sprint`, `/task` route through Orchestrator when orchestrator is present
-- [ ] When orchestrator present: state-mate is invoked via hooks, not explicit `Task(state-mate, ...)`
+- [ ] When orchestrator present: state-mate is invoked via hooks, not explicit `Task(moirai, ...)`
 - [ ] When orchestrator absent: direct state-mate invocation is valid and works correctly
 - [ ] Clear separation documented: Orchestrator = routing, state-mate = mutations
 - [ ] Entry pattern documented in `orchestration/entry-pattern.md`

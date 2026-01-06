@@ -388,13 +388,13 @@ EOF
 {
   "decision": "block",
   "reason": "Direct writes to *_CONTEXT.md files are not allowed. Use state-mate agent for all session/sprint state mutations.",
-  "instruction": "Use the Task tool to invoke state-mate: Task(state-mate, 'your mutation request')",
+  "instruction": "Use the Task tool to invoke state-mate: Task(moirai, 'your mutation request')",
   "examples": [
-    "Task(state-mate, 'update_field status=completed')",
-    "Task(state-mate, 'mark_complete task-001 artifact=docs/design/TDD-foo.md')",
-    "Task(state-mate, 'park_session reason=\"Taking a break\"')",
-    "Task(state-mate, 'transition_phase from=design to=implementation')",
-    "Task(state-mate, '--dry-run mark_complete task-001 artifact=...')"
+    "Task(moirai, 'update_field status=completed')",
+    "Task(moirai, 'mark_complete task-001 artifact=docs/design/TDD-foo.md')",
+    "Task(moirai, 'park_session reason=\"Taking a break\"')",
+    "Task(moirai, 'transition_phase from=design to=implementation')",
+    "Task(moirai, '--dry-run mark_complete task-001 artifact=...')"
   ],
   "documentation": "user-agents/state-mate.md"
 }
@@ -406,8 +406,8 @@ EOF
 {
   "decision": "block",
   "reason": "Direct writes to *_CONTEXT.md files are blocked. Use state-mate for state mutations.",
-  "instruction": "Task(state-mate, 'your mutation request')",
-  "example": "Task(state-mate, 'mark_complete task-001 artifact=docs/design/TDD-foo.md')",
+  "instruction": "Task(moirai, 'your mutation request')",
+  "example": "Task(moirai, 'mark_complete task-001 artifact=docs/design/TDD-foo.md')",
   "documentation": "user-agents/state-mate.md"
 }
 ```

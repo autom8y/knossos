@@ -167,7 +167,7 @@ Router parses `mark_complete` -> delegates to Lachesis.
 ### Legacy (Backward Compatible)
 
 ```
-Task(state-mate, "park_session reason=\"Taking a break\"
+Task(moirai, "park_session reason=\"Taking a break\"
 
 Session Context:
 - Session ID: session-abc123")

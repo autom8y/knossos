@@ -50,7 +50,7 @@ See pattern documentation for response handling and error types.
 After successful resume, if agent override was specified, invoke:
 
 ```
-Task(state-mate, "update_field last_agent='{selected_agent}'
+Task(moirai, "update_field last_agent='{selected_agent}'
 
 Session Context:
 - Session ID: {session_id}

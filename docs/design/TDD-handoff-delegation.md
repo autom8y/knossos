@@ -78,7 +78,7 @@ The existing implementation in `ariadne/internal/cmd/session/` shows:
 
 | Context | Tool | Authority |
 |---------|------|-----------|
-| Within Claude Code session | Task(state-mate, ...) | state-mate agent |
+| Within Claude Code session | Task(moirai, ...) | state-mate agent |
 | From shell/CLI | `ari session park` | ari using shared Go package |
 
 **ADR**: See ADR-0008 (to be created) for full decision record.
@@ -375,7 +375,7 @@ When invoked from different contexts, state transitions must produce identical r
 | Invocation | Operation | Result |
 |------------|-----------|--------|
 | `ari session park --reason="Break"` | Park from CLI | STATE: PARKED, EVENTS: SESSION_PARKED + session_end |
-| `Task(state-mate, "park_session reason='Break'")` | Park from Claude | STATE: PARKED, EVENTS: SESSION_PARKED + session_end |
+| `Task(moirai, "park_session reason='Break'")` | Park from Claude | STATE: PARKED, EVENTS: SESSION_PARKED + session_end |
 
 ### 7.2 Verification Approach
 

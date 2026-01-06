@@ -106,8 +106,8 @@ orchestrator_override:
 
 **state-mate Command**:
 ```
-Task(state-mate, "enable orchestrator override reason='Emergency hotfix' scope=next")
-Task(state-mate, "disable orchestrator override")
+Task(moirai, "enable orchestrator override reason='Emergency hotfix' scope=next")
+Task(moirai, "disable orchestrator override")
 ```
 
 ---

@@ -195,7 +195,7 @@ The `state-mate` alias is supported for backward compatibility:
 ```markdown
 # Both work
 Task(moirai, "...")
-Task(state-mate, "...")
+Task(moirai, "...")
 ```
 
 **DEPRECATED**: The `state-mate` alias is deprecated as of 2026-01-06. New code should use `moirai`. The alias will be removed in a future major version.

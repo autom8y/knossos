@@ -307,7 +307,7 @@ state-mate is the authority for session state mutations. It delegates to ari for
 
 ```bash
 # Park via state-mate
-Task(state-mate, "park session with reason: blocked on review")
+Task(moirai, "park session with reason: blocked on review")
 
 # Which internally calls:
 ari session park "blocked on review"

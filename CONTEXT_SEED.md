@@ -127,7 +127,7 @@ Task-003 addresses this directly.
 
 ### Reporting Completion
 ```bash
-Task(state-mate, "mark_complete task-00X artifact=path/to/artifact.md
+Task(moirai, "mark_complete task-00X artifact=path/to/artifact.md
 
 Session Context:
 - Session ID: session-20260102-022932-a8a79927

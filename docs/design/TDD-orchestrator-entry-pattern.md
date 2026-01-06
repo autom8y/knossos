@@ -22,7 +22,7 @@ When users invoke `/start`, `/sprint`, or `/task`, the main agent frequently:
 
 1. Manages SESSION_CONTEXT mutations directly instead of delegating through state-mate
 2. Attempts to orchestrate work itself rather than consulting the Orchestrator first
-3. Invokes state-mate via explicit `Task(state-mate, ...)` calls rather than having hooks trigger it
+3. Invokes state-mate via explicit `Task(moirai, ...)` calls rather than having hooks trigger it
 
 This blurs the separation between:
 - **Orchestrator**: Routing and phase coordination (stateless advisor)
@@ -319,7 +319,7 @@ TIMESTAMP | SESSION_ID | OPERATION | TRIGGER_SOURCE | DETAIL
 # Examples
 2024-01-15T10:30:00Z | session-20240115-103000-abc123 | CREATE | hook | start-preflight.sh
 2024-01-15T10:35:00Z | session-20240115-103000-abc123 | PHASE_TRANSITION | hook | artifact-tracker.sh
-2024-01-15T10:40:00Z | session-20240115-103000-abc123 | PARK | direct | Task(state-mate)
+2024-01-15T10:40:00Z | session-20240115-103000-abc123 | PARK | direct | Task(moirai)
 ```
 
 ---
@@ -415,7 +415,7 @@ throughline:
 
 Blocks direct writes to `*_CONTEXT.md` files with message:
 ```
-State mutations are handled by state-mate. Use Task(state-mate, "...")
+State mutations are handled by state-mate. Use Task(moirai, "...")
 ```
 
 ### New Behavior: Workflow-Aware Messages
@@ -476,7 +476,7 @@ State mutations are handled **automatically by hooks** during active workflows.
 - \`/wrap\` - Complete and archive session
 - \`/handoff\` - Transfer to another agent
 
-**Do not** call \`Task(state-mate, ...)\` directly during orchestrated workflows."
+**Do not** call \`Task(moirai, ...)\` directly during orchestrated workflows."
 
 else
     # No workflow or no orchestrator = suggest state-mate
@@ -487,13 +487,13 @@ Direct writes to \`*_CONTEXT.md\` files are not allowed.
 **Use state-mate for all session/sprint mutations:**
 
 \`\`\`
-Task(state-mate, \"<your mutation request>\")
+Task(moirai, \"<your mutation request>\")
 \`\`\`
 
 **Examples:**
-- \`Task(state-mate, \"mark task-001 complete\")\`
-- \`Task(state-mate, \"transition to design phase\")\`
-- \`Task(state-mate, \"register artifact docs/PRD-foo.md\")\`
+- \`Task(moirai, \"mark task-001 complete\")\`
+- \`Task(moirai, \"transition to design phase\")\`
+- \`Task(moirai, \"register artifact docs/PRD-foo.md\")\`
 
 See \`~/.claude/agents/state-mate.md\` for full documentation (synced from roster/user-agents/)."
 
@@ -730,7 +730,7 @@ User: /start Add dark mode toggle
          |
          v
 +----------------------------------+
-| Task(state-mate, ...)           |
+| Task(moirai, ...)           |
 | Direct state mutations allowed   |
 +----------------------------------+
 ```
@@ -750,7 +750,7 @@ User: /start Add dark mode toggle
 
 ```
 # WRONG
-Task(state-mate, "transition to design phase")
+Task(moirai, "transition to design phase")
 
 # RIGHT
 Let the artifact-tracker.sh hook detect the PRD write
@@ -835,7 +835,7 @@ If hooks fail or are disabled, the system degrades gracefully:
 | V1 session (legacy) | Auto-migrated per existing session-migrate.sh |
 | No session | Works unchanged |
 
-### Direct Task(state-mate) Compatibility
+### Direct Task(moirai) Compatibility
 
 Direct invocation of state-mate remains valid as an escape hatch:
 
@@ -916,7 +916,7 @@ Direct invocation of state-mate remains valid as an escape hatch:
 | Test ID | Description | Setup | Expected |
 |---------|-------------|-------|----------|
 | `oep_bc_001` | V1 sessions auto-migrate | V1 session format | Migrated to V2 on first access |
-| `oep_bc_002` | Direct state-mate still works | No workflow, Task(state-mate) | Operation succeeds |
+| `oep_bc_002` | Direct state-mate still works | No workflow, Task(moirai) | Operation succeeds |
 | `oep_bc_003` | Emergency override bypasses | --emergency flag | Operation proceeds with logging |
 | `oep_bc_004` | Teams without orchestrator work | No orchestrator.md | Full functionality, direct execution |
 

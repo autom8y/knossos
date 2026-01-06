@@ -125,7 +125,7 @@ When orchestrator needs a state change:
 
 2. Orchestrator outputs instruction (NOT direct mutation):
    "Phase complete. To transition:
-   Task(state-mate, "transition_phase from=requirements to=design
+   Task(moirai, "transition_phase from=requirements to=design
 
    Session Context:
    - Session ID: session-xyz
@@ -480,7 +480,7 @@ Task(orchestrator, "Break down initiative into phases and tasks
 
 2. When orchestrator indicates phase transition, use:
 \`\`\`
-Task(state-mate, "transition_phase from=<current> to=<next>
+Task(moirai, "transition_phase from=<current> to=<next>
 
 Session Context:
 - Session ID: session-20260104-022401-abcd1234
@@ -680,7 +680,7 @@ teardown() {
     # Simulate orchestrator Task output (mocked)
     local orchestrator_output="Task completed. Phase transition needed.
 To record completion:
-Task(state-mate, \"mark_complete task-001 artifact=docs/PRD.md
+Task(moirai, \"mark_complete task-001 artifact=docs/PRD.md
 
 Session Context:
 - Session ID: session-test-123
@@ -691,7 +691,7 @@ Session Context:
     ! [[ "$orchestrator_output" == *"Edit("*"SESSION_CONTEXT"* ]]
 
     # Verify state-mate delegation is present
-    [[ "$orchestrator_output" == *"Task(state-mate"* ]]
+    [[ "$orchestrator_output" == *"Task(moirai"* ]]
 }
 
 @test "state_004: direct write to SESSION_CONTEXT is blocked" {

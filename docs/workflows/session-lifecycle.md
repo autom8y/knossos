@@ -220,10 +220,10 @@ Orchestrator: Plans workflow, delegates to subagents
       |
       v
 Orchestrator: "Phase complete. To transition, use:
-               Task(state-mate, 'transition_phase from=requirements to=design...')"
+               Task(moirai, 'transition_phase from=requirements to=design...')"
       |
       v
-User/Main: Executes Task(state-mate, ...)
+User/Main: Executes Task(moirai, ...)
       |
       v
 state-mate: Validates and applies transition

@@ -82,7 +82,7 @@ User: /start Add dark mode toggle
          |
          v
 +----------------------------------+
-| Task(state-mate, ...)           |
+| Task(moirai, ...)           |
 | Direct state mutations allowed   |
 +----------------------------------+
 ```
@@ -114,7 +114,7 @@ When `/start` is invoked with orchestrator present:
 2024-01-15T10:30:00Z | session-20240115-103000-abc123 | CREATE | hook | start-preflight.sh
 
 # Direct creation (orchestrator-less)
-2024-01-15T10:35:00Z | session-20240115-103500-def456 | CREATE | direct | Task(state-mate)
+2024-01-15T10:35:00Z | session-20240115-103500-def456 | CREATE | direct | Task(moirai)
 ```
 
 ## Anti-Patterns
@@ -123,7 +123,7 @@ When `/start` is invoked with orchestrator present:
 
 ```yaml
 # WRONG
-Task(state-mate, "transition to design phase")
+Task(moirai, "transition to design phase")
 
 # RIGHT
 Let the artifact-tracker.sh hook detect the PRD write
@@ -211,7 +211,7 @@ If you need an explicit mutation, use:
 - /wrap - Complete and archive session
 - /handoff - Transfer to another agent
 
-Do not call Task(state-mate, ...) directly during orchestrated workflows.
+Do not call Task(moirai, ...) directly during orchestrated workflows.
 ```
 
 **Without orchestrator or no workflow:**
@@ -219,11 +219,11 @@ Do not call Task(state-mate, ...) directly during orchestrated workflows.
 Direct writes to *_CONTEXT.md files are not allowed.
 
 Use state-mate for all session/sprint mutations:
-  Task(state-mate, "<your mutation request>")
+  Task(moirai, "<your mutation request>")
 
 Examples:
-- Task(state-mate, "mark task-001 complete")
-- Task(state-mate, "transition to design phase")
+- Task(moirai, "mark task-001 complete")
+- Task(moirai, "transition to design phase")
 ```
 
 ### orchestrator-bypass-check.sh

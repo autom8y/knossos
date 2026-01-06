@@ -25,7 +25,7 @@ Consolidate terminology from the legacy `state-mate` alias to canonical `Moirai`
 | Category | Count | Files |
 |----------|-------|-------|
 | Direct `state-mate` mentions | ~528 | 66 files |
-| `Task(state-mate, ...)` invocations | 61 | 18 files |
+| `Task(moirai, ...)` invocations | 61 | 18 files |
 | Agent alias definition | 1 | user-agents/moirai.md |
 | Bypass audit log | 1 | .claude/audit/state-mate-bypass.jsonl |
 | Deprecated hook | 1 | .claude/hooks/.deprecated/session-guards/session-write-guard.sh |
@@ -102,7 +102,7 @@ The Moirai router (`moirai.md`) correctly:
 Current valid invocations (both work identically):
 ```
 Task(moirai, "park_session reason='break'")
-Task(state-mate, "park_session reason='break'")
+Task(moirai, "park_session reason='break'")
 ```
 
 The alias mechanism in Claude Code handles this at the agent resolution level, meaning no hooks or infrastructure changes are needed for the alias to continue working.
@@ -164,7 +164,7 @@ The alias mechanism in Claude Code handles this at the agent resolution level, m
 | Pattern | Replacement | Scope |
 |---------|-------------|-------|
 | `state-mate` (agent reference) | `Moirai` | docs/ directory |
-| `Task(state-mate,` | `Task(moirai,` | docs/ directory examples |
+| `Task(moirai,` | `Task(moirai,` | docs/ directory examples |
 | `ADR-0005-state-mate-centralized-state-authority` | `ADR-0005-moirai-centralized-state-authority` | All references |
 
 **Note**: Preserve historical accuracy in changelog entries and commit messages.
@@ -177,13 +177,13 @@ The alias mechanism in Claude Code handles this at the agent resolution level, m
 
 The change is backward compatible because:
 1. The `state-mate` alias remains in `moirai.md` aliases list
-2. Existing `Task(state-mate, ...)` invocations continue to work
+2. Existing `Task(moirai, ...)` invocations continue to work
 3. No hook changes required (alias resolution happens at agent level)
 4. Only documentation and naming changes
 
 ### No Migration Required for Consumers
 
-Existing code using `Task(state-mate, ...)` will continue to work. New documentation will prefer `Task(moirai, ...)` but the alias remains available.
+Existing code using `Task(moirai, ...)` will continue to work. New documentation will prefer `Task(moirai, ...)` but the alias remains available.
 
 ---
 
@@ -212,7 +212,7 @@ Existing code using `Task(state-mate, ...)` will continue to work. New documenta
 
 ### 8.4 Files to UPDATE Content (Bulk)
 
-All files in `docs/` containing `Task(state-mate,` examples should be updated to use `Task(moirai,`. This affects 18 files with 61 occurrences. Examples should be updated but inline text references may remain for historical context.
+All files in `docs/` containing `Task(moirai,` examples should be updated to use `Task(moirai,`. This affects 18 files with 61 occurrences. Examples should be updated but inline text references may remain for historical context.
 
 ---
 
@@ -223,7 +223,7 @@ All files in `docs/` containing `Task(state-mate,` examples should be updated to
 | Minimal (no session) | Invoke moirai | Agent resolves correctly |
 | Minimal (no session) | Invoke state-mate | Agent resolves (alias works) |
 | Standard (with session) | `Task(moirai, "park_session ...")` | Session parks successfully |
-| Standard (with session) | `Task(state-mate, "park_session ...")` | Session parks successfully (alias) |
+| Standard (with session) | `Task(moirai, "park_session ...")` | Session parks successfully (alias) |
 | Complex (orchestrated) | Hook blocks direct write, suggests Moirai | Correct terminology in error message |
 
 ---

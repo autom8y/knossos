@@ -154,7 +154,7 @@ The assignment follows classical mythology:
 └─────────────────────────────────────────────────────────────────────┘
                                     │
                                     │ Task(moirai, "operation ...")
-                                    │ Task(state-mate, "operation ...")
+                                    │ Task(moirai, "operation ...")
                                     │ Task(clotho, "operation ...")
                                     │ Task(lachesis, "operation ...")
                                     │ Task(atropos, "operation ...")
@@ -218,7 +218,7 @@ routing_table:
 
 ```
 Task(moirai, "mark_complete task-001 artifact=docs/requirements/PRD-foo.md")
-Task(state-mate, "park_session reason=\"Taking a break\"")
+Task(moirai, "park_session reason=\"Taking a break\"")
 ```
 
 Router parses operation, looks up fate, delegates.
@@ -694,7 +694,7 @@ If operation is not recognized, return:
 | Invocation | Before | After | Breaking? |
 |------------|--------|-------|-----------|
 | `Task(moirai, "mark_complete ...")` | Direct execution | Router → Lachesis | No |
-| `Task(state-mate, "park_session ...")` | Direct execution | Router → Lachesis | No |
+| `Task(moirai, "park_session ...")` | Direct execution | Router → Lachesis | No |
 | `Task(moirai, "wrap_session")` | Direct execution | Router → Atropos | No |
 | `Task(clotho, "create_sprint ...")` | N/A (new) | Direct to Clotho | No (additive) |
 | `Task(lachesis, "mark_complete ...")` | N/A (new) | Direct to Lachesis | No (additive) |
@@ -755,7 +755,7 @@ Task(lachesis, "mark_complete task-001 artifact=docs/requirements/PRD-foo.md")
 
 **Legacy (still works):**
 ```
-Task(state-mate, "mark_complete task-001 artifact=docs/requirements/PRD-foo.md")
+Task(moirai, "mark_complete task-001 artifact=docs/requirements/PRD-foo.md")
 ```
 ```
 
@@ -905,7 +905,7 @@ git checkout .claude/CLAUDE.md
 | `fate_003` | create_sprint | Wrong | `Task(lachesis, ...)` | FATE_MISMATCH |
 | `fate_004` | mark_complete | Lachesis | `Task(lachesis, ...)` | Success |
 | `fate_005` | mark_complete | Router | `Task(moirai, ...)` | Routes to Lachesis |
-| `fate_006` | mark_complete | Legacy | `Task(state-mate, ...)` | Routes to Lachesis |
+| `fate_006` | mark_complete | Legacy | `Task(moirai, ...)` | Routes to Lachesis |
 | `fate_007` | wrap_session | Atropos | `Task(atropos, ...)` | Success |
 | `fate_008` | wrap_session | Router | `Task(moirai, ...)` | Routes to Atropos |
 | `fate_009` | generate_sails | Atropos | `Task(atropos, ...)` | Success + WHITE_SAILS.yaml |
@@ -923,7 +923,7 @@ git checkout .claude/CLAUDE.md
 
 | Test | Legacy Pattern | Expected Behavior |
 |------|----------------|-------------------|
-| BC_001 | `Task(state-mate, "park_session ...")` | Routes to Lachesis, success |
+| BC_001 | `Task(moirai, "park_session ...")` | Routes to Lachesis, success |
 | BC_002 | `Task(moirai, "mark_complete ...")` | Routes to Lachesis, success |
 | BC_003 | `Task(moirai, "wrap_session")` | Routes to Atropos, success |
 | BC_004 | `Task(moirai, "create_sprint ...")` | Routes to Clotho, success |
