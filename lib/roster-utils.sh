@@ -2,8 +2,8 @@
 #
 # roster-utils.sh - Dynamic Team Roster Generation Utilities
 #
-# Library functions for generating team rosters from agent frontmatter
-# and workflow.yaml files. Designed to be sourced by swap-team.sh.
+# Library functions for generating rite rosters from agent frontmatter
+# and workflow.yaml files. Designed to be sourced by swap-rite.sh.
 #
 # Usage:
 #   source "$ROSTER_HOME/lib/roster-utils.sh"
