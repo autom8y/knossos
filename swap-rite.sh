@@ -788,14 +788,14 @@ commit_staged_resources() {
 # Source roster utilities for dynamic roster generation
 source "$ROSTER_HOME/lib/roster-utils.sh"
 
-# Source transaction infrastructure for team swaps
-source "$ROSTER_HOME/lib/team/team-transaction.sh"
+# Source transaction infrastructure for rite swaps
+source "$ROSTER_HOME/lib/rite/rite-transaction.sh"
 
-# Source team resource operations
-source "$ROSTER_HOME/lib/team/team-resource.sh"
+# Source rite resource operations
+source "$ROSTER_HOME/lib/rite/rite-resource.sh"
 
 # Source hook registration infrastructure
-source "$ROSTER_HOME/lib/team/team-hooks-registration.sh"
+source "$ROSTER_HOME/lib/rite/rite-hooks-registration.sh"
 
 # ============================================================================
 # Manifest Functions
