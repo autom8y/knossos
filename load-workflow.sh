@@ -12,11 +12,11 @@ if [ -z "$TEAM" ]; then
   echo "Error: No team specified and no ACTIVE_TEAM found" >&2
   echo "Usage: $0 [team-name]" >&2
   echo "Available teams:" >&2
-  ls -1 "$ROSTER_HOME/teams" 2>/dev/null | sed 's/^/  /' >&2
+  ls -1 "$ROSTER_HOME/rites" 2>/dev/null | sed 's/^/  /' >&2
   exit 1
 fi
 
-WORKFLOW_FILE="$ROSTER_HOME/teams/$TEAM/workflow.yaml"
+WORKFLOW_FILE="$ROSTER_HOME/rites/$TEAM/workflow.yaml"
 
 if [ ! -f "$WORKFLOW_FILE" ]; then
   echo "Error: No workflow.yaml found for team '$TEAM'" >&2

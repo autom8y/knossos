@@ -337,7 +337,7 @@ test_init_with_team_flag() {
 
     # Get first available team
     local team_name
-    team_name=$(ls "$ROSTER_HOME/teams/" 2>/dev/null | head -1)
+    team_name=$(ls "$ROSTER_HOME/rites/" 2>/dev/null | head -1)
 
     if [[ -z "$team_name" ]]; then
         echo "  SKIP: No teams available"
@@ -403,7 +403,7 @@ test_init_team_equals_syntax() {
     reset_test_project
 
     local team_name
-    team_name=$(ls "$ROSTER_HOME/teams/" 2>/dev/null | head -1)
+    team_name=$(ls "$ROSTER_HOME/rites/" 2>/dev/null | head -1)
 
     if [[ -z "$team_name" ]]; then
         echo "  SKIP: No teams available"
@@ -429,7 +429,7 @@ test_init_team_space_syntax() {
     reset_test_project
 
     local team_name
-    team_name=$(ls "$ROSTER_HOME/teams/" 2>/dev/null | head -1)
+    team_name=$(ls "$ROSTER_HOME/rites/" 2>/dev/null | head -1)
 
     if [[ -z "$team_name" ]]; then
         echo "  SKIP: No teams available"

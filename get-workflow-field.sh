@@ -22,7 +22,7 @@ if [ -z "$TEAM" ]; then
   exit 1
 fi
 
-WORKFLOW_FILE="$ROSTER_HOME/teams/$TEAM/workflow.yaml"
+WORKFLOW_FILE="$ROSTER_HOME/rites/$TEAM/workflow.yaml"
 
 if [ ! -f "$WORKFLOW_FILE" ]; then
   exit 1

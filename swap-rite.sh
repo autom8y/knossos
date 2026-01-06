@@ -704,7 +704,7 @@ verify_state_consistency() {
         fi
 
         # Check team pack exists in roster
-        if [[ ! -d "$ROSTER_HOME/teams/$active_team" ]]; then
+        if [[ ! -d "$ROSTER_HOME/rites/$active_team" ]]; then
             log_warning "Active team $active_team not found in roster (may be orphaned)"
         fi
     fi
@@ -1056,7 +1056,7 @@ init_manifest_from_existing() {
 # Output: One agent filename per line
 list_incoming_agents() {
     local team_name="$1"
-    local pack_dir="$ROSTER_HOME/teams/$team_name/agents"
+    local pack_dir="$ROSTER_HOME/rites/$team_name/agents"
 
     if [[ -d "$pack_dir" ]]; then
         for agent_file in "$pack_dir"/*.md; do
@@ -1537,13 +1537,13 @@ validate_pack_tools() {
 # Validate team pack exists and has required structure
 validate_pack() {
     local team_name="$1"
-    local pack_dir="$ROSTER_HOME/teams/$team_name"
+    local pack_dir="$ROSTER_HOME/rites/$team_name"
 
     log_debug "Validating pack: $team_name"
 
     # Check pack directory exists
     if [[ ! -d "$pack_dir" ]]; then
-        log_error "Team pack '$team_name' not found in $ROSTER_HOME/teams/"
+        log_error "Team pack '$team_name' not found in $ROSTER_HOME/rites/"
         log "Use './swap-team.sh --list' to see available packs"
         exit "$EXIT_VALIDATION_FAILURE"
     fi
@@ -1623,7 +1623,7 @@ validate_project() {
 # Returns 0 if valid or file doesn't exist, 1 if validation fails
 validate_workflow_yaml() {
     local team_name="$1"
-    local workflow_file="$ROSTER_HOME/teams/$team_name/workflow.yaml"
+    local workflow_file="$ROSTER_HOME/rites/$team_name/workflow.yaml"
 
     # Skip if workflow.yaml doesn't exist (optional file)
     if [[ ! -f "$workflow_file" ]]; then
@@ -1666,7 +1666,7 @@ validate_workflow_yaml() {
 # Returns 0 if valid or file doesn't exist, 1 if validation fails
 validate_orchestrator_yaml() {
     local team_name="$1"
-    local orchestrator_file="$ROSTER_HOME/teams/$team_name/orchestrator.yaml"
+    local orchestrator_file="$ROSTER_HOME/rites/$team_name/orchestrator.yaml"
 
     # Skip if orchestrator.yaml doesn't exist (optional file)
     if [[ ! -f "$orchestrator_file" ]]; then
@@ -1742,7 +1742,7 @@ query_current_team() {
     fi
 
     # Check if team still exists in roster
-    if [[ ! -d "$ROSTER_HOME/teams/$current" ]]; then
+    if [[ ! -d "$ROSTER_HOME/rites/$current" ]]; then
         log_warning "Active team '$current' not found in roster (orphaned state)"
         log "Consider swapping to a valid team"
     else
@@ -1756,7 +1756,7 @@ query_current_team() {
 list_teams() {
     log_debug "Listing available teams"
 
-    local teams_dir="$ROSTER_HOME/teams"
+    local teams_dir="$ROSTER_HOME/rites"
 
     if [[ ! -d "$teams_dir" ]]; then
         log_error "Roster teams directory not found: $teams_dir"
@@ -1831,7 +1831,7 @@ backup_current_agents() {
 swap_agents() {
     local team_name="$1"
     local agent_count="$2"
-    local source_dir="$ROSTER_HOME/teams/$team_name/agents"
+    local source_dir="$ROSTER_HOME/rites/$team_name/agents"
 
     log_debug "Starting swap phase"
 
@@ -1876,7 +1876,7 @@ swap_agents() {
     fi
 
     # Copy workflow.yaml if exists
-    local workflow_file="$ROSTER_HOME/teams/$team_name/workflow.yaml"
+    local workflow_file="$ROSTER_HOME/rites/$team_name/workflow.yaml"
     if [[ -f "$workflow_file" ]]; then
         log_debug "Copying workflow.yaml"
         cp "$workflow_file" .claude/ACTIVE_WORKFLOW.yaml || {
@@ -1926,7 +1926,7 @@ get_hook_team()    { get_resource_team "$1" "hooks" "f"; }
 # Called before team commands are staged to inform user of potential conflicts
 check_user_command_collisions() {
     local team_name="$1"
-    local source_dir="$ROSTER_HOME/teams/$team_name/commands"
+    local source_dir="$ROSTER_HOME/rites/$team_name/commands"
 
     # Skip if team has no commands directory
     if [[ ! -d "$source_dir" ]]; then
@@ -1974,7 +1974,7 @@ check_user_command_collisions() {
 # Team commands are copied to .claude/commands/ with a marker file
 swap_commands() {
     local team_name="$1"
-    local source_dir="$ROSTER_HOME/teams/$team_name/commands"
+    local source_dir="$ROSTER_HOME/rites/$team_name/commands"
 
     log_debug "Checking for team commands in $source_dir"
 
@@ -2042,7 +2042,7 @@ swap_commands() {
 # Skills from team layer overlay baseline skills (team wins on collision)
 swap_skills() {
     local team_name="$1"
-    local source_dir="$ROSTER_HOME/teams/$team_name/skills"
+    local source_dir="$ROSTER_HOME/rites/$team_name/skills"
 
     log_debug "Checking for team skills in $source_dir"
 
@@ -2136,7 +2136,7 @@ remove_shared_skills() {
 # Shared skills are copied to .claude/skills/ with a marker file
 # Team skills win over shared skills (team-privileged override)
 sync_shared_skills() {
-    local source_dir="$ROSTER_HOME/teams/shared/skills"
+    local source_dir="$ROSTER_HOME/rites/shared/skills"
 
     log_debug "Checking for shared skills in $source_dir"
 
@@ -2211,7 +2211,7 @@ sync_shared_skills() {
 swap_hooks() {
     local team_name="$1"
     local base_hooks_dir="$ROSTER_HOME/user-hooks"
-    local team_hooks_dir="$ROSTER_HOME/teams/$team_name/hooks"
+    local team_hooks_dir="$ROSTER_HOME/rites/$team_name/hooks"
 
     log_debug "Syncing hooks: base=$base_hooks_dir, team=$team_hooks_dir"
 
@@ -2417,7 +2417,7 @@ cleanup_orphan_backups() {
 get_produces_from_workflow() {
     local team_name="$1"
     local agent_name="$2"
-    local workflow_file="$ROSTER_HOME/teams/$team_name/workflow.yaml"
+    local workflow_file="$ROSTER_HOME/rites/$team_name/workflow.yaml"
 
     if [[ ! -f "$workflow_file" ]]; then
         echo "Artifacts"  # Fallback
@@ -2468,7 +2468,7 @@ get_produces_from_workflow() {
 # Returns list of "agent:produces" pairs in workflow order
 get_workflow_phases() {
     local team_name="$1"
-    local workflow_file="$ROSTER_HOME/teams/$team_name/workflow.yaml"
+    local workflow_file="$ROSTER_HOME/rites/$team_name/workflow.yaml"
 
     if [[ ! -f "$workflow_file" ]]; then
         return
@@ -2511,7 +2511,7 @@ update_claude_md() {
     log_debug "Updating CLAUDE.md for team $team_name"
 
     # REQ-3.1: Read from roster source directly, not disk state after copy
-    local source_agents="$ROSTER_HOME/teams/$team_name/agents"
+    local source_agents="$ROSTER_HOME/rites/$team_name/agents"
 
     # Create temp files for agent data
     local agent_list_file agent_table_file temp_file
@@ -2673,7 +2673,7 @@ update_active_team() {
 # Preview what refresh would change (for --dry-run)
 preview_refresh() {
     local team_name="$1"
-    local source_dir="$ROSTER_HOME/teams/$team_name/agents"
+    local source_dir="$ROSTER_HOME/rites/$team_name/agents"
 
     # Get current team for scoped orphan detection (RF-005)
     local current_team=""
@@ -2901,7 +2901,7 @@ update_cem_manifest_team() {
     fi
 
     # Compute team directory checksum for staleness detection
-    local team_dir="$ROSTER_HOME/teams/$team_name"
+    local team_dir="$ROSTER_HOME/rites/$team_name"
     local team_checksum=""
     if [[ -d "$team_dir" ]]; then
         # Use tar to create stable checksum of team directory contents
@@ -3299,7 +3299,7 @@ perform_swap() {
     generate_roster "$team_name"
 
     # Success - show workflow info if available
-    local workflow_file="$ROSTER_HOME/teams/$team_name/workflow.yaml"
+    local workflow_file="$ROSTER_HOME/rites/$team_name/workflow.yaml"
     if [[ -f "$workflow_file" ]]; then
         local entry_agent
         local phase_count

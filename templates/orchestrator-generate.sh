@@ -498,9 +498,9 @@ generate_team() {
 
     log_info "Processing team: $team"
 
-    CONFIG="$ROSTER_HOME/teams/$team/orchestrator.yaml"
-    WORKFLOW="$ROSTER_HOME/teams/$team/workflow.yaml"
-    OUTPUT="$ROSTER_HOME/teams/$team/agents/orchestrator.md"
+    CONFIG="$ROSTER_HOME/rites/$team/orchestrator.yaml"
+    WORKFLOW="$ROSTER_HOME/rites/$team/workflow.yaml"
+    OUTPUT="$ROSTER_HOME/rites/$team/agents/orchestrator.md"
 
     # Validation phase
     validate_schema "$CONFIG" || return 1
@@ -568,10 +568,10 @@ batch_generate_all_teams() {
     while IFS= read -r team_dir; do
         local team=$(basename "$team_dir")
         teams+=("$team")
-    done < <(find "$ROSTER_HOME/teams" -maxdepth 1 -type d -name "*-pack" | sort)
+    done < <(find "$ROSTER_HOME/rites" -maxdepth 1 -type d -name "*-pack" | sort)
 
     if [[ ${#teams[@]} -eq 0 ]]; then
-        log_error "No teams found in $ROSTER_HOME/teams"
+        log_error "No teams found in $ROSTER_HOME/rites"
         return 1
     fi
 

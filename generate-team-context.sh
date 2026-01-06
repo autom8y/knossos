@@ -14,7 +14,7 @@ if [[ -z "$TEAM" ]]; then
     exit 0
 fi
 
-WORKFLOW_FILE="$ROSTER_HOME/teams/$TEAM/workflow.yaml"
+WORKFLOW_FILE="$ROSTER_HOME/rites/$TEAM/workflow.yaml"
 
 # Exit gracefully if workflow doesn't exist
 if [[ ! -f "$WORKFLOW_FILE" ]]; then

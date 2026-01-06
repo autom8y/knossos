@@ -9,7 +9,7 @@
 set -euo pipefail
 
 ROSTER_HOME="${ROSTER_HOME:-$HOME/Code/roster}"
-TEAMS_DIR="$ROSTER_HOME/teams"
+TEAMS_DIR="$ROSTER_HOME/rites"
 
 # Required directories (empty with .gitkeep if no content)
 REQUIRED_DIRS="commands skills"

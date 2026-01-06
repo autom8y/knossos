@@ -15,9 +15,9 @@ TEAM="${1:-rnd-pack}"
 DRY_RUN="${2:-}"
 
 TEMPLATE="$ROSTER_HOME/templates/base-orchestrator.md"
-CONFIG="$ROSTER_HOME/teams/$TEAM/orchestrator.yaml"
-WORKFLOW="$ROSTER_HOME/teams/$TEAM/workflow.yaml"
-OUTPUT="$ROSTER_HOME/teams/$TEAM/agents/orchestrator.md"
+CONFIG="$ROSTER_HOME/rites/$TEAM/orchestrator.yaml"
+WORKFLOW="$ROSTER_HOME/rites/$TEAM/workflow.yaml"
+OUTPUT="$ROSTER_HOME/rites/$TEAM/agents/orchestrator.md"
 
 # Check dependencies
 if ! command -v yq &> /dev/null; then
