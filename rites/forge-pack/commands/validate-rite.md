@@ -1,39 +1,38 @@
 ---
-description: Run validation suite on an existing team pack
-argument-hint: <team-name> [--verbose]
+description: Run validation suite on an existing rite
+argument-hint: <rite-name> [--verbose]
 allowed-tools: Bash, Glob, Grep, Read, Task, TodoWrite
 model: opus
 ---
 
 ## Context
 
-Auto-injected by SessionStart hook (project, team, session context).
+Auto-injected by SessionStart hook (project, rite, session context).
 
 ## Your Task
 
-Validate the team pack: $ARGUMENTS
+Validate the rite: $ARGUMENTS
 
 ## Behavior
 
 ### 1. Parse Arguments
 
-- `team-name`: Required. Name of team to validate (with or without `-pack` suffix)
+- `rite-name`: Required. Name of rite to validate
 - `--verbose`: Optional. Show detailed check results
 
-### 2. Locate Team
+### 2. Locate Rite
 
-Check team exists at:
-- `$ROSTER_HOME/teams/{team-name}/` or
-- `$ROSTER_HOME/teams/{team-name}-pack/`
+Check rite exists at:
+- `$ROSTER_HOME/rites/{rite-name}/`
 
-If not found, report error and suggest checking team name.
+If not found, report error and suggest checking rite name.
 
 ### 3. Invoke Eval Specialist
 
 Use the Task tool to invoke the eval-specialist agent:
 
 ```
-"Validate the team pack at $ROSTER_HOME/teams/{team-name}/.
+"Validate the rite at $ROSTER_HOME/rites/{rite-name}/.
 
 Run the full validation suite:
 1. Structure Validation - Check all files exist
@@ -51,7 +50,7 @@ Verbose mode: {verbose}"
 Display validation results:
 
 ```
-VALIDATION REPORT: {team-name}
+VALIDATION REPORT: {rite-name}
 ==============================
 Status: {PASS | FAIL | WARNINGS}
 
@@ -69,13 +68,13 @@ Adversarial: {✓|✗} Edge cases handled
 
 ```bash
 # Validate security-pack
-/validate-team security-pack
+/validate-rite security-pack
 
 # Validate with detailed output
-/validate-team 10x-dev-pack --verbose
+/validate-rite 10x-dev-pack --verbose
 
-# Validate team (auto-adds -pack suffix)
-/validate-team hygiene
+# Validate hygiene rite
+/validate-rite hygiene
 ```
 
 ## Reference

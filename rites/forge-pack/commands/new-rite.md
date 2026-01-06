@@ -1,27 +1,27 @@
 ---
-description: Create a new agent team pack through The Forge workflow
-argument-hint: <team-name> [--complexity=PATCH|TEAM|ECOSYSTEM]
+description: Create a new agent rite through The Forge workflow
+argument-hint: <rite-name> [--complexity=PATCH|RITE|ECOSYSTEM]
 allowed-tools: Bash, Glob, Grep, Read, Write, Edit, Task, TodoWrite
 model: opus
 ---
 
 ## Context
 
-Auto-injected by SessionStart hook (project, team, session context).
+Auto-injected by SessionStart hook (project, rite, session context).
 
 ## Your Task
 
-Create a new team pack: $ARGUMENTS
+Create a new rite: $ARGUMENTS
 
 ## Behavior
 
 ### 1. Parse Arguments
 
-- `team-name`: Required. Name for the new team (will become `{name}-pack`)
-- `--complexity`: Optional. Default is TEAM.
+- `rite-name`: Required. Name for the new rite
+- `--complexity`: Optional. Default is RITE.
   - PATCH: Single agent modification (phases: design, prompting, validation)
-  - TEAM: Full team with 3-5 agents (all 6 phases)
-  - ECOSYSTEM: Multi-team initiative (all 6 phases)
+  - RITE: Full rite with 3-5 agents (all 6 phases)
+  - ECOSYSTEM: Multi-rite initiative (all 6 phases)
 
 ### 2. Invoke Agent Designer
 
@@ -30,10 +30,10 @@ Start the Forge workflow by invoking the Agent Designer:
 ```
 Use the Task tool to invoke the agent-designer agent with:
 
-"Create a TEAM-SPEC for {team-name}-pack.
+"Create a RITE-SPEC for {rite-name}.
 
-The user wants to create a new team. Your job is to:
-1. Clarify the team's purpose with the user
+The user wants to create a new rite. Your job is to:
+1. Clarify the rite's purpose with the user
 2. Design 3-5 agent roles with clear boundaries
 3. Define input/output contracts
 4. Specify complexity levels
@@ -41,7 +41,7 @@ The user wants to create a new team. Your job is to:
 
 Complexity level: {complexity}
 
-When the TEAM-SPEC is complete, hand off to Prompt Architect."
+When the RITE-SPEC is complete, hand off to Prompt Architect."
 ```
 
 ### 3. Workflow Continues
@@ -56,22 +56,22 @@ Each agent hands off to the next when their handoff criteria are met.
 
 ### 4. Completion
 
-When Agent Curator finishes, the team is:
-- Deployed to `$ROSTER_HOME/teams/{team-name}-pack/`
+When Agent Curator finishes, the rite is:
+- Deployed to `$ROSTER_HOME/rites/{rite-name}/`
 - Discoverable via `/consult`
-- Ready for use via `/{team-name}` or `/team {team-name}-pack`
+- Ready for use via `/{rite-name}` or `/rite {rite-name}`
 
 ## Example Usage
 
 ```bash
-# Create a new API development team
-/new-team api-dev
+# Create a new API development rite
+/new-rite api-dev
 
 # Create a minimal agent modification
-/new-team security-auditor --complexity=PATCH
+/new-rite security-auditor --complexity=PATCH
 
-# Create a multi-team ecosystem initiative
-/new-team observability-platform --complexity=ECOSYSTEM
+# Create a multi-rite ecosystem initiative
+/new-rite observability-platform --complexity=ECOSYSTEM
 ```
 
 ## Reference
