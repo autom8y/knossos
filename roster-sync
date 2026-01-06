@@ -532,10 +532,10 @@ cmd_init() {
 SETTINGS_EOF
     fi
 
-    # Apply team if --team specified
+    # Apply rite if --rite/--team specified
     if [[ -n "$team_name" ]]; then
-        log "Applying team: $team_name"
-        echo "$team_name" > .claude/ACTIVE_TEAM
+        log "Applying rite: $team_name"
+        echo "$team_name" > .claude/ACTIVE_RITE
 
         # Update manifest with team info
         local team_checksum
