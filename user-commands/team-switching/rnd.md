@@ -6,27 +6,27 @@ model: haiku
 ---
 
 ## Context
-Auto-injected by SessionStart hook (project, team, session, git).
+Auto-injected by SessionStart hook (project, rite, session, git).
 
 ## Your Task
 
-Switch to the Innovation Lab (R&D) pack and display the team roster. $ARGUMENTS
+Switch to the Innovation Lab (R&D) pack and display the rite roster. $ARGUMENTS
 
 ## Behavior
 
-1. Execute: `${ROSTER_HOME:-~/Code/roster}/swap-team.sh rnd-pack $ARGUMENTS`
-2. Display the roster output from swap-team.sh (agents and their roles)
-3. If SESSION_CONTEXT exists, update `active_team` to `rnd-pack`
+1. Execute: `${ROSTER_HOME:-~/Code/roster}/swap-rite.sh rnd-pack $ARGUMENTS`
+2. Display the roster output from swap-rite.sh (agents and their roles)
+3. If SESSION_CONTEXT exists, update `active_rite` to `rnd-pack`
 
 ## Flags
 
 | Flag | Short | Description | Handled By |
 |------|-------|-------------|------------|
-| `--update` | `-u` | Pull latest agent definitions from roster even if already on team | swap-team.sh |
-| `--dry-run` | - | Preview changes without applying | swap-team.sh |
-| `--keep-all` | - | Preserve all orphan agents in project | swap-team.sh |
-| `--remove-all` | - | Remove all orphans (backup available) | swap-team.sh |
-| `--promote-all` | - | Move all orphans to user-level | swap-team.sh |
+| `--update` | `-u` | Pull latest agent definitions from roster even if already on team | swap-rite.sh |
+| `--dry-run` | - | Preview changes without applying | swap-rite.sh |
+| `--keep-all` | - | Preserve all orphan agents in project | swap-rite.sh |
+| `--remove-all` | - | Remove all orphans (backup available) | swap-rite.sh |
+| `--promote-all` | - | Move all orphans to user-level | swap-rite.sh |
 
 ## When to Use
 

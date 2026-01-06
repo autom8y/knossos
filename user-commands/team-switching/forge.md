@@ -72,7 +72,7 @@ Display available Forge commands with usage:
 
 | Command | Purpose | Entry Agent |
 |---------|---------|-------------|
-| `/new-team <name>` | Create a new team pack | Agent Designer |
+| `/new-team <name>` | Create a new rite | Agent Designer |
 | `/validate-team <name>` | Validate existing team | Eval Specialist |
 | `/eval-agent <name>` | Test single agent | Eval Specialist |
 
