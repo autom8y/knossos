@@ -605,43 +605,43 @@ create_swap_backup() {
     fi
 
     # Backup commands if rite commands exist
-    if [[ -f ".claude/commands/.team-commands" ]]; then
+    if [[ -f ".claude/commands/.rite-commands" ]]; then
         mkdir -p "$SWAP_BACKUP_DIR/commands"
         while IFS= read -r cmd_file; do
             [[ -z "$cmd_file" ]] && continue
             if [[ -f ".claude/commands/$cmd_file" ]]; then
                 cp ".claude/commands/$cmd_file" "$SWAP_BACKUP_DIR/commands/$cmd_file"
             fi
-        done < ".claude/commands/.team-commands"
-        cp ".claude/commands/.team-commands" "$SWAP_BACKUP_DIR/commands/.team-commands"
+        done < ".claude/commands/.rite-commands"
+        cp ".claude/commands/.rite-commands" "$SWAP_BACKUP_DIR/commands/.rite-commands"
         update_journal_backups "commands" "$SWAP_BACKUP_DIR/commands"
         log_debug "Backed up rite commands"
     fi
 
     # Backup skills if rite skills exist
-    if [[ -f ".claude/skills/.team-skills" ]]; then
+    if [[ -f ".claude/skills/.rite-skills" ]]; then
         mkdir -p "$SWAP_BACKUP_DIR/skills"
         while IFS= read -r skill_dir; do
             [[ -z "$skill_dir" ]] && continue
             if [[ -d ".claude/skills/$skill_dir" ]]; then
                 cp -rp ".claude/skills/$skill_dir" "$SWAP_BACKUP_DIR/skills/$skill_dir"
             fi
-        done < ".claude/skills/.team-skills"
-        cp ".claude/skills/.team-skills" "$SWAP_BACKUP_DIR/skills/.team-skills"
+        done < ".claude/skills/.rite-skills"
+        cp ".claude/skills/.rite-skills" "$SWAP_BACKUP_DIR/skills/.rite-skills"
         update_journal_backups "skills" "$SWAP_BACKUP_DIR/skills"
         log_debug "Backed up rite skills"
     fi
 
     # Backup hooks if rite hooks exist
-    if [[ -f ".claude/hooks/.team-hooks" ]]; then
+    if [[ -f ".claude/hooks/.rite-hooks" ]]; then
         mkdir -p "$SWAP_BACKUP_DIR/hooks"
         while IFS= read -r hook_file; do
             [[ -z "$hook_file" ]] && continue
             if [[ -f ".claude/hooks/$hook_file" ]]; then
                 cp ".claude/hooks/$hook_file" "$SWAP_BACKUP_DIR/hooks/$hook_file"
             fi
-        done < ".claude/hooks/.team-hooks"
-        cp ".claude/hooks/.team-hooks" "$SWAP_BACKUP_DIR/hooks/.team-hooks"
+        done < ".claude/hooks/.rite-hooks"
+        cp ".claude/hooks/.rite-hooks" "$SWAP_BACKUP_DIR/hooks/.rite-hooks"
         update_journal_backups "hooks" "$SWAP_BACKUP_DIR/hooks"
         log_debug "Backed up rite hooks"
     fi
