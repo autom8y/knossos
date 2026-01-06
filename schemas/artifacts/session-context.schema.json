@@ -10,7 +10,7 @@
     "created_at",
     "initiative",
     "complexity",
-    "active_team",
+    "active_rite",
     "current_phase"
   ],
 
@@ -37,7 +37,7 @@
     "complexity": {
       "$ref": "common.schema.json#/$defs/complexity_enum"
     },
-    "active_team": {
+    "active_rite": {
       "$ref": "common.schema.json#/$defs/team_name"
     },
     "current_phase": {
@@ -75,10 +75,10 @@
       "$ref": "common.schema.json#/$defs/schema_version",
       "default": "1.0"
     },
-    "state_mate_agent_id": {
+    "moirai_agent_id": {
       "type": "string",
       "pattern": "^[a-f0-9]{8}$",
-      "description": "Unique identifier for state-mate agent instance, persisted across context compaction. Generated on first mutation, used to verify continuity."
+      "description": "Unique identifier for Moirai agent instance, persisted across context compaction. Generated on first mutation, used to verify continuity."
     }
   },
 
@@ -91,7 +91,7 @@
       "created_at": "2025-12-29T23:10:45Z",
       "initiative": "Artifact Schema Standardization",
       "complexity": "SYSTEM",
-      "active_team": "ecosystem-pack",
+      "active_rite": "ecosystem-pack",
       "current_phase": "design",
       "schema_version": "1.0"
     }

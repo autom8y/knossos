@@ -9,7 +9,7 @@
     "sprint_id",
     "sprint_name",
     "complexity",
-    "active_team",
+    "active_rite",
     "status",
     "created_at"
   ],
@@ -41,12 +41,12 @@
     "complexity": {
       "$ref": "common.schema.json#/$defs/complexity_enum"
     },
-    "active_team": {
+    "active_rite": {
       "$ref": "common.schema.json#/$defs/team_name"
     },
     "team": {
       "$ref": "common.schema.json#/$defs/team_name",
-      "description": "Alias for active_team (deprecated, use active_team)"
+      "description": "Alias for active_rite (deprecated, use active_rite)"
     },
     "workflow": {
       "type": "string",
@@ -151,7 +151,7 @@
       "sprint_name": "Artifact Schema Standardization",
       "initiative": "artifact-schema-standardization",
       "complexity": "SYSTEM",
-      "active_team": "ecosystem-pack",
+      "active_rite": "ecosystem-pack",
       "workflow": "sequential",
       "status": "active",
       "created_at": "2025-12-29T20:00:00Z",
