@@ -823,21 +823,21 @@ cmd_validate() {
         fi
     done < <(echo "$manifest" | jq -c '.managed_files[]?')
 
-    # 5. Team validation (if --team flag)
+    # 5. Rite validation (if --team flag)
     if [[ "$team_check" == "1" ]]; then
-        if [[ -f ".claude/ACTIVE_TEAM" ]]; then
-            local active_team manifest_team
-            active_team=$(cat ".claude/ACTIVE_TEAM")
-            manifest_team=$(echo "$manifest" | jq -r '.team.name // empty')
+        if [[ -f ".claude/ACTIVE_RITE" ]] || [[ -f ".claude/ACTIVE_TEAM" ]]; then
+            local active_rite manifest_rite
+            active_rite=$(cat ".claude/ACTIVE_RITE" 2>/dev/null || cat ".claude/ACTIVE_TEAM" 2>/dev/null)
+            manifest_rite=$(echo "$manifest" | jq -r '.team.name // empty')
 
-            if [[ -z "$manifest_team" ]]; then
-                log_warning "Active team '$active_team' not recorded in manifest"
+            if [[ -z "$manifest_rite" ]]; then
+                log_warning "Active rite '$active_rite' not recorded in manifest"
                 warnings=$((warnings + 1))
-            elif [[ "$active_team" != "$manifest_team" ]]; then
-                log_warning "Team mismatch: active='$active_team' manifest='$manifest_team'"
+            elif [[ "$active_rite" != "$manifest_rite" ]]; then
+                log_warning "Rite mismatch: active='$active_rite' manifest='$manifest_rite'"
                 integrity_issues=$((integrity_issues + 1))
             elif [[ "$verbose" == "1" ]]; then
-                log "  Team: $active_team (matches manifest)"
+                log "  Rite: $active_rite (matches manifest)"
             fi
         fi
     fi
@@ -1095,12 +1095,12 @@ cmd_repair() {
             previous_roster_path: $from
         }')
 
-    # 6. Preserve team info if present
-    if [[ -f ".claude/ACTIVE_TEAM" ]]; then
-        local team_name
-        team_name=$(cat ".claude/ACTIVE_TEAM")
-        manifest=$(update_manifest_team "$manifest" "$team_name" "")
-        log "Team preserved: $team_name"
+    # 6. Preserve rite info if present
+    if [[ -f ".claude/ACTIVE_RITE" ]] || [[ -f ".claude/ACTIVE_TEAM" ]]; then
+        local rite_name
+        rite_name=$(cat ".claude/ACTIVE_RITE" 2>/dev/null || cat ".claude/ACTIVE_TEAM" 2>/dev/null)
+        manifest=$(update_manifest_team "$manifest" "$rite_name" "")
+        log "Rite preserved: $rite_name"
     fi
 
     # Write manifest
@@ -1265,14 +1265,14 @@ cmd_status() {
     fi
     echo ""
 
-    # Active team status
-    if [[ -f ".claude/ACTIVE_TEAM" ]]; then
-        local team_name
-        team_name=$(cat ".claude/ACTIVE_TEAM")
-        echo "Active Team: $team_name"
+    # Active rite status
+    if [[ -f ".claude/ACTIVE_RITE" ]] || [[ -f ".claude/ACTIVE_TEAM" ]]; then
+        local rite_name
+        rite_name=$(cat ".claude/ACTIVE_RITE" 2>/dev/null || cat ".claude/ACTIVE_TEAM" 2>/dev/null)
+        echo "Active Rite: $rite_name"
 
         if is_team_stale; then
-            echo -e "  ${YELLOW}Team may need refresh${NC}"
+            echo -e "  ${YELLOW}Rite may need refresh${NC}"
         fi
     fi
 

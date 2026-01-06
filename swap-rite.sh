@@ -170,14 +170,16 @@ rollback_swap() {
         rm -f "$MANIFEST_FILE" 2>/dev/null
     fi
 
-    # Restore ACTIVE_TEAM (LAST - this is the rollback commit point)
-    if [[ -f "$SWAP_BACKUP_DIR/ACTIVE_TEAM" ]]; then
-        cp "$SWAP_BACKUP_DIR/ACTIVE_TEAM" .claude/ACTIVE_RITE
-        log_debug "Restored ACTIVE_TEAM"
+    # Restore ACTIVE_RITE (LAST - this is the rollback commit point)
+    # Note: Check ACTIVE_TEAM for backward compat with old backups
+    if [[ -f "$SWAP_BACKUP_DIR/ACTIVE_RITE" ]] || [[ -f "$SWAP_BACKUP_DIR/ACTIVE_TEAM" ]]; then
+        cp "$SWAP_BACKUP_DIR/ACTIVE_RITE" .claude/ACTIVE_RITE 2>/dev/null || \
+            cp "$SWAP_BACKUP_DIR/ACTIVE_TEAM" .claude/ACTIVE_RITE
+        log_debug "Restored ACTIVE_RITE"
     else
-        # Virgin swap had no ACTIVE_TEAM - remove it
+        # Virgin swap had no ACTIVE_RITE - remove it
         rm -f .claude/ACTIVE_RITE
-        log_debug "Removed ACTIVE_TEAM (virgin swap rollback)"
+        log_debug "Removed ACTIVE_RITE (virgin swap rollback)"
     fi
 
     # Restore commands if backed up
@@ -415,7 +417,7 @@ prompt_recovery_action() {
         echo "  [c] Complete swap to $target (recommended)"
         echo "  [a] Abort (leave as-is for manual recovery)"
         echo ""
-        echo "Note: Rollback is not available because ACTIVE_TEAM was already written."
+        echo "Note: Rollback is not available because ACTIVE_RITE was already written."
         echo ""
 
         local choice
@@ -513,7 +515,7 @@ recover_partial_commit() {
 
     log "Recovering from partial commit..."
 
-    # Check if we're past the point-of-no-return (ACTIVE_TEAM written)
+    # Check if we're past the point-of-no-return (ACTIVE_RITE written)
     if is_past_point_of_no_return; then
         log "Past point-of-no-return. Completing swap forward..."
         complete_partial_commit "$target_team"
@@ -646,7 +648,7 @@ complete_partial_commit() {
             mark_commit_step "$COMMIT_STEP_CEM_MANIFEST"
         else
             log_warning "CEM manifest update failed during recovery"
-            # Continue anyway - ACTIVE_TEAM is already committed
+            # Continue anyway - ACTIVE_RITE is already committed
         fi
     fi
 
@@ -690,12 +692,12 @@ verify_state_consistency() {
             fi
         fi
 
-        # Check manifest matches ACTIVE_TEAM
+        # Check manifest matches ACTIVE_RITE
         if [[ -f "$MANIFEST_FILE" ]]; then
             local manifest_team
             manifest_team=$(jq -r '.active_team // "unknown"' "$MANIFEST_FILE" 2>/dev/null)
             if [[ "$manifest_team" != "$active_team" ]]; then
-                log_error "ACTIVE_TEAM ($active_team) does not match manifest ($manifest_team)"
+                log_error "ACTIVE_RITE ($active_team) does not match manifest ($manifest_team)"
                 ((errors++)) || true
             fi
 
@@ -778,7 +780,7 @@ commit_staged_resources() {
     fi
     mark_commit_step "$COMMIT_STEP_WORKFLOW"
 
-    # Note: ACTIVE_TEAM is committed LAST (after manifest is written)
+    # Note: ACTIVE_RITE is committed LAST (after manifest is written)
     # This happens in the main perform_swap flow
 
     log_debug "Core resources committed"
@@ -1743,7 +1745,7 @@ query_current_team() {
     current=$(cat .claude/ACTIVE_RITE | tr -d '[:space:]')
 
     if [[ -z "$current" ]]; then
-        log_error "ACTIVE_TEAM file is empty (undefined state)"
+        log_error "ACTIVE_RITE file is empty (undefined state)"
         exit "$EXIT_INVALID_ARGS"
     fi
 
@@ -2661,14 +2663,14 @@ update_claude_md() {
     log_debug "CLAUDE.md updated with $agent_count agents"
 }
 
-# Update active team state
-update_active_team() {
+# Update active rite state
+update_active_rite() {
     local team_name="$1"
 
-    log_debug "Updating ACTIVE_TEAM state"
+    log_debug "Updating ACTIVE_RITE state"
 
     echo -n "$team_name" > .claude/ACTIVE_RITE || {
-        log_warning "Failed to update ACTIVE_TEAM (agents swapped successfully)"
+        log_warning "Failed to update ACTIVE_RITE (agents swapped successfully)"
         log "Manually fix: echo '$team_name' > .claude/ACTIVE_RITE"
         exit "$EXIT_SWAP_FAILURE"
     }
@@ -3228,7 +3230,7 @@ perform_swap() {
     if ! update_cem_manifest_team "$team_name"; then
         log_warning "Failed to update CEM manifest team section"
         log_warning "CEM manifest may be stale - run roster-sync to update"
-        # Cannot rollback - we're past point-of-no-return (ACTIVE_TEAM written)
+        # Cannot rollback - we're past point-of-no-return (ACTIVE_RITE written)
         # Continue with swap completion - CEM staleness is recoverable
     fi
     mark_commit_step "$COMMIT_STEP_CEM_MANIFEST"
@@ -3275,12 +3277,12 @@ perform_swap() {
             first_line=$(head -n 1 "$session_file")
             if [[ "$first_line" != "---" ]]; then
                 log_warning "Cannot update session - SESSION_CONTEXT missing YAML frontmatter"
-                log_warning "ACTIVE_TEAM updated but session state may be inconsistent"
+                log_warning "ACTIVE_RITE updated but session state may be inconsistent"
             else
-                # Check for active_team field exists
-                if ! grep -q "^active_team:" "$session_file" 2>/dev/null; then
-                    log_warning "Cannot update session - active_team field not found"
-                    log_warning "ACTIVE_TEAM updated but session state may be inconsistent"
+                # Check for active_rite field exists (with active_team fallback)
+                if ! grep -qE "^active_(rite|team):" "$session_file" 2>/dev/null; then
+                    log_warning "Cannot update session - active_rite field not found"
+                    log_warning "ACTIVE_RITE updated but session state may be inconsistent"
                 else
                     # Safe to mutate
                     if sed -i '' "s/^active_team: .*/active_team: \"$team_name\"/" "$session_file"; then
@@ -3401,7 +3403,7 @@ preview_reset() {
     if [[ -f ".claude/ACTIVE_RITE" ]]; then
         local current
         current=$(cat .claude/ACTIVE_RITE 2>/dev/null | tr -d '[:space:]')
-        echo "Would clear: ACTIVE_TEAM (currently: $current)"
+        echo "Would clear: ACTIVE_RITE (currently: $current)"
     fi
     echo "Would regenerate: CLAUDE.md (baseline)"
 
@@ -3579,10 +3581,10 @@ perform_reset() {
     remove_team_skills
     remove_team_hooks
 
-    # Clear ACTIVE_TEAM
+    # Clear ACTIVE_RITE
     rm -f ".claude/ACTIVE_RITE"
     rm -f ".claude/ACTIVE_WORKFLOW.yaml"
-    log "Cleared: ACTIVE_TEAM"
+    log "Cleared: ACTIVE_RITE"
 
     # Regenerate CLAUDE.md
     regenerate_baseline_claude_md
