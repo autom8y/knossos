@@ -19,13 +19,13 @@ func TestCreate_BasicCreation(t *testing.T) {
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
 
-	// Create .claude directory and ACTIVE_TEAM
+	// Create .claude directory and ACTIVE_RITE
 	claudeDir := filepath.Join(projectDir, ".claude")
 	if err := os.MkdirAll(claudeDir, 0755); err != nil {
 		t.Fatalf("Failed to create .claude dir: %v", err)
 	}
-	if err := os.WriteFile(filepath.Join(claudeDir, "ACTIVE_TEAM"), []byte("10x-dev-pack"), 0644); err != nil {
-		t.Fatalf("Failed to write ACTIVE_TEAM: %v", err)
+	if err := os.WriteFile(filepath.Join(claudeDir, "ACTIVE_RITE"), []byte("10x-dev-pack"), 0644); err != nil {
+		t.Fatalf("Failed to write ACTIVE_RITE: %v", err)
 	}
 
 	// Create sessions directory
@@ -125,8 +125,8 @@ func TestCreate_InvalidComplexity(t *testing.T) {
 	if err := os.MkdirAll(claudeDir, 0755); err != nil {
 		t.Fatalf("Failed to create .claude dir: %v", err)
 	}
-	if err := os.WriteFile(filepath.Join(claudeDir, "ACTIVE_TEAM"), []byte("10x-dev-pack"), 0644); err != nil {
-		t.Fatalf("Failed to write ACTIVE_TEAM: %v", err)
+	if err := os.WriteFile(filepath.Join(claudeDir, "ACTIVE_RITE"), []byte("10x-dev-pack"), 0644); err != nil {
+		t.Fatalf("Failed to write ACTIVE_RITE: %v", err)
 	}
 
 	outputFormat := "json"
@@ -154,13 +154,13 @@ func TestCreate_BlocksSecondActiveSession(t *testing.T) {
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
 
-	// Create .claude directory and ACTIVE_TEAM
+	// Create .claude directory and ACTIVE_RITE
 	claudeDir := filepath.Join(projectDir, ".claude")
 	if err := os.MkdirAll(claudeDir, 0755); err != nil {
 		t.Fatalf("Failed to create .claude dir: %v", err)
 	}
-	if err := os.WriteFile(filepath.Join(claudeDir, "ACTIVE_TEAM"), []byte("10x-dev-pack"), 0644); err != nil {
-		t.Fatalf("Failed to write ACTIVE_TEAM: %v", err)
+	if err := os.WriteFile(filepath.Join(claudeDir, "ACTIVE_RITE"), []byte("10x-dev-pack"), 0644); err != nil {
+		t.Fatalf("Failed to write ACTIVE_RITE: %v", err)
 	}
 
 	// Create sessions directory
@@ -589,13 +589,13 @@ func TestFSM_FullLifecycle(t *testing.T) {
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
 
-	// Create .claude directory and ACTIVE_TEAM
+	// Create .claude directory and ACTIVE_RITE
 	claudeDir := filepath.Join(projectDir, ".claude")
 	if err := os.MkdirAll(claudeDir, 0755); err != nil {
 		t.Fatalf("Failed to create .claude dir: %v", err)
 	}
-	if err := os.WriteFile(filepath.Join(claudeDir, "ACTIVE_TEAM"), []byte("10x-dev-pack"), 0644); err != nil {
-		t.Fatalf("Failed to write ACTIVE_TEAM: %v", err)
+	if err := os.WriteFile(filepath.Join(claudeDir, "ACTIVE_RITE"), []byte("10x-dev-pack"), 0644); err != nil {
+		t.Fatalf("Failed to write ACTIVE_RITE: %v", err)
 	}
 
 	sessionsDir := filepath.Join(claudeDir, "sessions")

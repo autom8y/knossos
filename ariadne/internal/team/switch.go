@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/autom8y/ariadne/internal/errors"
+	"github.com/autom8y/ariadne/internal/inscription"
 	"github.com/autom8y/ariadne/internal/paths"
 )
 
@@ -18,6 +19,7 @@ type SwitchOptions struct {
 	PromoteAll bool
 	Update     bool
 	DryRun     bool
+	NoSync     bool // Skip inscription sync on team switch
 }
 
 // HasOrphanStrategy returns true if an orphan handling flag is set.
@@ -41,13 +43,24 @@ func (o *SwitchOptions) OrphanStrategy() string {
 
 // SwitchResult represents the result of a team switch.
 type SwitchResult struct {
-	Team            string        `json:"team"`
-	PreviousTeam    string        `json:"previous_team"`
-	SwitchedAt      time.Time     `json:"switched_at"`
-	AgentsInstalled []string      `json:"agents_installed"`
-	OrphansHandled  *OrphanResult `json:"orphans_handled,omitempty"`
-	ClaudeMDUpdated bool          `json:"claude_md_updated"`
-	ManifestPath    string        `json:"manifest_path"`
+	Team               string             `json:"team"`
+	PreviousTeam       string             `json:"previous_team"`
+	SwitchedAt         time.Time          `json:"switched_at"`
+	AgentsInstalled    []string           `json:"agents_installed"`
+	OrphansHandled     *OrphanResult      `json:"orphans_handled,omitempty"`
+	ClaudeMDUpdated    bool               `json:"claude_md_updated"`
+	ManifestPath       string             `json:"manifest_path"`
+	InscriptionSynced  bool               `json:"inscription_synced,omitempty"`
+	InscriptionVersion string             `json:"inscription_version,omitempty"`
+	SyncConflicts      []InscriptionConflict `json:"sync_conflicts,omitempty"`
+}
+
+// InscriptionConflict represents a conflict from inscription sync.
+type InscriptionConflict struct {
+	Region    string `json:"region"`
+	Type      string `json:"type"`
+	Message   string `json:"message"`
+	Preserved bool   `json:"preserved"`
 }
 
 // OrphanResult tracks orphan handling.
@@ -212,9 +225,9 @@ func (s *Switcher) executeSwitch(team *Team, manifest *Manifest, orphans []strin
 		installedAgents = append(installedAgents, entry.Name())
 	}
 
-	// 3. Update ACTIVE_TEAM file
-	if err := os.WriteFile(s.resolver.ActiveTeamFile(), []byte(opts.TargetTeam), 0644); err != nil {
-		return nil, errors.Wrap(errors.CodePermissionDenied, "failed to write ACTIVE_TEAM", err)
+	// 3. Update ACTIVE_RITE file
+	if err := os.WriteFile(s.resolver.ActiveRiteFile(), []byte(opts.TargetTeam), 0644); err != nil {
+		return nil, errors.Wrap(errors.CodePermissionDenied, "failed to write ACTIVE_RITE", err)
 	}
 
 	// 4. Copy workflow.yaml to ACTIVE_WORKFLOW.yaml
@@ -231,19 +244,13 @@ func (s *Switcher) executeSwitch(team *Team, manifest *Manifest, orphans []strin
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to save manifest", err)
 	}
 
-	// 6. Update CLAUDE.md satellites (non-critical)
-	claudeMDUpdated := false
-	updater := NewClaudeMDUpdater(s.resolver.ClaudeMDFile())
-	if err := updater.UpdateForTeam(team); err == nil {
-		claudeMDUpdated = true
-	}
-
+	// 6. Build result structure
 	result := &SwitchResult{
 		Team:            opts.TargetTeam,
 		PreviousTeam:    manifest.ActiveTeam,
 		SwitchedAt:      time.Now().UTC(),
 		AgentsInstalled: installedAgents,
-		ClaudeMDUpdated: claudeMDUpdated,
+		ClaudeMDUpdated: false,
 		ManifestPath:    s.resolver.AgentManifestFile(),
 	}
 
@@ -251,6 +258,42 @@ func (s *Switcher) executeSwitch(team *Team, manifest *Manifest, orphans []strin
 		result.OrphansHandled = &OrphanResult{
 			Strategy: opts.OrphanStrategy(),
 			Agents:   orphans,
+		}
+	}
+
+	// 7. Trigger inscription sync (unless --no-sync)
+	if !opts.NoSync {
+		pipeline := inscription.NewPipeline(s.resolver.ProjectRoot())
+		syncResult, err := pipeline.Sync(inscription.SyncOptions{
+			RiteName: opts.TargetTeam,
+		})
+		if err != nil {
+			// Log warning but don't fail the switch
+			// The switch itself succeeded, inscription sync is non-critical
+			result.InscriptionSynced = false
+		} else {
+			result.InscriptionSynced = true
+			result.InscriptionVersion = syncResult.InscriptionVersion
+			result.ClaudeMDUpdated = true
+
+			// Convert conflicts to output format
+			if len(syncResult.Conflicts) > 0 {
+				result.SyncConflicts = make([]InscriptionConflict, len(syncResult.Conflicts))
+				for i, c := range syncResult.Conflicts {
+					result.SyncConflicts[i] = InscriptionConflict{
+						Region:    c.Region,
+						Type:      string(c.Type),
+						Message:   c.Message,
+						Preserved: c.Preserved,
+					}
+				}
+			}
+		}
+	} else {
+		// Fallback to legacy ClaudeMDUpdater if inscription sync is skipped
+		updater := NewClaudeMDUpdater(s.resolver.ClaudeMDFile())
+		if err := updater.UpdateForTeam(team); err == nil {
+			result.ClaudeMDUpdated = true
 		}
 	}
 
@@ -294,13 +337,13 @@ type backup struct {
 // createBackup saves current state for potential rollback.
 func (s *Switcher) createBackup() (*backup, error) {
 	b := &backup{
-		activeTeamPath: s.resolver.ActiveTeamFile(),
+		activeTeamPath: s.resolver.ActiveRiteFile(),
 		manifestPath:   s.resolver.AgentManifestFile(),
 		agentsDir:      s.resolver.AgentsDir(),
 		agentBackups:   make(map[string][]byte),
 	}
 
-	// Backup ACTIVE_TEAM
+	// Backup ACTIVE_RITE
 	if data, err := os.ReadFile(b.activeTeamPath); err == nil {
 		b.activeTeamData = data
 	}
@@ -332,7 +375,7 @@ func (s *Switcher) restoreBackup(b *backup) {
 		return
 	}
 
-	// Restore ACTIVE_TEAM
+	// Restore ACTIVE_RITE
 	if b.activeTeamData != nil {
 		os.WriteFile(b.activeTeamPath, b.activeTeamData, 0644)
 	}

@@ -51,7 +51,7 @@ Have a parked session?
 
 | Check | Warning If | Action |
 |-------|-----------|--------|
-| Team consistency | `ACTIVE_TEAM` ≠ `session.active_team` | Offer team switch |
+| Team consistency | `ACTIVE_RITE` ≠ `session.active_team` | Offer team switch |
 | Git status | New changes since park | Offer diff review |
 | Agent availability | Agent not in team | Error with valid list |
 

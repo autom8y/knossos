@@ -280,7 +280,7 @@ if [[ "$command" == "start" ]] && ! has_session; then
 
     # Get active team
     local team
-    team=$(cat "$PROJECT_DIR/.claude/ACTIVE_TEAM" 2>/dev/null || echo "10x-dev-pack")
+    team=$(cat "$PROJECT_DIR/.claude/ACTIVE_RITE" 2>/dev/null || echo "10x-dev-pack")
 
     # Create session via session-manager (uses FSM for schema-validated write)
     local result
@@ -994,7 +994,7 @@ Direct invocation of state-mate remains valid as an escape hatch:
 
 ### Performance Optimization Notes
 
-1. **orchestrator-router.sh**: Minimize file I/O, use cached ACTIVE_TEAM
+1. **orchestrator-router.sh**: Minimize file I/O, use cached ACTIVE_RITE
 2. **orchestrator-bypass-check.sh**: Only check last 20 events, not full history
 3. **Session creation**: FSM already optimized with atomic writes
 4. **JSON processing**: Use jq streaming where possible

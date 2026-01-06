@@ -102,7 +102,7 @@ In orchestrated mode, `/consult` provides full team/workflow routing as describe
 When invoked without arguments, `/consult` provides ecosystem overview:
 
 1. **Summarize Current State**
-   - Active team (from `.claude/ACTIVE_TEAM`)
+   - Active team (from `.claude/ACTIVE_RITE`)
    - Active session (from `.claude/sessions/`)
    - Git branch and status
    - Current complexity level (if in session)

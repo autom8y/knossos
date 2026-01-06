@@ -35,6 +35,9 @@ type GateResult struct {
 
 	// OpenQuestions from the sails file (if any).
 	OpenQuestions []string `json:"open_questions,omitempty" yaml:"open_questions,omitempty"`
+
+	// ContractViolations lists thread contract violations found (if any).
+	ContractViolations []ContractViolation `json:"contract_violations,omitempty" yaml:"contract_violations,omitempty"`
 }
 
 // CheckGate reads WHITE_SAILS.yaml from a session and returns the gate result.
@@ -43,13 +46,17 @@ type GateResult struct {
 // The sessionPath can be:
 //   - A session directory containing WHITE_SAILS.yaml
 //   - A direct path to WHITE_SAILS.yaml
+//
+// This function also validates the thread contract from events.jsonl.
+// Thread contract violations degrade sails to GRAY at minimum.
 func CheckGate(sessionPath string) (*GateResult, error) {
 	if sessionPath == "" {
 		return nil, errors.New(errors.CodeUsageError, "session path is required")
 	}
 
-	// Determine the WHITE_SAILS.yaml path
+	// Determine the WHITE_SAILS.yaml path and session directory
 	sailsPath := sessionPath
+	sessionDir := sessionPath
 	info, err := os.Stat(sessionPath)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -71,6 +78,9 @@ func CheckGate(sessionPath string) (*GateResult, error) {
 			}
 			return nil, errors.Wrap(errors.CodeGeneralError, "failed to access WHITE_SAILS.yaml", err)
 		}
+	} else {
+		// If sailsPath is a file, extract the directory
+		sessionDir = filepath.Dir(sailsPath)
 	}
 
 	// Read the WHITE_SAILS.yaml file
@@ -85,21 +95,38 @@ func CheckGate(sessionPath string) (*GateResult, error) {
 		return nil, errors.Wrap(errors.CodeParseError, "failed to parse WHITE_SAILS.yaml", err)
 	}
 
+	// Validate thread contract from events.jsonl
+	violations, err := ValidateThreadContract(sessionDir)
+	if err != nil {
+		// Log the error but don't fail the gate check
+		// Thread contract validation is best-effort
+		violations = nil
+	}
+
 	// Build the gate result
 	color := Color(sails.Color)
 	computedBase := Color(sails.ComputedBase)
 
+	// Apply thread contract violations to color
+	if len(violations) > 0 {
+		// Thread contract violations degrade to GRAY minimum
+		if color == ColorWhite {
+			color = ColorGray
+		}
+	}
+
 	result := &GateResult{
-		Pass:          color == ColorWhite,
-		Color:         color,
-		SessionID:     sails.SessionID,
-		FilePath:      sailsPath,
-		ComputedBase:  computedBase,
-		OpenQuestions: sails.OpenQuestions,
+		Pass:               color == ColorWhite,
+		Color:              color,
+		SessionID:          sails.SessionID,
+		FilePath:           sailsPath,
+		ComputedBase:       computedBase,
+		OpenQuestions:      sails.OpenQuestions,
+		ContractViolations: violations,
 	}
 
 	// Build reasons based on the color
-	switch color {
+	switch Color(sails.Color) { // Use original color from YAML
 	case ColorWhite:
 		result.Reasons = append(result.Reasons, "sails color is WHITE: high confidence, ship without QA")
 	case ColorGray:
@@ -116,7 +143,15 @@ func CheckGate(sessionPath string) (*GateResult, error) {
 	case ColorBlack:
 		result.Reasons = append(result.Reasons, "sails color is BLACK: known failure, do not ship")
 	default:
-		result.Reasons = append(result.Reasons, "unknown sails color: "+string(color))
+		result.Reasons = append(result.Reasons, "unknown sails color: "+string(sails.Color))
+	}
+
+	// Add reason for thread contract violations
+	if len(violations) > 0 {
+		if Color(sails.Color) == ColorWhite {
+			result.Reasons = append(result.Reasons, "thread contract violations present: downgraded to GRAY")
+		}
+		result.Reasons = append(result.Reasons, "thread contract has violations (see contract_violations)")
 	}
 
 	return result, nil

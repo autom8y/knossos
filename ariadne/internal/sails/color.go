@@ -133,6 +133,10 @@ type ColorInput struct {
 	// Any open question triggers gray ceiling.
 	OpenQuestions []string `yaml:"open_questions" json:"open_questions"`
 
+	// Blockers is a list of explicit blockers from the session context.
+	// Any blocker triggers BLACK (known failure).
+	Blockers []string `yaml:"blockers,omitempty" json:"blockers,omitempty"`
+
 	// Modifiers are human-declared adjustments.
 	Modifiers []Modifier `yaml:"modifiers" json:"modifiers"`
 
@@ -155,7 +159,7 @@ type ColorResult struct {
 // ComputeColor computes the sails color based on the algorithm in TDD 4.1.
 //
 // Algorithm summary:
-//  1. Check for failures (BLACK)
+//  1. Check for failures (BLACK): explicit blockers OR proof failures
 //  2. Check for open questions (GRAY ceiling)
 //  3. Check session type ceiling (spike/hotfix = GRAY)
 //  4. Check proof completeness per complexity
@@ -165,7 +169,20 @@ type ColorResult struct {
 func ComputeColor(input ColorInput) ColorResult {
 	var reasons []string
 
-	// Step 1: Check for failures (BLACK)
+	// Step 1a: Check for explicit blockers (BLACK)
+	if len(input.Blockers) > 0 {
+		reasons = append(reasons, "explicit blockers present: black sails (do not ship)")
+		for _, blocker := range input.Blockers {
+			reasons = append(reasons, "  - "+blocker)
+		}
+		return ColorResult{
+			Color:        ColorBlack,
+			ComputedBase: ColorBlack,
+			Reasons:      reasons,
+		}
+	}
+
+	// Step 1b: Check for proof failures (BLACK)
 	for name, proof := range input.Proofs {
 		if proof.Status == ProofFail {
 			reasons = append(reasons, "proof '"+name+"' has status FAIL")

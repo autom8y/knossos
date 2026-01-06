@@ -35,9 +35,9 @@ func TestCreateSeedMode(t *testing.T) {
 		t.Fatalf("Failed to create .claude dir: %v", err)
 	}
 
-	// Create ACTIVE_TEAM file
-	if err := os.WriteFile(filepath.Join(claudeDir, "ACTIVE_TEAM"), []byte("10x-dev-pack"), 0644); err != nil {
-		t.Fatalf("Failed to write ACTIVE_TEAM: %v", err)
+	// Create ACTIVE_RITE file
+	if err := os.WriteFile(filepath.Join(claudeDir, "ACTIVE_RITE"), []byte("10x-dev-pack"), 0644); err != nil {
+		t.Fatalf("Failed to write ACTIVE_RITE: %v", err)
 	}
 
 	// Create sessions directory
@@ -137,9 +137,9 @@ func TestCreateSeedMultiple(t *testing.T) {
 		t.Fatalf("Failed to create .claude dir: %v", err)
 	}
 
-	// Create ACTIVE_TEAM file
-	if err := os.WriteFile(filepath.Join(claudeDir, "ACTIVE_TEAM"), []byte("10x-dev-pack"), 0644); err != nil {
-		t.Fatalf("Failed to write ACTIVE_TEAM: %v", err)
+	// Create ACTIVE_RITE file
+	if err := os.WriteFile(filepath.Join(claudeDir, "ACTIVE_RITE"), []byte("10x-dev-pack"), 0644); err != nil {
+		t.Fatalf("Failed to write ACTIVE_RITE: %v", err)
 	}
 
 	// Create sessions directory
@@ -228,9 +228,9 @@ func TestCreateSeedCleanup(t *testing.T) {
 		t.Fatalf("Failed to create .claude dir: %v", err)
 	}
 
-	// Create ACTIVE_TEAM file
-	if err := os.WriteFile(filepath.Join(claudeDir, "ACTIVE_TEAM"), []byte("10x-dev-pack"), 0644); err != nil {
-		t.Fatalf("Failed to write ACTIVE_TEAM: %v", err)
+	// Create ACTIVE_RITE file
+	if err := os.WriteFile(filepath.Join(claudeDir, "ACTIVE_RITE"), []byte("10x-dev-pack"), 0644); err != nil {
+		t.Fatalf("Failed to write ACTIVE_RITE: %v", err)
 	}
 
 	// Run create with --seed and --seed-keep
@@ -291,9 +291,9 @@ func TestCreateSeedJSONOutput(t *testing.T) {
 		t.Fatalf("Failed to create .claude dir: %v", err)
 	}
 
-	// Create ACTIVE_TEAM file
-	if err := os.WriteFile(filepath.Join(claudeDir, "ACTIVE_TEAM"), []byte("10x-dev-pack"), 0644); err != nil {
-		t.Fatalf("Failed to write ACTIVE_TEAM: %v", err)
+	// Create ACTIVE_RITE file
+	if err := os.WriteFile(filepath.Join(claudeDir, "ACTIVE_RITE"), []byte("10x-dev-pack"), 0644); err != nil {
+		t.Fatalf("Failed to write ACTIVE_RITE: %v", err)
 	}
 
 	// Create sessions directory

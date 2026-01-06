@@ -81,7 +81,7 @@ setup_satellite() {
 # Test 1: No team active (ACTIVE_TEAM = none)
 test_no_team() {
     setup_satellite
-    echo "none" > .claude/ACTIVE_TEAM
+    echo "none" > .claude/ACTIVE_RITE
 
     source "$SCRIPT_DIR/.claude/hooks/lib/team-context-loader.sh"
     local output=$(load_team_context)
@@ -94,7 +94,7 @@ test_team_no_script() {
     setup_satellite
 
     # Use a team that exists but has no context-injection.sh
-    echo "10x-dev-pack" > .claude/ACTIVE_TEAM
+    echo "10x-dev-pack" > .claude/ACTIVE_RITE
 
     # Make sure the team exists but script doesn't
     mkdir -p "$SCRIPT_DIR/teams/10x-dev-pack"
@@ -108,7 +108,7 @@ test_team_no_script() {
 # Test 3: Team with context script produces output
 test_team_with_script() {
     setup_satellite
-    echo "ecosystem-pack" > .claude/ACTIVE_TEAM
+    echo "ecosystem-pack" > .claude/ACTIVE_RITE
 
     source "$SCRIPT_DIR/.claude/hooks/lib/team-context-loader.sh"
     local output=$(load_team_context)
@@ -120,7 +120,7 @@ test_team_with_script() {
 # Test 4: Script exists but not executable (should still work, bash doesn't require +x for sourcing)
 test_script_not_executable() {
     setup_satellite
-    echo "test-team" > .claude/ACTIVE_TEAM
+    echo "test-team" > .claude/ACTIVE_RITE
 
     # Create test team with non-executable script
     mkdir -p "$SCRIPT_DIR/teams/test-team"
@@ -145,7 +145,7 @@ EOF
 # Test 5: Function missing from script (graceful degradation)
 test_missing_function() {
     setup_satellite
-    echo "test-team-broken" > .claude/ACTIVE_TEAM
+    echo "test-team-broken" > .claude/ACTIVE_RITE
 
     # Create test team with script missing the required function
     mkdir -p "$SCRIPT_DIR/teams/test-team-broken"
@@ -169,7 +169,7 @@ EOF
 # Test 6: Function outputs nothing (normal case)
 test_empty_output() {
     setup_satellite
-    echo "test-team-empty" > .claude/ACTIVE_TEAM
+    echo "test-team-empty" > .claude/ACTIVE_RITE
 
     # Create test team with empty output
     mkdir -p "$SCRIPT_DIR/teams/test-team-empty"
@@ -193,7 +193,7 @@ EOF
 # Test 7: ROSTER_HOME not set (fallback to default)
 test_roster_home_fallback() {
     setup_satellite
-    echo "ecosystem-pack" > .claude/ACTIVE_TEAM
+    echo "ecosystem-pack" > .claude/ACTIVE_RITE
 
     # Unset ROSTER_HOME to test fallback
     local original_roster_home="${ROSTER_HOME:-}"

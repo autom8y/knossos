@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/autom8y/ariadne/internal/hook/threadcontract"
+	"github.com/autom8y/ariadne/internal/hook/clewcontract"
 	"github.com/autom8y/ariadne/internal/session"
 )
 
@@ -46,7 +46,7 @@ status: ACTIVE
 initiative: Test Park Session
 complexity: MODULE
 created_at: ` + createdAt.Format(time.RFC3339) + `
-active_team: 10x-dev-pack
+active_rite: 10x-dev-pack
 current_phase: requirements
 ---
 
@@ -92,7 +92,7 @@ standard
 	// Find session_end event
 	found := false
 	for _, event := range events {
-		if event.Type == threadcontract.EventTypeSessionEnd {
+		if event.Type == clewcontract.EventTypeSessionEnd {
 			found = true
 
 			// Verify status is "parked"
@@ -173,7 +173,7 @@ status: ACTIVE
 initiative: Test Wrap Session
 complexity: MODULE
 created_at: ` + createdAt.Format(time.RFC3339) + `
-active_team: 10x-dev-pack
+active_rite: 10x-dev-pack
 current_phase: qa
 ---
 
@@ -219,7 +219,7 @@ standard
 	// Find session_end event
 	found := false
 	for _, event := range events {
-		if event.Type == threadcontract.EventTypeSessionEnd {
+		if event.Type == clewcontract.EventTypeSessionEnd {
 			found = true
 
 			// Verify status is "completed"
@@ -309,7 +309,7 @@ status: ACTIVE
 initiative: Test Resume Session
 complexity: MODULE
 created_at: ` + createdAt.Format(time.RFC3339) + `
-active_team: 10x-dev-pack
+active_rite: 10x-dev-pack
 current_phase: implementation
 ---
 
@@ -355,7 +355,7 @@ standard
 	// Count session_end events after park
 	sessionEndCountAfterPark := 0
 	for _, event := range eventsAfterPark {
-		if event.Type == threadcontract.EventTypeSessionEnd {
+		if event.Type == clewcontract.EventTypeSessionEnd {
 			sessionEndCountAfterPark++
 		}
 	}
@@ -380,7 +380,7 @@ standard
 	// Count session_end events after resume
 	sessionEndCountAfterResume := 0
 	for _, event := range eventsAfterResume {
-		if event.Type == threadcontract.EventTypeSessionEnd {
+		if event.Type == clewcontract.EventTypeSessionEnd {
 			sessionEndCountAfterResume++
 		}
 	}
@@ -415,7 +415,7 @@ standard
 }
 
 // TestPark_EmitsSessionParkedAndSessionEnd verifies both event types are emitted.
-// SESSION_PARKED comes from session.EventEmitter, session_end comes from threadcontract.
+// SESSION_PARKED comes from session.EventEmitter, session_end comes from clewcontract.
 func TestPark_EmitsBothEventTypes(t *testing.T) {
 	// Create temporary project structure
 	tmpDir := t.TempDir()
@@ -447,7 +447,7 @@ status: ACTIVE
 initiative: Test Both Events
 complexity: FEATURE
 created_at: ` + createdAt.Format(time.RFC3339) + `
-active_team: 10x-dev-pack
+active_rite: 10x-dev-pack
 current_phase: implementation
 ---
 
@@ -505,7 +505,7 @@ current_phase: implementation
 
 	hasSessionEnd := false
 	for _, event := range events {
-		if event.Type == threadcontract.EventTypeSessionEnd {
+		if event.Type == clewcontract.EventTypeSessionEnd {
 			hasSessionEnd = true
 			if event.Meta["status"] != "parked" {
 				t.Errorf("session_end status = %v, want parked", event.Meta["status"])
@@ -518,16 +518,16 @@ current_phase: implementation
 	}
 }
 
-// readEventsFile reads and parses events.jsonl into threadcontract.Event structs.
+// readEventsFile reads and parses events.jsonl into clewcontract.Event structs.
 // This handles the JSONL format where each line is a separate JSON object.
-func readEventsFile(path string) ([]threadcontract.Event, error) {
+func readEventsFile(path string) ([]clewcontract.Event, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
 	defer file.Close()
 
-	var events []threadcontract.Event
+	var events []clewcontract.Event
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -535,7 +535,7 @@ func readEventsFile(path string) ([]threadcontract.Event, error) {
 			continue
 		}
 
-		var event threadcontract.Event
+		var event clewcontract.Event
 		if err := json.Unmarshal([]byte(line), &event); err != nil {
 			// Some events may use the old format (session.Event), skip those
 			continue

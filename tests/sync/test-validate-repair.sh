@@ -259,7 +259,7 @@ test_validate_with_team_flag() {
     create_test_manifest "$project_dir"
 
     # Create ACTIVE_TEAM file
-    echo "10x-dev-pack" > "$project_dir/.claude/ACTIVE_TEAM"
+    echo "10x-dev-pack" > "$project_dir/.claude/ACTIVE_RITE"
 
     local exit_code=0
     local output
@@ -434,7 +434,7 @@ test_repair_preserves_team() {
 
     local project_dir="$TEST_TMP/repair-team"
     mkdir -p "$project_dir/.claude/.cem"
-    echo "my-team" > "$project_dir/.claude/ACTIVE_TEAM"
+    echo "my-team" > "$project_dir/.claude/ACTIVE_RITE"
 
     local exit_code=0
     "$ROSTER_HOME/roster-sync" repair "$project_dir" 2>/dev/null || exit_code=$?

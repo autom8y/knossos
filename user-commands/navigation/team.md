@@ -17,7 +17,7 @@ Manage agent team packs. $ARGUMENTS
 ## Behavior
 
 **If no arguments or querying current team:**
-1. Read `.claude/ACTIVE_TEAM` and display current team
+1. Read `.claude/ACTIVE_RITE` and display current team
 2. Show: "Active team: {name}" or "No team active"
 
 **If `--list` or `-l`:**

@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/autom8y/ariadne/internal/hook/threadcontract"
+	"github.com/autom8y/ariadne/internal/hook/clewcontract"
 )
 
 // TestPrepare_EmitsTaskEnd verifies that handoff prepare emits a task_end event.
@@ -44,7 +44,7 @@ status: ACTIVE
 initiative: Test Handoff Prepare
 complexity: MODULE
 created_at: ` + createdAt.Format(time.RFC3339) + `
-active_team: 10x-dev-pack
+active_rite: 10x-dev-pack
 current_phase: design
 ---
 
@@ -91,7 +91,7 @@ standard
 	// Find task_end event
 	found := false
 	for _, event := range events {
-		if event.Type == threadcontract.EventTypeTaskEnd {
+		if event.Type == clewcontract.EventTypeTaskEnd {
 			found = true
 
 			// Verify agent is the source agent
@@ -104,14 +104,14 @@ standard
 				t.Errorf("task_end event agent = %q, want %q", agent, "architect")
 			}
 
-			// Verify status is success
-			status, ok := event.Meta["status"].(string)
+			// Verify outcome is success
+			outcome, ok := event.Meta["outcome"].(string)
 			if !ok {
-				t.Errorf("task_end event missing status in meta")
+				t.Errorf("task_end event missing outcome in meta")
 				continue
 			}
-			if status != "success" {
-				t.Errorf("task_end event status = %q, want %q", status, "success")
+			if outcome != "success" {
+				t.Errorf("task_end event outcome = %q, want %q", outcome, "success")
 			}
 
 			break
@@ -120,6 +120,31 @@ standard
 
 	if !found {
 		t.Error("events.jsonl does not contain task_end event for prepare operation")
+	}
+
+	// Also verify HANDOFF_PREPARED event exists
+	foundHandoffPrepared := false
+	for _, event := range events {
+		if event.Type == clewcontract.EventTypeHandoffPrepared {
+			foundHandoffPrepared = true
+
+			// Verify from_agent and to_agent
+			fromAgent, ok := event.Meta["from_agent"].(string)
+			if !ok || fromAgent != "architect" {
+				t.Errorf("handoff_prepared event from_agent = %q, want %q", fromAgent, "architect")
+			}
+
+			toAgent, ok := event.Meta["to_agent"].(string)
+			if !ok || toAgent != "principal-engineer" {
+				t.Errorf("handoff_prepared event to_agent = %q, want %q", toAgent, "principal-engineer")
+			}
+
+			break
+		}
+	}
+
+	if !foundHandoffPrepared {
+		t.Error("events.jsonl does not contain handoff_prepared event")
 	}
 }
 
@@ -155,7 +180,7 @@ status: ACTIVE
 initiative: Test Handoff Execute
 complexity: MODULE
 created_at: ` + createdAt.Format(time.RFC3339) + `
-active_team: 10x-dev-pack
+active_rite: 10x-dev-pack
 current_phase: design
 ---
 
@@ -199,7 +224,7 @@ current_phase: design
 	// Find task_start event
 	found := false
 	for _, event := range events {
-		if event.Type == threadcontract.EventTypeTaskStart {
+		if event.Type == clewcontract.EventTypeTaskStart {
 			found = true
 
 			// Verify agent is the target agent
@@ -212,14 +237,14 @@ current_phase: design
 				t.Errorf("task_start event agent = %q, want %q", agent, "principal-engineer")
 			}
 
-			// Verify parent_session is set
-			parentSession, ok := event.Meta["parent_session"].(string)
+			// Verify session_id is set
+			sid, ok := event.Meta["session_id"].(string)
 			if !ok {
-				t.Errorf("task_start event missing parent_session in meta")
+				t.Errorf("task_start event missing session_id in meta")
 				continue
 			}
-			if parentSession != sessionID {
-				t.Errorf("task_start event parent_session = %q, want %q", parentSession, sessionID)
+			if sid != sessionID {
+				t.Errorf("task_start event session_id = %q, want %q", sid, sessionID)
 			}
 
 			break
@@ -230,15 +255,32 @@ current_phase: design
 		t.Error("events.jsonl does not contain task_start event for execute operation")
 	}
 
-	// Also verify HANDOFF_EXECUTED event exists
-	handoffFound := false
-	content, _ := os.ReadFile(eventsPath)
-	if strings.Contains(string(content), "HANDOFF_EXECUTED") {
-		handoffFound = true
+	// Also verify HANDOFF_EXECUTED event exists (ThreadContract format)
+	foundHandoffExecuted := false
+	for _, event := range events {
+		if event.Type == clewcontract.EventTypeHandoffExecuted {
+			foundHandoffExecuted = true
+
+			// Verify to_agent
+			toAgent, ok := event.Meta["to_agent"].(string)
+			if !ok || toAgent != "principal-engineer" {
+				t.Errorf("handoff_executed event to_agent = %q, want %q", toAgent, "principal-engineer")
+			}
+
+			// Verify artifacts
+			artifacts, ok := event.Meta["artifacts"].([]interface{})
+			if !ok {
+				t.Error("handoff_executed event missing artifacts")
+			} else if len(artifacts) != 1 || artifacts[0].(string) != "TDD-test-feature" {
+				t.Errorf("handoff_executed event artifacts = %v, want [\"TDD-test-feature\"]", artifacts)
+			}
+
+			break
+		}
 	}
 
-	if !handoffFound {
-		t.Error("events.jsonl does not contain HANDOFF_EXECUTED event")
+	if !foundHandoffExecuted {
+		t.Error("events.jsonl does not contain handoff_executed event (ThreadContract format)")
 	}
 }
 
@@ -274,7 +316,7 @@ status: ACTIVE
 initiative: Test Handoff Status
 complexity: FEATURE
 created_at: ` + createdAt.Format(time.RFC3339) + `
-active_team: 10x-dev-pack
+active_rite: 10x-dev-pack
 current_phase: implementation
 ---
 
@@ -339,7 +381,7 @@ status: ACTIVE
 initiative: Test Handoff History
 complexity: MODULE
 created_at: ` + createdAt.Format(time.RFC3339) + `
-active_team: 10x-dev-pack
+active_rite: 10x-dev-pack
 current_phase: design
 ---
 
@@ -419,7 +461,7 @@ status: ACTIVE
 initiative: Test Invalid Handoff
 complexity: MODULE
 created_at: ` + createdAt.Format(time.RFC3339) + `
-active_team: 10x-dev-pack
+active_rite: 10x-dev-pack
 current_phase: design
 ---
 
@@ -495,7 +537,7 @@ status: ACTIVE
 initiative: Test Self Handoff
 complexity: MODULE
 created_at: ` + createdAt.Format(time.RFC3339) + `
-active_team: 10x-dev-pack
+active_rite: 10x-dev-pack
 current_phase: design
 ---
 
@@ -590,7 +632,7 @@ status: ACTIVE
 initiative: Test Invalid Handoff Sequence
 complexity: MODULE
 created_at: ` + createdAt.Format(time.RFC3339) + `
-active_team: 10x-dev-pack
+active_rite: 10x-dev-pack
 current_phase: design
 ---
 
@@ -699,7 +741,7 @@ status: ACTIVE
 initiative: Test Cross-Team Validation
 complexity: MODULE
 created_at: ` + createdAt.Format(time.RFC3339) + `
-active_team: ` + tc.activeTeam + `
+active_rite: ` + tc.activeTeam + `
 current_phase: design
 ---
 
@@ -803,7 +845,7 @@ status: ACTIVE
 initiative: Test Empty History
 complexity: TRIVIAL
 created_at: ` + createdAt.Format(time.RFC3339) + `
-active_team: 10x-dev-pack
+active_rite: 10x-dev-pack
 current_phase: requirements
 ---
 
@@ -871,7 +913,7 @@ status: ACTIVE
 initiative: Test Dry Run Validation
 complexity: MODULE
 created_at: ` + createdAt.Format(time.RFC3339) + `
-active_team: 10x-dev-pack
+active_rite: 10x-dev-pack
 current_phase: design
 ---
 
@@ -959,7 +1001,7 @@ status: ACTIVE
 initiative: Test Dry Run
 complexity: MODULE
 created_at: ` + createdAt.Format(time.RFC3339) + `
-active_team: 10x-dev-pack
+active_rite: 10x-dev-pack
 current_phase: design
 ---
 
@@ -1005,15 +1047,15 @@ current_phase: design
 	}
 }
 
-// readEventsFile reads and parses events.jsonl into threadcontract.Event structs.
-func readEventsFile(path string) ([]threadcontract.Event, error) {
+// readEventsFile reads and parses events.jsonl into clewcontract.Event structs.
+func readEventsFile(path string) ([]clewcontract.Event, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
 	defer file.Close()
 
-	var events []threadcontract.Event
+	var events []clewcontract.Event
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -1021,7 +1063,7 @@ func readEventsFile(path string) ([]threadcontract.Event, error) {
 			continue
 		}
 
-		var event threadcontract.Event
+		var event clewcontract.Event
 		if err := json.Unmarshal([]byte(line), &event); err != nil {
 			// Some events may use the old format, skip those
 			continue
@@ -1087,7 +1129,7 @@ status: ACTIVE
 initiative: Test Valid Handoff
 complexity: MODULE
 created_at: ` + createdAt.Format(time.RFC3339) + `
-active_team: 10x-dev-pack
+active_rite: 10x-dev-pack
 current_phase: design
 ---
 
@@ -1179,7 +1221,7 @@ status: PARKED
 initiative: Test Parked Session
 complexity: MODULE
 created_at: ` + createdAt.Format(time.RFC3339) + `
-active_team: 10x-dev-pack
+active_rite: 10x-dev-pack
 current_phase: design
 ---
 
@@ -1272,7 +1314,7 @@ status: ACTIVE
 initiative: Test Unknown Agent
 complexity: MODULE
 created_at: ` + createdAt.Format(time.RFC3339) + `
-active_team: 10x-dev-pack
+active_rite: 10x-dev-pack
 current_phase: design
 ---
 
@@ -1339,7 +1381,7 @@ status: ACTIVE
 initiative: Test Artifact ID
 complexity: MODULE
 created_at: ` + createdAt.Format(time.RFC3339) + `
-active_team: 10x-dev-pack
+active_rite: 10x-dev-pack
 current_phase: design
 ---
 
@@ -1380,7 +1422,7 @@ current_phase: design
 	}
 
 	for _, event := range events {
-		if event.Type == threadcontract.EventTypeTaskEnd {
+		if event.Type == clewcontract.EventTypeTaskEnd {
 			artifacts, ok := event.Meta["artifacts"].([]interface{})
 			if !ok {
 				t.Error("task_end event missing artifacts in meta")
@@ -1461,7 +1503,7 @@ status: PARKED
 initiative: Test Execute Parked
 complexity: MODULE
 created_at: ` + createdAt.Format(time.RFC3339) + `
-active_team: 10x-dev-pack
+active_rite: 10x-dev-pack
 current_phase: design
 ---
 
@@ -1536,7 +1578,7 @@ status: ACTIVE
 initiative: Test Execute All Agents
 complexity: MODULE
 created_at: ` + createdAt.Format(time.RFC3339) + `
-active_team: 10x-dev-pack
+active_rite: 10x-dev-pack
 current_phase: design
 ---
 
@@ -1577,7 +1619,7 @@ current_phase: design
 
 			foundTaskStart := false
 			for _, event := range events {
-				if event.Type == threadcontract.EventTypeTaskStart {
+				if event.Type == clewcontract.EventTypeTaskStart {
 					foundTaskStart = true
 					agent, ok := event.Meta["agent"].(string)
 					if !ok {
@@ -1625,7 +1667,7 @@ status: ACTIVE
 initiative: Test Execute Structure
 complexity: MODULE
 created_at: ` + createdAt.Format(time.RFC3339) + `
-active_team: 10x-dev-pack
+active_rite: 10x-dev-pack
 current_phase: design
 ---
 
@@ -1709,7 +1751,7 @@ status: ACTIVE
 initiative: Test Status With History
 complexity: MODULE
 created_at: ` + createdAt.Format(time.RFC3339) + `
-active_team: 10x-dev-pack
+active_rite: 10x-dev-pack
 current_phase: implementation
 ---
 
@@ -1792,7 +1834,7 @@ status: ACTIVE
 initiative: Test Phase Status
 complexity: MODULE
 created_at: ` + createdAt.Format(time.RFC3339) + `
-active_team: 10x-dev-pack
+active_rite: 10x-dev-pack
 current_phase: ` + tc.phase + `
 ---
 
@@ -1855,7 +1897,7 @@ status: ACTIVE
 initiative: Test History Limit
 complexity: MODULE
 created_at: ` + createdAt.Format(time.RFC3339) + `
-active_team: 10x-dev-pack
+active_rite: 10x-dev-pack
 current_phase: validation
 ---
 
@@ -1931,7 +1973,7 @@ status: ACTIVE
 initiative: Test Phase Transitions
 complexity: MODULE
 created_at: ` + createdAt.Format(time.RFC3339) + `
-active_team: 10x-dev-pack
+active_rite: 10x-dev-pack
 current_phase: implementation
 ---
 
@@ -2038,7 +2080,7 @@ status: ACTIVE
 initiative: Test Explicit Session ID
 complexity: MODULE
 created_at: ` + createdAt.Format(time.RFC3339) + `
-active_team: 10x-dev-pack
+active_rite: 10x-dev-pack
 current_phase: design
 ---
 
@@ -2119,7 +2161,7 @@ status: COMPLETED
 initiative: Test Execute Completed
 complexity: MODULE
 created_at: ` + createdAt.Format(time.RFC3339) + `
-active_team: 10x-dev-pack
+active_rite: 10x-dev-pack
 current_phase: validation
 ---
 

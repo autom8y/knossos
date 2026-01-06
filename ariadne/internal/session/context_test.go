@@ -14,7 +14,7 @@ status: "ACTIVE"
 created_at: "2026-01-04T16:04:14Z"
 initiative: "Test Initiative"
 complexity: "MODULE"
-active_team: "10x-dev-pack"
+active_rite: "10x-dev-pack"
 current_phase: "design"
 ---
 
@@ -45,8 +45,8 @@ current_phase: "design"
 	if ctx.Complexity != "MODULE" {
 		t.Errorf("Complexity = %q, want %q", ctx.Complexity, "MODULE")
 	}
-	if ctx.ActiveTeam != "10x-dev-pack" {
-		t.Errorf("ActiveTeam = %q, want %q", ctx.ActiveTeam, "10x-dev-pack")
+	if ctx.ActiveRite != "10x-dev-pack" {
+		t.Errorf("ActiveTeam = %q, want %q", ctx.ActiveRite, "10x-dev-pack")
 	}
 	if ctx.CurrentPhase != "design" {
 		t.Errorf("CurrentPhase = %q, want %q", ctx.CurrentPhase, "design")
@@ -61,7 +61,7 @@ status: "PARKED"
 created_at: "2026-01-04T16:04:14Z"
 initiative: "Test"
 complexity: "PATCH"
-active_team: "none"
+active_rite: "none"
 current_phase: "requirements"
 parked_at: "2026-01-04T18:00:00Z"
 parked_reason: "End of day"
@@ -116,7 +116,7 @@ func TestContext_Serialize(t *testing.T) {
 		CreatedAt:     now,
 		Initiative:    "Test Initiative",
 		Complexity:    "MODULE",
-		ActiveTeam:    "test-pack",
+		ActiveRite:    "test-pack",
 		CurrentPhase:  "requirements",
 		Body:          "\n# Test\n",
 	}
@@ -156,7 +156,7 @@ func TestContext_RoundTrip(t *testing.T) {
 		CreatedAt:     now,
 		Initiative:    "Round Trip Test",
 		Complexity:    "SYSTEM",
-		ActiveTeam:    "test-pack",
+		ActiveRite:    "test-pack",
 		CurrentPhase:  "design",
 		Body:          "\n# Test Body\n",
 	}
@@ -207,8 +207,8 @@ func TestNewContext(t *testing.T) {
 	if ctx.Complexity != "MODULE" {
 		t.Errorf("Complexity = %q, want %q", ctx.Complexity, "MODULE")
 	}
-	if ctx.ActiveTeam != "10x-dev-pack" {
-		t.Errorf("ActiveTeam = %q, want %q", ctx.ActiveTeam, "10x-dev-pack")
+	if ctx.ActiveRite != "10x-dev-pack" {
+		t.Errorf("ActiveTeam = %q, want %q", ctx.ActiveRite, "10x-dev-pack")
 	}
 	if ctx.CurrentPhase != "requirements" {
 		t.Errorf("CurrentPhase = %q, want %q", ctx.CurrentPhase, "requirements")
@@ -229,7 +229,7 @@ func TestContext_Validate(t *testing.T) {
 		Status:       Status("INVALID"),
 		Initiative:   "Test",
 		Complexity:   "MODULE",
-		ActiveTeam:   "test",
+		ActiveRite:   "test",
 		CurrentPhase: "design",
 	}
 	issues = invalid.Validate()

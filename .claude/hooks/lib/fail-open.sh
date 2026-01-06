@@ -127,9 +127,9 @@ build_fail_open_context() {
     echo "$json"
 }
 
-# Log state-mate bypass events to audit trail
+# Log Moirai bypass events to audit trail
 #
-# Per ADR-0010 Section 5: When state-mate agent is allowed to bypass
+# Per ADR-0010 Section 5: When Moirai agent is allowed to bypass
 # the session-write-guard, we log the bypass for audit purposes.
 #
 # Arguments:
@@ -141,11 +141,11 @@ build_fail_open_context() {
 # Schema:
 # {
 #   "timestamp": "2026-01-05T10:00:00Z",
-#   "event": "state-mate-bypass",
+#   "event": "moirai-bypass",
 #   "hook": "session-write-guard.sh",
 #   "bypass_mechanism": "agent_name",
 #   "file_path": ".claude/sessions/session-xxx/SESSION_CONTEXT.md",
-#   "context": {"agent_name": "state-mate", "tool_name": "Edit"}
+#   "context": {"agent_name": "moirai", "tool_name": "Edit"}
 # }
 #
 # Returns: 0 always (logging must never crash)
@@ -178,16 +178,16 @@ log_bypass() {
         --arg mechanism "$bypass_mechanism" \
         --arg path "$file_path" \
         --argjson ctx "$context" \
-        '{timestamp: $ts, event: "state-mate-bypass", hook: $hook, bypass_mechanism: $mechanism, file_path: $path, context: $ctx}' 2>/dev/null)
+        '{timestamp: $ts, event: "moirai-bypass", hook: $hook, bypass_mechanism: $mechanism, file_path: $path, context: $ctx}' 2>/dev/null)
 
     # Fallback if jq fails
     if [[ -z "$json_line" ]]; then
         local escaped_path
         escaped_path=$(printf '%s' "$file_path" | sed 's/"/\\"/g; s/\\/\\\\/g')
-        json_line="{\"timestamp\":\"$timestamp\",\"event\":\"state-mate-bypass\",\"hook\":\"$hook\",\"bypass_mechanism\":\"$bypass_mechanism\",\"file_path\":\"$escaped_path\",\"context\":$context}"
+        json_line="{\"timestamp\":\"$timestamp\",\"event\":\"moirai-bypass\",\"hook\":\"$hook\",\"bypass_mechanism\":\"$bypass_mechanism\",\"file_path\":\"$escaped_path\",\"context\":$context}"
     fi
 
-    # Append to state-mate bypass audit log
+    # Append to Moirai bypass audit log (legacy log name kept for continuity)
     echo "$json_line" >> "$AUDIT_DIR/state-mate-bypass.jsonl" 2>/dev/null || true
 
     return 0

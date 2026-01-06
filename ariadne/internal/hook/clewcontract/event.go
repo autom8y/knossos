@@ -1,6 +1,6 @@
 // Package threadcontract provides Thread Contract v2 event recording for Claude Code hooks.
 // "Theseus has amnesia; the Thread remembers" - events.jsonl provides the factual route through decisions.
-package threadcontract
+package clewcontract
 
 import (
 	"fmt"
@@ -24,6 +24,8 @@ const (
 	EventTypeSessionEnd      EventType = "session_end"
 	EventTypeArtifactCreated EventType = "artifact_created"
 	EventTypeError           EventType = "error"
+	EventTypeHandoffPrepared EventType = "handoff_prepared"
+	EventTypeHandoffExecuted EventType = "handoff_executed"
 )
 
 // ArtifactType represents the type of artifact created during a session.
@@ -231,46 +233,50 @@ func NewSailsGeneratedEvent(sessionID string, data SailsGeneratedData) Event {
 	}
 }
 
-// NewTaskStartEvent creates an event for Task tool delegation to a sub-agent.
-// This marks the beginning of a delegated task for handoff protocol tracking.
+// NewTaskStartEvent creates a task_start event for cognitive budget tracking.
+// This marks the beginning of a task within a workflow phase.
 //
 // Parameters:
-//   - agentName: The specialist agent receiving the task (e.g., "architect", "qa-adversary")
-//   - taskDescription: The task description passed to the agent
-//   - parentSessionID: The session ID of the parent/orchestrator session
-func NewTaskStartEvent(agentName, taskDescription, parentSessionID string) Event {
+//   - taskID: Unique task identifier (e.g., "task-001")
+//   - agent: The agent executing the task
+//   - phase: The workflow phase (e.g., "design", "implementation", "validation")
+//   - sessionID: The session ID context for the task
+func NewTaskStartEvent(taskID, agent, phase, sessionID string) Event {
 	return Event{
 		Timestamp: timestamp(),
 		Type:      EventTypeTaskStart,
-		Summary:   "Task delegated to " + agentName,
+		Summary:   fmt.Sprintf("Task started: %s by %s in %s phase", taskID, agent, phase),
 		Meta: map[string]interface{}{
-			"agent":          agentName,
-			"description":    taskDescription,
-			"parent_session": parentSessionID,
+			"task_id":    taskID,
+			"agent":      agent,
+			"phase":      phase,
+			"session_id": sessionID,
 		},
 	}
 }
 
-// NewTaskEndEvent creates an event for Task tool completion.
-// This marks the end of a delegated task and captures the throughline for handoff protocol.
+// NewTaskEndEvent creates a task_end event with outcome for cognitive budget tracking.
+// This marks the end of a task and captures completion metrics.
 //
 // Parameters:
-//   - agentName: The specialist agent that completed the task
-//   - status: Completion status (e.g., "success", "failed", "blocked")
-//   - throughline: The extracted throughline summary from the task result
-//   - artifacts: List of artifact paths produced by the task
+//   - taskID: Unique task identifier matching the task_start event
+//   - agent: The agent that executed the task
+//   - outcome: Task completion outcome (e.g., "success", "failed", "blocked")
+//   - sessionID: The session ID context for the task
 //   - durationMs: Task execution duration in milliseconds
-func NewTaskEndEvent(agentName, status, throughline string, artifacts []string, durationMs int64) Event {
+//   - artifacts: List of artifact paths produced by the task
+func NewTaskEndEvent(taskID, agent, outcome, sessionID string, durationMs int64, artifacts []string) Event {
 	return Event{
 		Timestamp: timestamp(),
 		Type:      EventTypeTaskEnd,
-		Summary:   "Task completed by " + agentName + ": " + status,
+		Summary:   fmt.Sprintf("Task ended: %s by %s - %s (%dms)", taskID, agent, outcome, durationMs),
 		Meta: map[string]interface{}{
-			"agent":       agentName,
-			"status":      status,
-			"throughline": throughline,
-			"artifacts":   artifacts,
+			"task_id":     taskID,
+			"agent":       agent,
+			"outcome":     outcome,
+			"session_id":  sessionID,
 			"duration_ms": durationMs,
+			"artifacts":   artifacts,
 		},
 	}
 }
@@ -377,6 +383,48 @@ func NewErrorEvent(errorCode, message, context string, recoverable bool, suggest
 			"context":          context,
 			"recoverable":      recoverable,
 			"suggested_action": suggestedAction,
+		},
+	}
+}
+
+// NewHandoffPreparedEvent creates an event for handoff preparation.
+// This marks the preparation phase of agent handoff per Knossos doctrine section VI.
+//
+// Parameters:
+//   - fromAgent: The agent transferring work
+//   - toAgent: The agent receiving work
+//   - sessionID: The session ID context for the handoff
+func NewHandoffPreparedEvent(fromAgent, toAgent, sessionID string) Event {
+	return Event{
+		Timestamp: timestamp(),
+		Type:      EventTypeHandoffPrepared,
+		Summary:   fmt.Sprintf("Handoff prepared: %s -> %s", fromAgent, toAgent),
+		Meta: map[string]interface{}{
+			"from_agent": fromAgent,
+			"to_agent":   toAgent,
+			"session_id": sessionID,
+		},
+	}
+}
+
+// NewHandoffExecutedEvent creates an event for handoff execution.
+// This marks the execution phase of agent handoff per Knossos doctrine section VI.
+//
+// Parameters:
+//   - fromAgent: The agent that transferred work
+//   - toAgent: The agent that received work
+//   - sessionID: The session ID context for the handoff
+//   - artifacts: List of artifact paths transferred during handoff
+func NewHandoffExecutedEvent(fromAgent, toAgent, sessionID string, artifacts []string) Event {
+	return Event{
+		Timestamp: timestamp(),
+		Type:      EventTypeHandoffExecuted,
+		Summary:   fmt.Sprintf("Handoff executed: %s -> %s (%d artifacts)", fromAgent, toAgent, len(artifacts)),
+		Meta: map[string]interface{}{
+			"from_agent": fromAgent,
+			"to_agent":   toAgent,
+			"session_id": sessionID,
+			"artifacts":  artifacts,
 		},
 	}
 }

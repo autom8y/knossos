@@ -56,7 +56,7 @@ allowing parallel work without conflicts.
 
 Examples:
   ari worktree create feature-auth
-  ari worktree create feature-auth --team=10x-dev-pack
+  ari worktree create feature-auth --rite=10x-dev-pack
   ari worktree create bugfix --from=develop
   ari worktree create experiment --complexity=PATCH`,
 		Args: cobra.ExactArgs(1),
@@ -65,9 +65,12 @@ Examples:
 		},
 	}
 
-	cmd.Flags().StringVar(&opts.team, "team", "", "Team pack to activate in worktree")
+	cmd.Flags().StringVar(&opts.team, "rite", "", "Rite (practice bundle) to activate in worktree")
+	cmd.Flags().StringVar(&opts.team, "team", "", "Deprecated: use --rite instead")
 	cmd.Flags().StringVar(&opts.fromRef, "from", "", "Git ref to create from (default: HEAD)")
 	cmd.Flags().StringVar(&opts.complexity, "complexity", "MODULE", "Session complexity: PATCH, MODULE, SYSTEM, INITIATIVE, MIGRATION")
+
+	cmd.Flags().MarkDeprecated("team", "use --rite instead")
 
 	return cmd
 }

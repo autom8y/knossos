@@ -240,7 +240,7 @@ state-mate: Validates and applies transition
 | Session creation fails (lock timeout) | Router outputs CONSULTATION_REQUEST with manual guidance |
 | Initiative name with special characters | Properly escaped in Task invocation |
 | No orchestrator in team pack | Router exits, preflight handles session creation |
-| ACTIVE_TEAM not set | Creates cross-cutting session |
+| ACTIVE_RITE not set | Creates cross-cutting session |
 | Parallel `/start` in multiple terminals | Locking prevents race conditions |
 
 ---

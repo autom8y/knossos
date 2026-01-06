@@ -23,7 +23,7 @@ The roster ecosystem determines execution mode via `execution_mode()` in `sessio
 3. SESSION_CONTEXT.md missing -> "native"
 4. status == PARKED -> "cross-cutting"
 5. status == ARCHIVED -> "native"
-6. ACTIVE_TEAM == none/null -> "cross-cutting"
+6. ACTIVE_RITE == none/null -> "cross-cutting"
 7. team pack directory missing -> "cross-cutting"
 8. All conditions pass -> "orchestrated"
 ```
@@ -38,7 +38,7 @@ The current 3-mode model has semantic entanglement issues identified in the Gap 
 
 3. **Naming confusion**: "Cross-cutting" implies work spanning teams, but the mode actually means "session tracking without delegation." The name obscures the underlying model.
 
-4. **Hidden constraint**: "Team Active + No Session" is silently invalid. The function returns `native` if no session exists, even if ACTIVE_TEAM is set. This constraint is not explicit in the model.
+4. **Hidden constraint**: "Team Active + No Session" is silently invalid. The function returns `native` if no session exists, even if ACTIVE_RITE is set. This constraint is not explicit in the model.
 
 ### Gap Analysis Reference
 
@@ -76,7 +76,7 @@ Full analysis available at: `/Users/tomtenuta/Code/roster/docs/analysis/GAP-exec
   - Returns `false` otherwise
 
 - **FR-1.2**: Add `has_active_team()` function to `session-manager.sh` returning boolean (`true`/`false` exit code).
-  - Returns `true` when: Session is tracked AND status is ACTIVE AND ACTIVE_TEAM is set (not "none" or empty) AND team pack directory exists
+  - Returns `true` when: Session is tracked AND status is ACTIVE AND ACTIVE_RITE is set (not "none" or empty) AND team pack directory exists
   - Returns `false` otherwise
   - Note: PARKED sessions return `false` for `has_active_team()` because delegation is suspended
 
@@ -120,7 +120,7 @@ Full analysis available at: `/Users/tomtenuta/Code/roster/docs/analysis/GAP-exec
 
 - **FR-3.2**: Attempting to activate a team without a session should produce an error with guidance: "Cannot activate team without a session. Use /start first."
 
-- **FR-3.3**: If ACTIVE_TEAM exists but no session is tracked, `has_active_team()` returns `false` (the orphaned ACTIVE_TEAM is ignored).
+- **FR-3.3**: If ACTIVE_RITE exists but no session is tracked, `has_active_team()` returns `false` (the orphaned ACTIVE_RITE is ignored).
 
 #### FR-4: PARKED as Lifecycle Modifier
 
@@ -234,7 +234,7 @@ has_active_team() {
     [[ "$status" != "ACTIVE" ]] && return 1
 
     local active_team
-    active_team=$(cat ".claude/ACTIVE_TEAM" 2>/dev/null || echo "none")
+    active_team=$(cat ".claude/ACTIVE_RITE" 2>/dev/null || echo "none")
     [[ -z "$active_team" || "$active_team" == "none" || "$active_team" == "null" ]] && return 1
 
     local team_pack_dir="${ROSTER_HOME:-$HOME/.config/roster}/teams/$active_team"
@@ -323,7 +323,7 @@ After primitives are stable and hooks have migrated to use them (optional):
 
 | Case | Expected Behavior |
 |------|-------------------|
-| ACTIVE_TEAM exists but no session | `has_active_team()` returns false, orphaned file ignored |
+| ACTIVE_RITE exists but no session | `has_active_team()` returns false, orphaned file ignored |
 | Session ACTIVE, team file missing | `has_active_team()` returns false, `execution_mode()` returns cross-cutting |
 | Session PARKED, team configured | `has_active_team()` returns false, `execution_mode()` returns cross-cutting |
 | Session resumed, team still configured | `has_active_team()` returns true, `execution_mode()` returns orchestrated |

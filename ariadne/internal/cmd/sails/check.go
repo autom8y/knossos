@@ -110,27 +110,29 @@ func formatGateResult(result *sails.GateResult) interface{} {
 	// For text output, this will be formatted by the printer
 
 	return &gateOutput{
-		Pass:          result.Pass,
-		Color:         string(result.Color),
-		SessionID:     result.SessionID,
-		Reasons:       result.Reasons,
-		FilePath:      result.FilePath,
-		ComputedBase:  string(result.ComputedBase),
-		OpenQuestions: result.OpenQuestions,
-		Summary:       buildSummary(result),
+		Pass:               result.Pass,
+		Color:              string(result.Color),
+		SessionID:          result.SessionID,
+		Reasons:            result.Reasons,
+		FilePath:           result.FilePath,
+		ComputedBase:       string(result.ComputedBase),
+		OpenQuestions:      result.OpenQuestions,
+		ContractViolations: result.ContractViolations,
+		Summary:            buildSummary(result),
 	}
 }
 
 // gateOutput is the structured output for the check command.
 type gateOutput struct {
-	Pass          bool     `json:"pass" yaml:"pass"`
-	Color         string   `json:"color" yaml:"color"`
-	SessionID     string   `json:"session_id" yaml:"session_id"`
-	Reasons       []string `json:"reasons" yaml:"reasons"`
-	FilePath      string   `json:"file_path" yaml:"file_path"`
-	ComputedBase  string   `json:"computed_base,omitempty" yaml:"computed_base,omitempty"`
-	OpenQuestions []string `json:"open_questions,omitempty" yaml:"open_questions,omitempty"`
-	Summary       string   `json:"summary" yaml:"summary"`
+	Pass               bool                       `json:"pass" yaml:"pass"`
+	Color              string                     `json:"color" yaml:"color"`
+	SessionID          string                     `json:"session_id" yaml:"session_id"`
+	Reasons            []string                   `json:"reasons" yaml:"reasons"`
+	FilePath           string                     `json:"file_path" yaml:"file_path"`
+	ComputedBase       string                     `json:"computed_base,omitempty" yaml:"computed_base,omitempty"`
+	OpenQuestions      []string                   `json:"open_questions,omitempty" yaml:"open_questions,omitempty"`
+	ContractViolations []sails.ContractViolation  `json:"contract_violations,omitempty" yaml:"contract_violations,omitempty"`
+	Summary            string                     `json:"summary" yaml:"summary"`
 }
 
 // String returns the text representation of the gate output.
@@ -173,6 +175,18 @@ func (g *gateOutput) String() string {
 		b.WriteString("\nOpen Questions:\n")
 		for _, q := range g.OpenQuestions {
 			b.WriteString(fmt.Sprintf("  - %s\n", q))
+		}
+	}
+
+	// Contract violations (if any)
+	if len(g.ContractViolations) > 0 {
+		b.WriteString("\nThread Contract Violations:\n")
+		for _, v := range g.ContractViolations {
+			severityLabel := "ERROR"
+			if v.Severity == "warning" {
+				severityLabel = "WARN"
+			}
+			b.WriteString(fmt.Sprintf("  [%s] %s: %s\n", severityLabel, v.Type, v.Description))
 		}
 	}
 

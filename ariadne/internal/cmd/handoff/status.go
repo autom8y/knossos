@@ -12,7 +12,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/autom8y/ariadne/internal/errors"
-	"github.com/autom8y/ariadne/internal/hook/threadcontract"
+	"github.com/autom8y/ariadne/internal/hook/clewcontract"
 	"github.com/autom8y/ariadne/internal/output"
 	"github.com/autom8y/ariadne/internal/session"
 )
@@ -90,7 +90,7 @@ func runStatus(ctx *cmdContext) error {
 		SessionStatus: string(sessCtx.Status),
 		CurrentPhase:  sessCtx.CurrentPhase,
 		CurrentAgent:  currentAgent,
-		ActiveTeam:    sessCtx.ActiveTeam,
+		ActiveTeam:    sessCtx.ActiveRite,
 		HandoffCount:  handoffCount,
 		LastHandoff:   lastHandoff,
 		Initiative:    sessCtx.Initiative,
@@ -194,7 +194,7 @@ func determineCurrentAgent(events []GenericEvent, currentPhase string) string {
 	// Look for most recent task_start event
 	for i := len(events) - 1; i >= 0; i-- {
 		e := events[i]
-		if e.Type == string(threadcontract.EventTypeTaskStart) {
+		if e.Type == string(clewcontract.EventTypeTaskStart) {
 			if agent, ok := e.Meta["agent"].(string); ok {
 				return agent
 			}
@@ -253,7 +253,7 @@ func findLastHandoff(events []GenericEvent) *HandoffSummary {
 		}
 
 		// Check for task_end followed by task_start (implicit handoff)
-		if e.Type == string(threadcontract.EventTypeTaskEnd) {
+		if e.Type == string(clewcontract.EventTypeTaskEnd) {
 			summary := &HandoffSummary{
 				Timestamp: e.GetTimestamp(),
 			}
@@ -273,7 +273,7 @@ func countHandoffs(events []GenericEvent) int {
 	count := 0
 	for _, e := range events {
 		if e.Event == "HANDOFF_EXECUTED" ||
-			e.Type == string(threadcontract.EventTypeTaskEnd) {
+			e.Type == string(clewcontract.EventTypeTaskEnd) {
 			count++
 		}
 	}

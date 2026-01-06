@@ -17,15 +17,18 @@ func newValidateCmd(ctx *cmdContext) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "validate",
-		Short: "Validate team pack integrity",
-		Long:  `Validates team pack structure and configuration integrity.`,
+		Short: "Validate rite integrity",
+		Long:  `Validates rite (practice bundle) structure and configuration integrity.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runValidate(ctx, opts)
 		},
 	}
 
-	cmd.Flags().StringVarP(&opts.teamName, "team", "t", "", "Team to validate (default: active)")
+	cmd.Flags().StringVarP(&opts.teamName, "rite", "r", "", "Rite to validate (default: active)")
+	cmd.Flags().StringVarP(&opts.teamName, "team", "t", "", "Deprecated: use --rite instead")
 	cmd.Flags().BoolVar(&opts.fix, "fix", false, "Attempt automatic repairs")
+
+	cmd.Flags().MarkDeprecated("team", "use --rite instead")
 
 	return cmd
 }

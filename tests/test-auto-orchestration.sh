@@ -114,7 +114,7 @@ setup_test_project() {
     cp "$SCRIPT_DIR/.claude/hooks/lib/logging.sh" .claude/hooks/lib/
 
     # Setup orchestrator in active team
-    echo "ecosystem-pack" > .claude/ACTIVE_TEAM
+    echo "ecosystem-pack" > .claude/ACTIVE_RITE
     echo "# Orchestrator" > .claude/agents/orchestrator.md
 
     # Set CLAUDE_PROJECT_DIR

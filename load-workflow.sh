@@ -6,7 +6,7 @@
 set -e
 
 ROSTER_HOME="${ROSTER_HOME:-$HOME/Code/roster}"
-TEAM="${1:-$(cat .claude/ACTIVE_TEAM 2>/dev/null)}"
+TEAM="${1:-$(cat .claude/ACTIVE_RITE 2>/dev/null)}"
 
 if [ -z "$TEAM" ]; then
   echo "Error: No team specified and no ACTIVE_TEAM found" >&2

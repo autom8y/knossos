@@ -10,11 +10,11 @@ What NOT to put in CLAUDE.md. Each anti-pattern includes the violation, why it's
 |---|--------------|-----------|------------------|
 | 1 | Session state in CLAUDE.md | Changes every session, creates maintenance burden | SESSION_CONTEXT |
 | 2 | Dynamic git references | Stale after any git operation | Hook injection |
-| 3 | Duplicating roster state | Creates two sources of truth, can desync | ACTIVE_TEAM + agents/ |
+| 3 | Duplicating roster state | Creates two sources of truth, can desync | ACTIVE_RITE + agents/ |
 | 4 | Personal preferences in project | User-specific, causes team conflicts | ~/.claude/CLAUDE.md |
 | 5 | Hardcoded dynamic values | Sprint/velocity/blockers become stale quickly | Project management tools |
 | 6 | Session history | CLAUDE.md is not a changelog | .claude/sessions/ |
-| 7 | Roster team in satellites | Satellite has its own team | Regenerate from satellite's ACTIVE_TEAM |
+| 7 | Roster team in satellites | Satellite has its own team | Regenerate from satellite's ACTIVE_RITE |
 | 8 | "Last updated" timestamps | Immediately stale, git provides this | Git history |
 | 9 | Task lists/checkboxes | Session-scoped, better tools exist | TodoWrite, issue tracker |
 | 10 | Environment configuration | Security risk, varies by machine | .env files, secret managers |
@@ -48,9 +48,9 @@ What NOT to put in CLAUDE.md. Each anti-pattern includes the violation, why it's
 
 **Violation**: `Active Team: doc-team-pack, Swapped: 2024-12-25`
 
-**Why wrong**: Duplicates ACTIVE_TEAM file, dates become stale, creates two sources of truth.
+**Why wrong**: Duplicates ACTIVE_RITE file, dates become stale, creates two sources of truth.
 
-**Correct**: Team sections regenerated from ACTIVE_TEAM + agents/ directory.
+**Correct**: Team sections regenerated from ACTIVE_RITE + agents/ directory.
 
 ---
 
@@ -90,7 +90,7 @@ What NOT to put in CLAUDE.md. Each anti-pattern includes the violation, why it's
 
 **Why wrong**: Satellite has its own team, roster's team is irrelevant, creates incorrect routing.
 
-**Correct**: Team sections are PRESERVE or REGENERATE from satellite's own ACTIVE_TEAM, never SYNC.
+**Correct**: Team sections are PRESERVE or REGENERATE from satellite's own ACTIVE_RITE, never SYNC.
 
 ---
 
@@ -150,7 +150,7 @@ Rules:
 | "Currently working on X" | Session state | SESSION_CONTEXT |
 | "Last updated: DATE" | Stale metadata | Git history |
 | "Git branch: X" | Changes constantly | Hook output |
-| Roster team in satellite | Wrong team source | Regenerate from satellite's ACTIVE_TEAM |
+| Roster team in satellite | Wrong team source | Regenerate from satellite's ACTIVE_RITE |
 | Personal preferences | Wrong scope | ~/.claude/CLAUDE.md |
 | Sprint/initiative details | Too dynamic | PRD, session files |
 | Task checkboxes | Session-scoped | TodoWrite, issue tracker |

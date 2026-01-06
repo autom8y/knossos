@@ -648,9 +648,9 @@ fsm_create_session() {
     local complexity="$2"
     local team="${3:-}"
 
-    # If team not specified, check ACTIVE_TEAM file
+    # If team not specified, check ACTIVE_RITE file
     if [[ -z "$team" ]]; then
-        team=$(cat ".claude/ACTIVE_TEAM" 2>/dev/null || echo "")
+        team=$(cat ".claude/ACTIVE_RITE" 2>/dev/null || echo "")
     fi
 
     # Normalize empty/none to explicit marker for cross-cutting

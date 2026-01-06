@@ -90,11 +90,11 @@ func (m *Manager) Create(opts CreateOptions) (*Worktree, error) {
 		return nil, err
 	}
 
-	// Get team from flag or detect from ACTIVE_TEAM
+	// Get team from flag or detect from ACTIVE_RITE
 	team := opts.Team
 	if team == "" {
-		activeTeamPath := filepath.Join(m.rootDir, ".claude", "ACTIVE_TEAM")
-		data, err := os.ReadFile(activeTeamPath)
+		activeRitePath := filepath.Join(m.rootDir, ".claude", "ACTIVE_RITE")
+		data, err := os.ReadFile(activeRitePath)
 		if err == nil {
 			team = strings.TrimSpace(string(data))
 		}

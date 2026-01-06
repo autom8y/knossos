@@ -60,7 +60,7 @@ preserving team, complexity, and other metadata settings.
 Examples:
   ari worktree clone feature-auth feature-auth-v2
   ari worktree clone wt-20260104-143052-a1b2 experiment
-  ari worktree clone feature-auth branch-b --team=10x-dev-pack
+  ari worktree clone feature-auth branch-b --rite=10x-dev-pack
   ari worktree clone feature-auth backup --copy-session`,
 		Args: cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -68,8 +68,11 @@ Examples:
 		},
 	}
 
-	cmd.Flags().StringVar(&opts.team, "team", "", "Override team pack (default: copy from source)")
+	cmd.Flags().StringVar(&opts.team, "rite", "", "Override rite (practice bundle) (default: copy from source)")
+	cmd.Flags().StringVar(&opts.team, "team", "", "Deprecated: use --rite instead")
 	cmd.Flags().BoolVar(&opts.copySession, "copy-session", false, "Copy session context from source")
+
+	cmd.Flags().MarkDeprecated("team", "use --rite instead")
 
 	return cmd
 }

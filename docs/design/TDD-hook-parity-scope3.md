@@ -209,7 +209,7 @@ output_condensed_context() {
 
 | | |
 |---|---|
-| **Team** | $ACTIVE_TEAM |
+| **Team** | $ACTIVE_RITE |
 | **Session** | $session_display |
 | **Initiative** | $initiative_display |
 | **Git** | $GIT_DISPLAY |

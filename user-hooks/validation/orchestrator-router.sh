@@ -29,7 +29,7 @@ fi
 # Extract command
 COMMAND=$(echo "$USER_PROMPT" | grep -oE '^/(start|sprint|task)' | tr -d '/')
 
-# Check if orchestrator is present in active team
+# Check if orchestrator is present in active rite
 if [[ ! -f "$PROJECT_DIR/.claude/agents/orchestrator.md" ]]; then
     # No orchestrator = direct execution is valid
     log_end 0 2>/dev/null || true
@@ -50,8 +50,8 @@ fi
 # Clean up initiative (remove quotes if present)
 INITIATIVE=$(echo "$INITIATIVE" | sed 's/^"//;s/"$//' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
 
-# Get active team
-ACTIVE_TEAM=$(cat ".claude/ACTIVE_TEAM" 2>/dev/null || echo "none")
+# Get active rite (with backward compatibility fallback)
+ACTIVE_RITE=$(cat ".claude/ACTIVE_RITE" 2>/dev/null || cat ".claude/ACTIVE_TEAM" 2>/dev/null || echo "none")
 
 # Check for existing session
 SESSION_ID=$(get_session_id 2>/dev/null || echo "")
@@ -60,7 +60,7 @@ SESSION_CREATED="false"
 # For /start command, create session if none exists
 if [[ "$COMMAND" == "start" && -z "$SESSION_ID" ]]; then
     # Create session via session-manager.sh
-    SESSION_RESULT=$("$HOOKS_LIB/session-manager.sh" create "$INITIATIVE" "$COMPLEXITY" "$ACTIVE_TEAM" 2>&1) || true
+    SESSION_RESULT=$("$HOOKS_LIB/session-manager.sh" create "$INITIATIVE" "$COMPLEXITY" "$ACTIVE_RITE" 2>&1) || true
 
     if [[ "$SESSION_RESULT" == *'"success": true'* ]]; then
         SESSION_ID=$(echo "$SESSION_RESULT" | grep -o '"session_id": *"[^"]*"' | cut -d'"' -f4)
@@ -119,7 +119,7 @@ Session Context:
 - Session Path: $SESSION_PATH
 - Initiative: $INITIATIVE_ESCAPED
 - Complexity: $COMPLEXITY
-- Team: $ACTIVE_TEAM
+- Team: $ACTIVE_RITE
 - Request Type: $REQUEST_TYPE")
 \`\`\`
 

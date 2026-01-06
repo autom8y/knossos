@@ -27,7 +27,7 @@ Starting work?
 |-----------|----------|---------|-------------|
 | `initiative-name` | No* | Prompted | Name of feature/task |
 | `--complexity` | No* | Prompted | SCRIPT \| MODULE \| SERVICE \| PLATFORM |
-| `--team` | No | ACTIVE_TEAM | Team pack for session |
+| `--team` | No | ACTIVE_RITE | Team pack for session |
 | `--no-team` | No | false | Create cross-cutting session (no orchestration) |
 
 *If not provided, user will be prompted interactively.
@@ -49,16 +49,47 @@ Starting work?
 
 **Actions**:
 1. Gather parameters (initiative, complexity, team)
-2. Create SESSION_CONTEXT with initial metadata
+2. Delegate to Moirai (Clotho - the Spinner) to create session
 3. Invoke Requirements Analyst → PRD
 4. Invoke Architect → TDD + ADRs (if MODULE+)
-5. Update SESSION_CONTEXT with artifacts
+5. Delegate to Moirai to update session with artifacts
 6. Display confirmation with next steps
 
-**Creates**:
+**Creates** (via Moirai):
 - `.claude/sessions/{session_id}/SESSION_CONTEXT.md`
 - `/docs/requirements/PRD-{slug}.md`
 - `/docs/design/TDD-{slug}.md` (if MODULE+)
+
+## State Mutation
+
+All session state mutations are delegated to the **Moirai** (the Fates). Direct writes to `SESSION_CONTEXT.md` are prohibited.
+
+**Session Creation** (Clotho - the Spinner):
+```
+Task(moirai, "create_session initiative='...' complexity=... rite=...
+
+Session Context:
+- New session requested
+- Initiative: {user-provided}
+- Complexity: {determined}
+- Team: {active-rite}")
+```
+
+**Session Updates** (Lachesis - the Measurer):
+```
+Task(moirai, "update_session session_id=... artifacts=[{type: PRD, path: ...}]
+
+Session Context:
+- Session ID: {session-id}
+- Artifacts produced: PRD, TDD
+- Phase transition: requirements → design")
+```
+
+The Moirai enforce:
+- Schema validation
+- Lifecycle transitions
+- Audit trails
+- Atomic state changes
 
 ## Anti-Patterns
 

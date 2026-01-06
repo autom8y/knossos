@@ -396,7 +396,7 @@ Related: /handoff, /wrap --skip-checks
 
 ### Team Mismatch
 
-**When**: /resume but ACTIVE_TEAM differs from session team
+**When**: /resume but ACTIVE_RITE differs from session team
 
 ```
 ⚠ Team Mismatch

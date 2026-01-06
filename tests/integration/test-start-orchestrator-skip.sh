@@ -32,7 +32,7 @@ echo "--------------------------------------------------------------------------
 echo "# Orchestrator" > .claude/agents/orchestrator.md
 
 # Create ACTIVE_TEAM
-echo "ecosystem-pack" > .claude/ACTIVE_TEAM
+echo "ecosystem-pack" > .claude/ACTIVE_RITE
 
 # Create session via session-manager
 SESSION_RESULT=$(.claude/hooks/lib/session-manager.sh create "Test Initiative" "MODULE" "ecosystem-pack" 2>&1)

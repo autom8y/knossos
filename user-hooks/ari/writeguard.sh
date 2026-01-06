@@ -19,8 +19,8 @@ if [[ "$TOOL_INPUT" != *"_CONTEXT.md"* ]]; then
     exit 0
 fi
 
-# Check 4: Allow bypass for state-mate operations
-[[ "${STATE_MATE_BYPASS:-}" == "true" ]] && exit 0
+# Check 4: Allow bypass for Moirai operations (backward compatible with STATE_MATE_BYPASS)
+[[ "${MOIRAI_BYPASS:-}" == "true" ]] || [[ "${STATE_MATE_BYPASS:-}" == "true" ]] && exit 0
 
 # Feature flag (default: Go enabled)
 [[ "${USE_ARI_HOOKS:-1}" != "1" ]] && exit 0

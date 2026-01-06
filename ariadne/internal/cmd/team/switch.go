@@ -16,15 +16,16 @@ type switchOptions struct {
 	promoteAll bool
 	update     bool
 	dryRun     bool
+	noSync     bool
 }
 
 func newSwitchCmd(ctx *cmdContext) *cobra.Command {
 	var opts switchOptions
 
 	cmd := &cobra.Command{
-		Use:   "switch <team-name>",
-		Short: "Switch to a different team",
-		Long:  `Switches the active team pack with atomic operations and orphan handling.`,
+		Use:   "switch <rite-name>",
+		Short: "Switch to a different rite (practice bundle)",
+		Long:  `Switches the active rite with atomic operations and orphan handling.`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runSwitch(ctx, args[0], opts)
@@ -36,6 +37,7 @@ func newSwitchCmd(ctx *cmdContext) *cobra.Command {
 	cmd.Flags().BoolVarP(&opts.promoteAll, "promote-all", "P", false, "Promote orphans to project-level agents")
 	cmd.Flags().BoolVarP(&opts.update, "update", "u", false, "Re-pull agents even if already on target team")
 	cmd.Flags().BoolVar(&opts.dryRun, "dry-run", false, "Preview changes without applying")
+	cmd.Flags().BoolVar(&opts.noSync, "no-sync", false, "Skip CLAUDE.md inscription sync")
 
 	return cmd
 }
@@ -70,6 +72,7 @@ func runSwitch(ctx *cmdContext, teamName string, opts switchOptions) error {
 		PromoteAll: opts.promoteAll,
 		Update:     opts.update,
 		DryRun:     opts.dryRun,
+		NoSync:     opts.noSync,
 	}
 
 	// Handle dry-run specially
@@ -86,18 +89,32 @@ func runSwitch(ctx *cmdContext, teamName string, opts switchOptions) error {
 
 	// Build output
 	out := output.TeamSwitchOutput{
-		Team:            result.Team,
-		PreviousTeam:    result.PreviousTeam,
-		SwitchedAt:      result.SwitchedAt.Format(time.RFC3339),
-		AgentsInstalled: result.AgentsInstalled,
-		ClaudeMDUpdated: result.ClaudeMDUpdated,
-		ManifestPath:    result.ManifestPath,
+		Team:               result.Team,
+		PreviousTeam:       result.PreviousTeam,
+		SwitchedAt:         result.SwitchedAt.Format(time.RFC3339),
+		AgentsInstalled:    result.AgentsInstalled,
+		ClaudeMDUpdated:    result.ClaudeMDUpdated,
+		ManifestPath:       result.ManifestPath,
+		InscriptionSynced:  result.InscriptionSynced,
+		InscriptionVersion: result.InscriptionVersion,
 	}
 
 	if result.OrphansHandled != nil {
 		out.OrphansHandled = &output.OrphanHandleResult{
 			Strategy: result.OrphansHandled.Strategy,
 			Agents:   result.OrphansHandled.Agents,
+		}
+	}
+
+	if len(result.SyncConflicts) > 0 {
+		out.SyncConflicts = make([]output.InscriptionConflictOut, len(result.SyncConflicts))
+		for i, c := range result.SyncConflicts {
+			out.SyncConflicts[i] = output.InscriptionConflictOut{
+				Region:    c.Region,
+				Type:      c.Type,
+				Message:   c.Message,
+				Preserved: c.Preserved,
+			}
 		}
 	}
 

@@ -301,7 +301,7 @@ Skeleton has 38 user-commands; roster has none.
 
 | File | Skeleton | Roster | Action |
 |------|----------|--------|--------|
-| ACTIVE_TEAM | Present | Present | Project-specific |
+| ACTIVE_RITE | Present | Present | Project-specific |
 | ACTIVE_WORKFLOW.yaml | Present | Present | Project-specific |
 | AGENT_MANIFEST.json | Present | Present | Project-specific |
 | CLAUDE.md | Present | Present | Project-specific |

@@ -198,7 +198,7 @@ session_id=$(fsm_create_session "$initiative" "$complexity" "$team")
 cmd_create() {
     local initiative="${1:-unnamed}"
     local complexity="${2:-MODULE}"
-    local team="${3:-$(cat ".claude/ACTIVE_TEAM" 2>/dev/null || echo "none")}"
+    local team="${3:-$(cat ".claude/ACTIVE_RITE" 2>/dev/null || echo "none")}"
 
     local lockfile="$SESSIONS_DIR/.create.lock"
     local lock_timeout=10

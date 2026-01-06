@@ -270,13 +270,13 @@ list_stale_sessions() {
 # =============================================================================
 # This is THE ONLY place for team updates (consolidates 3 locations)
 
-# Atomic team update: sync ACTIVE_TEAM and SESSION_CONTEXT.active_team together
+# Atomic team update: sync ACTIVE_RITE and SESSION_CONTEXT.active_team together
 # Usage: atomic_team_update "new_team_name"
 # Returns: 0 on success, 1 on failure
 atomic_team_update() {
     local new_team="$1"
     local project_dir="${CLAUDE_PROJECT_DIR:-.}"
-    local active_team_file="$project_dir/.claude/ACTIVE_TEAM"
+    local active_team_file="$project_dir/.claude/ACTIVE_RITE"
     local session_dir
     session_dir=$(get_session_dir)
 
@@ -296,7 +296,7 @@ atomic_team_update() {
 
     local success=1
 
-    # Update ACTIVE_TEAM atomically
+    # Update ACTIVE_RITE atomically
     if atomic_write "$active_team_file" "$new_team"; then
         success=0
 
@@ -320,9 +320,9 @@ atomic_team_update() {
 
             # Write updated content atomically
             if ! atomic_write "$session_file" "$temp_content"; then
-                # SESSION_CONTEXT update failed, but ACTIVE_TEAM succeeded
+                # SESSION_CONTEXT update failed, but ACTIVE_RITE succeeded
                 # Log warning but don't fail the operation
-                echo "Warning: ACTIVE_TEAM updated but SESSION_CONTEXT update failed" >&2
+                echo "Warning: ACTIVE_RITE updated but SESSION_CONTEXT update failed" >&2
             fi
         fi
     else

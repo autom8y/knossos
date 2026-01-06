@@ -184,7 +184,7 @@ execution_mode() {
 
     # Session is ACTIVE - check team configuration
     local active_team
-    active_team=$(cat ".claude/ACTIVE_TEAM" 2>/dev/null || echo "none")
+    active_team=$(cat ".claude/ACTIVE_RITE" 2>/dev/null || echo "none")
 
     # Also check team field in session context for cross-cutting sessions
     if [[ "$active_team" == "none" || -z "$active_team" ]]; then
@@ -216,14 +216,14 @@ execution_mode() {
 
 | Test ID | Precondition | Expected Output |
 |---------|--------------|-----------------|
-| `mode_001` | No session file, no ACTIVE_TEAM | `native` |
+| `mode_001` | No session file, no ACTIVE_RITE | `native` |
 | `mode_002` | Session ACTIVE, team=10x-dev-pack, pack exists | `orchestrated` |
 | `mode_003` | Session ACTIVE, team=none | `cross-cutting` |
 | `mode_004` | Session PARKED, team=10x-dev-pack | `cross-cutting` |
 | `mode_005` | Session ACTIVE, team=missing-pack (pack dir missing) | `cross-cutting` |
 | `mode_006` | Session ARCHIVED | `native` |
 | `mode_007` | SESSION_CONTEXT.md corrupted (parse error) | `cross-cutting` |
-| `mode_008` | ACTIVE_TEAM file exists but empty | `cross-cutting` |
+| `mode_008` | ACTIVE_RITE file exists but empty | `cross-cutting` |
 
 ---
 
@@ -232,7 +232,7 @@ execution_mode() {
 ### New Optional `team` Field
 
 Per FR-2.3, add an optional `team` field to SESSION_CONTEXT schema. This field:
-- Is distinct from `active_team` (which syncs with ACTIVE_TEAM file)
+- Is distinct from `active_team` (which syncs with ACTIVE_RITE file)
 - When null/absent indicates cross-cutting mode at session creation
 - Preserved through session lifecycle
 
@@ -269,7 +269,7 @@ current_phase: "implementation"
 
 Existing sessions without `team` field:
 - Continue to work unchanged (NFR-4)
-- Mode detection uses `active_team` from ACTIVE_TEAM file or SESSION_CONTEXT
+- Mode detection uses `active_team` from ACTIVE_RITE file or SESSION_CONTEXT
 - No migration required; field is optional
 
 **Validation Update** (in `session-fsm.sh`):
@@ -380,7 +380,7 @@ cat <<EOF
 
 | | |
 |---|---|
-| **Team** | $ACTIVE_TEAM |
+| **Team** | $ACTIVE_RITE |
 | **Mode** | $mode |
 | **Session** | $session_display |
 | **Initiative** | $initiative_display |
@@ -456,9 +456,9 @@ cmd_create() {
     local complexity="${2:-MODULE}"
     local team="${3:-}"  # Changed: No default, allow empty
 
-    # If team not specified, check ACTIVE_TEAM file
+    # If team not specified, check ACTIVE_RITE file
     if [[ -z "$team" ]]; then
-        team=$(cat ".claude/ACTIVE_TEAM" 2>/dev/null || echo "")
+        team=$(cat ".claude/ACTIVE_RITE" 2>/dev/null || echo "")
     fi
 
     # Normalize empty/none to explicit null for cross-cutting
@@ -513,8 +513,8 @@ fi
 | Case | Detection | Behavior | Implementation |
 |------|-----------|----------|----------------|
 | Session file corrupted | `fsm_get_state` returns error | `cross-cutting` (graceful) | `execution_mode()` catches error, returns fallback |
-| ACTIVE_TEAM exists but pack missing | Check `$ROSTER_HOME/teams/$team` dir | `cross-cutting` + warn | Log warning, return cross-cutting |
-| Session with team, then team file deleted | ACTIVE_TEAM file absent | Downgrade to `cross-cutting` | Mode detection checks both sources |
+| ACTIVE_RITE exists but pack missing | Check `$ROSTER_HOME/teams/$team` dir | `cross-cutting` + warn | Log warning, return cross-cutting |
+| Session with team, then team file deleted | ACTIVE_RITE file absent | Downgrade to `cross-cutting` | Mode detection checks both sources |
 | Session-without-team receives `/handoff` | No orchestrator available | Error with guidance | `/handoff` skill checks mode first |
 | Native mode receives `/park` | No session to park | Error message | `/park` skill checks session existence |
 | `/consult` in native mode | Mode detection | Works, may suggest `/start` | `/consult` adapts response to mode |
@@ -760,13 +760,13 @@ No session is active. Options:
 
 1. **Existing Sessions**: Sessions without `team` field continue working
 2. **Schema Validation**: Both v2.0 and v2.1 schemas accepted
-3. **ACTIVE_TEAM File**: Continues to be primary team source
+3. **ACTIVE_RITE File**: Continues to be primary team source
 4. **Hook Behavior**: Only warnings changed, never blocking
 
 ### Migration Strategy
 
 **No Migration Required**: The `team` field is optional. Existing sessions:
-- Are detected via ACTIVE_TEAM file or active_team frontmatter field
+- Are detected via ACTIVE_RITE file or active_team frontmatter field
 - Mode detection works with or without explicit `team` field
 - Schema version 2.0 remains valid
 

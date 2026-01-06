@@ -3,9 +3,11 @@ package session
 import (
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v3"
 
 	"github.com/autom8y/ariadne/internal/errors"
 	"github.com/autom8y/ariadne/internal/lock"
@@ -83,6 +85,20 @@ func runStatus(ctx *cmdContext) error {
 	// Get git info
 	gitBranch, gitChanges := getGitInfo()
 
+	// Load WHITE_SAILS.yaml if exists
+	sailsPath := filepath.Join(sessionDir, "WHITE_SAILS.yaml")
+	var sailsColor, sailsBase string
+	if data, err := os.ReadFile(sailsPath); err == nil {
+		var sailsData struct {
+			Color        string `yaml:"color"`
+			ComputedBase string `yaml:"computed_base"`
+		}
+		if yaml.Unmarshal(data, &sailsData) == nil {
+			sailsColor = sailsData.Color
+			sailsBase = sailsData.ComputedBase
+		}
+	}
+
 	// Build result
 	result := output.StatusOutput{
 		SessionID:     sessionID,
@@ -92,12 +108,14 @@ func runStatus(ctx *cmdContext) error {
 		Initiative:    sessCtx.Initiative,
 		Complexity:    sessCtx.Complexity,
 		CurrentPhase:  sessCtx.CurrentPhase,
-		ActiveTeam:    sessCtx.ActiveTeam,
+		ActiveTeam:    sessCtx.ActiveRite,
 		ExecutionMode: executionMode,
 		CreatedAt:     sessCtx.CreatedAt.Format("2006-01-02T15:04:05Z"),
 		SchemaVersion: sessCtx.SchemaVersion,
 		GitBranch:     gitBranch,
 		GitChanges:    gitChanges,
+		SailsColor:    sailsColor,
+		SailsBase:     sailsBase,
 	}
 
 	return printer.Print(result)

@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/autom8y/ariadne/internal/hook"
-	"github.com/autom8y/ariadne/internal/hook/threadcontract"
+	"github.com/autom8y/ariadne/internal/hook/clewcontract"
 	"github.com/autom8y/ariadne/internal/output"
 )
 
@@ -108,10 +108,10 @@ func runThread(ctx *cmdContext) error {
 	}
 
 	// Build event for trigger checking (before recording)
-	event := threadcontract.BuildEventFromToolInput(hookEnv, toolInput)
+	event := clewcontract.BuildEventFromToolInput(hookEnv, toolInput)
 
 	// Record the tool event
-	if err := threadcontract.RecordToolEvent(sessionDir, hookEnv, toolInput); err != nil {
+	if err := clewcontract.RecordToolEvent(sessionDir, hookEnv, toolInput); err != nil {
 		printer.VerboseLog("error", "failed to record tool event",
 			map[string]interface{}{"error": err.Error()})
 		return outputNotRecorded(printer, "write failed: "+err.Error())
@@ -119,9 +119,9 @@ func runThread(ctx *cmdContext) error {
 
 	// Check if this is an orchestrator Task completion and record throughline stamp
 	if hookEnv.ToolName == "Task" && hookEnv.ToolResult != "" {
-		if throughline := threadcontract.ExtractThroughline(hookEnv.ToolResult); throughline != nil {
+		if throughline := clewcontract.ExtractThroughline(hookEnv.ToolResult); throughline != nil {
 			// Record decision stamp (fail silently - don't break hook if stamp fails)
-			if err := threadcontract.RecordStamp(sessionDir, throughline.Decision, throughline.Rationale, nil); err != nil {
+			if err := clewcontract.RecordStamp(sessionDir, throughline.Decision, throughline.Rationale, nil); err != nil {
 				printer.VerboseLog("warn", "failed to record orchestrator stamp",
 					map[string]interface{}{"error": err.Error()})
 				// Continue - stamp failure is not critical
@@ -133,9 +133,9 @@ func runThread(ctx *cmdContext) error {
 	}
 
 	// Check triggers after recording
-	eventsPath := threadcontract.GetEventsPath(sessionDir)
-	triggerConfig := threadcontract.DefaultTriggerConfig()
-	triggerResult := threadcontract.CheckTriggers(eventsPath, event, triggerConfig)
+	eventsPath := clewcontract.GetEventsPath(sessionDir)
+	triggerConfig := clewcontract.DefaultTriggerConfig()
+	triggerResult := clewcontract.CheckTriggers(eventsPath, event, triggerConfig)
 
 	// Build output
 	result := ThreadOutput{
@@ -227,10 +227,10 @@ func runThreadWithPrinter(ctx *cmdContext, printer *output.Printer) error {
 	}
 
 	// Build event for trigger checking (before recording)
-	event := threadcontract.BuildEventFromToolInput(hookEnv, toolInput)
+	event := clewcontract.BuildEventFromToolInput(hookEnv, toolInput)
 
 	// Record the tool event
-	if err := threadcontract.RecordToolEvent(sessionDir, hookEnv, toolInput); err != nil {
+	if err := clewcontract.RecordToolEvent(sessionDir, hookEnv, toolInput); err != nil {
 		printer.VerboseLog("error", "failed to record tool event",
 			map[string]interface{}{"error": err.Error()})
 		return outputNotRecordedWithPrinter(printer, "write failed: "+err.Error())
@@ -238,9 +238,9 @@ func runThreadWithPrinter(ctx *cmdContext, printer *output.Printer) error {
 
 	// Check if this is an orchestrator Task completion and record throughline stamp
 	if hookEnv.ToolName == "Task" && hookEnv.ToolResult != "" {
-		if throughline := threadcontract.ExtractThroughline(hookEnv.ToolResult); throughline != nil {
+		if throughline := clewcontract.ExtractThroughline(hookEnv.ToolResult); throughline != nil {
 			// Record decision stamp (fail silently - don't break hook if stamp fails)
-			if err := threadcontract.RecordStamp(sessionDir, throughline.Decision, throughline.Rationale, nil); err != nil {
+			if err := clewcontract.RecordStamp(sessionDir, throughline.Decision, throughline.Rationale, nil); err != nil {
 				printer.VerboseLog("warn", "failed to record orchestrator stamp",
 					map[string]interface{}{"error": err.Error()})
 				// Continue - stamp failure is not critical
@@ -252,9 +252,9 @@ func runThreadWithPrinter(ctx *cmdContext, printer *output.Printer) error {
 	}
 
 	// Check triggers after recording
-	eventsPath := threadcontract.GetEventsPath(sessionDir)
-	triggerConfig := threadcontract.DefaultTriggerConfig()
-	triggerResult := threadcontract.CheckTriggers(eventsPath, event, triggerConfig)
+	eventsPath := clewcontract.GetEventsPath(sessionDir)
+	triggerConfig := clewcontract.DefaultTriggerConfig()
+	triggerResult := clewcontract.CheckTriggers(eventsPath, event, triggerConfig)
 
 	// Build output
 	result := ThreadOutput{

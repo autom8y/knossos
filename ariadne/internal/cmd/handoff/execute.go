@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/autom8y/ariadne/internal/errors"
-	"github.com/autom8y/ariadne/internal/hook/threadcontract"
+	"github.com/autom8y/ariadne/internal/hook/clewcontract"
 	"github.com/autom8y/ariadne/internal/output"
 	"github.com/autom8y/ariadne/internal/session"
 )
@@ -123,18 +123,31 @@ func runExecute(ctx *cmdContext, opts executeOptions) error {
 
 	// Emit task_start event for the receiving agent
 	sessionDir := resolver.SessionDir(sessionID)
-	tcWriter, err := threadcontract.NewEventWriter(sessionDir)
+	tcWriter, err := clewcontract.NewEventWriter(sessionDir)
 	if err != nil {
 		printer.VerboseLog("warn", "failed to create event writer", map[string]interface{}{"error": err.Error()})
 	} else {
-		taskDescription := fmt.Sprintf("Handoff received: implement %s", opts.artifactID)
-		taskStartEvent := threadcontract.NewTaskStartEvent(
+		// Build task ID from session and agent
+		taskID := fmt.Sprintf("%s-%s", sessionID, opts.toAgent)
+		phase := targetPhase
+
+		taskStartEvent := clewcontract.NewTaskStartEvent(
+			taskID,
 			opts.toAgent,
-			taskDescription,
+			phase,
 			sessionID,
 		)
 		if err := tcWriter.Write(taskStartEvent); err != nil {
 			printer.VerboseLog("warn", "failed to emit task_start event", map[string]interface{}{"error": err.Error()})
+		}
+
+		// Emit HANDOFF_EXECUTED event
+		// Infer fromAgent from current phase
+		fromAgent := phaseToAgent(sessCtx.CurrentPhase)
+		artifacts := []string{opts.artifactID}
+		handoffExecutedEvent := clewcontract.NewHandoffExecutedEvent(fromAgent, opts.toAgent, sessionID, artifacts)
+		if err := tcWriter.Write(handoffExecutedEvent); err != nil {
+			printer.VerboseLog("warn", "failed to emit handoff_executed event", map[string]interface{}{"error": err.Error()})
 		}
 	}
 
@@ -183,6 +196,24 @@ func agentToTargetPhase(agent string) string {
 		return "orchestration"
 	default:
 		return "unknown"
+	}
+}
+
+// phaseToAgent maps a phase to the agent responsible for it.
+func phaseToAgent(phase string) string {
+	switch phase {
+	case "requirements":
+		return "requirements-analyst"
+	case "design":
+		return "architect"
+	case "implementation":
+		return "principal-engineer"
+	case "validation", "qa":
+		return "qa-adversary"
+	case "orchestration":
+		return "orchestrator"
+	default:
+		return ""
 	}
 }
 

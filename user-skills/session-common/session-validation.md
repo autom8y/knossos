@@ -39,7 +39,7 @@ Fail: "Agent '{agent}' not found in team '{active_team}'."
 ### Team Consistency
 
 ```
-Check: SESSION_CONTEXT.active_team matches ACTIVE_TEAM file
+Check: SESSION_CONTEXT.active_team matches ACTIVE_RITE file
 Pass: Continue without warning
 Fail: Prompt user for team switch or override
 ```

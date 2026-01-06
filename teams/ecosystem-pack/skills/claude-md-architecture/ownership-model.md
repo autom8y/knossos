@@ -83,10 +83,10 @@ This project deploys via GitHub Actions to AWS ECS.
 
 ### REGENERATE Sections (Roster-Derived)
 
-Content derived from roster state (ACTIVE_TEAM file + agents/ directory).
+Content derived from roster state (ACTIVE_RITE file + agents/ directory).
 
 **Characteristics**:
-- Source of truth: ACTIVE_TEAM + agents/
+- Source of truth: ACTIVE_RITE + agents/
 - Regeneration trigger: `swap-team.sh` or CEM sync with missing content
 - Generated locally: Each satellite has its own team
 - Represents: Which agents are available in THIS project
@@ -95,14 +95,14 @@ Content derived from roster state (ACTIVE_TEAM file + agents/ directory).
 
 | Section | Source |
 |---------|--------|
-| Quick Start agent table | ACTIVE_TEAM + agents/*.md |
+| Quick Start agent table | ACTIVE_RITE + agents/*.md |
 | Agent Configurations list | agents/*.md |
-| Team name reference | ACTIVE_TEAM |
+| Team name reference | ACTIVE_RITE |
 
 **Regeneration Logic**:
 
 ```
-IF satellite has ACTIVE_TEAM + agents:
+IF satellite has ACTIVE_RITE + agents:
   REGENERATE team sections from satellite roster
 ELSE IF section exists in satellite:
   PRESERVE existing content
@@ -110,7 +110,7 @@ ELSE:
   Leave empty (satellite needs to configure team)
 ```
 
-**Rule**: Team content ALWAYS comes from satellite's own ACTIVE_TEAM + agents/.
+**Rule**: Team content ALWAYS comes from satellite's own ACTIVE_RITE + agents/.
 
 ---
 
@@ -121,7 +121,7 @@ Complete mapping of sections to owners and sync behavior:
 | Section Header | Owner | Sync Behavior | Notes |
 |----------------|-------|---------------|-------|
 | `# CLAUDE.md` | Roster | SYNC | Title and tagline |
-| `## Quick Start` | Team | PRESERVE/REGENERATE | From satellite's ACTIVE_TEAM |
+| `## Quick Start` | Team | PRESERVE/REGENERATE | From satellite's ACTIVE_RITE |
 | `## Agent Routing` | Roster | SYNC | Infrastructure |
 | `## Skills Architecture` | Roster | SYNC | Infrastructure |
 | `## Agent Configurations` | Team | PRESERVE/REGENERATE | From satellite's agents/ |
@@ -156,7 +156,7 @@ What does this content describe?
    - Agent roster
    - Team name
    - Agent configurations
-   └─> Roster-derived, REGENERATE from ACTIVE_TEAM
+   └─> Roster-derived, REGENERATE from ACTIVE_RITE
 
 4. WHAT is happening now?
    - Current task
@@ -185,7 +185,7 @@ What does this content describe?
 
 1. **Session State**: Current task, work in progress, parked session info
 2. **Transient Context**: Git state, file modification status, worktree context
-3. **Team Content from Wrong Source**: Team content comes from satellite's own ACTIVE_TEAM
+3. **Team Content from Wrong Source**: Team content comes from satellite's own ACTIVE_RITE
 
 ---
 
@@ -202,10 +202,10 @@ This project uses a 6-agent workflow (ecosystem-pack):
 | context-architect | ... |
 ```
 
-**Why wrong**: Satellite has its own team (e.g., doc-team-pack). Team content should come from satellite's ACTIVE_TEAM + agents/.
+**Why wrong**: Satellite has its own team (e.g., doc-team-pack). Team content should come from satellite's ACTIVE_RITE + agents/.
 
 **Correct approach**:
-- Team sections are PRESERVE (keep satellite content) or REGENERATE (rebuild from satellite's own ACTIVE_TEAM)
+- Team sections are PRESERVE (keep satellite content) or REGENERATE (rebuild from satellite's own ACTIVE_RITE)
 - Never sync team content from roster's source templates
 
 ---
@@ -232,7 +232,7 @@ Use HTML comments to mark section ownership. CEM uses these markers to determine
 <!-- SYNC: roster-owned -->
 ## Section Name
 
-<!-- PRESERVE: satellite-owned, regenerated from ACTIVE_TEAM + agents/ -->
+<!-- PRESERVE: satellite-owned, regenerated from ACTIVE_RITE + agents/ -->
 ## Quick Start
 ```
 
@@ -248,7 +248,7 @@ Use HTML comments to mark section ownership. CEM uses these markers to determine
 |--------|---------|
 | `<!-- SYNC: roster-owned -->` | Section syncs from roster, overwrites satellite |
 | `<!-- PRESERVE: satellite-owned -->` | Section preserved from satellite, never overwritten |
-| `<!-- PRESERVE: satellite-owned, regenerated from ACTIVE_TEAM + agents/ -->` | Preserved, with note about regeneration source |
+| `<!-- PRESERVE: satellite-owned, regenerated from ACTIVE_RITE + agents/ -->` | Preserved, with note about regeneration source |
 
 ### Example CLAUDE.md Structure
 
@@ -257,7 +257,7 @@ Use HTML comments to mark section ownership. CEM uses these markers to determine
 
 > Entry point for Claude Code.
 
-<!-- PRESERVE: satellite-owned, regenerated from ACTIVE_TEAM + agents/ -->
+<!-- PRESERVE: satellite-owned, regenerated from ACTIVE_RITE + agents/ -->
 ## Quick Start
 
 This project uses a 5-agent workflow (doc-team-pack):

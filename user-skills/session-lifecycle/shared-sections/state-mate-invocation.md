@@ -1,6 +1,8 @@
-# state-mate Invocation Pattern
+# Moirai Invocation Pattern
 
-> Delegate session state mutations to state-mate agent via Task tool.
+> Delegate session state mutations to Moirai (the Fates) via Task tool.
+>
+> **Note**: `state-mate` is a backward-compatible alias for `moirai`.
 
 ## When to Apply
 
@@ -12,20 +14,47 @@ Commands that mutate SESSION_CONTEXT:
 ## Task Invocation Template
 
 ```
-Task(state-mate, "{operation}
+Task(moirai, "{operation}
 
 Session Context:
 - Session ID: {session_id}
 - Session Path: .claude/sessions/{session_id}/SESSION_CONTEXT.md")
 ```
 
-### Operations
+**Note**: `state-mate` can be used interchangeably with `moirai`.
 
-| Operation | Command | Mutations |
-|-----------|---------|-----------|
-| `park_session reason='{reason}'` | /park | Set parked_at, parked_reason |
-| `resume_session` | /resume | Clear parked_*, set resumed_at |
-| `wrap_session` | /wrap | Set completed_at, archive |
+### Operations and Fate Routing
+
+| Operation | Command | Fate | Mutations |
+|-----------|---------|------|-----------|
+| `park_session reason='{reason}'` | /park | Lachesis | Set parked_at, parked_reason |
+| `resume_session` | /resume | Lachesis | Clear parked_*, set resumed_at |
+| `wrap_session` | /wrap | Atropos | Set completed_at, archive |
+
+The Moirai router automatically delegates to the appropriate Fate based on operation semantics:
+- **Lachesis** (the Measurer): Session lifecycle transitions (park, resume, handoff)
+- **Atropos** (the Cutter): Session termination (wrap, generate_sails)
+
+### WHITE_SAILS Quality Gate (wrap_session only)
+
+When invoking `wrap_session`, Atropos generates a WHITE_SAILS confidence signal and enforces a quality gate:
+
+| Sails Color | Meaning | Wrap Behavior |
+|-------------|---------|---------------|
+| **WHITE** | All proofs pass, no open questions | Wrap succeeds |
+| **GREY** | Some proofs missing or open questions exist | Wrap succeeds with warning |
+| **BLACK** | Critical failures or major blockers | **Wrap BLOCKED** |
+
+**To override BLACK sails** (e.g., for emergency hotfixes):
+```
+Task(moirai, "wrap_session --emergency=reason=\"Hotfix deployment, will revert if unsuccessful\"
+
+Session Context:
+- Session ID: {session_id}
+- Session Path: {session_path}")
+```
+
+See [Atropos agent](../../../user-agents/atropos.md) for full WHITE_SAILS algorithm and proof collection.
 
 ## Response Handling
 
@@ -62,7 +91,7 @@ Session Context:
 |------------|-------|----------|
 | `LIFECYCLE_VIOLATION` | Invalid state transition | Follow hint (e.g., resume before wrap) |
 | `VALIDATION_ERROR` | Missing required field | Provide missing data |
-| `UNAVAILABLE` | state-mate not responding | Retry or check agent configuration |
+| `UNAVAILABLE` | Moirai not responding | Retry or check agent configuration |
 
 ## Implementation
 
@@ -71,7 +100,14 @@ Session Context:
    session_id=$(session-manager.sh status | jq -r '.session_id')
    session_path=".claude/sessions/${session_id}/SESSION_CONTEXT.md"
 
-2. Invoke state-mate via Task tool:
+2. Invoke Moirai via Task tool:
+   Task(moirai, "{operation}
+
+   Session Context:
+   - Session ID: {session_id}
+   - Session Path: {session_path}")
+
+   # Or using state-mate alias (backward compatible)
    Task(state-mate, "{operation}
 
    Session Context:
@@ -98,5 +134,9 @@ Session Context:
 
 ## Cross-Reference
 
-- state-mate agent: `.claude/agents/state-mate.md`
+- Moirai router agent: `user-agents/moirai.md`
+- Lachesis (Measurer): `user-agents/lachesis.md`
+- Atropos (Cutter): `user-agents/atropos.md`
+- Clotho (Spinner): `user-agents/clotho.md`
+- Knossos Doctrine: `docs/philosophy/knossos-doctrine.md`
 - ADR: `docs/decisions/ADR-0005-state-mate-centralized-state-authority.md`

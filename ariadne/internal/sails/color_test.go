@@ -345,6 +345,86 @@ func TestComputeColor_BlackTakesPriority(t *testing.T) {
 	}
 }
 
+// sails_004 variant: BLACK with explicit blockers
+func TestComputeColor_BlackWithBlockers(t *testing.T) {
+	input := ColorInput{
+		SessionType: "standard",
+		Complexity:  "MODULE",
+		Proofs: map[string]Proof{
+			"tests": {Status: ProofPass},
+			"build": {Status: ProofPass},
+			"lint":  {Status: ProofPass},
+		},
+		Blockers:      []string{"Waiting for database migration approval", "Security review pending"},
+		OpenQuestions: []string{},
+	}
+
+	result := ComputeColor(input)
+
+	if result.Color != ColorBlack {
+		t.Errorf("Color = %q, want %q (blockers should trigger BLACK)", result.Color, ColorBlack)
+	}
+	if result.ComputedBase != ColorBlack {
+		t.Errorf("ComputedBase = %q, want %q", result.ComputedBase, ColorBlack)
+	}
+
+	// Should mention blockers in reasons
+	foundBlockers := false
+	for _, reason := range result.Reasons {
+		if reason == "explicit blockers present: black sails (do not ship)" {
+			foundBlockers = true
+			break
+		}
+	}
+	if !foundBlockers {
+		t.Errorf("Reasons should mention explicit blockers, got: %v", result.Reasons)
+	}
+
+	// Should list each blocker in reasons
+	for _, blocker := range input.Blockers {
+		found := false
+		expectedReason := "  - " + blocker
+		for _, reason := range result.Reasons {
+			if reason == expectedReason {
+				found = true
+				break
+			}
+		}
+		if !found {
+			t.Errorf("Reasons should list blocker %q, got: %v", blocker, result.Reasons)
+		}
+	}
+}
+
+// sails_004 variant: Blockers take priority over everything (checked first)
+func TestComputeColor_BlockersTakePriority(t *testing.T) {
+	input := ColorInput{
+		SessionType: "standard",
+		Complexity:  "MODULE",
+		Proofs: map[string]Proof{
+			"tests": {Status: ProofPass},
+			"build": {Status: ProofPass},
+			"lint":  {Status: ProofPass},
+		},
+		Blockers:      []string{"Blocked by external dependency"},
+		OpenQuestions: []string{"Some question"},
+	}
+
+	result := ComputeColor(input)
+
+	if result.Color != ColorBlack {
+		t.Errorf("Color = %q, want %q (blockers should take priority)", result.Color, ColorBlack)
+	}
+
+	// First reason should be about blockers, not open questions
+	if len(result.Reasons) == 0 {
+		t.Fatal("Expected at least one reason")
+	}
+	if result.Reasons[0] != "explicit blockers present: black sails (do not ship)" {
+		t.Errorf("First reason should be about blockers, got: %q", result.Reasons[0])
+	}
+}
+
 // sails_005: Spike always GRAY
 func TestComputeColor_sails_005_SpikeAlwaysGray(t *testing.T) {
 	input := ColorInput{

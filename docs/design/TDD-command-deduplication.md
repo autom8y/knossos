@@ -259,24 +259,24 @@ Commands that invoke agents or switch teams:
 | Check | Method | Pass | Fail |
 |-------|--------|------|------|
 | Team exists | `$ROSTER_HOME/teams/{team}` exists | Directory exists | Error: Team not found |
-| Team matches session | Compare ACTIVE_TEAM to session.active_team | Match | Warning + prompt |
+| Team matches session | Compare ACTIVE_RITE to session.active_team | Match | Warning + prompt |
 | Agent exists | `.claude/agents/{agent}.md` exists | File exists | Error: Agent not found |
 
 ## Implementation
 
 ```
-1. Read ACTIVE_TEAM file
-   - Path: .claude/ACTIVE_TEAM
+1. Read ACTIVE_RITE file
+   - Path: .claude/ACTIVE_RITE
    - Returns: Current team pack name
 
 2. If command specifies team change:
    a. Verify team exists in roster
    b. Invoke swap-team.sh
-   c. Confirm ACTIVE_TEAM updated
+   c. Confirm ACTIVE_RITE updated
 
 3. For session operations, check consistency:
    a. Read session.active_team from SESSION_CONTEXT
-   b. Compare to ACTIVE_TEAM
+   b. Compare to ACTIVE_RITE
    c. If mismatch: Surface warning, offer switch or override
 
 4. For agent invocation:

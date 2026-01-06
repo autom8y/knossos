@@ -11,7 +11,7 @@ Team packs contain different agents. If session started with `10x-dev-pack` but 
 ### Check Logic
 
 ```
-Read current .claude/ACTIVE_TEAM
+Read current .claude/ACTIVE_RITE
 Compare to SESSION_CONTEXT.active_team
 If different → Surface mismatch warning
 ```
@@ -22,13 +22,13 @@ If different → Surface mismatch warning
 ⚠ Team Mismatch Detected
 
 Session started with: {session.active_team}
-Current active team: {current ACTIVE_TEAM}
+Current active team: {current ACTIVE_RITE}
 
 This session's agents may not be available in the current team.
 
 Options:
 1. Switch back to {session.active_team} (recommended)
-2. Continue with {current ACTIVE_TEAM} (may cause issues)
+2. Continue with {current ACTIVE_RITE} (may cause issues)
 3. Cancel resume
 
 Choice [1/2/3]:

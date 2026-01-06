@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "embed:///schemas/knossos-manifest.schema.json",
+  "title": "KNOSSOS_MANIFEST Schema",
+  "description": "Configuration for CLAUDE.md inscription system",
+  "type": "object",
+
+  "required": [
+    "schema_version",
+    "inscription_version",
+    "regions"
+  ],
+
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+$",
+      "default": "1.0",
+      "description": "Manifest schema version"
+    },
+    "inscription_version": {
+      "type": "string",
+      "pattern": "^[0-9]+$",
+      "description": "Incremented on each sync operation"
+    },
+    "last_sync": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of last sync"
+    },
+    "active_rite": {
+      "type": "string",
+      "description": "Current rite/team name"
+    },
+    "template_path": {
+      "type": "string",
+      "default": "knossos/templates/CLAUDE.md.tpl",
+      "description": "Path to master template"
+    },
+    "regions": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/region"
+      },
+      "description": "Region definitions keyed by region name"
+    },
+    "section_order": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9-]*$"
+      },
+      "description": "Ordered list of section identifiers"
+    },
+    "conditionals": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/conditional"
+      },
+      "description": "Conditional inclusion rules"
+    }
+  },
+
+  "$defs": {
+    "region": {
+      "type": "object",
+      "required": ["owner"],
+      "properties": {
+        "owner": {
+          "type": "string",
+          "enum": ["knossos", "satellite", "regenerate"],
+          "description": "knossos: Managed by Knossos templates; satellite: Owned by satellite project; regenerate: Generated from project state"
+        },
+        "source": {
+          "type": "string",
+          "description": "Data source for regenerate regions (e.g., 'ACTIVE_RITE+agents', 'agents/*.md')"
+        },
+        "preserve_on_conflict": {
+          "type": "boolean",
+          "default": false,
+          "description": "If true, satellite edits preserved on conflict"
+        },
+        "hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "description": "SHA256 hash of last synced content"
+        },
+        "synced_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when region was last synced"
+        }
+      },
+      "if": {
+        "properties": {
+          "owner": { "const": "regenerate" }
+        }
+      },
+      "then": {
+        "required": ["source"]
+      }
+    },
+    "conditional": {
+      "type": "object",
+      "required": ["when"],
+      "properties": {
+        "when": {
+          "type": "string",
+          "description": "Condition expression (e.g., file_exists('.claude/sessions'), env_set(VAR), always, never)"
+        },
+        "include": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Regions to include when condition is true"
+        },
+        "exclude": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Regions to exclude when condition is true"
+        }
+      }
+    }
+  },
+
+  "additionalProperties": false
+}

@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/autom8y/ariadne/internal/errors"
-	"github.com/autom8y/ariadne/internal/hook/threadcontract"
+	"github.com/autom8y/ariadne/internal/hook/clewcontract"
 	"github.com/autom8y/ariadne/internal/output"
 	"github.com/autom8y/ariadne/internal/session"
 	"github.com/autom8y/ariadne/internal/validation"
@@ -118,25 +118,25 @@ func runPrepare(ctx *cmdContext, opts prepareOptions) error {
 		return err
 	}
 
-	// Validate agents exist in active team (C3 cross-team validation)
-	if sessCtx.ActiveTeam != "" {
-		teamAgents := getTeamAgents(sessCtx.ActiveTeam)
+	// Validate agents exist in active rite (C3 cross-team validation)
+	if sessCtx.ActiveRite != "" {
+		teamAgents := getTeamAgents(sessCtx.ActiveRite)
 		if teamAgents != nil {
 			if !isValidAgent(opts.fromAgent, teamAgents) {
-				err := errors.NewWithDetails(errors.CodeUsageError, "source agent not in active team",
+				err := errors.NewWithDetails(errors.CodeUsageError, "source agent not in active rite",
 					map[string]interface{}{
 						"from":        opts.fromAgent,
-						"active_team": sessCtx.ActiveTeam,
+						"active_rite": sessCtx.ActiveRite,
 						"team_agents": teamAgents,
 					})
 				printer.PrintError(err)
 				return err
 			}
 			if !isValidAgent(opts.toAgent, teamAgents) {
-				err := errors.NewWithDetails(errors.CodeUsageError, "target agent not in active team",
+				err := errors.NewWithDetails(errors.CodeUsageError, "target agent not in active rite",
 					map[string]interface{}{
 						"to":          opts.toAgent,
-						"active_team": sessCtx.ActiveTeam,
+						"active_rite": sessCtx.ActiveRite,
 						"team_agents": teamAgents,
 					})
 				printer.PrintError(err)
@@ -186,7 +186,7 @@ func runPrepare(ctx *cmdContext, opts prepareOptions) error {
 
 	// Emit task_end event for the source agent
 	sessionDir := resolver.SessionDir(sessionID)
-	tcWriter, err := threadcontract.NewEventWriter(sessionDir)
+	tcWriter, err := clewcontract.NewEventWriter(sessionDir)
 	if err != nil {
 		printer.VerboseLog("warn", "failed to create event writer", map[string]interface{}{"error": err.Error()})
 	} else {
@@ -196,18 +196,25 @@ func runPrepare(ctx *cmdContext, opts prepareOptions) error {
 			artifacts = append(artifacts, opts.artifactID)
 		}
 
-		// Build throughline summary
-		throughline := fmt.Sprintf("Handoff from %s to %s prepared", opts.fromAgent, opts.toAgent)
+		// Build task ID from session and agent
+		taskID := fmt.Sprintf("%s-%s", sessionID, opts.fromAgent)
 
-		taskEndEvent := threadcontract.NewTaskEndEvent(
+		taskEndEvent := clewcontract.NewTaskEndEvent(
+			taskID,
 			opts.fromAgent,
 			"success",
-			throughline,
-			artifacts,
+			sessionID,
 			durationMs,
+			artifacts,
 		)
 		if err := tcWriter.Write(taskEndEvent); err != nil {
 			printer.VerboseLog("warn", "failed to emit task_end event", map[string]interface{}{"error": err.Error()})
+		}
+
+		// Emit HANDOFF_PREPARED event
+		handoffPreparedEvent := clewcontract.NewHandoffPreparedEvent(opts.fromAgent, opts.toAgent, sessionID)
+		if err := tcWriter.Write(handoffPreparedEvent); err != nil {
+			printer.VerboseLog("warn", "failed to emit handoff_prepared event", map[string]interface{}{"error": err.Error()})
 		}
 	}
 

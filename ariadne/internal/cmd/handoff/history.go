@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/autom8y/ariadne/internal/errors"
-	"github.com/autom8y/ariadne/internal/hook/threadcontract"
+	"github.com/autom8y/ariadne/internal/hook/clewcontract"
 	"github.com/autom8y/ariadne/internal/output"
 )
 
@@ -111,7 +111,7 @@ func eventToHistoryEntry(e GenericEvent) *HandoffHistoryEntry {
 	timestamp := e.GetTimestamp()
 
 	switch eventType {
-	case string(threadcontract.EventTypeTaskStart):
+	case string(clewcontract.EventTypeTaskStart):
 		entry := &HandoffHistoryEntry{
 			Timestamp: timestamp,
 			EventType: "task_start",
@@ -128,7 +128,7 @@ func eventToHistoryEntry(e GenericEvent) *HandoffHistoryEntry {
 		}
 		return entry
 
-	case string(threadcontract.EventTypeTaskEnd):
+	case string(clewcontract.EventTypeTaskEnd):
 		entry := &HandoffHistoryEntry{
 			Timestamp: timestamp,
 			EventType: "task_end",

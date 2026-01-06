@@ -351,7 +351,7 @@ The capability index is expensive to build (filesystem I/O, YAML parsing, regex 
 
 1. **Build on first invocation**: When `/consult` or `team-discovery` is first called in a session
 2. **Store in memory**: Keep index in session context (not persisted to disk)
-3. **Invalidate on team change**: If `ACTIVE_TEAM` changes, rebuild index
+3. **Invalidate on team change**: If `ACTIVE_RITE` changes, rebuild index
 4. **TTL fallback**: Rebuild after 30 minutes of inactivity (stale data protection)
 
 ```

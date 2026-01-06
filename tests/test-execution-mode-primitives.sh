@@ -118,7 +118,7 @@ EOF
 
 setup_team() {
     mkdir -p "$TEST_DIR/.claude/agents"
-    echo "ecosystem-pack" > "$TEST_DIR/.claude/ACTIVE_TEAM"
+    echo "ecosystem-pack" > "$TEST_DIR/.claude/ACTIVE_RITE"
 
     # Create dummy agent file
     cat > "$TEST_DIR/.claude/agents/orchestrator.md" <<'EOF'
@@ -130,7 +130,7 @@ EOF
 cleanup_test_environment() {
     rm -rf "$TEST_DIR/.claude/sessions"
     rm -rf "$TEST_DIR/.claude/agents"
-    rm -f "$TEST_DIR/.claude/ACTIVE_TEAM"
+    rm -f "$TEST_DIR/.claude/ACTIVE_RITE"
 }
 
 # =============================================================================
@@ -332,7 +332,7 @@ test_edge_cases() {
     setup_test_environment
     setup_active_session "MODULE" "ACTIVE"
     mkdir -p "$TEST_DIR/.claude"
-    echo "none" > "$TEST_DIR/.claude/ACTIVE_TEAM"
+    echo "none" > "$TEST_DIR/.claude/ACTIVE_RITE"
     source_session_manager
 
     log_test "em_044: has_active_team returns false when team is 'none'"

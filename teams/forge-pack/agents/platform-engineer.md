@@ -104,7 +104,7 @@ Copy all files to correct locations.
 Verify swap-team.sh can load the team.
 1. Run: `$ROSTER_HOME/swap-team.sh {team-name}`
 2. Check exit code is 0
-3. Verify .claude/ACTIVE_TEAM contains team name
+3. Verify .claude/ACTIVE_RITE contains team name
 4. Verify .claude/agents/ has correct files
 5. Verify .claude/ACTIVE_WORKFLOW.yaml exists
 
@@ -156,7 +156,7 @@ cat $ROSTER_HOME/teams/{team-name}/workflow.yaml
 $ROSTER_HOME/swap-team.sh {team-name}
 
 # Verify swap worked
-cat .claude/ACTIVE_TEAM
+cat .claude/ACTIVE_RITE
 ls .claude/agents/
 ```
 
@@ -168,7 +168,7 @@ Ready for Eval Specialist when:
 - [ ] workflow.yaml exists in team root
 - [ ] File count matches expected (from TEAM-SPEC)
 - [ ] swap-team.sh loads team without errors
-- [ ] .claude/ACTIVE_TEAM shows correct team name
+- [ ] .claude/ACTIVE_RITE shows correct team name
 - [ ] .claude/agents/ contains copied agent files
 - [ ] .claude/ACTIVE_WORKFLOW.yaml exists and is valid
 
@@ -220,7 +220,7 @@ Key behaviors to understand:
 - Preserves global agents from ~/.claude/agents/
 
 ### State Update
-- Writes team name to .claude/ACTIVE_TEAM
+- Writes team name to .claude/ACTIVE_RITE
 - Updates timestamps
 
 ### Exit Codes

@@ -139,13 +139,24 @@ func (s TeamStatusOutput) Text() string {
 
 // TeamSwitchOutput represents team switch result.
 type TeamSwitchOutput struct {
-	Team            string              `json:"team"`
-	PreviousTeam    string              `json:"previous_team"`
-	SwitchedAt      string              `json:"switched_at"`
-	AgentsInstalled []string            `json:"agents_installed"`
-	OrphansHandled  *OrphanHandleResult `json:"orphans_handled,omitempty"`
-	ClaudeMDUpdated bool                `json:"claude_md_updated"`
-	ManifestPath    string              `json:"manifest_path"`
+	Team               string                    `json:"team"`
+	PreviousTeam       string                    `json:"previous_team"`
+	SwitchedAt         string                    `json:"switched_at"`
+	AgentsInstalled    []string                  `json:"agents_installed"`
+	OrphansHandled     *OrphanHandleResult       `json:"orphans_handled,omitempty"`
+	ClaudeMDUpdated    bool                      `json:"claude_md_updated"`
+	ManifestPath       string                    `json:"manifest_path"`
+	InscriptionSynced  bool                      `json:"inscription_synced,omitempty"`
+	InscriptionVersion string                    `json:"inscription_version,omitempty"`
+	SyncConflicts      []InscriptionConflictOut  `json:"sync_conflicts,omitempty"`
+}
+
+// InscriptionConflictOut represents a sync conflict for output.
+type InscriptionConflictOut struct {
+	Region    string `json:"region"`
+	Type      string `json:"type"`
+	Message   string `json:"message"`
+	Preserved bool   `json:"preserved"`
 }
 
 // OrphanHandleResult tracks how orphans were handled.

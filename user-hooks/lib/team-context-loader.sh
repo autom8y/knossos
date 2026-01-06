@@ -1,6 +1,6 @@
 #!/bin/bash
-# Team Context Loader - discovers and executes team-specific context injection
-# Part of Per-Team Hook Context Injection feature
+# Rite Context Loader - discovers and executes rite-specific context injection
+# Part of Per-Rite Hook Context Injection feature
 #
 # Usage:
 #   source "$HOOKS_LIB/team-context-loader.sh"
@@ -11,12 +11,12 @@
 # Configuration
 # =============================================================================
 
-# Team context script name (convention)
+# Rite context script name (convention)
 if [[ -z "${TEAM_CONTEXT_SCRIPT_NAME:-}" ]]; then
     readonly TEAM_CONTEXT_SCRIPT_NAME="context-injection.sh"
 fi
 
-# Function name teams must export
+# Function name rites must export
 if [[ -z "${TEAM_CONTEXT_FUNCTION_NAME:-}" ]]; then
     readonly TEAM_CONTEXT_FUNCTION_NAME="inject_team_context"
 fi
@@ -26,43 +26,43 @@ fi
 # =============================================================================
 
 # Load team-specific context if available
-# Arguments: None (uses ACTIVE_TEAM file and ROSTER_HOME)
+# Arguments: None (uses ACTIVE_RITE file and ROSTER_HOME)
 # Output: Markdown content to stdout (may be empty)
 # Returns: 0 always (errors logged, not propagated)
 #
 # Contract:
-#   - Reads ACTIVE_TEAM from .claude/ACTIVE_TEAM
-#   - Looks for $ROSTER_HOME/teams/$ACTIVE_TEAM/context-injection.sh
+#   - Reads ACTIVE_RITE from .claude/ACTIVE_RITE
+#   - Looks for $ROSTER_HOME/teams/$ACTIVE_RITE/context-injection.sh
 #   - Sources script and calls inject_team_context()
 #   - Returns function output on stdout
 #   - Never fails (RECOVERABLE pattern)
 
 load_team_context() {
-    local active_team
-    local team_script
+    local active_rite
+    local rite_script
     local output=""
 
-    # Read active team
-    active_team=$(cat ".claude/ACTIVE_TEAM" 2>/dev/null || echo "")
-    if [[ -z "$active_team" || "$active_team" == "none" ]]; then
+    # Read active rite (with backward compatibility fallback to ACTIVE_TEAM)
+    active_rite=$(cat ".claude/ACTIVE_RITE" 2>/dev/null || cat ".claude/ACTIVE_TEAM" 2>/dev/null || echo "")
+    if [[ -z "$active_rite" || "$active_rite" == "none" ]]; then
         # No team active - nothing to inject
         return 0
     fi
 
-    # Resolve team context script path
+    # Resolve rite context script path
     local roster_home="${ROSTER_HOME:-$HOME/Code/roster}"
-    team_script="$roster_home/teams/$active_team/$TEAM_CONTEXT_SCRIPT_NAME"
+    rite_script="$roster_home/teams/$active_rite/$TEAM_CONTEXT_SCRIPT_NAME"
 
-    # Check if team has context script
-    if [[ ! -f "$team_script" ]]; then
-        # Team has no context script - normal, not an error
-        log_debug "Team $active_team has no context script at $team_script" 2>/dev/null || true
+    # Check if rite has context script
+    if [[ ! -f "$rite_script" ]]; then
+        # Rite has no context script - normal, not an error
+        log_debug "Rite $active_rite has no context script at $rite_script" 2>/dev/null || true
         return 0
     fi
 
     # Check if script is executable (warning if not)
-    if [[ ! -x "$team_script" ]]; then
-        log_warning "Team context script exists but not executable: $team_script" 2>/dev/null || true
+    if [[ ! -x "$rite_script" ]]; then
+        log_warning "Team context script exists but not executable: $rite_script" 2>/dev/null || true
         # Try sourcing anyway - bash doesn't require +x for sourcing
     fi
 
@@ -70,8 +70,8 @@ load_team_context() {
     # Use subshell to isolate any side effects
     output=$(
         # Source team script
-        source "$team_script" 2>/dev/null || {
-            log_warning "Failed to source team context script: $team_script" 2>/dev/null || true
+        source "$rite_script" 2>/dev/null || {
+            log_warning "Failed to source team context script: $rite_script" 2>/dev/null || true
             exit 0
         }
 
@@ -93,12 +93,12 @@ load_team_context() {
 }
 
 # =============================================================================
-# Utility Functions for Team Scripts
+# Utility Functions for Rite Scripts
 # =============================================================================
 
-# Teams can use these helpers in their context-injection.sh
+# Rites can use these helpers in their context-injection.sh
 
-# Format a key-value pair for team context table
+# Format a key-value pair for rite context table
 # Usage: team_context_row "Key" "Value"
 team_context_row() {
     local key="$1"

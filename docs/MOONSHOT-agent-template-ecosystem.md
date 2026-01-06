@@ -126,7 +126,7 @@ Agent behaviors require audit trails, version control, and compliance attestatio
 │  ┌─────────────────────────────────────────────────────────┐   │
 │  │ .claude/                                                 │   │
 │  │   ├── agents/*.md           (copied from roster)        │   │
-│  │   ├── ACTIVE_TEAM                                       │   │
+│  │   ├── ACTIVE_RITE                                       │   │
 │  │   ├── ACTIVE_WORKFLOW.yaml                              │   │
 │  │   └── AGENT_MANIFEST.json   (provenance tracking)       │   │
 │  └─────────────────────────────────────────────────────────┘   │

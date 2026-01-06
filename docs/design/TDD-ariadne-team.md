@@ -98,7 +98,7 @@ ariadne/
          │
          v
 ┌─────────────────────────────────────────────────────────────────┐
-│  Filesystem: teams/, .claude/agents/, .claude/ACTIVE_TEAM,      │
+│  Filesystem: teams/, .claude/agents/, .claude/ACTIVE_RITE,      │
 │  .claude/AGENT_MANIFEST.json, .claude/CLAUDE.md                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -124,7 +124,7 @@ teams/{team-name}/
 
 ```
 .claude/
-├── ACTIVE_TEAM                 # Single line: team name (e.g., "10x-dev-pack")
+├── ACTIVE_RITE                 # Single line: team name (e.g., "10x-dev-pack")
 ├── ACTIVE_WORKFLOW.yaml        # Copy of team's workflow.yaml
 ├── AGENT_MANIFEST.json         # Manifest tracking agent origins
 ├── CLAUDE.md                   # Contains satellite sections updated on switch
@@ -249,7 +249,7 @@ ari team switch <team-name> [--remove-all|--keep-all|--promote-all] [--dry-run]
 - Detects orphaned agents (agents in .claude/agents/ not from target team)
 - Requires explicit orphan handling flag if orphans detected
 - Copies agents from `teams/{team-name}/agents/` to `.claude/agents/`
-- Updates `ACTIVE_TEAM`, `ACTIVE_WORKFLOW.yaml`, `AGENT_MANIFEST.json`
+- Updates `ACTIVE_RITE`, `ACTIVE_WORKFLOW.yaml`, `AGENT_MANIFEST.json`
 - Updates CLAUDE.md satellite sections (Quick Start table, Agent Configurations)
 - Transaction safety: backup before, restore on failure
 
@@ -325,7 +325,7 @@ sre-pack
 - Also scans user-level teams at `$XDG_DATA_HOME/ariadne/teams/` if present
 - Reads `workflow.yaml` description field for each team
 - Counts agents by scanning `agents/` subdirectory
-- Marks currently active team (from `ACTIVE_TEAM` file)
+- Marks currently active team (from `ACTIVE_RITE` file)
 
 ### 3.4 Command: `ari team status`
 
@@ -424,7 +424,7 @@ Status: OK (manifest valid, CLAUDE.md synced)
 | 9 | No .claude/ directory found |
 
 **Implementation Notes**:
-- If `--team` not specified, uses active team from `ACTIVE_TEAM` file
+- If `--team` not specified, uses active team from `ACTIVE_RITE` file
 - Reads workflow.yaml for phase and entry point information
 - Cross-references installed agents with manifest
 - Checks CLAUDE.md satellite sections for sync status
@@ -594,7 +594,7 @@ func switchTeam(ctx context.Context, targetTeam string, opts SwitchOptions) erro
         })
     }
 
-    // 4. Execute switch (point of no return after ACTIVE_TEAM write)
+    // 4. Execute switch (point of no return after ACTIVE_RITE write)
     if err := executeSwitch(targetTeam, opts); err != nil {
         backup.Restore()
         return errors.Wrap(err, "SWITCH_ABORTED")
@@ -645,7 +645,7 @@ Tracks the origin and state of installed agents:
 }
 ```
 
-### 5.2 ACTIVE_TEAM
+### 5.2 ACTIVE_RITE
 
 Single line file containing the team name:
 
@@ -973,7 +973,7 @@ func (s *Switcher) Switch(ctx context.Context, opts Options) (*Result, error) {
 
 ### 7.1 Session Domain
 
-Team domain interacts with session domain via `ACTIVE_TEAM` file:
+Team domain interacts with session domain via `ACTIVE_RITE` file:
 - `ari session create --team=NAME` uses team validation
 - `ari session status` reads active team for display
 - Team switch does not affect existing sessions (they retain their team reference)
@@ -982,7 +982,7 @@ Team domain interacts with session domain via `ACTIVE_TEAM` file:
 
 The satellite system in CLAUDE.md uses anchor comments (preserved content):
 ```markdown
-<!-- PRESERVE: satellite-owned, regenerated from ACTIVE_TEAM + agents/ -->
+<!-- PRESERVE: satellite-owned, regenerated from ACTIVE_RITE + agents/ -->
 ```
 
 Team switch regenerates content between section headers while preserving:

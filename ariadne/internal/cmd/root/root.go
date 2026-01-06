@@ -12,11 +12,15 @@ import (
 	"github.com/autom8y/ariadne/internal/cmd/artifact"
 	"github.com/autom8y/ariadne/internal/cmd/handoff"
 	"github.com/autom8y/ariadne/internal/cmd/hook"
+	"github.com/autom8y/ariadne/internal/cmd/inscription"
 	"github.com/autom8y/ariadne/internal/cmd/manifest"
+	"github.com/autom8y/ariadne/internal/cmd/naxos"
+	"github.com/autom8y/ariadne/internal/cmd/rite"
 	"github.com/autom8y/ariadne/internal/cmd/sails"
 	"github.com/autom8y/ariadne/internal/cmd/session"
 	"github.com/autom8y/ariadne/internal/cmd/sync"
 	"github.com/autom8y/ariadne/internal/cmd/team"
+	"github.com/autom8y/ariadne/internal/cmd/tribute"
 	"github.com/autom8y/ariadne/internal/cmd/validate"
 	"github.com/autom8y/ariadne/internal/cmd/worktree"
 	"github.com/autom8y/ariadne/internal/errors"
@@ -56,7 +60,7 @@ func Execute() error {
 var rootCmd = &cobra.Command{
 	Use:   "ari",
 	Short: "Ariadne - Claude Code workflow harness",
-	Long: `Ariadne (ari) manages sessions, teams, manifests, and sync for Claude Code agentic workflows.
+	Long: `Ariadne (ari) manages sessions, rites, manifests, and sync for Claude Code agentic workflows.
 
 The thread that makes the maze survivable.`,
 	SilenceUsage:  true,
@@ -108,6 +112,7 @@ func init() {
 	rootCmd.AddCommand(session.NewSessionCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir, &globalOpts.SessionID))
 	rootCmd.AddCommand(team.NewTeamCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
 	rootCmd.AddCommand(manifest.NewManifestCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
+	rootCmd.AddCommand(inscription.NewInscriptionCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
 	rootCmd.AddCommand(sync.NewSyncCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
 	rootCmd.AddCommand(validate.NewValidateCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
 	rootCmd.AddCommand(handoff.NewHandoffCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir, &globalOpts.SessionID))
@@ -115,6 +120,9 @@ func init() {
 	rootCmd.AddCommand(hook.NewHookCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir, &globalOpts.SessionID))
 	rootCmd.AddCommand(artifact.NewArtifactCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir, &globalOpts.SessionID))
 	rootCmd.AddCommand(sails.NewSailsCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir, &globalOpts.SessionID))
+	rootCmd.AddCommand(naxos.NewNaxosCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
+	rootCmd.AddCommand(rite.NewRiteCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
+	rootCmd.AddCommand(tribute.NewTributeCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir, &globalOpts.SessionID))
 	rootCmd.AddCommand(versionCmd)
 }
 
@@ -191,6 +199,13 @@ func needsProject(cmd *cobra.Command) bool {
 	if cmd.Parent() != nil && cmd.Parent().Name() == "sync" {
 		return true
 	}
+	// All inscription commands need project
+	if cmd.Parent() != nil && cmd.Parent().Name() == "inscription" {
+		return true
+	}
+	if cmd.Name() == "inscription" {
+		return true
+	}
 	// All validate commands need project
 	if cmd.Parent() != nil && cmd.Parent().Name() == "validate" {
 		return true
@@ -219,6 +234,21 @@ func needsProject(cmd *cobra.Command) bool {
 		return false
 	}
 	if cmd.Name() == "sails" {
+		return false
+	}
+	// All naxos commands need project
+	if cmd.Parent() != nil && cmd.Parent().Name() == "naxos" {
+		return true
+	}
+	// All rite commands need project
+	if cmd.Parent() != nil && cmd.Parent().Name() == "rite" {
+		return true
+	}
+	// Tribute commands handle missing project gracefully (can specify session-dir)
+	if cmd.Parent() != nil && cmd.Parent().Name() == "tribute" {
+		return false
+	}
+	if cmd.Name() == "tribute" {
 		return false
 	}
 	return true

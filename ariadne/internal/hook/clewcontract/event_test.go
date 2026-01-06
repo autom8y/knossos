@@ -1,4 +1,4 @@
-package threadcontract
+package clewcontract
 
 import (
 	"encoding/json"
@@ -843,5 +843,221 @@ func TestArtifactType_Count(t *testing.T) {
 		if string(artType) != val {
 			t.Errorf("%v = %v, want %v", artType, string(artType), val)
 		}
+	}
+}
+
+func TestEventTypeTaskStart_Constant(t *testing.T) {
+	if string(EventTypeTaskStart) != "task_start" {
+		t.Errorf("EventTypeTaskStart = %q, want %q", EventTypeTaskStart, "task_start")
+	}
+}
+
+func TestEventTypeTaskEnd_Constant(t *testing.T) {
+	if string(EventTypeTaskEnd) != "task_end" {
+		t.Errorf("EventTypeTaskEnd = %q, want %q", EventTypeTaskEnd, "task_end")
+	}
+}
+
+func TestNewTaskStartEvent(t *testing.T) {
+	event := NewTaskStartEvent("task-001", "architect", "design", "session-20260106-123456-abc")
+
+	// Check event type
+	if event.Type != EventTypeTaskStart {
+		t.Errorf("Type = %v, want %v", event.Type, EventTypeTaskStart)
+	}
+
+	// Check summary format
+	expectedSummary := "Task started: task-001 by architect in design phase"
+	if event.Summary != expectedSummary {
+		t.Errorf("Summary = %v, want %v", event.Summary, expectedSummary)
+	}
+
+	// Check timestamp is set
+	if event.Timestamp == "" {
+		t.Error("Timestamp should not be empty")
+	}
+
+	// Check meta fields
+	if event.Meta["task_id"] != "task-001" {
+		t.Errorf("Meta.task_id = %v, want 'task-001'", event.Meta["task_id"])
+	}
+	if event.Meta["agent"] != "architect" {
+		t.Errorf("Meta.agent = %v, want 'architect'", event.Meta["agent"])
+	}
+	if event.Meta["phase"] != "design" {
+		t.Errorf("Meta.phase = %v, want 'design'", event.Meta["phase"])
+	}
+	if event.Meta["session_id"] != "session-20260106-123456-abc" {
+		t.Errorf("Meta.session_id = %v, want 'session-20260106-123456-abc'", event.Meta["session_id"])
+	}
+}
+
+func TestNewTaskEndEvent(t *testing.T) {
+	artifacts := []string{
+		"/Users/tomtenuta/Code/roster/docs/requirements/PRD-test.md",
+		"/Users/tomtenuta/Code/roster/docs/design/TDD-test.md",
+	}
+	event := NewTaskEndEvent("task-001", "architect", "success", "session-20260106-123456-abc", 15000, artifacts)
+
+	// Check event type
+	if event.Type != EventTypeTaskEnd {
+		t.Errorf("Type = %v, want %v", event.Type, EventTypeTaskEnd)
+	}
+
+	// Check summary format
+	expectedSummary := "Task ended: task-001 by architect - success (15000ms)"
+	if event.Summary != expectedSummary {
+		t.Errorf("Summary = %v, want %v", event.Summary, expectedSummary)
+	}
+
+	// Check timestamp is set
+	if event.Timestamp == "" {
+		t.Error("Timestamp should not be empty")
+	}
+
+	// Check meta fields
+	if event.Meta["task_id"] != "task-001" {
+		t.Errorf("Meta.task_id = %v, want 'task-001'", event.Meta["task_id"])
+	}
+	if event.Meta["agent"] != "architect" {
+		t.Errorf("Meta.agent = %v, want 'architect'", event.Meta["agent"])
+	}
+	if event.Meta["outcome"] != "success" {
+		t.Errorf("Meta.outcome = %v, want 'success'", event.Meta["outcome"])
+	}
+	if event.Meta["session_id"] != "session-20260106-123456-abc" {
+		t.Errorf("Meta.session_id = %v, want 'session-20260106-123456-abc'", event.Meta["session_id"])
+	}
+	if event.Meta["duration_ms"] != int64(15000) {
+		t.Errorf("Meta.duration_ms = %v, want 15000", event.Meta["duration_ms"])
+	}
+
+	// Check artifacts
+	artifactsFromMeta, ok := event.Meta["artifacts"].([]string)
+	if !ok {
+		t.Fatal("Meta.artifacts is not a []string")
+	}
+	if len(artifactsFromMeta) != 2 {
+		t.Errorf("Meta.artifacts length = %d, want 2", len(artifactsFromMeta))
+	}
+	if artifactsFromMeta[0] != artifacts[0] {
+		t.Errorf("Meta.artifacts[0] = %v, want %v", artifactsFromMeta[0], artifacts[0])
+	}
+}
+
+func TestNewTaskEndEvent_EmptyArtifacts(t *testing.T) {
+	event := NewTaskEndEvent("task-002", "qa-adversary", "blocked", "session-xyz", 5000, []string{})
+
+	// Check summary includes blocked status
+	if event.Summary != "Task ended: task-002 by qa-adversary - blocked (5000ms)" {
+		t.Errorf("Summary = %v, want blocked status", event.Summary)
+	}
+
+	// Check empty artifacts array
+	artifacts, ok := event.Meta["artifacts"].([]string)
+	if !ok {
+		t.Fatal("Meta.artifacts is not a []string")
+	}
+	if len(artifacts) != 0 {
+		t.Errorf("Meta.artifacts length = %d, want 0", len(artifacts))
+	}
+}
+
+func TestNewTaskEndEvent_NilArtifacts(t *testing.T) {
+	event := NewTaskEndEvent("task-003", "integration-engineer", "failed", "session-abc", 3000, nil)
+
+	// Check that nil artifacts doesn't cause panic
+	artifacts, ok := event.Meta["artifacts"].([]string)
+	if !ok {
+		// nil slices should still be typed correctly
+		if event.Meta["artifacts"] != nil {
+			t.Errorf("Meta.artifacts = %v (%T), want nil or []string", event.Meta["artifacts"], event.Meta["artifacts"])
+		}
+		return
+	}
+	if artifacts != nil && len(artifacts) != 0 {
+		t.Errorf("Meta.artifacts length = %d, want 0 or nil", len(artifacts))
+	}
+}
+
+func TestTaskEvents_JSONMarshaling(t *testing.T) {
+	// Test task_start event
+	startEvent := NewTaskStartEvent("task-001", "architect", "design", "session-test")
+	startData, err := json.Marshal(startEvent)
+	if err != nil {
+		t.Fatalf("Failed to marshal task_start event: %v", err)
+	}
+
+	var startRaw map[string]interface{}
+	if err := json.Unmarshal(startData, &startRaw); err != nil {
+		t.Fatalf("Failed to unmarshal task_start JSON: %v", err)
+	}
+
+	// Check type in JSON
+	if startRaw["type"] != "task_start" {
+		t.Errorf("type = %v, want 'task_start'", startRaw["type"])
+	}
+
+	// Check meta is present
+	startMeta, ok := startRaw["meta"].(map[string]interface{})
+	if !ok {
+		t.Fatal("meta is not a map")
+	}
+	if startMeta["task_id"] != "task-001" {
+		t.Errorf("meta.task_id = %v, want 'task-001'", startMeta["task_id"])
+	}
+
+	// Test task_end event
+	endEvent := NewTaskEndEvent("task-001", "architect", "success", "session-test", 10000, []string{"artifact.md"})
+	endData, err := json.Marshal(endEvent)
+	if err != nil {
+		t.Fatalf("Failed to marshal task_end event: %v", err)
+	}
+
+	var endRaw map[string]interface{}
+	if err := json.Unmarshal(endData, &endRaw); err != nil {
+		t.Fatalf("Failed to unmarshal task_end JSON: %v", err)
+	}
+
+	// Check type in JSON
+	if endRaw["type"] != "task_end" {
+		t.Errorf("type = %v, want 'task_end'", endRaw["type"])
+	}
+
+	// Check meta is present
+	endMeta, ok := endRaw["meta"].(map[string]interface{})
+	if !ok {
+		t.Fatal("meta is not a map")
+	}
+	if endMeta["outcome"] != "success" {
+		t.Errorf("meta.outcome = %v, want 'success'", endMeta["outcome"])
+	}
+	if endMeta["duration_ms"] != float64(10000) { // JSON numbers are float64
+		t.Errorf("meta.duration_ms = %v, want 10000", endMeta["duration_ms"])
+	}
+}
+
+func TestTaskEvents_Pairing(t *testing.T) {
+	// Verify that task_start and task_end use consistent field names
+	taskID := "task-paired"
+	agent := "documentation-engineer"
+	sessionID := "session-paired"
+
+	startEvent := NewTaskStartEvent(taskID, agent, "documentation", sessionID)
+	endEvent := NewTaskEndEvent(taskID, agent, "success", sessionID, 8000, []string{})
+
+	// Both should have matching task_id
+	if startEvent.Meta["task_id"] != endEvent.Meta["task_id"] {
+		t.Errorf("task_id mismatch: start=%v, end=%v", startEvent.Meta["task_id"], endEvent.Meta["task_id"])
+	}
+
+	// Both should have matching agent
+	if startEvent.Meta["agent"] != endEvent.Meta["agent"] {
+		t.Errorf("agent mismatch: start=%v, end=%v", startEvent.Meta["agent"], endEvent.Meta["agent"])
+	}
+
+	// Both should have matching session_id
+	if startEvent.Meta["session_id"] != endEvent.Meta["session_id"] {
+		t.Errorf("session_id mismatch: start=%v, end=%v", startEvent.Meta["session_id"], endEvent.Meta["session_id"])
 	}
 }

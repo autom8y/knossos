@@ -104,7 +104,13 @@ func (r *Resolver) CurrentSessionFile() string {
 	return filepath.Join(r.SessionsDir(), ".current-session")
 }
 
-// ActiveTeamFile returns the path to the ACTIVE_TEAM file.
+// ActiveRiteFile returns the path to the ACTIVE_RITE file.
+func (r *Resolver) ActiveRiteFile() string {
+	return filepath.Join(r.ClaudeDir(), "ACTIVE_RITE")
+}
+
+// ActiveTeamFile returns the path to the legacy ACTIVE_TEAM file.
+// Deprecated: Use ActiveRiteFile instead. This exists for backward compatibility.
 func (r *Resolver) ActiveTeamFile() string {
 	return filepath.Join(r.ClaudeDir(), "ACTIVE_TEAM")
 }
@@ -169,6 +175,40 @@ func (r *Resolver) TransitionsLog() string {
 	return filepath.Join(r.AuditDir(), "transitions.log")
 }
 
+// --- Rite Path Methods ---
+
+// InvocationStateFile returns the path to the INVOCATION_STATE.yaml file.
+func (r *Resolver) InvocationStateFile() string {
+	return filepath.Join(r.ClaudeDir(), "INVOCATION_STATE.yaml")
+}
+
+// RiteDir returns the path to a rite directory.
+// Checks project rites first, then user rites.
+func (r *Resolver) RiteDir(riteName string) string {
+	// Check project rites first
+	projectPath := filepath.Join(r.TeamsDir(), riteName)
+	if _, err := os.Stat(filepath.Join(projectPath, "rite.yaml")); err == nil {
+		return projectPath
+	}
+	// Fall back to user rites
+	return filepath.Join(UserRitesDir(), riteName)
+}
+
+// RiteManifestFile returns the path to a rite's manifest file.
+func (r *Resolver) RiteManifestFile(riteName string) string {
+	return filepath.Join(r.RiteDir(riteName), "rite.yaml")
+}
+
+// RiteAgentsDir returns the path to a rite's agents directory.
+func (r *Resolver) RiteAgentsDir(riteName string) string {
+	return filepath.Join(r.RiteDir(riteName), "agents")
+}
+
+// RiteSkillsDir returns the path to a rite's skills directory.
+func (r *Resolver) RiteSkillsDir(riteName string) string {
+	return filepath.Join(r.RiteDir(riteName), "skills")
+}
+
 // EnsureDir creates a directory if it doesn't exist.
 func EnsureDir(path string) error {
 	return os.MkdirAll(path, 0755)
@@ -199,6 +239,11 @@ func DataDir() string {
 // UserTeamsDir returns the user-level teams directory.
 func UserTeamsDir() string {
 	return filepath.Join(DataDir(), "teams")
+}
+
+// UserRitesDir returns the user-level rites directory.
+func UserRitesDir() string {
+	return filepath.Join(DataDir(), "rites")
 }
 
 // ConfigFile returns the path to a file in the config directory.

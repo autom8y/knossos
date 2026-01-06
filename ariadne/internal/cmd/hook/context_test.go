@@ -170,7 +170,7 @@ status: "ACTIVE"
 created_at: "2026-01-04T22:26:13Z"
 initiative: "Hooks Migration"
 complexity: "MODULE"
-active_team: "10x-dev-pack"
+active_rite: "10x-dev-pack"
 current_phase: "implementation"
 ---
 
@@ -181,10 +181,10 @@ current_phase: "implementation"
 		t.Fatalf("Failed to write session context: %v", err)
 	}
 
-	// Write ACTIVE_TEAM
-	activeTeamFile := filepath.Join(tmpDir, ".claude", "ACTIVE_TEAM")
+	// Write ACTIVE_RITE
+	activeTeamFile := filepath.Join(tmpDir, ".claude", "ACTIVE_RITE")
 	if err := os.WriteFile(activeTeamFile, []byte("10x-dev-pack"), 0644); err != nil {
-		t.Fatalf("Failed to write ACTIVE_TEAM: %v", err)
+		t.Fatalf("Failed to write ACTIVE_RITE: %v", err)
 	}
 
 	// Setup environment
@@ -327,12 +327,12 @@ status: "ACTIVE"
 created_at: "2026-01-04T22:26:13Z"
 initiative: "Benchmark"
 complexity: "MODULE"
-active_team: "test"
+active_rite: "test"
 current_phase: "implementation"
 ---
 `
 	os.WriteFile(filepath.Join(sessionDir, "SESSION_CONTEXT.md"), []byte(sessionContext), 0644)
-	os.WriteFile(filepath.Join(tmpDir, ".claude", "ACTIVE_TEAM"), []byte("test"), 0644)
+	os.WriteFile(filepath.Join(tmpDir, ".claude", "ACTIVE_RITE"), []byte("test"), 0644)
 
 	os.Setenv("USE_ARI_HOOKS", "1")
 	os.Setenv("CLAUDE_HOOK_EVENT", "SessionStart")
@@ -411,7 +411,7 @@ func runContextWithPrinter(ctx *cmdContext, printer *output.Printer) error {
 	// Read active team
 	activeTeam := readActiveTeam(resolver.ActiveTeamFile())
 	if activeTeam == "" {
-		activeTeam = sessCtx.ActiveTeam
+		activeTeam = sessCtx.ActiveRite
 	}
 
 	mode := determineExecutionMode(sessCtx, activeTeam)

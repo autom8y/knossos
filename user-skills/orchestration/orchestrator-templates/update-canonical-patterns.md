@@ -278,7 +278,7 @@ Activate a team and verify it still works:
 
 ```bash
 # Save current team
-current_team=$(cat .claude/ACTIVE_TEAM)
+current_team=$(cat .claude/ACTIVE_RITE)
 
 # Test activation with updated orchestrator
 ./swap-team.sh rnd-pack

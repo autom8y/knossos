@@ -580,8 +580,8 @@ create_swap_backup() {
     fi
 
     # Backup ACTIVE_TEAM if exists
-    if [[ -f ".claude/ACTIVE_TEAM" ]]; then
-        cp .claude/ACTIVE_TEAM "$SWAP_BACKUP_DIR/ACTIVE_TEAM" || {
+    if [[ -f ".claude/ACTIVE_RITE" ]]; then
+        cp .claude/ACTIVE_RITE "$SWAP_BACKUP_DIR/ACTIVE_TEAM" || {
             log_error "Failed to backup ACTIVE_TEAM"
             return 1
         }

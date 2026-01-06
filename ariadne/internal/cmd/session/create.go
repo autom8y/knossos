@@ -39,14 +39,18 @@ func newCreateCmd(ctx *cmdContext) *cobra.Command {
 
 	cmd.Flags().StringVarP(&opts.complexity, "complexity", "c", "MODULE",
 		"Complexity level: PATCH, MODULE, SYSTEM, INITIATIVE, MIGRATION")
+	cmd.Flags().StringVarP(&opts.team, "rite", "r", "",
+		"Rite (practice bundle) to activate (default: from ACTIVE_RITE)")
 	cmd.Flags().StringVarP(&opts.team, "team", "t", "",
-		"Team pack to activate (default: from ACTIVE_TEAM)")
+		"Deprecated: use --rite instead")
 	cmd.Flags().BoolVar(&opts.seed, "seed", false,
 		"Create session in ephemeral worktree, park it, and copy to main repo")
 	cmd.Flags().StringVar(&opts.seedPrefix, "seed-prefix", "/tmp/roster-seed-",
 		"Custom prefix for ephemeral worktree path")
 	cmd.Flags().BoolVar(&opts.seedKeep, "seed-keep", false,
 		"Keep worktree after seeding (for debugging)")
+
+	cmd.Flags().MarkDeprecated("team", "use --rite instead")
 
 	return cmd
 }
@@ -61,7 +65,7 @@ func runCreate(ctx *cmdContext, initiative string, opts createOptions) error {
 	resolver := ctx.getResolver()
 	lockMgr := ctx.getLockManager()
 
-	// Get team from flag or ACTIVE_TEAM file
+	// Get team from flag or ACTIVE_RITE file
 	team := opts.team
 	if team == "" {
 		team = ctx.getActiveTeam()
@@ -171,7 +175,7 @@ func runCreateSeeded(ctx *cmdContext, initiative string, opts createOptions) err
 	printer := ctx.getPrinter()
 	resolver := ctx.getResolver()
 
-	// Get team from flag or ACTIVE_TEAM file
+	// Get team from flag or ACTIVE_RITE file
 	team := opts.team
 	if team == "" {
 		team = ctx.getActiveTeam()

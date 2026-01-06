@@ -22,14 +22,17 @@ func newStatusCmd(ctx *cmdContext) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "status",
-		Short: "Show team status",
-		Long:  `Shows detailed status of the current or specified team.`,
+		Short: "Show rite status",
+		Long:  `Shows detailed status of the current or specified rite (practice bundle).`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runStatus(ctx, opts)
 		},
 	}
 
-	cmd.Flags().StringVarP(&opts.teamName, "team", "t", "", "Team to query status for (default: active)")
+	cmd.Flags().StringVarP(&opts.teamName, "rite", "r", "", "Rite to query status for (default: active)")
+	cmd.Flags().StringVarP(&opts.teamName, "team", "t", "", "Deprecated: use --rite instead")
+
+	cmd.Flags().MarkDeprecated("team", "use --rite instead")
 
 	return cmd
 }

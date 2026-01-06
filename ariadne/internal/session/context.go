@@ -19,7 +19,7 @@ type Context struct {
 	CreatedAt     time.Time `yaml:"created_at" json:"created_at"`
 	Initiative    string    `yaml:"initiative" json:"initiative"`
 	Complexity    string    `yaml:"complexity" json:"complexity"`
-	ActiveTeam    string    `yaml:"active_team" json:"active_team"`
+	ActiveRite    string    `yaml:"active_rite" json:"active_rite"`
 	Team          *string   `yaml:"team" json:"team,omitempty"` // null for cross-cutting
 	CurrentPhase  string    `yaml:"current_phase" json:"current_phase"`
 
@@ -41,7 +41,8 @@ type contextYAML struct {
 	CreatedAt     string  `yaml:"created_at"`
 	Initiative    string  `yaml:"initiative"`
 	Complexity    string  `yaml:"complexity"`
-	ActiveTeam    string  `yaml:"active_team"`
+	ActiveRite    string  `yaml:"active_rite"`
+	ActiveTeam    string  `yaml:"active_team"` // Deprecated: for backward compatibility
 	Team          *string `yaml:"team,omitempty"`
 	CurrentPhase  string  `yaml:"current_phase"`
 	ParkedAt      string  `yaml:"parked_at,omitempty"`
@@ -81,14 +82,20 @@ func ParseContext(content []byte) (*Context, error) {
 		return nil, errors.Wrap(errors.CodeSchemaInvalid, "invalid YAML frontmatter", err)
 	}
 
-	// Convert to Context
+	// Convert to Context with backward compatibility
+	activeRite := yamlData.ActiveRite
+	if activeRite == "" && yamlData.ActiveTeam != "" {
+		// Fall back to legacy active_team field
+		activeRite = yamlData.ActiveTeam
+	}
+
 	ctx := &Context{
 		SchemaVersion: yamlData.SchemaVersion,
 		SessionID:     yamlData.SessionID,
 		Status:        Status(yamlData.Status),
 		Initiative:    yamlData.Initiative,
 		Complexity:    yamlData.Complexity,
-		ActiveTeam:    yamlData.ActiveTeam,
+		ActiveRite:    activeRite,
 		Team:          yamlData.Team,
 		CurrentPhase:  yamlData.CurrentPhase,
 		ParkedReason:  yamlData.ParkedReason,
@@ -153,7 +160,7 @@ func (c *Context) Serialize() ([]byte, error) {
 		CreatedAt:     c.CreatedAt.UTC().Format(time.RFC3339),
 		Initiative:    c.Initiative,
 		Complexity:    c.Complexity,
-		ActiveTeam:    c.ActiveTeam,
+		ActiveRite:    c.ActiveRite,
 		Team:          c.Team,
 		CurrentPhase:  c.CurrentPhase,
 		ParkedReason:  c.ParkedReason,
@@ -207,7 +214,7 @@ func (c *Context) Validate() []string {
 		"created_at":    c.CreatedAt.UTC().Format(time.RFC3339),
 		"initiative":    c.Initiative,
 		"complexity":    c.Complexity,
-		"active_team":   c.ActiveTeam,
+		"active_rite":   c.ActiveRite,
 		"current_phase": c.CurrentPhase,
 	}
 	if c.SchemaVersion != "" {
@@ -217,7 +224,7 @@ func (c *Context) Validate() []string {
 }
 
 // NewContext creates a new session context with defaults.
-func NewContext(initiative, complexity, team string) *Context {
+func NewContext(initiative, complexity, rite string) *Context {
 	sessionID := GenerateSessionID()
 	now := time.Now().UTC()
 
@@ -228,17 +235,17 @@ func NewContext(initiative, complexity, team string) *Context {
 		CreatedAt:     now,
 		Initiative:    initiative,
 		Complexity:    complexity,
-		ActiveTeam:    team,
+		ActiveRite:    rite,
 		CurrentPhase:  "requirements",
 		Body:          defaultBody(initiative),
 	}
 
 	// Set team field - null for cross-cutting
-	if team == "" || team == "none" {
+	if rite == "" || rite == "none" {
 		ctx.Team = nil
 	} else {
-		teamCopy := team
-		ctx.Team = &teamCopy
+		riteCopy := rite
+		ctx.Team = &riteCopy
 	}
 
 	return ctx

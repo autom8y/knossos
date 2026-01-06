@@ -3,7 +3,7 @@
 # Usage: worktree-manager.sh <command> [args...]
 #
 # Lifecycle Commands:
-#   create [name] [--team=PACK]  - Create new worktree with full isolation
+#   create [name] [--rite=PACK]  - Create new worktree with full isolation
 #   list                          - List all worktrees with status
 #   status [id]                   - Detailed status of worktree(s)
 #   remove <id>                   - Remove specific worktree
@@ -159,15 +159,17 @@ cmd_create() {
     fi
 
     local name=""
-    local team=""
+    local rite=""
     local from_ref="HEAD"
     local complexity="MODULE"
 
     # Parse arguments
     while [[ $# -gt 0 ]]; do
         case "$1" in
-            --team=*)
-                team="${1#--team=}"
+            --rite=*|--team=*)
+                # Accept both --rite and --team for backward compatibility
+                rite="${1#--rite=}"
+                rite="${rite:-${1#--team=}}"
                 shift
                 ;;
             --from=*)
@@ -198,11 +200,11 @@ cmd_create() {
         exit 1
     fi
 
-    # Get current team if not specified
-    if [[ -z "$team" ]]; then
+    # Get current rite if not specified
+    if [[ -z "$rite" ]]; then
         local root
         root=$(get_project_root)
-        team=$(cat "$root/.claude/ACTIVE_TEAM" 2>/dev/null || echo "")
+        rite=$(cat "$root/.claude/ACTIVE_RITE" 2>/dev/null || cat "$root/.claude/ACTIVE_TEAM" 2>/dev/null || echo "")
     fi
 
     local wt_id
@@ -250,11 +252,11 @@ cmd_create() {
         fi
     fi
 
-    # Set team if specified
-    if [[ -n "$team" && "$team" != "none" ]]; then
+    # Set rite if specified
+    if [[ -n "$rite" && "$rite" != "none" ]]; then
         if [[ -x "$ROSTER_HOME/swap-team.sh" ]]; then
-            (cd "$wt_path" && "$ROSTER_HOME/swap-team.sh" "$team" 2>/dev/null) || {
-                echo '{"warning": "Failed to set team '"$team"'. Worktree created with default team."}' >&2
+            (cd "$wt_path" && "$ROSTER_HOME/swap-team.sh" "$rite" 2>/dev/null) || {
+                echo '{"warning": "Failed to set rite '"$rite"'. Worktree created with default rite."}' >&2
             }
         fi
     fi
@@ -267,7 +269,7 @@ cmd_create() {
     "created_at": "$timestamp",
     "name": "$name",
     "from_ref": "$from_ref",
-    "team": "${team:-none}",
+    "team": "${rite:-none}",
     "complexity": "$complexity",
     "parent_project": "$(get_project_root)"
 }
@@ -275,7 +277,7 @@ EOF
 
     # Create initial session in worktree
     if [[ -x "$wt_path/.claude/hooks/lib/session-manager.sh" ]]; then
-        (cd "$wt_path" && .claude/hooks/lib/session-manager.sh create "$name" "$complexity" "${team:-none}" 2>/dev/null) || true
+        (cd "$wt_path" && .claude/hooks/lib/session-manager.sh create "$name" "$complexity" "${rite:-none}" 2>/dev/null) || true
     fi
 
     # Output success
@@ -285,7 +287,7 @@ EOF
     "worktree_id": "$wt_id",
     "path": "$wt_path",
     "name": "$name",
-    "team": "${team:-none}",
+    "team": "${rite:-none}",
     "from_ref": "$from_ref",
     "instructions": "cd $wt_path && claude"
 }
@@ -1050,7 +1052,7 @@ cmd_help() {
 worktree-manager.sh - Per-session worktree isolation
 
 Commands:
-  create [name] [--team=PACK] [--from=REF]   Create isolated worktree
+  create [name] [--rite=PACK] [--from=REF]   Create isolated worktree
   list                                        List all worktrees
   status [id]                                 Detailed status
   remove <id> [--force]                       Remove worktree
@@ -1082,7 +1084,7 @@ Common Options:
   help                                        Show this help
 
 Examples:
-  worktree-manager.sh create "auth-sprint" --team=10x-dev-pack
+  worktree-manager.sh create "auth-sprint" --rite=10x-dev-pack
   worktree-manager.sh list
   worktree-manager.sh diff wt-20251224-143052-abc
   worktree-manager.sh merge wt-20251224-143052-abc --to=develop

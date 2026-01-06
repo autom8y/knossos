@@ -163,6 +163,18 @@ func exitCodeForCode(code string) int {
 		return ExitNetworkError
 	case CodeRemoteNotFound:
 		return ExitFileNotFound // Reuse FILE_NOT_FOUND exit code
+	case CodeRiteNotFound:
+		return ExitFileNotFound
+	case CodeBorrowConflict:
+		return ExitLifecycleError
+	case CodeBudgetExceeded:
+		return ExitBudgetExceeded
+	case CodeInvalidRiteForm:
+		return ExitUsageError
+	case CodeInvocationNotFound:
+		return ExitFileNotFound
+	case CodeQualityGateFailed:
+		return ExitQualityGateFailed
 	default:
 		return ExitGeneralError
 	}
@@ -448,6 +460,102 @@ func IsRemoteRejected(err error) bool {
 func IsRemoteNotFound(err error) bool {
 	if e, ok := err.(*Error); ok {
 		return e.Code == CodeRemoteNotFound
+	}
+	return false
+}
+
+// --- Rite-domain error codes ---
+
+const (
+	// Rite-specific error codes
+	CodeRiteNotFound       = "RITE_NOT_FOUND"
+	CodeBorrowConflict     = "BORROW_CONFLICT"
+	CodeBudgetExceeded     = "BUDGET_EXCEEDED"
+	CodeInvalidRiteForm    = "INVALID_RITE_FORM"
+	CodeInvocationNotFound = "INVOCATION_NOT_FOUND"
+
+	// Quality gate error codes
+	CodeQualityGateFailed = "QUALITY_GATE_FAILED"
+)
+
+// Exit codes for rite errors
+const (
+	ExitBudgetExceeded    = 19 // Context budget would be exceeded
+	ExitQualityGateFailed = 20 // Quality gate check failed (BLACK sails)
+)
+
+// --- Rite-domain error constructors ---
+
+// ErrRiteNotFound returns an error for missing rite.
+func ErrRiteNotFound(riteName string) *Error {
+	return NewWithDetails(CodeRiteNotFound,
+		fmt.Sprintf("Rite not found: %s", riteName),
+		map[string]interface{}{"rite": riteName})
+}
+
+// ErrBorrowConflict returns an error when borrowing would conflict with existing invocations.
+func ErrBorrowConflict(conflicts []string) *Error {
+	return NewWithDetails(CodeBorrowConflict,
+		"Borrowing would conflict with existing invocations",
+		map[string]interface{}{"conflicts": conflicts})
+}
+
+// ErrBudgetExceeded returns an error when context budget would be exceeded.
+func ErrBudgetExceeded(current, requested, limit int) *Error {
+	return NewWithDetails(CodeBudgetExceeded,
+		fmt.Sprintf("Context budget exceeded: %d + %d > %d", current, requested, limit),
+		map[string]interface{}{
+			"current":   current,
+			"requested": requested,
+			"limit":     limit,
+		})
+}
+
+// ErrInvalidRiteForm returns an error when rite form doesn't support requested component.
+func ErrInvalidRiteForm(form, required string) *Error {
+	return NewWithDetails(CodeInvalidRiteForm,
+		fmt.Sprintf("Rite form '%s' does not support requested component '%s'", form, required),
+		map[string]interface{}{
+			"form":     form,
+			"required": required,
+		})
+}
+
+// ErrInvocationNotFound returns an error for missing invocation.
+func ErrInvocationNotFound(id string) *Error {
+	return NewWithDetails(CodeInvocationNotFound,
+		fmt.Sprintf("Invocation not found: %s", id),
+		map[string]interface{}{"invocation_id": id})
+}
+
+// IsRiteNotFound returns true if the error is a rite not found error.
+func IsRiteNotFound(err error) bool {
+	if e, ok := err.(*Error); ok {
+		return e.Code == CodeRiteNotFound
+	}
+	return false
+}
+
+// IsBorrowConflict returns true if the error is a borrow conflict.
+func IsBorrowConflict(err error) bool {
+	if e, ok := err.(*Error); ok {
+		return e.Code == CodeBorrowConflict
+	}
+	return false
+}
+
+// IsBudgetExceeded returns true if the error is a budget exceeded error.
+func IsBudgetExceeded(err error) bool {
+	if e, ok := err.(*Error); ok {
+		return e.Code == CodeBudgetExceeded
+	}
+	return false
+}
+
+// IsInvocationNotFound returns true if the error is an invocation not found error.
+func IsInvocationNotFound(err error) bool {
+	if e, ok := err.(*Error); ok {
+		return e.Code == CodeInvocationNotFound
 	}
 	return false
 }

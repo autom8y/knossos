@@ -184,7 +184,7 @@ status: ACTIVE
 created_at: "2026-01-05T17:00:00Z"
 initiative: "Test Initiative"
 complexity: MODULE
-active_team: 10x-dev-pack
+active_rite: 10x-dev-pack
 current_phase: implementation
 ---
 
@@ -243,7 +243,7 @@ status: ACTIVE
 created_at: "2026-01-05T18:00:00Z"
 initiative: "Test Initiative"
 complexity: MODULE
-active_team: 10x-dev-pack
+active_rite: 10x-dev-pack
 current_phase: implementation
 ---
 
@@ -430,6 +430,99 @@ None.`,
 	}
 }
 
+func TestExtractBlockers(t *testing.T) {
+	tests := []struct {
+		name     string
+		body     string
+		expected []string
+	}{
+		{
+			name:     "no blockers section",
+			body:     "# Session\n\n## Open Questions\nNone.",
+			expected: nil,
+		},
+		{
+			name: "blockers section with None",
+			body: `# Session
+
+## Blockers
+None.
+
+## Next Steps`,
+			expected: nil,
+		},
+		{
+			name: "blockers section with None yet",
+			body: `# Session
+
+## Blockers
+None yet.`,
+			expected: nil,
+		},
+		{
+			name: "single blocker",
+			body: `## Blockers
+- Waiting for database migration approval
+
+## Next Steps`,
+			expected: []string{"Waiting for database migration approval"},
+		},
+		{
+			name: "multiple blockers",
+			body: `## Blockers
+- Security review pending
+- Waiting for external API access
+* Third blocker with asterisk
+
+## Open Questions`,
+			expected: []string{"Security review pending", "Waiting for external API access", "Third blocker with asterisk"},
+		},
+		{
+			name: "case insensitive header",
+			body: `## blockers
+- A blocker item`,
+			expected: []string{"A blocker item"},
+		},
+		{
+			name: "N/A should be filtered",
+			body: `## Blockers
+- N/A
+- Real blocker
+- none
+- Another real blocker`,
+			expected: []string{"Real blocker", "Another real blocker"},
+		},
+		{
+			name: "singular form (Blocker) should work",
+			body: `## Blocker
+- Some blocker`,
+			expected: []string{"Some blocker"},
+		},
+		{
+			name: "None at start of text should be filtered",
+			body: `## Blockers
+- None at this time
+- Real blocker`,
+			expected: []string{"Real blocker"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := extractBlockers(tt.body)
+			if len(result) != len(tt.expected) {
+				t.Errorf("Expected %d blockers, got %d: %v", len(tt.expected), len(result), result)
+				return
+			}
+			for i, b := range tt.expected {
+				if result[i] != b {
+					t.Errorf("Blocker %d: expected '%s', got '%s'", i, b, result[i])
+				}
+			}
+		})
+	}
+}
+
 func TestExtractModifiers(t *testing.T) {
 	tests := []struct {
 		name     string
@@ -591,7 +684,7 @@ status: ACTIVE
 created_at: "2026-01-05T20:00:00Z"
 initiative: "Big Initiative"
 complexity: INITIATIVE
-active_team: 10x-dev-pack
+active_rite: 10x-dev-pack
 current_phase: implementation
 ---
 
@@ -651,7 +744,7 @@ status: ACTIVE
 created_at: "2026-01-05T21:00:00Z"
 initiative: "Another Initiative"
 complexity: INITIATIVE
-active_team: 10x-dev-pack
+active_rite: 10x-dev-pack
 current_phase: implementation
 ---
 

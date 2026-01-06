@@ -332,7 +332,7 @@ stage_agents() { ... }
 # Requires: ROSTER_HOME, STAGING_DIR
 stage_workflow() { ... }
 
-# Stage ACTIVE_TEAM file
+# Stage ACTIVE_RITE file
 # Parameters:
 #   $1 - team_name: Team name to write
 # Returns: 0 on success, 1 on failure
@@ -479,19 +479,19 @@ verify_backup_integrity() { ... }
   2. `cleanup_staging()` - Removes staging directory
   3. `stage_agents()` - Stages agents from team pack
   4. `stage_workflow()` - Stages workflow.yaml
-  5. `stage_active_team()` - Stages ACTIVE_TEAM file
+  5. `stage_active_team()` - Stages ACTIVE_RITE file
   6. `verify_staging()` - Verifies staging integrity
 - **Invariants**:
   - Same staging directory structure
   - Same agent file counting method
-  - Same verification logic (agent count, ACTIVE_TEAM presence)
+  - Same verification logic (agent count, ACTIVE_RITE presence)
   - `cp -rp` for agents (preserve timestamps)
 - **Verification**:
   1. Unit test: `create_staging` creates directory
   2. Unit test: `create_staging` cleans existing staging
   3. Unit test: `stage_agents` copies from team pack
   4. Unit test: `verify_staging` fails on wrong count
-  5. Unit test: `verify_staging` fails on missing ACTIVE_TEAM
+  5. Unit test: `verify_staging` fails on missing ACTIVE_RITE
 - **Commit scope**: Add all 6 staging functions, add unit tests
 
 **[Rollback point: can stop here safely - module not integrated yet]**
@@ -521,7 +521,7 @@ verify_backup_integrity() { ... }
   ```
 - **Invariants**:
   - Same backup directory structure
-  - Same backup order (agents, ACTIVE_TEAM, manifest, workflow, commands, skills, hooks)
+  - Same backup order (agents, ACTIVE_RITE, manifest, workflow, commands, skills, hooks)
   - Virgin swap detection preserved in verify_backup_integrity()
   - Marker file backup preserved (.team-commands, etc.)
 - **Verification**:
@@ -647,7 +647,7 @@ verify_backup_integrity() { ... }
 | Input | expected_count: integer (expected .md file count) |
 | Output | Debug logs |
 | Return | 0 if verified, 1 if verification fails |
-| Checks | STAGING_DIR exists, agents dir exists, agent count matches, ACTIVE_TEAM exists |
+| Checks | STAGING_DIR exists, agents dir exists, agent count matches, ACTIVE_RITE exists |
 
 ### Backup Contract
 
@@ -659,7 +659,7 @@ verify_backup_integrity() { ... }
 | Output | Debug logs |
 | Return | 0 success, 1 on failure |
 | Side effects | Creates SWAP_BACKUP_DIR, updates journal backup_location |
-| Backup order | agents, ACTIVE_TEAM, manifest, workflow, commands, skills, hooks |
+| Backup order | agents, ACTIVE_RITE, manifest, workflow, commands, skills, hooks |
 | Marker files | .team-commands, .team-skills, .team-hooks copied if exist |
 
 ---
@@ -710,7 +710,7 @@ verify_backup_integrity() { ... }
 | test_cleanup_staging | `cleanup_staging` | Removes staging directory |
 | test_stage_agents | `stage_agents` | Copies agents from team pack |
 | test_stage_workflow | `stage_workflow` | Copies workflow.yaml |
-| test_stage_active_team | `stage_active_team` | Creates ACTIVE_TEAM file |
+| test_stage_active_team | `stage_active_team` | Creates ACTIVE_RITE file |
 | test_verify_staging_success | `verify_staging` | Passes with correct count |
 | test_verify_staging_wrong_count | `verify_staging` | Fails on count mismatch |
 | test_verify_staging_missing_dir | `verify_staging` | Fails on missing directory |
@@ -743,7 +743,7 @@ tests/fixtures/team-transaction/
     .claude/
       agents/
         old-agent.md
-      ACTIVE_TEAM        # Contains: old-team
+      ACTIVE_RITE        # Contains: old-team
       AGENT_MANIFEST.json
       commands/
         .team-commands

@@ -355,9 +355,9 @@ test_init_with_team_flag() {
     fi
 
     # Check ACTIVE_TEAM file created
-    if [[ -f "$TEST_PROJECT/.claude/ACTIVE_TEAM" ]]; then
+    if [[ -f "$TEST_PROJECT/.claude/ACTIVE_RITE" ]]; then
         local active_team
-        active_team=$(cat "$TEST_PROJECT/.claude/ACTIVE_TEAM")
+        active_team=$(cat "$TEST_PROJECT/.claude/ACTIVE_RITE")
         if [[ "$active_team" == "$team_name" ]]; then
             test_pass "ACTIVE_TEAM set to $team_name"
         else
@@ -416,7 +416,7 @@ test_init_team_equals_syntax() {
     }
 
     local active_team
-    active_team=$(cat "$TEST_PROJECT/.claude/ACTIVE_TEAM" 2>/dev/null)
+    active_team=$(cat "$TEST_PROJECT/.claude/ACTIVE_RITE" 2>/dev/null)
     if [[ "$active_team" == "$team_name" ]]; then
         test_pass "--team=value syntax works"
     else
@@ -442,7 +442,7 @@ test_init_team_space_syntax() {
     }
 
     local active_team
-    active_team=$(cat "$TEST_PROJECT/.claude/ACTIVE_TEAM" 2>/dev/null)
+    active_team=$(cat "$TEST_PROJECT/.claude/ACTIVE_RITE" 2>/dev/null)
     if [[ "$active_team" == "$team_name" ]]; then
         test_pass "--team value syntax works"
     else

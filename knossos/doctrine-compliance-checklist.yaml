@@ -1,0 +1,870 @@
+# knossos/doctrine-compliance-checklist.yaml
+# Knossos Doctrine Compliance Checklist
+# Generated: 2026-01-06
+# Source: docs/philosophy/knossos-doctrine.md + codebase exploration
+
+metadata:
+  version: "1.0.0"
+  created: "2026-01-06"
+  compliance_target: "90%+ with 100% architecture"
+  launch_type: "internal_dogfooding"
+  doctrine_source: "docs/philosophy/knossos-doctrine.md"
+  author: "ecosystem-analyst"
+
+summary:
+  total_items: 68
+  blockers: 24
+  enhancements: 44
+  estimated_compliance: "82%"
+  launch_ready: false
+  blocking_categories:
+    - "Skill workflows not delegating to Moirai via Task()"
+    - "handoff_prepared/handoff_executed events missing from Thread Contract"
+    - "Terminology migration incomplete (team -> rite)"
+    - "White Sails BLACK state not blocking session wrap"
+
+categories:
+  weight_economy:
+    description: "Athena's Wisdom - context budget management"
+    doctrine_ref: "Section III - Mortal Limits"
+    items:
+      - id: WE-001
+        name: "Cognitive budget tracking"
+        severity: BLOCKER
+        status: IMPLEMENTED
+        files:
+          - ariadne/internal/hook/threadcontract/event.go
+          - .claude/hooks/ari/cognitive-budget.sh
+          - .claude/hooks/ari/autopark.sh
+        validation_criteria: "ARIADNE_MSG_WARN threshold triggers warning; ari hook autopark fires on Stop event"
+        notes: "Environment variables ARIADNE_MSG_WARN, ARIADNE_MSG_PARK, ARIADNE_BUDGET_DISABLE implemented"
+
+      - id: WE-002
+        name: "Budget-aware session parking"
+        severity: ENHANCEMENT
+        status: PARTIAL
+        files:
+          - ariadne/internal/cmd/hook/autopark.go
+          - user-agents/lachesis.md
+        validation_criteria: "Park suggestion appears when budget nears threshold; cognitive budget included in session_end event"
+        notes: "autopark hook exists; integration with Moirai for actual parking not automated"
+
+      - id: WE-003
+        name: "Rite context weight measurement"
+        severity: ENHANCEMENT
+        status: MISSING
+        files:
+          - TBD
+        validation_criteria: "Rite loading reports context weight; warning if combined rite weight exceeds threshold"
+        notes: "Doctrine mentions weight cost but no measurement implemented"
+
+  thread_contract:
+    description: "The Clew Contract - event recording to events.jsonl"
+    doctrine_ref: "Section VI - The Clew Contract"
+    items:
+      - id: TC-001
+        name: "session_start event"
+        severity: BLOCKER
+        status: IMPLEMENTED
+        files:
+          - ariadne/internal/hook/threadcontract/event.go
+        validation_criteria: "NewSessionStartEvent records session_id, initiative, complexity, team"
+
+      - id: TC-002
+        name: "session_end event"
+        severity: BLOCKER
+        status: IMPLEMENTED
+        files:
+          - ariadne/internal/hook/threadcontract/event.go
+        validation_criteria: "NewSessionEndEvent records session_id, status, duration_ms; supports cognitive_budget metadata"
+
+      - id: TC-003
+        name: "task_start event"
+        severity: BLOCKER
+        status: IMPLEMENTED
+        files:
+          - ariadne/internal/hook/threadcontract/event.go
+        validation_criteria: "NewTaskStartEvent records agent, description, parent_session"
+
+      - id: TC-004
+        name: "task_end event"
+        severity: BLOCKER
+        status: IMPLEMENTED
+        files:
+          - ariadne/internal/hook/threadcontract/event.go
+        validation_criteria: "NewTaskEndEvent records agent, status, throughline, artifacts, duration_ms"
+
+      - id: TC-005
+        name: "tool_call event"
+        severity: BLOCKER
+        status: IMPLEMENTED
+        files:
+          - ariadne/internal/hook/threadcontract/event.go
+          - .claude/hooks/ari/thread.sh
+        validation_criteria: "PostToolUse hook records tool_call for Edit, Write, Bash tools"
+
+      - id: TC-006
+        name: "file_change event"
+        severity: BLOCKER
+        status: IMPLEMENTED
+        files:
+          - ariadne/internal/hook/threadcontract/event.go
+        validation_criteria: "NewFileChangeEvent records path, lines_changed"
+
+      - id: TC-007
+        name: "decision event (stamps)"
+        severity: BLOCKER
+        status: IMPLEMENTED
+        files:
+          - ariadne/internal/hook/threadcontract/event.go
+        validation_criteria: "Stamp type with decision, rationale, rejected alternatives converts to Event"
+
+      - id: TC-008
+        name: "artifact_created event"
+        severity: BLOCKER
+        status: IMPLEMENTED
+        files:
+          - ariadne/internal/hook/threadcontract/event.go
+        validation_criteria: "NewArtifactCreatedEvent records artifact_type, path, phase, validates_against"
+
+      - id: TC-009
+        name: "error event"
+        severity: BLOCKER
+        status: IMPLEMENTED
+        files:
+          - ariadne/internal/hook/threadcontract/event.go
+        validation_criteria: "NewErrorEvent records error_code, message, context, recoverable, suggested_action"
+
+      - id: TC-010
+        name: "sails_generated event"
+        severity: BLOCKER
+        status: IMPLEMENTED
+        files:
+          - ariadne/internal/hook/threadcontract/event.go
+        validation_criteria: "NewSailsGeneratedEvent records session_id, color, computed_base, reasons, file_path, evidence_paths"
+
+      - id: TC-011
+        name: "handoff_prepared event"
+        severity: BLOCKER
+        status: MISSING
+        files:
+          - ariadne/internal/hook/threadcontract/event.go
+          - ariadne/internal/cmd/handoff/prepare.go
+        validation_criteria: "Event type handoff_prepared defined in ThreadContract; emitted when ari handoff prepare validates artifacts"
+        notes: "Handoff validation exists but event not recorded to clew. Doctrine Section VIII requires handoff_prepared event."
+
+      - id: TC-012
+        name: "handoff_executed event"
+        severity: BLOCKER
+        status: MISSING
+        files:
+          - ariadne/internal/hook/threadcontract/event.go
+          - ariadne/internal/cmd/handoff/history.go
+        validation_criteria: "Event type handoff_executed defined in ThreadContract; emitted when handoff completes"
+        notes: "Handoff history tracking exists but no handoff_executed event type. Doctrine lists both handoff_prepared and handoff_executed."
+
+      - id: TC-013
+        name: "Automatic event recording via hook"
+        severity: BLOCKER
+        status: PARTIAL
+        files:
+          - .claude/hooks/ari/thread.sh
+          - ariadne/internal/cmd/hook/thread.go
+        validation_criteria: "PostToolUse hook records tool_call, file_change, command events to events.jsonl"
+        notes: "Hook fires for Edit/Write/Bash but not all event types auto-recorded; some require explicit agent invocation"
+
+  moirai:
+    description: "The Three Fates - session lifecycle management"
+    doctrine_ref: "Section II - The Fates: Moirai"
+    items:
+      - id: MO-001
+        name: "Moirai router agent"
+        severity: BLOCKER
+        status: IMPLEMENTED
+        files:
+          - user-agents/moirai.md
+        validation_criteria: "Router parses operations and delegates to Clotho, Lachesis, or Atropos via Task tool"
+
+      - id: MO-002
+        name: "Clotho agent (spinner)"
+        severity: BLOCKER
+        status: IMPLEMENTED
+        files:
+          - user-agents/clotho.md
+        validation_criteria: "Handles create_sprint, start_sprint operations; validates session exists and is ACTIVE"
+
+      - id: MO-003
+        name: "Lachesis agent (measurer)"
+        severity: BLOCKER
+        status: IMPLEMENTED
+        files:
+          - user-agents/lachesis.md
+        validation_criteria: "Handles mark_complete, transition_phase, update_field, park_session, resume_session, handoff, record_decision, append_content"
+
+      - id: MO-004
+        name: "Atropos agent (cutter)"
+        severity: BLOCKER
+        status: IMPLEMENTED
+        files:
+          - user-agents/atropos.md
+        validation_criteria: "Handles wrap_session, generate_sails, delete_sprint; generates WHITE_SAILS.yaml"
+
+      - id: MO-005
+        name: "Moirai shared infrastructure"
+        severity: ENHANCEMENT
+        status: IMPLEMENTED
+        files:
+          - user-agents/moirai-shared.md
+        validation_criteria: "Schema locations, lock protocol, audit format, error codes documented and referenced by all Fates"
+
+      - id: MO-006
+        name: "/start skill delegates to Clotho via Task()"
+        severity: BLOCKER
+        status: PARTIAL
+        files:
+          - user-skills/session-lifecycle/start-ref/SKILL.md
+          - user-agents/clotho.md
+        validation_criteria: "/start skill invokes Task(clotho, ...) for session bootstrap; Clotho handles sprint creation"
+        notes: "Task() is the correct invocation mechanism. Skill must explicitly delegate to Clotho for doctrine-compliant lifecycle."
+
+      - id: MO-007
+        name: "Workflows delegate state mutations to Lachesis via Task()"
+        severity: BLOCKER
+        status: PARTIAL
+        files:
+          - user-skills/session-lifecycle/*.md
+          - user-agents/lachesis.md
+        validation_criteria: "Skills invoke Task(lachesis, ...) for mark_complete, transition_phase, park_session, resume_session operations"
+        notes: "Task() is the correct invocation mechanism. Skills must explicitly delegate state mutations to Lachesis."
+
+      - id: MO-008
+        name: "/wrap skill delegates to Atropos via Task()"
+        severity: BLOCKER
+        status: PARTIAL
+        files:
+          - user-skills/session-lifecycle/wrap-ref/SKILL.md
+          - user-agents/atropos.md
+        validation_criteria: "/wrap skill invokes Task(atropos, ...) for session termination, sails generation, and archival"
+        notes: "Task() is the correct invocation mechanism. Skill must explicitly delegate to Atropos for doctrine-compliant closure."
+
+      - id: MO-009
+        name: "Writeguard redirects to Moirai"
+        severity: BLOCKER
+        status: IMPLEMENTED
+        files:
+          - .claude/hooks/ari/writeguard.sh
+          - ariadne/internal/cmd/hook/writeguard.go
+        validation_criteria: "PreToolUse hook intercepts Write/Edit to *_CONTEXT.md files; instructs use of Moirai"
+
+      - id: MO-010
+        name: "Moirai lock protocol"
+        severity: ENHANCEMENT
+        status: PARTIAL
+        files:
+          - user-agents/moirai-shared.md
+          - ariadne/internal/lock/lock.go
+        validation_criteria: "Atomic mkdir-based locking; stale lock detection after 60s; audit trail on force-release"
+        notes: "Lock protocol documented; CLI implements it; agent prompts reference it but rely on agent behavior"
+
+  white_sails:
+    description: "Confidence signaling system"
+    doctrine_ref: "Section VII - The Confidence Signal"
+    items:
+      - id: WS-001
+        name: "WHITE_SAILS.yaml generation"
+        severity: BLOCKER
+        status: IMPLEMENTED
+        files:
+          - ariadne/internal/sails/generator.go
+          - ariadne/internal/validation/schemas/white-sails.schema.json
+        validation_criteria: "ari sails check generates WHITE_SAILS.yaml with color, computed_base, proofs, modifiers"
+
+      - id: WS-002
+        name: "Three-color system (WHITE/GRAY/BLACK)"
+        severity: BLOCKER
+        status: IMPLEMENTED
+        files:
+          - ariadne/internal/sails/color.go
+        validation_criteria: "ComputeColor returns WHITE, GRAY, or BLACK based on proofs and open questions"
+
+      - id: WS-003
+        name: "Proof collection (tests/build/lint)"
+        severity: BLOCKER
+        status: IMPLEMENTED
+        files:
+          - ariadne/internal/sails/proofs.go
+        validation_criteria: "CollectProofs scans session directory for test-output.log, build-output.log, lint-output.log"
+
+      - id: WS-004
+        name: "Open questions detection"
+        severity: ENHANCEMENT
+        status: IMPLEMENTED
+        files:
+          - ariadne/internal/sails/generator.go
+        validation_criteria: "extractOpenQuestions parses SESSION_CONTEXT.md for '## Open Questions' section"
+
+      - id: WS-005
+        name: "Modifiers (DOWNGRADE_TO_GRAY, etc.)"
+        severity: ENHANCEMENT
+        status: IMPLEMENTED
+        files:
+          - ariadne/internal/sails/generator.go
+          - ariadne/internal/sails/color.go
+        validation_criteria: "extractModifiers parses modifiers; ApplyModifiers downgrades color"
+
+      - id: WS-006
+        name: "QA upgrade (GRAY to WHITE)"
+        severity: ENHANCEMENT
+        status: IMPLEMENTED
+        files:
+          - ariadne/internal/sails/generator.go
+        validation_criteria: "extractQAUpgrade parses QA session info; enables GRAY->WHITE with adversarial tests"
+
+      - id: WS-007
+        name: "BLACK state blocks session wrap"
+        severity: BLOCKER
+        status: MISSING
+        files:
+          - ariadne/internal/cmd/session/wrap.go
+          - user-agents/atropos.md
+        validation_criteria: "wrap_session fails if sails compute BLACK; requires --override to proceed"
+        notes: "User specified BLACK = block wrap. Current implementation generates sails but does not gate on color."
+
+      - id: WS-008
+        name: "sails_generated event emission"
+        severity: BLOCKER
+        status: IMPLEMENTED
+        files:
+          - ariadne/internal/hook/threadcontract/event.go
+          - ariadne/internal/sails/generator.go
+        validation_criteria: "Sails generation emits sails_generated event to clew"
+
+      - id: WS-009
+        name: "Evidence paths in sails"
+        severity: ENHANCEMENT
+        status: IMPLEMENTED
+        files:
+          - ariadne/internal/hook/threadcontract/event.go
+        validation_criteria: "EvidencePaths struct captures tests, build, lint, adversarial, integration paths"
+
+  rite_operations:
+    description: "Practice bundles (formerly team-packs)"
+    doctrine_ref: "Section IV - The Rites"
+    items:
+      - id: RO-001
+        name: "ACTIVE_RITE file"
+        severity: BLOCKER
+        status: IMPLEMENTED
+        files:
+          - .claude/ACTIVE_RITE
+          - ariadne/internal/paths/paths.go
+        validation_criteria: "File exists and contains current rite name; CLI reads/writes it"
+
+      - id: RO-002
+        name: "swap-rite command"
+        severity: ENHANCEMENT
+        status: PARTIAL
+        files:
+          - swap-team.sh
+          - ariadne/internal/cmd/rite/swap.go
+        validation_criteria: "ari rite swap <name> updates ACTIVE_RITE and loads rite context"
+        notes: "swap-team.sh exists (legacy); ari rite swap in development"
+
+      - id: RO-003
+        name: "invoke-rite command"
+        severity: ENHANCEMENT
+        status: MISSING
+        files:
+          - TBD
+        validation_criteria: "ari rite invoke <name> [skills|agents] imports subset without full swap"
+        notes: "Doctrine distinguishes swap-rite (expensive) vs invoke-rite (targeted import)"
+
+      - id: RO-004
+        name: "current-rite command"
+        severity: ENHANCEMENT
+        status: PARTIAL
+        files:
+          - ariadne/internal/cmd/rite/rite.go
+        validation_criteria: "ari rite status shows current active rite"
+
+  inscription_system:
+    description: "CLAUDE.md generation and management"
+    doctrine_ref: "Section II - The Inscription"
+    items:
+      - id: IS-001
+        name: "CLAUDE.md template system"
+        severity: BLOCKER
+        status: IMPLEMENTED
+        files:
+          - knossos/templates/CLAUDE.md.tpl
+          - knossos/templates/sections/*.md.tpl
+          - ariadne/internal/inscription/generator.go
+        validation_criteria: "Templates use Go text/template; sections are composable"
+
+      - id: IS-002
+        name: "ari inscription sync command"
+        severity: BLOCKER
+        status: IMPLEMENTED
+        files:
+          - ariadne/internal/cmd/inscription/inscription.go
+          - ariadne/internal/inscription/pipeline.go
+        validation_criteria: "ari inscription sync merges templates into CLAUDE.md; respects ownership markers"
+
+      - id: IS-003
+        name: "Ownership markers (KNOSSOS:START/END)"
+        severity: BLOCKER
+        status: IMPLEMENTED
+        files:
+          - ariadne/internal/inscription/marker.go
+          - .claude/CLAUDE.md
+        validation_criteria: "Regions marked knossos/satellite/regenerate; merger respects ownership"
+
+      - id: IS-004
+        name: "Dry-run mode"
+        severity: ENHANCEMENT
+        status: IMPLEMENTED
+        files:
+          - ariadne/internal/inscription/pipeline.go
+        validation_criteria: "ari inscription sync --dry-run shows diff without writing"
+
+      - id: IS-005
+        name: "Backup and rollback"
+        severity: ENHANCEMENT
+        status: IMPLEMENTED
+        files:
+          - ariadne/internal/inscription/backup.go
+        validation_criteria: "ari inscription backups lists backups; ari inscription rollback restores"
+
+      - id: IS-006
+        name: "Agent table regeneration"
+        severity: ENHANCEMENT
+        status: IMPLEMENTED
+        files:
+          - knossos/templates/partials/agent-table.md.tpl
+          - ariadne/internal/inscription/generator.go
+        validation_criteria: "Quick Start agent table regenerates from ACTIVE_RITE + agents/"
+
+  naxos:
+    description: "Orphaned session detection and cleanup"
+    doctrine_ref: "Section II - The Shore of Abandonment: Naxos"
+    items:
+      - id: NX-001
+        name: "ari naxos scan command"
+        severity: BLOCKER
+        status: IMPLEMENTED
+        files:
+          - ariadne/internal/cmd/naxos/scan.go
+          - ariadne/internal/naxos/scanner.go
+        validation_criteria: "ari naxos scan finds orphaned sessions based on inactivity threshold"
+
+      - id: NX-002
+        name: "Orphan reasons (INACTIVE/STALE_SAILS/INCOMPLETE_WRAP)"
+        severity: ENHANCEMENT
+        status: IMPLEMENTED
+        files:
+          - ariadne/internal/naxos/types.go
+        validation_criteria: "OrphanReason enum with descriptions; scanner classifies orphan type"
+
+      - id: NX-003
+        name: "Suggested actions (WRAP/RESUME/DELETE)"
+        severity: ENHANCEMENT
+        status: IMPLEMENTED
+        files:
+          - ariadne/internal/naxos/types.go
+        validation_criteria: "SuggestedAction enum recommends action per orphan type"
+
+      - id: NX-004
+        name: "7-day stale sails threshold"
+        severity: BLOCKER
+        status: IMPLEMENTED
+        files:
+          - ariadne/internal/naxos/types.go
+        validation_criteria: "DefaultConfig sets StaleSailsThreshold to 7 * 24 * time.Hour"
+        notes: "User confirmed 7-day threshold for Naxos orphan detection"
+
+      - id: NX-005
+        name: "Scan report generation"
+        severity: ENHANCEMENT
+        status: IMPLEMENTED
+        files:
+          - ariadne/internal/naxos/report.go
+        validation_criteria: "ScanResult includes breakdown by reason; supports JSON output"
+
+  minos_tribute:
+    description: "Status reporting and session summaries"
+    doctrine_ref: "Section II - The Commissioner: Minos"
+    items:
+      - id: MT-001
+        name: "TRIBUTE.md generation"
+        severity: ENHANCEMENT
+        status: IMPLEMENTED
+        files:
+          - ariadne/internal/tribute/generator.go
+          - ariadne/internal/tribute/types.go
+        validation_criteria: "ari tribute generate creates TRIBUTE.md with session summary"
+
+      - id: MT-002
+        name: "Artifact extraction from events"
+        severity: ENHANCEMENT
+        status: IMPLEMENTED
+        files:
+          - ariadne/internal/tribute/extractor.go
+        validation_criteria: "Extracts artifacts, decisions, handoffs from events.jsonl"
+
+      - id: MT-003
+        name: "Phase progression rendering"
+        severity: ENHANCEMENT
+        status: IMPLEMENTED
+        files:
+          - ariadne/internal/tribute/renderer.go
+        validation_criteria: "Renders phase timeline with durations and responsible agents"
+
+      - id: MT-004
+        name: "TRIBUTE.md trigger on phase change"
+        severity: ENHANCEMENT
+        status: MISSING
+        files:
+          - TBD
+        validation_criteria: "Phase transition auto-triggers TRIBUTE.md update"
+        notes: "User specified TRIBUTE.md should trigger on phase changes; currently manual"
+
+  terminology_migration:
+    description: "team -> rite migration across codebase"
+    doctrine_ref: "Section XII - Terminology Concordance"
+    items:
+      - id: TM-001
+        name: "ACTIVE_RITE file naming"
+        severity: BLOCKER
+        status: IMPLEMENTED
+        files:
+          - .claude/ACTIVE_RITE
+        validation_criteria: "File named ACTIVE_RITE, not ACTIVE_TEAM"
+        notes: "Migration complete for file naming"
+
+      - id: TM-002
+        name: "Session schema field naming (active_team)"
+        severity: BLOCKER
+        status: PARTIAL
+        files:
+          - ariadne/internal/session/context.go
+          - schemas/artifacts/session-context.schema.json
+        validation_criteria: "Field should be 'active_rite' not 'active_team'"
+        notes: "Code uses 'ActiveTeam' and 'active_team' in YAML tags; needs migration to 'active_rite'"
+
+      - id: TM-003
+        name: "CLI command naming (team vs rite)"
+        severity: BLOCKER
+        status: PARTIAL
+        files:
+          - ariadne/internal/cmd/team/team.go
+          - ariadne/internal/cmd/rite/rite.go
+        validation_criteria: "ari rite subcommand group; ari team deprecated or aliased"
+        notes: "Both team and rite command groups exist; need to consolidate on rite"
+
+      - id: TM-004
+        name: "Directory naming (teams/ vs rites/)"
+        severity: ENHANCEMENT
+        status: MISSING
+        files:
+          - teams/
+        validation_criteria: "Rename teams/ directory to rites/"
+        notes: "Low priority per doctrine; 'keep agents in technical contexts'"
+
+      - id: TM-005
+        name: "Documentation consistency"
+        severity: ENHANCEMENT
+        status: PARTIAL
+        files:
+          - docs/**/*.md
+        validation_criteria: "All docs use 'rite' terminology consistently"
+        notes: "Many docs still reference team-pack, team-context, etc."
+
+      - id: TM-006
+        name: "Session context schema team -> rite"
+        severity: BLOCKER
+        status: MISSING
+        files:
+          - ariadne/internal/session/context.go
+          - ariadne/internal/validation/schemas/session-context.schema.json
+        validation_criteria: "Schema fields updated: active_team -> active_rite, team -> rite"
+        notes: "Requires migration script for existing sessions"
+
+      - id: TM-007
+        name: "Hook script terminology"
+        severity: ENHANCEMENT
+        status: PARTIAL
+        files:
+          - user-hooks/lib/team-context-loader.sh
+          - .claude/hooks/lib/team-context-loader.sh
+        validation_criteria: "Rename team-context-loader.sh to rite-context-loader.sh"
+        notes: "Low priority; functionality correct"
+
+      - id: TM-008
+        name: "Skill references"
+        severity: ENHANCEMENT
+        status: PARTIAL
+        files:
+          - user-skills/guidance/team-ref/SKILL.md
+        validation_criteria: "team-ref skill updated to rite-ref or aliased"
+        notes: "User-facing skill names may need backward compatibility"
+
+cross_cutting:
+  description: "Items spanning multiple categories"
+  items:
+    - id: CC-001
+      name: "Skill-to-Moirai delegation pattern"
+      severity: BLOCKER
+      status: PARTIAL
+      categories:
+        - moirai
+        - thread_contract
+      files:
+        - user-skills/session-lifecycle/start-ref/SKILL.md
+        - user-skills/session-lifecycle/wrap-ref/SKILL.md
+        - user-skills/session-lifecycle/park-ref/SKILL.md
+      validation_criteria: "All lifecycle skills (start, wrap, park, resume) delegate to appropriate Fate via Task() invocation"
+      notes: "Task() is the only correct agent invocation mechanism in Claude Code. Skills must explicitly delegate."
+
+    - id: CC-002
+      name: "Clew naming in code (thread -> clew)"
+      severity: ENHANCEMENT
+      status: PARTIAL
+      categories:
+        - terminology_migration
+        - thread_contract
+      files:
+        - ariadne/internal/hook/threadcontract/*.go
+        - .claude/hooks/ari/thread.sh
+      validation_criteria: "Package name threadcontract; hook named thread.sh - low priority rename"
+      notes: "Doctrine acknowledges drift; marked LOW priority in Section XIV"
+
+    - id: CC-003
+      name: "Handoff validation gates"
+      severity: BLOCKER
+      status: IMPLEMENTED
+      categories:
+        - thread_contract
+        - white_sails
+      files:
+        - ariadne/internal/validation/handoff.go
+        - ariadne/internal/validation/schemas/handoff-criteria.yaml
+      validation_criteria: "HandoffValidator checks blocking criteria; phases have artifact requirements"
+
+    - id: CC-004
+      name: "Session context mutation audit trail"
+      severity: BLOCKER
+      status: IMPLEMENTED
+      categories:
+        - moirai
+        - thread_contract
+      files:
+        - user-agents/moirai-shared.md
+        - .claude/sessions/.audit/session-mutations.log
+      validation_criteria: "Every Moirai mutation logged to audit trail with timestamp, operation, fate"
+
+golden_paths:
+  start_to_wrap:
+    description: "/start to /wrap workflow"
+    validation_criteria:
+      - "User invokes /start with initiative and complexity"
+      - "Session created in ACTIVE state"
+      - "ACTIVE_RITE loaded and agents available"
+      - "Work proceeds with event recording to clew"
+      - "User invokes /wrap"
+      - "Atropos generates WHITE_SAILS.yaml"
+      - "Session transitions to ARCHIVED"
+      - "TRIBUTE.md generated (optional)"
+    blockers:
+      - "TM-002: Session schema uses active_team not active_rite"
+      - "MO-006: /start skill must delegate to Clotho via Task()"
+      - "MO-008: /wrap skill must delegate to Atropos via Task()"
+      - "WS-007: BLACK sails don't block wrap"
+
+  task_workflow:
+    description: "/task single-task workflow"
+    validation_criteria:
+      - "User invokes /task with task description"
+      - "Session created or reused"
+      - "Task delegated to appropriate agents via Task tool"
+      - "Artifacts produced (PRD, TDD, code)"
+      - "Handoff events recorded"
+      - "Task completes with validation"
+      - "Session wrappable"
+    blockers:
+      - "TC-011: handoff_prepared event not implemented"
+      - "TC-012: handoff_executed event not implemented"
+      - "MO-007: Workflow skills must delegate state mutations to Lachesis via Task()"
+
+  sprint_workflow:
+    description: "/sprint multi-task workflow"
+    validation_criteria:
+      - "User invokes /sprint with goals"
+      - "Orchestrator breaks into tasks"
+      - "Tasks tracked in SPRINT_CONTEXT.md"
+      - "Progress updated via Lachesis"
+      - "Sprint completes when all tasks done"
+      - "Sails generated with aggregate confidence"
+    blockers:
+      - "MO-006: /sprint skill must delegate to Clotho via Task() for sprint creation"
+      - "MO-007: /task skill must delegate to Lachesis via Task() for mark_complete"
+      - "MT-004: Phase transition skills should trigger TRIBUTE.md generation"
+
+dependencies:
+  description: "Inter-component dependencies"
+  items:
+    - id: DEP-001
+      from: "Moirai agents"
+      to: "Ariadne CLI"
+      relationship: "Moirai calls ari for structure/validation"
+      status: IMPLEMENTED
+      notes: "User confirmed: Moirai responsible for context/content, ari for structure/validation/tooling"
+
+    - id: DEP-002
+      from: "Hooks"
+      to: "Ariadne CLI"
+      relationship: "Shell hooks dispatch to ari binary"
+      status: IMPLEMENTED
+      files:
+        - .claude/hooks/ari/*.sh
+
+    - id: DEP-003
+      from: "Session Manager"
+      to: "Moirai"
+      relationship: "session-manager.sh creates; Moirai mutates"
+      status: IMPLEMENTED
+      files:
+        - user-hooks/lib/session-manager.sh
+        - user-agents/moirai-shared.md
+
+    - id: DEP-004
+      from: "White Sails"
+      to: "Atropos"
+      relationship: "Atropos calls sails generation on wrap"
+      status: IMPLEMENTED
+
+    - id: DEP-005
+      from: "Inscription"
+      to: "ACTIVE_RITE"
+      relationship: "Templates read ACTIVE_RITE for agent table"
+      status: IMPLEMENTED
+
+external_dependencies:
+  - name: "Claude Code"
+    version: "Any with Task tool support"
+    notes: "Hooks rely on CLAUDE_HOOK_* environment variables"
+  - name: "Git"
+    version: "2.x+"
+    notes: "For version control and worktree operations"
+  - name: "GitHub CLI (gh)"
+    version: "2.x+"
+    notes: "For PR creation and GitHub operations"
+  - name: "jq"
+    version: "1.6+"
+    notes: "JSON processing in shell scripts"
+  - name: "just"
+    version: "1.x+"
+    notes: "Task runner for ariadne/ build"
+
+launch_readiness_matrix:
+  - category: "Weight Economy"
+    compliance: "90%"
+    blockers: 0
+    enhancements: 2
+    notes: "Cognitive budget tracking implemented; weight measurement not done"
+
+  - category: "Thread Contract"
+    compliance: "75%"
+    blockers: 3
+    enhancements: 0
+    notes: "handoff_prepared/handoff_executed events missing; auto-recording partial"
+
+  - category: "Moirai"
+    compliance: "70%"
+    blockers: 1
+    enhancements: 1
+    notes: "Agents exist; skills need to delegate via Task() consistently"
+
+  - category: "White Sails"
+    compliance: "85%"
+    blockers: 1
+    enhancements: 3
+    notes: "Generation complete; BLACK state not blocking wrap"
+
+  - category: "Rite Operations"
+    compliance: "50%"
+    blockers: 0
+    enhancements: 3
+    notes: "ACTIVE_RITE works; invoke-rite not implemented"
+
+  - category: "Inscription System"
+    compliance: "95%"
+    blockers: 0
+    enhancements: 2
+    notes: "Fully functional template system"
+
+  - category: "Naxos"
+    compliance: "95%"
+    blockers: 0
+    enhancements: 2
+    notes: "Scanner implemented with 7-day threshold"
+
+  - category: "Minos Tribute"
+    compliance: "75%"
+    blockers: 0
+    enhancements: 2
+    notes: "Generation works; auto-trigger on phase change missing"
+
+  - category: "Terminology Migration"
+    compliance: "40%"
+    blockers: 4
+    enhancements: 4
+    notes: "ACTIVE_RITE done; session schema and CLI commands need migration"
+
+priority_remediation:
+  p1_critical:
+    description: "Must fix before launch"
+    items:
+      - "TC-011: Add handoff_prepared event type"
+      - "TC-012: Add handoff_executed event type"
+      - "TM-002: Session schema active_team -> active_rite"
+      - "TM-006: Update session-context.schema.json"
+      - "WS-007: BLACK sails block session wrap"
+
+  p2_high:
+    description: "Should fix before launch"
+    items:
+      - "MO-006/007/008: Skill-to-Moirai Task() delegation in lifecycle skills"
+      - "TM-003: Consolidate team/rite CLI commands"
+      - "CC-001: Ensure all lifecycle skills delegate to Moirai consistently"
+
+  p3_medium:
+    description: "Nice to have for launch"
+    items:
+      - "RO-003: invoke-rite command"
+      - "MT-004: TRIBUTE.md auto-trigger"
+      - "WE-003: Rite weight measurement"
+
+  p4_low:
+    description: "Post-launch improvement"
+    items:
+      - "CC-002: thread -> clew renaming in code"
+      - "TM-004: teams/ -> rites/ directory rename"
+      - "TM-007: Hook script terminology"
+
+notes:
+  prior_session_findings:
+    - "~78% compliance estimate aligned with this analysis"
+    - "Skill-to-Moirai delegation pattern needs completion"
+    - "Event auto-recording correctly identified as PARTIAL"
+    - "P1-P4 priority ordering validated: Handoff > Proof evidence > Cognitive budget > Hook optimization"
+
+  implementation_strategy:
+    - "P1 items are code changes in ariadne/ - Go implementation"
+    - "P2 skill delegation requires updating lifecycle skill prompts to invoke Task(moirai/clotho/lachesis/atropos)"
+    - "Terminology migration requires schema versioning and migration script"
+    - "Integration tests should cover golden paths"
+
+  test_satellites:
+    - "test-satellite-baseline: Minimal config for basic workflow"
+    - "test-satellite-minimal: No custom settings, clean slate"
+    - "test-satellite-complex: Nested arrays, custom hooks, full rite"

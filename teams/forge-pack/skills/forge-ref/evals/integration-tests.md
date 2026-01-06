@@ -16,7 +16,7 @@
 
 ```bash
 # Save current state
-ORIGINAL_TEAM=$(cat .claude/ACTIVE_TEAM 2>/dev/null || echo "none")
+ORIGINAL_TEAM=$(cat .claude/ACTIVE_RITE 2>/dev/null || echo "none")
 
 # Attempt swap
 $ROSTER_HOME/swap-team.sh {team-name}
@@ -24,7 +24,7 @@ EXIT_CODE=$?
 
 # Verify
 echo "Exit code: $EXIT_CODE"
-cat .claude/ACTIVE_TEAM
+cat .claude/ACTIVE_RITE
 ls .claude/agents/
 cat .claude/ACTIVE_WORKFLOW.yaml
 
@@ -39,7 +39,7 @@ fi
 | Check | Pass Condition |
 |-------|----------------|
 | Exit code | 0 |
-| ACTIVE_TEAM | Contains team name |
+| ACTIVE_RITE | Contains team name |
 | agents/ populated | Files copied |
 | workflow exists | ACTIVE_WORKFLOW.yaml present |
 | No warnings | No error messages in output |
@@ -181,7 +181,7 @@ Expected: Agent either:
 
 ## Swap Test
 - [ ] Exit code 0
-- [ ] ACTIVE_TEAM correct
+- [ ] ACTIVE_RITE correct
 - [ ] agents/ populated
 - [ ] workflow.yaml present
 Result: {PASS|FAIL}

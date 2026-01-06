@@ -320,7 +320,7 @@ roster-sync repair --force
 2. Scans `.claude/` for managed files
 3. Restores missing files from roster if available
 4. Recalculates all checksums
-5. Preserves team information from ACTIVE_TEAM
+5. Preserves team information from ACTIVE_RITE
 6. Writes fresh v3 manifest
 
 ### --prune Flag
@@ -348,7 +348,7 @@ roster-sync sync --auto-refresh
 ```
 
 Only triggers a team refresh if:
-- An active team is set (ACTIVE_TEAM exists)
+- An active team is set (ACTIVE_RITE exists)
 - The team in roster has changes since last sync
 
 ### --force Flag

@@ -73,7 +73,7 @@ CLAUDE.md excludes: DYNAMIC + EPHEMERAL
 | Skill documentation | STABLE | Yes | - |
 | Agent roster | STABLE | Yes (regenerated) | - |
 | Workflow patterns | STABLE | Yes (synced) | - |
-| Active team name | STABLE | Yes (regenerated) | ACTIVE_TEAM file |
+| Active team name | STABLE | Yes (regenerated) | ACTIVE_RITE file |
 | Current initiative | DYNAMIC | No | SESSION_CONTEXT |
 | Sprint goals | DYNAMIC | No | PRD, project docs |
 | Git branch | EPHEMERAL | No | Hook output |
@@ -111,7 +111,7 @@ Session state is injected by hooks at session start. It appears in Claude's cont
 |------|--------|--------|
 | Roster | SYNC |
 | Satellite | PRESERVE or PROJECT |
-| ACTIVE_TEAM + agents/ | REGENERATE |
+| ACTIVE_RITE + agents/ | REGENERATE |
 | Session files | NOT IN CLAUDE.md |
 
 ---
@@ -199,7 +199,7 @@ Each piece of content has one owner, one sync behavior, one location.
 
 If content exists in multiple places, one becomes stale. Pick the authoritative source and reference it:
 
-- **Derived content**: Regenerate from source (team sections from ACTIVE_TEAM + agents/)
+- **Derived content**: Regenerate from source (team sections from ACTIVE_RITE + agents/)
 - **Transient content**: Inject via hooks, never persist
 - **Project extensions**: Use `## Project:*` namespace
 
@@ -260,7 +260,7 @@ Key architectural decisions and their rationale:
 | Decision | Rationale |
 |----------|-----------|
 | Session state excluded from CLAUDE.md | Changes too frequently, creates maintenance burden |
-| Team sections regenerated, not copied | Satellites have their own teams from ACTIVE_TEAM |
+| Team sections regenerated, not copied | Satellites have their own teams from ACTIVE_RITE |
 | Hooks inject transient context | Separation of stable (file) vs ephemeral (context) |
 | PRESERVE as default for unknown sections | Encourages experimentation, safer than deletion |
 | `## Project:*` pattern for extensions | Clear namespace, prevents conflicts with roster sections |

@@ -62,7 +62,7 @@ Examples:
 		},
 	}
 
-	cmd.Flags().BoolVar(&opts.updateTeam, "update-team", false, "Update ACTIVE_TEAM to match worktree's team")
+	cmd.Flags().BoolVar(&opts.updateTeam, "update-team", false, "Update ACTIVE_RITE to match worktree's team")
 
 	return cmd
 }

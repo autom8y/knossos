@@ -168,11 +168,11 @@ rollback_swap() {
 
     # Restore ACTIVE_TEAM (LAST - this is the rollback commit point)
     if [[ -f "$SWAP_BACKUP_DIR/ACTIVE_TEAM" ]]; then
-        cp "$SWAP_BACKUP_DIR/ACTIVE_TEAM" .claude/ACTIVE_TEAM
+        cp "$SWAP_BACKUP_DIR/ACTIVE_TEAM" .claude/ACTIVE_RITE
         log_debug "Restored ACTIVE_TEAM"
     else
         # Virgin swap had no ACTIVE_TEAM - remove it
-        rm -f .claude/ACTIVE_TEAM
+        rm -f .claude/ACTIVE_RITE
         log_debug "Removed ACTIVE_TEAM (virgin swap rollback)"
     fi
 
@@ -626,9 +626,9 @@ complete_partial_commit() {
     # But verify and fix if somehow missing
     if ! is_commit_step_done "$COMMIT_STEP_ACTIVE_TEAM"; then
         log_warning "ACTIVE_TEAM step not marked but we're past point-of-no-return"
-        if [[ -f ".claude/ACTIVE_TEAM" ]]; then
+        if [[ -f ".claude/ACTIVE_RITE" ]]; then
             local current_team
-            current_team=$(cat .claude/ACTIVE_TEAM | tr -d '[:space:]')
+            current_team=$(cat .claude/ACTIVE_RITE | tr -d '[:space:]')
             if [[ "$current_team" == "$target_team" ]]; then
                 mark_commit_step "$COMMIT_STEP_ACTIVE_TEAM"
             fi
@@ -666,12 +666,12 @@ verify_state_consistency() {
     log "Verifying state consistency..."
 
     # Check ACTIVE_TEAM exists
-    if [[ ! -f ".claude/ACTIVE_TEAM" ]]; then
+    if [[ ! -f ".claude/ACTIVE_RITE" ]]; then
         log_warning "No ACTIVE_TEAM file (virgin state or corrupted)"
         ((errors++)) || true
     else
         local active_team
-        active_team=$(cat .claude/ACTIVE_TEAM | tr -d '[:space:]')
+        active_team=$(cat .claude/ACTIVE_RITE | tr -d '[:space:]')
 
         # Check agents directory exists
         if [[ ! -d ".claude/agents" ]]; then
@@ -1295,8 +1295,8 @@ prompt_disposition() {
 
     # Interactive mode
     local current_team="unknown"
-    if [[ -f ".claude/ACTIVE_TEAM" ]]; then
-        current_team=$(cat .claude/ACTIVE_TEAM | tr -d '[:space:]')
+    if [[ -f ".claude/ACTIVE_RITE" ]]; then
+        current_team=$(cat .claude/ACTIVE_RITE | tr -d '[:space:]')
     fi
 
     echo ""
@@ -1728,13 +1728,13 @@ validate_team_schemas() {
 query_current_team() {
     log_debug "Querying current team"
 
-    if [[ ! -f ".claude/ACTIVE_TEAM" ]]; then
+    if [[ ! -f ".claude/ACTIVE_RITE" ]]; then
         log "No team active (virgin project)"
         exit "$EXIT_SUCCESS"
     fi
 
     local current
-    current=$(cat .claude/ACTIVE_TEAM | tr -d '[:space:]')
+    current=$(cat .claude/ACTIVE_RITE | tr -d '[:space:]')
 
     if [[ -z "$current" ]]; then
         log_error "ACTIVE_TEAM file is empty (undefined state)"
@@ -2661,9 +2661,9 @@ update_active_team() {
 
     log_debug "Updating ACTIVE_TEAM state"
 
-    echo -n "$team_name" > .claude/ACTIVE_TEAM || {
+    echo -n "$team_name" > .claude/ACTIVE_RITE || {
         log_warning "Failed to update ACTIVE_TEAM (agents swapped successfully)"
-        log "Manually fix: echo '$team_name' > .claude/ACTIVE_TEAM"
+        log "Manually fix: echo '$team_name' > .claude/ACTIVE_RITE"
         exit "$EXIT_SWAP_FAILURE"
     }
 
@@ -2677,8 +2677,8 @@ preview_refresh() {
 
     # Get current team for scoped orphan detection (RF-005)
     local current_team=""
-    if [[ -f ".claude/ACTIVE_TEAM" ]]; then
-        current_team=$(cat .claude/ACTIVE_TEAM | tr -d '[:space:]')
+    if [[ -f ".claude/ACTIVE_RITE" ]]; then
+        current_team=$(cat .claude/ACTIVE_RITE | tr -d '[:space:]')
     fi
 
     log "Dry-run: Would refresh $team_name"
@@ -2982,8 +2982,8 @@ perform_swap() {
 
     # Get current team (before swap) for journal
     local source_team=""
-    if [[ -f ".claude/ACTIVE_TEAM" ]]; then
-        source_team=$(cat .claude/ACTIVE_TEAM | tr -d '[:space:]')
+    if [[ -f ".claude/ACTIVE_RITE" ]]; then
+        source_team=$(cat .claude/ACTIVE_RITE | tr -d '[:space:]')
     fi
 
     # Check if already active (idempotency, unless --update)
@@ -3199,7 +3199,7 @@ perform_swap() {
     # the swap is considered complete. Writing it LAST ensures all resources
     # are in place first. This is the POINT-OF-NO-RETURN.
     if [[ -f "$STAGING_DIR/ACTIVE_TEAM" ]]; then
-        mv "$STAGING_DIR/ACTIVE_TEAM" .claude/ACTIVE_TEAM || {
+        mv "$STAGING_DIR/ACTIVE_TEAM" .claude/ACTIVE_RITE || {
             log_error "Failed to commit ACTIVE_TEAM"
             update_journal_error "Failed to commit ACTIVE_TEAM"
             rollback_swap
@@ -3207,7 +3207,7 @@ perform_swap() {
         }
     else
         # Fallback if staging was already cleaned up
-        echo -n "$team_name" > .claude/ACTIVE_TEAM || {
+        echo -n "$team_name" > .claude/ACTIVE_RITE || {
             log_error "Failed to write ACTIVE_TEAM"
             rollback_swap
             exit "$EXIT_SWAP_FAILURE"
@@ -3392,9 +3392,9 @@ preview_reset() {
 
     # Show what will be cleared
     echo ""
-    if [[ -f ".claude/ACTIVE_TEAM" ]]; then
+    if [[ -f ".claude/ACTIVE_RITE" ]]; then
         local current
-        current=$(cat .claude/ACTIVE_TEAM 2>/dev/null | tr -d '[:space:]')
+        current=$(cat .claude/ACTIVE_RITE 2>/dev/null | tr -d '[:space:]')
         echo "Would clear: ACTIVE_TEAM (currently: $current)"
     fi
     echo "Would regenerate: CLAUDE.md (baseline)"
@@ -3553,8 +3553,8 @@ perform_reset() {
 
     # Get current team for reporting
     local current_team=""
-    if [[ -f ".claude/ACTIVE_TEAM" ]]; then
-        current_team=$(cat .claude/ACTIVE_TEAM 2>/dev/null | tr -d '[:space:]')
+    if [[ -f ".claude/ACTIVE_RITE" ]]; then
+        current_team=$(cat .claude/ACTIVE_RITE 2>/dev/null | tr -d '[:space:]')
     fi
 
     if [[ -z "$current_team" ]]; then
@@ -3574,7 +3574,7 @@ perform_reset() {
     remove_team_hooks
 
     # Clear ACTIVE_TEAM
-    rm -f ".claude/ACTIVE_TEAM"
+    rm -f ".claude/ACTIVE_RITE"
     rm -f ".claude/ACTIVE_WORKFLOW.yaml"
     log "Cleared: ACTIVE_TEAM"
 
@@ -3744,8 +3744,8 @@ main() {
     if [[ -z "$team_name" ]]; then
         if [[ "$UPDATE_MODE" -eq 1 ]]; then
             # Update mode without team name - update current team
-            if [[ -f ".claude/ACTIVE_TEAM" ]]; then
-                team_name=$(cat .claude/ACTIVE_TEAM | tr -d '[:space:]')
+            if [[ -f ".claude/ACTIVE_RITE" ]]; then
+                team_name=$(cat .claude/ACTIVE_RITE | tr -d '[:space:]')
                 log "Updating current team: $team_name"
                 perform_swap "$team_name"
             else

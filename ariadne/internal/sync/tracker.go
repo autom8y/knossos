@@ -13,7 +13,7 @@ import (
 var DefaultTrackedPaths = []string{
 	".claude/CLAUDE.md",
 	".claude/manifest.json",
-	".claude/ACTIVE_TEAM",
+	".claude/ACTIVE_RITE",
 	".claude/settings.json",
 }
 

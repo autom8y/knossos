@@ -82,9 +82,9 @@ All 20+ markdown reference links validated:
 
 | Required Pattern | Documented | Status |
 |------------------|------------|--------|
-| ACTIVE_TEAM validation | Read `.claude/ACTIVE_TEAM` | PASS |
+| ACTIVE_RITE validation | Read `.claude/ACTIVE_RITE` | PASS |
 | Agent availability check | `.claude/agents/{agent}.md` exists | PASS |
-| Team consistency validation | Compare ACTIVE_TEAM to session.active_team | PASS |
+| Team consistency validation | Compare ACTIVE_RITE to session.active_team | PASS |
 | Error messaging templates | 4 message templates | PASS |
 | Customization points | target_team, target_agent, allow_override | PASS |
 

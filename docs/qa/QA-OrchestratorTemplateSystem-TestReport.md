@@ -52,7 +52,7 @@ The orchestrator template system is **production-ready** with one documented cos
 | INF-003 | swap-team.sh dry-run | PASS | Correctly shows changes |
 | INF-004 | swap-team.sh to ecosystem-pack | PASS | 6 agents, 1 command, 4 skills synced |
 | INF-005 | AGENT_MANIFEST.json update | PASS | Correct format with all agents |
-| INF-006 | ACTIVE_TEAM update | PASS | Team name updated |
+| INF-006 | ACTIVE_RITE update | PASS | Team name updated |
 | INF-007 | swap-team.sh back to 10x-dev-pack | PASS | Round-trip successful |
 
 ### Category 3: Extension Points and Custom Content

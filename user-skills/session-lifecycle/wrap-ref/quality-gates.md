@@ -1,6 +1,8 @@
 # Quality Gates
 
 > Validation gates for session wrap.
+>
+> **Note**: In addition to these skill-level quality gates, Atropos enforces a final WHITE_SAILS quality gate that blocks wrap if critical failures are detected (BLACK sails).
 
 ## PRD Quality Gate (All Complexity)
 
@@ -157,3 +159,84 @@ When wrapped with skip:
 ⚠ Warning: Session wrapped without quality validation.
 Review artifacts manually before considering production-ready.
 ```
+
+---
+
+## WHITE_SAILS Quality Gate (Atropos)
+
+**Triggered when**: Always, during Moirai/Atropos wrap ceremony
+
+The final quality gate, enforced by Atropos after skill-level gates pass.
+
+**Checks**:
+- ✓ Test output logs exist and show passing tests
+- ✓ Build output logs exist and show successful build
+- ✓ Lint output logs exist and show clean results
+- ✓ No open questions in SESSION_CONTEXT.md
+- ✓ No explicit blockers declared
+
+**Sails Color Computation**:
+
+| Color | Criteria | Wrap Behavior |
+|-------|----------|---------------|
+| **WHITE** | All proofs pass, no open questions | Wrap succeeds |
+| **GREY** | Some proofs missing OR open questions exist | Wrap succeeds with warning |
+| **BLACK** | Critical test failures OR build failures OR explicit blockers | **Wrap BLOCKED** |
+
+**Failure Message** (BLACK sails):
+```
+⚠ Quality Gate Failure: WHITE_SAILS
+
+Sails Color: BLACK
+Computed Base: BLACK
+
+Reasons:
+- explicit blockers present: black sails (do not ship)
+  - Tests failing in integration suite
+  - Build broken on macOS
+
+Resolution:
+1. Fix critical failures listed above
+2. Re-run /wrap (Atropos will regenerate sails)
+3. Use --emergency override ONLY for hotfixes:
+   Task(moirai, "wrap_session --emergency=reason=\"Hotfix deployment\"")
+
+⚠ WARNING: Emergency override logs the reason and flags the session.
+```
+
+**Success Message** (WHITE sails):
+```
+✓ WHITE_SAILS Quality Gate: PASSED
+
+Sails Color: WHITE
+All proofs collected, no open questions.
+Confidence: Session work is production-ready.
+```
+
+**Warning Message** (GREY sails):
+```
+⚠ WHITE_SAILS Quality Gate: PASSED with warnings
+
+Sails Color: GREY
+Some proofs missing or open questions exist.
+Confidence: Session work may need manual review before production.
+```
+
+---
+
+## Quality Gate Sequence
+
+When `/wrap` is invoked, gates run in this order:
+
+1. **Skill-level gates** (this file) - can be skipped with `--skip-checks`
+   - PRD Quality Gate
+   - TDD Quality Gate (MODULE+)
+   - Code Quality Gate (if last_agent = engineer)
+   - Validation Quality Gate (if last_agent = qa)
+
+2. **WHITE_SAILS Quality Gate** (Atropos) - **cannot be skipped**, only overridden with `--emergency`
+   - Generates confidence signal
+   - Blocks on BLACK sails
+   - Proceeds on WHITE/GREY sails
+
+**Key Difference**: Skill gates validate artifacts; WHITE_SAILS gate validates **confidence in the work itself** via proof collection.

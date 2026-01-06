@@ -224,6 +224,8 @@ type StatusOutput struct {
 	SchemaVersion string `json:"schema_version,omitempty"`
 	GitBranch     string `json:"git_branch,omitempty"`
 	GitChanges    int    `json:"git_changes,omitempty"`
+	SailsColor    string `json:"sails_color,omitempty"`
+	SailsBase     string `json:"sails_base,omitempty"`
 }
 
 // Text implements Textable for StatusOutput.
@@ -240,6 +242,16 @@ func (s StatusOutput) Text() string {
 	b.WriteString(fmt.Sprintf("Mode: %s\n", s.ExecutionMode))
 	if s.GitBranch != "" {
 		b.WriteString(fmt.Sprintf("Branch: %s (%d changes)\n", s.GitBranch, s.GitChanges))
+	}
+	// Display sails info
+	if s.SailsColor != "" {
+		sailsInfo := fmt.Sprintf("Sails: %s", s.SailsColor)
+		if s.SailsBase != "" && s.SailsBase != s.SailsColor {
+			sailsInfo += fmt.Sprintf(" (base: %s)", s.SailsBase)
+		}
+		b.WriteString(sailsInfo + "\n")
+	} else {
+		b.WriteString("Sails: not generated\n")
 	}
 	return b.String()
 }

@@ -25,7 +25,7 @@ Detection Flow:
 3. SESSION_CONTEXT.md missing -> "native"
 4. status == PARKED -> "cross-cutting"
 5. status == ARCHIVED -> "native"
-6. ACTIVE_TEAM == none/null -> "cross-cutting"
+6. ACTIVE_RITE == none/null -> "cross-cutting"
 7. team pack directory missing -> "cross-cutting"
 8. All conditions pass -> "orchestrated"
 ```
@@ -86,9 +86,9 @@ Detection Flow:
 
 **Current Implementation**: No. The `execution_mode()` function checks session existence FIRST (lines 50-59). If no session, it returns `native` immediately without checking team.
 
-**Enforcement**: ACTIVE_TEAM file can exist without session, but:
+**Enforcement**: ACTIVE_RITE file can exist without session, but:
 - `orchestrator-router.sh` requires orchestrator.md file (agent presence, not team activation)
-- Session creation (`fsm_create_session`) reads ACTIVE_TEAM but creates session with whatever team exists
+- Session creation (`fsm_create_session`) reads ACTIVE_RITE but creates session with whatever team exists
 - No validation prevents team activation without session
 
 **Recommendation**: Keep this constraint. Teams provide coordination for session-tracked work. A team without a session is semantically undefined - there's nothing to coordinate.

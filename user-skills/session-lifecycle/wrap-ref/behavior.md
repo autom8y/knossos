@@ -32,22 +32,43 @@ If `last_agent` is not `qa-adversary`:
 - If yes: Invoke QA Adversary via Task tool
 - Wait for response; abort if issues found
 
-### 4. Invoke state-mate for Wrap Mutation
+### 4. Invoke Moirai (Atropos) for Wrap Ceremony
 
-Apply [state-mate Invocation Pattern](../shared-sections/state-mate-invocation.md):
-- Operation: `wrap_session`
-- Post-action: Archive session directory, generate summary
+Session wrap is managed via the Moirai (Atropos - the Cutter):
 
-**Prerequisites Enforced by state-mate**:
+```
+Task(moirai, "wrap_session
+
+Session Context:
+- Session ID: {current session}
+- Session Path: .claude/sessions/{session-id}/SESSION_CONTEXT.md")
+```
+
+**The Moirai (Atropos) will**:
+1. Invoke `ari session wrap` to generate WHITE_SAILS confidence signal
+2. Validate quality gate: **BLOCKS if sails are BLACK** (unless --emergency)
+3. Transition session state to ARCHIVED
+4. Record wrap in audit trail
+5. Return structured response with sails metadata
+
+**Prerequisites Enforced by Atropos**:
 - Session must be ACTIVE (not PARKED)
-- If PARKED, state-mate returns LIFECYCLE_VIOLATION with hint to resume first
+- If PARKED, Atropos returns LIFECYCLE_VIOLATION with hint to resume first
 - `--override=reason` can bypass prerequisites if explicitly requested
 
-**Additional Error Handling**:
-- If quality gates fail (checked by skill BEFORE invoking state-mate), offer options
-- If PARKED, offer to auto-invoke `/resume` then retry wrap
+**WHITE_SAILS Quality Gate**:
+- **WHITE sails**: All proofs pass, no open questions → Wrap succeeds
+- **GREY sails**: Some proofs missing or open questions → Wrap succeeds with warning
+- **BLACK sails**: Critical failures, major blockers → **Wrap blocked**
+  - Use `--emergency=reason` to override (logged and flagged)
+  - Example: `Task(moirai, "wrap_session --emergency=reason=\"Hotfix deployment\"")`
 
-See pattern documentation for response handling and error types.
+**Additional Error Handling**:
+- If quality gates fail (checked by skill BEFORE invoking Moirai), offer options
+- If PARKED, offer to auto-invoke `/resume` then retry wrap
+- If BLACK sails, display blockers and offer fix/override options
+
+See [Atropos agent](../../../user-agents/atropos.md) for full WHITE_SAILS algorithm.
 
 ### 5. Generate Session Summary
 
@@ -63,13 +84,14 @@ Summary includes:
 
 ### 6. Archive Session Directory
 
-After successful state-mate wrap, perform archival:
-```bash
-mkdir -p ".claude/.archive/sessions"
-mv ".claude/sessions/{session_id}" ".claude/.archive/sessions/"
+Archival is performed by Ariadne (`ari session wrap`) as part of the wrap ceremony.
+
+The session directory is moved from:
+```
+.claude/sessions/{session_id}/ → .claude/.archive/sessions/{session_id}/
 ```
 
-Note: Archival is file system operation, not state mutation. Performed by skill after state-mate confirms wrap.
+Note: Archival is handled by `ari` binary, not by the skill directly.
 
 ### 7. Save Session Summary
 

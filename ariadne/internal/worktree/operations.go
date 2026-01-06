@@ -28,7 +28,7 @@ type SyncResult struct {
 
 // SwitchOptions specifies options for switching to a worktree.
 type SwitchOptions struct {
-	UpdateTeam    bool // Update ACTIVE_TEAM to match worktree's team
+	UpdateTeam    bool // Update ACTIVE_RITE to match worktree's team
 	CreateSession bool // Create a new session in the worktree
 }
 
@@ -79,11 +79,11 @@ func (m *Manager) Switch(idOrName string, opts SwitchOptions) (*Worktree, error)
 			})
 	}
 
-	// Update ACTIVE_TEAM if requested and team differs
+	// Update ACTIVE_RITE if requested and team differs
 	if opts.UpdateTeam && wt.Team != "" {
-		activeTeamPath := filepath.Join(wt.Path, ".claude", "ACTIVE_TEAM")
-		if err := os.MkdirAll(filepath.Dir(activeTeamPath), 0755); err == nil {
-			os.WriteFile(activeTeamPath, []byte(wt.Team+"\n"), 0644)
+		activeRitePath := filepath.Join(wt.Path, ".claude", "ACTIVE_RITE")
+		if err := os.MkdirAll(filepath.Dir(activeRitePath), 0755); err == nil {
+			os.WriteFile(activeRitePath, []byte(wt.Team+"\n"), 0644)
 		}
 
 		// Also try to run swap-team.sh if available

@@ -129,7 +129,7 @@ Executed full swap cycle in skeleton_claude satellite:
 |-----------|------------|-------|
 | swap-team.sh API | YES | No breaking changes to CLI |
 | Existing team packs | YES | Works with/without hooks/ directory |
-| ACTIVE_TEAM state | YES | Format unchanged |
+| ACTIVE_RITE state | YES | Format unchanged |
 | AGENT_MANIFEST.json | YES | Schema unchanged |
 | Marker files (.team-*) | YES | Pattern extended to hooks, consistent |
 

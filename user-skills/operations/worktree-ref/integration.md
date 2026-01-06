@@ -17,7 +17,7 @@
         .worktree-meta.json         # Worktree metadata
         agents/                     # Team agents (isolated)
         sessions/                   # Single session
-        ACTIVE_TEAM                 # Team state (isolated)
+        ACTIVE_RITE                 # Team state (isolated)
         SPRINT_CONTEXT              # Sprint state (isolated)
 ```
 
@@ -104,9 +104,9 @@ cd worktrees/wt-{id}
 ./swap-team.sh 10x-dev-pack
 ```
 
-### ACTIVE_TEAM
+### ACTIVE_RITE
 
-Each worktree has its own ACTIVE_TEAM file, enabling different teams in parallel terminals.
+Each worktree has its own ACTIVE_RITE file, enabling different teams in parallel terminals.
 
 ## Git Integration
 

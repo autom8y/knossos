@@ -149,14 +149,15 @@ func (g *Generator) Generate() (*GenerateResult, error) {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to collect proofs", err)
 	}
 
-	// Step 2: Load session context to get open questions, modifiers, complexity, and session type
-	sessionID, complexity, sessionType, openQuestions, modifiers, qaUpgrade, err := g.loadSessionContext()
+	// Step 2: Load session context to get open questions, blockers, modifiers, complexity, and session type
+	sessionID, complexity, sessionType, openQuestions, blockers, modifiers, qaUpgrade, err := g.loadSessionContext()
 	if err != nil {
 		// Session context is optional - use defaults if not found
 		sessionID = g.extractSessionIDFromPath()
 		complexity = "MODULE" // Default complexity
 		sessionType = "standard"
 		openQuestions = nil
+		blockers = nil
 		modifiers = nil
 		qaUpgrade = nil
 	}
@@ -170,6 +171,7 @@ func (g *Generator) Generate() (*GenerateResult, error) {
 		Complexity:    complexity,
 		Proofs:        proofs,
 		OpenQuestions: openQuestions,
+		Blockers:      blockers,
 		Modifiers:     modifiers,
 		QAUpgrade:     qaUpgrade,
 	}
@@ -226,20 +228,20 @@ func (g *Generator) Generate() (*GenerateResult, error) {
 }
 
 // loadSessionContext reads SESSION_CONTEXT.md to extract metadata.
-func (g *Generator) loadSessionContext() (sessionID, complexity, sessionType string, openQuestions []string, modifiers []Modifier, qaUpgrade *QAUpgrade, err error) {
+func (g *Generator) loadSessionContext() (sessionID, complexity, sessionType string, openQuestions []string, blockers []string, modifiers []Modifier, qaUpgrade *QAUpgrade, err error) {
 	contextPath := filepath.Join(g.SessionPath, "SESSION_CONTEXT.md")
 
 	content, readErr := os.ReadFile(contextPath)
 	if readErr != nil {
 		if os.IsNotExist(readErr) {
-			return "", "", "", nil, nil, nil, errors.New(errors.CodeFileNotFound, "SESSION_CONTEXT.md not found")
+			return "", "", "", nil, nil, nil, nil, errors.New(errors.CodeFileNotFound, "SESSION_CONTEXT.md not found")
 		}
-		return "", "", "", nil, nil, nil, errors.Wrap(errors.CodeGeneralError, "failed to read SESSION_CONTEXT.md", readErr)
+		return "", "", "", nil, nil, nil, nil, errors.Wrap(errors.CodeGeneralError, "failed to read SESSION_CONTEXT.md", readErr)
 	}
 
 	ctx, parseErr := session.ParseContext(content)
 	if parseErr != nil {
-		return "", "", "", nil, nil, nil, errors.Wrap(errors.CodeSchemaInvalid, "failed to parse SESSION_CONTEXT.md", parseErr)
+		return "", "", "", nil, nil, nil, nil, errors.Wrap(errors.CodeSchemaInvalid, "failed to parse SESSION_CONTEXT.md", parseErr)
 	}
 
 	// Extract session ID and complexity from context
@@ -255,13 +257,16 @@ func (g *Generator) loadSessionContext() (sessionID, complexity, sessionType str
 	// Extract open questions from the body
 	openQuestions = extractOpenQuestions(ctx.Body)
 
+	// Extract blockers from the body
+	blockers = extractBlockers(ctx.Body)
+
 	// Extract modifiers from the body (if any declared)
 	modifiers = extractModifiers(ctx.Body)
 
 	// QA upgrade would be extracted if present (typically from a QA session)
 	qaUpgrade = extractQAUpgrade(ctx.Body)
 
-	return sessionID, complexity, sessionType, openQuestions, modifiers, qaUpgrade, nil
+	return sessionID, complexity, sessionType, openQuestions, blockers, modifiers, qaUpgrade, nil
 }
 
 // extractSessionIDFromPath extracts session ID from the directory name.
@@ -452,6 +457,56 @@ func extractOpenQuestions(body string) []string {
 	}
 
 	return questions
+}
+
+// extractBlockers parses the session body for blockers.
+// Looks for a section like "## Blockers" followed by bullet points.
+// Ignores common "no blocker" phrases like "None", "None yet", "N/A".
+func extractBlockers(body string) []string {
+	var blockers []string
+
+	// Pattern to find Blockers section
+	blockersPattern := regexp.MustCompile(`(?i)##\s*Blockers?\s*\n`)
+	match := blockersPattern.FindStringIndex(body)
+	if match == nil {
+		return blockers
+	}
+
+	// Extract content after the header until the next section or end
+	startIdx := match[1]
+	remaining := body[startIdx:]
+
+	// Find the next section header (## Something)
+	nextSectionPattern := regexp.MustCompile(`\n##\s+`)
+	nextMatch := nextSectionPattern.FindStringIndex(remaining)
+
+	var sectionContent string
+	if nextMatch != nil {
+		sectionContent = remaining[:nextMatch[0]]
+	} else {
+		sectionContent = remaining
+	}
+
+	// Extract bullet points (lines starting with - or *)
+	bulletPattern := regexp.MustCompile(`(?m)^[\s]*[-*]\s*(.+)$`)
+	matches := bulletPattern.FindAllStringSubmatch(sectionContent, -1)
+	for _, m := range matches {
+		if len(m) > 1 {
+			blocker := strings.TrimSpace(m[1])
+			// Filter out common "no blocker" phrases
+			blockerLower := strings.ToLower(blocker)
+			if blocker != "" &&
+				blockerLower != "none" &&
+				blockerLower != "none yet" &&
+				blockerLower != "none yet." &&
+				blockerLower != "n/a" &&
+				!strings.HasPrefix(blockerLower, "none ") {
+				blockers = append(blockers, blocker)
+			}
+		}
+	}
+
+	return blockers
 }
 
 // extractModifiers parses the session body for declared modifiers.

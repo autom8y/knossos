@@ -75,7 +75,7 @@ This Context Design addresses the gap identified in task-001: team-specific cont
 **Rationale**:
 - Direct sibling to workflow.yaml and agents/
 - Name clearly indicates purpose (injection into session context)
-- Simple discovery: `$ROSTER_HOME/teams/$ACTIVE_TEAM/context-injection.sh`
+- Simple discovery: `$ROSTER_HOME/teams/$ACTIVE_RITE/context-injection.sh`
 
 ### Decision 3: Script Interface Contract
 
@@ -149,13 +149,13 @@ readonly TEAM_CONTEXT_FUNCTION_NAME="inject_team_context"
 # =============================================================================
 
 # Load team-specific context if available
-# Arguments: None (uses ACTIVE_TEAM file and ROSTER_HOME)
+# Arguments: None (uses ACTIVE_RITE file and ROSTER_HOME)
 # Output: Markdown content to stdout (may be empty)
 # Returns: 0 always (errors logged, not propagated)
 #
 # Contract:
-#   - Reads ACTIVE_TEAM from .claude/ACTIVE_TEAM
-#   - Looks for $ROSTER_HOME/teams/$ACTIVE_TEAM/context-injection.sh
+#   - Reads ACTIVE_RITE from .claude/ACTIVE_RITE
+#   - Looks for $ROSTER_HOME/teams/$ACTIVE_RITE/context-injection.sh
 #   - Sources script and calls inject_team_context()
 #   - Returns function output on stdout
 #   - Never fails (RECOVERABLE pattern)
@@ -166,7 +166,7 @@ load_team_context() {
     local output=""
 
     # Read active team
-    active_team=$(cat ".claude/ACTIVE_TEAM" 2>/dev/null || echo "")
+    active_team=$(cat ".claude/ACTIVE_RITE" 2>/dev/null || echo "")
     if [[ -z "$active_team" || "$active_team" == "none" ]]; then
         # No team active - nothing to inject
         return 0
@@ -267,7 +267,7 @@ The library:
 ```bash
 # Team routing context (if team is active)
 # Note: ROSTER_HOME is defined in config.sh (sourced via session-utils.sh)
-if [[ -f ".claude/ACTIVE_TEAM" ]]; then
+if [[ -f ".claude/ACTIVE_RITE" ]]; then
     local TEAM_CONTEXT=$("$ROSTER_HOME/generate-team-context.sh" 2>/dev/null || echo "")
     if [[ -n "$TEAM_CONTEXT" ]]; then
         echo ""
@@ -312,7 +312,7 @@ if [[ -n "$TEAM_CONTEXT" ]]; then
 fi
 
 # Team routing context (workflow phases) - keep existing
-if [[ -f ".claude/ACTIVE_TEAM" ]]; then
+if [[ -f ".claude/ACTIVE_RITE" ]]; then
     local ROUTING_CONTEXT=$("$ROSTER_HOME/generate-team-context.sh" 2>/dev/null || echo "")
     if [[ -n "$ROUTING_CONTEXT" ]]; then
         echo ""
@@ -459,7 +459,7 @@ This change is fully backward compatible:
 |----------|-------|------------------|
 | Team with context script | ecosystem-pack active | Team Context section appears with CEM/skeleton status |
 | Team without context script | 10x-dev-pack active | No Team Context section (normal) |
-| No team active | ACTIVE_TEAM = none | No Team Context section (normal) |
+| No team active | ACTIVE_RITE = none | No Team Context section (normal) |
 | Script exists but not executable | chmod -x context-injection.sh | Warning logged, graceful skip |
 | Function missing from script | inject_team_context not defined | Warning logged, graceful skip |
 | Function returns error | inject_team_context returns 1 | Warning logged, partial output shown |

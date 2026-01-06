@@ -58,7 +58,7 @@ Claude Code discovers agents at **session startup only**, loading from both `~/.
 4. **Commands Sync**: Backs up, removes, and copies team commands via `.team-commands` marker
 5. **Skills Sync**: Backs up, removes, and copies team skills via `.team-skills` marker
 6. **CLAUDE.md Update**: Updates the Quick Start table and Agent Configurations section
-7. **ACTIVE_TEAM State**: Updates `.claude/ACTIVE_TEAM` file correctly
+7. **ACTIVE_RITE State**: Updates `.claude/ACTIVE_RITE` file correctly
 
 ### What It Cannot Do (Claude Code Limitation)
 
@@ -85,7 +85,7 @@ After running `swap-team.sh 10x-dev-pack` on skeleton_claude:
   technology-scout.md
 
 AGENT_MANIFEST.json      # Shows 5 agents, team=10x-dev-pack (CORRECT)
-ACTIVE_TEAM              # Shows "10x-dev-pack" (CORRECT)
+ACTIVE_RITE              # Shows "10x-dev-pack" (CORRECT)
 ```
 
 The filesystem is **correct**. The bug is that Claude Code's in-memory state doesn't match.

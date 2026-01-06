@@ -17,7 +17,7 @@ The current team context injection system uses bash-based sourcing via `team-con
 ```bash
 # .claude/hooks/lib/team-context-loader.sh
 load_team_context() {
-    active_team=$(cat ".claude/ACTIVE_TEAM" 2>/dev/null || echo "")
+    active_team=$(cat ".claude/ACTIVE_RITE" 2>/dev/null || echo "")
     team_script="$roster_home/teams/$active_team/$TEAM_CONTEXT_SCRIPT_NAME"
 
     # Source in subshell to isolate side effects

@@ -282,6 +282,6 @@ After making changes:
 |----------|------------|-------------|
 | Add project extension | Check `## Project:*` namespace available | Verify PRESERVE marker added |
 | Update workflow routing | Confirm this is roster content | Ensure SYNC marker preserved, descriptive tone |
-| Fix team configuration | Read ACTIVE_TEAM + agents/ | Verify regeneration source noted |
+| Fix team configuration | Read ACTIVE_RITE + agents/ | Verify regeneration source noted |
 | Remove stale content | Confirm it fails decay test | Verify no orphaned references |
 | Convert prescriptive to descriptive | Identify MUST mandates | Verify conditional tables used |

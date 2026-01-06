@@ -1,4 +1,4 @@
-package threadcontract
+package clewcontract
 
 import (
 	"path/filepath"
@@ -207,43 +207,45 @@ func RecordStampWithContext(sessionDir, decision, rationale string, rejected []s
 	return writer.Write(event)
 }
 
-// RecordTaskStart records a task delegation event.
-// Use when the orchestrator delegates work to a specialist agent via the Task tool.
+// RecordTaskStart records a task start event for cognitive budget tracking.
+// Use when a task begins within a workflow phase.
 //
 // Parameters:
 //   - sessionDir: Path to the session directory containing events.jsonl
-//   - agentName: The specialist agent receiving the task
-//   - taskDescription: The task description passed to the agent
-//   - parentSessionID: The session ID of the parent/orchestrator session
-func RecordTaskStart(sessionDir, agentName, taskDescription, parentSessionID string) error {
+//   - taskID: Unique task identifier (e.g., "task-001")
+//   - agent: The agent executing the task
+//   - phase: The workflow phase (e.g., "design", "implementation", "validation")
+//   - sessionID: The session ID context for the task
+func RecordTaskStart(sessionDir, taskID, agent, phase, sessionID string) error {
 	writer, err := NewEventWriter(sessionDir)
 	if err != nil {
 		return err
 	}
 	defer writer.Close()
 
-	event := NewTaskStartEvent(agentName, taskDescription, parentSessionID)
+	event := NewTaskStartEvent(taskID, agent, phase, sessionID)
 	return writer.Write(event)
 }
 
-// RecordTaskEnd records a task completion event.
-// Use when a delegated task completes and the throughline is extracted.
+// RecordTaskEnd records a task completion event for cognitive budget tracking.
+// Use when a task completes and captures completion metrics.
 //
 // Parameters:
 //   - sessionDir: Path to the session directory containing events.jsonl
-//   - agentName: The specialist agent that completed the task
-//   - status: Completion status (e.g., "success", "failed", "blocked")
-//   - throughline: The extracted throughline summary from the task result
-//   - artifacts: List of artifact paths produced by the task
+//   - taskID: Unique task identifier matching the task_start event
+//   - agent: The agent that executed the task
+//   - outcome: Task completion outcome (e.g., "success", "failed", "blocked")
+//   - sessionID: The session ID context for the task
 //   - durationMs: Task execution duration in milliseconds
-func RecordTaskEnd(sessionDir, agentName, status, throughline string, artifacts []string, durationMs int64) error {
+//   - artifacts: List of artifact paths produced by the task
+func RecordTaskEnd(sessionDir, taskID, agent, outcome, sessionID string, durationMs int64, artifacts []string) error {
 	writer, err := NewEventWriter(sessionDir)
 	if err != nil {
 		return err
 	}
 	defer writer.Close()
 
-	event := NewTaskEndEvent(agentName, status, throughline, artifacts, durationMs)
+	event := NewTaskEndEvent(taskID, agent, outcome, sessionID, durationMs, artifacts)
 	return writer.Write(event)
 }
 

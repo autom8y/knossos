@@ -603,7 +603,7 @@ EOF
 # Files/directories never touched by sync
 get_ignore_items() {
     cat <<EOF
-ACTIVE_TEAM
+ACTIVE_RITE
 ACTIVE_WORKFLOW.yaml
 sessions
 agents
@@ -734,7 +734,7 @@ merge_documentation(roster_file, local_file, output_file)
      d. Otherwise -> sync from roster
 
   5. For PRESERVE sections without local content:
-     a. Check for ACTIVE_TEAM
+     a. Check for ACTIVE_RITE
      b. Regenerate from agents/ directory if possible
 
   6. Append satellite-only sections (not in roster)
@@ -1265,9 +1265,9 @@ migrate_v2_to_v3() {
 
 ```bash
 # Support for --refresh flag to update team resources
-if [[ "$REFRESH_FLAG" == "1" ]] && [[ -f ".claude/ACTIVE_TEAM" ]]; then
+if [[ "$REFRESH_FLAG" == "1" ]] && [[ -f ".claude/ACTIVE_RITE" ]]; then
     local team_name
-    team_name=$(cat ".claude/ACTIVE_TEAM")
+    team_name=$(cat ".claude/ACTIVE_RITE")
     log "Refreshing team: $team_name"
     "$ROSTER_HOME/swap-team.sh" "$team_name" --update
 fi

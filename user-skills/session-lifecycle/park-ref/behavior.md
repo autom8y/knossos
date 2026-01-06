@@ -29,18 +29,31 @@ Gather current session state:
 Create a human-readable summary of session state at park time.
 See [parking-summary.md](parking-summary.md) for template.
 
-### 4. Invoke state-mate for Park Mutation
+### 4. Invoke Moirai for Park Mutation
 
-Apply [state-mate Invocation Pattern](../shared-sections/state-mate-invocation.md):
-- Operation: `park_session reason='{user_reason}'`
-- Post-action: Display parking summary
+Session parking is managed via the Moirai (Lachesis - the Measurer):
 
-See pattern documentation for response handling and error types.
+```
+Task(moirai, "park_session reason='{user_reason}'
+
+Session Context:
+- Session ID: {session_id}
+- Session Path: .claude/sessions/{session_id}/SESSION_CONTEXT.md")
+```
+
+The Moirai will route to **Lachesis** (the Measurer), who will:
+- Set session state metadata (parked_at, parked_reason, parked_phase, parked_git_status)
+- Preserve session for later resume
+- Validate lifecycle transition is legal
+
+**Note**: `state-mate` alias is supported for backward compatibility.
+
+See [state-mate Invocation Pattern](../shared-sections/state-mate-invocation.md) for response handling and error types.
 
 ### 5. Confirm Result
 
-Parse state-mate JSON response and display confirmation to user.
-Do NOT attempt direct file writes--state-mate handles all mutations.
+Parse Moirai JSON response and display confirmation to user.
+Do NOT attempt direct file writes--Moirai (via Lachesis) handles all mutations.
 
 ### 6. Confirmation
 

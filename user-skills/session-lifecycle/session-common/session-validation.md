@@ -148,7 +148,7 @@ Use /team to switch or check ROSTER_HOME.
 
 **Implementation**:
 ```bash
-active_team=$(cat .claude/ACTIVE_TEAM)
+active_team=$(cat .claude/ACTIVE_RITE)
 session_team=$(yq e '.active_team' SESSION_CONTEXT.md)
 
 if [[ "$active_team" != "$session_team" ]]; then
@@ -156,7 +156,7 @@ if [[ "$active_team" != "$session_team" ]]; then
 fi
 ```
 
-**Success**: ACTIVE_TEAM matches session.active_team
+**Success**: ACTIVE_RITE matches session.active_team
 
 **Failure**: Warning with option to switch or override
 

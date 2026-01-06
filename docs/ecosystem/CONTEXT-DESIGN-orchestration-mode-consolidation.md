@@ -729,7 +729,7 @@ All mode transitions are logged to `orchestration-audit.jsonl` as `MODE_TRANSITI
 4. **Test with existing sessions** - should continue working
 
 No session data migration required. Existing sessions will work because:
-- `execution_mode()` reads ACTIVE_TEAM and session status, not workflow.active
+- `execution_mode()` reads ACTIVE_RITE and session status, not workflow.active
 - New hooks are backward compatible with v2 session schema
 
 ---

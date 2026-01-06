@@ -244,7 +244,7 @@ Use this team for:
 
 | File | Change | Description |
 |------|--------|-------------|
-| `.claude/ACTIVE_TEAM` | Set to `10x-dev-pack` | Active team state |
+| `.claude/ACTIVE_RITE` | Set to `10x-dev-pack` | Active team state |
 | `.claude/agents/` | Populated | 5 agent files loaded |
 | `.claude/sessions/{session_id}/SESSION_CONTEXT.md` | `active_team` updated | If session active |
 

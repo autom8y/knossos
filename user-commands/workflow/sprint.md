@@ -15,7 +15,7 @@ Auto-injected by SessionStart hook (project, team, session, git).
    - If missing: ERROR "No active workflow. Use /team to select a team first."
 
 2. **Team context**:
-   - Verify `.claude/ACTIVE_TEAM` exists
+   - Verify `.claude/ACTIVE_RITE` exists
    - If missing: ERROR "No team active. Use /team <pack-name> to select a team."
 
 ## Your Task

@@ -29,8 +29,11 @@ func NewTeamCmd(outputFlag *string, verboseFlag *bool, projectDir *string) *cobr
 
 	cmd := &cobra.Command{
 		Use:   "team",
-		Short: "Manage agent teams",
-		Long:  `List, switch, validate, and manage agent team packs.`,
+		Short: "Manage rites (legacy command, use 'ari rite' for new features)",
+		Long: `List, switch, validate, and manage rites (practice bundles).
+
+This command provides backward compatibility for team operations.
+For new rite composition features (invoke/release), use 'ari rite'.`,
 	}
 
 	// Add subcommands
@@ -86,12 +89,20 @@ func (c *cmdContext) getValidator() *team.Validator {
 	return team.NewValidator(resolver)
 }
 
-// getActiveTeam reads the active team from ACTIVE_TEAM file.
+// getActiveTeam reads the active rite from ACTIVE_RITE file with backward compatibility.
 func (c *cmdContext) getActiveTeam() string {
 	resolver := c.getResolver()
-	data, err := os.ReadFile(resolver.ActiveTeamFile())
-	if err != nil {
-		return ""
+
+	// Try new ACTIVE_RITE first
+	ritePath := resolver.ActiveRiteFile()
+	if data, err := os.ReadFile(ritePath); err == nil {
+		return strings.TrimSpace(string(data))
+	} else if os.IsNotExist(err) {
+		// Fall back to legacy ACTIVE_TEAM file
+		if data, err := os.ReadFile(resolver.ActiveTeamFile()); err == nil {
+			return strings.TrimSpace(string(data))
+		}
 	}
-	return strings.TrimSpace(string(data))
+
+	return ""
 }

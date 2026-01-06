@@ -282,7 +282,7 @@ fi
 INITIATIVE=$(echo "$INITIATIVE" | sed 's/^"//;s/"$//' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
 
 # Get active team
-ACTIVE_TEAM=$(cat ".claude/ACTIVE_TEAM" 2>/dev/null || echo "none")
+ACTIVE_RITE=$(cat ".claude/ACTIVE_RITE" 2>/dev/null || echo "none")
 
 # Check for existing session
 SESSION_ID=$(get_session_id 2>/dev/null || echo "")
@@ -291,7 +291,7 @@ SESSION_CREATED="false"
 # For /start command, create session if none exists
 if [[ "$COMMAND" == "start" && -z "$SESSION_ID" ]]; then
     # Create session via session-manager.sh
-    SESSION_RESULT=$("$HOOKS_LIB/session-manager.sh" create "$INITIATIVE" "$COMPLEXITY" "$ACTIVE_TEAM" 2>&1) || true
+    SESSION_RESULT=$("$HOOKS_LIB/session-manager.sh" create "$INITIATIVE" "$COMPLEXITY" "$ACTIVE_RITE" 2>&1) || true
 
     if [[ "$SESSION_RESULT" == *'"success": true'* ]]; then
         SESSION_ID=$(echo "$SESSION_RESULT" | grep -o '"session_id": *"[^"]*"' | cut -d'"' -f4)
@@ -350,7 +350,7 @@ Session Context:
 - Session Path: $SESSION_PATH
 - Initiative: $INITIATIVE_ESCAPED
 - Complexity: $COMPLEXITY
-- Team: $ACTIVE_TEAM
+- Team: $ACTIVE_RITE
 - Request Type: $REQUEST_TYPE")
 \`\`\`
 
@@ -519,7 +519,7 @@ load '../test_helper'
 
 setup() {
     setup_test_project
-    echo "ecosystem-pack" > ".claude/ACTIVE_TEAM"
+    echo "ecosystem-pack" > ".claude/ACTIVE_RITE"
     mkdir -p ".claude/agents"
     echo "# Orchestrator" > ".claude/agents/orchestrator.md"
 }

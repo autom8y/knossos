@@ -69,7 +69,7 @@ cem (main script)
 | **MERGE-SETTINGS** | `settings.local.json` | Union arrays, base skeleton wins conflicts |
 | **MERGE-DOCS** | `CLAUDE.md` | Section-based merge with PRESERVE/SYNC markers |
 | **MERGE-DIR** | (currently empty, was `skills/`) | Sync skeleton items, preserve satellite-specific |
-| **IGNORE** | `ACTIVE_TEAM`, `sessions/`, `agents/`, `commands/`, `hooks/`, `skills/` | Never touch (roster-managed) |
+| **IGNORE** | `ACTIVE_RITE`, `sessions/`, `agents/`, `commands/`, `hooks/`, `skills/` | Never touch (roster-managed) |
 
 ---
 
@@ -231,11 +231,11 @@ Else:
 **Purpose**: Validate team pack against workflow schema.
 
 **Inputs**:
-- `name`: Team name (defaults to ACTIVE_TEAM)
+- `name`: Team name (defaults to ACTIVE_RITE)
 
 **Algorithm**:
 ```
-1. Read team name from arg or .claude/ACTIVE_TEAM
+1. Read team name from arg or .claude/ACTIVE_RITE
 2. Check workflow.yaml exists at $ROSTER_HOME/teams/$name/
 3. Validate YAML syntax via yq
 4. Check required fields: name, workflow_type, description, entry_point, phases, complexity_levels
@@ -423,7 +423,7 @@ The `migrate_manifest_v1_to_v2()` function:
 2. Extracts v1 flat fields
 3. Transforms to nested structure
 4. Adds provenance fields (`source`, `added_at`, `last_sync`) to managed_files
-5. Reads team info from ACTIVE_TEAM if present
+5. Reads team info from ACTIVE_RITE if present
 
 ---
 
@@ -475,7 +475,7 @@ The `migrate_manifest_v1_to_v2()` function:
    c. Fallback: "## Quick Start" and "## Agent Configurations" -> preserve
    d. Otherwise -> sync from skeleton
 4. For PRESERVE sections without satellite content:
-   a. Check for ACTIVE_TEAM
+   a. Check for ACTIVE_RITE
    b. Regenerate from agents/ directory if possible
 5. Append satellite-only sections (not in skeleton)
 6. Append ## Project:* sections from satellite
@@ -804,7 +804,7 @@ EOF  # Currently empty
 # IGNORE: Never touch
 get_ignore_items() {
     cat <<EOF
-ACTIVE_TEAM
+ACTIVE_RITE
 ACTIVE_WORKFLOW.yaml
 sessions
 agents

@@ -23,7 +23,7 @@ Read SESSION_CONTEXT and display:
 ### 3. Validate Context
 
 Apply [Workflow Resolution Pattern](../shared-sections/workflow-resolution.md):
-- Team consistency: Compare ACTIVE_TEAM to session.active_team
+- Team consistency: Compare ACTIVE_RITE to session.active_team
 - Allow override: Yes (user can continue with different team)
 
 See [validation-checks.md](validation-checks.md) for details.

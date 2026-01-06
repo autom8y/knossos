@@ -220,20 +220,26 @@ exit code: 0`
 		noArchive: true,
 	}
 
+	// Run wrap - should fail on BLACK sails due to quality gate
 	err := runWrap(ctx, opts)
-	if err != nil {
-		t.Fatalf("runWrap failed: %v", err)
+	if err == nil {
+		t.Fatal("Expected runWrap to fail on BLACK sails (failing tests), but it succeeded")
 	}
 
-	// Verify WHITE_SAILS.yaml was created with BLACK color
-	sailsPath := filepath.Join(sessionDir, "WHITE_SAILS.yaml")
-	sailsContent, err := os.ReadFile(sailsPath)
-	if err != nil {
-		t.Fatalf("Failed to read WHITE_SAILS.yaml: %v", err)
+	// Verify error is quality gate failure
+	if !strings.Contains(err.Error(), "BLACK sails") {
+		t.Errorf("Expected error about BLACK sails, got: %v", err)
 	}
 
-	if !strings.Contains(string(sailsContent), "color: BLACK") {
-		t.Errorf("Expected BLACK sails for failing tests, got: %s", string(sailsContent))
+	// Verify session was NOT archived (status should still be ACTIVE)
+	ctxPath := filepath.Join(sessionDir, "SESSION_CONTEXT.md")
+	ctx2, loadErr := session.LoadContext(ctxPath)
+	if loadErr != nil {
+		t.Fatalf("Failed to load session context: %v", loadErr)
+	}
+
+	if ctx2.Status != session.StatusActive {
+		t.Errorf("Expected status ACTIVE (wrap should have failed), got %s", ctx2.Status)
 	}
 }
 
@@ -475,6 +481,322 @@ exit code: 0`
 	}
 	if !strings.Contains(sailsStr, "adversarial_tests_added:") {
 		t.Error("WHITE_SAILS.yaml missing adversarial_tests_added list")
+	}
+}
+
+// TestWrapBlocksOnBlackSails verifies that wrap fails when sails are BLACK.
+func TestWrapBlocksOnBlackSails(t *testing.T) {
+	tmpDir := t.TempDir()
+	projectDir := tmpDir
+
+	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionID := "session-20250105-120010-black123"
+	sessionDir := filepath.Join(sessionsDir, sessionID)
+	locksDir := filepath.Join(sessionsDir, ".locks")
+	auditDir := filepath.Join(sessionsDir, ".audit")
+
+	if err := os.MkdirAll(sessionDir, 0755); err != nil {
+		t.Fatalf("Failed to create session dir: %v", err)
+	}
+	if err := os.MkdirAll(locksDir, 0755); err != nil {
+		t.Fatalf("Failed to create locks dir: %v", err)
+	}
+	if err := os.MkdirAll(auditDir, 0755); err != nil {
+		t.Fatalf("Failed to create audit dir: %v", err)
+	}
+
+	// Create SESSION_CONTEXT.md with explicit blocker
+	contextContent := `---
+schema_version: "1.0"
+session_id: ` + sessionID + `
+status: ACTIVE
+initiative: Test BLACK Sails Block
+complexity: MODULE
+created_at: 2025-01-05T12:00:00Z
+---
+
+# Session Context
+
+## Blockers
+- Critical bug in authentication flow
+`
+	if err := os.WriteFile(filepath.Join(sessionDir, "SESSION_CONTEXT.md"), []byte(contextContent), 0644); err != nil {
+		t.Fatalf("Failed to write SESSION_CONTEXT.md: %v", err)
+	}
+
+	if err := os.WriteFile(filepath.Join(sessionsDir, ".current-session"), []byte(sessionID), 0644); err != nil {
+		t.Fatalf("Failed to write .current-session: %v", err)
+	}
+
+	// Create passing proofs (blocker is what causes BLACK)
+	testLog := `PASS
+exit code: 0`
+	if err := os.WriteFile(filepath.Join(sessionDir, "test-output.log"), []byte(testLog), 0644); err != nil {
+		t.Fatalf("Failed to write test log: %v", err)
+	}
+
+	buildLog := `Build successful
+exit code: 0`
+	if err := os.WriteFile(filepath.Join(sessionDir, "build-output.log"), []byte(buildLog), 0644); err != nil {
+		t.Fatalf("Failed to write build log: %v", err)
+	}
+
+	lintLog := `No issues found
+exit code: 0`
+	if err := os.WriteFile(filepath.Join(sessionDir, "lint-output.log"), []byte(lintLog), 0644); err != nil {
+		t.Fatalf("Failed to write lint log: %v", err)
+	}
+
+	outputFormat := "json"
+	verbose := true
+	ctx := &cmdContext{
+		output:     &outputFormat,
+		verbose:    &verbose,
+		projectDir: &projectDir,
+	}
+
+	opts := wrapOptions{
+		noArchive: true,
+		force:     false, // No force - should fail
+	}
+
+	// Run wrap - should fail on BLACK sails
+	err := runWrap(ctx, opts)
+	if err == nil {
+		t.Fatal("Expected runWrap to fail on BLACK sails, but it succeeded")
+	}
+
+	// Verify error is quality gate failure
+	if !strings.Contains(err.Error(), "BLACK sails") {
+		t.Errorf("Expected error about BLACK sails, got: %v", err)
+	}
+
+	// Verify session was NOT archived (status should still be ACTIVE)
+	ctxPath := filepath.Join(sessionDir, "SESSION_CONTEXT.md")
+	ctx2, loadErr := session.LoadContext(ctxPath)
+	if loadErr != nil {
+		t.Fatalf("Failed to load session context: %v", loadErr)
+	}
+
+	if ctx2.Status != session.StatusActive {
+		t.Errorf("Expected status ACTIVE (wrap should have failed), got %s", ctx2.Status)
+	}
+}
+
+// TestWrapWithForceBypassesBlackSails verifies that --force bypasses BLACK sails check.
+func TestWrapWithForceBypassesBlackSails(t *testing.T) {
+	tmpDir := t.TempDir()
+	projectDir := tmpDir
+
+	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionID := "session-20250105-120011-force123"
+	sessionDir := filepath.Join(sessionsDir, sessionID)
+	locksDir := filepath.Join(sessionsDir, ".locks")
+	auditDir := filepath.Join(sessionsDir, ".audit")
+
+	if err := os.MkdirAll(sessionDir, 0755); err != nil {
+		t.Fatalf("Failed to create session dir: %v", err)
+	}
+	if err := os.MkdirAll(locksDir, 0755); err != nil {
+		t.Fatalf("Failed to create locks dir: %v", err)
+	}
+	if err := os.MkdirAll(auditDir, 0755); err != nil {
+		t.Fatalf("Failed to create audit dir: %v", err)
+	}
+
+	// Create SESSION_CONTEXT.md with explicit blocker
+	contextContent := `---
+schema_version: "1.0"
+session_id: ` + sessionID + `
+status: ACTIVE
+initiative: Test Force Bypass
+complexity: MODULE
+created_at: 2025-01-05T12:00:00Z
+---
+
+# Session Context
+
+## Blockers
+- Known issue - forcing wrap for emergency deployment
+`
+	if err := os.WriteFile(filepath.Join(sessionDir, "SESSION_CONTEXT.md"), []byte(contextContent), 0644); err != nil {
+		t.Fatalf("Failed to write SESSION_CONTEXT.md: %v", err)
+	}
+
+	if err := os.WriteFile(filepath.Join(sessionsDir, ".current-session"), []byte(sessionID), 0644); err != nil {
+		t.Fatalf("Failed to write .current-session: %v", err)
+	}
+
+	// Create passing proofs
+	testLog := `PASS
+exit code: 0`
+	if err := os.WriteFile(filepath.Join(sessionDir, "test-output.log"), []byte(testLog), 0644); err != nil {
+		t.Fatalf("Failed to write test log: %v", err)
+	}
+
+	buildLog := `Build successful
+exit code: 0`
+	if err := os.WriteFile(filepath.Join(sessionDir, "build-output.log"), []byte(buildLog), 0644); err != nil {
+		t.Fatalf("Failed to write build log: %v", err)
+	}
+
+	lintLog := `No issues found
+exit code: 0`
+	if err := os.WriteFile(filepath.Join(sessionDir, "lint-output.log"), []byte(lintLog), 0644); err != nil {
+		t.Fatalf("Failed to write lint log: %v", err)
+	}
+
+	outputFormat := "json"
+	verbose := true
+	ctx := &cmdContext{
+		output:     &outputFormat,
+		verbose:    &verbose,
+		projectDir: &projectDir,
+	}
+
+	opts := wrapOptions{
+		noArchive: true,
+		force:     true, // Force enabled - should succeed
+	}
+
+	// Run wrap with --force - should succeed despite BLACK sails
+	err := runWrap(ctx, opts)
+	if err != nil {
+		t.Fatalf("Expected runWrap with --force to succeed, but it failed: %v", err)
+	}
+
+	// Verify session was archived
+	ctxPath := filepath.Join(sessionDir, "SESSION_CONTEXT.md")
+	ctx2, loadErr := session.LoadContext(ctxPath)
+	if loadErr != nil {
+		t.Fatalf("Failed to load session context: %v", loadErr)
+	}
+
+	if ctx2.Status != session.StatusArchived {
+		t.Errorf("Expected status ARCHIVED, got %s", ctx2.Status)
+	}
+
+	// Verify WHITE_SAILS.yaml was created with BLACK color
+	sailsPath := filepath.Join(sessionDir, "WHITE_SAILS.yaml")
+	sailsContent, err := os.ReadFile(sailsPath)
+	if err != nil {
+		t.Fatalf("Failed to read WHITE_SAILS.yaml: %v", err)
+	}
+
+	if !strings.Contains(string(sailsContent), "color: BLACK") {
+		t.Errorf("Expected BLACK sails in file, got: %s", string(sailsContent))
+	}
+}
+
+// TestWrapSucceedsWithWhiteSails verifies wrap succeeds when sails are WHITE.
+func TestWrapSucceedsWithWhiteSails(t *testing.T) {
+	tmpDir := t.TempDir()
+	projectDir := tmpDir
+
+	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionID := "session-20250105-120012-white123"
+	sessionDir := filepath.Join(sessionsDir, sessionID)
+	locksDir := filepath.Join(sessionsDir, ".locks")
+	auditDir := filepath.Join(sessionsDir, ".audit")
+
+	if err := os.MkdirAll(sessionDir, 0755); err != nil {
+		t.Fatalf("Failed to create session dir: %v", err)
+	}
+	if err := os.MkdirAll(locksDir, 0755); err != nil {
+		t.Fatalf("Failed to create locks dir: %v", err)
+	}
+	if err := os.MkdirAll(auditDir, 0755); err != nil {
+		t.Fatalf("Failed to create audit dir: %v", err)
+	}
+
+	// Create SESSION_CONTEXT.md with NO blockers
+	contextContent := `---
+schema_version: "1.0"
+session_id: ` + sessionID + `
+status: ACTIVE
+initiative: Test WHITE Sails Success
+complexity: MODULE
+created_at: 2025-01-05T12:00:00Z
+---
+
+# Session Context
+
+## Session Type
+standard
+
+## Open Questions
+- None
+`
+	if err := os.WriteFile(filepath.Join(sessionDir, "SESSION_CONTEXT.md"), []byte(contextContent), 0644); err != nil {
+		t.Fatalf("Failed to write SESSION_CONTEXT.md: %v", err)
+	}
+
+	if err := os.WriteFile(filepath.Join(sessionsDir, ".current-session"), []byte(sessionID), 0644); err != nil {
+		t.Fatalf("Failed to write .current-session: %v", err)
+	}
+
+	// Create passing proofs (all required for MODULE complexity)
+	testLog := `=== RUN   TestExample
+--- PASS: TestExample (0.00s)
+PASS
+ok  	example.com/pkg	0.123s
+exit code: 0`
+	if err := os.WriteFile(filepath.Join(sessionDir, "test-output.log"), []byte(testLog), 0644); err != nil {
+		t.Fatalf("Failed to write test log: %v", err)
+	}
+
+	buildLog := `Building example.com/pkg...
+Build successful
+exit code: 0`
+	if err := os.WriteFile(filepath.Join(sessionDir, "build-output.log"), []byte(buildLog), 0644); err != nil {
+		t.Fatalf("Failed to write build log: %v", err)
+	}
+
+	lintLog := `Linting example.com/pkg...
+No issues found
+exit code: 0`
+	if err := os.WriteFile(filepath.Join(sessionDir, "lint-output.log"), []byte(lintLog), 0644); err != nil {
+		t.Fatalf("Failed to write lint log: %v", err)
+	}
+
+	outputFormat := "json"
+	verbose := true
+	ctx := &cmdContext{
+		output:     &outputFormat,
+		verbose:    &verbose,
+		projectDir: &projectDir,
+	}
+
+	opts := wrapOptions{
+		noArchive: true,
+	}
+
+	// Run wrap - should succeed with WHITE sails
+	err := runWrap(ctx, opts)
+	if err != nil {
+		t.Fatalf("Expected runWrap to succeed with WHITE sails, but it failed: %v", err)
+	}
+
+	// Verify session was archived
+	ctxPath := filepath.Join(sessionDir, "SESSION_CONTEXT.md")
+	ctx2, loadErr := session.LoadContext(ctxPath)
+	if loadErr != nil {
+		t.Fatalf("Failed to load session context: %v", loadErr)
+	}
+
+	if ctx2.Status != session.StatusArchived {
+		t.Errorf("Expected status ARCHIVED, got %s", ctx2.Status)
+	}
+
+	// Verify WHITE_SAILS.yaml was created with WHITE color
+	sailsPath := filepath.Join(sessionDir, "WHITE_SAILS.yaml")
+	sailsContent, err := os.ReadFile(sailsPath)
+	if err != nil {
+		t.Fatalf("Failed to read WHITE_SAILS.yaml: %v", err)
+	}
+
+	if !strings.Contains(string(sailsContent), "color: WHITE") {
+		t.Errorf("Expected WHITE sails in file, got: %s", string(sailsContent))
 	}
 }
 

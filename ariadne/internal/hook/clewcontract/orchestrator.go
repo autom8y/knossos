@@ -1,4 +1,4 @@
-package threadcontract
+package clewcontract
 
 import (
 	"regexp"

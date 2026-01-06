@@ -21,7 +21,7 @@ Roster is designed to coexist with native Claude, not replace it. Some work bene
 **Discovery Context:**
 - Stakeholder confirmed hybrid philosophy is intentional
 - Session-without-team is a valid edge case for cross-cutting work
-- Environment context (session files, ACTIVE_TEAM) provides all information needed for mode detection
+- Environment context (session files, ACTIVE_RITE) provides all information needed for mode detection
 - Main agent (not orchestrator) is appropriate for session-without-team scenarios
 
 ## User Stories
@@ -171,7 +171,7 @@ Roster is designed to coexist with native Claude, not replace it. Some work bene
 | Case | Expected Behavior |
 |------|------------------|
 | Session file exists but is corrupted | Treat as native mode (no session), log warning |
-| ACTIVE_TEAM file exists but team pack missing | Error with recovery guidance: "Team X not found. Use `/team` to reconfigure or `/team --remove` to continue in cross-cutting mode." |
+| ACTIVE_RITE file exists but team pack missing | Error with recovery guidance: "Team X not found. Use `/team` to reconfigure or `/team --remove` to continue in cross-cutting mode." |
 | Session created with team, then team file deleted | Downgrade to cross-cutting mode |
 | `/start` called with invalid team name | Error, do not create session |
 | Session-without-team receives `/handoff` | Error: "No orchestrator in cross-cutting mode. Use /team to enable orchestration." |

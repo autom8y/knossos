@@ -110,7 +110,7 @@ EOF
         fi
 
         # No orchestrator - create session and output status
-        ACTIVE_TEAM=$(cat ".claude/ACTIVE_TEAM" 2>/dev/null || echo "none")
+        ACTIVE_RITE=$(cat ".claude/ACTIVE_RITE" 2>/dev/null || cat ".claude/ACTIVE_TEAM" 2>/dev/null || echo "none")
         SUGGESTED_ID=$(generate_session_id)
 
         # Extract initiative and complexity from /start command
@@ -129,7 +129,7 @@ EOF
         [[ -z "$INITIATIVE" ]] && INITIATIVE="Unnamed initiative"
 
         # Trigger session creation via session-manager.sh (hook-triggered)
-        SESSION_CREATE_RESULT=$("$HOOKS_LIB/session-manager.sh" create "$INITIATIVE" "$COMPLEXITY" "$ACTIVE_TEAM" 2>&1)
+        SESSION_CREATE_RESULT=$("$HOOKS_LIB/session-manager.sh" create "$INITIATIVE" "$COMPLEXITY" "$ACTIVE_RITE" 2>&1)
         SESSION_CREATE_SUCCESS=$?
 
         if [[ $SESSION_CREATE_SUCCESS -eq 0 ]]; then
@@ -176,11 +176,11 @@ This is informational only - you may proceed with /start if appropriate.
 
 | Property | Value |
 |----------|-------|
-| Team | $ACTIVE_TEAM |
+| Team | $ACTIVE_RITE |
 | Initiative | $INITIATIVE |
 | Complexity | $COMPLEXITY |
 | Worktree | $WORKTREE_ID |
-| Expected Team | ${WORKTREE_TEAM:-$ACTIVE_TEAM} |
+| Expected Team | ${WORKTREE_TEAM:-$ACTIVE_RITE} |
 
 **Worktree Context**: Sessions here are isolated from main project.
 Use \`/wrap\` when done to finalize and optionally remove worktree.
@@ -197,7 +197,7 @@ EOF
 
 | Property | Value |
 |----------|-------|
-| Team | $ACTIVE_TEAM |
+| Team | $ACTIVE_RITE |
 | Initiative | $INITIATIVE |
 | Complexity | $COMPLEXITY |
 ${COMPLEXITY_WARNING}

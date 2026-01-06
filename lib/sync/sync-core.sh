@@ -973,7 +973,7 @@ roster_has_updates() {
 # Check if active team needs refresh
 # Returns: 0 if stale, 1 if fresh
 is_team_stale() {
-    local active_team_file=".claude/ACTIVE_TEAM"
+    local active_team_file=".claude/ACTIVE_RITE"
 
     if [[ ! -f "$active_team_file" ]]; then
         return 1  # No team, not stale
@@ -1018,7 +1018,7 @@ is_team_stale() {
 
 # Refresh active team via swap-team.sh
 refresh_active_team() {
-    local active_team_file=".claude/ACTIVE_TEAM"
+    local active_team_file=".claude/ACTIVE_RITE"
 
     if [[ ! -f "$active_team_file" ]]; then
         sync_log_debug "No active team to refresh"

@@ -38,7 +38,7 @@ A practical checklist for determining if content belongs in CLAUDE.md. Before ad
 **Examples that fail**:
 - Git state (derived from repository)
 - Session state (derived from SESSION_CONTEXT)
-- Team roster (derived from ACTIVE_TEAM + agents/)
+- Team roster (derived from ACTIVE_RITE + agents/)
 - Build status (derived from CI)
 
 **Correct approach**: Inject via hooks or regenerate from authoritative source
@@ -73,12 +73,12 @@ A practical checklist for determining if content belongs in CLAUDE.md. Before ad
 |--------|---------------|--------------|
 | Yes, roster -> satellites | SYNC | Infrastructure section |
 | No, satellite-only | PRESERVE | Identity/Extension section |
-| Regenerated from ACTIVE_TEAM | REGENERATE | Team configuration |
+| Regenerated from ACTIVE_RITE | REGENERATE | Team configuration |
 
 **Use this to determine section ownership**:
 - Infrastructure docs (skills, hooks, routing) = SYNC
 - Project-specific content = PRESERVE or `## Project:*`
-- Agent roster = REGENERATE from ACTIVE_TEAM
+- Agent roster = REGENERATE from ACTIVE_RITE
 
 ---
 

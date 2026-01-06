@@ -135,7 +135,7 @@ This document catalogs anti-patterns observed across all session-lifecycle comma
 - Handoff to agent that doesn't exist
 
 **Fix**:
-- Check ACTIVE_TEAM before /start
+- Check ACTIVE_RITE before /start
 - Use --team flag to switch explicitly
 
 **Prevention**: /start displays team confirmation

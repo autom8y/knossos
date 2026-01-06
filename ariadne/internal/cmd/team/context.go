@@ -16,15 +16,15 @@ func newContextCmd(ctx *cmdContext) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "context",
-		Short: "Show team context for Claude injection",
-		Long: `Displays the context injection data for a team.
+		Short: "Show rite context for Claude injection",
+		Long: `Displays the context injection data for a rite (practice bundle).
 
-This context is injected into Claude sessions when the team is active.
+This context is injected into Claude sessions when the rite is active.
 The output can be formatted as markdown (default), JSON, or YAML.
 
 Examples:
-  ari team context                     # Show current team's context
-  ari team context --team=10x-dev-pack # Show specific team's context
+  ari team context                     # Show current rite's context
+  ari team context --rite=10x-dev-pack # Show specific rite's context
   ari team context --format=yaml       # Output as YAML
   ari team context --format=json       # Output as JSON`,
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -32,8 +32,11 @@ Examples:
 		},
 	}
 
-	cmd.Flags().StringVarP(&opts.teamName, "team", "t", "", "Team name (defaults to active team)")
+	cmd.Flags().StringVarP(&opts.teamName, "rite", "r", "", "Rite name (defaults to active rite)")
+	cmd.Flags().StringVarP(&opts.teamName, "team", "t", "", "Deprecated: use --rite instead")
 	cmd.Flags().StringVarP(&opts.format, "format", "f", "markdown", "Output format: markdown, json, yaml")
+
+	cmd.Flags().MarkDeprecated("team", "use --rite instead")
 
 	return cmd
 }

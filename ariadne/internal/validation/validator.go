@@ -141,7 +141,7 @@ func ValidateSessionFields(data map[string]interface{}) []string {
 	var issues []string
 
 	// Required fields per TDD
-	required := []string{"session_id", "status", "created_at", "initiative", "complexity", "active_team", "current_phase"}
+	required := []string{"session_id", "status", "created_at", "initiative", "complexity", "active_rite", "current_phase"}
 	for _, field := range required {
 		if _, ok := data[field]; !ok {
 			issues = append(issues, fmt.Sprintf("missing required field: %s", field))

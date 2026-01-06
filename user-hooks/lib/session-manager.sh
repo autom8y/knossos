@@ -84,31 +84,31 @@ execution_mode() {
         return 0
     fi
 
-    # Session is ACTIVE - check team configuration
-    local active_team
-    active_team=$(cat ".claude/ACTIVE_TEAM" 2>/dev/null || echo "none")
+    # Session is ACTIVE - check rite configuration
+    local active_rite
+    active_rite=$(cat ".claude/ACTIVE_RITE" 2>/dev/null || cat ".claude/ACTIVE_TEAM" 2>/dev/null || echo "none")
 
-    # Also check team field in session context for cross-cutting sessions
-    if [[ "$active_team" == "none" || -z "$active_team" ]]; then
-        # Check if team is explicitly null in SESSION_CONTEXT
-        local ctx_team
-        ctx_team=$(grep -m1 "^active_team:" "$ctx_file" 2>/dev/null | cut -d: -f2- | tr -d ' "')
-        if [[ -z "$ctx_team" || "$ctx_team" == "none" || "$ctx_team" == "null" ]]; then
+    # Also check rite field in session context for cross-cutting sessions
+    if [[ "$active_rite" == "none" || -z "$active_rite" ]]; then
+        # Check if rite is explicitly null in SESSION_CONTEXT
+        local ctx_rite
+        ctx_rite=$(grep -m1 "^active_team:" "$ctx_file" 2>/dev/null | cut -d: -f2- | tr -d ' "')
+        if [[ -z "$ctx_rite" || "$ctx_rite" == "none" || "$ctx_rite" == "null" ]]; then
             echo "cross-cutting"
             return 0
         fi
-        active_team="$ctx_team"
+        active_rite="$ctx_rite"
     fi
 
-    # Verify team pack exists
-    local team_pack_dir="${ROSTER_HOME:-$HOME/.config/roster}/teams/$active_team"
-    if [[ ! -d "$team_pack_dir" ]]; then
-        # Team configured but pack missing - error state, but fallback gracefully
+    # Verify rite pack exists
+    local rite_pack_dir="${ROSTER_HOME:-$HOME/.config/roster}/teams/$active_rite"
+    if [[ ! -d "$rite_pack_dir" ]]; then
+        # Rite configured but pack missing - error state, but fallback gracefully
         echo "cross-cutting"
         return 0
     fi
 
-    # All conditions met: ACTIVE session + valid team = orchestrated
+    # All conditions met: ACTIVE session + valid rite = orchestrated
     echo "orchestrated"
     return 0
 }
@@ -236,9 +236,9 @@ cmd_status() {
         [[ "$session_state" == "PARKED" ]] && parked="true" || parked="false"
     fi
 
-    # Team and workflow
-    local active_team
-    active_team=$(cat ".claude/ACTIVE_TEAM" 2>/dev/null || echo "none")
+    # Rite and workflow
+    local active_rite
+    active_rite=$(cat ".claude/ACTIVE_RITE" 2>/dev/null || cat ".claude/ACTIVE_TEAM" 2>/dev/null || echo "none")
     local workflow_name
     workflow_name=$(get_workflow_name)
     local workflow_entry
@@ -269,7 +269,7 @@ cmd_status() {
   "complexity": $(json_string "$complexity"),
   "current_phase": $(json_string "$current_phase"),
   "parked": $parked,
-  "active_team": "$active_team",
+  "active_team": "$active_rite",
   "execution_mode": "$exec_mode",
   "workflow_name": "${workflow_name:-null}",
   "workflow_entry": "${workflow_entry:-null}",
@@ -289,7 +289,7 @@ EOF
 cmd_create() {
     local initiative="${1:-unnamed}"
     local complexity="${2:-MODULE}"
-    local team="${3:-$(cat ".claude/ACTIVE_TEAM" 2>/dev/null || echo "none")}"
+    local team="${3:-$(cat ".claude/ACTIVE_RITE" 2>/dev/null || cat ".claude/ACTIVE_TEAM" 2>/dev/null || echo "none")}"
 
     # Acquire lock to prevent race conditions during session creation
     local lockfile="$SESSIONS_DIR/.create.lock"

@@ -45,9 +45,12 @@ Finishing work?
 **Actions**:
 1. Run quality gates (unless --skip-checks)
 2. Offer final QA review (if last_agent ≠ qa)
-3. Invoke state-mate agent for wrap mutation (transitions session to ARCHIVED state)
+3. Invoke Moirai (Atropos) for wrap ceremony
+   - Generates WHITE_SAILS confidence signal
+   - Validates quality gate (blocks on BLACK sails unless --emergency)
+   - Transitions session to ARCHIVED state
 4. Generate session summary
-5. Archive session directory
+5. Archive session directory (moved by Ariadne)
 6. Update session index
 7. Display confirmation
 

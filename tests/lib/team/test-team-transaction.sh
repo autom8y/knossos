@@ -531,7 +531,7 @@ test_create_swap_backup() {
     cd "$TEST_TMP"
     mkdir -p .claude/agents
     echo "# Agent" > .claude/agents/test.md
-    echo "test-team" > .claude/ACTIVE_TEAM
+    echo "test-team" > .claude/ACTIVE_RITE
     echo '{}' > "$MANIFEST_FILE"
 
     # Create journal for backup to update

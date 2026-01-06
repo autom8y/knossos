@@ -56,7 +56,7 @@ The script handles:
 - Validation of team pack existence
 - Backup of current agents (if any)
 - Atomic swap of agent files
-- Update of `.claude/ACTIVE_TEAM` state file
+- Update of `.claude/ACTIVE_RITE` state file
 
 ### 3. Display Results
 
@@ -120,7 +120,7 @@ For detailed team profiles including agents, routing conditions, and use cases:
 
 | File | Change | Description |
 |------|--------|-------------|
-| `.claude/ACTIVE_TEAM` | Overwritten | Contains single line with active team name |
+| `.claude/ACTIVE_RITE` | Overwritten | Contains single line with active team name |
 | `.claude/agents/` | Replaced | All agent files swapped atomically |
 | `.claude/agents.backup/` | Created | Backup of previous agents (safety net) |
 | `.claude/sessions/{session_id}/SESSION_CONTEXT.md` | Updated | If session active, team field updated |
@@ -369,7 +369,7 @@ These commands invoke `/team {pack-name}` internally and display team roster aft
 ## Success Criteria
 
 - Correct team pack loaded in `.claude/agents/`
-- `.claude/ACTIVE_TEAM` file updated with team name
+- `.claude/ACTIVE_RITE` file updated with team name
 - Previous agents backed up to `.claude/agents.backup/`
 - All expected agent files present (validated by count)
 - If session active, SESSION_CONTEXT updated
@@ -404,7 +404,7 @@ The roster system uses backup-then-swap to prevent corruption:
 2. Clear `.claude/agents/`
 3. Copy new agents from roster
 4. Validate file count matches
-5. Update `.claude/ACTIVE_TEAM`
+5. Update `.claude/ACTIVE_RITE`
 
 If any step fails, previous agents can be restored from backup.
 

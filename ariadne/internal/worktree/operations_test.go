@@ -113,11 +113,11 @@ func TestSwitchWithTeamUpdate(t *testing.T) {
 		t.Fatalf("Switch failed: %v", err)
 	}
 
-	// Verify ACTIVE_TEAM file was updated
-	activeTeamPath := filepath.Join(wt.Path, ".claude", "ACTIVE_TEAM")
-	data, err := os.ReadFile(activeTeamPath)
+	// Verify ACTIVE_RITE file was updated
+	activeRitePath := filepath.Join(wt.Path, ".claude", "ACTIVE_RITE")
+	data, err := os.ReadFile(activeRitePath)
 	if err != nil {
-		t.Fatalf("Failed to read ACTIVE_TEAM: %v", err)
+		t.Fatalf("Failed to read ACTIVE_RITE: %v", err)
 	}
 
 	if strings.TrimSpace(string(data)) != "my-team" {
@@ -837,7 +837,7 @@ schema_version: "2.1"
 session_id: session-12345
 status: "ACTIVE"
 worktree_id: "wt-abcdef"
-active_team: "10x-dev-pack"
+active_rite: "10x-dev-pack"
 initiative: "Test Initiative"
 complexity: MODULE
 current_phase: implementation
@@ -868,8 +868,8 @@ Some body content.
 	if ctx.WorktreeID != "wt-abcdef" {
 		t.Errorf("Expected worktree_id 'wt-abcdef', got '%s'", ctx.WorktreeID)
 	}
-	if ctx.ActiveTeam != "10x-dev-pack" {
-		t.Errorf("Expected active_team '10x-dev-pack', got '%s'", ctx.ActiveTeam)
+	if ctx.ActiveRite != "10x-dev-pack" {
+		t.Errorf("Expected active_rite '10x-dev-pack', got '%s'", ctx.ActiveRite)
 	}
 	if ctx.Initiative != "Test Initiative" {
 		t.Errorf("Expected initiative 'Test Initiative', got '%s'", ctx.Initiative)

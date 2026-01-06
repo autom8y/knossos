@@ -19,8 +19,8 @@ type Context struct {
 	Session    *session.Context
 	HasSession bool
 
-	// Team information
-	ActiveTeam string
+	// Rite information
+	ActiveRite string
 
 	// Execution mode
 	ExecutionMode string
@@ -56,13 +56,19 @@ func LoadContext(env *Env) (*Context, error) {
 	ctx.ClaudeDir = filepath.Join(projectRoot, ".claude")
 	ctx.resolver = paths.NewResolver(projectRoot)
 
-	// Load active team (quick file read)
-	if data, err := os.ReadFile(ctx.resolver.ActiveTeamFile()); err == nil {
-		ctx.ActiveTeam = string(data)
+	// Load active rite with backward compatibility
+	ritePath := ctx.resolver.ActiveRiteFile()
+	if data, err := os.ReadFile(ritePath); err == nil {
+		ctx.ActiveRite = string(data)
+	} else if os.IsNotExist(err) {
+		// Fall back to legacy ACTIVE_TEAM file
+		if data, err := os.ReadFile(ctx.resolver.ActiveTeamFile()); err == nil {
+			ctx.ActiveRite = string(data)
+		}
 	}
 
-	// Determine execution mode based on team
-	ctx.ExecutionMode = determineExecutionMode(ctx.ActiveTeam, ctx.HasSession)
+	// Determine execution mode based on rite
+	ctx.ExecutionMode = determineExecutionMode(ctx.ActiveRite, ctx.HasSession)
 
 	// Load current session ID
 	sessionID := env.SessionID
@@ -92,7 +98,7 @@ func LoadContext(env *Env) (*Context, error) {
 	ctx.Session = sessionCtx
 
 	// Update execution mode based on session
-	ctx.ExecutionMode = determineExecutionMode(ctx.ActiveTeam, true)
+	ctx.ExecutionMode = determineExecutionMode(ctx.ActiveRite, true)
 
 	return ctx, nil
 }
@@ -103,12 +109,12 @@ func LoadContextFromProjectDir(projectDir string) (*Context, error) {
 	return LoadContext(env)
 }
 
-// determineExecutionMode determines the execution mode based on team and session state.
-func determineExecutionMode(activeTeam string, hasSession bool) string {
+// determineExecutionMode determines the execution mode based on rite and session state.
+func determineExecutionMode(activeRite string, hasSession bool) string {
 	if !hasSession {
 		return "native"
 	}
-	if activeTeam == "" || activeTeam == "none" {
+	if activeRite == "" || activeRite == "none" {
 		return "cross-cutting"
 	}
 	return "orchestrated"
@@ -164,8 +170,8 @@ func (c *Context) ContextSummary() map[string]interface{} {
 		summary["project_dir"] = c.ProjectDir
 	}
 
-	if c.ActiveTeam != "" {
-		summary["active_team"] = c.ActiveTeam
+	if c.ActiveRite != "" {
+		summary["active_rite"] = c.ActiveRite
 	}
 
 	if c.SessionID != "" {

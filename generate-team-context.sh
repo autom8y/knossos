@@ -7,7 +7,7 @@
 set -e
 
 ROSTER_HOME="${ROSTER_HOME:-$HOME/Code/roster}"
-TEAM="${1:-$(cat .claude/ACTIVE_TEAM 2>/dev/null || echo "")}"
+TEAM="${1:-$(cat .claude/ACTIVE_RITE 2>/dev/null || echo "")}"
 
 # Exit gracefully if no team
 if [[ -z "$TEAM" ]]; then

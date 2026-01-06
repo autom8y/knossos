@@ -6,7 +6,7 @@
 # Allows: Read operations, operations to other files
 # Response: Workflow-aware error messages
 #
-# This hook enforces centralized state management through the state-mate agent,
+# This hook enforces centralized state management through the Moirai agent,
 # preventing unguarded writes that could corrupt session/sprint state.
 #
 # OPTIMIZATION: Lazy init - check tool type BEFORE sourcing hooks-init.sh
@@ -29,33 +29,15 @@ FILE_PATH="${CLAUDE_HOOK_FILE_PATH:-}"
 # Early exit: Not a context file
 [[ ! "$FILE_PATH" =~ _CONTEXT\.md$ ]] && exit 0
 
-# =============================================================================
-# STATE-MATE BYPASS DETECTION (per ADR-0010 Section 5)
-# =============================================================================
-# Priority 1: Agent name detection (future Claude Code enhancement)
-# Priority 2: Environment marker (current mechanism)
-# Both mechanisms log to audit trail for traceability
-
-# Source fail-open library for bypass logging
-source "$HOOKS_LIB/fail-open.sh" 2>/dev/null || true
-
-# Priority 1: Check if invoked by state-mate agent via CLAUDE_TASK_AGENT_NAME
-# Note: This variable is a proposed Claude Code enhancement. Until implemented,
-# the STATE_MATE_BYPASS environment marker remains the primary mechanism.
-AGENT_NAME="${CLAUDE_TASK_AGENT_NAME:-}"
-if [[ "$AGENT_NAME" == "state-mate" ]]; then
-    # Log bypass for audit trail
-    BYPASS_CONTEXT=$(build_fail_open_context "agent_name" "$AGENT_NAME" "tool_name" "$TOOL_NAME" 2>/dev/null || echo '{}')
-    log_bypass "session-write-guard.sh" "agent_name" "$FILE_PATH" "$BYPASS_CONTEXT" 2>/dev/null || true
-    exit 0  # Allow write - state-mate is authorized
-fi
-
-# Priority 2: Environment marker (current/fallback mechanism)
-if [[ "${STATE_MATE_BYPASS:-}" == "true" ]]; then
-    # Log bypass for audit trail
-    BYPASS_CONTEXT=$(build_fail_open_context "env_var" "STATE_MATE_BYPASS" "tool_name" "$TOOL_NAME" 2>/dev/null || echo '{}')
-    log_bypass "session-write-guard.sh" "env_var" "$FILE_PATH" "$BYPASS_CONTEXT" 2>/dev/null || true
-    exit 0  # Allow write
+# MOIRAI_BYPASS: Reserved for future use
+# Currently unused because state mutations happen through:
+# 1. Native ariadne commands (ari session wrap, park, resume) - bypass hooks via Go file I/O
+# 2. session-manager.sh mutate commands - bypass hooks via direct bash writes
+# This guard only protects against Claude Code's Write/Edit tools.
+# See: ariadne/internal/cmd/session/wrap.go for native command bypass design
+# Note: STATE_MATE_BYPASS is checked for backward compatibility
+if [[ "${MOIRAI_BYPASS:-}" == "true" ]] || [[ "${STATE_MATE_BYPASS:-}" == "true" ]]; then
+    exit 0  # Allow write (reserved for future Moirai agent)
 fi
 
 # =============================================================================
@@ -104,36 +86,41 @@ if has_active_workflow && has_orchestrator; then
 
 State mutations are handled **automatically by hooks** during active workflows.
 
-**Why?** The orchestrator coordinates phase transitions, and hooks invoke state-mate to maintain the audit trail.
+**Why?** The orchestrator coordinates phase transitions, and hooks invoke Moirai to maintain the audit trail.
 
 **If you need an explicit mutation**, use the appropriate command:
 - `/park` - Pause current session
 - `/wrap` - Complete and archive session
 - `/handoff` - Transfer to another agent
 
-**Do not** call `Task(state-mate, ...)` directly during orchestrated workflows.
+**Do not** call `Task(moirai, ...)` directly during orchestrated workflows.
 
 EOF
 else
-    # No workflow or no orchestrator = suggest state-mate
+    # No workflow or no orchestrator = suggest Moirai
     cat >&2 <<'EOF'
 
 ## State Mutation Blocked
 
 Direct writes to `*_CONTEXT.md` files are not allowed.
 
-**Use state-mate for all session/sprint mutations:**
+**Use the Moirai (the Fates) for all session/sprint mutations:**
 
 ```
-Task(state-mate, "<your mutation request>")
+Task(moirai, "<your mutation request>")
 ```
 
 **Examples:**
-- `Task(state-mate, "mark task-001 complete")`
-- `Task(state-mate, "transition to design phase")`
-- `Task(state-mate, "register artifact docs/PRD-foo.md")`
+- `Task(moirai, "mark task-001 complete")`
+- `Task(moirai, "transition to design phase")`
+- `Task(moirai, "register artifact docs/PRD-foo.md")`
 
-See `~/.claude/agents/state-mate.md` for full documentation (synced from roster/user-agents/).
+**Additional Examples:**
+- `Task(moirai, "park session reason='waiting for review'")`
+- `Task(moirai, "update session phase=implementation")`
+- `Task(moirai, "wrap session")`
+
+See `user-agents/moirai.md` for full documentation.
 
 EOF
 fi

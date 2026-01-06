@@ -69,9 +69,9 @@ Gap Analysis (task-001) identified:
 
 - **FR-1.1**: Create `team-context-loader.sh` in `.claude/hooks/lib/` that provides `load_team_context()` function.
 
-- **FR-1.2**: `load_team_context()` MUST read active team from `.claude/ACTIVE_TEAM` file.
+- **FR-1.2**: `load_team_context()` MUST read active team from `.claude/ACTIVE_RITE` file.
 
-- **FR-1.3**: `load_team_context()` MUST look for context script at `$ROSTER_HOME/teams/$ACTIVE_TEAM/context-injection.sh`.
+- **FR-1.3**: `load_team_context()` MUST look for context script at `$ROSTER_HOME/teams/$ACTIVE_RITE/context-injection.sh`.
 
 - **FR-1.4**: `load_team_context()` MUST source the script and call `inject_team_context()` function if both exist.
 
@@ -147,8 +147,8 @@ Gap Analysis (task-001) identified:
 
 | Case | Expected Behavior |
 |------|------------------|
-| ACTIVE_TEAM file missing | No team context, silent skip |
-| ACTIVE_TEAM = "none" | No team context, silent skip |
+| ACTIVE_RITE file missing | No team context, silent skip |
+| ACTIVE_RITE = "none" | No team context, silent skip |
 | Team directory doesn't exist | No team context, silent skip |
 | context-injection.sh doesn't exist | No team context, silent skip |
 | Script exists but not executable | Log warning, attempt source anyway |

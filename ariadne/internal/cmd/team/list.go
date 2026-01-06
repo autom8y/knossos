@@ -15,8 +15,8 @@ func newListCmd(ctx *cmdContext) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "List available teams",
-		Long:  `Lists all available team packs from project and user directories.`,
+		Short: "List available rites",
+		Long:  `Lists all available rites (practice bundles) from project and user directories.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runList(ctx, opts)
 		},

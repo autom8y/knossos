@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/autom8y/ariadne/internal/errors"
-	"github.com/autom8y/ariadne/internal/hook/threadcontract"
+	"github.com/autom8y/ariadne/internal/hook/clewcontract"
 	"github.com/autom8y/ariadne/internal/lock"
 	"github.com/autom8y/ariadne/internal/output"
 	"github.com/autom8y/ariadne/internal/paths"
@@ -17,6 +17,7 @@ import (
 
 type wrapOptions struct {
 	noArchive bool
+	force     bool
 }
 
 func newWrapCmd(ctx *cmdContext) *cobra.Command {
@@ -32,6 +33,7 @@ func newWrapCmd(ctx *cmdContext) *cobra.Command {
 	}
 
 	cmd.Flags().BoolVar(&opts.noArchive, "no-archive", false, "Don't move to archive directory")
+	cmd.Flags().BoolVar(&opts.force, "force", false, "Force wrap even with BLACK sails")
 
 	return cmd
 }
@@ -88,15 +90,34 @@ func runWrap(ctx *cmdContext, opts wrapOptions) error {
 		// Don't block wrap on sails generation failure - warn and continue
 		printer.VerboseLog("warn", "failed to generate sails", map[string]interface{}{"error": sailsErr.Error()})
 	} else {
+		// Quality gate: Block wrap if sails are BLACK (unless --force)
+		if sailsResult.Color == sails.ColorBlack {
+			if !opts.force {
+				err := errors.NewWithDetails(errors.CodeQualityGateFailed,
+					"cannot wrap session with BLACK sails: explicit blockers present",
+					map[string]interface{}{
+						"color":   string(sailsResult.Color),
+						"reasons": sailsResult.Reasons,
+					})
+				printer.PrintError(err)
+				return err
+			}
+			// If --force, emit warning but continue
+			printer.VerboseLog("warn", "wrapping session with BLACK sails (--force used)", map[string]interface{}{
+				"color":   string(sailsResult.Color),
+				"reasons": sailsResult.Reasons,
+			})
+		}
+
 		// Emit SAILS_GENERATED event to Thread Contract
-		writer, writerErr := threadcontract.NewEventWriter(sessionDir)
+		writer, writerErr := clewcontract.NewEventWriter(sessionDir)
 		if writerErr != nil {
 			printer.VerboseLog("warn", "failed to create event writer for sails", map[string]interface{}{"error": writerErr.Error()})
 		} else {
 			// Build evidence paths from collected proofs
-			var evidencePaths *threadcontract.EvidencePaths
+			var evidencePaths *clewcontract.EvidencePaths
 			if sailsResult.Proofs != nil {
-				evidencePaths = &threadcontract.EvidencePaths{}
+				evidencePaths = &clewcontract.EvidencePaths{}
 				if proof, ok := sailsResult.Proofs["tests"]; ok && proof.EvidencePath != "" {
 					evidencePaths.Tests = proof.EvidencePath
 				}
@@ -114,7 +135,7 @@ func runWrap(ctx *cmdContext, opts wrapOptions) error {
 				}
 			}
 
-			sailsEvent := threadcontract.NewSailsGeneratedEvent(sessionID, threadcontract.SailsGeneratedData{
+			sailsEvent := clewcontract.NewSailsGeneratedEvent(sessionID, clewcontract.SailsGeneratedData{
 				Color:         string(sailsResult.Color),
 				ComputedBase:  string(sailsResult.ComputedBase),
 				Reasons:       sailsResult.Reasons,
@@ -157,18 +178,18 @@ func runWrap(ctx *cmdContext, opts wrapOptions) error {
 	}
 
 	// Emit Thread Contract session_end event
-	tcWriter, err := threadcontract.NewEventWriter(sessionDir)
+	tcWriter, err := clewcontract.NewEventWriter(sessionDir)
 	if err == nil {
 		durationMs := time.Since(sessCtx.CreatedAt).Milliseconds()
 
 		// Collect cognitive budget metadata if available
 		budget := collectCognitiveBudget(sessionDir)
 
-		var sessionEndEvent threadcontract.Event
+		var sessionEndEvent clewcontract.Event
 		if budget != nil {
-			sessionEndEvent = threadcontract.NewSessionEndEventWithBudget(sessionID, "completed", durationMs, budget)
+			sessionEndEvent = clewcontract.NewSessionEndEventWithBudget(sessionID, "completed", durationMs, budget)
 		} else {
-			sessionEndEvent = threadcontract.NewSessionEndEvent(sessionID, "completed", durationMs)
+			sessionEndEvent = clewcontract.NewSessionEndEvent(sessionID, "completed", durationMs)
 		}
 
 		if err := tcWriter.Write(sessionEndEvent); err != nil {

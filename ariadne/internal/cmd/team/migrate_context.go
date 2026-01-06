@@ -25,12 +25,12 @@ func newMigrateContextCmd(ctx *cmdContext) *cobra.Command {
 	var opts migrateContextOptions
 
 	cmd := &cobra.Command{
-		Use:   "migrate-context <team>",
-		Short: "Migrate team context from bash to YAML",
+		Use:   "migrate-context <rite>",
+		Short: "Migrate rite context from bash to YAML",
 		Long: `Generates a context.yaml file from an existing context-injection.sh script.
 
 This command:
-1. Sources the team's context-injection.sh script in a subshell
+1. Sources the rite's context-injection.sh script in a subshell
 2. Captures the output of inject_team_context()
 3. Parses the markdown table output into key-value pairs
 4. Generates a context.yaml file

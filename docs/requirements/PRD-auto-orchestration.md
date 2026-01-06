@@ -152,7 +152,7 @@ The parallel model allows:
 
 - **FR-1.1**: `start-preflight.sh` MUST auto-create a session via `session-manager.sh create` when `/start` is invoked and no active session exists.
   - **Input**: `/start "Initiative Name" [COMPLEXITY]`
-  - **Action**: Call `session-manager.sh create "$INITIATIVE" "$COMPLEXITY" "$ACTIVE_TEAM"`
+  - **Action**: Call `session-manager.sh create "$INITIATIVE" "$COMPLEXITY" "$ACTIVE_RITE"`
   - **Output**: Session created message with session ID
   - **Current Status**: Already implemented in start-preflight.sh lines 113-126
 
@@ -275,7 +275,7 @@ The parallel model allows:
 | Session creation fails (filesystem error) | Output error message with recovery steps |
 | Initiative name contains special characters | Properly escape in Task invocation |
 | No orchestrator in team pack | Skip CONSULTATION_REQUEST, proceed with direct execution guidance |
-| ACTIVE_TEAM not set | Create cross-cutting session, adjust Task invocation accordingly |
+| ACTIVE_RITE not set | Create cross-cutting session, adjust Task invocation accordingly |
 | `/start` in worktree | Include worktree context in Task invocation |
 | Parallel `/start` in multiple terminals | Locking prevents race conditions; second terminal gets "session exists" |
 

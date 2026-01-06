@@ -339,7 +339,7 @@ type SessionContext struct {
 	SessionID     string `json:"session_id"`
 	Status        string `json:"status"`
 	WorktreeID    string `json:"worktree_id,omitempty"`
-	ActiveTeam    string `json:"active_team,omitempty"`
+	ActiveRite    string `json:"active_rite,omitempty"`
 	Initiative    string `json:"initiative,omitempty"`
 	Complexity    string `json:"complexity,omitempty"`
 	CurrentPhase  string `json:"current_phase,omitempty"`
@@ -398,8 +398,8 @@ func ParseSessionContextFile(path string) (*SessionContext, error) {
 			ctx.Status = value
 		case "worktree_id":
 			ctx.WorktreeID = value
-		case "active_team":
-			ctx.ActiveTeam = value
+		case "active_rite", "active_team": // Support both new and legacy names
+			ctx.ActiveRite = value
 		case "initiative":
 			ctx.Initiative = value
 		case "complexity":

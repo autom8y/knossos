@@ -189,7 +189,7 @@ ari session create <initiative> [--complexity=MODULE] [--team=NAME]
 | Flag | Short | Type | Default | Description |
 |------|-------|------|---------|-------------|
 | `--complexity` | `-c` | string | `MODULE` | Complexity level: PATCH, MODULE, SYSTEM, INITIATIVE, MIGRATION |
-| `--team` | `-t` | string | (from ACTIVE_TEAM) | Team pack to activate |
+| `--team` | `-t` | string | (from ACTIVE_RITE) | Team pack to activate |
 
 **Output (JSON)**:
 ```json

@@ -129,12 +129,20 @@ func (c *cmdContext) clearCurrentSessionID() error {
 	return err
 }
 
-// getActiveTeam reads the active team from ACTIVE_TEAM file.
+// getActiveTeam reads the active rite from ACTIVE_RITE file with backward compatibility.
 func (c *cmdContext) getActiveTeam() string {
 	resolver := c.getResolver()
-	data, err := os.ReadFile(resolver.ActiveTeamFile())
-	if err != nil {
-		return "none"
+
+	// Try new ACTIVE_RITE first
+	ritePath := resolver.ActiveRiteFile()
+	if data, err := os.ReadFile(ritePath); err == nil {
+		return string(data)
+	} else if os.IsNotExist(err) {
+		// Fall back to legacy ACTIVE_TEAM file
+		if data, err := os.ReadFile(resolver.ActiveTeamFile()); err == nil {
+			return string(data)
+		}
 	}
-	return string(data)
+
+	return "none"
 }

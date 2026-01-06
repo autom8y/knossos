@@ -8,7 +8,7 @@
 
 ROSTER_HOME="${ROSTER_HOME:-$HOME/Code/roster}"
 FIELD="$1"
-TEAM="${2:-$(cat .claude/ACTIVE_TEAM 2>/dev/null)}"
+TEAM="${2:-$(cat .claude/ACTIVE_RITE 2>/dev/null)}"
 
 if [ -z "$FIELD" ]; then
   echo "Error: No field specified" >&2

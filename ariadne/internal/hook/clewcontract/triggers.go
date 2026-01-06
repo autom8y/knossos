@@ -1,5 +1,5 @@
 // Package threadcontract provides Thread Contract v2 event recording for Claude Code hooks.
-package threadcontract
+package clewcontract
 
 import (
 	"bufio"

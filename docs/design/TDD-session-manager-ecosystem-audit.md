@@ -40,7 +40,7 @@ This Technical Design Document expands the session management locking architectu
 
 | Event | Hook Script | Purpose | Mutates Session? |
 |-------|-------------|---------|-----------------|
-| **SessionStart** | `session-context.sh` | Injects SESSION_ID, ACTIVE_TEAM context | No (read-only) |
+| **SessionStart** | `session-context.sh` | Injects SESSION_ID, ACTIVE_RITE context | No (read-only) |
 | **SessionStart** | `orchestrated-mode.sh` | Detects orchestrator presence | No (read-only) |
 | **Stop** | `auto-park.sh` | Auto-parks session on stop | **Yes** (writes parked_at) |
 | **PreToolUse/Bash** | `command-validator.sh` | Validates bash commands, team packs | No |
@@ -913,7 +913,7 @@ EOF
 |-----------|--------|-------------|
 | CEM (roster-sync) | Out of scope; separate initiative | Flag for future work |
 | Team pack structure | Affects all satellites | Document as frozen |
-| ACTIVE_TEAM file format | Simple string, no need to change | Keep as-is |
+| ACTIVE_RITE file format | Simple string, no need to change | Keep as-is |
 | ACTIVE_WORKFLOW.yaml schema | Workflow engine separate concern | Keep as-is |
 | Hook event types | Claude Code API | Use existing events only |
 | Schema validation rules (beyond v2.1) | Breaking change risk | Additive only |

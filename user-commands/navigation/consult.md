@@ -20,7 +20,7 @@ model: opus
 
 Auto-injected by SessionStart hook (project, team, session, git).
 
-**Active team**: !`cat .claude/ACTIVE_TEAM 2>/dev/null || echo "none"`
+**Active team**: !`cat .claude/ACTIVE_RITE 2>/dev/null || echo "none"`
 **Available teams**: !`ls ${ROSTER_HOME:-~/Code/roster}/teams/ 2>/dev/null | tr '\n' ' '`
 
 ## Pre-flight

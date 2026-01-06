@@ -52,7 +52,7 @@ func newContextCmd(ctx *cmdContext) *cobra.Command {
 
 This hook is triggered on SessionStart events. It reads:
 - SESSION_CONTEXT.md if a session exists
-- ACTIVE_TEAM file for team context
+- ACTIVE_RITE file for team context
 
 Output is formatted as a markdown table suitable for Claude context.
 
@@ -119,10 +119,10 @@ func runContext(ctx *cmdContext) error {
 		return outputNoSession(printer)
 	}
 
-	// Read active team
-	activeTeam := readActiveTeam(resolver.ActiveTeamFile())
+	// Read active rite with backward compatibility
+	activeTeam := readActiveRite(resolver)
 	if activeTeam == "" {
-		activeTeam = sessCtx.ActiveTeam
+		activeTeam = sessCtx.ActiveRite
 	}
 
 	// Determine execution mode
@@ -148,7 +148,24 @@ func outputNoSession(printer *output.Printer) error {
 	return printer.Print(result)
 }
 
-// readActiveTeam reads the ACTIVE_TEAM file content.
+// readActiveRite reads the ACTIVE_RITE file with backward compatibility.
+func readActiveRite(resolver *paths.Resolver) string {
+	// Try new ACTIVE_RITE first
+	ritePath := resolver.ActiveRiteFile()
+	if data, err := os.ReadFile(ritePath); err == nil {
+		return strings.TrimSpace(string(data))
+	} else if os.IsNotExist(err) {
+		// Fall back to legacy ACTIVE_TEAM file
+		if data, err := os.ReadFile(resolver.ActiveTeamFile()); err == nil {
+			return strings.TrimSpace(string(data))
+		}
+	}
+
+	return ""
+}
+
+// readActiveTeam is deprecated. Use readActiveRite instead.
+// Kept for backward compatibility.
 func readActiveTeam(path string) string {
 	data, err := os.ReadFile(path)
 	if err != nil {
