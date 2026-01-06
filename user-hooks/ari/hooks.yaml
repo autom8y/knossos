@@ -58,10 +58,10 @@ hooks:
   # ===========================================================================
   - event: PostToolUse
     matcher: "Edit|Write|Bash"
-    path: ari/thread.sh
+    path: ari/clew.sh
     timeout: 5
     priority: 5
-    description: "Tracks artifacts and commits via ari hook thread"
+    description: "Tracks artifacts and commits via ari hook clew"
 
   - event: PostToolUse
     path: ari/cognitive-budget.sh

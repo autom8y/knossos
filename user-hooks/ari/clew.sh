@@ -1,6 +1,6 @@
 #!/bin/bash
-# thread.sh - Smart dispatch wrapper for thread/artifact tracking
-# Thin wrapper for ari hook thread
+# clew.sh - Smart dispatch wrapper for clew/artifact tracking
+# Thin wrapper for ari hook clew
 # Event: PostToolUse (Edit|Write|Bash)
 # Category: RECOVERABLE - graceful degradation if ari binary unavailable
 set -euo pipefail
@@ -36,4 +36,4 @@ fi
 [[ -x "$ARI" ]] || exit 0
 
 # DISPATCH: Call ari (<100ms total)
-exec "$ARI" hook thread --output json
+exec "$ARI" hook clew --output json

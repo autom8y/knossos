@@ -94,13 +94,13 @@ fi
 echo ""
 
 # =============================================================================
-# Test 5: thread.sh exits 0 with missing binary
+# Test 5: clew.sh exits 0 with missing binary
 # =============================================================================
-echo "Test 5: thread.sh exits 0 when ari binary missing"
-if CLAUDE_HOOK_TOOL_NAME=Edit run_hook "thread.sh" 2>/dev/null; then
-    pass "thread.sh exits cleanly when binary missing"
+echo "Test 5: clew.sh exits 0 when ari binary missing"
+if CLAUDE_HOOK_TOOL_NAME=Edit run_hook "clew.sh" 2>/dev/null; then
+    pass "clew.sh exits cleanly when binary missing"
 else
-    fail "thread.sh should exit 0, but exited with non-zero"
+    fail "clew.sh should exit 0, but exited with non-zero"
 fi
 echo ""
 
