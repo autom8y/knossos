@@ -616,7 +616,7 @@ cmd_sync() {
         log "Already up to date"
 
         if [[ "$FLAG_REFRESH" == "1" ]]; then
-            refresh_active_team
+            refresh_active_rite
         fi
 
         return 0
@@ -683,14 +683,14 @@ cmd_sync() {
     # Team refresh
     if [[ "$FLAG_REFRESH" == "1" ]]; then
         if [[ "$FLAG_DRY_RUN" != "1" ]]; then
-            refresh_active_team
+            refresh_active_rite
         else
             log "DRY-RUN: Would refresh team"
         fi
     elif [[ "$FLAG_AUTO_REFRESH" == "1" ]]; then
         if is_team_stale; then
             if [[ "$FLAG_DRY_RUN" != "1" ]]; then
-                refresh_active_team
+                refresh_active_rite
             else
                 log "DRY-RUN: Would auto-refresh stale team"
             fi

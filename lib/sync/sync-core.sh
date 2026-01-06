@@ -1017,7 +1017,7 @@ is_team_stale() {
 }
 
 # Refresh active rite via swap-rite.sh
-refresh_active_team() {
+refresh_active_rite() {
     local active_team_file=".claude/ACTIVE_RITE"
 
     if [[ ! -f "$active_team_file" ]]; then
@@ -1038,3 +1038,6 @@ refresh_active_team() {
         return 1
     fi
 }
+
+# Backward compatibility alias (deprecated)
+refresh_active_team() { refresh_active_rite "$@"; }
