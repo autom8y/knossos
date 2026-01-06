@@ -7,10 +7,10 @@ import (
 	"testing"
 )
 
-// getTestDataPath returns the absolute path to testdata/teams.
+// getTestDataPath returns the absolute path to testdata/rites.
 func getTestDataPath(t *testing.T) string {
 	t.Helper()
-	testdataPath := filepath.Join("..", "..", "testdata", "teams")
+	testdataPath := filepath.Join("..", "..", "testdata", "rites")
 	absPath, err := filepath.Abs(testdataPath)
 	if err != nil {
 		t.Fatalf("failed to get absolute path: %v", err)
@@ -150,17 +150,17 @@ func TestContextLoader_Load_FromYAML(t *testing.T) {
 	teamsDir := getTestDataPath(t)
 	loader := NewContextLoaderWithPaths(teamsDir, "")
 
-	ctx, err := loader.Load("valid-team")
+	ctx, err := loader.Load("valid-rite")
 	if err != nil {
-		t.Fatalf("Load(valid-team) error = %v", err)
+		t.Fatalf("Load(valid-rite) error = %v", err)
 	}
 
-	if ctx.TeamName != "valid-team" {
-		t.Errorf("TeamName = %q, want %q", ctx.TeamName, "valid-team")
+	if ctx.TeamName != "valid-rite" {
+		t.Errorf("TeamName = %q, want %q", ctx.TeamName, "valid-rite")
 	}
 
-	if ctx.DisplayName != "Valid Test Team" {
-		t.Errorf("DisplayName = %q, want %q", ctx.DisplayName, "Valid Test Team")
+	if ctx.DisplayName != "Valid Test Rite" {
+		t.Errorf("DisplayName = %q, want %q", ctx.DisplayName, "Valid Test Rite")
 	}
 
 	if ctx.Domain != "testing" {
@@ -186,13 +186,13 @@ func TestContextLoader_Load_FallbackToOrchestrator(t *testing.T) {
 	teamsDir := getTestDataPath(t)
 	loader := NewContextLoaderWithPaths(teamsDir, "")
 
-	ctx, err := loader.Load("minimal-team")
+	ctx, err := loader.Load("minimal-rite")
 	if err != nil {
-		t.Fatalf("Load(minimal-team) error = %v", err)
+		t.Fatalf("Load(minimal-rite) error = %v", err)
 	}
 
-	if ctx.TeamName != "minimal-team" {
-		t.Errorf("TeamName = %q, want %q", ctx.TeamName, "minimal-team")
+	if ctx.TeamName != "minimal-rite" {
+		t.Errorf("TeamName = %q, want %q", ctx.TeamName, "minimal-rite")
 	}
 
 	if ctx.Domain != "testing" {
@@ -257,18 +257,18 @@ func TestContextLoader_Caching(t *testing.T) {
 	loader := NewContextLoaderWithPaths(teamsDir, "")
 
 	// First load
-	ctx1, err := loader.Load("valid-team")
+	ctx1, err := loader.Load("valid-rite")
 	if err != nil {
 		t.Fatalf("first Load() error = %v", err)
 	}
 
 	// Should be cached now
-	if !loader.IsCached("valid-team") {
-		t.Error("IsCached(valid-team) = false after Load, want true")
+	if !loader.IsCached("valid-rite") {
+		t.Error("IsCached(valid-rite) = false after Load, want true")
 	}
 
 	// Second load should return same instance (from cache)
-	ctx2, err := loader.Load("valid-team")
+	ctx2, err := loader.Load("valid-rite")
 	if err != nil {
 		t.Fatalf("second Load() error = %v", err)
 	}
@@ -278,14 +278,14 @@ func TestContextLoader_Caching(t *testing.T) {
 	}
 
 	// Invalidate
-	loader.Invalidate("valid-team")
+	loader.Invalidate("valid-rite")
 
-	if loader.IsCached("valid-team") {
-		t.Error("IsCached(valid-team) = true after Invalidate, want false")
+	if loader.IsCached("valid-rite") {
+		t.Error("IsCached(valid-rite) = true after Invalidate, want false")
 	}
 
 	// Load again
-	ctx3, err := loader.Load("valid-team")
+	ctx3, err := loader.Load("valid-rite")
 	if err != nil {
 		t.Fatalf("third Load() error = %v", err)
 	}
@@ -300,21 +300,21 @@ func TestContextLoader_InvalidateAll(t *testing.T) {
 	loader := NewContextLoaderWithPaths(teamsDir, "")
 
 	// Load multiple teams
-	_, _ = loader.Load("valid-team")
-	_, _ = loader.Load("minimal-team")
+	_, _ = loader.Load("valid-rite")
+	_, _ = loader.Load("minimal-rite")
 
-	if !loader.IsCached("valid-team") || !loader.IsCached("minimal-team") {
+	if !loader.IsCached("valid-rite") || !loader.IsCached("minimal-rite") {
 		t.Error("teams not cached after Load")
 	}
 
 	// Invalidate all
 	loader.InvalidateAll()
 
-	if loader.IsCached("valid-team") {
-		t.Error("valid-team still cached after InvalidateAll")
+	if loader.IsCached("valid-rite") {
+		t.Error("valid-rite still cached after InvalidateAll")
 	}
-	if loader.IsCached("minimal-team") {
-		t.Error("minimal-team still cached after InvalidateAll")
+	if loader.IsCached("minimal-rite") {
+		t.Error("minimal-rite still cached after InvalidateAll")
 	}
 }
 
@@ -322,14 +322,14 @@ func TestContextLoader_HasContextFile(t *testing.T) {
 	teamsDir := getTestDataPath(t)
 	loader := NewContextLoaderWithPaths(teamsDir, "")
 
-	// valid-team has context.yaml
-	if !loader.HasContextFile("valid-team") {
-		t.Error("HasContextFile(valid-team) = false, want true")
+	// valid-rite has context.yaml
+	if !loader.HasContextFile("valid-rite") {
+		t.Error("HasContextFile(valid-rite) = false, want true")
 	}
 
-	// minimal-team only has orchestrator.yaml
-	if loader.HasContextFile("minimal-team") {
-		t.Error("HasContextFile(minimal-team) = true, want false")
+	// minimal-rite only has orchestrator.yaml
+	if loader.HasContextFile("minimal-rite") {
+		t.Error("HasContextFile(minimal-rite) = true, want false")
 	}
 
 	// non-existent team
@@ -342,11 +342,11 @@ func TestContextLoader_GetContextPath(t *testing.T) {
 	teamsDir := getTestDataPath(t)
 	loader := NewContextLoaderWithPaths(teamsDir, "")
 
-	path := loader.GetContextPath("valid-team")
-	expectedSuffix := filepath.Join("valid-team", "context.yaml")
+	path := loader.GetContextPath("valid-rite")
+	expectedSuffix := filepath.Join("valid-rite", "context.yaml")
 
 	if !strings.HasSuffix(path, expectedSuffix) {
-		t.Errorf("GetContextPath(valid-team) = %q, want suffix %q", path, expectedSuffix)
+		t.Errorf("GetContextPath(valid-rite) = %q, want suffix %q", path, expectedSuffix)
 	}
 }
 

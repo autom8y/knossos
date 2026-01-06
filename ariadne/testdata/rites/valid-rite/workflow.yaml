@@ -1,6 +1,6 @@
-name: valid-team
+name: valid-rite
 workflow_type: sequential
-description: A valid test team with multiple agents
+description: A valid test rite with multiple agents
 
 entry_point:
   agent: agent-a

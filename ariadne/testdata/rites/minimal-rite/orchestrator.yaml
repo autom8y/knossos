@@ -1,0 +1,17 @@
+# Minimal rite orchestrator for fallback testing
+team:
+  name: minimal-rite
+  domain: testing
+  color: gray
+
+frontmatter:
+  role: "Minimal testing rite"
+  description: |
+    A minimal rite for testing fallback context generation.
+
+routing:
+  solo-agent: "Handles all work for minimal rite"
+
+workflow_position:
+  upstream: "Test input"
+  downstream: "Test output"

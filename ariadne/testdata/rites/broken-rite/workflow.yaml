@@ -1,4 +1,4 @@
-name: broken-team
+name: broken-rite
 # Missing required fields, malformed YAML for testing validation
 workflow_type: sequential
 # Missing entry_point and phases

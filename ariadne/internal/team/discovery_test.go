@@ -8,7 +8,7 @@ import (
 
 func TestDiscovery_List(t *testing.T) {
 	// Get the testdata path relative to this test file
-	testdataPath := filepath.Join("..", "..", "testdata", "teams")
+	testdataPath := filepath.Join("..", "..", "testdata", "rites")
 
 	// Make path absolute
 	absPath, err := filepath.Abs(testdataPath)
@@ -23,40 +23,40 @@ func TestDiscovery_List(t *testing.T) {
 
 	d := NewDiscoveryWithPaths(absPath, "", "")
 
-	teams, err := d.List()
+	rites, err := d.List()
 	if err != nil {
 		t.Fatalf("List() error = %v", err)
 	}
 
-	// Should find at least valid-team and minimal-team
-	if len(teams) < 2 {
-		t.Errorf("List() returned %d teams, want at least 2", len(teams))
+	// Should find at least valid-rite and minimal-rite
+	if len(rites) < 2 {
+		t.Errorf("List() returned %d rites, want at least 2", len(rites))
 	}
 
-	// Find valid-team
+	// Find valid-rite
 	var validRite *Rite
-	for _,  rite := range teams {
-		if rite.Name == "valid-team" {
+	for _, rite := range rites {
+		if rite.Name == "valid-rite" {
 			validRite = &rite
 			break
 		}
 	}
 
 	if validRite == nil {
-		t.Fatal("valid-team not found in list")
+		t.Fatal("valid-rite not found in list")
 	}
 
 	if validRite.AgentCount != 2 {
-		t.Errorf("valid-team.AgentCount = %d, want 2", validRite.AgentCount)
+		t.Errorf("valid-rite.AgentCount = %d, want 2", validRite.AgentCount)
 	}
 
 	if validRite.EntryPoint != "agent-a" {
-		t.Errorf("valid-team.EntryPoint = %q, want %q", validRite.EntryPoint, "agent-a")
+		t.Errorf("valid-rite.EntryPoint = %q, want %q", validRite.EntryPoint, "agent-a")
 	}
 }
 
 func TestDiscovery_Get(t *testing.T) {
-	testdataPath := filepath.Join("..", "..", "testdata", "teams")
+	testdataPath := filepath.Join("..", "..", "testdata", "rites")
 	absPath, _ := filepath.Abs(testdataPath)
 
 	if _, err := os.Stat(absPath); os.IsNotExist(err) {
@@ -67,45 +67,45 @@ func TestDiscovery_Get(t *testing.T) {
 
 	tests := []struct {
 		name      string
-		teamName  string
+		riteName  string
 		wantErr   bool
 		wantAgent int
 	}{
 		{
-			name:      "valid team",
-			teamName:  "valid-team",
+			name:      "valid rite",
+			riteName:  "valid-rite",
 			wantErr:   false,
 			wantAgent: 2,
 		},
 		{
-			name:      "minimal team",
-			teamName:  "minimal-team",
+			name:      "minimal rite",
+			riteName:  "minimal-rite",
 			wantErr:   false,
 			wantAgent: 1,
 		},
 		{
-			name:     "non-existent team",
-			teamName: "does-not-exist",
+			name:     "non-existent rite",
+			riteName: "does-not-exist",
 			wantErr:  true,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			team, err := d.Get(tt.teamName)
+			rite, err := d.Get(tt.riteName)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("Get(%q) error = %v, wantErr %v", tt.teamName, err, tt.wantErr)
+				t.Errorf("Get(%q) error = %v, wantErr %v", tt.riteName, err, tt.wantErr)
 				return
 			}
-			if !tt.wantErr && team.AgentCount != tt.wantAgent {
-				t.Errorf("Get(%q).AgentCount = %d, want %d", tt.teamName, team.AgentCount, tt.wantAgent)
+			if !tt.wantErr && rite.AgentCount != tt.wantAgent {
+				t.Errorf("Get(%q).AgentCount = %d, want %d", tt.riteName, rite.AgentCount, tt.wantAgent)
 			}
 		})
 	}
 }
 
 func TestDiscovery_Exists(t *testing.T) {
-	testdataPath := filepath.Join("..", "..", "testdata", "teams")
+	testdataPath := filepath.Join("..", "..", "testdata", "rites")
 	absPath, _ := filepath.Abs(testdataPath)
 
 	if _, err := os.Stat(absPath); os.IsNotExist(err) {
@@ -114,8 +114,8 @@ func TestDiscovery_Exists(t *testing.T) {
 
 	d := NewDiscoveryWithPaths(absPath, "", "")
 
-	if !d.Exists("valid-team") {
-		t.Error("Exists(valid-team) = false, want true")
+	if !d.Exists("valid-rite") {
+		t.Error("Exists(valid-rite) = false, want true")
 	}
 
 	if d.Exists("non-existent") {
@@ -123,29 +123,29 @@ func TestDiscovery_Exists(t *testing.T) {
 	}
 }
 
-func TestDiscovery_ActiveTeam(t *testing.T) {
-	testdataPath := filepath.Join("..", "..", "testdata", "teams")
+func TestDiscovery_ActiveRite(t *testing.T) {
+	testdataPath := filepath.Join("..", "..", "testdata", "rites")
 	absPath, _ := filepath.Abs(testdataPath)
 
 	if _, err := os.Stat(absPath); os.IsNotExist(err) {
 		t.Skipf("testdata not found at %s", absPath)
 	}
 
-	d := NewDiscoveryWithPaths(absPath, "", "valid-team")
+	d := NewDiscoveryWithPaths(absPath, "", "valid-rite")
 
-	teams, _ := d.List()
+	rites, _ := d.List()
 
-	// Check that valid-team is marked active
-	for _,  rite := range teams {
-		if rite.Name == "valid-team" && !rite.Active {
+	// Check that valid-rite is marked active
+	for _, rite := range rites {
+		if rite.Name == "valid-rite" && !rite.Active {
 			t.Error("valid-rite.Active = false, want true")
 		}
-		if rite.Name == "minimal-team" && rite.Active {
+		if rite.Name == "minimal-rite" && rite.Active {
 			t.Error("minimal-rite.Active = true, want false")
 		}
 	}
 
-	if d.ActiveRiteName() != "valid-team" {
-		t.Errorf("ActiveRiteName() = %q, want %q", d.ActiveRiteName(), "valid-team")
+	if d.ActiveRiteName() != "valid-rite" {
+		t.Errorf("ActiveRiteName() = %q, want %q", d.ActiveRiteName(), "valid-rite")
 	}
 }

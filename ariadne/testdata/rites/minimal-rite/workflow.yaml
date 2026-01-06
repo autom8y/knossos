@@ -1,6 +1,6 @@
-name: minimal-team
+name: minimal-rite
 workflow_type: sequential
-description: A minimal test team
+description: A minimal test rite
 
 entry_point:
   agent: solo-agent

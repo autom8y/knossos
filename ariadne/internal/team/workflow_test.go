@@ -7,7 +7,7 @@ import (
 )
 
 func TestLoadWorkflow(t *testing.T) {
-	testdataPath := filepath.Join("..", "..", "testdata", "teams", "valid-team", "workflow.yaml")
+	testdataPath := filepath.Join("..", "..", "testdata", "rites", "valid-rite", "workflow.yaml")
 	absPath, _ := filepath.Abs(testdataPath)
 
 	if _, err := os.Stat(absPath); os.IsNotExist(err) {
@@ -19,8 +19,8 @@ func TestLoadWorkflow(t *testing.T) {
 		t.Fatalf("LoadWorkflow() error = %v", err)
 	}
 
-	if workflow.Name != "valid-team" {
-		t.Errorf("Name = %q, want %q", workflow.Name, "valid-team")
+	if workflow.Name != "valid-rite" {
+		t.Errorf("Name = %q, want %q", workflow.Name, "valid-rite")
 	}
 
 	if workflow.WorkflowType != "sequential" {
