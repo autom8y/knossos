@@ -223,7 +223,7 @@ context_version: "1.0"
 **CRITICAL**: All SESSION_CONTEXT modifications MUST go through `state-mate` agent.
 
 Direct writes via Edit/Write tools are **blocked** by the PreToolUse hook. See:
-- [state-mate invocation pattern](../shared-sections/state-mate-invocation.md)
+- [state-mate invocation pattern](../shared-sections/moirai-invocation.md)
 - ADR-0005-state-mate-centralized-state-authority.md
 
 ## Cross-References

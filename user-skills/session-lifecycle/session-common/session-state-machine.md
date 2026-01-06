@@ -202,7 +202,7 @@ Sessions move through a simple state machine with three primary states: **Active
 
 All state transitions MUST go through `state-mate` agent. Direct file writes are blocked by PreToolUse hook.
 
-See: [state-mate Invocation Pattern](../shared-sections/state-mate-invocation.md)
+See: [state-mate Invocation Pattern](../shared-sections/moirai-invocation.md)
 
 ### Validation Hooks
 
@@ -340,5 +340,5 @@ This creates a full history of session lifecycle.
 
 - [Session Context Schema](session-context-schema.md) - Field definitions
 - [Session Validation](session-validation.md) - Pre-flight checks
-- [state-mate Invocation](../shared-sections/state-mate-invocation.md) - Mutation pattern
+- [state-mate Invocation](../shared-sections/moirai-invocation.md) - Mutation pattern
 - ADR-0005-state-mate-centralized-state-authority.md - Design rationale

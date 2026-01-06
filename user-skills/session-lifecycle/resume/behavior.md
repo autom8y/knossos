@@ -39,7 +39,7 @@ Apply [Workflow Resolution Pattern](../shared-sections/workflow-resolution.md):
 
 ### 5. Invoke state-mate for Resume Mutation
 
-Apply [state-mate Invocation Pattern](../shared-sections/state-mate-invocation.md):
+Apply [state-mate Invocation Pattern](../shared-sections/moirai-invocation.md):
 - Operation: `resume_session`
 - Post-action: Invoke selected agent with full session context
 

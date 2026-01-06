@@ -8,7 +8,7 @@
 |---------|---------|---------|
 | [session-resolution](session-resolution.md) | Session existence and state validation | All 5 commands |
 | [workflow-resolution](workflow-resolution.md) | Team and agent validation | start, resume, handoff |
-| [state-mate-invocation](state-mate-invocation.md) | state-mate delegation pattern | park, resume, wrap |
+| [moirai-invocation](moirai-invocation.md) | state-mate delegation pattern | park, resume, wrap |
 
 ## Usage Pattern
 

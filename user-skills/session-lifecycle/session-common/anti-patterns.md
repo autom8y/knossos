@@ -37,7 +37,7 @@ This document catalogs anti-patterns observed across all session-lifecycle comma
 
 **Fix**:
 - Always use moirai agent via Task tool
-- Follow [moirai invocation pattern](../shared-sections/state-mate-invocation.md)
+- Follow [moirai invocation pattern](../shared-sections/moirai-invocation.md)
 
 **Prevention**: PreToolUse hook enforces this rule
 
