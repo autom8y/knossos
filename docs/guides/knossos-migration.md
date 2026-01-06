@@ -8,19 +8,19 @@ The Knossos platform (roster/.claude/) is 70% integrated with Ariadne CLI:
 
 ### What Works
 - Session lifecycle (create, park, wrap, resume)
-- Thread Contract v2 events (tool_call, file_change, command, decision, sails_generated)
+- Clew Contract v2 events (tool_call, file_change, command, decision, sails_generated)
 - White Sails confidence signaling
 - Hook invocation via `ari hook <name>`
-- state-mate session mutations
+- Moirai session mutations
 
 ### What's In Progress
-- Full Thread Contract event coverage (SESSION_*, TASK_*, ARTIFACT_*, ERROR)
-- Handoff delegation to state-mate
+- Full Clew Contract event coverage (SESSION_*, TASK_*, ARTIFACT_*, ERROR)
+- Handoff delegation to Moirai
 - Comprehensive documentation
 
 ## Target: 90% Integration
 
-### Phase 1: Thread Contract Completion
+### Phase 1: Clew Contract Completion
 
 All 6 handoff events must be emitted:
 
@@ -35,7 +35,7 @@ All 6 handoff events must be emitted:
 
 ### Phase 2: Handoff Integration
 
-Handoff commands delegate to state-mate:
+Handoff commands delegate to Moirai:
 
 ```bash
 # Handoff prepares context for agent transition
@@ -53,7 +53,7 @@ ari handoff status
 Ariadne managing Knossos sessions (dog-fooding milestone):
 
 1. Create session via `ari session create`
-2. Track all events via Thread Contract
+2. Track all events via Clew Contract
 3. Generate WHITE_SAILS.yaml via `ari sails generate`
 4. Wrap session via `ari session wrap`
 
@@ -112,8 +112,8 @@ Rename occurs when:
 ### Session State Rollback
 
 ```bash
-# If session state needs correction, use state-mate with override
-Task(state-mate, "--override=reason='Recovery from failed mutation' resume_session")
+# If session state needs correction, use Moirai with override
+Task(Moirai, "--override=reason='Recovery from failed mutation' resume_session")
 
 # View session audit history
 ari session audit

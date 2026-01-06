@@ -1,4 +1,4 @@
-# Thread Contract Validation in Sails Check
+# Clew Contract Validation in Sails Check
 
 **Implementation Date**: 2026-01-06
 **Wave**: Wave 2, Task 4 (T1-004)
@@ -6,15 +6,15 @@
 
 ## Overview
 
-This implementation adds thread contract validation to the `ari sails check` command. Thread contract violations are detected by analyzing the `events.jsonl` file and result in degrading WHITE sails to GRAY.
+This implementation adds clew contract validation to the `ari sails check` command. Clew contract violations are detected by analyzing the `events.jsonl` file and result in degrading WHITE sails to GRAY.
 
 ## Motivation
 
-Per Knossos Doctrine, "Theseus has amnesia; the Thread remembers." The thread contract (events.jsonl) provides the factual route through decisions. Validating this contract ensures that:
+Per Knossos Doctrine, "Theseus has amnesia; the Clew remembers." The clew contract (events.jsonl) provides the factual route through decisions. Validating this contract ensures that:
 
 1. **Handoff integrity**: Agent handoffs are properly prepared before execution
 2. **Task lifecycle**: Tasks have proper start/end pairs
-3. **Session quality**: The thread contract is internally consistent
+3. **Session quality**: The clew contract is internally consistent
 
 ## Implementation
 
@@ -72,7 +72,7 @@ Per Knossos Doctrine, "Theseus has amnesia; the Thread remembers." The thread co
 ```go
 // In CheckGate():
 if len(violations) > 0 {
-    // Thread contract violations degrade to GRAY minimum
+    // Clew contract violations degrade to GRAY minimum
     if color == ColorWhite {
         color = ColorGray
     }
@@ -110,8 +110,8 @@ File:         .claude/sessions/.../WHITE_SAILS.yaml
 
 Reasons:
   - sails color is WHITE: high confidence, ship without QA
-  - thread contract violations present: downgraded to GRAY
-  - thread contract has violations (see contract_violations)
+  - clew contract violations present: downgraded to GRAY
+  - clew contract has violations (see contract_violations)
 
 Thread Contract Violations:
   [ERROR] task_orphaned_end: task_end for task_id task-001 at event 5 has no preceding task_start
@@ -132,8 +132,8 @@ ari sails check --format json
   "computed_base": "WHITE",
   "reasons": [
     "sails color is WHITE: high confidence, ship without QA",
-    "thread contract violations present: downgraded to GRAY",
-    "thread contract has violations (see contract_violations)"
+    "clew contract violations present: downgraded to GRAY",
+    "clew contract has violations (see contract_violations)"
   ],
   "contract_violations": [
     {
@@ -180,9 +180,9 @@ Test coverage:
 
 ### Why Degrade to GRAY Instead of BLACK?
 
-Thread contract violations indicate **uncertainty** rather than **known failure**:
+Clew contract violations indicate **uncertainty** rather than **known failure**:
 - The work may be complete and correct
-- The thread contract just has inconsistencies
+- The clew contract just has inconsistencies
 - QA review can determine if the violations matter
 
 This aligns with:
@@ -201,7 +201,7 @@ This is a "best-effort" validation that adds value when events exist.
 ### Why Parse Events in Gate Check?
 
 Parsing events during gate check (rather than during generation) ensures:
-1. Thread contract is validated at ship-time
+1. Clew contract is validated at ship-time
 2. Events can be recorded incrementally during session
 3. No need for real-time validation overhead
 4. Violations are caught before deployment
@@ -227,8 +227,8 @@ Potential improvements for future waves:
 
 - `ari hook thread`: Record thread events to events.jsonl
 - `ari sails generate`: Generate WHITE_SAILS.yaml
-- `ari sails check`: Validate quality gate (includes thread contract)
+- `ari sails check`: Validate quality gate (includes clew contract)
 
 ---
 
-**Implementation complete**: Thread contract validation is now integrated into the sails check quality gate.
+**Implementation complete**: Clew contract validation is now integrated into the sails check quality gate.

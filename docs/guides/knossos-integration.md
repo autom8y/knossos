@@ -94,8 +94,8 @@ Hooks run automatically via Claude Code's hook system. Manual invocation:
 # Context injection (SessionStart)
 ari hook context
 
-# Thread event tracking (PostToolUse)
-ari hook thread
+# Clew event tracking (PostToolUse)
+ari hook clew
 
 # Auto-park detection (PostToolUse)
 ari hook autopark
@@ -206,9 +206,9 @@ The hook system is designed for minimal latency impact:
 - Full execution: <100ms (with all processing)
 - Maximum timeout: 500ms (safety limit)
 
-## Thread Contract Events
+## Clew Contract Events
 
-The Thread Contract v2 records significant events to `events.jsonl` in the session directory:
+The Clew Contract v2 records significant events to `events.jsonl` in the session directory:
 
 ### Event Types
 
