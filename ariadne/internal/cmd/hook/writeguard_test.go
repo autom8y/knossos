@@ -275,8 +275,8 @@ func TestRunWriteguard_BlockSessionContext(t *testing.T) {
 	if result.Reason == "" {
 		t.Error("Reason should not be empty for blocked write")
 	}
-	if !bytes.Contains([]byte(result.Reason), []byte("state-mate")) {
-		t.Errorf("Reason should mention state-mate, got: %q", result.Reason)
+	if !bytes.Contains([]byte(result.Reason), []byte("Moirai")) {
+		t.Errorf("Reason should mention Moirai, got: %q", result.Reason)
 	}
 }
 

@@ -41,7 +41,7 @@ func newWriteguardCmd(ctx *cmdContext) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "writeguard",
 		Short: "Block direct writes to context files",
-		Long: `Enforces state-mate for context file mutations.
+		Long: `Enforces Moirai for context file mutations.
 
 This hook is triggered on PreToolUse events for Write/Edit tools. It:
 - Checks if the target file is a protected context file (*_CONTEXT.md)
@@ -53,7 +53,7 @@ Input (stdin JSON):
   {"tool_name": "Write", "file_path": ".claude/sessions/.../SESSION_CONTEXT.md"}
 
 Output (stdout JSON):
-  {"decision": "block", "reason": "Use state-mate for SESSION_CONTEXT mutations"}
+  {"decision": "block", "reason": "Use Moirai for SESSION_CONTEXT mutations"}
 
 Performance: <5ms for passthrough path.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -223,7 +223,7 @@ func outputBlock(printer interface{ Print(interface{}) error }, filePath string)
 
 	result := WriteGuardDecision{
 		Decision: "block",
-		Reason:   "Use state-mate for " + contextType + " mutations",
+		Reason:   "Use Moirai for " + contextType + " mutations",
 	}
 	return printer.Print(result)
 }

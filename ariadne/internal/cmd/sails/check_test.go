@@ -795,7 +795,7 @@ func TestCmdContext_NilValues(t *testing.T) {
 // =============================================================================
 
 // TestCheckAfterWrap_Integration verifies check works on wrapped session sails.
-// This tests the C4 sails/state-mate coordination pattern.
+// This tests the C4 sails/moirai coordination pattern.
 func TestCheckAfterWrap_Integration(t *testing.T) {
 	// Simulate a session that was wrapped with WHITE_SAILS.yaml generated
 	projectDir := createTestProject(t)

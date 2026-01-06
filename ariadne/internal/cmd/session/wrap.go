@@ -155,7 +155,7 @@ func runWrap(ctx *cmdContext, opts wrapOptions) error {
 	sessCtx.ArchivedAt = &now
 
 	// Save context
-	// Note: This direct save bypasses the state-mate write guard by design.
+	// Note: This direct save bypasses the Moirai write guard by design.
 	// The write guard (user-hooks/session-guards/session-write-guard.sh) only
 	// protects against Claude Code's Write/Edit tools via PreToolUse hooks.
 	// Native ariadne commands like `ari session wrap` are the authorized mutation

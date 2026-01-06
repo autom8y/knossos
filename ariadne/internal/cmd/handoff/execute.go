@@ -33,7 +33,7 @@ transition in the session audit log and emitting a task_start
 event for the receiving agent.
 
 The handoff is recorded to events.jsonl for tracking purposes.
-This command delegates actual state mutations to state-mate
+This command delegates actual state mutations to Moirai
 when running within a Claude Code session.
 
 Examples:
