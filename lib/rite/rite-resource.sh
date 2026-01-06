@@ -13,11 +13,11 @@
 #   detect_resource_orphans "commands" ".claude/commands" "my-rite" "f" "*.md"
 #
 # Functions:
-#   is_resource_from_team     - Check if resource belongs to any team
-#   get_resource_team         - Get team name that owns a resource
-#   backup_team_resource      - Backup team-owned resources before swap
-#   remove_team_resource      - Remove team-owned resources
-#   detect_resource_orphans   - Detect orphaned resources from other teams
+#   is_resource_from_team     - Check if resource belongs to any rite
+#   get_resource_team         - Get rite name that owns a resource
+#   backup_team_resource      - Backup rite-owned resources before swap
+#   remove_team_resource      - Remove rite-owned resources
+#   detect_resource_orphans   - Detect orphaned resources from other rites
 #   remove_resource_orphans   - Remove orphaned resources with backup
 
 # Guard against re-sourcing
@@ -45,19 +45,19 @@ if ! type log_warning >/dev/null 2>&1; then
 fi
 
 # ============================================================================
-# Team Membership Checks
+# Rite Membership Checks
 # ============================================================================
 
-# Check if a resource belongs to a team pack in ROSTER_HOME/teams/
+# Check if a resource belongs to a rite pack in ROSTER_HOME/rites/
 #
 # Parameters:
 #   $1 - resource_name: basename of resource (e.g., "commit.md", "qa-ref")
 #   $2 - resource_type: "commands" | "skills" | "hooks"
 #   $3 - find_type:     "f" (file) | "d" (directory)
-#   $4 - team_scope:    (optional) space-separated list of team names to check
-#                       If empty, checks ALL teams (legacy behavior)
+#   $4 - team_scope:    (optional) space-separated list of rite names to check
+#                       If empty, checks ALL rites (legacy behavior)
 #
-# Returns: 0 if resource is from a team, 1 otherwise
+# Returns: 0 if resource is from a rite, 1 otherwise
 #
 # Requires: ROSTER_HOME environment variable
 is_resource_from_team() {
@@ -67,10 +67,10 @@ is_resource_from_team() {
     local team_scope="${4:-}"
 
     if [[ -z "$team_scope" ]]; then
-        # Legacy behavior: check ALL teams
+        # Legacy behavior: check ALL rites
         find "$ROSTER_HOME/teams" -path "*/${resource_type}/$resource_name" -type "$find_type" 2>/dev/null | grep -q .
     else
-        # Scoped behavior: check only specified teams
+        # Scoped behavior: check only specified rites
         local team
         for team in $team_scope; do
             local check_path="$ROSTER_HOME/teams/$team/$resource_type/$resource_name"
@@ -84,16 +84,16 @@ is_resource_from_team() {
     fi
 }
 
-# Get the team name that owns a specific resource
+# Get the rite name that owns a specific resource
 #
 # Parameters:
 #   $1 - resource_name: basename of resource
 #   $2 - resource_type: "commands" | "skills" | "hooks"
 #   $3 - find_type:     "f" (file) | "d" (directory)
-#   $4 - team_scope:    (optional) space-separated list of team names to check
-#                       If empty, checks ALL teams (legacy behavior)
+#   $4 - team_scope:    (optional) space-separated list of rite names to check
+#                       If empty, checks ALL rites (legacy behavior)
 #
-# Outputs: team name to stdout, empty if not found
+# Outputs: rite name to stdout, empty if not found
 #
 # Requires: ROSTER_HOME environment variable
 get_resource_team() {
@@ -129,7 +129,7 @@ get_resource_team() {
 # Backup Operations
 # ============================================================================
 
-# Backup team-owned resources to a .backup directory before swap
+# Backup rite-owned resources to a .backup directory before swap
 #
 # Parameters:
 #   $1 - resource_type: "commands" | "skills" | "hooks"
@@ -141,7 +141,7 @@ get_resource_team() {
 #
 # Side effects:
 #   - Creates ${resource_dir}.backup/ directory
-#   - Copies team resources to backup
+#   - Copies rite resources to backup
 #   - Logs via log_debug()
 backup_team_resource() {
     local resource_type="$1"
@@ -149,14 +149,14 @@ backup_team_resource() {
     local marker_file="$3"
     local find_type="$4"
 
-    log_debug "Checking for team ${resource_type} to backup"
+    log_debug "Checking for rite ${resource_type} to backup"
 
     local backup_dir="${resource_dir}.backup"
     local marker_path="${resource_dir}/${marker_file}"
 
-    # Check if any team resources exist (marked by marker file)
+    # Check if any rite resources exist (marked by marker file)
     if [[ ! -d "$resource_dir" ]] || [[ ! -f "$marker_path" ]]; then
-        log_debug "No team ${resource_type} to backup"
+        log_debug "No rite ${resource_type} to backup"
         return 0
     fi
 
@@ -168,7 +168,7 @@ backup_team_resource() {
         }
     fi
 
-    # Read list of team resources and backup
+    # Read list of rite resources and backup
     mkdir -p "$backup_dir"
     while IFS= read -r resource_name; do
         [[ -z "$resource_name" ]] && continue
@@ -185,14 +185,14 @@ backup_team_resource() {
         fi
     done < "$marker_path"
 
-    log_debug "Team ${resource_type} backed up"
+    log_debug "Rite ${resource_type} backed up"
 }
 
 # ============================================================================
 # Removal Operations
 # ============================================================================
 
-# Remove team-owned resources listed in marker file
+# Remove rite-owned resources listed in marker file
 #
 # Parameters:
 #   $1 - resource_type: "commands" | "skills" | "hooks"
@@ -212,12 +212,12 @@ remove_team_resource() {
     local marker_file="$3"
     local find_type="$4"
 
-    log_debug "Removing team ${resource_type} from previous team"
+    log_debug "Removing rite ${resource_type} from previous rite"
 
     local marker_path="${resource_dir}/${marker_file}"
 
     if [[ ! -f "$marker_path" ]]; then
-        log_debug "No team ${resource_type} marker found"
+        log_debug "No rite ${resource_type} marker found"
         return 0
     fi
 
@@ -229,37 +229,37 @@ remove_team_resource() {
         if [[ "$find_type" == "d" ]] && [[ -d "$resource_path" ]]; then
             # For directories (skills), use rm -rf
             rm -rf "$resource_path"
-            log_debug "Removed team ${resource_type%s}: $resource_name"
+            log_debug "Removed rite ${resource_type%s}: $resource_name"
         elif [[ "$find_type" == "f" ]] && [[ -f "$resource_path" ]]; then
             # For files (commands, hooks), use rm -f
             rm -f "$resource_path"
-            log_debug "Removed team ${resource_type%s}: $resource_name"
+            log_debug "Removed rite ${resource_type%s}: $resource_name"
         fi
     done < "$marker_path"
 
     # Remove the marker file
     rm -f "$marker_path"
 
-    log_debug "Team ${resource_type} removed"
+    log_debug "Rite ${resource_type} removed"
 }
 
 # ============================================================================
 # Orphan Detection
 # ============================================================================
 
-# Detect orphaned resources from other teams that shouldn't be present
+# Detect orphaned resources from other rites that shouldn't be present
 #
 # Parameters:
 #   $1 - resource_type:     "commands" | "skills" | "hooks"
 #   $2 - resource_dir:      ".claude/commands" | ".claude/skills" | ".claude/hooks"
-#   $3 - incoming_team:     name of team being swapped in
+#   $3 - incoming_team:     name of rite being swapped in
 #   $4 - find_type:         "f" (file) | "d" (directory)
 #   $5 - glob_pattern:      "*.md" | "*/" | "*" (for find pattern)
-#   $6 - previous_team:     (optional) name of the previous team
-#                           If provided, only flags orphans from this team
-#                           If empty, checks ALL teams (legacy behavior)
+#   $6 - previous_team:     (optional) name of the previous rite
+#                           If provided, only flags orphans from this rite
+#                           If empty, checks ALL rites (legacy behavior)
 #
-# Outputs: One "resource_name:origin_team" per line to stdout
+# Outputs: One "resource_name:origin_rite" per line to stdout
 #
 # Returns: 0 always (empty output means no orphans)
 #
@@ -275,13 +275,13 @@ detect_resource_orphans() {
     local incoming_resource_dir="$ROSTER_HOME/teams/$incoming_team/$resource_type"
     local orphan_count=0
 
-    # Build team scope for orphan detection
-    # If previous_team is provided, only check that team (scoped detection)
-    # Otherwise, check all teams (legacy behavior)
+    # Build rite scope for orphan detection
+    # If previous_team is provided, only check that rite (scoped detection)
+    # Otherwise, check all rites (legacy behavior)
     local team_scope=""
     if [[ -n "$previous_team" ]]; then
         team_scope="$previous_team"
-        log_debug "Orphan detection scoped to previous team: $previous_team"
+        log_debug "Orphan detection scoped to previous rite: $previous_team"
     fi
 
     # Return if resource directory doesn't exist
@@ -303,14 +303,14 @@ detect_resource_orphans() {
         [[ "$resource_name" == .* ]] && continue
         [[ "$resource_name" == "lib" ]] && continue
 
-        # Is this resource in the incoming team? If so, skip (not an orphan)
+        # Is this resource in the incoming rite? If so, skip (not an orphan)
         if [[ "$find_type" == "d" ]] && [[ -d "$incoming_resource_dir/$resource_name" ]]; then
             continue
         elif [[ "$find_type" == "f" ]] && [[ -f "$incoming_resource_dir/$resource_name" ]]; then
             continue
         fi
 
-        # Is this resource from a team pack (scoped or all)?
+        # Is this resource from a rite pack (scoped or all)?
         if is_resource_from_team "$resource_name" "$resource_type" "$find_type" "$team_scope"; then
             local origin_team
             origin_team=$(get_resource_team "$resource_name" "$resource_type" "$find_type" "$team_scope")
@@ -335,7 +335,7 @@ detect_resource_orphans() {
 #   $2 - resource_dir:   ".claude/commands" | ".claude/skills" | ".claude/hooks"
 #   $3 - orphan_mode:    "remove" | "keep" | ""
 #   $4 - find_type:      "f" (file) | "d" (directory)
-#   stdin:               orphan list (one "name:team" per line)
+#   stdin:               orphan list (one "name:rite" per line)
 #
 # Returns: 0 on success
 #

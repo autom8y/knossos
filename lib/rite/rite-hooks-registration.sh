@@ -259,17 +259,17 @@ extract_non_roster_hooks() {
 # Data Merge
 # ============================================================================
 
-# Merge hook registrations (base first, team appended)
+# Merge hook registrations (base first, rite appended)
 # Parameters:
 #   $1 - base_registrations: JSON-lines format (from base hooks)
-#   $2 - team_registrations: JSON-lines format (from team hooks)
-# Output: Combined JSON-lines to stdout (base first, then team)
+#   $2 - rite_registrations: JSON-lines format (from rite hooks)
+# Output: Combined JSON-lines to stdout (base first, then rite)
 # Returns: 0 always
 merge_hook_registrations() {
     local base_registrations="$1"
     local team_registrations="$2"
 
-    # Combine all registrations (base first, team second)
+    # Combine all registrations (base first, rite second)
     printf '%s\n%s' "$base_registrations" "$team_registrations" | grep -v '^$' || true
 }
 
@@ -420,7 +420,7 @@ generate_hooks_json() {
 # Sync hook registrations to settings.local.json
 # Called after swap_hooks() syncs the actual hook files
 # Parameters:
-#   $1 - team_name: Name of team being activated
+#   $1 - team_name: Name of rite being activated
 # Returns: 0 on success, 1 on error
 # Side effects:
 #   - Updates .claude/settings.local.json hooks section
@@ -436,7 +436,7 @@ swap_hook_registrations() {
     local base_hooks_yaml="$ROSTER_HOME/user-hooks/base_hooks.yaml"
     local team_hooks_yaml="$ROSTER_HOME/teams/$team_name/hooks.yaml"
 
-    log_debug "Updating hook registrations for team: $team_name"
+    log_debug "Updating hook registrations for rite: $team_name"
 
     # Require yq for YAML parsing
     if ! require_yq; then
@@ -482,18 +482,18 @@ swap_hook_registrations() {
         log_warning "Base hooks file not found: $base_hooks_yaml"
     fi
 
-    # Step 3: Parse team hooks (optional)
+    # Step 3: Parse rite hooks (optional)
     local team_registrations=""
     if [[ -f "$team_hooks_yaml" ]]; then
         team_registrations=$(parse_hooks_yaml "$team_hooks_yaml")
         local team_count
         team_count=$(echo "$team_registrations" | grep -c '^{' 2>/dev/null || echo 0)
-        log_debug "Parsed $team_count team hook registrations"
+        log_debug "Parsed $team_count rite hook registrations"
     else
-        log_debug "No team hooks.yaml for $team_name"
+        log_debug "No hooks.yaml for rite: $team_name"
     fi
 
-    # Step 4: Merge registrations (base first, team second)
+    # Step 4: Merge registrations (base first, rite second)
     local merged_registrations
     merged_registrations=$(merge_hook_registrations "$base_registrations" "$team_registrations")
 

@@ -107,8 +107,8 @@ write_atomic() {
 
 # Create a new journal entry for swap operation
 # Parameters:
-#   $1 - source_team: Current team (empty string for virgin swap)
-#   $2 - target_team: Team being swapped to
+#   $1 - source_team: Current rite (empty string for virgin swap)
+#   $2 - target_team: Rite being swapped to
 # Returns: 0 on success, 1 if journal already exists (concurrent swap)
 # Requires: JOURNAL_FILE, JOURNAL_VERSION, SWAP_BACKUP_DIR, STAGING_DIR
 create_journal() {
@@ -449,9 +449,9 @@ cleanup_staging() {
     fi
 }
 
-# Stage agents from team pack
+# Stage agents from rite pack
 # Parameters:
-#   $1 - team_name: Team to stage agents from
+#   $1 - team_name: Rite to stage agents from
 # Returns: 0 on success, 1 on failure
 # Requires: ROSTER_HOME, STAGING_DIR
 stage_agents() {
@@ -477,7 +477,7 @@ stage_agents() {
 
 # Stage workflow file
 # Parameters:
-#   $1 - team_name: Team to stage workflow from
+#   $1 - team_name: Rite to stage workflow from
 # Returns: 0 on success, 1 on failure (warning if no workflow.yaml)
 # Requires: ROSTER_HOME, STAGING_DIR
 stage_workflow() {
@@ -497,7 +497,7 @@ stage_workflow() {
 
 # Stage ACTIVE_TEAM file
 # Parameters:
-#   $1 - team_name: Team name to write
+#   $1 - team_name: Rite name to write
 # Returns: 0 on success, 1 on failure
 # Requires: STAGING_DIR
 stage_active_team() {
@@ -604,7 +604,7 @@ create_swap_backup() {
         log_debug "Backed up workflow"
     fi
 
-    # Backup commands if team commands exist
+    # Backup commands if rite commands exist
     if [[ -f ".claude/commands/.team-commands" ]]; then
         mkdir -p "$SWAP_BACKUP_DIR/commands"
         while IFS= read -r cmd_file; do
@@ -615,10 +615,10 @@ create_swap_backup() {
         done < ".claude/commands/.team-commands"
         cp ".claude/commands/.team-commands" "$SWAP_BACKUP_DIR/commands/.team-commands"
         update_journal_backups "commands" "$SWAP_BACKUP_DIR/commands"
-        log_debug "Backed up team commands"
+        log_debug "Backed up rite commands"
     fi
 
-    # Backup skills if team skills exist
+    # Backup skills if rite skills exist
     if [[ -f ".claude/skills/.team-skills" ]]; then
         mkdir -p "$SWAP_BACKUP_DIR/skills"
         while IFS= read -r skill_dir; do
@@ -629,10 +629,10 @@ create_swap_backup() {
         done < ".claude/skills/.team-skills"
         cp ".claude/skills/.team-skills" "$SWAP_BACKUP_DIR/skills/.team-skills"
         update_journal_backups "skills" "$SWAP_BACKUP_DIR/skills"
-        log_debug "Backed up team skills"
+        log_debug "Backed up rite skills"
     fi
 
-    # Backup hooks if team hooks exist
+    # Backup hooks if rite hooks exist
     if [[ -f ".claude/hooks/.team-hooks" ]]; then
         mkdir -p "$SWAP_BACKUP_DIR/hooks"
         while IFS= read -r hook_file; do
@@ -643,7 +643,7 @@ create_swap_backup() {
         done < ".claude/hooks/.team-hooks"
         cp ".claude/hooks/.team-hooks" "$SWAP_BACKUP_DIR/hooks/.team-hooks"
         update_journal_backups "hooks" "$SWAP_BACKUP_DIR/hooks"
-        log_debug "Backed up team hooks"
+        log_debug "Backed up rite hooks"
     fi
 
     log_debug "Comprehensive backup complete"
