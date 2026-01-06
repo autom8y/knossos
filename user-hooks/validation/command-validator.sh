@@ -83,14 +83,14 @@ EOF
 [[ "$COMMAND" =~ ^(git|gh|ls|cat|head|tail)[[:space:]].*\| ]] && auto_approve "Safe piped command"
 
 # =============================================================================
-# TEAM VALIDATION
-# Only fires for swap-team.sh invocations
+# RITE VALIDATION
+# Only fires for swap-rite.sh invocations
 # =============================================================================
 
-# Check if this is a swap-team.sh command (not just mentioned in a string)
-if [[ "$COMMAND" =~ (^|[[:space:]/])swap-team\.sh[[:space:]] ]]; then
-    # Extract target team from command
-    TARGET_TEAM=$(echo "$COMMAND" | grep -oE '(^|[[:space:]/])swap-team\.sh[[:space:]]+([a-z0-9-]+-pack)' | grep -oE '[a-z0-9-]+-pack') || TARGET_TEAM=""
+# Check if this is a swap-rite.sh command (not just mentioned in a string)
+if [[ "$COMMAND" =~ (^|[[:space:]/])swap-rite\.sh[[:space:]] ]]; then
+    # Extract target rite from command
+    TARGET_TEAM=$(echo "$COMMAND" | grep -oE '(^|[[:space:]/])swap-rite\.sh[[:space:]]+([a-z0-9-]+-pack)' | grep -oE '[a-z0-9-]+-pack') || TARGET_TEAM=""
 
     # Skip validation for --list or no argument
     if [[ -n "$TARGET_TEAM" ]] && [[ "$TARGET_TEAM" != "--list" ]]; then
@@ -151,17 +151,17 @@ fi
 
 # =============================================================================
 # WORKFLOW VALIDATION
-# Only fires for swap-team or ACTIVE_WORKFLOW commands
+# Only fires for swap-rite or ACTIVE_WORKFLOW commands
 # =============================================================================
 
 # Only validate commands that involve workflow operations
-if [[ "$COMMAND" == *"swap-team"* ]] || [[ "$COMMAND" == *"ACTIVE_WORKFLOW"* ]]; then
+if [[ "$COMMAND" == *"swap-rite"* ]] || [[ "$COMMAND" == *"ACTIVE_WORKFLOW"* ]]; then
     WORKFLOW_FILE=""
 
     # Determine which workflow file to validate
-    if [[ "$COMMAND" == *"swap-team"* ]]; then
-        # Extract target team from swap-team.sh command
-        TARGET_TEAM=$(echo "$COMMAND" | grep -oE 'swap-team\.sh[[:space:]]+([^[:space:]|&;]+)' | awk '{print $2}') || TARGET_TEAM=""
+    if [[ "$COMMAND" == *"swap-rite"* ]]; then
+        # Extract target rite from swap-rite.sh command
+        TARGET_TEAM=$(echo "$COMMAND" | grep -oE 'swap-rite\.sh[[:space:]]+([^[:space:]|&;]+)' | awk '{print $2}') || TARGET_TEAM=""
 
         # Skip validation for --list or no argument
         if [[ -n "$TARGET_TEAM" ]] && [[ "$TARGET_TEAM" != "--list" ]]; then

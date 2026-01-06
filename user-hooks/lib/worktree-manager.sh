@@ -254,8 +254,8 @@ cmd_create() {
 
     # Set rite if specified
     if [[ -n "$rite" && "$rite" != "none" ]]; then
-        if [[ -x "$ROSTER_HOME/swap-team.sh" ]]; then
-            (cd "$wt_path" && "$ROSTER_HOME/swap-team.sh" "$rite" 2>/dev/null) || {
+        if [[ -x "$ROSTER_HOME/swap-rite.sh" ]]; then
+            (cd "$wt_path" && "$ROSTER_HOME/swap-rite.sh" "$rite" 2>/dev/null) || {
                 echo '{"warning": "Failed to set rite '"$rite"'. Worktree created with default rite."}' >&2
             }
         fi
