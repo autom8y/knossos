@@ -15,14 +15,14 @@ const (
 	ExitLockTimeout      = 3  // Could not acquire lock within timeout
 	ExitSchemaInvalid    = 4  // Data failed schema validation
 	ExitLifecycleError   = 5  // Invalid state transition (also: orphan conflict)
-	ExitFileNotFound     = 6  // Required file, session, or team not found
+	ExitFileNotFound     = 6  // Required file, session, or rite not found
 	ExitPermissionDenied = 7  // Cannot read/write file
 	ExitMergeConflict    = 8  // Three-way merge has conflicts
 	ExitProjectNotFound  = 9  // No .claude/ directory found
 	ExitSessionExists    = 10 // Session already active (for create)
 	ExitMigrationFailed  = 11 // Schema migration failed
-	ExitValidationFailed = 12 // Team validation checks failed
-	ExitSwitchAborted    = 13 // Team switch rolled back due to error
+	ExitValidationFailed = 12 // Rite validation checks failed
+	ExitSwitchAborted    = 13 // Rite switch rolled back due to error
 	ExitSchemaNotFound   = 14 // Specified schema not available
 	ExitParseError       = 15 // JSON/YAML parsing failed
 	// Sync-domain exit codes
@@ -47,9 +47,9 @@ const (
 	CodeProjectNotFound    = "PROJECT_NOT_FOUND"
 	CodeSessionExists      = "SESSION_EXISTS"
 	CodeMigrationFailed    = "MIGRATION_FAILED"
-	// Team-domain error codes
+	// Rite-domain error codes (legacy team codes preserved for compatibility)
 	CodeOrphanConflict   = "ORPHAN_CONFLICT"
-	CodeTeamNotFound     = "TEAM_NOT_FOUND"
+	CodeTeamNotFound     = "TEAM_NOT_FOUND" // Deprecated: use CodeRiteNotFound
 	CodeValidationFailed = "VALIDATION_FAILED"
 	CodeSwitchAborted    = "SWITCH_ABORTED"
 	// Manifest-domain error codes
@@ -135,7 +135,7 @@ func exitCodeForCode(code string) int {
 		return ExitSchemaInvalid
 	case CodeLifecycleViolation, CodeOrphanConflict:
 		return ExitLifecycleError
-	case CodeFileNotFound, CodeSessionNotFound, CodeTeamNotFound:
+	case CodeFileNotFound, CodeSessionNotFound, CodeTeamNotFound, CodeRiteNotFound:
 		return ExitFileNotFound
 	case CodePermissionDenied:
 		return ExitPermissionDenied
@@ -163,8 +163,6 @@ func exitCodeForCode(code string) int {
 		return ExitNetworkError
 	case CodeRemoteNotFound:
 		return ExitFileNotFound // Reuse FILE_NOT_FOUND exit code
-	case CodeRiteNotFound:
-		return ExitFileNotFound
 	case CodeBorrowConflict:
 		return ExitLifecycleError
 	case CodeBudgetExceeded:
@@ -270,47 +268,40 @@ func GetExitCode(err error) int {
 	return ExitGeneralError
 }
 
-// --- Team-domain error constructors ---
-
-// ErrTeamNotFound returns an error for missing team pack.
-func ErrTeamNotFound(teamName string) *Error {
-	return NewWithDetails(CodeTeamNotFound,
-		fmt.Sprintf("Team not found: %s", teamName),
-		map[string]interface{}{"team": teamName})
-}
+// --- Rite-domain error constructors (legacy team-domain) ---
 
 // ErrOrphanConflict returns an error when orphaned agents detected without strategy.
-func ErrOrphanConflict(orphans []string, currentTeam, targetTeam string) *Error {
+func ErrOrphanConflict(orphans []string, currentRite, targetRite string) *Error {
 	return NewWithDetails(CodeOrphanConflict,
 		"Orphaned agents detected. Specify --remove-all, --keep-all, or --promote-all",
 		map[string]interface{}{
 			"orphans":      orphans,
-			"current_team": currentTeam,
-			"target_team":  targetTeam,
+			"current_rite": currentRite,
+			"target_rite":  targetRite,
 		})
 }
 
-// ErrValidationFailed returns an error for team validation failures.
-func ErrValidationFailed(teamName string, errorCount int, issues []string) *Error {
+// ErrValidationFailed returns an error for rite validation failures.
+func ErrValidationFailed(riteName string, errorCount int, issues []string) *Error {
 	return NewWithDetails(CodeValidationFailed,
-		fmt.Sprintf("Team validation failed with %d errors", errorCount),
+		fmt.Sprintf("Rite validation failed with %d errors", errorCount),
 		map[string]interface{}{
-			"team":   teamName,
+			"rite":   riteName,
 			"issues": issues,
 		})
 }
 
-// ErrSwitchAborted returns an error when team switch is rolled back.
-func ErrSwitchAborted(teamName string, reason string) *Error {
+// ErrSwitchAborted returns an error when rite switch is rolled back.
+func ErrSwitchAborted(riteName string, reason string) *Error {
 	return NewWithDetails(CodeSwitchAborted,
-		fmt.Sprintf("Team switch aborted: %s", reason),
-		map[string]interface{}{"team": teamName})
+		fmt.Sprintf("Rite switch aborted: %s", reason),
+		map[string]interface{}{"rite": riteName})
 }
 
-// IsTeamNotFound returns true if the error is a team not found error.
+// IsTeamNotFound returns true if the error is a rite not found error (deprecated: use IsRiteNotFound).
 func IsTeamNotFound(err error) bool {
 	if e, ok := err.(*Error); ok {
-		return e.Code == CodeTeamNotFound
+		return e.Code == CodeRiteNotFound || e.Code == CodeTeamNotFound
 	}
 	return false
 }

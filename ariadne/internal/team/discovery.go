@@ -107,7 +107,7 @@ func (d *Discovery) Get(name string) (*Rite, error) {
 		}
 	}
 
-	return nil, errors.ErrTeamNotFound(name)
+	return nil, errors.ErrRiteNotFound(name)
 }
 
 // GetActive returns the currently active rite.

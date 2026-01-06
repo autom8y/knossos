@@ -143,7 +143,7 @@ func (cl *ContextLoader) generateFromOrchestrator(teamName string) (*RiteContext
 	}
 
 	if !found {
-		return nil, errors.ErrTeamNotFound(teamName)
+		return nil, errors.ErrRiteNotFound(teamName)
 	}
 
 	// Load orchestrator.yaml
@@ -278,7 +278,7 @@ func (cl *ContextLoader) SaveContext(ctx *RiteContext) error {
 	// Default to project teams directory
 	teamDir := filepath.Join(cl.teamsDir, ctx.TeamName)
 	if _, err := os.Stat(teamDir); os.IsNotExist(err) {
-		return errors.ErrTeamNotFound(ctx.TeamName)
+		return errors.ErrRiteNotFound(ctx.TeamName)
 	}
 
 	contextPath := filepath.Join(teamDir, ContextFileName)
