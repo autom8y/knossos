@@ -36,7 +36,7 @@ type Discovery struct {
 // NewDiscovery creates a new rite discovery instance.
 func NewDiscovery(resolver *paths.Resolver) *Discovery {
 	d := &Discovery{
-		projectRitesDir: resolver.TeamsDir(), // Rites live alongside teams for now
+		projectRitesDir: resolver.RitesDir(),
 		userRitesDir:    paths.UserRitesDir(),
 	}
 

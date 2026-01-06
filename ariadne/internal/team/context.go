@@ -8,7 +8,7 @@ import (
 )
 
 // TeamContext represents the context injection configuration for a team.
-// This is the Go representation of teams/{team}/context.yaml files.
+// This is the Go representation of rites/{team}/context.yaml files.
 type TeamContext struct {
 	SchemaVersion string            `yaml:"schema_version" json:"schema_version"`
 	TeamName      string            `yaml:"team_name" json:"team_name"`

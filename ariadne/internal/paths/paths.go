@@ -243,8 +243,9 @@ func DataDir() string {
 }
 
 // UserTeamsDir returns the user-level teams directory.
+// Deprecated: Use UserRitesDir instead. This exists for backward compatibility.
 func UserTeamsDir() string {
-	return filepath.Join(DataDir(), "teams")
+	return UserRitesDir()
 }
 
 // UserRitesDir returns the user-level rites directory.

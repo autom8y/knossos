@@ -45,8 +45,8 @@ func NewContextLoaderWithPaths(teamsDir, userDir string) *ContextLoader {
 
 // Load returns the team context for the given team name.
 // It first checks the cache, then tries to load from:
-// 1. User teams directory ($XDG_DATA_HOME/ariadne/teams/{team}/context.yaml)
-// 2. Project teams directory (teams/{team}/context.yaml)
+// 1. User rites directory ($XDG_DATA_HOME/ariadne/rites/{team}/context.yaml)
+// 2. Project rites directory (rites/{team}/context.yaml)
 // 3. Fallback: generates context from orchestrator.yaml
 func (cl *ContextLoader) Load(teamName string) (*TeamContext, error) {
 	if teamName == "" {
