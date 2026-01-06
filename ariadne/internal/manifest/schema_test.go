@@ -68,7 +68,7 @@ func TestValidate(t *testing.T) {
 			name: "valid agent manifest",
 			content: map[string]interface{}{
 				"version":      "1.0",
-				"active_team":  "default",
+				"active_rite":  "default",
 				"agents":       map[string]interface{}{},
 				"generated_at": "2026-01-04T12:00:00Z",
 			},
@@ -76,7 +76,7 @@ func TestValidate(t *testing.T) {
 			wantValid:  true,
 		},
 		{
-			name: "invalid agent manifest - missing active_team",
+			name: "invalid agent manifest - missing active_rite",
 			content: map[string]interface{}{
 				"version": "1.0",
 				"agents":  map[string]interface{}{},

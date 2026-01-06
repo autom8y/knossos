@@ -184,10 +184,10 @@ func validateAgentManifestStructure(content map[string]interface{}, result *Vali
 		})
 	}
 
-	// Required: active_team, agents, generated_at
-	if _, ok := content["active_team"]; !ok {
+	// Required: active_rite, agents, generated_at
+	if _, ok := content["active_rite"]; !ok {
 		result.Issues = append(result.Issues, ValidationIssue{
-			Path:     "$.active_team",
+			Path:     "$.active_rite",
 			Message:  "missing required field",
 			Severity: "error",
 		})
