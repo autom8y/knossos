@@ -69,10 +69,7 @@ Examples:
 	}
 
 	cmd.Flags().StringVar(&opts.team, "rite", "", "Override rite (practice bundle) (default: copy from source)")
-	cmd.Flags().StringVar(&opts.team, "team", "", "Deprecated: use --rite instead")
 	cmd.Flags().BoolVar(&opts.copySession, "copy-session", false, "Copy session context from source")
-
-	cmd.Flags().MarkDeprecated("team", "use --rite instead")
 
 	return cmd
 }

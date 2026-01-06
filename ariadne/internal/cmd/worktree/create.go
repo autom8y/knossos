@@ -66,11 +66,8 @@ Examples:
 	}
 
 	cmd.Flags().StringVar(&opts.team, "rite", "", "Rite (practice bundle) to activate in worktree")
-	cmd.Flags().StringVar(&opts.team, "team", "", "Deprecated: use --rite instead")
 	cmd.Flags().StringVar(&opts.fromRef, "from", "", "Git ref to create from (default: HEAD)")
 	cmd.Flags().StringVar(&opts.complexity, "complexity", "MODULE", "Session complexity: PATCH, MODULE, SYSTEM, INITIATIVE, MIGRATION")
-
-	cmd.Flags().MarkDeprecated("team", "use --rite instead")
 
 	return cmd
 }
