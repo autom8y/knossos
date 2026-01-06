@@ -112,38 +112,38 @@ calculate_checksum() {
 # Team Collision Detection
 # ============================================================================
 
-# Check if a hook name exists in any team pack
-# Returns 0 if found in a team (collision), 1 if not found
-is_team_hook() {
+# Check if a hook name exists in any rite pack
+# Returns 0 if found in a rite (collision), 1 if not found
+is_rite_hook() {
     local hook_name="$1"
-    local roster_teams="${ROSTER_HOME}/teams"
+    local roster_rites="${ROSTER_HOME}/rites"
 
-    if [[ ! -d "$roster_teams" ]]; then
+    if [[ ! -d "$roster_rites" ]]; then
         return 1
     fi
 
-    # Search for hook in any team's hooks/ directory
-    if find "$roster_teams" -path "*/hooks/$hook_name" -type f 2>/dev/null | grep -q .; then
+    # Search for hook in any rite's hooks/ directory
+    if find "$roster_rites" -path "*/hooks/$hook_name" -type f 2>/dev/null | grep -q .; then
         return 0
     fi
 
     return 1
 }
 
-# Get which team(s) contain a hook
-get_team_for_hook() {
+# Get which rite(s) contain a hook
+get_rite_for_hook() {
     local hook_name="$1"
-    local roster_teams="${ROSTER_HOME}/teams"
+    local roster_rites="${ROSTER_HOME}/rites"
 
-    if [[ ! -d "$roster_teams" ]]; then
+    if [[ ! -d "$roster_rites" ]]; then
         echo ""
         return
     fi
 
-    # Find team directories containing this hook
-    find "$roster_teams" -path "*/hooks/$hook_name" -type f 2>/dev/null | while read -r path; do
-        # Extract team name from path: .../teams/TEAM_NAME/hooks/hook.sh
-        echo "$path" | sed 's|.*/teams/\([^/]*\)/hooks/.*|\1|'
+    # Find rite directories containing this hook
+    find "$roster_rites" -path "*/hooks/$hook_name" -type f 2>/dev/null | while read -r path; do
+        # Extract rite name from path: .../rites/RITE_NAME/hooks/hook.sh
+        echo "$path" | sed 's|.*/rites/\([^/]*\)/hooks/.*|\1|'
     done | tr '\n' ',' | sed 's/,$//'
 }
 

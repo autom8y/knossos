@@ -385,7 +385,7 @@ update_manifest_team() {
     echo "$manifest" | jq \
         --arg n "$team_name" \
         --arg c "$checksum" \
-        --arg rp "$roster_path/teams/$team_name" \
+        --arg rp "$roster_path/rites/$team_name" \
         --arg t "$timestamp" '
         .team = {
             name: $n,

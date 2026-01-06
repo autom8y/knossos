@@ -982,9 +982,9 @@ is_team_stale() {
     local team_name
     team_name=$(cat "$active_team_file")
 
-    local team_dir="${ROSTER_HOME:-}/teams/$team_name"
+    local team_dir="${ROSTER_HOME:-}/rites/$team_name"
     if [[ ! -d "$team_dir" ]]; then
-        sync_log_debug "Team directory not found: $team_dir"
+        sync_log_debug "Rite directory not found: $team_dir"
         return 1
     fi
 

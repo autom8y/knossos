@@ -106,52 +106,52 @@ calculate_checksum() {
 # Team Collision Detection
 # ============================================================================
 
-# Check if a command name exists in any team pack
-# Returns 0 if found in a team (collision), 1 if not found
-is_team_command() {
+# Check if a command name exists in any rite pack
+# Returns 0 if found in a rite (collision), 1 if not found
+is_rite_command() {
     local cmd_name="$1"
-    local roster_teams="${ROSTER_HOME}/teams"
+    local roster_rites="${ROSTER_HOME}/rites"
 
-    if [[ ! -d "$roster_teams" ]]; then
+    if [[ ! -d "$roster_rites" ]]; then
         return 1
     fi
 
-    # Search for command in any team's commands/ directory
-    if find "$roster_teams" -path "*/commands/$cmd_name" -type f 2>/dev/null | grep -q .; then
+    # Search for command in any rite's commands/ directory
+    if find "$roster_rites" -path "*/commands/$cmd_name" -type f 2>/dev/null | grep -q .; then
         return 0
     fi
 
     return 1
 }
 
-# Get which team(s) contain a command
-get_team_for_command() {
+# Get which rite(s) contain a command
+get_rite_for_command() {
     local cmd_name="$1"
-    local roster_teams="${ROSTER_HOME}/teams"
+    local roster_rites="${ROSTER_HOME}/rites"
 
-    if [[ ! -d "$roster_teams" ]]; then
+    if [[ ! -d "$roster_rites" ]]; then
         echo ""
         return
     fi
 
-    # Find team directories containing this command
-    find "$roster_teams" -path "*/commands/$cmd_name" -type f 2>/dev/null | while read -r path; do
-        # Extract team name from path: .../teams/TEAM_NAME/commands/command.md
-        echo "$path" | sed 's|.*/teams/\([^/]*\)/commands/.*|\1|'
+    # Find rite directories containing this command
+    find "$roster_rites" -path "*/commands/$cmd_name" -type f 2>/dev/null | while read -r path; do
+        # Extract rite name from path: .../rites/RITE_NAME/commands/command.md
+        echo "$path" | sed 's|.*/rites/\([^/]*\)/commands/.*|\1|'
     done | tr '\n' ',' | sed 's/,$//'
 }
 
 # ============================================================================
-# Team-Level Orphan Cleanup
+# Rite-Level Orphan Cleanup
 # ============================================================================
 
-# Clean up commands at user-level that should only exist at team-level
+# Clean up commands at user-level that should only exist at rite-level
 # These are commands that:
 #   1. Exist in ~/.claude/commands/
 #   2. Do NOT exist in roster/user-commands/
-#   3. DO exist in roster/teams/*/commands/ (team-level resources)
-cleanup_team_orphans() {
-    log_info "Scanning for team-level commands that leaked to user-level..."
+#   3. DO exist in roster/rites/*/commands/ (rite-level resources)
+cleanup_rite_orphans() {
+    log_info "Scanning for rite-level commands that leaked to user-level..."
 
     local target_dir="$USER_COMMANDS_DIR"
     local backup_dir="$HOME/.claude/.backup/commands"
@@ -840,14 +840,14 @@ Adopt Mode (--adopt):
 Cleanup Mode (--cleanup):
   Scans commands in ~/.claude/commands/ and removes any that:
   - Do NOT exist in roster/user-commands/ (not user-level resources)
-  - DO exist in roster/teams/*/commands/ (team-level resources)
+  - DO exist in roster/rites/*/commands/ (rite-level resources)
 
-  Team-level commands should only exist in .claude/commands/ (per-project)
-  when that team is active, not in ~/.claude/commands/ (user-level global).
+  Rite-level commands should only exist in .claude/commands/ (per-project)
+  when that rite is active, not in ~/.claude/commands/ (user-level global).
 
   Use --cleanup when:
-  - Team commands leaked to user-level directory
-  - Cleaning up after switching teams
+  - Rite commands leaked to user-level directory
+  - Cleaning up after switching rites
   - Resetting to clean user-level state
 
   Backups are saved to ~/.claude/.backup/commands/ before removal.

@@ -104,38 +104,38 @@ calculate_checksum() {
 # Team Collision Detection
 # ============================================================================
 
-# Check if an agent name exists in any team pack
-# Returns 0 if found in a team (collision), 1 if not found
-is_team_agent() {
+# Check if an agent name exists in any rite pack
+# Returns 0 if found in a rite (collision), 1 if not found
+is_rite_agent() {
     local agent_name="$1"
-    local roster_teams="${ROSTER_HOME}/teams"
+    local roster_rites="${ROSTER_HOME}/rites"
 
-    if [[ ! -d "$roster_teams" ]]; then
+    if [[ ! -d "$roster_rites" ]]; then
         return 1
     fi
 
-    # Search for agent in any team's agents/ directory
-    if find "$roster_teams" -path "*/agents/$agent_name" -type f 2>/dev/null | grep -q .; then
+    # Search for agent in any rite's agents/ directory
+    if find "$roster_rites" -path "*/agents/$agent_name" -type f 2>/dev/null | grep -q .; then
         return 0
     fi
 
     return 1
 }
 
-# Get which team(s) contain an agent
-get_team_for_agent() {
+# Get which rite(s) contain an agent
+get_rite_for_agent() {
     local agent_name="$1"
-    local roster_teams="${ROSTER_HOME}/teams"
+    local roster_rites="${ROSTER_HOME}/rites"
 
-    if [[ ! -d "$roster_teams" ]]; then
+    if [[ ! -d "$roster_rites" ]]; then
         echo ""
         return
     fi
 
-    # Find team directories containing this agent
-    find "$roster_teams" -path "*/agents/$agent_name" -type f 2>/dev/null | while read -r path; do
-        # Extract team name from path: .../teams/TEAM_NAME/agents/agent.md
-        echo "$path" | sed 's|.*/teams/\([^/]*\)/agents/.*|\1|'
+    # Find rite directories containing this agent
+    find "$roster_rites" -path "*/agents/$agent_name" -type f 2>/dev/null | while read -r path; do
+        # Extract rite name from path: .../rites/RITE_NAME/agents/agent.md
+        echo "$path" | sed 's|.*/rites/\([^/]*\)/agents/.*|\1|'
     done | tr '\n' ',' | sed 's/,$//'
 }
 
