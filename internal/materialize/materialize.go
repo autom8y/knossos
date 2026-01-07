@@ -7,6 +7,8 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
+	"time"
 
 	"gopkg.in/yaml.v3"
 
@@ -15,6 +17,23 @@ import (
 	"github.com/autom8y/knossos/internal/paths"
 	"github.com/autom8y/knossos/internal/sync"
 )
+
+// Options configures materialization behavior.
+type Options struct {
+	Force      bool // Force regeneration, overwriting local changes
+	Update     bool // Re-sync even if already on this rite (alias for Force)
+	DryRun     bool // Preview changes without applying
+	RemoveAll  bool // Remove all orphan agents (with backup)
+	KeepAll    bool // Preserve all orphan agents (default)
+	PromoteAll bool // Move orphan agents to user-level
+}
+
+// Result contains materialization outcome details.
+type Result struct {
+	OrphansDetected []string // List of orphan agent files detected
+	OrphanAction    string   // Action taken: "kept", "removed", "promoted"
+	BackupPath      string   // Path to backup if orphans were removed
+}
 
 // RiteManifest represents a rite manifest.yaml file.
 type RiteManifest struct {
@@ -52,54 +71,214 @@ func NewMaterializer(resolver *paths.Resolver) *Materializer {
 }
 
 // Materialize generates the .claude/ directory from templates and the active rite.
+// This is the legacy method that uses default options (keep orphans).
 func (m *Materializer) Materialize(activeRiteName string) error {
-	// 1. Load the active rite manifest
-	ritePath := filepath.Join(m.ritesDir, activeRiteName)
-	manifest, err := m.loadRiteManifest(ritePath)
-	if err != nil {
-		return errors.Wrap(errors.CodeFileNotFound, "failed to load rite manifest", err)
+	_, err := m.MaterializeWithOptions(activeRiteName, Options{KeepAll: true})
+	return err
+}
+
+// MaterializeWithOptions generates the .claude/ directory with configurable orphan handling.
+func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Options) (*Result, error) {
+	result := &Result{
+		OrphansDetected: []string{},
+		OrphanAction:    "kept",
 	}
 
 	claudeDir := m.resolver.ClaudeDir()
 
+	// Check if already on this rite (skip unless --force or --update)
+	if !opts.Force && !opts.Update && !opts.DryRun {
+		currentRite, err := m.getCurrentRite(claudeDir)
+		if err == nil && currentRite == activeRiteName {
+			result.OrphanAction = "skipped"
+			return result, nil
+		}
+	}
+
+	// 1. Load the active rite manifest
+	ritePath := filepath.Join(m.ritesDir, activeRiteName)
+	manifest, err := m.loadRiteManifest(ritePath)
+	if err != nil {
+		return nil, errors.Wrap(errors.CodeFileNotFound, "failed to load rite manifest", err)
+	}
+
+	// Dry-run: just detect orphans and return
+	if opts.DryRun {
+		orphans, err := m.detectOrphans(manifest, claudeDir)
+		if err != nil {
+			return nil, errors.Wrap(errors.CodeGeneralError, "failed to detect orphans", err)
+		}
+		result.OrphansDetected = orphans
+		return result, nil
+	}
+
 	// 2. Ensure .claude/ directory exists
 	if err := paths.EnsureDir(claudeDir); err != nil {
-		return errors.Wrap(errors.CodeGeneralError, "failed to create .claude directory", err)
+		return nil, errors.Wrap(errors.CodeGeneralError, "failed to create .claude directory", err)
 	}
 
-	// 3. Generate agents/ directory from rite
+	// 3. Handle orphans before materializing agents
+	orphans, err := m.detectOrphans(manifest, claudeDir)
+	if err != nil {
+		return nil, errors.Wrap(errors.CodeGeneralError, "failed to detect orphans", err)
+	}
+	result.OrphansDetected = orphans
+
+	if len(orphans) > 0 {
+		if opts.RemoveAll {
+			backupPath, err := m.backupAndRemoveOrphans(orphans, claudeDir)
+			if err != nil {
+				return nil, errors.Wrap(errors.CodeGeneralError, "failed to remove orphans", err)
+			}
+			result.OrphanAction = "removed"
+			result.BackupPath = backupPath
+		} else if opts.PromoteAll {
+			if err := m.promoteOrphans(orphans, claudeDir); err != nil {
+				return nil, errors.Wrap(errors.CodeGeneralError, "failed to promote orphans", err)
+			}
+			result.OrphanAction = "promoted"
+		}
+		// KeepAll: do nothing (orphans remain)
+	}
+
+	// 4. Generate agents/ directory from rite
 	if err := m.materializeAgents(manifest, ritePath, claudeDir); err != nil {
-		return errors.Wrap(errors.CodeGeneralError, "failed to materialize agents", err)
+		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize agents", err)
 	}
 
-	// 4. Generate skills/ directory from rite + shared + dependencies
+	// 5. Generate skills/ directory from rite + shared + dependencies
 	if err := m.materializeSkills(manifest, claudeDir); err != nil {
-		return errors.Wrap(errors.CodeGeneralError, "failed to materialize skills", err)
+		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize skills", err)
 	}
 
-	// 5. Generate hooks/ directory from templates/hooks
+	// 6. Generate hooks/ directory from templates/hooks
 	if err := m.materializeHooks(claudeDir); err != nil {
-		return errors.Wrap(errors.CodeGeneralError, "failed to materialize hooks", err)
+		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize hooks", err)
 	}
 
-	// 6. Generate CLAUDE.md from inscription system
+	// 7. Generate CLAUDE.md from inscription system
 	if err := m.materializeCLAUDEmd(manifest, claudeDir); err != nil {
-		return errors.Wrap(errors.CodeGeneralError, "failed to materialize CLAUDE.md", err)
+		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize CLAUDE.md", err)
 	}
 
-	// 7. Generate settings.local.json if not exists
+	// 8. Generate settings.local.json if not exists
 	if err := m.materializeSettings(claudeDir); err != nil {
-		return errors.Wrap(errors.CodeGeneralError, "failed to materialize settings", err)
+		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize settings", err)
 	}
 
-	// 8. Track state in .claude/sync/state.json
+	// 9. Track state in .claude/sync/state.json
 	if err := m.trackState(manifest, activeRiteName); err != nil {
-		return errors.Wrap(errors.CodeGeneralError, "failed to track state", err)
+		return nil, errors.Wrap(errors.CodeGeneralError, "failed to track state", err)
 	}
 
-	// 9. Write ACTIVE_RITE marker
+	// 10. Write ACTIVE_RITE marker
 	if err := m.writeActiveRite(activeRiteName, claudeDir); err != nil {
-		return errors.Wrap(errors.CodeGeneralError, "failed to write ACTIVE_RITE", err)
+		return nil, errors.Wrap(errors.CodeGeneralError, "failed to write ACTIVE_RITE", err)
+	}
+
+	return result, nil
+}
+
+// detectOrphans finds agent files that are not in the incoming rite's manifest.
+func (m *Materializer) detectOrphans(manifest *RiteManifest, claudeDir string) ([]string, error) {
+	agentsDir := filepath.Join(claudeDir, "agents")
+	if _, err := os.Stat(agentsDir); os.IsNotExist(err) {
+		return []string{}, nil
+	}
+
+	// Build set of expected agents from manifest
+	expectedAgents := make(map[string]bool)
+	for _, agent := range manifest.Agents {
+		expectedAgents[agent.Name+".md"] = true
+	}
+
+	// Find files that aren't expected
+	orphans := []string{}
+	entries, err := os.ReadDir(agentsDir)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, entry := range entries {
+		if entry.IsDir() || !expectedAgents[entry.Name()] {
+			if !entry.IsDir() && filepath.Ext(entry.Name()) == ".md" {
+				orphans = append(orphans, entry.Name())
+			}
+		}
+	}
+
+	return orphans, nil
+}
+
+// backupAndRemoveOrphans creates a backup of orphan agents then removes them.
+func (m *Materializer) backupAndRemoveOrphans(orphans []string, claudeDir string) (string, error) {
+	if len(orphans) == 0 {
+		return "", nil
+	}
+
+	agentsDir := filepath.Join(claudeDir, "agents")
+	backupDir := filepath.Join(claudeDir, ".orphan-backup", time.Now().Format("20060102-150405"))
+
+	if err := paths.EnsureDir(backupDir); err != nil {
+		return "", err
+	}
+
+	for _, orphan := range orphans {
+		srcPath := filepath.Join(agentsDir, orphan)
+		dstPath := filepath.Join(backupDir, orphan)
+
+		// Copy to backup
+		content, err := os.ReadFile(srcPath)
+		if err != nil {
+			return "", err
+		}
+		if err := os.WriteFile(dstPath, content, 0644); err != nil {
+			return "", err
+		}
+
+		// Remove original
+		if err := os.Remove(srcPath); err != nil {
+			return "", err
+		}
+	}
+
+	return backupDir, nil
+}
+
+// promoteOrphans moves orphan agents to user-level ~/.claude/agents/.
+func (m *Materializer) promoteOrphans(orphans []string, claudeDir string) error {
+	if len(orphans) == 0 {
+		return nil
+	}
+
+	agentsDir := filepath.Join(claudeDir, "agents")
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return err
+	}
+	userAgentsDir := filepath.Join(homeDir, ".claude", "agents")
+
+	if err := paths.EnsureDir(userAgentsDir); err != nil {
+		return err
+	}
+
+	for _, orphan := range orphans {
+		srcPath := filepath.Join(agentsDir, orphan)
+		dstPath := filepath.Join(userAgentsDir, orphan)
+
+		// Copy to user-level
+		content, err := os.ReadFile(srcPath)
+		if err != nil {
+			return err
+		}
+		if err := os.WriteFile(dstPath, content, 0644); err != nil {
+			return err
+		}
+
+		// Remove from project-level
+		if err := os.Remove(srcPath); err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -339,6 +518,16 @@ func (m *Materializer) trackState(manifest *RiteManifest, activeRiteName string)
 func (m *Materializer) writeActiveRite(riteName, claudeDir string) error {
 	activeRitePath := filepath.Join(claudeDir, "ACTIVE_RITE")
 	return os.WriteFile(activeRitePath, []byte(riteName+"\n"), 0644)
+}
+
+// getCurrentRite reads the current active rite from ACTIVE_RITE file.
+func (m *Materializer) getCurrentRite(claudeDir string) (string, error) {
+	activeRitePath := filepath.Join(claudeDir, "ACTIVE_RITE")
+	data, err := os.ReadFile(activeRitePath)
+	if err != nil {
+		return "", err
+	}
+	return strings.TrimSpace(string(data)), nil
 }
 
 // copyDir recursively copies a directory.

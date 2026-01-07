@@ -47,6 +47,7 @@ Rites are composable practice bundles. The invoke operation is additive
 	cmd.AddCommand(newContextCmd(ctx))
 	cmd.AddCommand(newStatusCmd(ctx))
 	cmd.AddCommand(newValidateCmd(ctx))
+	cmd.AddCommand(newPantheonCmd(ctx))
 
 	return cmd
 }
