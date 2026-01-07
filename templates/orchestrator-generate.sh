@@ -564,8 +564,8 @@ generate_rite() {
 # Batch Generation
 # ============================================================================
 
-batch_generate_all_teams() {
-    # Find all teams
+batch_generate_all_rites() {
+    # Find all rites
     local -a teams
     while IFS= read -r team_dir; do
         local team=$(basename "$team_dir")
@@ -573,11 +573,11 @@ batch_generate_all_teams() {
     done < <(find "$KNOSSOS_HOME/rites" -maxdepth 1 -type d -name "*-pack" | sort)
 
     if [[ ${#teams[@]} -eq 0 ]]; then
-        log_error "No teams found in $KNOSSOS_HOME/rites"
+        log_error "No rites found in $KNOSSOS_HOME/rites"
         return 1
     fi
 
-    log_info "Batch generating ${#teams[@]} teams"
+    log_info "Batch generating ${#teams[@]} rites"
     echo ""
 
     local failed_teams=()
@@ -592,11 +592,11 @@ batch_generate_all_teams() {
     log_info "Batch generation complete"
 
     if [[ ${#failed_teams[@]} -gt 0 ]]; then
-        log_error "Failed teams: ${failed_teams[*]}"
+        log_error "Failed rites: ${failed_teams[*]}"
         return 1
     fi
 
-    log_ok "All teams generated successfully"
+    log_ok "All rites generated successfully"
     return 0
 }
 
@@ -613,7 +613,7 @@ main() {
     echo ""
 
     if [[ "$BATCH_ALL" == true ]]; then
-        batch_generate_all_teams
+        batch_generate_all_rites
     else
         generate_rite "$TEAM"
     fi
