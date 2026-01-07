@@ -573,7 +573,7 @@ Security posture validated.
 
 ## Related Documents
 
-- [Cross-Team Coordination Playbook](../playbooks/cross-team-coordination.md)
+- [Cross-Team Coordination Playbook](../playbooks/cross-rite-coordination.md)
 - [Edge Cases: Cross-Team Workflows](../edge-cases/cross-team-workflows.md)
 - [Security Pack Workflow](../../teams/security-pack/workflow.md)
 - [Cross-Team Handoff Schema](../../.claude/skills/shared/cross-team-handoff/schema.md)

@@ -360,7 +360,7 @@ Future: Hook into CI to validate artifact existence and schema compliance at eac
 
 ## Related Documents
 
-- [Cross-Team Coordination Playbook](../playbooks/cross-team-coordination.md)
+- [Cross-Team Coordination Playbook](../playbooks/cross-rite-coordination.md)
 - [Handoff Smoke Tests](handoff-smoke-tests.md)
 - [10x-dev-pack Workflow](../../teams/10x-dev-pack/workflow.md)
 - [Cross-Team Handoff Schema](../../.claude/skills/shared/cross-team-handoff/schema.md)

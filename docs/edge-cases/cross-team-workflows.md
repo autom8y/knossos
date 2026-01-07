@@ -594,6 +594,6 @@ Configure expected response times:
 
 ## Related Documents
 
-- [Cross-Team Coordination Playbook](../playbooks/cross-team-coordination.md)
+- [Cross-Team Coordination Playbook](../playbooks/cross-rite-coordination.md)
 - [Handoff Smoke Tests](../testing/handoff-smoke-tests.md)
 - [Cross-Team Handoff Schema](../../.claude/skills/shared/cross-team-handoff/schema.md)

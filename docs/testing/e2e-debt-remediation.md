@@ -695,7 +695,7 @@ Package 1 complete. Behavior preserved with documented intentional unification.
 
 ## Related Documents
 
-- [Cross-Team Coordination Playbook](../playbooks/cross-team-coordination.md)
+- [Cross-Team Coordination Playbook](../playbooks/cross-rite-coordination.md)
 - [Handoff Smoke Tests](handoff-smoke-tests.md)
 - [Debt Triage Pack Workflow](../../teams/debt-triage-pack/workflow.md)
 - [Hygiene Pack Workflow](../../teams/hygiene-pack/workflow.md)
