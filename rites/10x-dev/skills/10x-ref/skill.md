@@ -11,7 +11,7 @@ description: "Quick switch to 10x-dev (full development workflow). Use when: sta
 
 Instantly switch to the 10x-dev, a comprehensive development team with full lifecycle agents for building features from requirements through implementation and testing.
 
-This is a convenience wrapper around `/rite 10x-dev` that also displays the rite roster after switching.
+This is a convenience wrapper around `/rite 10x-dev` that also displays the pantheon after switching.
 
 ---
 
@@ -39,7 +39,7 @@ $ROSTER_HOME/swap-rite.sh 10x-dev
 
 ### 2. Display Pantheon
 
-After successful switch, show the active rite roster:
+After successful switch, show the active pantheon:
 
 ```
 Switched to 10x-dev (5 agents loaded)

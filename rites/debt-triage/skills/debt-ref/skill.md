@@ -11,7 +11,7 @@ description: "Quick switch to debt-triage (technical debt management). Use when:
 
 Instantly switch to the debt-triage, a specialized team focused on identifying, assessing, and planning remediation of technical debt across codebases and projects.
 
-This is a convenience wrapper around `/rite debt-triage` that also displays the rite roster after switching.
+This is a convenience wrapper around `/rite debt-triage` that also displays the pantheon after switching.
 
 ---
 
@@ -39,7 +39,7 @@ $ROSTER_HOME/swap-rite.sh debt-triage
 
 ### 2. Display Pantheon
 
-After successful switch, show the active rite roster:
+After successful switch, show the active pantheon:
 
 ```
 Switched to debt-triage (3 agents loaded)

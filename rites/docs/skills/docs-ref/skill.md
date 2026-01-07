@@ -11,7 +11,7 @@ description: "Quick switch to docs (documentation workflow). Use when: creating 
 
 Instantly switch to the docs, a specialized team focused on technical writing, API documentation, information architecture, and documentation quality audits.
 
-This is a convenience wrapper around `/rite docs` that also displays the rite roster after switching.
+This is a convenience wrapper around `/rite docs` that also displays the pantheon after switching.
 
 ---
 
@@ -39,7 +39,7 @@ $ROSTER_HOME/swap-rite.sh docs
 
 ### 2. Display Pantheon
 
-After successful switch, show the active rite roster:
+After successful switch, show the active pantheon:
 
 ```
 Switched to docs (4 agents loaded)

@@ -11,7 +11,7 @@ description: "Quick switch to hygiene (code quality workflow). Use when: detecti
 
 Instantly switch to the hygiene, a specialized team focused on code quality, architectural compliance, refactoring, and technical cleanliness. This team detects code smells, enforces standards, and cleans up technical messes.
 
-This is a convenience wrapper around `/rite hygiene` that also displays the rite roster after switching.
+This is a convenience wrapper around `/rite hygiene` that also displays the pantheon after switching.
 
 ---
 
@@ -39,7 +39,7 @@ $ROSTER_HOME/swap-rite.sh hygiene
 
 ### 2. Display Pantheon
 
-After successful switch, show the active rite roster:
+After successful switch, show the active pantheon:
 
 ```
 Switched to hygiene (4 agents loaded)

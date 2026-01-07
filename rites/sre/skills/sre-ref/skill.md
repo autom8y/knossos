@@ -11,7 +11,7 @@ description: "Quick switch to sre (reliability workflow). Use when: improving ob
 
 Instantly switch to the sre, a Site Reliability Engineering team focused on system reliability, observability, incident response, and chaos engineering.
 
-This is a convenience wrapper around `/rite sre` that also displays the rite roster after switching.
+This is a convenience wrapper around `/rite sre` that also displays the pantheon after switching.
 
 ---
 
@@ -39,7 +39,7 @@ $ROSTER_HOME/swap-rite.sh sre
 
 ### 2. Display Pantheon
 
-After successful switch, show the active rite roster:
+After successful switch, show the active pantheon:
 
 ```
 Switched to sre (4 agents loaded)
