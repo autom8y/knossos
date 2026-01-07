@@ -59,7 +59,7 @@ $ CLAUDE_USER_PROMPT='/start "No Orchestrator Test"' bash .claude/hooks/session-
 
 | Property | Value |
 |----------|-------|
-| Team | ecosystem-pack |
+| Team | ecosystem |
 | Initiative | No Orchestrator Test |
 | Complexity | MODULE |
 

@@ -795,7 +795,7 @@ Commands:
 Examples:
   session-manager.sh status
   session-manager.sh create "Add dark mode" MODULE
-  session-manager.sh create "New API" SERVICE hygiene-pack
+  session-manager.sh create "New API" SERVICE hygiene
   session-manager.sh transition requirements design
   session-manager.sh transition design implementation
   session-manager.sh mutate park "Going to lunch"

@@ -1,7 +1,7 @@
 # SPIKE: Script Code Smell Refactoring Analysis
 
 **Date**: 2026-01-03
-**Author**: hygiene-pack (code-smeller agent)
+**Author**: hygiene (code-smeller agent)
 **Timebox**: 2 hours
 **Status**: Complete
 

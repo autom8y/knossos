@@ -1,5 +1,5 @@
 ---
-description: Quick switch to doc-rite-pack (documentation workflow)
+description: Quick switch to docs (documentation workflow)
 argument-hint: [--update] [--dry-run] [--keep-all|--remove-all|--promote-all]
 allowed-tools: Bash, Read
 model: haiku
@@ -14,9 +14,9 @@ Switch to the documentation rite and display the rite roster. $ARGUMENTS
 
 ## Behavior
 
-1. Execute: `${KNOSSOS_HOME:-~/Code/roster}/swap-rite.sh doc-rite-pack $ARGUMENTS`
+1. Execute: `${KNOSSOS_HOME:-~/Code/roster}/swap-rite.sh docs $ARGUMENTS`
 2. Display the roster output from swap-rite.sh (agents and their roles)
-3. If SESSION_CONTEXT exists, update `active_rite` to `doc-rite-pack`
+3. If SESSION_CONTEXT exists, update `active_rite` to `docs`
 
 ## Flags
 

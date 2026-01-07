@@ -218,7 +218,7 @@ Session Context:
 - Session Path: .claude/sessions/session-20260104-022401-abcd1234/SESSION_CONTEXT.md
 - Initiative: Auto-Orchestration Hook Enhancement
 - Complexity: MODULE
-- Team: ecosystem-pack")
+- Team: ecosystem")
 \`\`\`
 
 Copy the Task invocation above and execute it, or use `/consult` for manual routing.
@@ -519,7 +519,7 @@ load '../test_helper'
 
 setup() {
     setup_test_project
-    echo "ecosystem-pack" > ".claude/ACTIVE_RITE"
+    echo "ecosystem" > ".claude/ACTIVE_RITE"
     mkdir -p ".claude/agents"
     echo "# Orchestrator" > ".claude/agents/orchestrator.md"
 }

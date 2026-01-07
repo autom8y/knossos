@@ -5,7 +5,7 @@
 > Duration: 5 Sprints (Sprint 0-4)
 > Date: 2026-01-02
 > Complexity: SYSTEM
-> Active Team: 10x-dev-pack
+> Active Team: 10x-dev
 
 ---
 
@@ -35,13 +35,13 @@ This initiative transformed the roster ecosystem from ad-hoc cross-rite coordina
 
 | Task ID | Description | Team | Status |
 |---------|-------------|------|--------|
-| P0-STRAT-001 | Fix model assignment bug in skill.md | strategy-pack | Complete |
-| P1-INTEL-001 | Fix user-researcher agent quality | intelligence-pack | Complete |
-| P2-INTEL-002 | Fix insights-analyst agent quality | intelligence-pack | Complete |
-| P1-RND-001 | Fix ship-pack references | rnd-pack | Complete |
-| P1-ECO-001 | Demote ecosystem-pack from hub | ecosystem-pack | Complete |
+| P0-STRAT-001 | Fix model assignment bug in skill.md | strategy | Complete |
+| P1-INTEL-001 | Fix user-researcher agent quality | intelligence | Complete |
+| P2-INTEL-002 | Fix insights-analyst agent quality | intelligence | Complete |
+| P1-RND-001 | Fix ship-pack references | rnd | Complete |
+| P1-ECO-001 | Demote ecosystem from hub | ecosystem | Complete |
 | P2-DOC-001 | Add staleness detection to doc-auditor | doc-team-pack | Complete |
-| P1-HYG-001 | Define behavior preservation | hygiene-pack | Complete |
+| P1-HYG-001 | Define behavior preservation | hygiene | Complete |
 
 **Tasks Completed**: 7
 **Value Delivered**: +10% ecosystem quality, bugs fixed, foundation definitions in place
@@ -101,7 +101,7 @@ This initiative transformed the roster ecosystem from ad-hoc cross-rite coordina
 |---------|-------------|--------|
 | P1-SEC-001 | Add threat-modeler gate for SYSTEM complexity | Complete |
 | P1-SEC-002 | Update workflow for security gate | Complete |
-| P1-SEC-003 | Add pre-implementation phase to security-pack | Complete |
+| P1-SEC-003 | Add pre-implementation phase to security | Complete |
 
 #### Group 4: Documentation/RND Gates (2 tasks)
 | Task ID | Description | Status |
@@ -109,7 +109,7 @@ This initiative transformed the roster ecosystem from ad-hoc cross-rite coordina
 | P1-DOC-001 | Add documentation gate to QA checklist | Complete |
 | P2-RND-001 | Clarify spike overlap with 10x | Complete |
 
-**Additional Improvements**: Security-pack and rnd-pack README updates (2 tasks)
+**Additional Improvements**: Security-pack and rnd README updates (2 tasks)
 
 **Tasks Completed**: 14
 **Value Delivered**: Impact-aware routing, flexible entry points, proactive gates
@@ -208,17 +208,17 @@ This initiative transformed the roster ecosystem from ad-hoc cross-rite coordina
 |-------------|---------|
 | Impact assessment for smart routing | High-impact changes route to Architect even at SCRIPT complexity |
 | Flexible entry points | Reduced ceremony for simple projects (skip PRD for low-impact work) |
-| Security gate | Architect triggers security-pack consultation for auth/crypto/PII |
+| Security gate | Architect triggers security consultation for auth/crypto/PII |
 | Documentation gate | QA triggers doc-team-pack for user-facing changes |
 | Clear boundaries | RND /spike for research, 10x /spike for tactical validation |
 
 ### 4. New Agent Created
 
-**tech-transfer** agent in rnd-pack:
+**tech-transfer** agent in rnd:
 - Bridges exploration to production
 - Produces TRANSFER artifacts (internal) and HANDOFF artifacts (cross-rite)
-- Routes to 10x-dev-pack (implementation) or strategy-pack (strategic evaluation)
-- Location: `rites/rnd-pack/agents/tech-transfer.md`
+- Routes to 10x-dev (implementation) or strategy (strategic evaluation)
+- Location: `rites/rnd/agents/tech-transfer.md`
 
 ---
 
@@ -298,7 +298,7 @@ Manual verification of HANDOFF schema compliance. Future work should include sch
 ### New Agents
 | Agent | Path |
 |-------|------|
-| tech-transfer | `rites/rnd-pack/agents/tech-transfer.md` |
+| tech-transfer | `rites/rnd/agents/tech-transfer.md` |
 
 ### Planning Artifacts
 | Artifact | Path |
@@ -310,16 +310,16 @@ Manual verification of HANDOFF schema compliance. Future work should include sch
 ### Team TODO Files
 | File | Path |
 |------|------|
-| 10x-dev-pack | `rites/10x-dev-pack/TODO.md` |
-| ecosystem-pack | `rites/ecosystem-pack/TODO.md` |
+| 10x-dev | `rites/10x-dev/TODO.md` |
+| ecosystem | `rites/ecosystem/TODO.md` |
 | doc-team-pack | `rites/doc-team-pack/TODO.md` |
-| hygiene-pack | `rites/hygiene-pack/TODO.md` |
-| debt-triage-pack | `rites/debt-triage-pack/TODO.md` |
-| sre-pack | `rites/sre-pack/TODO.md` |
-| security-pack | `rites/security-pack/TODO.md` |
-| intelligence-pack | `rites/intelligence-pack/TODO.md` |
-| rnd-pack | `rites/rnd-pack/TODO.md` |
-| strategy-pack | `rites/strategy-pack/TODO.md` |
+| hygiene | `rites/hygiene/TODO.md` |
+| debt-triage | `rites/debt-triage/TODO.md` |
+| sre | `rites/sre/TODO.md` |
+| security | `rites/security/TODO.md` |
+| intelligence | `rites/intelligence/TODO.md` |
+| rnd | `rites/rnd/TODO.md` |
+| strategy | `rites/strategy/TODO.md` |
 
 ### Documentation
 | Document | Path |
@@ -331,39 +331,39 @@ Manual verification of HANDOFF schema compliance. Future work should include sch
 ### Modified Team Artifacts
 
 **Agents Updated**:
-- `rites/intelligence-pack/agents/user-researcher.md` - Quality improvements
-- `rites/intelligence-pack/agents/insights-analyst.md` - Quality improvements + HANDOFF production
+- `rites/intelligence/agents/user-researcher.md` - Quality improvements
+- `rites/intelligence/agents/insights-analyst.md` - Quality improvements + HANDOFF production
 - `rites/doc-team-pack/agents/doc-auditor.md` - Staleness detection
-- `rites/hygiene-pack/agents/architect-enforcer.md` - Behavior preservation
-- `rites/hygiene-pack/agents/audit-lead.md` - Behavior preservation
-- `rites/hygiene-pack/agents/code-smeller.md` - smell-detection integration + HANDOFF acceptance
-- `rites/debt-triage-pack/agents/debt-collector.md` - smell-detection integration
-- `rites/debt-triage-pack/agents/sprint-planner.md` - HANDOFF production
-- `rites/10x-dev-pack/agents/requirements-analyst.md` - Impact assessment
-- `rites/10x-dev-pack/agents/orchestrator.md` - Flexible entry points
-- `rites/10x-dev-pack/agents/architect.md` - Security gate trigger
-- `rites/10x-dev-pack/agents/qa-adversary.md` - Documentation gate + SRE/security HANDOFFs
-- `rites/strategy-pack/agents/roadmap-strategist.md` - HANDOFF production
+- `rites/hygiene/agents/architect-enforcer.md` - Behavior preservation
+- `rites/hygiene/agents/audit-lead.md` - Behavior preservation
+- `rites/hygiene/agents/code-smeller.md` - smell-detection integration + HANDOFF acceptance
+- `rites/debt-triage/agents/debt-collector.md` - smell-detection integration
+- `rites/debt-triage/agents/sprint-planner.md` - HANDOFF production
+- `rites/10x-dev/agents/requirements-analyst.md` - Impact assessment
+- `rites/10x-dev/agents/orchestrator.md` - Flexible entry points
+- `rites/10x-dev/agents/architect.md` - Security gate trigger
+- `rites/10x-dev/agents/qa-adversary.md` - Documentation gate + SRE/security HANDOFFs
+- `rites/strategy/agents/roadmap-strategist.md` - HANDOFF production
 
 **READMEs Updated**:
-- `rites/rnd-pack/README.md` - ship-pack fix, RND integration
-- `rites/ecosystem-pack/README.md` - Hub demotion
-- `rites/intelligence-pack/README.md` - Intelligence/Strategy boundary
-- `rites/strategy-pack/README.md` - Intelligence/Strategy boundary, RND integration
-- `rites/sre-pack/README.md` - HANDOFF acceptance guidance
-- `rites/security-pack/README.md` - Consultation mode
+- `rites/rnd/README.md` - ship-pack fix, RND integration
+- `rites/ecosystem/README.md` - Hub demotion
+- `rites/intelligence/README.md` - Intelligence/Strategy boundary
+- `rites/strategy/README.md` - Intelligence/Strategy boundary, RND integration
+- `rites/sre/README.md` - HANDOFF acceptance guidance
+- `rites/security/README.md` - Consultation mode
 
 **Workflows Updated**:
-- `rites/10x-dev-pack/workflow.yaml` - Impact routing, security gates, dynamic entry
-- `rites/strategy-pack/workflow.yaml` - Back-routes
-- `rites/security-pack/workflow.yaml` - Consultation mode
+- `rites/10x-dev/workflow.yaml` - Impact routing, security gates, dynamic entry
+- `rites/strategy/workflow.yaml` - Back-routes
+- `rites/security/workflow.yaml` - Consultation mode
 
 **Skills Updated**:
-- `rites/strategy-pack/skills/strategy-ref/skill.md` - Model assignment fix
-- `rites/10x-dev-pack/skills/10x-workflow/SKILL.md` - Flexible entry documentation
-- `rites/10x-dev-pack/skills/10x-workflow/quality-gates.md` - Impact assessment gate
-- `rites/10x-dev-pack/skills/doc-artifacts/SKILL.md` - PRD impact field
-- `rites/sre-pack/skills/doc-sre/SKILL.md` - Template migration
+- `rites/strategy/skills/strategy-ref/skill.md` - Model assignment fix
+- `rites/10x-dev/skills/10x-workflow/SKILL.md` - Flexible entry documentation
+- `rites/10x-dev/skills/10x-workflow/quality-gates.md` - Impact assessment gate
+- `rites/10x-dev/skills/doc-artifacts/SKILL.md` - PRD impact field
+- `rites/sre/skills/doc-sre/SKILL.md` - Template migration
 
 ---
 

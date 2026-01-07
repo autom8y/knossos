@@ -357,7 +357,7 @@ var _ output.Textable = HandoffPrepareOutput{}
 // Returns nil if rite is unknown (allowing fallback to universal agent list).
 func getRiteAgents(rite string) []string {
 	riteRoster := map[string][]string{
-		"10x-dev-pack": {
+		"10x-dev": {
 			"requirements-analyst", "architect", "principal-engineer", "qa-adversary", "orchestrator",
 		},
 		"consultant-pack": {

@@ -1,0 +1,62 @@
+# Orchestrator configuration for security
+# Used by generate-orchestrator.sh to produce orchestrator.md
+# References workflow.yaml for phase/specialist data
+
+# Team metadata
+rite:
+  name: security
+  domain: security assessment
+  color: red
+
+# Frontmatter customization
+frontmatter:
+  role: "Coordinates security initiatives"
+  description: |
+    Coordinates security phases for security work. Routes tasks through threat modeling, compliance, penetration testing, and review phases. Use when: security work spans multiple phases or requires cross-functional coordination. Triggers: coordinate, orchestrate, security workflow, security assessment, multi-phase security.
+
+# Specialist routing conditions (when to route to each)
+# Specialist names come from workflow.yaml phases
+routing:
+  threat-modeler: "Security concern raised, threat model needed"
+  compliance-architect: "Threat model complete, compliance requirements needed"
+  penetration-tester: "Compliance design complete, security testing needed"
+  security-reviewer: "Penetration testing complete, final review needed"
+
+# Workflow position descriptors
+workflow_position:
+  upstream: "User security request or /security trigger"
+  downstream: "Security signoff artifacts feed to deployment gates"
+
+# Handoff criteria between phases (checklist items)
+handoff_criteria:
+  threat-modeling:
+    - "Threat model document complete with identified threats"
+    - "Attack vectors documented"
+    - "Threat severity ratings assigned"
+  compliance-design:
+    - "Compliance requirements mapped to regulations"
+    - "Control mappings documented"
+    - "Compliance gaps identified"
+  penetration-testing:
+    - "Penetration test complete"
+    - "Vulnerabilities reported with severity and remediation"
+    - "Test coverage documented"
+  security-review:
+    - "Security signoff obtained"
+    - "All findings addressed or risk-accepted"
+    - "Deployment approval granted"
+
+# Skills references for this team
+skills:
+  - "@security-standards for threat modeling conventions"
+  - "@compliance for regulatory mappings"
+  - "@10x-workflow for complexity determination in security context"
+
+# Team-specific anti-patterns
+antipatterns:
+  - "Treating PATCH as SYSTEM (different scope requires different phases)"
+  - "Skipping threat modeling for 'simple' features"
+  - "Accepting unmitigated CRITICAL vulnerabilities"
+
+# Cross-rite protocol (security is a hub team)
+cross_team_protocol: "Escalate infrastructure security to sre. Coordinate with ecosystem on security hooks."

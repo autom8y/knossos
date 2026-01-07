@@ -1,8 +1,8 @@
 ---
-artifact_id: HANDOFF-10x-dev-pack-to-security-pack-2026-01-02
+artifact_id: HANDOFF-10x-dev-to-security-2026-01-02
 schema_version: "1.0"
-source_team: 10x-dev-pack
-target_team: security-pack
+source_team: 10x-dev
+target_team: security
 handoff_type: assessment
 priority: critical
 blocking: true
@@ -41,11 +41,11 @@ The handoff lacks sufficient context for security assessment:
 Source team should:
 1. Complete TDD-payment-processing.md with architecture diagrams
 2. Create new HANDOFF referencing this rejection
-3. Set `resubmission_of: HANDOFF-10x-dev-pack-to-security-pack-2026-01-02`
+3. Set `resubmission_of: HANDOFF-10x-dev-to-security-2026-01-02`
 
 ## Original Context
 
-The 10x-dev-pack attempted to hand off a payment processing security assessment before completing technical design. The PRD exists but lacks the architectural detail needed for threat modeling.
+The 10x-dev attempted to hand off a payment processing security assessment before completing technical design. The PRD exists but lacks the architectural detail needed for threat modeling.
 
 ## Why This Was Rejected
 
@@ -85,8 +85,8 @@ items:
 
 **Updated frontmatter**:
 ```yaml
-resubmission_of: HANDOFF-10x-dev-pack-to-security-pack-2026-01-02
-artifact_id: HANDOFF-10x-dev-pack-to-security-pack-2026-01-03
+resubmission_of: HANDOFF-10x-dev-to-security-2026-01-02
+artifact_id: HANDOFF-10x-dev-to-security-2026-01-03
 created_at: "2026-01-03T10:30:00Z"
 status: pending
 ```

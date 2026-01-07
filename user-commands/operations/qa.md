@@ -41,10 +41,10 @@ VALIDATION_AGENT=$(grep -B1 "next: null" .claude/ACTIVE_WORKFLOW.yaml | grep "ag
    - Implementation exists (code, docs, etc.)
 
 2. **Resolve validation agent** from workflow:
-   - 10x-dev-pack → qa-adversary
+   - 10x-dev → qa-adversary
    - doc-team-pack → doc-reviewer
-   - hygiene-pack → audit-lead
-   - debt-triage-pack → (risk-assessor for validation)
+   - hygiene → audit-lead
+   - debt-triage → (risk-assessor for validation)
 
 3. **Invoke validation agent** via Task tool:
    - Create validation plan

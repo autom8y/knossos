@@ -51,7 +51,7 @@ yq '.routing | keys' rites/my-team/orchestrator.yaml
 **If file doesn't exist**:
 ```bash
 # Create from template
-cp rites/doc-rite-pack/orchestrator.yaml \
+cp rites/docs/orchestrator.yaml \
    rites/my-team/orchestrator.yaml
 
 # Edit with your values

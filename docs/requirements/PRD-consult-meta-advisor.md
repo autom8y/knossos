@@ -162,7 +162,7 @@ Current `/consult` implementation provides ecosystem guidance and team recommend
 - [ ] Intent matching works for representative queries across common use cases
 - [ ] User can complete "describe intent -> receive recommendation -> invoke successfully" flow
 
-**Test Plan Note**: Specific test cases (e.g., "/consult 'I want to build a feature'" → 10x-dev-pack) should be enumerated during QA phase, not in PRD success criteria.
+**Test Plan Note**: Specific test cases (e.g., "/consult 'I want to build a feature'" → 10x-dev) should be enumerated during QA phase, not in PRD success criteria.
 
 ## Dependencies
 

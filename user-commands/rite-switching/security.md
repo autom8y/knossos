@@ -1,5 +1,5 @@
 ---
-description: Quick switch to security-pack (security assessment workflow)
+description: Quick switch to security (security assessment workflow)
 argument-hint: [--update] [--dry-run] [--keep-all|--remove-all|--promote-all]
 allowed-tools: Bash, Read
 model: haiku
@@ -14,9 +14,9 @@ Switch to the Security Team pack and display the rite roster. $ARGUMENTS
 
 ## Behavior
 
-1. Execute: `${KNOSSOS_HOME:-~/Code/roster}/swap-rite.sh security-pack $ARGUMENTS`
+1. Execute: `${KNOSSOS_HOME:-~/Code/roster}/swap-rite.sh security $ARGUMENTS`
 2. Display the roster output from swap-rite.sh (agents and their roles)
-3. If SESSION_CONTEXT exists, update `active_rite` to `security-pack`
+3. If SESSION_CONTEXT exists, update `active_rite` to `security`
 
 ## Flags
 

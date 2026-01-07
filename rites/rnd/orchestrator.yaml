@@ -1,0 +1,62 @@
+# Orchestrator configuration for rnd
+# Used by generate-orchestrator.sh to produce orchestrator.md
+# References workflow.yaml for phase/specialist data
+
+# Team metadata
+rite:
+  name: rnd
+  domain: technology exploration
+  color: purple
+
+# Frontmatter customization
+frontmatter:
+  role: "Coordinates technology exploration phases"
+  description: |
+    Stateless advisor that routes work through rnd specialists. Does not execute—provides structured directives for the main agent to invoke specialists. Use when: exploration spans multiple phases or requires coordination. Triggers: coordinate, orchestrate, R&D workflow, technology exploration, innovation pipeline.
+
+# Specialist routing conditions (when to route to each)
+# Specialist names come from workflow.yaml phases
+routing:
+  technology-scout: "New tech request, emerging trends, build vs buy"
+  integration-researcher: "Tech assessment complete, need dependency mapping"
+  prototype-engineer: "Integration map complete, need feasibility validation"
+  moonshot-architect: "Prototype complete, need long-term architecture"
+
+# Workflow position descriptors
+workflow_position:
+  upstream: "User request, SessionStart hook context"
+  downstream: "Specialists execute; artifacts flow to session context"
+
+# Handoff criteria between phases (checklist items)
+handoff_criteria:
+  scouting:
+    - "Tech assessment document complete with verdict"
+    - "Key risks and mitigations identified"
+    - "Complexity recommendation provided"
+  integration-analysis:
+    - "Integration map documents all dependencies"
+    - "POC scope defined with time box"
+    - "Risk areas for prototype identified"
+  prototyping:
+    - "Working prototype demonstrates core capability"
+    - "Deliberate shortcuts documented"
+    - "Go/no-go recommendation provided"
+  future-architecture:
+    - "Long-term architecture documented"
+    - "Migration path from prototype defined"
+    - "Future dependencies identified"
+
+# Skills references for this team
+skills:
+  - "@doc-rnd for artifact templates"
+  - "@standards for technology philosophy"
+  - "@cross-rite for handoff patterns to other teams"
+
+# Team-specific anti-patterns
+antipatterns:
+  - "Premature optimization during spikes (explore first, optimize later)"
+  - "Over-engineering prototypes (deliberate shortcuts are expected)"
+  - "Skipping feasibility gates (every spike needs a go/no-go)"
+
+# Cross-rite protocol (empty for rnd - not a hub team)
+cross_team_protocol: ""

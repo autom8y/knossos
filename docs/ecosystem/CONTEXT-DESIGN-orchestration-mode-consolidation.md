@@ -754,8 +754,8 @@ No session data migration required. Existing sessions will work because:
 | Satellite Type | Test IDs | Notes |
 |----------------|----------|-------|
 | Minimal (no session) | omc_003 | Silent in native mode |
-| Standard (10x-dev-pack) | omc_002, omc_004, omc_005, omc_009 | Full enforcement |
-| Complex (ecosystem-pack) | All | Full coverage |
+| Standard (10x-dev) | omc_002, omc_004, omc_005, omc_009 | Full enforcement |
+| Complex (ecosystem) | All | Full coverage |
 | Legacy (v1 session) | omc_001 | Backward compatibility |
 
 ---

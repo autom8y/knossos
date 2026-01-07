@@ -199,7 +199,7 @@ ari session create <initiative> [--complexity=MODULE] [--team=NAME]
   "status": "ACTIVE",
   "initiative": "Ariadne Go CLI",
   "complexity": "MODULE",
-  "team": "10x-dev-pack",
+  "team": "10x-dev",
   "created_at": "2026-01-04T16:04:14Z",
   "schema_version": "2.1"
 }
@@ -210,7 +210,7 @@ ari session create <initiative> [--complexity=MODULE] [--team=NAME]
 Created session: session-20260104-160414-563c681e
 Initiative: Ariadne Go CLI
 Complexity: MODULE
-Team: 10x-dev-pack
+Team: 10x-dev
 ```
 
 **Exit Codes**:
@@ -270,7 +270,7 @@ ari session status [--session-id=ID]
   "initiative": "Ariadne Go CLI",
   "complexity": "MODULE",
   "current_phase": "design",
-  "active_team": "10x-dev-pack",
+  "active_team": "10x-dev",
   "execution_mode": "orchestrated",
   "created_at": "2026-01-04T16:04:14Z",
   "schema_version": "2.1",
@@ -285,7 +285,7 @@ Session: session-20260104-160414-563c681e
 Status: ACTIVE
 Initiative: Ariadne Go CLI
 Phase: design
-Team: 10x-dev-pack
+Team: 10x-dev
 Mode: orchestrated
 Branch: feature/ariadne (3 changes)
 ```
@@ -686,7 +686,7 @@ ari session audit [--session-id=ID] [--limit=N] [--event-type=TYPE] [--since=TIM
       "metadata": {
         "initiative": "Ariadne Go CLI",
         "complexity": "MODULE",
-        "team": "10x-dev-pack"
+        "team": "10x-dev"
       }
     },
     {
@@ -1069,8 +1069,8 @@ status: "ACTIVE"                    # Single source of truth
 created_at: "2026-01-04T16:04:14Z"
 initiative: "Ariadne Go CLI"
 complexity: "MODULE"
-active_team: "10x-dev-pack"
-team: "10x-dev-pack"               # Explicit null for cross-cutting
+active_team: "10x-dev"
+team: "10x-dev"               # Explicit null for cross-cutting
 current_phase: "design"
 ---
 

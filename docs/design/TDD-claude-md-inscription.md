@@ -277,7 +277,7 @@ $defs:
 schema_version: "1.0"
 inscription_version: "42"
 last_sync: "2026-01-06T10:30:00Z"
-active_rite: "10x-dev-pack"
+active_rite: "10x-dev"
 template_path: "knossos/templates/CLAUDE.md.tpl"
 
 regions:
@@ -1263,7 +1263,7 @@ Ready for Implementation when:
 | Current CLAUDE.md | `/Users/tomtenuta/Code/roster/.claude/CLAUDE.md` | Read |
 | Knossos Doctrine | `/Users/tomtenuta/Code/roster/docs/philosophy/knossos-doctrine.md` | Read |
 | Existing claudemd.go | `/Users/tomtenuta/Code/roster/ariadne/internal/team/claudemd.go` | Read |
-| Ownership model | `/Users/tomtenuta/Code/roster/rites/ecosystem-pack/skills/claude-md-architecture/ownership-model.md` | Read |
+| Ownership model | `/Users/tomtenuta/Code/roster/rites/ecosystem/skills/claude-md-architecture/ownership-model.md` | Read |
 | Merge docs | `/Users/tomtenuta/Code/roster/lib/sync/merge/merge-docs.sh` | Read |
 | TDD Schema | `/Users/tomtenuta/Code/roster/user-skills/documentation/doc-artifacts/schemas/tdd-schema.md` | Read |
 | Hooks config | `/Users/tomtenuta/Code/roster/.claude/hooks/ari/hooks.yaml` | Read |

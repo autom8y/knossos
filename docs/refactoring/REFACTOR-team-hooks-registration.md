@@ -440,7 +440,7 @@ swap_hook_registrations() { ... }
   - ROSTER_HOME set before sourcing
 - **Verification**:
   1. Run: `./swap-rite.sh --help` (smoke test)
-  2. Run: `./swap-rite.sh --dry-run hygiene-pack` (full flow)
+  2. Run: `./swap-rite.sh --dry-run hygiene` (full flow)
   3. Verify: settings.local.json updated correctly
   4. Verify: User hooks preserved
 - **Commit scope**: Add source statement only
@@ -462,7 +462,7 @@ swap_hook_registrations() { ... }
 - **Invariants**: All tests pass, behavior unchanged
 - **Verification**:
   1. Run full test suite
-  2. Run: `./swap-rite.sh hygiene-pack` (full integration)
+  2. Run: `./swap-rite.sh hygiene` (full integration)
   3. Verify settings.local.json hooks are correct
   4. Verify user hooks preserved after swap
 - **Commit scope**: Remove inline functions (~430 LOC)
@@ -670,7 +670,7 @@ Refs: REFACTOR-rite-hooks-registration.md
 After each commit:
 1. `bash -n lib/team/rite-hooks-registration.sh` - Syntax check
 2. Run unit tests for completed functions
-3. After RF-025: Full integration test with `./swap-rite.sh hygiene-pack`
+3. After RF-025: Full integration test with `./swap-rite.sh hygiene`
 4. After RF-026: Verify settings.local.json hooks are correct
 
 ### Files to Avoid Touching
@@ -736,4 +736,4 @@ Findings deferred for future work:
 | Priority 2 plan | `/Users/tomtenuta/Code/roster/docs/refactoring/REFACTOR-team-transaction.md` | Read |
 | Module pattern | `/Users/tomtenuta/Code/roster/lib/team/rite-resource.sh` | Read |
 | Test pattern | `/Users/tomtenuta/Code/roster/tests/lib/team/test-rite-resource.sh` | Read |
-| Template | `/Users/tomtenuta/Code/roster/rites/ecosystem-pack/skills/doc-ecosystem/templates/refactoring-plan.md` | Read |
+| Template | `/Users/tomtenuta/Code/roster/rites/ecosystem/skills/doc-ecosystem/templates/refactoring-plan.md` | Read |

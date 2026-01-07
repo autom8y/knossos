@@ -49,7 +49,7 @@ roster/
   user-commands/                  # Command templates
   user-skills/                    # Skill templates
   rites/
-    10x-dev-pack/
+    10x-dev/
       agents/                     # Team agents
       commands/                   # Team commands
       skills/                     # Team skills (some teams)
@@ -67,7 +67,7 @@ roster/
   user-commands/                  # Command templates (unchanged)
   user-skills/                    # Skill templates (unchanged)
   rites/
-    10x-dev-pack/
+    10x-dev/
       agents/                     # Team agents (unchanged)
       commands/                   # Team commands (unchanged)
       skills/                     # Team skills (unchanged)
@@ -319,7 +319,7 @@ swap_hooks() {
 ```json
 {
   "manifest_version": "1.1",
-  "active_team": "10x-dev-pack",
+  "active_team": "10x-dev",
   "last_swap": "2025-12-31T16:25:51Z",
   "agents": { ... },
   "commands": { ... }
@@ -330,7 +330,7 @@ swap_hooks() {
 ```json
 {
   "manifest_version": "1.2",
-  "active_team": "10x-dev-pack",
+  "active_team": "10x-dev",
   "last_swap": "2025-12-31T16:25:51Z",
   "agents": { ... },
   "commands": { ... },
@@ -342,7 +342,7 @@ swap_hooks() {
     },
     "security-scan.sh": {
       "source": "team",
-      "origin": "security-pack",
+      "origin": "security",
       "installed_at": "2025-12-31T16:25:51Z"
     }
   }
@@ -618,7 +618,7 @@ Extend ADR-0002 to document:
 | sync-user-hooks.sh | `/Users/tomtenuta/Code/roster/sync-user-hooks.sh` | Read |
 | AGENT_MANIFEST.json | `/Users/tomtenuta/Code/roster/.claude/AGENT_MANIFEST.json` | Read |
 | ADR-0002 | `/Users/tomtenuta/Code/roster/docs/decisions/ADR-0002-hook-library-resolution-architecture.md` | Read |
-| 10x-dev-pack workflow | `/Users/tomtenuta/Code/roster/rites/10x-dev-pack/workflow.yaml` | Read |
+| 10x-dev workflow | `/Users/tomtenuta/Code/roster/rites/10x-dev/workflow.yaml` | Read |
 | Current hooks directory | `/Users/tomtenuta/Code/roster/hooks/` | Verified (12 hooks, 10 libs) |
 
 ## 10. Implementation Checklist

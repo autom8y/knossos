@@ -56,7 +56,7 @@ allowing parallel work without conflicts.
 
 Examples:
   ari worktree create feature-auth
-  ari worktree create feature-auth --rite=10x-dev-pack
+  ari worktree create feature-auth --rite=10x-dev
   ari worktree create bugfix --from=develop
   ari worktree create experiment --complexity=PATCH`,
 		Args: cobra.ExactArgs(1),

@@ -91,7 +91,7 @@
       "created_at": "2025-12-29T23:10:45Z",
       "initiative": "Artifact Schema Standardization",
       "complexity": "SYSTEM",
-      "active_rite": "ecosystem-pack",
+      "active_rite": "ecosystem",
       "current_phase": "design",
       "schema_version": "1.0"
     }

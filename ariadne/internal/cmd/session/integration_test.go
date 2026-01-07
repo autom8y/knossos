@@ -46,7 +46,7 @@ status: ACTIVE
 initiative: Test Park Session
 complexity: MODULE
 created_at: ` + createdAt.Format(time.RFC3339) + `
-active_rite: 10x-dev-pack
+active_rite: 10x-dev
 current_phase: requirements
 ---
 
@@ -173,7 +173,7 @@ status: ACTIVE
 initiative: Test Wrap Session
 complexity: MODULE
 created_at: ` + createdAt.Format(time.RFC3339) + `
-active_rite: 10x-dev-pack
+active_rite: 10x-dev
 current_phase: qa
 ---
 
@@ -309,7 +309,7 @@ status: ACTIVE
 initiative: Test Resume Session
 complexity: MODULE
 created_at: ` + createdAt.Format(time.RFC3339) + `
-active_rite: 10x-dev-pack
+active_rite: 10x-dev
 current_phase: implementation
 ---
 
@@ -447,7 +447,7 @@ status: ACTIVE
 initiative: Test Both Events
 complexity: FEATURE
 created_at: ` + createdAt.Format(time.RFC3339) + `
-active_rite: 10x-dev-pack
+active_rite: 10x-dev
 current_phase: implementation
 ---
 

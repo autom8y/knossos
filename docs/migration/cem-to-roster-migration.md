@@ -161,7 +161,7 @@ Managed Files:  4
 
 Up to date
 
-Active Team: 10x-dev-pack
+Active Team: 10x-dev
 ```
 
 Run validation again to confirm integrity:

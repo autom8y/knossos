@@ -247,5 +247,5 @@ For complete shell environment documentation, see [SHELL.md](../../../docs/SHELL
 
 - [prompting](../../guidance/prompting/SKILL.md) - Implementation prompts reference these
 - [justfile](../justfile/SKILL.md) - Task automation patterns and recipes
-- `claude-md-architecture` - Content placement for CLAUDE.md (available with ecosystem-pack)
+- `claude-md-architecture` - Content placement for CLAUDE.md (available with ecosystem)
 - Team workflows - Principal Engineer role enforces these standards during implementation

@@ -24,16 +24,16 @@ The roster ecosystem is architecturally sound with clear team specializations an
 
 | Team | Status | Key Priority |
 |------|--------|--------------|
-| 10x-dev-pack | MATURE | Flexible entry points, impact assessment |
-| ecosystem-pack | OVER-ENGINEERED | Demote from hub to specialist |
-| doc-rite-pack | FUNCTIONAL | Add proactive documentation gate |
-| hygiene-pack | MATURE | Define "behavior preservation" |
-| debt-triage-pack | MATURE | Shared detection skill, generalized handoff |
-| sre-pack | MATURE | Shared templates to ecosystem level |
-| security-pack | MATURE | Proactive threat modeling for SYSTEM |
-| intelligence-pack | FUNCTIONAL | Fix agent quality (user-researcher, insights-analyst) |
-| rnd-pack | FUNCTIONAL | Fix ship-pack references, clarify spike overlap |
-| strategy-pack | MATURE | R&D integration, back-routes, intelligence boundary |
+| 10x-dev | MATURE | Flexible entry points, impact assessment |
+| ecosystem | OVER-ENGINEERED | Demote from hub to specialist |
+| docs | FUNCTIONAL | Add proactive documentation gate |
+| hygiene | MATURE | Define "behavior preservation" |
+| debt-triage | MATURE | Shared detection skill, generalized handoff |
+| sre | MATURE | Shared templates to ecosystem level |
+| security | MATURE | Proactive threat modeling for SYSTEM |
+| intelligence | FUNCTIONAL | Fix agent quality (user-researcher, insights-analyst) |
+| rnd | FUNCTIONAL | Fix ship-pack references, clarify spike overlap |
+| strategy | MATURE | R&D integration, back-routes, intelligence boundary |
 
 ---
 
@@ -48,18 +48,18 @@ The roster ecosystem is architecturally sound with clear team specializations an
 **Affected Team Pairs:**
 | Source | Target | Handoff Type |
 |--------|--------|--------------|
-| debt-triage-pack | hygiene-pack | execution |
-| 10x-dev-pack (QA) | doc-rite-pack | documentation |
-| 10x-dev-pack (QA) | sre-pack | validation |
-| 10x-dev-pack (QA) | security-pack | assessment |
-| security-pack | 10x-dev-pack | remediation |
-| rnd-pack | 10x-dev-pack | productionization |
-| rnd-pack | strategy-pack | strategic_input |
-| intelligence-pack | 10x-dev-pack | implementation |
-| intelligence-pack | strategy-pack | strategic_input |
-| strategy-pack | 10x-dev-pack | implementation |
+| debt-triage | hygiene | execution |
+| 10x-dev (QA) | docs | documentation |
+| 10x-dev (QA) | sre | validation |
+| 10x-dev (QA) | security | assessment |
+| security | 10x-dev | remediation |
+| rnd | 10x-dev | productionization |
+| rnd | strategy | strategic_input |
+| intelligence | 10x-dev | implementation |
+| intelligence | strategy | strategic_input |
+| strategy | 10x-dev | implementation |
 
-**Owner:** debt-triage-pack TODO P2 defines the pattern; all other teams reference it.
+**Owner:** debt-triage TODO P2 defines the pattern; all other teams reference it.
 
 ---
 
@@ -76,7 +76,7 @@ The roster ecosystem is architecturally sound with clear team specializations an
 | risk-matrix | doc-sre | debt-triage |
 | sprint-debt-packages | doc-sre | debt-triage |
 
-**Owner:** sre-pack TODO P1 executes the move.
+**Owner:** sre TODO P1 executes the move.
 
 ---
 
@@ -86,7 +86,7 @@ The roster ecosystem is architecturally sound with clear team specializations an
 
 **Solution:** Create shared smell-detection skill at ecosystem level that both teams use with different post-processing.
 
-**Owner:** debt-triage-pack TODO P1 creates the skill.
+**Owner:** debt-triage TODO P1 creates the skill.
 
 ---
 
@@ -94,17 +94,17 @@ The roster ecosystem is architecturally sound with clear team specializations an
 
 **Problem:** Some teams only engage reactively (post-implementation) when earlier engagement would prevent issues.
 
-**Solution:** Add proactive consultation gates to 10x-dev-pack workflow.
+**Solution:** Add proactive consultation gates to 10x-dev workflow.
 
 **Gates to Add:**
 | Trigger | Consult | When |
 |---------|---------|------|
-| SYSTEM complexity + auth/crypto/PII | security-pack threat-modeler | Before TDD finalized |
-| User-facing feature | doc-rite-pack | During QA (before release) |
+| SYSTEM complexity + auth/crypto/PII | security threat-modeler | Before TDD finalized |
+| User-facing feature | docs | During QA (before release) |
 
 **Owners:**
-- security-pack TODO P1 (threat modeling gate)
-- doc-rite-pack TODO P1 (documentation gate)
+- security TODO P1 (threat modeling gate)
+- docs TODO P1 (documentation gate)
 
 ---
 
@@ -116,12 +116,12 @@ The roster ecosystem is architecturally sound with clear team specializations an
 
 | Boundary | Team A | Team B | Resolution |
 |----------|--------|--------|------------|
-| Product analytics vs market analysis | intelligence-pack | strategy-pack | Add comparison table to both READMEs |
-| Time-boxed spike vs exploration | 10x-dev-pack | rnd-pack | Add "when to use which" guidance |
+| Product analytics vs market analysis | intelligence | strategy | Add comparison table to both READMEs |
+| Time-boxed spike vs exploration | 10x-dev | rnd | Add "when to use which" guidance |
 
 **Owners:**
-- intelligence-pack TODO P3 + strategy-pack TODO P1 (intelligence/strategy boundary)
-- rnd-pack TODO P2 (spike overlap)
+- intelligence TODO P3 + strategy TODO P1 (intelligence/strategy boundary)
+- rnd TODO P2 (spike overlap)
 
 ---
 
@@ -130,38 +130,38 @@ The roster ecosystem is architecturally sound with clear team specializations an
 The improvements form a dependency graph. Execute in this order:
 
 ### Phase 1: Foundation (No Dependencies)
-- [ ] ecosystem-pack: Demote from hub, remove satellite testing
-- [ ] doc-rite-pack: Add staleness detection
-- [ ] hygiene-pack: Define "behavior preservation"
-- [ ] intelligence-pack: Fix agent quality (P1, P2)
-- [ ] rnd-pack: Fix ship-pack references (P1)
-- [ ] strategy-pack: Fix model assignment bug (P0)
+- [ ] ecosystem: Demote from hub, remove satellite testing
+- [ ] docs: Add staleness detection
+- [ ] hygiene: Define "behavior preservation"
+- [ ] intelligence: Fix agent quality (P1, P2)
+- [ ] rnd: Fix ship-pack references (P1)
+- [ ] strategy: Fix model assignment bug (P0)
 
 ### Phase 2: Shared Infrastructure
-- [ ] **debt-triage-pack P1**: Create shared smell-detection skill
-- [ ] **debt-triage-pack P2**: Create generalized HANDOFF artifact schema
-- [ ] **sre-pack P1**: Move shared templates to ecosystem level
+- [ ] **debt-triage P1**: Create shared smell-detection skill
+- [ ] **debt-triage P2**: Create generalized HANDOFF artifact schema
+- [ ] **sre P1**: Move shared templates to ecosystem level
 
 ### Phase 3: Cross-Team Coordination
-- [ ] **10x-dev-pack**: Add flexible entry points, impact assessment
-- [ ] **intelligence-pack P3 + strategy-pack P1**: Add boundary clarification to both READMEs
-- [ ] **rnd-pack P2**: Clarify spike overlap with 10x
-- [ ] **strategy-pack P2**: Define R&D integration pathway
-- [ ] **strategy-pack P3**: Add missing back-routes
+- [ ] **10x-dev**: Add flexible entry points, impact assessment
+- [ ] **intelligence P3 + strategy P1**: Add boundary clarification to both READMEs
+- [ ] **rnd P2**: Clarify spike overlap with 10x
+- [ ] **strategy P2**: Define R&D integration pathway
+- [ ] **strategy P3**: Add missing back-routes
 
 ### Phase 4: Proactive Gates
-- [ ] **security-pack P1**: Add proactive threat modeling requirement
-- [ ] **doc-rite-pack P1**: Add documentation gate to 10x release checklist
+- [ ] **security P1**: Add proactive threat modeling requirement
+- [ ] **docs P1**: Add documentation gate to 10x release checklist
 
 ### Phase 5: Handoff Formalization
 After generalized HANDOFF pattern exists (Phase 2), update each team to use it:
-- [ ] hygiene-pack: Accept HANDOFF from debt-triage
-- [ ] sre-pack: Accept HANDOFF from 10x
-- [ ] security-pack: Accept HANDOFF from 10x
-- [ ] doc-rite-pack: Accept HANDOFF from 10x
-- [ ] rnd-pack: Produce HANDOFF for 10x/strategy
-- [ ] intelligence-pack: Produce HANDOFF for 10x/strategy
-- [ ] strategy-pack: Produce HANDOFF for 10x
+- [ ] hygiene: Accept HANDOFF from debt-triage
+- [ ] sre: Accept HANDOFF from 10x
+- [ ] security: Accept HANDOFF from 10x
+- [ ] docs: Accept HANDOFF from 10x
+- [ ] rnd: Produce HANDOFF for 10x/strategy
+- [ ] intelligence: Produce HANDOFF for 10x/strategy
+- [ ] strategy: Produce HANDOFF for 10x
 
 ---
 
@@ -173,14 +173,14 @@ After generalized HANDOFF pattern exists (Phase 2), update each team to use it:
 - security + QA-adversary: Functional testing vs adversarial security are different
 
 ### Deferred Work
-- MCP integrations for intelligence-pack (autom8_data)
-- Hooks implementation for strategy-pack
+- MCP integrations for intelligence (autom8_data)
+- Hooks implementation for strategy
 - Hard enforcement mechanisms for security signoff
 
 ### Trust-Based Decisions
-- SPOT complexity in hygiene-pack: Trust user judgment
-- Chaos blast radius in sre-pack: Documentation sufficient
-- Prototype gates in rnd-pack: Documentation sufficient
+- SPOT complexity in hygiene: Trust user judgment
+- Chaos blast radius in sre: Documentation sufficient
+- Prototype gates in rnd: Documentation sufficient
 
 ---
 
@@ -209,7 +209,7 @@ After generalized HANDOFF pattern exists (Phase 2), update each team to use it:
 
 ## Next Steps
 
-1. **Immediate**: Fix strategy-pack model assignment bug (5 minutes)
+1. **Immediate**: Fix strategy model assignment bug (5 minutes)
 2. **This Sprint**: Execute Phase 1 foundation work (no dependencies)
 3. **Next Sprint**: Create shared infrastructure (smell detection, HANDOFF schema, templates)
 4. **Following Sprints**: Roll out cross-rite coordination improvements
@@ -220,16 +220,16 @@ After generalized HANDOFF pattern exists (Phase 2), update each team to use it:
 
 | Team | TODO File |
 |------|-----------|
-| 10x-dev-pack | rites/10x-dev-pack/TODO.md |
-| ecosystem-pack | rites/ecosystem-pack/TODO.md |
-| doc-rite-pack | rites/doc-rite-pack/TODO.md |
-| hygiene-pack | rites/hygiene-pack/TODO.md |
-| debt-triage-pack | rites/debt-triage-pack/TODO.md |
-| sre-pack | rites/sre-pack/TODO.md |
-| security-pack | rites/security-pack/TODO.md |
-| intelligence-pack | rites/intelligence-pack/TODO.md |
-| rnd-pack | rites/rnd-pack/TODO.md |
-| strategy-pack | rites/strategy-pack/TODO.md |
+| 10x-dev | rites/10x-dev/TODO.md |
+| ecosystem | rites/ecosystem/TODO.md |
+| docs | rites/docs/TODO.md |
+| hygiene | rites/hygiene/TODO.md |
+| debt-triage | rites/debt-triage/TODO.md |
+| sre | rites/sre/TODO.md |
+| security | rites/security/TODO.md |
+| intelligence | rites/intelligence/TODO.md |
+| rnd | rites/rnd/TODO.md |
+| strategy | rites/strategy/TODO.md |
 
 Each TODO.md contains:
 - Current state summary with strengths and issues

@@ -68,7 +68,7 @@ Hand-written orchestrators mix **unchanging protocol** with **rite-specific deta
 ```yaml
 # orchestrator.yaml - team owns this
 team:
-  name: rnd-pack
+  name: rnd
 routing:
   integration-researcher: "Needs research on technologies"
   technology-scout: "Evaluates emerging tools"
@@ -181,10 +181,10 @@ After generation, run `validate-orchestrator.sh` to verify:
 ## Common Patterns
 
 **Linear Pipeline** (4-5 specialists): analyst → designer → implementer → reviewer
-- Example teams: rnd-pack, security-pack, doc-rite-pack
+- Example teams: rnd, security, docs
 
 **Hub Coordination** (5+ specialists): analyzer coordinates multiple parallel paths
-- Example teams: ecosystem-pack
+- Example teams: ecosystem
 
 **Domain-Specific Complexity**: Generator pulls complexity enum from workflow.yaml
 - Security: PATCH | FEATURE | SYSTEM

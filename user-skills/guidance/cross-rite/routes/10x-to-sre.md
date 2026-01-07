@@ -1,6 +1,6 @@
 # 10x-to-SRE Handoff Checklist
 
-> Artifact checklist for handing off deployment-ready work to sre-pack.
+> Artifact checklist for handing off deployment-ready work to sre.
 
 ## When to Use
 
@@ -97,14 +97,14 @@ Expected output:
 
 ## HANDOFF Artifact Template
 
-Create `HANDOFF-10x-dev-pack-to-sre-pack-YYYY-MM-DD.md`:
+Create `HANDOFF-10x-dev-to-sre-YYYY-MM-DD.md`:
 
 ```yaml
 ---
-artifact_id: HANDOFF-10x-dev-pack-to-sre-pack-2026-01-05
+artifact_id: HANDOFF-10x-dev-to-sre-2026-01-05
 schema_version: "1.0"
-source_team: 10x-dev-pack
-target_team: sre-pack
+source_team: 10x-dev
+target_team: sre
 handoff_type: validation
 priority: high
 blocking: true

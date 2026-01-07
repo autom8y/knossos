@@ -63,7 +63,7 @@ COMPLEXITY_LEVELS=$(grep -A20 "^complexity_levels:" .claude/ACTIVE_WORKFLOW.yaml
 
 The workflow config determines the exact pipeline:
 
-**10x-dev-pack** (4 phases):
+**10x-dev** (4 phases):
 ```
 requirements → design → implementation → validation
 ```
@@ -73,12 +73,12 @@ requirements → design → implementation → validation
 audit → architecture → writing → review
 ```
 
-**hygiene-pack** (4 phases):
+**hygiene** (4 phases):
 ```
 assessment → planning → execution → audit
 ```
 
-**debt-triage-pack** (3 phases):
+**debt-triage** (3 phases):
 ```
 collection → assessment → planning
 ```

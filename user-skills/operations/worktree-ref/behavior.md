@@ -22,7 +22,7 @@ Create a new isolated worktree with full ecosystem initialization.
 
 **Example:**
 ```bash
-/worktree create "auth-sprint" --rite=10x-dev-pack
+/worktree create "auth-sprint" --rite=10x-dev
 # Output:
 # {
 #   "success": true,
@@ -44,7 +44,7 @@ Show all worktrees with status information.
       "id": "wt-20251224-143052-abc",
       "path": "worktrees/wt-20251224-143052-abc",
       "name": "auth-sprint",
-      "rite": "10x-dev-pack",
+      "rite": "10x-dev",
       "created_at": "2025-12-24T14:30:52Z",
       "has_changes": false,
       "session_status": "active"
@@ -65,7 +65,7 @@ Detailed status of a specific worktree or all worktrees.
   "created_at": "2025-12-24T14:30:52Z",
   "name": "auth-sprint",
   "from_ref": "HEAD",
-  "rite": "10x-dev-pack",
+  "rite": "10x-dev",
   "complexity": "MODULE",
   "parent_project": "/Users/user/Code/project"
 }
@@ -118,7 +118,7 @@ Each worktree stores metadata in `.claude/.worktree-meta.json`:
   "created_at": "2025-12-24T14:30:52Z",
   "name": "auth-sprint",
   "from_ref": "HEAD",
-  "rite": "10x-dev-pack",
+  "rite": "10x-dev",
   "complexity": "MODULE",
   "parent_project": "/Users/user/Code/project"
 }

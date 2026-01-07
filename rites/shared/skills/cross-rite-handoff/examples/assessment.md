@@ -1,8 +1,8 @@
 ---
-artifact_id: HANDOFF-10x-dev-pack-to-security-pack-2026-01-03
+artifact_id: HANDOFF-10x-dev-to-security-2026-01-03
 schema_version: "1.0"
-source_team: 10x-dev-pack
-target_team: security-pack
+source_team: 10x-dev
+target_team: security
 handoff_type: assessment
 priority: critical
 blocking: true
@@ -33,7 +33,7 @@ items:
 
 ## Context
 
-The 10x-dev-pack has completed PRD and TDD for a major payment processing overhaul. This feature handles credit card tokenization and requires security assessment before implementation can proceed.
+The 10x-dev has completed PRD and TDD for a major payment processing overhaul. This feature handles credit card tokenization and requires security assessment before implementation can proceed.
 
 ### Why This Handoff
 

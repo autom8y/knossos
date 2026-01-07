@@ -1,7 +1,7 @@
 # Refactoring Plan: Command Template Standardization
 
 **Date**: 2025-12-29
-**Architect**: Architect Enforcer (hygiene-pack)
+**Architect**: Architect Enforcer (hygiene)
 **Input**: SMELL-REPORT-command-template-hygiene.md
 **Standard**: CONTEXT-DESIGN-command-argument-standardization.md
 
@@ -279,7 +279,7 @@ model: sonnet
 
 #### RF-006: Add argument-hint to cem-debug.md
 
-**File**: `/roster/rites/ecosystem-pack/commands/cem-debug.md`
+**File**: `/roster/rites/ecosystem/commands/cem-debug.md`
 
 **Before State** (lines 1-5):
 ```yaml
@@ -305,10 +305,10 @@ model: opus
 - Implicit argument now documented
 
 **Verification**:
-1. Run: `head -6 rites/ecosystem-pack/commands/cem-debug.md`
+1. Run: `head -6 rites/ecosystem/commands/cem-debug.md`
 2. Confirm `argument-hint: [issue-description]` present
 
-**Rollback**: `git checkout rites/ecosystem-pack/commands/cem-debug.md`
+**Rollback**: `git checkout rites/ecosystem/commands/cem-debug.md`
 
 ---
 
@@ -435,7 +435,7 @@ Display information about The Forge - the meta-team for creating and maintaining
 - `user-commands/session/start.md`
 - `user-commands/workflow/sprint.md`
 - `rites/doc-team-pack/commands/consolidate.md`
-- `rites/ecosystem-pack/commands/cem-debug.md`
+- `rites/ecosystem/commands/cem-debug.md`
 
 ---
 
@@ -554,7 +554,7 @@ Before marking Phase complete:
 - [ ] RF-003: `grep -c "^---$" user-commands/meta/one.md` returns 2
 - [ ] RF-004: `grep "model:" user-commands/cem/sync.md` returns line
 - [ ] RF-005: `grep "allowed-tools:" user-commands/navigation/team.md` returns line
-- [ ] RF-006: `grep "argument-hint:" rites/ecosystem-pack/commands/cem-debug.md` returns line
+- [ ] RF-006: `grep "argument-hint:" rites/ecosystem/commands/cem-debug.md` returns line
 
 ### Phase 2 Verification
 - [ ] RF-007-016: `grep -l "| Flag | Short |" user-commands/team-switching/*.md` returns 9 files

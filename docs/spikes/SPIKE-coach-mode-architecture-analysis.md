@@ -99,7 +99,7 @@ The PRD-orchestrator-entry-pattern statement "Coach mode is legacy tech debt - H
 
 ## Follow-up Actions
 
-1. **Start new initiative** - `/start "Orchestration Mode Consolidation" --team ecosystem-pack`
+1. **Start new initiative** - `/start "Orchestration Mode Consolidation" --team ecosystem`
 2. **Use Context Design as requirements** - `docs/ecosystem/CONTEXT-DESIGN-orchestration-mode-consolidation.md`
 3. **Route to integration-engineer** for implementation
 4. **Validate with compatibility-tester** before merge

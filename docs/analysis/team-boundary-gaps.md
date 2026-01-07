@@ -17,7 +17,7 @@ This analysis audits 11 rites across the roster ecosystem to identify boundary i
 
 ## Team Boundary Inventory (Current State)
 
-### 1. 10x-dev-pack
+### 1. 10x-dev
 
 | Aspect | Definition |
 |--------|------------|
@@ -27,7 +27,7 @@ This analysis audits 11 rites across the roster ecosystem to identify boundary i
 | **Produces** | PRD, TDD, ADRs, code, tests |
 | **Complexity** | SCRIPT, MODULE, SERVICE, PLATFORM |
 
-**Boundary Clarity**: Medium - Overlaps with hygiene-pack on refactoring, rnd-pack on spikes
+**Boundary Clarity**: Medium - Overlaps with hygiene on refactoring, rnd on spikes
 
 ---
 
@@ -45,7 +45,7 @@ This analysis audits 11 rites across the roster ecosystem to identify boundary i
 
 ---
 
-### 3. hygiene-pack
+### 3. hygiene
 
 | Aspect | Definition |
 |--------|------------|
@@ -55,11 +55,11 @@ This analysis audits 11 rites across the roster ecosystem to identify boundary i
 | **Produces** | Smell Report, Refactoring Plan, Commit Stream, Audit Report |
 | **Complexity** | SPOT, MODULE, CODEBASE |
 
-**Boundary Clarity**: Medium - Overlaps with debt-triage-pack on debt identification
+**Boundary Clarity**: Medium - Overlaps with debt-triage on debt identification
 
 ---
 
-### 4. debt-triage-pack
+### 4. debt-triage
 
 | Aspect | Definition |
 |--------|------------|
@@ -69,11 +69,11 @@ This analysis audits 11 rites across the roster ecosystem to identify boundary i
 | **Produces** | Debt Ledger, Risk Report, Sprint Plan |
 | **Complexity** | QUICK, AUDIT |
 
-**Boundary Clarity**: Medium - Overlaps with hygiene-pack (assessment vs execution)
+**Boundary Clarity**: Medium - Overlaps with hygiene (assessment vs execution)
 
 ---
 
-### 5. rnd-pack
+### 5. rnd
 
 | Aspect | Definition |
 |--------|------------|
@@ -87,7 +87,7 @@ This analysis audits 11 rites across the roster ecosystem to identify boundary i
 
 ---
 
-### 6. sre-pack
+### 6. sre
 
 | Aspect | Definition |
 |--------|------------|
@@ -97,11 +97,11 @@ This analysis audits 11 rites across the roster ecosystem to identify boundary i
 | **Produces** | Observability Report, Reliability Plan, Infrastructure Changes, Resilience Report |
 | **Complexity** | ALERT, SERVICE, SYSTEM, PLATFORM |
 
-**Boundary Clarity**: High - Clear infrastructure focus, but overlaps with security-pack on infrastructure security
+**Boundary Clarity**: High - Clear infrastructure focus, but overlaps with security on infrastructure security
 
 ---
 
-### 7. intelligence-pack
+### 7. intelligence
 
 | Aspect | Definition |
 |--------|------------|
@@ -115,7 +115,7 @@ This analysis audits 11 rites across the roster ecosystem to identify boundary i
 
 ---
 
-### 8. strategy-pack
+### 8. strategy
 
 | Aspect | Definition |
 |--------|------------|
@@ -129,7 +129,7 @@ This analysis audits 11 rites across the roster ecosystem to identify boundary i
 
 ---
 
-### 9. security-pack
+### 9. security
 
 | Aspect | Definition |
 |--------|------------|
@@ -143,13 +143,13 @@ This analysis audits 11 rites across the roster ecosystem to identify boundary i
 
 ---
 
-### 10. ecosystem-pack
+### 10. ecosystem
 
 | Aspect | Definition |
 |--------|------------|
 | **Domain** | Ecosystem infrastructure |
 | **Triggers** | "Satellite sync failures", "hook/skill registration not working", "design infrastructure patterns", "CEM/roster bugs", "breaking changes migration", "cross-satellite compatibility" |
-| **Not for** | Application code in satellites (use 10x-dev-pack), team-specific workflows (use team-pack) |
+| **Not for** | Application code in satellites (use 10x-dev), team-specific workflows (use team-pack) |
 | **Produces** | Gap Analysis, Context Design, Implementation, Migration Runbook, Compatibility Report |
 | **Complexity** | PATCH, MODULE, SYSTEM, MIGRATION |
 
@@ -157,7 +157,7 @@ This analysis audits 11 rites across the roster ecosystem to identify boundary i
 
 ---
 
-### 11. forge-pack
+### 11. forge
 
 | Aspect | Definition |
 |--------|------------|
@@ -173,27 +173,27 @@ This analysis audits 11 rites across the roster ecosystem to identify boundary i
 
 ## Identified Overlaps
 
-### Overlap 1: Refactoring Territory (hygiene-pack vs 10x-dev-pack)
+### Overlap 1: Refactoring Territory (hygiene vs 10x-dev)
 
 **Contested Area**: Code changes that improve structure but also add functionality
 
-| Signal | hygiene-pack Claim | 10x-dev-pack Claim |
+| Signal | hygiene Claim | 10x-dev Claim |
 |--------|-------------------|-------------------|
 | "Refactor to add feature" | Refactoring is core domain | Feature work is core domain |
 | "Clean up while implementing" | Cleanup is hygiene territory | Part of implementation workflow |
 
-**Root Cause**: hygiene-pack handles "refactoring" but excludes "behavior changes", while feature work often requires both.
+**Root Cause**: hygiene handles "refactoring" but excludes "behavior changes", while feature work often requires both.
 
-**Recommendation for hygiene-pack "NOT for"**:
-> Refactoring that requires new test cases for new behavior (route to 10x-dev-pack). If behavior is preserved and only structure changes, use hygiene-pack.
+**Recommendation for hygiene "NOT for"**:
+> Refactoring that requires new test cases for new behavior (route to 10x-dev). If behavior is preserved and only structure changes, use hygiene.
 
 ---
 
-### Overlap 2: Debt Identification (debt-triage-pack vs hygiene-pack)
+### Overlap 2: Debt Identification (debt-triage vs hygiene)
 
 **Contested Area**: Initial assessment of code quality issues
 
-| Signal | debt-triage-pack Claim | hygiene-pack Claim |
+| Signal | debt-triage Claim | hygiene Claim |
 |--------|------------------------|-------------------|
 | "What debt do we have?" | Debt collection is phase 1 | code-smeller identifies issues |
 | "Technical debt inventory" | Core debt-collector role | Smell Report catalogs issues |
@@ -201,75 +201,75 @@ This analysis audits 11 rites across the roster ecosystem to identify boundary i
 **Root Cause**: Both teams have assessment agents (debt-collector vs code-smeller) with overlapping detection capabilities.
 
 **Differentiation**:
-- debt-triage-pack: Strategic assessment with risk scoring and sprint planning
-- hygiene-pack: Tactical cleanup with atomic commits and behavior preservation
+- debt-triage: Strategic assessment with risk scoring and sprint planning
+- hygiene: Tactical cleanup with atomic commits and behavior preservation
 
-**Recommendation for debt-triage-pack "NOT for"**:
-> Immediate code cleanup execution (route to hygiene-pack). Debt-triage assesses and prioritizes; hygiene-pack executes cleanup.
+**Recommendation for debt-triage "NOT for"**:
+> Immediate code cleanup execution (route to hygiene). Debt-triage assesses and prioritizes; hygiene executes cleanup.
 
-**Recommendation for hygiene-pack "NOT for"**:
-> Strategic debt prioritization across multiple sprints (route to debt-triage-pack). Hygiene-pack handles cleanup execution within a sprint.
+**Recommendation for hygiene "NOT for"**:
+> Strategic debt prioritization across multiple sprints (route to debt-triage). Hygiene-pack handles cleanup execution within a sprint.
 
 ---
 
-### Overlap 3: Spike vs Research (10x-dev-pack /spike vs rnd-pack)
+### Overlap 3: Spike vs Research (10x-dev /spike vs rnd)
 
 **Contested Area**: Technology evaluation and exploration
 
-| Signal | 10x /spike Claim | rnd-pack Claim |
+| Signal | 10x /spike Claim | rnd Claim |
 |--------|-----------------|----------------|
 | "Should we use React or Vue?" | Time-boxed decision | Technology evaluation |
 | "Is this library suitable?" | Single-session spike | Integration analysis |
 
 **Root Cause**: Both teams handle technology exploration, differentiated only by session duration and outcome type.
 
-**Current Mitigation**: Both READMEs include decision guides distinguishing single-session decisions (/spike) from multi-session research (rnd-pack).
+**Current Mitigation**: Both READMEs include decision guides distinguishing single-session decisions (/spike) from multi-session research (rnd).
 
-**Recommendation for 10x-dev-pack "NOT for"**:
-> Multi-session research with learning-focused outcomes (route to rnd-pack). If you need to learn, experiment, and iterate across multiple sessions, use rnd-pack.
+**Recommendation for 10x-dev "NOT for"**:
+> Multi-session research with learning-focused outcomes (route to rnd). If you need to learn, experiment, and iterate across multiple sessions, use rnd.
 
-**Recommendation for rnd-pack "NOT for"**:
+**Recommendation for rnd "NOT for"**:
 > Single-session technology comparisons with clear decision criteria (use 10x `/spike`). If you can answer it in one focused session with a decision at the end, use `/spike`.
 
 ---
 
-### Overlap 4: Infrastructure Security (security-pack vs sre-pack)
+### Overlap 4: Infrastructure Security (security vs sre)
 
 **Contested Area**: Infrastructure-related security concerns
 
-| Signal | security-pack Claim | sre-pack Claim |
+| Signal | security Claim | sre Claim |
 |--------|---------------------|----------------|
 | "Secure our infrastructure" | Security assessment domain | Infrastructure is platform-engineer territory |
 | "Vulnerability in deployment" | Penetration testing scope | Incident response scope |
 
-**Root Cause**: security-pack handles "security" broadly, while sre-pack handles "infrastructure" broadly. Infrastructure security falls in both domains.
+**Root Cause**: security handles "security" broadly, while sre handles "infrastructure" broadly. Infrastructure security falls in both domains.
 
-**Current Mitigation**: security-pack orchestrator.yaml includes cross_team_protocol: "Escalate infrastructure security to sre-pack."
+**Current Mitigation**: security orchestrator.yaml includes cross_team_protocol: "Escalate infrastructure security to sre."
 
-**Recommendation for security-pack "NOT for"**:
-> Infrastructure hardening without security vulnerabilities (route to sre-pack). Security-pack handles threat assessment; sre-pack handles infrastructure configuration.
+**Recommendation for security "NOT for"**:
+> Infrastructure hardening without security vulnerabilities (route to sre). Security-pack handles threat assessment; sre handles infrastructure configuration.
 
-**Recommendation for sre-pack "NOT for"**:
-> Security vulnerability assessment and compliance mapping (route to security-pack). SRE handles infrastructure operations; security handles vulnerability analysis.
+**Recommendation for sre "NOT for"**:
+> Security vulnerability assessment and compliance mapping (route to security). SRE handles infrastructure operations; security handles vulnerability analysis.
 
 ---
 
-### Overlap 5: Performance Issues (sre-pack vs 10x-dev-pack)
+### Overlap 5: Performance Issues (sre vs 10x-dev)
 
 **Contested Area**: Performance problems in application code vs infrastructure
 
-| Signal | sre-pack Claim | 10x-dev-pack Claim |
+| Signal | sre Claim | 10x-dev Claim |
 |--------|---------------|-------------------|
 | "API is slow" | Observability + latency = SRE | Application code optimization |
 | "Performance optimization" | SLO/SLI measurement | Code-level implementation |
 
 **Root Cause**: Performance spans both infrastructure (where it's measured) and application code (where it's fixed).
 
-**Recommendation for sre-pack "NOT for"**:
-> Application code optimization to improve performance (route to 10x-dev-pack). SRE identifies performance issues via observability; 10x implements code-level fixes.
+**Recommendation for sre "NOT for"**:
+> Application code optimization to improve performance (route to 10x-dev). SRE identifies performance issues via observability; 10x implements code-level fixes.
 
-**Recommendation for 10x-dev-pack "NOT for"**:
-> Infrastructure-level performance tuning (route to sre-pack). 10x handles application code; SRE handles infrastructure optimization, scaling, and caching layers.
+**Recommendation for 10x-dev "NOT for"**:
+> Infrastructure-level performance tuning (route to sre). 10x handles application code; SRE handles infrastructure optimization, scaling, and caching layers.
 
 ---
 
@@ -284,7 +284,7 @@ This analysis audits 11 rites across the roster ecosystem to identify boundary i
 
 **Currently Claimed By**:
 - doc-team-pack: General documentation, but "Not for: writing code comments"
-- 10x-dev-pack: Code implementation, but "Not for: documentation work"
+- 10x-dev: Code implementation, but "Not for: documentation work"
 
 **Gap Description**: API documentation requires both code knowledge (to generate accurate specs) and documentation skills (to write clear references). Neither team fully claims this territory.
 
@@ -303,15 +303,15 @@ This analysis audits 11 rites across the roster ecosystem to identify boundary i
 - Deployment workflow development
 
 **Currently Claimed By**:
-- sre-pack: "CI/CD pipelines, IaC" (platform-engineer) but "Not for: feature development"
-- 10x-dev-pack: "Build a new feature" but "Not for: infrastructure automation"
+- sre: "CI/CD pipelines, IaC" (platform-engineer) but "Not for: feature development"
+- 10x-dev: "Build a new feature" but "Not for: infrastructure automation"
 
 **Gap Description**: New pipeline development is neither "feature development" nor purely "infrastructure automation" - it's infrastructure development.
 
 **Recommendation**:
-- Clarify sre-pack scope: CI/CD pipeline creation is sre-pack territory
-- Add to sre-pack triggers: "Create CI/CD pipeline", "automate builds"
-- Add to 10x-dev-pack "NOT for": "CI/CD pipeline creation (route to sre-pack)"
+- Clarify sre scope: CI/CD pipeline creation is sre territory
+- Add to sre triggers: "Create CI/CD pipeline", "automate builds"
+- Add to 10x-dev "NOT for": "CI/CD pipeline creation (route to sre)"
 
 ---
 
@@ -323,15 +323,15 @@ This analysis audits 11 rites across the roster ecosystem to identify boundary i
 - Developer tooling scripts
 
 **Currently Claimed By**:
-- 10x-dev-pack: Explicitly "Not for: one-off scripts without testing requirements"
-- hygiene-pack: "Not for: quick formatting fixes"
+- 10x-dev: Explicitly "Not for: one-off scripts without testing requirements"
+- hygiene: "Not for: quick formatting fixes"
 - No team claims general scripting
 
 **Gap Description**: Quick but quality scripts have no home. 10x is too heavyweight, hygiene is for cleanup.
 
 **Recommendation**:
-- Consider rnd-pack for exploratory scripts (prototype-engineer)
-- Add to 10x-dev-pack complexity: SCRIPT handles "<200 LOC" but needs clearer entry
+- Consider rnd for exploratory scripts (prototype-engineer)
+- Add to 10x-dev complexity: SCRIPT handles "<200 LOC" but needs clearer entry
 - Alternative: Define a "utils" or "tooling" team for developer automation
 
 ---
@@ -344,15 +344,15 @@ This analysis audits 11 rites across the roster ecosystem to identify boundary i
 - Creating custom metrics in application code
 
 **Currently Claimed By**:
-- sre-pack: observability-engineer owns "Metrics, logs, traces"
-- 10x-dev-pack: Implementation of code changes
+- sre: observability-engineer owns "Metrics, logs, traces"
+- 10x-dev: Implementation of code changes
 
 **Gap Description**: observability-engineer defines what to measure; 10x implements code. But who instruments the code? Observability design vs implementation gap.
 
 **Recommendation**:
-- Establish handoff: sre-pack produces tracking plan, 10x implements instrumentation
-- Add to sre-pack "NOT for": "Adding instrumentation code to application (route to 10x with tracking plan)"
-- Add cross_team_protocol to sre-pack: "Observability implementation handoff to 10x-dev-pack"
+- Establish handoff: sre produces tracking plan, 10x implements instrumentation
+- Add to sre "NOT for": "Adding instrumentation code to application (route to 10x with tracking plan)"
+- Add cross_team_protocol to sre: "Observability implementation handoff to 10x-dev"
 
 ---
 
@@ -362,14 +362,14 @@ This analysis audits 11 rites across the roster ecosystem to identify boundary i
 
 **User Intent**: "I need to refactor the payment module and add a new payment provider"
 
-**Common Misroute**: hygiene-pack (because "refactor" triggers)
+**Common Misroute**: hygiene (because "refactor" triggers)
 
-**Correct Routing**: 10x-dev-pack (behavior change = feature work)
+**Correct Routing**: 10x-dev (behavior change = feature work)
 
 **Distinguishing Signal**: "add a new" = behavior change, not pure refactoring
 
 **Recommendation**:
-- Add to hygiene-pack "NOT for": "Refactoring that adds new functionality (behavior changes go to 10x-dev-pack)"
+- Add to hygiene "NOT for": "Refactoring that adds new functionality (behavior changes go to 10x-dev)"
 
 ---
 
@@ -379,12 +379,12 @@ This analysis audits 11 rites across the roster ecosystem to identify boundary i
 
 **Common Misroute**: Direct execution (seems simple, skip team routing)
 
-**Correct Routing**: security-pack at PATCH complexity (security-reviewer agent)
+**Correct Routing**: security at PATCH complexity (security-reviewer agent)
 
-**Distinguishing Signal**: Any security-related review, regardless of size, benefits from security-pack
+**Distinguishing Signal**: Any security-related review, regardless of size, benefits from security
 
 **Recommendation**:
-- Add to security-pack triggers: "quick security check", "security review before merge"
+- Add to security triggers: "quick security check", "security review before merge"
 - Document PATCH complexity as the fast-path for quick reviews
 
 ---
@@ -393,15 +393,15 @@ This analysis audits 11 rites across the roster ecosystem to identify boundary i
 
 **User Intent**: "Our API is slow and users are complaining"
 
-**Common Misroute**: 10x-dev-pack (to "fix the code")
+**Common Misroute**: 10x-dev (to "fix the code")
 
-**Correct Routing**: sre-pack first (observability-engineer diagnoses), then 10x if code fix needed
+**Correct Routing**: sre first (observability-engineer diagnoses), then 10x if code fix needed
 
 **Distinguishing Signal**: Investigation/diagnosis phase before implementation
 
 **Recommendation**:
-- Add to sre-pack triggers: "investigate performance", "diagnose slow"
-- Add to 10x-dev-pack "NOT for": "Performance investigation without diagnosis (start with sre-pack)"
+- Add to sre triggers: "investigate performance", "diagnose slow"
+- Add to 10x-dev "NOT for": "Performance investigation without diagnosis (start with sre)"
 
 ---
 
@@ -425,15 +425,15 @@ This analysis audits 11 rites across the roster ecosystem to identify boundary i
 
 **User Intent**: "We need to do a technical debt sprint"
 
-**Common Misroute**: hygiene-pack (because "cleanup")
+**Common Misroute**: hygiene (because "cleanup")
 
-**Correct Routing**: debt-triage-pack (for sprint planning), then hygiene-pack (for execution)
+**Correct Routing**: debt-triage (for sprint planning), then hygiene (for execution)
 
 **Distinguishing Signal**: "sprint" implies planning and prioritization, not just execution
 
 **Recommendation**:
-- Add to debt-triage-pack triggers: "plan debt sprint", "debt sprint planning"
-- Add to hygiene-pack "NOT for": "Sprint planning for debt paydown (start with debt-triage-pack)"
+- Add to debt-triage triggers: "plan debt sprint", "debt sprint planning"
+- Add to hygiene "NOT for": "Sprint planning for debt paydown (start with debt-triage)"
 - Establish handoff: debt-triage produces Sprint Plan, hygiene executes
 
 ---
@@ -444,36 +444,36 @@ This analysis audits 11 rites across the roster ecosystem to identify boundary i
 
 | Team | Add to "NOT for" |
 |------|------------------|
-| **10x-dev-pack** | Multi-session research (rnd-pack), CI/CD pipeline creation (sre-pack), performance investigation before diagnosis (sre-pack), infrastructure optimization (sre-pack) |
+| **10x-dev** | Multi-session research (rnd), CI/CD pipeline creation (sre), performance investigation before diagnosis (sre), infrastructure optimization (sre) |
 | **doc-team-pack** | API spec generation from code (10x first, then handoff) |
-| **hygiene-pack** | Strategic debt prioritization (debt-triage-pack), refactoring that adds new behavior (10x-dev-pack) |
-| **debt-triage-pack** | Immediate code cleanup execution (hygiene-pack) |
-| **rnd-pack** | Single-session technology comparisons (10x `/spike`) |
-| **sre-pack** | Security vulnerability assessment (security-pack), adding instrumentation code to application (10x with handoff) |
-| **intelligence-pack** | (Current definition adequate) |
-| **strategy-pack** | (Current definition adequate) |
-| **security-pack** | Infrastructure hardening without vulnerabilities (sre-pack) |
-| **ecosystem-pack** | (Current definition adequate) |
-| **forge-pack** | **(CRITICAL)** Add "NOT for" section: Production feature development, existing team modification (ecosystem-pack), one-off agent creation without rite context |
+| **hygiene** | Strategic debt prioritization (debt-triage), refactoring that adds new behavior (10x-dev) |
+| **debt-triage** | Immediate code cleanup execution (hygiene) |
+| **rnd** | Single-session technology comparisons (10x `/spike`) |
+| **sre** | Security vulnerability assessment (security), adding instrumentation code to application (10x with handoff) |
+| **intelligence** | (Current definition adequate) |
+| **strategy** | (Current definition adequate) |
+| **security** | Infrastructure hardening without vulnerabilities (sre) |
+| **ecosystem** | (Current definition adequate) |
+| **forge** | **(CRITICAL)** Add "NOT for" section: Production feature development, existing team modification (ecosystem), one-off agent creation without rite context |
 
 ### Cross-Team Handoff Formalization
 
 | From | To | Trigger |
 |------|----|---------|
-| sre-pack (observability) | 10x-dev-pack | Instrumentation implementation needed |
-| debt-triage-pack | hygiene-pack | Sprint plan ready for execution |
-| 10x-dev-pack | doc-team-pack | Feature complete, documentation needed |
-| 10x-dev-pack | sre-pack | Production deployment validation |
-| rnd-pack | 10x-dev-pack | Prototype ready for production |
+| sre (observability) | 10x-dev | Instrumentation implementation needed |
+| debt-triage | hygiene | Sprint plan ready for execution |
+| 10x-dev | doc-team-pack | Feature complete, documentation needed |
+| 10x-dev | sre | Production deployment validation |
+| rnd | 10x-dev | Prototype ready for production |
 
 ### Missing Documentation
 
 | Gap | Recommended Action |
 |-----|-------------------|
-| forge-pack README missing "NOT for" | Add section before next sync |
-| forge-pack README missing complexity levels | Define TEAM, AGENT, SKILL levels |
+| forge README missing "NOT for" | Add section before next sync |
+| forge README missing complexity levels | Define TEAM, AGENT, SKILL levels |
 | API documentation ownership undefined | Clarify in both doc-team and 10x READMEs |
-| CI/CD pipeline development ambiguous | Add explicit trigger to sre-pack |
+| CI/CD pipeline development ambiguous | Add explicit trigger to sre |
 
 ---
 
@@ -482,16 +482,16 @@ This analysis audits 11 rites across the roster ecosystem to identify boundary i
 | Artifact | Absolute Path | Status |
 |----------|---------------|--------|
 | This gap analysis | `/Users/tomtenuta/Code/roster/docs/analysis/team-boundary-gaps.md` | Created |
-| 10x-dev-pack README | `/Users/tomtenuta/Code/roster/rites/10x-dev-pack/README.md` | Read |
+| 10x-dev README | `/Users/tomtenuta/Code/roster/rites/10x-dev/README.md` | Read |
 | doc-team-pack README | `/Users/tomtenuta/Code/roster/rites/doc-team-pack/README.md` | Read |
-| hygiene-pack README | `/Users/tomtenuta/Code/roster/rites/hygiene-pack/README.md` | Read |
-| debt-triage-pack README | `/Users/tomtenuta/Code/roster/rites/debt-triage-pack/README.md` | Read |
-| rnd-pack README | `/Users/tomtenuta/Code/roster/rites/rnd-pack/README.md` | Read |
-| sre-pack README | `/Users/tomtenuta/Code/roster/rites/sre-pack/README.md` | Read |
-| intelligence-pack README | `/Users/tomtenuta/Code/roster/rites/intelligence-pack/README.md` | Read |
-| strategy-pack README | `/Users/tomtenuta/Code/roster/rites/strategy-pack/README.md` | Read |
-| security-pack README | `/Users/tomtenuta/Code/roster/rites/security-pack/README.md` | Read |
-| ecosystem-pack README | `/Users/tomtenuta/Code/roster/rites/ecosystem-pack/README.md` | Read |
+| hygiene README | `/Users/tomtenuta/Code/roster/rites/hygiene/README.md` | Read |
+| debt-triage README | `/Users/tomtenuta/Code/roster/rites/debt-triage/README.md` | Read |
+| rnd README | `/Users/tomtenuta/Code/roster/rites/rnd/README.md` | Read |
+| sre README | `/Users/tomtenuta/Code/roster/rites/sre/README.md` | Read |
+| intelligence README | `/Users/tomtenuta/Code/roster/rites/intelligence/README.md` | Read |
+| strategy README | `/Users/tomtenuta/Code/roster/rites/strategy/README.md` | Read |
+| security README | `/Users/tomtenuta/Code/roster/rites/security/README.md` | Read |
+| ecosystem README | `/Users/tomtenuta/Code/roster/rites/ecosystem/README.md` | Read |
 | DESIGN-intent-matching.md | `/Users/tomtenuta/Code/roster/docs/design/DESIGN-intent-matching.md` | Read |
 | cross-rite-handoff schema | `/Users/tomtenuta/Code/roster/rites/shared/skills/cross-rite-handoff/schema.md` | Read |
 

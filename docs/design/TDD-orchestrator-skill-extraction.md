@@ -383,7 +383,7 @@ frontmatter:
 **Example**:
 ```yaml
 description: |
-  Coordinates ecosystem-pack phases for CEM/skeleton/roster infrastructure work. Use when: work spans multiple phases or requires cross-component coordination. Triggers: coordinate, orchestrate, multi-phase, ecosystem workflow.
+  Coordinates ecosystem phases for CEM/skeleton/roster infrastructure work. Use when: work spans multiple phases or requires cross-component coordination. Triggers: coordinate, orchestrate, multi-phase, ecosystem workflow.
 ```
 
 ### 4.4 Validation Rules
@@ -538,7 +538,7 @@ validate_orchestrator_reference() {
 
 | Placeholder | Source | Example |
 |-------------|--------|---------|
-| `{{TEAM_NAME}}` | orchestrator.yaml rite.name | "ecosystem-pack" |
+| `{{TEAM_NAME}}` | orchestrator.yaml rite.name | "ecosystem" |
 | `{{UPSTREAM}}` | orchestrator.yaml workflow_position.upstream | "User request via /ecosystem" |
 | `{{DOWNSTREAM}}` | orchestrator.yaml workflow_position.downstream | "Implementation artifacts to session" |
 | `{{HANDOFF_CRITERIA}}` | orchestrator.yaml handoff_criteria | Markdown table rows |
@@ -573,7 +573,7 @@ antipatterns:         # Team-specific anti-patterns (already exists)
 
 1. Modify `templates/orchestrator-base.md.tpl` to new minimal structure
 2. Update `templates/orchestrator-generate.sh` for new placeholders
-3. Test with single team: `orchestrator-generate.sh rnd-pack --dry-run`
+3. Test with single team: `orchestrator-generate.sh rnd --dry-run`
 
 **Validation**: Dry-run output is valid, contains @orchestrator-core reference
 
@@ -636,7 +636,7 @@ The `orchestrator-core` skill can remain (no harm in having unused skill).
 | Skill load | `@orchestrator-core` | Full protocol content | All |
 | Generate minimal team | New team YAML | Valid orchestrator.md with skill ref | Minimal |
 | Generate complex team | Full team YAML | Valid orchestrator.md with all sections | Complex |
-| Regenerate existing | 10x-dev-pack | No content loss, skill ref added | Standard |
+| Regenerate existing | 10x-dev | No content loss, skill ref added | Standard |
 | Schema validation | Invalid frontmatter | Validation error | N/A |
 | Missing skill ref | Template without ref | Warning in validation | N/A |
 

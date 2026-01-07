@@ -142,19 +142,19 @@ initiative: [initiative name]
 
 ### Scenario 1: Feature Development with Security Gate
 
-**Flow**: 10x-dev-pack -> security-pack -> 10x-dev-pack
+**Flow**: 10x-dev -> security -> 10x-dev
 
-1. **10x-dev-pack** completes PRD for payment processing
+1. **10x-dev** completes PRD for payment processing
 2. **Trigger**: SYSTEM complexity + security considerations detected
-3. **Produce**: HANDOFF (assessment) to security-pack
+3. **Produce**: HANDOFF (assessment) to security
    ```yaml
    handoff_type: assessment
    priority: critical
    blocking: true
    ```
-4. **security-pack** produces threat model
+4. **security** produces threat model
 5. **Return**: Threat model with verdict (APPROVED/BLOCKED)
-6. **10x-dev-pack** continues with design phase
+6. **10x-dev** continues with design phase
 
 **Key Points**:
 - `blocking: true` prevents design from starting
@@ -163,15 +163,15 @@ initiative: [initiative name]
 
 ### Scenario 2: Debt Remediation
 
-**Flow**: debt-triage-pack -> hygiene-pack
+**Flow**: debt-triage -> hygiene
 
-1. **debt-triage-pack** completes debt collection, assessment, planning
-2. **Produce**: HANDOFF (execution) to hygiene-pack
+1. **debt-triage** completes debt collection, assessment, planning
+2. **Produce**: HANDOFF (execution) to hygiene
    ```yaml
    handoff_type: execution
    priority: high
    ```
-3. **hygiene-pack** executes sprint packages
+3. **hygiene** executes sprint packages
 4. **Output**: Remediation report with behavior preservation confirmation
 
 **Key Points**:
@@ -181,38 +181,38 @@ initiative: [initiative name]
 
 ### Scenario 3: Research to Production
 
-**Flow**: rnd-pack -> strategy-pack -> 10x-dev-pack
+**Flow**: rnd -> strategy -> 10x-dev
 
-1. **rnd-pack** completes spike/prototype
-2. **Produce**: HANDOFF (strategic_evaluation) to strategy-pack
+1. **rnd** completes spike/prototype
+2. **Produce**: HANDOFF (strategic_evaluation) to strategy
    ```yaml
    handoff_type: strategic_evaluation
    priority: medium
    ```
-3. **strategy-pack** evaluates viability, makes go/no-go decision
-4. **If GO**: Produce HANDOFF (implementation) to 10x-dev-pack
+3. **strategy** evaluates viability, makes go/no-go decision
+4. **If GO**: Produce HANDOFF (implementation) to 10x-dev
    ```yaml
    handoff_type: implementation
    priority: high
    ```
-5. **10x-dev-pack** builds production system
+5. **10x-dev** builds production system
 
 **Key Points**:
-- R&D never directly hands to 10x-dev-pack
+- R&D never directly hands to 10x-dev
 - Strategy gate ensures business alignment
 - Implementation handoff includes design references
 
 ### Scenario 4: Production Readiness
 
-**Flow**: 10x-dev-pack -> sre-pack
+**Flow**: 10x-dev -> sre
 
-1. **10x-dev-pack** completes feature + QA
-2. **Produce**: HANDOFF (validation) to sre-pack
+1. **10x-dev** completes feature + QA
+2. **Produce**: HANDOFF (validation) to sre
    ```yaml
    handoff_type: validation
    priority: high
    ```
-3. **sre-pack** validates production readiness
+3. **sre** validates production readiness
 4. **Output**: Validation report with deployment approval
 
 **Key Points**:
@@ -222,9 +222,9 @@ initiative: [initiative name]
 
 ### Scenario 5: Documentation Handoff
 
-**Flow**: 10x-dev-pack -> doc-team-pack
+**Flow**: 10x-dev -> doc-team-pack
 
-1. **10x-dev-pack** completes feature
+1. **10x-dev** completes feature
 2. **Produce**: HANDOFF (assessment) to doc-team-pack
    ```yaml
    handoff_type: assessment
@@ -246,17 +246,17 @@ initiative: [initiative name]
 
 ```
 Is this about security/compliance?
-  YES -> security-pack
+  YES -> security
   NO  -> Continue
 
 Is this about production operations?
-  YES -> sre-pack
+  YES -> sre
   NO  -> Continue
 
 Is this about technical debt?
   YES -> Is it planning or execution?
-    Planning -> debt-triage-pack
-    Execution -> hygiene-pack
+    Planning -> debt-triage
+    Execution -> hygiene
   NO  -> Continue
 
 Is this about documentation?
@@ -264,18 +264,18 @@ Is this about documentation?
   NO  -> Continue
 
 Is this about research/exploration?
-  YES -> rnd-pack
+  YES -> rnd
   NO  -> Continue
 
 Is this about strategic direction?
-  YES -> strategy-pack
+  YES -> strategy
   NO  -> Continue
 
 Is this about market/user intelligence?
-  YES -> intelligence-pack
+  YES -> intelligence
   NO  -> Continue
 
-Default: 10x-dev-pack (feature development)
+Default: 10x-dev (feature development)
 ```
 
 ### Multi-Team Coordination
@@ -293,7 +293,7 @@ When work requires multiple teams:
           -> HANDOFF -> Team C (docs)
    ```
 
-3. **Hub**: Use strategy-pack or 10x orchestrator as coordinator
+3. **Hub**: Use strategy or 10x orchestrator as coordinator
    ```
    Orchestrator coordinates multiple team handoffs
    ```

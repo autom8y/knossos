@@ -102,7 +102,7 @@ created_at: "2026-01-02T12:00:00Z"
 status: "$status"
 initiative: "Test Initiative"
 complexity: "$complexity"
-active_team: "ecosystem-pack"
+active_team: "ecosystem"
 current_phase: "implementation"
 ---
 
@@ -118,7 +118,7 @@ EOF
 
 setup_rite() {
     mkdir -p "$TEST_DIR/.claude/agents"
-    echo "ecosystem-pack" > "$TEST_DIR/.claude/ACTIVE_RITE"
+    echo "ecosystem" > "$TEST_DIR/.claude/ACTIVE_RITE"
 
     # Create dummy agent file
     cat > "$TEST_DIR/.claude/agents/orchestrator.md" <<'EOF'

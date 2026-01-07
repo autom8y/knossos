@@ -31,9 +31,9 @@ work_packages:
     estimated_effort: "30 minutes"
   - id: WP3
     name: "Ecosystem-Pack Context Script"
-    description: "Create prototype context-injection script for ecosystem-pack team"
+    description: "Create prototype context-injection script for ecosystem team"
     files:
-      - path: "rites/ecosystem-pack/context-injection.sh"
+      - path: "rites/ecosystem/context-injection.sh"
         action: create
         description: "Team-specific context: CEM sync, skeleton ref, drift status"
     dependencies: [WP1]
@@ -58,7 +58,7 @@ This Context Design addresses the gap identified in task-001: team-specific cont
 
 **Rationale**:
 - Teams know what context matters for their workflow
-- Ecosystem-pack needs CEM sync status; 10x-dev-pack needs different context
+- Ecosystem-pack needs CEM sync status; 10x-dev needs different context
 - Adding new rite context requires no roster changes
 - Script-based approach allows dynamic content (git queries, file checks)
 - Graceful degradation: teams without scripts get no extra context (not an error)
@@ -329,7 +329,7 @@ fi
 
 ## Ecosystem-Pack Context Script Specification
 
-### File: `rites/ecosystem-pack/context-injection.sh`
+### File: `rites/ecosystem/context-injection.sh`
 
 ```bash
 #!/bin/bash
@@ -416,7 +416,7 @@ fi
 
 ### Expected Output (Example)
 
-When ecosystem-pack is active, session context will include:
+When ecosystem is active, session context will include:
 
 ```markdown
 ### Team Context
@@ -446,8 +446,8 @@ This change is fully backward compatible:
 
 | Team | Impact |
 |------|--------|
-| ecosystem-pack | Gets new context section (CEM sync, skeleton ref) |
-| 10x-dev-pack | No change (no context script, can add later) |
+| ecosystem | Gets new context section (CEM sync, skeleton ref) |
+| 10x-dev | No change (no context script, can add later) |
 | Other teams | No change (can add context script when needed) |
 | Satellites | No change (receive updated session-context.sh via CEM) |
 
@@ -457,8 +457,8 @@ This change is fully backward compatible:
 
 | Scenario | Setup | Expected Outcome |
 |----------|-------|------------------|
-| Team with context script | ecosystem-pack active | Team Context section appears with CEM/skeleton status |
-| Team without context script | 10x-dev-pack active | No Team Context section (normal) |
+| Team with context script | ecosystem active | Team Context section appears with CEM/skeleton status |
+| Team without context script | 10x-dev active | No Team Context section (normal) |
 | No team active | ACTIVE_RITE = none | No Team Context section (normal) |
 | Script exists but not executable | chmod -x context-injection.sh | Warning logged, graceful skip |
 | Function missing from script | inject_team_context not defined | Warning logged, graceful skip |
@@ -476,7 +476,7 @@ This change is fully backward compatible:
 - [x] All design decisions have documented rationale
 - [x] rite-context-loader.sh fully specified with function signatures
 - [x] session-context.sh changes specified at line level
-- [x] ecosystem-pack/context-injection.sh template provided
+- [x] ecosystem/context-injection.sh template provided
 - [x] Backward compatibility assessed: COMPATIBLE
 - [x] No migration required
 - [x] Test matrix complete with expected outcomes
@@ -491,7 +491,7 @@ This change is fully backward compatible:
 
 1. Create `rite-context-loader.sh` library first (WP1)
 2. Test library in isolation: `source rite-context-loader.sh; load_team_context`
-3. Create ecosystem-pack context script (WP3)
+3. Create ecosystem context script (WP3)
 4. Test script in isolation: `source context-injection.sh; inject_team_context`
 5. Integrate into session-context.sh (WP2)
 6. Test full flow: `/start` or new session
@@ -504,7 +504,7 @@ This change is fully backward compatible:
 | `/Users/tomtenuta/Code/roster/.claude/hooks/context-injection/session-context.sh` | Hook to modify |
 | `/Users/tomtenuta/Code/roster/.claude/hooks/lib/hooks-init.sh` | Pattern reference |
 | `/Users/tomtenuta/Code/roster/.claude/hooks/lib/config.sh` | ROSTER_HOME definition |
-| `/Users/tomtenuta/Code/roster/rites/ecosystem-pack/context-injection.sh` | New team script |
+| `/Users/tomtenuta/Code/roster/rites/ecosystem/context-injection.sh` | New team script |
 | `/Users/tomtenuta/Code/roster/generate-rite-context.sh` | Existing routing generator (keep) |
 
 ### Testing Commands
@@ -515,8 +515,8 @@ cd /path/to/satellite
 source .claude/hooks/lib/rite-context-loader.sh
 load_team_context
 
-# Test ecosystem-pack script directly
-source ~/Code/roster/rites/ecosystem-pack/context-injection.sh
+# Test ecosystem script directly
+source ~/Code/roster/rites/ecosystem/context-injection.sh
 inject_team_context
 
 # Test full session context hook

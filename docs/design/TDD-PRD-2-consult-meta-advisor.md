@@ -19,7 +19,7 @@ Current state:
 - `consult-ref` provides ecosystem guidance but lacks explicit references to `prompting` skill for invocation patterns
 - `consult-ref` does not reference `10x-workflow` for workflow phase transitions and quality gates
 - The role of `/consult` as "cognitive load absorber" is undocumented
-- `team-ref` hardcodes 4 teams (`10x-dev-pack`, `doc-team-pack`, `hygiene-pack`, `debt-triage-pack`) when 11 teams exist
+- `team-ref` hardcodes 4 teams (`10x-dev`, `doc-team-pack`, `hygiene`, `debt-triage`) when 11 teams exist
 - Team profile information is scattered across `rites/*/orchestrator.yaml` and `rites/*/README.md` without structured access
 - CLAUDE.md Getting Help table does not include `/consult` for routing guidance
 
@@ -80,7 +80,7 @@ The `team-discovery` skill reads from existing `rites/*/orchestrator.yaml` files
 # Describes the structure that team-discovery extracts from orchestrator.yaml
 
 team_profile:
-  name: string           # Required: rite name (e.g., "10x-dev-pack")
+  name: string           # Required: rite name (e.g., "10x-dev")
   domain: string         # Required: team specialization (e.g., "software development")
   description: string    # Required: from orchestrator.yaml frontmatter.description
   role: string           # Required: from orchestrator.yaml frontmatter.role
@@ -107,7 +107,7 @@ team_profile:
 
 # Validation rules:
 # - name must match directory name in rites/
-# - quick_switch derived from name pattern (debt-triage-pack -> /debt)
+# - quick_switch derived from name pattern (debt-triage -> /debt)
 # - agent_count must match actual agent files
 # - All required fields must be present
 ```
@@ -322,13 +322,13 @@ Modify existing `.claude/skills/team-ref/skill.md` to dynamically discover teams
 ```markdown
 ## Available Team Packs
 
-### 10x-dev-pack
+### 10x-dev
 ...
 ### doc-team-pack
 ...
-### hygiene-pack
+### hygiene
 ...
-### debt-triage-pack
+### debt-triage
 ...
 ```
 
@@ -373,17 +373,17 @@ ls -d $ROSTER_HOME/rites/*-pack 2>/dev/null | xargs -n1 basename
 ```
 
 As of this writing, the roster contains 11 teams:
-- 10x-dev-pack (software development)
-- debt-triage-pack (technical debt)
+- 10x-dev (software development)
+- debt-triage (technical debt)
 - doc-team-pack (documentation)
-- ecosystem-pack (CEM/skeleton/roster infrastructure)
-- forge-pack (rite creation)
-- hygiene-pack (code quality)
-- intelligence-pack (analytics/research)
-- rnd-pack (exploration/prototyping)
-- security-pack (security assessment)
-- sre-pack (operations/reliability)
-- strategy-pack (business analysis)
+- ecosystem (CEM/skeleton/roster infrastructure)
+- forge (rite creation)
+- hygiene (code quality)
+- intelligence (analytics/research)
+- rnd (exploration/prototyping)
+- security (security assessment)
+- sre (operations/reliability)
+- strategy (business analysis)
 
 **Important**: This list is informational. For current, accurate team data, use `team-discovery` skill or read directly from `$ROSTER_HOME/rites/*/orchestrator.yaml`.
 
@@ -406,17 +406,17 @@ Quick-switch commands are derived from rite names:
 
 | Team | Quick Switch | Derivation |
 |------|--------------|------------|
-| 10x-dev-pack | `/10x` | First token before hyphen |
-| debt-triage-pack | `/debt` | First token before hyphen |
+| 10x-dev | `/10x` | First token before hyphen |
+| debt-triage | `/debt` | First token before hyphen |
 | doc-team-pack | `/docs` | First token before hyphen |
-| ecosystem-pack | `/ecosystem` | First token before hyphen |
-| forge-pack | `/forge` | First token before hyphen |
-| hygiene-pack | `/hygiene` | First token before hyphen |
-| intelligence-pack | `/intelligence` | First token before hyphen |
-| rnd-pack | `/rnd` | First token before hyphen |
-| security-pack | `/security` | First token before hyphen |
-| sre-pack | `/sre` | First token before hyphen |
-| strategy-pack | `/strategy` | First token before hyphen |
+| ecosystem | `/ecosystem` | First token before hyphen |
+| forge | `/forge` | First token before hyphen |
+| hygiene | `/hygiene` | First token before hyphen |
+| intelligence | `/intelligence` | First token before hyphen |
+| rnd | `/rnd` | First token before hyphen |
+| security | `/security` | First token before hyphen |
+| sre | `/sre` | First token before hyphen |
+| strategy | `/strategy` | First token before hyphen |
 
 These commands invoke `/team {pack-name}` internally and display team roster after switch.
 ```
@@ -486,7 +486,7 @@ User: /consult "I need to build a payment system"
     │      skill      │
     └────────┬────────┘
              │ 2. Match intent to team routing conditions
-             │    Returns: [{team: 10x-dev-pack, confidence: 0.95}, ...]
+             │    Returns: [{team: 10x-dev, confidence: 0.95}, ...]
              ▼
     ┌─────────────────┐
     │    prompting    │◄── Reads: prompting/patterns/discovery.md
@@ -505,7 +505,7 @@ User: /consult "I need to build a payment system"
     ┌─────────────────────────────────────────┐
     │           /consult Response             │
     │  Assessment: Build payment system       │
-    │  Recommendation: 10x-dev-pack, /task    │
+    │  Recommendation: 10x-dev, /task    │
     │  Command-Flow: /10x && /start...        │
     │  (with prompting patterns)              │
     │  (with 10x-workflow gates)              │
@@ -537,8 +537,8 @@ User: /team --list
     ┌─────────────────────────────────────────┐
     │         /team --list Response           │
     │  [Roster] Available teams:              │
-    │    - 10x-dev-pack (5 agents) - /10x     │
-    │    - debt-triage-pack (3 agents) - /debt│
+    │    - 10x-dev (5 agents) - /10x     │
+    │    - debt-triage (3 agents) - /debt│
     │    - ...11 teams total                  │
     └─────────────────────────────────────────┘
 ```
@@ -604,17 +604,17 @@ The following hardcoded references are deprecated in favor of dynamic discovery:
 | Test Case | Input | Expected Outcome | Validates |
 |-----------|-------|------------------|-----------|
 | TD-01: List all teams | `ls $ROSTER_HOME/rites/` | Returns 11 rite names | Team enumeration |
-| TD-02: Parse orchestrator.yaml | Read 10x-dev-pack/orchestrator.yaml | Extracts name, domain, routing | Schema parsing |
-| TD-03: Count agents | Read 10x-dev-pack/agents/*.md | Returns 4-5 agents | Agent enumeration |
-| TD-04: Derive quick_switch | Parse "debt-triage-pack" | Returns "/debt" | Derivation logic |
+| TD-02: Parse orchestrator.yaml | Read 10x-dev/orchestrator.yaml | Extracts name, domain, routing | Schema parsing |
+| TD-03: Count agents | Read 10x-dev/agents/*.md | Returns 4-5 agents | Agent enumeration |
+| TD-04: Derive quick_switch | Parse "debt-triage" | Returns "/debt" | Derivation logic |
 | TD-05: Handle missing orchestrator.yaml | rites/bad-pack/ (no yaml) | Skips gracefully | Error handling |
 
 ### 6.2 consult-ref Validation
 
 | Test Case | Input | Expected Outcome | Validates |
 |-----------|-------|------------------|-----------|
-| CR-01: Intent to 10x | "I want to build a feature" | Recommends 10x-dev-pack | Intent matching |
-| CR-02: Intent to security | "audit my code for vulnerabilities" | Recommends security-pack | Domain matching |
+| CR-01: Intent to 10x | "I want to build a feature" | Recommends 10x-dev | Intent matching |
+| CR-02: Intent to security | "audit my code for vulnerabilities" | Recommends security | Domain matching |
 | CR-03: Prompting reference | Any recommendation | Includes prompting pattern | FR-1.1 |
 | CR-04: Workflow reference | Any recommendation | Includes quality gates | FR-1.2 |
 | CR-05: No arguments | `/consult` | Shows scannable overview | FR-3.3 |

@@ -2,7 +2,7 @@
 
 > **Complexity**: PATCH (no user action required)
 > **Date**: 2025-12-27
-> **Affects**: hygiene-pack, intelligence-pack, rnd-pack, security-pack
+> **Affects**: hygiene, intelligence, rnd, security
 
 ## Problem Statement
 
@@ -16,11 +16,11 @@ Agent configurations specified artifact production requirements in their instruc
 
 | Team | Agent | File | Change |
 |------|-------|------|--------|
-| hygiene-pack | code-smeller | `rites/hygiene-pack/agents/code-smeller.md` | Added `Write` to tools |
-| intelligence-pack | user-researcher | `rites/intelligence-pack/agents/user-researcher.md` | Added `Edit` to tools |
-| rnd-pack | technology-scout | `rites/rnd-pack/agents/technology-scout.md` | Added `Edit` to tools |
-| security-pack | penetration-tester | `rites/security-pack/agents/penetration-tester.md` | Added `Edit` to tools |
-| security-pack | threat-modeler | `rites/security-pack/agents/threat-modeler.md` | Added `Edit` to tools |
+| hygiene | code-smeller | `rites/hygiene/agents/code-smeller.md` | Added `Write` to tools |
+| intelligence | user-researcher | `rites/intelligence/agents/user-researcher.md` | Added `Edit` to tools |
+| rnd | technology-scout | `rites/rnd/agents/technology-scout.md` | Added `Edit` to tools |
+| security | penetration-tester | `rites/security/agents/penetration-tester.md` | Added `Edit` to tools |
+| security | threat-modeler | `rites/security/agents/threat-modeler.md` | Added `Edit` to tools |
 
 ### Before/After Examples
 
@@ -50,19 +50,19 @@ Run this command from the roster root to confirm all modified agents have the co
 
 ```bash
 # Check code-smeller has Write
-grep "^tools:" rites/hygiene-pack/agents/code-smeller.md | grep -q "Write" && echo "PASS: code-smeller" || echo "FAIL: code-smeller"
+grep "^tools:" rites/hygiene/agents/code-smeller.md | grep -q "Write" && echo "PASS: code-smeller" || echo "FAIL: code-smeller"
 
 # Check user-researcher has Edit
-grep "^tools:" rites/intelligence-pack/agents/user-researcher.md | grep -q "Edit" && echo "PASS: user-researcher" || echo "FAIL: user-researcher"
+grep "^tools:" rites/intelligence/agents/user-researcher.md | grep -q "Edit" && echo "PASS: user-researcher" || echo "FAIL: user-researcher"
 
 # Check technology-scout has Edit
-grep "^tools:" rites/rnd-pack/agents/technology-scout.md | grep -q "Edit" && echo "PASS: technology-scout" || echo "FAIL: technology-scout"
+grep "^tools:" rites/rnd/agents/technology-scout.md | grep -q "Edit" && echo "PASS: technology-scout" || echo "FAIL: technology-scout"
 
 # Check penetration-tester has Edit
-grep "^tools:" rites/security-pack/agents/penetration-tester.md | grep -q "Edit" && echo "PASS: penetration-tester" || echo "FAIL: penetration-tester"
+grep "^tools:" rites/security/agents/penetration-tester.md | grep -q "Edit" && echo "PASS: penetration-tester" || echo "FAIL: penetration-tester"
 
 # Check threat-modeler has Edit
-grep "^tools:" rites/security-pack/agents/threat-modeler.md | grep -q "Edit" && echo "PASS: threat-modeler" || echo "FAIL: threat-modeler"
+grep "^tools:" rites/security/agents/threat-modeler.md | grep -q "Edit" && echo "PASS: threat-modeler" || echo "FAIL: threat-modeler"
 ```
 
 Expected output: All lines show `PASS`.
@@ -125,11 +125,11 @@ If issues arise, revert to previous tool configurations:
 ```bash
 # Rollback all changes
 git checkout HEAD~1 -- \
-  rites/hygiene-pack/agents/code-smeller.md \
-  rites/intelligence-pack/agents/user-researcher.md \
-  rites/rnd-pack/agents/technology-scout.md \
-  rites/security-pack/agents/penetration-tester.md \
-  rites/security-pack/agents/threat-modeler.md
+  rites/hygiene/agents/code-smeller.md \
+  rites/intelligence/agents/user-researcher.md \
+  rites/rnd/agents/technology-scout.md \
+  rites/security/agents/penetration-tester.md \
+  rites/security/agents/threat-modeler.md
 ```
 
 **Risk Assessment**: Low. Adding permissions is additive; removing them could break agent functionality.

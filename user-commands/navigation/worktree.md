@@ -94,7 +94,7 @@ hooks/lib/worktree-manager.sh gc
 
 ```bash
 # Create worktree for auth sprint with 10x rite
-/worktree create "auth-sprint" --rite=10x-dev-pack
+/worktree create "auth-sprint" --rite=10x-dev
 
 # Create worktree from specific branch
 /worktree create "hotfix" --from=release-1.2
@@ -113,7 +113,7 @@ hooks/lib/worktree-manager.sh gc
 
 1. In main project, want parallel work:
    ```
-   /worktree create "feature-x" --rite=10x-dev-pack
+   /worktree create "feature-x" --rite=10x-dev
    ```
 
 2. Open new terminal, navigate to worktree:

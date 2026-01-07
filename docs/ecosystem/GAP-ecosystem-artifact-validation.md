@@ -63,7 +63,7 @@ fi
 ```
 
 - Overlapping command names exist:
-  - Team commands: pr, spike (from 10x-dev-pack)
+  - Team commands: pr, spike (from 10x-dev)
   - User commands: pr, spike (from user-commands/operations/)
 
 **Impact**: Team command could silently replace user command behavior during swap. User expects `/pr` to invoke their customized version but gets team version instead.
@@ -131,10 +131,10 @@ if [[ "$ORPHAN_MODE" == "remove" ]] && [[ -d "$backup_dir" ]]; then
 
 #### SEC-001: Security Routing Not Automated (MEDIUM)
 
-**Description**: 10x-dev-pack defines 9 security patterns in workflow.yaml security_consultation section, but routing is advisory-only. Agents are not required to invoke security-pack consultation.
+**Description**: 10x-dev defines 9 security patterns in workflow.yaml security_consultation section, but routing is advisory-only. Agents are not required to invoke security consultation.
 
 **Evidence**:
-- File: `/Users/tomtenuta/Code/roster/rites/10x-dev-pack/workflow.yaml`
+- File: `/Users/tomtenuta/Code/roster/rites/10x-dev/workflow.yaml`
 - Lines 75-127: security_consultation section defines triggers and policy
 
 ```yaml
@@ -159,7 +159,7 @@ security_consultation:
 - No enforcement mechanism exists - policy is declarative only
 - Architect agent receives invocation pattern but no hook verifies consultation occurred
 
-**Impact**: Security-sensitive changes (authentication, cryptography, financial) may bypass security-pack review. "Required" policy is not enforced, only documented.
+**Impact**: Security-sensitive changes (authentication, cryptography, financial) may bypass security review. "Required" policy is not enforced, only documented.
 
 **Root Cause**: Advisory-only consultation triggers. Workflow.yaml declares policy but no pre-commit or phase-transition hook enforces it.
 
@@ -193,7 +193,7 @@ security_consultation:
 
 - [ ] GAP-SC-004: Security routing triggers enforced, not advisory-only
   - PreToolUse or phase transition hook checks security_consultation policy
-  - SYSTEM+cryptography requires proof of security-pack consultation
+  - SYSTEM+cryptography requires proof of security consultation
   - Enforcement configurable (strict vs. warn-only)
 
 ## Affected Components
@@ -230,7 +230,7 @@ For verification, test fixes against:
 
 5. **SEC-001**: Design security enforcement hook with context-architect
    - Needs: Definition of "consultation proof" (artifact path? session log?)
-   - Needs: Graceful degradation for teams without security-pack
+   - Needs: Graceful degradation for teams without security
 
 ## Handoff
 

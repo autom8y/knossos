@@ -4,7 +4,7 @@
 
 ## Overview
 
-Code smells detected by **code-smeller** (hygiene-pack) or **debt-collector** (debt-triage-pack) map to debt ledger entries with preserved references. This enables traceability from smell detection → debt tracking → sprint planning.
+Code smells detected by **code-smeller** (hygiene) or **debt-collector** (debt-triage) map to debt ledger entries with preserved references. This enables traceability from smell detection → debt tracking → sprint planning.
 
 ## Smell-to-Debt Category Mapping
 
@@ -70,8 +70,8 @@ tags:
 
 | Source | Target | Integration Type | Reference Field |
 |--------|--------|------------------|-----------------|
-| code-smeller (hygiene-pack) | Smell Report | Produces | - |
-| debt-collector (debt-triage-pack) | Debt Ledger | Produces | - |
+| code-smeller (hygiene) | Smell Report | Produces | - |
+| debt-collector (debt-triage) | Debt Ledger | Produces | - |
 | Smell Report | Debt Ledger | Reference | `smell_ref` field in debt entry |
 | Debt Ledger | Sprint Packages | Reference | `debt_id` field in package |
 | Sprint Packages | HANDOFF | Reference | `PKG-XXX` field |
@@ -84,7 +84,7 @@ smell-detection skill (patterns + severity classification)
         v
 +-------------------+     +-------------------+
 | code-smeller      |     | debt-collector    |
-| (hygiene-pack)    |     | (debt-triage-pack)|
+| (hygiene)    |     | (debt-triage)|
 +-------------------+     +-------------------+
         |                         |
         v                         v
@@ -95,7 +95,7 @@ smell-detection skill (patterns + severity classification)
                    |  |
                    v  v
             risk-assessor
-            (debt-triage-pack)
+            (debt-triage)
                    |
                    v
             Sprint Packages
@@ -156,7 +156,7 @@ evidence: "getUserData() modifies cache (smell-detection NM-MISLEAD heuristic, m
 
 ## Agent Responsibilities
 
-### code-smeller (hygiene-pack)
+### code-smeller (hygiene)
 
 **Produces**: Smell Report
 **Uses smell-detection for**:
@@ -166,7 +166,7 @@ evidence: "getUserData() modifies cache (smell-detection NM-MISLEAD heuristic, m
 
 **Output**: `docs/quality/SMELL_REPORT.md` with smell entries
 
-### debt-collector (debt-triage-pack)
+### debt-collector (debt-triage)
 
 **Produces**: Debt Ledger
 **Uses smell-detection for**:
@@ -177,7 +177,7 @@ evidence: "getUserData() modifies cache (smell-detection NM-MISLEAD heuristic, m
 **Input**: Codebase (or Smell Report from code-smeller)
 **Output**: `DEBT_LEDGER.yaml` with debt entries (smell_ref preserved)
 
-### risk-assessor (debt-triage-pack)
+### risk-assessor (debt-triage)
 
 **Consumes**: Debt Ledger
 **Produces**: Sprint Packages

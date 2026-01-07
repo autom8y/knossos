@@ -1,7 +1,7 @@
 # Smell Report: Command Template Standardization
 
 **Generated**: 2025-12-29
-**Auditor**: Code Smeller (hygiene-pack)
+**Auditor**: Code Smeller (hygiene)
 **Scope**: All command files in `user-commands/` and `rites/*/commands/`
 **Reference Standard**: `docs/ecosystem/CONTEXT-DESIGN-command-argument-standardization.md`
 
@@ -51,7 +51,7 @@ Commands with argument-hint but missing `$ARGUMENTS` in "Your Task" section.
 | File | Has argument-hint | Has $ARGUMENTS | Notes |
 |------|-------------------|----------------|-------|
 | `user-commands/navigation/team.md` | Yes | Yes | Clean |
-| `rites/ecosystem-pack/commands/cem-debug.md` | No argument-hint | N/A | Falls under S6, not S2 |
+| `rites/ecosystem/commands/cem-debug.md` | No argument-hint | N/A | Falls under S6, not S2 |
 
 **Analysis**: After reviewing all files, most commands correctly include `$ARGUMENTS`. One edge case:
 
@@ -82,7 +82,7 @@ Canonical order: Context -> Pre-flight -> Task -> Behavior -> Flags -> Examples 
 | `user-commands/session/start.md` | Pre-computed Context -> Task -> Behavior -> Complexity Levels -> Example Usage -> Reference | "Pre-computed Context" variant, "Complexity Levels" extra section |
 | `user-commands/workflow/sprint.md` | Context -> Pre-flight -> Task -> Behavior -> Example -> When to Use -> Parallel Sprint Pattern -> Reference | "When to Use" after Example, extra "Parallel Sprint Pattern" section |
 | `rites/doc-team-pack/commands/consolidate.md` | Context -> Task -> Parameters -> Workflow Phases -> Behavior -> Examples -> Phase Transitions -> Resumption -> Error Handling -> Reference | Multiple extra sections interspersed |
-| `rites/ecosystem-pack/commands/cem-debug.md` | Context -> Task -> Behavior -> When to Use -> CEM Diagnostic Checklist -> Expected Output -> Handoff -> Reference | Multiple extra sections |
+| `rites/ecosystem/commands/cem-debug.md` | Context -> Task -> Behavior -> When to Use -> CEM Diagnostic Checklist -> Expected Output -> Handoff -> Reference | Multiple extra sections |
 
 **Note**: Section order violations are LOW severity as they don't break functionality, only consistency.
 
@@ -143,7 +143,7 @@ No commands still reference `--refresh` or `--force` flags.
 | `user-commands/meta/one.md` | ALL (no frontmatter) | File starts with `# Session 1:` |
 | `user-commands/navigation/team.md` | `allowed-tools` | Uses Bash for swap-rite.sh but `allowed-tools` not declared |
 | `user-commands/cem/sync.md` | `model` | Has description, argument-hint, allowed-tools but no model |
-| `rites/ecosystem-pack/commands/cem-debug.md` | `argument-hint` | Has description, allowed-tools, model but no argument-hint despite accepting implicit arguments |
+| `rites/ecosystem/commands/cem-debug.md` | `argument-hint` | Has description, allowed-tools, model but no argument-hint despite accepting implicit arguments |
 
 **Required Frontmatter** (per standard):
 ```yaml
@@ -163,7 +163,7 @@ All team-switching commands correctly pass `$ARGUMENTS` in Behavior execution.
 ```markdown
 ## Behavior
 
-1. Execute: `${ROSTER_HOME:-~/Code/roster}/swap-rite.sh 10x-dev-pack $ARGUMENTS`
+1. Execute: `${ROSTER_HOME:-~/Code/roster}/swap-rite.sh 10x-dev $ARGUMENTS`
 ```
 
 All 10 team-switching commands follow this pattern correctly.
@@ -195,7 +195,7 @@ All 10 team-switching commands follow this pattern correctly.
 | `user-commands/session/start.md` | S3 | LOW | 6 (LOW) |
 | `user-commands/workflow/sprint.md` | S3 | LOW | 6 (LOW) |
 | `rites/doc-team-pack/commands/consolidate.md` | S3 | LOW | 6 (LOW) |
-| `rites/ecosystem-pack/commands/cem-debug.md` | S3, S6 | LOW | 4 (MEDIUM) |
+| `rites/ecosystem/commands/cem-debug.md` | S3, S6 | LOW | 4 (MEDIUM) |
 
 ---
 
@@ -223,12 +223,12 @@ These files fully comply with the canonical template:
 ### user-commands/navigation/
 - `consult.md`
 
-### rites/forge-pack/commands/
+### rites/forge/commands/
 - `new-team.md`
 - `validate-team.md`
 - `eval-agent.md`
 
-### rites/10x-dev-pack/commands/
+### rites/10x-dev/commands/
 - `spike.md`
 - `pr.md`
 

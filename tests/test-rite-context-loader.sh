@@ -89,15 +89,15 @@ test_no_rite() {
     assert_empty "No rite active returns empty" "$output"
 }
 
-# Test 2: Rite without context script (10x-dev-pack has no context-injection.sh)
+# Test 2: Rite without context script (10x-dev has no context-injection.sh)
 test_rite_no_script() {
     setup_satellite
 
     # Use a rite that exists but has no context-injection.sh
-    echo "10x-dev-pack" > .claude/ACTIVE_RITE
+    echo "10x-dev" > .claude/ACTIVE_RITE
 
     # Make sure the rite exists but script doesn't
-    mkdir -p "$SCRIPT_DIR/rites/10x-dev-pack"
+    mkdir -p "$SCRIPT_DIR/rites/10x-dev"
 
     source "$SCRIPT_DIR/user-hooks/lib/rite-context-loader.sh"
     local output=$(load_rite_context)
@@ -108,7 +108,7 @@ test_rite_no_script() {
 # Test 3: Rite with context script produces output
 test_rite_with_script() {
     setup_satellite
-    echo "ecosystem-pack" > .claude/ACTIVE_RITE
+    echo "ecosystem" > .claude/ACTIVE_RITE
 
     source "$SCRIPT_DIR/user-hooks/lib/rite-context-loader.sh"
     local output=$(load_rite_context)
@@ -193,7 +193,7 @@ EOF
 # Test 7: KNOSSOS_HOME not set (fallback to default)
 test_knossos_home_fallback() {
     setup_satellite
-    echo "ecosystem-pack" > .claude/ACTIVE_RITE
+    echo "ecosystem" > .claude/ACTIVE_RITE
 
     # Unset KNOSSOS_HOME to test fallback
     local original_knossos_home="${KNOSSOS_HOME:-}"
@@ -225,7 +225,7 @@ test_session_context_integration() {
     local output=$("$SCRIPT_DIR/user-hooks/context-injection/session-context.sh" 2>/dev/null || echo "HOOK_FAILED")
 
     # Should either contain rite context OR run successfully
-    # (rite context only appears if ecosystem-pack is active)
+    # (rite context only appears if ecosystem is active)
     local exit_code=0
     if [[ "$output" != "HOOK_FAILED" ]]; then
         exit_code=0

@@ -171,7 +171,7 @@ From analysis of `/roster/swap-rite.sh` (lines 1587-1661):
 **Reproduction**:
 ```bash
 cd /any/satellite/project
-$ROSTER_HOME/swap-rite.sh 10x-dev-pack --force
+$ROSTER_HOME/swap-rite.sh 10x-dev --force
 # Result: [Roster] Error: Unknown option: --force
 ```
 

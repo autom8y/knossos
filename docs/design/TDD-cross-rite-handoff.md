@@ -15,7 +15,7 @@ This Technical Design Document specifies the cross-rite-handoff shared skill, a 
 | Cross-Team Edge Cases | `/Users/tomtenuta/Code/roster/docs/edge-cases/cross-rite-workflows.md` |
 | Session Context Schema | `/Users/tomtenuta/Code/roster/user-skills/session-common/session-context-schema.md` |
 | TDD Schema | `/Users/tomtenuta/Code/roster/user-skills/documentation/doc-artifacts/schemas/tdd-schema.md` |
-| Context Design Schema | `/Users/tomtenuta/Code/roster/rites/ecosystem-pack/skills/doc-ecosystem/schemas/context-design-schema.md` |
+| Context Design Schema | `/Users/tomtenuta/Code/roster/rites/ecosystem/skills/doc-ecosystem/schemas/context-design-schema.md` |
 | Shared Skills README | `/Users/tomtenuta/Code/roster/rites/shared/README.md` |
 
 ### Problem Statement
@@ -59,8 +59,8 @@ artifact_id: string           # Pattern: HANDOFF-{source_rite}-to-{target_rite}-
 schema_version: "1.0"         # Must be "1.0" for this version
 
 # Required: Team routing
-source_rite: string           # Rite pack producing the handoff (e.g., "10x-dev-pack")
-target_rite: string           # Rite pack receiving the handoff (e.g., "security-pack")
+source_rite: string           # Rite pack producing the handoff (e.g., "10x-dev")
+target_rite: string           # Rite pack receiving the handoff (e.g., "security")
 
 # Required: Handoff classification
 handoff_type: enum            # execution | validation | assessment | implementation | strategic_input | strategic_evaluation
@@ -194,12 +194,12 @@ A cross-rite HANDOFF artifact is **required** when:
 
 | Condition | Target Rite | Handoff Type |
 |-----------|-------------|--------------|
-| Complexity >= SERVICE with security considerations | security-pack | assessment |
-| Feature involves production deployment | sre-pack | validation |
-| Debt remediation work ready for execution | hygiene-pack | execution |
-| R&D prototype ready for strategic evaluation | strategy-pack | strategic_evaluation |
-| User research synthesis complete | strategy-pack | strategic_input |
-| Strategic go-decision for production build | 10x-dev-pack | implementation |
+| Complexity >= SERVICE with security considerations | security | assessment |
+| Feature involves production deployment | sre | validation |
+| Debt remediation work ready for execution | hygiene | execution |
+| R&D prototype ready for strategic evaluation | strategy | strategic_evaluation |
+| User research synthesis complete | strategy | strategic_input |
+| Strategic go-decision for production build | 10x-dev | implementation |
 
 ### Optional Cross-Team Handoff
 
@@ -208,9 +208,9 @@ A cross-rite HANDOFF artifact is **optional** when:
 | Condition | Target Rite | Handoff Type |
 |-----------|-------------|--------------|
 | Feature complete, documentation update desired | doc-team-pack | assessment |
-| Code review reveals hygiene concerns | hygiene-pack | assessment |
-| Performance concerns identified | sre-pack | assessment |
-| Minor security considerations (complexity < SERVICE) | security-pack | assessment |
+| Code review reveals hygiene concerns | hygiene | assessment |
+| Performance concerns identified | sre | assessment |
+| Minor security considerations (complexity < SERVICE) | security | assessment |
 
 ### No Handoff Required
 
@@ -275,8 +275,8 @@ pending_handoffs:
 HANDOFF-{source}-to-{target}-{YYYY-MM-DD}[-{seq}].md
 
 Examples:
-- HANDOFF-10x-dev-pack-to-security-pack-2026-01-03.md
-- HANDOFF-debt-triage-pack-to-hygiene-pack-2026-01-03-2.md  (second handoff same day)
+- HANDOFF-10x-dev-to-security-2026-01-03.md
+- HANDOFF-debt-triage-to-hygiene-2026-01-03-2.md  (second handoff same day)
 ```
 
 ### Response Artifact Naming
@@ -292,10 +292,10 @@ HANDOFF-RESPONSE-{target}-to-{source}-{YYYY-MM-DD}.md
 
 ```yaml
 ---
-artifact_id: HANDOFF-10x-dev-pack-to-security-pack-2026-01-03
+artifact_id: HANDOFF-10x-dev-to-security-2026-01-03
 schema_version: "1.0"
-source_rite: 10x-dev-pack
-target_rite: security-pack
+source_rite: 10x-dev
+target_rite: security
 handoff_type: assessment
 priority: critical
 blocking: true
@@ -326,7 +326,7 @@ items:
 
 ## Context
 
-The 10x-dev-pack has completed PRD and TDD for a major payment processing overhaul. This feature handles credit card tokenization and requires security assessment before implementation can proceed.
+The 10x-dev has completed PRD and TDD for a major payment processing overhaul. This feature handles credit card tokenization and requires security assessment before implementation can proceed.
 
 ### Why This Handoff
 
@@ -362,10 +362,10 @@ The 10x-dev-pack has completed PRD and TDD for a major payment processing overha
 
 ```yaml
 ---
-artifact_id: HANDOFF-10x-dev-pack-to-security-pack-2026-01-02
+artifact_id: HANDOFF-10x-dev-to-security-2026-01-02
 schema_version: "1.0"
-source_team: 10x-dev-pack
-target_team: security-pack
+source_team: 10x-dev
+target_team: security
 handoff_type: assessment
 priority: critical
 blocking: true
@@ -404,7 +404,7 @@ The handoff lacks sufficient context for security assessment:
 Source team should:
 1. Complete TDD-payment-processing.md with architecture diagrams
 2. Create new HANDOFF referencing this rejection
-3. Set `resubmission_of: HANDOFF-10x-dev-pack-to-security-pack-2026-01-02`
+3. Set `resubmission_of: HANDOFF-10x-dev-to-security-2026-01-02`
 ```
 
 ---
@@ -413,10 +413,10 @@ Source team should:
 
 ```yaml
 ---
-artifact_id: HANDOFF-debt-triage-pack-to-hygiene-pack-2026-01-03
+artifact_id: HANDOFF-debt-triage-to-hygiene-2026-01-03
 schema_version: "1.0"
-source_team: debt-triage-pack
-target_team: hygiene-pack
+source_team: debt-triage
+target_team: hygiene
 handoff_type: execution
 priority: high
 blocking: false
@@ -450,7 +450,7 @@ items:
 
 ## Context
 
-The debt-triage-pack has completed assessment and planning for Q1 2026 debt remediation. These packages are ready for execution by hygiene-pack.
+The debt-triage has completed assessment and planning for Q1 2026 debt remediation. These packages are ready for execution by hygiene.
 
 ## Package Prioritization
 
@@ -792,5 +792,5 @@ The HANDOFF artifact schema complements, not replaces:
 | Cross-Team Playbook | `/Users/tomtenuta/Code/roster/docs/playbooks/cross-rite-coordination.md` | Read |
 | Cross-Team Edge Cases | `/Users/tomtenuta/Code/roster/docs/edge-cases/cross-rite-workflows.md` | Read |
 | Session Context Schema | `/Users/tomtenuta/Code/roster/user-skills/session-common/session-context-schema.md` | Read |
-| Context Design Schema | `/Users/tomtenuta/Code/roster/rites/ecosystem-pack/skills/doc-ecosystem/schemas/context-design-schema.md` | Read |
+| Context Design Schema | `/Users/tomtenuta/Code/roster/rites/ecosystem/skills/doc-ecosystem/schemas/context-design-schema.md` | Read |
 | Shared Skills README | `/Users/tomtenuta/Code/roster/rites/shared/README.md` | Read |

@@ -92,8 +92,8 @@ PreToolUse Hook (Edit|Write)
 |----------|-------|
 | **Project** | /Users/tomtenuta/code/roster |
 | **Worktree** | main project |
-| **Active Team** | 10x-dev-pack |
-| **Workflow** | 10x-dev-pack (entry: requirements-analyst) |
+| **Active Team** | 10x-dev |
+| **Workflow** | 10x-dev (entry: requirements-analyst) |
 | **Git** | main (27 uncommitted) |
 
 ### Session Status
@@ -127,7 +127,7 @@ PreToolUse Hook (Edit|Write)
 - `/handoff <agent>` - Transfer to another agent
 - `/wrap` - Finalize session
 
-## Rite Context: 10x-dev-pack
+## Rite Context: 10x-dev
 ... (additional rite routing context)
 ```
 
@@ -138,7 +138,7 @@ PreToolUse Hook (Edit|Write)
 
 | | |
 |---|---|
-| **Rite** | 10x-dev-pack |
+| **Rite** | 10x-dev |
 | **Session** | session-20251231-012324 (ACTIVE) |
 | **Initiative** | Hook Ecosystem Parity |
 | **Git** | main (27 uncommitted) |
@@ -332,7 +332,7 @@ Adding the matcher at the JSON level:
 ```
 [DELEGATION WARNING]
 ====================
-Active workflow detected: 10x-dev-pack
+Active workflow detected: 10x-dev
 Tool attempted: Edit on /tmp/test.py
 
 The main thread should delegate implementation to specialists via Task tool.
@@ -348,7 +348,7 @@ See: .claude/skills/orchestration/main-thread-guide.md
 #### Condensed Warning (3 lines)
 
 ```
-[DELEGATION] Workflow active (10x-dev-pack): Edit on /tmp/test.py
+[DELEGATION] Workflow active (10x-dev): Edit on /tmp/test.py
   -> Use Task tool to delegate, or proceed if intentional override.
   -> See: .claude/skills/orchestration/main-thread-guide.md
 ```

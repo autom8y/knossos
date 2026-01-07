@@ -68,7 +68,7 @@ All JSON outputs follow the PRD Section 4.4 contract:
   "status": "ACTIVE",
   "initiative": "...",
   "complexity": "MODULE",
-  "team": "10x-dev-pack",
+  "team": "10x-dev",
   "created_at": "2026-01-04T16:26:36Z",
   "schema_version": "2.1"
 }

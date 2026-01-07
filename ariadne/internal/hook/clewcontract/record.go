@@ -257,7 +257,7 @@ func RecordTaskEnd(sessionDir, taskID, agent, outcome, sessionID string, duratio
 //   - sessionID: The unique session identifier
 //   - initiative: The initiative or goal for this session
 //   - complexity: Complexity rating (trivial, standard, complex, critical)
-//   - team: The active rite (e.g., "10x-dev-pack")
+//   - team: The active rite (e.g., "10x-dev")
 func RecordSessionStart(sessionDir, sessionID, initiative, complexity, team string) error {
 	writer, err := NewEventWriter(sessionDir)
 	if err != nil {

@@ -138,7 +138,7 @@ Team-specific overrides for workflow customization:
 
 ```json
 "team_preferences": {
-  "ecosystem-pack": {
+  "ecosystem": {
     "preferred_agent": "integration-engineer",
     "auto_activate": true
   }

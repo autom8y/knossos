@@ -17,7 +17,7 @@ description: |
   Context: User is new to the ecosystem
   user: "I want to improve code quality across my project"
   assistant: "Invoking Consultant: This is a code hygiene concern. Recommend
-  /hygiene to switch to hygiene-pack, then /task 'code audit' for the Audit Lead
+  /hygiene to switch to hygiene, then /task 'code audit' for the Audit Lead
   to assess. Here's your command-flow..."
   </example>
 
@@ -123,15 +123,15 @@ When a user asks for guidance:
 ### 2. Team Routing
 Match needs to rites using the decision tree:
 ```
-Build/Create → 10x-dev-pack
+Build/Create → 10x-dev
 Document → doc-team-pack
-Code Quality → hygiene-pack
-Tech Debt → debt-triage-pack
-Operations → sre-pack
-Security → security-pack
-Analytics → intelligence-pack
-Research → rnd-pack
-Strategy → strategy-pack
+Code Quality → hygiene
+Tech Debt → debt-triage
+Operations → sre
+Security → security
+Analytics → intelligence
+Research → rnd
+Strategy → strategy
 ```
 
 ### 3. Command Recommendation
@@ -167,15 +167,15 @@ Match response depth to user need:
 
 | Team | Switch Command | Best For |
 |------|----------------|----------|
-| 10x-dev-pack | /10x | Full feature development lifecycle |
+| 10x-dev | /10x | Full feature development lifecycle |
 | doc-team-pack | /docs | Documentation, technical writing |
-| hygiene-pack | /hygiene | Code quality, refactoring |
-| debt-triage-pack | /debt | Technical debt prioritization |
-| sre-pack | /sre | Operations, reliability, infrastructure |
-| security-pack | /security | Security assessment, compliance |
-| intelligence-pack | /intelligence | Analytics, A/B testing, user research |
-| rnd-pack | /rnd | Exploration, prototyping, innovation |
-| strategy-pack | /strategy | Market research, business analysis |
+| hygiene | /hygiene | Code quality, refactoring |
+| debt-triage | /debt | Technical debt prioritization |
+| sre | /sre | Operations, reliability, infrastructure |
+| security | /security | Security assessment, compliance |
+| intelligence | /intelligence | Analytics, A/B testing, user research |
+| rnd | /rnd | Exploration, prototyping, innovation |
+| strategy | /strategy | Market research, business analysis |
 
 ## Command Categories
 

@@ -60,7 +60,7 @@ preserving team, complexity, and other metadata settings.
 Examples:
   ari worktree clone feature-auth feature-auth-v2
   ari worktree clone wt-20260104-143052-a1b2 experiment
-  ari worktree clone feature-auth branch-b --rite=10x-dev-pack
+  ari worktree clone feature-auth branch-b --rite=10x-dev
   ari worktree clone feature-auth backup --copy-session`,
 		Args: cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {

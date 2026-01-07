@@ -1,6 +1,6 @@
 # Audit Report: Command Template Standardization
 
-**Audit Lead**: audit-lead (hygiene-pack)
+**Audit Lead**: audit-lead (hygiene)
 **Date**: 2025-12-29
 **Sprint**: Command Template Standardization Hygiene
 

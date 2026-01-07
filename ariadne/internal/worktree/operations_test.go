@@ -837,7 +837,7 @@ schema_version: "2.1"
 session_id: session-12345
 status: "ACTIVE"
 worktree_id: "wt-abcdef"
-active_rite: "10x-dev-pack"
+active_rite: "10x-dev"
 initiative: "Test Initiative"
 complexity: MODULE
 current_phase: implementation
@@ -868,8 +868,8 @@ Some body content.
 	if ctx.WorktreeID != "wt-abcdef" {
 		t.Errorf("Expected worktree_id 'wt-abcdef', got '%s'", ctx.WorktreeID)
 	}
-	if ctx.ActiveRite != "10x-dev-pack" {
-		t.Errorf("Expected active_rite '10x-dev-pack', got '%s'", ctx.ActiveRite)
+	if ctx.ActiveRite != "10x-dev" {
+		t.Errorf("Expected active_rite '10x-dev', got '%s'", ctx.ActiveRite)
 	}
 	if ctx.Initiative != "Test Initiative" {
 		t.Errorf("Expected initiative 'Test Initiative', got '%s'", ctx.Initiative)

@@ -1,0 +1,61 @@
+name: debt-triage
+workflow_type: sequential
+description: Debt management lifecycle (Collect → Assess → Plan)
+
+entry_point:
+  agent: debt-collector
+  artifact:
+    type: debt-ledger
+    path_template: docs/debt/LEDGER-{slug}.md
+
+phases:
+  - name: collection
+    agent: debt-collector
+    produces: debt-ledger
+    next: assessment
+
+  - name: assessment
+    agent: risk-assessor
+    produces: risk-report
+    next: planning
+
+  - name: planning
+    agent: sprint-planner
+    produces: sprint-plan
+    next: null
+
+complexity_levels:
+  - name: QUICK
+    scope: "Known debt items"
+    phases: [assessment, planning]
+  - name: AUDIT
+    scope: "Full debt discovery"
+    phases: [collection, assessment, planning]
+
+# Agent roles for command mapping:
+# /architect  → risk-assessor (assessment/design role)
+# /build      → sprint-planner (planning is the "build" output)
+# /qa         → risk-assessor (validation role)
+# Note: This team has 3 agents, not 4. Some commands may not apply.
+
+back_routes:
+  - source_phase: planning
+    trigger: "fail(acceptance_criteria)"
+    target_phase: collection
+    target_agent: debt-collector
+    requires_user_confirmation: true
+    condition: "Failure is requirement gap, not implementation bug"
+
+  - source_phase: planning
+    trigger: "fail(implementation)"
+    target_phase: assessment
+    target_agent: risk-assessor
+    requires_user_confirmation: false
+    condition: "Failure is assessment issue"
+
+  - source_phase: assessment
+    trigger: "design_conflict"
+    target_phase: collection
+    target_agent: debt-collector
+    requires_user_confirmation: false
+    condition: "Assessment reveals missing debt items"

@@ -34,7 +34,7 @@ func TestGenerator_GenerateSection_Knossos(t *testing.T) {
 			"execution-mode": {Owner: OwnerKnossos},
 		},
 	}
-	ctx := &RenderContext{ActiveRite: "10x-dev-pack"}
+	ctx := &RenderContext{ActiveRite: "10x-dev"}
 	gen := NewGenerator("", manifest, ctx)
 
 	content, err := gen.GenerateSection("execution-mode")
@@ -57,7 +57,7 @@ func TestGenerator_GenerateSection_Regenerate(t *testing.T) {
 		},
 	}
 	ctx := &RenderContext{
-		ActiveRite: "10x-dev-pack",
+		ActiveRite: "10x-dev",
 		AgentCount: 3,
 		Agents: []AgentInfo{
 			{Name: "architect", Role: "Designs systems", Produces: "TDD"},
@@ -74,7 +74,7 @@ func TestGenerator_GenerateSection_Regenerate(t *testing.T) {
 	if !strings.Contains(content, "## Quick Start") {
 		t.Error("GenerateSection() should contain '## Quick Start'")
 	}
-	if !strings.Contains(content, "10x-dev-pack") {
+	if !strings.Contains(content, "10x-dev") {
 		t.Error("GenerateSection() should contain rite name")
 	}
 	if !strings.Contains(content, "architect") {
@@ -298,7 +298,7 @@ func TestGenerator_LookupTerminology_CustomVars(t *testing.T) {
 
 func TestGenerator_GenerateQuickStartContent(t *testing.T) {
 	ctx := &RenderContext{
-		ActiveRite: "10x-dev-pack",
+		ActiveRite: "10x-dev",
 		AgentCount: 5,
 		Agents: []AgentInfo{
 			{Name: "architect", Role: "System design", Produces: "TDD"},
@@ -314,7 +314,7 @@ func TestGenerator_GenerateQuickStartContent(t *testing.T) {
 	checks := []string{
 		"## Quick Start",
 		"5-agent workflow",
-		"10x-dev-pack",
+		"10x-dev",
 		"architect",
 		"prompting",
 	}

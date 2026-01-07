@@ -7,7 +7,7 @@
 #
 # Usage:
 #   source "$KNOSSOS_HOME/lib/roster-utils.sh"
-#   generate_roster "10x-dev-pack"
+#   generate_roster "10x-dev"
 #
 # Functions:
 #   get_frontmatter   - Extract field from markdown frontmatter

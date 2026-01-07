@@ -121,7 +121,7 @@ Each SKILL.md was evaluated against 5 criteria:
 
 ### Team-Specific Skills (26 total, sampled)
 
-#### 10x-dev-pack (5 skills) - **100% COMPLIANT**
+#### 10x-dev (5 skills) - **100% COMPLIANT**
 
 | Skill | Status | Notes |
 |-------|--------|-------|
@@ -131,7 +131,7 @@ Each SKILL.md was evaluated against 5 criteria:
 | `build-ref` | COMPLIANT | Progressive Disclosure section |
 | `doc-artifacts` | COMPLIANT | Team copy follows user-skills pattern |
 
-#### ecosystem-pack (3 skills) - **100% COMPLIANT**
+#### ecosystem (3 skills) - **100% COMPLIANT**
 
 | Skill | Status | Notes |
 |-------|--------|-------|
@@ -139,7 +139,7 @@ Each SKILL.md was evaluated against 5 criteria:
 | `doc-ecosystem` | COMPLIANT | **REMEDIATED**: Extracted 6 templates to templates/ (78 lines from 510) |
 | `claude-md-architecture` | COMPLIANT | Progressive Disclosure section |
 
-#### forge-pack (3 skills) - **100% COMPLIANT**
+#### forge (3 skills) - **100% COMPLIANT**
 
 | Skill | Status | Notes |
 |-------|--------|-------|
@@ -147,7 +147,7 @@ Each SKILL.md was evaluated against 5 criteria:
 | `agent-prompt-engineering` | COMPLIANT | Progressive Disclosure section |
 | `team-development` | COMPLIANT | Progressive Disclosure section |
 
-#### debt-triage-pack (1 skill) - **100% COMPLIANT**
+#### debt-triage (1 skill) - **100% COMPLIANT**
 
 | Skill | Status | Notes |
 |-------|--------|-------|
@@ -224,12 +224,12 @@ This skill is intentionally self-contained as a quick reference protocol.
 - `user-skills/operations/worktree-ref/integration.md` - Ecosystem integration
 
 ### doc-ecosystem Templates
-- `rites/ecosystem-pack/skills/doc-ecosystem/templates/gap-analysis.md`
-- `rites/ecosystem-pack/skills/doc-ecosystem/templates/context-design.md`
-- `rites/ecosystem-pack/skills/doc-ecosystem/templates/migration-runbook.md`
-- `rites/ecosystem-pack/skills/doc-ecosystem/templates/compatibility-report.md`
-- `rites/ecosystem-pack/skills/doc-ecosystem/templates/smell-report.md`
-- `rites/ecosystem-pack/skills/doc-ecosystem/templates/refactoring-plan.md`
+- `rites/ecosystem/skills/doc-ecosystem/templates/gap-analysis.md`
+- `rites/ecosystem/skills/doc-ecosystem/templates/context-design.md`
+- `rites/ecosystem/skills/doc-ecosystem/templates/migration-runbook.md`
+- `rites/ecosystem/skills/doc-ecosystem/templates/compatibility-report.md`
+- `rites/ecosystem/skills/doc-ecosystem/templates/smell-report.md`
+- `rites/ecosystem/skills/doc-ecosystem/templates/refactoring-plan.md`
 
 ---
 

@@ -135,7 +135,7 @@ func TestMetadataManager(t *testing.T) {
 		ID:        "wt-20260104-143052-a1b2",
 		Name:      "test-worktree",
 		Path:      filepath.Join(tmpDir, "wt-test"),
-		Rite:      "10x-dev-pack",
+		Rite:      "10x-dev",
 		CreatedAt: time.Now().UTC(),
 	}
 
@@ -260,7 +260,7 @@ func TestPerWorktreeMeta(t *testing.T) {
 	wt := Worktree{
 		ID:         "wt-20260104-143052-a1b2",
 		Name:       "test-worktree",
-		Rite:       "10x-dev-pack",
+		Rite:       "10x-dev",
 		Complexity: "MODULE",
 		FromRef:    "main",
 		CreatedAt:  time.Now().UTC(),
@@ -417,7 +417,7 @@ func TestManagerCreate(t *testing.T) {
 	// Create a worktree
 	opts := CreateOptions{
 		Name:       "test-feature",
-		Rite:       "10x-dev-pack",
+		Rite:       "10x-dev",
 		Complexity: "MODULE",
 	}
 

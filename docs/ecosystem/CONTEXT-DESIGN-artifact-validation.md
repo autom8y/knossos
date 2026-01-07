@@ -44,7 +44,7 @@ work_packages:
       - path: "user-hooks/security-consultation-check.sh"
         action: create
         description: "PreToolUse hook checking security consultation requirements"
-      - path: "rites/10x-dev-pack/workflow.yaml"
+      - path: "rites/10x-dev/workflow.yaml"
         action: modify
         description: "Add enforcement_mode field to security_consultation"
     dependencies: [WP1, WP2]
@@ -524,7 +524,7 @@ Logic:
 
 | File | Change |
 |------|--------|
-| rites/10x-dev-pack/workflow.yaml | Add enforcement section to security_consultation |
+| rites/10x-dev/workflow.yaml | Add enforcement section to security_consultation |
 
 ---
 

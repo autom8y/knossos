@@ -6,7 +6,7 @@
 
 ### Purpose
 
-Team packs contain different agents. If session started with `10x-dev-pack` but current rite is `doc-rite-pack`, expected agents may not be available.
+Team packs contain different agents. If session started with `10x-dev` but current rite is `docs`, expected agents may not be available.
 
 ### Check Logic
 

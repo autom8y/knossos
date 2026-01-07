@@ -66,13 +66,13 @@ Handoff complexity reflects coordination complexity. Shared primitives grow *wit
 
 | Item | Team | Effort | Dependencies |
 |------|------|--------|--------------|
-| P0: Fix model assignment bug | strategy-pack | 5 min | None |
-| P1: Fix user-researcher agent | intelligence-pack | 3 hrs | None |
-| P2: Fix insights-analyst agent | intelligence-pack | 3 hrs | None |
-| P1: Fix ship-pack references | rnd-pack | 1 hr | None |
-| P1: Demote from hub | ecosystem-pack | 2 hrs | None |
-| P2: Add staleness detection | doc-rite-pack | 2 hrs | None |
-| P1: Define behavior preservation | hygiene-pack | 2 hrs | None |
+| P0: Fix model assignment bug | strategy | 5 min | None |
+| P1: Fix user-researcher agent | intelligence | 3 hrs | None |
+| P2: Fix insights-analyst agent | intelligence | 3 hrs | None |
+| P1: Fix ship-pack references | rnd | 1 hr | None |
+| P1: Demote from hub | ecosystem | 2 hrs | None |
+| P2: Add staleness detection | docs | 2 hrs | None |
+| P1: Define behavior preservation | hygiene | 2 hrs | None |
 
 **Value Delivered:** +10% ecosystem quality, bugs fixed, foundation definitions in place
 **Token Impact:** -50 tokens (ecosystem demotion removes bloat)
@@ -117,9 +117,9 @@ Week 5: 10x Core Changes
 └── P3: Cross-rite handoff protocols
 
 Week 6: Dependent Team Gates (parallel)
-├── security-pack P1: Proactive threat-modeler gate
-├── doc-rite-pack P1: Documentation gate in QA checklist
-└── rnd-pack P2: Spike overlap clarification
+├── security P1: Proactive threat-modeler gate
+├── docs P1: Documentation gate in QA checklist
+└── rnd P2: Spike overlap clarification
 ```
 
 **Value Delivered:** 10-15% faster velocity on small changes, 0 security/doc surprises
@@ -135,19 +135,19 @@ Week 6: Dependent Team Gates (parallel)
 
 **Workstream A: Boundary Clarification**
 ```
-├── intelligence-pack P3 + strategy-pack P1: Mirror boundary table
-├── strategy-pack P2: Define R&D integration pathway
-└── strategy-pack P3: Add missing back-routes
+├── intelligence P3 + strategy P1: Mirror boundary table
+├── strategy P2: Define R&D integration pathway
+└── strategy P3: Add missing back-routes
 ```
 
 **Workstream B: HANDOFF Rollout**
 ```
-├── hygiene-pack P2: Accept HANDOFF from debt-triage
-├── sre-pack P2: Accept HANDOFF from 10x
-├── security-pack P3: Accept HANDOFF from 10x
-├── intelligence-pack P4: Produce HANDOFF for 10x/strategy
-├── rnd-pack P3: Produce HANDOFF for 10x/strategy
-└── strategy-pack P4: Produce HANDOFF for 10x
+├── hygiene P2: Accept HANDOFF from debt-triage
+├── sre P2: Accept HANDOFF from 10x
+├── security P3: Accept HANDOFF from 10x
+├── intelligence P4: Produce HANDOFF for 10x/strategy
+├── rnd P3: Produce HANDOFF for 10x/strategy
+└── strategy P4: Produce HANDOFF for 10x
 ```
 
 **Value Delivered:** All cross-rite handoffs formalized, routing confusion eliminated
@@ -204,8 +204,8 @@ Week 6: Dependent Team Gates (parallel)
 
 ```yaml
 ---
-source_team: debt-triage-pack
-target_team: hygiene-pack
+source_team: debt-triage
+target_team: hygiene
 handoff_type: execution
 created: 2026-01-02
 initiative: "Q1 Technical Debt Remediation"
@@ -251,11 +251,11 @@ Total estimated effort: 4-6 hours.
 # gates/security-threat-modeling.yaml
 gate_id: threat-modeling-pre-tdd
 trigger:
-  upstream_team: 10x-dev-pack
+  upstream_team: 10x-dev
   upstream_phase: design
   condition: complexity == SYSTEM AND (auth OR crypto OR pii)
 
-downstream_team: security-pack
+downstream_team: security
 downstream_agent: threat-modeler
 gate_type: consultation
 time_budget: 2-4 hours

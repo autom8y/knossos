@@ -397,10 +397,10 @@ esac
     "last_sync": "2025-01-01T00:00:00Z"
   },
   "team": {
-    "name": "10x-dev-pack",
+    "name": "10x-dev",
     "checksum": "sha256...",
     "last_refresh": "2025-01-01T00:00:00Z",
-    "roster_path": "/path/to/roster/rites/10x-dev-pack"
+    "roster_path": "/path/to/roster/rites/10x-dev"
   },
   "managed_files": [
     {

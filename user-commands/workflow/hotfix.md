@@ -50,9 +50,9 @@ IMPL_AGENT=$(grep -B1 "produces: code\|produces: commits\|produces: documentatio
    - Add regression test/check
    - Inline documentation
    - Agent varies by rite:
-     - 10x-dev-pack → principal-engineer
+     - 10x-dev → principal-engineer
      - doc-team-pack → tech-writer
-     - hygiene-pack → janitor
+     - hygiene → janitor
 
 4. **Fast validation** → Quick verification:
    - Verify fix works

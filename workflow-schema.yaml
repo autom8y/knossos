@@ -55,10 +55,10 @@ field_definitions:
       - matches_directory: true
     examples:
       valid:
-        - "10x-dev-pack"
-        - "ecosystem-pack"
-        - "security-pack"
-        - "sre-pack"
+        - "10x-dev"
+        - "ecosystem"
+        - "security"
+        - "sre"
       invalid:
         - "10xDevPack"          # camelCase not allowed
         - "my_team"             # underscores not allowed, missing -pack

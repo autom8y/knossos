@@ -53,9 +53,9 @@ Replace bash-sourced rite context with **YAML configuration files per rite**, lo
 #### Option A: Per-Rite YAML Files (Selected)
 
 ```yaml
-# rites/10x-dev-pack/rite-context.yaml
+# rites/10x-dev/rite-context.yaml
 rite:
-  name: 10x-dev-pack
+  name: 10x-dev
   display_name: "10x Development Pack"
   domain: software development
 
@@ -97,10 +97,10 @@ context_injection:
 ```yaml
 # ariadne.yaml or roster.yaml
 rites:
-  10x-dev-pack:
+  10x-dev:
     context_injection:
       static: [...]
-  ecosystem-pack:
+  ecosystem:
     context_injection:
       static: [...]
 ```
@@ -263,7 +263,7 @@ func LoadRiteContext(riteDir string) (*RiteContext, error) {
    - Logging when falling back to bash
 
 2. **Phase 2: Rite Migration** (Weeks 3-4)
-   - Migrate 10x-dev-pack first (canonical example)
+   - Migrate 10x-dev first (canonical example)
    - Migration script converts context-injection.sh to rite-context.yaml
    - Rites validate their context output matches
 
@@ -319,7 +319,7 @@ load_rite_context() {
 |----------|----------|---------|
 | Schema | `schemas/rite-context-schema.yaml` | Validation schema for rite context files |
 | Go Package | `ariadne/internal/rite/context.go` | Context loading and rendering |
-| Example | `rites/10x-dev-pack/rite-context.yaml` | Canonical example for other rites |
+| Example | `rites/10x-dev/rite-context.yaml` | Canonical example for other rites |
 | Migration Script | `scripts/migrate-rite-context.sh` | Converts bash to YAML |
 
 ## Related Decisions
@@ -331,7 +331,7 @@ load_rite_context() {
 ## References
 
 - Current implementation: `.claude/hooks/lib/rite-context-loader.sh`
-- Rite pack structure: `rites/10x-dev-pack/`
+- Rite pack structure: `rites/10x-dev/`
 - Orchestrator YAML: `rites/*/orchestrator.yaml` (existing YAML pattern)
 
 ## Version History

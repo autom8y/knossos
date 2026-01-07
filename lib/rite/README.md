@@ -81,7 +81,7 @@ backup_rite_resource "commands" ".claude/commands" ".rite-commands" "f"
 remove_rite_resource "commands" ".claude/commands" ".rite-commands" "f"
 
 # Detect and remove orphaned skills
-detect_resource_orphans "skills" ".claude/skills" "hygiene-pack" "d" "*/" \
+detect_resource_orphans "skills" ".claude/skills" "hygiene" "d" "*/" \
     | remove_resource_orphans "skills" ".claude/skills" "remove" "d"
 ```
 
@@ -246,7 +246,7 @@ cleanup_swap_backup
 source "$KNOSSOS_HOME/lib/rite/rite-hooks-registration.sh"
 
 # Update hook registrations for active rite
-swap_hook_registrations "hygiene-pack"
+swap_hook_registrations "hygiene"
 ```
 
 #### hooks.yaml Schema

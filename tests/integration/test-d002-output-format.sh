@@ -18,7 +18,7 @@ mkdir -p "$TEST_DIR/user-hooks/validation"
 echo "# Orchestrator" > "$TEST_DIR/.claude/agents/orchestrator.md"
 
 # Create ACTIVE_RITE
-echo "ecosystem-pack" > "$TEST_DIR/.claude/ACTIVE_RITE"
+echo "ecosystem" > "$TEST_DIR/.claude/ACTIVE_RITE"
 
 # Copy library dependencies
 cp /Users/tomtenuta/Code/roster/.claude/hooks/lib/{logging.sh,session-utils.sh,session-manager.sh} \

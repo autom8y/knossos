@@ -9,15 +9,15 @@ This Technical Design Document specifies the shared-templates skill, a multi-tea
 | Reference | Location |
 |-----------|----------|
 | Shared Team | `rites/shared/README.md` |
-| Debt Collector Agent | `rites/debt-triage-pack/agents/debt-collector.md` |
-| Risk Assessor Agent | `rites/debt-triage-pack/agents/risk-assessor.md` |
-| Sprint Planner Agent | `rites/debt-triage-pack/agents/sprint-planner.md` |
+| Debt Collector Agent | `rites/debt-triage/agents/debt-collector.md` |
+| Risk Assessor Agent | `rites/debt-triage/agents/risk-assessor.md` |
+| Sprint Planner Agent | `rites/debt-triage/agents/sprint-planner.md` |
 | Doc-Ecosystem Skill | `.claude/skills/doc-ecosystem/SKILL.md` |
 | Doc-Consolidation Templates | `rites/doc-team-pack/skills/doc-consolidation/templates/` |
 
 ### Problem Statement
 
-The debt-triage-pack agents reference templates that do not exist:
+The debt-triage agents reference templates that do not exist:
 - `debt-collector.md` references `@shared-templates#debt-ledger-template`
 - `risk-assessor.md` references `@shared-templates#risk-matrix-template`
 - `sprint-planner.md` references `@shared-templates#sprint-debt-packages-template`
@@ -337,7 +337,7 @@ sprint:
 # Optional fields
 session_id: string         # Associated session
 initiative: string         # Parent initiative
-target_team: string        # Team receiving handoff (e.g., "hygiene-pack")
+target_team: string        # Team receiving handoff (e.g., "hygiene")
 ---
 ```
 
@@ -489,7 +489,7 @@ Team-specific templates override shared templates when:
 1. Team pack includes `skills/shared-templates/templates/{template}.md`
 2. Team version syncs over shared version during `swap-rite.sh`
 
-**Example:** `rites/security-pack/skills/shared-templates/templates/risk-matrix.md` would override the shared version with security-specific additions.
+**Example:** `rites/security/skills/shared-templates/templates/risk-matrix.md` would override the shared version with security-specific additions.
 
 ---
 
@@ -529,7 +529,7 @@ Team-specific templates override shared templates when:
 |---------|--------|--------|------------|
 | DL -> RM | debt-collector | risk-assessor | All DL items scoreable |
 | RM -> SDP | risk-assessor | sprint-planner | All RM items packageable |
-| SDP -> HANDOFF | sprint-planner | hygiene-pack | HANDOFF schema valid |
+| SDP -> HANDOFF | sprint-planner | hygiene | HANDOFF schema valid |
 
 ---
 
@@ -632,9 +632,9 @@ Document validation logic for artifact verification.
 Update agent references to use new templates.
 
 **Files Modified:**
-- `rites/debt-triage-pack/agents/debt-collector.md` (verify reference works)
-- `rites/debt-triage-pack/agents/risk-assessor.md` (verify reference works)
-- `rites/debt-triage-pack/agents/sprint-planner.md` (verify reference works)
+- `rites/debt-triage/agents/debt-collector.md` (verify reference works)
+- `rites/debt-triage/agents/risk-assessor.md` (verify reference works)
+- `rites/debt-triage/agents/sprint-planner.md` (verify reference works)
 
 ---
 
@@ -692,9 +692,9 @@ Integration Engineer receives:
 |----------|---------------|--------|
 | This TDD | `/Users/tomtenuta/Code/roster/docs/design/TDD-shared-templates.md` | Created |
 | Shared Team README | `/Users/tomtenuta/Code/roster/rites/shared/README.md` | Read |
-| Debt Collector | `/Users/tomtenuta/Code/roster/rites/debt-triage-pack/agents/debt-collector.md` | Read |
-| Risk Assessor | `/Users/tomtenuta/Code/roster/rites/debt-triage-pack/agents/risk-assessor.md` | Read |
-| Sprint Planner | `/Users/tomtenuta/Code/roster/rites/debt-triage-pack/agents/sprint-planner.md` | Read |
+| Debt Collector | `/Users/tomtenuta/Code/roster/rites/debt-triage/agents/debt-collector.md` | Read |
+| Risk Assessor | `/Users/tomtenuta/Code/roster/rites/debt-triage/agents/risk-assessor.md` | Read |
+| Sprint Planner | `/Users/tomtenuta/Code/roster/rites/debt-triage/agents/sprint-planner.md` | Read |
 | Doc-Ecosystem SKILL | `/Users/tomtenuta/Code/roster/.claude/skills/doc-ecosystem/SKILL.md` | Read |
 | TDD Schema Reference | `/Users/tomtenuta/Code/roster/user-skills/documentation/doc-artifacts/schemas/tdd-schema.md` | Read |
 | Gap Analysis Schema | `/Users/tomtenuta/Code/roster/.claude/skills/doc-ecosystem/schemas/gap-analysis-schema.md` | Read |

@@ -12,7 +12,7 @@ Interactive prompts:
 ```
 Initiative: Add retry logic to API client
 Complexity? [SCRIPT/MODULE/SERVICE/PLATFORM]: SCRIPT
-Team? [current: 10x-dev-pack]: <Enter>
+Team? [current: 10x-dev]: <Enter>
 
 ✓ Session started
 ✓ Requirements Analyst creating PRD...
@@ -26,12 +26,12 @@ Review PRD and use /handoff engineer when ready to implement.
 ## Example 2: Module with Rite Switch
 
 ```bash
-/start "Multi-tenant authentication" --complexity=MODULE --rite=10x-dev-pack
+/start "Multi-tenant authentication" --complexity=MODULE --rite=10x-dev
 ```
 
 Output:
 ```
-Switching to rite: 10x-dev-pack (5 agents loaded)
+Switching to rite: 10x-dev (5 agents loaded)
 
 ✓ Session started: Multi-tenant authentication
 ✓ Complexity: MODULE

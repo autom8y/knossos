@@ -1,5 +1,5 @@
 ---
-description: Quick switch to rnd-pack (innovation lab workflow)
+description: Quick switch to rnd (innovation lab workflow)
 argument-hint: [--update] [--dry-run] [--keep-all|--remove-all|--promote-all]
 allowed-tools: Bash, Read
 model: haiku
@@ -14,9 +14,9 @@ Switch to the Innovation Lab (R&D) pack and display the rite roster. $ARGUMENTS
 
 ## Behavior
 
-1. Execute: `${KNOSSOS_HOME:-~/Code/roster}/swap-rite.sh rnd-pack $ARGUMENTS`
+1. Execute: `${KNOSSOS_HOME:-~/Code/roster}/swap-rite.sh rnd $ARGUMENTS`
 2. Display the roster output from swap-rite.sh (agents and their roles)
-3. If SESSION_CONTEXT exists, update `active_rite` to `rnd-pack`
+3. If SESSION_CONTEXT exists, update `active_rite` to `rnd`
 
 ## Flags
 

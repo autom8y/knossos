@@ -39,7 +39,7 @@ This Technical Design Document specifies the implementation of the **rite domain
 **Out of Scope**:
 - Manifest domain (separate TDD - handles manifest show/diff/validate/merge)
 - Three-way merge for manifests (manifest domain responsibility)
-- Rite pack creation/editing (forge-pack responsibility)
+- Rite pack creation/editing (forge responsibility)
 - Hook registration (sync domain responsibility)
 
 ### 1.3 Design Goals
@@ -124,7 +124,7 @@ rites/{rite-name}/
 
 ```
 .claude/
-├── ACTIVE_RITE                 # Single line: rite name (e.g., "10x-dev-pack")
+├── ACTIVE_RITE                 # Single line: rite name (e.g., "10x-dev")
 ├── ACTIVE_WORKFLOW.yaml        # Copy of rite's workflow.yaml
 ├── AGENT_MANIFEST.json         # Manifest tracking agent origins
 ├── CLAUDE.md                   # Contains satellite sections updated on switch
@@ -160,7 +160,7 @@ ari rite switch <rite-name> [--remove-all|--keep-all|--promote-all] [--dry-run]
 
 | Argument | Required | Description |
 |----------|----------|-------------|
-| `rite-name` | Yes | Target rite name (e.g., "10x-dev-pack", "rnd-pack") |
+| `rite-name` | Yes | Target rite name (e.g., "10x-dev", "rnd") |
 
 **Flags**:
 
@@ -184,8 +184,8 @@ ari rite switch <rite-name> [--remove-all|--keep-all|--promote-all] [--dry-run]
 **Output (JSON)**:
 ```json
 {
-  "rite": "10x-dev-pack",
-  "previous_rite": "rnd-pack",
+  "rite": "10x-dev",
+  "previous_rite": "rnd",
   "switched_at": "2026-01-04T18:00:00Z",
   "agents_installed": [
     "architect.md",
@@ -209,8 +209,8 @@ ari rite switch <rite-name> [--remove-all|--keep-all|--promote-all] [--dry-run]
 ```json
 {
   "dry_run": true,
-  "would_switch_to": "10x-dev-pack",
-  "current_team": "rnd-pack",
+  "would_switch_to": "10x-dev",
+  "current_team": "rnd",
   "would_install": ["architect.md", "orchestrator.md", "..."],
   "orphans_detected": ["technology-scout.md", "research-analyst.md"],
   "orphan_strategy_required": true,
@@ -237,8 +237,8 @@ ari rite switch <rite-name> [--remove-all|--keep-all|--promote-all] [--dry-run]
     "message": "Orphaned agents detected. Specify --remove-all, --keep-all, or --promote-all",
     "details": {
       "orphans": ["technology-scout.md", "research-analyst.md"],
-      "current_team": "rnd-pack",
-      "target_team": "10x-dev-pack"
+      "current_team": "rnd",
+      "target_team": "10x-dev"
     }
   }
 }
@@ -273,44 +273,44 @@ ari team list [--format=FORMAT]
 {
   "rites": [
     {
-      "name": "10x-dev-pack",
+      "name": "10x-dev",
       "description": "Full development lifecycle (PRD -> TDD -> Code -> QA)",
       "agents": ["architect", "orchestrator", "principal-engineer", "qa-adversary", "requirements-analyst"],
       "agent_count": 5,
-      "path": "/Users/tom/Code/roster/rites/10x-dev-pack",
+      "path": "/Users/tom/Code/roster/rites/10x-dev",
       "active": true
     },
     {
-      "name": "rnd-pack",
+      "name": "rnd",
       "description": "Research and exploration",
       "agents": ["technology-scout", "research-analyst"],
       "agent_count": 2,
-      "path": "/Users/tom/Code/roster/rites/rnd-pack",
+      "path": "/Users/tom/Code/roster/rites/rnd",
       "active": false
     }
   ],
   "total": 2,
-  "active_rite": "10x-dev-pack"
+  "active_rite": "10x-dev"
 }
 ```
 
 **Output (text/table)**:
 ```
 TEAM              AGENTS  DESCRIPTION                                     ACTIVE
-10x-dev-pack      5       Full development lifecycle (PRD -> TDD -> ...)  *
-rnd-pack          2       Research and exploration
-security-pack     3       Security analysis and threat modeling
-sre-pack          4       Site reliability and operations
+10x-dev      5       Full development lifecycle (PRD -> TDD -> ...)  *
+rnd          2       Research and exploration
+security     3       Security analysis and threat modeling
+sre          4       Site reliability and operations
 
 Total: 4 rites (* = active)
 ```
 
 **Output (name-only)**:
 ```
-10x-dev-pack
-rnd-pack
-security-pack
-sre-pack
+10x-dev
+rnd
+security
+sre
 ```
 
 **Exit Codes**:
@@ -345,9 +345,9 @@ ari rite status [--rite=NAME]
 **Output (JSON)**:
 ```json
 {
-  "rite": "10x-dev-pack",
+  "rite": "10x-dev",
   "is_active": true,
-  "path": "/Users/tom/Code/roster/rites/10x-dev-pack",
+  "path": "/Users/tom/Code/roster/rites/10x-dev",
   "description": "Full development lifecycle (PRD -> TDD -> Code -> QA)",
   "workflow_type": "sequential",
   "agents": [
@@ -397,8 +397,8 @@ ari rite status [--rite=NAME]
 
 **Output (text)**:
 ```
-Rite: 10x-dev-pack (ACTIVE)
-Path: /Users/tom/Code/roster/rites/10x-dev-pack
+Rite: 10x-dev (ACTIVE)
+Path: /Users/tom/Code/roster/rites/10x-dev
 Description: Full development lifecycle (PRD -> TDD -> Code -> QA)
 Workflow: sequential
 
@@ -464,7 +464,7 @@ ari rite validate [--rite=NAME] [--fix]
 **Output (JSON)**:
 ```json
 {
-  "rite": "10x-dev-pack",
+  "rite": "10x-dev",
   "valid": true,
   "checks": [
     {"check": "TEAM_EXISTS", "status": "pass", "message": "Team directory found"},
@@ -484,7 +484,7 @@ ari rite validate [--rite=NAME] [--fix]
 
 **Output (text)**:
 ```
-Validating team: 10x-dev-pack
+Validating team: 10x-dev
 
 [PASS] TEAM_EXISTS      Team directory found
 [PASS] AGENTS_DIR       agents/ directory exists
@@ -621,17 +621,17 @@ Tracks the origin and state of installed agents:
 {
   "version": "1.2",
   "generated_at": "2026-01-04T18:00:00Z",
-  "active_team": "10x-dev-pack",
+  "active_team": "10x-dev",
   "agents": {
     "architect.md": {
       "source": "team",
-      "rite": "10x-dev-pack",
+      "rite": "10x-dev",
       "checksum": "sha256:abc123...",
       "installed_at": "2026-01-04T18:00:00Z"
     },
     "orchestrator.md": {
       "source": "team",
-      "rite": "10x-dev-pack",
+      "rite": "10x-dev",
       "checksum": "sha256:def456...",
       "installed_at": "2026-01-04T18:00:00Z"
     },
@@ -650,7 +650,7 @@ Tracks the origin and state of installed agents:
 Single line file containing the rite name:
 
 ```
-10x-dev-pack
+10x-dev
 ```
 
 ### 5.3 workflow.yaml Structure
@@ -658,7 +658,7 @@ Single line file containing the rite name:
 Required fields for team discovery:
 
 ```yaml
-name: 10x-dev-pack
+name: 10x-dev
 workflow_type: sequential   # sequential | parallel | hybrid
 description: Full development lifecycle (PRD -> TDD -> Code -> QA)
 
@@ -681,7 +681,7 @@ Team switch updates these sections in CLAUDE.md:
 ```markdown
 ## Quick Start
 
-This project uses a 5-agent workflow (10x-dev-pack):
+This project uses a 5-agent workflow (10x-dev):
 
 | Agent | Role | Produces |
 | ----- | ---- | -------- |
@@ -1167,6 +1167,6 @@ Ready for Implementation when:
 | Spike | `/Users/tomtenuta/Code/roster/docs/spikes/SPIKE-ariadne-go-cli-architecture.md` | Read |
 | Session TDD | `/Users/tomtenuta/Code/roster/docs/design/TDD-ariadne-session.md` | Read |
 | swap-rite.sh | `/Users/tomtenuta/Code/roster/swap-rite.sh` | Read (partial) |
-| 10x workflow | `/Users/tomtenuta/Code/roster/rites/10x-dev-pack/workflow.yaml` | Read |
+| 10x workflow | `/Users/tomtenuta/Code/roster/rites/10x-dev/workflow.yaml` | Read |
 | Session implementation | `/Users/tomtenuta/Code/roster/ariadne/internal/cmd/session/session.go` | Read |
 | Output package | `/Users/tomtenuta/Code/roster/ariadne/internal/output/output.go` | Read |

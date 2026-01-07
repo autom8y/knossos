@@ -31,7 +31,7 @@ func TestManifestLoader_Load_Valid(t *testing.T) {
 	content := `schema_version: "1.0"
 inscription_version: "42"
 last_sync: "2026-01-06T10:30:00Z"
-active_rite: "10x-dev-pack"
+active_rite: "10x-dev"
 template_path: "knossos/templates/CLAUDE.md.tpl"
 regions:
   execution-mode:
@@ -63,8 +63,8 @@ section_order:
 		t.Errorf("Load() InscriptionVersion = %q, want '42'", manifest.InscriptionVersion)
 	}
 
-	if manifest.ActiveRite != "10x-dev-pack" {
-		t.Errorf("Load() ActiveRite = %q, want '10x-dev-pack'", manifest.ActiveRite)
+	if manifest.ActiveRite != "10x-dev" {
+		t.Errorf("Load() ActiveRite = %q, want '10x-dev'", manifest.ActiveRite)
 	}
 
 	if len(manifest.Regions) != 3 {

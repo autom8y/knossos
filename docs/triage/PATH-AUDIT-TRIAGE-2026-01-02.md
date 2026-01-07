@@ -92,8 +92,8 @@ The harness has **7 critical blocking issues** and **12 warning-level issues** s
 
 | Reference Location | Referenced Skill |
 |-------------------|------------------|
-| ecosystem-pack orchestrator.yaml | `@10x-workflow` |
-| security-pack orchestrator.yaml | `@10x-workflow` |
+| ecosystem orchestrator.yaml | `@10x-workflow` |
+| security orchestrator.yaml | `@10x-workflow` |
 
 **Evidence**:
 - Not in `.claude/skills/`
@@ -217,7 +217,7 @@ path: orchestrator-router.sh
 path: validation/orchestrator-router.sh
 ```
 
-Then regenerate settings.local.json via `swap-rite.sh ecosystem-pack`
+Then regenerate settings.local.json via `swap-rite.sh ecosystem`
 
 ### Phase 2: Resolve Duplicates (30 min)
 

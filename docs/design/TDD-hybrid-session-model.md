@@ -217,9 +217,9 @@ execution_mode() {
 | Test ID | Precondition | Expected Output |
 |---------|--------------|-----------------|
 | `mode_001` | No session file, no ACTIVE_RITE | `native` |
-| `mode_002` | Session ACTIVE, team=10x-dev-pack, pack exists | `orchestrated` |
+| `mode_002` | Session ACTIVE, team=10x-dev, pack exists | `orchestrated` |
 | `mode_003` | Session ACTIVE, team=none | `cross-cutting` |
-| `mode_004` | Session PARKED, team=10x-dev-pack | `cross-cutting` |
+| `mode_004` | Session PARKED, team=10x-dev | `cross-cutting` |
 | `mode_005` | Session ACTIVE, team=missing-pack (pack dir missing) | `cross-cutting` |
 | `mode_006` | Session ARCHIVED | `native` |
 | `mode_007` | SESSION_CONTEXT.md corrupted (parse error) | `cross-cutting` |
@@ -603,7 +603,7 @@ No session is active. Options:
 @test "mode_perf: execution_mode completes in <50ms" {
     # Setup: Create active session with team
     local session_id
-    session_id=$(fsm_create_session "Perf Test" "MODULE" "10x-dev-pack")
+    session_id=$(fsm_create_session "Perf Test" "MODULE" "10x-dev")
 
     # Measure time
     local start_ms end_ms duration_ms

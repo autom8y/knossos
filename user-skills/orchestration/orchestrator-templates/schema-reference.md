@@ -6,7 +6,7 @@
 
 **Template location**: `rites/{rite-name}/orchestrator.yaml`
 
-**Example location**: `rites/rnd-pack/orchestrator.yaml`
+**Example location**: `rites/rnd/orchestrator.yaml`
 
 ## Schema Overview
 
@@ -59,7 +59,7 @@ extension_points:        # OPTIONAL: Team customizations
 **Type**: String
 **Pattern**: `^[a-z0-9-]+$` (lowercase, numbers, hyphens only)
 **Length**: 1-64 characters
-**Example**: `rnd-pack`, `security-pack`, `my-new-team`
+**Example**: `rnd`, `security`, `my-new-team`
 
 Maps to frontmatter `name:` field. Must be "orchestrator" (this is handled automatically).
 
@@ -105,12 +105,12 @@ This appears in the agent description. Keep concise.
 
 ```yaml
 frontmatter:
-  role: "Coordinates rnd-pack phases for technology evaluation and prototyping"
+  role: "Coordinates rnd phases for technology evaluation and prototyping"
 ```
 
 Maps to generated orchestrator.md frontmatter:
 ```yaml
-role: "Coordinates rnd-pack phases for technology evaluation and prototyping"
+role: "Coordinates rnd phases for technology evaluation and prototyping"
 ```
 
 ### frontmatter.description (REQUIRED)
@@ -123,7 +123,7 @@ Explains the consultation role and triggers.
 
 ```yaml
 frontmatter:
-  description: "Coordinates rnd-pack phases for technology evaluation and prototyping. Use when: evaluating emerging technologies, building proof-of-concept, or designing long-term architecture. Triggers: evaluate, prototype, research, innovation."
+  description: "Coordinates rnd phases for technology evaluation and prototyping. Use when: evaluating emerging technologies, building proof-of-concept, or designing long-term architecture. Triggers: evaluate, prototype, research, innovation."
 ```
 
 ### routing (REQUIRED)
@@ -402,7 +402,7 @@ skills:
   - "@skill-two for purpose"
 ```
 
-**Example**: rnd-pack, security-pack, doc-rite-pack
+**Example**: rnd, security, docs
 
 ### Pattern 2: Hub Coordination
 
@@ -410,7 +410,7 @@ skills:
 
 ```yaml
 team:
-  name: ecosystem-pack
+  name: ecosystem
   domain: "Coordinates infrastructure changes across satellites"
   color: green
 
@@ -433,7 +433,7 @@ handoff_criteria:
   # ... continue for each specialist
 ```
 
-**Example**: ecosystem-pack
+**Example**: ecosystem
 
 ### Pattern 3: Domain-Specific Complexity
 
@@ -441,7 +441,7 @@ Team with custom complexity levels matching their domain.
 
 ```yaml
 team:
-  name: security-pack
+  name: security
   domain: "Security threat modeling and compliance"
   color: red
 
@@ -516,7 +516,7 @@ If you have a hand-written orchestrator.md and want to extract it to orchestrato
 
 ### Creating orchestrator.yaml from Scratch
 
-1. **Copy an example**: Use doc-rite-pack or rnd-pack as template
+1. **Copy an example**: Use docs or rnd as template
 2. **Update team metadata**: name, domain, color
 3. **Update frontmatter**: role and description for your team
 4. **Update routing**: Specialist names and conditions

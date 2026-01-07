@@ -531,7 +531,7 @@ If teams need to override patterns, extend partial schema:
 ```markdown
 ## Team Customization
 
-### ecosystem-pack Override
+### ecosystem Override
 
 [Ecosystem-pack may override Session Resolution to include...]
 ```

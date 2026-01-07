@@ -9,7 +9,7 @@ description: "Cross-rite code smell detection patterns with severity classificat
 
 ## Purpose
 
-Provides canonical smell taxonomy, detection heuristics, and severity classification for use across debt-triage-pack, hygiene-pack, and any team assessing code quality.
+Provides canonical smell taxonomy, detection heuristics, and severity classification for use across debt-triage, hygiene, and any team assessing code quality.
 
 ## Quick Reference
 
@@ -54,8 +54,8 @@ Provides canonical smell taxonomy, detection heuristics, and severity classifica
 
 ## Consumers
 
-- **code-smeller** (hygiene-pack): Produces Smell Reports
-- **debt-collector** (debt-triage-pack): Produces Debt Ledgers
+- **code-smeller** (hygiene): Produces Smell Reports
+- **debt-collector** (debt-triage): Produces Debt Ledgers
 - Any agent performing code quality assessment
 
 ## Progressive Disclosure
@@ -81,5 +81,5 @@ Provides canonical smell taxonomy, detection heuristics, and severity classifica
 
 ## Related Skills
 
-- [doc-ecosystem](../../ecosystem-pack/skills/doc-ecosystem/SKILL.md) - Smell report template
+- [doc-ecosystem](../../ecosystem/skills/doc-ecosystem/SKILL.md) - Smell report template
 - [standards](../../../.claude/skills/standards/SKILL.md) - Code conventions

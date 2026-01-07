@@ -14,7 +14,7 @@ status: "ACTIVE"
 created_at: "2026-01-04T16:04:14Z"
 initiative: "Test Initiative"
 complexity: "MODULE"
-active_rite: "10x-dev-pack"
+active_rite: "10x-dev"
 current_phase: "design"
 ---
 
@@ -45,8 +45,8 @@ current_phase: "design"
 	if ctx.Complexity != "MODULE" {
 		t.Errorf("Complexity = %q, want %q", ctx.Complexity, "MODULE")
 	}
-	if ctx.ActiveRite != "10x-dev-pack" {
-		t.Errorf("ActiveTeam = %q, want %q", ctx.ActiveRite, "10x-dev-pack")
+	if ctx.ActiveRite != "10x-dev" {
+		t.Errorf("ActiveTeam = %q, want %q", ctx.ActiveRite, "10x-dev")
 	}
 	if ctx.CurrentPhase != "design" {
 		t.Errorf("CurrentPhase = %q, want %q", ctx.CurrentPhase, "design")
@@ -186,7 +186,7 @@ func TestContext_RoundTrip(t *testing.T) {
 }
 
 func TestNewContext(t *testing.T) {
-	ctx := NewContext("Test Initiative", "MODULE", "10x-dev-pack")
+	ctx := NewContext("Test Initiative", "MODULE", "10x-dev")
 
 	// Check required fields
 	if ctx.SessionID == "" {
@@ -207,8 +207,8 @@ func TestNewContext(t *testing.T) {
 	if ctx.Complexity != "MODULE" {
 		t.Errorf("Complexity = %q, want %q", ctx.Complexity, "MODULE")
 	}
-	if ctx.ActiveRite != "10x-dev-pack" {
-		t.Errorf("ActiveTeam = %q, want %q", ctx.ActiveRite, "10x-dev-pack")
+	if ctx.ActiveRite != "10x-dev" {
+		t.Errorf("ActiveTeam = %q, want %q", ctx.ActiveRite, "10x-dev")
 	}
 	if ctx.CurrentPhase != "requirements" {
 		t.Errorf("CurrentPhase = %q, want %q", ctx.CurrentPhase, "requirements")

@@ -36,7 +36,7 @@ func TestCreateSeedMode(t *testing.T) {
 	}
 
 	// Create ACTIVE_RITE file
-	if err := os.WriteFile(filepath.Join(claudeDir, "ACTIVE_RITE"), []byte("10x-dev-pack"), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(claudeDir, "ACTIVE_RITE"), []byte("10x-dev"), 0644); err != nil {
 		t.Fatalf("Failed to write ACTIVE_RITE: %v", err)
 	}
 
@@ -138,7 +138,7 @@ func TestCreateSeedMultiple(t *testing.T) {
 	}
 
 	// Create ACTIVE_RITE file
-	if err := os.WriteFile(filepath.Join(claudeDir, "ACTIVE_RITE"), []byte("10x-dev-pack"), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(claudeDir, "ACTIVE_RITE"), []byte("10x-dev"), 0644); err != nil {
 		t.Fatalf("Failed to write ACTIVE_RITE: %v", err)
 	}
 
@@ -229,7 +229,7 @@ func TestCreateSeedCleanup(t *testing.T) {
 	}
 
 	// Create ACTIVE_RITE file
-	if err := os.WriteFile(filepath.Join(claudeDir, "ACTIVE_RITE"), []byte("10x-dev-pack"), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(claudeDir, "ACTIVE_RITE"), []byte("10x-dev"), 0644); err != nil {
 		t.Fatalf("Failed to write ACTIVE_RITE: %v", err)
 	}
 
@@ -292,7 +292,7 @@ func TestCreateSeedJSONOutput(t *testing.T) {
 	}
 
 	// Create ACTIVE_RITE file
-	if err := os.WriteFile(filepath.Join(claudeDir, "ACTIVE_RITE"), []byte("10x-dev-pack"), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(claudeDir, "ACTIVE_RITE"), []byte("10x-dev"), 0644); err != nil {
 		t.Fatalf("Failed to write ACTIVE_RITE: %v", err)
 	}
 

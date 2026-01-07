@@ -1,15 +1,15 @@
 # E2E Test: Feature Development Workflow
 
-> End-to-end test scenario for FEATURE complexity development through the 10x-dev-pack.
+> End-to-end test scenario for FEATURE complexity development through the 10x-dev.
 > Version: 1.0.0
 
 ## Overview
 
 This document defines a complete test scenario for the standard feature development workflow, validating HANDOFF artifact production at each phase transition.
 
-**Complexity Level**: FEATURE (MODULE complexity in 10x-dev-pack terms)
+**Complexity Level**: FEATURE (MODULE complexity in 10x-dev terms)
 **Workflow Path**: Requirements -> Design -> Code -> QA -> Doc (optional handoff)
-**Primary Team**: 10x-dev-pack
+**Primary Team**: 10x-dev
 **Cross-Team Handoffs**: Optional handoff to doc-team-pack for documentation
 
 ---
@@ -21,7 +21,7 @@ This document defines a complete test scenario for the standard feature developm
 Implement a user profile settings page allowing users to update their display name, email preferences, and notification settings.
 
 **Why This Scenario**: This represents a typical MODULE-complexity feature that:
-- Requires all four 10x-dev-pack phases
+- Requires all four 10x-dev phases
 - Produces artifacts at each phase transition
 - May trigger doc-team-pack handoff for user documentation
 - Has clear acceptance criteria for each phase
@@ -72,7 +72,7 @@ Users cannot modify their profile settings after initial account creation.
 ### Phase Transition
 - **From**: requirements
 - **To**: design
-- **Handoff Type**: Internal (within 10x-dev-pack)
+- **Handoff Type**: Internal (within 10x-dev)
 - **Trigger**: PRD marked complete in session context
 
 ---
@@ -134,7 +134,7 @@ ProfileSettingsPage
 ### Phase Transition
 - **From**: design
 - **To**: implementation
-- **Handoff Type**: Internal (within 10x-dev-pack)
+- **Handoff Type**: Internal (within 10x-dev)
 - **Trigger**: TDD marked complete in session context
 
 ---
@@ -179,7 +179,7 @@ ProfileSettingsPage
 ### Phase Transition
 - **From**: implementation
 - **To**: validation
-- **Handoff Type**: Internal (within 10x-dev-pack)
+- **Handoff Type**: Internal (within 10x-dev)
 - **Trigger**: Code complete, tests passing
 
 ---
@@ -250,7 +250,7 @@ If user-facing documentation is required, produce a HANDOFF artifact for doc-tea
 
 ```yaml
 ---
-source_team: 10x-dev-pack
+source_team: 10x-dev
 target_team: doc-team-pack
 handoff_type: assessment
 created: 2026-01-02
@@ -327,7 +327,7 @@ Product owner: @product-lead for content approval.
 
 1. Initialize session:
    ```
-   /start initiative="User Profile Settings" complexity=MODULE team=10x-dev-pack
+   /start initiative="User Profile Settings" complexity=MODULE team=10x-dev
    ```
 
 2. Execute Phase 1:
@@ -362,5 +362,5 @@ Future: Hook into CI to validate artifact existence and schema compliance at eac
 
 - [Cross-Team Coordination Playbook](../playbooks/cross-rite-coordination.md)
 - [Handoff Smoke Tests](handoff-smoke-tests.md)
-- [10x-dev-pack Workflow](../../rites/10x-dev-pack/workflow.md)
+- [10x-dev Workflow](../../rites/10x-dev/workflow.md)
 - [Cross-Team Handoff Schema](../../.claude/skills/shared/cross-rite-handoff/schema.md)

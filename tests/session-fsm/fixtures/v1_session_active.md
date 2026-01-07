@@ -3,7 +3,7 @@ session_id: "session-20251231-100000-fixture01"
 created_at: "2025-12-31T10:00:00Z"
 initiative: "V1 Active Session Fixture"
 complexity: "MODULE"
-active_team: "10x-dev-pack"
+active_team: "10x-dev"
 current_phase: "requirements"
 last_accessed_at: "2025-12-31T10:30:00Z"
 ---

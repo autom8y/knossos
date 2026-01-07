@@ -1,6 +1,6 @@
 # 10x-to-Security Handoff Checklist
 
-> Artifact checklist for handing off security-sensitive work to security-pack.
+> Artifact checklist for handing off security-sensitive work to security.
 
 ## When to Use
 
@@ -111,14 +111,14 @@ Expected output:
 
 ## HANDOFF Artifact Template
 
-Create `HANDOFF-10x-dev-pack-to-security-pack-YYYY-MM-DD.md`:
+Create `HANDOFF-10x-dev-to-security-YYYY-MM-DD.md`:
 
 ```yaml
 ---
-artifact_id: HANDOFF-10x-dev-pack-to-security-pack-2026-01-05
+artifact_id: HANDOFF-10x-dev-to-security-2026-01-05
 schema_version: "1.0"
-source_team: 10x-dev-pack
-target_team: security-pack
+source_team: 10x-dev
+target_team: security
 handoff_type: assessment
 priority: high
 blocking: true

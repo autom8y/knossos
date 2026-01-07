@@ -91,17 +91,17 @@ ls -d $KNOSSOS_HOME/rites/*-pack 2>/dev/null | xargs -n1 basename
 ```
 
 As of this writing, the roster contains 11 rites:
-- 10x-dev-pack (software development)
-- debt-triage-pack (technical debt)
-- doc-rite-pack (documentation)
-- ecosystem-pack (roster infrastructure)
-- forge-pack (rite creation)
-- hygiene-pack (code quality)
-- intelligence-pack (analytics/research)
-- rnd-pack (exploration/prototyping)
-- security-pack (security assessment)
-- sre-pack (operations/reliability)
-- strategy-pack (business analysis)
+- 10x-dev (software development)
+- debt-triage (technical debt)
+- docs (documentation)
+- ecosystem (roster infrastructure)
+- forge (rite creation)
+- hygiene (code quality)
+- intelligence (analytics/research)
+- rnd (exploration/prototyping)
+- security (security assessment)
+- sre (operations/reliability)
+- strategy (business analysis)
 
 **Important**: This list is informational. For current, accurate rite data, use `rite-discovery` skill or read directly from `$KNOSSOS_HOME/rites/*/orchestrator.yaml`.
 
@@ -147,7 +147,7 @@ The swap-rite.sh script returns:
 
 Output:
 ```
-[Roster] Active rite: 10x-dev-pack
+[Roster] Active rite: 10x-dev
 ```
 
 ### Example 2: List Available Rites
@@ -159,22 +159,22 @@ Output:
 Output:
 ```
 [Roster] Available rites:
-  - 10x-dev-pack
-  - debt-triage-pack
-  - doc-rite-pack
-  - hygiene-pack
+  - 10x-dev
+  - debt-triage
+  - docs
+  - hygiene
 ```
 
 ### Example 3: Switch to Doc Rite
 
 ```bash
-/rite doc-rite-pack
+/rite docs
 ```
 
 Output:
 ```
 [Roster] Backed up current agents to .claude/agents.backup/
-[Roster] Switched to doc-rite-pack (4 agents loaded)
+[Roster] Switched to docs (4 agents loaded)
 ```
 
 After switch, `.claude/agents/` contains:
@@ -186,28 +186,28 @@ After switch, `.claude/agents/` contains:
 ### Example 4: Switch During Active Session
 
 ```bash
-/rite hygiene-pack
+/rite hygiene
 ```
 
 Output:
 ```
 [Roster] Backed up current agents to .claude/agents.backup/
-[Roster] Switched to hygiene-pack (4 agents loaded)
+[Roster] Switched to hygiene (4 agents loaded)
 
 Session context updated:
-  Active rite: hygiene-pack
-  Handoff note added: "Rite switched: 10x-dev-pack → hygiene-pack (4 agents)"
+  Active rite: hygiene
+  Handoff note added: "Rite switched: 10x-dev → hygiene (4 agents)"
 ```
 
 ### Example 5: Idempotent Switch
 
 ```bash
-/rite doc-rite-pack   # Already active
+/rite docs   # Already active
 ```
 
 Output:
 ```
-[Roster] Already using doc-rite-pack (no changes needed)
+[Roster] Already using docs (no changes needed)
 ```
 
 **Idempotency**: The script automatically detects when already on the target rite and exits early. Use `--refresh` to pull latest agent definitions from roster.
@@ -232,7 +232,7 @@ Use `--refresh` when you need to pull the latest agent definitions from the rost
 /rite --refresh
 
 # Refresh specific rite
-/rite 10x-dev-pack --refresh
+/rite 10x-dev --refresh
 
 # Preview what would change before refreshing
 /rite --refresh --dry-run
@@ -241,7 +241,7 @@ Use `--refresh` when you need to pull the latest agent definitions from the rost
 ### Dry-Run Output
 
 ```
-[Roster] Dry-run: Would refresh ecosystem-pack
+[Roster] Dry-run: Would refresh ecosystem
 
 Agent changes:
   ~ orchestrator.md (modified in roster)
@@ -318,10 +318,10 @@ If file copy fails or count mismatch:
 The `/start` command supports `--rite=PACK` parameter:
 
 ```bash
-/start "Add dark mode" --rite=10x-dev-pack
+/start "Add dark mode" --rite=10x-dev
 ```
 
-This internally calls `/rite 10x-dev-pack` before creating SESSION_CONTEXT.
+This internally calls `/rite 10x-dev` before creating SESSION_CONTEXT.
 
 ### /handoff - Agent Coordination
 
@@ -329,7 +329,7 @@ When handing off between agents, if target agent not in current rite:
 
 ```
 Agent 'debt-collector' not found in current rite.
-Switch to 'debt-triage-pack' with /rite debt-triage-pack
+Switch to 'debt-triage' with /rite debt-triage
 ```
 
 ### /wrap - Session Finalization
@@ -338,7 +338,7 @@ On session wrap, current rite recorded in session summary:
 
 ```
 Session completed:
-  Rite used: hygiene-pack
+  Rite used: hygiene
   Agents invoked: code-smeller, janitor
 ```
 
@@ -350,17 +350,17 @@ Quick-switch commands are derived from rite names:
 
 | Rite | Quick Switch | Derivation |
 |------|--------------|------------|
-| 10x-dev-pack | `/10x` | First token before hyphen |
-| debt-triage-pack | `/debt` | First token before hyphen |
-| doc-rite-pack | `/docs` | First token before hyphen |
-| ecosystem-pack | `/ecosystem` | First token before hyphen |
-| forge-pack | `/forge` | First token before hyphen |
-| hygiene-pack | `/hygiene` | First token before hyphen |
-| intelligence-pack | `/intelligence` | First token before hyphen |
-| rnd-pack | `/rnd` | First token before hyphen |
-| security-pack | `/security` | First token before hyphen |
-| sre-pack | `/sre` | First token before hyphen |
-| strategy-pack | `/strategy` | First token before hyphen |
+| 10x-dev | `/10x` | First token before hyphen |
+| debt-triage | `/debt` | First token before hyphen |
+| docs | `/docs` | First token before hyphen |
+| ecosystem | `/ecosystem` | First token before hyphen |
+| forge | `/forge` | First token before hyphen |
+| hygiene | `/hygiene` | First token before hyphen |
+| intelligence | `/intelligence` | First token before hyphen |
+| rnd | `/rnd` | First token before hyphen |
+| security | `/security` | First token before hyphen |
+| sre | `/sre` | First token before hyphen |
+| strategy | `/strategy` | First token before hyphen |
 
 These commands invoke `/rite {pack-name}` internally and display rite roster after switch.
 
@@ -378,10 +378,10 @@ These commands invoke `/rite {pack-name}` internally and display rite roster aft
 
 ## Related Commands
 
-- `/10x` - Quick switch to 10x-dev-pack
-- `/docs` - Quick switch to doc-rite-pack
-- `/hygiene` - Quick switch to hygiene-pack
-- `/debt` - Quick switch to debt-triage-pack
+- `/10x` - Quick switch to 10x-dev
+- `/docs` - Quick switch to docs
+- `/hygiene` - Quick switch to hygiene
+- `/debt` - Quick switch to debt-triage
 - `/start` - Initialize session with rite selection
 
 ---

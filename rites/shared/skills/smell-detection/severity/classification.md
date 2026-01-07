@@ -185,7 +185,7 @@ def classify_severity(smell_type, context_overrides=None):
 
 ## Alignment with Risk Assessment
 
-This scoring system aligns with the risk-assessor scoring from debt-triage-pack:
+This scoring system aligns with the risk-assessor scoring from debt-triage:
 
 - **Both use multi-factor weighted scoring**
 - **Both prioritize impact over fix complexity**

@@ -57,10 +57,10 @@ report (summary)
 **From detect-changes job**:
 ```json
 {
-  "changed-yaml": ["rites/rnd-pack/orchestrator.yaml", ...],
-  "changed-md": ["rites/rnd-pack/agents/orchestrator.md", ...],
-  "yaml-teams": ["rnd-pack", "security-pack", ...],
-  "md-teams": ["rnd-pack", ...],
+  "changed-yaml": ["rites/rnd/orchestrator.yaml", ...],
+  "changed-md": ["rites/rnd/agents/orchestrator.md", ...],
+  "yaml-teams": ["rnd", "security", ...],
+  "md-teams": ["rnd", ...],
   "has-changes": "true"
 }
 ```
@@ -121,11 +121,11 @@ git config core.hooksPath .githooks
 ```
 INFO: Found 1 YAML file(s) and 0 MD file(s) to validate
 
-INFO: Validating YAML: rites/rnd-pack/orchestrator.yaml
-OK: YAML validated: rites/rnd-pack/orchestrator.yaml
-INFO: Regenerating orchestrator.md for: rnd-pack
+INFO: Validating YAML: rites/rnd/orchestrator.yaml
+OK: YAML validated: rites/rnd/orchestrator.yaml
+INFO: Regenerating orchestrator.md for: rnd
 INFO: Changes detected in regenerated orchestrator.md, staging update
-OK: Regenerated: rites/rnd-pack/agents/orchestrator.md
+OK: Regenerated: rites/rnd/agents/orchestrator.md
 
 OK: Pre-commit validation passed
 INFO: Regenerated orchestrators have been staged
@@ -152,7 +152,7 @@ Expected:
 
 Track in CI logs:
 ```bash
-time ./templates/orchestrator-generate.sh rnd-pack
+time ./templates/orchestrator-generate.sh rnd
 # real    0m0.423s
 # user    0m0.234s
 # sys     0m0.178s
@@ -260,39 +260,39 @@ pipelines:
 **Scenario 1: YAML Validation Fails**
 
 ```
-ERROR: Schema validation failed: rites/rnd-pack/orchestrator.yaml
+ERROR: Schema validation failed: rites/rnd/orchestrator.yaml
 ERROR: Missing required field in orchestrator.yaml: routing
 ```
 
 **Debug**:
-1. Check YAML syntax: `yq eval '.' rites/rnd-pack/orchestrator.yaml`
+1. Check YAML syntax: `yq eval '.' rites/rnd/orchestrator.yaml`
 2. Check required fields: `jq 'keys' schemas/orchestrator.yaml.schema.json`
 3. Compare to example: `cat schemas/orchestrator.yaml.schema.json | jq '.examples[0]'`
 
 **Scenario 2: Generation Fails**
 
 ```
-ERROR: Failed to generate orchestrator.md for: rnd-pack
+ERROR: Failed to generate orchestrator.md for: rnd
 ```
 
 **Debug**:
-1. Run generator with dry-run: `./templates/orchestrator-generate.sh rnd-pack --dry-run`
-2. Capture stderr: `./templates/orchestrator-generate.sh rnd-pack 2>&1 | tail -20`
+1. Run generator with dry-run: `./templates/orchestrator-generate.sh rnd --dry-run`
+2. Capture stderr: `./templates/orchestrator-generate.sh rnd 2>&1 | tail -20`
 3. Check template file: `wc -l templates/orchestrator-base.md.tpl`
-4. Verify workflow.yaml exists: `ls rites/rnd-pack/workflow.yaml`
+4. Verify workflow.yaml exists: `ls rites/rnd/workflow.yaml`
 
 **Scenario 3: File Mismatch**
 
 ```
-MISMATCH: rnd-pack (142 lines differ)
+MISMATCH: rnd (142 lines differ)
 Generated vs Committed differ
 ```
 
 **Debug**:
-1. Regenerate locally: `./templates/orchestrator-generate.sh rnd-pack --force`
-2. Compare: `diff rites/rnd-pack/agents/orchestrator.md /tmp/orchestrator.md`
-3. Check for whitespace: `od -c rites/rnd-pack/agents/orchestrator.md | head -20`
-4. Compare checksums: `md5sum rites/rnd-pack/agents/orchestrator.md`
+1. Regenerate locally: `./templates/orchestrator-generate.sh rnd --force`
+2. Compare: `diff rites/rnd/agents/orchestrator.md /tmp/orchestrator.md`
+3. Check for whitespace: `od -c rites/rnd/agents/orchestrator.md | head -20`
+4. Compare checksums: `md5sum rites/rnd/agents/orchestrator.md`
 
 **Resolution**: Regenerate and commit the updated file
 

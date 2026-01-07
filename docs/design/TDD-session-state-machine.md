@@ -144,7 +144,7 @@ current_phase: "design"             # Substate within ACTIVE (from workflow)
 created_at: "2025-12-31T12:00:00Z"
 initiative: "Feature X"
 complexity: "MODULE"
-active_team: "10x-dev-pack"
+active_team: "10x-dev"
 ---
 ```
 
@@ -950,7 +950,7 @@ Location: `tests/unit/session-fsm.bats`
 @test "fsm_003: Resume session changes PARKED to ACTIVE" {
     # Setup: Create parked session
     local session_id
-    session_id=$(fsm_create_session "Test" "MODULE" "10x-dev-pack")
+    session_id=$(fsm_create_session "Test" "MODULE" "10x-dev")
     fsm_transition "$session_id" "PARKED" '{"reason":"test"}'
 
     # Act: Resume
@@ -968,7 +968,7 @@ Location: `tests/unit/session-fsm.bats`
 @test "fsm_007: Any transition from ARCHIVED fails" {
     # Setup: Create and archive session
     local session_id
-    session_id=$(fsm_create_session "Test" "MODULE" "10x-dev-pack")
+    session_id=$(fsm_create_session "Test" "MODULE" "10x-dev")
     fsm_transition "$session_id" "ARCHIVED" '{}'
 
     # Act: Attempt resume
@@ -995,7 +995,7 @@ Location: `tests/integration/session-concurrency.bats`
 ```bash
 @test "int_002: Concurrent writes are serialized" {
     local session_id
-    session_id=$(fsm_create_session "Concurrent" "MODULE" "10x-dev-pack")
+    session_id=$(fsm_create_session "Concurrent" "MODULE" "10x-dev")
 
     # Start two parallel park operations
     (fsm_transition "$session_id" "PARKED" '{"reason":"writer1"}') &

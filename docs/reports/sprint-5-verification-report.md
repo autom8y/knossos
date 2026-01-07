@@ -172,7 +172,7 @@ worktree-manager.sh list  # Works without skeleton
 **Results**:
 ```bash
 ./swap-rite.sh --list
-# Output: 11 teams available (ecosystem-pack, strategy-pack, etc.)
+# Output: 11 teams available (ecosystem, strategy, etc.)
 
 ./swap-rite.sh --help
 # Shows --sync-first and --auto-sync flags for roster-sync integration

@@ -189,8 +189,8 @@ ari manifest show [--path=PATH] [--schema] [--resolved]
       "description": "Claude Code agentic workflow management"
     },
     "teams": {
-      "default": "10x-dev-pack",
-      "available": ["10x-dev-pack", "rnd-pack", "security-pack"]
+      "default": "10x-dev",
+      "available": ["10x-dev", "rnd", "security"]
     },
     "paths": {
       "sessions": ".claude/sessions",
@@ -211,8 +211,8 @@ Project: roster
 Description: Claude Code agentic workflow management
 
 Teams:
-  Default: 10x-dev-pack
-  Available: 10x-dev-pack, rnd-pack, security-pack
+  Default: 10x-dev
+  Available: 10x-dev, rnd, security
 
 Paths:
   Sessions: .claude/sessions
@@ -283,13 +283,13 @@ Paths can reference git objects:
     {
       "path": "$.teams.default",
       "type": "modified",
-      "old_value": "rnd-pack",
-      "new_value": "10x-dev-pack"
+      "old_value": "rnd",
+      "new_value": "10x-dev"
     },
     {
       "path": "$.teams.available[2]",
       "type": "added",
-      "new_value": "security-pack"
+      "new_value": "security"
     },
     {
       "path": "$.paths.hooks",
@@ -310,12 +310,12 @@ Paths can reference git objects:
 
 @@ teams @@
   "teams": {
--   "default": "rnd-pack",
-+   "default": "10x-dev-pack",
+-   "default": "rnd",
++   "default": "10x-dev",
     "available": [
-      "10x-dev-pack",
-      "rnd-pack",
-+     "security-pack"
+      "10x-dev",
+      "rnd",
++     "security"
     ]
   },
 
@@ -395,7 +395,7 @@ ari manifest validate <path> [--schema=NAME] [--strict]
   "issues": [
     {
       "path": "$.teams.default",
-      "message": "must be one of: 10x-dev-pack, rnd-pack",
+      "message": "must be one of: 10x-dev, rnd",
       "severity": "error"
     },
     {
@@ -427,7 +427,7 @@ Result: VALID (0 errors, 0 warnings)
 Validating: .claude/manifest.json
 Schema: manifest.schema.json
 
-[ERROR] $.teams.default: must be one of: 10x-dev-pack, rnd-pack
+[ERROR] $.teams.default: must be one of: 10x-dev, rnd
 [ERROR] $.version: missing required field
 [WARN]  $.experimental: additional property not in schema
 
@@ -510,8 +510,8 @@ ari manifest merge <base> <ours> <theirs> [--output=PATH] [--strategy=STRATEGY]
       "description": "Updated description"
     },
     "teams": {
-      "default": "10x-dev-pack",
-      "available": ["10x-dev-pack", "rnd-pack", "security-pack", "sre-pack"]
+      "default": "10x-dev",
+      "available": ["10x-dev", "rnd", "security", "sre"]
     }
   },
   "changes": {
@@ -532,9 +532,9 @@ ari manifest merge <base> <ours> <theirs> [--output=PATH] [--strategy=STRATEGY]
   "conflicts": [
     {
       "path": "$.teams.default",
-      "base_value": "rnd-pack",
-      "ours_value": "10x-dev-pack",
-      "theirs_value": "security-pack"
+      "base_value": "rnd",
+      "ours_value": "10x-dev",
+      "theirs_value": "security"
     }
   ],
   "merged_with_markers": "... (content with conflict markers)"
@@ -547,9 +547,9 @@ ari manifest merge <base> <ours> <theirs> [--output=PATH] [--strategy=STRATEGY]
 {
   "teams": {
     "default": <<<<<<< ours
-"10x-dev-pack"
+"10x-dev"
 =======
-"security-pack"
+"security"
 >>>>>>> theirs
   }
 }
@@ -565,7 +565,7 @@ Merging manifests...
 
 Changes:
   [OURS]   $.project.description: Updated description
-  [THEIRS] $.teams.available[3]: added 'sre-pack'
+  [THEIRS] $.teams.available[3]: added 'sre'
 
 Result: MERGED (no conflicts)
 Output: merged-manifest.json
@@ -581,9 +581,9 @@ Merging manifests...
 
 Conflicts:
   $.teams.default:
-    Base:   "rnd-pack"
-    Ours:   "10x-dev-pack"
-    Theirs: "security-pack"
+    Base:   "rnd"
+    Ours:   "10x-dev"
+    Theirs: "security"
 
 Result: CONFLICTS (1 conflict)
 Output: merged-manifest.json (contains conflict markers)
@@ -712,8 +712,8 @@ The Claude Extension Manifest (`.claude/manifest.json`):
     "repository": "https://github.com/autom8y/roster"
   },
   "teams": {
-    "default": "10x-dev-pack",
-    "available": ["10x-dev-pack", "rnd-pack", "security-pack"],
+    "default": "10x-dev",
+    "available": ["10x-dev", "rnd", "security"],
     "discovery": ["rites/", "~/.config/ariadne/rites/"]
   },
   "paths": {
@@ -739,7 +739,7 @@ Team pack manifest (`rites/*/manifest.yaml`):
 
 ```yaml
 version: "1.0"
-name: 10x-dev-pack
+name: 10x-dev
 description: Full development lifecycle (PRD -> TDD -> Code -> QA)
 
 workflow:

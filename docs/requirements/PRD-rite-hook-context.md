@@ -2,7 +2,7 @@
 
 ## Overview
 
-Enable rites to inject domain-specific context into SessionStart hooks. Currently, all rites receive the same generic session context (rite name, session ID, git status). Rites like ecosystem-pack need specialized context (CEM sync status, skeleton reference, drift detection) that is currently only available in verbose mode and generated through a hardcoded script.
+Enable rites to inject domain-specific context into SessionStart hooks. Currently, all rites receive the same generic session context (rite name, session ID, git status). Rites like ecosystem need specialized context (CEM sync status, skeleton reference, drift detection) that is currently only available in verbose mode and generated through a hardcoded script.
 
 This PRD defines a compose pattern where rites can optionally provide a context injection script that the SessionStart hook discovers and executes, allowing each rite to surface the information most relevant to their domain.
 
@@ -22,7 +22,7 @@ Rite-specific context exists but has two problems:
 
 ### Problem Statement
 
-When working with ecosystem-pack, users need to know:
+When working with ecosystem, users need to know:
 - When was the last CEM sync?
 - What skeleton commit is currently synced?
 - Are there local overrides (drift)?
@@ -35,17 +35,17 @@ This information is critical for ecosystem work but invisible in normal session 
 Gap Analysis (task-001) identified:
 - Root cause: Rite context generation only in verbose path
 - Recommended approach: Compose pattern with rite-owned scripts
-- ecosystem-pack requirements: CEM sync, skeleton ref, drift, test satellites
+- ecosystem requirements: CEM sync, skeleton ref, drift, test satellites
 
 ## User Stories
 
 ### US-1: Rite-Specific Context Visibility
 
-- **US-1.1**: As an ecosystem-pack user, I want to see CEM sync status in every session context, so that I know if I'm working with stale infrastructure definitions.
+- **US-1.1**: As an ecosystem user, I want to see CEM sync status in every session context, so that I know if I'm working with stale infrastructure definitions.
 
-- **US-1.2**: As an ecosystem-pack user, I want to see which skeleton commit is synced, so that I can trace issues to specific skeleton versions.
+- **US-1.2**: As an ecosystem user, I want to see which skeleton commit is synced, so that I can trace issues to specific skeleton versions.
 
-- **US-1.3**: As a 10x-dev-pack user, I want session context that shows my project's test coverage or build status, so that I have relevant dev context without ecosystem noise.
+- **US-1.3**: As a 10x-dev user, I want session context that shows my project's test coverage or build status, so that I have relevant dev context without ecosystem noise.
 
 ### US-2: Rite Pack Extensibility
 
@@ -105,7 +105,7 @@ Gap Analysis (task-001) identified:
 
 #### FR-4: Ecosystem-Pack Context Implementation
 
-- **FR-4.1**: Create `rites/ecosystem-pack/context-injection.sh` as prototype implementation.
+- **FR-4.1**: Create `rites/ecosystem/context-injection.sh` as prototype implementation.
 
 - **FR-4.2**: Ecosystem-pack context MUST include CEM sync status and timestamp.
 
@@ -163,7 +163,7 @@ Gap Analysis (task-001) identified:
 
 - [ ] `load_team_context()` function exists and is tested
 - [ ] Session context (condensed mode) shows Team Context section when team has script
-- [ ] ecosystem-pack displays CEM sync, skeleton ref, drift, satellites
+- [ ] ecosystem displays CEM sync, skeleton ref, drift, satellites
 - [ ] Teams without context-injection.sh see no change (graceful skip)
 - [ ] Script errors logged but don't block session start
 - [ ] Performance: rite context adds < 100ms to hook time
@@ -178,7 +178,7 @@ Gap Analysis (task-001) identified:
 | session-context.sh hook | Internal | roster | Ready |
 | hooks-init.sh library | Internal | roster | Ready |
 | config.sh (ROSTER_HOME) | Internal | roster | Ready |
-| ecosystem-pack team | Internal | roster | Ready |
+| ecosystem team | Internal | roster | Ready |
 
 ### Risks
 

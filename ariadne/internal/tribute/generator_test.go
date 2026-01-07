@@ -109,7 +109,7 @@ status: ARCHIVED
 created_at: "2026-01-06T10:00:00Z"
 initiative: events-test
 complexity: MODULE
-active_rite: 10x-dev-pack
+active_rite: 10x-dev
 current_phase: validation
 archived_at: "2026-01-06T14:00:00Z"
 ---
@@ -121,7 +121,7 @@ archived_at: "2026-01-06T14:00:00Z"
 	}
 
 	// Create events.jsonl with various events
-	eventsContent := `{"timestamp":"2026-01-06T10:00:00Z","event":"SESSION_CREATED","from":"NONE","to":"ACTIVE","metadata":{"initiative":"events-test","complexity":"MODULE","team":"10x-dev-pack"}}
+	eventsContent := `{"timestamp":"2026-01-06T10:00:00Z","event":"SESSION_CREATED","from":"NONE","to":"ACTIVE","metadata":{"initiative":"events-test","complexity":"MODULE","team":"10x-dev"}}
 {"ts":"2026-01-06T11:00:00Z","type":"artifact_created","path":"docs/requirements/PRD-test.md","artifact_type":"PRD"}
 {"ts":"2026-01-06T12:00:00Z","type":"decision","decision":"Use Go for implementation","rationale":"Type safety and performance"}
 {"ts":"2026-01-06T13:00:00Z","type":"handoff_executed","from":"architect","to":"principal-engineer","notes":"TDD approved"}
@@ -330,7 +330,7 @@ status: ARCHIVED
 created_at: "2026-01-06T10:00:00Z"
 initiative: sails-test
 complexity: MODULE
-active_rite: 10x-dev-pack
+active_rite: 10x-dev
 current_phase: validation
 archived_at: "2026-01-06T14:00:00Z"
 ---

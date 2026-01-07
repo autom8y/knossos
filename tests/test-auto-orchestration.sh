@@ -114,7 +114,7 @@ setup_test_project() {
     cp "$SCRIPT_DIR/.claude/hooks/lib/logging.sh" .claude/hooks/lib/
 
     # Setup orchestrator in active rite
-    echo "ecosystem-pack" > .claude/ACTIVE_RITE
+    echo "ecosystem" > .claude/ACTIVE_RITE
     echo "# Orchestrator" > .claude/agents/orchestrator.md
 
     # Set CLAUDE_PROJECT_DIR
@@ -183,7 +183,7 @@ test_boot_002_start_reuses_existing_session() {
 session_id: $existing_id
 initiative: Existing Initiative
 complexity: MODULE
-active_rite: ecosystem-pack
+active_rite: ecosystem
 status: ACTIVE
 created_at: 2026-01-04T00:00:00Z
 updated_at: 2026-01-04T00:00:00Z

@@ -41,7 +41,7 @@ This guide covers common operations, migration procedures, troubleshooting, and 
 
 ```bash
 # Via session-manager (recommended)
-./user-hooks/lib/session-manager.sh create "Feature: Dark Mode" "MODULE" "10x-dev-pack"
+./user-hooks/lib/session-manager.sh create "Feature: Dark Mode" "MODULE" "10x-dev"
 
 # Output:
 # {"success": true, "session_id": "session-20251231-120000-abc12345"}
@@ -339,7 +339,7 @@ grep "^[a-z_]*:" .claude/sessions/<session_id>/SESSION_CONTEXT.md
 cat >> .claude/sessions/<session_id>/SESSION_CONTEXT.md << 'EOF'
 initiative: "Unknown"
 complexity: "MODULE"
-active_team: "10x-dev-pack"
+active_team: "10x-dev"
 current_phase: "requirements"
 EOF
 

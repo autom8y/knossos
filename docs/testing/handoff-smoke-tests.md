@@ -7,7 +7,7 @@
 
 This document defines smoke tests for all valid cross-rite handoff paths in the roster ecosystem. Each test validates that a handoff can be produced, transmitted, and consumed correctly.
 
-**Teams**: 10 (10x-dev-pack, debt-triage-pack, doc-team-pack, ecosystem-pack, hygiene-pack, intelligence-pack, rnd-pack, security-pack, sre-pack, strategy-pack)
+**Teams**: 10 (10x-dev, debt-triage, doc-team-pack, ecosystem, hygiene, intelligence, rnd, security, sre, strategy)
 
 **Handoff Types**: 6 (execution, validation, assessment, implementation, strategic_input, strategic_evaluation)
 
@@ -19,29 +19,29 @@ This document defines smoke tests for all valid cross-rite handoff paths in the 
 
 | # | Source | Target | Type | Priority | Description |
 |---|--------|--------|------|----------|-------------|
-| 1 | 10x-dev-pack | security-pack | assessment | High | Threat modeling gate |
-| 2 | 10x-dev-pack | sre-pack | validation | High | Production readiness |
-| 3 | 10x-dev-pack | doc-team-pack | assessment | Medium | Documentation review |
-| 4 | debt-triage-pack | hygiene-pack | execution | High | Debt remediation |
-| 5 | strategy-pack | 10x-dev-pack | implementation | High | Strategic initiative |
-| 6 | intelligence-pack | strategy-pack | strategic_input | Medium | Research synthesis |
-| 7 | rnd-pack | strategy-pack | strategic_evaluation | Medium | Prototype evaluation |
-| 8 | rnd-pack | 10x-dev-pack | implementation | Medium | Proven prototype |
-| 9 | security-pack | 10x-dev-pack | assessment | High | Security findings |
-| 10 | sre-pack | 10x-dev-pack | validation | High | Operational findings |
-| 11 | hygiene-pack | debt-triage-pack | execution | Low | Remediation report |
-| 12 | ecosystem-pack | 10x-dev-pack | implementation | Medium | Ecosystem tooling |
+| 1 | 10x-dev | security | assessment | High | Threat modeling gate |
+| 2 | 10x-dev | sre | validation | High | Production readiness |
+| 3 | 10x-dev | doc-team-pack | assessment | Medium | Documentation review |
+| 4 | debt-triage | hygiene | execution | High | Debt remediation |
+| 5 | strategy | 10x-dev | implementation | High | Strategic initiative |
+| 6 | intelligence | strategy | strategic_input | Medium | Research synthesis |
+| 7 | rnd | strategy | strategic_evaluation | Medium | Prototype evaluation |
+| 8 | rnd | 10x-dev | implementation | Medium | Proven prototype |
+| 9 | security | 10x-dev | assessment | High | Security findings |
+| 10 | sre | 10x-dev | validation | High | Operational findings |
+| 11 | hygiene | debt-triage | execution | Low | Remediation report |
+| 12 | ecosystem | 10x-dev | implementation | Medium | Ecosystem tooling |
 
 ### Secondary Handoff Paths
 
 | # | Source | Target | Type | Priority | Description |
 |---|--------|--------|------|----------|-------------|
-| 13 | 10x-dev-pack | intelligence-pack | assessment | Low | User research request |
-| 14 | 10x-dev-pack | rnd-pack | assessment | Low | Technical spike request |
-| 15 | strategy-pack | rnd-pack | implementation | Medium | Research direction |
-| 16 | doc-team-pack | 10x-dev-pack | assessment | Low | Doc feedback |
-| 17 | sre-pack | security-pack | assessment | Medium | Security incident |
-| 18 | security-pack | sre-pack | validation | Medium | Security controls |
+| 13 | 10x-dev | intelligence | assessment | Low | User research request |
+| 14 | 10x-dev | rnd | assessment | Low | Technical spike request |
+| 15 | strategy | rnd | implementation | Medium | Research direction |
+| 16 | doc-team-pack | 10x-dev | assessment | Low | Doc feedback |
+| 17 | sre | security | assessment | Medium | Security incident |
+| 18 | security | sre | validation | Medium | Security controls |
 
 ---
 
@@ -70,15 +70,15 @@ Each smoke test validates:
 
 ## Smoke Tests: Primary Paths
 
-### ST-001: 10x-dev-pack -> security-pack (assessment)
+### ST-001: 10x-dev -> security (assessment)
 
 **Path**: Feature development requires threat modeling
 
 **Minimal HANDOFF**:
 ```yaml
 ---
-source_team: 10x-dev-pack
-target_team: security-pack
+source_team: 10x-dev
+target_team: security
 handoff_type: assessment
 created: 2026-01-02
 initiative: Smoke Test Feature
@@ -108,21 +108,21 @@ This is a schema validation test.
 - [ ] Frontmatter parses as valid YAML
 - [ ] `handoff_type: assessment` present
 - [ ] Assessment Questions present in item
-- [ ] Target team (security-pack) can consume
+- [ ] Target team (security) can consume
 
 **Expected Response Type**: Threat Model or Assessment Report
 
 ---
 
-### ST-002: 10x-dev-pack -> sre-pack (validation)
+### ST-002: 10x-dev -> sre (validation)
 
 **Path**: Feature ready for production validation
 
 **Minimal HANDOFF**:
 ```yaml
 ---
-source_team: 10x-dev-pack
-target_team: sre-pack
+source_team: 10x-dev
+target_team: sre
 handoff_type: validation
 created: 2026-01-02
 initiative: Smoke Test Feature
@@ -154,20 +154,20 @@ This is a schema validation test.
 - [ ] Frontmatter parses as valid YAML
 - [ ] `handoff_type: validation` present
 - [ ] Validation Scope present in item
-- [ ] Target team (sre-pack) can consume
+- [ ] Target team (sre) can consume
 
 **Expected Response Type**: Validation Report with approval/rejection
 
 ---
 
-### ST-003: 10x-dev-pack -> doc-team-pack (assessment)
+### ST-003: 10x-dev -> doc-team-pack (assessment)
 
 **Path**: Feature needs documentation review
 
 **Minimal HANDOFF**:
 ```yaml
 ---
-source_team: 10x-dev-pack
+source_team: 10x-dev
 target_team: doc-team-pack
 handoff_type: assessment
 created: 2026-01-02
@@ -204,15 +204,15 @@ This is a schema validation test.
 
 ---
 
-### ST-004: debt-triage-pack -> hygiene-pack (execution)
+### ST-004: debt-triage -> hygiene (execution)
 
 **Path**: Debt packages ready for remediation
 
 **Minimal HANDOFF**:
 ```yaml
 ---
-source_team: debt-triage-pack
-target_team: hygiene-pack
+source_team: debt-triage
+target_team: hygiene
 handoff_type: execution
 created: 2026-01-02
 initiative: Smoke Test Debt Sprint
@@ -232,7 +232,7 @@ Smoke test for debt execution handoff path.
 - **Priority**: Medium
 - **Summary**: Validate handoff schema for debt execution
 - **Acceptance Criteria**:
-  - Handoff can be parsed by hygiene-pack
+  - Handoff can be parsed by hygiene
   - Acceptance criteria are clear
   - Behavior preservation checkable
 
@@ -244,21 +244,21 @@ This is a schema validation test.
 - [ ] Frontmatter parses as valid YAML
 - [ ] `handoff_type: execution` present
 - [ ] Acceptance Criteria present in item
-- [ ] Target team (hygiene-pack) can consume
+- [ ] Target team (hygiene) can consume
 
 **Expected Response Type**: Execution report with completion status
 
 ---
 
-### ST-005: strategy-pack -> 10x-dev-pack (implementation)
+### ST-005: strategy -> 10x-dev (implementation)
 
 **Path**: Strategic initiative ready for build
 
 **Minimal HANDOFF**:
 ```yaml
 ---
-source_team: strategy-pack
-target_team: 10x-dev-pack
+source_team: strategy
+target_team: 10x-dev
 handoff_type: implementation
 created: 2026-01-02
 initiative: Smoke Test Initiative
@@ -290,21 +290,21 @@ This is a schema validation test.
 - [ ] Frontmatter parses as valid YAML
 - [ ] `handoff_type: implementation` present
 - [ ] Design References present in item
-- [ ] Target team (10x-dev-pack) can consume
+- [ ] Target team (10x-dev) can consume
 
 **Expected Response Type**: Implementation complete with artifacts
 
 ---
 
-### ST-006: intelligence-pack -> strategy-pack (strategic_input)
+### ST-006: intelligence -> strategy (strategic_input)
 
 **Path**: Research insights for strategic planning
 
 **Minimal HANDOFF**:
 ```yaml
 ---
-source_team: intelligence-pack
-target_team: strategy-pack
+source_team: intelligence
+target_team: strategy
 handoff_type: strategic_input
 created: 2026-01-02
 initiative: Smoke Test Research
@@ -336,21 +336,21 @@ This is a schema validation test.
 - [ ] Frontmatter parses as valid YAML
 - [ ] `handoff_type: strategic_input` present
 - [ ] Data Sources and Confidence present in item
-- [ ] Target team (strategy-pack) can consume
+- [ ] Target team (strategy) can consume
 
 **Expected Response Type**: Strategic decision or further inquiry
 
 ---
 
-### ST-007: rnd-pack -> strategy-pack (strategic_evaluation)
+### ST-007: rnd -> strategy (strategic_evaluation)
 
 **Path**: Prototype ready for viability assessment
 
 **Minimal HANDOFF**:
 ```yaml
 ---
-source_team: rnd-pack
-target_team: strategy-pack
+source_team: rnd
+target_team: strategy
 handoff_type: strategic_evaluation
 created: 2026-01-02
 initiative: Smoke Test Prototype
@@ -383,21 +383,21 @@ This is a schema validation test.
 - [ ] Frontmatter parses as valid YAML
 - [ ] `handoff_type: strategic_evaluation` present
 - [ ] Evaluation Criteria present in item
-- [ ] Target team (strategy-pack) can consume
+- [ ] Target team (strategy) can consume
 
 **Expected Response Type**: Go/No-Go decision with rationale
 
 ---
 
-### ST-008: rnd-pack -> 10x-dev-pack (implementation)
+### ST-008: rnd -> 10x-dev (implementation)
 
 **Path**: Proven prototype ready for production
 
 **Minimal HANDOFF**:
 ```yaml
 ---
-source_team: rnd-pack
-target_team: 10x-dev-pack
+source_team: rnd
+target_team: 10x-dev
 handoff_type: implementation
 created: 2026-01-02
 initiative: Smoke Test Prototype
@@ -406,7 +406,7 @@ priority: medium
 
 ## Context
 Smoke test for R&D to implementation handoff.
-Note: Typically flows through strategy-pack first.
+Note: Typically flows through strategy first.
 
 ## Source Artifacts
 - spikes/smoke-test/SPIKE-REPORT.md (hypothetical)
@@ -421,7 +421,7 @@ Note: Typically flows through strategy-pack first.
   - Spike report: spikes/smoke-test/SPIKE-REPORT.md
   - Prototype code: spikes/smoke-test/prototype/
 - **Implementation Notes**:
-  - Prototype validated by strategy-pack (hypothetical)
+  - Prototype validated by strategy (hypothetical)
 
 ## Notes for Target Team
 This is a schema validation test.
@@ -431,21 +431,21 @@ This is a schema validation test.
 - [ ] Frontmatter parses as valid YAML
 - [ ] `handoff_type: implementation` present
 - [ ] Design References present in item
-- [ ] Target team (10x-dev-pack) can consume
+- [ ] Target team (10x-dev) can consume
 
 **Expected Response Type**: Production implementation
 
 ---
 
-### ST-009: security-pack -> 10x-dev-pack (assessment)
+### ST-009: security -> 10x-dev (assessment)
 
 **Path**: Security findings returned to dev team
 
 **Minimal HANDOFF**:
 ```yaml
 ---
-source_team: security-pack
-target_team: 10x-dev-pack
+source_team: security
+target_team: 10x-dev
 handoff_type: assessment
 created: 2026-01-02
 initiative: Smoke Test Feature
@@ -477,21 +477,21 @@ Proceed with design incorporating mitigations.
 - [ ] Frontmatter parses as valid YAML
 - [ ] Response references original request
 - [ ] Verdict or outcome stated
-- [ ] Target team (10x-dev-pack) can consume
+- [ ] Target team (10x-dev) can consume
 
 **Expected Response Type**: N/A (this IS the response)
 
 ---
 
-### ST-010: sre-pack -> 10x-dev-pack (validation)
+### ST-010: sre -> 10x-dev (validation)
 
 **Path**: Operational findings returned to dev team
 
 **Minimal HANDOFF**:
 ```yaml
 ---
-source_team: sre-pack
-target_team: 10x-dev-pack
+source_team: sre
+target_team: 10x-dev
 handoff_type: validation
 created: 2026-01-02
 initiative: Smoke Test Feature
@@ -523,21 +523,21 @@ Approved for production deployment.
 - [ ] Frontmatter parses as valid YAML
 - [ ] Response references original request
 - [ ] Verdict or outcome stated
-- [ ] Target team (10x-dev-pack) can consume
+- [ ] Target team (10x-dev) can consume
 
 **Expected Response Type**: N/A (this IS the response)
 
 ---
 
-### ST-011: hygiene-pack -> debt-triage-pack (execution)
+### ST-011: hygiene -> debt-triage (execution)
 
 **Path**: Remediation report back to planning team
 
 **Minimal HANDOFF**:
 ```yaml
 ---
-source_team: hygiene-pack
-target_team: debt-triage-pack
+source_team: hygiene
+target_team: debt-triage
 handoff_type: execution
 created: 2026-01-02
 initiative: Smoke Test Debt Sprint
@@ -569,21 +569,21 @@ Sprint complete. Update debt ledger.
 - [ ] Frontmatter parses as valid YAML
 - [ ] Response references original execution request
 - [ ] Completion status stated
-- [ ] Target team (debt-triage-pack) can consume
+- [ ] Target team (debt-triage) can consume
 
 **Expected Response Type**: Debt ledger update
 
 ---
 
-### ST-012: ecosystem-pack -> 10x-dev-pack (implementation)
+### ST-012: ecosystem -> 10x-dev (implementation)
 
 **Path**: Ecosystem tooling ready for integration
 
 **Minimal HANDOFF**:
 ```yaml
 ---
-source_team: ecosystem-pack
-target_team: 10x-dev-pack
+source_team: ecosystem
+target_team: 10x-dev
 handoff_type: implementation
 created: 2026-01-02
 initiative: Smoke Test Tooling
@@ -615,7 +615,7 @@ This is a schema validation test.
 - [ ] Frontmatter parses as valid YAML
 - [ ] `handoff_type: implementation` present
 - [ ] Design References present
-- [ ] Target team (10x-dev-pack) can consume
+- [ ] Target team (10x-dev) can consume
 
 **Expected Response Type**: Integration complete
 

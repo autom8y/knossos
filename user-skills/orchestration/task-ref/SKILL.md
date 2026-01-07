@@ -318,7 +318,7 @@ See `examples/scenarios.md` for complete task lifecycle demonstrations.
 
 ## Prerequisites
 
-- 10x-dev-pack active (or team with 4 agents: Analyst, Architect, Engineer, QA)
+- 10x-dev active (or team with 4 agents: Analyst, Architect, Engineer, QA)
 - Project structure exists (for artifact storage)
 - Clear task description
 
@@ -342,7 +342,7 @@ See `examples/scenarios.md` for complete task lifecycle demonstrations.
 | Design complexity mismatch | Complexity underestimated | Architect escalates, recommends higher complexity |
 | Implementation fails tests | Code doesn't meet acceptance criteria | Engineer fixes, QA re-validates |
 | QA finds critical defects | Quality gate failure | Hand back to Engineer, fix and retest |
-| Missing team agents | Required agent not available | Switch to 10x-dev-pack with `/10x` |
+| Missing team agents | Required agent not available | Switch to 10x-dev with `/10x` |
 
 ---
 

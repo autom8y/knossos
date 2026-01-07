@@ -14,7 +14,7 @@ Swap Claude Code agent rites for different workflows.
 
 - **dev-pack**: Development workflow (Architect, Principal Engineer, QA Adversary)
 - **doc-pack**: Documentation workflow (Technical Writer, API Documenter, README Author)
-- **hygiene-pack**: Code quality workflow (Refactorer, Linter Advisor, Dependency Auditor)
+- **hygiene**: Code quality workflow (Refactorer, Linter Advisor, Dependency Auditor)
 
 ## Implementation
 

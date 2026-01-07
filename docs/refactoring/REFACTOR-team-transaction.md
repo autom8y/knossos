@@ -557,7 +557,7 @@ verify_backup_integrity() { ... }
   - All existing function calls work unchanged
 - **Verification**:
   1. Run: `./swap-rite.sh --help` (basic smoke test)
-  2. Run: `./swap-rite.sh --dry-run hygiene-pack` (full flow)
+  2. Run: `./swap-rite.sh --dry-run hygiene` (full flow)
   3. Verify: Journal created/deleted correctly
   4. Verify: Staging created/verified/cleaned correctly
 - **Commit scope**: Add source statement only
@@ -590,7 +590,7 @@ verify_backup_integrity() { ... }
 - **Invariants**: All tests pass, behavior unchanged
 - **Verification**:
   1. Run full test suite
-  2. Run: `./swap-rite.sh hygiene-pack` (full integration)
+  2. Run: `./swap-rite.sh hygiene` (full integration)
   3. Test signal handling: `Ctrl+C` during swap, verify recovery works
   4. Test recovery: `./swap-rite.sh --recover` after interrupted swap
 - **Commit scope**: Remove inline functions (~300 LOC)
@@ -797,7 +797,7 @@ Refs: REFACTOR-team-transaction.md
 After each commit:
 1. `bash -n lib/team/team-transaction.sh` - Syntax check
 2. Run unit tests for completed functions
-3. After RF-015: Full integration test with `./swap-rite.sh --dry-run hygiene-pack`
+3. After RF-015: Full integration test with `./swap-rite.sh --dry-run hygiene`
 4. After RF-016: Test signal handling and recovery
 
 ### Files to Avoid Touching
@@ -875,4 +875,4 @@ Findings deferred for future work:
 | Source file | `/Users/tomtenuta/Code/roster/swap-rite.sh` (lines 100-534, 669-785) | Analyzed |
 | Module pattern | `/Users/tomtenuta/Code/roster/lib/team/rite-resource.sh` | Read |
 | Priority 1 plan | `/Users/tomtenuta/Code/roster/docs/refactoring/REFACTOR-rite-resource.md` | Read |
-| Template | `/Users/tomtenuta/Code/roster/rites/ecosystem-pack/skills/doc-ecosystem/templates/refactoring-plan.md` | Read |
+| Template | `/Users/tomtenuta/Code/roster/rites/ecosystem/skills/doc-ecosystem/templates/refactoring-plan.md` | Read |

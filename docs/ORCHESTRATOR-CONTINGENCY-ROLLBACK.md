@@ -39,7 +39,7 @@ This document defines procedures for handling issues that arise during orchestra
 **Recovery** (< 1 hour):
 1. If schema corrupted: Revert last schema change
 2. If tool issue: Update tools on CI runner
-3. Test validation locally: `./templates/orchestrator-generate.sh rnd-pack --validate-only`
+3. Test validation locally: `./templates/orchestrator-generate.sh rnd --validate-only`
 4. Re-enable workflow
 5. Post-mortem: Document root cause and preventative measures
 
@@ -67,14 +67,14 @@ Next: [preventative measures]
 **Immediate Response** (< 5 minutes):
 1. Check generator script exists and is executable: `ls -la templates/orchestrator-generate.sh`
 2. Check template file exists: `ls -la templates/orchestrator-base.md.tpl`
-3. Try generation manually: `./templates/orchestrator-generate.sh rnd-pack --dry-run`
+3. Try generation manually: `./templates/orchestrator-generate.sh rnd --dry-run`
 4. Capture error output
 
 **Investigation**:
 1. Verify template file integrity (check git status, recent diffs)
 2. Test jq and sed commands in isolation
 3. Check file permissions: `chmod +x templates/orchestrator-*.sh`
-4. Test with simplest team first (rnd-pack is usually simplest)
+4. Test with simplest team first (rnd is usually simplest)
 
 **Recovery**:
 1. If template corrupted: `git checkout templates/orchestrator-base.md.tpl`

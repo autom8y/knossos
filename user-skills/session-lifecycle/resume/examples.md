@@ -17,7 +17,7 @@ Session Details:
 - Parked: 2025-12-24 12:30:00 (3 hours ago)
 - Park reason: Lunch break
 - Complexity: MODULE
-- Team: 10x-dev-pack
+- Team: 10x-dev
 - Current phase: design
 - Last agent: architect
 
@@ -56,24 +56,24 @@ Session Details:
 - Parked: 2025-12-23 17:00:00 (1 day ago)
 - Park reason: Waiting for design review
 - Complexity: SERVICE
-- Team: 10x-dev-pack
+- Team: 10x-dev
 - Current phase: design
 - Last agent: architect
 
 ⚠ Team Mismatch Detected
 
-Session started with: 10x-dev-pack
-Current active rite: doc-rite-pack
+Session started with: 10x-dev
+Current active rite: docs
 
 Options:
-1. Switch back to 10x-dev-pack (recommended)
-2. Continue with doc-rite-pack (may cause issues)
+1. Switch back to 10x-dev (recommended)
+2. Continue with docs (may cause issues)
 3. Cancel resume
 
 Choice [1/2/3]: 1
 
-Switching to team: 10x-dev-pack
-✓ Swapped to 10x-dev-pack (5 agents loaded)
+Switching to team: 10x-dev
+✓ Swapped to 10x-dev (5 agents loaded)
 
 Continue with architect? [Y/n]: Y
 
@@ -99,7 +99,7 @@ Session Details:
 - Parked: 2025-12-24 12:00:00 (4 hours ago)
 - Park reason: Design approved, ready for implementation
 - Complexity: MODULE
-- Team: 10x-dev-pack
+- Team: 10x-dev
 - Current phase: design
 - Last agent: architect
 

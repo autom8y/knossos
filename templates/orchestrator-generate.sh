@@ -75,7 +75,7 @@ USAGE:
   ./orchestrator-generate.sh --help
 
 ARGUMENTS:
-  <rite-name>      Generate for single rite (e.g., rnd-pack, security-pack)
+  <rite-name>      Generate for single rite (e.g., rnd, security)
   --all            Batch-generate all rites with rollback on error
 
 OPTIONS:
@@ -86,19 +86,19 @@ OPTIONS:
 
 EXAMPLES:
   # Generate single rite with validation
-  ./orchestrator-generate.sh rnd-pack
+  ./orchestrator-generate.sh rnd
 
   # Validate without generating
-  ./orchestrator-generate.sh rnd-pack --validate-only
+  ./orchestrator-generate.sh rnd --validate-only
 
   # Preview output
-  ./orchestrator-generate.sh rnd-pack --dry-run
+  ./orchestrator-generate.sh rnd --dry-run
 
   # Batch-generate all rites
   ./orchestrator-generate.sh --all
 
   # Regenerate existing rite
-  ./orchestrator-generate.sh security-pack --force
+  ./orchestrator-generate.sh security --force
 
 ENVIRONMENT:
   KNOSSOS_HOME     Root directory for roster (default: ~/Code/roster)

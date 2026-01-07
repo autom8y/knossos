@@ -184,7 +184,7 @@ status: ACTIVE
 created_at: "2026-01-05T17:00:00Z"
 initiative: "Test Initiative"
 complexity: MODULE
-active_rite: 10x-dev-pack
+active_rite: 10x-dev
 current_phase: implementation
 ---
 
@@ -243,7 +243,7 @@ status: ACTIVE
 created_at: "2026-01-05T18:00:00Z"
 initiative: "Test Initiative"
 complexity: MODULE
-active_rite: 10x-dev-pack
+active_rite: 10x-dev
 current_phase: implementation
 ---
 
@@ -684,7 +684,7 @@ status: ACTIVE
 created_at: "2026-01-05T20:00:00Z"
 initiative: "Big Initiative"
 complexity: INITIATIVE
-active_rite: 10x-dev-pack
+active_rite: 10x-dev
 current_phase: implementation
 ---
 
@@ -744,7 +744,7 @@ status: ACTIVE
 created_at: "2026-01-05T21:00:00Z"
 initiative: "Another Initiative"
 complexity: INITIATIVE
-active_rite: 10x-dev-pack
+active_rite: 10x-dev
 current_phase: implementation
 ---
 

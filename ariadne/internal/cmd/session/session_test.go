@@ -24,7 +24,7 @@ func TestCreate_BasicCreation(t *testing.T) {
 	if err := os.MkdirAll(claudeDir, 0755); err != nil {
 		t.Fatalf("Failed to create .claude dir: %v", err)
 	}
-	if err := os.WriteFile(filepath.Join(claudeDir, "ACTIVE_RITE"), []byte("10x-dev-pack"), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(claudeDir, "ACTIVE_RITE"), []byte("10x-dev"), 0644); err != nil {
 		t.Fatalf("Failed to write ACTIVE_RITE: %v", err)
 	}
 
@@ -100,8 +100,8 @@ func TestCreate_BasicCreation(t *testing.T) {
 	}
 
 	// Verify team (Team is a pointer, may be nil for cross-cutting sessions)
-	if sessCtx.Rite != nil && *sessCtx.Rite != "10x-dev-pack" {
-		t.Errorf("Team = %q, want %q", *sessCtx.Rite, "10x-dev-pack")
+	if sessCtx.Rite != nil && *sessCtx.Rite != "10x-dev" {
+		t.Errorf("Team = %q, want %q", *sessCtx.Rite, "10x-dev")
 	}
 
 	// Verify current-session file was created
@@ -125,7 +125,7 @@ func TestCreate_InvalidComplexity(t *testing.T) {
 	if err := os.MkdirAll(claudeDir, 0755); err != nil {
 		t.Fatalf("Failed to create .claude dir: %v", err)
 	}
-	if err := os.WriteFile(filepath.Join(claudeDir, "ACTIVE_RITE"), []byte("10x-dev-pack"), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(claudeDir, "ACTIVE_RITE"), []byte("10x-dev"), 0644); err != nil {
 		t.Fatalf("Failed to write ACTIVE_RITE: %v", err)
 	}
 
@@ -159,7 +159,7 @@ func TestCreate_BlocksSecondActiveSession(t *testing.T) {
 	if err := os.MkdirAll(claudeDir, 0755); err != nil {
 		t.Fatalf("Failed to create .claude dir: %v", err)
 	}
-	if err := os.WriteFile(filepath.Join(claudeDir, "ACTIVE_RITE"), []byte("10x-dev-pack"), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(claudeDir, "ACTIVE_RITE"), []byte("10x-dev"), 0644); err != nil {
 		t.Fatalf("Failed to write ACTIVE_RITE: %v", err)
 	}
 
@@ -594,7 +594,7 @@ func TestFSM_FullLifecycle(t *testing.T) {
 	if err := os.MkdirAll(claudeDir, 0755); err != nil {
 		t.Fatalf("Failed to create .claude dir: %v", err)
 	}
-	if err := os.WriteFile(filepath.Join(claudeDir, "ACTIVE_RITE"), []byte("10x-dev-pack"), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(claudeDir, "ACTIVE_RITE"), []byte("10x-dev"), 0644); err != nil {
 		t.Fatalf("Failed to write ACTIVE_RITE: %v", err)
 	}
 

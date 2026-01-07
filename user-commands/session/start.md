@@ -106,7 +106,7 @@ Output to user:
 ```
 /start "Add dark mode toggle"
 /start "Refactor auth module" --complexity=MODULE
-/start "New billing service" --complexity=SERVICE --rite=10x-dev-pack
+/start "New billing service" --complexity=SERVICE --rite=10x-dev
 ```
 
 ## Reference

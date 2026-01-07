@@ -28,28 +28,28 @@ meta_scale:
 
 team_mappings:
   # Development teams
-  10x-dev-pack:
+  10x-dev:
     SCRIPT: PATCH
     MODULE: MODULE
     SERVICE: SYSTEM
     PLATFORM: PLATFORM
 
   # Ecosystem teams
-  ecosystem-pack:
+  ecosystem:
     PATCH: PATCH
     MODULE: MODULE
     SYSTEM: SYSTEM
     MIGRATION: PLATFORM
 
   # Security teams
-  security-pack:
+  security:
     PATCH: PATCH
     MODULE: MODULE
     SERVICE: SYSTEM
     PLATFORM: PLATFORM
 
   # Research teams
-  rnd-pack:
+  rnd:
     SPIKE: PATCH
     EXPLORATION: MODULE
     PROTOTYPE: SYSTEM
@@ -63,42 +63,42 @@ team_mappings:
     DOCUMENTATION_SYSTEM: PLATFORM
 
   # Hygiene teams
-  hygiene-pack:
+  hygiene:
     LINT_FIX: PATCH
     REFACTOR: MODULE
     CLEANUP: SYSTEM
     MIGRATION: PLATFORM
 
   # Debt teams
-  debt-triage-pack:
+  debt-triage:
     QUICK_WIN: PATCH
     FOCUSED: MODULE
     STRATEGIC: SYSTEM
     ARCHITECTURAL: PLATFORM
 
   # SRE teams
-  sre-pack:
+  sre:
     INCIDENT: PATCH
     IMPROVEMENT: MODULE
     RELIABILITY: SYSTEM
     PLATFORM_SRE: PLATFORM
 
   # Intelligence teams
-  intelligence-pack:
+  intelligence:
     QUERY: PATCH
     ANALYSIS: MODULE
     RESEARCH: SYSTEM
     PLATFORM_ANALYTICS: PLATFORM
 
   # Strategy teams
-  strategy-pack:
+  strategy:
     INSIGHT: PATCH
     INITIATIVE: MODULE
     STRATEGY: SYSTEM
     VISION: PLATFORM
 
   # Forge teams
-  forge-pack:
+  forge:
     AGENT_FIX: PATCH
     AGENT: MODULE
     TEAM: SYSTEM
@@ -112,8 +112,8 @@ routing_rules:
 
   - description: "Cross-team work requires hub team notification"
     condition: "affects_multiple_teams == true"
-    action: "notify ecosystem-pack or forge-pack"
+    action: "notify ecosystem or forge"
 
-  - description: "Security-critical work requires security-pack review"
+  - description: "Security-critical work requires security review"
     condition: "security_impact == true and meta_complexity >= MODULE"
-    action: "route through security-pack after implementation"
+    action: "route through security after implementation"

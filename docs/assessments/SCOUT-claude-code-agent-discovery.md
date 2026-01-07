@@ -68,7 +68,7 @@ Claude Code discovers agents at **session startup only**, loading from both `~/.
 
 ### Filesystem State After Swap
 
-After running `swap-rite.sh 10x-dev-pack` on skeleton_claude:
+After running `swap-rite.sh 10x-dev` on skeleton_claude:
 
 ```
 .claude/agents/          # Contains exactly 5 files (CORRECT)
@@ -84,8 +84,8 @@ After running `swap-rite.sh 10x-dev-pack` on skeleton_claude:
   requirements-analyst.md
   technology-scout.md
 
-AGENT_MANIFEST.json      # Shows 5 agents, team=10x-dev-pack (CORRECT)
-ACTIVE_RITE              # Shows "10x-dev-pack" (CORRECT)
+AGENT_MANIFEST.json      # Shows 5 agents, team=10x-dev (CORRECT)
+ACTIVE_RITE              # Shows "10x-dev" (CORRECT)
 ```
 
 The filesystem is **correct**. The bug is that Claude Code's in-memory state doesn't match.
@@ -147,7 +147,7 @@ The filesystem is **correct**. The bug is that Claude Code's in-memory state doe
 
 2. **Add `--fresh` flag** for CI/scripted workflows:
    ```bash
-   swap-rite.sh 10x-dev-pack --fresh  # Clears user-level agents too
+   swap-rite.sh 10x-dev --fresh  # Clears user-level agents too
    ```
 
 3. **Improve same-name detection**:

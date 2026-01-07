@@ -44,7 +44,7 @@ status: ACTIVE
 initiative: Test Handoff Prepare
 complexity: MODULE
 created_at: ` + createdAt.Format(time.RFC3339) + `
-active_rite: 10x-dev-pack
+active_rite: 10x-dev
 current_phase: design
 ---
 
@@ -180,7 +180,7 @@ status: ACTIVE
 initiative: Test Handoff Execute
 complexity: MODULE
 created_at: ` + createdAt.Format(time.RFC3339) + `
-active_rite: 10x-dev-pack
+active_rite: 10x-dev
 current_phase: design
 ---
 
@@ -316,7 +316,7 @@ status: ACTIVE
 initiative: Test Handoff Status
 complexity: FEATURE
 created_at: ` + createdAt.Format(time.RFC3339) + `
-active_rite: 10x-dev-pack
+active_rite: 10x-dev
 current_phase: implementation
 ---
 
@@ -381,7 +381,7 @@ status: ACTIVE
 initiative: Test Handoff History
 complexity: MODULE
 created_at: ` + createdAt.Format(time.RFC3339) + `
-active_rite: 10x-dev-pack
+active_rite: 10x-dev
 current_phase: design
 ---
 
@@ -461,7 +461,7 @@ status: ACTIVE
 initiative: Test Invalid Handoff
 complexity: MODULE
 created_at: ` + createdAt.Format(time.RFC3339) + `
-active_rite: 10x-dev-pack
+active_rite: 10x-dev
 current_phase: design
 ---
 
@@ -537,7 +537,7 @@ status: ACTIVE
 initiative: Test Self Handoff
 complexity: MODULE
 created_at: ` + createdAt.Format(time.RFC3339) + `
-active_rite: 10x-dev-pack
+active_rite: 10x-dev
 current_phase: design
 ---
 
@@ -632,7 +632,7 @@ status: ACTIVE
 initiative: Test Invalid Handoff Sequence
 complexity: MODULE
 created_at: ` + createdAt.Format(time.RFC3339) + `
-active_rite: 10x-dev-pack
+active_rite: 10x-dev
 current_phase: design
 ---
 
@@ -685,8 +685,8 @@ func TestPrepare_CrossRiteValidation(t *testing.T) {
 		errorMsg   string
 	}{
 		{
-			name:       "valid agents in 10x-dev-pack",
-			activeRite: "10x-dev-pack",
+			name:       "valid agents in 10x-dev",
+			activeRite: "10x-dev",
 			fromAgent:  "architect",
 			toAgent:    "principal-engineer",
 			shouldFail: false,
@@ -845,7 +845,7 @@ status: ACTIVE
 initiative: Test Empty History
 complexity: TRIVIAL
 created_at: ` + createdAt.Format(time.RFC3339) + `
-active_rite: 10x-dev-pack
+active_rite: 10x-dev
 current_phase: requirements
 ---
 
@@ -913,7 +913,7 @@ status: ACTIVE
 initiative: Test Dry Run Validation
 complexity: MODULE
 created_at: ` + createdAt.Format(time.RFC3339) + `
-active_rite: 10x-dev-pack
+active_rite: 10x-dev
 current_phase: design
 ---
 
@@ -1001,7 +1001,7 @@ status: ACTIVE
 initiative: Test Dry Run
 complexity: MODULE
 created_at: ` + createdAt.Format(time.RFC3339) + `
-active_rite: 10x-dev-pack
+active_rite: 10x-dev
 current_phase: design
 ---
 
@@ -1129,7 +1129,7 @@ status: ACTIVE
 initiative: Test Valid Handoff
 complexity: MODULE
 created_at: ` + createdAt.Format(time.RFC3339) + `
-active_rite: 10x-dev-pack
+active_rite: 10x-dev
 current_phase: design
 ---
 
@@ -1221,7 +1221,7 @@ status: PARKED
 initiative: Test Parked Session
 complexity: MODULE
 created_at: ` + createdAt.Format(time.RFC3339) + `
-active_rite: 10x-dev-pack
+active_rite: 10x-dev
 current_phase: design
 ---
 
@@ -1314,7 +1314,7 @@ status: ACTIVE
 initiative: Test Unknown Agent
 complexity: MODULE
 created_at: ` + createdAt.Format(time.RFC3339) + `
-active_rite: 10x-dev-pack
+active_rite: 10x-dev
 current_phase: design
 ---
 
@@ -1381,7 +1381,7 @@ status: ACTIVE
 initiative: Test Artifact ID
 complexity: MODULE
 created_at: ` + createdAt.Format(time.RFC3339) + `
-active_rite: 10x-dev-pack
+active_rite: 10x-dev
 current_phase: design
 ---
 
@@ -1503,7 +1503,7 @@ status: PARKED
 initiative: Test Execute Parked
 complexity: MODULE
 created_at: ` + createdAt.Format(time.RFC3339) + `
-active_rite: 10x-dev-pack
+active_rite: 10x-dev
 current_phase: design
 ---
 
@@ -1578,7 +1578,7 @@ status: ACTIVE
 initiative: Test Execute All Agents
 complexity: MODULE
 created_at: ` + createdAt.Format(time.RFC3339) + `
-active_rite: 10x-dev-pack
+active_rite: 10x-dev
 current_phase: design
 ---
 
@@ -1667,7 +1667,7 @@ status: ACTIVE
 initiative: Test Execute Structure
 complexity: MODULE
 created_at: ` + createdAt.Format(time.RFC3339) + `
-active_rite: 10x-dev-pack
+active_rite: 10x-dev
 current_phase: design
 ---
 
@@ -1751,7 +1751,7 @@ status: ACTIVE
 initiative: Test Status With History
 complexity: MODULE
 created_at: ` + createdAt.Format(time.RFC3339) + `
-active_rite: 10x-dev-pack
+active_rite: 10x-dev
 current_phase: implementation
 ---
 
@@ -1834,7 +1834,7 @@ status: ACTIVE
 initiative: Test Phase Status
 complexity: MODULE
 created_at: ` + createdAt.Format(time.RFC3339) + `
-active_rite: 10x-dev-pack
+active_rite: 10x-dev
 current_phase: ` + tc.phase + `
 ---
 
@@ -1897,7 +1897,7 @@ status: ACTIVE
 initiative: Test History Limit
 complexity: MODULE
 created_at: ` + createdAt.Format(time.RFC3339) + `
-active_rite: 10x-dev-pack
+active_rite: 10x-dev
 current_phase: validation
 ---
 
@@ -1973,7 +1973,7 @@ status: ACTIVE
 initiative: Test Phase Transitions
 complexity: MODULE
 created_at: ` + createdAt.Format(time.RFC3339) + `
-active_rite: 10x-dev-pack
+active_rite: 10x-dev
 current_phase: implementation
 ---
 
@@ -2080,7 +2080,7 @@ status: ACTIVE
 initiative: Test Explicit Session ID
 complexity: MODULE
 created_at: ` + createdAt.Format(time.RFC3339) + `
-active_rite: 10x-dev-pack
+active_rite: 10x-dev
 current_phase: design
 ---
 
@@ -2161,7 +2161,7 @@ status: COMPLETED
 initiative: Test Execute Completed
 complexity: MODULE
 created_at: ` + createdAt.Format(time.RFC3339) + `
-active_rite: 10x-dev-pack
+active_rite: 10x-dev
 current_phase: validation
 ---
 

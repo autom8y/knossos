@@ -67,7 +67,7 @@ Shows sessions across all worktrees:
 session-20251224-143052-a1b2 | ACTIVE | feature-auth | 2025-12-24T14:30:52Z
 
 === Worktrees ===
-[wt-20251224-150000-xyz] billing-sprint (rite: 10x-dev-pack)
+[wt-20251224-150000-xyz] billing-sprint (rite: 10x-dev)
   session-20251224-150000-c3d4 | ACTIVE | billing-sprint
 ```
 
@@ -81,7 +81,7 @@ Worktree Status
 
 [WORKTREE]    wt-20251224-150000-xyz
 Name:         billing-sprint
-Rite:         10x-dev-pack
+Rite:         10x-dev
 
 Roster:       /Users/user/Code/roster
 ...
@@ -101,7 +101,7 @@ Worktree functions in `worktree-manager.sh`:
 Works identically in worktrees:
 ```bash
 cd worktrees/wt-{id}
-./swap-rite.sh 10x-dev-pack
+./swap-rite.sh 10x-dev
 ```
 
 ### ACTIVE_RITE

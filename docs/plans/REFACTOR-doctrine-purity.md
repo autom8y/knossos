@@ -345,7 +345,7 @@ grep -r "Team not found\|Team validation" ariadne/ | wc -l  # Should be 0
 
 **Invariants**:
 - `swap-rite.sh list -o json | jq '.active_rite'` returns value
-- `swap-rite.sh hygiene-pack -o json | jq '.rite'` returns value
+- `swap-rite.sh hygiene -o json | jq '.rite'` returns value
 
 **Verification**:
 ```bash
@@ -435,13 +435,13 @@ grep -r "team-switching" user-commands/ docs/ sync-user-commands.sh | wc -l  # S
 
 ---
 
-#### RF-010: Update forge-pack skill directory
+#### RF-010: Update forge skill directory
 
 **Before State** (if not already done):
-- `rites/forge-pack/skills/team-development/`
+- `rites/forge/skills/team-development/`
 
 **After State**:
-- `rites/forge-pack/skills/rite-development/`
+- `rites/forge/skills/rite-development/`
 
 **Note**: Verify current state first--may already be migrated.
 
@@ -516,7 +516,7 @@ cd ariadne && go test ./...
 ari rite list
 ari rite status
 ari rite list -o json | jq '.active_rite'
-./swap-rite.sh hygiene-pack --dry-run
+./swap-rite.sh hygiene --dry-run
 ```
 
 **Commit**: `test: validate doctrine purity refactoring [DP-P5-014]`
@@ -657,7 +657,7 @@ ari rite status -o json | jq '.rite'  # Field exists
 ### Regression Detection
 
 Key behaviors that must not change:
-1. `swap-rite.sh hygiene-pack` successfully swaps rite
+1. `swap-rite.sh hygiene` successfully swaps rite
 2. `ari rite list` shows available rites
 3. Session creation includes active rite in context
 4. Inscription sync regenerates CLAUDE.md correctly

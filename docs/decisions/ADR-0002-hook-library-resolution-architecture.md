@@ -269,10 +269,10 @@ Teams can optionally have their own `hooks/` directories (parallel to existing `
 
 ```
 rites/
-  10x-dev-pack/
+  10x-dev/
     commands/
     hooks/          # Team-specific hooks (future)
-  ecosystem-pack/
+  ecosystem/
     commands/
     hooks/          # Team-specific hooks (future)
 ```

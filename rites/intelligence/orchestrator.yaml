@@ -1,0 +1,52 @@
+# Orchestrator configuration for intelligence
+# Used by generate-orchestrator.sh to produce orchestrator.md
+
+rite:
+  name: intelligence
+  domain: product analytics
+  color: cyan
+
+frontmatter:
+  role: "Coordinates analytics and research initiatives"
+  description: |
+    Routes analytics work through instrumentation, user research, experimentation, and synthesis phases. Use when: understanding user behavior or validating product decisions requires data-driven insights. Triggers: coordinate, orchestrate, analytics workflow, user research, experimentation.
+
+routing:
+  analytics-engineer: "Tracking plan and instrumentation needed"
+  user-researcher: "Analytics complete, user research needed"
+  experimentation-lead: "Research findings available, experiment design needed"
+  insights-analyst: "Experiment results ready, insights synthesis needed"
+
+workflow_position:
+  upstream: "Product question or analytics request from leadership"
+  downstream: "Analytics reports and insights to product team"
+
+handoff_criteria:
+  instrumentation:
+    - "Tracking plan documented"
+    - "Events instrumented"
+    - "Data validation complete"
+  research:
+    - "User research findings documented"
+    - "Key insights extracted"
+    - "Recommendations provided"
+  experimentation:
+    - "Experiment designed and running"
+    - "Success metrics defined"
+    - "Sample size calculated"
+  synthesis:
+    - "Results analyzed and documented"
+    - "Conclusions supported by data"
+    - "Actionable recommendations provided"
+
+skills:
+  - "@analytics for data frameworks"
+  - "@experimentation for testing patterns"
+  - "@research for user insight extraction"
+
+antipatterns:
+  - "Insights without actionability (every insight needs a recommendation)"
+  - "Skipping sample size validation (risk of false conclusions)"
+  - "Reporting without recommendations (analysis must drive decisions)"
+
+cross_team_protocol: "Share actionable insights with strategy. Coordinate experiment designs with relevant product teams."

@@ -11,7 +11,7 @@
 
 **Recommendation: GO**
 
-All 11 rites successfully complete the swap cycle with proper agent cleanup, restart warnings, same-name detection, command sync, and skill sync. One low-severity cosmetic defect identified in forge-pack roster display.
+All 11 rites successfully complete the swap cycle with proper agent cleanup, restart warnings, same-name detection, command sync, and skill sync. One low-severity cosmetic defect identified in forge roster display.
 
 ---
 
@@ -19,17 +19,17 @@ All 11 rites successfully complete the swap cycle with proper agent cleanup, res
 
 | Team | Agents | Warning Shows | Same-Name Detection | Commands Sync | Skills Sync | Status |
 |------|--------|---------------|---------------------|---------------|-------------|--------|
-| 10x-dev-pack | 5 | PASS | PASS (requirements-analyst) | PASS (2) | PASS (13) | PASS |
-| debt-triage-pack | 4 | PASS | N/A | N/A (0) | PASS (1) | PASS |
+| 10x-dev | 5 | PASS | PASS (requirements-analyst) | PASS (2) | PASS (13) | PASS |
+| debt-triage | 4 | PASS | N/A | N/A (0) | PASS (1) | PASS |
 | doc-team-pack | 5 | PASS | N/A | PASS (1) | PASS (4) | PASS |
-| ecosystem-pack | 6 | PASS | N/A | PASS (1) | PASS (4) | PASS |
-| forge-pack | 7 | PASS | N/A | PASS (3) | N/A (0) | PASS* |
-| hygiene-pack | 5 | PASS | N/A | N/A (0) | PASS (1) | PASS |
-| intelligence-pack | 5 | PASS | N/A | N/A (0) | PASS (2) | PASS |
-| rnd-pack | 5 | PASS | PASS (technology-scout) | N/A (0) | PASS (2) | PASS |
-| security-pack | 5 | PASS | N/A | N/A (0) | PASS (2) | PASS |
-| sre-pack | 5 | PASS | N/A | N/A (0) | PASS (2) | PASS |
-| strategy-pack | 5 | PASS | N/A | N/A (0) | PASS (2) | PASS |
+| ecosystem | 6 | PASS | N/A | PASS (1) | PASS (4) | PASS |
+| forge | 7 | PASS | N/A | PASS (3) | N/A (0) | PASS* |
+| hygiene | 5 | PASS | N/A | N/A (0) | PASS (1) | PASS |
+| intelligence | 5 | PASS | N/A | N/A (0) | PASS (2) | PASS |
+| rnd | 5 | PASS | PASS (technology-scout) | N/A (0) | PASS (2) | PASS |
+| security | 5 | PASS | N/A | N/A (0) | PASS (2) | PASS |
+| sre | 5 | PASS | N/A | N/A (0) | PASS (2) | PASS |
+| strategy | 5 | PASS | N/A | N/A (0) | PASS (2) | PASS |
 
 **Legend**: N/A = Not applicable (no items to sync/detect), PASS* = Functional but cosmetic issue
 
@@ -38,20 +38,20 @@ All 11 rites successfully complete the swap cycle with proper agent cleanup, res
 ## Edge Case Test Results
 
 ### 1. Same Team Swap (Idempotency)
-**Test**: `swap-rite.sh strategy-pack` when already on strategy-pack
+**Test**: `swap-rite.sh strategy` when already on strategy
 **Expected**: No-op with helpful message
 **Result**: PASS
 ```
-[Roster] Already using strategy-pack (no changes needed)
+[Roster] Already using strategy (no changes needed)
 [Roster] Use --refresh to pull latest from roster
 ```
 
 ### 2. Rapid Succession Swaps
-**Test**: Sequential swaps 10x-dev-pack -> sre-pack -> hygiene-pack
+**Test**: Sequential swaps 10x-dev -> sre -> hygiene
 **Expected**: Clean state after each swap
 **Result**: PASS
 - All three swaps completed without error
-- Final state correctly shows hygiene-pack with 5 agents
+- Final state correctly shows hygiene with 5 agents
 - No orphan conflicts or stale state
 
 ### 3. Non-existent Team
@@ -64,7 +64,7 @@ Available teams: [lists all 11 valid teams]
 ```
 
 ### 4. Refresh Mode
-**Test**: `swap-rite.sh --refresh` and `swap-rite.sh 10x-dev-pack --refresh`
+**Test**: `swap-rite.sh --refresh` and `swap-rite.sh 10x-dev --refresh`
 **Expected**: Re-pull agents even when already on team
 **Result**: PASS
 - Both forms correctly refresh agents from roster
@@ -93,8 +93,8 @@ User-level agents detected:
 - `~/.claude/agents/technology-scout.md`
 
 Warning correctly shown for:
-- 10x-dev-pack: "Team agent 'requirements-analyst.md' shadows user-level agent"
-- rnd-pack: "Team agent 'technology-scout.md' shadows user-level agent"
+- 10x-dev: "Team agent 'requirements-analyst.md' shadows user-level agent"
+- rnd: "Team agent 'technology-scout.md' shadows user-level agent"
 
 ### Agent Cleanup
 **Requirement**: Previous team agents removed before new team installed
@@ -124,17 +124,17 @@ Warning correctly shown for:
 
 ## Defects Found
 
-### DEF-001: forge-pack Role Field Missing (Low)
+### DEF-001: forge Role Field Missing (Low)
 
 **Severity**: Low
 **Priority**: P3
 **Component**: Data (agent frontmatter), not script
 
 **Description**:
-forge-pack agents display empty Role column in roster table because agent frontmatter lacks `role:` field.
+forge agents display empty Role column in roster table because agent frontmatter lacks `role:` field.
 
 **Reproduction**:
-1. Run `swap-rite.sh forge-pack`
+1. Run `swap-rite.sh forge`
 2. Observe roster output
 
 **Actual Result**:
@@ -150,11 +150,11 @@ forge-pack agents display empty Role column in roster table because agent frontm
 ```
 
 **Root Cause**:
-`/roster/rites/forge-pack/agents/*.md` files have `description:` but no `role:` field in YAML frontmatter. The script falls back to description but multiline descriptions are not parsed correctly.
+`/roster/rites/forge/agents/*.md` files have `description:` but no `role:` field in YAML frontmatter. The script falls back to description but multiline descriptions are not parsed correctly.
 
 **Impact**: Cosmetic only - swap functionality unaffected.
 
-**Recommendation**: Add `role:` field to forge-pack agent frontmatter or enhance roster-utils.sh to better extract single-line role from multiline description.
+**Recommendation**: Add `role:` field to forge agent frontmatter or enhance roster-utils.sh to better extract single-line role from multiline description.
 
 ---
 

@@ -1,5 +1,5 @@
 ---
-description: Quick switch to intelligence-pack (product analytics workflow)
+description: Quick switch to intelligence (product analytics workflow)
 argument-hint: [--update] [--dry-run] [--keep-all|--remove-all|--promote-all]
 allowed-tools: Bash, Read
 model: haiku
@@ -14,9 +14,9 @@ Switch to the Product Intelligence Team pack and display the rite roster. $ARGUM
 
 ## Behavior
 
-1. Execute: `${KNOSSOS_HOME:-~/Code/roster}/swap-rite.sh intelligence-pack $ARGUMENTS`
+1. Execute: `${KNOSSOS_HOME:-~/Code/roster}/swap-rite.sh intelligence $ARGUMENTS`
 2. Display the roster output from swap-rite.sh (agents and their roles)
-3. If SESSION_CONTEXT exists, update `active_rite` to `intelligence-pack`
+3. If SESSION_CONTEXT exists, update `active_rite` to `intelligence`
 
 ## Flags
 

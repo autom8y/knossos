@@ -22,8 +22,8 @@ This document covers edge cases that may occur during cross-rite coordination, i
 **Example Rejection Response**:
 ```yaml
 ---
-source_team: security-pack
-target_team: 10x-dev-pack
+source_team: security
+target_team: 10x-dev
 handoff_type: assessment
 status: rejected
 created: 2026-01-02
@@ -80,12 +80,12 @@ Update PRD with security context section, resubmit HANDOFF.
 
 ### Escalation Request
 Requesting user intervention to:
-1. Confirm handoff was received by security-pack
+1. Confirm handoff was received by security
 2. Expedite response or provide ETA
 3. If team unavailable, identify alternative path
 
 ### Options
-A. Wait for security-pack response (preferred)
+A. Wait for security response (preferred)
 B. Proceed without security review (RISK: compliance gap)
 C. Engage external security consultant (COST)
 ```
@@ -134,9 +134,9 @@ C. Engage external security consultant (COST)
 
 **Example**:
 ```
-10x-dev-pack -> security-pack (threat model request)
-security-pack -> 10x-dev-pack (needs architecture details)
-10x-dev-pack waiting on security before architecture
+10x-dev -> security (threat model request)
+security -> 10x-dev (needs architecture details)
+10x-dev waiting on security before architecture
 ```
 
 **Detection**:
@@ -150,8 +150,8 @@ security-pack -> 10x-dev-pack (needs architecture details)
 ## Circular Dependency Resolution
 
 ### Deadlock Identified
-- 10x-dev-pack waiting on: HANDOFF-security-response
-- security-pack waiting on: Architecture details from 10x
+- 10x-dev waiting on: HANDOFF-security-response
+- security waiting on: Architecture details from 10x
 
 ### Breaking the Loop
 1. Identify minimum viable input for one team
@@ -159,9 +159,9 @@ security-pack -> 10x-dev-pack (needs architecture details)
 3. Iterate with additional detail
 
 ### Resolution
-10x-dev-pack produces: Preliminary architecture (enough for threat modeling)
-security-pack proceeds: Threat model with architecture assumptions
-10x-dev-pack finalizes: Architecture incorporating threat mitigations
+10x-dev produces: Preliminary architecture (enough for threat modeling)
+security proceeds: Threat model with architecture assumptions
+10x-dev finalizes: Architecture incorporating threat mitigations
 ```
 
 **Prevention**:
@@ -177,9 +177,9 @@ security-pack proceeds: Threat model with architecture assumptions
 
 **Example**:
 ```
-rnd-pack -> strategy-pack (evaluation)
-strategy-pack -> 10x-dev-pack (implementation guidance needed)
-10x-dev-pack -> rnd-pack (prototype questions)
+rnd -> strategy (evaluation)
+strategy -> 10x-dev (implementation guidance needed)
+10x-dev -> rnd (prototype questions)
 ```
 
 **Detection**:
@@ -208,9 +208,9 @@ strategy-pack -> 10x-dev-pack (implementation guidance needed)
 **Scenario**: Feature requires simultaneous work from multiple teams.
 
 **Example**: New authentication system requires:
-- security-pack: Threat model and compliance review
-- sre-pack: Infrastructure provisioning
-- 10x-dev-pack: Implementation
+- security: Threat model and compliance review
+- sre: Infrastructure provisioning
+- 10x-dev: Implementation
 
 **Coordination Pattern**:
 
@@ -218,9 +218,9 @@ strategy-pack -> 10x-dev-pack (implementation guidance needed)
 ## Parallel Coordination: Authentication System
 
 ### Teams Involved
-1. security-pack - Threat model (blocking for 10x)
-2. sre-pack - Infrastructure (parallel with 10x)
-3. 10x-dev-pack - Implementation (after security, parallel with sre)
+1. security - Threat model (blocking for 10x)
+2. sre - Infrastructure (parallel with 10x)
+3. 10x-dev - Implementation (after security, parallel with sre)
 
 ### Handoff Structure
 ```
@@ -258,7 +258,7 @@ strategy-pack -> 10x-dev-pack (implementation guidance needed)
 
 **Example**: Research to production pipeline:
 ```
-intelligence-pack -> strategy-pack -> 10x-dev-pack -> sre-pack
+intelligence -> strategy -> 10x-dev -> sre
 ```
 
 **Chain Management**:
@@ -267,16 +267,16 @@ intelligence-pack -> strategy-pack -> 10x-dev-pack -> sre-pack
 ## Sequential Chain: Customer Insights Feature
 
 ### Chain
-1. intelligence-pack: User research synthesis
+1. intelligence: User research synthesis
    Output: HANDOFF-intelligence-to-strategy (strategic_input)
 
-2. strategy-pack: Strategic evaluation and go decision
+2. strategy: Strategic evaluation and go decision
    Output: HANDOFF-strategy-to-10x (implementation)
 
-3. 10x-dev-pack: Production implementation
+3. 10x-dev: Production implementation
    Output: HANDOFF-10x-to-sre (validation)
 
-4. sre-pack: Production readiness validation
+4. sre: Production readiness validation
    Output: Deployment approval
 
 ### Chain Integrity
@@ -338,7 +338,7 @@ intelligence-pack -> strategy-pack -> 10x-dev-pack -> sre-pack
 - Duration: Started 2026-01-02 14:30 UTC
 
 ### Bypass Justification
-Normal security-pack review would take 24+ hours.
+Normal security review would take 24+ hours.
 User impact exceeds security review benefit for this fix.
 
 ### Bypass Scope
@@ -420,10 +420,10 @@ Standard workflow would complete: 2026-01-20
 ## Single-Team Override: Security Hotfix
 
 ### Normal Path
-10x-dev-pack -> security-pack (assessment) -> 10x-dev-pack
+10x-dev -> security (assessment) -> 10x-dev
 
 ### Override Request
-Security team member embedded in 10x-dev-pack session
+Security team member embedded in 10x-dev session
 Performing inline security review during implementation
 
 ### Justification

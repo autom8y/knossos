@@ -25,7 +25,7 @@ This refactoring plan addresses systematic terminology drift from Knossos doctri
 | `lib/team/` | Needs rename | Shell library (3 files, 170 team references) |
 | `user-hooks/lib/rite-context-loader.sh` | Needs rename | Hook support file |
 | `ariadne/internal/cmd/team/` | Keep for CLI | Command group (user-facing, backward compat) |
-| `rites/forge-pack/skills/team-development/` | Needs rename | Template skill |
+| `rites/forge/skills/team-development/` | Needs rename | Template skill |
 
 ### Root Causes Identified
 
@@ -280,9 +280,9 @@ lib/rite/
 
 **Goal**: Update user-facing templates and forge commands
 
-#### RF-T10-001: Update template variables in forge-pack
+#### RF-T10-001: Update template variables in forge
 
-**Directory**: `rites/forge-pack/skills/team-development/`
+**Directory**: `rites/forge/skills/team-development/`
 **Files affected**: 11+ files with `{team-name}` or `{rite_name}` variables
 
 **Changes**:
@@ -290,7 +290,7 @@ lib/rite/
 - `{rite_name}` -> `{rite_name}` where used
 - Update documentation text
 
-**Commit message**: `refactor(templates): update team variables to rite in forge-pack [RF-T10-001]`
+**Commit message**: `refactor(templates): update team variables to rite in forge [RF-T10-001]`
 
 #### RF-T11-001: Update user-commands/team-switching/ content
 
@@ -299,14 +299,14 @@ lib/rite/
 
 **Commit message**: `refactor(commands): update team-switching command descriptions [RF-T11-001]`
 
-#### RF-T12-001: Rename forge-pack skill directory
+#### RF-T12-001: Rename forge skill directory
 
-**Before**: `rites/forge-pack/skills/team-development/`
-**After**: `rites/forge-pack/skills/rite-development/`
+**Before**: `rites/forge/skills/team-development/`
+**After**: `rites/forge/skills/rite-development/`
 
 **Also rename**:
-- `rites/forge-pack/commands/new-team.md` -> `new-rite.md`
-- `rites/forge-pack/commands/validate-team.md` -> `validate-rite.md`
+- `rites/forge/commands/new-team.md` -> `new-rite.md`
+- `rites/forge/commands/validate-team.md` -> `validate-rite.md`
 
 **Commit message**: `refactor(forge): rename team-development to rite-development [RF-T12-001]`
 

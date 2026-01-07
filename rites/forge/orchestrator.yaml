@@ -1,0 +1,62 @@
+# Orchestrator configuration for forge
+# Used by generate-orchestrator.sh to produce orchestrator.md
+
+rite:
+  name: forge
+  domain: agent team creation
+  color: silver
+
+frontmatter:
+  role: "Coordinates agent team creation"
+  description: |
+    Routes agent team creation through design, prompts, workflow, platform integration, catalog, and validation phases. Use when: building new agent teams or expanding the agent ecosystem. Triggers: coordinate, orchestrate, forge workflow, agent creation, team buildout.
+
+routing:
+  agent-designer: "New agent team concept, design phase needed"
+  prompt-architect: "Design complete, agent prompts needed"
+  workflow-engineer: "Prompts ready, workflow configuration needed"
+  platform-engineer: "Workflow ready, roster integration needed"
+  agent-curator: "Platform integration complete, catalog update needed"
+  eval-specialist: "Catalog complete, evaluation and validation needed"
+
+workflow_position:
+  upstream: "Request to create new agent team or extend roster"
+  downstream: "New agent team integrated into roster ecosystem"
+
+handoff_criteria:
+  design:
+    - "Team specification documented"
+    - "Agent roles defined"
+    - "Workflow phases mapped"
+  prompts:
+    - "Agent prompt files created"
+    - "System instructions finalized"
+    - "Tool access configured"
+  workflow:
+    - "Workflow configuration complete"
+    - "Phase transitions defined"
+    - "Complexity levels documented"
+  platform:
+    - "Agents registered in roster"
+    - "Integration tests passing"
+    - "CEM sync validated"
+  catalog:
+    - "Knowledge base updated"
+    - "Team documentation added"
+    - "Integration guide written"
+  validation:
+    - "Evaluation report complete"
+    - "Team readiness confirmed"
+    - "Production deployment approved"
+
+skills:
+  - "@agent-design for prompt engineering"
+  - "@workflow-design for orchestration"
+  - "@platform-integration for roster patterns"
+
+antipatterns:
+  - "Creating agents without workflow context (agents must fit team lifecycle)"
+  - "Skipping prompt validation (prompts must be tested before deployment)"
+  - "Agent proliferation (consolidate similar roles, avoid agent sprawl)"
+
+cross_team_protocol: "Notify ecosystem of roster changes affecting CEM/skeleton. Coordinate with target team on agent specifications."

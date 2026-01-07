@@ -87,7 +87,7 @@ Before migrating a team, ensure:
    ```bash
    # Use create-new-rite-orchestrator guide
    # Or copy from example team and modify
-   cp rites/doc-rite-pack/orchestrator.yaml \
+   cp rites/docs/orchestrator.yaml \
       rites/my-team/orchestrator.yaml
 
    # Edit to match your extracted configuration
@@ -349,7 +349,7 @@ For each team migrating, use this checklist:
 
 ## Extraction Examples
 
-### Example 1: Extracting rnd-pack
+### Example 1: Extracting rnd
 
 **Original orchestrator.md has**:
 
@@ -372,7 +372,7 @@ routing:
   moonshot-architect: "Needs long-term architecture"
 ```
 
-### Example 2: Extracting security-pack
+### Example 2: Extracting security
 
 **Original has**:
 ```markdown

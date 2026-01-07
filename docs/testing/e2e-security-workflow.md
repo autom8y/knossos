@@ -7,12 +7,12 @@
 
 This document defines a complete test scenario for security-sensitive feature development, validating that threat-modeler gates trigger correctly and security assessment HANDOFFs are produced.
 
-**Complexity Level**: SYSTEM (highest complexity in 10x-dev-pack)
+**Complexity Level**: SYSTEM (highest complexity in 10x-dev)
 **Workflow Path**: Requirements -> Security Consultation -> Design -> Code -> Security Assessment -> QA
-**Primary Team**: 10x-dev-pack
+**Primary Team**: 10x-dev
 **Cross-Team Handoffs**:
-- 10x-dev-pack -> security-pack (threat modeling gate)
-- 10x-dev-pack -> security-pack (security assessment)
+- 10x-dev -> security (threat modeling gate)
+- 10x-dev -> security (security assessment)
 
 ---
 
@@ -82,7 +82,7 @@ Platform lacks payment processing capability, preventing monetization.
 
 - **From**: requirements
 - **To**: security-consultation (BLOCKING)
-- **Handoff Type**: Cross-team (10x-dev-pack -> security-pack)
+- **Handoff Type**: Cross-team (10x-dev -> security)
 - **Trigger**: PRD contains security considerations AND complexity=SYSTEM
 
 ---
@@ -98,8 +98,8 @@ Platform lacks payment processing capability, preventing monetization.
 
 ```yaml
 ---
-source_team: 10x-dev-pack
-target_team: security-pack
+source_team: 10x-dev
+target_team: security
 handoff_type: assessment
 created: 2026-01-02
 initiative: Payment Processing Integration
@@ -208,7 +208,7 @@ Design may continue with above mitigations incorporated.
 ### Phase Transition
 - **From**: security-consultation
 - **To**: design
-- **Handoff Type**: Return to 10x-dev-pack
+- **Handoff Type**: Return to 10x-dev
 - **Trigger**: Security team verdict = APPROVED
 
 ---
@@ -288,7 +288,7 @@ POST /api/v1/webhooks/stripe (Stripe signature verified)
 ### Phase Transition
 - **From**: design
 - **To**: implementation
-- **Handoff Type**: Internal (within 10x-dev-pack)
+- **Handoff Type**: Internal (within 10x-dev)
 - **Trigger**: TDD complete
 
 ---
@@ -334,7 +334,7 @@ POST /api/v1/webhooks/stripe (Stripe signature verified)
 
 - **From**: implementation
 - **To**: security-assessment (BLOCKING)
-- **Handoff Type**: Cross-team (10x-dev-pack -> security-pack)
+- **Handoff Type**: Cross-team (10x-dev -> security)
 - **Trigger**: Implementation complete for SYSTEM complexity with security considerations
 
 ---
@@ -350,8 +350,8 @@ POST /api/v1/webhooks/stripe (Stripe signature verified)
 
 ```yaml
 ---
-source_team: 10x-dev-pack
-target_team: security-pack
+source_team: 10x-dev
+target_team: security
 handoff_type: validation
 created: 2026-01-02
 initiative: Payment Processing Integration
@@ -448,7 +448,7 @@ All security controls validated. May proceed to QA phase.
 ### Phase Transition
 - **From**: security-assessment
 - **To**: validation (QA)
-- **Handoff Type**: Return to 10x-dev-pack
+- **Handoff Type**: Return to 10x-dev
 - **Trigger**: Security validation verdict = APPROVED
 
 ---
@@ -515,10 +515,10 @@ Security posture validated.
 
 ### Security Gates Verification
 - [ ] Security gate triggered after PRD (detected SYSTEM + auth/crypto/PII)
-- [ ] Blocking handoff to security-pack produced
+- [ ] Blocking handoff to security produced
 - [ ] Design waited for threat model approval
 - [ ] Security assessment gate triggered after implementation
-- [ ] Blocking handoff to security-pack produced
+- [ ] Blocking handoff to security produced
 - [ ] QA waited for security validation approval
 
 ### Handoff Artifacts
@@ -535,7 +535,7 @@ Security posture validated.
 
 1. Initialize session:
    ```
-   /start initiative="Payment Processing" complexity=SYSTEM team=10x-dev-pack
+   /start initiative="Payment Processing" complexity=SYSTEM team=10x-dev
    ```
 
 2. Execute Phase 1:
@@ -548,15 +548,15 @@ Security posture validated.
    # Session should detect security concerns and prompt for handoff
    ```
 
-4. Switch to security-pack (or await response):
+4. Switch to security (or await response):
    ```
-   /team security-pack
+   /team security
    Task(threat-modeler, "Analyze payment flow threats per HANDOFF...")
    ```
 
-5. Return to 10x-dev-pack with threat model:
+5. Return to 10x-dev with threat model:
    ```
-   /team 10x-dev-pack
+   /team 10x-dev
    Task(architect, "Design payment system incorporating threat model...")
    ```
 
@@ -575,5 +575,5 @@ Security posture validated.
 
 - [Cross-Team Coordination Playbook](../playbooks/cross-rite-coordination.md)
 - [Edge Cases: Cross-Team Workflows](../edge-cases/cross-rite-workflows.md)
-- [Security Pack Workflow](../../rites/security-pack/workflow.md)
+- [Security Pack Workflow](../../rites/security/workflow.md)
 - [Cross-Team Handoff Schema](../../.claude/skills/shared/cross-rite-handoff/schema.md)

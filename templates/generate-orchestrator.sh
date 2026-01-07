@@ -6,7 +6,7 @@
 # - Minimal error handling
 # - Hardcoded paths
 # - No input validation
-# - Single-rite focus (rnd-pack)
+# - Single-rite focus (rnd)
 
 set -e
 
@@ -14,7 +14,7 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/../lib/knossos-home.sh"
 
-RITE="${1:-rnd-pack}"
+RITE="${1:-rnd}"
 DRY_RUN="${2:-}"
 
 TEMPLATE="$KNOSSOS_HOME/templates/base-orchestrator.md"
@@ -64,7 +64,7 @@ SPECIALIST_ENUM=$(echo "$SPECIALISTS" | tr '\n' ' ' | sed 's/ *$//' | sed 's/ /"
 SPECIALIST_ENUM="\"$SPECIALIST_ENUM\""
 
 # --- Generate workflow diagram ---
-# POC: Hardcoded structure for rnd-pack linear workflow
+# POC: Hardcoded structure for rnd linear workflow
 # Production would need to parse workflow.yaml graph structure
 
 generate_workflow_diagram() {

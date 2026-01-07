@@ -36,7 +36,7 @@ The algorithm extracts four categories of signals from user queries:
 | **Trigger signals** | Direct matches to orchestrator.yaml `frontmatter.description` triggers | 0.40 | "build a feature", "security review", "explore technology" |
 | **Domain signals** | Matches to `team.domain` field | 0.25 | "documentation", "code quality", "analytics" |
 | **Problem signals** | Inferred from problem domain keywords | 0.20 | "slow API" -> sre/10x, "vulnerability" -> security |
-| **Exclusion signals** | Matches to README.md "Not for" sections | -0.50 | "one-off script" excludes 10x-dev-pack |
+| **Exclusion signals** | Matches to README.md "Not for" sections | -0.50 | "one-off script" excludes 10x-dev |
 
 ### Extraction Pipeline
 
@@ -76,7 +76,7 @@ extracted_signals: SignalSet
 Parse orchestrator.yaml `frontmatter.description` for trigger phrases:
 
 ```yaml
-# Example from 10x-dev-pack/orchestrator.yaml
+# Example from 10x-dev/orchestrator.yaml
 frontmatter:
   description: |
     Routes development work through requirements, design, implementation, and validation phases.
@@ -96,7 +96,7 @@ Direct match against `team.domain` field:
 ```yaml
 # Each team has a domain
 team:
-  name: security-pack
+  name: security
   domain: security assessment
 ```
 
@@ -111,25 +111,25 @@ Map common problem patterns to team domains:
 
 | Problem Pattern | Primary Team | Secondary Team |
 |-----------------|--------------|----------------|
-| `slow`, `performance`, `latency` | sre-pack | 10x-dev-pack |
-| `bug`, `error`, `broken`, `fix` | 10x-dev-pack | - |
-| `vulnerability`, `CVE`, `auth`, `crypto` | security-pack | - |
+| `slow`, `performance`, `latency` | sre | 10x-dev |
+| `bug`, `error`, `broken`, `fix` | 10x-dev | - |
+| `vulnerability`, `CVE`, `auth`, `crypto` | security | - |
 | `documentation`, `docs`, `readme` | doc-team-pack | - |
-| `refactor`, `cleanup`, `smells` | hygiene-pack | - |
-| `debt`, `legacy`, `cruft` | debt-triage-pack | hygiene-pack |
-| `analytics`, `metrics`, `tracking` | intelligence-pack | - |
-| `research`, `explore`, `prototype` | rnd-pack | - |
-| `market`, `strategy`, `business` | strategy-pack | - |
-| `reliability`, `incident`, `SLO` | sre-pack | - |
-| `sync`, `satellite`, `CEM`, `roster` | ecosystem-pack | - |
-| `agent`, `team creation`, `forge` | forge-pack | - |
+| `refactor`, `cleanup`, `smells` | hygiene | - |
+| `debt`, `legacy`, `cruft` | debt-triage | hygiene |
+| `analytics`, `metrics`, `tracking` | intelligence | - |
+| `research`, `explore`, `prototype` | rnd | - |
+| `market`, `strategy`, `business` | strategy | - |
+| `reliability`, `incident`, `SLO` | sre | - |
+| `sync`, `satellite`, `CEM`, `roster` | ecosystem | - |
+| `agent`, `team creation`, `forge` | forge | - |
 
 #### Exclusion Signal Extraction
 
 Parse README.md "Not for" sections:
 
 ```markdown
-# From 10x-dev-pack/README.md
+# From 10x-dev/README.md
 **Not for**: Documentation work, infrastructure automation, one-off scripts without testing requirements
 ```
 
@@ -148,7 +148,7 @@ The capability index is the normalized representation of all team capabilities, 
 
 ```yaml
 capability_index:
-  10x-dev-pack:
+  10x-dev:
     display_name: "10x Dev Pack"
     domain: "software development"
     command: "/10x"
@@ -179,9 +179,9 @@ capability_index:
       - "qa-adversary"
     related_teams:
       - "doc-team-pack"
-      - "rnd-pack"
+      - "rnd"
 
-  ecosystem-pack:
+  ecosystem:
     display_name: "Ecosystem Pack"
     domain: "ecosystem infrastructure"
     command: "/ecosystem"
@@ -211,7 +211,7 @@ capability_index:
       - "documentation-engineer"
       - "compatibility-tester"
     related_teams:
-      - "hygiene-pack"
+      - "hygiene"
 
   # ... additional teams follow same structure
 ```
@@ -821,7 +821,7 @@ function build_rationale(signals, team, score):
 
 **Scenario**: Two or more teams have identical scores.
 
-**Example**: `/consult "improve system"` might match sre-pack, hygiene-pack, and 10x-dev-pack equally.
+**Example**: `/consult "improve system"` might match sre, hygiene, and 10x-dev equally.
 
 **Handling**:
 - Break ties using secondary criteria in order:
@@ -837,7 +837,7 @@ function build_rationale(signals, team, score):
 
 **Example**: `/consult "write documentation for my one-off script"`
 - "write documentation" -> triggers doc-team-pack
-- "one-off script" -> excluded by 10x-dev-pack
+- "one-off script" -> excluded by 10x-dev
 
 **Handling**:
 - Exclusion penalty is applied AFTER base score calculation
@@ -871,8 +871,8 @@ function build_rationale(signals, team, score):
 - Present as workflow recommendation:
   ```
   This goal spans multiple teams:
-  1. 10x-dev-pack (build feature) -> then handoff to
-  2. security-pack (security review) -> then handoff to
+  1. 10x-dev (build feature) -> then handoff to
+  2. security (security review) -> then handoff to
   3. doc-team-pack (documentation)
 
   Recommended workflow: /sprint with phased handoffs
@@ -882,12 +882,12 @@ function build_rationale(signals, team, score):
 
 **Scenario**: Session context strongly suggests a team different from query match.
 
-**Example**: Active session is `ecosystem-pack` but query is `/consult "write some tests"`
+**Example**: Active session is `ecosystem` but query is `/consult "write some tests"`
 
 **Handling**:
 - Session context provides bonus, not override
 - If query strongly matches different team, recommend it
-- Include note: "Note: You're currently in ecosystem-pack session. This recommendation would change your active rite."
+- Include note: "Note: You're currently in ecosystem session. This recommendation would change your active rite."
 
 ---
 
@@ -949,7 +949,7 @@ Learn from user team selections:
 
 Persist intent patterns across sessions:
 - Build user-specific intent profiles
-- "You usually use 10x-dev-pack for 'feature' queries"
+- "You usually use 10x-dev for 'feature' queries"
 - Opt-in personalization with privacy controls
 
 ---
@@ -986,16 +986,16 @@ If issues discovered:
 
 | Test Case | Input | Expected Outcome |
 |-----------|-------|------------------|
-| High confidence single match | `/consult "build a new feature"` | 10x-dev-pack with confidence >= 0.80 |
-| High confidence security | `/consult "security review for auth"` | security-pack with confidence >= 0.80 |
+| High confidence single match | `/consult "build a new feature"` | 10x-dev with confidence >= 0.80 |
+| High confidence security | `/consult "security review for auth"` | security with confidence >= 0.80 |
 | Medium confidence ambiguous | `/consult "improve the system"` | 2-3 teams with scores 0.50-0.79 |
 | Low confidence vague | `/consult "help"` | Clarification questions returned |
-| Exclusion penalty applied | `/consult "one-off script"` | 10x-dev-pack demoted, hygiene-pack or rnd-pack up |
+| Exclusion penalty applied | `/consult "one-off script"` | 10x-dev demoted, hygiene or rnd up |
 | Multi-team detection | `/consult "feature with docs and security"` | Sprint workflow recommended |
 | Empty query | `/consult ""` | General help displayed |
 | Domain exact match | `/consult "documentation"` | doc-team-pack highest |
-| Problem pattern match | `/consult "API is slow"` | sre-pack primary, 10x secondary |
-| Session context bonus | Query in ecosystem-pack session | ecosystem-pack gets recency bonus |
+| Problem pattern match | `/consult "API is slow"` | sre primary, 10x secondary |
+| Session context bonus | Query in ecosystem session | ecosystem gets recency bonus |
 | New team discovery | Add new `test-pack` team | Appears in recommendations |
 
 ### Satellite Diversity Coverage
@@ -1033,17 +1033,17 @@ Current teams and their key characteristics (as of 2026-01-04):
 
 | Team | Domain | Key Triggers | Exclusions |
 |------|--------|--------------|------------|
-| 10x-dev-pack | software development | build feature, PRD, TDD, implementation | documentation, infrastructure, one-off scripts |
-| debt-triage-pack | technical debt management | debt, legacy, sprint planning | implementation |
+| 10x-dev | software development | build feature, PRD, TDD, implementation | documentation, infrastructure, one-off scripts |
+| debt-triage | technical debt management | debt, legacy, sprint planning | implementation |
 | doc-team-pack | documentation lifecycle | docs, writing, readme | code review, performance |
-| ecosystem-pack | ecosystem infrastructure | CEM, roster, sync, satellite | application code, team workflows |
-| forge-pack | agent team creation | new team, agent, forge | production features |
-| hygiene-pack | code quality | refactor, cleanup, smells | new features |
-| intelligence-pack | product analytics | analytics, metrics, A/B test | strategy, market research |
-| rnd-pack | technology exploration | research, prototype, explore | production code |
-| security-pack | security assessment | security, vulnerability, compliance | general code review |
-| sre-pack | site reliability engineering | reliability, incident, SLO | feature development |
-| strategy-pack | business strategy | market, strategy, business | tactical, engineering |
+| ecosystem | ecosystem infrastructure | CEM, roster, sync, satellite | application code, team workflows |
+| forge | agent team creation | new team, agent, forge | production features |
+| hygiene | code quality | refactor, cleanup, smells | new features |
+| intelligence | product analytics | analytics, metrics, A/B test | strategy, market research |
+| rnd | technology exploration | research, prototype, explore | production code |
+| security | security assessment | security, vulnerability, compliance | general code review |
+| sre | site reliability engineering | reliability, incident, SLO | feature development |
+| strategy | business strategy | market, strategy, business | tactical, engineering |
 
 ---
 

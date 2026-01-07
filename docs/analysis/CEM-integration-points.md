@@ -16,7 +16,7 @@ CEM is invoked from roster in **3 primary integration points**:
 3. **/cem-debug command** - Diagnostic command for ecosystem troubleshooting
 
 Additionally, CEM concepts are referenced in:
-- **ecosystem-pack context injection** - CEM sync status detection
+- **ecosystem context injection** - CEM sync status detection
 - **ecosystem-ref skill** - Documentation of CEM patterns
 - **swap-rite.sh** - References skeleton baseline (indirect)
 
@@ -188,7 +188,7 @@ fi
 
 ### 3. /cem-debug Command (Diagnostic)
 
-**Location**: `/Users/tomtenuta/Code/roster/rites/ecosystem-pack/commands/cem-debug.md`
+**Location**: `/Users/tomtenuta/Code/roster/rites/ecosystem/commands/cem-debug.md`
 
 | Attribute | Value |
 |-----------|-------|
@@ -226,7 +226,7 @@ Gap Analysis document at: `docs/ecosystem/GAP-{issue-slug}.md`
 - Cons: Need to build diagnostic infrastructure
 
 **Option B**: Keep as Ecosystem-Pack Tool
-- Command stays in ecosystem-pack
+- Command stays in ecosystem
 - Update references from CEM to roster internals
 - Pros: Minimal change, still useful
 - Cons: References may become stale
@@ -237,9 +237,9 @@ Gap Analysis document at: `docs/ecosystem/GAP-{issue-slug}.md`
 
 ## Indirect CEM References
 
-### 4. ecosystem-pack/context-injection.sh
+### 4. ecosystem/context-injection.sh
 
-**Location**: `/Users/tomtenuta/Code/roster/rites/ecosystem-pack/context-injection.sh`
+**Location**: `/Users/tomtenuta/Code/roster/rites/ecosystem/context-injection.sh`
 
 | Attribute | Value |
 |-----------|-------|
@@ -276,7 +276,7 @@ fi
 
 ### 5. ecosystem-ref Skill
 
-**Location**: `/Users/tomtenuta/Code/roster/rites/ecosystem-pack/skills/ecosystem-ref/SKILL.md`
+**Location**: `/Users/tomtenuta/Code/roster/rites/ecosystem/skills/ecosystem-ref/SKILL.md`
 
 | Attribute | Value |
 |-----------|-------|
@@ -427,9 +427,9 @@ The skeleton CEM script sources these library modules:
 |----------|---------------|----------|
 | worktree-manager.sh | `/Users/tomtenuta/Code/roster/user-hooks/lib/worktree-manager.sh` | Lines 225-251 read |
 | /sync command | `/Users/tomtenuta/Code/roster/user-commands/cem/sync.md` | Full file read |
-| /cem-debug command | `/Users/tomtenuta/Code/roster/rites/ecosystem-pack/commands/cem-debug.md` | Full file read |
-| context-injection.sh | `/Users/tomtenuta/Code/roster/rites/ecosystem-pack/context-injection.sh` | Full file read |
-| ecosystem-ref skill | `/Users/tomtenuta/Code/roster/rites/ecosystem-pack/skills/ecosystem-ref/SKILL.md` | Full file read |
+| /cem-debug command | `/Users/tomtenuta/Code/roster/rites/ecosystem/commands/cem-debug.md` | Full file read |
+| context-injection.sh | `/Users/tomtenuta/Code/roster/rites/ecosystem/context-injection.sh` | Full file read |
+| ecosystem-ref skill | `/Users/tomtenuta/Code/roster/rites/ecosystem/skills/ecosystem-ref/SKILL.md` | Full file read |
 | CEM main script | `/Users/tomtenuta/Code/skeleton_claude/cem` | Full file read |
 | cem-sync.sh library | `/Users/tomtenuta/Code/skeleton_claude/lib/cem-sync.sh` | Full file read |
 | manifest.json | `/Users/tomtenuta/Code/roster/.claude/.cem/manifest.json` | Full file read |

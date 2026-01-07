@@ -65,17 +65,17 @@ Quick-switch commands are derived from rite names:
 
 | Rite | Quick Switch | Domain |
 |------|--------------|--------|
-| 10x-dev-pack | `/10x` | Full feature development |
-| debt-triage-pack | `/debt` | Technical debt management |
+| 10x-dev | `/10x` | Full feature development |
+| debt-triage | `/debt` | Technical debt management |
 | doc-team-pack | `/docs` | Documentation workflows |
-| ecosystem-pack | `/ecosystem` | CEM/skeleton/roster infrastructure |
-| forge-pack | `/forge` | Rite creation |
-| hygiene-pack | `/hygiene` | Code quality, refactoring |
-| intelligence-pack | `/intelligence` | Analytics, research |
-| rnd-pack | `/rnd` | Exploration, prototyping |
-| security-pack | `/security` | Security assessment |
-| sre-pack | `/sre` | Operations, reliability |
-| strategy-pack | `/strategy` | Business analysis |
+| ecosystem | `/ecosystem` | CEM/skeleton/roster infrastructure |
+| forge | `/forge` | Rite creation |
+| hygiene | `/hygiene` | Code quality, refactoring |
+| intelligence | `/intelligence` | Analytics, research |
+| rnd | `/rnd` | Exploration, prototyping |
+| security | `/security` | Security assessment |
+| sre | `/sre` | Operations, reliability |
+| strategy | `/strategy` | Business analysis |
 
 **Note**: Use `team-discovery` skill for programmatic rite metadata access.
 
@@ -84,8 +84,8 @@ Quick-switch commands are derived from rite names:
 ```bash
 /rite                           # Show current rite
 /rite --list                    # List all rites
-/rite 10x-dev-pack              # Switch (prompts for orphans)
-/rite hygiene-pack --keep-all   # Switch, keep all orphans
+/rite 10x-dev              # Switch (prompts for orphans)
+/rite hygiene --keep-all   # Switch, keep all orphans
 /rite debt-pack --promote-all   # Switch, promote orphans to user-level
 /rite doc-team-pack --update    # Update even if already on rite
 ```

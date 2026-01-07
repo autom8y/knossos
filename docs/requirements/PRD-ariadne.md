@@ -335,7 +335,7 @@ Only two settings are user-configurable:
 ```yaml
 # $XDG_CONFIG_HOME/ariadne/config.yaml
 default_output: json    # text | json | yaml
-default_team: 10x-dev-pack
+default_team: 10x-dev
 ```
 
 Everything else is hardcoded for consistency.

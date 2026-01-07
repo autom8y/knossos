@@ -24,7 +24,7 @@ The output can be formatted as markdown (default), JSON, or YAML.
 
 Examples:
   ari team context                     # Show current rite's context
-  ari team context --rite=10x-dev-pack # Show specific rite's context
+  ari team context --rite=10x-dev # Show specific rite's context
   ari team context --format=yaml       # Output as YAML
   ari team context --format=json       # Output as JSON`,
 		RunE: func(cmd *cobra.Command, args []string) error {

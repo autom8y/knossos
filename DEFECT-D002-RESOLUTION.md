@@ -62,7 +62,7 @@ Session Context:
 - Session Path: .claude/sessions/session-YYYYMMDD-HHMMSS-xxxxxxxx/SESSION_CONTEXT.md
 - Initiative: [user input]
 - Complexity: MODULE
-- Team: ecosystem-pack
+- Team: ecosystem
 - Request Type: initial")
 \`\`\`
 

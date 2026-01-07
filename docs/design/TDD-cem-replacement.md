@@ -861,10 +861,10 @@ dispatch_merge_strategy() {
     "last_sync": "2026-01-03T00:00:00Z"
   },
   "team": {
-    "name": "10x-dev-pack",
+    "name": "10x-dev",
     "checksum": "sha256...",
     "last_refresh": "2026-01-03T00:00:00Z",
-    "roster_path": "/path/to/roster/rites/10x-dev-pack"
+    "roster_path": "/path/to/roster/rites/10x-dev"
   },
   "managed_files": [
     {
@@ -1339,7 +1339,7 @@ Consider future consolidation:
     "last_sync": "..."
   },
   "team": {
-    "name": "10x-dev-pack",
+    "name": "10x-dev",
     "agents": [...],
     "skills": [...],
     "commands": [...]

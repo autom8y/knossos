@@ -6,10 +6,10 @@
 
 ## Overview
 
-This Technical Design Document specifies the `smell-detection` shared skill that provides unified code smell detection patterns, severity classification rules, and integration with debt tracking systems. The skill serves as a single source of truth for smell taxonomy across `debt-triage-pack`, `hygiene-pack`, and any team assessing code quality.
+This Technical Design Document specifies the `smell-detection` shared skill that provides unified code smell detection patterns, severity classification rules, and integration with debt tracking systems. The skill serves as a single source of truth for smell taxonomy across `debt-triage`, `hygiene`, and any team assessing code quality.
 
 **Location**: `rites/shared/skills/smell-detection/`
-**Consumers**: debt-collector (debt-triage-pack), code-smeller (hygiene-pack), any quality assessment workflow
+**Consumers**: debt-collector (debt-triage), code-smeller (hygiene), any quality assessment workflow
 
 ---
 
@@ -18,8 +18,8 @@ This Technical Design Document specifies the `smell-detection` shared skill that
 | Reference | Location |
 |-----------|----------|
 | Smell Report Template | `/Users/tomtenuta/Code/roster/.claude/skills/doc-ecosystem/templates/smell-report.md` |
-| Code Smeller Agent | `/Users/tomtenuta/Code/roster/rites/hygiene-pack/agents/code-smeller.md` |
-| Debt Collector Agent | `/Users/tomtenuta/Code/roster/rites/debt-triage-pack/agents/debt-collector.md` |
+| Code Smeller Agent | `/Users/tomtenuta/Code/roster/rites/hygiene/agents/code-smeller.md` |
+| Debt Collector Agent | `/Users/tomtenuta/Code/roster/rites/debt-triage/agents/debt-collector.md` |
 | E2E Debt Remediation | `/Users/tomtenuta/Code/roster/docs/testing/e2e-debt-remediation.md` |
 | Shared Skills README | `/Users/tomtenuta/Code/roster/rites/shared/README.md` |
 
@@ -40,7 +40,7 @@ Without a centralized skill, detection is inconsistent across teams, severity cl
 2. Specify detection heuristics with automated hints and manual inspection patterns
 3. Establish severity classification algorithm with consistent scoring
 4. Document integration with debt-ledger entries and smell reports
-5. Enable reuse across debt-triage-pack, hygiene-pack, and future quality teams
+5. Enable reuse across debt-triage, hygiene, and future quality teams
 
 ---
 
@@ -96,7 +96,7 @@ severity_score = (impact * 3) + (frequency * 2) + (blast_radius * 2) - (fix_comp
 | 6-10 | Medium | P3 | Address opportunistically |
 | 1-5 | Low | P4 | Track for future |
 
-**Rationale**: Aligns with existing risk-assessor scoring from debt-triage-pack (see `/Users/tomtenuta/Code/roster/docs/testing/e2e-debt-remediation.md` lines 149-168). Weighting prioritizes business impact while accounting for fix complexity as a practical constraint.
+**Rationale**: Aligns with existing risk-assessor scoring from debt-triage (see `/Users/tomtenuta/Code/roster/docs/testing/e2e-debt-remediation.md` lines 149-168). Weighting prioritizes business impact while accounting for fix complexity as a practical constraint.
 
 ### Decision 4: Integration with Debt Ledger
 
@@ -456,8 +456,8 @@ owner: "@platform-team"
 
 | Source | Target | Integration Type |
 |--------|--------|------------------|
-| code-smeller (hygiene-pack) | Smell Report | Produces |
-| debt-collector (debt-triage-pack) | Debt Ledger | Produces |
+| code-smeller (hygiene) | Smell Report | Produces |
+| debt-collector (debt-triage) | Debt Ledger | Produces |
 | Smell Report | Debt Ledger | Reference (smell_ref field) |
 | Debt Ledger | Sprint Packages | Reference (debt_id field) |
 | Sprint Packages | HANDOFF | Reference (PKG-XXX field) |
@@ -470,7 +470,7 @@ smell-detection skill (patterns)
         v
 +-------------------+     +-------------------+
 | code-smeller      |     | debt-collector    |
-| (hygiene-pack)    |     | (debt-triage-pack)|
+| (hygiene)    |     | (debt-triage)|
 +-------------------+     +-------------------+
         |                         |
         v                         v
@@ -532,7 +532,7 @@ description: "Cross-team code smell detection patterns with severity classificat
 
 ## Purpose
 
-Provides canonical smell taxonomy, detection heuristics, and severity classification for use across debt-triage-pack, hygiene-pack, and any team assessing code quality.
+Provides canonical smell taxonomy, detection heuristics, and severity classification for use across debt-triage, hygiene, and any team assessing code quality.
 
 ## Quick Reference
 
@@ -577,8 +577,8 @@ Provides canonical smell taxonomy, detection heuristics, and severity classifica
 
 ## Consumers
 
-- **code-smeller** (hygiene-pack): Produces Smell Reports
-- **debt-collector** (debt-triage-pack): Produces Debt Ledgers
+- **code-smeller** (hygiene): Produces Smell Reports
+- **debt-collector** (debt-triage): Produces Debt Ledgers
 - Any agent performing code quality assessment
 
 ## Progressive Disclosure
@@ -604,7 +604,7 @@ Provides canonical smell taxonomy, detection heuristics, and severity classifica
 
 ## Related Skills
 
-- [doc-ecosystem](../../ecosystem-pack/skills/doc-ecosystem/SKILL.md) - Smell report template
+- [doc-ecosystem](../../ecosystem/skills/doc-ecosystem/SKILL.md) - Smell report template
 - [standards](../../../.claude/skills/standards/SKILL.md) - Code conventions
 ```
 

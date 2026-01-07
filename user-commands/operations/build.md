@@ -41,10 +41,10 @@ IMPL_AGENT=$(grep -B1 "produces: code\|produces: commits\|produces: documentatio
    - Design is approved
 
 2. **Resolve implementation agent** from workflow:
-   - 10x-dev-pack → principal-engineer
+   - 10x-dev → principal-engineer
    - doc-team-pack → tech-writer
-   - hygiene-pack → janitor
-   - debt-triage-pack → sprint-planner
+   - hygiene → janitor
+   - debt-triage → sprint-planner
 
 3. **Invoke implementation agent** via Task tool:
    - Follow design specification exactly

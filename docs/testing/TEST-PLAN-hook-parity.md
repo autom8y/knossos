@@ -42,7 +42,7 @@ This test plan validates the Hook Ecosystem Parity feature which introduces:
 |----|--------|
 | **Objective** | Verify base hooks are synced from `roster/user-hooks/` to `.claude/hooks/` |
 | **Preconditions** | Clean `.claude/hooks/` directory |
-| **Steps** | 1. Remove existing `.claude/hooks/` contents<br>2. Run `./swap-rite.sh 10x-dev-pack`<br>3. List `.claude/hooks/` contents |
+| **Steps** | 1. Remove existing `.claude/hooks/` contents<br>2. Run `./swap-rite.sh 10x-dev`<br>3. List `.claude/hooks/` contents |
 | **Expected** | All 10 base hooks present: artifact-tracker.sh, auto-park.sh, coach-mode.sh, command-validator.sh, commit-tracker.sh, delegation-check.sh, session-audit.sh, session-context.sh, session-write-guard.sh, start-preflight.sh |
 | **Result** | PASS |
 | **Notes** | Verified 10 base hooks in user-hooks/, all synced to .claude/hooks/ after --update |
@@ -73,7 +73,7 @@ This test plan validates the Hook Ecosystem Parity feature which introduces:
 |----|--------|
 | **Objective** | Verify hooks section generated with correct structure |
 | **Preconditions** | Valid base_hooks.yaml exists |
-| **Steps** | 1. Run `./swap-rite.sh 10x-dev-pack`<br>2. Extract hooks from settings.local.json<br>3. Compare structure to expected format |
+| **Steps** | 1. Run `./swap-rite.sh 10x-dev`<br>2. Extract hooks from settings.local.json<br>3. Compare structure to expected format |
 | **Expected** | JSON structure matches Claude Code hooks schema with event types, matchers, and hook arrays |
 | **Result** | PASS |
 | **Notes** | Verified 5 event types (SessionStart, Stop, PreToolUse, PostToolUse, UserPromptSubmit) with correct structure |
@@ -82,7 +82,7 @@ This test plan validates the Hook Ecosystem Parity feature which introduces:
 |----|--------|
 | **Objective** | Verify hook paths use $CLAUDE_PROJECT_DIR variable |
 | **Preconditions** | None |
-| **Steps** | 1. Run `./swap-rite.sh 10x-dev-pack`<br>2. Grep settings.local.json for hook commands |
+| **Steps** | 1. Run `./swap-rite.sh 10x-dev`<br>2. Grep settings.local.json for hook commands |
 | **Expected** | All hook commands prefixed with `$CLAUDE_PROJECT_DIR/.claude/hooks/` |
 | **Result** | PASS |
 | **Notes** | All 10 hook commands use $CLAUDE_PROJECT_DIR prefix; 0 commands without it |
@@ -91,7 +91,7 @@ This test plan validates the Hook Ecosystem Parity feature which introduces:
 |----|--------|
 | **Objective** | Verify non-roster hooks preserved |
 | **Preconditions** | Add custom (non-roster) hook to settings.local.json |
-| **Steps** | 1. Add hook entry with command `/custom/path/myhook.sh`<br>2. Run `./swap-rite.sh 10x-dev-pack`<br>3. Verify custom hook still present |
+| **Steps** | 1. Add hook entry with command `/custom/path/myhook.sh`<br>2. Run `./swap-rite.sh 10x-dev`<br>3. Verify custom hook still present |
 | **Expected** | Custom hook preserved, roster hooks updated |
 | **Result** | NOT TESTED |
 | **Notes** | Verified extract_non_roster_hooks() logic in code; preserves hooks without .claude/hooks/ in path |
@@ -144,7 +144,7 @@ This test plan validates the Hook Ecosystem Parity feature which introduces:
 |----|--------|
 | **Objective** | Verify settings.local.json includes matcher after swap |
 | **Preconditions** | None |
-| **Steps** | 1. Run `./swap-rite.sh 10x-dev-pack`<br>2. Check UserPromptSubmit section in settings.local.json |
+| **Steps** | 1. Run `./swap-rite.sh 10x-dev`<br>2. Check UserPromptSubmit section in settings.local.json |
 | **Expected** | `"matcher": "^/"` present in UserPromptSubmit hook entry |
 | **Result** | PASS |
 | **Notes** | After --update: jq shows "matcher": "^/" in UserPromptSubmit entry |
@@ -153,7 +153,7 @@ This test plan validates the Hook Ecosystem Parity feature which introduces:
 |----|--------|
 | **Objective** | Verify dry-run shows correct matcher |
 | **Preconditions** | None |
-| **Steps** | 1. Run `./swap-rite.sh --dry-run 10x-dev-pack`<br>2. Find UserPromptSubmit in output |
+| **Steps** | 1. Run `./swap-rite.sh --dry-run 10x-dev`<br>2. Find UserPromptSubmit in output |
 | **Expected** | Dry-run output shows `"matcher": "^/"` |
 | **Result** | PASS |
 | **Notes** | Dry-run JSON output includes UserPromptSubmit with "matcher": "^/" |
@@ -228,7 +228,7 @@ This test plan validates the Hook Ecosystem Parity feature which introduces:
 |----|--------|
 | **Objective** | Verify --dry-run shows hook file changes |
 | **Preconditions** | None |
-| **Steps** | 1. Run `./swap-rite.sh --dry-run 10x-dev-pack`<br>2. Verify hook section in output |
+| **Steps** | 1. Run `./swap-rite.sh --dry-run 10x-dev`<br>2. Verify hook section in output |
 | **Expected** | Output shows "Hook registrations (settings.local.json):" with JSON preview |
 | **Result** | PASS |
 | **Notes** | Output contains "Hook registrations" header and full JSON preview (2 occurrences) |
@@ -237,7 +237,7 @@ This test plan validates the Hook Ecosystem Parity feature which introduces:
 |----|--------|
 | **Objective** | Verify --dry-run does not modify files |
 | **Preconditions** | Note current settings.local.json mtime |
-| **Steps** | 1. Record mtime of settings.local.json<br>2. Run `./swap-rite.sh --dry-run 10x-dev-pack`<br>3. Compare mtime |
+| **Steps** | 1. Record mtime of settings.local.json<br>2. Run `./swap-rite.sh --dry-run 10x-dev`<br>3. Compare mtime |
 | **Expected** | settings.local.json unchanged |
 | **Result** | PASS |
 | **Notes** | mtime before (1767206392) equals mtime after dry-run |
@@ -395,11 +395,11 @@ This test plan validates the Hook Ecosystem Parity feature which introduces:
 | ID | ADV-4.1 |
 |----|---------|
 | **Objective** | Test team with no hooks/ directory |
-| **Preconditions** | 10x-dev-pack has no hooks/ (normal state) |
-| **Steps** | 1. Verify rites/10x-dev-pack/hooks/ does not exist<br>2. Run swap-rite.sh 10x-dev-pack<br>3. Verify base hooks installed |
+| **Preconditions** | 10x-dev has no hooks/ (normal state) |
+| **Steps** | 1. Verify rites/10x-dev/hooks/ does not exist<br>2. Run swap-rite.sh 10x-dev<br>3. Verify base hooks installed |
 | **Expected** | Base hooks installed; no errors about missing team hooks |
 | **Result** | PASS |
-| **Notes** | rites/10x-dev-pack/hooks/ does not exist; swap-rite works correctly |
+| **Notes** | rites/10x-dev/hooks/ does not exist; swap-rite works correctly |
 
 | ID | ADV-4.2 |
 |----|---------|
@@ -458,7 +458,7 @@ This test plan validates the Hook Ecosystem Parity feature which introduces:
 |----|---------|
 | **Objective** | Verify user-created hooks not deleted |
 | **Preconditions** | Add custom hook to .claude/hooks/ |
-| **Steps** | 1. Create .claude/hooks/my-custom-hook.sh<br>2. Run swap-rite.sh 10x-dev-pack<br>3. Verify my-custom-hook.sh still exists |
+| **Steps** | 1. Create .claude/hooks/my-custom-hook.sh<br>2. Run swap-rite.sh 10x-dev<br>3. Verify my-custom-hook.sh still exists |
 | **Expected** | Custom hook preserved (not deleted by swap) |
 | **Result** | OBSERVED |
 | **Notes** | team-validator.sh and workflow-validator.sh (legacy) preserved despite not in user-hooks/ - swap overwrites but does NOT delete orphans |
@@ -467,7 +467,7 @@ This test plan validates the Hook Ecosystem Parity feature which introduces:
 |----|---------|
 | **Objective** | Verify settings.local.json custom hooks preserved |
 | **Preconditions** | Add custom hook registration to settings.local.json |
-| **Steps** | 1. Add PostToolUse hook with command: "/custom/path.sh"<br>2. Run swap-rite.sh 10x-dev-pack<br>3. Verify custom hook still in settings.local.json |
+| **Steps** | 1. Add PostToolUse hook with command: "/custom/path.sh"<br>2. Run swap-rite.sh 10x-dev<br>3. Verify custom hook still in settings.local.json |
 | **Expected** | Custom hook registration preserved |
 | **Result** | VERIFIED (code review) |
 | **Notes** | |
@@ -485,7 +485,7 @@ This test plan validates the Hook Ecosystem Parity feature which introduces:
 | **Component** | settings.local.json |
 | **Status** | RESOLVED |
 | **Found** | Initial exploration |
-| **Fixed** | After running `./swap-rite.sh --update 10x-dev-pack` |
+| **Fixed** | After running `./swap-rite.sh --update 10x-dev` |
 
 **Description**: The current `settings.local.json` had UserPromptSubmit hook without a matcher, but `base_hooks.yaml` correctly specifies `matcher: "^/"`. The dry-run output shows correct output, suggesting the hooks were installed before this fix was implemented.
 
@@ -496,7 +496,7 @@ This test plan validates the Hook Ecosystem Parity feature which introduces:
 **Expected**: `"matcher": "^/"` present
 **Actual**: No matcher field (before fix)
 
-**Resolution**: Running `./swap-rite.sh --update 10x-dev-pack` regenerates settings.local.json with correct matcher. Verified matcher now present.
+**Resolution**: Running `./swap-rite.sh --update 10x-dev` regenerates settings.local.json with correct matcher. Verified matcher now present.
 
 **Impact**: Pre-fix, UserPromptSubmit fired on ALL prompts. Post-fix, only fires on slash commands.
 
@@ -538,7 +538,7 @@ This test plan validates the Hook Ecosystem Parity feature which introduces:
 | **Component** | .claude/hooks/session-context.sh |
 | **Status** | RESOLVED |
 | **Found** | Initial exploration |
-| **Fixed** | After running `./swap-rite.sh --update 10x-dev-pack` |
+| **Fixed** | After running `./swap-rite.sh --update 10x-dev` |
 
 **Description**: `.claude/hooks/session-context.sh` (219 lines) differed from `user-hooks/session-context.sh` (285 lines). The deployed version lacked the condensed output and --verbose flag improvements.
 
@@ -549,7 +549,7 @@ This test plan validates the Hook Ecosystem Parity feature which introduces:
 **Expected**: Same content (user-hooks is canonical)
 **Actual**: Deployed version was outdated (before fix)
 
-**Resolution**: Running `./swap-rite.sh --update 10x-dev-pack` syncs latest hooks. Verified both files now match (285 lines, diff confirms identical).
+**Resolution**: Running `./swap-rite.sh --update 10x-dev` syncs latest hooks. Verified both files now match (285 lines, diff confirms identical).
 
 **Impact**: Context noise reduction (SC-3) now active after sync.
 
@@ -570,7 +570,7 @@ Execute SC-1 through SC-10 test cases sequentially.
 Execute ADV-1 through ADV-8 with appropriate setup/teardown.
 
 ### Phase 4: Regression Verification
-1. Run swap-rite.sh 10x-dev-pack
+1. Run swap-rite.sh 10x-dev
 2. Verify all hooks functional
 3. Test hook execution (SessionStart, PreToolUse, PostToolUse)
 

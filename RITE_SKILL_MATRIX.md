@@ -151,7 +151,7 @@ External tool integrations and automation.
 
 ## Team Profiles
 
-### 10x-dev-pack (Full Development Lifecycle)
+### 10x-dev (Full Development Lifecycle)
 
 **Primary Skills (12)**: doc-artifacts, 10x-workflow, architect-ref, build-ref, hotfix-ref, orchestration, pr-ref, qa-ref, review, spike-ref, sprint-ref, task-ref, start-ref, park-ref, resume, wrap-ref, handoff-ref, initiative-scoping, 10x-ref, team-ref, consult-ref, prompting, standards, justfile, worktree-ref
 
@@ -159,7 +159,7 @@ External tool integrations and automation.
 
 ---
 
-### ecosystem-pack (Infrastructure Lifecycle)
+### ecosystem (Infrastructure Lifecycle)
 
 **Primary Skills (14)**: doc-consolidation, doc-ecosystem, orchestration, pr-ref, sprint-ref, task-ref, start-ref, park-ref, resume, wrap-ref, handoff-ref, initiative-scoping, hygiene-ref, team-ref, ecosystem-ref, claude-md-architecture, consult-ref, forge-ref, team-development, prompting, standards, atuin-desktop, justfile
 
@@ -175,7 +175,7 @@ External tool integrations and automation.
 
 ---
 
-### debt-triage-pack (Debt Management)
+### debt-triage (Debt Management)
 
 **Primary Skills (7)**: doc-sre, orchestration, sprint-ref, task-ref, start-ref, park-ref, resume, wrap-ref, handoff-ref, initiative-scoping, debt-ref, team-ref, consult-ref, prompting
 
@@ -183,7 +183,7 @@ External tool integrations and automation.
 
 ---
 
-### sre-pack (Reliability Lifecycle)
+### sre (Reliability Lifecycle)
 
 **Primary Skills (8)**: doc-sre, hotfix-ref, orchestration, sprint-ref, task-ref, start-ref, park-ref, resume, wrap-ref, handoff-ref, initiative-scoping, sre-ref, team-ref, consult-ref, prompting, standards, justfile
 
@@ -191,7 +191,7 @@ External tool integrations and automation.
 
 ---
 
-### security-pack (Security Assessment)
+### security (Security Assessment)
 
 **Primary Skills (9)**: doc-security, orchestration, qa-ref, review, sprint-ref, task-ref, start-ref, park-ref, resume, wrap-ref, handoff-ref, initiative-scoping, security-ref, team-ref, consult-ref, prompting, standards
 
@@ -199,7 +199,7 @@ External tool integrations and automation.
 
 ---
 
-### strategy-pack (Strategic Planning)
+### strategy (Strategic Planning)
 
 **Primary Skills (7)**: doc-strategy, orchestration, sprint-ref, task-ref, start-ref, park-ref, resume, wrap-ref, handoff-ref, initiative-scoping, strategy-ref, team-ref, consult-ref, prompting
 
@@ -207,7 +207,7 @@ External tool integrations and automation.
 
 ---
 
-### hygiene-pack (Code Quality)
+### hygiene (Code Quality)
 
 **Primary Skills (11)**: doc-ecosystem, orchestration, qa-ref, review, sprint-ref, task-ref, start-ref, park-ref, resume, wrap-ref, handoff-ref, initiative-scoping, hygiene-ref, team-ref, ecosystem-ref, consult-ref, prompting, standards
 
@@ -215,7 +215,7 @@ External tool integrations and automation.
 
 ---
 
-### intelligence-pack (Product Analytics)
+### intelligence (Product Analytics)
 
 **Primary Skills (7)**: doc-intelligence, orchestration, sprint-ref, task-ref, start-ref, park-ref, resume, wrap-ref, handoff-ref, initiative-scoping, intelligence-ref, team-ref, consult-ref, prompting
 
@@ -223,7 +223,7 @@ External tool integrations and automation.
 
 ---
 
-### rnd-pack (Innovation Lab)
+### rnd (Innovation Lab)
 
 **Primary Skills (8)**: doc-rnd, orchestration, spike-ref, sprint-ref, task-ref, start-ref, park-ref, resume, wrap-ref, handoff-ref, initiative-scoping, rnd-ref, team-ref, consult-ref, prompting, standards, justfile
 
@@ -269,16 +269,16 @@ These skills are core infrastructure used by every rite:
 1. Check the **primary skill** needed for the task
 2. Find rites where that skill is **P** (Primary)
 3. If multiple rites match, choose based on artifact output:
-   - PRD/TDD/Code/Tests -> 10x-dev-pack
-   - CEM/skeleton/roster -> ecosystem-pack
+   - PRD/TDD/Code/Tests -> 10x-dev
+   - CEM/skeleton/roster -> ecosystem
    - Audit/Structure/Docs -> doc-team-pack
-   - Debt ledger/Risk/Sprint -> debt-triage-pack
-   - Observability/Incidents/Chaos -> sre-pack
-   - Threat/Compliance/Pentest -> security-pack
-   - Market/Competitive/Roadmap -> strategy-pack
-   - Smells/Refactor/Cleanup -> hygiene-pack
-   - Research/Experiments/Insights -> intelligence-pack
-   - Scouting/Prototypes/Moonshots -> rnd-pack
+   - Debt ledger/Risk/Sprint -> debt-triage
+   - Observability/Incidents/Chaos -> sre
+   - Threat/Compliance/Pentest -> security
+   - Market/Competitive/Roadmap -> strategy
+   - Smells/Refactor/Cleanup -> hygiene
+   - Research/Experiments/Insights -> intelligence
+   - Scouting/Prototypes/Moonshots -> rnd
 
 ---
 

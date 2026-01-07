@@ -86,17 +86,17 @@ The sprint goal was "Extract shared orchestrator sections to skill" - NOT "regen
 
 | Team | Lines | References @orchestrator-core | Status |
 |------|-------|-------------------------------|--------|
-| 10x-dev-pack | 192 | NO | Unchanged |
-| debt-triage-pack | 185 | NO | Unchanged |
+| 10x-dev | 192 | NO | Unchanged |
+| debt-triage | 185 | NO | Unchanged |
 | doc-team-pack | 191 | NO | Unchanged |
-| ecosystem-pack | 206 | NO | Unchanged |
-| forge-pack | 205 | NO | Unchanged |
-| hygiene-pack | 192 | NO | Unchanged |
-| intelligence-pack | 202 | NO | Unchanged |
-| rnd-pack | 192 | NO | Unchanged |
-| security-pack | 202 | NO | Unchanged |
-| sre-pack | 192 | NO | Unchanged |
-| strategy-pack | 192 | NO | Unchanged |
+| ecosystem | 206 | NO | Unchanged |
+| forge | 205 | NO | Unchanged |
+| hygiene | 192 | NO | Unchanged |
+| intelligence | 202 | NO | Unchanged |
+| rnd | 192 | NO | Unchanged |
+| security | 202 | NO | Unchanged |
+| sre | 192 | NO | Unchanged |
+| strategy | 192 | NO | Unchanged |
 
 **Finding**: All 11 orchestrators still reference `@orchestrator-templates/schemas/consultation-request.md` (old path). This is expected per migration plan Phase 1.
 

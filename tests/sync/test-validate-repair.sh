@@ -259,7 +259,7 @@ test_validate_with_rite_flag() {
     create_test_manifest "$project_dir"
 
     # Create ACTIVE_RITE file
-    echo "10x-dev-pack" > "$project_dir/.claude/ACTIVE_RITE"
+    echo "10x-dev" > "$project_dir/.claude/ACTIVE_RITE"
 
     local exit_code=0
     local output

@@ -286,10 +286,10 @@ Some rites specialize in complexity levels:
 
 | Team | Best For |
 |------|----------|
-| 10x-dev-pack | MODULE, SERVICE (general development) |
-| rnd-pack | SCRIPT, MODULE (experimentation, prototyping) |
-| sre-pack | SERVICE, PLATFORM (infrastructure, reliability) |
-| ecosystem-pack | PLATFORM (CEM/skeleton/roster infrastructure) |
+| 10x-dev | MODULE, SERVICE (general development) |
+| rnd | SCRIPT, MODULE (experimentation, prototyping) |
+| sre | SERVICE, PLATFORM (infrastructure, reliability) |
+| ecosystem | PLATFORM (CEM/skeleton/roster infrastructure) |
 
 **Note**: Team pack doesn't dictate complexity; complexity dictates which agents are invoked.
 

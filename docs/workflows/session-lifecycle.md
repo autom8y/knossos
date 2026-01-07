@@ -34,7 +34,7 @@ Session Context:
 - Session Path: .claude/sessions/session-20260104-022401-5552866f/SESSION_CONTEXT.md
 - Initiative: Your Initiative Name
 - Complexity: MODULE
-- Team: ecosystem-pack")
+- Team: ecosystem")
 ```
 
 Copy the Task invocation above and execute it, or use `/consult` for manual routing.

@@ -36,10 +36,10 @@ The Ariadne Team Domain implementation has **3 Critical** and **2 High** severit
 
 **Reproduction Steps**:
 ```bash
-/tmp/ari_static team switch rnd-pack --output json
+/tmp/ari_static team switch rnd --output json
 ```
 
-**Expected**: Switch to rnd-pack team or appropriate error
+**Expected**: Switch to rnd team or appropriate error
 **Actual**:
 ```
 panic: unable to redefine 'p' shorthand in "switch" flagset: it's already used for "promote-all" flag
@@ -93,7 +93,7 @@ echo $?  # Shows 0, should show 6
 **Evidence**:
 ```json
 // Actual manifest on disk
-"architect.md": {"source": "team", "origin": "10x-dev-pack", ...}
+"architect.md": {"source": "team", "origin": "10x-dev", ...}
 
 // Go struct expects
 Team string `json:"team,omitempty"`

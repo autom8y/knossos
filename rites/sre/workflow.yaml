@@ -1,0 +1,74 @@
+name: sre
+workflow_type: sequential
+description: Reliability lifecycle (Observe → Coordinate → Build → Verify)
+
+entry_point:
+  agent: observability-engineer
+  artifact:
+    type: observability-report
+    path_template: docs/reliability/OBS-{slug}.md
+
+phases:
+  - name: observation
+    agent: observability-engineer
+    produces: observability-report
+    next: coordination
+
+  - name: coordination
+    agent: incident-commander
+    produces: reliability-plan
+    next: implementation
+    condition: "complexity >= SERVICE"
+
+  - name: implementation
+    agent: platform-engineer
+    produces: infrastructure-changes
+    next: resilience
+
+  - name: resilience
+    agent: chaos-engineer
+    produces: resilience-report
+    next: null
+
+complexity_levels:
+  - name: ALERT
+    scope: "Single alert/dashboard fix"
+    phases: [implementation, resilience]
+  - name: SERVICE
+    scope: "Single service reliability"
+    phases: [observation, coordination, implementation, resilience]
+  - name: SYSTEM
+    scope: "Multi-service SLOs/SLIs"
+    phases: [observation, coordination, implementation, resilience]
+  - name: PLATFORM
+    scope: "Full platform reliability"
+    phases: [observation, coordination, implementation, resilience]
+
+# Agent roles for command mapping:
+# /architect  → platform-engineer
+# /build      → platform-engineer
+# /qa         → chaos-engineer
+# /hotfix     → incident-commander (fast path)
+# /code-review → chaos-engineer (review mode)
+
+back_routes:
+  - source_phase: resilience
+    trigger: "fail(acceptance_criteria)"
+    target_phase: observation
+    target_agent: observability-engineer
+    requires_user_confirmation: true
+    condition: "Failure is requirement gap, not implementation bug"
+
+  - source_phase: resilience
+    trigger: "fail(implementation)"
+    target_phase: implementation
+    target_agent: platform-engineer
+    requires_user_confirmation: false
+    condition: "Failure is implementation bug"
+
+  - source_phase: implementation
+    trigger: "design_conflict"
+    target_phase: coordination
+    target_agent: incident-commander
+    requires_user_confirmation: false
+    condition: "Implementation reveals design flaw"

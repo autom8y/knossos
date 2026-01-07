@@ -71,7 +71,7 @@
       "status": "accepted",
       "date": "2025-12-29",
       "author": "context-architect",
-      "deciders": ["ecosystem-pack"],
+      "deciders": ["ecosystem"],
       "related": ["PRD-artifact-schema-standardization"],
       "schema_version": "1.0"
     }

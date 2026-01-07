@@ -40,7 +40,7 @@ Both skeleton and roster have the same 5 agents. **Roster versions are superior*
 
 | Resource | Skeleton Path | Purpose | Roster Equivalent | Action |
 |----------|---------------|---------|-------------------|--------|
-| architect.md | agents/architect.md | System design, TDD/ADR production | agents/architect.md | **KEEP ROSTER** (has security-pack consultation) |
+| architect.md | agents/architect.md | System design, TDD/ADR production | agents/architect.md | **KEEP ROSTER** (has security consultation) |
 | orchestrator.md | agents/orchestrator.md | Work breakdown, agent coordination | agents/orchestrator.md | **KEEP ROSTER** (has entry point selection) |
 | principal-engineer.md | agents/principal-engineer.md | Implementation, code production | agents/principal-engineer.md | **KEEP ROSTER** (identical) |
 | qa-adversary.md | agents/qa-adversary.md | Testing, validation | agents/qa-adversary.md | **KEEP ROSTER** (has doc impact, security/SRE handoff) |

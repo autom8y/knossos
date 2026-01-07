@@ -166,6 +166,6 @@ Exit code: 0 (operation allowed to proceed)
 - **Satellite**: roster (skeleton)
 - **Branch**: main
 - **Session**: session-20260102-022932-a8a79927
-- **Active Team**: ecosystem-pack
+- **Active Team**: ecosystem
 - **Execution Mode**: orchestrated
 - **Schema Version**: 2.0

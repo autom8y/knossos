@@ -26,7 +26,7 @@ func TestContextOutput_Text(t *testing.T) {
 				SessionID:     "session-20260104-222613-05a12c6b",
 				Status:        "ACTIVE",
 				Initiative:    "Test Initiative",
-				Rite:          "10x-dev-pack",
+				Rite:          "10x-dev",
 				CurrentPhase:  "design",
 				ExecutionMode: "orchestrated",
 				HasSession:    true,
@@ -36,7 +36,7 @@ func TestContextOutput_Text(t *testing.T) {
 				"| Session | session-20260104-222613-05a12c6b |",
 				"| Status | ACTIVE |",
 				"| Initiative | Test Initiative |",
-				"| Rite | 10x-dev-pack |",
+				"| Rite | 10x-dev |",
 				"| Mode | orchestrated |",
 			},
 		},
@@ -75,7 +75,7 @@ func TestDetermineExecutionMode(t *testing.T) {
 		{
 			name:       "session with team is orchestrated",
 			hasSession: true,
-			activeRite: "10x-dev-pack",
+			activeRite: "10x-dev",
 			want:       "orchestrated",
 		},
 		{
@@ -170,7 +170,7 @@ status: "ACTIVE"
 created_at: "2026-01-04T22:26:13Z"
 initiative: "Hooks Migration"
 complexity: "MODULE"
-active_rite: "10x-dev-pack"
+active_rite: "10x-dev"
 current_phase: "implementation"
 ---
 
@@ -183,7 +183,7 @@ current_phase: "implementation"
 
 	// Write ACTIVE_RITE
 	activeRiteFile := filepath.Join(tmpDir, ".claude", "ACTIVE_RITE")
-	if err := os.WriteFile(activeRiteFile, []byte("10x-dev-pack"), 0644); err != nil {
+	if err := os.WriteFile(activeRiteFile, []byte("10x-dev"), 0644); err != nil {
 		t.Fatalf("Failed to write ACTIVE_RITE: %v", err)
 	}
 

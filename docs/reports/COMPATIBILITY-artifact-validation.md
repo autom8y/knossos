@@ -85,7 +85,7 @@ All critical sync scripts and swap-rite operations pass validation. Minor issues
 
 ---
 
-### Test 5: swap-rite.sh --dry-run ecosystem-pack (CRITICAL)
+### Test 5: swap-rite.sh --dry-run ecosystem (CRITICAL)
 
 | Aspect | Result | Details |
 |--------|--------|---------|
@@ -105,7 +105,7 @@ All critical sync scripts and swap-rite operations pass validation. Minor issues
 
 ---
 
-### Test 6: swap-rite.sh --dry-run 10x-dev-pack
+### Test 6: swap-rite.sh --dry-run 10x-dev
 
 | Aspect | Result | Details |
 |--------|--------|---------|
@@ -140,18 +140,18 @@ All critical sync scripts and swap-rite operations pass validation. Minor issues
 
 | Team | name | workflow_type | phases | Verdict |
 |------|------|---------------|--------|---------|
-| 10x-dev-pack | OK | OK | OK | PASS |
-| debt-triage-pack | OK | OK | OK | PASS |
+| 10x-dev | OK | OK | OK | PASS |
+| debt-triage | OK | OK | OK | PASS |
 | doc-team-pack | OK | OK | OK | PASS |
-| ecosystem-pack | OK | OK | OK | PASS |
-| forge-pack | OK | OK | OK | PASS |
-| hygiene-pack | OK | OK | OK | PASS |
-| intelligence-pack | OK | OK | OK | PASS |
-| rnd-pack | OK | OK | OK | PASS |
-| security-pack | OK | OK | OK | PASS |
+| ecosystem | OK | OK | OK | PASS |
+| forge | OK | OK | OK | PASS |
+| hygiene | OK | OK | OK | PASS |
+| intelligence | OK | OK | OK | PASS |
+| rnd | OK | OK | OK | PASS |
+| security | OK | OK | OK | PASS |
 | shared | N/A | N/A | N/A | SKIP (no workflow.yaml) |
-| sre-pack | OK | OK | OK | PASS |
-| strategy-pack | OK | OK | OK | PASS |
+| sre | OK | OK | OK | PASS |
+| strategy | OK | OK | OK | PASS |
 
 **Note**: `shared/` is not a team - it contains shared resources.
 
@@ -179,7 +179,7 @@ All critical sync scripts and swap-rite operations pass validation. Minor issues
 | Field | Value | Status |
 |-------|-------|--------|
 | manifest_version | 1.2 | OK |
-| active_team | ecosystem-pack | OK |
+| active_team | ecosystem | OK |
 | last_swap | 2026-01-03T18:13:06Z | OK |
 | agents | 6 entries | OK |
 | commands | 1 entry | OK |
@@ -192,7 +192,7 @@ All critical sync scripts and swap-rite operations pass validation. Minor issues
 | schema_version | 3 | OK |
 | roster.path | /Users/tomtenuta/Code/skeleton_claude | OK |
 | roster.commit | 6053c2d | OK |
-| rite.name | ecosystem-pack | OK |
+| rite.name | ecosystem | OK |
 | team.checksum | Present | OK |
 | managed_files | Present | OK |
 
@@ -222,8 +222,8 @@ All critical sync scripts and swap-rite operations pass validation. Minor issues
 | 2 | sync-user-skills.sh --status | PASS |
 | 3 | sync-user-hooks.sh --status | PASS |
 | 4 | sync-user-commands.sh --status | PASS |
-| 5 | swap-rite.sh --dry-run ecosystem-pack | PASS |
-| 6 | swap-rite.sh --dry-run 10x-dev-pack | PASS |
+| 5 | swap-rite.sh --dry-run ecosystem | PASS |
+| 6 | swap-rite.sh --dry-run 10x-dev | PASS |
 | 7 | Orphan cleanup --dry-run | PASS |
 | 8 | Validate all team workflows | PASS (11/11) |
 | 9 | Check for orphan backups | PASS (P3) |
@@ -265,9 +265,9 @@ Agent Status:
   [=] state-mate.md (up to date)
 ```
 
-### swap-rite.sh --dry-run ecosystem-pack (excerpt)
+### swap-rite.sh --dry-run ecosystem (excerpt)
 ```
-[Roster] Dry-run: Would refresh ecosystem-pack
+[Roster] Dry-run: Would refresh ecosystem
 
 Agent changes:
   = compatibility-tester.md (unchanged)
@@ -290,7 +290,7 @@ No changes made (--dry-run mode)
 ```json
 {
   "manifest_version": "1.2",
-  "active_team": "ecosystem-pack",
+  "active_team": "ecosystem",
   "last_swap": "2026-01-03T18:13:06Z",
   "agents": { /* 6 entries */ },
   "commands": { /* 1 entry */ },

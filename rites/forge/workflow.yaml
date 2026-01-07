@@ -1,0 +1,95 @@
+name: forge
+version: "1.0.0"
+workflow_type: sequential
+description: Agent team creation lifecycle (Design → Prompts → Workflow → Platform → Catalog → Validation)
+
+entry_point:
+  agent: agent-designer
+  artifact:
+    type: rite-spec
+    path_template: docs/forge/TEAM-SPEC-{slug}.md
+
+phases:
+  - name: design
+    agent: agent-designer
+    produces: rite-spec
+    next: prompts
+
+  - name: prompts
+    agent: prompt-architect
+    produces: agent-files
+    next: workflow
+
+  - name: workflow
+    agent: workflow-engineer
+    produces: workflow-config
+    next: platform
+
+  - name: platform
+    agent: platform-engineer
+    produces: roster-integration
+    next: catalog
+    condition: "complexity >= MODULE"
+
+  - name: catalog
+    agent: agent-curator
+    produces: knowledge-update
+    next: validation
+    condition: "complexity >= MODULE"
+
+  - name: validation
+    agent: eval-specialist
+    produces: eval-report
+    next: null
+
+complexity_levels:
+  - name: AGENT
+    scope: "Single agent addition to existing team"
+    phases: [design, prompts, validation]
+  - name: MODULE
+    scope: "New rite with 3-5 agents"
+    phases: [design, prompts, workflow, platform, catalog, validation]
+  - name: SYSTEM
+    scope: "Major team redesign or cross-rite refactor"
+    phases: [design, prompts, workflow, platform, catalog, validation]
+
+# Agent roles for command mapping:
+# /forge           → agent-designer (full pipeline)
+# /forge-design    → agent-designer (design only)
+# /forge-prompt    → prompt-architect (prompts only)
+# /forge-workflow  → workflow-engineer (workflow only)
+# /forge-platform  → platform-engineer (platform only)
+# /forge-catalog   → agent-curator (catalog only)
+# /forge-eval      → eval-specialist (validation only)
+# /new-team        → agent-designer (alias for /forge)
+# /new-agent       → agent-designer + prompt-architect (reduced scope)
+
+# Team-specific commands (synced on team swap):
+commands:
+  - name: forge
+    file: forge.md
+    description: "Create new agent teams from scratch"
+    primary_agent: agent-designer
+    workflow_phase: all
+
+back_routes:
+  - source_phase: validation
+    trigger: "fail(acceptance_criteria)"
+    target_phase: design
+    target_agent: agent-designer
+    requires_user_confirmation: true
+    condition: "Failure is requirement gap, not implementation bug"
+
+  - source_phase: validation
+    trigger: "fail(implementation)"
+    target_phase: workflow
+    target_agent: workflow-engineer
+    requires_user_confirmation: false
+    condition: "Failure is implementation bug"
+
+  - source_phase: workflow
+    trigger: "design_conflict"
+    target_phase: prompts
+    target_agent: prompt-architect
+    requires_user_confirmation: false
+    condition: "Implementation reveals design flaw"

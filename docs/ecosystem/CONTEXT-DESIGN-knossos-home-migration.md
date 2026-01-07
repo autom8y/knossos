@@ -92,7 +92,7 @@ High-impact documentation:
 | `/Users/tomtenuta/Code/roster/docs/INTEGRATION.md` | 9 | YES - primary integration guide |
 | `/Users/tomtenuta/Code/roster/docs/migration/cem-to-roster-migration.md` | 9 | YES - migration guide |
 | `/Users/tomtenuta/Code/roster/user-skills/guidance/rite-ref/SKILL.md` | 12 | YES - rite skill |
-| `/Users/tomtenuta/Code/roster/rites/forge-pack/agents/platform-engineer.md` | 16 | YES - agent prompt |
+| `/Users/tomtenuta/Code/roster/rites/forge/agents/platform-engineer.md` | 16 | YES - agent prompt |
 | `/Users/tomtenuta/Code/roster/user-commands/cem/sync.md` | 3 | YES - command doc |
 | Various TDD/design docs | 5-15 each | Internal |
 

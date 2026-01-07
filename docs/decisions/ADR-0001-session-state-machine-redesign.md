@@ -151,7 +151,7 @@ Rationale: The existing `COMPLETED` status is redundant with `ARCHIVED`. A compl
 Substates are derived from `ACTIVE_WORKFLOW.yaml` and only valid within `ACTIVE`:
 
 ```yaml
-# Example: 10x-dev-pack workflow defines these substates
+# Example: 10x-dev workflow defines these substates
 substates:
   - requirements
   - design

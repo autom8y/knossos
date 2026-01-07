@@ -32,10 +32,10 @@ echo "--------------------------------------------------------------------------
 echo "# Orchestrator" > .claude/agents/orchestrator.md
 
 # Create ACTIVE_RITE
-echo "ecosystem-pack" > .claude/ACTIVE_RITE
+echo "ecosystem" > .claude/ACTIVE_RITE
 
 # Create session via session-manager
-SESSION_RESULT=$(.claude/hooks/lib/session-manager.sh create "Test Initiative" "MODULE" "ecosystem-pack" 2>&1)
+SESSION_RESULT=$(.claude/hooks/lib/session-manager.sh create "Test Initiative" "MODULE" "ecosystem" 2>&1)
 SESSION_ID=$(echo "$SESSION_RESULT" | grep -o '"session_id": *"[^"]*"' | cut -d'"' -f4)
 if [[ -z "$SESSION_ID" ]]; then
     echo "FAIL: Could not create session for test 1"
@@ -120,7 +120,7 @@ echo "Test 4: Parked session with orchestrator -> shows options"
 echo "--------------------------------------------------------"
 
 # Create parked session
-SESSION_RESULT=$(.claude/hooks/lib/session-manager.sh create "Parked Initiative" "MODULE" "ecosystem-pack" 2>&1)
+SESSION_RESULT=$(.claude/hooks/lib/session-manager.sh create "Parked Initiative" "MODULE" "ecosystem" 2>&1)
 SESSION_ID=$(echo "$SESSION_RESULT" | grep -o '"session_id": *"[^"]*"' | cut -d'"' -f4)
 if [[ -z "$SESSION_ID" ]]; then
     echo "FAIL: Could not create session for test 4"

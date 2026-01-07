@@ -1,8 +1,8 @@
 ---
-artifact_id: HANDOFF-debt-triage-pack-to-hygiene-pack-2026-01-03
+artifact_id: HANDOFF-debt-triage-to-hygiene-2026-01-03
 schema_version: "1.0"
-source_team: debt-triage-pack
-target_team: hygiene-pack
+source_team: debt-triage
+target_team: hygiene
 handoff_type: execution
 priority: high
 blocking: false
@@ -36,7 +36,7 @@ items:
 
 ## Context
 
-The debt-triage-pack has completed assessment and planning for Q1 2026 debt remediation. These packages are ready for execution by hygiene-pack.
+The debt-triage has completed assessment and planning for Q1 2026 debt remediation. These packages are ready for execution by hygiene.
 
 ## Package Prioritization
 
@@ -79,4 +79,4 @@ Target state: Complete migration to new implementation, remove legacy code.
 
 ## Contact
 
-For questions during execution, contact debt-triage-pack lead or reference source artifacts.
+For questions during execution, contact debt-triage lead or reference source artifacts.

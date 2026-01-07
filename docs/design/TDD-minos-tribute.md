@@ -136,7 +136,7 @@ duration_hours: 4.5
 **Initiative**: Feature X Implementation
 **Complexity**: MODULE (estimated 4-8 hours)
 **Duration**: 4h 30m (2026-01-06T11:00:00Z to 2026-01-06T15:30:00Z)
-**Team/Rite**: 10x-dev-pack
+**Team/Rite**: 10x-dev
 **Final Phase**: validation
 **Confidence Signal**: WHITE
 

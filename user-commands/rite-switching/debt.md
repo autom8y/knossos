@@ -1,5 +1,5 @@
 ---
-description: Quick switch to debt-triage-pack (technical debt workflow)
+description: Quick switch to debt-triage (technical debt workflow)
 argument-hint: [--update] [--dry-run] [--keep-all|--remove-all|--promote-all]
 allowed-tools: Bash, Read
 model: haiku
@@ -14,9 +14,9 @@ Switch to the technical debt triage rite and display the rite roster. $ARGUMENTS
 
 ## Behavior
 
-1. Execute: `${KNOSSOS_HOME:-~/Code/roster}/swap-rite.sh debt-triage-pack $ARGUMENTS`
+1. Execute: `${KNOSSOS_HOME:-~/Code/roster}/swap-rite.sh debt-triage $ARGUMENTS`
 2. Display the roster output from swap-rite.sh (agents and their roles)
-3. If SESSION_CONTEXT exists, update `active_rite` to `debt-triage-pack`
+3. If SESSION_CONTEXT exists, update `active_rite` to `debt-triage`
 
 ## Flags
 

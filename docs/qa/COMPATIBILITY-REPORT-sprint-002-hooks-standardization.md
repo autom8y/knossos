@@ -3,7 +3,7 @@
 **Date**: 2026-01-01
 **Session**: session-20260101-195557-1b27d7dc
 **Sprint**: sprint-002 "Hooks Standardization"
-**Tester**: Compatibility Tester (ecosystem-pack)
+**Tester**: Compatibility Tester (ecosystem)
 
 ---
 
@@ -115,7 +115,7 @@ Category: lib (11 library files)
 **Description**: The categorical refactoring moved hooks from `user-hooks/*.sh` to categorical subdirectories (`user-hooks/context-injection/`, `user-hooks/session-guards/`, etc.). However, `swap-rite.sh` line 2521 only copies from root-level `$base_hooks_dir/*.sh`.
 
 **Reproduction Steps**:
-1. Run `swap-rite.sh 10x-dev-pack`
+1. Run `swap-rite.sh 10x-dev`
 2. Check `.claude/hooks/` in target project
 3. Observe: hooks are not present (only lib/ files copied)
 

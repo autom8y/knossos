@@ -195,17 +195,17 @@ test_update_cem_manifest_rite_creates_rite_section() {
     source "$ROSTER_HOME/swap-rite.sh" 2>/dev/null <<< "" || true
 
     # Call the function
-    update_cem_manifest_rite "10x-dev-pack"
+    update_cem_manifest_rite "10x-dev"
 
     # Check manifest was updated
     if [[ -f ".claude/.cem/manifest.json" ]]; then
         local rite_name
         rite_name=$(jq -r '.rite.name // empty' ".claude/.cem/manifest.json")
 
-        if [[ "$rite_name" == "10x-dev-pack" ]]; then
+        if [[ "$rite_name" == "10x-dev" ]]; then
             test_pass "Rite name set in manifest"
         else
-            test_fail "Rite name" "10x-dev-pack" "$rite_name"
+            test_fail "Rite name" "10x-dev" "$rite_name"
         fi
 
         # Check last_refresh is set
@@ -222,10 +222,10 @@ test_update_cem_manifest_rite_creates_rite_section() {
         local roster_path
         roster_path=$(jq -r '.rite.roster_path // empty' ".claude/.cem/manifest.json")
 
-        if [[ "$roster_path" == *"rites/10x-dev-pack"* ]]; then
+        if [[ "$roster_path" == *"rites/10x-dev"* ]]; then
             test_pass "roster_path set correctly"
         else
-            test_fail "roster_path" "*rites/10x-dev-pack*" "$roster_path"
+            test_fail "roster_path" "*rites/10x-dev*" "$roster_path"
         fi
     else
         test_fail "manifest exists" "true" "false"
@@ -245,7 +245,7 @@ test_update_cem_manifest_no_manifest() {
     source "$ROSTER_HOME/swap-rite.sh" 2>/dev/null <<< "" || true
 
     # Call the function - should not fail
-    if update_cem_manifest_rite "10x-dev-pack" 2>/dev/null; then
+    if update_cem_manifest_rite "10x-dev" 2>/dev/null; then
         test_pass "Graceful return when no manifest"
     else
         test_fail "Return code" "0" "$?"
@@ -317,7 +317,7 @@ test_swap_without_new_flags() {
 
     # Dry-run swap to test the flow without actually swapping
     local output
-    output=$("$ROSTER_HOME/swap-rite.sh" "10x-dev-pack" --dry-run 2>&1) || true
+    output=$("$ROSTER_HOME/swap-rite.sh" "10x-dev" --dry-run 2>&1) || true
 
     # Should show preview output, not an error about flags
     if echo "$output" | grep -qi "error.*sync\|unknown.*option"; then

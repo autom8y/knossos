@@ -47,10 +47,10 @@ The codebase has accumulated backward compatibility patterns during the team-to-
 | File | Pattern | Count |
 |------|---------|-------|
 | `user-commands/session/start.md` | `--team=PACK` | 3 |
-| `user-commands/workflow/sprint.md` | `--team=10x-dev-pack` | 3 |
+| `user-commands/workflow/sprint.md` | `--team=10x-dev` | 3 |
 | `user-commands/navigation/worktree.md` | `--team=PACK` | 5 |
 | `user-skills/session-lifecycle/start-ref/SKILL.md` | `--team` | 3 |
-| `rites/forge-pack/commands/eval-agent.md` | `--team=<team-name>` | 2 |
+| `rites/forge/commands/eval-agent.md` | `--team=<team-name>` | 2 |
 
 **Assessment**: 16+ documentation files reference `--team` flag. Must update docs alongside flag removal.
 
@@ -184,17 +184,17 @@ The pattern `cat ACTIVE_RITE 2>/dev/null || cat ACTIVE_RITE` exists for backward
 
 | Satellite | Configuration | Risk Assessment |
 |-----------|---------------|-----------------|
-| 10x-dev-pack | Full ecosystem | MEDIUM - may have custom scripts |
-| ecosystem-pack | Full ecosystem | LOW - maintained in-repo |
-| forge-pack | Full ecosystem | LOW - maintained in-repo |
-| doc-rite-pack | Full ecosystem | LOW - maintained in-repo |
-| hygiene-pack | Minimal | LOW |
-| debt-triage-pack | Minimal | LOW |
-| sre-pack | Minimal | LOW |
-| intelligence-pack | Minimal | LOW |
-| rnd-pack | Minimal | LOW |
-| security-pack | Minimal | LOW |
-| strategy-pack | Minimal | LOW |
+| 10x-dev | Full ecosystem | MEDIUM - may have custom scripts |
+| ecosystem | Full ecosystem | LOW - maintained in-repo |
+| forge | Full ecosystem | LOW - maintained in-repo |
+| docs | Full ecosystem | LOW - maintained in-repo |
+| hygiene | Minimal | LOW |
+| debt-triage | Minimal | LOW |
+| sre | Minimal | LOW |
+| intelligence | Minimal | LOW |
+| rnd | Minimal | LOW |
+| security | Minimal | LOW |
+| strategy | Minimal | LOW |
 
 ### 6.2 External Consumer Patterns
 

@@ -601,7 +601,7 @@ Sails generation becomes a quality gate:
 A GRAY session can be upgraded to WHITE only through an independent QA session:
 
 1. Original session wrapped with GRAY sails
-2. New QA session created: `/start "QA: {original initiative}" --complexity=PATCH --team=10x-dev-pack`
+2. New QA session created: `/start "QA: {original initiative}" --complexity=PATCH --team=10x-dev`
 3. QA session references original session ID
 4. QA adversary agent runs adversarial validation
 5. If issues found: document in constraint resolution log

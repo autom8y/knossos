@@ -1,5 +1,5 @@
 ---
-description: Quick switch to sre-pack (reliability workflow)
+description: Quick switch to sre (reliability workflow)
 argument-hint: [--update] [--dry-run] [--keep-all|--remove-all|--promote-all]
 allowed-tools: Bash, Read
 model: haiku
@@ -14,9 +14,9 @@ Switch to the SRE rite and display the rite roster. $ARGUMENTS
 
 ## Behavior
 
-1. Execute: `${KNOSSOS_HOME:-~/Code/roster}/swap-rite.sh sre-pack $ARGUMENTS`
+1. Execute: `${KNOSSOS_HOME:-~/Code/roster}/swap-rite.sh sre $ARGUMENTS`
 2. Display the roster output from swap-rite.sh (agents and their roles)
-3. If SESSION_CONTEXT exists, update `active_rite` to `sre-pack`
+3. If SESSION_CONTEXT exists, update `active_rite` to `sre`
 
 ## Flags
 

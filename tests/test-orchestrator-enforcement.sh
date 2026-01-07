@@ -166,7 +166,7 @@ session_id: "$session_id"
 created_at: "2026-01-02T12:00:00Z"
 initiative: "Test Initiative"
 complexity: "$complexity"
-active_team: "ecosystem-pack"
+active_team: "ecosystem"
 current_phase: "implementation"
 workflow:
   name: "test-workflow"
@@ -485,7 +485,7 @@ EOF
 session_id: "$session_id"
 created_at: "2026-01-02T12:00:00Z"
 initiative: "Legacy Initiative"
-active_team: "ecosystem-pack"
+active_team: "ecosystem"
 current_phase: "implementation"
 workflow:
   name: "test-workflow"

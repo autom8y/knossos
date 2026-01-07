@@ -1084,7 +1084,7 @@ Common Options:
   help                                        Show this help
 
 Examples:
-  worktree-manager.sh create "auth-sprint" --rite=10x-dev-pack
+  worktree-manager.sh create "auth-sprint" --rite=10x-dev
   worktree-manager.sh list
   worktree-manager.sh diff wt-20251224-143052-abc
   worktree-manager.sh merge wt-20251224-143052-abc --to=develop

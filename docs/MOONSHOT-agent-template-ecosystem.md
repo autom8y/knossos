@@ -103,10 +103,10 @@ Agent behaviors require audit trails, version control, and compliance attestatio
 │                          ROSTER                                 │
 │  ┌─────────────────────────────────────────────────────────┐   │
 │  │ rites/                                                   │   │
-│  │   ├── 10x-dev-pack/                                     │   │
+│  │   ├── 10x-dev/                                     │   │
 │  │   │     ├── agents/*.md        (handcrafted)            │   │
 │  │   │     └── workflow.yaml                               │   │
-│  │   ├── rnd-pack/                                         │   │
+│  │   ├── rnd/                                         │   │
 │  │   │     ├── agents/*.md        (handcrafted)            │   │
 │  │   │     ├── orchestrator.yaml  (POC: spec)              │   │
 │  │   │     └── workflow.yaml                               │   │
@@ -286,7 +286,7 @@ Agents are **commoditized infrastructure**—teams focus on domain logic, not pr
 **Deliverables**:
 - JSON Schema for agent YAML specs (frontmatter, sections, skills references)
 - Schema validation in generate-orchestrator.sh
-- Migration of rnd-pack orchestrator.yaml to schema-compliant format
+- Migration of rnd orchestrator.yaml to schema-compliant format
 - Documentation of agent taxonomy (orchestrator, specialist, reviewer)
 
 **Investment**: 1-2 weeks
@@ -299,7 +299,7 @@ Agents are **commoditized infrastructure**—teams focus on domain logic, not pr
 **Deliverables**:
 - Base templates for specialist and reviewer archetypes
 - Composition system for shared sections (Domain Authority, Handoff Criteria, etc.)
-- Generation of 10x-dev-pack agents from YAML specs
+- Generation of 10x-dev agents from YAML specs
 - Comparison tooling (generated vs. handcrafted diff)
 
 **Investment**: 2-3 weeks
@@ -423,7 +423,7 @@ This architecture positions the agent ecosystem as **platform infrastructure** r
 ### Immediate Actions (Start Now)
 
 1. **Define agent schema**: Write JSON Schema for agent YAML specs (1 week)
-2. **Validate POC output**: Run schema validation on rnd-pack generated orchestrator
+2. **Validate POC output**: Run schema validation on rnd generated orchestrator
 3. **Document taxonomy**: Formalize orchestrator/specialist/reviewer archetypes
 4. **Inventory section patterns**: Catalog shared sections across all 50+ agents
 
@@ -509,4 +509,4 @@ Based on analysis of 50+ agents across 10 rites:
 
 ---
 
-*Document produced by Moonshot Architect as terminal agent in rnd-pack pipeline.*
+*Document produced by Moonshot Architect as terminal agent in rnd pipeline.*

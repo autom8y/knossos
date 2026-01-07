@@ -38,7 +38,7 @@ Git worktrees provide true filesystem isolation for parallel Claude sessions. Ea
 
 ```bash
 # 1. Create worktree for parallel work
-/worktree create "feature-billing" --rite=10x-dev-pack
+/worktree create "feature-billing" --rite=10x-dev
 
 # 2. Navigate in new terminal
 cd worktrees/wt-{id} && claude

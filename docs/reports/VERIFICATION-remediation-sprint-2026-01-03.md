@@ -46,7 +46,7 @@ All critical verification checks passed. The remediation sprint successfully rem
 
 **Status**: PASS
 
-### forge-pack (7 agents)
+### forge (7 agents)
 - agent-curator.md
 - agent-designer.md
 - eval-specialist.md
@@ -55,7 +55,7 @@ All critical verification checks passed. The remediation sprint successfully rem
 - prompt-architect.md
 - workflow-engineer.md
 
-### 10x-dev-pack (5 agents)
+### 10x-dev (5 agents)
 - architect.md
 - orchestrator.md
 - principal-engineer.md
@@ -63,15 +63,15 @@ All critical verification checks passed. The remediation sprint successfully rem
 - requirements-analyst.md
 
 ### Other Team Packs Present
-- debt-triage-pack
+- debt-triage
 - doc-team-pack
-- ecosystem-pack
-- hygiene-pack
-- intelligence-pack
-- rnd-pack
-- security-pack
-- sre-pack
-- strategy-pack
+- ecosystem
+- hygiene
+- intelligence
+- rnd
+- security
+- sre
+- strategy
 - shared (cross-rite resources)
 
 ---
@@ -134,7 +134,7 @@ artifact-tracker.sh, auto-park.sh, coach-mode.sh, command-validator.sh, commit-t
 
 **Status**: PASS
 
-**Command**: `./swap-rite.sh --dry-run 10x-dev-pack`
+**Command**: `./swap-rite.sh --dry-run 10x-dev`
 
 **Result**: Dry-run completed successfully
 
@@ -177,7 +177,7 @@ artifact-tracker.sh, auto-park.sh, coach-mode.sh, command-validator.sh, commit-t
 - **Roster Path**: /Users/tomtenuta/Code/skeleton_claude
 - **Last Sync**: 2026-01-03T17:25:10Z
 - **Managed Files**: 7
-- **Active Team**: 10x-dev-pack
+- **Active Team**: 10x-dev
 
 **Note**: The "missing files" warnings are architectural - roster-sync manages core project scaffolding, while swap-rite.sh handles team-specific materialization. This is working as designed.
 
@@ -189,7 +189,7 @@ artifact-tracker.sh, auto-park.sh, coach-mode.sh, command-validator.sh, commit-t
 
 ### .claude/ACTIVE_RITE
 ```
-10x-dev-pack
+10x-dev
 ```
 
 ### .claude/agents/ (Materialized Team)
@@ -224,8 +224,8 @@ artifact-tracker.sh, auto-park.sh, coach-mode.sh, command-validator.sh, commit-t
 | user-commands/ | /Users/tomtenuta/Code/roster/user-commands/ | Yes |
 | user-skills/ | /Users/tomtenuta/Code/roster/user-skills/ | Yes |
 | user-hooks/ | /Users/tomtenuta/Code/roster/user-hooks/ | Yes |
-| rites/10x-dev-pack/agents/ | /Users/tomtenuta/Code/roster/rites/10x-dev-pack/agents/ | Yes |
-| rites/forge-pack/agents/ | /Users/tomtenuta/Code/roster/rites/forge-pack/agents/ | Yes |
+| rites/10x-dev/agents/ | /Users/tomtenuta/Code/roster/rites/10x-dev/agents/ | Yes |
+| rites/forge/agents/ | /Users/tomtenuta/Code/roster/rites/forge/agents/ | Yes |
 | ~/.claude/agents/ | /Users/tomtenuta/.claude/agents/ | Yes |
 | ~/.claude/skills/ | /Users/tomtenuta/.claude/skills/ | Yes |
 | ~/.claude/hooks/ | /Users/tomtenuta/.claude/hooks/ | Yes |

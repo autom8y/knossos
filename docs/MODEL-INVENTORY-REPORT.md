@@ -177,7 +177,7 @@
 | Command | Model | Description |
 |---------|-------|-------------|
 | `/consult` | opus | Ecosystem guidance |
-| `/ecosystem` | sonnet | Switch to ecosystem-pack |
+| `/ecosystem` | sonnet | Switch to ecosystem |
 | `/team` | sonnet | Switch rites |
 | `/sessions` | sonnet | List/manage sessions |
 | `/worktree` | sonnet | Manage isolated worktrees |
@@ -186,16 +186,16 @@
 
 | Command | Model | Target Team |
 |---------|-------|-------------|
-| `/10x` | sonnet | 10x-dev-pack |
+| `/10x` | sonnet | 10x-dev |
 | `/docs` | sonnet | doc-team-pack |
-| `/hygiene` | sonnet | hygiene-pack |
-| `/debt` | sonnet | debt-triage-pack |
-| `/sre` | sonnet | sre-pack |
-| `/security` | sonnet | security-pack |
-| `/intelligence` | sonnet | intelligence-pack |
-| `/rnd` | sonnet | rnd-pack |
-| `/strategy` | sonnet | strategy-pack |
-| `/forge` | sonnet | forge-pack |
+| `/hygiene` | sonnet | hygiene |
+| `/debt` | sonnet | debt-triage |
+| `/sre` | sonnet | sre |
+| `/security` | sonnet | security |
+| `/intelligence` | sonnet | intelligence |
+| `/rnd` | sonnet | rnd |
+| `/strategy` | sonnet | strategy |
+| `/forge` | sonnet | forge |
 
 ### Meta Commands (3)
 
@@ -215,13 +215,13 @@
 
 | Command | Model | Team | Description |
 |---------|-------|------|-------------|
-| `/pr` | sonnet | 10x-dev-pack | Create pull request |
-| `/spike` | opus | 10x-dev-pack | Time-boxed research |
+| `/pr` | sonnet | 10x-dev | Create pull request |
+| `/spike` | opus | 10x-dev | Time-boxed research |
 | `/consolidate` | opus | doc-team-pack | Consolidate documentation |
-| `/cem-debug` | opus | ecosystem-pack | Diagnose CEM issues |
-| `/eval-agent` | opus | forge-pack | Test agent in isolation |
-| `/new-team` | opus | forge-pack | Create new rite |
-| `/validate-team` | opus | forge-pack | Validate rite |
+| `/cem-debug` | opus | ecosystem | Diagnose CEM issues |
+| `/eval-agent` | opus | forge | Test agent in isolation |
+| `/new-team` | opus | forge | Create new rite |
+| `/validate-team` | opus | forge | Validate rite |
 
 ---
 
@@ -271,7 +271,7 @@ These agents might work well with sonnet given their focused roles:
 
 | Agent | Team | Current | Consideration |
 |-------|------|---------|---------------|
-| principal-engineer | 10x-dev-pack | opus | Implementation-focused, could be sonnet |
+| principal-engineer | 10x-dev | opus | Implementation-focused, could be sonnet |
 | information-architect | doc-team-pack | opus | Structure work, possibly sonnet |
 
 ### Potential Sonnet → Opus (Quality Improvement)
@@ -280,8 +280,8 @@ These agents might benefit from opus for better reasoning:
 
 | Agent | Team | Current | Consideration |
 |-------|------|---------|---------------|
-| analytics-engineer | intelligence-pack | sonnet | Complex pipeline design |
-| debt-collector | debt-triage-pack | sonnet | Judgment on debt priority |
+| analytics-engineer | intelligence | sonnet | Complex pipeline design |
+| debt-collector | debt-triage | sonnet | Judgment on debt priority |
 
 ### Haiku Candidates (Speed/Cost)
 
@@ -299,7 +299,7 @@ Currently 0 haiku. Potential candidates for simple tasks:
 
 | Item | Issue | Recommendation |
 |------|-------|----------------|
-| strategy-pack orchestrator | color: yellow | Update to standard (cyan/purple) |
+| strategy orchestrator | color: yellow | Update to standard (cyan/purple) |
 
 ---
 

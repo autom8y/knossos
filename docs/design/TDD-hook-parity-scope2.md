@@ -275,7 +275,7 @@ hooks:
     description: "Validates written files for security issues"
 ```
 
-### Example: 10x-dev-pack
+### Example: 10x-dev
 
 ```yaml
 # 10x Dev Pack Hooks
@@ -850,7 +850,7 @@ swap_hook_registrations() {
 ### Example Output
 
 ```
-$ ./swap-rite.sh --dry-run security-pack
+$ ./swap-rite.sh --dry-run security
 
 Hook registrations that would be written:
 {

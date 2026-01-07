@@ -324,7 +324,7 @@ session_id: "session-20260105-143000-abc12345"
 status: "ACTIVE"  # ACTIVE | PARKED | ARCHIVED
 initiative: "feature-name"
 complexity: "MODULE"
-team: "10x-dev-pack"
+team: "10x-dev"
 created_at: "2026-01-05T14:30:00Z"
 ---
 

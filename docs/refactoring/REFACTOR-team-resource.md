@@ -439,7 +439,7 @@ remove_resource_orphans() { ... }
   - All existing callers work without modification
   - No behavior change observable from outside
 - **Verification**:
-  1. Run: `./swap-rite.sh hygiene-pack` (full integration)
+  1. Run: `./swap-rite.sh hygiene` (full integration)
   2. Run: `./swap-rite.sh different-team` (team swap)
   3. Verify: Backups created, orphans handled, team activated
 - **Commit scope**: Add source statement, add wrapper functions
@@ -603,7 +603,7 @@ Refs: REFACTOR-rite-resource.md
 After each commit:
 1. `bash -n lib/team/rite-resource.sh` - Syntax check
 2. Run unit tests for completed functions
-3. After RF-007: Full integration test with `./swap-rite.sh hygiene-pack`
+3. After RF-007: Full integration test with `./swap-rite.sh hygiene`
 
 ### Files to Avoid Touching
 
@@ -654,4 +654,4 @@ Findings deferred for future work:
 | Source file | `/Users/tomtenuta/Code/roster/swap-rite.sh` | Analyzed (lines 2050-2760) |
 | Module pattern | `/Users/tomtenuta/Code/roster/lib/sync/sync-core.sh` | Read |
 | Module pattern | `/Users/tomtenuta/Code/roster/lib/sync/sync-manifest.sh` | Read |
-| Template | `/Users/tomtenuta/Code/roster/rites/ecosystem-pack/skills/doc-ecosystem/templates/refactoring-plan.md` | Read |
+| Template | `/Users/tomtenuta/Code/roster/rites/ecosystem/skills/doc-ecosystem/templates/refactoring-plan.md` | Read |

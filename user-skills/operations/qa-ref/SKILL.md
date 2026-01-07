@@ -416,7 +416,7 @@ Use `/qa` for production-critical features requiring audit trail.
 - **PRD must exist** at `/docs/requirements/PRD-{feature-slug}.md`
 - Implementation complete (code files exist)
 - TDD optional but helpful
-- 10x-dev-pack or team with QA Adversary
+- 10x-dev or team with QA Adversary
 - Tests should be passing (QA validates beyond unit tests)
 
 ---
@@ -538,7 +538,7 @@ Both are valuable, different perspectives:
 | PRD not found | No acceptance criteria | Run `/architect` or `/task` first |
 | Implementation not found | Nothing to test | Run `/build` or `/task` first |
 | Tests not passing | Unit tests failing | Fix tests before QA validation |
-| Missing QA agent | Team doesn't have QA | Switch to 10x-dev-pack with `/10x` |
+| Missing QA agent | Team doesn't have QA | Switch to 10x-dev with `/10x` |
 | Acceptance criteria ambiguous | Can't determine pass/fail | Escalate to Analyst for clarification |
 
 ---

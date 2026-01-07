@@ -272,7 +272,7 @@ test_migrate_v2_to_v3() {
         "last_sync": "2025-01-01T00:00:00Z"
     },
     "rite": {
-        "name": "10x-dev-pack"
+        "name": "10x-dev"
     },
     "managed_files": []
 }
@@ -309,10 +309,10 @@ EOF
 
     local rite_name
     rite_name=$(echo "$manifest" | jq -r '.rite.name')
-    if [[ "$rite_name" == "10x-dev-pack" ]]; then
+    if [[ "$rite_name" == "10x-dev" ]]; then
         test_pass "rite preserved"
     else
-        test_fail "rite.name" "10x-dev-pack" "$rite_name"
+        test_fail "rite.name" "10x-dev" "$rite_name"
     fi
 
     local migrated_from

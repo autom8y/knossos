@@ -129,20 +129,20 @@ When invoked without arguments, `/consult` provides ecosystem overview:
 
 ```
 === Ecosystem Status ===
-Active Rite: 10x-dev-pack (5 agents)
+Active Rite: 10x-dev (5 agents)
 Session: ACTIVE - "Add authentication" (MODULE complexity)
 Git: feature/auth-system (clean)
 
 === Available Rites ===
-  10x-dev-pack       /10x          Full feature development
-  doc-rite-pack      /docs         Documentation workflows
-  hygiene-pack       /hygiene      Code quality & refactoring
-  debt-triage-pack   /debt         Technical debt management
-  sre-pack           /sre          Operations & reliability
-  security-pack      /security     Security assessment
-  intelligence-pack  /intelligence Analytics & research
-  rnd-pack           /rnd          Exploration & prototyping
-  strategy-pack      /strategy     Business analysis
+  10x-dev       /10x          Full feature development
+  docs      /docs         Documentation workflows
+  hygiene       /hygiene      Code quality & refactoring
+  debt-triage   /debt         Technical debt management
+  sre           /sre          Operations & reliability
+  security      /security     Security assessment
+  intelligence  /intelligence Analytics & research
+  rnd           /rnd          Exploration & prototyping
+  strategy      /strategy     Business analysis
 
 === Common Starting Points ===
   Build a feature:     /10x && /start "Feature name"
@@ -208,7 +208,7 @@ Domain: Security + Backend
 Estimated Complexity: MODULE to SERVICE level
 
 === Recommendation ===
-Rite: 10x-dev-pack
+Rite: 10x-dev
 Workflow: /task (sequential phases)
 Complexity: MODULE
 
@@ -311,7 +311,7 @@ This workflow guides you through full feature lifecycle:
 Requirements → Design → Implementation → Testing → Deployment
 
 Current Context:
-  Rite: none (will switch to 10x-dev-pack)
+  Rite: none (will switch to 10x-dev)
   Session: none (will start new)
   Branch: main
 
@@ -357,15 +357,15 @@ Display complete rite reference table:
 
 | Rite              | Command       | Agents | Best For                           |
 |-------------------|---------------|--------|------------------------------------|
-| 10x-dev-pack      | /10x          | 5      | Full feature development lifecycle |
-| doc-rite-pack     | /docs         | 4      | Documentation, technical writing   |
-| hygiene-pack      | /hygiene      | 4      | Code quality, refactoring          |
-| debt-triage-pack  | /debt         | 3      | Technical debt prioritization      |
-| sre-pack          | /sre          | 4      | Operations, reliability            |
-| security-pack     | /security     | 4      | Security assessment, compliance    |
-| intelligence-pack | /intelligence | 4      | Analytics, A/B testing, research   |
-| rnd-pack          | /rnd          | 4      | Exploration, prototyping           |
-| strategy-pack     | /strategy     | 4      | Market research, business analysis |
+| 10x-dev      | /10x          | 5      | Full feature development lifecycle |
+| docs     | /docs         | 4      | Documentation, technical writing   |
+| hygiene      | /hygiene      | 4      | Code quality, refactoring          |
+| debt-triage  | /debt         | 3      | Technical debt prioritization      |
+| sre          | /sre          | 4      | Operations, reliability            |
+| security     | /security     | 4      | Security assessment, compliance    |
+| intelligence | /intelligence | 4      | Analytics, A/B testing, research   |
+| rnd          | /rnd          | 4      | Exploration, prototyping           |
+| strategy     | /strategy     | 4      | Market research, business analysis |
 
 Total: 41 agents across all rites
 
@@ -391,15 +391,15 @@ Display all commands categorized by domain:
 
 --- Rite Management (10) ---
 /rite               Switch rite or list available
-/10x                Quick switch to 10x-dev-pack
-/docs               Quick switch to doc-rite-pack
-/hygiene            Quick switch to hygiene-pack
-/debt               Quick switch to debt-triage-pack
-/sre                Quick switch to sre-pack
-/security           Quick switch to security-pack
-/intelligence       Quick switch to intelligence-pack
-/rnd                Quick switch to rnd-pack
-/strategy           Quick switch to strategy-pack
+/10x                Quick switch to 10x-dev
+/docs               Quick switch to docs
+/hygiene            Quick switch to hygiene
+/debt               Quick switch to debt-triage
+/sre                Quick switch to sre
+/security           Quick switch to security
+/intelligence       Quick switch to intelligence
+/rnd                Quick switch to rnd
+/strategy           Quick switch to strategy
 
 --- Development Workflows (4) ---
 /task               Single task through full lifecycle
@@ -525,15 +525,15 @@ When recommending rites, `/consult` retrieves current rite inventory from:
 
 | Rite | Command | Complexity Levels | Use When |
 |------|---------|-------------------|----------|
-| **10x-dev-pack** | `/10x` | SCRIPT, MODULE, SERVICE, PLATFORM | Building features, fixing complex bugs |
-| **doc-rite-pack** | `/docs` | PAGE, SECTION, SITE | Writing or updating documentation |
-| **hygiene-pack** | `/hygiene` | SPOT, MODULE, CODEBASE | Refactoring, code quality improvements |
-| **debt-triage-pack** | `/debt` | QUICK, AUDIT | Assessing and prioritizing technical debt |
-| **sre-pack** | `/sre` | TASK, PROJECT, PLATFORM | Operational work, reliability, monitoring |
-| **security-pack** | `/security` | PATCH, FEATURE, SYSTEM | Security reviews, vulnerability fixes |
-| **intelligence-pack** | `/intelligence` | METRIC, FEATURE, INITIATIVE | Analytics, A/B tests, data research |
-| **rnd-pack** | `/rnd` | SPIKE, EVALUATION, MOONSHOT | Exploration, prototyping, research |
-| **strategy-pack** | `/strategy` | TACTICAL, STRATEGIC, TRANSFORMATION | Business planning, market research |
+| **10x-dev** | `/10x` | SCRIPT, MODULE, SERVICE, PLATFORM | Building features, fixing complex bugs |
+| **docs** | `/docs` | PAGE, SECTION, SITE | Writing or updating documentation |
+| **hygiene** | `/hygiene` | SPOT, MODULE, CODEBASE | Refactoring, code quality improvements |
+| **debt-triage** | `/debt` | QUICK, AUDIT | Assessing and prioritizing technical debt |
+| **sre** | `/sre` | TASK, PROJECT, PLATFORM | Operational work, reliability, monitoring |
+| **security** | `/security` | PATCH, FEATURE, SYSTEM | Security reviews, vulnerability fixes |
+| **intelligence** | `/intelligence` | METRIC, FEATURE, INITIATIVE | Analytics, A/B tests, data research |
+| **rnd** | `/rnd` | SPIKE, EVALUATION, MOONSHOT | Exploration, prototyping, research |
+| **strategy** | `/strategy` | TACTICAL, STRATEGIC, TRANSFORMATION | Business planning, market research |
 
 ---
 
@@ -547,7 +547,7 @@ When recommending rites, `/consult` retrieves current rite inventory from:
 
 **Response:**
 - Assessment: New feature, ecommerce domain, MODULE/SERVICE complexity
-- Recommendation: 10x-dev-pack, /task workflow, MODULE complexity
+- Recommendation: 10x-dev, /task workflow, MODULE complexity
 - Command-Flow: `/10x` → `/start "Shopping cart" --complexity=MODULE` → agent handoffs
 - Alternatives: Consider `/intelligence` rite if A/B testing cart UX needed
 
@@ -561,7 +561,7 @@ When recommending rites, `/consult` retrieves current rite inventory from:
 
 **Response:**
 - Assessment: Performance optimization, backend focus, existing system
-- Recommendation: 10x-dev-pack for implementation OR intelligence-pack for profiling first
+- Recommendation: 10x-dev for implementation OR intelligence for profiling first
 - Command-Flow: Option A (immediate fix) vs Option B (data-driven)
 - Alternatives: `/sre` rite if operational/infrastructure issue
 
@@ -575,7 +575,7 @@ When recommending rites, `/consult` retrieves current rite inventory from:
 
 **Response:**
 - Assessment: Documentation task, API domain, SECTION complexity
-- Recommendation: doc-rite-pack, /task workflow
+- Recommendation: docs, /task workflow
 - Command-Flow: `/docs` → `/task "API documentation" --complexity=SECTION`
 - Alternatives: None, straightforward doc work
 
@@ -589,7 +589,7 @@ When recommending rites, `/consult` retrieves current rite inventory from:
 
 **Response:**
 - Assessment: Code quality, refactoring need, MODULE complexity
-- Recommendation: hygiene-pack, /task workflow
+- Recommendation: hygiene, /task workflow
 - Command-Flow: `/hygiene` → `/task "Refactor module X" --complexity=MODULE`
 - Alternatives: If technical debt assessment needed first, start with `/debt`
 

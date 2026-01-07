@@ -27,7 +27,7 @@
           "type": "string",
           "description": "Rite pack name (lowercase with hyphens, must match directory name)",
           "pattern": "^[a-z0-9-]+$",
-          "examples": ["rnd-pack", "security-pack", "ecosystem-pack"]
+          "examples": ["rnd", "security", "ecosystem"]
         },
         "domain": {
           "type": "string",
@@ -59,15 +59,15 @@
           "examples": [
             "Coordinates technology exploration phases",
             "Coordinates security initiatives",
-            "Coordinates ecosystem-pack phases"
+            "Coordinates ecosystem phases"
           ]
         },
         "description": {
           "type": "string",
           "description": "Multi-line description for frontmatter 'description' field. May use YAML pipe syntax (|) for multiline.",
           "examples": [
-            "Stateless advisor that routes work through rnd-pack specialists. Does not execute—provides structured directives for the main agent to invoke specialists.",
-            "Coordinates ecosystem-pack phases for CEM/roster infrastructure work. Use when: work spans multiple phases or requires cross-component coordination."
+            "Stateless advisor that routes work through rnd specialists. Does not execute—provides structured directives for the main agent to invoke specialists.",
+            "Coordinates ecosystem phases for CEM/roster infrastructure work. Use when: work spans multiple phases or requires cross-component coordination."
           ]
         }
       }
@@ -180,7 +180,7 @@
     },
     "cross_team_protocol": {
       "type": "string",
-      "description": "OPTIONAL: Cross-team handoff protocol if this team acts as a hub (e.g., ecosystem-pack coordinates with other packs). Empty string means no special protocol.",
+      "description": "OPTIONAL: Cross-team handoff protocol if this team acts as a hub (e.g., ecosystem coordinates with other packs). Empty string means no special protocol.",
       "examples": [
         "Ecosystem-pack acts as hub for infrastructure changes. When escalating to user, also notify infrastructure-team lead.",
         ""
@@ -209,13 +209,13 @@
   "examples": [
     {
       "rite": {
-        "name": "rnd-pack",
+        "name": "rnd",
         "domain": "technology exploration",
         "color": "purple"
       },
       "frontmatter": {
         "role": "Coordinates technology exploration phases",
-        "description": "Stateless advisor that routes work through rnd-pack specialists. Does not execute—provides structured directives for the main agent to invoke specialists. Use when: exploration spans multiple phases or requires coordination. Triggers: coordinate, orchestrate, R&D workflow, technology exploration, innovation pipeline."
+        "description": "Stateless advisor that routes work through rnd specialists. Does not execute—provides structured directives for the main agent to invoke specialists. Use when: exploration spans multiple phases or requires coordination. Triggers: coordinate, orchestrate, R&D workflow, technology exploration, innovation pipeline."
       },
       "routing": {
         "technology-scout": "New tech request, emerging trends, build vs buy",
@@ -259,13 +259,13 @@
     },
     {
       "rite": {
-        "name": "ecosystem-pack",
+        "name": "ecosystem",
         "domain": "ecosystem infrastructure",
         "color": "#8B00FF"
       },
       "frontmatter": {
-        "role": "Coordinates ecosystem-pack phases",
-        "description": "Coordinates ecosystem-pack phases for CEM/roster infrastructure work. Use when: work spans multiple phases or requires cross-component coordination. Triggers: coordinate, orchestrate, multi-phase, ecosystem workflow."
+        "role": "Coordinates ecosystem phases",
+        "description": "Coordinates ecosystem phases for CEM/roster infrastructure work. Use when: work spans multiple phases or requires cross-component coordination. Triggers: coordinate, orchestrate, multi-phase, ecosystem workflow."
       },
       "routing": {
         "ecosystem-analyst": "Initial phase, gap analysis needed",
@@ -321,13 +321,13 @@
     },
     {
       "rite": {
-        "name": "security-pack",
+        "name": "security",
         "domain": "security assessment",
         "color": "red"
       },
       "frontmatter": {
         "role": "Coordinates security initiatives",
-        "description": "Coordinates security-pack phases for security work. Routes tasks through threat modeling, compliance, penetration testing, and review phases. Use when: security work spans multiple phases or requires cross-functional coordination. Triggers: coordinate, orchestrate, security workflow, security assessment, multi-phase security."
+        "description": "Coordinates security phases for security work. Routes tasks through threat modeling, compliance, penetration testing, and review phases. Use when: security work spans multiple phases or requires cross-functional coordination. Triggers: coordinate, orchestrate, security workflow, security assessment, multi-phase security."
       },
       "routing": {
         "threat-modeler": "Security concern raised, threat model needed",

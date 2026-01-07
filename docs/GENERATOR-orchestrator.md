@@ -37,16 +37,16 @@ The `orchestrator-generate.sh` generator creates production-ready orchestrator.m
 cd /roster
 
 # Generate with validation
-./templates/orchestrator-generate.sh rnd-pack
+./templates/orchestrator-generate.sh rnd
 
 # Preview output (no file written)
-./templates/orchestrator-generate.sh rnd-pack --dry-run
+./templates/orchestrator-generate.sh rnd --dry-run
 
 # Validate config without generating
-./templates/orchestrator-generate.sh rnd-pack --validate-only
+./templates/orchestrator-generate.sh rnd --validate-only
 
 # Regenerate existing team
-./templates/orchestrator-generate.sh security-pack --force
+./templates/orchestrator-generate.sh security --force
 ```
 
 ### Generate All Teams
@@ -81,16 +81,16 @@ cd /roster
 
 | Argument | Purpose | Example |
 |----------|---------|---------|
-| `<team-name>` | Generate single team (lowercase with hyphens) | `rnd-pack`, `security-pack` |
+| `<team-name>` | Generate single team (lowercase with hyphens) | `rnd`, `security` |
 | `--all` | Batch-generate all teams found in rites/ directory | `./orchestrator-generate.sh --all` |
 
 ### Options
 
 | Flag | Purpose | Usage |
 |------|---------|-------|
-| `--validate-only` | Check configs and schema, skip generation | `./orchestrator-generate.sh rnd-pack --validate-only` |
-| `--dry-run` | Output to stdout instead of writing file | `./orchestrator-generate.sh rnd-pack --dry-run` |
-| `--force` | Overwrite existing orchestrator.md | `./orchestrator-generate.sh security-pack --force` |
+| `--validate-only` | Check configs and schema, skip generation | `./orchestrator-generate.sh rnd --validate-only` |
+| `--dry-run` | Output to stdout instead of writing file | `./orchestrator-generate.sh rnd --dry-run` |
+| `--force` | Overwrite existing orchestrator.md | `./orchestrator-generate.sh security --force` |
 | `--help` | Show help message | `./orchestrator-generate.sh --help` |
 
 ### Environment Variables
@@ -114,7 +114,7 @@ Each team has an `orchestrator.yaml` file that defines its orchestrator.md gener
 ```yaml
 # Team metadata
 team:
-  name: rnd-pack                          # Must match directory name
+  name: rnd                          # Must match directory name
   domain: technology exploration
   color: purple                           # Hex or named color
 
@@ -156,7 +156,7 @@ antipatterns:
 cross_team_protocol: "Description of how team coordinates with others"
 ```
 
-**Example**: `/roster/rites/rnd-pack/orchestrator.yaml`
+**Example**: `/roster/rites/rnd/orchestrator.yaml`
 
 ### workflow.yaml
 
@@ -197,21 +197,21 @@ OK: Generated: /roster/rites/doc-team-pack/agents/orchestrator.md
 ### Example 2: Dry-Run Preview
 
 ```bash
-$ ./templates/orchestrator-generate.sh security-pack --dry-run 2>&1 | head -40
+$ ./templates/orchestrator-generate.sh security --dry-run 2>&1 | head -40
 
 OK: All dependencies found
 OK: All required files exist
 
-INFO: Processing team: security-pack
+INFO: Processing team: security
 OK: Schema validation passed: ...
 OK: Workflow references validated: ...
-INFO: Generating: security-pack
+INFO: Generating: security
 
 === Generated Content (dry-run) ===
 ---
 name: orchestrator
 role: "Coordinates security initiatives"
-description: "Coordinates security-pack phases for security work. Routes tasks ..."
+description: "Coordinates security phases for security work. Routes tasks ..."
 tools: Read, Skill
 model: opus
 color: red
@@ -238,15 +238,15 @@ OK: All required files exist
 
 INFO: Batch generating 11 teams
 
-INFO: Processing team: 10x-dev-pack
+INFO: Processing team: 10x-dev
 OK: Schema validation passed: ...
 OK: Workflow references validated: ...
-OK: Validation passed: 10x-dev-pack
+OK: Validation passed: 10x-dev
 
-INFO: Processing team: debt-triage-pack
+INFO: Processing team: debt-triage
 OK: Schema validation passed: ...
 OK: Workflow references validated: ...
-OK: Validation passed: debt-triage-pack
+OK: Validation passed: debt-triage
 
 ... (9 more teams) ...
 
@@ -265,11 +265,11 @@ OK: All required files exist
 INFO: Batch generating 11 teams
 
 ... (validation for all teams) ...
-INFO: Generating: rnd-pack
-OK: Generated: /roster/rites/rnd-pack/agents/orchestrator.md
+INFO: Generating: rnd
+OK: Generated: /roster/rites/rnd/agents/orchestrator.md
 
-INFO: Generating: security-pack
-OK: Generated: /roster/rites/security-pack/agents/orchestrator.md
+INFO: Generating: security
+OK: Generated: /roster/rites/security/agents/orchestrator.md
 
 ... (9 more teams) ...
 
@@ -356,7 +356,7 @@ ERROR: Post-generation validation failed: /var/folders/.../tmp.xyz
 
 **Error**:
 ```
-ERROR: Output file exists: /roster/rites/rnd-pack/agents/orchestrator.md (use --force to overwrite)
+ERROR: Output file exists: /roster/rites/rnd/agents/orchestrator.md (use --force to overwrite)
 ```
 
 **Cause**: orchestrator.md already exists and --force not specified
@@ -364,11 +364,11 @@ ERROR: Output file exists: /roster/rites/rnd-pack/agents/orchestrator.md (use --
 **Solution**:
 ```bash
 # Option 1: Use --force to overwrite
-./templates/orchestrator-generate.sh rnd-pack --force
+./templates/orchestrator-generate.sh rnd --force
 
 # Option 2: Delete existing file first
-rm /roster/rites/rnd-pack/agents/orchestrator.md
-./templates/orchestrator-generate.sh rnd-pack
+rm /roster/rites/rnd/agents/orchestrator.md
+./templates/orchestrator-generate.sh rnd
 ```
 
 ---
@@ -424,9 +424,9 @@ team:
 
 Different teams have different complexity enums. The generator extracts these from workflow.yaml:
 
-**rnd-pack**: SPIKE, EVALUATION, MOONSHOT
-**ecosystem-pack**: PATCH, MODULE, SYSTEM, MIGRATION
-**security-pack**: PATCH, FEATURE, SYSTEM
+**rnd**: SPIKE, EVALUATION, MOONSHOT
+**ecosystem**: PATCH, MODULE, SYSTEM, MIGRATION
+**security**: PATCH, FEATURE, SYSTEM
 
 The `{{COMPLEXITY_ENUM}}` placeholder is automatically populated.
 
@@ -460,7 +460,7 @@ cd /roster
 
 # Test file generation for 5 teams
 bash << 'EOF'
-for team in rnd-pack security-pack ecosystem-pack doc-team-pack 10x-dev-pack; do
+for team in rnd security ecosystem doc-team-pack 10x-dev; do
   echo "Testing $team..."
   ./templates/orchestrator-generate.sh "$team" --force
   ./templates/validate-orchestrator.sh "rites/$team/agents/orchestrator.md"

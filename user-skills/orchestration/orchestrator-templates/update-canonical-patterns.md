@@ -217,10 +217,10 @@ done
 
 ```bash
 # Review one team's changes
-git diff .claude/rites/rnd-pack/agents/orchestrator.md
+git diff .claude/rites/rnd/agents/orchestrator.md
 
 # Review another team
-git diff .claude/rites/security-pack/agents/orchestrator.md
+git diff .claude/rites/security/agents/orchestrator.md
 ```
 
 **For medium-risk updates**, review all teams:
@@ -240,7 +240,7 @@ git diff .claude/rites/*/agents/orchestrator.md
 
 ```bash
 # Verify frontmatter unchanged on several teams
-for team in rnd-pack security-pack ecosystem-pack; do
+for team in rnd security ecosystem; do
   echo "=== $team ==="
   head -10 .claude/rites/$team/agents/orchestrator.md
 done
@@ -260,12 +260,12 @@ role: "..."
 
 ```bash
 # Verify specialist names are consistent across all diffs
-echo "Specialists in rnd-pack after update:"
-grep "routing_specialist=" .claude/rites/rnd-pack/agents/orchestrator.md | head -3
+echo "Specialists in rnd after update:"
+grep "routing_specialist=" .claude/rites/rnd/agents/orchestrator.md | head -3
 
 echo ""
-echo "Specialists in security-pack after update:"
-grep "routing_specialist=" .claude/rites/security-pack/agents/orchestrator.md | head -3
+echo "Specialists in security after update:"
+grep "routing_specialist=" .claude/rites/security/agents/orchestrator.md | head -3
 ```
 
 All specialist names should match original configuration.
@@ -281,7 +281,7 @@ Activate a team and verify it still works:
 current_team=$(cat .claude/ACTIVE_RITE)
 
 # Test activation with updated orchestrator
-./swap-rite.sh rnd-pack
+./swap-rite.sh rnd
 
 # Verify frontmatter parsed
 grep "^role:" .claude/agents/orchestrator.md
@@ -296,14 +296,14 @@ If you changed Consultation Protocol section:
 
 ```bash
 # Check CONSULTATION_REQUEST still present
-grep "CONSULTATION_REQUEST" .claude/rites/rnd-pack/agents/orchestrator.md
+grep "CONSULTATION_REQUEST" .claude/rites/rnd/agents/orchestrator.md
 
 # Check CONSULTATION_RESPONSE still present
-grep "CONSULTATION_RESPONSE" .claude/rites/rnd-pack/agents/orchestrator.md
+grep "CONSULTATION_RESPONSE" .claude/rites/rnd/agents/orchestrator.md
 
 # Check input/output structure preserved
-grep "type:" .claude/rites/rnd-pack/agents/orchestrator.md
-grep "directive:" .claude/rites/rnd-pack/agents/orchestrator.md
+grep "type:" .claude/rites/rnd/agents/orchestrator.md
+grep "directive:" .claude/rites/rnd/agents/orchestrator.md
 ```
 
 ### Step 5.3: Verify Skills References
@@ -436,7 +436,7 @@ for team in .claude/rites/*/; do
 done
 
 # Review sample
-git diff .claude/rites/rnd-pack/agents/orchestrator.md | head -50
+git diff .claude/rites/rnd/agents/orchestrator.md | head -50
 
 # Commit
 git add .claude/rites/*/agents/orchestrator.md
@@ -479,12 +479,12 @@ done
 
 # Spot-check diffs
 git diff --stat .claude/rites/*/agents/orchestrator.md
-git diff .claude/rites/rnd-pack/agents/orchestrator.md | head -80
+git diff .claude/rites/rnd/agents/orchestrator.md | head -80
 
 # Test activation
-./swap-rite.sh security-pack
+./swap-rite.sh security
 grep "Examples" .claude/agents/orchestrator.md  # Should show new section
-./swap-rite.sh rnd-pack  # Restore
+./swap-rite.sh rnd  # Restore
 
 # Commit
 git add .claude/rites/*/agents/orchestrator.md
@@ -534,8 +534,8 @@ Steps:
 **Solution**: This is normal. Validate that expected sections did change:
 
 ```bash
-# Check rnd-pack for your change
-git diff .claude/rites/rnd-pack/agents/orchestrator.md | grep "^+" | head -20
+# Check rnd for your change
+git diff .claude/rites/rnd/agents/orchestrator.md | grep "^+" | head -20
 ```
 
 ### Issue: Validation fails after regeneration

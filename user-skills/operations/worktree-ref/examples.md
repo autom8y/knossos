@@ -10,7 +10,7 @@ From main project, when you want parallel work:
 
 ```bash
 # In main terminal, already working on feature-auth
-/worktree create "billing-sprint" --rite=10x-dev-pack
+/worktree create "billing-sprint" --rite=10x-dev
 
 # Output tells you what to do next
 # "cd worktrees/wt-20251224-150000-xyz && claude"
@@ -85,7 +85,7 @@ The `--all` flag shows sessions across all worktrees:
 session-20251224-143052-a1b2 | ACTIVE | feature-auth | 2025-12-24T14:30:52Z
 
 === Worktrees ===
-[wt-20251224-150000-xyz] billing-sprint (rite: 10x-dev-pack)
+[wt-20251224-150000-xyz] billing-sprint (rite: 10x-dev)
   session-20251224-150000-c3d4 | ACTIVE | billing-sprint
 ```
 
@@ -99,7 +99,7 @@ Worktree Status
 
 [WORKTREE]    wt-20251224-150000-xyz
 Name:         billing-sprint
-Rite:         10x-dev-pack
+Rite:         10x-dev
 
 Roster:       /Users/user/Code/roster
 ...

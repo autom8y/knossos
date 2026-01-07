@@ -209,14 +209,14 @@ Support Requests:     2 open
 
 TEAMS STATUS
 ============
-rnd-pack              ✓ ADOPTED      (generated.md: 100% match)
-security-pack         ✓ ADOPTED      (generated.md: 100% match)
-ecosystem-pack        ~ MIGRATING    (PR #423)
+rnd              ✓ ADOPTED      (generated.md: 100% match)
+security         ✓ ADOPTED      (generated.md: 100% match)
+ecosystem        ~ MIGRATING    (PR #423)
 doc-team-pack         ○ INTERESTED   (in roadmap)
-forge-pack            ○ NOT ADOPTED  (manual orchestrator)
-debt-triage-pack      ○ NOT ADOPTED  (manual orchestrator)
-sre-pack              ○ NOT ADOPTED  (manual orchestrator)
-strategy-pack         ○ NOT ADOPTED  (manual orchestrator)
+forge            ○ NOT ADOPTED  (manual orchestrator)
+debt-triage      ○ NOT ADOPTED  (manual orchestrator)
+sre              ○ NOT ADOPTED  (manual orchestrator)
+strategy         ○ NOT ADOPTED  (manual orchestrator)
 integration-researcher ○ NOT ADOPTED (manual orchestrator)
 moonshot-architect    ○ NOT ADOPTED  (manual orchestrator)
 
@@ -266,8 +266,8 @@ Each validation run produces:
 artifacts/
   validation-report.txt
   generated-orchestrators/
-    rnd-pack-orchestrator.md
-    security-pack-orchestrator.md
+    rnd-orchestrator.md
+    security-orchestrator.md
     ...
 ```
 

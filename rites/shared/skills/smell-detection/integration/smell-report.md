@@ -4,7 +4,7 @@
 
 ## Overview
 
-Smell reports are produced by **code-smeller** (hygiene-pack) and document code quality issues discovered through systematic smell detection. This document specifies required fields, format, and validation rules.
+Smell reports are produced by **code-smeller** (hygiene) and document code quality issues discovered through systematic smell detection. This document specifies required fields, format, and validation rules.
 
 **Template Location**: `.claude/skills/doc-ecosystem/templates/smell-report.md`
 
@@ -48,7 +48,7 @@ factors:
 title: Code Smell Report
 scope: src/validators/
 generated_at: 2026-01-03T10:30:00Z
-generated_by: code-smeller (hygiene-pack)
+generated_by: code-smeller (hygiene)
 total_smells: 12
 severity_breakdown:
   critical: 2

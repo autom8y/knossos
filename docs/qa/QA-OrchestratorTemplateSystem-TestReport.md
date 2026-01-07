@@ -2,7 +2,7 @@
 
 **Initiative**: QA-OrchestratorTemplateSystem
 **Complexity**: MODULE
-**Team**: 10x-dev-pack
+**Team**: 10x-dev
 **QA Agent**: QA Adversary
 **Date**: 2025-12-29
 
@@ -32,16 +32,16 @@ The orchestrator template system is **production-ready** with one documented cos
 
 | Test ID | Test Case | Team | Result | Notes |
 |---------|-----------|------|--------|-------|
-| GEN-001 | Dry-run generation | 10x-dev-pack | PASS | No placeholders remaining |
-| GEN-002 | Dry-run generation | security-pack | PASS | No placeholders remaining |
+| GEN-001 | Dry-run generation | 10x-dev | PASS | No placeholders remaining |
+| GEN-002 | Dry-run generation | security | PASS | No placeholders remaining |
 | GEN-003 | Dry-run generation | doc-team-pack | PASS | No placeholders remaining |
-| GEN-004 | Dry-run generation | rnd-pack | PASS | No placeholders remaining |
-| GEN-005 | Dry-run generation | ecosystem-pack | PASS* | Diagram malformed (DEF-001) |
+| GEN-004 | Dry-run generation | rnd | PASS | No placeholders remaining |
+| GEN-005 | Dry-run generation | ecosystem | PASS* | Diagram malformed (DEF-001) |
 | GEN-006 | Frontmatter validation | All 5 teams | PASS | All fields present |
 | GEN-007 | Required sections present | All 5 teams | PASS | All sections found |
 | GEN-008 | Post-generation validation | All 5 teams | PASS | validate-orchestrator.sh passes |
 | GEN-009 | Batch generation --all | 11 teams | PASS | All teams generated successfully |
-| GEN-010 | Actual file generation | rnd-pack | PASS | File written correctly |
+| GEN-010 | Actual file generation | rnd | PASS | File written correctly |
 
 ### Category 2: Infrastructure Compatibility
 
@@ -50,17 +50,17 @@ The orchestrator template system is **production-ready** with one documented cos
 | INF-001 | Frontmatter parsing | PASS | name/role/tools/model/color all parseable |
 | INF-002 | swap-rite.sh --list | PASS | All 11 teams listed |
 | INF-003 | swap-rite.sh dry-run | PASS | Correctly shows changes |
-| INF-004 | swap-rite.sh to ecosystem-pack | PASS | 6 agents, 1 command, 4 skills synced |
+| INF-004 | swap-rite.sh to ecosystem | PASS | 6 agents, 1 command, 4 skills synced |
 | INF-005 | AGENT_MANIFEST.json update | PASS | Correct format with all agents |
 | INF-006 | ACTIVE_RITE update | PASS | Team name updated |
-| INF-007 | swap-rite.sh back to 10x-dev-pack | PASS | Round-trip successful |
+| INF-007 | swap-rite.sh back to 10x-dev | PASS | Round-trip successful |
 
 ### Category 3: Extension Points and Custom Content
 
 | Test ID | Test Case | Result | Notes |
 |---------|-----------|--------|-------|
 | EXT-001 | extension_points field | N/A | Not defined in any team configs |
-| EXT-002 | Custom antipatterns | PASS | security-pack: 3, ecosystem-pack: 3 |
+| EXT-002 | Custom antipatterns | PASS | security: 3, ecosystem: 3 |
 | EXT-003 | Skills reference domain-appropriateness | PASS | All skills match team domains |
 | EXT-004 | Routing table domain-appropriateness | PASS | All routing conditions domain-specific |
 
@@ -83,10 +83,10 @@ The orchestrator template system is **production-ready** with one documented cos
 | Test ID | Test Case | Result | Notes |
 |---------|-----------|--------|-------|
 | SAT-001 | List teams from skeleton_claude | PASS | All 11 teams visible |
-| SAT-002 | Swap to rnd-pack from skeleton_claude | PASS | 5 agents + 2 skills synced |
+| SAT-002 | Swap to rnd from skeleton_claude | PASS | 5 agents + 2 skills synced |
 | SAT-003 | orchestrator.md content verification | PASS | Frontmatter and content correct |
 | SAT-004 | AGENT_MANIFEST.json in satellite | PASS | Correctly updated |
-| SAT-005 | Restore to 10x-dev-pack | PASS | Round-trip successful |
+| SAT-005 | Restore to 10x-dev | PASS | Round-trip successful |
 
 ---
 
@@ -98,10 +98,10 @@ The orchestrator template system is **production-ready** with one documented cos
 **Priority**: P3 (can ship, fix later)
 **Status**: OPEN
 
-**Description**: The `generate_workflow_diagram()` function in `orchestrator-generate.sh` produces a malformed ASCII diagram when a team has exactly 5 specialists (e.g., ecosystem-pack).
+**Description**: The `generate_workflow_diagram()` function in `orchestrator-generate.sh` produces a malformed ASCII diagram when a team has exactly 5 specialists (e.g., ecosystem).
 
 **Reproduction Steps**:
-1. Run: `./templates/orchestrator-generate.sh ecosystem-pack --dry-run`
+1. Run: `./templates/orchestrator-generate.sh ecosystem --dry-run`
 2. Observe the Position in Workflow section
 
 **Expected**: A properly formatted ASCII box diagram showing all 5 specialists
@@ -123,7 +123,7 @@ The orchestrator template system is **production-ready** with one documented cos
 
 **Workaround**: Accept cosmetic issue or manually fix the diagram in the generated file.
 
-**Affected Teams**: ecosystem-pack (5 specialists)
+**Affected Teams**: ecosystem (5 specialists)
 
 ---
 

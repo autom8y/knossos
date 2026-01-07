@@ -108,7 +108,7 @@ Session: session-20260106-100000-test
 Status: ACTIVE
 Initiative: Test Initiative
 Phase: implementation
-Team: ecosystem-pack
+Team: ecosystem
 Mode: orchestrated
 Sails: WHITE
 ```
@@ -119,7 +119,7 @@ Session: session-20260106-100000-test
 Status: ACTIVE
 Initiative: Test Initiative
 Phase: implementation
-Team: ecosystem-pack
+Team: ecosystem
 Mode: orchestrated
 Sails: GRAY (base: WHITE)
 ```
@@ -130,7 +130,7 @@ Session: session-20260106-100000-test
 Status: ACTIVE
 Initiative: Test Initiative
 Phase: implementation
-Team: ecosystem-pack
+Team: ecosystem
 Mode: orchestrated
 Sails: not generated
 ```

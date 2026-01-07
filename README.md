@@ -38,7 +38,7 @@ See [docs/INTEGRATION.md](docs/INTEGRATION.md) for full artifact architecture de
 ./generate-team-context.sh
 
 # For specific rite
-./generate-team-context.sh 10x-dev-pack
+./generate-team-context.sh 10x-dev
 ```
 
 Output: Markdown table of phase→agent mappings for session hook injection.

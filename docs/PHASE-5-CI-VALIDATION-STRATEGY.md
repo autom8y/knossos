@@ -147,10 +147,10 @@ Generated: 2025-12-29 10:30:00 UTC
 Scope: 10 teams
 
 RESULTS BY TEAM:
-  rnd-pack          PASS  (config: valid, generation: ok, match: 100%)
-  security-pack     PASS  (config: valid, generation: ok, match: 100%)
-  ecosystem-pack    FAIL  (config: invalid field 'routing.unknown-specialist')
-  sre-pack          PASS  (config: valid, generation: ok, match: 100%)
+  rnd          PASS  (config: valid, generation: ok, match: 100%)
+  security     PASS  (config: valid, generation: ok, match: 100%)
+  ecosystem    FAIL  (config: invalid field 'routing.unknown-specialist')
+  sre          PASS  (config: valid, generation: ok, match: 100%)
   ...
 
 SUMMARY:
@@ -159,7 +159,7 @@ SUMMARY:
   ✗ Manual Edits Detected: 0
 
 ERRORS (blocking):
-  1. ecosystem-pack: Unknown specialist 'unknown-specialist' in routing
+  1. ecosystem: Unknown specialist 'unknown-specialist' in routing
 
 WARNINGS (non-blocking):
   (none)

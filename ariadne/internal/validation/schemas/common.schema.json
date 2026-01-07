@@ -86,7 +86,7 @@
     "rite_name": {
       "type": "string",
       "pattern": "^[a-z0-9]+-pack$",
-      "description": "Rite pack name (e.g., ecosystem-pack, security-pack)"
+      "description": "Rite pack name (e.g., ecosystem, security)"
     },
 
     "schema_version": {

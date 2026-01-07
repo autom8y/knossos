@@ -138,7 +138,7 @@ budget:
 
 # Migration metadata (for transition from team-pack)
 migration:
-  from_team: 10x-dev-pack           # Original rite name
+  from_team: 10x-dev           # Original rite name
   migrated_at: null                 # Populated on migration
 ```
 
@@ -793,7 +793,7 @@ func MigrateTeamPack(teamPath string) (*RiteManifest, error) {
     // Build rite manifest
     manifest := &RiteManifest{
         SchemaVersion: "1.0",
-        Name:          toRiteName(workflow.Name), // 10x-dev-pack -> 10x-dev-rite
+        Name:          toRiteName(workflow.Name), // 10x-dev -> 10x-dev-rite
         DisplayName:   workflow.Description,
         Description:   workflow.Description,
         Form:          form,
@@ -812,7 +812,7 @@ func MigrateTeamPack(teamPath string) (*RiteManifest, error) {
 }
 
 func toRiteName(teamName string) string {
-    // 10x-dev-pack -> 10x-dev-rite
+    // 10x-dev -> 10x-dev-rite
     return strings.Replace(teamName, "-pack", "-rite", 1)
 }
 ```
@@ -831,7 +831,7 @@ Flags:
 
 Examples:
   ari rite migrate --all --dry-run
-  ari rite migrate --team 10x-dev-pack
+  ari rite migrate --team 10x-dev
 ```
 
 ### 7.4 Gradual Migration Strategy
@@ -996,7 +996,7 @@ ari rite current --output=json | jq '.borrowed'
 ari rite release documentation
 
 # Test swap compatibility
-ari team switch 10x-dev-pack --remove-all
+ari team switch 10x-dev --remove-all
 ari rite swap security-rite --remove-all
 
 # Test budget enforcement
@@ -1200,7 +1200,7 @@ budget:
   workflow_cost: 1000
 
 migration:
-  from_team: 10x-dev-pack
+  from_team: 10x-dev
 ```
 
 ---

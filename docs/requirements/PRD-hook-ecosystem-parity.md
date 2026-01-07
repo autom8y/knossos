@@ -24,7 +24,7 @@ The roster project has evolved a sophisticated team-pack system where agents, co
 
 ### Scope 1: Team Hooks Parity
 
-- **US-1.1**: As a rite maintainer, I want to include hooks in my rite so that teams can have specialized hook behavior (e.g., security-pack with credential-scanning hooks).
+- **US-1.1**: As a rite maintainer, I want to include hooks in my rite so that teams can have specialized hook behavior (e.g., security with credential-scanning hooks).
 
 - **US-1.2**: As a developer, I want `swap-rite.sh` to merge my team's hooks with base hooks so that I get both base functionality and team-specific behavior.
 
@@ -128,7 +128,7 @@ The roster project has evolved a sophisticated team-pack system where agents, co
 
 ### Should Have
 
-- **FR-S.1**: Create example team hooks for `10x-dev-pack` demonstrating team-specific hook capability.
+- **FR-S.1**: Create example team hooks for `10x-dev` demonstrating team-specific hook capability.
 
 - **FR-S.2**: Add `--verbose` flag to `session-context.sh` for expanded output when explicitly requested.
 
@@ -136,7 +136,7 @@ The roster project has evolved a sophisticated team-pack system where agents, co
 
 ### Could Have
 
-- **FR-C.1**: Create hooks for `security-pack` demonstrating security-specific hooks (e.g., credential scanning on Write).
+- **FR-C.1**: Create hooks for `security` demonstrating security-specific hooks (e.g., credential scanning on Write).
 
 - **FR-C.2**: Add `just hooks:validate` task to validate all hook registrations against schema.
 
@@ -171,7 +171,7 @@ The roster project has evolved a sophisticated team-pack system where agents, co
 ## Success Criteria
 
 - [ ] `roster/user-hooks/` exists and contains all hooks previously in `roster/hooks/`
-- [ ] `swap-rite.sh --dry-run 10x-dev-pack` shows hook merge and settings generation
+- [ ] `swap-rite.sh --dry-run 10x-dev` shows hook merge and settings generation
 - [ ] `settings.local.json` hooks section generated correctly after team swap
 - [ ] Session start context is 15 lines or fewer (measured by line count)
 - [ ] UserPromptSubmit fires only on `/` prefixed prompts (verified by logging)

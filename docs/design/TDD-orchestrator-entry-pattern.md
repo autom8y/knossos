@@ -280,7 +280,7 @@ if [[ "$command" == "start" ]] && ! has_session; then
 
     # Get active rite
     local team
-    team=$(cat "$PROJECT_DIR/.claude/ACTIVE_RITE" 2>/dev/null || echo "10x-dev-pack")
+    team=$(cat "$PROJECT_DIR/.claude/ACTIVE_RITE" 2>/dev/null || echo "10x-dev")
 
     # Create session via session-manager (uses FSM for schema-validated write)
     local result
@@ -925,7 +925,7 @@ Direct invocation of state-mate remains valid as an escape hatch:
 | Satellite Type | Configuration | Tests Required |
 |----------------|---------------|----------------|
 | **Minimal** | No orchestrator, no workflow | oep_or_002, oep_wg_002, oep_bd_003 |
-| **Standard** | 10x-dev-pack with orchestrator | All oep_or_*, oep_wg_001, oep_bd_001 |
+| **Standard** | 10x-dev with orchestrator | All oep_or_*, oep_wg_001, oep_bd_001 |
 | **Complex** | Ecosystem-pack, nested workflows | oep_sc_*, oep_su_*, oep_bc_* |
 | **Legacy** | V1 session format | oep_bc_001 |
 

@@ -40,9 +40,9 @@ REVIEW_AGENT=$(grep -B1 "next: null" .claude/ACTIVE_WORKFLOW.yaml | grep "agent:
    - Review all changed files/content
    - Apply multiple lenses
    - Agent varies by team:
-     - 10x-dev-pack → qa-adversary
+     - 10x-dev → qa-adversary
      - doc-team-pack → doc-reviewer
-     - hygiene-pack → audit-lead
+     - hygiene → audit-lead
 
 3. **Categorize feedback**:
 

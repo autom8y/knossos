@@ -43,9 +43,9 @@ Does it need user-facing documentation?
 
 | Route | Target Team | Required For | Validation |
 |-------|-------------|--------------|------------|
-| [10x-to-sre](routes/10x-to-sre.md) | sre-pack | SERVICE+ complexity, any production deploy | `ari hook handoff-validate --route=sre` |
-| [10x-to-security](routes/10x-to-security.md) | security-pack | Auth, crypto, secrets, external input handling | `ari hook handoff-validate --route=security` |
-| [10x-to-doc](routes/10x-to-doc.md) | doc-rite-pack | User-facing features, API changes, config changes | `ari hook handoff-validate --route=doc` |
+| [10x-to-sre](routes/10x-to-sre.md) | sre | SERVICE+ complexity, any production deploy | `ari hook handoff-validate --route=sre` |
+| [10x-to-security](routes/10x-to-security.md) | security | Auth, crypto, secrets, external input handling | `ari hook handoff-validate --route=security` |
+| [10x-to-doc](routes/10x-to-doc.md) | docs | User-facing features, API changes, config changes | `ari hook handoff-validate --route=doc` |
 
 ## Integration with /wrap
 

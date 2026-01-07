@@ -393,12 +393,12 @@ alias swap='$ROSTER_HOME/swap-rite.sh --update'
 
 | Satellite | Test Case | Expected Outcome | Validates |
 |-----------|-----------|------------------|-----------|
-| skeleton | `/team 10x-dev-pack --update` | Swap succeeds with roster output | New flag works |
-| skeleton | `/team 10x-dev-pack --refresh` | Swap succeeds with deprecation warning | Backward compat |
+| skeleton | `/team 10x-dev --update` | Swap succeeds with roster output | New flag works |
+| skeleton | `/team 10x-dev --refresh` | Swap succeeds with deprecation warning | Backward compat |
 | skeleton | `/team --update` (no pack) | Updates current team | Flag without pack |
 | skeleton | `/10x --update` | Swap succeeds | Quick-switch with flag |
-| any satellite | `swap-rite.sh 10x-dev-pack -u` | Swap succeeds | Short flag alias |
-| any satellite | `swap-rite.sh 10x-dev-pack -r` | Swap succeeds with warning | Deprecated short flag |
+| any satellite | `swap-rite.sh 10x-dev -u` | Swap succeeds | Short flag alias |
+| any satellite | `swap-rite.sh 10x-dev -r` | Swap succeeds with warning | Deprecated short flag |
 
 ---
 
@@ -464,9 +464,9 @@ Update any messages mentioning `--refresh` to say `--update`.
 
 2. **Order of changes matters**:
    - First update swap-rite.sh
-   - Test directly: `./swap-rite.sh --update 10x-dev-pack`
+   - Test directly: `./swap-rite.sh --update 10x-dev`
    - Then update command documentation
-   - Test via commands: `/team 10x-dev-pack --update`
+   - Test via commands: `/team 10x-dev --update`
 
 3. **Deprecation warning placement**: The warning should appear before the action, not after
 

@@ -25,7 +25,7 @@ The Principles Purist analysis identified that CLAUDE.md should answer "What is 
 
 **Architecture context:**
 - CLAUDE.md uses SYNC/PRESERVE comments marking skeleton-owned vs satellite-owned sections
-- The `claude-md-architecture` skill exists at `rites/ecosystem-pack/skills/claude-md-architecture/` but needs enhancement for descriptive tone
+- The `claude-md-architecture` skill exists at `rites/ecosystem/skills/claude-md-architecture/` but needs enhancement for descriptive tone
 - This skill should be updated to generate descriptive content during team swaps
 
 ## User Stories
@@ -163,7 +163,7 @@ For routing guidance: `/consult`
 
 **Requirement:** Enhance existing skill to emphasize descriptive content architecture.
 
-**Location:** `rites/ecosystem-pack/skills/claude-md-architecture/SKILL.md` (skill already exists, needs enhancement)
+**Location:** `rites/ecosystem/skills/claude-md-architecture/SKILL.md` (skill already exists, needs enhancement)
 
 **Skill must define:**
 - Purpose of CLAUDE.md (entry point, progressive disclosure)
@@ -248,7 +248,7 @@ Reference the analysis that motivated this change for context.
 | `swap-rite.sh` satellite section regeneration | Internal | roster | Exists |
 | `orchestration/execution-mode.md` enforcement rules | Internal | roster | Exists |
 | `consult-ref` skill for routing | Internal | roster | Exists |
-| `claude-md-architecture` skill | Internal | ecosystem-pack | Exists (needs enhancement) |
+| `claude-md-architecture` skill | Internal | ecosystem | Exists (needs enhancement) |
 | Skeleton-owned section update mechanism | Internal | roster | TBD |
 
 ## Risks

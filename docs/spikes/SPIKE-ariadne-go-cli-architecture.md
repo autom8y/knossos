@@ -4,7 +4,7 @@
 
 **Time-boxed**: Research spike (findings, not production code)
 **Date**: 2026-01-04
-**Author**: Technology Scout (rnd-pack)
+**Author**: Technology Scout (rnd)
 
 ---
 
@@ -370,8 +370,8 @@ $XDG_CONFIG_HOME/ariadne/      # ~/.config/ariadne/
 
 $XDG_DATA_HOME/ariadne/        # ~/.local/share/ariadne/
   rites/                        # Downloaded rites
-    rnd-pack/
-    security-pack/
+    rnd/
+    security/
   manifests/                    # Team manifests
 
 $XDG_STATE_HOME/ariadne/       # ~/.local/state/ariadne/

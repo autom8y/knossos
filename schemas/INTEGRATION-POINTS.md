@@ -90,7 +90,7 @@ When generating orchestrator.md for a team:
 
 ### Data Consistency Note
 
-**Pre-existing issue discovered during POC**: Original rnd-pack orchestrator.md references complexity "PROTOTYPE" but workflow.yaml defines "EVALUATION". This is data inconsistency, not a generator bug. Generator should validate and report such issues.
+**Pre-existing issue discovered during POC**: Original rnd orchestrator.md references complexity "PROTOTYPE" but workflow.yaml defines "EVALUATION". This is data inconsistency, not a generator bug. Generator should validate and report such issues.
 
 ---
 
@@ -144,7 +144,7 @@ Could add `generated: true` metadata to orchestrator agents to indicate they wer
 {
   "orchestrator.md": {
     "source": "team",
-    "origin": "rnd-pack",
+    "origin": "rnd",
     "generated": true,
     "template_version": "1.0"
   }
@@ -171,11 +171,11 @@ The following teams should be tested in Phase 2 to verify integration:
 
 | Team | Specialists | Phases | Complexity | Notes |
 |---|---|---|---|---|
-| rnd-pack | 4 | 4 | 3 levels | Linear flow, baseline case |
-| security-pack | 4 | 4 | 3 levels | Different naming conventions |
-| ecosystem-pack | 5 | 5 | 4 levels | Longest pipeline, critical path |
+| rnd | 4 | 4 | 3 levels | Linear flow, baseline case |
+| security | 4 | 4 | 3 levels | Different naming conventions |
+| ecosystem | 5 | 5 | 4 levels | Longest pipeline, critical path |
 | doc-team-pack | 4 | 4 | 3 levels | Different domain (documentation) |
-| strategy-pack | 4 | 4 | 3 levels | Different complexity enum |
+| strategy | 4 | 4 | 3 levels | Different complexity enum |
 
 ### Integration Test Criteria
 

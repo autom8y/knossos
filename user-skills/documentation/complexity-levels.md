@@ -9,13 +9,13 @@ description: "Reference for task complexity classification and phase requirement
 
 ## Overview
 
-Complexity levels determine workflow phases, documentation requirements, and agent coordination. Standard levels (SCRIPT | MODULE | SERVICE | PLATFORM) apply to general development workflows, while specialized teams like ecosystem-pack use domain-specific levels.
+Complexity levels determine workflow phases, documentation requirements, and agent coordination. Standard levels (SCRIPT | MODULE | SERVICE | PLATFORM) apply to general development workflows, while specialized teams like ecosystem use domain-specific levels.
 
 ---
 
 ## Standard Complexity Levels
 
-Used by most teams (10x-dev-pack, hygiene-pack, etc.) for general software development tasks.
+Used by most teams (10x-dev, hygiene, etc.) for general software development tasks.
 
 ### SCRIPT
 
@@ -166,7 +166,7 @@ Used by most teams (10x-dev-pack, hygiene-pack, etc.) for general software devel
 
 ### Ecosystem Pack (CEM/Skeleton/Roster Infrastructure)
 
-Used by ecosystem-pack for infrastructure work affecting the agent ecosystem itself.
+Used by ecosystem for infrastructure work affecting the agent ecosystem itself.
 
 #### PATCH
 

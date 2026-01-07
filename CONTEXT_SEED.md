@@ -67,22 +67,22 @@ PATCH/MODULE/SERVICE heuristic for right-sizing workflows.
 ### Task-001: Progressive Disclosure Audit
 **Problem**: Some SKILL.md files repeat content instead of routing to supporting files
 **Goal**: Audit all skills, ensure explicit routing, no duplication
-**Complexity**: MODULE | **Team**: 10x-dev-pack
+**Complexity**: MODULE | **Team**: 10x-dev
 
 ### Task-002: Per-Team Hook Context Injection
 **Problem**: All teams share same hook context
 **Goal**: Teams can override/extend base hooks for domain-specific context
-**Complexity**: MODULE | **Team**: ecosystem-pack
+**Complexity**: MODULE | **Team**: ecosystem
 
 ### Task-003: Orchestrator Enforcement
 **Problem**: Main thread bypasses orchestrator when complexity demands it
 **Goal**: Complexity-based gating (warn/block) with override mechanism
-**Complexity**: PATCH | **Team**: ecosystem-pack
+**Complexity**: PATCH | **Team**: ecosystem
 
 ### Task-004: Execution Mode Simplification
 **Problem**: 3-mode model conflates session and team concerns
 **Goal**: 2x2 model with migration plan
-**Complexity**: MODULE | **Team**: ecosystem-pack
+**Complexity**: MODULE | **Team**: ecosystem
 
 ---
 
@@ -107,8 +107,8 @@ Task-003 addresses this directly.
 - Immutable = clear snapshot of starting assumptions
 
 ### Why Different Teams Per Session?
-- Task-001 is a 10x-dev-pack concern (workflow optimization)
-- Task-002/003/004 are ecosystem-pack concerns (infrastructure, enforcement, modes)
+- Task-001 is a 10x-dev concern (workflow optimization)
+- Task-002/003/004 are ecosystem concerns (infrastructure, enforcement, modes)
 
 ---
 

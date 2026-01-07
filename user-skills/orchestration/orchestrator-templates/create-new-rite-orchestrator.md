@@ -35,10 +35,10 @@ team:
   color: blue             # Valid hex or CSS color
 ```
 
-**Example** (doc-rite-pack):
+**Example** (docs):
 ```yaml
 team:
-  name: doc-rite-pack
+  name: docs
   domain: "Documentation and technical writing"
   color: "#4A90E2"        # Or just: blue
 ```
@@ -57,12 +57,12 @@ frontmatter:
     3. Key triggers
 ```
 
-**Example** (security-pack):
+**Example** (security):
 ```yaml
 frontmatter:
-  role: "Coordinates security-pack threat modeling and compliance"
+  role: "Coordinates security threat modeling and compliance"
   description: |
-    Coordinates security-pack phases for threat modeling, compliance architecture,
+    Coordinates security phases for threat modeling, compliance architecture,
     and penetration testing. Use when: designing security controls, planning compliance,
     or assessing security vulnerabilities. Triggers: threat-model, security-review,
     compliance-planning, penetration-test.
@@ -88,7 +88,7 @@ grep "agent:" rites/my-team/workflow.yaml
 
 This shows exact specialist names. Use those names, not variations.
 
-**Example** (rnd-pack):
+**Example** (rnd):
 ```yaml
 routing:
   integration-researcher: "Needs research on technology integration paths"
@@ -111,7 +111,7 @@ workflow_position:
   downstream: "Which team typically comes after yours"
 ```
 
-**Example** (ecosystem-pack):
+**Example** (ecosystem):
 ```yaml
 workflow_position:
   upstream: "Any team (multi-phase coordination)"
@@ -139,7 +139,7 @@ handoff_criteria:
 
 **Important**: Each specialist in routing MUST have handoff_criteria entry.
 
-**Example** (rnd-pack):
+**Example** (rnd):
 ```yaml
 handoff_criteria:
   integration-researcher:
@@ -181,7 +181,7 @@ skills:
   - "@another-skill why this team uses it"
 ```
 
-**Example** (security-pack):
+**Example** (security):
 ```yaml
 skills:
   - "@security-ref for threat modeling workflows and controls"
@@ -507,22 +507,22 @@ After successful creation:
 3. **Coordinate with Phase 5**: CI/CD integration when ready
 4. **Share with team**: Team members know how to use it
 
-## Example: Complete doc-rite-pack Walkthrough
+## Example: Complete docs Walkthrough
 
-For reference, here's a real example of doc-rite-pack configuration:
+For reference, here's a real example of docs configuration:
 
-**File**: `rites/doc-rite-pack/orchestrator.yaml`
+**File**: `rites/docs/orchestrator.yaml`
 
 ```yaml
 team:
-  name: doc-rite-pack
+  name: docs
   domain: "Documentation design and technical writing"
   color: "#4A90E2"
 
 frontmatter:
-  role: "Coordinates doc-rite-pack documentation phases"
+  role: "Coordinates docs documentation phases"
   description: |
-    Coordinates doc-rite-pack phases for documentation audit, information architecture,
+    Coordinates docs phases for documentation audit, information architecture,
     and technical writing. Use when: auditing documentation, reorganizing information,
     or writing comprehensive guides. Triggers: audit, documentation, rewrite, consolidate.
 

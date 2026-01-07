@@ -8,7 +8,7 @@ schema_version: "1.0"
 artifact_types:
 
   # ============================================================================
-  # Core Workflow Artifacts (10x-dev-pack)
+  # Core Workflow Artifacts (10x-dev)
   # ============================================================================
 
   prd:
@@ -124,7 +124,7 @@ artifact_types:
         blocking: true
 
   # ============================================================================
-  # Ecosystem Artifacts (ecosystem-pack)
+  # Ecosystem Artifacts (ecosystem)
   # ============================================================================
 
   gap-analysis:

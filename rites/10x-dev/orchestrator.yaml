@@ -1,0 +1,52 @@
+# Orchestrator configuration for 10x-dev
+# Used by generate-orchestrator.sh to produce orchestrator.md
+
+rite:
+  name: 10x-dev
+  domain: software development
+  color: blue
+
+frontmatter:
+  role: "Coordinates development lifecycle"
+  description: |
+    Routes development work through requirements, design, implementation, and validation phases. Use when: building features or systems requires full lifecycle coordination. Triggers: coordinate, orchestrate, development workflow, feature development, implementation planning.
+
+routing:
+  requirements-analyst: "New feature or system requested, PRD needed"
+  architect: "Requirements complete, architecture design needed"
+  principal-engineer: "Design complete, implementation needed"
+  qa-adversary: "Implementation complete, validation needed"
+
+workflow_position:
+  upstream: "User feature request or development initiative"
+  downstream: "Implemented code and validated test plans"
+
+handoff_criteria:
+  requirements:
+    - "Product requirements document complete"
+    - "User stories and acceptance criteria defined"
+    - "Success metrics established"
+  design:
+    - "Architecture document with rationale"
+    - "Test-driven design (TDD) approach defined"
+    - "Technical risks identified"
+  implementation:
+    - "Code passes linting and type checking"
+    - "All unit tests pass"
+    - "Code review approval obtained"
+  validation:
+    - "Test plan complete and executed"
+    - "All tests pass"
+    - "Deployment readiness verified"
+
+skills:
+  - "@development for coding standards"
+  - "@testing for QA patterns"
+  - "@architecture for design review"
+
+antipatterns:
+  - "Skipping design phase for MODULE complexity (always design first)"
+  - "Implementing without acceptance criteria defined"
+  - "Validating against incomplete or ambiguous requirements"
+
+cross_team_protocol: ""

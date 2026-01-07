@@ -194,7 +194,7 @@ Run these after pulling roster updates:
     "last_sync": "2026-01-03T00:00:00Z"
   },
   "team": {
-    "name": "10x-dev-pack",
+    "name": "10x-dev",
     "last_swap": "2026-01-03T00:00:00Z"
   },
   "managed_files": [

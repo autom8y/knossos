@@ -60,17 +60,17 @@ Display all rites dynamically (use `rite-discovery` skill):
 ```
 | Rite              | Command       | Best For                           |
 |-------------------|---------------|------------------------------------|
-| 10x-dev-pack      | /10x          | Full feature development lifecycle |
-| debt-triage-pack  | /debt         | Technical debt prioritization      |
-| doc-rite-pack     | /docs         | Documentation, technical writing   |
-| ecosystem-pack    | /ecosystem    | CEM/skeleton/roster infrastructure |
-| forge-pack        | /forge        | Rite creation and validation       |
-| hygiene-pack      | /hygiene      | Code quality, refactoring          |
-| intelligence-pack | /intelligence | Analytics, A/B testing, research   |
-| rnd-pack          | /rnd          | Exploration, prototyping           |
-| security-pack     | /security     | Security assessment, compliance    |
-| sre-pack          | /sre          | Operations, reliability            |
-| strategy-pack     | /strategy     | Market research, business analysis |
+| 10x-dev      | /10x          | Full feature development lifecycle |
+| debt-triage  | /debt         | Technical debt prioritization      |
+| docs     | /docs         | Documentation, technical writing   |
+| ecosystem    | /ecosystem    | CEM/skeleton/roster infrastructure |
+| forge        | /forge        | Rite creation and validation       |
+| hygiene      | /hygiene      | Code quality, refactoring          |
+| intelligence | /intelligence | Analytics, A/B testing, research   |
+| rnd          | /rnd          | Exploration, prototyping           |
+| security     | /security     | Security assessment, compliance    |
+| sre          | /sre          | Operations, reliability            |
+| strategy     | /strategy     | Market research, business analysis |
 ```
 **Note**: This list reflects current roster inventory. Use `rite-discovery` skill for programmatic access.
 

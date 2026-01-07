@@ -141,7 +141,7 @@ total_tasks: 3
 duration: "2w"
 start_date: "2025-12-29"
 end_date: "2026-01-12"
-active_team: "10x-dev-pack"
+active_team: "10x-dev"
 blockers: []
 context_version: "1.0"
 ---

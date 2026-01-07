@@ -27,8 +27,8 @@ artifact_id: string           # Pattern: HANDOFF-{source}-to-{target}-{YYYY-MM-D
 schema_version: "1.0"         # Must be "1.0" for this version
 
 # Required: Team routing
-source_team: string           # Rite producing the handoff (e.g., "10x-dev-pack")
-target_team: string           # Rite receiving the handoff (e.g., "security-pack")
+source_team: string           # Rite producing the handoff (e.g., "10x-dev")
+target_team: string           # Rite receiving the handoff (e.g., "security")
 
 # Required: Handoff classification
 handoff_type: enum            # execution | validation | assessment | implementation | strategic_input | strategic_evaluation
@@ -168,12 +168,12 @@ A cross-rite HANDOFF artifact is **required** when:
 
 | Condition | Target Team | Handoff Type |
 |-----------|-------------|--------------|
-| Complexity >= SERVICE with security considerations | security-pack | assessment |
-| Feature involves production deployment | sre-pack | validation |
-| Debt remediation work ready for execution | hygiene-pack | execution |
-| R&D prototype ready for strategic evaluation | strategy-pack | strategic_evaluation |
-| User research synthesis complete | strategy-pack | strategic_input |
-| Strategic go-decision for production build | 10x-dev-pack | implementation |
+| Complexity >= SERVICE with security considerations | security | assessment |
+| Feature involves production deployment | sre | validation |
+| Debt remediation work ready for execution | hygiene | execution |
+| R&D prototype ready for strategic evaluation | strategy | strategic_evaluation |
+| User research synthesis complete | strategy | strategic_input |
+| Strategic go-decision for production build | 10x-dev | implementation |
 
 ### Optional Cross-Team Handoff
 
@@ -181,10 +181,10 @@ A cross-rite HANDOFF artifact is **optional** when:
 
 | Condition | Target Team | Handoff Type |
 |-----------|-------------|--------------|
-| Feature complete, documentation update desired | doc-rite-pack | assessment |
-| Code review reveals hygiene concerns | hygiene-pack | assessment |
-| Performance concerns identified | sre-pack | assessment |
-| Minor security considerations (complexity < SERVICE) | security-pack | assessment |
+| Feature complete, documentation update desired | docs | assessment |
+| Code review reveals hygiene concerns | hygiene | assessment |
+| Performance concerns identified | sre | assessment |
+| Minor security considerations (complexity < SERVICE) | security | assessment |
 
 ### No Handoff Required
 
@@ -211,8 +211,8 @@ Cross-rite handoff is **not required** when:
 HANDOFF-{source}-to-{target}-{YYYY-MM-DD}[-{seq}].md
 
 Examples:
-- HANDOFF-10x-dev-pack-to-security-pack-2026-01-03.md
-- HANDOFF-debt-triage-pack-to-hygiene-pack-2026-01-03-2.md  (second handoff same day)
+- HANDOFF-10x-dev-to-security-2026-01-03.md
+- HANDOFF-debt-triage-to-hygiene-2026-01-03-2.md  (second handoff same day)
 ```
 
 ### Response Artifact Naming

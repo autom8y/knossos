@@ -40,7 +40,7 @@ This Technical Design Document specifies the implementation of the **sync domain
 - Remote source resolution (GitHub raw URLs, local paths, git refs)
 
 **Out of Scope**:
-- Team pack authoring (forge-pack responsibility)
+- Team pack authoring (forge responsibility)
 - Agent manifest operations (team domain handles AGENT_MANIFEST.json)
 - Schema validation (manifest domain handles via `ari manifest validate`)
 - Remote registry/discovery service (future enhancement)
@@ -206,10 +206,10 @@ ari sync status [--resource=TYPE] [--verbose]
       "remote": "https://github.com/autom8y/roster",
       "last_sync": "2026-01-04T18:00:00Z",
       "items": [
-        {"name": "10x-dev-pack", "status": "synced", "checksum": "sha256:abc123..."},
-        {"name": "rnd-pack", "status": "synced", "checksum": "sha256:def456..."},
-        {"name": "security-pack", "status": "local_modified", "checksum": "sha256:789abc..."},
-        {"name": "sre-pack", "status": "synced", "checksum": "sha256:012def..."}
+        {"name": "10x-dev", "status": "synced", "checksum": "sha256:abc123..."},
+        {"name": "rnd", "status": "synced", "checksum": "sha256:def456..."},
+        {"name": "security", "status": "local_modified", "checksum": "sha256:789abc..."},
+        {"name": "sre", "status": "synced", "checksum": "sha256:012def..."}
       ]
     },
     "skills": {
@@ -354,8 +354,8 @@ ari sync pull [--resource=TYPE] [--remote=NAME] [--dry-run] [--force]
     "conflicts": [
       {
         "resource": "teams",
-        "name": "10x-dev-pack",
-        "path": "rites/10x-dev-pack/workflow.yaml",
+        "name": "10x-dev",
+        "path": "rites/10x-dev/workflow.yaml",
         "conflict_file": ".claude/sync/conflicts/workflow.yaml-20260104-190000.conflict",
         "base_checksum": "sha256:base123...",
         "local_checksum": "sha256:local456...",
@@ -395,7 +395,7 @@ Sync state updated.
 Pulling from roster...
 
 Conflicts:
-  [teams] 10x-dev-pack/workflow.yaml
+  [teams] 10x-dev/workflow.yaml
     Local and remote both modified since last sync.
     Conflict file: .claude/sync/conflicts/workflow.yaml-20260104-190000.conflict
 
@@ -451,8 +451,8 @@ ari sync push [--resource=TYPE] [--remote=NAME] [--dry-run] [--message=TEXT]
     "pushed": [
       {
         "resource": "teams",
-        "name": "10x-dev-pack",
-        "path": "rites/10x-dev-pack/workflow.yaml",
+        "name": "10x-dev",
+        "path": "rites/10x-dev/workflow.yaml",
         "checksum": "sha256:new123..."
       }
     ]
@@ -461,7 +461,7 @@ ari sync push [--resource=TYPE] [--remote=NAME] [--dry-run] [--message=TEXT]
     "pushed": 1
   },
   "commit": "abc123def456",
-  "message": "Update 10x-dev-pack workflow"
+  "message": "Update 10x-dev workflow"
 }
 ```
 
@@ -470,12 +470,12 @@ ari sync push [--resource=TYPE] [--remote=NAME] [--dry-run] [--message=TEXT]
 Pushing to roster...
 
 Pushed:
-  [teams] 10x-dev-pack/workflow.yaml
+  [teams] 10x-dev/workflow.yaml
 
 Summary: 1 file pushed
 
 Commit: abc123def456
-Message: Update 10x-dev-pack workflow
+Message: Update 10x-dev workflow
 ```
 
 **Exit Codes**:
@@ -519,9 +519,9 @@ ari sync diff [--resource=TYPE] [--name=NAME] [--format=FORMAT]
   "diffs": [
     {
       "resource": "teams",
-      "name": "10x-dev-pack",
+      "name": "10x-dev",
       "file": "workflow.yaml",
-      "local_path": "rites/10x-dev-pack/workflow.yaml",
+      "local_path": "rites/10x-dev/workflow.yaml",
       "status": "modified",
       "changes": [
         {
@@ -544,8 +544,8 @@ ari sync diff [--resource=TYPE] [--name=NAME] [--format=FORMAT]
 
 **Output (unified, text)**:
 ```
---- local: rites/10x-dev-pack/workflow.yaml
-+++ remote: roster:rites/10x-dev-pack/workflow.yaml
+--- local: rites/10x-dev/workflow.yaml
++++ remote: roster:rites/10x-dev/workflow.yaml
 
 @@ entry_point @@
   entry_point:
@@ -602,7 +602,7 @@ ari sync resolve [--strategy=STRATEGY] [--conflict=FILE] [--all]
   "conflicts_resolved": [
     {
       "resource": "teams",
-      "name": "10x-dev-pack",
+      "name": "10x-dev",
       "file": "workflow.yaml",
       "strategy": "ours",
       "result_checksum": "sha256:resolved123..."
@@ -620,7 +620,7 @@ ari sync resolve [--strategy=STRATEGY] [--conflict=FILE] [--all]
 Resolving conflicts...
 
 Resolved:
-  [teams] 10x-dev-pack/workflow.yaml (strategy: ours)
+  [teams] 10x-dev/workflow.yaml (strategy: ours)
 
 Summary: 1 resolved, 0 remaining
 
@@ -828,7 +828,7 @@ Example:
     "details": {
       "conflict_count": 2,
       "conflicts": [
-        "rites/10x-dev-pack/workflow.yaml",
+        "rites/10x-dev/workflow.yaml",
         "skills/commit-ref.md"
       ],
       "resolution_hint": "Run 'ari sync resolve' to resolve conflicts"
@@ -914,7 +914,7 @@ Tracks the synchronization state of all resources:
   },
   "resources": {
     "teams": {
-      "10x-dev-pack": {
+      "10x-dev": {
         "local_checksum": "sha256:abc123...",
         "remote_checksum": "sha256:abc123...",
         "base_checksum": "sha256:abc123...",
@@ -967,10 +967,10 @@ Conflict files stored in `.claude/sync/conflicts/`:
 {
   "created_at": "2026-01-04T19:00:00Z",
   "resource": "teams",
-  "name": "10x-dev-pack",
+  "name": "10x-dev",
   "file": "workflow.yaml",
-  "local_path": "rites/10x-dev-pack/workflow.yaml",
-  "remote_url": "https://github.com/autom8y/roster/blob/main/rites/10x-dev-pack/workflow.yaml",
+  "local_path": "rites/10x-dev/workflow.yaml",
+  "remote_url": "https://github.com/autom8y/roster/blob/main/rites/10x-dev/workflow.yaml",
   "base": {
     "checksum": "sha256:base123...",
     "content": "... base content ..."
@@ -1705,7 +1705,7 @@ ariadne/
         ├── remotes/
         │   └── mock-roster/
         │       ├── rites/
-        │       │   └── 10x-dev-pack/
+        │       │   └── 10x-dev/
         │       │       └── workflow.yaml
         │       └── skills/
         │           └── commit-ref.md

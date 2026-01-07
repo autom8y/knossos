@@ -71,7 +71,7 @@ Production issue?
 
 ## Prerequisites
 
-- 10x-dev-pack active (minimum: Engineer + QA agents)
+- 10x-dev active (minimum: Engineer + QA agents)
 - Clear understanding of the issue
 - Access to production logs/monitoring
 - Time pressure (< 60 min fix target)

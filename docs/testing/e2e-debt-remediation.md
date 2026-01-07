@@ -1,15 +1,15 @@
 # E2E Test: Debt Remediation Workflow
 
-> End-to-end test scenario for debt-triage-pack to hygiene-pack cross-rite workflow.
+> End-to-end test scenario for debt-triage to hygiene cross-rite workflow.
 > Version: 1.0.0
 
 ## Overview
 
-This document defines a complete test scenario for technical debt remediation, validating the handoff from debt-triage-pack (planning) to hygiene-pack (execution) and behavior preservation validation throughout.
+This document defines a complete test scenario for technical debt remediation, validating the handoff from debt-triage (planning) to hygiene (execution) and behavior preservation validation throughout.
 
 **Workflow Path**: debt-triage planning -> HANDOFF -> hygiene execution
-**Primary Teams**: debt-triage-pack, hygiene-pack
-**Cross-Team Handoffs**: debt-triage-pack -> hygiene-pack (execution handoff)
+**Primary Teams**: debt-triage, hygiene
+**Cross-Team Handoffs**: debt-triage -> hygiene (execution handoff)
 
 ---
 
@@ -20,8 +20,8 @@ This document defines a complete test scenario for technical debt remediation, v
 Address accumulated technical debt in the validator module: duplicate email validation logic across 3 files, dead utility functions, and inconsistent error message formatting.
 
 **Why This Scenario**: This represents a typical cross-rite debt remediation that:
-- Requires full debt-triage-pack workflow (collection, assessment, planning)
-- Produces execution HANDOFF for hygiene-pack
+- Requires full debt-triage workflow (collection, assessment, planning)
+- Produces execution HANDOFF for hygiene
 - Requires behavior preservation validation
 - Tests the debt-triage -> hygiene handoff path
 
@@ -35,7 +35,7 @@ Address accumulated technical debt in the validator module: duplicate email vali
 - [ ] Complexity = AUDIT (full debt discovery)
 
 ### Agent
-**debt-collector** (debt-triage-pack)
+**debt-collector** (debt-triage)
 
 ### Input
 User request: "Audit the validator module for technical debt. We've noticed duplicated code and some functions that seem unused."
@@ -122,7 +122,7 @@ User request: "Audit the validator module for technical debt. We've noticed dupl
 ### Phase Transition
 - **From**: collection
 - **To**: assessment
-- **Handoff Type**: Internal (within debt-triage-pack)
+- **Handoff Type**: Internal (within debt-triage)
 - **Trigger**: Debt ledger complete
 
 ---
@@ -134,7 +134,7 @@ User request: "Audit the validator module for technical debt. We've noticed dupl
 - [ ] All items cataloged with evidence
 
 ### Agent
-**risk-assessor** (debt-triage-pack)
+**risk-assessor** (debt-triage)
 
 ### Input
 - Debt ledger from Phase 1
@@ -208,7 +208,7 @@ User request: "Audit the validator module for technical debt. We've noticed dupl
 ### Phase Transition
 - **From**: assessment
 - **To**: planning
-- **Handoff Type**: Internal (within debt-triage-pack)
+- **Handoff Type**: Internal (within debt-triage)
 - **Trigger**: Risk matrix complete
 
 ---
@@ -220,7 +220,7 @@ User request: "Audit the validator module for technical debt. We've noticed dupl
 - [ ] Priorities assigned
 
 ### Agent
-**sprint-planner** (debt-triage-pack)
+**sprint-planner** (debt-triage)
 
 ### Input
 - Debt ledger
@@ -235,7 +235,7 @@ User request: "Audit the validator module for technical debt. We've noticed dupl
 ## Sprint Overview
 - **Sprint Goal**: Eliminate P1 debt, address high-impact P2 items
 - **Estimated Effort**: 8-12 hours
-- **Team**: hygiene-pack
+- **Team**: hygiene
 
 ## Package 1: Email Validator Consolidation (P1)
 
@@ -340,8 +340,8 @@ Each package is independently deployable. Rollback by reverting PR.
 
 ### Phase Transition: CROSS-TEAM HANDOFF
 
-- **From**: planning (debt-triage-pack)
-- **To**: execution (hygiene-pack)
+- **From**: planning (debt-triage)
+- **To**: execution (hygiene)
 - **Handoff Type**: Cross-team execution handoff
 - **Trigger**: Sprint packages approved
 
@@ -353,8 +353,8 @@ Each package is independently deployable. Rollback by reverting PR.
 
 ```yaml
 ---
-source_team: debt-triage-pack
-target_team: hygiene-pack
+source_team: debt-triage
+target_team: hygiene
 handoff_type: execution
 created: 2026-01-02
 initiative: Q1 Technical Debt Remediation
@@ -429,12 +429,12 @@ Risk assessor available for clarification: @risk-assessor
 ## Phase 5: Hygiene Execution
 
 ### Entry Criteria
-- [ ] HANDOFF received from debt-triage-pack
+- [ ] HANDOFF received from debt-triage
 - [ ] Sprint packages reviewed
 - [ ] Acceptance criteria clear
 
 ### Team
-**hygiene-pack**
+**hygiene**
 
 ### Workflow
 ```
@@ -613,7 +613,7 @@ Package 1 complete. Behavior preserved with documented intentional unification.
 
 ## Complete Test Checklist
 
-### Phase Completeness (debt-triage-pack)
+### Phase Completeness (debt-triage)
 - [ ] Phase 1 (Collection): Debt ledger produced
 - [ ] Phase 2 (Assessment): Risk matrix produced
 - [ ] Phase 3 (Planning): Sprint packages produced
@@ -624,7 +624,7 @@ Package 1 complete. Behavior preserved with documented intentional unification.
 - [ ] Source artifacts linked
 - [ ] Priority set appropriately
 
-### Phase Completeness (hygiene-pack)
+### Phase Completeness (hygiene)
 - [ ] Smell verification for each package
 - [ ] Refactor plans for each package
 - [ ] Commits for each package
@@ -649,7 +649,7 @@ Package 1 complete. Behavior preserved with documented intentional unification.
 
 1. Initialize debt-triage session:
    ```
-   /start initiative="Validator Debt Remediation" complexity=AUDIT team=debt-triage-pack
+   /start initiative="Validator Debt Remediation" complexity=AUDIT team=debt-triage
    ```
 
 2. Execute Phase 1 (Collection):
@@ -669,7 +669,7 @@ Package 1 complete. Behavior preserved with documented intentional unification.
 
 5. Produce cross-rite handoff and switch teams:
    ```
-   /team hygiene-pack
+   /team hygiene
    ```
 
 6. Execute hygiene workflow for each package:
@@ -688,7 +688,7 @@ Package 1 complete. Behavior preserved with documented intentional unification.
 |------|---------|----------|
 | Collection -> Assessment | Debt ledger complete | Items have location, evidence, age |
 | Assessment -> Planning | Risk matrix complete | Items scored and prioritized |
-| Planning -> HANDOFF | Packages approved | Execution handoff to hygiene-pack |
+| Planning -> HANDOFF | Packages approved | Execution handoff to hygiene |
 | Per-Package Completion | Audit signoff | Behavior preservation confirmed |
 
 ---
@@ -697,7 +697,7 @@ Package 1 complete. Behavior preserved with documented intentional unification.
 
 - [Cross-Team Coordination Playbook](../playbooks/cross-rite-coordination.md)
 - [Handoff Smoke Tests](handoff-smoke-tests.md)
-- [Debt Triage Pack Workflow](../../rites/debt-triage-pack/workflow.md)
-- [Hygiene Pack Workflow](../../rites/hygiene-pack/workflow.md)
+- [Debt Triage Pack Workflow](../../rites/debt-triage/workflow.md)
+- [Hygiene Pack Workflow](../../rites/hygiene/workflow.md)
 - [Shared Templates: Debt Ledger](../../.claude/skills/shared/shared-templates/templates/debt-ledger.md)
 - [Cross-Team Handoff Schema](../../.claude/skills/shared/cross-rite-handoff/schema.md)
