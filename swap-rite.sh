@@ -1987,8 +1987,8 @@ swap_commands() {
     mkdir -p ".claude/commands"
 
     # Backup and remove previous rite commands
-    backup_team_commands
-    remove_team_commands
+    backup_rite_commands
+    remove_rite_commands
 
     # Check if team has commands
     if [[ ! -d "$source_dir" ]]; then
@@ -3572,11 +3572,11 @@ perform_reset() {
     # Backup current state
     backup_current_agents
 
-    # Remove team resources using existing functions
-    remove_team_agents
-    remove_team_commands
-    remove_team_skills
-    remove_team_hooks
+    # Remove rite resources using existing functions
+    remove_rite_agents
+    remove_rite_commands
+    remove_rite_skills
+    remove_rite_hooks
 
     # Clear ACTIVE_RITE
     rm -f ".claude/ACTIVE_RITE"
