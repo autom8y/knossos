@@ -1667,7 +1667,7 @@ validate_workflow_yaml() {
 }
 
 # Validate orchestrator.yaml schema for a rite
-# Checks required fields: team, routing
+# Checks required fields: rite, routing
 # Returns 0 if valid or file doesn't exist, 1 if validation fails
 validate_orchestrator_yaml() {
     local rite_name="$1"
@@ -1681,15 +1681,15 @@ validate_orchestrator_yaml() {
 
     log_debug "Validating orchestrator.yaml schema for $rite_name"
 
-    # Check required field: team
-    if ! grep -q "^team:" "$orchestrator_file"; then
-        log_error "orchestrator.yaml missing required field: team"
+    # Check required field: rite
+    if ! grep -q "^rite:" "$orchestrator_file"; then
+        log_error "orchestrator.yaml missing required field: rite"
         return 1
     fi
 
-    # Check required nested field: team.name
-    if ! grep -A 3 "^team:" "$orchestrator_file" | grep -q "  name:"; then
-        log_error "orchestrator.yaml missing required field: team.name"
+    # Check required nested field: rite.name
+    if ! grep -A 3 "^rite:" "$orchestrator_file" | grep -q "  name:"; then
+        log_error "orchestrator.yaml missing required field: rite.name"
         return 1
     fi
 

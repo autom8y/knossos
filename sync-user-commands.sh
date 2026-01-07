@@ -9,6 +9,12 @@
 #   - Preserves: User-created commands not from roster
 #   - Flattens: Subdirectories in source become flat list in target
 #
+# Collision Handling (Intentional Design):
+#   When a command exists in both user-commands/ (global) and rites/<name>/commands/
+#   (rite-specific), collisions are logged as warnings but are expected behavior.
+#   Rite-specific commands override global commands when that rite is active,
+#   allowing rites to customize command behavior while preserving global defaults.
+#
 # Usage:
 #   ./sync-user-commands.sh              # Sync user-commands to ~/.claude/commands/
 #   ./sync-user-commands.sh --dry-run    # Preview changes without applying

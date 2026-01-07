@@ -34,7 +34,8 @@ readonly SOURCE_DIR="$KNOSSOS_HOME/user-hooks"
 readonly MANIFEST_VERSION="1.1"
 
 # Root exceptions (items that stay at root level, not in categories)
-readonly ROOT_EXCEPTIONS="lib"
+# lib: hook library files, ari: Ariadne CLI hooks (separate sync)
+readonly ROOT_EXCEPTIONS="lib ari"
 
 # Valid categories for hooks
 readonly HOOK_CATEGORIES="context-injection session-guards validation tracking"
@@ -518,8 +519,9 @@ is_root_exception() {
 # Check if a directory name is a valid category
 is_valid_category() {
     local name="$1"
-    for category in $HOOK_CATEGORIES; do
-        [[ "$name" == "$category" ]] && return 0
+    local cat
+    for cat in $HOOK_CATEGORIES; do
+        [[ "$name" == "$cat" ]] && return 0
     done
     return 1
 }

@@ -5,7 +5,7 @@
 # Each rite must have a workflow.yaml matching this structure.
 # This file serves as both documentation and validation reference.
 #
-# Human-readable guide: skeleton/.claude/skills/team-development/schema/rite-pack-schema.md
+# Human-readable guide: skeleton/.claude/skills/team-development/schema/rite-schema.md
 
 schema_version: "1.1"
 
@@ -15,7 +15,7 @@ schema_version: "1.1"
 # Every workflow.yaml must include these top-level fields:
 
 required_fields:
-  - name              # Team pack identifier (must match directory name)
+  - name              # Rite identifier (must match directory name)
   - workflow_type     # Execution model: sequential | parallel | hybrid
   - description       # Human-readable purpose description
   - entry_point       # First agent and initial artifact definition
@@ -60,9 +60,9 @@ field_definitions:
         - "security"
         - "sre"
       invalid:
-        - "10xDevPack"          # camelCase not allowed
-        - "my_team"             # underscores not allowed, missing -pack
-        - "MyTeamPack"          # uppercase not allowed
+        - "10xDev"              # camelCase not allowed
+        - "my_rite"             # underscores not allowed
+        - "MyRite"              # uppercase not allowed
 
   # ---------------------------------------------------------------------------
   # version

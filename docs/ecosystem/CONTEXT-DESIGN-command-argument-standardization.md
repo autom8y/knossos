@@ -125,7 +125,7 @@ model: <model-id>
 
 | Field | Required | Format | Example |
 |-------|----------|--------|---------|
-| `description` | Yes | Imperative sentence starting with verb | `Switch agent rites or list available teams` |
+| `description` | Yes | Imperative sentence starting with verb | `Switch rites or list available rites` |
 | `argument-hint` | Yes | Argument syntax with brackets | `[pack-name] [--list] [--update]` |
 | `model` | Yes | Valid Claude model ID | `haiku`, `sonnet`, `opus` |
 | `allowed-tools` | Optional | Comma-separated tool list | `Bash, Read, Write` |

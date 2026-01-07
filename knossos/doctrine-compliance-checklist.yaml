@@ -348,7 +348,7 @@ categories:
         validation_criteria: "EvidencePaths struct captures tests, build, lint, adversarial, integration paths"
 
   rite_operations:
-    description: "Practice bundles (formerly team-packs)"
+    description: "Practice bundles"
     doctrine_ref: "Section IV - The Rites"
     items:
       - id: RO-001
@@ -577,17 +577,17 @@ categories:
         files:
           - docs/**/*.md
         validation_criteria: "All docs use 'rite' terminology consistently"
-        notes: "Many docs still reference team-pack, team-context, etc."
+        notes: "Completed in Knossos Terminology Finalization Sprint"
 
       - id: TM-006
         name: "Session context schema team -> rite"
         severity: BLOCKER
-        status: MISSING
+        status: IMPLEMENTED
         files:
           - ariadne/internal/session/context.go
           - ariadne/internal/validation/schemas/session-context.schema.json
         validation_criteria: "Schema fields updated: active_team -> active_rite, team -> rite"
-        notes: "Requires migration script for existing sessions"
+        notes: "Completed in Knossos Terminology Finalization Sprint"
 
       - id: TM-007
         name: "Hook script terminology"
