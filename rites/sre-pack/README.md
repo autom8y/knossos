@@ -2,7 +2,7 @@
 
 Reliability lifecycle for observability, incident management, infrastructure, and resilience testing.
 
-## When to Use This Team
+## When to Use This Rite
 
 **Triggers**:
 - "We need better monitoring and alerting"
@@ -17,7 +17,7 @@ Reliability lifecycle for observability, incident management, infrastructure, an
 ## Quick Start
 
 ```bash
-/team sre-pack
+/rite sre-pack
 ```
 
 ## Agents
@@ -45,7 +45,7 @@ See `workflow.md` for detailed phase flow and entry criteria.
 
 SRE accepts validation handoffs from 10x-dev-pack for production readiness assessment.
 
-**Expected HANDOFF Format** (see `cross-team-handoff` skill for full schema):
+**Expected HANDOFF Format** (see `cross-rite-handoff` skill for full schema):
 ```yaml
 ---
 source_team: 10x-dev-pack
@@ -115,7 +115,7 @@ Results are documented in a Reliability Report or returned as defect annotations
 - **Blocker**: Error rate alert not configured (required for GO)
 ```
 
-## Related Teams
+## Related Rites
 
 - **10x-dev-pack**: Primary source of validation handoffs for new features
 - **debt-triage-pack**: When reliability issues stem from accumulated technical debt

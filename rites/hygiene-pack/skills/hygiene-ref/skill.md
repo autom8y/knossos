@@ -11,7 +11,7 @@ description: "Quick switch to hygiene-pack (code quality workflow). Use when: de
 
 Instantly switch to the hygiene-pack, a specialized team focused on code quality, architectural compliance, refactoring, and technical cleanliness. This team detects code smells, enforces standards, and cleans up technical messes.
 
-This is a convenience wrapper around `/team hygiene-pack` that also displays the team roster after switching.
+This is a convenience wrapper around `/rite hygiene-pack` that also displays the rite roster after switching.
 
 ---
 
@@ -34,12 +34,12 @@ No parameters required. This command:
 Execute via Bash tool:
 
 ```bash
-$ROSTER_HOME/swap-team.sh hygiene-pack
+$ROSTER_HOME/swap-rite.sh hygiene-pack
 ```
 
 ### 2. Display Team Roster
 
-After successful switch, show the active team roster:
+After successful switch, show the active rite roster:
 
 ```
 Switched to hygiene-pack (4 agents loaded)
@@ -298,7 +298,7 @@ Use this team for:
 
 | File | Change | Description |
 |------|--------|-------------|
-| `.claude/ACTIVE_RITE` | Set to `hygiene-pack` | Active team state |
+| `.claude/ACTIVE_RITE` | Set to `hygiene-pack` | Active rite state |
 | `.claude/agents/` | Populated | 4 agent files loaded |
 | `.claude/sessions/{session_id}/SESSION_CONTEXT.md` | `active_team` updated | If session active |
 
@@ -318,8 +318,8 @@ Use this team for:
 If swap fails:
 
 ```
-[Roster] Error: Team pack 'hygiene-pack' not found
-[Roster] Use '/team --list' to see available packs
+[Roster] Error: Rite 'hygiene-pack' not found
+[Roster] Use '/rite --list' to see available packs
 ```
 
 **Resolution**: Verify roster installation at `$ROSTER_HOME/`
@@ -349,7 +349,7 @@ Standards skill defines rules, hygiene team enforces them.
 
 ## Related Commands
 
-- `/team` - General team switching with options
+- `/team` - General rite switching with options
 - `/10x` - Quick switch to development team
 - `/docs` - Quick switch to documentation team
 - `/debt` - Quick switch to technical debt team
@@ -367,7 +367,7 @@ Standards skill defines rules, hygiene team enforces them.
 ## Related Documentation
 
 - [COMMAND_REGISTRY.md](../../COMMAND_REGISTRY.md) - All registered commands
-- [swap-team.sh]($ROSTER_HOME/swap-team.sh) - Roster swap implementation
+- [swap-rite.sh]($ROSTER_HOME/swap-rite.sh) - Roster swap implementation
 
 ---
 
@@ -391,7 +391,7 @@ Both valid, continuous prevents accumulation.
 
 | Command | Behavior |
 |---------|----------|
-| `/team hygiene-pack` | Switches team, shows swap confirmation |
+| `/rite hygiene-pack` | Switches team, shows swap confirmation |
 | `/hygiene` | Switches team, shows roster with agent descriptions |
 
 Use `/hygiene` when you want to see available agents after switching.

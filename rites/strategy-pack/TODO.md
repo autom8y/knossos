@@ -46,7 +46,7 @@ Strategy-pack is a **well-designed, methodologically rigorous team** with clear 
 **Decision:** Coordinate with intelligence-pack P3 to add comparison table to both READMEs.
 
 **Changes required:**
-- [ ] Update `teams/strategy-pack/README.md`: Add "When to Use Strategy vs Intelligence" section
+- [ ] Update `rites/strategy-pack/README.md`: Add "When to Use Strategy vs Intelligence" section
 - [ ] Coordinate with intelligence-pack P3 (mirror same table)
 - [ ] Clarify:
   ```markdown
@@ -80,8 +80,8 @@ Strategy-pack is a **well-designed, methodologically rigorous team** with clear 
 **Decision:** Define explicit handoff workflow from moonshot-architect to roadmap-strategist.
 
 **Changes required:**
-- [ ] Update `teams/strategy-pack/README.md`: Add "Architecture Strategy Integration" section
-- [ ] Update `teams/rnd-pack/README.md`: Reference strategy-pack as consumer of moonshot outputs
+- [ ] Update `rites/strategy-pack/README.md`: Add "Architecture Strategy Integration" section
+- [ ] Update `rites/rnd-pack/README.md`: Reference strategy-pack as consumer of moonshot outputs
 - [ ] Define integration pattern:
   ```markdown
   ## Architecture Strategy Integration
@@ -127,7 +127,7 @@ Strategy-pack is a **well-designed, methodologically rigorous team** with clear 
 **Decision:** Add complete back-route coverage.
 
 **Changes required:**
-- [ ] Update `teams/strategy-pack/workflow.yaml`: Add missing back-routes
+- [ ] Update `rites/strategy-pack/workflow.yaml`: Add missing back-routes
 - [ ] Add routes:
   ```yaml
   back_routes:
@@ -168,7 +168,7 @@ Strategy-pack is a **well-designed, methodologically rigorous team** with clear 
 
 ### P4: Strategy Outputs Use Generalized Handoff Pattern
 
-**Decision:** Strategy → 10x handoff should use the same HANDOFF artifact pattern as other cross-team transitions.
+**Decision:** Strategy → 10x handoff should use the same HANDOFF artifact pattern as other cross-rite transitions.
 
 **Changes required:**
 - [ ] Document strategy handoffs in generalized pattern (ecosystem-level)
@@ -243,7 +243,7 @@ Strategy-pack is a **well-designed, methodologically rigorous team** with clear 
 This completes the 10-team audit:
 1. 10x-dev-pack (mature, impact assessment + flexible entry needed)
 2. ecosystem-pack (demote from hub, remove satellite testing)
-3. doc-team-pack (add proactive gate, staleness detection)
+3. doc-rite-pack (add proactive gate, staleness detection)
 4. hygiene-pack (define behavior preservation, formalize debt handoff)
 5. debt-triage-pack (shared detection skill, generalized handoff)
 6. sre-pack (shared templates, 10x→sre handoff)

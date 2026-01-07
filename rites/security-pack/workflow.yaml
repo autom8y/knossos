@@ -10,7 +10,7 @@ entry_point:
       type: threat-model
       path_template: docs/security/THREAT-{slug}.md
 
-  # Consultation entry for cross-team invocation (e.g., from 10x-dev-pack)
+  # Consultation entry for cross-rite invocation (e.g., from 10x-dev-pack)
   consultation:
     agent: threat-modeler
     mode: advisory

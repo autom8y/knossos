@@ -7,7 +7,7 @@
 ## Pre-Flight Checklist
 
 ### Directory Structure
-- [ ] Directory exists: `$ROSTER_HOME/teams/{team-name}/`
+- [ ] Directory exists: `$ROSTER_HOME/rites/{rite-name}/`
 - [ ] Name follows pattern: `{domain}-pack` (e.g., `sre-pack`)
 - [ ] Agents directory exists with 3-5 `.md` files
 - [ ] `workflow.yaml` exists in team root
@@ -31,31 +31,31 @@
 - [ ] All 11 sections present (see agent-template.md)
 
 ### Integration
-- [ ] Command file exists: `.claude/commands/{team-name}.md`
-- [ ] Skill directory exists: `.claude/skills/{team-name}-ref/`
+- [ ] Command file exists: `.claude/commands/{rite-name}.md`
+- [ ] Skill directory exists: `.claude/skills/{rite-name}-ref/`
 - [ ] COMMAND_REGISTRY.md updated
 
 ### Consultant Knowledge Base (REQUIRED)
 - [ ] `ecosystem-map.md` updated with new team
 - [ ] `agent-reference.md` updated with new agents
-- [ ] `team-profiles/{team-name}.md` created
+- [ ] `rite-profiles/{rite-name}.md` created
 - [ ] Routing files updated (`intent-patterns.md`, `decision-trees.md`)
 - [ ] `command-reference.md` updated
 
 ### Verification Commands
 ```bash
 # Test team swap
-$ROSTER_HOME/swap-team.sh {team-name}
+$ROSTER_HOME/swap-rite.sh {rite-name}
 
 # Verify workflow and agents copied
 cat .claude/ACTIVE_WORKFLOW.yaml
 ls .claude/agents/
 
 # Verify terminal phase
-grep -B1 "next: null" $ROSTER_HOME/teams/{team-name}/workflow.yaml
+grep -B1 "next: null" $ROSTER_HOME/rites/{rite-name}/workflow.yaml
 
 # Check Consultant knowledge
-grep "{team-name}" .claude/knowledge/consultant/ecosystem-map.md
+grep "{rite-name}" .claude/knowledge/consultant/ecosystem-map.md
 ```
 
 ---
@@ -66,7 +66,7 @@ grep "{team-name}" .claude/knowledge/consultant/ecosystem-map.md
 
 | Symptom | Cause | Fix |
 |---------|-------|-----|
-| "Team not found" | Directory missing or misnamed | Ensure `$ROSTER_HOME/teams/{domain}-pack/` exists |
+| "Team not found" | Directory missing or misnamed | Ensure `$ROSTER_HOME/rites/{domain}-pack/` exists |
 | "0 agents, N phases" | Agent files missing `.md` extension | Rename files to `{name}.md` |
 | "workflow.yaml not found" | Missing config | Create from `templates/workflow.yaml.template` |
 
@@ -98,8 +98,8 @@ grep "{team-name}" .claude/knowledge/consultant/ecosystem-map.md
 
 | Symptom | Cause | Fix |
 |---------|-------|-----|
-| `/{team-name}` not recognized | Command file missing | Create `.claude/commands/{team-name}.md` |
-| `@{team-name}-ref` not found | Skill missing | Create `.claude/skills/{team-name}-ref/skill.md` |
+| `/{rite-name}` not recognized | Command file missing | Create `.claude/commands/{rite-name}.md` |
+| `@{rite-name}-ref` not found | Skill missing | Create `.claude/skills/{rite-name}-ref/skill.md` |
 | SESSION_CONTEXT stale | Swap script issue | Verify quick-switch updates active_team |
 
 ---
@@ -108,7 +108,7 @@ grep "{team-name}" .claude/knowledge/consultant/ecosystem-map.md
 
 ```bash
 # Full team validation
-$ROSTER_HOME/swap-team.sh {team-name} && \
+$ROSTER_HOME/swap-rite.sh {rite-name} && \
 ls .claude/agents/ && \
 cat .claude/ACTIVE_WORKFLOW.yaml
 
@@ -119,7 +119,7 @@ python3 -c "import yaml; yaml.safe_load(open('workflow.yaml'))"
 head -20 agents/*.md | grep -A10 "^---"
 
 # Check command file
-cat .claude/commands/{team-name}.md | head -10
+cat .claude/commands/{rite-name}.md | head -10
 ```
 
 ---

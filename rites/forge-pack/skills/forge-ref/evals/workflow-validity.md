@@ -5,7 +5,7 @@
 ## Required Fields
 
 ```yaml
-name: {team-name}                    # REQUIRED
+name: {rite-name}                    # REQUIRED
 workflow_type: sequential            # REQUIRED (only "sequential" supported)
 description: {one-line description}  # REQUIRED
 

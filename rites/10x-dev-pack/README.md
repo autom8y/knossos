@@ -2,7 +2,7 @@
 
 Full-lifecycle software development from product requirements through quality validation.
 
-## When to Use This Team
+## When to Use This Rite
 
 **Triggers**:
 - "Build a new feature end-to-end"
@@ -17,7 +17,7 @@ Full-lifecycle software development from product requirements through quality va
 ```bash
 /task build payment processing system with Stripe integration
 # or invoke directly
-/team 10x-dev-pack
+/rite 10x-dev-pack
 ```
 
 ## Agents
@@ -68,8 +68,8 @@ See `workflow.md` for phase flow and complexity levels.
 
 **Rule of thumb**: If you can answer it in one focused session with a decision at the end, use `/spike`. If you need to learn, experiment, and iterate across multiple sessions, switch to `rnd-pack`.
 
-## Related Teams
+## Related Rites
 
-- **doc-team-pack**: When implementation is complete and needs documentation
+- **doc-rite-pack**: When implementation is complete and needs documentation
 - **infrastructure-pack**: When deployment automation is required
 - **rnd-pack**: When exploration scope exceeds a single session

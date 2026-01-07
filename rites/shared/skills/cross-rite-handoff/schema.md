@@ -1,10 +1,10 @@
 # HANDOFF Artifact Schema v1.0
 
-> Machine-readable frontmatter schema for cross-team work transfer
+> Machine-readable frontmatter schema for cross-rite work transfer
 
 ## Overview
 
-The HANDOFF artifact formalizes work transfer between team packs with validated schema, type-specific requirements, and session integration.
+The HANDOFF artifact formalizes work transfer between rites with validated schema, type-specific requirements, and session integration.
 
 **File Pattern**: `HANDOFF-{source}-to-{target}-{YYYY-MM-DD}[-{seq}].md`
 
@@ -19,7 +19,7 @@ The HANDOFF artifact formalizes work transfer between team packs with validated 
 # ============================================================================
 # HANDOFF Artifact Schema v1.0
 # ============================================================================
-# Machine-readable frontmatter for cross-team work transfer
+# Machine-readable frontmatter for cross-rite work transfer
 # All HANDOFF artifacts MUST conform to this schema
 
 # Required: Core identification
@@ -27,8 +27,8 @@ artifact_id: string           # Pattern: HANDOFF-{source}-to-{target}-{YYYY-MM-D
 schema_version: "1.0"         # Must be "1.0" for this version
 
 # Required: Team routing
-source_team: string           # Team pack producing the handoff (e.g., "10x-dev-pack")
-target_team: string           # Team pack receiving the handoff (e.g., "security-pack")
+source_team: string           # Rite producing the handoff (e.g., "10x-dev-pack")
+target_team: string           # Rite receiving the handoff (e.g., "security-pack")
 
 # Required: Handoff classification
 handoff_type: enum            # execution | validation | assessment | implementation | strategic_input | strategic_evaluation
@@ -127,7 +127,7 @@ rejected --resubmit--> pending (new artifact, references original)
 | Field | Rule | Error Code |
 |-------|------|------------|
 | `artifact_id` | Match pattern `^HANDOFF-[a-z0-9-]+-to-[a-z0-9-]+-[0-9]{4}-[0-9]{2}-[0-9]{2}(-[0-9]+)?$` | HANDOFF-001 |
-| `source_team` | Non-empty, match known team pack pattern | HANDOFF-002 |
+| `source_team` | Non-empty, match known rite pattern | HANDOFF-002 |
 | `target_team` | Non-empty, different from source_team | HANDOFF-003 |
 | `handoff_type` | One of: execution, validation, assessment, implementation, strategic_input, strategic_evaluation | HANDOFF-004 |
 | `priority` | One of: critical, high, medium, low | HANDOFF-005 |
@@ -164,7 +164,7 @@ rejected --resubmit--> pending (new artifact, references original)
 
 ### Required Cross-Team Handoff
 
-A cross-team HANDOFF artifact is **required** when:
+A cross-rite HANDOFF artifact is **required** when:
 
 | Condition | Target Team | Handoff Type |
 |-----------|-------------|--------------|
@@ -177,18 +177,18 @@ A cross-team HANDOFF artifact is **required** when:
 
 ### Optional Cross-Team Handoff
 
-A cross-team HANDOFF artifact is **optional** when:
+A cross-rite HANDOFF artifact is **optional** when:
 
 | Condition | Target Team | Handoff Type |
 |-----------|-------------|--------------|
-| Feature complete, documentation update desired | doc-team-pack | assessment |
+| Feature complete, documentation update desired | doc-rite-pack | assessment |
 | Code review reveals hygiene concerns | hygiene-pack | assessment |
 | Performance concerns identified | sre-pack | assessment |
 | Minor security considerations (complexity < SERVICE) | security-pack | assessment |
 
 ### No Handoff Required
 
-Cross-team handoff is **not required** when:
+Cross-rite handoff is **not required** when:
 
 - Work remains within single team's domain
 - Phase transition within same team (use `/handoff` within-team)

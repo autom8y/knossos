@@ -108,13 +108,13 @@ Each team has a quick-switch command:
 ### Implementation Pattern
 ```yaml
 ---
-description: Quick switch to {team-name} ({workflow description})
+description: Quick switch to {rite-name} ({workflow description})
 allowed-tools: Bash, Read
 model: haiku
 ---
 
 ## Behavior
-1. Execute: `$ROSTER_HOME/swap-team.sh {team-name}`
+1. Execute: `$ROSTER_HOME/swap-rite.sh {rite-name}`
 2. Display team roster
 3. Update SESSION_CONTEXT if active
 ```
@@ -174,7 +174,7 @@ Some commands skip to specific phases:
 
 ## Special Cases
 
-### Teams Without All Commands
+### Rites Without All Commands
 Some teams don't support all commands:
 
 **debt-triage-pack (3 agents):**
@@ -221,7 +221,7 @@ Update the total command count at the top of COMMAND_REGISTRY.md.
 ### Pre-Flight Checks
 ```bash
 # Verify command mappings work
-$ROSTER_HOME/swap-team.sh {team-name}
+$ROSTER_HOME/swap-rite.sh {rite-name}
 
 # Test /architect routing
 grep -B1 "produces: tdd" .claude/ACTIVE_WORKFLOW.yaml

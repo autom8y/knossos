@@ -6,7 +6,7 @@
 
 Ecosystem-pack is a **5-agent infrastructure team** handling CEM and roster patterns. The audit revealed it's well-documented but claims more scope than it actually needs:
 
-- Claims "hub team" status with cross-team coordination → but no mechanism exists
+- Claims "hub team" status with cross-rite coordination → but no mechanism exists
 - Defines satellite diversity matrix for testing → but doesn't actually work on satellites
 - Assumes orchestrated mode only → but users want direct agent access
 
@@ -28,7 +28,7 @@ Ecosystem-pack is a **5-agent infrastructure team** handling CEM and roster patt
 - [ ] Update `orchestrator.yaml`: Remove `cross_team_protocol` hub language
 - [ ] Update `README.md`: Remove hub team positioning
 - [ ] Update `agents/orchestrator.md`: Change escalation path to user-only (not "all team leads")
-- [ ] Simplify cross-team references to "escalate to user when changes affect other teams"
+- [ ] Simplify cross-rite references to "escalate to user when changes affect other teams"
 
 ---
 
@@ -106,7 +106,7 @@ Ecosystem-pack is a **5-agent infrastructure team** handling CEM and roster patt
 ### Recommended Focus
 - **Core**: CEM and roster infrastructure changes
 - **Secondary**: CLAUDE.md governance
-- **Remove**: Cross-team coordination, satellite testing matrix
+- **Remove**: Cross-rite coordination, satellite testing matrix
 
 ---
 
@@ -121,4 +121,4 @@ Ecosystem-pack is a **5-agent infrastructure team** handling CEM and roster patt
 
 ## Next Team
 
-Continue audit with: **doc-team-pack** (documentation and technical writing)
+Continue audit with: **doc-rite-pack** (documentation and technical writing)

@@ -1,6 +1,6 @@
 # First Principles: CLAUDE.md Architecture
 
-> "Session-specific knowledge should NOT be in CLAUDE.md. CLAUDE.md should just maintain alignment with the active team to ensure standardized workflows are followed."
+> "Session-specific knowledge should NOT be in CLAUDE.md. CLAUDE.md should just maintain alignment with the active rite to ensure standardized workflows are followed."
 
 These six principles govern all CLAUDE.md architecture decisions across the roster/satellite ecosystem.
 
@@ -14,7 +14,7 @@ CLAUDE.md tells Claude **what it can do** and **how to work**, not what it is cu
 
 1. **What can Claude do here?** (Capabilities: skills, agents, hooks)
 2. **How should Claude work here?** (Workflow: routing patterns, handoff protocols)
-3. **Who is Claude working as?** (Identity: active team, available agents)
+3. **Who is Claude working as?** (Identity: active rite, available agents)
 
 ### What CLAUDE.md Is NOT
 
@@ -30,7 +30,7 @@ CLAUDE.md tells Claude **what it can do** and **how to work**, not what it is cu
 ```markdown
 # CLAUDE.md
 
-This project uses a {N}-agent workflow ({team-name}).
+This project uses a {N}-agent workflow ({rite-name}).
 
 ## Available Agents
 {list of agents with one-line descriptions}
@@ -73,7 +73,7 @@ CLAUDE.md excludes: DYNAMIC + EPHEMERAL
 | Skill documentation | STABLE | Yes | - |
 | Agent roster | STABLE | Yes (regenerated) | - |
 | Workflow patterns | STABLE | Yes (synced) | - |
-| Active team name | STABLE | Yes (regenerated) | ACTIVE_RITE file |
+| Active rite name | STABLE | Yes (regenerated) | ACTIVE_RITE file |
 | Current initiative | DYNAMIC | No | SESSION_CONTEXT |
 | Sprint goals | DYNAMIC | No | PRD, project docs |
 | Git branch | EPHEMERAL | No | Hook output |
@@ -169,7 +169,7 @@ Hooks inject ephemeral context at session start. It appears in Claude's view but
 | Property | Value |
 |----------|-------|
 | **Project** | /Users/dev/myproject |
-| **Active Team** | doc-team-pack |
+| **Active Team** | doc-rite-pack |
 | **Git** | feature/add-auth (3 uncommitted) |
 ```
 

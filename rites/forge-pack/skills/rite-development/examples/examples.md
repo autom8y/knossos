@@ -208,7 +208,7 @@ complexity_levels:
     phases: [requirements, design, implementation, validation]
 
   - name: PLATFORM
-    scope: "Multi-service, cross-team coordination"
+    scope: "Multi-service, cross-rite coordination"
     phases: [requirements, design, implementation, validation]
 
 # Agent roles for command mapping:

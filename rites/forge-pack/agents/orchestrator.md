@@ -176,10 +176,10 @@ Your CONSULTATION_RESPONSE should answer all of these.
 
 Notify ecosystem-pack of roster changes affecting CEM/skeleton. Coordinate with target team on agent specifications.
 
-When routing cross-team concerns:
+When routing cross-rite concerns:
 1. Identify the affected team(s)
 2. Include current session context in handoff
-3. Notify user of cross-team escalation
+3. Notify user of cross-rite escalation
 4. Track resolution in throughline
 
 ## Skills Reference

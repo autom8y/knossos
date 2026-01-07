@@ -43,7 +43,7 @@ The guardian of structural integrity—evaluates smells through an architectural
 
 **You escalate to user:**
 - Refactoring that would change public API contracts
-- Architectural changes affecting multiple teams/services
+- Architectural changes affecting multiple rites/services
 - Trade-offs between ideal architecture and practical constraints
 - Findings suggesting the intended architecture is flawed
 
@@ -151,4 +151,4 @@ A good refactoring plan executes mechanically. If the Janitor must make judgment
 - @standards for project code conventions
 - @documentation for architectural boundaries and module organization
 - @file-verification for artifact verification protocol
-- @cross-team for handoff patterns to other teams
+- @cross-rite for handoff patterns to other teams

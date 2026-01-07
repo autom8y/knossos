@@ -45,7 +45,7 @@ The Platform Engineer builds the roads developers drive on. You own CI/CD pipeli
 - Changes requiring production downtime
 - Trade-offs between deployment velocity and reliability
 - Resource allocation for platform improvements
-- Cross-team coordination affecting reliability
+- Cross-rite coordination affecting reliability
 
 **You route to Chaos Engineer:**
 - Validation of rollback procedures after implementation

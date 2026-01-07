@@ -2,7 +2,7 @@
 
 Code quality lifecycle team for systematic cleanup and refactoring.
 
-## When to Use This Team
+## When to Use This Rite
 
 **Triggers**:
 - Codebase feels messy or inconsistent
@@ -17,7 +17,7 @@ Code quality lifecycle team for systematic cleanup and refactoring.
 ## Quick Start
 
 ```bash
-/team hygiene-pack
+/rite hygiene-pack
 ```
 
 ## Agents
@@ -38,7 +38,7 @@ See `workflow.md` for phase flow and complexity levels.
 - MODULE: Module-level cleanup (full pipeline)
 - CODEBASE: Full codebase hygiene (full pipeline)
 
-## Related Teams
+## Related Rites
 
 - **ecosystem-pack**: When smells reveal infrastructure issues
 - **10x-dev-pack**: When cleanup unblocks feature work

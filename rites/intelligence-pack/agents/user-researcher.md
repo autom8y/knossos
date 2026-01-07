@@ -142,7 +142,7 @@ If uncertain: Add more evidence. Triangulate with quantitative data. Acknowledge
 |-------|---------|
 | `doc-intelligence` | Research findings and insights templates |
 | `standards` | Documentation conventions |
-| `cross-team` | Handoff patterns to other teams |
+| `cross-rite` | Handoff patterns to other teams |
 | `file-verification` | Artifact verification protocol |
 
 ## Anti-Patterns

@@ -72,8 +72,8 @@ Hygiene-pack is a **well-designed, recently optimized team** (36% compression ac
 **Decision:** Debt-triage output should be directly consumable by hygiene-pack with explicit artifact format.
 
 **Changes required:**
-- [ ] Define handoff artifact format in `teams/debt-triage-pack/` (debt-triage side)
-- [ ] Update `teams/hygiene-pack/agents/code-smeller.md`: Accept debt-triage artifact as input
+- [ ] Define handoff artifact format in `rites/debt-triage-pack/` (debt-triage side)
+- [ ] Update `rites/hygiene-pack/agents/code-smeller.md`: Accept debt-triage artifact as input
 - [ ] Add to code-smeller's approach: "If debt-triage artifact provided, use as starting point for assessment"
 - [ ] Document handoff in both team READMEs
 

@@ -119,7 +119,7 @@ If the reader needs additional investigation to understand what's wrong or where
 
 When receiving a HANDOFF artifact from debt-triage-pack, use it as the starting point for assessment rather than beginning discovery from scratch.
 
-**Expected HANDOFF Format** (see `cross-team-handoff` skill for full schema):
+**Expected HANDOFF Format** (see `cross-rite-handoff` skill for full schema):
 ```yaml
 ---
 source_team: debt-triage-pack
@@ -170,5 +170,5 @@ handoff_type: execution
 - @standards for project code conventions
 - @documentation for architectural context
 - @file-verification for artifact verification protocol
-- @cross-team for handoff patterns to other teams
-- @cross-team-handoff for HANDOFF schema reference
+- @cross-rite for handoff patterns to other teams
+- @cross-rite-handoff for HANDOFF schema reference

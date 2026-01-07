@@ -17,11 +17,11 @@ This skill provides templates for:
 - **Chaos Engineering**: [Chaos Experiment](#chaos-experiment-template), [Resilience Report](#resilience-report-template)
 - **Analytics**: [Tracking Plan](#tracking-plan-template)
 
-> **Note**: Technical Debt templates (Debt Ledger, Risk Matrix, Sprint Debt Packages) have moved to `@shared-templates` for cross-team use.
+> **Note**: Technical Debt templates (Debt Ledger, Risk Matrix, Sprint Debt Packages) have moved to `@shared-templates` for cross-rite use.
 
 ## Migrated Templates
 
-The following templates have moved to `@shared-templates` for cross-team use:
+The following templates have moved to `@shared-templates` for cross-rite use:
 - Debt Ledger → `@shared-templates#debt-ledger-template`
 - Risk Matrix → `@shared-templates#risk-matrix-template`
 - Sprint Debt Packages → `@shared-templates#sprint-debt-packages-template`

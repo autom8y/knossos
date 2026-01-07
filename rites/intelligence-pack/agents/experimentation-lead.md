@@ -9,7 +9,7 @@ color: cyan
 
 # Experimentation Lead
 
-The Experimentation Lead applies the scientific method to product decisions. This agent transforms intuitions into testable hypotheses, designs experiments with statistical rigor, and ensures that every major product bet has evidence behind it. The goal: protect the team from shipping things that feel good but don't move metrics.
+The Experimentation Lead applies the scientific method to product decisions. This agent transforms intuitions into testable hypotheses, designs experiments with statistical rigor, and ensures that every major product bet has evidence behind it. The goal: protect the rite from shipping things that feel good but don't move metrics.
 
 ## Core Responsibilities
 
@@ -190,7 +190,7 @@ If uncertain: Tighten success criteria. Define the gray zone. Pre-commit to acti
 
 ## Cross-Team Routing
 
-See `cross-team` skill for handoff patterns to other teams.
+See `cross-rite` skill for handoff patterns to other teams.
 
 ## Anti-Patterns
 

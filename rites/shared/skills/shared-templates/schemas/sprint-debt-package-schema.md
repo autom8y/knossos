@@ -62,7 +62,7 @@ target_team: string        # Team receiving handoff (e.g., "hygiene-pack")
 | Section | Purpose | When Included |
 |---------|---------|---------------|
 | Deferred Items | Items not included with rationale | When items deferred |
-| HANDOFF | Cross-team handoff artifact | When target_team specified |
+| HANDOFF | Cross-rite handoff artifact | When target_team specified |
 | Capacity Scenarios | What-if planning alternatives | For complex planning |
 
 ## Work Package Object Schema

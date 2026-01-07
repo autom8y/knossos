@@ -1,11 +1,11 @@
 ---
-name: cross-team-handoff
-description: "HANDOFF artifact schema for cross-team work transfer. Use when: work crosses team boundaries, specialist review required, formal handoff needed. Triggers: cross-team, handoff artifact, team transfer, work handoff."
+name: cross-rite-handoff
+description: "HANDOFF artifact schema for cross-rite work transfer. Use when: work crosses team boundaries, specialist review required, formal handoff needed. Triggers: cross-rite, handoff artifact, team transfer, work handoff."
 ---
 
 # Cross-Team Handoff Skill
 
-> Defines the HANDOFF artifact schema for transferring work between team packs.
+> Defines the HANDOFF artifact schema for transferring work between rites.
 
 ## Quick Reference
 

@@ -123,7 +123,7 @@ Before recommending release, assess documentation impact:
 | Is existing documentation still accurate? | Flag inaccuracies for correction |
 | Does this deprecate or remove functionality? | Migration guides may be needed |
 
-**When to notify doc-team-pack:**
+**When to notify doc-rite-pack:**
 - New user-facing features or workflows
 - Changed behavior that contradicts current docs
 - Deprecated functionality requiring migration guidance
@@ -135,7 +135,7 @@ Before recommending release, assess documentation impact:
 - [ ] No documentation changes needed
 - [ ] Existing docs remain accurate
 - [ ] Doc updates needed: [describe]
-- [ ] doc-team-pack notification: [YES/NO - reason]
+- [ ] doc-rite-pack notification: [YES/NO - reason]
 ```
 
 ### Security Handoff Assessment
@@ -152,7 +152,7 @@ For FEATURE or SYSTEM complexity releases, prepare a security assessment handoff
 - File upload or download features
 - User input that becomes executable (templates, queries)
 
-**HANDOFF Format** (see `cross-team-handoff` skill for full schema):
+**HANDOFF Format** (see `cross-rite-handoff` skill for full schema):
 ```yaml
 ---
 source_team: 10x-dev-pack
@@ -210,7 +210,7 @@ For SERVICE or SYSTEM complexity releases, prepare an SRE validation handoff to 
 
 **Trigger**: Any release at SERVICE+ complexity (SERVICE, SYSTEM) requires SRE validation handoff.
 
-**HANDOFF Format** (see `cross-team-handoff` skill for full schema):
+**HANDOFF Format** (see `cross-rite-handoff` skill for full schema):
 ```yaml
 ---
 source_team: 10x-dev-pack
@@ -329,7 +329,7 @@ Test each input field with:
 
 ## Related Skills
 
-`doc-artifacts` (test case/defect templates), `10x-workflow` (release gate criteria), `standards` (security/performance requirements), `cross-team-handoff` (HANDOFF artifact schema for security and SRE handoffs).
+`doc-artifacts` (test case/defect templates), `10x-workflow` (release gate criteria), `standards` (security/performance requirements), `cross-rite-handoff` (HANDOFF artifact schema for security and SRE handoffs).
 
 
 ## Anti-Patterns to Avoid

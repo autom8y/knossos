@@ -30,7 +30,7 @@ RND-pack is a **well-structured exploration and prototyping team** with clear 4-
 **Decision:** Update all references to use 10x-dev-pack for productionization handoff.
 
 **Changes required:**
-- [x] Update `teams/rnd-pack/README.md`: Replace "ship-pack" references with "10x-dev-pack"
+- [x] Update `rites/rnd-pack/README.md`: Replace "ship-pack" references with "10x-dev-pack"
 - [x] Clarify handoff criteria: Tech-transfer produces TRANSFER artifacts → 10x requirements-analyst consumes as input
 - [x] Create `agents/tech-transfer.md`: Production readiness specialist with HANDOFF production to 10x-dev-pack and strategy-pack
 
@@ -48,8 +48,8 @@ RND exploration complete → tech-transfer produces TRANSFER doc → 10x-dev-pac
 **Decision:** Add explicit guidance in both teams distinguishing the scopes.
 
 **Changes required:**
-- [ ] Update `teams/rnd-pack/README.md`: Add "When to Use RND vs 10x /spike" section
-- [ ] Update `teams/10x-dev-pack/README.md` or spike skill: Add same clarification
+- [ ] Update `rites/rnd-pack/README.md`: Add "When to Use RND vs 10x /spike" section
+- [ ] Update `rites/10x-dev-pack/README.md` or spike skill: Add same clarification
 - [ ] Clarify:
   ```markdown
   ## When to Use RND-Pack vs 10x /spike
@@ -72,7 +72,7 @@ RND exploration complete → tech-transfer produces TRANSFER doc → 10x-dev-pac
 
 ### P3: RND Outputs Use Generalized Handoff Pattern
 
-**Decision:** RND→10x and RND→strategy handoffs should use the same HANDOFF artifact pattern as other cross-team transitions.
+**Decision:** RND→10x and RND→strategy handoffs should use the same HANDOFF artifact pattern as other cross-rite transitions.
 
 **Changes required:**
 - [ ] Document RND handoffs in generalized pattern (ecosystem-level)

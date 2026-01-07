@@ -9,7 +9,7 @@ color: green
 
 # Orchestrator
 
-The Orchestrator is the **consultative throughline** for doc-team-pack work. When consulted, this agent analyzes context, decides which specialist should act next, and returns structured guidance for the main agent to execute. The Orchestrator does not execute work—it provides prompts and direction that the main agent uses to invoke specialists via Task tool.
+The Orchestrator is the **consultative throughline** for doc-rite-pack work. When consulted, this agent analyzes context, decides which specialist should act next, and returns structured guidance for the main agent to execute. The Orchestrator does not execute work—it provides prompts and direction that the main agent uses to invoke specialists via Task tool.
 
 ## Consultation Role (CRITICAL)
 

@@ -14,7 +14,7 @@ After analyzing 23 improvements across 10 teams, one change provides **80% of th
 This single change:
 - Eliminates 8+ different handoff formats
 - Prevents N² format explosion with new teams
-- Enables cross-team workflow automation
+- Enables cross-rite workflow automation
 - Provides consistent routing language
 - Creates foundation for all other coordination improvements
 
@@ -28,7 +28,7 @@ The audit revealed five missing primitives that, once added, transform 23 point-
 
 | Primitive | Purpose | Teams Affected | Compression |
 |-----------|---------|----------------|-------------|
-| **HANDOFF Artifact** | Standardize all cross-team transitions | 10+ team pairs | 8→1 formats |
+| **HANDOFF Artifact** | Standardize all cross-rite transitions | 10+ team pairs | 8→1 formats |
 | **Boundary Matrix** | Explicit routing for overlapping concerns | 3 team pairs | 6→1 docs |
 | **Proactive Gate Registry** | Downstream teams inject into upstream workflows | security, docs | Pattern not ad-hoc |
 | **Shared Detection Skill** | Consolidated smell/debt patterns | debt, hygiene | 2→1 definitions |
@@ -51,7 +51,7 @@ The ecosystem needs shared knowledge of what teams do (routing metadata), not a 
 Document *why* teams are separate, *what* makes them different, and *when* you need both.
 
 ### 5. Treat Agent Quality as Ecosystem Risk
-Weak agents are team-level performance ceilings. Quality investment precedes scope expansion.
+Weak agents are rite-level performance ceilings. Quality investment precedes scope expansion.
 
 ### 6. Inverse Conway Law
 Handoff complexity reflects coordination complexity. Shared primitives grow *with* the ecosystem, not *against* it.
@@ -71,7 +71,7 @@ Handoff complexity reflects coordination complexity. Shared primitives grow *wit
 | P2: Fix insights-analyst agent | intelligence-pack | 3 hrs | None |
 | P1: Fix ship-pack references | rnd-pack | 1 hr | None |
 | P1: Demote from hub | ecosystem-pack | 2 hrs | None |
-| P2: Add staleness detection | doc-team-pack | 2 hrs | None |
+| P2: Add staleness detection | doc-rite-pack | 2 hrs | None |
 | P1: Define behavior preservation | hygiene-pack | 2 hrs | None |
 
 **Value Delivered:** +10% ecosystem quality, bugs fixed, foundation definitions in place
@@ -91,7 +91,7 @@ Week 2: Design Phase
 
 Week 3: Creation Phase
 ├── Create skills/shared/smell-detection/ (ecosystem level)
-├── Create skills/shared/cross-team-handoff/ (ecosystem level)
+├── Create skills/shared/cross-rite-handoff/ (ecosystem level)
 └── Create skills/shared/templates/ (ecosystem level)
 
 Week 4: Integration Phase
@@ -114,11 +114,11 @@ Week 4: Integration Phase
 Week 5: 10x Core Changes
 ├── P1: Impact assessment for requirements-analyst
 ├── P2: Flexible entry points in orchestrator
-└── P3: Cross-team handoff protocols
+└── P3: Cross-rite handoff protocols
 
 Week 6: Dependent Team Gates (parallel)
 ├── security-pack P1: Proactive threat-modeler gate
-├── doc-team-pack P1: Documentation gate in QA checklist
+├── doc-rite-pack P1: Documentation gate in QA checklist
 └── rnd-pack P2: Spike overlap clarification
 ```
 
@@ -150,7 +150,7 @@ Week 6: Dependent Team Gates (parallel)
 └── strategy-pack P4: Produce HANDOFF for 10x
 ```
 
-**Value Delivered:** All cross-team handoffs formalized, routing confusion eliminated
+**Value Delivered:** All cross-rite handoffs formalized, routing confusion eliminated
 **Token Impact:** -200 tokens per handoff (structured vs. ambiguous)
 
 ---
@@ -160,7 +160,7 @@ Week 6: Dependent Team Gates (parallel)
 
 ```
 ├── End-to-end workflow tests (3 representative scenarios)
-├── Cross-team coordination playbooks
+├── Cross-rite coordination playbooks
 ├── Edge case documentation
 └── Smoke tests for all handoff paths
 ```
@@ -179,14 +179,14 @@ Week 6: Dependent Team Gates (parallel)
 ├── core/                          # Always loaded (~200 tokens)
 │   ├── orchestration/
 │   ├── consult-ref/
-│   └── cross-team-handoff/        # NEW
+│   └── cross-rite-handoff/        # NEW
 │
 ├── shared/                        # Loaded on demand (~300 tokens each)
 │   ├── smell-detection/           # NEW
 │   ├── shared-templates/          # NEW
 │   └── doc-artifacts/
 │
-└── team-specific/                 # Loaded when team active
+└── rite-specific/                 # Loaded when team active
     ├── 10x-workflow/
     ├── doc-sre/
     ├── strategy-ref/
@@ -195,8 +195,8 @@ Week 6: Dependent Team Gates (parallel)
 
 **Token Economics:**
 - Cold start: Load `core/` only (200 tokens)
-- Team activation: Add team-specific (1500 tokens)
-- Cross-team transition: Add `shared/` once, cache (300 tokens, amortized)
+- Team activation: Add rite-specific (1500 tokens)
+- Cross-rite transition: Add `shared/` once, cache (300 tokens, amortized)
 
 ### HANDOFF Artifact Design
 
@@ -287,7 +287,7 @@ incorporation:
 - Team A = [domain axis]
 - Team B = [orthogonal axis]
 
-**When you need both:** [cross-team scenario]
+**When you need both:** [cross-rite scenario]
 ```
 
 **Where Applied:**
@@ -322,7 +322,7 @@ Use `SESSION_CONTEXT.md` checkpoints:
 checkpoint: sprint-1-complete
 completed_artifacts:
   - skills/shared/smell-detection/SKILL.md
-  - skills/shared/cross-team-handoff/SKILL.md
+  - skills/shared/cross-rite-handoff/SKILL.md
   - skills/shared/templates/SKILL.md
 next_phase: sprint-2-10x-changes
 dependencies_satisfied:
@@ -342,14 +342,14 @@ Week 1 (Sprint 0)
 
 Week 4 (Sprint 1 complete)
 ├── Shared infrastructure: 3 new skills
-├── Token savings potential: -50% on cross-team
+├── Token savings potential: -50% on cross-rite
 └── 7 teams ready for integration
 
 Week 6 (Sprint 2 complete) ← MVI THRESHOLD
 ├── Small project velocity: +10-15%
 ├── Security surprises: 0 (proactive gates)
 ├── Documentation gaps: 0 (proactive gates)
-└── Cross-team routing: Clear
+└── Cross-rite routing: Clear
 
 Week 8 (Sprint 3 complete)
 ├── All handoffs formalized: 10+ team pairs
@@ -406,7 +406,7 @@ Week 9 (Sprint 4 complete)
 
 ### Sprint 4 Complete When:
 - [ ] 3 end-to-end workflows tested
-- [ ] Cross-team playbooks written
+- [ ] Cross-rite playbooks written
 - [ ] Edge cases documented
 - [ ] Smoke tests passing
 
@@ -416,8 +416,8 @@ Week 9 (Sprint 4 complete)
 
 When complete, the roster ecosystem will have:
 
-1. **Uniform Coordination Language** - Every cross-team transition speaks HANDOFF
-2. **Progressive Disclosure** - Skills load in tiers: core → shared → team-specific
+1. **Uniform Coordination Language** - Every cross-rite transition speaks HANDOFF
+2. **Progressive Disclosure** - Skills load in tiers: core → shared → rite-specific
 3. **Explicit Boundaries** - Routing tables eliminate "which team?" confusion
 4. **Proactive Integration** - Downstream teams engage upstream via registered gates
 5. **Shared Foundation** - Detection patterns and templates owned collectively

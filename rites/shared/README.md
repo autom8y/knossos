@@ -1,16 +1,16 @@
 # Shared Skills Team
 
-> Cross-team primitives shared across all roster teams
+> Cross-rite primitives shared across all roster teams
 
 ## Purpose
 
-The shared team provides common skills, hooks, and commands that are universally available regardless of which team is currently active. This eliminates duplication and ensures consistency across all team packs.
+The shared team provides common skills, hooks, and commands that are universally available regardless of which team is currently active. This eliminates duplication and ensures consistency across all rites.
 
 ## Structure
 
 ```
-teams/shared/
-├── skills/      # Cross-team skill definitions
+rites/shared/
+├── skills/      # Cross-rite skill definitions
 ├── hooks/       # Shared lifecycle hooks
 └── commands/    # Common command definitions
 ```
@@ -19,19 +19,19 @@ teams/shared/
 
 ## Sync Behavior
 
-`swap-team.sh` automatically syncs shared team content alongside the active team:
+`swap-rite.sh` automatically syncs shared team content alongside the active rite:
 - Skills, hooks, and commands are synced to `.claude/skills/`, `.claude/hooks/`, `.claude/commands/`
-- Shared content is always available regardless of active team
-- Team-specific content takes precedence over shared content (team-privileged override)
+- Shared content is always available regardless of active rite
+- Team-specific content takes precedence over shared content (rite-privileged override)
 
 ## Runtime Behavior
 
-At runtime, shared skills are flattened into `.claude/skills/` with no subdirectory nesting. The skill `teams/shared/skills/foo.md` appears as `.claude/skills/foo.md`.
+At runtime, shared skills are flattened into `.claude/skills/` with no subdirectory nesting. The skill `rites/shared/skills/foo.md` appears as `.claude/skills/foo.md`.
 
 ## Override Resolution
 
-When both shared and team-specific content exist with the same name:
-1. Team-specific version wins (team-privileged)
+When both shared and rite-specific content exist with the same name:
+1. Team-specific version wins (rite-privileged)
 2. Shared version is ignored during sync
 3. No merge or conflict resolution occurs
 

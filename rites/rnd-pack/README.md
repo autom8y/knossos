@@ -2,7 +2,7 @@
 
 Technology scouting, integration analysis, prototyping, and future architecture.
 
-## When to Use This Team
+## When to Use This Rite
 
 **Triggers**:
 - "Should we evaluate [new technology]?"
@@ -15,7 +15,7 @@ Technology scouting, integration analysis, prototyping, and future architecture.
 ## Quick Start
 
 ```bash
-/team rnd-pack
+/rite rnd-pack
 ```
 
 ## Agents
@@ -97,7 +97,7 @@ MOONSHOT artifact:
 
 See also: [strategy-pack README](../strategy-pack/README.md#architecture-strategy-integration)
 
-## Related Teams
+## Related Rites
 
 - **10x-dev-pack**: Hand off validated prototypes for production implementation. RND produces TRANSFER artifacts (exploration findings, prototype specs, evaluation results) which the 10x-dev-pack requirements-analyst consumes to create production PRDs.
 - **strategy-pack**: Hand off long-term architecture plans for strategic planning. Moonshots with `business_impact > "significant"` trigger roadmap-strategist integration.

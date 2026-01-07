@@ -9,7 +9,7 @@ description: |
 
 # The Forge Reference
 
-> The team that builds teams. Meta-level agent factory for the Claude Code ecosystem.
+> The rite that builds teams. Meta-level agent factory for the Claude Code ecosystem.
 
 ## Supporting Files
 
@@ -23,7 +23,7 @@ description: |
 | Command | Purpose | Entry Agent |
 |---------|---------|-------------|
 | `/forge` | Display Forge overview and help | (info only) |
-| `/new-team <name>` | Create a new team pack | Agent Designer |
+| `/new-team <name>` | Create a new rite | Agent Designer |
 | `/validate-team <name>` | Run validation on team | Eval Specialist |
 | `/eval-agent <name>` | Test single agent | Eval Specialist |
 
@@ -44,7 +44,7 @@ description: |
 Agent Designer → Prompt Architect → Workflow Engineer → Platform Engineer → Eval Specialist → Agent Curator
      │               │                   │                    │                  │               │
      ▼               ▼                   ▼                    ▼                  ▼               ▼
- TEAM-SPEC      Agent .md files    workflow.yaml      roster/teams/       eval-report      roster entry
+ TEAM-SPEC      Agent .md files    workflow.yaml      roster/rites/       eval-report      roster entry
                                                          {team}/                           + Consultant
 ```
 
@@ -100,7 +100,7 @@ Agent Designer → Prompt Architect → Workflow Engineer → Platform Engineer 
 ### Testing Individual Agents
 
 ```bash
-# Test agent in active team
+# Test agent in active rite
 /eval-agent principal-engineer
 
 # Test agent in specific team
@@ -163,12 +163,12 @@ Agent Designer → Prompt Architect → Workflow Engineer → Platform Engineer 
 **Domain**:
 - Directory structure creation
 - File deployment
-- swap-team.sh integration
+- swap-rite.sh integration
 - Structure validation
 
-**Produces**: Team pack deployed to roster
+**Produces**: Rite deployed to roster
 
-**Handoff**: When swap-team.sh loads successfully
+**Handoff**: When swap-rite.sh loads successfully
 
 ### Eval Specialist
 
@@ -251,10 +251,10 @@ Templates are documented inline in this skill and agent prompts.
 
 ## Troubleshooting
 
-### "swap-team.sh fails"
+### "swap-rite.sh fails"
 
 Check:
-- Team directory exists at `$ROSTER_HOME/teams/{name}/`
+- Team directory exists at `$ROSTER_HOME/rites/{name}/`
 - agents/ subdirectory has .md files
 - workflow.yaml exists
 - File permissions are correct
@@ -271,7 +271,7 @@ Check:
 
 Check:
 - ecosystem-map.md updated
-- team-profiles/{team}.md exists
+- rite-profiles/{team}.md exists
 - intent-patterns.md has keywords
 - command-reference.md lists command
 
@@ -299,7 +299,7 @@ Check:
 
 ## Related Resources
 
-- [team-development skill](../team-development/SKILL.md) - Manual team creation guidance
+- [rite-development skill](../rite-development/SKILL.md) - Manual team creation guidance
 - [10x-workflow skill](../10x-workflow/SKILL.md) - Workflow patterns
 - [consult-ref skill](../consult-ref/skill.md) - Ecosystem navigation
 - [documentation skill](../documentation/SKILL.md) - Artifact templates
@@ -308,13 +308,13 @@ Check:
 
 ## Global Singleton Architecture
 
-The Forge is a **global singleton team**—it's always available regardless of which team pack is active.
+The Forge is a **global singleton team**—it's always available regardless of which rite is active.
 
 ### How It Works
 
 1. Forge agents live in `~/.claude/agents/`
-2. `swap-team.sh` preserves global agents after team swaps
-3. You can invoke any Forge agent from any team context
+2. `swap-rite.sh` preserves global agents after team swaps
+3. You can invoke any Forge agent from any rite context
 4. Forge has its own workflow config at `.claude/forge-workflow.yaml`
 
 ### Why Global?

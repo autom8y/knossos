@@ -11,8 +11,8 @@ description: "Innovation Lab (R&D) reference with technology scouting, prototypi
 
 | Component | Location | Purpose |
 |-----------|----------|---------|
-| Agents | `$ROSTER_HOME/teams/rnd-pack/agents/` | Agent prompts |
-| Workflow | `$ROSTER_HOME/teams/rnd-pack/workflow.yaml` | Phase configuration |
+| Agents | `$ROSTER_HOME/rites/rnd-pack/agents/` | Agent prompts |
+| Workflow | `$ROSTER_HOME/rites/rnd-pack/workflow.yaml` | Phase configuration |
 | Switch | `/rnd` | Activate this team |
 
 ## Team Roster
@@ -61,7 +61,7 @@ SCOUT-{slug}  INTEGRATE-{slug}    PROTO-{slug}   MOONSHOT-{slug}
 | `/hotfix` | N/A | Not applicable (R&D team) |
 | `/code-review` | N/A | Not applicable (R&D team) |
 
-## When to Use This Team
+## When to Use This Rite
 
 **Use rnd-pack when:**
 - Evaluating new technologies

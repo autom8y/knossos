@@ -29,9 +29,9 @@ Security-pack is a **well-structured security assessment team** with clear agent
 **Decision:** SYSTEM-level work (auth, crypto, PII, external integrations) requires threat-modeler consultation BEFORE implementation begins.
 
 **Changes required:**
-- [ ] Update `teams/10x-dev-pack/agents/architect.md`: Add trigger for security consultation
+- [ ] Update `rites/10x-dev-pack/agents/architect.md`: Add trigger for security consultation
   - "For SYSTEM complexity involving auth, crypto, or PII: consult threat-modeler before finalizing TDD"
-- [ ] Update `teams/security-pack/workflow.yaml`: Add pre-implementation phase option
+- [ ] Update `rites/security-pack/workflow.yaml`: Add pre-implementation phase option
 - [ ] Define handoff: Architect provides draft TDD → threat-modeler provides THREAT-*.md → Architect incorporates into final TDD
 - [ ] Update 10x-dev-pack workflow.yaml to route SYSTEM complexity through security consultation
 

@@ -11,7 +11,7 @@ description: "Quick switch to sre-pack (reliability workflow). Use when: improvi
 
 Instantly switch to the sre-pack, a Site Reliability Engineering team focused on system reliability, observability, incident response, and chaos engineering.
 
-This is a convenience wrapper around `/team sre-pack` that also displays the team roster after switching.
+This is a convenience wrapper around `/rite sre-pack` that also displays the rite roster after switching.
 
 ---
 
@@ -34,12 +34,12 @@ No parameters required. This command:
 Execute via Bash tool:
 
 ```bash
-$ROSTER_HOME/swap-team.sh sre-pack
+$ROSTER_HOME/swap-rite.sh sre-pack
 ```
 
 ### 2. Display Team Roster
 
-After successful switch, show the active team roster:
+After successful switch, show the active rite roster:
 
 ```
 Switched to sre-pack (4 agents loaded)
@@ -197,7 +197,7 @@ When sre-pack is active, commands route to these agents:
 
 ---
 
-## When to Use This Team
+## When to Use This Rite
 
 **Use sre-pack for**:
 - Observability improvements (dashboards, alerts, SLOs)
@@ -208,7 +208,7 @@ When sre-pack is active, commands route to these agents:
 
 **Don't use for**:
 - Feature development (use 10x-dev-pack)
-- Documentation cleanup (use doc-team-pack)
+- Documentation cleanup (use doc-rite-pack)
 - Code quality/refactoring (use hygiene-pack)
 - Technical debt triage (use debt-triage-pack)
 
@@ -221,7 +221,7 @@ The SRE pack often collaborates with other teams:
 | Situation | Integration |
 |-----------|-------------|
 | Reliability issues in code | Hand off to 10x-dev-pack for fixes |
-| Documentation gaps in runbooks | Hand off to doc-team-pack |
+| Documentation gaps in runbooks | Hand off to doc-rite-pack |
 | Technical debt causing incidents | Hand off to debt-triage-pack |
 | Code quality affecting reliability | Hand off to hygiene-pack |
 

@@ -148,7 +148,7 @@ sprint:
 
 [{## HANDOFF
 
-<!-- OPTIONAL: Cross-team handoff artifact when target_team specified -->
+<!-- OPTIONAL: Cross-rite handoff artifact when target_team specified -->
 
 **To:** {target_team}
 **From:** {author}

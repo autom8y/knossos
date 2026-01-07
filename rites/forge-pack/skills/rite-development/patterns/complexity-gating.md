@@ -196,7 +196,7 @@ Concrete, measurable criteria:
   scope: "APIs, persistence, external integrations"
 
 - name: PLATFORM
-  scope: "Multi-service, cross-team coordination"
+  scope: "Multi-service, cross-rite coordination"
 ```
 
 ### Bad Descriptions

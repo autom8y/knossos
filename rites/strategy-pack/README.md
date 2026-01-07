@@ -2,7 +2,7 @@
 
 Market research, competitive analysis, business modeling, and strategic planning for data-driven decision-making.
 
-## When to Use This Team
+## When to Use This Rite
 
 **Triggers**:
 - "What's the TAM for this market opportunity?"
@@ -15,7 +15,7 @@ Market research, competitive analysis, business modeling, and strategic planning
 ## Quick Start
 
 ```bash
-/team strategy-pack
+/rite strategy-pack
 ```
 
 ## Agents
@@ -78,7 +78,7 @@ When RND's moonshot-architect produces a MOONSHOT artifact with `business_impact
 
 See also: [rnd-pack README](../rnd-pack/README.md#architecture-strategy-integration)
 
-## Related Teams
+## Related Rites
 
 - **10x-dev-pack**: Hand off strategic roadmap for implementation
 - **security-pack**: When strategy involves new markets with compliance requirements

@@ -11,8 +11,8 @@ description: "Product Intelligence team reference with analytics, user research,
 
 | Component | Location | Purpose |
 |-----------|----------|---------|
-| Agents | `$ROSTER_HOME/teams/intelligence-pack/agents/` | Agent prompts |
-| Workflow | `$ROSTER_HOME/teams/intelligence-pack/workflow.yaml` | Phase configuration |
+| Agents | `$ROSTER_HOME/rites/intelligence-pack/agents/` | Agent prompts |
+| Workflow | `$ROSTER_HOME/rites/intelligence-pack/workflow.yaml` | Phase configuration |
 | Switch | `/intelligence` | Activate this team |
 
 ## Team Roster
@@ -61,7 +61,7 @@ instrumentation → research → experimentation → synthesis
 | `/hotfix` | N/A | Not applicable (research team) |
 | `/code-review` | N/A | Not applicable (research team) |
 
-## When to Use This Team
+## When to Use This Rite
 
 **Use intelligence-pack when:**
 - Instrumenting a new feature

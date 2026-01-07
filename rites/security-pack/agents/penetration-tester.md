@@ -172,4 +172,4 @@ Focus on enabling defense. Provide enough detail to fix, not enough to exploit w
 
 ## Cross-Team Routing
 
-See `cross-team` skill for handoff patterns to other teams.
+See `cross-rite` skill for handoff patterns to other teams.

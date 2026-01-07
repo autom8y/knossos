@@ -1,4 +1,4 @@
-name: doc-team-pack
+name: doc-rite-pack
 workflow_type: sequential
 description: Documentation lifecycle (Audit → Structure → Write → Review)
 

@@ -8,12 +8,12 @@
 
 ## Executive Summary
 
-The roster ecosystem is architecturally sound with clear team specializations and well-defined agent roles. The primary gaps are **cross-team coordination patterns** rather than individual team deficiencies. Most teams scored "MATURE" with isolated improvement needs.
+The roster ecosystem is architecturally sound with clear team specializations and well-defined agent roles. The primary gaps are **cross-rite coordination patterns** rather than individual team deficiencies. Most teams scored "MATURE" with isolated improvement needs.
 
 ### Key Findings
 
 1. **No team needs major restructuring** - all 10 teams have valid missions and clear workflows
-2. **Cross-team handoffs are the #1 gap** - formalized handoff patterns missing between most team pairs
+2. **Cross-rite handoffs are the #1 gap** - formalized handoff patterns missing between most team pairs
 3. **Shared infrastructure needed** - templates and detection patterns duplicated across teams
 4. **Proactive gates missing** - some teams (security, docs) should be consulted earlier in workflows
 5. **Boundary clarifications needed** - intelligence vs strategy, RND spike vs 10x spike
@@ -26,7 +26,7 @@ The roster ecosystem is architecturally sound with clear team specializations an
 |------|--------|--------------|
 | 10x-dev-pack | MATURE | Flexible entry points, impact assessment |
 | ecosystem-pack | OVER-ENGINEERED | Demote from hub to specialist |
-| doc-team-pack | FUNCTIONAL | Add proactive documentation gate |
+| doc-rite-pack | FUNCTIONAL | Add proactive documentation gate |
 | hygiene-pack | MATURE | Define "behavior preservation" |
 | debt-triage-pack | MATURE | Shared detection skill, generalized handoff |
 | sre-pack | MATURE | Shared templates to ecosystem level |
@@ -43,13 +43,13 @@ The roster ecosystem is architecturally sound with clear team specializations an
 
 **Problem:** Multiple teams need to hand off work to other teams, but each defines its own artifact format.
 
-**Solution:** Create ecosystem-level HANDOFF artifact schema that all cross-team transitions use.
+**Solution:** Create ecosystem-level HANDOFF artifact schema that all cross-rite transitions use.
 
 **Affected Team Pairs:**
 | Source | Target | Handoff Type |
 |--------|--------|--------------|
 | debt-triage-pack | hygiene-pack | execution |
-| 10x-dev-pack (QA) | doc-team-pack | documentation |
+| 10x-dev-pack (QA) | doc-rite-pack | documentation |
 | 10x-dev-pack (QA) | sre-pack | validation |
 | 10x-dev-pack (QA) | security-pack | assessment |
 | security-pack | 10x-dev-pack | remediation |
@@ -100,11 +100,11 @@ The roster ecosystem is architecturally sound with clear team specializations an
 | Trigger | Consult | When |
 |---------|---------|------|
 | SYSTEM complexity + auth/crypto/PII | security-pack threat-modeler | Before TDD finalized |
-| User-facing feature | doc-team-pack | During QA (before release) |
+| User-facing feature | doc-rite-pack | During QA (before release) |
 
 **Owners:**
 - security-pack TODO P1 (threat modeling gate)
-- doc-team-pack TODO P1 (documentation gate)
+- doc-rite-pack TODO P1 (documentation gate)
 
 ---
 
@@ -131,7 +131,7 @@ The improvements form a dependency graph. Execute in this order:
 
 ### Phase 1: Foundation (No Dependencies)
 - [ ] ecosystem-pack: Demote from hub, remove satellite testing
-- [ ] doc-team-pack: Add staleness detection
+- [ ] doc-rite-pack: Add staleness detection
 - [ ] hygiene-pack: Define "behavior preservation"
 - [ ] intelligence-pack: Fix agent quality (P1, P2)
 - [ ] rnd-pack: Fix ship-pack references (P1)
@@ -151,14 +151,14 @@ The improvements form a dependency graph. Execute in this order:
 
 ### Phase 4: Proactive Gates
 - [ ] **security-pack P1**: Add proactive threat modeling requirement
-- [ ] **doc-team-pack P1**: Add documentation gate to 10x release checklist
+- [ ] **doc-rite-pack P1**: Add documentation gate to 10x release checklist
 
 ### Phase 5: Handoff Formalization
 After generalized HANDOFF pattern exists (Phase 2), update each team to use it:
 - [ ] hygiene-pack: Accept HANDOFF from debt-triage
 - [ ] sre-pack: Accept HANDOFF from 10x
 - [ ] security-pack: Accept HANDOFF from 10x
-- [ ] doc-team-pack: Accept HANDOFF from 10x
+- [ ] doc-rite-pack: Accept HANDOFF from 10x
 - [ ] rnd-pack: Produce HANDOFF for 10x/strategy
 - [ ] intelligence-pack: Produce HANDOFF for 10x/strategy
 - [ ] strategy-pack: Produce HANDOFF for 10x
@@ -197,7 +197,7 @@ After generalized HANDOFF pattern exists (Phase 2), update each team to use it:
 ### Improvement Categories
 | Category | Count |
 |----------|-------|
-| Cross-team handoff | 8 |
+| Cross-rite handoff | 8 |
 | Documentation/clarity | 7 |
 | Shared infrastructure | 3 |
 | Proactive gates | 2 |
@@ -212,7 +212,7 @@ After generalized HANDOFF pattern exists (Phase 2), update each team to use it:
 1. **Immediate**: Fix strategy-pack model assignment bug (5 minutes)
 2. **This Sprint**: Execute Phase 1 foundation work (no dependencies)
 3. **Next Sprint**: Create shared infrastructure (smell detection, HANDOFF schema, templates)
-4. **Following Sprints**: Roll out cross-team coordination improvements
+4. **Following Sprints**: Roll out cross-rite coordination improvements
 
 ---
 
@@ -220,20 +220,20 @@ After generalized HANDOFF pattern exists (Phase 2), update each team to use it:
 
 | Team | TODO File |
 |------|-----------|
-| 10x-dev-pack | teams/10x-dev-pack/TODO.md |
-| ecosystem-pack | teams/ecosystem-pack/TODO.md |
-| doc-team-pack | teams/doc-team-pack/TODO.md |
-| hygiene-pack | teams/hygiene-pack/TODO.md |
-| debt-triage-pack | teams/debt-triage-pack/TODO.md |
-| sre-pack | teams/sre-pack/TODO.md |
-| security-pack | teams/security-pack/TODO.md |
-| intelligence-pack | teams/intelligence-pack/TODO.md |
-| rnd-pack | teams/rnd-pack/TODO.md |
-| strategy-pack | teams/strategy-pack/TODO.md |
+| 10x-dev-pack | rites/10x-dev-pack/TODO.md |
+| ecosystem-pack | rites/ecosystem-pack/TODO.md |
+| doc-rite-pack | rites/doc-rite-pack/TODO.md |
+| hygiene-pack | rites/hygiene-pack/TODO.md |
+| debt-triage-pack | rites/debt-triage-pack/TODO.md |
+| sre-pack | rites/sre-pack/TODO.md |
+| security-pack | rites/security-pack/TODO.md |
+| intelligence-pack | rites/intelligence-pack/TODO.md |
+| rnd-pack | rites/rnd-pack/TODO.md |
+| strategy-pack | rites/strategy-pack/TODO.md |
 
 Each TODO.md contains:
 - Current state summary with strengths and issues
 - Validated improvements with specific changes required
 - Deferred/not prioritized items with rationale
 - Dependencies on other teams
-- Cross-team coordination notes
+- Cross-rite coordination notes

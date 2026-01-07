@@ -1,6 +1,6 @@
 ---
 name: docs-ref
-description: "Quick switch to doc-team-pack (documentation workflow). Use when: creating API documentation, writing README files, structuring documentation, auditing doc quality. Triggers: /docs, documentation team, doc workflow, tech writing."
+description: "Quick switch to doc-rite-pack (documentation workflow). Use when: creating API documentation, writing README files, structuring documentation, auditing doc quality. Triggers: /docs, documentation team, doc workflow, tech writing."
 ---
 
 # /docs - Quick Switch to Documentation Team
@@ -9,9 +9,9 @@ description: "Quick switch to doc-team-pack (documentation workflow). Use when: 
 
 ## Purpose
 
-Instantly switch to the doc-team-pack, a specialized team focused on technical writing, API documentation, information architecture, and documentation quality audits.
+Instantly switch to the doc-rite-pack, a specialized team focused on technical writing, API documentation, information architecture, and documentation quality audits.
 
-This is a convenience wrapper around `/team doc-team-pack` that also displays the team roster after switching.
+This is a convenience wrapper around `/rite doc-rite-pack` that also displays the rite roster after switching.
 
 ---
 
@@ -22,7 +22,7 @@ This is a convenience wrapper around `/team doc-team-pack` that also displays th
 ```
 
 No parameters required. This command:
-1. Switches to doc-team-pack
+1. Switches to doc-rite-pack
 2. Displays team roster with agent descriptions
 
 ---
@@ -34,15 +34,15 @@ No parameters required. This command:
 Execute via Bash tool:
 
 ```bash
-$ROSTER_HOME/swap-team.sh doc-team-pack
+$ROSTER_HOME/swap-rite.sh doc-rite-pack
 ```
 
 ### 2. Display Team Roster
 
-After successful switch, show the active team roster:
+After successful switch, show the active rite roster:
 
 ```
-Switched to doc-team-pack (4 agents loaded)
+Switched to doc-rite-pack (4 agents loaded)
 
 Team Roster:
 ┌─────────────────────────┬──────────────────────────────────────────────┐
@@ -60,14 +60,14 @@ Use /handoff <agent> to delegate work.
 ### 3. Update SESSION_CONTEXT (if active)
 
 If a session is active:
-- Update `active_team` field to `doc-team-pack`
+- Update `active_team` field to `doc-rite-pack`
 - Add handoff note documenting team switch
 
 ---
 
 ## Team Details
 
-**Team Name**: doc-team-pack
+**Team Name**: doc-rite-pack
 **Agent Count**: 4
 **Workflow**: Audit → Architecture → Writing → Review
 
@@ -133,7 +133,7 @@ If a session is active:
 
 Output:
 ```
-[Roster] Switched to doc-team-pack (4 agents loaded)
+[Roster] Switched to doc-rite-pack (4 agents loaded)
 
 Team Roster:
   - doc-auditor: Reviews docs for accuracy and completeness
@@ -153,7 +153,7 @@ Ready for documentation workflow.
 
 Output:
 ```
-[Roster] Switched to doc-team-pack (4 agents loaded)
+[Roster] Switched to doc-rite-pack (4 agents loaded)
 Session started: Document REST API
 Complexity: MODULE
 
@@ -171,7 +171,7 @@ After implementing a feature with `/10x`, switch to document it:
 
 Output:
 ```
-[Roster] Switched to doc-team-pack (4 agents loaded)
+[Roster] Switched to doc-rite-pack (4 agents loaded)
 Handing off to: tech-writer
 
 Tech Writer reviewing implementation artifacts...
@@ -245,7 +245,7 @@ Use this team for:
 
 | File | Change | Description |
 |------|--------|-------------|
-| `.claude/ACTIVE_RITE` | Set to `doc-team-pack` | Active team state |
+| `.claude/ACTIVE_RITE` | Set to `doc-rite-pack` | Active rite state |
 | `.claude/agents/` | Populated | 4 agent files loaded |
 | `.claude/sessions/{session_id}/SESSION_CONTEXT.md` | `active_team` updated | If session active |
 
@@ -253,7 +253,7 @@ Use this team for:
 
 ## Success Criteria
 
-- Team switched to doc-team-pack
+- Team switched to doc-rite-pack
 - 4 agent files present in `.claude/agents/`
 - Team roster displayed to user
 - If session active, SESSION_CONTEXT updated
@@ -265,8 +265,8 @@ Use this team for:
 If swap fails:
 
 ```
-[Roster] Error: Team pack 'doc-team-pack' not found
-[Roster] Use '/team --list' to see available packs
+[Roster] Error: Rite 'doc-rite-pack' not found
+[Roster] Use '/rite --list' to see available packs
 ```
 
 **Resolution**: Verify roster installation at `$ROSTER_HOME/`
@@ -292,7 +292,7 @@ The documentation skill provides templates, this team provides specialized agent
 
 ## Related Commands
 
-- `/team` - General team switching with options
+- `/team` - General rite switching with options
 - `/10x` - Quick switch to development team
 - `/hygiene` - Quick switch to code hygiene team
 - `/debt` - Quick switch to technical debt team
@@ -310,7 +310,7 @@ The documentation skill provides templates, this team provides specialized agent
 ## Related Documentation
 
 - [COMMAND_REGISTRY.md](../../COMMAND_REGISTRY.md) - All registered commands
-- [swap-team.sh]($ROSTER_HOME/swap-team.sh) - Roster swap implementation
+- [swap-rite.sh]($ROSTER_HOME/swap-rite.sh) - Roster swap implementation
 
 ---
 
@@ -329,7 +329,7 @@ For these, start with `/docs` instead of `/10x`.
 
 | Command | Behavior |
 |---------|----------|
-| `/team doc-team-pack` | Switches team, shows swap confirmation |
+| `/rite doc-rite-pack` | Switches team, shows swap confirmation |
 | `/docs` | Switches team, shows roster with agent descriptions |
 
 Use `/docs` when you want to see available agents after switching.

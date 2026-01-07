@@ -11,7 +11,7 @@ description: "Quick switch to 10x-dev-pack (full development workflow). Use when
 
 Instantly switch to the 10x-dev-pack, a comprehensive development team with full lifecycle agents for building features from requirements through implementation and testing.
 
-This is a convenience wrapper around `/team 10x-dev-pack` that also displays the team roster after switching.
+This is a convenience wrapper around `/rite 10x-dev-pack` that also displays the rite roster after switching.
 
 ---
 
@@ -34,12 +34,12 @@ No parameters required. This command:
 Execute via Bash tool:
 
 ```bash
-$ROSTER_HOME/swap-team.sh 10x-dev-pack
+$ROSTER_HOME/swap-rite.sh 10x-dev-pack
 ```
 
 ### 2. Display Team Roster
 
-After successful switch, show the active team roster:
+After successful switch, show the active rite roster:
 
 ```
 Switched to 10x-dev-pack (5 agents loaded)
@@ -162,7 +162,7 @@ Output:
 [Roster] Switched to 10x-dev-pack (5 agents loaded)
 
 Session context updated:
-  Active team: 10x-dev-pack
+  Active rite: 10x-dev-pack
   Handoff note: "Switched to development team for implementation phase"
 
 Team Roster:
@@ -244,7 +244,7 @@ Use this team for:
 
 | File | Change | Description |
 |------|--------|-------------|
-| `.claude/ACTIVE_RITE` | Set to `10x-dev-pack` | Active team state |
+| `.claude/ACTIVE_RITE` | Set to `10x-dev-pack` | Active rite state |
 | `.claude/agents/` | Populated | 5 agent files loaded |
 | `.claude/sessions/{session_id}/SESSION_CONTEXT.md` | `active_team` updated | If session active |
 
@@ -264,8 +264,8 @@ Use this team for:
 If swap fails (unlikely - this is a core team):
 
 ```
-[Roster] Error: Team pack '10x-dev-pack' not found
-[Roster] Use '/team --list' to see available packs
+[Roster] Error: Rite '10x-dev-pack' not found
+[Roster] Use '/rite --list' to see available packs
 ```
 
 **Resolution**: Verify roster installation at `$ROSTER_HOME/`
@@ -274,7 +274,7 @@ If swap fails (unlikely - this is a core team):
 
 ## Related Commands
 
-- `/team` - General team switching with options
+- `/team` - General rite switching with options
 - `/docs` - Quick switch to documentation team
 - `/hygiene` - Quick switch to code hygiene team
 - `/debt` - Quick switch to technical debt team
@@ -287,7 +287,7 @@ If swap fails (unlikely - this is a core team):
 
 - [10x-workflow skill](../10x-workflow/SKILL.md) - Agent coordination patterns
 - [COMMAND_REGISTRY.md](../../COMMAND_REGISTRY.md) - All registered commands
-- [swap-team.sh]($ROSTER_HOME/swap-team.sh) - Roster swap implementation
+- [swap-rite.sh]($ROSTER_HOME/swap-rite.sh) - Roster swap implementation
 
 ---
 
@@ -306,7 +306,7 @@ This is the "default" team for general development work.
 
 | Command | Behavior |
 |---------|----------|
-| `/team 10x-dev-pack` | Switches team, shows swap confirmation |
+| `/rite 10x-dev-pack` | Switches team, shows swap confirmation |
 | `/10x` | Switches team, shows roster with agent descriptions |
 
 Use `/10x` when you want to see available agents after switching.

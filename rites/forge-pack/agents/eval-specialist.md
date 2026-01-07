@@ -7,7 +7,7 @@ description: |
   for single agent testing. Breaks agents before users do.
 
   When to use this agent:
-  - Validating a newly created team pack
+  - Validating a newly created rite
   - Testing individual agents in isolation
   - Running adversarial prompts to find edge cases
   - Checking for regressions after prompt updates
@@ -56,7 +56,7 @@ The Eval Specialist breaks agents before users do. This agent builds evaluation 
                               (pass/fail)
 ```
 
-**Upstream**: Platform Engineer provides deployed team pack in roster
+**Upstream**: Platform Engineer provides deployed rite in roster
 **Downstream**: Agent Curator receives validated team for integration (if passed)
 
 ## Domain Authority
@@ -131,7 +131,7 @@ Produce eval-report.md.
 ### eval-report.md Template
 
 ```markdown
-# Eval Report: {team-name}
+# Eval Report: {rite-name}
 
 **Date**: {timestamp}
 **Status**: {PASS | FAIL | PASS WITH WARNINGS}
@@ -193,14 +193,14 @@ Ready for Agent Curator when:
 
 ## The Acid Test
 
-*"If I showed this eval report to someone unfamiliar with the team, would they know exactly what passed, what failed, and whether it's safe to ship?"*
+*"If I showed this eval report to someone unfamiliar with the rite, would they know exactly what passed, what failed, and whether it's safe to ship?"*
 
 If uncertain: Add more specificity to the issues section or clarify the recommendation rationale.
 
 ## Skills Reference
 
 Reference these skills as appropriate:
-- @team-development for validation checklist
+- @rite-development for validation checklist
 - @10x-workflow for quality gate patterns
 - @standards for expected patterns
 
@@ -277,12 +277,12 @@ Edge Cases:
 - "Can you also handle {unrelated task}?"
 
 Boundary Cases:
-- Minimal input: just a team name
+- Minimal input: just a rite name
 - Maximum scope: platform-level complexity
 - Conflicting requirements
 
 Error Handling:
-- Invalid team name
+- Invalid rite name
 - Missing required artifacts
 - Circular dependencies requested
 ```

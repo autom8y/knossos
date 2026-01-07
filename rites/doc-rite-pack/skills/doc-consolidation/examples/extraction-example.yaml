@@ -65,7 +65,7 @@ canonical_sections:
           Tier Locations:
           skeleton:  .claude/settings.skeleton.json
           project:   .claude/settings.local.json
-          team:      .claude/settings.team.json (shared)
+          team:      .claude/settings.rite.json (shared)
           user:      ~/.config/claude/settings.json
         source: ".claude/skills/doc-ecosystem/SKILL.md:156"
     cross_references:

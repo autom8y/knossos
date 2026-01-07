@@ -6,13 +6,13 @@ description: Agent team creation lifecycle (Design → Prompts → Workflow → 
 entry_point:
   agent: agent-designer
   artifact:
-    type: team-spec
+    type: rite-spec
     path_template: docs/forge/TEAM-SPEC-{slug}.md
 
 phases:
   - name: design
     agent: agent-designer
-    produces: team-spec
+    produces: rite-spec
     next: prompts
 
   - name: prompts
@@ -47,10 +47,10 @@ complexity_levels:
     scope: "Single agent addition to existing team"
     phases: [design, prompts, validation]
   - name: MODULE
-    scope: "New team pack with 3-5 agents"
+    scope: "New rite with 3-5 agents"
     phases: [design, prompts, workflow, platform, catalog, validation]
   - name: SYSTEM
-    scope: "Major team redesign or cross-team refactor"
+    scope: "Major team redesign or cross-rite refactor"
     phases: [design, prompts, workflow, platform, catalog, validation]
 
 # Agent roles for command mapping:

@@ -87,7 +87,7 @@ Content derived from roster state (ACTIVE_RITE file + agents/ directory).
 
 **Characteristics**:
 - Source of truth: ACTIVE_RITE + agents/
-- Regeneration trigger: `swap-team.sh` or CEM sync with missing content
+- Regeneration trigger: `swap-rite.sh` or CEM sync with missing content
 - Generated locally: Each satellite has its own team
 - Represents: Which agents are available in THIS project
 
@@ -97,7 +97,7 @@ Content derived from roster state (ACTIVE_RITE file + agents/ directory).
 |---------|--------|
 | Quick Start agent table | ACTIVE_RITE + agents/*.md |
 | Agent Configurations list | agents/*.md |
-| Team name reference | ACTIVE_RITE |
+| Rite name reference | ACTIVE_RITE |
 
 **Regeneration Logic**:
 
@@ -154,7 +154,7 @@ What does this content describe?
 
 3. WHO is working (which agents)?
    - Agent roster
-   - Team name
+   - Rite name
    - Agent configurations
    └─> Roster-derived, REGENERATE from ACTIVE_RITE
 
@@ -177,7 +177,7 @@ What does this content describe?
 
 ### Satellites OWN
 
-1. **Team Identity**: Quick Start (regenerated), Agent Configurations, team-specific variations
+1. **Team Identity**: Quick Start (regenerated), Agent Configurations, rite-specific variations
 2. **Project Extensions**: `## Project:*` sections, custom sections, project conventions
 3. **Project Context**: Tech stack references, domain terminology, integration patterns
 
@@ -202,7 +202,7 @@ This project uses a 6-agent workflow (ecosystem-pack):
 | context-architect | ... |
 ```
 
-**Why wrong**: Satellite has its own team (e.g., doc-team-pack). Team content should come from satellite's ACTIVE_RITE + agents/.
+**Why wrong**: Satellite has its own team (e.g., doc-rite-pack). Team content should come from satellite's ACTIVE_RITE + agents/.
 
 **Correct approach**:
 - Team sections are PRESERVE (keep satellite content) or REGENERATE (rebuild from satellite's own ACTIVE_RITE)
@@ -260,7 +260,7 @@ Use HTML comments to mark section ownership. CEM uses these markers to determine
 <!-- PRESERVE: satellite-owned, regenerated from ACTIVE_RITE + agents/ -->
 ## Quick Start
 
-This project uses a 5-agent workflow (doc-team-pack):
+This project uses a 5-agent workflow (doc-rite-pack):
 ...
 
 <!-- SYNC: roster-owned -->

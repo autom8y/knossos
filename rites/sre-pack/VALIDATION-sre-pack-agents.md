@@ -50,7 +50,7 @@ All agents are now under the 200-line stretch goal.
 
 ---
 
-## swap-team.sh Dry-Run Results
+## swap-rite.sh Dry-Run Results
 
 ```
 [Roster] Dry-run: Would refresh sre-pack
@@ -94,7 +94,7 @@ All 5 agents recognized and ready to deploy.
 - [x] All 5 agents under 200 lines
 - [x] YAML frontmatter parses correctly
 - [x] All required sections present
-- [x] swap-team.sh dry-run passes
+- [x] swap-rite.sh dry-run passes
 - [x] Active voice throughout
 - [x] Handoff criteria use checkboxes
 - [x] Anti-patterns documented

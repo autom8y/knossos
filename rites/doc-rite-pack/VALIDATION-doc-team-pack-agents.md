@@ -1,4 +1,4 @@
-# Validation Report: doc-team-pack Agents
+# Validation Report: doc-rite-pack Agents
 
 > Post-optimization validation against quality criteria
 
@@ -55,10 +55,10 @@ All agents have valid YAML frontmatter with required fields:
 | Handoff Criteria by Phase | ✓ |
 | Handling Failures | ✓ |
 
-## swap-team.sh Dry-Run
+## swap-rite.sh Dry-Run
 
 ```
-[Roster] Dry-run: Would refresh doc-team-pack
+[Roster] Dry-run: Would refresh doc-rite-pack
 
 Agent changes:
   + doc-auditor.md (new)
@@ -104,6 +104,6 @@ Agent changes:
 | All YAML parses correctly | ✓ PASS |
 | All sections present | ✓ PASS |
 | Under 300 lines | ✓ PASS |
-| swap-team.sh dry-run passes | ✓ PASS |
+| swap-rite.sh dry-run passes | ✓ PASS |
 
 **Overall Validation Status: PASS**

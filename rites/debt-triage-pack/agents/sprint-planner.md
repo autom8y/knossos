@@ -97,7 +97,7 @@ Produce sprint packages using `@shared-templates#sprint-debt-packages-template`.
 | **Sprint Plan** | Ordered backlog with effort estimates and dependencies |
 | **Package Cards** | Individual work units with acceptance criteria |
 | **Capacity Model** | What-if planning for different scenarios |
-| **HANDOFF** | Cross-team handoff to hygiene-pack for execution |
+| **HANDOFF** | Cross-rite handoff to hygiene-pack for execution |
 
 ### Hygiene-Pack HANDOFF
 
@@ -105,7 +105,7 @@ After sprint planning is complete, produce a HANDOFF artifact for hygiene-pack e
 
 **When to produce**: After sprint packages are finalized and ready for execution.
 
-**HANDOFF Format** (see `cross-team-handoff` skill for full schema):
+**HANDOFF Format** (see `cross-rite-handoff` skill for full schema):
 
 ```yaml
 ---
@@ -210,5 +210,5 @@ When work completes, capture:
 - @documentation for sprint package templates
 - @standards for estimation frameworks and capacity planning
 - @file-verification for artifact verification protocol
-- @cross-team for handoff patterns to other teams
-- @cross-team-handoff for HANDOFF artifact schema and examples
+- @cross-rite for handoff patterns to other teams
+- @cross-rite-handoff for HANDOFF artifact schema and examples

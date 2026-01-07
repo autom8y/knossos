@@ -2,7 +2,7 @@
 
 Documentation lifecycle management from content audit through quality review.
 
-## When to Use This Team
+## When to Use This Rite
 
 **Triggers**:
 - "Our documentation is scattered and inconsistent"
@@ -17,7 +17,7 @@ Documentation lifecycle management from content audit through quality review.
 ```bash
 /task audit and improve documentation for authentication system
 # or invoke directly
-/team doc-team-pack
+/rite doc-rite-pack
 ```
 
 ## Agents
@@ -38,7 +38,7 @@ See `workflow.md` for phase flow and complexity levels.
 - SECTION: Multiple related documents (skips audit)
 - SITE: Full documentation site
 
-## Related Teams
+## Related Rites
 
 - **10x-dev-pack**: When code implementation produces documentation needs
-- **api-team-pack**: When API documentation needs specialized treatment
+- **api-rite-pack**: When API documentation needs specialized treatment

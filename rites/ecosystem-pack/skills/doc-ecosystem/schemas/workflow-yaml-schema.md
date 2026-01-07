@@ -1,19 +1,19 @@
 ---
 schema_name: workflow-yaml
 schema_version: "1.0"
-file_pattern: "teams/*/workflow.yaml"
+file_pattern: "rites/*/workflow.yaml"
 artifact_type: workflow
 ---
 
 # workflow.yaml Schema
 
-> Canonical schema for team workflow definitions at `teams/{team-name}/workflow.yaml`
+> Canonical schema for team workflow definitions at `rites/{rite-name}/workflow.yaml`
 
 ## YAML Structure
 
 ```yaml
 # Required fields
-name: string               # Team pack name (e.g., "10x-dev-pack")
+name: string               # Rite name (e.g., "10x-dev-pack")
 workflow_type: enum        # sequential | parallel | hybrid
 description: string        # Team workflow description
 
@@ -64,7 +64,7 @@ version: string            # e.g., "1.0.0"
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `name` | string | Team pack identifier |
+| `name` | string | Rite identifier |
 | `workflow_type` | enum | Flow type (sequential/parallel/hybrid) |
 | `description` | string | Team workflow description |
 | `entry_point` | object | First agent and artifact |

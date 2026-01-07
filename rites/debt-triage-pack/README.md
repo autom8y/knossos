@@ -2,7 +2,7 @@
 
 Technical debt management lifecycle for cataloging, risk assessment, and sprint planning.
 
-## When to Use This Team
+## When to Use This Rite
 
 **Triggers**:
 - "What technical debt do we have?"
@@ -17,7 +17,7 @@ Technical debt management lifecycle for cataloging, risk assessment, and sprint 
 ## Quick Start
 
 ```bash
-/team debt-triage-pack
+/rite debt-triage-pack
 ```
 
 ## Agents
@@ -38,6 +38,6 @@ Three-phase sequential workflow: **Collection → Assessment → Planning**
 
 See `workflow.md` for detailed phase flow and handoff criteria.
 
-## Related Teams
+## Related Rites
 
 - **sre-pack**: When debt manifests as reliability or infrastructure problems

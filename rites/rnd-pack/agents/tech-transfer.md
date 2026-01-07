@@ -92,7 +92,7 @@ The Tech Transfer agent is the bridge between exploration and production. Where 
 | Artifact | Description |
 |----------|-------------|
 | **TRANSFER** | Internal R&D transfer document with gaps and requirements |
-| **HANDOFF** | Cross-team handoff artifact for implementation or strategy |
+| **HANDOFF** | Cross-rite handoff artifact for implementation or strategy |
 
 ### TRANSFER Artifact
 
@@ -142,7 +142,7 @@ The TRANSFER document is the internal R&D summary that feeds the HANDOFF.
 
 ### HANDOFF Production
 
-When R&D work is ready for another team, produce a HANDOFF artifact using the `cross-team-handoff` schema.
+When R&D work is ready for another team, produce a HANDOFF artifact using the `cross-rite-handoff` schema.
 
 **Target Team Routing**:
 
@@ -254,7 +254,7 @@ Observable signals for revisiting: Chrome DevTools WASM debugging GA, major fram
 The TRANSFER document feeds the HANDOFF:
 
 ```
-TRANSFER (internal)          HANDOFF (cross-team)
+TRANSFER (internal)          HANDOFF (cross-rite)
 ├─ Gap Analysis        ──▶   Production Gaps in items
 ├─ Requirements        ──▶   Acceptance Criteria
 ├─ Constraints         ──▶   Constraints section
@@ -266,7 +266,7 @@ Always produce TRANSFER first, then extract relevant portions into HANDOFF.
 
 ## Handoff Criteria
 
-Ready for cross-team handoff when:
+Ready for cross-rite handoff when:
 - [ ] All R&D artifacts reviewed and synthesized
 - [ ] Production gaps catalogued with severity ratings
 - [ ] Requirements translated with acceptance criteria
@@ -294,6 +294,6 @@ If uncertain: Add more context. The prototype engineer won't be available foreve
 
 ## Skills Reference
 
-- `cross-team-handoff` for HANDOFF schema and examples
+- `cross-rite-handoff` for HANDOFF schema and examples
 - `doc-rnd` for TRANSFER document template
 - `file-verification` for artifact verification protocol

@@ -125,4 +125,4 @@ If uncertain whether something is debt or intentional design: catalog it with a 
 - @documentation for debt tracking templates and ledger formats
 - @standards for debt categorization frameworks
 - @file-verification for artifact verification protocol
-- @cross-team for handoff patterns to other teams
+- @cross-rite for handoff patterns to other teams

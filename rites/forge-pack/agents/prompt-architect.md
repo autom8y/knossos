@@ -241,7 +241,7 @@ If uncertain: Add more explicit guidance in the "How You Work" section or clarif
 ## Skills Reference
 
 Reference these skills as appropriate:
-- @team-development for agent.md.template structure
+- @rite-development for agent.md.template structure
 - @10x-workflow for coordination patterns
 - @standards for naming conventions
 - @prompting for invocation patterns

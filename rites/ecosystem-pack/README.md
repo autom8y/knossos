@@ -2,7 +2,7 @@
 
 Infrastructure lifecycle team for CEM and roster ecosystem maintenance.
 
-## When to Use This Team
+## When to Use This Rite
 
 **Triggers**:
 - Satellite sync failures or integration errors
@@ -12,12 +12,12 @@ Infrastructure lifecycle team for CEM and roster ecosystem maintenance.
 - Breaking changes require migration planning
 - Cross-satellite compatibility issues
 
-**Not for**: Application code in satellites (use 10x-dev-pack), team-specific workflows (use team-pack).
+**Not for**: Application code in satellites (use 10x-dev-pack), rite-specific workflows (use rite-pack).
 
 ## Quick Start
 
 ```bash
-/team ecosystem-pack
+/rite ecosystem-pack
 ```
 
 ## Agents
@@ -40,7 +40,7 @@ See `workflow.md` for phase flow and complexity levels.
 - SYSTEM: Multi-system change (full pipeline)
 - MIGRATION: Cross-satellite rollout (full pipeline with coordination)
 
-## Related Teams
+## Related Rites
 
 - **hygiene-pack**: When cleanup reveals ecosystem bugs
-- **team-pack**: When team-specific infrastructure needs changes
+- **rite-pack**: When rite-specific infrastructure needs changes

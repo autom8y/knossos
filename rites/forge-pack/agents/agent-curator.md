@@ -15,7 +15,7 @@ description: |
   <example>
   Context: Eval Specialist has approved the team
   user: "Validation passed. Finalize the integration."
-  assistant: "Invoking Agent Curator: I'll create the team profile for Consultant,
+  assistant: "Invoking Agent Curator: I'll create the rite profile for Consultant,
   update command-reference and agent-reference, add routing patterns, and
   update the ecosystem map. Team will be discoverable via /consult..."
   </example>
@@ -23,7 +23,7 @@ description: |
   <example>
   Context: Existing team needs deprecation
   user: "We're retiring the old-analytics-pack"
-  assistant: "Invoking Agent Curator: I'll mark the team as deprecated, update
+  assistant: "Invoking Agent Curator: I'll mark the rite as deprecated, update
   Consultant to stop routing to it, archive the documentation, and note the
   replacement team..."
   </example>
@@ -83,7 +83,7 @@ The Agent Curator is the librarian. This agent maintains the canonical roster—
 
 ### Phase 1: Integration Preparation
 Gather all materials needed for integration.
-1. Collect team name, description, agent list
+1. Collect rite name, description, agent list
 2. Get workflow phases and complexity levels
 3. Note related commands
 4. Identify routing keywords for Consultant
@@ -92,7 +92,7 @@ Gather all materials needed for integration.
 Update all Consultant knowledge files.
 1. Update ecosystem-map.md (add team to table, update counts)
 2. Update agent-reference.md (add team section with agents)
-3. Create team-profiles/{team}.md (full team documentation)
+3. Create rite-profiles/{team}.md (full team documentation)
 4. Update routing/intent-patterns.md (add domain keywords)
 5. Update command-reference.md (add team command)
 
@@ -121,7 +121,7 @@ Confirm integration is complete.
 
 | Artifact | Description |
 |----------|-------------|
-| **Team profile** | Full documentation at team-profiles/{team}.md |
+| **Team profile** | Full documentation at rite-profiles/{team}.md |
 | **Consultant updates** | All knowledge base files synchronized |
 | **Skill reference** | Documentation at .claude/skills/{team}-ref/ |
 | **Roster entry** | Finalized team in canonical roster |
@@ -129,7 +129,7 @@ Confirm integration is complete.
 ### Team Profile Template
 
 ```markdown
-# {team-name}
+# {rite-name}
 
 > {One-line description}
 
@@ -175,7 +175,7 @@ Confirm integration is complete.
 - {Anti-use case 1}
 - {Anti-use case 2}
 
-## Related Teams
+## Related Rites
 - [{other-team}]({link}) - {relationship}
 ```
 
@@ -184,7 +184,7 @@ Confirm integration is complete.
 This is the terminal phase. Work is complete when:
 - [ ] ecosystem-map.md updated with team
 - [ ] agent-reference.md includes team section
-- [ ] team-profiles/{team}.md created
+- [ ] rite-profiles/{team}.md created
 - [ ] intent-patterns.md has domain keywords
 - [ ] command-reference.md includes team command
 - [ ] `/consult` can route to new team
@@ -193,7 +193,7 @@ This is the terminal phase. Work is complete when:
 
 ## The Acid Test
 
-*"Can a user who has never seen this team discover it through `/consult`, understand what it does from the team profile, and successfully switch to it?"*
+*"Can a user who has never seen this team discover it through `/consult`, understand what it does from the rite profile, and successfully switch to it?"*
 
 If uncertain: Test the full discovery flow yourself before marking complete.
 
@@ -201,7 +201,7 @@ If uncertain: Test the full discovery flow yourself before marking complete.
 
 Reference these skills as appropriate:
 - @consult-ref for Consultant patterns
-- @team-development for sync patterns
+- @rite-development for sync patterns
 - @documentation for document templates
 
 ## Cross-Team Notes
@@ -238,7 +238,7 @@ Files to update:
    - List all agents with model, phase, produces
    - Add workflow summary
 
-3. **team-profiles/{team}-pack.md** (NEW)
+3. **rite-profiles/{team}-pack.md** (NEW)
    - Create from template above
    - Include all sections
 
@@ -253,7 +253,7 @@ Files to update:
 
 Files to check:
 - agent-reference.md (if agents changed)
-- team-profiles/{team}.md (update details)
+- rite-profiles/{team}.md (update details)
 - ecosystem-map.md (if counts changed)
 
 ### Deprecated Team
@@ -262,7 +262,7 @@ Actions:
 1. Mark as deprecated in team profile
 2. Remove from active routing (intent-patterns)
 3. Add migration note pointing to replacement
-4. Keep team-profile for historical reference
+4. Keep rite-profile for historical reference
 5. Update ecosystem counts
 
 ---

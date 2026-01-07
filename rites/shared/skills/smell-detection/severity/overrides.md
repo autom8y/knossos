@@ -56,7 +56,7 @@ Default severity factors (see [defaults.md](defaults.md)) provide a baseline, bu
 |---------|---------------|---------|
 | **Widely imported modules** | Utilities, shared libraries, base classes | Naming inconsistency in shared util → Blast Radius 3 (was 2) |
 | **Framework core** | Core abstractions, plugin systems | Leaky abstraction in plugin API → Blast Radius 3 (was 2) |
-| **Cross-team dependencies** | Code used by multiple teams | Breaking change in shared module → Blast Radius 3 (was 2) |
+| **Cross-rite dependencies** | Code used by multiple teams | Breaking change in shared module → Blast Radius 3 (was 2) |
 | **Database schema** | Schema changes affecting many queries | Missing abstraction for DB access → Blast Radius 3 (was 2) |
 
 ### Decrease Blast Radius (-1)

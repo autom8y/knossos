@@ -116,4 +116,4 @@ If uncertain: Focus on critical unknowns. Skip polish. The decision matters, not
 - @doc-rnd for prototype documentation template
 - @standards for coding conventions (even prototypes should be readable)
 - @file-verification for artifact verification protocol
-- @cross-team for handoff patterns to other teams
+- @cross-rite for handoff patterns to other teams

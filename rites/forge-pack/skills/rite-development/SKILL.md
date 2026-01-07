@@ -1,5 +1,5 @@
 ---
-name: team-development
+name: rite-development
 description: "Design and implement agent rites for the roster ecosystem. Use when: creating new rites, designing workflows, writing agent prompts, integrating with slash commands. Triggers: new rite, rite development, workflow design, agent creation, roster integration."
 ---
 
@@ -7,7 +7,7 @@ description: "Design and implement agent rites for the roster ecosystem. Use whe
 
 > Design agent rites that work. Build workflows that flow.
 
-This skill codifies the patterns discovered from building rites (10x-dev-pack, doc-team-pack, hygiene-pack, debt-triage-pack, sre-pack) into reusable templates and decision frameworks.
+This skill codifies the patterns discovered from building rites (10x-dev-pack, doc-rite-pack, hygiene-pack, debt-triage-pack, sre-pack) into reusable templates and decision frameworks.
 
 ---
 
@@ -111,7 +111,7 @@ Complete team implementations:
 | Rite | Agents | Workflow | Entry Agent |
 |------|--------|----------|-------------|
 | 10x-dev-pack | 5 | Requirements → Design → Implementation → Validation | requirements-analyst |
-| doc-team-pack | 4 | Audit → Architecture → Writing → Review | doc-auditor |
+| doc-rite-pack | 4 | Audit → Architecture → Writing → Review | doc-auditor |
 | hygiene-pack | 4 | Assessment → Planning → Execution → Audit | code-smeller |
 | debt-triage-pack | 3 | Collection → Assessment → Planning | debt-collector |
 | sre-pack | 4 | Observation → Coordination → Implementation → Resilience | observability-engineer |

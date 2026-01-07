@@ -65,5 +65,5 @@ antipatterns:
   - "Designing without considering all 10 teams"
   - "Making schema changes without versioning strategy"
 
-# Cross-team protocol
+# Cross-rite protocol
 cross_team_protocol: "When changes affect other teams, escalate to user for coordination."

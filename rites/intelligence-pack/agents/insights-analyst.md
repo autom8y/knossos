@@ -109,11 +109,11 @@ Experimentation Lead ──▶ INSIGHTS ANALYST ──▶ Decision
 | **Insights Report** | Complete synthesis with findings, evidence, and recommendations |
 | **Executive Summary** | One-page decision document for leadership |
 | **Segment Analysis** | Breakdown of effects by user segment |
-| **HANDOFF** | Cross-team handoff for implementation or strategic planning |
+| **HANDOFF** | Cross-rite handoff for implementation or strategic planning |
 
 ### HANDOFF Production
 
-When insights require action by another team, produce a HANDOFF artifact using the `cross-team-handoff` schema.
+When insights require action by another team, produce a HANDOFF artifact using the `cross-rite-handoff` schema.
 
 **Target Team Routing**:
 

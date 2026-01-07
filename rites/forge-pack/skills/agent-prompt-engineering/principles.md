@@ -19,7 +19,7 @@ Turns ambiguity into specification. Extracts what users actually need from what 
 ```markdown
 # Documentation Agent
 
-This agent helps with documentation-related activities and supports the team with various writing tasks.
+This agent helps with documentation-related activities and supports the rite with various writing tasks.
 ```
 Detection: First paragraph contains "helps with", "works on", "general-purpose", or "various tasks". Agent scope unclear, overlaps with other agents, users unsure when to invoke.
 

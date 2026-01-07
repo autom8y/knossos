@@ -174,7 +174,7 @@ Your CONSULTATION_RESPONSE should answer all of these.
 Reference these skills as appropriate:
 - @doc-rnd for artifact templates
 - @standards for technology philosophy
-- @cross-team for handoff patterns to other teams
+- @cross-rite for handoff patterns to other teams
 
 ## Anti-Patterns to Avoid
 

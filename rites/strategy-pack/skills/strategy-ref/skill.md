@@ -11,8 +11,8 @@ description: "Strategy team reference with market research, competitive analysis
 
 | Component | Location | Purpose |
 |-----------|----------|---------|
-| Agents | `$ROSTER_HOME/teams/strategy-pack/agents/` | Agent prompts |
-| Workflow | `$ROSTER_HOME/teams/strategy-pack/workflow.yaml` | Phase configuration |
+| Agents | `$ROSTER_HOME/rites/strategy-pack/agents/` | Agent prompts |
+| Workflow | `$ROSTER_HOME/rites/strategy-pack/workflow.yaml` | Phase configuration |
 | Switch | `/strategy` | Activate this team |
 
 ## Team Roster
@@ -61,7 +61,7 @@ market-research → competitive-analysis → business-modeling → strategic-pla
 | `/hotfix` | N/A | Not applicable (strategy team) |
 | `/code-review` | N/A | Not applicable (strategy team) |
 
-## When to Use This Team
+## When to Use This Rite
 
 **Use strategy-pack when:**
 - Market sizing and analysis

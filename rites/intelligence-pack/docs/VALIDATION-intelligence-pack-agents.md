@@ -45,10 +45,10 @@ All agents now include:
 - [ ] **When Invoked (First Actions)**: Numbered sequence of first actions on invocation
 - [ ] **Concrete Examples**: At least one artifact example with format
 
-## swap-team.sh Dry-Run
+## swap-rite.sh Dry-Run
 
 ```
-$ swap-team.sh --dry-run intelligence-pack
+$ swap-rite.sh --dry-run intelligence-pack
 
 [Roster] Dry-run: Would refresh intelligence-pack
 

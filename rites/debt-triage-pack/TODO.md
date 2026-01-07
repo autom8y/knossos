@@ -29,10 +29,10 @@ Debt-triage-pack is a **well-designed, recently optimized team** (34% compressio
 **Rationale:** Different purposes (strategic catalog vs tactical diagnosis) but same underlying detection patterns. Share the detection, diverge on what to do with findings.
 
 **Changes required:**
-- [ ] Create `skills/smell-detection/SKILL.md` (ecosystem-level, not team-specific)
+- [ ] Create `skills/smell-detection/SKILL.md` (ecosystem-level, not rite-specific)
 - [ ] Define detection patterns: dead code, duplication, complexity, naming, imports, etc.
 - [ ] Update `agents/debt-collector.md`: Reference shared skill for detection phase
-- [ ] Update `teams/hygiene-pack/agents/code-smeller.md`: Reference same shared skill
+- [ ] Update `rites/hygiene-pack/agents/code-smeller.md`: Reference same shared skill
 - [ ] Each team post-processes differently:
   - Debt Collector: Adds business context, age, ownership → feeds Risk Assessor
   - Code Smeller: Adds ROI scoring, blast radius → feeds Architect Enforcer
@@ -60,7 +60,7 @@ skills/smell-detection/
 **Rationale:** The debt→hygiene handoff is one instance of a broader pattern. 10x→doc-team, security→10x, etc. all need structured handoffs. Centralize the pattern.
 
 **Changes required:**
-- [ ] Create ecosystem-level handoff artifact schema in `skills/cross-team-handoff/`
+- [ ] Create ecosystem-level handoff artifact schema in `skills/cross-rite-handoff/`
 - [ ] Define generic HANDOFF artifact format:
   ```yaml
   # HANDOFF-{source-team}-{target-team}-{slug}.yaml
@@ -88,14 +88,14 @@ skills/smell-detection/
     Recommend starting with PKG-001 as it unblocks PKG-002.
   ```
 - [ ] Update Sprint Planner to produce HANDOFF artifact as additional output
-- [ ] Document pattern in ecosystem-pack or cross-team skill
+- [ ] Document pattern in ecosystem-pack or cross-rite skill
 - [ ] Update hygiene-pack code-smeller to accept HANDOFF artifact as input
 
 **Pattern usage across ecosystem:**
 | Source | Target | Handoff Type |
 |--------|--------|--------------|
 | debt-triage-pack | hygiene-pack | execution |
-| 10x-dev-pack (QA) | doc-team-pack | documentation |
+| 10x-dev-pack (QA) | doc-rite-pack | documentation |
 | security-pack | 10x-dev-pack | remediation |
 | rnd-pack | 10x-dev-pack | productionization |
 
@@ -125,7 +125,7 @@ skills/smell-detection/
 
 ## Cross-Team Notes
 
-**For ecosystem-pack:** P2 defines a generalized handoff artifact pattern that should live at ecosystem level, not team level. Consider adding to cross-team skill or creating dedicated handoff-protocol skill.
+**For ecosystem-pack:** P2 defines a generalized handoff artifact pattern that should live at ecosystem level, not team level. Consider adding to cross-rite skill or creating dedicated handoff-protocol skill.
 
 **For hygiene-pack:** Update P2 in hygiene-pack TODO to reference this generalized pattern instead of debt-specific artifact.
 

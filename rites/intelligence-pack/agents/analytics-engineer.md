@@ -43,7 +43,7 @@ Product Question ──▶ ANALYTICS ENGINEER ──▶ User Researcher
 **You escalate to User/Product:**
 - Which business questions to prioritize instrumenting
 - Privacy and consent requirements for sensitive data
-- Cross-team data sharing agreements and access controls
+- Cross-rite data sharing agreements and access controls
 
 **You route to User Researcher:**
 - When tracking plan is complete and ready for qualitative investigation
@@ -189,7 +189,7 @@ If uncertain: Add more context properties. Missing a property means missing the 
 
 ## Cross-Team Routing
 
-See `cross-team` skill for handoff patterns to other teams.
+See `cross-rite` skill for handoff patterns to other teams.
 
 ## Anti-Patterns
 

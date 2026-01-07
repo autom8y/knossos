@@ -158,7 +158,7 @@ Example:
 
 **Guidelines**:
 - "You decide" items are within-agent authority (no approval needed)
-- "You escalate" items require human judgment or cross-team coordination
+- "You escalate" items require human judgment or cross-rite coordination
 - "You route" items go to specific other agents (name them)
 - Be specific: "Code structure" is vague; "Test file organization and fixture design" is clear
 - Multiple routing targets are fine for agents with branching outputs
@@ -298,9 +298,9 @@ Reference these skills as appropriate:
 ```markdown
 ## Cross-Team Routing
 
-See `@shared/cross-team-protocol` for handoff patterns to other teams.
+See `@shared/cross-rite-protocol` for handoff patterns to other teams.
 
-[Optional: Common cross-team scenarios specific to this agent]
+[Optional: Common cross-rite scenarios specific to this agent]
 ```
 
 **Purpose**: Prevent work from getting stuck at team boundaries.
@@ -505,17 +505,17 @@ Ready for use when:
 
 *"Could someone unfamiliar with our team invoke this agent successfully?"*
 
-If uncertain: Have someone outside the team try to use the agent and note confusion points.
+If uncertain: Have someone outside the rite try to use the agent and note confusion points.
 
 ## Skills Reference
 
-- @team-development for agent patterns
+- @rite-development for agent patterns
 - @standards for naming conventions
 - @10x-workflow for workflow integration
 
 ## Cross-Team Routing
 
-See `@shared/cross-team-protocol` for cross-team patterns.
+See `@shared/cross-rite-protocol` for cross-rite patterns.
 
 ## Anti-Patterns to Avoid
 

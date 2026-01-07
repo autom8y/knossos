@@ -11,7 +11,7 @@ description: "Quick switch to debt-triage-pack (technical debt management). Use 
 
 Instantly switch to the debt-triage-pack, a specialized team focused on identifying, assessing, and planning remediation of technical debt across codebases and projects.
 
-This is a convenience wrapper around `/team debt-triage-pack` that also displays the team roster after switching.
+This is a convenience wrapper around `/rite debt-triage-pack` that also displays the rite roster after switching.
 
 ---
 
@@ -34,12 +34,12 @@ No parameters required. This command:
 Execute via Bash tool:
 
 ```bash
-$ROSTER_HOME/swap-team.sh debt-triage-pack
+$ROSTER_HOME/swap-rite.sh debt-triage-pack
 ```
 
 ### 2. Display Team Roster
 
-After successful switch, show the active team roster:
+After successful switch, show the active rite roster:
 
 ```
 Switched to debt-triage-pack (3 agents loaded)
@@ -314,7 +314,7 @@ Use this team for:
 
 | File | Change | Description |
 |------|--------|-------------|
-| `.claude/ACTIVE_RITE` | Set to `debt-triage-pack` | Active team state |
+| `.claude/ACTIVE_RITE` | Set to `debt-triage-pack` | Active rite state |
 | `.claude/agents/` | Populated | 3 agent files loaded |
 | `.claude/sessions/{session_id}/SESSION_CONTEXT.md` | `active_team` updated | If session active |
 
@@ -334,8 +334,8 @@ Use this team for:
 If swap fails:
 
 ```
-[Roster] Error: Team pack 'debt-triage-pack' not found
-[Roster] Use '/team --list' to see available packs
+[Roster] Error: Rite 'debt-triage-pack' not found
+[Roster] Use '/rite --list' to see available packs
 ```
 
 **Resolution**: Verify roster installation at `$ROSTER_HOME/`
@@ -387,7 +387,7 @@ items:
 
 ## Related Commands
 
-- `/team` - General team switching with options
+- `/team` - General rite switching with options
 - `/10x` - Quick switch to development team
 - `/docs` - Quick switch to documentation team
 - `/hygiene` - Quick switch to code hygiene team
@@ -405,7 +405,7 @@ items:
 ## Related Documentation
 
 - [COMMAND_REGISTRY.md](../../COMMAND_REGISTRY.md) - All registered commands
-- [swap-team.sh]($ROSTER_HOME/swap-team.sh) - Roster swap implementation
+- [swap-rite.sh]($ROSTER_HOME/swap-rite.sh) - Roster swap implementation
 
 ---
 
@@ -426,7 +426,7 @@ This enables evidence-based prioritization.
 
 | Command | Behavior |
 |---------|----------|
-| `/team debt-triage-pack` | Switches team, shows swap confirmation |
+| `/rite debt-triage-pack` | Switches team, shows swap confirmation |
 | `/debt` | Switches team, shows roster with agent descriptions |
 
 Use `/debt` when you want to see available agents after switching.

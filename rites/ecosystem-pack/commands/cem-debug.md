@@ -15,7 +15,7 @@ Invoke the Ecosystem Analyst agent with CEM diagnostic focus to trace sync failu
 ## Behavior
 
 1. **Verify ecosystem-pack is active**:
-   - If not already on ecosystem-pack, execute: `$ROSTER_HOME/swap-team.sh ecosystem-pack`
+   - If not already on ecosystem-pack, execute: `$ROSTER_HOME/swap-rite.sh ecosystem-pack`
 
 2. **Invoke Ecosystem Analyst** with this focus:
    - Reproduce the reported CEM sync issue

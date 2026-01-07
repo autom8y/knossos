@@ -27,7 +27,7 @@ SRE-pack is a **production-ready, well-optimized team** (44% token reduction ach
 
 **Decision:** doc-sre templates used by multiple teams (debt ledger, risk matrix, sprint debt packages) should move to ecosystem-level shared skill.
 
-**Rationale:** Templates used by debt-triage-pack, hygiene-pack, and sre-pack shouldn't be owned by one team. Ecosystem-level templates prevent cross-team ownership confusion.
+**Rationale:** Templates used by debt-triage-pack, hygiene-pack, and sre-pack shouldn't be owned by one team. Ecosystem-level templates prevent cross-rite ownership confusion.
 
 **Changes required:**
 - [ ] Create `skills/shared-templates/` at ecosystem level (or extend existing skill)
@@ -64,7 +64,7 @@ SRE-pack is a **production-ready, well-optimized team** (44% token reduction ach
 
 **Decision:** When 10x-dev-pack completes implementation and needs resilience validation, use the generalized HANDOFF artifact pattern (same as debt→hygiene).
 
-**Rationale:** Consistent cross-team handoff pattern across ecosystem. 10x→sre is a handoff (code ready for validation), not just "SRE pulls when ready."
+**Rationale:** Consistent cross-rite handoff pattern across ecosystem. 10x→sre is a handoff (code ready for validation), not just "SRE pulls when ready."
 
 **Changes required:**
 - [ ] Document 10x→sre handoff in generalized pattern (P2 from debt-triage TODO)

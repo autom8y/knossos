@@ -23,7 +23,7 @@
 
 ## Affected Systems
 - [ ] CEM (lib/sync, roster-sync)
-- [ ] roster (user-*, teams/*)
+- [ ] roster (user-*, rites/*)
 
 ## Recommended Complexity
 **Level**: [PATCH | MODULE | SYSTEM | MIGRATION]

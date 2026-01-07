@@ -11,8 +11,8 @@ description: "Security team reference with threat modeling, compliance architect
 
 | Component | Location | Purpose |
 |-----------|----------|---------|
-| Agents | `$ROSTER_HOME/teams/security-pack/agents/` | Agent prompts |
-| Workflow | `$ROSTER_HOME/teams/security-pack/workflow.yaml` | Phase configuration |
+| Agents | `$ROSTER_HOME/rites/security-pack/agents/` | Agent prompts |
+| Workflow | `$ROSTER_HOME/rites/security-pack/workflow.yaml` | Phase configuration |
 | Switch | `/security` | Activate this team |
 
 ## Team Roster
@@ -61,7 +61,7 @@ threat-modeling → compliance-design → penetration-testing → security-revie
 | `/hotfix` | penetration-tester | Quick security fix |
 | `/code-review` | security-reviewer | Security code review |
 
-## When to Use This Team
+## When to Use This Rite
 
 **Use security-pack when:**
 - New feature touches auth, crypto, or PII
@@ -70,7 +70,7 @@ threat-modeling → compliance-design → penetration-testing → security-revie
 - Reviewing code with security implications
 
 **Don't use security-pack when:**
-- Pure documentation changes → Use doc-team-pack
+- Pure documentation changes → Use doc-rite-pack
 - General code quality → Use hygiene-pack
 - Feature development → Use 10x-dev-pack
 

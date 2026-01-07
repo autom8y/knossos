@@ -117,4 +117,4 @@ If uncertain: Recommend a time-boxed spike (1-2 days) to reduce uncertainty befo
 - @doc-rnd for tech assessment template
 - @standards for technology philosophy and evaluation criteria
 - @file-verification for artifact verification protocol
-- @cross-team for handoff patterns to other teams
+- @cross-rite for handoff patterns to other teams

@@ -2,7 +2,7 @@
 
 Security assessment, compliance mapping, penetration testing, and review for systems handling auth, crypto, PII, or external integrations.
 
-## When to Use This Team
+## When to Use This Rite
 
 **Triggers**:
 - "We need to security-review this new auth system"
@@ -15,7 +15,7 @@ Security assessment, compliance mapping, penetration testing, and review for sys
 ## Quick Start
 
 ```bash
-/team security-pack
+/rite security-pack
 ```
 
 ## Agents
@@ -36,7 +36,7 @@ Sequential workflow with complexity-based phase skipping:
 
 See `workflow.md` for phase flow and complexity levels.
 
-## Related Teams
+## Related Rites
 
 - **10x-dev-pack**: Hand off security-approved features for implementation
 - **eval-pack**: When security findings need systematic testing validation

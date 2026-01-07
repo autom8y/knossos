@@ -1,6 +1,6 @@
 ---
 name: ecosystem-ref
-description: "Quick reference for roster ecosystem patterns. Use when: working with roster-sync, swap-team.sh, manifest schema, team management. Triggers: roster-sync, swap-team, roster, manifest, ecosystem patterns."
+description: "Quick reference for roster ecosystem patterns. Use when: working with roster-sync, swap-rite.sh, manifest schema, rite management. Triggers: roster-sync, swap-rite, roster, manifest, ecosystem patterns."
 ---
 
 # ecosystem-ref
@@ -17,7 +17,7 @@ Roster-sync manages synchronization between roster repository and user/project C
 | `sync-user-agents.sh` | Sync agents to user config | `~/.claude/agents/` |
 | `sync-user-commands.sh` | Sync commands to user config | `~/.claude/commands/` |
 | `sync-user-skills.sh` | Sync skills to user config | `~/.claude/skills/` |
-| `swap-team.sh` | Switch active team pack | `.claude/agents/` |
+| `swap-rite.sh` | Switch active rite | `.claude/agents/` |
 
 ### Key Paths
 - Roster: `$ROSTER_HOME` or `~/Code/roster`
@@ -31,16 +31,16 @@ Roster-sync manages synchronization between roster repository and user/project C
 ./sync-user-agents.sh          # Sync user-agents to ~/.claude/agents/
 ./sync-user-commands.sh        # Sync user-commands to ~/.claude/commands/
 ./sync-user-skills.sh          # Sync user-skills to ~/.claude/skills/
-./swap-team.sh <pack>          # Switch active team pack
-./swap-team.sh --list          # List available team packs
-./swap-team.sh --refresh       # Refresh current team
+./swap-rite.sh <pack>          # Switch active rite
+./swap-rite.sh --list          # List available rites
+./swap-rite.sh --refresh       # Refresh current team
 ```
 
 ## Roster (Team Pack Manager)
 
 ### Team Pack Structure
 ```
-teams/{name}/
+rites/{name}/
   agents/           # Agent definitions (*.md)
   commands/         # Team-specific slash commands
   skills/           # Team-specific skills (Phase 2)
@@ -48,13 +48,13 @@ teams/{name}/
   README.md         # Pack documentation
 ```
 
-### swap-team.sh
+### swap-rite.sh
 ```bash
-swap-team.sh <pack>           # Switch to team pack
-swap-team.sh --list           # List available packs
-swap-team.sh --refresh        # Refresh current team
-swap-team.sh <pack> --keep-all    # Preserve orphan agents
-swap-team.sh <pack> --remove-all  # Remove orphan agents
+swap-rite.sh <pack>           # Switch to rite
+swap-rite.sh --list           # List available packs
+swap-rite.sh --refresh        # Refresh current team
+swap-rite.sh <pack> --keep-all    # Preserve orphan agents
+swap-rite.sh <pack> --remove-all  # Remove orphan agents
 ```
 
 ### Orphan Handling
@@ -70,7 +70,7 @@ roster (base) -> project (local overlay)
 
 | Layer | Source | Precedence |
 |-------|--------|------------|
-| Roster | `$ROSTER_HOME/teams/{name}/` | Base agents and skills |
+| Roster | `$ROSTER_HOME/rites/{name}/` | Base agents and skills |
 | Project | `.claude/agents/`, `.claude/skills/` | Local overrides |
 
 ## Team Manifest Schema
@@ -90,7 +90,7 @@ roster (base) -> project (local overlay)
 ## Debugging
 
 ```bash
-ROSTER_DEBUG=1 swap-team.sh   # Verbose roster output
+ROSTER_DEBUG=1 swap-rite.sh   # Verbose roster output
 ```
 
 ## Progressive Disclosure

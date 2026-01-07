@@ -1,10 +1,10 @@
-# doc-team-pack TODO
+# doc-rite-pack TODO
 
 > Audit conducted: 2026-01-02 | Status: MATURE, targeted integration improvements
 
 ## Current State Summary
 
-Doc-team-pack is a **well-designed, production-ready documentation team** with clear phase separation (audit → architecture → writing → review) and comprehensive quality gates.
+Doc-rite-pack is a **well-designed, production-ready documentation team** with clear phase separation (audit → architecture → writing → review) and comprehensive quality gates.
 
 **Strengths confirmed:**
 - Clear 4-phase pipeline with explicit handoff criteria
@@ -24,19 +24,19 @@ Doc-team-pack is a **well-designed, production-ready documentation team** with c
 
 ### P1: Add Documentation Gate to 10x Workflow
 
-**Gap identified:** No mechanism triggers doc-team-pack after 10x completes. Handoff is documented but not enforced - engineers manually invoke `/docs`.
+**Gap identified:** No mechanism triggers doc-rite-pack after 10x completes. Handoff is documented but not enforced - engineers manually invoke `/docs`.
 
 **Solution:** Add "documentation plan" as a checklist item in 10x QA-adversary's release recommendation.
 
 **Changes required:**
-- [ ] Update `teams/10x-dev-pack/agents/qa-adversary.md`: Add documentation assessment to release checklist
+- [ ] Update `rites/10x-dev-pack/agents/qa-adversary.md`: Add documentation assessment to release checklist
 - [ ] Add criteria: "User-facing changes documented or doc-team handoff planned"
 - [ ] QA can mark "docs not needed" for internal-only changes, but must explicitly decide
 
 **Gate questions for QA:**
 - Does this change affect user-facing behavior?
 - Is existing documentation still accurate?
-- Should doc-team-pack be notified? (Yes → include in handoff notes)
+- Should doc-rite-pack be notified? (Yes → include in handoff notes)
 
 ---
 
@@ -69,7 +69,7 @@ For each doc file:
 **Decision:** Reactive-only is correct. Docs should reflect actual implementation, not aspirational designs. Documentation lag is acceptable.
 
 ### Domain-Specific Tech Writers
-**Decision:** Generalist model is correct. Domain teams (security-pack, sre-pack, etc.) own their specialized docs via doc-* skills. Doc-team-pack handles general user-facing content only.
+**Decision:** Generalist model is correct. Domain teams (security-pack, sre-pack, etc.) own their specialized docs via doc-* skills. Doc-rite-pack handles general user-facing content only.
 
 ### CI Integration for Staleness
 **Decision:** Out of scope for roster. Would require tooling integration outside Claude Code. On-demand `/doc-audit --staleness` is sufficient.
@@ -83,11 +83,11 @@ For each doc file:
 
 Based on audit, confirm this ownership matrix:
 
-| Doc Type | Owner | NOT doc-team-pack |
+| Doc Type | Owner | NOT doc-rite-pack |
 |----------|-------|-------------------|
-| User guides, tutorials | doc-team-pack | |
-| API reference docs | doc-team-pack | |
-| User-facing README | doc-team-pack | |
+| User guides, tutorials | doc-rite-pack | |
+| API reference docs | doc-rite-pack | |
+| User-facing README | doc-rite-pack | |
 | Code comments | | 10x-dev-pack |
 | ADRs | | 10x-dev-pack |
 | Internal design docs | | 10x-dev-pack |

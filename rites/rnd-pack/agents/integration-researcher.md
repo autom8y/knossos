@@ -117,4 +117,4 @@ If uncertain: Dig deeper. Hidden dependencies kill integrations. Surface them no
 - @doc-rnd for integration map template
 - @standards for architecture patterns
 - @file-verification for artifact verification protocol
-- @cross-team for handoff patterns to other teams
+- @cross-rite for handoff patterns to other teams

@@ -25,7 +25,7 @@ The Consultant agent (`/consult`) is the ecosystem's meta-navigator. Users rely 
 │   ├── intent-patterns.md    # Natural language → team/command
 │   ├── decision-trees.md     # Structured routing logic
 │   └── complexity-matrix.md  # Scope-based selection
-├── team-profiles/
+├── rite-profiles/
 │   └── {team}-pack.md        # One per team
 └── playbooks/curated/
     └── {scenario}.md         # Common workflow playbooks
@@ -37,12 +37,12 @@ The Consultant agent (`/consult`) is the ecosystem's meta-navigator. Users rely 
 
 | Change Type | Files to Update |
 |-------------|-----------------|
-| **New team** | ecosystem-map, agent-reference, team-profile (new), intent-patterns, decision-trees, complexity-matrix, command-reference |
-| **New agent to existing team** | agent-reference, team-profile |
+| **New team** | ecosystem-map, agent-reference, rite-profile (new), intent-patterns, decision-trees, complexity-matrix, command-reference |
+| **New agent to existing team** | agent-reference, rite-profile |
 | **New command** | command-reference, ecosystem-map |
-| **Workflow change** | team-profile, agent-reference (if phases change) |
+| **Workflow change** | rite-profile, agent-reference (if phases change) |
 | **Rename team** | All files referencing old name |
-| **Remove team** | Remove from all files, delete team-profile |
+| **Remove team** | Remove from all files, delete rite-profile |
 | **New playbook** | Create in playbooks/curated/ |
 
 ---
@@ -76,7 +76,7 @@ Add new section:
 **Workflow**: {phase-1} → {phase-2} → {phase-3} → {phase-4}
 ```
 
-### 3. Create team-profiles/{team}-pack.md
+### 3. Create rite-profiles/{team}-pack.md
 
 Use template from SKILL.md. Include:
 - Overview
@@ -140,21 +140,21 @@ Add to Team Management section:
 ### Agent Added
 
 1. **agent-reference.md**: Add agent to team section
-2. **team-profiles/{team}.md**: Update Agents table
+2. **rite-profiles/{team}.md**: Update Agents table
 
 ### Agent Removed
 
 1. **agent-reference.md**: Remove agent from team section
-2. **team-profiles/{team}.md**: Update Agents table
+2. **rite-profiles/{team}.md**: Update Agents table
 
 ### Workflow Changed
 
-1. **team-profiles/{team}.md**: Update Workflow diagram
+1. **rite-profiles/{team}.md**: Update Workflow diagram
 2. **agent-reference.md**: Update workflow summary if needed
 
 ### Complexity Levels Changed
 
-1. **team-profiles/{team}.md**: Update Complexity Levels table
+1. **rite-profiles/{team}.md**: Update Complexity Levels table
 2. **routing/complexity-matrix.md**: Update team section
 
 ---
@@ -232,10 +232,10 @@ grep "teams" .claude/knowledge/consultant/ecosystem-map.md
 grep "## .*-pack" .claude/knowledge/consultant/agent-reference.md
 
 # Verify all team profiles exist
-ls .claude/knowledge/consultant/team-profiles/
+ls .claude/knowledge/consultant/rite-profiles/
 
 # Verify routing includes team
-grep "{team-name}" .claude/knowledge/consultant/routing/intent-patterns.md
+grep "{rite-name}" .claude/knowledge/consultant/routing/intent-patterns.md
 
 # Verify command reference
 grep "/{team}" .claude/knowledge/consultant/command-reference.md
@@ -253,7 +253,7 @@ grep "/{team}" .claude/knowledge/consultant/command-reference.md
 ### Missing team profile
 
 **Symptom**: `/consult` can't give detailed team guidance
-**Fix**: Create team-profiles/{team}-pack.md
+**Fix**: Create rite-profiles/{team}-pack.md
 
 ### Stale routing patterns
 

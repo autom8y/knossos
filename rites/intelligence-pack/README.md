@@ -2,7 +2,7 @@
 
 Product analytics, user research, experimentation, and insights synthesis.
 
-## When to Use This Team
+## When to Use This Rite
 
 **Triggers**:
 - "How do users actually use this feature?"
@@ -15,7 +15,7 @@ Product analytics, user research, experimentation, and insights synthesis.
 ## Quick Start
 
 ```bash
-/team intelligence-pack
+/rite intelligence-pack
 ```
 
 ## Agents
@@ -59,7 +59,7 @@ See `workflow.md` for phase flow and complexity levels.
 
 See also: [strategy-pack README](../strategy-pack/README.md#when-to-use-strategy-vs-intelligence)
 
-## Related Teams
+## Related Rites
 
 - **strategy-pack**: Hand off for business case development and strategic planning
 - **ship-pack**: Hand off instrumentation implementation to engineering teams

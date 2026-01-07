@@ -12,7 +12,7 @@
 
 ### Components Affected
 - **CEM** (lib/sync, roster-sync): [what changes, why]
-- **roster** (user-*, teams/*): [what changes, why]
+- **roster** (user-*, rites/*): [what changes, why]
 
 ### Design Decisions
 [Key architectural choices and rationale]
@@ -40,7 +40,7 @@ lifecycle:
 **Function**: `function_name`
 **Changes**: [detailed specification]
 
-### roster Changes (user-*, teams/*)
+### roster Changes (user-*, rites/*)
 **Location**: `path/to/content`
 **Changes**: [detailed specification]
 

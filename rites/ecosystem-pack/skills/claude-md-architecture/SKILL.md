@@ -166,7 +166,7 @@ These sections are never overwritten by CEM sync. Content is project-specific.
 
 | Section | Purpose | Content Pattern |
 |---------|---------|-----------------|
-| **Quick Start** | Orient to current team | Team name, agent table (regenerated from roster) |
+| **Quick Start** | Orient to current team | Rite name, agent table (regenerated from roster) |
 | **Agent Configurations** | List available agents | Agent-to-file mapping (regenerated from roster) |
 | **Project:\*** namespace | Project extensions | Any project-specific patterns |
 | Custom sections | Satellite additions | Not matching roster section names |

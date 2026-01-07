@@ -46,7 +46,7 @@ What NOT to put in CLAUDE.md. Each anti-pattern includes the violation, why it's
 
 ### 3. Duplicating Roster State
 
-**Violation**: `Active Team: doc-team-pack, Swapped: 2024-12-25`
+**Violation**: `Active Team: doc-rite-pack, Swapped: 2024-12-25`
 
 **Why wrong**: Duplicates ACTIVE_RITE file, dates become stale, creates two sources of truth.
 

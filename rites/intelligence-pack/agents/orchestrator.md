@@ -173,10 +173,10 @@ Your CONSULTATION_RESPONSE should answer all of these.
 
 Share actionable insights with strategy-pack. Coordinate experiment designs with relevant product teams.
 
-When routing cross-team concerns:
+When routing cross-rite concerns:
 1. Identify the affected team(s)
 2. Include current session context in handoff
-3. Notify user of cross-team escalation
+3. Notify user of cross-rite escalation
 4. Track resolution in throughline
 
 ## Skills Reference

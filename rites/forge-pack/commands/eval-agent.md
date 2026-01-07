@@ -1,6 +1,6 @@
 ---
 description: Test a single agent in isolation
-argument-hint: <agent-name> [--team=<team-name>] [--adversarial]
+argument-hint: <agent-name> [--team=<rite-name>] [--adversarial]
 allowed-tools: Bash, Glob, Grep, Read, Task, TodoWrite
 model: opus
 ---
@@ -18,14 +18,14 @@ Test the agent: $ARGUMENTS
 ### 1. Parse Arguments
 
 - `agent-name`: Required. Name of agent to test (e.g., `principal-engineer`)
-- `--team`: Optional. Team containing the agent. Defaults to active team.
+- `--team`: Optional. Team containing the agent. Defaults to active rite.
 - `--adversarial`: Optional. Include adversarial prompts in testing.
 
 ### 2. Locate Agent
 
 Find agent file at:
-- `.claude/agents/{agent-name}.md` (if in active team)
-- `$ROSTER_HOME/teams/{team-name}/agents/{agent-name}.md` (if team specified)
+- `.claude/agents/{agent-name}.md` (if in active rite)
+- `$ROSTER_HOME/rites/{rite-name}/agents/{agent-name}.md` (if team specified)
 - `~/.claude/agents/{agent-name}.md` (if global agent)
 
 If not found, report error with available agents.
@@ -86,7 +86,7 @@ Overall: {PASS | FAIL}
 ## Example Usage
 
 ```bash
-# Test agent in active team
+# Test agent in active rite
 /eval-agent principal-engineer
 
 # Test agent in specific team

@@ -68,15 +68,15 @@ The 10x-dev-pack is a **production-ready, well-documented team** implementing a 
 
 ### P3: Strengthen Cross-Team Handoff Protocols
 
-**Gap identified:** Audit documented upstream/downstream relationships but no formal handoff protocols exist. The `/handoff` skill exists but cross-team handoffs need specification.
+**Gap identified:** Audit documented upstream/downstream relationships but no formal handoff protocols exist. The `/handoff` skill exists but cross-rite handoffs need specification.
 
 **Changes required:**
-- [ ] Create `skills/cross-team-handoff/SKILL.md`: Formal protocols for handoffs to other teams
+- [ ] Create `skills/cross-rite-handoff/SKILL.md`: Formal protocols for handoffs to other teams
 - [ ] Document handoff artifacts expected by receiving teams:
   - To SRE Pack: deployment manifest, runbook draft, observability requirements
   - To Security Pack: threat model, security-relevant code paths, auth flows
   - To Doc Team Pack: feature summary, API changes, user-facing behavior changes
-- [ ] Add cross-team handoff section to `README.md`
+- [ ] Add cross-rite handoff section to `README.md`
 
 ---
 
@@ -97,7 +97,7 @@ The 10x-dev-pack is a **production-ready, well-documented team** implementing a 
 
 | Item | Depends On |
 |------|------------|
-| Cross-team handoffs | Audit of receiving teams (SRE, Security, Doc) to validate expected artifacts |
+| Cross-rite handoffs | Audit of receiving teams (SRE, Security, Doc) to validate expected artifacts |
 | Team hooks decision | Pattern analysis across all team audits |
 
 ---

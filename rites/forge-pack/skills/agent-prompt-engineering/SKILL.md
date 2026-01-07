@@ -76,7 +76,7 @@ Example prompts:
 **Before** (vague):
 ```markdown
 # Documentation Agent
-This agent helps with documentation-related activities and supports the team.
+This agent helps with documentation-related activities and supports the rite.
 ```
 
 **After** (crystal clear):
@@ -169,7 +169,7 @@ Route to human when:
 
 | Skill | Relationship |
 |-------|--------------|
-| [team-development](../team-development/SKILL.md) | Uses this skill's template for new agents |
+| [rite-development](../rite-development/SKILL.md) | Uses this skill's template for new agents |
 | [documentation](../documentation/SKILL.md) | Artifact templates referenced by agents |
 | [standards](../standards/SKILL.md) | Code conventions agents should enforce |
 | [file-verification](../file-verification/SKILL.md) | Verification protocol agents should reference |
@@ -202,6 +202,6 @@ Full details with fixes: [principles.md](principles.md) (integrated into each pr
 
 ## Related Documentation
 
-- Agent template: `.claude/skills/team-development/templates/agent-template.md`
+- Agent template: `.claude/skills/rite-development/templates/agent-template.md`
 - Existing agents: `.claude/agents/*.md`
 - Team roster: Check `roster` repository for production examples

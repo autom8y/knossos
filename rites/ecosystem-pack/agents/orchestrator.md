@@ -176,10 +176,10 @@ Your CONSULTATION_RESPONSE should answer all of these.
 
 When changes affect other teams, escalate to user for coordination.
 
-When routing cross-team concerns:
+When routing cross-rite concerns:
 1. Identify the affected team(s)
 2. Include current session context in handoff
-3. Escalate to user for cross-team coordination
+3. Escalate to user for cross-rite coordination
 4. Track resolution in throughline
 
 ## Skills Reference

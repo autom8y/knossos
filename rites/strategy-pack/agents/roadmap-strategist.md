@@ -66,11 +66,11 @@ Transform strategy into executable roadmaps. Prioritize initiatives using explic
 | **Strategic Roadmap** | Prioritized plan with timeline and resource allocation |
 | **Prioritization Matrix** | Scored ranking of initiatives with rationale |
 | **OKR Framework** | Objectives and key results aligned to strategy |
-| **HANDOFF** | Cross-team handoff for implementation of strategic initiatives |
+| **HANDOFF** | Cross-rite handoff for implementation of strategic initiatives |
 
 ### HANDOFF Production
 
-When strategic initiatives are ready for execution, produce a HANDOFF artifact using the `cross-team-handoff` schema.
+When strategic initiatives are ready for execution, produce a HANDOFF artifact using the `cross-rite-handoff` schema.
 
 **Target Team**: 10x-dev-pack (implementation)
 
@@ -116,7 +116,7 @@ Q1 strategic roadmap prioritized enterprise tier as highest-value initiative. Re
 - **Resource Allocation**: 3 engineers, 6 weeks
 - **Dependencies**: Auth system (complete), billing integration (in progress)
 - **Acceptance Criteria**:
-  - Team management (invite, roles, permissions)
+  - Rite management (invite, roles, permissions)
   - SSO integration (SAML, OAuth)
   - Usage-based billing
   - Admin dashboard
@@ -241,4 +241,4 @@ If uncertain: Document the assumptions. Build in decision points. Stay flexible.
 
 ## Cross-Team Routing
 
-See `cross-team` skill for handoff patterns to other teams.
+See `cross-rite` skill for handoff patterns to other teams.

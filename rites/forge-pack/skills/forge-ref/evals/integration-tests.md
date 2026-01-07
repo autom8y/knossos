@@ -1,10 +1,10 @@
 # Integration Tests
 
-> End-to-end tests for team pack functionality
+> End-to-end tests for rite functionality
 
 ## Test Categories
 
-1. **Swap Test**: Can swap-team.sh load this team?
+1. **Swap Test**: Can swap-rite.sh load this team?
 2. **Agent Invocation**: Can each agent be invoked?
 3. **Handoff Test**: Do agents hand off correctly?
 4. **Command Test**: Do team commands work?
@@ -19,7 +19,7 @@
 ORIGINAL_TEAM=$(cat .claude/ACTIVE_RITE 2>/dev/null || echo "none")
 
 # Attempt swap
-$ROSTER_HOME/swap-team.sh {team-name}
+$ROSTER_HOME/swap-rite.sh {rite-name}
 EXIT_CODE=$?
 
 # Verify
@@ -30,7 +30,7 @@ cat .claude/ACTIVE_WORKFLOW.yaml
 
 # Restore
 if [ "$ORIGINAL_TEAM" != "none" ]; then
-  $ROSTER_HOME/swap-team.sh "$ORIGINAL_TEAM"
+  $ROSTER_HOME/swap-rite.sh "$ORIGINAL_TEAM"
 fi
 ```
 
@@ -39,7 +39,7 @@ fi
 | Check | Pass Condition |
 |-------|----------------|
 | Exit code | 0 |
-| ACTIVE_RITE | Contains team name |
+| ACTIVE_RITE | Contains rite name |
 | agents/ populated | Files copied |
 | workflow exists | ACTIVE_WORKFLOW.yaml present |
 | No warnings | No error messages in output |
@@ -48,7 +48,7 @@ fi
 
 ### Test Each Agent
 
-For each agent in the team, verify it can be invoked:
+For each agent in the rite, verify it can be invoked:
 
 ```markdown
 Test prompt: "You are {agent-name}. Acknowledge your role briefly."
@@ -95,7 +95,7 @@ Expected: Agent either:
 ### Quick-Switch Command
 
 ```bash
-/{team-name}
+/{rite-name}
 ```
 
 Expected:
@@ -174,7 +174,7 @@ Expected: Agent either:
 ## Test Report Template
 
 ```markdown
-# Integration Test Report: {team-name}
+# Integration Test Report: {rite-name}
 
 **Date**: {timestamp}
 **Tester**: {name}
@@ -216,7 +216,7 @@ Future: Script to run all integration tests:
 
 ```bash
 #!/bin/bash
-# run-integration-tests.sh {team-name}
+# run-integration-tests.sh {rite-name}
 
 TEAM=$1
 RESULTS="integration-report-${TEAM}.md"
@@ -226,6 +226,6 @@ echo "**Date**: $(date -Iseconds)" >> $RESULTS
 
 # Swap test
 echo "## Swap Test" >> $RESULTS
-$ROSTER_HOME/swap-team.sh "$TEAM" 2>&1 | tee -a $RESULTS
+$ROSTER_HOME/swap-rite.sh "$TEAM" 2>&1 | tee -a $RESULTS
 # ... continue with other tests
 ```

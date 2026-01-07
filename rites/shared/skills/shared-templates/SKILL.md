@@ -50,4 +50,4 @@ Templates follow semantic versioning. MINOR versions are backward compatible.
 
 - `@documentation` - Core PRD/TDD/ADR templates
 - `@doc-ecosystem` - Ecosystem change templates
-- `@cross-team-handoff` - HANDOFF artifact schema
+- `@cross-rite-handoff` - HANDOFF artifact schema

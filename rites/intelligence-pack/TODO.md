@@ -96,8 +96,8 @@ Intelligence-pack is a **well-structured analytics and research team** with clea
 **Decision:** Add explicit comparison to both team READMEs.
 
 **Changes required:**
-- [ ] Update `teams/intelligence-pack/README.md`: Add "When to Use Intelligence vs Strategy" section
-- [ ] Update `teams/strategy-pack/README.md`: Add same section (mirror content)
+- [ ] Update `rites/intelligence-pack/README.md`: Add "When to Use Intelligence vs Strategy" section
+- [ ] Update `rites/strategy-pack/README.md`: Add same section (mirror content)
 - [ ] Clarify:
   ```markdown
   ## When to Use Intelligence-Pack vs Strategy-Pack
