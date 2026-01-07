@@ -1,13 +1,13 @@
-# Team-Skill Matrix
+# Rite-Skill Matrix
 
-> Maps skills to team packs for routing and activation decisions.
+> Maps skills to rites for routing and activation decisions.
 
 ## Overview
 
-This matrix documents which skills are relevant to each team pack. Use it to:
-- Route work to appropriate teams based on skill requirements
-- Understand skill activation patterns for each team
-- Plan team composition for complex initiatives
+This matrix documents which skills are relevant to each rite. Use it to:
+- Route work to appropriate rites based on skill requirements
+- Understand skill activation patterns for each rite
+- Plan rite composition for complex initiatives
 
 ---
 
@@ -15,15 +15,15 @@ This matrix documents which skills are relevant to each team pack. Use it to:
 
 | Symbol | Meaning |
 |--------|---------|
-| **P** | Primary - Core to team workflow, frequently activated |
+| **P** | Primary - Core to rite workflow, frequently activated |
 | **S** | Secondary - Useful but not core, occasionally activated |
-| (blank) | Not applicable to this team |
+| (blank) | Not applicable to this rite |
 
 ---
 
 ## Documentation Template Skills
 
-These skills provide templates for artifacts produced by teams.
+These skills provide templates for artifacts produced by rites.
 
 | Skill | 10x-dev | ecosystem | doc-team | debt | sre | security | strategy | hygiene | intelligence | rnd |
 |-------|:-------:|:---------:|:--------:|:----:|:---:|:--------:|:--------:|:-------:|:------------:|:---:|
@@ -233,9 +233,9 @@ External tool integrations and automation.
 
 ## Skill Categories by Team Relevance
 
-### Universal Skills (Primary for All Teams)
+### Universal Skills (Primary for All Rites)
 
-These skills are core infrastructure used by every team:
+These skills are core infrastructure used by every rite:
 - `orchestration` - Multi-phase workflow coordination
 - `sprint-ref` - Sprint planning and multi-task workflows
 - `task-ref` - Single focused development tasks
@@ -245,9 +245,9 @@ These skills are core infrastructure used by every team:
 - `consult-ref` - Routing guidance
 - `prompting` - Agent invocation patterns
 
-### Specialized Skills (Primary for 1-2 Teams)
+### Specialized Skills (Primary for 1-2 Rites)
 
-| Skill | Primary Teams | Purpose |
+| Skill | Primary Rites | Purpose |
 |-------|---------------|---------|
 | doc-artifacts | 10x-dev | PRD, TDD, ADR, Test Plan |
 | doc-ecosystem | ecosystem, hygiene | CEM sync, migration, compatibility |
@@ -264,11 +264,11 @@ These skills are core infrastructure used by every team:
 
 ## Routing Decision Guide
 
-**Question: "Which team should handle this?"**
+**Question: "Which rite should handle this?"**
 
 1. Check the **primary skill** needed for the task
-2. Find teams where that skill is **P** (Primary)
-3. If multiple teams match, choose based on artifact output:
+2. Find rites where that skill is **P** (Primary)
+3. If multiple rites match, choose based on artifact output:
    - PRD/TDD/Code/Tests -> 10x-dev-pack
    - CEM/skeleton/roster -> ecosystem-pack
    - Audit/Structure/Docs -> doc-team-pack
@@ -286,9 +286,9 @@ These skills are core infrastructure used by every team:
 
 This matrix should be updated when:
 - New skills are added to SKILL_REGISTRY.md
-- New team packs are created in roster
-- Team workflows change significantly
+- New rites are created in roster
+- Rite workflows change significantly
 - Skill activation patterns shift based on usage
 
 **Last updated**: 2025-12-25
-**Source**: SKILL_REGISTRY.md (47 skills), roster/teams/ (10 team packs)
+**Source**: SKILL_REGISTRY.md (47 skills), roster/rites/ (10 rites)

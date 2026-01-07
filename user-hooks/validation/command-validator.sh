@@ -96,19 +96,19 @@ if [[ "$COMMAND" =~ (^|[[:space:]/])swap-rite\.sh[[:space:]] ]]; then
     if [[ -n "$TARGET_TEAM" ]] && [[ "$TARGET_TEAM" != "--list" ]]; then
         ROSTER_DIR="$KNOSSOS_HOME/rites"
 
-        # Validate team pack exists
+        # Validate rite exists
         if [[ ! -d "$ROSTER_DIR/$TARGET_TEAM" ]]; then
-            echo "Team pack '$TARGET_TEAM' not found in $ROSTER_DIR" >&2
-            echo "Available teams:" >&2
+            echo "Rite '$TARGET_TEAM' not found in $ROSTER_DIR" >&2
+            echo "Available rites:" >&2
             ls -1 "$ROSTER_DIR" 2>/dev/null | sed 's/^/  - /' >&2 || echo "  (none found)" >&2
             hooks_finalize 2
             exit 2  # Block the command
         fi
 
-        # Validate team has agents
+        # Validate rite has agents
         AGENT_COUNT=$(find "$ROSTER_DIR/$TARGET_TEAM/agents/" -maxdepth 1 -name "*.md" 2>/dev/null | wc -l | tr -d ' ') || AGENT_COUNT="0"
         if [[ "$AGENT_COUNT" == "0" ]]; then
-            echo "Team pack '$TARGET_TEAM' has no agent files" >&2
+            echo "Rite '$TARGET_TEAM' has no agent files" >&2
             hooks_finalize 2
             exit 2  # Block the command
         fi

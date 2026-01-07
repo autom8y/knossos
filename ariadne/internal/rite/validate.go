@@ -35,13 +35,13 @@ type ValidationResult struct {
 	Fixable  []string          `json:"fixable,omitempty"`
 }
 
-// Validator validates team pack integrity.
+// Validator validates rite integrity.
 type Validator struct {
 	resolver  *paths.Resolver
 	discovery *Discovery
 }
 
-// NewValidator creates a new team validator.
+// NewValidator creates a new rite validator.
 func NewValidator(resolver *paths.Resolver) *Validator {
 	return &Validator{
 		resolver:  resolver,

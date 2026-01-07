@@ -24,10 +24,10 @@ Context engineering for distributed workflows. Team manager analogy - coordinate
 
 **Rationale**: Multi-agent workflows need coordination beyond native Task delegation.
 
-### 2. Team Packs
-Specialized domain teams minimize cognitive load by scoping agent knowledge.
+### 2. Rites
+Specialized domain rites minimize cognitive load by scoping agent knowledge.
 
-**Rationale**: Loading all agents wastes context. Teams provide just-in-time expertise.
+**Rationale**: Loading all agents wastes context. Rites provide just-in-time expertise.
 
 ### 3. State-Mate
 Centralized authority for session/sprint mutations with schema validation (ADR-0005).

@@ -1,8 +1,8 @@
-# Workflow Schema for Team Packs
+# Workflow Schema for Rites
 # Version: 1.1.0
 # Last Updated: 2025-12-25
 #
-# Each team pack must have a workflow.yaml matching this structure.
+# Each rite must have a workflow.yaml matching this structure.
 # This file serves as both documentation and validation reference.
 #
 # Human-readable guide: skeleton/.claude/skills/team-development/schema/rite-pack-schema.md
@@ -44,12 +44,12 @@ field_definitions:
     type: string
     required: true
     description: |
-      Unique identifier for this team pack. Must exactly match the parent
-      directory name in teams/<name>/.
+      Unique identifier for this rite. Must exactly match the parent
+      directory name in rites/<name>/.
     constraints:
       - format: kebab-case (lowercase with hyphens)
       - suffix: must end with "-pack"
-      - uniqueness: must be unique across all team packs
+      - uniqueness: must be unique across all rites
     validation:
       - pattern: "^[a-z][a-z0-9]*(-[a-z0-9]+)*-pack$"
       - matches_directory: true
@@ -71,7 +71,7 @@ field_definitions:
     type: string
     required: false
     description: |
-      Semantic version for the team pack. Use to track breaking changes
+      Semantic version for the rite. Use to track breaking changes
       in phase structure or agent roles.
     constraints:
       - format: semantic versioning (MAJOR.MINOR.PATCH)
@@ -311,7 +311,7 @@ field_definitions:
     type: array
     required: false
     description: |
-      Team-specific slash commands synced to satellite.
+      Rite-specific slash commands synced to satellite.
     item_type: object
     default: []
     item_fields:
@@ -375,14 +375,14 @@ field_definitions:
 validation_rules:
 
   file_structure:
-    - rule: "workflow.yaml exists in team directory"
-      path: "teams/<name>/workflow.yaml"
-    - rule: "workflow.md exists in team directory"
-      path: "teams/<name>/workflow.md"
-    - rule: "README.md exists in team directory"
-      path: "teams/<name>/README.md"
+    - rule: "workflow.yaml exists in rite directory"
+      path: "rites/<name>/workflow.yaml"
+    - rule: "workflow.md exists in rite directory"
+      path: "rites/<name>/workflow.md"
+    - rule: "README.md exists in rite directory"
+      path: "rites/<name>/README.md"
     - rule: "agents/ directory exists with at least one .md file"
-      path: "teams/<name>/agents/*.md"
+      path: "rites/<name>/agents/*.md"
 
   name_matching:
     - rule: "name field matches directory name"

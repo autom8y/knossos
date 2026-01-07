@@ -1,6 +1,6 @@
 # Base Hooks Registration
-# These hooks are applied to all team packs
-# Team-specific hooks.yaml will append to these registrations
+# These hooks are applied to all rites
+# Rite-specific hooks.yaml will append to these registrations
 #
 # Schema version: 1.0
 # See TDD-hook-parity-scope2.md for schema documentation

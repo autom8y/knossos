@@ -22,7 +22,7 @@ TESTS_FAILED=0
 # Test temp directory
 TEST_TMP=""
 
-# Mock logging functions (team-transaction.sh expects these)
+# Mock logging functions (rite-transaction.sh expects these)
 log() {
     echo "[LOG] $*" >&2
 }
