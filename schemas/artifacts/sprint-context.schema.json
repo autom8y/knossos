@@ -44,10 +44,6 @@
     "active_rite": {
       "$ref": "common.schema.json#/$defs/rite_name"
     },
-    "team": {
-      "$ref": "common.schema.json#/$defs/rite_name",
-      "description": "Alias for active_rite (deprecated, use active_rite)"
-    },
     "workflow": {
       "type": "string",
       "enum": ["sequential", "parallel", "hybrid"],
