@@ -73,9 +73,9 @@ The 10x-dev is a **production-ready, well-documented team** implementing a 5-age
 **Changes required:**
 - [ ] Create `skills/cross-rite-handoff/SKILL.md`: Formal protocols for handoffs to other teams
 - [ ] Document handoff artifacts expected by receiving teams:
-  - To SRE Pack: deployment manifest, runbook draft, observability requirements
-  - To Security Pack: threat model, security-relevant code paths, auth flows
-  - To Doc Team Pack: feature summary, API changes, user-facing behavior changes
+  - To SRE rite: deployment manifest, runbook draft, observability requirements
+  - To Security rite: threat model, security-relevant code paths, auth flows
+  - To Docs rite: feature summary, API changes, user-facing behavior changes
 - [ ] Add cross-rite handoff section to `README.md`
 
 ---

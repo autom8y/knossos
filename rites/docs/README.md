@@ -1,4 +1,4 @@
-# Doc Team Pack
+# Docs Rite
 
 Documentation lifecycle management from content audit through quality review.
 
@@ -41,4 +41,4 @@ See `workflow.md` for phase flow and complexity levels.
 ## Related Rites
 
 - **10x-dev**: When code implementation produces documentation needs
-- **api-rite-pack**: When API documentation needs specialized treatment
+- **api-rite**: When API documentation needs specialized treatment

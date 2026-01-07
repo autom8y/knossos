@@ -1,4 +1,4 @@
-# Doc Team Pack Workflow
+# Docs Rite Workflow
 
 ## Phase Flow
 

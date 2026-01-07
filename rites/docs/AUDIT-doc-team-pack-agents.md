@@ -1,4 +1,4 @@
-# Doc-Team-Pack Agent Audit Report
+# Docs Rite Agent Audit Report
 
 > Scored against canonical prompt engineering best practices from REFERENCE-prompt-engineering-synthesis.md
 
