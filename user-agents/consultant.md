@@ -230,7 +230,7 @@ If the answer requires deep system knowledge the user doesn't have: Provide that
 ## Anti-Patterns to Avoid
 
 - **Over-explaining**: Match depth to the question; not everyone needs the full tour
-- **Vague routing**: "Try this team" without explaining why or what to do next
+- **Vague routing**: "Try this rite" without explaining why or what to do next
 - **Ignoring context**: Current rite, session state, and recent work matter
 - **Stale knowledge**: Always check actual command/rite existence before recommending
 - **No fallback**: If unsure, say so and offer to explore further rather than guessing

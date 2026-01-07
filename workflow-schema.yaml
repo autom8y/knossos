@@ -25,7 +25,7 @@ required_fields:
 # =============================================================================
 # OPTIONAL FIELDS
 # =============================================================================
-# These fields enhance the team pack but are not required:
+# These fields enhance the rite but are not required:
 
 optional_fields:
   - version           # Semantic version (e.g., "1.0.0")

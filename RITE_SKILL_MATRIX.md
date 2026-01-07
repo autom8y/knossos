@@ -90,9 +90,9 @@ Quick team context switching.
 
 ---
 
-## Team Reference Skills
+## Rite Reference Skills
 
-Documentation for specific team packs.
+Documentation for specific rites.
 
 | Skill | 10x-dev | ecosystem | doc-team | debt | sre | security | strategy | hygiene | intelligence | rnd |
 |-------|:-------:|:---------:|:--------:|:----:|:---:|:--------:|:--------:|:-------:|:------------:|:---:|
@@ -115,9 +115,9 @@ CEM, skeleton, roster infrastructure and CLAUDE.md architecture.
 
 ---
 
-## Team Creation Skills
+## Rite Creation Skills
 
-Creating and managing agent team packs.
+Creating and managing agent rites.
 
 | Skill | 10x-dev | ecosystem | doc-team | debt | sre | security | strategy | hygiene | intelligence | rnd |
 |-------|:-------:|:---------:|:--------:|:----:|:---:|:--------:|:--------:|:-------:|:------------:|:---:|

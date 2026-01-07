@@ -418,7 +418,7 @@ test_cleanup_staging() {
 }
 
 test_stage_agents() {
-    run_test "stage_agents copies agents from team pack"
+    run_test "stage_agents copies agents from rite"
 
     create_staging
 

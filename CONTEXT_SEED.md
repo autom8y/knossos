@@ -10,7 +10,7 @@
 - **Plugin Structure Compliance** - Directory structure, plugin.json gaps
 - **Command/Skill Parity** - Feature comparison with official commands
 - **Hook System Analysis** - Event types, configuration, enforcement
-- **Agent Architecture** - Orchestrator pattern, team packs, state-mate
+- **Agent Architecture** - Orchestrator pattern, rites, state-mate
 - **Workflow/Session Gaps** - Session management (unique to roster)
 
 **Key Finding**: Roster is a sophisticated meta-framework that substantially extends Claude Code. Not over-engineered - validated patterns serve real coordination needs.
