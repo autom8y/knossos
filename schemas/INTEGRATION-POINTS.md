@@ -143,7 +143,7 @@ Could add `generated: true` metadata to orchestrator agents to indicate they wer
 ```json
 {
   "orchestrator.md": {
-    "source": "team",
+    "source": "rite",
     "origin": "rnd",
     "generated": true,
     "template_version": "1.0"

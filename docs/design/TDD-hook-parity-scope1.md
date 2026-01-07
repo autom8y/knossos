@@ -15,7 +15,7 @@
 This document specifies the technical design for achieving hook parity with other managed artifacts (agents, commands, skills) in the roster system. The scope covers:
 
 1. Renaming `roster/hooks/` to `roster/user-hooks/` for naming consistency
-2. Adding `hooks/` directory support to team-pack schema
+2. Adding `hooks/` directory support to rite schema
 3. Implementing base + team hook merging in `swap_hooks()`
 4. Extending `AGENT_MANIFEST.json` to track hooks
 5. Updating sync scripts for new paths
@@ -132,7 +132,7 @@ Team hook: security-scan.sh        ->  .claude/hooks/security-scan.sh (new)
 |------|-------------|-------------|
 | `roster/hooks/` | RENAME | Rename to `roster/user-hooks/` |
 | `roster/user-hooks/` | CREATE | New location for base hooks |
-| `rites/*/hooks/` | SCHEMA | Add hooks directory to team-pack schema |
+| `rites/*/hooks/` | SCHEMA | Add hooks directory to rite schema |
 | `swap-rite.sh` | MODIFY | Update `swap_hooks()` for merge logic |
 | `swap-rite.sh` | MODIFY | Update `write_manifest()` for hooks tracking |
 | `install-hooks.sh` | MODIFY | Update SOURCE_DIR path |
@@ -173,7 +173,7 @@ git mv roster/hooks roster/user-hooks
 
 ### 4.2 Team-Pack Schema Extension (FR-1.2)
 
-Team packs may now include a `hooks/` directory with the same structure as base hooks:
+Rites may now include a `hooks/` directory with the same structure as base hooks:
 
 ```
 rites/<team-name>/
@@ -341,7 +341,7 @@ swap_hooks() {
       "installed_at": "2025-12-31T16:25:51Z"
     },
     "security-scan.sh": {
-      "source": "team",
+      "source": "rite",
       "origin": "security",
       "installed_at": "2025-12-31T16:25:51Z"
     }

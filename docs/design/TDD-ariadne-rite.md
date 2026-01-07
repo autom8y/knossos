@@ -624,13 +624,13 @@ Tracks the origin and state of installed agents:
   "active_team": "10x-dev",
   "agents": {
     "architect.md": {
-      "source": "team",
+      "source": "rite",
       "rite": "10x-dev",
       "checksum": "sha256:abc123...",
       "installed_at": "2026-01-04T18:00:00Z"
     },
     "orchestrator.md": {
-      "source": "team",
+      "source": "rite",
       "rite": "10x-dev",
       "checksum": "sha256:def456...",
       "installed_at": "2026-01-04T18:00:00Z"
@@ -789,7 +789,7 @@ type Manifest struct {
 }
 
 type AgentEntry struct {
-    Source      string    `json:"source"`       // "team" | "project"
+    Source      string    `json:"source"`       // "rite" | "project"
     Team        string    `json:"team,omitempty"`
     Checksum    string    `json:"checksum"`
     InstalledAt time.Time `json:"installed_at"`

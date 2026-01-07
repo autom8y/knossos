@@ -324,7 +324,7 @@ routing:
 {
   "agents": {
     "orchestrator": {
-      "source": "team",
+      "source": "rite",
       "origin": "my-team",
       "model": "opus"
     }
