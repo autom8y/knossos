@@ -220,5 +220,5 @@ Gap Analysis (task-001) identified:
 
 | Artifact | Absolute Path | Status |
 |----------|---------------|--------|
-| This PRD | `/Users/tomtenuta/Code/roster/docs/requirements/PRD-team-hook-context.md` | Created |
+| This PRD | `/Users/tomtenuta/Code/roster/docs/requirements/PRD-rite-hook-context.md` | Created |
 | Context Design | `/Users/tomtenuta/Code/roster/docs/ecosystem/CONTEXT-DESIGN-team-context-loader.md` | Created |

@@ -6,7 +6,7 @@
 **Author**: Architect Agent
 **Date**: 2026-01-04
 **PRD**: docs/requirements/PRD-ariadne.md
-**Reference**: docs/design/TDD-ariadne-session.md (Phase 1), docs/design/TDD-ariadne-team.md (Phase 2), docs/design/TDD-ariadne-manifest.md (Phase 3)
+**Reference**: docs/design/TDD-ariadne-session.md (Phase 1), docs/design/TDD-ariadne-rite.md (Phase 2), docs/design/TDD-ariadne-manifest.md (Phase 3)
 
 ---
 
@@ -21,7 +21,7 @@ This Technical Design Document specifies the implementation of the **sync domain
 | PRD | `docs/requirements/PRD-ariadne.md` (Sections 2.1, 4.1) |
 | Spike | `docs/spikes/SPIKE-ariadne-go-cli-architecture.md` |
 | Session TDD | `docs/design/TDD-ariadne-session.md` |
-| Team TDD | `docs/design/TDD-ariadne-team.md` |
+| Team TDD | `docs/design/TDD-ariadne-rite.md` |
 | Manifest TDD | `docs/design/TDD-ariadne-manifest.md` |
 | Error Taxonomy | `ariadne/internal/errors/errors.go` |
 | Merge Logic | `ariadne/internal/manifest/merge.go` |
@@ -1813,7 +1813,7 @@ Ready for Implementation when:
 | TDD | `/Users/tomtenuta/Code/roster/docs/design/TDD-ariadne-sync.md` | Write |
 | PRD | `/Users/tomtenuta/Code/roster/docs/requirements/PRD-ariadne.md` | Read |
 | Session TDD | `/Users/tomtenuta/Code/roster/docs/design/TDD-ariadne-session.md` | Read |
-| Team TDD | `/Users/tomtenuta/Code/roster/docs/design/TDD-ariadne-team.md` | Read |
+| Team TDD | `/Users/tomtenuta/Code/roster/docs/design/TDD-ariadne-rite.md` | Read |
 | Manifest TDD | `/Users/tomtenuta/Code/roster/docs/design/TDD-ariadne-manifest.md` | Read |
 | Errors Package | `/Users/tomtenuta/Code/roster/ariadne/internal/errors/errors.go` | Read |
 | Merge Logic | `/Users/tomtenuta/Code/roster/ariadne/internal/manifest/merge.go` | Read |

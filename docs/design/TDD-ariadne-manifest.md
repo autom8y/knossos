@@ -7,7 +7,7 @@
 **Date**: 2026-01-04
 **PRD**: docs/requirements/PRD-ariadne.md
 **Spike**: docs/spikes/SPIKE-ariadne-go-cli-architecture.md
-**Reference**: docs/design/TDD-ariadne-session.md (Phase 1), docs/design/TDD-ariadne-team.md (Phase 2)
+**Reference**: docs/design/TDD-ariadne-session.md (Phase 1), docs/design/TDD-ariadne-rite.md (Phase 2)
 
 ---
 
@@ -22,7 +22,7 @@ This Technical Design Document specifies the implementation of the **manifest do
 | PRD | `docs/requirements/PRD-ariadne.md` (Sections 4.1, 6, 7) |
 | Spike | `docs/spikes/SPIKE-ariadne-go-cli-architecture.md` |
 | Session TDD | `docs/design/TDD-ariadne-session.md` |
-| Team TDD | `docs/design/TDD-ariadne-team.md` |
+| Team TDD | `docs/design/TDD-ariadne-rite.md` |
 | Error Taxonomy | `ariadne/internal/errors/errors.go` |
 | Validation Package | `ariadne/internal/validation/validator.go` |
 | Team Manifest | `ariadne/internal/team/manifest.go` |
@@ -1673,7 +1673,7 @@ Ready for Implementation when:
 | PRD | `/Users/tomtenuta/Code/roster/docs/requirements/PRD-ariadne.md` | Read |
 | Spike | `/Users/tomtenuta/Code/roster/docs/spikes/SPIKE-ariadne-go-cli-architecture.md` | Referenced |
 | Session TDD | `/Users/tomtenuta/Code/roster/docs/design/TDD-ariadne-session.md` | Read |
-| Team TDD | `/Users/tomtenuta/Code/roster/docs/design/TDD-ariadne-team.md` | Read |
+| Team TDD | `/Users/tomtenuta/Code/roster/docs/design/TDD-ariadne-rite.md` | Read |
 | Errors Package | `/Users/tomtenuta/Code/roster/ariadne/internal/errors/errors.go` | Read |
 | Validation Package | `/Users/tomtenuta/Code/roster/ariadne/internal/validation/validator.go` | Read |
 | Team Manifest | `/Users/tomtenuta/Code/roster/ariadne/internal/team/manifest.go` | Read |

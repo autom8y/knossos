@@ -1162,7 +1162,7 @@ Ready for Implementation when:
 
 | Artifact | Absolute Path | Verified |
 |----------|---------------|----------|
-| TDD | `/Users/tomtenuta/Code/roster/docs/design/TDD-ariadne-team.md` | Write |
+| TDD | `/Users/tomtenuta/Code/roster/docs/design/TDD-ariadne-rite.md` | Write |
 | PRD | `/Users/tomtenuta/Code/roster/docs/requirements/PRD-ariadne.md` | Read |
 | Spike | `/Users/tomtenuta/Code/roster/docs/spikes/SPIKE-ariadne-go-cli-architecture.md` | Read |
 | Session TDD | `/Users/tomtenuta/Code/roster/docs/design/TDD-ariadne-session.md` | Read |

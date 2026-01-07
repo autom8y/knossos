@@ -490,7 +490,7 @@ grep -r "team-switching" user-commands/ docs/ sync-user-commands.sh | wc -l  # S
 **Scope**: Update remaining documentation references
 
 **Files** (sampling):
-- `docs/design/TDD-ariadne-team.md`: Update examples
+- `docs/design/TDD-ariadne-rite.md`: Update examples
 - `docs/design/TDD-session-manager-ecosystem-audit.md`: Update field references
 - `README.md`: Update terminology
 

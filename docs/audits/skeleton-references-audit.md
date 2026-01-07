@@ -130,7 +130,7 @@ References in documentation that describe the ecosystem relationship.
 |------|------|-----------|---------|------------------|
 | `/Users/tomtenuta/Code/roster/docs/requirements/PRD-claude-md-descriptive-architecture.md` | 27 | `skeleton-owned` | Section ownership model | **REVIEW**: May need architectural update |
 | `/Users/tomtenuta/Code/roster/docs/requirements/PRD-hook-ecosystem-parity.md` | 119 | `CEM (skeleton_claude)` | CEM ownership | **UPDATE**: Reflect new ownership |
-| `/Users/tomtenuta/Code/roster/docs/requirements/PRD-team-hook-context.md` | 27, 38, 46 | `skeleton` | Context requirements | **UPDATE**: Remove skeleton dependencies |
+| `/Users/tomtenuta/Code/roster/docs/requirements/PRD-rite-hook-context.md` | 27, 38, 46 | `skeleton` | Context requirements | **UPDATE**: Remove skeleton dependencies |
 | `/Users/tomtenuta/Code/roster/docs/ecosystem/CONTEXT-DESIGN-team-context-loader.md` | 10, 371-379, 427, 449 | `skeleton` | Design context | **UPDATE**: After code migration |
 
 ### QA/Test Reports

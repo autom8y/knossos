@@ -280,7 +280,7 @@ Message: fmt.Sprintf("All %d agent files present", len(expectedAgents))
 | Artifact | Absolute Path | Verified |
 |----------|---------------|----------|
 | Test Summary | `/Users/tomtenuta/Code/roster/docs/analysis/QA-ariadne-team-domain.md` | Write |
-| TDD | `/Users/tomtenuta/Code/roster/docs/design/TDD-ariadne-team.md` | Read |
+| TDD | `/Users/tomtenuta/Code/roster/docs/design/TDD-ariadne-rite.md` | Read |
 | PRD | `/Users/tomtenuta/Code/roster/docs/requirements/PRD-ariadne.md` | Read |
 | Switch command | `/Users/tomtenuta/Code/roster/ariadne/internal/cmd/team/switch.go` | Read |
 | Root command | `/Users/tomtenuta/Code/roster/ariadne/internal/cmd/root/root.go` | Read |
