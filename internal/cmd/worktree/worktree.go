@@ -6,24 +6,24 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"github.com/autom8y/knossos/internal/output"
-	"github.com/autom8y/knossos/internal/paths"
 	"github.com/autom8y/knossos/internal/worktree"
 )
 
 // cmdContext holds shared state for worktree commands.
 type cmdContext struct {
-	output     *string
-	verbose    *bool
-	projectDir *string
+	common.BaseContext
 }
 
 // NewWorktreeCmd creates the worktree command group.
 func NewWorktreeCmd(outputFlag *string, verboseFlag *bool, projectDir *string) *cobra.Command {
 	ctx := &cmdContext{
-		output:     outputFlag,
-		verbose:    verboseFlag,
-		projectDir: projectDir,
+		BaseContext: common.BaseContext{
+			Output:     outputFlag,
+			Verbose:    verboseFlag,
+			ProjectDir: projectDir,
+		},
 	}
 
 	cmd := &cobra.Command{
@@ -55,6 +55,9 @@ Examples:
 	cmd.AddCommand(newExportCmd(ctx))
 	cmd.AddCommand(newImportCmd(ctx))
 
+	// Worktree commands require project context
+	common.SetNeedsProject(cmd, true, true)
+
 	return cmd
 }
 
@@ -62,32 +65,15 @@ Examples:
 
 // getPrinter creates an output printer from the context.
 func (c *cmdContext) getPrinter() *output.Printer {
-	format := output.FormatText
-	if c.output != nil {
-		format = output.ParseFormat(*c.output)
-	}
-	verbose := false
-	if c.verbose != nil {
-		verbose = *c.verbose
-	}
-	return output.NewPrinter(format, os.Stdout, os.Stderr, verbose)
-}
-
-// getResolver creates a path resolver from the context.
-func (c *cmdContext) getResolver() *paths.Resolver {
-	projectDir := ""
-	if c.projectDir != nil {
-		projectDir = *c.projectDir
-	}
-	return paths.NewResolver(projectDir)
+	return c.GetPrinter(output.FormatText)
 }
 
 // getManager creates a worktree manager from the context.
 func (c *cmdContext) getManager() (*worktree.Manager, error) {
 	// Start from project dir if specified, otherwise current dir
 	workDir := ""
-	if c.projectDir != nil && *c.projectDir != "" {
-		workDir = *c.projectDir
+	if c.ProjectDir != nil && *c.ProjectDir != "" {
+		workDir = *c.ProjectDir
 	} else {
 		var err error
 		workDir, err = os.Getwd()

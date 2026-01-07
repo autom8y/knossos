@@ -25,10 +25,7 @@ func newValidateCmd(ctx *cmdContext) *cobra.Command {
 	}
 
 	cmd.Flags().StringVarP(&opts.riteName, "rite", "r", "", "Rite to validate (default: active)")
-	cmd.Flags().StringVarP(&opts.riteName, "team", "t", "", "Deprecated: use --rite instead")
 	cmd.Flags().BoolVar(&opts.fix, "fix", false, "Attempt automatic repairs")
-
-	cmd.Flags().MarkDeprecated("team", "use --rite instead")
 
 	return cmd
 }

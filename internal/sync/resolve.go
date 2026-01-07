@@ -245,7 +245,7 @@ func (r *Resolver) mergeJSON(state *State, opts ResolveOptions, localContent, re
 	oursManifest := &manifest.Manifest{Path: "ours", Content: localData}
 	theirsManifest := &manifest.Manifest{Path: "theirs", Content: remoteData}
 
-	mergeOpts := manifest.MergeOptions{
+	mergeOpts := manifest.ManifestMergeOptions{
 		Strategy: manifest.StrategySmart,
 		DryRun:   opts.DryRun,
 	}

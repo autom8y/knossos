@@ -54,7 +54,7 @@ func runDiff(ctx *cmdContext, path1, path2 string, opts diffOptions) error {
 	}
 
 	// Compute diff
-	diffOpts := manifest.DiffOptions{
+	diffOpts := manifest.ManifestDiffOptions{
 		IgnoreOrder: opts.ignoreOrder,
 	}
 	result, err := manifest.Diff(base, compare, diffOpts)

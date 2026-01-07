@@ -60,7 +60,7 @@ func runSync(ctx *cmdContext, opts syncOptions) error {
 	printer := ctx.getPrinter()
 	pipeline := ctx.getPipeline()
 
-	syncOpts := inscription.SyncOptions{
+	syncOpts := inscription.InscriptionSyncOptions{
 		Force:    opts.force,
 		RiteName: opts.rite,
 		DryRun:   opts.dryRun,
@@ -100,7 +100,7 @@ func runSync(ctx *cmdContext, opts syncOptions) error {
 	return printer.Print(out)
 }
 
-func runSyncDryRun(ctx *cmdContext, pipeline *inscription.Pipeline, opts inscription.SyncOptions, printer *output.Printer) error {
+func runSyncDryRun(ctx *cmdContext, pipeline *inscription.Pipeline, opts inscription.InscriptionSyncOptions, printer *output.Printer) error {
 	preview, err := pipeline.DryRun(opts)
 	if err != nil {
 		printer.PrintError(err)

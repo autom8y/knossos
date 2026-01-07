@@ -83,22 +83,22 @@ func runGenerate(ctx *cmdContext, sessionDir string) error {
 	if sessionDir != "" {
 		// Use explicit session directory
 		generator = tribute.NewGenerator(sessionDir)
-	} else if ctx.sessionID != nil && *ctx.sessionID != "" {
+	} else if ctx.SessionID != nil && *ctx.SessionID != "" {
 		// Use session ID to find session
-		if ctx.projectDir == nil || *ctx.projectDir == "" {
+		if ctx.ProjectDir == nil || *ctx.ProjectDir == "" {
 			return errors.New(errors.CodeProjectNotFound, "project directory required when using session ID")
 		}
-		generator, err = tribute.GenerateFromSessionID(*ctx.projectDir, *ctx.sessionID)
+		generator, err = tribute.GenerateFromSessionID(*ctx.ProjectDir, *ctx.SessionID)
 		if err != nil {
 			printer.PrintError(err)
 			return err
 		}
 	} else {
 		// Use current session
-		if ctx.projectDir == nil || *ctx.projectDir == "" {
+		if ctx.ProjectDir == nil || *ctx.ProjectDir == "" {
 			return errors.New(errors.CodeProjectNotFound, "project directory required")
 		}
-		generator, err = tribute.GenerateFromProject(*ctx.projectDir)
+		generator, err = tribute.GenerateFromProject(*ctx.ProjectDir)
 		if err != nil {
 			printer.PrintError(err)
 			return err

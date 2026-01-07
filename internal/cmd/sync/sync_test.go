@@ -627,7 +627,7 @@ func TestDiff_DetectsModifiedFiles(t *testing.T) {
 
 	// Check diff
 	differ := sync.NewDiffer(resolver)
-	result, err := differ.Diff(sync.DiffOptions{})
+	result, err := differ.Diff(sync.FileDiffOptions{})
 	if err != nil {
 		t.Fatalf("Diff() error = %v", err)
 	}
@@ -668,7 +668,7 @@ func TestDiff_NoChangesWhenSynced(t *testing.T) {
 
 	// Check diff (no modifications)
 	differ := sync.NewDiffer(resolver)
-	result, err := differ.Diff(sync.DiffOptions{})
+	result, err := differ.Diff(sync.FileDiffOptions{})
 	if err != nil {
 		t.Fatalf("Diff() error = %v", err)
 	}

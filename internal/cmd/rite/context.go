@@ -33,17 +33,14 @@ Examples:
 	}
 
 	cmd.Flags().StringVarP(&opts.riteName, "rite", "r", "", "Rite name (defaults to active rite)")
-	cmd.Flags().StringVarP(&opts.riteName, "team", "t", "", "Deprecated: use --rite instead")
-	cmd.Flags().StringVarP(&opts.format, "format", "f", "markdown", "Output format: markdown, json, yaml")
-
-	cmd.Flags().MarkDeprecated("team", "use --rite instead")
+	cmd.Flags().StringVar(&opts.format, "format", "markdown", "Output format: markdown, json, yaml")
 
 	return cmd
 }
 
 func runContext(ctx *cmdContext, opts contextOptions) error {
 	printer := ctx.getPrinter()
-	resolver := ctx.getResolver()
+	resolver := ctx.GetResolver()
 
 	// Determine rite name
 	riteName := opts.riteName

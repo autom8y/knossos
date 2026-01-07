@@ -39,10 +39,10 @@ Examples:
 // runStatus executes the handoff status command.
 func runStatus(ctx *cmdContext) error {
 	printer := ctx.getPrinter()
-	resolver := ctx.getResolver()
+	resolver := ctx.GetResolver()
 
 	// Get session ID
-	sessionID, err := ctx.getSessionID()
+	sessionID, err := ctx.GetSessionID()
 	if err != nil {
 		printer.PrintError(errors.Wrap(errors.CodeGeneralError, "failed to get session ID", err))
 		return err

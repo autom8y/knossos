@@ -11,6 +11,8 @@ import (
 
 	"github.com/autom8y/knossos/internal/output"
 	"github.com/autom8y/knossos/internal/session"
+
+	"github.com/autom8y/knossos/internal/cmd/common"
 )
 
 // TestCreateSeedMode verifies that --seed creates a PARKED session in main repo.
@@ -50,9 +52,13 @@ func TestCreateSeedMode(t *testing.T) {
 	outputFormat := "json"
 	verbose := false
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	opts := createOptions{
@@ -152,9 +158,13 @@ func TestCreateSeedMultiple(t *testing.T) {
 	outputFormat := "json"
 	verbose := false
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	sessionIDs := make(map[string]bool)
@@ -237,9 +247,13 @@ func TestCreateSeedCleanup(t *testing.T) {
 	outputFormat := "json"
 	verbose := true
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	worktreePrefix := filepath.Join(tmpDir, "keep-worktree-")
@@ -313,9 +327,13 @@ func TestCreateSeedJSONOutput(t *testing.T) {
 	outputFormat := "json"
 	verbose := false
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	opts := createOptions{

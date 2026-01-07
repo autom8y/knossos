@@ -38,7 +38,7 @@ type AgentFrontmatter struct {
 
 func runPantheon(ctx *cmdContext) error {
 	printer := ctx.getPrinter()
-	resolver := ctx.getResolver()
+	resolver := ctx.GetResolver()
 
 	// Get active rite
 	activeRite := ctx.getActiveRite()

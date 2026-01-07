@@ -69,8 +69,8 @@ func runCheck(ctx *cmdContext, flags *checkFlags, args []string) error {
 	} else {
 		// Check current session
 		projectDir := ""
-		if ctx.projectDir != nil {
-			projectDir = *ctx.projectDir
+		if ctx.ProjectDir != nil {
+			projectDir = *ctx.ProjectDir
 		}
 		if projectDir == "" {
 			return errors.New(errors.CodeProjectNotFound, "no project directory specified and none discovered")

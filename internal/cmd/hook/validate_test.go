@@ -9,6 +9,8 @@ import (
 
 	"github.com/autom8y/knossos/internal/output"
 	"github.com/autom8y/knossos/test/hooks/testutil"
+
+	"github.com/autom8y/knossos/internal/cmd/common"
 )
 
 func TestParseCommand(t *testing.T) {
@@ -246,9 +248,13 @@ func TestRunValidate_EarlyExit_HooksDisabled(t *testing.T) {
 	verboseFlag := false
 	projectDir := ""
 	ctx := &cmdContext{
-		output:     &outputFlag,
-		verbose:    &verboseFlag,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	err := runValidateWithPrinter(ctx, printer, "")
@@ -282,9 +288,13 @@ func TestRunValidate_BypassEnvVar(t *testing.T) {
 	verboseFlag := false
 	projectDir := ""
 	ctx := &cmdContext{
-		output:     &outputFlag,
-		verbose:    &verboseFlag,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	err := runValidateWithPrinter(ctx, printer, "")
@@ -317,9 +327,13 @@ func TestRunValidate_NonBashTool(t *testing.T) {
 	verboseFlag := false
 	projectDir := ""
 	ctx := &cmdContext{
-		output:     &outputFlag,
-		verbose:    &verboseFlag,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	err := runValidateWithPrinter(ctx, printer, "")
@@ -352,9 +366,13 @@ func TestRunValidate_AllowSafeCommand(t *testing.T) {
 	verboseFlag := false
 	projectDir := ""
 	ctx := &cmdContext{
-		output:     &outputFlag,
-		verbose:    &verboseFlag,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	err := runValidateWithPrinter(ctx, printer, "")
@@ -387,9 +405,13 @@ func TestRunValidate_BlockRmRfGit(t *testing.T) {
 	verboseFlag := false
 	projectDir := ""
 	ctx := &cmdContext{
-		output:     &outputFlag,
-		verbose:    &verboseFlag,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	err := runValidateWithPrinter(ctx, printer, "")
@@ -428,9 +450,13 @@ func TestRunValidate_BlockForcePush(t *testing.T) {
 	verboseFlag := false
 	projectDir := ""
 	ctx := &cmdContext{
-		output:     &outputFlag,
-		verbose:    &verboseFlag,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	err := runValidateWithPrinter(ctx, printer, "")
@@ -466,9 +492,13 @@ func TestRunValidate_BlockNoVerify(t *testing.T) {
 	verboseFlag := false
 	projectDir := ""
 	ctx := &cmdContext{
-		output:     &outputFlag,
-		verbose:    &verboseFlag,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	err := runValidateWithPrinter(ctx, printer, "")
@@ -504,9 +534,13 @@ func TestRunValidate_BlockResetHard(t *testing.T) {
 	verboseFlag := false
 	projectDir := ""
 	ctx := &cmdContext{
-		output:     &outputFlag,
-		verbose:    &verboseFlag,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	err := runValidateWithPrinter(ctx, printer, "")
@@ -542,9 +576,13 @@ func TestRunValidate_BlockCleanFd(t *testing.T) {
 	verboseFlag := false
 	projectDir := ""
 	ctx := &cmdContext{
-		output:     &outputFlag,
-		verbose:    &verboseFlag,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	err := runValidateWithPrinter(ctx, printer, "")
@@ -580,9 +618,13 @@ func TestRunValidate_StdinInput(t *testing.T) {
 	verboseFlag := false
 	projectDir := ""
 	ctx := &cmdContext{
-		output:     &outputFlag,
-		verbose:    &verboseFlag,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	// Simulate stdin input with dangerous command
@@ -620,9 +662,13 @@ func BenchmarkValidateHook_Passthrough(b *testing.B) {
 	projectDir := ""
 
 	ctx := &cmdContext{
-		output:     &outputFlag,
-		verbose:    &verboseFlag,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	var stdout, stderr bytes.Buffer
@@ -650,9 +696,13 @@ func BenchmarkValidateHook_EarlyExit(b *testing.B) {
 	projectDir := ""
 
 	ctx := &cmdContext{
-		output:     &outputFlag,
-		verbose:    &verboseFlag,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	var stdout, stderr bytes.Buffer
@@ -689,9 +739,13 @@ func BenchmarkValidateHook_Validation(b *testing.B) {
 	projectDir := ""
 
 	ctx := &cmdContext{
-		output:     &outputFlag,
-		verbose:    &verboseFlag,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	var stdout, stderr bytes.Buffer

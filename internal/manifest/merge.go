@@ -23,8 +23,8 @@ const (
 	StrategyUnion MergeStrategy = "union"
 )
 
-// MergeOptions configures merge behavior.
-type MergeOptions struct {
+// ManifestMergeOptions configures manifest merge behavior.
+type ManifestMergeOptions struct {
 	Strategy MergeStrategy
 	DryRun   bool
 }
@@ -57,7 +57,7 @@ type MergeResult struct {
 }
 
 // Merge performs a three-way merge of manifests.
-func Merge(base, ours, theirs *Manifest, opts MergeOptions) (*MergeResult, error) {
+func Merge(base, ours, theirs *Manifest, opts ManifestMergeOptions) (*MergeResult, error) {
 	result := &MergeResult{
 		Base:     base.Path,
 		Ours:     ours.Path,

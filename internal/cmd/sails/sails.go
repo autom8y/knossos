@@ -2,28 +2,28 @@
 package sails
 
 import (
-	"os"
-
 	"github.com/spf13/cobra"
 
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"github.com/autom8y/knossos/internal/output"
 )
 
 // cmdContext holds shared state for sails commands.
 type cmdContext struct {
-	output     *string
-	verbose    *bool
-	projectDir *string
-	sessionID  *string
+	common.SessionContext
 }
 
 // NewSailsCmd creates the sails command group.
 func NewSailsCmd(outputFlag *string, verboseFlag *bool, projectDir, sessionID *string) *cobra.Command {
 	ctx := &cmdContext{
-		output:     outputFlag,
-		verbose:    verboseFlag,
-		projectDir: projectDir,
-		sessionID:  sessionID,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     outputFlag,
+				Verbose:    verboseFlag,
+				ProjectDir: projectDir,
+			},
+			SessionID: sessionID,
+		},
 	}
 
 	cmd := &cobra.Command{
@@ -42,6 +42,9 @@ Quality gate checks return exit code 0 for WHITE, non-zero for GRAY/BLACK.`,
 	// Add subcommands
 	cmd.AddCommand(newCheckCmd(ctx))
 
+	// Sails commands do NOT require project context (can check arbitrary paths)
+	common.SetNeedsProject(cmd, false, true)
+
 	return cmd
 }
 
@@ -49,13 +52,5 @@ Quality gate checks return exit code 0 for WHITE, non-zero for GRAY/BLACK.`,
 
 // getPrinter creates an output printer from the context.
 func (c *cmdContext) getPrinter() *output.Printer {
-	format := output.FormatText
-	if c.output != nil {
-		format = output.ParseFormat(*c.output)
-	}
-	verbose := false
-	if c.verbose != nil {
-		verbose = *c.verbose
-	}
-	return output.NewPrinter(format, os.Stdout, os.Stderr, verbose)
+	return c.GetPrinter(output.FormatText)
 }

@@ -41,16 +41,12 @@ func newCreateCmd(ctx *cmdContext) *cobra.Command {
 		"Complexity level: PATCH, MODULE, SYSTEM, INITIATIVE, MIGRATION")
 	cmd.Flags().StringVarP(&opts.team, "rite", "r", "",
 		"Rite (practice bundle) to activate (default: from ACTIVE_RITE)")
-	cmd.Flags().StringVarP(&opts.team, "team", "t", "",
-		"Deprecated: use --rite instead")
 	cmd.Flags().BoolVar(&opts.seed, "seed", false,
 		"Create session in ephemeral worktree, park it, and copy to main repo")
 	cmd.Flags().StringVar(&opts.seedPrefix, "seed-prefix", "/tmp/roster-seed-",
 		"Custom prefix for ephemeral worktree path")
 	cmd.Flags().BoolVar(&opts.seedKeep, "seed-keep", false,
 		"Keep worktree after seeding (for debugging)")
-
-	cmd.Flags().MarkDeprecated("team", "use --rite instead")
 
 	return cmd
 }
@@ -62,8 +58,8 @@ func runCreate(ctx *cmdContext, initiative string, opts createOptions) error {
 	}
 
 	printer := ctx.getPrinter()
-	resolver := ctx.getResolver()
-	lockMgr := ctx.getLockManager()
+	resolver := ctx.GetResolver()
+	lockMgr := ctx.GetLockManager()
 
 	// Get team from flag or ACTIVE_RITE file
 	team := opts.team
@@ -94,7 +90,7 @@ func runCreate(ctx *cmdContext, initiative string, opts createOptions) error {
 	defer createLock.Release()
 
 	// Check for existing session
-	currentID, err := ctx.getCurrentSessionID()
+	currentID, err := ctx.GetCurrentSessionID()
 	if err != nil {
 		err := errors.Wrap(errors.CodeGeneralError, "failed to read current session", err)
 		printer.PrintError(err)
@@ -149,7 +145,7 @@ func runCreate(ctx *cmdContext, initiative string, opts createOptions) error {
 	}
 
 	// Set as current session
-	if err := ctx.setCurrentSessionID(newCtx.SessionID); err != nil {
+	if err := ctx.SetCurrentSessionID(newCtx.SessionID); err != nil {
 		printer.VerboseLog("warn", "failed to set current session", map[string]interface{}{"error": err.Error()})
 	}
 
@@ -173,7 +169,7 @@ func runCreate(ctx *cmdContext, initiative string, opts createOptions) error {
 // preparation without hitting the single-session-per-terminal constraint.
 func runCreateSeeded(ctx *cmdContext, initiative string, opts createOptions) error {
 	printer := ctx.getPrinter()
-	resolver := ctx.getResolver()
+	resolver := ctx.GetResolver()
 
 	// Get team from flag or ACTIVE_RITE file
 	team := opts.team

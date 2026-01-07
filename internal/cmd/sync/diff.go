@@ -39,10 +39,10 @@ With a path argument, shows detailed diff for that file.`,
 
 func runDiff(ctx *cmdContext, path string, opts diffOptions) error {
 	printer := ctx.getPrinter()
-	resolver := ctx.getResolver()
+	resolver := ctx.GetResolver()
 
 	differ := sync.NewDiffer(resolver)
-	diffOpts := sync.DiffOptions{
+	diffOpts := sync.FileDiffOptions{
 		Path:     path,
 		ShowFull: opts.showFull,
 	}

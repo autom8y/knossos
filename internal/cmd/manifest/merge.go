@@ -41,7 +41,7 @@ Strategies:
 		},
 	}
 
-	cmd.Flags().StringVarP(&opts.outputPath, "output", "o", "", "Output path for merged manifest (default: stdout)")
+	cmd.Flags().StringVar(&opts.outputPath, "write-to", "", "Output path for merged manifest (default: stdout)")
 	cmd.Flags().StringVar(&opts.strategy, "strategy", "smart", "Merge strategy: smart, ours, theirs, union")
 	cmd.Flags().BoolVar(&opts.dryRun, "dry-run", false, "Preview merge without writing")
 
@@ -88,7 +88,7 @@ func runMerge(ctx *cmdContext, basePath, oursPath, theirsPath string, opts merge
 	}
 
 	// Perform merge
-	mergeOpts := manifest.MergeOptions{
+	mergeOpts := manifest.ManifestMergeOptions{
 		Strategy: strategy,
 		DryRun:   opts.dryRun,
 	}

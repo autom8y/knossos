@@ -10,6 +10,7 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/autom8y/knossos/internal/cmd/artifact"
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"github.com/autom8y/knossos/internal/cmd/handoff"
 	"github.com/autom8y/knossos/internal/cmd/hook"
 	"github.com/autom8y/knossos/internal/cmd/inscription"
@@ -176,76 +177,16 @@ func initConfig() error {
 }
 
 // needsProject returns true if the command requires a project context.
+// Uses annotation-based lookup from common.NeedsProject, which checks
+// the command's Annotations map set by each command group.
 func needsProject(cmd *cobra.Command) bool {
-	// Version command doesn't need project
+	// Version command doesn't need project (special case handled here)
 	if cmd.Name() == "version" {
 		return false
 	}
-	// All session commands need project
-	if cmd.Parent() != nil && cmd.Parent().Name() == "session" {
-		return true
-	}
-	// All manifest commands need project
-	if cmd.Parent() != nil && cmd.Parent().Name() == "manifest" {
-		return true
-	}
-	// All sync commands need project
-	if cmd.Parent() != nil && cmd.Parent().Name() == "sync" {
-		return true
-	}
-	// All inscription commands need project
-	if cmd.Parent() != nil && cmd.Parent().Name() == "inscription" {
-		return true
-	}
-	if cmd.Name() == "inscription" {
-		return true
-	}
-	// All validate commands need project
-	if cmd.Parent() != nil && cmd.Parent().Name() == "validate" {
-		return true
-	}
-	// All handoff commands need project
-	if cmd.Parent() != nil && cmd.Parent().Name() == "handoff" {
-		return true
-	}
-	// All worktree commands need project
-	if cmd.Parent() != nil && cmd.Parent().Name() == "worktree" {
-		return true
-	}
-	// Hook commands do NOT require project (they handle missing project gracefully)
-	if cmd.Parent() != nil && cmd.Parent().Name() == "hook" {
-		return false
-	}
-	if cmd.Name() == "hook" {
-		return false
-	}
-	// All artifact commands need project
-	if cmd.Parent() != nil && cmd.Parent().Name() == "artifact" {
-		return true
-	}
-	// Sails commands handle missing project gracefully (can check arbitrary paths)
-	if cmd.Parent() != nil && cmd.Parent().Name() == "sails" {
-		return false
-	}
-	if cmd.Name() == "sails" {
-		return false
-	}
-	// All naxos commands need project
-	if cmd.Parent() != nil && cmd.Parent().Name() == "naxos" {
-		return true
-	}
-	// All rite commands need project
-	if cmd.Parent() != nil && cmd.Parent().Name() == "rite" {
-		return true
-	}
-	// Tribute commands handle missing project gracefully (can specify session-dir)
-	if cmd.Parent() != nil && cmd.Parent().Name() == "tribute" {
-		return false
-	}
-	if cmd.Name() == "tribute" {
-		return false
-	}
-	return true
+
+	// Use annotation-based lookup from common package
+	return common.NeedsProject(cmd)
 }
 
 // GetGlobalOptions returns the global options (for use by subcommands).

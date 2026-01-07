@@ -6,27 +6,27 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/autom8y/knossos/internal/lock"
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"github.com/autom8y/knossos/internal/output"
-	"github.com/autom8y/knossos/internal/paths"
 	"github.com/autom8y/knossos/internal/session"
 )
 
 // cmdContext holds shared state for session commands.
 type cmdContext struct {
-	output    *string
-	verbose   *bool
-	projectDir *string
-	sessionID  *string
+	common.SessionContext
 }
 
 // NewSessionCmd creates the session command group.
 func NewSessionCmd(outputFlag *string, verboseFlag *bool, projectDir, sessionID *string) *cobra.Command {
 	ctx := &cmdContext{
-		output:     outputFlag,
-		verbose:    verboseFlag,
-		projectDir: projectDir,
-		sessionID:  sessionID,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     outputFlag,
+				Verbose:    verboseFlag,
+				ProjectDir: projectDir,
+			},
+			SessionID: sessionID,
+		},
 	}
 
 	cmd := &cobra.Command{
@@ -48,6 +48,9 @@ func NewSessionCmd(outputFlag *string, verboseFlag *bool, projectDir, sessionID 
 	cmd.AddCommand(newLockCmd(ctx))
 	cmd.AddCommand(newUnlockCmd(ctx))
 
+	// Session commands require project context
+	common.SetNeedsProject(cmd, true, true)
+
 	return cmd
 }
 
@@ -55,88 +58,19 @@ func NewSessionCmd(outputFlag *string, verboseFlag *bool, projectDir, sessionID 
 
 // getPrinter creates an output printer from the context.
 func (c *cmdContext) getPrinter() *output.Printer {
-	format := output.FormatText
-	if c.output != nil {
-		format = output.ParseFormat(*c.output)
-	}
-	verbose := false
-	if c.verbose != nil {
-		verbose = *c.verbose
-	}
-	return output.NewPrinter(format, os.Stdout, os.Stderr, verbose)
-}
-
-// getResolver creates a path resolver from the context.
-func (c *cmdContext) getResolver() *paths.Resolver {
-	projectDir := ""
-	if c.projectDir != nil {
-		projectDir = *c.projectDir
-	}
-	return paths.NewResolver(projectDir)
-}
-
-// getLockManager creates a lock manager from the context.
-func (c *cmdContext) getLockManager() *lock.Manager {
-	resolver := c.getResolver()
-	return lock.NewManager(resolver.LocksDir())
+	return c.GetPrinter(output.FormatText)
 }
 
 // getEventEmitter creates an event emitter for a session.
 func (c *cmdContext) getEventEmitter(sessionID string) *session.EventEmitter {
-	resolver := c.getResolver()
-	eventsPath := resolver.SessionEventsFile(sessionID)
-	auditPath := resolver.TransitionsLog()
-	return session.NewEventEmitter(eventsPath, auditPath)
-}
-
-// getSessionID returns the session ID to use (from flag or current).
-func (c *cmdContext) getSessionID() (string, error) {
-	if c.sessionID != nil && *c.sessionID != "" {
-		return *c.sessionID, nil
-	}
-	return c.getCurrentSessionID()
-}
-
-// getCurrentSessionID reads the current session ID from .current-session file.
-func (c *cmdContext) getCurrentSessionID() (string, error) {
-	resolver := c.getResolver()
-	data, err := os.ReadFile(resolver.CurrentSessionFile())
-	if err != nil {
-		if os.IsNotExist(err) {
-			return "", nil
-		}
-		return "", err
-	}
-	return string(data), nil
-}
-
-// setCurrentSessionID writes the current session ID.
-func (c *cmdContext) setCurrentSessionID(sessionID string) error {
-	resolver := c.getResolver()
-	if err := paths.EnsureDir(resolver.SessionsDir()); err != nil {
-		return err
-	}
-	return os.WriteFile(resolver.CurrentSessionFile(), []byte(sessionID), 0644)
-}
-
-// clearCurrentSessionID removes the current session marker.
-func (c *cmdContext) clearCurrentSessionID() error {
-	resolver := c.getResolver()
-	err := os.Remove(resolver.CurrentSessionFile())
-	if os.IsNotExist(err) {
-		return nil
-	}
-	return err
+	return c.GetEventEmitter(sessionID)
 }
 
 // getActiveRite reads the active rite from ACTIVE_RITE file.
 func (c *cmdContext) getActiveRite() string {
-	resolver := c.getResolver()
-
-	ritePath := resolver.ActiveRiteFile()
+	ritePath := c.GetResolver().ActiveRiteFile()
 	if data, err := os.ReadFile(ritePath); err == nil {
 		return string(data)
 	}
-
 	return "none"
 }

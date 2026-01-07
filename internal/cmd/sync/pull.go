@@ -54,7 +54,7 @@ Conflict handling:
 
 func runPull(ctx *cmdContext, remoteArg string, opts pullOptions) error {
 	printer := ctx.getPrinter()
-	resolver := ctx.getResolver()
+	resolver := ctx.GetResolver()
 
 	// Load existing state to get remote if not specified
 	stateManager := sync.NewStateManager(resolver)

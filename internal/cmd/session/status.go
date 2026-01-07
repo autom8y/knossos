@@ -30,10 +30,10 @@ func newStatusCmd(ctx *cmdContext) *cobra.Command {
 
 func runStatus(ctx *cmdContext) error {
 	printer := ctx.getPrinter()
-	resolver := ctx.getResolver()
-	lockMgr := ctx.getLockManager()
+	resolver := ctx.GetResolver()
+	lockMgr := ctx.GetLockManager()
 
-	sessionID, err := ctx.getSessionID()
+	sessionID, err := ctx.GetSessionID()
 	if err != nil {
 		err := errors.Wrap(errors.CodeGeneralError, "failed to get session ID", err)
 		printer.PrintError(err)

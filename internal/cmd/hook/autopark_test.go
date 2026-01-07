@@ -10,6 +10,8 @@ import (
 
 	"github.com/autom8y/knossos/internal/output"
 	"github.com/autom8y/knossos/test/hooks/testutil"
+
+	"github.com/autom8y/knossos/internal/cmd/common"
 )
 
 func TestAutoparkOutput_Text(t *testing.T) {
@@ -59,10 +61,14 @@ func TestRunAutopark_EarlyExit_HooksDisabled(t *testing.T) {
 	projectDir := ""
 	sessionID := ""
 	ctx := &cmdContext{
-		output:     &outputFlag,
-		verbose:    &verboseFlag,
-		projectDir: &projectDir,
-		sessionID:  &sessionID,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &projectDir,
+			},
+			SessionID: &sessionID,
+		},
 	}
 
 	err := runAutoparkWithPrinter(ctx, printer)
@@ -97,10 +103,14 @@ func TestRunAutopark_WrongEvent(t *testing.T) {
 	projectDir := ""
 	sessionID := ""
 	ctx := &cmdContext{
-		output:     &outputFlag,
-		verbose:    &verboseFlag,
-		projectDir: &projectDir,
-		sessionID:  &sessionID,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &projectDir,
+			},
+			SessionID: &sessionID,
+		},
 	}
 
 	err := runAutoparkWithPrinter(ctx, printer)
@@ -142,10 +152,14 @@ func TestRunAutopark_NoSession(t *testing.T) {
 	outputFlag := "json"
 	verboseFlag := false
 	ctx := &cmdContext{
-		output:     &outputFlag,
-		verbose:    &verboseFlag,
-		projectDir: &tmpDir,
-		sessionID:  nil,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &tmpDir,
+			},
+			SessionID: nil,
+		},
 	}
 
 	err := runAutoparkWithPrinter(ctx, printer)
@@ -209,10 +223,14 @@ current_phase: "implementation"
 	outputFlag := "json"
 	verboseFlag := false
 	ctx := &cmdContext{
-		output:     &outputFlag,
-		verbose:    &verboseFlag,
-		projectDir: &tmpDir,
-		sessionID:  nil,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &tmpDir,
+			},
+			SessionID: nil,
+		},
 	}
 
 	err := runAutoparkWithPrinter(ctx, printer)
@@ -289,10 +307,14 @@ parked_reason: "manual"
 	outputFlag := "json"
 	verboseFlag := false
 	ctx := &cmdContext{
-		output:     &outputFlag,
-		verbose:    &verboseFlag,
-		projectDir: &tmpDir,
-		sessionID:  nil,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &tmpDir,
+			},
+			SessionID: nil,
+		},
 	}
 
 	err := runAutoparkWithPrinter(ctx, printer)
@@ -323,10 +345,14 @@ func BenchmarkAutoparkHook_EarlyExit(b *testing.B) {
 	sessionID := ""
 
 	ctx := &cmdContext{
-		output:     &outputFlag,
-		verbose:    &verboseFlag,
-		projectDir: &projectDir,
-		sessionID:  &sessionID,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &projectDir,
+			},
+			SessionID: &sessionID,
+		},
 	}
 
 	var stdout, stderr bytes.Buffer
@@ -361,7 +387,7 @@ func runAutoparkWithPrinter(ctx *cmdContext, printer *output.Printer) error {
 	}
 
 	// Get resolver for path lookups
-	resolver := ctx.getResolver()
+	resolver := ctx.GetResolver()
 	if resolver.ProjectRoot() == "" {
 		if hookEnv.ProjectDir != "" {
 			resolver = newResolverFromPath(hookEnv.ProjectDir)
@@ -371,7 +397,7 @@ func runAutoparkWithPrinter(ctx *cmdContext, printer *output.Printer) error {
 	}
 
 	// Get current session ID
-	sessionIDStr, err := ctx.getCurrentSessionID()
+	sessionIDStr, err := ctx.GetCurrentSessionID()
 	if err != nil {
 		return outputNoPark(printer, "no active session")
 	}

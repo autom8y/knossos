@@ -10,6 +10,8 @@ import (
 	"testing"
 
 	"github.com/autom8y/knossos/internal/output"
+
+	"github.com/autom8y/knossos/internal/cmd/common"
 )
 
 // TestStatusIntegration_WithSailsColor is an integration test verifying
@@ -82,9 +84,13 @@ type: standard
 	outputFormat := "json"
 	verbose := false
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	// Override printer to capture output
@@ -152,9 +158,13 @@ created_at: 2026-01-06T12:00:00Z
 	outputFormat := "json"
 	verbose := false
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	printer := output.NewPrinter(output.FormatJSON, &outBuf, os.Stderr, false)
@@ -234,9 +244,13 @@ type: standard
 	outputFormat := "text"
 	verbose := false
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	printer := output.NewPrinter(output.FormatText, &outBuf, os.Stderr, false)

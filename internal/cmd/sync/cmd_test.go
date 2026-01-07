@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/autom8y/knossos/internal/cmd/common"
 )
 
 // TestNewSyncCmd verifies the sync command is properly constructed.
@@ -48,9 +50,11 @@ func TestCmdContext_GetPrinter(t *testing.T) {
 	projectDir := "/tmp/test"
 
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		BaseContext: common.BaseContext{
+			Output:     &outputFormat,
+			Verbose:    &verbose,
+			ProjectDir: &projectDir,
+		},
 	}
 
 	printer := ctx.getPrinter()
@@ -66,12 +70,14 @@ func TestCmdContext_GetResolver(t *testing.T) {
 	projectDir := "/tmp/test"
 
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		BaseContext: common.BaseContext{
+			Output:     &outputFormat,
+			Verbose:    &verbose,
+			ProjectDir: &projectDir,
+		},
 	}
 
-	resolver := ctx.getResolver()
+	resolver := ctx.GetResolver()
 	if resolver == nil {
 		t.Fatal("Expected non-nil resolver")
 	}
@@ -84,9 +90,11 @@ func TestCmdContext_GetResolver(t *testing.T) {
 // TestCmdContext_NilValues verifies context handles nil values gracefully.
 func TestCmdContext_NilValues(t *testing.T) {
 	ctx := &cmdContext{
-		output:     nil,
-		verbose:    nil,
-		projectDir: nil,
+		BaseContext: common.BaseContext{
+			Output:     nil,
+			Verbose:    nil,
+			ProjectDir: nil,
+		},
 	}
 
 	// Should not panic
@@ -95,7 +103,7 @@ func TestCmdContext_NilValues(t *testing.T) {
 		t.Fatal("Expected non-nil printer even with nil values")
 	}
 
-	resolver := ctx.getResolver()
+	resolver := ctx.GetResolver()
 	if resolver == nil {
 		t.Fatal("Expected non-nil resolver even with nil values")
 	}
@@ -147,9 +155,11 @@ func TestStatusCmd_Construction(t *testing.T) {
 	projectDir := "/tmp/test"
 
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		BaseContext: common.BaseContext{
+			Output:     &outputFormat,
+			Verbose:    &verbose,
+			ProjectDir: &projectDir,
+		},
 	}
 
 	cmd := newStatusCmd(ctx)
@@ -169,9 +179,11 @@ func TestPullCmd_Construction(t *testing.T) {
 	projectDir := "/tmp/test"
 
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		BaseContext: common.BaseContext{
+			Output:     &outputFormat,
+			Verbose:    &verbose,
+			ProjectDir: &projectDir,
+		},
 	}
 
 	cmd := newPullCmd(ctx)
@@ -202,9 +214,11 @@ func TestPushCmd_Construction(t *testing.T) {
 	projectDir := "/tmp/test"
 
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		BaseContext: common.BaseContext{
+			Output:     &outputFormat,
+			Verbose:    &verbose,
+			ProjectDir: &projectDir,
+		},
 	}
 
 	cmd := newPushCmd(ctx)
@@ -235,9 +249,11 @@ func TestDiffCmd_Construction(t *testing.T) {
 	projectDir := "/tmp/test"
 
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		BaseContext: common.BaseContext{
+			Output:     &outputFormat,
+			Verbose:    &verbose,
+			ProjectDir: &projectDir,
+		},
 	}
 
 	cmd := newDiffCmd(ctx)
@@ -257,9 +273,11 @@ func TestResolveCmd_Construction(t *testing.T) {
 	projectDir := "/tmp/test"
 
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		BaseContext: common.BaseContext{
+			Output:     &outputFormat,
+			Verbose:    &verbose,
+			ProjectDir: &projectDir,
+		},
 	}
 
 	cmd := newResolveCmd(ctx)
@@ -288,9 +306,11 @@ func TestHistoryCmd_Construction(t *testing.T) {
 	projectDir := "/tmp/test"
 
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		BaseContext: common.BaseContext{
+			Output:     &outputFormat,
+			Verbose:    &verbose,
+			ProjectDir: &projectDir,
+		},
 	}
 
 	cmd := newHistoryCmd(ctx)
@@ -319,9 +339,11 @@ func TestResetCmd_Construction(t *testing.T) {
 	projectDir := "/tmp/test"
 
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		BaseContext: common.BaseContext{
+			Output:     &outputFormat,
+			Verbose:    &verbose,
+			ProjectDir: &projectDir,
+		},
 	}
 
 	cmd := newResetCmd(ctx)
@@ -352,9 +374,11 @@ func TestRunStatus_NotInitialized(t *testing.T) {
 	verbose := false
 
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &tmpDir,
+		BaseContext: common.BaseContext{
+			Output:     &outputFormat,
+			Verbose:    &verbose,
+			ProjectDir: &tmpDir,
+		},
 	}
 
 	// Should not error - just shows not initialized
@@ -376,9 +400,11 @@ func TestRunDiff_NotInitialized(t *testing.T) {
 	verbose := false
 
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &tmpDir,
+		BaseContext: common.BaseContext{
+			Output:     &outputFormat,
+			Verbose:    &verbose,
+			ProjectDir: &tmpDir,
+		},
 	}
 
 	// Should error - not initialized
@@ -400,9 +426,11 @@ func TestRunResolve_InvalidStrategy(t *testing.T) {
 	verbose := false
 
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &tmpDir,
+		BaseContext: common.BaseContext{
+			Output:     &outputFormat,
+			Verbose:    &verbose,
+			ProjectDir: &tmpDir,
+		},
 	}
 
 	// Invalid strategy should error
@@ -424,9 +452,11 @@ func TestRunHistory_Empty(t *testing.T) {
 	verbose := false
 
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &tmpDir,
+		BaseContext: common.BaseContext{
+			Output:     &outputFormat,
+			Verbose:    &verbose,
+			ProjectDir: &tmpDir,
+		},
 	}
 
 	// Should not error - just shows empty history
@@ -448,9 +478,11 @@ func TestRunReset_NotInitialized(t *testing.T) {
 	verbose := false
 
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &tmpDir,
+		BaseContext: common.BaseContext{
+			Output:     &outputFormat,
+			Verbose:    &verbose,
+			ProjectDir: &tmpDir,
+		},
 	}
 
 	// Should error - not initialized
@@ -472,9 +504,11 @@ func TestRunPull_NoRemote(t *testing.T) {
 	verbose := false
 
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &tmpDir,
+		BaseContext: common.BaseContext{
+			Output:     &outputFormat,
+			Verbose:    &verbose,
+			ProjectDir: &tmpDir,
+		},
 	}
 
 	// Should error - no remote specified and not initialized
@@ -496,9 +530,11 @@ func TestRunPush_NotInitialized(t *testing.T) {
 	verbose := false
 
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &tmpDir,
+		BaseContext: common.BaseContext{
+			Output:     &outputFormat,
+			Verbose:    &verbose,
+			ProjectDir: &tmpDir,
+		},
 	}
 
 	// Should error - not initialized

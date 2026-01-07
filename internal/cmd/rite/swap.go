@@ -49,7 +49,7 @@ Examples:
 
 func runSwap(ctx *cmdContext, riteName string, opts swapOptions) error {
 	printer := ctx.getPrinter()
-	resolver := ctx.getResolver()
+	resolver := ctx.GetResolver()
 	invoker := ctx.getInvoker()
 
 	// Validate mutually exclusive flags
@@ -87,7 +87,7 @@ func runSwap(ctx *cmdContext, riteName string, opts swapOptions) error {
 	// Use rite switcher for the actual swap
 	switcher := ritelib.NewSwitcher(resolver)
 
-	switchOpts := ritelib.SwitchOptions{
+	switchOpts := ritelib.RiteSwitchOptions{
 		TargetRite: riteName,
 		RemoveAll:  opts.removeAll,
 		KeepAll:    opts.keepAll,

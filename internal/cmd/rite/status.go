@@ -30,9 +30,6 @@ func newStatusCmd(ctx *cmdContext) *cobra.Command {
 	}
 
 	cmd.Flags().StringVarP(&opts.riteName, "rite", "r", "", "Rite to query status for (default: active)")
-	cmd.Flags().StringVarP(&opts.riteName, "team", "t", "", "Deprecated: use --rite instead")
-
-	cmd.Flags().MarkDeprecated("team", "use --rite instead")
 
 	return cmd
 }
@@ -40,7 +37,7 @@ func newStatusCmd(ctx *cmdContext) *cobra.Command {
 func runStatus(ctx *cmdContext, opts statusOptions) error {
 	printer := ctx.getPrinter()
 	discovery := ctx.getDiscovery()
-	resolver := ctx.getResolver()
+	resolver := ctx.GetResolver()
 
 	// Get rite name (from flag or active)
 	riteName := opts.riteName

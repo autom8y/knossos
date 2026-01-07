@@ -11,8 +11,8 @@ import (
 	"github.com/autom8y/knossos/internal/paths"
 )
 
-// SwitchOptions configures rite switch behavior.
-type SwitchOptions struct {
+// RiteSwitchOptions configures rite switch behavior.
+type RiteSwitchOptions struct {
 	TargetRite string
 	RemoveAll  bool
 	KeepAll    bool
@@ -23,12 +23,12 @@ type SwitchOptions struct {
 }
 
 // HasOrphanStrategy returns true if an orphan handling flag is set.
-func (o *SwitchOptions) HasOrphanStrategy() bool {
+func (o *RiteSwitchOptions) HasOrphanStrategy() bool {
 	return o.RemoveAll || o.KeepAll || o.PromoteAll
 }
 
 // OrphanStrategy returns the strategy name.
-func (o *SwitchOptions) OrphanStrategy() string {
+func (o *RiteSwitchOptions) OrphanStrategy() string {
 	if o.RemoveAll {
 		return "remove-all"
 	}
@@ -95,7 +95,7 @@ func NewSwitcher(resolver *paths.Resolver) *Switcher {
 }
 
 // Switch performs a rite switch.
-func (s *Switcher) Switch(opts SwitchOptions) (*SwitchResult, error) {
+func (s *Switcher) Switch(opts RiteSwitchOptions) (*SwitchResult, error) {
 	// 1. Validate target rite exists
 	rite, err := s.discovery.Get(opts.TargetRite)
 	if err != nil {
@@ -154,7 +154,7 @@ func (s *Switcher) Switch(opts SwitchOptions) (*SwitchResult, error) {
 }
 
 // dryRunResult returns what would happen without making changes.
-func (s *Switcher) dryRunResult(rite *Rite, manifest *AgentManifest, orphans []string, opts SwitchOptions) (*SwitchResult, error) {
+func (s *Switcher) dryRunResult(rite *Rite, manifest *AgentManifest, orphans []string, opts RiteSwitchOptions) (*SwitchResult, error) {
 	// This is a bit of a hack - return DryRunResult through a wrapper
 	// The actual implementation will populate the proper structure
 	agents := make([]string, len(rite.Agents))
@@ -182,7 +182,7 @@ func (s *Switcher) dryRunResult(rite *Rite, manifest *AgentManifest, orphans []s
 }
 
 // executeSwitch performs the actual switch operation.
-func (s *Switcher) executeSwitch(rite *Rite, manifest *AgentManifest, orphans []string, opts SwitchOptions) (*SwitchResult, error) {
+func (s *Switcher) executeSwitch(rite *Rite, manifest *AgentManifest, orphans []string, opts RiteSwitchOptions) (*SwitchResult, error) {
 	// 1. Handle orphans
 	if len(orphans) > 0 {
 		if err := s.handleOrphans(manifest, orphans, opts); err != nil {
@@ -264,7 +264,7 @@ func (s *Switcher) executeSwitch(rite *Rite, manifest *AgentManifest, orphans []
 	// 7. Trigger inscription sync (unless --no-sync)
 	if !opts.NoSync {
 		pipeline := inscription.NewPipeline(s.resolver.ProjectRoot())
-		syncResult, err := pipeline.Sync(inscription.SyncOptions{
+		syncResult, err := pipeline.Sync(inscription.InscriptionSyncOptions{
 			RiteName: opts.TargetRite,
 		})
 		if err != nil {
@@ -301,7 +301,7 @@ func (s *Switcher) executeSwitch(rite *Rite, manifest *AgentManifest, orphans []
 }
 
 // handleOrphans processes orphaned agents according to the strategy.
-func (s *Switcher) handleOrphans(manifest *AgentManifest, orphans []string, opts SwitchOptions) error {
+func (s *Switcher) handleOrphans(manifest *AgentManifest, orphans []string, opts RiteSwitchOptions) error {
 	agentsDir := s.resolver.AgentsDir()
 
 	for _, orphan := range orphans {

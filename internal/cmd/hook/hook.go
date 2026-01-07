@@ -5,14 +5,13 @@ package hook
 import (
 	"context"
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/spf13/cobra"
 
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"github.com/autom8y/knossos/internal/hook"
 	"github.com/autom8y/knossos/internal/output"
-	"github.com/autom8y/knossos/internal/paths"
 )
 
 // Default timeout for hook operations (100ms target, 500ms max safety).
@@ -24,21 +23,22 @@ const (
 
 // cmdContext holds shared state for hook commands.
 type cmdContext struct {
-	output     *string
-	verbose    *bool
-	projectDir *string
-	sessionID  *string
-	timeout    time.Duration
+	common.SessionContext
+	timeout time.Duration
 }
 
 // NewHookCmd creates the hook command group.
 func NewHookCmd(outputFlag *string, verboseFlag *bool, projectDir, sessionID *string) *cobra.Command {
 	ctx := &cmdContext{
-		output:     outputFlag,
-		verbose:    verboseFlag,
-		projectDir: projectDir,
-		sessionID:  sessionID,
-		timeout:    DefaultTimeout,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     outputFlag,
+				Verbose:    verboseFlag,
+				ProjectDir: projectDir,
+			},
+			SessionID: sessionID,
+		},
+		timeout: DefaultTimeout,
 	}
 
 	var timeoutMs int
@@ -88,31 +88,18 @@ Performance Targets:
 	cmd.AddCommand(newValidateCmd(ctx))
 	cmd.AddCommand(newClewCmd(ctx))
 
+	// Hook commands do NOT require project context
+	common.SetNeedsProject(cmd, false, true)
+
 	return cmd
 }
 
 // helper functions for commands
 
 // getPrinter creates an output printer from the context.
+// Hook commands default to JSON format for machine-readable output.
 func (c *cmdContext) getPrinter() *output.Printer {
-	format := output.FormatJSON // Default to JSON for hook output
-	if c.output != nil {
-		format = output.ParseFormat(*c.output)
-	}
-	verbose := false
-	if c.verbose != nil {
-		verbose = *c.verbose
-	}
-	return output.NewPrinter(format, os.Stdout, os.Stderr, verbose)
-}
-
-// getResolver creates a path resolver from the context.
-func (c *cmdContext) getResolver() *paths.Resolver {
-	projectDir := ""
-	if c.projectDir != nil {
-		projectDir = *c.projectDir
-	}
-	return paths.NewResolver(projectDir)
+	return c.GetPrinter(output.FormatJSON)
 }
 
 // getHookEnv parses the hook environment variables.
@@ -124,22 +111,6 @@ func (c *cmdContext) getHookEnv() *hook.Env {
 // Returns true if hooks are disabled or no session context needed.
 func (c *cmdContext) shouldEarlyExit() bool {
 	return !hook.IsEnabled()
-}
-
-// getCurrentSessionID reads the current session ID from .current-session file.
-func (c *cmdContext) getCurrentSessionID() (string, error) {
-	if c.sessionID != nil && *c.sessionID != "" {
-		return *c.sessionID, nil
-	}
-	resolver := c.getResolver()
-	data, err := os.ReadFile(resolver.CurrentSessionFile())
-	if err != nil {
-		if os.IsNotExist(err) {
-			return "", nil
-		}
-		return "", err
-	}
-	return string(data), nil
 }
 
 // withTimeout wraps a command execution function with context.WithTimeout.

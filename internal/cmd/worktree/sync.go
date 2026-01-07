@@ -113,7 +113,7 @@ func runSync(ctx *cmdContext, idOrName string, opts syncOptions) error {
 		idOrName = currentWT.ID
 	}
 
-	syncOpts := worktree.SyncOptions{
+	syncOpts := worktree.WorktreeSyncOptions{
 		Pull: opts.pull,
 	}
 

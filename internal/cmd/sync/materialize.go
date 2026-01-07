@@ -64,7 +64,7 @@ Orphan Handling:
 		},
 	}
 
-	cmd.Flags().BoolVar(&force, "force", false, "Force regeneration, overwriting local changes")
+	cmd.Flags().BoolVarP(&force, "force", "f", false, "Force regeneration, overwriting local changes")
 	cmd.Flags().StringVar(&riteName, "rite", "", "Rite to materialize (defaults to current ACTIVE_RITE)")
 	cmd.Flags().BoolVar(&dryRun, "dry-run", false, "Preview changes without applying")
 	cmd.Flags().BoolVar(&removeAll, "remove-all", false, "Remove all orphan agents (with backup)")
@@ -76,7 +76,7 @@ Orphan Handling:
 
 func runMaterialize(ctx *cmdContext, riteName string, opts materialize.Options) error {
 	printer := ctx.getPrinter()
-	resolver := ctx.getResolver()
+	resolver := ctx.GetResolver()
 
 	// Determine which rite to materialize
 	if riteName == "" {

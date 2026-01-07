@@ -8,6 +8,8 @@ import (
 	"time"
 
 	"github.com/autom8y/knossos/internal/session"
+
+	"github.com/autom8y/knossos/internal/cmd/common"
 )
 
 // =============================================================================
@@ -44,9 +46,13 @@ func TestCreate_BasicCreation(t *testing.T) {
 	outputFormat := "json"
 	verbose := false
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	opts := createOptions{
@@ -132,9 +138,13 @@ func TestCreate_InvalidComplexity(t *testing.T) {
 	outputFormat := "json"
 	verbose := false
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	opts := createOptions{
@@ -173,9 +183,13 @@ func TestCreate_BlocksSecondActiveSession(t *testing.T) {
 	outputFormat := "json"
 	verbose := false
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	opts := createOptions{
@@ -214,9 +228,13 @@ func TestList_NoSessions(t *testing.T) {
 	outputFormat := "json"
 	verbose := false
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	opts := listOptions{
@@ -295,9 +313,13 @@ parked_at: 2026-01-05T11:30:00Z
 	outputFormat := "json"
 	verbose := false
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	// Test list with ACTIVE filter
@@ -386,9 +408,13 @@ created_at: 2026-01-05T09:00:00Z
 	outputFormat := "json"
 	verbose := false
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	// Without --all, should only return active
@@ -469,9 +495,13 @@ created_at: 2026-01-05T12:00:00Z
 	outputFormat := "json"
 	verbose := false
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	opts := auditOptions{
@@ -533,9 +563,13 @@ created_at: 2026-01-05T13:00:00Z
 	outputFormat := "json"
 	verbose := false
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	// Filter by PHASE_TRANSITION
@@ -565,9 +599,13 @@ func TestAudit_NoSession(t *testing.T) {
 	outputFormat := "json"
 	verbose := false
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	opts := auditOptions{
@@ -612,9 +650,13 @@ func TestFSM_FullLifecycle(t *testing.T) {
 	outputFormat := "json"
 	verbose := true
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	// Step 1: NONE -> ACTIVE (create)
@@ -628,7 +670,7 @@ func TestFSM_FullLifecycle(t *testing.T) {
 	}
 
 	// Get the session ID
-	currentID, err := ctx.getCurrentSessionID()
+	currentID, err := ctx.GetCurrentSessionID()
 	if err != nil {
 		t.Fatalf("Failed to get current session ID: %v", err)
 	}
@@ -734,9 +776,13 @@ created_at: 2026-01-05T14:00:00Z
 	outputFormat := "json"
 	verbose := false
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	// Try to resume - should fail
@@ -791,9 +837,13 @@ parked_reason: Already parked
 	outputFormat := "json"
 	verbose := false
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	// Try to park again - should fail
@@ -851,9 +901,13 @@ parked_reason: Testing wrap from parked
 	outputFormat := "json"
 	verbose := true
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	// Wrap from PARKED should succeed
@@ -932,9 +986,13 @@ current_phase: requirements
 	outputFormat := "json"
 	verbose := false
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	opts := transitionOptions{
@@ -1000,9 +1058,13 @@ current_phase: requirements
 	outputFormat := "json"
 	verbose := false
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	opts := transitionOptions{
@@ -1060,9 +1122,13 @@ parked_at: 2026-01-05T19:30:00Z
 	outputFormat := "json"
 	verbose := false
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	opts := transitionOptions{
@@ -1119,9 +1185,13 @@ current_phase: requirements
 	outputFormat := "json"
 	verbose := false
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	// Without force - should fail (no PRD)

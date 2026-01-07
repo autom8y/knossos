@@ -40,11 +40,11 @@ func newWrapCmd(ctx *cmdContext) *cobra.Command {
 
 func runWrap(ctx *cmdContext, opts wrapOptions) error {
 	printer := ctx.getPrinter()
-	resolver := ctx.getResolver()
-	lockMgr := ctx.getLockManager()
+	resolver := ctx.GetResolver()
+	lockMgr := ctx.GetLockManager()
 	fsm := session.NewFSM()
 
-	sessionID, err := ctx.getSessionID()
+	sessionID, err := ctx.GetSessionID()
 	if err != nil {
 		printer.PrintError(errors.Wrap(errors.CodeGeneralError, "failed to get session ID", err))
 		return err
@@ -167,7 +167,7 @@ func runWrap(ctx *cmdContext, opts wrapOptions) error {
 	}
 
 	// Clear current session
-	if err := ctx.clearCurrentSessionID(); err != nil {
+	if err := ctx.ClearCurrentSessionID(); err != nil {
 		printer.VerboseLog("warn", "failed to clear current session", map[string]interface{}{"error": err.Error()})
 	}
 

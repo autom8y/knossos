@@ -39,8 +39,8 @@ Valid phases: requirements, design, implementation, validation, complete`,
 
 func runTransition(ctx *cmdContext, targetPhase string, opts transitionOptions) error {
 	printer := ctx.getPrinter()
-	resolver := ctx.getResolver()
-	lockMgr := ctx.getLockManager()
+	resolver := ctx.GetResolver()
+	lockMgr := ctx.GetLockManager()
 
 	// Validate phase
 	if !sess.IsValidPhase(targetPhase) {
@@ -49,7 +49,7 @@ func runTransition(ctx *cmdContext, targetPhase string, opts transitionOptions) 
 		return err
 	}
 
-	sessionID, err := ctx.getSessionID()
+	sessionID, err := ctx.GetSessionID()
 	if err != nil {
 		printer.PrintError(errors.Wrap(errors.CodeGeneralError, "failed to get session ID", err))
 		return err

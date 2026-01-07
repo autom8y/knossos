@@ -66,7 +66,7 @@ into the project-level registry. Use this for recovery or initial index build.`,
 			printer.Print(result)
 
 			// Print summary in text mode
-			if *ctx.output == "text" {
+			if *ctx.Output == "text" {
 				fmt.Printf("\nRebuilt project registry:\n")
 				fmt.Printf("  Sessions scanned: %d\n", projectReg.SessionsIndexed)
 				fmt.Printf("  Artifacts indexed: %d\n", projectReg.ArtifactCount)

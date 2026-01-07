@@ -9,6 +9,8 @@ import (
 
 	"github.com/autom8y/knossos/internal/output"
 	"github.com/autom8y/knossos/test/hooks/testutil"
+
+	"github.com/autom8y/knossos/internal/cmd/common"
 )
 
 func TestIsProtectedFile(t *testing.T) {
@@ -148,9 +150,13 @@ func TestRunWriteguard_EarlyExit_HooksDisabled(t *testing.T) {
 	verboseFlag := false
 	projectDir := ""
 	ctx := &cmdContext{
-		output:     &outputFlag,
-		verbose:    &verboseFlag,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	err := runWriteguardWithPrinter(ctx, printer, "")
@@ -184,9 +190,13 @@ func TestRunWriteguard_BypassEnvVar(t *testing.T) {
 	verboseFlag := false
 	projectDir := ""
 	ctx := &cmdContext{
-		output:     &outputFlag,
-		verbose:    &verboseFlag,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	err := runWriteguardWithPrinter(ctx, printer, "")
@@ -219,9 +229,13 @@ func TestRunWriteguard_NonWriteTool(t *testing.T) {
 	verboseFlag := false
 	projectDir := ""
 	ctx := &cmdContext{
-		output:     &outputFlag,
-		verbose:    &verboseFlag,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	err := runWriteguardWithPrinter(ctx, printer, "")
@@ -254,9 +268,13 @@ func TestRunWriteguard_BlockSessionContext(t *testing.T) {
 	verboseFlag := false
 	projectDir := ""
 	ctx := &cmdContext{
-		output:     &outputFlag,
-		verbose:    &verboseFlag,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	err := runWriteguardWithPrinter(ctx, printer, "")
@@ -295,9 +313,13 @@ func TestRunWriteguard_BlockSprintContext(t *testing.T) {
 	verboseFlag := false
 	projectDir := ""
 	ctx := &cmdContext{
-		output:     &outputFlag,
-		verbose:    &verboseFlag,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	err := runWriteguardWithPrinter(ctx, printer, "")
@@ -333,9 +355,13 @@ func TestRunWriteguard_AllowRegularFile(t *testing.T) {
 	verboseFlag := false
 	projectDir := ""
 	ctx := &cmdContext{
-		output:     &outputFlag,
-		verbose:    &verboseFlag,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	err := runWriteguardWithPrinter(ctx, printer, "")
@@ -368,9 +394,13 @@ func TestRunWriteguard_StdinInput(t *testing.T) {
 	verboseFlag := false
 	projectDir := ""
 	ctx := &cmdContext{
-		output:     &outputFlag,
-		verbose:    &verboseFlag,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	// Simulate stdin input
@@ -408,9 +438,13 @@ func BenchmarkWriteguardHook_Passthrough(b *testing.B) {
 	projectDir := ""
 
 	ctx := &cmdContext{
-		output:     &outputFlag,
-		verbose:    &verboseFlag,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	var stdout, stderr bytes.Buffer
@@ -438,9 +472,13 @@ func BenchmarkWriteguardHook_EarlyExit(b *testing.B) {
 	projectDir := ""
 
 	ctx := &cmdContext{
-		output:     &outputFlag,
-		verbose:    &verboseFlag,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	var stdout, stderr bytes.Buffer

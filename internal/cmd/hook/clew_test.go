@@ -10,6 +10,8 @@ import (
 
 	"github.com/autom8y/knossos/internal/output"
 	"github.com/autom8y/knossos/test/hooks/testutil"
+
+	"github.com/autom8y/knossos/internal/cmd/common"
 )
 
 func TestClewOutput_Text(t *testing.T) {
@@ -60,8 +62,12 @@ func TestRunClew_HooksDisabled(t *testing.T) {
 	outputFlag := "json"
 	verboseFlag := false
 	ctx := &cmdContext{
-		output:  &outputFlag,
-		verbose: &verboseFlag,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:  &outputFlag,
+				Verbose: &verboseFlag,
+			},
+		},
 	}
 
 	err := runClewWithPrinter(ctx, printer)
@@ -95,8 +101,12 @@ func TestRunClew_WrongEventType(t *testing.T) {
 	outputFlag := "json"
 	verboseFlag := false
 	ctx := &cmdContext{
-		output:  &outputFlag,
-		verbose: &verboseFlag,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:  &outputFlag,
+				Verbose: &verboseFlag,
+			},
+		},
 	}
 
 	err := runClewWithPrinter(ctx, printer)
@@ -136,9 +146,13 @@ func TestRunClew_NoActiveSession(t *testing.T) {
 	verboseFlag := false
 	projectDir := tmpDir
 	ctx := &cmdContext{
-		output:     &outputFlag,
-		verbose:    &verboseFlag,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	err := runClewWithPrinter(ctx, printer)
@@ -193,9 +207,13 @@ func TestRunClew_WithActiveSession(t *testing.T) {
 	verboseFlag := false
 	projectDir := tmpDir
 	ctx := &cmdContext{
-		output:     &outputFlag,
-		verbose:    &verboseFlag,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	err := runClewWithPrinter(ctx, printer)
@@ -274,9 +292,13 @@ throughline:
 	verboseFlag := false
 	projectDir := tmpDir
 	ctx := &cmdContext{
-		output:     &outputFlag,
-		verbose:    &verboseFlag,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	err := runClewWithPrinter(ctx, printer)
@@ -364,9 +386,13 @@ Files modified:
 	verboseFlag := false
 	projectDir := tmpDir
 	ctx := &cmdContext{
-		output:     &outputFlag,
-		verbose:    &verboseFlag,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	err := runClewWithPrinter(ctx, printer)

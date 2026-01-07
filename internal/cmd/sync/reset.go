@@ -44,7 +44,7 @@ WARNING: This operation can cause data loss. Use --force to skip confirmation.`,
 
 func runReset(ctx *cmdContext, opts resetOptions) error {
 	printer := ctx.getPrinter()
-	resolver := ctx.getResolver()
+	resolver := ctx.GetResolver()
 
 	stateManager := sync.NewStateManager(resolver)
 	historyManager := sync.NewHistoryManager(resolver)

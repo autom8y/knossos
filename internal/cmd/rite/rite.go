@@ -7,24 +7,24 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"github.com/autom8y/knossos/internal/output"
-	"github.com/autom8y/knossos/internal/paths"
 	"github.com/autom8y/knossos/internal/rite"
 )
 
 // cmdContext holds shared state for rite commands.
 type cmdContext struct {
-	output     *string
-	verbose    *bool
-	projectDir *string
+	common.BaseContext
 }
 
 // NewRiteCmd creates the rite command group.
 func NewRiteCmd(outputFlag *string, verboseFlag *bool, projectDir *string) *cobra.Command {
 	ctx := &cmdContext{
-		output:     outputFlag,
-		verbose:    verboseFlag,
-		projectDir: projectDir,
+		BaseContext: common.BaseContext{
+			Output:     outputFlag,
+			Verbose:    verboseFlag,
+			ProjectDir: projectDir,
+		},
 	}
 
 	cmd := &cobra.Command{
@@ -49,6 +49,9 @@ Rites are composable practice bundles. The invoke operation is additive
 	cmd.AddCommand(newValidateCmd(ctx))
 	cmd.AddCommand(newPantheonCmd(ctx))
 
+	// Rite commands require project context
+	common.SetNeedsProject(cmd, true, true)
+
 	return cmd
 }
 
@@ -56,52 +59,29 @@ Rites are composable practice bundles. The invoke operation is additive
 
 // getPrinter creates an output printer from the context.
 func (c *cmdContext) getPrinter() *output.Printer {
-	format := output.FormatText
-	if c.output != nil {
-		format = output.ParseFormat(*c.output)
-	}
-	verbose := false
-	if c.verbose != nil {
-		verbose = *c.verbose
-	}
-	return output.NewPrinter(format, os.Stdout, os.Stderr, verbose)
-}
-
-// getResolver creates a path resolver from the context.
-func (c *cmdContext) getResolver() *paths.Resolver {
-	projectDir := ""
-	if c.projectDir != nil {
-		projectDir = *c.projectDir
-	}
-	return paths.NewResolver(projectDir)
+	return c.GetPrinter(output.FormatText)
 }
 
 // getDiscovery creates a rite discovery instance.
 func (c *cmdContext) getDiscovery() *rite.Discovery {
-	resolver := c.getResolver()
-	return rite.NewDiscovery(resolver)
+	return rite.NewDiscovery(c.GetResolver())
 }
 
 // getInvoker creates a rite invoker.
 func (c *cmdContext) getInvoker() *rite.Invoker {
-	resolver := c.getResolver()
-	return rite.NewInvoker(resolver)
+	return rite.NewInvoker(c.GetResolver())
 }
 
 // getValidator creates a rite validator.
 func (c *cmdContext) getValidator() *rite.Validator {
-	resolver := c.getResolver()
-	return rite.NewValidator(resolver)
+	return rite.NewValidator(c.GetResolver())
 }
 
 // getActiveRite reads the active rite from ACTIVE_RITE file.
 func (c *cmdContext) getActiveRite() string {
-	resolver := c.getResolver()
-
-	ritePath := resolver.ActiveRiteFile()
+	ritePath := c.GetResolver().ActiveRiteFile()
 	if data, err := os.ReadFile(ritePath); err == nil {
 		return strings.TrimSpace(string(data))
 	}
-
 	return ""
 }

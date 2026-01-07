@@ -27,8 +27,8 @@ type SyncResult struct {
 	PullError string   `json:"pull_error,omitempty"`
 }
 
-// SwitchOptions specifies options for switching to a worktree.
-type SwitchOptions struct {
+// WorktreeSwitchOptions specifies options for switching to a worktree.
+type WorktreeSwitchOptions struct {
 	UpdateRite    bool // Update ACTIVE_RITE to match worktree's rite
 	CreateSession bool // Create a new session in the worktree
 }
@@ -39,8 +39,8 @@ type CloneOptions struct {
 	CopySession bool   // Copy session context from source
 }
 
-// SyncOptions specifies options for syncing a worktree.
-type SyncOptions struct {
+// WorktreeSyncOptions specifies options for syncing a worktree.
+type WorktreeSyncOptions struct {
 	Pull bool // Actually pull changes (vs. just check status)
 }
 
@@ -63,7 +63,7 @@ const (
 
 // Switch updates the session context to point to a different worktree.
 // This enables switching context without changing the shell's working directory.
-func (m *Manager) Switch(idOrName string, opts SwitchOptions) (*Worktree, error) {
+func (m *Manager) Switch(idOrName string, opts WorktreeSwitchOptions) (*Worktree, error) {
 	// Resolve worktree
 	wt, err := m.resolveWorktree(idOrName)
 	if err != nil {
@@ -182,7 +182,7 @@ func (m *Manager) Clone(sourceIDOrName, newName string, opts CloneOptions) (*Wor
 
 // Sync checks synchronization status between worktree and upstream,
 // optionally pulling changes.
-func (m *Manager) Sync(idOrName string, opts SyncOptions) (*SyncResult, error) {
+func (m *Manager) Sync(idOrName string, opts WorktreeSyncOptions) (*SyncResult, error) {
 	// Resolve worktree
 	wt, err := m.resolveWorktree(idOrName)
 	if err != nil {

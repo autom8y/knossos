@@ -5,6 +5,8 @@ import (
 	"path/filepath"
 	"testing"
 	"time"
+
+	"github.com/autom8y/knossos/internal/cmd/common"
 )
 
 // TestStatus_WithSailsColor verifies that sails color is included in status output.
@@ -74,9 +76,13 @@ type: standard
 	outputFormat := "json"
 	verbose := false
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	err := runStatus(ctx)
@@ -150,9 +156,13 @@ type: standard
 	outputFormat := "json"
 	verbose := false
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	err := runStatus(ctx)
@@ -202,9 +212,13 @@ created_at: 2026-01-06T12:00:00Z
 	outputFormat := "json"
 	verbose := false
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	err := runStatus(ctx)
@@ -259,9 +273,13 @@ created_at: 2026-01-06T13:00:00Z
 	outputFormat := "json"
 	verbose := false
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	err := runStatus(ctx)
@@ -331,9 +349,13 @@ type: standard
 	outputFormat := "json"
 	verbose := false
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	err := runStatus(ctx)

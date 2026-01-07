@@ -29,7 +29,7 @@ Displays:
 
 func runStatus(ctx *cmdContext) error {
 	printer := ctx.getPrinter()
-	resolver := ctx.getResolver()
+	resolver := ctx.GetResolver()
 
 	stateManager := sync.NewStateManager(resolver)
 	state, err := stateManager.Load()

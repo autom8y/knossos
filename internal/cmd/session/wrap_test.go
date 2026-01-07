@@ -8,6 +8,8 @@ import (
 
 	"github.com/autom8y/knossos/internal/output"
 	"github.com/autom8y/knossos/internal/session"
+
+	"github.com/autom8y/knossos/internal/cmd/common"
 )
 
 // TestWrapGeneratesWhiteSails verifies that /wrap generates WHITE_SAILS.yaml.
@@ -89,9 +91,13 @@ exit code: 0`
 	outputFormat := "json"
 	verbose := true
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	opts := wrapOptions{
@@ -211,9 +217,13 @@ exit code: 0`
 	outputFormat := "json"
 	verbose := true
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	opts := wrapOptions{
@@ -353,9 +363,13 @@ created_at: 2025-01-05T12:00:00Z
 	outputFormat := "json"
 	verbose := true
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	opts := wrapOptions{
@@ -448,9 +462,13 @@ exit code: 0`
 	outputFormat := "json"
 	verbose := true
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	opts := wrapOptions{
@@ -550,9 +568,13 @@ exit code: 0`
 	outputFormat := "json"
 	verbose := true
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	opts := wrapOptions{
@@ -649,9 +671,13 @@ exit code: 0`
 	outputFormat := "json"
 	verbose := true
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	opts := wrapOptions{
@@ -762,9 +788,13 @@ exit code: 0`
 	outputFormat := "json"
 	verbose := true
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	opts := wrapOptions{
@@ -859,9 +889,13 @@ exit code: 0`
 	outputFormat := "json"
 	verbose := true
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	opts := wrapOptions{

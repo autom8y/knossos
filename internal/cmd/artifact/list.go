@@ -85,7 +85,7 @@ Dimensions:
 			}
 
 			// Format output
-			format := output.ParseFormat(*ctx.output)
+			format := output.ParseFormat(*ctx.Output)
 			if format == output.FormatText {
 				printCountsTable(by, counts, total)
 			} else {

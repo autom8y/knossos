@@ -10,6 +10,8 @@ import (
 	"time"
 
 	"github.com/autom8y/knossos/internal/hook/clewcontract"
+
+	"github.com/autom8y/knossos/internal/cmd/common"
 )
 
 // TestPrepare_EmitsTaskEnd verifies that handoff prepare emits a task_end event.
@@ -66,9 +68,13 @@ standard
 	outputFormat := "json"
 	verbose := true
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	opts := prepareOptions{
@@ -199,9 +205,13 @@ current_phase: design
 	outputFormat := "json"
 	verbose := true
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	opts := executeOptions{
@@ -335,9 +345,13 @@ current_phase: implementation
 	outputFormat := "json"
 	verbose := false
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	err := runStatus(ctx)
@@ -411,9 +425,13 @@ current_phase: design
 	outputFormat := "json"
 	verbose := false
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	opts := historyOptions{
@@ -480,9 +498,13 @@ current_phase: design
 	outputFormat := "json"
 	verbose := false
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	opts := prepareOptions{
@@ -556,10 +578,14 @@ current_phase: design
 			outputFormat := "json"
 			verbose := false
 			ctx := &cmdContext{
-				output:     &outputFormat,
-				verbose:    &verbose,
-				projectDir: &projectDir,
-			}
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
+	}
 
 			opts := prepareOptions{
 				fromAgent: agent,
@@ -651,10 +677,14 @@ current_phase: design
 			outputFormat := "json"
 			verbose := false
 			ctx := &cmdContext{
-				output:     &outputFormat,
-				verbose:    &verbose,
-				projectDir: &projectDir,
-			}
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
+	}
 
 			opts := prepareOptions{
 				fromAgent: tc.from,
@@ -760,10 +790,14 @@ current_phase: design
 			outputFormat := "json"
 			verbose := false
 			ctx := &cmdContext{
-				output:     &outputFormat,
-				verbose:    &verbose,
-				projectDir: &projectDir,
-			}
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
+	}
 
 			opts := prepareOptions{
 				fromAgent: tc.fromAgent,
@@ -802,9 +836,13 @@ func TestStatus_NoSession(t *testing.T) {
 	outputFormat := "json"
 	verbose := false
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	err := runStatus(ctx)
@@ -866,9 +904,13 @@ current_phase: requirements
 	outputFormat := "json"
 	verbose := false
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	opts := historyOptions{
@@ -932,9 +974,13 @@ current_phase: design
 	outputFormat := "json"
 	verbose := false
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	opts := executeOptions{
@@ -1020,9 +1066,13 @@ current_phase: design
 	outputFormat := "json"
 	verbose := false
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	opts := executeOptions{
@@ -1146,10 +1196,14 @@ current_phase: design
 			outputFormat := "json"
 			verbose := false
 			ctx := &cmdContext{
-				output:     &outputFormat,
-				verbose:    &verbose,
-				projectDir: &projectDir,
-			}
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
+	}
 
 			opts := prepareOptions{
 				fromAgent: tc.from,
@@ -1176,9 +1230,13 @@ func TestPrepare_NoActiveSession(t *testing.T) {
 	outputFormat := "json"
 	verbose := false
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	opts := prepareOptions{
@@ -1238,9 +1296,13 @@ current_phase: design
 	outputFormat := "json"
 	verbose := false
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	opts := prepareOptions{
@@ -1331,10 +1393,14 @@ current_phase: design
 			outputFormat := "json"
 			verbose := false
 			ctx := &cmdContext{
-				output:     &outputFormat,
-				verbose:    &verbose,
-				projectDir: &projectDir,
-			}
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
+	}
 
 			opts := prepareOptions{
 				fromAgent: tc.fromAgent,
@@ -1398,9 +1464,13 @@ current_phase: design
 	outputFormat := "json"
 	verbose := true
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	opts := prepareOptions{
@@ -1458,9 +1528,13 @@ func TestExecute_NoActiveSession(t *testing.T) {
 	outputFormat := "json"
 	verbose := false
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	opts := executeOptions{
@@ -1520,9 +1594,13 @@ current_phase: design
 	outputFormat := "json"
 	verbose := false
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	opts := executeOptions{
@@ -1595,10 +1673,14 @@ current_phase: design
 			outputFormat := "json"
 			verbose := false
 			ctx := &cmdContext{
-				output:     &outputFormat,
-				verbose:    &verbose,
-				projectDir: &projectDir,
-			}
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
+	}
 
 			opts := executeOptions{
 				artifactID: "TDD-test-" + tc.agent,
@@ -1684,9 +1766,13 @@ current_phase: design
 	outputFormat := "json"
 	verbose := false
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	opts := executeOptions{
@@ -1780,9 +1866,13 @@ current_phase: implementation
 	outputFormat := "json"
 	verbose := false
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	err := runStatus(ctx)
@@ -1851,10 +1941,14 @@ current_phase: ` + tc.phase + `
 			outputFormat := "json"
 			verbose := false
 			ctx := &cmdContext{
-				output:     &outputFormat,
-				verbose:    &verbose,
-				projectDir: &projectDir,
-			}
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
+	}
 
 			err := runStatus(ctx)
 			if err != nil {
@@ -1928,9 +2022,13 @@ current_phase: validation
 	outputFormat := "json"
 	verbose := false
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	opts := historyOptions{
@@ -2000,9 +2098,13 @@ current_phase: implementation
 	outputFormat := "json"
 	verbose := false
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	opts := historyOptions{
@@ -2027,9 +2129,13 @@ func TestHistory_NoSession(t *testing.T) {
 	outputFormat := "json"
 	verbose := false
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	opts := historyOptions{
@@ -2100,10 +2206,14 @@ current_phase: design
 	outputFormat := "json"
 	verbose := false
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
-		sessionID:  &session2ID,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+			SessionID: &session2ID,
+		},
 	}
 
 	opts := prepareOptions{
@@ -2178,9 +2288,13 @@ current_phase: validation
 	outputFormat := "json"
 	verbose := false
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	opts := executeOptions{

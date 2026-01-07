@@ -39,13 +39,13 @@ type DiffResult struct {
 	Deletions     int      `json:"deletions"`
 }
 
-// DiffOptions configures diff behavior.
-type DiffOptions struct {
+// ManifestDiffOptions configures manifest diff behavior.
+type ManifestDiffOptions struct {
 	IgnoreOrder bool // Treat arrays as sets for comparison
 }
 
 // Diff computes differences between two manifests.
-func Diff(base, compare *Manifest, opts DiffOptions) (*DiffResult, error) {
+func Diff(base, compare *Manifest, opts ManifestDiffOptions) (*DiffResult, error) {
 	result := &DiffResult{
 		Base:    base.Path,
 		Compare: compare.Path,
@@ -73,7 +73,7 @@ func Diff(base, compare *Manifest, opts DiffOptions) (*DiffResult, error) {
 }
 
 // walkAndCompare recursively compares two values and collects changes.
-func walkAndCompare(path string, base, compare interface{}, changes *[]Change, opts DiffOptions) {
+func walkAndCompare(path string, base, compare interface{}, changes *[]Change, opts ManifestDiffOptions) {
 	// Handle nil cases
 	if base == nil && compare == nil {
 		return
@@ -135,7 +135,7 @@ func walkAndCompare(path string, base, compare interface{}, changes *[]Change, o
 }
 
 // compareMaps compares two map values.
-func compareMaps(path string, base, compare map[string]interface{}, changes *[]Change, opts DiffOptions) {
+func compareMaps(path string, base, compare map[string]interface{}, changes *[]Change, opts ManifestDiffOptions) {
 	// Get all keys from both maps
 	allKeys := make(map[string]bool)
 	for k := range base {
@@ -176,7 +176,7 @@ func compareMaps(path string, base, compare map[string]interface{}, changes *[]C
 }
 
 // compareArrays compares two arrays maintaining order.
-func compareArrays(path string, base, compare []interface{}, changes *[]Change, opts DiffOptions) {
+func compareArrays(path string, base, compare []interface{}, changes *[]Change, opts ManifestDiffOptions) {
 	maxLen := len(base)
 	if len(compare) > maxLen {
 		maxLen = len(compare)

@@ -27,17 +27,17 @@ func newLockCmd(ctx *cmdContext) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().IntVarP(&opts.timeout, "timeout", "t", 10, "Lock acquisition timeout in seconds")
+	cmd.Flags().IntVarP(&opts.timeout, "timeout", "T", 10, "Lock acquisition timeout in seconds")
 
 	return cmd
 }
 
 func runLock(ctx *cmdContext, opts lockOptions) error {
 	printer := ctx.getPrinter()
-	resolver := ctx.getResolver()
-	lockMgr := ctx.getLockManager()
+	resolver := ctx.GetResolver()
+	lockMgr := ctx.GetLockManager()
 
-	sessionID, err := ctx.getSessionID()
+	sessionID, err := ctx.GetSessionID()
 	if err != nil {
 		printer.PrintError(errors.Wrap(errors.CodeGeneralError, "failed to get session ID", err))
 		return err

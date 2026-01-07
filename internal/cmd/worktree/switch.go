@@ -76,7 +76,7 @@ func runSwitch(ctx *cmdContext, idOrName string, opts switchOptions) error {
 		return err
 	}
 
-	switchOpts := worktree.SwitchOptions{
+	switchOpts := worktree.WorktreeSwitchOptions{
 		UpdateRite: opts.updateRite,
 	}
 

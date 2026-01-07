@@ -9,6 +9,8 @@ import (
 
 	"github.com/autom8y/knossos/internal/output"
 	"github.com/autom8y/knossos/test/hooks/testutil"
+
+	"github.com/autom8y/knossos/internal/cmd/common"
 )
 
 func TestRouteOutput_Text(t *testing.T) {
@@ -267,9 +269,13 @@ func TestRunRoute_SessionCommands(t *testing.T) {
 			outputFlag := "json"
 			verboseFlag := false
 			ctx := &cmdContext{
-				output:  &outputFlag,
-				verbose: &verboseFlag,
-			}
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:  &outputFlag,
+				Verbose: &verboseFlag,
+			},
+		},
+	}
 
 			err := runRouteWithPrinter(ctx, printer)
 			if err != nil {
@@ -307,8 +313,12 @@ func TestRunRoute_OrchestratorCommands(t *testing.T) {
 	outputFlag := "json"
 	verboseFlag := false
 	ctx := &cmdContext{
-		output:  &outputFlag,
-		verbose: &verboseFlag,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:  &outputFlag,
+				Verbose: &verboseFlag,
+			},
+		},
 	}
 
 	err := runRouteWithPrinter(ctx, printer)
@@ -352,9 +362,13 @@ func TestRunRoute_InitiativeCommands(t *testing.T) {
 			outputFlag := "json"
 			verboseFlag := false
 			ctx := &cmdContext{
-				output:  &outputFlag,
-				verbose: &verboseFlag,
-			}
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:  &outputFlag,
+				Verbose: &verboseFlag,
+			},
+		},
+	}
 
 			err := runRouteWithPrinter(ctx, printer)
 			if err != nil {
@@ -396,9 +410,13 @@ func TestRunRoute_GitCommands(t *testing.T) {
 			outputFlag := "json"
 			verboseFlag := false
 			ctx := &cmdContext{
-				output:  &outputFlag,
-				verbose: &verboseFlag,
-			}
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:  &outputFlag,
+				Verbose: &verboseFlag,
+			},
+		},
+	}
 
 			err := runRouteWithPrinter(ctx, printer)
 			if err != nil {
@@ -436,8 +454,12 @@ func TestRunRoute_ThreadCommands(t *testing.T) {
 	outputFlag := "json"
 	verboseFlag := false
 	ctx := &cmdContext{
-		output:  &outputFlag,
-		verbose: &verboseFlag,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:  &outputFlag,
+				Verbose: &verboseFlag,
+			},
+		},
 	}
 
 	err := runRouteWithPrinter(ctx, printer)
@@ -477,8 +499,12 @@ func TestRunRoute_RegularMessage(t *testing.T) {
 	outputFlag := "json"
 	verboseFlag := false
 	ctx := &cmdContext{
-		output:  &outputFlag,
-		verbose: &verboseFlag,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:  &outputFlag,
+				Verbose: &verboseFlag,
+			},
+		},
 	}
 
 	err := runRouteWithPrinter(ctx, printer)
@@ -509,8 +535,12 @@ func TestRunRoute_EmptyMessage(t *testing.T) {
 	outputFlag := "json"
 	verboseFlag := false
 	ctx := &cmdContext{
-		output:  &outputFlag,
-		verbose: &verboseFlag,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:  &outputFlag,
+				Verbose: &verboseFlag,
+			},
+		},
 	}
 
 	err := runRouteWithPrinter(ctx, printer)
@@ -541,8 +571,12 @@ func TestRunRoute_WrongEventType(t *testing.T) {
 	outputFlag := "json"
 	verboseFlag := false
 	ctx := &cmdContext{
-		output:  &outputFlag,
-		verbose: &verboseFlag,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:  &outputFlag,
+				Verbose: &verboseFlag,
+			},
+		},
 	}
 
 	err := runRouteWithPrinter(ctx, printer)
@@ -573,8 +607,12 @@ func TestRunRoute_UnknownCommand(t *testing.T) {
 	outputFlag := "json"
 	verboseFlag := false
 	ctx := &cmdContext{
-		output:  &outputFlag,
-		verbose: &verboseFlag,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:  &outputFlag,
+				Verbose: &verboseFlag,
+			},
+		},
 	}
 
 	err := runRouteWithPrinter(ctx, printer)
@@ -613,9 +651,13 @@ func TestRunRoute_PartialCommandMatch(t *testing.T) {
 			outputFlag := "json"
 			verboseFlag := false
 			ctx := &cmdContext{
-				output:  &outputFlag,
-				verbose: &verboseFlag,
-			}
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:  &outputFlag,
+				Verbose: &verboseFlag,
+			},
+		},
+	}
 
 			err := runRouteWithPrinter(ctx, printer)
 			if err != nil {
@@ -649,8 +691,12 @@ func BenchmarkRouteHook_SlashCommand(b *testing.B) {
 	verboseFlag := false
 
 	ctx := &cmdContext{
-		output:  &outputFlag,
-		verbose: &verboseFlag,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:  &outputFlag,
+				Verbose: &verboseFlag,
+			},
+		},
 	}
 
 	var stdout, stderr bytes.Buffer
@@ -685,8 +731,12 @@ func BenchmarkRouteHook_RegularMessage(b *testing.B) {
 	verboseFlag := false
 
 	ctx := &cmdContext{
-		output:  &outputFlag,
-		verbose: &verboseFlag,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:  &outputFlag,
+				Verbose: &verboseFlag,
+			},
+		},
 	}
 
 	var stdout, stderr bytes.Buffer

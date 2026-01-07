@@ -47,7 +47,7 @@ Strategies:
 
 func runResolve(ctx *cmdContext, path string, opts resolveOptions) error {
 	printer := ctx.getPrinter()
-	resolver := ctx.getResolver()
+	resolver := ctx.GetResolver()
 
 	// Parse strategy
 	var strategy sync.ResolveStrategy

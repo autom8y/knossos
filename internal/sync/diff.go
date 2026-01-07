@@ -11,8 +11,8 @@ import (
 	"github.com/autom8y/knossos/internal/paths"
 )
 
-// DiffOptions configures diff behavior.
-type DiffOptions struct {
+// FileDiffOptions configures file diff behavior.
+type FileDiffOptions struct {
 	Path     string // Specific path to diff (empty = all tracked)
 	ShowFull bool   // Show full content, not just summary
 }
@@ -60,7 +60,7 @@ func NewDiffer(resolver *paths.Resolver) *Differ {
 }
 
 // Diff computes differences between local and remote.
-func (d *Differ) Diff(opts DiffOptions) (*DiffResult, error) {
+func (d *Differ) Diff(opts FileDiffOptions) (*DiffResult, error) {
 	state, err := d.state.Load()
 	if err != nil {
 		return nil, err

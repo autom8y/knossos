@@ -40,10 +40,10 @@ func newListCmd(ctx *cmdContext) *cobra.Command {
 
 func runList(ctx *cmdContext, opts listOptions) error {
 	printer := ctx.getPrinter()
-	resolver := ctx.getResolver()
+	resolver := ctx.GetResolver()
 
 	// Get current session ID
-	currentID, _ := ctx.getCurrentSessionID()
+	currentID, _ := ctx.GetCurrentSessionID()
 
 	var sessions []output.SessionSummary
 

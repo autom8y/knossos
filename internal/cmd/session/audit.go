@@ -38,10 +38,10 @@ func newAuditCmd(ctx *cmdContext) *cobra.Command {
 
 func runAudit(ctx *cmdContext, opts auditOptions) error {
 	printer := ctx.getPrinter()
-	resolver := ctx.getResolver()
-	lockMgr := ctx.getLockManager()
+	resolver := ctx.GetResolver()
+	lockMgr := ctx.GetLockManager()
 
-	sessionID, err := ctx.getSessionID()
+	sessionID, err := ctx.GetSessionID()
 	if err != nil {
 		printer.PrintError(errors.Wrap(errors.CodeGeneralError, "failed to get session ID", err))
 		return err

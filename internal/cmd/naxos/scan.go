@@ -53,7 +53,7 @@ Examples:
 
 func runScan(ctx *cmdContext, opts scanOptions) error {
 	printer := ctx.getPrinter()
-	resolver := ctx.getResolver()
+	resolver := ctx.GetResolver()
 
 	// Build scan configuration
 	config := naxos.ScanConfig{

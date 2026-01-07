@@ -41,7 +41,7 @@ Displays:
 
 func runHistory(ctx *cmdContext, opts historyOptions) error {
 	printer := ctx.getPrinter()
-	resolver := ctx.getResolver()
+	resolver := ctx.GetResolver()
 
 	historyManager := sync.NewHistoryManager(resolver)
 	listOpts := sync.ListOptions{

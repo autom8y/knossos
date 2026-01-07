@@ -2,28 +2,28 @@
 package tribute
 
 import (
-	"os"
-
 	"github.com/spf13/cobra"
 
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"github.com/autom8y/knossos/internal/output"
 )
 
 // cmdContext holds shared state for tribute commands.
 type cmdContext struct {
-	output     *string
-	verbose    *bool
-	projectDir *string
-	sessionID  *string
+	common.SessionContext
 }
 
 // NewTributeCmd creates the tribute command group.
 func NewTributeCmd(outputFlag *string, verboseFlag *bool, projectDir, sessionID *string) *cobra.Command {
 	ctx := &cmdContext{
-		output:     outputFlag,
-		verbose:    verboseFlag,
-		projectDir: projectDir,
-		sessionID:  sessionID,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     outputFlag,
+				Verbose:    verboseFlag,
+				ProjectDir: projectDir,
+			},
+			SessionID: sessionID,
+		},
 	}
 
 	cmd := &cobra.Command{
@@ -42,6 +42,9 @@ and machine-parseable metadata for analytics and future context loading.`,
 	// Add subcommands
 	cmd.AddCommand(newGenerateCmd(ctx))
 
+	// Tribute commands do NOT require project context (can specify session-dir)
+	common.SetNeedsProject(cmd, false, true)
+
 	return cmd
 }
 
@@ -49,13 +52,5 @@ and machine-parseable metadata for analytics and future context loading.`,
 
 // getPrinter creates an output printer from the context.
 func (c *cmdContext) getPrinter() *output.Printer {
-	format := output.FormatText
-	if c.output != nil {
-		format = output.ParseFormat(*c.output)
-	}
-	verbose := false
-	if c.verbose != nil {
-		verbose = *c.verbose
-	}
-	return output.NewPrinter(format, os.Stdout, os.Stderr, verbose)
+	return c.GetPrinter(output.FormatText)
 }

@@ -11,6 +11,8 @@ import (
 
 	"github.com/autom8y/knossos/internal/hook/clewcontract"
 	"github.com/autom8y/knossos/internal/session"
+
+	"github.com/autom8y/knossos/internal/cmd/common"
 )
 
 // TestPark_EmitsSessionEnd verifies that parking a session emits a session_end event
@@ -68,9 +70,13 @@ standard
 	outputFormat := "json"
 	verbose := true
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	opts := parkOptions{
@@ -195,9 +201,13 @@ standard
 	outputFormat := "json"
 	verbose := true
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	opts := wrapOptions{
@@ -331,9 +341,13 @@ standard
 	outputFormat := "json"
 	verbose := true
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	parkOpts := parkOptions{
@@ -466,9 +480,13 @@ current_phase: implementation
 	outputFormat := "json"
 	verbose := true
 	ctx := &cmdContext{
-		output:     &outputFormat,
-		verbose:    &verbose,
-		projectDir: &projectDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
 	}
 
 	opts := parkOptions{

@@ -3,31 +3,30 @@ package validate
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/spf13/cobra"
 
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"github.com/autom8y/knossos/internal/errors"
 	"github.com/autom8y/knossos/internal/output"
-	"github.com/autom8y/knossos/internal/paths"
 	"github.com/autom8y/knossos/internal/validation"
 )
 
 // cmdContext holds shared state for validate commands.
 type cmdContext struct {
-	output     *string
-	verbose    *bool
-	projectDir *string
+	common.BaseContext
 }
 
 // NewValidateCmd creates the validate command group.
 func NewValidateCmd(outputFlag *string, verboseFlag *bool, projectDir *string) *cobra.Command {
 	ctx := &cmdContext{
-		output:     outputFlag,
-		verbose:    verboseFlag,
-		projectDir: projectDir,
+		BaseContext: common.BaseContext{
+			Output:     outputFlag,
+			Verbose:    verboseFlag,
+			ProjectDir: projectDir,
+		},
 	}
 
 	cmd := &cobra.Command{
@@ -47,6 +46,9 @@ Examples:
 	cmd.AddCommand(newHandoffCmd(ctx))
 	cmd.AddCommand(newSchemaCmd(ctx))
 
+	// Validate commands require project context
+	common.SetNeedsProject(cmd, true, true)
+
 	return cmd
 }
 
@@ -54,24 +56,7 @@ Examples:
 
 // getPrinter creates an output printer from the context.
 func (c *cmdContext) getPrinter() *output.Printer {
-	format := output.FormatText
-	if c.output != nil {
-		format = output.ParseFormat(*c.output)
-	}
-	verbose := false
-	if c.verbose != nil {
-		verbose = *c.verbose
-	}
-	return output.NewPrinter(format, os.Stdout, os.Stderr, verbose)
-}
-
-// getResolver creates a path resolver from the context.
-func (c *cmdContext) getResolver() *paths.Resolver {
-	projectDir := ""
-	if c.projectDir != nil {
-		projectDir = *c.projectDir
-	}
-	return paths.NewResolver(projectDir)
+	return c.GetPrinter(output.FormatText)
 }
 
 // ArtifactOutput represents the JSON output for artifact validation.
@@ -137,7 +122,7 @@ Examples:
 
 			// Resolve to absolute path if needed
 			if !filepath.IsAbs(filePath) {
-				resolver := ctx.getResolver()
+				resolver := ctx.GetResolver()
 				filePath = filepath.Join(resolver.ProjectRoot(), filePath)
 			}
 
@@ -430,7 +415,7 @@ Examples:
 			// Resolve artifact path
 			filePath := artifactPath
 			if !filepath.IsAbs(filePath) {
-				resolver := ctx.getResolver()
+				resolver := ctx.GetResolver()
 				filePath = filepath.Join(resolver.ProjectRoot(), filePath)
 			}
 
@@ -533,7 +518,7 @@ Examples:
 
 			// Resolve to absolute path if needed
 			if !filepath.IsAbs(filePath) {
-				resolver := ctx.getResolver()
+				resolver := ctx.GetResolver()
 				filePath = filepath.Join(resolver.ProjectRoot(), filePath)
 			}
 

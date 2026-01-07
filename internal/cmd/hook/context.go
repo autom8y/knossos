@@ -86,7 +86,7 @@ func runContext(ctx *cmdContext) error {
 	}
 
 	// Get resolver for path lookups
-	resolver := ctx.getResolver()
+	resolver := ctx.GetResolver()
 	if resolver.ProjectRoot() == "" {
 		// Try to discover project from environment
 		if hookEnv.ProjectDir != "" {
@@ -97,7 +97,7 @@ func runContext(ctx *cmdContext) error {
 	}
 
 	// Get current session ID
-	sessionID, err := ctx.getCurrentSessionID()
+	sessionID, err := ctx.GetCurrentSessionID()
 	if err != nil {
 		printer.VerboseLog("warn", "failed to read current session", map[string]interface{}{"error": err.Error()})
 		return outputNoSession(printer)

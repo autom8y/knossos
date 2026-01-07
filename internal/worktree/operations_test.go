@@ -32,7 +32,7 @@ func TestSwitchWorktree(t *testing.T) {
 	}
 
 	// Test switch
-	switched, err := mgr.Switch(wt.ID, SwitchOptions{UpdateRite: false})
+	switched, err := mgr.Switch(wt.ID, WorktreeSwitchOptions{UpdateRite: false})
 	if err != nil {
 		t.Fatalf("Switch failed: %v", err)
 	}
@@ -62,7 +62,7 @@ func TestSwitchByName(t *testing.T) {
 	}
 
 	// Switch by name
-	switched, err := mgr.Switch("my-feature", SwitchOptions{})
+	switched, err := mgr.Switch("my-feature", WorktreeSwitchOptions{})
 	if err != nil {
 		t.Fatalf("Switch by name failed: %v", err)
 	}
@@ -82,7 +82,7 @@ func TestSwitchNonexistent(t *testing.T) {
 		t.Fatalf("Failed to create manager: %v", err)
 	}
 
-	_, err = mgr.Switch("nonexistent", SwitchOptions{})
+	_, err = mgr.Switch("nonexistent", WorktreeSwitchOptions{})
 	if err == nil {
 		t.Error("Switch to nonexistent worktree should fail")
 	}
@@ -108,7 +108,7 @@ func TestSwitchWithRiteUpdate(t *testing.T) {
 	}
 
 	// Switch with rite update
-	_, err = mgr.Switch(wt.ID, SwitchOptions{UpdateRite: true})
+	_, err = mgr.Switch(wt.ID, WorktreeSwitchOptions{UpdateRite: true})
 	if err != nil {
 		t.Fatalf("Switch failed: %v", err)
 	}
@@ -269,7 +269,7 @@ func TestSyncWorktree(t *testing.T) {
 	}
 
 	// Sync without pull
-	result, err := mgr.Sync(wt.ID, SyncOptions{Pull: false})
+	result, err := mgr.Sync(wt.ID, WorktreeSyncOptions{Pull: false})
 	if err != nil {
 		t.Fatalf("Sync failed: %v", err)
 	}
@@ -301,7 +301,7 @@ func TestSyncByName(t *testing.T) {
 		t.Fatalf("Failed to create worktree: %v", err)
 	}
 
-	result, err := mgr.Sync("sync-named", SyncOptions{})
+	result, err := mgr.Sync("sync-named", WorktreeSyncOptions{})
 	if err != nil {
 		t.Fatalf("Sync by name failed: %v", err)
 	}
@@ -321,7 +321,7 @@ func TestSyncNonexistent(t *testing.T) {
 		t.Fatalf("Failed to create manager: %v", err)
 	}
 
-	_, err = mgr.Sync("nonexistent", SyncOptions{})
+	_, err = mgr.Sync("nonexistent", WorktreeSyncOptions{})
 	if err == nil {
 		t.Error("Sync of nonexistent worktree should fail")
 	}

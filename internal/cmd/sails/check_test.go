@@ -13,6 +13,8 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/autom8y/knossos/internal/sails"
+
+	"github.com/autom8y/knossos/internal/cmd/common"
 )
 
 // =============================================================================
@@ -770,8 +772,12 @@ func TestCmdContext_GetPrinter(t *testing.T) {
 	verbose := true
 
 	ctx := &cmdContext{
-		output:  &outputFormat,
-		verbose: &verbose,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:  &outputFormat,
+				Verbose: &verbose,
+			},
+		},
 	}
 
 	printer := ctx.getPrinter()
@@ -781,8 +787,12 @@ func TestCmdContext_GetPrinter(t *testing.T) {
 // TestCmdContext_NilValues handles nil context values gracefully.
 func TestCmdContext_NilValues(t *testing.T) {
 	ctx := &cmdContext{
-		output:  nil,
-		verbose: nil,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:  nil,
+				Verbose: nil,
+			},
+		},
 	}
 
 	// Should not panic
@@ -1022,8 +1032,12 @@ func TestCmdContext_ConcurrentPrinterAccess(t *testing.T) {
 	verbose := true
 
 	ctx := &cmdContext{
-		output:  &outputFormat,
-		verbose: &verbose,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:  &outputFormat,
+				Verbose: &verbose,
+			},
+		},
 	}
 
 	// Create multiple printers concurrently

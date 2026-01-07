@@ -43,7 +43,7 @@ Pre-push checks:
 
 func runPush(ctx *cmdContext, opts pushOptions) error {
 	printer := ctx.getPrinter()
-	resolver := ctx.getResolver()
+	resolver := ctx.GetResolver()
 
 	// Create history manager
 	historyManager := sync.NewHistoryManager(resolver)

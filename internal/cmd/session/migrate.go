@@ -40,8 +40,8 @@ func newMigrateCmd(ctx *cmdContext) *cobra.Command {
 
 func runMigrate(ctx *cmdContext, opts migrateOptions) error {
 	printer := ctx.getPrinter()
-	resolver := ctx.getResolver()
-	lockMgr := ctx.getLockManager()
+	resolver := ctx.GetResolver()
+	lockMgr := ctx.GetLockManager()
 
 	var migrated []output.MigrationResult
 	var skipped []output.SkipResult
@@ -80,7 +80,7 @@ func runMigrate(ctx *cmdContext, opts migrateOptions) error {
 		}
 	} else {
 		// Get session from flag or current
-		sessionID, err := ctx.getSessionID()
+		sessionID, err := ctx.GetSessionID()
 		if err != nil {
 			printer.PrintError(errors.Wrap(errors.CodeGeneralError, "failed to get session ID", err))
 			return err

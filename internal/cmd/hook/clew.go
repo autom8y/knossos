@@ -159,7 +159,7 @@ func runClew(ctx *cmdContext) error {
 // getSessionDir determines the session directory from context and environment.
 func getSessionDir(ctx *cmdContext, hookEnv *hook.Env) string {
 	// Try to get session ID from context
-	sessionID, err := ctx.getCurrentSessionID()
+	sessionID, err := ctx.GetCurrentSessionID()
 	if err != nil || sessionID == "" {
 		return ""
 	}
@@ -167,7 +167,7 @@ func getSessionDir(ctx *cmdContext, hookEnv *hook.Env) string {
 	sessionID = strings.TrimSpace(sessionID)
 
 	// Get resolver for path lookups
-	resolver := ctx.getResolver()
+	resolver := ctx.GetResolver()
 	if resolver.ProjectRoot() == "" {
 		// Try to discover project from environment
 		if hookEnv.ProjectDir != "" {

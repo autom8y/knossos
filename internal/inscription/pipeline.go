@@ -77,8 +77,8 @@ type Pipeline struct {
 	ProjectRoot string
 }
 
-// SyncOptions configures the sync operation.
-type SyncOptions struct {
+// InscriptionSyncOptions configures the inscription sync operation.
+type InscriptionSyncOptions struct {
 	// Force forces full regeneration regardless of hashes.
 	Force bool
 
@@ -192,7 +192,7 @@ func NewPipelineWithPaths(claudeMDPath, manifestPath, templateDir, backupDir str
 
 // Sync performs the full sync pipeline.
 // This is the main entry point for CLAUDE.md synchronization.
-func (p *Pipeline) Sync(opts SyncOptions) (*SyncResult, error) {
+func (p *Pipeline) Sync(opts InscriptionSyncOptions) (*SyncResult, error) {
 	start := time.Now()
 
 	// 1. Load or create manifest
@@ -231,7 +231,7 @@ func (p *Pipeline) Sync(opts SyncOptions) (*SyncResult, error) {
 	// 7. Create merger and merge regions
 	merger := NewMerger(manifest, generator)
 
-	mergeOpts := MergeOptions{
+	mergeOpts := InscriptionMergeOptions{
 		Force:  opts.Force,
 		DryRun: opts.DryRun,
 	}
@@ -292,7 +292,7 @@ func (p *Pipeline) Sync(opts SyncOptions) (*SyncResult, error) {
 }
 
 // DryRun previews changes without writing.
-func (p *Pipeline) DryRun(opts SyncOptions) (*SyncPreview, error) {
+func (p *Pipeline) DryRun(opts InscriptionSyncOptions) (*SyncPreview, error) {
 	opts.DryRun = true
 
 	// Load manifest

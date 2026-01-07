@@ -20,8 +20,7 @@ import (
 
 // Options configures materialization behavior.
 type Options struct {
-	Force      bool // Force regeneration, overwriting local changes
-	Update     bool // Re-sync even if already on this rite (alias for Force)
+	Force      bool // Skip idempotency check; proceed even if already on this rite
 	DryRun     bool // Preview changes without applying
 	RemoveAll  bool // Remove all orphan agents (with backup)
 	KeepAll    bool // Preserve all orphan agents (default)
@@ -86,8 +85,8 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 
 	claudeDir := m.resolver.ClaudeDir()
 
-	// Check if already on this rite (skip unless --force or --update)
-	if !opts.Force && !opts.Update && !opts.DryRun {
+	// Check if already on this rite (skip unless --force)
+	if !opts.Force && !opts.DryRun {
 		currentRite, err := m.getCurrentRite(claudeDir)
 		if err == nil && currentRite == activeRiteName {
 			result.OrphanAction = "skipped"

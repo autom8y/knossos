@@ -35,13 +35,13 @@ Phase and specialist can be specified explicitly or inferred from context.`,
 			printer := ctx.getPrinter()
 			registry := ctx.getRegistry()
 			aggregator := ctx.getAggregator()
-			resolver := ctx.getResolver()
+			resolver := ctx.GetResolver()
 
 			// Determine session ID
 			sid := sessionID
 			if sid == "" {
 				var err error
-				sid, err = ctx.getSessionID()
+				sid, err = ctx.GetSessionID()
 				if err != nil {
 					printer.PrintError(errors.Wrap(errors.CodeGeneralError, "failed to get session ID", err))
 					return err

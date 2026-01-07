@@ -282,8 +282,8 @@ func (m *Merger) wrapWithMarkers(regionName string, region *Region, content stri
 	return WrapContent(regionName, content, options)
 }
 
-// MergeOptions configures the merge behavior.
-type MergeOptions struct {
+// InscriptionMergeOptions configures the inscription merge behavior.
+type InscriptionMergeOptions struct {
 	// Force overwrites all content regardless of ownership.
 	Force bool
 
@@ -295,7 +295,7 @@ type MergeOptions struct {
 }
 
 // MergeWithOptions merges with custom options.
-func (m *Merger) MergeWithOptions(existingContent string, generatedContent map[string]string, opts MergeOptions) (*MergeResult, error) {
+func (m *Merger) MergeWithOptions(existingContent string, generatedContent map[string]string, opts InscriptionMergeOptions) (*MergeResult, error) {
 	if opts.Force {
 		// Force mode: overwrite everything except satellite
 		return m.forceMerge(existingContent, generatedContent)

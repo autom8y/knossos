@@ -12,6 +12,8 @@ import (
 	"github.com/autom8y/knossos/internal/output"
 	"github.com/autom8y/knossos/internal/session"
 	"github.com/autom8y/knossos/test/hooks/testutil"
+
+	"github.com/autom8y/knossos/internal/cmd/common"
 )
 
 func TestContextOutput_Text(t *testing.T) {
@@ -121,10 +123,14 @@ func TestRunContext_EarlyExit_HooksDisabled(t *testing.T) {
 	projectDir := ""
 	sessionIDVal := ""
 	ctx := &cmdContext{
-		output:     &outputFlag,
-		verbose:    &verboseFlag,
-		projectDir: &projectDir,
-		sessionID:  &sessionIDVal,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &projectDir,
+			},
+			SessionID: &sessionIDVal,
+		},
 	}
 
 	// Override getPrinter to use our buffer
@@ -200,10 +206,14 @@ current_phase: "implementation"
 	outputFlag := "json"
 	verboseFlag := false
 	ctx := &cmdContext{
-		output:     &outputFlag,
-		verbose:    &verboseFlag,
-		projectDir: &tmpDir,
-		sessionID:  nil,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &tmpDir,
+			},
+			SessionID: nil,
+		},
 	}
 
 	err := runContextWithPrinter(ctx, printer)
@@ -254,10 +264,14 @@ func TestRunContext_NoSession(t *testing.T) {
 	outputFlag := "json"
 	verboseFlag := false
 	ctx := &cmdContext{
-		output:     &outputFlag,
-		verbose:    &verboseFlag,
-		projectDir: &tmpDir,
-		sessionID:  nil,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &tmpDir,
+			},
+			SessionID: nil,
+		},
 	}
 
 	err := runContextWithPrinter(ctx, printer)
@@ -286,10 +300,14 @@ func BenchmarkContextHook_EarlyExit(b *testing.B) {
 	sessionIDVal := ""
 
 	ctx := &cmdContext{
-		output:     &outputFlag,
-		verbose:    &verboseFlag,
-		projectDir: &projectDir,
-		sessionID:  &sessionIDVal,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &projectDir,
+			},
+			SessionID: &sessionIDVal,
+		},
 	}
 
 	var stdout, stderr bytes.Buffer
@@ -347,10 +365,14 @@ current_phase: "implementation"
 	verboseFlag := false
 
 	ctx := &cmdContext{
-		output:     &outputFlag,
-		verbose:    &verboseFlag,
-		projectDir: &tmpDir,
-		sessionID:  nil,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &tmpDir,
+			},
+			SessionID: nil,
+		},
 	}
 
 	var stdout, stderr bytes.Buffer
@@ -380,7 +402,7 @@ func runContextWithPrinter(ctx *cmdContext, printer *output.Printer) error {
 	hookEnv := ctx.getHookEnv()
 
 	// Get resolver for path lookups
-	resolver := ctx.getResolver()
+	resolver := ctx.GetResolver()
 	if resolver.ProjectRoot() == "" {
 		if hookEnv.ProjectDir != "" {
 			resolver = newResolverFromPath(hookEnv.ProjectDir)
@@ -390,7 +412,7 @@ func runContextWithPrinter(ctx *cmdContext, printer *output.Printer) error {
 	}
 
 	// Get current session ID
-	sessionIDStr, err := ctx.getCurrentSessionID()
+	sessionIDStr, err := ctx.GetCurrentSessionID()
 	if err != nil {
 		return outputNoSession(printer)
 	}

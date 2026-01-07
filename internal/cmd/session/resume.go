@@ -26,11 +26,11 @@ func newResumeCmd(ctx *cmdContext) *cobra.Command {
 
 func runResume(ctx *cmdContext) error {
 	printer := ctx.getPrinter()
-	resolver := ctx.getResolver()
-	lockMgr := ctx.getLockManager()
+	resolver := ctx.GetResolver()
+	lockMgr := ctx.GetLockManager()
 	fsm := session.NewFSM()
 
-	sessionID, err := ctx.getSessionID()
+	sessionID, err := ctx.GetSessionID()
 	if err != nil {
 		printer.PrintError(errors.Wrap(errors.CodeGeneralError, "failed to get session ID", err))
 		return err
@@ -82,7 +82,7 @@ func runResume(ctx *cmdContext) error {
 	}
 
 	// Set as current session
-	if err := ctx.setCurrentSessionID(sessionID); err != nil {
+	if err := ctx.SetCurrentSessionID(sessionID); err != nil {
 		printer.VerboseLog("warn", "failed to set current session", map[string]interface{}{"error": err.Error()})
 	}
 

@@ -11,6 +11,8 @@ import (
 
 	"github.com/autom8y/knossos/internal/output"
 	"github.com/autom8y/knossos/test/hooks/testutil"
+
+	"github.com/autom8y/knossos/internal/cmd/common"
 )
 
 // =============================================================================
@@ -25,11 +27,15 @@ func TestWithTimeout_Success(t *testing.T) {
 	sessionID := ""
 
 	ctx := &cmdContext{
-		output:     &outputFlag,
-		verbose:    &verboseFlag,
-		projectDir: &projectDir,
-		sessionID:  &sessionID,
-		timeout:    100 * time.Millisecond,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &projectDir,
+			},
+			SessionID: &sessionID,
+		},
+		timeout: 100 * time.Millisecond,
 	}
 
 	var called bool
@@ -53,11 +59,15 @@ func TestWithTimeout_ReturnsError(t *testing.T) {
 	sessionID := ""
 
 	ctx := &cmdContext{
-		output:     &outputFlag,
-		verbose:    &verboseFlag,
-		projectDir: &projectDir,
-		sessionID:  &sessionID,
-		timeout:    100 * time.Millisecond,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &projectDir,
+			},
+			SessionID: &sessionID,
+		},
+		timeout: 100 * time.Millisecond,
 	}
 
 	expectedErr := errors.New("test error")
@@ -77,11 +87,15 @@ func TestWithTimeout_Timeout(t *testing.T) {
 	sessionID := ""
 
 	ctx := &cmdContext{
-		output:     &outputFlag,
-		verbose:    &verboseFlag,
-		projectDir: &projectDir,
-		sessionID:  &sessionID,
-		timeout:    10 * time.Millisecond, // Very short timeout
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &projectDir,
+			},
+			SessionID: &sessionID,
+		},
+		timeout: 10 * time.Millisecond,
 	}
 
 	start := time.Now()
@@ -128,10 +142,7 @@ func TestEarlyExitThreshold(t *testing.T) {
 // =============================================================================
 
 func TestGetPrinter_DefaultJSON(t *testing.T) {
-	ctx := &cmdContext{
-		output:  nil,
-		verbose: nil,
-	}
+	ctx := &cmdContext{}
 
 	printer := ctx.getPrinter()
 	if printer == nil {
@@ -146,8 +157,11 @@ func TestGetPrinter_WithFormat(t *testing.T) {
 		t.Run(format, func(t *testing.T) {
 			f := format
 			ctx := &cmdContext{
-				output:  &f,
-				verbose: nil,
+				SessionContext: common.SessionContext{
+					BaseContext: common.BaseContext{
+						Output: &f,
+					},
+				},
 			}
 
 			printer := ctx.getPrinter()
@@ -159,11 +173,9 @@ func TestGetPrinter_WithFormat(t *testing.T) {
 }
 
 func TestGetResolver_Empty(t *testing.T) {
-	ctx := &cmdContext{
-		projectDir: nil,
-	}
+	ctx := &cmdContext{}
 
-	resolver := ctx.getResolver()
+	resolver := ctx.GetResolver()
 	if resolver == nil {
 		t.Fatal("getResolver() returned nil")
 	}
@@ -172,10 +184,14 @@ func TestGetResolver_Empty(t *testing.T) {
 func TestGetResolver_WithProjectDir(t *testing.T) {
 	tmpDir := t.TempDir()
 	ctx := &cmdContext{
-		projectDir: &tmpDir,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				ProjectDir: &tmpDir,
+			},
+		},
 	}
 
-	resolver := ctx.getResolver()
+	resolver := ctx.GetResolver()
 	if resolver == nil {
 		t.Fatal("getResolver() returned nil")
 	}
@@ -212,10 +228,12 @@ func TestShouldEarlyExit_HooksEnabled(t *testing.T) {
 func TestGetCurrentSessionID_FromContext(t *testing.T) {
 	sessionID := "test-session-123"
 	ctx := &cmdContext{
-		sessionID: &sessionID,
+		SessionContext: common.SessionContext{
+			SessionID: &sessionID,
+		},
 	}
 
-	result, err := ctx.getCurrentSessionID()
+	result, err := ctx.GetCurrentSessionID()
 	if err != nil {
 		t.Fatalf("getCurrentSessionID() error = %v", err)
 	}
@@ -239,11 +257,14 @@ func TestGetCurrentSessionID_FromFile(t *testing.T) {
 	}
 
 	ctx := &cmdContext{
-		projectDir: &tmpDir,
-		sessionID:  nil,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				ProjectDir: &tmpDir,
+			},
+		},
 	}
 
-	result, err := ctx.getCurrentSessionID()
+	result, err := ctx.GetCurrentSessionID()
 	if err != nil {
 		t.Fatalf("getCurrentSessionID() error = %v", err)
 	}
@@ -256,11 +277,14 @@ func TestGetCurrentSessionID_NoFile(t *testing.T) {
 	tmpDir := t.TempDir()
 
 	ctx := &cmdContext{
-		projectDir: &tmpDir,
-		sessionID:  nil,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				ProjectDir: &tmpDir,
+			},
+		},
 	}
 
-	result, err := ctx.getCurrentSessionID()
+	result, err := ctx.GetCurrentSessionID()
 	if err != nil {
 		t.Fatalf("getCurrentSessionID() error = %v", err)
 	}
@@ -363,11 +387,15 @@ func TestIntegration_ContextHook_NoSession(t *testing.T) {
 	outputFlag := "json"
 	verboseFlag := false
 	ctx := &cmdContext{
-		output:     &outputFlag,
-		verbose:    &verboseFlag,
-		projectDir: &tmpDir,
-		sessionID:  nil,
-		timeout:    DefaultTimeout,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &tmpDir,
+			},
+			SessionID: nil,
+		},
+		timeout: DefaultTimeout,
 	}
 
 	err := runContextWithPrinter(ctx, printer)
@@ -414,10 +442,14 @@ func TestIntegration_ValidateHook_Chain(t *testing.T) {
 			verboseFlag := false
 			projectDir := ""
 			ctx := &cmdContext{
-				output:     &outputFlag,
-				verbose:    &verboseFlag,
-				projectDir: &projectDir,
-				timeout:    DefaultTimeout,
+				SessionContext: common.SessionContext{
+					BaseContext: common.BaseContext{
+						Output:     &outputFlag,
+						Verbose:    &verboseFlag,
+						ProjectDir: &projectDir,
+					},
+				},
+				timeout: DefaultTimeout,
 			}
 
 			err := runValidateWithPrinter(ctx, printer, "")
@@ -466,10 +498,14 @@ func TestIntegration_WriteguardHook_Chain(t *testing.T) {
 			verboseFlag := false
 			projectDir := ""
 			ctx := &cmdContext{
-				output:     &outputFlag,
-				verbose:    &verboseFlag,
-				projectDir: &projectDir,
-				timeout:    DefaultTimeout,
+				SessionContext: common.SessionContext{
+					BaseContext: common.BaseContext{
+						Output:     &outputFlag,
+						Verbose:    &verboseFlag,
+						ProjectDir: &projectDir,
+					},
+				},
+				timeout: DefaultTimeout,
 			}
 
 			err := runWriteguardWithPrinter(ctx, printer, "")
@@ -522,8 +558,12 @@ func TestIntegration_RouteHook_AllCategories(t *testing.T) {
 			outputFlag := "json"
 			verboseFlag := false
 			ctx := &cmdContext{
-				output:  &outputFlag,
-				verbose: &verboseFlag,
+				SessionContext: common.SessionContext{
+					BaseContext: common.BaseContext{
+						Output:  &outputFlag,
+						Verbose: &verboseFlag,
+					},
+				},
 				timeout: DefaultTimeout,
 			}
 
@@ -564,10 +604,14 @@ func BenchmarkHook_EarlyExitPath(b *testing.B) {
 	projectDir := ""
 
 	ctx := &cmdContext{
-		output:     &outputFlag,
-		verbose:    &verboseFlag,
-		projectDir: &projectDir,
-		timeout:    DefaultTimeout,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &projectDir,
+			},
+		},
+		timeout: DefaultTimeout,
 	}
 
 	var stdout, stderr bytes.Buffer
@@ -596,10 +640,14 @@ func BenchmarkHook_TimeoutOverhead(b *testing.B) {
 	projectDir := ""
 
 	ctx := &cmdContext{
-		output:     &outputFlag,
-		verbose:    &verboseFlag,
-		projectDir: &projectDir,
-		timeout:    DefaultTimeout,
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &projectDir,
+			},
+		},
+		timeout: DefaultTimeout,
 	}
 
 	b.ResetTimer()
