@@ -786,7 +786,7 @@ The HANDOFF artifact schema complements, not replaces:
 
 | Artifact | Absolute Path | Status |
 |----------|---------------|--------|
-| This TDD | `/Users/tomtenuta/Code/roster/docs/design/TDD-cross-team-handoff.md` | Created |
+| This TDD | `/Users/tomtenuta/Code/roster/docs/design/TDD-cross-rite-handoff.md` | Created |
 | Handoff Criteria Schema | `/Users/tomtenuta/Code/roster/schemas/handoff-criteria-schema.yaml` | Read |
 | Within-Team Handoff | `/Users/tomtenuta/Code/roster/user-skills/session-lifecycle/handoff-ref/SKILL.md` | Read |
 | Cross-Team Playbook | `/Users/tomtenuta/Code/roster/docs/playbooks/cross-rite-coordination.md` | Read |
