@@ -117,13 +117,13 @@ get_produces() {
 # Roster Generation
 # ============================================================================
 
-# Generate roster table for a team
-# Usage: generate_roster "team-name"
+# Generate roster table for a rite
+# Usage: generate_roster "rite-name"
 # Output: Formatted markdown table to stdout
 generate_roster() {
-    local team_name="$1"
-    local agents_dir="$KNOSSOS_HOME/rites/$team_name/agents"
-    local workflow_file="$KNOSSOS_HOME/rites/$team_name/workflow.yaml"
+    local rite_name="$1"
+    local agents_dir="$KNOSSOS_HOME/rites/$rite_name/agents"
+    local workflow_file="$KNOSSOS_HOME/rites/$rite_name/workflow.yaml"
 
     if [[ ! -d "$agents_dir" ]]; then
         echo "Error: Agents directory not found: $agents_dir" >&2
@@ -141,7 +141,7 @@ generate_roster() {
 
     # Output header
     echo ""
-    echo "**${team_name}** ($agent_count agents):"
+    echo "**${rite_name}** ($agent_count agents):"
     echo ""
     echo "| Agent | Role | Produces |"
     echo "|-------|------|----------|"
