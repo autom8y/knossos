@@ -34,7 +34,7 @@ You're building a new agent team and need to create its orchestrator.md. Follow 
 **Time**: 15 minutes for straightforward teams, 30-45 minutes for complex routing.
 
 ### Updating the Canonical Template
-Your team discovered a pattern all orchestrators should follow. Update `orchestrator-base.md.tpl` and regenerate all teams:
+Your team discovered a pattern all orchestrators should follow. Update `rite-base.md.tpl` and regenerate all teams:
 1. Modify the template
 2. Run batch regeneration
 3. Review diffs (should be cosmetic if adding optional section)
@@ -133,14 +133,14 @@ git commit -m "feat: add my-team orchestrator"
 ./swap-team.sh my-team
 ```
 
-See [create-new-team-orchestrator.md](create-new-team-orchestrator.md) for detailed walkthrough.
+See [create-new-rite-orchestrator.md](create-new-rite-orchestrator.md) for detailed walkthrough.
 
 ## File Structure
 
 | File | Location | Purpose |
 |------|----------|---------|
 | **orchestrator.yaml** | `teams/{team}/orchestrator.yaml` | Team config (durable) |
-| **orchestrator-base.md.tpl** | `/roster/templates/` | Canonical template |
+| **rite-base.md.tpl** | `/roster/templates/` | Canonical template |
 | **workflow.yaml** | `teams/{team}/workflow.yaml` | Phase definitions (reference) |
 | **orchestrator.md** | `teams/{team}/agents/orchestrator.md` | Generated agent (production) |
 

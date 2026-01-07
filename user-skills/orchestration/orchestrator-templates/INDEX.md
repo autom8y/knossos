@@ -6,7 +6,7 @@
 
 **First time?** Read [SKILL.md](SKILL.md) (10 min) to understand what this is.
 
-**Creating orchestrator?** Follow [create-new-team-orchestrator.md](create-new-team-orchestrator.md) (15-30 min).
+**Creating orchestrator?** Follow [create-new-rite-orchestrator.md](create-new-rite-orchestrator.md) (15-30 min).
 
 **Updating template?** Follow [update-canonical-patterns.md](update-canonical-patterns.md) (20-45 min).
 
@@ -33,7 +33,7 @@ orchestrator.md (production output, regenerable)
 | File | Purpose | Time | Audience |
 |------|---------|------|----------|
 | [SKILL.md](SKILL.md) | Main entry point | 10-15 min | Everyone |
-| [create-new-team-orchestrator.md](create-new-team-orchestrator.md) | Step-by-step creation | 15-30 min | Team leads |
+| [create-new-rite-orchestrator.md](create-new-rite-orchestrator.md) | Step-by-step creation | 15-30 min | Team leads |
 | [update-canonical-patterns.md](update-canonical-patterns.md) | Template evolution | 20-45 min | Infrastructure |
 | [troubleshooting.md](troubleshooting.md) | Problem solving | 5-30 min | Debug issues |
 | [schema-reference.md](schema-reference.md) | YAML field docs | As needed | Implementation |
@@ -46,7 +46,7 @@ orchestrator.md (production output, regenerable)
 
 ### Creating a New Orchestrator
 1. Read [SKILL.md](SKILL.md) for context
-2. Follow [create-new-team-orchestrator.md](create-new-team-orchestrator.md)
+2. Follow [create-new-rite-orchestrator.md](create-new-rite-orchestrator.md)
 3. Use [QUICK-REFERENCE.md](QUICK-REFERENCE.md) for commands
 
 ### Updating the Template

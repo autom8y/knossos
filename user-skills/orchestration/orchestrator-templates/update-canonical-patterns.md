@@ -87,7 +87,7 @@ Ask yourself:
 
 ### Step 2.1: Locate the Template
 
-**File**: `/roster/templates/orchestrator-base.md.tpl`
+**File**: `/roster/templates/rite-base.md.tpl`
 
 Open and familiarize yourself with structure:
 - Lines 1-10: Frontmatter
@@ -428,7 +428,7 @@ Steps:
 **Command sequence**:
 ```bash
 # Edit template
-nano /roster/templates/orchestrator-base.md.tpl
+nano /roster/templates/rite-base.md.tpl
 
 # Regenerate
 for team in .claude/teams/*/; do
@@ -465,7 +465,7 @@ mkdir -p /tmp/orch-backup
 cp -r .claude/teams/*/agents/orchestrator.md /tmp/orch-backup/
 
 # Edit template - add new section with placeholder
-nano /roster/templates/orchestrator-base.md.tpl
+nano /roster/templates/rite-base.md.tpl
 
 # Regenerate all
 for team in .claude/teams/*/; do
@@ -545,7 +545,7 @@ git diff .claude/teams/rnd-pack/agents/orchestrator.md | grep "^+" | head -20
 **Solution**:
 ```bash
 # Review template changes
-git diff /roster/templates/orchestrator-base.md.tpl
+git diff /roster/templates/rite-base.md.tpl
 
 # Check for common errors:
 # - Unclosed code blocks
@@ -553,7 +553,7 @@ git diff /roster/templates/orchestrator-base.md.tpl
 # - Missing colons in YAML
 
 # Revert and try again
-git checkout /roster/templates/orchestrator-base.md.tpl
+git checkout /roster/templates/rite-base.md.tpl
 ```
 
 ### Issue: Specialist names changed in output
@@ -580,7 +580,7 @@ If something goes wrong:
 cp /tmp/orchestrator-backup/* .claude/teams/*/agents/orchestrator.md
 
 # Revert template
-git checkout /roster/templates/orchestrator-base.md.tpl
+git checkout /roster/templates/rite-base.md.tpl
 
 # Verify
 for md in .claude/teams/*/agents/orchestrator.md; do

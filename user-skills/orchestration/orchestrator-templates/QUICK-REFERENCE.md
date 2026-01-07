@@ -64,7 +64,7 @@ grep "^role:" .claude/agents/orchestrator.md
 
 ```bash
 # Step 1: Edit template
-nano /roster/templates/orchestrator-base.md.tpl
+nano /roster/templates/rite-base.md.tpl
 
 # Step 2: Regenerate all
 for team in .claude/teams/*/; do
@@ -257,7 +257,7 @@ Before considering orchestrator complete:
 | Question | Reference |
 |----------|-----------|
 | "What is this?" | [SKILL.md](SKILL.md) |
-| "How do I create?" | [create-new-team-orchestrator.md](create-new-team-orchestrator.md) |
+| "How do I create?" | [create-new-rite-orchestrator.md](create-new-rite-orchestrator.md) |
 | "How do I update template?" | [update-canonical-patterns.md](update-canonical-patterns.md) |
 | "I have an error" | [troubleshooting.md](troubleshooting.md) |
 | "What are the fields?" | [schema-reference.md](schema-reference.md) |
