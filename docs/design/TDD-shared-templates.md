@@ -2,18 +2,18 @@
 
 ## Overview
 
-This Technical Design Document specifies the shared-templates skill, a multi-team infrastructure providing canonical document templates for debt-ledger, risk-matrix, and sprint-debt-package artifacts. The skill lives in `teams/shared/skills/shared-templates/` and is automatically available to all team packs via the shared team sync mechanism.
+This Technical Design Document specifies the shared-templates skill, a multi-team infrastructure providing canonical document templates for debt-ledger, risk-matrix, and sprint-debt-package artifacts. The skill lives in `rites/shared/skills/shared-templates/` and is automatically available to all rites via the shared team sync mechanism.
 
 ## Context
 
 | Reference | Location |
 |-----------|----------|
-| Shared Team | `teams/shared/README.md` |
-| Debt Collector Agent | `teams/debt-triage-pack/agents/debt-collector.md` |
-| Risk Assessor Agent | `teams/debt-triage-pack/agents/risk-assessor.md` |
-| Sprint Planner Agent | `teams/debt-triage-pack/agents/sprint-planner.md` |
+| Shared Team | `rites/shared/README.md` |
+| Debt Collector Agent | `rites/debt-triage-pack/agents/debt-collector.md` |
+| Risk Assessor Agent | `rites/debt-triage-pack/agents/risk-assessor.md` |
+| Sprint Planner Agent | `rites/debt-triage-pack/agents/sprint-planner.md` |
 | Doc-Ecosystem Skill | `.claude/skills/doc-ecosystem/SKILL.md` |
-| Doc-Consolidation Templates | `teams/doc-team-pack/skills/doc-consolidation/templates/` |
+| Doc-Consolidation Templates | `rites/doc-team-pack/skills/doc-consolidation/templates/` |
 
 ### Problem Statement
 
@@ -43,7 +43,7 @@ Without canonical templates, agents produce inconsistent artifacts that:
 ### Skill Structure
 
 ```
-teams/shared/skills/shared-templates/
+rites/shared/skills/shared-templates/
 ├── SKILL.md                          # Skill entry point
 ├── schemas/
 │   ├── debt-ledger-schema.md         # Schema definition
@@ -59,9 +59,9 @@ teams/shared/skills/shared-templates/
 
 ### Sync Behavior
 
-Per `teams/shared/README.md`, shared skills are flattened into `.claude/skills/` during `swap-team.sh` execution:
-- `teams/shared/skills/shared-templates/` syncs to `.claude/skills/shared-templates/`
-- Available regardless of active team pack
+Per `rites/shared/README.md`, shared skills are flattened into `.claude/skills/` during `swap-rite.sh` execution:
+- `rites/shared/skills/shared-templates/` syncs to `.claude/skills/shared-templates/`
+- Available regardless of active rite
 - Team-specific overrides take precedence (team-privileged)
 
 ### Reference Syntax
@@ -466,7 +466,7 @@ These elements are controlled by shared-templates and MUST NOT be customized:
 
 | Element | Rationale |
 |---------|-----------|
-| Frontmatter schema | Enables cross-team interoperability |
+| Frontmatter schema | Enables cross-rite interoperability |
 | Required sections | Ensures handoff completeness |
 | Placeholder syntax | Consistent parsing |
 | Validation rules | Predictable quality |
@@ -487,9 +487,9 @@ Teams MAY customize within these boundaries:
 
 Team-specific templates override shared templates when:
 1. Team pack includes `skills/shared-templates/templates/{template}.md`
-2. Team version syncs over shared version during `swap-team.sh`
+2. Team version syncs over shared version during `swap-rite.sh`
 
-**Example:** `teams/security-pack/skills/shared-templates/templates/risk-matrix.md` would override the shared version with security-specific additions.
+**Example:** `rites/security-pack/skills/shared-templates/templates/risk-matrix.md` would override the shared version with security-specific additions.
 
 ---
 
@@ -588,7 +588,7 @@ Templates follow semantic versioning. MINOR versions are backward compatible.
 
 - `@documentation` - Core PRD/TDD/ADR templates
 - `@doc-ecosystem` - Ecosystem change templates
-- `@cross-team-handoff` - HANDOFF artifact schema
+- `@cross-rite-handoff` - HANDOFF artifact schema
 ```
 
 ---
@@ -600,41 +600,41 @@ Templates follow semantic versioning. MINOR versions are backward compatible.
 Create directory structure and SKILL.md entry point.
 
 **Files Created:**
-- `teams/shared/skills/shared-templates/SKILL.md`
+- `rites/shared/skills/shared-templates/SKILL.md`
 
 ### Phase 2: Schemas
 
 Define formal schemas for each template type.
 
 **Files Created:**
-- `teams/shared/skills/shared-templates/schemas/debt-ledger-schema.md`
-- `teams/shared/skills/shared-templates/schemas/risk-matrix-schema.md`
-- `teams/shared/skills/shared-templates/schemas/sprint-debt-package-schema.md`
+- `rites/shared/skills/shared-templates/schemas/debt-ledger-schema.md`
+- `rites/shared/skills/shared-templates/schemas/risk-matrix-schema.md`
+- `rites/shared/skills/shared-templates/schemas/sprint-debt-package-schema.md`
 
 ### Phase 3: Templates
 
 Create template files with placeholder conventions.
 
 **Files Created:**
-- `teams/shared/skills/shared-templates/templates/debt-ledger.md`
-- `teams/shared/skills/shared-templates/templates/risk-matrix.md`
-- `teams/shared/skills/shared-templates/templates/sprint-debt-package.md`
+- `rites/shared/skills/shared-templates/templates/debt-ledger.md`
+- `rites/shared/skills/shared-templates/templates/risk-matrix.md`
+- `rites/shared/skills/shared-templates/templates/sprint-debt-package.md`
 
 ### Phase 4: Validation Rules
 
 Document validation logic for artifact verification.
 
 **Files Created:**
-- `teams/shared/skills/shared-templates/validation/template-rules.md`
+- `rites/shared/skills/shared-templates/validation/template-rules.md`
 
 ### Phase 5: Integration
 
 Update agent references to use new templates.
 
 **Files Modified:**
-- `teams/debt-triage-pack/agents/debt-collector.md` (verify reference works)
-- `teams/debt-triage-pack/agents/risk-assessor.md` (verify reference works)
-- `teams/debt-triage-pack/agents/sprint-planner.md` (verify reference works)
+- `rites/debt-triage-pack/agents/debt-collector.md` (verify reference works)
+- `rites/debt-triage-pack/agents/risk-assessor.md` (verify reference works)
+- `rites/debt-triage-pack/agents/sprint-planner.md` (verify reference works)
 
 ---
 
@@ -669,7 +669,7 @@ Agent prompts already reference `@shared-templates#*`. Once skill is created, re
 - [ ] Team customization boundaries clearly defined
 - [ ] Agent references resolve to templates (`@shared-templates#*`)
 - [ ] Validation rules defined for each template type
-- [ ] Templates integrate into swap-team.sh sync flow
+- [ ] Templates integrate into swap-rite.sh sync flow
 
 ---
 
@@ -691,10 +691,10 @@ Integration Engineer receives:
 | Artifact | Absolute Path | Status |
 |----------|---------------|--------|
 | This TDD | `/Users/tomtenuta/Code/roster/docs/design/TDD-shared-templates.md` | Created |
-| Shared Team README | `/Users/tomtenuta/Code/roster/teams/shared/README.md` | Read |
-| Debt Collector | `/Users/tomtenuta/Code/roster/teams/debt-triage-pack/agents/debt-collector.md` | Read |
-| Risk Assessor | `/Users/tomtenuta/Code/roster/teams/debt-triage-pack/agents/risk-assessor.md` | Read |
-| Sprint Planner | `/Users/tomtenuta/Code/roster/teams/debt-triage-pack/agents/sprint-planner.md` | Read |
+| Shared Team README | `/Users/tomtenuta/Code/roster/rites/shared/README.md` | Read |
+| Debt Collector | `/Users/tomtenuta/Code/roster/rites/debt-triage-pack/agents/debt-collector.md` | Read |
+| Risk Assessor | `/Users/tomtenuta/Code/roster/rites/debt-triage-pack/agents/risk-assessor.md` | Read |
+| Sprint Planner | `/Users/tomtenuta/Code/roster/rites/debt-triage-pack/agents/sprint-planner.md` | Read |
 | Doc-Ecosystem SKILL | `/Users/tomtenuta/Code/roster/.claude/skills/doc-ecosystem/SKILL.md` | Read |
 | TDD Schema Reference | `/Users/tomtenuta/Code/roster/user-skills/documentation/doc-artifacts/schemas/tdd-schema.md` | Read |
 | Gap Analysis Schema | `/Users/tomtenuta/Code/roster/.claude/skills/doc-ecosystem/schemas/gap-analysis-schema.md` | Read |

@@ -6,7 +6,7 @@
 
 ## Executive Summary
 
-This analysis audits 11 team packs across the roster ecosystem to identify boundary issues affecting routing accuracy and developer discoverability. Key findings:
+This analysis audits 11 rites across the roster ecosystem to identify boundary issues affecting routing accuracy and developer discoverability. Key findings:
 
 - **5 boundary overlaps** identified where multiple teams claim similar territory
 - **4 boundary gaps** identified where work falls between teams
@@ -454,7 +454,7 @@ This analysis audits 11 team packs across the roster ecosystem to identify bound
 | **strategy-pack** | (Current definition adequate) |
 | **security-pack** | Infrastructure hardening without vulnerabilities (sre-pack) |
 | **ecosystem-pack** | (Current definition adequate) |
-| **forge-pack** | **(CRITICAL)** Add "NOT for" section: Production feature development, existing team modification (ecosystem-pack), one-off agent creation without team context |
+| **forge-pack** | **(CRITICAL)** Add "NOT for" section: Production feature development, existing team modification (ecosystem-pack), one-off agent creation without rite context |
 
 ### Cross-Team Handoff Formalization
 
@@ -482,18 +482,18 @@ This analysis audits 11 team packs across the roster ecosystem to identify bound
 | Artifact | Absolute Path | Status |
 |----------|---------------|--------|
 | This gap analysis | `/Users/tomtenuta/Code/roster/docs/analysis/team-boundary-gaps.md` | Created |
-| 10x-dev-pack README | `/Users/tomtenuta/Code/roster/teams/10x-dev-pack/README.md` | Read |
-| doc-team-pack README | `/Users/tomtenuta/Code/roster/teams/doc-team-pack/README.md` | Read |
-| hygiene-pack README | `/Users/tomtenuta/Code/roster/teams/hygiene-pack/README.md` | Read |
-| debt-triage-pack README | `/Users/tomtenuta/Code/roster/teams/debt-triage-pack/README.md` | Read |
-| rnd-pack README | `/Users/tomtenuta/Code/roster/teams/rnd-pack/README.md` | Read |
-| sre-pack README | `/Users/tomtenuta/Code/roster/teams/sre-pack/README.md` | Read |
-| intelligence-pack README | `/Users/tomtenuta/Code/roster/teams/intelligence-pack/README.md` | Read |
-| strategy-pack README | `/Users/tomtenuta/Code/roster/teams/strategy-pack/README.md` | Read |
-| security-pack README | `/Users/tomtenuta/Code/roster/teams/security-pack/README.md` | Read |
-| ecosystem-pack README | `/Users/tomtenuta/Code/roster/teams/ecosystem-pack/README.md` | Read |
+| 10x-dev-pack README | `/Users/tomtenuta/Code/roster/rites/10x-dev-pack/README.md` | Read |
+| doc-team-pack README | `/Users/tomtenuta/Code/roster/rites/doc-team-pack/README.md` | Read |
+| hygiene-pack README | `/Users/tomtenuta/Code/roster/rites/hygiene-pack/README.md` | Read |
+| debt-triage-pack README | `/Users/tomtenuta/Code/roster/rites/debt-triage-pack/README.md` | Read |
+| rnd-pack README | `/Users/tomtenuta/Code/roster/rites/rnd-pack/README.md` | Read |
+| sre-pack README | `/Users/tomtenuta/Code/roster/rites/sre-pack/README.md` | Read |
+| intelligence-pack README | `/Users/tomtenuta/Code/roster/rites/intelligence-pack/README.md` | Read |
+| strategy-pack README | `/Users/tomtenuta/Code/roster/rites/strategy-pack/README.md` | Read |
+| security-pack README | `/Users/tomtenuta/Code/roster/rites/security-pack/README.md` | Read |
+| ecosystem-pack README | `/Users/tomtenuta/Code/roster/rites/ecosystem-pack/README.md` | Read |
 | DESIGN-intent-matching.md | `/Users/tomtenuta/Code/roster/docs/design/DESIGN-intent-matching.md` | Read |
-| cross-team-handoff schema | `/Users/tomtenuta/Code/roster/teams/shared/skills/cross-team-handoff/schema.md` | Read |
+| cross-rite-handoff schema | `/Users/tomtenuta/Code/roster/rites/shared/skills/cross-rite-handoff/schema.md` | Read |
 
 ---
 

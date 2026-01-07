@@ -324,7 +324,7 @@ exit 0
 [[ "$COMMAND" =~ ^git[[:space:]]+status ]] && exit 0
 
 # Exit 1: Block operation (generic error)
-if [[ ! -d "teams/$TEAM" ]]; then
+if [[ ! -d "rites/$TEAM" ]]; then
     echo "Team pack '$TEAM' not found" >&2
     exit 1
 fi
@@ -530,15 +530,15 @@ set -euo pipefail
 
 COMMAND="${CLAUDE_HOOK_COMMAND:-}"
 
-# Extract team from swap-team.sh command
-if [[ "$COMMAND" =~ swap-team\.sh[[:space:]]+([a-z0-9-]+-pack) ]]; then
+# Extract team from swap-rite.sh command
+if [[ "$COMMAND" =~ swap-rite\.sh[[:space:]]+([a-z0-9-]+-pack) ]]; then
     TARGET_TEAM="${BASH_REMATCH[1]}"
 
     # Validate team exists
-    if [[ ! -d "teams/$TARGET_TEAM" ]]; then
+    if [[ ! -d "rites/$TARGET_TEAM" ]]; then
         echo "Team pack '$TARGET_TEAM' not found" >&2
         echo "Available teams:" >&2
-        ls -1 teams/ | sed 's/^/  - /' >&2
+        ls -1 rites/ | sed 's/^/  - /' >&2
         exit 1  # Block operation
     fi
 fi

@@ -30,7 +30,7 @@
 | 3 | worktree-ref | 353 lines, no PD | Extracted to behavior.md, examples.md, troubleshooting.md, integration.md (now 85 lines) |
 | 4 | doc-artifacts | Bare schema refs | Converted to markdown links, added Progressive Disclosure section |
 | 5 | file-verification | No PD section | Added Progressive Disclosure section (intentionally self-contained) |
-| 6 | cross-team | No PD section | Added Progressive Disclosure section (intentionally minimal) |
+| 6 | cross-rite | No PD section | Added Progressive Disclosure section (intentionally minimal) |
 | 7 | ecosystem-ref | Missing frontmatter | Added `name:` and `description:` with triggers, added Progressive Disclosure section |
 | 8 | doc-ecosystem | 510 lines, no PD | Extracted 6 templates to templates/ directory (now 78 lines) |
 
@@ -108,7 +108,7 @@ Each SKILL.md was evaluated against 5 criteria:
 |-------|--------|-------|
 | `prompting` | COMPLIANT | Links to patterns/*.md and workflows/*.md |
 | `file-verification` | COMPLIANT | **REMEDIATED**: Added Progressive Disclosure section (intentionally self-contained) |
-| `cross-team` | COMPLIANT | **REMEDIATED**: Added Progressive Disclosure section (intentionally minimal) |
+| `cross-rite` | COMPLIANT | **REMEDIATED**: Added Progressive Disclosure section (intentionally minimal) |
 | `team-discovery` | COMPLIANT | Has schema link and Progressive Disclosure section |
 
 #### session-common (1 skill) - **ROOT EXCEPTION**
@@ -224,12 +224,12 @@ This skill is intentionally self-contained as a quick reference protocol.
 - `user-skills/operations/worktree-ref/integration.md` - Ecosystem integration
 
 ### doc-ecosystem Templates
-- `teams/ecosystem-pack/skills/doc-ecosystem/templates/gap-analysis.md`
-- `teams/ecosystem-pack/skills/doc-ecosystem/templates/context-design.md`
-- `teams/ecosystem-pack/skills/doc-ecosystem/templates/migration-runbook.md`
-- `teams/ecosystem-pack/skills/doc-ecosystem/templates/compatibility-report.md`
-- `teams/ecosystem-pack/skills/doc-ecosystem/templates/smell-report.md`
-- `teams/ecosystem-pack/skills/doc-ecosystem/templates/refactoring-plan.md`
+- `rites/ecosystem-pack/skills/doc-ecosystem/templates/gap-analysis.md`
+- `rites/ecosystem-pack/skills/doc-ecosystem/templates/context-design.md`
+- `rites/ecosystem-pack/skills/doc-ecosystem/templates/migration-runbook.md`
+- `rites/ecosystem-pack/skills/doc-ecosystem/templates/compatibility-report.md`
+- `rites/ecosystem-pack/skills/doc-ecosystem/templates/smell-report.md`
+- `rites/ecosystem-pack/skills/doc-ecosystem/templates/refactoring-plan.md`
 
 ---
 

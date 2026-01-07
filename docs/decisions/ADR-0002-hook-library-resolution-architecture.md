@@ -268,7 +268,7 @@ HOOKS_LIB="${ROSTER_HOME:-$HOME/Code/roster}/.claude/hooks/lib"
 Teams can optionally have their own `hooks/` directories (parallel to existing `commands/`):
 
 ```
-teams/
+rites/
   10x-dev-pack/
     commands/
     hooks/          # Team-specific hooks (future)

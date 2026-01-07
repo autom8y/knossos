@@ -14,7 +14,7 @@ The codebase has accumulated backward compatibility patterns during the team-to-
 **Pattern Categories**:
 1. CLI flags (`--team` should be `--rite`)
 2. JSON fields (`active_team` should be `active_rite`)
-3. File fallbacks (`ACTIVE_TEAM` fallback to `ACTIVE_RITE`)
+3. File fallbacks (`ACTIVE_RITE` fallback to `ACTIVE_RITE`)
 4. Command deprecation (`ari team` should be `ari rite`)
 5. Function naming (internal variable/function names)
 
@@ -62,7 +62,7 @@ The codebase has accumulated backward compatibility patterns during the team-to-
 
 | Location | Field | Current | Target | Risk Level |
 |----------|-------|---------|--------|------------|
-| `swap-rite.sh:860` | JSON output | `"active_team": "$team_name"` | `"active_rite"` | HIGH - external consumers |
+| `swap-rite.sh:860` | JSON output | `"active_team": "$rite_name"` | `"active_rite"` | HIGH - external consumers |
 | `swap-rite.sh:1004` | JSON output | `"active_team": "unknown"` | `"active_rite"` | HIGH |
 | `session-manager.sh:272` | JSON output | `"active_team": "$active_rite"` | `"active_rite"` | MEDIUM |
 
@@ -90,37 +90,37 @@ The codebase has accumulated backward compatibility patterns during the team-to-
 
 ## 3. File Fallback Inventory
 
-### 3.1 ACTIVE_TEAM Fallback Pattern
+### 3.1 ACTIVE_RITE Fallback Pattern
 
-The pattern `cat ACTIVE_RITE 2>/dev/null || cat ACTIVE_TEAM` exists for backward compatibility:
+The pattern `cat ACTIVE_RITE 2>/dev/null || cat ACTIVE_RITE` exists for backward compatibility:
 
 | File | Line(s) | Pattern | Removal Risk |
 |------|---------|---------|--------------|
-| `user-hooks/validation/orchestrator-router.sh` | 54 | `cat ".claude/ACTIVE_RITE" 2>/dev/null \|\| cat ".claude/ACTIVE_TEAM"` | LOW |
+| `user-hooks/validation/orchestrator-router.sh` | 54 | `cat ".claude/ACTIVE_RITE" 2>/dev/null \|\| cat ".claude/ACTIVE_RITE"` | LOW |
 | `user-hooks/lib/session-manager.sh` | 89, 243, 294 | Same pattern | LOW |
 | `user-hooks/lib/rite-context-loader.sh` | 45-46 | Same pattern | LOW |
 | `user-hooks/lib/worktree-manager.sh` | 207 | Same pattern | LOW |
 | `user-hooks/session-guards/start-preflight.sh` | 113 | Same pattern | LOW |
 
-### 3.2 ACTIVE_TEAM File Writes
+### 3.2 ACTIVE_RITE File Writes
 
 | File | Line(s) | Operation | Notes |
 |------|---------|-----------|-------|
-| `roster-sync` | 538 | `echo "$team_name" > .claude/ACTIVE_TEAM` | CRITICAL - still writes ACTIVE_TEAM |
-| `lib/rite/rite-transaction.sh` | 582-588 | Backup to `ACTIVE_TEAM` | Internal backup name |
-| `swap-rite.sh` | 169-176 | Restore from `ACTIVE_TEAM` backup | Internal backup name |
+| `roster-sync` | 538 | `echo "$rite_name" > .claude/ACTIVE_RITE` | CRITICAL - still writes ACTIVE_RITE |
+| `lib/rite/rite-transaction.sh` | 582-588 | Backup to `ACTIVE_RITE` | Internal backup name |
+| `swap-rite.sh` | 169-176 | Restore from `ACTIVE_RITE` backup | Internal backup name |
 
-**CRITICAL FINDING**: `roster-sync` at line 538 still writes to `ACTIVE_TEAM` instead of `ACTIVE_RITE`. This is a bug, not a backward compatibility pattern.
+**CRITICAL FINDING**: `roster-sync` at line 538 still writes to `ACTIVE_RITE` instead of `ACTIVE_RITE`. This is a bug, not a backward compatibility pattern.
 
-### 3.3 ACTIVE_TEAM in Error Messages
+### 3.3 ACTIVE_RITE in Error Messages
 
 | File | Line(s) | Message | Assessment |
 |------|---------|---------|------------|
-| `swap-rite.sh` | 678, 684 | "ACTIVE_TEAM is $active_team" | INCORRECT - file is ACTIVE_RITE |
-| `swap-rite.sh` | 670 | "No ACTIVE_TEAM file" | INCORRECT |
-| `lib/rite/rite-transaction.sh` | 692-693 | "Backup missing ACTIVE_TEAM" | INCORRECT |
-| `get-workflow-field.sh` | 21 | "No team specified and no ACTIVE_TEAM found" | INCORRECT |
-| `load-workflow.sh` | 12 | "No team specified and no ACTIVE_TEAM found" | INCORRECT |
+| `swap-rite.sh` | 678, 684 | "ACTIVE_RITE is $active_team" | INCORRECT - file is ACTIVE_RITE |
+| `swap-rite.sh` | 670 | "No ACTIVE_RITE file" | INCORRECT |
+| `lib/rite/rite-transaction.sh` | 692-693 | "Backup missing ACTIVE_RITE" | INCORRECT |
+| `get-workflow-field.sh` | 21 | "No team specified and no ACTIVE_RITE found" | INCORRECT |
+| `load-workflow.sh` | 12 | "No team specified and no ACTIVE_RITE found" | INCORRECT |
 
 **Assessment**: Error messages reference wrong file name. These are bugs, not compatibility patterns.
 
@@ -144,7 +144,7 @@ The pattern `cat ACTIVE_RITE 2>/dev/null || cat ACTIVE_TEAM` exists for backward
 | `ari team switch` | `ari rite swap` | Implemented |
 | `ari team status` | `ari rite current` | Implemented |
 | `ari team validate` | `ari rite validate` | Implemented |
-| `ari team context` | `ari rite context` | NOT IMPLEMENTED |
+| `ari rite context` | `ari rite context` | NOT IMPLEMENTED |
 
 **Gap**: `ari rite context` command does not exist yet.
 
@@ -164,8 +164,8 @@ The pattern `cat ACTIVE_RITE 2>/dev/null || cat ACTIVE_TEAM` exists for backward
 
 | File | Variable | Occurrences | Assessment |
 |------|----------|-------------|------------|
-| `swap-rite.sh` | `active_team`, `current_team`, `team_name` | ~50 | Internal - low priority |
-| `roster-sync` | `active_team`, `manifest_team`, `team_name` | ~30 | Internal - low priority |
+| `swap-rite.sh` | `active_team`, `current_team`, `rite_name` | ~50 | Internal - low priority |
+| `roster-sync` | `active_team`, `manifest_team`, `rite_name` | ~30 | Internal - low priority |
 | Various test files | `active_team` | ~40 | Internal - low priority |
 
 ### 5.3 Go Struct Fields and Parameters
@@ -203,7 +203,7 @@ The pattern `cat ACTIVE_RITE 2>/dev/null || cat ACTIVE_TEAM` exists for backward
 | `roster-sync --team` | HIGH | Any project using roster-sync CLI |
 | `ari team switch` | MEDIUM | Users with muscle memory |
 | `active_team` JSON field | HIGH | Scripts parsing JSON output |
-| `ACTIVE_TEAM` file | MEDIUM | Legacy satellites not yet migrated |
+| `ACTIVE_RITE` file | MEDIUM | Legacy satellites not yet migrated |
 | `active_team:` YAML field | HIGH | Existing SESSION_CONTEXT.md files |
 
 ### 6.3 Breaking Change Impact
@@ -214,7 +214,7 @@ Removing backward compatibility will break:
    - Call `roster-sync --team` in CI/CD scripts
    - Parse `active_team` from JSON output
    - Have existing sessions with `active_team:` in YAML
-   - Still have `ACTIVE_TEAM` file (unlikely after roster-sync)
+   - Still have `ACTIVE_RITE` file (unlikely after roster-sync)
 
 2. **User workflows** that:
    - Use `ari team` commands in scripts or aliases
@@ -230,8 +230,8 @@ These are bugs, not compatibility patterns:
 
 | Item | File | Action |
 |------|------|--------|
-| `roster-sync` writes `ACTIVE_TEAM` | Line 538 | Change to `ACTIVE_RITE` |
-| "ACTIVE_TEAM" in error messages | Multiple | Update to "ACTIVE_RITE" |
+| `roster-sync` writes `ACTIVE_RITE` | Line 538 | Change to `ACTIVE_RITE` |
+| "ACTIVE_RITE" in error messages | Multiple | Update to "ACTIVE_RITE" |
 | Incorrect comments | Multiple | Update |
 
 ### 7.2 v2.0 Removal (Needs Deprecation Period)
@@ -243,7 +243,7 @@ These have deprecation warnings but consumers may still depend on them:
 | `--team` CLI flags | WARNING added | 1 major version after warning |
 | `ari team` command | WARNING added | 1 major version after warning |
 | `active_team` JSON field | NOT deprecated | Add `active_rite`, deprecate `active_team` |
-| `ACTIVE_TEAM` file fallback | N/A | Remove when no satellites have ACTIVE_TEAM |
+| `ACTIVE_RITE` file fallback | N/A | Remove when no satellites have ACTIVE_RITE |
 
 ### 7.3 Keep Indefinitely (Too Risky to Remove)
 
@@ -261,7 +261,7 @@ These have deprecation warnings but consumers may still depend on them:
 |---------|--------|------------|-----------|----------|
 | `roster-sync --team` removal | HIGH | HIGH | Low - silent failure | v2.0 |
 | `active_team` JSON removal | HIGH | MEDIUM | Medium - JSON parse errors | v2.0 |
-| `ACTIVE_TEAM` fallback removal | MEDIUM | LOW | High - explicit fallback | v1.5 |
+| `ACTIVE_RITE` fallback removal | MEDIUM | LOW | High - explicit fallback | v1.5 |
 | `ari team` removal | LOW | LOW | High - deprecation warning | v2.0 |
 | Function renames | LOW | LOW | Low - internal only | v1.x |
 
@@ -269,13 +269,13 @@ These have deprecation warnings but consumers may still depend on them:
 
 ## 9. Success Criteria
 
-- [ ] `roster-sync` writes to `ACTIVE_RITE` not `ACTIVE_TEAM`
+- [ ] `roster-sync` writes to `ACTIVE_RITE` not `ACTIVE_RITE`
 - [ ] All error messages reference `ACTIVE_RITE`
 - [ ] `roster-sync --help` shows `--rite` as primary, `--team` as deprecated
 - [ ] `swap-rite.sh` JSON output includes `active_rite` (with `active_team` for compat)
 - [ ] SESSION_CONTEXT.md schema accepts both `active_rite` and `active_team`
 - [ ] All 10 satellites pass sync without errors
-- [ ] `grep -r "ACTIVE_TEAM" --include="*.sh" | grep -v "backup\|comment"` returns only intentional patterns
+- [ ] `grep -r "ACTIVE_RITE" --include="*.sh" | grep -v "backup\|comment"` returns only intentional patterns
 
 ---
 
@@ -286,7 +286,7 @@ These have deprecation warnings but consumers may still depend on them:
 | test-satellite-baseline | Minimal config, verify clean ACTIVE_RITE creation |
 | test-satellite-minimal | No custom settings, verify default behavior |
 | test-satellite-complex | Nested arrays, custom hooks, verify no regressions |
-| test-satellite-legacy | Has ACTIVE_TEAM file, verify migration path |
+| test-satellite-legacy | Has ACTIVE_RITE file, verify migration path |
 | test-satellite-session | Has SESSION_CONTEXT with active_team field |
 
 ---
@@ -295,7 +295,7 @@ These have deprecation warnings but consumers may still depend on them:
 
 ### Phase 1: Bug Fixes (Immediate)
 1. Fix `roster-sync` line 538 to write `ACTIVE_RITE`
-2. Update error messages referencing `ACTIVE_TEAM`
+2. Update error messages referencing `ACTIVE_RITE`
 3. Update `get-workflow-field.sh` and `load-workflow.sh` messages
 
 ### Phase 2: Deprecation Warnings (v1.x)
@@ -311,7 +311,7 @@ These have deprecation warnings but consumers may still depend on them:
 ### Phase 4: Full Removal (v2.0)
 1. Remove `--team` flag support
 2. Remove `active_team` JSON field
-3. Remove `ACTIVE_TEAM` file fallback
+3. Remove `ACTIVE_RITE` file fallback
 4. Remove `ari team` command
 
 ---

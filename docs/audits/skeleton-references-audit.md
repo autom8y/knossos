@@ -36,10 +36,10 @@ Critical infrastructure variables that define skeleton location.
 | `/Users/tomtenuta/Code/roster/user-hooks/lib/worktree-manager.sh` | 22 | `# Source configuration (provides SKELETON_HOME, ROSTER_HOME, etc.)` | Comment | **UPDATE**: Update comment if SKELETON_HOME removed |
 | `/Users/tomtenuta/Code/roster/docs/INTEGRATION.md` | 41 | `SKELETON_HOME` `~/Code/skeleton_claude` | Environment variable table | **UPDATE**: Remove or mark as optional |
 | `/Users/tomtenuta/Code/roster/docs/INTEGRATION.md` | 13 | `$SKELETON_HOME/docs/INTEGRATION.md` | Path reference | **UPDATE**: Point to roster docs |
-| `/Users/tomtenuta/Code/roster/docs/ecosystem/CONTEXT-DESIGN-team-context-loader.md` | 373 | `local skeleton_home="${SKELETON_HOME:-$HOME/Code/skeleton_claude}"` | Design doc code example | **UPDATE**: Update example when code changes |
-| `/Users/tomtenuta/Code/roster/teams/ecosystem-pack/context-injection.sh` | 39 | `local skeleton_home="${SKELETON_HOME:-$HOME/Code/skeleton_claude}"` | Skeleton ref lookup | **MIGRATE**: Remove or make optional |
-| `/Users/tomtenuta/Code/roster/teams/ecosystem-pack/skills/ecosystem-ref/SKILL.md` | 21 | `Skeleton: $SKELETON_HOME or ~/Code/skeleton_claude` | Documentation | **UPDATE**: Remove if skeleton dependency eliminated |
-| `/Users/tomtenuta/Code/roster/teams/ecosystem-pack/skills/ecosystem-ref/SKILL.md` | 70 | `Skeleton` `$SKELETON_HOME/.claude/` | Path table | **UPDATE**: Remove row |
+| `/Users/tomtenuta/Code/roster/docs/ecosystem/CONTEXT-DESIGN-rite-context-loader.md` | 373 | `local skeleton_home="${SKELETON_HOME:-$HOME/Code/skeleton_claude}"` | Design doc code example | **UPDATE**: Update example when code changes |
+| `/Users/tomtenuta/Code/roster/rites/ecosystem-pack/context-injection.sh` | 39 | `local skeleton_home="${SKELETON_HOME:-$HOME/Code/skeleton_claude}"` | Skeleton ref lookup | **MIGRATE**: Remove or make optional |
+| `/Users/tomtenuta/Code/roster/rites/ecosystem-pack/skills/ecosystem-ref/SKILL.md` | 21 | `Skeleton: $SKELETON_HOME or ~/Code/skeleton_claude` | Documentation | **UPDATE**: Remove if skeleton dependency eliminated |
+| `/Users/tomtenuta/Code/roster/rites/ecosystem-pack/skills/ecosystem-ref/SKILL.md` | 70 | `Skeleton` `$SKELETON_HOME/.claude/` | Path table | **UPDATE**: Remove row |
 
 ---
 
@@ -85,9 +85,9 @@ These are documentation paths showing where templates live in skeleton_claude.
 
 | File | Line | Reference | Context | Migration Action |
 |------|------|-----------|---------|------------------|
-| `/Users/tomtenuta/Code/roster/user-skills/orchestration/orchestrator-templates/schema-reference.md` | 7 | `/skeleton_claude/.claude/teams/{team-name}/orchestrator.yaml` | Template location | **UPDATE**: Change to roster path |
-| `/Users/tomtenuta/Code/roster/user-skills/orchestration/orchestrator-templates/schema-reference.md` | 9 | `/skeleton_claude/.claude/teams/rnd-pack/orchestrator.yaml` | Example location | **UPDATE**: Change to roster path |
-| `/Users/tomtenuta/Code/roster/user-skills/orchestration/orchestrator-templates/integration-diagram.txt` | 315-321 | Multiple `/skeleton_claude/.claude/teams/` paths | Diagram references | **UPDATE**: Update diagram |
+| `/Users/tomtenuta/Code/roster/user-skills/orchestration/orchestrator-templates/schema-reference.md` | 7 | `/skeleton_claude/.claude/rites/{team-name}/orchestrator.yaml` | Template location | **UPDATE**: Change to roster path |
+| `/Users/tomtenuta/Code/roster/user-skills/orchestration/orchestrator-templates/schema-reference.md` | 9 | `/skeleton_claude/.claude/rites/rnd-pack/orchestrator.yaml` | Example location | **UPDATE**: Change to roster path |
+| `/Users/tomtenuta/Code/roster/user-skills/orchestration/orchestrator-templates/integration-diagram.txt` | 315-321 | Multiple `/skeleton_claude/.claude/rites/` paths | Diagram references | **UPDATE**: Update diagram |
 | `/Users/tomtenuta/Code/roster/user-skills/orchestration/orchestrator-templates/create-new-team-orchestrator.md` | 12-514 | 30+ `/skeleton_claude/` paths | Tutorial paths | **UPDATE**: Change all to roster |
 | `/Users/tomtenuta/Code/roster/user-skills/orchestration/orchestrator-templates/troubleshooting.md` | 38-638 | 40+ `/skeleton_claude/` paths | Debug paths | **UPDATE**: Change all to roster |
 | `/Users/tomtenuta/Code/roster/user-skills/orchestration/orchestrator-templates/migration-guide.md` | 64-248 | 20+ `/skeleton_claude/` paths | Migration paths | **UPDATE**: Change all to roster |
@@ -103,9 +103,9 @@ Actual runtime code that depends on skeleton_claude existing.
 | File | Line | Reference | Context | Purpose | Migration Action |
 |------|------|-----------|---------|---------|------------------|
 | `/Users/tomtenuta/Code/roster/user-hooks/lib/worktree-manager.sh` | 225-250 | `$SKELETON_HOME/cem` | CEM executable calls | Worktree initialization | **HIGH PRIORITY**: Bundle CEM or make optional |
-| `/Users/tomtenuta/Code/roster/teams/ecosystem-pack/context-injection.sh` | 39-44 | `$skeleton_home/.git` | Git ref lookup | Context display | **MIGRATE**: Remove or make optional |
-| `/Users/tomtenuta/Code/roster/swap-team.sh` | 3979 | `regenerate_skeleton_claude_md()` | Function name | Reset to baseline | **RENAME**: Function name only (no functional change) |
-| `/Users/tomtenuta/Code/roster/swap-team.sh` | 4106 | `regenerate_skeleton_claude_md` | Function call | Reset operation | **RENAME**: Update call site |
+| `/Users/tomtenuta/Code/roster/rites/ecosystem-pack/context-injection.sh` | 39-44 | `$skeleton_home/.git` | Git ref lookup | Context display | **MIGRATE**: Remove or make optional |
+| `/Users/tomtenuta/Code/roster/swap-rite.sh` | 3979 | `regenerate_skeleton_claude_md()` | Function name | Reset to baseline | **RENAME**: Function name only (no functional change) |
+| `/Users/tomtenuta/Code/roster/swap-rite.sh` | 4106 | `regenerate_skeleton_claude_md` | Function call | Reset operation | **RENAME**: Update call site |
 
 ---
 
@@ -131,7 +131,7 @@ References in documentation that describe the ecosystem relationship.
 | `/Users/tomtenuta/Code/roster/docs/requirements/PRD-claude-md-descriptive-architecture.md` | 27 | `skeleton-owned` | Section ownership model | **REVIEW**: May need architectural update |
 | `/Users/tomtenuta/Code/roster/docs/requirements/PRD-hook-ecosystem-parity.md` | 119 | `CEM (skeleton_claude)` | CEM ownership | **UPDATE**: Reflect new ownership |
 | `/Users/tomtenuta/Code/roster/docs/requirements/PRD-rite-hook-context.md` | 27, 38, 46 | `skeleton` | Context requirements | **UPDATE**: Remove skeleton dependencies |
-| `/Users/tomtenuta/Code/roster/docs/ecosystem/CONTEXT-DESIGN-team-context-loader.md` | 10, 371-379, 427, 449 | `skeleton` | Design context | **UPDATE**: After code migration |
+| `/Users/tomtenuta/Code/roster/docs/ecosystem/CONTEXT-DESIGN-rite-context-loader.md` | 10, 371-379, 427, 449 | `skeleton` | Design context | **UPDATE**: After code migration |
 
 ### QA/Test Reports
 
@@ -168,13 +168,13 @@ References to "skeleton" as a concept (baseline state, not the repository).
 
 | File | Line | Reference | Context | Migration Action |
 |------|------|-----------|---------|------------------|
-| `/Users/tomtenuta/Code/roster/swap-team.sh` | 1554 | `--reset Reset to skeleton baseline` | Help text | **KEEP**: Conceptual use is fine |
-| `/Users/tomtenuta/Code/roster/swap-team.sh` | 1595 | `# Reset to skeleton baseline` | Comment | **KEEP**: Conceptual |
-| `/Users/tomtenuta/Code/roster/swap-team.sh` | 2167-2425 | `skeleton skill` | Skill layer terminology | **KEEP**: Describes base layer |
-| `/Users/tomtenuta/Code/roster/swap-team.sh` | 3847-4110 | `skeleton baseline` | Reset terminology | **KEEP**: Conceptual term |
+| `/Users/tomtenuta/Code/roster/swap-rite.sh` | 1554 | `--reset Reset to skeleton baseline` | Help text | **KEEP**: Conceptual use is fine |
+| `/Users/tomtenuta/Code/roster/swap-rite.sh` | 1595 | `# Reset to skeleton baseline` | Comment | **KEEP**: Conceptual |
+| `/Users/tomtenuta/Code/roster/swap-rite.sh` | 2167-2425 | `skeleton skill` | Skill layer terminology | **KEEP**: Describes base layer |
+| `/Users/tomtenuta/Code/roster/swap-rite.sh` | 3847-4110 | `skeleton baseline` | Reset terminology | **KEEP**: Conceptual term |
 | `/Users/tomtenuta/Code/roster/docs/validation/COMPAT-orchestrator-entry-pattern.md` | 12, 181 | `skeleton templates` | Template location | **UPDATE**: Change to roster |
 | `/Users/tomtenuta/Code/roster/docs/MOONSHOT-agent-template-ecosystem.md` | 136, 139, 447 | `SKELETON` | Architecture diagram | **UPDATE**: Update diagram |
-| `/Users/tomtenuta/Code/roster/teams/10x-dev-pack/agents/principal-engineer.md` | 71 | `skeleton first` | Coding approach | **KEEP**: Unrelated to skeleton_claude |
+| `/Users/tomtenuta/Code/roster/rites/10x-dev-pack/agents/principal-engineer.md` | 71 | `skeleton first` | Coding approach | **KEEP**: Unrelated to skeleton_claude |
 
 ---
 
@@ -200,7 +200,7 @@ References to "skeleton" as a concept (baseline state, not the repository).
 | File | Issue | Impact |
 |------|-------|--------|
 | `schemas/*.json` | Skeleton in enums | Schema validation inconsistency |
-| `teams/ecosystem-pack/context-injection.sh` | Skeleton ref display | Ecosystem context incomplete |
+| `rites/ecosystem-pack/context-injection.sh` | Skeleton ref display | Ecosystem context incomplete |
 
 ### P3 - Low (Documentation cleanup)
 

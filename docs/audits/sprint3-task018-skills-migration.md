@@ -182,7 +182,7 @@ After migration, roster now has 34 skill directories including the 11 newly migr
 ## Recommendations
 
 1. **Test worktree-ref skill** - The path replacements should be validated in a real worktree creation scenario
-2. **Update .rite-skills if needed** - If these skills should be auto-included in team packs, update team skill configurations
+2. **Update .rite-skills if needed** - If these skills should be auto-included in rites, update team skill configurations
 3. **Consider deprecation notice in skeleton** - Add notes in skeleton indicating these skills have been migrated to roster
 
 ## Attestation

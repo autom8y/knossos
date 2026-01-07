@@ -1,6 +1,6 @@
 # E2E Test: Debt Remediation Workflow
 
-> End-to-end test scenario for debt-triage-pack to hygiene-pack cross-team workflow.
+> End-to-end test scenario for debt-triage-pack to hygiene-pack cross-rite workflow.
 > Version: 1.0.0
 
 ## Overview
@@ -19,7 +19,7 @@ This document defines a complete test scenario for technical debt remediation, v
 
 Address accumulated technical debt in the validator module: duplicate email validation logic across 3 files, dead utility functions, and inconsistent error message formatting.
 
-**Why This Scenario**: This represents a typical cross-team debt remediation that:
+**Why This Scenario**: This represents a typical cross-rite debt remediation that:
 - Requires full debt-triage-pack workflow (collection, assessment, planning)
 - Produces execution HANDOFF for hygiene-pack
 - Requires behavior preservation validation
@@ -667,7 +667,7 @@ Package 1 complete. Behavior preserved with documented intentional unification.
    Task(sprint-planner, "Create sprint packages for remediation...")
    ```
 
-5. Produce cross-team handoff and switch teams:
+5. Produce cross-rite handoff and switch teams:
    ```
    /team hygiene-pack
    ```
@@ -697,7 +697,7 @@ Package 1 complete. Behavior preserved with documented intentional unification.
 
 - [Cross-Team Coordination Playbook](../playbooks/cross-rite-coordination.md)
 - [Handoff Smoke Tests](handoff-smoke-tests.md)
-- [Debt Triage Pack Workflow](../../teams/debt-triage-pack/workflow.md)
-- [Hygiene Pack Workflow](../../teams/hygiene-pack/workflow.md)
+- [Debt Triage Pack Workflow](../../rites/debt-triage-pack/workflow.md)
+- [Hygiene Pack Workflow](../../rites/hygiene-pack/workflow.md)
 - [Shared Templates: Debt Ledger](../../.claude/skills/shared/shared-templates/templates/debt-ledger.md)
-- [Cross-Team Handoff Schema](../../.claude/skills/shared/cross-team-handoff/schema.md)
+- [Cross-Team Handoff Schema](../../.claude/skills/shared/cross-rite-handoff/schema.md)

@@ -18,7 +18,7 @@ Migration of JSON schemas from skeleton_claude to roster as part of the skeleton
 | Property | Value |
 |----------|-------|
 | File | `workflow.schema.json` |
-| Purpose | Validation schema for team pack `workflow.yaml` files |
+| Purpose | Validation schema for rite `workflow.yaml` files |
 | Size | ~100 lines |
 | Schema Version | JSON Schema draft-07 |
 
@@ -31,7 +31,7 @@ Migration of JSON schemas from skeleton_claude to roster as part of the skeleton
 
 **Modifications Made:** None
 
-The schema contained no skeleton-specific references. All concepts (team packs, workflows, phases, agents, complexity levels) are roster-native patterns.
+The schema contained no skeleton-specific references. All concepts (rites, workflows, phases, agents, complexity levels) are roster-native patterns.
 
 ## Verification
 
@@ -52,7 +52,7 @@ The schema contained no skeleton-specific references. All concepts (team packs, 
 ## Notes
 
 - Created new `.claude/schemas/` directory in roster (did not exist previously)
-- Schema is immediately usable for validating team pack workflow definitions
+- Schema is immediately usable for validating rite workflow definitions
 - No downstream changes required - schema is self-contained
 
 ## Completion

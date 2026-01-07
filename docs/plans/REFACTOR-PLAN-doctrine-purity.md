@@ -11,7 +11,7 @@ This refactoring plan addresses systematic terminology drift from Knossos doctri
 - `state-mate` -> `moirai` (secondary, ~528 occurrences across 66 files)
 - `thread` -> `clew` (tertiary, ~40 occurrences in Go)
 
-**Critical Finding**: The `teams/` directory at `ROSTER_HOME` does NOT exist. The shell scripts reference a non-existent path. The actual rite packs live in `rites/` directory. Track T1 is **already complete** at the filesystem level.
+**Critical Finding**: The `rites/` directory at `ROSTER_HOME` does NOT exist. The shell scripts reference a non-existent path. The actual rite packs live in `rites/` directory. Track T1 is **already complete** at the filesystem level.
 
 ## Architectural Assessment
 
@@ -23,7 +23,7 @@ This refactoring plan addresses systematic terminology drift from Knossos doctri
 | `ariadne/internal/rite/` | Already exists | New rite management package (9 files), coexists with team/ |
 | `ariadne/internal/paths/` | Clean | Already uses `RitesDir()`, `ActiveRiteFile()`, etc. |
 | `lib/team/` | Needs rename | Shell library (3 files, 170 team references) |
-| `user-hooks/lib/team-context-loader.sh` | Needs rename | Hook support file |
+| `user-hooks/lib/rite-context-loader.sh` | Needs rename | Hook support file |
 | `ariadne/internal/cmd/team/` | Keep for CLI | Command group (user-facing, backward compat) |
 | `rites/forge-pack/skills/team-development/` | Needs rename | Template skill |
 
@@ -40,12 +40,12 @@ This refactoring plan addresses systematic terminology drift from Knossos doctri
 - CLI command: `ari team` (user-facing, keep for backward compat)
 - CLI command: `ari rite` (canonical, already exists)
 - JSON output field: `active_team` (manifest schema, external consumers)
-- YAML field: `team_name` in context.yaml (external schema)
+- YAML field: `rite_name` in context.yaml (external schema)
 - File: `.claude/ACTIVE_RITE` (already canonical)
 - File: `.claude/AGENT_MANIFEST.json` with `active_team` field
 
 **MAY Change (Internal):**
-- Go type names (TeamContext -> RiteContext)
+- Go type names (RiteContext -> RiteContext)
 - Go method names (ActiveTeamName -> ActiveRiteName)
 - Error message text ("Team not found" -> "Rite not found")
 - Internal variable names
@@ -58,7 +58,7 @@ This refactoring plan addresses systematic terminology drift from Knossos doctri
 
 | Track | Proposed | Validated | Notes |
 |-------|----------|-----------|-------|
-| T1: Directory rename teams/ -> rites/ | Invalid | **Skip** | `ROSTER_HOME/teams/` does not exist; `rites/` already canonical |
+| T1: Directory rename rites/ -> rites/ | Invalid | **Skip** | `ROSTER_HOME/rites/` does not exist; `rites/` already canonical |
 | T2: lib/team/ -> lib/rite/ | Valid | **Execute** | Shell library rename |
 | T3-T6: Go type/method renames | Valid | **Execute** | Core refactoring work |
 | T7-T9: Shell script renames | Valid | **Execute** | Function and path updates |
@@ -88,8 +88,8 @@ This refactoring plan addresses systematic terminology drift from Knossos doctri
 **Before State**:
 ```
 lib/team/
-  team-resource.sh
-  team-hooks-registration.sh
+  rite-resource.sh
+  rite-hooks-registration.sh
   team-transaction.sh
 ```
 
@@ -128,7 +128,7 @@ lib/rite/
 
 **Files affected** (callers):
 - `swap-rite.sh`
-- `generate-team-context.sh`
+- `generate-rite-context.sh`
 - `sync-user-hooks.sh`
 - `sync-user-commands.sh`
 - `sync-user-agents.sh`
@@ -164,7 +164,7 @@ lib/rite/
 - `type Discovery struct` fields: `activeTeam` -> `activeRite`
 
 **Type renames** (in context.go):
-- `type TeamContext struct` -> `type RiteContext struct`
+- `type RiteContext struct` -> `type RiteContext struct`
 
 **Type renames** (in manifest.go):
 - `Manifest.ActiveTeam` -> `Manifest.ActiveRite`
@@ -188,7 +188,7 @@ lib/rite/
 - `GetActiveTeam()` -> `GetActiveRite()` (in cmd/session/, cmd/team/)
 - `SetActiveTeam()` -> `SetActiveRite()`
 - `IsFromTeam()` -> `IsFromRite()`
-- `GetTeamAgents()` -> `GetRiteAgents()`
+- `GetRiteAgents()` -> `GetRiteAgents()`
 - `DetectOrphans()` parameters and docs
 
 **Files affected**:
@@ -234,9 +234,9 @@ lib/rite/
 
 **Goal**: Update function names and remaining path references
 
-#### RF-T7-001: Rename user-hooks/lib/team-context-loader.sh
+#### RF-T7-001: Rename user-hooks/lib/rite-context-loader.sh
 
-**Before**: `user-hooks/lib/team-context-loader.sh`
+**Before**: `user-hooks/lib/rite-context-loader.sh`
 **After**: `user-hooks/lib/rite-context-loader.sh`
 
 **Internal changes**:
@@ -247,7 +247,7 @@ lib/rite/
 
 **Note**: Keep backward compat alias `load_team_context()` calling `load_rite_context()`
 
-**Commit message**: `refactor(hooks): rename team-context-loader.sh to rite-context-loader.sh [RF-T7-001]`
+**Commit message**: `refactor(hooks): rename rite-context-loader.sh to rite-context-loader.sh [RF-T7-001]`
 
 #### RF-T8-001: Update shell function implementations
 
@@ -260,7 +260,7 @@ lib/rite/
 
 #### RF-T9-001: Update ROSTER_HOME/teams path references
 
-**Critical Finding**: These references point to non-existent `$ROSTER_HOME/teams/` directory.
+**Critical Finding**: These references point to non-existent `$ROSTER_HOME/rites/` directory.
 
 **Files affected**:
 - `lib/rite/rite-resource.sh` (references `$ROSTER_HOME/teams`)
@@ -283,11 +283,11 @@ lib/rite/
 #### RF-T10-001: Update template variables in forge-pack
 
 **Directory**: `rites/forge-pack/skills/team-development/`
-**Files affected**: 11+ files with `{team-name}` or `{team_name}` variables
+**Files affected**: 11+ files with `{team-name}` or `{rite_name}` variables
 
 **Changes**:
 - `{team-name}` -> `{rite-name}` in templates
-- `{team_name}` -> `{rite_name}` where used
+- `{rite_name}` -> `{rite_name}` where used
 - Update documentation text
 
 **Commit message**: `refactor(templates): update team variables to rite in forge-pack [RF-T10-001]`

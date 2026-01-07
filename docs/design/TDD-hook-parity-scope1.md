@@ -25,7 +25,7 @@ This document specifies the technical design for achieving hook parity with othe
 - **Consistency**: Follow established patterns from agents, commands, and skills
 - **Atomicity**: Path changes must be atomic per NFR-5
 - **Backwards Compatibility**: Existing installations continue working during migration (NFR-2)
-- **Graceful Degradation**: Missing team hooks directory must not break swap-team.sh (NFR-3)
+- **Graceful Degradation**: Missing team hooks directory must not break swap-rite.sh (NFR-3)
 
 ### 1.2 Key Constraints
 
@@ -48,7 +48,7 @@ roster/
   user-agents/                    # Agent templates
   user-commands/                  # Command templates
   user-skills/                    # Skill templates
-  teams/
+  rites/
     10x-dev-pack/
       agents/                     # Team agents
       commands/                   # Team commands
@@ -66,7 +66,7 @@ roster/
   user-agents/                    # Agent templates (unchanged)
   user-commands/                  # Command templates (unchanged)
   user-skills/                    # Skill templates (unchanged)
-  teams/
+  rites/
     10x-dev-pack/
       agents/                     # Team agents (unchanged)
       commands/                   # Team commands (unchanged)
@@ -83,7 +83,7 @@ roster/
                     +----------------------------------------+
                     |                                        |
        +------------v-----------+           +----------------v----------------+
-       |   roster/user-hooks/   |           |   teams/<team>/hooks/           |
+       |   roster/user-hooks/   |           |   rites/<team>/hooks/           |
        |   (base hooks)         |           |   (team-specific hooks)         |
        +------------+-----------+           +----------------+----------------+
                     |                                        |
@@ -95,7 +95,7 @@ roster/
                     |        project/.claude/hooks/          |
                     |   (merged destination)                 |
                     |                                        |
-                    |   .team-hooks (marker file)            |
+                    |   .rite-hooks (marker file)            |
                     +----------------------------------------+
                                        |
                                        v
@@ -111,11 +111,11 @@ The merge follows the same pattern as `swap_commands()` with one key difference:
 
 ```
 MERGE ORDER:
-1. Clear previous team hooks (remove files listed in .team-hooks marker)
+1. Clear previous team hooks (remove files listed in .rite-hooks marker)
 2. Copy base hooks from roster/user-hooks/ to .claude/hooks/
-3. Copy team hooks from teams/<team>/hooks/ to .claude/hooks/
+3. Copy team hooks from rites/<team>/hooks/ to .claude/hooks/
 4. If collision (same filename): team hook wins with WARNING
-5. Update .team-hooks marker with list of team hook filenames
+5. Update .rite-hooks marker with list of team hook filenames
 6. Update AGENT_MANIFEST.json with hooks section
 ```
 
@@ -132,9 +132,9 @@ Team hook: security-scan.sh        ->  .claude/hooks/security-scan.sh (new)
 |------|-------------|-------------|
 | `roster/hooks/` | RENAME | Rename to `roster/user-hooks/` |
 | `roster/user-hooks/` | CREATE | New location for base hooks |
-| `teams/*/hooks/` | SCHEMA | Add hooks directory to team-pack schema |
-| `swap-team.sh` | MODIFY | Update `swap_hooks()` for merge logic |
-| `swap-team.sh` | MODIFY | Update `write_manifest()` for hooks tracking |
+| `rites/*/hooks/` | SCHEMA | Add hooks directory to team-pack schema |
+| `swap-rite.sh` | MODIFY | Update `swap_hooks()` for merge logic |
+| `swap-rite.sh` | MODIFY | Update `write_manifest()` for hooks tracking |
 | `install-hooks.sh` | MODIFY | Update SOURCE_DIR path |
 | `sync-user-hooks.sh` | MODIFY | Update SOURCE_DIR path |
 | `.claude/AGENT_MANIFEST.json` | EXTEND | Add `hooks` section |
@@ -176,7 +176,7 @@ git mv roster/hooks roster/user-hooks
 Team packs may now include a `hooks/` directory with the same structure as base hooks:
 
 ```
-teams/<team-name>/
+rites/<team-name>/
   hooks/                    # OPTIONAL - team-specific hooks
     <hook-name>.sh          # Shell scripts only (*.sh)
 ```
@@ -190,8 +190,8 @@ teams/<team-name>/
 ### 4.3 swap_hooks() Modification (FR-1.3)
 
 **Current Implementation** (lines 2454-2521):
-- Copies only team hooks from `teams/<team>/hooks/`
-- Creates `.team-hooks` marker
+- Copies only team hooks from `rites/<team>/hooks/`
+- Creates `.rite-hooks` marker
 - Does NOT copy base hooks (assumes already installed)
 
 **New Implementation**:
@@ -200,9 +200,9 @@ teams/<team-name>/
 # Sync base hooks AND team-specific hooks to project
 # Base hooks provide foundation, team hooks can override
 swap_hooks() {
-    local team_name="$1"
+    local rite_name="$1"
     local base_hooks_dir="$ROSTER_HOME/user-hooks"
-    local team_hooks_dir="$ROSTER_HOME/teams/$team_name/hooks"
+    local team_hooks_dir="$ROSTER_HOME/rites/$rite_name/hooks"
 
     log_debug "Syncing hooks: base=$base_hooks_dir, team=$team_hooks_dir"
 
@@ -255,7 +255,7 @@ swap_hooks() {
     # PHASE 2: Overlay team hooks (if team has hooks directory)
     # =========================================================================
     if [[ ! -d "$team_hooks_dir" ]]; then
-        log_debug "Team $team_name has no hooks/ directory"
+        log_debug "Team $rite_name has no hooks/ directory"
         return 0
     fi
 
@@ -263,14 +263,14 @@ swap_hooks() {
     hook_count=$(find "$team_hooks_dir" -maxdepth 1 -type f -name "*.sh" 2>/dev/null | wc -l | tr -d ' ')
 
     if [[ "$hook_count" -eq 0 ]]; then
-        log_debug "Team $team_name has no hook files"
+        log_debug "Team $rite_name has no hook files"
         return 0
     fi
 
-    log_debug "Overlaying $hook_count hook(s) from team $team_name"
+    log_debug "Overlaying $hook_count hook(s) from team $rite_name"
 
     # Create marker file to track team hooks
-    local marker_file=".claude/hooks/.team-hooks"
+    local marker_file=".claude/hooks/.rite-hooks"
     : > "$marker_file"
 
     # Copy each team hook (may override base hooks)
@@ -353,7 +353,7 @@ swap_hooks() {
 | Field | Type | Values | Description |
 |-------|------|--------|-------------|
 | `source` | string | `"base"`, `"team"` | Where hook originated |
-| `origin` | string | `"user-hooks"` or team name | Specific source identifier |
+| `origin` | string | `"user-hooks"` or rite name | Specific source identifier |
 | `installed_at` | ISO 8601 | timestamp | When hook was installed |
 
 **write_manifest() Modification**:
@@ -373,7 +373,7 @@ echo "  \"hooks\": {" >> "$MANIFEST_FILE"
 local first_hook=true
 local base_hooks_dir="$ROSTER_HOME/user-hooks"
 
-# Track base hooks (not in .team-hooks marker)
+# Track base hooks (not in .rite-hooks marker)
 if [[ -d ".claude/hooks" ]]; then
     for hook_file in .claude/hooks/*.sh; do
         [[ ! -f "$hook_file" ]] && continue
@@ -385,9 +385,9 @@ if [[ -d ".claude/hooks" ]]; then
         local source="base"
         local origin="user-hooks"
 
-        if [[ -f ".claude/hooks/.team-hooks" ]] && grep -q "^$hook_name$" ".claude/hooks/.team-hooks" 2>/dev/null; then
+        if [[ -f ".claude/hooks/.rite-hooks" ]] && grep -q "^$hook_name$" ".claude/hooks/.rite-hooks" 2>/dev/null; then
             source="team"
-            origin="$team_name"
+            origin="$rite_name"
         fi
 
         if [[ "$first_hook" == true ]]; then
@@ -467,15 +467,15 @@ PHASE 2: ATOMIC COMMIT
   1. git mv roster/hooks roster/user-hooks
   2. Update install-hooks.sh SOURCE_DIR
   3. Update sync-user-hooks.sh SOURCE_DIR
-  4. Update swap_hooks() in swap-team.sh
-  5. Update write_manifest() in swap-team.sh
+  4. Update swap_hooks() in swap-rite.sh
+  5. Update write_manifest() in swap-rite.sh
   6. Bump MANIFEST_VERSION to "1.2"
   7. Delete team-validator.sh and workflow-validator.sh (FR-4.2, FR-4.3)
   8. Commit with message: "feat(hooks): rename hooks/ to user-hooks/ and add team hook support"
 
 PHASE 3: VERIFY (post-commit)
   1. Run all tests
-  2. Test swap-team.sh --dry-run with various teams
+  2. Test swap-rite.sh --dry-run with various teams
   3. Verify hooks installed correctly
   4. Verify manifest contains hooks section
   5. Test collision warning appears
@@ -524,7 +524,7 @@ If only team hooks feature has issues:
 ```bash
 # In swap_hooks(), add early return to skip team hook overlay:
 swap_hooks() {
-    local team_name="$1"
+    local rite_name="$1"
     # ... base hooks installation ...
 
     # TEMPORARY: Disable team hooks until fixed
@@ -613,12 +613,12 @@ Extend ADR-0002 to document:
 |----------|---------------|--------|
 | This TDD | `/Users/tomtenuta/Code/roster/docs/design/TDD-hook-parity-scope1.md` | Created |
 | PRD Reference | `/Users/tomtenuta/Code/roster/docs/requirements/PRD-hook-ecosystem-parity.md` | Read |
-| swap-team.sh | `/Users/tomtenuta/Code/roster/swap-team.sh` | Read (lines 2308-2521, 1003-1096) |
+| swap-rite.sh | `/Users/tomtenuta/Code/roster/swap-rite.sh` | Read (lines 2308-2521, 1003-1096) |
 | install-hooks.sh | `/Users/tomtenuta/Code/roster/install-hooks.sh` | Read |
 | sync-user-hooks.sh | `/Users/tomtenuta/Code/roster/sync-user-hooks.sh` | Read |
 | AGENT_MANIFEST.json | `/Users/tomtenuta/Code/roster/.claude/AGENT_MANIFEST.json` | Read |
 | ADR-0002 | `/Users/tomtenuta/Code/roster/docs/decisions/ADR-0002-hook-library-resolution-architecture.md` | Read |
-| 10x-dev-pack workflow | `/Users/tomtenuta/Code/roster/teams/10x-dev-pack/workflow.yaml` | Read |
+| 10x-dev-pack workflow | `/Users/tomtenuta/Code/roster/rites/10x-dev-pack/workflow.yaml` | Read |
 | Current hooks directory | `/Users/tomtenuta/Code/roster/hooks/` | Verified (12 hooks, 10 libs) |
 
 ## 10. Implementation Checklist
@@ -643,22 +643,22 @@ Extend ADR-0002 to document:
 
 ## Appendix A: Current swap_hooks() Implementation
 
-Reference: `/Users/tomtenuta/Code/roster/swap-team.sh` lines 2454-2521
+Reference: `/Users/tomtenuta/Code/roster/swap-rite.sh` lines 2454-2521
 
 The current implementation:
-1. Only copies hooks from `teams/<team>/hooks/`
-2. Creates `.team-hooks` marker file
+1. Only copies hooks from `rites/<team>/hooks/`
+2. Creates `.rite-hooks` marker file
 3. Skips project hooks (with warning)
 4. Does NOT install base hooks (assumes already present)
 
-## Appendix B: Related Functions in swap-team.sh
+## Appendix B: Related Functions in swap-rite.sh
 
 | Function | Lines | Purpose |
 |----------|-------|---------|
 | `backup_team_hooks()` | 2309-2339 | Backup current team hooks |
 | `remove_team_hooks()` | 2341-2363 | Remove team hooks by marker |
 | `is_team_hook()` | 2365-2369 | Check if hook belongs to team |
-| `get_hook_team()` | 2371-2379 | Get team name for a hook |
+| `get_hook_team()` | 2371-2379 | Get rite name for a hook |
 | `detect_hook_orphans()` | 2381-2414 | Find orphan hooks from other teams |
 | `remove_orphan_hooks()` | 2416-2450 | Handle orphan hook cleanup |
 | `swap_hooks()` | 2454-2521 | Main hook sync function |

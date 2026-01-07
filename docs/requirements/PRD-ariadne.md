@@ -27,7 +27,7 @@
 
 ## 1. Problem Statement
 
-The current bash script harness (`session-manager.sh`, `swap-team.sh`, `roster-sync`, etc.) has limitations:
+The current bash script harness (`session-manager.sh`, `swap-rite.sh`, `roster-sync`, etc.) has limitations:
 
 1. **Distribution**: Requires consistent shell environments, jq, yq dependencies
 2. **Performance**: File hashing, manifest diffing slow in bash
@@ -52,7 +52,7 @@ The current bash script harness (`session-manager.sh`, `swap-team.sh`, `roster-s
 | Domain | Commands | Replaces |
 |--------|----------|----------|
 | **session** | create, status, park, resume, wrap, list, transition, migrate, audit, lock, unlock | session-manager.sh, session-fsm.sh |
-| **team** | switch, list, status, validate | swap-team.sh |
+| **team** | switch, list, status, validate | swap-rite.sh |
 | **manifest** | show, diff, validate, merge | CEM manifest operations |
 | **sync** | init, pull, push, status, diff, validate, repair | roster-sync |
 

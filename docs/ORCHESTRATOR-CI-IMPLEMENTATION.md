@@ -22,8 +22,8 @@ schemas/orchestrator.yaml.schema.json         # YAML schema
 on:
   pull_request:
     paths:
-      - 'teams/*/orchestrator.yaml'
-      - 'teams/*/agents/orchestrator.md'
+      - 'rites/*/orchestrator.yaml'
+      - 'rites/*/agents/orchestrator.md'
   push:
     branches: [main]
     paths: [same as above]
@@ -57,8 +57,8 @@ report (summary)
 **From detect-changes job**:
 ```json
 {
-  "changed-yaml": ["teams/rnd-pack/orchestrator.yaml", ...],
-  "changed-md": ["teams/rnd-pack/agents/orchestrator.md", ...],
+  "changed-yaml": ["rites/rnd-pack/orchestrator.yaml", ...],
+  "changed-md": ["rites/rnd-pack/agents/orchestrator.md", ...],
   "yaml-teams": ["rnd-pack", "security-pack", ...],
   "md-teams": ["rnd-pack", ...],
   "has-changes": "true"
@@ -104,7 +104,7 @@ git config core.hooksPath .githooks
 
 ### Lifecycle
 
-1. User stages changes: `git add teams/<team>/orchestrator.yaml`
+1. User stages changes: `git add rites/<team>/orchestrator.yaml`
 2. User runs: `git commit`
 3. Git automatically runs: `.git/hooks/pre-commit`
 4. Hook detects changes, validates, regenerates if needed
@@ -121,11 +121,11 @@ git config core.hooksPath .githooks
 ```
 INFO: Found 1 YAML file(s) and 0 MD file(s) to validate
 
-INFO: Validating YAML: teams/rnd-pack/orchestrator.yaml
-OK: YAML validated: teams/rnd-pack/orchestrator.yaml
+INFO: Validating YAML: rites/rnd-pack/orchestrator.yaml
+OK: YAML validated: rites/rnd-pack/orchestrator.yaml
 INFO: Regenerating orchestrator.md for: rnd-pack
 INFO: Changes detected in regenerated orchestrator.md, staging update
-OK: Regenerated: teams/rnd-pack/agents/orchestrator.md
+OK: Regenerated: rites/rnd-pack/agents/orchestrator.md
 
 OK: Pre-commit validation passed
 INFO: Regenerated orchestrators have been staged
@@ -217,7 +217,7 @@ validate-orchestrators:
     - ./templates/orchestrator-generate.sh --all --validate-only
   artifacts:
     paths:
-      - teams/*/agents/orchestrator.md
+      - rites/*/agents/orchestrator.md
     expire_in: 1 week
   only:
     - merge_requests
@@ -260,12 +260,12 @@ pipelines:
 **Scenario 1: YAML Validation Fails**
 
 ```
-ERROR: Schema validation failed: teams/rnd-pack/orchestrator.yaml
+ERROR: Schema validation failed: rites/rnd-pack/orchestrator.yaml
 ERROR: Missing required field in orchestrator.yaml: routing
 ```
 
 **Debug**:
-1. Check YAML syntax: `yq eval '.' teams/rnd-pack/orchestrator.yaml`
+1. Check YAML syntax: `yq eval '.' rites/rnd-pack/orchestrator.yaml`
 2. Check required fields: `jq 'keys' schemas/orchestrator.yaml.schema.json`
 3. Compare to example: `cat schemas/orchestrator.yaml.schema.json | jq '.examples[0]'`
 
@@ -279,7 +279,7 @@ ERROR: Failed to generate orchestrator.md for: rnd-pack
 1. Run generator with dry-run: `./templates/orchestrator-generate.sh rnd-pack --dry-run`
 2. Capture stderr: `./templates/orchestrator-generate.sh rnd-pack 2>&1 | tail -20`
 3. Check template file: `wc -l templates/orchestrator-base.md.tpl`
-4. Verify workflow.yaml exists: `ls teams/rnd-pack/workflow.yaml`
+4. Verify workflow.yaml exists: `ls rites/rnd-pack/workflow.yaml`
 
 **Scenario 3: File Mismatch**
 
@@ -290,9 +290,9 @@ Generated vs Committed differ
 
 **Debug**:
 1. Regenerate locally: `./templates/orchestrator-generate.sh rnd-pack --force`
-2. Compare: `diff teams/rnd-pack/agents/orchestrator.md /tmp/orchestrator.md`
-3. Check for whitespace: `od -c teams/rnd-pack/agents/orchestrator.md | head -20`
-4. Compare checksums: `md5sum teams/rnd-pack/agents/orchestrator.md`
+2. Compare: `diff rites/rnd-pack/agents/orchestrator.md /tmp/orchestrator.md`
+3. Check for whitespace: `od -c rites/rnd-pack/agents/orchestrator.md | head -20`
+4. Compare checksums: `md5sum rites/rnd-pack/agents/orchestrator.md`
 
 **Resolution**: Regenerate and commit the updated file
 
@@ -339,13 +339,13 @@ permissions:
 
 ### Input Validation
 
-All user inputs (team names, file paths) validated:
+All user inputs (rite names, file paths) validated:
 
 ```bash
-# Example: Validate team name
+# Example: Validate rite name
 TEAM="$1"
-[[ "$TEAM" =~ ^[a-z0-9-]+$ ]] || die "Invalid team name"
-[[ -d "teams/$TEAM" ]] || die "Team directory not found"
+[[ "$TEAM" =~ ^[a-z0-9-]+$ ]] || die "Invalid rite name"
+[[ -d "rites/$TEAM" ]] || die "Team directory not found"
 ```
 
 ### Secret Protection

@@ -10,15 +10,15 @@
 
 ## Context
 
-The current team context injection system uses bash-based sourcing via `team-context-loader.sh`. Teams provide executable `context-injection.sh` scripts that export an `inject_team_context()` function. While functional, this approach has several architectural limitations:
+The current rite context injection system uses bash-based sourcing via `rite-context-loader.sh`. Teams provide executable `context-injection.sh` scripts that export an `inject_team_context()` function. While functional, this approach has several architectural limitations:
 
 ### Current Implementation
 
 ```bash
-# .claude/hooks/lib/team-context-loader.sh
+# .claude/hooks/lib/rite-context-loader.sh
 load_team_context() {
     active_team=$(cat ".claude/ACTIVE_RITE" 2>/dev/null || echo "")
-    team_script="$roster_home/teams/$active_team/$TEAM_CONTEXT_SCRIPT_NAME"
+    team_script="$roster_home/rites/$active_team/$TEAM_CONTEXT_SCRIPT_NAME"
 
     # Source in subshell to isolate side effects
     output=$(
@@ -30,7 +30,7 @@ load_team_context() {
 
 ### Problems with Current Approach
 
-1. **Security**: Arbitrary code execution from team scripts; must trust all team pack authors
+1. **Security**: Arbitrary code execution from team scripts; must trust all rite authors
 2. **Portability**: Bash-specific; incompatible with Go-based Ariadne CLI
 3. **Testability**: Difficult to unit test bash function sourcing
 4. **Discoverability**: No schema for what teams can inject; each team invents its own format
@@ -39,21 +39,21 @@ load_team_context() {
 
 ### Constraints
 
-- **Backward Compatibility**: Existing team packs must continue working during migration
+- **Backward Compatibility**: Existing rites must continue working during migration
 - **Multi-Source**: Team context comes from roster (central) and satellite projects (local)
 - **Performance**: Context injection runs on every prompt; must be fast
 - **Extensibility**: New teams should be addable without modifying Ariadne core
 
 ## Decision
 
-Replace bash-sourced team context with **YAML configuration files per team**, loaded and validated by Ariadne at startup.
+Replace bash-sourced rite context with **YAML configuration files per team**, loaded and validated by Ariadne at startup.
 
 ### Option Analysis
 
 #### Option A: Per-Team YAML Files (Selected)
 
 ```yaml
-# teams/10x-dev-pack/team-context.yaml
+# rites/10x-dev-pack/rite-context.yaml
 team:
   name: 10x-dev-pack
   display_name: "10x Development Pack"
@@ -113,7 +113,7 @@ teams:
 **Cons**:
 - Merge conflicts when multiple teams change simultaneously
 - Doesn't scale to 11+ teams
-- Breaks team pack modularity
+- Breaks rite modularity
 - Central config becomes bottleneck for team additions
 
 #### Option C: Embedded in Session Context
@@ -139,7 +139,7 @@ team_context:
 
 ### Selected Approach: Option A (Per-Team YAML)
 
-Each team pack contains a `team-context.yaml` file defining:
+Each rite contains a `rite-context.yaml` file defining:
 
 1. **Team metadata**: Name, domain, display name
 2. **Static context**: Always-injected markdown sections
@@ -149,9 +149,9 @@ Each team pack contains a `team-context.yaml` file defining:
 ### Schema Definition
 
 ```yaml
-# schemas/team-context-schema.yaml
+# schemas/rite-context-schema.yaml
 $schema: "https://json-schema.org/draft/2020-12/schema"
-$id: "https://roster.dev/schemas/team-context.schema.yaml"
+$id: "https://roster.dev/schemas/rite-context.schema.yaml"
 title: "Team Context Configuration"
 type: object
 
@@ -234,10 +234,10 @@ import (
     "gopkg.in/yaml.v3"
 )
 
-//go:embed schemas/team-context.schema.yaml
+//go:embed schemas/rite-context.schema.yaml
 var teamContextSchema []byte
 
-type TeamContext struct {
+type RiteContext struct {
     SchemaVersion string `yaml:"schema_version"`
     Team          TeamMetadata `yaml:"team"`
     ContextInjection ContextInjection `yaml:"context_injection"`
@@ -249,7 +249,7 @@ type ContextInjection struct {
     Conditional []ConditionalSection `yaml:"conditional"`
 }
 
-func LoadTeamContext(teamDir string) (*TeamContext, error) {
+func LoadRiteContext(teamDir string) (*RiteContext, error) {
     // Load and validate against schema
     // Return structured context for injection
 }
@@ -264,23 +264,23 @@ func LoadTeamContext(teamDir string) (*TeamContext, error) {
 
 2. **Phase 2: Team Migration** (Weeks 3-4)
    - Migrate 10x-dev-pack first (canonical example)
-   - Migration script converts context-injection.sh to team-context.yaml
+   - Migration script converts context-injection.sh to rite-context.yaml
    - Teams validate their context output matches
 
 3. **Phase 3: Deprecation** (Week 5+)
    - Log deprecation warnings for bash scripts
-   - Update team pack template to use YAML
+   - Update rite template to use YAML
    - Remove bash loading in Ariadne v2.0
 
 ### Backward Compatibility
 
-During migration, `team-context-loader.sh` continues to function:
+During migration, `rite-context-loader.sh` continues to function:
 
 ```bash
 load_team_context() {
     # Check for YAML first (new approach)
-    if [[ -f "$team_dir/team-context.yaml" ]]; then
-        ari team context --format=markdown
+    if [[ -f "$team_dir/rite-context.yaml" ]]; then
+        ari rite context --format=markdown
         return $?
     fi
 
@@ -303,7 +303,7 @@ load_team_context() {
 
 ### Negative
 
-1. **Migration Effort**: All 11 team packs need YAML files created
+1. **Migration Effort**: All 11 rites need YAML files created
 2. **Reduced Flexibility**: Complex context logic requires template/CEL expressions
 3. **Learning Curve**: Teams must learn schema and template syntax
 4. **Two Systems During Migration**: Increased complexity while both approaches coexist
@@ -317,10 +317,10 @@ load_team_context() {
 
 | Artifact | Location | Purpose |
 |----------|----------|---------|
-| Schema | `schemas/team-context-schema.yaml` | Validation schema for team context files |
+| Schema | `schemas/rite-context-schema.yaml` | Validation schema for rite context files |
 | Go Package | `ariadne/internal/team/context.go` | Context loading and rendering |
-| Example | `teams/10x-dev-pack/team-context.yaml` | Canonical example for other teams |
-| Migration Script | `scripts/migrate-team-context.sh` | Converts bash to YAML |
+| Example | `rites/10x-dev-pack/rite-context.yaml` | Canonical example for other teams |
+| Migration Script | `scripts/migrate-rite-context.sh` | Converts bash to YAML |
 
 ## Related Decisions
 
@@ -330,12 +330,12 @@ load_team_context() {
 
 ## References
 
-- Current implementation: `.claude/hooks/lib/team-context-loader.sh`
-- Team pack structure: `teams/10x-dev-pack/`
-- Orchestrator YAML: `teams/*/orchestrator.yaml` (existing YAML pattern)
+- Current implementation: `.claude/hooks/lib/rite-context-loader.sh`
+- Team pack structure: `rites/10x-dev-pack/`
+- Orchestrator YAML: `rites/*/orchestrator.yaml` (existing YAML pattern)
 
 ## Version History
 
 | Date | Author | Change |
 |------|--------|--------|
-| 2026-01-04 | Claude Code | Initial proposal for YAML-based team context |
+| 2026-01-04 | Claude Code | Initial proposal for YAML-based rite context |

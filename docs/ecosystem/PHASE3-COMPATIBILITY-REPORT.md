@@ -30,21 +30,21 @@ All 7 forge-pack agents have the `role:` field in YAML frontmatter:
 | Agent | role: Field | Value |
 |-------|-------------|-------|
 | prompt-architect.md | PRESENT | "Crafts agent system prompts" |
-| platform-engineer.md | PRESENT | "Implements team packs in roster" |
+| platform-engineer.md | PRESENT | "Implements rites in roster" |
 | eval-specialist.md | PRESENT | "Validates teams before deployment" |
 | agent-designer.md | PRESENT | "Designs agent roles and contracts" |
 | workflow-engineer.md | PRESENT | "Wires agents into workflows" |
 | agent-curator.md | PRESENT | "Integrates teams into catalog" |
 | orchestrator.md | PRESENT | "Coordinates agent team creation" |
 
-**Verification**: All agents displayed role in swap-team.sh roster output.
+**Verification**: All agents displayed role in swap-rite.sh roster output.
 
 ---
 
 ### Test 2: Hooks Sync Functions
 **Status**: PASS
 
-Verified swap-team.sh contains all required hooks sync functions:
+Verified swap-rite.sh contains all required hooks sync functions:
 
 | Function | Line | Status |
 |----------|------|--------|
@@ -55,10 +55,10 @@ Verified swap-team.sh contains all required hooks sync functions:
 
 **Implementation Pattern**: Follows skills sync pattern exactly:
 1. Creates `.claude/hooks/` directory if needed
-2. Backs up existing team hooks via `.team-hooks` marker
+2. Backs up existing team hooks via `.rite-hooks` marker
 3. Removes previous team hooks
 4. Copies new team hooks from roster
-5. Tracks installed hooks in `.team-hooks` marker
+5. Tracks installed hooks in `.rite-hooks` marker
 6. Returns 0 gracefully if team has no hooks/ directory
 
 ---
@@ -87,7 +87,7 @@ Executed full swap cycle in skeleton_claude satellite:
 
 | Edge Case | Result |
 |-----------|--------|
-| Syntax validation (`bash -n swap-team.sh`) | PASS |
+| Syntax validation (`bash -n swap-rite.sh`) | PASS |
 | Team with no hooks/ directory (10x-dev-pack) | PASS - Returns 0, no error |
 | Team with no hooks/ directory (forge-pack) | PASS - Returns 0, no error |
 
@@ -127,8 +127,8 @@ Executed full swap cycle in skeleton_claude satellite:
 
 | Component | Compatible | Notes |
 |-----------|------------|-------|
-| swap-team.sh API | YES | No breaking changes to CLI |
-| Existing team packs | YES | Works with/without hooks/ directory |
+| swap-rite.sh API | YES | No breaking changes to CLI |
+| Existing rites | YES | Works with/without hooks/ directory |
 | ACTIVE_RITE state | YES | Format unchanged |
 | AGENT_MANIFEST.json | YES | Schema unchanged |
 | Marker files (.team-*) | YES | Pattern extended to hooks, consistent |
@@ -139,8 +139,8 @@ Executed full swap cycle in skeleton_claude satellite:
 
 | File | Change Type |
 |------|-------------|
-| `/roster/teams/forge-pack/agents/*.md` | Added `role:` field |
-| `/roster/swap-team.sh` | Added hooks sync functions |
+| `/roster/rites/forge-pack/agents/*.md` | Added `role:` field |
+| `/roster/swap-rite.sh` | Added hooks sync functions |
 
 ---
 

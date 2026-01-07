@@ -74,7 +74,7 @@ All library functionality has been reimplemented in Go:
 | config.sh | `ariadne/internal/config/` |
 | primitives.sh | Go standard library |
 | preferences-loader.sh | `ariadne/internal/config/preferences.go` |
-| team-context-loader.sh | `ariadne/internal/team/` |
+| rite-context-loader.sh | `ariadne/internal/team/` |
 | worktree-manager.sh | `ariadne/internal/worktree/` |
 | artifact-validation.sh | `ariadne/internal/artifact/` |
 | handoff-validator.sh | `ariadne/internal/handoff/` |

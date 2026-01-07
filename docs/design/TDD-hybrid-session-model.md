@@ -2,7 +2,7 @@
 
 ## Overview
 
-This Technical Design Document specifies the implementation of the hybrid session model for roster. The design introduces explicit execution mode detection (native, orchestrated, cross-cutting) based on session state and team context, enabling the system to behave appropriately across all three modes without ambiguity.
+This Technical Design Document specifies the implementation of the hybrid session model for roster. The design introduces explicit execution mode detection (native, orchestrated, cross-cutting) based on session state and rite context, enabling the system to behave appropriately across all three modes without ambiguity.
 
 ## Context
 
@@ -126,7 +126,7 @@ User Intent
 
 **Signature**:
 ```bash
-# Get current execution mode based on session state and team context
+# Get current execution mode based on session state and rite context
 # Returns: "native" | "orchestrated" | "cross-cutting"
 # Exit code: 0 always (graceful fallback on errors)
 # Performance: <50ms required (NFR-1)
@@ -198,8 +198,8 @@ execution_mode() {
         active_team="$ctx_team"
     fi
 
-    # Verify team pack exists
-    local team_pack_dir="${ROSTER_HOME:-$HOME/.config/roster}/teams/$active_team"
+    # Verify rite exists
+    local team_pack_dir="${ROSTER_HOME:-$HOME/.config/roster}/rites/$active_team"
     if [[ ! -d "$team_pack_dir" ]]; then
         # Team configured but pack missing - error state, but fallback gracefully
         echo "cross-cutting"
@@ -407,7 +407,7 @@ Add after "## Execution Mode" header in `.claude/CLAUDE.md`:
 ```markdown
 ## Execution Mode
 
-The roster ecosystem operates in three execution modes based on session state and team context:
+The roster ecosystem operates in three execution modes based on session state and rite context:
 
 | Mode | Session | Team | Main Agent Behavior |
 |------|---------|------|---------------------|
@@ -513,7 +513,7 @@ fi
 | Case | Detection | Behavior | Implementation |
 |------|-----------|----------|----------------|
 | Session file corrupted | `fsm_get_state` returns error | `cross-cutting` (graceful) | `execution_mode()` catches error, returns fallback |
-| ACTIVE_RITE exists but pack missing | Check `$ROSTER_HOME/teams/$team` dir | `cross-cutting` + warn | Log warning, return cross-cutting |
+| ACTIVE_RITE exists but pack missing | Check `$ROSTER_HOME/rites/$team` dir | `cross-cutting` + warn | Log warning, return cross-cutting |
 | Session with team, then team file deleted | ACTIVE_RITE file absent | Downgrade to `cross-cutting` | Mode detection checks both sources |
 | Session-without-team receives `/handoff` | No orchestrator available | Error with guidance | `/handoff` skill checks mode first |
 | Native mode receives `/park` | No session to park | Error message | `/park` skill checks session existence |

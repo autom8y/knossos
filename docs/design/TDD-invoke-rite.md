@@ -11,7 +11,7 @@
 
 ### 1.1 Problem Statement
 
-The current team switching mechanism (`ari team switch`) operates as an all-or-nothing replacement. When switching teams, the entire agent set and workflow configuration are replaced. This creates friction when practitioners need to temporarily borrow capabilities from another rite without abandoning their current practice.
+The current rite switching mechanism (`ari team switch`) operates as an all-or-nothing replacement. When switching teams, the entire agent set and workflow configuration are replaced. This creates friction when practitioners need to temporarily borrow capabilities from another rite without abandoning their current practice.
 
 Per the Knossos Doctrine Section IV:
 > "You can invoke a documentation rite while still practicing under the quality rite--borrowing useful knowledge without conversion. Context switching is expensive; knowledge sharing is cheap."
@@ -138,7 +138,7 @@ budget:
 
 # Migration metadata (for transition from team-pack)
 migration:
-  from_team: 10x-dev-pack           # Original team pack name
+  from_team: 10x-dev-pack           # Original rite name
   migrated_at: null                 # Populated on migration
 ```
 
@@ -765,7 +765,7 @@ func init() {
 
 ### 7.2 Team Pack to Rite Migration
 
-Migration script generates `rite.yaml` from existing team pack structure:
+Migration script generates `rite.yaml` from existing rite structure:
 
 ```go
 func MigrateTeamPack(teamPath string) (*RiteManifest, error) {
@@ -823,10 +823,10 @@ func toRiteName(teamName string) string {
 Usage: ari rite migrate [flags]
 
 Flags:
-  --all             Migrate all team packs
-  --team <name>     Migrate specific team pack
+  --all             Migrate all rites
+  --team <name>     Migrate specific rite
   --dry-run         Preview migration without writing
-  --in-place        Modify existing team pack directory
+  --in-place        Modify existing rite directory
   -o, --output      Output format: text, json, yaml
 
 Examples:
@@ -839,7 +839,7 @@ Examples:
 | Phase | Action | Timeline |
 |-------|--------|----------|
 | **Phase 1** | Add `ari rite` commands alongside `ari team` | Immediate |
-| **Phase 2** | Generate `rite.yaml` for existing team packs | Week 1 |
+| **Phase 2** | Generate `rite.yaml` for existing rites | Week 1 |
 | **Phase 3** | Deprecation warnings on `ari team` commands | Week 2 |
 | **Phase 4** | Documentation updates to use rite terminology | Week 3 |
 | **Phase 5** | Remove `ari team` commands (major version) | v3.0 |
@@ -1054,7 +1054,7 @@ ARIADNE_CONTEXT_LIMIT=5000 ari rite invoke large-rite
 - [ ] CLAUDE.md updates via inscription system
 - [ ] Moirai session lifecycle integration
 - [ ] Hook context includes invocation state
-- [ ] Migration preserves all team pack functionality
+- [ ] Migration preserves all rite functionality
 
 ---
 

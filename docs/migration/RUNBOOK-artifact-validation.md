@@ -1,5 +1,5 @@
 ---
-title: "Migration Runbook: Artifact Validation Features (swap-team.sh v1.3)"
+title: "Migration Runbook: Artifact Validation Features (swap-rite.sh v1.3)"
 type: migration-runbook
 created_at: "2026-01-03T20:00:00Z"
 author: documentation-engineer
@@ -9,8 +9,8 @@ breaking_change: false
 estimated_effort: "15 minutes"
 risk_level: low
 prerequisites:
-  - description: "swap-team.sh v1.3.0 with validation features available"
-    verification: "Run: grep -q 'validate_workflow_yaml' swap-team.sh (returns 0)"
+  - description: "swap-rite.sh v1.3.0 with validation features available"
+    verification: "Run: grep -q 'validate_workflow_yaml' swap-rite.sh (returns 0)"
   - description: "Git working directory is clean"
     verification: "Run: git status --porcelain (should return empty)"
   - description: "No swap operation in progress"
@@ -18,49 +18,49 @@ prerequisites:
 steps:
   - number: 1
     action: "Pull latest roster changes"
-    verification: "swap-team.sh contains validation functions"
+    verification: "swap-rite.sh contains validation functions"
     command: "cd ~/Code/roster && git pull"
     expected_output: "Already up to date or merge successful"
   - number: 2
-    action: "Validate team pack schemas before using --update"
+    action: "Validate rite schemas before using --update"
     verification: "No validation errors in output"
-    command: "./swap-team.sh <team-name> --dry-run"
+    command: "./swap-rite.sh <team-name> --dry-run"
     expected_output: "Dry-run preview shows no validation errors"
   - number: 3
     action: "Run swap with new validation features active"
     verification: "Swap completes successfully with validation messages"
-    command: "./swap-team.sh <team-name> --update"
+    command: "./swap-rite.sh <team-name> --update"
     expected_output: "Switched to <team-name> (N agents loaded)"
   - number: 4
     action: "Clean up orphan backups if desired"
     verification: "Old backups removed, last 3 retained"
-    command: "./swap-team.sh --cleanup-orphans"
+    command: "./swap-rite.sh --cleanup-orphans"
     expected_output: "Cleaned up N old orphan backup(s)"
 rollback_steps:
   - number: 1
     action: "Restore from previous roster commit"
-    verification: "swap-team.sh no longer has validation functions"
-    command: "cd ~/Code/roster && git checkout HEAD~1 -- swap-team.sh"
+    verification: "swap-rite.sh no longer has validation functions"
+    command: "cd ~/Code/roster && git checkout HEAD~1 -- swap-rite.sh"
   - number: 2
     action: "Re-run swap without validation"
     verification: "Swap completes (may encounter schema issues)"
 verification:
   - description: "Schema validation runs during swap"
     expected: "Logs show 'Validating team schemas' or validation passes silently"
-    command: "ROSTER_DEBUG=1 ./swap-team.sh <team-name> --dry-run 2>&1 | grep -i validat"
+    command: "ROSTER_DEBUG=1 ./swap-rite.sh <team-name> --dry-run 2>&1 | grep -i validat"
   - description: "Command collision detection active"
     expected: "Warnings appear if user commands override team commands"
     command: "Create test command in ~/.claude/commands/, then run swap"
   - description: "Orphan backup cleanup available"
     expected: "--cleanup-orphans and --auto-cleanup flags accepted"
-    command: "./swap-team.sh --help | grep cleanup"
+    command: "./swap-rite.sh --help | grep cleanup"
 context_design: N/A
 schema_version: "1.0"
 ---
 
 ## Overview
 
-This runbook documents the new artifact validation features added to `swap-team.sh` in v1.3.0. These features improve swap reliability by:
+This runbook documents the new artifact validation features added to `swap-rite.sh` in v1.3.0. These features improve swap reliability by:
 
 1. **WP1: Command Collision Detection** - Warns when user commands would override team commands
 2. **WP2: Schema Validation Pre-Swap** - Validates workflow.yaml and orchestrator.yaml before applying
@@ -74,7 +74,7 @@ These are **non-breaking changes** - existing swap operations continue to work, 
 
 ### WP1: Command Collision Detection
 
-**Location**: `swap-team.sh` lines 2189-2237, integrated at line 4107
+**Location**: `swap-rite.sh` lines 2189-2237, integrated at line 4107
 
 **Behavior**:
 - Checks for naming conflicts between team commands and user commands (in `~/.claude/commands/`)
@@ -92,11 +92,11 @@ These are **non-breaking changes** - existing swap operations continue to work, 
 
 ### WP2: Schema Validation Pre-Swap
 
-**Location**: `swap-team.sh` lines 1763-1875, integrated at lines 3983-3987
+**Location**: `swap-rite.sh` lines 1763-1875, integrated at lines 3983-3987
 
 **Behavior**:
 - Validates `workflow.yaml` schema (if present): requires `name`, `workflow_type`, `phases` fields
-- Validates `orchestrator.yaml` schema (if present): requires `team`, `team.name`, `routing` fields
+- Validates `orchestrator.yaml` schema (if present): requires `team`, `rite.name`, `routing` fields
 - **Hard fail**: If validation fails, swap is aborted with exit code 2 (`EXIT_VALIDATION_FAILURE`)
 
 **Validated Fields**:
@@ -104,11 +104,11 @@ These are **non-breaking changes** - existing swap operations continue to work, 
 | File | Required Fields | Validation |
 |------|-----------------|------------|
 | `workflow.yaml` | `name`, `workflow_type`, `phases` | `phases` must be non-empty list |
-| `orchestrator.yaml` | `team`, `team.name`, `routing` | Nested structure validated |
+| `orchestrator.yaml` | `team`, `rite.name`, `routing` | Nested structure validated |
 
 ### WP3: Orphan Backup Cleanup
 
-**Location**: `swap-team.sh` lines 2895-2962
+**Location**: `swap-rite.sh` lines 2895-2962
 
 **New Flags**:
 - `--cleanup-orphans`: Manual cleanup of old orphan backup directories
@@ -129,13 +129,13 @@ Standard swap operation now includes schema validation automatically:
 
 ```bash
 # Swap to a team (validation runs automatically)
-./swap-team.sh dev-pack
+./swap-rite.sh dev-pack
 
 # Preview swap without applying (includes validation check)
-./swap-team.sh dev-pack --dry-run
+./swap-rite.sh dev-pack --dry-run
 
 # Force re-apply current team with validation
-./swap-team.sh dev-pack --update
+./swap-rite.sh dev-pack --update
 ```
 
 ### Interpreting Collision Warnings
@@ -150,7 +150,7 @@ When you see collision warnings:
 
 **What this means**:
 - You have a file `~/.claude/commands/commit.md`
-- The team pack also has a command `commit.md`
+- The rite also has a command `commit.md`
 - Your user command will be used; the team command will be skipped
 
 **What to do**:
@@ -169,7 +169,7 @@ If swap fails with validation error:
 ```
 
 **What this means**:
-- The team pack has an invalid `workflow.yaml` or `orchestrator.yaml`
+- The rite has an invalid `workflow.yaml` or `orchestrator.yaml`
 - Swap was aborted to prevent loading broken configuration
 
 **Resolution**: See Troubleshooting section below.
@@ -179,13 +179,13 @@ If swap fails with validation error:
 **Manual cleanup** (run independently):
 ```bash
 # Clean up old orphan backups (keeps last 3 per type)
-./swap-team.sh --cleanup-orphans
+./swap-rite.sh --cleanup-orphans
 ```
 
 **Automatic cleanup during swap**:
 ```bash
 # Swap and clean orphan backups in one operation
-./swap-team.sh dev-pack --auto-cleanup
+./swap-rite.sh dev-pack --auto-cleanup
 ```
 
 **Check current backup usage**:
@@ -222,7 +222,7 @@ Validation error during swap?
     +-> "missing required field: team"
     |   -> Add "team:" section at top level
     |
-    +-> "missing required field: team.name"
+    +-> "missing required field: rite.name"
     |   -> Add "name:" under "team:" section
     |
     +-> "missing required field: routing"
@@ -256,7 +256,7 @@ phases:
 
 #### orchestrator.yaml Errors
 
-**Error**: `orchestrator.yaml missing required field: team.name`
+**Error**: `orchestrator.yaml missing required field: rite.name`
 ```yaml
 # Wrong:
 team:
@@ -282,7 +282,7 @@ routing:
    mv ~/.claude/commands/review.md ~/.claude/commands/my-review.md
 
    # Re-run swap
-   ./swap-team.sh dev-pack --update
+   ./swap-rite.sh dev-pack --update
    ```
 
 3. **Merge commands**: Copy relevant parts from team command into user command
@@ -295,7 +295,7 @@ routing:
 du -sh .claude/*.orphan-backup/*
 
 # Clean up old backups
-./swap-team.sh --cleanup-orphans
+./swap-rite.sh --cleanup-orphans
 ```
 
 **Error**: Cannot find backed-up agents
@@ -315,9 +315,9 @@ ls -la .claude/agents.orphan-backup/
 
 - [ ] No `.claude/.swap-journal` file exists (no interrupted swap)
 - [ ] Git working directory is clean (or changes are intentional)
-- [ ] Team pack exists in roster: `ls ~/Code/roster/teams/<team-name>`
+- [ ] Team pack exists in roster: `ls ~/Code/roster/rites/<team-name>`
 - [ ] If team has workflow.yaml: `name`, `workflow_type`, `phases` fields present
-- [ ] If team has orchestrator.yaml: `team`, `team.name`, `routing` fields present
+- [ ] If team has orchestrator.yaml: `team`, `rite.name`, `routing` fields present
 
 ### Post-Swap Verification
 
@@ -328,13 +328,13 @@ cat .claude/ACTIVE_RITE
 
 # 2. Verify agents loaded
 ls .claude/agents/*.md | wc -l
-# Expected: Number of agents in team pack
+# Expected: Number of agents in rite
 
 # 3. Check for collision warnings in output
 # Review any "Command collision(s) detected" warnings
 
 # 4. Validate manifest updated
-jq '.team.name' .claude/AGENT_MANIFEST.json
+jq '.rite.name' .claude/AGENT_MANIFEST.json
 # Expected: "<team-name>"
 
 # 5. Check orphan backup status (if --auto-cleanup used)
@@ -346,14 +346,14 @@ ls .claude/*.orphan-backup/ 2>/dev/null | wc -l
 
 ```bash
 # Full validation dry-run
-ROSTER_DEBUG=1 ./swap-team.sh <team-name> --dry-run 2>&1
+ROSTER_DEBUG=1 ./swap-rite.sh <team-name> --dry-run 2>&1
 
 # Check for schema issues before swap
-grep -l "^name:" ~/Code/roster/teams/<team-name>/workflow.yaml
-grep -l "^team:" ~/Code/roster/teams/<team-name>/orchestrator.yaml
+grep -l "^name:" ~/Code/roster/rites/<team-name>/workflow.yaml
+grep -l "^team:" ~/Code/roster/rites/<team-name>/orchestrator.yaml
 
 # Verify current state consistency
-./swap-team.sh --verify
+./swap-rite.sh --verify
 
 # Check for orphan backups
 du -sh .claude/*.orphan-backup/* 2>/dev/null
@@ -369,28 +369,28 @@ If swap completed but team configuration causes problems:
 
 ```bash
 # Option 1: Swap to different team
-./swap-team.sh <previous-team>
+./swap-rite.sh <previous-team>
 
 # Option 2: Reset to no team (skeleton baseline)
-./swap-team.sh --reset
+./swap-rite.sh --reset
 
 # Option 3: Recover from backup
 ls .claude/.swap-backup/  # Check if backup exists
-./swap-team.sh --recover
+./swap-rite.sh --recover
 ```
 
 ### Rollback: Validation Blocked Legitimate Swap
 
-If validation is incorrectly blocking a valid team pack:
+If validation is incorrectly blocking a valid rite:
 
 ```bash
-# 1. Verify the team pack schema is correct
-cat ~/Code/roster/teams/<team-name>/workflow.yaml
+# 1. Verify the rite schema is correct
+cat ~/Code/roster/rites/<team-name>/workflow.yaml
 
 # 2. If schema is actually valid, file a bug
 # The validation may have a false positive
 
-# 3. Temporary workaround: fix schema in team pack
+# 3. Temporary workaround: fix schema in rite
 # Edit workflow.yaml or orchestrator.yaml to add missing fields
 ```
 
@@ -424,7 +424,7 @@ cp -r .claude/agents.orphan-backup/<timestamp>-<team>/* .claude/agents/
 
 ## Compatibility Matrix
 
-| swap-team.sh | workflow.yaml | orchestrator.yaml | Behavior |
+| swap-rite.sh | workflow.yaml | orchestrator.yaml | Behavior |
 |--------------|---------------|-------------------|----------|
 | < 1.3.0 | Any | Any | No validation, may load invalid configs |
 | >= 1.3.0 | Valid | Valid | Swap proceeds normally |
@@ -439,7 +439,7 @@ cp -r .claude/agents.orphan-backup/<timestamp>-<team>/* .claude/agents/
 
 If issues persist after troubleshooting:
 
-1. Enable debug mode: `ROSTER_DEBUG=1 ./swap-team.sh <team> 2>&1 | tee swap-debug.log`
+1. Enable debug mode: `ROSTER_DEBUG=1 ./swap-rite.sh <team> 2>&1 | tee swap-debug.log`
 2. Check journal for interrupted swap: `cat .claude/.swap-journal`
 3. File issue in roster repository with:
    - Error message

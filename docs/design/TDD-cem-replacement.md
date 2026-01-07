@@ -64,7 +64,7 @@ This TDD specifies the architecture for replacing CEM (Claude Ecosystem Manager)
 | Decision | Choice | Rationale |
 |----------|--------|-----------|
 | Approach | Port + Enhance | Minimizes risk, maintains compatibility |
-| Entry Point | Enhance swap-team.sh | Leverage existing infrastructure |
+| Entry Point | Enhance swap-rite.sh | Leverage existing infrastructure |
 | Manifest | Schema v3 with migration | Forward-compatible, preserves history |
 | Library Location | `$ROSTER_HOME/lib/sync/` | Clear separation, easy testing |
 
@@ -79,7 +79,7 @@ This TDD specifies the architecture for replacing CEM (Claude Ecosystem Manager)
 
 **Out of Scope**:
 - User-level resource sync (handled by existing sync-user-*.sh scripts)
-- Team validation (already in swap-team.sh)
+- Team validation (already in swap-rite.sh)
 - New features beyond CEM parity
 
 ---
@@ -93,7 +93,7 @@ This TDD specifies the architecture for replacing CEM (Claude Ecosystem Manager)
                                     │           ROSTER ECOSYSTEM           │
                                     │                                     │
   ┌─────────────────┐              │  ┌─────────────────────────────┐    │
-  │   swap-team.sh  │──────────────┼─▶│      roster-sync            │    │
+  │   swap-rite.sh  │──────────────┼─▶│      roster-sync            │    │
   │  (team swaps)   │              │  │   (ecosystem sync)          │    │
   └─────────────────┘              │  └──────────────┬──────────────┘    │
                                     │                │                   │
@@ -222,7 +222,7 @@ This TDD specifies the architecture for replacing CEM (Claude Ecosystem Manager)
             ┌───────────────────────────────┐
             │  7. Team Refresh (--refresh)  │
             │  - Check team freshness       │
-            │  - Call swap-team.sh --update │
+            │  - Call swap-rite.sh --update │
             └───────────────────────────────┘
 ```
 
@@ -253,7 +253,7 @@ This TDD specifies the architecture for replacing CEM (Claude Ecosystem Manager)
 |------|----------|----------|
 | `--force` | Overwrite local changes | sync, init |
 | `--dry-run` | Preview without changes | sync, init |
-| `--refresh` | Also refresh active team | sync |
+| `--refresh` | Also refresh active rite | sync |
 | `--prune` | Remove orphaned files | sync |
 | `--auto-refresh` | Auto-refresh if team updates | sync |
 
@@ -412,8 +412,8 @@ cmd_status()
      b. Compare with last_commit
      c. If different: "Updates available!" + commit count
      d. If same: "Up to date"
-  4. If active team:
-     a. Show team name
+  4. If active rite:
+     a. Show rite name
      b. Check team freshness
 ```
 
@@ -750,11 +750,11 @@ merge_documentation(roster_file, local_file, output_file)
 # Regenerate ## Quick Start from agents/ directory
 regenerate_quick_start() {
     local agents_dir="$1"
-    local team_name="$2"
+    local rite_name="$2"
 
     echo "## Quick Start"
     echo ""
-    echo "This project uses a $(count_agents "$agents_dir")-agent workflow ($team_name):"
+    echo "This project uses a $(count_agents "$agents_dir")-agent workflow ($rite_name):"
     echo ""
     echo "| Agent | Role | Produces |"
     echo "| ----- | ---- | -------- |"
@@ -864,7 +864,7 @@ dispatch_merge_strategy() {
     "name": "10x-dev-pack",
     "checksum": "sha256...",
     "last_refresh": "2026-01-03T00:00:00Z",
-    "roster_path": "/path/to/roster/teams/10x-dev-pack"
+    "roster_path": "/path/to/roster/rites/10x-dev-pack"
   },
   "managed_files": [
     {
@@ -933,10 +933,10 @@ migrate_v1_to_v3() {
             last_sync: .last_sync
         },
         team: (if .team then {
-            name: .team.name,
-            checksum: .team.checksum,
-            last_refresh: .team.last_refresh,
-            roster_path: .team.roster_path
+            name: .rite.name,
+            checksum: .rite.checksum,
+            last_refresh: .rite.last_refresh,
+            roster_path: .rite.roster_path
         } else null end),
         managed_files: [.managed_files[] | . + {
             source: "roster",
@@ -1266,10 +1266,10 @@ migrate_v2_to_v3() {
 ```bash
 # Support for --refresh flag to update team resources
 if [[ "$REFRESH_FLAG" == "1" ]] && [[ -f ".claude/ACTIVE_RITE" ]]; then
-    local team_name
-    team_name=$(cat ".claude/ACTIVE_RITE")
-    log "Refreshing team: $team_name"
-    "$ROSTER_HOME/swap-team.sh" "$team_name" --update
+    local rite_name
+    rite_name=$(cat ".claude/ACTIVE_RITE")
+    log "Refreshing team: $rite_name"
+    "$ROSTER_HOME/swap-rite.sh" "$rite_name" --update
 fi
 ```
 
@@ -1292,11 +1292,11 @@ fi
 
 ---
 
-## 11. Integration with swap-team.sh
+## 11. Integration with swap-rite.sh
 
-### 11.1 Current swap-team.sh Functions
+### 11.1 Current swap-rite.sh Functions
 
-swap-team.sh already handles:
+swap-rite.sh already handles:
 - Agent swapping from roster teams
 - Manifest management (AGENT_MANIFEST.json)
 - Backup/restore operations
@@ -1304,10 +1304,10 @@ swap-team.sh already handles:
 
 ### 11.2 Integration Points
 
-| Function | swap-team.sh | roster-sync | Interaction |
+| Function | swap-rite.sh | roster-sync | Interaction |
 |----------|--------------|-------------|-------------|
-| Team swap | Primary | None | swap-team.sh owns team changes |
-| Agent sync | Primary | Trigger | roster-sync --refresh calls swap-team.sh |
+| Team swap | Primary | None | swap-rite.sh owns team changes |
+| Agent sync | Primary | Trigger | roster-sync --refresh calls swap-rite.sh |
 | CEM sync | None | Primary | roster-sync owns ecosystem files |
 | Manifest | AGENT_MANIFEST.json | manifest.json | Separate manifests |
 | Worktree | Consumer | Consumer | Both use worktree-manager.sh |
@@ -1319,7 +1319,7 @@ roster-sync sync --refresh
         │
         ├──▶ Sync ecosystem files (roster-sync)
         │
-        └──▶ Refresh team (swap-team.sh --update)
+        └──▶ Refresh team (swap-rite.sh --update)
                 │
                 ├──▶ Sync agents from roster
                 │
@@ -1373,7 +1373,7 @@ This is out of scope for current TDD but noted for future consideration.
 - [x] Each merge strategy has implementation approach (Section 5)
 - [x] Rollback procedure defined for each sprint (Section 8)
 - [x] Test infrastructure requirements specified (Section 9)
-- [x] Integration with swap-team.sh clarified (Section 11)
+- [x] Integration with swap-rite.sh clarified (Section 11)
 - [x] Addresses all 5 HIGH severity risks (Section 10)
 
 ---

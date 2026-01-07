@@ -26,7 +26,7 @@ Implement Stripe Connect integration for processing user payments, including che
 - Handles sensitive financial data (PCI-DSS implications)
 - Requires threat modeling before design proceeds
 - Requires security assessment before production deployment
-- Demonstrates blocking cross-team handoff patterns
+- Demonstrates blocking cross-rite handoff patterns
 - Tests priority=critical and blocking=true handoff flags
 
 ---
@@ -575,5 +575,5 @@ Security posture validated.
 
 - [Cross-Team Coordination Playbook](../playbooks/cross-rite-coordination.md)
 - [Edge Cases: Cross-Team Workflows](../edge-cases/cross-rite-workflows.md)
-- [Security Pack Workflow](../../teams/security-pack/workflow.md)
-- [Cross-Team Handoff Schema](../../.claude/skills/shared/cross-team-handoff/schema.md)
+- [Security Pack Workflow](../../rites/security-pack/workflow.md)
+- [Cross-Team Handoff Schema](../../.claude/skills/shared/cross-rite-handoff/schema.md)

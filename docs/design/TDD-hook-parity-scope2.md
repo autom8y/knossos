@@ -2,7 +2,7 @@
 
 ## Overview
 
-This Technical Design Document specifies the implementation of automated settings.json hook registration management for the roster ecosystem. The design enables team packs to declaratively define hook configurations (event type, path, matcher, timeout) in YAML, which `swap-team.sh` merges and generates into `settings.local.json` during team swaps.
+This Technical Design Document specifies the implementation of automated settings.json hook registration management for the roster ecosystem. The design enables rites to declaratively define hook configurations (event type, path, matcher, timeout) in YAML, which `swap-rite.sh` merges and generates into `settings.local.json` during team swaps.
 
 ## Context
 
@@ -12,12 +12,12 @@ This Technical Design Document specifies the implementation of automated setting
 | Sprint | `sprint-hook-parity-20251231` |
 | Task | `task-003` |
 | Current settings.local.json | `/Users/tomtenuta/Code/roster/.claude/settings.local.json` |
-| swap-team.sh | `/Users/tomtenuta/Code/roster/swap-team.sh` |
+| swap-rite.sh | `/Users/tomtenuta/Code/roster/swap-rite.sh` |
 | Related Scope | Scope 1 (Team Hooks Parity - file sync) |
 
 ### Problem Statement
 
-Currently, `swap-team.sh` syncs hook FILES to `.claude/hooks/` but does not update hook REGISTRATIONS in `settings.local.json`. This creates several issues:
+Currently, `swap-rite.sh` syncs hook FILES to `.claude/hooks/` but does not update hook REGISTRATIONS in `settings.local.json`. This creates several issues:
 
 1. **Manual Registration**: After swapping teams, users must manually edit `settings.local.json` to register new hooks
 2. **No Team Customization**: Teams cannot specify custom matchers, timeouts, or event types for their hooks
@@ -28,7 +28,7 @@ Currently, `swap-team.sh` syncs hook FILES to `.claude/hooks/` but does not upda
 
 1. Declarative YAML schema for hook registration configuration
 2. Base hooks configuration at `roster/user-hooks/base_hooks.yaml`
-3. Team-specific hooks configuration at `teams/<team>/hooks.yaml`
+3. Team-specific hooks configuration at `rites/<team>/hooks.yaml`
 4. Automated `settings.local.json` generation during team swap
 5. Merge strategy: base hooks first, team hooks append per event type
 6. Preservation of non-roster hooks in `settings.local.json`
@@ -40,7 +40,7 @@ Currently, `swap-team.sh` syncs hook FILES to `.claude/hooks/` but does not upda
 | FR-2.1 | Hook registration schema | YAML Schema Definition |
 | FR-2.2 | `base_hooks.yaml` in `roster/user-hooks/` | Base Hooks Configuration |
 | FR-2.3 | Team `hooks.yaml` for team-specific registrations | Team Hooks Configuration |
-| FR-2.4 | `swap-team.sh` generates settings.local.json | JSON Generation Algorithm |
+| FR-2.4 | `swap-rite.sh` generates settings.local.json | JSON Generation Algorithm |
 | FR-2.5 | Merge strategy: base first, team append | Merge Strategy Design |
 
 ---
@@ -51,14 +51,14 @@ Currently, `swap-team.sh` syncs hook FILES to `.claude/hooks/` but does not upda
 
 ```
                                     +-----------------------+
-                                    |   swap-team.sh        |
+                                    |   swap-rite.sh        |
                                     +-----------+-----------+
                                                 |
                         +-----------------------+-----------------------+
                         |                       |                       |
                         v                       v                       v
               +------------------+    +------------------+    +------------------+
-              | roster/          |    | teams/<team>/    |    | .claude/         |
+              | roster/          |    | rites/<team>/    |    | .claude/         |
               | user-hooks/      |    | hooks.yaml       |    | settings.local   |
               | base_hooks.yaml  |    | (optional)       |    | .json            |
               +--------+---------+    +--------+---------+    +--------+---------+
@@ -92,10 +92,10 @@ Currently, `swap-team.sh` syncs hook FILES to `.claude/hooks/` but does not upda
 | Component | Responsibility | Location |
 |-----------|---------------|----------|
 | **Base Hooks Config** | Default hook registrations for all teams | `roster/user-hooks/base_hooks.yaml` |
-| **Team Hooks Config** | Team-specific hook registrations | `teams/<team>/hooks.yaml` |
-| **Hook Registration Merger** | Parses, validates, merges YAML configs | `swap-team.sh` (new functions) |
-| **Settings Generator** | Writes merged config to settings.local.json | `swap-team.sh` (new functions) |
-| **User Hook Preserver** | Identifies and preserves non-roster hooks | `swap-team.sh` (new functions) |
+| **Team Hooks Config** | Team-specific hook registrations | `rites/<team>/hooks.yaml` |
+| **Hook Registration Merger** | Parses, validates, merges YAML configs | `swap-rite.sh` (new functions) |
+| **Settings Generator** | Writes merged config to settings.local.json | `swap-rite.sh` (new functions) |
+| **User Hook Preserver** | Identifies and preserves non-roster hooks | `swap-rite.sh` (new functions) |
 
 ---
 
@@ -165,7 +165,7 @@ hooks:
 
 ```yaml
 # Base Hooks Registration
-# These hooks are applied to all team packs
+# These hooks are applied to all rites
 # Team-specific hooks.yaml will append to these registrations
 
 schema_version: "1.0"
@@ -242,7 +242,7 @@ hooks:
 
 ### File Location
 
-`/Users/tomtenuta/Code/roster/teams/<team-name>/hooks.yaml`
+`/Users/tomtenuta/Code/roster/rites/<team-name>/hooks.yaml`
 
 ### Example: Security Pack
 
@@ -306,10 +306,10 @@ The generation algorithm:
 
 ```bash
 generate_settings_hooks() {
-    local team_name="$1"
+    local rite_name="$1"
     local settings_file=".claude/settings.local.json"
     local base_hooks="$ROSTER_HOME/user-hooks/base_hooks.yaml"
-    local team_hooks="$ROSTER_HOME/teams/$team_name/hooks.yaml"
+    local team_hooks="$ROSTER_HOME/rites/$rite_name/hooks.yaml"
 
     # Step 1: Backup existing settings
     local backup_file="${settings_file}.backup"
@@ -646,7 +646,7 @@ Hooks with commands NOT matching this pattern are considered user hooks and are 
 
 ---
 
-## Integration with swap-team.sh
+## Integration with swap-rite.sh
 
 ### New Function: `swap_hook_registrations()`
 
@@ -654,12 +654,12 @@ Hooks with commands NOT matching this pattern are considered user hooks and are 
 # Sync hook registrations to settings.local.json
 # Called after swap_hooks() syncs the actual hook files
 swap_hook_registrations() {
-    local team_name="$1"
+    local rite_name="$1"
     local settings_file=".claude/settings.local.json"
     local base_hooks_yaml="$ROSTER_HOME/user-hooks/base_hooks.yaml"
-    local team_hooks_yaml="$ROSTER_HOME/teams/$team_name/hooks.yaml"
+    local team_hooks_yaml="$ROSTER_HOME/rites/$rite_name/hooks.yaml"
 
-    log_debug "Updating hook registrations for team: $team_name"
+    log_debug "Updating hook registrations for team: $rite_name"
 
     # Ensure settings file exists with valid JSON
     if [[ ! -f "$settings_file" ]]; then
@@ -696,7 +696,7 @@ swap_hook_registrations() {
         team_count=$(echo "$team_registrations" | grep -c '^{' || echo 0)
         log_debug "Parsed $team_count team hook registrations"
     else
-        log_debug "No team hooks.yaml for $team_name"
+        log_debug "No team hooks.yaml for $rite_name"
     fi
 
     # Step 4: Merge registrations
@@ -728,14 +728,14 @@ swap_hook_registrations() {
 
 ### Integration Point in `do_swap()`
 
-Location: Line ~3070 in `swap-team.sh`, after `swap_hooks "$team_name"`
+Location: Line ~3070 in `swap-rite.sh`, after `swap_hooks "$rite_name"`
 
 ```bash
     # Sync team hooks
-    swap_hooks "$team_name"
+    swap_hooks "$rite_name"
 
     # NEW: Update hook registrations in settings.local.json
-    swap_hook_registrations "$team_name"
+    swap_hook_registrations "$rite_name"
 ```
 
 ---
@@ -833,7 +833,7 @@ fi
 
 ```bash
 swap_hook_registrations() {
-    local team_name="$1"
+    local rite_name="$1"
 
     # ... parsing and merging ...
 
@@ -850,7 +850,7 @@ swap_hook_registrations() {
 ### Example Output
 
 ```
-$ ./swap-team.sh --dry-run security-pack
+$ ./swap-rite.sh --dry-run security-pack
 
 Hook registrations that would be written:
 {
@@ -977,13 +977,13 @@ YAML
 
 4. **Phase 4: Integration**
    - Implement `swap_hook_registrations()`
-   - Integrate into `swap-team.sh` after `swap_hooks()`
+   - Integrate into `swap-rite.sh` after `swap_hooks()`
    - Add dry-run support
 
 5. **Phase 5: Testing**
    - Unit tests for all functions
    - Integration tests for full swap flow
-   - Manual testing with real team packs
+   - Manual testing with real rites
 
 ### Dependencies
 
@@ -1019,7 +1019,7 @@ parse_yaml_field() {
 
 ## ADRs
 
-This design does not introduce new architectural decisions requiring ADRs. It implements FR-2.1-2.5 from the PRD using established patterns from `swap-team.sh`.
+This design does not introduce new architectural decisions requiring ADRs. It implements FR-2.1-2.5 from the PRD using established patterns from `swap-rite.sh`.
 
 ---
 
@@ -1040,6 +1040,6 @@ This design does not introduce new architectural decisions requiring ADRs. It im
 | TDD | `/Users/tomtenuta/Code/roster/docs/design/TDD-hook-parity-scope2.md` | Created |
 | PRD | `/Users/tomtenuta/Code/roster/docs/requirements/PRD-hook-ecosystem-parity.md` | Read |
 | Current settings.local.json | `/Users/tomtenuta/Code/roster/.claude/settings.local.json` | Read |
-| swap-team.sh | `/Users/tomtenuta/Code/roster/swap-team.sh` | Read |
+| swap-rite.sh | `/Users/tomtenuta/Code/roster/swap-rite.sh` | Read |
 | TDD-session-state-machine.md (template) | `/Users/tomtenuta/Code/roster/docs/design/TDD-session-state-machine.md` | Read |
 | workflow-schema.yaml | `/Users/tomtenuta/Code/roster/workflow-schema.yaml` | Read |

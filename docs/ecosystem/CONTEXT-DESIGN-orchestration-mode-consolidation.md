@@ -146,12 +146,12 @@ This Context Design addresses the fragmented orchestration mode implementation i
 
 3. **Consolidate on `workflow.active` only** - Simpler field-based check
    - Rejected: Requires ensuring field is set correctly at all state transitions
-   - Rejected: Does not consider team pack existence
+   - Rejected: Does not consider rite existence
    - Rejected: Cannot detect PARKED session correctly
 
 **Selected**: Consolidate on `execution_mode()`
 
-**Rationale**: `execution_mode()` in session-manager.sh already implements the complete decision tree from PRD-hybrid-session-model. It checks session existence, status (ACTIVE/PARKED/ARCHIVED), team configuration, and team pack existence. The `workflow.active` field is redundant and prone to staleness.
+**Rationale**: `execution_mode()` in session-manager.sh already implements the complete decision tree from PRD-hybrid-session-model. It checks session existence, status (ACTIVE/PARKED/ARCHIVED), team configuration, and rite existence. The `workflow.active` field is redundant and prone to staleness.
 
 **Implementation**:
 

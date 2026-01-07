@@ -50,17 +50,17 @@ All 32 command files have required frontmatter fields.
 | No inline `**Flags:**` bullets | 0 | 0 | PASS |
 | forge.md special format | 1 | 1 | PASS |
 
-**forge.md Exception**: Intentionally uses a different format because it has internal argument handling (`--agents`, `--workflow`, `--commands`) that are NOT passed through to swap-team.sh. This is correct behavior as documented in the refactoring plan.
+**forge.md Exception**: Intentionally uses a different format because it has internal argument handling (`--agents`, `--workflow`, `--commands`) that are NOT passed through to swap-rite.sh. This is correct behavior as documented in the refactoring plan.
 
 **Standard Flag Table Format (9 files)**:
 ```markdown
 | Flag | Short | Description | Handled By |
 |------|-------|-------------|------------|
-| `--update` | `-u` | Pull latest agent definitions | swap-team.sh |
-| `--dry-run` | - | Preview changes without applying | swap-team.sh |
-| `--keep-all` | - | Preserve all orphan agents | swap-team.sh |
-| `--remove-all` | - | Remove all orphans | swap-team.sh |
-| `--promote-all` | - | Move all orphans to user-level | swap-team.sh |
+| `--update` | `-u` | Pull latest agent definitions | swap-rite.sh |
+| `--dry-run` | - | Preview changes without applying | swap-rite.sh |
+| `--keep-all` | - | Preserve all orphan agents | swap-rite.sh |
+| `--remove-all` | - | Remove all orphans | swap-rite.sh |
+| `--promote-all` | - | Move all orphans to user-level | swap-rite.sh |
 ```
 
 ---
@@ -80,7 +80,7 @@ All 32 command files have required frontmatter fields.
 
 | Area | Before | After | Preserved |
 |------|--------|-------|-----------|
-| Team-switching execution | Calls swap-team.sh with flags | Calls swap-team.sh with $ARGUMENTS | YES |
+| Team-switching execution | Calls swap-rite.sh with flags | Calls swap-rite.sh with $ARGUMENTS | YES |
 | Argument passthrough | Mixed (some inline, some pass) | Uniform $ARGUMENTS pattern | YES |
 | Frontmatter structure | Varied (description, model, allowed-tools) | Standardized format | YES |
 | Flag documentation | Inline bullets | Table format | YES (format change only) |
@@ -106,7 +106,7 @@ All 32 command files have required frontmatter fields.
 | `sre.md` | YES | YES | YES | COMPLIANT |
 | `strategy.md` | YES | YES | YES | COMPLIANT |
 
-*forge.md uses internal argument handling (not swap-team.sh pass-through)
+*forge.md uses internal argument handling (not swap-rite.sh pass-through)
 
 ### Other Command Categories (22 files)
 

@@ -239,7 +239,7 @@ state-mate: Validates and applies transition
 | `/start` with existing PARKED session | Preflight shows options: resume, wrap, or parallel |
 | Session creation fails (lock timeout) | Router outputs CONSULTATION_REQUEST with manual guidance |
 | Initiative name with special characters | Properly escaped in Task invocation |
-| No orchestrator in team pack | Router exits, preflight handles session creation |
+| No orchestrator in rite | Router exits, preflight handles session creation |
 | ACTIVE_RITE not set | Creates cross-cutting session |
 | Parallel `/start` in multiple terminals | Locking prevents race conditions |
 

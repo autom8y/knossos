@@ -163,7 +163,7 @@ Extend `orchestration/behavior.md` (existing skill file) to document:
 
 Add a PreToolUse hook that:
 - Detects when main agent attempts to invoke specialists without prior Orchestrator consultation
-- Only activates when orchestrator is present in the active team
+- Only activates when orchestrator is present in the active rite
 - Warns (does not block) to avoid breaking orchestrator-less workflows
 - Logs the violation for audit, minimal context window impact
 

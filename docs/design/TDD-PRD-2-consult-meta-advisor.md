@@ -20,14 +20,14 @@ Current state:
 - `consult-ref` does not reference `10x-workflow` for workflow phase transitions and quality gates
 - The role of `/consult` as "cognitive load absorber" is undocumented
 - `team-ref` hardcodes 4 teams (`10x-dev-pack`, `doc-team-pack`, `hygiene-pack`, `debt-triage-pack`) when 11 teams exist
-- Team profile information is scattered across `teams/*/orchestrator.yaml` and `teams/*/README.md` without structured access
+- Team profile information is scattered across `rites/*/orchestrator.yaml` and `rites/*/README.md` without structured access
 - CLAUDE.md Getting Help table does not include `/consult` for routing guidance
 
 ### 1.2 Design Principles
 
 - **Dynamic discovery over static lists**: Team counts come from filesystem, not hardcoded values
 - **Skill reference over duplication**: `/consult` references `prompting` and `10x-workflow` rather than duplicating content
-- **Single source of truth**: `team-discovery` reads from `teams/*/orchestrator.yaml` as canonical team profiles
+- **Single source of truth**: `team-discovery` reads from `rites/*/orchestrator.yaml` as canonical team profiles
 - **Cognitive load absorption**: Users describe intent; ecosystem handles routing complexity
 - **Stateless operation**: `/consult` advises but does not execute
 
@@ -73,14 +73,14 @@ Create a new skill that provides structured team metadata for routing decisions.
 
 #### 2.1.2 team-profile Schema
 
-The `team-discovery` skill reads from existing `teams/*/orchestrator.yaml` files and structures the output for routing:
+The `team-discovery` skill reads from existing `rites/*/orchestrator.yaml` files and structures the output for routing:
 
 ```yaml
 # Schema: rite-profile.yaml
 # Describes the structure that team-discovery extracts from orchestrator.yaml
 
 team_profile:
-  name: string           # Required: team pack name (e.g., "10x-dev-pack")
+  name: string           # Required: rite name (e.g., "10x-dev-pack")
   domain: string         # Required: team specialization (e.g., "software development")
   description: string    # Required: from orchestrator.yaml frontmatter.description
   role: string           # Required: from orchestrator.yaml frontmatter.role
@@ -94,7 +94,7 @@ team_profile:
     upstream: string
     downstream: string
 
-  agents: list[string]   # Derived: filenames from teams/{name}/agents/*.md
+  agents: list[string]   # Derived: filenames from rites/{name}/agents/*.md
   agent_count: integer   # Derived: count of agents
 
   skills: list[string]   # From orchestrator.yaml skills array
@@ -106,7 +106,7 @@ team_profile:
       matches: boolean   # Whether this team handles it
 
 # Validation rules:
-# - name must match directory name in teams/
+# - name must match directory name in rites/
 # - quick_switch derived from name pattern (debt-triage-pack -> /debt)
 # - agent_count must match actual agent files
 # - All required fields must be present
@@ -122,7 +122,7 @@ description: "Dynamic team metadata discovery from roster. Use when: routing dec
 
 # Team Discovery
 
-> Provides structured team metadata by reading from `teams/*/orchestrator.yaml`.
+> Provides structured team metadata by reading from `rites/*/orchestrator.yaml`.
 
 ## Purpose
 
@@ -134,10 +134,10 @@ This skill provides read-only team metadata. It does not switch teams.
 
 ### List All Teams
 
-Read all orchestrator.yaml files from `$ROSTER_HOME/teams/*/orchestrator.yaml` and extract:
+Read all orchestrator.yaml files from `$ROSTER_HOME/rites/*/orchestrator.yaml` and extract:
 - Team name, domain, description
 - Quick-switch command
-- Agent roster (from teams/{name}/agents/*.md)
+- Agent roster (from rites/{name}/agents/*.md)
 - Routing conditions (what triggers each specialist)
 
 ### Match Intent to Team
@@ -149,8 +149,8 @@ Given a user query, compare against team routing conditions:
 
 ## Data Source
 
-**Primary**: `$ROSTER_HOME/teams/*/orchestrator.yaml`
-**Supplementary**: `$ROSTER_HOME/teams/*/README.md` for use cases
+**Primary**: `$ROSTER_HOME/rites/*/orchestrator.yaml`
+**Supplementary**: `$ROSTER_HOME/rites/*/README.md` for use cases
 
 ### Current Team Inventory
 
@@ -158,12 +158,12 @@ Given a user query, compare against team routing conditions:
 
 To get current team count:
 ```bash
-ls -d $ROSTER_HOME/teams/*-pack | wc -l
+ls -d $ROSTER_HOME/rites/*-pack | wc -l
 ```
 
-To list team names:
+To list rite names:
 ```bash
-ls -d $ROSTER_HOME/teams/*-pack | xargs -n1 basename
+ls -d $ROSTER_HOME/rites/*-pack | xargs -n1 basename
 ```
 
 ## Schema Reference
@@ -190,7 +190,7 @@ Would require:
 
 Rationale:
 - `orchestrator.yaml` already contains team metadata (name, domain, description, routing)
-- Agent list derivable from `teams/{name}/agents/*.md`
+- Agent list derivable from `rites/{name}/agents/*.md`
 - Single source of truth for team configuration
 - No new files to maintain
 
@@ -336,13 +336,13 @@ Modify existing `.claude/skills/team-ref/skill.md` to dynamically discover teams
 ```markdown
 ## Available Team Packs
 
-Team packs are discovered dynamically from `$ROSTER_HOME/teams/`. Use `team-discovery` skill for structured metadata.
+Team packs are discovered dynamically from `$ROSTER_HOME/rites/`. Use `team-discovery` skill for structured metadata.
 
 ### Discovering Teams
 
 The current team inventory is read at runtime:
 ```bash
-ls -d $ROSTER_HOME/teams/*-pack | xargs -n1 basename
+ls -d $ROSTER_HOME/rites/*-pack | xargs -n1 basename
 ```
 
 ### Team Quick Reference
@@ -363,13 +363,13 @@ For full team profiles, run `/consult --team` or reference `team-discovery` skil
 ```markdown
 ## Available Team Packs
 
-Team packs are discovered dynamically from `$ROSTER_HOME/teams/`. Reference the `team-discovery` skill for structured metadata access.
+Team packs are discovered dynamically from `$ROSTER_HOME/rites/`. Reference the `team-discovery` skill for structured metadata access.
 
 ### Current Inventory
 
 To list all teams at runtime:
 ```bash
-ls -d $ROSTER_HOME/teams/*-pack 2>/dev/null | xargs -n1 basename
+ls -d $ROSTER_HOME/rites/*-pack 2>/dev/null | xargs -n1 basename
 ```
 
 As of this writing, the roster contains 11 teams:
@@ -377,7 +377,7 @@ As of this writing, the roster contains 11 teams:
 - debt-triage-pack (technical debt)
 - doc-team-pack (documentation)
 - ecosystem-pack (CEM/skeleton/roster infrastructure)
-- forge-pack (team pack creation)
+- forge-pack (rite creation)
 - hygiene-pack (code quality)
 - intelligence-pack (analytics/research)
 - rnd-pack (exploration/prototyping)
@@ -385,14 +385,14 @@ As of this writing, the roster contains 11 teams:
 - sre-pack (operations/reliability)
 - strategy-pack (business analysis)
 
-**Important**: This list is informational. For current, accurate team data, use `team-discovery` skill or read directly from `$ROSTER_HOME/teams/*/orchestrator.yaml`.
+**Important**: This list is informational. For current, accurate team data, use `team-discovery` skill or read directly from `$ROSTER_HOME/rites/*/orchestrator.yaml`.
 
 ### Team Details
 
 For detailed team profiles including agents, routing conditions, and use cases:
 - Run `/consult --team` for formatted display
 - Reference `team-discovery` skill for structured data
-- Read `teams/{name}/README.md` for extended documentation
+- Read `rites/{name}/README.md` for extended documentation
 ```
 
 #### 2.3.3 Quick Switch Commands Update
@@ -402,7 +402,7 @@ For detailed team profiles including agents, routing conditions, and use cases:
 ```markdown
 ## Quick Switch Commands
 
-Quick-switch commands are derived from team names:
+Quick-switch commands are derived from rite names:
 
 | Team | Quick Switch | Derivation |
 |------|--------------|------------|
@@ -482,7 +482,7 @@ User: /consult "I need to build a payment system"
              │ 1. Parse intent (build, payment, system)
              ▼
     ┌─────────────────┐
-    │ team-discovery  │◄── Reads: $ROSTER_HOME/teams/*/orchestrator.yaml
+    │ team-discovery  │◄── Reads: $ROSTER_HOME/rites/*/orchestrator.yaml
     │      skill      │
     └────────┬────────┘
              │ 2. Match intent to team routing conditions
@@ -526,8 +526,8 @@ User: /team --list
              │ 1. Invoke team-discovery for current inventory
              ▼
     ┌─────────────────┐
-    │ team-discovery  │◄── Reads: $ROSTER_HOME/teams/*/orchestrator.yaml
-    │      skill      │    Reads: $ROSTER_HOME/teams/*/agents/*.md (for counts)
+    │ team-discovery  │◄── Reads: $ROSTER_HOME/rites/*/orchestrator.yaml
+    │      skill      │    Reads: $ROSTER_HOME/rites/*/agents/*.md (for counts)
     └────────┬────────┘
              │ 2. Returns structured team list with:
              │    - name, domain, quick_switch
@@ -593,7 +593,7 @@ The following hardcoded references are deprecated in favor of dynamic discovery:
 |------------|-------------|
 | "9 teams" in consult-ref SKILL.md line 61 | Dynamic count from team-discovery |
 | "All 9 Teams" in consult-ref SKILL.md line 295 | Dynamic list from team-discovery |
-| "4 team packs" implicit in team-ref | Dynamic discovery showing 11 teams |
+| "4 rites" implicit in team-ref | Dynamic discovery showing 11 teams |
 
 ---
 
@@ -603,11 +603,11 @@ The following hardcoded references are deprecated in favor of dynamic discovery:
 
 | Test Case | Input | Expected Outcome | Validates |
 |-----------|-------|------------------|-----------|
-| TD-01: List all teams | `ls $ROSTER_HOME/teams/` | Returns 11 team names | Team enumeration |
+| TD-01: List all teams | `ls $ROSTER_HOME/rites/` | Returns 11 rite names | Team enumeration |
 | TD-02: Parse orchestrator.yaml | Read 10x-dev-pack/orchestrator.yaml | Extracts name, domain, routing | Schema parsing |
 | TD-03: Count agents | Read 10x-dev-pack/agents/*.md | Returns 4-5 agents | Agent enumeration |
 | TD-04: Derive quick_switch | Parse "debt-triage-pack" | Returns "/debt" | Derivation logic |
-| TD-05: Handle missing orchestrator.yaml | teams/bad-pack/ (no yaml) | Skips gracefully | Error handling |
+| TD-05: Handle missing orchestrator.yaml | rites/bad-pack/ (no yaml) | Skips gracefully | Error handling |
 
 ### 6.2 consult-ref Validation
 
@@ -625,7 +625,7 @@ The following hardcoded references are deprecated in favor of dynamic discovery:
 | Test Case | Input | Expected Outcome | Validates |
 |-----------|-------|------------------|-----------|
 | TR-01: List teams | `/team --list` | Shows 11 teams | US-8 |
-| TR-02: Quick switch mapping | All quick switches | Maps correctly to team names | Derivation |
+| TR-02: Quick switch mapping | All quick switches | Maps correctly to rite names | Derivation |
 | TR-03: Dynamic count | Add/remove team | Count updates | Dynamic discovery |
 
 ### 6.4 CLAUDE.md Validation
@@ -641,10 +641,10 @@ The following hardcoded references are deprecated in favor of dynamic discovery:
 
 ### 7.1 team-discovery Implementation
 
-1. **Read orchestrator.yaml files**: Use glob pattern `teams/*/orchestrator.yaml`
-2. **Parse YAML frontmatter**: Extract `team.name`, `team.domain`, `frontmatter.description`, `frontmatter.role`
-3. **Derive quick_switch**: Split team name on `-`, take first token, prefix with `/`
-4. **Count agents**: Glob `teams/{name}/agents/*.md`, count results
+1. **Read orchestrator.yaml files**: Use glob pattern `rites/*/orchestrator.yaml`
+2. **Parse YAML frontmatter**: Extract `rite.name`, `team.domain`, `frontmatter.description`, `frontmatter.role`
+3. **Derive quick_switch**: Split rite name on `-`, take first token, prefix with `/`
+4. **Count agents**: Glob `rites/{name}/agents/*.md`, count results
 5. **Handle errors**: Skip teams missing orchestrator.yaml, log warning
 
 ### 7.2 consult-ref Implementation
@@ -673,7 +673,7 @@ The following hardcoded references are deprecated in favor of dynamic discovery:
 ### 8.1 Pre-Implementation Gate
 
 - [ ] PRD requirements understood (FR-1.1, FR-1.2, FR-2.1, FR-2.4, FR-3.1, FR-3.2, FR-4.1)
-- [ ] All 11 teams accessible in `$ROSTER_HOME/teams/`
+- [ ] All 11 teams accessible in `$ROSTER_HOME/rites/`
 - [ ] Existing `consult-ref`, `team-ref`, and CLAUDE.md files readable
 
 ### 8.2 Implementation Gate

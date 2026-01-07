@@ -2,7 +2,7 @@
 
 ## Overview
 
-Enable team packs to inject domain-specific context into SessionStart hooks. Currently, all teams receive the same generic session context (team name, session ID, git status). Teams like ecosystem-pack need specialized context (CEM sync status, skeleton reference, drift detection) that is currently only available in verbose mode and generated through a hardcoded script.
+Enable rites to inject domain-specific context into SessionStart hooks. Currently, all teams receive the same generic session context (rite name, session ID, git status). Teams like ecosystem-pack need specialized context (CEM sync status, skeleton reference, drift detection) that is currently only available in verbose mode and generated through a hardcoded script.
 
 This PRD defines a compose pattern where teams can optionally provide a context injection script that the SessionStart hook discovers and executes, allowing each team to surface the information most relevant to their domain.
 
@@ -11,13 +11,13 @@ This PRD defines a compose pattern where teams can optionally provide a context 
 ### Current State
 
 The SessionStart hook (`session-context.sh`) provides generic context to all sessions:
-- Active team name
+- Active rite name
 - Execution mode (native/orchestrated/cross-cutting)
 - Session ID and initiative
 - Git branch and change count
 
 Team-specific context exists but has two problems:
-1. **Only in verbose mode**: Lines 261-267 of session-context.sh call `generate-team-context.sh` only when `--verbose` is set
+1. **Only in verbose mode**: Lines 261-267 of session-context.sh call `generate-rite-context.sh` only when `--verbose` is set
 2. **Generic format**: The existing generator outputs workflow routing tables, not team-specific status information
 
 ### Problem Statement
@@ -49,17 +49,17 @@ Gap Analysis (task-001) identified:
 
 ### US-2: Team Pack Extensibility
 
-- **US-2.1**: As a team pack author, I want to define what context my team needs, so that users get domain-relevant information without roster changes.
+- **US-2.1**: As a rite author, I want to define what context my team needs, so that users get domain-relevant information without roster changes.
 
-- **US-2.2**: As a team pack author, I want my context script to access hook library utilities, so that I can use existing patterns for file age checks, logging, etc.
+- **US-2.2**: As a rite author, I want my context script to access hook library utilities, so that I can use existing patterns for file age checks, logging, etc.
 
-- **US-2.3**: As a team pack author, I want a clear contract for context injection, so that my scripts integrate predictably with the SessionStart hook.
+- **US-2.3**: As a rite author, I want a clear contract for context injection, so that my scripts integrate predictably with the SessionStart hook.
 
 ### US-3: Graceful Degradation
 
 - **US-3.1**: As a user of a team without context injection, I want session context to work normally, so that new teams don't break existing behavior.
 
-- **US-3.2**: As a user, I want team context errors to be logged but not block my session, so that a broken context script doesn't prevent work.
+- **US-3.2**: As a user, I want rite context errors to be logged but not block my session, so that a broken context script doesn't prevent work.
 
 ## Functional Requirements
 
@@ -67,11 +67,11 @@ Gap Analysis (task-001) identified:
 
 #### FR-1: Team Context Loader Library
 
-- **FR-1.1**: Create `team-context-loader.sh` in `.claude/hooks/lib/` that provides `load_team_context()` function.
+- **FR-1.1**: Create `rite-context-loader.sh` in `.claude/hooks/lib/` that provides `load_team_context()` function.
 
-- **FR-1.2**: `load_team_context()` MUST read active team from `.claude/ACTIVE_RITE` file.
+- **FR-1.2**: `load_team_context()` MUST read active rite from `.claude/ACTIVE_RITE` file.
 
-- **FR-1.3**: `load_team_context()` MUST look for context script at `$ROSTER_HOME/teams/$ACTIVE_RITE/context-injection.sh`.
+- **FR-1.3**: `load_team_context()` MUST look for context script at `$ROSTER_HOME/rites/$ACTIVE_RITE/context-injection.sh`.
 
 - **FR-1.4**: `load_team_context()` MUST source the script and call `inject_team_context()` function if both exist.
 
@@ -81,19 +81,19 @@ Gap Analysis (task-001) identified:
 
 #### FR-2: SessionStart Hook Integration
 
-- **FR-2.1**: Modify `session-context.sh` to source `team-context-loader.sh`.
+- **FR-2.1**: Modify `session-context.sh` to source `rite-context-loader.sh`.
 
-- **FR-2.2**: Add team context output to condensed mode (default), not just verbose mode.
+- **FR-2.2**: Add rite context output to condensed mode (default), not just verbose mode.
 
 - **FR-2.3**: Team context MUST appear after core session info but before command suggestions.
 
 - **FR-2.4**: Team context section MUST be labeled "### Team Context" for consistent parsing.
 
-- **FR-2.5**: Keep existing `generate-team-context.sh` call for workflow routing table (separate from team status context).
+- **FR-2.5**: Keep existing `generate-rite-context.sh` call for workflow routing table (separate from team status context).
 
 #### FR-3: Team Context Script Contract
 
-- **FR-3.1**: Team context scripts MUST be located at `teams/$TEAM/context-injection.sh`.
+- **FR-3.1**: Team context scripts MUST be located at `rites/$TEAM/context-injection.sh`.
 
 - **FR-3.2**: Team context scripts MUST export a function named `inject_team_context`.
 
@@ -101,11 +101,11 @@ Gap Analysis (task-001) identified:
 
 - **FR-3.4**: `inject_team_context` SHOULD return 0 on success, non-zero on partial failure.
 
-- **FR-3.5**: Team context scripts MAY use utilities from `team-context-loader.sh` (e.g., `team_context_row`, `is_file_stale`).
+- **FR-3.5**: Team context scripts MAY use utilities from `rite-context-loader.sh` (e.g., `team_context_row`, `is_file_stale`).
 
 #### FR-4: Ecosystem-Pack Context Implementation
 
-- **FR-4.1**: Create `teams/ecosystem-pack/context-injection.sh` as prototype implementation.
+- **FR-4.1**: Create `rites/ecosystem-pack/context-injection.sh` as prototype implementation.
 
 - **FR-4.2**: Ecosystem-pack context MUST include CEM sync status and timestamp.
 
@@ -121,15 +121,15 @@ Gap Analysis (task-001) identified:
 
 - **FR-S.2**: Provide `is_file_stale "/path" minutes` helper for age-based status checks.
 
-- **FR-S.3**: Document context script authoring guide for team pack creators.
+- **FR-S.3**: Document context script authoring guide for rite creators.
 
 ### Could Have
 
-- **FR-C.1**: Add `/team-context` command to show team context on demand (outside session start).
+- **FR-C.1**: Add `/rite-context` command to show rite context on demand (outside session start).
 
 - **FR-C.2**: Allow teams to specify context urgency levels (info/warning/critical) for visual distinction.
 
-- **FR-C.3**: Support team context caching to avoid repeated computation during rapid session starts.
+- **FR-C.3**: Support rite context caching to avoid repeated computation during rapid session starts.
 
 ## Non-Functional Requirements
 
@@ -147,12 +147,12 @@ Gap Analysis (task-001) identified:
 
 | Case | Expected Behavior |
 |------|------------------|
-| ACTIVE_RITE file missing | No team context, silent skip |
-| ACTIVE_RITE = "none" | No team context, silent skip |
-| Team directory doesn't exist | No team context, silent skip |
-| context-injection.sh doesn't exist | No team context, silent skip |
+| ACTIVE_RITE file missing | No rite context, silent skip |
+| ACTIVE_RITE = "none" | No rite context, silent skip |
+| Team directory doesn't exist | No rite context, silent skip |
+| context-injection.sh doesn't exist | No rite context, silent skip |
 | Script exists but not executable | Log warning, attempt source anyway |
-| inject_team_context function missing | Log warning, skip team context |
+| inject_team_context function missing | Log warning, skip rite context |
 | Function returns non-zero | Log warning, show partial output |
 | Function outputs nothing | No Team Context section (valid) |
 | ROSTER_HOME not set | Fall back to ~/Code/roster |
@@ -166,8 +166,8 @@ Gap Analysis (task-001) identified:
 - [ ] ecosystem-pack displays CEM sync, skeleton ref, drift, satellites
 - [ ] Teams without context-injection.sh see no change (graceful skip)
 - [ ] Script errors logged but don't block session start
-- [ ] Performance: team context adds < 100ms to hook time
-- [ ] Documentation: team pack authors know how to add context
+- [ ] Performance: rite context adds < 100ms to hook time
+- [ ] Documentation: rite authors know how to add context
 
 ## Dependencies and Risks
 
@@ -194,10 +194,10 @@ Gap Analysis (task-001) identified:
 
 - Automatic context refresh during session (only on SessionStart)
 - Context injection for other hook types (PreToolUse, PostToolUse)
-- User-level context scripts (team packs only)
+- User-level context scripts (rites only)
 - GUI/visual formatting for context (markdown only)
 - Context persistence or history
-- Inter-team context dependencies
+- Inter-rite context dependencies
 
 ## Open Questions
 
@@ -221,4 +221,4 @@ Gap Analysis (task-001) identified:
 | Artifact | Absolute Path | Status |
 |----------|---------------|--------|
 | This PRD | `/Users/tomtenuta/Code/roster/docs/requirements/PRD-rite-hook-context.md` | Created |
-| Context Design | `/Users/tomtenuta/Code/roster/docs/ecosystem/CONTEXT-DESIGN-team-context-loader.md` | Created |
+| Context Design | `/Users/tomtenuta/Code/roster/docs/ecosystem/CONTEXT-DESIGN-rite-context-loader.md` | Created |

@@ -6,11 +6,11 @@ The roster hook ecosystem lacks parity with other managed artifacts (agents, com
 
 ## Background
 
-The roster project has evolved a sophisticated team-pack system where agents, commands, and skills all have team-specific directories managed by `swap-team.sh`. However, hooks remain global-only despite `swap-team.sh` having full infrastructure for team hooks (lines 2308-2521). Deep exploration revealed several issues:
+The roster project has evolved a sophisticated team-pack system where agents, commands, and skills all have team-specific directories managed by `swap-rite.sh`. However, hooks remain global-only despite `swap-rite.sh` having full infrastructure for team hooks (lines 2308-2521). Deep exploration revealed several issues:
 
 1. **Naming Inconsistency**: Canonical templates live in `roster/hooks/` while other artifacts use `roster/user-*` naming (e.g., `roster/user-agents/`, `roster/user-commands/`, `roster/user-skills/`).
 
-2. **Settings.json Gap**: `swap-team.sh` syncs hook FILES to `.claude/hooks/` but does not update hook REGISTRATIONS in `settings.local.json`. Teams cannot customize hook behavior (matchers, timeouts, event types).
+2. **Settings.json Gap**: `swap-rite.sh` syncs hook FILES to `.claude/hooks/` but does not update hook REGISTRATIONS in `settings.local.json`. Teams cannot customize hook behavior (matchers, timeouts, event types).
 
 3. **Context Noise**: `session-context.sh` outputs 50-80 lines per session start. `delegation-check.sh` emits 12-line warnings. UserPromptSubmit fires on every prompt without filtering.
 
@@ -24,17 +24,17 @@ The roster project has evolved a sophisticated team-pack system where agents, co
 
 ### Scope 1: Team Hooks Parity
 
-- **US-1.1**: As a team pack maintainer, I want to include hooks in my team pack so that teams can have specialized hook behavior (e.g., security-pack with credential-scanning hooks).
+- **US-1.1**: As a rite maintainer, I want to include hooks in my rite so that teams can have specialized hook behavior (e.g., security-pack with credential-scanning hooks).
 
-- **US-1.2**: As a developer, I want `swap-team.sh` to merge my team's hooks with base hooks so that I get both base functionality and team-specific behavior.
+- **US-1.2**: As a developer, I want `swap-rite.sh` to merge my team's hooks with base hooks so that I get both base functionality and team-specific behavior.
 
 - **US-1.3**: As an ecosystem contributor, I want hook directories to follow the same naming convention as other artifacts so that the codebase is consistent and discoverable.
 
 ### Scope 2: Settings.json Hook Management
 
-- **US-2.1**: As a developer, I want `swap-team.sh` to automatically configure my hooks in settings.local.json so that I don't have to manually register hooks after swapping teams.
+- **US-2.1**: As a developer, I want `swap-rite.sh` to automatically configure my hooks in settings.local.json so that I don't have to manually register hooks after swapping teams.
 
-- **US-2.2**: As a team pack maintainer, I want to specify hook matchers and timeouts in my team configuration so that hooks are optimally configured for my workflow.
+- **US-2.2**: As a rite maintainer, I want to specify hook matchers and timeouts in my team configuration so that hooks are optimally configured for my workflow.
 
 - **US-2.3**: As a developer, I want base hooks and team hooks merged correctly by event type so that both operate without conflict.
 
@@ -64,10 +64,10 @@ The roster project has evolved a sophisticated team-pack system where agents, co
 
 - **FR-1.2**: Add `hooks/` to the team-pack schema with the same structure as `commands/` (directory containing `.sh` files).
 
-- **FR-1.3**: Update `swap-team.sh` `swap_hooks()` function to:
+- **FR-1.3**: Update `swap-rite.sh` `swap_hooks()` function to:
   - Copy base hooks from `roster/user-hooks/` to `.claude/hooks/`
-  - Merge team hooks from `teams/<team>/hooks/` on top
-  - Maintain `.team-hooks` marker for cleanup
+  - Merge team hooks from `rites/<team>/hooks/` on top
+  - Maintain `.rite-hooks` marker for cleanup
 
 - **FR-1.4**: Update `AGENT_MANIFEST.json` to track hooks per team using the existing manifest structure.
 
@@ -85,9 +85,9 @@ The roster project has evolved a sophisticated team-pack system where agents, co
 
 - **FR-2.2**: Add `base_hooks.yaml` to `roster/user-hooks/` defining default hook registrations for all base hooks.
 
-- **FR-2.3**: Allow team packs to include `hooks.yaml` defining team-specific hook registrations that merge with base.
+- **FR-2.3**: Allow rites to include `hooks.yaml` defining team-specific hook registrations that merge with base.
 
-- **FR-2.4**: Update `swap-team.sh` to generate `settings.local.json` hooks section by:
+- **FR-2.4**: Update `swap-rite.sh` to generate `settings.local.json` hooks section by:
   - Reading base hook registrations from `base_hooks.yaml`
   - Reading team hook registrations from team's `hooks.yaml` (if exists)
   - Merging by event type (team hooks append to base hooks for same event)
@@ -132,7 +132,7 @@ The roster project has evolved a sophisticated team-pack system where agents, co
 
 - **FR-S.2**: Add `--verbose` flag to `session-context.sh` for expanded output when explicitly requested.
 
-- **FR-S.3**: Add hook registration validation to `swap-team.sh` that warns on invalid matchers or timeouts.
+- **FR-S.3**: Add hook registration validation to `swap-rite.sh` that warns on invalid matchers or timeouts.
 
 ### Could Have
 
@@ -148,7 +148,7 @@ The roster project has evolved a sophisticated team-pack system where agents, co
 
 - **NFR-2**: Backwards Compatibility - Existing `.claude/hooks/` installations must continue working during migration (deprecation period).
 
-- **NFR-3**: Reliability - Missing team hooks directory must not cause `swap-team.sh` to fail (graceful degradation).
+- **NFR-3**: Reliability - Missing team hooks directory must not cause `swap-rite.sh` to fail (graceful degradation).
 
 - **NFR-4**: Maintainability - Hook registration schema must be documented and validated.
 
@@ -171,7 +171,7 @@ The roster project has evolved a sophisticated team-pack system where agents, co
 ## Success Criteria
 
 - [ ] `roster/user-hooks/` exists and contains all hooks previously in `roster/hooks/`
-- [ ] `swap-team.sh --dry-run 10x-dev-pack` shows hook merge and settings generation
+- [ ] `swap-rite.sh --dry-run 10x-dev-pack` shows hook merge and settings generation
 - [ ] `settings.local.json` hooks section generated correctly after team swap
 - [ ] Session start context is 15 lines or fewer (measured by line count)
 - [ ] UserPromptSubmit fires only on `/` prefixed prompts (verified by logging)
@@ -187,7 +187,7 @@ The roster project has evolved a sophisticated team-pack system where agents, co
 
 | Dependency | Type | Owner | Status |
 |------------|------|-------|--------|
-| `swap-team.sh` modification | Internal | roster | Ready |
+| `swap-rite.sh` modification | Internal | roster | Ready |
 | Team pack schema update | Internal | roster | Ready |
 | ADR-0002 access | Internal | roster | Ready |
 | `settings.local.json` schema | External | Claude Code | Stable |
@@ -204,7 +204,7 @@ The roster project has evolved a sophisticated team-pack system where agents, co
 
 ## Out of Scope
 
-- User-level hook customization (beyond team packs)
+- User-level hook customization (beyond rites)
 - Hook dependency resolution (hooks running in guaranteed order beyond base-then-team)
 - Hook versioning or rollback
 - Graphical hook configuration UI

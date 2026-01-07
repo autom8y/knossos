@@ -1,7 +1,7 @@
 # Test Report: Team Swap Cycle Validation
 
 **Test Date**: 2025-12-29
-**Script Under Test**: `/roster/swap-team.sh`
+**Script Under Test**: `/roster/swap-rite.sh`
 **Tester**: QA Adversary
 **Test Environment**: macOS Darwin 25.1.0
 
@@ -11,7 +11,7 @@
 
 **Recommendation: GO**
 
-All 11 team packs successfully complete the swap cycle with proper agent cleanup, restart warnings, same-name detection, command sync, and skill sync. One low-severity cosmetic defect identified in forge-pack roster display.
+All 11 rites successfully complete the swap cycle with proper agent cleanup, restart warnings, same-name detection, command sync, and skill sync. One low-severity cosmetic defect identified in forge-pack roster display.
 
 ---
 
@@ -38,7 +38,7 @@ All 11 team packs successfully complete the swap cycle with proper agent cleanup
 ## Edge Case Test Results
 
 ### 1. Same Team Swap (Idempotency)
-**Test**: `swap-team.sh strategy-pack` when already on strategy-pack
+**Test**: `swap-rite.sh strategy-pack` when already on strategy-pack
 **Expected**: No-op with helpful message
 **Result**: PASS
 ```
@@ -55,7 +55,7 @@ All 11 team packs successfully complete the swap cycle with proper agent cleanup
 - No orphan conflicts or stale state
 
 ### 3. Non-existent Team
-**Test**: `swap-team.sh nonexistent-pack`
+**Test**: `swap-rite.sh nonexistent-pack`
 **Expected**: Error with helpful list of valid teams
 **Result**: PASS (blocked by pre-tool hook before script)
 ```
@@ -64,7 +64,7 @@ Available teams: [lists all 11 valid teams]
 ```
 
 ### 4. Refresh Mode
-**Test**: `swap-team.sh --refresh` and `swap-team.sh 10x-dev-pack --refresh`
+**Test**: `swap-rite.sh --refresh` and `swap-rite.sh 10x-dev-pack --refresh`
 **Expected**: Re-pull agents even when already on team
 **Result**: PASS
 - Both forms correctly refresh agents from roster
@@ -134,7 +134,7 @@ Warning correctly shown for:
 forge-pack agents display empty Role column in roster table because agent frontmatter lacks `role:` field.
 
 **Reproduction**:
-1. Run `swap-team.sh forge-pack`
+1. Run `swap-rite.sh forge-pack`
 2. Observe roster output
 
 **Actual Result**:
@@ -150,7 +150,7 @@ forge-pack agents display empty Role column in roster table because agent frontm
 ```
 
 **Root Cause**:
-`/roster/teams/forge-pack/agents/*.md` files have `description:` but no `role:` field in YAML frontmatter. The script falls back to description but multiline descriptions are not parsed correctly.
+`/roster/rites/forge-pack/agents/*.md` files have `description:` but no `role:` field in YAML frontmatter. The script falls back to description but multiline descriptions are not parsed correctly.
 
 **Impact**: Cosmetic only - swap functionality unaffected.
 
@@ -161,7 +161,7 @@ forge-pack agents display empty Role column in roster table because agent frontm
 ## Test Coverage Assessment
 
 ### What Was Tested
-- All 11 team packs: swap cycle, agent counts, workflow presence
+- All 11 rites: swap cycle, agent counts, workflow presence
 - Restart warning display on every successful swap
 - Same-name detection with actual user-level agents
 - Command sync with marker file tracking
@@ -192,7 +192,7 @@ forge-pack agents display empty Role column in roster table because agent frontm
 
 ## Release Recommendation
 
-**GO** - swap-team.sh is ready for production use.
+**GO** - swap-rite.sh is ready for production use.
 
 **Conditions**:
 1. Low-severity DEF-001 is acceptable as-is or can be fixed in a follow-up
@@ -207,7 +207,7 @@ forge-pack agents display empty Role column in roster table because agent frontm
 ## Appendix: Test Environment
 
 - macOS Darwin 25.1.0
-- bash (via swap-team.sh shebang)
+- bash (via swap-rite.sh shebang)
 - ROSTER_HOME: /roster
 - Test directory: /tmp/roster-swap-test (cleaned up)
 - User-level agents present: consultant.md, context-engineer.md, requirements-analyst.md, technology-scout.md

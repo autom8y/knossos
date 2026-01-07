@@ -164,7 +164,7 @@ When the budget nears its end, the system warns. Parking is not failure; parking
 
 ## IV. The Rites
 
-A **Rite** is an invokable practice—a bundle of knowledge, practitioners, and procedures for a specific domain. Where the older tongue spoke of "teams" and "team packs," we now speak of Rites.
+A **Rite** is an invokable practice—a bundle of knowledge, practitioners, and procedures for a specific domain. Where the older tongue spoke of "teams" and "rites," we now speak of Rites.
 
 The change is not cosmetic. Teams imply completeness and fixed membership. Rites are flexible compositions:
 

@@ -1,15 +1,15 @@
-# Refactoring Plan: lib/team/team-hooks-registration.sh Extraction
+# Refactoring Plan: lib/team/rite-hooks-registration.sh Extraction
 
 **Based on**: SPIKE-script-code-smell-refactoring.md
 **Prepared**: 2026-01-03
-**Scope**: Extract hook registration operations from swap-team.sh to lib/team/team-hooks-registration.sh
-**Priority**: 3 (following team-resource.sh and team-transaction.sh extraction)
+**Scope**: Extract hook registration operations from swap-rite.sh to lib/team/rite-hooks-registration.sh
+**Priority**: 3 (following rite-resource.sh and team-transaction.sh extraction)
 
 ---
 
 ## Executive Summary
 
-This plan extracts hook registration infrastructure from `swap-team.sh` into a new `lib/team/team-hooks-registration.sh` module. The extraction consolidates ~430 lines (lines 2136-2565) of YAML parsing, JSON generation, and settings.local.json manipulation into a self-contained, testable module.
+This plan extracts hook registration infrastructure from `swap-rite.sh` into a new `lib/team/rite-hooks-registration.sh` module. The extraction consolidates ~430 lines (lines 2136-2565) of YAML parsing, JSON generation, and settings.local.json manipulation into a self-contained, testable module.
 
 **Expected outcome**: Clean module boundary, testable hook registration logic, ~430 LOC extraction, no behavior change.
 
@@ -21,10 +21,10 @@ This plan extracts hook registration infrastructure from `swap-team.sh` into a n
 
 | Module | Assessment |
 |--------|------------|
-| `swap-team.sh` (main script) | swap_hooks() orchestration stays; registration logic extracts |
-| `lib/team/team-resource.sh` | Extracted in Priority 1; provides pattern to follow |
+| `swap-rite.sh` (main script) | swap_hooks() orchestration stays; registration logic extracts |
+| `lib/team/rite-resource.sh` | Extracted in Priority 1; provides pattern to follow |
 | `lib/team/team-transaction.sh` | Extracted in Priority 2; provides sourcing guard pattern |
-| `lib/team/team-hooks-registration.sh` (new) | Will establish clean boundary for hook registration infrastructure |
+| `lib/team/rite-hooks-registration.sh` (new) | Will establish clean boundary for hook registration infrastructure |
 
 ### Root Causes Identified
 
@@ -95,25 +95,25 @@ Based on dependencies, the extraction order is:
 
 | Dependency | Type | Source |
 |------------|------|--------|
-| `ROSTER_HOME` | Global variable | Environment / swap-team.sh |
-| `DRY_RUN_MODE` | Global variable | swap-team.sh (passed as behavior) |
+| `ROSTER_HOME` | Global variable | Environment / swap-rite.sh |
+| `DRY_RUN_MODE` | Global variable | swap-rite.sh (passed as behavior) |
 | `yq` | External command | System (v4+ required) |
 | `jq` | External command | System |
-| `log()` | Function | swap-team.sh |
-| `log_debug()` | Function | swap-team.sh |
-| `log_warning()` | Function | swap-team.sh |
-| `log_error()` | Function | swap-team.sh |
+| `log()` | Function | swap-rite.sh |
+| `log_debug()` | Function | swap-rite.sh |
+| `log_warning()` | Function | swap-rite.sh |
+| `log_error()` | Function | swap-rite.sh |
 
 ---
 
 ## Target API
 
-### lib/team/team-hooks-registration.sh Public Interface
+### lib/team/rite-hooks-registration.sh Public Interface
 
 ```bash
 #!/usr/bin/env bash
 #
-# team-hooks-registration.sh - Hook Registration for settings.local.json
+# rite-hooks-registration.sh - Hook Registration for settings.local.json
 #
 # Parses hooks.yaml files and generates Claude Code hook registrations
 # in settings.local.json while preserving user-defined hooks.
@@ -121,7 +121,7 @@ Based on dependencies, the extraction order is:
 # Part of: roster team-swap infrastructure
 #
 # Usage:
-#   source "$ROSTER_HOME/lib/team/team-hooks-registration.sh"
+#   source "$ROSTER_HOME/lib/team/rite-hooks-registration.sh"
 #   swap_hook_registrations "team-name"
 #
 # Dependencies:
@@ -209,7 +209,7 @@ generate_hooks_json() { ... }
 # Sync hook registrations to settings.local.json
 # Called after swap_hooks() syncs the actual hook files
 # Parameters:
-#   $1 - team_name: Name of team being activated
+#   $1 - rite_name: Name of team being activated
 # Returns: 0 on success, 1 on error
 # Side effects:
 #   - Updates .claude/settings.local.json hooks section
@@ -230,20 +230,20 @@ swap_hook_registrations() { ... }
 
 **Goal**: Create module structure with sourcing guard and logging stubs.
 
-#### RF-017: Create lib/team/team-hooks-registration.sh skeleton
+#### RF-017: Create lib/team/rite-hooks-registration.sh skeleton
 
 - **Smells addressed**: CH-004 (swap_hook_registrations complexity)
 - **Category**: Local (infrastructure)
-- **Before**: No `lib/team/team-hooks-registration.sh` exists
+- **Before**: No `lib/team/rite-hooks-registration.sh` exists
 - **After**: Module exists with:
   - Sourcing guard (`_TEAM_HOOKS_REGISTRATION_LOADED`)
   - Module header documentation
-  - Logging stubs (same pattern as team-resource.sh)
+  - Logging stubs (same pattern as rite-resource.sh)
   - Empty function stubs with documentation
-- **Invariants**: swap-team.sh unchanged, still works
+- **Invariants**: swap-rite.sh unchanged, still works
 - **Verification**:
-  1. Run: `bash -n lib/team/team-hooks-registration.sh` (syntax check)
-  2. Run: `./swap-team.sh --help` (existing behavior unchanged)
+  1. Run: `bash -n lib/team/rite-hooks-registration.sh` (syntax check)
+  2. Run: `./swap-rite.sh --help` (existing behavior unchanged)
 - **Commit scope**: Create module skeleton with guards and stubs
 
 **[Rollback point: can stop here safely - module not integrated yet]**
@@ -260,7 +260,7 @@ swap_hook_registrations() { ... }
 - **Category**: Local
 - **Before**:
   ```bash
-  # swap-team.sh:2136-2156
+  # swap-rite.sh:2136-2156
   require_yq() {
       if ! command -v yq &>/dev/null; then
           log_error "yq is required but not installed"
@@ -268,7 +268,7 @@ swap_hook_registrations() { ... }
       }
   }
   ```
-- **After**: Same function in team-hooks-registration.sh
+- **After**: Same function in rite-hooks-registration.sh
 - **Invariants**:
   - Same version check logic (v4+ required)
   - Same error messages
@@ -283,8 +283,8 @@ swap_hook_registrations() { ... }
 
 - **Smells addressed**: YAML parsing logic
 - **Category**: Local
-- **Before**: Lines 2161-2247 in swap-team.sh
-- **After**: Same function in team-hooks-registration.sh
+- **Before**: Lines 2161-2247 in swap-rite.sh
+- **After**: Same function in rite-hooks-registration.sh
 - **Invariants**:
   - Same schema version validation (warns on non-1.0)
   - Same event type validation (SessionStart, Stop, PreToolUse, PostToolUse, UserPromptSubmit)
@@ -313,8 +313,8 @@ swap_hook_registrations() { ... }
 
 - **Smells addressed**: User hook preservation logic
 - **Category**: Local
-- **Before**: Lines 2253-2312 in swap-team.sh
-- **After**: Same function in team-hooks-registration.sh
+- **Before**: Lines 2253-2312 in swap-rite.sh
+- **After**: Same function in rite-hooks-registration.sh
 - **Invariants**:
   - Same detection logic (commands NOT containing ".claude/hooks/")
   - Same event type iteration
@@ -332,8 +332,8 @@ swap_hook_registrations() { ... }
 
 - **Smells addressed**: Simple consolidation function
 - **Category**: Local
-- **Before**: Lines 2318-2324 in swap-team.sh
-- **After**: Same function in team-hooks-registration.sh
+- **Before**: Lines 2318-2324 in swap-rite.sh
+- **After**: Same function in rite-hooks-registration.sh
 - **Invariants**:
   - Base registrations first in output
   - Team registrations appended
@@ -348,8 +348,8 @@ swap_hook_registrations() { ... }
 
 - **Smells addressed**: JSON generation logic
 - **Category**: Local
-- **Before**: Lines 2330-2418 in swap-team.sh
-- **After**: Same function in team-hooks-registration.sh
+- **Before**: Lines 2330-2418 in swap-rite.sh
+- **After**: Same function in rite-hooks-registration.sh
 - **Invariants**:
   - Same grouping by event type
   - Same grouping by matcher within event
@@ -368,8 +368,8 @@ swap_hook_registrations() { ... }
 
 - **Smells addressed**: Hook merging logic
 - **Category**: Local
-- **Before**: Lines 2423-2456 in swap-team.sh
-- **After**: Same function in team-hooks-registration.sh
+- **Before**: Lines 2423-2456 in swap-rite.sh
+- **After**: Same function in rite-hooks-registration.sh
 - **Invariants**:
   - Preserved hooks appended to generated for each event
   - Empty preserved returns generated unchanged
@@ -392,8 +392,8 @@ swap_hook_registrations() { ... }
 
 - **Smells addressed**: CH-004 (complexity), module boundary
 - **Category**: Module boundary
-- **Before**: Lines 2461-2565 in swap-team.sh
-- **After**: Same function in team-hooks-registration.sh
+- **Before**: Lines 2461-2565 in swap-rite.sh
+- **After**: Same function in rite-hooks-registration.sh
 - **Invariants**:
   - Same 7-step process (require_yq, extract preserved, parse base, parse team, merge registrations, generate JSON, merge with preserved, write)
   - Same dry-run behavior (preview without write)
@@ -415,32 +415,32 @@ swap_hook_registrations() { ... }
 
 ### Phase 5: Integration [Medium Risk]
 
-**Goal**: Wire new module into swap-team.sh, remove inline implementations.
+**Goal**: Wire new module into swap-rite.sh, remove inline implementations.
 
-#### RF-025: Add source statement in swap-team.sh
+#### RF-025: Add source statement in swap-rite.sh
 
 - **Smells addressed**: Final integration
 - **Category**: Boundary integration
 - **Before**: All hook registration functions inline
 - **After**:
   ```bash
-  # swap-team.sh (after lib/team/team-transaction.sh)
-  source "$ROSTER_HOME/lib/team/team-hooks-registration.sh"
+  # swap-rite.sh (after lib/team/team-transaction.sh)
+  source "$ROSTER_HOME/lib/team/rite-hooks-registration.sh"
   ```
-- **Source order in swap-team.sh**:
+- **Source order in swap-rite.sh**:
   ```bash
   source "$ROSTER_HOME/lib/roster-utils.sh"
   source "$ROSTER_HOME/lib/team/team-transaction.sh"
-  source "$ROSTER_HOME/lib/team/team-resource.sh"
-  source "$ROSTER_HOME/lib/team/team-hooks-registration.sh"  # NEW
+  source "$ROSTER_HOME/lib/team/rite-resource.sh"
+  source "$ROSTER_HOME/lib/team/rite-hooks-registration.sh"  # NEW
   ```
 - **Invariants**:
   - All existing function calls work unchanged
   - Logging functions available before sourcing
   - ROSTER_HOME set before sourcing
 - **Verification**:
-  1. Run: `./swap-team.sh --help` (smoke test)
-  2. Run: `./swap-team.sh --dry-run hygiene-pack` (full flow)
+  1. Run: `./swap-rite.sh --help` (smoke test)
+  2. Run: `./swap-rite.sh --dry-run hygiene-pack` (full flow)
   3. Verify: settings.local.json updated correctly
   4. Verify: User hooks preserved
 - **Commit scope**: Add source statement only
@@ -449,7 +449,7 @@ swap_hook_registrations() { ... }
 
 - **Smells addressed**: Final cleanup, eliminate duplication
 - **Category**: Local
-- **Before**: 7 inline functions in swap-team.sh (lines 2136-2565, ~430 LOC)
+- **Before**: 7 inline functions in swap-rite.sh (lines 2136-2565, ~430 LOC)
 - **After**: Only source statement remains
 - **Functions removed**:
   - `require_yq()`
@@ -462,7 +462,7 @@ swap_hook_registrations() { ... }
 - **Invariants**: All tests pass, behavior unchanged
 - **Verification**:
   1. Run full test suite
-  2. Run: `./swap-team.sh hygiene-pack` (full integration)
+  2. Run: `./swap-rite.sh hygiene-pack` (full integration)
   3. Verify settings.local.json hooks are correct
   4. Verify user hooks preserved after swap
 - **Commit scope**: Remove inline functions (~430 LOC)
@@ -553,8 +553,8 @@ hooks:
 | RF-022 | Low | 1 new file | Trivial | RF-017 |
 | RF-023 | Low | 1 new file | Trivial | RF-017 |
 | RF-024 | Medium | 1 new file | Trivial | RF-017 through RF-023 |
-| RF-025 | Medium | 1 file (swap-team.sh) | 1 commit | RF-017 through RF-024 |
-| RF-026 | Medium | 1 file (swap-team.sh) | 1 commit | RF-025 |
+| RF-025 | Medium | 1 file (swap-rite.sh) | 1 commit | RF-017 through RF-024 |
+| RF-026 | Medium | 1 file (swap-rite.sh) | 1 commit | RF-025 |
 
 ### Risk Details
 
@@ -571,7 +571,7 @@ hooks:
 
 ## Test Requirements
 
-### Unit Tests (tests/lib/team/test-team-hooks-registration.sh)
+### Unit Tests (tests/lib/team/test-rite-hooks-registration.sh)
 
 | Test | Function | Scenario |
 |------|----------|----------|
@@ -603,7 +603,7 @@ hooks:
 ### Test Fixtures Required
 
 ```
-tests/fixtures/team-hooks-registration/
+tests/fixtures/rite-hooks-registration/
   valid-hooks.yaml             # Valid hooks.yaml with multiple hooks
   invalid-event.yaml           # hooks.yaml with invalid event type
   no-matcher.yaml              # PostToolUse without matcher
@@ -631,7 +631,7 @@ tests/fixtures/team-hooks-registration/
 
 | After Phase | Rollback Action | Data Loss |
 |-------------|-----------------|-----------|
-| Phase 1-4 | Delete `lib/team/team-hooks-registration.sh` | None (not integrated) |
+| Phase 1-4 | Delete `lib/team/rite-hooks-registration.sh` | None (not integrated) |
 | Phase 5 (RF-025) | Remove source statement | None |
 | Phase 5 (RF-026) | Revert commit, restore inline functions | None |
 
@@ -639,7 +639,7 @@ tests/fixtures/team-hooks-registration/
 
 If issues discovered post-integration:
 1. Run: `git revert HEAD~2..HEAD` (reverts RF-025, RF-026)
-2. Verify: `./swap-team.sh --help` works
+2. Verify: `./swap-rite.sh --help` works
 3. Verify: Hook registration works correctly
 
 ### Rollback Indicators
@@ -662,22 +662,22 @@ refactor(lib/team): [RF-0XX] description
 
 Body explaining what changed and why.
 
-Refs: REFACTOR-team-hooks-registration.md
+Refs: REFACTOR-rite-hooks-registration.md
 ```
 
 ### Test Run Requirements
 
 After each commit:
-1. `bash -n lib/team/team-hooks-registration.sh` - Syntax check
+1. `bash -n lib/team/rite-hooks-registration.sh` - Syntax check
 2. Run unit tests for completed functions
-3. After RF-025: Full integration test with `./swap-team.sh hygiene-pack`
+3. After RF-025: Full integration test with `./swap-rite.sh hygiene-pack`
 4. After RF-026: Verify settings.local.json hooks are correct
 
 ### Files to Avoid Touching
 
-- `lib/team/team-resource.sh` - Separate module, already extracted
+- `lib/team/rite-resource.sh` - Separate module, already extracted
 - `lib/team/team-transaction.sh` - Separate module, already extracted
-- `teams/*/hooks.yaml` - Source of truth, read-only for this refactor
+- `rites/*/hooks.yaml` - Source of truth, read-only for this refactor
 - `user-hooks/base_hooks.yaml` - Source of truth, read-only for this refactor
 
 ### Order is Critical For
@@ -686,14 +686,14 @@ After each commit:
 - **RF-025 requires RF-017 through RF-024**: Module must be complete before sourcing
 - **RF-026 requires RF-025**: Integration must work before removing inlines
 
-### Source Order in swap-team.sh
+### Source Order in swap-rite.sh
 
 After Priority 3 extraction:
 ```bash
 source "$ROSTER_HOME/lib/roster-utils.sh"
 source "$ROSTER_HOME/lib/team/team-transaction.sh"
-source "$ROSTER_HOME/lib/team/team-resource.sh"
-source "$ROSTER_HOME/lib/team/team-hooks-registration.sh"  # NEW
+source "$ROSTER_HOME/lib/team/rite-resource.sh"
+source "$ROSTER_HOME/lib/team/rite-hooks-registration.sh"  # NEW
 ```
 
 ### Bash 3.2 Compatibility Notes
@@ -731,9 +731,9 @@ Findings deferred for future work:
 | Artifact | Path | Verified |
 |----------|------|----------|
 | Spike analysis | `/Users/tomtenuta/Code/roster/docs/spikes/SPIKE-script-code-smell-refactoring.md` | Read |
-| Source file | `/Users/tomtenuta/Code/roster/swap-team.sh` (lines 2136-2565) | Analyzed |
-| Priority 1 plan | `/Users/tomtenuta/Code/roster/docs/refactoring/REFACTOR-team-resource.md` | Read |
+| Source file | `/Users/tomtenuta/Code/roster/swap-rite.sh` (lines 2136-2565) | Analyzed |
+| Priority 1 plan | `/Users/tomtenuta/Code/roster/docs/refactoring/REFACTOR-rite-resource.md` | Read |
 | Priority 2 plan | `/Users/tomtenuta/Code/roster/docs/refactoring/REFACTOR-team-transaction.md` | Read |
-| Module pattern | `/Users/tomtenuta/Code/roster/lib/team/team-resource.sh` | Read |
-| Test pattern | `/Users/tomtenuta/Code/roster/tests/lib/team/test-team-resource.sh` | Read |
-| Template | `/Users/tomtenuta/Code/roster/teams/ecosystem-pack/skills/doc-ecosystem/templates/refactoring-plan.md` | Read |
+| Module pattern | `/Users/tomtenuta/Code/roster/lib/team/rite-resource.sh` | Read |
+| Test pattern | `/Users/tomtenuta/Code/roster/tests/lib/team/test-rite-resource.sh` | Read |
+| Template | `/Users/tomtenuta/Code/roster/rites/ecosystem-pack/skills/doc-ecosystem/templates/refactoring-plan.md` | Read |

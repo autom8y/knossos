@@ -90,7 +90,7 @@ The manifest preserves category as metadata:
 | `orchestration` | Multi-phase workflow coordination and execution | orchestration, orchestrator-templates, sprint-ref, task-ref, initiative-scoping |
 | `operations` | Code shipping activities | commit-ref, pr-ref, qa-ref, review, hotfix-ref, spike-ref, worktree-ref |
 | `documentation` | Templates, standards, and conventions | documentation, doc-artifacts, standards |
-| `guidance` | Meta-skills for navigation and quality | prompting, cross-team, file-verification |
+| `guidance` | Meta-skills for navigation and quality | prompting, cross-rite, file-verification |
 | **Root exception** | Shared reference module | session-common |
 
 ### Command Categories (Workflow-Based) - Validated
@@ -213,7 +213,7 @@ user-skills/
     standards/
   guidance/
     prompting/
-    cross-team/
+    cross-rite/
     file-verification/
 ```
 
@@ -289,7 +289,7 @@ Version 1.1.0 adds skills and hooks sections with category tracking:
 | orchestration | orchestration, orchestrator-templates, sprint-ref, task-ref, initiative-scoping | 5 |
 | operations | commit-ref, pr-ref, qa-ref, review, hotfix-ref, spike-ref, worktree-ref | 7 |
 | documentation | documentation, doc-artifacts, standards | 3 |
-| guidance | prompting, cross-team, file-verification | 3 |
+| guidance | prompting, cross-rite, file-verification | 3 |
 | root | session-common | 1 |
 
 ### Commands (32 total, 7 categories)

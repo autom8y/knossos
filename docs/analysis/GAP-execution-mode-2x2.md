@@ -26,7 +26,7 @@ Detection Flow:
 4. status == PARKED -> "cross-cutting"
 5. status == ARCHIVED -> "native"
 6. ACTIVE_RITE == none/null -> "cross-cutting"
-7. team pack directory missing -> "cross-cutting"
+7. rite directory missing -> "cross-cutting"
 8. All conditions pass -> "orchestrated"
 ```
 
@@ -149,7 +149,7 @@ Team pack missing -> cross-cutting
 Any detection error -> cross-cutting
 ```
 
-**Semantic Issue**: Why does "team pack missing" fall to cross-cutting but "session corrupted" falls to native?
+**Semantic Issue**: Why does "rite missing" fall to cross-cutting but "session corrupted" falls to native?
 
 **Rationale**: Session corruption means we can't trust ANY session state, so drop to native. Team pack missing means session is valid but team isn't, so preserve session tracking.
 

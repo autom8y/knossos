@@ -22,7 +22,7 @@ Design optimal categorical organization for all roster user-level resources (ski
 - Produce migration plan
 
 ### Out of Scope
-- Team-level resources (agents managed by swap-team.sh)
+- Team-level resources (agents managed by swap-rite.sh)
 - CEM infrastructure changes (install-user delegates correctly)
 - Claude Code destination changes (remains flat)
 
@@ -50,7 +50,7 @@ Design optimal categorical organization for all roster user-level resources (ski
 ### Skills (24 total, currently flat)
 ```
 commit-ref       documentation      initiative-scoping  park-ref       qa-ref      session-common  start-ref      wrap-ref
-cross-team       file-verification  orchestration       pr-ref         resume      spike-ref       task-ref       worktree-ref
+cross-rite       file-verification  orchestration       pr-ref         resume      spike-ref       task-ref       worktree-ref
 doc-artifacts    handoff-ref        orchestrator-templates  prompting  review      sprint-ref      standards
 ```
 
@@ -83,7 +83,7 @@ Lib (10):  config, logging, primitives, session-core, session-state,
 - Proposed groupings (validate/revise):
   - `session-lifecycle/`: start-ref, park-ref, resume, handoff-ref, wrap-ref, session-common
   - `documentation/`: doc-artifacts, documentation, standards
-  - `orchestration/`: orchestration, orchestrator-templates, cross-team
+  - `orchestration/`: orchestration, orchestrator-templates, cross-rite
   - `workflow-patterns/`: sprint-ref, task-ref, hotfix-ref, spike-ref, worktree-ref
   - `operations/`: commit-ref, pr-ref, qa-ref, review, file-verification
   - `meta-guidance/`: prompting, initiative-scoping, consult-ref (if consult-ref exists)

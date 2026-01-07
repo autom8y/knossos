@@ -350,7 +350,7 @@ var (
     // Config: read-only user preferences (e.g., default team, aliases)
     ConfigDir = filepath.Join(xdg.ConfigHome, "ariadne")
 
-    // Data: persistent data that should survive cache clear (e.g., team packs)
+    // Data: persistent data that should survive cache clear (e.g., rites)
     DataDir = filepath.Join(xdg.DataHome, "ariadne")
 
     // State: mutable state that's not config (e.g., sessions, locks)
@@ -369,7 +369,7 @@ $XDG_CONFIG_HOME/ariadne/      # ~/.config/ariadne/
   aliases.yaml                  # Command aliases
 
 $XDG_DATA_HOME/ariadne/        # ~/.local/share/ariadne/
-  teams/                        # Downloaded team packs
+  rites/                        # Downloaded rites
     rnd-pack/
     security-pack/
   manifests/                    # Team manifests

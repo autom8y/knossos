@@ -13,7 +13,7 @@
 
 ## 1. Overview
 
-This Technical Design Document specifies the implementation of the **manifest domain** for Ariadne (`ari`), the Go binary replacement for the roster bash script harness. The manifest domain encompasses 4 commands that manage Claude Extension Manifest (CEM) operations -- the configuration files that define project structure, team packs, and agent inventories.
+This Technical Design Document specifies the implementation of the **manifest domain** for Ariadne (`ari`), the Go binary replacement for the roster bash script harness. The manifest domain encompasses 4 commands that manage Claude Extension Manifest (CEM) operations -- the configuration files that define project structure, rites, and agent inventories.
 
 ### 1.1 Context
 
@@ -109,7 +109,7 @@ ariadne/
          │
          v
 ┌─────────────────────────────────────────────────────────────────┐
-│  Filesystem: .claude/manifest.json, teams/*/manifest.yaml,     │
+│  Filesystem: .claude/manifest.json, rites/*/manifest.yaml,     │
 │  schemas/*.schema.json                                          │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -131,7 +131,7 @@ Per PRD Section 3.2:
 | Type | Location | Schema | Purpose |
 |------|----------|--------|---------|
 | CEM Project | `.claude/manifest.json` | `manifest.schema.json` | Project configuration |
-| Team Pack | `teams/*/manifest.yaml` | `team-manifest.schema.json` | Team pack definition |
+| Team Pack | `rites/*/manifest.yaml` | `team-manifest.schema.json` | Team pack definition |
 | Agent Manifest | `.claude/AGENT_MANIFEST.json` | (embedded) | Agent tracking (team domain) |
 
 #### Remote Sources
@@ -139,7 +139,7 @@ Per PRD Section 3.2:
 For `diff` and `merge` operations, manifests can be loaded from:
 - Local filesystem path
 - Git ref (e.g., `HEAD:manifest.json`, `origin/main:.claude/manifest.json`)
-- URL (future: team pack registry)
+- URL (future: rite registry)
 
 ---
 
@@ -369,7 +369,7 @@ ari manifest validate <path> [--schema=NAME] [--strict]
 | Path Pattern | Schema |
 |--------------|--------|
 | `.claude/manifest.json` | `manifest.schema.json` |
-| `teams/*/manifest.yaml` | `team-manifest.schema.json` |
+| `rites/*/manifest.yaml` | `team-manifest.schema.json` |
 | `**/AGENT_MANIFEST.json` | `agent-manifest.schema.json` |
 | `**/SESSION_CONTEXT.md` | `session-context.schema.json` |
 | `**/SPRINT_CONTEXT.md` | `sprint-context.schema.json` |
@@ -714,7 +714,7 @@ The Claude Extension Manifest (`.claude/manifest.json`):
   "teams": {
     "default": "10x-dev-pack",
     "available": ["10x-dev-pack", "rnd-pack", "security-pack"],
-    "discovery": ["teams/", "~/.config/ariadne/teams/"]
+    "discovery": ["rites/", "~/.config/ariadne/rites/"]
   },
   "paths": {
     "sessions": ".claude/sessions",
@@ -735,7 +735,7 @@ The Claude Extension Manifest (`.claude/manifest.json`):
 
 ### 5.2 Team Pack Manifest
 
-Team pack manifest (`teams/*/manifest.yaml`):
+Team pack manifest (`rites/*/manifest.yaml`):
 
 ```yaml
 version: "1.0"
@@ -1302,7 +1302,7 @@ func (v *Validator) ValidateManifest(data []byte) error {
     return nil
 }
 
-// ValidateTeamManifest validates a team pack manifest.
+// ValidateTeamManifest validates a rite manifest.
 func (v *Validator) ValidateTeamManifest(data []byte) error {
     schema, err := v.getSchema(SchemaTeamManifest)
     if err != nil {
@@ -1328,7 +1328,7 @@ func (v *Validator) ValidateTeamManifest(data []byte) error {
 func DetectSchemaFromPath(path string) (string, error) {
     patterns := map[string]string{
         `.claude/manifest.json`:           SchemaManifest,
-        `teams/*/manifest.yaml`:           SchemaTeamManifest,
+        `rites/*/manifest.yaml`:           SchemaTeamManifest,
         `AGENT_MANIFEST.json`:             SchemaAgentManifest,
         `SESSION_CONTEXT.md`:              "session-context",
         `SPRINT_CONTEXT.md`:               "sprint-context",
@@ -1481,7 +1481,7 @@ Manifest domain provides schema validation that session domain uses:
 
 Manifest domain supports team domain operations:
 - `AGENT_MANIFEST.json` validation
-- Team pack manifest validation (`teams/*/manifest.yaml`)
+- Team pack manifest validation (`rites/*/manifest.yaml`)
 - Team switch can invoke `ari manifest validate` for pre-flight checks
 
 ### 8.3 Sync Domain (Future)

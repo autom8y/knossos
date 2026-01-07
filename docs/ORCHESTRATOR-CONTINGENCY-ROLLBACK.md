@@ -173,16 +173,16 @@ We'll follow up when ready to re-run validation.
 **Response Timeline**: < 30 minutes
 
 **Steps**:
-1. Compare files manually: `diff teams/<team>/agents/orchestrator.md /tmp/generated.md`
-2. Use `od` to check for hidden characters: `od -c teams/<team>/agents/orchestrator.md | head -20`
-3. Check for Windows vs Unix line endings: `file teams/<team>/agents/orchestrator.md`
+1. Compare files manually: `diff rites/<team>/agents/orchestrator.md /tmp/generated.md`
+2. Use `od` to check for hidden characters: `od -c rites/<team>/agents/orchestrator.md | head -20`
+3. Check for Windows vs Unix line endings: `file rites/<team>/agents/orchestrator.md`
 
 **Resolution Options**:
 
 **Option A: Regenerate** (Recommended)
 ```bash
 ./templates/orchestrator-generate.sh <team> --force
-git add teams/<team>/agents/orchestrator.md
+git add rites/<team>/agents/orchestrator.md
 git commit --amend
 git push -f  # Only if not yet merged
 ```
@@ -382,7 +382,7 @@ ERROR: Specialist 'integration-enginer' not found in workflow.yaml
 
 Did you mean: integration-engineer?
 
-Check: teams/<team>/workflow.yaml for list of available specialists
+Check: rites/<team>/workflow.yaml for list of available specialists
 ```
 
 **Response Timeline**: < 24 hours
@@ -403,7 +403,7 @@ Check: teams/<team>/workflow.yaml for list of available specialists
 gh workflow disable validate-orchestrators -R <owner>/<repo>
 
 # Delete orchestrator.yaml files (keep for recovery)
-git rm teams/*/orchestrator.yaml
+git rm rites/*/orchestrator.yaml
 
 # Commit rollback
 git commit -m "Revert orchestrator templating (emergency rollback)"
@@ -454,7 +454,7 @@ git push
 **Steps**:
 ```bash
 # For the team:
-cd /roster/teams/<team>
+cd /roster/rites/<team>
 
 # Delete YAML config
 rm orchestrator.yaml
@@ -518,7 +518,7 @@ START: [time]
 SEVERITY: P[0-3]
 
 IMPACT: [what's broken]
-AFFECTED: [which teams/workflows]
+AFFECTED: [which rites/workflows]
 ETA FIX: [estimated time]
 WORKAROUND: [temporary solution if available]
 

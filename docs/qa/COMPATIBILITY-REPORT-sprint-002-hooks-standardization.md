@@ -19,7 +19,7 @@
 
 ### P1 Fix Verification
 
-The `swap-team.sh` fix (lines 2520-2580) was verified:
+The `swap-rite.sh` fix (lines 2520-2580) was verified:
 
 | Requirement | Status | Evidence |
 |-------------|--------|----------|
@@ -41,13 +41,13 @@ The `swap-team.sh` fix (lines 2520-2580) was verified:
 | hooks-init.sh | RECOVERABLE mode | PASS | Enables trap correctly |
 | command-validator.sh | JSON input processing | PASS | Returns allow decision |
 | session-context.sh | Context output | PASS | Outputs markdown table |
-| swap-team.sh | Hook deployment | **PASS** | All categorical subdirs iterated |
+| swap-rite.sh | Hook deployment | **PASS** | All categorical subdirs iterated |
 
 ### Defect Status Update
 
 | ID | Severity | Status | Notes |
 |----|----------|--------|-------|
-| D001 | P1 | **RESOLVED** | swap-team.sh now iterates categorical subdirs |
+| D001 | P1 | **RESOLVED** | swap-rite.sh now iterates categorical subdirs |
 | D002 | P3 | Open (deferred) | Non-blocking, cosmetic |
 
 ### Glob Pattern Verification
@@ -99,7 +99,7 @@ Category: lib (11 library files)
 | base_hooks.yaml | Priority field presence | PASS | All 10 hooks have priority |
 | base_hooks.yaml | Priority range (1-100) | PASS | All values valid |
 | base_hooks.yaml | No ambiguous duplicates | PASS | Different matchers OK |
-| swap-team.sh | Hook deployment | **FAIL** | Does not copy from subdirs |
+| swap-rite.sh | Hook deployment | **FAIL** | Does not copy from subdirs |
 
 ---
 
@@ -107,21 +107,21 @@ Category: lib (11 library files)
 
 | ID | Severity | Description | Blocking |
 |----|----------|-------------|----------|
-| D001 | **P1** | swap-team.sh does not deploy hooks from categorical subdirectories | **YES** |
+| D001 | **P1** | swap-rite.sh does not deploy hooks from categorical subdirectories | **YES** |
 | D002 | P3 | base_hooks.yaml paths are filenames only, not full paths | No |
 
-### D001: swap-team.sh Hook Deployment Failure (P1)
+### D001: swap-rite.sh Hook Deployment Failure (P1)
 
-**Description**: The categorical refactoring moved hooks from `user-hooks/*.sh` to categorical subdirectories (`user-hooks/context-injection/`, `user-hooks/session-guards/`, etc.). However, `swap-team.sh` line 2521 only copies from root-level `$base_hooks_dir/*.sh`.
+**Description**: The categorical refactoring moved hooks from `user-hooks/*.sh` to categorical subdirectories (`user-hooks/context-injection/`, `user-hooks/session-guards/`, etc.). However, `swap-rite.sh` line 2521 only copies from root-level `$base_hooks_dir/*.sh`.
 
 **Reproduction Steps**:
-1. Run `swap-team.sh 10x-dev-pack`
+1. Run `swap-rite.sh 10x-dev-pack`
 2. Check `.claude/hooks/` in target project
 3. Observe: hooks are not present (only lib/ files copied)
 
 **Impact**: Hooks will not function in satellite projects after team swap. Session context, command validation, write guards, and artifact tracking will all be non-functional.
 
-**Location**: `/Users/tomtenuta/Code/roster/swap-team.sh` lines 2521-2532
+**Location**: `/Users/tomtenuta/Code/roster/swap-rite.sh` lines 2521-2532
 
 **Fix Required**: Update `swap_hooks()` to recursively copy from categorical subdirectories, or flatten the directory structure.
 
@@ -223,9 +223,9 @@ user-hooks/
 
 ### Required Actions Before Release
 
-1. **Integration Engineer**: Fix `swap-team.sh` to deploy hooks from categorical subdirectories
+1. **Integration Engineer**: Fix `swap-rite.sh` to deploy hooks from categorical subdirectories
 2. **Re-test**: Run compatibility tests after fix
-3. **Regression test**: Verify satellite hooks work after swap-team.sh execution
+3. **Regression test**: Verify satellite hooks work after swap-rite.sh execution
 
 ### Suggested Fix Approaches
 
@@ -251,7 +251,7 @@ done
 - `/Users/tomtenuta/Code/roster/user-hooks/validation/delegation-check.sh`
 - `/Users/tomtenuta/Code/roster/user-hooks/context-injection/session-context.sh`
 - `/Users/tomtenuta/Code/roster/user-hooks/tracking/artifact-tracker.sh`
-- `/Users/tomtenuta/Code/roster/swap-team.sh` (lines 2499-2598)
+- `/Users/tomtenuta/Code/roster/swap-rite.sh` (lines 2499-2598)
 
 ---
 
@@ -270,7 +270,7 @@ done
 
 ## Re-Validation Sign-Off (2026-01-01)
 
-- [x] P1 fix verified in swap-team.sh (lines 2520-2580)
+- [x] P1 fix verified in swap-rite.sh (lines 2520-2580)
 - [x] Categorical directory iteration confirmed (context-injection, session-guards, tracking, validation)
 - [x] lib/ directory deployment verified
 - [x] base_hooks.yaml deployment verified

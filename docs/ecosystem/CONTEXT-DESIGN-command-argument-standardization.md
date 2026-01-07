@@ -2,7 +2,7 @@
 
 ## Overview
 
-Standardize flag naming and argument handling across the roster command ecosystem. The primary change renames `--refresh` to `--update` in `swap-team.sh` for semantic clarity, establishes backward-compatible deprecation, and defines canonical patterns for all command documentation.
+Standardize flag naming and argument handling across the roster command ecosystem. The primary change renames `--refresh` to `--update` in `swap-rite.sh` for semantic clarity, establishes backward-compatible deprecation, and defines canonical patterns for all command documentation.
 
 This design addresses the Gap Analysis finding: 11 commands document a non-existent `--force` flag when the actual working flag is `--refresh`. Rather than just fixing documentation, we're taking the opportunity to standardize flag semantics across the ecosystem.
 
@@ -13,7 +13,7 @@ This design addresses the Gap Analysis finding: 11 commands document a non-exist
 ### Components Affected
 
 - **roster**: Primary target
-  - `swap-team.sh`: Flag rename with deprecation alias
+  - `swap-rite.sh`: Flag rename with deprecation alias
   - `user-commands/`: 32 command files need flag documentation update
 - **skeleton**: Reference update only
   - `.claude/user-commands/`: Already synced from roster, will receive changes automatically
@@ -45,11 +45,11 @@ Rationale:
 
 ---
 
-## swap-team.sh Flag Specification
+## swap-rite.sh Flag Specification
 
 ### Flag Rename: `--refresh` to `--update`
 
-#### Current State (swap-team.sh lines 1615-1619)
+#### Current State (swap-rite.sh lines 1615-1619)
 
 ```bash
 --refresh|-r)
@@ -125,7 +125,7 @@ model: <model-id>
 
 | Field | Required | Format | Example |
 |-------|----------|--------|---------|
-| `description` | Yes | Imperative sentence starting with verb | `Switch agent team packs or list available teams` |
+| `description` | Yes | Imperative sentence starting with verb | `Switch agent rites or list available teams` |
 | `argument-hint` | Yes | Argument syntax with brackets | `[pack-name] [--list] [--update]` |
 | `model` | Yes | Valid Claude model ID | `haiku`, `sonnet`, `opus` |
 | `allowed-tools` | Optional | Comma-separated tool list | `Bash, Read, Write` |
@@ -189,7 +189,7 @@ Full documentation: `.claude/skills/<skill>/skill.md`
 1. **For pass-through commands** (rite-switching): Place after first sentence
    ```markdown
    ## Your Task
-   Switch to the 10x development team pack. $ARGUMENTS
+   Switch to the 10x development rite. $ARGUMENTS
    ```
 
 2. **For internally-parsed commands** (session, workflow): Place after task description
@@ -216,21 +216,21 @@ When a command accepts flags, document them in a standardized table:
 
 | Flag | Short | Description | Handled By |
 |------|-------|-------------|------------|
-| `--update` | `-u` | Pull latest definitions from roster | swap-team.sh |
-| `--dry-run` | - | Preview changes without applying | swap-team.sh |
-| `--keep-all` | - | Preserve all orphan agents | swap-team.sh |
+| `--update` | `-u` | Pull latest definitions from roster | swap-rite.sh |
+| `--dry-run` | - | Preview changes without applying | swap-rite.sh |
+| `--keep-all` | - | Preserve all orphan agents | swap-rite.sh |
 ```
 
 **Handled By** column values:
-- `swap-team.sh`: Pass-through to underlying script
+- `swap-rite.sh`: Pass-through to underlying script
 - `internal`: Parsed by command behavior
 - `Claude`: Interpreted by model (no script parsing)
 
 ### Pass-Through vs Internal Handling
 
 **Pass-through** (rite-switching commands):
-- Flags passed directly to `swap-team.sh $ARGUMENTS`
-- Document flags that swap-team.sh accepts
+- Flags passed directly to `swap-rite.sh $ARGUMENTS`
+- Document flags that swap-rite.sh accepts
 - Command markdown does not parse flags
 
 **Internal** (session, workflow commands):
@@ -254,7 +254,7 @@ When a command accepts flags, document them in a standardized table:
 
 ### Category: rite-switching
 
-**Pattern**: Pass-through all $ARGUMENTS to swap-team.sh
+**Pattern**: Pass-through all $ARGUMENTS to swap-rite.sh
 
 **Files**: `10x.md`, `hygiene.md`, `docs.md`, `debt.md`, `sre.md`, `security.md`, `intelligence.md`, `rnd.md`, `strategy.md`, `forge.md`
 
@@ -270,11 +270,11 @@ model: haiku
 Auto-injected by SessionStart hook (project, team, session, git).
 
 ## Your Task
-Switch to the {team-name} team pack. $ARGUMENTS
+Switch to the {team-name} rite. $ARGUMENTS
 
 ## Behavior
-1. Execute: `${ROSTER_HOME:-~/Code/roster}/swap-team.sh {pack-name} $ARGUMENTS`
-2. Display the roster output from swap-team.sh
+1. Execute: `${ROSTER_HOME:-~/Code/roster}/swap-rite.sh {pack-name} $ARGUMENTS`
+2. Display the roster output from swap-rite.sh
 3. If SESSION_CONTEXT exists, update `active_team` to `{pack-name}`
 
 ## Flags
@@ -298,7 +298,7 @@ Full documentation: `.claude/skills/{skill}/skill.md`
 1. Replace `--force` with `--update` in argument-hint
 2. Replace `--refresh` with `--update` in documentation
 3. Add standardized Flags section
-4. Remove hardcoded agent tables (rely on swap-team.sh output)
+4. Remove hardcoded agent tables (rely on swap-rite.sh output)
 
 ### Category: navigation/team.md (special case)
 
@@ -321,7 +321,7 @@ Full documentation: `.claude/skills/{skill}/skill.md`
 - Session state mutations
 - Pre-flight validation required
 
-**No changes needed for this sprint** (flags are command-specific, not swap-team.sh related)
+**No changes needed for this sprint** (flags are command-specific, not swap-rite.sh related)
 
 ### Category: workflow
 
@@ -344,7 +344,7 @@ Full documentation: `.claude/skills/{skill}/skill.md`
 
 **Characteristics**:
 - Design-specific arguments (paths, names)
-- No swap-team.sh interaction
+- No swap-rite.sh interaction
 - Pre-flight validation for prerequisites
 
 **No changes needed for this sprint**
@@ -355,7 +355,7 @@ Full documentation: `.claude/skills/{skill}/skill.md`
 
 **Files**: `sync.md`
 
-**Note**: `sync.md` uses `--refresh` for CEM's waterfall sync, which is a different flag from swap-team.sh's `--refresh`. CEM's flag is unaffected by this change.
+**Note**: `sync.md` uses `--refresh` for CEM's waterfall sync, which is a different flag from swap-rite.sh's `--refresh`. CEM's flag is unaffected by this change.
 
 ---
 
@@ -381,10 +381,10 @@ This change is backward compatible:
 Users can update their scripts/aliases at their convenience:
 ```bash
 # Before
-alias swap='$ROSTER_HOME/swap-team.sh --refresh'
+alias swap='$ROSTER_HOME/swap-rite.sh --refresh'
 
 # After
-alias swap='$ROSTER_HOME/swap-team.sh --update'
+alias swap='$ROSTER_HOME/swap-rite.sh --update'
 ```
 
 ---
@@ -397,16 +397,16 @@ alias swap='$ROSTER_HOME/swap-team.sh --update'
 | skeleton | `/team 10x-dev-pack --refresh` | Swap succeeds with deprecation warning | Backward compat |
 | skeleton | `/team --update` (no pack) | Updates current team | Flag without pack |
 | skeleton | `/10x --update` | Swap succeeds | Quick-switch with flag |
-| any satellite | `swap-team.sh 10x-dev-pack -u` | Swap succeeds | Short flag alias |
-| any satellite | `swap-team.sh 10x-dev-pack -r` | Swap succeeds with warning | Deprecated short flag |
+| any satellite | `swap-rite.sh 10x-dev-pack -u` | Swap succeeds | Short flag alias |
+| any satellite | `swap-rite.sh 10x-dev-pack -r` | Swap succeeds with warning | Deprecated short flag |
 
 ---
 
 ## Implementation Specification
 
-### swap-team.sh Changes
+### swap-rite.sh Changes
 
-**File**: `/roster/swap-team.sh`
+**File**: `/roster/swap-rite.sh`
 
 #### Change 1: Variable rename (line 28)
 ```bash
@@ -463,8 +463,8 @@ Update any messages mentioning `--refresh` to say `--update`.
 1. **Variable rename is mechanical**: Use find/replace for `REFRESH_MODE` -> `UPDATE_MODE`
 
 2. **Order of changes matters**:
-   - First update swap-team.sh
-   - Test directly: `./swap-team.sh --update 10x-dev-pack`
+   - First update swap-rite.sh
+   - Test directly: `./swap-rite.sh --update 10x-dev-pack`
    - Then update command documentation
    - Test via commands: `/team 10x-dev-pack --update`
 
@@ -474,7 +474,7 @@ Update any messages mentioning `--refresh` to say `--update`.
 
 ### Gotchas
 
-1. **CEM's --refresh is different**: The `sync.md` command's `--refresh` flag goes to CEM, not swap-team.sh. Don't change that one.
+1. **CEM's --refresh is different**: The `sync.md` command's `--refresh` flag goes to CEM, not swap-rite.sh. Don't change that one.
 
 2. **Help text format**: The usage() function has specific formatting. Maintain the column alignment.
 
@@ -487,7 +487,7 @@ Update any messages mentioning `--refresh` to say `--update`.
 ## Handoff Checklist
 
 - [x] Solution architecture documented with rationale
-- [x] swap-team.sh change fully specified at line/function level
+- [x] swap-rite.sh change fully specified at line/function level
 - [x] Backward compatibility classified: COMPATIBLE
 - [x] Deprecation timeline specified (no migration required)
 - [x] Command template is copy-paste ready
@@ -516,7 +516,7 @@ Commands requiring `--force`/`--refresh` to `--update` change:
 | `rite-switching/forge.md` | Same | Same |
 | `navigation/team.md` | `[--list] [--force] [--keep-all\|...]` | `[--list] [--update] [--dry-run] [--keep-all\|...]` |
 
-Commands NOT requiring changes (no swap-team.sh interaction):
+Commands NOT requiring changes (no swap-rite.sh interaction):
 - All `session/` commands
 - All `workflow/` commands
 - All `operations/` commands

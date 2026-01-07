@@ -305,7 +305,7 @@ The `^/` regex matcher ensures the hook only fires when the user prompt starts w
 
 File: `.claude/settings.local.json`
 
-The change is a JSON configuration update, not code change. This will be handled by the `swap-team.sh` settings generation (Scope 2) or can be manually updated.
+The change is a JSON configuration update, not code change. This will be handled by the `swap-rite.sh` settings generation (Scope 2) or can be manually updated.
 
 #### Fallback Behavior
 

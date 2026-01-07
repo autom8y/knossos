@@ -120,7 +120,7 @@ cem (main script)
 **Inputs**:
 - `--force`: Overwrite local modifications on conflicts
 - `--dry-run`: Preview without changes
-- `--refresh`: Also refresh active team from roster
+- `--refresh`: Also refresh active rite from roster
 - `--prune`: Remove orphaned resources
 - `--auto-refresh`: Automatically refresh team if roster has updates
 
@@ -228,15 +228,15 @@ Else:
 
 ### 7. `cem validate-team [name]`
 
-**Purpose**: Validate team pack against workflow schema.
+**Purpose**: Validate rite against workflow schema.
 
 **Inputs**:
 - `name`: Team name (defaults to ACTIVE_RITE)
 
 **Algorithm**:
 ```
-1. Read team name from arg or .claude/ACTIVE_RITE
-2. Check workflow.yaml exists at $ROSTER_HOME/teams/$name/
+1. Read rite name from arg or .claude/ACTIVE_RITE
+2. Check workflow.yaml exists at $ROSTER_HOME/rites/$name/
 3. Validate YAML syntax via yq
 4. Check required fields: name, workflow_type, description, entry_point, phases, complexity_levels
 5. Verify name matches directory name
@@ -400,7 +400,7 @@ esac
     "name": "10x-dev-pack",
     "checksum": "sha256...",
     "last_refresh": "2025-01-01T00:00:00Z",
-    "roster_path": "/path/to/roster/teams/10x-dev-pack"
+    "roster_path": "/path/to/roster/rites/10x-dev-pack"
   },
   "managed_files": [
     {
@@ -608,7 +608,7 @@ def detect_orphans(skeleton):
                     orphans.append({
                         path: entry.path,
                         source: "team:{name}",
-                        reason: "deleted from team pack"
+                        reason: "deleted from rite"
                     })
 
     return orphans
@@ -886,7 +886,7 @@ V2 manifest tracks `source` field ("skeleton", "team", "user") for each managed 
 CLAUDE.md merge uses AWK-based section extraction with marker-based ownership. The `<!-- PRESERVE: -->` and `<!-- SYNC: -->` markers control which version wins.
 
 ### 5. Team Freshness
-CEM can detect when roster team packs have updates via checksum comparison, enabling auto-refresh via `--auto-refresh` flag.
+CEM can detect when roster rites have updates via checksum comparison, enabling auto-refresh via `--auto-refresh` flag.
 
 ---
 

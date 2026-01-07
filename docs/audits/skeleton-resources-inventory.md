@@ -12,7 +12,7 @@ final destinations in roster. For the correct roster artifact architecture, see 
 
 After migration, the correct locations are:
 - User-level content: `roster/user-*/` syncs to `~/.claude/*/`
-- Team content: `roster/teams/{pack}/` syncs to `.claude/` (project-level)
+- Team content: `roster/rites/{pack}/` syncs to `.claude/` (project-level)
 
 ---
 
@@ -81,7 +81,7 @@ Both skeleton and roster have the same 5 agents. **Roster versions are superior*
 | session-context.sh | hooks/session-context.sh | SessionStart context injection | hooks/context-injection/session-context.sh | **KEEP ROSTER** (has verbose mode) |
 | session-write-guard.sh | hooks/session-write-guard.sh | Guard SESSION_CONTEXT.md writes | hooks/session-guards/session-write-guard.sh | **KEEP ROSTER** (uses hooks-init.sh) |
 | start-preflight.sh | hooks/start-preflight.sh | Pre-flight checks on session start | hooks/session-guards/start-preflight.sh | **KEEP ROSTER** (reorganized) |
-| team-validator.sh | hooks/team-validator.sh | Validate team pack | None | **EVALUATE** - may be useful |
+| team-validator.sh | hooks/team-validator.sh | Validate rite | None | **EVALUATE** - may be useful |
 | workflow-validator.sh | hooks/workflow-validator.sh | Validate workflow.yaml | None | **EVALUATE** - may be useful |
 
 ### Roster-Only Hooks (Main Level)
@@ -126,7 +126,7 @@ Both skeleton and roster have the same 5 agents. **Roster versions are superior*
 | orchestration-audit.sh | hooks/lib/ | Orchestration auditing | New in roster |
 | session-fsm.sh | hooks/lib/ | Session finite state machine | New in roster |
 | session-migrate.sh | hooks/lib/ | Session migration utilities | New in roster |
-| team-context-loader.sh | hooks/lib/ | Load team context | New in roster |
+| rite-context-loader.sh | hooks/lib/ | Load rite context | New in roster |
 
 **Migration Recommendation**:
 - KEEP all roster lib files (newer infrastructure)
@@ -171,8 +171,8 @@ Both skeleton and roster have the same 5 agents. **Roster versions are superior*
 | Resource | Purpose | Notes |
 |----------|---------|-------|
 | consult-ref | Ecosystem guidance | Already in roster |
-| cross-team | Cross-team routing | Already in roster |
-| cross-team-handoff | Cross-team handoffs | Already in roster |
+| cross-rite | Cross-team routing | Already in roster |
+| cross-rite-handoff | Cross-team handoffs | Already in roster |
 | file-verification | Anti-hallucination verification | Already in roster |
 | handoff-ref | Agent handoff reference | Already in roster |
 | initiative-scoping | Session -1/0 protocols | Already in roster |
@@ -253,7 +253,7 @@ Skeleton has 38 user-commands; roster has none.
 | sync.md | Sync state | Session Mgmt | **MIGRATE** |
 | task.md | Single task lifecycle | Development | **MIGRATE** |
 | team.md | Team management | Team Switching | **MIGRATE** |
-| validate-team.md | Validate team pack | Forge | **MIGRATE** |
+| validate-team.md | Validate rite | Forge | **MIGRATE** |
 | worktree.md | Git worktree | Development | **MIGRATE** |
 | wrap.md | Wrap session | Session Mgmt | **MIGRATE** |
 

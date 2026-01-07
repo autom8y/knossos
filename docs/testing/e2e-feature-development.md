@@ -312,7 +312,7 @@ Product owner: @product-lead for content approval.
 ### Artifact Trail
 - [ ] Each artifact references its inputs
 - [ ] Session context updated at each transition
-- [ ] Handoff artifacts follow schema (if cross-team)
+- [ ] Handoff artifacts follow schema (if cross-rite)
 
 ### Quality Gates
 - [ ] No phase skipped for MODULE complexity
@@ -362,5 +362,5 @@ Future: Hook into CI to validate artifact existence and schema compliance at eac
 
 - [Cross-Team Coordination Playbook](../playbooks/cross-rite-coordination.md)
 - [Handoff Smoke Tests](handoff-smoke-tests.md)
-- [10x-dev-pack Workflow](../../teams/10x-dev-pack/workflow.md)
-- [Cross-Team Handoff Schema](../../.claude/skills/shared/cross-team-handoff/schema.md)
+- [10x-dev-pack Workflow](../../rites/10x-dev-pack/workflow.md)
+- [Cross-Team Handoff Schema](../../.claude/skills/shared/cross-rite-handoff/schema.md)

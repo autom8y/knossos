@@ -1,6 +1,6 @@
 # TDD: Smell Detection Shared Skill
 
-> Technical Design Document for cross-team smell detection patterns and heuristics.
+> Technical Design Document for cross-rite smell detection patterns and heuristics.
 
 ---
 
@@ -8,7 +8,7 @@
 
 This Technical Design Document specifies the `smell-detection` shared skill that provides unified code smell detection patterns, severity classification rules, and integration with debt tracking systems. The skill serves as a single source of truth for smell taxonomy across `debt-triage-pack`, `hygiene-pack`, and any team assessing code quality.
 
-**Location**: `teams/shared/skills/smell-detection/`
+**Location**: `rites/shared/skills/smell-detection/`
 **Consumers**: debt-collector (debt-triage-pack), code-smeller (hygiene-pack), any quality assessment workflow
 
 ---
@@ -18,10 +18,10 @@ This Technical Design Document specifies the `smell-detection` shared skill that
 | Reference | Location |
 |-----------|----------|
 | Smell Report Template | `/Users/tomtenuta/Code/roster/.claude/skills/doc-ecosystem/templates/smell-report.md` |
-| Code Smeller Agent | `/Users/tomtenuta/Code/roster/teams/hygiene-pack/agents/code-smeller.md` |
-| Debt Collector Agent | `/Users/tomtenuta/Code/roster/teams/debt-triage-pack/agents/debt-collector.md` |
+| Code Smeller Agent | `/Users/tomtenuta/Code/roster/rites/hygiene-pack/agents/code-smeller.md` |
+| Debt Collector Agent | `/Users/tomtenuta/Code/roster/rites/debt-triage-pack/agents/debt-collector.md` |
 | E2E Debt Remediation | `/Users/tomtenuta/Code/roster/docs/testing/e2e-debt-remediation.md` |
-| Shared Skills README | `/Users/tomtenuta/Code/roster/teams/shared/README.md` |
+| Shared Skills README | `/Users/tomtenuta/Code/roster/rites/shared/README.md` |
 
 ### Problem Statement
 
@@ -493,7 +493,7 @@ smell-detection skill (patterns)
 ## Skill File Structure
 
 ```
-teams/shared/skills/smell-detection/
+rites/shared/skills/smell-detection/
     |
     +-- SKILL.md                 # Entry point: quick reference, triggers
     +-- taxonomy/
@@ -676,7 +676,7 @@ This skill is **NEW** - no backward compatibility concerns.
 - [ ] Default severity factors defined for all 42 smell types
 - [ ] Context override patterns documented
 - [ ] Debt ledger integration schema defined
-- [ ] Skill file structure created under teams/shared/skills/smell-detection/
+- [ ] Skill file structure created under rites/shared/skills/smell-detection/
 - [ ] Existing agent references (`@smell-detection`) now resolve
 
 ---

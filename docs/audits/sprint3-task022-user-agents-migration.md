@@ -40,13 +40,13 @@ The following patterns were searched for in migrated files:
 
 ## Agent Descriptions (Forge Team)
 
-These 7 agents constitute the "Forge" team - specialized agents for creating and managing team packs:
+These 7 agents constitute the "Forge" team - specialized agents for creating and managing rites:
 
 1. **agent-curator**: Finalizes teams for roster deployment, syncs Consultant knowledge base, handles versioning and documentation
 2. **agent-designer**: Designs agent roles, boundaries, and contracts for new teams; produces TEAM-SPEC documents
 3. **consultant**: Meta-level ecosystem navigator providing team routing and workflow guidance
 4. **eval-specialist**: Validates teams and agents before production use with 29-point validation checklist
-5. **platform-engineer**: Infrastructure specialist implementing team packs in the roster system
+5. **platform-engineer**: Infrastructure specialist implementing rites in the roster system
 6. **prompt-architect**: Crafts agent identities and system prompts following 11-section template
 7. **workflow-engineer**: Wires agents into cohesive workflows, creates workflow.yaml configurations
 

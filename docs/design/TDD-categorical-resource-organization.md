@@ -56,7 +56,7 @@ Skills are grouped by functional domain. Five categories capture all 24 skills w
 | `orchestration` | Multi-phase workflow coordination and execution | orchestration, orchestrator-templates, sprint-ref, task-ref, initiative-scoping | 5 |
 | `operations` | Code shipping activities (commit, PR, review, hotfix) | commit-ref, pr-ref, qa-ref, review, hotfix-ref, spike-ref, worktree-ref | 7 |
 | `documentation` | Templates, standards, and conventions | documentation, doc-artifacts, standards | 3 |
-| `guidance` | Meta-skills for navigation and quality | prompting, cross-team, file-verification | 3 |
+| `guidance` | Meta-skills for navigation and quality | prompting, cross-rite, file-verification | 3 |
 | **Root exception** | Shared reference module | session-common | 1 |
 
 **Total: 24 skills**
@@ -222,7 +222,7 @@ user-skills/
       SKILL.md
       patterns/
       workflows/
-    cross-team/
+    cross-rite/
       SKILL.md
     file-verification/
       SKILL.md
@@ -514,7 +514,7 @@ mv user-skills/standards user-skills/documentation/
 
 # guidance (3 skills)
 mv user-skills/prompting user-skills/guidance/
-mv user-skills/cross-team user-skills/guidance/
+mv user-skills/cross-rite user-skills/guidance/
 mv user-skills/file-verification user-skills/guidance/
 
 # session-common stays at root (1 skill)

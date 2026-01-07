@@ -521,7 +521,7 @@ Update `schemas/artifacts/session-context.schema.json`:
       "$ref": "common.schema.json#/$defs/complexity_enum"
     },
     "active_team": {
-      "$ref": "common.schema.json#/$defs/team_name"
+      "$ref": "common.schema.json#/$defs/rite_name"
     },
     "current_phase": {
       "type": "string",

@@ -87,7 +87,7 @@ CEM provides **8 commands** with sophisticated sync logic:
 | `init` | ~150 | Medium | None |
 | `sync` | ~400 | **High** | None |
 | `validate` | ~100 | Low | None |
-| `validate-team` | ~80 | Low | Partial (swap-team.sh) |
+| `validate-team` | ~80 | Low | Partial (swap-rite.sh) |
 | `repair` | ~80 | Medium | None |
 | `install-user` | ~40 | Low | sync-user-*.sh (4 scripts) |
 | `status` | ~60 | Low | None |
@@ -116,12 +116,12 @@ CEM provides **8 commands** with sophisticated sync logic:
 **Option A: Port CEM to Roster** (Recommended)
 - Copy CEM main + lib/ to roster
 - Update paths from `$SKELETON_HOME` to `$ROSTER_HOME`
-- Integrate with swap-team.sh
+- Integrate with swap-rite.sh
 - Estimated: 500 lines of adaptation
 
 **Option B: Inline Critical Functions**
 - Extract only sync + merge logic
-- Embed directly in swap-team.sh
+- Embed directly in swap-rite.sh
 - Drop unused commands (repair, diff, alias)
 - Estimated: 300 lines of new code
 
@@ -168,7 +168,7 @@ Skeleton has resources roster lacks:
 
 ### Gap Resolution
 
-1. **Skills**: Copy 11 skeleton skills to `roster/.claude/skills/` or `teams/shared/skills/`
+1. **Skills**: Copy 11 skeleton skills to `roster/.claude/skills/` or `rites/shared/skills/`
 2. **User-Agents**: Migrate to `roster/user-agents/` (Forge team agents)
 3. **User-Commands**: Migrate to `roster/user-commands/` or convert to skills
 4. **Evaluate**: team-validator.sh, workflow-validator.sh, workflow.schema.json
@@ -193,7 +193,7 @@ Skeleton has resources roster lacks:
 |-----------|---------|---------------|
 | `context-injection.sh` | CEM sync status | Path update |
 | `ecosystem-ref` skill | CEM documentation | Content update |
-| `swap-team.sh` | Skeleton baseline concept | Minimal |
+| `swap-rite.sh` | Skeleton baseline concept | Minimal |
 
 ### Target State
 
@@ -304,7 +304,7 @@ Sprint 6: Deprecation & Archive
 | Dependency | Status | Notes |
 |------------|--------|-------|
 | Shared Skills Architecture | **COMPLETE** | session-20260103-031131-181cfc38 |
-| swap-team.sh stability | Ready | Recent optimizations complete |
+| swap-rite.sh stability | Ready | Recent optimizations complete |
 | Test infrastructure | Needed | Must create before Sprint 2 |
 
 ---

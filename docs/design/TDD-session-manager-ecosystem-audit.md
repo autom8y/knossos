@@ -43,7 +43,7 @@ This Technical Design Document expands the session management locking architectu
 | **SessionStart** | `session-context.sh` | Injects SESSION_ID, ACTIVE_RITE context | No (read-only) |
 | **SessionStart** | `orchestrated-mode.sh` | Detects orchestrator presence | No (read-only) |
 | **Stop** | `auto-park.sh` | Auto-parks session on stop | **Yes** (writes parked_at) |
-| **PreToolUse/Bash** | `command-validator.sh` | Validates bash commands, team packs | No |
+| **PreToolUse/Bash** | `command-validator.sh` | Validates bash commands, rites | No |
 | **PreToolUse/Edit,Write** | `session-write-guard.sh` | Blocks direct writes to *_CONTEXT.md | No (blocker) |
 | **PreToolUse/Edit,Write** | `delegation-check.sh` | Warns on orchestrator bypass | No (warning) |
 | **PreToolUse/Task** | `orchestrator-bypass-check.sh` | Warns on missing orchestrator consultation | No (warning) |

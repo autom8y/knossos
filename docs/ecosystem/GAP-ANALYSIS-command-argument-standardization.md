@@ -21,21 +21,21 @@
 
 ### Critical Findings
 
-1. **--force flag is documented in 11 commands but does NOT exist in swap-team.sh** - This is a documentation bug. The script only supports `--refresh`, not `--force`.
+1. **--force flag is documented in 11 commands but does NOT exist in swap-rite.sh** - This is a documentation bug. The script only supports `--refresh`, not `--force`.
 
-2. **9 commands have $ARGUMENTS in task but NOT in the Behavior execution** - Arguments may not actually reach swap-team.sh.
+2. **9 commands have $ARGUMENTS in task but NOT in the Behavior execution** - Arguments may not actually reach swap-rite.sh.
 
 3. **3 commands lack argument-hint frontmatter** - Minor completeness issue.
 
 ---
 
-## swap-team.sh Actual Flags
+## swap-rite.sh Actual Flags
 
-From analysis of `/roster/swap-team.sh` (lines 1587-1661):
+From analysis of `/roster/swap-rite.sh` (lines 1587-1661):
 
 | Flag | Short | Purpose | Lines |
 |------|-------|---------|-------|
-| `--list` | `-l` | List all available team packs | 1617-1619 |
+| `--list` | `-l` | List all available rites | 1617-1619 |
 | `--help` | `-h` | Display usage information | 1620-1623 |
 | `--keep-all` | - | Preserve orphan agents in project | 1624-1627 |
 | `--remove-all` | - | Remove orphan agents (backup available) | 1628-1631 |
@@ -49,7 +49,7 @@ From analysis of `/roster/swap-team.sh` (lines 1587-1661):
 |------|---------------------------|
 | `--force` | 10x.md, debt.md, docs.md, hygiene.md, intelligence.md, rnd.md, security.md, sre.md, strategy.md, ecosystem.md, team.md |
 
-**Root Cause**: The `--force` flag appears to be a legacy or planned feature that was never implemented. The rite-switching commands document it, but swap-team.sh does not accept it.
+**Root Cause**: The `--force` flag appears to be a legacy or planned feature that was never implemented. The rite-switching commands document it, but swap-rite.sh does not accept it.
 
 ---
 
@@ -159,7 +159,7 @@ From analysis of `/roster/swap-team.sh` (lines 1587-1661):
 - `/roster/user-commands/navigation/ecosystem.md`
 - `/roster/user-commands/navigation/team.md`
 
-**Evidence**: Line 1624-1629 in swap-team.sh shows unknown flags cause exit:
+**Evidence**: Line 1624-1629 in swap-rite.sh shows unknown flags cause exit:
 ```bash
 -*)
     log_error "Unknown option: $1"
@@ -171,13 +171,13 @@ From analysis of `/roster/swap-team.sh` (lines 1587-1661):
 **Reproduction**:
 ```bash
 cd /any/satellite/project
-$ROSTER_HOME/swap-team.sh 10x-dev-pack --force
+$ROSTER_HOME/swap-rite.sh 10x-dev-pack --force
 # Result: [Roster] Error: Unknown option: --force
 ```
 
 **Decision Required**:
 - Option A: Remove `--force` from all command documentation
-- Option B: Implement `--force` flag in swap-team.sh (alias for `--refresh`?)
+- Option B: Implement `--force` flag in swap-rite.sh (alias for `--refresh`?)
 - Option C: Rename documented flag to match existing `--refresh`
 
 ### Issue 2: Inconsistent Argument-hint Frontmatter
@@ -199,14 +199,14 @@ $ROSTER_HOME/swap-team.sh 10x-dev-pack --force
 **Location**: `/roster/user-commands/navigation/team.md`
 
 **Issue**: team.md documents these flags:
-- `--force`, `-f` - Not in swap-team.sh
+- `--force`, `-f` - Not in swap-rite.sh
 - `--keep-all` - Correct
 - `--remove-all` - Correct
 - `--promote-all` - Correct
 
 But it does NOT document:
-- `--refresh`, `-r` - Available in swap-team.sh
-- `--dry-run` - Available in swap-team.sh
+- `--refresh`, `-r` - Available in swap-rite.sh
+- `--dry-run` - Available in swap-rite.sh
 
 ---
 
@@ -244,7 +244,7 @@ argument-hint: [init|sync|status|diff|install-user] [--refresh] [--force] [--dry
 
 ### Recommendation 3: Update team.md Flag Documentation
 
-**Action**: Align team.md flags with actual swap-team.sh capabilities:
+**Action**: Align team.md flags with actual swap-rite.sh capabilities:
 - Remove: `--force`, `-f`
 - Add: `--refresh`, `-r`, `--dry-run`
 - Keep: `--keep-all`, `--remove-all`, `--promote-all`
@@ -261,7 +261,7 @@ After implementation, these criteria should be met:
 
 1. [ ] No command documents `--force` flag (0 instances)
 2. [ ] All non-meta commands have `argument-hint` in frontmatter
-3. [ ] All rite-switching commands document only flags that exist in swap-team.sh
+3. [ ] All rite-switching commands document only flags that exist in swap-rite.sh
 4. [ ] team.md documents all orphan handling flags correctly
 5. [ ] Running `grep -r "\-\-force" user-commands/` returns 0 results
 
@@ -273,7 +273,7 @@ After implementation, these criteria should be met:
 
 **Rationale**:
 - No schema changes required
-- No code changes to swap-team.sh needed
+- No code changes to swap-rite.sh needed
 - Documentation-only fixes
 - All changes are in user-commands/*.md files
 - Low risk, high impact on user experience
@@ -308,12 +308,12 @@ Commands to validate after changes:
 
 ---
 
-## Appendix: swap-team.sh Flag Parsing Code
+## Appendix: swap-rite.sh Flag Parsing Code
 
 ```bash
-# Lines 1587-1661 from /roster/swap-team.sh
+# Lines 1587-1661 from /roster/swap-rite.sh
 main() {
-    local team_name=""
+    local rite_name=""
 
     # Parse arguments
     while [[ $# -gt 0 ]]; do
@@ -355,10 +355,10 @@ main() {
                 exit "$EXIT_INVALID_ARGS"
                 ;;
             *)
-                if [[ -z "$team_name" ]]; then
-                    team_name="$1"
+                if [[ -z "$rite_name" ]]; then
+                    rite_name="$1"
                 else
-                    log_error "Multiple team names specified"
+                    log_error "Multiple rite names specified"
                     usage
                     exit "$EXIT_INVALID_ARGS"
                 fi

@@ -15,7 +15,7 @@ This document specifies the technical design for extracting shared orchestrator 
 ### 1.1 Problem Statement
 
 Current state:
-- 11 team packs each have their own `orchestrator.md` (~193 lines each)
+- 11 rites each have their own `orchestrator.md` (~193 lines each)
 - Analysis shows ~142 lines (74%) are identical across all teams
 - Only ~51 lines (26%) are genuinely team-specific
 - The `orchestrator-templates` skill documents generation but does not provide shared content for runtime reference
@@ -503,7 +503,7 @@ jobs:
 
       - name: Check orchestrator references
         run: |
-          for team in teams/*-pack; do
+          for team in rites/*-pack; do
             grep -q "@orchestrator-core" "$team/agents/orchestrator.md" || \
               echo "WARNING: $team missing @orchestrator-core reference"
           done
@@ -538,7 +538,7 @@ validate_orchestrator_reference() {
 
 | Placeholder | Source | Example |
 |-------------|--------|---------|
-| `{{TEAM_NAME}}` | orchestrator.yaml team.name | "ecosystem-pack" |
+| `{{TEAM_NAME}}` | orchestrator.yaml rite.name | "ecosystem-pack" |
 | `{{UPSTREAM}}` | orchestrator.yaml workflow_position.upstream | "User request via /ecosystem" |
 | `{{DOWNSTREAM}}` | orchestrator.yaml workflow_position.downstream | "Implementation artifacts to session" |
 | `{{HANDOFF_CRITERIA}}` | orchestrator.yaml handoff_criteria | Markdown table rows |
@@ -619,8 +619,8 @@ The `orchestrator-core` skill can remain (no harm in having unused skill).
 |------|--------|
 | `templates/orchestrator-base.md.tpl` | Reduce to minimal template with skill reference |
 | `templates/orchestrator-generate.sh` | Add validation for @orchestrator-core, new placeholders |
-| `teams/*/agents/orchestrator.md` | Regenerated with new structure (all 11) |
-| `teams/*/orchestrator.yaml` | Frontmatter standardization (all 11) |
+| `rites/*/agents/orchestrator.md` | Regenerated with new structure (all 11) |
+| `rites/*/orchestrator.yaml` | Frontmatter standardization (all 11) |
 | `user-skills/orchestration/orchestrator-templates/references/consultation-protocol.md` | Update to reference new location |
 
 ### 8.3 Deleted Files
@@ -646,8 +646,8 @@ The `orchestrator-core` skill can remain (no harm in having unused skill).
 |-----------|--------------|
 | Skill created and synced | `ls ~/.claude/skills/orchestrator-core/SKILL.md` |
 | Template reduced by >50% | `wc -l templates/orchestrator-base.md.tpl` < 70 |
-| All orchestrators regenerated | 11 files in teams/*/agents/orchestrator.md |
-| Skill reference in all orchestrators | `grep -l "@orchestrator-core" teams/*/agents/orchestrator.md \| wc -l` = 11 |
+| All orchestrators regenerated | 11 files in rites/*/agents/orchestrator.md |
+| Skill reference in all orchestrators | `grep -l "@orchestrator-core" rites/*/agents/orchestrator.md \| wc -l` = 11 |
 | Frontmatter validated | Generator reports no schema errors |
 | No functionality regression | Manual test of /task workflow |
 

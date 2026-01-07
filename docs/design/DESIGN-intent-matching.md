@@ -17,7 +17,7 @@ Currently, `/consult` uses hardcoded team lists in `consult.md` and `consult-ref
 
 ### Design Goals
 
-1. **Generative**: Auto-discover teams from filesystem (`teams/*/orchestrator.yaml`)
+1. **Generative**: Auto-discover teams from filesystem (`rites/*/orchestrator.yaml`)
 2. **Intelligent**: Match natural language intent to team capabilities
 3. **Transparent**: Provide confidence scores with rationale
 4. **Extensible**: Support new signal types without algorithm changes
@@ -231,7 +231,7 @@ additionalProperties:
   properties:
     display_name:
       type: string
-      description: Human-readable team name
+      description: Human-readable rite name
     domain:
       type: string
       description: Primary domain from orchestrator.yaml team.domain
@@ -277,7 +277,7 @@ additionalProperties:
 The capability index is populated from three sources in priority order:
 
 1. **orchestrator.yaml** (required, primary source)
-   - `team.name`, `team.domain`, `team.color`
+   - `rite.name`, `team.domain`, `team.color`
    - `frontmatter.description` -> extract triggers
    - `routing` keys -> agent names
    - `handoff_criteria` keys -> artifacts
@@ -298,24 +298,24 @@ The capability index is populated from three sources in priority order:
 ```
 function build_capability_index():
     index = {}
-    teams_dir = "$ROSTER_HOME/teams/"
+    teams_dir = "$ROSTER_HOME/rites/"
 
     for team_dir in glob(teams_dir + "*-pack"):
-        team_name = basename(team_dir)
+        rite_name = basename(team_dir)
 
         # Required: orchestrator.yaml
         orch_path = team_dir + "/orchestrator.yaml"
         if not exists(orch_path):
-            log_warning("Skipping " + team_name + ": no orchestrator.yaml")
+            log_warning("Skipping " + rite_name + ": no orchestrator.yaml")
             continue
 
         orch = parse_yaml(orch_path)
 
         # Build team entry
         entry = {
-            display_name: titlecase(team_name.replace("-pack", " Pack")),
-            domain: orch.team.domain,
-            command: "/" + team_name.replace("-pack", ""),
+            display_name: titlecase(rite_name.replace("-pack", " Pack")),
+            domain: orch.rite.domain,
+            command: "/" + rite_name.replace("-pack", ""),
             triggers: extract_triggers(orch.frontmatter.description),
             artifacts: list(orch.handoff_criteria.keys()),
             complexity_levels: [],
@@ -340,7 +340,7 @@ function build_capability_index():
             if agent_name not in entry.agents:
                 entry.agents.append(agent_name)
 
-        index[team_name] = entry
+        index[rite_name] = entry
 
     return index
 ```
@@ -471,8 +471,8 @@ function problem_score(signals, team):
         return 0.0
 
     # Score based on team match position
-    primary_matches = sum(1 for p, s in matched_problems if p == team.name)
-    secondary_matches = sum(1 for p, s in matched_problems if s == team.name)
+    primary_matches = sum(1 for p, s in matched_problems if p == rite.name)
+    secondary_matches = sum(1 for p, s in matched_problems if s == rite.name)
 
     # Primary match: full credit, secondary: half credit
     return min(1.0, (primary_matches * 1.0 + secondary_matches * 0.5) / len(matched_problems))
@@ -514,13 +514,13 @@ function recency_bonus(session_context, team):
     if not session_context or not session_context.team_history:
         return 0.0
 
-    history = session_context.team_history  # List of recently used team names
+    history = session_context.team_history  # List of recently used rite names
 
-    if team.name == history[0]:  # Most recent
+    if rite.name == history[0]:  # Most recent
         return 1.0
-    elif team.name in history[:3]:  # Top 3
+    elif rite.name in history[:3]:  # Top 3
         return 0.5
-    elif team.name in history:
+    elif rite.name in history:
         return 0.2
 
     return 0.0
@@ -573,7 +573,7 @@ Domain: {matched_domain}
 Confidence: HIGH ({score:.0%})
 
 === Recommendation ===
-Team: {team_name}
+Team: {rite_name}
 Command: {team_command}
 
 Rationale: {trigger_matches_explanation}
@@ -695,9 +695,9 @@ team-discovery skill
     |
     +-- Build capability index (if not cached)
     |       |
-    |       +-- Read teams/*/orchestrator.yaml
-    |       +-- Read teams/*/README.md
-    |       +-- Read teams/*/agents/*.md
+    |       +-- Read rites/*/orchestrator.yaml
+    |       +-- Read rites/*/README.md
+    |       +-- Read rites/*/agents/*.md
     |
     +-- Extract signals from query
     |
@@ -734,9 +734,9 @@ function match_intent(query: string, session_context: SessionContext?):
 
     # Step 3: Score each team
     scores = {}
-    for team_name, team in capability_index.items():
+    for rite_name, team in capability_index.items():
         score = calculate_team_score(signals, team, session_context)
-        scores[team_name] = {
+        scores[rite_name] = {
             score: score,
             team: team,
             rationale: build_rationale(signals, team, score)
@@ -887,7 +887,7 @@ function build_rationale(signals, team, score):
 **Handling**:
 - Session context provides bonus, not override
 - If query strongly matches different team, recommend it
-- Include note: "Note: You're currently in ecosystem-pack session. This recommendation would change your active team."
+- Include note: "Note: You're currently in ecosystem-pack session. This recommendation would change your active rite."
 
 ---
 

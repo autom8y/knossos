@@ -2,7 +2,7 @@
 
 ## Overview
 
-This Technical Design Document specifies the implementation of the Orchestrator Entry Pattern, which ensures that `/start`, `/sprint`, and `/task` commands route through the Orchestrator agent when present in the active team. The design formalizes hook-triggered state mutations (via state-mate) rather than direct Task calls from the main agent.
+This Technical Design Document specifies the implementation of the Orchestrator Entry Pattern, which ensures that `/start`, `/sprint`, and `/task` commands route through the Orchestrator agent when present in the active rite. The design formalizes hook-triggered state mutations (via state-mate) rather than direct Task calls from the main agent.
 
 ## Context
 
@@ -128,7 +128,7 @@ Result: Routing context injected BEFORE preflight validation
 
 ### orchestrator-router.sh Specification
 
-**Purpose**: Detect `/start`, `/sprint`, `/task` commands and inject orchestrator routing context when an orchestrator agent is present in the active team.
+**Purpose**: Detect `/start`, `/sprint`, `/task` commands and inject orchestrator routing context when an orchestrator agent is present in the active rite.
 
 **Event**: UserPromptSubmit
 **Matcher**: `^/(start|sprint|task)`
@@ -174,7 +174,7 @@ if ! echo "$prompt" | grep -qE '^/(start|sprint|task)'; then
     exit 0
 fi
 
-# Check if orchestrator is present in active team
+# Check if orchestrator is present in active rite
 has_orchestrator() {
     local agents_dir="$PROJECT_DIR/.claude/agents"
     [[ -f "$agents_dir/orchestrator.md" ]]
@@ -278,7 +278,7 @@ if [[ "$command" == "start" ]] && ! has_session; then
     # Default complexity (main agent can adjust)
     local complexity="MODULE"
 
-    # Get active team
+    # Get active rite
     local team
     team=$(cat "$PROJECT_DIR/.claude/ACTIVE_RITE" 2>/dev/null || echo "10x-dev-pack")
 
@@ -667,7 +667,7 @@ EOF
 
 ## The Pattern
 
-When an orchestrator is present in the active team:
+When an orchestrator is present in the active rite:
 
 ```
 User: /start Add dark mode toggle

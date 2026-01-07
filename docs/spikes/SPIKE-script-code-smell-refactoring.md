@@ -9,11 +9,11 @@
 
 ## Executive Summary
 
-This spike investigated practical refactoring strategies for large roster shell scripts, particularly `swap-team.sh` at 4,708 LOC.
+This spike investigated practical refactoring strategies for large roster shell scripts, particularly `swap-rite.sh` at 4,708 LOC.
 
 **Key Finding**: The script significantly exceeds industry best practices (Google recommends <100 LOC for shell scripts), but the complexity is justified by the domain. Modularization following the `lib/sync/` pattern is feasible and recommended.
 
-**Recommendation**: **PROCEED** with incremental refactoring via `/task` workflow. Extract `lib/team/team-resource.sh` first (highest ROI, lowest risk), then evaluate further extraction based on results.
+**Recommendation**: **PROCEED** with incremental refactoring via `/task` workflow. Extract `lib/team/rite-resource.sh` first (highest ROI, lowest risk), then evaluate further extraction based on results.
 
 ---
 
@@ -32,11 +32,11 @@ This spike investigated practical refactoring strategies for large roster shell 
 
 **Total DRY violation**: ~549 lines (12% of file) with clear consolidation path.
 
-### 2. What would lib/team/team-resource.sh look like?
+### 2. What would lib/team/rite-resource.sh look like?
 
 ```bash
 #!/usr/bin/env bash
-# lib/team/team-resource.sh - Generic team resource operations
+# lib/team/rite-resource.sh - Generic team resource operations
 
 # Generic backup for any resource type (commands, skills, hooks)
 backup_team_resource() {
@@ -54,7 +54,7 @@ remove_team_resource() {
     # Unified removal logic (~22 lines vs 66 duplicated)
 }
 
-# Check if resource belongs to any team pack
+# Check if resource belongs to any rite
 is_resource_from_team() {
     local resource_name="$1"
     local resource_type="$2"    # command, skill, hook
@@ -62,13 +62,13 @@ is_resource_from_team() {
     find "$ROSTER_HOME/teams" -path "*/${resource_type}s/$resource_name" -type "$find_type" 2>/dev/null | grep -q .
 }
 
-# Get team name that owns a resource
+# Get rite name that owns a resource
 get_resource_team() {
     local resource_name="$1"
     local resource_type="$2"
     local match
     match=$(find "$ROSTER_HOME/teams" -path "*/${resource_type}s/$resource_name" -print -quit 2>/dev/null)
-    [[ -n "$match" ]] && echo "$match" | sed "s|.*/teams/\([^/]*\)/${resource_type}s/.*|\1|"
+    [[ -n "$match" ]] && echo "$match" | sed "s|.*/rites/\([^/]*\)/${resource_type}s/.*|\1|"
 }
 
 # Generic orphan detection (returns results via stdout, one per line)
@@ -106,7 +106,7 @@ readonly PHASE_STAGING="staging"
 readonly PHASE_COMMIT="commit"
 readonly PHASE_COMPLETE="complete"
 
-# Exported functions for swap-team.sh
+# Exported functions for swap-rite.sh
 create_journal() { ... }
 update_journal_phase() { ... }
 get_journal_phase() { ... }
@@ -143,7 +143,7 @@ verify_backup_integrity() { ... }
 
 | Module | Required Globals | Can Be Parameters |
 |--------|-----------------|-------------------|
-| team-resource.sh | `ROSTER_HOME` | All others |
+| rite-resource.sh | `ROSTER_HOME` | All others |
 | team-transaction.sh | None | All (paths as params) |
 
 **Bash limitation**: Array passing requires either:
@@ -157,13 +157,13 @@ verify_backup_integrity() { ... }
 
 | Current State | With Modular Extraction |
 |---------------|------------------------|
-| No unit tests for swap-team.sh | Each module testable in isolation |
+| No unit tests for swap-rite.sh | Each module testable in isolation |
 | Integration testing only | Unit + integration layers |
 | Hard to mock team directories | Can mock ROSTER_HOME per test |
 | ~4700 LOC to understand | ~150-300 LOC per focused module |
 
 **Test fixtures needed**:
-- Mock team pack directories
+- Mock rite directories
 - Mock .claude/ project structure
 - Journal file fixtures
 - Manifest JSON fixtures
@@ -174,7 +174,7 @@ verify_backup_integrity() { ... }
 
 ### Google Shell Style Guide Recommendations
 
-| Guideline | swap-team.sh Status | Assessment |
+| Guideline | swap-rite.sh Status | Assessment |
 |-----------|---------------------|------------|
 | <100 LOC for shell scripts | 4,708 LOC | **47x over limit** |
 | Rewrite if >100 LOC with complex control flow | Has complex control flow | Rewrite candidate |
@@ -202,9 +202,9 @@ verify_backup_integrity() { ... }
 
 | Refactoring Option | Effort | Impact | Risk | Recommendation |
 |-------------------|--------|--------|------|----------------|
-| Extract team-resource.sh | Low (2-4h) | High (-400 LOC, 6x DRY) | Low | **DO FIRST** |
+| Extract rite-resource.sh | Low (2-4h) | High (-400 LOC, 6x DRY) | Low | **DO FIRST** |
 | Extract team-transaction.sh | Medium (4-6h) | Medium (-300 LOC) | Medium | DO SECOND |
-| Extract team-hooks-registration.sh | Medium (3-4h) | Medium (-200 LOC) | Low | DO THIRD |
+| Extract rite-hooks-registration.sh | Medium (3-4h) | Medium (-200 LOC) | Low | DO THIRD |
 | Split perform_swap() into phases | High (6-8h) | Medium (clarity) | Medium | DEFER |
 | Rewrite in Python/Go | Very High (40h+) | Variable | High | DON'T DO |
 
@@ -213,8 +213,8 @@ verify_backup_integrity() { ... }
 ## Risk Assessment
 
 ### Low Risk
-- **team-resource.sh extraction**: Pure function consolidation, behavior unchanged
-- **team-hooks-registration.sh**: Self-contained, no state coupling
+- **rite-resource.sh extraction**: Pure function consolidation, behavior unchanged
+- **rite-hooks-registration.sh**: Self-contained, no state coupling
 
 ### Medium Risk
 - **team-transaction.sh extraction**: Must carefully preserve commit atomicity
@@ -236,8 +236,8 @@ verify_backup_integrity() { ... }
 ### Phase 1: Foundation (Week 1)
 1. Create `lib/team/` directory structure
 2. Add `tests/lib/team/` test fixtures
-3. Extract `team-resource.sh` with unit tests
-4. Update `swap-team.sh` to source and use module
+3. Extract `rite-resource.sh` with unit tests
+4. Update `swap-rite.sh` to source and use module
 
 ### Phase 2: Transaction Safety (Week 2)
 1. Extract `team-transaction.sh`
@@ -246,12 +246,12 @@ verify_backup_integrity() { ... }
 4. Document module contracts
 
 ### Phase 3: Hook Registration (Week 3)
-1. Extract `team-hooks-registration.sh`
+1. Extract `rite-hooks-registration.sh`
 2. Add YAML/JSON manipulation tests
 3. Validate settings.local.json generation
 
 ### Phase 4: Cleanup (Week 4)
-1. Review remaining `swap-team.sh` (~2000 LOC)
+1. Review remaining `swap-rite.sh` (~2000 LOC)
 2. Evaluate if further extraction warranted
 3. Document final architecture
 
@@ -270,9 +270,9 @@ The analysis confirms:
 ### Suggested Next Step
 
 ```
-/task Extract lib/team/team-resource.sh Module
+/task Extract lib/team/rite-resource.sh Module
 
-Create lib/team/team-resource.sh consolidating:
+Create lib/team/rite-resource.sh consolidating:
 - backup_team_resource() - generic backup for commands/skills/hooks
 - remove_team_resource() - generic removal
 - is_resource_from_team() - team membership check
@@ -281,7 +281,7 @@ Create lib/team/team-resource.sh consolidating:
 - remove_resource_orphans() - orphan removal
 
 Include unit tests in tests/lib/team/.
-Update swap-team.sh to source and use the new module.
+Update swap-rite.sh to source and use the new module.
 
 Expected outcome: ~400 LOC reduction, 6x DRY improvement.
 ```

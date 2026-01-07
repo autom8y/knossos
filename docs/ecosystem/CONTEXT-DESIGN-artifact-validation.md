@@ -13,9 +13,9 @@ migration_required: false
 work_packages:
   - id: WP1
     name: "Command Collision Detection"
-    description: "Add user-level command collision detection to swap-team.sh"
+    description: "Add user-level command collision detection to swap-rite.sh"
     files:
-      - path: "swap-team.sh"
+      - path: "swap-rite.sh"
         action: modify
         description: "Add check_user_command_collisions() function and integration"
     estimated_effort: "2 hours"
@@ -23,7 +23,7 @@ work_packages:
     name: "Schema Validation Pre-Swap"
     description: "Validate workflow.yaml and orchestrator.yaml before commit phase"
     files:
-      - path: "swap-team.sh"
+      - path: "swap-rite.sh"
         action: modify
         description: "Add validate_team_schemas() function with yq-based validation"
     dependencies: []
@@ -32,7 +32,7 @@ work_packages:
     name: "Orphan Backup Cleanup Policy"
     description: "Implement retention policy and cleanup command for orphan backups"
     files:
-      - path: "swap-team.sh"
+      - path: "swap-rite.sh"
         action: modify
         description: "Add cleanup_orphan_backups() function with retention logic"
     dependencies: []
@@ -44,7 +44,7 @@ work_packages:
       - path: "user-hooks/security-consultation-check.sh"
         action: create
         description: "PreToolUse hook checking security consultation requirements"
-      - path: "teams/10x-dev-pack/workflow.yaml"
+      - path: "rites/10x-dev-pack/workflow.yaml"
         action: modify
         description: "Add enforcement_mode field to security_consultation"
     dependencies: [WP1, WP2]
@@ -101,7 +101,7 @@ This Context Design addresses 4 validation gaps identified in GAP-ecosystem-arti
 
 **Rationale**:
 - workflow.schema.json requires `name`, `workflow_type`, `entry_point`, `phases`
-- yq/jq dependency already exists in swap-team.sh (used for manifest operations)
+- yq/jq dependency already exists in swap-rite.sh (used for manifest operations)
 - Full JSON Schema validation adds complexity for marginal benefit
 - Required field check catches 90% of issues (missing config)
 - If yq not available, fall back to grep-based check with warning
@@ -118,7 +118,7 @@ This Context Design addresses 4 validation gaps identified in GAP-ecosystem-arti
 **Rationale**:
 - Invalid workflow.yaml will fail at runtime anyway
 - Fail-fast gives clear feedback at swap time
-- Transaction rollback already implemented in swap-team.sh
+- Transaction rollback already implemented in swap-rite.sh
 - Users can fix workflow.yaml and retry
 
 ### Decision 5: Orphan Backup Retention Policy
@@ -150,8 +150,8 @@ This Context Design addresses 4 validation gaps identified in GAP-ecosystem-arti
 **Rationale**:
 - Default: preserve backups (safe)
 - Opt-in: `--auto-cleanup` for users who want it
-- Manual: `swap-team.sh --cleanup-orphans` for explicit pruning
-- No prompts (swap-team.sh is designed for non-interactive use)
+- Manual: `swap-rite.sh --cleanup-orphans` for explicit pruning
+- No prompts (swap-rite.sh is designed for non-interactive use)
 
 ### Decision 7: Security Consultation Enforcement Mode
 
@@ -178,7 +178,7 @@ This Context Design addresses 4 validation gaps identified in GAP-ecosystem-arti
 **Implementation**:
 
 ```bash
-# Add to swap-team.sh after line 2109 (inside sync_team_commands)
+# Add to swap-rite.sh after line 2109 (inside sync_team_commands)
 
 # Check for user-level command collisions
 check_user_command_collisions() {
@@ -232,8 +232,8 @@ fi
 
 | File | Line(s) | Change |
 |------|---------|--------|
-| swap-team.sh | 2109 | Add check_user_command_collisions() function |
-| swap-team.sh | 2117-2122 | Add user-level collision check |
+| swap-rite.sh | 2109 | Add check_user_command_collisions() function |
+| swap-rite.sh | 2117-2122 | Add user-level collision check |
 
 ---
 
@@ -244,16 +244,16 @@ fi
 **Implementation**:
 
 ```bash
-# Add to swap-team.sh in Transaction Safety Functions section
+# Add to swap-rite.sh in Transaction Safety Functions section
 
 # Validate team configuration files
 # Returns: 0 = valid, 1 = invalid
 validate_team_schemas() {
-    local team_name="$1"
+    local rite_name="$1"
     local errors=0
 
     # Validate workflow.yaml if exists
-    local workflow_file="$ROSTER_HOME/teams/$team_name/workflow.yaml"
+    local workflow_file="$ROSTER_HOME/rites/$rite_name/workflow.yaml"
     if [[ -f "$workflow_file" ]]; then
         if ! validate_workflow_yaml "$workflow_file"; then
             ((errors++)) || true
@@ -261,7 +261,7 @@ validate_team_schemas() {
     fi
 
     # Validate orchestrator.yaml if exists
-    local orchestrator_file="$ROSTER_HOME/teams/$team_name/orchestrator.yaml"
+    local orchestrator_file="$ROSTER_HOME/rites/$rite_name/orchestrator.yaml"
     if [[ -f "$orchestrator_file" ]]; then
         if ! validate_orchestrator_yaml "$orchestrator_file"; then
             ((errors++)) || true
@@ -346,7 +346,7 @@ validate_orchestrator_yaml() {
 ```bash
 # Before "PHASE: VERIFYING" section, add:
 # Validate team configuration schemas
-if ! validate_team_schemas "$team_name"; then
+if ! validate_team_schemas "$rite_name"; then
     log_error "Team schema validation failed"
     rollback_transaction
     return $EXIT_VALIDATION_FAILURE
@@ -357,8 +357,8 @@ fi
 
 | File | Line(s) | Change |
 |------|---------|--------|
-| swap-team.sh | ~200 | Add validate_team_schemas(), validate_workflow_yaml(), validate_orchestrator_yaml() |
-| swap-team.sh | ~3890 | Call validate_team_schemas() in perform_swap() |
+| swap-rite.sh | ~200 | Add validate_team_schemas(), validate_workflow_yaml(), validate_orchestrator_yaml() |
+| swap-rite.sh | ~3890 | Call validate_team_schemas() in perform_swap() |
 
 ---
 
@@ -369,7 +369,7 @@ fi
 **Implementation**:
 
 ```bash
-# Add to swap-team.sh
+# Add to swap-rite.sh
 
 # Cleanup orphan backups, keeping last N
 # Usage: cleanup_orphan_backups [--keep=N] [--type=TYPE]
@@ -460,10 +460,10 @@ fi
 
 | File | Line(s) | Change |
 |------|---------|--------|
-| swap-team.sh | ~50 | Add AUTO_CLEANUP_MODE=0 variable |
-| swap-team.sh | ~200 | Add cleanup_orphan_backups() function |
-| swap-team.sh | ~3700 | Add --auto-cleanup and --cleanup-orphans flag handling |
-| swap-team.sh | ~3980 | Call cleanup after successful swap |
+| swap-rite.sh | ~50 | Add AUTO_CLEANUP_MODE=0 variable |
+| swap-rite.sh | ~200 | Add cleanup_orphan_backups() function |
+| swap-rite.sh | ~3700 | Add --auto-cleanup and --cleanup-orphans flag handling |
+| swap-rite.sh | ~3980 | Call cleanup after successful swap |
 
 ---
 
@@ -524,7 +524,7 @@ Logic:
 
 | File | Change |
 |------|--------|
-| teams/10x-dev-pack/workflow.yaml | Add enforcement section to security_consultation |
+| rites/10x-dev-pack/workflow.yaml | Add enforcement section to security_consultation |
 
 ---
 
@@ -610,7 +610,7 @@ Implement in order: WP2 (lowest risk), WP1, WP3, WP4 (design only).
 
 ### Testing Approach
 
-1. Run existing swap-team tests to establish baseline
+1. Run existing swap-rite tests to establish baseline
 2. Add test cases per test matrix above
 3. Test on roster (baseline) and a minimal satellite
 
@@ -618,4 +618,4 @@ Implement in order: WP2 (lowest risk), WP1, WP3, WP4 (design only).
 
 If validation gate causes issues:
 1. Set `ROSTER_SKIP_VALIDATION=1` environment variable (escape hatch)
-2. Or revert specific function without touching rest of swap-team.sh
+2. Or revert specific function without touching rest of swap-rite.sh

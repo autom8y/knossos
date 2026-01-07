@@ -182,7 +182,7 @@ Last Updated: 2025-12-29 14:30 UTC
 ADOPTION
 --------
 Teams Adopted:        3/10 (30%)  [████░░░░░░]
-Adoption Velocity:    +1.5 teams/week
+Adoption Velocity:    +1.5 rites/week
 Projected Completion: ~8 weeks
 
 CI VALIDATION

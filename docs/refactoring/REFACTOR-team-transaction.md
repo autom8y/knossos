@@ -2,14 +2,14 @@
 
 **Based on**: SPIKE-script-code-smell-refactoring.md
 **Prepared**: 2026-01-03
-**Scope**: Extract transaction infrastructure from swap-team.sh to lib/team/team-transaction.sh
-**Priority**: 2 (following team-resource.sh extraction)
+**Scope**: Extract transaction infrastructure from swap-rite.sh to lib/team/team-transaction.sh
+**Priority**: 2 (following rite-resource.sh extraction)
 
 ---
 
 ## Executive Summary
 
-This plan extracts transaction infrastructure functions from `swap-team.sh` into a new `lib/team/team-transaction.sh` module. The extraction consolidates ~300 lines of atomic write, journal, staging, and backup operations into a reusable module while preserving transaction atomicity guarantees.
+This plan extracts transaction infrastructure functions from `swap-rite.sh` into a new `lib/team/team-transaction.sh` module. The extraction consolidates ~300 lines of atomic write, journal, staging, and backup operations into a reusable module while preserving transaction atomicity guarantees.
 
 **Expected outcome**: Clean module boundary, testable transaction infrastructure, ~300 LOC extraction, no behavior change.
 
@@ -21,8 +21,8 @@ This plan extracts transaction infrastructure functions from `swap-team.sh` into
 
 | Module | Assessment |
 |--------|------------|
-| `swap-team.sh` (main script) | Recovery orchestration and rollback logic must stay; infrastructure can extract |
-| `lib/team/team-resource.sh` | Extracted in Priority 1; provides pattern to follow |
+| `swap-rite.sh` (main script) | Recovery orchestration and rollback logic must stay; infrastructure can extract |
+| `lib/team/rite-resource.sh` | Extracted in Priority 1; provides pattern to follow |
 | `lib/team/team-transaction.sh` (new) | Will establish clean boundary for transaction infrastructure |
 
 ### Root Causes Identified
@@ -31,7 +31,7 @@ This plan extracts transaction infrastructure functions from `swap-team.sh` into
 
 2. **Circular dependency risk**: `create_swap_backup()` calls `update_journal_backups()` - this must be preserved in extraction design.
 
-3. **Signal handler coupling**: `handle_interrupt()` calls journal/staging/backup functions. Signal handler registration must stay in swap-team.sh, but called functions can extract.
+3. **Signal handler coupling**: `handle_interrupt()` calls journal/staging/backup functions. Signal handler registration must stay in swap-rite.sh, but called functions can extract.
 
 ### Transaction Atomicity Preservation
 
@@ -46,13 +46,13 @@ The extraction must NOT break the transaction safety model:
 | COMMITTING | `update_journal_phase()`, `update_journal_error()` | Phase tracking for recovery |
 | COMPLETED | `delete_journal()`, `cleanup_*()` | Cleanup after success |
 
-**Design principle**: Extract infrastructure functions, keep orchestration decisions in swap-team.sh.
+**Design principle**: Extract infrastructure functions, keep orchestration decisions in swap-rite.sh.
 
 ---
 
 ## Extraction Manifest
 
-### Functions to Extract from swap-team.sh (~300 LOC)
+### Functions to Extract from swap-rite.sh (~300 LOC)
 
 | Current Function | Line | LOC | Category |
 |-----------------|------|-----|----------|
@@ -76,7 +76,7 @@ The extraction must NOT break the transaction safety model:
 | `verify_backup_integrity()` | 502-534 | 33 | Backup |
 | **Total** | | **~302** | |
 
-### Functions STAYING in swap-team.sh
+### Functions STAYING in swap-rite.sh
 
 | Function | Lines | Reason |
 |----------|-------|--------|
@@ -161,17 +161,17 @@ verify_backup_integrity()
 
 | Dependency | Type | Source |
 |------------|------|--------|
-| `ROSTER_HOME` | Global variable | Environment / swap-team.sh |
-| `JOURNAL_FILE` | Constant | swap-team.sh (must pass or expose) |
-| `STAGING_DIR` | Constant | swap-team.sh (must pass or expose) |
-| `SWAP_BACKUP_DIR` | Constant | swap-team.sh (must pass or expose) |
-| `JOURNAL_VERSION` | Constant | swap-team.sh (must pass or expose) |
-| `PHASE_*` | Constants | swap-team.sh (must pass or expose) |
-| `MANIFEST_FILE` | Constant | swap-team.sh (for journal backup_location) |
-| `log()` | Function | swap-team.sh |
-| `log_debug()` | Function | swap-team.sh |
-| `log_warning()` | Function | swap-team.sh |
-| `log_error()` | Function | swap-team.sh |
+| `ROSTER_HOME` | Global variable | Environment / swap-rite.sh |
+| `JOURNAL_FILE` | Constant | swap-rite.sh (must pass or expose) |
+| `STAGING_DIR` | Constant | swap-rite.sh (must pass or expose) |
+| `SWAP_BACKUP_DIR` | Constant | swap-rite.sh (must pass or expose) |
+| `JOURNAL_VERSION` | Constant | swap-rite.sh (must pass or expose) |
+| `PHASE_*` | Constants | swap-rite.sh (must pass or expose) |
+| `MANIFEST_FILE` | Constant | swap-rite.sh (for journal backup_location) |
+| `log()` | Function | swap-rite.sh |
+| `log_debug()` | Function | swap-rite.sh |
+| `log_warning()` | Function | swap-rite.sh |
+| `log_error()` | Function | swap-rite.sh |
 | `jq` | External command | System |
 
 ---
@@ -186,14 +186,14 @@ verify_backup_integrity()
 # team-transaction.sh - Transaction Infrastructure for Team Swaps
 #
 # Provides atomic write, journal management, staging, and backup
-# operations for swap-team.sh transaction safety.
+# operations for swap-rite.sh transaction safety.
 #
 # Part of: roster team-swap infrastructure
 #
 # Usage:
 #   source "$ROSTER_HOME/lib/team/team-transaction.sh"
 #   create_journal "$source_team" "$target_team"
-#   create_staging && stage_agents "$team_name" && verify_staging "$count"
+#   create_staging && stage_agents "$rite_name" && verify_staging "$count"
 #
 # Dependencies:
 #   - jq (for JSON manipulation)
@@ -223,7 +223,7 @@ readonly _TEAM_TRANSACTION_LOADED=1
 : "${PHASE_COMPLETED:=COMPLETED}"
 
 # ============================================================================
-# Logging Stubs (overridden when sourced from swap-team.sh)
+# Logging Stubs (overridden when sourced from swap-rite.sh)
 # ============================================================================
 
 if ! type log >/dev/null 2>&1; then
@@ -318,23 +318,23 @@ create_staging() { ... }
 # Side effects: Removes STAGING_DIR if exists
 cleanup_staging() { ... }
 
-# Stage agents from team pack
+# Stage agents from rite
 # Parameters:
-#   $1 - team_name: Team to stage agents from
+#   $1 - rite_name: Team to stage agents from
 # Returns: 0 on success, 1 on failure
 # Requires: ROSTER_HOME, STAGING_DIR
 stage_agents() { ... }
 
 # Stage workflow file
 # Parameters:
-#   $1 - team_name: Team to stage workflow from
+#   $1 - rite_name: Team to stage workflow from
 # Returns: 0 on success, 1 on failure (warning if no workflow.yaml)
 # Requires: ROSTER_HOME, STAGING_DIR
 stage_workflow() { ... }
 
 # Stage ACTIVE_RITE file
 # Parameters:
-#   $1 - team_name: Team name to write
+#   $1 - rite_name: Team name to write
 # Returns: 0 on success, 1 on failure
 # Requires: STAGING_DIR
 stage_active_team() { ... }
@@ -384,11 +384,11 @@ verify_backup_integrity() { ... }
   - Sourcing guard (`_TEAM_TRANSACTION_LOADED`)
   - Module header documentation
   - Default constant definitions with `: "${VAR:=default}"` pattern
-  - Logging stubs (same pattern as team-resource.sh)
-- **Invariants**: swap-team.sh unchanged, still works
+  - Logging stubs (same pattern as rite-resource.sh)
+- **Invariants**: swap-rite.sh unchanged, still works
 - **Verification**:
   1. Run: `bash -n lib/team/team-transaction.sh` (syntax check)
-  2. Run: `./swap-team.sh --help` (existing behavior unchanged)
+  2. Run: `./swap-rite.sh --help` (existing behavior unchanged)
 - **Commit scope**: Create module skeleton with guards and stubs
 
 #### RF-011: Extract write_atomic()
@@ -397,7 +397,7 @@ verify_backup_integrity() { ... }
 - **Category**: Local
 - **Before**:
   ```bash
-  # swap-team.sh:100-131
+  # swap-rite.sh:100-131
   write_atomic() {
       local target="$1"
       local content="$2"
@@ -436,7 +436,7 @@ verify_backup_integrity() { ... }
 
 - **Smells addressed**: Clean module boundary for journal operations
 - **Category**: Local
-- **Before**: 9 journal functions inline in swap-team.sh (lines 135-276)
+- **Before**: 9 journal functions inline in swap-rite.sh (lines 135-276)
 - **After**: Same 9 functions in team-transaction.sh
 - **Functions extracted**:
   1. `create_journal()` - Creates journal entry
@@ -472,12 +472,12 @@ verify_backup_integrity() { ... }
 
 - **Smells addressed**: Clean module boundary for staging operations
 - **Category**: Local
-- **Before**: 6 staging functions inline in swap-team.sh (lines 283-393)
+- **Before**: 6 staging functions inline in swap-rite.sh (lines 283-393)
 - **After**: Same 6 functions in team-transaction.sh
 - **Functions extracted**:
   1. `create_staging()` - Creates staging directory
   2. `cleanup_staging()` - Removes staging directory
-  3. `stage_agents()` - Stages agents from team pack
+  3. `stage_agents()` - Stages agents from rite
   4. `stage_workflow()` - Stages workflow.yaml
   5. `stage_active_team()` - Stages ACTIVE_RITE file
   6. `verify_staging()` - Verifies staging integrity
@@ -489,7 +489,7 @@ verify_backup_integrity() { ... }
 - **Verification**:
   1. Unit test: `create_staging` creates directory
   2. Unit test: `create_staging` cleans existing staging
-  3. Unit test: `stage_agents` copies from team pack
+  3. Unit test: `stage_agents` copies from rite
   4. Unit test: `verify_staging` fails on wrong count
   5. Unit test: `verify_staging` fails on missing ACTIVE_RITE
 - **Commit scope**: Add all 6 staging functions, add unit tests
@@ -508,7 +508,7 @@ verify_backup_integrity() { ... }
 
 - **Smells addressed**: Complete transaction infrastructure extraction
 - **Category**: Module boundary (internal function call)
-- **Before**: 3 backup functions inline in swap-team.sh (lines 401-534)
+- **Before**: 3 backup functions inline in swap-rite.sh (lines 401-534)
 - **After**: Same 3 functions in team-transaction.sh
 - **Functions extracted**:
   1. `create_swap_backup()` - Creates comprehensive backup
@@ -538,26 +538,26 @@ verify_backup_integrity() { ... }
 
 ### Phase 5: Integration [Medium Risk]
 
-**Goal**: Wire new module into swap-team.sh, remove inline implementations.
+**Goal**: Wire new module into swap-rite.sh, remove inline implementations.
 
-#### RF-015: Add source statement in swap-team.sh
+#### RF-015: Add source statement in swap-rite.sh
 
 - **Smells addressed**: Final integration
 - **Category**: Boundary integration
 - **Before**: All transaction functions inline
 - **After**:
   ```bash
-  # swap-team.sh (after lib/roster-utils.sh, before lib/team/team-resource.sh)
+  # swap-rite.sh (after lib/roster-utils.sh, before lib/team/rite-resource.sh)
   source "$ROSTER_HOME/lib/team/team-transaction.sh"
   ```
-- **Order matters**: team-transaction.sh must be sourced before team-resource.sh if any resource functions need transaction functions (currently they don't, but order is defensive)
+- **Order matters**: team-transaction.sh must be sourced before rite-resource.sh if any resource functions need transaction functions (currently they don't, but order is defensive)
 - **Invariants**:
   - Constants defined before sourcing (JOURNAL_FILE, etc.) take precedence
   - Logging functions defined before sourcing take precedence
   - All existing function calls work unchanged
 - **Verification**:
-  1. Run: `./swap-team.sh --help` (basic smoke test)
-  2. Run: `./swap-team.sh --dry-run hygiene-pack` (full flow)
+  1. Run: `./swap-rite.sh --help` (basic smoke test)
+  2. Run: `./swap-rite.sh --dry-run hygiene-pack` (full flow)
   3. Verify: Journal created/deleted correctly
   4. Verify: Staging created/verified/cleaned correctly
 - **Commit scope**: Add source statement only
@@ -566,7 +566,7 @@ verify_backup_integrity() { ... }
 
 - **Smells addressed**: Final cleanup, eliminate duplication
 - **Category**: Local
-- **Before**: 18 inline functions in swap-team.sh (lines 100-534)
+- **Before**: 18 inline functions in swap-rite.sh (lines 100-534)
 - **After**: Only source statement remains
 - **Functions removed**:
   - `write_atomic()`
@@ -590,9 +590,9 @@ verify_backup_integrity() { ... }
 - **Invariants**: All tests pass, behavior unchanged
 - **Verification**:
   1. Run full test suite
-  2. Run: `./swap-team.sh hygiene-pack` (full integration)
+  2. Run: `./swap-rite.sh hygiene-pack` (full integration)
   3. Test signal handling: `Ctrl+C` during swap, verify recovery works
-  4. Test recovery: `./swap-team.sh --recover` after interrupted swap
+  4. Test recovery: `./swap-rite.sh --recover` after interrupted swap
 - **Commit scope**: Remove inline functions (~300 LOC)
 
 **[Final state: Module fully integrated, ~300 LOC extracted]**
@@ -673,8 +673,8 @@ verify_backup_integrity() { ... }
 | RF-012 | Low | 1 new file | Trivial | RF-010, RF-011 |
 | RF-013 | Low | 1 new file | Trivial | RF-010 |
 | RF-014 | Medium | 1 new file | Trivial | RF-010, RF-012 |
-| RF-015 | Medium | 1 file (swap-team.sh) | 1 commit | RF-010 through RF-014 |
-| RF-016 | Medium | 1 file (swap-team.sh) | 1 commit | RF-015 |
+| RF-015 | Medium | 1 file (swap-rite.sh) | 1 commit | RF-010 through RF-014 |
+| RF-016 | Medium | 1 file (swap-rite.sh) | 1 commit | RF-015 |
 
 ### Risk Details
 
@@ -708,7 +708,7 @@ verify_backup_integrity() { ... }
 | test_create_staging | `create_staging` | Creates directory |
 | test_create_staging_cleans | `create_staging` | Removes existing staging |
 | test_cleanup_staging | `cleanup_staging` | Removes staging directory |
-| test_stage_agents | `stage_agents` | Copies agents from team pack |
+| test_stage_agents | `stage_agents` | Copies agents from rite |
 | test_stage_workflow | `stage_workflow` | Copies workflow.yaml |
 | test_stage_active_team | `stage_active_team` | Creates ACTIVE_RITE file |
 | test_verify_staging_success | `verify_staging` | Passes with correct count |
@@ -721,7 +721,7 @@ verify_backup_integrity() { ... }
 | test_verify_backup_missing | `verify_backup_integrity` | Returns 1 for missing backup |
 | test_verify_backup_virgin | `verify_backup_integrity` | Handles virgin swap case |
 
-### Integration Tests (tests/integration/test-swap-team-transaction.sh)
+### Integration Tests (tests/integration/test-swap-rite-transaction.sh)
 
 | Test | Scenario |
 |------|----------|
@@ -733,7 +733,7 @@ verify_backup_integrity() { ... }
 
 ```
 tests/fixtures/team-transaction/
-  mock-teams/
+  mock-rites/
     test-team/
       agents/
         orchestrator.md
@@ -766,7 +766,7 @@ tests/fixtures/team-transaction/
 
 If issues discovered post-integration:
 1. Run: `git revert HEAD~2..HEAD` (reverts RF-015, RF-016)
-2. Verify: `./swap-team.sh --help` works
+2. Verify: `./swap-rite.sh --help` works
 3. Verify: Team swap with journal works correctly
 
 ### Rollback Indicators
@@ -797,15 +797,15 @@ Refs: REFACTOR-team-transaction.md
 After each commit:
 1. `bash -n lib/team/team-transaction.sh` - Syntax check
 2. Run unit tests for completed functions
-3. After RF-015: Full integration test with `./swap-team.sh --dry-run hygiene-pack`
+3. After RF-015: Full integration test with `./swap-rite.sh --dry-run hygiene-pack`
 4. After RF-016: Test signal handling and recovery
 
 ### Files to Avoid Touching
 
-- `lib/team/team-resource.sh` - Separate module, already extracted
+- `lib/team/rite-resource.sh` - Separate module, already extracted
 - `.claude/settings.json` - Hook registration, different concern
-- `teams/*/` - Source of truth, read-only for this refactor
-- Rollback functions in swap-team.sh - Stay in main script
+- `rites/*/` - Source of truth, read-only for this refactor
+- Rollback functions in swap-rite.sh - Stay in main script
 
 ### Order is Critical For
 
@@ -813,19 +813,19 @@ After each commit:
 - **RF-015 requires RF-010 through RF-014**: Module must be complete before sourcing
 - **RF-016 requires RF-015**: Integration must work before removing inlines
 
-### Source Order in swap-team.sh
+### Source Order in swap-rite.sh
 
 Current:
 ```bash
 source "$ROSTER_HOME/lib/roster-utils.sh"
-source "$ROSTER_HOME/lib/team/team-resource.sh"
+source "$ROSTER_HOME/lib/team/rite-resource.sh"
 ```
 
 After:
 ```bash
 source "$ROSTER_HOME/lib/roster-utils.sh"
 source "$ROSTER_HOME/lib/team/team-transaction.sh"  # NEW
-source "$ROSTER_HOME/lib/team/team-resource.sh"
+source "$ROSTER_HOME/lib/team/rite-resource.sh"
 ```
 
 ### Bash 3.2 Compatibility Notes
@@ -836,7 +836,7 @@ source "$ROSTER_HOME/lib/team/team-resource.sh"
 
 ### Signal Handler Interaction
 
-Signal handlers in swap-team.sh call these functions:
+Signal handlers in swap-rite.sh call these functions:
 
 ```bash
 handle_interrupt() {
@@ -845,12 +845,12 @@ handle_interrupt() {
         ...
         cleanup_staging                 # Calls module
         delete_journal                  # Calls module
-        rollback_swap                   # STAYS in swap-team.sh
+        rollback_swap                   # STAYS in swap-rite.sh
     esac
 }
 ```
 
-The signal handler registration (`trap`) and the handler function itself stay in swap-team.sh. Only the infrastructure functions they call extract to the module.
+The signal handler registration (`trap`) and the handler function itself stay in swap-rite.sh. Only the infrastructure functions they call extract to the module.
 
 ---
 
@@ -872,7 +872,7 @@ Findings deferred for future work:
 | Artifact | Path | Verified |
 |----------|------|----------|
 | Spike analysis | `/Users/tomtenuta/Code/roster/docs/spikes/SPIKE-script-code-smell-refactoring.md` | Read |
-| Source file | `/Users/tomtenuta/Code/roster/swap-team.sh` (lines 100-534, 669-785) | Analyzed |
-| Module pattern | `/Users/tomtenuta/Code/roster/lib/team/team-resource.sh` | Read |
-| Priority 1 plan | `/Users/tomtenuta/Code/roster/docs/refactoring/REFACTOR-team-resource.md` | Read |
-| Template | `/Users/tomtenuta/Code/roster/teams/ecosystem-pack/skills/doc-ecosystem/templates/refactoring-plan.md` | Read |
+| Source file | `/Users/tomtenuta/Code/roster/swap-rite.sh` (lines 100-534, 669-785) | Analyzed |
+| Module pattern | `/Users/tomtenuta/Code/roster/lib/team/rite-resource.sh` | Read |
+| Priority 1 plan | `/Users/tomtenuta/Code/roster/docs/refactoring/REFACTOR-rite-resource.md` | Read |
+| Template | `/Users/tomtenuta/Code/roster/rites/ecosystem-pack/skills/doc-ecosystem/templates/refactoring-plan.md` | Read |

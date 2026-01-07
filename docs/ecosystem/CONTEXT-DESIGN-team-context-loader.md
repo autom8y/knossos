@@ -16,24 +16,24 @@ work_packages:
     name: "Team Context Loader Library"
     description: "Create shell library that discovers and loads team-specific context injection scripts"
     files:
-      - path: ".claude/hooks/lib/team-context-loader.sh"
+      - path: ".claude/hooks/lib/rite-context-loader.sh"
         action: create
         description: "Core library with load_team_context() function"
     estimated_effort: "1 hour"
   - id: WP2
     name: "Session Context Hook Integration"
-    description: "Integrate team context loader into existing session-context.sh hook"
+    description: "Integrate rite context loader into existing session-context.sh hook"
     files:
       - path: ".claude/hooks/context-injection/session-context.sh"
         action: modify
-        description: "Add team context section after session info output"
+        description: "Add rite context section after session info output"
     dependencies: [WP1]
     estimated_effort: "30 minutes"
   - id: WP3
     name: "Ecosystem-Pack Context Script"
     description: "Create prototype context-injection script for ecosystem-pack team"
     files:
-      - path: "teams/ecosystem-pack/context-injection.sh"
+      - path: "rites/ecosystem-pack/context-injection.sh"
         action: create
         description: "Team-specific context: CEM sync, skeleton ref, drift status"
     dependencies: [WP1]
@@ -50,7 +50,7 @@ This Context Design addresses the gap identified in task-001: team-specific cont
 ### Decision 1: Compose Pattern via Team Scripts
 
 **Options Considered**:
-1. **Hardcode all team context in session-context.sh** - Rejected: requires roster changes for every team, doesn't scale
+1. **Hardcode all rite context in session-context.sh** - Rejected: requires roster changes for every team, doesn't scale
 2. **Dynamic detection via workflow.yaml parsing** - Rejected: complex, inflexible, can't customize output format
 3. **Team-owned context-injection.sh scripts (Compose Pattern)** - Selected: teams own their context, no roster changes needed for new teams
 
@@ -59,23 +59,23 @@ This Context Design addresses the gap identified in task-001: team-specific cont
 **Rationale**:
 - Teams know what context matters for their workflow
 - Ecosystem-pack needs CEM sync status; 10x-dev-pack needs different context
-- Adding new team context requires no roster changes
+- Adding new rite context requires no roster changes
 - Script-based approach allows dynamic content (git queries, file checks)
 - Graceful degradation: teams without scripts get no extra context (not an error)
 
 ### Decision 2: Script Location in Team Directory
 
 **Options Considered**:
-1. **`teams/$TEAM/hooks/context-injection.sh`** - Rejected: too nested, hooks/ already has .gitkeep placeholder
-2. **`teams/$TEAM/context.sh`** - Rejected: ambiguous name, could be config
-3. **`teams/$TEAM/context-injection.sh`** - Selected: clear purpose, flat in team dir
+1. **`rites/$TEAM/hooks/context-injection.sh`** - Rejected: too nested, hooks/ already has .gitkeep placeholder
+2. **`rites/$TEAM/context.sh`** - Rejected: ambiguous name, could be config
+3. **`rites/$TEAM/context-injection.sh`** - Selected: clear purpose, flat in team dir
 
-**Selected**: `teams/$TEAM/context-injection.sh`
+**Selected**: `rites/$TEAM/context-injection.sh`
 
 **Rationale**:
 - Direct sibling to workflow.yaml and agents/
 - Name clearly indicates purpose (injection into session context)
-- Simple discovery: `$ROSTER_HOME/teams/$ACTIVE_RITE/context-injection.sh`
+- Simple discovery: `$ROSTER_HOME/rites/$ACTIVE_RITE/context-injection.sh`
 
 ### Decision 3: Script Interface Contract
 
@@ -95,11 +95,11 @@ This Context Design addresses the gap identified in task-001: team-specific cont
 ### Decision 4: Output Placement in Session Context
 
 **Options Considered**:
-1. **Always show team context (condensed + verbose)** - Selected: team context is always relevant when team is active
+1. **Always show rite context (condensed + verbose)** - Selected: rite context is always relevant when team is active
 2. **Only in verbose mode** - Rejected: defeats purpose, that's the current broken state
 3. **Separate hook entirely** - Rejected: adds hook latency, fragmentscontext
 
-**Selected**: Always show team context in condensed mode when team is active
+**Selected**: Always show rite context in condensed mode when team is active
 
 **Rationale**:
 - If a team is active, its context matters
@@ -122,7 +122,7 @@ This Context Design addresses the gap identified in task-001: team-specific cont
 
 ## Team Context Loader Library Specification
 
-### File: `.claude/hooks/lib/team-context-loader.sh`
+### File: `.claude/hooks/lib/rite-context-loader.sh`
 
 ```bash
 #!/bin/bash
@@ -130,7 +130,7 @@ This Context Design addresses the gap identified in task-001: team-specific cont
 # Part of Per-Team Hook Context Injection feature
 #
 # Usage:
-#   source "$HOOKS_LIB/team-context-loader.sh"
+#   source "$HOOKS_LIB/rite-context-loader.sh"
 #   output=$(load_team_context)
 #   [[ -n "$output" ]] && echo "$output"
 
@@ -155,7 +155,7 @@ readonly TEAM_CONTEXT_FUNCTION_NAME="inject_team_context"
 #
 # Contract:
 #   - Reads ACTIVE_RITE from .claude/ACTIVE_RITE
-#   - Looks for $ROSTER_HOME/teams/$ACTIVE_RITE/context-injection.sh
+#   - Looks for $ROSTER_HOME/rites/$ACTIVE_RITE/context-injection.sh
 #   - Sources script and calls inject_team_context()
 #   - Returns function output on stdout
 #   - Never fails (RECOVERABLE pattern)
@@ -165,16 +165,16 @@ load_team_context() {
     local team_script
     local output=""
 
-    # Read active team
+    # Read active rite
     active_team=$(cat ".claude/ACTIVE_RITE" 2>/dev/null || echo "")
     if [[ -z "$active_team" || "$active_team" == "none" ]]; then
         # No team active - nothing to inject
         return 0
     fi
 
-    # Resolve team context script path
+    # Resolve rite context script path
     local roster_home="${ROSTER_HOME:-$HOME/Code/roster}"
-    team_script="$roster_home/teams/$active_team/$TEAM_CONTEXT_SCRIPT_NAME"
+    team_script="$roster_home/rites/$active_team/$TEAM_CONTEXT_SCRIPT_NAME"
 
     # Check if team has context script
     if [[ ! -f "$team_script" ]]; then
@@ -194,7 +194,7 @@ load_team_context() {
     output=$(
         # Source team script
         source "$team_script" 2>/dev/null || {
-            log_warning "Failed to source team context script: $team_script" 2>/dev/null || true
+            log_warning "Failed to source rite context script: $team_script" 2>/dev/null || true
             exit 0
         }
 
@@ -221,7 +221,7 @@ load_team_context() {
 
 # Teams can use these helpers in their context-injection.sh
 
-# Format a key-value pair for team context table
+# Format a key-value pair for rite context table
 # Usage: team_context_row "Key" "Value"
 team_context_row() {
     local key="$1"
@@ -252,7 +252,7 @@ is_file_stale() {
 ### Integration Points
 
 The library:
-1. Sources via `$HOOKS_LIB/team-context-loader.sh`
+1. Sources via `$HOOKS_LIB/rite-context-loader.sh`
 2. Depends on `config.sh` for `ROSTER_HOME`
 3. Depends on `logging.sh` for `log_debug`, `log_warning`
 4. Provides utility functions teams can use
@@ -268,7 +268,7 @@ The library:
 # Team routing context (if team is active)
 # Note: ROSTER_HOME is defined in config.sh (sourced via session-utils.sh)
 if [[ -f ".claude/ACTIVE_RITE" ]]; then
-    local TEAM_CONTEXT=$("$ROSTER_HOME/generate-team-context.sh" 2>/dev/null || echo "")
+    local TEAM_CONTEXT=$("$ROSTER_HOME/generate-rite-context.sh" 2>/dev/null || echo "")
     if [[ -n "$TEAM_CONTEXT" ]]; then
         echo ""
         echo "$TEAM_CONTEXT"
@@ -279,11 +279,11 @@ fi
 **Change 1**: Add source statement (after line 34, with other library sources)
 
 ```bash
-# Source team context loader
-safe_source "$HOOKS_LIB/team-context-loader.sh" || true
+# Source rite context loader
+safe_source "$HOOKS_LIB/rite-context-loader.sh" || true
 ```
 
-**Change 2**: Add team context to condensed output (in `output_condensed_context`, after commands line ~177)
+**Change 2**: Add rite context to condensed output (in `output_condensed_context`, after commands line ~177)
 
 ```bash
 # Team-specific context (if team has context script)
@@ -299,7 +299,7 @@ fi
 
 **Change 3**: Update verbose output to also use the loader (lines 259-269)
 
-Replace the existing `generate-team-context.sh` call with:
+Replace the existing `generate-rite-context.sh` call with:
 ```bash
 # Team-specific context (compose pattern)
 local TEAM_CONTEXT
@@ -313,7 +313,7 @@ fi
 
 # Team routing context (workflow phases) - keep existing
 if [[ -f ".claude/ACTIVE_RITE" ]]; then
-    local ROUTING_CONTEXT=$("$ROSTER_HOME/generate-team-context.sh" 2>/dev/null || echo "")
+    local ROUTING_CONTEXT=$("$ROSTER_HOME/generate-rite-context.sh" 2>/dev/null || echo "")
     if [[ -n "$ROUTING_CONTEXT" ]]; then
         echo ""
         echo "$ROUTING_CONTEXT"
@@ -321,7 +321,7 @@ if [[ -f ".claude/ACTIVE_RITE" ]]; then
 fi
 ```
 
-**Rationale**: Keep both team-specific context (new, from context-injection.sh) and routing context (existing, from generate-team-context.sh). They serve different purposes:
+**Rationale**: Keep both team-specific context (new, from context-injection.sh) and routing context (existing, from generate-rite-context.sh). They serve different purposes:
 - Team context: Status information specific to the team's domain
 - Routing context: Workflow phases and agent routing table
 
@@ -329,17 +329,17 @@ fi
 
 ## Ecosystem-Pack Context Script Specification
 
-### File: `teams/ecosystem-pack/context-injection.sh`
+### File: `rites/ecosystem-pack/context-injection.sh`
 
 ```bash
 #!/bin/bash
 # Ecosystem-Pack Context Injection
 # Provides CEM sync status, skeleton reference, and drift detection for ecosystem work
 #
-# Called by: session-context.sh via team-context-loader.sh
+# Called by: session-context.sh via rite-context-loader.sh
 # Output: Markdown table with ecosystem status
 
-# Required function name (per team-context-loader.sh contract)
+# Required function name (per rite-context-loader.sh contract)
 inject_team_context() {
     local project_dir="${CLAUDE_PROJECT_DIR:-.}"
     local output=""
@@ -398,7 +398,7 @@ inject_team_context() {
     echo "$output"
 }
 
-# Helper function (provided by team-context-loader.sh, but define fallback)
+# Helper function (provided by rite-context-loader.sh, but define fallback)
 if ! declare -f is_file_stale >/dev/null 2>&1; then
     is_file_stale() {
         local file="$1"
@@ -437,8 +437,8 @@ When ecosystem-pack is active, session context will include:
 
 This change is fully backward compatible:
 - Teams without `context-injection.sh` see no change
-- Existing `generate-team-context.sh` output is preserved (routing table)
-- New team context appears as additional section
+- Existing `generate-rite-context.sh` output is preserved (routing table)
+- New rite context appears as additional section
 - No schema changes to SESSION_CONTEXT.md
 - No changes to session-manager.sh
 
@@ -474,7 +474,7 @@ This change is fully backward compatible:
 
 - [x] Solution architecture documented with rationale
 - [x] All design decisions have documented rationale
-- [x] team-context-loader.sh fully specified with function signatures
+- [x] rite-context-loader.sh fully specified with function signatures
 - [x] session-context.sh changes specified at line level
 - [x] ecosystem-pack/context-injection.sh template provided
 - [x] Backward compatibility assessed: COMPATIBLE
@@ -489,8 +489,8 @@ This change is fully backward compatible:
 
 ### Implementation Order
 
-1. Create `team-context-loader.sh` library first (WP1)
-2. Test library in isolation: `source team-context-loader.sh; load_team_context`
+1. Create `rite-context-loader.sh` library first (WP1)
+2. Test library in isolation: `source rite-context-loader.sh; load_team_context`
 3. Create ecosystem-pack context script (WP3)
 4. Test script in isolation: `source context-injection.sh; inject_team_context`
 5. Integrate into session-context.sh (WP2)
@@ -500,23 +500,23 @@ This change is fully backward compatible:
 
 | File | Purpose |
 |------|---------|
-| `/Users/tomtenuta/Code/roster/.claude/hooks/lib/team-context-loader.sh` | New library |
+| `/Users/tomtenuta/Code/roster/.claude/hooks/lib/rite-context-loader.sh` | New library |
 | `/Users/tomtenuta/Code/roster/.claude/hooks/context-injection/session-context.sh` | Hook to modify |
 | `/Users/tomtenuta/Code/roster/.claude/hooks/lib/hooks-init.sh` | Pattern reference |
 | `/Users/tomtenuta/Code/roster/.claude/hooks/lib/config.sh` | ROSTER_HOME definition |
-| `/Users/tomtenuta/Code/roster/teams/ecosystem-pack/context-injection.sh` | New team script |
-| `/Users/tomtenuta/Code/roster/generate-team-context.sh` | Existing routing generator (keep) |
+| `/Users/tomtenuta/Code/roster/rites/ecosystem-pack/context-injection.sh` | New team script |
+| `/Users/tomtenuta/Code/roster/generate-rite-context.sh` | Existing routing generator (keep) |
 
 ### Testing Commands
 
 ```bash
 # Test library function
 cd /path/to/satellite
-source .claude/hooks/lib/team-context-loader.sh
+source .claude/hooks/lib/rite-context-loader.sh
 load_team_context
 
 # Test ecosystem-pack script directly
-source ~/Code/roster/teams/ecosystem-pack/context-injection.sh
+source ~/Code/roster/rites/ecosystem-pack/context-injection.sh
 inject_team_context
 
 # Test full session context hook

@@ -13,7 +13,7 @@ The strategy enforces a "source of truth" model:
 
 ### Rule 1: orchestrator.yaml Change Detected
 
-**Trigger**: Any `.yaml` file changed in `teams/*/orchestrator.yaml`
+**Trigger**: Any `.yaml` file changed in `rites/*/orchestrator.yaml`
 
 **Validation Pipeline**:
 1. **Validate YAML against schema**
@@ -37,7 +37,7 @@ The strategy enforces a "source of truth" model:
 **Failure Messages**:
 - Schema validation failure: "YAML validation failed: [specific error]"
 - Generation failure: "Failed to generate from YAML: [specific error]"
-- File mismatch: "Generated orchestrator.md differs from committed. Run: orchestrator-generate.sh <team> --force && git add teams/<team>/agents/orchestrator.md"
+- File mismatch: "Generated orchestrator.md differs from committed. Run: orchestrator-generate.sh <team> --force && git add rites/<team>/agents/orchestrator.md"
 
 ### Rule 2: orchestrator.md Change Detected (Without YAML Change)
 
@@ -45,7 +45,7 @@ The strategy enforces a "source of truth" model:
 
 **Validation Pipeline**:
 1. **Identify orchestrator.md change**
-   - Git detects modification to `teams/*/agents/orchestrator.md`
+   - Git detects modification to `rites/*/agents/orchestrator.md`
 
 2. **Check for corresponding YAML change**
    - If YAML also changed: Skip this rule (handle in Rule 3)
@@ -85,7 +85,7 @@ The strategy enforces a "source of truth" model:
 **Failure Messages**:
 - Schema failure: Same as Rule 1
 - Generation failure: Same as Rule 1
-- Mismatch: "Generated orchestrator.md differs from committed. Generated version shows [X lines changed]. Run: orchestrator-generate.sh <team> --force && git add teams/<team>/agents/orchestrator.md"
+- Mismatch: "Generated orchestrator.md differs from committed. Generated version shows [X lines changed]. Run: orchestrator-generate.sh <team> --force && git add rites/<team>/agents/orchestrator.md"
 
 ## CI Pipeline Implementation
 
@@ -94,7 +94,7 @@ The strategy enforces a "source of truth" model:
 Create `.github/workflows/validate-orchestrators.yml`:
 
 **Triggers**:
-- Pull request with changes to `teams/*/orchestrator.yaml` or `teams/*/agents/orchestrator.md`
+- Pull request with changes to `rites/*/orchestrator.yaml` or `rites/*/agents/orchestrator.md`
 - Push to main with same changes
 - Manual trigger via workflow_dispatch
 
@@ -202,7 +202,7 @@ If validation fails:
 2. **Local Failure**: Developer fixes locally using:
    ```bash
    orchestrator-generate.sh <team> --force
-   git add teams/<team>/agents/orchestrator.md
+   git add rites/<team>/agents/orchestrator.md
    git commit --amend  # or make new commit
    ```
 

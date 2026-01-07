@@ -70,7 +70,7 @@ Ecosystem grows from 10-15 satellites to 100+ projects, each with customized age
 - Sync failures due to satellite divergence
 - Request for self-service template creation
 
-**Stress Test**: Current manual sync (swap-team.sh + CEM) breaks at scale. Need automated distribution, conflict resolution, and satellite health monitoring.
+**Stress Test**: Current manual sync (swap-rite.sh + CEM) breaks at scale. Need automated distribution, conflict resolution, and satellite health monitoring.
 
 ### Scenario D: Regulatory/Compliance Requirements
 
@@ -102,7 +102,7 @@ Agent behaviors require audit trails, version control, and compliance attestatio
 ┌─────────────────────────────────────────────────────────────────┐
 │                          ROSTER                                 │
 │  ┌─────────────────────────────────────────────────────────┐   │
-│  │ teams/                                                   │   │
+│  │ rites/                                                   │   │
 │  │   ├── 10x-dev-pack/                                     │   │
 │  │   │     ├── agents/*.md        (handcrafted)            │   │
 │  │   │     └── workflow.yaml                               │   │
@@ -110,7 +110,7 @@ Agent behaviors require audit trails, version control, and compliance attestatio
 │  │   │     ├── agents/*.md        (handcrafted)            │   │
 │  │   │     ├── orchestrator.yaml  (POC: spec)              │   │
 │  │   │     └── workflow.yaml                               │   │
-│  │   └── ... (10 team packs)                               │   │
+│  │   └── ... (10 rites)                               │   │
 │  │                                                          │   │
 │  │ templates/                     (POC)                     │   │
 │  │   ├── orchestrator-base.md.tpl                          │   │
@@ -118,7 +118,7 @@ Agent behaviors require audit trails, version control, and compliance attestatio
 │  └─────────────────────────────────────────────────────────┘   │
 └─────────────────────────────────────────────────────────────────┘
                               │
-                              │ swap-team.sh
+                              │ swap-rite.sh
                               │ (copy agents, update CLAUDE.md)
                               ▼
 ┌─────────────────────────────────────────────────────────────────┐
@@ -150,7 +150,7 @@ Agent behaviors require audit trails, version control, and compliance attestatio
 
 1. **Handcrafted agents**: 50+ agents manually maintained across 10 packs
 2. **Duplication**: Orchestrators share ~60% identical content
-3. **Fragile sync**: swap-team.sh requires manual intervention for conflicts
+3. **Fragile sync**: swap-rite.sh requires manual intervention for conflicts
 4. **No validation**: Agent changes can silently break workflows
 5. **No versioning**: Template changes have no rollback path
 
@@ -162,7 +162,7 @@ Agent behaviors require audit trails, version control, and compliance attestatio
 | Hardcoded tool names | Prevents multi-provider support |
 | Manual CLAUDE.md update | Scales poorly beyond 10 teams |
 | No behavioral tests | Cannot verify agents work after generation |
-| Monolithic swap-team.sh | Difficult to extend for new agent types |
+| Monolithic swap-rite.sh | Difficult to extend for new agent types |
 
 ---
 
@@ -239,7 +239,7 @@ Agents are **commoditized infrastructure**—teams focus on domain logic, not pr
 | Agent definition | Handcrafted markdown | Declarative YAML specs | Enables generation, validation, composition |
 | Generation | Single orchestrator template | Multi-type Agent Factory | Scales to all agent types with consistency |
 | Validation | None | Behavioral contracts + schema | Catches breaking changes before distribution |
-| Distribution | Manual swap-team.sh | Automated registry + channels | Scales to 100+ satellites |
+| Distribution | Manual swap-rite.sh | Automated registry + channels | Scales to 100+ satellites |
 | Versioning | Git commits only | Semantic versions + channels | Supports stable/beta/edge deployment |
 | Customization | Fork and edit | Override layers | Preserves upstream compatibility |
 
@@ -479,7 +479,7 @@ This system explicitly should NOT become:
 
 ## Appendix: Agent Taxonomy
 
-Based on analysis of 50+ agents across 10 team packs:
+Based on analysis of 50+ agents across 10 rites:
 
 ### Orchestrators (10 agents)
 

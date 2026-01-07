@@ -38,7 +38,7 @@
 | test-sync-orphan.sh | PASS | 25/25 |
 | test-validate-repair.sh | PASS | 21/21 |
 | test-init.sh | PASS | 38/38 |
-| test-swap-team-integration.sh | PASS | 13/13 |
+| test-swap-rite-integration.sh | PASS | 13/13 |
 
 **Total**: 190 tests passed, 0 failed
 
@@ -46,7 +46,7 @@
 
 | Test Suite | Result | Notes |
 |------------|--------|-------|
-| test-team-context-loader.sh | INCOMPLETE | Runs but outputs minimal results |
+| test-rite-context-loader.sh | INCOMPLETE | Runs but outputs minimal results |
 | test-execution-mode-primitives.sh | FAIL | `is_session_tracked` command not found - missing function export |
 | test-orchestrator-enforcement.sh | INCOMPLETE | Starts but exits early |
 
@@ -90,7 +90,7 @@ grep -r "skeleton" docs/ | grep -v deprecated | grep -v history | grep -v audits
 
 **Results**: Found references in historical/design documents:
 - `docs/ecosystem/PHASE3-COMPATIBILITY-REPORT.md` - Historical report
-- `docs/ecosystem/CONTEXT-DESIGN-team-context-loader.md` - Design doc
+- `docs/ecosystem/CONTEXT-DESIGN-rite-context-loader.md` - Design doc
 - `docs/ecosystem/GAP-ANALYSIS-skeleton-deprecation.md` - Analysis doc
 - `docs/design/TDD-cem-replacement.md` - Design doc referencing deprecation
 
@@ -152,7 +152,7 @@ roster-sync init "$TEMP_DIR"
 
 **Code Review** (`user-hooks/lib/worktree-manager.sh`):
 - Line 225-229: Uses `$ROSTER_HOME/roster-sync` for ecosystem initialization
-- Line 255-259: Uses `$ROSTER_HOME/swap-team.sh` for team application
+- Line 255-259: Uses `$ROSTER_HOME/swap-rite.sh` for team application
 - No references to `$SKELETON_HOME` or `cem`
 
 **Functional Test**:
@@ -167,14 +167,14 @@ worktree-manager.sh list  # Works without skeleton
 
 ### 3.5 Team Swap Functionality
 
-**Test**: Verify swap-team.sh works without skeleton.
+**Test**: Verify swap-rite.sh works without skeleton.
 
 **Results**:
 ```bash
-./swap-team.sh --list
+./swap-rite.sh --list
 # Output: 11 teams available (ecosystem-pack, strategy-pack, etc.)
 
-./swap-team.sh --help
+./swap-rite.sh --help
 # Shows --sync-first and --auto-sync flags for roster-sync integration
 ```
 
@@ -327,7 +327,7 @@ The skeleton deprecation migration is **COMPLETE** and ready for production.
 | This report | /Users/tomtenuta/Code/roster/docs/reports/sprint-5-verification-report.md | YES |
 | Migration guide | /Users/tomtenuta/Code/roster/docs/migration/cem-to-roster-migration.md | YES |
 | roster-sync | /Users/tomtenuta/Code/roster/roster-sync | YES |
-| swap-team.sh | /Users/tomtenuta/Code/roster/swap-team.sh | YES |
+| swap-rite.sh | /Users/tomtenuta/Code/roster/swap-rite.sh | YES |
 | worktree-manager.sh | /Users/tomtenuta/Code/roster/user-hooks/lib/worktree-manager.sh | YES |
 
 ---

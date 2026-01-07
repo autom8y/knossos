@@ -2,7 +2,7 @@
 
 ## Overview
 
-This Technical Design Document specifies the cross-team-handoff shared skill, a reusable schema and protocol for transferring work between team packs. The skill defines the HANDOFF artifact structure, validation rules, and integration points with the session lifecycle.
+This Technical Design Document specifies the cross-rite-handoff shared skill, a reusable schema and protocol for transferring work between rites. The skill defines the HANDOFF artifact structure, validation rules, and integration points with the session lifecycle.
 
 ## Context
 
@@ -10,13 +10,13 @@ This Technical Design Document specifies the cross-team-handoff shared skill, a 
 |-----------|----------|
 | Handoff Criteria Schema | `/Users/tomtenuta/Code/roster/schemas/handoff-criteria-schema.yaml` |
 | Within-Team Handoff | `/Users/tomtenuta/Code/roster/user-skills/session-lifecycle/handoff-ref/SKILL.md` |
-| Cross-Team Skill (guidance) | `/Users/tomtenuta/Code/roster/user-skills/guidance/cross-team/SKILL.md` |
+| Cross-Team Skill (guidance) | `/Users/tomtenuta/Code/roster/user-skills/guidance/cross-rite/SKILL.md` |
 | Cross-Team Playbook | `/Users/tomtenuta/Code/roster/docs/playbooks/cross-rite-coordination.md` |
 | Cross-Team Edge Cases | `/Users/tomtenuta/Code/roster/docs/edge-cases/cross-rite-workflows.md` |
 | Session Context Schema | `/Users/tomtenuta/Code/roster/user-skills/session-common/session-context-schema.md` |
 | TDD Schema | `/Users/tomtenuta/Code/roster/user-skills/documentation/doc-artifacts/schemas/tdd-schema.md` |
-| Context Design Schema | `/Users/tomtenuta/Code/roster/teams/ecosystem-pack/skills/doc-ecosystem/schemas/context-design-schema.md` |
-| Shared Skills README | `/Users/tomtenuta/Code/roster/teams/shared/README.md` |
+| Context Design Schema | `/Users/tomtenuta/Code/roster/rites/ecosystem-pack/skills/doc-ecosystem/schemas/context-design-schema.md` |
+| Shared Skills README | `/Users/tomtenuta/Code/roster/rites/shared/README.md` |
 
 ### Problem Statement
 
@@ -26,15 +26,15 @@ Cross-team coordination in roster currently relies on:
 2. **No Validation**: Handoffs can be incomplete, missing required fields per type
 3. **Scattered Documentation**: Edge cases, playbook, and protocol exist in different locations
 4. **Type-Specific Requirements Hidden**: Each handoff type has unique requirements buried in prose
-5. **No Integration with Session State**: SESSION_CONTEXT tracks artifacts but not pending cross-team handoffs
+5. **No Integration with Session State**: SESSION_CONTEXT tracks artifacts but not pending cross-rite handoffs
 
 ### Design Goals
 
 1. Single canonical schema for HANDOFF artifacts, validated like PRD/TDD/ADR
 2. Type-specific required fields enforced at schema level
-3. Clear trigger conditions for when cross-team handoff is required vs optional
+3. Clear trigger conditions for when cross-rite handoff is required vs optional
 4. Session integration for tracking pending handoffs
-5. Reusable by all team packs via shared skill
+5. Reusable by all rites via shared skill
 
 ---
 
@@ -42,7 +42,7 @@ Cross-team coordination in roster currently relies on:
 
 ### HANDOFF Artifact Schema (v1.0)
 
-**File Location**: `teams/shared/skills/cross-team-handoff/schema.md`
+**File Location**: `rites/shared/skills/cross-rite-handoff/schema.md`
 
 **File Pattern**: `HANDOFF-{source}-to-{target}-{date}.md` or stored in session directory
 
@@ -51,7 +51,7 @@ Cross-team coordination in roster currently relies on:
 # ============================================================================
 # HANDOFF Artifact Schema v1.0
 # ============================================================================
-# Machine-readable frontmatter for cross-team work transfer
+# Machine-readable frontmatter for cross-rite work transfer
 # All HANDOFF artifacts MUST conform to this schema
 
 # Required: Core identification
@@ -153,7 +153,7 @@ rejected --resubmit--> pending (new artifact, references original)
 | Field | Rule | Error Code |
 |-------|------|------------|
 | `artifact_id` | Match pattern `^HANDOFF-[a-z0-9-]+-to-[a-z0-9-]+-[0-9]{4}-[0-9]{2}-[0-9]{2}(-[0-9]+)?$` | HANDOFF-001 |
-| `source_team` | Non-empty, match known team pack pattern | HANDOFF-002 |
+| `source_team` | Non-empty, match known rite pattern | HANDOFF-002 |
 | `target_team` | Non-empty, different from source_team | HANDOFF-003 |
 | `handoff_type` | One of: execution, validation, assessment, implementation, strategic_input, strategic_evaluation | HANDOFF-004 |
 | `priority` | One of: critical, high, medium, low | HANDOFF-005 |
@@ -190,7 +190,7 @@ rejected --resubmit--> pending (new artifact, references original)
 
 ### Required Cross-Team Handoff
 
-A cross-team HANDOFF artifact is **required** when:
+A cross-rite HANDOFF artifact is **required** when:
 
 | Condition | Target Team | Handoff Type |
 |-----------|-------------|--------------|
@@ -203,7 +203,7 @@ A cross-team HANDOFF artifact is **required** when:
 
 ### Optional Cross-Team Handoff
 
-A cross-team HANDOFF artifact is **optional** when:
+A cross-rite HANDOFF artifact is **optional** when:
 
 | Condition | Target Team | Handoff Type |
 |-----------|-------------|--------------|
@@ -585,7 +585,7 @@ Add HANDOFF to the existing `schemas/handoff-criteria-schema.yaml`:
   # In artifact_types section of handoff-criteria-schema.yaml
 
   handoff:
-    phase: cross-team
+    phase: cross-rite
     description: "Cross-Team Handoff Artifact"
     criteria:
       - id: handoff-001
@@ -625,7 +625,7 @@ Add HANDOFF to the existing `schemas/handoff-criteria-schema.yaml`:
 ### Directory Layout
 
 ```
-teams/shared/skills/cross-team-handoff/
+rites/shared/skills/cross-rite-handoff/
 +-- SKILL.md           # Main skill definition
 +-- schema.md          # Full schema documentation (this content)
 +-- validation.sh      # Validation functions
@@ -639,13 +639,13 @@ teams/shared/skills/cross-team-handoff/
 
 ```markdown
 ---
-name: cross-team-handoff
-description: "HANDOFF artifact schema for cross-team work transfer. Use when: work crosses team boundaries, specialist review required, formal handoff needed. Triggers: cross-team, handoff artifact, team transfer, work handoff."
+name: cross-rite-handoff
+description: "HANDOFF artifact schema for cross-rite work transfer. Use when: work crosses team boundaries, specialist review required, formal handoff needed. Triggers: cross-rite, handoff artifact, team transfer, work handoff."
 ---
 
 # Cross-Team Handoff Skill
 
-> Defines the HANDOFF artifact schema for transferring work between team packs.
+> Defines the HANDOFF artifact schema for transferring work between rites.
 
 ## Quick Reference
 
@@ -710,13 +710,13 @@ The existing `schemas/handoff-criteria-schema.yaml` gains a new `handoff` artifa
 ### 3. Orchestrator Awareness
 
 Orchestrators should:
-- Check for pending cross-team handoffs when planning work
+- Check for pending cross-rite handoffs when planning work
 - Block on `blocking: true` handoffs
 - Surface required handoffs based on trigger conditions
 
 ### 4. CEM Sync
 
-The `teams/shared/skills/cross-team-handoff/` directory is synced to all satellites via shared skill mechanism.
+The `rites/shared/skills/cross-rite-handoff/` directory is synced to all satellites via shared skill mechanism.
 
 ---
 
@@ -755,7 +755,7 @@ The `teams/shared/skills/cross-team-handoff/` directory is synced to all satelli
 This skill introduces new functionality without modifying existing behavior:
 
 1. **Existing handoff-ref**: Unchanged - handles within-team agent handoffs
-2. **Existing cross-team skill**: Unchanged - remains routing guidance
+2. **Existing cross-rite skill**: Unchanged - remains routing guidance
 3. **Existing playbook/edge-cases docs**: Unchanged - serve as operational guidance
 
 ### Coexistence
@@ -792,5 +792,5 @@ The HANDOFF artifact schema complements, not replaces:
 | Cross-Team Playbook | `/Users/tomtenuta/Code/roster/docs/playbooks/cross-rite-coordination.md` | Read |
 | Cross-Team Edge Cases | `/Users/tomtenuta/Code/roster/docs/edge-cases/cross-rite-workflows.md` | Read |
 | Session Context Schema | `/Users/tomtenuta/Code/roster/user-skills/session-common/session-context-schema.md` | Read |
-| Context Design Schema | `/Users/tomtenuta/Code/roster/teams/ecosystem-pack/skills/doc-ecosystem/schemas/context-design-schema.md` | Read |
-| Shared Skills README | `/Users/tomtenuta/Code/roster/teams/shared/README.md` | Read |
+| Context Design Schema | `/Users/tomtenuta/Code/roster/rites/ecosystem-pack/skills/doc-ecosystem/schemas/context-design-schema.md` | Read |
+| Shared Skills README | `/Users/tomtenuta/Code/roster/rites/shared/README.md` | Read |

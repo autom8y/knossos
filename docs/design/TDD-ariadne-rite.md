@@ -13,7 +13,7 @@
 
 ## 1. Overview
 
-This Technical Design Document specifies the implementation of the **team domain** for Ariadne (`ari`), the Go binary replacement for the roster bash script harness. The team domain encompasses 4 commands that manage agent team packs -- the specialized agent configurations that enable different workflow patterns.
+This Technical Design Document specifies the implementation of the **team domain** for Ariadne (`ari`), the Go binary replacement for the roster bash script harness. The team domain encompasses 4 commands that manage agent rites -- the specialized agent configurations that enable different workflow patterns.
 
 ### 1.1 Context
 
@@ -22,8 +22,8 @@ This Technical Design Document specifies the implementation of the **team domain
 | PRD | `docs/requirements/PRD-ariadne.md` (Section 4.1) |
 | Spike | `docs/spikes/SPIKE-ariadne-go-cli-architecture.md` |
 | Session TDD | `docs/design/TDD-ariadne-session.md` |
-| Current Implementation | `swap-team.sh`, `lib/team/*.sh` |
-| Teams Directory | `teams/` (source of team packs) |
+| Current Implementation | `swap-rite.sh`, `lib/team/*.sh` |
+| Teams Directory | `rites/` (source of rites) |
 | Workflow Schema | `schemas/orchestrator.yaml.schema.json` |
 
 ### 1.2 Scope
@@ -46,9 +46,9 @@ This Technical Design Document specifies the implementation of the **team domain
 
 1. **Atomic Operations**: Team switches complete fully or roll back
 2. **Explicit Orphan Handling**: No silent data loss; require user decision on orphaned agents
-3. **CLAUDE.md Consistency**: Satellite sections always reflect active team
+3. **CLAUDE.md Consistency**: Satellite sections always reflect active rite
 4. **Manifest Integrity**: AGENT_MANIFEST.json provides audit trail and validation
-5. **Backward Compatibility**: Support existing teams/ structure without changes
+5. **Backward Compatibility**: Support existing rites/ structure without changes
 
 ---
 
@@ -98,7 +98,7 @@ ariadne/
          │
          v
 ┌─────────────────────────────────────────────────────────────────┐
-│  Filesystem: teams/, .claude/agents/, .claude/ACTIVE_RITE,      │
+│  Filesystem: rites/, .claude/agents/, .claude/ACTIVE_RITE,      │
 │  .claude/AGENT_MANIFEST.json, .claude/CLAUDE.md                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -108,7 +108,7 @@ ariadne/
 #### Team Pack Structure
 
 ```
-teams/{team-name}/
+rites/{team-name}/
 ├── agents/                     # Agent .md files
 │   ├── orchestrator.md
 │   ├── principal-engineer.md
@@ -124,13 +124,13 @@ teams/{team-name}/
 
 ```
 .claude/
-├── ACTIVE_RITE                 # Single line: team name (e.g., "10x-dev-pack")
+├── ACTIVE_RITE                 # Single line: rite name (e.g., "10x-dev-pack")
 ├── ACTIVE_WORKFLOW.yaml        # Copy of team's workflow.yaml
 ├── AGENT_MANIFEST.json         # Manifest tracking agent origins
 ├── CLAUDE.md                   # Contains satellite sections updated on switch
 └── agents/
-    ├── orchestrator.md         # Copied from active team
-    ├── principal-engineer.md   # Copied from active team
+    ├── orchestrator.md         # Copied from active rite
+    ├── principal-engineer.md   # Copied from active rite
     └── ...
 ```
 
@@ -142,14 +142,14 @@ teams/{team-name}/
 
 | Command | Description | Modifies State |
 |---------|-------------|----------------|
-| `switch` | Switch to a different team pack | Yes |
-| `list` | List available team packs | No |
+| `switch` | Switch to a different rite | Yes |
+| `list` | List available rites | No |
 | `status` | Show current team status | No |
-| `validate` | Validate team pack integrity | No |
+| `validate` | Validate rite integrity | No |
 
 ### 3.2 Command: `ari team switch`
 
-Switches the active team pack with atomic operations and orphan handling.
+Switches the active rite with atomic operations and orphan handling.
 
 **Signature**:
 ```
@@ -160,7 +160,7 @@ ari team switch <team-name> [--remove-all|--keep-all|--promote-all] [--dry-run]
 
 | Argument | Required | Description |
 |----------|----------|-------------|
-| `team-name` | Yes | Target team pack name (e.g., "10x-dev-pack", "rnd-pack") |
+| `team-name` | Yes | Target rite name (e.g., "10x-dev-pack", "rnd-pack") |
 
 **Flags**:
 
@@ -245,17 +245,17 @@ ari team switch <team-name> [--remove-all|--keep-all|--promote-all] [--dry-run]
 ```
 
 **Implementation Notes**:
-- Validates target team exists in `teams/` or user-level teams directory
+- Validates target team exists in `rites/` or user-level teams directory
 - Detects orphaned agents (agents in .claude/agents/ not from target team)
 - Requires explicit orphan handling flag if orphans detected
-- Copies agents from `teams/{team-name}/agents/` to `.claude/agents/`
+- Copies agents from `rites/{team-name}/agents/` to `.claude/agents/`
 - Updates `ACTIVE_RITE`, `ACTIVE_WORKFLOW.yaml`, `AGENT_MANIFEST.json`
 - Updates CLAUDE.md satellite sections (Quick Start table, Agent Configurations)
 - Transaction safety: backup before, restore on failure
 
 ### 3.3 Command: `ari team list`
 
-Lists all available team packs from discovery locations.
+Lists all available rites from discovery locations.
 
 **Signature**:
 ```
@@ -277,7 +277,7 @@ ari team list [--format=FORMAT]
       "description": "Full development lifecycle (PRD -> TDD -> Code -> QA)",
       "agents": ["architect", "orchestrator", "principal-engineer", "qa-adversary", "requirements-analyst"],
       "agent_count": 5,
-      "path": "/Users/tom/Code/roster/teams/10x-dev-pack",
+      "path": "/Users/tom/Code/roster/rites/10x-dev-pack",
       "active": true
     },
     {
@@ -285,7 +285,7 @@ ari team list [--format=FORMAT]
       "description": "Research and exploration",
       "agents": ["technology-scout", "research-analyst"],
       "agent_count": 2,
-      "path": "/Users/tom/Code/roster/teams/rnd-pack",
+      "path": "/Users/tom/Code/roster/rites/rnd-pack",
       "active": false
     }
   ],
@@ -321,11 +321,11 @@ sre-pack
 | 9 | No .claude/ directory found |
 
 **Implementation Notes**:
-- Scans `teams/` directory in roster location
-- Also scans user-level teams at `$XDG_DATA_HOME/ariadne/teams/` if present
+- Scans `rites/` directory in roster location
+- Also scans user-level teams at `$XDG_DATA_HOME/ariadne/rites/` if present
 - Reads `workflow.yaml` description field for each team
 - Counts agents by scanning `agents/` subdirectory
-- Marks currently active team (from `ACTIVE_RITE` file)
+- Marks currently active rite (from `ACTIVE_RITE` file)
 
 ### 3.4 Command: `ari team status`
 
@@ -347,7 +347,7 @@ ari team status [--team=NAME]
 {
   "team": "10x-dev-pack",
   "is_active": true,
-  "path": "/Users/tom/Code/roster/teams/10x-dev-pack",
+  "path": "/Users/tom/Code/roster/rites/10x-dev-pack",
   "description": "Full development lifecycle (PRD -> TDD -> Code -> QA)",
   "workflow_type": "sequential",
   "agents": [
@@ -398,7 +398,7 @@ ari team status [--team=NAME]
 **Output (text)**:
 ```
 Team: 10x-dev-pack (ACTIVE)
-Path: /Users/tom/Code/roster/teams/10x-dev-pack
+Path: /Users/tom/Code/roster/rites/10x-dev-pack
 Description: Full development lifecycle (PRD -> TDD -> Code -> QA)
 Workflow: sequential
 
@@ -424,15 +424,15 @@ Status: OK (manifest valid, CLAUDE.md synced)
 | 9 | No .claude/ directory found |
 
 **Implementation Notes**:
-- If `--team` not specified, uses active team from `ACTIVE_RITE` file
+- If `--team` not specified, uses active rite from `ACTIVE_RITE` file
 - Reads workflow.yaml for phase and entry point information
 - Cross-references installed agents with manifest
 - Checks CLAUDE.md satellite sections for sync status
-- Returns `is_active: false` if querying non-active team
+- Returns `is_active: false` if querying non-active rite
 
 ### 3.5 Command: `ari team validate`
 
-Validates team pack structure and configuration integrity.
+Validates rite structure and configuration integrity.
 
 **Signature**:
 ```
@@ -457,7 +457,7 @@ ari team validate [--team=NAME] [--fix]
 | `AGENT_FILES` | All referenced agents have .md files | Error |
 | `ORCHESTRATOR_YAML` | orchestrator.yaml exists (if team has orchestrator) | Warning |
 | `MANIFEST_SYNC` | AGENT_MANIFEST.json matches installed agents | Warning |
-| `CLAUDE_MD_SYNC` | CLAUDE.md satellites match active team | Warning |
+| `CLAUDE_MD_SYNC` | CLAUDE.md satellites match active rite | Warning |
 | `NO_CIRCULAR_DEPS` | No circular phase dependencies | Error |
 | `VALID_ENTRY_POINT` | Entry point agent exists | Error |
 
@@ -527,7 +527,7 @@ Result: VALID (0 errors, 0 warnings)
 | 9 | No .claude/ directory found |
 
 **Implementation Notes**:
-- When `--team` not specified, validates active team
+- When `--team` not specified, validates active rite
 - `--fix` attempts repairs for fixable issues (manifest sync, CLAUDE.md sync)
 - Returns error count as exit code indicator
 - Schema validation uses embedded workflow schema
@@ -573,7 +573,7 @@ type ErrorDetail struct {
 Team switch operations follow a transaction pattern:
 
 ```go
-func switchTeam(ctx context.Context, targetTeam string, opts SwitchOptions) error {
+func switchTeam(ctx context.Context, targetRite string, opts SwitchOptions) error {
     // 1. Create backup of current state
     backup, err := createBackup()
     if err != nil {
@@ -582,12 +582,12 @@ func switchTeam(ctx context.Context, targetTeam string, opts SwitchOptions) erro
     defer backup.Cleanup()
 
     // 2. Validate target team exists
-    if !teamExists(targetTeam) {
+    if !teamExists(targetRite) {
         return errors.New("TEAM_NOT_FOUND")
     }
 
     // 3. Detect orphans
-    orphans := detectOrphans(targetTeam)
+    orphans := detectOrphans(targetRite)
     if len(orphans) > 0 && !opts.HasOrphanStrategy() {
         return errors.WithDetails("ORPHAN_CONFLICT", map[string]interface{}{
             "orphans": orphans,
@@ -595,13 +595,13 @@ func switchTeam(ctx context.Context, targetTeam string, opts SwitchOptions) erro
     }
 
     // 4. Execute switch (point of no return after ACTIVE_RITE write)
-    if err := executeSwitch(targetTeam, opts); err != nil {
+    if err := executeSwitch(targetRite, opts); err != nil {
         backup.Restore()
         return errors.Wrap(err, "SWITCH_ABORTED")
     }
 
     // 5. Update CLAUDE.md (non-critical, log warning on failure)
-    if err := updateClaudeMD(targetTeam); err != nil {
+    if err := updateClaudeMD(targetRite); err != nil {
         log.Warn("CLAUDE.md update failed: %v", err)
     }
 
@@ -647,7 +647,7 @@ Tracks the origin and state of installed agents:
 
 ### 5.2 ACTIVE_RITE
 
-Single line file containing the team name:
+Single line file containing the rite name:
 
 ```
 10x-dev-pack
@@ -716,7 +716,7 @@ Core team domain logic, independent of CLI.
 ```go
 package team
 
-// Team represents a discovered team pack
+// Team represents a discovered rite
 type Team struct {
     Name        string   `json:"name"`
     Path        string   `json:"path"`
@@ -726,7 +726,7 @@ type Team struct {
     EntryPoint  string   `json:"entry_point"`
 }
 
-// Discovery locates available team packs
+// Discovery locates available rites
 type Discovery struct {
     rosterPath string
     userPath   string
@@ -743,7 +743,7 @@ func NewDiscovery(rosterPath, userPath string) *Discovery {
 func (d *Discovery) List() ([]Team, error) {
     var teams []Team
 
-    // Scan roster/teams/
+    // Scan roster/rites/
     rosterTeams, _ := d.scanDir(filepath.Join(d.rosterPath, "teams"))
     teams = append(teams, rosterTeams...)
 
@@ -824,10 +824,10 @@ func (m *Manifest) Save(path string) error {
 }
 
 // DetectOrphans finds agents not belonging to target team
-func (m *Manifest) DetectOrphans(targetTeam string) []string {
+func (m *Manifest) DetectOrphans(targetRite string) []string {
     var orphans []string
     for name, entry := range m.Agents {
-        if entry.Source == "team" && entry.Team != targetTeam {
+        if entry.Source == "team" && entry.Team != targetRite {
             orphans = append(orphans, name)
         }
     }
@@ -903,7 +903,7 @@ Switch orchestration:
 package switch
 
 type Options struct {
-    TargetTeam    string
+    TargetRite    string
     RemoveAll     bool
     KeepAll       bool
     PromoteAll    bool
@@ -940,7 +940,7 @@ type Switcher struct {
 
 func (s *Switcher) Switch(ctx context.Context, opts Options) (*Result, error) {
     // 1. Validate target team
-    team, err := s.discovery.Get(opts.TargetTeam)
+    team, err := s.discovery.Get(opts.TargetRite)
     if err != nil {
         return nil, err
     }
@@ -952,7 +952,7 @@ func (s *Switcher) Switch(ctx context.Context, opts Options) (*Result, error) {
     }
 
     // 3. Detect orphans
-    orphans := manifest.DetectOrphans(opts.TargetTeam)
+    orphans := manifest.DetectOrphans(opts.TargetRite)
     if len(orphans) > 0 && !opts.HasOrphanStrategy() {
         return nil, &OrphanConflictError{Orphans: orphans}
     }
@@ -975,7 +975,7 @@ func (s *Switcher) Switch(ctx context.Context, opts Options) (*Result, error) {
 
 Team domain interacts with session domain via `ACTIVE_RITE` file:
 - `ari session create --team=NAME` uses team validation
-- `ari session status` reads active team for display
+- `ari session status` reads active rite for display
 - Team switch does not affect existing sessions (they retain their team reference)
 
 ### 7.2 CLAUDE.md Satellite System
@@ -1034,7 +1034,7 @@ Location: `tests/integration/team_test.go`
 ```
 ariadne/
 └── testdata/
-    └── teams/
+    └── rites/
         ├── valid-team/
         │   ├── agents/
         │   │   ├── agent-a.md
@@ -1054,11 +1054,11 @@ ariadne/
 
 ## 9. Migration from Bash
 
-### 9.1 swap-team.sh Parity
+### 9.1 swap-rite.sh Parity
 
 The Go implementation follows **specification** behavior, not bash quirks:
 
-| Behavior | Bash (swap-team.sh) | Go (ari team switch) |
+| Behavior | Bash (swap-rite.sh) | Go (ari team switch) |
 |----------|---------------------|----------------------|
 | Orphan default | Interactive prompt | Error requiring flag |
 | Transaction journal | Custom journal file | Backup/restore pattern |
@@ -1070,7 +1070,7 @@ The Go implementation follows **specification** behavior, not bash quirks:
 During migration, bash calls `ari`:
 
 ```bash
-# swap-team.sh (bridge)
+# swap-rite.sh (bridge)
 case "$1" in
   switch) ari team switch "${@:2}" ;;
   list)   ari team list "${@:2}" ;;
@@ -1081,7 +1081,7 @@ esac
 ### 9.3 Post-v1.0 Cleanup
 
 After v1.0 ships:
-- Delete `swap-team.sh`
+- Delete `swap-rite.sh`
 - Delete `lib/team/*.sh`
 - Update documentation to reference `ari team` commands
 
@@ -1166,7 +1166,7 @@ Ready for Implementation when:
 | PRD | `/Users/tomtenuta/Code/roster/docs/requirements/PRD-ariadne.md` | Read |
 | Spike | `/Users/tomtenuta/Code/roster/docs/spikes/SPIKE-ariadne-go-cli-architecture.md` | Read |
 | Session TDD | `/Users/tomtenuta/Code/roster/docs/design/TDD-ariadne-session.md` | Read |
-| swap-team.sh | `/Users/tomtenuta/Code/roster/swap-team.sh` | Read (partial) |
-| 10x workflow | `/Users/tomtenuta/Code/roster/teams/10x-dev-pack/workflow.yaml` | Read |
+| swap-rite.sh | `/Users/tomtenuta/Code/roster/swap-rite.sh` | Read (partial) |
+| 10x workflow | `/Users/tomtenuta/Code/roster/rites/10x-dev-pack/workflow.yaml` | Read |
 | Session implementation | `/Users/tomtenuta/Code/roster/ariadne/internal/cmd/session/session.go` | Read |
 | Output package | `/Users/tomtenuta/Code/roster/ariadne/internal/output/output.go` | Read |

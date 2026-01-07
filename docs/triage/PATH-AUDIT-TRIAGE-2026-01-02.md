@@ -217,7 +217,7 @@ path: orchestrator-router.sh
 path: validation/orchestrator-router.sh
 ```
 
-Then regenerate settings.local.json via `swap-team.sh ecosystem-pack`
+Then regenerate settings.local.json via `swap-rite.sh ecosystem-pack`
 
 ### Phase 2: Resolve Duplicates (30 min)
 

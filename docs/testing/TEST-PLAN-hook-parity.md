@@ -21,8 +21,8 @@ This test plan validates the Hook Ecosystem Parity feature which introduces:
 ## Test Strategy
 
 ### Approach
-- **Unit Testing**: Individual function validation in swap-team.sh
-- **Integration Testing**: Full swap-team.sh execution with various teams
+- **Unit Testing**: Individual function validation in swap-rite.sh
+- **Integration Testing**: Full swap-rite.sh execution with various teams
 - **Adversarial Testing**: Edge cases, error conditions, malformed inputs
 - **Regression Testing**: Verify existing hook functionality preserved
 
@@ -42,7 +42,7 @@ This test plan validates the Hook Ecosystem Parity feature which introduces:
 |----|--------|
 | **Objective** | Verify base hooks are synced from `roster/user-hooks/` to `.claude/hooks/` |
 | **Preconditions** | Clean `.claude/hooks/` directory |
-| **Steps** | 1. Remove existing `.claude/hooks/` contents<br>2. Run `./swap-team.sh 10x-dev-pack`<br>3. List `.claude/hooks/` contents |
+| **Steps** | 1. Remove existing `.claude/hooks/` contents<br>2. Run `./swap-rite.sh 10x-dev-pack`<br>3. List `.claude/hooks/` contents |
 | **Expected** | All 10 base hooks present: artifact-tracker.sh, auto-park.sh, coach-mode.sh, command-validator.sh, commit-tracker.sh, delegation-check.sh, session-audit.sh, session-context.sh, session-write-guard.sh, start-preflight.sh |
 | **Result** | PASS |
 | **Notes** | Verified 10 base hooks in user-hooks/, all synced to .claude/hooks/ after --update |
@@ -51,8 +51,8 @@ This test plan validates the Hook Ecosystem Parity feature which introduces:
 |----|--------|
 | **Objective** | Verify team hooks overlay on base hooks |
 | **Preconditions** | Create test team with custom hook |
-| **Steps** | 1. Create `teams/test-pack/hooks/custom-hook.sh`<br>2. Run `./swap-team.sh test-pack`<br>3. Verify custom-hook.sh in `.claude/hooks/`<br>4. Verify .team-hooks marker file updated |
-| **Expected** | Both base hooks and team hook present; .team-hooks lists team hooks |
+| **Steps** | 1. Create `rites/test-pack/hooks/custom-hook.sh`<br>2. Run `./swap-rite.sh test-pack`<br>3. Verify custom-hook.sh in `.claude/hooks/`<br>4. Verify .rite-hooks marker file updated |
+| **Expected** | Both base hooks and team hook present; .rite-hooks lists team hooks |
 | **Result** | NOT TESTED |
 | **Notes** | No test team with hooks/ available; verified code logic in swap_hooks() |
 
@@ -60,7 +60,7 @@ This test plan validates the Hook Ecosystem Parity feature which introduces:
 |----|--------|
 | **Objective** | Verify hook collision warning |
 | **Preconditions** | Team hook with same name as base hook |
-| **Steps** | 1. Create `teams/test-pack/hooks/session-context.sh`<br>2. Run `./swap-team.sh test-pack`<br>3. Check for warning message |
+| **Steps** | 1. Create `rites/test-pack/hooks/session-context.sh`<br>2. Run `./swap-rite.sh test-pack`<br>3. Check for warning message |
 | **Expected** | Warning logged: "Team hook overrides base: session-context.sh" |
 | **Result** | NOT TESTED |
 | **Notes** | Verified warning code exists in swap_hooks() at line 2582-2583 |
@@ -73,7 +73,7 @@ This test plan validates the Hook Ecosystem Parity feature which introduces:
 |----|--------|
 | **Objective** | Verify hooks section generated with correct structure |
 | **Preconditions** | Valid base_hooks.yaml exists |
-| **Steps** | 1. Run `./swap-team.sh 10x-dev-pack`<br>2. Extract hooks from settings.local.json<br>3. Compare structure to expected format |
+| **Steps** | 1. Run `./swap-rite.sh 10x-dev-pack`<br>2. Extract hooks from settings.local.json<br>3. Compare structure to expected format |
 | **Expected** | JSON structure matches Claude Code hooks schema with event types, matchers, and hook arrays |
 | **Result** | PASS |
 | **Notes** | Verified 5 event types (SessionStart, Stop, PreToolUse, PostToolUse, UserPromptSubmit) with correct structure |
@@ -82,7 +82,7 @@ This test plan validates the Hook Ecosystem Parity feature which introduces:
 |----|--------|
 | **Objective** | Verify hook paths use $CLAUDE_PROJECT_DIR variable |
 | **Preconditions** | None |
-| **Steps** | 1. Run `./swap-team.sh 10x-dev-pack`<br>2. Grep settings.local.json for hook commands |
+| **Steps** | 1. Run `./swap-rite.sh 10x-dev-pack`<br>2. Grep settings.local.json for hook commands |
 | **Expected** | All hook commands prefixed with `$CLAUDE_PROJECT_DIR/.claude/hooks/` |
 | **Result** | PASS |
 | **Notes** | All 10 hook commands use $CLAUDE_PROJECT_DIR prefix; 0 commands without it |
@@ -91,7 +91,7 @@ This test plan validates the Hook Ecosystem Parity feature which introduces:
 |----|--------|
 | **Objective** | Verify non-roster hooks preserved |
 | **Preconditions** | Add custom (non-roster) hook to settings.local.json |
-| **Steps** | 1. Add hook entry with command `/custom/path/myhook.sh`<br>2. Run `./swap-team.sh 10x-dev-pack`<br>3. Verify custom hook still present |
+| **Steps** | 1. Add hook entry with command `/custom/path/myhook.sh`<br>2. Run `./swap-rite.sh 10x-dev-pack`<br>3. Verify custom hook still present |
 | **Expected** | Custom hook preserved, roster hooks updated |
 | **Result** | NOT TESTED |
 | **Notes** | Verified extract_non_roster_hooks() logic in code; preserves hooks without .claude/hooks/ in path |
@@ -144,7 +144,7 @@ This test plan validates the Hook Ecosystem Parity feature which introduces:
 |----|--------|
 | **Objective** | Verify settings.local.json includes matcher after swap |
 | **Preconditions** | None |
-| **Steps** | 1. Run `./swap-team.sh 10x-dev-pack`<br>2. Check UserPromptSubmit section in settings.local.json |
+| **Steps** | 1. Run `./swap-rite.sh 10x-dev-pack`<br>2. Check UserPromptSubmit section in settings.local.json |
 | **Expected** | `"matcher": "^/"` present in UserPromptSubmit hook entry |
 | **Result** | PASS |
 | **Notes** | After --update: jq shows "matcher": "^/" in UserPromptSubmit entry |
@@ -153,7 +153,7 @@ This test plan validates the Hook Ecosystem Parity feature which introduces:
 |----|--------|
 | **Objective** | Verify dry-run shows correct matcher |
 | **Preconditions** | None |
-| **Steps** | 1. Run `./swap-team.sh --dry-run 10x-dev-pack`<br>2. Find UserPromptSubmit in output |
+| **Steps** | 1. Run `./swap-rite.sh --dry-run 10x-dev-pack`<br>2. Find UserPromptSubmit in output |
 | **Expected** | Dry-run output shows `"matcher": "^/"` |
 | **Result** | PASS |
 | **Notes** | Dry-run JSON output includes UserPromptSubmit with "matcher": "^/" |
@@ -228,7 +228,7 @@ This test plan validates the Hook Ecosystem Parity feature which introduces:
 |----|--------|
 | **Objective** | Verify --dry-run shows hook file changes |
 | **Preconditions** | None |
-| **Steps** | 1. Run `./swap-team.sh --dry-run 10x-dev-pack`<br>2. Verify hook section in output |
+| **Steps** | 1. Run `./swap-rite.sh --dry-run 10x-dev-pack`<br>2. Verify hook section in output |
 | **Expected** | Output shows "Hook registrations (settings.local.json):" with JSON preview |
 | **Result** | PASS |
 | **Notes** | Output contains "Hook registrations" header and full JSON preview (2 occurrences) |
@@ -237,7 +237,7 @@ This test plan validates the Hook Ecosystem Parity feature which introduces:
 |----|--------|
 | **Objective** | Verify --dry-run does not modify files |
 | **Preconditions** | Note current settings.local.json mtime |
-| **Steps** | 1. Record mtime of settings.local.json<br>2. Run `./swap-team.sh --dry-run 10x-dev-pack`<br>3. Compare mtime |
+| **Steps** | 1. Record mtime of settings.local.json<br>2. Run `./swap-rite.sh --dry-run 10x-dev-pack`<br>3. Compare mtime |
 | **Expected** | settings.local.json unchanged |
 | **Result** | PASS |
 | **Notes** | mtime before (1767206392) equals mtime after dry-run |
@@ -336,7 +336,7 @@ This test plan validates the Hook Ecosystem Parity feature which introduces:
 |----|---------|
 | **Objective** | Test behavior with yq v3 (python yq) |
 | **Preconditions** | Install python yq if possible |
-| **Steps** | 1. Run swap-team.sh with yq v3<br>2. Observe error handling |
+| **Steps** | 1. Run swap-rite.sh with yq v3<br>2. Observe error handling |
 | **Expected** | Clear error message: "yq v4+ is required" |
 | **Result** | NOT TESTED |
 | **Notes** | Skipped - yq v3 not available; code review confirms version check at lines 2613-2623 |
@@ -345,7 +345,7 @@ This test plan validates the Hook Ecosystem Parity feature which introduces:
 |----|---------|
 | **Objective** | Test behavior with missing yq |
 | **Preconditions** | Rename yq binary temporarily |
-| **Steps** | 1. Hide yq from PATH<br>2. Run swap-team.sh<br>3. Check hook registrations |
+| **Steps** | 1. Hide yq from PATH<br>2. Run swap-rite.sh<br>3. Check hook registrations |
 | **Expected** | Warning: "Cannot update hook registrations without yq"; hook files still synced |
 | **Result** | VERIFIED (code review) |
 | **Notes** | require_yq() logs error and returns 1; swap_hook_registrations() handles gracefully |
@@ -356,7 +356,7 @@ This test plan validates the Hook Ecosystem Parity feature which introduces:
 |----|---------|
 | **Objective** | Test with syntax error in base_hooks.yaml |
 | **Preconditions** | Create backup of base_hooks.yaml |
-| **Steps** | 1. Introduce YAML syntax error (bad indentation)<br>2. Run swap-team.sh<br>3. Restore backup |
+| **Steps** | 1. Introduce YAML syntax error (bad indentation)<br>2. Run swap-rite.sh<br>3. Restore backup |
 | **Expected** | Graceful failure with error message; no partial writes |
 | **Result** | NOT TESTED |
 | **Notes** | Did not modify production YAML; code review shows yq errors propagate gracefully |
@@ -365,7 +365,7 @@ This test plan validates the Hook Ecosystem Parity feature which introduces:
 |----|---------|
 | **Objective** | Test with missing required fields |
 | **Preconditions** | Create test hooks.yaml with missing 'event' field |
-| **Steps** | 1. Create entry without event field<br>2. Run swap-team.sh |
+| **Steps** | 1. Create entry without event field<br>2. Run swap-rite.sh |
 | **Expected** | Warning logged, entry skipped, other entries processed |
 | **Result** | VERIFIED (code review) |
 | **Notes** | parse_hooks_yaml() validates event type and logs warning for invalid at line 2668-2670 |
@@ -376,7 +376,7 @@ This test plan validates the Hook Ecosystem Parity feature which introduces:
 |----|---------|
 | **Objective** | Test with missing base_hooks.yaml |
 | **Preconditions** | Rename base_hooks.yaml |
-| **Steps** | 1. Hide base_hooks.yaml<br>2. Run swap-team.sh<br>3. Verify behavior |
+| **Steps** | 1. Hide base_hooks.yaml<br>2. Run swap-rite.sh<br>3. Verify behavior |
 | **Expected** | Warning logged; hooks files still synced; settings.local.json hooks section may be empty |
 | **Result** | VERIFIED (code review) |
 | **Notes** | parse_hooks_yaml() returns empty if file not found; swap_hook_registrations logs warning at line 2979 |
@@ -385,7 +385,7 @@ This test plan validates the Hook Ecosystem Parity feature which introduces:
 |----|---------|
 | **Objective** | Test with missing user-hooks/ directory |
 | **Preconditions** | Rename user-hooks/ |
-| **Steps** | 1. Hide user-hooks/<br>2. Run swap-team.sh |
+| **Steps** | 1. Hide user-hooks/<br>2. Run swap-rite.sh |
 | **Expected** | Warning: "Base hooks directory not found"; continues without failure |
 | **Result** | VERIFIED (code review) |
 | **Notes** | swap_hooks() logs warning at line 2515 and continues; team hooks may still work |
@@ -396,16 +396,16 @@ This test plan validates the Hook Ecosystem Parity feature which introduces:
 |----|---------|
 | **Objective** | Test team with no hooks/ directory |
 | **Preconditions** | 10x-dev-pack has no hooks/ (normal state) |
-| **Steps** | 1. Verify teams/10x-dev-pack/hooks/ does not exist<br>2. Run swap-team.sh 10x-dev-pack<br>3. Verify base hooks installed |
+| **Steps** | 1. Verify rites/10x-dev-pack/hooks/ does not exist<br>2. Run swap-rite.sh 10x-dev-pack<br>3. Verify base hooks installed |
 | **Expected** | Base hooks installed; no errors about missing team hooks |
 | **Result** | PASS |
-| **Notes** | teams/10x-dev-pack/hooks/ does not exist; swap-team works correctly |
+| **Notes** | rites/10x-dev-pack/hooks/ does not exist; swap-rite works correctly |
 
 | ID | ADV-4.2 |
 |----|---------|
 | **Objective** | Test team with empty hooks/ directory |
 | **Preconditions** | Create empty hooks/ in test team |
-| **Steps** | 1. Create teams/test-pack/hooks/ (empty)<br>2. Run swap-team.sh test-pack |
+| **Steps** | 1. Create rites/test-pack/hooks/ (empty)<br>2. Run swap-rite.sh test-pack |
 | **Expected** | Base hooks installed; log indicates "Team has no hook files" |
 | **Result** | VERIFIED (code review) |
 | **Notes** | swap_hooks() line 2559 handles hook_count=0 gracefully |
@@ -416,7 +416,7 @@ This test plan validates the Hook Ecosystem Parity feature which introduces:
 |----|---------|
 | **Objective** | Verify team hook properly overrides base hook |
 | **Preconditions** | Create team hook with same name as base |
-| **Steps** | 1. Create teams/test-pack/hooks/session-context.sh with unique content<br>2. Run swap-team.sh test-pack<br>3. Check content of .claude/hooks/session-context.sh |
+| **Steps** | 1. Create rites/test-pack/hooks/session-context.sh with unique content<br>2. Run swap-rite.sh test-pack<br>3. Check content of .claude/hooks/session-context.sh |
 | **Expected** | Team version installed; warning logged |
 | **Result** | VERIFIED (code review) |
 | **Notes** | swap_hooks() logs warning at line 2582 before overwriting |
@@ -427,7 +427,7 @@ This test plan validates the Hook Ecosystem Parity feature which introduces:
 |----|---------|
 | **Objective** | Test with invalid regex in matcher |
 | **Preconditions** | Create hooks.yaml with invalid regex |
-| **Steps** | 1. Add entry with matcher: "[invalid("<br>2. Run swap-team.sh |
+| **Steps** | 1. Add entry with matcher: "[invalid("<br>2. Run swap-rite.sh |
 | **Expected** | Warning: "Invalid matcher regex"; entry skipped |
 | **Result** | VERIFIED (code review) |
 | **Notes** | parse_hooks_yaml() uses grep -E to validate regex at lines 2688-2696 |
@@ -438,7 +438,7 @@ This test plan validates the Hook Ecosystem Parity feature which introduces:
 |----|---------|
 | **Objective** | Test timeout > 60 seconds |
 | **Preconditions** | Create hooks.yaml with timeout: 120 |
-| **Steps** | 1. Add entry with timeout: 120<br>2. Run swap-team.sh<br>3. Check settings.local.json |
+| **Steps** | 1. Add entry with timeout: 120<br>2. Run swap-rite.sh<br>3. Check settings.local.json |
 | **Expected** | Warning logged; timeout clamped to 60 |
 | **Result** | VERIFIED (code review) |
 | **Notes** | parse_hooks_yaml() clamps timeout at lines 2699-2703 with warning |
@@ -447,7 +447,7 @@ This test plan validates the Hook Ecosystem Parity feature which introduces:
 |----|---------|
 | **Objective** | Test timeout < 1 second |
 | **Preconditions** | Create hooks.yaml with timeout: 0 |
-| **Steps** | 1. Add entry with timeout: 0<br>2. Run swap-team.sh<br>3. Check settings.local.json |
+| **Steps** | 1. Add entry with timeout: 0<br>2. Run swap-rite.sh<br>3. Check settings.local.json |
 | **Expected** | Default timeout (5) applied |
 | **Result** | VERIFIED (code review) |
 | **Notes** | parse_hooks_yaml() sets default 5 for timeout < 1 at lines 2704-2706 |
@@ -458,7 +458,7 @@ This test plan validates the Hook Ecosystem Parity feature which introduces:
 |----|---------|
 | **Objective** | Verify user-created hooks not deleted |
 | **Preconditions** | Add custom hook to .claude/hooks/ |
-| **Steps** | 1. Create .claude/hooks/my-custom-hook.sh<br>2. Run swap-team.sh 10x-dev-pack<br>3. Verify my-custom-hook.sh still exists |
+| **Steps** | 1. Create .claude/hooks/my-custom-hook.sh<br>2. Run swap-rite.sh 10x-dev-pack<br>3. Verify my-custom-hook.sh still exists |
 | **Expected** | Custom hook preserved (not deleted by swap) |
 | **Result** | OBSERVED |
 | **Notes** | team-validator.sh and workflow-validator.sh (legacy) preserved despite not in user-hooks/ - swap overwrites but does NOT delete orphans |
@@ -467,7 +467,7 @@ This test plan validates the Hook Ecosystem Parity feature which introduces:
 |----|---------|
 | **Objective** | Verify settings.local.json custom hooks preserved |
 | **Preconditions** | Add custom hook registration to settings.local.json |
-| **Steps** | 1. Add PostToolUse hook with command: "/custom/path.sh"<br>2. Run swap-team.sh 10x-dev-pack<br>3. Verify custom hook still in settings.local.json |
+| **Steps** | 1. Add PostToolUse hook with command: "/custom/path.sh"<br>2. Run swap-rite.sh 10x-dev-pack<br>3. Verify custom hook still in settings.local.json |
 | **Expected** | Custom hook registration preserved |
 | **Result** | VERIFIED (code review) |
 | **Notes** | |
@@ -485,7 +485,7 @@ This test plan validates the Hook Ecosystem Parity feature which introduces:
 | **Component** | settings.local.json |
 | **Status** | RESOLVED |
 | **Found** | Initial exploration |
-| **Fixed** | After running `./swap-team.sh --update 10x-dev-pack` |
+| **Fixed** | After running `./swap-rite.sh --update 10x-dev-pack` |
 
 **Description**: The current `settings.local.json` had UserPromptSubmit hook without a matcher, but `base_hooks.yaml` correctly specifies `matcher: "^/"`. The dry-run output shows correct output, suggesting the hooks were installed before this fix was implemented.
 
@@ -496,7 +496,7 @@ This test plan validates the Hook Ecosystem Parity feature which introduces:
 **Expected**: `"matcher": "^/"` present
 **Actual**: No matcher field (before fix)
 
-**Resolution**: Running `./swap-team.sh --update 10x-dev-pack` regenerates settings.local.json with correct matcher. Verified matcher now present.
+**Resolution**: Running `./swap-rite.sh --update 10x-dev-pack` regenerates settings.local.json with correct matcher. Verified matcher now present.
 
 **Impact**: Pre-fix, UserPromptSubmit fired on ALL prompts. Post-fix, only fires on slash commands.
 
@@ -512,7 +512,7 @@ This test plan validates the Hook Ecosystem Parity feature which introduces:
 | **Status** | Open (Accepted Risk) |
 | **Found** | Initial exploration |
 
-**Description**: `team-validator.sh` and `workflow-validator.sh` exist in `.claude/hooks/` but not in `user-hooks/`. They persist from a previous installation. swap-team.sh overwrites but does NOT delete orphan files.
+**Description**: `team-validator.sh` and `workflow-validator.sh` exist in `.claude/hooks/` but not in `user-hooks/`. They persist from a previous installation. swap-rite.sh overwrites but does NOT delete orphan files.
 
 **Steps to Reproduce**:
 1. `ls .claude/hooks/team-validator.sh` - exists
@@ -525,7 +525,7 @@ This test plan validates the Hook Ecosystem Parity feature which introduces:
 
 **Risk Assessment**: Low risk - orphan files have no effect on hook execution since settings.local.json registration drives execution. Manifest tracking is informational only.
 
-**Recommendation**: Document as known state. Future cleanup could add orphan detection to swap-team.sh, but not blocking for this release.
+**Recommendation**: Document as known state. Future cleanup could add orphan detection to swap-rite.sh, but not blocking for this release.
 
 ---
 
@@ -538,7 +538,7 @@ This test plan validates the Hook Ecosystem Parity feature which introduces:
 | **Component** | .claude/hooks/session-context.sh |
 | **Status** | RESOLVED |
 | **Found** | Initial exploration |
-| **Fixed** | After running `./swap-team.sh --update 10x-dev-pack` |
+| **Fixed** | After running `./swap-rite.sh --update 10x-dev-pack` |
 
 **Description**: `.claude/hooks/session-context.sh` (219 lines) differed from `user-hooks/session-context.sh` (285 lines). The deployed version lacked the condensed output and --verbose flag improvements.
 
@@ -549,7 +549,7 @@ This test plan validates the Hook Ecosystem Parity feature which introduces:
 **Expected**: Same content (user-hooks is canonical)
 **Actual**: Deployed version was outdated (before fix)
 
-**Resolution**: Running `./swap-team.sh --update 10x-dev-pack` syncs latest hooks. Verified both files now match (285 lines, diff confirms identical).
+**Resolution**: Running `./swap-rite.sh --update 10x-dev-pack` syncs latest hooks. Verified both files now match (285 lines, diff confirms identical).
 
 **Impact**: Context noise reduction (SC-3) now active after sync.
 
@@ -570,7 +570,7 @@ Execute SC-1 through SC-10 test cases sequentially.
 Execute ADV-1 through ADV-8 with appropriate setup/teardown.
 
 ### Phase 4: Regression Verification
-1. Run swap-team.sh 10x-dev-pack
+1. Run swap-rite.sh 10x-dev-pack
 2. Verify all hooks functional
 3. Test hook execution (SessionStart, PreToolUse, PostToolUse)
 
@@ -624,7 +624,7 @@ Execute ADV-1 through ADV-8 with appropriate setup/teardown.
 
 ### Key Findings
 
-1. **Hook sync mechanism works correctly**: After running `./swap-team.sh --update`, all hooks are properly synced from `user-hooks/` to `.claude/hooks/`.
+1. **Hook sync mechanism works correctly**: After running `./swap-rite.sh --update`, all hooks are properly synced from `user-hooks/` to `.claude/hooks/`.
 
 2. **Context reduction achieved**: session-context.sh now outputs 10 lines (condensed) vs 53 lines (verbose), meeting the <= 15 line requirement.
 
@@ -652,7 +652,7 @@ Execute ADV-1 through ADV-8 with appropriate setup/teardown.
 
 **Conditions for Release:**
 
-1. **Required**: Run `./swap-team.sh --update <team>` to sync hooks on any existing installation. This resolves DEF-001 and DEF-003.
+1. **Required**: Run `./swap-rite.sh --update <team>` to sync hooks on any existing installation. This resolves DEF-001 and DEF-003.
 
 2. **Recommended**: Manually delete orphan hook files:
    ```bash
@@ -678,7 +678,7 @@ Execute ADV-1 through ADV-8 with appropriate setup/teardown.
 | This Test Plan | `/Users/tomtenuta/Code/roster/docs/testing/TEST-PLAN-hook-parity.md` | Created |
 | PRD | `/Users/tomtenuta/Code/roster/docs/requirements/PRD-hook-ecosystem-parity.md` | Verified |
 | base_hooks.yaml | `/Users/tomtenuta/Code/roster/user-hooks/base_hooks.yaml` | Verified |
-| swap-team.sh | `/Users/tomtenuta/Code/roster/swap-team.sh` | Verified |
+| swap-rite.sh | `/Users/tomtenuta/Code/roster/swap-rite.sh` | Verified |
 | ADR-0002 | `/Users/tomtenuta/Code/roster/docs/decisions/ADR-0002-hook-library-resolution-architecture.md` | Verified |
 | settings.local.json | `/Users/tomtenuta/Code/roster/.claude/settings.local.json` | Verified (post-update) |
 | session-context.sh (canonical) | `/Users/tomtenuta/Code/roster/user-hooks/session-context.sh` | Verified |

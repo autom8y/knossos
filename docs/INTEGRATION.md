@@ -42,7 +42,7 @@ $ROSTER_HOME/roster-sync init
 # Sync updates from roster
 $ROSTER_HOME/roster-sync sync
 
-# Sync and refresh active team
+# Sync and refresh active rite
 $ROSTER_HOME/roster-sync sync --refresh
 
 # Check sync status
@@ -58,7 +58,7 @@ $ROSTER_HOME/roster-sync diff
 |---------|---------|
 | `init [path]` | Initialize a new satellite project |
 | `sync` | Pull updates from roster |
-| `status` | Show sync status and active team |
+| `status` | Show sync status and active rite |
 | `validate` | Check manifest integrity |
 | `diff [file]` | Show pending changes |
 | `repair` | Rebuild manifest from current state |
@@ -69,23 +69,23 @@ $ROSTER_HOME/roster-sync diff
 |------|---------|
 | `--force`, `-f` | Override conflict detection |
 | `--dry-run`, `-n` | Preview changes without applying |
-| `--refresh`, `-r` | Also refresh active team |
+| `--refresh`, `-r` | Also refresh active rite |
 | `--prune`, `-p` | Remove orphaned files |
 
 ## Team Management
 
 ```bash
 # List available teams
-./swap-team.sh --list
+./swap-rite.sh --list
 
 # Switch to a team
-./swap-team.sh <team-name>
+./swap-rite.sh <team-name>
 
 # Refresh current team from roster
-./swap-team.sh --refresh
+./swap-rite.sh --refresh
 
-# Show current active team
-./swap-team.sh
+# Show current active rite
+./swap-rite.sh
 ```
 
 ## Environment Variables
@@ -102,7 +102,7 @@ export ROSTER_HOME="$HOME/Code/roster"
 ## Team Pack Structure
 
 ```
-teams/<team-name>/
+rites/<team-name>/
   +-- agents/           # Agent prompt files (*.md)
   |   +-- orchestrator.md
   |   +-- specialist.md
@@ -124,15 +124,15 @@ Roster uses a **two-tier destination model**: user-level artifacts go to `~/.cla
 | `user-commands/` | `~/.claude/commands/` | `sync-user-commands.sh` | User (global) |
 | `user-skills/` | `~/.claude/skills/` | `sync-user-skills.sh` | User (global) |
 | `user-hooks/` | `~/.claude/hooks/` | `sync-user-hooks.sh` | User (global) |
-| `teams/{pack}/agents/` | `.claude/agents/` | `swap-team.sh` | Project |
-| `teams/{pack}/skills/` | `.claude/skills/` | `swap-team.sh` | Project |
-| `teams/{pack}/commands/` | `.claude/commands/` | `swap-team.sh` | Project |
+| `rites/{pack}/agents/` | `.claude/agents/` | `swap-rite.sh` | Project |
+| `rites/{pack}/skills/` | `.claude/skills/` | `swap-rite.sh` | Project |
+| `rites/{pack}/commands/` | `.claude/commands/` | `swap-rite.sh` | Project |
 | `.claude/` (roster) | `.claude/` (satellite) | `roster-sync` | Project |
 
 ### Key Points
 
 1. **User-level content** (`user-*/`) syncs to `~/.claude/` (available in all projects)
-2. **Team-level content** (`teams/{pack}/`) syncs to `.claude/` (project-specific)
+2. **Team-level content** (`rites/{pack}/`) syncs to `.claude/` (project-specific)
 3. **NO `.claude/user-*` directories should exist** - these were stale migration artifacts from the skeleton deprecation
 4. **Precedence**: Project-level (`.claude/`) takes precedence over user-level (`~/.claude/`)
 
@@ -146,7 +146,7 @@ Roster Repository
     +-- user-skills/    -> sync-user-skills.sh    -> ~/.claude/skills/   (global)
     +-- user-hooks/     -> sync-user-hooks.sh     -> ~/.claude/hooks/    (global)
     |
-    +-- teams/{pack}/   -> swap-team.sh           -> .claude/agents/     (project)
+    +-- rites/{pack}/   -> swap-rite.sh           -> .claude/agents/     (project)
     |                                             -> .claude/skills/     (project)
     |                                             -> .claude/commands/   (project)
     |
@@ -179,7 +179,7 @@ Run these after pulling roster updates:
 | Mistake | Correct Approach |
 |---------|------------------|
 | Creating `.claude/user-agents/` in satellite | User agents go to `~/.claude/agents/` |
-| Copying team agents to `~/.claude/` | Team agents go to `.claude/agents/` via swap-team |
+| Copying team agents to `~/.claude/` | Team agents go to `.claude/agents/` via swap-rite |
 | Manually editing synced files | Edit in roster, then sync |
 
 ## Manifest Schema (v3)
@@ -209,11 +209,11 @@ Run these after pulling roster updates:
 
 ## Related Files in This Repository
 
-- `swap-team.sh` - Team switching script
+- `swap-rite.sh` - Team switching script
 - `roster-sync/` - Ecosystem synchronization tool
 - `workflow-schema.yaml` - Team pack schema reference
 - `RITE_SKILL_MATRIX.md` - Agent skill assignments
-- `generate-team-context.sh` - Team routing table generator
+- `generate-rite-context.sh` - Team routing table generator
 
 ## Migration from CEM
 

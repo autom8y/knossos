@@ -330,8 +330,8 @@ grep -r "Team not found\|Team validation" ariadne/ | wc -l  # Should be 0
 #### RF-006: Update swap-rite.sh internal terminology
 
 **Before State**:
-- Variables: `active_team`, `current_team`, `team_name` (~50 occurrences)
-- JSON output: `"active_team": "$team_name"`
+- Variables: `active_team`, `current_team`, `rite_name` (~50 occurrences)
+- JSON output: `"active_team": "$rite_name"`
 - Log messages: References to "team"
 
 **After State**:
@@ -340,7 +340,7 @@ grep -r "Team not found\|Team validation" ariadne/ | wc -l  # Should be 0
 - Log messages: References to "rite"
 
 **Key Lines**:
-- Line 860: `"active_team": "$team_name"` -> `"active_rite": "$rite_name"`
+- Line 860: `"active_team": "$rite_name"` -> `"active_rite": "$rite_name"`
 - Line 1004: `"active_team": "unknown"` -> `"active_rite": "unknown"`
 
 **Invariants**:
@@ -717,7 +717,7 @@ Findings deferred for future work:
 
 3. **Thread contract package name**: `internal/hook/threadcontract/` vs `clewcontract/` - doctrine allows drift here.
 
-4. **Cross-team handoff skills**: These use "team" semantically (cross-team coordination). Keep.
+4. **Cross-team handoff skills**: These use "team" semantically (cross-rite coordination). Keep.
 
 ---
 

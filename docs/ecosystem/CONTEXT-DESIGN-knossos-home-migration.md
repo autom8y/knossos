@@ -50,7 +50,7 @@ These files define `ROSTER_HOME` with the canonical fallback pattern:
 | `/Users/tomtenuta/Code/roster/templates/orchestrator-generate.sh` | 26 | `readonly ROSTER_HOME="${ROSTER_HOME:-$HOME/Code/roster}"` | 10 total |
 | `/Users/tomtenuta/Code/roster/templates/validate-orchestrator.sh` | 19 | `readonly ROSTER_HOME="${ROSTER_HOME:-$HOME/Code/roster}"` | 2 total |
 | `/Users/tomtenuta/Code/roster/templates/generate-orchestrator.sh` | 13 | `ROSTER_HOME="${ROSTER_HOME:-$HOME/Code/roster}"` | 5 total |
-| `/Users/tomtenuta/Code/roster/generate-team-context.sh` | 9 | `ROSTER_HOME="${ROSTER_HOME:-$HOME/Code/roster}"` | 2 total |
+| `/Users/tomtenuta/Code/roster/generate-rite-context.sh` | 9 | `ROSTER_HOME="${ROSTER_HOME:-$HOME/Code/roster}"` | 2 total |
 | `/Users/tomtenuta/Code/roster/load-workflow.sh` | 8 | `ROSTER_HOME="${ROSTER_HOME:-$HOME/Code/roster}"` | 4 total |
 | `/Users/tomtenuta/Code/roster/get-workflow-field.sh` | 9 | `ROSTER_HOME="${ROSTER_HOME:-$HOME/Code/roster}"` | 2 total |
 
@@ -81,7 +81,7 @@ Files that use `$ROSTER_HOME` after sourcing or assuming it's set:
 | `/Users/tomtenuta/Code/roster/tests/sync/test-swap-rite-integration.sh` | 17 | Swap tests |
 | `/Users/tomtenuta/Code/roster/tests/sync/test-sync-*.sh` | 3-5 each | Sync unit tests |
 | `/Users/tomtenuta/Code/roster/tests/lib/rite/test-rite-*.sh` | 3-4 each | Rite lib tests |
-| `/Users/tomtenuta/Code/roster/tests/test-team-context-loader.sh` | 7 | Context loader tests |
+| `/Users/tomtenuta/Code/roster/tests/test-rite-context-loader.sh` | 7 | Context loader tests |
 
 ### Category 5: Documentation Files (120+ files)
 
@@ -105,7 +105,7 @@ Commands with `ROSTER_HOME` in execution paths:
 | `/Users/tomtenuta/Code/roster/user-commands/rite-switching/*.md` | `${ROSTER_HOME:-~/Code/roster}/swap-rite.sh` |
 | `/Users/tomtenuta/Code/roster/user-commands/navigation/rite.md` | `${ROSTER_HOME:-~/Code/roster}/swap-rite.sh` |
 | `/Users/tomtenuta/Code/roster/user-commands/cem/sync.md` | `${ROSTER_HOME:-~/Code/roster}/roster-sync` |
-| `/Users/tomtenuta/Code/roster/skills/team/skill.md` | `$ROSTER_HOME/swap-team.sh` |
+| `/Users/tomtenuta/Code/roster/skills/team/skill.md` | `$ROSTER_HOME/swap-rite.sh` |
 
 ---
 
@@ -570,7 +570,7 @@ Primary scripts requiring `source` addition:
 - `sync-user-hooks.sh`, `sync-user-skills.sh`, `sync-user-agents.sh`, `sync-user-commands.sh`
 - `install-hooks.sh`
 - `templates/orchestrator-generate.sh`, `templates/validate-orchestrator.sh`, `templates/generate-orchestrator.sh`
-- `generate-team-context.sh`, `load-workflow.sh`, `get-workflow-field.sh`
+- `generate-rite-context.sh`, `load-workflow.sh`, `get-workflow-field.sh`
 - `user-hooks/lib/config.sh`
 
 Library scripts requiring variable rename:

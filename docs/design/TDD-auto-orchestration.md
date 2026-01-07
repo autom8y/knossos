@@ -260,7 +260,7 @@ fi
 # Extract command
 COMMAND=$(echo "$USER_PROMPT" | grep -oE '^/(start|sprint|task)' | tr -d '/')
 
-# Check if orchestrator is present in active team
+# Check if orchestrator is present in active rite
 if [[ ! -f "$PROJECT_DIR/.claude/agents/orchestrator.md" ]]; then
     # No orchestrator = direct execution is valid
     log_end 0 2>/dev/null || true
@@ -281,7 +281,7 @@ fi
 # Clean up initiative (remove quotes if present)
 INITIATIVE=$(echo "$INITIATIVE" | sed 's/^"//;s/"$//' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
 
-# Get active team
+# Get active rite
 ACTIVE_RITE=$(cat ".claude/ACTIVE_RITE" 2>/dev/null || echo "none")
 
 # Check for existing session
@@ -807,7 +807,7 @@ fi
 **File**: `/Users/tomtenuta/Code/roster/.claude/hooks/session-guards/start-preflight.sh`
 
 **Changes**:
-1. Detect if orchestrator exists in active team
+1. Detect if orchestrator exists in active rite
 2. Skip session creation output if orchestrator handled it
 3. Maintain existing behavior for non-orchestrated teams
 

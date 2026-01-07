@@ -12,7 +12,7 @@
 
 ## 1. Overview
 
-This Technical Design Document specifies the implementation of the **sync domain** for Ariadne (`ari`), the Go binary replacement for the roster bash script harness. The sync domain encompasses 7 commands that manage synchronization of Claude Code resources -- team packs, skills, and hooks -- between local projects and remote sources. This is Phase 4 and the final domain for Ariadne v1.0.
+This Technical Design Document specifies the implementation of the **sync domain** for Ariadne (`ari`), the Go binary replacement for the roster bash script harness. The sync domain encompasses 7 commands that manage synchronization of Claude Code resources -- rites, skills, and hooks -- between local projects and remote sources. This is Phase 4 and the final domain for Ariadne v1.0.
 
 ### 1.1 Context
 
@@ -116,7 +116,7 @@ ariadne/
          v
 ┌─────────────────────────────────────────────────────────────────┐
 │  Filesystem: .claude/sync/state.json, .claude/sync/history.json,│
-│  teams/, ~/.claude/skills/, .claude/hooks/                       │
+│  rites/, ~/.claude/skills/, .claude/hooks/                       │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -128,7 +128,7 @@ Resources that can be synced:
 
 | Target | Local Path | Remote Source |
 |--------|------------|---------------|
-| Team Packs | `teams/{name}/` | GitHub repo, local path |
+| Team Packs | `rites/{name}/` | GitHub repo, local path |
 | Skills | `~/.claude/skills/` | GitHub repo, local path |
 | Hooks | `.claude/hooks/` | GitHub repo, local path |
 
@@ -141,7 +141,7 @@ remotes:
     url: "https://github.com/autom8y/roster"
     branch: main
     paths:
-      teams: teams/
+      teams: rites/
       skills: .claude/skills/
       hooks: .claude/hooks/
   custom-skills:
@@ -202,7 +202,7 @@ ari sync status [--resource=TYPE] [--verbose]
     "teams": {
       "status": "synced",
       "tracked": 4,
-      "local_path": "teams/",
+      "local_path": "rites/",
       "remote": "https://github.com/autom8y/roster",
       "last_sync": "2026-01-04T18:00:00Z",
       "items": [
@@ -248,7 +248,7 @@ ari sync status [--resource=TYPE] [--verbose]
 ```
 Sync Status (as of 2026-01-04T18:00:00Z)
 
-Teams (teams/)
+Teams (rites/)
   Status: SYNCED
   Tracked: 4 teams
   Remote: https://github.com/autom8y/roster
@@ -355,7 +355,7 @@ ari sync pull [--resource=TYPE] [--remote=NAME] [--dry-run] [--force]
       {
         "resource": "teams",
         "name": "10x-dev-pack",
-        "path": "teams/10x-dev-pack/workflow.yaml",
+        "path": "rites/10x-dev-pack/workflow.yaml",
         "conflict_file": ".claude/sync/conflicts/workflow.yaml-20260104-190000.conflict",
         "base_checksum": "sha256:base123...",
         "local_checksum": "sha256:local456...",
@@ -452,7 +452,7 @@ ari sync push [--resource=TYPE] [--remote=NAME] [--dry-run] [--message=TEXT]
       {
         "resource": "teams",
         "name": "10x-dev-pack",
-        "path": "teams/10x-dev-pack/workflow.yaml",
+        "path": "rites/10x-dev-pack/workflow.yaml",
         "checksum": "sha256:new123..."
       }
     ]
@@ -521,7 +521,7 @@ ari sync diff [--resource=TYPE] [--name=NAME] [--format=FORMAT]
       "resource": "teams",
       "name": "10x-dev-pack",
       "file": "workflow.yaml",
-      "local_path": "teams/10x-dev-pack/workflow.yaml",
+      "local_path": "rites/10x-dev-pack/workflow.yaml",
       "status": "modified",
       "changes": [
         {
@@ -544,8 +544,8 @@ ari sync diff [--resource=TYPE] [--name=NAME] [--format=FORMAT]
 
 **Output (unified, text)**:
 ```
---- local: teams/10x-dev-pack/workflow.yaml
-+++ remote: roster:teams/10x-dev-pack/workflow.yaml
+--- local: rites/10x-dev-pack/workflow.yaml
++++ remote: roster:rites/10x-dev-pack/workflow.yaml
 
 @@ entry_point @@
   entry_point:
@@ -828,7 +828,7 @@ Example:
     "details": {
       "conflict_count": 2,
       "conflicts": [
-        "teams/10x-dev-pack/workflow.yaml",
+        "rites/10x-dev-pack/workflow.yaml",
         "skills/commit-ref.md"
       ],
       "resolution_hint": "Run 'ari sync resolve' to resolve conflicts"
@@ -969,8 +969,8 @@ Conflict files stored in `.claude/sync/conflicts/`:
   "resource": "teams",
   "name": "10x-dev-pack",
   "file": "workflow.yaml",
-  "local_path": "teams/10x-dev-pack/workflow.yaml",
-  "remote_url": "https://github.com/autom8y/roster/blob/main/teams/10x-dev-pack/workflow.yaml",
+  "local_path": "rites/10x-dev-pack/workflow.yaml",
+  "remote_url": "https://github.com/autom8y/roster/blob/main/rites/10x-dev-pack/workflow.yaml",
   "base": {
     "checksum": "sha256:base123...",
     "content": "... base content ..."
@@ -1600,8 +1600,8 @@ func (r *Resolver) ResolveConflict(conflict ConflictEntry, strategy string) (*Re
 
 ### 8.1 Team Domain
 
-Sync domain integrates with team domain for team pack synchronization:
-- `ari sync pull --resource=teams` updates `teams/` directory
+Sync domain integrates with team domain for rite synchronization:
+- `ari sync pull --resource=teams` updates `rites/` directory
 - Team domain's `AGENT_MANIFEST.json` remains separate (team-local tracking)
 - `ari team validate` can be called post-sync for validation
 
@@ -1627,7 +1627,7 @@ State-mate can invoke sync commands:
 # Check for available updates
 ari sync status --output=json
 
-# Pull latest team packs
+# Pull latest rites
 ari sync pull --resource=teams --output=json
 
 # After resolving conflicts
@@ -1704,7 +1704,7 @@ ariadne/
         │   └── conflict-state.json
         ├── remotes/
         │   └── mock-roster/
-        │       ├── teams/
+        │       ├── rites/
         │       │   └── 10x-dev-pack/
         │       │       └── workflow.yaml
         │       └── skills/

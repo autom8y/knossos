@@ -274,7 +274,7 @@ The parallel model allows:
 | Session creation fails (lock timeout) | Output CONSULTATION_REQUEST with manual session creation guidance |
 | Session creation fails (filesystem error) | Output error message with recovery steps |
 | Initiative name contains special characters | Properly escape in Task invocation |
-| No orchestrator in team pack | Skip CONSULTATION_REQUEST, proceed with direct execution guidance |
+| No orchestrator in rite | Skip CONSULTATION_REQUEST, proceed with direct execution guidance |
 | ACTIVE_RITE not set | Create cross-cutting session, adjust Task invocation accordingly |
 | `/start` in worktree | Include worktree context in Task invocation |
 | Parallel `/start` in multiple terminals | Locking prevents race conditions; second terminal gets "session exists" |

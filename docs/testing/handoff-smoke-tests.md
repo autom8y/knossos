@@ -1,11 +1,11 @@
 # Handoff Smoke Tests
 
-> Minimal validation for all cross-team handoff paths.
+> Minimal validation for all cross-rite handoff paths.
 > Version: 1.0.0
 
 ## Overview
 
-This document defines smoke tests for all valid cross-team handoff paths in the roster ecosystem. Each test validates that a handoff can be produced, transmitted, and consumed correctly.
+This document defines smoke tests for all valid cross-rite handoff paths in the roster ecosystem. Each test validates that a handoff can be produced, transmitted, and consumed correctly.
 
 **Teams**: 10 (10x-dev-pack, debt-triage-pack, doc-team-pack, ecosystem-pack, hygiene-pack, intelligence-pack, rnd-pack, security-pack, sre-pack, strategy-pack)
 
@@ -662,7 +662,7 @@ for field in source_team target_team handoff_type created initiative; do
   fi
 done
 
-# Validate team names
+# Validate rite names
 source=$(yq e '.source_team' "$HANDOFF_FILE")
 target=$(yq e '.target_team' "$HANDOFF_FILE")
 
@@ -785,7 +785,7 @@ jobs:
 
 ## Related Documents
 
-- [Cross-Team Handoff Schema](../../.claude/skills/shared/cross-team-handoff/schema.md)
+- [Cross-Team Handoff Schema](../../.claude/skills/shared/cross-rite-handoff/schema.md)
 - [Cross-Team Coordination Playbook](../playbooks/cross-rite-coordination.md)
 - [Edge Cases: Cross-Team Workflows](../edge-cases/cross-rite-workflows.md)
 - [E2E Test: Feature Development](e2e-feature-development.md)

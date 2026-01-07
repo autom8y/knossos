@@ -76,7 +76,7 @@ Evaluated 26 skeleton hooks against 38 roster hooks. Roster has a more mature, r
 | orchestrator-router.sh | Route orchestrator commands |
 | session-fsm.sh | Formal state machine implementation |
 | session-migrate.sh | v1 to v2 schema migration |
-| team-context-loader.sh | Team context loading |
+| rite-context-loader.sh | Team context loading |
 | orchestrated-mode.sh | Context injection for orchestrated sessions |
 
 ### Test Files

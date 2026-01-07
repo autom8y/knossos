@@ -160,7 +160,7 @@ Technical reference for CI/CD teams:
    - Used by: All YAML validation
    - Integration: Direct reference, no modifications needed
 
-4. **Team Orchestrator Configs** (`teams/*/orchestrator.yaml`)
+4. **Team Orchestrator Configs** (`rites/*/orchestrator.yaml`)
    - Status: ✓ Already exist for all teams
    - Impact: Now validated by CI
    - Adoption: Optional (teams can stay manual if desired)

@@ -2,7 +2,7 @@
 
 **Generated**: 2025-12-29
 **Auditor**: Code Smeller (hygiene-pack)
-**Scope**: All command files in `user-commands/` and `teams/*/commands/`
+**Scope**: All command files in `user-commands/` and `rites/*/commands/`
 **Reference Standard**: `docs/ecosystem/CONTEXT-DESIGN-command-argument-standardization.md`
 
 ---
@@ -51,7 +51,7 @@ Commands with argument-hint but missing `$ARGUMENTS` in "Your Task" section.
 | File | Has argument-hint | Has $ARGUMENTS | Notes |
 |------|-------------------|----------------|-------|
 | `user-commands/navigation/team.md` | Yes | Yes | Clean |
-| `teams/ecosystem-pack/commands/cem-debug.md` | No argument-hint | N/A | Falls under S6, not S2 |
+| `rites/ecosystem-pack/commands/cem-debug.md` | No argument-hint | N/A | Falls under S6, not S2 |
 
 **Analysis**: After reviewing all files, most commands correctly include `$ARGUMENTS`. One edge case:
 
@@ -81,8 +81,8 @@ Canonical order: Context -> Pre-flight -> Task -> Behavior -> Flags -> Examples 
 | `user-commands/navigation/worktree.md` | Context -> Pre-flight -> Task -> Commands -> Examples -> Typical Workflow -> Reference | "Commands" instead of "Behavior", "Typical Workflow" section added |
 | `user-commands/session/start.md` | Pre-computed Context -> Task -> Behavior -> Complexity Levels -> Example Usage -> Reference | "Pre-computed Context" variant, "Complexity Levels" extra section |
 | `user-commands/workflow/sprint.md` | Context -> Pre-flight -> Task -> Behavior -> Example -> When to Use -> Parallel Sprint Pattern -> Reference | "When to Use" after Example, extra "Parallel Sprint Pattern" section |
-| `teams/doc-team-pack/commands/consolidate.md` | Context -> Task -> Parameters -> Workflow Phases -> Behavior -> Examples -> Phase Transitions -> Resumption -> Error Handling -> Reference | Multiple extra sections interspersed |
-| `teams/ecosystem-pack/commands/cem-debug.md` | Context -> Task -> Behavior -> When to Use -> CEM Diagnostic Checklist -> Expected Output -> Handoff -> Reference | Multiple extra sections |
+| `rites/doc-team-pack/commands/consolidate.md` | Context -> Task -> Parameters -> Workflow Phases -> Behavior -> Examples -> Phase Transitions -> Resumption -> Error Handling -> Reference | Multiple extra sections interspersed |
+| `rites/ecosystem-pack/commands/cem-debug.md` | Context -> Task -> Behavior -> When to Use -> CEM Diagnostic Checklist -> Expected Output -> Handoff -> Reference | Multiple extra sections |
 
 **Note**: Section order violations are LOW severity as they don't break functionality, only consistency.
 
@@ -110,8 +110,8 @@ Flags documented as bullet list instead of table format with "Handled By" column
 
 | Flag | Short | Description | Handled By |
 |------|-------|-------------|------------|
-| `--update` | `-u` | Pull latest definitions from roster | swap-team.sh |
-| `--dry-run` | - | Preview changes without applying | swap-team.sh |
+| `--update` | `-u` | Pull latest definitions from roster | swap-rite.sh |
+| `--dry-run` | - | Preview changes without applying | swap-rite.sh |
 ```
 
 **Actual Format** (in team-switching commands):
@@ -132,7 +132,7 @@ No commands still reference `--refresh` or `--force` flags.
 | `--refresh` in user-commands | 0 matches (correctly updated to `--update`) |
 | `--force` in user-commands | Only in `sync.md` which correctly uses CEM's `--force` |
 
-**Note**: The `user-commands/cem/sync.md` uses `--force` for CEM's force flag which is distinct from swap-team.sh's deprecated `--force`. This is correct per the standard which notes CEM's `--refresh` is unaffected.
+**Note**: The `user-commands/cem/sync.md` uses `--force` for CEM's force flag which is distinct from swap-rite.sh's deprecated `--force`. This is correct per the standard which notes CEM's `--refresh` is unaffected.
 
 ### S6: Missing Frontmatter Fields (6 files) - HIGH
 
@@ -141,9 +141,9 @@ No commands still reference `--refresh` or `--force` flags.
 | `user-commands/meta/minus-1.md` | ALL (no frontmatter) | File starts with `# Session -1:` |
 | `user-commands/meta/zero.md` | ALL (no frontmatter) | File starts with `# Session 0:` |
 | `user-commands/meta/one.md` | ALL (no frontmatter) | File starts with `# Session 1:` |
-| `user-commands/navigation/team.md` | `allowed-tools` | Uses Bash for swap-team.sh but `allowed-tools` not declared |
+| `user-commands/navigation/team.md` | `allowed-tools` | Uses Bash for swap-rite.sh but `allowed-tools` not declared |
 | `user-commands/cem/sync.md` | `model` | Has description, argument-hint, allowed-tools but no model |
-| `teams/ecosystem-pack/commands/cem-debug.md` | `argument-hint` | Has description, allowed-tools, model but no argument-hint despite accepting implicit arguments |
+| `rites/ecosystem-pack/commands/cem-debug.md` | `argument-hint` | Has description, allowed-tools, model but no argument-hint despite accepting implicit arguments |
 
 **Required Frontmatter** (per standard):
 ```yaml
@@ -163,7 +163,7 @@ All team-switching commands correctly pass `$ARGUMENTS` in Behavior execution.
 ```markdown
 ## Behavior
 
-1. Execute: `${ROSTER_HOME:-~/Code/roster}/swap-team.sh 10x-dev-pack $ARGUMENTS`
+1. Execute: `${ROSTER_HOME:-~/Code/roster}/swap-rite.sh 10x-dev-pack $ARGUMENTS`
 ```
 
 All 10 team-switching commands follow this pattern correctly.
@@ -194,8 +194,8 @@ All 10 team-switching commands follow this pattern correctly.
 | `user-commands/navigation/sessions.md` | S3 | LOW | 6 (LOW) |
 | `user-commands/session/start.md` | S3 | LOW | 6 (LOW) |
 | `user-commands/workflow/sprint.md` | S3 | LOW | 6 (LOW) |
-| `teams/doc-team-pack/commands/consolidate.md` | S3 | LOW | 6 (LOW) |
-| `teams/ecosystem-pack/commands/cem-debug.md` | S3, S6 | LOW | 4 (MEDIUM) |
+| `rites/doc-team-pack/commands/consolidate.md` | S3 | LOW | 6 (LOW) |
+| `rites/ecosystem-pack/commands/cem-debug.md` | S3, S6 | LOW | 4 (MEDIUM) |
 
 ---
 
@@ -223,12 +223,12 @@ These files fully comply with the canonical template:
 ### user-commands/navigation/
 - `consult.md`
 
-### teams/forge-pack/commands/
+### rites/forge-pack/commands/
 - `new-team.md`
 - `validate-team.md`
 - `eval-agent.md`
 
-### teams/10x-dev-pack/commands/
+### rites/10x-dev-pack/commands/
 - `spike.md`
 - `pr.md`
 
@@ -265,11 +265,11 @@ Convert bullet-list flags to table format in all team-switching commands and `ec
 
 | Flag | Short | Description | Handled By |
 |------|-------|-------------|------------|
-| `--update` | `-u` | Pull latest definitions from roster | swap-team.sh |
-| `--dry-run` | - | Preview changes without applying | swap-team.sh |
-| `--keep-all` | - | Keep all orphan agents in project | swap-team.sh |
-| `--remove-all` | - | Remove all orphan agents | swap-team.sh |
-| `--promote-all` | - | Move orphan agents to user-level | swap-team.sh |
+| `--update` | `-u` | Pull latest definitions from roster | swap-rite.sh |
+| `--dry-run` | - | Preview changes without applying | swap-rite.sh |
+| `--keep-all` | - | Keep all orphan agents in project | swap-rite.sh |
+| `--remove-all` | - | Remove all orphan agents | swap-rite.sh |
+| `--promote-all` | - | Move orphan agents to user-level | swap-rite.sh |
 ```
 
 ### Priority 4: Fix $ARGUMENTS Placement (1 file)

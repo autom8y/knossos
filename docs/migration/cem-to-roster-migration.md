@@ -18,7 +18,7 @@ Before migrating, understand where artifacts belong:
 | `user-commands/` | `~/.claude/commands/` | User (global) |
 | `user-skills/` | `~/.claude/skills/` | User (global) |
 | `user-hooks/` | `~/.claude/hooks/` | User (global) |
-| `teams/{pack}/` | `.claude/` | Project |
+| `rites/{pack}/` | `.claude/` | Project |
 
 **Critical**: NO `.claude/user-*` directories should exist in satellite projects. If you see `.claude/user-agents/`, `.claude/user-commands/`, `.claude/user-skills/`, or `.claude/user-hooks/` in a satellite project, these are stale migration artifacts from skeleton deprecation and should be removed.
 
@@ -341,14 +341,14 @@ Orphaned files are moved to the backup directory with timestamps, never permanen
 
 ### --auto-refresh Flag
 
-Automatically refreshes the active team if roster has updates to team resources:
+Automatically refreshes the active rite if roster has updates to team resources:
 
 ```bash
 roster-sync sync --auto-refresh
 ```
 
 Only triggers a team refresh if:
-- An active team is set (ACTIVE_RITE exists)
+- An active rite is set (ACTIVE_RITE exists)
 - The team in roster has changes since last sync
 
 ### --force Flag
@@ -508,7 +508,7 @@ echo 'export ROSTER_HOME="$HOME/Code/roster"' >> ~/.zshrc
 
 **Warning**: `Team may need refresh`
 
-**What happened**: The active team has updates in roster since last sync.
+**What happened**: The active rite has updates in roster since last sync.
 
 **Solution**:
 ```bash

@@ -88,7 +88,7 @@ echo $?  # Shows 0, should show 6
 **Description**: The Go code expects JSON field `"team"` for agent origin, but the existing production manifest uses `"origin"` field. This causes:
 1. All agents appear to have empty team field
 2. DetectOrphans() incorrectly flags all agents as orphans
-3. Team status shows active team's agents as orphans
+3. Team status shows active rite's agents as orphans
 
 **Evidence**:
 ```json
@@ -104,7 +104,7 @@ Team string `json:"team,omitempty"`
 **Reproduction**:
 ```bash
 /tmp/ari_static team status --output json | jq '.orphans'
-# Returns all 5 agents as orphans even though they're from active team
+# Returns all 5 agents as orphans even though they're from active rite
 ```
 
 **Impact**:
@@ -173,14 +173,14 @@ Message: fmt.Sprintf("All %d agent files present", len(expectedAgents))
 | Test | Result | Notes |
 |------|--------|-------|
 | `team list --output json` | PASS | Returns correct team data |
-| `team list --format name-only` | PASS | Returns team names |
-| `team status` (active team) | PASS* | Works but shows false orphans |
+| `team list --format name-only` | PASS | Returns rite names |
+| `team status` (active rite) | PASS* | Works but shows false orphans |
 | `team validate` (structure checks) | PASS | TEAM_EXISTS, AGENTS_DIR, WORKFLOW_YAML pass |
 | Project not found handling | PASS | Correct exit code 9 |
 | Validation failed exit code | PASS | Correct exit code 12 |
-| Injection in team name | PASS | Safely rejected |
+| Injection in rite name | PASS | Safely rejected |
 | Path traversal attempt | PASS | Safely rejected |
-| Long team name | PASS | Graceful handling |
+| Long rite name | PASS | Graceful handling |
 | Race detector tests | PASS | No races detected |
 
 ---
@@ -192,7 +192,7 @@ Message: fmt.Sprintf("All %d agent files present", len(expectedAgents))
 | `team switch` any args | Switch or error | Panic | D-001 |
 | Exit code for TEAM_NOT_FOUND | 6 | 0 | D-002 |
 | Exit code for FILE_NOT_FOUND | 6 | 0 | D-002 |
-| Orphan detection accuracy | Empty for active team | 5 false positives | D-003 |
+| Orphan detection accuracy | Empty for active rite | 5 false positives | D-003 |
 | Agent count in validate msg | "All 4 agent files" | "All \u0004 agent files" | D-004 |
 | MANIFEST_SYNC validation | PASS | WARN | D-005 |
 | Switch with orphan flags | Execute switch | Panic before flag parse | D-001 |
@@ -219,7 +219,7 @@ Message: fmt.Sprintf("All %d agent files present", len(expectedAgents))
 | Check | Status | Notes |
 |-------|--------|-------|
 | Path traversal | PASS | Team names with `..` are rejected |
-| Command injection | PASS | Shell metacharacters in team names are safe |
+| Command injection | PASS | Shell metacharacters in rite names are safe |
 | Input length limits | PASS | Long inputs handled gracefully |
 | Sensitive data exposure | PASS | No credentials in output |
 
@@ -231,7 +231,7 @@ Message: fmt.Sprintf("All %d agent files present", len(expectedAgents))
 
 2. **No CLI integration tests**: The `internal/cmd/team/` package has no test files. Cobra command construction is untested.
 
-3. **Missing testdata for broken scenarios**: `testdata/teams/broken-team/` has no agents directory, making it not discoverable by the real teams/ path.
+3. **Missing testdata for broken scenarios**: `testdata/rites/broken-team/` has no agents directory, making it not discoverable by the real rites/ path.
 
 4. **Schema backward compatibility**: No tests verify compatibility with existing bash-generated manifests.
 
@@ -248,7 +248,7 @@ Message: fmt.Sprintf("All %d agent files present", len(expectedAgents))
 - [ ] D-004: Fix agent count string conversion (5 minutes)
 
 ### Recommended Improvements
-- [ ] Add CLI integration tests for cmd/team package
+- [ ] Add CLI integration tests for cmd/riteage
 - [ ] Add backward compatibility test with real manifest
 - [ ] Add testdata fixture with production-like manifest
 

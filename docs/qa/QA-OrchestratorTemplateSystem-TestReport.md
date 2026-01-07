@@ -16,7 +16,7 @@ The orchestrator template system is **production-ready** with one documented cos
 
 - Generator produces valid, fully-substituted orchestrator.md files
 - Validator correctly catches structural and semantic issues
-- Infrastructure integration (swap-team.sh, AGENT_MANIFEST) works correctly
+- Infrastructure integration (swap-rite.sh, AGENT_MANIFEST) works correctly
 - Cross-satellite integration verified with skeleton_claude
 - Error handling is robust for all tested edge cases
 
@@ -48,12 +48,12 @@ The orchestrator template system is **production-ready** with one documented cos
 | Test ID | Test Case | Result | Notes |
 |---------|-----------|--------|-------|
 | INF-001 | Frontmatter parsing | PASS | name/role/tools/model/color all parseable |
-| INF-002 | swap-team.sh --list | PASS | All 11 teams listed |
-| INF-003 | swap-team.sh dry-run | PASS | Correctly shows changes |
-| INF-004 | swap-team.sh to ecosystem-pack | PASS | 6 agents, 1 command, 4 skills synced |
+| INF-002 | swap-rite.sh --list | PASS | All 11 teams listed |
+| INF-003 | swap-rite.sh dry-run | PASS | Correctly shows changes |
+| INF-004 | swap-rite.sh to ecosystem-pack | PASS | 6 agents, 1 command, 4 skills synced |
 | INF-005 | AGENT_MANIFEST.json update | PASS | Correct format with all agents |
 | INF-006 | ACTIVE_RITE update | PASS | Team name updated |
-| INF-007 | swap-team.sh back to 10x-dev-pack | PASS | Round-trip successful |
+| INF-007 | swap-rite.sh back to 10x-dev-pack | PASS | Round-trip successful |
 
 ### Category 3: Extension Points and Custom Content
 
@@ -71,8 +71,8 @@ The orchestrator template system is **production-ready** with one documented cos
 | ADV-001 | Missing orchestrator.yaml | PASS | Clear error: "Config file not found" |
 | ADV-002 | Invalid YAML syntax | PASS | Clear error: "Failed to parse YAML" |
 | ADV-003 | Missing required fields | PASS | Clear error identifies missing field |
-| ADV-004 | Trailing slash in team name | PASS | Handled correctly |
-| ADV-005 | teams/ prefix in team name | PASS | Handled correctly |
+| ADV-004 | Trailing slash in rite name | PASS | Handled correctly |
+| ADV-005 | rites/ prefix in rite name | PASS | Handled correctly |
 | ADV-006 | Concurrent generation | PASS | Both teams generated without conflict |
 | ADV-007 | Validator with empty file | PASS | Correctly fails with 4 errors |
 | ADV-008 | Validator without arguments | PASS | Shows usage message |
@@ -157,7 +157,7 @@ The orchestrator template system is **production-ready** with one documented cos
 2. **yq version differences** - Only tested with installed version
 3. **Disk full scenarios** - Simulated only via code review
 4. **Network failure during git operations** - Not applicable (local only)
-5. **Very long team names** - Not tested (no practical concern)
+5. **Very long rite names** - Not tested (no practical concern)
 
 ---
 

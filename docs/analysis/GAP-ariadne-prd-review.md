@@ -77,10 +77,10 @@ The PRD (`docs/requirements/PRD-ariadne.md`) is **substantially complete** and r
 | session | audit | (new capability) | PARTIAL - GAP-3 |
 | session | lock | (implicit in bash) | YES |
 | session | unlock | (implicit in bash) | YES |
-| team | switch | swap-team.sh | YES |
-| team | list | swap-team.sh --list | YES |
-| team | status | swap-team.sh --status | YES |
-| team | validate | swap-team.sh --verify | YES |
+| team | switch | swap-rite.sh | YES |
+| team | list | swap-rite.sh --list | YES |
+| team | status | swap-rite.sh --status | YES |
+| team | validate | swap-rite.sh --verify | YES |
 | manifest | show | (new capability) | YES |
 | manifest | diff | (new capability) | YES |
 | manifest | validate | (new capability) | YES |
@@ -122,7 +122,7 @@ ari session audit [--session-id=ID] [--limit=N]
 
 **GAP-4: Missing --dry-run Global Flag**
 
-**Issue**: `--dry-run` is specified for `sync pull`, `sync push`, `sync repair` but not as a global flag. The bash scripts (swap-team.sh, roster-sync) support `--dry-run` at multiple levels.
+**Issue**: `--dry-run` is specified for `sync pull`, `sync push`, `sync repair` but not as a global flag. The bash scripts (swap-rite.sh, roster-sync) support `--dry-run` at multiple levels.
 
 **Recommendation**: Add `--dry-run` as global flag or explicitly document which commands support it.
 
@@ -151,8 +151,8 @@ ari session audit [--session-id=ID] [--limit=N]
 | TEAM_NOT_FOUND | `ari team switch <invalid>` |
 | SYNC_CONFLICT | Three-way sync classification conflict |
 | MANIFEST_MISMATCH | Manifest checksum validation failure |
-| ORPHAN_CONFLICT | swap-team.sh EXIT_ORPHAN_CONFLICT equivalent |
-| RECOVERY_REQUIRED | swap-team.sh EXIT_RECOVERY_REQUIRED equivalent |
+| ORPHAN_CONFLICT | swap-rite.sh EXIT_ORPHAN_CONFLICT equivalent |
+| RECOVERY_REQUIRED | swap-rite.sh EXIT_RECOVERY_REQUIRED equivalent |
 
 **Recommendation**: Add domain-specific error codes in TDD. Exit codes can share (e.g., TEAM_NOT_FOUND = 6 like FILE_NOT_FOUND).
 
@@ -193,7 +193,7 @@ ari session audit [--session-id=ID] [--limit=N]
 
 **Current bash scripts to migrate**:
 1. `session-manager.sh` -> `ari session *`
-2. `swap-team.sh` -> `ari team *`
+2. `swap-rite.sh` -> `ari team *`
 3. `roster-sync` (lib/sync/*) -> `ari sync *`
 
 **GAP-6: Migration Order Conflict**
@@ -363,7 +363,7 @@ Before starting TDD:
 | Spike | docs/spikes/SPIKE-ariadne-go-cli-architecture.md | Research findings |
 | state-mate | user-agents/state-mate.md | Integration target |
 | session-manager.sh | .claude/hooks/lib/session-manager.sh | Replacement target |
-| swap-team.sh | swap-team.sh | Replacement target |
+| swap-rite.sh | swap-rite.sh | Replacement target |
 | sync-core.sh | lib/sync/sync-core.sh | Replacement target |
 | session-context.schema.json | schemas/artifacts/session-context.schema.json | Validation schema |
 
@@ -381,7 +381,7 @@ Before starting TDD:
 
 - [x] Root cause traced to specific component (PRD vs spike alignment)
 - [x] Success criteria defined (all spike findings incorporated)
-- [x] Affected systems enumerated (session-manager.sh, swap-team.sh, roster-sync, state-mate)
+- [x] Affected systems enumerated (session-manager.sh, swap-rite.sh, roster-sync, state-mate)
 - [x] Complexity level recommended (MODULE)
 - [x] Test satellite matrix specified
 - [x] Gap analysis committed to session artifacts

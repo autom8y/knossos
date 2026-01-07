@@ -178,7 +178,7 @@
 |---------|-------|-------------|
 | `/consult` | opus | Ecosystem guidance |
 | `/ecosystem` | sonnet | Switch to ecosystem-pack |
-| `/team` | sonnet | Switch team packs |
+| `/team` | sonnet | Switch rites |
 | `/sessions` | sonnet | List/manage sessions |
 | `/worktree` | sonnet | Manage isolated worktrees |
 
@@ -220,8 +220,8 @@
 | `/consolidate` | opus | doc-team-pack | Consolidate documentation |
 | `/cem-debug` | opus | ecosystem-pack | Diagnose CEM issues |
 | `/eval-agent` | opus | forge-pack | Test agent in isolation |
-| `/new-team` | opus | forge-pack | Create new team pack |
-| `/validate-team` | opus | forge-pack | Validate team pack |
+| `/new-team` | opus | forge-pack | Create new rite |
+| `/validate-team` | opus | forge-pack | Validate rite |
 
 ---
 
@@ -307,20 +307,20 @@ Currently 0 haiku. Potential candidates for simple tasks:
 
 ```
 Agents:
-├── $ROSTER_HOME/teams/*/agents/*.md      (team agents)
+├── $ROSTER_HOME/rites/*/agents/*.md      (team agents)
 ├── $ROSTER_HOME/user-agents/*.md          (user-level agents)
 └── ~/.claude/agents/*.md                   (global installed)
 
 Commands:
 ├── $ROSTER_HOME/user-commands/*/*.md      (user commands)
-└── $ROSTER_HOME/teams/*/commands/*.md     (team commands)
+└── $ROSTER_HOME/rites/*/commands/*.md     (team commands)
 
 Hooks:
 └── $ROSTER_HOME/.claude/hooks/*.sh        (no model logic)
 
 Skills:
 ├── $ROSTER_HOME/.claude/skills/*/         (active skills)
-└── $ROSTER_HOME/teams/*/skills/*/         (team skills)
+└── $ROSTER_HOME/rites/*/skills/*/         (team skills)
 ```
 
 ---

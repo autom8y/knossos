@@ -11,7 +11,7 @@
 
 **Recommendation: GO**
 
-All critical sync scripts and swap-team operations pass validation. Minor issues identified (orphan backups accumulating, update-available files) are P3 severity and do not block release.
+All critical sync scripts and swap-rite operations pass validation. Minor issues identified (orphan backups accumulating, update-available files) are P3 severity and do not block release.
 
 ---
 
@@ -85,7 +85,7 @@ All critical sync scripts and swap-team operations pass validation. Minor issues
 
 ---
 
-### Test 5: swap-team.sh --dry-run ecosystem-pack (CRITICAL)
+### Test 5: swap-rite.sh --dry-run ecosystem-pack (CRITICAL)
 
 | Aspect | Result | Details |
 |--------|--------|---------|
@@ -97,7 +97,7 @@ All critical sync scripts and swap-team operations pass validation. Minor issues
 | **Hook Registration** | OK | Valid JSON output |
 
 **Orphans Detected**:
-- `cross-team-handoff` (from shared)
+- `cross-rite-handoff` (from shared)
 - `shared-templates` (from shared)
 - `smell-detection` (from shared)
 
@@ -105,7 +105,7 @@ All critical sync scripts and swap-team operations pass validation. Minor issues
 
 ---
 
-### Test 6: swap-team.sh --dry-run 10x-dev-pack
+### Test 6: swap-rite.sh --dry-run 10x-dev-pack
 
 | Aspect | Result | Details |
 |--------|--------|---------|
@@ -166,7 +166,7 @@ All critical sync scripts and swap-team operations pass validation. Minor issues
 | Commands | 4 | cem-debug.md, consolidate.md, pr.md, spike.md |
 | Skills | 25 | Various team-specific skills |
 
-**Analysis**: Orphan backups are accumulating. This is expected behavior for team switching but may warrant periodic cleanup.
+**Analysis**: Orphan backups are accumulating. This is expected behavior for rite switching but may warrant periodic cleanup.
 
 **Verdict**: PASS (P3 - cleanup recommended but not blocking)
 
@@ -192,7 +192,7 @@ All critical sync scripts and swap-team operations pass validation. Minor issues
 | schema_version | 3 | OK |
 | roster.path | /Users/tomtenuta/Code/skeleton_claude | OK |
 | roster.commit | 6053c2d | OK |
-| team.name | ecosystem-pack | OK |
+| rite.name | ecosystem-pack | OK |
 | team.checksum | Present | OK |
 | managed_files | Present | OK |
 
@@ -222,8 +222,8 @@ All critical sync scripts and swap-team operations pass validation. Minor issues
 | 2 | sync-user-skills.sh --status | PASS |
 | 3 | sync-user-hooks.sh --status | PASS |
 | 4 | sync-user-commands.sh --status | PASS |
-| 5 | swap-team.sh --dry-run ecosystem-pack | PASS |
-| 6 | swap-team.sh --dry-run 10x-dev-pack | PASS |
+| 5 | swap-rite.sh --dry-run ecosystem-pack | PASS |
+| 6 | swap-rite.sh --dry-run 10x-dev-pack | PASS |
 | 7 | Orphan cleanup --dry-run | PASS |
 | 8 | Validate all team workflows | PASS (11/11) |
 | 9 | Check for orphan backups | PASS (P3) |
@@ -238,7 +238,7 @@ All critical sync scripts and swap-team operations pass validation. Minor issues
 ### Recommended Follow-up Actions
 
 1. **Optional Sync Update**: Run sync scripts to clear "update available" items
-2. **Optional Cleanup**: Run `./swap-team.sh --cleanup-orphans` to reduce backup accumulation
+2. **Optional Cleanup**: Run `./swap-rite.sh --cleanup-orphans` to reduce backup accumulation
 3. **Informational**: The `shared/` directory correctly does not have a workflow.yaml as it contains shared resources, not a team configuration
 
 ---
@@ -265,7 +265,7 @@ Agent Status:
   [=] state-mate.md (up to date)
 ```
 
-### swap-team.sh --dry-run ecosystem-pack (excerpt)
+### swap-rite.sh --dry-run ecosystem-pack (excerpt)
 ```
 [Roster] Dry-run: Would refresh ecosystem-pack
 
@@ -278,7 +278,7 @@ Agent changes:
   = orchestrator.md (unchanged)
 
 Skill orphans (from other teams):
-  ? cross-team-handoff (from shared)
+  ? cross-rite-handoff (from shared)
   ? shared-templates (from shared)
   ? smell-detection (from shared)
 

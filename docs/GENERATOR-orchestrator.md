@@ -10,7 +10,7 @@
 
 ## Overview
 
-The `orchestrator-generate.sh` generator creates production-ready orchestrator.md agent files for all 10 team packs from declarative YAML configurations (`orchestrator.yaml`) and workflow definitions (`workflow.yaml`).
+The `orchestrator-generate.sh` generator creates production-ready orchestrator.md agent files for all 10 rites from declarative YAML configurations (`orchestrator.yaml`) and workflow definitions (`workflow.yaml`).
 
 ### What It Does
 
@@ -24,7 +24,7 @@ The `orchestrator-generate.sh` generator creates production-ready orchestrator.m
 
 - **orchestrator.md**: Production-ready agent file ready to commit to git
 - **Validated**: Passes all 10 validation rules from validate-orchestrator.sh
-- **Compatible**: Frontmatter parses by swap-team.sh patterns
+- **Compatible**: Frontmatter parses by swap-rite.sh patterns
 - **Integrated**: Specialist references validate against workflow.yaml
 
 ---
@@ -82,7 +82,7 @@ cd /roster
 | Argument | Purpose | Example |
 |----------|---------|---------|
 | `<team-name>` | Generate single team (lowercase with hyphens) | `rnd-pack`, `security-pack` |
-| `--all` | Batch-generate all teams found in teams/ directory | `./orchestrator-generate.sh --all` |
+| `--all` | Batch-generate all teams found in rites/ directory | `./orchestrator-generate.sh --all` |
 
 ### Options
 
@@ -107,7 +107,7 @@ cd /roster
 
 Each team has an `orchestrator.yaml` file that defines its orchestrator.md generation parameters.
 
-**Location**: `/roster/teams/<team>/orchestrator.yaml`
+**Location**: `/roster/rites/<team>/orchestrator.yaml`
 
 **Structure**:
 
@@ -156,13 +156,13 @@ antipatterns:
 cross_team_protocol: "Description of how team coordinates with others"
 ```
 
-**Example**: `/roster/teams/rnd-pack/orchestrator.yaml`
+**Example**: `/roster/rites/rnd-pack/orchestrator.yaml`
 
 ### workflow.yaml
 
 Each team also has a `workflow.yaml` that defines phases, specialists, and complexity levels.
 
-**Location**: `/roster/teams/<team>/workflow.yaml`
+**Location**: `/roster/rites/<team>/workflow.yaml`
 
 **Key Sections**:
 - `phases[]`: Array of phase names and agent names
@@ -188,10 +188,10 @@ OK: All dependencies found
 OK: All required files exist
 
 INFO: Processing team: doc-team-pack
-OK: Schema validation passed: /roster/teams/doc-team-pack/orchestrator.yaml
-OK: Workflow references validated: /roster/teams/doc-team-pack/orchestrator.yaml -> /roster/teams/doc-team-pack/workflow.yaml
+OK: Schema validation passed: /roster/rites/doc-team-pack/orchestrator.yaml
+OK: Workflow references validated: /roster/rites/doc-team-pack/orchestrator.yaml -> /roster/rites/doc-team-pack/workflow.yaml
 INFO: Generating: doc-team-pack
-OK: Generated: /roster/teams/doc-team-pack/agents/orchestrator.md
+OK: Generated: /roster/rites/doc-team-pack/agents/orchestrator.md
 ```
 
 ### Example 2: Dry-Run Preview
@@ -266,10 +266,10 @@ INFO: Batch generating 11 teams
 
 ... (validation for all teams) ...
 INFO: Generating: rnd-pack
-OK: Generated: /roster/teams/rnd-pack/agents/orchestrator.md
+OK: Generated: /roster/rites/rnd-pack/agents/orchestrator.md
 
 INFO: Generating: security-pack
-OK: Generated: /roster/teams/security-pack/agents/orchestrator.md
+OK: Generated: /roster/rites/security-pack/agents/orchestrator.md
 
 ... (9 more teams) ...
 
@@ -301,7 +301,7 @@ apt-get install yq jq
 
 **Error**:
 ```
-ERROR: Config file not found: /roster/teams/my-team/orchestrator.yaml
+ERROR: Config file not found: /roster/rites/my-team/orchestrator.yaml
 ```
 
 **Cause**: Team directory exists but no orchestrator.yaml file
@@ -323,7 +323,7 @@ ERROR: Missing required field in orchestrator.yaml: routing
 
 **Error**:
 ```
-ERROR: Specialist 'bad-specialist-name' not found in workflow.yaml: /roster/teams/my-team/workflow.yaml
+ERROR: Specialist 'bad-specialist-name' not found in workflow.yaml: /roster/rites/my-team/workflow.yaml
 ```
 
 **Cause**: orchestrator.yaml references specialist that doesn't exist in workflow.yaml
@@ -344,7 +344,7 @@ ERROR: Post-generation validation failed: /var/folders/.../tmp.xyz
 **Diagnosis**:
 ```bash
 # Run validator directly to see what failed
-./templates/validate-orchestrator.sh /roster/teams/my-team/agents/orchestrator.md
+./templates/validate-orchestrator.sh /roster/rites/my-team/agents/orchestrator.md
 ```
 
 **Common Causes**:
@@ -356,7 +356,7 @@ ERROR: Post-generation validation failed: /var/folders/.../tmp.xyz
 
 **Error**:
 ```
-ERROR: Output file exists: /roster/teams/rnd-pack/agents/orchestrator.md (use --force to overwrite)
+ERROR: Output file exists: /roster/rites/rnd-pack/agents/orchestrator.md (use --force to overwrite)
 ```
 
 **Cause**: orchestrator.md already exists and --force not specified
@@ -367,7 +367,7 @@ ERROR: Output file exists: /roster/teams/rnd-pack/agents/orchestrator.md (use --
 ./templates/orchestrator-generate.sh rnd-pack --force
 
 # Option 2: Delete existing file first
-rm /roster/teams/rnd-pack/agents/orchestrator.md
+rm /roster/rites/rnd-pack/agents/orchestrator.md
 ./templates/orchestrator-generate.sh rnd-pack
 ```
 
@@ -394,12 +394,12 @@ All generated files pass:
 2. **Workflow Validation**: All specialists exist in workflow.yaml
 3. **Substitution Check**: No unreplaced placeholders remain
 4. **Post-Generation Validation**: 10-rule validation from validate-orchestrator.sh
-5. **Frontmatter Parsing**: Compatible with swap-team.sh grep/sed patterns
+5. **Frontmatter Parsing**: Compatible with swap-rite.sh grep/sed patterns
 6. **Markdown Syntax**: Valid Markdown structure
 
 ### Integration with Existing Tools
 
-**swap-team.sh**: Generated frontmatter parses cleanly without modifications
+**swap-rite.sh**: Generated frontmatter parses cleanly without modifications
 
 **CEM Sync**: Generated files treated as standard agent files (no special handling)
 
@@ -446,7 +446,7 @@ antipatterns:
 If your team coordinates with other teams:
 
 ```yaml
-cross_team_protocol: "Ecosystem-pack acts as hub for infrastructure changes. When escalating to user, notify all active team leads."
+cross_team_protocol: "Ecosystem-pack acts as hub for infrastructure changes. When escalating to user, notify all active rite leads."
 ```
 
 ---
@@ -463,7 +463,7 @@ bash << 'EOF'
 for team in rnd-pack security-pack ecosystem-pack doc-team-pack 10x-dev-pack; do
   echo "Testing $team..."
   ./templates/orchestrator-generate.sh "$team" --force
-  ./templates/validate-orchestrator.sh "teams/$team/agents/orchestrator.md"
+  ./templates/validate-orchestrator.sh "rites/$team/agents/orchestrator.md"
 done
 EOF
 ```
@@ -490,8 +490,8 @@ EOF
 | `/roster/templates/orchestrator-base.md.tpl` | Canonical template | Complete |
 | `/roster/templates/validate-orchestrator.sh` | Validation script (10 rules) | Complete |
 | `/roster/schemas/orchestrator.yaml.schema.json` | JSON Schema | Complete |
-| `/roster/teams/*/orchestrator.yaml` | Team configs (11 total) | Complete |
-| `/roster/teams/*/agents/orchestrator.md` | Generated agents (11 total) | Generated |
+| `/roster/rites/*/orchestrator.yaml` | Team configs (11 total) | Complete |
+| `/roster/rites/*/agents/orchestrator.md` | Generated agents (11 total) | Generated |
 
 ---
 
@@ -506,7 +506,7 @@ EOF
 **Required Tools**: yq (v4.x), jq, sed, awk
 
 **Backward Compatibility**:
-- Generated files compatible with swap-team.sh (verified)
+- Generated files compatible with swap-rite.sh (verified)
 - No CEM changes required
 - No breaking changes to existing satellites
 

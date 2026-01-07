@@ -35,7 +35,7 @@ Deep audit of roster's five artifact pillars (agents, skills, hooks, commands, w
 ## Root Cause Chain
 
 1. sync-user-*.sh scripts designed for additive-only operation (never remove)
-2. swap-team.sh mirrors this pattern for team-level artifacts
+2. swap-rite.sh mirrors this pattern for team-level artifacts
 3. No manifest or registry exists for command collision detection
 4. Schema validation exists but is not invoked pre-swap
 5. Orphan backups created but no cleanup policy defined
@@ -47,10 +47,10 @@ Deep audit of roster's five artifact pillars (agents, skills, hooks, commands, w
 
 #### COL-001: Command Collision Detection Missing (HIGH)
 
-**Description**: When swapping teams, team commands can silently shadow user-level commands of the same name. No COMMAND_MANIFEST.json or collision check exists in swap-team.sh.
+**Description**: When swapping teams, team commands can silently shadow user-level commands of the same name. No COMMAND_MANIFEST.json or collision check exists in swap-rite.sh.
 
 **Evidence**:
-- File: `/Users/tomtenuta/Code/roster/swap-team.sh`
+- File: `/Users/tomtenuta/Code/roster/swap-rite.sh`
 - Lines 2117-2122: Collision check only protects project commands, not user commands
 
 ```bash
@@ -76,15 +76,15 @@ fi
 
 #### SCH-001: Schema Validation Not Enforced Pre-Swap (HIGH)
 
-**Description**: swap-team.sh copies workflow.yaml without validating it against the schema at `.claude/schemas/workflow.schema.json`. Invalid workflow files are loaded and fail at runtime.
+**Description**: swap-rite.sh copies workflow.yaml without validating it against the schema at `.claude/schemas/workflow.schema.json`. Invalid workflow files are loaded and fail at runtime.
 
 **Evidence**:
-- File: `/Users/tomtenuta/Code/roster/swap-team.sh`
+- File: `/Users/tomtenuta/Code/roster/swap-rite.sh`
 - Lines 1915-1919: Copy without validation
 
 ```bash
 # Copy workflow.yaml if exists
-local workflow_file="$ROSTER_HOME/teams/$team_name/workflow.yaml"
+local workflow_file="$ROSTER_HOME/rites/$rite_name/workflow.yaml"
     log_debug "Copying workflow.yaml"
     cp "$workflow_file" .claude/ACTIVE_WORKFLOW.yaml || {
         log_warning "Failed to copy workflow.yaml (agents swapped successfully)"
@@ -106,7 +106,7 @@ local workflow_file="$ROSTER_HOME/teams/$team_name/workflow.yaml"
 **Description**: When skills are orphaned during team swaps, they are backed up to `.claude/skills.orphan-backup/` but never cleaned up. Backups accumulate indefinitely.
 
 **Evidence**:
-- File: `/Users/tomtenuta/Code/roster/swap-team.sh`
+- File: `/Users/tomtenuta/Code/roster/swap-rite.sh`
 - Lines 2231, 2258-2259:
 
 ```bash
@@ -134,7 +134,7 @@ if [[ "$ORPHAN_MODE" == "remove" ]] && [[ -d "$backup_dir" ]]; then
 **Description**: 10x-dev-pack defines 9 security patterns in workflow.yaml security_consultation section, but routing is advisory-only. Agents are not required to invoke security-pack consultation.
 
 **Evidence**:
-- File: `/Users/tomtenuta/Code/roster/teams/10x-dev-pack/workflow.yaml`
+- File: `/Users/tomtenuta/Code/roster/rites/10x-dev-pack/workflow.yaml`
 - Lines 75-127: security_consultation section defines triggers and policy
 
 ```yaml
@@ -177,12 +177,12 @@ security_consultation:
 ## Success Criteria
 
 - [ ] GAP-SC-001: Command collision detection prevents user/team command shadowing
-  - swap-team.sh checks user-level commands at ~/.claude/commands/ before copying team commands
+  - swap-rite.sh checks user-level commands at ~/.claude/commands/ before copying team commands
   - Warning or error raised when collision detected
   - Manifest tracks command provenance (user vs. team vs. project)
 
 - [ ] GAP-SC-002: workflow.yaml validated against schema before team swap completes
-  - swap-team.sh invokes schema validation after staging, before commit
+  - swap-rite.sh invokes schema validation after staging, before commit
   - Invalid workflow.yaml causes swap to abort with clear error
   - Validation uses existing `.claude/schemas/workflow.schema.json`
 
@@ -200,9 +200,9 @@ security_consultation:
 
 | Component | Files | Change Type |
 |-----------|-------|-------------|
-| swap-team.sh | `/Users/tomtenuta/Code/roster/swap-team.sh:2100-2136` | Add collision detection |
-| swap-team.sh | `/Users/tomtenuta/Code/roster/swap-team.sh:1915-1919` | Add schema validation |
-| swap-team.sh | `/Users/tomtenuta/Code/roster/swap-team.sh:2231-2260` | Add cleanup policy |
+| swap-rite.sh | `/Users/tomtenuta/Code/roster/swap-rite.sh:2100-2136` | Add collision detection |
+| swap-rite.sh | `/Users/tomtenuta/Code/roster/swap-rite.sh:1915-1919` | Add schema validation |
+| swap-rite.sh | `/Users/tomtenuta/Code/roster/swap-rite.sh:2231-2260` | Add cleanup policy |
 | workflow.yaml | All team workflow files | Document enforcement gates |
 | hooks | New security-enforcement hook | Enforce consultation policy |
 
@@ -218,7 +218,7 @@ For verification, test fixes against:
 
 ### Immediate (This Sprint)
 
-1. **COL-001**: Add user-command collision detection to swap-team.sh sync_team_commands()
+1. **COL-001**: Add user-command collision detection to swap-rite.sh sync_team_commands()
 2. **SCH-001**: Add workflow.yaml schema validation call before commit phase
 
 ### Short-term (Next Sprint)

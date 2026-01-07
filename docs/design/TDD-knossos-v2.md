@@ -25,7 +25,7 @@ In the original myth, Aegeus threw himself from a cliff when he saw black sails,
 |---------|-------|
 | 1. White Sails Typed Contract | Schema, computation, proofs, state-mate integration |
 | 2. Naming Convention Migration | SCREAMING_SNAKE audit, migration plan |
-| 3. Remaining Gaps | `ari hook handoff-validate`, cross-team integration |
+| 3. Remaining Gaps | `ari hook handoff-validate`, cross-rite integration |
 | 4. Implementation Roadmap | Phases, files, tests, rollout |
 
 ### 1.3 Design Goals
@@ -709,13 +709,13 @@ Current naming is already consistent. New WHITE_SAILS.yaml follows convention.
 - `ari handoff status` - "not yet implemented"
 - `ari handoff history` - "not yet implemented"
 
-**Required**: Implement `ari hook handoff-validate` for cross-team handoff validation.
+**Required**: Implement `ari hook handoff-validate` for cross-rite handoff validation.
 
 ### 9.2 Handoff Validation Specification
 
 ```
 Command: ari hook handoff-validate
-Purpose: Validate artifact readiness for cross-team handoff
+Purpose: Validate artifact readiness for cross-rite handoff
 Hook Event: PreToolUse (when Task tool invoked with handoff agent)
 
 Inputs:
@@ -770,14 +770,14 @@ command: ari hook handoff-validate
 
 ### 9.5 Cross-Team Handoff Integration
 
-Integrate with existing cross-team skill:
+Integrate with existing cross-rite skill:
 
 ```
-user-skills/guidance/cross-team/
+user-skills/guidance/cross-rite/
     validation.md            # Existing validation rules
     SKILL.md                 # Skill entry point
 
-teams/shared/skills/cross-team-handoff/
+rites/shared/skills/cross-rite-handoff/
     SKILL.md                 # Shared skill
     schema.md                # Handoff schema
     validation.sh            # Shell validator (to be replaced by ari)
@@ -828,7 +828,7 @@ teams/shared/skills/cross-team-handoff/
 |------|-------|-------|-------------|
 | ari hook handoff-validate | Integration Engineer | `ariadne/internal/cmd/hook/handoff_validate.go` | CLI command |
 | Hook registration | Integration Engineer | `.claude/hooks/handoff-validate.yaml` | Hook config |
-| Cross-team integration | Integration Engineer | `teams/shared/skills/cross-team-handoff/` | Updated skill |
+| Cross-team integration | Integration Engineer | `rites/shared/skills/cross-rite-handoff/` | Updated skill |
 
 ### 10.6 Phase 6: Validation & Rollout (Week 6)
 

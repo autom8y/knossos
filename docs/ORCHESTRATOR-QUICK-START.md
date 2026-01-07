@@ -26,7 +26,7 @@ Orchestrators can now be generated automatically from simple YAML configuration 
 Look for your team's orchestrator.yaml:
 
 ```bash
-ls /roster/teams/<YOUR-TEAM>/orchestrator.yaml
+ls /roster/rites/<YOUR-TEAM>/orchestrator.yaml
 ```
 
 If it exists, you're already set up (skip to Step 3).
@@ -42,10 +42,10 @@ cd /roster
 ./scripts/orchestrator-migrate.sh <YOUR-TEAM>
 
 # Review the diff
-git diff teams/<YOUR-TEAM>/orchestrator.yaml
+git diff rites/<YOUR-TEAM>/orchestrator.yaml
 
 # Verify it looks correct
-cat teams/<YOUR-TEAM>/orchestrator.yaml
+cat rites/<YOUR-TEAM>/orchestrator.yaml
 ```
 
 The script extracts your orchestrator.yaml from the existing orchestrator.md and validates it produces the same output.
@@ -92,12 +92,12 @@ Try updating your orchestrator. Example: Add a new specialist to routing.
 
 3. Review changes:
    ```bash
-   git diff teams/<YOUR-TEAM>/agents/orchestrator.md
+   git diff rites/<YOUR-TEAM>/agents/orchestrator.md
    ```
 
 4. Commit:
    ```bash
-   git add teams/<YOUR-TEAM>/
+   git add rites/<YOUR-TEAM>/
    git commit -m "Update routing for new specialist"
    ```
 
@@ -171,7 +171,7 @@ cross_team_protocol: ""  # If you coordinate with other teams (optional)
 **After** (Templated):
 ```bash
 # 1. Edit orchestrator.yaml
-nano teams/<YOUR-TEAM>/orchestrator.yaml
+nano rites/<YOUR-TEAM>/orchestrator.yaml
 
 # 2. Add new specialist to routing:
 # routing:
@@ -182,7 +182,7 @@ nano teams/<YOUR-TEAM>/orchestrator.yaml
 
 # 4. Review and commit
 git diff
-git add teams/<YOUR-TEAM>/
+git add rites/<YOUR-TEAM>/
 git commit -m "Add new specialist to routing"
 ```
 
@@ -201,7 +201,7 @@ git commit -m "Add new specialist to routing"
 ./templates/orchestrator-generate.sh <YOUR-TEAM>
 
 # 3. Commit
-git add teams/<YOUR-TEAM>/
+git add rites/<YOUR-TEAM>/
 git commit -m "Update handoff criteria for phase-name"
 ```
 
@@ -211,7 +211,7 @@ If you prefer to keep hand-writing your orchestrator:
 
 ```bash
 # Delete the YAML file
-cd /roster/teams/<YOUR-TEAM>
+cd /roster/rites/<YOUR-TEAM>
 rm orchestrator.yaml
 
 # Update your manifest to say "user" (not generated)
@@ -244,8 +244,8 @@ cat /roster/schemas/orchestrator.yaml.schema.json | jq '.examples[0]'
 **Fix**: Review the diff and commit the generated version:
 
 ```bash
-git diff teams/<YOUR-TEAM>/agents/orchestrator.md
-git add teams/<YOUR-TEAM>/agents/orchestrator.md
+git diff rites/<YOUR-TEAM>/agents/orchestrator.md
+git add rites/<YOUR-TEAM>/agents/orchestrator.md
 git commit -m "Regenerate orchestrator with templates"
 ```
 
@@ -264,7 +264,7 @@ The generated version is valid and maintains the same content.
 **Steps**:
 ```bash
 # Delete orchestrator.yaml
-rm teams/<YOUR-TEAM>/orchestrator.yaml
+rm rites/<YOUR-TEAM>/orchestrator.yaml
 
 # Update manifest
 jq '.orchestrator.source = "user"' AGENT_MANIFEST.json > temp && mv temp AGENT_MANIFEST.json

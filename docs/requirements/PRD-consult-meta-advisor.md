@@ -2,13 +2,13 @@
 
 ## Overview
 
-The `/consult` command should serve as the primary cognitive load absorber for the roster ecosystem. With multiple teams, skills, and agents (see `roster/teams/` for current inventory), users need a meta-advisor that handles routing complexity so they can describe intent in natural language and receive optimal team/skill/workflow paths without internalizing all concepts upfront.
+The `/consult` command should serve as the primary cognitive load absorber for the roster ecosystem. With multiple teams, skills, and agents (see `roster/rites/` for current inventory), users need a meta-advisor that handles routing complexity so they can describe intent in natural language and receive optimal team/skill/workflow paths without internalizing all concepts upfront.
 
 ## Background
 
 The roster ecosystem has grown to significant complexity:
 
-- **Teams**: Multiple team packs in `roster/teams/` (dynamically discoverable)
+- **Teams**: Multiple rites in `roster/rites/` (dynamically discoverable)
 - **Skills**: Distributed across managed and user locations (see `RITE_SKILL_MATRIX.md`)
 - **Agents**: Specialized roles with specific invocation patterns (per team)
 
@@ -20,7 +20,7 @@ Current `/consult` implementation provides ecosystem guidance and team recommend
 
 3. **Role as "cognitive load absorber" undocumented** - Neither CLAUDE.md nor the consult-ref skill explicitly position `/consult` as THE entry point for confused users.
 
-4. **Team profiles fragmented** - Team information is scattered across `teams/*/TEAM.yaml`, skill descriptions, and ad-hoc knowledge rather than structured routing tables.
+4. **Team profiles fragmented** - Team information is scattered across `rites/*/TEAM.yaml`, skill descriptions, and ad-hoc knowledge rather than structured routing tables.
 
 5. **No "confused? start here" positioning** - The ecosystem lacks a clear "I don't know where to go" entry point.
 
@@ -81,7 +81,7 @@ Current `/consult` implementation provides ecosystem guidance and team recommend
 
 - **FR-2.3**: `/consult` MUST offer alternatives when multiple teams could handle a request, with explicit tradeoff explanations.
 
-- **FR-2.4**: Create a `team-discovery` skill that provides structured team routing data accessible by both `/consult` and other agents. This skill reads from `roster/teams/*/TEAM.yaml` and provides consistent team metadata.
+- **FR-2.4**: Create a `team-discovery` skill that provides structured team routing data accessible by both `/consult` and other agents. This skill reads from `roster/rites/*/TEAM.yaml` and provides consistent team metadata.
 
 #### Cognitive Load Absorber Positioning
 
@@ -141,7 +141,7 @@ Current `/consult` implementation provides ecosystem guidance and team recommend
 |------|------------------|
 | Query matches multiple teams equally | Present top 3 with explicit tradeoff analysis, ask user to specify constraint |
 | Query uses unknown terminology | Ask clarifying question, suggest possible interpretations |
-| User requests dormant team capability | Explain dormant status, offer alternative from active teams, note future availability |
+| User requests dormant team capability | Explain dormant status, offer alternative from active rites, note future availability |
 | Query is too vague ("help me code") | Narrow down with 2-3 clarifying questions before recommending |
 | User is mid-session and asks for different team | Warn about active session, offer `/park` + team switch or session continuation |
 | Query matches skill but not team | Recommend skill directly with invocation pattern, note that no team switch needed |
@@ -170,7 +170,7 @@ Current `/consult` implementation provides ecosystem guidance and team recommend
 |------------|------|-------|--------|
 | `prompting` skill content | Internal | roster | Complete - patterns exist |
 | `10x-workflow` skill content | Internal | roster | Complete - routing logic exists |
-| Team profiles in `teams/*/TEAM.yaml` | Internal | roster | Complete - 11 teams defined |
+| Team profiles in `rites/*/TEAM.yaml` | Internal | roster | Complete - 11 teams defined |
 | `consult-ref` skill | Internal | roster | Exists - needs enhancement |
 | CLAUDE.md structure | Internal | roster | Exists - needs positioning update |
 
@@ -198,7 +198,7 @@ Current `/consult` implementation provides ecosystem guidance and team recommend
 *All questions resolved during stakeholder discussion:*
 
 1. ~~Should `/consult` invoke skills directly or just reference them?~~ **Resolved**: Reference only; user invokes.
-2. ~~How should dormant teams appear in recommendations?~~ **Resolved**: Listed with dormant status, alternatives from active teams offered.
+2. ~~How should dormant teams appear in recommendations?~~ **Resolved**: Listed with dormant status, alternatives from active rites offered.
 3. ~~Where exactly in CLAUDE.md should cognitive load absorber positioning go?~~ **Resolved**: Quick Start or Getting Help section with prominent visibility.
 
 ---

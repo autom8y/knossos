@@ -1,11 +1,11 @@
 # Edge Cases: Cross-Team Workflows
 
-> Documentation of edge cases, failure modes, and recovery procedures for cross-team handoffs.
+> Documentation of edge cases, failure modes, and recovery procedures for cross-rite handoffs.
 > Version: 1.0.0
 
 ## Overview
 
-This document covers edge cases that may occur during cross-team coordination, including failed handoffs, circular dependencies, multi-team coordination needs, and urgent change bypass procedures.
+This document covers edge cases that may occur during cross-rite coordination, including failed handoffs, circular dependencies, multi-team coordination needs, and urgent change bypass procedures.
 
 ---
 
@@ -412,7 +412,7 @@ Standard workflow would complete: 2026-01-20
 
 ### 4.3 Single-Team Override
 
-**Scenario**: Work normally requiring cross-team handoff done by single team.
+**Scenario**: Work normally requiring cross-rite handoff done by single team.
 
 **Override Justification**:
 
@@ -596,4 +596,4 @@ Configure expected response times:
 
 - [Cross-Team Coordination Playbook](../playbooks/cross-rite-coordination.md)
 - [Handoff Smoke Tests](../testing/handoff-smoke-tests.md)
-- [Cross-Team Handoff Schema](../../.claude/skills/shared/cross-team-handoff/schema.md)
+- [Cross-Team Handoff Schema](../../.claude/skills/shared/cross-rite-handoff/schema.md)

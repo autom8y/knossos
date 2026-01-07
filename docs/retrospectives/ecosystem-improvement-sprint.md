@@ -11,7 +11,7 @@
 
 ## Executive Summary
 
-This initiative transformed the roster ecosystem from ad-hoc cross-team coordination to a structured HANDOFF-based workflow with proactive gates, clear boundaries, and shared infrastructure. What began as an audit of 23 improvements across 10 teams was compressed into 5 architectural primitives, delivering 80% of the value through the HANDOFF artifact alone.
+This initiative transformed the roster ecosystem from ad-hoc cross-rite coordination to a structured HANDOFF-based workflow with proactive gates, clear boundaries, and shared infrastructure. What began as an audit of 23 improvements across 10 teams was compressed into 5 architectural primitives, delivering 80% of the value through the HANDOFF artifact alone.
 
 ---
 
@@ -62,7 +62,7 @@ This initiative transformed the roster ecosystem from ad-hoc cross-team coordina
 | Task ID | Description | Status |
 |---------|-------------|--------|
 | P1-SHARED-004 | Create smell-detection skill | Complete |
-| P1-SHARED-005 | Create cross-team-handoff skill | Complete |
+| P1-SHARED-005 | Create cross-rite-handoff skill | Complete |
 | P1-SHARED-006 | Create shared-templates skill | Complete |
 
 #### Integration Phase (4 tasks)
@@ -179,7 +179,7 @@ This initiative transformed the roster ecosystem from ad-hoc cross-team coordina
 
 | Primitive | Description | Compression |
 |-----------|-------------|-------------|
-| **HANDOFF Artifact** | Universal schema for cross-team transitions | 8 formats -> 1 |
+| **HANDOFF Artifact** | Universal schema for cross-rite transitions | 8 formats -> 1 |
 | **Boundary Matrix** | Explicit routing for overlapping concerns | 6 docs -> 1 template |
 | **Proactive Gate Registry** | Downstream teams inject into upstream workflows | Pattern formalized |
 | **Shared Detection Skill** | Consolidated smell/debt patterns | 2 implementations -> 1 |
@@ -216,9 +216,9 @@ This initiative transformed the roster ecosystem from ad-hoc cross-team coordina
 
 **tech-transfer** agent in rnd-pack:
 - Bridges exploration to production
-- Produces TRANSFER artifacts (internal) and HANDOFF artifacts (cross-team)
+- Produces TRANSFER artifacts (internal) and HANDOFF artifacts (cross-rite)
 - Routes to 10x-dev-pack (implementation) or strategy-pack (strategic evaluation)
-- Location: `teams/rnd-pack/agents/tech-transfer.md`
+- Location: `rites/rnd-pack/agents/tech-transfer.md`
 
 ---
 
@@ -275,8 +275,8 @@ Manual verification of HANDOFF schema compliance. Future work should include sch
 ### Shared Skills
 | Artifact | Path |
 |----------|------|
-| Cross-Team Handoff Skill | `.claude/skills/shared/cross-team-handoff/SKILL.md` |
-| Cross-Team Handoff Schema | `.claude/skills/shared/cross-team-handoff/schema.md` |
+| Cross-Team Handoff Skill | `.claude/skills/shared/cross-rite-handoff/SKILL.md` |
+| Cross-Team Handoff Schema | `.claude/skills/shared/cross-rite-handoff/schema.md` |
 | Smell Detection Skill | `.claude/skills/shared/smell-detection/SKILL.md` |
 | Detection Patterns | `.claude/skills/shared/smell-detection/patterns/` |
 | Detection Checklist | `.claude/skills/shared/smell-detection/tools/detection-checklist.md` |
@@ -298,28 +298,28 @@ Manual verification of HANDOFF schema compliance. Future work should include sch
 ### New Agents
 | Agent | Path |
 |-------|------|
-| tech-transfer | `teams/rnd-pack/agents/tech-transfer.md` |
+| tech-transfer | `rites/rnd-pack/agents/tech-transfer.md` |
 
 ### Planning Artifacts
 | Artifact | Path |
 |----------|------|
-| Implementation Blueprint | `teams/IMPLEMENTATION_BLUEPRINT.md` |
+| Implementation Blueprint | `rites/IMPLEMENTATION_BLUEPRINT.md` |
 | Sprint Context | `.claude/sessions/session-20260102-201916-f6254ce1/SPRINT_CONTEXT.md` |
 | Session Context | `.claude/sessions/session-20260102-201916-f6254ce1/SESSION_CONTEXT.md` |
 
 ### Team TODO Files
 | File | Path |
 |------|------|
-| 10x-dev-pack | `teams/10x-dev-pack/TODO.md` |
-| ecosystem-pack | `teams/ecosystem-pack/TODO.md` |
-| doc-team-pack | `teams/doc-team-pack/TODO.md` |
-| hygiene-pack | `teams/hygiene-pack/TODO.md` |
-| debt-triage-pack | `teams/debt-triage-pack/TODO.md` |
-| sre-pack | `teams/sre-pack/TODO.md` |
-| security-pack | `teams/security-pack/TODO.md` |
-| intelligence-pack | `teams/intelligence-pack/TODO.md` |
-| rnd-pack | `teams/rnd-pack/TODO.md` |
-| strategy-pack | `teams/strategy-pack/TODO.md` |
+| 10x-dev-pack | `rites/10x-dev-pack/TODO.md` |
+| ecosystem-pack | `rites/ecosystem-pack/TODO.md` |
+| doc-team-pack | `rites/doc-team-pack/TODO.md` |
+| hygiene-pack | `rites/hygiene-pack/TODO.md` |
+| debt-triage-pack | `rites/debt-triage-pack/TODO.md` |
+| sre-pack | `rites/sre-pack/TODO.md` |
+| security-pack | `rites/security-pack/TODO.md` |
+| intelligence-pack | `rites/intelligence-pack/TODO.md` |
+| rnd-pack | `rites/rnd-pack/TODO.md` |
+| strategy-pack | `rites/strategy-pack/TODO.md` |
 
 ### Documentation
 | Document | Path |
@@ -331,52 +331,52 @@ Manual verification of HANDOFF schema compliance. Future work should include sch
 ### Modified Team Artifacts
 
 **Agents Updated**:
-- `teams/intelligence-pack/agents/user-researcher.md` - Quality improvements
-- `teams/intelligence-pack/agents/insights-analyst.md` - Quality improvements + HANDOFF production
-- `teams/doc-team-pack/agents/doc-auditor.md` - Staleness detection
-- `teams/hygiene-pack/agents/architect-enforcer.md` - Behavior preservation
-- `teams/hygiene-pack/agents/audit-lead.md` - Behavior preservation
-- `teams/hygiene-pack/agents/code-smeller.md` - smell-detection integration + HANDOFF acceptance
-- `teams/debt-triage-pack/agents/debt-collector.md` - smell-detection integration
-- `teams/debt-triage-pack/agents/sprint-planner.md` - HANDOFF production
-- `teams/10x-dev-pack/agents/requirements-analyst.md` - Impact assessment
-- `teams/10x-dev-pack/agents/orchestrator.md` - Flexible entry points
-- `teams/10x-dev-pack/agents/architect.md` - Security gate trigger
-- `teams/10x-dev-pack/agents/qa-adversary.md` - Documentation gate + SRE/security HANDOFFs
-- `teams/strategy-pack/agents/roadmap-strategist.md` - HANDOFF production
+- `rites/intelligence-pack/agents/user-researcher.md` - Quality improvements
+- `rites/intelligence-pack/agents/insights-analyst.md` - Quality improvements + HANDOFF production
+- `rites/doc-team-pack/agents/doc-auditor.md` - Staleness detection
+- `rites/hygiene-pack/agents/architect-enforcer.md` - Behavior preservation
+- `rites/hygiene-pack/agents/audit-lead.md` - Behavior preservation
+- `rites/hygiene-pack/agents/code-smeller.md` - smell-detection integration + HANDOFF acceptance
+- `rites/debt-triage-pack/agents/debt-collector.md` - smell-detection integration
+- `rites/debt-triage-pack/agents/sprint-planner.md` - HANDOFF production
+- `rites/10x-dev-pack/agents/requirements-analyst.md` - Impact assessment
+- `rites/10x-dev-pack/agents/orchestrator.md` - Flexible entry points
+- `rites/10x-dev-pack/agents/architect.md` - Security gate trigger
+- `rites/10x-dev-pack/agents/qa-adversary.md` - Documentation gate + SRE/security HANDOFFs
+- `rites/strategy-pack/agents/roadmap-strategist.md` - HANDOFF production
 
 **READMEs Updated**:
-- `teams/rnd-pack/README.md` - ship-pack fix, RND integration
-- `teams/ecosystem-pack/README.md` - Hub demotion
-- `teams/intelligence-pack/README.md` - Intelligence/Strategy boundary
-- `teams/strategy-pack/README.md` - Intelligence/Strategy boundary, RND integration
-- `teams/sre-pack/README.md` - HANDOFF acceptance guidance
-- `teams/security-pack/README.md` - Consultation mode
+- `rites/rnd-pack/README.md` - ship-pack fix, RND integration
+- `rites/ecosystem-pack/README.md` - Hub demotion
+- `rites/intelligence-pack/README.md` - Intelligence/Strategy boundary
+- `rites/strategy-pack/README.md` - Intelligence/Strategy boundary, RND integration
+- `rites/sre-pack/README.md` - HANDOFF acceptance guidance
+- `rites/security-pack/README.md` - Consultation mode
 
 **Workflows Updated**:
-- `teams/10x-dev-pack/workflow.yaml` - Impact routing, security gates, dynamic entry
-- `teams/strategy-pack/workflow.yaml` - Back-routes
-- `teams/security-pack/workflow.yaml` - Consultation mode
+- `rites/10x-dev-pack/workflow.yaml` - Impact routing, security gates, dynamic entry
+- `rites/strategy-pack/workflow.yaml` - Back-routes
+- `rites/security-pack/workflow.yaml` - Consultation mode
 
 **Skills Updated**:
-- `teams/strategy-pack/skills/strategy-ref/skill.md` - Model assignment fix
-- `teams/10x-dev-pack/skills/10x-workflow/SKILL.md` - Flexible entry documentation
-- `teams/10x-dev-pack/skills/10x-workflow/quality-gates.md` - Impact assessment gate
-- `teams/10x-dev-pack/skills/doc-artifacts/SKILL.md` - PRD impact field
-- `teams/sre-pack/skills/doc-sre/SKILL.md` - Template migration
+- `rites/strategy-pack/skills/strategy-ref/skill.md` - Model assignment fix
+- `rites/10x-dev-pack/skills/10x-workflow/SKILL.md` - Flexible entry documentation
+- `rites/10x-dev-pack/skills/10x-workflow/quality-gates.md` - Impact assessment gate
+- `rites/10x-dev-pack/skills/doc-artifacts/SKILL.md` - PRD impact field
+- `rites/sre-pack/skills/doc-sre/SKILL.md` - Template migration
 
 ---
 
 ## Conclusion
 
-The Roster Ecosystem Improvement Sprint successfully transformed the ecosystem from ad-hoc cross-team coordination to a structured workflow. The key insight--that the HANDOFF artifact provides 80% of value--focused implementation on high-leverage changes.
+The Roster Ecosystem Improvement Sprint successfully transformed the ecosystem from ad-hoc cross-rite coordination to a structured workflow. The key insight--that the HANDOFF artifact provides 80% of value--focused implementation on high-leverage changes.
 
 **Before**: 23 point-fixes across 10 teams, 8+ handoff formats, unclear boundaries, no shared infrastructure.
 
 **After**: 5 architectural primitives, 1 universal HANDOFF schema, clear team boundaries, shared detection and template skills, proactive gates for security and documentation.
 
 The ecosystem now has:
-1. **Uniform Coordination Language** - Every cross-team transition speaks HANDOFF
+1. **Uniform Coordination Language** - Every cross-rite transition speaks HANDOFF
 2. **Progressive Disclosure** - Skills load in tiers: core -> shared -> team-specific
 3. **Explicit Boundaries** - Routing tables eliminate "which team?" confusion
 4. **Proactive Integration** - Downstream teams engage upstream via registered gates

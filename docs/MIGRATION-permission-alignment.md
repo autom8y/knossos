@@ -16,11 +16,11 @@ Agent configurations specified artifact production requirements in their instruc
 
 | Team | Agent | File | Change |
 |------|-------|------|--------|
-| hygiene-pack | code-smeller | `teams/hygiene-pack/agents/code-smeller.md` | Added `Write` to tools |
-| intelligence-pack | user-researcher | `teams/intelligence-pack/agents/user-researcher.md` | Added `Edit` to tools |
-| rnd-pack | technology-scout | `teams/rnd-pack/agents/technology-scout.md` | Added `Edit` to tools |
-| security-pack | penetration-tester | `teams/security-pack/agents/penetration-tester.md` | Added `Edit` to tools |
-| security-pack | threat-modeler | `teams/security-pack/agents/threat-modeler.md` | Added `Edit` to tools |
+| hygiene-pack | code-smeller | `rites/hygiene-pack/agents/code-smeller.md` | Added `Write` to tools |
+| intelligence-pack | user-researcher | `rites/intelligence-pack/agents/user-researcher.md` | Added `Edit` to tools |
+| rnd-pack | technology-scout | `rites/rnd-pack/agents/technology-scout.md` | Added `Edit` to tools |
+| security-pack | penetration-tester | `rites/security-pack/agents/penetration-tester.md` | Added `Edit` to tools |
+| security-pack | threat-modeler | `rites/security-pack/agents/threat-modeler.md` | Added `Edit` to tools |
 
 ### Before/After Examples
 
@@ -50,19 +50,19 @@ Run this command from the roster root to confirm all modified agents have the co
 
 ```bash
 # Check code-smeller has Write
-grep "^tools:" teams/hygiene-pack/agents/code-smeller.md | grep -q "Write" && echo "PASS: code-smeller" || echo "FAIL: code-smeller"
+grep "^tools:" rites/hygiene-pack/agents/code-smeller.md | grep -q "Write" && echo "PASS: code-smeller" || echo "FAIL: code-smeller"
 
 # Check user-researcher has Edit
-grep "^tools:" teams/intelligence-pack/agents/user-researcher.md | grep -q "Edit" && echo "PASS: user-researcher" || echo "FAIL: user-researcher"
+grep "^tools:" rites/intelligence-pack/agents/user-researcher.md | grep -q "Edit" && echo "PASS: user-researcher" || echo "FAIL: user-researcher"
 
 # Check technology-scout has Edit
-grep "^tools:" teams/rnd-pack/agents/technology-scout.md | grep -q "Edit" && echo "PASS: technology-scout" || echo "FAIL: technology-scout"
+grep "^tools:" rites/rnd-pack/agents/technology-scout.md | grep -q "Edit" && echo "PASS: technology-scout" || echo "FAIL: technology-scout"
 
 # Check penetration-tester has Edit
-grep "^tools:" teams/security-pack/agents/penetration-tester.md | grep -q "Edit" && echo "PASS: penetration-tester" || echo "FAIL: penetration-tester"
+grep "^tools:" rites/security-pack/agents/penetration-tester.md | grep -q "Edit" && echo "PASS: penetration-tester" || echo "FAIL: penetration-tester"
 
 # Check threat-modeler has Edit
-grep "^tools:" teams/security-pack/agents/threat-modeler.md | grep -q "Edit" && echo "PASS: threat-modeler" || echo "FAIL: threat-modeler"
+grep "^tools:" rites/security-pack/agents/threat-modeler.md | grep -q "Edit" && echo "PASS: threat-modeler" || echo "FAIL: threat-modeler"
 ```
 
 Expected output: All lines show `PASS`.
@@ -91,7 +91,7 @@ Add to `justfile` or CI pipeline:
 
 ERRORS=0
 
-for agent in teams/*/agents/*.md; do
+for agent in rites/*/agents/*.md; do
   # Check if agent produces artifacts
   if grep -q "Produce.*using\|produces.*\.md\|Artifact Production" "$agent"; then
     # Must have Write or Edit
@@ -125,11 +125,11 @@ If issues arise, revert to previous tool configurations:
 ```bash
 # Rollback all changes
 git checkout HEAD~1 -- \
-  teams/hygiene-pack/agents/code-smeller.md \
-  teams/intelligence-pack/agents/user-researcher.md \
-  teams/rnd-pack/agents/technology-scout.md \
-  teams/security-pack/agents/penetration-tester.md \
-  teams/security-pack/agents/threat-modeler.md
+  rites/hygiene-pack/agents/code-smeller.md \
+  rites/intelligence-pack/agents/user-researcher.md \
+  rites/rnd-pack/agents/technology-scout.md \
+  rites/security-pack/agents/penetration-tester.md \
+  rites/security-pack/agents/threat-modeler.md
 ```
 
 **Risk Assessment**: Low. Adding permissions is additive; removing them could break agent functionality.
@@ -145,4 +145,4 @@ git checkout HEAD~1 -- \
 
 ## Summary
 
-This PATCH-level migration adds missing tool permissions to 5 agents across 4 team packs. No user action is required for satellites that sync from roster. The validation script prevents future occurrences.
+This PATCH-level migration adds missing tool permissions to 5 agents across 4 rites. No user action is required for satellites that sync from roster. The validation script prevents future occurrences.

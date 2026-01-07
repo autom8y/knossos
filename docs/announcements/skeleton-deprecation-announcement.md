@@ -218,7 +218,7 @@ A: Your manifest is automatically migrated to schema v3. A backup of the origina
 
 - **Manifest location**: `.claude/.cem/manifest.json` (unchanged)
 - **Managed files location**: `.claude/` directory structure (unchanged)
-- **Team management**: swap-team functionality continues to work
+- **Team management**: swap-rite functionality continues to work
 - **Session management**: All session workflows continue unchanged
 
 ---

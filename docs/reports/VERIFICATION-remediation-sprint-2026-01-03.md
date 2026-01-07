@@ -72,7 +72,7 @@ All critical verification checks passed. The remediation sprint successfully rem
 - security-pack
 - sre-pack
 - strategy-pack
-- shared (cross-team resources)
+- shared (cross-rite resources)
 
 ---
 
@@ -95,7 +95,7 @@ All critical verification checks passed. The remediation sprint successfully rem
 - state-mate.md
 
 **Skills (28)**:
-commit-ref, consult-ref, cross-team, doc-artifacts, documentation, file-verification, handoff-ref, hotfix-ref, initiative-scoping, justfile, orchestration, orchestrator-core, orchestrator-templates, park-ref, pr-ref, prompting, qa-ref, resume, review, session-common, spike-ref, sprint-ref, standards, start-ref, task-ref, team-discovery, worktree-ref, wrap-ref
+commit-ref, consult-ref, cross-rite, doc-artifacts, documentation, file-verification, handoff-ref, hotfix-ref, initiative-scoping, justfile, orchestration, orchestrator-core, orchestrator-templates, park-ref, pr-ref, prompting, qa-ref, resume, review, session-common, spike-ref, sprint-ref, standards, start-ref, task-ref, team-discovery, worktree-ref, wrap-ref
 
 **Hooks (14 + lib/)**:
 artifact-tracker.sh, auto-park.sh, coach-mode.sh, command-validator.sh, commit-tracker.sh, delegation-check.sh, orchestrator-bypass-check.sh, orchestrator-router.sh, session-audit.sh, session-context.sh, session-write-guard.sh, start-preflight.sh, team-validator.sh, workflow-validator.sh
@@ -130,11 +130,11 @@ artifact-tracker.sh, auto-park.sh, coach-mode.sh, command-validator.sh, commit-t
 
 ---
 
-## 6. swap-team.sh Working
+## 6. swap-rite.sh Working
 
 **Status**: PASS
 
-**Command**: `./swap-team.sh --dry-run 10x-dev-pack`
+**Command**: `./swap-rite.sh --dry-run 10x-dev-pack`
 
 **Result**: Dry-run completed successfully
 
@@ -146,7 +146,7 @@ artifact-tracker.sh, auto-park.sh, coach-mode.sh, command-validator.sh, commit-t
 - requirements-analyst.md (unchanged)
 
 **Skill Orphans Detected**: 3 from shared
-- cross-team-handoff
+- cross-rite-handoff
 - shared-templates
 - smell-detection
 
@@ -166,10 +166,10 @@ artifact-tracker.sh, auto-park.sh, coach-mode.sh, command-validator.sh, commit-t
 
 | Warning | Explanation | Severity |
 |---------|-------------|----------|
-| Missing: .claude/commands | Expected - materialized by swap-team.sh, not roster-sync | Informational |
-| Missing: .claude/hooks | Expected - materialized by swap-team.sh, not roster-sync | Informational |
+| Missing: .claude/commands | Expected - materialized by swap-rite.sh, not roster-sync | Informational |
+| Missing: .claude/hooks | Expected - materialized by swap-rite.sh, not roster-sync | Informational |
 | Missing: .claude/knowledge | Expected - optional directory | Informational |
-| Missing: .claude/skills | Expected - materialized by swap-team.sh, not roster-sync | Informational |
+| Missing: .claude/skills | Expected - materialized by swap-rite.sh, not roster-sync | Informational |
 | 2 unresolved conflict backups | Recovery artifacts from sync operations | Cleanup recommended |
 
 ### roster-sync status
@@ -179,7 +179,7 @@ artifact-tracker.sh, auto-park.sh, coach-mode.sh, command-validator.sh, commit-t
 - **Managed Files**: 7
 - **Active Team**: 10x-dev-pack
 
-**Note**: The "missing files" warnings are architectural - roster-sync manages core project scaffolding, while swap-team.sh handles team-specific materialization. This is working as designed.
+**Note**: The "missing files" warnings are architectural - roster-sync manages core project scaffolding, while swap-rite.sh handles team-specific materialization. This is working as designed.
 
 ---
 
@@ -211,7 +211,7 @@ artifact-tracker.sh, auto-park.sh, coach-mode.sh, command-validator.sh, commit-t
 
 ### Future Consideration
 1. Consider updating roster-sync to distinguish between "missing because not yet materialized" vs "missing and should exist"
-2. Document the architectural separation: roster-sync (core scaffolding) vs swap-team.sh (team materialization)
+2. Document the architectural separation: roster-sync (core scaffolding) vs swap-rite.sh (team materialization)
 
 ---
 
@@ -224,8 +224,8 @@ artifact-tracker.sh, auto-park.sh, coach-mode.sh, command-validator.sh, commit-t
 | user-commands/ | /Users/tomtenuta/Code/roster/user-commands/ | Yes |
 | user-skills/ | /Users/tomtenuta/Code/roster/user-skills/ | Yes |
 | user-hooks/ | /Users/tomtenuta/Code/roster/user-hooks/ | Yes |
-| teams/10x-dev-pack/agents/ | /Users/tomtenuta/Code/roster/teams/10x-dev-pack/agents/ | Yes |
-| teams/forge-pack/agents/ | /Users/tomtenuta/Code/roster/teams/forge-pack/agents/ | Yes |
+| rites/10x-dev-pack/agents/ | /Users/tomtenuta/Code/roster/rites/10x-dev-pack/agents/ | Yes |
+| rites/forge-pack/agents/ | /Users/tomtenuta/Code/roster/rites/forge-pack/agents/ | Yes |
 | ~/.claude/agents/ | /Users/tomtenuta/.claude/agents/ | Yes |
 | ~/.claude/skills/ | /Users/tomtenuta/.claude/skills/ | Yes |
 | ~/.claude/hooks/ | /Users/tomtenuta/.claude/hooks/ | Yes |
@@ -241,7 +241,7 @@ The remediation sprint successfully achieved its objectives:
 2. **Source architecture preserved**: All `user-*` source directories intact with expected contents
 3. **Team packs intact**: All team agent directories verified
 4. **User materialization working**: All user-level directories populated correctly
-5. **Tooling functional**: All sync scripts and swap-team.sh operating correctly
+5. **Tooling functional**: All sync scripts and swap-rite.sh operating correctly
 
 **Release Recommendation**: GO
 

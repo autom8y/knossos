@@ -35,11 +35,11 @@ Validation of 5 agent permission alignment fixes. All changes pass syntax, forma
 
 | File | Result |
 |------|--------|
-| `teams/hygiene-pack/agents/code-smeller.md` | VALID |
-| `teams/intelligence-pack/agents/user-researcher.md` | VALID |
-| `teams/rnd-pack/agents/technology-scout.md` | VALID |
-| `teams/security-pack/agents/penetration-tester.md` | VALID |
-| `teams/security-pack/agents/threat-modeler.md` | VALID |
+| `rites/hygiene-pack/agents/code-smeller.md` | VALID |
+| `rites/intelligence-pack/agents/user-researcher.md` | VALID |
+| `rites/rnd-pack/agents/technology-scout.md` | VALID |
+| `rites/security-pack/agents/penetration-tester.md` | VALID |
+| `rites/security-pack/agents/threat-modeler.md` | VALID |
 
 **Conclusion**: All frontmatter blocks are valid YAML.
 
@@ -164,14 +164,14 @@ Each agent was analyzed to verify the added tool is justified by artifact produc
 ## File Locations Verified
 
 ```
-/roster/teams/hygiene-pack/agents/code-smeller.md
-/roster/teams/intelligence-pack/agents/user-researcher.md
-/roster/teams/rnd-pack/agents/technology-scout.md
-/roster/teams/security-pack/agents/penetration-tester.md
-/roster/teams/security-pack/agents/threat-modeler.md
+/roster/rites/hygiene-pack/agents/code-smeller.md
+/roster/rites/intelligence-pack/agents/user-researcher.md
+/roster/rites/rnd-pack/agents/technology-scout.md
+/roster/rites/security-pack/agents/penetration-tester.md
+/roster/rites/security-pack/agents/threat-modeler.md
 ```
 
-**Note**: The task description referenced paths under `packs/` but the actual files are located under `teams/`. This is a documentation discrepancy, not a defect in the changes themselves.
+**Note**: The task description referenced paths under `packs/` but the actual files are located under `rites/`. This is a documentation discrepancy, not a defect in the changes themselves.
 
 ---
 
@@ -189,7 +189,7 @@ Each agent was analyzed to verify the added tool is justified by artifact produc
 **Notes**:
 - Changes are backward compatible (adding permissions, not removing)
 - No migration required - changes take effect immediately on agent invocation
-- Recommend updating task documentation to use correct `teams/` paths instead of `packs/`
+- Recommend updating task documentation to use correct `rites/` paths instead of `packs/`
 
 ---
 

@@ -24,7 +24,7 @@ The roster ecosystem determines execution mode via `execution_mode()` in `sessio
 4. status == PARKED -> "cross-cutting"
 5. status == ARCHIVED -> "native"
 6. ACTIVE_RITE == none/null -> "cross-cutting"
-7. team pack directory missing -> "cross-cutting"
+7. rite directory missing -> "cross-cutting"
 8. All conditions pass -> "orchestrated"
 ```
 
@@ -76,7 +76,7 @@ Full analysis available at: `/Users/tomtenuta/Code/roster/docs/analysis/GAP-exec
   - Returns `false` otherwise
 
 - **FR-1.2**: Add `has_active_team()` function to `session-manager.sh` returning boolean (`true`/`false` exit code).
-  - Returns `true` when: Session is tracked AND status is ACTIVE AND ACTIVE_RITE is set (not "none" or empty) AND team pack directory exists
+  - Returns `true` when: Session is tracked AND status is ACTIVE AND ACTIVE_RITE is set (not "none" or empty) AND rite directory exists
   - Returns `false` otherwise
   - Note: PARKED sessions return `false` for `has_active_team()` because delegation is suspended
 
@@ -237,7 +237,7 @@ has_active_team() {
     active_team=$(cat ".claude/ACTIVE_RITE" 2>/dev/null || echo "none")
     [[ -z "$active_team" || "$active_team" == "none" || "$active_team" == "null" ]] && return 1
 
-    local team_pack_dir="${ROSTER_HOME:-$HOME/.config/roster}/teams/$active_team"
+    local team_pack_dir="${ROSTER_HOME:-$HOME/.config/roster}/rites/$active_team"
     [[ ! -d "$team_pack_dir" ]] && return 1
 
     return 0

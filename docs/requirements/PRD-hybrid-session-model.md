@@ -2,11 +2,11 @@
 
 ## Overview
 
-The roster ecosystem operates in a hybrid mode alongside native Claude Code. This PRD codifies explicit rules for determining execution mode based on session state and team context, addresses the session-without-team edge case, and documents the main agent's role in cross-cutting work. The goal is eliminating ambiguity in mode determination so both humans and agents know exactly how to behave in each scenario.
+The roster ecosystem operates in a hybrid mode alongside native Claude Code. This PRD codifies explicit rules for determining execution mode based on session state and rite context, addresses the session-without-team edge case, and documents the main agent's role in cross-cutting work. The goal is eliminating ambiguity in mode determination so both humans and agents know exactly how to behave in each scenario.
 
 ## Background
 
-The roster project has evolved a sophisticated session-based workflow system where team packs, orchestrators, and specialist agents coordinate work through explicit session tracking. However, the relationship with native Claude Code (direct execution without roster orchestration) has remained implicit.
+The roster project has evolved a sophisticated session-based workflow system where rites, orchestrators, and specialist agents coordinate work through explicit session tracking. However, the relationship with native Claude Code (direct execution without roster orchestration) has remained implicit.
 
 **Current State:**
 - Sessions are created via `/start` with a team and complexity level
@@ -171,9 +171,9 @@ Roster is designed to coexist with native Claude, not replace it. Some work bene
 | Case | Expected Behavior |
 |------|------------------|
 | Session file exists but is corrupted | Treat as native mode (no session), log warning |
-| ACTIVE_RITE file exists but team pack missing | Error with recovery guidance: "Team X not found. Use `/team` to reconfigure or `/team --remove` to continue in cross-cutting mode." |
+| ACTIVE_RITE file exists but rite missing | Error with recovery guidance: "Team X not found. Use `/team` to reconfigure or `/team --remove` to continue in cross-cutting mode." |
 | Session created with team, then team file deleted | Downgrade to cross-cutting mode |
-| `/start` called with invalid team name | Error, do not create session |
+| `/start` called with invalid rite name | Error, do not create session |
 | Session-without-team receives `/handoff` | Error: "No orchestrator in cross-cutting mode. Use /team to enable orchestration." |
 | Native mode receives `/park` or `/wrap` | Error: "No active session. Use /start to begin tracked work." |
 | `/consult` in native mode | Works normally, may recommend starting a session |

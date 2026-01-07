@@ -1,11 +1,11 @@
 # Cross-Team Coordination Playbook
 
-> Operational guidance for producing and consuming cross-team HANDOFF artifacts.
+> Operational guidance for producing and consuming cross-rite HANDOFF artifacts.
 > Version: 1.0.0
 
 ## Overview
 
-This playbook provides practical guidance for cross-team coordination in the roster ecosystem. It covers when to use HANDOFF artifacts, how to produce and consume them, common scenarios, and escalation paths.
+This playbook provides practical guidance for cross-rite coordination in the roster ecosystem. It covers when to use HANDOFF artifacts, how to produce and consume them, common scenarios, and escalation paths.
 
 ---
 
@@ -443,8 +443,8 @@ intelligence -> strategy : strategic_input (research)
 
 ## Related Documents
 
-- [Cross-Team Handoff Schema](../../.claude/skills/shared/cross-team-handoff/schema.md)
-- [Cross-Team Handoff SKILL](../../.claude/skills/shared/cross-team-handoff/SKILL.md)
+- [Cross-Team Handoff Schema](../../.claude/skills/shared/cross-rite-handoff/schema.md)
+- [Cross-Team Handoff SKILL](../../.claude/skills/shared/cross-rite-handoff/SKILL.md)
 - [Edge Cases: Cross-Team Workflows](../edge-cases/cross-rite-workflows.md)
 - [E2E Test: Feature Development](../testing/e2e-feature-development.md)
 - [E2E Test: Security Workflow](../testing/e2e-security-workflow.md)

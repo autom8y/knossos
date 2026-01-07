@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-Claude Code discovers agents at **session startup only**, loading from both `~/.claude/agents/` (user-level) and `.claude/agents/` (project-level) into a per-session cache. The observed agent accumulation bug is caused by a **combination of Claude Code's session-level caching and our swap-team.sh correctly modifying files but having no mechanism to invalidate Claude Code's in-memory agent registry**. The filesystem is correct after swap; Claude Code simply does not re-scan mid-session.
+Claude Code discovers agents at **session startup only**, loading from both `~/.claude/agents/` (user-level) and `.claude/agents/` (project-level) into a per-session cache. The observed agent accumulation bug is caused by a **combination of Claude Code's session-level caching and our swap-rite.sh correctly modifying files but having no mechanism to invalidate Claude Code's in-memory agent registry**. The filesystem is correct after swap; Claude Code simply does not re-scan mid-session.
 
 ## Technology Overview
 
@@ -43,12 +43,12 @@ Claude Code discovers agents at **session startup only**, loading from both `~/.
 1. User started session with Team A (5 agents) loaded into memory
 2. Team A agents in `.claude/agents/` were discovered at session start
 3. User-level agents in `~/.claude/agents/` (4 agents: requirements-analyst, context-engineer, technology-scout, consultant) were also discovered
-4. User switched to Team B via swap-team.sh
-5. swap-team.sh correctly replaced files in `.claude/agents/`
+4. User switched to Team B via swap-rite.sh
+5. swap-rite.sh correctly replaced files in `.claude/agents/`
 6. Claude Code's in-memory cache still contains **all agents from session start**
 7. No mechanism exists to tell Claude Code "re-scan the agents directory"
 
-## swap-team.sh Analysis
+## swap-rite.sh Analysis
 
 ### What It Does Correctly
 
@@ -68,7 +68,7 @@ Claude Code discovers agents at **session startup only**, loading from both `~/.
 
 ### Filesystem State After Swap
 
-After running `swap-team.sh 10x-dev-pack` on skeleton_claude:
+After running `swap-rite.sh 10x-dev-pack` on skeleton_claude:
 
 ```
 .claude/agents/          # Contains exactly 5 files (CORRECT)
@@ -101,13 +101,13 @@ The filesystem is **correct**. The bug is that Claude Code's in-memory state doe
 
 ## Fit Assessment
 
-- **Philosophy Alignment**: Poor - We want dynamic team switching; Claude Code assumes static agent sets
+- **Philosophy Alignment**: Poor - We want dynamic rite switching; Claude Code assumes static agent sets
 - **Stack Compatibility**: Partial - Filesystem operations work; cache invalidation impossible
 - **Team Readiness**: High awareness needed - Users must understand restart requirement
 
 ## Comparison Matrix
 
-| Criteria | Current swap-team.sh | Restart After Swap | Clear User Agents |
+| Criteria | Current swap-rite.sh | Restart After Swap | Clear User Agents |
 |----------|---------------------|-------------------|-------------------|
 | Filesystem Correct | Yes | Yes | Yes |
 | Claude Code Sees Changes | No | Yes | Partially |
@@ -118,7 +118,7 @@ The filesystem is **correct**. The bug is that Claude Code's in-memory state doe
 
 | Component | Status | Notes |
 |-----------|--------|-------|
-| swap-team.sh file operations | Working | Filesystem is correct |
+| swap-rite.sh file operations | Working | Filesystem is correct |
 | AGENT_MANIFEST.json | Working | Tracks agent provenance |
 | CLAUDE.md updates | Working | Reflects new team |
 | Claude Code agent scan | One-time | Only at session start |
@@ -129,7 +129,7 @@ The filesystem is **correct**. The bug is that Claude Code's in-memory state doe
 
 **Verdict**: Assess (investigate workarounds before accepting limitation)
 
-**Rationale**: The bug is a Claude Code limitation, not a swap-team.sh defect. However, we have options:
+**Rationale**: The bug is a Claude Code limitation, not a swap-rite.sh defect. However, we have options:
 
 1. **Document the restart requirement** - Immediate, low-effort
 2. **Explore `/agents` command automation** - May allow programmatic refresh
@@ -138,7 +138,7 @@ The filesystem is **correct**. The bug is that Claude Code's in-memory state doe
 
 ## Recommended Fixes
 
-### Immediate (swap-team.sh)
+### Immediate (swap-rite.sh)
 
 1. **Add post-swap warning**:
    ```bash
@@ -147,7 +147,7 @@ The filesystem is **correct**. The bug is that Claude Code's in-memory state doe
 
 2. **Add `--fresh` flag** for CI/scripted workflows:
    ```bash
-   swap-team.sh 10x-dev-pack --fresh  # Clears user-level agents too
+   swap-rite.sh 10x-dev-pack --fresh  # Clears user-level agents too
    ```
 
 3. **Improve same-name detection**:

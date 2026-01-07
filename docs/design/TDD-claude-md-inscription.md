@@ -201,7 +201,7 @@ properties:
 
   active_rite:
     type: string
-    description: "Current rite/team name"
+    description: "Current rite/rite name"
 
   template_path:
     type: string
@@ -765,7 +765,7 @@ conditionals:
     include: [state-management]
     exclude: []
 
-  # Include orchestration only with active team
+  # Include orchestration only with active rite
   orchestrated-content:
     when: "file_exists('.claude/ACTIVE_RITE')"
     include: [agent-routing, skills]
@@ -1263,7 +1263,7 @@ Ready for Implementation when:
 | Current CLAUDE.md | `/Users/tomtenuta/Code/roster/.claude/CLAUDE.md` | Read |
 | Knossos Doctrine | `/Users/tomtenuta/Code/roster/docs/philosophy/knossos-doctrine.md` | Read |
 | Existing claudemd.go | `/Users/tomtenuta/Code/roster/ariadne/internal/team/claudemd.go` | Read |
-| Ownership model | `/Users/tomtenuta/Code/roster/teams/ecosystem-pack/skills/claude-md-architecture/ownership-model.md` | Read |
+| Ownership model | `/Users/tomtenuta/Code/roster/rites/ecosystem-pack/skills/claude-md-architecture/ownership-model.md` | Read |
 | Merge docs | `/Users/tomtenuta/Code/roster/lib/sync/merge/merge-docs.sh` | Read |
 | TDD Schema | `/Users/tomtenuta/Code/roster/user-skills/documentation/doc-artifacts/schemas/tdd-schema.md` | Read |
 | Hooks config | `/Users/tomtenuta/Code/roster/.claude/hooks/ari/hooks.yaml` | Read |

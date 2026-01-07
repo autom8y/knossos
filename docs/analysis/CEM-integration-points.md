@@ -18,7 +18,7 @@ CEM is invoked from roster in **3 primary integration points**:
 Additionally, CEM concepts are referenced in:
 - **ecosystem-pack context injection** - CEM sync status detection
 - **ecosystem-ref skill** - Documentation of CEM patterns
-- **swap-team.sh** - References skeleton baseline (indirect)
+- **swap-rite.sh** - References skeleton baseline (indirect)
 
 ---
 
@@ -127,7 +127,7 @@ fi
 |---------|------|---------|
 | `cem install-user` | 33, 68 | Push skeleton updates to ~/.claude/ |
 | `cem sync` | 41 | Pull updates from skeleton to satellite |
-| `cem sync --refresh` | 44 | Sync + refresh active team from roster |
+| `cem sync --refresh` | 44 | Sync + refresh active rite from roster |
 | `cem init` | 51 | Initialize project with ecosystem |
 | `cem status` | 54 | Show current sync state |
 | `cem diff` | 57 | Show differences with skeleton |
@@ -188,7 +188,7 @@ fi
 
 ### 3. /cem-debug Command (Diagnostic)
 
-**Location**: `/Users/tomtenuta/Code/roster/teams/ecosystem-pack/commands/cem-debug.md`
+**Location**: `/Users/tomtenuta/Code/roster/rites/ecosystem-pack/commands/cem-debug.md`
 
 | Attribute | Value |
 |-----------|-------|
@@ -239,7 +239,7 @@ Gap Analysis document at: `docs/ecosystem/GAP-{issue-slug}.md`
 
 ### 4. ecosystem-pack/context-injection.sh
 
-**Location**: `/Users/tomtenuta/Code/roster/teams/ecosystem-pack/context-injection.sh`
+**Location**: `/Users/tomtenuta/Code/roster/rites/ecosystem-pack/context-injection.sh`
 
 | Attribute | Value |
 |-----------|-------|
@@ -276,7 +276,7 @@ fi
 
 ### 5. ecosystem-ref Skill
 
-**Location**: `/Users/tomtenuta/Code/roster/teams/ecosystem-pack/skills/ecosystem-ref/SKILL.md`
+**Location**: `/Users/tomtenuta/Code/roster/rites/ecosystem-pack/skills/ecosystem-ref/SKILL.md`
 
 | Attribute | Value |
 |-----------|-------|
@@ -301,9 +301,9 @@ fi
 
 ---
 
-### 6. swap-team.sh (Skeleton References)
+### 6. swap-rite.sh (Skeleton References)
 
-**Location**: `/Users/tomtenuta/Code/roster/swap-team.sh`
+**Location**: `/Users/tomtenuta/Code/roster/swap-rite.sh`
 
 | Attribute | Value |
 |-----------|-------|
@@ -319,7 +319,7 @@ fi
 
 #### Note
 
-swap-team.sh does NOT invoke CEM directly. It references skeleton as a concept for the base configuration layer. This is more about the three-tier architecture (skeleton -> team -> satellite) than CEM itself.
+swap-rite.sh does NOT invoke CEM directly. It references skeleton as a concept for the base configuration layer. This is more about the three-tier architecture (skeleton -> team -> satellite) than CEM itself.
 
 ---
 
@@ -377,7 +377,7 @@ The skeleton CEM script sources these library modules:
 | `init` | `[skeleton-path]` | Initialize project with ecosystem | worktree-manager.sh, /sync |
 | `sync` | `[--refresh] [--prune] [--force] [--dry-run]` | Pull updates from skeleton | worktree-manager.sh, /sync |
 | `validate` | - | Validate manifest and file integrity | /sync (status) |
-| `validate-team` | `[name]` | Validate team pack against workflow schema | - |
+| `validate-team` | `[name]` | Validate rite against workflow schema | - |
 | `repair` | - | Rebuild manifest from .claude/ state | /sync |
 | `install-user` | - | Install user-level resources to ~/.claude/ | /sync |
 | `status` | - | Show sync status and version info | /sync |
@@ -427,9 +427,9 @@ The skeleton CEM script sources these library modules:
 |----------|---------------|----------|
 | worktree-manager.sh | `/Users/tomtenuta/Code/roster/user-hooks/lib/worktree-manager.sh` | Lines 225-251 read |
 | /sync command | `/Users/tomtenuta/Code/roster/user-commands/cem/sync.md` | Full file read |
-| /cem-debug command | `/Users/tomtenuta/Code/roster/teams/ecosystem-pack/commands/cem-debug.md` | Full file read |
-| context-injection.sh | `/Users/tomtenuta/Code/roster/teams/ecosystem-pack/context-injection.sh` | Full file read |
-| ecosystem-ref skill | `/Users/tomtenuta/Code/roster/teams/ecosystem-pack/skills/ecosystem-ref/SKILL.md` | Full file read |
+| /cem-debug command | `/Users/tomtenuta/Code/roster/rites/ecosystem-pack/commands/cem-debug.md` | Full file read |
+| context-injection.sh | `/Users/tomtenuta/Code/roster/rites/ecosystem-pack/context-injection.sh` | Full file read |
+| ecosystem-ref skill | `/Users/tomtenuta/Code/roster/rites/ecosystem-pack/skills/ecosystem-ref/SKILL.md` | Full file read |
 | CEM main script | `/Users/tomtenuta/Code/skeleton_claude/cem` | Full file read |
 | cem-sync.sh library | `/Users/tomtenuta/Code/skeleton_claude/lib/cem-sync.sh` | Full file read |
 | manifest.json | `/Users/tomtenuta/Code/roster/.claude/.cem/manifest.json` | Full file read |

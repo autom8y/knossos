@@ -15,7 +15,7 @@ The command ecosystem has three distinct architectural boundaries:
 
 1. **Standard Commands**: Pass-through or internal-parsed commands following the canonical template (32 files)
 2. **Meta Commands**: Session initialization templates using `{TAG}` pattern (3 files: minus-1.md, zero.md, one.md)
-3. **Team Commands**: Team-specific commands under `teams/*/commands/` (variable)
+3. **Team Commands**: Team-specific commands under `rites/*/commands/` (variable)
 
 **Root Cause Analysis**: The smells cluster into two root causes:
 
@@ -59,7 +59,7 @@ The command ecosystem has three distinct architectural boundaries:
 
 **Rationale**:
 1. Consistency enables tooling (automatic flag extraction, validation)
-2. "Handled By" column clarifies responsibility boundaries (swap-team.sh vs internal vs Claude)
+2. "Handled By" column clarifies responsibility boundaries (swap-rite.sh vs internal vs Claude)
 3. The 11 affected files all follow the same pattern - batch conversion is low-risk
 4. Table format is more scannable than bullet lists for complex flag sets
 
@@ -232,7 +232,7 @@ model: sonnet
 
 **Invariants**:
 - No behavioral change
-- CEM's `--refresh` flag preserved (distinct from swap-team.sh's deprecated flag)
+- CEM's `--refresh` flag preserved (distinct from swap-rite.sh's deprecated flag)
 
 **Verification**:
 1. Run: `head -6 user-commands/cem/sync.md`
@@ -249,7 +249,7 @@ model: sonnet
 **Before State** (lines 1-5):
 ```yaml
 ---
-description: Switch agent team packs or list available teams
+description: Switch agent rites or list available teams
 argument-hint: [pack-name] [--list] [--update] [--dry-run] [--keep-all|--remove-all|--promote-all]
 model: sonnet
 ---
@@ -258,7 +258,7 @@ model: sonnet
 **After State**:
 ```yaml
 ---
-description: Switch agent team packs or list available teams
+description: Switch agent rites or list available teams
 argument-hint: [pack-name] [--list] [--update] [--dry-run] [--keep-all|--remove-all|--promote-all]
 allowed-tools: Bash, Read
 model: sonnet
@@ -279,7 +279,7 @@ model: sonnet
 
 #### RF-006: Add argument-hint to cem-debug.md
 
-**File**: `/roster/teams/ecosystem-pack/commands/cem-debug.md`
+**File**: `/roster/rites/ecosystem-pack/commands/cem-debug.md`
 
 **Before State** (lines 1-5):
 ```yaml
@@ -305,10 +305,10 @@ model: opus
 - Implicit argument now documented
 
 **Verification**:
-1. Run: `head -6 teams/ecosystem-pack/commands/cem-debug.md`
+1. Run: `head -6 rites/ecosystem-pack/commands/cem-debug.md`
 2. Confirm `argument-hint: [issue-description]` present
 
-**Rollback**: `git checkout teams/ecosystem-pack/commands/cem-debug.md`
+**Rollback**: `git checkout rites/ecosystem-pack/commands/cem-debug.md`
 
 ---
 
@@ -334,8 +334,8 @@ All 11 files in this phase follow the same transformation pattern.
 ```markdown
 ## Behavior
 
-1. Execute: `${ROSTER_HOME:-~/Code/roster}/swap-team.sh {pack-name} $ARGUMENTS`
-2. Display the roster output from swap-team.sh (agents and their roles)
+1. Execute: `${ROSTER_HOME:-~/Code/roster}/swap-rite.sh {pack-name} $ARGUMENTS`
+2. Display the roster output from swap-rite.sh (agents and their roles)
 3. If SESSION_CONTEXT exists, update `active_team` to `{pack-name}`
 
 **Flags:**
@@ -350,19 +350,19 @@ All 11 files in this phase follow the same transformation pattern.
 ```markdown
 ## Behavior
 
-1. Execute: `${ROSTER_HOME:-~/Code/roster}/swap-team.sh {pack-name} $ARGUMENTS`
-2. Display the roster output from swap-team.sh (agents and their roles)
+1. Execute: `${ROSTER_HOME:-~/Code/roster}/swap-rite.sh {pack-name} $ARGUMENTS`
+2. Display the roster output from swap-rite.sh (agents and their roles)
 3. If SESSION_CONTEXT exists, update `active_team` to `{pack-name}`
 
 ## Flags
 
 | Flag | Short | Description | Handled By |
 |------|-------|-------------|------------|
-| `--update` | `-u` | Pull latest agent definitions from roster even if already on team | swap-team.sh |
-| `--dry-run` | - | Preview changes without applying | swap-team.sh |
-| `--keep-all` | - | Preserve all orphan agents in project | swap-team.sh |
-| `--remove-all` | - | Remove all orphans (backup available) | swap-team.sh |
-| `--promote-all` | - | Move all orphans to user-level | swap-team.sh |
+| `--update` | `-u` | Pull latest agent definitions from roster even if already on team | swap-rite.sh |
+| `--dry-run` | - | Preview changes without applying | swap-rite.sh |
+| `--keep-all` | - | Preserve all orphan agents in project | swap-rite.sh |
+| `--remove-all` | - | Remove all orphans (backup available) | swap-rite.sh |
+| `--promote-all` | - | Move all orphans to user-level | swap-rite.sh |
 ```
 
 **Invariants**:
@@ -374,7 +374,7 @@ All 11 files in this phase follow the same transformation pattern.
 **Verification** (for each file):
 1. Run: `grep -A 10 "## Flags" user-commands/team-switching/{file}.md`
 2. Confirm table format with 5 rows
-3. Confirm "Handled By" column shows `swap-team.sh`
+3. Confirm "Handled By" column shows `swap-rite.sh`
 
 **Rollback**: `git checkout user-commands/team-switching/`
 
@@ -434,8 +434,8 @@ Display information about The Forge - the meta-team for creating and maintaining
 - `user-commands/navigation/worktree.md`
 - `user-commands/session/start.md`
 - `user-commands/workflow/sprint.md`
-- `teams/doc-team-pack/commands/consolidate.md`
-- `teams/ecosystem-pack/commands/cem-debug.md`
+- `rites/doc-team-pack/commands/consolidate.md`
+- `rites/ecosystem-pack/commands/cem-debug.md`
 
 ---
 
@@ -538,7 +538,7 @@ After each phase:
 
 ### Edge Cases
 
-1. **sync.md `--refresh`**: This is CEM's flag, NOT swap-team.sh's deprecated flag. Do not change.
+1. **sync.md `--refresh`**: This is CEM's flag, NOT swap-rite.sh's deprecated flag. Do not change.
 2. **team.md mixed flags**: Has inline bullets AND orphan handling table. Only add `allowed-tools`, do not restructure.
 3. **forge.md Context section**: Missing Context section. Do not add - it uses Read/Glob, not session context.
 
@@ -554,7 +554,7 @@ Before marking Phase complete:
 - [ ] RF-003: `grep -c "^---$" user-commands/meta/one.md` returns 2
 - [ ] RF-004: `grep "model:" user-commands/cem/sync.md` returns line
 - [ ] RF-005: `grep "allowed-tools:" user-commands/navigation/team.md` returns line
-- [ ] RF-006: `grep "argument-hint:" teams/ecosystem-pack/commands/cem-debug.md` returns line
+- [ ] RF-006: `grep "argument-hint:" rites/ecosystem-pack/commands/cem-debug.md` returns line
 
 ### Phase 2 Verification
 - [ ] RF-007-016: `grep -l "| Flag | Short |" user-commands/team-switching/*.md` returns 9 files

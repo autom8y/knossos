@@ -14,7 +14,7 @@ Migrated all 38 user-commands from `~/Code/skeleton_claude/.claude/user-commands
 
 | Command | Action | Notes |
 |---------|--------|-------|
-| start.md | MIGRATED | Updated swap-team.sh path to absolute roster path |
+| start.md | MIGRATED | Updated swap-rite.sh path to absolute roster path |
 | park.md | MIGRATED | No path changes needed |
 | continue.md | MIGRATED | No path changes needed (skeleton has no resume.md, uses continue.md) |
 | wrap.md | MIGRATED | No path changes needed |
@@ -48,7 +48,7 @@ Migrated all 38 user-commands from `~/Code/skeleton_claude/.claude/user-commands
 
 | Command | Action | Notes |
 |---------|--------|-------|
-| team.md | MIGRATED | Updated swap-team.sh path to absolute roster path |
+| team.md | MIGRATED | Updated swap-rite.sh path to absolute roster path |
 | worktree.md | MIGRATED | Removed CEM reference, updated for roster |
 | new-team.md | MIGRATED | Updated roster path to absolute |
 | validate-team.md | MIGRATED | Updated roster path to absolute |
@@ -58,19 +58,19 @@ Migrated all 38 user-commands from `~/Code/skeleton_claude/.claude/user-commands
 
 | Command | Action | Notes |
 |---------|--------|-------|
-| 10x.md | MIGRATED | Updated swap-team.sh path to absolute roster path |
+| 10x.md | MIGRATED | Updated swap-rite.sh path to absolute roster path |
 | cem-debug.md | MIGRATED | Renamed to roster-debug.md, updated all CEM references to roster |
-| debt.md | MIGRATED | Updated swap-team.sh path to absolute roster path |
-| docs.md | MIGRATED | Updated swap-team.sh path to absolute roster path |
-| ecosystem.md | MIGRATED | Updated swap-team.sh path and CEM references to roster |
+| debt.md | MIGRATED | Updated swap-rite.sh path to absolute roster path |
+| docs.md | MIGRATED | Updated swap-rite.sh path to absolute roster path |
+| ecosystem.md | MIGRATED | Updated swap-rite.sh path and CEM references to roster |
 | eval-agent.md | MIGRATED | Updated roster path to absolute |
 | forge.md | MIGRATED | No path changes needed |
-| hygiene.md | MIGRATED | Updated swap-team.sh path to absolute roster path |
-| intelligence.md | MIGRATED | Updated swap-team.sh path to absolute roster path |
-| rnd.md | MIGRATED | Updated swap-team.sh path to absolute roster path |
-| security.md | MIGRATED | Updated swap-team.sh path to absolute roster path |
-| sre.md | MIGRATED | Updated swap-team.sh path to absolute roster path |
-| strategy.md | MIGRATED | Updated swap-team.sh path to absolute roster path |
+| hygiene.md | MIGRATED | Updated swap-rite.sh path to absolute roster path |
+| intelligence.md | MIGRATED | Updated swap-rite.sh path to absolute roster path |
+| rnd.md | MIGRATED | Updated swap-rite.sh path to absolute roster path |
+| security.md | MIGRATED | Updated swap-rite.sh path to absolute roster path |
+| sre.md | MIGRATED | Updated swap-rite.sh path to absolute roster path |
+| strategy.md | MIGRATED | Updated swap-rite.sh path to absolute roster path |
 
 ### Configuration Files (2)
 
@@ -83,7 +83,7 @@ Migrated all 38 user-commands from `~/Code/skeleton_claude/.claude/user-commands
 
 | Old Pattern | New Pattern | Count |
 |-------------|-------------|-------|
-| `~/Code/roster/swap-team.sh` | `/Users/tomtenuta/Code/roster/swap-team.sh` | 12 |
+| `~/Code/roster/swap-rite.sh` | `/Users/tomtenuta/Code/roster/swap-rite.sh` | 12 |
 | `~/Code/skeleton_claude/cem` | `/Users/tomtenuta/Code/roster/roster-sync` | 1 |
 | `cem-debug.md` | `roster-debug.md` | 1 (new file name) |
 | CEM references in ecosystem.md | roster references | 3 |
