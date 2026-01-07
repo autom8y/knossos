@@ -14,19 +14,19 @@ Switch to the Strategy rite and display the pantheon. $ARGUMENTS
 
 ## Behavior
 
-1. Execute: `${KNOSSOS_HOME:-~/Code/roster}/swap-rite.sh strategy $ARGUMENTS`
-2. Display the roster output from swap-rite.sh (agents and their roles)
+1. Execute: `ari sync materialize --rite strategy $ARGUMENTS`
+2. Display the roster output from ari (agents and their roles)
 3. If SESSION_CONTEXT exists, update `active_rite` to `strategy`
 
 ## Flags
 
 | Flag | Short | Description | Handled By |
 |------|-------|-------------|------------|
-| `--update` | `-u` | Pull latest agent definitions from roster even if already on rite | swap-rite.sh |
-| `--dry-run` | - | Preview changes without applying | swap-rite.sh |
-| `--keep-all` | - | Preserve all orphan agents in project | swap-rite.sh |
-| `--remove-all` | - | Remove all orphans (backup available) | swap-rite.sh |
-| `--promote-all` | - | Move all orphans to user-level | swap-rite.sh |
+| `--update` | `-u` | Pull latest agent definitions from roster even if already on rite | ari sync materialize |
+| `--dry-run` | - | Preview changes without applying | ari sync materialize |
+| `--keep-all` | - | Preserve all orphan agents in project | ari sync materialize |
+| `--remove-all` | - | Remove all orphans (backup available) | ari sync materialize |
+| `--promote-all` | - | Move all orphans to user-level | ari sync materialize |
 
 ## When to Use
 

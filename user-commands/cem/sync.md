@@ -1,6 +1,6 @@
 ---
-description: Sync project with roster ecosystem
-argument-hint: [sync|init|status|diff|validate|repair] [--refresh] [--force] [--dry-run]
+description: Sync project with roster ecosystem using ari CLI
+argument-hint: [status|pull|push|diff|materialize|resolve|history|reset] [--rite=NAME] [--force]
 allowed-tools: Bash, Read
 model: haiku
 ---
@@ -10,36 +10,62 @@ Auto-injected by SessionStart hook (project, team, session, git).
 
 ## Your Task
 
-Execute roster-sync to synchronize project with roster ecosystem. $ARGUMENTS
+Execute ari sync to synchronize project with roster ecosystem. $ARGUMENTS
 
 ## Behavior
 
-1. **Execute roster-sync** using standard path resolution:
+1. **Execute ari sync** using the installed binary:
    ```bash
-   ${KNOSSOS_HOME:-~/Code/roster}/roster-sync [command] $ARGUMENTS
+   ari sync [command] $ARGUMENTS
    ```
-   This expands to `$KNOSSOS_HOME/roster-sync` if set, otherwise `~/Code/roster/roster-sync`
+   If `ari` is not in PATH, fall back to: `~/bin/ari sync [command] $ARGUMENTS`
 
 2. **Pass through all arguments**:
-   - Command: sync, init, status, diff, validate, repair
-   - Flags: --refresh, --force, --dry-run, --prune, --auto-refresh, etc.
+   - Commands: status, pull, push, diff, materialize, resolve, history, reset
+   - Flags: --rite=NAME (for materialize), --force, --verbose
    - Display output directly to user
 
 3. **Handle errors**:
-   - If roster-sync not found at `~/Code/roster/roster-sync`:
-     - ERROR: "roster-sync not found. Expected location: ~/Code/roster/roster-sync"
-     - Suggest: "Clone roster repository to ~/Code/roster or set KNOSSOS_HOME"
+   - If ari not found:
+     - ERROR: "ari not found. Install via: brew install autom8y/tap/ari"
+     - Or build locally: "cd ~/Code/roster && just build && cp ari ~/bin/"
    - If execution fails: Display stderr for debugging
+
+4. **Special handling for --refresh flag**:
+   - If `--refresh` is passed, translate to: `ari sync materialize`
+   - This regenerates .claude/ from templates and active rite
+
+## Command Mapping
+
+| /sync command | ari sync command | Description |
+|---------------|------------------|-------------|
+| `/sync status` | `ari sync status` | Show sync status |
+| `/sync pull` | `ari sync pull` | Pull remote changes |
+| `/sync push` | `ari sync push` | Push local changes |
+| `/sync diff` | `ari sync diff` | Show differences |
+| `/sync materialize` | `ari sync materialize` | Generate .claude/ from templates |
+| `/sync materialize --rite=X` | `ari sync materialize --rite X` | Generate for specific rite |
+| `/sync --refresh` | `ari sync materialize` | Refresh/regenerate .claude/ |
+| `/sync resolve` | `ari sync resolve` | Resolve conflicts |
+| `/sync history` | `ari sync history` | Show audit log |
+| `/sync reset` | `ari sync reset` | Reset sync state (dangerous) |
+
+## Legacy Compatibility
+
+The following legacy commands are deprecated:
+- `roster-sync` shell script → Use `ari sync` instead
+- `/sync init` → Use `ari sync materialize` for new projects
+- `/sync validate` → Use `ari manifest validate` instead
+- `/sync repair` → Use `ari sync reset` followed by `ari sync materialize`
 
 ## Common Commands
 
 ```bash
-/sync sync              # Pull updates from roster
-/sync sync --refresh   # Sync and refresh active rite
-/sync status           # Show sync status and version
-/sync diff             # Show pending changes
-/sync init             # Initialize new project
-/sync validate         # Check manifest integrity
+/sync status                      # Show sync status
+/sync materialize                 # Generate .claude/ from templates
+/sync materialize --rite=hygiene  # Generate for specific rite
+/sync pull                        # Pull remote changes
+/sync diff                        # Show pending changes
 ```
 
 ## Reference

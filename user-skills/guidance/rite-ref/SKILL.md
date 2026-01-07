@@ -44,19 +44,32 @@ Determine operation mode:
 - **`--list` or `-l`**: List all available rites
 - **`<rite-name>`**: Switch to specified rite
 
-### 2. Invoke Roster Script
+### 2. Invoke Ari CLI
 
-Execute the swap-rite.sh script via Bash tool:
+Execute rite operations via ari CLI:
 
+```bash
+# Primary method (recommended)
+ari sync materialize --rite <rite-name>
+
+# Alternative methods
+ari rite swap <rite-name>     # If ari rite subcommand available
+ari rite list                  # List available rites
+ari rite current               # Show current rite
+```
+
+If ari is not in PATH, use full path: `~/bin/ari`
+
+The ari CLI handles:
+- Validation of rite existence via manifest.yaml
+- Generation of .claude/ from templates and rite
+- State tracking in .claude/sync/state.json
+- Update of `.claude/ACTIVE_RITE` state file
+
+**Legacy fallback** (deprecated):
 ```bash
 $KNOSSOS_HOME/swap-rite.sh [args]
 ```
-
-The script handles:
-- Validation of rite existence
-- Backup of current agents (if any)
-- Atomic swap of agent files
-- Update of `.claude/ACTIVE_RITE` state file
 
 ### 3. Display Results
 
@@ -388,7 +401,9 @@ These commands invoke `/rite {rite-name}` internally and display rite roster aft
 
 ## Related Documentation
 
-- [swap-rite.sh]($KNOSSOS_HOME/swap-rite.sh) - Roster swap script
+- [ari CLI](~/bin/ari) - Primary rite management interface
+- [ari sync materialize](~/bin/ari sync materialize --help) - Generate .claude/ for rite
+- [swap-rite.sh]($KNOSSOS_HOME/swap-rite.sh) - Legacy roster swap script (deprecated)
 - [TDD-roster-system.md]($KNOSSOS_HOME/docs/design/TDD-0003-rite-swap.md) - Roster design
 - [COMMAND_REGISTRY.md](../../COMMAND_REGISTRY.md) - All registered commands
 

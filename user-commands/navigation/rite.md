@@ -21,16 +21,20 @@ Manage rites. $ARGUMENTS
 2. Show: "Active rite: {name}" or "No rite active"
 
 **If `--list` or `-l`:**
-1. Execute: `${KNOSSOS_HOME:-~/Code/roster}/swap-rite.sh --list`
+1. Execute: `ari rite list` (or fallback to `${KNOSSOS_HOME:-~/Code/roster}/swap-rite.sh --list`)
 2. Display all available rites
 
 **If `<pack-name>` provided:**
-1. Execute: `${KNOSSOS_HOME:-~/Code/roster}/swap-rite.sh <pack-name> [flags]`
+1. Execute: `ari sync materialize --rite <pack-name>` (primary method)
+   - Or fallback to: `${KNOSSOS_HOME:-~/Code/roster}/swap-rite.sh <pack-name> [flags]`
 2. If orphan agents exist (agents in current project but not in target rite):
    - **Interactive (TTY)**: Prompt user for each orphan agent
    - **Non-interactive**: Require `--keep-all`, `--remove-all`, or `--promote-all` flag
 3. Show confirmation with agent count
 4. If SESSION_CONTEXT exists, update `active_rite` field
+
+**Note**: The `ari sync materialize` command is the recommended approach as of v0.1.0.
+The legacy `swap-rite.sh` script remains available as a fallback.
 
 ## Orphan Agent Handling
 
