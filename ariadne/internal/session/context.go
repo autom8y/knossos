@@ -20,7 +20,7 @@ type Context struct {
 	Initiative    string    `yaml:"initiative" json:"initiative"`
 	Complexity    string    `yaml:"complexity" json:"complexity"`
 	ActiveRite    string    `yaml:"active_rite" json:"active_rite"`
-	Team          *string   `yaml:"team" json:"team,omitempty"` // null for cross-cutting
+	Rite          *string   `yaml:"rite" json:"rite,omitempty"` // null for cross-cutting
 	CurrentPhase  string    `yaml:"current_phase" json:"current_phase"`
 
 	// Optional fields
@@ -42,7 +42,7 @@ type contextYAML struct {
 	Initiative    string  `yaml:"initiative"`
 	Complexity    string  `yaml:"complexity"`
 	ActiveRite    string  `yaml:"active_rite"`
-	Team          *string `yaml:"team,omitempty"`
+	Rite          *string `yaml:"rite,omitempty"`
 	CurrentPhase  string  `yaml:"current_phase"`
 	ParkedAt      string  `yaml:"parked_at,omitempty"`
 	ParkedReason  string  `yaml:"parked_reason,omitempty"`
@@ -89,7 +89,7 @@ func ParseContext(content []byte) (*Context, error) {
 		Initiative:    yamlData.Initiative,
 		Complexity:    yamlData.Complexity,
 		ActiveRite:    yamlData.ActiveRite,
-		Team:          yamlData.Team,
+		Rite:          yamlData.Rite,
 		CurrentPhase:  yamlData.CurrentPhase,
 		ParkedReason:  yamlData.ParkedReason,
 		Body:          body,
@@ -154,7 +154,7 @@ func (c *Context) Serialize() ([]byte, error) {
 		Initiative:    c.Initiative,
 		Complexity:    c.Complexity,
 		ActiveRite:    c.ActiveRite,
-		Team:          c.Team,
+		Rite:          c.Rite,
 		CurrentPhase:  c.CurrentPhase,
 		ParkedReason:  c.ParkedReason,
 	}
@@ -233,12 +233,12 @@ func NewContext(initiative, complexity, rite string) *Context {
 		Body:          defaultBody(initiative),
 	}
 
-	// Set team field - null for cross-cutting
+	// Set rite field - null for cross-cutting
 	if rite == "" || rite == "none" {
-		ctx.Team = nil
+		ctx.Rite = nil
 	} else {
 		riteCopy := rite
-		ctx.Team = &riteCopy
+		ctx.Rite = &riteCopy
 	}
 
 	return ctx

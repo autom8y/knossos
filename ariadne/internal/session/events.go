@@ -103,7 +103,7 @@ func (e *EventEmitter) EmitToAudit(sessionID string, event Event) error {
 }
 
 // EmitCreated emits a SESSION_CREATED event.
-func (e *EventEmitter) EmitCreated(sessionID, initiative, complexity, team string) error {
+func (e *EventEmitter) EmitCreated(sessionID, initiative, complexity, rite string) error {
 	event := Event{
 		Timestamp: time.Now().UTC().Format(time.RFC3339),
 		Event:     EventSessionCreated,
@@ -112,7 +112,7 @@ func (e *EventEmitter) EmitCreated(sessionID, initiative, complexity, team strin
 		Metadata: map[string]interface{}{
 			"initiative": initiative,
 			"complexity": complexity,
-			"team":       team,
+			"rite":       rite,
 		},
 	}
 	if err := e.Emit(event); err != nil {

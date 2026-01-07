@@ -27,7 +27,7 @@ type ValidationCheck struct {
 
 // ValidationResult holds the complete validation results.
 type ValidationResult struct {
-	Team     string            `json:"team"`
+	Rite     string            `json:"rite"`
 	Valid    bool              `json:"valid"`
 	Checks   []ValidationCheck `json:"checks"`
 	Errors   int               `json:"errors"`
@@ -49,35 +49,35 @@ func NewValidator(resolver *paths.Resolver) *Validator {
 	}
 }
 
-// Validate performs all validation checks on a team.
-func (v *Validator) Validate(teamName string) (*ValidationResult, error) {
+// Validate performs all validation checks on a rite.
+func (v *Validator) Validate(riteName string) (*ValidationResult, error) {
 	result := &ValidationResult{
-		Team:   teamName,
+		Rite:   riteName,
 		Valid:  true,
 		Checks: []ValidationCheck{},
 	}
 
-	// Get team info (also validates existence)
-	team, err := v.discovery.Get(teamName)
+	// Get rite info (also validates existence)
+	rite, err := v.discovery.Get(riteName)
 	if err != nil {
 		result.Valid = false
 		result.Checks = append(result.Checks, ValidationCheck{
 			Check:   "TEAM_EXISTS",
 			Status:  CheckFail,
-			Message: "Rite not found: " + teamName,
+			Message: "Rite not found: " + riteName,
 		})
 		result.Errors++
 		return result, nil
 	}
 
 	// Run all checks
-	v.checkTeamExists(result, team)
-	v.checkAgentsDir(result, team)
-	v.checkWorkflowYAML(result, team)
-	v.checkAgentFiles(result, team)
-	v.checkManifestSync(result, team)
-	v.checkClaudeMDSync(result, team)
-	v.checkValidEntryPoint(result, team)
+	v.checkTeamExists(result, rite)
+	v.checkAgentsDir(result, rite)
+	v.checkWorkflowYAML(result, rite)
+	v.checkAgentFiles(result, rite)
+	v.checkManifestSync(result, rite)
+	v.checkClaudeMDSync(result, rite)
+	v.checkValidEntryPoint(result, rite)
 
 	// Set overall validity
 	result.Valid = result.Errors == 0
@@ -333,8 +333,8 @@ func (v *Validator) checkValidEntryPoint(result *ValidationResult, rite *Rite) {
 }
 
 // Fix attempts to repair fixable issues.
-func (v *Validator) Fix(teamName string) error {
-	result, err := v.Validate(teamName)
+func (v *Validator) Fix(riteName string) error {
+	result, err := v.Validate(riteName)
 	if err != nil {
 		return err
 	}
@@ -343,22 +343,22 @@ func (v *Validator) Fix(teamName string) error {
 		switch fixable {
 		case "MANIFEST_SYNC":
 			// Regenerate manifest from current state
-			team, err := v.discovery.Get(teamName)
+			rite, err := v.discovery.Get(riteName)
 			if err != nil {
 				continue
 			}
-			if team.Active {
+			if rite.Active {
 				// Would need to run switch --update
 			}
 		case "CLAUDE_MD_SYNC":
 			// Update CLAUDE.md satellites
-			team, err := v.discovery.Get(teamName)
+			rite, err := v.discovery.Get(riteName)
 			if err != nil {
 				continue
 			}
-			if team.Active {
+			if rite.Active {
 				updater := NewClaudeMDUpdater(v.resolver.ClaudeMDFile())
-				updater.UpdateForTeam(team)
+				updater.UpdateForTeam(rite)
 			}
 		}
 	}
