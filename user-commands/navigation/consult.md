@@ -1,6 +1,6 @@
 ---
-description: Get ecosystem guidance, team recommendations, and command-flows
-argument-hint: [query] [--playbook=NAME] [--team] [--commands]
+description: Get ecosystem guidance, rite recommendations, and command-flows
+argument-hint: [query] [--playbook=NAME] [--rite] [--commands]
 allowed-tools: Bash, Read, Grep, Glob, Task
 model: opus
 ---
@@ -18,7 +18,7 @@ model: opus
 
 ## Context
 
-Auto-injected by SessionStart hook (project, team, session, git).
+Auto-injected by SessionStart hook (project, rite, session, git).
 
 **Active rite**: !`cat .claude/ACTIVE_RITE 2>/dev/null || echo "none"`
 **Available rites**: !`ls ${KNOSSOS_HOME:-~/Code/roster}/rites/ 2>/dev/null | tr '\n' ' '`
@@ -37,13 +37,13 @@ Provide ecosystem guidance and recommendations. $ARGUMENTS
 
 ### No arguments (general help)
 1. Summarize current ecosystem state (active rite, session status)
-2. Display rites dynamically (use `team-discovery` skill for current count)
+2. Display rites dynamically (use `rite-discovery` skill for current count)
 3. List common starting points based on user goals
 4. Point to playbook library for detailed workflows
 
 ### Query provided (e.g., `/consult "improve code quality"`)
 1. Parse user intent using knowledge base
-2. Use `team-discovery` skill to match intent to rite routing conditions
+2. Use `rite-discovery` skill to match intent to rite routing conditions
 3. Match to appropriate rite and workflow
 4. **Reference invocation patterns**: Use `prompting` skill to retrieve exact copy-paste patterns
 5. **Reference workflow context**: Use `10x-workflow` skill for phase/gate information
@@ -56,13 +56,13 @@ Provide ecosystem guidance and recommendations. $ARGUMENTS
 3. If not found, list available playbooks
 
 ### `--rite` flag
-Display all rites dynamically (use `team-discovery` skill):
+Display all rites dynamically (use `rite-discovery` skill):
 ```
 | Rite              | Command       | Best For                           |
 |-------------------|---------------|------------------------------------|
 | 10x-dev-pack      | /10x          | Full feature development lifecycle |
 | debt-triage-pack  | /debt         | Technical debt prioritization      |
-| doc-team-pack     | /docs         | Documentation, technical writing   |
+| doc-rite-pack     | /docs         | Documentation, technical writing   |
 | ecosystem-pack    | /ecosystem    | CEM/skeleton/roster infrastructure |
 | forge-pack        | /forge        | Rite creation and validation       |
 | hygiene-pack      | /hygiene      | Code quality, refactoring          |
@@ -72,7 +72,7 @@ Display all rites dynamically (use `team-discovery` skill):
 | sre-pack          | /sre          | Operations, reliability            |
 | strategy-pack     | /strategy     | Market research, business analysis |
 ```
-**Note**: This list reflects current roster inventory. Use `team-discovery` skill for programmatic access.
+**Note**: This list reflects current roster inventory. Use `rite-discovery` skill for programmatic access.
 
 ### `--commands` flag
 Display all commands by category:
@@ -133,17 +133,17 @@ When explaining workflow journeys, retrieve context from:
 
 **Pattern**: Include quality gate expectations when describing phase transitions.
 
-### Referencing team-discovery Skill
+### Referencing rite-discovery Skill
 
 When recommending rites, retrieve current rite inventory from:
-- `team-discovery` skill for dynamic rite list
-- `team-discovery/schemas/rite-profile.yaml` for profile structure
+- `rite-discovery` skill for dynamic rite list
+- `rite-discovery/schemas/rite-profile.yaml` for profile structure
 
-**Pattern**: Never hardcode rite counts or capabilities; always read from `team-discovery`.
+**Pattern**: Never hardcode rite counts or capabilities; always read from `rite-discovery`.
 
 ## Knowledge Sources
 
-- `$KNOSSOS_HOME/rites/*/orchestrator.yaml` - Rite profiles (via team-discovery)
+- `$KNOSSOS_HOME/rites/*/orchestrator.yaml` - Rite profiles (via rite-discovery)
 - `prompting` skill - Invocation patterns
 - `10x-workflow` skill - Phase transitions and quality gates
 

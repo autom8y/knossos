@@ -23,15 +23,15 @@ Review PRD and use /handoff engineer when ready to implement.
 
 ---
 
-## Example 2: Module with Team Switch
+## Example 2: Module with Rite Switch
 
 ```bash
-/start "Multi-tenant authentication" --complexity=MODULE --team=10x-dev-pack
+/start "Multi-tenant authentication" --complexity=MODULE --rite=10x-dev-pack
 ```
 
 Output:
 ```
-Switching to team: 10x-dev-pack (5 agents loaded)
+Switching to rite: 10x-dev-pack (5 agents loaded)
 
 ✓ Session started: Multi-tenant authentication
 ✓ Complexity: MODULE

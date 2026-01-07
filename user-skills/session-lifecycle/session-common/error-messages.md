@@ -61,7 +61,7 @@ Related: /start, /status
 Active session: {initiative}
 Created: {created_at}
 Phase: {current_phase}
-Team: {active_team}
+Rite: {active_rite}
 
 Resolution:
 - Use /resume to continue this session
@@ -71,7 +71,7 @@ Resolution:
 Related: /resume, /wrap, /status
 ```
 
-**Variables**: `{initiative}`, `{created_at}`, `{current_phase}`, `{active_team}`
+**Variables**: `{initiative}`, `{created_at}`, `{current_phase}`, `{active_rite}`
 
 **Code**: `SESSION_EXISTS`
 
@@ -154,31 +154,31 @@ Related: /resume
 
 ---
 
-## Team Context Errors
+## Rite Context Errors
 
-### Team Not Found
+### Rite Not Found
 
-**When**: --team specified but doesn't exist
+**When**: --rite specified but doesn't exist
 
 ```
-✗ Team Not Found
+✗ Rite Not Found
 
-Team '{team_name}' does not exist in roster.
+Rite '{rite_name}' does not exist in roster.
 
-Available teams:
-{team_list}
+Available rites:
+{rite_list}
 
 Resolution:
-- Choose team from list above
+- Choose rite from list above
 - Check KNOSSOS_HOME: {roster_home}
-- Use /team to see team details
+- Use /rite to see rite details
 
-Related: /team, /roster
+Related: /rite, /roster
 ```
 
-**Variables**: `{team_name}`, `{team_list}`, `{roster_home}`
+**Variables**: `{rite_name}`, `{rite_list}`, `{roster_home}`
 
-**Code**: `TEAM_NOT_FOUND`
+**Code**: `RITE_NOT_FOUND`
 
 ---
 
@@ -218,20 +218,20 @@ Related: /help, /status
 ```
 ✗ Agent Not Found
 
-Agent '{agent_name}' not found in team '{team}'.
+Agent '{agent_name}' not found in rite '{rite}'.
 
-Available agents in {team}:
+Available agents in {rite}:
 {agent_list}
 
 Resolution:
 - Choose agent from list above
 - Use /roster to see agent descriptions
-- Switch teams with /team if needed
+- Switch rites with /rite if needed
 
-Related: /roster, /team
+Related: /roster, /rite
 ```
 
-**Variables**: `{agent_name}`, `{team}`, `{agent_list}`
+**Variables**: `{agent_name}`, `{rite}`, `{agent_list}`
 
 **Code**: `AGENT_NOT_FOUND`
 
@@ -394,29 +394,29 @@ Related: /handoff, /wrap --skip-checks
 
 ## Validation Warnings (Non-Blocking)
 
-### Team Mismatch
+### Rite Mismatch
 
-**When**: /resume but ACTIVE_RITE differs from session team
+**When**: /resume but ACTIVE_RITE differs from session rite
 
 ```
-⚠ Team Mismatch
+⚠ Rite Mismatch
 
-Session team:  {session_team}
-Active team:   {active_team}
+Session rite:  {session_rite}
+Active rite:   {active_rite}
 
 This may cause agent availability issues.
 
 Options:
-1. Switch to session team: /team {session_team}
+1. Switch to session rite: /rite {session_rite}
 2. Continue with current rite (agents may differ)
 3. Cancel and investigate
 
 Continue? [1/2/cancel]:
 ```
 
-**Variables**: `{session_team}`, `{active_team}`
+**Variables**: `{session_rite}`, `{active_rite}`
 
-**Code**: `TEAM_MISMATCH`
+**Code**: `RITE_MISMATCH`
 
 ---
 
@@ -638,12 +638,12 @@ Continue wrap without validation? [y/n]:
 | ALREADY_PARKED | Yes | park |
 | NOT_PARKED | No | resume |
 | SESSION_PARKED | Yes | park, wrap, handoff |
-| TEAM_NOT_FOUND | Yes | start, resume, handoff |
+| RITE_NOT_FOUND | Yes | start, resume, handoff |
 | ROSTER_UNAVAILABLE | Yes | start, resume, handoff |
 | AGENT_NOT_FOUND | Yes | handoff, resume |
 | SAME_AGENT | No | handoff |
 | QUALITY_GATE_* | Yes* | wrap |
-| TEAM_MISMATCH | No | resume |
+| RITE_MISMATCH | No | resume |
 | GIT_STATUS_CHANGED | No | resume |
 | UNCOMMITTED_CHANGES | No | park, wrap |
 | STALE_SESSION | No | resume |

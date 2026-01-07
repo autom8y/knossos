@@ -15,9 +15,9 @@
     wt-20251224-143052-abc/         # Per-session worktree
       .claude/                      # Independent ecosystem
         .worktree-meta.json         # Worktree metadata
-        agents/                     # Team agents (isolated)
+        agents/                     # Rite agents (isolated)
         sessions/                   # Single session
-        ACTIVE_RITE                 # Team state (isolated)
+        ACTIVE_RITE                 # Rite state (isolated)
         SPRINT_CONTEXT              # Sprint state (isolated)
 ```
 
@@ -67,7 +67,7 @@ Shows sessions across all worktrees:
 session-20251224-143052-a1b2 | ACTIVE | feature-auth | 2025-12-24T14:30:52Z
 
 === Worktrees ===
-[wt-20251224-150000-xyz] billing-sprint (team: 10x-dev-pack)
+[wt-20251224-150000-xyz] billing-sprint (rite: 10x-dev-pack)
   session-20251224-150000-c3d4 | ACTIVE | billing-sprint
 ```
 
@@ -81,7 +81,7 @@ Worktree Status
 
 [WORKTREE]    wt-20251224-150000-xyz
 Name:         billing-sprint
-Team:         10x-dev-pack
+Rite:         10x-dev-pack
 
 Roster:       /Users/user/Code/roster
 ...
@@ -94,7 +94,7 @@ Worktree functions in `worktree-manager.sh`:
 - `get_worktree_info()` - Read metadata
 - `get_worktree_id()` - Extract ID from metadata
 
-## Team Pack Integration
+## Rite Pack Integration
 
 ### swap-rite.sh
 
@@ -106,7 +106,7 @@ cd worktrees/wt-{id}
 
 ### ACTIVE_RITE
 
-Each worktree has its own ACTIVE_RITE file, enabling different teams in parallel terminals.
+Each worktree has its own ACTIVE_RITE file, enabling different rites in parallel terminals.
 
 ## Git Integration
 

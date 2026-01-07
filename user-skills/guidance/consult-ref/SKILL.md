@@ -1,6 +1,6 @@
 ---
 name: consult-ref
-description: "Ecosystem guidance and navigation that matches user intent to appropriate teams and workflows. Use when: unsure which team to use, need workflow recommendations, or routing guidance. Triggers: /consult, guidance, what team, which workflow, how do I."
+description: "Ecosystem guidance and navigation that matches user intent to appropriate rites and workflows. Use when: unsure which rite to use, need workflow recommendations, or routing guidance. Triggers: /consult, guidance, what rite, which workflow, how do I."
 ---
 
 # /consult - Ecosystem Guidance & Navigation
@@ -9,21 +9,21 @@ description: "Ecosystem guidance and navigation that matches user intent to appr
 
 ## Purpose
 
-The `/consult` command provides ecosystem guidance, matches user intent to appropriate teams and workflows, and delivers actionable command-flows. It serves as the meta-navigator for the entire Claude Code ecosystem.
+The `/consult` command provides ecosystem guidance, matches user intent to appropriate rites and workflows, and delivers actionable command-flows. It serves as the meta-navigator for the entire Claude Code ecosystem.
 
 This command acts as an intelligent routing layer that:
 - Understands user goals and translates them into concrete workflows
-- Recommends the right team for the job
+- Recommends the right rite for the job
 - Provides step-by-step command sequences
 - Offers alternative approaches when multiple valid paths exist
 - Surfaces pre-built playbooks for common scenarios
 
 ## Cognitive Load Absorber Role
 
-`/consult` is the designated entry point for users who are confused, overwhelmed, or unsure where to start. When users don't know which team, workflow, or command to use, `/consult` absorbs that cognitive load by:
+`/consult` is the designated entry point for users who are confused, overwhelmed, or unsure where to start. When users don't know which rite, workflow, or command to use, `/consult` absorbs that cognitive load by:
 
 1. **Parsing natural language intent** - Understanding what the user wants to accomplish
-2. **Matching to ecosystem capabilities** - Identifying the right team, workflow, and complexity
+2. **Matching to ecosystem capabilities** - Identifying the right rite, workflow, and complexity
 3. **Providing actionable patterns** - Referencing `prompting` skill for exact invocation commands
 4. **Explaining the journey** - Referencing `10x-workflow` for phase transitions and quality gates
 
@@ -42,14 +42,14 @@ When invoked, `/consult` first detects the current execution mode and adapts its
 ```
 Current Mode: Cross-Cutting
 
-You're in a session without team orchestration. In this mode:
+You're in a session without rite orchestration. In this mode:
 - Direct execution is valid (Edit/Write allowed)
 - Session tracking is active (artifacts, blockers recorded)
 - No delegation required
 
 Options:
 1. Continue directly - You can implement this yourself
-2. Switch to orchestrated mode: /team <pack-name>
+2. Switch to orchestrated mode: /rite <pack-name>
 3. Get routing advice - Describe your task and I'll suggest an approach
 ```
 
@@ -61,12 +61,12 @@ Current Mode: Native
 No session is active. Options:
 1. Execute directly - For quick tasks, just do it
 2. Start a tracked session: /start "<initiative>"
-3. Start with a team: /start "<initiative>" --team <pack>
+3. Start with a rite: /start "<initiative>" --rite <pack>
 ```
 
 ### Orchestrated Mode Response
 
-In orchestrated mode, `/consult` provides full team/workflow routing as described below.
+In orchestrated mode, `/consult` provides full rite/workflow routing as described below.
 
 ---
 
@@ -86,8 +86,8 @@ In orchestrated mode, `/consult` provides full team/workflow routing as describe
 /consult --playbook=bug-fix
 /consult --playbook=security-review
 
-# Display teams reference
-/consult --team
+# Display rites reference
+/consult --rite
 
 # Display commands reference
 /consult --commands
@@ -102,15 +102,15 @@ In orchestrated mode, `/consult` provides full team/workflow routing as describe
 When invoked without arguments, `/consult` provides ecosystem overview:
 
 1. **Summarize Current State**
-   - Active team (from `.claude/ACTIVE_RITE`)
+   - Active rite (from `.claude/ACTIVE_RITE`)
    - Active session (from `.claude/sessions/`)
    - Git branch and status
    - Current complexity level (if in session)
 
-2. **Display Team Roster**
-   - Show all teams with brief descriptions (dynamic count from rite-discovery)
+2. **Display Rite Roster**
+   - Show all rites with brief descriptions (dynamic count from rite-discovery)
    - Highlight quick-switch commands
-   - Indicate which team is currently active
+   - Indicate which rite is currently active
 
 3. **List Common Starting Points**
    Based on typical user goals:
@@ -129,11 +129,11 @@ When invoked without arguments, `/consult` provides ecosystem overview:
 
 ```
 === Ecosystem Status ===
-Active Team: 10x-dev-pack (5 agents)
+Active Rite: 10x-dev-pack (5 agents)
 Session: ACTIVE - "Add authentication" (MODULE complexity)
 Git: feature/auth-system (clean)
 
-=== Available Teams ===
+=== Available Rites ===
   10x-dev-pack       /10x          Full feature development
   doc-rite-pack      /docs         Documentation workflows
   hygiene-pack       /hygiene      Code quality & refactoring
@@ -165,7 +165,7 @@ When given a natural language query, `/consult` acts as intelligent router:
    - Identify key verbs (add, fix, improve, deploy, etc.)
    - Recognize domain keywords (auth, performance, tests, docs)
 
-2. **Match to Team + Workflow**
+2. **Match to Rite + Workflow**
    - Consult `~/.claude/knowledge/consultant/routing/intent-patterns.md`
    - Determine appropriate rite
    - Select workflow type (task, sprint, hotfix, spike)
@@ -208,7 +208,7 @@ Domain: Security + Backend
 Estimated Complexity: MODULE to SERVICE level
 
 === Recommendation ===
-Team: 10x-dev-pack
+Rite: 10x-dev-pack
 Workflow: /task (sequential phases)
 Complexity: MODULE
 
@@ -216,7 +216,7 @@ Rationale: Authentication is a well-scoped feature requiring
 requirements, design, implementation, and security validation.
 
 === Command-Flow ===
-1. Switch to development team:
+1. Switch to development rite:
    /10x
 
 2. Start session with appropriate complexity:
@@ -258,7 +258,7 @@ requirements, design, implementation, and security validation.
 
 === Alternatives ===
 - If urgent/hotfix context: Use /hotfix instead (skips full workflow)
-- If security-focused review needed: Start with /security team
+- If security-focused review needed: Start with /security rite
 - If this is part of larger initiative: Consider /sprint for multi-task coordination
 
 Next step: Run `/10x` to switch rites
@@ -311,7 +311,7 @@ This workflow guides you through full feature lifecycle:
 Requirements → Design → Implementation → Testing → Deployment
 
 Current Context:
-  Team: none (will switch to 10x-dev-pack)
+  Rite: none (will switch to 10x-dev-pack)
   Session: none (will start new)
   Branch: main
 
@@ -348,14 +348,14 @@ Next step: /10x && /start "Your feature name"
 
 ---
 
-### Mode 4: Team Reference (`--team`)
+### Mode 4: Rite Reference (`--rite`)
 
-Display complete team reference table:
+Display complete rite reference table:
 
 ```
-=== All Teams (Dynamic Count from rite-discovery) ===
+=== All Rites (Dynamic Count from rite-discovery) ===
 
-| Team              | Command       | Agents | Best For                           |
+| Rite              | Command       | Agents | Best For                           |
 |-------------------|---------------|--------|------------------------------------|
 | 10x-dev-pack      | /10x          | 5      | Full feature development lifecycle |
 | doc-rite-pack     | /docs         | 4      | Documentation, technical writing   |
@@ -367,9 +367,9 @@ Display complete team reference table:
 | rnd-pack          | /rnd          | 4      | Exploration, prototyping           |
 | strategy-pack     | /strategy     | 4      | Market research, business analysis |
 
-Total: 41 agents across all teams
+Total: 41 agents across all rites
 
-Use /team <name> or quick-switch commands (e.g., /10x) to activate.
+Use /rite <name> or quick-switch commands (e.g., /10x) to activate.
 ```
 
 ---
@@ -389,8 +389,8 @@ Display all commands categorized by domain:
 /wrap               Finalize session, run quality gates
 /worktree           Manage isolated worktrees
 
---- Team Management (10) ---
-/team               Switch team or list available
+--- Rite Management (10) ---
+/rite               Switch rite or list available
 /10x                Quick switch to 10x-dev-pack
 /docs               Quick switch to doc-rite-pack
 /hygiene            Quick switch to hygiene-pack
@@ -420,8 +420,8 @@ Display all commands categorized by domain:
 
 --- Meta/Factory (4) ---
 /forge              The Forge overview
-/new-team           Create new rite
-/validate-team      Validate existing team
+/new-rite           Create new rite
+/validate-rite      Validate existing rite
 /eval-agent         Test single agent
 ```
 
@@ -433,11 +433,11 @@ The Consultant draws from structured knowledge base:
 
 | Source | Purpose |
 |--------|---------|
-| `ecosystem-map.md` | Complete system overview (teams, commands, workflows) |
+| `ecosystem-map.md` | Complete system overview (rites, commands, workflows) |
 | `agent-reference.md` | All 41+ agents with roles and capabilities |
 | `command-reference.md` | Complete command catalog with examples |
-| `routing/intent-patterns.md` | Natural language → team/workflow mapping |
-| `rite-profiles/*.md` | Deep knowledge of each team's strengths |
+| `routing/intent-patterns.md` | Natural language → rite/workflow mapping |
+| `rite-profiles/*.md` | Deep knowledge of each rite's strengths |
 | `playbooks/curated/*.md` | Pre-built workflows for common scenarios |
 
 These sources are maintained in `~/.claude/knowledge/consultant/` and kept in sync with the ecosystem.
@@ -456,7 +456,7 @@ What you understand the user needs:
 - Constraint recognition
 
 ### 2. Recommendation
-Which team/workflow fits best:
+Which rite/workflow fits best:
 - Rite name and quick-switch command
 - Workflow type (task/sprint/hotfix/spike)
 - Complexity level recommendation
@@ -473,7 +473,7 @@ Step-by-step commands to execute:
 
 ### 4. Alternatives
 Other valid approaches (if applicable):
-- Alternative teams or workflows
+- Alternative rites or workflows
 - Tradeoffs between options
 - When to escalate or simplify
 - Edge cases or special considerations
@@ -513,17 +513,17 @@ Example enhancement:
 
 ### Referencing rite-discovery Skill
 
-When recommending teams, `/consult` retrieves current rite inventory from:
-- `rite-discovery` skill for dynamic team list
+When recommending rites, `/consult` retrieves current rite inventory from:
+- `rite-discovery` skill for dynamic rite list
 - `rite-discovery/schemas/rite-profile.yaml` for profile structure
 
-**Pattern**: Never hardcode team counts or capabilities; always read from `rite-discovery`.
+**Pattern**: Never hardcode rite counts or capabilities; always read from `rite-discovery`.
 
 ---
 
-## Teams Quick Reference
+## Rites Quick Reference
 
-| Team | Command | Complexity Levels | Use When |
+| Rite | Command | Complexity Levels | Use When |
 |------|---------|-------------------|----------|
 | **10x-dev-pack** | `/10x` | SCRIPT, MODULE, SERVICE, PLATFORM | Building features, fixing complex bugs |
 | **doc-rite-pack** | `/docs` | PAGE, SECTION, SITE | Writing or updating documentation |
@@ -549,7 +549,7 @@ When recommending teams, `/consult` retrieves current rite inventory from:
 - Assessment: New feature, ecommerce domain, MODULE/SERVICE complexity
 - Recommendation: 10x-dev-pack, /task workflow, MODULE complexity
 - Command-Flow: `/10x` → `/start "Shopping cart" --complexity=MODULE` → agent handoffs
-- Alternatives: Consider `/intelligence` team if A/B testing cart UX needed
+- Alternatives: Consider `/intelligence` rite if A/B testing cart UX needed
 
 ---
 
@@ -563,7 +563,7 @@ When recommending teams, `/consult` retrieves current rite inventory from:
 - Assessment: Performance optimization, backend focus, existing system
 - Recommendation: 10x-dev-pack for implementation OR intelligence-pack for profiling first
 - Command-Flow: Option A (immediate fix) vs Option B (data-driven)
-- Alternatives: `/sre` team if operational/infrastructure issue
+- Alternatives: `/sre` rite if operational/infrastructure issue
 
 ---
 
@@ -605,7 +605,7 @@ When recommending teams, `/consult` retrieves current rite inventory from:
 - Assessment: Urgent production issue, security/availability concern
 - Recommendation: /hotfix for immediate fix, then /sre for root cause
 - Command-Flow: `/hotfix` → diagnose → fix → deploy → `/sre` for postmortem
-- Alternatives: If security breach suspected, involve `/security` team
+- Alternatives: If security breach suspected, involve `/security` rite
 
 ---
 
@@ -613,10 +613,10 @@ When recommending teams, `/consult` retrieves current rite inventory from:
 
 The `/consult` command is workflow-aware:
 
-- **Before session**: Recommends which team + workflow to start
+- **Before session**: Recommends which rite + workflow to start
 - **During session**: Suggests next phase or agent handoff
 - **After session**: Points to follow-up work (PR, deployment, monitoring)
-- **Blocked**: Offers alternative approaches or team escalation
+- **Blocked**: Offers alternative approaches or rite escalation
 
 ---
 
@@ -624,7 +624,7 @@ The `/consult` command is workflow-aware:
 
 A good `/consult` response:
 - Clearly understands user intent (Assessment)
-- Recommends appropriate team and workflow (Recommendation)
+- Recommends appropriate rite and workflow (Recommendation)
 - Provides actionable, copy-pasteable commands (Command-Flow)
 - Explains why this approach fits (Rationale)
 - Offers alternatives when multiple valid paths exist
@@ -635,10 +635,10 @@ A good `/consult` response:
 
 | Command | Relationship |
 |---------|--------------|
-| `/team` | Executes team switches recommended by /consult |
+| `/rite` | Executes rite switches recommended by /consult |
 | `/start` | Begins sessions recommended by /consult |
 | `/task`, `/sprint`, `/hotfix`, `/spike` | Executes workflows recommended by /consult |
-| `/forge` | Meta-level team creation (vs /consult for navigation) |
+| `/forge` | Meta-level rite creation (vs /consult for navigation) |
 
 ---
 
@@ -647,24 +647,24 @@ A good `/consult` response:
 ### Consultant Agent
 
 The `/consult` command is powered by the **Consultant** agent, a global singleton at `~/.claude/agents/consultant.md`. This agent:
-- Persists across team swaps
-- Has deep knowledge of all teams and workflows
+- Persists across rite swaps
+- Has deep knowledge of all rites and workflows
 - Uses Claude Opus 4.5 for complex reasoning
 - Accesses comprehensive knowledge base
 
 ### When to Use /consult
 
 Use `/consult` when:
-- Starting work and unsure which team to use
+- Starting work and unsure which rite to use
 - Stuck and need alternative approaches
 - Want to see all options before committing
 - Learning the ecosystem and its capabilities
-- Need a quick reference for teams or commands
+- Need a quick reference for rites or commands
 
 **Don't use** for:
 - Executing work (use workflow commands instead)
-- Creating new teams (use `/forge` commands)
-- Switching teams (use `/team` or quick-switch commands)
+- Creating new rites (use `/forge` commands)
+- Switching rites (use `/rite` or quick-switch commands)
 
 ---
 
@@ -685,7 +685,7 @@ The `/consult` command:
 ## Maintenance
 
 This skill is kept in sync with:
-- Team roster changes (new teams, team updates)
+- Rite roster changes (new rites, rite updates)
 - Command registry updates (new commands, deprecations)
 - Playbook library (new curated workflows)
 - Intent patterns (improved routing heuristics)

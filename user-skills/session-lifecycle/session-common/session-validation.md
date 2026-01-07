@@ -142,32 +142,32 @@ Available teams:
 Use /team to switch or check KNOSSOS_HOME.
 ```
 
-### Check: Team Consistency
+### Check: Rite Consistency
 
 **Used By**: resume
 
 **Implementation**:
 ```bash
-active_team=$(cat .claude/ACTIVE_RITE)
-session_team=$(yq e '.active_team' SESSION_CONTEXT.md)
+active_rite=$(cat .claude/ACTIVE_RITE)
+session_rite=$(yq e '.active_rite' SESSION_CONTEXT.md)
 
-if [[ "$active_team" != "$session_team" ]]; then
-  WARNING: Team mismatch
+if [[ "$active_rite" != "$session_rite" ]]; then
+  WARNING: Rite mismatch
 fi
 ```
 
-**Success**: ACTIVE_RITE matches session.active_team
+**Success**: ACTIVE_RITE matches session.active_rite
 
 **Failure**: Warning with option to switch or override
 
 **Warning Message**:
 ```
-⚠ Team mismatch:
-  Session team: {session_team}
-  Active team:  {active_team}
+⚠ Rite mismatch:
+  Session rite: {session_rite}
+  Active rite:  {active_rite}
 
 Options:
-1. Switch to session team: /team {session_team}
+1. Switch to session rite: /rite {session_rite}
 2. Continue with current rite (may have different agents)
 3. Cancel and investigate
 

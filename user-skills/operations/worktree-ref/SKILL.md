@@ -30,7 +30,7 @@ Git worktrees provide true filesystem isolation for parallel Claude sessions. Ea
 
 | Flag | Description |
 |------|-------------|
-| `--team=PACK` | Team pack to use (default: current) |
+| `--rite=PACK` | Rite pack to use (default: current) |
 | `--from=REF` | Git ref to base on (default: HEAD) |
 | `--force` | Override safety checks |
 
@@ -38,12 +38,12 @@ Git worktrees provide true filesystem isolation for parallel Claude sessions. Ea
 
 ```bash
 # 1. Create worktree for parallel work
-/worktree create "feature-billing" --team=10x-dev-pack
+/worktree create "feature-billing" --rite=10x-dev-pack
 
 # 2. Navigate in new terminal
 cd worktrees/wt-{id} && claude
 
-# 3. Work independently (different team, session, sprint)
+# 3. Work independently (different rite, session, sprint)
 
 # 4. Complete and cleanup
 /wrap

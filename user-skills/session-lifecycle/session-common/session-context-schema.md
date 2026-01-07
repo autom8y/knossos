@@ -34,7 +34,7 @@ SESSION_CONTEXT is a YAML-frontmatter Markdown file that stores session metadata
 
 | Field | Type | Required | Set By | Description |
 |-------|------|----------|--------|-------------|
-| `active_team` | string | Yes | /start | Team pack name (e.g., "10x-dev-pack") |
+| `active_rite` | string | Yes | /start | Rite pack name (e.g., "10x-dev-pack") |
 | `current_phase` | enum | Yes | /start | requirements \| design \| implementation \| validation |
 | `last_agent` | string | No | Agent invocations | Last agent to work on session |
 | `handoff_count` | integer | No | /handoff | Number of agent handoffs |
@@ -137,7 +137,7 @@ session_id: "session-20260101-143022"
 created_at: "2026-01-01T14:30:22Z"
 initiative: "Add dark mode toggle"
 complexity: "MODULE"
-active_team: "10x-dev-pack"
+active_rite: "10x-dev-pack"
 current_phase: "requirements"
 last_agent: "requirements-analyst"
 artifacts:
@@ -173,7 +173,7 @@ session_id: "session-20260101-143022"
 created_at: "2026-01-01T14:30:22Z"
 initiative: "Add dark mode toggle"
 complexity: "MODULE"
-active_team: "10x-dev-pack"
+active_rite: "10x-dev-pack"
 current_phase: "implementation"
 last_agent: "principal-engineer"
 artifacts:

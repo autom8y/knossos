@@ -6,7 +6,7 @@ model: sonnet
 ---
 
 ## Context
-Auto-injected by SessionStart hook (project, team, session, git).
+Auto-injected by SessionStart hook (project, rite, session, git).
 
 ## Your Task
 
@@ -54,7 +54,7 @@ fi
 
 3. **Validate environment**:
    - Check git branch matches (warn if changed)
-   - Check team matches (warn if different)
+   - Check rite matches (warn if different)
 
 4. **Execute atomic resume mutation**:
    ```bash

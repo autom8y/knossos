@@ -10,7 +10,7 @@ From main project, when you want parallel work:
 
 ```bash
 # In main terminal, already working on feature-auth
-/worktree create "billing-sprint" --team=10x-dev-pack
+/worktree create "billing-sprint" --rite=10x-dev-pack
 
 # Output tells you what to do next
 # "cd worktrees/wt-20251224-150000-xyz && claude"
@@ -26,7 +26,7 @@ claude
 ```
 
 Now you're in a completely isolated environment:
-- Different team configuration
+- Different rite configuration
 - Different sprint context
 - Different session state
 - Changes don't affect main project
@@ -85,7 +85,7 @@ The `--all` flag shows sessions across all worktrees:
 session-20251224-143052-a1b2 | ACTIVE | feature-auth | 2025-12-24T14:30:52Z
 
 === Worktrees ===
-[wt-20251224-150000-xyz] billing-sprint (team: 10x-dev-pack)
+[wt-20251224-150000-xyz] billing-sprint (rite: 10x-dev-pack)
   session-20251224-150000-c3d4 | ACTIVE | billing-sprint
 ```
 
@@ -99,7 +99,7 @@ Worktree Status
 
 [WORKTREE]    wt-20251224-150000-xyz
 Name:         billing-sprint
-Team:         10x-dev-pack
+Rite:         10x-dev-pack
 
 Roster:       /Users/user/Code/roster
 ...
@@ -110,5 +110,5 @@ Roster:       /Users/user/Code/roster
 1. **Name worktrees descriptively** - Use meaningful names for easy identification
 2. **Clean up regularly** - Run `/worktree cleanup` periodically
 3. **One session per worktree** - Worktrees are designed for single sessions
-4. **Use for different teams** - Primary use case is parallel team work
+4. **Use for different rites** - Primary use case is parallel rite work
 5. **Don't commit worktree changes to main** - Worktrees are ephemeral

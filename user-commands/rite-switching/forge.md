@@ -1,5 +1,5 @@
 ---
-description: Display The Forge meta-team overview and available commands
+description: Display The Forge meta-rite overview and available commands
 argument-hint: [--agents|--workflow|--commands]
 allowed-tools: Read, Glob
 model: haiku

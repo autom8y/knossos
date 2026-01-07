@@ -20,19 +20,19 @@ Starting work?
 ## Usage
 
 ```bash
-/start [initiative-name] [--complexity=LEVEL] [--team=PACK] [--no-team]
+/start [initiative-name] [--complexity=LEVEL] [--rite=PACK] [--no-rite]
 ```
 
 | Parameter | Required | Default | Description |
 |-----------|----------|---------|-------------|
 | `initiative-name` | No* | Prompted | Name of feature/task |
 | `--complexity` | No* | Prompted | SCRIPT \| MODULE \| SERVICE \| PLATFORM |
-| `--team` | No | ACTIVE_RITE | Team pack for session |
-| `--no-team` | No | false | Create cross-cutting session (no orchestration) |
+| `--rite` | No | ACTIVE_RITE | Rite pack for session |
+| `--no-rite` | No | false | Create cross-cutting session (no orchestration) |
 
 *If not provided, user will be prompted interactively.
 
-**Note**: When `--no-team` is specified or no team is active, the session operates in **cross-cutting mode**: direct execution with session tracking, no orchestrator required. See `orchestration/execution-mode.md`.
+**Note**: When `--no-rite` is specified or no rite is active, the session operates in **cross-cutting mode**: direct execution with session tracking, no orchestrator required. See `orchestration/execution-mode.md`.
 
 ## Complexity Levels
 

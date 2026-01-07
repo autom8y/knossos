@@ -1,5 +1,5 @@
 ---
-description: Quick switch to doc-team-pack (documentation workflow)
+description: Quick switch to doc-rite-pack (documentation workflow)
 argument-hint: [--update] [--dry-run] [--keep-all|--remove-all|--promote-all]
 allowed-tools: Bash, Read
 model: haiku
@@ -14,15 +14,15 @@ Switch to the documentation rite and display the rite roster. $ARGUMENTS
 
 ## Behavior
 
-1. Execute: `${KNOSSOS_HOME:-~/Code/roster}/swap-rite.sh doc-team-pack $ARGUMENTS`
+1. Execute: `${KNOSSOS_HOME:-~/Code/roster}/swap-rite.sh doc-rite-pack $ARGUMENTS`
 2. Display the roster output from swap-rite.sh (agents and their roles)
-3. If SESSION_CONTEXT exists, update `active_rite` to `doc-team-pack`
+3. If SESSION_CONTEXT exists, update `active_rite` to `doc-rite-pack`
 
 ## Flags
 
 | Flag | Short | Description | Handled By |
 |------|-------|-------------|------------|
-| `--update` | `-u` | Pull latest agent definitions from roster even if already on team | swap-rite.sh |
+| `--update` | `-u` | Pull latest agent definitions from roster even if already on rite | swap-rite.sh |
 | `--dry-run` | - | Preview changes without applying | swap-rite.sh |
 | `--keep-all` | - | Preserve all orphan agents in project | swap-rite.sh |
 | `--remove-all` | - | Remove all orphans (backup available) | swap-rite.sh |

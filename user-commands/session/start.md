@@ -1,6 +1,6 @@
 ---
 description: Initialize a new work session
-argument-hint: <initiative> [--complexity=LEVEL] [--team=PACK]
+argument-hint: <initiative> [--complexity=LEVEL] [--rite=PACK]
 allowed-tools: Bash, Read, Task
 model: opus
 ---

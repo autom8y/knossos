@@ -22,7 +22,7 @@ Switch to the Security Team pack and display the rite roster. $ARGUMENTS
 
 | Flag | Short | Description | Handled By |
 |------|-------|-------------|------------|
-| `--update` | `-u` | Pull latest agent definitions from roster even if already on team | swap-rite.sh |
+| `--update` | `-u` | Pull latest agent definitions from roster even if already on rite | swap-rite.sh |
 | `--dry-run` | - | Preview changes without applying | swap-rite.sh |
 | `--keep-all` | - | Preserve all orphan agents in project | swap-rite.sh |
 | `--remove-all` | - | Remove all orphans (backup available) | swap-rite.sh |

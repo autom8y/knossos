@@ -7,7 +7,7 @@ model: sonnet
 
 ## Context
 
-Git worktrees provide true filesystem isolation for parallel Claude sessions. Each worktree has its own `.claude/` directory with independent agents, sessions, sprints, and team configuration.
+Git worktrees provide true filesystem isolation for parallel Claude sessions. Each worktree has its own `.claude/` directory with independent agents, sessions, sprints, and rite configuration.
 
 ## Pre-flight
 
@@ -24,18 +24,18 @@ $ARGUMENTS
 
 ## Commands
 
-### create [name] [--team=PACK] [--from=REF]
+### create [name] [--rite=PACK] [--from=REF]
 
 Create a new isolated worktree:
 
 ```bash
-hooks/lib/worktree-manager.sh create "$NAME" --team="$TEAM"
+hooks/lib/worktree-manager.sh create "$NAME" --rite="$RITE"
 ```
 
 **What happens:**
 1. Creates git worktree with detached HEAD (no branch pollution)
 2. Initializes ecosystem (fresh sync from roster)
-3. Sets team if specified
+3. Sets rite if specified
 4. Creates initial session
 5. Returns path for user to `cd` into
 
@@ -93,8 +93,8 @@ hooks/lib/worktree-manager.sh gc
 ## Examples
 
 ```bash
-# Create worktree for auth sprint with 10x team
-/worktree create "auth-sprint" --team=10x-dev-pack
+# Create worktree for auth sprint with 10x rite
+/worktree create "auth-sprint" --rite=10x-dev-pack
 
 # Create worktree from specific branch
 /worktree create "hotfix" --from=release-1.2
@@ -113,7 +113,7 @@ hooks/lib/worktree-manager.sh gc
 
 1. In main project, want parallel work:
    ```
-   /worktree create "feature-x" --team=10x-dev-pack
+   /worktree create "feature-x" --rite=10x-dev-pack
    ```
 
 2. Open new terminal, navigate to worktree:
