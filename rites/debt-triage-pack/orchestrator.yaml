@@ -1,7 +1,7 @@
 # Orchestrator configuration for debt-triage-pack
 # Used by generate-orchestrator.sh to produce orchestrator.md
 
-team:
+rite:
   name: debt-triage-pack
   domain: technical debt management
   color: brown

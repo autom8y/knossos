@@ -3,7 +3,7 @@
 # References workflow.yaml for phase/specialist data
 
 # Team metadata
-team:
+rite:
   name: rnd-pack
   domain: technology exploration
   color: purple

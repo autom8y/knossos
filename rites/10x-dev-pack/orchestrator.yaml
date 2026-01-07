@@ -1,7 +1,7 @@
 # Orchestrator configuration for 10x-dev-pack
 # Used by generate-orchestrator.sh to produce orchestrator.md
 
-team:
+rite:
   name: 10x-dev-pack
   domain: software development
   color: blue

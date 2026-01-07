@@ -1,7 +1,7 @@
 # Orchestrator configuration for intelligence-pack
 # Used by generate-orchestrator.sh to produce orchestrator.md
 
-team:
+rite:
   name: intelligence-pack
   domain: product analytics
   color: cyan

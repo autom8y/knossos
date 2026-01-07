@@ -1,7 +1,7 @@
 # Orchestrator configuration for hygiene-pack
 # Used by generate-orchestrator.sh to produce orchestrator.md
 
-team:
+rite:
   name: hygiene-pack
   domain: code quality
   color: lime

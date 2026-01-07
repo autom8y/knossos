@@ -1,7 +1,7 @@
 # Orchestrator configuration for sre-pack
 # Used by generate-orchestrator.sh to produce orchestrator.md
 
-team:
+rite:
   name: sre-pack
   domain: site reliability engineering
   color: orange

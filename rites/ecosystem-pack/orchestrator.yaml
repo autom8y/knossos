@@ -3,7 +3,7 @@
 # References workflow.yaml for phase/specialist data
 
 # Team metadata
-team:
+rite:
   name: ecosystem-pack
   domain: ecosystem infrastructure
   color: "#8B00FF"

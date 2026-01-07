@@ -1,7 +1,7 @@
 # Orchestrator configuration for strategy-pack
 # Used by generate-orchestrator.sh to produce orchestrator.md
 
-team:
+rite:
   name: strategy-pack
   domain: business strategy
   color: gold

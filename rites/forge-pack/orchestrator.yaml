@@ -1,7 +1,7 @@
 # Orchestrator configuration for forge-pack
 # Used by generate-orchestrator.sh to produce orchestrator.md
 
-team:
+rite:
   name: forge-pack
   domain: agent team creation
   color: silver

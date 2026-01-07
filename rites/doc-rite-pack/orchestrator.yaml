@@ -1,7 +1,7 @@
 # Orchestrator configuration for doc-team-pack
 # Used by generate-orchestrator.sh to produce orchestrator.md
 
-team:
+rite:
   name: doc-team-pack
   domain: documentation lifecycle
   color: green

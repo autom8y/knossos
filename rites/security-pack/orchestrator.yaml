@@ -3,7 +3,7 @@
 # References workflow.yaml for phase/specialist data
 
 # Team metadata
-team:
+rite:
   name: security-pack
   domain: security assessment
   color: red
