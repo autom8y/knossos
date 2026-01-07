@@ -62,7 +62,7 @@ func (v *Validator) Validate(riteName string) (*ValidationResult, error) {
 	if err != nil {
 		result.Valid = false
 		result.Checks = append(result.Checks, ValidationCheck{
-			Check:   "TEAM_EXISTS",
+			Check:   "RITE_EXISTS",
 			Status:  CheckFail,
 			Message: "Rite not found: " + riteName,
 		})
@@ -71,7 +71,7 @@ func (v *Validator) Validate(riteName string) (*ValidationResult, error) {
 	}
 
 	// Run all checks
-	v.checkTeamExists(result, rite)
+	v.checkRiteExists(result, rite)
 	v.checkAgentsDir(result, rite)
 	v.checkWorkflowYAML(result, rite)
 	v.checkAgentFiles(result, rite)
@@ -85,18 +85,18 @@ func (v *Validator) Validate(riteName string) (*ValidationResult, error) {
 	return result, nil
 }
 
-// checkTeamExists verifies the team directory exists.
-func (v *Validator) checkTeamExists(result *ValidationResult, rite *Rite) {
+// checkRiteExists verifies the rite directory exists.
+func (v *Validator) checkRiteExists(result *ValidationResult, rite *Rite) {
 	if _, err := os.Stat(rite.Path); os.IsNotExist(err) {
 		result.Checks = append(result.Checks, ValidationCheck{
-			Check:   "TEAM_EXISTS",
+			Check:   "RITE_EXISTS",
 			Status:  CheckFail,
 			Message: "Rite directory not found",
 		})
 		result.Errors++
 	} else {
 		result.Checks = append(result.Checks, ValidationCheck{
-			Check:   "TEAM_EXISTS",
+			Check:   "RITE_EXISTS",
 			Status:  CheckPass,
 			Message: "Rite directory found",
 		})

@@ -188,7 +188,7 @@ func TestMetadataManager(t *testing.T) {
 	}
 	got, _ = mgr.Get(wt.ID)
 	if got.Rite != "new-team" {
-		t.Errorf("Expected team new-team, got %s", got.Rite)
+		t.Errorf("Expected rite new-team, got %s", got.Rite)
 	}
 
 	// Remove
@@ -291,7 +291,7 @@ func TestPerWorktreeMeta(t *testing.T) {
 		t.Errorf("Expected name %s, got %s", wt.Name, meta.Name)
 	}
 	if meta.Rite != wt.Rite {
-		t.Errorf("Expected team %s, got %s", wt.Rite, meta.Rite)
+		t.Errorf("Expected rite %s, got %s", wt.Rite, meta.Rite)
 	}
 	if meta.Complexity != wt.Complexity {
 		t.Errorf("Expected complexity %s, got %s", wt.Complexity, meta.Complexity)
@@ -434,7 +434,7 @@ func TestManagerCreate(t *testing.T) {
 		t.Errorf("Expected name %s, got %s", opts.Name, wt.Name)
 	}
 	if wt.Rite != opts.Rite {
-		t.Errorf("Expected team %s, got %s", opts.Rite, wt.Rite)
+		t.Errorf("Expected rite %s, got %s", opts.Rite, wt.Rite)
 	}
 
 	// Verify path exists

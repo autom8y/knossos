@@ -263,7 +263,7 @@ type CreateOutput struct {
 	Status        string `json:"status"`
 	Initiative    string `json:"initiative"`
 	Complexity    string `json:"complexity"`
-	Team          string `json:"rite"`
+	Rite          string `json:"rite"`
 	CreatedAt     string `json:"created_at"`
 	SchemaVersion string `json:"schema_version"`
 }
@@ -274,7 +274,7 @@ func (c CreateOutput) Text() string {
 	b.WriteString(fmt.Sprintf("Created session: %s\n", c.SessionID))
 	b.WriteString(fmt.Sprintf("Initiative: %s\n", c.Initiative))
 	b.WriteString(fmt.Sprintf("Complexity: %s\n", c.Complexity))
-	b.WriteString(fmt.Sprintf("Rite: %s\n", c.Team))
+	b.WriteString(fmt.Sprintf("Rite: %s\n", c.Rite))
 	return b.String()
 }
 
@@ -288,7 +288,7 @@ type SeedCreateOutput struct {
 	ParkReason  string `json:"park_reason"`
 	Initiative  string `json:"initiative"`
 	Complexity  string `json:"complexity"`
-	Team        string `json:"rite"`
+	Rite        string `json:"rite"`
 	CreatedAt   string `json:"created_at"`
 	ParkedAt    string `json:"parked_at"`
 	ProjectRoot string `json:"project_root,omitempty"`
@@ -301,7 +301,7 @@ func (s SeedCreateOutput) Text() string {
 	b.WriteString(fmt.Sprintf("Status: %s\n", s.Status))
 	b.WriteString(fmt.Sprintf("Initiative: %s\n", s.Initiative))
 	b.WriteString(fmt.Sprintf("Complexity: %s\n", s.Complexity))
-	b.WriteString(fmt.Sprintf("Rite: %s\n", s.Team))
+	b.WriteString(fmt.Sprintf("Rite: %s\n", s.Rite))
 	b.WriteString(fmt.Sprintf("Seeded to: %s\n", s.SeededTo))
 	b.WriteString(fmt.Sprintf("Park reason: %s\n", s.ParkReason))
 	return b.String()

@@ -51,7 +51,7 @@ Examples:
 	cmd.Flags().BoolVarP(&opts.force, "force", "f", false, "Force full regeneration regardless of hashes")
 	cmd.Flags().BoolVar(&opts.dryRun, "dry-run", false, "Preview changes without writing")
 	cmd.Flags().BoolVar(&opts.noBackup, "no-backup", false, "Skip backup creation")
-	cmd.Flags().StringVar(&opts.rite, "rite", "", "Rite/team name to sync for")
+	cmd.Flags().StringVar(&opts.rite, "rite", "", "Rite name to sync for")
 
 	return cmd
 }

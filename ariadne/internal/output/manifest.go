@@ -60,7 +60,7 @@ func (m ManifestShowOutput) Text() string {
 		b.WriteString("\n")
 
 		if teams, ok := m.Content["teams"].(map[string]interface{}); ok {
-			b.WriteString("Teams:\n")
+			b.WriteString("Rites:\n")
 			if def, ok := teams["default"].(string); ok {
 				b.WriteString(fmt.Sprintf("  Default: %s\n", def))
 			}

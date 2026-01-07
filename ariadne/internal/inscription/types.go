@@ -157,7 +157,7 @@ type Manifest struct {
 	// LastSync is the timestamp of the last sync operation.
 	LastSync *time.Time `yaml:"last_sync,omitempty" json:"last_sync,omitempty"`
 
-	// ActiveRite is the current rite/team name.
+	// ActiveRite is the current rite name.
 	ActiveRite string `yaml:"active_rite,omitempty" json:"active_rite,omitempty"`
 
 	// TemplatePath is the path to the master template file.

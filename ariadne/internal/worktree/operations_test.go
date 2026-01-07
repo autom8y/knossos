@@ -388,7 +388,7 @@ func TestExportImportRoundtrip(t *testing.T) {
 		t.Errorf("Expected name '%s', got '%s'", wt.Name, imported.Name)
 	}
 	if imported.Rite != wt.Rite {
-		t.Errorf("Expected team '%s', got '%s'", wt.Rite, imported.Rite)
+		t.Errorf("Expected rite '%s', got '%s'", wt.Rite, imported.Rite)
 	}
 	if imported.Complexity != wt.Complexity {
 		t.Errorf("Expected complexity '%s', got '%s'", wt.Complexity, imported.Complexity)

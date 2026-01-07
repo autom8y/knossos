@@ -288,7 +288,7 @@ func NewTaskEndEvent(taskID, agent, outcome, sessionID string, durationMs int64,
 //   - sessionID: The unique session identifier
 //   - initiative: The initiative or goal for this session
 //   - complexity: Complexity rating (trivial, standard, complex, critical)
-//   - team: The active rite (e.g., "10x-dev")
+//   - rite: The active rite (e.g., "10x-dev")
 func NewSessionStartEvent(sessionID, initiative, complexity, team string) Event {
 	return Event{
 		Timestamp: timestamp(),

@@ -23,7 +23,7 @@ type AgentManifest struct {
 
 // AgentEntry tracks the source and state of an installed agent.
 type AgentEntry struct {
-	Source      string    `json:"source"` // "team" or "project"
+	Source      string    `json:"source"` // "rite" or "project"
 	Origin      string    `json:"origin,omitempty"`
 	Checksum    string    `json:"checksum"`
 	InstalledAt time.Time `json:"installed_at"`
@@ -82,7 +82,7 @@ func (m *AgentManifest) Save(path string) error {
 func (m *AgentManifest) DetectOrphans(targetRite string) []string {
 	var orphans []string
 	for name, entry := range m.Agents {
-		if entry.Source == "team" && entry.Origin != targetRite {
+		if entry.Source == "rite" && entry.Origin != targetRite {
 			orphans = append(orphans, name)
 		}
 	}
@@ -170,7 +170,7 @@ func (m *AgentManifest) GetInstalledAgents() []string {
 func (m *AgentManifest) GetRiteAgents(riteName string) []string {
 	var agents []string
 	for name, entry := range m.Agents {
-		if entry.Source == "team" && entry.Origin == riteName {
+		if entry.Source == "rite" && entry.Origin == riteName {
 			agents = append(agents, name)
 		}
 	}
@@ -183,7 +183,7 @@ func (m *AgentManifest) IsFromRite(agentName, riteName string) bool {
 	if !ok {
 		return false
 	}
-	return entry.Source == "team" && entry.Origin == riteName
+	return entry.Source == "rite" && entry.Origin == riteName
 }
 
 // ComputeChecksum calculates a SHA-256 checksum for a file.

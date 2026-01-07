@@ -160,7 +160,7 @@ func runCreate(ctx *cmdContext, initiative string, opts createOptions) error {
 		Status:        string(newCtx.Status),
 		Initiative:    initiative,
 		Complexity:    opts.complexity,
-		Team:          team,
+		Rite:          team,
 		CreatedAt:     newCtx.CreatedAt.Format(time.RFC3339),
 		SchemaVersion: newCtx.SchemaVersion,
 	}
@@ -298,7 +298,7 @@ func runCreateSeeded(ctx *cmdContext, initiative string, opts createOptions) err
 		ParkReason:  newCtx.ParkedReason,
 		Initiative:  initiative,
 		Complexity:  opts.complexity,
-		Team:        team,
+		Rite:        team,
 		CreatedAt:   newCtx.CreatedAt.Format(time.RFC3339),
 		ParkedAt:    newCtx.ParkedAt.Format(time.RFC3339),
 		ProjectRoot: mainProjectRoot,

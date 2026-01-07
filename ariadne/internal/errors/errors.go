@@ -47,9 +47,8 @@ const (
 	CodeProjectNotFound    = "PROJECT_NOT_FOUND"
 	CodeSessionExists      = "SESSION_EXISTS"
 	CodeMigrationFailed    = "MIGRATION_FAILED"
-	// Rite-domain error codes (legacy team codes preserved for compatibility)
+	// Rite-domain error codes
 	CodeOrphanConflict   = "ORPHAN_CONFLICT"
-	CodeTeamNotFound     = "TEAM_NOT_FOUND" // Deprecated: use CodeRiteNotFound
 	CodeValidationFailed = "VALIDATION_FAILED"
 	CodeSwitchAborted    = "SWITCH_ABORTED"
 	// Manifest-domain error codes
@@ -135,7 +134,7 @@ func exitCodeForCode(code string) int {
 		return ExitSchemaInvalid
 	case CodeLifecycleViolation, CodeOrphanConflict:
 		return ExitLifecycleError
-	case CodeFileNotFound, CodeSessionNotFound, CodeTeamNotFound, CodeRiteNotFound:
+	case CodeFileNotFound, CodeSessionNotFound, CodeRiteNotFound:
 		return ExitFileNotFound
 	case CodePermissionDenied:
 		return ExitPermissionDenied
@@ -296,14 +295,6 @@ func ErrSwitchAborted(riteName string, reason string) *Error {
 	return NewWithDetails(CodeSwitchAborted,
 		fmt.Sprintf("Rite switch aborted: %s", reason),
 		map[string]interface{}{"rite": riteName})
-}
-
-// IsTeamNotFound returns true if the error is a rite not found error (deprecated: use IsRiteNotFound).
-func IsTeamNotFound(err error) bool {
-	if e, ok := err.(*Error); ok {
-		return e.Code == CodeRiteNotFound || e.Code == CodeTeamNotFound
-	}
-	return false
 }
 
 // IsOrphanConflict returns true if the error is an orphan conflict.

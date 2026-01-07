@@ -46,7 +46,7 @@ current_phase: "design"
 		t.Errorf("Complexity = %q, want %q", ctx.Complexity, "MODULE")
 	}
 	if ctx.ActiveRite != "10x-dev" {
-		t.Errorf("ActiveTeam = %q, want %q", ctx.ActiveRite, "10x-dev")
+		t.Errorf("ActiveRite = %q, want %q", ctx.ActiveRite, "10x-dev")
 	}
 	if ctx.CurrentPhase != "design" {
 		t.Errorf("CurrentPhase = %q, want %q", ctx.CurrentPhase, "design")
@@ -208,7 +208,7 @@ func TestNewContext(t *testing.T) {
 		t.Errorf("Complexity = %q, want %q", ctx.Complexity, "MODULE")
 	}
 	if ctx.ActiveRite != "10x-dev" {
-		t.Errorf("ActiveTeam = %q, want %q", ctx.ActiveRite, "10x-dev")
+		t.Errorf("ActiveRite = %q, want %q", ctx.ActiveRite, "10x-dev")
 	}
 	if ctx.CurrentPhase != "requirements" {
 		t.Errorf("CurrentPhase = %q, want %q", ctx.CurrentPhase, "requirements")

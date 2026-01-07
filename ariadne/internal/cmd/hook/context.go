@@ -52,7 +52,7 @@ func newContextCmd(ctx *cmdContext) *cobra.Command {
 
 This hook is triggered on SessionStart events. It reads:
 - SESSION_CONTEXT.md if a session exists
-- ACTIVE_RITE file for team context
+- ACTIVE_RITE file for rite context
 
 Output is formatted as a markdown table suitable for Claude context.
 

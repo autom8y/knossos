@@ -21,7 +21,7 @@ type AgentInfo struct {
 
 // RenderContext provides data for template rendering.
 type RenderContext struct {
-	// ActiveRite is the current rite/team name.
+	// ActiveRite is the current rite name.
 	ActiveRite string
 
 	// AgentCount is the number of agents in the active rite.

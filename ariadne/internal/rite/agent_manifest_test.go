@@ -30,7 +30,7 @@ func TestManifest_SaveLoad(t *testing.T) {
 	// Create and save manifest
 	m := NewEmptyAgentManifest()
 	m.ActiveRite = "test-team"
-	m.AddAgent("agent-a.md", "team", "test-team", "sha256:abc123")
+	m.AddAgent("agent-a.md", "rite", "test-team", "sha256:abc123")
 
 	if err := m.Save(manifestPath); err != nil {
 		t.Fatalf("Save() error = %v", err)
@@ -43,7 +43,7 @@ func TestManifest_SaveLoad(t *testing.T) {
 	}
 
 	if loaded.ActiveRite != "test-team" {
-		t.Errorf("ActiveTeam = %q, want %q", loaded.ActiveRite, "test-team")
+		t.Errorf("ActiveRite = %q, want %q", loaded.ActiveRite, "test-team")
 	}
 
 	if len(loaded.Agents) != 1 {
@@ -55,8 +55,8 @@ func TestManifest_SaveLoad(t *testing.T) {
 		t.Fatal("agent-a.md not found in Agents")
 	}
 
-	if agent.Source != "team" {
-		t.Errorf("agent.Source = %q, want %q", agent.Source, "team")
+	if agent.Source != "rite" {
+		t.Errorf("agent.Source = %q, want %q", agent.Source, "rite")
 	}
 	if agent.Origin != "test-team" {
 		t.Errorf("agent.Origin = %q, want %q", agent.Origin, "test-team")
@@ -87,9 +87,9 @@ func TestManifest_LoadNonExistent(t *testing.T) {
 func TestManifest_DetectOrphans(t *testing.T) {
 	m := NewEmptyAgentManifest()
 	m.ActiveRite = "team-a"
-	m.AddAgent("agent-a.md", "team", "team-a", "sha256:a")
-	m.AddAgent("agent-b.md", "team", "team-a", "sha256:b")
-	m.AddAgent("agent-c.md", "team", "team-b", "sha256:c")
+	m.AddAgent("agent-a.md", "rite", "team-a", "sha256:a")
+	m.AddAgent("agent-b.md", "rite", "team-a", "sha256:b")
+	m.AddAgent("agent-c.md", "rite", "team-b", "sha256:c")
 	m.AddAgent("project-agent.md", "project", "", "sha256:d")
 
 	// Switch to team-b - agents from team-a become orphans
@@ -121,7 +121,7 @@ func TestManifest_DetectOrphans(t *testing.T) {
 
 func TestManifest_MarkOrphaned(t *testing.T) {
 	m := NewEmptyAgentManifest()
-	m.AddAgent("agent-a.md", "team", "team-a", "sha256:a")
+	m.AddAgent("agent-a.md", "rite", "team-a", "sha256:a")
 
 	m.MarkOrphaned("agent-a.md")
 
@@ -137,7 +137,7 @@ func TestManifest_MarkOrphaned(t *testing.T) {
 
 func TestManifest_PromoteToProject(t *testing.T) {
 	m := NewEmptyAgentManifest()
-	m.AddAgent("agent-a.md", "team", "team-a", "sha256:a")
+	m.AddAgent("agent-a.md", "rite", "team-a", "sha256:a")
 	m.MarkOrphaned("agent-a.md")
 
 	m.PromoteToProject("agent-a.md")
@@ -160,7 +160,7 @@ func TestManifest_PromoteToProject(t *testing.T) {
 
 func TestManifest_RemoveAgent(t *testing.T) {
 	m := NewEmptyAgentManifest()
-	m.AddAgent("agent-a.md", "team", "team-a", "sha256:a")
+	m.AddAgent("agent-a.md", "rite", "team-a", "sha256:a")
 
 	if len(m.Agents) != 1 {
 		t.Fatalf("len(Agents) = %d before remove, want 1", len(m.Agents))
@@ -175,9 +175,9 @@ func TestManifest_RemoveAgent(t *testing.T) {
 
 func TestManifest_GetRiteAgents(t *testing.T) {
 	m := NewEmptyAgentManifest()
-	m.AddAgent("agent-a.md", "team", "team-a", "sha256:a")
-	m.AddAgent("agent-b.md", "team", "team-a", "sha256:b")
-	m.AddAgent("agent-c.md", "team", "team-b", "sha256:c")
+	m.AddAgent("agent-a.md", "rite", "team-a", "sha256:a")
+	m.AddAgent("agent-b.md", "rite", "team-a", "sha256:b")
+	m.AddAgent("agent-c.md", "rite", "team-b", "sha256:c")
 	m.AddAgent("project-agent.md", "project", "", "sha256:d")
 
 	agents := m.GetRiteAgents("team-a")
@@ -218,7 +218,7 @@ func TestComputeChecksum(t *testing.T) {
 func TestManifest_AgentEntry_InstalledAt(t *testing.T) {
 	m := NewEmptyAgentManifest()
 	before := time.Now().Add(-time.Second)
-	m.AddAgent("agent.md", "team", "test", "sha256:x")
+	m.AddAgent("agent.md", "rite", "test", "sha256:x")
 	after := time.Now().Add(time.Second)
 
 	agent := m.Agents["agent.md"]

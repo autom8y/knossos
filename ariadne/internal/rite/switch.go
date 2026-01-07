@@ -221,7 +221,7 @@ func (s *Switcher) executeSwitch(rite *Rite, manifest *AgentManifest, orphans []
 
 		// Compute checksum and add to manifest
 		checksum, _ := ComputeChecksum(dstPath)
-		manifest.AddAgent(entry.Name(), "team", opts.TargetRite, checksum)
+		manifest.AddAgent(entry.Name(), "rite", opts.TargetRite, checksum)
 		installedAgents = append(installedAgents, entry.Name())
 	}
 
