@@ -83,8 +83,8 @@ func runContext(ctx *cmdContext, opts contextOptions) error {
 	}
 }
 
-// TeamContextOutput is the JSON/YAML output structure.
-type TeamContextOutput struct {
+// RiteContextOutput is the JSON/YAML output structure.
+type RiteContextOutput struct {
 	TeamName      string            `json:"team_name" yaml:"team_name"`
 	DisplayName   string            `json:"display_name,omitempty" yaml:"display_name,omitempty"`
 	Description   string            `json:"description,omitempty" yaml:"description,omitempty"`
@@ -101,7 +101,7 @@ type ContextRowOut struct {
 	Value string `json:"value" yaml:"value"`
 }
 
-func riteContextToOutput(tc *ritelib.RiteContext, hasContextFile bool) TeamContextOutput {
+func riteContextToOutput(tc *ritelib.RiteContext, hasContextFile bool) RiteContextOutput {
 	rows := make([]ContextRowOut, len(tc.ContextRows))
 	for i, r := range tc.ContextRows {
 		rows[i] = ContextRowOut{
@@ -115,7 +115,7 @@ func riteContextToOutput(tc *ritelib.RiteContext, hasContextFile bool) TeamConte
 		source = "context.yaml"
 	}
 
-	return TeamContextOutput{
+	return RiteContextOutput{
 		TeamName:      tc.TeamName,
 		DisplayName:   tc.DisplayName,
 		Description:   tc.Description,
@@ -127,8 +127,8 @@ func riteContextToOutput(tc *ritelib.RiteContext, hasContextFile bool) TeamConte
 	}
 }
 
-// Text implements output.Textable for TeamContextOutput.
-func (t TeamContextOutput) Text() string {
+// Text implements output.Textable for RiteContextOutput.
+func (t RiteContextOutput) Text() string {
 	// For text output, defer to markdown
 	return ""
 }

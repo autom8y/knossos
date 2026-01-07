@@ -83,7 +83,7 @@ func (rc *RiteContext) HasRows() bool {
 // Validate checks that the RiteContext has required fields.
 func (rc *RiteContext) Validate() error {
 	if rc.TeamName == "" {
-		return fmt.Errorf("team_name is required")
+		return fmt.Errorf("rite_name is required")
 	}
 	if rc.SchemaVersion == "" {
 		return fmt.Errorf("schema_version is required")

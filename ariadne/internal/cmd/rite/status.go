@@ -47,7 +47,7 @@ func runStatus(ctx *cmdContext, opts statusOptions) error {
 	if riteName == "" {
 		riteName = discovery.ActiveRiteName()
 		if riteName == "" {
-			err := errors.New(errors.CodeFileNotFound, "No active team set")
+			err := errors.New(errors.CodeFileNotFound, "No active rite set")
 			printer.PrintError(err)
 			return err
 		}

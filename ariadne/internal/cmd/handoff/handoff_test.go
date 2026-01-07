@@ -697,7 +697,7 @@ func TestPrepare_CrossTeamValidation(t *testing.T) {
 			fromAgent:  "architect",
 			toAgent:    "orchestrator",
 			shouldFail: true,
-			errorMsg:   "source agent not in active team",
+			errorMsg:   "source agent not in active rite",
 		},
 		{
 			name:       "invalid to agent not in team",
@@ -705,7 +705,7 @@ func TestPrepare_CrossTeamValidation(t *testing.T) {
 			fromAgent:  "orchestrator",
 			toAgent:    "architect",
 			shouldFail: true,
-			errorMsg:   "target agent not in active team",
+			errorMsg:   "target agent not in active rite",
 		},
 	}
 

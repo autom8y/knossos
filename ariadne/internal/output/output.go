@@ -238,7 +238,7 @@ func (s StatusOutput) Text() string {
 	b.WriteString(fmt.Sprintf("Status: %s\n", s.Status))
 	b.WriteString(fmt.Sprintf("Initiative: %s\n", s.Initiative))
 	b.WriteString(fmt.Sprintf("Phase: %s\n", s.CurrentPhase))
-	b.WriteString(fmt.Sprintf("Team: %s\n", s.ActiveRite))
+	b.WriteString(fmt.Sprintf("Rite: %s\n", s.ActiveRite))
 	b.WriteString(fmt.Sprintf("Mode: %s\n", s.ExecutionMode))
 	if s.GitBranch != "" {
 		b.WriteString(fmt.Sprintf("Branch: %s (%d changes)\n", s.GitBranch, s.GitChanges))
@@ -274,7 +274,7 @@ func (c CreateOutput) Text() string {
 	b.WriteString(fmt.Sprintf("Created session: %s\n", c.SessionID))
 	b.WriteString(fmt.Sprintf("Initiative: %s\n", c.Initiative))
 	b.WriteString(fmt.Sprintf("Complexity: %s\n", c.Complexity))
-	b.WriteString(fmt.Sprintf("Team: %s\n", c.Team))
+	b.WriteString(fmt.Sprintf("Rite: %s\n", c.Team))
 	return b.String()
 }
 
@@ -301,7 +301,7 @@ func (s SeedCreateOutput) Text() string {
 	b.WriteString(fmt.Sprintf("Status: %s\n", s.Status))
 	b.WriteString(fmt.Sprintf("Initiative: %s\n", s.Initiative))
 	b.WriteString(fmt.Sprintf("Complexity: %s\n", s.Complexity))
-	b.WriteString(fmt.Sprintf("Team: %s\n", s.Team))
+	b.WriteString(fmt.Sprintf("Rite: %s\n", s.Team))
 	b.WriteString(fmt.Sprintf("Seeded to: %s\n", s.SeededTo))
 	b.WriteString(fmt.Sprintf("Park reason: %s\n", s.ParkReason))
 	return b.String()

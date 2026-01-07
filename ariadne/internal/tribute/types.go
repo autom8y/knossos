@@ -28,7 +28,7 @@ type GenerateResult struct {
 	// Duration is the session duration.
 	Duration time.Duration
 
-	// Team is the active team/rite for the session.
+	// Team is the active rite for the session.
 	Team string
 
 	// FinalPhase is the phase at wrap time.

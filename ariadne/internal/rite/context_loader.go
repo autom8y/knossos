@@ -48,38 +48,38 @@ func NewContextLoaderWithPaths(ritesDir, userDir string) *ContextLoader {
 // 1. User rites directory ($XDG_DATA_HOME/ariadne/rites/{rite}/context.yaml)
 // 2. Project rites directory (rites/{rite}/context.yaml)
 // 3. Fallback: generates context from orchestrator.yaml
-func (cl *ContextLoader) Load(teamName string) (*RiteContext, error) {
-	if teamName == "" {
+func (cl *ContextLoader) Load(riteName string) (*RiteContext, error) {
+	if riteName == "" {
 		return nil, errors.New(errors.CodeUsageError, "rite name is required")
 	}
 
 	// Check cache first
 	cl.mu.RLock()
-	if ctx, ok := cl.cache[teamName]; ok {
+	if ctx, ok := cl.cache[riteName]; ok {
 		cl.mu.RUnlock()
 		return ctx, nil
 	}
 	cl.mu.RUnlock()
 
 	// Try to load from files
-	ctx, err := cl.loadFromFiles(teamName)
+	ctx, err := cl.loadFromFiles(riteName)
 	if err != nil {
 		return nil, err
 	}
 
 	// Cache the result
 	cl.mu.Lock()
-	cl.cache[teamName] = ctx
+	cl.cache[riteName] = ctx
 	cl.mu.Unlock()
 
 	return ctx, nil
 }
 
 // loadFromFiles attempts to load context from YAML files or fallback to orchestrator.
-func (cl *ContextLoader) loadFromFiles(teamName string) (*RiteContext, error) {
+func (cl *ContextLoader) loadFromFiles(riteName string) (*RiteContext, error) {
 	// Try user teams directory first (higher priority)
 	if cl.userDir != "" {
-		contextPath := filepath.Join(cl.userDir, teamName, ContextFileName)
+		contextPath := filepath.Join(cl.userDir, riteName, ContextFileName)
 		if ctx, err := cl.loadFromYAML(contextPath); err == nil {
 			return ctx, nil
 		}
@@ -87,14 +87,14 @@ func (cl *ContextLoader) loadFromFiles(teamName string) (*RiteContext, error) {
 
 	// Try project rites directory
 	if cl.ritesDir != "" {
-		contextPath := filepath.Join(cl.ritesDir, teamName, ContextFileName)
+		contextPath := filepath.Join(cl.ritesDir, riteName, ContextFileName)
 		if ctx, err := cl.loadFromYAML(contextPath); err == nil {
 			return ctx, nil
 		}
 	}
 
 	// Fallback: generate from orchestrator.yaml
-	return cl.generateFromOrchestrator(teamName)
+	return cl.generateFromOrchestrator(riteName)
 }
 
 // loadFromYAML loads a RiteContext from a YAML file.
@@ -119,14 +119,14 @@ func (cl *ContextLoader) loadFromYAML(path string) (*RiteContext, error) {
 
 // generateFromOrchestrator creates a RiteContext from an orchestrator.yaml file.
 // This provides backward compatibility when no context.yaml exists.
-func (cl *ContextLoader) generateFromOrchestrator(teamName string) (*RiteContext, error) {
+func (cl *ContextLoader) generateFromOrchestrator(riteName string) (*RiteContext, error) {
 	// Try to find orchestrator.yaml
 	var orchestratorPath string
 	var found bool
 
 	// Check user teams
 	if cl.userDir != "" {
-		path := filepath.Join(cl.userDir, teamName, "orchestrator.yaml")
+		path := filepath.Join(cl.userDir, riteName, "orchestrator.yaml")
 		if _, err := os.Stat(path); err == nil {
 			orchestratorPath = path
 			found = true
@@ -135,7 +135,7 @@ func (cl *ContextLoader) generateFromOrchestrator(teamName string) (*RiteContext
 
 	// Check project rites
 	if !found && cl.ritesDir != "" {
-		path := filepath.Join(cl.ritesDir, teamName, "orchestrator.yaml")
+		path := filepath.Join(cl.ritesDir, riteName, "orchestrator.yaml")
 		if _, err := os.Stat(path); err == nil {
 			orchestratorPath = path
 			found = true
@@ -143,7 +143,7 @@ func (cl *ContextLoader) generateFromOrchestrator(teamName string) (*RiteContext
 	}
 
 	if !found {
-		return nil, errors.ErrRiteNotFound(teamName)
+		return nil, errors.ErrRiteNotFound(riteName)
 	}
 
 	// Load orchestrator.yaml
@@ -158,7 +158,7 @@ func (cl *ContextLoader) generateFromOrchestrator(teamName string) (*RiteContext
 	}
 
 	// Generate context from orchestrator
-	ctx := NewRiteContext(teamName)
+	ctx := NewRiteContext(riteName)
 	ctx.Description = orchestrator.Frontmatter.Description
 	ctx.Domain = orchestrator.Team.Domain
 
@@ -204,9 +204,9 @@ type OrchestratorConfig struct {
 }
 
 // Invalidate removes a rite from the cache, forcing a reload on next access.
-func (cl *ContextLoader) Invalidate(teamName string) {
+func (cl *ContextLoader) Invalidate(riteName string) {
 	cl.mu.Lock()
-	delete(cl.cache, teamName)
+	delete(cl.cache, riteName)
 	cl.mu.Unlock()
 }
 
@@ -218,19 +218,19 @@ func (cl *ContextLoader) InvalidateAll() {
 }
 
 // IsCached returns true if the rite context is in the cache.
-func (cl *ContextLoader) IsCached(teamName string) bool {
+func (cl *ContextLoader) IsCached(riteName string) bool {
 	cl.mu.RLock()
 	defer cl.mu.RUnlock()
-	_, ok := cl.cache[teamName]
+	_, ok := cl.cache[riteName]
 	return ok
 }
 
 // GetContextPath returns the path where context.yaml would be for a rite.
 // Returns the first path that exists, or the project path if none exists.
-func (cl *ContextLoader) GetContextPath(teamName string) string {
+func (cl *ContextLoader) GetContextPath(riteName string) string {
 	// Check user rites first
 	if cl.userDir != "" {
-		path := filepath.Join(cl.userDir, teamName, ContextFileName)
+		path := filepath.Join(cl.userDir, riteName, ContextFileName)
 		if _, err := os.Stat(path); err == nil {
 			return path
 		}
@@ -238,21 +238,21 @@ func (cl *ContextLoader) GetContextPath(teamName string) string {
 
 	// Check project rites
 	if cl.ritesDir != "" {
-		path := filepath.Join(cl.ritesDir, teamName, ContextFileName)
+		path := filepath.Join(cl.ritesDir, riteName, ContextFileName)
 		if _, err := os.Stat(path); err == nil {
 			return path
 		}
 	}
 
 	// Return where it would be (project rites)
-	return filepath.Join(cl.ritesDir, teamName, ContextFileName)
+	return filepath.Join(cl.ritesDir, riteName, ContextFileName)
 }
 
 // HasContextFile checks if a rite has a context.yaml file.
-func (cl *ContextLoader) HasContextFile(teamName string) bool {
+func (cl *ContextLoader) HasContextFile(riteName string) bool {
 	// Check user rites first
 	if cl.userDir != "" {
-		path := filepath.Join(cl.userDir, teamName, ContextFileName)
+		path := filepath.Join(cl.userDir, riteName, ContextFileName)
 		if _, err := os.Stat(path); err == nil {
 			return true
 		}
@@ -260,7 +260,7 @@ func (cl *ContextLoader) HasContextFile(teamName string) bool {
 
 	// Check project rites
 	if cl.ritesDir != "" {
-		path := filepath.Join(cl.ritesDir, teamName, ContextFileName)
+		path := filepath.Join(cl.ritesDir, riteName, ContextFileName)
 		if _, err := os.Stat(path); err == nil {
 			return true
 		}
