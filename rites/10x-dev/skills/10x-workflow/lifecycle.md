@@ -123,7 +123,7 @@
 
 **Critical**: The Orchestrator does NOT implement. It coordinates.
 
-**Also Critical**: The Orchestrator cannot invoke specialists. It provides DIRECTIVES that the main thread executes via Task tool. See `.claude/skills/orchestration/main-thread-guide.md`.
+**Also Critical**: The Orchestrator cannot invoke specialists. It provides DIRECTIVES that the main thread executes via Task tool. See `~/.claude/skills/orchestration/main-thread-guide.md`.
 
 ### Requirements Analyst (Specialist)
 

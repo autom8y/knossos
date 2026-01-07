@@ -87,5 +87,5 @@ assessment. Suggest next step: Create hygiene ticket for DRY violation review."
 | Skill | When to Use |
 |-------|-------------|
 | [cross-rite-handoff](../cross-rite-handoff/SKILL.md) | HANDOFF artifact schema for formal transfers |
-| [wrap-ref](../wrap-ref/skill.md) | Session completion with quality gates |
-| [handoff-ref](../handoff-ref/skill.md) | Within-team agent transitions |
+| [wrap-ref](../wrap-ref/SKILL.md) | Session completion with quality gates |
+| [handoff-ref](../handoff-ref/SKILL.md) | Within-team agent transitions |

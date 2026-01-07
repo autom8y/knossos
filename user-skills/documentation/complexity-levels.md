@@ -450,9 +450,9 @@ Start conservative, escalate if needed:
 
 ## Related Documentation
 
-- **Session Context Schema**: `/Users/tomtenuta/Code/roster/user-skills/session-common/session-context-schema.md`
-- **Task Reference**: `/Users/tomtenuta/Code/roster/user-skills/orchestration/task-ref/SKILL.md`
-- **Ecosystem Workflow**: `/Users/tomtenuta/Code/roster/.claude/ACTIVE_WORKFLOW.yaml`
+- **Session Context Schema**: `~/.claude/skills/session-common/session-context-schema.md`
+- **Task Reference**: `~/.claude/skills/task-ref/SKILL.md`
+- **Ecosystem Workflow**: `.claude/ACTIVE_WORKFLOW.yaml` (project-level)
 - **Agent Coordination**: See `orchestration` skill
 - **Standards**: See `standards` skill
 

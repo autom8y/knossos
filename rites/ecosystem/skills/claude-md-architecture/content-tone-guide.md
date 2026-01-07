@@ -171,4 +171,4 @@ If the latter, revise to describe when each pattern applies rather than prescrib
 
 - [SKILL.md](SKILL.md) - Parent skill with content architecture principles
 - [anti-patterns.md](anti-patterns.md) - Content that should not appear
-- [../orchestration/execution-mode.md](../orchestration/execution-mode.md) - Where enforcement rules live
+- [execution-mode.md](~/.claude/skills/orchestration/execution-mode.md) - Where enforcement rules live

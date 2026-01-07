@@ -45,7 +45,7 @@ categories:
         status: PARTIAL
         files:
           - ariadne/internal/cmd/hook/autopark.go
-          - user-agents/lachesis.md
+          - user-skills/session-lifecycle/moirai/lachesis.md
         validation_criteria: "Park suggestion appears when budget nears threshold; cognitive budget included in session_end event"
         notes: "autopark hook exists; integration with Moirai for actual parking not automated"
 
@@ -331,7 +331,7 @@ categories:
         status: MISSING
         files:
           - ariadne/internal/cmd/session/wrap.go
-          - user-agents/atropos.md
+          - user-skills/session-lifecycle/moirai/atropos.md
         validation_criteria: "wrap_session fails if sails compute BLACK; requires --override to proceed"
         notes: "User specified BLACK = block wrap. Current implementation generates sails but does not gate on color."
 

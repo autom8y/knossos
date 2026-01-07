@@ -405,7 +405,7 @@ These commands invoke `/rite {rite-name}` internally and display rite roster aft
 - [ari sync materialize](~/bin/ari sync materialize --help) - Generate .claude/ for rite
 - [swap-rite.sh]($KNOSSOS_HOME/swap-rite.sh) - Legacy roster swap script (deprecated)
 - [TDD-roster-system.md]($KNOSSOS_HOME/docs/design/TDD-0003-rite-swap.md) - Roster design
-- [COMMAND_REGISTRY.md](../../COMMAND_REGISTRY.md) - All registered commands
+- [COMMAND_REGISTRY.md](.claude/COMMAND_REGISTRY.md) - All registered commands (project-level)
 
 ---
 

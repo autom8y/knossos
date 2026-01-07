@@ -187,7 +187,7 @@ gh pr list
 gh issue create
 ```
 
-See [Shell Configuration Guide](../../../docs/SHELL.md) for complete tool reference.
+See tool selection guidance below.
 
 ## Tool Selection
 
@@ -241,7 +241,7 @@ Directory structure visualization?
 | `just` | Project commands (preferred) | `just test`, `just dev`, `just lint` |
 | `make` | Project commands (legacy) | `make test`, `make dev`, `make lint` |
 
-For complete shell environment documentation, see [SHELL.md](../../../docs/SHELL.md).
+For additional shell patterns, see the `justfile` skill.
 
 ## Cross-Skill Integration
 

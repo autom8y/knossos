@@ -197,12 +197,12 @@ See [anti-patterns.md](anti-patterns.md) for the full list. Key exclusions:
 **Related Skills**:
 
 - [ecosystem-ref](../ecosystem-ref/SKILL.md) - CEM implementation and sync mechanics
-- [documentation](../documentation/SKILL.md) - General documentation standards
-- [standards](../standards/SKILL.md) - Repository conventions
+- [documentation](~/.claude/skills/documentation/SKILL.md) - General documentation standards
+- [standards](~/.claude/skills/standards/SKILL.md) - Repository conventions
 
 **Enforcement Reference**:
 
-- [orchestration/execution-mode.md](../orchestration/execution-mode.md) - When delegation is required (source of enforcement rules)
+- [execution-mode.md](~/.claude/skills/orchestration/execution-mode.md) - When delegation is required (source of enforcement rules)
 
 ---
 
