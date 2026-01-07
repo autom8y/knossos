@@ -1,4 +1,4 @@
-# Roster - Agent Rite Management
+# Roster - Rite Management
 
 ## Scripts
 

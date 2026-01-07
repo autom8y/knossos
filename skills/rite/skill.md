@@ -1,6 +1,6 @@
 # Rite Swapper
 
-Swap Claude Code agent rites for different workflows.
+Swap Claude Code rites for different workflows.
 
 ## Usage
 

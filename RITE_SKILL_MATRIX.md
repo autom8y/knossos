@@ -117,7 +117,7 @@ CEM, skeleton, roster infrastructure and CLAUDE.md architecture.
 
 ## Rite Creation Skills
 
-Creating and managing agent rites.
+Creating and managing rites.
 
 | Skill | 10x-dev | ecosystem | doc-team | debt | sre | security | strategy | hygiene | intelligence | rnd |
 |-------|:-------:|:---------:|:--------:|:----:|:---:|:--------:|:--------:|:-------:|:------------:|:---:|
@@ -258,7 +258,7 @@ These skills are core infrastructure used by every rite:
 | doc-rnd | rnd | Tech assessment, prototypes |
 | ecosystem-ref | ecosystem, hygiene | CEM/skeleton/roster infrastructure |
 | claude-md-architecture | ecosystem | CLAUDE.md content and sync |
-| forge-ref, team-development | ecosystem | Team pack creation |
+| forge-ref, rite-development | ecosystem | Rite creation |
 
 ---
 

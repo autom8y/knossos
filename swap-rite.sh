@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 #
-# swap-rite.sh - Agent Rite Pack Management System
+# swap-rite.sh - Rite Management System
 #
-# Swaps Claude Code agent rites (pantheons) with atomic-ish operations.
+# Swaps Claude Code rites (agent pantheons) with atomic-ish operations.
 # See TDD-0003 for design details.
 
 set -euo pipefail
@@ -1055,8 +1055,8 @@ init_manifest_from_existing() {
 # Orphan Detection Functions
 # ============================================================================
 
-# List agents in incoming rite pack
-# Usage: list_incoming_agents "team-name"
+# List agents in incoming rite
+# Usage: list_incoming_agents "rite-name"
 # Output: One agent filename per line
 list_incoming_agents() {
     local rite_name="$1"
@@ -1401,8 +1401,8 @@ usage() {
 Usage: swap-rite.sh [OPTIONS] [COMMAND]
 
 Commands:
-  <pack-name>    Switch to specified rite pack
-  --list         List all available rite packs
+  <rite-name>    Switch to specified rite
+  --list         List all available rites
   --reset        Reset to baseline (remove all rite resources)
   --verify       Verify current state consistency
   --recover      Interactive recovery from interrupted swap
