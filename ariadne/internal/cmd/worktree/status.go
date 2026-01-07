@@ -15,7 +15,7 @@ type StatusOutput struct {
 	WorktreeID     string `json:"worktree_id"`
 	Name           string `json:"name"`
 	Path           string `json:"path"`
-	Team           string `json:"team"`
+	Rite           string `json:"rite"`
 	Branch         string `json:"branch,omitempty"`
 	BaseBranch     string `json:"base_branch"`
 	FromRef        string `json:"from_ref"`
@@ -40,8 +40,8 @@ func (s StatusOutput) Text() string {
 	b.WriteString(fmt.Sprintf("  Name: %s\n", s.Name))
 	b.WriteString(fmt.Sprintf("  Path: %s\n", s.Path))
 
-	if s.Team != "" && s.Team != "none" {
-		b.WriteString(fmt.Sprintf("  Team: %s\n", s.Team))
+	if s.Rite != "" && s.Rite != "none" {
+		b.WriteString(fmt.Sprintf("  Rite: %s\n", s.Rite))
 	}
 
 	if s.Branch != "" {
@@ -138,7 +138,7 @@ func runStatus(ctx *cmdContext, idOrName string) error {
 		WorktreeID:     status.ID,
 		Name:           status.Name,
 		Path:           status.Path,
-		Team:           status.Team,
+		Rite:           status.Rite,
 		Branch:         status.Branch,
 		BaseBranch:     status.BaseBranch,
 		FromRef:        status.FromRef,

@@ -11,7 +11,7 @@ import (
 )
 
 type cloneOptions struct {
-	team        string
+	rite        string
 	copySession bool
 }
 
@@ -21,7 +21,7 @@ type CloneOutput struct {
 	WorktreeID     string `json:"worktree_id"`
 	Name           string `json:"name"`
 	Path           string `json:"path"`
-	Team           string `json:"team"`
+	Rite           string `json:"rite"`
 	SourceID       string `json:"source_id"`
 	SourceName     string `json:"source_name"`
 	CreatedAt      string `json:"created_at"`
@@ -36,8 +36,8 @@ func (c CloneOutput) Text() string {
 	b.WriteString(fmt.Sprintf("  Name: %s\n", c.Name))
 	b.WriteString(fmt.Sprintf("  Path: %s\n", c.Path))
 	b.WriteString(fmt.Sprintf("  Source: %s (%s)\n", c.SourceName, c.SourceID))
-	if c.Team != "" && c.Team != "none" {
-		b.WriteString(fmt.Sprintf("  Team: %s\n", c.Team))
+	if c.Rite != "" && c.Rite != "none" {
+		b.WriteString(fmt.Sprintf("  Rite: %s\n", c.Rite))
 	}
 	if c.SessionCopied {
 		b.WriteString("  Session context: copied\n")
@@ -68,7 +68,7 @@ Examples:
 		},
 	}
 
-	cmd.Flags().StringVar(&opts.team, "rite", "", "Override rite (practice bundle) (default: copy from source)")
+	cmd.Flags().StringVar(&opts.rite, "rite", "", "Override rite (practice bundle) (default: copy from source)")
 	cmd.Flags().BoolVar(&opts.copySession, "copy-session", false, "Copy session context from source")
 
 	return cmd
@@ -93,7 +93,7 @@ func runClone(ctx *cmdContext, sourceIDOrName, newName string, opts cloneOptions
 	}
 
 	cloneOpts := worktree.CloneOptions{
-		Team:        opts.team,
+		Rite:        opts.rite,
 		CopySession: opts.copySession,
 	}
 
@@ -108,7 +108,7 @@ func runClone(ctx *cmdContext, sourceIDOrName, newName string, opts cloneOptions
 		WorktreeID:    wt.ID,
 		Name:          wt.Name,
 		Path:          wt.Path,
-		Team:          wt.Team,
+		Rite:          wt.Rite,
 		SourceID:      sourceID,
 		SourceName:    sourceName,
 		CreatedAt:     wt.CreatedAt.Format(time.RFC3339),

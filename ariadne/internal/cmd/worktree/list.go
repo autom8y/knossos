@@ -22,7 +22,7 @@ type WorktreeSummary struct {
 	ID            string `json:"id"`
 	Name          string `json:"name"`
 	Path          string `json:"path"`
-	Team          string `json:"team"`
+	Rite          string `json:"rite"`
 	Age           string `json:"age"`
 	SessionStatus string `json:"session_status"`
 	IsDirty       bool   `json:"is_dirty"`
@@ -31,7 +31,7 @@ type WorktreeSummary struct {
 
 // Headers implements output.Tabular for ListOutput.
 func (l ListOutput) Headers() []string {
-	return []string{"ID", "NAME", "TEAM", "SESSION", "STATUS", "AGE"}
+	return []string{"ID", "NAME", "RITE", "SESSION", "STATUS", "AGE"}
 }
 
 // Rows implements output.Tabular for ListOutput.
@@ -46,14 +46,14 @@ func (l ListOutput) Rows() [][]string {
 		if wt.IsDirty {
 			status = "dirty"
 		}
-		team := wt.Team
-		if team == "" {
-			team = "-"
+		rite := wt.Rite
+		if rite == "" {
+			rite = "-"
 		}
 		rows[i] = []string{
 			prefix + wt.ID,
 			wt.Name,
-			team,
+			rite,
 			wt.SessionStatus,
 			status,
 			wt.Age,
@@ -114,7 +114,7 @@ func runList(ctx *cmdContext) error {
 			ID:            wt.ID,
 			Name:          wt.Name,
 			Path:          wt.Path,
-			Team:          wt.Team,
+			Rite:          wt.Rite,
 			Age:           wt.Age,
 			SessionStatus: wt.SessionStatus,
 			IsDirty:       wt.IsDirty || wt.HasUntracked,

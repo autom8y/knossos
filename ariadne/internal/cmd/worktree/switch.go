@@ -10,7 +10,7 @@ import (
 )
 
 type switchOptions struct {
-	updateTeam bool
+	updateRite bool
 }
 
 // SwitchOutput represents the output of worktree switch.
@@ -19,8 +19,8 @@ type SwitchOutput struct {
 	WorktreeID  string `json:"worktree_id"`
 	Name        string `json:"name"`
 	Path        string `json:"path"`
-	Team        string `json:"team"`
-	TeamUpdated bool   `json:"team_updated"`
+	Rite        string `json:"rite"`
+	RiteUpdated bool   `json:"rite_updated"`
 	Message     string `json:"message"`
 }
 
@@ -30,9 +30,9 @@ func (s SwitchOutput) Text() string {
 	b.WriteString(fmt.Sprintf("Switched to worktree: %s\n", s.WorktreeID))
 	b.WriteString(fmt.Sprintf("  Name: %s\n", s.Name))
 	b.WriteString(fmt.Sprintf("  Path: %s\n", s.Path))
-	if s.Team != "" && s.Team != "none" {
-		b.WriteString(fmt.Sprintf("  Team: %s", s.Team))
-		if s.TeamUpdated {
+	if s.Rite != "" && s.Rite != "none" {
+		b.WriteString(fmt.Sprintf("  Rite: %s", s.Rite))
+		if s.RiteUpdated {
 			b.WriteString(" (updated)")
 		}
 		b.WriteString("\n")
@@ -62,7 +62,7 @@ Examples:
 		},
 	}
 
-	cmd.Flags().BoolVar(&opts.updateTeam, "update-team", false, "Update ACTIVE_RITE to match worktree's team")
+	cmd.Flags().BoolVar(&opts.updateRite, "update-rite", false, "Update ACTIVE_RITE to match worktree's rite")
 
 	return cmd
 }
@@ -77,7 +77,7 @@ func runSwitch(ctx *cmdContext, idOrName string, opts switchOptions) error {
 	}
 
 	switchOpts := worktree.SwitchOptions{
-		UpdateTeam: opts.updateTeam,
+		UpdateRite: opts.updateRite,
 	}
 
 	wt, err := mgr.Switch(idOrName, switchOpts)
@@ -91,8 +91,8 @@ func runSwitch(ctx *cmdContext, idOrName string, opts switchOptions) error {
 		WorktreeID:  wt.ID,
 		Name:        wt.Name,
 		Path:        wt.Path,
-		Team:        wt.Team,
-		TeamUpdated: opts.updateTeam && wt.Team != "",
+		Rite:        wt.Rite,
+		RiteUpdated: opts.updateRite && wt.Rite != "",
 		Message:     fmt.Sprintf("Switched to worktree %s", wt.Name),
 	}
 

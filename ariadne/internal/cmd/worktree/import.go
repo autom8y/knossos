@@ -16,7 +16,7 @@ type ImportOutput struct {
 	WorktreeID   string `json:"worktree_id"`
 	Name         string `json:"name"`
 	Path         string `json:"path"`
-	Team         string `json:"team"`
+	Rite         string `json:"rite"`
 	FromArchive  string `json:"from_archive"`
 	OriginalID   string `json:"original_id"`
 	CreatedAt    string `json:"created_at"`
@@ -29,8 +29,8 @@ func (i ImportOutput) Text() string {
 	b.WriteString(fmt.Sprintf("Imported worktree: %s\n", i.WorktreeID))
 	b.WriteString(fmt.Sprintf("  Name: %s\n", i.Name))
 	b.WriteString(fmt.Sprintf("  Path: %s\n", i.Path))
-	if i.Team != "" && i.Team != "none" {
-		b.WriteString(fmt.Sprintf("  Team: %s\n", i.Team))
+	if i.Rite != "" && i.Rite != "none" {
+		b.WriteString(fmt.Sprintf("  Rite: %s\n", i.Rite))
 	}
 	b.WriteString(fmt.Sprintf("  From archive: %s\n", i.FromArchive))
 	b.WriteString(fmt.Sprintf("  Original ID: %s\n", i.OriginalID))
@@ -89,7 +89,7 @@ func runImport(ctx *cmdContext, archivePath string) error {
 		WorktreeID:   wt.ID,
 		Name:         wt.Name,
 		Path:         wt.Path,
-		Team:         wt.Team,
+		Rite:         wt.Rite,
 		FromArchive:  archivePath,
 		OriginalID:   wt.FromRef, // FromRef contains the original git ref
 		CreatedAt:    time.Now().UTC().Format(time.RFC3339),

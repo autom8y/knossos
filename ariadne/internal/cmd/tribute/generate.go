@@ -16,7 +16,7 @@ type GenerateOutput struct {
 	Initiative  string  `json:"initiative"`
 	Complexity  string  `json:"complexity"`
 	Duration    string  `json:"duration"`
-	Team        string  `json:"team"`
+	Rite        string  `json:"rite"`
 	FinalPhase  string  `json:"final_phase"`
 	SailsColor  string  `json:"sails_color,omitempty"`
 	Artifacts   int     `json:"artifacts_count"`
@@ -122,7 +122,7 @@ func runGenerate(ctx *cmdContext, sessionDir string) error {
 		Initiative:  result.Initiative,
 		Complexity:  result.Complexity,
 		Duration:    formatDuration(result.Duration),
-		Team:        result.Team,
+		Rite:        result.Team,
 		FinalPhase:  result.FinalPhase,
 		SailsColor:  result.SailsColor,
 		Artifacts:   len(result.Artifacts),

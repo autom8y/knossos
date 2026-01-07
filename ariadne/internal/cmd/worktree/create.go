@@ -12,7 +12,7 @@ import (
 )
 
 type createOptions struct {
-	team       string
+	rite       string
 	fromRef    string
 	complexity string
 }
@@ -23,7 +23,7 @@ type CreateOutput struct {
 	WorktreeID   string `json:"worktree_id"`
 	Path         string `json:"path"`
 	Name         string `json:"name"`
-	Team         string `json:"team"`
+	Rite         string `json:"rite"`
 	FromRef      string `json:"from_ref"`
 	Complexity   string `json:"complexity"`
 	CreatedAt    string `json:"created_at"`
@@ -36,8 +36,8 @@ func (c CreateOutput) Text() string {
 	b.WriteString(fmt.Sprintf("Created worktree: %s\n", c.WorktreeID))
 	b.WriteString(fmt.Sprintf("  Name: %s\n", c.Name))
 	b.WriteString(fmt.Sprintf("  Path: %s\n", c.Path))
-	if c.Team != "" && c.Team != "none" {
-		b.WriteString(fmt.Sprintf("  Team: %s\n", c.Team))
+	if c.Rite != "" && c.Rite != "none" {
+		b.WriteString(fmt.Sprintf("  Rite: %s\n", c.Rite))
 	}
 	b.WriteString(fmt.Sprintf("\nTo start working: cd %s && claude\n", c.Path))
 	return b.String()
@@ -65,7 +65,7 @@ Examples:
 		},
 	}
 
-	cmd.Flags().StringVar(&opts.team, "rite", "", "Rite (practice bundle) to activate in worktree")
+	cmd.Flags().StringVar(&opts.rite, "rite", "", "Rite (practice bundle) to activate in worktree")
 	cmd.Flags().StringVar(&opts.fromRef, "from", "", "Git ref to create from (default: HEAD)")
 	cmd.Flags().StringVar(&opts.complexity, "complexity", "MODULE", "Session complexity: PATCH, MODULE, SYSTEM, INITIATIVE, MIGRATION")
 
@@ -90,7 +90,7 @@ func runCreate(ctx *cmdContext, name string, opts createOptions) error {
 
 	createOpts := worktree.CreateOptions{
 		Name:       name,
-		Team:       opts.team,
+		Rite:       opts.rite,
 		FromRef:    opts.fromRef,
 		Complexity: opts.complexity,
 	}
@@ -106,7 +106,7 @@ func runCreate(ctx *cmdContext, name string, opts createOptions) error {
 		WorktreeID:   wt.ID,
 		Path:         wt.Path,
 		Name:         wt.Name,
-		Team:         wt.Team,
+		Rite:         wt.Rite,
 		FromRef:      wt.FromRef,
 		Complexity:   wt.Complexity,
 		CreatedAt:    wt.CreatedAt.Format(time.RFC3339),

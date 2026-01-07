@@ -19,7 +19,7 @@ type ContextOutput struct {
 	SessionID     string `json:"session_id,omitempty"`
 	Status        string `json:"status,omitempty"`
 	Initiative    string `json:"initiative,omitempty"`
-	Team          string `json:"team,omitempty"`
+	Rite          string `json:"rite,omitempty"`
 	CurrentPhase  string `json:"current_phase,omitempty"`
 	ExecutionMode string `json:"execution_mode,omitempty"`
 	HasSession    bool   `json:"has_session"`
@@ -38,7 +38,7 @@ func (c ContextOutput) Text() string {
 	b.WriteString(fmt.Sprintf("| Session | %s |\n", c.SessionID))
 	b.WriteString(fmt.Sprintf("| Status | %s |\n", c.Status))
 	b.WriteString(fmt.Sprintf("| Initiative | %s |\n", c.Initiative))
-	b.WriteString(fmt.Sprintf("| Team | %s |\n", c.Team))
+	b.WriteString(fmt.Sprintf("| Rite | %s |\n", c.Rite))
 	b.WriteString(fmt.Sprintf("| Mode | %s |\n", c.ExecutionMode))
 	return b.String()
 }
@@ -133,7 +133,7 @@ func runContext(ctx *cmdContext) error {
 		SessionID:     sessCtx.SessionID,
 		Status:        string(sessCtx.Status),
 		Initiative:    sessCtx.Initiative,
-		Team:          activeTeam,
+		Rite:          activeTeam,
 		CurrentPhase:  sessCtx.CurrentPhase,
 		ExecutionMode: mode,
 		HasSession:    true,
