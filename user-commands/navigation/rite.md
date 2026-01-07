@@ -1,5 +1,5 @@
 ---
-description: Switch agent rite packs or list available rites
+description: Switch rites or list available rites
 argument-hint: [pack-name] [--list] [--update] [--dry-run] [--keep-all|--remove-all|--promote-all]
 allowed-tools: Bash, Read
 model: sonnet
@@ -12,7 +12,7 @@ Auto-injected by SessionStart hook (project, rite, session, git).
 
 ## Your Task
 
-Manage agent rite packs. $ARGUMENTS
+Manage rites. $ARGUMENTS
 
 ## Behavior
 
@@ -22,7 +22,7 @@ Manage agent rite packs. $ARGUMENTS
 
 **If `--list` or `-l`:**
 1. Execute: `${KNOSSOS_HOME:-~/Code/roster}/swap-rite.sh --list`
-2. Display all available rite packs
+2. Display all available rites
 
 **If `<pack-name>` provided:**
 1. Execute: `${KNOSSOS_HOME:-~/Code/roster}/swap-rite.sh <pack-name> [flags]`

@@ -10,7 +10,7 @@ Auto-injected by SessionStart hook (project, rite, session, git).
 
 ## Your Task
 
-Switch to the Security Team pack and display the rite roster. $ARGUMENTS
+Switch to the Security rite and display the pantheon. $ARGUMENTS
 
 ## Behavior
 

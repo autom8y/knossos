@@ -7,7 +7,7 @@ model: haiku
 
 ## Your Task
 
-Display information about The Forge - the meta-rite for creating and maintaining agent rites. $ARGUMENTS
+Display information about The Forge - the meta-rite for creating and maintaining rites. $ARGUMENTS
 
 ## Behavior
 
