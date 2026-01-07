@@ -9,7 +9,7 @@
 #
 # Usage:
 #   source "$ROSTER_HOME/lib/sync/merge/merge-docs.sh"
-#   merge_documentation "$roster_file" "$local_file" "$output_file"
+#   merge_documentation "$knossos_file" "$local_file" "$output_file"
 #
 # Markers:
 #   <!-- SYNC: roster-owned -->       - Always take roster version
@@ -49,16 +49,16 @@ readonly PRESERVE_SECTIONS="Quick Start|Agent Configurations"
 #   4. Append satellite-only sections (not in roster)
 #   5. Append ## Project:* sections from local
 #
-# Usage: merge_documentation "roster_file" "local_file" "output_file"
+# Usage: merge_documentation "knossos_file" "local_file" "output_file"
 merge_documentation() {
-    local roster_file="$1"
+    local knossos_file="$1"
     local local_file="$2"
     local output_file="$3"
 
     # If no local file, copy roster as-is
     if [[ ! -f "$local_file" ]]; then
         sync_log_debug "merge-docs: no local file, copying roster"
-        cp "$roster_file" "$output_file"
+        cp "$knossos_file" "$output_file"
         return 0
     fi
 
@@ -68,11 +68,11 @@ merge_documentation() {
     trap "rm -f '$temp_output'" RETURN
 
     # 1. Extract and write header/preamble from roster
-    extract_header "$roster_file" > "$temp_output"
+    extract_header "$knossos_file" > "$temp_output"
 
     # 2. Get section lists
     local roster_sections local_sections
-    roster_sections=$(list_sections "$roster_file")
+    roster_sections=$(list_sections "$knossos_file")
     local_sections=$(list_sections "$local_file")
 
     sync_log_debug "merge-docs: roster sections: $roster_sections"
@@ -86,7 +86,7 @@ merge_documentation() {
         local decision roster_marker local_marker
 
         # Check markers
-        roster_marker=$(get_section_marker "$roster_file" "$section")
+        roster_marker=$(get_section_marker "$knossos_file" "$section")
         local_marker=$(get_section_marker "$local_file" "$section")
 
         sync_log_debug "merge-docs: section='$section' roster_marker='$roster_marker' local_marker='$local_marker'"
@@ -110,7 +110,7 @@ merge_documentation() {
         if [[ "$decision" == "local" ]]; then
             extract_section "$local_file" "$section" >> "$temp_output"
         else
-            extract_section "$roster_file" "$section" >> "$temp_output"
+            extract_section "$knossos_file" "$section" >> "$temp_output"
         fi
 
         echo "" >> "$temp_output"

@@ -9,7 +9,7 @@
 #
 # Usage:
 #   source "$ROSTER_HOME/lib/sync/merge/merge-settings.sh"
-#   merge_settings_json "$roster_file" "$local_file" "$output_file"
+#   merge_settings_json "$knossos_file" "$local_file" "$output_file"
 #
 # Merge Behavior:
 #   - Uses roster file as base
@@ -33,22 +33,22 @@ readonly _MERGE_SETTINGS_LOADED=1
 #   3. Merge: roster base + satellite extras
 #   4. Preserve local enableAllProjectMcpServers if set
 #
-# Usage: merge_settings_json "roster_file" "local_file" "output_file"
+# Usage: merge_settings_json "knossos_file" "local_file" "output_file"
 merge_settings_json() {
-    local roster_file="$1"
+    local knossos_file="$1"
     local local_file="$2"
     local output_file="$3"
 
     # If no local file, copy roster as-is
     if [[ ! -f "$local_file" ]]; then
         sync_log_debug "merge-settings: no local file, copying roster"
-        cp "$roster_file" "$output_file"
+        cp "$knossos_file" "$output_file"
         return 0
     fi
 
     # Validate both files are valid JSON
-    if ! jq -e . "$roster_file" >/dev/null 2>&1; then
-        sync_log_error "Invalid JSON in roster file: $roster_file"
+    if ! jq -e . "$knossos_file" >/dev/null 2>&1; then
+        sync_log_error "Invalid JSON in roster file: $knossos_file"
         return 1
     fi
 
@@ -59,20 +59,20 @@ merge_settings_json() {
 
     # Extract satellite-specific permissions (in local but not in roster)
     local extra_perms
-    extra_perms=$(jq -n --slurpfile r "$roster_file" --slurpfile l "$local_file" '
+    extra_perms=$(jq -n --slurpfile r "$knossos_file" --slurpfile l "$local_file" '
         ($l[0].permissions.allow // []) - ($r[0].permissions.allow // [])
     ')
 
     # Extract satellite-specific directories
     local extra_dirs
-    extra_dirs=$(jq -n --slurpfile r "$roster_file" --slurpfile l "$local_file" '
+    extra_dirs=$(jq -n --slurpfile r "$knossos_file" --slurpfile l "$local_file" '
         ($l[0].permissions.additionalDirectories // []) -
         ($r[0].permissions.additionalDirectories // [])
     ')
 
     # Extract satellite-specific MCP servers
     local extra_mcp
-    extra_mcp=$(jq -n --slurpfile r "$roster_file" --slurpfile l "$local_file" '
+    extra_mcp=$(jq -n --slurpfile r "$knossos_file" --slurpfile l "$local_file" '
         ($l[0].enabledMcpjsonServers // []) -
         ($r[0].enabledMcpjsonServers // [])
     ')
@@ -99,7 +99,7 @@ merge_settings_json() {
         if $l[0].enableAllProjectMcpServers then
             .enableAllProjectMcpServers = $l[0].enableAllProjectMcpServers
         else . end
-    ' "$roster_file" > "$output_file" || {
+    ' "$knossos_file" > "$output_file" || {
         sync_log_error "merge-settings: jq merge failed"
         return 1
     }
@@ -140,18 +140,18 @@ validate_settings_json() {
 # ============================================================================
 
 # Extract satellite-specific settings for reporting
-# Usage: get_satellite_settings "$local_file" "$roster_file"
+# Usage: get_satellite_settings "$local_file" "$knossos_file"
 # Outputs: JSON object with satellite-specific additions
 get_satellite_settings() {
     local local_file="$1"
-    local roster_file="$2"
+    local knossos_file="$2"
 
-    if [[ ! -f "$local_file" || ! -f "$roster_file" ]]; then
+    if [[ ! -f "$local_file" || ! -f "$knossos_file" ]]; then
         echo "{}"
         return 1
     fi
 
-    jq -n --slurpfile r "$roster_file" --slurpfile l "$local_file" '{
+    jq -n --slurpfile r "$knossos_file" --slurpfile l "$local_file" '{
         extra_permissions: (($l[0].permissions.allow // []) - ($r[0].permissions.allow // [])),
         extra_directories: (($l[0].permissions.additionalDirectories // []) - ($r[0].permissions.additionalDirectories // [])),
         extra_mcp_servers: (($l[0].enabledMcpjsonServers // []) - ($r[0].enabledMcpjsonServers // [])),

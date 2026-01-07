@@ -46,21 +46,21 @@ readonly CLASSIFY_NEW="NEW"
 # | Yes                    | No                     | UPDATE    |
 # | Yes                    | Yes                    | CONFLICT  |
 #
-# Usage: classify_file "filename" "roster_file" "local_file"
+# Usage: classify_file "filename" "knossos_file" "local_file"
 # Returns: SKIP, UPDATE, CONFLICT, or NEW
 classify_file() {
     local filename="$1"
-    local roster_file="$2"
+    local knossos_file="$2"
     local local_file="$3"
 
     # Get checksums
-    local roster_checksum manifest_checksum local_checksum
+    local knossos_checksum manifest_checksum local_checksum
 
-    # Roster checksum (from current roster file)
-    if [[ -f "$roster_file" ]]; then
-        roster_checksum=$(compute_checksum "$roster_file")
+    # Knossos checksum (from current knossos file)
+    if [[ -f "$knossos_file" ]]; then
+        knossos_checksum=$(compute_checksum "$knossos_file")
     else
-        sync_log_debug "Roster file not found: $roster_file"
+        sync_log_debug "Knossos file not found: $knossos_file"
         echo "$CLASSIFY_SKIP"
         return 0
     fi
@@ -80,13 +80,13 @@ classify_file() {
 
     # Log for debugging
     sync_log_debug "Classifying: $filename"
-    sync_log_debug "  roster_checksum:   $roster_checksum"
+    sync_log_debug "  knossos_checksum:  $knossos_checksum"
     sync_log_debug "  manifest_checksum: ${manifest_checksum:-<none>}"
     sync_log_debug "  local_checksum:    $local_checksum"
 
     # First sync (no manifest entry)
     if [[ -z "$manifest_checksum" ]]; then
-        if [[ "$roster_checksum" == "$local_checksum" ]]; then
+        if [[ "$knossos_checksum" == "$local_checksum" ]]; then
             sync_log_debug "  -> SKIP (identical, no manifest)"
             echo "$CLASSIFY_SKIP"
         else
@@ -100,7 +100,7 @@ classify_file() {
     local roster_changed=0
     local local_changed=0
 
-    if [[ "$roster_checksum" != "$manifest_checksum" ]]; then
+    if [[ "$knossos_checksum" != "$manifest_checksum" ]]; then
         roster_changed=1
     fi
 
@@ -224,32 +224,32 @@ create_conflict_backup() {
 }
 
 # Resolve a conflict by applying roster version
-# Usage: resolve_conflict "roster_file" "local_file" "filename" [force]
+# Usage: resolve_conflict "knossos_file" "local_file" "filename" [force]
 # Returns: 0 on success, 1 on failure
 #
 # Without force: Creates backup, reports conflict
 # With force: Creates backup, overwrites with roster version
 resolve_conflict() {
-    local roster_file="$1"
+    local knossos_file="$1"
     local local_file="$2"
     local filename="$3"
     local force="${4:-0}"
 
-    if [[ ! -f "$roster_file" ]]; then
-        sync_log_error "Roster file not found: $roster_file"
+    if [[ ! -f "$knossos_file" ]]; then
+        sync_log_error "Knossos file not found: $knossos_file"
         return 1
     fi
 
     # Pre-flight check: skip cp if files are already identical (fixes BSD cp error)
     if [[ -f "$local_file" ]]; then
-        local roster_checksum local_checksum
-        roster_checksum=$(compute_checksum "$roster_file")
+        local knossos_checksum local_checksum
+        knossos_checksum=$(compute_checksum "$knossos_file")
         local_checksum=$(compute_checksum "$local_file")
 
-        if [[ "$roster_checksum" == "$local_checksum" ]]; then
+        if [[ "$knossos_checksum" == "$local_checksum" ]]; then
             sync_log_debug "Files already identical, skipping copy: $local_file"
             # Update manifest to reflect current state
-            set_manifest_checksum "$filename" "$roster_checksum"
+            set_manifest_checksum "$filename" "$knossos_checksum"
             return 0
         fi
     fi
@@ -270,7 +270,7 @@ resolve_conflict() {
 
     if [[ "$force" == "1" ]]; then
         # Force mode: overwrite with roster version
-        cp "$roster_file" "$local_file" || {
+        cp "$knossos_file" "$local_file" || {
             sync_log_error "Failed to overwrite conflict: $local_file"
             return 1
         }
@@ -432,20 +432,20 @@ clean_old_backups() {
 }
 
 # Get detailed classification result with all checksums
-# Usage: classify_file_detailed "filename" "roster_file" "local_file"
+# Usage: classify_file_detailed "filename" "knossos_file" "local_file"
 # Returns: JSON with classification details
 classify_file_detailed() {
     local filename="$1"
-    local roster_file="$2"
+    local knossos_file="$2"
     local local_file="$3"
 
-    local roster_checksum="" manifest_checksum="" local_checksum=""
+    local knossos_checksum="" manifest_checksum="" local_checksum=""
     local classification="$CLASSIFY_SKIP"
     local reason=""
 
     # Roster checksum
-    if [[ -f "$roster_file" ]]; then
-        roster_checksum=$(compute_checksum "$roster_file")
+    if [[ -f "$knossos_file" ]]; then
+        knossos_checksum=$(compute_checksum "$knossos_file")
     else
         classification="$CLASSIFY_SKIP"
         reason="roster_missing"
@@ -453,7 +453,7 @@ classify_file_detailed() {
             --arg c "$classification" \
             --arg r "$reason" \
             --arg f "$filename" \
-            '{classification: $c, reason: $r, filename: $f, roster_checksum: null, manifest_checksum: null, local_checksum: null}'
+            '{classification: $c, reason: $r, filename: $f, knossos_checksum: null, manifest_checksum: null, local_checksum: null}'
         return 0
     fi
 
@@ -470,14 +470,14 @@ classify_file_detailed() {
             --arg c "$classification" \
             --arg r "$reason" \
             --arg f "$filename" \
-            --arg rc "$roster_checksum" \
-            '{classification: $c, reason: $r, filename: $f, roster_checksum: $rc, manifest_checksum: null, local_checksum: null}'
+            --arg rc "$knossos_checksum" \
+            '{classification: $c, reason: $r, filename: $f, knossos_checksum: $rc, manifest_checksum: null, local_checksum: null}'
         return 0
     fi
 
     # First sync (no manifest entry)
     if [[ -z "$manifest_checksum" ]]; then
-        if [[ "$roster_checksum" == "$local_checksum" ]]; then
+        if [[ "$knossos_checksum" == "$local_checksum" ]]; then
             classification="$CLASSIFY_SKIP"
             reason="identical_no_manifest"
         else
@@ -489,7 +489,7 @@ classify_file_detailed() {
         local roster_changed=0
         local local_changed=0
 
-        [[ "$roster_checksum" != "$manifest_checksum" ]] && roster_changed=1
+        [[ "$knossos_checksum" != "$manifest_checksum" ]] && roster_changed=1
         [[ "$local_checksum" != "$manifest_checksum" ]] && local_changed=1
 
         if [[ $roster_changed -eq 0 && $local_changed -eq 0 ]]; then
@@ -500,7 +500,7 @@ classify_file_detailed() {
             reason="preserve_local"
         elif [[ $roster_changed -eq 1 && $local_changed -eq 0 ]]; then
             classification="$CLASSIFY_UPDATE"
-            reason="roster_updated"
+            reason="knossos_updated"
         else
             classification="$CLASSIFY_CONFLICT"
             reason="both_modified"
@@ -511,10 +511,10 @@ classify_file_detailed() {
         --arg c "$classification" \
         --arg r "$reason" \
         --arg f "$filename" \
-        --arg rc "$roster_checksum" \
+        --arg rc "$knossos_checksum" \
         --arg mc "$manifest_checksum" \
         --arg lc "$local_checksum" \
-        '{classification: $c, reason: $r, filename: $f, roster_checksum: $rc, manifest_checksum: (if $mc == "" then null else $mc end), local_checksum: $lc}'
+        '{classification: $c, reason: $r, filename: $f, knossos_checksum: $rc, manifest_checksum: (if $mc == "" then null else $mc end), local_checksum: $lc}'
 }
 
 # ============================================================================
@@ -534,15 +534,15 @@ process_copy_replace() {
     local force="${3:-0}"
 
     local conflicts=0
-    local item roster_file local_file classification
+    local item knossos_filelocal_file classification
 
     while IFS= read -r item; do
         [[ -z "$item" ]] && continue
 
-        roster_file="$roster_dir/$item"
+        knossos_file="$roster_dir/$item"
         local_file="$local_dir/$item"
 
-        classification=$(classify_file "$item" "$roster_file" "$local_file")
+        classification=$(classify_file "$item" "$knossos_file" "$local_file")
 
         case "$classification" in
             "$CLASSIFY_SKIP")
@@ -551,7 +551,7 @@ process_copy_replace() {
             "$CLASSIFY_NEW"|"$CLASSIFY_UPDATE")
                 sync_log "Updating: $item"
                 mkdir -p "$(dirname "$local_file")"
-                cp "$roster_file" "$local_file" || {
+                cp "$knossos_file" "$local_file" || {
                     sync_log_error "Failed to copy: $item"
                     return 1
                 }
@@ -565,7 +565,7 @@ process_copy_replace() {
                 ((conflicts++)) || true
 
                 # Use resolve_conflict which handles backup and optional force
-                resolve_conflict "$roster_file" "$local_file" "$item" "$force"
+                resolve_conflict "$knossos_file" "$local_file" "$item" "$force"
                 ;;
         esac
     done < <(get_copy_replace_items)
@@ -586,7 +586,7 @@ process_merge_items() {
     local force="${3:-0}"
 
     local errors=0
-    local line file strategy roster_file local_file roster_checksum manifest_checksum
+    local line file strategy knossos_file local_file knossos_checksum manifest_checksum
 
     while IFS= read -r line; do
         [[ -z "$line" ]] && continue
@@ -594,14 +594,14 @@ process_merge_items() {
         file="${line%%:*}"
         strategy="${line#*:}"
 
-        roster_file="$roster_dir/$file"
+        knossos_file="$roster_dir/$file"
         local_file="$local_dir/$file"
 
         # Check if roster file changed
-        roster_checksum=$(compute_checksum "$roster_file")
+        knossos_checksum=$(compute_checksum "$knossos_file")
         manifest_checksum=$(get_manifest_checksum "$file")
 
-        if [[ -n "$manifest_checksum" && "$roster_checksum" == "$manifest_checksum" ]]; then
+        if [[ -n "$manifest_checksum" && "$knossos_checksum" == "$manifest_checksum" ]]; then
             sync_log_debug "Merge skip (unchanged): $file"
             continue
         fi
@@ -609,7 +609,7 @@ process_merge_items() {
         sync_log "Merging: $file (strategy: $strategy)"
 
         # Dispatch to appropriate merge strategy
-        if ! dispatch_merge_strategy "$strategy" "$roster_file" "$local_file" "$local_file"; then
+        if ! dispatch_merge_strategy "$strategy" "$knossos_file" "$local_file" "$local_file"; then
             sync_log_error "Merge failed: $file"
             ((errors++)) || true
             continue
@@ -645,7 +645,7 @@ detect_orphans() {
 
     manifest=$(read_manifest) || return 1
 
-    local file_path roster_file strategy
+    local file_path knossos_filestrategy
     while IFS= read -r file_entry; do
         [[ -z "$file_entry" ]] && continue
 
@@ -661,9 +661,9 @@ detect_orphans() {
         fi
 
         # Check if file exists in roster source
-        roster_file="$roster_dir/$filename"
+        knossos_file="$roster_dir/$filename"
 
-        if [[ ! -f "$roster_file" ]]; then
+        if [[ ! -f "$knossos_file" ]]; then
             # File was in manifest with a sync strategy but no longer in roster
             # This is an orphan (the file was previously synced from roster)
             if [[ "$strategy" == "copy-replace" || "$strategy" == "merge-settings" || "$strategy" == "merge-docs" ]]; then

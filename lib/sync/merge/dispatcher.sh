@@ -9,7 +9,7 @@
 #
 # Usage:
 #   source "$ROSTER_HOME/lib/sync/merge/dispatcher.sh"
-#   dispatch_merge_strategy "merge-settings" "$roster_file" "$local_file" "$output_file"
+#   dispatch_merge_strategy "merge-settings" "$knossos_file" "$local_file" "$output_file"
 #
 # Strategies:
 #   copy-replace    - Complete file replacement
@@ -27,30 +27,30 @@ readonly _MERGE_DISPATCHER_LOADED=1
 # ============================================================================
 
 # Dispatch to appropriate merge strategy
-# Usage: dispatch_merge_strategy "strategy" "roster_file" "local_file" "output_file"
+# Usage: dispatch_merge_strategy "strategy" "knossos_file" "local_file" "output_file"
 # Returns: 0 on success, 1 on failure
 dispatch_merge_strategy() {
     local strategy="$1"
-    local roster_file="$2"
+    local knossos_file="$2"
     local local_file="$3"
     local output_file="$4"
 
     sync_log_debug "Dispatching merge: strategy=$strategy"
-    sync_log_debug "  roster: $roster_file"
+    sync_log_debug "  roster: $knossos_file"
     sync_log_debug "  local:  $local_file"
     sync_log_debug "  output: $output_file"
 
     # Verify roster file exists
-    if [[ ! -f "$roster_file" ]]; then
-        sync_log_error "Roster file not found: $roster_file"
+    if [[ ! -f "$knossos_file" ]]; then
+        sync_log_error "Roster file not found: $knossos_file"
         return 1
     fi
 
     case "$strategy" in
         copy-replace)
             # Complete replacement - just copy
-            cp "$roster_file" "$output_file" || {
-                sync_log_error "copy-replace failed: $roster_file -> $output_file"
+            cp "$knossos_file" "$output_file" || {
+                sync_log_error "copy-replace failed: $knossos_file -> $output_file"
                 return 1
             }
             sync_log_debug "copy-replace complete: $output_file"
@@ -58,7 +58,7 @@ dispatch_merge_strategy() {
 
         merge-settings)
             # JSON union merge for settings.local.json
-            merge_settings_json "$roster_file" "$local_file" "$output_file" || {
+            merge_settings_json "$knossos_file" "$local_file" "$output_file" || {
                 sync_log_error "merge-settings failed"
                 return 1
             }
@@ -67,7 +67,7 @@ dispatch_merge_strategy() {
 
         merge-docs)
             # Section-based merge for CLAUDE.md
-            merge_documentation "$roster_file" "$local_file" "$output_file" || {
+            merge_documentation "$knossos_file" "$local_file" "$output_file" || {
                 sync_log_error "merge-docs failed"
                 return 1
             }
@@ -76,7 +76,7 @@ dispatch_merge_strategy() {
 
         merge-dir)
             # Directory content sync
-            merge_directory "$roster_file" "$local_file" 0 || {
+            merge_directory "$knossos_file" "$local_file" 0 || {
                 sync_log_error "merge-dir failed"
                 return 1
             }
@@ -86,8 +86,8 @@ dispatch_merge_strategy() {
         merge-init)
             # Copy only if local doesn't exist
             if [[ ! -f "$local_file" ]]; then
-                cp "$roster_file" "$output_file" || {
-                    sync_log_error "merge-init failed: $roster_file -> $output_file"
+                cp "$knossos_file" "$output_file" || {
+                    sync_log_error "merge-init failed: $knossos_file -> $output_file"
                     return 1
                 }
                 sync_log_debug "merge-init complete (copied): $output_file"
