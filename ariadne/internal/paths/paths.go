@@ -139,36 +139,6 @@ func (r *Resolver) RitesDir() string {
 	return filepath.Join(r.projectRoot, "rites")
 }
 
-// TeamDir returns the path to a specific team directory.
-// Deprecated: Use RiteDir instead.
-func (r *Resolver) TeamDir(teamName string) string {
-	return filepath.Join(r.RitesDir(), teamName)
-}
-
-// TeamAgentsDir returns the path to a team's agents/ directory.
-// Deprecated: Use RiteAgentsDir instead.
-func (r *Resolver) TeamAgentsDir(teamName string) string {
-	return filepath.Join(r.TeamDir(teamName), "agents")
-}
-
-// TeamWorkflowFile returns the path to a team's workflow.yaml file.
-// Deprecated: Use RiteWorkflowFile instead.
-func (r *Resolver) TeamWorkflowFile(teamName string) string {
-	return filepath.Join(r.TeamDir(teamName), "workflow.yaml")
-}
-
-// TeamOrchestratorFile returns the path to a team's orchestrator.yaml file.
-// Deprecated: Use RiteOrchestratorFile instead.
-func (r *Resolver) TeamOrchestratorFile(teamName string) string {
-	return filepath.Join(r.TeamDir(teamName), "orchestrator.yaml")
-}
-
-// TeamContextFile returns the path to a team's context.yaml file.
-// Deprecated: Use RiteContextFile instead.
-func (r *Resolver) TeamContextFile(teamName string) string {
-	return filepath.Join(r.TeamDir(teamName), "context.yaml")
-}
-
 // TransitionsLog returns the path to the global transitions log.
 func (r *Resolver) TransitionsLog() string {
 	return filepath.Join(r.AuditDir(), "transitions.log")
@@ -206,6 +176,21 @@ func (r *Resolver) RiteAgentsDir(riteName string) string {
 // RiteSkillsDir returns the path to a rite's skills directory.
 func (r *Resolver) RiteSkillsDir(riteName string) string {
 	return filepath.Join(r.RiteDir(riteName), "skills")
+}
+
+// RiteWorkflowFile returns the path to a rite's workflow.yaml file.
+func (r *Resolver) RiteWorkflowFile(riteName string) string {
+	return filepath.Join(r.RiteDir(riteName), "workflow.yaml")
+}
+
+// RiteOrchestratorFile returns the path to a rite's orchestrator.yaml file.
+func (r *Resolver) RiteOrchestratorFile(riteName string) string {
+	return filepath.Join(r.RiteDir(riteName), "orchestrator.yaml")
+}
+
+// RiteContextFile returns the path to a rite's context.yaml file.
+func (r *Resolver) RiteContextFile(riteName string) string {
+	return filepath.Join(r.RiteDir(riteName), "context.yaml")
 }
 
 // EnsureDir creates a directory if it doesn't exist.

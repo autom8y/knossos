@@ -197,7 +197,7 @@ func (s *Switcher) executeSwitch(rite *Rite, manifest *AgentManifest, orphans []
 	}
 
 	var installedAgents []string
-	riteAgentsDir := s.resolver.TeamAgentsDir(opts.TargetRite)
+	riteAgentsDir := s.resolver.RiteAgentsDir(opts.TargetRite)
 
 	entries, err := os.ReadDir(riteAgentsDir)
 	if err != nil {
@@ -231,7 +231,7 @@ func (s *Switcher) executeSwitch(rite *Rite, manifest *AgentManifest, orphans []
 	}
 
 	// 4. Copy workflow.yaml to ACTIVE_WORKFLOW.yaml
-	workflowSrc := s.resolver.TeamWorkflowFile(opts.TargetRite)
+	workflowSrc := s.resolver.RiteWorkflowFile(opts.TargetRite)
 	workflowDst := s.resolver.ActiveWorkflowFile()
 	if err := copyFile(workflowSrc, workflowDst); err != nil {
 		// Non-critical, just log
