@@ -63,7 +63,7 @@ Display the Forge workflow:
 Agent Designer → Prompt Architect → Workflow Engineer → Platform Engineer → Eval Specialist → Agent Curator
      │               │                   │                    │                  │               │
      ▼               ▼                   ▼                    ▼                  ▼               ▼
- TEAM-SPEC      Agent .md files    workflow.yaml      roster/teams/       eval-report      roster entry
+ TEAM-SPEC      Agent .md files    workflow.yaml      roster/rites/       eval-report      roster entry
 ```
 
 ### With --commands

@@ -59,7 +59,7 @@ All 11 rites successfully complete the swap cycle with proper agent cleanup, res
 **Expected**: Error with helpful list of valid teams
 **Result**: PASS (blocked by pre-tool hook before script)
 ```
-Team pack 'nonexistent-pack' not found in /roster/teams
+Team pack 'nonexistent-pack' not found in /roster/rites
 Available teams: [lists all 11 valid teams]
 ```
 
