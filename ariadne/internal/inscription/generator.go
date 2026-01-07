@@ -261,7 +261,7 @@ func (g *Generator) lookupTerminology(term string) string {
 		"theseus":     "Claude Code agent - the navigator with amnesia",
 		"moirai":      "Session lifecycle agent - the Fates who spin, measure, and cut",
 		"white-sails": "Confidence signal - honest return indicator",
-		"rites":       "Practice bundles - invokable ceremonies (formerly 'team packs')",
+		"rites":       "Practice bundles - invokable ceremonies",
 	}
 
 	if def, ok := terminology[strings.ToLower(term)]; ok {
@@ -407,7 +407,7 @@ The naming reflects Greek mythology (see ` + "`docs/philosophy/knossos-doctrine.
 | **Theseus** | Claude Code agent | The navigator with amnesia |
 | **Moirai** | Session lifecycle agent | The Fates who spin, measure, and cut |
 | **White Sails** | Confidence signal | Honest return indicator |
-| **Rites** | Practice bundles | Invokable ceremonies (formerly "team packs") |
+| **Rites** | Practice bundles | Invokable ceremonies |
 
 For full details: ` + "`docs/guides/knossos-integration.md`" + ` and ` + "`docs/decisions/ADR-0009-knossos-roster-identity.md`"
 }

@@ -29,7 +29,7 @@ func TestRiteContext_ToMarkdown(t *testing.T) {
 	}{
 		{
 			name: "empty context",
-			ctx:  NewRiteContext("test-team"),
+			ctx:  NewRiteContext("test-rite"),
 			want: "",
 		},
 		{
@@ -41,7 +41,7 @@ func TestRiteContext_ToMarkdown(t *testing.T) {
 			name: "single row",
 			ctx: &RiteContext{
 				SchemaVersion: "1.0",
-				RiteName:      "test-team",
+				RiteName:      "test-rite",
 				ContextRows: []ContextRow{
 					{Key: "Status", Value: "Active"},
 				},
@@ -52,7 +52,7 @@ func TestRiteContext_ToMarkdown(t *testing.T) {
 			name: "multiple rows",
 			ctx: &RiteContext{
 				SchemaVersion: "1.0",
-				RiteName:      "test-team",
+				RiteName:      "test-rite",
 				ContextRows: []ContextRow{
 					{Key: "Status", Value: "Active"},
 					{Key: "Environment", Value: "Production"},
@@ -83,7 +83,7 @@ func TestRiteContext_Validate(t *testing.T) {
 			name: "valid context",
 			ctx: &RiteContext{
 				SchemaVersion: "1.0",
-				RiteName:      "test-team",
+				RiteName:      "test-rite",
 			},
 			wantErr: false,
 		},
@@ -97,7 +97,7 @@ func TestRiteContext_Validate(t *testing.T) {
 		{
 			name: "missing schema version",
 			ctx: &RiteContext{
-				RiteName: "test-team",
+				RiteName: "test-rite",
 			},
 			wantErr: true,
 		},
@@ -114,7 +114,7 @@ func TestRiteContext_Validate(t *testing.T) {
 }
 
 func TestRiteContext_AddRow(t *testing.T) {
-	ctx := NewRiteContext("test-team")
+	ctx := NewRiteContext("test-rite")
 
 	ctx.AddRow("Key1", "Value1")
 	ctx.AddRow("Key2", "Value2")
@@ -133,7 +133,7 @@ func TestRiteContext_AddRow(t *testing.T) {
 }
 
 func TestRiteContext_HasRows(t *testing.T) {
-	ctx := NewRiteContext("test-team")
+	ctx := NewRiteContext("test-rite")
 
 	if ctx.HasRows() {
 		t.Error("HasRows() = true on new context, want false")
@@ -147,8 +147,8 @@ func TestRiteContext_HasRows(t *testing.T) {
 }
 
 func TestContextLoader_Load_FromYAML(t *testing.T) {
-	teamsDir := getTestDataPath(t)
-	loader := NewContextLoaderWithPaths(teamsDir, "")
+	ritesDir := getTestDataPath(t)
+	loader := NewContextLoaderWithPaths(ritesDir, "")
 
 	ctx, err := loader.Load("valid-rite")
 	if err != nil {
@@ -183,8 +183,8 @@ func TestContextLoader_Load_FromYAML(t *testing.T) {
 }
 
 func TestContextLoader_Load_FallbackToOrchestrator(t *testing.T) {
-	teamsDir := getTestDataPath(t)
-	loader := NewContextLoaderWithPaths(teamsDir, "")
+	ritesDir := getTestDataPath(t)
+	loader := NewContextLoaderWithPaths(ritesDir, "")
 
 	ctx, err := loader.Load("minimal-rite")
 	if err != nil {
@@ -216,8 +216,8 @@ func TestContextLoader_Load_RiteNotFound(t *testing.T) {
 }
 
 func TestContextLoader_Load_EmptyRiteName(t *testing.T) {
-	teamsDir := getTestDataPath(t)
-	loader := NewContextLoaderWithPaths(teamsDir, "")
+	ritesDir := getTestDataPath(t)
+	loader := NewContextLoaderWithPaths(ritesDir, "")
 
 	_, err := loader.Load("")
 	if err == nil {
@@ -253,8 +253,8 @@ context_rows:
 }
 
 func TestContextLoader_Caching(t *testing.T) {
-	teamsDir := getTestDataPath(t)
-	loader := NewContextLoaderWithPaths(teamsDir, "")
+	ritesDir := getTestDataPath(t)
+	loader := NewContextLoaderWithPaths(ritesDir, "")
 
 	// First load
 	ctx1, err := loader.Load("valid-rite")
@@ -296,8 +296,8 @@ func TestContextLoader_Caching(t *testing.T) {
 }
 
 func TestContextLoader_InvalidateAll(t *testing.T) {
-	teamsDir := getTestDataPath(t)
-	loader := NewContextLoaderWithPaths(teamsDir, "")
+	ritesDir := getTestDataPath(t)
+	loader := NewContextLoaderWithPaths(ritesDir, "")
 
 	// Load multiple teams
 	_, _ = loader.Load("valid-rite")
@@ -319,8 +319,8 @@ func TestContextLoader_InvalidateAll(t *testing.T) {
 }
 
 func TestContextLoader_HasContextFile(t *testing.T) {
-	teamsDir := getTestDataPath(t)
-	loader := NewContextLoaderWithPaths(teamsDir, "")
+	ritesDir := getTestDataPath(t)
+	loader := NewContextLoaderWithPaths(ritesDir, "")
 
 	// valid-rite has context.yaml
 	if !loader.HasContextFile("valid-rite") {
@@ -339,8 +339,8 @@ func TestContextLoader_HasContextFile(t *testing.T) {
 }
 
 func TestContextLoader_GetContextPath(t *testing.T) {
-	teamsDir := getTestDataPath(t)
-	loader := NewContextLoaderWithPaths(teamsDir, "")
+	ritesDir := getTestDataPath(t)
+	loader := NewContextLoaderWithPaths(ritesDir, "")
 
 	path := loader.GetContextPath("valid-rite")
 	expectedSuffix := filepath.Join("valid-rite", "context.yaml")
@@ -403,15 +403,15 @@ context_rows:
 }
 
 func TestContextLoader_SaveContext(t *testing.T) {
-	teamsDir := t.TempDir()
+	ritesDir := t.TempDir()
 
 	// Create team directory
-	teamDir := filepath.Join(teamsDir, "save-team")
+	teamDir := filepath.Join(ritesDir, "save-team")
 	if err := os.MkdirAll(teamDir, 0755); err != nil {
 		t.Fatalf("failed to create team dir: %v", err)
 	}
 
-	loader := NewContextLoaderWithPaths(teamsDir, "")
+	loader := NewContextLoaderWithPaths(ritesDir, "")
 
 	ctx := NewRiteContext("save-team")
 	ctx.DisplayName = "Save Test Team"
@@ -444,8 +444,8 @@ func TestContextLoader_SaveContext(t *testing.T) {
 }
 
 func TestContextLoader_SaveContext_InvalidContext(t *testing.T) {
-	teamsDir := t.TempDir()
-	loader := NewContextLoaderWithPaths(teamsDir, "")
+	ritesDir := t.TempDir()
+	loader := NewContextLoaderWithPaths(ritesDir, "")
 
 	// Context without required fields
 	ctx := &RiteContext{}

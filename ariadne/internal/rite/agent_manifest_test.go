@@ -29,8 +29,8 @@ func TestManifest_SaveLoad(t *testing.T) {
 
 	// Create and save manifest
 	m := NewEmptyAgentManifest()
-	m.ActiveRite = "test-team"
-	m.AddAgent("agent-a.md", "rite", "test-team", "sha256:abc123")
+	m.ActiveRite = "test-rite"
+	m.AddAgent("agent-a.md", "rite", "test-rite", "sha256:abc123")
 
 	if err := m.Save(manifestPath); err != nil {
 		t.Fatalf("Save() error = %v", err)
@@ -42,8 +42,8 @@ func TestManifest_SaveLoad(t *testing.T) {
 		t.Fatalf("LoadAgentManifest() error = %v", err)
 	}
 
-	if loaded.ActiveRite != "test-team" {
-		t.Errorf("ActiveRite = %q, want %q", loaded.ActiveRite, "test-team")
+	if loaded.ActiveRite != "test-rite" {
+		t.Errorf("ActiveRite = %q, want %q", loaded.ActiveRite, "test-rite")
 	}
 
 	if len(loaded.Agents) != 1 {
@@ -58,8 +58,8 @@ func TestManifest_SaveLoad(t *testing.T) {
 	if agent.Source != "rite" {
 		t.Errorf("agent.Source = %q, want %q", agent.Source, "rite")
 	}
-	if agent.Origin != "test-team" {
-		t.Errorf("agent.Origin = %q, want %q", agent.Origin, "test-team")
+	if agent.Origin != "test-rite" {
+		t.Errorf("agent.Origin = %q, want %q", agent.Origin, "test-rite")
 	}
 	if agent.Checksum != "sha256:abc123" {
 		t.Errorf("agent.Checksum = %q, want %q", agent.Checksum, "sha256:abc123")

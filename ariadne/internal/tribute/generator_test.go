@@ -24,7 +24,7 @@ status: ACTIVE
 created_at: "2026-01-06T10:00:00Z"
 initiative: test-initiative
 complexity: MODULE
-active_rite: test-team
+active_rite: test-rite
 current_phase: implementation
 ---
 
@@ -55,8 +55,8 @@ current_phase: implementation
 	if result.Complexity != "MODULE" {
 		t.Errorf("Complexity = %q, want %q", result.Complexity, "MODULE")
 	}
-	if result.Rite != "test-team" {
-		t.Errorf("Rite = %q, want %q", result.Rite, "test-team")
+	if result.Rite != "test-rite" {
+		t.Errorf("Rite = %q, want %q", result.Rite, "test-rite")
 	}
 	if result.FinalPhase != "implementation" {
 		t.Errorf("FinalPhase = %q, want %q", result.FinalPhase, "implementation")
@@ -193,7 +193,7 @@ status: ACTIVE
 created_at: "2026-01-06T10:00:00Z"
 initiative: no-events-test
 complexity: SCRIPT
-active_rite: test-team
+active_rite: test-rite
 current_phase: requirements
 ---
 
@@ -244,7 +244,7 @@ status: ACTIVE
 created_at: "2026-01-06T10:00:00Z"
 initiative: idempotent-test
 complexity: MODULE
-active_rite: test-team
+active_rite: test-rite
 current_phase: implementation
 ---
 

@@ -44,7 +44,7 @@ func TestValidate(t *testing.T) {
 			name: "valid team manifest",
 			content: map[string]interface{}{
 				"version": "1.0",
-				"name":    "test-team",
+				"name":    "test-rite",
 				"workflow": map[string]interface{}{
 					"type":        "sequential",
 					"entry_point": "start",
@@ -58,7 +58,7 @@ func TestValidate(t *testing.T) {
 			name: "invalid team manifest - missing workflow",
 			content: map[string]interface{}{
 				"version": "1.0",
-				"name":    "test-team",
+				"name":    "test-rite",
 				"agents":  []interface{}{},
 			},
 			schemaName: manifest.SchemaTeamManifest,

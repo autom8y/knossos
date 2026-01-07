@@ -25,7 +25,7 @@ func TestSwitchWorktree(t *testing.T) {
 	// Create a worktree to switch to
 	wt, err := mgr.Create(CreateOptions{
 		Name: "switch-target",
-		Rite: "test-team",
+		Rite: "test-rite",
 	})
 	if err != nil {
 		t.Fatalf("Failed to create worktree: %v", err)

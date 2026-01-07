@@ -13,16 +13,16 @@ func setupTestRites(t *testing.T) (string, func()) {
 
 	// Create project structure
 	claudeDir := filepath.Join(tempDir, ".claude")
-	teamsDir := filepath.Join(tempDir, "teams")
+	ritesDir := filepath.Join(tempDir, "rites")
 
-	for _, dir := range []string{claudeDir, teamsDir} {
+	for _, dir := range []string{claudeDir, ritesDir} {
 		if err := os.MkdirAll(dir, 0755); err != nil {
 			t.Fatalf("Failed to create directory %s: %v", dir, err)
 		}
 	}
 
 	// Create a valid rite
-	rite1Dir := filepath.Join(teamsDir, "test-rite")
+	rite1Dir := filepath.Join(ritesDir, "test-rite")
 	if err := os.MkdirAll(rite1Dir, 0755); err != nil {
 		t.Fatalf("Failed to create rite dir: %v", err)
 	}
@@ -45,7 +45,7 @@ skills:
 	}
 
 	// Create a simple rite
-	rite2Dir := filepath.Join(teamsDir, "simple-rite")
+	rite2Dir := filepath.Join(ritesDir, "simple-rite")
 	if err := os.MkdirAll(rite2Dir, 0755); err != nil {
 		t.Fatalf("Failed to create rite dir: %v", err)
 	}
@@ -79,7 +79,7 @@ func TestDiscovery_List(t *testing.T) {
 	defer cleanup()
 
 	discovery := NewDiscoveryWithPaths(
-		filepath.Join(tempDir, "teams"),
+		filepath.Join(tempDir, "rites"),
 		"", // No user rites
 		"test-rite",
 	)
@@ -117,7 +117,7 @@ func TestDiscovery_ListByForm(t *testing.T) {
 	defer cleanup()
 
 	discovery := NewDiscoveryWithPaths(
-		filepath.Join(tempDir, "teams"),
+		filepath.Join(tempDir, "rites"),
 		"",
 		"",
 	)
@@ -149,7 +149,7 @@ func TestDiscovery_Get(t *testing.T) {
 	defer cleanup()
 
 	discovery := NewDiscoveryWithPaths(
-		filepath.Join(tempDir, "teams"),
+		filepath.Join(tempDir, "rites"),
 		"",
 		"test-rite",
 	)
@@ -181,7 +181,7 @@ func TestDiscovery_GetManifest(t *testing.T) {
 	defer cleanup()
 
 	discovery := NewDiscoveryWithPaths(
-		filepath.Join(tempDir, "teams"),
+		filepath.Join(tempDir, "rites"),
 		"",
 		"",
 	)
@@ -203,7 +203,7 @@ func TestDiscovery_GetActive(t *testing.T) {
 	defer cleanup()
 
 	discovery := NewDiscoveryWithPaths(
-		filepath.Join(tempDir, "teams"),
+		filepath.Join(tempDir, "rites"),
 		"",
 		"test-rite",
 	)
@@ -218,7 +218,7 @@ func TestDiscovery_GetActive(t *testing.T) {
 
 	// No active rite
 	noActiveDiscovery := NewDiscoveryWithPaths(
-		filepath.Join(tempDir, "teams"),
+		filepath.Join(tempDir, "rites"),
 		"",
 		"",
 	)
@@ -233,7 +233,7 @@ func TestDiscovery_Exists(t *testing.T) {
 	defer cleanup()
 
 	discovery := NewDiscoveryWithPaths(
-		filepath.Join(tempDir, "teams"),
+		filepath.Join(tempDir, "rites"),
 		"",
 		"",
 	)
@@ -260,12 +260,12 @@ func TestDiscovery_ActiveRiteName(t *testing.T) {
 
 func TestDiscovery_EmptyDir(t *testing.T) {
 	tempDir := t.TempDir()
-	teamsDir := filepath.Join(tempDir, "teams")
-	if err := os.MkdirAll(teamsDir, 0755); err != nil {
-		t.Fatalf("Failed to create teams dir: %v", err)
+	ritesDir := filepath.Join(tempDir, "rites")
+	if err := os.MkdirAll(ritesDir, 0755); err != nil {
+		t.Fatalf("Failed to create rites dir: %v", err)
 	}
 
-	discovery := NewDiscoveryWithPaths(teamsDir, "", "")
+	discovery := NewDiscoveryWithPaths(ritesDir, "", "")
 
 	rites, err := discovery.List()
 	if err != nil {
@@ -278,10 +278,10 @@ func TestDiscovery_EmptyDir(t *testing.T) {
 
 func TestDiscovery_InvalidRiteSkipped(t *testing.T) {
 	tempDir := t.TempDir()
-	teamsDir := filepath.Join(tempDir, "teams")
+	ritesDir := filepath.Join(tempDir, "rites")
 
 	// Create a valid rite
-	validDir := filepath.Join(teamsDir, "valid-rite")
+	validDir := filepath.Join(ritesDir, "valid-rite")
 	if err := os.MkdirAll(validDir, 0755); err != nil {
 		t.Fatalf("Failed to create dir: %v", err)
 	}
@@ -297,12 +297,12 @@ skills:
 	}
 
 	// Create an invalid rite (no rite.yaml)
-	invalidDir := filepath.Join(teamsDir, "invalid-rite")
+	invalidDir := filepath.Join(ritesDir, "invalid-rite")
 	if err := os.MkdirAll(invalidDir, 0755); err != nil {
 		t.Fatalf("Failed to create dir: %v", err)
 	}
 
-	discovery := NewDiscoveryWithPaths(teamsDir, "", "")
+	discovery := NewDiscoveryWithPaths(ritesDir, "", "")
 
 	rites, err := discovery.List()
 	if err != nil {
