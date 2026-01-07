@@ -18,7 +18,7 @@ fi
 
 # Function name rites must export
 if [[ -z "${RITE_CONTEXT_FUNCTION_NAME:-}" ]]; then
-    readonly RITE_CONTEXT_FUNCTION_NAME="inject_team_context"
+    readonly RITE_CONTEXT_FUNCTION_NAME="inject_rite_context"
 fi
 
 # =============================================================================
@@ -33,7 +33,7 @@ fi
 # Contract:
 #   - Reads ACTIVE_RITE from .claude/ACTIVE_RITE
 #   - Looks for $KNOSSOS_HOME/rites/$ACTIVE_RITE/context-injection.sh
-#   - Sources script and calls inject_team_context()
+#   - Sources script and calls inject_rite_context()
 #   - Returns function output on stdout
 #   - Never fails (RECOVERABLE pattern)
 

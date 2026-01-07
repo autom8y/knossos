@@ -2,11 +2,11 @@
 # Ecosystem-Pack Context Injection
 # Provides CEM sync status, roster reference, and drift detection for ecosystem work
 #
-# Called by: session-context.sh via team-context-loader.sh
+# Called by: session-context.sh via rite-context-loader.sh
 # Output: Markdown table with ecosystem status
 
-# Required function name (per team-context-loader.sh contract)
-inject_team_context() {
+# Required function name (per rite-context-loader.sh contract)
+inject_rite_context() {
     local project_dir="${CLAUDE_PROJECT_DIR:-.}"
     local output=""
 
@@ -64,7 +64,7 @@ inject_team_context() {
     echo "$output"
 }
 
-# Helper function (provided by team-context-loader.sh, but define fallback)
+# Helper function (provided by rite-context-loader.sh, but define fallback)
 if ! declare -f is_file_stale >/dev/null 2>&1; then
     is_file_stale() {
         local file="$1"
