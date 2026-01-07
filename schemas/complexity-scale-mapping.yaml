@@ -1,10 +1,10 @@
 # Complexity Scale Mapping
-# Maps team-specific complexity levels to meta-scale for cross-team coordination
+# Maps rite-specific complexity levels to meta-scale for cross-rite coordination
 
 schema_version: "1.0"
 
 meta_scale:
-  description: "Universal 4-tier complexity scale for cross-team communication"
+  description: "Universal 4-tier complexity scale for cross-rite communication"
   tiers:
     - name: PATCH
       description: "Single file/config change, minimal coordination"
@@ -26,92 +26,92 @@ meta_scale:
       typical_phases: 5+
       typical_duration: "2+ weeks"
 
-team_mappings:
-  # Development teams
+rite_mappings:
+  # Development rites
   10x-dev:
     SCRIPT: PATCH
     MODULE: MODULE
     SERVICE: SYSTEM
     PLATFORM: PLATFORM
 
-  # Ecosystem teams
+  # Ecosystem rites
   ecosystem:
     PATCH: PATCH
     MODULE: MODULE
     SYSTEM: SYSTEM
     MIGRATION: PLATFORM
 
-  # Security teams
+  # Security rites
   security:
     PATCH: PATCH
     MODULE: MODULE
     SERVICE: SYSTEM
     PLATFORM: PLATFORM
 
-  # Research teams
+  # Research rites
   rnd:
     SPIKE: PATCH
     EXPLORATION: MODULE
     PROTOTYPE: SYSTEM
     PLATFORM_RESEARCH: PLATFORM
 
-  # Documentation teams
+  # Documentation rites
   docs:
     PAGE: PATCH
     SECTION: MODULE
     GUIDE: SYSTEM
     DOCUMENTATION_SYSTEM: PLATFORM
 
-  # Hygiene teams
+  # Hygiene rites
   hygiene:
     LINT_FIX: PATCH
     REFACTOR: MODULE
     CLEANUP: SYSTEM
     MIGRATION: PLATFORM
 
-  # Debt teams
+  # Debt rites
   debt-triage:
     QUICK_WIN: PATCH
     FOCUSED: MODULE
     STRATEGIC: SYSTEM
     ARCHITECTURAL: PLATFORM
 
-  # SRE teams
+  # SRE rites
   sre:
     INCIDENT: PATCH
     IMPROVEMENT: MODULE
     RELIABILITY: SYSTEM
     PLATFORM_SRE: PLATFORM
 
-  # Intelligence teams
+  # Intelligence rites
   intelligence:
     QUERY: PATCH
     ANALYSIS: MODULE
     RESEARCH: SYSTEM
     PLATFORM_ANALYTICS: PLATFORM
 
-  # Strategy teams
+  # Strategy rites
   strategy:
     INSIGHT: PATCH
     INITIATIVE: MODULE
     STRATEGY: SYSTEM
     VISION: PLATFORM
 
-  # Forge teams
+  # Forge rites
   forge:
     AGENT_FIX: PATCH
     AGENT: MODULE
     TEAM: SYSTEM
     ECOSYSTEM: PLATFORM
 
-# Cross-team routing rules
+# Cross-rite routing rules
 routing_rules:
   - description: "PLATFORM complexity requires orchestrator consultation"
     condition: "meta_complexity == PLATFORM"
     action: "invoke_orchestrator before specialist"
 
-  - description: "Cross-team work requires hub team notification"
-    condition: "affects_multiple_teams == true"
+  - description: "Cross-rite work requires hub rite notification"
+    condition: "affects_multiple_rites == true"
     action: "notify ecosystem or forge"
 
   - description: "Security-critical work requires security review"
