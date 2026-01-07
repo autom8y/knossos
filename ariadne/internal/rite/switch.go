@@ -292,7 +292,7 @@ func (s *Switcher) executeSwitch(rite *Rite, manifest *AgentManifest, orphans []
 	} else {
 		// Fallback to legacy ClaudeMDUpdater if inscription sync is skipped
 		updater := NewClaudeMDUpdater(s.resolver.ClaudeMDFile())
-		if err := updater.UpdateForTeam(rite); err == nil {
+		if err := updater.UpdateForRite(rite); err == nil {
 			result.ClaudeMDUpdated = true
 		}
 	}

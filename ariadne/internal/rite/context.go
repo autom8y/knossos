@@ -47,8 +47,8 @@ func (rc *RiteContext) ToMarkdown() string {
 	return b.String()
 }
 
-// NewTeamContext creates a new RiteContext with default values.
-func NewTeamContext(riteName string) *RiteContext {
+// NewRiteContext creates a new RiteContext with default values.
+func NewRiteContext(riteName string) *RiteContext {
 	return &RiteContext{
 		SchemaVersion: "1.0",
 		TeamName:      riteName,

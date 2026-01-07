@@ -29,7 +29,7 @@ func TestRiteContext_ToMarkdown(t *testing.T) {
 	}{
 		{
 			name: "empty context",
-			ctx:  NewTeamContext("test-team"),
+			ctx:  NewRiteContext("test-team"),
 			want: "",
 		},
 		{
@@ -114,7 +114,7 @@ func TestRiteContext_Validate(t *testing.T) {
 }
 
 func TestRiteContext_AddRow(t *testing.T) {
-	ctx := NewTeamContext("test-team")
+	ctx := NewRiteContext("test-team")
 
 	ctx.AddRow("Key1", "Value1")
 	ctx.AddRow("Key2", "Value2")
@@ -133,7 +133,7 @@ func TestRiteContext_AddRow(t *testing.T) {
 }
 
 func TestRiteContext_HasRows(t *testing.T) {
-	ctx := NewTeamContext("test-team")
+	ctx := NewRiteContext("test-team")
 
 	if ctx.HasRows() {
 		t.Error("HasRows() = true on new context, want false")
@@ -413,7 +413,7 @@ func TestContextLoader_SaveContext(t *testing.T) {
 
 	loader := NewContextLoaderWithPaths(teamsDir, "")
 
-	ctx := NewTeamContext("save-team")
+	ctx := NewRiteContext("save-team")
 	ctx.DisplayName = "Save Test Team"
 	ctx.Domain = "testing"
 	ctx.AddRow("Key", "Value")
@@ -459,7 +459,7 @@ func TestContextLoader_SaveContext_TeamNotFound(t *testing.T) {
 	teamsDir := t.TempDir()
 	loader := NewContextLoaderWithPaths(teamsDir, "")
 
-	ctx := NewTeamContext("non-existent-team")
+	ctx := NewRiteContext("non-existent-team")
 
 	if err := loader.SaveContext(ctx); err == nil {
 		t.Error("SaveContext() with non-existent team should return error")

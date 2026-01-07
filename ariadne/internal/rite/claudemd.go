@@ -18,8 +18,8 @@ func NewClaudeMDUpdater(path string) *ClaudeMDUpdater {
 	return &ClaudeMDUpdater{path: path}
 }
 
-// UpdateForTeam regenerates satellite sections for a rite.
-func (u *ClaudeMDUpdater) UpdateForTeam(rite *Rite) error {
+// UpdateForRite regenerates satellite sections for a rite.
+func (u *ClaudeMDUpdater) UpdateForRite(rite *Rite) error {
 	content, err := os.ReadFile(u.path)
 	if err != nil {
 		return fmt.Errorf("reading CLAUDE.md: %w", err)

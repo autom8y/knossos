@@ -358,7 +358,7 @@ func (v *Validator) Fix(riteName string) error {
 			}
 			if rite.Active {
 				updater := NewClaudeMDUpdater(v.resolver.ClaudeMDFile())
-				updater.UpdateForTeam(rite)
+				updater.UpdateForRite(rite)
 			}
 		}
 	}

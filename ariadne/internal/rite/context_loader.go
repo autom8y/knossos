@@ -158,7 +158,7 @@ func (cl *ContextLoader) generateFromOrchestrator(teamName string) (*RiteContext
 	}
 
 	// Generate context from orchestrator
-	ctx := NewTeamContext(teamName)
+	ctx := NewRiteContext(teamName)
 	ctx.Description = orchestrator.Frontmatter.Description
 	ctx.Domain = orchestrator.Team.Domain
 
