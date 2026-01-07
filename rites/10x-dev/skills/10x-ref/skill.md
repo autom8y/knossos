@@ -37,14 +37,14 @@ Execute via Bash tool:
 $ROSTER_HOME/swap-rite.sh 10x-dev
 ```
 
-### 2. Display Team Roster
+### 2. Display Pantheon
 
 After successful switch, show the active rite roster:
 
 ```
 Switched to 10x-dev (5 agents loaded)
 
-Team Roster:
+Pantheon:
 ┌─────────────────────────┬──────────────────────────────────────────────┐
 │ Agent                   │ Role                                         │
 ├─────────────────────────┼──────────────────────────────────────────────┤
@@ -141,7 +141,7 @@ Output:
 ```
 [Roster] Switched to 10x-dev (5 agents loaded)
 
-Team Roster:
+Pantheon:
   - orchestrator: Coordinates multi-phase workflows
   - requirements-analyst: Produces PRDs, clarifies intent
   - architect: Produces TDDs and ADRs, designs solutions
@@ -165,7 +165,7 @@ Session context updated:
   Active rite: 10x-dev
   Handoff note: "Switched to development team for implementation phase"
 
-Team Roster:
+Pantheon:
   [... agent list ...]
 
 Next step: Use /handoff architect to review design, or /handoff engineer to begin implementation.
@@ -181,7 +181,7 @@ Output:
 ```
 [Roster] Already using 10x-dev (no changes needed)
 
-Team Roster:
+Pantheon:
   [... agent list ...]
 ```
 

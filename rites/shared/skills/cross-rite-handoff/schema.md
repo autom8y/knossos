@@ -26,9 +26,9 @@ The HANDOFF artifact formalizes work transfer between rites with validated schem
 artifact_id: string           # Pattern: HANDOFF-{source}-to-{target}-{YYYY-MM-DD}[-{seq}]
 schema_version: "1.0"         # Must be "1.0" for this version
 
-# Required: Team routing
-source_team: string           # Rite producing the handoff (e.g., "10x-dev")
-target_team: string           # Rite receiving the handoff (e.g., "security")
+# Required: Rite routing
+source_rite: string           # Rite producing the handoff (e.g., "10x-dev")
+target_rite: string           # Rite receiving the handoff (e.g., "security")
 
 # Required: Handoff classification
 handoff_type: enum            # execution | validation | assessment | implementation | strategic_input | strategic_evaluation
@@ -82,7 +82,7 @@ items:
     evaluation_criteria: array     # Required for type: strategic_evaluation
 
     # Optional fields
-    notes: string             # Additional context for target team
+    notes: string             # Additional context for target rite
     dependencies: array       # IDs of other items this depends on
     estimated_effort: string  # Time estimate if known
 ```
@@ -127,8 +127,8 @@ rejected --resubmit--> pending (new artifact, references original)
 | Field | Rule | Error Code |
 |-------|------|------------|
 | `artifact_id` | Match pattern `^HANDOFF-[a-z0-9-]+-to-[a-z0-9-]+-[0-9]{4}-[0-9]{2}-[0-9]{2}(-[0-9]+)?$` | HANDOFF-001 |
-| `source_team` | Non-empty, match known rite pattern | HANDOFF-002 |
-| `target_team` | Non-empty, different from source_team | HANDOFF-003 |
+| `source_rite` | Non-empty, match known rite pattern | HANDOFF-002 |
+| `target_rite` | Non-empty, different from source_rite | HANDOFF-003 |
 | `handoff_type` | One of: execution, validation, assessment, implementation, strategic_input, strategic_evaluation | HANDOFF-004 |
 | `priority` | One of: critical, high, medium, low | HANDOFF-005 |
 | `blocking` | Boolean | HANDOFF-006 |
@@ -153,7 +153,7 @@ rejected --resubmit--> pending (new artifact, references original)
 
 | Rule | Error Code |
 |------|------------|
-| `source_team` and `target_team` MUST be different | HANDOFF-030 |
+| `source_rite` and `target_rite` MUST be different | HANDOFF-030 |
 | If `status: rejected`, `rejection_reason` MUST be present | HANDOFF-031 |
 | If `resubmission_of` present, referenced artifact MUST exist | HANDOFF-032 |
 | If `blocking: true`, `priority` SHOULD be `critical` or `high` | HANDOFF-033 (warning) |
@@ -166,7 +166,7 @@ rejected --resubmit--> pending (new artifact, references original)
 
 A cross-rite HANDOFF artifact is **required** when:
 
-| Condition | Target Team | Handoff Type |
+| Condition | Target Rite | Handoff Type |
 |-----------|-------------|--------------|
 | Complexity >= SERVICE with security considerations | security | assessment |
 | Feature involves production deployment | sre | validation |
@@ -179,7 +179,7 @@ A cross-rite HANDOFF artifact is **required** when:
 
 A cross-rite HANDOFF artifact is **optional** when:
 
-| Condition | Target Team | Handoff Type |
+| Condition | Target Rite | Handoff Type |
 |-----------|-------------|--------------|
 | Feature complete, documentation update desired | docs | assessment |
 | Code review reveals hygiene concerns | hygiene | assessment |
@@ -190,8 +190,8 @@ A cross-rite HANDOFF artifact is **optional** when:
 
 Cross-rite handoff is **not required** when:
 
-- Work remains within single team's domain
-- Phase transition within same team (use `/handoff` within-team)
+- Work remains within single rite's domain
+- Phase transition within same rite (use `/handoff` within-rite)
 - Quick consultation (use `/consult` or direct user communication)
 - Information sharing without action items
 
@@ -234,7 +234,7 @@ Add optional `pending_handoffs` field to SESSION_CONTEXT:
 # In SESSION_CONTEXT.md frontmatter
 pending_handoffs:
   - artifact_id: string      # Reference to HANDOFF artifact
-    target_team: string      # Team waiting on
+    target_rite: string      # Rite waiting on
     blocking: boolean        # Is this blocking progress
     created_at: string       # When handoff was created
     status: enum             # pending | in_progress
@@ -243,13 +243,13 @@ pending_handoffs:
 ### Handoff Lifecycle in Session
 
 ```
-1. Source team creates HANDOFF artifact
-2. Source team updates SESSION_CONTEXT.pending_handoffs (if session active)
-3. User routes HANDOFF to target team
-4. Target team accepts, rejects, or requests clarification
-5. If accepted: Target team produces response artifact
-6. If rejected: Source team updates and resubmits (new artifact)
-7. On completion: Source team removes from pending_handoffs
+1. Source rite creates HANDOFF artifact
+2. Source rite updates SESSION_CONTEXT.pending_handoffs (if session active)
+3. User routes HANDOFF to target rite
+4. Target rite accepts, rejects, or requests clarification
+5. If accepted: Target rite produces response artifact
+6. If rejected: Source rite updates and resubmits (new artifact)
+7. On completion: Source rite removes from pending_handoffs
 ```
 
 ---

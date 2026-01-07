@@ -4,7 +4,7 @@
 
 ## Current State Summary
 
-Doc-rite-pack is a **well-designed, production-ready documentation team** with clear phase separation (audit → architecture → writing → review) and comprehensive quality gates.
+Doc-rite is a **well-designed, production-ready documentation team** with clear phase separation (audit → architecture → writing → review) and comprehensive quality gates.
 
 **Strengths confirmed:**
 - Clear 4-phase pipeline with explicit handoff criteria
@@ -69,7 +69,7 @@ For each doc file:
 **Decision:** Reactive-only is correct. Docs should reflect actual implementation, not aspirational designs. Documentation lag is acceptable.
 
 ### Domain-Specific Tech Writers
-**Decision:** Generalist model is correct. Domain teams (security, sre, etc.) own their specialized docs via doc-* skills. Doc-rite-pack handles general user-facing content only.
+**Decision:** Generalist model is correct. Domain teams (security, sre, etc.) own their specialized docs via doc-* skills. Doc-rite handles general user-facing content only.
 
 ### CI Integration for Staleness
 **Decision:** Out of scope for roster. Would require tooling integration outside Claude Code. On-demand `/doc-audit --staleness` is sufficient.

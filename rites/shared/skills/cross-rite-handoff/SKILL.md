@@ -1,23 +1,23 @@
 ---
 name: cross-rite-handoff
-description: "HANDOFF artifact schema for cross-rite work transfer. Use when: work crosses team boundaries, specialist review required, formal handoff needed. Triggers: cross-rite, handoff artifact, team transfer, work handoff."
+description: "HANDOFF artifact schema for cross-rite work transfer. Use when: work crosses rite boundaries, specialist review required, formal handoff needed. Triggers: cross-rite, handoff artifact, rite transfer, work handoff."
 ---
 
-# Cross-Team Handoff Skill
+# Cross-Rite Handoff Skill
 
 > Defines the HANDOFF artifact schema for transferring work between rites.
 
 ## Quick Reference
 
-**When to Use**: Work crosses team boundaries and requires formal handoff
+**When to Use**: Work crosses rite boundaries and requires formal handoff
 **Artifact Pattern**: `HANDOFF-{source}-to-{target}-{date}.md`
 **Handoff Types**: execution, validation, assessment, implementation, strategic_input, strategic_evaluation
 
 ## Decision Tree
 
 ```
-Is work crossing team boundaries?
-+-- No -> Use /handoff (within-team) or continue directly
+Is work crossing rite boundaries?
++-- No -> Use /handoff (within-rite) or continue directly
 +-- Yes -> Continue below
 
 Is formal work transfer needed?

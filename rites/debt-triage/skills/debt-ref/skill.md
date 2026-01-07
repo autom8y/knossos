@@ -37,14 +37,14 @@ Execute via Bash tool:
 $ROSTER_HOME/swap-rite.sh debt-triage
 ```
 
-### 2. Display Team Roster
+### 2. Display Pantheon
 
 After successful switch, show the active rite roster:
 
 ```
 Switched to debt-triage (3 agents loaded)
 
-Team Roster:
+Pantheon:
 ┌─────────────────────────┬──────────────────────────────────────────────┐
 │ Agent                   │ Role                                         │
 ├─────────────────────────┼──────────────────────────────────────────────┤
@@ -169,7 +169,7 @@ Output:
 ```
 [Roster] Switched to debt-triage (3 agents loaded)
 
-Team Roster:
+Pantheon:
   - debt-collector: Identifies and catalogs technical debt
   - risk-assessor: Evaluates impact and urgency of debt
   - sprint-planner: Creates remediation plans and roadmaps

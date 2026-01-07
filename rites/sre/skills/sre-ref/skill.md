@@ -37,14 +37,14 @@ Execute via Bash tool:
 $ROSTER_HOME/swap-rite.sh sre
 ```
 
-### 2. Display Team Roster
+### 2. Display Pantheon
 
 After successful switch, show the active rite roster:
 
 ```
 Switched to sre (4 agents loaded)
 
-Team Roster:
+Pantheon:
 ┌─────────────────────────┬──────────────────────────────────────────────┐
 │ Agent                   │ Role                                         │
 ├─────────────────────────┼──────────────────────────────────────────────┤

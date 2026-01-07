@@ -15,7 +15,7 @@ description: "Security team reference with threat modeling, compliance architect
 | Workflow | `$ROSTER_HOME/rites/security/workflow.yaml` | Phase configuration |
 | Switch | `/security` | Activate this team |
 
-## Team Roster
+## Pantheon
 
 | Agent | Model | Role | Produces |
 |-------|-------|------|----------|

@@ -12,7 +12,7 @@ Infrastructure lifecycle team for CEM and roster ecosystem maintenance.
 - Breaking changes require migration planning
 - Cross-satellite compatibility issues
 
-**Not for**: Application code in satellites (use 10x-dev), rite-specific workflows (use rite-pack).
+**Not for**: Application code in satellites (use 10x-dev), rite-specific workflows (use rite).
 
 ## Quick Start
 
@@ -43,4 +43,4 @@ See `workflow.md` for phase flow and complexity levels.
 ## Related Rites
 
 - **hygiene**: When cleanup reveals ecosystem bugs
-- **rite-pack**: When rite-specific infrastructure needs changes
+- **rite**: When rite-specific infrastructure needs changes

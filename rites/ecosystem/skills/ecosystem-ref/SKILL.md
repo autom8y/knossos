@@ -24,41 +24,41 @@ Roster-sync manages synchronization between roster repository and user/project C
 - User Agents: `~/.claude/agents/`
 - User Commands: `~/.claude/commands/`
 - User Skills: `~/.claude/skills/`
-- Team Manifest: `.claude/TEAM_MANIFEST.json`
+- Rite Manifest: `.claude/RITE_MANIFEST.json`
 
 ### Common Commands
 ```bash
 ./sync-user-agents.sh          # Sync user-agents to ~/.claude/agents/
 ./sync-user-commands.sh        # Sync user-commands to ~/.claude/commands/
 ./sync-user-skills.sh          # Sync user-skills to ~/.claude/skills/
-./swap-rite.sh <pack>          # Switch active rite
+./swap-rite.sh <rite>          # Switch active rite
 ./swap-rite.sh --list          # List available rites
-./swap-rite.sh --refresh       # Refresh current team
+./swap-rite.sh --refresh       # Refresh current rite
 ```
 
-## Roster (Team Pack Manager)
+## Roster (Rite Manager)
 
-### Team Pack Structure
+### Rite Structure
 ```
 rites/{name}/
   agents/           # Agent definitions (*.md)
-  commands/         # Team-specific slash commands
-  skills/           # Team-specific skills (Phase 2)
+  commands/         # Rite-specific slash commands
+  skills/           # Rite-specific skills
   workflow.yaml     # Phase orchestration
-  README.md         # Pack documentation
+  README.md         # Rite documentation
 ```
 
 ### swap-rite.sh
 ```bash
-swap-rite.sh <pack>           # Switch to rite
-swap-rite.sh --list           # List available packs
-swap-rite.sh --refresh        # Refresh current team
-swap-rite.sh <pack> --keep-all    # Preserve orphan agents
-swap-rite.sh <pack> --remove-all  # Remove orphan agents
+swap-rite.sh <rite>           # Switch to rite
+swap-rite.sh --list           # List available rites
+swap-rite.sh --refresh        # Refresh current rite
+swap-rite.sh <rite> --keep-all    # Preserve orphan agents
+swap-rite.sh <rite> --remove-all  # Remove orphan agents
 ```
 
 ### Orphan Handling
-Orphan = agent from previous team not in new team.
+Orphan = agent from previous rite not in new rite.
 - Interactive: k/p/r per agent (keep/promote/remove)
 - Non-interactive: `--keep-all`, `--remove-all`, `--promote-all`
 
@@ -73,12 +73,12 @@ roster (base) -> project (local overlay)
 | Roster | `$ROSTER_HOME/rites/{name}/` | Base agents and skills |
 | Project | `.claude/agents/`, `.claude/skills/` | Local overrides |
 
-## Team Manifest Schema
+## Rite Manifest Schema
 
 ```json
 {
   "schema_version": 1,
-  "team": { "name": "", "last_swap": "" },
+  "rite": { "name": "", "last_swap": "" },
   "managed": {
     "agents": [],
     "commands": [],

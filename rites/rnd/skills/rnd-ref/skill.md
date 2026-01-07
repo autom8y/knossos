@@ -15,7 +15,7 @@ description: "Innovation Lab (R&D) reference with technology scouting, prototypi
 | Workflow | `$ROSTER_HOME/rites/rnd/workflow.yaml` | Phase configuration |
 | Switch | `/rnd` | Activate this team |
 
-## Team Roster
+## Pantheon
 
 | Agent | Model | Role | Produces |
 |-------|-------|------|----------|

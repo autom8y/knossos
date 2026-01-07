@@ -37,14 +37,14 @@ Execute via Bash tool:
 $ROSTER_HOME/swap-rite.sh docs
 ```
 
-### 2. Display Team Roster
+### 2. Display Pantheon
 
 After successful switch, show the active rite roster:
 
 ```
 Switched to docs (4 agents loaded)
 
-Team Roster:
+Pantheon:
 ┌─────────────────────────┬──────────────────────────────────────────────┐
 │ Agent                   │ Role                                         │
 ├─────────────────────────┼──────────────────────────────────────────────┤
@@ -135,7 +135,7 @@ Output:
 ```
 [Roster] Switched to docs (4 agents loaded)
 
-Team Roster:
+Pantheon:
   - doc-auditor: Reviews docs for accuracy and completeness
   - information-architect: Structures documentation for discoverability
   - tech-writer: Creates clear, concise technical content

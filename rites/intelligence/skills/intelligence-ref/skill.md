@@ -15,7 +15,7 @@ description: "Product Intelligence team reference with analytics, user research,
 | Workflow | `$ROSTER_HOME/rites/intelligence/workflow.yaml` | Phase configuration |
 | Switch | `/intelligence` | Activate this team |
 
-## Team Roster
+## Pantheon
 
 | Agent | Model | Role | Produces |
 |-------|-------|------|----------|

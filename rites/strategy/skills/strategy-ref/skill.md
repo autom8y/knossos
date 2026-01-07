@@ -15,7 +15,7 @@ description: "Strategy team reference with market research, competitive analysis
 | Workflow | `$ROSTER_HOME/rites/strategy/workflow.yaml` | Phase configuration |
 | Switch | `/strategy` | Activate this team |
 
-## Team Roster
+## Pantheon
 
 | Agent | Model | Role | Produces |
 |-------|-------|------|----------|

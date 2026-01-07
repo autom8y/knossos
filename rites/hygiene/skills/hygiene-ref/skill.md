@@ -37,14 +37,14 @@ Execute via Bash tool:
 $ROSTER_HOME/swap-rite.sh hygiene
 ```
 
-### 2. Display Team Roster
+### 2. Display Pantheon
 
 After successful switch, show the active rite roster:
 
 ```
 Switched to hygiene (4 agents loaded)
 
-Team Roster:
+Pantheon:
 ┌─────────────────────────┬──────────────────────────────────────────────┐
 │ Agent                   │ Role                                         │
 ├─────────────────────────┼──────────────────────────────────────────────┤
@@ -169,7 +169,7 @@ Output:
 ```
 [Roster] Switched to hygiene (4 agents loaded)
 
-Team Roster:
+Pantheon:
   - code-smeller: Detects code smells and anti-patterns
   - architect-enforcer: Validates architectural compliance
   - janitor: Cleans up code, refactors for quality

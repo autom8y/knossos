@@ -32,7 +32,7 @@ description: |
 | Workflow | `~/Code/roster/rites/{rite-name}/workflow.yaml` | Phase configuration |
 | Switch | `/{rite-name}` | Activate this rite |
 
-## Team Roster
+## Pantheon
 
 | Agent | Model | Role | Produces |
 |-------|-------|------|----------|
