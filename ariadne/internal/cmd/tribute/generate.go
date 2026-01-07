@@ -122,7 +122,7 @@ func runGenerate(ctx *cmdContext, sessionDir string) error {
 		Initiative:  result.Initiative,
 		Complexity:  result.Complexity,
 		Duration:    formatDuration(result.Duration),
-		Rite:        result.Team,
+		Rite:        result.Rite,
 		FinalPhase:  result.FinalPhase,
 		SailsColor:  result.SailsColor,
 		Artifacts:   len(result.Artifacts),

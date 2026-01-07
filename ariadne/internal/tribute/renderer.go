@@ -125,9 +125,9 @@ func (r *Renderer) renderSummary(b *strings.Builder, result *GenerateResult) {
 		b.WriteString(fmt.Sprintf("**Duration**: %s\n", formatDuration(result.Duration)))
 	}
 
-	// Team/Rite
-	if result.Team != "" {
-		b.WriteString(fmt.Sprintf("**Team/Rite**: %s\n", result.Team))
+	// Rite
+	if result.Rite != "" {
+		b.WriteString(fmt.Sprintf("**Rite**: %s\n", result.Rite))
 	}
 
 	// Final Phase

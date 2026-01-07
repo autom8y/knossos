@@ -120,20 +120,20 @@ func runContext(ctx *cmdContext) error {
 	}
 
 	// Read active rite with backward compatibility
-	activeTeam := readActiveRite(resolver)
-	if activeTeam == "" {
-		activeTeam = sessCtx.ActiveRite
+	activeRite := readActiveRite(resolver)
+	if activeRite == "" {
+		activeRite = sessCtx.ActiveRite
 	}
 
 	// Determine execution mode
-	mode := determineExecutionMode(sessCtx, activeTeam)
+	mode := determineExecutionMode(sessCtx, activeRite)
 
 	// Build output
 	result := ContextOutput{
 		SessionID:     sessCtx.SessionID,
 		Status:        string(sessCtx.Status),
 		Initiative:    sessCtx.Initiative,
-		Rite:          activeTeam,
+		Rite:          activeRite,
 		CurrentPhase:  sessCtx.CurrentPhase,
 		ExecutionMode: mode,
 		HasSession:    true,
@@ -158,19 +158,19 @@ func readActiveRite(resolver *paths.Resolver) string {
 	return ""
 }
 
-// determineExecutionMode determines the execution mode based on session and team.
-func determineExecutionMode(sessCtx *session.Context, activeTeam string) string {
+// determineExecutionMode determines the execution mode based on session and rite.
+func determineExecutionMode(sessCtx *session.Context, activeRite string) string {
 	// No session = native mode
 	if sessCtx == nil {
 		return "native"
 	}
 
-	// Session with team = orchestrated mode
-	if activeTeam != "" && activeTeam != "none" {
+	// Session with rite = orchestrated mode
+	if activeRite != "" && activeRite != "none" {
 		return "orchestrated"
 	}
 
-	// Session without team = cross-cutting mode
+	// Session without rite = cross-cutting mode
 	return "cross-cutting"
 }
 

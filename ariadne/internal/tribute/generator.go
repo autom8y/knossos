@@ -92,7 +92,7 @@ func (g *Generator) Generate() (*GenerateResult, error) {
 		Initiative:  ctx.Initiative,
 		Complexity:  ctx.Complexity,
 		Duration:    duration,
-		Team:        ctx.ActiveRite,
+		Rite:        ctx.ActiveRite,
 		FinalPhase:  ctx.CurrentPhase,
 		StartedAt:   startedAt,
 		EndedAt:     endedAt,

@@ -12,7 +12,7 @@ func TestRenderer_Render(t *testing.T) {
 		Initiative:  "Test Initiative",
 		Complexity:  "MODULE",
 		Duration:    4*time.Hour + 30*time.Minute,
-		Team:        "10x-dev-pack",
+		Rite:        "10x-dev-pack",
 		FinalPhase:  "validation",
 		StartedAt:   time.Date(2026, 1, 6, 10, 0, 0, 0, time.UTC),
 		EndedAt:     time.Date(2026, 1, 6, 14, 30, 0, 0, time.UTC),

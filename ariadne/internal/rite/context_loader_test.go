@@ -205,13 +205,13 @@ func TestContextLoader_Load_FallbackToOrchestrator(t *testing.T) {
 	}
 }
 
-func TestContextLoader_Load_TeamNotFound(t *testing.T) {
-	teamsDir := getTestDataPath(t)
-	loader := NewContextLoaderWithPaths(teamsDir, "")
+func TestContextLoader_Load_RiteNotFound(t *testing.T) {
+	ritesDir := getTestDataPath(t)
+	loader := NewContextLoaderWithPaths(ritesDir, "")
 
-	_, err := loader.Load("non-existent-team")
+	_, err := loader.Load("non-existent-rite")
 	if err == nil {
-		t.Fatal("Load(non-existent-team) error = nil, want error")
+		t.Fatal("Load(non-existent-rite) error = nil, want error")
 	}
 }
 
@@ -455,13 +455,13 @@ func TestContextLoader_SaveContext_InvalidContext(t *testing.T) {
 	}
 }
 
-func TestContextLoader_SaveContext_TeamNotFound(t *testing.T) {
-	teamsDir := t.TempDir()
-	loader := NewContextLoaderWithPaths(teamsDir, "")
+func TestContextLoader_SaveContext_RiteNotFound(t *testing.T) {
+	ritesDir := t.TempDir()
+	loader := NewContextLoaderWithPaths(ritesDir, "")
 
-	ctx := NewRiteContext("non-existent-team")
+	ctx := NewRiteContext("non-existent-rite")
 
 	if err := loader.SaveContext(ctx); err == nil {
-		t.Error("SaveContext() with non-existent team should return error")
+		t.Error("SaveContext() with non-existent rite should return error")
 	}
 }

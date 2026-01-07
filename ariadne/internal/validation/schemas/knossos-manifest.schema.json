@@ -30,7 +30,7 @@
     },
     "active_rite": {
       "type": "string",
-      "description": "Current rite/team name"
+      "description": "Current rite name"
     },
     "template_path": {
       "type": "string",

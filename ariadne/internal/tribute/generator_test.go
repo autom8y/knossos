@@ -55,8 +55,8 @@ current_phase: implementation
 	if result.Complexity != "MODULE" {
 		t.Errorf("Complexity = %q, want %q", result.Complexity, "MODULE")
 	}
-	if result.Team != "test-team" {
-		t.Errorf("Team = %q, want %q", result.Team, "test-team")
+	if result.Rite != "test-team" {
+		t.Errorf("Rite = %q, want %q", result.Rite, "test-team")
 	}
 	if result.FinalPhase != "implementation" {
 		t.Errorf("FinalPhase = %q, want %q", result.FinalPhase, "implementation")

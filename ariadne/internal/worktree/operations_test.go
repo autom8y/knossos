@@ -88,8 +88,8 @@ func TestSwitchNonexistent(t *testing.T) {
 	}
 }
 
-// TestSwitchWithTeamUpdate tests that UpdateRite option works.
-func TestSwitchWithTeamUpdate(t *testing.T) {
+// TestSwitchWithRiteUpdate tests that UpdateRite option works.
+func TestSwitchWithRiteUpdate(t *testing.T) {
 	tmpDir := setupTestGitRepo(t)
 	defer os.RemoveAll(tmpDir)
 
@@ -98,16 +98,16 @@ func TestSwitchWithTeamUpdate(t *testing.T) {
 		t.Fatalf("Failed to create manager: %v", err)
 	}
 
-	// Create a worktree with team
+	// Create a worktree with rite
 	wt, err := mgr.Create(CreateOptions{
-		Name: "team-wt",
-		Rite: "my-team",
+		Name: "rite-wt",
+		Rite: "my-rite",
 	})
 	if err != nil {
 		t.Fatalf("Failed to create worktree: %v", err)
 	}
 
-	// Switch with team update
+	// Switch with rite update
 	_, err = mgr.Switch(wt.ID, SwitchOptions{UpdateRite: true})
 	if err != nil {
 		t.Fatalf("Switch failed: %v", err)
@@ -120,8 +120,8 @@ func TestSwitchWithTeamUpdate(t *testing.T) {
 		t.Fatalf("Failed to read ACTIVE_RITE: %v", err)
 	}
 
-	if strings.TrimSpace(string(data)) != "my-team" {
-		t.Errorf("Expected team 'my-team', got '%s'", strings.TrimSpace(string(data)))
+	if strings.TrimSpace(string(data)) != "my-rite" {
+		t.Errorf("Expected rite 'my-rite', got '%s'", strings.TrimSpace(string(data)))
 	}
 }
 
@@ -161,9 +161,9 @@ func TestCloneWorktree(t *testing.T) {
 		t.Errorf("Expected name 'cloned-wt', got '%s'", clone.Name)
 	}
 
-	// Verify clone copied team
+	// Verify clone copied rite
 	if clone.Rite != source.Rite {
-		t.Errorf("Expected team '%s', got '%s'", source.Rite, clone.Rite)
+		t.Errorf("Expected rite '%s', got '%s'", source.Rite, clone.Rite)
 	}
 
 	// Verify clone copied complexity
@@ -177,8 +177,8 @@ func TestCloneWorktree(t *testing.T) {
 	}
 }
 
-// TestCloneWithTeamOverride tests clone with team override.
-func TestCloneWithTeamOverride(t *testing.T) {
+// TestCloneWithRiteOverride tests clone with rite override.
+func TestCloneWithRiteOverride(t *testing.T) {
 	tmpDir := setupTestGitRepo(t)
 	defer os.RemoveAll(tmpDir)
 
@@ -190,22 +190,22 @@ func TestCloneWithTeamOverride(t *testing.T) {
 	// Create source worktree
 	source, err := mgr.Create(CreateOptions{
 		Name: "source",
-		Rite: "original-team",
+		Rite: "original-rite",
 	})
 	if err != nil {
 		t.Fatalf("Failed to create source: %v", err)
 	}
 
-	// Clone with team override
+	// Clone with rite override
 	clone, err := mgr.Clone(source.ID, "override-clone", CloneOptions{
-		Rite: "new-team",
+		Rite: "new-rite",
 	})
 	if err != nil {
 		t.Fatalf("Clone failed: %v", err)
 	}
 
-	if clone.Rite != "new-team" {
-		t.Errorf("Expected team 'new-team', got '%s'", clone.Rite)
+	if clone.Rite != "new-rite" {
+		t.Errorf("Expected rite 'new-rite', got '%s'", clone.Rite)
 	}
 }
 

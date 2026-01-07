@@ -612,9 +612,9 @@ func TestInscription_IdempotentSync(t *testing.T) {
 	}
 }
 
-// TestInscription_TeamSwitchTriggersSync tests integration between team switch and sync.
-// TDD Section 11.2 inscription_009: Team switch triggers sync.
-func TestInscription_TeamSwitchTriggersSync(t *testing.T) {
+// TestInscription_RiteSwitchTriggersSync tests integration between rite switch and sync.
+// TDD Section 11.2 inscription_009: Rite switch triggers sync.
+func TestInscription_RiteSwitchTriggersSync(t *testing.T) {
 	// Setup: Create project with existing content
 	tmpDir := t.TempDir()
 	claudeDir := filepath.Join(tmpDir, ".claude")
@@ -660,7 +660,7 @@ section_order:
 		t.Fatalf("Failed to create manifest: %v", err)
 	}
 
-	// Sync with new rite name (simulating team switch)
+	// Sync with new rite name (simulating rite switch)
 	pipeline := NewPipeline(tmpDir)
 	result, err := pipeline.Sync(SyncOptions{
 		RiteName: "new-pack",

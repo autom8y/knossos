@@ -674,11 +674,11 @@ current_phase: design
 	}
 }
 
-// TestPrepare_CrossTeamValidation verifies agents must exist in active_team (C3 edge case).
-func TestPrepare_CrossTeamValidation(t *testing.T) {
+// TestPrepare_CrossRiteValidation verifies agents must exist in active_rite (C3 edge case).
+func TestPrepare_CrossRiteValidation(t *testing.T) {
 	testCases := []struct {
 		name       string
-		activeTeam string
+		activeRite string
 		fromAgent  string
 		toAgent    string
 		shouldFail bool
@@ -686,22 +686,22 @@ func TestPrepare_CrossTeamValidation(t *testing.T) {
 	}{
 		{
 			name:       "valid agents in 10x-dev-pack",
-			activeTeam: "10x-dev-pack",
+			activeRite: "10x-dev-pack",
 			fromAgent:  "architect",
 			toAgent:    "principal-engineer",
 			shouldFail: false,
 		},
 		{
-			name:       "invalid from agent not in team",
-			activeTeam: "consultant-pack",
+			name:       "invalid from agent not in rite",
+			activeRite: "consultant-pack",
 			fromAgent:  "architect",
 			toAgent:    "orchestrator",
 			shouldFail: true,
 			errorMsg:   "source agent not in active rite",
 		},
 		{
-			name:       "invalid to agent not in team",
-			activeTeam: "consultant-pack",
+			name:       "invalid to agent not in rite",
+			activeRite: "consultant-pack",
 			fromAgent:  "orchestrator",
 			toAgent:    "architect",
 			shouldFail: true,
@@ -741,7 +741,7 @@ status: ACTIVE
 initiative: Test Cross-Team Validation
 complexity: MODULE
 created_at: ` + createdAt.Format(time.RFC3339) + `
-active_rite: ` + tc.activeTeam + `
+active_rite: ` + tc.activeRite + `
 current_phase: design
 ---
 

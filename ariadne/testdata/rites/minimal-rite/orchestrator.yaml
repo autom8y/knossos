@@ -1,5 +1,5 @@
 # Minimal rite orchestrator for fallback testing
-team:
+rite:
   name: minimal-rite
   domain: testing
   color: gray

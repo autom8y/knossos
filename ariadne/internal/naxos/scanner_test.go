@@ -61,7 +61,7 @@ func (ts *testSetup) createSession(id, status string, createdAt time.Time, opts 
 		createdAt:    createdAt,
 		initiative:   "Test Initiative",
 		complexity:   "MODULE",
-		activeTeam:   "test-pack",
+		activeRite:   "test-pack",
 		currentPhase: "requirements",
 	}
 	for _, opt := range opts {
@@ -89,7 +89,7 @@ type sessionOpts struct {
 	createdAt    time.Time
 	initiative   string
 	complexity   string
-	activeTeam   string
+	activeRite   string
 	currentPhase string
 	parkedAt     *time.Time
 	parkedReason string
@@ -125,7 +125,7 @@ status: "` + so.status + `"
 created_at: "` + so.createdAt.Format(time.RFC3339) + `"
 initiative: "` + so.initiative + `"
 complexity: "` + so.complexity + `"
-active_rite: "` + so.activeTeam + `"
+active_rite: "` + so.activeRite + `"
 current_phase: "` + so.currentPhase + `"`
 
 	if so.parkedAt != nil {

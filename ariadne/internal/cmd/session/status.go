@@ -121,8 +121,8 @@ func runStatus(ctx *cmdContext) error {
 	return printer.Print(result)
 }
 
-// deriveExecutionMode determines the execution mode based on session and team state.
-func deriveExecutionMode(ctx *session.Context, activeTeam string) string {
+// deriveExecutionMode determines the execution mode based on session and rite state.
+func deriveExecutionMode(ctx *session.Context, activeRite string) string {
 	// No session = native
 	if ctx == nil {
 		return "native"
@@ -138,12 +138,12 @@ func deriveExecutionMode(ctx *session.Context, activeTeam string) string {
 		return "native"
 	}
 
-	// Check team configuration
-	if activeTeam == "" || activeTeam == "none" {
+	// Check rite configuration
+	if activeRite == "" || activeRite == "none" {
 		return "cross-cutting"
 	}
 
-	// Active session with team = orchestrated
+	// Active session with rite = orchestrated
 	return "orchestrated"
 }
 

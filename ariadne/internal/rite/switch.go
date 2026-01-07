@@ -326,8 +326,8 @@ func (s *Switcher) handleOrphans(manifest *AgentManifest, orphans []string, opts
 
 // Backup structure for rollback
 type backup struct {
-	activeTeamPath   string
-	activeTeamData   []byte
+	activeRitePath   string
+	activeRiteData   []byte
 	manifestPath     string
 	manifestData     []byte
 	agentsDir        string
@@ -337,15 +337,15 @@ type backup struct {
 // createBackup saves current state for potential rollback.
 func (s *Switcher) createBackup() (*backup, error) {
 	b := &backup{
-		activeTeamPath: s.resolver.ActiveRiteFile(),
+		activeRitePath: s.resolver.ActiveRiteFile(),
 		manifestPath:   s.resolver.AgentManifestFile(),
 		agentsDir:      s.resolver.AgentsDir(),
 		agentBackups:   make(map[string][]byte),
 	}
 
 	// Backup ACTIVE_RITE
-	if data, err := os.ReadFile(b.activeTeamPath); err == nil {
-		b.activeTeamData = data
+	if data, err := os.ReadFile(b.activeRitePath); err == nil {
+		b.activeRiteData = data
 	}
 
 	// Backup manifest
@@ -376,8 +376,8 @@ func (s *Switcher) restoreBackup(b *backup) {
 	}
 
 	// Restore ACTIVE_RITE
-	if b.activeTeamData != nil {
-		os.WriteFile(b.activeTeamPath, b.activeTeamData, 0644)
+	if b.activeRiteData != nil {
+		os.WriteFile(b.activeRitePath, b.activeRiteData, 0644)
 	}
 
 	// Restore manifest

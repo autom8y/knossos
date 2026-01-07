@@ -160,14 +160,14 @@ func (cl *ContextLoader) generateFromOrchestrator(riteName string) (*RiteContext
 	// Generate context from orchestrator
 	ctx := NewRiteContext(riteName)
 	ctx.Description = orchestrator.Frontmatter.Description
-	ctx.Domain = orchestrator.Team.Domain
+	ctx.Domain = orchestrator.Rite.Domain
 
 	// Add basic info rows
-	if orchestrator.Team.Name != "" {
-		ctx.AddRow("Team", orchestrator.Team.Name)
+	if orchestrator.Rite.Name != "" {
+		ctx.AddRow("Rite", orchestrator.Rite.Name)
 	}
-	if orchestrator.Team.Domain != "" {
-		ctx.AddRow("Domain", orchestrator.Team.Domain)
+	if orchestrator.Rite.Domain != "" {
+		ctx.AddRow("Domain", orchestrator.Rite.Domain)
 	}
 	if orchestrator.Frontmatter.Role != "" {
 		ctx.AddRow("Role", orchestrator.Frontmatter.Role)
@@ -184,11 +184,11 @@ func (cl *ContextLoader) generateFromOrchestrator(riteName string) (*RiteContext
 // OrchestratorConfig represents the structure of orchestrator.yaml files.
 // This is used for fallback context generation.
 type OrchestratorConfig struct {
-	Team struct {
+	Rite struct {
 		Name   string `yaml:"name"`
 		Domain string `yaml:"domain"`
 		Color  string `yaml:"color,omitempty"`
-	} `yaml:"team"`
+	} `yaml:"rite"`
 	Frontmatter struct {
 		Role        string `yaml:"role"`
 		Description string `yaml:"description"`
