@@ -12,7 +12,7 @@
 **Completed**: {now}
 **Duration**: {total duration}
 **Complexity**: {complexity}
-**Team**: {active_team}
+**Team**: {active_rite}
 
 ## Accomplishments
 

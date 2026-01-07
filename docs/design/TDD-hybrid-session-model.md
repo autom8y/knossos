@@ -183,24 +183,24 @@ execution_mode() {
     fi
 
     # Session is ACTIVE - check team configuration
-    local active_team
-    active_team=$(cat ".claude/ACTIVE_RITE" 2>/dev/null || echo "none")
+    local active_rite
+    active_rite=$(cat ".claude/ACTIVE_RITE" 2>/dev/null || echo "none")
 
     # Also check team field in session context for cross-cutting sessions
-    if [[ "$active_team" == "none" || -z "$active_team" ]]; then
+    if [[ "$active_rite" == "none" || -z "$active_rite" ]]; then
         # Check if team is explicitly null in SESSION_CONTEXT
         local ctx_team
-        ctx_team=$(grep -m1 "^active_team:" "$ctx_file" 2>/dev/null | cut -d: -f2- | tr -d ' "')
+        ctx_team=$(grep -m1 "^active_rite:" "$ctx_file" 2>/dev/null | cut -d: -f2- | tr -d ' "')
         if [[ -z "$ctx_team" || "$ctx_team" == "none" || "$ctx_team" == "null" ]]; then
             echo "cross-cutting"
             return 0
         fi
-        active_team="$ctx_team"
+        active_rite="$ctx_team"
     fi
 
     # Verify rite exists
-    local team_pack_dir="${ROSTER_HOME:-$HOME/.config/roster}/rites/$active_team"
-    if [[ ! -d "$team_pack_dir" ]]; then
+    local rite_dir="${ROSTER_HOME:-$HOME/.config/roster}/rites/$active_rite"
+    if [[ ! -d "$rite_dir" ]]; then
         # Team configured but pack missing - error state, but fallback gracefully
         echo "cross-cutting"
         return 0
@@ -232,7 +232,7 @@ execution_mode() {
 ### New Optional `team` Field
 
 Per FR-2.3, add an optional `team` field to SESSION_CONTEXT schema. This field:
-- Is distinct from `active_team` (which syncs with ACTIVE_RITE file)
+- Is distinct from `active_rite` (which syncs with ACTIVE_RITE file)
 - When null/absent indicates cross-cutting mode at session creation
 - Preserved through session lifecycle
 
@@ -243,7 +243,7 @@ Per FR-2.3, add an optional `team` field to SESSION_CONTEXT schema. This field:
   "properties": {
     "team": {
       "type": ["string", "null"],
-      "description": "Team at session creation. Null indicates cross-cutting session. Distinct from active_team which may change."
+      "description": "Team at session creation. Null indicates cross-cutting session. Distinct from active_rite which may change."
     }
   }
 }
@@ -259,7 +259,7 @@ status: "ACTIVE"
 created_at: "2026-01-02T12:00:00Z"
 initiative: "Cross-cutting refactor"
 complexity: "MODULE"
-active_team: "none"
+active_rite: "none"
 team: null                    # NEW: Explicitly null for cross-cutting
 current_phase: "implementation"
 ---
@@ -269,7 +269,7 @@ current_phase: "implementation"
 
 Existing sessions without `team` field:
 - Continue to work unchanged (NFR-4)
-- Mode detection uses `active_team` from ACTIVE_RITE file or SESSION_CONTEXT
+- Mode detection uses `active_rite` from ACTIVE_RITE file or SESSION_CONTEXT
 - No migration required; field is optional
 
 **Validation Update** (in `session-fsm.sh`):
@@ -477,7 +477,7 @@ status: "ACTIVE"
 created_at: "$timestamp"
 initiative: "$initiative"
 complexity: "$complexity"
-active_team: "$team"
+active_rite: "$team"
 team: $([ "$team" == "none" ] && echo "null" || echo "\"$team\"")
 current_phase: "requirements"
 ---
@@ -647,7 +647,7 @@ No session is active. Options:
 | `mode_005` | Corrupted session = cross-cutting | NFR-2 |
 | `mode_006` | Performance <50ms | NFR-1 |
 | `mode_007` | Archived session = native | FR-1.1 |
-| `mode_008` | Team pack missing = cross-cutting | Edge case |
+| `mode_008` | Rite missing = cross-cutting | Edge case |
 
 ### Integration Tests
 
@@ -766,7 +766,7 @@ No session is active. Options:
 ### Migration Strategy
 
 **No Migration Required**: The `team` field is optional. Existing sessions:
-- Are detected via ACTIVE_RITE file or active_team frontmatter field
+- Are detected via ACTIVE_RITE file or active_rite frontmatter field
 - Mode detection works with or without explicit `team` field
 - Schema version 2.0 remains valid
 

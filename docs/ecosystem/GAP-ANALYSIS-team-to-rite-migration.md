@@ -13,7 +13,7 @@ The codebase has accumulated backward compatibility patterns during the team-to-
 
 **Pattern Categories**:
 1. CLI flags (`--team` should be `--rite`)
-2. JSON fields (`active_team` should be `active_rite`)
+2. JSON fields (`active_rite` should be `active_rite`)
 3. File fallbacks (`ACTIVE_RITE` fallback to `ACTIVE_RITE`)
 4. Command deprecation (`ari team` should be `ari rite`)
 5. Function naming (internal variable/function names)
@@ -62,9 +62,9 @@ The codebase has accumulated backward compatibility patterns during the team-to-
 
 | Location | Field | Current | Target | Risk Level |
 |----------|-------|---------|--------|------------|
-| `swap-rite.sh:860` | JSON output | `"active_team": "$rite_name"` | `"active_rite"` | HIGH - external consumers |
-| `swap-rite.sh:1004` | JSON output | `"active_team": "unknown"` | `"active_rite"` | HIGH |
-| `session-manager.sh:272` | JSON output | `"active_team": "$active_rite"` | `"active_rite"` | MEDIUM |
+| `swap-rite.sh:860` | JSON output | `"active_rite": "$rite_name"` | `"active_rite"` | HIGH - external consumers |
+| `swap-rite.sh:1004` | JSON output | `"active_rite": "unknown"` | `"active_rite"` | HIGH |
+| `session-manager.sh:272` | JSON output | `"active_rite": "$active_rite"` | `"active_rite"` | MEDIUM |
 
 ### 2.2 Go Struct JSON Tags
 
@@ -80,11 +80,11 @@ The codebase has accumulated backward compatibility patterns during the team-to-
 
 | File | Field | Consumer Impact |
 |------|-------|-----------------|
-| `user-skills/session-common/session-context-schema.md` | `active_team: string` | SESSION_CONTEXT.md files |
-| `user-skills/session-common/sprint-context-schema.md` | `active_team: string` | SPRINT_CONTEXT.md files |
-| Various test fixtures | `active_team:` | Test files only |
+| `user-skills/session-common/session-context-schema.md` | `active_rite: string` | SESSION_CONTEXT.md files |
+| `user-skills/session-common/sprint-context-schema.md` | `active_rite: string` | SPRINT_CONTEXT.md files |
+| Various test fixtures | `active_rite:` | Test files only |
 
-**Assessment**: Schema migration requires dual-read support during transition. Existing sessions have `active_team:` in their YAML frontmatter.
+**Assessment**: Schema migration requires dual-read support during transition. Existing sessions have `active_rite:` in their YAML frontmatter.
 
 ---
 
@@ -116,7 +116,7 @@ The pattern `cat ACTIVE_RITE 2>/dev/null || cat ACTIVE_RITE` exists for backward
 
 | File | Line(s) | Message | Assessment |
 |------|---------|---------|------------|
-| `swap-rite.sh` | 678, 684 | "ACTIVE_RITE is $active_team" | INCORRECT - file is ACTIVE_RITE |
+| `swap-rite.sh` | 678, 684 | "ACTIVE_RITE is $active_rite" | INCORRECT - file is ACTIVE_RITE |
 | `swap-rite.sh` | 670 | "No ACTIVE_RITE file" | INCORRECT |
 | `lib/rite/rite-transaction.sh` | 692-693 | "Backup missing ACTIVE_RITE" | INCORRECT |
 | `get-workflow-field.sh` | 21 | "No team specified and no ACTIVE_RITE found" | INCORRECT |
@@ -156,17 +156,17 @@ The pattern `cat ACTIVE_RITE 2>/dev/null || cat ACTIVE_RITE` exists for backward
 
 | File | Function | Assessment |
 |------|----------|------------|
-| `swap-rite.sh` | `update_active_team()` | Rename to `update_active_rite()` |
-| `roster-sync` / `lib/sync/sync-core.sh` | `refresh_active_team()` | Rename to `refresh_active_rite()` |
+| `swap-rite.sh` | `update_active_rite()` | Rename to `update_active_rite()` |
+| `roster-sync` / `lib/sync/sync-core.sh` | `refresh_active_rite()` | Rename to `refresh_active_rite()` |
 | `lib/rite/rite-transaction.sh` | `stage_active_rite()` | ALREADY MIGRATED |
 
 ### 5.2 Shell Variables with "team" in Name
 
 | File | Variable | Occurrences | Assessment |
 |------|----------|-------------|------------|
-| `swap-rite.sh` | `active_team`, `current_team`, `rite_name` | ~50 | Internal - low priority |
-| `roster-sync` | `active_team`, `manifest_team`, `rite_name` | ~30 | Internal - low priority |
-| Various test files | `active_team` | ~40 | Internal - low priority |
+| `swap-rite.sh` | `active_rite`, `current_team`, `rite_name` | ~50 | Internal - low priority |
+| `roster-sync` | `active_rite`, `manifest_team`, `rite_name` | ~30 | Internal - low priority |
+| Various test files | `active_rite` | ~40 | Internal - low priority |
 
 ### 5.3 Go Struct Fields and Parameters
 
@@ -202,9 +202,9 @@ The pattern `cat ACTIVE_RITE 2>/dev/null || cat ACTIVE_RITE` exists for backward
 |---------|---------------|---------------|
 | `roster-sync --team` | HIGH | Any project using roster-sync CLI |
 | `ari team switch` | MEDIUM | Users with muscle memory |
-| `active_team` JSON field | HIGH | Scripts parsing JSON output |
+| `active_rite` JSON field | HIGH | Scripts parsing JSON output |
 | `ACTIVE_RITE` file | MEDIUM | Legacy satellites not yet migrated |
-| `active_team:` YAML field | HIGH | Existing SESSION_CONTEXT.md files |
+| `active_rite:` YAML field | HIGH | Existing SESSION_CONTEXT.md files |
 
 ### 6.3 Breaking Change Impact
 
@@ -212,8 +212,8 @@ Removing backward compatibility will break:
 
 1. **External satellites** that:
    - Call `roster-sync --team` in CI/CD scripts
-   - Parse `active_team` from JSON output
-   - Have existing sessions with `active_team:` in YAML
+   - Parse `active_rite` from JSON output
+   - Have existing sessions with `active_rite:` in YAML
    - Still have `ACTIVE_RITE` file (unlikely after roster-sync)
 
 2. **User workflows** that:
@@ -242,7 +242,7 @@ These have deprecation warnings but consumers may still depend on them:
 |------|-------------------|------------------|
 | `--team` CLI flags | WARNING added | 1 major version after warning |
 | `ari team` command | WARNING added | 1 major version after warning |
-| `active_team` JSON field | NOT deprecated | Add `active_rite`, deprecate `active_team` |
+| `active_rite` JSON field | NOT deprecated | Add `active_rite`, deprecate `active_rite` |
 | `ACTIVE_RITE` file fallback | N/A | Remove when no satellites have ACTIVE_RITE |
 
 ### 7.3 Keep Indefinitely (Too Risky to Remove)
@@ -260,7 +260,7 @@ These have deprecation warnings but consumers may still depend on them:
 | Pattern | Impact | Likelihood | Detection | Timeline |
 |---------|--------|------------|-----------|----------|
 | `roster-sync --team` removal | HIGH | HIGH | Low - silent failure | v2.0 |
-| `active_team` JSON removal | HIGH | MEDIUM | Medium - JSON parse errors | v2.0 |
+| `active_rite` JSON removal | HIGH | MEDIUM | Medium - JSON parse errors | v2.0 |
 | `ACTIVE_RITE` fallback removal | MEDIUM | LOW | High - explicit fallback | v1.5 |
 | `ari team` removal | LOW | LOW | High - deprecation warning | v2.0 |
 | Function renames | LOW | LOW | Low - internal only | v1.x |
@@ -272,8 +272,8 @@ These have deprecation warnings but consumers may still depend on them:
 - [ ] `roster-sync` writes to `ACTIVE_RITE` not `ACTIVE_RITE`
 - [ ] All error messages reference `ACTIVE_RITE`
 - [ ] `roster-sync --help` shows `--rite` as primary, `--team` as deprecated
-- [ ] `swap-rite.sh` JSON output includes `active_rite` (with `active_team` for compat)
-- [ ] SESSION_CONTEXT.md schema accepts both `active_rite` and `active_team`
+- [ ] `swap-rite.sh` JSON output includes `active_rite` (with `active_rite` for compat)
+- [ ] SESSION_CONTEXT.md schema accepts both `active_rite` and `active_rite`
 - [ ] All 10 satellites pass sync without errors
 - [ ] `grep -r "ACTIVE_RITE" --include="*.sh" | grep -v "backup\|comment"` returns only intentional patterns
 
@@ -287,7 +287,7 @@ These have deprecation warnings but consumers may still depend on them:
 | test-satellite-minimal | No custom settings, verify default behavior |
 | test-satellite-complex | Nested arrays, custom hooks, verify no regressions |
 | test-satellite-legacy | Has ACTIVE_RITE file, verify migration path |
-| test-satellite-session | Has SESSION_CONTEXT with active_team field |
+| test-satellite-session | Has SESSION_CONTEXT with active_rite field |
 
 ---
 
@@ -300,7 +300,7 @@ These have deprecation warnings but consumers may still depend on them:
 
 ### Phase 2: Deprecation Warnings (v1.x)
 1. Add deprecation warning to `roster-sync --team`
-2. Add `active_rite` to JSON output alongside `active_team`
+2. Add `active_rite` to JSON output alongside `active_rite`
 3. Update session schema to accept both fields
 
 ### Phase 3: Documentation Update
@@ -310,7 +310,7 @@ These have deprecation warnings but consumers may still depend on them:
 
 ### Phase 4: Full Removal (v2.0)
 1. Remove `--team` flag support
-2. Remove `active_team` JSON field
+2. Remove `active_rite` JSON field
 3. Remove `ACTIVE_RITE` file fallback
 4. Remove `ari team` command
 

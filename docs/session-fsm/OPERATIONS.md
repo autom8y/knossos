@@ -268,7 +268,7 @@ FSM_LOCK_TIMEOUT=30 ./user-hooks/lib/session-manager.sh mutate resume
 ./user-hooks/lib/session-fsm.sh validate .claude/sessions/<session_id>/SESSION_CONTEXT.md
 
 # 2. Check for missing required fields
-grep -E "^(schema_version|session_id|status|created_at|initiative|complexity|active_team|current_phase):" \
+grep -E "^(schema_version|session_id|status|created_at|initiative|complexity|active_rite|current_phase):" \
   .claude/sessions/<session_id>/SESSION_CONTEXT.md
 
 # 3. Fix missing fields manually or re-migrate
@@ -282,7 +282,7 @@ grep -E "^(schema_version|session_id|status|created_at|initiative|complexity|act
 - `created_at`
 - `initiative`
 - `complexity`
-- `active_team`
+- `active_rite`
 - `current_phase`
 
 ### Error: Session Not Found
@@ -339,7 +339,7 @@ grep "^[a-z_]*:" .claude/sessions/<session_id>/SESSION_CONTEXT.md
 cat >> .claude/sessions/<session_id>/SESSION_CONTEXT.md << 'EOF'
 initiative: "Unknown"
 complexity: "MODULE"
-active_team: "10x-dev"
+active_rite: "10x-dev"
 current_phase: "requirements"
 EOF
 

@@ -366,7 +366,7 @@ func ExtractMetrics(sessionPath string) (Metrics, error)
 - `session_id`
 - `initiative`
 - `complexity`
-- `active_team`
+- `active_rite`
 - `created_at`
 - `archived_at` (set by wrap)
 - `current_phase` (final phase at wrap)

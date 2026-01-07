@@ -319,7 +319,7 @@ swap_hooks() {
 ```json
 {
   "manifest_version": "1.1",
-  "active_team": "10x-dev",
+  "active_rite": "10x-dev",
   "last_swap": "2025-12-31T16:25:51Z",
   "agents": { ... },
   "commands": { ... }
@@ -330,7 +330,7 @@ swap_hooks() {
 ```json
 {
   "manifest_version": "1.2",
-  "active_team": "10x-dev",
+  "active_rite": "10x-dev",
   "last_swap": "2025-12-31T16:25:51Z",
   "agents": { ... },
   "commands": { ... },

@@ -33,13 +33,13 @@ Fail: "Session not parked. Continue working or check /status."
 ```
 Check: .claude/agents/{agent}.md exists
 Pass: Continue with agent invocation
-Fail: "Agent '{agent}' not found in team '{active_team}'."
+Fail: "Agent '{agent}' not found in team '{active_rite}'."
 ```
 
 ### Team Consistency
 
 ```
-Check: SESSION_CONTEXT.active_team matches ACTIVE_RITE file
+Check: SESSION_CONTEXT.active_rite matches ACTIVE_RITE file
 Pass: Continue without warning
 Fail: Prompt user for team switch or override
 ```

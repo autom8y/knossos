@@ -179,7 +179,7 @@ All critical sync scripts and swap-rite operations pass validation. Minor issues
 | Field | Value | Status |
 |-------|-------|--------|
 | manifest_version | 1.2 | OK |
-| active_team | ecosystem | OK |
+| active_rite | ecosystem | OK |
 | last_swap | 2026-01-03T18:13:06Z | OK |
 | agents | 6 entries | OK |
 | commands | 1 entry | OK |
@@ -290,7 +290,7 @@ No changes made (--dry-run mode)
 ```json
 {
   "manifest_version": "1.2",
-  "active_team": "ecosystem",
+  "active_rite": "ecosystem",
   "last_swap": "2026-01-03T18:13:06Z",
   "agents": { /* 6 entries */ },
   "commands": { /* 1 entry */ },

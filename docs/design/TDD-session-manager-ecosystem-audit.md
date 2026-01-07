@@ -321,7 +321,7 @@ FUNCTION migrate_v1_to_v2(session_id):
         status = "ARCHIVED"
 
     # Determine team
-    team = read_field(ctx_file, "active_team")
+    team = read_field(ctx_file, "active_rite")
     IF team == "" OR team == "none":
         team_value = "null"
     ELSE:
@@ -407,13 +407,13 @@ migrate_session_v1_to_v2() {
     fi
 
     # Determine team value
-    local active_team
-    active_team=$(grep -m1 "^active_team:" "$ctx_file" 2>/dev/null | cut -d: -f2- | tr -d ' "')
+    local active_rite
+    active_rite=$(grep -m1 "^active_rite:" "$ctx_file" 2>/dev/null | cut -d: -f2- | tr -d ' "')
     local team_value
-    if [[ -z "$active_team" || "$active_team" == "none" ]]; then
+    if [[ -z "$active_rite" || "$active_rite" == "none" ]]; then
         team_value="null"
     else
-        team_value="\"$active_team\""
+        team_value="\"$active_rite\""
     fi
 
     # Handle auto_parked fields
@@ -547,8 +547,8 @@ migrate_session_dry_run() {
         status="ARCHIVED"
     fi
 
-    local active_team
-    active_team=$(grep -m1 "^active_team:" "$ctx_file" 2>/dev/null | cut -d: -f2- | tr -d ' "')
+    local active_rite
+    active_rite=$(grep -m1 "^active_rite:" "$ctx_file" 2>/dev/null | cut -d: -f2- | tr -d ' "')
 
     local auto_parked_at
     auto_parked_at=$(grep -m1 "^auto_parked_at:" "$ctx_file" 2>/dev/null | cut -d: -f2- | tr -d ' "')
@@ -560,7 +560,7 @@ migrate_session_dry_run() {
   "changes": [
     {"field": "schema_version", "action": "add", "value": "2.1"},
     {"field": "status", "action": "add", "value": "$status"},
-    {"field": "team", "action": "add", "value": "${active_team:-null}"}
+    {"field": "team", "action": "add", "value": "${active_rite:-null}"}
 EOF
 
     if [[ -n "$auto_parked_at" ]]; then
@@ -782,7 +782,7 @@ session_id: "$session_id"
 created_at: "2026-01-01T12:00:00Z"
 initiative: "Test"
 complexity: "MODULE"
-active_team: "test-pack"
+active_rite: "test-pack"
 current_phase: "requirements"
 ---
 # Test Session
@@ -810,7 +810,7 @@ session_id: "$session_id"
 created_at: "2026-01-01T12:00:00Z"
 initiative: "Test"
 complexity: "MODULE"
-active_team: "none"
+active_rite: "none"
 current_phase: "requirements"
 auto_parked_at: "2026-01-01T13:00:00Z"
 auto_parked_reason: "Session stopped"
@@ -837,7 +837,7 @@ session_id: "$session_id"
 created_at: "2026-01-01T12:00:00Z"
 initiative: "Test"
 complexity: "MODULE"
-active_team: "test-pack"
+active_rite: "test-pack"
 current_phase: "requirements"
 ---
 EOF

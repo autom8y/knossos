@@ -316,7 +316,7 @@ cmd_sync()
     |
     +-- 8. Team Freshness
     |       - check_team_freshness()
-    |       - If --refresh or --auto-refresh: refresh_active_team()
+    |       - If --refresh or --auto-refresh: refresh_active_rite()
 ```
 
 ### Three-Way Classification Logic
@@ -587,7 +587,7 @@ def detect_orphans(skeleton):
     skeleton_path_set = list_skeleton_managed_paths(skeleton)
 
     # Collect team paths if team is active
-    team_path_set = list_team_managed_paths(active_team) if active_team else {}
+    team_path_set = list_team_managed_paths(active_rite) if active_rite else {}
 
     # Check skeleton-sourced resources
     for entry in manifest.managed_files:
@@ -746,7 +746,7 @@ main()
   |     +-- backup_orphans()
   |     +-- prune_orphans()
   |     +-- check_team_freshness()
-  |     +-- refresh_active_team()
+  |     +-- refresh_active_rite()
   |
   +-- save_checksum_cache()
 ```

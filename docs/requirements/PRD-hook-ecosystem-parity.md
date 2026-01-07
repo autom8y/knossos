@@ -6,7 +6,7 @@ The roster hook ecosystem lacks parity with other managed artifacts (agents, com
 
 ## Background
 
-The roster project has evolved a sophisticated team-pack system where agents, commands, and skills all have team-specific directories managed by `swap-rite.sh`. However, hooks remain global-only despite `swap-rite.sh` having full infrastructure for team hooks (lines 2308-2521). Deep exploration revealed several issues:
+The roster project has evolved a sophisticated rite system where agents, commands, and skills all have team-specific directories managed by `swap-rite.sh`. However, hooks remain global-only despite `swap-rite.sh` having full infrastructure for team hooks (lines 2308-2521). Deep exploration revealed several issues:
 
 1. **Naming Inconsistency**: Canonical templates live in `roster/hooks/` while other artifacts use `roster/user-*` naming (e.g., `roster/user-agents/`, `roster/user-commands/`, `roster/user-skills/`).
 
@@ -62,7 +62,7 @@ The roster project has evolved a sophisticated team-pack system where agents, co
 
 - **FR-1.1**: Rename `roster/hooks/` to `roster/user-hooks/` for naming consistency with `user-agents/`, `user-commands/`, `user-skills/`.
 
-- **FR-1.2**: Add `hooks/` to the team-pack schema with the same structure as `commands/` (directory containing `.sh` files).
+- **FR-1.2**: Add `hooks/` to the rite schema with the same structure as `commands/` (directory containing `.sh` files).
 
 - **FR-1.3**: Update `swap-rite.sh` `swap_hooks()` function to:
   - Copy base hooks from `roster/user-hooks/` to `.claude/hooks/`
@@ -188,7 +188,7 @@ The roster project has evolved a sophisticated team-pack system where agents, co
 | Dependency | Type | Owner | Status |
 |------------|------|-------|--------|
 | `swap-rite.sh` modification | Internal | roster | Ready |
-| Team pack schema update | Internal | roster | Ready |
+| Rite schema update | Internal | roster | Ready |
 | ADR-0002 access | Internal | roster | Ready |
 | `settings.local.json` schema | External | Claude Code | Stable |
 

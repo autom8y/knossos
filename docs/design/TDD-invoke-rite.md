@@ -136,7 +136,7 @@ budget:
   skills_cost: 3500                  # Skill content total
   workflow_cost: 1000                # Workflow config overhead
 
-# Migration metadata (for transition from team-pack)
+# Migration metadata (for transition from rite)
 migration:
   from_team: 10x-dev           # Original rite name
   migrated_at: null                 # Populated on migration
@@ -768,7 +768,7 @@ func init() {
 Migration script generates `rite.yaml` from existing rite structure:
 
 ```go
-func MigrateTeamPack(teamPath string) (*RiteManifest, error) {
+func MigrateLegacyRite(teamPath string) (*RiteManifest, error) {
     // Load existing workflow.yaml
     workflow, err := team.LoadWorkflow(filepath.Join(teamPath, "workflow.yaml"))
     if err != nil {
@@ -869,7 +869,7 @@ ariadne/internal/
     invoker.go         # Invoke/release operations
     state.go           # Invocation state management
     budget.go          # Context budget calculations
-    migrate.go         # Team pack migration utilities
+    migrate.go         # Rite migration utilities
 
   cmd/rite/
     rite.go            # Root rite command
@@ -984,7 +984,7 @@ var (
 | Full invoke cycle | Invoke -> verify -> release |
 | Multiple invocations | Stack multiple rites |
 | Session lifecycle | Park/resume preserves state |
-| Migration | Team pack converts correctly |
+| Migration | Rite converts correctly |
 | CLAUDE.md injection | Region updates correctly |
 
 ### 10.3 E2E Tests

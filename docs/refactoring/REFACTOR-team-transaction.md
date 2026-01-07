@@ -69,7 +69,7 @@ The extraction must NOT break the transaction safety model:
 | `cleanup_staging()` | 298-303 | 6 | Staging |
 | `stage_agents()` | 307-326 | 20 | Staging |
 | `stage_workflow()` | 330-343 | 14 | Staging |
-| `stage_active_team()` | 347-357 | 11 | Staging |
+| `stage_active_rite()` | 347-357 | 11 | Staging |
 | `verify_staging()` | 361-393 | 33 | Staging |
 | `create_swap_backup()` | 401-490 | 90 | Backup |
 | `cleanup_swap_backup()` | 493-498 | 6 | Backup |
@@ -135,7 +135,7 @@ stage_agents()
 stage_workflow()
   |-- [standalone, uses ROSTER_HOME]
 
-stage_active_team()
+stage_active_rite()
   |-- [standalone]
 
 verify_staging()
@@ -337,7 +337,7 @@ stage_workflow() { ... }
 #   $1 - rite_name: Team name to write
 # Returns: 0 on success, 1 on failure
 # Requires: STAGING_DIR
-stage_active_team() { ... }
+stage_active_rite() { ... }
 
 # Verify staging directory integrity
 # Parameters:
@@ -479,7 +479,7 @@ verify_backup_integrity() { ... }
   2. `cleanup_staging()` - Removes staging directory
   3. `stage_agents()` - Stages agents from rite
   4. `stage_workflow()` - Stages workflow.yaml
-  5. `stage_active_team()` - Stages ACTIVE_RITE file
+  5. `stage_active_rite()` - Stages ACTIVE_RITE file
   6. `verify_staging()` - Verifies staging integrity
 - **Invariants**:
   - Same staging directory structure
@@ -582,7 +582,7 @@ verify_backup_integrity() { ... }
   - `cleanup_staging()`
   - `stage_agents()`
   - `stage_workflow()`
-  - `stage_active_team()`
+  - `stage_active_rite()`
   - `verify_staging()`
   - `create_swap_backup()`
   - `cleanup_swap_backup()`
@@ -625,7 +625,7 @@ verify_backup_integrity() { ... }
   "backup_location": {
     "agents": "path|null",
     "manifest": "path|null",
-    "active_team": "path|null",
+    "active_rite": "path|null",
     "workflow": "path|null",
     "commands": "path|null",
     "skills": "path|null",
@@ -710,7 +710,7 @@ verify_backup_integrity() { ... }
 | test_cleanup_staging | `cleanup_staging` | Removes staging directory |
 | test_stage_agents | `stage_agents` | Copies agents from rite |
 | test_stage_workflow | `stage_workflow` | Copies workflow.yaml |
-| test_stage_active_team | `stage_active_team` | Creates ACTIVE_RITE file |
+| test_stage_active_rite | `stage_active_rite` | Creates ACTIVE_RITE file |
 | test_verify_staging_success | `verify_staging` | Passes with correct count |
 | test_verify_staging_wrong_count | `verify_staging` | Fails on count mismatch |
 | test_verify_staging_missing_dir | `verify_staging` | Fails on missing directory |

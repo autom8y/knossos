@@ -634,8 +634,8 @@ _legacy_get_session_state() {
 
 | Function | Required Fields |
 |----------|-----------------|
-| `validate_session_context()` | session_id, created_at, initiative, complexity, active_team, current_phase |
-| `_fsm_validate_context()` | schema_version, session_id, status, created_at, initiative, complexity, active_team, current_phase |
+| `validate_session_context()` | session_id, created_at, initiative, complexity, active_rite, current_phase |
+| `_fsm_validate_context()` | schema_version, session_id, status, created_at, initiative, complexity, active_rite, current_phase |
 
 **Fix Design**: Consolidate to single validation function in FSM.
 
@@ -661,7 +661,7 @@ validate_session_context() {
     fi
 
     # v1 or FSM not available: Basic validation
-    local required_fields=("session_id" "created_at" "initiative" "complexity" "active_team" "current_phase")
+    local required_fields=("session_id" "created_at" "initiative" "complexity" "active_rite" "current_phase")
     local missing=()
 
     for field in "${required_fields[@]}"; do

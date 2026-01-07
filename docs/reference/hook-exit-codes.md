@@ -209,7 +209,7 @@ HAS_SESSION=$(echo "$SESSION_JSON" | jq -r '.has_session // false')
 # Output context
 if [[ "$HAS_SESSION" == "true" ]]; then
     echo "## Session Context"
-    echo "| Team | $(echo "$SESSION_JSON" | jq -r '.active_team') |"
+    echo "| Team | $(echo "$SESSION_JSON" | jq -r '.active_rite') |"
     echo "| Session | $(echo "$SESSION_JSON" | jq -r '.session_id') |"
 else
     echo "## Session Context"

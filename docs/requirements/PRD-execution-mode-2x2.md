@@ -54,7 +54,7 @@ Full analysis available at: `/Users/tomtenuta/Code/roster/docs/analysis/GAP-exec
 
 3. **Backward compatibility**: Existing `execution_mode()` consumers continue working unchanged.
 
-4. **Improved clarity**: Developers and agents can reason about mode using primitives (`is_session_tracked()`, `has_active_team()`) rather than memorizing a 3-value enum.
+4. **Improved clarity**: Developers and agents can reason about mode using primitives (`is_session_tracked()`, `has_active_rite()`) rather than memorizing a 3-value enum.
 
 5. **Extensibility**: Future dimensions (complexity-based enforcement, environment-specific rules) can be added without creating new mode enum values.
 
@@ -75,10 +75,10 @@ Full analysis available at: `/Users/tomtenuta/Code/roster/docs/analysis/GAP-exec
   - Returns `true` when: Session ID exists AND session directory exists AND session status is ACTIVE or PARKED
   - Returns `false` otherwise
 
-- **FR-1.2**: Add `has_active_team()` function to `session-manager.sh` returning boolean (`true`/`false` exit code).
+- **FR-1.2**: Add `has_active_rite()` function to `session-manager.sh` returning boolean (`true`/`false` exit code).
   - Returns `true` when: Session is tracked AND status is ACTIVE AND ACTIVE_RITE is set (not "none" or empty) AND rite directory exists
   - Returns `false` otherwise
-  - Note: PARKED sessions return `false` for `has_active_team()` because delegation is suspended
+  - Note: PARKED sessions return `false` for `has_active_rite()` because delegation is suspended
 
 - **FR-1.3**: Add `is_session_parked()` function to `session-manager.sh` returning boolean (`true`/`false` exit code).
   - Returns `true` when: Session is tracked AND status is PARKED
@@ -91,7 +91,7 @@ Full analysis available at: `/Users/tomtenuta/Code/roster/docs/analysis/GAP-exec
   execution_mode() {
       if ! is_session_tracked; then
           echo "native"
-      elif has_active_team; then
+      elif has_active_rite; then
           echo "orchestrated"
       else
           echo "cross-cutting"
@@ -120,19 +120,19 @@ Full analysis available at: `/Users/tomtenuta/Code/roster/docs/analysis/GAP-exec
 
 - **FR-3.2**: Attempting to activate a team without a session should produce an error with guidance: "Cannot activate team without a session. Use /start first."
 
-- **FR-3.3**: If ACTIVE_RITE exists but no session is tracked, `has_active_team()` returns `false` (the orphaned ACTIVE_RITE is ignored).
+- **FR-3.3**: If ACTIVE_RITE exists but no session is tracked, `has_active_rite()` returns `false` (the orphaned ACTIVE_RITE is ignored).
 
 #### FR-4: PARKED as Lifecycle Modifier
 
 - **FR-4.1**: PARKED suspends the "Team Active" dimension. When a session is PARKED:
   - `is_session_tracked()` returns `true`
-  - `has_active_team()` returns `false` (delegation suspended)
+  - `has_active_rite()` returns `false` (delegation suspended)
   - `is_session_parked()` returns `true`
   - `execution_mode()` returns `cross-cutting`
 
 - **FR-4.2**: When PARKED session is resumed:
-  - If team still configured: `has_active_team()` returns `true`, mode becomes `orchestrated`
-  - If team removed while parked: `has_active_team()` returns `false`, mode remains `cross-cutting`
+  - If team still configured: `has_active_rite()` returns `true`, mode becomes `orchestrated`
+  - If team removed while parked: `has_active_rite()` returns `false`, mode remains `cross-cutting`
 
 - **FR-4.3**: Document PARKED as orthogonal to mode:
   ```
@@ -223,7 +223,7 @@ is_session_parked() {
 }
 
 # Check if team delegation is active (tracked session + ACTIVE status + valid team)
-has_active_team() {
+has_active_rite() {
     is_session_tracked || return 1
     is_session_parked && return 1  # PARKED suspends delegation
 
@@ -233,12 +233,12 @@ has_active_team() {
     status=$(fsm_get_state "$session_id" 2>/dev/null)
     [[ "$status" != "ACTIVE" ]] && return 1
 
-    local active_team
-    active_team=$(cat ".claude/ACTIVE_RITE" 2>/dev/null || echo "none")
-    [[ -z "$active_team" || "$active_team" == "none" || "$active_team" == "null" ]] && return 1
+    local active_rite
+    active_rite=$(cat ".claude/ACTIVE_RITE" 2>/dev/null || echo "none")
+    [[ -z "$active_rite" || "$active_rite" == "none" || "$active_rite" == "null" ]] && return 1
 
-    local team_pack_dir="${ROSTER_HOME:-$HOME/.config/roster}/rites/$active_team"
-    [[ ! -d "$team_pack_dir" ]] && return 1
+    local rite_dir="${ROSTER_HOME:-$HOME/.config/roster}/rites/$active_rite"
+    [[ ! -d "$rite_dir" ]] && return 1
 
     return 0
 }
@@ -252,7 +252,7 @@ Simplify `execution_mode()` to use primitives:
 execution_mode() {
     if ! is_session_tracked; then
         echo "native"
-    elif has_active_team; then
+    elif has_active_rite; then
         echo "orchestrated"
     else
         echo "cross-cutting"
@@ -298,7 +298,7 @@ After primitives are stable and hooks have migrated to use them (optional):
 ### Functional Verification
 
 - [ ] `is_session_tracked()` returns correct boolean for all session states
-- [ ] `has_active_team()` returns correct boolean for all team configurations
+- [ ] `has_active_rite()` returns correct boolean for all team configurations
 - [ ] `is_session_parked()` returns correct boolean for PARKED vs non-PARKED
 - [ ] `execution_mode()` returns identical values to current implementation for all inputs
 - [ ] PARKED sessions with team configured return `cross-cutting` mode
@@ -323,11 +323,11 @@ After primitives are stable and hooks have migrated to use them (optional):
 
 | Case | Expected Behavior |
 |------|-------------------|
-| ACTIVE_RITE exists but no session | `has_active_team()` returns false, orphaned file ignored |
-| Session ACTIVE, team file missing | `has_active_team()` returns false, `execution_mode()` returns cross-cutting |
-| Session PARKED, team configured | `has_active_team()` returns false, `execution_mode()` returns cross-cutting |
-| Session resumed, team still configured | `has_active_team()` returns true, `execution_mode()` returns orchestrated |
-| Session resumed, team removed while parked | `has_active_team()` returns false, `execution_mode()` returns cross-cutting |
+| ACTIVE_RITE exists but no session | `has_active_rite()` returns false, orphaned file ignored |
+| Session ACTIVE, team file missing | `has_active_rite()` returns false, `execution_mode()` returns cross-cutting |
+| Session PARKED, team configured | `has_active_rite()` returns false, `execution_mode()` returns cross-cutting |
+| Session resumed, team still configured | `has_active_rite()` returns true, `execution_mode()` returns orchestrated |
+| Session resumed, team removed while parked | `has_active_rite()` returns false, `execution_mode()` returns cross-cutting |
 | fsm_get_state() fails | Primitives return false, `execution_mode()` falls back to native |
 | Multiple primitives called in sequence | Each reads fresh state (no caching race conditions) |
 
@@ -366,7 +366,7 @@ After primitives are stable and hooks have migrated to use them (optional):
 
 | Requirement | Source |
 |-------------|--------|
-| FR-1.x (Primitive Functions) | Gap Analysis: "Add primitive functions: has_session(), has_active_team()" |
+| FR-1.x (Primitive Functions) | Gap Analysis: "Add primitive functions: has_session(), has_active_rite()" |
 | FR-2.x (Backward Compatibility) | Gap Analysis: "Keep execution_mode() for backward compatibility" |
 | FR-3.x (2x2 Validation) | Gap Analysis: "Team Active + No Session is invalid state" |
 | FR-4.x (PARKED Lifecycle) | Gap Analysis: "PARKED is orthogonal... lifecycle state, not mode dimension" |

@@ -548,10 +548,10 @@ def cmd_sync(flags):
 
     # 7. Team Refresh
     if flags.refresh:
-        refresh_active_team()
+        refresh_active_rite()
     elif flags.auto_refresh:
         if is_team_stale():
-            refresh_active_team()
+            refresh_active_rite()
 
     # 8. Return
     if conflicts > 0 and not flags.force:

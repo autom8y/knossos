@@ -11,7 +11,7 @@ This refactoring plan addresses systematic terminology drift from Knossos doctri
 - `state-mate` -> `moirai` (secondary, ~528 occurrences across 66 files)
 - `thread` -> `clew` (tertiary, ~40 occurrences in Go)
 
-**Critical Finding**: The `rites/` directory at `ROSTER_HOME` does NOT exist. The shell scripts reference a non-existent path. The actual rite packs live in `rites/` directory. Track T1 is **already complete** at the filesystem level.
+**Critical Finding**: The `rites/` directory at `ROSTER_HOME` does NOT exist. The shell scripts reference a non-existent path. The actual rites live in `rites/` directory. Track T1 is **already complete** at the filesystem level.
 
 ## Architectural Assessment
 
@@ -39,10 +39,10 @@ This refactoring plan addresses systematic terminology drift from Knossos doctri
 **MUST Preserve (Public API):**
 - CLI command: `ari team` (user-facing, keep for backward compat)
 - CLI command: `ari rite` (canonical, already exists)
-- JSON output field: `active_team` (manifest schema, external consumers)
+- JSON output field: `active_rite` (manifest schema, external consumers)
 - YAML field: `rite_name` in context.yaml (external schema)
 - File: `.claude/ACTIVE_RITE` (already canonical)
-- File: `.claude/AGENT_MANIFEST.json` with `active_team` field
+- File: `.claude/AGENT_MANIFEST.json` with `active_rite` field
 
 **MAY Change (Internal):**
 - Go type names (RiteContext -> RiteContext)
@@ -170,7 +170,7 @@ lib/rite/
 - `Manifest.ActiveTeam` -> `Manifest.ActiveRite`
 
 **Invariants**:
-- JSON tags remain unchanged (`"active_team"`) for backward compat
+- JSON tags remain unchanged (`"active_rite"`) for backward compat
 - Method signatures update to use new type names
 - All tests updated in same commit
 
@@ -209,7 +209,7 @@ lib/rite/
 - `backup.activeTeamData` -> `backup.activeRiteData`
 - Comments and documentation strings
 
-**Note**: JSON tags like `"active_team"` remain unchanged for API stability
+**Note**: JSON tags like `"active_rite"` remain unchanged for API stability
 
 **Commit message**: `refactor(go): update internal field names to rite terminology [RF-T5-001]`
 
@@ -444,7 +444,7 @@ After each phase:
 ### Files to Avoid Touching
 
 - `ariadne/internal/cmd/team/` command files (keep `team` as CLI command)
-- JSON schema files with `active_team` (external API)
+- JSON schema files with `active_rite` (external API)
 - ADR documents (historical record)
 - Generated files in `.claude/` (will be regenerated in T15)
 
@@ -458,7 +458,7 @@ After each phase:
 ### Backward Compatibility Requirements
 
 1. `ari team` CLI command must continue working
-2. JSON `active_team` field must be preserved in output
+2. JSON `active_rite` field must be preserved in output
 3. Shell `load_team_context()` should alias to `load_rite_context()`
 
 ## Out of Scope
@@ -468,7 +468,7 @@ Findings deferred for future work:
 1. **CLI command rename**: `ari team` -> `ari rite` as primary (keep team as alias)
    - Reason: User-facing change, needs migration guide
 
-2. **JSON schema migration**: `active_team` -> `active_rite`
+2. **JSON schema migration**: `active_rite` -> `active_rite`
    - Reason: Breaking change for external consumers
 
 3. **user-commands/team-switching/ directory rename**

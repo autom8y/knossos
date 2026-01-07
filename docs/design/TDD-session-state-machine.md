@@ -144,7 +144,7 @@ current_phase: "design"             # Substate within ACTIVE (from workflow)
 created_at: "2025-12-31T12:00:00Z"
 initiative: "Feature X"
 complexity: "MODULE"
-active_team: "10x-dev"
+active_rite: "10x-dev"
 ---
 ```
 
@@ -303,7 +303,7 @@ status: "ACTIVE"
 created_at: "$timestamp"
 initiative: "$initiative"
 complexity: "$complexity"
-active_team: "$team"
+active_rite: "$team"
 current_phase: "requirements"
 ---
 
@@ -492,7 +492,7 @@ Update `schemas/artifacts/session-context.schema.json`:
     "created_at",
     "initiative",
     "complexity",
-    "active_team",
+    "active_rite",
     "current_phase"
   ],
 
@@ -520,7 +520,7 @@ Update `schemas/artifacts/session-context.schema.json`:
     "complexity": {
       "$ref": "common.schema.json#/$defs/complexity_enum"
     },
-    "active_team": {
+    "active_rite": {
       "$ref": "common.schema.json#/$defs/rite_name"
     },
     "current_phase": {
@@ -551,7 +551,7 @@ _fsm_validate_context() {
 
     # Required fields for v2
     local required=("schema_version" "session_id" "status" "created_at"
-                    "initiative" "complexity" "active_team" "current_phase")
+                    "initiative" "complexity" "active_rite" "current_phase")
 
     for field in "${required[@]}"; do
         if ! grep -q "^${field}:" "$ctx_file" 2>/dev/null; then

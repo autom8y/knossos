@@ -275,7 +275,7 @@ Switch to the {team-name} rite. $ARGUMENTS
 ## Behavior
 1. Execute: `${ROSTER_HOME:-~/Code/roster}/swap-rite.sh {pack-name} $ARGUMENTS`
 2. Display the roster output from swap-rite.sh
-3. If SESSION_CONTEXT exists, update `active_team` to `{pack-name}`
+3. If SESSION_CONTEXT exists, update `active_rite` to `{pack-name}`
 
 ## Flags
 | Flag | Short | Description |

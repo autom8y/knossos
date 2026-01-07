@@ -270,7 +270,7 @@ ari session status [--session-id=ID]
   "initiative": "Ariadne Go CLI",
   "complexity": "MODULE",
   "current_phase": "design",
-  "active_team": "10x-dev",
+  "active_rite": "10x-dev",
   "execution_mode": "orchestrated",
   "created_at": "2026-01-04T16:04:14Z",
   "schema_version": "2.1",
@@ -1069,7 +1069,7 @@ status: "ACTIVE"                    # Single source of truth
 created_at: "2026-01-04T16:04:14Z"
 initiative: "Ariadne Go CLI"
 complexity: "MODULE"
-active_team: "10x-dev"
+active_rite: "10x-dev"
 team: "10x-dev"               # Explicit null for cross-cutting
 current_phase: "design"
 ---
@@ -1140,7 +1140,7 @@ type Context struct {
     CreatedAt     time.Time `yaml:"created_at"`
     Initiative    string    `yaml:"initiative"`
     Complexity    string    `yaml:"complexity"`
-    ActiveTeam    string    `yaml:"active_team"`
+    ActiveTeam    string    `yaml:"active_rite"`
     CurrentPhase  string    `yaml:"current_phase"`
 }
 

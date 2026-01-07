@@ -621,7 +621,7 @@ Tracks the origin and state of installed agents:
 {
   "version": "1.2",
   "generated_at": "2026-01-04T18:00:00Z",
-  "active_team": "10x-dev",
+  "active_rite": "10x-dev",
   "agents": {
     "architect.md": {
       "source": "rite",
@@ -783,7 +783,7 @@ package manifest
 type Manifest struct {
     Version     string              `json:"version"`
     GeneratedAt time.Time           `json:"generated_at"`
-    ActiveTeam  string              `json:"active_team"`
+    ActiveTeam  string              `json:"active_rite"`
     Agents      map[string]AgentEntry `json:"agents"`
     Orphans     []string            `json:"orphans"`
 }

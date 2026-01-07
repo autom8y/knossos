@@ -259,7 +259,7 @@ Commands that invoke agents or switch teams:
 | Check | Method | Pass | Fail |
 |-------|--------|------|------|
 | Team exists | `$ROSTER_HOME/rites/{team}` exists | Directory exists | Error: Team not found |
-| Team matches session | Compare ACTIVE_RITE to session.active_team | Match | Warning + prompt |
+| Team matches session | Compare ACTIVE_RITE to session.active_rite | Match | Warning + prompt |
 | Agent exists | `.claude/agents/{agent}.md` exists | File exists | Error: Agent not found |
 
 ## Implementation
@@ -275,7 +275,7 @@ Commands that invoke agents or switch teams:
    c. Confirm ACTIVE_RITE updated
 
 3. For session operations, check consistency:
-   a. Read session.active_team from SESSION_CONTEXT
+   a. Read session.active_rite from SESSION_CONTEXT
    b. Compare to ACTIVE_RITE
    c. If mismatch: Surface warning, offer switch or override
 
@@ -289,7 +289,7 @@ Commands that invoke agents or switch teams:
 | Condition | Message Template |
 |-----------|------------------|
 | Team not found | "Team '{name}' not found. Use `/roster` to list available teams." |
-| Team mismatch | "Session team ({session_team}) differs from active rite ({active_team})." |
+| Team mismatch | "Session team ({session_team}) differs from active rite ({active_rite})." |
 | Agent not found | "Agent '{agent}' not found in team '{team}'." |
 | Roster unavailable | "Roster system unavailable. Set ROSTER_HOME or check installation." |
 

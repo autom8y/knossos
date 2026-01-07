@@ -61,8 +61,8 @@ This playbook provides practical guidance for cross-rite coordination in the ros
 
 #### All Types (Required)
 ```yaml
-source_team: [your-team-pack]
-target_team: [receiving-team-pack]
+source_team: [your-rite]
+target_team: [receiving-rite]
 handoff_type: [type]
 created: [YYYY-MM-DD]
 initiative: [initiative name]

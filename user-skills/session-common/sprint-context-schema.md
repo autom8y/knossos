@@ -47,7 +47,7 @@ context_version: "1.0"      # Schema version for compatibility checks
 | `duration` | No | "2w" | User |
 | `start_date` | No | created_at | /sprint |
 | `end_date` | No | calculated | /sprint |
-| `active_team` | Yes | - | /sprint (from SESSION_CONTEXT) |
+| `active_rite` | Yes | - | /sprint (from SESSION_CONTEXT) |
 | `blockers` | No | [] | Task execution |
 | `context_version` | Yes | "1.0" | /sprint |
 
@@ -141,7 +141,7 @@ total_tasks: 3
 duration: "2w"
 start_date: "2025-12-29"
 end_date: "2026-01-12"
-active_team: "10x-dev"
+active_rite: "10x-dev"
 blockers: []
 context_version: "1.0"
 ---
@@ -200,7 +200,7 @@ SESSION_CONTEXT.md
 ```
 
 ### Inheritance Rules
-- `active_team` in SPRINT_CONTEXT MUST match SESSION_CONTEXT at creation time
+- `active_rite` in SPRINT_CONTEXT MUST match SESSION_CONTEXT at creation time
 - If SESSION_CONTEXT team changes, SPRINT_CONTEXT team is NOT automatically updated
 - `/wrap` on a session with active sprint MUST wrap sprint first
 

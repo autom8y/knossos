@@ -12,7 +12,7 @@ Rites contain different pantheons. If session started with `10x-dev` but current
 
 ```
 Read current .claude/ACTIVE_RITE
-Compare to SESSION_CONTEXT.active_team
+Compare to SESSION_CONTEXT.active_rite
 If different → Surface mismatch warning
 ```
 
@@ -21,20 +21,20 @@ If different → Surface mismatch warning
 ```
 ⚠ Team Mismatch Detected
 
-Session started with: {session.active_team}
+Session started with: {session.active_rite}
 Current active rite: {current ACTIVE_RITE}
 
 This session's agents may not be available in the current rite.
 
 Options:
-1. Switch back to {session.active_team} (recommended)
+1. Switch back to {session.active_rite} (recommended)
 2. Continue with {current ACTIVE_RITE} (may cause issues)
 3. Cancel resume
 
 Choice [1/2/3]:
 ```
 
-**Option 1**: Invoke `$KNOSSOS_HOME/swap-rite.sh {session.active_team}`
+**Option 1**: Invoke `$KNOSSOS_HOME/swap-rite.sh {session.active_rite}`
 **Option 2**: Continue with potential agent mismatch
 **Option 3**: Abort resume
 
@@ -103,7 +103,7 @@ If not found → Error with agent list
 ### Error Message
 
 ```
-Agent '{agent}' not found in team '{active_team}'.
+Agent '{agent}' not found in team '{active_rite}'.
 
 Available agents:
 - requirements-analyst

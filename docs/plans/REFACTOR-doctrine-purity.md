@@ -23,7 +23,7 @@ This refactoring plan addresses the final greenfield migration to achieve 100% K
 1. **output/team.go**: Legacy output types (TeamListOutput, TeamStatusOutput, etc.) with `team` JSON tags
 2. **roster-utils.sh**: File name and internal terminology
 3. **ROSTER_DEBUG**: Environment variable used in 27+ shell scripts
-4. **active_team JSON fields**: ~68 files still use this field name
+4. **active_rite JSON fields**: ~68 files still use this field name
 5. **swap-rite.sh**: Uses `[Roster]` log prefix, `ROSTER_DEBUG` env var
 
 ---
@@ -40,7 +40,7 @@ This refactoring plan addresses the final greenfield migration to achieve 100% K
 | `lib/roster-utils.sh` | **HIGH** | File name contains roster; sourced by swap-rite.sh |
 | `swap-rite.sh` | **HIGH** | Uses ROSTER_DEBUG, [Roster] log prefix |
 | `lib/sync/*.sh` | **MEDIUM** | Uses roster terminology in comments and variable names |
-| `user-hooks/lib/session-manager.sh` | **MEDIUM** | Outputs active_team in JSON |
+| `user-hooks/lib/session-manager.sh` | **MEDIUM** | Outputs active_rite in JSON |
 
 ### Root Causes Identified
 
@@ -60,7 +60,7 @@ Phase 1: Critical Infrastructure (no dependencies)
 Phase 2: Go Output Types (depends on Phase 1 for consistency)
   +--> output/team.go rename to output/rite.go
   |    +--> Type renames: Team* -> Rite*
-  |    +--> JSON tags: active_team -> active_rite
+  |    +--> JSON tags: active_rite -> active_rite
   +--> cmd/rite/ imports update
 
 Phase 3: Shell Function Updates (depends on Phase 1)
@@ -68,7 +68,7 @@ Phase 3: Shell Function Updates (depends on Phase 1)
   +--> session-manager.sh JSON output
 
 Phase 4: JSON Migration (depends on Phase 2)
-  +--> active_team -> active_rite in JSON output
+  +--> active_rite -> active_rite in JSON output
   +--> Schema updates for validation
 
 Phase 5: Finalization (depends on all)
@@ -330,8 +330,8 @@ grep -r "Team not found\|Team validation" ariadne/ | wc -l  # Should be 0
 #### RF-006: Update swap-rite.sh internal terminology
 
 **Before State**:
-- Variables: `active_team`, `current_team`, `rite_name` (~50 occurrences)
-- JSON output: `"active_team": "$rite_name"`
+- Variables: `active_rite`, `current_team`, `rite_name` (~50 occurrences)
+- JSON output: `"active_rite": "$rite_name"`
 - Log messages: References to "team"
 
 **After State**:
@@ -340,8 +340,8 @@ grep -r "Team not found\|Team validation" ariadne/ | wc -l  # Should be 0
 - Log messages: References to "rite"
 
 **Key Lines**:
-- Line 860: `"active_team": "$rite_name"` -> `"active_rite": "$rite_name"`
-- Line 1004: `"active_team": "unknown"` -> `"active_rite": "unknown"`
+- Line 860: `"active_rite": "$rite_name"` -> `"active_rite": "$rite_name"`
+- Line 1004: `"active_rite": "unknown"` -> `"active_rite": "unknown"`
 
 **Invariants**:
 - `swap-rite.sh list -o json | jq '.active_rite'` returns value
@@ -350,7 +350,7 @@ grep -r "Team not found\|Team validation" ariadne/ | wc -l  # Should be 0
 **Verification**:
 ```bash
 ./swap-rite.sh list -o json | jq '.active_rite'
-grep -c "active_team" swap-rite.sh  # Should be 0 (excluding comments)
+grep -c "active_rite" swap-rite.sh  # Should be 0 (excluding comments)
 ```
 
 **Commit**: `refactor(shell): update swap-rite.sh to rite terminology [DP-P3-006]`
@@ -360,14 +360,14 @@ grep -c "active_team" swap-rite.sh  # Should be 0 (excluding comments)
 #### RF-007: Update session-manager.sh JSON output
 
 **Before State**:
-- Line 272: `"active_team": "$active_rite"`
+- Line 272: `"active_rite": "$active_rite"`
 
 **After State**:
 - `"active_rite": "$active_rite"`
 
 **Verification**:
 ```bash
-grep "active_team" user-hooks/lib/session-manager.sh  # Should be 0
+grep "active_rite" user-hooks/lib/session-manager.sh  # Should be 0
 ```
 
 **Commit**: `refactor(shell): update session-manager.sh to rite terminology [DP-P3-007]`
@@ -587,7 +587,7 @@ git revert HEAD  # RF-013 documentation
 
 | Before | After | Commands Affected |
 |--------|-------|-------------------|
-| `active_team` | `active_rite` | session status, rite list, rite status |
+| `active_rite` | `active_rite` | session status, rite list, rite status |
 | `team` | `rite` | rite switch, rite status |
 | `previous_team` | `previous_rite` | rite switch |
 | `current_team` | `current_rite` | rite switch --dry-run |
@@ -702,7 +702,7 @@ After each phase:
 ### Files to Avoid Touching
 
 - Historical ADR documents (preserve original terminology for accuracy)
-- Test fixture files with documented `active_team` fields (update in separate PR after schema migration)
+- Test fixture files with documented `active_rite` fields (update in separate PR after schema migration)
 - Generated files in `.claude/` (will be regenerated in RF-012)
 
 ---
@@ -734,7 +734,7 @@ The refactoring is complete when:
 - [ ] All Go tests pass
 - [ ] All shell tests pass
 - [ ] `ari inscription sync` completes without conflict
-- [ ] `grep -r "active_team" --include="*.go" ariadne/` returns 0 (excluding test fixtures)
+- [ ] `grep -r "active_rite" --include="*.go" ariadne/` returns 0 (excluding test fixtures)
 
 ---
 

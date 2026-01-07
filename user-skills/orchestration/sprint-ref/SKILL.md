@@ -55,7 +55,7 @@ sprint_goal: "{high-level-objective}"
 duration: "{1w|2w|1m}"
 start_date: "2025-12-24"
 end_date: "{calculated}"
-active_team: "{current-team}"
+active_rite: "{current-team}"
 tasks:
   - id: "task-001"
     name: "{task-name}"

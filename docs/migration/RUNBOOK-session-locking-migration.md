@@ -456,7 +456,7 @@ cp .claude/sessions/$SESSION_ID/SESSION_CONTEXT.md.v1.backup \
 cat .claude/sessions/$SESSION_ID/SESSION_CONTEXT.md
 
 # Check which required fields are missing
-grep -E "^(session_id|created_at|initiative|complexity|active_team|current_phase):" \
+grep -E "^(session_id|created_at|initiative|complexity|active_rite|current_phase):" \
     .claude/sessions/$SESSION_ID/SESSION_CONTEXT.md
 ```
 

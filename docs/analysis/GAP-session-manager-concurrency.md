@@ -261,13 +261,13 @@ Two different validation functions with different required fields:
 
 `session-state.sh:143` (`validate_session_context`):
 ```bash
-local required_fields=("session_id" "created_at" "initiative" "complexity" "active_team" "current_phase")
+local required_fields=("session_id" "created_at" "initiative" "complexity" "active_rite" "current_phase")
 ```
 
 `session-fsm.sh:215` (`_fsm_validate_context`):
 ```bash
 local required_fields=("schema_version" "session_id" "status" "created_at"
-                       "initiative" "complexity" "active_team" "current_phase")
+                       "initiative" "complexity" "active_rite" "current_phase")
 ```
 
 **Difference**: FSM requires `schema_version` and `status`, state module doesn't.

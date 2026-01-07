@@ -302,7 +302,7 @@ status: "ACTIVE"                 # Single source of truth
 created_at: "2025-..."
 initiative: "Feature X"
 complexity: "MODULE"
-active_team: "10x-dev"
+active_rite: "10x-dev"
 current_phase: "requirements"
 ---
 ```

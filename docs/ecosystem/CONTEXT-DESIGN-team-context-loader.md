@@ -161,25 +161,25 @@ readonly TEAM_CONTEXT_FUNCTION_NAME="inject_team_context"
 #   - Never fails (RECOVERABLE pattern)
 
 load_team_context() {
-    local active_team
+    local active_rite
     local team_script
     local output=""
 
     # Read active rite
-    active_team=$(cat ".claude/ACTIVE_RITE" 2>/dev/null || echo "")
-    if [[ -z "$active_team" || "$active_team" == "none" ]]; then
+    active_rite=$(cat ".claude/ACTIVE_RITE" 2>/dev/null || echo "")
+    if [[ -z "$active_rite" || "$active_rite" == "none" ]]; then
         # No team active - nothing to inject
         return 0
     fi
 
     # Resolve rite context script path
     local roster_home="${ROSTER_HOME:-$HOME/Code/roster}"
-    team_script="$roster_home/rites/$active_team/$TEAM_CONTEXT_SCRIPT_NAME"
+    team_script="$roster_home/rites/$active_rite/$TEAM_CONTEXT_SCRIPT_NAME"
 
     # Check if team has context script
     if [[ ! -f "$team_script" ]]; then
         # Team has no context script - normal, not an error
-        log_debug "Team $active_team has no context script at $team_script" 2>/dev/null || true
+        log_debug "Team $active_rite has no context script at $team_script" 2>/dev/null || true
         return 0
     fi
 

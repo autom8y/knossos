@@ -241,14 +241,14 @@ The 2x2 model correctly separates orthogonal concerns:
 1. **Keep `execution_mode()` for backward compatibility** - compute from 2x2 dimensions
 2. **Add primitive functions**:
    - `has_session()` - already exists
-   - `has_active_team()` - NEW, checks team AND session ACTIVE
+   - `has_active_rite()` - NEW, checks team AND session ACTIVE
 3. **Model PARKED as a lifecycle flag**, not a mode dimension
 4. **Update documentation** to present 2x2 conceptually, even if API remains compatible
 
 ### Complexity Classification: MODULE
 
 Requires changes to:
-- session-manager.sh (add `has_active_team()`)
+- session-manager.sh (add `has_active_rite()`)
 - execution-mode.md (full rewrite)
 - CLAUDE.md (update table)
 - Session context display

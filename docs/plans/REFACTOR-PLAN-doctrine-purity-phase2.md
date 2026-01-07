@@ -13,32 +13,32 @@ This plan covers three breaking changes required to complete the doctrine purity
 ### Boundary Health
 
 - **CLI Layer** (`ariadne/internal/cmd/`): Clean separation. Both `team/` and `rite/` command groups exist. The `team` command is already marked as legacy in its help text.
-- **Output Layer** (`ariadne/internal/output/`): Mixed state. `team.go` uses `active_team` JSON tags, `rite.go` correctly uses `active_rite`.
+- **Output Layer** (`ariadne/internal/output/`): Mixed state. `team.go` uses `active_rite` JSON tags, `rite.go` correctly uses `active_rite`.
 - **Domain Layer** (`ariadne/internal/team/`): Uses Go struct field names with `Rite` suffix but preserves `team` JSON tags for backward compatibility.
-- **Schema Layer** (`ariadne/internal/validation/schemas/`): Still requires `active_team` field.
+- **Schema Layer** (`ariadne/internal/validation/schemas/`): Still requires `active_rite` field.
 - **User Commands** (`user-commands/team-switching/`): Directory name contains legacy terminology.
 
 ### Root Causes Identified
 
 1. **Phased migration**: The codebase underwent partial migration (Go field names changed, JSON tags preserved for compatibility). This is intentional technical debt.
-2. **Schema coupling**: JSON schemas and YAML fixtures depend on `active_team` field names.
+2. **Schema coupling**: JSON schemas and YAML fixtures depend on `active_rite` field names.
 3. **Path coupling**: Documentation and scripts reference `user-commands/team-switching/` path.
 
 ### Current State Summary
 
 | Component | Go Field Name | JSON Tag | Status |
 |-----------|---------------|----------|--------|
-| `team/manifest.go:Manifest.ActiveRite` | `ActiveRite` | `active_team` | Needs migration |
+| `team/manifest.go:Manifest.ActiveRite` | `ActiveRite` | `active_rite` | Needs migration |
 | `team/switch.go:SwitchResult.Rite` | `Rite` | `team` | Needs migration |
 | `team/switch.go:SwitchResult.PreviousRite` | `PreviousRite` | `previous_team` | Needs migration |
 | `team/switch.go:DryRunResult.CurrentTeam` | `CurrentTeam` | `current_team` | Needs migration |
-| `output/team.go:TeamListOutput.ActiveTeam` | `ActiveTeam` | `active_team` | Needs migration |
+| `output/team.go:TeamListOutput.ActiveTeam` | `ActiveTeam` | `active_rite` | Needs migration |
 | `output/team.go:TeamSwitchDryRunOutput.CurrentTeam` | `CurrentTeam` | `current_team` | Needs migration |
 | `output/team.go:TeamStatusOutput.Team` | `Team` | `team` | Keep (describes team entity) |
 | `output/rite.go:RiteSwapOutput.Team` | `Team` | `team` | Needs migration to `rite` |
 | `output/rite.go:RiteSwapOutput.PreviousTeam` | `PreviousTeam` | `previous_team` | Needs migration |
-| `output/output.go:StatusOutput.ActiveTeam` | `ActiveTeam` | `active_team` | Needs migration |
-| `cmd/handoff/status.go:HandoffStatusOutput.ActiveTeam` | `ActiveTeam` | `active_team` | Needs migration |
+| `output/output.go:StatusOutput.ActiveTeam` | `ActiveTeam` | `active_rite` | Needs migration |
+| `cmd/handoff/status.go:HandoffStatusOutput.ActiveTeam` | `ActiveTeam` | `active_rite` | Needs migration |
 
 ## Refactoring Sequence
 
@@ -89,7 +89,7 @@ This plan covers three breaking changes required to complete the doctrine purity
 
 ### Phase 2: JSON Schema Migration [Medium Risk]
 
-**Goal**: Update all JSON output fields from `active_team`/`team`/`previous_team`/`current_team` to `active_rite`/`rite`/`previous_rite`/`current_rite`
+**Goal**: Update all JSON output fields from `active_rite`/`team`/`previous_team`/`current_team` to `active_rite`/`rite`/`previous_rite`/`current_rite`
 
 This phase has multiple sub-tasks that must be done atomically to prevent inconsistent JSON output.
 
@@ -97,13 +97,13 @@ This phase has multiple sub-tasks that must be done atomically to prevent incons
 
 - **Category**: Schema
 - **Before State**:
-  - `session-context.schema.json`: requires `active_team`
-  - `agent-manifest.schema.json`: requires `active_team`
+  - `session-context.schema.json`: requires `active_rite`
+  - `agent-manifest.schema.json`: requires `active_rite`
 - **After State**:
   - Both schemas require `active_rite`
-  - Both schemas accept `active_team` as optional (backward read compatibility)
+  - Both schemas accept `active_rite` as optional (backward read compatibility)
 - **Invariants**:
-  - Schema validation passes for existing sessions with `active_team`
+  - Schema validation passes for existing sessions with `active_rite`
   - New sessions use `active_rite`
 - **Files**:
   - `/Users/tomtenuta/Code/roster/ariadne/internal/validation/schemas/session-context.schema.json`
@@ -115,7 +115,7 @@ This phase has multiple sub-tasks that must be done atomically to prevent incons
 - **Before State**:
   ```go
   // team/manifest.go:19
-  ActiveRite  string  `json:"active_team"`
+  ActiveRite  string  `json:"active_rite"`
 
   // team/switch.go:46-47
   Rite           string  `json:"team"`
@@ -162,7 +162,7 @@ ari session status -o json | jq '.active_rite'  # Should work
 ari rite list -o json | jq '.active_rite'  # Should work
 ```
 
-**Commit message**: `refactor(json): migrate active_team to active_rite in JSON output [RF-P2-002-005]`
+**Commit message**: `refactor(json): migrate active_rite to active_rite in JSON output [RF-P2-002-005]`
 
 [Rollback point: Revert single commit]
 
@@ -236,7 +236,7 @@ Properties:
 - [ ] `ari session status -o json | jq '.active_rite'` returns value
 - [ ] `ari rite list -o json | jq '.active_rite'` returns value
 - [ ] `ari team switch hygiene -o json | jq '.rite'` returns value
-- [ ] No JSON output contains `active_team` (except for backward-compat reads)
+- [ ] No JSON output contains `active_rite` (except for backward-compat reads)
 
 ### Track 3: CLI Deprecation
 - [ ] `ari team list 2>&1 | grep -i deprecated` finds warning
@@ -269,11 +269,11 @@ Properties:
 
 Findings deferred for future work:
 
-1. **`json:"team"` tags in worktree and tribute commands**: These describe the entity type, not the field name. The field semantically means "which team/rite". Future work could evaluate whether these should also migrate, but they are not part of the `active_team` pattern.
+1. **`json:"team"` tags in worktree and tribute commands**: These describe the entity type, not the field name. The field semantically means "which team/rite". Future work could evaluate whether these should also migrate, but they are not part of the `active_rite` pattern.
 
 2. **Full removal of `ari team` command**: This plan adds deprecation warning. Actual removal requires a major version bump and migration period.
 
-3. **Schema validation backward compatibility**: The schema changes in RF-P2-002 may need `oneOf` patterns to accept both `active_team` and `active_rite` for reading existing sessions. This is a design decision for the Janitor.
+3. **Schema validation backward compatibility**: The schema changes in RF-P2-002 may need `oneOf` patterns to accept both `active_rite` and `active_rite` for reading existing sessions. This is a design decision for the Janitor.
 
 ## Artifact Attestation
 

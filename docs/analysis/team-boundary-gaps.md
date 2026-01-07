@@ -149,7 +149,7 @@ This analysis audits 11 rites across the roster ecosystem to identify boundary i
 |--------|------------|
 | **Domain** | Ecosystem infrastructure |
 | **Triggers** | "Satellite sync failures", "hook/skill registration not working", "design infrastructure patterns", "CEM/roster bugs", "breaking changes migration", "cross-satellite compatibility" |
-| **Not for** | Application code in satellites (use 10x-dev), team-specific workflows (use team-pack) |
+| **Not for** | Application code in satellites (use 10x-dev), rite-specific workflows |
 | **Produces** | Gap Analysis, Context Design, Implementation, Migration Runbook, Compatibility Report |
 | **Complexity** | PATCH, MODULE, SYSTEM, MIGRATION |
 
