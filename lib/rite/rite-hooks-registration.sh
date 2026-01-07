@@ -420,7 +420,7 @@ generate_hooks_json() {
 # Sync hook registrations to settings.local.json
 # Called after swap_hooks() syncs the actual hook files
 # Parameters:
-#   $1 - team_name: Name of rite being activated
+#   $1 - rite_name: Name of rite being activated
 # Returns: 0 on success, 1 on error
 # Side effects:
 #   - Updates .claude/settings.local.json hooks section
@@ -431,12 +431,12 @@ generate_hooks_json() {
 #   KNOSSOS_HOME - Must be set (ROSTER_HOME deprecated)
 #   DRY_RUN_MODE - If 1, prints preview without writing
 swap_hook_registrations() {
-    local team_name="$1"
+    local rite_name="$1"
     local settings_file=".claude/settings.local.json"
     local base_hooks_yaml="$KNOSSOS_HOME/user-hooks/base_hooks.yaml"
-    local team_hooks_yaml="$KNOSSOS_HOME/rites/$team_name/hooks.yaml"
+    local team_hooks_yaml="$KNOSSOS_HOME/rites/$rite_name/hooks.yaml"
 
-    log_debug "Updating hook registrations for rite: $team_name"
+    log_debug "Updating hook registrations for rite: $rite_name"
 
     # Require yq for YAML parsing
     if ! require_yq; then
@@ -490,7 +490,7 @@ swap_hook_registrations() {
         team_count=$(echo "$team_registrations" | grep -c '^{' 2>/dev/null || echo 0)
         log_debug "Parsed $team_count rite hook registrations"
     else
-        log_debug "No hooks.yaml for rite: $team_name"
+        log_debug "No hooks.yaml for rite: $rite_name"
     fi
 
     # Step 4: Merge registrations (base first, rite second)

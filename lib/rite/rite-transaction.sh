@@ -451,12 +451,12 @@ cleanup_staging() {
 
 # Stage agents from rite pack
 # Parameters:
-#   $1 - team_name: Rite to stage agents from
+#   $1 - rite_name: Rite to stage agents from
 # Returns: 0 on success, 1 on failure
 # Requires: ROSTER_HOME, STAGING_DIR
 stage_agents() {
-    local team_name="$1"
-    local source_dir="$KNOSSOS_HOME/rites/$team_name/agents"
+    local rite_name="$1"
+    local source_dir="$KNOSSOS_HOME/rites/$rite_name/agents"
     local staging_agents="$STAGING_DIR/agents"
 
     if [[ ! -d "$source_dir" ]]; then
@@ -477,12 +477,12 @@ stage_agents() {
 
 # Stage workflow file
 # Parameters:
-#   $1 - team_name: Rite to stage workflow from
+#   $1 - rite_name: Rite to stage workflow from
 # Returns: 0 on success, 1 on failure (warning if no workflow.yaml)
 # Requires: ROSTER_HOME, STAGING_DIR
 stage_workflow() {
-    local team_name="$1"
-    local source_file="$KNOSSOS_HOME/rites/$team_name/workflow.yaml"
+    local rite_name="$1"
+    local source_file="$KNOSSOS_HOME/rites/$rite_name/workflow.yaml"
 
     if [[ -f "$source_file" ]]; then
         cp "$source_file" "$STAGING_DIR/ACTIVE_WORKFLOW.yaml" || {
