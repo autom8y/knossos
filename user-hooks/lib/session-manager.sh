@@ -171,22 +171,22 @@ extract_session_fields() {
 
 # -----------------------------------------------------------------------------
 # Helper: Extract worktree info
-# Returns: is_worktree worktree_id worktree_name worktree_team (space-separated)
+# Returns: is_worktree worktree_id worktree_name worktree_rite (space-separated)
 # -----------------------------------------------------------------------------
 extract_worktree_fields() {
     local in_worktree="false"
     local wt_id=""
     local wt_name=""
-    local wt_team=""
+    local wt_rite=""
 
     if is_worktree; then
         in_worktree="true"
         wt_id=$(get_worktree_field worktree_id)
         wt_name=$(get_worktree_field name)
-        wt_team=$(get_worktree_field team)
+        wt_rite=$(get_worktree_field rite)
     fi
 
-    echo "$in_worktree" "$wt_id" "$wt_name" "$wt_team"
+    echo "$in_worktree" "$wt_id" "$wt_name" "$wt_rite"
 }
 
 # -----------------------------------------------------------------------------
@@ -242,8 +242,8 @@ cmd_status() {
     git_status_count=$(git status --short 2>/dev/null | wc -l | tr -d ' ')
 
     # Worktree info
-    local in_worktree wt_id wt_name wt_team
-    read -r in_worktree wt_id wt_name wt_team < <(extract_worktree_fields)
+    local in_worktree wt_id wt_name wt_rite
+    read -r in_worktree wt_id wt_name wt_rite < <(extract_worktree_fields)
 
     # Execution mode
     local exec_mode
@@ -269,7 +269,7 @@ cmd_status() {
   "is_worktree": $in_worktree,
   "worktree_id": $(json_string "$wt_id"),
   "worktree_name": $(json_string "$wt_name"),
-  "worktree_rite": $(json_string "$wt_team"),
+  "worktree_rite": $(json_string "$wt_rite"),
   "suggested_session_id": "$(generate_session_id)",
   "sessions_dir": "$SESSIONS_DIR"
 }
