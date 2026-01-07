@@ -787,7 +787,7 @@ jobs:
 
 - [Cross-Team Handoff Schema](../../.claude/skills/shared/cross-team-handoff/schema.md)
 - [Cross-Team Coordination Playbook](../playbooks/cross-rite-coordination.md)
-- [Edge Cases: Cross-Team Workflows](../edge-cases/cross-team-workflows.md)
+- [Edge Cases: Cross-Team Workflows](../edge-cases/cross-rite-workflows.md)
 - [E2E Test: Feature Development](e2e-feature-development.md)
 - [E2E Test: Security Workflow](e2e-security-workflow.md)
 - [E2E Test: Debt Remediation](e2e-debt-remediation.md)

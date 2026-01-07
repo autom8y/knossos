@@ -326,7 +326,7 @@ Manual verification of HANDOFF schema compliance. Future work should include sch
 |----------|------|
 | Handoff Smoke Tests | `docs/testing/handoff-smoke-tests.md` |
 | Cross-Team Playbook | `docs/playbooks/cross-rite-coordination.md` |
-| Edge Cases | `docs/edge-cases/cross-team-workflows.md` |
+| Edge Cases | `docs/edge-cases/cross-rite-workflows.md` |
 
 ### Modified Team Artifacts
 

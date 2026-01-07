@@ -445,7 +445,7 @@ intelligence -> strategy : strategic_input (research)
 
 - [Cross-Team Handoff Schema](../../.claude/skills/shared/cross-team-handoff/schema.md)
 - [Cross-Team Handoff SKILL](../../.claude/skills/shared/cross-team-handoff/SKILL.md)
-- [Edge Cases: Cross-Team Workflows](../edge-cases/cross-team-workflows.md)
+- [Edge Cases: Cross-Team Workflows](../edge-cases/cross-rite-workflows.md)
 - [E2E Test: Feature Development](../testing/e2e-feature-development.md)
 - [E2E Test: Security Workflow](../testing/e2e-security-workflow.md)
 - [E2E Test: Debt Remediation](../testing/e2e-debt-remediation.md)

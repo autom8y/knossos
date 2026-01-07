@@ -12,7 +12,7 @@ This Technical Design Document specifies the cross-team-handoff shared skill, a 
 | Within-Team Handoff | `/Users/tomtenuta/Code/roster/user-skills/session-lifecycle/handoff-ref/SKILL.md` |
 | Cross-Team Skill (guidance) | `/Users/tomtenuta/Code/roster/user-skills/guidance/cross-team/SKILL.md` |
 | Cross-Team Playbook | `/Users/tomtenuta/Code/roster/docs/playbooks/cross-rite-coordination.md` |
-| Cross-Team Edge Cases | `/Users/tomtenuta/Code/roster/docs/edge-cases/cross-team-workflows.md` |
+| Cross-Team Edge Cases | `/Users/tomtenuta/Code/roster/docs/edge-cases/cross-rite-workflows.md` |
 | Session Context Schema | `/Users/tomtenuta/Code/roster/user-skills/session-common/session-context-schema.md` |
 | TDD Schema | `/Users/tomtenuta/Code/roster/user-skills/documentation/doc-artifacts/schemas/tdd-schema.md` |
 | Context Design Schema | `/Users/tomtenuta/Code/roster/teams/ecosystem-pack/skills/doc-ecosystem/schemas/context-design-schema.md` |
@@ -790,7 +790,7 @@ The HANDOFF artifact schema complements, not replaces:
 | Handoff Criteria Schema | `/Users/tomtenuta/Code/roster/schemas/handoff-criteria-schema.yaml` | Read |
 | Within-Team Handoff | `/Users/tomtenuta/Code/roster/user-skills/session-lifecycle/handoff-ref/SKILL.md` | Read |
 | Cross-Team Playbook | `/Users/tomtenuta/Code/roster/docs/playbooks/cross-rite-coordination.md` | Read |
-| Cross-Team Edge Cases | `/Users/tomtenuta/Code/roster/docs/edge-cases/cross-team-workflows.md` | Read |
+| Cross-Team Edge Cases | `/Users/tomtenuta/Code/roster/docs/edge-cases/cross-rite-workflows.md` | Read |
 | Session Context Schema | `/Users/tomtenuta/Code/roster/user-skills/session-common/session-context-schema.md` | Read |
 | Context Design Schema | `/Users/tomtenuta/Code/roster/teams/ecosystem-pack/skills/doc-ecosystem/schemas/context-design-schema.md` | Read |
 | Shared Skills README | `/Users/tomtenuta/Code/roster/teams/shared/README.md` | Read |
