@@ -230,7 +230,7 @@ import (
     "embed"
     _ "embed"
 
-    "github.com/autom8y/ariadne/internal/validation"
+    "github.com/autom8y/knossos/internal/validation"
     "gopkg.in/yaml.v3"
 )
 

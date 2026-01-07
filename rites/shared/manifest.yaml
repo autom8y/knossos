@@ -1,0 +1,41 @@
+# Rite Manifest: shared
+# Generated per ADR-0015 (Content Organization)
+
+name: shared
+version: "1.0.0"
+description: Cross-rite primitives providing shared skills, hooks, and commands available to all rites
+
+# Shared is a special rite - no entry_agent or phases
+# It provides infrastructure resources, not workflow orchestration
+entry_agent: null
+
+phases: []
+
+# Shared has no agents - it's skills-only infrastructure
+agents: []
+
+skills:
+  - cross-rite-handoff
+  - shared-templates
+  - smell-detection
+
+hooks: []
+
+dependencies: []
+
+metadata:
+  type: infrastructure
+  description: |
+    The shared rite is a special infrastructure rite that contains no agents
+    or workflow phases. It provides common skills, hooks, and commands that
+    are universally available regardless of which rite is currently active.
+
+    Sync behavior:
+    - swap-rite.sh automatically syncs shared content alongside active rite
+    - Shared content is always available regardless of active rite
+    - Rite-specific content takes precedence over shared content (override)
+
+    Override resolution:
+    - When both shared and rite-specific content exist with same name,
+      the rite-specific version wins
+    - No merge or conflict resolution occurs

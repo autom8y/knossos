@@ -1,0 +1,55 @@
+# Rite Manifest: debt-triage
+# Generated per ADR-0015 (Content Organization)
+
+name: debt-triage
+version: "1.0.0"
+description: Debt management lifecycle for collecting, assessing, and planning technical debt paydown
+
+entry_agent: orchestrator
+
+phases:
+  - name: collection
+    agent: debt-collector
+    produces: debt-ledger
+    description: Collect and inventory technical debt items
+
+  - name: assessment
+    agent: risk-assessor
+    produces: risk-report
+    description: Assess risk and prioritize debt items
+
+  - name: planning
+    agent: sprint-planner
+    produces: sprint-plan
+    description: Plan debt paydown sprints with resource allocation
+
+agents:
+  - name: orchestrator
+    role: Coordinates debt assessment and planning phases
+
+  - name: debt-collector
+    role: Collects and inventories technical debt across the codebase
+
+  - name: risk-assessor
+    role: Assesses risk and impact of debt items for prioritization
+
+  - name: sprint-planner
+    role: Plans debt paydown sprints with timelines and resources
+
+skills:
+  - debt-ref
+
+hooks: []
+
+dependencies:
+  - shared
+
+complexity_levels:
+  - name: QUICK
+    scope: "Known debt items"
+  - name: AUDIT
+    scope: "Full debt discovery"
+
+metadata:
+  domain: technical debt management
+  color: brown

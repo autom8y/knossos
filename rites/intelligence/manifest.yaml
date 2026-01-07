@@ -1,0 +1,67 @@
+# Rite Manifest: intelligence
+# Generated per ADR-0015 (Content Organization)
+
+name: intelligence
+version: "1.0.0"
+description: Product analytics lifecycle for instrumentation, research, experimentation, and insights synthesis
+
+entry_agent: orchestrator
+
+phases:
+  - name: instrumentation
+    agent: analytics-engineer
+    produces: tracking-plan
+    description: Design and implement event tracking
+
+  - name: research
+    agent: user-researcher
+    produces: research-findings
+    description: Conduct user research and gather qualitative insights
+    condition: "complexity >= FEATURE"
+
+  - name: experimentation
+    agent: experimentation-lead
+    produces: experiment-design
+    description: Design and run experiments with statistical rigor
+
+  - name: synthesis
+    agent: insights-analyst
+    produces: insights-report
+    description: Synthesize data into actionable insights
+
+agents:
+  - name: orchestrator
+    role: Coordinates analytics and research initiative phases
+
+  - name: analytics-engineer
+    role: Designs tracking plans and implements event instrumentation
+
+  - name: user-researcher
+    role: Conducts user research and extracts qualitative insights
+
+  - name: experimentation-lead
+    role: Designs experiments with proper statistical methodology
+
+  - name: insights-analyst
+    role: Synthesizes quantitative and qualitative data into insights
+
+skills:
+  - doc-intelligence
+  - intelligence-ref
+
+hooks: []
+
+dependencies:
+  - shared
+
+complexity_levels:
+  - name: METRIC
+    scope: "Single metric analysis, existing event data"
+  - name: FEATURE
+    scope: "New feature instrumentation, user journey analysis"
+  - name: INITIATIVE
+    scope: "Cross-feature analysis, strategic product decisions"
+
+metadata:
+  domain: product analytics
+  color: cyan

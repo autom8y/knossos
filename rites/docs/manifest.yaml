@@ -1,0 +1,68 @@
+# Rite Manifest: docs
+# Generated per ADR-0015 (Content Organization)
+
+name: docs
+version: "1.0.0"
+description: Documentation lifecycle from audit through review (Audit -> Structure -> Write -> Review)
+
+entry_agent: orchestrator
+
+phases:
+  - name: audit
+    agent: doc-auditor
+    produces: audit-report
+    description: Audit existing documentation and identify gaps
+
+  - name: architecture
+    agent: information-architect
+    produces: doc-structure
+    description: Design documentation structure and navigation
+    condition: "complexity >= SECTION"
+
+  - name: writing
+    agent: tech-writer
+    produces: documentation
+    description: Write and integrate documentation content
+
+  - name: review
+    agent: doc-reviewer
+    produces: review-signoff
+    description: Review documentation for accuracy and quality
+
+agents:
+  - name: orchestrator
+    role: Coordinates documentation workflow phases
+
+  - name: doc-auditor
+    role: Audits existing documentation and identifies gaps and priorities
+
+  - name: information-architect
+    role: Designs documentation structure aligned with user mental models
+
+  - name: tech-writer
+    role: Writes clear, accurate technical documentation
+
+  - name: doc-reviewer
+    role: Reviews documentation for technical accuracy and quality
+
+skills:
+  - doc-consolidation
+  - doc-reviews
+  - docs-ref
+
+hooks: []
+
+dependencies:
+  - shared
+
+complexity_levels:
+  - name: PAGE
+    scope: "Single document"
+  - name: SECTION
+    scope: "Multiple related documents"
+  - name: SITE
+    scope: "Full documentation site"
+
+metadata:
+  domain: documentation lifecycle
+  color: green

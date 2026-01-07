@@ -1,0 +1,85 @@
+# Rite Manifest: forge
+# Generated per ADR-0015 (Content Organization)
+
+name: forge
+version: "1.0.0"
+description: Agent team creation lifecycle (Design -> Prompts -> Workflow -> Platform -> Catalog -> Validation)
+
+entry_agent: orchestrator
+
+phases:
+  - name: design
+    agent: agent-designer
+    produces: rite-spec
+    description: Design agent team concept and role definitions
+
+  - name: prompts
+    agent: prompt-architect
+    produces: agent-files
+    description: Create agent prompt files and system instructions
+
+  - name: workflow
+    agent: workflow-engineer
+    produces: workflow-config
+    description: Configure workflow phases and transitions
+
+  - name: platform
+    agent: platform-engineer
+    produces: roster-integration
+    description: Integrate agents into roster ecosystem
+    condition: "complexity >= MODULE"
+
+  - name: catalog
+    agent: agent-curator
+    produces: knowledge-update
+    description: Update knowledge base and documentation
+    condition: "complexity >= MODULE"
+
+  - name: validation
+    agent: eval-specialist
+    produces: eval-report
+    description: Evaluate and validate agent team readiness
+
+agents:
+  - name: orchestrator
+    role: Coordinates agent team creation phases
+
+  - name: agent-designer
+    role: Designs agent team concepts and role specifications
+
+  - name: prompt-architect
+    role: Creates agent prompts and system instructions
+
+  - name: workflow-engineer
+    role: Configures workflow phases and orchestration
+
+  - name: platform-engineer
+    role: Integrates agents into roster platform
+
+  - name: agent-curator
+    role: Maintains agent catalog and knowledge base
+
+  - name: eval-specialist
+    role: Evaluates agent performance and validates readiness
+
+skills:
+  - agent-prompt-engineering
+  - forge-ref
+  - rite-development
+
+hooks: []
+
+dependencies:
+  - shared
+
+complexity_levels:
+  - name: AGENT
+    scope: "Single agent addition to existing team"
+  - name: MODULE
+    scope: "New rite with 3-5 agents"
+  - name: SYSTEM
+    scope: "Major team redesign or cross-rite refactor"
+
+metadata:
+  domain: agent team creation
+  color: silver

@@ -1,0 +1,65 @@
+# Rite Manifest: hygiene
+# Generated per ADR-0015 (Content Organization)
+
+name: hygiene
+version: "1.0.0"
+description: Code quality lifecycle for smell detection, planning, and cleanup (Smell -> Plan -> Clean -> Audit)
+
+entry_agent: orchestrator
+
+phases:
+  - name: assessment
+    agent: code-smeller
+    produces: smell-report
+    description: Detect code smells and quality issues
+
+  - name: planning
+    agent: architect-enforcer
+    produces: refactor-plan
+    description: Plan systematic refactoring approach
+
+  - name: execution
+    agent: janitor
+    produces: commits
+    description: Execute code cleanup and improvements
+
+  - name: audit
+    agent: audit-lead
+    produces: audit-signoff
+    description: Audit cleanup and sign off on quality improvements
+
+agents:
+  - name: orchestrator
+    role: Coordinates code hygiene initiative phases
+
+  - name: code-smeller
+    role: Detects code smells and quality issues across codebase
+
+  - name: architect-enforcer
+    role: Plans refactoring approach and enforces architecture standards
+
+  - name: janitor
+    role: Executes code cleanup and improvements
+
+  - name: audit-lead
+    role: Audits cleanup results and provides quality signoff
+
+skills:
+  - hygiene-ref
+
+hooks: []
+
+dependencies:
+  - shared
+
+complexity_levels:
+  - name: SPOT
+    scope: "Single smell fix"
+  - name: MODULE
+    scope: "Module-level cleanup"
+  - name: CODEBASE
+    scope: "Full codebase hygiene"
+
+metadata:
+  domain: code quality
+  color: lime

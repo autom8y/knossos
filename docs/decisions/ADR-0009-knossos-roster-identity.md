@@ -21,7 +21,7 @@ The project has evolved through multiple naming iterations, creating potential c
 ### Current State
 
 - Repository: `github.com/autom8y/roster`
-- Go module: `github.com/autom8y/ariadne`
+- Go module: `github.com/autom8y/knossos`
 - CLI binary: `ari`
 - Configuration directory: `.claude/`
 - Documentation references: Mixed usage of "roster", "Knossos", and "Ariadne"

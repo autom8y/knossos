@@ -100,7 +100,7 @@ roster/              # Future: knossos/
 └── ...
 ```
 
-**Module path**: `github.com/autom8y/ariadne`
+**Module path**: `github.com/autom8y/knossos`
 
 ### 3.2 Dependencies
 
@@ -419,7 +419,7 @@ brew install autom8y/tap/ariadne
 
 **Developer**: go install
 ```bash
-go install github.com/autom8y/ariadne/cmd/ari@latest
+go install github.com/autom8y/knossos/cmd/ari@latest
 ```
 
 ### 10.2 Versioning
@@ -571,7 +571,7 @@ All decisions from Q&A session (2026-01-04):
 - Repo location: Inside roster (future knossos)
 - V1 scope: All four domains complete
 - Non-goals: No AI, no TUI, no daemon
-- Module path: github.com/autom8y/ariadne
+- Module path: github.com/autom8y/knossos
 
 ### Interface
 - Session commands: Full lifecycle (11 commands)

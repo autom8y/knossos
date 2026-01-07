@@ -3,13 +3,21 @@ name: Ariadne Tests
 on:
   pull_request:
     paths:
-      - 'ariadne/**'
+      - 'cmd/**'
+      - 'internal/**'
+      - 'test/**'
+      - 'go.mod'
+      - 'go.sum'
       - '.github/workflows/ariadne-tests.yml'
   push:
     branches:
       - main
     paths:
-      - 'ariadne/**'
+      - 'cmd/**'
+      - 'internal/**'
+      - 'test/**'
+      - 'go.mod'
+      - 'go.sum'
       - '.github/workflows/ariadne-tests.yml'
   workflow_dispatch:
 
@@ -17,17 +25,14 @@ jobs:
   test:
     name: Go Tests
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ariadne
     steps:
       - uses: actions/checkout@v4
 
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version-file: ariadne/go.mod
-          cache-dependency-path: ariadne/go.sum
+          go-version-file: go.mod
+          cache-dependency-path: go.sum
 
       - name: Download Dependencies
         run: go mod download
@@ -43,39 +48,32 @@ jobs:
   lint:
     name: Lint
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ariadne
     steps:
       - uses: actions/checkout@v4
 
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version-file: ariadne/go.mod
-          cache-dependency-path: ariadne/go.sum
+          go-version-file: go.mod
+          cache-dependency-path: go.sum
 
       - name: Run golangci-lint
         uses: golangci/golangci-lint-action@v6
         with:
           version: latest
-          working-directory: ariadne
         continue-on-error: true
 
   build:
     name: Build
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ariadne
     steps:
       - uses: actions/checkout@v4
 
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version-file: ariadne/go.mod
-          cache-dependency-path: ariadne/go.sum
+          go-version-file: go.mod
+          cache-dependency-path: go.sum
 
       - name: Build Binary
         run: CGO_ENABLED=0 go build -o ari ./cmd/ari/main.go

@@ -1,0 +1,76 @@
+# Rite Manifest: security
+# Generated per ADR-0015 (Content Organization)
+
+name: security
+version: "1.0.0"
+description: Security assessment lifecycle for threat modeling, compliance, penetration testing, and review
+
+entry_agent: orchestrator
+
+phases:
+  - name: threat-modeling
+    agent: threat-modeler
+    produces: threat-model
+    description: Model threats and identify attack vectors
+
+  - name: compliance-design
+    agent: compliance-architect
+    produces: compliance-requirements
+    description: Map compliance requirements to regulations
+    condition: "complexity >= FEATURE"
+
+  - name: penetration-testing
+    agent: penetration-tester
+    produces: pentest-report
+    description: Execute penetration tests and report vulnerabilities
+
+  - name: security-review
+    agent: security-reviewer
+    produces: security-signoff
+    description: Final security review and deployment approval
+
+agents:
+  - name: orchestrator
+    role: Coordinates security initiative phases
+
+  - name: threat-modeler
+    role: Models threats and identifies security risks and attack vectors
+
+  - name: compliance-architect
+    role: Maps compliance requirements and designs control frameworks
+
+  - name: penetration-tester
+    role: Executes penetration tests and documents vulnerabilities
+
+  - name: security-reviewer
+    role: Performs final security review and grants deployment approval
+
+skills:
+  - doc-security
+  - security-ref
+
+hooks: []
+
+dependencies:
+  - shared
+
+complexity_levels:
+  - name: PATCH
+    scope: "Single file change, no auth/crypto/PII impact"
+  - name: FEATURE
+    scope: "New endpoints, data handling, session management"
+  - name: SYSTEM
+    scope: "Auth systems, cryptography, external integrations, PII processing"
+
+metadata:
+  domain: security assessment
+  color: red
+
+# Cross-rite consultation support
+external_consultation:
+  enabled: true
+  allowed_invokers:
+    - rite: 10x-dev
+      agents: [architect, orchestrator]
+    - rite: sre
+      agents: [incident-commander]

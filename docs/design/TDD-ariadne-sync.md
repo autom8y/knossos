@@ -1295,7 +1295,7 @@ Pull operation logic.
 package sync
 
 import (
-    "github.com/autom8y/ariadne/internal/manifest"
+    "github.com/autom8y/knossos/internal/manifest"
 )
 
 // PullOptions configures pull behavior.
@@ -1543,7 +1543,7 @@ func (r *Resolver) HooksDir() string {
 Sync domain reuses the manifest domain's merge logic:
 
 ```go
-import "github.com/autom8y/ariadne/internal/manifest"
+import "github.com/autom8y/knossos/internal/manifest"
 
 // ResolveConflict resolves a sync conflict using three-way merge.
 func (r *Resolver) ResolveConflict(conflict ConflictEntry, strategy string) (*ResolveResult, error) {

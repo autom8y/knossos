@@ -1,0 +1,67 @@
+# Rite Manifest: strategy
+# Generated per ADR-0015 (Content Organization)
+
+name: strategy
+version: "1.0.0"
+description: Business strategy lifecycle for market research, competitive analysis, business modeling, and strategic planning
+
+entry_agent: orchestrator
+
+phases:
+  - name: market-research
+    agent: market-researcher
+    produces: market-analysis
+    description: Research market size, segments, and trends
+
+  - name: competitive-analysis
+    agent: competitive-analyst
+    produces: competitive-intel
+    description: Analyze competitive landscape and positioning
+    condition: "complexity >= STRATEGIC"
+
+  - name: business-modeling
+    agent: business-model-analyst
+    produces: financial-model
+    description: Build financial models and unit economics analysis
+
+  - name: strategic-planning
+    agent: roadmap-strategist
+    produces: strategic-roadmap
+    description: Create strategic roadmap with go/no-go recommendations
+
+agents:
+  - name: orchestrator
+    role: Coordinates strategic initiative phases
+
+  - name: market-researcher
+    role: Researches markets and identifies customer segments
+
+  - name: competitive-analyst
+    role: Analyzes competitive landscape and identifies opportunities
+
+  - name: business-model-analyst
+    role: Builds financial models and analyzes unit economics
+
+  - name: roadmap-strategist
+    role: Creates strategic roadmaps with execution timelines
+
+skills:
+  - doc-strategy
+  - strategy-ref
+
+hooks: []
+
+dependencies:
+  - shared
+
+complexity_levels:
+  - name: TACTICAL
+    scope: "Single decision, existing market data"
+  - name: STRATEGIC
+    scope: "New market entry, major product bet"
+  - name: TRANSFORMATION
+    scope: "Business model change, company pivot"
+
+metadata:
+  domain: business strategy
+  color: gold

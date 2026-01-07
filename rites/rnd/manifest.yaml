@@ -1,0 +1,70 @@
+# Rite Manifest: rnd
+# Generated per ADR-0015 (Content Organization)
+
+name: rnd
+version: "1.0.0"
+description: Technology exploration lifecycle for scouting, integration analysis, prototyping, and future architecture
+
+entry_agent: orchestrator
+
+phases:
+  - name: scouting
+    agent: technology-scout
+    produces: tech-assessment
+    description: Scout emerging technologies and assess fit
+
+  - name: integration-analysis
+    agent: integration-researcher
+    produces: integration-map
+    description: Analyze integration requirements and dependencies
+    condition: "complexity >= EVALUATION"
+
+  - name: prototyping
+    agent: prototype-engineer
+    produces: prototype
+    description: Build proof-of-concept prototypes
+
+  - name: future-architecture
+    agent: moonshot-architect
+    produces: moonshot-plan
+    description: Design long-term architecture and migration paths
+
+agents:
+  - name: orchestrator
+    role: Coordinates technology exploration phases
+
+  - name: technology-scout
+    role: Scouts emerging technologies and provides build vs buy analysis
+
+  - name: integration-researcher
+    role: Maps integration dependencies and assesses compatibility
+
+  - name: prototype-engineer
+    role: Builds proof-of-concept prototypes with deliberate shortcuts
+
+  - name: moonshot-architect
+    role: Designs visionary long-term architecture plans
+
+  - name: tech-transfer
+    role: Facilitates technology transfer from R&D to production teams
+
+skills:
+  - doc-rnd
+  - rnd-ref
+
+hooks: []
+
+dependencies:
+  - shared
+
+complexity_levels:
+  - name: SPIKE
+    scope: "Quick feasibility check, single technology"
+  - name: EVALUATION
+    scope: "Full technology evaluation with integration analysis"
+  - name: MOONSHOT
+    scope: "Paradigm shift exploration, multi-year architecture"
+
+metadata:
+  domain: technology exploration
+  color: purple

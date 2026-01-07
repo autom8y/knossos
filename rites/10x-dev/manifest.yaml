@@ -1,0 +1,72 @@
+# Rite Manifest: 10x-dev
+# Generated per ADR-0015 (Content Organization)
+
+name: 10x-dev
+version: "1.0.0"
+description: Full development lifecycle from requirements through validation (PRD -> TDD -> Code -> QA)
+
+entry_agent: orchestrator
+
+phases:
+  - name: requirements
+    agent: requirements-analyst
+    produces: prd
+    description: Gather and document product requirements
+
+  - name: design
+    agent: architect
+    produces: tdd
+    description: Create technical design document with architecture decisions
+    condition: "complexity >= MODULE"
+
+  - name: implementation
+    agent: principal-engineer
+    produces: code
+    description: Implement the solution per design specifications
+
+  - name: validation
+    agent: qa-adversary
+    produces: test-plan
+    description: Validate implementation against requirements
+
+agents:
+  - name: orchestrator
+    role: Coordinates development lifecycle phases and routes work to specialists
+
+  - name: requirements-analyst
+    role: Gathers requirements and produces PRD artifacts
+
+  - name: architect
+    role: Creates technical design documents and architecture decisions
+
+  - name: principal-engineer
+    role: Implements code according to design specifications
+
+  - name: qa-adversary
+    role: Validates implementation through adversarial testing
+
+skills:
+  - 10x-ref
+  - 10x-workflow
+  - architect-ref
+  - build-ref
+  - doc-artifacts
+
+hooks: []
+
+dependencies:
+  - shared
+
+complexity_levels:
+  - name: SCRIPT
+    scope: "Single file, <200 LOC"
+  - name: MODULE
+    scope: "Multiple files, <2000 LOC"
+  - name: SERVICE
+    scope: "APIs, persistence"
+  - name: PLATFORM
+    scope: "Multi-service"
+
+metadata:
+  domain: software development
+  color: blue

@@ -1,0 +1,69 @@
+# Rite Manifest: sre
+# Generated per ADR-0015 (Content Organization)
+
+name: sre
+version: "1.0.0"
+description: Reliability engineering lifecycle for observability, coordination, implementation, and resilience testing
+
+entry_agent: orchestrator
+
+phases:
+  - name: observation
+    agent: observability-engineer
+    produces: observability-report
+    description: Assess observability gaps and establish baselines
+
+  - name: coordination
+    agent: incident-commander
+    produces: reliability-plan
+    description: Coordinate reliability improvements and create runbooks
+    condition: "complexity >= SERVICE"
+
+  - name: implementation
+    agent: platform-engineer
+    produces: infrastructure-changes
+    description: Implement infrastructure and reliability improvements
+
+  - name: resilience
+    agent: chaos-engineer
+    produces: resilience-report
+    description: Test system resilience through chaos engineering
+
+agents:
+  - name: orchestrator
+    role: Coordinates reliability engineering initiative phases
+
+  - name: observability-engineer
+    role: Designs observability strategy and establishes SLO/SLI baselines
+
+  - name: incident-commander
+    role: Coordinates reliability plans and creates incident runbooks
+
+  - name: platform-engineer
+    role: Implements infrastructure changes and reliability improvements
+
+  - name: chaos-engineer
+    role: Designs and executes chaos experiments to verify resilience
+
+skills:
+  - doc-sre
+  - sre-ref
+
+hooks: []
+
+dependencies:
+  - shared
+
+complexity_levels:
+  - name: ALERT
+    scope: "Single alert/dashboard fix"
+  - name: SERVICE
+    scope: "Single service reliability"
+  - name: SYSTEM
+    scope: "Multi-service SLOs/SLIs"
+  - name: PLATFORM
+    scope: "Full platform reliability"
+
+metadata:
+  domain: site reliability engineering
+  color: orange
