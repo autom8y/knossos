@@ -269,7 +269,7 @@ cmd_status() {
   "is_worktree": $in_worktree,
   "worktree_id": $(json_string "$wt_id"),
   "worktree_name": $(json_string "$wt_name"),
-  "worktree_team": $(json_string "$wt_team"),
+  "worktree_rite": $(json_string "$wt_team"),
   "suggested_session_id": "$(generate_session_id)",
   "sessions_dir": "$SESSIONS_DIR"
 }
