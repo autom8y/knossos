@@ -38,7 +38,7 @@
       "$ref": "common.schema.json#/$defs/complexity_enum"
     },
     "active_rite": {
-      "$ref": "common.schema.json#/$defs/team_name"
+      "$ref": "common.schema.json#/$defs/rite_name"
     },
     "current_phase": {
       "type": "string",
