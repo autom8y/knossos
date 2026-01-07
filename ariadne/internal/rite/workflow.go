@@ -1,4 +1,4 @@
-// Package team implements team pack discovery, management, and switching for Ariadne.
+// Package rite implements rite discovery, management, and switching for Ariadne.
 package rite
 
 import (
