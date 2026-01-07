@@ -76,8 +76,8 @@ Migrated all 38 user-commands from `~/Code/skeleton_claude/.claude/user-commands
 
 | File | Action | Notes |
 |------|--------|-------|
-| .team-commands-exclusions | MIGRATED | Updated to reference roster-debug.md instead of cem-debug.md |
-| .team-user-commands | MIGRATED | Empty file, created for consistency |
+| .rite-commands-exclusions | MIGRATED | Updated to reference roster-debug.md instead of cem-debug.md |
+| .rite-user-commands | MIGRATED | Empty file, created for consistency |
 
 ## Path Replacements Made
 

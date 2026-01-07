@@ -491,7 +491,7 @@ The `migrate_manifest_v1_to_v2()` function:
 
 **Algorithm**:
 ```
-1. Load exclusions from .team-skills-exclusions
+1. Load exclusions from .rite-skills-exclusions
 2. Create destination if needed
 3. For each item in source:
    a. Skip if in exclusion list

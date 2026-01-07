@@ -42,7 +42,7 @@ This spike investigated practical refactoring strategies for large roster shell 
 backup_team_resource() {
     local resource_type="$1"    # commands, skills, hooks
     local resource_dir="$2"     # .claude/commands, etc.
-    local marker_file="$3"      # .team-commands, etc.
+    local marker_file="$3"      # .rite-commands, etc.
     # Unified backup logic (~30 lines vs 90 duplicated)
 }
 

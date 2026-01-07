@@ -28,7 +28,7 @@ This plan extracts 5 DRY-violation patterns (SM-001 through SM-005) from `swap-t
 
 1. **Resource-type-specific duplication**: Each resource type (commands, skills, hooks) has near-identical backup, remove, detect, and cleanup functions. The only differences are:
    - Directory paths (`.claude/commands/`, `.claude/skills/`, `.claude/hooks/`)
-   - Marker files (`.team-commands`, `.team-skills`, `.team-hooks`)
+   - Marker files (`.rite-commands`, `.rite-skills`, `.rite-hooks`)
    - Find type (`-type f` for files, `-type d` for directories)
 
 2. **Global array coupling**: Orphan detection writes to global arrays (`ORPHAN_COMMANDS`, `ORPHAN_SKILLS`, `ORPHAN_HOOKS`) rather than returning data via stdout.
@@ -95,7 +95,7 @@ This plan extracts 5 DRY-violation patterns (SM-001 through SM-005) from `swap-t
 #
 # Usage:
 #   source "$ROSTER_HOME/lib/team/team-resource.sh"
-#   backup_team_resource "commands" ".claude/commands" ".team-commands" "f"
+#   backup_team_resource "commands" ".claude/commands" ".rite-commands" "f"
 #   detect_resource_orphans "commands" ".claude/commands" "my-team" "f"
 
 # =============================================================================
@@ -106,7 +106,7 @@ This plan extracts 5 DRY-violation patterns (SM-001 through SM-005) from `swap-t
 # Parameters:
 #   $1 - resource_type: "commands" | "skills" | "hooks"
 #   $2 - resource_dir:  ".claude/commands" | ".claude/skills" | ".claude/hooks"
-#   $3 - marker_file:   ".team-commands" | ".team-skills" | ".team-hooks"
+#   $3 - marker_file:   ".rite-commands" | ".rite-skills" | ".rite-hooks"
 #   $4 - find_type:     "f" (file) | "d" (directory)
 #
 # Returns: 0 on success, 0 if nothing to backup
@@ -125,7 +125,7 @@ backup_team_resource() { ... }
 # Parameters:
 #   $1 - resource_type: "commands" | "skills" | "hooks"
 #   $2 - resource_dir:  ".claude/commands" | ".claude/skills" | ".claude/hooks"
-#   $3 - marker_file:   ".team-commands" | ".team-skills" | ".team-hooks"
+#   $3 - marker_file:   ".rite-commands" | ".rite-skills" | ".rite-hooks"
 #   $4 - find_type:     "f" (file) | "d" (directory)
 #
 # Returns: 0 on success
@@ -296,7 +296,7 @@ remove_resource_orphans() { ... }
   ```bash
   # swap-team.sh:2050 - backup_team_commands()
   local backup_dir=".claude/commands.backup"
-  if [[ ! -d ".claude/commands" ]] || [[ ! -f ".claude/commands/.team-commands" ]]; then
+  if [[ ! -d ".claude/commands" ]] || [[ ! -f ".claude/commands/.rite-commands" ]]; then
       return 0
   fi
   # ... identical pattern for skills and hooks
@@ -429,9 +429,9 @@ remove_resource_orphans() { ... }
   source "$ROSTER_HOME/lib/team/team-resource.sh"
 
   # Wrapper functions for backward compatibility
-  backup_team_commands() { backup_team_resource "commands" ".claude/commands" ".team-commands" "f"; }
-  backup_team_skills()   { backup_team_resource "skills" ".claude/skills" ".team-skills" "d"; }
-  backup_team_hooks()    { backup_team_resource "hooks" ".claude/hooks" ".team-hooks" "f"; }
+  backup_team_commands() { backup_team_resource "commands" ".claude/commands" ".rite-commands" "f"; }
+  backup_team_skills()   { backup_team_resource "skills" ".claude/skills" ".rite-skills" "d"; }
+  backup_team_hooks()    { backup_team_resource "hooks" ".claude/hooks" ".rite-hooks" "f"; }
   # ... similar for remove, is_team, get_team
   ```
 - **Invariants**:
@@ -550,10 +550,10 @@ tests/fixtures/team-resource/
     .claude/
       commands/
         cmd-a.md
-        .team-commands  # Contains: cmd-a.md
+        .rite-commands  # Contains: cmd-a.md
       skills/
         skill-a/
-        .team-skills    # Contains: skill-a
+        .rite-skills    # Contains: skill-a
 ```
 
 ---

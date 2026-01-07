@@ -523,7 +523,7 @@ verify_backup_integrity() { ... }
   - Same backup directory structure
   - Same backup order (agents, ACTIVE_RITE, manifest, workflow, commands, skills, hooks)
   - Virgin swap detection preserved in verify_backup_integrity()
-  - Marker file backup preserved (.team-commands, etc.)
+  - Marker file backup preserved (.rite-commands, etc.)
 - **Verification**:
   1. Unit test: `create_swap_backup` creates complete backup
   2. Unit test: `create_swap_backup` updates journal backup locations
@@ -660,7 +660,7 @@ verify_backup_integrity() { ... }
 | Return | 0 success, 1 on failure |
 | Side effects | Creates SWAP_BACKUP_DIR, updates journal backup_location |
 | Backup order | agents, ACTIVE_RITE, manifest, workflow, commands, skills, hooks |
-| Marker files | .team-commands, .team-skills, .team-hooks copied if exist |
+| Marker files | .rite-commands, .rite-skills, .rite-hooks copied if exist |
 
 ---
 
@@ -746,7 +746,7 @@ tests/fixtures/team-transaction/
       ACTIVE_RITE        # Contains: old-team
       AGENT_MANIFEST.json
       commands/
-        .team-commands
+        .rite-commands
         test-cmd.md
 ```
 

@@ -105,13 +105,13 @@ Warning correctly shown for:
 ### Commands Sync
 **Requirement**: Team commands copied to `.claude/commands/` with marker file
 **Result**: PASS
-- Marker file `.team-commands` correctly tracks team commands
+- Marker file `.rite-commands` correctly tracks team commands
 - Previous team commands removed before new team commands installed
 
 ### Skills Sync
 **Requirement**: Team skills copied to `.claude/skills/` with marker file
 **Result**: PASS
-- Marker file `.team-skills` correctly tracks team skills
+- Marker file `.rite-skills` correctly tracks team skills
 - Previous team skills removed before new team skills installed
 
 ### Manifest Generation

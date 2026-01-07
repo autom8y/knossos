@@ -55,8 +55,8 @@ Claude Code discovers agents at **session startup only**, loading from both `~/.
 1. **File Operations**: Properly backs up, removes, and copies agent files
 2. **Manifest Tracking**: Maintains `AGENT_MANIFEST.json` with source/origin metadata
 3. **Orphan Handling**: Detects and prompts for disposition of orphan agents
-4. **Commands Sync**: Backs up, removes, and copies team commands via `.team-commands` marker
-5. **Skills Sync**: Backs up, removes, and copies team skills via `.team-skills` marker
+4. **Commands Sync**: Backs up, removes, and copies team commands via `.rite-commands` marker
+5. **Skills Sync**: Backs up, removes, and copies team skills via `.rite-skills` marker
 6. **CLAUDE.md Update**: Updates the Quick Start table and Agent Configurations section
 7. **ACTIVE_RITE State**: Updates `.claude/ACTIVE_RITE` file correctly
 
