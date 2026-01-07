@@ -6,7 +6,7 @@
 
 ### Purpose
 
-Team packs contain different agents. If session started with `10x-dev` but current rite is `docs`, expected agents may not be available.
+Rites contain different pantheons. If session started with `10x-dev` but current rite is `docs`, expected agents may not be available.
 
 ### Check Logic
 

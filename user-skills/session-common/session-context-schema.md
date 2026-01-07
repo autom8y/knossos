@@ -10,7 +10,7 @@ session_id: string        # "session-YYYYMMDD-HHMMSS-{hash}"
 created_at: string        # ISO 8601 timestamp
 initiative: string        # User-provided name
 complexity: enum          # SCRIPT | MODULE | SERVICE | PLATFORM
-active_team: string       # Team pack name
+active_rite: string       # Rite name
 current_phase: enum       # requirements | design | implementation | validation
 last_agent: string|null   # Agent identifier or null if not started
 artifacts: array          # [{type, path, status}]

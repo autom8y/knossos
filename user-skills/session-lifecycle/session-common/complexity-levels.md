@@ -291,7 +291,7 @@ Some rites specialize in complexity levels:
 | sre | SERVICE, PLATFORM (infrastructure, reliability) |
 | ecosystem | PLATFORM (CEM/skeleton/roster infrastructure) |
 
-**Note**: Team pack doesn't dictate complexity; complexity dictates which agents are invoked.
+**Note**: Rite doesn't dictate complexity; complexity dictates which agents are invoked.
 
 ## Estimation Guidelines
 

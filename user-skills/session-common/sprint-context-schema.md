@@ -23,7 +23,7 @@ start_date?: string         # ISO 8601 date
 end_date?: string           # Calculated from duration
 
 # Inherited from session
-active_team: string         # Team pack name (copied from SESSION_CONTEXT)
+active_rite: string         # Rite name (copied from SESSION_CONTEXT)
 
 # State tracking
 blockers?: array            # [{description, task_id, severity}]

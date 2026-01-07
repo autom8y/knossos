@@ -46,7 +46,7 @@ Session Context:
 - New session requested
 - Initiative: {user-provided-initiative}
 - Complexity: {SCRIPT|MODULE|SERVICE|PLATFORM}
-- Team: {rite-pack-name}
+- Team: {rite-name}
 - Phase: requirements")
 ```
 
@@ -139,7 +139,7 @@ Display confirmation message with:
 | `created_at` | Current ISO timestamp | Session start time |
 | `initiative` | User-provided | Initiative name |
 | `complexity` | User-provided | Complexity level |
-| `active_team` | Current or specified team | Team pack for this session |
+| `active_rite` | Current or specified rite | Rite for this session |
 | `current_phase` | "requirements" or "design" | Current workflow phase |
 | `last_agent` | "analyst" or "architect" | Last agent to work on session |
 | `artifacts` | List of produced artifacts | Tracks deliverables |

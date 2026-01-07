@@ -30,7 +30,7 @@ Git worktrees provide true filesystem isolation for parallel Claude sessions. Ea
 
 | Flag | Description |
 |------|-------------|
-| `--rite=PACK` | Rite pack to use (default: current) |
+| `--rite=NAME` | Rite to use (default: current) |
 | `--from=REF` | Git ref to base on (default: HEAD) |
 | `--force` | Override safety checks |
 

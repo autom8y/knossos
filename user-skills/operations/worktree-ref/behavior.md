@@ -4,13 +4,13 @@
 
 ## Commands
 
-### `/worktree create [name] [--rite=PACK] [--from=REF]`
+### `/worktree create [name] [--rite=NAME] [--from=REF]`
 
 Create a new isolated worktree with full ecosystem initialization.
 
 **Parameters:**
 - `name` - Descriptive name for the worktree (default: "unnamed")
-- `--rite=PACK` - Rite pack to use (default: current rite)
+- `--rite=NAME` - Rite to use (default: current rite)
 - `--from=REF` - Git ref to base worktree on (default: HEAD)
 
 **What Happens:**

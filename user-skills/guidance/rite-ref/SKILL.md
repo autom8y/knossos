@@ -1,15 +1,15 @@
 ---
 name: rite-ref
-description: "Switch agent rite packs or list available rites via roster system. Use when: changing active rite, listing available packs, checking current rite status. Triggers: /rite, switch rite, change rite pack, rite management, roster."
+description: "Switch rites or list available rites via roster system. Use when: changing active rite, listing available rites, checking current rite status. Triggers: /rite, switch rite, change rite, rite management, roster."
 ---
 
-# /rite - Agent Rite Pack Switcher
+# /rite - Rite Switcher
 
 > **Category**: Rite Management | **Phase**: Rite Switching
 
 ## Purpose
 
-Switch between agent rite packs to access specialized workflows. Each rite pack provides a curated set of agents optimized for specific types of work (development, documentation, code hygiene, technical debt).
+Switch between agent rites to access specialized workflows. Each rite provides a curated pantheon of agents optimized for specific types of work (development, documentation, code hygiene, technical debt).
 
 This command integrates with the roster system at `$KNOSSOS_HOME/` and updates the active rite context for the current project.
 
@@ -19,16 +19,16 @@ This command integrates with the roster system at `$KNOSSOS_HOME/` and updates t
 
 ```bash
 /rite                 # Show current active rite
-/rite <pack-name>     # Switch to specified rite pack
-/rite --list          # List all available rite packs
+/rite <rite-name>     # Switch to specified rite
+/rite --list          # List all available rites
 ```
 
 ### Parameters
 
 | Parameter | Required | Description |
 |-----------|----------|-------------|
-| `pack-name` | No | Name of rite pack to switch to |
-| `--list` | No | List all available rite packs |
+| `rite-name` | No | Name of rite to switch to |
+| `--list` | No | List all available rites |
 
 ---
 
@@ -42,7 +42,7 @@ Determine operation mode:
 
 - **No arguments**: Query and display current active rite
 - **`--list` or `-l`**: List all available rites
-- **`<pack-name>`**: Switch to specified rite
+- **`<rite-name>`**: Switch to specified rite
 
 ### 2. Invoke Roster Script
 
@@ -79,15 +79,15 @@ If a session is active (`.claude/sessions/{session_id}/SESSION_CONTEXT.md` exist
 
 ---
 
-## Available Rite Packs
+## Available Rites
 
-Rite packs are discovered dynamically from `$KNOSSOS_HOME/rites/`. Reference the `rite-discovery` skill for structured metadata access.
+Rites are discovered dynamically from `$KNOSSOS_HOME/rites/`. Reference the `rite-discovery` skill for structured metadata access.
 
 ### Current Inventory
 
 To list all rites at runtime:
 ```bash
-ls -d $KNOSSOS_HOME/rites/*-pack 2>/dev/null | xargs -n1 basename
+ls -d $KNOSSOS_HOME/rites/* 2>/dev/null | xargs -n1 basename
 ```
 
 As of this writing, the roster contains 11 rites:
@@ -256,15 +256,15 @@ No changes made (--dry-run mode)
 
 ## Error Handling
 
-### Rite Pack Not Found
+### Rite Not Found
 
 ```bash
-/rite nonexistent-pack
+/rite nonexistent-rite
 ```
 
 Output:
 ```
-[Roster] Error: Rite pack 'nonexistent-pack' not found in $KNOSSOS_HOME/rites/
+[Roster] Error: Rite 'nonexistent-rite' not found in $KNOSSOS_HOME/rites/
 [Roster] Use './swap-rite.sh --list' to see available packs
 ```
 
@@ -275,7 +275,7 @@ Output:
 If a rite exists but missing `agents/` directory:
 
 ```
-[Roster] Error: Rite pack 'broken-pack' missing agents/ directory
+[Roster] Error: Rite 'broken-rite' missing agents/ directory
 ```
 
 **Resolution**: Fix rite structure in roster repository
@@ -315,7 +315,7 @@ If file copy fails or count mismatch:
 
 ### /start - Session Initialization
 
-The `/start` command supports `--rite=PACK` parameter:
+The `/start` command supports `--rite=NAME` parameter:
 
 ```bash
 /start "Add dark mode" --rite=10x-dev
@@ -362,7 +362,7 @@ Quick-switch commands are derived from rite names:
 | sre | `/sre` | First token before hyphen |
 | strategy | `/strategy` | First token before hyphen |
 
-These commands invoke `/rite {pack-name}` internally and display rite roster after switch.
+These commands invoke `/rite {rite-name}` internally and display rite roster after switch.
 
 ---
 
@@ -408,7 +408,7 @@ The roster system uses backup-then-swap to prevent corruption:
 
 If any step fails, previous agents can be restored from backup.
 
-### Rite Pack Structure
+### Rite Structure
 
 Each rite in `$KNOSSOS_HOME/rites/` has:
 

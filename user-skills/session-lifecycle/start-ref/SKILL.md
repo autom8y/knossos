@@ -20,14 +20,14 @@ Starting work?
 ## Usage
 
 ```bash
-/start [initiative-name] [--complexity=LEVEL] [--rite=PACK] [--no-rite]
+/start [initiative-name] [--complexity=LEVEL] [--rite=NAME] [--no-rite]
 ```
 
 | Parameter | Required | Default | Description |
 |-----------|----------|---------|-------------|
 | `initiative-name` | No* | Prompted | Name of feature/task |
 | `--complexity` | No* | Prompted | SCRIPT \| MODULE \| SERVICE \| PLATFORM |
-| `--rite` | No | ACTIVE_RITE | Rite pack for session |
+| `--rite` | No | ACTIVE_RITE | Rite for session |
 | `--no-rite` | No | false | Create cross-cutting session (no orchestration) |
 
 *If not provided, user will be prompted interactively.

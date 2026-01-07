@@ -94,7 +94,7 @@ Worktree functions in `worktree-manager.sh`:
 - `get_worktree_info()` - Read metadata
 - `get_worktree_id()` - Extract ID from metadata
 
-## Rite Pack Integration
+## Rite Integration
 
 ### swap-rite.sh
 
