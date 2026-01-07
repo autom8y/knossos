@@ -743,9 +743,9 @@ verify_state_consistency() {
 
 # Commit staged resources to live directories
 # This is the atomic commit phase
-# Usage: commit_staged_resources "team_name"
+# Usage: commit_staged_resources "rite_name"
 commit_staged_resources() {
-    local team_name="$1"
+    local rite_name="$1"
 
     log_debug "Committing staged resources..."
 
@@ -845,11 +845,11 @@ get_agent_from_manifest() {
 }
 
 # Write manifest with current agent state
-# Usage: write_manifest "team-name"
+# Usage: write_manifest "rite-name"
 # Note: Records written_at timestamp in both manifest and journal for
 #       staleness detection during recovery (RF-006)
 write_manifest() {
-    local team_name="$1"
+    local rite_name="$1"
     local timestamp
     timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
@@ -861,7 +861,7 @@ write_manifest() {
     {
         echo "{"
         echo "  \"manifest_version\": \"$MANIFEST_VERSION\","
-        echo "  \"active_rite\": \"$team_name\","
+        echo "  \"active_rite\": \"$rite_name\","
         echo "  \"last_swap\": \"$timestamp\","
         echo "  \"written_at\": \"$timestamp\","
         echo "  \"agents\": {"
@@ -876,9 +876,9 @@ write_manifest() {
             local agent_name
             agent_name=$(basename "$agent_file")
 
-            # Determine source: check if it came from the team or is user-added
+            # Determine source: check if it came from the rite or is user-added
             local source="rite"
-            local origin="$team_name"
+            local origin="$rite_name"
 
             # Check if this was a kept user agent (marked by stash)
             if [[ -f ".claude/.agent_stash/$agent_name.meta" ]]; then
@@ -927,7 +927,7 @@ write_manifest() {
             {
                 echo -n "    \"$cmd_file\": {"
                 echo -n "\"source\": \"rite\", "
-                echo -n "\"origin\": \"$team_name\", "
+                echo -n "\"origin\": \"$rite_name\", "
                 echo -n "\"installed_at\": \"$timestamp\""
                 echo -n "}"
             } >> "$MANIFEST_FILE"
@@ -957,7 +957,7 @@ write_manifest() {
 
             if [[ -f ".claude/hooks/.rite-hooks" ]] && grep -q "^$hook_name$" ".claude/hooks/.rite-hooks" 2>/dev/null; then
                 source="rite"
-                origin="$team_name"
+                origin="$rite_name"
             fi
 
             if [[ "$first_hook" == true ]]; then
@@ -1059,8 +1059,8 @@ init_manifest_from_existing() {
 # Usage: list_incoming_agents "team-name"
 # Output: One agent filename per line
 list_incoming_agents() {
-    local team_name="$1"
-    local pack_dir="$KNOSSOS_HOME/rites/$team_name/agents"
+    local rite_name="$1"
+    local pack_dir="$KNOSSOS_HOME/rites/$rite_name/agents"
 
     if [[ -d "$pack_dir" ]]; then
         for agent_file in "$pack_dir"/*.md; do
@@ -1084,16 +1084,16 @@ list_current_agents() {
 # Usage: detect_orphans "team-name"
 # Sets ORPHAN_AGENTS array with orphan info: "agent.md:source:origin"
 detect_orphans() {
-    local team_name="$1"
+    local rite_name="$1"
     ORPHAN_AGENTS=()
 
     # Get list of incoming agents
     local -a incoming_agents=()
     while IFS= read -r agent; do
         [[ -n "$agent" ]] && incoming_agents+=("$agent")
-    done < <(list_incoming_agents "$team_name")
+    done < <(list_incoming_agents "$rite_name")
 
-    log_debug "Incoming agents from $team_name: ${incoming_agents[*]:-none}"
+    log_debug "Incoming agents from $rite_name: ${incoming_agents[*]:-none}"
 
     # If no manifest exists and agents exist, initialize it
     if [[ ! -f "$MANIFEST_FILE" ]] && [[ -d ".claude/agents" ]]; then
@@ -1261,14 +1261,14 @@ cleanup_stash() {
 # Interactive prompt for orphan disposition
 # Returns: 0 if user made choices, 1 if cancelled
 prompt_disposition() {
-    local team_name="$1"
+    local rite_name="$1"
 
     # Check if we're in an interactive mode
     if ! is_interactive; then
         # Non-interactive - error if no flag set
         if [[ -z "$ORPHAN_MODE" ]]; then
             log_error "Orphan agents detected in non-interactive mode."
-            log "Found ${#ORPHAN_AGENTS[@]} agent(s) not in $team_name:"
+            log "Found ${#ORPHAN_AGENTS[@]} agent(s) not in $rite_name:"
             for orphan in "${ORPHAN_AGENTS[@]}"; do
                 echo "  - $(format_orphan "$orphan")"
             done
@@ -1304,8 +1304,8 @@ prompt_disposition() {
     fi
 
     echo ""
-    echo -e "${YELLOW}[Knossos]${NC} Switching from $current_rite to $team_name..."
-    echo -e "${YELLOW}[Knossos]${NC} Found ${#ORPHAN_AGENTS[@]} agent(s) not in $team_name:"
+    echo -e "${YELLOW}[Knossos]${NC} Switching from $current_rite to $rite_name..."
+    echo -e "${YELLOW}[Knossos]${NC} Found ${#ORPHAN_AGENTS[@]} agent(s) not in $rite_name:"
     echo ""
 
     local idx=1
@@ -1541,21 +1541,21 @@ validate_pack_tools() {
 
 # Validate rite exists and has required structure
 validate_pack() {
-    local team_name="$1"
-    local pack_dir="$KNOSSOS_HOME/rites/$team_name"
+    local rite_name="$1"
+    local pack_dir="$KNOSSOS_HOME/rites/$rite_name"
 
-    log_debug "Validating pack: $team_name"
+    log_debug "Validating pack: $rite_name"
 
     # Check pack directory exists
     if [[ ! -d "$pack_dir" ]]; then
-        log_error "Rite pack '$team_name' not found in $KNOSSOS_HOME/rites/"
+        log_error "Rite pack '$rite_name' not found in $KNOSSOS_HOME/rites/"
         log "Use './swap-rite.sh --list' to see available packs"
         exit "$EXIT_VALIDATION_FAILURE"
     fi
 
     # Check agents/ subdirectory exists
     if [[ ! -d "$pack_dir/agents" ]]; then
-        log_error "Rite '$team_name' missing agents/ directory"
+        log_error "Rite '$rite_name' missing agents/ directory"
         exit "$EXIT_VALIDATION_FAILURE"
     fi
 
@@ -1564,21 +1564,21 @@ validate_pack() {
     agent_count=$(find "$pack_dir/agents" -maxdepth 1 -name "*.md" -type f 2>/dev/null | wc -l | tr -d ' ')
 
     if [[ "$agent_count" -eq 0 ]]; then
-        log_error "Rite '$team_name' has no agent files (.md)"
+        log_error "Rite '$rite_name' has no agent files (.md)"
         exit "$EXIT_VALIDATION_FAILURE"
     fi
 
     # Check workflow.yaml exists
     if [[ ! -f "$pack_dir/workflow.yaml" ]]; then
-        log_warning "Rite '$team_name' missing workflow.yaml (commands may fail)"
+        log_warning "Rite '$rite_name' missing workflow.yaml (commands may fail)"
     fi
 
     # Check for missing directories (REQ-3.4)
     if [[ ! -d "$pack_dir/commands" ]]; then
-        log_warning "Rite '$team_name' missing commands/ (run normalize-rite-structure.sh)"
+        log_warning "Rite '$rite_name' missing commands/ (run normalize-rite-structure.sh)"
     fi
     if [[ ! -d "$pack_dir/skills" ]]; then
-        log_warning "Rite '$team_name' missing skills/ (run normalize-rite-structure.sh)"
+        log_warning "Rite '$rite_name' missing skills/ (run normalize-rite-structure.sh)"
     fi
 
     # Validate agent tools (REQ-3.3)
@@ -1627,16 +1627,16 @@ validate_project() {
 # Checks required fields: name, workflow_type, phases
 # Returns 0 if valid or file doesn't exist, 1 if validation fails
 validate_workflow_yaml() {
-    local team_name="$1"
-    local workflow_file="$KNOSSOS_HOME/rites/$team_name/workflow.yaml"
+    local rite_name="$1"
+    local workflow_file="$KNOSSOS_HOME/rites/$rite_name/workflow.yaml"
 
     # Skip if workflow.yaml doesn't exist (optional file)
     if [[ ! -f "$workflow_file" ]]; then
-        log_debug "No workflow.yaml for $team_name (optional)"
+        log_debug "No workflow.yaml for $rite_name (optional)"
         return 0
     fi
 
-    log_debug "Validating workflow.yaml schema for $team_name"
+    log_debug "Validating workflow.yaml schema for $rite_name"
 
     # Check required field: name
     if ! grep -q "^name:" "$workflow_file"; then
@@ -1670,16 +1670,16 @@ validate_workflow_yaml() {
 # Checks required fields: team, routing
 # Returns 0 if valid or file doesn't exist, 1 if validation fails
 validate_orchestrator_yaml() {
-    local team_name="$1"
-    local orchestrator_file="$KNOSSOS_HOME/rites/$team_name/orchestrator.yaml"
+    local rite_name="$1"
+    local orchestrator_file="$KNOSSOS_HOME/rites/$rite_name/orchestrator.yaml"
 
     # Skip if orchestrator.yaml doesn't exist (optional file)
     if [[ ! -f "$orchestrator_file" ]]; then
-        log_debug "No orchestrator.yaml for $team_name (optional)"
+        log_debug "No orchestrator.yaml for $rite_name (optional)"
         return 0
     fi
 
-    log_debug "Validating orchestrator.yaml schema for $team_name"
+    log_debug "Validating orchestrator.yaml schema for $rite_name"
 
     # Check required field: team
     if ! grep -q "^team:" "$orchestrator_file"; then
@@ -1707,21 +1707,21 @@ validate_orchestrator_yaml() {
 # Called during PHASE_PREPARING to catch schema issues early
 # Returns 0 if all schemas valid, 1 if any validation fails
 validate_rite_schemas() {
-    local team_name="$1"
+    local rite_name="$1"
 
-    log_debug "Validating rite schemas for $team_name"
+    log_debug "Validating rite schemas for $rite_name"
 
     # Validate workflow.yaml if present
-    if ! validate_workflow_yaml "$team_name"; then
+    if ! validate_workflow_yaml "$rite_name"; then
         log_error "Schema validation failed for workflow.yaml"
-        log_error "Rite $team_name has invalid configuration"
+        log_error "Rite $rite_name has invalid configuration"
         return 1
     fi
 
     # Validate orchestrator.yaml if present
-    if ! validate_orchestrator_yaml "$team_name"; then
+    if ! validate_orchestrator_yaml "$rite_name"; then
         log_error "Schema validation failed for orchestrator.yaml"
-        log_error "Rite $team_name has invalid configuration"
+        log_error "Rite $rite_name has invalid configuration"
         return 1
     fi
 
@@ -1834,9 +1834,9 @@ backup_current_agents() {
 
 # Perform the agent swap
 swap_agents() {
-    local team_name="$1"
+    local rite_name="$1"
     local agent_count="$2"
-    local source_dir="$KNOSSOS_HOME/rites/$team_name/agents"
+    local source_dir="$KNOSSOS_HOME/rites/$rite_name/agents"
 
     log_debug "Starting swap phase"
 
@@ -1881,7 +1881,7 @@ swap_agents() {
     fi
 
     # Copy workflow.yaml if exists
-    local workflow_file="$KNOSSOS_HOME/rites/$team_name/workflow.yaml"
+    local workflow_file="$KNOSSOS_HOME/rites/$rite_name/workflow.yaml"
     if [[ -f "$workflow_file" ]]; then
         log_debug "Copying workflow.yaml"
         cp "$workflow_file" .claude/ACTIVE_WORKFLOW.yaml || {
@@ -1930,8 +1930,8 @@ get_hook_rite()    { get_resource_rite "$1" "hooks" "f"; }
 # Warns about conflicts but allows user commands to win (non-blocking)
 # Called before rite commands are staged to inform user of potential conflicts
 check_user_command_collisions() {
-    local team_name="$1"
-    local source_dir="$KNOSSOS_HOME/rites/$team_name/commands"
+    local rite_name="$1"
+    local source_dir="$KNOSSOS_HOME/rites/$rite_name/commands"
 
     # Skip if team has no commands directory
     if [[ ! -d "$source_dir" ]]; then
@@ -1978,8 +1978,8 @@ check_user_command_collisions() {
 # Sync team-specific commands to project
 # Rite commands are copied to .claude/commands/ with a marker file
 swap_commands() {
-    local team_name="$1"
-    local source_dir="$KNOSSOS_HOME/rites/$team_name/commands"
+    local rite_name="$1"
+    local source_dir="$KNOSSOS_HOME/rites/$rite_name/commands"
 
     log_debug "Checking for rite commands in $source_dir"
 
@@ -1992,7 +1992,7 @@ swap_commands() {
 
     # Check if team has commands
     if [[ ! -d "$source_dir" ]]; then
-        log_debug "Rite $team_name has no commands/ directory"
+        log_debug "Rite $rite_name has no commands/ directory"
         return 0
     fi
 
@@ -2000,11 +2000,11 @@ swap_commands() {
     cmd_count=$(find "$source_dir" -maxdepth 1 -name "*.md" -type f 2>/dev/null | wc -l | tr -d ' ')
 
     if [[ "$cmd_count" -eq 0 ]]; then
-        log_debug "Rite $team_name has no command files"
+        log_debug "Rite $rite_name has no command files"
         return 0
     fi
 
-    log_debug "Syncing $cmd_count command(s) from $team_name"
+    log_debug "Syncing $cmd_count command(s) from $rite_name"
 
     # Create marker file to track which commands belong to this team
     local marker_file=".claude/commands/.rite-commands"
@@ -2046,8 +2046,8 @@ swap_commands() {
 # Rite skills are copied to .claude/skills/ with a marker file
 # Skills from team layer overlay baseline skills (team wins on collision)
 swap_skills() {
-    local team_name="$1"
-    local source_dir="$KNOSSOS_HOME/rites/$team_name/skills"
+    local rite_name="$1"
+    local source_dir="$KNOSSOS_HOME/rites/$rite_name/skills"
 
     log_debug "Checking for team skills in $source_dir"
 
@@ -2060,7 +2060,7 @@ swap_skills() {
 
     # Check if team has skills
     if [[ ! -d "$source_dir" ]]; then
-        log_debug "Rite $team_name has no skills/ directory"
+        log_debug "Rite $rite_name has no skills/ directory"
         return 0
     fi
 
@@ -2069,11 +2069,11 @@ swap_skills() {
     skill_count=$(find "$source_dir" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l | tr -d ' ')
 
     if [[ "$skill_count" -eq 0 ]]; then
-        log_debug "Rite $team_name has no skill directories"
+        log_debug "Rite $rite_name has no skill directories"
         return 0
     fi
 
-    log_debug "Syncing $skill_count skill(s) from $team_name"
+    log_debug "Syncing $skill_count skill(s) from $rite_name"
 
     # Create marker file to track which skills belong to this team
     local marker_file=".claude/skills/.rite-skills"
@@ -2214,9 +2214,9 @@ sync_shared_skills() {
 # Sync base hooks AND team-specific hooks to project
 # Base hooks provide foundation, team hooks can override
 swap_hooks() {
-    local team_name="$1"
+    local rite_name="$1"
     local base_hooks_dir="$KNOSSOS_HOME/user-hooks"
-    local team_hooks_dir="$KNOSSOS_HOME/rites/$team_name/hooks"
+    local team_hooks_dir="$KNOSSOS_HOME/rites/$rite_name/hooks"
 
     log_debug "Syncing hooks: base=$base_hooks_dir, team=$team_hooks_dir"
 
@@ -2303,7 +2303,7 @@ swap_hooks() {
     # PHASE 2: Overlay team hooks (if team has hooks directory)
     # =========================================================================
     if [[ ! -d "$team_hooks_dir" ]]; then
-        log_debug "Rite $team_name has no hooks/ directory"
+        log_debug "Rite $rite_name has no hooks/ directory"
         return 0
     fi
 
@@ -2311,11 +2311,11 @@ swap_hooks() {
     hook_count=$(find "$team_hooks_dir" -maxdepth 1 -type f -name "*.sh" 2>/dev/null | wc -l | tr -d ' ')
 
     if [[ "$hook_count" -eq 0 ]]; then
-        log_debug "Rite $team_name has no hook files"
+        log_debug "Rite $rite_name has no hook files"
         return 0
     fi
 
-    log_debug "Overlaying $hook_count hook(s) from team $team_name"
+    log_debug "Overlaying $hook_count hook(s) from team $rite_name"
 
     # Create marker file to track team hooks
     local marker_file=".claude/hooks/.rite-hooks"
@@ -2420,9 +2420,9 @@ cleanup_orphan_backups() {
 # REQ-3.1: Get produces field from workflow.yaml for an agent
 # Reads directly from roster source instead of hardcoded mapping
 get_produces_from_workflow() {
-    local team_name="$1"
+    local rite_name="$1"
     local agent_name="$2"
-    local workflow_file="$KNOSSOS_HOME/rites/$team_name/workflow.yaml"
+    local workflow_file="$KNOSSOS_HOME/rites/$rite_name/workflow.yaml"
 
     if [[ ! -f "$workflow_file" ]]; then
         echo "Artifacts"  # Fallback
@@ -2472,8 +2472,8 @@ get_produces_from_workflow() {
 # REQ-3.1: Get all phases from workflow.yaml in order
 # Returns list of "agent:produces" pairs in workflow order
 get_workflow_phases() {
-    local team_name="$1"
-    local workflow_file="$KNOSSOS_HOME/rites/$team_name/workflow.yaml"
+    local rite_name="$1"
+    local workflow_file="$KNOSSOS_HOME/rites/$rite_name/workflow.yaml"
 
     if [[ ! -f "$workflow_file" ]]; then
         return
@@ -2505,7 +2505,7 @@ get_workflow_phases() {
 # REQ-3.1: Reads from roster source instead of disk state after copy
 # This ensures Claude Code's context matches the swapped agents
 update_claude_md() {
-    local team_name="$1"
+    local rite_name="$1"
     local claude_md=".claude/CLAUDE.md"
 
     if [[ ! -f "$claude_md" ]]; then
@@ -2513,10 +2513,10 @@ update_claude_md() {
         return 0
     fi
 
-    log_debug "Updating CLAUDE.md for team $team_name"
+    log_debug "Updating CLAUDE.md for rite $rite_name"
 
     # REQ-3.1: Read from roster source directly, not disk state after copy
-    local source_agents="$KNOSSOS_HOME/rites/$team_name/agents"
+    local source_agents="$KNOSSOS_HOME/rites/$rite_name/agents"
 
     # Create temp files for agent data
     local agent_list_file agent_table_file temp_file
@@ -2581,7 +2581,7 @@ update_claude_md() {
         fi
 
         # REQ-3.1: Get produces from workflow.yaml instead of hardcoded case statement
-        produces=$(get_produces_from_workflow "$team_name" "$basename")
+        produces=$(get_produces_from_workflow "$rite_name" "$basename")
 
         # Special case for orchestrator (not in phases but always present)
         if [[ "$basename" == "orchestrator" && "$produces" == "Artifacts" ]]; then
@@ -2611,7 +2611,7 @@ update_claude_md() {
     fi
 
     # Add new header and table
-    echo "This project uses a ${agent_count}-agent workflow (${team_name}):" >> "$temp_file"
+    echo "This project uses a ${agent_count}-agent workflow (${rite_name}):" >> "$temp_file"
     echo "" >> "$temp_file"
     echo "| Agent | Role | Produces |" >> "$temp_file"
     echo "| ----- | ---- | -------- |" >> "$temp_file"
@@ -2662,23 +2662,23 @@ update_claude_md() {
 
 # Update active rite state
 update_active_rite() {
-    local team_name="$1"
+    local rite_name="$1"
 
     log_debug "Updating ACTIVE_RITE state"
 
-    echo -n "$team_name" > .claude/ACTIVE_RITE || {
+    echo -n "$rite_name" > .claude/ACTIVE_RITE || {
         log_warning "Failed to update ACTIVE_RITE (agents swapped successfully)"
-        log "Manually fix: echo '$team_name' > .claude/ACTIVE_RITE"
+        log "Manually fix: echo '$rite_name' > .claude/ACTIVE_RITE"
         exit "$EXIT_SWAP_FAILURE"
     }
 
-    log_debug "State updated to $team_name"
+    log_debug "State updated to $rite_name"
 }
 
 # Preview what refresh would change (for --dry-run)
 preview_refresh() {
-    local team_name="$1"
-    local source_dir="$KNOSSOS_HOME/rites/$team_name/agents"
+    local rite_name="$1"
+    local source_dir="$KNOSSOS_HOME/rites/$rite_name/agents"
 
     # Get current team for scoped orphan detection (RF-005)
     local current_rite=""
@@ -2686,7 +2686,7 @@ preview_refresh() {
         current_rite=$(cat .claude/ACTIVE_RITE | tr -d '[:space:]')
     fi
 
-    log "Dry-run: Would refresh $team_name"
+    log "Dry-run: Would refresh $rite_name"
     echo ""
     echo "Agent changes:"
 
@@ -2723,7 +2723,7 @@ preview_refresh() {
     echo ""
     echo "Command orphans (from other teams):"
     local orphan_commands
-    orphan_commands=$(detect_resource_orphans "commands" ".claude/commands" "$team_name" "f" "*.md" "$current_rite")
+    orphan_commands=$(detect_resource_orphans "commands" ".claude/commands" "$rite_name" "f" "*.md" "$current_rite")
     if [[ -n "$orphan_commands" ]]; then
         while IFS=: read -r cmd_name origin_team; do
             echo "  ? $cmd_name (from $origin_team)"
@@ -2737,7 +2737,7 @@ preview_refresh() {
     echo ""
     echo "Skill orphans (from other teams):"
     local orphan_skills
-    orphan_skills=$(detect_resource_orphans "skills" ".claude/skills" "$team_name" "d" "*/" "$current_rite")
+    orphan_skills=$(detect_resource_orphans "skills" ".claude/skills" "$rite_name" "d" "*/" "$current_rite")
     if [[ -n "$orphan_skills" ]]; then
         while IFS=: read -r skill_name origin_team; do
             echo "  ? $skill_name (from $origin_team)"
@@ -2751,7 +2751,7 @@ preview_refresh() {
     echo ""
     echo "Hook orphans (from other teams):"
     local orphan_hooks
-    orphan_hooks=$(detect_resource_orphans "hooks" ".claude/hooks" "$team_name" "f" "*" "$current_rite")
+    orphan_hooks=$(detect_resource_orphans "hooks" ".claude/hooks" "$rite_name" "f" "*" "$current_rite")
     if [[ -n "$orphan_hooks" ]]; then
         while IFS=: read -r hook_name origin_team; do
             echo "  ? $hook_name (from $origin_team)"
@@ -2779,7 +2779,7 @@ preview_refresh() {
     echo ""
     echo "Hook registrations (settings.local.json):"
     if require_yq 2>/dev/null; then
-        swap_hook_registrations "$team_name"
+        swap_hook_registrations "$rite_name"
     else
         echo "  (skipped - yq not available)"
     fi
@@ -2894,9 +2894,9 @@ run_roster_sync_waterfall() {
 }
 
 # Update CEM manifest team section after swap
-# Usage: update_cem_manifest_rite "team_name"
+# Usage: update_cem_manifest_rite "rite_name"
 update_cem_manifest_rite() {
-    local team_name="$1"
+    local rite_name="$1"
     local manifest_file=".claude/.cem/manifest.json"
 
     # Skip if no manifest exists (roster-sync not initialized)
@@ -2906,7 +2906,7 @@ update_cem_manifest_rite() {
     fi
 
     # Compute team directory checksum for staleness detection
-    local team_dir="$KNOSSOS_HOME/rites/$team_name"
+    local team_dir="$KNOSSOS_HOME/rites/$rite_name"
     local team_checksum=""
     if [[ -d "$team_dir" ]]; then
         # Use tar to create stable checksum of team directory contents
@@ -2919,7 +2919,7 @@ update_cem_manifest_rite() {
     # Update manifest team section using jq
     local updated
     updated=$(jq \
-        --arg name "$team_name" \
+        --arg name "$rite_name" \
         --arg checksum "$team_checksum" \
         --arg roster_path "$team_dir" \
         --arg timestamp "$timestamp" '
@@ -2947,15 +2947,15 @@ update_cem_manifest_rite() {
         return 1
     }
 
-    log_debug "Updated CEM manifest team section: $team_name"
+    log_debug "Updated CEM manifest team section: $rite_name"
     return 0
 }
 
 # Main swap orchestration
 perform_swap() {
-    local team_name="$1"
+    local rite_name="$1"
 
-    log_debug "Starting swap to $team_name"
+    log_debug "Starting swap to $rite_name"
 
     # Set up signal handlers for graceful interruption
     setup_signal_handlers
@@ -2993,8 +2993,8 @@ perform_swap() {
 
     # Check if already active (idempotency, unless --update)
     if [[ -n "$source_rite" ]] && [[ "$UPDATE_MODE" -eq 0 ]]; then
-        if [[ "$source_rite" == "$team_name" ]]; then
-            log "Already using $team_name (no changes needed)"
+        if [[ "$source_rite" == "$rite_name" ]]; then
+            log "Already using $rite_name (no changes needed)"
             log "Use --update to pull latest from roster"
             exit "$EXIT_SUCCESS"
         fi
@@ -3002,35 +3002,35 @@ perform_swap() {
 
     # Validate pack and project
     local agent_count
-    agent_count=$(validate_pack "$team_name")
+    agent_count=$(validate_pack "$rite_name")
     validate_project
 
     # Validate team schemas (workflow.yaml, orchestrator.yaml) before swap
-    validate_rite_schemas "$team_name" || {
+    validate_rite_schemas "$rite_name" || {
         log_error "Rite schema validation failed, aborting swap"
         exit "$EXIT_VALIDATION_FAILURE"
     }
 
     # Dry-run mode: preview changes and exit
     if [[ "$DRY_RUN_MODE" -eq 1 ]]; then
-        preview_refresh "$team_name"
+        preview_refresh "$rite_name"
         exit "$EXIT_SUCCESS"
     fi
 
     # =========================================================================
     # PHASE: PREPARING - Create journal and validate
     # =========================================================================
-    create_journal "$source_rite" "$team_name" || {
+    create_journal "$source_rite" "$rite_name" || {
         exit "$EXIT_SWAP_FAILURE"
     }
 
     # Detect orphan agents (current agents not in target rite)
-    detect_orphans "$team_name"
+    detect_orphans "$rite_name"
 
     # Handle orphans if any exist
     if [[ ${#ORPHAN_AGENTS[@]} -gt 0 ]]; then
         # Get user disposition for orphans (interactive or via flags)
-        prompt_disposition "$team_name"
+        prompt_disposition "$rite_name"
 
         # Promote agents before swap (while they still exist)
         promote_agents
@@ -3071,17 +3071,17 @@ perform_swap() {
     }
 
     # Stage agents
-    stage_agents "$team_name" || {
+    stage_agents "$rite_name" || {
         log_error "Failed to stage agents"
         rollback_swap
         exit "$EXIT_SWAP_FAILURE"
     }
 
     # Stage workflow
-    stage_workflow "$team_name"
+    stage_workflow "$rite_name"
 
     # Stage active_rite (prepared but committed last)
-    stage_active_rite "$team_name" || {
+    stage_active_rite "$rite_name" || {
         log_error "Failed to stage active_rite"
         rollback_swap
         exit "$EXIT_SWAP_FAILURE"
@@ -3101,7 +3101,7 @@ perform_swap() {
     # =========================================================================
     # PHASE: COMMITTING - Atomic commit of staged resources
     # =========================================================================
-    commit_staged_resources "$team_name" || {
+    commit_staged_resources "$rite_name" || {
         log_error "Commit failed - attempting rollback"
         rollback_swap
         exit "$EXIT_SWAP_FAILURE"
@@ -3114,7 +3114,7 @@ perform_swap() {
     # Detect and handle orphan commands (commands from other teams)
     # Pass source_rite to scope detection to previous team only (RF-005)
     local orphan_commands
-    orphan_commands=$(detect_resource_orphans "commands" ".claude/commands" "$team_name" "f" "*.md" "$source_rite")
+    orphan_commands=$(detect_resource_orphans "commands" ".claude/commands" "$rite_name" "f" "*.md" "$source_rite")
     if [[ -n "$orphan_commands" ]]; then
         if [[ -z "$ORPHAN_MODE" ]]; then
             local orphan_count
@@ -3130,16 +3130,16 @@ perform_swap() {
     fi
 
     # Check for user command collisions before syncing rite commands
-    check_user_command_collisions "$team_name"
+    check_user_command_collisions "$rite_name"
 
     # Sync team-specific commands
-    swap_commands "$team_name"
+    swap_commands "$rite_name"
     mark_commit_step "$COMMIT_STEP_COMMANDS"
 
     # Detect and handle orphan skills (skills from other teams)
     # Pass source_rite to scope detection to previous team only (RF-005)
     local orphan_skills
-    orphan_skills=$(detect_resource_orphans "skills" ".claude/skills" "$team_name" "d" "*/" "$source_rite")
+    orphan_skills=$(detect_resource_orphans "skills" ".claude/skills" "$rite_name" "d" "*/" "$source_rite")
     if [[ -n "$orphan_skills" ]]; then
         if [[ -z "$ORPHAN_MODE" ]]; then
             # Non-interactive mode without flags - warn but don't block
@@ -3156,7 +3156,7 @@ perform_swap() {
     fi
 
     # Sync team-specific skills (Phase 2: Unified Sync)
-    swap_skills "$team_name"
+    swap_skills "$rite_name"
     mark_commit_step "$COMMIT_STEP_SKILLS"
 
     # Sync shared skills (always active, team-privileged override)
@@ -3166,7 +3166,7 @@ perform_swap() {
     # Detect and handle orphan hooks (hooks from other teams)
     # Pass source_rite to scope detection to previous team only (RF-005)
     local orphan_hooks
-    orphan_hooks=$(detect_resource_orphans "hooks" ".claude/hooks" "$team_name" "f" "*" "$source_rite")
+    orphan_hooks=$(detect_resource_orphans "hooks" ".claude/hooks" "$rite_name" "f" "*" "$source_rite")
     if [[ -n "$orphan_hooks" ]]; then
         if [[ -z "$ORPHAN_MODE" ]]; then
             local orphan_count
@@ -3182,11 +3182,11 @@ perform_swap() {
     fi
 
     # Sync team hooks
-    swap_hooks "$team_name"
+    swap_hooks "$rite_name"
     mark_commit_step "$COMMIT_STEP_HOOKS"
 
     # Update hook registrations in settings.local.json (Scope 2)
-    swap_hook_registrations "$team_name"
+    swap_hook_registrations "$rite_name"
     mark_commit_step "$COMMIT_STEP_HOOK_REGISTRATIONS"
 
     # =========================================================================
@@ -3194,7 +3194,7 @@ perform_swap() {
     # =========================================================================
     # Write manifest with current state (after commands synced so we capture them)
     # IMPORTANT: Manifest must be written BEFORE ACTIVE_RITE
-    write_manifest "$team_name"
+    write_manifest "$rite_name"
     mark_commit_step "$COMMIT_STEP_MANIFEST"
 
     # =========================================================================
@@ -3212,7 +3212,7 @@ perform_swap() {
         }
     else
         # Fallback if staging was already cleaned up
-        echo -n "$team_name" > .claude/ACTIVE_RITE || {
+        echo -n "$rite_name" > .claude/ACTIVE_RITE || {
             log_error "Failed to write ACTIVE_RITE"
             rollback_swap
             exit "$EXIT_SWAP_FAILURE"
@@ -3224,7 +3224,7 @@ perform_swap() {
     # Update CEM manifest team section (critical for roster-sync staleness tracking)
     # Note: This is after point-of-no-return, so failure cannot trigger rollback
     # Instead, log warning and continue - CEM staleness is recoverable via roster-sync
-    if ! update_cem_manifest_rite "$team_name"; then
+    if ! update_cem_manifest_rite "$rite_name"; then
         log_warning "Failed to update CEM manifest team section"
         log_warning "CEM manifest may be stale - run roster-sync to update"
         # Cannot rollback - we're past point-of-no-return (ACTIVE_RITE written)
@@ -3264,7 +3264,7 @@ perform_swap() {
         if [[ -n "$current_session" && -f ".claude/sessions/$current_session/SESSION_CONTEXT.md" ]]; then
             # Warn user about team change
             log_warning "Active session detected: $current_session"
-            log_warning "Session team will be updated to: $team_name"
+            log_warning "Session rite will be updated to: $rite_name"
 
             local session_file=".claude/sessions/$current_session/SESSION_CONTEXT.md"
 
@@ -3282,8 +3282,8 @@ perform_swap() {
                     log_warning "ACTIVE_RITE updated but session state may be inconsistent"
                 else
                     # Safe to mutate
-                    if sed -i '' "s/^active_rite: .*/active_rite: \"$team_name\"/" "$session_file"; then
-                        log "Session rite updated to: $team_name"
+                    if sed -i '' "s/^active_rite: .*/active_rite: \"$rite_name\"/" "$session_file"; then
+                        log "Session rite updated to: $rite_name"
                     else
                         log_warning "Failed to update active_rite in SESSION_CONTEXT"
                     fi
@@ -3293,7 +3293,7 @@ perform_swap() {
     fi
 
     # Update CLAUDE.md to reflect new rite's agents (non-critical)
-    update_claude_md "$team_name" || log_warning "CLAUDE.md update failed (non-critical)"
+    update_claude_md "$rite_name" || log_warning "CLAUDE.md update failed (non-critical)"
 
     # Auto-cleanup orphan backups if flag enabled (non-critical)
     if [[ "$AUTO_CLEANUP_MODE" -eq 1 ]]; then
@@ -3301,19 +3301,19 @@ perform_swap() {
     fi
 
     # Display rite pantheon (dynamic generation from agent frontmatter)
-    generate_roster "$team_name"
+    generate_roster "$rite_name"
 
     # Success - show workflow info if available
-    local workflow_file="$KNOSSOS_HOME/rites/$team_name/workflow.yaml"
+    local workflow_file="$KNOSSOS_HOME/rites/$rite_name/workflow.yaml"
     if [[ -f "$workflow_file" ]]; then
         local entry_agent
         local phase_count
         entry_agent=$(grep -A2 "^entry_point:" "$workflow_file" | grep "agent:" | head -1 | awk '{print $2}')
         # Count phases only (lines with "agent:" under phases: section, before complexity_levels:)
         phase_count=$(sed -n '/^phases:/,/^complexity_levels:/p' "$workflow_file" | grep -c "agent:" 2>/dev/null || echo "?")
-        log "Switched to $team_name ($agent_count agents, $phase_count phases, entry: $entry_agent)"
+        log "Switched to $rite_name ($agent_count agents, $phase_count phases, entry: $entry_agent)"
     else
-        log "Switched to $team_name ($agent_count agents loaded)"
+        log "Switched to $rite_name ($agent_count agents loaded)"
     fi
 
     # Restart warning - Claude Code scans agents at session startup only
@@ -3596,7 +3596,7 @@ perform_reset() {
 
 # Main entry point
 main() {
-    local team_name=""
+    local rite_name=""
 
     # Check environment variable for auto-recover
     if [[ "${KNOSSOS_AUTO_RECOVER:-0}" == "1" ]]; then
@@ -3610,7 +3610,7 @@ main() {
                 shift
                 ;;
             --list|-l)
-                list_teams
+                list_rites
                 ;;
             --help|-h)
                 usage
@@ -3687,10 +3687,10 @@ main() {
                 exit "$EXIT_INVALID_ARGS"
                 ;;
             *)
-                if [[ -z "$team_name" ]]; then
-                    team_name="$1"
+                if [[ -z "$rite_name" ]]; then
+                    rite_name="$1"
                 else
-                    log_error "Multiple team names specified"
+                    log_error "Multiple rite names specified"
                     usage
                     exit "$EXIT_INVALID_ARGS"
                 fi
@@ -3735,7 +3735,7 @@ main() {
     fi
 
     # Handle --auto-recover mode (takes precedence for recovery)
-    if [[ "$AUTO_RECOVER" -eq 1 ]] && [[ -z "$team_name" ]]; then
+    if [[ "$AUTO_RECOVER" -eq 1 ]] && [[ -z "$rite_name" ]]; then
         if [[ ! -f "$JOURNAL_FILE" ]]; then
             log "No interrupted swap detected. State is clean."
             exit "$EXIT_SUCCESS"
@@ -3746,24 +3746,24 @@ main() {
     fi
 
     # Handle the command
-    if [[ -z "$team_name" ]]; then
+    if [[ -z "$rite_name" ]]; then
         if [[ "$UPDATE_MODE" -eq 1 ]]; then
-            # Update mode without team name - update current team
+            # Update mode without rite name - update current rite
             if [[ -f ".claude/ACTIVE_RITE" ]]; then
-                team_name=$(cat .claude/ACTIVE_RITE | tr -d '[:space:]')
-                log "Updating current team: $team_name"
-                perform_swap "$team_name"
+                rite_name=$(cat .claude/ACTIVE_RITE | tr -d '[:space:]')
+                log "Updating current rite: $rite_name"
+                perform_swap "$rite_name"
             else
-                log_error "No team active. Specify a team name to update."
+                log_error "No rite active. Specify a rite name to update."
                 exit "$EXIT_INVALID_ARGS"
             fi
         else
-            # No team specified and not update mode - query current team
+            # No rite specified and not update mode - query current rite
             query_current_rite
         fi
     else
         # Rite name - perform swap
-        perform_swap "$team_name"
+        perform_swap "$rite_name"
     fi
 }
 
