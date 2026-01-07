@@ -1,11 +1,11 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Orchestrator YAML Schema",
-  "description": "Canonical schema for orchestrator.yaml configuration files that drive orchestrator.md generation. Each team pack uses one orchestrator.yaml to parameterize the generation of their orchestrator.md agent.",
+  "description": "Canonical schema for orchestrator.yaml configuration files that drive orchestrator.md generation. Each rite pack uses one orchestrator.yaml to parameterize the generation of their orchestrator.md agent.",
   "type": "object",
   "additionalProperties": false,
   "required": [
-    "team",
+    "rite",
     "frontmatter",
     "routing",
     "workflow_position",
@@ -17,21 +17,21 @@
       "type": "string",
       "description": "Optional file header comment. Generator ignores this."
     },
-    "team": {
+    "rite": {
       "type": "object",
-      "description": "Team metadata used for frontmatter and template context.",
+      "description": "Rite metadata used for frontmatter and template context.",
       "additionalProperties": false,
       "required": ["name", "domain", "color"],
       "properties": {
         "name": {
           "type": "string",
-          "description": "Team pack name (lowercase with hyphens, must match directory name)",
+          "description": "Rite pack name (lowercase with hyphens, must match directory name)",
           "pattern": "^[a-z0-9-]+$",
           "examples": ["rnd-pack", "security-pack", "ecosystem-pack"]
         },
         "domain": {
           "type": "string",
-          "description": "Human-readable domain this team operates in",
+          "description": "Human-readable domain this rite operates in",
           "examples": [
             "technology exploration",
             "security assessment",
@@ -41,7 +41,7 @@
         },
         "color": {
           "type": "string",
-          "description": "Hex color or named color for team branding in orchestrator.md frontmatter",
+          "description": "Hex color or named color for rite branding in orchestrator.md frontmatter",
           "pattern": "^(#[0-9a-f]{6}|[a-z]+)$",
           "examples": ["purple", "red", "blue", "green", "#ff5733"]
         }
@@ -188,27 +188,27 @@
     },
     "extension_points": {
       "type": "object",
-      "description": "OPTIONAL: Which sections of the generated orchestrator.md can teams customize.",
+      "description": "OPTIONAL: Which sections of the generated orchestrator.md can rites customize.",
       "additionalProperties": false,
       "properties": {
         "team_examples": {
           "type": "boolean",
-          "description": "Can teams add team-specific examples to the Consultation Protocol section?"
+          "description": "Can rites add rite-specific examples to the Consultation Protocol section?"
         },
         "custom_antipatterns": {
           "type": "boolean",
-          "description": "Can teams add custom anti-patterns beyond canonical ones?"
+          "description": "Can rites add custom anti-patterns beyond canonical ones?"
         },
         "routing_nuances": {
           "type": "boolean",
-          "description": "Can teams add team-specific routing nuances to the Routing Criteria section?"
+          "description": "Can rites add rite-specific routing nuances to the Routing Criteria section?"
         }
       }
     }
   },
   "examples": [
     {
-      "team": {
+      "rite": {
         "name": "rnd-pack",
         "domain": "technology exploration",
         "color": "purple"
@@ -258,7 +258,7 @@
       "cross_team_protocol": ""
     },
     {
-      "team": {
+      "rite": {
         "name": "ecosystem-pack",
         "domain": "ecosystem infrastructure",
         "color": "#8B00FF"
@@ -320,7 +320,7 @@
       "cross_team_protocol": "Ecosystem-pack coordinates with all other packs. When escalating infrastructure changes to user, notify all active team leads."
     },
     {
-      "team": {
+      "rite": {
         "name": "security-pack",
         "domain": "security assessment",
         "color": "red"
@@ -374,7 +374,7 @@
       "cross_team_protocol": ""
     },
     {
-      "team": {
+      "rite": {
         "name": "doc-team-pack",
         "domain": "documentation lifecycle",
         "color": "green"
