@@ -3408,9 +3408,9 @@ preview_reset() {
     echo "No changes made (--dry-run mode)"
 }
 
-# Remove team agents only (preserve user-added agents)
-remove_team_agents() {
-    log_debug "Removing team agents (preserving user-added)"
+# Remove rite agents only (preserve user-added agents)
+remove_rite_agents() {
+    log_debug "Removing rite agents (preserving user-added)"
 
     if [[ ! -f "$MANIFEST_FILE" ]] || [[ ! -d ".claude/agents" ]]; then
         log_debug "No manifest or agents directory"
@@ -3433,14 +3433,14 @@ remove_team_agents() {
 
         if [[ "$source" == "team" ]]; then
             rm -f "$agent_file"
-            log_debug "Removed team agent: $agent_name"
+            log_debug "Removed rite agent: $agent_name"
             ((removed++)) || true
         else
             log_debug "Preserved: $agent_name (source: $source)"
         fi
     done
 
-    log "Removed: $removed team agent(s)"
+    log "Removed: $removed rite agent(s)"
 
     # Clear manifest (will be regenerated if user agents remain)
     rm -f "$MANIFEST_FILE"
