@@ -1,0 +1,122 @@
+# GoReleaser configuration for Knossos/Ariadne CLI
+# https://goreleaser.com
+
+version: 2
+
+project_name: ari
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: ari
+    main: ./cmd/ari
+    binary: ari
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - darwin
+      - linux
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X main.version={{.Version}}
+      - -X main.commit={{.Commit}}
+      - -X main.date={{.Date}}
+
+archives:
+  - id: default
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    format: tar.gz
+    format_overrides:
+      - goos: windows
+        format: zip
+    files:
+      - README.md
+      - LICENSE*
+      - docs/guides/ariadne-cli.md
+
+checksum:
+  name_template: "checksums.txt"
+  algorithm: sha256
+
+snapshot:
+  version_template: "{{ incpatch .Version }}-next"
+
+changelog:
+  sort: asc
+  use: github
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^chore:"
+      - "Merge pull request"
+      - "Merge branch"
+  groups:
+    - title: "Features"
+      regexp: "^.*feat[(\\w)]*:.*$"
+      order: 0
+    - title: "Bug Fixes"
+      regexp: "^.*fix[(\\w)]*:.*$"
+      order: 1
+    - title: "Breaking Changes"
+      regexp: "^.*feat[(\\w)]*!:.*$"
+      order: 2
+    - title: "Other"
+      order: 999
+
+release:
+  github:
+    owner: autom8y
+    name: knossos
+  draft: false
+  prerelease: auto
+  mode: replace
+  header: |
+    ## Knossos v{{ .Version }}
+
+    Ariadne CLI (`ari`) - The thread through the labyrinth.
+
+    ### Installation
+
+    **Homebrew (macOS/Linux):**
+    ```bash
+    brew install autom8y/tap/ari
+    ```
+
+    **Go install:**
+    ```bash
+    go install github.com/autom8y/knossos/cmd/ari@{{ .Tag }}
+    ```
+
+    **Binary download:**
+    Download the appropriate archive for your platform below.
+  footer: |
+    ---
+
+    **Full Changelog**: https://github.com/autom8y/knossos/compare/{{ .PreviousTag }}...{{ .Tag }}
+
+    For documentation, see [docs/guides/ariadne-cli.md](https://github.com/autom8y/knossos/blob/main/docs/guides/ariadne-cli.md)
+
+brews:
+  - name: ari
+    repository:
+      owner: autom8y
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
+    commit_author:
+      name: goreleaserbot
+      email: bot@goreleaser.com
+    commit_msg_template: "Brew formula update for {{ .ProjectName }} version {{ .Tag }}"
+    directory: Formula
+    homepage: "https://github.com/autom8y/knossos"
+    description: "Ariadne CLI - The thread through the Knossos labyrinth"
+    license: "MIT"
+    install: |
+      bin.install "ari"
+    test: |
+      system "#{bin}/ari", "--help"
