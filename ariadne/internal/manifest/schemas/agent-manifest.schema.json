@@ -16,7 +16,7 @@
     },
     "active_rite": {
       "type": "string",
-      "description": "Currently active rite pack"
+      "description": "Currently active rite"
     },
     "agents": {
       "type": "object",

@@ -49,14 +49,14 @@
     },
     "active_rite": {
       "type": "string",
-      "description": "Active rite pack name"
+      "description": "Active rite name"
     },
     "team": {
       "oneOf": [
         {"type": "string"},
         {"type": "null"}
       ],
-      "description": "Team pack name (null for cross-cutting sessions)"
+      "description": "Rite name (null for cross-cutting sessions)"
     },
     "current_phase": {
       "type": "string",

@@ -33,21 +33,21 @@
       "properties": {
         "default": {
           "type": "string",
-          "description": "Default rite pack name"
+          "description": "Default rite name"
         },
         "available": {
           "type": "array",
           "items": {
             "type": "string"
           },
-          "description": "List of available rite pack names"
+          "description": "List of available rite names"
         },
         "discovery": {
           "type": "array",
           "items": {
             "type": "string"
           },
-          "description": "Paths to search for rite packs"
+          "description": "Paths to search for rites"
         }
       }
     },
