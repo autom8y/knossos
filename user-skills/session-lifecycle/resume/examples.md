@@ -63,11 +63,11 @@ Session Details:
 ⚠ Team Mismatch Detected
 
 Session started with: 10x-dev-pack
-Current active team: doc-team-pack
+Current active rite: doc-rite-pack
 
 Options:
 1. Switch back to 10x-dev-pack (recommended)
-2. Continue with doc-team-pack (may cause issues)
+2. Continue with doc-rite-pack (may cause issues)
 3. Cancel resume
 
 Choice [1/2/3]: 1

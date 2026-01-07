@@ -55,13 +55,13 @@ The generator produced unexpected output or failed validation. Use the troublesh
 You're designing a new team structure and want to understand how orchestrator templating fits. Read the architecture overview to see:
 - How generated agents evolve over time
 - Why YAML specs are durable
-- How templating integrates with CEM, swap-team.sh, and workflow.yaml
+- How templating integrates with CEM, swap-rite.sh, and workflow.yaml
 
 **Time**: 10-15 minutes for solid understanding.
 
 ## Core Concept: Durable Abstractions
 
-Hand-written orchestrators mix **unchanging protocol** with **team-specific details**. When protocol evolves, you update 10+ files manually with high risk of inconsistency.
+Hand-written orchestrators mix **unchanging protocol** with **rite-specific details**. When protocol evolves, you update 10+ files manually with high risk of inconsistency.
 
 **The solution**: Separate canonical protocol (template) from team specifics (YAML):
 
@@ -87,7 +87,7 @@ Template contains protocol once. YAML contains variation. Generator merges them.
 
 ### 1. Design Configuration
 
-Create `teams/my-team/orchestrator.yaml`:
+Create `rites/my-team/orchestrator.yaml`:
 
 ```yaml
 team:
@@ -122,15 +122,15 @@ See [schema-reference.md](schema-reference.md) for complete field reference.
 
 # Validate
 /roster/templates/validate-orchestrator.sh \
-  teams/my-team/agents/orchestrator.md
+  rites/my-team/agents/orchestrator.md
 ```
 
 ### 3. Commit & Activate
 
 ```bash
-git add teams/my-team/orchestrator.yaml teams/my-team/agents/orchestrator.md
+git add rites/my-team/orchestrator.yaml rites/my-team/agents/orchestrator.md
 git commit -m "feat: add my-team orchestrator"
-./swap-team.sh my-team
+./swap-rite.sh my-team
 ```
 
 See [create-new-rite-orchestrator.md](create-new-rite-orchestrator.md) for detailed walkthrough.
@@ -139,10 +139,10 @@ See [create-new-rite-orchestrator.md](create-new-rite-orchestrator.md) for detai
 
 | File | Location | Purpose |
 |------|----------|---------|
-| **orchestrator.yaml** | `teams/{team}/orchestrator.yaml` | Team config (durable) |
+| **orchestrator.yaml** | `rites/{team}/orchestrator.yaml` | Team config (durable) |
 | **rite-base.md.tpl** | `/roster/templates/` | Canonical template |
-| **workflow.yaml** | `teams/{team}/workflow.yaml` | Phase definitions (reference) |
-| **orchestrator.md** | `teams/{team}/agents/orchestrator.md` | Generated agent (production) |
+| **workflow.yaml** | `rites/{team}/workflow.yaml` | Phase definitions (reference) |
+| **orchestrator.md** | `rites/{team}/agents/orchestrator.md` | Generated agent (production) |
 
 ## Generator Behavior
 
@@ -181,7 +181,7 @@ After generation, run `validate-orchestrator.sh` to verify:
 ## Common Patterns
 
 **Linear Pipeline** (4-5 specialists): analyst → designer → implementer → reviewer
-- Example teams: rnd-pack, security-pack, doc-team-pack
+- Example teams: rnd-pack, security-pack, doc-rite-pack
 
 **Hub Coordination** (5+ specialists): analyzer coordinates multiple parallel paths
 - Example teams: ecosystem-pack
@@ -194,7 +194,7 @@ See [architecture-overview.md](architecture-overview.md) for pattern details.
 
 ## Integration Points
 
-**swap-team.sh**: Reads frontmatter, extracts name/role/description, symlinks orchestrator.md
+**swap-rite.sh**: Reads frontmatter, extracts name/role/description, symlinks orchestrator.md
 
 **workflow.yaml**: Generator validates specialists in routing exist in workflow.yaml phases
 

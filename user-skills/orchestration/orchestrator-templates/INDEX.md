@@ -72,8 +72,8 @@ orchestrator.md (production output, regenerable)
 | Generator | `/roster/templates/orchestrator-generate.sh` |
 | Validator | `/roster/templates/validate-orchestrator.sh` |
 | Template | `/roster/templates/orchestrator-base.md.tpl` |
-| Team config | `.claude/teams/{team}/orchestrator.yaml` |
-| Generated | `.claude/teams/{team}/agents/orchestrator.md` |
+| Team config | `.claude/rites/{team}/orchestrator.yaml` |
+| Generated | `.claude/rites/{team}/agents/orchestrator.md` |
 
 ## Common Commands
 
@@ -82,10 +82,10 @@ orchestrator.md (production output, regenerable)
 /roster/templates/orchestrator-generate.sh my-team
 
 # Validate output
-/roster/templates/validate-orchestrator.sh .claude/teams/my-team/agents/orchestrator.md
+/roster/templates/validate-orchestrator.sh .claude/rites/my-team/agents/orchestrator.md
 
 # Activate team
-./swap-team.sh my-team
+./swap-rite.sh my-team
 ```
 
 See [QUICK-REFERENCE.md](QUICK-REFERENCE.md) for complete command reference.

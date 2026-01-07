@@ -4,7 +4,7 @@
 
 ```bash
 # Step 1: Create config
-cat > .claude/teams/my-team/orchestrator.yaml << 'EOF'
+cat > .claude/rites/my-team/orchestrator.yaml << 'EOF'
 team:
   name: my-team
   domain: "What your team does"
@@ -22,8 +22,8 @@ routing:
   specialist-three: "When [condition]"
 
 workflow_position:
-  upstream: "None or team name"
-  downstream: "None or team name"
+  upstream: "None or rite name"
+  downstream: "None or rite name"
 
 handoff_criteria:
   specialist-one:
@@ -47,17 +47,17 @@ EOF
 
 # Step 3: Validate
 /roster/templates/validate-orchestrator.sh \
-  .claude/teams/my-team/agents/orchestrator.md
+  .claude/rites/my-team/agents/orchestrator.md
 
 # Step 4: Commit
-git add .claude/teams/my-team/orchestrator.yaml
-git add .claude/teams/my-team/agents/orchestrator.md
+git add .claude/rites/my-team/orchestrator.yaml
+git add .claude/rites/my-team/agents/orchestrator.md
 git commit -m "feat: add my-team orchestrator"
 
 # Step 5: Test
-./swap-team.sh my-team
+./swap-rite.sh my-team
 grep "^role:" .claude/agents/orchestrator.md
-./swap-team.sh previous-team
+./swap-rite.sh previous-team
 ```
 
 ## Updating All Orchestrators (20 min)
@@ -67,23 +67,23 @@ grep "^role:" .claude/agents/orchestrator.md
 nano /roster/templates/rite-base.md.tpl
 
 # Step 2: Regenerate all
-for team in .claude/teams/*/; do
+for team in .claude/rites/*/; do
   /roster/templates/orchestrator-generate.sh $(basename "$team")
 done
 
 # Step 3: Validate all
 validation_failed=0
-for md in .claude/teams/*/agents/orchestrator.md; do
+for md in .claude/rites/*/agents/orchestrator.md; do
   /roster/templates/validate-orchestrator.sh "$md" || \
     validation_failed=$((validation_failed + 1))
 done
 [ $validation_failed -eq 0 ] && echo "All passed" || echo "$validation_failed failed"
 
 # Step 4: Review diffs
-git diff .claude/teams/*/agents/orchestrator.md | head -100
+git diff .claude/rites/*/agents/orchestrator.md | head -100
 
 # Step 5: Commit
-git add .claude/teams/*/agents/orchestrator.md
+git add .claude/rites/*/agents/orchestrator.md
 git commit -m "refactor: regenerate orchestrators with updated template"
 ```
 
@@ -93,10 +93,10 @@ git commit -m "refactor: regenerate orchestrators with updated template"
 
 ```bash
 # Check exact names in workflow.yaml
-yq '.phases[].agent' .claude/teams/my-team/workflow.yaml
+yq '.phases[].agent' .claude/rites/my-team/workflow.yaml
 
 # Update orchestrator.yaml to match exactly
-nano .claude/teams/my-team/orchestrator.yaml
+nano .claude/rites/my-team/orchestrator.yaml
 
 # Regenerate
 /roster/templates/orchestrator-generate.sh my-team
@@ -106,26 +106,26 @@ nano .claude/teams/my-team/orchestrator.yaml
 
 ```bash
 # Delete bad file, regenerate
-rm .claude/teams/my-team/agents/orchestrator.md
+rm .claude/rites/my-team/agents/orchestrator.md
 /roster/templates/orchestrator-generate.sh my-team
 
 # If still fails, check YAML
-yq . .claude/teams/my-team/orchestrator.yaml > /dev/null
+yq . .claude/rites/my-team/orchestrator.yaml > /dev/null
 ```
 
-### swap-team.sh Can't Parse
+### swap-rite.sh Can't Parse
 
 ```bash
 # Check frontmatter
-head -10 .claude/teams/my-team/agents/orchestrator.md
+head -10 .claude/rites/my-team/agents/orchestrator.md
 
 # Regenerate if malformed
-rm .claude/teams/my-team/agents/orchestrator.md
+rm .claude/rites/my-team/agents/orchestrator.md
 /roster/templates/orchestrator-generate.sh my-team
 
 # Validate
 /roster/templates/validate-orchestrator.sh \
-  .claude/teams/my-team/agents/orchestrator.md
+  .claude/rites/my-team/agents/orchestrator.md
 ```
 
 ## YAML Quick Reference
@@ -176,8 +176,8 @@ extension_points:
 | Validator | `templates/validate-orchestrator.sh` |
 | Template | `templates/orchestrator-base.md.tpl` |
 | Schema | `schemas/orchestrator.yaml.schema.json` |
-| Team config | `teams/{team-name}/orchestrator.yaml` |
-| Generated | `teams/{team-name}/agents/orchestrator.md` |
+| Team config | `rites/{rite-name}/orchestrator.yaml` |
+| Generated | `rites/{rite-name}/agents/orchestrator.md` |
 
 ## Validation Rules (10)
 
@@ -211,10 +211,10 @@ diff <(yq '.phases[].agent' workflow.yaml | sort) \
      <(yq '.routing | keys[]' orchestrator.yaml | sort)
 
 # Show routing table
-grep "^|" .claude/teams/my-team/agents/orchestrator.md | grep -v "^|---"
+grep "^|" .claude/rites/my-team/agents/orchestrator.md | grep -v "^|---"
 
 # Test team activation
-./swap-team.sh my-team && echo "OK" || echo "FAILED"
+./swap-rite.sh my-team && echo "OK" || echo "FAILED"
 ```
 
 ## Success Checklist
@@ -230,7 +230,7 @@ Before considering orchestrator complete:
 - [ ] All specialist names match workflow.yaml exactly
 - [ ] Skills use @skill-name format
 - [ ] Both files committed to git
-- [ ] Team activation works (swap-team.sh)
+- [ ] Team activation works (swap-rite.sh)
 
 ## FAQ
 

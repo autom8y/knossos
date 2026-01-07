@@ -4,7 +4,7 @@
 
 ## The Pattern
 
-When an orchestrator is present in the active team:
+When an orchestrator is present in the active rite:
 
 ```
 User: /start Add dark mode toggle

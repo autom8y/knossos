@@ -408,7 +408,7 @@ This may cause agent availability issues.
 
 Options:
 1. Switch to session team: /team {session_team}
-2. Continue with current team (agents may differ)
+2. Continue with current rite (agents may differ)
 3. Cancel and investigate
 
 Continue? [1/2/cancel]:

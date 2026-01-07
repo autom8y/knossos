@@ -4,7 +4,7 @@
 
 ## Overview
 
-The `handoff-validate` hook checks that required artifacts exist and are complete before cross-team handoff. It integrates with `/wrap` to catch missing handoffs for SERVICE+ complexity work.
+The `handoff-validate` hook checks that required artifacts exist and are complete before cross-rite handoff. It integrates with `/wrap` to catch missing handoffs for SERVICE+ complexity work.
 
 ## Command Usage
 

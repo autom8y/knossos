@@ -61,7 +61,7 @@ Before migrating a team, ensure:
 
 1. **Read current orchestrator**
    ```bash
-   cat teams/my-team/agents/orchestrator.md | head -80
+   cat rites/my-team/agents/orchestrator.md | head -80
    ```
 
 2. **Extract team metadata**
@@ -76,7 +76,7 @@ Before migrating a team, ensure:
 4. **Extract handoff criteria**
    - Find handoff sections (one per specialist)
    - List criteria with exact wording
-   - Note any team-specific criteria
+   - Note any rite-specific criteria
 
 5. **Extract skills**
    - Find "Skills Reference" section
@@ -85,16 +85,16 @@ Before migrating a team, ensure:
 
 6. **Create orchestrator.yaml**
    ```bash
-   # Use create-new-team-orchestrator guide
+   # Use create-new-rite-orchestrator guide
    # Or copy from example team and modify
-   cp teams/doc-team-pack/orchestrator.yaml \
-      teams/my-team/orchestrator.yaml
+   cp rites/doc-rite-pack/orchestrator.yaml \
+      rites/my-team/orchestrator.yaml
 
    # Edit to match your extracted configuration
-   nano teams/my-team/orchestrator.yaml
+   nano rites/my-team/orchestrator.yaml
    ```
 
-**Output**: `teams/my-team/orchestrator.yaml` (ready to generate from)
+**Output**: `rites/my-team/orchestrator.yaml` (ready to generate from)
 
 ### Phase 3: Generation (Day 2 - 5 minutes)
 
@@ -110,7 +110,7 @@ Before migrating a team, ensure:
 2. **Run validator**
    ```bash
    /roster/templates/validate-orchestrator.sh \
-     teams/my-team/agents/orchestrator.md
+     rites/my-team/agents/orchestrator.md
    ```
 
 3. **Verify success**
@@ -118,7 +118,7 @@ Before migrating a team, ensure:
    VALIDATION PASSED (exit code 0)
    ```
 
-**Output**: `teams/my-team/agents/orchestrator.md` (regenerated)
+**Output**: `rites/my-team/agents/orchestrator.md` (regenerated)
 
 ### Phase 4: Comparison (Day 2-3 - 15 minutes)
 
@@ -128,14 +128,14 @@ Before migrating a team, ensure:
 
 1. **Backup original**
    ```bash
-   cp teams/my-team/agents/orchestrator.md \
-      teams/my-team/agents/orchestrator.md.original
+   cp rites/my-team/agents/orchestrator.md \
+      rites/my-team/agents/orchestrator.md.original
    ```
 
 2. **Review diff**
    ```bash
-   git diff teams/my-team/agents/orchestrator.md.original \
-            teams/my-team/agents/orchestrator.md
+   git diff rites/my-team/agents/orchestrator.md.original \
+            rites/my-team/agents/orchestrator.md
    ```
 
 3. **What to look for**:
@@ -194,8 +194,8 @@ Before migrating a team, ensure:
 cd $KNOSSOS_HOME
 
 # Stage both files
-git add .claude/teams/my-team/orchestrator.yaml
-git add .claude/teams/my-team/agents/orchestrator.md
+git add .claude/rites/my-team/orchestrator.yaml
+git add .claude/rites/my-team/agents/orchestrator.md
 
 # Create commit
 git commit -m "refactor: migrate my-team to templated orchestrator
@@ -215,7 +215,7 @@ git log -1 --stat
 
 ```bash
 # Test 1: Activate team
-./swap-team.sh my-team
+./swap-rite.sh my-team
 
 # Test 2: Verify frontmatter
 grep "^role:" .claude/agents/orchestrator.md
@@ -224,7 +224,7 @@ grep "^role:" .claude/agents/orchestrator.md
 grep "specialist-name" .claude/agents/orchestrator.md
 
 # Test 4: Restore previous team
-./swap-team.sh previous-team
+./swap-rite.sh previous-team
 
 # Test 5: Quick smoke test with real usage
 # (e.g., did orchestrator receive consultation request?)
@@ -238,14 +238,14 @@ If anything goes wrong during migration:
 
 ```bash
 # 1. Restore original orchestrator.md
-cp teams/my-team/agents/orchestrator.md.original \
-   teams/my-team/agents/orchestrator.md
+cp rites/my-team/agents/orchestrator.md.original \
+   rites/my-team/agents/orchestrator.md
 
 # 2. Remove YAML config
-rm teams/my-team/orchestrator.yaml
+rm rites/my-team/orchestrator.yaml
 
 # 3. Verify restoration
-head -10 teams/my-team/agents/orchestrator.md
+head -10 rites/my-team/agents/orchestrator.md
 
 # 4. Don't commit anything
 # (your original .md file is unchanged in git)
@@ -300,7 +300,7 @@ For each team migrating, use this checklist:
 - [ ] Commit created successfully
 
 ### Testing
-- [ ] Team activation works (swap-team.sh)
+- [ ] Team activation works (swap-rite.sh)
 - [ ] Frontmatter parses correctly
 - [ ] Specialists appear in routing
 - [ ] Smoke test with real usage
@@ -462,7 +462,7 @@ Don't migrate if wording matters more than consistency.
 After migration, verify:
 
 - [ ] Team continues to function (no behavior change)
-- [ ] Orchestrator can be activated (swap-team.sh works)
+- [ ] Orchestrator can be activated (swap-rite.sh works)
 - [ ] Consultation requests work as before
 - [ ] Routing works as before
 - [ ] Team members understand YAML location
@@ -472,7 +472,7 @@ After migration, verify:
 
 **To announce migration to team**:
 
-> We're migrating [team-name] orchestrator to a templated system. This means:
+> We're migrating [rite-name] orchestrator to a templated system. This means:
 >
 > **What changes**: Orchestrator configuration moves to YAML file (orchestrator.yaml)
 > **What stays same**: Behavior and functionality are identical

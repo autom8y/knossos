@@ -376,7 +376,7 @@ Recommend: Resolve blocker and run `/task "Stripe webhook integration"` separate
 | Sprint already active | SPRINT_CONTEXT exists | Use `/wrap-sprint` to complete or `/resume-sprint` to continue |
 | Invalid task name | Empty or duplicate task | Prompt for valid task name |
 | Task execution fails | Agent error during /task | Document blocker, offer skip/resolve |
-| Missing team agents | Required agent not in active team | Switch to 10x-dev-pack with `/10x` |
+| Missing team agents | Required agent not in active rite | Switch to 10x-dev-pack with `/10x` |
 
 ---
 

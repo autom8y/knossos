@@ -282,7 +282,7 @@ If complexity decreases (rare):
 
 ## Complexity vs. Team Pack
 
-Some team packs specialize in complexity levels:
+Some rites specialize in complexity levels:
 
 | Team | Best For |
 |------|----------|

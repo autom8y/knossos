@@ -12,7 +12,7 @@ Apply [Session Resolution Pattern](../shared-sections/session-resolution.md):
 
 Apply [Workflow Resolution Pattern](../shared-sections/workflow-resolution.md):
 - Target agent: User-specified agent name
-- Validate agent exists in current team
+- Validate agent exists in current rite
 
 **Additional Check**:
 - **Check for same agent handoff**: Compare to `last_agent` field
@@ -103,7 +103,7 @@ Display confirmation message with:
 | No active session | No session for current project | Use `/start` to begin a session |
 | Session parked | `parked_at` field set | Use `/resume` first, then `/handoff` |
 | Invalid agent | Agent not in roster | Use valid agent name or `/roster` to list |
-| Agent not in team | Agent file missing | Check active team, switch if needed |
+| Agent not in team | Agent file missing | Check active rite, switch if needed |
 | Missing parameter | No agent specified | Provide: `/handoff <agent-name>` |
 
 ---

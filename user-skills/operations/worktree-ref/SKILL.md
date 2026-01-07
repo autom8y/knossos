@@ -11,7 +11,7 @@ description: "Git worktree management for parallel Claude sessions with filesyst
 
 Git worktrees provide true filesystem isolation for parallel Claude sessions. Each worktree has its own `.claude/` directory with independent agents, sessions, sprints, and team configuration.
 
-**The Problem**: Claude Code requires a local `.claude/` directory structure that cannot be configured per-terminal. When multiple terminals work on the same project with different teams/sprints, they collide on shared files.
+**The Problem**: Claude Code requires a local `.claude/` directory structure that cannot be configured per-terminal. When multiple terminals work on the same project with different rites/sprints, they collide on shared files.
 
 **The Solution**: Git worktrees create separate working directories that share the same git database but have independent file systems.
 
@@ -73,7 +73,7 @@ cd worktrees/wt-{id} && claude
 - [behavior.md](behavior.md) - Full command reference and implementation details
 - [examples.md](examples.md) - Workflow scenarios and integration examples
 - [troubleshooting.md](troubleshooting.md) - Common issues and solutions
-- [integration.md](integration.md) - CEM, session, and team pack integration
+- [integration.md](integration.md) - CEM, session, and rite integration
 
 ## Related Commands
 

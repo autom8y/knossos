@@ -31,7 +31,7 @@ Prompt user for any missing parameters:
 ### 3. Team Context Setup
 
 - If `--team` specified and differs from ACTIVE_RITE:
-  - Invoke `$KNOSSOS_HOME/swap-team.sh <team-name>` via Bash tool
+  - Invoke `$KNOSSOS_HOME/swap-rite.sh <rite-name>` via Bash tool
   - Verify ACTIVE_RITE file updated
   - Confirm: "Switched to {team} for this session"
 
@@ -40,13 +40,13 @@ Prompt user for any missing parameters:
 Delegate session creation to the Moirai (Clotho - the Spinner) via Task tool:
 
 ```
-Task(moirai, "create_session initiative='{user-initiative}' complexity={COMPLEXITY} rite={team-name}
+Task(moirai, "create_session initiative='{user-initiative}' complexity={COMPLEXITY} rite={rite-name}
 
 Session Context:
 - New session requested
 - Initiative: {user-provided-initiative}
 - Complexity: {SCRIPT|MODULE|SERVICE|PLATFORM}
-- Team: {team-pack-name}
+- Team: {rite-pack-name}
 - Phase: requirements")
 ```
 
@@ -151,7 +151,7 @@ Display confirmation message with:
 | Error | Condition | Resolution |
 |-------|-----------|------------|
 | Session already active | Active session for current project | Use `/wrap` to complete current session or `/resume` to continue it |
-| Invalid team name | Team not found in roster | Use `/roster` to list available teams |
+| Invalid rite name | Team not found in roster | Use `/roster` to list available rites |
 | Roster system unavailable | `$KNOSSOS_HOME/` not found | Set KNOSSOS_HOME environment variable or check installation |
 | PRD creation failed | Analyst unable to produce PRD | Review error, provide more context, retry |
 | Missing parameters | User cancels prompts | Command aborted, no state changed |

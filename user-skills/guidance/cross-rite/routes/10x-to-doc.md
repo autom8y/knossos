@@ -1,6 +1,6 @@
 # 10x-to-Doc Handoff Checklist
 
-> Artifact checklist for handing off documentation work to doc-team-pack.
+> Artifact checklist for handing off documentation work to doc-rite-pack.
 
 ## When to Use
 
@@ -150,14 +150,14 @@ Expected output:
 
 ## HANDOFF Artifact Template
 
-Create `HANDOFF-10x-dev-pack-to-doc-team-pack-YYYY-MM-DD.md`:
+Create `HANDOFF-10x-dev-pack-to-doc-rite-pack-YYYY-MM-DD.md`:
 
 ```yaml
 ---
-artifact_id: HANDOFF-10x-dev-pack-to-doc-team-pack-2026-01-05
+artifact_id: HANDOFF-10x-dev-pack-to-doc-rite-pack-2026-01-05
 schema_version: "1.0"
 source_team: 10x-dev-pack
-target_team: doc-team-pack
+target_team: doc-rite-pack
 handoff_type: assessment
 priority: medium
 blocking: false

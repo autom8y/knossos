@@ -4,9 +4,9 @@
 
 ## File Locations
 
-**Template location**: `teams/{team-name}/orchestrator.yaml`
+**Template location**: `rites/{rite-name}/orchestrator.yaml`
 
-**Example location**: `teams/rnd-pack/orchestrator.yaml`
+**Example location**: `rites/rnd-pack/orchestrator.yaml`
 
 ## Schema Overview
 
@@ -306,7 +306,7 @@ If empty or omitted, generated orchestrator uses only canonical anti-patterns.
 ### cross_team_protocol (OPTIONAL)
 
 **Type**: String
-**Default**: Empty string (no cross-team responsibilities)
+**Default**: Empty string (no cross-rite responsibilities)
 **Purpose**: Responsibilities when other teams consult this orchestrator
 
 Some orchestrators act as hubs that other teams consult. This documents that protocol.
@@ -402,7 +402,7 @@ skills:
   - "@skill-two for purpose"
 ```
 
-**Example**: rnd-pack, security-pack, doc-team-pack
+**Example**: rnd-pack, security-pack, doc-rite-pack
 
 ### Pattern 2: Hub Coordination
 
@@ -478,7 +478,7 @@ When you save your orchestrator.yaml, ensure:
 **Automated check**: Run generator, then validator
 ```bash
 orchestrator-generate.sh my-team
-validate-orchestrator.sh .claude/teams/my-team/agents/orchestrator.md
+validate-orchestrator.sh .claude/rites/my-team/agents/orchestrator.md
 ```
 
 ---
@@ -516,7 +516,7 @@ If you have a hand-written orchestrator.md and want to extract it to orchestrato
 
 ### Creating orchestrator.yaml from Scratch
 
-1. **Copy an example**: Use doc-team-pack or rnd-pack as template
+1. **Copy an example**: Use doc-rite-pack or rnd-pack as template
 2. **Update team metadata**: name, domain, color
 3. **Update frontmatter**: role and description for your team
 4. **Update routing**: Specialist names and conditions
@@ -540,7 +540,7 @@ Current schema supports all 11 teams without changes. Future evolution handled t
 ### Adding Custom Fields (Not Yet Supported)
 
 If you need custom fields beyond schema:
-1. **Use extension_points**: Add team-specific configuration here
+1. **Use extension_points**: Add rite-specific configuration here
 2. **Request feature**: Propose to tech team for next template evolution
 3. **Don't edit template**: Keep modifications in YAML, not in base template
 

@@ -1,6 +1,6 @@
 # Execution Mode
 
-> Defines the three operating modes based on session state and team context.
+> Defines the three operating modes based on session state and rite context.
 
 ## The Three Modes
 

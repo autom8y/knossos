@@ -101,7 +101,7 @@ git worktree prune
 **Fix:**
 ```bash
 cd worktrees/wt-{id}
-./swap-team.sh <pack-name>
+./swap-rite.sh <pack-name>
 ```
 
 ## Diagnostic Commands

@@ -6,7 +6,7 @@
 
 ### Purpose
 
-Team packs contain different agents. If session started with `10x-dev-pack` but current team is `doc-team-pack`, expected agents may not be available.
+Team packs contain different agents. If session started with `10x-dev-pack` but current rite is `doc-rite-pack`, expected agents may not be available.
 
 ### Check Logic
 
@@ -22,9 +22,9 @@ If different → Surface mismatch warning
 ⚠ Team Mismatch Detected
 
 Session started with: {session.active_team}
-Current active team: {current ACTIVE_RITE}
+Current active rite: {current ACTIVE_RITE}
 
-This session's agents may not be available in the current team.
+This session's agents may not be available in the current rite.
 
 Options:
 1. Switch back to {session.active_team} (recommended)
@@ -34,7 +34,7 @@ Options:
 Choice [1/2/3]:
 ```
 
-**Option 1**: Invoke `$KNOSSOS_HOME/swap-team.sh {session.active_team}`
+**Option 1**: Invoke `$KNOSSOS_HOME/swap-rite.sh {session.active_team}`
 **Option 2**: Continue with potential agent mismatch
 **Option 3**: Abort resume
 
@@ -87,7 +87,7 @@ Review changes before continuing? [y/n]:
 
 ### Purpose
 
-Validate selected agent exists in current team.
+Validate selected agent exists in current rite.
 
 ### Check Logic
 

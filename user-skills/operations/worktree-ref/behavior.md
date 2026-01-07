@@ -10,13 +10,13 @@ Create a new isolated worktree with full ecosystem initialization.
 
 **Parameters:**
 - `name` - Descriptive name for the worktree (default: "unnamed")
-- `--team=PACK` - Team pack to use (default: current team)
+- `--team=PACK` - Team pack to use (default: current rite)
 - `--from=REF` - Git ref to base worktree on (default: HEAD)
 
 **What Happens:**
 1. Creates git worktree with detached HEAD (no branch pollution)
 2. Initializes ecosystem (fresh sync from roster)
-3. Sets team if specified via swap-team.sh
+3. Sets team if specified via swap-rite.sh
 4. Creates initial session via session-manager.sh
 5. Returns path for user to `cd` into
 

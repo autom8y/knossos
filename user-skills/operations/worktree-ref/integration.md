@@ -96,12 +96,12 @@ Worktree functions in `worktree-manager.sh`:
 
 ## Team Pack Integration
 
-### swap-team.sh
+### swap-rite.sh
 
 Works identically in worktrees:
 ```bash
 cd worktrees/wt-{id}
-./swap-team.sh 10x-dev-pack
+./swap-rite.sh 10x-dev-pack
 ```
 
 ### ACTIVE_RITE

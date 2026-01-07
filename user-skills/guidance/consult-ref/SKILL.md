@@ -108,7 +108,7 @@ When invoked without arguments, `/consult` provides ecosystem overview:
    - Current complexity level (if in session)
 
 2. **Display Team Roster**
-   - Show all teams with brief descriptions (dynamic count from team-discovery)
+   - Show all teams with brief descriptions (dynamic count from rite-discovery)
    - Highlight quick-switch commands
    - Indicate which team is currently active
 
@@ -135,7 +135,7 @@ Git: feature/auth-system (clean)
 
 === Available Teams ===
   10x-dev-pack       /10x          Full feature development
-  doc-team-pack      /docs         Documentation workflows
+  doc-rite-pack      /docs         Documentation workflows
   hygiene-pack       /hygiene      Code quality & refactoring
   debt-triage-pack   /debt         Technical debt management
   sre-pack           /sre          Operations & reliability
@@ -167,7 +167,7 @@ When given a natural language query, `/consult` acts as intelligent router:
 
 2. **Match to Team + Workflow**
    - Consult `~/.claude/knowledge/consultant/routing/intent-patterns.md`
-   - Determine appropriate team pack
+   - Determine appropriate rite
    - Select workflow type (task, sprint, hotfix, spike)
    - Estimate complexity level
 
@@ -261,7 +261,7 @@ requirements, design, implementation, and security validation.
 - If security-focused review needed: Start with /security team
 - If this is part of larger initiative: Consider /sprint for multi-task coordination
 
-Next step: Run `/10x` to switch teams
+Next step: Run `/10x` to switch rites
 ```
 
 ---
@@ -353,12 +353,12 @@ Next step: /10x && /start "Your feature name"
 Display complete team reference table:
 
 ```
-=== All Teams (Dynamic Count from team-discovery) ===
+=== All Teams (Dynamic Count from rite-discovery) ===
 
 | Team              | Command       | Agents | Best For                           |
 |-------------------|---------------|--------|------------------------------------|
 | 10x-dev-pack      | /10x          | 5      | Full feature development lifecycle |
-| doc-team-pack     | /docs         | 4      | Documentation, technical writing   |
+| doc-rite-pack     | /docs         | 4      | Documentation, technical writing   |
 | hygiene-pack      | /hygiene      | 4      | Code quality, refactoring          |
 | debt-triage-pack  | /debt         | 3      | Technical debt prioritization      |
 | sre-pack          | /sre          | 4      | Operations, reliability            |
@@ -392,7 +392,7 @@ Display all commands categorized by domain:
 --- Team Management (10) ---
 /team               Switch team or list available
 /10x                Quick switch to 10x-dev-pack
-/docs               Quick switch to doc-team-pack
+/docs               Quick switch to doc-rite-pack
 /hygiene            Quick switch to hygiene-pack
 /debt               Quick switch to debt-triage-pack
 /sre                Quick switch to sre-pack
@@ -420,7 +420,7 @@ Display all commands categorized by domain:
 
 --- Meta/Factory (4) ---
 /forge              The Forge overview
-/new-team           Create new team pack
+/new-team           Create new rite
 /validate-team      Validate existing team
 /eval-agent         Test single agent
 ```
@@ -437,7 +437,7 @@ The Consultant draws from structured knowledge base:
 | `agent-reference.md` | All 41+ agents with roles and capabilities |
 | `command-reference.md` | Complete command catalog with examples |
 | `routing/intent-patterns.md` | Natural language → team/workflow mapping |
-| `team-profiles/*.md` | Deep knowledge of each team's strengths |
+| `rite-profiles/*.md` | Deep knowledge of each team's strengths |
 | `playbooks/curated/*.md` | Pre-built workflows for common scenarios |
 
 These sources are maintained in `~/.claude/knowledge/consultant/` and kept in sync with the ecosystem.
@@ -457,7 +457,7 @@ What you understand the user needs:
 
 ### 2. Recommendation
 Which team/workflow fits best:
-- Team name and quick-switch command
+- Rite name and quick-switch command
 - Workflow type (task/sprint/hotfix/spike)
 - Complexity level recommendation
 - Rationale for the choice
@@ -511,13 +511,13 @@ Example enhancement:
 - WITHOUT: "After PRD, handoff to Architect"
 - WITH: "After PRD, quality gate requires: problem clear, scope defined, requirements testable. Then handoff to Architect per `10x-workflow` lifecycle."
 
-### Referencing team-discovery Skill
+### Referencing rite-discovery Skill
 
-When recommending teams, `/consult` retrieves current team inventory from:
-- `team-discovery` skill for dynamic team list
-- `team-discovery/schemas/rite-profile.yaml` for profile structure
+When recommending teams, `/consult` retrieves current rite inventory from:
+- `rite-discovery` skill for dynamic team list
+- `rite-discovery/schemas/rite-profile.yaml` for profile structure
 
-**Pattern**: Never hardcode team counts or capabilities; always read from `team-discovery`.
+**Pattern**: Never hardcode team counts or capabilities; always read from `rite-discovery`.
 
 ---
 
@@ -526,7 +526,7 @@ When recommending teams, `/consult` retrieves current team inventory from:
 | Team | Command | Complexity Levels | Use When |
 |------|---------|-------------------|----------|
 | **10x-dev-pack** | `/10x` | SCRIPT, MODULE, SERVICE, PLATFORM | Building features, fixing complex bugs |
-| **doc-team-pack** | `/docs` | PAGE, SECTION, SITE | Writing or updating documentation |
+| **doc-rite-pack** | `/docs` | PAGE, SECTION, SITE | Writing or updating documentation |
 | **hygiene-pack** | `/hygiene` | SPOT, MODULE, CODEBASE | Refactoring, code quality improvements |
 | **debt-triage-pack** | `/debt` | QUICK, AUDIT | Assessing and prioritizing technical debt |
 | **sre-pack** | `/sre` | TASK, PROJECT, PLATFORM | Operational work, reliability, monitoring |
@@ -575,7 +575,7 @@ When recommending teams, `/consult` retrieves current team inventory from:
 
 **Response:**
 - Assessment: Documentation task, API domain, SECTION complexity
-- Recommendation: doc-team-pack, /task workflow
+- Recommendation: doc-rite-pack, /task workflow
 - Command-Flow: `/docs` → `/task "API documentation" --complexity=SECTION`
 - Alternatives: None, straightforward doc work
 

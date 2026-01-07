@@ -22,7 +22,7 @@ Command file (e.g., `.claude/commands/task.md`) sets up the consultation:
 ## Initialization
 
 1. Read SESSION_CONTEXT.md for current state
-2. Identify active team and orchestrator
+2. Identify active rite and orchestrator
 3. Parse user input for initiative name and scope
 
 ## Consultation Setup

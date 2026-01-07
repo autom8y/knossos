@@ -9,8 +9,8 @@
 
 ## Prerequisites
 
-- [ ] You have a team directory created: `teams/my-team/`
-- [ ] You have a workflow.yaml with your team's specialists: `teams/my-team/workflow.yaml`
+- [ ] You have a team directory created: `rites/my-team/`
+- [ ] You have a workflow.yaml with your team's specialists: `rites/my-team/workflow.yaml`
 - [ ] You know the team's: name, domain, color, and specialist roles
 - [ ] You have access to generator and validator scripts
 
@@ -18,10 +18,10 @@
 
 ### Step 1.1: Create the File
 
-Create `teams/my-team/orchestrator.yaml`:
+Create `rites/my-team/orchestrator.yaml`:
 
 ```bash
-touch teams/my-team/orchestrator.yaml
+touch rites/my-team/orchestrator.yaml
 ```
 
 ### Step 1.2: Add Team Metadata
@@ -35,10 +35,10 @@ team:
   color: blue             # Valid hex or CSS color
 ```
 
-**Example** (doc-team-pack):
+**Example** (doc-rite-pack):
 ```yaml
 team:
-  name: doc-team-pack
+  name: doc-rite-pack
   domain: "Documentation and technical writing"
   color: "#4A90E2"        # Or just: blue
 ```
@@ -83,7 +83,7 @@ routing:
 
 **Check your workflow.yaml**:
 ```bash
-grep "agent:" teams/my-team/workflow.yaml
+grep "agent:" rites/my-team/workflow.yaml
 ```
 
 This shows exact specialist names. Use those names, not variations.
@@ -208,8 +208,8 @@ cd $KNOSSOS_HOME
 ```
 Generating orchestrator for my-team...
 Template: /roster/templates/orchestrator-base.md.tpl
-Config: teams/my-team/orchestrator.yaml
-Output: teams/my-team/agents/orchestrator.md
+Config: rites/my-team/orchestrator.yaml
+Output: rites/my-team/agents/orchestrator.md
 Generation complete!
 ```
 
@@ -238,7 +238,7 @@ If generator fails:
 
 ```bash
 /roster/templates/validate-orchestrator.sh \
-  teams/my-team/agents/orchestrator.md
+  rites/my-team/agents/orchestrator.md
 ```
 
 **Expected output**:
@@ -278,7 +278,7 @@ ERROR: Found 2 unreplaced placeholder(s)
 ### Step 4.1: Preview the File
 
 ```bash
-head -80 teams/my-team/agents/orchestrator.md
+head -80 rites/my-team/agents/orchestrator.md
 ```
 
 **Check these sections**:
@@ -322,11 +322,11 @@ Verify specialist names match workflow.yaml exactly:
 ```bash
 # Show specialists in YAML
 echo "=== orchestrator.yaml routing ==="
-yq '.routing | keys[]' teams/my-team/orchestrator.yaml | sort
+yq '.routing | keys[]' rites/my-team/orchestrator.yaml | sort
 
 # Show specialists in generated orchestrator
 echo "=== Generated routing table ==="
-grep "^|.*→" teams/my-team/agents/orchestrator.md | awk '{print $3}' | sort | uniq
+grep "^|.*→" rites/my-team/agents/orchestrator.md | awk '{print $3}' | sort | uniq
 ```
 
 **These should match.**
@@ -337,8 +337,8 @@ grep "^|.*→" teams/my-team/agents/orchestrator.md | awk '{print $3}' | sort | 
 
 ```bash
 cd $KNOSSOS_HOME
-git add .claude/teams/my-team/orchestrator.yaml
-git add .claude/teams/my-team/agents/orchestrator.md
+git add .claude/rites/my-team/orchestrator.yaml
+git add .claude/rites/my-team/agents/orchestrator.md
 ```
 
 ### Step 5.2: Create Commit
@@ -349,12 +349,12 @@ git commit -m "feat: add my-team orchestrator configuration and generated agent"
 
 **Commit message pattern**:
 ```
-feat: add {team-name} orchestrator configuration and generated agent
+feat: add {rite-name} orchestrator configuration and generated agent
 
 - Creates orchestrator.yaml with team routing and handoff criteria
 - Generates orchestrator.md from canonical template
 - Validates against schema and structural rules
-- Ready for team activation via swap-team.sh
+- Ready for team activation via swap-rite.sh
 ```
 
 ### Step 5.3: Verify Commit
@@ -365,8 +365,8 @@ git log -1 --stat
 
 Should show both files added:
 ```
-.claude/teams/my-team/agents/orchestrator.md
-.claude/teams/my-team/orchestrator.yaml
+.claude/rites/my-team/agents/orchestrator.md
+.claude/rites/my-team/orchestrator.yaml
 ```
 
 ## Phase 6: Test Team Activation (2 minutes)
@@ -374,7 +374,7 @@ Should show both files added:
 ### Step 6.1: Activate Your Team
 
 ```bash
-./swap-team.sh my-team
+./swap-rite.sh my-team
 ```
 
 **Expected output**:
@@ -418,7 +418,7 @@ All your specialists should appear.
 **Fix**:
 ```bash
 # Check exact names in workflow.yaml
-yq '.phases[] | .agent' teams/my-team/workflow.yaml
+yq '.phases[] | .agent' rites/my-team/workflow.yaml
 
 # Update orchestrator.yaml routing to match exactly
 # Then regenerate
@@ -431,10 +431,10 @@ yq '.phases[] | .agent' teams/my-team/workflow.yaml
 **Fix**:
 ```bash
 # Verify orchestrator.yaml syntax
-yq . teams/my-team/orchestrator.yaml
+yq . rites/my-team/orchestrator.yaml
 
 # Try manual validation
-head -20 teams/my-team/agents/orchestrator.md
+head -20 rites/my-team/agents/orchestrator.md
 
 # Regenerate
 /roster/templates/orchestrator-generate.sh my-team
@@ -447,7 +447,7 @@ head -20 teams/my-team/agents/orchestrator.md
 **Fix**:
 ```bash
 # Review your orchestrator.yaml team section
-yq '.team' teams/my-team/orchestrator.yaml
+yq '.team' rites/my-team/orchestrator.yaml
 
 # All fields required and valid:
 # - name: lowercase-hyphens
@@ -495,34 +495,34 @@ Before considering orchestrator complete:
 - [ ] Skills references use @skill-name format
 - [ ] Color is valid CSS color or hex
 - [ ] Both orchestrator.yaml and orchestrator.md committed to git
-- [ ] Team activation works via swap-team.sh
+- [ ] Team activation works via swap-rite.sh
 - [ ] Frontmatter parses correctly
 
 ## Next Steps
 
 After successful creation:
 
-1. **Test with swap-team.sh**: Activate and verify
+1. **Test with swap-rite.sh**: Activate and verify
 2. **Add to documentation**: Reference in team guide
 3. **Coordinate with Phase 5**: CI/CD integration when ready
 4. **Share with team**: Team members know how to use it
 
-## Example: Complete doc-team-pack Walkthrough
+## Example: Complete doc-rite-pack Walkthrough
 
-For reference, here's a real example of doc-team-pack configuration:
+For reference, here's a real example of doc-rite-pack configuration:
 
-**File**: `teams/doc-team-pack/orchestrator.yaml`
+**File**: `rites/doc-rite-pack/orchestrator.yaml`
 
 ```yaml
 team:
-  name: doc-team-pack
+  name: doc-rite-pack
   domain: "Documentation design and technical writing"
   color: "#4A90E2"
 
 frontmatter:
-  role: "Coordinates doc-team-pack documentation phases"
+  role: "Coordinates doc-rite-pack documentation phases"
   description: |
-    Coordinates doc-team-pack phases for documentation audit, information architecture,
+    Coordinates doc-rite-pack phases for documentation audit, information architecture,
     and technical writing. Use when: auditing documentation, reorganizing information,
     or writing comprehensive guides. Triggers: audit, documentation, rewrite, consolidate.
 

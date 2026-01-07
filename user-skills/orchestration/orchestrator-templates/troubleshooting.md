@@ -11,7 +11,7 @@ Start here to identify your problem:
 | Generator fails immediately | Configuration error | Section 1 |
 | Generated file has placeholder like `{{ROUTING_TABLE}}` | Substitution failed | Section 2 |
 | Validation fails | Output format issue | Section 3 |
-| swap-team.sh can't parse frontmatter | Frontmatter corrupted | Section 4 |
+| swap-rite.sh can't parse frontmatter | Frontmatter corrupted | Section 4 |
 | Specialist names don't match | Naming inconsistency | Section 5 |
 | Generated file looks different from expected | Template mismatch | Section 6 |
 | Handoff criteria are wrong | YAML parsing issue | Section 7 |
@@ -35,15 +35,15 @@ Your orchestrator.yaml has syntax errors or missing required fields.
 
 ```bash
 # Check file exists
-ls -la teams/my-team/orchestrator.yaml
+ls -la rites/my-team/orchestrator.yaml
 
 # Validate YAML syntax
-yq . teams/my-team/orchestrator.yaml
+yq . rites/my-team/orchestrator.yaml
 
 # Check required fields
-yq '.team.name' teams/my-team/orchestrator.yaml
-yq '.frontmatter.role' teams/my-team/orchestrator.yaml
-yq '.routing | keys' teams/my-team/orchestrator.yaml
+yq '.team.name' rites/my-team/orchestrator.yaml
+yq '.frontmatter.role' rites/my-team/orchestrator.yaml
+yq '.routing | keys' rites/my-team/orchestrator.yaml
 ```
 
 ### Solutions
@@ -51,11 +51,11 @@ yq '.routing | keys' teams/my-team/orchestrator.yaml
 **If file doesn't exist**:
 ```bash
 # Create from template
-cp teams/doc-team-pack/orchestrator.yaml \
-   teams/my-team/orchestrator.yaml
+cp rites/doc-rite-pack/orchestrator.yaml \
+   rites/my-team/orchestrator.yaml
 
 # Edit with your values
-nano teams/my-team/orchestrator.yaml
+nano rites/my-team/orchestrator.yaml
 ```
 
 **If YAML syntax error**:
@@ -70,18 +70,18 @@ nano teams/my-team/orchestrator.yaml
 # https://www.yamllint.com/
 
 # Fix and retry
-yq . teams/my-team/orchestrator.yaml
+yq . rites/my-team/orchestrator.yaml
 ```
 
 **If required field missing**:
 ```bash
 # Check what's missing
-yq keys teams/my-team/orchestrator.yaml
+yq keys rites/my-team/orchestrator.yaml
 
 # Required: team, frontmatter, routing, workflow_position, handoff_criteria, skills
 
 # Add missing section
-cat >> teams/my-team/orchestrator.yaml << 'EOF'
+cat >> rites/my-team/orchestrator.yaml << 'EOF'
 skills:
   - "@skill-one brief description"
 EOF
@@ -106,7 +106,7 @@ Generator encountered error during template substitution.
 
 ```bash
 # Check what placeholders remain
-grep "{{" teams/my-team/agents/orchestrator.md
+grep "{{" rites/my-team/agents/orchestrator.md
 
 # Run generator with debugging
 bash -x /roster/templates/orchestrator-generate.sh my-team 2>&1 | tail -50
@@ -134,7 +134,7 @@ chmod 644 /roster/templates/orchestrator-base.md.tpl
 
 ```bash
 # Validate orchestrator.yaml again
-yq . teams/my-team/orchestrator.yaml > /dev/null
+yq . rites/my-team/orchestrator.yaml > /dev/null
 if [ $? -ne 0 ]; then
   echo "YAML is invalid"
   # Fix issues shown above in Section 1
@@ -145,14 +145,14 @@ fi
 
 ```bash
 # Delete bad output and retry
-rm teams/my-team/agents/orchestrator.md
+rm rites/my-team/agents/orchestrator.md
 
 # Regenerate
 /roster/templates/orchestrator-generate.sh my-team
 
 # Validate
 /roster/templates/validate-orchestrator.sh \
-  teams/my-team/agents/orchestrator.md
+  rites/my-team/agents/orchestrator.md
 ```
 
 ## Section 3: Validation Failures
@@ -182,7 +182,7 @@ File does not have proper --- delimiters
 **Diagnosis**:
 ```bash
 # Check frontmatter structure
-head -15 teams/my-team/agents/orchestrator.md
+head -15 rites/my-team/agents/orchestrator.md
 
 # Should look like:
 # ---
@@ -195,11 +195,11 @@ head -15 teams/my-team/agents/orchestrator.md
 **Solution**:
 ```bash
 # If frontmatter is missing delimiters, regenerate
-rm teams/my-team/agents/orchestrator.md
+rm rites/my-team/agents/orchestrator.md
 /roster/templates/orchestrator-generate.sh my-team
 
 # If still broken, check orchestrator.yaml:
-yq '.frontmatter' teams/my-team/orchestrator.yaml
+yq '.frontmatter' rites/my-team/orchestrator.yaml
 ```
 
 ### Symptom 3c: Missing required sections
@@ -216,7 +216,7 @@ Missing: Routing Decisions
 **Diagnosis**:
 ```bash
 # List sections in generated file
-grep "^## " teams/my-team/agents/orchestrator.md
+grep "^## " rites/my-team/agents/orchestrator.md
 
 # Should have 9-10 sections including:
 # - Consultation Role
@@ -235,7 +235,7 @@ wc -l /roster/templates/orchestrator-base.md.tpl
 # Should be 130-150 lines
 
 # Regenerate
-rm teams/my-team/agents/orchestrator.md
+rm rites/my-team/agents/orchestrator.md
 /roster/templates/orchestrator-generate.sh my-team
 ```
 
@@ -252,18 +252,18 @@ Unbalanced code block fences
 **Diagnosis**:
 ```bash
 # Count backticks
-grep -o '```' teams/my-team/agents/orchestrator.md | wc -l
+grep -o '```' rites/my-team/agents/orchestrator.md | wc -l
 # Should be even number
 
 # Find problematic areas
-grep -n "^" teams/my-team/agents/orchestrator.md | \
+grep -n "^" rites/my-team/agents/orchestrator.md | \
   grep -B2 -A2 '```' | head -20
 ```
 
 **Solution**:
 ```bash
 # Regenerate (usually fixes this)
-rm teams/my-team/agents/orchestrator.md
+rm rites/my-team/agents/orchestrator.md
 /roster/templates/orchestrator-generate.sh my-team
 
 # If still broken, check template
@@ -273,7 +273,7 @@ grep '```' /roster/templates/orchestrator-base.md.tpl | wc -l
 
 ## Section 4: Frontmatter Parsing Issues
 
-### Symptom: swap-team.sh fails to parse orchestrator
+### Symptom: swap-rite.sh fails to parse orchestrator
 
 **Error**:
 ```
@@ -283,13 +283,13 @@ Error: Could not parse role
 
 ### Root Cause
 
-Frontmatter doesn't match format swap-team.sh expects.
+Frontmatter doesn't match format swap-rite.sh expects.
 
 ### Diagnosis
 
 ```bash
 # Show actual frontmatter
-head -10 teams/my-team/agents/orchestrator.md
+head -10 rites/my-team/agents/orchestrator.md
 
 # Should be:
 # ---
@@ -302,7 +302,7 @@ head -10 teams/my-team/agents/orchestrator.md
 # ---
 
 # Test if grep can parse it
-sed -n '/^---$/,/^---$/p' teams/my-team/agents/orchestrator.md | \
+sed -n '/^---$/,/^---$/p' rites/my-team/agents/orchestrator.md | \
   grep "^name:" | sed 's/^name:[[:space:]]*//'
 ```
 
@@ -312,7 +312,7 @@ sed -n '/^---$/,/^---$/p' teams/my-team/agents/orchestrator.md | \
 
 1. Regenerate clean file:
 ```bash
-rm teams/my-team/agents/orchestrator.md
+rm rites/my-team/agents/orchestrator.md
 /roster/templates/orchestrator-generate.sh my-team
 ```
 
@@ -325,7 +325,7 @@ frontmatter:
 
 3. Verify no special characters in role/description that break grep:
 ```bash
-yq '.frontmatter.role' teams/my-team/orchestrator.yaml | \
+yq '.frontmatter.role' rites/my-team/orchestrator.yaml | \
   grep -E '[$\`"'\''|]'
 # If any matches, those characters need escaping
 ```
@@ -352,12 +352,12 @@ Specialist names in orchestrator.yaml don't match workflow.yaml exactly.
 ```bash
 # Get specialist names from workflow.yaml
 echo "=== workflow.yaml specialists ==="
-yq '.phases[].agent' teams/my-team/workflow.yaml | sort
+yq '.phases[].agent' rites/my-team/workflow.yaml | sort
 
 # Get specialist names from orchestrator.yaml
 echo ""
 echo "=== orchestrator.yaml specialists ==="
-yq '.routing | keys[]' teams/my-team/orchestrator.yaml | sort
+yq '.routing | keys[]' rites/my-team/orchestrator.yaml | sort
 
 # Compare
 echo ""
@@ -402,11 +402,11 @@ handoff_criteria:
 # Interactive check
 team="my-team"
 echo "Workflow agents:"
-yq '.phases[] | {agent, description}' teams/$team/workflow.yaml
+yq '.phases[] | {agent, description}' rites/$team/workflow.yaml
 
 echo ""
 echo "Current orchestrator routing:"
-yq '.routing' teams/$team/orchestrator.yaml
+yq '.routing' rites/$team/orchestrator.yaml
 ```
 
 ## Section 6: Output Differs from Expected
@@ -574,7 +574,7 @@ For now, if you need custom content:
 
 ## Section 9: Team Activation Issues
 
-### Symptom: swap-team.sh rejects new orchestrator
+### Symptom: swap-rite.sh rejects new orchestrator
 
 **Error**:
 ```
@@ -590,13 +590,13 @@ Generated orchestrator not in expected location or structure.
 
 ```bash
 # Check file exists
-ls -la teams/my-team/agents/orchestrator.md
+ls -la rites/my-team/agents/orchestrator.md
 
 # Check frontmatter
-head -10 teams/my-team/agents/orchestrator.md
+head -10 rites/my-team/agents/orchestrator.md
 
 # Check name field
-grep "^name:" teams/my-team/agents/orchestrator.md
+grep "^name:" rites/my-team/agents/orchestrator.md
 # Must be exactly: name: orchestrator
 ```
 
@@ -612,10 +612,10 @@ The generated file always has `name: orchestrator` (hardcoded in template). If i
 
 ```bash
 # File must be here:
-teams/{team-name}/agents/orchestrator.md
+rites/{rite-name}/agents/orchestrator.md
 
 # Verify directory exists
-mkdir -p teams/my-team/agents
+mkdir -p rites/my-team/agents
 
 # Regenerate
 /roster/templates/orchestrator-generate.sh my-team
@@ -627,20 +627,20 @@ Before detailed troubleshooting, try:
 
 ```bash
 # 1. Delete and regenerate
-rm teams/my-team/agents/orchestrator.md
+rm rites/my-team/agents/orchestrator.md
 /roster/templates/orchestrator-generate.sh my-team
 
 # 2. Validate output
 /roster/templates/validate-orchestrator.sh \
-  teams/my-team/agents/orchestrator.md
+  rites/my-team/agents/orchestrator.md
 
 # 3. Check YAML syntax
-yq . teams/my-team/orchestrator.yaml > /dev/null
+yq . rites/my-team/orchestrator.yaml > /dev/null
 
 # 4. Test team activation
-./swap-team.sh my-team
+./swap-rite.sh my-team
 grep "^role:" .claude/agents/orchestrator.md
-./swap-team.sh previous-team  # Switch back
+./swap-rite.sh previous-team  # Switch back
 ```
 
 **Most issues resolve with these four steps.**

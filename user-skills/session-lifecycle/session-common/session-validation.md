@@ -122,7 +122,7 @@ if [[ -z "$KNOSSOS_HOME" ]]; then
   ERROR: Roster system not configured
 fi
 
-team_dir="$KNOSSOS_HOME/teams/$target_team"
+team_dir="$KNOSSOS_HOME/rites/$target_team"
 if [[ ! -d "$team_dir" ]]; then
   ERROR: Team not found
 fi
@@ -130,7 +130,7 @@ fi
 
 **Success**: Team directory exists in roster
 
-**Failure**: Error listing available teams
+**Failure**: Error listing available rites
 
 **Error Message**:
 ```
@@ -168,7 +168,7 @@ fi
 
 Options:
 1. Switch to session team: /team {session_team}
-2. Continue with current team (may have different agents)
+2. Continue with current rite (may have different agents)
 3. Cancel and investigate
 
 Continue? [1/2/cancel]:
@@ -188,7 +188,7 @@ if [[ ! -f "$agent_file" ]]; then
 fi
 ```
 
-**Success**: Agent file exists in current team
+**Success**: Agent file exists in current rite
 
 **Failure**: Error listing available agents
 

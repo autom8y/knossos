@@ -5,7 +5,7 @@ description: "Reference for task complexity classification and phase requirement
 
 # Complexity Levels Reference
 
-> Canonical guide to task complexity classification, phase requirements, and team-specific variations.
+> Canonical guide to task complexity classification, phase requirements, and rite-specific variations.
 
 ## Overview
 
@@ -290,7 +290,7 @@ START
   ├─ Multiple components, APIs, persistence?
   |    └─ YES → SERVICE (standard) or SYSTEM (ecosystem)
   |
-  └─ Multiple services, infrastructure, cross-team?
+  └─ Multiple services, infrastructure, cross-rite?
        └─ YES → PLATFORM (standard) or MIGRATION (ecosystem)
 ```
 
@@ -314,7 +314,7 @@ Ask yourself:
    - 1-2 integrations → MODULE/SERVICE
    - 3+ integrations → SERVICE/PLATFORM
 
-4. **Impact Radius**: How many teams/satellites affected?
+4. **Impact Radius**: How many rites/satellites affected?
    - None → SCRIPT/PATCH
    - Single team → MODULE/SERVICE
    - Multiple teams → PLATFORM/MIGRATION

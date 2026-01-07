@@ -1,6 +1,6 @@
 ---
 name: start-ref
-description: "Begin a new work session capturing initiative, complexity, and team context. Use when: starting new feature work, initializing tracked workflow, beginning fresh development session. Triggers: /start, new session, begin work, kickoff, start session, initialize session."
+description: "Begin a new work session capturing initiative, complexity, and rite context. Use when: starting new feature work, initializing tracked workflow, beginning fresh development session. Triggers: /start, new session, begin work, kickoff, start session, initialize session."
 ---
 
 # /start - Initialize Work Session
@@ -45,7 +45,7 @@ Starting work?
 
 ## Quick Reference
 
-**Pre-flight**: No existing session, team pack valid
+**Pre-flight**: No existing session, rite valid
 
 **Actions**:
 1. Gather parameters (initiative, complexity, team)
@@ -98,12 +98,12 @@ The Moirai enforce:
 | Start without wrapping previous session | Creates orphaned sessions | Run `/wrap` or check `/status` first |
 | Under-classify complexity | Skips design phase, causes rework | When uncertain, classify one level higher |
 | Start PLATFORM work in single session | Too large, loses context | Break into multiple MODULE sessions |
-| Ignore team context | Wrong agents for the work | Verify team with `/team` before starting |
+| Ignore rite context | Wrong agents for the work | Verify team with `/team` before starting |
 
 ## Prerequisites
 
 - No existing active session
-- Target team pack exists (if specified)
+- Target rite exists (if specified)
 
 ## Success Criteria
 

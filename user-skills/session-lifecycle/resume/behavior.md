@@ -35,7 +35,7 @@ See [validation-checks.md](validation-checks.md) for details.
 
 Apply [Workflow Resolution Pattern](../shared-sections/workflow-resolution.md):
 - Target agent: Default to `last_agent` or override with `--agent=NAME`
-- Validate agent exists in current team
+- Validate agent exists in current rite
 
 ### 5. Invoke state-mate for Resume Mutation
 
@@ -98,8 +98,8 @@ Display:
 |-------|-----------|------------|
 | No parked session | No session for project | Use `/start` to begin new session |
 | Session not parked | `parked_at` not set | Session is active, continue working |
-| Invalid agent | Agent not in team | Specify valid agent or switch teams |
-| Team unavailable | Session team not in roster | Install team pack or choose different |
+| Invalid agent | Agent not in team | Specify valid agent or switch rites |
+| Team unavailable | Session team not in roster | Install rite or choose different |
 | Merge conflicts | Git detects conflicts | Resolve conflicts before resuming |
 
 ---

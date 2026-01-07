@@ -45,7 +45,7 @@ Agent orchestrators encode two things:
                          ▼
 ┌─────────────────────────────────────────────────────────┐
 │ Production Orchestrator (orchestrator.md)               │
-│ [Ready to commit to git, use with swap-team.sh]         │
+│ [Ready to commit to git, use with swap-rite.sh]         │
 └─────────────────────────────────────────────────────────┘
 ```
 
@@ -88,7 +88,7 @@ Separate the parts that are the same from the parts that differ:
 - Domain Authority structure
 - Handling Failures framework
 - Anti-Patterns framework
-- Placeholders for team-specific data
+- Placeholders for rite-specific data
 
 **Sections marked**:
 - `<!-- CANONICAL: ... -->` - Never change (protocol is frozen)
@@ -208,8 +208,8 @@ Developer
     │   git add orchestrator.yaml orchestrator.md
     │   git commit -m "feat: add orchestrator"
     │
-    └─→ Test with swap-team.sh
-        ./swap-team.sh my-team
+    └─→ Test with swap-rite.sh
+        ./swap-rite.sh my-team
         └─→ Reads frontmatter from orchestrator.md
         └─→ Validates format
         └─→ Activates team
@@ -235,19 +235,19 @@ Discovery: All orchestrators should have [new pattern]
     │   done
     │
     ├─→ Review diffs
-    │   git diff teams/*/agents/orchestrator.md
+    │   git diff rites/*/agents/orchestrator.md
     │
     └─→ Commit template + regenerated files
         git add templates/orchestrator-base.md.tpl
-        git add teams/*/agents/orchestrator.md
+        git add rites/*/agents/orchestrator.md
         git commit -m "refactor: update orchestrator template"
 ```
 
 ## Integration Points
 
-### 1. swap-team.sh (Team Activation)
+### 1. swap-rite.sh (Team Activation)
 
-**What swap-team.sh does**:
+**What swap-rite.sh does**:
 - Reads frontmatter from orchestrator.md
 - Extracts: name, role, description, model, color, tools
 - Validates format
@@ -262,7 +262,7 @@ role: "Team role description"
 description: "Team description"
 tools: Read, Skill
 model: opus
-color: team-color
+color: rite-color
 ---
 ```
 
@@ -425,9 +425,9 @@ But hand-edited tables are hard to migrate.
 
 **Tradeoff**:
 - One template: Consistency, single source of truth
-- Multiple templates: Flexibility, team-specific sections
+- Multiple templates: Flexibility, rite-specific sections
 
-**Decision**: One template with team-specific YAML data
+**Decision**: One template with rite-specific YAML data
 
 **Rationale**:
 - Consultation protocol is identical → template captures it once

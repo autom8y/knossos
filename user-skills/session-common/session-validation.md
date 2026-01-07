@@ -51,4 +51,4 @@ Fail: Prompt user for team switch or override
 | Missing session | "No active session to {verb}. Use /start to begin." |
 | Already parked | "Session parked at {timestamp}. Use /resume first." |
 | Invalid agent | "Agent '{name}' not found in team '{team}'." |
-| Team mismatch | "Session team ({A}) differs from active team ({B})." |
+| Team mismatch | "Session team ({A}) differs from active rite ({B})." |

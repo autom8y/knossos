@@ -18,7 +18,7 @@ Need to switch agents?
 ├─ Phase transition (design → implementation) → /handoff engineer
 ├─ Session is parked → /resume first, then /handoff
 ├─ Want to pause work → /park (not /handoff)
-└─ Want to switch teams → /team, then new /start
+└─ Want to switch rites → /team, then new /start
 ```
 
 **Mode Check**: `/handoff` requires orchestrated mode. If in cross-cutting mode:
@@ -87,7 +87,7 @@ Alternatively, in cross-cutting mode:
 
 - **Orchestrated mode** (session ACTIVE + team configured)
 - Active session (not parked)
-- Target agent exists in current team
+- Target agent exists in current rite
 
 **Note**: Cross-cutting mode does not support `/handoff` - use direct execution instead.
 

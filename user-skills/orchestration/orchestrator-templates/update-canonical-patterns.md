@@ -19,7 +19,7 @@ Update the canonical template when:
 **Coordinated updates** (High risk):
 - Removing sections
 - Breaking changes to frontmatter
-- Changes to integration points (swap-team.sh, workflow.yaml)
+- Changes to integration points (swap-rite.sh, workflow.yaml)
 
 ## Timeline
 
@@ -63,7 +63,7 @@ Ask yourself:
 
 1. **Does this change existing sections?** No = LOW risk. Yes = MEDIUM risk.
 2. **Does this change the Consultation Protocol?** No = LOW risk. Yes = HIGH risk.
-3. **Does this affect swap-team.sh parsing?** No = LOW risk. Yes = HIGH risk.
+3. **Does this affect swap-rite.sh parsing?** No = LOW risk. Yes = HIGH risk.
 4. **Must existing teams update YAML?** No = LOW risk. Yes = MEDIUM risk.
 5. **Can this be optional?** Yes = LOW risk. No = MEDIUM/HIGH risk.
 
@@ -159,7 +159,7 @@ Use batch regeneration command:
 
 ```bash
 # Regenerate all orchestrators
-for team in .claude/teams/*/; do
+for team in .claude/rites/*/; do
   team_name=$(basename "$team")
   echo "Regenerating $team_name..."
   /roster/templates/orchestrator-generate.sh "$team_name"
@@ -176,7 +176,7 @@ find .claude/teams -name "orchestrator.md" -exec grep -l "{{" {} \;
 ```bash
 # Run validator on each team's orchestrator.md
 validation_failed=0
-for team_md in .claude/teams/*/agents/orchestrator.md; do
+for team_md in .claude/rites/*/agents/orchestrator.md; do
   echo "Validating $team_md..."
   if ! /roster/templates/validate-orchestrator.sh "$team_md"; then
     validation_failed=$((validation_failed + 1))
@@ -199,14 +199,14 @@ fi
 ```bash
 # Show summary of changes
 echo "=== Change Summary ==="
-git diff --stat .claude/teams/*/agents/orchestrator.md | tail -5
+git diff --stat .claude/rites/*/agents/orchestrator.md | tail -5
 
 # Show line count changes per team
 echo ""
 echo "=== Changes per Team ==="
-git diff .claude/teams/*/agents/orchestrator.md | \
+git diff .claude/rites/*/agents/orchestrator.md | \
   grep "^diff --git" | sed 's|.*/\([^/]*\)/agents.*|\1|' | while read team; do
-  lines=$(git diff .claude/teams/$team/agents/orchestrator.md | wc -l)
+  lines=$(git diff .claude/rites/$team/agents/orchestrator.md | wc -l)
   echo "$team: $lines lines changed"
 done
 ```
@@ -217,17 +217,17 @@ done
 
 ```bash
 # Review one team's changes
-git diff .claude/teams/rnd-pack/agents/orchestrator.md
+git diff .claude/rites/rnd-pack/agents/orchestrator.md
 
 # Review another team
-git diff .claude/teams/security-pack/agents/orchestrator.md
+git diff .claude/rites/security-pack/agents/orchestrator.md
 ```
 
 **For medium-risk updates**, review all teams:
 
 ```bash
 # Show all diffs side-by-side
-git diff .claude/teams/*/agents/orchestrator.md
+git diff .claude/rites/*/agents/orchestrator.md
 ```
 
 **What to look for**:
@@ -242,7 +242,7 @@ git diff .claude/teams/*/agents/orchestrator.md
 # Verify frontmatter unchanged on several teams
 for team in rnd-pack security-pack ecosystem-pack; do
   echo "=== $team ==="
-  head -10 .claude/teams/$team/agents/orchestrator.md
+  head -10 .claude/rites/$team/agents/orchestrator.md
 done
 ```
 
@@ -251,7 +251,7 @@ Should show:
 ---
 name: orchestrator
 role: "..."
-[team-specific role]
+[rite-specific role]
 ...
 ---
 ```
@@ -261,11 +261,11 @@ role: "..."
 ```bash
 # Verify specialist names are consistent across all diffs
 echo "Specialists in rnd-pack after update:"
-grep "routing_specialist=" .claude/teams/rnd-pack/agents/orchestrator.md | head -3
+grep "routing_specialist=" .claude/rites/rnd-pack/agents/orchestrator.md | head -3
 
 echo ""
 echo "Specialists in security-pack after update:"
-grep "routing_specialist=" .claude/teams/security-pack/agents/orchestrator.md | head -3
+grep "routing_specialist=" .claude/rites/security-pack/agents/orchestrator.md | head -3
 ```
 
 All specialist names should match original configuration.
@@ -277,17 +277,17 @@ All specialist names should match original configuration.
 Activate a team and verify it still works:
 
 ```bash
-# Save current team
+# Save current rite
 current_team=$(cat .claude/ACTIVE_RITE)
 
 # Test activation with updated orchestrator
-./swap-team.sh rnd-pack
+./swap-rite.sh rnd-pack
 
 # Verify frontmatter parsed
 grep "^role:" .claude/agents/orchestrator.md
 
 # Restore original team
-./swap-team.sh "$current_team"
+./swap-rite.sh "$current_team"
 ```
 
 ### Step 5.2: Verify Consultation Protocol (For Protocol Changes)
@@ -296,14 +296,14 @@ If you changed Consultation Protocol section:
 
 ```bash
 # Check CONSULTATION_REQUEST still present
-grep "CONSULTATION_REQUEST" .claude/teams/rnd-pack/agents/orchestrator.md
+grep "CONSULTATION_REQUEST" .claude/rites/rnd-pack/agents/orchestrator.md
 
 # Check CONSULTATION_RESPONSE still present
-grep "CONSULTATION_RESPONSE" .claude/teams/rnd-pack/agents/orchestrator.md
+grep "CONSULTATION_RESPONSE" .claude/rites/rnd-pack/agents/orchestrator.md
 
 # Check input/output structure preserved
-grep "type:" .claude/teams/rnd-pack/agents/orchestrator.md
-grep "directive:" .claude/teams/rnd-pack/agents/orchestrator.md
+grep "type:" .claude/rites/rnd-pack/agents/orchestrator.md
+grep "directive:" .claude/rites/rnd-pack/agents/orchestrator.md
 ```
 
 ### Step 5.3: Verify Skills References
@@ -312,7 +312,7 @@ If you changed how skills are referenced:
 
 ```bash
 # Check skill references format
-grep "^- @" .claude/teams/*/agents/orchestrator.md | head -20
+grep "^- @" .claude/rites/*/agents/orchestrator.md | head -20
 
 # Should all be: "- @skill-name description"
 ```
@@ -325,7 +325,7 @@ grep "^- @" .claude/teams/*/agents/orchestrator.md | head -20
 cd $KNOSSOS_HOME
 
 # Stage only orchestrator.md files (not YAML, which shouldn't change)
-git add .claude/teams/*/agents/orchestrator.md
+git add .claude/rites/*/agents/orchestrator.md
 
 # Verify what's staged
 git status
@@ -341,7 +341,7 @@ git commit -m "refactor: regenerate all orchestrators with updated template
 - [Description of change]
 - Regenerated all 11 orchestrators from updated orchestrator-base.md.tpl
 - All validators pass (10 rules per team)
-- Team activation tested with swap-team.sh
+- Team activation tested with swap-rite.sh
 - No breaking changes to specialist routing or handoff criteria"
 ```
 
@@ -353,7 +353,7 @@ refactor: regenerate all orchestrators with improved Consultation Role wording
 - Improved explanation of stateless advisor pattern
 - Regenerated all 11 orchestrators from updated template
 - All validators pass (10 rules per team × 11 teams = 110/110)
-- Team activation tested with swap-team.sh
+- Team activation tested with swap-rite.sh
 - No changes to Consultation Protocol or routing behavior
 ```
 
@@ -406,7 +406,7 @@ For high-risk changes, post notification:
 
 If template change affects documentation:
 - Update schema-reference.md (if schema changed)
-- Update create-new-team-orchestrator.md (if process changed)
+- Update create-new-rite-orchestrator.md (if process changed)
 - Update troubleshooting.md (if new common issues)
 
 ## Example Workflows
@@ -431,15 +431,15 @@ Steps:
 nano /roster/templates/rite-base.md.tpl
 
 # Regenerate
-for team in .claude/teams/*/; do
+for team in .claude/rites/*/; do
   /roster/templates/orchestrator-generate.sh $(basename "$team")
 done
 
 # Review sample
-git diff .claude/teams/rnd-pack/agents/orchestrator.md | head -50
+git diff .claude/rites/rnd-pack/agents/orchestrator.md | head -50
 
 # Commit
-git add .claude/teams/*/agents/orchestrator.md
+git add .claude/rites/*/agents/orchestrator.md
 git commit -m "refactor: improve Core Purpose wording in all orchestrators"
 ```
 
@@ -462,36 +462,36 @@ Steps:
 ```bash
 # Backup
 mkdir -p /tmp/orch-backup
-cp -r .claude/teams/*/agents/orchestrator.md /tmp/orch-backup/
+cp -r .claude/rites/*/agents/orchestrator.md /tmp/orch-backup/
 
 # Edit template - add new section with placeholder
 nano /roster/templates/rite-base.md.tpl
 
 # Regenerate all
-for team in .claude/teams/*/; do
+for team in .claude/rites/*/; do
   /roster/templates/orchestrator-generate.sh $(basename "$team")
 done
 
 # Validate all
-for md in .claude/teams/*/agents/orchestrator.md; do
+for md in .claude/rites/*/agents/orchestrator.md; do
   /roster/templates/validate-orchestrator.sh "$md" || exit 1
 done
 
 # Spot-check diffs
-git diff --stat .claude/teams/*/agents/orchestrator.md
-git diff .claude/teams/rnd-pack/agents/orchestrator.md | head -80
+git diff --stat .claude/rites/*/agents/orchestrator.md
+git diff .claude/rites/rnd-pack/agents/orchestrator.md | head -80
 
 # Test activation
-./swap-team.sh security-pack
+./swap-rite.sh security-pack
 grep "Examples" .claude/agents/orchestrator.md  # Should show new section
-./swap-team.sh rnd-pack  # Restore
+./swap-rite.sh rnd-pack  # Restore
 
 # Commit
-git add .claude/teams/*/agents/orchestrator.md
+git add .claude/rites/*/agents/orchestrator.md
 git commit -m "feat: add Examples section to all orchestrators
 
 - New optional section after Anti-Patterns
-- Teams can customize with team-specific examples
+- Teams can customize with rite-specific examples
 - Regenerated all 11 orchestrators
 - Validators pass: 110/110 rules
 - Backward compatible, no YAML changes required"
@@ -535,7 +535,7 @@ Steps:
 
 ```bash
 # Check rnd-pack for your change
-git diff .claude/teams/rnd-pack/agents/orchestrator.md | grep "^+" | head -20
+git diff .claude/rites/rnd-pack/agents/orchestrator.md | grep "^+" | head -20
 ```
 
 ### Issue: Validation fails after regeneration
@@ -563,10 +563,10 @@ git checkout /roster/templates/rite-base.md.tpl
 **Solution**:
 ```bash
 # Verify workflow.yaml unchanged
-git diff .claude/teams/*/workflow.yaml
+git diff .claude/rites/*/workflow.yaml
 
 # Verify orchestrator.yaml unchanged
-git diff .claude/teams/*/orchestrator.yaml
+git diff .claude/rites/*/orchestrator.yaml
 
 # Specialist names should come from orchestrator.yaml, not template
 ```
@@ -577,13 +577,13 @@ If something goes wrong:
 
 ```bash
 # Restore from backup
-cp /tmp/orchestrator-backup/* .claude/teams/*/agents/orchestrator.md
+cp /tmp/orchestrator-backup/* .claude/rites/*/agents/orchestrator.md
 
 # Revert template
 git checkout /roster/templates/rite-base.md.tpl
 
 # Verify
-for md in .claude/teams/*/agents/orchestrator.md; do
+for md in .claude/rites/*/agents/orchestrator.md; do
   /roster/templates/validate-orchestrator.sh "$md" || exit 1
 done
 ```

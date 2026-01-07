@@ -40,20 +40,20 @@ When `/rite` is invoked, the following sequence occurs:
 
 Determine operation mode:
 
-- **No arguments**: Query and display current active team
-- **`--list` or `-l`**: List all available team packs
-- **`<pack-name>`**: Switch to specified team pack
+- **No arguments**: Query and display current active rite
+- **`--list` or `-l`**: List all available rites
+- **`<pack-name>`**: Switch to specified rite
 
 ### 2. Invoke Roster Script
 
-Execute the swap-team.sh script via Bash tool:
+Execute the swap-rite.sh script via Bash tool:
 
 ```bash
-$KNOSSOS_HOME/swap-team.sh [args]
+$KNOSSOS_HOME/swap-rite.sh [args]
 ```
 
 The script handles:
-- Validation of team pack existence
+- Validation of rite existence
 - Backup of current agents (if any)
 - Atomic swap of agent files
 - Update of `.claude/ACTIVE_RITE` state file
@@ -62,15 +62,15 @@ The script handles:
 
 Show script output to user, which includes:
 
-- **For query**: Current active team name
-- **For list**: All available team packs
+- **For query**: Current active rite name
+- **For list**: All available rites
 - **For swap**: Confirmation with agent count loaded
 
 ### 4. Update SESSION_CONTEXT (if active)
 
 If a session is active (`.claude/sessions/{session_id}/SESSION_CONTEXT.md` exists):
 
-- Update `active_team` field to new team name
+- Update `active_team` field to new rite name
 - Append to handoff notes:
   ```
   Team switched: {old-team} → {new-team} ({agent-count} agents)
@@ -81,21 +81,21 @@ If a session is active (`.claude/sessions/{session_id}/SESSION_CONTEXT.md` exist
 
 ## Available Team Packs
 
-Team packs are discovered dynamically from `$KNOSSOS_HOME/teams/`. Reference the `team-discovery` skill for structured metadata access.
+Team packs are discovered dynamically from `$KNOSSOS_HOME/rites/`. Reference the `rite-discovery` skill for structured metadata access.
 
 ### Current Inventory
 
 To list all teams at runtime:
 ```bash
-ls -d $KNOSSOS_HOME/teams/*-pack 2>/dev/null | xargs -n1 basename
+ls -d $KNOSSOS_HOME/rites/*-pack 2>/dev/null | xargs -n1 basename
 ```
 
 As of this writing, the roster contains 11 teams:
 - 10x-dev-pack (software development)
 - debt-triage-pack (technical debt)
-- doc-team-pack (documentation)
+- doc-rite-pack (documentation)
 - ecosystem-pack (roster infrastructure)
-- forge-pack (team pack creation)
+- forge-pack (rite creation)
 - hygiene-pack (code quality)
 - intelligence-pack (analytics/research)
 - rnd-pack (exploration/prototyping)
@@ -103,14 +103,14 @@ As of this writing, the roster contains 11 teams:
 - sre-pack (operations/reliability)
 - strategy-pack (business analysis)
 
-**Important**: This list is informational. For current, accurate team data, use `team-discovery` skill or read directly from `$KNOSSOS_HOME/teams/*/orchestrator.yaml`.
+**Important**: This list is informational. For current, accurate team data, use `rite-discovery` skill or read directly from `$KNOSSOS_HOME/rites/*/orchestrator.yaml`.
 
 ### Team Details
 
 For detailed team profiles including agents, routing conditions, and use cases:
 - Run `/consult --team` for formatted display
-- Reference `team-discovery` skill for structured data
-- Read `teams/{name}/README.md` for extended documentation
+- Reference `rite-discovery` skill for structured data
+- Read `rites/{name}/README.md` for extended documentation
 
 ---
 
@@ -120,14 +120,14 @@ For detailed team profiles including agents, routing conditions, and use cases:
 
 | File | Change | Description |
 |------|--------|-------------|
-| `.claude/ACTIVE_RITE` | Overwritten | Contains single line with active team name |
+| `.claude/ACTIVE_RITE` | Overwritten | Contains single line with active rite name |
 | `.claude/agents/` | Replaced | All agent files swapped atomically |
 | `.claude/agents.backup/` | Created | Backup of previous agents (safety net) |
 | `.claude/sessions/{session_id}/SESSION_CONTEXT.md` | Updated | If session active, team field updated |
 
 ### Exit Codes
 
-The swap-team.sh script returns:
+The swap-rite.sh script returns:
 
 - `0` - Success
 - `1` - Invalid arguments
@@ -161,20 +161,20 @@ Output:
 [Roster] Available teams:
   - 10x-dev-pack
   - debt-triage-pack
-  - doc-team-pack
+  - doc-rite-pack
   - hygiene-pack
 ```
 
 ### Example 3: Switch to Doc Team
 
 ```bash
-/team doc-team-pack
+/team doc-rite-pack
 ```
 
 Output:
 ```
 [Roster] Backed up current agents to .claude/agents.backup/
-[Roster] Switched to doc-team-pack (4 agents loaded)
+[Roster] Switched to doc-rite-pack (4 agents loaded)
 ```
 
 After switch, `.claude/agents/` contains:
@@ -202,12 +202,12 @@ Session context updated:
 ### Example 5: Idempotent Switch
 
 ```bash
-/team doc-team-pack   # Already active
+/team doc-rite-pack   # Already active
 ```
 
 Output:
 ```
-[Roster] Already using doc-team-pack (no changes needed)
+[Roster] Already using doc-rite-pack (no changes needed)
 ```
 
 **Idempotency**: The script automatically detects when already on the target team and exits early. Use `--refresh` to pull latest agent definitions from roster.
@@ -228,7 +228,7 @@ Use `--refresh` when you need to pull the latest agent definitions from the rost
 ### Examples
 
 ```bash
-# Refresh current team (most common)
+# Refresh current rite (most common)
 /team --refresh
 
 # Refresh specific team
@@ -264,21 +264,21 @@ No changes made (--dry-run mode)
 
 Output:
 ```
-[Roster] Error: Team pack 'nonexistent-pack' not found in $KNOSSOS_HOME/teams/
-[Roster] Use './swap-team.sh --list' to see available packs
+[Roster] Error: Team pack 'nonexistent-pack' not found in $KNOSSOS_HOME/rites/
+[Roster] Use './swap-rite.sh --list' to see available packs
 ```
 
-**Resolution**: Use `/team --list` to see valid team names
+**Resolution**: Use `/team --list` to see valid rite names
 
 ### Invalid Pack Structure
 
-If a team pack exists but missing `agents/` directory:
+If a rite exists but missing `agents/` directory:
 
 ```
 [Roster] Error: Team pack 'broken-pack' missing agents/ directory
 ```
 
-**Resolution**: Fix team pack structure in roster repository
+**Resolution**: Fix rite structure in roster repository
 
 ### Backup Failure
 
@@ -306,7 +306,7 @@ If file copy fails or count mismatch:
 ## Prerequisites
 
 - Roster system installed at `$KNOSSOS_HOME/`
-- At least one team pack exists in `$KNOSSOS_HOME/teams/`
+- At least one rite exists in `$KNOSSOS_HOME/rites/`
 - `.claude/` directory exists and is writable (created automatically if missing)
 
 ---
@@ -325,16 +325,16 @@ This internally calls `/team 10x-dev-pack` before creating SESSION_CONTEXT.
 
 ### /handoff - Agent Coordination
 
-When handing off between agents, if target agent not in current team:
+When handing off between agents, if target agent not in current rite:
 
 ```
-Agent 'debt-collector' not found in current team.
+Agent 'debt-collector' not found in current rite.
 Switch to 'debt-triage-pack' with /team debt-triage-pack
 ```
 
 ### /wrap - Session Finalization
 
-On session wrap, current team recorded in session summary:
+On session wrap, current rite recorded in session summary:
 
 ```
 Session completed:
@@ -346,13 +346,13 @@ Session completed:
 
 ## Quick Switch Commands
 
-Quick-switch commands are derived from team names:
+Quick-switch commands are derived from rite names:
 
 | Team | Quick Switch | Derivation |
 |------|--------------|------------|
 | 10x-dev-pack | `/10x` | First token before hyphen |
 | debt-triage-pack | `/debt` | First token before hyphen |
-| doc-team-pack | `/docs` | First token before hyphen |
+| doc-rite-pack | `/docs` | First token before hyphen |
 | ecosystem-pack | `/ecosystem` | First token before hyphen |
 | forge-pack | `/forge` | First token before hyphen |
 | hygiene-pack | `/hygiene` | First token before hyphen |
@@ -368,8 +368,8 @@ These commands invoke `/team {pack-name}` internally and display team roster aft
 
 ## Success Criteria
 
-- Correct team pack loaded in `.claude/agents/`
-- `.claude/ACTIVE_RITE` file updated with team name
+- Correct rite loaded in `.claude/agents/`
+- `.claude/ACTIVE_RITE` file updated with rite name
 - Previous agents backed up to `.claude/agents.backup/`
 - All expected agent files present (validated by count)
 - If session active, SESSION_CONTEXT updated
@@ -379,7 +379,7 @@ These commands invoke `/team {pack-name}` internally and display team roster aft
 ## Related Commands
 
 - `/10x` - Quick switch to 10x-dev-pack
-- `/docs` - Quick switch to doc-team-pack
+- `/docs` - Quick switch to doc-rite-pack
 - `/hygiene` - Quick switch to hygiene-pack
 - `/debt` - Quick switch to debt-triage-pack
 - `/start` - Initialize session with team selection
@@ -388,8 +388,8 @@ These commands invoke `/team {pack-name}` internally and display team roster aft
 
 ## Related Documentation
 
-- [swap-team.sh]($KNOSSOS_HOME/swap-team.sh) - Roster swap script
-- [TDD-roster-system.md]($KNOSSOS_HOME/docs/design/TDD-0003-team-swap.md) - Roster design
+- [swap-rite.sh]($KNOSSOS_HOME/swap-rite.sh) - Roster swap script
+- [TDD-roster-system.md]($KNOSSOS_HOME/docs/design/TDD-0003-rite-swap.md) - Roster design
 - [COMMAND_REGISTRY.md](../../COMMAND_REGISTRY.md) - All registered commands
 
 ---
@@ -410,10 +410,10 @@ If any step fails, previous agents can be restored from backup.
 
 ### Team Pack Structure
 
-Each team pack in `$KNOSSOS_HOME/teams/` has:
+Each rite in `$KNOSSOS_HOME/rites/` has:
 
 ```
-team-name/
+rite-name/
   agents/
     agent1.md
     agent2.md

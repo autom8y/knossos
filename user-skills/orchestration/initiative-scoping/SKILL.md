@@ -76,7 +76,7 @@ Sessions -1 and 0 are **pre-work** - Orchestrator ingestion only. Real work begi
 | [start-ref](../../session-lifecycle/start-ref/SKILL.md) | Direct session start (scope already validated) |
 | [prompting](../../guidance/prompting/SKILL.md) | Agent invocation patterns |
 | Team workflows | Each team defines its own workflow in ACTIVE_WORKFLOW.yaml |
-| Team documentation | Templates available via team-specific skills |
+| Team documentation | Templates available via rite-specific skills |
 
 ## Archived Templates
 
