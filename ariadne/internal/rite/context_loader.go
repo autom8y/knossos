@@ -77,7 +77,7 @@ func (cl *ContextLoader) Load(riteName string) (*RiteContext, error) {
 
 // loadFromFiles attempts to load context from YAML files or fallback to orchestrator.
 func (cl *ContextLoader) loadFromFiles(riteName string) (*RiteContext, error) {
-	// Try user teams directory first (higher priority)
+	// Try user rites directory first (higher priority)
 	if cl.userDir != "" {
 		contextPath := filepath.Join(cl.userDir, riteName, ContextFileName)
 		if ctx, err := cl.loadFromYAML(contextPath); err == nil {
@@ -124,7 +124,7 @@ func (cl *ContextLoader) generateFromOrchestrator(riteName string) (*RiteContext
 	var orchestratorPath string
 	var found bool
 
-	// Check user teams
+	// Check user rites
 	if cl.userDir != "" {
 		path := filepath.Join(cl.userDir, riteName, "orchestrator.yaml")
 		if _, err := os.Stat(path); err == nil {

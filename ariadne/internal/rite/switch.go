@@ -80,13 +80,13 @@ type DryRunResult struct {
 	SuggestedFlags         []string `json:"suggested_flags,omitempty"`
 }
 
-// Switcher handles team switching operations.
+// Switcher handles rite switching operations.
 type Switcher struct {
 	resolver  *paths.Resolver
 	discovery *Discovery
 }
 
-// NewSwitcher creates a new team switcher.
+// NewSwitcher creates a new rite switcher.
 func NewSwitcher(resolver *paths.Resolver) *Switcher {
 	return &Switcher{
 		resolver:  resolver,

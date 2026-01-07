@@ -84,7 +84,7 @@ func runSwap(ctx *cmdContext, riteName string, opts swapOptions) error {
 		}
 	}
 
-	// Use team switcher for the actual swap (backward compatibility)
+	// Use rite switcher for the actual swap
 	switcher := ritelib.NewSwitcher(resolver)
 
 	switchOpts := ritelib.SwitchOptions{
