@@ -127,8 +127,8 @@ PreToolUse Hook (Edit|Write)
 - `/handoff <agent>` - Transfer to another agent
 - `/wrap` - Finalize session
 
-## Team Context: 10x-dev-pack
-... (additional team routing context)
+## Rite Context: 10x-dev-pack
+... (additional rite routing context)
 ```
 
 #### Condensed Output (15 lines max)
@@ -138,7 +138,7 @@ PreToolUse Hook (Edit|Write)
 
 | | |
 |---|---|
-| **Team** | 10x-dev-pack |
+| **Rite** | 10x-dev-pack |
 | **Session** | session-20251231-012324 (ACTIVE) |
 | **Initiative** | Hook Ecosystem Parity |
 | **Git** | main (27 uncommitted) |

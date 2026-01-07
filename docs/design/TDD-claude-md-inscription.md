@@ -1016,9 +1016,9 @@ ari inscription diff [region]
 
 ## 9. Integration Points
 
-### 9.1 Team Switch Integration
+### 9.1 Rite Switch Integration
 
-Modify `ariadne/internal/team/switch.go`:
+Modify `ariadne/internal/rite/switch.go`:
 
 ```go
 func (s *Switcher) Switch(riteName string) error {

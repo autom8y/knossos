@@ -111,9 +111,9 @@ User Intent
 | Condition | Mode | Behavior |
 |-----------|------|----------|
 | No session file exists | `native` | Direct execution, no session tracking |
-| Session exists, status=ACTIVE, team configured | `orchestrated` | Coach pattern, delegate via Task tool |
-| Session exists, status=PARKED (regardless of team) | `cross-cutting` | Direct execution with session tracking |
-| Session exists, status=ACTIVE, no team (null/none) | `cross-cutting` | Direct execution with session tracking |
+| Session exists, status=ACTIVE, rite configured | `orchestrated` | Coach pattern, delegate via Task tool |
+| Session exists, status=PARKED (regardless of rite) | `cross-cutting` | Direct execution with session tracking |
+| Session exists, status=ACTIVE, no rite (null/none) | `cross-cutting` | Direct execution with session tracking |
 | Session file corrupted or unreadable | `cross-cutting` | Graceful degradation per NFR-2 |
 
 ---
@@ -417,8 +417,8 @@ The roster ecosystem operates in three execution modes based on session state an
 
 **Mode Detection**:
 - No session file -> Native
-- Session ACTIVE + team configured -> Orchestrated
-- Session exists but no team OR parked -> Cross-Cutting
+- Session ACTIVE + rite configured -> Orchestrated
+- Session exists but no rite OR parked -> Cross-Cutting
 
 **Active workflow?** (Orchestrated mode) MUST delegate via Task tool. See `orchestration/execution-mode.md`.
 **Cross-cutting?** Execute directly with session tracking. `/consult` available for routing guidance.
@@ -444,7 +444,7 @@ Update the "## Agent Routing" section:
 
 ### Session-Without-Team Support (FR-2.1, FR-2.2)
 
-Allow `/start <initiative>` to create a session without requiring team specification.
+Allow `/start <initiative>` to create a session without requiring rite specification.
 
 **Location**: Update `/start` skill (`.claude/skills/session-lifecycle/start-ref.md`) and `session-manager.sh`.
 

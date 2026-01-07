@@ -2,10 +2,10 @@
 #
 # test-swap-rite-integration.sh - Integration tests for swap-rite.sh with roster-sync
 #
-# Tests the waterfall sync pattern and manifest team section updates per task-016:
-#   - --sync-first flag triggers roster-sync before team apply
+# Tests the waterfall sync pattern and manifest rite section updates per task-016:
+#   - --sync-first flag triggers roster-sync before rite apply
 #   - --auto-sync conditionally syncs if roster has updates
-#   - manifest.json team section updated on swap
+#   - manifest.json rite section updated on swap
 #   - No regression in existing swap-rite.sh behavior
 #
 # Part of: roster-sync integration (task-016)
@@ -84,7 +84,7 @@ create_test_manifest() {
         "ref": "main",
         "last_sync": "2024-01-01T00:00:00Z"
     },
-    "team": null,
+    "rite": null,
     "managed_files": [],
     "orphans": []
 }
@@ -178,11 +178,11 @@ test_roster_has_updates_current_manifest() {
 }
 
 # ============================================================================
-# Tests: Manifest Team Section Update
+# Tests: Manifest Rite Section Update
 # ============================================================================
 
-test_update_cem_manifest_team_creates_team_section() {
-    run_test "update_cem_manifest_team creates team section in manifest"
+test_update_cem_manifest_rite_creates_rite_section() {
+    run_test "update_cem_manifest_rite creates rite section in manifest"
     reset_test_project
 
     local current_commit
@@ -195,22 +195,22 @@ test_update_cem_manifest_team_creates_team_section() {
     source "$ROSTER_HOME/swap-rite.sh" 2>/dev/null <<< "" || true
 
     # Call the function
-    update_cem_manifest_team "10x-dev-pack"
+    update_cem_manifest_rite "10x-dev-pack"
 
     # Check manifest was updated
     if [[ -f ".claude/.cem/manifest.json" ]]; then
-        local team_name
-        team_name=$(jq -r '.team.name // empty' ".claude/.cem/manifest.json")
+        local rite_name
+        rite_name=$(jq -r '.rite.name // empty' ".claude/.cem/manifest.json")
 
-        if [[ "$team_name" == "10x-dev-pack" ]]; then
-            test_pass "Team name set in manifest"
+        if [[ "$rite_name" == "10x-dev-pack" ]]; then
+            test_pass "Rite name set in manifest"
         else
-            test_fail "Team name" "10x-dev-pack" "$team_name"
+            test_fail "Rite name" "10x-dev-pack" "$rite_name"
         fi
 
         # Check last_refresh is set
         local last_refresh
-        last_refresh=$(jq -r '.team.last_refresh // empty' ".claude/.cem/manifest.json")
+        last_refresh=$(jq -r '.rite.last_refresh // empty' ".claude/.cem/manifest.json")
 
         if [[ -n "$last_refresh" ]]; then
             test_pass "last_refresh timestamp set"
@@ -220,12 +220,12 @@ test_update_cem_manifest_team_creates_team_section() {
 
         # Check roster_path is set
         local roster_path
-        roster_path=$(jq -r '.team.roster_path // empty' ".claude/.cem/manifest.json")
+        roster_path=$(jq -r '.rite.roster_path // empty' ".claude/.cem/manifest.json")
 
-        if [[ "$roster_path" == *"teams/10x-dev-pack"* ]]; then
+        if [[ "$roster_path" == *"rites/10x-dev-pack"* ]]; then
             test_pass "roster_path set correctly"
         else
-            test_fail "roster_path" "*teams/10x-dev-pack*" "$roster_path"
+            test_fail "roster_path" "*rites/10x-dev-pack*" "$roster_path"
         fi
     else
         test_fail "manifest exists" "true" "false"
@@ -233,7 +233,7 @@ test_update_cem_manifest_team_creates_team_section() {
 }
 
 test_update_cem_manifest_no_manifest() {
-    run_test "update_cem_manifest_team gracefully handles missing manifest"
+    run_test "update_cem_manifest_rite gracefully handles missing manifest"
     reset_test_project
 
     # Ensure no manifest exists
@@ -245,7 +245,7 @@ test_update_cem_manifest_no_manifest() {
     source "$ROSTER_HOME/swap-rite.sh" 2>/dev/null <<< "" || true
 
     # Call the function - should not fail
-    if update_cem_manifest_team "10x-dev-pack" 2>/dev/null; then
+    if update_cem_manifest_rite "10x-dev-pack" 2>/dev/null; then
         test_pass "Graceful return when no manifest"
     else
         test_fail "Return code" "0" "$?"
@@ -298,10 +298,10 @@ test_existing_flags_still_work() {
     local output
     output=$("$ROSTER_HOME/swap-rite.sh" --list 2>&1) || true
 
-    if echo "$output" | grep -q "Available teams"; then
+    if echo "$output" | grep -q "Available rites"; then
         test_pass "--list flag works"
     else
-        test_fail "--list output" "Available teams" "different output"
+        test_fail "--list output" "Available rites" "different output"
     fi
 }
 
@@ -346,7 +346,7 @@ main() {
     test_roster_has_updates_no_manifest
     test_roster_has_updates_stale_manifest
     test_roster_has_updates_current_manifest
-    test_update_cem_manifest_team_creates_team_section
+    test_update_cem_manifest_rite_creates_rite_section
     test_update_cem_manifest_no_manifest
     test_roster_sync_available
     test_existing_flags_still_work

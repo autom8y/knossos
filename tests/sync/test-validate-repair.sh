@@ -73,7 +73,7 @@ create_test_manifest() {
         "ref": "main",
         "last_sync": "2026-01-01T00:00:00Z"
     },
-    "team": null,
+    "rite": null,
     "managed_files": [],
     "orphans": []
 }
@@ -251,10 +251,10 @@ EOF
     fi
 }
 
-test_validate_with_team_flag() {
-    run_test "validate: --team flag checks team consistency"
+test_validate_with_rite_flag() {
+    run_test "validate: --rite flag checks rite consistency"
 
-    local project_dir="$TEST_TMP/team-check"
+    local project_dir="$TEST_TMP/rite-check"
     mkdir -p "$project_dir/.claude/.cem"
     create_test_manifest "$project_dir"
 
@@ -263,11 +263,11 @@ test_validate_with_team_flag() {
 
     local exit_code=0
     local output
-    output=$("$ROSTER_HOME/roster-sync" validate --team "$project_dir" 2>&1) || exit_code=$?
+    output=$("$ROSTER_HOME/roster-sync" validate --rite "$project_dir" 2>&1) || exit_code=$?
 
-    # Should warn about team not in manifest (exit 1)
+    # Should warn about rite not in manifest (exit 1)
     if [[ $exit_code -eq 1 ]]; then
-        test_pass "exit code 1 for team warning"
+        test_pass "exit code 1 for rite warning"
     else
         test_fail "exit code" "1" "$exit_code"
     fi
@@ -429,12 +429,12 @@ test_repair_backup_created() {
     fi
 }
 
-test_repair_preserves_team() {
-    run_test "repair: preserves team info"
+test_repair_preserves_rite() {
+    run_test "repair: preserves rite info"
 
-    local project_dir="$TEST_TMP/repair-team"
+    local project_dir="$TEST_TMP/repair-rite"
     mkdir -p "$project_dir/.claude/.cem"
-    echo "my-team" > "$project_dir/.claude/ACTIVE_RITE"
+    echo "my-rite" > "$project_dir/.claude/ACTIVE_RITE"
 
     local exit_code=0
     "$ROSTER_HOME/roster-sync" repair "$project_dir" 2>/dev/null || exit_code=$?
@@ -446,19 +446,19 @@ test_repair_preserves_team() {
         test_fail "exit code" "0 or 4" "$exit_code"
     fi
 
-    # Check manifest exists before checking team
+    # Check manifest exists before checking rite
     if [[ ! -f "$project_dir/.claude/.cem/manifest.json" ]]; then
         test_fail "manifest" "exists" "missing"
         return
     fi
 
-    # Check team preserved in manifest
-    local team_name
-    team_name=$(jq -r '.team.name // empty' "$project_dir/.claude/.cem/manifest.json")
-    if [[ "$team_name" == "my-team" ]]; then
-        test_pass "team preserved in manifest"
+    # Check rite preserved in manifest
+    local rite_name
+    rite_name=$(jq -r '.rite.name // empty' "$project_dir/.claude/.cem/manifest.json")
+    if [[ "$rite_name" == "my-rite" ]]; then
+        test_pass "rite preserved in manifest"
     else
-        test_fail "team.name" "my-team" "$team_name"
+        test_fail "rite.name" "my-rite" "$rite_name"
     fi
 }
 
@@ -481,7 +481,7 @@ test_validate_valid_empty_manifest
 test_validate_missing_files_detected
 test_validate_checksum_mismatch_detected
 test_validate_old_schema_warns
-test_validate_with_team_flag
+test_validate_with_rite_flag
 
 # Repair tests
 test_repair_no_claude_dir
@@ -490,7 +490,7 @@ test_repair_dry_run
 test_repair_fixes_missing_files
 test_repair_updates_checksums
 test_repair_backup_created
-test_repair_preserves_team
+test_repair_preserves_rite
 
 teardown
 

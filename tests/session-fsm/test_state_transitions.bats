@@ -297,7 +297,7 @@ session_id: "$session_id"
 created_at: "2025-12-31T00:00:00Z"
 ---
 
-# Missing initiative, complexity, active_team, current_phase
+# Missing initiative, complexity, active_rite, current_phase
 EOF
 
     # Source session utilities to get validation function
@@ -330,7 +330,7 @@ status: "INVALID_STATUS"
 created_at: "2025-12-31T00:00:00Z"
 initiative: "Test"
 complexity: "MODULE"
-active_team: "10x-dev-pack"
+active_rite: "10x-dev-pack"
 current_phase: "requirements"
 ---
 EOF

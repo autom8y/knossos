@@ -116,7 +116,7 @@ EOF
     echo "$session_id"
 }
 
-setup_team() {
+setup_rite() {
     mkdir -p "$TEST_DIR/.claude/agents"
     echo "ecosystem-pack" > "$TEST_DIR/.claude/ACTIVE_RITE"
 
@@ -165,11 +165,11 @@ test_native_mode() {
     is_session_tracked || exit_code=$?
     assert_exit_code "em_001" "is_session_tracked returns 1" "$exit_code" "1"
 
-    # Test 1.2: has_active_team returns false
-    log_test "em_002: has_active_team returns false when no session"
+    # Test 1.2: has_active_rite returns false
+    log_test "em_002: has_active_rite returns false when no session"
     exit_code=0
-    has_active_team || exit_code=$?
-    assert_exit_code "em_002" "has_active_team returns 1" "$exit_code" "1"
+    has_active_rite || exit_code=$?
+    assert_exit_code "em_002" "has_active_rite returns 1" "$exit_code" "1"
 
     # Test 1.3: execution_mode returns native
     log_test "em_003: execution_mode returns native"
@@ -197,11 +197,11 @@ test_cross_cutting_mode() {
     is_session_tracked || exit_code=$?
     assert_exit_code "em_010" "is_session_tracked returns 0" "$exit_code" "0"
 
-    # Test 2.2: has_active_team returns false (no team set)
-    log_test "em_011: has_active_team returns false when no team"
+    # Test 2.2: has_active_rite returns false (no team set)
+    log_test "em_011: has_active_rite returns false when no team"
     exit_code=0
-    has_active_team || exit_code=$?
-    assert_exit_code "em_011" "has_active_team returns 1" "$exit_code" "1"
+    has_active_rite || exit_code=$?
+    assert_exit_code "em_011" "has_active_rite returns 1" "$exit_code" "1"
 
     # Test 2.3: execution_mode returns cross-cutting
     log_test "em_012: execution_mode returns cross-cutting"
@@ -236,11 +236,11 @@ test_parked_session_mode() {
     is_session_parked || exit_code=$?
     assert_exit_code "em_021" "is_session_parked returns 0" "$exit_code" "0"
 
-    # Test 3.3: has_active_team returns false (delegation suspended)
-    log_test "em_022: has_active_team returns false when PARKED"
+    # Test 3.3: has_active_rite returns false (delegation suspended)
+    log_test "em_022: has_active_rite returns false when PARKED"
     exit_code=0
-    has_active_team || exit_code=$?
-    assert_exit_code "em_022" "has_active_team returns 1" "$exit_code" "1"
+    has_active_rite || exit_code=$?
+    assert_exit_code "em_022" "has_active_rite returns 1" "$exit_code" "1"
 
     # Test 3.4: execution_mode returns cross-cutting
     log_test "em_023: execution_mode returns cross-cutting for PARKED"
@@ -275,11 +275,11 @@ test_orchestrated_mode() {
     is_session_parked || exit_code=$?
     assert_exit_code "em_031" "is_session_parked returns 1" "$exit_code" "1"
 
-    # Test 4.3: has_active_team returns true
-    log_test "em_032: has_active_team returns true"
+    # Test 4.3: has_active_rite returns true
+    log_test "em_032: has_active_rite returns true"
     exit_code=0
-    has_active_team || exit_code=$?
-    assert_exit_code "em_032" "has_active_team returns 0" "$exit_code" "0"
+    has_active_rite || exit_code=$?
+    assert_exit_code "em_032" "has_active_rite returns 0" "$exit_code" "0"
 
     # Test 4.4: execution_mode returns orchestrated
     log_test "em_033: execution_mode returns orchestrated"
@@ -318,10 +318,10 @@ test_edge_cases() {
     setup_team
     source_session_manager
 
-    log_test "em_042: has_active_team returns false when no session"
+    log_test "em_042: has_active_rite returns false when no session"
     exit_code=0
-    has_active_team || exit_code=$?
-    assert_exit_code "em_042" "has_active_team returns 1 with orphaned team" "$exit_code" "1"
+    has_active_rite || exit_code=$?
+    assert_exit_code "em_042" "has_active_rite returns 1 with orphaned team" "$exit_code" "1"
 
     log_test "em_043: execution_mode returns native with orphaned team"
     mode=$(execution_mode)
@@ -335,10 +335,10 @@ test_edge_cases() {
     echo "none" > "$TEST_DIR/.claude/ACTIVE_RITE"
     source_session_manager
 
-    log_test "em_044: has_active_team returns false when team is 'none'"
+    log_test "em_044: has_active_rite returns false when team is 'none'"
     exit_code=0
-    has_active_team || exit_code=$?
-    assert_exit_code "em_044" "has_active_team returns 1" "$exit_code" "1"
+    has_active_rite || exit_code=$?
+    assert_exit_code "em_044" "has_active_rite returns 1" "$exit_code" "1"
 
     log_test "em_045: execution_mode returns cross-cutting"
     mode=$(execution_mode)

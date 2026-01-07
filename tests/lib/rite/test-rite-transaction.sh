@@ -69,10 +69,10 @@ setup() {
     MANIFEST_FILE="$TEST_TMP/AGENT_MANIFEST.json"
 
     # Create mock roster structure
-    mkdir -p "$TEST_TMP/mock-roster/teams/test-team/agents"
-    echo "# Test Agent" > "$TEST_TMP/mock-roster/teams/test-team/agents/test-agent.md"
-    echo "# Another Agent" > "$TEST_TMP/mock-roster/teams/test-team/agents/other-agent.md"
-    echo "workflow: test" > "$TEST_TMP/mock-roster/teams/test-team/workflow.yaml"
+    mkdir -p "$TEST_TMP/mock-roster/rites/test-rite/agents"
+    echo "# Test Agent" > "$TEST_TMP/mock-roster/rites/test-rite/agents/test-agent.md"
+    echo "# Another Agent" > "$TEST_TMP/mock-roster/rites/test-rite/agents/other-agent.md"
+    echo "workflow: test" > "$TEST_TMP/mock-roster/rites/test-rite/workflow.yaml"
 
     # Override ROSTER_HOME for tests
     ROSTER_HOME="$TEST_TMP/mock-roster"
@@ -172,7 +172,7 @@ test_write_atomic_cleanup_on_fail() {
 test_create_journal() {
     run_test "create_journal creates valid JSON journal"
 
-    if create_journal "source-team" "target-team"; then
+    if create_journal "source-rite" "target-rite"; then
         if [[ -f "$JOURNAL_FILE" ]]; then
             local version
             version=$(jq -r '.version' "$JOURNAL_FILE")
@@ -184,8 +184,8 @@ test_create_journal() {
             phase=$(jq -r '.phase' "$JOURNAL_FILE")
 
             if [[ "$version" == "1.0" ]] && \
-               [[ "$source" == "source-team" ]] && \
-               [[ "$target" == "target-team" ]] && \
+               [[ "$source" == "source-rite" ]] && \
+               [[ "$target" == "target-rite" ]] && \
                [[ "$phase" == "PREPARING" ]]; then
                 test_pass "created valid journal with correct fields"
             else
@@ -205,7 +205,7 @@ test_create_journal() {
 test_create_journal_virgin_swap() {
     run_test "create_journal handles virgin swap (empty source)"
 
-    if create_journal "" "target-team"; then
+    if create_journal "" "target-rite"; then
         local source
         source=$(jq -r '.source_rite' "$JOURNAL_FILE")
         if [[ "$source" == "null" ]]; then
@@ -301,15 +301,15 @@ test_update_journal_error() {
 test_get_journal_field() {
     run_test "get_journal_field returns correct field value"
 
-    create_journal "source-team" "target-team" 2>/dev/null
+    create_journal "source-rite" "target-rite" 2>/dev/null
 
     local result
     result=$(get_journal_field "target_rite")
 
-    if [[ "$result" == "target-team" ]]; then
+    if [[ "$result" == "target-rite" ]]; then
         test_pass "returned correct field value"
     else
-        test_fail "get_journal_field" "target-team" "$result"
+        test_fail "get_journal_field" "target-rite" "$result"
     fi
 
     rm -f "$JOURNAL_FILE"
@@ -617,7 +617,7 @@ test_verify_backup_virgin_swap() {
     mkdir -p "$SWAP_BACKUP_DIR"
     # Virgin swap: no ACTIVE_RITE in backup
 
-    create_journal "" "target-team" 2>/dev/null
+    create_journal "" "target-rite" 2>/dev/null
 
     if verify_backup_integrity; then
         test_pass "correctly handled virgin swap (no ACTIVE_RITE required)"

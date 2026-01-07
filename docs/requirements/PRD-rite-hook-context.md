@@ -1,10 +1,10 @@
-# PRD: Per-Team Hook Context Injection
+# PRD: Per-Rite Hook Context Injection
 
 ## Overview
 
-Enable rites to inject domain-specific context into SessionStart hooks. Currently, all teams receive the same generic session context (rite name, session ID, git status). Teams like ecosystem-pack need specialized context (CEM sync status, skeleton reference, drift detection) that is currently only available in verbose mode and generated through a hardcoded script.
+Enable rites to inject domain-specific context into SessionStart hooks. Currently, all rites receive the same generic session context (rite name, session ID, git status). Rites like ecosystem-pack need specialized context (CEM sync status, skeleton reference, drift detection) that is currently only available in verbose mode and generated through a hardcoded script.
 
-This PRD defines a compose pattern where teams can optionally provide a context injection script that the SessionStart hook discovers and executes, allowing each team to surface the information most relevant to their domain.
+This PRD defines a compose pattern where rites can optionally provide a context injection script that the SessionStart hook discovers and executes, allowing each rite to surface the information most relevant to their domain.
 
 ## Background
 
@@ -16,9 +16,9 @@ The SessionStart hook (`session-context.sh`) provides generic context to all ses
 - Session ID and initiative
 - Git branch and change count
 
-Team-specific context exists but has two problems:
+Rite-specific context exists but has two problems:
 1. **Only in verbose mode**: Lines 261-267 of session-context.sh call `generate-rite-context.sh` only when `--verbose` is set
-2. **Generic format**: The existing generator outputs workflow routing tables, not team-specific status information
+2. **Generic format**: The existing generator outputs workflow routing tables, not rite-specific status information
 
 ### Problem Statement
 
@@ -33,13 +33,13 @@ This information is critical for ecosystem work but invisible in normal session 
 ### Discovery Context
 
 Gap Analysis (task-001) identified:
-- Root cause: Team context generation only in verbose path
-- Recommended approach: Compose pattern with team-owned scripts
+- Root cause: Rite context generation only in verbose path
+- Recommended approach: Compose pattern with rite-owned scripts
 - ecosystem-pack requirements: CEM sync, skeleton ref, drift, test satellites
 
 ## User Stories
 
-### US-1: Team-Specific Context Visibility
+### US-1: Rite-Specific Context Visibility
 
 - **US-1.1**: As an ecosystem-pack user, I want to see CEM sync status in every session context, so that I know if I'm working with stale infrastructure definitions.
 
@@ -47,9 +47,9 @@ Gap Analysis (task-001) identified:
 
 - **US-1.3**: As a 10x-dev-pack user, I want session context that shows my project's test coverage or build status, so that I have relevant dev context without ecosystem noise.
 
-### US-2: Team Pack Extensibility
+### US-2: Rite Pack Extensibility
 
-- **US-2.1**: As a rite author, I want to define what context my team needs, so that users get domain-relevant information without roster changes.
+- **US-2.1**: As a rite author, I want to define what context my rite needs, so that users get domain-relevant information without roster changes.
 
 - **US-2.2**: As a rite author, I want my context script to access hook library utilities, so that I can use existing patterns for file age checks, logging, etc.
 
@@ -57,7 +57,7 @@ Gap Analysis (task-001) identified:
 
 ### US-3: Graceful Degradation
 
-- **US-3.1**: As a user of a team without context injection, I want session context to work normally, so that new teams don't break existing behavior.
+- **US-3.1**: As a user of a rite without context injection, I want session context to work normally, so that new rites don't break existing behavior.
 
 - **US-3.2**: As a user, I want rite context errors to be logged but not block my session, so that a broken context script doesn't prevent work.
 
@@ -65,19 +65,19 @@ Gap Analysis (task-001) identified:
 
 ### Must Have
 
-#### FR-1: Team Context Loader Library
+#### FR-1: Rite Context Loader Library
 
-- **FR-1.1**: Create `rite-context-loader.sh` in `.claude/hooks/lib/` that provides `load_team_context()` function.
+- **FR-1.1**: Create `rite-context-loader.sh` in `.claude/hooks/lib/` that provides `load_rite_context()` function.
 
-- **FR-1.2**: `load_team_context()` MUST read active rite from `.claude/ACTIVE_RITE` file.
+- **FR-1.2**: `load_rite_context()` MUST read active rite from `.claude/ACTIVE_RITE` file.
 
-- **FR-1.3**: `load_team_context()` MUST look for context script at `$ROSTER_HOME/rites/$ACTIVE_RITE/context-injection.sh`.
+- **FR-1.3**: `load_rite_context()` MUST look for context script at `$ROSTER_HOME/rites/$ACTIVE_RITE/context-injection.sh`.
 
-- **FR-1.4**: `load_team_context()` MUST source the script and call `inject_team_context()` function if both exist.
+- **FR-1.4**: `load_rite_context()` MUST source the script and call `inject_rite_context()` function if both exist.
 
-- **FR-1.5**: `load_team_context()` MUST return empty string and exit 0 if team has no context script (graceful skip).
+- **FR-1.5**: `load_rite_context()` MUST return empty string and exit 0 if rite has no context script (graceful skip).
 
-- **FR-1.6**: `load_team_context()` MUST log warnings and continue if script exists but function is missing or fails.
+- **FR-1.6**: `load_rite_context()` MUST log warnings and continue if script exists but function is missing or fails.
 
 #### FR-2: SessionStart Hook Integration
 
@@ -85,19 +85,19 @@ Gap Analysis (task-001) identified:
 
 - **FR-2.2**: Add rite context output to condensed mode (default), not just verbose mode.
 
-- **FR-2.3**: Team context MUST appear after core session info but before command suggestions.
+- **FR-2.3**: Rite context MUST appear after core session info but before command suggestions.
 
-- **FR-2.4**: Team context section MUST be labeled "### Team Context" for consistent parsing.
+- **FR-2.4**: Rite context section MUST be labeled "### Rite Context" for consistent parsing.
 
-- **FR-2.5**: Keep existing `generate-rite-context.sh` call for workflow routing table (separate from team status context).
+- **FR-2.5**: Keep existing `generate-rite-context.sh` call for workflow routing table (separate from rite status context).
 
-#### FR-3: Team Context Script Contract
+#### FR-3: Rite Context Script Contract
 
-- **FR-3.1**: Team context scripts MUST be located at `rites/$TEAM/context-injection.sh`.
+- **FR-3.1**: Rite context scripts MUST be located at `rites/$RITE/context-injection.sh`.
 
-- **FR-3.2**: Team context scripts MUST export a function named `inject_team_context`.
+- **FR-3.2**: Rite context scripts MUST export a function named `inject_rite_context`.
 
-- **FR-3.3**: `inject_team_context` MUST output markdown to stdout (empty is valid).
+- **FR-3.3**: `inject_rite_context` MUST output markdown to stdout (empty is valid).
 
 - **FR-3.4**: `inject_team_context` SHOULD return 0 on success, non-zero on partial failure.
 

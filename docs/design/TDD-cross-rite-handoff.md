@@ -55,12 +55,12 @@ Cross-team coordination in roster currently relies on:
 # All HANDOFF artifacts MUST conform to this schema
 
 # Required: Core identification
-artifact_id: string           # Pattern: HANDOFF-{source}-to-{target}-{YYYY-MM-DD}[-{seq}]
+artifact_id: string           # Pattern: HANDOFF-{source_rite}-to-{target_rite}-{YYYY-MM-DD}[-{seq}]
 schema_version: "1.0"         # Must be "1.0" for this version
 
 # Required: Team routing
-source_team: string           # Team pack producing the handoff (e.g., "10x-dev-pack")
-target_team: string           # Team pack receiving the handoff (e.g., "security-pack")
+source_rite: string           # Rite pack producing the handoff (e.g., "10x-dev-pack")
+target_rite: string           # Rite pack receiving the handoff (e.g., "security-pack")
 
 # Required: Handoff classification
 handoff_type: enum            # execution | validation | assessment | implementation | strategic_input | strategic_evaluation
@@ -153,8 +153,8 @@ rejected --resubmit--> pending (new artifact, references original)
 | Field | Rule | Error Code |
 |-------|------|------------|
 | `artifact_id` | Match pattern `^HANDOFF-[a-z0-9-]+-to-[a-z0-9-]+-[0-9]{4}-[0-9]{2}-[0-9]{2}(-[0-9]+)?$` | HANDOFF-001 |
-| `source_team` | Non-empty, match known rite pattern | HANDOFF-002 |
-| `target_team` | Non-empty, different from source_team | HANDOFF-003 |
+| `source_rite` | Non-empty, match known rite pattern | HANDOFF-002 |
+| `target_rite` | Non-empty, different from source_rite | HANDOFF-003 |
 | `handoff_type` | One of: execution, validation, assessment, implementation, strategic_input, strategic_evaluation | HANDOFF-004 |
 | `priority` | One of: critical, high, medium, low | HANDOFF-005 |
 | `blocking` | Boolean | HANDOFF-006 |
@@ -179,7 +179,7 @@ rejected --resubmit--> pending (new artifact, references original)
 
 | Rule | Error Code |
 |------|------------|
-| `source_team` and `target_team` MUST be different | HANDOFF-030 |
+| `source_rite` and `target_rite` MUST be different | HANDOFF-030 |
 | If `status: rejected`, `rejection_reason` MUST be present | HANDOFF-031 |
 | If `resubmission_of` present, referenced artifact MUST exist | HANDOFF-032 |
 | If `blocking: true`, `priority` SHOULD be `critical` or `high` | HANDOFF-033 (warning) |
@@ -192,7 +192,7 @@ rejected --resubmit--> pending (new artifact, references original)
 
 A cross-rite HANDOFF artifact is **required** when:
 
-| Condition | Target Team | Handoff Type |
+| Condition | Target Rite | Handoff Type |
 |-----------|-------------|--------------|
 | Complexity >= SERVICE with security considerations | security-pack | assessment |
 | Feature involves production deployment | sre-pack | validation |
@@ -205,7 +205,7 @@ A cross-rite HANDOFF artifact is **required** when:
 
 A cross-rite HANDOFF artifact is **optional** when:
 
-| Condition | Target Team | Handoff Type |
+| Condition | Target Rite | Handoff Type |
 |-----------|-------------|--------------|
 | Feature complete, documentation update desired | doc-team-pack | assessment |
 | Code review reveals hygiene concerns | hygiene-pack | assessment |
@@ -294,8 +294,8 @@ HANDOFF-RESPONSE-{target}-to-{source}-{YYYY-MM-DD}.md
 ---
 artifact_id: HANDOFF-10x-dev-pack-to-security-pack-2026-01-03
 schema_version: "1.0"
-source_team: 10x-dev-pack
-target_team: security-pack
+source_rite: 10x-dev-pack
+target_rite: security-pack
 handoff_type: assessment
 priority: critical
 blocking: true
@@ -341,7 +341,7 @@ The 10x-dev-pack has completed PRD and TDD for a major payment processing overha
 | PRD-payment-processing.md | Approved | Sections 3.2, 3.3 cover security requirements |
 | TDD-payment-processing.md | In Review | Section 4.2 has data flow diagram |
 
-## Notes for Security Team
+## Notes for Security Rite
 
 1. Priority SEC-001 before SEC-002 (dependency)
 2. PCI-DSS Level 1 compliance required
@@ -456,7 +456,7 @@ The debt-triage-pack has completed assessment and planning for Q1 2026 debt reme
 
 Execute in order: PKG-001, PKG-002 (no dependencies between them, but PKG-001 is higher priority).
 
-## Notes for Hygiene Team
+## Notes for Hygiene Rite
 
 - PKG-001 affects: user-service, billing-service, notification-service, auth-service
 - All changes must preserve existing behavior (see acceptance criteria)
@@ -524,12 +524,12 @@ validate_handoff() {
         return 5
     fi
 
-    # Validate source_team != target_team
-    local source_team target_team
-    source_team=$(echo "$frontmatter" | grep "^source_team:" | sed 's/source_team: *//' | tr -d '"')
-    target_team=$(echo "$frontmatter" | grep "^target_team:" | sed 's/target_team: *//' | tr -d '"')
-    if [[ "$source_team" == "$target_team" ]]; then
-        echo "HANDOFF-030: source_team and target_team must be different" >&2
+    # Validate source_rite != target_rite
+    local source_rite target_rite
+    source_rite=$(echo "$frontmatter" | grep "^source_rite:" | sed 's/source_rite: *//' | tr -d '"')
+    target_rite=$(echo "$frontmatter" | grep "^target_rite:" | sed 's/target_rite: *//' | tr -d '"')
+    if [[ "$source_rite" == "$target_rite" ]]; then
+        echo "HANDOFF-030: source_rite and target_rite must be different" >&2
         return 5
     fi
 

@@ -1,6 +1,6 @@
-# TDD: Ariadne Team Domain
+# TDD: Ariadne Rite Domain
 
-> Technical Design Document for the team domain of the Ariadne Go CLI
+> Technical Design Document for the rite domain of the Ariadne Go CLI
 
 **Status**: Draft
 **Author**: Architect Agent
@@ -13,7 +13,7 @@
 
 ## 1. Overview
 
-This Technical Design Document specifies the implementation of the **team domain** for Ariadne (`ari`), the Go binary replacement for the roster bash script harness. The team domain encompasses 4 commands that manage agent rites -- the specialized agent configurations that enable different workflow patterns.
+This Technical Design Document specifies the implementation of the **rite domain** for Ariadne (`ari`), the Go binary replacement for the roster bash script harness. The rite domain encompasses 4 commands that manage agent rites -- the specialized agent configurations that enable different workflow patterns.
 
 ### 1.1 Context
 
@@ -22,15 +22,15 @@ This Technical Design Document specifies the implementation of the **team domain
 | PRD | `docs/requirements/PRD-ariadne.md` (Section 4.1) |
 | Spike | `docs/spikes/SPIKE-ariadne-go-cli-architecture.md` |
 | Session TDD | `docs/design/TDD-ariadne-session.md` |
-| Current Implementation | `swap-rite.sh`, `lib/team/*.sh` |
-| Teams Directory | `rites/` (source of rites) |
+| Current Implementation | `swap-rite.sh`, `lib/rite/*.sh` |
+| Rites Directory | `rites/` (source of rites) |
 | Workflow Schema | `schemas/orchestrator.yaml.schema.json` |
 
 ### 1.2 Scope
 
 **In Scope**:
-- 4 team commands: switch, list, status, validate
-- Internal packages: `cmd/team/`, extension of `paths/`, `output/`
+- 4 rite commands: switch, list, status, validate
+- Internal packages: `cmd/rite/`, extension of `paths/`, `output/`
 - Error handling with exit codes per PRD Section 5.1
 - CLAUDE.md satellite system integration
 - Agent resolution and manifest management
@@ -39,12 +39,12 @@ This Technical Design Document specifies the implementation of the **team domain
 **Out of Scope**:
 - Manifest domain (separate TDD - handles manifest show/diff/validate/merge)
 - Three-way merge for manifests (manifest domain responsibility)
-- Team pack creation/editing (forge-pack responsibility)
+- Rite pack creation/editing (forge-pack responsibility)
 - Hook registration (sync domain responsibility)
 
 ### 1.3 Design Goals
 
-1. **Atomic Operations**: Team switches complete fully or roll back
+1. **Atomic Operations**: Rite switches complete fully or roll back
 2. **Explicit Orphan Handling**: No silent data loss; require user decision on orphaned agents
 3. **CLAUDE.md Consistency**: Satellite sections always reflect active rite
 4. **Manifest Integrity**: AGENT_MANIFEST.json provides audit trail and validation
@@ -60,31 +60,31 @@ This Technical Design Document specifies the implementation of the **team domain
 ariadne/
 ├── internal/
 │   ├── cmd/
-│   │   └── team/
-│   │       ├── team.go              # Parent command registration
-│   │       ├── switch.go            # ari team switch
-│   │       ├── list.go              # ari team list
-│   │       ├── status.go            # ari team status
-│   │       └── validate.go          # ari team validate
-│   ├── team/
-│   │   ├── discovery.go             # Team location and enumeration
+│   │   └── rite/
+│   │       ├── rite.go              # Parent command registration
+│   │       ├── switch.go            # ari rite switch
+│   │       ├── list.go              # ari rite list
+│   │       ├── status.go            # ari rite status
+│   │       └── validate.go          # ari rite validate
+│   ├── rite/
+│   │   ├── discovery.go             # Rite location and enumeration
 │   │   ├── manifest.go              # AGENT_MANIFEST.json operations
-│   │   ├── resolver.go              # Agent resolution from team to .claude/agents/
+│   │   ├── resolver.go              # Agent resolution from rite to .claude/agents/
 │   │   ├── switch.go                # Switch orchestration logic
 │   │   ├── orphan.go                # Orphan detection and handling
 │   │   ├── claudemd.go              # CLAUDE.md satellite updates
 │   │   └── workflow.go              # workflow.yaml parsing
 │   ├── paths/
-│   │   └── team.go                  # Team-specific path resolution (extends existing)
+│   │   └── rite.go                  # Rite-specific path resolution (extends existing)
 │   └── output/
-│       └── team.go                  # Team-specific output structures (extends existing)
+│       └── rite.go                  # Rite-specific output structures (extends existing)
 ```
 
 ### 2.2 Dependency Graph
 
 ```
                     ┌─────────────────────────────────┐
-                    │  internal/cmd/team/team.go      │
+                    │  internal/cmd/rite/rite.go      │
                     │  (4 commands)                   │
                     └─────────────┬───────────────────┘
                                   │
@@ -92,7 +92,7 @@ ariadne/
          │                        │                        │
          v                        v                        v
 ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│ internal/team/  │     │ internal/paths/ │     │ internal/output/│
+│ internal/rite/  │     │ internal/paths/ │     │ internal/output/│
 │ (business logic)│     │ (extended)      │     │ (extended)      │
 └────────┬────────┘     └─────────────────┘     └─────────────────┘
          │
@@ -105,27 +105,27 @@ ariadne/
 
 ### 2.3 Key Concepts
 
-#### Team Pack Structure
+#### Rite Pack Structure
 
 ```
-rites/{team-name}/
+rites/{rite-name}/
 ├── agents/                     # Agent .md files
 │   ├── orchestrator.md
 │   ├── principal-engineer.md
 │   └── ...
 ├── workflow.yaml               # Workflow phases and routing
 ├── orchestrator.yaml           # Orchestrator generation config
-├── commands/                   # Team-specific commands (optional)
-├── skills/                     # Team-specific skills (optional)
-└── hooks/                      # Team-specific hooks (optional)
+├── commands/                   # Rite-specific commands (optional)
+├── skills/                     # Rite-specific skills (optional)
+└── hooks/                      # Rite-specific hooks (optional)
 ```
 
-#### Active Team State
+#### Active Rite State
 
 ```
 .claude/
 ├── ACTIVE_RITE                 # Single line: rite name (e.g., "10x-dev-pack")
-├── ACTIVE_WORKFLOW.yaml        # Copy of team's workflow.yaml
+├── ACTIVE_WORKFLOW.yaml        # Copy of rite's workflow.yaml
 ├── AGENT_MANIFEST.json         # Manifest tracking agent origins
 ├── CLAUDE.md                   # Contains satellite sections updated on switch
 └── agents/
@@ -147,20 +147,20 @@ rites/{team-name}/
 | `status` | Show current team status | No |
 | `validate` | Validate rite integrity | No |
 
-### 3.2 Command: `ari team switch`
+### 3.2 Command: `ari rite switch`
 
 Switches the active rite with atomic operations and orphan handling.
 
 **Signature**:
 ```
-ari team switch <team-name> [--remove-all|--keep-all|--promote-all] [--dry-run]
+ari rite switch <rite-name> [--remove-all|--keep-all|--promote-all] [--dry-run]
 ```
 
 **Arguments**:
 
 | Argument | Required | Description |
 |----------|----------|-------------|
-| `team-name` | Yes | Target rite name (e.g., "10x-dev-pack", "rnd-pack") |
+| `rite-name` | Yes | Target rite name (e.g., "10x-dev-pack", "rnd-pack") |
 
 **Flags**:
 
@@ -184,8 +184,8 @@ ari team switch <team-name> [--remove-all|--keep-all|--promote-all] [--dry-run]
 **Output (JSON)**:
 ```json
 {
-  "team": "10x-dev-pack",
-  "previous_team": "rnd-pack",
+  "rite": "10x-dev-pack",
+  "previous_rite": "rnd-pack",
   "switched_at": "2026-01-04T18:00:00Z",
   "agents_installed": [
     "architect.md",
@@ -222,10 +222,10 @@ ari team switch <team-name> [--remove-all|--keep-all|--promote-all] [--dry-run]
 
 | Code | Condition |
 |------|-----------|
-| 0 | Team switch successful |
-| 2 | Invalid arguments (unknown team, conflicting flags) |
+| 0 | Rite switch successful |
+| 2 | Invalid arguments (unknown rite, conflicting flags) |
 | 5 | Orphan conflict (orphans detected, no strategy specified) |
-| 6 | Team not found |
+| 6 | Rite not found |
 | 7 | Permission denied (cannot write to .claude/) |
 | 9 | No .claude/ directory found |
 
@@ -245,10 +245,10 @@ ari team switch <team-name> [--remove-all|--keep-all|--promote-all] [--dry-run]
 ```
 
 **Implementation Notes**:
-- Validates target team exists in `rites/` or user-level teams directory
-- Detects orphaned agents (agents in .claude/agents/ not from target team)
+- Validates target rite exists in `rites/` or user-level rites directory
+- Detects orphaned agents (agents in .claude/agents/ not from target rite)
 - Requires explicit orphan handling flag if orphans detected
-- Copies agents from `rites/{team-name}/agents/` to `.claude/agents/`
+- Copies agents from `rites/{rite-name}/agents/` to `.claude/agents/`
 - Updates `ACTIVE_RITE`, `ACTIVE_WORKFLOW.yaml`, `AGENT_MANIFEST.json`
 - Updates CLAUDE.md satellite sections (Quick Start table, Agent Configurations)
 - Transaction safety: backup before, restore on failure
@@ -271,7 +271,7 @@ ari team list [--format=FORMAT]
 **Output (JSON)**:
 ```json
 {
-  "teams": [
+  "rites": [
     {
       "name": "10x-dev-pack",
       "description": "Full development lifecycle (PRD -> TDD -> Code -> QA)",
@@ -290,7 +290,7 @@ ari team list [--format=FORMAT]
     }
   ],
   "total": 2,
-  "active_team": "10x-dev-pack"
+  "active_rite": "10x-dev-pack"
 }
 ```
 
@@ -302,7 +302,7 @@ rnd-pack          2       Research and exploration
 security-pack     3       Security analysis and threat modeling
 sre-pack          4       Site reliability and operations
 
-Total: 4 teams (* = active)
+Total: 4 rites (* = active)
 ```
 
 **Output (name-only)**:
@@ -327,25 +327,25 @@ sre-pack
 - Counts agents by scanning `agents/` subdirectory
 - Marks currently active rite (from `ACTIVE_RITE` file)
 
-### 3.4 Command: `ari team status`
+### 3.4 Command: `ari rite status`
 
-Shows detailed status of the current or specified team.
+Shows detailed status of the current or specified rite.
 
 **Signature**:
 ```
-ari team status [--team=NAME]
+ari rite status [--rite=NAME]
 ```
 
 **Flags**:
 
 | Flag | Short | Type | Default | Description |
 |------|-------|------|---------|-------------|
-| `--team` | `-t` | string | (active) | Team to query status for |
+| `--rite` | `-t` | string | (active) | Rite to query status for |
 
 **Output (JSON)**:
 ```json
 {
-  "team": "10x-dev-pack",
+  "rite": "10x-dev-pack",
   "is_active": true,
   "path": "/Users/tom/Code/roster/rites/10x-dev-pack",
   "description": "Full development lifecycle (PRD -> TDD -> Code -> QA)",
@@ -397,7 +397,7 @@ ari team status [--team=NAME]
 
 **Output (text)**:
 ```
-Team: 10x-dev-pack (ACTIVE)
+Rite: 10x-dev-pack (ACTIVE)
 Path: /Users/tom/Code/roster/rites/10x-dev-pack
 Description: Full development lifecycle (PRD -> TDD -> Code -> QA)
 Workflow: sequential
@@ -430,20 +430,20 @@ Status: OK (manifest valid, CLAUDE.md synced)
 - Checks CLAUDE.md satellite sections for sync status
 - Returns `is_active: false` if querying non-active rite
 
-### 3.5 Command: `ari team validate`
+### 3.5 Command: `ari rite validate`
 
 Validates rite structure and configuration integrity.
 
 **Signature**:
 ```
-ari team validate [--team=NAME] [--fix]
+ari rite validate [--rite=NAME] [--fix]
 ```
 
 **Flags**:
 
 | Flag | Short | Type | Default | Description |
 |------|-------|------|---------|-------------|
-| `--team` | `-t` | string | (active) | Team to validate |
+| `--rite` | `-t` | string | (active) | Rite to validate |
 | `--fix` | | bool | false | Attempt automatic repairs |
 
 **Validation Rules**:
@@ -464,7 +464,7 @@ ari team validate [--team=NAME] [--fix]
 **Output (JSON)**:
 ```json
 {
-  "team": "10x-dev-pack",
+  "rite": "10x-dev-pack",
   "valid": true,
   "checks": [
     {"check": "TEAM_EXISTS", "status": "pass", "message": "Team directory found"},
@@ -625,13 +625,13 @@ Tracks the origin and state of installed agents:
   "agents": {
     "architect.md": {
       "source": "team",
-      "team": "10x-dev-pack",
+      "rite": "10x-dev-pack",
       "checksum": "sha256:abc123...",
       "installed_at": "2026-01-04T18:00:00Z"
     },
     "orchestrator.md": {
       "source": "team",
-      "team": "10x-dev-pack",
+      "rite": "10x-dev-pack",
       "checksum": "sha256:def456...",
       "installed_at": "2026-01-04T18:00:00Z"
     },

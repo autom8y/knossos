@@ -113,7 +113,7 @@ setup_test_project() {
     cp "$SCRIPT_DIR/.claude/hooks/lib/config.sh" .claude/hooks/lib/
     cp "$SCRIPT_DIR/.claude/hooks/lib/logging.sh" .claude/hooks/lib/
 
-    # Setup orchestrator in active team
+    # Setup orchestrator in active rite
     echo "ecosystem-pack" > .claude/ACTIVE_RITE
     echo "# Orchestrator" > .claude/agents/orchestrator.md
 
@@ -183,7 +183,7 @@ test_boot_002_start_reuses_existing_session() {
 session_id: $existing_id
 initiative: Existing Initiative
 complexity: MODULE
-active_team: ecosystem-pack
+active_rite: ecosystem-pack
 status: ACTIVE
 created_at: 2026-01-04T00:00:00Z
 updated_at: 2026-01-04T00:00:00Z
@@ -283,7 +283,7 @@ test_boot_005_task_invocation_format() {
     assert_contains "boot_005.4" "Task invocation has Session Path" "$task_block" "Session Path:" || return 1
     assert_contains "boot_005.5" "Task invocation has Initiative" "$task_block" "Initiative:" || return 1
     assert_contains "boot_005.6" "Task invocation has Complexity" "$task_block" "Complexity:" || return 1
-    assert_contains "boot_005.7" "Task invocation has Team" "$task_block" "Team:" || return 1
+    assert_contains "boot_005.7" "Task invocation has Rite" "$task_block" "Rite:" || return 1
 }
 
 test_boot_006_special_chars_escaping() {

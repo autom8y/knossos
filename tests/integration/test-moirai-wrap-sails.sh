@@ -43,8 +43,8 @@ status: ACTIVE
 created_at: "2026-01-06T10:00:00Z"
 initiative: "Test wrap with WHITE sails"
 complexity: PATCH
-active_team: ecosystem-pack
-team: ecosystem-pack
+active_rite: ecosystem-pack
+rite: ecosystem-pack
 current_phase: implementation
 ---
 
@@ -163,8 +163,8 @@ status: ACTIVE
 created_at: "2026-01-06T10:00:00Z"
 initiative: "Test wrap with BLACK sails"
 complexity: PATCH
-active_team: ecosystem-pack
-team: ecosystem-pack
+active_rite: ecosystem-pack
+rite: ecosystem-pack
 current_phase: implementation
 ---
 

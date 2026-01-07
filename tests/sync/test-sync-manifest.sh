@@ -271,7 +271,7 @@ test_migrate_v2_to_v3() {
         "ref": "master",
         "last_sync": "2025-01-01T00:00:00Z"
     },
-    "team": {
+    "rite": {
         "name": "10x-dev-pack"
     },
     "managed_files": []
@@ -307,12 +307,12 @@ EOF
         test_fail "roster.path" "/old/skeleton" "$roster_path"
     fi
 
-    local team_name
-    team_name=$(echo "$manifest" | jq -r '.team.name')
-    if [[ "$team_name" == "10x-dev-pack" ]]; then
-        test_pass "team preserved"
+    local rite_name
+    rite_name=$(echo "$manifest" | jq -r '.rite.name')
+    if [[ "$rite_name" == "10x-dev-pack" ]]; then
+        test_pass "rite preserved"
     else
-        test_fail "team.name" "10x-dev-pack" "$team_name"
+        test_fail "rite.name" "10x-dev-pack" "$rite_name"
     fi
 
     local migrated_from
@@ -329,22 +329,22 @@ test_update_manifest_rite() {
 
     local manifest
     manifest=$(create_manifest "/test" "abc" "main")
-    manifest=$(update_manifest_rite "$manifest" "custom-team" "teamhash")
+    manifest=$(update_manifest_rite "$manifest" "custom-rite" "ritehash")
 
-    local team_name
-    team_name=$(echo "$manifest" | jq -r '.team.name')
-    if [[ "$team_name" == "custom-team" ]]; then
-        test_pass "team.name set"
+    local rite_name
+    rite_name=$(echo "$manifest" | jq -r '.rite.name')
+    if [[ "$rite_name" == "custom-rite" ]]; then
+        test_pass "rite.name set"
     else
-        test_fail "team.name" "custom-team" "$team_name"
+        test_fail "rite.name" "custom-rite" "$rite_name"
     fi
 
-    local team_checksum
-    team_checksum=$(echo "$manifest" | jq -r '.team.checksum')
-    if [[ "$team_checksum" == "teamhash" ]]; then
-        test_pass "team.checksum set"
+    local rite_checksum
+    rite_checksum=$(echo "$manifest" | jq -r '.rite.checksum')
+    if [[ "$rite_checksum" == "ritehash" ]]; then
+        test_pass "rite.checksum set"
     else
-        test_fail "team.checksum" "teamhash" "$team_checksum"
+        test_fail "rite.checksum" "ritehash" "$rite_checksum"
     fi
 }
 

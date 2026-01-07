@@ -450,23 +450,23 @@ remove_orchestrator() {
 # Team Context Tests
 # =============================================================================
 
-# team_001: Active team is included in Task invocation
-@test "team_001: active team included in Task invocation" {
+# rite_001: Active rite is included in Task invocation
+@test "rite_001: active rite included in Task invocation" {
     clean_sessions
-    echo "custom-team-pack" > "$TEST_PROJECT_DIR/.claude/ACTIVE_TEAM"
+    echo "custom-rite-pack" > "$TEST_PROJECT_DIR/.claude/ACTIVE_RITE"
 
-    export CLAUDE_USER_PROMPT='/start "Team Test"'
+    export CLAUDE_USER_PROMPT='/start "Rite Test"'
     export CLAUDE_PROJECT_DIR="$TEST_PROJECT_DIR"
     cd "$TEST_PROJECT_DIR"
 
     run bash "$ORCHESTRATOR_ROUTER"
 
     [ "$status" -eq 0 ]
-    [[ "$output" == *"Team: custom-team-pack"* ]]
+    [[ "$output" == *"Rite: custom-rite-pack"* ]]
 }
 
-# team_002: No orchestrator means no routing
-@test "team_002: no orchestrator means direct execution" {
+# rite_002: No orchestrator means no routing
+@test "rite_002: no orchestrator means direct execution" {
     clean_sessions
     remove_orchestrator
 

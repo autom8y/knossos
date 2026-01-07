@@ -6,7 +6,7 @@
 #   - Fresh project initialization
 #   - --force overwrite
 #   - Invalid path handling
-#   - --team flag
+#   - --rite flag
 #
 # Part of: Skeleton Deprecation & CEM Migration (task-012)
 
@@ -328,25 +328,25 @@ test_init_current_directory() {
 }
 
 # ============================================================================
-# Tests: --team Flag
+# Tests: --rite Flag
 # ============================================================================
 
-test_init_with_team_flag() {
-    run_test "Init with --team flag"
+test_init_with_rite_flag() {
+    run_test "Init with --rite flag"
     reset_test_project
 
-    # Get first available team
-    local team_name
-    team_name=$(ls "$ROSTER_HOME/rites/" 2>/dev/null | head -1)
+    # Get first available rite
+    local rite_name
+    rite_name=$(ls "$ROSTER_HOME/rites/" 2>/dev/null | head -1)
 
-    if [[ -z "$team_name" ]]; then
-        echo "  SKIP: No teams available"
+    if [[ -z "$rite_name" ]]; then
+        echo "  SKIP: No rites available"
         return
     fi
 
-    # Run init with team
+    # Run init with rite
     local exit_code=0
-    "$ROSTER_HOME/roster-sync" init --team="$team_name" "$TEST_PROJECT" >/dev/null 2>&1 || exit_code=$?
+    "$ROSTER_HOME/roster-sync" init --rite="$rite_name" "$TEST_PROJECT" >/dev/null 2>&1 || exit_code=$?
 
     if [[ $exit_code -eq 0 ]]; then
         test_pass "exits with code 0"
@@ -358,34 +358,34 @@ test_init_with_team_flag() {
     if [[ -f "$TEST_PROJECT/.claude/ACTIVE_RITE" ]]; then
         local active_rite
         active_rite=$(cat "$TEST_PROJECT/.claude/ACTIVE_RITE")
-        if [[ "$active_rite" == "$team_name" ]]; then
-            test_pass "ACTIVE_RITE set to $team_name"
+        if [[ "$active_rite" == "$rite_name" ]]; then
+            test_pass "ACTIVE_RITE set to $rite_name"
         else
-            test_fail "ACTIVE_RITE content" "$team_name" "$active_rite"
+            test_fail "ACTIVE_RITE content" "$rite_name" "$active_rite"
         fi
     else
         test_fail "ACTIVE_RITE file" "exists" "missing"
     fi
 
-    # Check manifest has team info
-    local manifest_team
-    manifest_team=$(jq -r '.team.name // empty' "$TEST_PROJECT/.claude/.cem/manifest.json" 2>/dev/null)
-    if [[ "$manifest_team" == "$team_name" ]]; then
-        test_pass "manifest team.name set"
+    # Check manifest has rite info
+    local manifest_rite
+    manifest_rite=$(jq -r '.rite.name // empty' "$TEST_PROJECT/.claude/.cem/manifest.json" 2>/dev/null)
+    if [[ "$manifest_rite" == "$rite_name" ]]; then
+        test_pass "manifest rite.name set"
     else
-        test_fail "manifest team.name" "$team_name" "$manifest_team"
+        test_fail "manifest rite.name" "$rite_name" "$manifest_rite"
     fi
 }
 
-test_init_with_invalid_team() {
-    run_test "Init with invalid team fails"
+test_init_with_invalid_rite() {
+    run_test "Init with invalid rite fails"
     reset_test_project
 
     local exit_code=0
-    "$ROSTER_HOME/roster-sync" init --team="nonexistent-team" "$TEST_PROJECT" >/dev/null 2>&1 || exit_code=$?
+    "$ROSTER_HOME/roster-sync" init --rite="nonexistent-rite" "$TEST_PROJECT" >/dev/null 2>&1 || exit_code=$?
 
     if [[ $exit_code -eq 3 ]]; then
-        test_pass "exits with code 3 for invalid team"
+        test_pass "exits with code 3 for invalid rite"
     else
         test_fail "exit code" "3" "$exit_code"
     fi
@@ -398,55 +398,55 @@ test_init_with_invalid_team() {
     fi
 }
 
-test_init_team_equals_syntax() {
-    run_test "Init with --team=value syntax"
+test_init_rite_equals_syntax() {
+    run_test "Init with --rite=value syntax"
     reset_test_project
 
-    local team_name
-    team_name=$(ls "$ROSTER_HOME/rites/" 2>/dev/null | head -1)
+    local rite_name
+    rite_name=$(ls "$ROSTER_HOME/rites/" 2>/dev/null | head -1)
 
-    if [[ -z "$team_name" ]]; then
-        echo "  SKIP: No teams available"
+    if [[ -z "$rite_name" ]]; then
+        echo "  SKIP: No rites available"
         return
     fi
 
-    "$ROSTER_HOME/roster-sync" init "--team=$team_name" "$TEST_PROJECT" >/dev/null 2>&1 || {
-        test_fail "init with --team=value" "exit 0" "exit $?"
+    "$ROSTER_HOME/roster-sync" init "--rite=$rite_name" "$TEST_PROJECT" >/dev/null 2>&1 || {
+        test_fail "init with --rite=value" "exit 0" "exit $?"
         return
     }
 
-    local active_team
-    active_team=$(cat "$TEST_PROJECT/.claude/ACTIVE_RITE" 2>/dev/null)
-    if [[ "$active_team" == "$team_name" ]]; then
-        test_pass "--team=value syntax works"
+    local active_rite
+    active_rite=$(cat "$TEST_PROJECT/.claude/ACTIVE_RITE" 2>/dev/null)
+    if [[ "$active_rite" == "$rite_name" ]]; then
+        test_pass "--rite=value syntax works"
     else
-        test_fail "team" "$team_name" "$active_team"
+        test_fail "rite" "$rite_name" "$active_rite"
     fi
 }
 
-test_init_team_space_syntax() {
-    run_test "Init with --team value syntax"
+test_init_rite_space_syntax() {
+    run_test "Init with --rite value syntax"
     reset_test_project
 
-    local team_name
-    team_name=$(ls "$ROSTER_HOME/rites/" 2>/dev/null | head -1)
+    local rite_name
+    rite_name=$(ls "$ROSTER_HOME/rites/" 2>/dev/null | head -1)
 
-    if [[ -z "$team_name" ]]; then
-        echo "  SKIP: No teams available"
+    if [[ -z "$rite_name" ]]; then
+        echo "  SKIP: No rites available"
         return
     fi
 
-    "$ROSTER_HOME/roster-sync" init --team "$team_name" "$TEST_PROJECT" >/dev/null 2>&1 || {
-        test_fail "init with --team value" "exit 0" "exit $?"
+    "$ROSTER_HOME/roster-sync" init --rite "$rite_name" "$TEST_PROJECT" >/dev/null 2>&1 || {
+        test_fail "init with --rite value" "exit 0" "exit $?"
         return
     }
 
-    local active_team
-    active_team=$(cat "$TEST_PROJECT/.claude/ACTIVE_RITE" 2>/dev/null)
-    if [[ "$active_team" == "$team_name" ]]; then
-        test_pass "--team value syntax works"
+    local active_rite
+    active_rite=$(cat "$TEST_PROJECT/.claude/ACTIVE_RITE" 2>/dev/null)
+    if [[ "$active_rite" == "$rite_name" ]]; then
+        test_pass "--rite value syntax works"
     else
-        test_fail "team" "$team_name" "$active_team"
+        test_fail "rite" "$rite_name" "$active_rite"
     fi
 }
 
@@ -596,11 +596,11 @@ test_init_nonexistent_path
 test_init_inside_roster_fails
 test_init_current_directory
 
-# Team flag tests
-test_init_with_team_flag
-test_init_with_invalid_team
-test_init_team_equals_syntax
-test_init_team_space_syntax
+# Rite flag tests
+test_init_with_rite_flag
+test_init_with_invalid_rite
+test_init_rite_equals_syntax
+test_init_rite_space_syntax
 
 # Dry run tests
 test_init_dry_run

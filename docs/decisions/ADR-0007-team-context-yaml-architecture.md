@@ -1,4 +1,4 @@
-# ADR-0007: Team Context YAML Architecture
+# ADR-0007: Rite Context YAML Architecture
 
 | Field | Value |
 |-------|-------|
@@ -10,51 +10,51 @@
 
 ## Context
 
-The current rite context injection system uses bash-based sourcing via `rite-context-loader.sh`. Teams provide executable `context-injection.sh` scripts that export an `inject_team_context()` function. While functional, this approach has several architectural limitations:
+The current rite context injection system uses bash-based sourcing via `rite-context-loader.sh`. Rites provide executable `context-injection.sh` scripts that export an `inject_rite_context()` function. While functional, this approach has several architectural limitations:
 
 ### Current Implementation
 
 ```bash
 # .claude/hooks/lib/rite-context-loader.sh
-load_team_context() {
-    active_team=$(cat ".claude/ACTIVE_RITE" 2>/dev/null || echo "")
-    team_script="$roster_home/rites/$active_team/$TEAM_CONTEXT_SCRIPT_NAME"
+load_rite_context() {
+    active_rite=$(cat ".claude/ACTIVE_RITE" 2>/dev/null || echo "")
+    rite_script="$roster_home/rites/$active_rite/$RITE_CONTEXT_SCRIPT_NAME"
 
     # Source in subshell to isolate side effects
     output=$(
-        source "$team_script"
-        "$TEAM_CONTEXT_FUNCTION_NAME"
+        source "$rite_script"
+        "$RITE_CONTEXT_FUNCTION_NAME"
     )
 }
 ```
 
 ### Problems with Current Approach
 
-1. **Security**: Arbitrary code execution from team scripts; must trust all rite authors
+1. **Security**: Arbitrary code execution from rite scripts; must trust all rite authors
 2. **Portability**: Bash-specific; incompatible with Go-based Ariadne CLI
 3. **Testability**: Difficult to unit test bash function sourcing
-4. **Discoverability**: No schema for what teams can inject; each team invents its own format
+4. **Discoverability**: No schema for what rites can inject; each rite invents its own format
 5. **Performance**: Shell spawning overhead for every context injection call
-6. **Validation**: No compile-time or startup-time validation of team configurations
+6. **Validation**: No compile-time or startup-time validation of rite configurations
 
 ### Constraints
 
 - **Backward Compatibility**: Existing rites must continue working during migration
-- **Multi-Source**: Team context comes from roster (central) and satellite projects (local)
+- **Multi-Source**: Rite context comes from roster (central) and satellite projects (local)
 - **Performance**: Context injection runs on every prompt; must be fast
-- **Extensibility**: New teams should be addable without modifying Ariadne core
+- **Extensibility**: New rites should be addable without modifying Ariadne core
 
 ## Decision
 
-Replace bash-sourced rite context with **YAML configuration files per team**, loaded and validated by Ariadne at startup.
+Replace bash-sourced rite context with **YAML configuration files per rite**, loaded and validated by Ariadne at startup.
 
 ### Option Analysis
 
-#### Option A: Per-Team YAML Files (Selected)
+#### Option A: Per-Rite YAML Files (Selected)
 
 ```yaml
 # rites/10x-dev-pack/rite-context.yaml
-team:
+rite:
   name: 10x-dev-pack
   display_name: "10x Development Pack"
   domain: software development
@@ -83,9 +83,9 @@ context_injection:
 **Pros**:
 - Declarative, no code execution required
 - Schema-validatable at startup
-- Per-team isolation maintained
+- Per-rite isolation maintained
 - Easy to diff and review changes
-- Natural migration path (one team at a time)
+- Natural migration path (one rite at a time)
 
 **Cons**:
 - Reduces flexibility for complex context injection
@@ -96,7 +96,7 @@ context_injection:
 
 ```yaml
 # ariadne.yaml or roster.yaml
-teams:
+rites:
   10x-dev-pack:
     context_injection:
       static: [...]
@@ -111,16 +111,16 @@ teams:
 - Simpler discovery
 
 **Cons**:
-- Merge conflicts when multiple teams change simultaneously
-- Doesn't scale to 11+ teams
+- Merge conflicts when multiple rites change simultaneously
+- Doesn't scale to 11+ rites
 - Breaks rite modularity
-- Central config becomes bottleneck for team additions
+- Central config becomes bottleneck for rite additions
 
 #### Option C: Embedded in Session Context
 
 ```yaml
 # SESSION_CONTEXT.md
-team_context:
+rite_context:
   injected_at: "2026-01-04T10:00:00Z"
   sections:
     - name: "Agent Routing"
@@ -137,11 +137,11 @@ team_context:
 - Duplicate storage across sessions
 - Doesn't solve the source-of-truth problem
 
-### Selected Approach: Option A (Per-Team YAML)
+### Selected Approach: Option A (Per-Rite YAML)
 
 Each rite contains a `rite-context.yaml` file defining:
 
-1. **Team metadata**: Name, domain, display name
+1. **Rite metadata**: Name, domain, display name
 2. **Static context**: Always-injected markdown sections
 3. **Dynamic context**: Template-rendered sections from file sources
 4. **Conditional context**: Sections injected based on session state
@@ -152,11 +152,11 @@ Each rite contains a `rite-context.yaml` file defining:
 # schemas/rite-context-schema.yaml
 $schema: "https://json-schema.org/draft/2020-12/schema"
 $id: "https://roster.dev/schemas/rite-context.schema.yaml"
-title: "Team Context Configuration"
+title: "Rite Context Configuration"
 type: object
 
 required:
-  - team
+  - rite
   - schema_version
 
 properties:
@@ -164,7 +164,7 @@ properties:
     type: string
     pattern: "^[0-9]+\\.[0-9]+$"
 
-  team:
+  rite:
     type: object
     required: [name, domain]
     properties:
@@ -223,8 +223,8 @@ properties:
 ### Implementation in Ariadne
 
 ```go
-// ariadne/internal/team/context.go
-package team
+// ariadne/internal/rite/context.go
+package rite
 
 import (
     "embed"
@@ -235,11 +235,11 @@ import (
 )
 
 //go:embed schemas/rite-context.schema.yaml
-var teamContextSchema []byte
+var riteContextSchema []byte
 
 type RiteContext struct {
     SchemaVersion string `yaml:"schema_version"`
-    Team          TeamMetadata `yaml:"team"`
+    Rite          RiteMetadata `yaml:"rite"`
     ContextInjection ContextInjection `yaml:"context_injection"`
 }
 
@@ -249,7 +249,7 @@ type ContextInjection struct {
     Conditional []ConditionalSection `yaml:"conditional"`
 }
 
-func LoadRiteContext(teamDir string) (*RiteContext, error) {
+func LoadRiteContext(riteDir string) (*RiteContext, error) {
     // Load and validate against schema
     // Return structured context for injection
 }
@@ -262,10 +262,10 @@ func LoadRiteContext(teamDir string) (*RiteContext, error) {
    - YAML takes precedence if present
    - Logging when falling back to bash
 
-2. **Phase 2: Team Migration** (Weeks 3-4)
+2. **Phase 2: Rite Migration** (Weeks 3-4)
    - Migrate 10x-dev-pack first (canonical example)
    - Migration script converts context-injection.sh to rite-context.yaml
-   - Teams validate their context output matches
+   - Rites validate their context output matches
 
 3. **Phase 3: Deprecation** (Week 5+)
    - Log deprecation warnings for bash scripts
@@ -277,15 +277,15 @@ func LoadRiteContext(teamDir string) (*RiteContext, error) {
 During migration, `rite-context-loader.sh` continues to function:
 
 ```bash
-load_team_context() {
+load_rite_context() {
     # Check for YAML first (new approach)
-    if [[ -f "$team_dir/rite-context.yaml" ]]; then
+    if [[ -f "$rite_dir/rite-context.yaml" ]]; then
         ari rite context --format=markdown
         return $?
     fi
 
     # Fall back to bash (deprecated)
-    log_warning "Team $active_team uses deprecated bash context injection"
+    log_warning "Rite $active_rite uses deprecated bash context injection"
     # ... existing bash logic
 }
 ```
@@ -305,7 +305,7 @@ load_team_context() {
 
 1. **Migration Effort**: All 11 rites need YAML files created
 2. **Reduced Flexibility**: Complex context logic requires template/CEL expressions
-3. **Learning Curve**: Teams must learn schema and template syntax
+3. **Learning Curve**: Rites must learn schema and template syntax
 4. **Two Systems During Migration**: Increased complexity while both approaches coexist
 
 ### Neutral
@@ -318,20 +318,20 @@ load_team_context() {
 | Artifact | Location | Purpose |
 |----------|----------|---------|
 | Schema | `schemas/rite-context-schema.yaml` | Validation schema for rite context files |
-| Go Package | `ariadne/internal/team/context.go` | Context loading and rendering |
-| Example | `rites/10x-dev-pack/rite-context.yaml` | Canonical example for other teams |
+| Go Package | `ariadne/internal/rite/context.go` | Context loading and rendering |
+| Example | `rites/10x-dev-pack/rite-context.yaml` | Canonical example for other rites |
 | Migration Script | `scripts/migrate-rite-context.sh` | Converts bash to YAML |
 
 ## Related Decisions
 
 - **ADR-0001**: Session State Machine (session context structure)
-- **ADR-0002**: Hook Library Resolution (where team scripts live)
+- **ADR-0002**: Hook Library Resolution (where rite scripts live)
 - **ADR-0005**: state-mate Centralized State Authority (session state access pattern)
 
 ## References
 
 - Current implementation: `.claude/hooks/lib/rite-context-loader.sh`
-- Team pack structure: `rites/10x-dev-pack/`
+- Rite pack structure: `rites/10x-dev-pack/`
 - Orchestrator YAML: `rites/*/orchestrator.yaml` (existing YAML pattern)
 
 ## Version History

@@ -59,24 +59,24 @@ setup() {
     echo "Test temp dir: $TEST_TMP"
 
     # Create mock rite structure for testing
-    mkdir -p "$TEST_TMP/mock-knossos/rites/team-a/commands"
-    mkdir -p "$TEST_TMP/mock-knossos/rites/team-a/skills"
-    mkdir -p "$TEST_TMP/mock-knossos/rites/team-a/hooks"
-    mkdir -p "$TEST_TMP/mock-knossos/rites/team-b/commands"
-    mkdir -p "$TEST_TMP/mock-knossos/rites/team-b/skills"
-    mkdir -p "$TEST_TMP/mock-knossos/rites/team-b/hooks"
+    mkdir -p "$TEST_TMP/mock-knossos/rites/rite-a/commands"
+    mkdir -p "$TEST_TMP/mock-knossos/rites/rite-a/skills"
+    mkdir -p "$TEST_TMP/mock-knossos/rites/rite-a/hooks"
+    mkdir -p "$TEST_TMP/mock-knossos/rites/rite-b/commands"
+    mkdir -p "$TEST_TMP/mock-knossos/rites/rite-b/skills"
+    mkdir -p "$TEST_TMP/mock-knossos/rites/rite-b/hooks"
 
     # Create mock commands (files)
-    touch "$TEST_TMP/mock-knossos/rites/team-a/commands/cmd-a.md"
-    touch "$TEST_TMP/mock-knossos/rites/team-b/commands/cmd-b.md"
+    touch "$TEST_TMP/mock-knossos/rites/rite-a/commands/cmd-a.md"
+    touch "$TEST_TMP/mock-knossos/rites/rite-b/commands/cmd-b.md"
 
     # Create mock skills (directories)
-    mkdir -p "$TEST_TMP/mock-knossos/rites/team-a/skills/skill-a"
-    mkdir -p "$TEST_TMP/mock-knossos/rites/team-b/skills/skill-b"
+    mkdir -p "$TEST_TMP/mock-knossos/rites/rite-a/skills/skill-a"
+    mkdir -p "$TEST_TMP/mock-knossos/rites/rite-b/skills/skill-b"
 
     # Create mock hooks (files)
-    touch "$TEST_TMP/mock-knossos/rites/team-a/hooks/hook-a.sh"
-    touch "$TEST_TMP/mock-knossos/rites/team-b/hooks/hook-b.sh"
+    touch "$TEST_TMP/mock-knossos/rites/rite-a/hooks/hook-a.sh"
+    touch "$TEST_TMP/mock-knossos/rites/rite-b/hooks/hook-b.sh"
 
     # Override KNOSSOS_HOME for tests
     KNOSSOS_HOME="$TEST_TMP/mock-knossos"
@@ -94,7 +94,7 @@ test_is_resource_from_rite_command() {
     run_test "is_resource_from_rite finds command file"
 
     if is_resource_from_rite "cmd-a.md" "commands" "f"; then
-        test_pass "found team-a command"
+        test_pass "found rite-a command"
     else
         test_fail "is_resource_from_rite" "success (return 0)" "failure (return 1)"
     fi
@@ -104,7 +104,7 @@ test_is_resource_from_rite_skill() {
     run_test "is_resource_from_rite finds skill directory"
 
     if is_resource_from_rite "skill-a" "skills" "d"; then
-        test_pass "found team-a skill"
+        test_pass "found rite-a skill"
     else
         test_fail "is_resource_from_rite" "success (return 0)" "failure (return 1)"
     fi
@@ -114,7 +114,7 @@ test_is_resource_from_rite_hook() {
     run_test "is_resource_from_rite finds hook file"
 
     if is_resource_from_rite "hook-b.sh" "hooks" "f"; then
-        test_pass "found team-b hook"
+        test_pass "found rite-b hook"
     else
         test_fail "is_resource_from_rite" "success (return 0)" "failure (return 1)"
     fi
@@ -151,10 +151,10 @@ test_get_resource_rite_command() {
     local result
     result=$(get_resource_rite "cmd-a.md" "commands" "f")
 
-    if [[ "$result" == "team-a" ]]; then
-        test_pass "returned correct team name: team-a"
+    if [[ "$result" == "rite-a" ]]; then
+        test_pass "returned correct team name: rite-a"
     else
-        test_fail "get_resource_rite" "team-a" "$result"
+        test_fail "get_resource_rite" "rite-a" "$result"
     fi
 }
 
@@ -164,10 +164,10 @@ test_get_resource_rite_skill() {
     local result
     result=$(get_resource_rite "skill-b" "skills" "d")
 
-    if [[ "$result" == "team-b" ]]; then
-        test_pass "returned correct team name: team-b"
+    if [[ "$result" == "rite-b" ]]; then
+        test_pass "returned correct team name: rite-b"
     else
-        test_fail "get_resource_rite" "team-b" "$result"
+        test_fail "get_resource_rite" "rite-b" "$result"
     fi
 }
 
@@ -177,10 +177,10 @@ test_get_resource_rite_hook() {
     local result
     result=$(get_resource_rite "hook-a.sh" "hooks" "f")
 
-    if [[ "$result" == "team-a" ]]; then
-        test_pass "returned correct team name: team-a"
+    if [[ "$result" == "rite-a" ]]; then
+        test_pass "returned correct team name: rite-a"
     else
-        test_fail "get_resource_rite" "team-a" "$result"
+        test_fail "get_resource_rite" "rite-a" "$result"
     fi
 }
 
@@ -201,17 +201,17 @@ test_get_resource_rite_multiple_teams() {
     run_test "get_resource_rite returns first match when resource exists in multiple teams"
 
     # Create same command in both teams
-    touch "$TEST_TMP/mock-knossos/rites/team-a/commands/shared.md"
-    touch "$TEST_TMP/mock-knossos/rites/team-b/commands/shared.md"
+    touch "$TEST_TMP/mock-knossos/rites/rite-a/commands/shared.md"
+    touch "$TEST_TMP/mock-knossos/rites/rite-b/commands/shared.md"
 
     local result
     result=$(get_resource_rite "shared.md" "commands" "f")
 
     # Should return one of them (behavior: first match from find)
-    if [[ "$result" == "team-a" ]] || [[ "$result" == "team-b" ]]; then
+    if [[ "$result" == "rite-a" ]] || [[ "$result" == "rite-b" ]]; then
         test_pass "returned a team name: $result"
     else
-        test_fail "get_resource_rite" "team-a or team-b" "$result"
+        test_fail "get_resource_rite" "rite-a or rite-b" "$result"
     fi
 }
 
@@ -464,82 +464,82 @@ test_remove_rite_resource_removes_marker() {
 test_detect_resource_orphans_commands() {
     run_test "detect_resource_orphans detects command orphans"
 
-    # Setup: project with orphan command from team-a, swapping to team-b
+    # Setup: project with orphan command from rite-a, swapping to rite-b
     local project_dir="$TEST_TMP/project-detect-orphans-cmd"
     local cmd_dir="$project_dir/.claude/commands"
     mkdir -p "$cmd_dir"
-    echo "orphan from team-a" > "$cmd_dir/cmd-a.md"
+    echo "orphan from rite-a" > "$cmd_dir/cmd-a.md"
 
-    # Act: detect orphans (incoming team is team-b)
+    # Act: detect orphans (incoming team is rite-b)
     cd "$project_dir"
     local result
-    result=$(detect_resource_orphans "commands" ".claude/commands" "team-b" "f" "*.md")
+    result=$(detect_resource_orphans "commands" ".claude/commands" "rite-b" "f" "*.md")
 
-    # Assert: should detect cmd-a.md as orphan from team-a
-    if [[ "$result" == "cmd-a.md:team-a" ]]; then
+    # Assert: should detect cmd-a.md as orphan from rite-a
+    if [[ "$result" == "cmd-a.md:rite-a" ]]; then
         test_pass "detected command orphan with correct origin team"
     else
-        test_fail "detect_resource_orphans" "cmd-a.md:team-a" "$result"
+        test_fail "detect_resource_orphans" "cmd-a.md:rite-a" "$result"
     fi
 }
 
 test_detect_resource_orphans_skills() {
     run_test "detect_resource_orphans detects skill orphans"
 
-    # Setup: project with orphan skill from team-b, swapping to team-a
+    # Setup: project with orphan skill from rite-b, swapping to rite-a
     local project_dir="$TEST_TMP/project-detect-orphans-skill"
     local skill_dir="$project_dir/.claude/skills"
     mkdir -p "$skill_dir/skill-b"
     echo "orphan skill" > "$skill_dir/skill-b/skill.md"
 
-    # Act: detect orphans (incoming team is team-a)
+    # Act: detect orphans (incoming team is rite-a)
     cd "$project_dir"
     local result
-    result=$(detect_resource_orphans "skills" ".claude/skills" "team-a" "d" "*/")
+    result=$(detect_resource_orphans "skills" ".claude/skills" "rite-a" "d" "*/")
 
-    # Assert: should detect skill-b as orphan from team-b
-    if [[ "$result" == "skill-b:team-b" ]]; then
+    # Assert: should detect skill-b as orphan from rite-b
+    if [[ "$result" == "skill-b:rite-b" ]]; then
         test_pass "detected skill orphan with correct origin team"
     else
-        test_fail "detect_resource_orphans" "skill-b:team-b" "$result"
+        test_fail "detect_resource_orphans" "skill-b:rite-b" "$result"
     fi
 }
 
 test_detect_resource_orphans_hooks() {
     run_test "detect_resource_orphans detects hook orphans"
 
-    # Setup: project with orphan hook from team-a, swapping to team-b
+    # Setup: project with orphan hook from rite-a, swapping to rite-b
     local project_dir="$TEST_TMP/project-detect-orphans-hook"
     local hook_dir="$project_dir/.claude/hooks"
     mkdir -p "$hook_dir"
     echo "orphan hook" > "$hook_dir/hook-a.sh"
 
-    # Act: detect orphans (incoming team is team-b)
+    # Act: detect orphans (incoming team is rite-b)
     cd "$project_dir"
     local result
-    result=$(detect_resource_orphans "hooks" ".claude/hooks" "team-b" "f" "*")
+    result=$(detect_resource_orphans "hooks" ".claude/hooks" "rite-b" "f" "*")
 
-    # Assert: should detect hook-a.sh as orphan from team-a
-    if [[ "$result" == "hook-a.sh:team-a" ]]; then
+    # Assert: should detect hook-a.sh as orphan from rite-a
+    if [[ "$result" == "hook-a.sh:rite-a" ]]; then
         test_pass "detected hook orphan with correct origin team"
     else
-        test_fail "detect_resource_orphans" "hook-a.sh:team-a" "$result"
+        test_fail "detect_resource_orphans" "hook-a.sh:rite-a" "$result"
     fi
 }
 
 test_detect_resource_orphans_skips_incoming() {
     run_test "detect_resource_orphans skips resources from incoming team"
 
-    # Setup: project with command from team-a, swapping to team-a (should not be orphan)
+    # Setup: project with command from rite-a, swapping to rite-a (should not be orphan)
     local project_dir="$TEST_TMP/project-detect-no-orphan"
     local cmd_dir="$project_dir/.claude/commands"
     mkdir -p "$cmd_dir"
-    echo "team-a command" > "$cmd_dir/cmd-a.md"
+    echo "rite-a command" > "$cmd_dir/cmd-a.md"
 
-    # Act: detect orphans (incoming team is team-a - same as resource)
+    # Act: detect orphans (incoming team is rite-a - same as resource)
     cd "$project_dir"
     local result
-    result=$(detect_resource_orphans "commands" ".claude/commands" "team-a" "f" "*.md")
+    result=$(detect_resource_orphans "commands" ".claude/commands" "rite-a" "f" "*.md")
 
     # Assert: should return empty (no orphans)
     if [[ -z "$result" ]]; then
@@ -558,10 +558,10 @@ test_detect_resource_orphans_skips_non_team() {
     mkdir -p "$cmd_dir"
     echo "user command" > "$cmd_dir/user-custom.md"
 
-    # Act: detect orphans (incoming team is team-a)
+    # Act: detect orphans (incoming team is rite-a)
     cd "$project_dir"
     local result
-    result=$(detect_resource_orphans "commands" ".claude/commands" "team-a" "f" "*.md")
+    result=$(detect_resource_orphans "commands" ".claude/commands" "rite-a" "f" "*.md")
 
     # Assert: should return empty (user commands are not orphans)
     if [[ -z "$result" ]]; then
@@ -578,16 +578,16 @@ test_detect_resource_orphans_multiple() {
     local project_dir="$TEST_TMP/project-detect-multiple"
     local cmd_dir="$project_dir/.claude/commands"
     mkdir -p "$cmd_dir"
-    echo "from team-a" > "$cmd_dir/cmd-a.md"
-    echo "from team-b" > "$cmd_dir/cmd-b.md"
+    echo "from rite-a" > "$cmd_dir/cmd-a.md"
+    echo "from rite-b" > "$cmd_dir/cmd-b.md"
     echo "user command" > "$cmd_dir/user.md"
 
-    # Act: detect orphans (incoming team is neither team-a nor team-b)
+    # Act: detect orphans (incoming team is neither rite-a nor rite-b)
     # Create a third team for this test
-    mkdir -p "$TEST_TMP/mock-knossos/rites/team-c/commands"
+    mkdir -p "$TEST_TMP/mock-knossos/rites/rite-c/commands"
     cd "$project_dir"
     local result
-    result=$(detect_resource_orphans "commands" ".claude/commands" "team-c" "f" "*.md")
+    result=$(detect_resource_orphans "commands" ".claude/commands" "rite-c" "f" "*.md")
 
     # Assert: should detect both cmd-a.md and cmd-b.md (but not user.md)
     local count
@@ -609,7 +609,7 @@ test_detect_resource_orphans_no_directory() {
     # Act: detect orphans on non-existent directory
     cd "$project_dir"
     local result
-    result=$(detect_resource_orphans "commands" ".claude/commands" "team-a" "f" "*.md")
+    result=$(detect_resource_orphans "commands" ".claude/commands" "rite-a" "f" "*.md")
 
     # Assert: should return empty
     if [[ -z "$result" ]]; then
@@ -634,7 +634,7 @@ test_remove_resource_orphans_remove_mode_commands() {
 
     # Act: pipe orphan list to remove function (remove mode)
     cd "$project_dir"
-    echo "cmd-a.md:team-a" | remove_resource_orphans "commands" ".claude/commands" "remove" "f" 2>/dev/null
+    echo "cmd-a.md:rite-a" | remove_resource_orphans "commands" ".claude/commands" "remove" "f" 2>/dev/null
 
     # Assert: file removed, backup created
     if [[ ! -f "$cmd_dir/cmd-a.md" ]] && \
@@ -657,7 +657,7 @@ test_remove_resource_orphans_remove_mode_skills() {
 
     # Act: pipe orphan list to remove function (remove mode)
     cd "$project_dir"
-    echo "skill-b:team-b" | remove_resource_orphans "skills" ".claude/skills" "remove" "d" 2>/dev/null
+    echo "skill-b:rite-b" | remove_resource_orphans "skills" ".claude/skills" "remove" "d" 2>/dev/null
 
     # Assert: directory removed, backup created with recursive structure
     if [[ ! -d "$skill_dir/skill-b" ]] && \
@@ -681,7 +681,7 @@ test_remove_resource_orphans_remove_mode_hooks() {
 
     # Act: pipe orphan list to remove function (remove mode)
     cd "$project_dir"
-    echo "hook-a.sh:team-a" | remove_resource_orphans "hooks" ".claude/hooks" "remove" "f" 2>/dev/null
+    echo "hook-a.sh:rite-a" | remove_resource_orphans "hooks" ".claude/hooks" "remove" "f" 2>/dev/null
 
     # Assert: file removed, backup created
     if [[ ! -f "$hook_dir/hook-a.sh" ]] && \
@@ -703,7 +703,7 @@ test_remove_resource_orphans_keep_mode() {
 
     # Act: pipe orphan list to remove function (keep mode)
     cd "$project_dir"
-    echo "cmd-a.md:team-a" | remove_resource_orphans "commands" ".claude/commands" "keep" "f" 2>/dev/null
+    echo "cmd-a.md:rite-a" | remove_resource_orphans "commands" ".claude/commands" "keep" "f" 2>/dev/null
 
     # Assert: file still exists, no backup created
     if [[ -f "$cmd_dir/cmd-a.md" ]] && \
@@ -725,7 +725,7 @@ test_remove_resource_orphans_empty_mode() {
 
     # Act: pipe orphan list to remove function (empty mode)
     cd "$project_dir"
-    echo "cmd-b.md:team-b" | remove_resource_orphans "commands" ".claude/commands" "" "f" 2>/dev/null
+    echo "cmd-b.md:rite-b" | remove_resource_orphans "commands" ".claude/commands" "" "f" 2>/dev/null
 
     # Assert: file still exists, no backup created
     if [[ -f "$cmd_dir/cmd-b.md" ]] && \
@@ -750,9 +750,9 @@ test_remove_resource_orphans_multiple() {
     # Act: pipe multiple orphans to remove function
     cd "$project_dir"
     {
-        echo "cmd-a.md:team-a"
-        echo "cmd-b.md:team-b"
-        echo "other.md:team-a"
+        echo "cmd-a.md:rite-a"
+        echo "cmd-b.md:rite-b"
+        echo "other.md:rite-a"
     } | remove_resource_orphans "commands" ".claude/commands" "remove" "f" 2>/dev/null
 
     # Assert: all files removed, all backed up
@@ -793,15 +793,15 @@ test_remove_resource_orphans_empty_input() {
 test_remove_resource_orphans_piped_from_detect() {
     run_test "remove_resource_orphans works piped from detect_resource_orphans"
 
-    # Setup: project with orphan from team-a, swapping to team-b
+    # Setup: project with orphan from rite-a, swapping to rite-b
     local project_dir="$TEST_TMP/project-pipe-test"
     local cmd_dir="$project_dir/.claude/commands"
     mkdir -p "$cmd_dir"
-    echo "orphan from team-a" > "$cmd_dir/cmd-a.md"
+    echo "orphan from rite-a" > "$cmd_dir/cmd-a.md"
 
     # Act: pipe detect output directly to remove
     cd "$project_dir"
-    detect_resource_orphans "commands" ".claude/commands" "team-b" "f" "*.md" \
+    detect_resource_orphans "commands" ".claude/commands" "rite-b" "f" "*.md" \
         | remove_resource_orphans "commands" ".claude/commands" "remove" "f" 2>/dev/null
 
     # Assert: orphan detected and removed
