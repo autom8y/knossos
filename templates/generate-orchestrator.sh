@@ -1,12 +1,12 @@
 #!/bin/bash
 # generate-orchestrator.sh - Generate orchestrator.md from template + config
-# Usage: ./generate-orchestrator.sh <team-name> [--dry-run]
+# Usage: ./generate-orchestrator.sh <rite-name> [--dry-run]
 #
 # POC SHORTCUTS (see end of file for full list):
 # - Minimal error handling
 # - Hardcoded paths
 # - No input validation
-# - Single-team focus (rnd-pack)
+# - Single-rite focus (rnd-pack)
 
 set -e
 
@@ -14,13 +14,13 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/../lib/knossos-home.sh"
 
-TEAM="${1:-rnd-pack}"
+RITE="${1:-rnd-pack}"
 DRY_RUN="${2:-}"
 
 TEMPLATE="$KNOSSOS_HOME/templates/base-orchestrator.md"
-CONFIG="$KNOSSOS_HOME/rites/$TEAM/orchestrator.yaml"
-WORKFLOW="$KNOSSOS_HOME/rites/$TEAM/workflow.yaml"
-OUTPUT="$KNOSSOS_HOME/rites/$TEAM/agents/orchestrator.md"
+CONFIG="$KNOSSOS_HOME/rites/$RITE/orchestrator.yaml"
+WORKFLOW="$KNOSSOS_HOME/rites/$RITE/workflow.yaml"
+OUTPUT="$KNOSSOS_HOME/rites/$RITE/agents/orchestrator.md"
 
 # Check dependencies
 if ! command -v yq &> /dev/null; then
@@ -33,7 +33,7 @@ fi
 [[ -f "$CONFIG" ]] || { echo "ERROR: Config not found: $CONFIG"; exit 1; }
 [[ -f "$WORKFLOW" ]] || { echo "ERROR: Workflow not found: $WORKFLOW"; exit 1; }
 
-echo "Generating orchestrator for: $TEAM"
+echo "Generating orchestrator for: $RITE"
 echo "  Template: $TEMPLATE"
 echo "  Config: $CONFIG"
 echo "  Workflow: $WORKFLOW"
@@ -43,8 +43,8 @@ echo "  Output: $OUTPUT"
 
 ROLE=$(yq '.frontmatter.role' "$CONFIG")
 DESCRIPTION=$(yq '.frontmatter.description' "$CONFIG" | tr '\n' ' ' | sed 's/  */ /g' | sed 's/ *$//')
-COLOR=$(yq '.team.color' "$CONFIG")
-TEAM_NAME=$(yq '.team.name' "$CONFIG")
+COLOR=$(yq '.rite.color' "$CONFIG")
+RITE_NAME=$(yq '.rite.name' "$CONFIG")
 
 # Workflow position (upstream/downstream)
 UPSTREAM_SOURCES=$(yq '.workflow_position.upstream' "$CONFIG" | tr -d '"')
@@ -232,7 +232,7 @@ CONTENT="${CONTENT//\{\{ROLE\}\}/$ROLE}"
 CONTENT="${CONTENT//\{\{TEAM_COLOR\}\}/$COLOR}"
 CONTENT="${CONTENT//\{\{COMPLEXITY_ENUM\}\}/$COMPLEXITY_ENUM}"
 CONTENT="${CONTENT//\{\{SPECIALIST_ENUM\}\}/$SPECIALIST_ENUM}"
-CONTENT="${CONTENT//\{\{TEAM_NAME\}\}/$TEAM_NAME}"
+CONTENT="${CONTENT//\{\{TEAM_NAME\}\}/$RITE_NAME}"
 CONTENT="${CONTENT//\{\{UPSTREAM_SOURCES\}\}/$UPSTREAM_SOURCES}"
 CONTENT="${CONTENT//\{\{DOWNSTREAM_AGENTS\}\}/$DOWNSTREAM_AGENTS}"
 

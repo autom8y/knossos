@@ -1948,12 +1948,12 @@ check_user_command_collisions() {
     local collision_count=0
     local collisions=()
 
-    # Check each team command against user commands
-    for team_cmd in "$source_dir"/*.md; do
-        [[ -f "$team_cmd" ]] || continue
+    # Check each rite command against user commands
+    for rite_cmd in "$source_dir"/*.md; do
+        [[ -f "$rite_cmd" ]] || continue
 
         local cmd_name
-        cmd_name=$(basename "$team_cmd")
+        cmd_name=$(basename "$rite_cmd")
 
         # Check if user command with same name exists
         if [[ -f "$HOME/.claude/commands/$cmd_name" ]]; then
@@ -2006,7 +2006,7 @@ swap_commands() {
 
     log_debug "Syncing $cmd_count command(s) from $rite_name"
 
-    # Create marker file to track which commands belong to this team
+    # Create marker file to track which commands belong to this rite
     local marker_file=".claude/commands/.rite-commands"
     : > "$marker_file"
 
@@ -2019,7 +2019,7 @@ swap_commands() {
 
         # Check for collision with existing project command
         if [[ -f ".claude/commands/$cmd_name" ]] && ! grep -q "^$cmd_name$" "$marker_file" 2>/dev/null; then
-            # Not a team command, this is a project command - skip with warning
+            # Not a rite command, this is a project command - skip with warning
             log_warning "Skipped: $cmd_name (project command exists)"
             continue
         fi
@@ -2034,7 +2034,7 @@ swap_commands() {
     synced_count=$(wc -l < "$marker_file" | tr -d ' ')
 
     if [[ "$synced_count" -gt 0 ]]; then
-        log "Synced: $synced_count team command(s)"
+        log "Synced: $synced_count rite command(s)"
     fi
 }
 
@@ -2049,7 +2049,7 @@ swap_skills() {
     local rite_name="$1"
     local source_dir="$KNOSSOS_HOME/rites/$rite_name/skills"
 
-    log_debug "Checking for team skills in $source_dir"
+    log_debug "Checking for rite skills in $source_dir"
 
     # Ensure skills directory exists
     mkdir -p ".claude/skills"
@@ -2105,7 +2105,7 @@ swap_skills() {
     synced_count=$(wc -l < "$marker_file" | tr -d ' ')
 
     if [[ "$synced_count" -gt 0 ]]; then
-        log "Synced: $synced_count team skill(s)"
+        log "Synced: $synced_count rite skill(s)"
     fi
 }
 
@@ -2211,14 +2211,14 @@ sync_shared_skills() {
 # Rite Hooks Functions (Phase 2: Unified Sync)
 # ============================================================================
 
-# Sync base hooks AND team-specific hooks to project
-# Base hooks provide foundation, team hooks can override
+# Sync base hooks AND rite-specific hooks to project
+# Base hooks provide foundation, rite hooks can override
 swap_hooks() {
     local rite_name="$1"
     local base_hooks_dir="$KNOSSOS_HOME/user-hooks"
-    local team_hooks_dir="$KNOSSOS_HOME/rites/$rite_name/hooks"
+    local rite_hooks_dir="$KNOSSOS_HOME/rites/$rite_name/hooks"
 
-    log_debug "Syncing hooks: base=$base_hooks_dir, team=$team_hooks_dir"
+    log_debug "Syncing hooks: base=$base_hooks_dir, rite=$rite_hooks_dir"
 
     # Ensure hooks directory exists
     mkdir -p ".claude/hooks"
@@ -2233,7 +2233,7 @@ swap_hooks() {
     # =========================================================================
     if [[ ! -d "$base_hooks_dir" ]]; then
         log_warning "Base hooks directory not found: $base_hooks_dir"
-        # Continue anyway - team hooks may still work
+        # Continue anyway - rite hooks may still work
     else
         log_debug "Installing base hooks from $base_hooks_dir"
 
@@ -2300,29 +2300,29 @@ swap_hooks() {
     fi
 
     # =========================================================================
-    # PHASE 2: Overlay team hooks (if team has hooks directory)
+    # PHASE 2: Overlay rite hooks (if rite has hooks directory)
     # =========================================================================
-    if [[ ! -d "$team_hooks_dir" ]]; then
+    if [[ ! -d "$rite_hooks_dir" ]]; then
         log_debug "Rite $rite_name has no hooks/ directory"
         return 0
     fi
 
     local hook_count
-    hook_count=$(find "$team_hooks_dir" -maxdepth 1 -type f -name "*.sh" 2>/dev/null | wc -l | tr -d ' ')
+    hook_count=$(find "$rite_hooks_dir" -maxdepth 1 -type f -name "*.sh" 2>/dev/null | wc -l | tr -d ' ')
 
     if [[ "$hook_count" -eq 0 ]]; then
         log_debug "Rite $rite_name has no hook files"
         return 0
     fi
 
-    log_debug "Overlaying $hook_count hook(s) from team $rite_name"
+    log_debug "Overlaying $hook_count hook(s) from rite $rite_name"
 
-    # Create marker file to track team hooks
+    # Create marker file to track rite hooks
     local marker_file=".claude/hooks/.rite-hooks"
     : > "$marker_file"
 
-    # Copy each team hook (may override base hooks)
-    for hook_file in "$team_hooks_dir"/*.sh; do
+    # Copy each rite hook (may override base hooks)
+    for hook_file in "$rite_hooks_dir"/*.sh; do
         [[ -f "$hook_file" ]] || continue
 
         local hook_name
@@ -2339,15 +2339,15 @@ swap_hooks() {
         cp "$hook_file" ".claude/hooks/$hook_name"
         chmod +x ".claude/hooks/$hook_name"
         echo "$hook_name" >> "$marker_file"
-        log_debug "Installed team hook: $hook_name"
+        log_debug "Installed rite hook: $hook_name"
     done
 
-    # Count successfully synced team hooks
+    # Count successfully synced rite hooks
     local synced_count
     synced_count=$(wc -l < "$marker_file" | tr -d ' ')
 
     if [[ "$synced_count" -gt 0 ]]; then
-        log "Synced: $synced_count team hook(s)"
+        log "Synced: $synced_count rite hook(s)"
     fi
 }
 
@@ -3181,7 +3181,7 @@ perform_swap() {
         fi
     fi
 
-    # Sync team hooks
+    # Sync rite hooks
     swap_hooks "$rite_name"
     mark_commit_step "$COMMIT_STEP_HOOKS"
 
@@ -3371,7 +3371,7 @@ preview_reset() {
         echo "  (none)"
     fi
 
-    # Check for team skills
+    # Check for rite skills
     echo ""
     echo "Rite skills to remove:"
     if [[ -f ".claude/skills/.rite-skills" ]]; then
@@ -3383,7 +3383,7 @@ preview_reset() {
         echo "  (none)"
     fi
 
-    # Check for team hooks
+    # Check for rite hooks
     echo ""
     echo "Rite hooks to remove:"
     if [[ -f ".claude/hooks/.rite-hooks" ]]; then

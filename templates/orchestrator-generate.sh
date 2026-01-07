@@ -70,13 +70,13 @@ show_help() {
 orchestrator-generate.sh - Generate orchestrator.md from configuration
 
 USAGE:
-  ./orchestrator-generate.sh <team-name> [options]
+  ./orchestrator-generate.sh <rite-name> [options]
   ./orchestrator-generate.sh --all [options]
   ./orchestrator-generate.sh --help
 
 ARGUMENTS:
-  <team-name>      Generate for single team (e.g., rnd-pack, security-pack)
-  --all            Batch-generate all teams with rollback on error
+  <rite-name>      Generate for single rite (e.g., rnd-pack, security-pack)
+  --all            Batch-generate all rites with rollback on error
 
 OPTIONS:
   --validate-only  Parse configs, validate schema, exit (no generation)
@@ -85,7 +85,7 @@ OPTIONS:
   --help           Show this help message
 
 EXAMPLES:
-  # Generate single team with validation
+  # Generate single rite with validation
   ./orchestrator-generate.sh rnd-pack
 
   # Validate without generating
@@ -94,10 +94,10 @@ EXAMPLES:
   # Preview output
   ./orchestrator-generate.sh rnd-pack --dry-run
 
-  # Batch-generate all teams
+  # Batch-generate all rites
   ./orchestrator-generate.sh --all
 
-  # Regenerate existing team
+  # Regenerate existing rite
   ./orchestrator-generate.sh security-pack --force
 
 ENVIRONMENT:
@@ -114,7 +114,7 @@ parse_arguments() {
     fi
 
     # Initialize variables
-    TEAM=""
+    RITE=""
     DRY_RUN=false
     VALIDATE_ONLY=false
     FORCE=false
@@ -149,11 +149,11 @@ parse_arguments() {
                 exit 1
                 ;;
             *)
-                # First positional argument is the team name
-                if [[ -z "$TEAM" ]]; then
-                    TEAM="$1"
+                # First positional argument is the rite name
+                if [[ -z "$RITE" ]]; then
+                    RITE="$1"
                 else
-                    log_error "Multiple team names specified: $TEAM and $1"
+                    log_error "Multiple rite names specified: $RITE and $1"
                     exit 1
                 fi
                 shift
@@ -161,9 +161,9 @@ parse_arguments() {
         esac
     done
 
-    # Validate that either team or --all is specified
-    if [[ -z "$TEAM" ]] && [[ "$BATCH_ALL" != true ]]; then
-        log_error "Team name or --all flag required"
+    # Validate that either rite or --all is specified
+    if [[ -z "$RITE" ]] && [[ "$BATCH_ALL" != true ]]; then
+        log_error "Rite name or --all flag required"
         show_help
         exit 1
     fi
@@ -240,7 +240,7 @@ validate_schema() {
     fi
 
     # Schema validation: check required fields
-    local required_fields=("team" "frontmatter" "routing" "workflow_position" "handoff_criteria" "skills")
+    local required_fields=("rite" "frontmatter" "routing" "workflow_position" "handoff_criteria" "skills")
     for field in "${required_fields[@]}"; do
         if ! echo "$config_json" | jq -e ".\"$field\"" >/dev/null 2>&1; then
             log_error "Missing required field in $config: $field"
@@ -303,7 +303,7 @@ extract_frontmatter_values() {
 
     ROLE=$(yq eval '.frontmatter.role' "$config")
     DESCRIPTION=$(yq eval '.frontmatter.description' "$config")
-    COLOR=$(yq eval '.team.color' "$config")
+    COLOR=$(yq eval '.rite.color' "$config")
 
     # Normalize description: remove excess whitespace
     DESCRIPTION=$(echo "$DESCRIPTION" | tr '\n' ' ' | sed 's/[[:space:]]\+/ /g' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
@@ -493,23 +493,23 @@ validate_substitution() {
 # ============================================================================
 
 generate_rite() {
-    local team="$1"
+    local rite="$1"
 
-    # Normalize team name: strip "teams/" prefix if present
-    team="${team#teams/}"
+    # Normalize rite name: strip "rites/" prefix if present
+    rite="${rite#rites/}"
 
-    log_info "Processing rite: $team"
+    log_info "Processing rite: $rite"
 
-    CONFIG="$KNOSSOS_HOME/rites/$team/orchestrator.yaml"
-    WORKFLOW="$KNOSSOS_HOME/rites/$team/workflow.yaml"
-    OUTPUT="$KNOSSOS_HOME/rites/$team/agents/orchestrator.md"
+    CONFIG="$KNOSSOS_HOME/rites/$rite/orchestrator.yaml"
+    WORKFLOW="$KNOSSOS_HOME/rites/$rite/workflow.yaml"
+    OUTPUT="$KNOSSOS_HOME/rites/$rite/agents/orchestrator.md"
 
     # Validation phase
     validate_schema "$CONFIG" || return 1
     validate_workflow_references "$CONFIG" "$WORKFLOW" || return 1
 
     if [[ "$VALIDATE_ONLY" == true ]]; then
-        log_ok "Validation passed: $team"
+        log_ok "Validation passed: $rite"
         return 0
     fi
 
@@ -524,7 +524,7 @@ generate_rite() {
     extract_workflow_values "$WORKFLOW"
 
     # Generate
-    log_info "Generating: $team"
+    log_info "Generating: $rite"
 
     TMPFILE=$(mktemp)
     DIAGRAM_FILE=$(mktemp)
@@ -566,33 +566,33 @@ generate_rite() {
 
 batch_generate_all_rites() {
     # Find all rites
-    local -a teams
-    while IFS= read -r team_dir; do
-        local team=$(basename "$team_dir")
-        teams+=("$team")
+    local -a rites
+    while IFS= read -r rite_dir; do
+        local rite=$(basename "$rite_dir")
+        rites+=("$rite")
     done < <(find "$KNOSSOS_HOME/rites" -maxdepth 1 -type d -name "*-pack" | sort)
 
-    if [[ ${#teams[@]} -eq 0 ]]; then
+    if [[ ${#rites[@]} -eq 0 ]]; then
         log_error "No rites found in $KNOSSOS_HOME/rites"
         return 1
     fi
 
-    log_info "Batch generating ${#teams[@]} rites"
+    log_info "Batch generating ${#rites[@]} rites"
     echo ""
 
-    local failed_teams=()
-    for team in "${teams[@]}"; do
-        if ! generate_rite "$team"; then
-            failed_teams+=("$team")
-            log_error "Failed to generate: $team"
+    local failed_rites=()
+    for rite in "${rites[@]}"; do
+        if ! generate_rite "$rite"; then
+            failed_rites+=("$rite")
+            log_error "Failed to generate: $rite"
         fi
     done
 
     echo ""
     log_info "Batch generation complete"
 
-    if [[ ${#failed_teams[@]} -gt 0 ]]; then
-        log_error "Failed rites: ${failed_teams[*]}"
+    if [[ ${#failed_rites[@]} -gt 0 ]]; then
+        log_error "Failed rites: ${failed_rites[*]}"
         return 1
     fi
 
@@ -615,7 +615,7 @@ main() {
     if [[ "$BATCH_ALL" == true ]]; then
         batch_generate_all_rites
     else
-        generate_rite "$TEAM"
+        generate_rite "$RITE"
     fi
 }
 

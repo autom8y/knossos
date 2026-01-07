@@ -1,6 +1,6 @@
 #!/bin/bash
 # Extract specific field from workflow config
-# Usage: ./get-workflow-field.sh <field> [team-name]
+# Usage: ./get-workflow-field.sh <field> [rite-name]
 # Examples:
 #   ./get-workflow-field.sh entry_point.agent
 #   ./get-workflow-field.sh name
@@ -10,21 +10,21 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/lib/knossos-home.sh"
 FIELD="$1"
-TEAM="${2:-$(cat .claude/ACTIVE_RITE 2>/dev/null)}"
+RITE="${2:-$(cat .claude/ACTIVE_RITE 2>/dev/null)}"
 
 if [ -z "$FIELD" ]; then
   echo "Error: No field specified" >&2
-  echo "Usage: $0 <field> [team-name]" >&2
+  echo "Usage: $0 <field> [rite-name]" >&2
   echo "Common fields: name, description, entry_point.agent, workflow_type" >&2
   exit 1
 fi
 
-if [ -z "$TEAM" ]; then
-  echo "Error: No team specified and no ACTIVE_RITE found" >&2
+if [ -z "$RITE" ]; then
+  echo "Error: No rite specified and no ACTIVE_RITE found" >&2
   exit 1
 fi
 
-WORKFLOW_FILE="$KNOSSOS_HOME/rites/$TEAM/workflow.yaml"
+WORKFLOW_FILE="$KNOSSOS_HOME/rites/$RITE/workflow.yaml"
 
 if [ ! -f "$WORKFLOW_FILE" ]; then
   exit 1
