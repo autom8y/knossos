@@ -120,24 +120,24 @@ func runPrepare(ctx *cmdContext, opts prepareOptions) error {
 
 	// Validate agents exist in active rite (C3 cross-team validation)
 	if sessCtx.ActiveRite != "" {
-		teamAgents := getTeamAgents(sessCtx.ActiveRite)
-		if teamAgents != nil {
-			if !isValidAgent(opts.fromAgent, teamAgents) {
+		riteAgents := getRiteAgents(sessCtx.ActiveRite)
+		if riteAgents != nil {
+			if !isValidAgent(opts.fromAgent, riteAgents) {
 				err := errors.NewWithDetails(errors.CodeUsageError, "source agent not in active rite",
 					map[string]interface{}{
 						"from":        opts.fromAgent,
 						"active_rite": sessCtx.ActiveRite,
-						"team_agents": teamAgents,
+						"rite_agents": riteAgents,
 					})
 				printer.PrintError(err)
 				return err
 			}
-			if !isValidAgent(opts.toAgent, teamAgents) {
+			if !isValidAgent(opts.toAgent, riteAgents) {
 				err := errors.NewWithDetails(errors.CodeUsageError, "target agent not in active rite",
 					map[string]interface{}{
 						"to":          opts.toAgent,
 						"active_rite": sessCtx.ActiveRite,
-						"team_agents": teamAgents,
+						"rite_agents": riteAgents,
 					})
 				printer.PrintError(err)
 				return err
@@ -353,17 +353,17 @@ func (h HandoffPrepareOutput) Text() string {
 // Ensure Textable interface is implemented
 var _ output.Textable = HandoffPrepareOutput{}
 
-// getTeamAgents returns the list of agents for a given team.
-// Returns nil if team is unknown (allowing fallback to universal agent list).
-func getTeamAgents(team string) []string {
-	teamRoster := map[string][]string{
+// getRiteAgents returns the list of agents for a given rite.
+// Returns nil if rite is unknown (allowing fallback to universal agent list).
+func getRiteAgents(rite string) []string {
+	riteRoster := map[string][]string{
 		"10x-dev-pack": {
 			"requirements-analyst", "architect", "principal-engineer", "qa-adversary", "orchestrator",
 		},
 		"consultant-pack": {
 			"orchestrator",
 		},
-		// Add more teams as needed
+		// Add more rites as needed
 	}
-	return teamRoster[team]
+	return riteRoster[rite]
 }
