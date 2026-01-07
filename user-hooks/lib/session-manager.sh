@@ -491,16 +491,10 @@ EOF
         sed -i.bak "s/^current_phase:.*$/current_phase: \"$to_phase\"/" "$ctx_file"
         rm -f "$ctx_file.bak"
     else
-        # Add field after active_rite (or active_team for backward compat)
-        if grep -q "^active_rite:" "$ctx_file" 2>/dev/null; then
-            sed -i.bak "/^active_rite:/a\\
+        # Add field after active_rite
+        sed -i.bak "/^active_rite:/a\\
 current_phase: \"$to_phase\"
 " "$ctx_file"
-        else
-            sed -i.bak "/^active_team:/a\\
-current_phase: \"$to_phase\"
-" "$ctx_file"
-        fi
         rm -f "$ctx_file.bak"
     fi
 

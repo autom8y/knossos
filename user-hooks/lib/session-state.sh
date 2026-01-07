@@ -138,7 +138,6 @@ get_complexity() {
 # Validate SESSION_CONTEXT.md has required fields
 # Usage: validate_session_context "path/to/SESSION_CONTEXT.md"
 # Returns: 0 if valid, 1 if missing required fields
-# Note: Accepts both active_rite (new) and active_team (legacy) for backward compatibility
 validate_session_context() {
     local file="$1"
     local required_fields=("session_id" "created_at" "initiative" "complexity" "current_phase")
@@ -152,8 +151,8 @@ validate_session_context() {
         fi
     done
 
-    # Check for active_rite OR active_team (backward compat)
-    if ! grep -q "^active_rite:" "$file" 2>/dev/null && ! grep -q "^active_team:" "$file" 2>/dev/null; then
+    # Check for active_rite
+    if ! grep -q "^active_rite:" "$file" 2>/dev/null; then
         missing+=("active_rite")
     fi
 
@@ -311,12 +310,9 @@ atomic_rite_update() {
             local session_file="$session_dir/SESSION_CONTEXT.md"
             local temp_content
 
-            # Read current content and update active_rite field (migrate from active_team if present)
+            # Read current content and update active_rite field
             if grep -q "^active_rite:" "$session_file" 2>/dev/null; then
                 temp_content=$(sed "s/^active_rite:.*/active_rite: \"$new_rite\"/" "$session_file")
-            elif grep -q "^active_team:" "$session_file" 2>/dev/null; then
-                # Migrate: replace active_team with active_rite
-                temp_content=$(sed "s/^active_team:.*/active_rite: \"$new_rite\"/" "$session_file")
             else
                 # Insert active_rite before closing --- of frontmatter
                 temp_content=$(awk -v rite="$new_rite" '

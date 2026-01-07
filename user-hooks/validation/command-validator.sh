@@ -124,9 +124,9 @@ if [[ "$COMMAND" =~ (^|[[:space:]/])swap-rite\.sh[[:space:]] ]]; then
             SESSION_FILE="${SESSION_DIR:+$SESSION_DIR/SESSION_CONTEXT.md}"
 
             if [[ -n "$SESSION_FILE" ]] && [[ -f "$SESSION_FILE" ]]; then
-                SESSION_TEAM=$(grep -m1 "^active_team:" "$SESSION_FILE" 2>/dev/null | cut -d: -f2- | tr -d ' "') || SESSION_TEAM=""
-                if [[ -n "$SESSION_TEAM" ]] && [[ "$SESSION_TEAM" != "$TARGET_TEAM" ]]; then
-                    echo "{\"systemMessage\": \"Note: Session was started with '$SESSION_TEAM', switching to '$TARGET_TEAM'\"}"
+                SESSION_RITE=$(grep -m1 "^active_rite:" "$SESSION_FILE" 2>/dev/null | cut -d: -f2- | tr -d ' "') || SESSION_RITE=""
+                if [[ -n "$SESSION_RITE" ]] && [[ "$SESSION_RITE" != "$TARGET_TEAM" ]]; then
+                    echo "{\"systemMessage\": \"Note: Session was started with '$SESSION_RITE', switching to '$TARGET_TEAM'\"}"
                 fi
             fi
         fi

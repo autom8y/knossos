@@ -210,7 +210,7 @@ _fsm_validate_context() {
         return 1
     fi
 
-    # Required fields for v2 schema (active_rite OR active_team for backward compat)
+    # Required fields for v2 schema
     local required_fields=("schema_version" "session_id" "status" "created_at"
                            "initiative" "complexity" "current_phase")
     local missing=()
@@ -221,8 +221,8 @@ _fsm_validate_context() {
         fi
     done
 
-    # Check for active_rite OR active_team (backward compat)
-    if ! grep -q "^active_rite:" "$ctx_file" 2>/dev/null && ! grep -q "^active_team:" "$ctx_file" 2>/dev/null; then
+    # Check for active_rite
+    if ! grep -q "^active_rite:" "$ctx_file" 2>/dev/null; then
         missing+=("active_rite")
     fi
 
