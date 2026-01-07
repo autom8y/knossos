@@ -73,8 +73,11 @@ This atomically:
 
 If user specified `--rite=NAME` and it differs from Active Rite:
 ```bash
-${ROSTER_HOME:-~/Code/roster}/swap-rite.sh <rite-name>
+ari sync materialize --rite <rite-name>
 ```
+
+**Note**: If `ari` is not in PATH, use `~/bin/ari` or fall back to legacy:
+`${ROSTER_HOME:-~/Code/roster}/swap-rite.sh <rite-name>`
 
 ### 5. Invoke Entry Point Agent
 
