@@ -9,7 +9,7 @@ The `/consult` command should serve as the primary cognitive load absorber for t
 The roster ecosystem has grown to significant complexity:
 
 - **Teams**: Multiple team packs in `roster/teams/` (dynamically discoverable)
-- **Skills**: Distributed across managed and user locations (see `TEAM_SKILL_MATRIX.md`)
+- **Skills**: Distributed across managed and user locations (see `RITE_SKILL_MATRIX.md`)
 - **Agents**: Specialized roles with specific invocation patterns (per team)
 
 Current `/consult` implementation provides ecosystem guidance and team recommendations but has structural gaps:

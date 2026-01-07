@@ -212,7 +212,7 @@ Run these after pulling roster updates:
 - `swap-team.sh` - Team switching script
 - `roster-sync/` - Ecosystem synchronization tool
 - `workflow-schema.yaml` - Team pack schema reference
-- `TEAM_SKILL_MATRIX.md` - Agent skill assignments
+- `RITE_SKILL_MATRIX.md` - Agent skill assignments
 - `generate-team-context.sh` - Team routing table generator
 
 ## Migration from CEM
