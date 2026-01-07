@@ -55,6 +55,15 @@ func NewRemoteFetcher() *RemoteFetcher {
 
 // ParseRemote parses a remote string into a Remote struct.
 func ParseRemote(remote string) (*Remote, error) {
+	// Check for empty/unconfigured remote
+	if remote == "" {
+		return nil, errors.NewWithDetails(errors.CodeSyncNotConfigured,
+			"No remote configured. Use 'ari sync pull <remote>' to configure a remote.",
+			map[string]interface{}{
+				"suggestion": "Remotes can be: local paths (/path/to/source), HTTP URLs (https://example.com/config), GitHub shorthand (org/repo), or git refs (HEAD:.claude/path)",
+			})
+	}
+
 	// Check for HTTP(S) URL
 	if strings.HasPrefix(remote, "http://") || strings.HasPrefix(remote, "https://") {
 		return &Remote{
@@ -108,10 +117,16 @@ func ParseRemote(remote string) (*Remote, error) {
 	}
 
 	return nil, errors.NewWithDetails(errors.CodeUsageError,
-		"invalid remote format",
+		fmt.Sprintf("Invalid remote format: %q", remote),
 		map[string]interface{}{
-			"remote":   remote,
-			"expected": "URL, git remote, org/repo, or local path",
+			"remote": remote,
+			"valid_formats": []string{
+				"Local path: /path/to/source, ./relative, ~/home",
+				"HTTP URL: https://example.com/config",
+				"GitHub shorthand: org/repo",
+				"Git ref: HEAD:.claude/path, origin/main:.claude/path",
+			},
+			"suggestion": "Run 'ari sync reset' then 'ari sync pull <valid-remote>' to reconfigure",
 		})
 }
 

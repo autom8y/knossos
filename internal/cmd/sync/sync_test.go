@@ -1008,6 +1008,28 @@ func TestParseRemote_GitHubShorthand(t *testing.T) {
 	}
 }
 
+// TestParseRemote_EmptyString verifies helpful error for empty remote string.
+func TestParseRemote_EmptyString(t *testing.T) {
+	remote, err := sync.ParseRemote("")
+	if err == nil {
+		t.Fatal("Expected error for empty remote string")
+	}
+
+	if remote != nil {
+		t.Error("Expected nil remote for empty string")
+	}
+
+	// Verify error message is helpful
+	errMsg := err.Error()
+	if !bytes.Contains([]byte(errMsg), []byte("No remote configured")) {
+		t.Errorf("Expected error message to contain 'No remote configured', got: %s", errMsg)
+	}
+
+	if !bytes.Contains([]byte(errMsg), []byte("ari sync pull")) {
+		t.Errorf("Expected error message to suggest 'ari sync pull', got: %s", errMsg)
+	}
+}
+
 // TestShortenHash verifies hash shortening.
 func TestShortenHash(t *testing.T) {
 	fullHash := "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9"

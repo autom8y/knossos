@@ -124,9 +124,9 @@ func TestRiteManifest_Validate(t *testing.T) {
 		{
 			name: "missing required fields",
 			manifest: RiteManifest{
-				// Empty
+				// Empty - in new format only name is required
 			},
-			wantIssues: 3, // schema_version, name, form
+			wantIssues: 1, // name
 		},
 		{
 			name: "invalid name format",

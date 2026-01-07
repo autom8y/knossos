@@ -210,16 +210,28 @@ func (d *Discovery) loadRite(ritePath, source string) (*Rite, error) {
 		return nil, err
 	}
 
+	// Derive form from manifest structure if not explicitly set
+	form := manifest.Form
+	if form == "" {
+		form = deriveForm(manifest)
+	}
+
+	// Calculate skill count from both formats
+	skillCount := len(manifest.Skills)
+	if len(manifest.SkillNames) > 0 {
+		skillCount = len(manifest.SkillNames)
+	}
+
 	rite := &Rite{
 		Name:        manifest.Name,
 		DisplayName: manifest.DisplayName,
 		Description: manifest.Description,
-		Form:        manifest.Form,
+		Form:        form,
 		Path:        ritePath,
 		Agents:      manifest.AgentNames(),
 		AgentCount:  len(manifest.Agents),
 		Skills:      manifest.SkillRefs(),
-		SkillCount:  len(manifest.Skills),
+		SkillCount:  skillCount,
 		HasWorkflow: manifest.HasWorkflow(),
 		Source:      source,
 	}
@@ -229,7 +241,46 @@ func (d *Discovery) loadRite(ritePath, source string) (*Rite, error) {
 		rite.Name = filepath.Base(ritePath)
 	}
 
+	// Set workflow type from phases if available
+	if len(manifest.Phases) > 0 {
+		rite.WorkflowType = "sequential"
+	} else if manifest.Workflow != nil {
+		rite.WorkflowType = manifest.Workflow.Type
+	}
+
+	// Set entry point
+	if manifest.EntryAgent != "" {
+		rite.EntryPoint = manifest.EntryAgent
+	} else if manifest.Workflow != nil {
+		rite.EntryPoint = manifest.Workflow.EntryPoint
+	}
+
 	return rite, nil
+}
+
+// deriveForm determines the rite form from its components.
+func deriveForm(m *RiteManifest) RiteForm {
+	hasAgents := len(m.Agents) > 0
+	hasSkills := len(m.Skills) > 0 || len(m.SkillNames) > 0
+	hasWorkflow := m.HasWorkflow()
+
+	if hasAgents && hasSkills && hasWorkflow {
+		return FormFull
+	}
+	if hasAgents && hasSkills {
+		return FormPractitioner
+	}
+	if hasWorkflow && !hasAgents {
+		return FormProcedural
+	}
+	if hasSkills && !hasAgents {
+		return FormSimple
+	}
+	// Default to practitioner for rites with agents
+	if hasAgents {
+		return FormPractitioner
+	}
+	return FormSimple
 }
 
 // GetRitePath returns the path to a rite directory.
@@ -237,14 +288,14 @@ func (d *Discovery) loadRite(ritePath, source string) (*Rite, error) {
 func (d *Discovery) GetRitePath(name string) (string, error) {
 	// Check project rites first
 	projectPath := filepath.Join(d.projectRitesDir, name)
-	if _, err := os.Stat(filepath.Join(projectPath, "rite.yaml")); err == nil {
+	if _, err := os.Stat(filepath.Join(projectPath, "manifest.yaml")); err == nil {
 		return projectPath, nil
 	}
 
 	// Check user rites
 	if d.userRitesDir != "" {
 		userPath := filepath.Join(d.userRitesDir, name)
-		if _, err := os.Stat(filepath.Join(userPath, "rite.yaml")); err == nil {
+		if _, err := os.Stat(filepath.Join(userPath, "manifest.yaml")); err == nil {
 			return userPath, nil
 		}
 	}

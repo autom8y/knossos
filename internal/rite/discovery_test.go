@@ -40,7 +40,7 @@ skills:
   - ref: skill1
     path: skills/skill1/
 `
-	if err := os.WriteFile(filepath.Join(rite1Dir, "rite.yaml"), []byte(rite1Manifest), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(rite1Dir, "manifest.yaml"), []byte(rite1Manifest), 0644); err != nil {
 		t.Fatalf("Failed to write rite manifest: %v", err)
 	}
 
@@ -58,7 +58,7 @@ skills:
   - ref: docs
     path: skills/docs/
 `
-	if err := os.WriteFile(filepath.Join(rite2Dir, "rite.yaml"), []byte(rite2Manifest), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(rite2Dir, "manifest.yaml"), []byte(rite2Manifest), 0644); err != nil {
 		t.Fatalf("Failed to write rite manifest: %v", err)
 	}
 
@@ -292,11 +292,11 @@ skills:
   - ref: s1
     path: skills/s1/
 `
-	if err := os.WriteFile(filepath.Join(validDir, "rite.yaml"), []byte(validManifest), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(validDir, "manifest.yaml"), []byte(validManifest), 0644); err != nil {
 		t.Fatalf("Failed to write manifest: %v", err)
 	}
 
-	// Create an invalid rite (no rite.yaml)
+	// Create an invalid rite (no manifest.yaml)
 	invalidDir := filepath.Join(ritesDir, "invalid-rite")
 	if err := os.MkdirAll(invalidDir, 0755); err != nil {
 		t.Fatalf("Failed to create dir: %v", err)

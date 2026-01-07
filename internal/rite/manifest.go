@@ -40,23 +40,43 @@ func IsValidForm(f RiteForm) bool {
 	return false
 }
 
-// RiteManifest represents a parsed rite.yaml file.
+// RiteManifest represents a parsed manifest.yaml file.
+// This struct supports both the new actual format used in rites/ directory
+// and maintains backward compatibility with the original planned schema.
 type RiteManifest struct {
-	SchemaVersion string `yaml:"schema_version" json:"schema_version"`
-	Name          string `yaml:"name" json:"name"`
-	DisplayName   string `yaml:"display_name,omitempty" json:"display_name,omitempty"`
-	Description   string `yaml:"description,omitempty" json:"description,omitempty"`
-	Form          RiteForm `yaml:"form" json:"form"`
+	// Primary fields (actual manifest.yaml format)
+	Name        string `yaml:"name" json:"name"`
+	Version     string `yaml:"version,omitempty" json:"version,omitempty"`
+	Description string `yaml:"description,omitempty" json:"description,omitempty"`
+	EntryAgent  string `yaml:"entry_agent,omitempty" json:"entry_agent,omitempty"`
 
-	// Component references
-	Agents []AgentRef `yaml:"agents,omitempty" json:"agents,omitempty"`
-	Skills []SkillRef `yaml:"skills,omitempty" json:"skills,omitempty"`
+	// Phases (actual format has phases at top level)
+	Phases []ManifestPhase `yaml:"phases,omitempty" json:"phases,omitempty"`
 
-	// Optional workflow configuration
+	// Component references - supports both string list and object list
+	Agents     []AgentRef `yaml:"agents,omitempty" json:"agents,omitempty"`
+	SkillNames []string   `yaml:"-" json:"-"` // Parsed from skills when they're strings
+	Skills     []SkillRef `yaml:"-" json:"skills,omitempty"`
+
+	// Dependencies on other rites
+	Dependencies []string `yaml:"dependencies,omitempty" json:"dependencies,omitempty"`
+
+	// Complexity levels
+	ComplexityLevels []ComplexityLevel `yaml:"complexity_levels,omitempty" json:"complexity_levels,omitempty"`
+
+	// Metadata
+	Metadata map[string]interface{} `yaml:"metadata,omitempty" json:"metadata,omitempty"`
+
+	// Legacy/planned fields for backward compatibility
+	SchemaVersion string   `yaml:"schema_version,omitempty" json:"schema_version,omitempty"`
+	DisplayName   string   `yaml:"display_name,omitempty" json:"display_name,omitempty"`
+	Form          RiteForm `yaml:"form,omitempty" json:"form,omitempty"`
+
+	// Optional workflow configuration (legacy format)
 	Workflow *WorkflowConfig `yaml:"workflow,omitempty" json:"workflow,omitempty"`
 
 	// Optional lifecycle hooks
-	Hooks *HooksConfig `yaml:"hooks,omitempty" json:"hooks,omitempty"`
+	Hooks interface{} `yaml:"hooks,omitempty" json:"hooks,omitempty"`
 
 	// Context budget metadata
 	Budget *BudgetInfo `yaml:"budget,omitempty" json:"budget,omitempty"`
@@ -68,10 +88,25 @@ type RiteManifest struct {
 	Path string `yaml:"-" json:"path,omitempty"`
 }
 
+// ManifestPhase represents a phase in the actual manifest format.
+type ManifestPhase struct {
+	Name        string `yaml:"name" json:"name"`
+	Agent       string `yaml:"agent" json:"agent"`
+	Produces    string `yaml:"produces,omitempty" json:"produces,omitempty"`
+	Description string `yaml:"description,omitempty" json:"description,omitempty"`
+	Condition   string `yaml:"condition,omitempty" json:"condition,omitempty"`
+}
+
+// ComplexityLevel represents a complexity level definition.
+type ComplexityLevel struct {
+	Name  string `yaml:"name" json:"name"`
+	Scope string `yaml:"scope" json:"scope"`
+}
+
 // AgentRef references an agent within a rite.
 type AgentRef struct {
 	Name     string `yaml:"name" json:"name"`
-	File     string `yaml:"file" json:"file"`
+	File     string `yaml:"file,omitempty" json:"file,omitempty"`
 	Role     string `yaml:"role,omitempty" json:"role,omitempty"`
 	Produces string `yaml:"produces,omitempty" json:"produces,omitempty"`
 }
@@ -124,90 +159,171 @@ type MigrationInfo struct {
 	MigratedAt string `yaml:"migrated_at,omitempty" json:"migrated_at,omitempty"`
 }
 
-// LoadManifest reads and parses a rite.yaml file.
+// rawManifest is an intermediate struct for parsing manifests with flexible skills field.
+type rawManifest struct {
+	Name             string                 `yaml:"name"`
+	Version          string                 `yaml:"version,omitempty"`
+	Description      string                 `yaml:"description,omitempty"`
+	EntryAgent       string                 `yaml:"entry_agent,omitempty"`
+	Phases           []ManifestPhase        `yaml:"phases,omitempty"`
+	Agents           []AgentRef             `yaml:"agents,omitempty"`
+	Skills           interface{}            `yaml:"skills,omitempty"` // Can be []string or []SkillRef
+	Dependencies     []string               `yaml:"dependencies,omitempty"`
+	ComplexityLevels []ComplexityLevel      `yaml:"complexity_levels,omitempty"`
+	Metadata         map[string]interface{} `yaml:"metadata,omitempty"`
+	SchemaVersion    string                 `yaml:"schema_version,omitempty"`
+	DisplayName      string                 `yaml:"display_name,omitempty"`
+	Form             RiteForm               `yaml:"form,omitempty"`
+	Workflow         *WorkflowConfig        `yaml:"workflow,omitempty"`
+	Hooks            interface{}            `yaml:"hooks,omitempty"`
+	Budget           *BudgetInfo            `yaml:"budget,omitempty"`
+	Migration        *MigrationInfo         `yaml:"migration,omitempty"`
+}
+
+// LoadManifest reads and parses a manifest.yaml file.
 func LoadManifest(path string) (*RiteManifest, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, errors.Wrap(errors.CodeFileNotFound, "failed to read rite manifest", err)
 	}
 
-	var manifest RiteManifest
-	if err := yaml.Unmarshal(data, &manifest); err != nil {
+	var raw rawManifest
+	if err := yaml.Unmarshal(data, &raw); err != nil {
 		return nil, errors.ErrParseError(path, "yaml", err)
 	}
 
-	// Set the path to the containing directory
-	manifest.Path = filepath.Dir(path)
+	manifest := &RiteManifest{
+		Name:             raw.Name,
+		Version:          raw.Version,
+		Description:      raw.Description,
+		EntryAgent:       raw.EntryAgent,
+		Phases:           raw.Phases,
+		Agents:           raw.Agents,
+		Dependencies:     raw.Dependencies,
+		ComplexityLevels: raw.ComplexityLevels,
+		Metadata:         raw.Metadata,
+		SchemaVersion:    raw.SchemaVersion,
+		DisplayName:      raw.DisplayName,
+		Form:             raw.Form,
+		Workflow:         raw.Workflow,
+		Hooks:            raw.Hooks,
+		Budget:           raw.Budget,
+		Migration:        raw.Migration,
+		Path:             filepath.Dir(path),
+	}
 
-	return &manifest, nil
+	// Parse skills - can be []string or []SkillRef
+	if raw.Skills != nil {
+		switch skills := raw.Skills.(type) {
+		case []interface{}:
+			for _, s := range skills {
+				switch skill := s.(type) {
+				case string:
+					manifest.SkillNames = append(manifest.SkillNames, skill)
+				case map[string]interface{}:
+					ref := SkillRef{}
+					if v, ok := skill["ref"].(string); ok {
+						ref.Ref = v
+					}
+					if v, ok := skill["path"].(string); ok {
+						ref.Path = v
+					}
+					if v, ok := skill["external"].(bool); ok {
+						ref.External = v
+					}
+					manifest.Skills = append(manifest.Skills, ref)
+				}
+			}
+		}
+	}
+
+	return manifest, nil
 }
 
-// LoadManifestFromDir loads a rite.yaml from a directory.
+// LoadManifestFromDir loads a manifest.yaml from a directory.
 func LoadManifestFromDir(dir string) (*RiteManifest, error) {
-	manifestPath := filepath.Join(dir, "rite.yaml")
+	manifestPath := filepath.Join(dir, "manifest.yaml")
 	return LoadManifest(manifestPath)
 }
 
 // Validate checks if the manifest is valid according to schema rules.
+// Supports both the actual manifest format and the legacy planned format.
 func (m *RiteManifest) Validate() []string {
 	var issues []string
 
-	// Required fields
-	if m.SchemaVersion == "" {
-		issues = append(issues, "schema_version is required")
-	}
+	// Required fields - name is always required
 	if m.Name == "" {
 		issues = append(issues, "name is required")
 	} else if !isKebabCase(m.Name) {
 		issues = append(issues, "name must be kebab-case")
 	}
-	if m.Form == "" {
-		issues = append(issues, "form is required")
-	} else if !IsValidForm(m.Form) {
-		issues = append(issues, "form must be one of: simple, practitioner, procedural, full")
-	}
 
-	// Form-specific validation
-	switch m.Form {
-	case FormSimple:
-		// Simple forms should not have agents
-		if len(m.Agents) > 0 {
-			issues = append(issues, "simple form should not have agents")
+	// For legacy format, validate schema_version and form
+	if m.SchemaVersion != "" || m.Form != "" {
+		if m.SchemaVersion == "" {
+			issues = append(issues, "schema_version is required (legacy format)")
 		}
-	case FormPractitioner, FormFull:
-		// Practitioner and full forms require agents
-		if len(m.Agents) == 0 {
-			issues = append(issues, "practitioner and full forms require agents")
+		if m.Form == "" {
+			issues = append(issues, "form is required (legacy format)")
+		} else if !IsValidForm(m.Form) {
+			issues = append(issues, "form must be one of: simple, practitioner, procedural, full")
 		}
-	case FormProcedural:
-		// Procedural forms should not have dedicated agents
-		if len(m.Agents) > 0 {
-			issues = append(issues, "procedural form should not have dedicated agents")
-		}
-	}
 
-	// Validate agent references
-	for i, agent := range m.Agents {
-		if agent.Name == "" {
-			issues = append(issues, fmt.Sprintf("agents[%d].name is required", i))
+		// Form-specific validation (legacy format only)
+		switch m.Form {
+		case FormSimple:
+			if len(m.Agents) > 0 {
+				issues = append(issues, "simple form should not have agents")
+			}
+		case FormPractitioner, FormFull:
+			if len(m.Agents) == 0 {
+				issues = append(issues, "practitioner and full forms require agents")
+			}
+		case FormProcedural:
+			if len(m.Agents) > 0 {
+				issues = append(issues, "procedural form should not have dedicated agents")
+			}
 		}
-		if agent.File == "" {
-			issues = append(issues, fmt.Sprintf("agents[%d].file is required", i))
-		}
-	}
 
-	// Validate skill references
-	for i, skill := range m.Skills {
-		if skill.Ref == "" {
-			issues = append(issues, fmt.Sprintf("skills[%d].ref is required", i))
+		// Validate agent references (legacy format requires file)
+		for i, agent := range m.Agents {
+			if agent.Name == "" {
+				issues = append(issues, fmt.Sprintf("agents[%d].name is required", i))
+			}
+			if agent.File == "" {
+				issues = append(issues, fmt.Sprintf("agents[%d].file is required", i))
+			}
 		}
-		// External skills should not have path
-		if skill.External && skill.Path != "" {
-			issues = append(issues, fmt.Sprintf("skills[%d]: external skills should not have path", i))
+
+		// Validate skill references (legacy format)
+		for i, skill := range m.Skills {
+			if skill.Ref == "" {
+				issues = append(issues, fmt.Sprintf("skills[%d].ref is required", i))
+			}
+			if skill.External && skill.Path != "" {
+				issues = append(issues, fmt.Sprintf("skills[%d]: external skills should not have path", i))
+			}
+			if !skill.External && skill.Path == "" {
+				issues = append(issues, fmt.Sprintf("skills[%d]: local skills require path", i))
+			}
 		}
-		// Non-external skills should have path
-		if !skill.External && skill.Path == "" {
-			issues = append(issues, fmt.Sprintf("skills[%d]: local skills require path", i))
+	} else {
+		// Actual format validation
+		// Validate agent references (name only required)
+		for i, agent := range m.Agents {
+			if agent.Name == "" {
+				issues = append(issues, fmt.Sprintf("agents[%d].name is required", i))
+			}
+		}
+
+		// Validate phases
+		for i, phase := range m.Phases {
+			if phase.Name == "" {
+				issues = append(issues, fmt.Sprintf("phases[%d].name is required", i))
+			}
+			if phase.Agent == "" {
+				issues = append(issues, fmt.Sprintf("phases[%d].agent is required", i))
+			}
 		}
 	}
 
@@ -242,7 +358,13 @@ func (m *RiteManifest) AgentNames() []string {
 }
 
 // SkillRefs returns the list of skill references.
+// Returns SkillNames if skills were parsed as strings, otherwise refs from SkillRef objects.
 func (m *RiteManifest) SkillRefs() []string {
+	// If skills were parsed as strings, return those
+	if len(m.SkillNames) > 0 {
+		return m.SkillNames
+	}
+	// Otherwise, extract refs from SkillRef objects
 	refs := make([]string, len(m.Skills))
 	for i, s := range m.Skills {
 		refs[i] = s.Ref
@@ -277,12 +399,13 @@ func (m *RiteManifest) HasAgents() bool {
 
 // HasSkills returns true if the rite has skills.
 func (m *RiteManifest) HasSkills() bool {
-	return len(m.Skills) > 0
+	return len(m.Skills) > 0 || len(m.SkillNames) > 0
 }
 
 // HasWorkflow returns true if the rite has workflow configuration.
+// Checks both the legacy Workflow field and the new Phases field.
 func (m *RiteManifest) HasWorkflow() bool {
-	return m.Workflow != nil
+	return m.Workflow != nil || len(m.Phases) > 0
 }
 
 // GetEstimatedTokens returns the estimated token cost.

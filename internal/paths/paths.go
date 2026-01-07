@@ -156,7 +156,7 @@ func (r *Resolver) InvocationStateFile() string {
 func (r *Resolver) RiteDir(riteName string) string {
 	// Check project rites first
 	projectPath := filepath.Join(r.RitesDir(), riteName)
-	if _, err := os.Stat(filepath.Join(projectPath, "rite.yaml")); err == nil {
+	if _, err := os.Stat(filepath.Join(projectPath, "manifest.yaml")); err == nil {
 		return projectPath
 	}
 	// Fall back to user rites
@@ -165,7 +165,7 @@ func (r *Resolver) RiteDir(riteName string) string {
 
 // RiteManifestFile returns the path to a rite's manifest file.
 func (r *Resolver) RiteManifestFile(riteName string) string {
-	return filepath.Join(r.RiteDir(riteName), "rite.yaml")
+	return filepath.Join(r.RiteDir(riteName), "manifest.yaml")
 }
 
 // RiteAgentsDir returns the path to a rite's agents directory.

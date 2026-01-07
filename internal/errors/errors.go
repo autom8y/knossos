@@ -26,9 +26,10 @@ const (
 	ExitSchemaNotFound   = 14 // Specified schema not available
 	ExitParseError       = 15 // JSON/YAML parsing failed
 	// Sync-domain exit codes
-	ExitSyncStateCorrupt = 16 // state.json is invalid or corrupt
-	ExitRemoteRejected   = 17 // Push rejected by remote
-	ExitNetworkError     = 18 // Failed to fetch from remote
+	ExitSyncStateCorrupt  = 16 // state.json is invalid or corrupt
+	ExitRemoteRejected    = 17 // Push rejected by remote
+	ExitNetworkError      = 18 // Failed to fetch from remote
+	ExitSyncNotConfigured = 21 // Sync not initialized/no remote configured
 )
 
 // Error codes for JSON output
@@ -55,10 +56,11 @@ const (
 	CodeSchemaNotFound = "SCHEMA_NOT_FOUND"
 	CodeParseError     = "PARSE_ERROR"
 	// Sync-domain error codes
-	CodeSyncStateCorrupt = "SYNC_STATE_CORRUPT"
-	CodeRemoteRejected   = "REMOTE_REJECTED"
-	CodeNetworkError     = "NETWORK_ERROR"
-	CodeRemoteNotFound   = "REMOTE_NOT_FOUND"
+	CodeSyncStateCorrupt  = "SYNC_STATE_CORRUPT"
+	CodeRemoteRejected    = "REMOTE_REJECTED"
+	CodeNetworkError      = "NETWORK_ERROR"
+	CodeRemoteNotFound    = "REMOTE_NOT_FOUND"
+	CodeSyncNotConfigured = "SYNC_NOT_CONFIGURED"
 )
 
 // Error represents a structured error with code and details.
@@ -162,6 +164,8 @@ func exitCodeForCode(code string) int {
 		return ExitNetworkError
 	case CodeRemoteNotFound:
 		return ExitFileNotFound // Reuse FILE_NOT_FOUND exit code
+	case CodeSyncNotConfigured:
+		return ExitSyncNotConfigured
 	case CodeBorrowConflict:
 		return ExitLifecycleError
 	case CodeBudgetExceeded:
@@ -442,6 +446,14 @@ func IsRemoteRejected(err error) bool {
 func IsRemoteNotFound(err error) bool {
 	if e, ok := err.(*Error); ok {
 		return e.Code == CodeRemoteNotFound
+	}
+	return false
+}
+
+// IsSyncNotConfigured returns true if the error is a sync not configured error.
+func IsSyncNotConfigured(err error) bool {
+	if e, ok := err.(*Error); ok {
+		return e.Code == CodeSyncNotConfigured
 	}
 	return false
 }
