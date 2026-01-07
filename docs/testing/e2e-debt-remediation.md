@@ -596,7 +596,7 @@ Package 1 complete. Behavior preserved with documented intentional unification.
 - Flaky test rate: 3% -> 0%
 
 ## Recommendations for Next Sprint
-- Address D001 (outdated docs) with doc-team-pack
+- Address D001 (outdated docs) with docs
 - Address C005 (redundant null checks) if touching those files
 ```
 

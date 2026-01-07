@@ -78,7 +78,7 @@ For truly parallel sprints across multiple rites/focuses, use **worktrees**:
 # Create isolated worktrees per sprint
 /worktree create "sprint-backend" --rite=10x-dev
 /worktree create "sprint-frontend" --rite=10x-dev
-/worktree create "sprint-docs" --rite=doc-team-pack
+/worktree create "sprint-docs" --rite=docs
 
 # In each terminal, navigate and start sprint independently:
 # Terminal 1:

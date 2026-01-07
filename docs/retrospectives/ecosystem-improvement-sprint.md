@@ -40,7 +40,7 @@ This initiative transformed the roster ecosystem from ad-hoc cross-rite coordina
 | P2-INTEL-002 | Fix insights-analyst agent quality | intelligence | Complete |
 | P1-RND-001 | Fix ship-pack references | rnd | Complete |
 | P1-ECO-001 | Demote ecosystem from hub | ecosystem | Complete |
-| P2-DOC-001 | Add staleness detection to doc-auditor | doc-team-pack | Complete |
+| P2-DOC-001 | Add staleness detection to doc-auditor | docs | Complete |
 | P1-HYG-001 | Define behavior preservation | hygiene | Complete |
 
 **Tasks Completed**: 7
@@ -209,7 +209,7 @@ This initiative transformed the roster ecosystem from ad-hoc cross-rite coordina
 | Impact assessment for smart routing | High-impact changes route to Architect even at SCRIPT complexity |
 | Flexible entry points | Reduced ceremony for simple projects (skip PRD for low-impact work) |
 | Security gate | Architect triggers security consultation for auth/crypto/PII |
-| Documentation gate | QA triggers doc-team-pack for user-facing changes |
+| Documentation gate | QA triggers docs for user-facing changes |
 | Clear boundaries | RND /spike for research, 10x /spike for tactical validation |
 
 ### 4. New Agent Created
@@ -312,7 +312,7 @@ Manual verification of HANDOFF schema compliance. Future work should include sch
 |------|------|
 | 10x-dev | `rites/10x-dev/TODO.md` |
 | ecosystem | `rites/ecosystem/TODO.md` |
-| doc-team-pack | `rites/doc-team-pack/TODO.md` |
+| docs | `rites/docs/TODO.md` |
 | hygiene | `rites/hygiene/TODO.md` |
 | debt-triage | `rites/debt-triage/TODO.md` |
 | sre | `rites/sre/TODO.md` |
@@ -333,7 +333,7 @@ Manual verification of HANDOFF schema compliance. Future work should include sch
 **Agents Updated**:
 - `rites/intelligence/agents/user-researcher.md` - Quality improvements
 - `rites/intelligence/agents/insights-analyst.md` - Quality improvements + HANDOFF production
-- `rites/doc-team-pack/agents/doc-auditor.md` - Staleness detection
+- `rites/docs/agents/doc-auditor.md` - Staleness detection
 - `rites/hygiene/agents/architect-enforcer.md` - Behavior preservation
 - `rites/hygiene/agents/audit-lead.md` - Behavior preservation
 - `rites/hygiene/agents/code-smeller.md` - smell-detection integration + HANDOFF acceptance

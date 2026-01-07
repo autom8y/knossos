@@ -182,16 +182,16 @@ The generator uses workflow.yaml to:
 
 ```bash
 $ cd /roster
-$ ./templates/orchestrator-generate.sh doc-team-pack
+$ ./templates/orchestrator-generate.sh docs
 
 OK: All dependencies found
 OK: All required files exist
 
-INFO: Processing team: doc-team-pack
-OK: Schema validation passed: /roster/rites/doc-team-pack/orchestrator.yaml
-OK: Workflow references validated: /roster/rites/doc-team-pack/orchestrator.yaml -> /roster/rites/doc-team-pack/workflow.yaml
-INFO: Generating: doc-team-pack
-OK: Generated: /roster/rites/doc-team-pack/agents/orchestrator.md
+INFO: Processing team: docs
+OK: Schema validation passed: /roster/rites/docs/orchestrator.yaml
+OK: Workflow references validated: /roster/rites/docs/orchestrator.yaml -> /roster/rites/docs/workflow.yaml
+INFO: Generating: docs
+OK: Generated: /roster/rites/docs/agents/orchestrator.md
 ```
 
 ### Example 2: Dry-Run Preview
@@ -460,7 +460,7 @@ cd /roster
 
 # Test file generation for 5 teams
 bash << 'EOF'
-for team in rnd security ecosystem doc-team-pack 10x-dev; do
+for team in rnd security ecosystem docs 10x-dev; do
   echo "Testing $team..."
   ./templates/orchestrator-generate.sh "$team" --force
   ./templates/validate-orchestrator.sh "rites/$team/agents/orchestrator.md"

@@ -94,9 +94,9 @@ execution_mode() {
         active_rite="$ctx_rite"
     fi
 
-    # Verify rite pack exists
-    local rite_pack_dir="${KNOSSOS_HOME:-$HOME/Code/roster}/rites/$active_rite"
-    if [[ ! -d "$rite_pack_dir" ]]; then
+    # Verify rite exists
+    local rite_dir="${KNOSSOS_HOME:-$HOME/Code/roster}/rites/$active_rite"
+    if [[ ! -d "$rite_dir" ]]; then
         # Rite configured but pack missing - error state, but fallback gracefully
         echo "cross-cutting"
         return 0

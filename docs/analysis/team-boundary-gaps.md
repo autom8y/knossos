@@ -31,7 +31,7 @@ This analysis audits 11 rites across the roster ecosystem to identify boundary i
 
 ---
 
-### 2. doc-team-pack
+### 2. docs
 
 | Aspect | Definition |
 |--------|------------|
@@ -283,14 +283,14 @@ This analysis audits 11 rites across the roster ecosystem to identify boundary i
 - SDK documentation
 
 **Currently Claimed By**:
-- doc-team-pack: General documentation, but "Not for: writing code comments"
+- docs: General documentation, but "Not for: writing code comments"
 - 10x-dev: Code implementation, but "Not for: documentation work"
 
 **Gap Description**: API documentation requires both code knowledge (to generate accurate specs) and documentation skills (to write clear references). Neither team fully claims this territory.
 
 **Recommendation**:
-- Add to doc-team-pack triggers: "API reference documentation"
-- Add to doc-team-pack "NOT for": "API spec generation from code (route to 10x, then handoff)"
+- Add to docs triggers: "API reference documentation"
+- Add to docs "NOT for": "API spec generation from code (route to 10x, then handoff)"
 - Establish handoff pattern: 10x produces OpenAPI spec, doc-team enriches with examples
 
 ---
@@ -411,13 +411,13 @@ This analysis audits 11 rites across the roster ecosystem to identify boundary i
 
 **Common Misroute**: Doing it inline during 10x session
 
-**Correct Routing**: Handoff to doc-team-pack after implementation complete
+**Correct Routing**: Handoff to docs after implementation complete
 
 **Distinguishing Signal**: Post-implementation documentation is doc-team territory
 
 **Recommendation**:
-- Formalize in 10x "Related Teams": "After implementation, handoff documentation to doc-team-pack"
-- Add doc-team-pack triggers: "document completed feature", "write docs for new feature"
+- Formalize in 10x "Related Teams": "After implementation, handoff documentation to docs"
+- Add docs triggers: "document completed feature", "write docs for new feature"
 
 ---
 
@@ -445,7 +445,7 @@ This analysis audits 11 rites across the roster ecosystem to identify boundary i
 | Team | Add to "NOT for" |
 |------|------------------|
 | **10x-dev** | Multi-session research (rnd), CI/CD pipeline creation (sre), performance investigation before diagnosis (sre), infrastructure optimization (sre) |
-| **doc-team-pack** | API spec generation from code (10x first, then handoff) |
+| **docs** | API spec generation from code (10x first, then handoff) |
 | **hygiene** | Strategic debt prioritization (debt-triage), refactoring that adds new behavior (10x-dev) |
 | **debt-triage** | Immediate code cleanup execution (hygiene) |
 | **rnd** | Single-session technology comparisons (10x `/spike`) |
@@ -462,7 +462,7 @@ This analysis audits 11 rites across the roster ecosystem to identify boundary i
 |------|----|---------|
 | sre (observability) | 10x-dev | Instrumentation implementation needed |
 | debt-triage | hygiene | Sprint plan ready for execution |
-| 10x-dev | doc-team-pack | Feature complete, documentation needed |
+| 10x-dev | docs | Feature complete, documentation needed |
 | 10x-dev | sre | Production deployment validation |
 | rnd | 10x-dev | Prototype ready for production |
 
@@ -483,7 +483,7 @@ This analysis audits 11 rites across the roster ecosystem to identify boundary i
 |----------|---------------|--------|
 | This gap analysis | `/Users/tomtenuta/Code/roster/docs/analysis/team-boundary-gaps.md` | Created |
 | 10x-dev README | `/Users/tomtenuta/Code/roster/rites/10x-dev/README.md` | Read |
-| doc-team-pack README | `/Users/tomtenuta/Code/roster/rites/doc-team-pack/README.md` | Read |
+| docs README | `/Users/tomtenuta/Code/roster/rites/docs/README.md` | Read |
 | hygiene README | `/Users/tomtenuta/Code/roster/rites/hygiene/README.md` | Read |
 | debt-triage README | `/Users/tomtenuta/Code/roster/rites/debt-triage/README.md` | Read |
 | rnd README | `/Users/tomtenuta/Code/roster/rites/rnd/README.md` | Read |

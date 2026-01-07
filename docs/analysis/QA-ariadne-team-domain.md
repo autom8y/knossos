@@ -259,7 +259,7 @@ Message: fmt.Sprintf("All %d agent files present", len(expectedAgents))
 - [ ] No documentation changes needed
 - [x] Existing docs remain accurate
 - [ ] Doc updates needed: None identified
-- [ ] doc-team-pack notification: NO
+- [ ] docs notification: NO
 
 ---
 

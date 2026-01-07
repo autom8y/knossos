@@ -353,7 +353,7 @@ remove_resource_orphans() {
     local orphan_count=0
 
     # Read orphan list from stdin (one "name:team" per line)
-    while IFS=: read -r resource_name origin_team; do
+    while IFS=: read -r resource_name origin_rite; do
         # Skip empty lines
         [[ -z "$resource_name" ]] && continue
 
@@ -370,16 +370,16 @@ remove_resource_orphans() {
                     # For directories (skills), use recursive copy
                     cp -rp "$resource_path" "$backup_dir/$resource_name"
                     rm -rf "$resource_path"
-                    log "Removed orphan ${resource_type%s}: $resource_name (was from $origin_team)"
+                    log "Removed orphan ${resource_type%s}: $resource_name (was from $origin_rite)"
                 elif [[ "$find_type" == "f" ]] && [[ -f "$resource_path" ]]; then
                     # For files (commands, hooks), use simple copy
                     cp "$resource_path" "$backup_dir/$resource_name"
                     rm -f "$resource_path"
-                    log "Removed orphan ${resource_type%s}: $resource_name (was from $origin_team)"
+                    log "Removed orphan ${resource_type%s}: $resource_name (was from $origin_rite)"
                 fi
                 ;;
             "keep")
-                log "Keeping orphan ${resource_type%s}: $resource_name (from $origin_team)"
+                log "Keeping orphan ${resource_type%s}: $resource_name (from $origin_rite)"
                 ;;
             *)
                 # Default: keep silently (no explicit mode set)

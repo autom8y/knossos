@@ -51,7 +51,7 @@ IMPL_AGENT=$(grep -B1 "produces: code\|produces: commits\|produces: documentatio
    - Inline documentation
    - Agent varies by rite:
      - 10x-dev → principal-engineer
-     - doc-team-pack → tech-writer
+     - docs → tech-writer
      - hygiene → janitor
 
 4. **Fast validation** → Quick verification:

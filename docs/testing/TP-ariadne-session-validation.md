@@ -307,7 +307,7 @@ func main() {
 - [ ] No documentation changes needed
 - [x] Existing docs remain accurate
 - [ ] Doc updates needed
-- [ ] doc-team-pack notification: NO
+- [ ] docs notification: NO
 
 ## Security Handoff
 

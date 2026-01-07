@@ -174,7 +174,7 @@ The following teams should be tested in Phase 2 to verify integration:
 | rnd | 4 | 4 | 3 levels | Linear flow, baseline case |
 | security | 4 | 4 | 3 levels | Different naming conventions |
 | ecosystem | 5 | 5 | 4 levels | Longest pipeline, critical path |
-| doc-team-pack | 4 | 4 | 3 levels | Different domain (documentation) |
+| docs | 4 | 4 | 3 levels | Different domain (documentation) |
 | strategy | 4 | 4 | 3 levels | Different complexity enum |
 
 ### Integration Test Criteria

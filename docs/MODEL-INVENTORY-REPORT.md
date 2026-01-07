@@ -187,7 +187,7 @@
 | Command | Model | Target Team |
 |---------|-------|-------------|
 | `/10x` | sonnet | 10x-dev |
-| `/docs` | sonnet | doc-team-pack |
+| `/docs` | sonnet | docs |
 | `/hygiene` | sonnet | hygiene |
 | `/debt` | sonnet | debt-triage |
 | `/sre` | sonnet | sre |
@@ -217,7 +217,7 @@
 |---------|-------|------|-------------|
 | `/pr` | sonnet | 10x-dev | Create pull request |
 | `/spike` | opus | 10x-dev | Time-boxed research |
-| `/consolidate` | opus | doc-team-pack | Consolidate documentation |
+| `/consolidate` | opus | docs | Consolidate documentation |
 | `/cem-debug` | opus | ecosystem | Diagnose CEM issues |
 | `/eval-agent` | opus | forge | Test agent in isolation |
 | `/new-team` | opus | forge | Create new rite |
@@ -272,7 +272,7 @@ These agents might work well with sonnet given their focused roles:
 | Agent | Team | Current | Consideration |
 |-------|------|---------|---------------|
 | principal-engineer | 10x-dev | opus | Implementation-focused, could be sonnet |
-| information-architect | doc-team-pack | opus | Structure work, possibly sonnet |
+| information-architect | docs | opus | Structure work, possibly sonnet |
 
 ### Potential Sonnet → Opus (Quality Improvement)
 

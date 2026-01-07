@@ -167,7 +167,7 @@ External tool integrations and automation.
 
 ---
 
-### doc-team-pack (Documentation Lifecycle)
+### docs (Documentation Lifecycle)
 
 **Primary Skills (10)**: doc-consolidation, doc-reviews, documentation, orchestration, qa-ref, review, sprint-ref, task-ref, start-ref, park-ref, resume, wrap-ref, handoff-ref, initiative-scoping, docs-ref, team-ref, consult-ref, prompting, atuin-desktop
 
@@ -271,7 +271,7 @@ These skills are core infrastructure used by every rite:
 3. If multiple rites match, choose based on artifact output:
    - PRD/TDD/Code/Tests -> 10x-dev
    - CEM/skeleton/roster -> ecosystem
-   - Audit/Structure/Docs -> doc-team-pack
+   - Audit/Structure/Docs -> docs
    - Debt ledger/Risk/Sprint -> debt-triage
    - Observability/Incidents/Chaos -> sre
    - Threat/Compliance/Pentest -> security

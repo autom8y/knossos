@@ -88,7 +88,7 @@ The sprint goal was "Extract shared orchestrator sections to skill" - NOT "regen
 |------|-------|-------------------------------|--------|
 | 10x-dev | 192 | NO | Unchanged |
 | debt-triage | 185 | NO | Unchanged |
-| doc-team-pack | 191 | NO | Unchanged |
+| docs | 191 | NO | Unchanged |
 | ecosystem | 206 | NO | Unchanged |
 | forge | 205 | NO | Unchanged |
 | hygiene | 192 | NO | Unchanged |

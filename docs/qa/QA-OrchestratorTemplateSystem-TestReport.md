@@ -34,7 +34,7 @@ The orchestrator template system is **production-ready** with one documented cos
 |---------|-----------|------|--------|-------|
 | GEN-001 | Dry-run generation | 10x-dev | PASS | No placeholders remaining |
 | GEN-002 | Dry-run generation | security | PASS | No placeholders remaining |
-| GEN-003 | Dry-run generation | doc-team-pack | PASS | No placeholders remaining |
+| GEN-003 | Dry-run generation | docs | PASS | No placeholders remaining |
 | GEN-004 | Dry-run generation | rnd | PASS | No placeholders remaining |
 | GEN-005 | Dry-run generation | ecosystem | PASS* | Diagram malformed (DEF-001) |
 | GEN-006 | Frontmatter validation | All 5 teams | PASS | All fields present |

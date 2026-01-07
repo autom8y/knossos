@@ -81,7 +81,7 @@ Canonical order: Context -> Pre-flight -> Task -> Behavior -> Flags -> Examples 
 | `user-commands/navigation/worktree.md` | Context -> Pre-flight -> Task -> Commands -> Examples -> Typical Workflow -> Reference | "Commands" instead of "Behavior", "Typical Workflow" section added |
 | `user-commands/session/start.md` | Pre-computed Context -> Task -> Behavior -> Complexity Levels -> Example Usage -> Reference | "Pre-computed Context" variant, "Complexity Levels" extra section |
 | `user-commands/workflow/sprint.md` | Context -> Pre-flight -> Task -> Behavior -> Example -> When to Use -> Parallel Sprint Pattern -> Reference | "When to Use" after Example, extra "Parallel Sprint Pattern" section |
-| `rites/doc-team-pack/commands/consolidate.md` | Context -> Task -> Parameters -> Workflow Phases -> Behavior -> Examples -> Phase Transitions -> Resumption -> Error Handling -> Reference | Multiple extra sections interspersed |
+| `rites/docs/commands/consolidate.md` | Context -> Task -> Parameters -> Workflow Phases -> Behavior -> Examples -> Phase Transitions -> Resumption -> Error Handling -> Reference | Multiple extra sections interspersed |
 | `rites/ecosystem/commands/cem-debug.md` | Context -> Task -> Behavior -> When to Use -> CEM Diagnostic Checklist -> Expected Output -> Handoff -> Reference | Multiple extra sections |
 
 **Note**: Section order violations are LOW severity as they don't break functionality, only consistency.
@@ -194,7 +194,7 @@ All 10 team-switching commands follow this pattern correctly.
 | `user-commands/navigation/sessions.md` | S3 | LOW | 6 (LOW) |
 | `user-commands/session/start.md` | S3 | LOW | 6 (LOW) |
 | `user-commands/workflow/sprint.md` | S3 | LOW | 6 (LOW) |
-| `rites/doc-team-pack/commands/consolidate.md` | S3 | LOW | 6 (LOW) |
+| `rites/docs/commands/consolidate.md` | S3 | LOW | 6 (LOW) |
 | `rites/ecosystem/commands/cem-debug.md` | S3, S6 | LOW | 4 (MEDIUM) |
 
 ---

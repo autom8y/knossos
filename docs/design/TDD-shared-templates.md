@@ -13,7 +13,7 @@ This Technical Design Document specifies the shared-templates skill, a multi-tea
 | Risk Assessor Agent | `rites/debt-triage/agents/risk-assessor.md` |
 | Sprint Planner Agent | `rites/debt-triage/agents/sprint-planner.md` |
 | Doc-Ecosystem Skill | `.claude/skills/doc-ecosystem/SKILL.md` |
-| Doc-Consolidation Templates | `rites/doc-team-pack/skills/doc-consolidation/templates/` |
+| Doc-Consolidation Templates | `rites/docs/skills/doc-consolidation/templates/` |
 
 ### Problem Statement
 

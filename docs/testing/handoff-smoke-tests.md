@@ -7,7 +7,7 @@
 
 This document defines smoke tests for all valid cross-rite handoff paths in the roster ecosystem. Each test validates that a handoff can be produced, transmitted, and consumed correctly.
 
-**Teams**: 10 (10x-dev, debt-triage, doc-team-pack, ecosystem, hygiene, intelligence, rnd, security, sre, strategy)
+**Teams**: 10 (10x-dev, debt-triage, docs, ecosystem, hygiene, intelligence, rnd, security, sre, strategy)
 
 **Handoff Types**: 6 (execution, validation, assessment, implementation, strategic_input, strategic_evaluation)
 
@@ -21,7 +21,7 @@ This document defines smoke tests for all valid cross-rite handoff paths in the 
 |---|--------|--------|------|----------|-------------|
 | 1 | 10x-dev | security | assessment | High | Threat modeling gate |
 | 2 | 10x-dev | sre | validation | High | Production readiness |
-| 3 | 10x-dev | doc-team-pack | assessment | Medium | Documentation review |
+| 3 | 10x-dev | docs | assessment | Medium | Documentation review |
 | 4 | debt-triage | hygiene | execution | High | Debt remediation |
 | 5 | strategy | 10x-dev | implementation | High | Strategic initiative |
 | 6 | intelligence | strategy | strategic_input | Medium | Research synthesis |
@@ -39,7 +39,7 @@ This document defines smoke tests for all valid cross-rite handoff paths in the 
 | 13 | 10x-dev | intelligence | assessment | Low | User research request |
 | 14 | 10x-dev | rnd | assessment | Low | Technical spike request |
 | 15 | strategy | rnd | implementation | Medium | Research direction |
-| 16 | doc-team-pack | 10x-dev | assessment | Low | Doc feedback |
+| 16 | docs | 10x-dev | assessment | Low | Doc feedback |
 | 17 | sre | security | assessment | Medium | Security incident |
 | 18 | security | sre | validation | Medium | Security controls |
 
@@ -160,7 +160,7 @@ This is a schema validation test.
 
 ---
 
-### ST-003: 10x-dev -> doc-team-pack (assessment)
+### ST-003: 10x-dev -> docs (assessment)
 
 **Path**: Feature needs documentation review
 
@@ -168,7 +168,7 @@ This is a schema validation test.
 ```yaml
 ---
 source_team: 10x-dev
-target_team: doc-team-pack
+target_team: docs
 handoff_type: assessment
 created: 2026-01-02
 initiative: Smoke Test Feature
@@ -198,7 +198,7 @@ This is a schema validation test.
 - [ ] Frontmatter parses as valid YAML
 - [ ] `handoff_type: assessment` present
 - [ ] Assessment Questions present in item
-- [ ] Target team (doc-team-pack) can consume
+- [ ] Target team (docs) can consume
 
 **Expected Response Type**: Documentation plan or review
 

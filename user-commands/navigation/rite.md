@@ -67,7 +67,7 @@ Quick-switch commands are derived from rite names:
 |------|--------------|--------|
 | 10x-dev | `/10x` | Full feature development |
 | debt-triage | `/debt` | Technical debt management |
-| doc-team-pack | `/docs` | Documentation workflows |
+| docs | `/docs` | Documentation workflows |
 | ecosystem | `/ecosystem` | CEM/skeleton/roster infrastructure |
 | forge | `/forge` | Rite creation |
 | hygiene | `/hygiene` | Code quality, refactoring |
@@ -87,7 +87,7 @@ Quick-switch commands are derived from rite names:
 /rite 10x-dev              # Switch (prompts for orphans)
 /rite hygiene --keep-all   # Switch, keep all orphans
 /rite debt-pack --promote-all   # Switch, promote orphans to user-level
-/rite doc-team-pack --update    # Update even if already on rite
+/rite docs --update    # Update even if already on rite
 ```
 
 ## Reference

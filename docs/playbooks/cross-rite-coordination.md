@@ -222,15 +222,15 @@ initiative: [initiative name]
 
 ### Scenario 5: Documentation Handoff
 
-**Flow**: 10x-dev -> doc-team-pack
+**Flow**: 10x-dev -> docs
 
 1. **10x-dev** completes feature
-2. **Produce**: HANDOFF (assessment) to doc-team-pack
+2. **Produce**: HANDOFF (assessment) to docs
    ```yaml
    handoff_type: assessment
    priority: medium
    ```
-3. **doc-team-pack** assesses documentation needs
+3. **docs** assesses documentation needs
 4. **Output**: Documentation or doc-review
 
 **Key Points**:
@@ -260,7 +260,7 @@ Is this about technical debt?
   NO  -> Continue
 
 Is this about documentation?
-  YES -> doc-team-pack
+  YES -> docs
   NO  -> Continue
 
 Is this about research/exploration?

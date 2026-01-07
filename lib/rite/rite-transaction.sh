@@ -449,7 +449,7 @@ cleanup_staging() {
     fi
 }
 
-# Stage agents from rite pack
+# Stage agents from rite
 # Parameters:
 #   $1 - rite_name: Rite to stage agents from
 # Returns: 0 on success, 1 on failure

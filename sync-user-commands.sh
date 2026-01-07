@@ -110,7 +110,7 @@ calculate_checksum() {
 # Team Collision Detection
 # ============================================================================
 
-# Check if a command name exists in any rite pack
+# Check if a command name exists in any rite
 # Returns 0 if found in a rite (collision), 1 if not found
 is_rite_command() {
     local cmd_name="$1"

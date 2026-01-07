@@ -64,7 +64,7 @@ All critical verification checks passed. The remediation sprint successfully rem
 
 ### Other Team Packs Present
 - debt-triage
-- doc-team-pack
+- docs
 - ecosystem
 - hygiene
 - intelligence

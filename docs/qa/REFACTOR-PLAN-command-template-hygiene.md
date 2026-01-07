@@ -434,7 +434,7 @@ Display information about The Forge - the meta-team for creating and maintaining
 - `user-commands/navigation/worktree.md`
 - `user-commands/session/start.md`
 - `user-commands/workflow/sprint.md`
-- `rites/doc-team-pack/commands/consolidate.md`
+- `rites/docs/commands/consolidate.md`
 - `rites/ecosystem/commands/cem-debug.md`
 
 ---

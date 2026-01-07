@@ -124,7 +124,7 @@ When a user asks for guidance:
 Match needs to rites using the decision tree:
 ```
 Build/Create → 10x-dev
-Document → doc-team-pack
+Document → docs
 Code Quality → hygiene
 Tech Debt → debt-triage
 Operations → sre
@@ -168,7 +168,7 @@ Match response depth to user need:
 | Team | Switch Command | Best For |
 |------|----------------|----------|
 | 10x-dev | /10x | Full feature development lifecycle |
-| doc-team-pack | /docs | Documentation, technical writing |
+| docs | /docs | Documentation, technical writing |
 | hygiene | /hygiene | Code quality, refactoring |
 | debt-triage | /debt | Technical debt prioritization |
 | sre | /sre | Operations, reliability, infrastructure |

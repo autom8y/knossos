@@ -10,7 +10,7 @@ This document defines a complete test scenario for the standard feature developm
 **Complexity Level**: FEATURE (MODULE complexity in 10x-dev terms)
 **Workflow Path**: Requirements -> Design -> Code -> QA -> Doc (optional handoff)
 **Primary Team**: 10x-dev
-**Cross-Team Handoffs**: Optional handoff to doc-team-pack for documentation
+**Cross-Team Handoffs**: Optional handoff to docs for documentation
 
 ---
 
@@ -23,7 +23,7 @@ Implement a user profile settings page allowing users to update their display na
 **Why This Scenario**: This represents a typical MODULE-complexity feature that:
 - Requires all four 10x-dev phases
 - Produces artifacts at each phase transition
-- May trigger doc-team-pack handoff for user documentation
+- May trigger docs handoff for user documentation
 - Has clear acceptance criteria for each phase
 
 ---
@@ -236,7 +236,7 @@ All 15 test cases pass. No blocking defects.
 
 ### Phase Transition
 - **From**: validation
-- **To**: complete (or handoff to doc-team-pack)
+- **To**: complete (or handoff to docs)
 - **Handoff Type**: Cross-team (if documentation needed)
 - **Trigger**: QA signoff
 
@@ -244,14 +244,14 @@ All 15 test cases pass. No blocking defects.
 
 ## Optional Cross-Team Handoff: Documentation
 
-If user-facing documentation is required, produce a HANDOFF artifact for doc-team-pack:
+If user-facing documentation is required, produce a HANDOFF artifact for docs:
 
 ### HANDOFF Artifact
 
 ```yaml
 ---
 source_team: 10x-dev
-target_team: doc-team-pack
+target_team: docs
 handoff_type: assessment
 created: 2026-01-02
 initiative: User Profile Settings Feature

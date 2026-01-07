@@ -7,4 +7,5 @@
 | **Theseus** | Claude Code agent | The navigator with amnesia |
 | **Moirai** | Session lifecycle agent | The Fates who spin, measure, and cut |
 | **White Sails** | Confidence signal | Honest return indicator |
-| **Rites** | Practice bundles | Invokable ceremonies (formerly "team packs") |
+| **Rites** | Practice bundles | Invokable ceremonies |
+| **Pantheon** | Agent collection | The specialist agents within a rite |

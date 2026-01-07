@@ -1060,10 +1060,10 @@ init_manifest_from_existing() {
 # Output: One agent filename per line
 list_incoming_agents() {
     local rite_name="$1"
-    local pack_dir="$KNOSSOS_HOME/rites/$rite_name/agents"
+    local rite_dir="$KNOSSOS_HOME/rites/$rite_name/agents"
 
-    if [[ -d "$pack_dir" ]]; then
-        for agent_file in "$pack_dir"/*.md; do
+    if [[ -d "$rite_dir" ]]; then
+        for agent_file in "$rite_dir"/*.md; do
             [[ -f "$agent_file" ]] && basename "$agent_file"
         done
     fi
@@ -1525,11 +1525,11 @@ validate_agent_tools() {
 
 # Validate all agent tools in a rite
 # Returns count of agents with invalid tools (0 = all valid)
-validate_pack_tools() {
-    local pack_dir="$1"
+validate_rite_tools() {
+    local rite_dir="$1"
     local invalid_count=0
 
-    for agent_file in "$pack_dir/agents"/*.md; do
+    for agent_file in "$rite_dir/agents"/*.md; do
         [[ -f "$agent_file" ]] || continue
         if ! validate_agent_tools "$agent_file"; then
             ((invalid_count++)) || true
@@ -1540,28 +1540,28 @@ validate_pack_tools() {
 }
 
 # Validate rite exists and has required structure
-validate_pack() {
+validate_rite() {
     local rite_name="$1"
-    local pack_dir="$KNOSSOS_HOME/rites/$rite_name"
+    local rite_dir="$KNOSSOS_HOME/rites/$rite_name"
 
     log_debug "Validating pack: $rite_name"
 
     # Check pack directory exists
-    if [[ ! -d "$pack_dir" ]]; then
+    if [[ ! -d "$rite_dir" ]]; then
         log_error "Rite pack '$rite_name' not found in $KNOSSOS_HOME/rites/"
         log "Use './swap-rite.sh --list' to see available packs"
         exit "$EXIT_VALIDATION_FAILURE"
     fi
 
     # Check agents/ subdirectory exists
-    if [[ ! -d "$pack_dir/agents" ]]; then
+    if [[ ! -d "$rite_dir/agents" ]]; then
         log_error "Rite '$rite_name' missing agents/ directory"
         exit "$EXIT_VALIDATION_FAILURE"
     fi
 
     # Check at least one .md file exists
     local agent_count
-    agent_count=$(find "$pack_dir/agents" -maxdepth 1 -name "*.md" -type f 2>/dev/null | wc -l | tr -d ' ')
+    agent_count=$(find "$rite_dir/agents" -maxdepth 1 -name "*.md" -type f 2>/dev/null | wc -l | tr -d ' ')
 
     if [[ "$agent_count" -eq 0 ]]; then
         log_error "Rite '$rite_name' has no agent files (.md)"
@@ -1569,21 +1569,21 @@ validate_pack() {
     fi
 
     # Check workflow.yaml exists
-    if [[ ! -f "$pack_dir/workflow.yaml" ]]; then
+    if [[ ! -f "$rite_dir/workflow.yaml" ]]; then
         log_warning "Rite '$rite_name' missing workflow.yaml (commands may fail)"
     fi
 
     # Check for missing directories (REQ-3.4)
-    if [[ ! -d "$pack_dir/commands" ]]; then
+    if [[ ! -d "$rite_dir/commands" ]]; then
         log_warning "Rite '$rite_name' missing commands/ (run normalize-rite-structure.sh)"
     fi
-    if [[ ! -d "$pack_dir/skills" ]]; then
+    if [[ ! -d "$rite_dir/skills" ]]; then
         log_warning "Rite '$rite_name' missing skills/ (run normalize-rite-structure.sh)"
     fi
 
     # Validate agent tools (REQ-3.3)
     local invalid_tool_count
-    invalid_tool_count=$(validate_pack_tools "$pack_dir")
+    invalid_tool_count=$(validate_rite_tools "$rite_dir")
     if [[ "$invalid_tool_count" -gt 0 ]]; then
         log_warning "$invalid_tool_count agent(s) have invalid tools declarations"
     fi
@@ -2718,43 +2718,43 @@ preview_refresh() {
         done
     fi
 
-    # Check for orphan commands (commands from other teams)
+    # Check for orphan commands (commands from other rites)
     # Pass current_rite to scope detection to previous team only (RF-005)
     echo ""
-    echo "Command orphans (from other teams):"
+    echo "Command orphans (from other rites):"
     local orphan_commands
     orphan_commands=$(detect_resource_orphans "commands" ".claude/commands" "$rite_name" "f" "*.md" "$current_rite")
     if [[ -n "$orphan_commands" ]]; then
-        while IFS=: read -r cmd_name origin_team; do
-            echo "  ? $cmd_name (from $origin_team)"
+        while IFS=: read -r cmd_name origin_rite; do
+            echo "  ? $cmd_name (from $origin_rite)"
         done <<< "$orphan_commands"
     else
         echo "  (none)"
     fi
 
-    # Check for orphan skills (skills from other teams)
+    # Check for orphan skills (skills from other rites)
     # Pass current_rite to scope detection to previous team only (RF-005)
     echo ""
-    echo "Skill orphans (from other teams):"
+    echo "Skill orphans (from other rites):"
     local orphan_skills
     orphan_skills=$(detect_resource_orphans "skills" ".claude/skills" "$rite_name" "d" "*/" "$current_rite")
     if [[ -n "$orphan_skills" ]]; then
-        while IFS=: read -r skill_name origin_team; do
-            echo "  ? $skill_name (from $origin_team)"
+        while IFS=: read -r skill_name origin_rite; do
+            echo "  ? $skill_name (from $origin_rite)"
         done <<< "$orphan_skills"
     else
         echo "  (none)"
     fi
 
-    # Check for orphan hooks (hooks from other teams)
+    # Check for orphan hooks (hooks from other rites)
     # Pass current_rite to scope detection to previous team only (RF-005)
     echo ""
-    echo "Hook orphans (from other teams):"
+    echo "Hook orphans (from other rites):"
     local orphan_hooks
     orphan_hooks=$(detect_resource_orphans "hooks" ".claude/hooks" "$rite_name" "f" "*" "$current_rite")
     if [[ -n "$orphan_hooks" ]]; then
-        while IFS=: read -r hook_name origin_team; do
-            echo "  ? $hook_name (from $origin_team)"
+        while IFS=: read -r hook_name origin_rite; do
+            echo "  ? $hook_name (from $origin_rite)"
         done <<< "$orphan_hooks"
     else
         echo "  (none)"
@@ -3002,7 +3002,7 @@ perform_swap() {
 
     # Validate pack and project
     local agent_count
-    agent_count=$(validate_pack "$rite_name")
+    agent_count=$(validate_rite "$rite_name")
     validate_project
 
     # Validate team schemas (workflow.yaml, orchestrator.yaml) before swap
@@ -3111,7 +3111,7 @@ perform_swap() {
     # PART 1 OF COMMIT: Commands, Skills, Hooks (still rollback-able)
     # =========================================================================
 
-    # Detect and handle orphan commands (commands from other teams)
+    # Detect and handle orphan commands (commands from other rites)
     # Pass source_rite to scope detection to previous team only (RF-005)
     local orphan_commands
     orphan_commands=$(detect_resource_orphans "commands" ".claude/commands" "$rite_name" "f" "*.md" "$source_rite")
@@ -3119,9 +3119,9 @@ perform_swap() {
         if [[ -z "$ORPHAN_MODE" ]]; then
             local orphan_count
             orphan_count=$(echo "$orphan_commands" | wc -l | tr -d ' ')
-            log_warning "Found ${orphan_count} orphan command(s) from other teams:"
-            while IFS=: read -r cmd_name origin_team; do
-                echo "  - $cmd_name (from $origin_team)"
+            log_warning "Found ${orphan_count} orphan command(s) from other rites:"
+            while IFS=: read -r cmd_name origin_rite; do
+                echo "  - $cmd_name (from $origin_rite)"
             done <<< "$orphan_commands"
             log "Use --remove-all to clean up orphan commands"
         else
@@ -3136,7 +3136,7 @@ perform_swap() {
     swap_commands "$rite_name"
     mark_commit_step "$COMMIT_STEP_COMMANDS"
 
-    # Detect and handle orphan skills (skills from other teams)
+    # Detect and handle orphan skills (skills from other rites)
     # Pass source_rite to scope detection to previous team only (RF-005)
     local orphan_skills
     orphan_skills=$(detect_resource_orphans "skills" ".claude/skills" "$rite_name" "d" "*/" "$source_rite")
@@ -3145,9 +3145,9 @@ perform_swap() {
             # Non-interactive mode without flags - warn but don't block
             local orphan_count
             orphan_count=$(echo "$orphan_skills" | wc -l | tr -d ' ')
-            log_warning "Found ${orphan_count} orphan skill(s) from other teams:"
-            while IFS=: read -r skill_name origin_team; do
-                echo "  - $skill_name (from $origin_team)"
+            log_warning "Found ${orphan_count} orphan skill(s) from other rites:"
+            while IFS=: read -r skill_name origin_rite; do
+                echo "  - $skill_name (from $origin_rite)"
             done <<< "$orphan_skills"
             log "Use --remove-all to clean up orphan skills"
         else
@@ -3163,7 +3163,7 @@ perform_swap() {
     sync_shared_skills
     mark_commit_step "$COMMIT_STEP_SHARED_SKILLS"
 
-    # Detect and handle orphan hooks (hooks from other teams)
+    # Detect and handle orphan hooks (hooks from other rites)
     # Pass source_rite to scope detection to previous team only (RF-005)
     local orphan_hooks
     orphan_hooks=$(detect_resource_orphans "hooks" ".claude/hooks" "$rite_name" "f" "*" "$source_rite")
@@ -3171,9 +3171,9 @@ perform_swap() {
         if [[ -z "$ORPHAN_MODE" ]]; then
             local orphan_count
             orphan_count=$(echo "$orphan_hooks" | wc -l | tr -d ' ')
-            log_warning "Found ${orphan_count} orphan hook(s) from other teams:"
-            while IFS=: read -r hook_name origin_team; do
-                echo "  - $hook_name (from $origin_team)"
+            log_warning "Found ${orphan_count} orphan hook(s) from other rites:"
+            while IFS=: read -r hook_name origin_rite; do
+                echo "  - $hook_name (from $origin_rite)"
             done <<< "$orphan_hooks"
             log "Use --remove-all to clean up orphan hooks"
         else

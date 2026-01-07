@@ -207,7 +207,7 @@ A cross-rite HANDOFF artifact is **optional** when:
 
 | Condition | Target Rite | Handoff Type |
 |-----------|-------------|--------------|
-| Feature complete, documentation update desired | doc-team-pack | assessment |
+| Feature complete, documentation update desired | docs | assessment |
 | Code review reveals hygiene concerns | hygiene | assessment |
 | Performance concerns identified | sre | assessment |
 | Minor security considerations (complexity < SERVICE) | security | assessment |

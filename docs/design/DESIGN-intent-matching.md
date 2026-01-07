@@ -114,7 +114,7 @@ Map common problem patterns to team domains:
 | `slow`, `performance`, `latency` | sre | 10x-dev |
 | `bug`, `error`, `broken`, `fix` | 10x-dev | - |
 | `vulnerability`, `CVE`, `auth`, `crypto` | security | - |
-| `documentation`, `docs`, `readme` | doc-team-pack | - |
+| `documentation`, `docs`, `readme` | docs | - |
 | `refactor`, `cleanup`, `smells` | hygiene | - |
 | `debt`, `legacy`, `cruft` | debt-triage | hygiene |
 | `analytics`, `metrics`, `tracking` | intelligence | - |
@@ -178,7 +178,7 @@ capability_index:
       - "principal-engineer"
       - "qa-adversary"
     related_teams:
-      - "doc-team-pack"
+      - "docs"
       - "rnd"
 
   ecosystem:
@@ -836,7 +836,7 @@ function build_rationale(signals, team, score):
 **Scenario**: Query matches both triggers AND exclusion phrases for the same team.
 
 **Example**: `/consult "write documentation for my one-off script"`
-- "write documentation" -> triggers doc-team-pack
+- "write documentation" -> triggers docs
 - "one-off script" -> excluded by 10x-dev
 
 **Handling**:
@@ -873,7 +873,7 @@ function build_rationale(signals, team, score):
   This goal spans multiple teams:
   1. 10x-dev (build feature) -> then handoff to
   2. security (security review) -> then handoff to
-  3. doc-team-pack (documentation)
+  3. docs (documentation)
 
   Recommended workflow: /sprint with phased handoffs
   ```
@@ -993,7 +993,7 @@ If issues discovered:
 | Exclusion penalty applied | `/consult "one-off script"` | 10x-dev demoted, hygiene or rnd up |
 | Multi-team detection | `/consult "feature with docs and security"` | Sprint workflow recommended |
 | Empty query | `/consult ""` | General help displayed |
-| Domain exact match | `/consult "documentation"` | doc-team-pack highest |
+| Domain exact match | `/consult "documentation"` | docs highest |
 | Problem pattern match | `/consult "API is slow"` | sre primary, 10x secondary |
 | Session context bonus | Query in ecosystem session | ecosystem gets recency bonus |
 | New team discovery | Add new `test-pack` team | Appears in recommendations |
@@ -1035,7 +1035,7 @@ Current teams and their key characteristics (as of 2026-01-04):
 |------|--------|--------------|------------|
 | 10x-dev | software development | build feature, PRD, TDD, implementation | documentation, infrastructure, one-off scripts |
 | debt-triage | technical debt management | debt, legacy, sprint planning | implementation |
-| doc-team-pack | documentation lifecycle | docs, writing, readme | code review, performance |
+| docs | documentation lifecycle | docs, writing, readme | code review, performance |
 | ecosystem | ecosystem infrastructure | CEM, roster, sync, satellite | application code, team workflows |
 | forge | agent team creation | new team, agent, forge | production features |
 | hygiene | code quality | refactor, cleanup, smells | new features |

@@ -42,7 +42,7 @@ IMPL_AGENT=$(grep -B1 "produces: code\|produces: commits\|produces: documentatio
 
 2. **Resolve implementation agent** from workflow:
    - 10x-dev → principal-engineer
-   - doc-team-pack → tech-writer
+   - docs → tech-writer
    - hygiene → janitor
    - debt-triage → sprint-planner
 

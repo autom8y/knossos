@@ -56,7 +56,7 @@ team_mappings:
     PLATFORM_RESEARCH: PLATFORM
 
   # Documentation teams
-  doc-team-pack:
+  docs:
     PAGE: PATCH
     SECTION: MODULE
     GUIDE: SYSTEM

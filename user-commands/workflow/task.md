@@ -68,7 +68,7 @@ The workflow config determines the exact pipeline:
 requirements → design → implementation → validation
 ```
 
-**doc-team-pack** (4 phases):
+**docs** (4 phases):
 ```
 audit → architecture → writing → review
 ```

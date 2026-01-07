@@ -19,7 +19,7 @@ Current state:
 - `consult-ref` provides ecosystem guidance but lacks explicit references to `prompting` skill for invocation patterns
 - `consult-ref` does not reference `10x-workflow` for workflow phase transitions and quality gates
 - The role of `/consult` as "cognitive load absorber" is undocumented
-- `team-ref` hardcodes 4 teams (`10x-dev`, `doc-team-pack`, `hygiene`, `debt-triage`) when 11 teams exist
+- `team-ref` hardcodes 4 teams (`10x-dev`, `docs`, `hygiene`, `debt-triage`) when 11 teams exist
 - Team profile information is scattered across `rites/*/orchestrator.yaml` and `rites/*/README.md` without structured access
 - CLAUDE.md Getting Help table does not include `/consult` for routing guidance
 
@@ -324,7 +324,7 @@ Modify existing `.claude/skills/team-ref/skill.md` to dynamically discover teams
 
 ### 10x-dev
 ...
-### doc-team-pack
+### docs
 ...
 ### hygiene
 ...
@@ -375,7 +375,7 @@ ls -d $ROSTER_HOME/rites/*-pack 2>/dev/null | xargs -n1 basename
 As of this writing, the roster contains 11 teams:
 - 10x-dev (software development)
 - debt-triage (technical debt)
-- doc-team-pack (documentation)
+- docs (documentation)
 - ecosystem (CEM/skeleton/roster infrastructure)
 - forge (rite creation)
 - hygiene (code quality)
@@ -408,7 +408,7 @@ Quick-switch commands are derived from rite names:
 |------|--------------|------------|
 | 10x-dev | `/10x` | First token before hyphen |
 | debt-triage | `/debt` | First token before hyphen |
-| doc-team-pack | `/docs` | First token before hyphen |
+| docs | `/docs` | First token before hyphen |
 | ecosystem | `/ecosystem` | First token before hyphen |
 | forge | `/forge` | First token before hyphen |
 | hygiene | `/hygiene` | First token before hyphen |

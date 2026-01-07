@@ -212,7 +212,7 @@ TEAMS STATUS
 rnd              ✓ ADOPTED      (generated.md: 100% match)
 security         ✓ ADOPTED      (generated.md: 100% match)
 ecosystem        ~ MIGRATING    (PR #423)
-doc-team-pack         ○ INTERESTED   (in roadmap)
+docs         ○ INTERESTED   (in roadmap)
 forge            ○ NOT ADOPTED  (manual orchestrator)
 debt-triage      ○ NOT ADOPTED  (manual orchestrator)
 sre              ○ NOT ADOPTED  (manual orchestrator)

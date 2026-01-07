@@ -21,7 +21,7 @@ All 11 rites successfully complete the swap cycle with proper agent cleanup, res
 |------|--------|---------------|---------------------|---------------|-------------|--------|
 | 10x-dev | 5 | PASS | PASS (requirements-analyst) | PASS (2) | PASS (13) | PASS |
 | debt-triage | 4 | PASS | N/A | N/A (0) | PASS (1) | PASS |
-| doc-team-pack | 5 | PASS | N/A | PASS (1) | PASS (4) | PASS |
+| docs | 5 | PASS | N/A | PASS (1) | PASS (4) | PASS |
 | ecosystem | 6 | PASS | N/A | PASS (1) | PASS (4) | PASS |
 | forge | 7 | PASS | N/A | PASS (3) | N/A (0) | PASS* |
 | hygiene | 5 | PASS | N/A | N/A (0) | PASS (1) | PASS |

@@ -42,7 +42,7 @@ DESIGN_AGENT=$(grep -B1 "produces: tdd\|produces: doc-structure\|produces: refac
 
 2. **Resolve design agent** from workflow:
    - 10x-dev → architect
-   - doc-team-pack → information-architect
+   - docs → information-architect
    - hygiene → architect-enforcer
    - debt-triage → risk-assessor
 

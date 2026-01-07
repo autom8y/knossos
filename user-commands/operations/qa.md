@@ -42,7 +42,7 @@ VALIDATION_AGENT=$(grep -B1 "next: null" .claude/ACTIVE_WORKFLOW.yaml | grep "ag
 
 2. **Resolve validation agent** from workflow:
    - 10x-dev → qa-adversary
-   - doc-team-pack → doc-reviewer
+   - docs → doc-reviewer
    - hygiene → audit-lead
    - debt-triage → (risk-assessor for validation)
 

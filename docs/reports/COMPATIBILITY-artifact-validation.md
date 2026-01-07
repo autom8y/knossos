@@ -142,7 +142,7 @@ All critical sync scripts and swap-rite operations pass validation. Minor issues
 |------|------|---------------|--------|---------|
 | 10x-dev | OK | OK | OK | PASS |
 | debt-triage | OK | OK | OK | PASS |
-| doc-team-pack | OK | OK | OK | PASS |
+| docs | OK | OK | OK | PASS |
 | ecosystem | OK | OK | OK | PASS |
 | forge | OK | OK | OK | PASS |
 | hygiene | OK | OK | OK | PASS |

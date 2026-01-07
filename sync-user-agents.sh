@@ -108,7 +108,7 @@ calculate_checksum() {
 # Rite Collision Detection
 # ============================================================================
 
-# Check if an agent name exists in any rite pack
+# Check if an agent name exists in any rite
 # Returns 0 if found in a rite (collision), 1 if not found
 is_rite_agent() {
     local agent_name="$1"
