@@ -4,7 +4,7 @@
 #
 # Commands:
 #   status              - Output JSON with full session state
-#   create <init> <complexity> [team] - Create new session
+#   create <init> <complexity> [rite] - Create new session
 #   exists              - Exit 0 if session exists, 1 otherwise
 #   suggest-id          - Output suggested session ID
 
@@ -280,7 +280,7 @@ EOF
 cmd_create() {
     local initiative="${1:-unnamed}"
     local complexity="${2:-MODULE}"
-    local team="${3:-$(cat ".claude/ACTIVE_RITE" 2>/dev/null || echo "none")}"
+    local rite="${3:-$(cat ".claude/ACTIVE_RITE" 2>/dev/null || echo "none")}"
 
     # Acquire lock to prevent race conditions during session creation
     local lockfile="$SESSIONS_DIR/.create.lock"
@@ -337,7 +337,7 @@ EOF
 
     # Use FSM to create session (handles schema v2, validation, events)
     local session_id
-    session_id=$(fsm_create_session "$initiative" "$complexity" "$team")
+    session_id=$(fsm_create_session "$initiative" "$complexity" "$rite")
 
     # Check if FSM creation succeeded
     if [[ -z "$session_id" || "$session_id" == *"error"* ]]; then
@@ -371,7 +371,7 @@ EOF
   "session_dir": "$session_dir",
   "initiative": "$initiative",
   "complexity": "$complexity",
-  "team": "$team",
+  "rite": "$rite",
   "entry_agent": "${entry_agent:-requirements-analyst}",
   "schema_version": "2.1"
 }
@@ -785,7 +785,7 @@ session-manager.sh - Unified session management
 
 Commands:
   status              Show full session state as JSON
-  create <init> <complexity> [team]   Create new session
+  create <init> <complexity> [rite]   Create new session
   exists              Check if session exists (exit code)
   transition <from> <to>   Transition between workflow phases with validation
   suggest-id          Generate new session ID
@@ -795,7 +795,7 @@ Commands:
 Examples:
   session-manager.sh status
   session-manager.sh create "Add dark mode" MODULE
-  session-manager.sh create "New API" SERVICE 10x-dev-pack
+  session-manager.sh create "New API" SERVICE hygiene-pack
   session-manager.sh transition requirements design
   session-manager.sh transition design implementation
   session-manager.sh mutate park "Going to lunch"

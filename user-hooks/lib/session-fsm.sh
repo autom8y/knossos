@@ -644,23 +644,23 @@ fsm_transition() {
 }
 
 # Create a new session (NONE -> ACTIVE transition)
-# Usage: fsm_create_session <initiative> <complexity> [team]
+# Usage: fsm_create_session <initiative> <complexity> [rite]
 # Returns: session_id on success
 # Exit code: 0 on success, 1 on failure
-# Note: If team is empty/none/null, creates a cross-cutting session
+# Note: If rite is empty/none/null, creates a cross-cutting session
 fsm_create_session() {
     local initiative="$1"
     local complexity="$2"
-    local team="${3:-}"
+    local rite="${3:-}"
 
-    # If team not specified, check ACTIVE_RITE file
-    if [[ -z "$team" ]]; then
-        team=$(cat ".claude/ACTIVE_RITE" 2>/dev/null || echo "")
+    # If rite not specified, check ACTIVE_RITE file
+    if [[ -z "$rite" ]]; then
+        rite=$(cat ".claude/ACTIVE_RITE" 2>/dev/null || echo "")
     fi
 
     # Normalize empty/none to explicit marker for cross-cutting
-    if [[ -z "$team" || "$team" == "none" ]]; then
-        team="none"
+    if [[ -z "$rite" || "$rite" == "none" ]]; then
+        rite="none"
     fi
 
     if [[ -z "$initiative" || -z "$complexity" ]]; then
@@ -684,12 +684,12 @@ fsm_create_session() {
     local timestamp
     timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
-    # Compute team field value (null for cross-cutting, quoted string otherwise)
-    local team_field_value
-    if [[ "$team" == "none" ]]; then
-        team_field_value="null"
+    # Compute rite field value (null for cross-cutting, quoted string otherwise)
+    local rite_field_value
+    if [[ "$rite" == "none" ]]; then
+        rite_field_value="null"
     else
-        team_field_value="\"$team\""
+        rite_field_value="\"$rite\""
     fi
 
     # Create SESSION_CONTEXT.md with v2.1 schema
@@ -701,8 +701,8 @@ status: "ACTIVE"
 created_at: "$timestamp"
 initiative: "$initiative"
 complexity: "$complexity"
-active_rite: "$team"
-rite: $team_field_value
+active_rite: "$rite"
+rite: $rite_field_value
 current_phase: "requirements"
 ---
 
@@ -819,7 +819,7 @@ session-fsm.sh - Session Finite State Machine
 Commands:
   get-state <session_id>              Get current session state
   transition <session_id> <state> [metadata]  Execute state transition
-  create <initiative> <complexity> [team]     Create new session
+  create <initiative> <complexity> [rite]     Create new session
   is-valid-transition <from> <to>     Check if transition is valid
   validate <ctx_file>                 Validate SESSION_CONTEXT.md
 

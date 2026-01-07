@@ -207,7 +207,7 @@ cleanup_rite_orphans() {
             fi
             ((cleaned++)) || true
         else
-            # Not in user-commands AND not a team command = truly user-created
+            # Not in user-commands AND not a rite command = truly user-created
             log_debug "Keeping: $cmd_name (user-created, not from any roster source)"
             ((skipped++)) || true
         fi
@@ -219,7 +219,7 @@ cleanup_rite_orphans() {
     else
         log "Cleanup complete:"
     fi
-    echo "  Removed:   $cleaned (team-level commands)"
+    echo "  Removed:   $cleaned (rite-level commands)"
     echo "  Preserved: $skipped (user-created commands)"
 
     if [[ "$cleaned" -gt 0 ]] && [[ "$DRY_RUN_MODE" -eq 0 ]]; then
@@ -881,7 +881,7 @@ Examples:
   ./sync-user-commands.sh --status     # Show current sync status
   ./sync-user-commands.sh --adopt      # Recover manifest from existing files
   ./sync-user-commands.sh --adopt --dry-run  # Preview adopt results
-  ./sync-user-commands.sh --cleanup    # Remove team-level leaks
+  ./sync-user-commands.sh --cleanup    # Remove rite-level leaks
   ./sync-user-commands.sh --cleanup --dry-run  # Preview cleanup
 
 EOF
@@ -928,9 +928,9 @@ main() {
     # Ensure target directory exists
     mkdir -p "$USER_COMMANDS_DIR"
 
-    # Run cleanup if enabled (removes team-level commands from user-level)
+    # Run cleanup if enabled (removes rite-level commands from user-level)
     if [[ "$CLEANUP_MODE" -eq 1 ]]; then
-        cleanup_team_orphans
+        cleanup_rite_orphans
     fi
 
     # Run manifest recovery if adopt mode is enabled

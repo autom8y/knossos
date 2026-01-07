@@ -131,16 +131,16 @@ if [[ "$COMMAND" =~ (^|[[:space:]/])swap-rite\.sh[[:space:]] ]]; then
             fi
         fi
 
-        # Check for worktree/team mismatch (simple check without session-utils)
+        # Check for worktree/rite mismatch (simple check without session-utils)
         GIT_DIR=$(git rev-parse --git-dir 2>/dev/null) || GIT_DIR=""
         if [[ -f "$GIT_DIR" ]] && grep -q "^gitdir:" "$GIT_DIR" 2>/dev/null; then
             # This is a worktree
             if [[ -f "$PROJECT_DIR/.claude/.worktree-meta.json" ]]; then
-                WORKTREE_TEAM=$(jq -r '.team // "none"' "$PROJECT_DIR/.claude/.worktree-meta.json" 2>/dev/null) || WORKTREE_TEAM=""
-                if [[ -n "$WORKTREE_TEAM" ]] && [[ "$WORKTREE_TEAM" != "none" ]] && [[ "$WORKTREE_TEAM" != "$TARGET_TEAM" ]]; then
+                WORKTREE_RITE=$(jq -r '.team // "none"' "$PROJECT_DIR/.claude/.worktree-meta.json" 2>/dev/null) || WORKTREE_RITE=""
+                if [[ -n "$WORKTREE_RITE" ]] && [[ "$WORKTREE_RITE" != "none" ]] && [[ "$WORKTREE_RITE" != "$TARGET_TEAM" ]]; then
                     cat <<EOF
 {
-  "systemMessage": "Warning: Worktree team mismatch. This worktree was created for '$WORKTREE_TEAM' but switching to '$TARGET_TEAM'. Consider using main project for different team."
+  "systemMessage": "Warning: Worktree rite mismatch. This worktree was created for '$WORKTREE_RITE' but switching to '$TARGET_TEAM'. Consider using main project for different rite."
 }
 EOF
                 fi
