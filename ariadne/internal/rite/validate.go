@@ -64,7 +64,7 @@ func (v *Validator) Validate(teamName string) (*ValidationResult, error) {
 		result.Checks = append(result.Checks, ValidationCheck{
 			Check:   "TEAM_EXISTS",
 			Status:  CheckFail,
-			Message: "Team not found: " + teamName,
+			Message: "Rite not found: " + teamName,
 		})
 		result.Errors++
 		return result, nil
@@ -91,14 +91,14 @@ func (v *Validator) checkTeamExists(result *ValidationResult, rite *Rite) {
 		result.Checks = append(result.Checks, ValidationCheck{
 			Check:   "TEAM_EXISTS",
 			Status:  CheckFail,
-			Message: "Team directory not found",
+			Message: "Rite directory not found",
 		})
 		result.Errors++
 	} else {
 		result.Checks = append(result.Checks, ValidationCheck{
 			Check:   "TEAM_EXISTS",
 			Status:  CheckPass,
-			Message: "Team directory found",
+			Message: "Rite directory found",
 		})
 	}
 }
@@ -200,12 +200,12 @@ func (v *Validator) checkAgentFiles(result *ValidationResult, rite *Rite) {
 
 // checkManifestSync verifies AGENT_MANIFEST.json matches installed agents.
 func (v *Validator) checkManifestSync(result *ValidationResult, rite *Rite) {
-	// Only check if this is the active team
+	// Only check if this is the active rite
 	if !rite.Active {
 		result.Checks = append(result.Checks, ValidationCheck{
 			Check:   "MANIFEST_SYNC",
 			Status:  CheckPass,
-			Message: "Skipped (team not active)",
+			Message: "Skipped (rite not active)",
 		})
 		return
 	}
@@ -222,12 +222,12 @@ func (v *Validator) checkManifestSync(result *ValidationResult, rite *Rite) {
 		return
 	}
 
-	// Check if manifest's active team matches
+	// Check if manifest's active rite matches
 	if manifest.ActiveRite != rite.Name {
 		result.Checks = append(result.Checks, ValidationCheck{
 			Check:   "MANIFEST_SYNC",
 			Status:  CheckWarn,
-			Message: "Manifest active team mismatch: " + manifest.ActiveRite,
+			Message: "Manifest active rite mismatch: " + manifest.ActiveRite,
 		})
 		result.Warnings++
 		result.Fixable = append(result.Fixable, "MANIFEST_SYNC")
@@ -258,14 +258,14 @@ func (v *Validator) checkManifestSync(result *ValidationResult, rite *Rite) {
 	})
 }
 
-// checkClaudeMDSync verifies CLAUDE.md satellite sections match active team.
+// checkClaudeMDSync verifies CLAUDE.md satellite sections match active rite.
 func (v *Validator) checkClaudeMDSync(result *ValidationResult, rite *Rite) {
-	// Only check if this is the active team
+	// Only check if this is the active rite
 	if !rite.Active {
 		result.Checks = append(result.Checks, ValidationCheck{
 			Check:   "CLAUDE_MD_SYNC",
 			Status:  CheckPass,
-			Message: "Skipped (team not active)",
+			Message: "Skipped (rite not active)",
 		})
 		return
 	}
@@ -283,12 +283,12 @@ func (v *Validator) checkClaudeMDSync(result *ValidationResult, rite *Rite) {
 		return
 	}
 
-	// Check if team name appears in Quick Start section
+	// Check if rite name appears in Quick Start section
 	if !strings.Contains(string(content), rite.Name) {
 		result.Checks = append(result.Checks, ValidationCheck{
 			Check:   "CLAUDE_MD_SYNC",
 			Status:  CheckWarn,
-			Message: "CLAUDE.md does not reference active team",
+			Message: "CLAUDE.md does not reference active rite",
 		})
 		result.Warnings++
 		result.Fixable = append(result.Fixable, "CLAUDE_MD_SYNC")
