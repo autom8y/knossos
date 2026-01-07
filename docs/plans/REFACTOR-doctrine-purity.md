@@ -452,13 +452,13 @@ grep -r "team-switching" user-commands/ docs/ sync-user-commands.sh | wc -l  # S
 #### RF-011: Update schema files
 
 **Before State**:
-- `user-skills/guidance/rite-discovery/schemas/team-profile.yaml`
+- `user-skills/guidance/rite-discovery/schemas/rite-profile.yaml`
 
 **After State**:
 - `user-skills/guidance/rite-discovery/schemas/rite-profile.yaml`
 - Internal references updated
 
-**Commit**: `refactor(schemas): rename team-profile.yaml to rite-profile.yaml [DP-P4-011]`
+**Commit**: `refactor(schemas): rename rite-profile.yaml to rite-profile.yaml [DP-P4-011]`
 
 ---
 

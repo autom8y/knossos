@@ -5,7 +5,7 @@
 # Each team pack must have a workflow.yaml matching this structure.
 # This file serves as both documentation and validation reference.
 #
-# Human-readable guide: skeleton/.claude/skills/team-development/schema/team-pack-schema.md
+# Human-readable guide: skeleton/.claude/skills/team-development/schema/rite-pack-schema.md
 
 schema_version: "1.1"
 

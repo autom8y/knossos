@@ -68,7 +68,7 @@ Create a new skill that provides structured team metadata for routing decisions.
 .claude/skills/team-discovery/
   SKILL.md              # Entry point with discovery behavior
   schemas/
-    team-profile.yaml   # Canonical team profile schema
+    rite-profile.yaml   # Canonical team profile schema
 ```
 
 #### 2.1.2 team-profile Schema
@@ -76,7 +76,7 @@ Create a new skill that provides structured team metadata for routing decisions.
 The `team-discovery` skill reads from existing `teams/*/orchestrator.yaml` files and structures the output for routing:
 
 ```yaml
-# Schema: team-profile.yaml
+# Schema: rite-profile.yaml
 # Describes the structure that team-discovery extracts from orchestrator.yaml
 
 team_profile:
@@ -168,7 +168,7 @@ ls -d $ROSTER_HOME/teams/*-pack | xargs -n1 basename
 
 ## Schema Reference
 
-See [schemas/team-profile.yaml](schemas/team-profile.yaml) for the structured output format.
+See [schemas/rite-profile.yaml](schemas/rite-profile.yaml) for the structured output format.
 
 ## Integration Points
 
@@ -296,7 +296,7 @@ Example enhancement:
 
 When recommending teams, `/consult` retrieves current team inventory from:
 - `team-discovery` skill for dynamic team list
-- `team-discovery/schemas/team-profile.yaml` for profile structure
+- `team-discovery/schemas/rite-profile.yaml` for profile structure
 
 **Pattern**: Never hardcode team counts or capabilities; always read from `team-discovery`.
 ```
@@ -552,7 +552,7 @@ User: /team --list
 | File | Purpose | Lines (est.) |
 |------|---------|--------------|
 | `.claude/skills/team-discovery/SKILL.md` | Team discovery skill entry point | ~80 |
-| `.claude/skills/team-discovery/schemas/team-profile.yaml` | Team profile schema | ~40 |
+| `.claude/skills/team-discovery/schemas/rite-profile.yaml` | Team profile schema | ~40 |
 
 ### 4.2 Modified Files
 
@@ -700,7 +700,7 @@ The following hardcoded references are deprecated in favor of dynamic discovery:
 | Decision | Resolution | Rationale |
 |----------|------------|-----------|
 | How does consult-ref reference prompting? | Mental invocation + pattern extraction | Matches skill design; avoids recursive invocation |
-| What's the schema for team-discovery output? | team-profile.yaml (section 2.1.2) | Structured for routing decisions |
+| What's the schema for team-discovery output? | rite-profile.yaml (section 2.1.2) | Structured for routing decisions |
 | Skill or script for team-discovery? | Skill | Aligns with ecosystem architecture; reusable |
 | How to keep team counts synchronized? | Dynamic filesystem read | Single source of truth; no maintenance burden |
 

@@ -515,7 +515,7 @@ Example enhancement:
 
 When recommending teams, `/consult` retrieves current team inventory from:
 - `team-discovery` skill for dynamic team list
-- `team-discovery/schemas/team-profile.yaml` for profile structure
+- `team-discovery/schemas/rite-profile.yaml` for profile structure
 
 **Pattern**: Never hardcode team counts or capabilities; always read from `team-discovery`.
 

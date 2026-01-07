@@ -51,7 +51,7 @@ ls -d $KNOSSOS_HOME/teams/*-pack | xargs -n1 basename
 
 ## Schema Reference
 
-See [schemas/team-profile.yaml](schemas/team-profile.yaml) for the structured output format.
+See [schemas/rite-profile.yaml](schemas/rite-profile.yaml) for the structured output format.
 
 ## Integration Points
 

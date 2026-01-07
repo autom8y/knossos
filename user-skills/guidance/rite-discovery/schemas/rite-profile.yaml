@@ -1,4 +1,4 @@
-# Schema: team-profile.yaml
+# Schema: rite-profile.yaml
 # Describes the structure that team-discovery extracts from orchestrator.yaml
 
 team_profile:
