@@ -979,18 +979,18 @@ is_rite_stale() {
         return 1  # No rite, not stale
     fi
 
-    local team_name
-    team_name=$(cat "$active_rite_file")
+    local rite_name
+    rite_name=$(cat "$active_rite_file")
 
-    local team_dir="${KNOSSOS_HOME:-}/rites/$team_name"
-    if [[ ! -d "$team_dir" ]]; then
-        sync_log_debug "Rite directory not found: $team_dir"
+    local rite_dir="${KNOSSOS_HOME:-}/rites/$rite_name"
+    if [[ ! -d "$rite_dir" ]]; then
+        sync_log_debug "Rite directory not found: $rite_dir"
         return 1
     fi
 
-    # Compare team directory mtime with last refresh
-    local team_mtime manifest_refresh
-    team_mtime=$(stat -f "%m" "$team_dir" 2>/dev/null || stat -c "%Y" "$team_dir" 2>/dev/null)
+    # Compare rite directory mtime with last refresh
+    local rite_mtime manifest_refresh
+    rite_mtime=$(stat -f "%m" "$rite_dir" 2>/dev/null || stat -c "%Y" "$rite_dir" 2>/dev/null)
     manifest_refresh=$(get_manifest_field ".team.last_refresh")
 
     if [[ -z "$manifest_refresh" ]]; then
@@ -1009,8 +1009,8 @@ is_rite_stale() {
         return 0  # Cannot parse, assume stale
     fi
 
-    if [[ "$team_mtime" -gt "$refresh_epoch" ]]; then
-        return 0  # Team updated after last refresh
+    if [[ "$rite_mtime" -gt "$refresh_epoch" ]]; then
+        return 0  # Rite updated after last refresh
     fi
 
     return 1  # Fresh
@@ -1018,15 +1018,15 @@ is_rite_stale() {
 
 # Refresh active rite via swap-rite.sh
 refresh_active_rite() {
-    local active_team_file=".claude/ACTIVE_RITE"
+    local active_rite_file=".claude/ACTIVE_RITE"
 
-    if [[ ! -f "$active_team_file" ]]; then
+    if [[ ! -f "$active_rite_file" ]]; then
         sync_log_debug "No active rite to refresh"
         return 0
     fi
 
     local rite_name
-    rite_name=$(cat "$active_team_file")
+    rite_name=$(cat "$active_rite_file")
 
     sync_log "Refreshing rite: $rite_name"
 
