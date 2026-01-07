@@ -91,13 +91,13 @@ func (m *Manager) Create(opts CreateOptions) (*Worktree, error) {
 		return nil, err
 	}
 
-	// Get team from flag or detect from ACTIVE_RITE
-	team := opts.Team
-	if team == "" {
+	// Get rite from flag or detect from ACTIVE_RITE
+	rite := opts.Rite
+	if rite == "" {
 		activeRitePath := filepath.Join(m.rootDir, ".claude", "ACTIVE_RITE")
 		data, err := os.ReadFile(activeRitePath)
 		if err == nil {
-			team = strings.TrimSpace(string(data))
+			rite = strings.TrimSpace(string(data))
 		}
 	}
 
@@ -112,7 +112,7 @@ func (m *Manager) Create(opts CreateOptions) (*Worktree, error) {
 		ID:         id,
 		Name:       opts.Name,
 		Path:       wtPath,
-		Team:       team,
+		Rite:       rite,
 		CreatedAt:  time.Now().UTC(),
 		BaseBranch: baseBranch,
 		FromRef:    opts.FromRef,
@@ -155,11 +155,11 @@ func (m *Manager) Create(opts CreateOptions) (*Worktree, error) {
 	}
 
 	// Try to set rite if specified
-	if team != "" && team != "none" {
+	if rite != "" && rite != "none" {
 		if knossosHome != "" {
 			swapRitePath := filepath.Join(knossosHome, "swap-rite.sh")
 			if _, err := os.Stat(swapRitePath); err == nil {
-				cmd := exec.Command(swapRitePath, team)
+				cmd := exec.Command(swapRitePath, rite)
 				cmd.Dir = wtPath
 				cmd.Run() // Ignore errors, rite setup is optional
 			}

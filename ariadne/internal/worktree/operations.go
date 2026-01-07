@@ -29,13 +29,13 @@ type SyncResult struct {
 
 // SwitchOptions specifies options for switching to a worktree.
 type SwitchOptions struct {
-	UpdateTeam    bool // Update ACTIVE_RITE to match worktree's team
+	UpdateRite    bool // Update ACTIVE_RITE to match worktree's rite
 	CreateSession bool // Create a new session in the worktree
 }
 
 // CloneOptions specifies options for cloning a worktree.
 type CloneOptions struct {
-	Team        string // Override team (empty = copy from source)
+	Rite        string // Override rite (empty = copy from source)
 	CopySession bool   // Copy session context from source
 }
 
@@ -48,7 +48,7 @@ type SyncOptions struct {
 type ExportArchive struct {
 	WorktreeID string    `json:"worktree_id"`
 	Name       string    `json:"name"`
-	Team       string    `json:"team"`
+	Rite       string    `json:"rite"`
 	Complexity string    `json:"complexity"`
 	FromRef    string    `json:"from_ref"`
 	GitRef     string    `json:"git_ref"` // HEAD commit at export time
@@ -80,11 +80,11 @@ func (m *Manager) Switch(idOrName string, opts SwitchOptions) (*Worktree, error)
 			})
 	}
 
-	// Update ACTIVE_RITE if requested and team differs
-	if opts.UpdateTeam && wt.Team != "" {
+	// Update ACTIVE_RITE if requested and rite differs
+	if opts.UpdateRite && wt.Rite != "" {
 		activeRitePath := filepath.Join(wt.Path, ".claude", "ACTIVE_RITE")
 		if err := os.MkdirAll(filepath.Dir(activeRitePath), 0755); err == nil {
-			os.WriteFile(activeRitePath, []byte(wt.Team+"\n"), 0644)
+			os.WriteFile(activeRitePath, []byte(wt.Rite+"\n"), 0644)
 		}
 
 		// Also try to run swap-rite.sh if available
@@ -92,7 +92,7 @@ func (m *Manager) Switch(idOrName string, opts SwitchOptions) (*Worktree, error)
 		if knossosHome != "" {
 			swapRitePath := filepath.Join(knossosHome, "swap-rite.sh")
 			if _, err := os.Stat(swapRitePath); err == nil {
-				cmd := exec.Command(swapRitePath, wt.Team)
+				cmd := exec.Command(swapRitePath, wt.Rite)
 				cmd.Dir = wt.Path
 				cmd.Run() // Ignore errors
 			}
@@ -124,10 +124,10 @@ func (m *Manager) Clone(sourceIDOrName, newName string, opts CloneOptions) (*Wor
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to get source HEAD", err)
 	}
 
-	// Determine team
-	team := opts.Team
-	if team == "" {
-		team = source.Team
+	// Determine rite
+	rite := opts.Rite
+	if rite == "" {
+		rite = source.Rite
 	}
 
 	// Generate new worktree ID
@@ -148,7 +148,7 @@ func (m *Manager) Clone(sourceIDOrName, newName string, opts CloneOptions) (*Wor
 		ID:         id,
 		Name:       newName,
 		Path:       wtPath,
-		Team:       team,
+		Rite:       rite,
 		CreatedAt:  time.Now().UTC(),
 		BaseBranch: source.BaseBranch,
 		FromRef:    sourceHead, // Created from source's HEAD
@@ -175,7 +175,7 @@ func (m *Manager) Clone(sourceIDOrName, newName string, opts CloneOptions) (*Wor
 	}
 
 	// Try to run roster-sync and swap-rite
-	m.setupWorktreeEcosystem(wtPath, team)
+	m.setupWorktreeEcosystem(wtPath, rite)
 
 	return &wt, nil
 }
@@ -252,7 +252,7 @@ func (m *Manager) Export(idOrName, targetPath string) error {
 	meta := ExportArchive{
 		WorktreeID: wt.ID,
 		Name:       wt.Name,
-		Team:       wt.Team,
+		Rite:       wt.Rite,
 		Complexity: wt.Complexity,
 		FromRef:    wt.FromRef,
 		GitRef:     gitRef,
@@ -545,7 +545,7 @@ func (m *Manager) Import(archivePath string) (*Worktree, error) {
 		ID:         id,
 		Name:       meta.Name,
 		Path:       wtPath,
-		Team:       meta.Team,
+		Rite:       meta.Rite,
 		CreatedAt:  time.Now().UTC(),
 		BaseBranch: m.git.GetDefaultBranch(),
 		FromRef:    meta.GitRef,
@@ -565,7 +565,7 @@ func (m *Manager) Import(archivePath string) (*Worktree, error) {
 	}
 
 	// Setup ecosystem
-	m.setupWorktreeEcosystem(wtPath, wt.Team)
+	m.setupWorktreeEcosystem(wtPath, wt.Rite)
 
 	return &wt, nil
 }
@@ -659,7 +659,7 @@ func copySessionContext(sourcePath, targetPath string) error {
 }
 
 // setupWorktreeEcosystem runs roster-sync and swap-rite for a worktree.
-func (m *Manager) setupWorktreeEcosystem(wtPath, team string) {
+func (m *Manager) setupWorktreeEcosystem(wtPath, rite string) {
 	knossosHome := config.KnossosHome()
 	if knossosHome == "" {
 		return
@@ -681,10 +681,10 @@ func (m *Manager) setupWorktreeEcosystem(wtPath, team string) {
 	}
 
 	// Run swap-rite if rite specified
-	if team != "" && team != "none" {
+	if rite != "" && rite != "none" {
 		swapRitePath := filepath.Join(knossosHome, "swap-rite.sh")
 		if _, err := os.Stat(swapRitePath); err == nil {
-			cmd := exec.Command(swapRitePath, team)
+			cmd := exec.Command(swapRitePath, rite)
 			cmd.Dir = wtPath
 			cmd.Run()
 		}

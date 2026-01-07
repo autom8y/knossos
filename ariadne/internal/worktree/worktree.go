@@ -15,7 +15,7 @@ type Worktree struct {
 	Name       string    `json:"name"`        // User-friendly name
 	Path       string    `json:"path"`        // Filesystem path
 	Branch     string    `json:"branch"`      // Git branch (empty if detached)
-	Team       string    `json:"team"`        // Active team pack
+	Rite       string    `json:"rite"`        // Active rite
 	CreatedAt  time.Time `json:"created_at"`  // Creation timestamp
 	BaseBranch string    `json:"base_branch"` // Branch it was created from
 	FromRef    string    `json:"from_ref"`    // Original ref used to create worktree
@@ -45,7 +45,7 @@ type WorktreeStatus struct {
 // CreateOptions specifies options for creating a worktree.
 type CreateOptions struct {
 	Name       string // User-friendly name
-	Team       string // Team pack to activate
+	Rite       string // Rite to activate
 	FromRef    string // Git ref to create from (default: HEAD)
 	Complexity string // Session complexity level
 }

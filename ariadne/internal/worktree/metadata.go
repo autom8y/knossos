@@ -225,7 +225,7 @@ type PerWorktreeMeta struct {
 	CreatedAt     string `json:"created_at"`
 	Name          string `json:"name"`
 	FromRef       string `json:"from_ref"`
-	Team          string `json:"team"`
+	Rite          string `json:"rite"`
 	Complexity    string `json:"complexity"`
 	ParentProject string `json:"parent_project"`
 }
@@ -242,7 +242,7 @@ func SavePerWorktreeMeta(worktreePath string, wt Worktree, parentProject string)
 		CreatedAt:     wt.CreatedAt.UTC().Format(time.RFC3339),
 		Name:          wt.Name,
 		FromRef:       wt.FromRef,
-		Team:          wt.Team,
+		Rite:          wt.Rite,
 		Complexity:    wt.Complexity,
 		ParentProject: parentProject,
 	}
@@ -329,7 +329,7 @@ func (m *MetadataManager) SyncMetadataFromFilesystem() error {
 				ID:         id,
 				Name:       perMeta.Name,
 				Path:       wtPath,
-				Team:       perMeta.Team,
+				Rite:       perMeta.Rite,
 				Complexity: perMeta.Complexity,
 				FromRef:    perMeta.FromRef,
 				CreatedAt:  createdAt,
