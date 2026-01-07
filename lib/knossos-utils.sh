@@ -16,8 +16,8 @@
 #   generate_roster   - Generate formatted roster table
 
 # Guard against re-sourcing
-[[ -n "${_ROSTER_UTILS_LOADED:-}" ]] && return 0
-readonly _ROSTER_UTILS_LOADED=1
+[[ -n "${_KNOSSOS_UTILS_LOADED:-}" ]] && return 0
+readonly _KNOSSOS_UTILS_LOADED=1
 
 # ============================================================================
 # Core Functions

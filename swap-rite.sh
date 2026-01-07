@@ -790,7 +790,7 @@ commit_staged_resources() {
 # ============================================================================
 
 # Source roster utilities for dynamic roster generation
-source "$KNOSSOS_HOME/lib/roster-utils.sh"
+source "$KNOSSOS_HOME/lib/knossos-utils.sh"
 
 # Source transaction infrastructure for rite swaps
 source "$KNOSSOS_HOME/lib/rite/rite-transaction.sh"
