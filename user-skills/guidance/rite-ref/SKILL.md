@@ -9,7 +9,7 @@ description: "Switch rites or list available rites via roster system. Use when: 
 
 ## Purpose
 
-Switch between agent rites to access specialized workflows. Each rite provides a curated pantheon of agents optimized for specific types of work (development, documentation, code hygiene, technical debt).
+Switch between rites to access specialized workflows. Each rite provides a curated pantheon of agents optimized for specific types of work (development, documentation, code hygiene, technical debt).
 
 This command integrates with the roster system at `$KNOSSOS_HOME/` and updates the active rite context for the current project.
 
