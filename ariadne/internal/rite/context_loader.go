@@ -276,12 +276,12 @@ func (cl *ContextLoader) SaveContext(ctx *RiteContext) error {
 	}
 
 	// Default to project rites directory
-	teamDir := filepath.Join(cl.ritesDir, ctx.TeamName)
-	if _, err := os.Stat(teamDir); os.IsNotExist(err) {
-		return errors.ErrRiteNotFound(ctx.TeamName)
+	riteDir := filepath.Join(cl.ritesDir, ctx.RiteName)
+	if _, err := os.Stat(riteDir); os.IsNotExist(err) {
+		return errors.ErrRiteNotFound(ctx.RiteName)
 	}
 
-	contextPath := filepath.Join(teamDir, ContextFileName)
+	contextPath := filepath.Join(riteDir, ContextFileName)
 
 	data, err := yaml.Marshal(ctx)
 	if err != nil {
@@ -293,7 +293,7 @@ func (cl *ContextLoader) SaveContext(ctx *RiteContext) error {
 	}
 
 	// Invalidate cache
-	cl.Invalidate(ctx.TeamName)
+	cl.Invalidate(ctx.RiteName)
 
 	return nil
 }

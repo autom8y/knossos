@@ -41,7 +41,7 @@ ls -la rites/my-team/orchestrator.yaml
 yq . rites/my-team/orchestrator.yaml
 
 # Check required fields
-yq '.team.name' rites/my-team/orchestrator.yaml
+yq '.rite.name' rites/my-team/orchestrator.yaml
 yq '.frontmatter.role' rites/my-team/orchestrator.yaml
 yq '.routing | keys' rites/my-team/orchestrator.yaml
 ```
@@ -427,8 +427,8 @@ Mismatch between orchestrator.yaml configuration and template generation.
 
 ```bash
 # Compare YAML config with generated output
-echo "=== Team Name ==="
-yq '.team.name' orchestrator.yaml
+echo "=== Rite Name ==="
+yq '.rite.name' orchestrator.yaml
 grep "^name:" agents/orchestrator.md
 
 echo ""
@@ -438,7 +438,7 @@ grep "^role:" agents/orchestrator.md
 
 echo ""
 echo "=== Color ==="
-yq '.team.color' orchestrator.yaml
+yq '.rite.color' orchestrator.yaml
 grep "^color:" agents/orchestrator.md
 ```
 
@@ -459,7 +459,7 @@ rm agents/orchestrator.md
 
 3. Compare again:
 ```bash
-diff <(yq '.team.color' orchestrator.yaml) \
+diff <(yq '.rite.color' orchestrator.yaml) \
      <(grep "^color:" agents/orchestrator.md | sed 's/^color:[[:space:]]*//')
 ```
 

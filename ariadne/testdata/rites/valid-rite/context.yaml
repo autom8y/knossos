@@ -1,5 +1,5 @@
 schema_version: "1.0"
-team_name: valid-rite
+rite_name: valid-rite
 display_name: Valid Test Rite
 description: A valid test rite with multiple agents
 domain: testing

@@ -372,10 +372,10 @@ validate_manifest() {
 # ============================================================================
 
 # Update rite info in manifest
-# Usage: manifest=$(update_manifest_rite "$manifest" "team_name" "checksum")
+# Usage: manifest=$(update_manifest_rite "$manifest" "rite_name" "checksum")
 update_manifest_rite() {
     local manifest="$1"
-    local team_name="$2"
+    local rite_name="$2"
     local checksum="${3:-}"
     local roster_path="${KNOSSOS_HOME:-}"
     local timestamp
@@ -383,11 +383,11 @@ update_manifest_rite() {
     timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
     echo "$manifest" | jq \
-        --arg n "$team_name" \
+        --arg n "$rite_name" \
         --arg c "$checksum" \
-        --arg rp "$roster_path/rites/$team_name" \
+        --arg rp "$roster_path/rites/$rite_name" \
         --arg t "$timestamp" '
-        .team = {
+        .rite = {
             name: $n,
             checksum: (if $c != "" then $c else null end),
             last_refresh: $t,
@@ -398,7 +398,7 @@ update_manifest_rite() {
 # Clear rite from manifest (reset to no rite)
 clear_manifest_rite() {
     local manifest="$1"
-    echo "$manifest" | jq '.team = null'
+    echo "$manifest" | jq '.rite = null'
 }
 
 # ============================================================================

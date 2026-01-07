@@ -991,7 +991,7 @@ is_rite_stale() {
     # Compare rite directory mtime with last refresh
     local rite_mtime manifest_refresh
     rite_mtime=$(stat -f "%m" "$rite_dir" 2>/dev/null || stat -c "%Y" "$rite_dir" 2>/dev/null)
-    manifest_refresh=$(get_manifest_field ".team.last_refresh")
+    manifest_refresh=$(get_manifest_field ".rite.last_refresh")
 
     if [[ -z "$manifest_refresh" ]]; then
         return 0  # No refresh recorded, assume stale

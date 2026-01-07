@@ -25,14 +25,14 @@ func TestSwitchWorktree(t *testing.T) {
 	// Create a worktree to switch to
 	wt, err := mgr.Create(CreateOptions{
 		Name: "switch-target",
-		Team: "test-team",
+		Rite: "test-team",
 	})
 	if err != nil {
 		t.Fatalf("Failed to create worktree: %v", err)
 	}
 
 	// Test switch
-	switched, err := mgr.Switch(wt.ID, SwitchOptions{UpdateTeam: false})
+	switched, err := mgr.Switch(wt.ID, SwitchOptions{UpdateRite: false})
 	if err != nil {
 		t.Fatalf("Switch failed: %v", err)
 	}
@@ -88,7 +88,7 @@ func TestSwitchNonexistent(t *testing.T) {
 	}
 }
 
-// TestSwitchWithTeamUpdate tests that UpdateTeam option works.
+// TestSwitchWithTeamUpdate tests that UpdateRite option works.
 func TestSwitchWithTeamUpdate(t *testing.T) {
 	tmpDir := setupTestGitRepo(t)
 	defer os.RemoveAll(tmpDir)
@@ -101,14 +101,14 @@ func TestSwitchWithTeamUpdate(t *testing.T) {
 	// Create a worktree with team
 	wt, err := mgr.Create(CreateOptions{
 		Name: "team-wt",
-		Team: "my-team",
+		Rite: "my-team",
 	})
 	if err != nil {
 		t.Fatalf("Failed to create worktree: %v", err)
 	}
 
 	// Switch with team update
-	_, err = mgr.Switch(wt.ID, SwitchOptions{UpdateTeam: true})
+	_, err = mgr.Switch(wt.ID, SwitchOptions{UpdateRite: true})
 	if err != nil {
 		t.Fatalf("Switch failed: %v", err)
 	}
@@ -138,7 +138,7 @@ func TestCloneWorktree(t *testing.T) {
 	// Create source worktree
 	source, err := mgr.Create(CreateOptions{
 		Name:       "source-wt",
-		Team:       "source-team",
+		Rite:       "source-team",
 		Complexity: "MODULE",
 	})
 	if err != nil {
@@ -162,8 +162,8 @@ func TestCloneWorktree(t *testing.T) {
 	}
 
 	// Verify clone copied team
-	if clone.Team != source.Team {
-		t.Errorf("Expected team '%s', got '%s'", source.Team, clone.Team)
+	if clone.Rite != source.Rite {
+		t.Errorf("Expected team '%s', got '%s'", source.Rite, clone.Rite)
 	}
 
 	// Verify clone copied complexity
@@ -190,7 +190,7 @@ func TestCloneWithTeamOverride(t *testing.T) {
 	// Create source worktree
 	source, err := mgr.Create(CreateOptions{
 		Name: "source",
-		Team: "original-team",
+		Rite: "original-team",
 	})
 	if err != nil {
 		t.Fatalf("Failed to create source: %v", err)
@@ -198,14 +198,14 @@ func TestCloneWithTeamOverride(t *testing.T) {
 
 	// Clone with team override
 	clone, err := mgr.Clone(source.ID, "override-clone", CloneOptions{
-		Team: "new-team",
+		Rite: "new-team",
 	})
 	if err != nil {
 		t.Fatalf("Clone failed: %v", err)
 	}
 
-	if clone.Team != "new-team" {
-		t.Errorf("Expected team 'new-team', got '%s'", clone.Team)
+	if clone.Rite != "new-team" {
+		t.Errorf("Expected team 'new-team', got '%s'", clone.Rite)
 	}
 }
 
@@ -340,7 +340,7 @@ func TestExportImportRoundtrip(t *testing.T) {
 	// Create a worktree with some content
 	wt, err := mgr.Create(CreateOptions{
 		Name:       "export-test",
-		Team:       "export-team",
+		Rite:       "export-team",
 		Complexity: "SYSTEM",
 	})
 	if err != nil {
@@ -387,8 +387,8 @@ func TestExportImportRoundtrip(t *testing.T) {
 	if imported.Name != wt.Name {
 		t.Errorf("Expected name '%s', got '%s'", wt.Name, imported.Name)
 	}
-	if imported.Team != wt.Team {
-		t.Errorf("Expected team '%s', got '%s'", wt.Team, imported.Team)
+	if imported.Rite != wt.Rite {
+		t.Errorf("Expected team '%s', got '%s'", wt.Rite, imported.Rite)
 	}
 	if imported.Complexity != wt.Complexity {
 		t.Errorf("Expected complexity '%s', got '%s'", wt.Complexity, imported.Complexity)

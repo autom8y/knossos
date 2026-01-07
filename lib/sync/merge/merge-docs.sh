@@ -267,10 +267,10 @@ get_section_marker() {
 # ============================================================================
 
 # Regenerate ## Quick Start from agents directory
-# Usage: regenerate_quick_start "agents_dir" "team_name"
+# Usage: regenerate_quick_start "agents_dir" "rite_name"
 regenerate_quick_start() {
     local agents_dir="$1"
-    local team_name="$2"
+    local rite_name="$2"
 
     if [[ ! -d "$agents_dir" ]]; then
         sync_log_debug "Cannot regenerate Quick Start: agents dir not found"
@@ -283,7 +283,7 @@ regenerate_quick_start() {
     cat <<EOF
 ## Quick Start
 
-This project uses a ${agent_count}-agent workflow (${team_name}):
+This project uses a ${agent_count}-agent workflow (${rite_name}):
 
 | Agent | Role | Produces |
 | ----- | ---- | -------- |

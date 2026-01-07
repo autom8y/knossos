@@ -135,7 +135,7 @@ func TestMetadataManager(t *testing.T) {
 		ID:        "wt-20260104-143052-a1b2",
 		Name:      "test-worktree",
 		Path:      filepath.Join(tmpDir, "wt-test"),
-		Team:      "10x-dev-pack",
+		Rite:      "10x-dev-pack",
 		CreatedAt: time.Now().UTC(),
 	}
 
@@ -181,14 +181,14 @@ func TestMetadataManager(t *testing.T) {
 	}
 
 	// Update
-	wt.Team = "new-team"
+	wt.Rite = "new-team"
 	err = mgr.Update(wt)
 	if err != nil {
 		t.Fatalf("Failed to update: %v", err)
 	}
 	got, _ = mgr.Get(wt.ID)
-	if got.Team != "new-team" {
-		t.Errorf("Expected team new-team, got %s", got.Team)
+	if got.Rite != "new-team" {
+		t.Errorf("Expected team new-team, got %s", got.Rite)
 	}
 
 	// Remove
@@ -260,7 +260,7 @@ func TestPerWorktreeMeta(t *testing.T) {
 	wt := Worktree{
 		ID:         "wt-20260104-143052-a1b2",
 		Name:       "test-worktree",
-		Team:       "10x-dev-pack",
+		Rite:       "10x-dev-pack",
 		Complexity: "MODULE",
 		FromRef:    "main",
 		CreatedAt:  time.Now().UTC(),
@@ -290,8 +290,8 @@ func TestPerWorktreeMeta(t *testing.T) {
 	if meta.Name != wt.Name {
 		t.Errorf("Expected name %s, got %s", wt.Name, meta.Name)
 	}
-	if meta.Team != wt.Team {
-		t.Errorf("Expected team %s, got %s", wt.Team, meta.Team)
+	if meta.Rite != wt.Rite {
+		t.Errorf("Expected team %s, got %s", wt.Rite, meta.Rite)
 	}
 	if meta.Complexity != wt.Complexity {
 		t.Errorf("Expected complexity %s, got %s", wt.Complexity, meta.Complexity)
@@ -417,7 +417,7 @@ func TestManagerCreate(t *testing.T) {
 	// Create a worktree
 	opts := CreateOptions{
 		Name:       "test-feature",
-		Team:       "10x-dev-pack",
+		Rite:       "10x-dev-pack",
 		Complexity: "MODULE",
 	}
 
@@ -433,8 +433,8 @@ func TestManagerCreate(t *testing.T) {
 	if wt.Name != opts.Name {
 		t.Errorf("Expected name %s, got %s", opts.Name, wt.Name)
 	}
-	if wt.Team != opts.Team {
-		t.Errorf("Expected team %s, got %s", opts.Team, wt.Team)
+	if wt.Rite != opts.Rite {
+		t.Errorf("Expected team %s, got %s", opts.Rite, wt.Rite)
 	}
 
 	// Verify path exists
@@ -710,7 +710,7 @@ func TestMetadataJSON(t *testing.T) {
 		ID:         "wt-20260104-143052-a1b2",
 		Name:       "test",
 		Path:       "/tmp/test",
-		Team:       "team",
+		Rite:       "team",
 		CreatedAt:  time.Now().UTC(),
 		BaseBranch: "main",
 		FromRef:    "HEAD",

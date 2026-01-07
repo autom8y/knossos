@@ -36,7 +36,7 @@ VALIDATION_PASSED=true
 CHANGES_MADE=false
 YAML_CHANGED_FILES=()
 MD_CHANGED_FILES=()
-TEAMS_TO_REGENERATE=()
+RITES_TO_REGENERATE=()
 
 # ============================================================================
 # Logging
@@ -74,10 +74,10 @@ detect_orchestrator_changes() {
     fi
 }
 
-extract_team_name() {
+extract_rite_name() {
     local file="$1"
-    # Extract team name from path like "teams/rnd-pack/orchestrator.yaml"
-    echo "$file" | sed -E 's|teams/([^/]+)/.*|\1|'
+    # Extract rite name from path like "rites/rnd-pack/orchestrator.yaml"
+    echo "$file" | sed -E 's|rites/([^/]+)/.*|\1|'
 }
 
 # ============================================================================
@@ -96,7 +96,7 @@ validate_yaml_schema() {
     fi
 
     # Run generator in validate-only mode
-    if ! "$GENERATOR" "$(extract_team_name "$yaml_file")" --validate-only >/dev/null 2>&1; then
+    if ! "$GENERATOR" "$(extract_rite_name "$yaml_file")" --validate-only >/dev/null 2>&1; then
         log_error "Schema validation failed: $yaml_file"
         VALIDATION_PASSED=false
         return 1
@@ -107,10 +107,10 @@ validate_yaml_schema() {
 }
 
 regenerate_orchestrator() {
-    local team="$1"
-    local md_file="teams/$team/agents/orchestrator.md"
+    local rite="$1"
+    local md_file="rites/$rite/agents/orchestrator.md"
 
-    log_info "Regenerating orchestrator.md for: $team"
+    log_info "Regenerating orchestrator.md for: $rite"
 
     # Generate new version to temporary file
     local temp_file
@@ -118,15 +118,15 @@ regenerate_orchestrator() {
     trap "rm -f $temp_file" RETURN
 
     # Run generator
-    if ! "$GENERATOR" "$team" --force >/dev/null 2>&1; then
-        log_error "Failed to generate orchestrator.md for: $team"
+    if ! "$GENERATOR" "$rite" --force >/dev/null 2>&1; then
+        log_error "Failed to generate orchestrator.md for: $rite"
         VALIDATION_PASSED=false
         return 1
     fi
 
     # Check if file changed
     if [[ -f "$REPO_ROOT/$md_file" ]]; then
-        if ! diff -q "$REPO_ROOT/$md_file" <("$GENERATOR" "$team" --dry-run 2>/dev/null | tail -n +4 | head -n -2) >/dev/null 2>&1; then
+        if ! diff -q "$REPO_ROOT/$md_file" <("$GENERATOR" "$rite" --dry-run 2>/dev/null | tail -n +4 | head -n -2) >/dev/null 2>&1; then
             log_info "Changes detected in regenerated $md_file, staging update"
             git add "$md_file"
             CHANGES_MADE=true
@@ -143,8 +143,8 @@ regenerate_orchestrator() {
 
 check_md_without_yaml() {
     local md_file="$1"
-    local team=$(extract_team_name "$md_file")
-    local yaml_file="teams/$team/orchestrator.yaml"
+    local rite=$(extract_rite_name "$md_file")
+    local yaml_file="rites/$rite/orchestrator.yaml"
 
     # Check if corresponding YAML file exists and was also changed
     local yaml_in_changes=false
@@ -160,7 +160,7 @@ check_md_without_yaml() {
         log_warn "This breaks the generation contract. Recommended: update orchestrator.yaml instead."
         log_info ""
         log_info "To fix:"
-        log_info "  1. Run: $GENERATOR $team --force"
+        log_info "  1. Run: $GENERATOR $rite --force"
         log_info "  2. Review changes: git diff $md_file"
         log_info "  3. Stage: git add $md_file"
         log_info "  4. Commit: git commit --amend"
@@ -197,14 +197,14 @@ main() {
 
     # Validate all YAML files
     for yaml_file in "${YAML_CHANGED_FILES[@]}"; do
-        local team=$(extract_team_name "$yaml_file")
+        local rite=$(extract_rite_name "$yaml_file")
         validate_yaml_schema "$yaml_file" || continue
-        TEAMS_TO_REGENERATE+=("$team")
+        RITES_TO_REGENERATE+=("$rite")
     done
 
     # Regenerate orchestrator.md from YAML if YAML changed
-    for team in "${TEAMS_TO_REGENERATE[@]}"; do
-        regenerate_orchestrator "$team" || true
+    for rite in "${RITES_TO_REGENERATE[@]}"; do
+        regenerate_orchestrator "$rite" || true
     done
 
     # Check for MD without YAML (drift detection)

@@ -153,25 +153,25 @@ ls -la /tmp/orchestrator-backup/ | head -20
 # Should show orchestrator.md files from multiple teams
 ```
 
-### Step 3.2: Regenerate All Teams
+### Step 3.2: Regenerate All Rites
 
 Use batch regeneration command:
 
 ```bash
 # Regenerate all orchestrators
-for team in .claude/rites/*/; do
-  team_name=$(basename "$team")
-  echo "Regenerating $team_name..."
-  /roster/templates/orchestrator-generate.sh "$team_name"
+for rite in .claude/rites/*/; do
+  rite_name=$(basename "$rite")
+  echo "Regenerating $rite_name..."
+  /roster/templates/orchestrator-generate.sh "$rite_name"
 done
 
 # Verify all succeeded
 echo "Checking for generation errors..."
-find .claude/teams -name "orchestrator.md" -exec grep -l "{{" {} \;
+find .claude/rites -name "orchestrator.md" -exec grep -l "{{" {} \;
 # Should output nothing (no unreplaced placeholders)
 ```
 
-### Step 3.3: Validate All Teams
+### Step 3.3: Validate All Rites
 
 ```bash
 # Run validator on each team's orchestrator.md

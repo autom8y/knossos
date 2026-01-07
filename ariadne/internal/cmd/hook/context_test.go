@@ -26,7 +26,7 @@ func TestContextOutput_Text(t *testing.T) {
 				SessionID:     "session-20260104-222613-05a12c6b",
 				Status:        "ACTIVE",
 				Initiative:    "Test Initiative",
-				Team:          "10x-dev-pack",
+				Rite:          "10x-dev-pack",
 				CurrentPhase:  "design",
 				ExecutionMode: "orchestrated",
 				HasSession:    true,
@@ -36,7 +36,7 @@ func TestContextOutput_Text(t *testing.T) {
 				"| Session | session-20260104-222613-05a12c6b |",
 				"| Status | ACTIVE |",
 				"| Initiative | Test Initiative |",
-				"| Team | 10x-dev-pack |",
+				"| Rite | 10x-dev-pack |",
 				"| Mode | orchestrated |",
 			},
 		},
@@ -63,31 +63,31 @@ func TestDetermineExecutionMode(t *testing.T) {
 	tests := []struct {
 		name       string
 		hasSession bool
-		activeTeam string
+		activeRite string
 		want       string
 	}{
 		{
 			name:       "nil session is native",
 			hasSession: false,
-			activeTeam: "",
+			activeRite: "",
 			want:       "native",
 		},
 		{
 			name:       "session with team is orchestrated",
 			hasSession: true,
-			activeTeam: "10x-dev-pack",
+			activeRite: "10x-dev-pack",
 			want:       "orchestrated",
 		},
 		{
 			name:       "session with 'none' team is cross-cutting",
 			hasSession: true,
-			activeTeam: "none",
+			activeRite: "none",
 			want:       "cross-cutting",
 		},
 		{
 			name:       "session with empty team is cross-cutting",
 			hasSession: true,
-			activeTeam: "",
+			activeRite: "",
 			want:       "cross-cutting",
 		},
 	}
@@ -98,7 +98,7 @@ func TestDetermineExecutionMode(t *testing.T) {
 			if tt.hasSession {
 				sessCtx = &session.Context{} // Non-nil
 			}
-			result := determineExecutionMode(sessCtx, tt.activeTeam)
+			result := determineExecutionMode(sessCtx, tt.activeRite)
 			if result != tt.want {
 				t.Errorf("determineExecutionMode() = %q, want %q", result, tt.want)
 			}
@@ -182,8 +182,8 @@ current_phase: "implementation"
 	}
 
 	// Write ACTIVE_RITE
-	activeTeamFile := filepath.Join(tmpDir, ".claude", "ACTIVE_RITE")
-	if err := os.WriteFile(activeTeamFile, []byte("10x-dev-pack"), 0644); err != nil {
+	activeRiteFile := filepath.Join(tmpDir, ".claude", "ACTIVE_RITE")
+	if err := os.WriteFile(activeRiteFile, []byte("10x-dev-pack"), 0644); err != nil {
 		t.Fatalf("Failed to write ACTIVE_RITE: %v", err)
 	}
 
@@ -409,18 +409,18 @@ func runContextWithPrinter(ctx *cmdContext, printer *output.Printer) error {
 	}
 
 	// Read active rite
-	activeTeam := readActiveRite(resolver)
-	if activeTeam == "" {
-		activeTeam = sessCtx.ActiveRite
+	activeRite := readActiveRite(resolver)
+	if activeRite == "" {
+		activeRite = sessCtx.ActiveRite
 	}
 
-	mode := determineExecutionMode(sessCtx, activeTeam)
+	mode := determineExecutionMode(sessCtx, activeRite)
 
 	result := ContextOutput{
 		SessionID:     sessCtx.SessionID,
 		Status:        string(sessCtx.Status),
 		Initiative:    sessCtx.Initiative,
-		Team:          activeTeam,
+		Rite:          activeRite,
 		CurrentPhase:  sessCtx.CurrentPhase,
 		ExecutionMode: mode,
 		HasSession:    true,

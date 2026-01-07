@@ -85,7 +85,7 @@ func runContext(ctx *cmdContext, opts contextOptions) error {
 
 // RiteContextOutput is the JSON/YAML output structure.
 type RiteContextOutput struct {
-	TeamName      string            `json:"team_name" yaml:"team_name"`
+	RiteName      string            `json:"rite_name" yaml:"rite_name"`
 	DisplayName   string            `json:"display_name,omitempty" yaml:"display_name,omitempty"`
 	Description   string            `json:"description,omitempty" yaml:"description,omitempty"`
 	Domain        string            `json:"domain,omitempty" yaml:"domain,omitempty"`
@@ -116,7 +116,7 @@ func riteContextToOutput(tc *ritelib.RiteContext, hasContextFile bool) RiteConte
 	}
 
 	return RiteContextOutput{
-		TeamName:      tc.TeamName,
+		RiteName:      tc.RiteName,
 		DisplayName:   tc.DisplayName,
 		Description:   tc.Description,
 		Domain:        tc.Domain,

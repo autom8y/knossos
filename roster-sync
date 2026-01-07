@@ -352,7 +352,7 @@ cmd_init() {
     parse_init_flags "$@"
 
     local project_path="${INIT_PROJECT_PATH:-$(pwd)}"
-    local team_name="$INIT_TEAM"
+    local rite_name="$INIT_TEAM"
 
     # Resolve to absolute path if relative
     if [[ "$project_path" != /* ]]; then
@@ -409,25 +409,25 @@ cmd_init() {
         return "$EXIT_SYNC_INIT_FAILED"
     fi
 
-    # Validate team if specified
-    if [[ -n "$team_name" ]]; then
-        local team_dir="$KNOSSOS_HOME/teams/$team_name"
-        if [[ ! -d "$team_dir" ]]; then
-            log_error "Team not found: $team_name"
-            log_error "Available teams:"
-            ls "$KNOSSOS_HOME/teams/" 2>/dev/null | while read -r t; do
+    # Validate rite if specified
+    if [[ -n "$rite_name" ]]; then
+        local rite_dir="$KNOSSOS_HOME/rites/$rite_name"
+        if [[ ! -d "$rite_dir" ]]; then
+            log_error "Rite not found: $rite_name"
+            log_error "Available rites:"
+            ls "$KNOSSOS_HOME/rites/" 2>/dev/null | while read -r t; do
                 log_error "  - $t"
             done
             return "$EXIT_SYNC_INIT_FAILED"
         fi
-        log "  Team: $team_name"
+        log "  Rite: $rite_name"
     fi
 
     if [[ "$FLAG_DRY_RUN" == "1" ]]; then
         log "DRY-RUN: Would initialize project"
         log "  Roster: $KNOSSOS_HOME"
         log "  Target: $project_path"
-        [[ -n "$team_name" ]] && log "  Team: $team_name"
+        [[ -n "$rite_name" ]] && log "  Rite: $rite_name"
         return 0
     fi
 
@@ -543,20 +543,20 @@ SETTINGS_EOF
     fi
 
     # Apply rite if --rite/--team specified
-    if [[ -n "$team_name" ]]; then
-        log "Applying rite: $team_name"
-        echo "$team_name" > .claude/ACTIVE_RITE
+    if [[ -n "$rite_name" ]]; then
+        log "Applying rite: $rite_name"
+        echo "$rite_name" > .claude/ACTIVE_RITE
 
-        # Update manifest with team info
-        local team_checksum
-        team_checksum=$(compute_content_checksum "$team_name")
-        manifest=$(update_manifest_team "$manifest" "$team_name" "$team_checksum")
+        # Update manifest with rite info
+        local rite_checksum
+        rite_checksum=$(compute_content_checksum "$rite_name")
+        manifest=$(update_manifest_rite "$manifest" "$rite_name" "$rite_checksum")
 
         # Call swap-rite.sh to apply rite agents/skills/commands
         local swap_rite="$KNOSSOS_HOME/swap-rite.sh"
         if [[ -x "$swap_rite" ]]; then
             log "  Applying rite resources..."
-            "$swap_rite" "$team_name" 2>/dev/null || {
+            "$swap_rite" "$rite_name" 2>/dev/null || {
                 log_warning "Rite application completed with warnings (non-fatal)"
             }
         else
@@ -579,7 +579,7 @@ SETTINGS_EOF
     log "  Project: $project_path"
     log "  Managed files: $(echo "$manifest" | jq '.managed_files | length')"
     log "  Manifest: $manifest_file"
-    [[ -n "$team_name" ]] && log "  Team: $team_name"
+    [[ -n "$rite_name" ]] && log "  Rite: $rite_name"
 
     return 0
 }
@@ -828,7 +828,7 @@ cmd_validate() {
         if [[ -f ".claude/ACTIVE_RITE" ]]; then
             local active_rite manifest_rite
             active_rite=$(cat ".claude/ACTIVE_RITE" 2>/dev/null)
-            manifest_rite=$(echo "$manifest" | jq -r '.team.name // empty')
+            manifest_rite=$(echo "$manifest" | jq -r '.rite.name // empty')
 
             if [[ -z "$manifest_rite" ]]; then
                 log_warning "Active rite '$active_rite' not recorded in manifest"
@@ -1099,7 +1099,7 @@ cmd_repair() {
     if [[ -f ".claude/ACTIVE_RITE" ]]; then
         local rite_name
         rite_name=$(cat ".claude/ACTIVE_RITE" 2>/dev/null)
-        manifest=$(update_manifest_team "$manifest" "$rite_name" "")
+        manifest=$(update_manifest_rite "$manifest" "$rite_name" "")
         log "Rite preserved: $rite_name"
     fi
 

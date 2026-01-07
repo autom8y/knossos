@@ -100,8 +100,8 @@ func TestCreate_BasicCreation(t *testing.T) {
 	}
 
 	// Verify team (Team is a pointer, may be nil for cross-cutting sessions)
-	if sessCtx.Team != nil && *sessCtx.Team != "10x-dev-pack" {
-		t.Errorf("Team = %q, want %q", *sessCtx.Team, "10x-dev-pack")
+	if sessCtx.Rite != nil && *sessCtx.Rite != "10x-dev-pack" {
+		t.Errorf("Team = %q, want %q", *sessCtx.Rite, "10x-dev-pack")
 	}
 
 	// Verify current-session file was created

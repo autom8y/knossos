@@ -11,7 +11,7 @@ import (
 // This is the Go representation of rites/{rite}/context.yaml files.
 type RiteContext struct {
 	SchemaVersion string            `yaml:"schema_version" json:"schema_version"`
-	TeamName      string            `yaml:"team_name" json:"team_name"` // Keep field name for YAML compatibility
+	RiteName      string            `yaml:"rite_name" json:"rite_name"`
 	DisplayName   string            `yaml:"display_name,omitempty" json:"display_name,omitempty"`
 	Description   string            `yaml:"description,omitempty" json:"description,omitempty"`
 	Domain        string            `yaml:"domain,omitempty" json:"domain,omitempty"`
@@ -51,7 +51,7 @@ func (rc *RiteContext) ToMarkdown() string {
 func NewRiteContext(riteName string) *RiteContext {
 	return &RiteContext{
 		SchemaVersion: "1.0",
-		TeamName:      riteName,
+		RiteName:      riteName,
 		ContextRows:   []ContextRow{},
 		Metadata:      make(map[string]string),
 	}
@@ -82,7 +82,7 @@ func (rc *RiteContext) HasRows() bool {
 
 // Validate checks that the RiteContext has required fields.
 func (rc *RiteContext) Validate() error {
-	if rc.TeamName == "" {
+	if rc.RiteName == "" {
 		return fmt.Errorf("rite_name is required")
 	}
 	if rc.SchemaVersion == "" {

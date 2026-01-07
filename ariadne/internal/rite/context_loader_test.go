@@ -41,7 +41,7 @@ func TestRiteContext_ToMarkdown(t *testing.T) {
 			name: "single row",
 			ctx: &RiteContext{
 				SchemaVersion: "1.0",
-				TeamName:      "test-team",
+				RiteName:      "test-team",
 				ContextRows: []ContextRow{
 					{Key: "Status", Value: "Active"},
 				},
@@ -52,7 +52,7 @@ func TestRiteContext_ToMarkdown(t *testing.T) {
 			name: "multiple rows",
 			ctx: &RiteContext{
 				SchemaVersion: "1.0",
-				TeamName:      "test-team",
+				RiteName:      "test-team",
 				ContextRows: []ContextRow{
 					{Key: "Status", Value: "Active"},
 					{Key: "Environment", Value: "Production"},
@@ -83,7 +83,7 @@ func TestRiteContext_Validate(t *testing.T) {
 			name: "valid context",
 			ctx: &RiteContext{
 				SchemaVersion: "1.0",
-				TeamName:      "test-team",
+				RiteName:      "test-team",
 			},
 			wantErr: false,
 		},
@@ -97,7 +97,7 @@ func TestRiteContext_Validate(t *testing.T) {
 		{
 			name: "missing schema version",
 			ctx: &RiteContext{
-				TeamName: "test-team",
+				RiteName: "test-team",
 			},
 			wantErr: true,
 		},
@@ -155,8 +155,8 @@ func TestContextLoader_Load_FromYAML(t *testing.T) {
 		t.Fatalf("Load(valid-rite) error = %v", err)
 	}
 
-	if ctx.TeamName != "valid-rite" {
-		t.Errorf("TeamName = %q, want %q", ctx.TeamName, "valid-rite")
+	if ctx.RiteName != "valid-rite" {
+		t.Errorf("RiteName = %q, want %q", ctx.RiteName, "valid-rite")
 	}
 
 	if ctx.DisplayName != "Valid Test Rite" {
@@ -191,8 +191,8 @@ func TestContextLoader_Load_FallbackToOrchestrator(t *testing.T) {
 		t.Fatalf("Load(minimal-rite) error = %v", err)
 	}
 
-	if ctx.TeamName != "minimal-rite" {
-		t.Errorf("TeamName = %q, want %q", ctx.TeamName, "minimal-rite")
+	if ctx.RiteName != "minimal-rite" {
+		t.Errorf("RiteName = %q, want %q", ctx.RiteName, "minimal-rite")
 	}
 
 	if ctx.Domain != "testing" {
@@ -215,7 +215,7 @@ func TestContextLoader_Load_TeamNotFound(t *testing.T) {
 	}
 }
 
-func TestContextLoader_Load_EmptyTeamName(t *testing.T) {
+func TestContextLoader_Load_EmptyRiteName(t *testing.T) {
 	teamsDir := getTestDataPath(t)
 	loader := NewContextLoaderWithPaths(teamsDir, "")
 
@@ -235,7 +235,7 @@ func TestContextLoader_Load_MalformedYAML(t *testing.T) {
 
 	// Write malformed YAML
 	malformedYAML := `schema_version: "1.0"
-team_name: bad-team
+rite_name: bad-team
 context_rows:
   - key: "unclosed string
     value: broken`
@@ -370,14 +370,14 @@ func TestContextLoader_UserDirPriority(t *testing.T) {
 
 	// Write project context
 	projectContext := `schema_version: "1.0"
-team_name: priority-team
+rite_name: priority-team
 context_rows:
   - key: Source
     value: Project`
 
 	// Write user context (should take priority)
 	userContext := `schema_version: "1.0"
-team_name: priority-team
+rite_name: priority-team
 context_rows:
   - key: Source
     value: User`
