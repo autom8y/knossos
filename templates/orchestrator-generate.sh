@@ -492,13 +492,13 @@ validate_substitution() {
 # Single Team Generation
 # ============================================================================
 
-generate_team() {
+generate_rite() {
     local team="$1"
 
     # Normalize team name: strip "teams/" prefix if present
     team="${team#teams/}"
 
-    log_info "Processing team: $team"
+    log_info "Processing rite: $team"
 
     CONFIG="$KNOSSOS_HOME/rites/$team/orchestrator.yaml"
     WORKFLOW="$KNOSSOS_HOME/rites/$team/workflow.yaml"
@@ -582,7 +582,7 @@ batch_generate_all_teams() {
 
     local failed_teams=()
     for team in "${teams[@]}"; do
-        if ! generate_team "$team"; then
+        if ! generate_rite "$team"; then
             failed_teams+=("$team")
             log_error "Failed to generate: $team"
         fi
@@ -615,7 +615,7 @@ main() {
     if [[ "$BATCH_ALL" == true ]]; then
         batch_generate_all_teams
     else
-        generate_team "$TEAM"
+        generate_rite "$TEAM"
     fi
 }
 
