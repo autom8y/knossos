@@ -66,4 +66,4 @@ antipatterns:
   - "Making schema changes without versioning strategy"
 
 # Cross-rite protocol
-cross_team_protocol: "When changes affect other teams, escalate to user for coordination."
+cross_rite_protocol: "When changes affect other teams, escalate to user for coordination."

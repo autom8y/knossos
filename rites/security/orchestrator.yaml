@@ -59,4 +59,4 @@ antipatterns:
   - "Accepting unmitigated CRITICAL vulnerabilities"
 
 # Cross-rite protocol (security is a hub team)
-cross_team_protocol: "Escalate infrastructure security to sre. Coordinate with ecosystem on security hooks."
+cross_rite_protocol: "Escalate infrastructure security to sre. Coordinate with ecosystem on security hooks."

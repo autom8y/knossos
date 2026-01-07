@@ -49,4 +49,4 @@ antipatterns:
   - "Skipping capacity planning (risk of cascading failures)"
   - "Ignoring blast radius (changes must consider failure domains)"
 
-cross_team_protocol: ""
+cross_rite_protocol: ""

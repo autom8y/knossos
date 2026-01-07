@@ -49,4 +49,4 @@ antipatterns:
   - "Ignoring competitive response (competitors will react)"
   - "Strategy without execution path (every strategy needs implementation plan)"
 
-cross_team_protocol: ""
+cross_rite_protocol: ""

@@ -49,4 +49,4 @@ antipatterns:
   - "Skipping sample size validation (risk of false conclusions)"
   - "Reporting without recommendations (analysis must drive decisions)"
 
-cross_team_protocol: "Share actionable insights with strategy. Coordinate experiment designs with relevant product teams."
+cross_rite_protocol: "Share actionable insights with strategy. Coordinate experiment designs with relevant product teams."

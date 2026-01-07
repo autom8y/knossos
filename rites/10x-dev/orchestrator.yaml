@@ -49,4 +49,4 @@ antipatterns:
   - "Implementing without acceptance criteria defined"
   - "Validating against incomplete or ambiguous requirements"
 
-cross_team_protocol: ""
+cross_rite_protocol: ""

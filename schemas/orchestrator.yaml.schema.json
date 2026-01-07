@@ -178,9 +178,9 @@
         []
       ]
     },
-    "cross_team_protocol": {
+    "cross_rite_protocol": {
       "type": "string",
-      "description": "OPTIONAL: Cross-team handoff protocol if this team acts as a hub (e.g., ecosystem coordinates with other packs). Empty string means no special protocol.",
+      "description": "OPTIONAL: Cross-rite handoff protocol if this team acts as a hub (e.g., ecosystem coordinates with other packs). Empty string means no special protocol.",
       "examples": [
         "Ecosystem-pack acts as hub for infrastructure changes. When escalating to user, also notify infrastructure-team lead.",
         ""
@@ -255,7 +255,7 @@
         "@cross-team for handoff patterns to other teams"
       ],
       "antipatterns": [],
-      "cross_team_protocol": ""
+      "cross_rite_protocol": ""
     },
     {
       "rite": {
@@ -317,7 +317,7 @@
         "Designing without considering all 10 teams",
         "Making schema changes without versioning strategy"
       ],
-      "cross_team_protocol": "Ecosystem-pack coordinates with all other packs. When escalating infrastructure changes to user, notify all active team leads."
+      "cross_rite_protocol": "Ecosystem-pack coordinates with all other packs. When escalating infrastructure changes to user, notify all active team leads."
     },
     {
       "rite": {
@@ -371,7 +371,7 @@
         "Skipping threat modeling for 'simple' features",
         "Accepting unmitigated CRITICAL vulnerabilities"
       ],
-      "cross_team_protocol": ""
+      "cross_rite_protocol": ""
     },
     {
       "rite": {
@@ -420,7 +420,7 @@
         "@standards for writing conventions"
       ],
       "antipatterns": [],
-      "cross_team_protocol": ""
+      "cross_rite_protocol": ""
     }
   ]
 }

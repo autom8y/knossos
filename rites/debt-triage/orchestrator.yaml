@@ -44,4 +44,4 @@ antipatterns:
   - "Skipping risk assessment before paydown"
   - "Debt without business context (need ROI justification)"
 
-cross_team_protocol: ""
+cross_rite_protocol: ""

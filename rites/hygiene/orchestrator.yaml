@@ -49,4 +49,4 @@ antipatterns:
   - "Overfitting to single codebase style"
   - "Ignoring performance implications of changes"
 
-cross_team_protocol: ""
+cross_rite_protocol: ""
