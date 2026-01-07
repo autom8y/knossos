@@ -35,7 +35,7 @@ Execute roster-sync to synchronize project with roster ecosystem. $ARGUMENTS
 
 ```bash
 /sync sync              # Pull updates from roster
-/sync sync --refresh   # Sync and refresh active team
+/sync sync --refresh   # Sync and refresh active rite
 /sync status           # Show sync status and version
 /sync diff             # Show pending changes
 /sync init             # Initialize new project

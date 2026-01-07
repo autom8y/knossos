@@ -12,11 +12,11 @@ Auto-injected by SessionStart hook (project, team, session, git).
 
 1. **Workflow required**:
    - Verify `.claude/ACTIVE_WORKFLOW.yaml` exists
-   - If missing: ERROR "No active workflow. Use /team to select a team first."
+   - If missing: ERROR "No active workflow. Use /rite to select a rite first."
 
-2. **Team context**:
+2. **Rite context**:
    - Verify `.claude/ACTIVE_RITE` exists
-   - If missing: ERROR "No team active. Use /team <pack-name> to select a team."
+   - If missing: ERROR "No rite active. Use /rite <pack-name> to select a rite."
 
 ## Your Task
 
@@ -72,13 +72,13 @@ Plan and execute a sprint with multiple coordinated tasks. $ARGUMENTS
 
 ## Parallel Sprint Pattern
 
-For truly parallel sprints across multiple teams/focuses, use **worktrees**:
+For truly parallel sprints across multiple rites/focuses, use **worktrees**:
 
 ```bash
 # Create isolated worktrees per sprint
-/worktree create "sprint-backend" --team=10x-dev-pack
-/worktree create "sprint-frontend" --team=10x-dev-pack
-/worktree create "sprint-docs" --team=doc-team-pack
+/worktree create "sprint-backend" --rite=10x-dev-pack
+/worktree create "sprint-frontend" --rite=10x-dev-pack
+/worktree create "sprint-docs" --rite=doc-team-pack
 
 # In each terminal, navigate and start sprint independently:
 # Terminal 1:
@@ -96,7 +96,7 @@ cd worktrees/wt-zzz && claude
 
 **Why worktrees for parallel sprints?**
 - Each sprint gets isolated SPRINT_CONTEXT (no collision)
-- Different teams can work simultaneously
+- Different rites can work simultaneously
 - Changes don't affect each other
 - Use `/sessions --all` to monitor all sprints
 

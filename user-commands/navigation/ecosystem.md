@@ -10,7 +10,7 @@ Auto-injected by SessionStart hook (project, team, session, git).
 
 ## Your Task
 
-Switch to the ecosystem infrastructure team pack and display the team roster. $ARGUMENTS
+Switch to the ecosystem infrastructure rite and display the rite roster. $ARGUMENTS
 
 ## Behavior
 
@@ -22,11 +22,11 @@ Switch to the ecosystem infrastructure team pack and display the team roster. $A
 
 | Flag | Short | Description | Handled By |
 |------|-------|-------------|------------|
-| `--update` | `-u` | Pull latest agent definitions from roster even if already on team | swap-team.sh |
-| `--dry-run` | - | Preview changes without applying | swap-team.sh |
-| `--keep-all` | - | Preserve all orphan agents in project | swap-team.sh |
-| `--remove-all` | - | Remove all orphans (backup available) | swap-team.sh |
-| `--promote-all` | - | Move all orphans to user-level | swap-team.sh |
+| `--update` | `-u` | Pull latest agent definitions from roster even if already on rite | swap-rite.sh |
+| `--dry-run` | - | Preview changes without applying | swap-rite.sh |
+| `--keep-all` | - | Preserve all orphan agents in project | swap-rite.sh |
+| `--remove-all` | - | Remove all orphans (backup available) | swap-rite.sh |
+| `--promote-all` | - | Move all orphans to user-level | swap-rite.sh |
 
 ## When to Use
 

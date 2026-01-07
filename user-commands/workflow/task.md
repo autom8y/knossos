@@ -12,15 +12,15 @@ Auto-injected by SessionStart hook (project, team, session, git, workflow).
 
 1. **Workflow required**:
    - Verify `.claude/ACTIVE_WORKFLOW.yaml` exists
-   - If missing: ERROR "No active workflow. Use /team to select a team first."
+   - If missing: ERROR "No active workflow. Use /rite to select a rite first."
 
-2. **Team context**:
+2. **Rite context**:
    - Verify `.claude/ACTIVE_RITE` exists
-   - If missing: ERROR "No team active. Use /team <pack-name> to select a team."
+   - If missing: ERROR "No rite active. Use /rite <pack-name> to select a rite."
 
 ## Your Task
 
-Execute a single task through the complete workflow lifecycle for the active team. $ARGUMENTS
+Execute a single task through the complete workflow lifecycle for the active rite. $ARGUMENTS
 
 ## Workflow Resolution
 
@@ -38,7 +38,7 @@ COMPLEXITY_LEVELS=$(grep -A20 "^complexity_levels:" .claude/ACTIVE_WORKFLOW.yaml
 
 1. **Assess complexity** (if not provided):
    - Read complexity levels from workflow config
-   - Each team defines its own levels (e.g., SCRIPT/MODULE vs PAGE/SECTION)
+   - Each rite defines its own levels (e.g., SCRIPT/MODULE vs PAGE/SECTION)
    - Match task scope to appropriate level
 
 2. **Determine applicable phases**:
@@ -59,7 +59,7 @@ COMPLEXITY_LEVELS=$(grep -A20 "^complexity_levels:" .claude/ACTIVE_WORKFLOW.yaml
    - Subsequent phases build on previous artifacts
    - Final phase provides approval/sign-off
 
-## Team-Specific Workflows
+## Rite-Specific Workflows
 
 The workflow config determines the exact pipeline:
 

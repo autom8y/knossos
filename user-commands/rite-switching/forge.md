@@ -7,7 +7,7 @@ model: haiku
 
 ## Your Task
 
-Display information about The Forge - the meta-team for creating and maintaining agent teams. $ARGUMENTS
+Display information about The Forge - the meta-rite for creating and maintaining agent rites. $ARGUMENTS
 
 ## Behavior
 
@@ -16,10 +16,10 @@ Display information about The Forge - the meta-team for creating and maintaining
 Display the Forge overview:
 
 ```
-THE FORGE - Agent Factory Team
+THE FORGE - Agent Factory Rite
 ==============================
 
-The team that builds teams. Global singleton (always available).
+The rite that builds rites. Global singleton (always available).
 
 AGENTS (6):
   Agent Designer    (purple)  - Role specs and contracts
@@ -30,14 +30,14 @@ AGENTS (6):
   Agent Curator     (blue)    - Versioning and integration
 
 COMMANDS:
-  /new-team <name>      - Full team creation workflow
-  /validate-team <name> - Run validation suite on team
+  /new-rite <name>      - Full rite creation workflow
+  /validate-rite <name> - Run validation suite on rite
   /eval-agent <name>    - Test single agent in isolation
 
 COMPLEXITY LEVELS:
   PATCH     - Single agent modification
-  TEAM      - New team with 3-5 agents
-  ECOSYSTEM - Multi-team initiative
+  RITE      - New rite with 3-5 agents
+  ECOSYSTEM - Multi-rite initiative
 
 Full docs: .claude/skills/forge-ref/skill.md
 ```
@@ -72,8 +72,8 @@ Display available Forge commands with usage:
 
 | Command | Purpose | Entry Agent |
 |---------|---------|-------------|
-| `/new-team <name>` | Create a new rite | Agent Designer |
-| `/validate-team <name>` | Validate existing team | Eval Specialist |
+| `/new-rite <name>` | Create a new rite | Agent Designer |
+| `/validate-rite <name>` | Validate existing rite | Eval Specialist |
 | `/eval-agent <name>` | Test single agent | Eval Specialist |
 
 ## Reference

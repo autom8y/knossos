@@ -12,11 +12,11 @@ Auto-injected by SessionStart hook (project, team, session, git, workflow).
 
 1. **Workflow required**:
    - Verify `.claude/ACTIVE_WORKFLOW.yaml` exists
-   - If missing: ERROR "No active workflow. Use /team to select a team first."
+   - If missing: ERROR "No active workflow. Use /rite to select a rite first."
 
-2. **Team context**:
+2. **Rite context**:
    - Verify `.claude/ACTIVE_RITE` exists
-   - If missing: ERROR "No team active. Use /team <pack-name> to select a team."
+   - If missing: ERROR "No rite active. Use /rite <pack-name> to select a rite."
 
 ## Your Task
 
@@ -49,7 +49,7 @@ IMPL_AGENT=$(grep -B1 "produces: code\|produces: commits\|produces: documentatio
    - Minimal, focused changes
    - Add regression test/check
    - Inline documentation
-   - Agent varies by team:
+   - Agent varies by rite:
      - 10x-dev-pack → principal-engineer
      - doc-team-pack → tech-writer
      - hygiene-pack → janitor

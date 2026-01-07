@@ -55,12 +55,12 @@ If not provided in arguments, ask the user:
 |-----------|-------------|---------|
 | **Initiative** | What are we building? | Required |
 | **Complexity** | SCRIPT \| MODULE \| SERVICE \| PLATFORM | MODULE |
-| **Team** | Team pack to use | Current team from context |
+| **Rite** | Rite to use | Current rite from context |
 
 ### 3. Create Session (ONE command)
 
 ```bash
-hooks/lib/session-manager.sh create "<initiative>" "<complexity>" "<team>"
+hooks/lib/session-manager.sh create "<initiative>" "<complexity>" "<rite>"
 ```
 
 This atomically:
@@ -69,11 +69,11 @@ This atomically:
 - Creates SESSION_CONTEXT.md
 - Returns JSON with session_id, entry_agent
 
-### 4. Team Switch (only if --team differs)
+### 4. Rite Switch (only if --rite differs)
 
-If user specified `--team=NAME` and it differs from Active Team:
+If user specified `--rite=NAME` and it differs from Active Rite:
 ```bash
-${ROSTER_HOME:-~/Code/roster}/swap-team.sh <team-name>
+${ROSTER_HOME:-~/Code/roster}/swap-rite.sh <rite-name>
 ```
 
 ### 5. Invoke Entry Point Agent
@@ -106,7 +106,7 @@ Output to user:
 ```
 /start "Add dark mode toggle"
 /start "Refactor auth module" --complexity=MODULE
-/start "New billing service" --complexity=SERVICE --team=10x-dev-pack
+/start "New billing service" --complexity=SERVICE --rite=10x-dev-pack
 ```
 
 ## Reference

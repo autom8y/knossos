@@ -26,7 +26,7 @@ Manage agent rite packs. $ARGUMENTS
 
 **If `<pack-name>` provided:**
 1. Execute: `${KNOSSOS_HOME:-~/Code/roster}/swap-rite.sh <pack-name> [flags]`
-2. If orphan agents exist (agents in current rite but not in target):
+2. If orphan agents exist (agents in current project but not in target rite):
    - **Interactive (TTY)**: Prompt user for each orphan agent
    - **Non-interactive**: Require `--keep-all`, `--remove-all`, or `--promote-all` flag
 3. Show confirmation with agent count
@@ -44,7 +44,7 @@ When switching rites, agents that exist in the current project but not in the ta
 | Apply to all | a | Apply same choice to remaining orphans |
 
 For CI/scripts (non-interactive), use flags:
-- `--update`, `-u`: Pull latest agent definitions from roster even if already on team
+- `--update`, `-u`: Pull latest agent definitions from roster even if already on rite
 - `--dry-run`: Preview changes without applying
 - `--keep-all`: Preserve all orphan agents in project
 - `--remove-all`: Remove all orphans (backup available)
@@ -52,24 +52,24 @@ For CI/scripts (non-interactive), use flags:
 
 ## Agent Provenance
 
-Team swaps track agent provenance in `.claude/AGENT_MANIFEST.json`:
-- **source**: `team` (from roster) or `user` (project-added)
-- **origin**: Which team pack installed this agent
+Rite swaps track agent provenance in `.claude/AGENT_MANIFEST.json`:
+- **source**: `rite` (from roster) or `user` (project-added)
+- **origin**: Which rite installed this agent
 - **installed_at**: Timestamp of installation
 
-**Note**: Team context (phase->agent routing) is automatically injected into every session via the session-context hook.
+**Note**: Rite context (phase->agent routing) is automatically injected into every session via the session-context hook.
 
 ## Quick Switch Commands
 
-Quick-switch commands are derived from team names:
+Quick-switch commands are derived from rite names:
 
-| Team | Quick Switch | Domain |
+| Rite | Quick Switch | Domain |
 |------|--------------|--------|
 | 10x-dev-pack | `/10x` | Full feature development |
 | debt-triage-pack | `/debt` | Technical debt management |
 | doc-team-pack | `/docs` | Documentation workflows |
 | ecosystem-pack | `/ecosystem` | CEM/skeleton/roster infrastructure |
-| forge-pack | `/forge` | Team pack creation |
+| forge-pack | `/forge` | Rite creation |
 | hygiene-pack | `/hygiene` | Code quality, refactoring |
 | intelligence-pack | `/intelligence` | Analytics, research |
 | rnd-pack | `/rnd` | Exploration, prototyping |
@@ -77,19 +77,19 @@ Quick-switch commands are derived from team names:
 | sre-pack | `/sre` | Operations, reliability |
 | strategy-pack | `/strategy` | Business analysis |
 
-**Note**: Use `team-discovery` skill for programmatic team metadata access.
+**Note**: Use `team-discovery` skill for programmatic rite metadata access.
 
 ## Examples
 
 ```bash
-/team                           # Show current team
-/team --list                    # List all teams
-/team 10x-dev-pack              # Switch (prompts for orphans)
-/team hygiene-pack --keep-all   # Switch, keep all orphans
-/team debt-pack --promote-all   # Switch, promote orphans to user-level
-/team doc-team-pack --update    # Update even if already on team
+/rite                           # Show current rite
+/rite --list                    # List all rites
+/rite 10x-dev-pack              # Switch (prompts for orphans)
+/rite hygiene-pack --keep-all   # Switch, keep all orphans
+/rite debt-pack --promote-all   # Switch, promote orphans to user-level
+/rite doc-team-pack --update    # Update even if already on rite
 ```
 
 ## Reference
 
-Full documentation: `.claude/skills/team-ref/skill.md`
+Full documentation: `.claude/skills/rite-ref/skill.md`
