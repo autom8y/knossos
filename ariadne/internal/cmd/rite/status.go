@@ -86,8 +86,8 @@ func runStatus(ctx *cmdContext, opts statusOptions) error {
 		orphans = manifest.DetectOrphans(riteName)
 	}
 
-	result := output.TeamStatusOutput{
-		Team:           t.Name,
+	result := output.RiteStatusOutput{
+		Rite:           t.Name,
 		IsActive:       t.Active,
 		Path:           t.Path,
 		Description:    t.Description,

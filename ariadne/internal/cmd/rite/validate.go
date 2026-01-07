@@ -75,8 +75,8 @@ func runValidate(ctx *cmdContext, opts validateOptions) error {
 		}
 	}
 
-	out := output.TeamValidateOutput{
-		Team:     result.Team,
+	out := output.RiteValidateOutput{
+		Rite:     result.Team,
 		Valid:    result.Valid,
 		Checks:   checks,
 		Errors:   result.Errors,
