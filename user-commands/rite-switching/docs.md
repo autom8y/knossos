@@ -10,7 +10,7 @@ Auto-injected by SessionStart hook (project, rite, session, git).
 
 ## Your Task
 
-Switch to the documentation rite and display the rite roster. $ARGUMENTS
+Switch to the documentation rite and display the pantheon. $ARGUMENTS
 
 ## Behavior
 

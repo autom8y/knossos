@@ -10,7 +10,7 @@ Auto-injected by SessionStart hook (project, team, session, git).
 
 ## Your Task
 
-Switch to the ecosystem infrastructure rite and display the rite roster. $ARGUMENTS
+Switch to the ecosystem infrastructure rite and display the pantheon. $ARGUMENTS
 
 ## Behavior
 

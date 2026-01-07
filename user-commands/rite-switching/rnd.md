@@ -10,7 +10,7 @@ Auto-injected by SessionStart hook (project, rite, session, git).
 
 ## Your Task
 
-Switch to the Innovation Lab (R&D) pack and display the rite roster. $ARGUMENTS
+Switch to the Innovation Lab (R&D) pack and display the pantheon. $ARGUMENTS
 
 ## Behavior
 
