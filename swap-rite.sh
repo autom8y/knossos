@@ -83,20 +83,20 @@ fi
 
 # Logging functions
 log() {
-    echo "[Roster] $*"
+    echo "[Knossos] $*"
 }
 
 log_error() {
-    echo "[Roster] Error: $*" >&2
+    echo "[Knossos] Error: $*" >&2
 }
 
 log_warning() {
-    echo "[Roster] Warning: $*" >&2
+    echo "[Knossos] Warning: $*" >&2
 }
 
 log_debug() {
     if [[ "$KNOSSOS_DEBUG" == "1" ]]; then
-        echo "[Roster DEBUG] $*" >&2
+        echo "[Knossos DEBUG] $*" >&2
     fi
 }
 
@@ -1304,8 +1304,8 @@ prompt_disposition() {
     fi
 
     echo ""
-    echo -e "${YELLOW}[Roster]${NC} Switching from $current_rite to $team_name..."
-    echo -e "${YELLOW}[Roster]${NC} Found ${#ORPHAN_AGENTS[@]} agent(s) not in $team_name:"
+    echo -e "${YELLOW}[Knossos]${NC} Switching from $current_rite to $team_name..."
+    echo -e "${YELLOW}[Knossos]${NC} Found ${#ORPHAN_AGENTS[@]} agent(s) not in $team_name:"
     echo ""
 
     local idx=1
