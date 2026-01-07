@@ -4,7 +4,7 @@
 ## Quick Start
 
 {{- if .ActiveRite }}
-This project uses a {{ .AgentCount }}-agent rite ({{ .ActiveRite }}):
+This project uses a {{ .AgentCount }}-agent pantheon ({{ .ActiveRite }} rite):
 
 {{include "partials/agent-table.md.tpl"}}
 
