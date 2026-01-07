@@ -68,9 +68,9 @@ func runContext(ctx *cmdContext, opts contextOptions) error {
 	// Build output based on format
 	switch opts.format {
 	case "json":
-		return printer.Print(teamContextToOutput(riteCtx, loader.HasContextFile(riteName)))
+		return printer.Print(riteContextToOutput(riteCtx, loader.HasContextFile(riteName)))
 	case "yaml":
-		return printer.Print(teamContextToOutput(riteCtx, loader.HasContextFile(riteName)))
+		return printer.Print(riteContextToOutput(riteCtx, loader.HasContextFile(riteName)))
 	default:
 		// Markdown format - raw output
 		markdown := riteCtx.ToMarkdown()
@@ -101,7 +101,7 @@ type ContextRowOut struct {
 	Value string `json:"value" yaml:"value"`
 }
 
-func teamContextToOutput(tc *ritelib.RiteContext, hasContextFile bool) TeamContextOutput {
+func riteContextToOutput(tc *ritelib.RiteContext, hasContextFile bool) TeamContextOutput {
 	rows := make([]ContextRowOut, len(tc.ContextRows))
 	for i, r := range tc.ContextRows {
 		rows[i] = ContextRowOut{
