@@ -267,10 +267,10 @@ extract_non_roster_hooks() {
 # Returns: 0 always
 merge_hook_registrations() {
     local base_registrations="$1"
-    local team_registrations="$2"
+    local rite_registrations="$2"
 
     # Combine all registrations (base first, rite second)
-    printf '%s\n%s' "$base_registrations" "$team_registrations" | grep -v '^$' || true
+    printf '%s\n%s' "$base_registrations" "$rite_registrations" | grep -v '^$' || true
 }
 
 # Merge generated hooks with preserved user hooks
@@ -434,7 +434,7 @@ swap_hook_registrations() {
     local rite_name="$1"
     local settings_file=".claude/settings.local.json"
     local base_hooks_yaml="$KNOSSOS_HOME/user-hooks/base_hooks.yaml"
-    local team_hooks_yaml="$KNOSSOS_HOME/rites/$rite_name/hooks.yaml"
+    local rite_hooks_yaml="$KNOSSOS_HOME/rites/$rite_name/hooks.yaml"
 
     log_debug "Updating hook registrations for rite: $rite_name"
 
@@ -483,19 +483,19 @@ swap_hook_registrations() {
     fi
 
     # Step 3: Parse rite hooks (optional)
-    local team_registrations=""
-    if [[ -f "$team_hooks_yaml" ]]; then
-        team_registrations=$(parse_hooks_yaml "$team_hooks_yaml")
-        local team_count
-        team_count=$(echo "$team_registrations" | grep -c '^{' 2>/dev/null || echo 0)
-        log_debug "Parsed $team_count rite hook registrations"
+    local rite_registrations=""
+    if [[ -f "$rite_hooks_yaml" ]]; then
+        rite_registrations=$(parse_hooks_yaml "$rite_hooks_yaml")
+        local rite_count
+        rite_count=$(echo "$rite_registrations" | grep -c '^{' 2>/dev/null || echo 0)
+        log_debug "Parsed $rite_count rite hook registrations"
     else
         log_debug "No hooks.yaml for rite: $rite_name"
     fi
 
     # Step 4: Merge registrations (base first, rite second)
     local merged_registrations
-    merged_registrations=$(merge_hook_registrations "$base_registrations" "$team_registrations")
+    merged_registrations=$(merge_hook_registrations "$base_registrations" "$rite_registrations")
 
     # Step 5: Generate hooks JSON
     local generated_hooks
