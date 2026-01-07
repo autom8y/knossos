@@ -28,26 +28,26 @@
         }
       }
     },
-    "teams": {
+    "rites": {
       "type": "object",
       "properties": {
         "default": {
           "type": "string",
-          "description": "Default team pack name"
+          "description": "Default rite pack name"
         },
         "available": {
           "type": "array",
           "items": {
             "type": "string"
           },
-          "description": "List of available team pack names"
+          "description": "List of available rite pack names"
         },
         "discovery": {
           "type": "array",
           "items": {
             "type": "string"
           },
-          "description": "Paths to search for team packs"
+          "description": "Paths to search for rite packs"
         }
       }
     },
