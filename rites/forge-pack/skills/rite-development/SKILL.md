@@ -84,7 +84,7 @@ Detailed definitions: [glossary/agents.md](glossary/agents.md) | [glossary/artif
 
 ### Patterns
 Codified design patterns:
-- [patterns/team-composition.md](patterns/team-composition.md) - 3/4/5-agent patterns
+- [patterns/rite-composition.md](patterns/rite-composition.md) - 3/4/5-agent patterns
 - [patterns/phase-sequencing.md](patterns/phase-sequencing.md) - Sequential workflow design
 - [patterns/complexity-gating.md](patterns/complexity-gating.md) - Complexity levels
 - [patterns/command-mapping.md](patterns/command-mapping.md) - Slash command integration
