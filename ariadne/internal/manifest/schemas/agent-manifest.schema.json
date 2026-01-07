@@ -26,12 +26,12 @@
         "properties": {
           "source": {
             "type": "string",
-            "enum": ["team", "project"],
+            "enum": ["rite", "project"],
             "description": "Source of the agent"
           },
           "origin": {
             "type": "string",
-            "description": "Team name if source is team"
+            "description": "Rite name if source is rite"
           },
           "checksum": {
             "type": "string",
