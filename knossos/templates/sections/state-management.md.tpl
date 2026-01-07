@@ -7,7 +7,7 @@
 
 ### Moirai Usage
 
-The Moirai are the centralized authority for session lifecycle--spinning sessions into existence (Clotho), measuring their allotment (Lachesis), and cutting when complete (Atropos). They enforce schema validation, lifecycle transitions, and maintain audit trails.
+Moirai is the unified session lifecycle agent embodying the three Fates: Clotho (creation), Lachesis (measurement), and Atropos (termination). It enforces schema validation, lifecycle transitions, and maintains audit trails. The Fates exist as internal skills loaded on-demand, not as separate agents.
 
 **When to Use**:
 - Updating session state (park, resume, wrap)
@@ -40,5 +40,5 @@ Task(moirai, "Mark the PRD task complete with artifact at docs/requirements/PRD-
 
 **Direct writes blocked**: PreToolUse hook intercepts `Write`/`Edit` to `*_CONTEXT.md` and instructs use of Moirai.
 
-**Full documentation**: See `user-agents/moirai.md` and `docs/philosophy/knossos-doctrine.md`
+**Full documentation**: See `.claude/agents/moirai.md` and `docs/philosophy/knossos-doctrine.md`
 <!-- KNOSSOS:END state-management -->

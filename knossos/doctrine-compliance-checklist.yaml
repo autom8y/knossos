@@ -174,78 +174,83 @@ categories:
         notes: "Hook fires for Edit/Write/Bash but not all event types auto-recorded; some require explicit agent invocation"
 
   moirai:
-    description: "The Three Fates - session lifecycle management"
+    description: "The Three Fates - unified session lifecycle management"
     doctrine_ref: "Section II - The Fates: Moirai"
     items:
       - id: MO-001
-        name: "Moirai router agent"
+        name: "Unified Moirai agent"
         severity: BLOCKER
         status: IMPLEMENTED
         files:
-          - user-agents/moirai.md
-        validation_criteria: "Router parses operations and delegates to Clotho, Lachesis, or Atropos via Task tool"
+          - .claude/agents/moirai.md
+        validation_criteria: "Single Moirai agent handles all session state operations directly, loading Fate skills on-demand"
+        notes: "Consolidated from 4-agent architecture (router + 3 Fates) to single unified agent per PRD-moirai-consolidation"
 
       - id: MO-002
-        name: "Clotho agent (spinner)"
+        name: "Clotho skill (spinner)"
         severity: BLOCKER
         status: IMPLEMENTED
         files:
-          - user-agents/clotho.md
-        validation_criteria: "Handles create_sprint, start_sprint operations; validates session exists and is ACTIVE"
+          - .claude/skills/moirai/clotho.md
+        validation_criteria: "Moirai-internal skill for create_sprint, start_sprint operations; loaded on-demand"
+        notes: "Converted from standalone agent to Moirai-internal skill"
 
       - id: MO-003
-        name: "Lachesis agent (measurer)"
+        name: "Lachesis skill (measurer)"
         severity: BLOCKER
         status: IMPLEMENTED
         files:
-          - user-agents/lachesis.md
-        validation_criteria: "Handles mark_complete, transition_phase, update_field, park_session, resume_session, handoff, record_decision, append_content"
+          - .claude/skills/moirai/lachesis.md
+        validation_criteria: "Moirai-internal skill for mark_complete, transition_phase, update_field, park_session, resume_session, handoff, record_decision, append_content"
+        notes: "Converted from standalone agent to Moirai-internal skill"
 
       - id: MO-004
-        name: "Atropos agent (cutter)"
+        name: "Atropos skill (cutter)"
         severity: BLOCKER
         status: IMPLEMENTED
         files:
-          - user-agents/atropos.md
-        validation_criteria: "Handles wrap_session, generate_sails, delete_sprint; generates WHITE_SAILS.yaml"
+          - .claude/skills/moirai/atropos.md
+        validation_criteria: "Moirai-internal skill for wrap_session, generate_sails, delete_sprint; generates WHITE_SAILS.yaml"
+        notes: "Converted from standalone agent to Moirai-internal skill"
 
       - id: MO-005
-        name: "Moirai shared infrastructure"
+        name: "Moirai skill routing table"
         severity: ENHANCEMENT
         status: IMPLEMENTED
         files:
-          - user-agents/moirai-shared.md
-        validation_criteria: "Schema locations, lock protocol, audit format, error codes documented and referenced by all Fates"
+          - .claude/skills/moirai/SKILL.md
+        validation_criteria: "Routing table maps operations to Fate domains; loaded by Moirai for progressive disclosure"
+        notes: "Replaced moirai-shared.md; schema locations, lock protocol, error codes now in unified agent"
 
       - id: MO-006
-        name: "/start skill delegates to Clotho via Task()"
+        name: "/start skill delegates to Moirai via Task()"
         severity: BLOCKER
         status: PARTIAL
         files:
           - user-skills/session-lifecycle/start-ref/SKILL.md
-          - user-agents/clotho.md
-        validation_criteria: "/start skill invokes Task(clotho, ...) for session bootstrap; Clotho handles sprint creation"
-        notes: "Task() is the correct invocation mechanism. Skill must explicitly delegate to Clotho for doctrine-compliant lifecycle."
+          - .claude/agents/moirai.md
+        validation_criteria: "/start skill invokes Task(moirai, 'create_sprint ...') for session bootstrap"
+        notes: "Task(moirai, ...) is the only invocation pattern. Moirai loads clotho skill internally."
 
       - id: MO-007
-        name: "Workflows delegate state mutations to Lachesis via Task()"
+        name: "Workflows delegate state mutations to Moirai via Task()"
         severity: BLOCKER
         status: PARTIAL
         files:
           - user-skills/session-lifecycle/*.md
-          - user-agents/lachesis.md
-        validation_criteria: "Skills invoke Task(lachesis, ...) for mark_complete, transition_phase, park_session, resume_session operations"
-        notes: "Task() is the correct invocation mechanism. Skills must explicitly delegate state mutations to Lachesis."
+          - .claude/agents/moirai.md
+        validation_criteria: "Skills invoke Task(moirai, ...) for all state mutations; Moirai routes to appropriate Fate skill internally"
+        notes: "Single invocation pattern: Task(moirai, ...). Never Task(clotho|lachesis|atropos, ...)"
 
       - id: MO-008
-        name: "/wrap skill delegates to Atropos via Task()"
+        name: "/wrap skill delegates to Moirai via Task()"
         severity: BLOCKER
         status: PARTIAL
         files:
           - user-skills/session-lifecycle/wrap-ref/SKILL.md
-          - user-agents/atropos.md
-        validation_criteria: "/wrap skill invokes Task(atropos, ...) for session termination, sails generation, and archival"
-        notes: "Task() is the correct invocation mechanism. Skill must explicitly delegate to Atropos for doctrine-compliant closure."
+          - .claude/agents/moirai.md
+        validation_criteria: "/wrap skill invokes Task(moirai, 'wrap_session') for session termination"
+        notes: "Task(moirai, ...) is the only invocation pattern. Moirai loads atropos skill internally."
 
       - id: MO-009
         name: "Writeguard redirects to Moirai"
@@ -254,17 +259,17 @@ categories:
         files:
           - .claude/hooks/ari/writeguard.sh
           - ariadne/internal/cmd/hook/writeguard.go
-        validation_criteria: "PreToolUse hook intercepts Write/Edit to *_CONTEXT.md files; instructs use of Moirai"
+        validation_criteria: "PreToolUse hook intercepts Write/Edit to *_CONTEXT.md files; instructs use of Task(moirai, ...)"
 
       - id: MO-010
         name: "Moirai lock protocol"
         severity: ENHANCEMENT
         status: PARTIAL
         files:
-          - user-agents/moirai-shared.md
+          - .claude/agents/moirai.md
           - ariadne/internal/lock/lock.go
         validation_criteria: "Atomic mkdir-based locking; stale lock detection after 60s; audit trail on force-release"
-        notes: "Lock protocol documented; CLI implements it; agent prompts reference it but rely on agent behavior"
+        notes: "Lock protocol documented in unified agent; CLI implements it"
 
   white_sails:
     description: "Confidence signaling system"
@@ -622,8 +627,8 @@ cross_cutting:
         - user-skills/session-lifecycle/start-ref/SKILL.md
         - user-skills/session-lifecycle/wrap-ref/SKILL.md
         - user-skills/session-lifecycle/park-ref/SKILL.md
-      validation_criteria: "All lifecycle skills (start, wrap, park, resume) delegate to appropriate Fate via Task() invocation"
-      notes: "Task() is the only correct agent invocation mechanism in Claude Code. Skills must explicitly delegate."
+      validation_criteria: "All lifecycle skills (start, wrap, park, resume) delegate to unified Moirai via Task(moirai, ...) invocation"
+      notes: "Task(moirai, ...) is the only correct pattern. Moirai routes to Fate skills internally. Never invoke Fates directly."
 
     - id: CC-002
       name: "Clew naming in code (thread -> clew)"
@@ -658,9 +663,9 @@ cross_cutting:
         - moirai
         - thread_contract
       files:
-        - user-agents/moirai-shared.md
+        - .claude/agents/moirai.md
         - .claude/sessions/.audit/session-mutations.log
-      validation_criteria: "Every Moirai mutation logged to audit trail with timestamp, operation, fate"
+      validation_criteria: "Every Moirai mutation logged to audit trail with timestamp, operation, fate domain"
 
 golden_paths:
   start_to_wrap:
@@ -671,13 +676,13 @@ golden_paths:
       - "ACTIVE_RITE loaded and agents available"
       - "Work proceeds with event recording to clew"
       - "User invokes /wrap"
-      - "Atropos generates WHITE_SAILS.yaml"
+      - "Moirai (atropos skill) generates WHITE_SAILS.yaml"
       - "Session transitions to ARCHIVED"
       - "TRIBUTE.md generated (optional)"
     blockers:
       - "TM-002: Session schema uses active_team not active_rite"
-      - "MO-006: /start skill must delegate to Clotho via Task()"
-      - "MO-008: /wrap skill must delegate to Atropos via Task()"
+      - "MO-006: /start skill must delegate to Moirai via Task(moirai, ...)"
+      - "MO-008: /wrap skill must delegate to Moirai via Task(moirai, ...)"
       - "WS-007: BLACK sails don't block wrap"
 
   task_workflow:
@@ -693,7 +698,7 @@ golden_paths:
     blockers:
       - "TC-011: handoff_prepared event not implemented"
       - "TC-012: handoff_executed event not implemented"
-      - "MO-007: Workflow skills must delegate state mutations to Lachesis via Task()"
+      - "MO-007: Workflow skills must delegate state mutations to Moirai via Task(moirai, ...)"
 
   sprint_workflow:
     description: "/sprint multi-task workflow"
@@ -701,23 +706,23 @@ golden_paths:
       - "User invokes /sprint with goals"
       - "Orchestrator breaks into tasks"
       - "Tasks tracked in SPRINT_CONTEXT.md"
-      - "Progress updated via Lachesis"
+      - "Progress updated via Moirai (lachesis skill)"
       - "Sprint completes when all tasks done"
       - "Sails generated with aggregate confidence"
     blockers:
-      - "MO-006: /sprint skill must delegate to Clotho via Task() for sprint creation"
-      - "MO-007: /task skill must delegate to Lachesis via Task() for mark_complete"
+      - "MO-006: /sprint skill must delegate to Moirai via Task(moirai, ...) for sprint creation"
+      - "MO-007: /task skill must delegate to Moirai via Task(moirai, ...) for mark_complete"
       - "MT-004: Phase transition skills should trigger TRIBUTE.md generation"
 
 dependencies:
   description: "Inter-component dependencies"
   items:
     - id: DEP-001
-      from: "Moirai agents"
+      from: "Moirai agent"
       to: "Ariadne CLI"
-      relationship: "Moirai calls ari for structure/validation"
+      relationship: "Moirai calls ari for authoritative state changes"
       status: IMPLEMENTED
-      notes: "User confirmed: Moirai responsible for context/content, ari for structure/validation/tooling"
+      notes: "Moirai responsible for context/content, ari for structure/validation/tooling"
 
     - id: DEP-002
       from: "Hooks"
@@ -734,12 +739,12 @@ dependencies:
       status: IMPLEMENTED
       files:
         - user-hooks/lib/session-manager.sh
-        - user-agents/moirai-shared.md
+        - .claude/agents/moirai.md
 
     - id: DEP-004
       from: "White Sails"
-      to: "Atropos"
-      relationship: "Atropos calls sails generation on wrap"
+      to: "Moirai (atropos skill)"
+      relationship: "Moirai atropos skill calls sails generation on wrap"
       status: IMPLEMENTED
 
     - id: DEP-005
@@ -858,9 +863,16 @@ notes:
     - "Event auto-recording correctly identified as PARTIAL"
     - "P1-P4 priority ordering validated: Handoff > Proof evidence > Cognitive budget > Hook optimization"
 
+  moirai_consolidation:
+    - "PRD-moirai-consolidation: Unified Moirai architecture implemented"
+    - "4-agent architecture (router + 3 Fates) replaced by single unified agent"
+    - "Fates now exist as Moirai-internal skills at .claude/skills/moirai/"
+    - "Single invocation pattern: Task(moirai, ...) - never Task(clotho|lachesis|atropos, ...)"
+    - "Old files removed: user-agents/moirai.md, clotho.md, lachesis.md, atropos.md, moirai-shared.md"
+
   implementation_strategy:
     - "P1 items are code changes in ariadne/ - Go implementation"
-    - "P2 skill delegation requires updating lifecycle skill prompts to invoke Task(moirai/clotho/lachesis/atropos)"
+    - "P2 skill delegation requires updating lifecycle skill prompts to invoke Task(moirai, ...)"
     - "Terminology migration requires schema versioning and migration script"
     - "Integration tests should cover golden paths"
 

@@ -1,12 +1,18 @@
 # Moirai Invocation Pattern
 
-> Centralized session state mutation through the Moirai agent (the Fates).
+> Centralized session state mutation through the unified Moirai agent.
 
 ## Overview
 
-**Moirai** (formerly `state-mate`) is the sole authority for `SESSION_CONTEXT.md` and `SPRINT_CONTEXT.md` mutations. All state transitions and context updates MUST go through this agent via the Task tool.
+**Moirai** is the unified session lifecycle agent and sole authority for `SESSION_CONTEXT.md` and `SPRINT_CONTEXT.md` mutations. All state transitions and context updates MUST go through this agent via the Task tool.
 
-**Why Moirai?**: In Greek mythology, the Moirai (the Fates) controlled the thread of life—spinning (creation), measuring (duration), and cutting (completion). This agent similarly manages the lifecycle of development sessions.
+**Architecture**: Moirai embodies the three Fates as internal skills (not separate agents):
+- **Clotho** (creation): `create_sprint`, `start_sprint`
+- **Lachesis** (measurement): `mark_complete`, `transition_phase`, `park_session`, etc.
+- **Atropos** (termination): `wrap_session`, `generate_sails`, `delete_sprint`
+
+**Agent location**: `.claude/agents/moirai.md`
+**Skills location**: `.claude/skills/moirai/` (clotho.md, lachesis.md, atropos.md)
 
 ## When to Invoke
 
@@ -210,6 +216,7 @@ Task(moirai, "...")
 
 ## See Also
 
-- `user-agents/moirai.md` - Full Moirai agent specification
+- `.claude/agents/moirai.md` - Full Moirai agent specification
+- `.claude/skills/moirai/` - Fate skills (clotho.md, lachesis.md, atropos.md)
 - `.claude/hooks/PreToolUse.sh` - Direct write prevention
 - `schemas/artifacts/session-context.schema.json` - Validation schema

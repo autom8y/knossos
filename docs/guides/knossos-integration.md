@@ -301,17 +301,20 @@ The cognitive budget system tracks tool usage per CLI invocation and warns when 
 
 ## State Management
 
-### state-mate Integration
+### Moirai Integration
 
-state-mate is the authority for session state mutations. It delegates to ari for state operations:
+Moirai is the unified session lifecycle agent and the authority for all session state mutations. It embodies the three Fates (Clotho, Lachesis, Atropos) as internal skills loaded on-demand. Moirai delegates to the `ari` CLI for authoritative state operations:
 
 ```bash
-# Park via state-mate
-Task(moirai, "park session with reason: blocked on review")
+# Park via Moirai
+Task(moirai, "park_session reason='blocked on review'")
 
 # Which internally calls:
-ari session park "blocked on review"
+ari session park --reason="blocked on review"
 ```
+
+**Agent location**: `.claude/agents/moirai.md`
+**Skills location**: `.claude/skills/moirai/` (clotho.md, lachesis.md, atropos.md)
 
 ### SESSION_CONTEXT.md
 

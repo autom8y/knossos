@@ -54,7 +54,7 @@ If not provided in arguments, ask the user:
 | Parameter | Description | Default |
 |-----------|-------------|---------|
 | **Initiative** | What are we building? | Required |
-| **Complexity** | SCRIPT \| MODULE \| SERVICE \| PLATFORM | MODULE |
+| **Complexity** | PATCH \| MODULE \| SYSTEM \| INITIATIVE \| MIGRATION | MODULE |
 | **Rite** | Rite to use | Current rite from context |
 
 ### 3. Create Session (ONE command)
@@ -99,17 +99,18 @@ Output to user:
 
 | Level | Phases | Use For |
 |-------|--------|---------|
-| SCRIPT | requirements → implementation | Single-file changes, quick fixes |
+| PATCH | requirements → implementation | Single-file changes, quick fixes |
 | MODULE | requirements → design → implementation | Multi-file features |
-| SERVICE | + validation | New services, APIs |
-| PLATFORM | + Session -1/0 assessment | Major initiatives |
+| SYSTEM | + validation | New services, APIs |
+| INITIATIVE | + Session -1/0 assessment | Major initiatives |
+| MIGRATION | Full lifecycle + migration planning | Cross-cutting migrations, large-scale refactors |
 
 ## Example Usage
 
 ```
 /start "Add dark mode toggle"
 /start "Refactor auth module" --complexity=MODULE
-/start "New billing service" --complexity=SERVICE --rite=10x-dev
+/start "New billing service" --complexity=SYSTEM --rite=10x-dev
 ```
 
 ## Reference
