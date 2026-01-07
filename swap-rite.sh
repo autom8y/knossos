@@ -2054,9 +2054,9 @@ swap_skills() {
     # Ensure skills directory exists
     mkdir -p ".claude/skills"
 
-    # Backup and remove previous team skills
-    backup_team_skills
-    remove_team_skills
+    # Backup and remove previous rite skills
+    backup_rite_skills
+    remove_rite_skills
 
     # Check if team has skills
     if [[ ! -d "$source_dir" ]]; then
@@ -2224,9 +2224,9 @@ swap_hooks() {
     mkdir -p ".claude/hooks"
     mkdir -p ".claude/hooks/lib"
 
-    # Backup and remove previous team hooks
-    backup_team_hooks
-    remove_team_hooks
+    # Backup and remove previous rite hooks
+    backup_rite_hooks
+    remove_rite_hooks
 
     # =========================================================================
     # PHASE 1: Install base hooks from roster/user-hooks/
