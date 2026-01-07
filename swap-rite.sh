@@ -13,7 +13,7 @@ source "$SCRIPT_DIR/lib/knossos-home.sh"
 
 # Constants
 readonly KNOSSOS_HOME  # Already set by knossos-home.sh
-readonly ROSTER_DEBUG="${ROSTER_DEBUG:-0}"
+readonly KNOSSOS_DEBUG="${KNOSSOS_DEBUG:-0}"
 readonly EXIT_SUCCESS=0
 readonly EXIT_INVALID_ARGS=1
 readonly EXIT_VALIDATION_FAILURE=2
@@ -95,7 +95,7 @@ log_warning() {
 }
 
 log_debug() {
-    if [[ "$ROSTER_DEBUG" == "1" ]]; then
+    if [[ "$KNOSSOS_DEBUG" == "1" ]]; then
         echo "[Roster DEBUG] $*" >&2
     fi
 }
@@ -1436,8 +1436,8 @@ Interactive Mode:
 Environment Variables:
   KNOSSOS_HOME        Knossos platform location (default: ~/Code/roster)
   ROSTER_HOME         Deprecated - use KNOSSOS_HOME instead
-  ROSTER_DEBUG        Enable debug logging (set to 1)
-  ROSTER_AUTO_RECOVER Enable auto-recovery in non-interactive mode (set to 1)
+  KNOSSOS_DEBUG       Enable debug logging (set to 1)
+  KNOSSOS_AUTO_RECOVER Enable auto-recovery in non-interactive mode (set to 1)
 
 Exit Codes:
   0  Success
@@ -3599,7 +3599,7 @@ main() {
     local team_name=""
 
     # Check environment variable for auto-recover
-    if [[ "${ROSTER_AUTO_RECOVER:-0}" == "1" ]]; then
+    if [[ "${KNOSSOS_AUTO_RECOVER:-0}" == "1" ]]; then
         AUTO_RECOVER=1
     fi
 

@@ -19,7 +19,7 @@
 # Environment Variables:
 #   KNOSSOS_HOME   Knossos platform location (default: ~/Code/roster)
 #   ROSTER_HOME    Deprecated - use KNOSSOS_HOME instead
-#   ROSTER_DEBUG   Enable debug logging (set to 1)
+#   KNOSSOS_DEBUG   Enable debug logging (set to 1)
 
 set -euo pipefail
 
@@ -28,7 +28,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/lib/knossos-home.sh"
 
 # Constants
-readonly ROSTER_DEBUG="${ROSTER_DEBUG:-0}"
+readonly KNOSSOS_DEBUG="${KNOSSOS_DEBUG:-0}"
 readonly USER_SKILLS_DIR="$HOME/.claude/skills"
 readonly USER_MANIFEST_FILE="$HOME/.claude/USER_SKILL_MANIFEST.json"
 readonly SOURCE_DIR="$KNOSSOS_HOME/user-skills"
@@ -87,7 +87,7 @@ log_error() {
 }
 
 log_debug() {
-    if [[ "$ROSTER_DEBUG" == "1" ]]; then
+    if [[ "$KNOSSOS_DEBUG" == "1" ]]; then
         echo "[User-Skills DEBUG] $*" >&2
     fi
 }
@@ -923,7 +923,7 @@ Adopt Mode (--adopt):
 
 Environment Variables:
   ROSTER_HOME    Roster repository location (default: ~/Code/roster)
-  ROSTER_DEBUG   Enable debug logging (set to 1)
+  KNOSSOS_DEBUG   Enable debug logging (set to 1)
 
 Exit Codes:
   0  Success
