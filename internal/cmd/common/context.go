@@ -63,10 +63,15 @@ func (c *SessionContext) GetSessionID() (string, error) {
 }
 
 // GetCurrentSessionID reads the current session ID from the project.
+// Returns empty string with no error if no session is active (file doesn't exist).
 func (c *SessionContext) GetCurrentSessionID() (string, error) {
 	resolver := c.GetResolver()
 	data, err := os.ReadFile(resolver.CurrentSessionFile())
 	if err != nil {
+		if os.IsNotExist(err) {
+			// No current session is a valid state, not an error
+			return "", nil
+		}
 		return "", err
 	}
 	return string(data), nil
