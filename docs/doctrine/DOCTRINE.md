@@ -50,15 +50,21 @@ docs/doctrine/
 │       └── quality-review-20260108.md
 │
 ├── operations/                 # How to use the platform
-│   ├── guides/                 # Integration and usage guides (symlinks)
-│   │   ├── ariadne-cli.md
-│   │   ├── knossos-integration.md
-│   │   ├── parallel-sessions.md
-│   │   ├── user-preferences.md
-│   │   └── white-sails.md
-│   └── cli-reference/          # [IN PROGRESS] 68 commands across 15 families
+│   └── cli-reference/          # CLI command reference (72 commands, 14 families)
+│       ├── index.md            # Quick reference and navigation
+│       ├── cli-session.md      # Session lifecycle (11 commands)
+│       ├── cli-rite.md         # Rite management (10 commands)
+│       ├── cli-worktree.md     # Worktree operations (10 commands)
+│       └── ...                 # All 14 command families
 │
-├── rites/                      # [IN PROGRESS] Catalog of 12 rites
+├── rites/                      # Catalog of 11 rites
+│   ├── index.md                # Rite selection guide
+│   ├── 10x-dev.md              # Full development lifecycle
+│   ├── forge.md                # Meta-rite for rite creation
+│   └── ...                     # All 11 rites documented
+│
+├── guides/                     # Operational guides
+│   └── worktree-guide.md       # Worktree production patterns
 │
 └── reference/                  # Navigation and lookup
     ├── INDEX.md                # Master navigation hub
@@ -71,9 +77,10 @@ docs/doctrine/
 - **SOURCE** = `/roster/` repository (what Knossos IS)
 - **PROJECTION** = `.claude/` directories (materialized by `ari sync materialize`)
 
-**In Progress**:
-- `operations/cli-reference/` - CLI documentation (see compliance/audits/)
-- `rites/` - Rite catalog under development
+**Completed** (2026-01-08 Sprint 2):
+- `operations/cli-reference/` - 14 CLI reference files (72 commands)
+- `rites/` - 11 rite documentation files with selection guide
+- `guides/worktree-guide.md` - Worktree production patterns
 
 **Removed** (2026-01-08):
 - Empty scaffolding directories collapsed (architecture/, evolution/ subdirs)

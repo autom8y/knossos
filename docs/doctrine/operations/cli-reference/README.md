@@ -1,35 +1,37 @@
-# CLI Reference - In Progress
+# CLI Reference
 
-**Status**: Under development
-**Target**: Comprehensive reference for all 68 `ari` commands across 15 families
+**Status**: ✓ Complete
+**Coverage**: 72 commands across 14 families
 
-## Current Coverage Gap
+## Documentation
 
-- **Implemented**: 68 commands
-- **Documented**: ~8 commands (mentioned in guides)
-- **Gap**: 60 commands (88%)
+See [index.md](index.md) for the complete CLI reference with:
+- Quick reference table
+- Global flags
+- Common workflows
+- Use case organization
 
-## Command Families (Pending Documentation)
+## Command Families
 
-| Family | Commands | Priority |
-|--------|----------|----------|
-| session | 11 | HIGH |
-| rite | 10 | HIGH |
-| worktree | 11 | HIGH |
-| sync | 7 | HIGH |
-| hook | 6 | MEDIUM |
-| handoff | 4 | MEDIUM |
-| inscription | 5 | MEDIUM |
-| manifest | 4 | MEDIUM |
-| artifact | 3 | MEDIUM |
-| validate | 3 | MEDIUM |
-| sails | 1 | LOW |
-| naxos | 1 | LOW |
-| tribute | 1 | LOW |
+| Family | Commands | Documentation |
+|--------|----------|---------------|
+| session | 11 | [cli-session.md](cli-session.md) |
+| rite | 10 | [cli-rite.md](cli-rite.md) |
+| worktree | 10 | [cli-worktree.md](cli-worktree.md) |
+| sync | 8 | [cli-sync.md](cli-sync.md) |
+| hook | 6 | [cli-hook.md](cli-hook.md) |
+| handoff | 4 | [cli-handoff.md](cli-handoff.md) |
+| inscription | 5 | [cli-inscription.md](cli-inscription.md) |
+| artifact | 4 | [cli-artifact.md](cli-artifact.md) |
+| validate | 3 | [cli-validate.md](cli-validate.md) |
+| manifest | 4 | [cli-manifest.md](cli-manifest.md) |
+| sails | 1 | [cli-sails.md](cli-sails.md) |
+| naxos | 1 | [cli-naxos.md](cli-naxos.md) |
+| tribute | 1 | [cli-tribute.md](cli-tribute.md) |
+| completion | 4 | [cli-completion.md](cli-completion.md) |
 
-## Temporary Workaround
+## Quick Help
 
-Use CLI help directly:
 ```bash
 ari --help              # List all commands
 ari [command] --help    # Command-specific help
@@ -37,5 +39,5 @@ ari [command] --help    # Command-specific help
 
 ## See Also
 
-- [Refinement Recommendations](../../compliance/audits/refinement-recommendations-20260108.md)
 - [Ariadne CLI Guide](../guides/ariadne-cli.md)
+- [Knossos Integration Guide](../guides/knossos-integration.md)

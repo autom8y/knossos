@@ -13,9 +13,11 @@ This index organizes doctrine content by audience and purpose. Use this as your 
 | Understand the core philosophy | [Philosophy](#philosophy) |
 | Learn why Knossos is designed this way | [Design Principles](#design-principles) |
 | Map mythology to implementation | [Mythology Concordance](#mythology-concordance) |
+| Use the Ariadne CLI | [CLI Reference](#cli-reference) |
+| Choose a rite for my work | [Rite Catalog](#rite-catalog) |
+| Run parallel Claude sessions | [Worktree Guide](#worktree-guide) |
 | See architectural decisions | [Architecture](#architecture) |
 | Check compliance status | [Compliance](#compliance) |
-| Track doctrine evolution | [Evolution](#evolution) |
 
 ---
 
@@ -115,6 +117,27 @@ Architecture Decision Records documenting significant platform decisions.
 
 ---
 
+### CLI Reference
+
+**Path:** [`../operations/cli-reference/`](../operations/cli-reference/)
+
+Complete reference for all Ariadne CLI commands (72 commands across 14 families).
+
+**Command Families:**
+- [session](../operations/cli-reference/cli-session.md) — Session lifecycle (11 commands)
+- [rite](../operations/cli-reference/cli-rite.md) — Rite management (10 commands)
+- [worktree](../operations/cli-reference/cli-worktree.md) — Parallel sessions (10 commands)
+- [sync](../operations/cli-reference/cli-sync.md) — Materialization (8 commands)
+- [hook](../operations/cli-reference/cli-hook.md) — Hook operations (6 commands)
+- [handoff](../operations/cli-reference/cli-handoff.md) — Agent handoffs (4 commands)
+- Plus 8 additional families (inscription, artifact, validate, manifest, sails, naxos, tribute, completion)
+
+**Entry Point:** [CLI Reference Index](../operations/cli-reference/index.md)
+
+**Audience:** Operators, developers, anyone using the `ari` CLI.
+
+---
+
 ### Rite Catalog
 
 **Path:** [`../rites/`](../rites/)
@@ -122,19 +145,38 @@ Architecture Decision Records documenting significant platform decisions.
 Documentation for each canonical rite (practice bundle).
 
 **Available Rites:**
-- 10x-dev (full development lifecycle)
-- docs (documentation workflow)
-- forge (agent and tool creation)
-- hygiene (code quality maintenance)
-- debt-triage (technical debt remediation)
-- security (threat modeling and compliance)
-- sre (operations and reliability)
-- intelligence (research and synthesis)
-- rnd (exploration and prototypes)
-- strategy (business analysis)
-- ecosystem (platform infrastructure)
+- [10x-dev](../rites/10x-dev.md) — Full development lifecycle
+- [docs](../rites/docs.md) — Documentation workflow
+- [forge](../rites/forge.md) — Agent and tool creation (meta-rite)
+- [hygiene](../rites/hygiene.md) — Code quality maintenance
+- [debt-triage](../rites/debt-triage.md) — Technical debt remediation
+- [security](../rites/security.md) — Threat modeling and compliance
+- [sre](../rites/sre.md) — Operations and reliability
+- [intelligence](../rites/intelligence.md) — Research and synthesis
+- [rnd](../rites/rnd.md) — Exploration and prototypes
+- [strategy](../rites/strategy.md) — Business analysis
+- [ecosystem](../rites/ecosystem.md) — Platform infrastructure
+
+**Entry Point:** [Rite Catalog Index](../rites/index.md)
 
 **Audience:** Practitioners selecting or invoking rites, rite authors, workflow designers.
+
+---
+
+### Worktree Guide
+
+**Path:** [`../guides/worktree-guide.md`](../guides/worktree-guide.md)
+
+Comprehensive guide to running parallel Claude Code sessions with filesystem isolation.
+
+**Topics:**
+- Worktree creation and lifecycle
+- Merge, diff, and cherry-pick operations
+- Production patterns (parallel features, hotfixes, CI/CD)
+- Troubleshooting common issues
+- Architecture and best practices
+
+**Audience:** Developers running parallel sessions, CI/CD engineers, anyone needing worktree patterns.
 
 ---
 

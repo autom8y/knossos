@@ -1,0 +1,71 @@
+name: Verify Doctrine Documentation
+
+on:
+  push:
+    paths:
+      - 'docs/doctrine/**'
+      - 'scripts/docs/**'
+  pull_request:
+    paths:
+      - 'docs/doctrine/**'
+      - 'scripts/docs/**'
+  workflow_dispatch:
+
+jobs:
+  verify-doctrine:
+    name: Verify Documentation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+          cache-dependency-path: ariadne/go.sum
+
+      - name: Build Ariadne CLI
+        working-directory: ariadne
+        run: |
+          CGO_ENABLED=0 go build -o ari ./cmd/ari/main.go
+          echo "$PWD" >> $GITHUB_PATH
+
+      - name: Verify doctrine documentation
+        run: |
+          chmod +x scripts/docs/verify-doctrine.sh
+          ./scripts/docs/verify-doctrine.sh
+
+      - name: Check markdown links
+        uses: gaurav-nelson/github-action-markdown-link-check@v1
+        with:
+          folder-path: 'docs/doctrine'
+          file-extension: '.md'
+          use-quiet-mode: 'yes'
+          config-file: '.github/markdown-link-check-config.json'
+        continue-on-error: true
+
+  lint-markdown:
+    name: Lint Markdown
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install markdownlint
+        run: npm install -g markdownlint-cli
+
+      - name: Lint doctrine documentation
+        run: |
+          markdownlint docs/doctrine/**/*.md \
+            --config .markdownlint.json \
+            --ignore docs/doctrine/compliance/audits/ \
+            || echo "Markdown lint warnings (non-blocking)"
+        continue-on-error: true

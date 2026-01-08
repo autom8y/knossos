@@ -1,40 +1,54 @@
-# Rite Catalog - In Progress
+# Rite Catalog
 
-**Status**: Under development
-**Target**: Catalog of all 12 rites with purpose, agents, and invocation patterns
+> Practice bundles for specialized workflows in the Knossos ecosystem.
 
-## Current Rites
+**Status**: Complete
+**Rites Documented**: 11
 
-| Rite | Purpose | Agents |
-|------|---------|--------|
-| 10x-dev | Full development lifecycle | 5 |
-| docs | Documentation workflow | 5 |
-| hygiene | Code quality | 3 |
-| debt-triage | Technical debt assessment | 4 |
-| security | Security assessment | 4 |
-| sre | Reliability workflow | 4 |
-| intelligence | Product analytics | 3 |
-| strategy | Business strategy | 3 |
-| rnd | Innovation lab | 3 |
-| ecosystem | CEM infrastructure | 4 |
-| forge | Meta-rite overview | - |
+---
 
-## Temporary Workaround
+## Navigation
 
-Explore rite definitions directly:
+- **[Index](index.md)** — Full catalog with selection guide and invocation patterns
+
+---
+
+## Rites
+
+| Rite | Purpose | Doc |
+|------|---------|-----|
+| 10x-dev | Full development lifecycle | [10x-dev.md](10x-dev.md) |
+| docs | Documentation workflow | [docs.md](docs.md) |
+| forge | Meta-rite for creating rites | [forge.md](forge.md) |
+| hygiene | Code quality lifecycle | [hygiene.md](hygiene.md) |
+| debt-triage | Technical debt management | [debt-triage.md](debt-triage.md) |
+| security | Security assessment | [security.md](security.md) |
+| sre | Reliability engineering | [sre.md](sre.md) |
+| intelligence | Product analytics | [intelligence.md](intelligence.md) |
+| strategy | Business strategy | [strategy.md](strategy.md) |
+| rnd | Technology exploration | [rnd.md](rnd.md) |
+| ecosystem | Platform infrastructure | [ecosystem.md](ecosystem.md) |
+
+---
+
+## Quick Start
+
 ```bash
-# List available rites
+# List all rites
 ari rite pantheon
 
-# View rite manifest
-cat /roster/rites/[rite-name]/manifest.yaml
+# Switch to a rite
+/10x         # Development
+/docs        # Documentation
+/security    # Security
+
+# Get rite details
+ari rite info 10x-dev
 ```
 
-## Quick Reference
-
-See [INDEX.md](../reference/INDEX.md) for rite summaries.
+---
 
 ## See Also
 
-- [Refinement Recommendations](../compliance/audits/refinement-recommendations-20260108.md)
-- [Knossos Doctrine - Rites](../philosophy/knossos-doctrine.md#iv-the-rites)
+- [CLI: rite](../operations/cli-reference/cli-rite.md)
+- [Knossos Doctrine](../philosophy/knossos-doctrine.md#iv-the-rites)
