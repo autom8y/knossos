@@ -1,0 +1,1 @@
+../../../guides/ariadne-cli.md

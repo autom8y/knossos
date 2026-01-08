@@ -1,0 +1,1 @@
+../../decisions/ADR-0005-moirai-centralized-state-authority.md

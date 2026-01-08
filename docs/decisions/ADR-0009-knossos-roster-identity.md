@@ -171,3 +171,36 @@ knossos/                    # The platform (was: roster)
 | Date | Author | Change |
 |------|--------|--------|
 | 2026-01-05 | Claude Code (Architect) | Initial acceptance - formalizing platform identity |
+| 2026-01-08 | Claude Code (Doctrine Sprint) | Amendment: SOURCE/PROJECTION clarification |
+
+---
+
+## Amendment: SOURCE/PROJECTION Clarification (2026-01-08)
+
+**Context**: The original identity statement "roster/.claude/ IS Knossos" (line 49) was imprecise and led to downstream confusion in documentation.
+
+**Clarification**:
+
+The relationship between SOURCE and PROJECTION is:
+
+| Term | Definition | Example Paths |
+|------|------------|---------------|
+| **SOURCE** | The `/roster/` repository (versioned, canonical, what Knossos IS) | `/roster/internal/`, `/roster/rites/`, `/roster/cmd/ari/` |
+| **PROJECTION** | The `.claude/` directories (gitignored, materialized by `ari sync materialize`) | `.claude/hooks/`, `.claude/agents/`, `.claude/sessions/` |
+
+**Corrected Identity Statement**:
+
+**The `/roster/` repository IS Knossos.** The `.claude/` directory structure is a PROJECTION of Knossos—generated artifacts materialized into consuming projects.
+
+**Rationale**:
+- Knossos is the SOURCE (the palace/labyrinth itself)
+- `.claude/` is the PROJECTION (the rooms within, generated for each project)
+- The labyrinth is the palace, not the rooms within it
+- Implementation exists in `/roster/`, not `.claude/`
+
+**Impact on Documentation**:
+- `docs/doctrine/philosophy/mythology-concordance.md` correctly states this relationship
+- This amendment supersedes the original line 49 identity statement
+- All subsequent documentation should reference SOURCE = `/roster/` when locating implementation
+
+**See Also**: `docs/doctrine/philosophy/mythology-concordance.md` for comprehensive SOURCE/PROJECTION mapping
