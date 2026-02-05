@@ -30,7 +30,20 @@ func newCreateCmd(ctx *cmdContext) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create <initiative>",
 		Short: "Create a new session",
-		Long:  `Create a new session, transitioning from NONE to ACTIVE state.`,
+		Long: `Create a new session, transitioning from NONE to ACTIVE state.
+
+The initiative argument is a short description of the work being done.
+Complexity defaults to MODULE if not specified.
+
+Seed mode (--seed) creates the session in an ephemeral worktree, immediately
+parks it, and copies it to the main repo. This enables parallel session
+preparation without hitting the single-session-per-terminal constraint.
+
+Examples:
+  ari session create "user-auth feature"
+  ari session create "deploy pipeline" -c SYSTEM -r sre
+  ari session create "hotfix login" -c PATCH
+  ari session create "parallel work" --seed`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runCreate(ctx, args[0], opts)

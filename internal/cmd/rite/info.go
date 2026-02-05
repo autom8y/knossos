@@ -18,7 +18,13 @@ func newInfoCmd(ctx *cmdContext) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "info <name>",
 		Short: "Show detailed rite information",
-		Long:  `Displays detailed information about a rite including agents, skills, workflow, and budget.`,
+		Long: `Displays detailed information about a rite including agents, skills, workflow, and budget.
+
+Examples:
+  ari rite info ecosystem
+  ari rite info 10x-dev --budget
+  ari rite info forge --components
+  ari rite info ecosystem -o json`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runInfo(ctx, args[0], opts)

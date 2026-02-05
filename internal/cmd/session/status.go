@@ -19,7 +19,16 @@ func newStatusCmd(ctx *cmdContext) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "status",
 		Short: "Show session state",
-		Long:  `Returns current session state with comprehensive metadata.`,
+		Long: `Returns current session state with comprehensive metadata.
+
+Includes session ID, status, initiative, complexity, current phase,
+active rite, execution mode, git branch, and White Sails color.
+Returns has_session=false if no active session exists.
+
+Examples:
+  ari session status
+  ari session status -o json
+  ari session status -s session-20260105-143000-abc12345`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runStatus(ctx)
 		},

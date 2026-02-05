@@ -128,6 +128,12 @@ func init() {
 var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Show version information",
+	Long: `Display the ari binary version, build commit, build date, Go version,
+and platform architecture.
+
+Examples:
+  ari version              # Human-readable output
+  ari version -o json      # Machine-readable JSON output`,
 	Run: func(cmd *cobra.Command, args []string) {
 		format := output.ParseFormat(globalOpts.Output)
 		printer := output.NewPrinter(format, os.Stdout, os.Stderr, globalOpts.Verbose)

@@ -55,7 +55,7 @@ Note: This does not change your shell's working directory. Use 'cd' to navigate.
 Examples:
   ari worktree switch feature-auth
   ari worktree switch wt-20260104-143052-a1b2
-  ari worktree switch feature-auth --update-team`,
+  ari worktree switch feature-auth --update-rite`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runSwitch(ctx, args[0], opts)

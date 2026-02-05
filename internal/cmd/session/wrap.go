@@ -26,7 +26,17 @@ func newWrapCmd(ctx *cmdContext) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "wrap",
 		Short: "Complete and archive a session",
-		Long:  `Completes a session, transitioning to ARCHIVED state.`,
+		Long: `Completes a session, transitioning to ARCHIVED state.
+
+Before archiving, generates a White Sails confidence signal. If sails
+are BLACK (explicit blockers present), the wrap is blocked unless --force
+is used. The session directory is moved to the archive unless --no-archive
+is specified.
+
+Examples:
+  ari session wrap
+  ari session wrap --no-archive
+  ari session wrap --force          # Wrap even with BLACK sails`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runWrap(ctx, opts)
 		},

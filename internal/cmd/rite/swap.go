@@ -26,7 +26,7 @@ func newSwapCmd(ctx *cmdContext) *cobra.Command {
 		Short: "Full context switch to another rite",
 		Long: `Performs a full context switch (replacement, not additive).
 
-This is equivalent to 'ari team switch' and maintains backward compatibility.
+Unlike 'ari rite invoke' (additive), swap replaces the entire rite context.
 Any active invocations will be released before the swap.
 
 Examples:

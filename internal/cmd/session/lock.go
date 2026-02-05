@@ -21,7 +21,15 @@ func newLockCmd(ctx *cmdContext) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "lock",
 		Short: "Manually acquire a session lock",
-		Long:  `Manually acquires an exclusive lock on a session. Primarily for debugging.`,
+		Long: `Manually acquires an exclusive lock on a session. Primarily for debugging.
+
+The lock is held until the process exits (Ctrl+C) or 'ari session unlock --force'
+is used from another terminal. Normal session commands acquire and release locks
+automatically.
+
+Examples:
+  ari session lock
+  ari session lock -T 30    # 30 second acquisition timeout`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runLock(ctx, opts)
 		},

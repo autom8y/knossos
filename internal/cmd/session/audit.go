@@ -23,7 +23,16 @@ func newAuditCmd(ctx *cmdContext) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "audit",
 		Short: "Show session event history",
-		Long:  `Displays session event history from events.jsonl.`,
+		Long: `Displays session event history from events.jsonl.
+
+Events include session lifecycle transitions, handoffs, phase changes,
+and other significant actions recorded during the session.
+
+Examples:
+  ari session audit
+  ari session audit -n 10
+  ari session audit -e HANDOFF_EXECUTED
+  ari session audit --since 2026-01-05T14:00:00Z`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runAudit(ctx, opts)
 		},

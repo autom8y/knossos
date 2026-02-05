@@ -25,7 +25,15 @@ func newTransitionCmd(ctx *cmdContext) *cobra.Command {
 		Short: "Transition between workflow phases",
 		Long: `Transitions between workflow phases within an active session.
 
-Valid phases: requirements, design, implementation, validation, complete`,
+Valid phases: requirements, design, implementation, validation, complete
+
+Phases must progress forward. Artifact validation is performed by default
+and can be skipped with --force.
+
+Examples:
+  ari session transition design
+  ari session transition implementation
+  ari session transition complete --force`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runTransition(ctx, args[0], opts)

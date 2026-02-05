@@ -20,7 +20,13 @@ func newShowCmd(ctx *cmdContext) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "show",
 		Short: "Display current effective manifest",
-		Long:  `Shows the manifest file contents with optional schema information.`,
+		Long: `Shows the manifest file contents with optional schema information.
+
+Examples:
+  ari manifest show
+  ari manifest show --schema
+  ari manifest show --resolved
+  ari manifest show --path .claude/manifest.json -o json`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runShow(ctx, opts)
 		},

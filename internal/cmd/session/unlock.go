@@ -19,7 +19,13 @@ func newUnlockCmd(ctx *cmdContext) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "unlock",
 		Short: "Manually release a session lock",
-		Long:  `Manually releases a session lock. Use --force to remove locks held by other processes.`,
+		Long: `Manually releases a session lock. Use --force to remove locks held by other processes.
+
+Useful for recovering from stale locks left by crashed processes.
+
+Examples:
+  ari session unlock
+  ari session unlock --force    # Release lock held by another process`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runUnlock(ctx, opts)
 		},

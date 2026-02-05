@@ -15,7 +15,14 @@ func newResumeCmd(ctx *cmdContext) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "resume",
 		Short: "Resume a parked session",
-		Long:  `Resumes a parked session (PARKED -> ACTIVE).`,
+		Long: `Resumes a parked session (PARKED -> ACTIVE).
+
+The session must be in PARKED state. Use 'ari session status' to check.
+Use -s to specify a session ID if not resuming the current session.
+
+Examples:
+  ari session resume
+  ari session resume -s session-20260105-143000-abc12345`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runResume(ctx)
 		},

@@ -19,7 +19,15 @@ func newListCmd(ctx *cmdContext) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "List available rites",
-		Long:  `Lists all available rites from project and user directories.`,
+		Long: `Lists all available rites from project and user directories.
+
+Shows name, form, agent count, skill count, and active status for each rite.
+
+Examples:
+  ari rite list
+  ari rite list --form full
+  ari rite list --project
+  ari rite list -o json`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runList(ctx, opts)
 		},

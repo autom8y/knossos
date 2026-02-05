@@ -18,7 +18,15 @@ func newValidateCmd(ctx *cmdContext) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "validate",
 		Short: "Validate rite integrity",
-		Long:  `Validates rite (practice bundle) structure and configuration integrity.`,
+		Long: `Validates rite (practice bundle) structure and configuration integrity.
+
+Checks manifest schema, agent files, skill references, and workflow
+configuration. Use --fix to attempt automatic repairs.
+
+Examples:
+  ari rite validate
+  ari rite validate -r ecosystem
+  ari rite validate --fix`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runValidate(ctx, opts)
 		},

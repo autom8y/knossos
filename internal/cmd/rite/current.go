@@ -18,7 +18,15 @@ func newCurrentCmd(ctx *cmdContext) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "current",
 		Short: "Show active rite and borrowed components",
-		Long:  `Displays the active rite, native components, and any borrowed components from invocations.`,
+		Long: `Displays the active rite, native components, and any borrowed components from invocations.
+
+Includes token budget usage showing native, borrowed, and total tokens.
+
+Examples:
+  ari rite current
+  ari rite current --borrowed
+  ari rite current --native
+  ari rite current -o json`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runCurrent(ctx, opts)
 		},

@@ -32,7 +32,18 @@ func NewSessionCmd(outputFlag *string, verboseFlag *bool, projectDir, sessionID 
 	cmd := &cobra.Command{
 		Use:   "session",
 		Short: "Manage workflow sessions",
-		Long:  `Create, list, park, resume, and manage Claude Code workflow sessions.`,
+		Long: `Create, list, park, resume, wrap, and manage Claude Code workflow sessions.
+
+Session lifecycle: NONE -> ACTIVE -> {PARKED, ARCHIVED}
+  PARKED sessions can be resumed back to ACTIVE.
+  ARCHIVED is terminal.
+
+Examples:
+  ari session create "user-auth feature" -c MODULE
+  ari session status
+  ari session park -r "switching context"
+  ari session resume
+  ari session wrap`,
 	}
 
 	// Add subcommands

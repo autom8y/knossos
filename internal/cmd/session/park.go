@@ -24,7 +24,15 @@ func newParkCmd(ctx *cmdContext) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "park",
 		Short: "Suspend the current session",
-		Long:  `Suspends the current session (ACTIVE -> PARKED).`,
+		Long: `Suspends the current session (ACTIVE -> PARKED).
+
+Parked sessions preserve their state and can be resumed later
+with 'ari session resume'. A reason can be provided for the audit log.
+
+Examples:
+  ari session park
+  ari session park -r "switching to higher priority work"
+  ari session park --reason "end of day"`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runPark(ctx, opts)
 		},

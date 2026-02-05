@@ -23,7 +23,15 @@ func newStatusCmd(ctx *cmdContext) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "status",
 		Short: "Show rite status",
-		Long:  `Shows detailed status of the current or specified rite (practice bundle).`,
+		Long: `Shows detailed status of the current or specified rite (practice bundle).
+
+Includes agent installation status, workflow phases, manifest validity,
+CLAUDE.md sync status, and any orphaned agents.
+
+Examples:
+  ari rite status
+  ari rite status -r ecosystem
+  ari rite status -o json`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runStatus(ctx, opts)
 		},
