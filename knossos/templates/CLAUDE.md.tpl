@@ -20,8 +20,6 @@
 {{/* Core navigation (read first) */}}
 {{include "sections/execution-mode.md.tpl"}}
 
-{{include "sections/knossos-identity.md.tpl"}}
-
 {{/* Team context (who is available) */}}
 {{include "sections/quick-start.md.tpl"}}
 
@@ -44,3 +42,6 @@
 {{include "sections/state-management.md.tpl"}}
 
 {{include "sections/slash-commands.md.tpl"}}
+
+{{/* User customization (edit freely) */}}
+{{include "sections/user-content.md.tpl"}}

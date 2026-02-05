@@ -200,29 +200,54 @@ func EnsureDir(path string) error {
 
 // --- XDG Directory Helpers ---
 
-// ConfigDir returns the XDG config directory for ariadne.
+// ConfigDir returns the XDG config directory for knossos.
 func ConfigDir() string {
-	return filepath.Join(xdg.ConfigHome, "ariadne")
+	return filepath.Join(xdg.ConfigHome, "knossos")
 }
 
-// StateDir returns the XDG state directory for ariadne.
+// StateDir returns the XDG state directory for knossos.
 func StateDir() string {
-	return filepath.Join(xdg.StateHome, "ariadne")
+	return filepath.Join(xdg.StateHome, "knossos")
 }
 
-// CacheDir returns the XDG cache directory for ariadne.
+// CacheDir returns the XDG cache directory for knossos.
 func CacheDir() string {
-	return filepath.Join(xdg.CacheHome, "ariadne")
+	return filepath.Join(xdg.CacheHome, "knossos")
 }
 
-// DataDir returns the XDG data directory for ariadne.
+// DataDir returns the XDG data directory for knossos.
 func DataDir() string {
-	return filepath.Join(xdg.DataHome, "ariadne")
+	return filepath.Join(xdg.DataHome, "knossos")
 }
 
 // UserRitesDir returns the user-level rites directory.
 func UserRitesDir() string {
 	return filepath.Join(DataDir(), "rites")
+}
+
+// LegacyDataDir returns the legacy ariadne data directory for migration.
+// Deprecated: Use DataDir() instead. This is only for migration support.
+func LegacyDataDir() string {
+	return filepath.Join(xdg.DataHome, "ariadne")
+}
+
+// MigrateLegacyPaths checks for legacy ariadne directories and returns paths
+// that need migration. Returns nil if no migration needed.
+func MigrateLegacyPaths() []string {
+	legacyPaths := []string{
+		filepath.Join(xdg.ConfigHome, "ariadne"),
+		filepath.Join(xdg.StateHome, "ariadne"),
+		filepath.Join(xdg.CacheHome, "ariadne"),
+		filepath.Join(xdg.DataHome, "ariadne"),
+	}
+
+	var needsMigration []string
+	for _, p := range legacyPaths {
+		if _, err := os.Stat(p); err == nil {
+			needsMigration = append(needsMigration, p)
+		}
+	}
+	return needsMigration
 }
 
 // ConfigFile returns the path to a file in the config directory.
@@ -238,6 +263,54 @@ func EnsureConfigDir() error {
 // EnsureStateDir creates the state directory if it doesn't exist.
 func EnsureStateDir() error {
 	return EnsureDir(StateDir())
+}
+
+// --- User-Level Resource Paths ---
+
+// UserClaudeDir returns the user-level .claude directory.
+func UserClaudeDir() string {
+	homeDir, _ := os.UserHomeDir()
+	return filepath.Join(homeDir, ".claude")
+}
+
+// UserAgentsDir returns the user-level agents directory.
+func UserAgentsDir() string {
+	return filepath.Join(UserClaudeDir(), "agents")
+}
+
+// UserSkillsDir returns the user-level skills directory.
+func UserSkillsDir() string {
+	return filepath.Join(UserClaudeDir(), "skills")
+}
+
+// UserCommandsDir returns the user-level commands directory.
+func UserCommandsDir() string {
+	return filepath.Join(UserClaudeDir(), "commands")
+}
+
+// UserHooksDir returns the user-level hooks directory.
+func UserHooksDir() string {
+	return filepath.Join(UserClaudeDir(), "hooks")
+}
+
+// UserAgentManifest returns the path to the user agent manifest.
+func UserAgentManifest() string {
+	return filepath.Join(UserClaudeDir(), "USER_AGENT_MANIFEST.json")
+}
+
+// UserSkillManifest returns the path to the user skill manifest.
+func UserSkillManifest() string {
+	return filepath.Join(UserClaudeDir(), "USER_SKILL_MANIFEST.json")
+}
+
+// UserCommandManifest returns the path to the user command manifest.
+func UserCommandManifest() string {
+	return filepath.Join(UserClaudeDir(), "USER_COMMAND_MANIFEST.json")
+}
+
+// UserHooksManifest returns the path to the user hooks manifest.
+func UserHooksManifest() string {
+	return filepath.Join(UserClaudeDir(), "USER_HOOKS_MANIFEST.json")
 }
 
 // --- Session ID Helpers ---

@@ -25,24 +25,30 @@ type Options struct {
 	RemoveAll  bool // Remove all orphan agents (with backup)
 	KeepAll    bool // Preserve all orphan agents (default)
 	PromoteAll bool // Move orphan agents to user-level
+	Minimal    bool // Generate base infrastructure only (no rite/agents/skills)
 }
 
 // Result contains materialization outcome details.
 type Result struct {
-	OrphansDetected []string // List of orphan agent files detected
-	OrphanAction    string   // Action taken: "kept", "removed", "promoted"
-	BackupPath      string   // Path to backup if orphans were removed
+	OrphansDetected  []string // List of orphan agent files detected
+	OrphanAction     string   // Action taken: "kept", "removed", "promoted"
+	BackupPath       string   // Path to backup if orphans were removed
+	HooksSkipped     bool     // True if hooks were skipped (no templates/hooks dir)
+	Source           string   // Source type used: "project", "user", "knossos", "explicit"
+	SourcePath       string   // Actual path resolved for rite source
+	LegacyBackupPath string   // Path to legacy CLAUDE.md backup if migration occurred
 }
 
 // RiteManifest represents a rite manifest.yaml file.
 type RiteManifest struct {
-	Name        string   `yaml:"name"`
-	Version     string   `yaml:"version"`
-	Description string   `yaml:"description"`
-	EntryAgent  string   `yaml:"entry_agent"`
-	Agents      []Agent  `yaml:"agents"`
-	Skills      []string `yaml:"skills"`
-	Hooks       []string `yaml:"hooks"`
+	Name         string   `yaml:"name"`
+	Version      string   `yaml:"version"`
+	Description  string   `yaml:"description"`
+	EntryAgent   string   `yaml:"entry_agent"`
+	Agents       []Agent  `yaml:"agents"`
+	Commands     []string `yaml:"commands"`               // Replaces Skills - unified command system
+	Skills       []string `yaml:"skills"`                 // Deprecated: use Commands instead
+	Hooks        []string `yaml:"hooks"`
 	Dependencies []string `yaml:"dependencies"`
 }
 
@@ -54,18 +60,35 @@ type Agent struct {
 
 // Materializer handles .claude/ directory generation.
 type Materializer struct {
-	resolver *paths.Resolver
-	ritesDir string
-	templatesDir string
+	resolver       *paths.Resolver
+	sourceResolver *SourceResolver
+	explicitSource string // Optional explicit source from --source flag
+	ritesDir       string // Deprecated: use sourceResolver
+	templatesDir   string
 }
 
-// NewMaterializer creates a new materializer.
+// NewMaterializer creates a new materializer with default source resolution.
+// Uses 4-tier resolution: project > user > knossos.
 func NewMaterializer(resolver *paths.Resolver) *Materializer {
 	projectRoot := resolver.ProjectRoot()
 	return &Materializer{
-		resolver:     resolver,
-		ritesDir:     filepath.Join(projectRoot, "rites"),
-		templatesDir: filepath.Join(projectRoot, "templates"),
+		resolver:       resolver,
+		sourceResolver: NewSourceResolver(projectRoot),
+		ritesDir:       filepath.Join(projectRoot, "rites"),
+		templatesDir:   filepath.Join(projectRoot, "templates"),
+	}
+}
+
+// NewMaterializerWithSource creates a materializer with an explicit source path.
+// The source can be a path (absolute or ~-relative) or "knossos" to use $KNOSSOS_HOME.
+func NewMaterializerWithSource(resolver *paths.Resolver, source string) *Materializer {
+	projectRoot := resolver.ProjectRoot()
+	return &Materializer{
+		resolver:       resolver,
+		sourceResolver: NewSourceResolver(projectRoot),
+		explicitSource: source,
+		ritesDir:       filepath.Join(projectRoot, "rites"),
+		templatesDir:   filepath.Join(projectRoot, "templates"),
 	}
 }
 
@@ -74,6 +97,55 @@ func NewMaterializer(resolver *paths.Resolver) *Materializer {
 func (m *Materializer) Materialize(activeRiteName string) error {
 	_, err := m.MaterializeWithOptions(activeRiteName, Options{KeepAll: true})
 	return err
+}
+
+// MaterializeMinimal generates minimal .claude/ infrastructure without a rite.
+// This is suitable for cross-cutting mode (session tracking without orchestrated workflows).
+// It creates: CLAUDE.md (base sections), hooks, KNOSSOS_MANIFEST.yaml
+// It does NOT create: agents/, skills/, ACTIVE_RITE
+func (m *Materializer) MaterializeMinimal(opts Options) (*Result, error) {
+	result := &Result{
+		OrphansDetected: []string{},
+		OrphanAction:    "minimal",
+		Source:          "minimal",
+	}
+
+	claudeDir := m.resolver.ClaudeDir()
+
+	// Dry-run: just return success
+	if opts.DryRun {
+		return result, nil
+	}
+
+	// Ensure .claude/ directory exists
+	if err := paths.EnsureDir(claudeDir); err != nil {
+		return nil, errors.Wrap(errors.CodeGeneralError, "failed to create .claude directory", err)
+	}
+
+	// Generate hooks from templates (if available)
+	hooksSkipped, err := m.materializeHooks(claudeDir)
+	if err != nil {
+		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize hooks", err)
+	}
+	result.HooksSkipped = hooksSkipped
+
+	// Generate minimal CLAUDE.md (no agents)
+	legacyBackupPath, err := m.materializeMinimalCLAUDEmd(claudeDir)
+	if err != nil {
+		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize CLAUDE.md", err)
+	}
+	result.LegacyBackupPath = legacyBackupPath
+
+	// Generate settings.local.json if needed
+	if err := m.materializeSettings(claudeDir); err != nil {
+		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize settings", err)
+	}
+
+	// Remove ACTIVE_RITE file if it exists (cross-cutting mode has no rite)
+	activeRitePath := filepath.Join(claudeDir, "ACTIVE_RITE")
+	os.Remove(activeRitePath) // Ignore error if doesn't exist
+
+	return result, nil
 }
 
 // MaterializeWithOptions generates the .claude/ directory with configurable orphan handling.
@@ -94,8 +166,23 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 		}
 	}
 
-	// 1. Load the active rite manifest
-	ritePath := filepath.Join(m.ritesDir, activeRiteName)
+	// 1. Resolve rite source using 4-tier resolution
+	resolved, err := m.sourceResolver.ResolveRite(activeRiteName, m.explicitSource)
+	if err != nil {
+		return nil, err // Error already has good context from SourceResolver
+	}
+
+	// Use resolved rite path and record source info
+	ritePath := resolved.RitePath
+	result.Source = string(resolved.Source.Type)
+	result.SourcePath = resolved.Source.Path
+
+	// Update templates dir if resolved from different source
+	if resolved.TemplatesDir != "" {
+		m.templatesDir = resolved.TemplatesDir
+	}
+
+	// Load the rite manifest from resolved path
 	manifest, err := m.loadRiteManifest(ritePath)
 	if err != nil {
 		return nil, errors.Wrap(errors.CodeFileNotFound, "failed to load rite manifest", err)
@@ -145,20 +232,24 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize agents", err)
 	}
 
-	// 5. Generate skills/ directory from rite + shared + dependencies
-	if err := m.materializeSkills(manifest, claudeDir); err != nil {
-		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize skills", err)
+	// 5. Generate commands/ directory from rite + shared + dependencies + user-commands
+	if err := m.materializeCommands(manifest, claudeDir); err != nil {
+		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize commands", err)
 	}
 
 	// 6. Generate hooks/ directory from templates/hooks
-	if err := m.materializeHooks(claudeDir); err != nil {
+	hooksSkipped, err := m.materializeHooks(claudeDir)
+	if err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize hooks", err)
 	}
+	result.HooksSkipped = hooksSkipped
 
 	// 7. Generate CLAUDE.md from inscription system
-	if err := m.materializeCLAUDEmd(manifest, claudeDir); err != nil {
+	legacyBackupPath, err := m.materializeCLAUDEmd(manifest, claudeDir)
+	if err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize CLAUDE.md", err)
 	}
+	result.LegacyBackupPath = legacyBackupPath
 
 	// 8. Generate settings.local.json if not exists
 	if err := m.materializeSettings(claudeDir); err != nil {
@@ -349,7 +440,60 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claud
 	})
 }
 
-// materializeSkills copies skill files from rite, shared, and dependencies to .claude/skills/
+// materializeCommands copies command files to .claude/commands/
+// Sources: user-commands/, rites/{rite}/commands/, rites/shared/commands/
+// Priority order (later sources override earlier): user-commands < shared < dependencies < current rite
+func (m *Materializer) materializeCommands(manifest *RiteManifest, claudeDir string) error {
+	commandsDir := filepath.Join(claudeDir, "commands")
+
+	// Remove existing commands directory
+	if err := os.RemoveAll(commandsDir); err != nil && !os.IsNotExist(err) {
+		return err
+	}
+
+	// Create fresh commands directory
+	if err := paths.EnsureDir(commandsDir); err != nil {
+		return err
+	}
+
+	// Priority order for sources (later sources can override earlier)
+	sources := []string{}
+
+	// 1. User-level commands (lowest priority, can be overridden)
+	if userCmdsDir := m.getUserCommandsDir(); userCmdsDir != "" {
+		sources = append(sources, userCmdsDir)
+	}
+
+	// 2. Shared rite commands
+	sharedCmdsDir := filepath.Join(m.ritesDir, "shared", "commands")
+	sources = append(sources, sharedCmdsDir)
+
+	// 3. Dependency rite commands (in order)
+	for _, dep := range manifest.Dependencies {
+		if dep != "shared" { // Already added shared
+			sources = append(sources, filepath.Join(m.ritesDir, dep, "commands"))
+		}
+	}
+
+	// 4. Current rite commands (highest priority)
+	currentRiteCmdsDir := filepath.Join(m.ritesDir, manifest.Name, "commands")
+	sources = append(sources, currentRiteCmdsDir)
+
+	// Copy from all sources
+	for _, source := range sources {
+		if _, err := os.Stat(source); os.IsNotExist(err) {
+			continue // Skip if source doesn't exist
+		}
+		if err := m.copyDir(source, commandsDir); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// materializeSkills is deprecated - use materializeCommands instead.
+// Kept for backward compatibility with legacy manifests that still use skills field.
 func (m *Materializer) materializeSkills(manifest *RiteManifest, claudeDir string) error {
 	skillsDir := filepath.Join(claudeDir, "skills")
 
@@ -385,41 +529,74 @@ func (m *Materializer) materializeSkills(manifest *RiteManifest, claudeDir strin
 	return nil
 }
 
+// getUserCommandsDir returns the user-commands directory path.
+// Checks project-level first, then falls back to Knossos platform level.
+func (m *Materializer) getUserCommandsDir() string {
+	// Check for project-level user-commands first
+	projectUserCmds := filepath.Join(m.resolver.ProjectRoot(), "user-commands")
+	if _, err := os.Stat(projectUserCmds); err == nil {
+		return projectUserCmds
+	}
+
+	// Fall back to Knossos platform user-commands
+	if m.sourceResolver.knossosHome != "" {
+		knossosUserCmds := filepath.Join(m.sourceResolver.knossosHome, "user-commands")
+		if _, err := os.Stat(knossosUserCmds); err == nil {
+			return knossosUserCmds
+		}
+	}
+
+	return ""
+}
+
 // materializeHooks copies hook files from templates/hooks to .claude/hooks/
-func (m *Materializer) materializeHooks(claudeDir string) error {
+// Returns (skipped bool, err error) where skipped=true if no templates/hooks dir exists.
+func (m *Materializer) materializeHooks(claudeDir string) (bool, error) {
 	hooksDir := filepath.Join(claudeDir, "hooks")
 	sourceHooksDir := filepath.Join(m.templatesDir, "hooks")
 
 	// Check if templates/hooks exists (it may not yet)
 	if _, err := os.Stat(sourceHooksDir); os.IsNotExist(err) {
-		// For now, just copy the existing hooks from .claude/hooks if they exist
-		// This preserves existing functionality until we have templates/hooks
-		return nil
+		// No templates/hooks directory - this is expected for consumer projects
+		// or when hooks are managed separately. Preserve existing hooks if any.
+		return true, nil
 	}
 
 	// Remove existing hooks directory
 	if err := os.RemoveAll(hooksDir); err != nil && !os.IsNotExist(err) {
-		return err
+		return false, err
 	}
 
 	// Create fresh hooks directory
 	if err := paths.EnsureDir(hooksDir); err != nil {
-		return err
+		return false, err
 	}
 
 	// Copy hooks
-	return m.copyDir(sourceHooksDir, hooksDir)
+	return false, m.copyDir(sourceHooksDir, hooksDir)
 }
 
 // materializeCLAUDEmd generates CLAUDE.md using the inscription system.
-func (m *Materializer) materializeCLAUDEmd(manifest *RiteManifest, claudeDir string) error {
-	// Load KNOSSOS_MANIFEST.yaml
+// Returns the path to legacy backup if migration occurred, or empty string if no backup.
+func (m *Materializer) materializeCLAUDEmd(manifest *RiteManifest, claudeDir string) (string, error) {
+	// Load or create KNOSSOS_MANIFEST.yaml
 	knossosManifestPath := filepath.Join(claudeDir, "KNOSSOS_MANIFEST.yaml")
 	loader := inscription.NewManifestLoader(m.resolver.ProjectRoot())
 	loader.ManifestPath = knossosManifestPath
-	inscriptionManifest, err := loader.Load()
+
+	// Check if manifest exists before loading (for save decision later)
+	manifestExists := loader.Exists()
+
+	inscriptionManifest, err := loader.LoadOrCreate()
 	if err != nil {
-		return errors.Wrap(errors.CodeFileNotFound, "failed to load KNOSSOS_MANIFEST.yaml", err)
+		return "", errors.Wrap(errors.CodeGeneralError, "failed to load or create KNOSSOS_MANIFEST.yaml", err)
+	}
+
+	// Save manifest if newly created (ensures it persists for future runs)
+	if !manifestExists {
+		if err := loader.Save(inscriptionManifest); err != nil {
+			return "", errors.Wrap(errors.CodeGeneralError, "failed to save KNOSSOS_MANIFEST.yaml", err)
+		}
 	}
 
 	// Build render context
@@ -441,31 +618,120 @@ func (m *Materializer) materializeCLAUDEmd(manifest *RiteManifest, claudeDir str
 		ProjectRoot: m.resolver.ProjectRoot(),
 	}
 
-	// Create generator
-	generator := inscription.NewGenerator("", inscriptionManifest, renderCtx)
+	// Create generator with template directory for section rendering
+	generator := inscription.NewGenerator(m.templatesDir, inscriptionManifest, renderCtx)
 
 	// Generate all sections
 	sections, err := generator.GenerateAll()
 	if err != nil {
-		return errors.Wrap(errors.CodeGeneralError, "failed to generate CLAUDE.md sections", err)
+		return "", errors.Wrap(errors.CodeGeneralError, "failed to generate CLAUDE.md sections", err)
 	}
 
-	// Read existing CLAUDE.md if it exists
+	// Read existing CLAUDE.md and check for legacy format
 	claudeMdPath := filepath.Join(claudeDir, "CLAUDE.md")
 	existingContent := ""
+	legacyBackupPath := ""
+
 	if data, err := os.ReadFile(claudeMdPath); err == nil {
 		existingContent = string(data)
+
+		// Detect legacy CLAUDE.md (no KNOSSOS markers) and backup before overwriting
+		if !strings.Contains(existingContent, "<!-- KNOSSOS:START") && len(existingContent) > 0 {
+			legacyBackupPath = fmt.Sprintf("%s.legacy-%s", claudeMdPath, time.Now().Format("20060102-150405"))
+			if err := os.WriteFile(legacyBackupPath, data, 0644); err != nil {
+				return "", errors.Wrap(errors.CodeGeneralError, "failed to backup legacy CLAUDE.md", err)
+			}
+			// Clear existing content so merger generates fresh file
+			existingContent = ""
+		}
 	}
 
 	// Merge sections
 	merger := inscription.NewMerger(inscriptionManifest, generator)
 	mergeResult, err := merger.MergeRegions(existingContent, sections)
 	if err != nil {
-		return errors.Wrap(errors.CodeGeneralError, "failed to merge CLAUDE.md regions", err)
+		return "", errors.Wrap(errors.CodeGeneralError, "failed to merge CLAUDE.md regions", err)
 	}
 
 	// Write CLAUDE.md
-	return os.WriteFile(claudeMdPath, []byte(mergeResult.Content), 0644)
+	if err := os.WriteFile(claudeMdPath, []byte(mergeResult.Content), 0644); err != nil {
+		return "", errors.Wrap(errors.CodeGeneralError, "failed to write CLAUDE.md", err)
+	}
+
+	return legacyBackupPath, nil
+}
+
+// materializeMinimalCLAUDEmd generates CLAUDE.md for cross-cutting mode (no agents).
+func (m *Materializer) materializeMinimalCLAUDEmd(claudeDir string) (string, error) {
+	// Load or create KNOSSOS_MANIFEST.yaml
+	knossosManifestPath := filepath.Join(claudeDir, "KNOSSOS_MANIFEST.yaml")
+	loader := inscription.NewManifestLoader(m.resolver.ProjectRoot())
+	loader.ManifestPath = knossosManifestPath
+
+	// Check if manifest exists before loading
+	manifestExists := loader.Exists()
+
+	inscriptionManifest, err := loader.LoadOrCreate()
+	if err != nil {
+		return "", errors.Wrap(errors.CodeGeneralError, "failed to load or create KNOSSOS_MANIFEST.yaml", err)
+	}
+
+	// Save manifest if newly created
+	if !manifestExists {
+		if err := loader.Save(inscriptionManifest); err != nil {
+			return "", errors.Wrap(errors.CodeGeneralError, "failed to save KNOSSOS_MANIFEST.yaml", err)
+		}
+	}
+
+	// Build minimal render context (no agents, no rite)
+	renderCtx := &inscription.RenderContext{
+		ActiveRite:  "", // Cross-cutting mode has no rite
+		AgentCount:  0,
+		Agents:      []inscription.AgentInfo{},
+		KnossosVars: make(map[string]string),
+		ProjectRoot: m.resolver.ProjectRoot(),
+	}
+
+	// Create generator with template directory
+	generator := inscription.NewGenerator(m.templatesDir, inscriptionManifest, renderCtx)
+
+	// Generate all sections
+	sections, err := generator.GenerateAll()
+	if err != nil {
+		return "", errors.Wrap(errors.CodeGeneralError, "failed to generate CLAUDE.md sections", err)
+	}
+
+	// Read existing CLAUDE.md and check for legacy format
+	claudeMdPath := filepath.Join(claudeDir, "CLAUDE.md")
+	existingContent := ""
+	legacyBackupPath := ""
+
+	if data, err := os.ReadFile(claudeMdPath); err == nil {
+		existingContent = string(data)
+
+		// Detect legacy CLAUDE.md (no KNOSSOS markers) and backup before overwriting
+		if !strings.Contains(existingContent, "<!-- KNOSSOS:START") && len(existingContent) > 0 {
+			legacyBackupPath = fmt.Sprintf("%s.legacy-%s", claudeMdPath, time.Now().Format("20060102-150405"))
+			if err := os.WriteFile(legacyBackupPath, data, 0644); err != nil {
+				return "", errors.Wrap(errors.CodeGeneralError, "failed to backup legacy CLAUDE.md", err)
+			}
+			existingContent = ""
+		}
+	}
+
+	// Merge sections
+	merger := inscription.NewMerger(inscriptionManifest, generator)
+	mergeResult, err := merger.MergeRegions(existingContent, sections)
+	if err != nil {
+		return "", errors.Wrap(errors.CodeGeneralError, "failed to merge CLAUDE.md regions", err)
+	}
+
+	// Write CLAUDE.md
+	if err := os.WriteFile(claudeMdPath, []byte(mergeResult.Content), 0644); err != nil {
+		return "", errors.Wrap(errors.CodeGeneralError, "failed to write CLAUDE.md", err)
+	}
+
+	return legacyBackupPath, nil
 }
 
 // materializeSettings generates settings.local.json if it doesn't exist.
@@ -478,8 +744,8 @@ func (m *Materializer) materializeSettings(claudeDir string) error {
 	}
 
 	// Create minimal settings with hooks configuration
-	settings := map[string]interface{}{
-		"hooks": map[string]interface{}{},
+	settings := map[string]any{
+		"hooks": map[string]any{},
 	}
 
 	data, err := json.MarshalIndent(settings, "", "  ")

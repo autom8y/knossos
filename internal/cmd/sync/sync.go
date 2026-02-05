@@ -38,8 +38,8 @@ Supported remotes:
   - Git refs: HEAD:.claude/path, origin/main:.claude/path`,
 	}
 
-	// Add subcommands
-	cmd.AddCommand(newMaterializeCmd(ctx))
+	// Add subcommands - each sets its own NeedsProject annotation
+	cmd.AddCommand(newMaterializeCmd(ctx)) // NeedsProject=false (can bootstrap)
 	cmd.AddCommand(newStatusCmd(ctx))
 	cmd.AddCommand(newPullCmd(ctx))
 	cmd.AddCommand(newPushCmd(ctx))
@@ -47,9 +47,17 @@ Supported remotes:
 	cmd.AddCommand(newResolveCmd(ctx))
 	cmd.AddCommand(newHistoryCmd(ctx))
 	cmd.AddCommand(newResetCmd(ctx))
+	cmd.AddCommand(newUserCmd(ctx)) // User sync (NeedsProject=false)
 
-	// Sync commands require project context
-	common.SetNeedsProject(cmd, true, true)
+	// Sync parent command requires project (but not recursive - materialize/user overrides)
+	common.SetNeedsProject(cmd, true, false)
+
+	// Set NeedsProject for all subcommands except materialize and user
+	for _, sub := range cmd.Commands() {
+		if sub.Name() != "materialize" && sub.Name() != "user" {
+			common.SetNeedsProject(sub, true, false)
+		}
+	}
 
 	return cmd
 }

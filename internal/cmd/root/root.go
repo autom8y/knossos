@@ -102,7 +102,7 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&globalOpts.Verbose, "verbose", "v", false,
 		"Enable verbose output (JSON lines to stderr)")
 	rootCmd.PersistentFlags().StringVar(&globalOpts.Config, "config", "",
-		"Config file (default: $XDG_CONFIG_HOME/ariadne/config.yaml)")
+		"Config file (default: $XDG_CONFIG_HOME/knossos/config.yaml)")
 	rootCmd.PersistentFlags().StringVarP(&globalOpts.ProjectDir, "project-dir", "p", "",
 		"Project root directory (overrides discovery)")
 	rootCmd.PersistentFlags().StringVarP(&globalOpts.SessionID, "session-id", "s", "",
