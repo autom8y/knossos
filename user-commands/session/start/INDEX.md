@@ -1,6 +1,6 @@
 ---
 description: Initialize a new work session
-argument-hint: <initiative> [--complexity=LEVEL] [--team=PACK]
+argument-hint: <initiative> [--complexity=LEVEL] [--rite=PACK]
 allowed-tools: Bash, Read, Task
 model: opus
 ---
@@ -54,13 +54,13 @@ If not provided in arguments, ask the user:
 | Parameter | Description | Default |
 |-----------|-------------|---------|
 | **Initiative** | What are we building? | Required |
-| **Complexity** | SCRIPT \| MODULE \| SERVICE \| PLATFORM | MODULE |
-| **Team** | Team pack to use | Current team from context |
+| **Complexity** | PATCH \| MODULE \| SYSTEM \| INITIATIVE \| MIGRATION | MODULE |
+| **Rite** | Rite to use | Current rite from context |
 
 ### 3. Create Session (ONE command)
 
 ```bash
-.claude/hooks/lib/session-manager.sh create "<initiative>" "<complexity>" "<team>"
+hooks/lib/session-manager.sh create "<initiative>" "<complexity>" "<rite>"
 ```
 
 This atomically:
@@ -69,12 +69,15 @@ This atomically:
 - Creates SESSION_CONTEXT.md
 - Returns JSON with session_id, entry_agent
 
-### 4. Team Switch (only if --team differs)
+### 4. Rite Switch (only if --rite differs)
 
-If user specified `--team=NAME` and it differs from Active Team:
+If user specified `--rite=NAME` and it differs from Active Rite:
 ```bash
-${ROSTER_HOME:-~/Code/roster}/swap-team.sh <team-name>
+ari sync materialize --rite <rite-name>
 ```
+
+**Note**: If `ari` is not in PATH, use `~/bin/ari` or fall back to legacy:
+`${ROSTER_HOME:-~/Code/roster}/swap-rite.sh <rite-name>`
 
 ### 5. Invoke Entry Point Agent
 
@@ -96,17 +99,18 @@ Output to user:
 
 | Level | Phases | Use For |
 |-------|--------|---------|
-| SCRIPT | requirements → implementation | Single-file changes, quick fixes |
+| PATCH | requirements → implementation | Single-file changes, quick fixes |
 | MODULE | requirements → design → implementation | Multi-file features |
-| SERVICE | + validation | New services, APIs |
-| PLATFORM | + Session -1/0 assessment | Major initiatives |
+| SYSTEM | + validation | New services, APIs |
+| INITIATIVE | + Session -1/0 assessment | Major initiatives |
+| MIGRATION | Full lifecycle + migration planning | Cross-cutting migrations, large-scale refactors |
 
 ## Example Usage
 
 ```
 /start "Add dark mode toggle"
 /start "Refactor auth module" --complexity=MODULE
-/start "New billing service" --complexity=SERVICE --team=10x-dev-pack
+/start "New billing service" --complexity=SYSTEM --rite=10x-dev
 ```
 
 ## Reference

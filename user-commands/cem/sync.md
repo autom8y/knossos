@@ -10,30 +10,29 @@ Auto-injected by SessionStart hook (project, team, session, git).
 
 ## Your Task
 
-Execute ari sync to synchronize project with roster ecosystem. $ARGUMENTS
+Execute ari sync to synchronize project with roster ecosystem.
 
 ## Behavior
 
-1. **Execute ari sync** using the installed binary:
-   ```bash
-   ari sync [command] $ARGUMENTS
-   ```
-   If `ari` is not in PATH, fall back to: `~/bin/ari sync [command] $ARGUMENTS`
+**CRITICAL**: Execute EXACTLY this command based on arguments:
 
-2. **Pass through all arguments**:
-   - Commands: status, pull, push, diff, materialize, resolve, history, reset
-   - Flags: --rite=NAME (for materialize), --force, --verbose
-   - Display output directly to user
+| If $ARGUMENTS is... | Run this command |
+|---------------------|------------------|
+| Empty (no args) | `ari sync status` |
+| `--refresh` | `ari sync materialize` |
+| Anything else | `ari sync $ARGUMENTS` |
 
-3. **Handle errors**:
-   - If ari not found:
-     - ERROR: "ari not found. Install via: brew install autom8y/tap/ari"
-     - Or build locally: "cd ~/Code/roster && just build && cp ari ~/bin/"
-   - If execution fails: Display stderr for debugging
+**IMPORTANT - Interpret status output**:
+- If status shows **empty table** (just headers, no rows): Project is NOT configured. Tell user:
+  > "Project not yet configured for Knossos sync. To set up, run one of:"
+  > - `ari sync materialize --rite=10x-dev` (within roster repo)
+  > - `ari sync materialize --rite=10x-dev --source=knossos` (consumer project)
+  > - `ari sync materialize --minimal --source=knossos` (cross-cutting mode, no agents)
+- If status shows tracked paths: Report the actual status
 
-4. **Special handling for --refresh flag**:
-   - If `--refresh` is passed, translate to: `ari sync materialize`
-   - This regenerates .claude/ from templates and active rite
+**Handle errors**:
+- If "no ACTIVE_RITE found": Suggest `ari sync materialize --rite=<name> --source=knossos` or `--minimal`
+- If ari not found: `cd ~/Code/roster && CGO_ENABLED=0 go install ./cmd/ari`
 
 ## Command Mapping
 
@@ -61,11 +60,28 @@ The following legacy commands are deprecated:
 ## Common Commands
 
 ```bash
+# Within roster repo (has local rites)
+/sync                             # Show sync status (default)
 /sync status                      # Show sync status
 /sync materialize                 # Generate .claude/ from templates
 /sync materialize --rite=hygiene  # Generate for specific rite
-/sync pull                        # Pull remote changes
-/sync diff                        # Show pending changes
+
+# Bootstrap NEW project (creates .claude/ if missing)
+/sync materialize --rite=10x-dev --source=knossos
+
+# Cross-cutting mode (no rite, just base infrastructure)
+/sync materialize --minimal --source=knossos
+```
+
+## Bootstrapping New Projects
+
+`materialize` can bootstrap a new project from scratch - it will create the `.claude/` directory if it doesn't exist:
+
+```bash
+cd ~/Code/my-new-project
+ari sync materialize --rite=10x-dev --source=knossos  # Full orchestrated workflow
+# OR
+ari sync materialize --minimal --source=knossos       # Just base infrastructure
 ```
 
 ## Reference
