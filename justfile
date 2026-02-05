@@ -31,6 +31,12 @@ test-verbose:
 test-sails:
     CGO_ENABLED=0 go test -v ./internal/sails/...
 
+# Validate frontmatter on all INDEX.md command files
+audit-frontmatter:
+    @echo "Auditing command frontmatter..."
+    @CGO_ENABLED=0 go test ./internal/materialize/... -run TestFrontmatterAllIndexFiles -v
+    @echo "✓ Frontmatter audit passed."
+
 # Lint the codebase
 lint:
     golangci-lint run
