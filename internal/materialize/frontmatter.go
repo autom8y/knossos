@@ -3,10 +3,46 @@ package materialize
 
 import (
 	"bytes"
+	"strings"
 
 	"github.com/autom8y/knossos/internal/errors"
 	"gopkg.in/yaml.v3"
 )
+
+// FlexibleStringSlice is a YAML type that accepts both a comma-separated string
+// (e.g., "Bash, Read, Glob") and a proper YAML list (e.g., [Bash, Read, Glob]).
+// This handles the common pattern in command frontmatter where tools are listed inline.
+type FlexibleStringSlice []string
+
+// UnmarshalYAML implements the yaml.Unmarshaler interface.
+func (f *FlexibleStringSlice) UnmarshalYAML(value *yaml.Node) error {
+	// Try as a sequence first
+	if value.Kind == yaml.SequenceNode {
+		var slice []string
+		if err := value.Decode(&slice); err != nil {
+			return err
+		}
+		*f = slice
+		return nil
+	}
+
+	// Fall back to comma-separated string
+	var str string
+	if err := value.Decode(&str); err != nil {
+		return err
+	}
+
+	parts := strings.Split(str, ",")
+	result := make([]string, 0, len(parts))
+	for _, part := range parts {
+		part = strings.TrimSpace(part)
+		if part != "" {
+			result = append(result, part)
+		}
+	}
+	*f = result
+	return nil
+}
 
 // CommandFrontmatter represents the unified frontmatter schema for commands.
 // Commands can be invokable (user-callable via /name) or reference (auto-loaded patterns).
@@ -18,8 +54,8 @@ type CommandFrontmatter struct {
 	// Invocation Control
 	Invokable    *bool    `yaml:"invokable,omitempty"`     // Default: true. User-callable via /name
 	ArgumentHint string   `yaml:"argument-hint,omitempty"` // Only for invokable=true. Usage hint
-	Triggers     []string `yaml:"triggers,omitempty"`      // Auto-invocation keywords
-	AllowedTools []string `yaml:"allowed-tools,omitempty"` // Tool restrictions (only for invokable=true)
+	Triggers     FlexibleStringSlice `yaml:"triggers,omitempty"`      // Auto-invocation keywords
+	AllowedTools FlexibleStringSlice `yaml:"allowed-tools,omitempty"` // Tool restrictions (only for invokable=true)
 	Model        string   `yaml:"model,omitempty"`         // Model selection (only for invokable=true)
 
 	// Classification (for non-invokable)

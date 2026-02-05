@@ -440,19 +440,27 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claud
 	})
 }
 
-// materializeCommands copies command files to .claude/commands/
+// materializeCommands copies command files to .claude/commands/ or .claude/skills/
+// based on the invokable frontmatter field in each command's INDEX.md.
 // Sources: user-commands/, rites/{rite}/commands/, rites/shared/commands/
 // Priority order (later sources override earlier): user-commands < shared < dependencies < current rite
 func (m *Materializer) materializeCommands(manifest *RiteManifest, claudeDir string) error {
 	commandsDir := filepath.Join(claudeDir, "commands")
+	skillsDir := filepath.Join(claudeDir, "skills")
 
-	// Remove existing commands directory
+	// Remove and recreate commands directory
 	if err := os.RemoveAll(commandsDir); err != nil && !os.IsNotExist(err) {
 		return err
 	}
-
-	// Create fresh commands directory
 	if err := paths.EnsureDir(commandsDir); err != nil {
+		return err
+	}
+
+	// Remove and recreate skills directory (routing may place non-invokable commands here)
+	if err := os.RemoveAll(skillsDir); err != nil && !os.IsNotExist(err) {
+		return err
+	}
+	if err := paths.EnsureDir(skillsDir); err != nil {
 		return err
 	}
 
@@ -479,12 +487,50 @@ func (m *Materializer) materializeCommands(manifest *RiteManifest, claudeDir str
 	currentRiteCmdsDir := filepath.Join(m.ritesDir, manifest.Name, "commands")
 	sources = append(sources, currentRiteCmdsDir)
 
-	// Copy from all sources
+	// Pass 1: Collect command directories from all sources.
+	// Later sources override earlier ones for the same command name.
+	// Each entry maps commandName -> source directory path.
+	collected := make(map[string]string)
 	for _, source := range sources {
 		if _, err := os.Stat(source); os.IsNotExist(err) {
-			continue // Skip if source doesn't exist
+			continue
 		}
-		if err := m.copyDir(source, commandsDir); err != nil {
+		entries, err := os.ReadDir(source)
+		if err != nil {
+			return err
+		}
+		for _, entry := range entries {
+			if !entry.IsDir() {
+				continue
+			}
+			// Later sources override earlier: same key gets overwritten
+			collected[entry.Name()] = filepath.Join(source, entry.Name())
+		}
+	}
+
+	// Pass 2: Route each collected command directory by frontmatter.
+	// Invokable (or parse failure/missing INDEX.md) -> .claude/commands/
+	// Non-invokable -> .claude/skills/
+	for name, srcDir := range collected {
+		invokable := true // default: route to commands/
+
+		indexPath := filepath.Join(srcDir, "INDEX.md")
+		if content, err := os.ReadFile(indexPath); err == nil {
+			if fm, err := ParseCommandFrontmatter(content); err == nil {
+				invokable = fm.IsInvokable()
+			}
+			// Parse failure: keep default (invokable=true)
+		}
+		// Missing INDEX.md: keep default (invokable=true)
+
+		var destDir string
+		if invokable {
+			destDir = filepath.Join(commandsDir, name)
+		} else {
+			destDir = filepath.Join(skillsDir, name)
+		}
+
+		if err := m.copyDir(srcDir, destDir); err != nil {
 			return err
 		}
 	}
