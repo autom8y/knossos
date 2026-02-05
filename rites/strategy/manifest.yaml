@@ -45,7 +45,7 @@ agents:
   - name: roadmap-strategist
     role: Creates strategic roadmaps with execution timelines
 
-skills:
+commands:
   - doc-strategy
   - strategy-ref
 

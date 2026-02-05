@@ -48,7 +48,7 @@ agents:
   - name: tech-transfer
     role: Facilitates technology transfer from R&D to production teams
 
-skills:
+commands:
   - doc-rnd
   - rnd-ref
 

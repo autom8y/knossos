@@ -14,7 +14,7 @@ phases: []
 # Shared has no agents - it's skills-only infrastructure
 agents: []
 
-skills:
+commands:
   - cross-rite-handoff
   - shared-templates
   - smell-detection

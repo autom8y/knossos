@@ -45,7 +45,7 @@ agents:
   - name: security-reviewer
     role: Performs final security review and grants deployment approval
 
-skills:
+commands:
   - doc-security
   - security-ref
 

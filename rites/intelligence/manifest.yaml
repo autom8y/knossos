@@ -45,7 +45,7 @@ agents:
   - name: insights-analyst
     role: Synthesizes quantitative and qualitative data into insights
 
-skills:
+commands:
   - doc-intelligence
   - intelligence-ref
 

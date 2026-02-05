@@ -54,7 +54,7 @@ agents:
   - name: compatibility-tester
     role: Validates ecosystem changes across satellite configurations
 
-skills:
+commands:
   - claude-md-architecture
   - doc-ecosystem
   - ecosystem-ref

@@ -45,7 +45,7 @@ agents:
   - name: chaos-engineer
     role: Designs and executes chaos experiments to verify resilience
 
-skills:
+commands:
   - doc-sre
   - sre-ref
 

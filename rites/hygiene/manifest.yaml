@@ -44,7 +44,7 @@ agents:
   - name: audit-lead
     role: Audits cleanup results and provides quality signoff
 
-skills:
+commands:
   - hygiene-ref
 
 hooks: []

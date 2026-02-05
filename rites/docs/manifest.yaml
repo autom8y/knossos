@@ -45,7 +45,7 @@ agents:
   - name: doc-reviewer
     role: Reviews documentation for technical accuracy and quality
 
-skills:
+commands:
   - doc-consolidation
   - doc-reviews
   - docs-ref

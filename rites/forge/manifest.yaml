@@ -62,7 +62,7 @@ agents:
   - name: eval-specialist
     role: Evaluates agent performance and validates readiness
 
-skills:
+commands:
   - agent-prompt-engineering
   - forge-ref
   - rite-development
