@@ -340,7 +340,7 @@ func TestGenerator_GenerateAgentConfigsContent(t *testing.T) {
 		t.Fatalf("generateAgentConfigsContent() error = %v", err)
 	}
 
-	if !strings.Contains(content, "## Agent Configurations") {
+	if !strings.Contains(content, "## Agents") {
 		t.Error("generateAgentConfigsContent() missing header")
 	}
 	if !strings.Contains(content, "architect.md") {
@@ -357,14 +357,11 @@ func TestGenerator_GetDefaultSectionContent(t *testing.T) {
 	// Test each known section
 	sections := []string{
 		"execution-mode",
-		"knossos-identity",
 		"agent-routing",
+		"commands",
 		"skills",
-		"hooks",
-		"dynamic-context",
-		"ariadne-cli",
-		"getting-help",
-		"state-management",
+		"platform-infrastructure",
+		"navigation",
 		"slash-commands",
 		"quick-start",
 		"agent-configurations",

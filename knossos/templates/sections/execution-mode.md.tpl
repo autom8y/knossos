@@ -3,7 +3,7 @@
 <!-- KNOSSOS:START execution-mode -->
 ## Execution Mode
 
-This project supports three operating modes (see PRD-hybrid-session-model for details):
+Three operating modes:
 
 | Mode | Session | Rite | Main Agent Behavior |
 |------|---------|------|---------------------|
@@ -11,7 +11,5 @@ This project supports three operating modes (see PRD-hybrid-session-model for de
 | **Cross-Cutting** | Yes | No | Direct execution + session tracking |
 | **Orchestrated** | Yes | Yes (ACTIVE) | Coach pattern, delegate via Task tool |
 
-**Unsure?** Use `/consult` for workflow routing.
-
-For enforcement rules: `orchestration/execution-mode.md`
+Use `/consult` for mode selection. Enforcement rules: `orchestration/execution-mode.md`
 <!-- KNOSSOS:END execution-mode -->

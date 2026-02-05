@@ -3,7 +3,7 @@
 <!-- KNOSSOS:START agent-routing -->
 ## Agent Routing
 
-When working within an orchestrated session, the main thread coordinates via Task tool delegation to specialist agents. Without an active session, direct execution or `/task` initialization are both valid approaches.
+In orchestrated sessions, delegate to specialists via Task tool. Without a session, execute directly or use `/task`.
 
-For routing guidance: `/consult`
+Routing guidance: `/consult`
 <!-- KNOSSOS:END agent-routing -->

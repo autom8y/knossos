@@ -336,7 +336,7 @@ func (g *Generator) generateQuickStartContent() (string, error) {
 	sb.WriteString("\n\n")
 
 	// Footer
-	sb.WriteString("**New here?** Use the `prompting` skill for copy-paste patterns, or `initiative-scoping` to start a new project.")
+	sb.WriteString("Use `prompting` for agent invocation patterns. Use `initiative-scoping` for new projects.")
 
 	return sb.String(), nil
 }
@@ -348,8 +348,8 @@ func (g *Generator) generateAgentConfigsContent() (string, error) {
 	}
 
 	var sb strings.Builder
-	sb.WriteString("## Agent Configurations\n\n")
-	sb.WriteString("Full agent prompts live in `.claude/agents/`:\n\n")
+	sb.WriteString("## Agents\n\n")
+	sb.WriteString("Prompts in `.claude/agents/`:\n\n")
 
 	for _, agent := range g.Context.Agents {
 		sb.WriteString("- `")
@@ -365,19 +365,15 @@ func (g *Generator) generateAgentConfigsContent() (string, error) {
 // getDefaultSectionContent returns default content for known sections.
 func (g *Generator) getDefaultSectionContent(regionName string) (string, error) {
 	defaults := map[string]string{
-		"execution-mode":       g.getDefaultExecutionModeContent(),
-		"knossos-identity":     g.getDefaultKnossosIdentityContent(),
-		"agent-routing":        g.getDefaultAgentRoutingContent(),
-		"commands":             g.getDefaultCommandsContent(),
-		"skills":               g.getDefaultCommandsContent(), // Alias for backward compatibility
-		"hooks":                g.getDefaultHooksContent(),
-		"dynamic-context":      g.getDefaultDynamicContextContent(),
-		"ariadne-cli":          g.getDefaultAriadneCliContent(),
-		"getting-help":         g.getDefaultGettingHelpContent(),
-		"state-management":     g.getDefaultStateManagementContent(),
-		"slash-commands":       g.getDefaultSlashCommandsContent(),
-		"quick-start":          g.getDefaultQuickStartContent(),
-		"agent-configurations": g.getDefaultAgentConfigsContent(),
+		"execution-mode":          g.getDefaultExecutionModeContent(),
+		"agent-routing":           g.getDefaultAgentRoutingContent(),
+		"commands":                g.getDefaultCommandsContent(),
+		"skills":                  g.getDefaultCommandsContent(), // Alias for backward compatibility
+		"platform-infrastructure": g.getDefaultPlatformInfrastructureContent(),
+		"navigation":              g.getDefaultNavigationContent(),
+		"slash-commands":          g.getDefaultSlashCommandsContent(),
+		"quick-start":             g.getDefaultQuickStartContent(),
+		"agent-configurations":    g.getDefaultAgentConfigsContent(),
 	}
 
 	if content, ok := defaults[regionName]; ok {
@@ -399,160 +395,49 @@ func (g *Generator) SetSectionTemplate(regionName, template string) {
 func (g *Generator) getDefaultExecutionModeContent() string {
 	return `## Execution Mode
 
-This project supports three operating modes (see PRD-hybrid-session-model for details):
+Three operating modes:
 
-| Mode | Session | Team | Main Agent Behavior |
+| Mode | Session | Rite | Main Agent Behavior |
 |------|---------|------|---------------------|
 | **Native** | No | - | Direct execution, no tracking |
 | **Cross-Cutting** | Yes | No | Direct execution + session tracking |
 | **Orchestrated** | Yes | Yes (ACTIVE) | Coach pattern, delegate via Task tool |
 
-**Unsure?** Use ` + "`/consult`" + ` for workflow routing.
-
-For enforcement rules: ` + "`orchestration/execution-mode.md`"
+Use ` + "`/consult`" + ` for mode selection. Enforcement rules: ` + "`orchestration/execution-mode.md`"
 }
 
-func (g *Generator) getDefaultKnossosIdentityContent() string {
-	return `## Knossos Identity
-
-> **roster/.claude/ IS Knossos.** This repository is the Knossos platform.
-
-The naming reflects Greek mythology (see ` + "`docs/philosophy/knossos-doctrine.md`" + ` for the full doctrine):
-
-| Myth | Component | Function |
-|------|-----------|----------|
-| **Knossos** | The platform | The labyrinth itself |
-| **Ariadne** | CLI binary (` + "`ari`" + `) | The clew ensuring return |
-| **Theseus** | Claude Code agent | The navigator with amnesia |
-| **Moirai** | Session lifecycle agent | The Fates who spin, measure, and cut |
-| **White Sails** | Confidence signal | Honest return indicator |
-| **Rites** | Practice bundles | Invokable ceremonies |
-
-For full details: ` + "`docs/guides/knossos-integration.md`" + ` and ` + "`docs/decisions/ADR-0009-knossos-roster-identity.md`"
-}
 
 func (g *Generator) getDefaultAgentRoutingContent() string {
 	return `## Agent Routing
 
-When working within an orchestrated session, the main thread coordinates via Task tool delegation to specialist agents. Without an active session, direct execution or ` + "`/task`" + ` initialization are both valid approaches.
+In orchestrated sessions, delegate to specialists via Task tool. Without a session, execute directly or use ` + "`/task`" + `.
 
-For routing guidance: ` + "`/consult`"
+Routing guidance: ` + "`/consult`"
 }
 
 func (g *Generator) getDefaultCommandsContent() string {
 	return `## Commands
 
-Commands are invoked via the **Skill tool**. Two types exist:
+Invoke via the **Skill tool**. Two types:
 
-- **Invokable** (` + "`/name`" + `): User-callable actions like ` + "`/start`" + `, ` + "`/commit`" + `, ` + "`/pr`" + `
-- **Reference** (auto-loaded): Patterns and templates like ` + "`prompting`" + `, ` + "`doc-artifacts`" + `
+- **Invokable** (` + "`/name`" + `): User-callable actions (` + "`/start`" + `, ` + "`/commit`" + `, ` + "`/pr`" + `)
+- **Reference** (Skill tool): Domain knowledge (` + "`prompting`" + `, ` + "`doc-artifacts`" + `, ` + "`standards`" + `)
 
-Key reference commands: ` + "`prompting`" + ` (agent patterns), ` + "`doc-artifacts`" + ` (PRD/TDD/ADR schemas), ` + "`standards`" + ` (code conventions), ` + "`session/common`" + ` (lifecycle schemas).
-
-See ` + "`.claude/commands/`" + ` for the full list.`
+Full list: ` + "`.claude/commands/`" + ` and ` + "`.claude/skills/`"
 }
 
-func (g *Generator) getDefaultHooksContent() string {
-	return `## Hooks
 
-Hooks auto-inject context (SessionStart, Stop, PostToolUse). No manual context needed. See ` + "`.claude/hooks/`" + `.`
+func (g *Generator) getDefaultPlatformInfrastructureContent() string {
+	return `## Platform
+
+Hooks auto-inject session context. CLI reference: ` + "`ari --help`" + `.
+Mutate ` + "`*_CONTEXT.md`" + ` only via ` + "`Task(moirai, \"...\")`" + `.`
 }
 
-func (g *Generator) getDefaultDynamicContextContent() string {
-	return `## Dynamic Context
+func (g *Generator) getDefaultNavigationContent() string {
+	return `## Navigation
 
-Commands use ` + "`!`" + ` prefix for live context: ` + "`` `!`cat .claude/ACTIVE_RITE` ``" + `. Prefer hooks for complex context.`
-}
-
-func (g *Generator) getDefaultAriadneCliContent() string {
-	return `## Ariadne CLI
-
-The ` + "`ari`" + ` binary provides session and hook operations:
-
-` + "```bash" + `
-# Session management
-ari session create "initiative" COMPLEXITY
-ari session status
-ari session park "reason"
-
-# Hook operations
-ari hook clew
-ari hook context
-
-# Quality gates
-ari sails check
-
-# Agent handoffs
-ari handoff prepare --from <agent> --to <agent>
-ari handoff execute --from <agent> --to <agent>
-ari handoff status
-ari handoff history
-` + "```" + `
-
-### Cognitive Budget
-
-Tool usage tracking with configurable thresholds:
-- ` + "`ARIADNE_MSG_WARN=250`" + ` - Warning threshold (default)
-- ` + "`ARIADNE_MSG_PARK`" + ` - Park suggestion threshold
-- ` + "`ARIADNE_BUDGET_DISABLE=1`" + ` - Disable tracking
-
-Build: ` + "`cd ariadne && just build`" + `
-
-Full reference: ` + "`docs/guides/knossos-integration.md`"
-}
-
-func (g *Generator) getDefaultGettingHelpContent() string {
-	return `## Getting Help
-
-| Question | Command |
-|----------|---------|
-| Invoke agents | ` + "`prompting`" + ` |
-| Conventions | ` + "`standards`" + ` |
-| Workflow coordination | ` + "`orchestration`" + ` |
-| Unsure where to start | ` + "`/consult`" + ` |`
-}
-
-func (g *Generator) getDefaultStateManagementContent() string {
-	return `## State Management
-
-**Mutating session/sprint state?** Use the **Moirai** (the Fates) for all ` + "`SESSION_CONTEXT.md`" + ` and ` + "`SPRINT_CONTEXT.md`" + ` changes.
-
-### Moirai Usage
-
-The Moirai are the centralized authority for session lifecycle--spinning sessions into existence (Clotho), measuring their allotment (Lachesis), and cutting when complete (Atropos). They enforce schema validation, lifecycle transitions, and maintain audit trails.
-
-**When to Use**:
-- Updating session state (park, resume, wrap)
-- Marking tasks complete
-- Transitioning workflow phases
-- Creating or managing sprints
-- Any modification to ` + "`*_CONTEXT.md`" + ` files
-- Generating White Sails confidence signals
-
-**Invocation Pattern** (requires session context):
-` + "```" + `
-Task(moirai, "mark_complete task-001 artifact=docs/requirements/PRD-foo.md
-
-Session Context:
-- Session ID: {from session-manager.sh status}
-- Session Path: .claude/sessions/{session-id}/SESSION_CONTEXT.md")
-` + "```" + `
-
-Get session context: ` + "`.claude/hooks/lib/session-manager.sh status | jq -r '.session_id'`" + `
-
-**Natural Language Supported**:
-` + "```" + `
-Task(moirai, "Mark the PRD task complete with artifact at docs/requirements/PRD-foo.md")
-` + "```" + `
-
-**Control Flags**:
-- ` + "`--dry-run`" + `: Preview changes without applying
-- ` + "`--emergency`" + `: Bypass non-critical validations (logged)
-- ` + "`--override=reason`" + `: Bypass lifecycle rules with explicit reason
-
-**Direct writes blocked**: PreToolUse hook intercepts ` + "`Write`" + `/` + "`Edit`" + ` to ` + "`*_CONTEXT.md`" + ` and instructs use of Moirai.
-
-**Full documentation**: See ` + "`user-agents/moirai.md`" + ` and ` + "`docs/philosophy/knossos-doctrine.md`"
+Workflow routing: ` + "`/consult`" + `. Domain knowledge: Skill tool. File locations: ` + "`MEMORY.md`" + `.`
 }
 
 func (g *Generator) getDefaultSlashCommandsContent() string {
@@ -569,13 +454,13 @@ This project uses a multi-agent workflow:
 | Agent | Role | Produces |
 | ----- | ---- | -------- |
 
-**New here?** Use the ` + "`prompting`" + ` skill for copy-paste patterns, or ` + "`initiative-scoping`" + ` to start a new project.`
+Use ` + "`prompting`" + ` for agent invocation patterns. Use ` + "`initiative-scoping`" + ` for new projects.`
 }
 
 func (g *Generator) getDefaultAgentConfigsContent() string {
-	return `## Agent Configurations
+	return `## Agents
 
-Full agent prompts live in ` + "`.claude/agents/`" + `.`
+Prompts in ` + "`.claude/agents/`" + `.`
 }
 
 // GenerateAll generates content for all sections in section_order.

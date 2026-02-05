@@ -1,15 +1,15 @@
 {{/* agent-configurations section template */}}
 {{/* Owner: regenerate - Generated from agents/*.md */}}
 <!-- KNOSSOS:START agent-configurations regenerate=true source=agents/*.md -->
-## Agent Configurations
-
-Full agent prompts live in `.claude/agents/`:
+## Agents
 
 {{- if .Agents }}
+Prompts in `.claude/agents/`:
+
 {{- range .Agents }}
-- `{{ .FilePath }}` - {{ .Role }}
+- `{{ .File }}` - {{ .Role }}
 {{- end }}
 {{- else }}
-_No agents installed. Use `ari team switch <rite-name>` to install agents._
+No agents installed. Run `ari rite switch <name>` to install.
 {{- end }}
 <!-- KNOSSOS:END agent-configurations -->

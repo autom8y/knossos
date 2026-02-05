@@ -15,9 +15,9 @@
 */}}
 # CLAUDE.md
 
-> Entry point for Claude Code. Skills-based progressive disclosure architecture.
+> Entry point for Claude Code. Navigation pointers to on-demand context.
 
-{{/* Core navigation (read first) */}}
+{{/* Core behavior (determines agent mode) */}}
 {{include "sections/execution-mode.md.tpl"}}
 
 {{/* Team context (who is available) */}}
@@ -25,22 +25,17 @@
 
 {{include "sections/agent-routing.md.tpl"}}
 
-{{include "sections/skills.md.tpl"}}
+{{include "sections/commands.md.tpl"}}
 
 {{include "sections/agent-configurations.md.tpl"}}
 
-{{/* Infrastructure (how things work) */}}
-{{include "sections/hooks.md.tpl"}}
+{{/* Infrastructure pointer (how to access platform tools) */}}
+{{include "sections/platform-infrastructure.md.tpl"}}
 
-{{include "sections/dynamic-context.md.tpl"}}
+{{/* Navigation pointer (where to find everything else) */}}
+{{include "sections/navigation.md.tpl"}}
 
-{{include "sections/ariadne-cli.md.tpl"}}
-
-{{/* Reference (consult as needed) */}}
-{{include "sections/getting-help.md.tpl"}}
-
-{{include "sections/state-management.md.tpl"}}
-
+{{/* Behavioral rules */}}
 {{include "sections/slash-commands.md.tpl"}}
 
 {{/* User customization (edit freely) */}}

@@ -278,9 +278,10 @@ func TestManifestLoader_CreateDefault(t *testing.T) {
 	// Check default regions
 	expectedKnossos := []string{
 		"execution-mode",
-		"knossos-identity",
 		"agent-routing",
 		"commands",
+		"platform-infrastructure",
+		"navigation",
 	}
 
 	for _, name := range expectedKnossos {

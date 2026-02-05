@@ -201,14 +201,10 @@ func (m *ManifestLoader) CreateDefault() (*Manifest, error) {
 	// Add default knossos-owned regions
 	defaultKnossosRegions := []string{
 		"execution-mode",
-		"knossos-identity",
 		"agent-routing",
 		"commands",
-		"hooks",
-		"dynamic-context",
-		"ariadne-cli",
-		"getting-help",
-		"state-management",
+		"platform-infrastructure",
+		"navigation",
 		"slash-commands",
 	}
 
@@ -240,9 +236,8 @@ func (m *ManifestLoader) CreateDefault() (*Manifest, error) {
 // DefaultSectionOrder returns the default section order.
 func DefaultSectionOrder() []string {
 	return []string{
-		// Core navigation (read first)
+		// Core behavior (determines agent mode)
 		"execution-mode",
-		"knossos-identity",
 
 		// Team context (who is available)
 		"quick-start",
@@ -250,14 +245,13 @@ func DefaultSectionOrder() []string {
 		"commands",
 		"agent-configurations",
 
-		// Infrastructure (how things work)
-		"hooks",
-		"dynamic-context",
-		"ariadne-cli",
+		// Infrastructure pointer (how to access platform tools)
+		"platform-infrastructure",
 
-		// Reference (consult as needed)
-		"getting-help",
-		"state-management",
+		// Navigation pointer (where to find everything else)
+		"navigation",
+
+		// Behavioral rules
 		"slash-commands",
 
 		// User customization (edit freely)
