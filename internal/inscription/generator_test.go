@@ -417,9 +417,9 @@ func TestGenerator_GenerateAll(t *testing.T) {
 		t.Error("GenerateAll() missing 'quick-start'")
 	}
 
-	// Should NOT have satellite content
-	if _, ok := result["project-custom"]; ok {
-		t.Error("GenerateAll() should not include satellite 'project-custom'")
+	// Satellite content is now generated (merger preserves existing if present)
+	if _, ok := result["project-custom"]; !ok {
+		t.Error("GenerateAll() should include satellite 'project-custom' for initial template")
 	}
 }
 

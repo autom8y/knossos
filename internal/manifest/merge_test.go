@@ -98,7 +98,7 @@ func TestMerge(t *testing.T) {
 			ours := &manifest.Manifest{Content: tt.ours}
 			theirs := &manifest.Manifest{Content: tt.theirs}
 
-			result, err := manifest.Merge(base, ours, theirs, manifest.MergeOptions{Strategy: tt.strategy})
+			result, err := manifest.Merge(base, ours, theirs, manifest.ManifestMergeOptions{Strategy: tt.strategy})
 			if err != nil {
 				t.Fatalf("Merge() error = %v", err)
 			}
@@ -121,7 +121,7 @@ func TestMergeConflictMarkers(t *testing.T) {
 	ours := &manifest.Manifest{Content: map[string]interface{}{"version": "2.0"}}
 	theirs := &manifest.Manifest{Content: map[string]interface{}{"version": "3.0"}}
 
-	result, err := manifest.Merge(base, ours, theirs, manifest.MergeOptions{Strategy: manifest.StrategySmart})
+	result, err := manifest.Merge(base, ours, theirs, manifest.ManifestMergeOptions{Strategy: manifest.StrategySmart})
 	if err != nil {
 		t.Fatalf("Merge() error = %v", err)
 	}

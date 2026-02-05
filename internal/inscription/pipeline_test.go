@@ -157,7 +157,7 @@ section_order:
 
 	pipeline := NewPipeline(tmpDir)
 
-	preview, err := pipeline.DryRun(SyncOptions{})
+	preview, err := pipeline.DryRun(InscriptionSyncOptions{})
 	if err != nil {
 		t.Fatalf("DryRun() error = %v", err)
 	}
@@ -204,7 +204,7 @@ section_order:
 
 	pipeline := NewPipeline(tmpDir)
 
-	result, err := pipeline.Sync(SyncOptions{})
+	result, err := pipeline.Sync(InscriptionSyncOptions{})
 	if err != nil {
 		t.Fatalf("Sync() error = %v", err)
 	}
@@ -243,7 +243,7 @@ section_order:
 
 	pipeline := NewPipeline(tmpDir)
 
-	result, err := pipeline.Sync(SyncOptions{NoBackup: true})
+	result, err := pipeline.Sync(InscriptionSyncOptions{NoBackup: true})
 	if err != nil {
 		t.Fatalf("Sync() error = %v", err)
 	}
@@ -281,7 +281,7 @@ section_order:
 
 	pipeline := NewPipeline(tmpDir)
 
-	result, err := pipeline.Sync(SyncOptions{DryRun: true})
+	result, err := pipeline.Sync(InscriptionSyncOptions{DryRun: true})
 	if err != nil {
 		t.Fatalf("Sync() error = %v", err)
 	}
@@ -316,7 +316,7 @@ section_order:
 
 	pipeline := NewPipeline(tmpDir)
 
-	result, err := pipeline.Sync(SyncOptions{})
+	result, err := pipeline.Sync(InscriptionSyncOptions{})
 	if err != nil {
 		t.Fatalf("Sync() error = %v", err)
 	}
@@ -389,7 +389,7 @@ section_order:
 }
 
 func TestSyncOptions_Defaults(t *testing.T) {
-	opts := SyncOptions{}
+	opts := InscriptionSyncOptions{}
 
 	if opts.Force {
 		t.Error("SyncOptions.Force should default to false")

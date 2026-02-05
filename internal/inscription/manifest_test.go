@@ -280,7 +280,7 @@ func TestManifestLoader_CreateDefault(t *testing.T) {
 		"execution-mode",
 		"knossos-identity",
 		"agent-routing",
-		"skills",
+		"commands",
 	}
 
 	for _, name := range expectedKnossos {

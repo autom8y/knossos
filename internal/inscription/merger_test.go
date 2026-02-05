@@ -419,7 +419,7 @@ Satellite content
 		"knossos-section": "Forced new content",
 	}
 
-	result, err := merger.MergeWithOptions(existing, generated, MergeOptions{Force: true})
+	result, err := merger.MergeWithOptions(existing, generated, InscriptionMergeOptions{Force: true})
 	if err != nil {
 		t.Fatalf("MergeWithOptions() error = %v", err)
 	}
@@ -453,7 +453,7 @@ Existing content
 		"section": "New content",
 	}
 
-	result, err := merger.MergeWithOptions(existing, generated, MergeOptions{PreserveAllConflicts: true})
+	result, err := merger.MergeWithOptions(existing, generated, InscriptionMergeOptions{PreserveAllConflicts: true})
 	if err != nil {
 		t.Fatalf("MergeWithOptions() error = %v", err)
 	}

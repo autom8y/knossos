@@ -41,7 +41,7 @@ Produces: Test reports
 
 	// Create pipeline and run sync
 	pipeline := NewPipeline(tmpDir)
-	result, err := pipeline.Sync(SyncOptions{})
+	result, err := pipeline.Sync(InscriptionSyncOptions{})
 	if err != nil {
 		t.Fatalf("Sync() error = %v", err)
 	}
@@ -137,7 +137,7 @@ section_order:
 
 	// Run sync
 	pipeline := NewPipeline(tmpDir)
-	result, err := pipeline.Sync(SyncOptions{})
+	result, err := pipeline.Sync(InscriptionSyncOptions{})
 	if err != nil {
 		t.Fatalf("Sync() error = %v", err)
 	}
@@ -214,7 +214,7 @@ section_order:
 
 	// Run sync
 	pipeline := NewPipeline(tmpDir)
-	result, err := pipeline.Sync(SyncOptions{})
+	result, err := pipeline.Sync(InscriptionSyncOptions{})
 	if err != nil {
 		t.Fatalf("Sync() error = %v", err)
 	}
@@ -304,7 +304,7 @@ section_order:
 
 	// Run sync
 	pipeline := NewPipeline(tmpDir)
-	result, err := pipeline.Sync(SyncOptions{})
+	result, err := pipeline.Sync(InscriptionSyncOptions{})
 	if err != nil {
 		t.Fatalf("Sync() error = %v", err)
 	}
@@ -382,7 +382,7 @@ section_order:
 
 	// Run sync (which creates a backup)
 	pipeline := NewPipeline(tmpDir)
-	result, err := pipeline.Sync(SyncOptions{})
+	result, err := pipeline.Sync(InscriptionSyncOptions{})
 	if err != nil {
 		t.Fatalf("Sync() error = %v", err)
 	}
@@ -474,7 +474,7 @@ section_order:
 
 	// Run dry-run sync
 	pipeline := NewPipeline(tmpDir)
-	result, err := pipeline.Sync(SyncOptions{DryRun: true})
+	result, err := pipeline.Sync(InscriptionSyncOptions{DryRun: true})
 	if err != nil {
 		t.Fatalf("Sync(DryRun) error = %v", err)
 	}
@@ -537,7 +537,7 @@ func TestInscription_IdempotentSync(t *testing.T) {
 
 	// First sync
 	pipeline := NewPipeline(tmpDir)
-	result1, err := pipeline.Sync(SyncOptions{})
+	result1, err := pipeline.Sync(InscriptionSyncOptions{})
 	if err != nil {
 		t.Fatalf("First Sync() error = %v", err)
 	}
@@ -554,7 +554,7 @@ func TestInscription_IdempotentSync(t *testing.T) {
 	}
 
 	// Second sync
-	result2, err := pipeline.Sync(SyncOptions{})
+	result2, err := pipeline.Sync(InscriptionSyncOptions{})
 	if err != nil {
 		t.Fatalf("Second Sync() error = %v", err)
 	}
@@ -662,7 +662,7 @@ section_order:
 
 	// Sync with new rite name (simulating rite switch)
 	pipeline := NewPipeline(tmpDir)
-	result, err := pipeline.Sync(SyncOptions{
+	result, err := pipeline.Sync(InscriptionSyncOptions{
 		RiteName: "new-pack",
 	})
 	if err != nil {
@@ -755,7 +755,7 @@ section_order:
 
 	// Sync should still succeed (graceful degradation)
 	pipeline := NewPipeline(tmpDir)
-	result, err := pipeline.Sync(SyncOptions{})
+	result, err := pipeline.Sync(InscriptionSyncOptions{})
 
 	// The sync should handle malformed content gracefully
 	// It may succeed with conflicts or report errors, but shouldn't panic
@@ -815,7 +815,7 @@ section_order:
 	// Sync should complete in reasonable time
 	start := time.Now()
 	pipeline := NewPipeline(tmpDir)
-	result, err := pipeline.Sync(SyncOptions{})
+	result, err := pipeline.Sync(InscriptionSyncOptions{})
 	elapsed := time.Since(start)
 
 	if err != nil {
@@ -873,7 +873,7 @@ section_order:
 		// Small delay to ensure different timestamps
 		time.Sleep(5 * time.Millisecond)
 
-		_, err := pipeline.Sync(SyncOptions{})
+		_, err := pipeline.Sync(InscriptionSyncOptions{})
 		if err != nil {
 			t.Fatalf("Sync() %d error = %v", i, err)
 		}

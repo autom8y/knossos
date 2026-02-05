@@ -65,7 +65,7 @@ func TestDiff(t *testing.T) {
 			mA := &manifest.Manifest{Content: tt.a}
 			mB := &manifest.Manifest{Content: tt.b}
 
-			result, err := manifest.Diff(mA, mB, manifest.DiffOptions{})
+			result, err := manifest.Diff(mA, mB, manifest.ManifestDiffOptions{})
 			if err != nil {
 				t.Fatalf("Diff() error = %v", err)
 			}
@@ -100,7 +100,7 @@ func TestDiffFormatUnified(t *testing.T) {
 		},
 	}
 
-	result, err := manifest.Diff(mA, mB, manifest.DiffOptions{})
+	result, err := manifest.Diff(mA, mB, manifest.ManifestDiffOptions{})
 	if err != nil {
 		t.Fatalf("Diff() error = %v", err)
 	}

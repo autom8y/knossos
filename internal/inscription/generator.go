@@ -84,8 +84,8 @@ func (g *Generator) GenerateSection(regionName string) (string, error) {
 	case OwnerRegenerate:
 		return g.regenerateFromSource(regionName, region.Source)
 	case OwnerSatellite:
-		// Satellite regions are pass-through; content comes from existing file
-		return "", nil
+		// Satellite regions: render template for new files, but merger will preserve existing content
+		return g.renderSatelliteRegion(regionName)
 	default:
 		return "", errors.NewWithDetails(errors.CodeUsageError,
 			"unknown owner type",
@@ -103,7 +103,8 @@ func (g *Generator) RenderRegion(regionName string) (string, error) {
 		return "", err
 	}
 
-	// For satellite regions, return empty (will be preserved from existing file)
+	// For satellite regions without templates, return empty (backward compatibility)
+	// Satellite regions with templates will have content from renderSatelliteRegion
 	if content == "" {
 		region := g.Manifest.GetRegion(regionName)
 		if region != nil && region.Owner == OwnerSatellite {
@@ -152,6 +153,20 @@ func (g *Generator) renderKnossosRegion(regionName string) (string, error) {
 
 	// Use default content for known sections
 	return g.getDefaultSectionContent(regionName)
+}
+
+// renderSatelliteRegion renders a satellite region's template.
+// Returns template content for new files; merger will preserve existing content.
+// Returns empty string if no template exists (backward compatibility).
+func (g *Generator) renderSatelliteRegion(regionName string) (string, error) {
+	// Try to find a template file for this satellite region
+	templatePath := g.getSectionTemplatePath(regionName)
+	if templatePath != "" {
+		return g.renderTemplateFile(templatePath)
+	}
+
+	// No template for this satellite region - return empty (backward compatible)
+	return "", nil
 }
 
 // getSectionTemplatePath returns the path to a section template if it exists.
@@ -350,17 +365,18 @@ func (g *Generator) generateAgentConfigsContent() (string, error) {
 // getDefaultSectionContent returns default content for known sections.
 func (g *Generator) getDefaultSectionContent(regionName string) (string, error) {
 	defaults := map[string]string{
-		"execution-mode":     g.getDefaultExecutionModeContent(),
-		"knossos-identity":   g.getDefaultKnossosIdentityContent(),
-		"agent-routing":      g.getDefaultAgentRoutingContent(),
-		"skills":             g.getDefaultSkillsContent(),
-		"hooks":              g.getDefaultHooksContent(),
-		"dynamic-context":    g.getDefaultDynamicContextContent(),
-		"ariadne-cli":        g.getDefaultAriadneCliContent(),
-		"getting-help":       g.getDefaultGettingHelpContent(),
-		"state-management":   g.getDefaultStateManagementContent(),
-		"slash-commands":     g.getDefaultSlashCommandsContent(),
-		"quick-start":        g.getDefaultQuickStartContent(),
+		"execution-mode":       g.getDefaultExecutionModeContent(),
+		"knossos-identity":     g.getDefaultKnossosIdentityContent(),
+		"agent-routing":        g.getDefaultAgentRoutingContent(),
+		"commands":             g.getDefaultCommandsContent(),
+		"skills":               g.getDefaultCommandsContent(), // Alias for backward compatibility
+		"hooks":                g.getDefaultHooksContent(),
+		"dynamic-context":      g.getDefaultDynamicContextContent(),
+		"ariadne-cli":          g.getDefaultAriadneCliContent(),
+		"getting-help":         g.getDefaultGettingHelpContent(),
+		"state-management":     g.getDefaultStateManagementContent(),
+		"slash-commands":       g.getDefaultSlashCommandsContent(),
+		"quick-start":          g.getDefaultQuickStartContent(),
 		"agent-configurations": g.getDefaultAgentConfigsContent(),
 	}
 
@@ -423,10 +439,17 @@ When working within an orchestrated session, the main thread coordinates via Tas
 For routing guidance: ` + "`/consult`"
 }
 
-func (g *Generator) getDefaultSkillsContent() string {
-	return `## Skills
+func (g *Generator) getDefaultCommandsContent() string {
+	return `## Commands
 
-Skills are invoked via the **Skill tool**. Key skills: ` + "`orchestration`" + ` (workflow coordination), ` + "`documentation`" + ` (templates), ` + "`prompting`" + ` (agent invocation), ` + "`standards`" + ` (conventions), ` + "`ecosystem-ref`" + ` (roster ecosystem patterns). See ` + "`.claude/skills/`" + ` and ` + "`~/.claude/skills/`" + ` for full list.`
+Commands are invoked via the **Skill tool**. Two types exist:
+
+- **Invokable** (` + "`/name`" + `): User-callable actions like ` + "`/start`" + `, ` + "`/commit`" + `, ` + "`/pr`" + `
+- **Reference** (auto-loaded): Patterns and templates like ` + "`prompting`" + `, ` + "`doc-artifacts`" + `
+
+Key reference commands: ` + "`prompting`" + ` (agent patterns), ` + "`doc-artifacts`" + ` (PRD/TDD/ADR schemas), ` + "`standards`" + ` (code conventions), ` + "`session/common`" + ` (lifecycle schemas).
+
+See ` + "`.claude/commands/`" + ` for the full list.`
 }
 
 func (g *Generator) getDefaultHooksContent() string {
@@ -481,16 +504,11 @@ Full reference: ` + "`docs/guides/knossos-integration.md`"
 func (g *Generator) getDefaultGettingHelpContent() string {
 	return `## Getting Help
 
-| Question | Skill |
-|----------|-------|
+| Question | Command |
+|----------|---------|
 | Invoke agents | ` + "`prompting`" + ` |
-| Templates | ` + "`documentation`" + ` or ` + "`doc-ecosystem`" + ` |
 | Conventions | ` + "`standards`" + ` |
 | Workflow coordination | ` + "`orchestration`" + ` |
-| Roster ecosystem | ` + "`ecosystem-ref`" + ` |
-| User preferences | See ` + "`docs/guides/user-preferences.md`" + ` |
-| Knossos integration | ` + "`docs/guides/knossos-integration.md`" + ` |
-| Migration path | ` + "`docs/guides/knossos-migration.md`" + ` |
 | Unsure where to start | ` + "`/consult`" + ` |`
 }
 
@@ -571,11 +589,9 @@ func (g *Generator) GenerateAll() (map[string]string, error) {
 			continue
 		}
 
-		// Skip satellite regions (they're preserved, not generated)
-		if region.Owner == OwnerSatellite {
-			continue
-		}
-
+		// Generate all regions including satellite
+		// For satellite regions, the merger will preserve existing content if present,
+		// but for new files we need the initial template content
 		content, err := g.GenerateSection(regionName)
 		if err != nil {
 			return nil, err

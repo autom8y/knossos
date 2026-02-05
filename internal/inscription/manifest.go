@@ -203,7 +203,7 @@ func (m *ManifestLoader) CreateDefault() (*Manifest, error) {
 		"execution-mode",
 		"knossos-identity",
 		"agent-routing",
-		"skills",
+		"commands",
 		"hooks",
 		"dynamic-context",
 		"ariadne-cli",
@@ -229,6 +229,11 @@ func (m *ManifestLoader) CreateDefault() (*Manifest, error) {
 		Source: "agents/*.md",
 	}
 
+	// Add user-content region (satellite-owned, user can freely edit)
+	manifest.Regions["user-content"] = &Region{
+		Owner: OwnerSatellite,
+	}
+
 	return manifest, nil
 }
 
@@ -242,7 +247,7 @@ func DefaultSectionOrder() []string {
 		// Team context (who is available)
 		"quick-start",
 		"agent-routing",
-		"skills",
+		"commands",
 		"agent-configurations",
 
 		// Infrastructure (how things work)
@@ -254,6 +259,9 @@ func DefaultSectionOrder() []string {
 		"getting-help",
 		"state-management",
 		"slash-commands",
+
+		// User customization (edit freely)
+		"user-content",
 	}
 }
 

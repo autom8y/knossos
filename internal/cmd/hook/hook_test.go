@@ -233,12 +233,13 @@ func TestGetCurrentSessionID_FromContext(t *testing.T) {
 		},
 	}
 
-	result, err := ctx.GetCurrentSessionID()
+	// GetSessionID checks the flag first, then falls back to file
+	result, err := ctx.GetSessionID()
 	if err != nil {
-		t.Fatalf("getCurrentSessionID() error = %v", err)
+		t.Fatalf("GetSessionID() error = %v", err)
 	}
 	if result != sessionID {
-		t.Errorf("getCurrentSessionID() = %q, want %q", result, sessionID)
+		t.Errorf("GetSessionID() = %q, want %q", result, sessionID)
 	}
 }
 
