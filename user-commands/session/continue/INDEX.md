@@ -1,4 +1,5 @@
 ---
+name: continue
 description: Resume a parked work session with full context
 argument-hint:
 allowed-tools: Bash, Read, Write, Task

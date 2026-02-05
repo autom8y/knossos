@@ -1,4 +1,6 @@
 ---
+name: session-shared
+description: Reusable behavior patterns for session lifecycle commands
 invokable: false
 category: reference
 ---

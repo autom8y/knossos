@@ -1,6 +1,7 @@
 ---
+name: commit
 description: Create git commit with AI-generated message
-argument-hint: [--all] [--message="override"]
+argument-hint: "[--all] [--message='override']"
 allowed-tools: Bash, Read, Glob, Grep
 model: sonnet
 ---

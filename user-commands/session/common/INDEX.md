@@ -1,4 +1,6 @@
 ---
+name: session-common
+description: Shared schemas and patterns for session lifecycle
 invokable: false
 category: reference
 ---

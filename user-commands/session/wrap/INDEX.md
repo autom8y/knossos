@@ -1,6 +1,7 @@
 ---
+name: wrap
 description: Complete session with quality gates and summary
-argument-hint: [--skip-checks] [--no-archive]
+argument-hint: "[--skip-checks] [--no-archive]"
 allowed-tools: Bash, Read, Write, Task, Glob
 model: sonnet
 ---

@@ -1,4 +1,5 @@
 ---
+name: hotfix
 description: Rapid fix workflow for urgent issues
 argument-hint: <issue-description> [--severity=LEVEL]
 allowed-tools: Bash, Read, Write, Task, Glob, Grep

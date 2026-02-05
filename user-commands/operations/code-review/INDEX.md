@@ -1,4 +1,5 @@
 ---
+name: code-review
 description: Structured review with categorized feedback
 argument-hint: <pr-number-or-branch> [--focus=AREA]
 allowed-tools: Bash, Read, Glob, Grep

@@ -1,4 +1,5 @@
 ---
+name: handoff
 description: Transfer work to a different agent with context
 argument-hint: <agent-name> [notes]
 allowed-tools: Bash, Read, Write, Task
