@@ -45,7 +45,9 @@ agents:
   - name: security-reviewer
     role: Performs final security review and grants deployment approval
 
-commands:
+dromena: []
+
+legomena:
   - doc-security
   - security-ref
 

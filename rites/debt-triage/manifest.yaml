@@ -36,7 +36,9 @@ agents:
   - name: sprint-planner
     role: Plans debt paydown sprints with timelines and resources
 
-commands:
+dromena: []
+
+legomena:
   - debt-ref
 
 hooks: []

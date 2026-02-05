@@ -45,7 +45,9 @@ agents:
   - name: roadmap-strategist
     role: Creates strategic roadmaps with execution timelines
 
-commands:
+dromena: []
+
+legomena:
   - doc-strategy
   - strategy-ref
 

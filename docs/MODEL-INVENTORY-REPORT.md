@@ -312,8 +312,8 @@ Agents:
 └── ~/.claude/agents/*.md                   (global installed)
 
 Commands:
-├── $ROSTER_HOME/user-commands/*/*.md      (user commands)
-└── $ROSTER_HOME/rites/*/commands/*.md     (team commands)
+├── $ROSTER_HOME/mena/*/*.md               (user commands)
+└── $ROSTER_HOME/rites/*/mena/*.md         (rite commands)
 
 Hooks:
 └── $ROSTER_HOME/.claude/hooks/*.sh        (no model logic)

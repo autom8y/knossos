@@ -15,7 +15,7 @@ Before migrating, understand where artifacts belong:
 | Source (roster/) | Target | Scope |
 |------------------|--------|-------|
 | `user-agents/` | `~/.claude/agents/` | User (global) |
-| `user-commands/` | `~/.claude/commands/` | User (global) |
+| `mena/` | `~/.claude/commands/` | User (global) |
 | `user-skills/` | `~/.claude/skills/` | User (global) |
 | `user-hooks/` | `~/.claude/hooks/` | User (global) |
 | `rites/{pack}/` | `.claude/` | Project |

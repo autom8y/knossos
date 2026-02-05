@@ -359,7 +359,6 @@ func TestGenerator_GetDefaultSectionContent(t *testing.T) {
 		"execution-mode",
 		"agent-routing",
 		"commands",
-		"skills",
 		"platform-infrastructure",
 		"navigation",
 		"slash-commands",

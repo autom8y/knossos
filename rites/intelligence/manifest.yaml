@@ -45,7 +45,9 @@ agents:
   - name: insights-analyst
     role: Synthesizes quantitative and qualitative data into insights
 
-commands:
+dromena: []
+
+legomena:
   - doc-intelligence
   - intelligence-ref
 

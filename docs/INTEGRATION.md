@@ -121,7 +121,7 @@ Roster uses a **two-tier destination model**: user-level artifacts go to `~/.cla
 | Source (roster/) | Materialized Target | Sync Mechanism | Scope |
 |------------------|---------------------|----------------|-------|
 | `user-agents/` | `~/.claude/agents/` | `sync-user-agents.sh` | User (global) |
-| `user-commands/` | `~/.claude/commands/` | `sync-user-commands.sh` | User (global) |
+| `mena/` | `~/.claude/commands/` | `sync-user-commands.sh` | User (global) |
 | `user-skills/` | `~/.claude/skills/` | `sync-user-skills.sh` | User (global) |
 | `user-hooks/` | `~/.claude/hooks/` | `sync-user-hooks.sh` | User (global) |
 | `rites/{pack}/agents/` | `.claude/agents/` | `swap-rite.sh` | Project |
@@ -142,7 +142,7 @@ Roster uses a **two-tier destination model**: user-level artifacts go to `~/.cla
 Roster Repository
     |
     +-- user-agents/    -> sync-user-agents.sh    -> ~/.claude/agents/   (global)
-    +-- user-commands/  -> sync-user-commands.sh  -> ~/.claude/commands/ (global)
+    +-- mena/           -> sync-user-commands.sh  -> ~/.claude/commands/ (global)
     +-- user-skills/    -> sync-user-skills.sh    -> ~/.claude/skills/   (global)
     +-- user-hooks/     -> sync-user-hooks.sh     -> ~/.claude/hooks/    (global)
     |

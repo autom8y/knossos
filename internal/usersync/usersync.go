@@ -38,6 +38,9 @@ func (r ResourceType) Singular() string {
 
 // SourceDir returns the source directory name for the resource type.
 func (r ResourceType) SourceDir() string {
+	if r == ResourceCommands {
+		return "mena"
+	}
 	return "user-" + string(r)
 }
 
@@ -130,7 +133,7 @@ func NewSyncer(resourceType ResourceType) (*Syncer, error) {
 		s.manifestPath = filepath.Join(homeDir, ".claude", "USER_SKILL_MANIFEST.json")
 		s.nested = true
 	case ResourceCommands:
-		s.sourceDir = filepath.Join(knossosHome, "user-commands")
+		s.sourceDir = filepath.Join(knossosHome, "mena")
 		s.targetDir = filepath.Join(homeDir, ".claude", "commands")
 		s.manifestPath = filepath.Join(homeDir, ".claude", "USER_COMMAND_MANIFEST.json")
 		s.nested = true

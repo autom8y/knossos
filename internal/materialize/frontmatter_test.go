@@ -7,39 +7,38 @@ import (
 	"testing"
 )
 
-// TestFrontmatterAllIndexFiles validates frontmatter in all INDEX.md command files.
-// This test walks both user-commands/ and rites/*/commands/ directories to ensure
-// all command files have valid frontmatter according to the unified schema.
-func TestFrontmatterAllIndexFiles(t *testing.T) {
+// TestFrontmatterAllMenaFiles validates frontmatter in all INDEX.dro.md and INDEX.lego.md files.
+// This test walks both mena/ and rites/*/mena/ directories to ensure
+// all mena files have valid frontmatter according to the unified schema.
+func TestFrontmatterAllMenaFiles(t *testing.T) {
 	projectRoot := findProjectRoot(t)
 
 	var failures []string
 	var checked int
 
-	// Walk user-commands directory
-	userCommandsDir := filepath.Join(projectRoot, "user-commands")
-	if err := filepath.Walk(userCommandsDir, func(path string, info os.FileInfo, err error) error {
+	// Walk mena/ directory (project-level)
+	menaDir := filepath.Join(projectRoot, "mena")
+	if err := filepath.Walk(menaDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
-			// Don't fail on directory access errors, just skip
 			t.Logf("Warning: cannot access %s: %v", path, err)
 			return nil
 		}
 
-		if info.IsDir() || info.Name() != "INDEX.md" {
+		if info.IsDir() || !isMenaIndex(info.Name()) {
 			return nil
 		}
 
 		checked++
-		if err := validateIndexFile(t, path); err != nil {
+		if err := validateMenaFile(t, path); err != nil {
 			failures = append(failures, path+": "+err.Error())
 		}
 
 		return nil
 	}); err != nil {
-		t.Fatalf("Failed to walk user-commands: %v", err)
+		t.Fatalf("Failed to walk mena/: %v", err)
 	}
 
-	// Walk rites/*/commands directories
+	// Walk rites/*/mena/ directories
 	ritesDir := filepath.Join(projectRoot, "rites")
 	riteDirs, err := os.ReadDir(ritesDir)
 	if err != nil {
@@ -51,52 +50,58 @@ func TestFrontmatterAllIndexFiles(t *testing.T) {
 			continue
 		}
 
-		commandsDir := filepath.Join(ritesDir, riteEntry.Name(), "commands")
-		if _, err := os.Stat(commandsDir); os.IsNotExist(err) {
-			continue // No commands directory in this rite
+		riteMenaDir := filepath.Join(ritesDir, riteEntry.Name(), "mena")
+		if _, err := os.Stat(riteMenaDir); os.IsNotExist(err) {
+			continue // No mena directory in this rite
 		}
 
-		if err := filepath.Walk(commandsDir, func(path string, info os.FileInfo, err error) error {
+		if err := filepath.Walk(riteMenaDir, func(path string, info os.FileInfo, err error) error {
 			if err != nil {
 				t.Logf("Warning: cannot access %s: %v", path, err)
 				return nil
 			}
 
-			if info.IsDir() || info.Name() != "INDEX.md" {
+			if info.IsDir() || !isMenaIndex(info.Name()) {
 				return nil
 			}
 
 			checked++
-			if err := validateIndexFile(t, path); err != nil {
+			if err := validateMenaFile(t, path); err != nil {
 				failures = append(failures, path+": "+err.Error())
 			}
 
 			return nil
 		}); err != nil {
-			t.Fatalf("Failed to walk rite commands in %s: %v", riteEntry.Name(), err)
+			t.Fatalf("Failed to walk rite mena in %s: %v", riteEntry.Name(), err)
 		}
 	}
 
 	// Report results
 	if checked == 0 {
-		t.Fatal("No INDEX.md files found - this suggests the test is not finding the correct directories")
+		t.Fatal("No INDEX.dro.md or INDEX.lego.md files found - this suggests the test is not finding the correct directories")
 	}
 
-	t.Logf("Validated frontmatter in %d INDEX.md files", checked)
+	t.Logf("Validated frontmatter in %d mena index files", checked)
 
 	if len(failures) > 0 {
 		t.Errorf("Found %d files with invalid frontmatter:\n%s", len(failures), strings.Join(failures, "\n"))
 	}
 }
 
-// validateIndexFile reads an INDEX.md file and validates its frontmatter.
-func validateIndexFile(t *testing.T, path string) error {
+// isMenaIndex returns true if the filename is a mena index file
+// (INDEX.dro.md, INDEX.lego.md, or legacy INDEX.md).
+func isMenaIndex(name string) bool {
+	return name == "INDEX.dro.md" || name == "INDEX.lego.md" || name == "INDEX.md"
+}
+
+// validateMenaFile reads a mena index file and validates its frontmatter.
+func validateMenaFile(t *testing.T, path string) error {
 	content, err := os.ReadFile(path)
 	if err != nil {
 		return err
 	}
 
-	fm, err := ParseCommandFrontmatter(content)
+	fm, err := ParseMenaFrontmatter(content)
 	if err != nil {
 		return err
 	}
@@ -105,7 +110,7 @@ func validateIndexFile(t *testing.T, path string) error {
 		return err
 	}
 
-	t.Logf("✓ %s", path)
+	t.Logf("  %s", path)
 	return nil
 }
 

@@ -48,7 +48,9 @@ agents:
   - name: tech-transfer
     role: Facilitates technology transfer from R&D to production teams
 
-commands:
+dromena: []
+
+legomena:
   - doc-rnd
   - rnd-ref
 

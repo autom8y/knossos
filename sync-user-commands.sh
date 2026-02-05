@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 #
-# sync-user-commands.sh - Sync roster user-commands to ~/.claude/commands/
+# sync-user-commands.sh - Sync roster mena/ to ~/.claude/commands/
 #
-# Syncs commands from roster/user-commands/ to the user-level commands directory.
+# Syncs commands from roster/mena/ to the user-level commands directory.
 # Behavior:
 #   - Additive: Never removes existing commands from ~/.claude/commands/
 #   - Overwrites: Only commands previously installed from roster (tracked in manifest)
@@ -10,13 +10,13 @@
 #   - Flattens: Subdirectories in source become flat list in target
 #
 # Collision Handling (Intentional Design):
-#   When a command exists in both user-commands/ (global) and rites/<name>/commands/
+#   When a command exists in both mena/ (global) and rites/<name>/mena/
 #   (rite-specific), collisions are logged as warnings but are expected behavior.
 #   Rite-specific commands override global commands when that rite is active,
 #   allowing rites to customize command behavior while preserving global defaults.
 #
 # Usage:
-#   ./sync-user-commands.sh              # Sync user-commands to ~/.claude/commands/
+#   ./sync-user-commands.sh              # Sync mena/ to ~/.claude/commands/
 #   ./sync-user-commands.sh --dry-run    # Preview changes without applying
 #   ./sync-user-commands.sh --status     # Show sync status
 #   ./sync-user-commands.sh --help       # Show usage
@@ -36,7 +36,7 @@ source "$SCRIPT_DIR/lib/knossos-home.sh"
 readonly KNOSSOS_DEBUG="${KNOSSOS_DEBUG:-0}"
 readonly USER_COMMANDS_DIR="$HOME/.claude/commands"
 readonly USER_MANIFEST_FILE="$HOME/.claude/USER_COMMAND_MANIFEST.json"
-readonly SOURCE_DIR="$KNOSSOS_HOME/user-commands"
+readonly SOURCE_DIR="$KNOSSOS_HOME/mena"
 readonly MANIFEST_VERSION="1.0"
 
 readonly EXIT_SUCCESS=0
@@ -158,8 +158,8 @@ get_rite_for_command() {
 # Clean up commands at user-level that should only exist at rite-level
 # These are commands that:
 #   1. Exist in ~/.claude/commands/
-#   2. Do NOT exist in roster/user-commands/
-#   3. DO exist in roster/rites/*/commands/ (rite-level resources)
+#   2. Do NOT exist in roster/mena/
+#   3. DO exist in roster/rites/*/mena/ (rite-level resources)
 cleanup_rite_orphans() {
     log_info "Scanning for rite-level commands that leaked to user-level..."
 
@@ -174,7 +174,7 @@ cleanup_rite_orphans() {
         local cmd_name
         cmd_name=$(basename "$target_file")
 
-        # Check if this command exists in roster/user-commands/ (legitimate user-level)
+        # Check if this command exists in roster/mena/ (legitimate user-level)
         local found_in_user_commands=false
         for category_dir in "$SOURCE_DIR"/*/; do
             [[ -d "$category_dir" ]] || continue
@@ -185,11 +185,11 @@ cleanup_rite_orphans() {
         done
 
         if [[ "$found_in_user_commands" == true ]]; then
-            log_debug "Keeping: $cmd_name (in user-commands)"
+            log_debug "Keeping: $cmd_name (in mena)"
             continue
         fi
 
-        # Not in user-commands - check if it's a rite-level command
+        # Not in mena - check if it's a rite-level command
         if is_rite_command "$cmd_name"; then
             local rites
             rites=$(get_rite_for_command "$cmd_name")
@@ -213,7 +213,7 @@ cleanup_rite_orphans() {
             fi
             ((cleaned++)) || true
         else
-            # Not in user-commands AND not a rite command = truly user-created
+            # Not in mena AND not a rite command = truly user-created
             log_debug "Keeping: $cmd_name (user-created, not from any roster source)"
             ((skipped++)) || true
         fi
@@ -816,7 +816,7 @@ usage() {
     cat <<EOF
 Usage: sync-user-commands.sh [OPTIONS]
 
-Syncs roster user-commands to ~/.claude/commands/
+Syncs roster mena/ to ~/.claude/commands/
 
 Options:
   --dry-run      Preview changes without applying
@@ -849,8 +849,8 @@ Adopt Mode (--adopt):
 
 Cleanup Mode (--cleanup):
   Scans commands in ~/.claude/commands/ and removes any that:
-  - Do NOT exist in roster/user-commands/ (not user-level resources)
-  - DO exist in roster/rites/*/commands/ (rite-level resources)
+  - Do NOT exist in roster/mena/ (not user-level resources)
+  - DO exist in roster/rites/*/mena/ (rite-level resources)
 
   Rite-level commands should only exist in .claude/commands/ (per-project)
   when that rite is active, not in ~/.claude/commands/ (user-level global).
@@ -863,7 +863,7 @@ Cleanup Mode (--cleanup):
   Backups are saved to ~/.claude/.backup/commands/ before removal.
 
 Source Structure:
-  roster/user-commands/
+  roster/mena/
     session/       # start, park, continue, handoff, wrap
     workflow/      # task, sprint, hotfix
     operations/    # architect, build, qa, code-review, commit
@@ -882,7 +882,7 @@ Exit Codes:
   3  Sync failure
 
 Examples:
-  ./sync-user-commands.sh              # Sync user-commands
+  ./sync-user-commands.sh              # Sync mena/ commands
   ./sync-user-commands.sh --dry-run    # Preview what would change
   ./sync-user-commands.sh --status     # Show current sync status
   ./sync-user-commands.sh --adopt      # Recover manifest from existing files

@@ -71,7 +71,7 @@ func TestResourceType_SourceDir(t *testing.T) {
 	}{
 		{ResourceAgents, "user-agents"},
 		{ResourceSkills, "user-skills"},
-		{ResourceCommands, "user-commands"},
+		{ResourceCommands, "mena"},
 		{ResourceHooks, "user-hooks"},
 	}
 	for _, tt := range tests {

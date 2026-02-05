@@ -368,7 +368,6 @@ func (g *Generator) getDefaultSectionContent(regionName string) (string, error) 
 		"execution-mode":          g.getDefaultExecutionModeContent(),
 		"agent-routing":           g.getDefaultAgentRoutingContent(),
 		"commands":                g.getDefaultCommandsContent(),
-		"skills":                  g.getDefaultCommandsContent(), // Alias for backward compatibility
 		"platform-infrastructure": g.getDefaultPlatformInfrastructureContent(),
 		"navigation":              g.getDefaultNavigationContent(),
 		"slash-commands":          g.getDefaultSlashCommandsContent(),
@@ -420,8 +419,8 @@ func (g *Generator) getDefaultCommandsContent() string {
 
 Invoke via the **Skill tool**. Two types:
 
-- **Invokable** (` + "`/name`" + `): User-callable actions (` + "`/start`" + `, ` + "`/commit`" + `, ` + "`/pr`" + `)
-- **Reference** (Skill tool): Domain knowledge (` + "`prompting`" + `, ` + "`doc-artifacts`" + `, ` + "`standards`" + `)
+- **Dromena** (` + "`/name`" + `): Enacted actions (` + "`/start`" + `, ` + "`/commit`" + `, ` + "`/pr`" + `)
+- **Legomena** (Skill tool): Sacred knowledge (` + "`prompting`" + `, ` + "`doc-artifacts`" + `, ` + "`standards`" + `)
 
 Full list: ` + "`.claude/commands/`" + ` and ` + "`.claude/skills/`"
 }

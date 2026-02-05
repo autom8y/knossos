@@ -46,8 +46,10 @@ type RiteManifest struct {
 	Description  string   `yaml:"description"`
 	EntryAgent   string   `yaml:"entry_agent"`
 	Agents       []Agent  `yaml:"agents"`
-	Commands     []string `yaml:"commands"`               // Replaces Skills - unified command system
-	Skills       []string `yaml:"skills"`                 // Deprecated: use Commands instead
+	Dromena      []string `yaml:"dromena"`                // Invokable commands (project to .claude/commands/)
+	Legomena     []string `yaml:"legomena"`               // Reference knowledge (project to .claude/skills/)
+	Commands     []string `yaml:"commands"`               // Backward compat: populates from dromena+legomena if empty
+	Skills       []string `yaml:"skills"`                 // Deprecated: use Legomena instead
 	Hooks        []string `yaml:"hooks"`
 	Dependencies []string `yaml:"dependencies"`
 }
@@ -232,9 +234,9 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize agents", err)
 	}
 
-	// 5. Generate commands/ directory from rite + shared + dependencies + user-commands
-	if err := m.materializeCommands(manifest, claudeDir); err != nil {
-		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize commands", err)
+	// 5. Generate commands/ and skills/ directories from rite + shared + dependencies + mena
+	if err := m.materializeMena(manifest, claudeDir); err != nil {
+		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize mena", err)
 	}
 
 	// 6. Generate hooks/ directory from templates/hooks
@@ -440,11 +442,11 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claud
 	})
 }
 
-// materializeCommands copies command files to .claude/commands/ or .claude/skills/
-// based on the invokable frontmatter field in each command's INDEX.md.
-// Sources: user-commands/, rites/{rite}/commands/, rites/shared/commands/
-// Priority order (later sources override earlier): user-commands < shared < dependencies < current rite
-func (m *Materializer) materializeCommands(manifest *RiteManifest, claudeDir string) error {
+// materializeMena copies mena files to .claude/commands/ or .claude/skills/
+// based on the filename convention (.dro.md for dromena, .lego.md for legomena).
+// Sources: mena/, rites/{rite}/mena/, rites/shared/mena/
+// Priority order (later sources override earlier): mena < shared < dependencies < current rite
+func (m *Materializer) materializeMena(manifest *RiteManifest, claudeDir string) error {
 	commandsDir := filepath.Join(claudeDir, "commands")
 	skillsDir := filepath.Join(claudeDir, "skills")
 
@@ -467,25 +469,25 @@ func (m *Materializer) materializeCommands(manifest *RiteManifest, claudeDir str
 	// Priority order for sources (later sources can override earlier)
 	sources := []string{}
 
-	// 1. User-level commands (lowest priority, can be overridden)
-	if userCmdsDir := m.getUserCommandsDir(); userCmdsDir != "" {
-		sources = append(sources, userCmdsDir)
+	// 1. User-level mena (lowest priority, can be overridden)
+	if menaDir := m.getMenaDir(); menaDir != "" {
+		sources = append(sources, menaDir)
 	}
 
-	// 2. Shared rite commands
-	sharedCmdsDir := filepath.Join(m.ritesDir, "shared", "commands")
-	sources = append(sources, sharedCmdsDir)
+	// 2. Shared rite mena
+	sharedMenaDir := filepath.Join(m.ritesDir, "shared", "mena")
+	sources = append(sources, sharedMenaDir)
 
-	// 3. Dependency rite commands (in order)
+	// 3. Dependency rite mena (in order)
 	for _, dep := range manifest.Dependencies {
 		if dep != "shared" { // Already added shared
-			sources = append(sources, filepath.Join(m.ritesDir, dep, "commands"))
+			sources = append(sources, filepath.Join(m.ritesDir, dep, "mena"))
 		}
 	}
 
-	// 4. Current rite commands (highest priority)
-	currentRiteCmdsDir := filepath.Join(m.ritesDir, manifest.Name, "commands")
-	sources = append(sources, currentRiteCmdsDir)
+	// 4. Current rite mena (highest priority)
+	currentRiteMenaDir := filepath.Join(m.ritesDir, manifest.Name, "mena")
+	sources = append(sources, currentRiteMenaDir)
 
 	// Pass 1: Collect command directories from all sources.
 	// Later sources override earlier ones for the same command name.
@@ -508,23 +510,25 @@ func (m *Materializer) materializeCommands(manifest *RiteManifest, claudeDir str
 		}
 	}
 
-	// Pass 2: Route each collected command directory by frontmatter.
-	// Invokable (or parse failure/missing INDEX.md) -> .claude/commands/
-	// Non-invokable -> .claude/skills/
+	// Pass 2: Route each collected command directory by filename convention.
+	// Files with .dro.md -> .claude/commands/ (dromena, invokable)
+	// Files with .lego.md -> .claude/skills/ (legomena, reference)
+	// Default (INDEX.md or other) -> .claude/commands/ for backward compatibility
 	for name, srcDir := range collected {
-		invokable := true // default: route to commands/
+		menaType := "dro" // default: route to commands/
 
-		indexPath := filepath.Join(srcDir, "INDEX.md")
-		if content, err := os.ReadFile(indexPath); err == nil {
-			if fm, err := ParseCommandFrontmatter(content); err == nil {
-				invokable = fm.IsInvokable()
+		// Check for INDEX.md variants to determine mena type
+		if entries, err := os.ReadDir(srcDir); err == nil {
+			for _, entry := range entries {
+				if !entry.IsDir() && strings.HasPrefix(entry.Name(), "INDEX") {
+					menaType = DetectMenaType(entry.Name())
+					break
+				}
 			}
-			// Parse failure: keep default (invokable=true)
 		}
-		// Missing INDEX.md: keep default (invokable=true)
 
 		var destDir string
-		if invokable {
+		if menaType == "dro" {
 			destDir = filepath.Join(commandsDir, name)
 		} else {
 			destDir = filepath.Join(skillsDir, name)
@@ -538,57 +542,20 @@ func (m *Materializer) materializeCommands(manifest *RiteManifest, claudeDir str
 	return nil
 }
 
-// materializeSkills is deprecated - use materializeCommands instead.
-// Kept for backward compatibility with legacy manifests that still use skills field.
-func (m *Materializer) materializeSkills(manifest *RiteManifest, claudeDir string) error {
-	skillsDir := filepath.Join(claudeDir, "skills")
-
-	// Remove existing skills directory
-	if err := os.RemoveAll(skillsDir); err != nil && !os.IsNotExist(err) {
-		return err
-	}
-
-	// Create fresh skills directory
-	if err := paths.EnsureDir(skillsDir); err != nil {
-		return err
-	}
-
-	// Collect all skill sources: current rite + dependencies + shared
-	sources := []string{filepath.Join(m.ritesDir, manifest.Name, "skills")}
-
-	// Add dependency rites
-	for _, dep := range manifest.Dependencies {
-		sources = append(sources, filepath.Join(m.ritesDir, dep, "skills"))
-	}
-
-	// Copy skills from all sources
-	for _, source := range sources {
-		if _, err := os.Stat(source); os.IsNotExist(err) {
-			continue // Skip if source doesn't exist
-		}
-
-		if err := m.copyDir(source, skillsDir); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-// getUserCommandsDir returns the user-commands directory path.
+// getMenaDir returns the mena directory path.
 // Checks project-level first, then falls back to Knossos platform level.
-func (m *Materializer) getUserCommandsDir() string {
-	// Check for project-level user-commands first
-	projectUserCmds := filepath.Join(m.resolver.ProjectRoot(), "user-commands")
-	if _, err := os.Stat(projectUserCmds); err == nil {
-		return projectUserCmds
+func (m *Materializer) getMenaDir() string {
+	// Check for project-level mena first
+	projectMena := filepath.Join(m.resolver.ProjectRoot(), "mena")
+	if _, err := os.Stat(projectMena); err == nil {
+		return projectMena
 	}
 
-	// Fall back to Knossos platform user-commands
+	// Fall back to Knossos platform mena
 	if m.sourceResolver.knossosHome != "" {
-		knossosUserCmds := filepath.Join(m.sourceResolver.knossosHome, "user-commands")
-		if _, err := os.Stat(knossosUserCmds); err == nil {
-			return knossosUserCmds
+		knossosMena := filepath.Join(m.sourceResolver.knossosHome, "mena")
+		if _, err := os.Stat(knossosMena); err == nil {
+			return knossosMena
 		}
 	}
 

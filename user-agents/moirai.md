@@ -230,7 +230,7 @@ You load domain-specific guidance from Fate skills on-demand. This is **progress
    b. Parse CLI output
    c. Return structured response
 4. If file-mutation operation:
-   a. Read routing table: Read(~/.claude/skills/moirai/SKILL.md)
+   a. Read routing table: Read(~/.claude/skills/moirai/INDEX.md)
    b. Read appropriate skill: Read(~/.claude/skills/moirai/{fate}.md)
    c. Apply skill guidance for validation/mutation
    d. Execute file mutation

@@ -471,6 +471,22 @@ Slaying the Minotaur matters less than returning to Athens. A merged PR with hon
 
 CLAUDE.md is not documentation—it is the labyrinth speaking. Keep the Inscription current, and travelers arrive prepared.
 
+### 9. The Halves of the Rite: Dromena and Legomena
+
+Greek religious rites consist of two inseparable halves:
+
+- **Dromena** (δρώμενα, "things enacted"): Ritual actions. In Knossos, these are invokable
+  commands that users perform — `/start`, `/commit`, `/pr`. They project to `.claude/commands/`.
+  File convention: `.dro.md`
+
+- **Legomena** (λεγόμενα, "things spoken"): Sacred words and knowledge. In Knossos, these are
+  reference materials that agents consult — `prompting`, `standards`, `doc-artifacts`. They
+  project to `.claude/skills/`. File convention: `.lego.md`
+
+Both live in `mena/` (the shared root, from the Greek μένα). The filesystem convention
+(double extension) replaces the previous frontmatter-based routing, following the principle
+that convention beats configuration.
+
 ---
 
 ## XII. Terminology Concordance
@@ -485,6 +501,9 @@ For those encountering older documentation:
 | `ACTIVE_RITE` | `ACTIVE_RITE` | Current practice file |
 | `agents` | `heroes` | In mythology; keep "agents" in technical contexts |
 | `roster` (repository) | `knossos` | Platform name (pending rename) |
+| `invokable: true` | `Dromena` | Things enacted. Invokable commands projected to `.claude/commands/`. Convention: `.dro.md` |
+| `invokable: false` | `Legomena` | Things spoken. Reference knowledge projected to `.claude/skills/`. Convention: `.lego.md` |
+| `user-commands/` | `Mena` | Source directory for all rite content (both dromena and legomena). Replaces `user-commands/`. |
 
 ---
 

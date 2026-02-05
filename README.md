@@ -7,7 +7,7 @@
 | Script | Source | Target |
 |--------|--------|--------|
 | `sync-user-agents.sh` | `user-agents/` | `~/.claude/agents/` |
-| `sync-user-commands.sh` | `user-commands/` | `~/.claude/commands/` |
+| `sync-user-commands.sh` | `mena/` | `~/.claude/commands/` |
 | `sync-user-skills.sh` | `user-skills/` | `~/.claude/skills/` |
 | `sync-user-hooks.sh` | `user-hooks/` | `~/.claude/hooks/` |
 
@@ -72,7 +72,7 @@ Syncs agents from `roster/user-agents/` to `~/.claude/agents/`.
 
 ### Sync User Commands
 
-Syncs slash commands from `roster/user-commands/` to `~/.claude/commands/`.
+Syncs slash commands from `roster/mena/` to `~/.claude/commands/`.
 
 ```bash
 # Sync user-commands
@@ -93,7 +93,7 @@ Syncs slash commands from `roster/user-commands/` to `~/.claude/commands/`.
 
 **Source Structure:**
 ```
-user-commands/
+mena/
   session/       # start, park, continue, handoff, wrap (5)
   workflow/      # task, sprint, hotfix (3)
   operations/    # architect, build, qa, code-review, commit (5)
@@ -129,7 +129,7 @@ Syncs skill directories from `roster/user-skills/` to `~/.claude/skills/`.
 - Uses `rsync --delete` for clean updates within roster-managed skills
 
 **Key Differences from User Agents:**
-- Skills are directories (containing SKILL.md + supporting files)
+- Skills are directories (containing INDEX.md + supporting files)
 - Checksum computed over all files in skill directory
 - Manifest tracks `file_count` in addition to checksum
 

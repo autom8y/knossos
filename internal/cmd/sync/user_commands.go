@@ -13,7 +13,7 @@ func newUserCommandsCmd(ctx *cmdContext) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "commands",
 		Short: "Sync user commands to ~/.claude/commands/",
-		Long: `Sync command files from roster user-commands/ to ~/.claude/commands/.
+		Long: `Sync command files from roster mena/ to ~/.claude/commands/.
 
 Commands use a nested directory structure (category/).
 Manifest keys are relative paths: operations/commit.md

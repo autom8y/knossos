@@ -18,7 +18,7 @@ They are stored in ~/.claude/ and synced from $KNOSSOS_HOME/user-{type}/.
 Resources:
   agents    - Agent prompts (user-agents/ -> ~/.claude/agents/)
   skills    - Skill references (user-skills/ -> ~/.claude/skills/)
-  commands  - Slash commands (user-commands/ -> ~/.claude/commands/)
+  commands  - Slash commands (mena/ -> ~/.claude/commands/)
   hooks     - Hook scripts (user-hooks/ -> ~/.claude/hooks/)
 
 Sync Behavior:

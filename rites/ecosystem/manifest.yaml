@@ -54,7 +54,9 @@ agents:
   - name: compatibility-tester
     role: Validates ecosystem changes across satellite configurations
 
-commands:
+dromena: []
+
+legomena:
   - claude-md-architecture
   - doc-ecosystem
   - ecosystem-ref

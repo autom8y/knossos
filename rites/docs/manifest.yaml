@@ -45,7 +45,9 @@ agents:
   - name: doc-reviewer
     role: Reviews documentation for technical accuracy and quality
 
-commands:
+dromena: []
+
+legomena:
   - doc-consolidation
   - doc-reviews
   - docs-ref

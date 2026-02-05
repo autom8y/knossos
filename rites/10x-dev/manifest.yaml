@@ -45,7 +45,9 @@ agents:
   - name: qa-adversary
     role: Validates implementation through adversarial testing
 
-commands:
+dromena: []
+
+legomena:
   - 10x-ref
   - 10x-workflow
   - architect-ref
