@@ -16,7 +16,7 @@ func newUserAllCmd(ctx *cmdContext) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "all",
 		Short: "Sync all user resources to ~/.claude/",
-		Long: `Sync all user resources from roster to ~/.claude/.
+		Long: `Sync all user resources from knossos to ~/.claude/.
 
 Runs sync for all resource types in sequence:
   1. agents
@@ -57,7 +57,7 @@ Examples:
 	}
 
 	cmd.Flags().BoolVarP(&dryRun, "dry-run", "n", false, "Preview changes without applying")
-	cmd.Flags().BoolVarP(&recover, "recover", "r", false, "Adopt existing files matching roster")
+	cmd.Flags().BoolVarP(&recover, "recover", "r", false, "Adopt existing files matching knossos")
 	cmd.Flags().BoolVarP(&force, "force", "f", false, "Overwrite diverged files")
 	cmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "Enable verbose output")
 

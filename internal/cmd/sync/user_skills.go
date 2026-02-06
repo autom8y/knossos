@@ -13,7 +13,7 @@ func newUserSkillsCmd(ctx *cmdContext) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "skills",
 		Short: "Sync user skills to ~/.claude/skills/",
-		Long: `Sync skill directories from roster user-skills/ to ~/.claude/skills/.
+		Long: `Sync skill directories from knossos user-skills/ to ~/.claude/skills/.
 
 Skills use a nested directory structure (category/skill-name/).
 Manifest keys are relative paths: documentation/doc-artifacts/SKILL.md
@@ -50,7 +50,7 @@ Examples:
 	}
 
 	cmd.Flags().BoolVarP(&dryRun, "dry-run", "n", false, "Preview changes without applying")
-	cmd.Flags().BoolVarP(&recover, "recover", "r", false, "Adopt existing files matching roster")
+	cmd.Flags().BoolVarP(&recover, "recover", "r", false, "Adopt existing files matching knossos")
 	cmd.Flags().BoolVarP(&force, "force", "f", false, "Overwrite diverged files")
 	cmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "Enable verbose output")
 

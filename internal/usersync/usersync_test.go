@@ -188,7 +188,7 @@ func TestManifest_LoadSave(t *testing.T) {
 		LastSync: time.Now().UTC(),
 		Entries: map[string]Entry{
 			"test.md": {
-				Source:      SourceRoster,
+				Source:      SourceKnossos,
 				InstalledAt: time.Now().UTC(),
 				Checksum:    "sha256:abc123",
 			},
@@ -219,8 +219,8 @@ func TestManifest_LoadSave(t *testing.T) {
 	if !ok {
 		t.Error("Entry 'test.md' not found")
 	}
-	if entry.Source != SourceRoster {
-		t.Errorf("Source: got %s, want %s", entry.Source, SourceRoster)
+	if entry.Source != SourceKnossos {
+		t.Errorf("Source: got %s, want %s", entry.Source, SourceKnossos)
 	}
 	if entry.Checksum != "sha256:abc123" {
 		t.Errorf("Checksum: got %s, want sha256:abc123", entry.Checksum)
@@ -307,8 +307,8 @@ func TestManifest_BackwardCompatibility(t *testing.T) {
 		t.Fatal("Entry 'test-agent.md' not found")
 	}
 
-	if entry.Source != SourceRoster {
-		t.Errorf("Source: got %s, want roster", entry.Source)
+	if entry.Source != SourceKnossos {
+		t.Errorf("Source: got %s, want knossos", entry.Source)
 	}
 
 	if entry.Checksum != "sha256:legacy123" {

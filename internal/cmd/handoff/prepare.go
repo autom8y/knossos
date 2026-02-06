@@ -356,7 +356,7 @@ var _ output.Textable = HandoffPrepareOutput{}
 // getRiteAgents returns the list of agents for a given rite.
 // Returns nil if rite is unknown (allowing fallback to universal agent list).
 func getRiteAgents(rite string) []string {
-	riteRoster := map[string][]string{
+	riteAgentMap := map[string][]string{
 		"10x-dev": {
 			"requirements-analyst", "architect", "principal-engineer", "qa-adversary", "orchestrator",
 		},
@@ -365,5 +365,5 @@ func getRiteAgents(rite string) []string {
 		},
 		// Add more rites as needed
 	}
-	return riteRoster[rite]
+	return riteAgentMap[rite]
 }

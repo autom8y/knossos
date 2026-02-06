@@ -174,7 +174,7 @@ func (m *Manager) Clone(sourceIDOrName, newName string, opts CloneOptions) (*Wor
 		}
 	}
 
-	// Try to run roster-sync and swap-rite
+	// Try to run knossos-sync and swap-rite
 	m.setupWorktreeEcosystem(wtPath, rite)
 
 	return &wt, nil
@@ -658,15 +658,15 @@ func copySessionContext(sourcePath, targetPath string) error {
 	return nil
 }
 
-// setupWorktreeEcosystem runs roster-sync and swap-rite for a worktree.
+// setupWorktreeEcosystem runs knossos-sync and swap-rite for a worktree.
 func (m *Manager) setupWorktreeEcosystem(wtPath, rite string) {
 	knossosHome := config.KnossosHome()
 	if knossosHome == "" {
 		return
 	}
 
-	// Run roster-sync init or sync
-	syncPath := filepath.Join(knossosHome, "roster-sync")
+	// Run knossos-sync init or sync
+	syncPath := filepath.Join(knossosHome, "knossos-sync")
 	if _, err := os.Stat(syncPath); err == nil {
 		manifestPath := filepath.Join(wtPath, ".claude", ".cem", "manifest.json")
 		if _, err := os.Stat(manifestPath); err == nil {

@@ -56,7 +56,7 @@ Examples:
 		"Rite (practice bundle) to activate (default: from ACTIVE_RITE)")
 	cmd.Flags().BoolVar(&opts.seed, "seed", false,
 		"Create session in ephemeral worktree, park it, and copy to main repo")
-	cmd.Flags().StringVar(&opts.seedPrefix, "seed-prefix", "/tmp/roster-seed-",
+	cmd.Flags().StringVar(&opts.seedPrefix, "seed-prefix", "/tmp/knossos-seed-",
 		"Custom prefix for ephemeral worktree path")
 	cmd.Flags().BoolVar(&opts.seedKeep, "seed-keep", false,
 		"Keep worktree after seeding (for debugging)")

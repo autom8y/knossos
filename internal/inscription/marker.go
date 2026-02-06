@@ -306,6 +306,7 @@ func (p *MarkerParser) suggestRegionName(content string, lineNum int) string {
 	content = strings.TrimSuffix(content, "-owned")
 	content = strings.TrimSuffix(content, "satellite")
 	content = strings.TrimSuffix(content, "roster")
+	content = strings.TrimSuffix(content, "knossos")
 
 	// Convert to kebab-case
 	content = strings.ReplaceAll(content, " ", "-")

@@ -56,15 +56,31 @@ func (r ResourceType) RiteSubDir() string {
 type SourceType string
 
 const (
-	SourceRoster   SourceType = "roster"          // Synced from roster, unchanged
-	SourceDiverged SourceType = "roster-diverged" // From roster but locally modified
-	SourceUser     SourceType = "user"            // User-created, not in roster
+	SourceKnossos  SourceType = "knossos"          // Synced from knossos, unchanged
+	SourceDiverged SourceType = "knossos-diverged" // From knossos but locally modified
+	SourceUser     SourceType = "user"             // User-created, not from knossos
+
+	// Deprecated: Use SourceKnossos. Kept for manifest backward compatibility.
+	SourceRoster SourceType = "roster"
 )
+
+// NormalizeSource maps legacy source values to current ones.
+// This enables reading manifests written by older versions.
+func NormalizeSource(s SourceType) SourceType {
+	switch s {
+	case "roster":
+		return SourceKnossos
+	case "roster-diverged":
+		return SourceDiverged
+	default:
+		return s
+	}
+}
 
 // Options configures sync behavior.
 type Options struct {
 	DryRun  bool // Preview changes without applying
-	Recover bool // Adopt existing files matching roster
+	Recover bool // Adopt existing files matching knossos
 	Force   bool // Overwrite diverged files
 	Verbose bool // Enable verbose logging
 }
@@ -294,10 +310,10 @@ func (s *Syncer) syncFiles(manifest *Manifest, result *Result, opts Options) err
 				if opts.Recover {
 					targetChecksum, _ := ComputeFileChecksum(targetPath)
 					if targetChecksum == sourceChecksum {
-						// Exact match - adopt as roster
+						// Exact match - adopt as knossos
 						if !opts.DryRun {
 							manifest.Entries[manifestKey] = Entry{
-								Source:      SourceRoster,
+								Source:      SourceKnossos,
 								InstalledAt: result.SyncedAt,
 								Checksum:    sourceChecksum,
 							}
@@ -340,7 +356,7 @@ func (s *Syncer) syncFiles(manifest *Manifest, result *Result, opts Options) err
 					return err
 				}
 				manifest.Entries[manifestKey] = Entry{
-					Source:      SourceRoster,
+					Source:      SourceKnossos,
 					InstalledAt: result.SyncedAt,
 					Checksum:    sourceChecksum,
 				}
@@ -366,7 +382,7 @@ func (s *Syncer) syncFiles(manifest *Manifest, result *Result, opts Options) err
 						return err
 					}
 					manifest.Entries[manifestKey] = Entry{
-						Source:      SourceRoster,
+						Source:      SourceKnossos,
 						InstalledAt: result.SyncedAt,
 						Checksum:    sourceChecksum,
 					}
@@ -380,7 +396,7 @@ func (s *Syncer) syncFiles(manifest *Manifest, result *Result, opts Options) err
 				})
 			}
 
-		case SourceRoster:
+		case SourceKnossos:
 			// Check if source changed
 			if entry.Checksum == sourceChecksum {
 				// No change in source
@@ -395,7 +411,7 @@ func (s *Syncer) syncFiles(manifest *Manifest, result *Result, opts Options) err
 							return err
 						}
 						manifest.Entries[manifestKey] = Entry{
-							Source:      SourceRoster,
+							Source:      SourceKnossos,
 							InstalledAt: result.SyncedAt,
 							Checksum:    sourceChecksum,
 						}
@@ -422,7 +438,7 @@ func (s *Syncer) syncFiles(manifest *Manifest, result *Result, opts Options) err
 	})
 }
 
-// recover adopts existing target files that match roster sources.
+// recover adopts existing target files that match knossos sources.
 func (s *Syncer) recover(manifest *Manifest, result *Result, opts Options) error {
 	// Check if target directory exists
 	if _, err := os.Stat(s.targetDir); os.IsNotExist(err) {
@@ -452,7 +468,7 @@ func (s *Syncer) recover(manifest *Manifest, result *Result, opts Options) error
 		// Check if source exists
 		sourcePath := filepath.Join(s.sourceDir, relPath)
 		if _, err := os.Stat(sourcePath); os.IsNotExist(err) {
-			// Not in roster - mark as user
+			// Not in knossos - mark as user
 			if !opts.DryRun {
 				targetChecksum, _ := ComputeFileChecksum(path)
 				manifest.Entries[manifestKey] = Entry{
@@ -471,7 +487,7 @@ func (s *Syncer) recover(manifest *Manifest, result *Result, opts Options) error
 		if !opts.DryRun {
 			if sourceChecksum == targetChecksum {
 				manifest.Entries[manifestKey] = Entry{
-					Source:      SourceRoster,
+					Source:      SourceKnossos,
 					InstalledAt: result.SyncedAt,
 					Checksum:    sourceChecksum,
 				}

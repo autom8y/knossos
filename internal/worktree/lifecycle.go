@@ -133,10 +133,10 @@ func (m *Manager) Create(opts CreateOptions) (*Worktree, error) {
 		return nil, err
 	}
 
-	// Try to run roster-sync if available
+	// Try to run knossos-sync if available
 	knossosHome := config.KnossosHome()
 	if knossosHome != "" {
-		syncPath := filepath.Join(knossosHome, "roster-sync")
+		syncPath := filepath.Join(knossosHome, "knossos-sync")
 		if _, err := os.Stat(syncPath); err == nil {
 			// First check if .claude/.cem/manifest.json exists
 			manifestPath := filepath.Join(wtPath, ".claude", ".cem", "manifest.json")

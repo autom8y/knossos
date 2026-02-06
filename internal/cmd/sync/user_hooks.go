@@ -13,7 +13,7 @@ func newUserHooksCmd(ctx *cmdContext) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "hooks",
 		Short: "Sync user hooks to ~/.claude/hooks/",
-		Long: `Sync hook files from roster user-hooks/ to ~/.claude/hooks/.
+		Long: `Sync hook files from knossos user-hooks/ to ~/.claude/hooks/.
 
 Hooks have special handling:
   - lib/ directory: Recursive copy of shared libraries
@@ -55,7 +55,7 @@ Examples:
 	}
 
 	cmd.Flags().BoolVarP(&dryRun, "dry-run", "n", false, "Preview changes without applying")
-	cmd.Flags().BoolVarP(&recover, "recover", "r", false, "Adopt existing files matching roster")
+	cmd.Flags().BoolVarP(&recover, "recover", "r", false, "Adopt existing files matching knossos")
 	cmd.Flags().BoolVarP(&force, "force", "f", false, "Overwrite diverged files")
 	cmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "Enable verbose output")
 

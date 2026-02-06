@@ -10,7 +10,7 @@ func newUserCmd(ctx *cmdContext) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "user",
 		Short: "Sync user-level resources to ~/.claude/",
-		Long: `Sync user-level resources from roster to ~/.claude/.
+		Long: `Sync user-level resources from knossos to ~/.claude/.
 
 User resources are globally available across all projects.
 They are stored in ~/.claude/ and synced from $KNOSSOS_HOME/user-{type}/.
@@ -27,9 +27,9 @@ Sync Behavior:
   - Collision-aware: Skips resources that would shadow rite resources
 
 Source Types:
-  - roster          Synced from roster, checksums match
-  - roster-diverged Originally from roster but locally modified
-  - user            Created by user, not in roster`,
+  - knossos          Synced from knossos, checksums match
+  - knossos-diverged Originally from knossos but locally modified
+  - user             Created by user, not from knossos`,
 	}
 
 	// Add subcommands

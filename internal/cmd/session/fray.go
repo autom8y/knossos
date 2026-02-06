@@ -148,7 +148,7 @@ func fraySession(projectDir, parentID string, opts frayOptions) (*output.FrayOut
 	// Create worktree if requested (default behavior)
 	var worktreePath string
 	if !opts.noWorktree {
-		worktreePath = fmt.Sprintf("/tmp/roster-fray-%d-%d", time.Now().Unix(), os.Getpid())
+		worktreePath = fmt.Sprintf("/tmp/knossos-fray-%d-%d", time.Now().Unix(), os.Getpid())
 		if err := createWorktree(worktreePath); err != nil {
 			// Non-fatal: worktree creation failure shouldn't block the fray
 			// The session is already created, parent is parked — just skip the worktree

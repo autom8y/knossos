@@ -13,7 +13,7 @@ func newUserCommandsCmd(ctx *cmdContext) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "commands",
 		Short: "Sync user commands to ~/.claude/commands/",
-		Long: `Sync command files from roster mena/ to ~/.claude/commands/.
+		Long: `Sync command files from knossos mena/ to ~/.claude/commands/.
 
 Commands use a nested directory structure (category/).
 Manifest keys are relative paths: operations/commit.md
@@ -50,7 +50,7 @@ Examples:
 	}
 
 	cmd.Flags().BoolVarP(&dryRun, "dry-run", "n", false, "Preview changes without applying")
-	cmd.Flags().BoolVarP(&recover, "recover", "r", false, "Adopt existing files matching roster")
+	cmd.Flags().BoolVarP(&recover, "recover", "r", false, "Adopt existing files matching knossos")
 	cmd.Flags().BoolVarP(&force, "force", "f", false, "Overwrite diverged files")
 	cmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "Enable verbose output")
 

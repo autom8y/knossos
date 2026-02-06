@@ -13,11 +13,11 @@ func newUserAgentsCmd(ctx *cmdContext) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "agents",
 		Short: "Sync user agents to ~/.claude/agents/",
-		Long: `Sync agent files from roster user-agents/ to ~/.claude/agents/.
+		Long: `Sync agent files from knossos user-agents/ to ~/.claude/agents/.
 
 Behavior:
-  - Adds new agents from roster
-  - Updates roster-managed agents when source changes
+  - Adds new agents from knossos
+  - Updates knossos-managed agents when source changes
   - Preserves user-created agents (never deleted)
   - Skips agents that would shadow rite agents (collision detection)
 
@@ -46,7 +46,7 @@ Examples:
 	}
 
 	cmd.Flags().BoolVarP(&dryRun, "dry-run", "n", false, "Preview changes without applying")
-	cmd.Flags().BoolVarP(&recover, "recover", "r", false, "Adopt existing files matching roster")
+	cmd.Flags().BoolVarP(&recover, "recover", "r", false, "Adopt existing files matching knossos")
 	cmd.Flags().BoolVarP(&force, "force", "f", false, "Overwrite diverged files")
 	cmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "Enable verbose output")
 
