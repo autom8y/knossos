@@ -560,6 +560,18 @@ type menaSource struct {
 	isEmbedded bool
 }
 
+// menaCollectedEntry represents a leaf mena directory collected for routing.
+type menaCollectedEntry struct {
+	source menaSource
+	name   string
+}
+
+// menaStandaloneFile represents a standalone file in a grouping directory.
+type menaStandaloneFile struct {
+	srcPath string
+	relPath string // e.g., "navigation/rite.dro.md"
+}
+
 // materializeMena copies mena files to .claude/commands/ or .claude/skills/
 // based on the filename convention (.dro.md for dromena, .lego.md for legomena).
 // Sources: mena/, rites/{rite}/mena/, rites/shared/mena/
@@ -628,33 +640,16 @@ func (m *Materializer) materializeMena(manifest *RiteManifest, claudeDir string,
 		sources = append(sources, menaSource{path: currentRiteMenaDir})
 	}
 
-	// Pass 1: Collect command directories from all sources.
+	// Pass 1: Collect mena entries from all sources.
 	// Later sources override earlier ones for the same command name.
-	type collectedEntry struct {
-		source menaSource
-		name   string
-	}
-	collected := make(map[string]collectedEntry)
+	// Directories with INDEX files are leaf entries; directories without
+	// INDEX files are grouping directories that are recursively descended.
+	collected := make(map[string]menaCollectedEntry)
+	standalones := make(map[string]menaStandaloneFile) // key: relPath
 
 	for _, src := range sources {
 		if src.isEmbedded {
-			entries, err := fs.ReadDir(src.fsys, src.fsysPath)
-			if err != nil {
-				continue // Path doesn't exist in embedded FS
-			}
-			for _, entry := range entries {
-				if !entry.IsDir() {
-					continue
-				}
-				collected[entry.Name()] = collectedEntry{
-					source: menaSource{
-						fsys:       src.fsys,
-						fsysPath:   src.fsysPath + "/" + entry.Name(),
-						isEmbedded: true,
-					},
-					name: entry.Name(),
-				}
-			}
+			collectMenaEntriesFS(src.fsys, src.fsysPath, "", collected)
 		} else {
 			if src.path == "" {
 				continue
@@ -662,18 +657,8 @@ func (m *Materializer) materializeMena(manifest *RiteManifest, claudeDir string,
 			if _, err := os.Stat(src.path); os.IsNotExist(err) {
 				continue
 			}
-			entries, err := os.ReadDir(src.path)
-			if err != nil {
+			if err := collectMenaEntriesDir(src.path, "", collected, standalones); err != nil {
 				return err
-			}
-			for _, entry := range entries {
-				if !entry.IsDir() {
-					continue
-				}
-				collected[entry.Name()] = collectedEntry{
-					source: menaSource{path: filepath.Join(src.path, entry.Name())},
-					name:   entry.Name(),
-				}
 			}
 		}
 	}
@@ -725,7 +710,124 @@ func (m *Materializer) materializeMena(manifest *RiteManifest, claudeDir string,
 		}
 	}
 
+	// Copy standalone files (e.g., mena/navigation/rite.dro.md)
+	// Route by extension: .dro.md → commands/, .lego.md → skills/
+	for _, sf := range standalones {
+		menaType := DetectMenaType(filepath.Base(sf.srcPath))
+		var baseDir string
+		if menaType == "dro" {
+			baseDir = commandsDir
+		} else {
+			baseDir = skillsDir
+		}
+		destPath := filepath.Join(baseDir, sf.relPath)
+		if err := os.MkdirAll(filepath.Dir(destPath), 0755); err != nil {
+			return err
+		}
+		data, err := os.ReadFile(sf.srcPath)
+		if err != nil {
+			return err
+		}
+		if err := os.WriteFile(destPath, data, 0644); err != nil {
+			return err
+		}
+	}
+
 	return nil
+}
+
+// collectMenaEntriesDir recursively collects mena entries from a filesystem directory.
+// Leaf directories (containing INDEX files) are collected for routing.
+// Standalone files in grouping directories are collected separately.
+func collectMenaEntriesDir(dirPath string, prefix string, collected map[string]menaCollectedEntry, standalones map[string]menaStandaloneFile) error {
+	entries, err := os.ReadDir(dirPath)
+	if err != nil {
+		return err
+	}
+	for _, entry := range entries {
+		name := entry.Name()
+		if prefix != "" {
+			name = prefix + "/" + entry.Name()
+		}
+		if entry.IsDir() {
+			childPath := filepath.Join(dirPath, entry.Name())
+			if dirHasIndexFile(childPath) {
+				collected[name] = menaCollectedEntry{
+					source: menaSource{path: childPath},
+					name:   name,
+				}
+			} else {
+				if err := collectMenaEntriesDir(childPath, name, collected, standalones); err != nil {
+					return err
+				}
+			}
+		} else {
+			// Standalone file in a grouping directory
+			standalones[name] = menaStandaloneFile{
+				srcPath: filepath.Join(dirPath, entry.Name()),
+				relPath: name,
+			}
+		}
+	}
+	return nil
+}
+
+// collectMenaEntriesFS recursively collects mena entries from an embedded filesystem.
+func collectMenaEntriesFS(fsys fs.FS, fsysPath string, prefix string, collected map[string]menaCollectedEntry) {
+	entries, err := fs.ReadDir(fsys, fsysPath)
+	if err != nil {
+		return // Path doesn't exist in embedded FS
+	}
+	for _, entry := range entries {
+		if !entry.IsDir() {
+			continue // Embedded rite mena doesn't have standalone files
+		}
+		name := entry.Name()
+		if prefix != "" {
+			name = prefix + "/" + entry.Name()
+		}
+		childPath := fsysPath + "/" + entry.Name()
+		if fsHasIndexFile(fsys, childPath) {
+			collected[name] = menaCollectedEntry{
+				source: menaSource{
+					fsys:       fsys,
+					fsysPath:   childPath,
+					isEmbedded: true,
+				},
+				name: name,
+			}
+		} else {
+			collectMenaEntriesFS(fsys, childPath, name, collected)
+		}
+	}
+}
+
+// dirHasIndexFile checks if a filesystem directory contains an INDEX file.
+func dirHasIndexFile(dirPath string) bool {
+	entries, err := os.ReadDir(dirPath)
+	if err != nil {
+		return false
+	}
+	for _, entry := range entries {
+		if !entry.IsDir() && strings.HasPrefix(entry.Name(), "INDEX") {
+			return true
+		}
+	}
+	return false
+}
+
+// fsHasIndexFile checks if an embedded FS directory contains an INDEX file.
+func fsHasIndexFile(fsys fs.FS, dirPath string) bool {
+	entries, err := fs.ReadDir(fsys, dirPath)
+	if err != nil {
+		return false
+	}
+	for _, entry := range entries {
+		if !entry.IsDir() && strings.HasPrefix(entry.Name(), "INDEX") {
+			return true
+		}
+	}
+	return false
 }
 
 // getMenaDir returns the mena directory path.

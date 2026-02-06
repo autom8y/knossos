@@ -318,6 +318,113 @@ description: A default command
 	}
 }
 
+// TestRoutingNestedGrouping verifies that grouping directories (no INDEX file)
+// recurse into leaf directories, routing each leaf by its own INDEX type.
+// This tests the fix for the legomena routing defect where nested grouping dirs
+// (e.g., guidance/standards with INDEX.lego.md) were incorrectly routed to commands/.
+func TestRoutingNestedGrouping(t *testing.T) {
+	tmpDir := t.TempDir()
+	claudeDir := filepath.Join(tmpDir, ".claude")
+	menaBaseDir := filepath.Join(tmpDir, "mena")
+
+	// Create grouping dir "guidance" (no INDEX file — just a container)
+	// with two leaf dirs: one legomena, one dromena
+	legoLeaf := filepath.Join(menaBaseDir, "guidance", "standards")
+	droLeaf := filepath.Join(menaBaseDir, "guidance", "file-verification")
+	if err := os.MkdirAll(legoLeaf, 0755); err != nil {
+		t.Fatalf("Failed to create lego leaf: %v", err)
+	}
+	if err := os.MkdirAll(droLeaf, 0755); err != nil {
+		t.Fatalf("Failed to create dro leaf: %v", err)
+	}
+
+	// guidance/standards/ — legomena (INDEX.lego.md)
+	legoIndex := `---
+name: standards
+description: Code conventions and tech stack
+---
+# Standards
+`
+	if err := os.WriteFile(filepath.Join(legoLeaf, "INDEX.lego.md"), []byte(legoIndex), 0644); err != nil {
+		t.Fatalf("Failed to write lego INDEX: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(legoLeaf, "code-conventions.md"), []byte("# Code Conventions\n"), 0644); err != nil {
+		t.Fatalf("Failed to write supporting file: %v", err)
+	}
+
+	// guidance/file-verification/ — dromena (INDEX.dro.md)
+	droIndex := `---
+name: file-verification
+description: File verification command
+---
+# File Verification
+`
+	if err := os.WriteFile(filepath.Join(droLeaf, "INDEX.dro.md"), []byte(droIndex), 0644); err != nil {
+		t.Fatalf("Failed to write dro INDEX: %v", err)
+	}
+
+	// Also create a flat top-level entry to ensure it still works
+	flatDir := filepath.Join(menaBaseDir, "flat-cmd")
+	if err := os.MkdirAll(flatDir, 0755); err != nil {
+		t.Fatalf("Failed to create flat dir: %v", err)
+	}
+	flatIndex := `---
+name: flat-cmd
+description: A flat command
+---
+# Flat Command
+`
+	if err := os.WriteFile(filepath.Join(flatDir, "INDEX.dro.md"), []byte(flatIndex), 0644); err != nil {
+		t.Fatalf("Failed to write flat INDEX: %v", err)
+	}
+
+	resolver := paths.NewResolver(tmpDir)
+	m := NewMaterializer(resolver)
+
+	manifest := &RiteManifest{
+		Name:    "test",
+		Version: "1.0.0",
+	}
+
+	if err := m.materializeMena(manifest, claudeDir, nil); err != nil {
+		t.Fatalf("materializeMena failed: %v", err)
+	}
+
+	// Verify: guidance/standards → skills/guidance/standards/ (legomena)
+	skillsStandards := filepath.Join(claudeDir, "skills", "guidance", "standards", "INDEX.lego.md")
+	if _, err := os.Stat(skillsStandards); os.IsNotExist(err) {
+		t.Errorf("Expected guidance/standards to be in skills/, but %s does not exist", skillsStandards)
+	}
+	skillsConventions := filepath.Join(claudeDir, "skills", "guidance", "standards", "code-conventions.md")
+	if _, err := os.Stat(skillsConventions); os.IsNotExist(err) {
+		t.Errorf("Expected supporting file to follow INDEX to skills/, but %s does not exist", skillsConventions)
+	}
+
+	// Verify: guidance/standards NOT in commands/
+	commandsStandards := filepath.Join(claudeDir, "commands", "guidance", "standards", "INDEX.lego.md")
+	if _, err := os.Stat(commandsStandards); err == nil {
+		t.Errorf("Legomena guidance/standards should NOT be in commands/, but %s exists", commandsStandards)
+	}
+
+	// Verify: guidance/file-verification → commands/guidance/file-verification/ (dromena)
+	commandsFV := filepath.Join(claudeDir, "commands", "guidance", "file-verification", "INDEX.dro.md")
+	if _, err := os.Stat(commandsFV); os.IsNotExist(err) {
+		t.Errorf("Expected guidance/file-verification to be in commands/, but %s does not exist", commandsFV)
+	}
+
+	// Verify: guidance/file-verification NOT in skills/
+	skillsFV := filepath.Join(claudeDir, "skills", "guidance", "file-verification", "INDEX.dro.md")
+	if _, err := os.Stat(skillsFV); err == nil {
+		t.Errorf("Dromena guidance/file-verification should NOT be in skills/, but %s exists", skillsFV)
+	}
+
+	// Verify: flat-cmd → commands/ (still works)
+	flatPath := filepath.Join(claudeDir, "commands", "flat-cmd", "INDEX.dro.md")
+	if _, err := os.Stat(flatPath); os.IsNotExist(err) {
+		t.Errorf("Expected flat-cmd to still be in commands/, but %s does not exist", flatPath)
+	}
+}
+
 // TestDetectMenaType verifies the extension-based type detection
 func TestDetectMenaType(t *testing.T) {
 	tests := []struct {

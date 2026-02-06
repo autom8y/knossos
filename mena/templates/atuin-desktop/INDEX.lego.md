@@ -23,8 +23,6 @@ forkedFrom: null        # Required: null or source document ID
 content: []             # Required: Array of blocks
 ```
 
----
-
 ## Block Types Quick Reference
 
 | Type | Purpose | Has Content? | Key Props |
@@ -40,159 +38,6 @@ content: []             # Required: Array of blocks
 
 **Critical**: `script` and `var` blocks have NO `content` field.
 
----
-
-## Block Structure Pattern
-
-Every block follows this structure:
-
-```yaml
-- id: <uuid>
-  type: <block-type>
-  props:
-    # Type-specific properties (order matters for some)
-  content:  # Only if block type supports content
-    - type: text
-      text: "Content here"
-      styles: {}
-```
-
-### Props Order (when present)
-
-`backgroundColor` -> `textColor` -> `textAlignment` -> `level` -> `isToggleable`
-
----
-
-## Content Blocks (with inline content)
-
-### Paragraph
-
-```yaml
-- id: "block-uuid"
-  type: paragraph
-  props:
-    backgroundColor: default
-    textColor: default
-    textAlignment: left
-  content:
-    - type: text
-      text: "Your text here"
-      styles: {}
-```
-
-### Heading
-
-```yaml
-- id: "block-uuid"
-  type: heading
-  props:
-    backgroundColor: default
-    textColor: default
-    textAlignment: left
-    level: 2
-    isToggleable: false
-  content:
-    - type: text
-      text: "Section Title"
-      styles: {}
-```
-
-### Quote
-
-```yaml
-- id: "block-uuid"
-  type: quote
-  props:
-    backgroundColor: default
-    textColor: default
-  content:
-    - type: text
-      text: "Quoted text"
-      styles: {}
-```
-
----
-
-## Executable Blocks (no content field)
-
-### Script Block
-
-```yaml
-- id: "block-uuid"
-  type: script
-  props:
-    interpreter: zsh
-    name: "my-script"
-    code: |-
-      echo "Hello"
-      echo "World"
-    outputVariable: result_var
-    outputVisible: true
-    dependency: null
-```
-
-**Interpreters**: `zsh`, `bash`, `sh`, `fish`, `python`, `node`, `ruby`, `perl`
-
-### Run Block (Terminal)
-
-```yaml
-- id: "block-uuid"
-  type: run
-  props:
-    type: terminal
-    name: "terminal-name"
-    code: |-
-      ./start-server.sh
-    pty: true
-    global: false
-    outputVisible: true
-    dependency: null
-    terminalRows: 10
-```
-
-### HTTP Block
-
-```yaml
-- id: "block-uuid"
-  type: http
-  props:
-    name: "api-call"
-    request:
-      method: GET
-      url: "https://api.example.com/data"
-      headers:
-        Authorization: "Bearer {{var.token}}"
-```
-
----
-
-## Variable System
-
-### Define Variable
-
-```yaml
-- id: "block-uuid"
-  type: var
-  props:
-    name: api_key
-    value: "sk-xxxxx"
-```
-
-### Display Variable
-
-```yaml
-- id: "block-uuid"
-  type: var_display
-  props:
-    name: api_key
-```
-
-### Use in Templates
-
-Reference with double braces: `{{var.variable_name}}`
-
----
-
 ## Critical Formatting Rules
 
 1. **No YAML document markers** - Don't start with `---`
@@ -201,8 +46,6 @@ Reference with double braces: `{{var.variable_name}}`
 4. **Trailing paragraph** - All documents end with empty paragraph
 5. **Props before content** - Always in this order
 6. **No content on script/var** - These blocks store data in props only
-
----
 
 ## Agent Workflow
 
@@ -213,18 +56,12 @@ Reference with double braces: `{{var.variable_name}}`
 | Principal Engineer | Generating valid .atrb files |
 | QA/Adversary | Validating .atrb structure and content |
 
----
+## Sub-Files
 
-## Progressive Disclosure
-
-**Detailed References**:
-- [spec/block-types.md](spec/block-types.md) - Complete block type specifications
+**Specifications**:
+- [spec/block-types.md](spec/block-types.md) - Complete block type specifications with examples
 - [spec/formatting-rules.md](spec/formatting-rules.md) - YAML formatting requirements
-- [spec/template-variables.md](spec/template-variables.md) - Variable interpolation
-
-**Examples**:
-- [examples/minimal.atrb](examples/minimal.atrb) - Simplest valid document
-- [examples/comprehensive.atrb](examples/comprehensive.atrb) - All features demonstrated
+- [spec/template-variables.md](spec/template-variables.md) - Variable interpolation and usage
 
 **Validation**:
 - [validation/checklist.md](validation/checklist.md) - QA validation checklist
@@ -232,8 +69,6 @@ Reference with double braces: `{{var.variable_name}}`
 
 **Agent Integration**:
 - [agent-guidance.md](agent-guidance.md) - Agent-specific workflows
-
----
 
 ## Cross-Skill Integration
 
