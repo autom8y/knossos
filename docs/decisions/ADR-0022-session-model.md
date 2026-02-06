@@ -131,7 +131,7 @@ D2 validated that `flock` is correct for the current use case (single user, loca
 
 **3b. Lock timeout error improvement**
 
-The current error message ("Could not acquire lock within timeout") provides no recovery guidance (D2 Risk 2.7). The improved message should include: holder PID, whether the holder is alive or dead, and the command to run for recovery (`ari session unlock --force` if dead, `kill {pid}` if alive but unresponsive).
+The current error message ("Could not acquire lock within timeout") provides no recovery guidance (D2 Risk 2.7). The improved message now directs users to `ari session recover` for stale lock cleanup.
 
 **3c. Lock file cleanup on archive**
 
@@ -149,7 +149,7 @@ Write `{pid} {unix-timestamp}` to lock files instead of just `{pid}`. This enabl
 | Replace `flock` with cross-platform library | Adds external dependency. `flock` is available on all target platforms (macOS, Linux). Windows support is not a current requirement. |
 | Add NFS detection and warning | Low priority. If productization targets network filesystems, revisit. Document the limitation (Decision 5). |
 
-**Backward compatibility:** COMPATIBLE. Lock file format change is additive. ForceRelease behavior change only affects `ari session unlock --force`, which is a debugging command.
+**Backward compatibility:** COMPATIBLE. Lock file format change is additive. The manual `lock` and `unlock` commands have been removed; recovery is handled by `ari session recover`.
 
 ### Decision 4: Worktrees Provide Session Isolation by Design
 
@@ -224,42 +224,55 @@ This resolves the tension: Moirai is the sole authority at the agent convention 
 
 ## Implementation
 
-### Phase 1: Session Pointer Lock (addresses D2 R1)
+### Phase 1: Scan-Based Discovery (addresses D2 R1) -- COMPLETE
 
 | File | Change |
 |------|--------|
-| `internal/cmd/session/create.go` | After creating session, acquire `__session-pointer__` lock before calling `SetCurrentSessionID`. Release after write. |
-| `internal/cmd/session/resume.go` | Acquire `__session-pointer__` lock before calling `SetCurrentSessionID`. Release after write. |
-| `internal/cmd/session/wrap.go` | Acquire `__session-pointer__` lock before calling `ClearCurrentSessionID`. Release after clear. |
-| `internal/lock/lock.go` | No changes. The existing `Acquire` method works with any sentinel ID. |
+| `internal/session/discovery.go` | New file. `FindActiveSession()` scans session directories for ACTIVE status. Authoritative source of truth; `.current-session` demoted to 5-second TTL cache. |
+| `internal/cmd/session/create.go` | Uses `FindActiveSession()` scan instead of reading `.current-session`. |
+| `internal/cmd/session/resume.go` | Writes `.current-session` as cache after FSM transition. |
+| `internal/cmd/session/wrap.go` | Clears `.current-session` cache after archive. Scans for stale parked sessions post-wrap. |
 
-### Phase 2: ForceRelease Hardening (addresses D2 R2, R3)
-
-| File | Change |
-|------|--------|
-| `internal/cmd/session/unlock.go` | Before calling `ForceRelease`, check if holder PID is alive. If alive and `--kill` not passed, print warning and refuse. |
-| `internal/lock/lock.go` | `Acquire` method: write `{pid} {timestamp}` instead of `{pid}` to lock files. `getHolderPID` method: parse first token only (backward compatible). Add `getHolderTimestamp` method. |
-| `internal/errors/errors.go` | `ErrLockTimeout`: include recovery guidance in error message. |
-
-### Phase 3: Lock Cleanup on Archive (addresses D2 R4)
+### Phase 2: Lock Format v2 and Recovery (addresses D2 R2, R3, R7) -- COMPLETE
 
 | File | Change |
 |------|--------|
-| `internal/cmd/session/wrap.go` | After successful archive (line ~221), call `lockMgr.ForceRelease(sessionID)` to remove the lock file. |
+| `internal/lock/lock.go` | `Acquire` writes JSON `LockMetadata` (session, acquired timestamp, holder command, version "2") instead of PID. Age-based stale detection at 5-minute threshold. Backward-compatible: reads both JSON v2 and legacy PID formats. |
+| `internal/errors/errors.go` | `ErrLockTimeout` message directs users to `ari session recover`. |
+| `internal/cmd/session/recover.go` | New command. Scans lock files for stale entries, removes them, rebuilds `.current-session` cache from directory scan. Supports `--dry-run`. |
 
-### Phase 4: Documentation
+### Phase 3: Lock Cleanup on Archive (addresses D2 R4) -- COMPLETE
 
 | File | Change |
 |------|--------|
-| This ADR | Serves as the canonical reference for session model architecture. |
-| `docs/guides/parallel-sessions.md` | Update with worktree isolation model and CI guidance. |
-| `.claude/CLAUDE.md` state management section | Clarify Moirai vs CLI authority layers. |
+| `internal/cmd/session/wrap.go` | After successful archive, calls `lockMgr.ForceRelease(sessionID)` to remove the lock file. |
+
+### Phase 4: Stale Session Detection -- COMPLETE
+
+| File | Change |
+|------|--------|
+| `internal/naxos/scanner.go` | `FormatDuration` exported. `ScanStaleSessions()` added for lightweight stale PARKED session detection. |
+| `internal/cmd/session/list.go` | Annotates PARKED sessions older than `ARIADNE_STALE_SESSION_DAYS` (default 2) with `[STALE]` and suggests `ari session wrap <id>`. |
+| `internal/cmd/session/wrap.go` | After successful wrap, scans for stale parked sessions and reports to stderr. |
+
+### Phase 5: Documentation -- COMPLETE
+
+| File | Change |
+|------|--------|
+| This ADR | Amended Decision 2 for scan-based discovery. Updated Implementation to reflect completed work. |
+| `docs/doctrine/operations/cli-reference/cli-session.md` | Removed `lock`/`unlock` sections. Added `recover` section. |
+
+### Removed Commands
+
+| Command | Reason |
+|---------|--------|
+| `ari session lock` | Manual lock acquisition is replaced by automatic stale detection and `ari session recover`. The lock/unlock debugging workflow was a footgun (D2 Risk 2.6: blocks forever). |
+| `ari session unlock` | Manual lock release is replaced by `ari session recover` which combines stale lock cleanup with cache rebuild. Safer than unlock --force which could cause split-brain (D2 Risk 2.2). |
 
 ### Not Implemented (Deferred)
 
 | Item | Reason |
 |------|--------|
-| Manual `lock` duration limit (D2 R6) | Low priority. The `ari session lock` command is a debugging tool rarely used in production. |
 | Configurable lock timeout via env var (D2 Q5) | Low priority. The 10-second default has not been reported as problematic. Can be added later without architectural impact. |
 | NFS/network FS detection (D2 Risk 2.5) | Not a current requirement. If productization targets shared filesystems, revisit with a different locking strategy entirely. |
 
@@ -267,16 +280,16 @@ This resolves the tension: Moirai is the sole authority at the agent convention 
 
 ### Positive
 
-1. **TOCTOU race eliminated.** The `__session-pointer__` lock ensures that `.current-session` mutations are serialized regardless of which command initiates them. The race described in D2 Risk 2.1 becomes impossible.
-2. **ForceRelease is safer.** Users cannot accidentally create split-brain by force-unlocking a live process. The new liveness check and `--kill` flag make the danger explicit.
+1. **TOCTOU race eliminated.** Scan-based discovery (`FindActiveSession`) derives the active session from directory contents. The `.current-session` pointer is a performance cache, not a coordination mechanism. The race described in D2 Risk 2.1 is eliminated at the design level.
+2. **Recovery is automated.** `ari session recover` replaces the manual lock/unlock workflow with a single command that cleans stale locks and rebuilds the session cache. Safer than manual unlock which could cause split-brain.
 3. **Worktree model is documented.** The per-worktree isolation behavior was implicit; it is now an explicit architectural decision with rationale, enabling satellite developers to reason about multi-worktree deployments.
 4. **Moirai/CLI layering is clarified.** The philosophical tension between "Moirai is sole authority" and "CLI is authoritative" is resolved by distinguishing the convention layer from the enforcement layer.
 5. **Lock error messages guide recovery.** Users encountering lock contention receive actionable instructions rather than opaque error messages.
 
 ### Negative
 
-1. **Slightly more lock contention.** Operations that mutate `.current-session` now acquire two locks (session-specific + `__session-pointer__`). In practice this adds microseconds; `flock` on a local file is fast.
-2. **ForceRelease is more restrictive.** Users who previously relied on `ari session unlock --force` to bypass stuck locks must now also pass `--kill` if the holder is alive. This is intentional friction.
+1. **Scan cost per operation.** `FindActiveSession` scans session directories on each create/resume. With typical session counts of 2-3, this completes in <1ms, which is lower than the lock overhead it replaced.
+2. **Manual lock/unlock removed.** Users who relied on `ari session lock`/`ari session unlock` for debugging must use `ari session recover` instead. This is a deliberate simplification -- the lock/unlock workflow was a footgun.
 3. **CI requires worktrees for parallelism.** CI pipelines cannot run multiple sessions in a single checkout. This is an explicit trade-off: protecting the single-session invariant for the common case at the cost of CI complexity for the uncommon case.
 
 ### Neutral

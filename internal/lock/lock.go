@@ -280,6 +280,13 @@ func (m *Manager) LocksDir() string {
 	return m.locksDir
 }
 
+// IsStaleForTest exposes the isStale method for cross-package testing.
+// This allows the stale divergence tests to compare lock.isStale behavior
+// against recover.isLockStale behavior.
+func (m *Manager) IsStaleForTest(lockPath string) bool {
+	return m.isStale(lockPath)
+}
+
 // SessionID returns the session ID this lock is for.
 func (l *Lock) SessionID() string {
 	return l.sessionID

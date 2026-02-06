@@ -27,7 +27,10 @@ func newListCmd(ctx *cmdContext) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "List sessions",
-		Long:  `Lists sessions with optional filtering by status.`,
+		Long: `Lists sessions with optional filtering by status.
+
+Parked sessions older than ARIADNE_STALE_SESSION_DAYS (default: 2 days)
+are annotated as stale with a suggestion to wrap them.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runList(ctx, opts)
 		},

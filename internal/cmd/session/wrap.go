@@ -35,6 +35,9 @@ are BLACK (explicit blockers present), the wrap is blocked unless --force
 is used. The session directory is moved to the archive unless --no-archive
 is specified.
 
+After a successful wrap, scans for stale parked sessions and reports
+them to stderr with a suggestion to wrap them as well.
+
 Examples:
   ari session wrap
   ari session wrap --no-archive

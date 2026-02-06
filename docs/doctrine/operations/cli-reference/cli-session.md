@@ -5,7 +5,7 @@
 Sessions track work context through the [Moirai](../../reference/GLOSSARY.md#moirai) lifecycle: create → park → resume → wrap. Each session has an initiative, complexity level, and maintains an [event log](../../reference/GLOSSARY.md#event-log) (the clew).
 
 **Family**: session
-**Commands**: 11
+**Commands**: 10
 **Priority**: HIGH
 
 ---
@@ -68,7 +68,7 @@ ari session list [flags]
 ```
 
 **Description**:
-Lists sessions in the project, optionally filtered by status. Shows session ID, initiative, status, and timestamps.
+Lists sessions in the project, optionally filtered by status. Shows session ID, initiative, status, and timestamps. Parked sessions older than `ARIADNE_STALE_SESSION_DAYS` (default: 2 days) are annotated as stale with a suggestion to wrap them.
 
 **Flags**:
 | Flag | Type | Default | Description |
@@ -200,7 +200,7 @@ ari session wrap [flags]
 ```
 
 **Description**:
-Completes the session, generating [White Sails](../../reference/GLOSSARY.md#white-sails) confidence signal and transitioning to ARCHIVED state. Runs quality gates unless forced.
+Completes the session, generating [White Sails](../../reference/GLOSSARY.md#white-sails) confidence signal and transitioning to ARCHIVED state. Runs quality gates unless forced. After a successful wrap, scans for stale parked sessions and reports them to stderr.
 
 **Flags**:
 | Flag | Type | Default | Description |
@@ -300,65 +300,37 @@ ari session transition validation --force
 
 ---
 
-### ari session lock
+### ari session recover
 
-Manually acquire session lock.
+Clean up stale locks and rebuild session cache.
 
 **Synopsis**:
 ```bash
-ari session lock [flags]
+ari session recover [flags]
 ```
 
 **Description**:
-Acquires an exclusive lock on the session. Primarily for debugging lock contention issues. Most operations handle locking automatically.
+Recovers from stale locks and inconsistent session state. Scans all lock files for stale entries (older than 5 minutes), removes them, scans session directories for the ACTIVE session, and rebuilds the `.current-session` cache. Use `--dry-run` to preview what would be fixed without making changes.
+
+This command replaces the former `ari session lock` and `ari session unlock` commands which were removed in v0.2.0.
 
 **Flags**:
 | Flag | Type | Default | Description |
 |------|------|---------|-------------|
-| `-T, --timeout` | int | 10 | Lock acquisition timeout in seconds |
+| `--dry-run` | bool | false | Preview changes without applying |
 
 **Examples**:
 ```bash
-# Acquire lock with default timeout
-ari session lock
+# Preview recovery actions
+ari session recover --dry-run
 
-# Longer timeout for slow systems
-ari session lock --timeout=30
+# Clean up stale locks and rebuild cache
+ari session recover
 ```
 
 **Related Commands**:
-- [`ari session unlock`](#ari-session-unlock) — Release lock
-
----
-
-### ari session unlock
-
-Manually release session lock.
-
-**Synopsis**:
-```bash
-ari session unlock [flags]
-```
-
-**Description**:
-Releases a session lock. Use `--force` to remove locks held by other processes (e.g., crashed processes).
-
-**Flags**:
-| Flag | Type | Default | Description |
-|------|------|---------|-------------|
-| `-f, --force` | bool | false | Force unlock even if not owner |
-
-**Examples**:
-```bash
-# Release own lock
-ari session unlock
-
-# Force remove stale lock
-ari session unlock --force
-```
-
-**Related Commands**:
-- [`ari session lock`](#ari-session-lock) — Acquire lock
+- [`ari session status`](#ari-session-status) — Check current session state
+- [`ari session list`](#ari-session-list) — List sessions
 
 ---
 

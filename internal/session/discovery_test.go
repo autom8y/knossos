@@ -181,3 +181,97 @@ func TestFindActiveSession_SkipsNonSessionDirs(t *testing.T) {
 		t.Errorf("FindActiveSession() = %q, want empty", result)
 	}
 }
+
+// --- Dual-ACTIVE Session Scenario ---
+//
+// KNOWN BEHAVIOR: After a crash, two sessions could both have status ACTIVE.
+// FindActiveSession scans via os.ReadDir (alphabetical order on most OSes)
+// and returns the FIRST active session found. There is no conflict detection.
+//
+// This is documented and accepted behavior for now. The Fray initiative
+// (future work) will need to add conflict detection to handle this case
+// by either prompting the user or using timestamp-based resolution.
+
+func TestFindActiveSession_DualActive(t *testing.T) {
+	tmpDir, err := os.MkdirTemp("", "discovery-dual-test-*")
+	if err != nil {
+		t.Fatalf("Failed to create temp dir: %v", err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	sessionsDir := filepath.Join(tmpDir, "sessions")
+
+	// Create two sessions both with status ACTIVE
+	session1 := "session-20260201-100000-active01"
+	session2 := "session-20260202-100000-active02"
+	writeSessionContext(t, sessionsDir, session1, "ACTIVE")
+	writeSessionContext(t, sessionsDir, session2, "ACTIVE")
+
+	result, err := FindActiveSession(sessionsDir)
+	if err != nil {
+		t.Fatalf("FindActiveSession() error = %v", err)
+	}
+
+	// Must return one of the two — not empty
+	if result == "" {
+		t.Fatal("FindActiveSession() returned empty string, expected one of the two ACTIVE sessions")
+	}
+
+	// Must be one of the two sessions we created
+	if result != session1 && result != session2 {
+		t.Errorf("FindActiveSession() = %q, want either %q or %q", result, session1, session2)
+	}
+
+	// KNOWN BEHAVIOR: scan returns first-found by os.ReadDir order.
+	// On most systems, os.ReadDir returns entries sorted alphabetically,
+	// so session1 (active01) would be returned first. But we do NOT assert
+	// which specific one is returned — only that it IS one of them.
+	// The Fray initiative will need to add conflict detection here.
+	t.Logf("Dual-ACTIVE: FindActiveSession returned %q (first-found behavior)", result)
+}
+
+// --- Cache-Then-Scan Performance Sanity Check ---
+//
+// The GetCurrentSessionID() in internal/cmd/common/context.go implements
+// cache-then-scan with a 5s TTL. This test verifies the scan component
+// (FindActiveSession) completes in a reasonable time even with multiple
+// sessions. This is a sanity check, not a benchmark.
+
+func TestFindActiveSession_Performance(t *testing.T) {
+	tmpDir, err := os.MkdirTemp("", "discovery-perf-test-*")
+	if err != nil {
+		t.Fatalf("Failed to create temp dir: %v", err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	sessionsDir := filepath.Join(tmpDir, "sessions")
+
+	// Create 9 PARKED sessions and 1 ACTIVE session (last alphabetically)
+	for i := 0; i < 9; i++ {
+		sessionID := fmt.Sprintf("session-20260201-10%02d00-parked%02d", i, i)
+		writeSessionContext(t, sessionsDir, sessionID, "PARKED")
+	}
+	activeID := "session-20260201-109900-theactive"
+	writeSessionContext(t, sessionsDir, activeID, "ACTIVE")
+
+	// Time the scan
+	start := time.Now()
+	result, err := FindActiveSession(sessionsDir)
+	elapsed := time.Since(start)
+
+	if err != nil {
+		t.Fatalf("FindActiveSession() error = %v", err)
+	}
+
+	if result != activeID {
+		t.Errorf("FindActiveSession() = %q, want %q", result, activeID)
+	}
+
+	// Sanity check: 10 sessions should scan in well under 100ms
+	// even on slow filesystems
+	if elapsed > 100*time.Millisecond {
+		t.Errorf("FindActiveSession() took %v for 10 sessions, expected < 100ms", elapsed)
+	}
+
+	t.Logf("Performance: scanned 10 sessions in %v", elapsed)
+}
