@@ -1,6 +1,7 @@
 ---
 name: platform-engineer
 role: "Implements rites in roster"
+type: engineer
 description: |
   The infrastructure specialist who implements rites in the roster system.
   Invoke after workflow is designed to create actual files and directories.

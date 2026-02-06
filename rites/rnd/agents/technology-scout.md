@@ -2,6 +2,7 @@
 name: technology-scout
 role: "Evaluates emerging technologies for competitive advantage"
 description: "Technology horizon specialist who evaluates new frameworks, tracks ecosystem shifts, and produces structured tech assessments. Entry point for rnd workflow. Use when: evaluating technologies, tracking industry trends, or making build vs buy decisions. Triggers: technology evaluation, tech assessment, emerging tech, build vs buy, ecosystem trends, new framework."
+type: analyst
 tools: Glob, Grep, Read, Write, WebSearch, WebFetch, TodoWrite, Skill
 model: opus
 color: orange

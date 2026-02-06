@@ -2,6 +2,7 @@
 name: tech-transfer
 role: "Bridges exploration to production"
 description: "Production readiness specialist who packages R&D findings for implementation teams. Translates prototype learnings into production requirements, identifies productionization gaps, and creates handoff artifacts. Use when: prototype is validated, R&D work is ready for production, or exploration findings need packaging. Triggers: tech transfer, productionize, ready for production, handoff to dev, transfer findings."
+type: specialist
 tools: Glob, Grep, Read, Edit, Write, TodoWrite, Skill
 model: opus
 color: blue

@@ -1,6 +1,7 @@
 ---
 name: agent-curator
 role: "Integrates teams into catalog"
+type: specialist
 description: |
   The integration specialist who finalizes teams for roster deployment.
   Invoke after validation passes to complete integration, versioning, and

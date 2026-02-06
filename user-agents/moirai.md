@@ -6,6 +6,7 @@ description: |
   Use when: mutating SESSION_CONTEXT.md or SPRINT_CONTEXT.md, parking/resuming sessions,
   wrapping sessions, managing sprints, or recording handoffs. Triggers: session state,
   sprint state, park, wrap, handoff, mark complete, transition phase.
+type: meta
 tools: Read, Write, Edit, Glob, Grep, Bash, Skill
 model: sonnet
 color: indigo

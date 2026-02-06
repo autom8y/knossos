@@ -2,6 +2,7 @@
 name: orchestrator
 description: |
   Coordinates security phases for security work. Routes tasks through threat modeling, compliance, penetration testing, and review phases. Use when: security work spans multiple phases or requires cross-functional coordination. Triggers: coordinate, orchestrate, security workflow, security assessment, multi-phase security.
+type: orchestrator
 tools: Read
 model: opus
 color: red

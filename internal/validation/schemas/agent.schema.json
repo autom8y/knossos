@@ -1,0 +1,240 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "embed:///schemas/agent.schema.json",
+  "title": "Agent Frontmatter Schema",
+  "description": "Schema for agent markdown frontmatter (v1.0). Validates both current minimal format and enhanced format with archetypes, workflow position, and behavioral contracts.",
+  "type": "object",
+
+  "required": [
+    "name",
+    "description"
+  ],
+
+  "properties": {
+    "name": {
+      "$ref": "embed:///schemas/common.schema.json#/$defs/agent_name",
+      "description": "Agent identifier (e.g., ecosystem-analyst, context-architect)"
+    },
+    "description": {
+      "type": "string",
+      "minLength": 10,
+      "description": "Agent description including use-cases and trigger phrases"
+    },
+    "role": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "description": "Short role summary (e.g., 'Traces ecosystem issues to root causes')"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "orchestrator",
+        "specialist",
+        "reviewer",
+        "meta",
+        "designer",
+        "analyst",
+        "engineer"
+      ],
+      "description": "Agent archetype determining section ownership and platform behaviors"
+    },
+    "tools": {
+      "oneOf": [
+        {
+          "type": "string",
+          "minLength": 1,
+          "description": "Comma-separated tool list (e.g., 'Bash, Glob, Grep, Read')"
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^([A-Z][a-zA-Z]*|mcp:[a-z0-9-]+(\\/[a-z0-9_-]+)?)$"
+          },
+          "minItems": 1,
+          "description": "Tool list as array with validated entries"
+        }
+      ],
+      "description": "Tools available to this agent. Accepts comma-separated string or array."
+    },
+    "model": {
+      "type": "string",
+      "enum": ["opus", "sonnet", "haiku"],
+      "description": "Model tier for this agent"
+    },
+    "color": {
+      "type": "string",
+      "pattern": "^[a-z]+$",
+      "description": "Display color for agent identification"
+    },
+    "aliases": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9-]+$"
+      },
+      "description": "Alternative names for agent invocation"
+    },
+    "upstream": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/upstream_ref"
+      },
+      "description": "Agents or sources that feed into this agent"
+    },
+    "downstream": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/downstream_ref"
+      },
+      "description": "Agents this agent routes work to"
+    },
+    "produces": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/artifact_decl"
+      },
+      "description": "Artifacts this agent is expected to produce"
+    },
+    "contract": {
+      "$ref": "#/$defs/behavioral_contract",
+      "description": "Behavioral constraints and requirements for this agent"
+    },
+    "schema_version": {
+      "$ref": "embed:///schemas/common.schema.json#/$defs/schema_version",
+      "description": "Agent schema version (e.g., 1.0)"
+    }
+  },
+
+  "additionalProperties": true,
+
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "type": { "const": "orchestrator" }
+        },
+        "required": ["type"]
+      },
+      "then": {
+        "properties": {
+          "model": {
+            "const": "opus",
+            "description": "Orchestrators should use opus model for coordination quality"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": { "const": "reviewer" }
+        },
+        "required": ["type"]
+      },
+      "then": {
+        "properties": {
+          "contract": {
+            "type": "object",
+            "required": ["must_not"],
+            "properties": {
+              "must_not": {
+                "type": "array",
+                "minItems": 1
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+
+  "$defs": {
+    "upstream_ref": {
+      "type": "object",
+      "required": ["source"],
+      "properties": {
+        "source": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Source agent name or external input description"
+        },
+        "artifact": {
+          "type": "string",
+          "description": "Expected artifact from upstream"
+        }
+      },
+      "additionalProperties": false
+    },
+    "downstream_ref": {
+      "type": "object",
+      "required": ["agent"],
+      "properties": {
+        "agent": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Target agent name"
+        },
+        "condition": {
+          "type": "string",
+          "description": "When to route to this agent"
+        },
+        "artifact": {
+          "type": "string",
+          "description": "Artifact passed to downstream agent"
+        }
+      },
+      "additionalProperties": false
+    },
+    "artifact_decl": {
+      "type": "object",
+      "required": ["artifact"],
+      "properties": {
+        "artifact": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Artifact name or type"
+        },
+        "format": {
+          "type": "string",
+          "description": "Expected format (e.g., 'markdown', 'yaml', 'json')"
+        }
+      },
+      "additionalProperties": false
+    },
+    "behavioral_contract": {
+      "type": "object",
+      "properties": {
+        "must_use": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Tools or patterns the agent must use"
+        },
+        "must_produce": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Artifacts the agent must produce"
+        },
+        "must_not": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Actions the agent must not take"
+        },
+        "max_turns": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Maximum conversation turns before requiring handoff"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

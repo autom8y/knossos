@@ -2,6 +2,7 @@
 name: orchestrator
 description: |
   Routes agent team creation through design, prompts, workflow, platform integration, catalog, and validation phases. Use when: building new agent teams or expanding the agent ecosystem. Triggers: coordinate, orchestrate, forge workflow, agent creation, team buildout.
+type: orchestrator
 tools: Read
 model: opus
 color: cyan

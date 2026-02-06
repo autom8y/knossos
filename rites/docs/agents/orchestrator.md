@@ -2,6 +2,7 @@
 name: orchestrator
 description: |
   Routes documentation work through audit, architecture, writing, and review phases. Use when: documentation spans multiple pages or requires structural planning. Triggers: coordinate, orchestrate, doc workflow, documentation planning.
+type: orchestrator
 tools: Read
 model: opus
 color: green

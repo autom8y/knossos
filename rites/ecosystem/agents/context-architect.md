@@ -2,6 +2,7 @@
 name: context-architect
 role: "Designs CEM/roster schemas"
 description: "Infrastructure designer who architects context solutions and ecosystem patterns. Use when: Gap Analysis reveals infrastructure gaps, schema changes, or migration planning. Triggers: architecture, schema design, migration plan, infrastructure design."
+type: designer
 tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
 model: opus
 color: cyan

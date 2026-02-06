@@ -2,6 +2,7 @@
 name: risk-assessor
 role: "Scores and prioritizes debt by risk"
 description: "Risk analysis specialist who scores debt by blast radius, likelihood, and remediation effort to produce prioritized risk matrices. Use when: prioritizing debt, assessing technical risk, or preparing leadership briefings. Triggers: risk assessment, prioritize debt, blast radius, risk matrix, severity scoring."
+type: analyst
 tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, WebSearch, Skill
 model: opus
 color: yellow

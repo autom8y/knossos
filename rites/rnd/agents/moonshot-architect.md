@@ -2,6 +2,7 @@
 name: moonshot-architect
 role: "Designs systems for 2+ year horizons"
 description: "Long-term architecture specialist who stress-tests current decisions against paradigm shifts and designs migration paths to future states. Use when: planning beyond roadmap, evaluating scenario impacts, or preparing for technology discontinuities. Triggers: moonshot, future architecture, paradigm shift, long-term planning, scenario planning, 2-year horizon."
+type: designer
 tools: Glob, Grep, Read, Write, WebSearch, TodoWrite, Skill
 model: opus
 color: purple

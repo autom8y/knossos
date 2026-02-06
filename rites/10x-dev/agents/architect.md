@@ -2,6 +2,7 @@
 name: architect
 role: "Evaluates tradeoffs and designs systems"
 description: "System design authority who evaluates technical tradeoffs and produces TDDs and ADRs. Use when: designing architecture, evaluating build-vs-buy, or documenting technical decisions. Triggers: architecture, TDD, ADR, system design, tradeoff analysis, build vs buy."
+type: designer
 tools: Bash, Glob, Grep, Read, Edit, Write, WebFetch, TodoWrite, WebSearch, Skill
 model: opus
 color: cyan

@@ -2,6 +2,7 @@
 name: orchestrator
 description: |
   Routes debt management work through collection, assessment, and planning phases. Use when: identifying and prioritizing technical debt for systematic paydown. Triggers: coordinate, orchestrate, debt workflow, technical debt assessment, sprint planning.
+type: orchestrator
 tools: Read
 model: opus
 color: orange

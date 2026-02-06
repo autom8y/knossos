@@ -2,6 +2,7 @@
 name: penetration-tester
 role: "Probes systems like an adversary"
 description: "Offensive security specialist who probes systems for vulnerabilities with exploit PoCs and remediation guidance. Use when: testing security controls, validating fixes, or assessing attack resistance. Triggers: pentest, penetration testing, vulnerability assessment, security testing, exploit."
+type: specialist
 tools: Bash, Edit, Glob, Grep, Read, Write, TodoWrite, Skill
 model: opus
 color: green

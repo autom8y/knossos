@@ -9,12 +9,14 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
+	"github.com/autom8y/knossos/internal/cmd/agent"
 	"github.com/autom8y/knossos/internal/cmd/artifact"
 	"github.com/autom8y/knossos/internal/cmd/common"
 	"github.com/autom8y/knossos/internal/cmd/handoff"
 	"github.com/autom8y/knossos/internal/cmd/hook"
 	"github.com/autom8y/knossos/internal/cmd/inscription"
 	"github.com/autom8y/knossos/internal/cmd/manifest"
+	"github.com/autom8y/knossos/internal/cmd/migrate"
 	"github.com/autom8y/knossos/internal/cmd/naxos"
 	"github.com/autom8y/knossos/internal/cmd/rite"
 	"github.com/autom8y/knossos/internal/cmd/sails"
@@ -121,7 +123,9 @@ func init() {
 	rootCmd.AddCommand(sails.NewSailsCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir, &globalOpts.SessionID))
 	rootCmd.AddCommand(naxos.NewNaxosCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
 	rootCmd.AddCommand(rite.NewRiteCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
+	rootCmd.AddCommand(agent.NewAgentCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
 	rootCmd.AddCommand(tribute.NewTributeCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir, &globalOpts.SessionID))
+	rootCmd.AddCommand(migrate.NewMigrateCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
 	rootCmd.AddCommand(versionCmd)
 }
 

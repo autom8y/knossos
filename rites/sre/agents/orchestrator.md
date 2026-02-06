@@ -2,6 +2,7 @@
 name: orchestrator
 description: |
   Routes reliability work through observation, coordination, implementation, and resilience verification phases. Use when: improving system reliability requires comprehensive observability and chaos engineering. Triggers: coordinate, orchestrate, reliability workflow, incident response, SLO improvement.
+type: orchestrator
 tools: Read
 model: opus
 color: orange

@@ -133,6 +133,23 @@ func (v *Validator) ValidateSessionContextMap(data map[string]interface{}) error
 	return v.ValidateSessionContext(jsonData)
 }
 
+// ValidateAgentData validates pre-parsed agent data against the agent schema.
+// The data parameter should be an interface{} from JSON unmarshal (not raw bytes).
+func (v *Validator) ValidateAgentData(data interface{}) error {
+	schema, err := v.getSchema("agent")
+	if err != nil {
+		return err
+	}
+
+	if err := schema.Validate(data); err != nil {
+		return errors.NewWithDetails(errors.CodeSchemaInvalid,
+			"agent schema validation failed",
+			map[string]interface{}{"error": err.Error()})
+	}
+
+	return nil
+}
+
 // --- Lightweight validation without full schema ---
 
 // ValidateSessionFields performs lightweight validation of required session fields.

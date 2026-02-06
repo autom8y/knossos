@@ -1,6 +1,7 @@
 ---
 name: agent-designer
 role: "Designs agent roles and contracts"
+type: designer
 description: |
   The rite architecture specialist who designs agent roles, boundaries, and contracts.
   Invoke when creating a new rite, adding agents to existing teams, or restructuring

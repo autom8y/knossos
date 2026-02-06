@@ -2,6 +2,7 @@
 name: orchestrator
 description: |
   Stateless advisor that routes work through rnd specialists. Does not execute—provides structured directives for the main agent to invoke specialists. Use when: exploration spans multiple phases or requires coordination. Triggers: coordinate, orchestrate, R&D workflow, technology exploration, innovation pipeline.
+type: orchestrator
 tools: Read
 model: opus
 color: purple

@@ -1,6 +1,46 @@
 ---
 name: context-engineer
-description: Use this agent when optimizing how Claude itself is leveraged, rather than what software is being built. Specifically, use when: designing or restructuring Skills architecture, optimizing prompt structures and token economics, improving context management across multi-turn conversations, implementing progressive disclosure patterns, architecting agentic workflows, diagnosing why Claude loses context mid-session, or deciding whether to use new Claude features. This agent operates at the meta-level, engineering the system that executes work rather than executing the work itself.\n\nExamples:\n\n<example>\nContext: User has documentation that's too large to load every time and wants to convert it to Skills.\nuser: "Our docs are 10,000+ lines. How should we structure them as Skills to avoid loading everything upfront?"\nassistant: "This is a context architecture question about progressive disclosure and skill granularity. I'll use the context-engineer to design an optimal skill structure."\n<Task tool invocation to context-engineer agent>\n</example>\n\n<example>\nContext: User notices Claude is forgetting earlier decisions in long conversations.\nuser: "Claude keeps losing context about decisions we made earlier in the session. How do we fix this?"\nassistant: "This is a context management and session architecture issue. I'll use the context-engineer to diagnose the problem and recommend strategies like session boundaries or checkpoint documents."\n<Task tool invocation to context-engineer agent>\n</example>\n\n<example>\nContext: User wants to optimize their Prompt 0 template which has grown to 800+ lines.\nuser: "Our system prompt is massive. How much is too much, and what should we move to Skills?"\nassistant: "This requires token economics analysis and compression strategies. I'll use the context-engineer to audit and optimize."\n<Task tool invocation to context-engineer agent>\n</example>\n\n<example>\nContext: User is setting up a new agentic workflow and wants to integrate Skills effectively.\nuser: "How should we structure our 4-agent workflow to take advantage of Skills for context efficiency?"\nassistant: "This is a meta-workflow architecture question. I'll use the context-engineer to design how Claude's capabilities and constraints shape the workflow."\n<Task tool invocation to context-engineer agent>\n</example>\n\n<example>\nContext: User is proactively designing a new system and wants expert guidance on context structure.\nuser: "We're building a new documentation system. What context architecture would work best with Claude?"\nassistant: "I'll use the context-engineer proactively to design context architecture that optimizes token usage and progressive disclosure from the start."\n<Task tool invocation to context-engineer agent>\n</example>
+description: |
+  Use this agent when optimizing how Claude itself is leveraged, rather than what software is being built. Specifically, use when: designing or restructuring Skills architecture, optimizing prompt structures and token economics, improving context management across multi-turn conversations, implementing progressive disclosure patterns, architecting agentic workflows, diagnosing why Claude loses context mid-session, or deciding whether to use new Claude features. This agent operates at the meta-level, engineering the system that executes work rather than executing the work itself.
+
+  Examples:
+
+  <example>
+  Context: User has documentation that's too large to load every time and wants to convert it to Skills.
+  user: "Our docs are 10,000+ lines. How should we structure them as Skills to avoid loading everything upfront?"
+  assistant: "This is a context architecture question about progressive disclosure and skill granularity. I'll use the context-engineer to design an optimal skill structure."
+  <Task tool invocation to context-engineer agent>
+  </example>
+
+  <example>
+  Context: User notices Claude is forgetting earlier decisions in long conversations.
+  user: "Claude keeps losing context about decisions we made earlier in the session. How do we fix this?"
+  assistant: "This is a context management and session architecture issue. I'll use the context-engineer to diagnose the problem and recommend strategies like session boundaries or checkpoint documents."
+  <Task tool invocation to context-engineer agent>
+  </example>
+
+  <example>
+  Context: User wants to optimize their Prompt 0 template which has grown to 800+ lines.
+  user: "Our system prompt is massive. How much is too much, and what should we move to Skills?"
+  assistant: "This requires token economics analysis and compression strategies. I'll use the context-engineer to audit and optimize."
+  <Task tool invocation to context-engineer agent>
+  </example>
+
+  <example>
+  Context: User is setting up a new agentic workflow and wants to integrate Skills effectively.
+  user: "How should we structure our 4-agent workflow to take advantage of Skills for context efficiency?"
+  assistant: "This is a meta-workflow architecture question. I'll use the context-engineer to design how Claude's capabilities and constraints shape the workflow."
+  <Task tool invocation to context-engineer agent>
+  </example>
+
+  <example>
+  Context: User is proactively designing a new system and wants expert guidance on context structure.
+  user: "We're building a new documentation system. What context architecture would work best with Claude?"
+  assistant: "I'll use the context-engineer proactively to design context architecture that optimizes token usage and progressive disclosure from the start."
+  <Task tool invocation to context-engineer agent>
+  </example>
+type: meta
+tools: Bash, Glob, Grep, Read, Edit, Write, Skill
 model: opus
 color: orange
 ---

@@ -2,6 +2,7 @@
 name: orchestrator
 description: |
   Routes development work through requirements, design, implementation, and validation phases. Use when: building features or systems requires full lifecycle coordination. Triggers: coordinate, orchestrate, development workflow, feature development, implementation planning.
+type: orchestrator
 tools: Read
 model: opus
 color: blue

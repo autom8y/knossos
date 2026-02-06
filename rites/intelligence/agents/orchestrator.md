@@ -2,6 +2,7 @@
 name: orchestrator
 description: |
   Routes analytics work through instrumentation, user research, experimentation, and synthesis phases. Use when: understanding user behavior or validating product decisions requires data-driven insights. Triggers: coordinate, orchestrate, analytics workflow, user research, experimentation.
+type: orchestrator
 tools: Read
 model: opus
 color: cyan

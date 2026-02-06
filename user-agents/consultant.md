@@ -35,6 +35,7 @@ description: |
   assistant: "Invoking Consultant with --commands flag to display all 24+
   commands organized by category: Session, Rite Management, Workflows, Operations."
   </example>
+type: meta
 tools: Bash, Glob, Grep, Read, Task, WebSearch
 model: opus
 color: cyan

@@ -2,6 +2,7 @@
 name: orchestrator
 description: |
   Coordinates ecosystem phases for CEM/roster infrastructure work. Use when: work spans multiple phases or requires cross-component coordination. Triggers: coordinate, orchestrate, multi-phase, ecosystem workflow.
+type: orchestrator
 tools: Read
 model: opus
 color: purple

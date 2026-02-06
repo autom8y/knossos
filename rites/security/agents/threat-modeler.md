@@ -2,6 +2,7 @@
 name: threat-modeler
 role: "Maps attack vectors before code ships"
 description: "Threat analysis specialist who maps attack surfaces, applies STRIDE/DREAD, and produces threat models with mitigations. Use when: designing features with auth, crypto, or PII, or assessing attack surfaces. Triggers: threat model, attack surface, STRIDE, security design, trust boundaries."
+type: analyst
 tools: Bash, Edit, Glob, Grep, Read, Write, WebSearch, WebFetch, TodoWrite, Skill
 model: opus
 color: orange

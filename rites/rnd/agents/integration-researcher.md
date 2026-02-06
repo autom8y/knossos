@@ -2,6 +2,7 @@
 name: integration-researcher
 role: "Maps technology integration paths and surfaces hidden dependencies"
 description: "Integration analysis specialist who maps how technologies connect with existing systems. Surfaces hidden dependencies, estimates effort with confidence levels, and plans phased migrations. Use when: evaluating integration complexity, planning migrations, or mapping dependencies. Triggers: integration analysis, dependency mapping, migration planning, API compatibility, integration effort."
+type: analyst
 tools: Glob, Grep, Read, Write, TodoWrite, Skill
 model: opus
 color: cyan

@@ -2,7 +2,6 @@
 package materialize
 
 import (
-	"encoding/json"
 	"fmt"
 	"io/fs"
 	"os"
@@ -39,19 +38,37 @@ type Result struct {
 	LegacyBackupPath string   // Path to legacy CLAUDE.md backup if migration occurred
 }
 
+// MCPServer represents an MCP server declaration in a rite manifest.
+type MCPServer struct {
+	Name    string            `yaml:"name" json:"name"`
+	Command string            `yaml:"command" json:"command"`
+	Args    []string          `yaml:"args,omitempty" json:"args,omitempty"`
+	Env     map[string]string `yaml:"env,omitempty" json:"env,omitempty"`
+}
+
 // RiteManifest represents a rite manifest.yaml file.
 type RiteManifest struct {
-	Name         string   `yaml:"name"`
-	Version      string   `yaml:"version"`
-	Description  string   `yaml:"description"`
-	EntryAgent   string   `yaml:"entry_agent"`
-	Agents       []Agent  `yaml:"agents"`
-	Dromena      []string `yaml:"dromena"`                // Invokable commands (project to .claude/commands/)
-	Legomena     []string `yaml:"legomena"`               // Reference knowledge (project to .claude/skills/)
-	Commands     []string `yaml:"commands"`               // Backward compat: populates from dromena+legomena if empty
-	Skills       []string `yaml:"skills"`                 // Deprecated: use Legomena instead
-	Hooks        []string `yaml:"hooks"`
-	Dependencies []string `yaml:"dependencies"`
+	Name         string      `yaml:"name"`
+	Version      string      `yaml:"version"`
+	Description  string      `yaml:"description"`
+	EntryAgent   string      `yaml:"entry_agent"`
+	Agents       []Agent     `yaml:"agents"`
+	Dromena      []string    `yaml:"dromena"`                // Invokable commands (project to .claude/commands/)
+	Legomena     []string    `yaml:"legomena"`               // Reference knowledge (project to .claude/skills/)
+	Commands     []string    `yaml:"commands"`               // Backward compat: populates from dromena+legomena if empty
+	Skills       []string    `yaml:"skills"`                 // Deprecated: use Legomena instead
+	Hooks        []string    `yaml:"hooks"`
+	Dependencies []string    `yaml:"dependencies"`
+	MCPServers   []MCPServer `yaml:"mcp_servers,omitempty"` // MCP server declarations
+}
+
+// MCPServerNames returns the list of MCP server names declared in the manifest.
+func (m *RiteManifest) MCPServerNames() []string {
+	names := make([]string, len(m.MCPServers))
+	for i, server := range m.MCPServers {
+		names[i] = server.Name
+	}
+	return names
 }
 
 // Agent represents an agent definition in a rite manifest.
@@ -138,8 +155,8 @@ func (m *Materializer) MaterializeMinimal(opts Options) (*Result, error) {
 	}
 	result.LegacyBackupPath = legacyBackupPath
 
-	// Generate settings.local.json if needed
-	if err := m.materializeSettings(claudeDir); err != nil {
+	// Generate settings.local.json if needed (no manifest in minimal mode)
+	if err := m.materializeSettingsWithManifest(claudeDir, nil); err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize settings", err)
 	}
 
@@ -253,8 +270,8 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 	}
 	result.LegacyBackupPath = legacyBackupPath
 
-	// 8. Generate settings.local.json if not exists
-	if err := m.materializeSettings(claudeDir); err != nil {
+	// 8. Generate or update settings.local.json with MCP servers from manifest
+	if err := m.materializeSettingsWithManifest(claudeDir, manifest); err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize settings", err)
 	}
 
@@ -747,26 +764,35 @@ func (m *Materializer) materializeMinimalCLAUDEmd(claudeDir string) (string, err
 	return legacyBackupPath, nil
 }
 
-// materializeSettings generates settings.local.json if it doesn't exist.
+// materializeSettings generates or updates settings.local.json with MCP servers from manifest.
 func (m *Materializer) materializeSettings(claudeDir string) error {
+	return m.materializeSettingsWithManifest(claudeDir, nil)
+}
+
+// materializeSettingsWithManifest generates or updates settings.local.json.
+// If manifest has MCP servers, merges them into existing settings.
+// If no manifest or no MCP servers, creates minimal settings if needed.
+func (m *Materializer) materializeSettingsWithManifest(claudeDir string, manifest *RiteManifest) error {
 	settingsPath := filepath.Join(claudeDir, "settings.local.json")
 
-	// Don't overwrite existing settings
-	if _, err := os.Stat(settingsPath); err == nil {
-		return nil
-	}
-
-	// Create minimal settings with hooks configuration
-	settings := map[string]any{
-		"hooks": map[string]any{},
-	}
-
-	data, err := json.MarshalIndent(settings, "", "  ")
+	// Load existing settings or create empty map
+	existingSettings, err := loadExistingSettings(settingsPath)
 	if err != nil {
 		return err
 	}
 
-	return os.WriteFile(settingsPath, data, 0644)
+	// Ensure hooks key exists
+	if existingSettings["hooks"] == nil {
+		existingSettings["hooks"] = make(map[string]any)
+	}
+
+	// If manifest has MCP servers, merge them
+	if manifest != nil && len(manifest.MCPServers) > 0 {
+		existingSettings = mergeMCPServers(existingSettings, manifest.MCPServers)
+	}
+
+	// Write settings (always write, even if no changes, to ensure file exists)
+	return saveSettings(settingsPath, existingSettings)
 }
 
 // trackState updates .claude/sync/state.json with materialization metadata.

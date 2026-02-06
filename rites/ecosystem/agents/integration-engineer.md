@@ -2,6 +2,7 @@
 name: integration-engineer
 role: "Implements ecosystem infrastructure"
 description: "Implementation specialist who builds CEM and roster changes with integration tests. Use when: Context Design is ready for implementation. Triggers: implement, build, integration, CEM changes, roster update."
+type: engineer
 tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
 model: sonnet
 color: green

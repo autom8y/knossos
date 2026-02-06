@@ -2,6 +2,7 @@
 name: orchestrator
 description: |
   Routes code quality work through assessment, planning, execution, and audit phases. Use when: improving code quality requires detecting smells and planning systematic cleanup. Triggers: coordinate, orchestrate, hygiene workflow, code cleanup, refactoring.
+type: orchestrator
 tools: Read
 model: opus
 color: green
