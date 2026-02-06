@@ -14,6 +14,7 @@ import (
 	"github.com/autom8y/knossos/internal/cmd/common"
 	"github.com/autom8y/knossos/internal/cmd/handoff"
 	"github.com/autom8y/knossos/internal/cmd/hook"
+	initcmd "github.com/autom8y/knossos/internal/cmd/initialize"
 	"github.com/autom8y/knossos/internal/cmd/inscription"
 	"github.com/autom8y/knossos/internal/cmd/manifest"
 	"github.com/autom8y/knossos/internal/cmd/migrate"
@@ -126,6 +127,7 @@ func init() {
 	rootCmd.AddCommand(agent.NewAgentCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
 	rootCmd.AddCommand(tribute.NewTributeCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir, &globalOpts.SessionID))
 	rootCmd.AddCommand(migrate.NewMigrateCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
+	rootCmd.AddCommand(initcmd.NewInitCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
 	rootCmd.AddCommand(versionCmd)
 }
 
