@@ -185,7 +185,7 @@ ari hook writeguard
 - Full execution: <100ms (with all processing)
 
 **Environment Variables**:
-- `USE_ARI_HOOKS=1` — Enable ari hook implementations
+- `USE_ARI_HOOKS=0` — Emergency kill switch to disable ari hook implementations (default: enabled)
 - `CLAUDE_HOOK_*` — Standard Claude Code hook variables
 
 ---

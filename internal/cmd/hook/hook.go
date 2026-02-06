@@ -55,7 +55,7 @@ Hooks process Claude Code tool events and can modify, validate,
 or enrich tool operations. Use subcommands for specific hook types.
 
 Environment Variables:
-  USE_ARI_HOOKS=1    Enable ari hook implementations
+  USE_ARI_HOOKS=0    Emergency kill switch to disable ari hooks (default: enabled)
   CLAUDE_HOOK_*      Standard Claude Code hook environment variables
 
 Performance Targets:

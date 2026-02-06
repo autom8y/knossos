@@ -9,9 +9,6 @@ set -euo pipefail
 # Check 1: Feature flag (default: enabled)
 [[ "${ARIADNE_BUDGET_DISABLE:-0}" == "1" ]] && exit 0
 
-# Check 2: Hook feature flag
-[[ "${USE_ARI_HOOKS:-1}" != "1" ]] && exit 0
-
 # Binary resolution with PATH fallback (per ADR-0002 style)
 ARI="${ARIADNE_BIN:-}"
 if [[ -z "$ARI" ]]; then

@@ -10,9 +10,6 @@ set -euo pipefail
 # Check 1: Only process Bash tool
 [[ "$CLAUDE_HOOK_TOOL_NAME" != "Bash" ]] && exit 0
 
-# Feature flag (default: Go enabled)
-[[ "${USE_ARI_HOOKS:-1}" != "1" ]] && exit 0
-
 # Binary resolution with PATH fallback (per ADR-0002 style)
 ARI="${ARIADNE_BIN:-}"
 if [[ -z "$ARI" ]]; then

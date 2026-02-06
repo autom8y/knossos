@@ -141,7 +141,7 @@ ari rite swap docs     # Switch to docs rite
 
 | Variable | Description |
 |----------|-------------|
-| `USE_ARI_HOOKS=1` | Enable ari hook implementations |
+| `USE_ARI_HOOKS=0` | Emergency kill switch to disable ari hook implementations (default: enabled) |
 | `ARIADNE_MSG_WARN` | Message count warning threshold (default: 250) |
 | `ARIADNE_MSG_PARK` | Message count park suggestion threshold |
 | `ARIADNE_BUDGET_DISABLE=1` | Disable cognitive budget tracking |

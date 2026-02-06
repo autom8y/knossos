@@ -33,7 +33,7 @@ metadata:
     are universally available regardless of which rite is currently active.
 
     Sync behavior:
-    - swap-rite.sh automatically syncs shared content alongside active rite
+    - ari sync automatically syncs shared content alongside active rite
     - Shared content is always available regardless of active rite
     - Rite-specific content takes precedence over shared content (override)
 

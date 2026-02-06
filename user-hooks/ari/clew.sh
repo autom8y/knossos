@@ -17,9 +17,6 @@ SESSION_DIR="${CLAUDE_SESSION_DIR:-.claude/sessions}"
 shopt -s nullglob; SESSION_FILES=("$SESSION_DIR"/*/SESSION_CONTEXT.md); shopt -u nullglob
 [[ ${#SESSION_FILES[@]} -eq 0 ]] && exit 0
 
-# Feature flag (default: Go enabled)
-[[ "${USE_ARI_HOOKS:-1}" != "1" ]] && exit 0
-
 # Binary resolution with PATH fallback (per ADR-0002 style)
 ARI="${ARIADNE_BIN:-}"
 if [[ -z "$ARI" ]]; then

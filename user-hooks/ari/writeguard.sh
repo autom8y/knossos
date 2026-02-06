@@ -22,9 +22,6 @@ fi
 # Check 4: Allow bypass for Moirai operations (backward compatible with STATE_MATE_BYPASS)
 [[ "${MOIRAI_BYPASS:-}" == "true" ]] || [[ "${STATE_MATE_BYPASS:-}" == "true" ]] && exit 0
 
-# Feature flag (default: Go enabled)
-[[ "${USE_ARI_HOOKS:-1}" != "1" ]] && exit 0
-
 # Binary resolution with PATH fallback (per ADR-0002 style)
 ARI="${ARIADNE_BIN:-}"
 if [[ -z "$ARI" ]]; then

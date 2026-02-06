@@ -20,7 +20,7 @@ Hooks have special handling:
   - *.yaml files: Hook configuration files
   - Shell scripts: Preserve executable permissions (+x)
 
-Manifest keys are relative paths: lib/session-manager.sh, hooks.yaml
+Manifest keys are relative paths: ari/hooks.yaml, ari/context.sh
 
 Behavior:
   - Recursively copies hook directories

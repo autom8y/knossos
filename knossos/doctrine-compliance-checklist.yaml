@@ -735,10 +735,10 @@ dependencies:
     - id: DEP-003
       from: "Session Manager"
       to: "Moirai"
-      relationship: "session-manager.sh creates; Moirai mutates"
+      relationship: "ari hook context creates; Moirai mutates"
       status: IMPLEMENTED
       files:
-        - user-hooks/lib/session-manager.sh
+        - internal/cmd/hook/context.go
         - .claude/agents/moirai.md
 
     - id: DEP-004

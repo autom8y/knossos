@@ -180,7 +180,7 @@ just info            # Show binary info
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `USE_ARI_HOOKS` | Enable/disable hook integration | 1 (enabled) |
+| `USE_ARI_HOOKS` | Emergency kill switch (set to 0 to disable) | enabled |
 | `ARIADNE_BIN` | Path to ari binary | Auto-discovered |
 | `ARIADNE_MSG_WARN` | Cognitive budget warning threshold | 250 |
 | `ARIADNE_MSG_PARK` | Cognitive budget park threshold | - |

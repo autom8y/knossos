@@ -18,9 +18,6 @@ fi
 # Fast string prefix check without spawning subprocess
 [[ "${USER_PROMPT:0:1}" != "/" ]] && exit 0
 
-# Feature flag (default: Go enabled)
-[[ "${USE_ARI_HOOKS:-1}" != "1" ]] && exit 0
-
 # Binary resolution with PATH fallback (per ADR-0002 style)
 ARI="${ARIADNE_BIN:-}"
 if [[ -z "$ARI" ]]; then

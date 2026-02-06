@@ -8,9 +8,6 @@ set -euo pipefail
 # FAST PATH: No early exit checks needed - always run on session start
 # Context injection is unconditional for startup/resume events
 
-# Feature flag (default: Go enabled)
-[[ "${USE_ARI_HOOKS:-1}" != "1" ]] && exit 0
-
 # Binary resolution with PATH fallback (per ADR-0002 style)
 ARI="${ARIADNE_BIN:-}"
 if [[ -z "$ARI" ]]; then

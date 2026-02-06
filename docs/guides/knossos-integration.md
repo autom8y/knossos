@@ -169,9 +169,6 @@ case "$CLAUDE_HOOK_TOOL_NAME" in Edit|Write|Bash) ;; *) exit 0 ;; esac
 SESSION_DIR="${CLAUDE_SESSION_DIR:-.claude/sessions}"
 [[ ! -d "$SESSION_DIR" ]] && exit 0
 
-# Feature flag (default: Go enabled)
-[[ "${USE_ARI_HOOKS:-1}" != "1" ]] && exit 0
-
 # DISPATCH: Call ari (<100ms total)
 ARI="${ARIADNE_BIN:-/path/to/ariadne/ari}"
 exec "$ARI" hook thread --output json
@@ -191,7 +188,7 @@ Ariadne-specific:
 
 | Variable | Description |
 |----------|-------------|
-| `USE_ARI_HOOKS` | Feature flag: 1=enabled (default), 0=disabled |
+| `USE_ARI_HOOKS` | Emergency kill switch: 0=disabled (default: enabled) |
 | `ARIADNE_BIN` | Path to ari binary (for development) |
 | `ARIADNE_MSG_WARN` | Cognitive budget warning threshold (default: 250) |
 | `ARIADNE_MSG_PARK` | Cognitive budget park suggestion threshold |
