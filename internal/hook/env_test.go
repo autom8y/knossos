@@ -65,14 +65,14 @@ func TestIsEnabled(t *testing.T) {
 		value    string
 		expected bool
 	}{
-		{"empty", "", false},
+		{"empty", "", true},
 		{"zero", "0", false},
 		{"one", "1", true},
 		{"true lowercase", "true", true},
 		{"TRUE uppercase", "TRUE", true},
 		{"True mixed", "True", true},
 		{"false", "false", false},
-		{"random", "random", false},
+		{"random", "random", true},
 	}
 
 	for _, tt := range tests {

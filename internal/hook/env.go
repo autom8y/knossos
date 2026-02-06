@@ -88,10 +88,15 @@ func isValidHookEvent(event HookEvent) bool {
 	}
 }
 
-// IsEnabled returns true if ari hooks are enabled via the feature flag.
+// IsEnabled returns true if ari hooks are enabled.
+// Defaults to true (enabled). Only returns false when explicitly disabled via
+// USE_ARI_HOOKS=0 or USE_ARI_HOOKS=false.
 func IsEnabled() bool {
 	val := os.Getenv(FeatureFlagEnvVar)
-	return val == "1" || strings.ToLower(val) == "true"
+	if val == "" {
+		return true // Default: enabled (ADR-0011 Phase 2 complete)
+	}
+	return val != "0" && strings.ToLower(val) != "false"
 }
 
 // IsPreToolUse returns true if this is a PreToolUse event.

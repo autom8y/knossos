@@ -52,6 +52,8 @@ func SetupEnv(t *testing.T, env *HookEnv) *EnvSetup {
 
 	if env.UseAriHooks {
 		vars["USE_ARI_HOOKS"] = "1"
+	} else {
+		vars["USE_ARI_HOOKS"] = "0"
 	}
 
 	for key, value := range vars {
