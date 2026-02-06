@@ -413,7 +413,7 @@ func TestSyncer_SkipUserCreated(t *testing.T) {
 	}
 
 	// Create source file
-	if err := os.WriteFile(filepath.Join(sourceDir, "test.md"), []byte("roster"), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(sourceDir, "test.md"), []byte("source"), 0644); err != nil {
 		t.Fatal(err)
 	}
 

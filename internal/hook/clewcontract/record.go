@@ -119,7 +119,7 @@ func GetEventsPath(sessionDir string) string {
 }
 
 // RecordStamp records a decision stamp to events.jsonl.
-// This is the primary integration point for the /stamp skill.
+// This is the primary integration point for the /stamp command.
 //
 // Parameters:
 //   - sessionDir: Path to the session directory containing events.jsonl

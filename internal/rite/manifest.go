@@ -17,9 +17,9 @@ import (
 type RiteForm string
 
 const (
-	// FormSimple represents a rite with skills only, no agents.
+	// FormSimple represents a rite with mena only, no agents.
 	FormSimple RiteForm = "simple"
-	// FormPractitioner represents a rite with agents + skills.
+	// FormPractitioner represents a rite with agents + mena.
 	FormPractitioner RiteForm = "practitioner"
 	// FormProcedural represents a rite with hooks + workflows, no dedicated agents.
 	FormProcedural RiteForm = "procedural"
