@@ -168,7 +168,7 @@ func (m *Manager) Clone(sourceIDOrName, newName string, opts CloneOptions) (*Wor
 		}
 	}
 
-	// Try to run knossos-sync and swap-rite
+	// Materialize .claude/ and set up rite for the new worktree
 	m.setupWorktreeEcosystem(wtPath, rite)
 
 	return &wt, nil

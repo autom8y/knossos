@@ -48,7 +48,7 @@ The imported worktree will have:
 - A new unique ID (preserving original ID in metadata)
 - Same name and team as the exported worktree
 - Files restored to the archived git ref
-- Ecosystem setup (knossos-sync, team) applied
+- Ecosystem setup (materialization, rite) applied
 
 Examples:
   ari worktree import ./feature-auth.tar.gz
