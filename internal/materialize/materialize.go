@@ -458,7 +458,7 @@ func (m *Materializer) materializeMena(manifest *RiteManifest, claudeDir string)
 		return err
 	}
 
-	// Remove and recreate skills directory (routing may place non-invokable commands here)
+	// Remove and recreate skills directory (routing places legomena here)
 	if err := os.RemoveAll(skillsDir); err != nil && !os.IsNotExist(err) {
 		return err
 	}

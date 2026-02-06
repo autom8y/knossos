@@ -82,6 +82,25 @@ func TestResourceType_SourceDir(t *testing.T) {
 	}
 }
 
+// TestResourceType_RiteSubDir tests rite subdirectory name for resource types.
+func TestResourceType_RiteSubDir(t *testing.T) {
+	tests := []struct {
+		rt   ResourceType
+		want string
+	}{
+		{ResourceAgents, "agents"},
+		{ResourceSkills, "skills"},
+		{ResourceCommands, "mena"},
+		{ResourceHooks, "hooks"},
+	}
+	for _, tt := range tests {
+		got := tt.rt.RiteSubDir()
+		if got != tt.want {
+			t.Errorf("%s.RiteSubDir() = %s, want %s", tt.rt, got, tt.want)
+		}
+	}
+}
+
 // TestComputeFileChecksum tests SHA256 checksum computation.
 func TestComputeFileChecksum(t *testing.T) {
 	// Create temp file

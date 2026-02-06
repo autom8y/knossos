@@ -84,7 +84,7 @@ agents.backup
 .cem
 .archive
 user-agents
-user-commands
+mena
 user-skills
 user-hooks
 commands

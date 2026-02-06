@@ -38,8 +38,8 @@ func (c *CollisionChecker) CheckCollision(name string) (bool, string) {
 		return false, ""
 	}
 
-	// Get the resource subdirectory name (agents, skills, commands, hooks)
-	subDir := string(c.resourceType)
+	// Get the resource subdirectory name within rites (agents, skills, mena, hooks)
+	subDir := c.resourceType.RiteSubDir()
 
 	// For flat resources (agents), use just filename
 	// For nested resources (skills, commands, hooks), use full relative path
@@ -84,7 +84,7 @@ func GetRiteForResource(resourceType ResourceType, name string, nested bool) str
 		return ""
 	}
 
-	subDir := string(resourceType)
+	subDir := resourceType.RiteSubDir()
 	var matches []string
 
 	// For flat resources, use just filename
@@ -125,7 +125,7 @@ func ListRiteResources(resourceType ResourceType, nested bool) map[string][]stri
 		return result
 	}
 
-	subDir := string(resourceType)
+	subDir := resourceType.RiteSubDir()
 
 	for _, riteEntry := range riteEntries {
 		if !riteEntry.IsDir() {

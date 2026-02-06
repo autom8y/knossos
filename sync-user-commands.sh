@@ -126,8 +126,8 @@ is_rite_command() {
         return 1
     fi
 
-    # Search for command in any rite's commands/ directory
-    if find "$roster_rites" -path "*/commands/$cmd_name" -type f 2>/dev/null | grep -q .; then
+    # Search for command in any rite's mena/ directory
+    if find "$roster_rites" -path "*/mena/$cmd_name" -type f 2>/dev/null | grep -q .; then
         return 0
     fi
 
@@ -145,9 +145,9 @@ get_rite_for_command() {
     fi
 
     # Find rite directories containing this command
-    find "$roster_rites" -path "*/commands/$cmd_name" -type f 2>/dev/null | while read -r path; do
-        # Extract rite name from path: .../rites/RITE_NAME/commands/command.md
-        echo "$path" | sed 's|.*/rites/\([^/]*\)/commands/.*|\1|'
+    find "$roster_rites" -path "*/mena/$cmd_name" -type f 2>/dev/null | while read -r path; do
+        # Extract rite name from path: .../rites/RITE_NAME/mena/command.md
+        echo "$path" | sed 's|.*/rites/\([^/]*\)/mena/.*|\1|'
     done | tr '\n' ',' | sed 's/,$//'
 }
 

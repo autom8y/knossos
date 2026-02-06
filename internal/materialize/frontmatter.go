@@ -45,17 +45,17 @@ func (f *FlexibleStringSlice) UnmarshalYAML(value *yaml.Node) error {
 }
 
 // MenaFrontmatter represents the unified frontmatter schema for commands.
-// Commands can be invokable (user-callable via /name) or reference (auto-loaded patterns).
+// Mena content is either dromena (.dro.md, enacted via /name) or legomena (.lego.md, reference knowledge).
 type MenaFrontmatter struct {
 	// Identity (required for all)
 	Name        string `yaml:"name"`
 	Description string `yaml:"description"`
 
 	// Invocation Control
-	ArgumentHint string   `yaml:"argument-hint,omitempty"` // Only for invokable=true. Usage hint
+	ArgumentHint string   `yaml:"argument-hint,omitempty"` // Only for dromena. Usage hint
 	Triggers     FlexibleStringSlice `yaml:"triggers,omitempty"`      // Auto-invocation keywords
-	AllowedTools FlexibleStringSlice `yaml:"allowed-tools,omitempty"` // Tool restrictions (only for invokable=true)
-	Model        string   `yaml:"model,omitempty"`         // Model selection (only for invokable=true)
+	AllowedTools FlexibleStringSlice `yaml:"allowed-tools,omitempty"` // Tool restrictions (only for dromena)
+	Model        string   `yaml:"model,omitempty"`         // Model selection (only for dromena)
 
 	// Optional Metadata
 	Version      string `yaml:"version,omitempty"`       // Semantic version for tracking
@@ -119,10 +119,4 @@ func DetectMenaType(filename string) string {
 		return "lego"
 	}
 	return "dro" // default for backward compat
-}
-
-// BoolPtr is a helper function to create a pointer to a bool value.
-// Useful for testing and creating MenaFrontmatter with explicit invokable values.
-func BoolPtr(b bool) *bool {
-	return &b
 }

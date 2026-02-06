@@ -44,6 +44,14 @@ func (r ResourceType) SourceDir() string {
 	return "user-" + string(r)
 }
 
+// RiteSubDir returns the subdirectory name within rites for the resource type.
+func (r ResourceType) RiteSubDir() string {
+	if r == ResourceCommands {
+		return "mena"
+	}
+	return string(r)
+}
+
 // SourceType identifies the origin of a synced resource.
 type SourceType string
 
