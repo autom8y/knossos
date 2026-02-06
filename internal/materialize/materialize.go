@@ -771,6 +771,7 @@ func (m *Materializer) materializeSettings(claudeDir string) error {
 
 // materializeSettingsWithManifest generates or updates settings.local.json.
 // If manifest has MCP servers, merges them into existing settings.
+// Loads hooks.yaml and merges hook registrations into settings.
 // If no manifest or no MCP servers, creates minimal settings if needed.
 func (m *Materializer) materializeSettingsWithManifest(claudeDir string, manifest *RiteManifest) error {
 	settingsPath := filepath.Join(claudeDir, "settings.local.json")
@@ -781,9 +782,14 @@ func (m *Materializer) materializeSettingsWithManifest(claudeDir string, manifes
 		return err
 	}
 
-	// Ensure hooks key exists
-	if existingSettings["hooks"] == nil {
-		existingSettings["hooks"] = make(map[string]any)
+	// Load hooks.yaml and merge hook registrations
+	if hooksConfig := m.loadHooksConfig(); hooksConfig != nil {
+		existingSettings = mergeHooksSettings(existingSettings, hooksConfig)
+	} else {
+		// No hooks.yaml found — ensure hooks key exists (empty)
+		if existingSettings["hooks"] == nil {
+			existingSettings["hooks"] = make(map[string]any)
+		}
 	}
 
 	// If manifest has MCP servers, merge them
