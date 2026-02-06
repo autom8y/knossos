@@ -79,6 +79,10 @@ func (m *Materializer) loadHooksConfig() *HooksConfig {
 
 // buildHooksSettings generates the hooks section for settings.local.json
 // from a HooksConfig. Groups entries by event type and sorts by priority.
+//
+// Claude Code hook format: each event maps to an array of matcher groups.
+// Each matcher group has an optional "matcher" (regex string) and a "hooks"
+// array of hook handlers (each with "type" and "command").
 func buildHooksSettings(cfg *HooksConfig) map[string]any {
 	hooks := make(map[string]any)
 
@@ -104,26 +108,34 @@ func buildHooksSettings(cfg *HooksConfig) map[string]any {
 			return pi < pj
 		})
 
-		hookList := make([]map[string]any, 0, len(entries))
+		matcherGroups := make([]map[string]any, 0, len(entries))
 		for _, entry := range entries {
-			hookEntry := map[string]any{
+			hookHandler := map[string]any{
+				"type":    "command",
 				"command": entry.Command,
 			}
-			if entry.Matcher != "" {
-				hookEntry["matcher"] = entry.Matcher
+			if entry.Timeout > 0 {
+				hookHandler["timeout"] = entry.Timeout
 			}
-			hookList = append(hookList, hookEntry)
+
+			matcherGroup := map[string]any{
+				"hooks": []map[string]any{hookHandler},
+			}
+			if entry.Matcher != "" {
+				matcherGroup["matcher"] = entry.Matcher
+			}
+			matcherGroups = append(matcherGroups, matcherGroup)
 		}
 
-		hooks[event] = hookList
+		hooks[event] = matcherGroups
 	}
 
 	return hooks
 }
 
 // mergeHooksSettings merges knossos-managed hooks into existing settings.
-// Preserves user-defined hooks (commands not starting with "ari hook").
-// Replaces all knossos-managed hooks with the new configuration.
+// Preserves user-defined matcher groups (those without "ari hook" commands).
+// Replaces all knossos-managed matcher groups with the new configuration.
 func mergeHooksSettings(existingSettings map[string]any, hooksConfig *HooksConfig) map[string]any {
 	newHooks := buildHooksSettings(hooksConfig)
 
@@ -134,7 +146,7 @@ func mergeHooksSettings(existingSettings map[string]any, hooksConfig *HooksConfi
 		return existingSettings
 	}
 
-	// For each event type, merge: replace ari hooks, preserve user hooks
+	// For each event type, merge: replace ari groups, preserve user groups
 	mergedHooks := make(map[string]any)
 
 	// First, collect all event types from both sources
@@ -149,21 +161,20 @@ func mergeHooksSettings(existingSettings map[string]any, hooksConfig *HooksConfi
 	for event := range allEvents {
 		var userEntries []map[string]any
 
-		// Extract user-defined hooks from existing (non-ari commands)
+		// Extract user-defined matcher groups from existing settings
 		if existingList, ok := existingHooks[event]; ok {
 			if entries, ok := existingList.([]any); ok {
 				for _, e := range entries {
-					if entry, ok := e.(map[string]any); ok {
-						cmd, _ := entry["command"].(string)
-						if !strings.HasPrefix(cmd, ariHookPrefix) {
-							userEntries = append(userEntries, entry)
+					if group, ok := e.(map[string]any); ok {
+						if !isAriManagedGroup(group) {
+							userEntries = append(userEntries, group)
 						}
 					}
 				}
 			}
 		}
 
-		// Get new ari hooks for this event
+		// Get new ari matcher groups for this event
 		var ariEntries []map[string]any
 		if newList, ok := newHooks[event]; ok {
 			if entries, ok := newList.([]map[string]any); ok {
@@ -171,7 +182,7 @@ func mergeHooksSettings(existingSettings map[string]any, hooksConfig *HooksConfi
 			}
 		}
 
-		// Combine: ari hooks first (sorted by priority), then user hooks
+		// Combine: ari groups first (sorted by priority), then user groups
 		combined := make([]map[string]any, 0, len(ariEntries)+len(userEntries))
 		combined = append(combined, ariEntries...)
 		combined = append(combined, userEntries...)
@@ -183,4 +194,46 @@ func mergeHooksSettings(existingSettings map[string]any, hooksConfig *HooksConfi
 
 	existingSettings["hooks"] = mergedHooks
 	return existingSettings
+}
+
+// isAriManagedGroup checks if a matcher group is managed by ari.
+// Handles both new nested format ({hooks: [{command: "ari hook ..."}]})
+// and old flat format ({command: "ari hook ..."}).
+func isAriManagedGroup(group map[string]any) bool {
+	// New format: check hooks array
+	if hooksArr, ok := group["hooks"]; ok {
+		// After JSON unmarshal: []any
+		if hooks, ok := hooksArr.([]any); ok {
+			allAri := len(hooks) > 0
+			for _, h := range hooks {
+				if hook, ok := h.(map[string]any); ok {
+					cmd, _ := hook["command"].(string)
+					if !strings.HasPrefix(cmd, ariHookPrefix) {
+						allAri = false
+						break
+					}
+				}
+			}
+			return allAri
+		}
+		// In-memory (before JSON round-trip): []map[string]any
+		if hooks, ok := hooksArr.([]map[string]any); ok {
+			allAri := len(hooks) > 0
+			for _, hook := range hooks {
+				cmd, _ := hook["command"].(string)
+				if !strings.HasPrefix(cmd, ariHookPrefix) {
+					allAri = false
+					break
+				}
+			}
+			return allAri
+		}
+	}
+
+	// Old flat format: check top-level command field
+	if cmd, ok := group["command"].(string); ok {
+		return strings.HasPrefix(cmd, ariHookPrefix)
+	}
+
+	return false
 }

@@ -10,6 +10,19 @@ import (
 	"github.com/autom8y/knossos/internal/paths"
 )
 
+// extractHookCommand extracts the command from the first hook handler in a matcher group.
+func extractHookCommand(group map[string]any) string {
+	hooks, ok := group["hooks"].([]map[string]any)
+	if !ok {
+		return ""
+	}
+	if len(hooks) == 0 {
+		return ""
+	}
+	cmd, _ := hooks[0]["command"].(string)
+	return cmd
+}
+
 func TestBuildHooksSettings(t *testing.T) {
 	cfg := &HooksConfig{
 		SchemaVersion: "2.0",
@@ -34,7 +47,7 @@ func TestBuildHooksSettings(t *testing.T) {
 		}
 	}
 
-	// Check PreToolUse has 2 entries ordered by priority (3 before 5)
+	// Check PreToolUse has 2 matcher groups ordered by priority (3 before 5)
 	preToolUse, ok := hooks["PreToolUse"].([]map[string]any)
 	if !ok {
 		t.Fatalf("PreToolUse is not []map[string]any")
@@ -42,11 +55,11 @@ func TestBuildHooksSettings(t *testing.T) {
 	if len(preToolUse) != 2 {
 		t.Fatalf("PreToolUse has %d entries, want 2", len(preToolUse))
 	}
-	if preToolUse[0]["command"] != "ari hook writeguard --output json" {
-		t.Errorf("PreToolUse[0] command = %v, want writeguard (priority 3)", preToolUse[0]["command"])
+	if extractHookCommand(preToolUse[0]) != "ari hook writeguard --output json" {
+		t.Errorf("PreToolUse[0] command = %v, want writeguard (priority 3)", extractHookCommand(preToolUse[0]))
 	}
-	if preToolUse[1]["command"] != "ari hook validate --output json" {
-		t.Errorf("PreToolUse[1] command = %v, want validate (priority 5)", preToolUse[1]["command"])
+	if extractHookCommand(preToolUse[1]) != "ari hook validate --output json" {
+		t.Errorf("PreToolUse[1] command = %v, want validate (priority 5)", extractHookCommand(preToolUse[1]))
 	}
 
 	// Check PostToolUse sorted: clew (5) before budget (90)
@@ -57,11 +70,11 @@ func TestBuildHooksSettings(t *testing.T) {
 	if len(postToolUse) != 2 {
 		t.Fatalf("PostToolUse has %d entries, want 2", len(postToolUse))
 	}
-	if postToolUse[0]["command"] != "ari hook clew --output json" {
-		t.Errorf("PostToolUse[0] command = %v, want clew (priority 5)", postToolUse[0]["command"])
+	if extractHookCommand(postToolUse[0]) != "ari hook clew --output json" {
+		t.Errorf("PostToolUse[0] command = %v, want clew (priority 5)", extractHookCommand(postToolUse[0]))
 	}
-	if postToolUse[1]["command"] != "ari hook budget --output json" {
-		t.Errorf("PostToolUse[1] command = %v, want budget (priority 90)", postToolUse[1]["command"])
+	if extractHookCommand(postToolUse[1]) != "ari hook budget --output json" {
+		t.Errorf("PostToolUse[1] command = %v, want budget (priority 90)", extractHookCommand(postToolUse[1]))
 	}
 
 	// Check matcher is included when present, absent when not
@@ -70,6 +83,35 @@ func TestBuildHooksSettings(t *testing.T) {
 	}
 	if postToolUse[1]["matcher"] != nil {
 		t.Errorf("PostToolUse[1] should not have matcher, got %v", postToolUse[1]["matcher"])
+	}
+
+	// Check hooks array structure: each matcher group has a hooks array with type+command
+	hooksArr, ok := preToolUse[0]["hooks"].([]map[string]any)
+	if !ok || len(hooksArr) != 1 {
+		t.Fatalf("PreToolUse[0].hooks should be []map[string]any with 1 entry")
+	}
+	if hooksArr[0]["type"] != "command" {
+		t.Errorf("PreToolUse[0].hooks[0].type = %v, want command", hooksArr[0]["type"])
+	}
+	if hooksArr[0]["command"] != "ari hook writeguard --output json" {
+		t.Errorf("PreToolUse[0].hooks[0].command = %v, want writeguard", hooksArr[0]["command"])
+	}
+}
+
+func TestBuildHooksSettings_IncludesTimeout(t *testing.T) {
+	cfg := &HooksConfig{
+		SchemaVersion: "2.0",
+		Hooks: []HookEntry{
+			{Event: "PreToolUse", Command: "ari hook writeguard --output json", Timeout: 3},
+		},
+	}
+
+	hooks := buildHooksSettings(cfg)
+	preToolUse := hooks["PreToolUse"].([]map[string]any)
+	hooksArr := preToolUse[0]["hooks"].([]map[string]any)
+
+	if hooksArr[0]["timeout"] != 3 {
+		t.Errorf("timeout = %v, want 3", hooksArr[0]["timeout"])
 	}
 }
 
@@ -113,7 +155,10 @@ func TestMergeHooksSettings_FreshSettings(t *testing.T) {
 		t.Fatalf("PreToolUse is not []map[string]any")
 	}
 	if len(preToolUse) != 1 {
-		t.Fatalf("Expected 1 hook entry, got %d", len(preToolUse))
+		t.Fatalf("Expected 1 matcher group, got %d", len(preToolUse))
+	}
+	if extractHookCommand(preToolUse[0]) != "ari hook writeguard --output json" {
+		t.Errorf("command = %v, want writeguard", extractHookCommand(preToolUse[0]))
 	}
 }
 
@@ -125,12 +170,23 @@ func TestMergeHooksSettings_PreservesUserHooks(t *testing.T) {
 		},
 	}
 
-	// Simulate existing settings with a user-defined hook
+	// Simulate existing settings with a user-defined matcher group and an old ari group
 	settings := map[string]any{
 		"hooks": map[string]any{
 			"PreToolUse": []any{
-				map[string]any{"command": "my-custom-hook.sh", "matcher": "Bash"},
-				map[string]any{"command": "ari hook writeguard --output json"}, // old ari hook
+				// User-defined matcher group (new format)
+				map[string]any{
+					"matcher": "Bash",
+					"hooks": []any{
+						map[string]any{"type": "command", "command": "my-custom-hook.sh"},
+					},
+				},
+				// Old ari matcher group (will be replaced)
+				map[string]any{
+					"hooks": []any{
+						map[string]any{"type": "command", "command": "ari hook writeguard --output json"},
+					},
+				},
 			},
 		},
 	}
@@ -140,19 +196,58 @@ func TestMergeHooksSettings_PreservesUserHooks(t *testing.T) {
 	hooks := result["hooks"].(map[string]any)
 	preToolUse := hooks["PreToolUse"].([]map[string]any)
 
-	// Should have 2 entries: new ari hook + preserved user hook
+	// Should have 2 entries: new ari group + preserved user group
 	if len(preToolUse) != 2 {
 		t.Fatalf("Expected 2 entries (1 ari + 1 user), got %d", len(preToolUse))
 	}
 
-	// Ari hook should come first
-	if preToolUse[0]["command"] != "ari hook writeguard --output json" {
-		t.Errorf("First entry should be ari hook, got %v", preToolUse[0]["command"])
+	// Ari group should come first
+	if extractHookCommand(preToolUse[0]) != "ari hook writeguard --output json" {
+		t.Errorf("First entry should be ari hook, got %v", extractHookCommand(preToolUse[0]))
 	}
 
-	// User hook should be preserved
+	// User group should be preserved with its matcher
+	if preToolUse[1]["matcher"] != "Bash" {
+		t.Errorf("Second entry matcher = %v, want Bash", preToolUse[1]["matcher"])
+	}
+}
+
+func TestMergeHooksSettings_PreservesOldFlatUserHooks(t *testing.T) {
+	cfg := &HooksConfig{
+		SchemaVersion: "2.0",
+		Hooks: []HookEntry{
+			{Event: "PreToolUse", Command: "ari hook writeguard --output json", Priority: 3},
+		},
+	}
+
+	// Simulate existing settings with old flat format entries
+	settings := map[string]any{
+		"hooks": map[string]any{
+			"PreToolUse": []any{
+				map[string]any{"command": "my-custom-hook.sh", "matcher": "Bash"},
+				map[string]any{"command": "ari hook writeguard --output json"}, // old ari flat format
+			},
+		},
+	}
+
+	result := mergeHooksSettings(settings, cfg)
+
+	hooks := result["hooks"].(map[string]any)
+	preToolUse := hooks["PreToolUse"].([]map[string]any)
+
+	// Should have 2 entries: new ari group + preserved user entry
+	if len(preToolUse) != 2 {
+		t.Fatalf("Expected 2 entries (1 ari + 1 user), got %d", len(preToolUse))
+	}
+
+	// Ari group should come first (new format)
+	if extractHookCommand(preToolUse[0]) != "ari hook writeguard --output json" {
+		t.Errorf("First entry should be ari hook, got %v", extractHookCommand(preToolUse[0]))
+	}
+
+	// User entry preserved (old flat format)
 	if preToolUse[1]["command"] != "my-custom-hook.sh" {
-		t.Errorf("Second entry should be user hook, got %v", preToolUse[1]["command"])
+		t.Errorf("Second entry should be user hook, got %v", preToolUse[1])
 	}
 }
 
@@ -164,12 +259,20 @@ func TestMergeHooksSettings_RemovesOldAriHooks(t *testing.T) {
 		},
 	}
 
-	// Simulate existing settings with old ari hooks
+	// Simulate existing settings with old ari matcher groups
 	settings := map[string]any{
 		"hooks": map[string]any{
 			"PostToolUse": []any{
-				map[string]any{"command": "ari hook clew --output json"},    // old, will be replaced
-				map[string]any{"command": "ari hook budget --output json"},  // old, will be replaced
+				map[string]any{
+					"hooks": []any{
+						map[string]any{"type": "command", "command": "ari hook clew --output json"},
+					},
+				},
+				map[string]any{
+					"hooks": []any{
+						map[string]any{"type": "command", "command": "ari hook budget --output json"},
+					},
+				},
 			},
 		},
 	}
@@ -183,8 +286,8 @@ func TestMergeHooksSettings_RemovesOldAriHooks(t *testing.T) {
 	if len(postToolUse) != 1 {
 		t.Fatalf("Expected 1 entry, got %d", len(postToolUse))
 	}
-	if postToolUse[0]["command"] != "ari hook budget --output json" {
-		t.Errorf("Expected budget hook, got %v", postToolUse[0]["command"])
+	if extractHookCommand(postToolUse[0]) != "ari hook budget --output json" {
+		t.Errorf("Expected budget hook, got %v", extractHookCommand(postToolUse[0]))
 	}
 }
 
@@ -213,6 +316,62 @@ func TestMergeHooksSettings_Idempotent(t *testing.T) {
 
 	if string(data1) != string(data2) {
 		t.Errorf("Merge is not idempotent.\nFirst:\n%s\nSecond:\n%s", data1, data2)
+	}
+}
+
+func TestIsAriManagedGroup(t *testing.T) {
+	tests := []struct {
+		name  string
+		group map[string]any
+		want  bool
+	}{
+		{
+			name: "new format ari hook",
+			group: map[string]any{
+				"hooks": []any{
+					map[string]any{"type": "command", "command": "ari hook budget --output json"},
+				},
+			},
+			want: true,
+		},
+		{
+			name: "new format user hook",
+			group: map[string]any{
+				"hooks": []any{
+					map[string]any{"type": "command", "command": "my-script.sh"},
+				},
+			},
+			want: false,
+		},
+		{
+			name: "old flat format ari hook",
+			group: map[string]any{
+				"command": "ari hook writeguard --output json",
+				"matcher": "Edit|Write",
+			},
+			want: true,
+		},
+		{
+			name: "old flat format user hook",
+			group: map[string]any{
+				"command": "my-custom-hook.sh",
+			},
+			want: false,
+		},
+		{
+			name:  "empty group",
+			group: map[string]any{},
+			want:  false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := isAriManagedGroup(tt.group)
+			if got != tt.want {
+				t.Errorf("isAriManagedGroup() = %v, want %v", got, tt.want)
+			}
+		})
 	}
 }
 
