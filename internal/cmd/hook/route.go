@@ -96,7 +96,11 @@ Performance: <5ms target execution time (simple string prefix matching).`,
 
 func runRoute(ctx *cmdContext) error {
 	printer := ctx.getPrinter()
+	return runRouteCore(ctx, printer)
+}
 
+// runRouteCore contains the actual logic with injected printer for testing.
+func runRouteCore(ctx *cmdContext, printer *output.Printer) error {
 	// Get hook environment
 	hookEnv := ctx.getHookEnv()
 
@@ -166,43 +170,3 @@ func outputNotRouted(printer *output.Printer) error {
 	return printer.Print(result)
 }
 
-// runRouteWithPrinter is a helper that uses an injected printer for testing.
-func runRouteWithPrinter(ctx *cmdContext, printer *output.Printer) error {
-	// Get hook environment
-	hookEnv := ctx.getHookEnv()
-
-	// Verify this is a UserPromptSubmit event (or allow for testing without event)
-	if hookEnv.Event != "" && hookEnv.Event != hook.EventUserPromptSubmit {
-		printer.VerboseLog("debug", "skipping route hook for non-UserPromptSubmit event",
-			map[string]interface{}{"event": string(hookEnv.Event)})
-		return outputNotRoutedWithPrinter(printer)
-	}
-
-	// Get user message from environment
-	userMessage := hookEnv.UserMessage
-	if userMessage == "" {
-		return outputNotRoutedWithPrinter(printer)
-	}
-
-	// Parse the message for slash commands
-	command, args, category := parseSlashCommand(userMessage)
-	if command == "" {
-		return outputNotRoutedWithPrinter(printer)
-	}
-
-	// Build output
-	result := RouteOutput{
-		Routed:   true,
-		Command:  command,
-		Args:     args,
-		Category: category,
-	}
-
-	return printer.Print(result)
-}
-
-// outputNotRoutedWithPrinter outputs the not-routed response with an injected printer.
-func outputNotRoutedWithPrinter(printer *output.Printer) error {
-	result := RouteOutput{Routed: false}
-	return printer.Print(result)
-}

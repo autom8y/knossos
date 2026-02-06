@@ -5,6 +5,7 @@ package hook
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -12,6 +13,7 @@ import (
 	"github.com/autom8y/knossos/internal/cmd/common"
 	"github.com/autom8y/knossos/internal/hook"
 	"github.com/autom8y/knossos/internal/output"
+	"github.com/autom8y/knossos/internal/paths"
 )
 
 // Default timeout for hook operations (100ms target, 500ms max safety).
@@ -126,4 +128,30 @@ func (c *cmdContext) withTimeout(fn func() error) error {
 	case <-ctx.Done():
 		return fmt.Errorf("hook operation timed out after %v", c.timeout)
 	}
+}
+
+// resolveSession resolves the project resolver and current session ID from hook context.
+// Returns the resolver, trimmed session ID, and any error.
+// If no resolver can be established, resolver.ProjectRoot() will be empty.
+// If no session exists, sessionID will be empty and err will be nil.
+func (c *cmdContext) resolveSession(hookEnv *hook.Env) (*paths.Resolver, string, error) {
+	// Get resolver for path lookups
+	resolver := c.GetResolver()
+	if resolver.ProjectRoot() == "" {
+		// Try to discover project from environment
+		if hookEnv.ProjectDir != "" {
+			resolver = paths.NewResolver(hookEnv.ProjectDir)
+		}
+	}
+
+	// Get current session ID
+	sessionID, err := c.GetCurrentSessionID()
+	if err != nil {
+		return resolver, "", err
+	}
+
+	// Trim any whitespace/newlines from session ID
+	sessionID = strings.TrimSpace(sessionID)
+
+	return resolver, sessionID, nil
 }

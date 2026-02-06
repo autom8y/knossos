@@ -94,10 +94,14 @@ Performance: <5ms for passthrough path.`,
 
 func runValidate(ctx *cmdContext) error {
 	printer := ctx.getPrinter()
+	return runValidateCore(ctx, printer, "")
+}
 
+// runValidateCore contains the actual logic with injected printer for testing.
+// stdinInput is used by tests to simulate stdin input.
+func runValidateCore(ctx *cmdContext, printer *output.Printer, stdinInput string) error {
 	// Check bypass env var
 	if os.Getenv(ValidateBypassEnvVar) == "1" {
-		printer.VerboseLog("debug", "validate bypassed via env var", nil)
 		return outputValidateAllow(printer)
 	}
 
@@ -106,21 +110,22 @@ func runValidate(ctx *cmdContext) error {
 
 	// Verify this is a PreToolUse event
 	if hookEnv.Event != "" && hookEnv.Event != hook.EventPreToolUse {
-		printer.VerboseLog("debug", "skipping validate for non-PreToolUse event",
-			map[string]interface{}{"event": string(hookEnv.Event)})
 		return outputValidateAllow(printer)
 	}
 
 	// Check if this is a Bash tool
 	if hookEnv.ToolName != "Bash" {
-		// Not a bash command, allow
 		return outputValidateAllow(printer)
 	}
 
 	// Parse command from tool input
 	command := parseCommand(printer, hookEnv.ToolInput)
+	if command == "" && stdinInput != "" {
+		// Try stdin input for testing
+		command = parseCommand(printer, stdinInput)
+	}
+
 	if command == "" {
-		printer.VerboseLog("debug", "no command in tool input", nil)
 		return outputValidateAllow(printer)
 	}
 
@@ -196,7 +201,7 @@ func validateCommand(command string) (bool, string) {
 }
 
 // outputValidateAllow outputs an allow decision.
-func outputValidateAllow(printer interface{ Print(interface{}) error }) error {
+func outputValidateAllow(printer *output.Printer) error {
 	result := ValidateDecision{
 		Decision: "allow",
 	}
@@ -204,7 +209,7 @@ func outputValidateAllow(printer interface{ Print(interface{}) error }) error {
 }
 
 // outputValidateBlock outputs a block decision with the reason.
-func outputValidateBlock(printer interface{ Print(interface{}) error }, reason string) error {
+func outputValidateBlock(printer *output.Printer, reason string) error {
 	result := ValidateDecision{
 		Decision: "block",
 		Reason:   reason,
@@ -212,42 +217,3 @@ func outputValidateBlock(printer interface{ Print(interface{}) error }, reason s
 	return printer.Print(result)
 }
 
-// runValidateWithPrinter is a helper for testing with injected printer.
-func runValidateWithPrinter(ctx *cmdContext, printer interface{ Print(interface{}) error }, stdinInput string) error {
-	// Check bypass env var
-	if os.Getenv(ValidateBypassEnvVar) == "1" {
-		return outputValidateAllow(printer)
-	}
-
-	// Get hook environment
-	hookEnv := ctx.getHookEnv()
-
-	// Verify this is a PreToolUse event
-	if hookEnv.Event != "" && string(hookEnv.Event) != "PreToolUse" {
-		return outputValidateAllow(printer)
-	}
-
-	// Check if this is a Bash tool
-	if hookEnv.ToolName != "Bash" {
-		return outputValidateAllow(printer)
-	}
-
-	// Parse command from tool input
-	testPrinter := printer.(*output.Printer)
-	command := parseCommand(testPrinter, hookEnv.ToolInput)
-	if command == "" && stdinInput != "" {
-		// Try stdin input for testing
-		command = parseCommand(testPrinter, stdinInput)
-	}
-
-	if command == "" {
-		return outputValidateAllow(printer)
-	}
-
-	// Validate the command
-	if blocked, reason := validateCommand(command); blocked {
-		return outputValidateBlock(printer, reason)
-	}
-
-	return outputValidateAllow(printer)
-}

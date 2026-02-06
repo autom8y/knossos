@@ -158,7 +158,7 @@ func TestRunWriteguard_EarlyExit_HooksDisabled(t *testing.T) {
 		},
 	}
 
-	err := runWriteguardWithPrinter(ctx, printer, "")
+	err := runWriteguardCore(ctx, printer, "")
 	if err != nil {
 		t.Fatalf("runWriteguard() error = %v", err)
 	}
@@ -197,7 +197,7 @@ func TestRunWriteguard_BypassEnvVar(t *testing.T) {
 		},
 	}
 
-	err := runWriteguardWithPrinter(ctx, printer, "")
+	err := runWriteguardCore(ctx, printer, "")
 	if err != nil {
 		t.Fatalf("runWriteguard() error = %v", err)
 	}
@@ -235,7 +235,7 @@ func TestRunWriteguard_NonWriteTool(t *testing.T) {
 		},
 	}
 
-	err := runWriteguardWithPrinter(ctx, printer, "")
+	err := runWriteguardCore(ctx, printer, "")
 	if err != nil {
 		t.Fatalf("runWriteguard() error = %v", err)
 	}
@@ -273,7 +273,7 @@ func TestRunWriteguard_BlockSessionContext(t *testing.T) {
 		},
 	}
 
-	err := runWriteguardWithPrinter(ctx, printer, "")
+	err := runWriteguardCore(ctx, printer, "")
 	if err != nil {
 		t.Fatalf("runWriteguard() error = %v", err)
 	}
@@ -317,7 +317,7 @@ func TestRunWriteguard_BlockSprintContext(t *testing.T) {
 		},
 	}
 
-	err := runWriteguardWithPrinter(ctx, printer, "")
+	err := runWriteguardCore(ctx, printer, "")
 	if err != nil {
 		t.Fatalf("runWriteguard() error = %v", err)
 	}
@@ -358,7 +358,7 @@ func TestRunWriteguard_AllowRegularFile(t *testing.T) {
 		},
 	}
 
-	err := runWriteguardWithPrinter(ctx, printer, "")
+	err := runWriteguardCore(ctx, printer, "")
 	if err != nil {
 		t.Fatalf("runWriteguard() error = %v", err)
 	}
@@ -398,7 +398,7 @@ func TestRunWriteguard_StdinInput(t *testing.T) {
 
 	// Simulate stdin input
 	stdinInput := `{"tool_name": "Write", "file_path": ".claude/sessions/test/SESSION_CONTEXT.md"}`
-	err := runWriteguardWithPrinter(ctx, printer, stdinInput)
+	err := runWriteguardCore(ctx, printer, stdinInput)
 	if err != nil {
 		t.Fatalf("runWriteguard() error = %v", err)
 	}
@@ -415,12 +415,10 @@ func TestRunWriteguard_StdinInput(t *testing.T) {
 
 // BenchmarkWriteguardHook_Passthrough benchmarks the passthrough path (<5ms target).
 func BenchmarkWriteguardHook_Passthrough(b *testing.B) {
-	os.Setenv("USE_ARI_HOOKS", "1")
 	os.Setenv("CLAUDE_HOOK_EVENT", "PreToolUse")
 	os.Setenv("CLAUDE_TOOL_NAME", "Write")
 	os.Setenv("CLAUDE_TOOL_INPUT", `{"file_path": "src/main.go", "content": "x"}`)
 	defer func() {
-		os.Unsetenv("USE_ARI_HOOKS")
 		os.Unsetenv("CLAUDE_HOOK_EVENT")
 		os.Unsetenv("CLAUDE_TOOL_NAME")
 		os.Unsetenv("CLAUDE_TOOL_INPUT")
@@ -446,7 +444,7 @@ func BenchmarkWriteguardHook_Passthrough(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		stdout.Reset()
-		runWriteguardWithPrinter(ctx, printer, "")
+		runWriteguardCore(ctx, printer, "")
 	}
 
 	elapsed := b.Elapsed()
@@ -458,8 +456,6 @@ func BenchmarkWriteguardHook_Passthrough(b *testing.B) {
 
 // BenchmarkWriteguardHook_EarlyExit benchmarks early exit when disabled.
 func BenchmarkWriteguardHook_EarlyExit(b *testing.B) {
-	os.Unsetenv("USE_ARI_HOOKS")
-
 	outputFlag := "json"
 	verboseFlag := false
 	projectDir := ""
@@ -480,7 +476,7 @@ func BenchmarkWriteguardHook_EarlyExit(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		stdout.Reset()
-		runWriteguardWithPrinter(ctx, printer, "")
+		runWriteguardCore(ctx, printer, "")
 	}
 
 	elapsed := b.Elapsed()
@@ -490,42 +486,3 @@ func BenchmarkWriteguardHook_EarlyExit(b *testing.B) {
 	}
 }
 
-// runWriteguardWithPrinter is a helper for testing with injected printer and stdin.
-func runWriteguardWithPrinter(ctx *cmdContext, printer *output.Printer, stdinInput string) error {
-	// Check bypass env var
-	if os.Getenv(BypassEnvVar) == "1" {
-		return outputAllow(printer)
-	}
-
-	// Get hook environment
-	hookEnv := ctx.getHookEnv()
-
-	// Verify this is a PreToolUse event
-	if hookEnv.Event != "" && string(hookEnv.Event) != "PreToolUse" {
-		return outputAllow(printer)
-	}
-
-	// Check if this is a Write or Edit tool
-	toolName := hookEnv.ToolName
-	if toolName != "Write" && toolName != "Edit" {
-		return outputAllow(printer)
-	}
-
-	// Parse file path from tool input
-	filePath := parseFilePath(printer, hookEnv.ToolInput)
-	if filePath == "" && stdinInput != "" {
-		// Try stdin input for testing
-		filePath = parseFilePath(printer, stdinInput)
-	}
-
-	if filePath == "" {
-		return outputAllow(printer)
-	}
-
-	// Check if file is protected
-	if isProtectedFile(filePath) {
-		return outputBlock(printer, filePath)
-	}
-
-	return outputAllow(printer)
-}

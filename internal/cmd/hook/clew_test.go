@@ -69,7 +69,7 @@ func TestRunClew_WrongEventType(t *testing.T) {
 		},
 	}
 
-	err := runClewWithPrinter(ctx, printer)
+	err := runClewCore(ctx, printer)
 	if err != nil {
 		t.Fatalf("runThread() error = %v", err)
 	}
@@ -114,7 +114,7 @@ func TestRunClew_NoActiveSession(t *testing.T) {
 		},
 	}
 
-	err := runClewWithPrinter(ctx, printer)
+	err := runClewCore(ctx, printer)
 	if err != nil {
 		t.Fatalf("runThread() error = %v", err)
 	}
@@ -174,7 +174,7 @@ func TestRunClew_WithActiveSession(t *testing.T) {
 		},
 	}
 
-	err := runClewWithPrinter(ctx, printer)
+	err := runClewCore(ctx, printer)
 	if err != nil {
 		t.Fatalf("runThread() error = %v", err)
 	}
@@ -258,7 +258,7 @@ throughline:
 		},
 	}
 
-	err := runClewWithPrinter(ctx, printer)
+	err := runClewCore(ctx, printer)
 	if err != nil {
 		t.Fatalf("runThread() error = %v", err)
 	}
@@ -351,7 +351,7 @@ Files modified:
 		},
 	}
 
-	err := runClewWithPrinter(ctx, printer)
+	err := runClewCore(ctx, printer)
 	if err != nil {
 		t.Fatalf("runThread() error = %v", err)
 	}

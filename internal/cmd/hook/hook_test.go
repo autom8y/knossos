@@ -372,7 +372,7 @@ func TestIntegration_ContextHook_NoSession(t *testing.T) {
 		timeout: DefaultTimeout,
 	}
 
-	err := runContextWithPrinter(ctx, printer)
+	err := runContextCore(ctx, printer)
 	if err != nil {
 		t.Fatalf("runContext() error = %v", err)
 	}
@@ -425,7 +425,7 @@ func TestIntegration_ValidateHook_Chain(t *testing.T) {
 				timeout: DefaultTimeout,
 			}
 
-			err := runValidateWithPrinter(ctx, printer, "")
+			err := runValidateCore(ctx, printer, "")
 			if err != nil {
 				t.Fatalf("runValidate() error = %v", err)
 			}
@@ -480,7 +480,7 @@ func TestIntegration_WriteguardHook_Chain(t *testing.T) {
 				timeout: DefaultTimeout,
 			}
 
-			err := runWriteguardWithPrinter(ctx, printer, "")
+			err := runWriteguardCore(ctx, printer, "")
 			if err != nil {
 				t.Fatalf("runWriteguard() error = %v", err)
 			}
@@ -538,7 +538,7 @@ func TestIntegration_RouteHook_AllCategories(t *testing.T) {
 				timeout: DefaultTimeout,
 			}
 
-			err := runRouteWithPrinter(ctx, printer)
+			err := runRouteCore(ctx, printer)
 			if err != nil {
 				t.Fatalf("runRoute() error = %v", err)
 			}
@@ -588,7 +588,7 @@ func BenchmarkHook_EarlyExitPath(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		stdout.Reset()
-		runContextWithPrinter(ctx, printer)
+		runContextCore(ctx, printer)
 	}
 
 	// Verify early exit is fast

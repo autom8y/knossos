@@ -3,7 +3,6 @@ package hook
 
 import (
 	"os"
-	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -70,9 +69,37 @@ Performance: <100ms target execution time.`,
 	return cmd
 }
 
+// runClew is the cobra RunE handler that creates the printer and delegates to runClewCore.
 func runClew(ctx *cmdContext) error {
 	printer := ctx.getPrinter()
+	return runClewCore(ctx, printer)
+}
 
+// getSessionDir determines the session directory from context and environment.
+func getSessionDir(ctx *cmdContext, hookEnv *hook.Env) string {
+	// Resolve session context
+	resolver, sessionID, err := ctx.resolveSession(hookEnv)
+	if err != nil || sessionID == "" || resolver.ProjectRoot() == "" {
+		return ""
+	}
+
+	// Return the session directory path
+	return resolver.SessionDir(sessionID)
+}
+
+// outputNotRecorded outputs the not-recorded response with the given printer.
+func outputNotRecorded(printer *output.Printer, reason string) error {
+	result := ClewOutput{
+		Recorded: false,
+		Reason:   reason,
+	}
+	return printer.Print(result)
+}
+
+// runClewCore contains the actual clew hook logic. It accepts an injected printer
+// for testing purposes, allowing tests to capture output without creating a full
+// command context.
+func runClewCore(ctx *cmdContext, printer *output.Printer) error {
 	// Get hook environment
 	hookEnv := ctx.getHookEnv()
 
@@ -148,129 +175,5 @@ func runClew(ctx *cmdContext) error {
 		}
 	}
 
-	return printer.Print(result)
-}
-
-// getSessionDir determines the session directory from context and environment.
-func getSessionDir(ctx *cmdContext, hookEnv *hook.Env) string {
-	// Try to get session ID from context
-	sessionID, err := ctx.GetCurrentSessionID()
-	if err != nil || sessionID == "" {
-		return ""
-	}
-
-	sessionID = strings.TrimSpace(sessionID)
-
-	// Get resolver for path lookups
-	resolver := ctx.GetResolver()
-	if resolver.ProjectRoot() == "" {
-		// Try to discover project from environment
-		if hookEnv.ProjectDir != "" {
-			resolver = newResolverFromPath(hookEnv.ProjectDir)
-		} else {
-			return ""
-		}
-	}
-
-	// Return the session directory path
-	return resolver.SessionDir(sessionID)
-}
-
-// outputNotRecorded outputs the not-recorded response.
-func outputNotRecorded(printer *output.Printer, reason string) error {
-	result := ClewOutput{
-		Recorded: false,
-		Reason:   reason,
-	}
-	return printer.Print(result)
-}
-
-// runClewWithPrinter is a helper that uses an injected printer for testing.
-func runClewWithPrinter(ctx *cmdContext, printer *output.Printer) error {
-
-	// Get hook environment
-	hookEnv := ctx.getHookEnv()
-
-	// Verify this is a PostToolUse event (or allow for testing without event)
-	if hookEnv.Event != "" && hookEnv.Event != hook.EventPostToolUse {
-		printer.VerboseLog("debug", "skipping clew hook for non-PostToolUse event",
-			map[string]interface{}{"event": string(hookEnv.Event)})
-		return outputNotRecordedWithPrinter(printer, "not a PostToolUse event")
-	}
-
-	// Get session directory
-	sessionDir := getSessionDir(ctx, hookEnv)
-	if sessionDir == "" {
-		return outputNotRecordedWithPrinter(printer, "no active session")
-	}
-
-	// Parse tool input from environment
-	toolInputJSON := hookEnv.ToolInput
-	if toolInputJSON == "" {
-		toolInputJSON = os.Getenv("CLAUDE_HOOK_TOOL_INPUT")
-	}
-
-	toolInput, err := hook.ParseToolInput(toolInputJSON)
-	if err != nil {
-		printer.VerboseLog("warn", "failed to parse tool input",
-			map[string]interface{}{"error": err.Error()})
-		return outputNotRecordedWithPrinter(printer, "invalid tool input: "+err.Error())
-	}
-
-	// Build event for trigger checking (before recording)
-	event := clewcontract.BuildEventFromToolInput(hookEnv, toolInput)
-
-	// Record the tool event
-	if err := clewcontract.RecordToolEvent(sessionDir, hookEnv, toolInput); err != nil {
-		printer.VerboseLog("error", "failed to record tool event",
-			map[string]interface{}{"error": err.Error()})
-		return outputNotRecordedWithPrinter(printer, "write failed: "+err.Error())
-	}
-
-	// Check if this is an orchestrator Task completion and record throughline stamp
-	if hookEnv.ToolName == "Task" && hookEnv.ToolResult != "" {
-		if throughline := clewcontract.ExtractThroughline(hookEnv.ToolResult); throughline != nil {
-			// Record decision stamp (fail silently - don't break hook if stamp fails)
-			if err := clewcontract.RecordStamp(sessionDir, throughline.Decision, throughline.Rationale, nil); err != nil {
-				printer.VerboseLog("warn", "failed to record orchestrator stamp",
-					map[string]interface{}{"error": err.Error()})
-				// Continue - stamp failure is not critical
-			} else {
-				printer.VerboseLog("debug", "recorded orchestrator decision stamp",
-					map[string]interface{}{"decision": throughline.Decision})
-			}
-		}
-	}
-
-	// Check triggers after recording
-	eventsPath := clewcontract.GetEventsPath(sessionDir)
-	triggerConfig := clewcontract.DefaultTriggerConfig()
-	triggerResult := clewcontract.CheckTriggers(eventsPath, event, triggerConfig)
-
-	// Build output
-	result := ClewOutput{
-		Recorded:   true,
-		EventsFile: eventsPath,
-	}
-
-	// Include trigger if triggered
-	if triggerResult.Triggered {
-		result.Trigger = &ClewTriggerOutput{
-			Triggered: true,
-			Type:      string(triggerResult.Type),
-			Reason:    triggerResult.Reason,
-			Suggest:   triggerResult.Suggest,
-		}
-	}
-
-	return printer.Print(result)
-}
-
-// outputNotRecordedWithPrinter outputs the not-recorded response with an injected printer.
-func outputNotRecordedWithPrinter(printer *output.Printer, reason string) error {
-	result := ClewOutput{
-		Recorded: false,
-		Reason:   reason,
-	}
 	return printer.Print(result)
 }

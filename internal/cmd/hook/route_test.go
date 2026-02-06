@@ -276,7 +276,7 @@ func TestRunRoute_SessionCommands(t *testing.T) {
 		},
 	}
 
-			err := runRouteWithPrinter(ctx, printer)
+			err := runRouteCore(ctx, printer)
 			if err != nil {
 				t.Fatalf("runRoute() error = %v", err)
 			}
@@ -319,7 +319,7 @@ func TestRunRoute_OrchestratorCommands(t *testing.T) {
 		},
 	}
 
-	err := runRouteWithPrinter(ctx, printer)
+	err := runRouteCore(ctx, printer)
 	if err != nil {
 		t.Fatalf("runRoute() error = %v", err)
 	}
@@ -367,7 +367,7 @@ func TestRunRoute_InitiativeCommands(t *testing.T) {
 		},
 	}
 
-			err := runRouteWithPrinter(ctx, printer)
+			err := runRouteCore(ctx, printer)
 			if err != nil {
 				t.Fatalf("runRoute() error = %v", err)
 			}
@@ -414,7 +414,7 @@ func TestRunRoute_GitCommands(t *testing.T) {
 		},
 	}
 
-			err := runRouteWithPrinter(ctx, printer)
+			err := runRouteCore(ctx, printer)
 			if err != nil {
 				t.Fatalf("runRoute() error = %v", err)
 			}
@@ -457,7 +457,7 @@ func TestRunRoute_ThreadCommands(t *testing.T) {
 		},
 	}
 
-	err := runRouteWithPrinter(ctx, printer)
+	err := runRouteCore(ctx, printer)
 	if err != nil {
 		t.Fatalf("runRoute() error = %v", err)
 	}
@@ -501,7 +501,7 @@ func TestRunRoute_RegularMessage(t *testing.T) {
 		},
 	}
 
-	err := runRouteWithPrinter(ctx, printer)
+	err := runRouteCore(ctx, printer)
 	if err != nil {
 		t.Fatalf("runRoute() error = %v", err)
 	}
@@ -536,7 +536,7 @@ func TestRunRoute_EmptyMessage(t *testing.T) {
 		},
 	}
 
-	err := runRouteWithPrinter(ctx, printer)
+	err := runRouteCore(ctx, printer)
 	if err != nil {
 		t.Fatalf("runRoute() error = %v", err)
 	}
@@ -571,7 +571,7 @@ func TestRunRoute_WrongEventType(t *testing.T) {
 		},
 	}
 
-	err := runRouteWithPrinter(ctx, printer)
+	err := runRouteCore(ctx, printer)
 	if err != nil {
 		t.Fatalf("runRoute() error = %v", err)
 	}
@@ -606,7 +606,7 @@ func TestRunRoute_UnknownCommand(t *testing.T) {
 		},
 	}
 
-	err := runRouteWithPrinter(ctx, printer)
+	err := runRouteCore(ctx, printer)
 	if err != nil {
 		t.Fatalf("runRoute() error = %v", err)
 	}
@@ -649,7 +649,7 @@ func TestRunRoute_PartialCommandMatch(t *testing.T) {
 		},
 	}
 
-			err := runRouteWithPrinter(ctx, printer)
+			err := runRouteCore(ctx, printer)
 			if err != nil {
 				t.Fatalf("runRoute() error = %v", err)
 			}
@@ -668,11 +668,9 @@ func TestRunRoute_PartialCommandMatch(t *testing.T) {
 
 // BenchmarkRouteHook_SlashCommand benchmarks slash command routing (<5ms target).
 func BenchmarkRouteHook_SlashCommand(b *testing.B) {
-	os.Setenv("USE_ARI_HOOKS", "1")
 	os.Setenv("CLAUDE_HOOK_EVENT", "UserPromptSubmit")
 	os.Setenv("CLAUDE_USER_MESSAGE", "/start Add dark mode toggle to settings")
 	defer func() {
-		os.Unsetenv("USE_ARI_HOOKS")
 		os.Unsetenv("CLAUDE_HOOK_EVENT")
 		os.Unsetenv("CLAUDE_USER_MESSAGE")
 	}()
@@ -695,7 +693,7 @@ func BenchmarkRouteHook_SlashCommand(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		stdout.Reset()
-		runRouteWithPrinter(ctx, printer)
+		runRouteCore(ctx, printer)
 	}
 
 	// Report timing
@@ -708,11 +706,9 @@ func BenchmarkRouteHook_SlashCommand(b *testing.B) {
 
 // BenchmarkRouteHook_RegularMessage benchmarks regular message processing (<5ms target).
 func BenchmarkRouteHook_RegularMessage(b *testing.B) {
-	os.Setenv("USE_ARI_HOOKS", "1")
 	os.Setenv("CLAUDE_HOOK_EVENT", "UserPromptSubmit")
 	os.Setenv("CLAUDE_USER_MESSAGE", "Help me understand this code and fix the bug in the authentication module")
 	defer func() {
-		os.Unsetenv("USE_ARI_HOOKS")
 		os.Unsetenv("CLAUDE_HOOK_EVENT")
 		os.Unsetenv("CLAUDE_USER_MESSAGE")
 	}()
@@ -735,7 +731,7 @@ func BenchmarkRouteHook_RegularMessage(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		stdout.Reset()
-		runRouteWithPrinter(ctx, printer)
+		runRouteCore(ctx, printer)
 	}
 
 	// Report timing

@@ -9,7 +9,6 @@ import (
 
 	"github.com/autom8y/knossos/internal/hook"
 	"github.com/autom8y/knossos/internal/output"
-	"github.com/autom8y/knossos/internal/paths"
 	"github.com/autom8y/knossos/internal/session"
 )
 
@@ -68,7 +67,11 @@ Performance: <100ms target execution time.`,
 
 func runContext(ctx *cmdContext) error {
 	printer := ctx.getPrinter()
+	return runContextCore(ctx, printer)
+}
 
+// runContextCore contains the actual logic with injected printer for testing.
+func runContextCore(ctx *cmdContext, printer *output.Printer) error {
 	// Get hook environment
 	hookEnv := ctx.getHookEnv()
 
@@ -79,30 +82,16 @@ func runContext(ctx *cmdContext) error {
 		return outputNoSession(printer)
 	}
 
-	// Get resolver for path lookups
-	resolver := ctx.GetResolver()
-	if resolver.ProjectRoot() == "" {
-		// Try to discover project from environment
-		if hookEnv.ProjectDir != "" {
-			resolver = newResolverFromPath(hookEnv.ProjectDir)
-		} else {
-			return outputNoSession(printer)
-		}
-	}
-
-	// Get current session ID
-	sessionID, err := ctx.GetCurrentSessionID()
+	// Resolve session context
+	resolver, sessionID, err := ctx.resolveSession(hookEnv)
 	if err != nil {
 		printer.VerboseLog("warn", "failed to read current session", map[string]interface{}{"error": err.Error()})
 		return outputNoSession(printer)
 	}
 
-	if sessionID == "" {
+	if resolver.ProjectRoot() == "" || sessionID == "" {
 		return outputNoSession(printer)
 	}
-
-	// Trim any whitespace/newlines from session ID
-	sessionID = strings.TrimSpace(sessionID)
 
 	// Load session context
 	ctxPath := resolver.SessionContextFile(sessionID)
@@ -156,9 +145,4 @@ func determineExecutionMode(sessCtx *session.Context, activeRite string) string 
 
 	// Session without rite = cross-cutting mode
 	return "cross-cutting"
-}
-
-// newResolverFromPath creates a resolver from a project path.
-func newResolverFromPath(projectDir string) *paths.Resolver {
-	return paths.NewResolver(projectDir)
 }

@@ -132,7 +132,7 @@ func TestRunContext_EarlyExit_HooksDisabled(t *testing.T) {
 	}
 
 	// Override getPrinter to use our buffer
-	err := runContextWithPrinter(ctx, printer)
+	err := runContextCore(ctx, printer)
 	if err != nil {
 		t.Fatalf("runContext() error = %v", err)
 	}
@@ -213,7 +213,7 @@ current_phase: "implementation"
 		},
 	}
 
-	err := runContextWithPrinter(ctx, printer)
+	err := runContextCore(ctx, printer)
 	if err != nil {
 		t.Fatalf("runContext() error = %v", err)
 	}
@@ -270,7 +270,7 @@ func TestRunContext_NoSession(t *testing.T) {
 		},
 	}
 
-	err := runContextWithPrinter(ctx, printer)
+	err := runContextCore(ctx, printer)
 	if err != nil {
 		t.Fatalf("runContext() error = %v", err)
 	}
@@ -309,7 +309,7 @@ func BenchmarkContextHook_EarlyExit(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		stdout.Reset()
-		runContextWithPrinter(ctx, printer)
+		runContextCore(ctx, printer)
 	}
 
 	// Report ns/op
@@ -345,11 +345,9 @@ current_phase: "implementation"
 	os.WriteFile(filepath.Join(sessionDir, "SESSION_CONTEXT.md"), []byte(sessionContext), 0644)
 	os.WriteFile(filepath.Join(tmpDir, ".claude", "ACTIVE_RITE"), []byte("test"), 0644)
 
-	os.Setenv("USE_ARI_HOOKS", "1")
 	os.Setenv("CLAUDE_HOOK_EVENT", "SessionStart")
 	os.Setenv("CLAUDE_PROJECT_DIR", tmpDir)
 	defer func() {
-		os.Unsetenv("USE_ARI_HOOKS")
 		os.Unsetenv("CLAUDE_HOOK_EVENT")
 		os.Unsetenv("CLAUDE_PROJECT_DIR")
 	}()
@@ -374,7 +372,7 @@ current_phase: "implementation"
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		stdout.Reset()
-		runContextWithPrinter(ctx, printer)
+		runContextCore(ctx, printer)
 	}
 
 	elapsed := b.Elapsed()
@@ -384,57 +382,3 @@ current_phase: "implementation"
 	}
 }
 
-// runContextWithPrinter is a helper that uses an injected printer for testing.
-func runContextWithPrinter(ctx *cmdContext, printer *output.Printer) error {
-	// Get hook environment
-	hookEnv := ctx.getHookEnv()
-
-	// Get resolver for path lookups
-	resolver := ctx.GetResolver()
-	if resolver.ProjectRoot() == "" {
-		if hookEnv.ProjectDir != "" {
-			resolver = newResolverFromPath(hookEnv.ProjectDir)
-		} else {
-			return outputNoSession(printer)
-		}
-	}
-
-	// Get current session ID
-	sessionIDStr, err := ctx.GetCurrentSessionID()
-	if err != nil {
-		return outputNoSession(printer)
-	}
-
-	if sessionIDStr == "" {
-		return outputNoSession(printer)
-	}
-
-	sessionIDStr = strings.TrimSpace(sessionIDStr)
-
-	// Load session context using real session package
-	ctxPath := resolver.SessionContextFile(sessionIDStr)
-	sessCtx, err := session.LoadContext(ctxPath)
-	if err != nil {
-		return outputNoSession(printer)
-	}
-
-	// Read active rite
-	activeRite := resolver.ReadActiveRite()
-	if activeRite == "" {
-		activeRite = sessCtx.ActiveRite
-	}
-
-	mode := determineExecutionMode(sessCtx, activeRite)
-
-	result := ContextOutput{
-		SessionID:     sessCtx.SessionID,
-		Status:        string(sessCtx.Status),
-		Initiative:    sessCtx.Initiative,
-		Rite:          activeRite,
-		CurrentPhase:  sessCtx.CurrentPhase,
-		ExecutionMode: mode,
-		HasSession:    true,
-	}
-
-	return printer.Print(result)
-}

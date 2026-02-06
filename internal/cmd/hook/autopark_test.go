@@ -70,7 +70,7 @@ func TestRunAutopark_EarlyExit_HooksDisabled(t *testing.T) {
 		},
 	}
 
-	err := runAutoparkWithPrinter(ctx, printer)
+	err := runAutoparkCore(ctx, printer)
 	if err != nil {
 		t.Fatalf("runAutopark() error = %v", err)
 	}
@@ -108,7 +108,7 @@ func TestRunAutopark_WrongEvent(t *testing.T) {
 		},
 	}
 
-	err := runAutoparkWithPrinter(ctx, printer)
+	err := runAutoparkCore(ctx, printer)
 	if err != nil {
 		t.Fatalf("runAutopark() error = %v", err)
 	}
@@ -156,7 +156,7 @@ func TestRunAutopark_NoSession(t *testing.T) {
 		},
 	}
 
-	err := runAutoparkWithPrinter(ctx, printer)
+	err := runAutoparkCore(ctx, printer)
 	if err != nil {
 		t.Fatalf("runAutopark() error = %v", err)
 	}
@@ -226,7 +226,7 @@ current_phase: "implementation"
 		},
 	}
 
-	err := runAutoparkWithPrinter(ctx, printer)
+	err := runAutoparkCore(ctx, printer)
 	if err != nil {
 		t.Fatalf("runAutopark() error = %v", err)
 	}
@@ -309,7 +309,7 @@ parked_reason: "manual"
 		},
 	}
 
-	err := runAutoparkWithPrinter(ctx, printer)
+	err := runAutoparkCore(ctx, printer)
 	if err != nil {
 		t.Fatalf("runAutopark() error = %v", err)
 	}
@@ -329,8 +329,6 @@ parked_reason: "manual"
 
 // BenchmarkAutoparkHook_EarlyExit benchmarks the early exit path.
 func BenchmarkAutoparkHook_EarlyExit(b *testing.B) {
-	os.Unsetenv("USE_ARI_HOOKS")
-
 	outputFlag := "json"
 	verboseFlag := false
 	projectDir := ""
@@ -353,7 +351,7 @@ func BenchmarkAutoparkHook_EarlyExit(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		stdout.Reset()
-		runAutoparkWithPrinter(ctx, printer)
+		runAutoparkCore(ctx, printer)
 	}
 
 	elapsed := b.Elapsed()
@@ -363,72 +361,3 @@ func BenchmarkAutoparkHook_EarlyExit(b *testing.B) {
 	}
 }
 
-// runAutoparkWithPrinter is a helper for testing with injected printer.
-func runAutoparkWithPrinter(ctx *cmdContext, printer *output.Printer) error {
-	// Get hook environment
-	hookEnv := ctx.getHookEnv()
-
-	// Verify this is a Stop event
-	if hookEnv.Event != "" && string(hookEnv.Event) != "Stop" {
-		return outputNoPark(printer, "not a Stop event")
-	}
-
-	// Get resolver for path lookups
-	resolver := ctx.GetResolver()
-	if resolver.ProjectRoot() == "" {
-		if hookEnv.ProjectDir != "" {
-			resolver = newResolverFromPath(hookEnv.ProjectDir)
-		} else {
-			return outputNoPark(printer, "no project context")
-		}
-	}
-
-	// Get current session ID
-	sessionIDStr, err := ctx.GetCurrentSessionID()
-	if err != nil {
-		return outputNoPark(printer, "no active session")
-	}
-
-	if sessionIDStr == "" {
-		return outputNoPark(printer, "no active session")
-	}
-
-	sessionIDStr = bytes.NewBufferString(sessionIDStr).String()
-
-	// Load and update session context using real session package
-	ctxPath := resolver.SessionContextFile(sessionIDStr)
-	content, err := os.ReadFile(ctxPath)
-	if err != nil {
-		return outputNoPark(printer, "could not load session")
-	}
-
-	// Check if already not ACTIVE
-	if !bytes.Contains(content, []byte("status: \"ACTIVE\"")) &&
-		!bytes.Contains(content, []byte("status: ACTIVE")) {
-		return outputNoPark(printer, "session not active (status: PARKED)")
-	}
-
-	// Update the status to PARKED
-	now := time.Now().UTC()
-	updated := bytes.Replace(content, []byte("status: ACTIVE"), []byte("status: PARKED"), 1)
-	updated = bytes.Replace(updated, []byte("status: \"ACTIVE\""), []byte("status: PARKED"), 1)
-
-	// Add parked_at and parked_reason before the closing ---
-	parkedFields := []byte("\nparked_at: \"" + now.Format(time.RFC3339) + "\"\nparked_reason: \"auto-parked on Stop\"\n---")
-	updated = bytes.Replace(updated, []byte("\n---"), parkedFields, 1)
-
-	if err := os.WriteFile(ctxPath, updated, 0644); err != nil {
-		return outputNoPark(printer, "failed to save session")
-	}
-
-	result := AutoparkOutput{
-		SessionID:      sessionIDStr,
-		Status:         "PARKED",
-		PreviousStatus: "ACTIVE",
-		AutoParkedAt:   now.Format(time.RFC3339),
-		WasParked:      true,
-		Message:        "Session auto-parked",
-	}
-
-	return printer.Print(result)
-}

@@ -256,7 +256,7 @@ func TestRunValidate_EarlyExit_HooksDisabled(t *testing.T) {
 		},
 	}
 
-	err := runValidateWithPrinter(ctx, printer, "")
+	err := runValidateCore(ctx, printer, "")
 	if err != nil {
 		t.Fatalf("runValidate() error = %v", err)
 	}
@@ -295,7 +295,7 @@ func TestRunValidate_BypassEnvVar(t *testing.T) {
 		},
 	}
 
-	err := runValidateWithPrinter(ctx, printer, "")
+	err := runValidateCore(ctx, printer, "")
 	if err != nil {
 		t.Fatalf("runValidate() error = %v", err)
 	}
@@ -333,7 +333,7 @@ func TestRunValidate_NonBashTool(t *testing.T) {
 		},
 	}
 
-	err := runValidateWithPrinter(ctx, printer, "")
+	err := runValidateCore(ctx, printer, "")
 	if err != nil {
 		t.Fatalf("runValidate() error = %v", err)
 	}
@@ -371,7 +371,7 @@ func TestRunValidate_AllowSafeCommand(t *testing.T) {
 		},
 	}
 
-	err := runValidateWithPrinter(ctx, printer, "")
+	err := runValidateCore(ctx, printer, "")
 	if err != nil {
 		t.Fatalf("runValidate() error = %v", err)
 	}
@@ -409,7 +409,7 @@ func TestRunValidate_BlockRmRfGit(t *testing.T) {
 		},
 	}
 
-	err := runValidateWithPrinter(ctx, printer, "")
+	err := runValidateCore(ctx, printer, "")
 	if err != nil {
 		t.Fatalf("runValidate() error = %v", err)
 	}
@@ -453,7 +453,7 @@ func TestRunValidate_BlockForcePush(t *testing.T) {
 		},
 	}
 
-	err := runValidateWithPrinter(ctx, printer, "")
+	err := runValidateCore(ctx, printer, "")
 	if err != nil {
 		t.Fatalf("runValidate() error = %v", err)
 	}
@@ -494,7 +494,7 @@ func TestRunValidate_BlockNoVerify(t *testing.T) {
 		},
 	}
 
-	err := runValidateWithPrinter(ctx, printer, "")
+	err := runValidateCore(ctx, printer, "")
 	if err != nil {
 		t.Fatalf("runValidate() error = %v", err)
 	}
@@ -535,7 +535,7 @@ func TestRunValidate_BlockResetHard(t *testing.T) {
 		},
 	}
 
-	err := runValidateWithPrinter(ctx, printer, "")
+	err := runValidateCore(ctx, printer, "")
 	if err != nil {
 		t.Fatalf("runValidate() error = %v", err)
 	}
@@ -576,7 +576,7 @@ func TestRunValidate_BlockCleanFd(t *testing.T) {
 		},
 	}
 
-	err := runValidateWithPrinter(ctx, printer, "")
+	err := runValidateCore(ctx, printer, "")
 	if err != nil {
 		t.Fatalf("runValidate() error = %v", err)
 	}
@@ -619,7 +619,7 @@ func TestRunValidate_StdinInput(t *testing.T) {
 
 	// Simulate stdin input with dangerous command
 	stdinInput := `{"command": "rm -rf .git"}`
-	err := runValidateWithPrinter(ctx, printer, stdinInput)
+	err := runValidateCore(ctx, printer, stdinInput)
 	if err != nil {
 		t.Fatalf("runValidate() error = %v", err)
 	}
@@ -636,12 +636,10 @@ func TestRunValidate_StdinInput(t *testing.T) {
 
 // BenchmarkValidateHook_Passthrough benchmarks the passthrough path (<5ms target).
 func BenchmarkValidateHook_Passthrough(b *testing.B) {
-	os.Setenv("USE_ARI_HOOKS", "1")
 	os.Setenv("CLAUDE_HOOK_EVENT", "PreToolUse")
 	os.Setenv("CLAUDE_TOOL_NAME", "Bash")
 	os.Setenv("CLAUDE_TOOL_INPUT", `{"command": "ls -la", "description": "List files"}`)
 	defer func() {
-		os.Unsetenv("USE_ARI_HOOKS")
 		os.Unsetenv("CLAUDE_HOOK_EVENT")
 		os.Unsetenv("CLAUDE_TOOL_NAME")
 		os.Unsetenv("CLAUDE_TOOL_INPUT")
@@ -667,7 +665,7 @@ func BenchmarkValidateHook_Passthrough(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		stdout.Reset()
-		runValidateWithPrinter(ctx, printer, "")
+		runValidateCore(ctx, printer, "")
 	}
 
 	elapsed := b.Elapsed()
@@ -679,8 +677,6 @@ func BenchmarkValidateHook_Passthrough(b *testing.B) {
 
 // BenchmarkValidateHook_EarlyExit benchmarks early exit when disabled.
 func BenchmarkValidateHook_EarlyExit(b *testing.B) {
-	os.Unsetenv("USE_ARI_HOOKS")
-
 	outputFlag := "json"
 	verboseFlag := false
 	projectDir := ""
@@ -701,7 +697,7 @@ func BenchmarkValidateHook_EarlyExit(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		stdout.Reset()
-		runValidateWithPrinter(ctx, printer, "")
+		runValidateCore(ctx, printer, "")
 	}
 
 	elapsed := b.Elapsed()
@@ -713,12 +709,10 @@ func BenchmarkValidateHook_EarlyExit(b *testing.B) {
 
 // BenchmarkValidateHook_Validation benchmarks the full validation path.
 func BenchmarkValidateHook_Validation(b *testing.B) {
-	os.Setenv("USE_ARI_HOOKS", "1")
 	os.Setenv("CLAUDE_HOOK_EVENT", "PreToolUse")
 	os.Setenv("CLAUDE_TOOL_NAME", "Bash")
 	os.Setenv("CLAUDE_TOOL_INPUT", `{"command": "git push --force origin main"}`)
 	defer func() {
-		os.Unsetenv("USE_ARI_HOOKS")
 		os.Unsetenv("CLAUDE_HOOK_EVENT")
 		os.Unsetenv("CLAUDE_TOOL_NAME")
 		os.Unsetenv("CLAUDE_TOOL_INPUT")
@@ -744,7 +738,7 @@ func BenchmarkValidateHook_Validation(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		stdout.Reset()
-		runValidateWithPrinter(ctx, printer, "")
+		runValidateCore(ctx, printer, "")
 	}
 
 	elapsed := b.Elapsed()

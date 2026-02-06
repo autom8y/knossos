@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/autom8y/knossos/internal/hook"
-	"github.com/autom8y/knossos/internal/paths"
+	"github.com/autom8y/knossos/internal/output"
 	"github.com/autom8y/knossos/internal/session"
 )
 
@@ -57,7 +57,11 @@ Performance: <100ms target execution time.`,
 
 func runAutopark(ctx *cmdContext) error {
 	printer := ctx.getPrinter()
+	return runAutoparkCore(ctx, printer)
+}
 
+// runAutoparkCore contains the actual logic with injected printer for testing.
+func runAutoparkCore(ctx *cmdContext, printer *output.Printer) error {
 	// Get hook environment
 	hookEnv := ctx.getHookEnv()
 
@@ -68,30 +72,16 @@ func runAutopark(ctx *cmdContext) error {
 		return outputNoPark(printer, "not a Stop event")
 	}
 
-	// Get resolver for path lookups
-	resolver := ctx.GetResolver()
-	if resolver.ProjectRoot() == "" {
-		// Try to discover project from environment
-		if hookEnv.ProjectDir != "" {
-			resolver = paths.NewResolver(hookEnv.ProjectDir)
-		} else {
-			return outputNoPark(printer, "no project context")
-		}
-	}
-
-	// Get current session ID
-	sessionID, err := ctx.GetCurrentSessionID()
+	// Resolve session context
+	resolver, sessionID, err := ctx.resolveSession(hookEnv)
 	if err != nil {
 		printer.VerboseLog("warn", "failed to read current session", map[string]interface{}{"error": err.Error()})
 		return outputNoPark(printer, "no active session")
 	}
 
-	if sessionID == "" {
+	if resolver.ProjectRoot() == "" || sessionID == "" {
 		return outputNoPark(printer, "no active session")
 	}
-
-	// Trim any whitespace/newlines from session ID
-	sessionID = strings.TrimSpace(sessionID)
 
 	// Load session context
 	ctxPath := resolver.SessionContextFile(sessionID)
@@ -150,7 +140,7 @@ func runAutopark(ctx *cmdContext) error {
 }
 
 // outputNoPark outputs a no-op response when parking didn't occur.
-func outputNoPark(printer interface{ Print(interface{}) error }, reason string) error {
+func outputNoPark(printer *output.Printer, reason string) error {
 	result := AutoparkOutput{
 		WasParked: false,
 		Message:   reason,

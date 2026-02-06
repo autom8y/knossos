@@ -68,10 +68,14 @@ Performance: <5ms for passthrough path.`,
 
 func runWriteguard(ctx *cmdContext) error {
 	printer := ctx.getPrinter()
+	return runWriteguardCore(ctx, printer, "")
+}
 
+// runWriteguardCore contains the actual logic with injected printer for testing.
+// stdinInput is used by tests to simulate stdin input.
+func runWriteguardCore(ctx *cmdContext, printer *output.Printer, stdinInput string) error {
 	// Check bypass env var
 	if os.Getenv(BypassEnvVar) == "1" {
-		printer.VerboseLog("debug", "writeguard bypassed via env var", nil)
 		return outputAllow(printer)
 	}
 
@@ -80,27 +84,23 @@ func runWriteguard(ctx *cmdContext) error {
 
 	// Verify this is a PreToolUse event
 	if hookEnv.Event != "" && hookEnv.Event != hook.EventPreToolUse {
-		printer.VerboseLog("debug", "skipping writeguard for non-PreToolUse event",
-			map[string]interface{}{"event": string(hookEnv.Event)})
 		return outputAllow(printer)
 	}
 
 	// Check if this is a Write or Edit tool
 	toolName := hookEnv.ToolName
 	if toolName != "Write" && toolName != "Edit" {
-		// Not a write operation, allow
 		return outputAllow(printer)
 	}
 
-	// Parse file path from tool input (try env var first, then stdin)
+	// Parse file path from tool input
 	filePath := parseFilePath(printer, hookEnv.ToolInput)
-	if filePath == "" {
-		// Try reading from stdin as fallback
-		filePath = parseFilePathFromStdin(printer)
+	if filePath == "" && stdinInput != "" {
+		// Try stdin input for testing
+		filePath = parseFilePath(printer, stdinInput)
 	}
 
 	if filePath == "" {
-		printer.VerboseLog("debug", "no file path in tool input", nil)
 		return outputAllow(printer)
 	}
 
@@ -197,7 +197,7 @@ func isProtectedFile(filePath string) bool {
 }
 
 // outputAllow outputs an allow decision.
-func outputAllow(printer interface{ Print(interface{}) error }) error {
+func outputAllow(printer *output.Printer) error {
 	result := WriteGuardDecision{
 		Decision: "allow",
 	}
@@ -205,7 +205,7 @@ func outputAllow(printer interface{ Print(interface{}) error }) error {
 }
 
 // outputBlock outputs a block decision with the reason.
-func outputBlock(printer interface{ Print(interface{}) error }, filePath string) error {
+func outputBlock(printer *output.Printer, filePath string) error {
 	// Determine which context file type
 	var contextType string
 	if strings.HasSuffix(filePath, "SESSION_CONTEXT.md") {
