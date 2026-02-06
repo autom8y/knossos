@@ -56,8 +56,7 @@ Examples:
 	cmd.AddCommand(newTransitionCmd(ctx))
 	cmd.AddCommand(newMigrateCmd(ctx))
 	cmd.AddCommand(newAuditCmd(ctx))
-	cmd.AddCommand(newLockCmd(ctx))
-	cmd.AddCommand(newUnlockCmd(ctx))
+	cmd.AddCommand(newRecoverCmd(ctx))
 
 	// Session commands require project context
 	common.SetNeedsProject(cmd, true, true)

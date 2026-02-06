@@ -216,13 +216,14 @@ func ErrLifecycleViolation(from, to string, reason string) *Error {
 }
 
 // ErrLockTimeout returns an error when lock acquisition times out.
-func ErrLockTimeout(lockPath string, holderPID int) *Error {
+// The lockMeta parameter accepts structured metadata about the lock holder (or nil).
+func ErrLockTimeout(lockPath string, lockMeta interface{}) *Error {
 	details := map[string]interface{}{"lock_path": lockPath}
-	if holderPID > 0 {
-		details["holder_pid"] = holderPID
+	if lockMeta != nil {
+		details["lock_holder"] = lockMeta
 	}
 	return NewWithDetails(CodeLockTimeout,
-		"Could not acquire lock within timeout",
+		"Could not acquire lock within timeout. Run 'ari session recover' to clean up stale locks.",
 		details)
 }
 

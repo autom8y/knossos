@@ -323,6 +323,8 @@ type SessionSummary struct {
 	CreatedAt  string `json:"created_at"`
 	ParkedAt   string `json:"parked_at,omitempty"`
 	Current    bool   `json:"current"`
+	Stale      bool   `json:"stale,omitempty"`
+	StaleHint  string `json:"stale_hint,omitempty"`
 }
 
 // Headers implements Tabular for SessionListOutput.
@@ -343,9 +345,13 @@ func (l SessionListOutput) Rows() [][]string {
 		if len(date) >= 10 {
 			date = date[:10]
 		}
+		status := s.Status
+		if s.Stale && s.StaleHint != "" {
+			status = s.Status + "  [STALE - " + s.StaleHint + "]"
+		}
 		rows[i] = []string{
 			prefix + s.SessionID,
-			s.Status,
+			status,
 			s.Initiative,
 			date,
 		}
@@ -526,4 +532,15 @@ type SkipResult struct {
 type FailResult struct {
 	SessionID string `json:"session_id"`
 	Error     string `json:"error"`
+}
+
+// RecoverOutput represents session recovery result.
+type RecoverOutput struct {
+	StaleLocks    []string `json:"stale_locks,omitempty"`
+	RemovedLocks  []string `json:"removed_locks,omitempty"`
+	ActiveSession string   `json:"active_session,omitempty"`
+	CacheStatus   string   `json:"cache_status"`
+	PreviousCache string   `json:"previous_cache,omitempty"`
+	DryRun        bool     `json:"dry_run"`
+	Summary       string   `json:"summary"`
 }

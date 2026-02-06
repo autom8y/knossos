@@ -181,7 +181,7 @@ func migrateSession(ctx *cmdContext, resolver *paths.Resolver, lockMgr *lock.Man
 	}
 
 	// Acquire exclusive lock
-	sessionLock, err := lockMgr.Acquire(sessionID, lock.Exclusive, lock.DefaultTimeout)
+	sessionLock, err := lockMgr.Acquire(sessionID, lock.Exclusive, lock.DefaultTimeout, "ari-session-migrate")
 	if err != nil {
 		return nil, nil, &output.FailResult{
 			SessionID: sessionID,

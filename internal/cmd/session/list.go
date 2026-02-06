@@ -4,7 +4,9 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/spf13/cobra"
 
@@ -149,5 +151,26 @@ func loadSessionSummaryFromPath(ctxPath, sessionID, currentID string) (output.Se
 		summary.ParkedAt = sessCtx.ParkedAt.Format("2006-01-02T15:04:05Z")
 	}
 
+	// Annotate stale parked sessions
+	if sessCtx.Status == session.StatusParked && sessCtx.ParkedAt != nil {
+		threshold := staleSessionThreshold()
+		if time.Since(*sessCtx.ParkedAt) > threshold {
+			summary.Stale = true
+			summary.StaleHint = "consider: ari session wrap " + sessionID
+		}
+	}
+
 	return summary, true
+}
+
+// staleSessionThreshold returns the duration after which a parked session
+// is considered stale. Configurable via ARIADNE_STALE_SESSION_DAYS (default: 2).
+func staleSessionThreshold() time.Duration {
+	days := 2
+	if env := os.Getenv("ARIADNE_STALE_SESSION_DAYS"); env != "" {
+		if d, err := strconv.Atoi(env); err == nil && d > 0 {
+			days = d
+		}
+	}
+	return time.Duration(days) * 24 * time.Hour
 }

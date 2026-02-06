@@ -63,7 +63,7 @@ func runAudit(ctx *cmdContext, opts auditOptions) error {
 	}
 
 	// Acquire shared lock for consistent read
-	sessionLock, err := lockMgr.Acquire(sessionID, lock.Shared, lock.DefaultTimeout)
+	sessionLock, err := lockMgr.Acquire(sessionID, lock.Shared, lock.DefaultTimeout, "ari-session-audit")
 	if err != nil {
 		// Non-fatal - continue without lock
 		printer.VerboseLog("warn", "failed to acquire lock", map[string]interface{}{"error": err.Error()})

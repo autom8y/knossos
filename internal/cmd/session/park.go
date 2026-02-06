@@ -62,7 +62,7 @@ func runPark(ctx *cmdContext, opts parkOptions) error {
 	}
 
 	// Acquire exclusive lock
-	sessionLock, err := lockMgr.Acquire(sessionID, lock.Exclusive, lock.DefaultTimeout)
+	sessionLock, err := lockMgr.Acquire(sessionID, lock.Exclusive, lock.DefaultTimeout, "ari-session-park")
 	if err != nil {
 		printer.PrintError(err)
 		return err

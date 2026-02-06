@@ -70,7 +70,7 @@ func runTransition(ctx *cmdContext, targetPhase string, opts transitionOptions) 
 	}
 
 	// Acquire exclusive lock
-	sessionLock, err := lockMgr.Acquire(sessionID, lock.Exclusive, lock.DefaultTimeout)
+	sessionLock, err := lockMgr.Acquire(sessionID, lock.Exclusive, lock.DefaultTimeout, "ari-session-transition")
 	if err != nil {
 		printer.PrintError(err)
 		return err

@@ -50,7 +50,7 @@ func runResume(ctx *cmdContext) error {
 	}
 
 	// Acquire exclusive lock
-	sessionLock, err := lockMgr.Acquire(sessionID, lock.Exclusive, lock.DefaultTimeout)
+	sessionLock, err := lockMgr.Acquire(sessionID, lock.Exclusive, lock.DefaultTimeout, "ari-session-resume")
 	if err != nil {
 		printer.PrintError(err)
 		return err

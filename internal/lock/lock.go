@@ -3,6 +3,7 @@
 package lock
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -27,12 +28,24 @@ const (
 // DefaultTimeout is the default lock acquisition timeout.
 const DefaultTimeout = 10 * time.Second
 
+// StaleThreshold is the age after which a lock is considered stale.
+const StaleThreshold = 5 * time.Minute
+
+// LockMetadata is the JSON structure written to lock files.
+type LockMetadata struct {
+	Session  string `json:"session"`           // Session ID being operated on
+	Acquired int64  `json:"acquired"`          // Unix timestamp of acquisition
+	Holder   string `json:"holder"`            // Command name (e.g., "ari-session-create")
+	Version  string `json:"version,omitempty"` // Lock format version "2"
+}
+
 // Lock represents an acquired file lock.
 type Lock struct {
 	sessionID string
 	file      *os.File
 	lockType  LockType
 	lockPath  string
+	metadata  *LockMetadata
 }
 
 // Manager handles lock operations for sessions.
@@ -51,8 +64,9 @@ func (m *Manager) lockFilePath(sessionID string) string {
 }
 
 // Acquire attempts to acquire a lock with the given timeout.
+// The holder parameter identifies the command acquiring the lock (e.g., "ari-session-create").
 // Returns a Lock that must be released when done.
-func (m *Manager) Acquire(sessionID string, lockType LockType, timeout time.Duration) (*Lock, error) {
+func (m *Manager) Acquire(sessionID string, lockType LockType, timeout time.Duration, holder string) (*Lock, error) {
 	if timeout == 0 {
 		timeout = DefaultTimeout
 	}
@@ -77,17 +91,26 @@ func (m *Manager) Acquire(sessionID string, lockType LockType, timeout time.Dura
 		err := syscall.Flock(int(file.Fd()), int(lockType)|syscall.LOCK_NB)
 		if err == nil {
 			// Lock acquired successfully
+			meta := &LockMetadata{
+				Session:  sessionID,
+				Acquired: time.Now().Unix(),
+				Holder:   holder,
+				Version:  "2",
+			}
 			if lockType == Exclusive {
-				// Write PID for debugging and stale detection
+				// Write JSON metadata
 				file.Truncate(0)
 				file.Seek(0, 0)
-				fmt.Fprintf(file, "%d\n", os.Getpid())
+				data, _ := json.Marshal(meta)
+				file.Write(data)
+				file.Write([]byte("\n"))
 			}
 			return &Lock{
 				sessionID: sessionID,
 				file:      file,
 				lockType:  lockType,
 				lockPath:  lockPath,
+				metadata:  meta,
 			}, nil
 		}
 
@@ -109,8 +132,8 @@ func (m *Manager) Acquire(sessionID string, lockType LockType, timeout time.Dura
 
 	// Timeout - get holder info for error message
 	file.Close()
-	holderPID := m.getHolderPID(lockPath)
-	return nil, errors.ErrLockTimeout(lockPath, holderPID)
+	meta, _ := m.GetLockInfo(sessionID)
+	return nil, errors.ErrLockTimeout(lockPath, meta)
 }
 
 // Release releases the lock.
@@ -127,9 +150,38 @@ func (l *Lock) Release() error {
 	return nil
 }
 
-// isStale checks if the lock holder process is dead.
+// isStale checks if a lock should be considered stale.
+// Strategy:
+// 1. JSON lock with acquired older than StaleThreshold → stale
+// 2. Legacy PID-only lock with dead process → stale
+// 3. Legacy PID-only lock with alive process → NOT stale
+// 4. Unparseable lock file → treat as stale
 func (m *Manager) isStale(lockPath string) bool {
-	pid := m.getHolderPID(lockPath)
+	data, err := os.ReadFile(lockPath)
+	if err != nil {
+		return false
+	}
+
+	content := strings.TrimSpace(string(data))
+	if content == "" {
+		return false
+	}
+
+	// Try JSON format first (v2)
+	var meta LockMetadata
+	if json.Unmarshal(data, &meta) == nil && meta.Version == "2" {
+		// Age-based stale check
+		acquired := time.Unix(meta.Acquired, 0)
+		return time.Since(acquired) > StaleThreshold
+	}
+
+	// Try legacy PID format
+	pid, err := strconv.Atoi(content)
+	if err != nil {
+		// Unparseable — treat as stale
+		return true
+	}
+
 	if pid <= 0 {
 		return false
 	}
@@ -137,7 +189,7 @@ func (m *Manager) isStale(lockPath string) bool {
 	// Check if process exists
 	process, err := os.FindProcess(pid)
 	if err != nil {
-		return true // Can't find process
+		return true
 	}
 
 	// On Unix, FindProcess always succeeds; check with signal 0
@@ -148,20 +200,42 @@ func (m *Manager) isStale(lockPath string) bool {
 	return false
 }
 
-// getHolderPID reads the PID from a lock file.
-func (m *Manager) getHolderPID(lockPath string) int {
+// getLockMetadata reads and parses lock metadata from a lock file.
+func (m *Manager) getLockMetadata(lockPath string) (*LockMetadata, error) {
 	data, err := os.ReadFile(lockPath)
 	if err != nil {
-		return 0
+		return nil, err
 	}
 
-	pidStr := strings.TrimSpace(string(data))
-	pid, err := strconv.Atoi(pidStr)
+	content := strings.TrimSpace(string(data))
+	if content == "" {
+		return nil, fmt.Errorf("empty lock file")
+	}
+
+	// Try JSON format first (v2)
+	var meta LockMetadata
+	if json.Unmarshal(data, &meta) == nil && meta.Version == "2" {
+		return &meta, nil
+	}
+
+	// Try legacy PID format — synthesize metadata
+	pid, err := strconv.Atoi(content)
 	if err != nil {
-		return 0
+		return nil, fmt.Errorf("unparseable lock file")
 	}
 
-	return pid
+	// Get file mod time as approximate acquired time
+	info, _ := os.Stat(lockPath)
+	acquired := time.Now().Unix()
+	if info != nil {
+		acquired = info.ModTime().Unix()
+	}
+
+	return &LockMetadata{
+		Holder:   fmt.Sprintf("legacy-pid-%d", pid),
+		Acquired: acquired,
+		Version:  "1",
+	}, nil
 }
 
 // IsLocked checks if a session is currently locked.
@@ -186,14 +260,10 @@ func (m *Manager) IsLocked(sessionID string) bool {
 	return false
 }
 
-// GetHolder returns the PID of the lock holder, if any.
-func (m *Manager) GetHolder(sessionID string) (int, error) {
+// GetLockInfo returns the metadata for a session's lock, if any.
+func (m *Manager) GetLockInfo(sessionID string) (*LockMetadata, error) {
 	lockPath := m.lockFilePath(sessionID)
-	pid := m.getHolderPID(lockPath)
-	if pid <= 0 {
-		return 0, errors.New(errors.CodeFileNotFound, "no lock holder found")
-	}
-	return pid, nil
+	return m.getLockMetadata(lockPath)
 }
 
 // ForceRelease forcibly removes a lock file (for stale lock cleanup).
@@ -203,6 +273,11 @@ func (m *Manager) ForceRelease(sessionID string) error {
 		return errors.Wrap(errors.CodeGeneralError, "failed to remove lock file", err)
 	}
 	return nil
+}
+
+// LocksDir returns the locks directory path.
+func (m *Manager) LocksDir() string {
+	return m.locksDir
 }
 
 // SessionID returns the session ID this lock is for.
@@ -215,10 +290,7 @@ func (l *Lock) Path() string {
 	return l.lockPath
 }
 
-// HolderPID returns the PID of the lock holder (this process for exclusive locks).
-func (l *Lock) HolderPID() int {
-	if l.lockType == Exclusive {
-		return os.Getpid()
-	}
-	return 0
+// Metadata returns the lock metadata.
+func (l *Lock) Metadata() *LockMetadata {
+	return l.metadata
 }

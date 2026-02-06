@@ -1,6 +1,7 @@
 package session
 
 import (
+	"fmt"
 	"os"
 	"time"
 
@@ -9,6 +10,7 @@ import (
 	"github.com/autom8y/knossos/internal/errors"
 	"github.com/autom8y/knossos/internal/hook/clewcontract"
 	"github.com/autom8y/knossos/internal/lock"
+	"github.com/autom8y/knossos/internal/naxos"
 	"github.com/autom8y/knossos/internal/output"
 	"github.com/autom8y/knossos/internal/paths"
 	"github.com/autom8y/knossos/internal/sails"
@@ -67,7 +69,7 @@ func runWrap(ctx *cmdContext, opts wrapOptions) error {
 	}
 
 	// Acquire exclusive lock
-	sessionLock, err := lockMgr.Acquire(sessionID, lock.Exclusive, lock.DefaultTimeout)
+	sessionLock, err := lockMgr.Acquire(sessionID, lock.Exclusive, lock.DefaultTimeout, "ari-session-wrap")
 	if err != nil {
 		printer.PrintError(err)
 		return err
@@ -207,6 +209,9 @@ func runWrap(ctx *cmdContext, opts wrapOptions) error {
 		}
 	}
 
+	// Clean up lock file for archived session
+	lockMgr.ForceRelease(sessionID)
+
 	// Move to archive if requested
 	var archivePath string
 	archived := false
@@ -245,7 +250,22 @@ func runWrap(ctx *cmdContext, opts wrapOptions) error {
 		result.SailsPath = sailsResult.FilePath
 	}
 
-	return printer.PrintSuccess(result)
+	if err := printer.PrintSuccess(result); err != nil {
+		return err
+	}
+
+	// Scan for stale parked sessions after successful wrap
+	staleThreshold := staleSessionThreshold()
+	staleSessions := naxos.ScanStaleSessions(resolver.SessionsDir(), staleThreshold, sessionID)
+	if len(staleSessions) > 0 {
+		fmt.Fprintf(os.Stderr, "\nFound %d stale parked session(s):\n", len(staleSessions))
+		for _, s := range staleSessions {
+			fmt.Fprintf(os.Stderr, "  %s  PARKED  %s ago\n", s.ID, naxos.FormatDuration(s.Age))
+		}
+		fmt.Fprintf(os.Stderr, "Consider: ari session wrap <session-id>\n")
+	}
+
+	return nil
 }
 
 // collectCognitiveBudget attempts to collect cognitive budget metadata from the session.

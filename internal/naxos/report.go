@@ -43,8 +43,8 @@ func FromScanResult(result *ScanResult) ScanOutput {
 			IncompleteWrap: result.ByReason[ReasonIncompleteWrap],
 		},
 		Config: ConfigSummary{
-			InactiveThreshold:   formatDuration(result.Config.InactiveThreshold),
-			StaleSailsThreshold: formatDuration(result.Config.StaleSailsThreshold),
+			InactiveThreshold:   FormatDuration(result.Config.InactiveThreshold),
+			StaleSailsThreshold: FormatDuration(result.Config.StaleSailsThreshold),
 			IncludeArchived:     result.Config.IncludeArchived,
 		},
 	}
@@ -69,7 +69,7 @@ func (o ScanOutput) Rows() [][]string {
 			sessionID,
 			s.Status,
 			reasonSymbol(s.Reason) + " " + s.Reason.String(),
-			formatDuration(s.InactiveFor),
+			FormatDuration(s.InactiveFor),
 			s.SuggestedAction.String(),
 		}
 	}
@@ -119,7 +119,7 @@ func (o ScanOutput) Text() string {
 		b.WriteString(fmt.Sprintf("  Status: %s\n", s.Status))
 		b.WriteString(fmt.Sprintf("  Initiative: %s\n", truncate(s.Initiative, 40)))
 		b.WriteString(fmt.Sprintf("  Reason: %s\n", s.Reason.Description()))
-		b.WriteString(fmt.Sprintf("  Inactive: %s\n", formatDuration(s.InactiveFor)))
+		b.WriteString(fmt.Sprintf("  Inactive: %s\n", FormatDuration(s.InactiveFor)))
 		if s.AdditionalInfo != "" {
 			b.WriteString(fmt.Sprintf("  Info: %s\n", s.AdditionalInfo))
 		}

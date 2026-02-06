@@ -118,7 +118,7 @@ func (s *Scanner) checkSession(sessionID, sessionDir string, ctx *session.Contex
 				InactiveFor:     inactiveDuration,
 				CreatedAt:       ctx.CreatedAt,
 				LastActivity:    lastActivity,
-				AdditionalInfo:  formatDuration(inactiveDuration) + " since last activity",
+				AdditionalInfo:  FormatDuration(inactiveDuration) + " since last activity",
 			}
 		}
 	}
@@ -161,7 +161,7 @@ func (s *Scanner) checkSession(sessionID, sessionDir string, ctx *session.Contex
 						CreatedAt:       ctx.CreatedAt,
 						LastActivity:    *parkedAt,
 						SailsColor:      sailsColor,
-						AdditionalInfo:  formatDuration(staleDuration) + " parked with gray/unknown sails",
+						AdditionalInfo:  FormatDuration(staleDuration) + " parked with gray/unknown sails",
 					}
 				}
 			}
@@ -279,8 +279,8 @@ func containsImpl(s, substr string) bool {
 	return false
 }
 
-// formatDuration formats a duration in a human-readable way.
-func formatDuration(d time.Duration) string {
+// FormatDuration formats a duration in a human-readable way.
+func FormatDuration(d time.Duration) string {
 	if d < time.Hour {
 		return d.Round(time.Minute).String()
 	}
@@ -314,4 +314,59 @@ func formatInt(n int) string {
 		n /= 10
 	}
 	return digits
+}
+
+// StaleSession is a lightweight representation of a stale parked session
+// used by the wrap command for interactive cleanup prompting.
+type StaleSession struct {
+	ID  string
+	Age time.Duration
+}
+
+// ScanStaleSessions scans the sessions directory for parked sessions
+// that have been inactive longer than the given threshold.
+// Returns only PARKED sessions past the threshold; skips the excludeID session.
+func ScanStaleSessions(sessionsDir string, threshold time.Duration, excludeID string) []StaleSession {
+	entries, err := os.ReadDir(sessionsDir)
+	if err != nil {
+		return nil
+	}
+
+	now := time.Now().UTC()
+	var stale []StaleSession
+
+	for _, entry := range entries {
+		if !entry.IsDir() || !paths.IsSessionDir(entry.Name()) {
+			continue
+		}
+
+		sessionID := entry.Name()
+		if sessionID == excludeID {
+			continue
+		}
+
+		ctxPath := filepath.Join(sessionsDir, sessionID, "SESSION_CONTEXT.md")
+		ctx, err := session.LoadContext(ctxPath)
+		if err != nil {
+			continue
+		}
+
+		if ctx.Status != session.StatusParked {
+			continue
+		}
+
+		if ctx.ParkedAt == nil {
+			continue
+		}
+
+		age := now.Sub(*ctx.ParkedAt)
+		if age > threshold {
+			stale = append(stale, StaleSession{
+				ID:  sessionID,
+				Age: age,
+			})
+		}
+	}
+
+	return stale
 }

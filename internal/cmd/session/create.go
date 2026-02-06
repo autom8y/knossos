@@ -95,7 +95,7 @@ func runCreate(ctx *cmdContext, initiative string, opts createOptions) error {
 	}
 
 	// Acquire exclusive lock for creation (using a special "create" lock)
-	createLock, err := lockMgr.Acquire("__create__", lock.Exclusive, lock.DefaultTimeout)
+	createLock, err := lockMgr.Acquire("__create__", lock.Exclusive, lock.DefaultTimeout, "ari-session-create")
 	if err != nil {
 		printer.PrintError(err)
 		return err

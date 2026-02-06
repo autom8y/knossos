@@ -2,7 +2,7 @@
 
 | Field | Value |
 |-------|-------|
-| **Status** | Proposed |
+| **Status** | Accepted (amended 2026-02-06) |
 | **Date** | 2026-02-05 |
 | **Deciders** | Architecture Team |
 | **Supersedes** | N/A (refines ADR-0001, ADR-0005/0013, ADR-0010) |
@@ -89,9 +89,11 @@ These options cover all observed use cases without relaxing the constraint. The 
 
 **Consequence:** CI environments that need multiple concurrent sessions in the same checkout must use worktrees. This is documented in Decision 4.
 
-### Decision 2: Introduce a Session Pointer Lock to Fix the TOCTOU Race
+### Decision 2: Scan-Based Session Discovery (AMENDED 2026-02-06)
 
-**Add a dedicated lock for `.current-session` mutations, separate from both the `__create__` sentinel and per-session locks.**
+**Replace `.current-session` as the authoritative source of active session with scan-based discovery. Demote `.current-session` to a TTL cache.**
+
+> **Amendment note:** The original Decision 2 proposed a `__session-pointer__` sentinel lock. During implementation ("The Thread Strengthens" initiative), analysis showed that scan-based discovery eliminates the TOCTOU race at the design level rather than serializing it with a lock. The scan cost is O(n) where n is session count (typically 2-3), completing in <1ms — lower than the lock overhead would have been.
 
 D2 identified a P1 TOCTOU race: `create` holds the `__create__` lock, `resume` holds the session-specific lock, and `wrap` holds the session-specific lock -- three different locks protecting the same resource (`.current-session`). Concurrent `resume` + `create` can corrupt the pointer.
 
@@ -100,24 +102,22 @@ D2 identified a P1 TOCTOU race: `create` holds the `__create__` lock, `resume` h
 | Option | Description | Verdict |
 |--------|-------------|---------|
 | (a) Reuse `__create__` lock for all `.current-session` mutations | Simple; all pointer operations hold the same lock | Rejected |
-| (b) Introduce `__session-pointer__` sentinel lock | Dedicated lock for pointer; per-session locks remain for session data | **Selected** |
-| (c) Eliminate `.current-session`; derive active session from directory scan | No pointer file, no race. Scan all session dirs, find the one with `status: ACTIVE` | Rejected |
+| (b) Introduce `__session-pointer__` sentinel lock | Dedicated lock for pointer; per-session locks remain for session data | Rejected (originally selected, superseded) |
+| (c) Eliminate `.current-session` as authority; derive active session from directory scan with cache | Scan session dirs for `status: ACTIVE`, cache result in `.current-session` with TTL | **Selected (amended)** |
 
-**Why (a) is rejected:** The `__create__` lock protects session creation logic (ID generation, directory creation, uniqueness checks), not just the pointer. Overloading it for resume/wrap would force those commands to serialize against create, adding unnecessary contention. A park operation in terminal A would block a create attempt in terminal B even though they operate on different sessions.
+**Why (b) is now rejected:** While correct, it adds lock infrastructure to solve a problem that can be eliminated entirely. The `__session-pointer__` lock serializes access to a pointer file. If the pointer file is demoted to a cache, there is nothing to serialize — the scan is the authority, and concurrent scans are safe (read-only).
 
-**Why (c) is rejected:** Directory scanning is O(n) in the number of sessions. For a developer with dozens of sessions accumulated over weeks, this adds measurable latency to every hook invocation that checks the current session. The `.current-session` file is a deliberate O(1) optimization.
+**Why (c) is now selected:** With a typical session count of 2-3 (and rarely more than 5), the scan completes in <1ms. The `.current-session` file is retained as a performance cache with a 5-second TTL. Hooks read the cache (O(1) fast path) and the CLI validates via scan when the cache is stale. This eliminates the TOCTOU race at the design level:
 
-**Why (b) is selected:** A dedicated `__session-pointer__` sentinel lock clearly expresses intent: "I am mutating the pointer to the current session." It does not contend with per-session data mutations (park/resume/wrap still hold session-specific locks for data integrity) or with session creation logic (which still holds `__create__` for ID uniqueness). The lock is lightweight (one additional `flock` acquisition) and only required by three operations: `create` (after creating the session, before writing the pointer), `resume` (before writing the pointer), and `wrap` (before clearing the pointer).
+- `create` scans for ACTIVE sessions (instead of reading `.current-session`), rejects if found
+- `resume` writes to `.current-session` as cache (session-specific lock protects the FSM transition)
+- `wrap` clears `.current-session` cache (session-specific lock protects the FSM transition)
 
-**Acquisition order to prevent deadlocks:**
+Two concurrent `resume` calls on different sessions would each hold their own session-specific lock. Both might write to the cache, but the scan resolves which session is actually ACTIVE. The cache is a performance hint, not a coordination mechanism.
 
-1. `create`: acquire `__create__` -> create session -> acquire `__session-pointer__` -> write pointer -> release both
-2. `resume`: acquire `{sessionID}` -> validate FSM -> acquire `__session-pointer__` -> write pointer -> release both
-3. `wrap`: acquire `{sessionID}` -> validate FSM -> acquire `__session-pointer__` -> clear pointer -> release both
+**The `__session-pointer__` lock is not needed.** The entire concept is superseded by the scan approach. The `__create__` sentinel lock remains for session creation uniqueness.
 
-The rule is: always acquire the session-specific or sentinel lock first, then acquire `__session-pointer__` second. Since `__session-pointer__` is always acquired last, no circular dependency can form.
-
-**Backward compatibility:** COMPATIBLE. Existing sessions and satellites are unaffected. The new lock file (`__session-pointer__.lock`) is created automatically on first use.
+**Backward compatibility:** COMPATIBLE. The `.current-session` file format and location are unchanged. It simply changes from "authoritative source" to "TTL cache that is rebuilt from scan on miss."
 
 ### Decision 3: Keep `flock`-Based Locking, Harden ForceRelease
 
@@ -345,3 +345,4 @@ Replace `.current-session` with a PID-indexed pointer (e.g., `.current-session.{
 | Date | Author | Change |
 |------|--------|--------|
 | 2026-02-05 | Claude Code (Context Architect) | Initial proposal synthesizing D1-D3 findings |
+| 2026-02-06 | Claude Opus 4.6 (Integration Engineer) | Amended Decision 2: scan-based discovery replaces pointer lock. Amended Decision 3: JSON lock format replaces PID-only. Removed manual lock/unlock commands. Added `ari session recover`. |

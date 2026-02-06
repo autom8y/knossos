@@ -3,12 +3,17 @@ package common
 
 import (
 	"os"
+	"strings"
+	"time"
 
 	"github.com/autom8y/knossos/internal/lock"
 	"github.com/autom8y/knossos/internal/output"
 	"github.com/autom8y/knossos/internal/paths"
 	"github.com/autom8y/knossos/internal/session"
 )
+
+// CacheTTL is how long the .current-session cache is trusted before re-scanning.
+const CacheTTL = 5 * time.Second
 
 // BaseContext contains the core fields shared by all command contexts.
 type BaseContext struct {
@@ -62,22 +67,42 @@ func (c *SessionContext) GetSessionID() (string, error) {
 	return c.GetCurrentSessionID()
 }
 
-// GetCurrentSessionID reads the current session ID from the project.
-// Returns empty string with no error if no session is active (file doesn't exist).
+// GetCurrentSessionID returns the active session ID.
+// Strategy: read .current-session cache, validate against scan.
+// If cache is fresh (< CacheTTL) and non-empty, trust it.
+// If cache is stale, missing, or empty, scan and rebuild.
 func (c *SessionContext) GetCurrentSessionID() (string, error) {
 	resolver := c.GetResolver()
-	data, err := os.ReadFile(resolver.CurrentSessionFile())
-	if err != nil {
-		if os.IsNotExist(err) {
-			// No current session is a valid state, not an error
-			return "", nil
+	cacheFile := resolver.CurrentSessionFile()
+
+	// Try cache first
+	if info, err := os.Stat(cacheFile); err == nil {
+		if time.Since(info.ModTime()) < CacheTTL {
+			data, err := os.ReadFile(cacheFile)
+			if err == nil && len(strings.TrimSpace(string(data))) > 0 {
+				return strings.TrimSpace(string(data)), nil
+			}
 		}
+	}
+
+	// Cache miss/stale — scan for active session
+	activeID, err := session.FindActiveSession(resolver.SessionsDir())
+	if err != nil {
 		return "", err
 	}
-	return string(data), nil
+
+	// Rebuild cache
+	if activeID != "" {
+		os.WriteFile(cacheFile, []byte(activeID), 0644)
+	} else {
+		os.Remove(cacheFile) // No active session — remove stale cache
+	}
+
+	return activeID, nil
 }
 
-// SetCurrentSessionID writes the current session ID.
+// SetCurrentSessionID updates the .current-session cache.
+// This is a performance optimization, not the source of truth.
 func (c *SessionContext) SetCurrentSessionID(sessionID string) error {
 	resolver := c.GetResolver()
 	if err := paths.EnsureDir(resolver.SessionsDir()); err != nil {
@@ -86,7 +111,7 @@ func (c *SessionContext) SetCurrentSessionID(sessionID string) error {
 	return os.WriteFile(resolver.CurrentSessionFile(), []byte(sessionID), 0644)
 }
 
-// ClearCurrentSessionID removes the current session ID file.
+// ClearCurrentSessionID removes the .current-session cache.
 func (c *SessionContext) ClearCurrentSessionID() error {
 	resolver := c.GetResolver()
 	err := os.Remove(resolver.CurrentSessionFile())
