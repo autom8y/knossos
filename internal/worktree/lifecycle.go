@@ -2,12 +2,10 @@ package worktree
 
 import (
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 	"time"
 
-	"github.com/autom8y/knossos/internal/config"
 	"github.com/autom8y/knossos/internal/errors"
 )
 
@@ -133,38 +131,8 @@ func (m *Manager) Create(opts CreateOptions) (*Worktree, error) {
 		return nil, err
 	}
 
-	// Try to run knossos-sync if available
-	knossosHome := config.KnossosHome()
-	if knossosHome != "" {
-		syncPath := filepath.Join(knossosHome, "knossos-sync")
-		if _, err := os.Stat(syncPath); err == nil {
-			// First check if .claude/.cem/manifest.json exists
-			manifestPath := filepath.Join(wtPath, ".claude", ".cem", "manifest.json")
-			if _, err := os.Stat(manifestPath); err == nil {
-				// Already initialized, run sync
-				cmd := exec.Command(syncPath, "sync")
-				cmd.Dir = wtPath
-				cmd.Run() // Ignore errors, sync is optional
-			} else {
-				// Not initialized, run init
-				cmd := exec.Command(syncPath, "init")
-				cmd.Dir = wtPath
-				cmd.Run() // Ignore errors, init is optional
-			}
-		}
-	}
-
-	// Try to set rite if specified
-	if rite != "" && rite != "none" {
-		if knossosHome != "" {
-			swapRitePath := filepath.Join(knossosHome, "swap-rite.sh")
-			if _, err := os.Stat(swapRitePath); err == nil {
-				cmd := exec.Command(swapRitePath, rite)
-				cmd.Dir = wtPath
-				cmd.Run() // Ignore errors, rite setup is optional
-			}
-		}
-	}
+	// Materialize .claude/ and set up rite for the new worktree
+	m.setupWorktreeEcosystem(wtPath, rite)
 
 	return &wt, nil
 }

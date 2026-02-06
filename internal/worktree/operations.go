@@ -11,8 +11,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/autom8y/knossos/internal/config"
 	"github.com/autom8y/knossos/internal/errors"
+	"github.com/autom8y/knossos/internal/materialize"
+	"github.com/autom8y/knossos/internal/paths"
+	"github.com/autom8y/knossos/internal/rite"
 )
 
 // SyncResult provides detailed status about worktree synchronization with upstream.
@@ -80,23 +82,15 @@ func (m *Manager) Switch(idOrName string, opts WorktreeSwitchOptions) (*Worktree
 			})
 	}
 
-	// Update ACTIVE_RITE if requested and rite differs
+	// Update rite if requested
 	if opts.UpdateRite && wt.Rite != "" {
+		// Write ACTIVE_RITE file directly (always, as baseline)
 		activeRitePath := filepath.Join(wt.Path, ".claude", "ACTIVE_RITE")
 		if err := os.MkdirAll(filepath.Dir(activeRitePath), 0755); err == nil {
 			os.WriteFile(activeRitePath, []byte(wt.Rite+"\n"), 0644)
 		}
-
-		// Also try to run swap-rite.sh if available
-		knossosHome := config.KnossosHome()
-		if knossosHome != "" {
-			swapRitePath := filepath.Join(knossosHome, "swap-rite.sh")
-			if _, err := os.Stat(swapRitePath); err == nil {
-				cmd := exec.Command(swapRitePath, wt.Rite)
-				cmd.Dir = wt.Path
-				cmd.Run() // Ignore errors
-			}
-		}
+		// Then attempt full rite switch (best-effort, may fail if rite source unavailable)
+		m.switchRite(wt.Path, wt.Rite)
 	}
 
 	return wt, nil
@@ -658,35 +652,27 @@ func copySessionContext(sourcePath, targetPath string) error {
 	return nil
 }
 
-// setupWorktreeEcosystem runs knossos-sync and swap-rite for a worktree.
-func (m *Manager) setupWorktreeEcosystem(wtPath, rite string) {
-	knossosHome := config.KnossosHome()
-	if knossosHome == "" {
-		return
-	}
+// setupWorktreeEcosystem materializes .claude/ and switches rite for a worktree.
+func (m *Manager) setupWorktreeEcosystem(wtPath, riteName string) {
+	// Materialize .claude/ directory
+	resolver := paths.NewResolver(wtPath)
+	mat := materialize.NewMaterializer(resolver)
+	mat.MaterializeWithOptions(riteName, materialize.Options{
+		KeepAll: true,
+	})
 
-	// Run knossos-sync init or sync
-	syncPath := filepath.Join(knossosHome, "knossos-sync")
-	if _, err := os.Stat(syncPath); err == nil {
-		manifestPath := filepath.Join(wtPath, ".claude", ".cem", "manifest.json")
-		if _, err := os.Stat(manifestPath); err == nil {
-			cmd := exec.Command(syncPath, "sync")
-			cmd.Dir = wtPath
-			cmd.Run()
-		} else {
-			cmd := exec.Command(syncPath, "init")
-			cmd.Dir = wtPath
-			cmd.Run()
-		}
+	// Switch rite if specified
+	if riteName != "" && riteName != "none" {
+		m.switchRite(wtPath, riteName)
 	}
+}
 
-	// Run swap-rite if rite specified
-	if rite != "" && rite != "none" {
-		swapRitePath := filepath.Join(knossosHome, "swap-rite.sh")
-		if _, err := os.Stat(swapRitePath); err == nil {
-			cmd := exec.Command(swapRitePath, rite)
-			cmd.Dir = wtPath
-			cmd.Run()
-		}
-	}
+// switchRite switches the active rite for a worktree using the Go rite package.
+func (m *Manager) switchRite(wtPath, riteName string) {
+	resolver := paths.NewResolver(wtPath)
+	switcher := rite.NewSwitcher(resolver)
+	switcher.Switch(rite.RiteSwitchOptions{
+		TargetRite: riteName,
+		KeepAll:    true,
+	})
 }
