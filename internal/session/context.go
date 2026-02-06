@@ -29,6 +29,11 @@ type Context struct {
 	ArchivedAt   *time.Time `yaml:"archived_at,omitempty" json:"archived_at,omitempty"`
 	ResumedAt    *time.Time `yaml:"resumed_at,omitempty" json:"resumed_at,omitempty"`
 
+	// Fray fields (session forking)
+	FrayedFrom string   `yaml:"frayed_from,omitempty" json:"frayed_from,omitempty"`
+	FrayPoint  string   `yaml:"fray_point,omitempty" json:"fray_point,omitempty"` // Phase at fork
+	Strands    []string `yaml:"strands,omitempty" json:"strands,omitempty"`       // Child session IDs
+
 	// Raw markdown body (after frontmatter)
 	Body string `yaml:"-" json:"-"`
 }
@@ -48,6 +53,9 @@ type contextYAML struct {
 	ParkedReason  string  `yaml:"parked_reason,omitempty"`
 	ArchivedAt    string  `yaml:"archived_at,omitempty"`
 	ResumedAt     string  `yaml:"resumed_at,omitempty"`
+	FrayedFrom    string  `yaml:"frayed_from,omitempty"`
+	FrayPoint     string  `yaml:"fray_point,omitempty"`
+	Strands       []string `yaml:"strands,omitempty"`
 }
 
 // ParseContext parses SESSION_CONTEXT.md content.
@@ -128,6 +136,10 @@ func ParseContext(content []byte) (*Context, error) {
 		ctx.ResumedAt = &t
 	}
 
+	ctx.FrayedFrom = yamlData.FrayedFrom
+	ctx.FrayPoint = yamlData.FrayPoint
+	ctx.Strands = yamlData.Strands
+
 	return ctx, nil
 }
 
@@ -168,6 +180,10 @@ func (c *Context) Serialize() ([]byte, error) {
 	if c.ResumedAt != nil {
 		yamlData.ResumedAt = c.ResumedAt.UTC().Format(time.RFC3339)
 	}
+
+	yamlData.FrayedFrom = c.FrayedFrom
+	yamlData.FrayPoint = c.FrayPoint
+	yamlData.Strands = c.Strands
 
 	// Marshal YAML
 	yamlBytes, err := yaml.Marshal(yamlData)

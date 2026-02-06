@@ -237,3 +237,125 @@ func TestContext_Validate(t *testing.T) {
 		t.Error("Validate() should return issues for invalid context")
 	}
 }
+
+func TestContext_FrayFields_RoundTrip(t *testing.T) {
+	now := time.Now().UTC().Truncate(time.Second)
+
+	original := &Context{
+		SchemaVersion: "2.2",
+		SessionID:     "session-20260206-120000-abcdef01",
+		Status:        StatusActive,
+		CreatedAt:     now,
+		Initiative:    "Fray Test",
+		Complexity:    "MODULE",
+		ActiveRite:    "test-pack",
+		CurrentPhase:  "design",
+		FrayedFrom:    "session-20260101-120000-abcdef01",
+		FrayPoint:     "design",
+		Strands:       []string{"session-20260101-130000-bcdef012"},
+		Body:          "\n# Test Body\n",
+	}
+
+	// Serialize
+	data, err := original.Serialize()
+	if err != nil {
+		t.Fatalf("Serialize() error = %v", err)
+	}
+
+	// Parse back
+	parsed, err := ParseContext(data)
+	if err != nil {
+		t.Fatalf("ParseContext() error = %v", err)
+	}
+
+	// Verify fray fields survived the round trip
+	if parsed.FrayedFrom != original.FrayedFrom {
+		t.Errorf("FrayedFrom mismatch: got %q, want %q", parsed.FrayedFrom, original.FrayedFrom)
+	}
+	if parsed.FrayPoint != original.FrayPoint {
+		t.Errorf("FrayPoint mismatch: got %q, want %q", parsed.FrayPoint, original.FrayPoint)
+	}
+	if len(parsed.Strands) != len(original.Strands) {
+		t.Fatalf("Strands length mismatch: got %d, want %d", len(parsed.Strands), len(original.Strands))
+	}
+	for i, strand := range parsed.Strands {
+		if strand != original.Strands[i] {
+			t.Errorf("Strands[%d] mismatch: got %q, want %q", i, strand, original.Strands[i])
+		}
+	}
+}
+
+func TestContext_FrayFields_Optional(t *testing.T) {
+	content := `---
+schema_version: "2.1"
+session_id: "session-20260104-160414-563c681e"
+status: "ACTIVE"
+created_at: "2026-01-04T16:04:14Z"
+initiative: "Test Initiative"
+complexity: "MODULE"
+active_rite: "10x-dev"
+current_phase: "design"
+---
+
+# Session: Test Initiative
+
+## Artifacts
+- PRD: pending
+`
+
+	ctx, err := ParseContext([]byte(content))
+	if err != nil {
+		t.Fatalf("ParseContext() error = %v", err)
+	}
+
+	// Verify fray fields are empty (backward compatibility)
+	if ctx.FrayedFrom != "" {
+		t.Errorf("FrayedFrom should be empty, got %q", ctx.FrayedFrom)
+	}
+	if ctx.FrayPoint != "" {
+		t.Errorf("FrayPoint should be empty, got %q", ctx.FrayPoint)
+	}
+	if ctx.Strands != nil {
+		t.Errorf("Strands should be nil, got %v", ctx.Strands)
+	}
+}
+
+func TestContext_FrayFields_StrandsArray(t *testing.T) {
+	now := time.Now().UTC().Truncate(time.Second)
+
+	original := &Context{
+		SchemaVersion: "2.2",
+		SessionID:     "session-20260206-120000-abcdef01",
+		Status:        StatusActive,
+		CreatedAt:     now,
+		Initiative:    "Strands Test",
+		Complexity:    "MODULE",
+		ActiveRite:    "test-pack",
+		CurrentPhase:  "design",
+		Strands:       []string{"session-20260201-100000-aaa11111", "session-20260202-110000-bbb22222"},
+		Body:          "\n# Test\n",
+	}
+
+	// Serialize
+	data, err := original.Serialize()
+	if err != nil {
+		t.Fatalf("Serialize() error = %v", err)
+	}
+
+	// Parse back
+	parsed, err := ParseContext(data)
+	if err != nil {
+		t.Fatalf("ParseContext() error = %v", err)
+	}
+
+	// Verify both strands are present and in order
+	if len(parsed.Strands) != 2 {
+		t.Fatalf("Strands length mismatch: got %d, want 2", len(parsed.Strands))
+	}
+	if parsed.Strands[0] != "session-20260201-100000-aaa11111" {
+		t.Errorf("Strands[0] mismatch: got %q, want %q", parsed.Strands[0], "session-20260201-100000-aaa11111")
+	}
+	if parsed.Strands[1] != "session-20260202-110000-bbb22222" {
+		t.Errorf("Strands[1] mismatch: got %q, want %q", parsed.Strands[1], "session-20260202-110000-bbb22222")
+	}
+}

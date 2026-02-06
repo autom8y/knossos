@@ -212,6 +212,17 @@ func runWrap(ctx *cmdContext, opts wrapOptions) error {
 		}
 	}
 
+	// If this was a frayed session, emit strand_resolved on parent
+	if sessCtx.FrayedFrom != "" {
+		parentDir := resolver.SessionDir(sessCtx.FrayedFrom)
+		if writer, err := clewcontract.NewEventWriter(parentDir); err == nil {
+			event := clewcontract.NewStrandResolvedEvent(sessCtx.FrayedFrom, sessionID, "wrapped")
+			if writeErr := writer.Write(event); writeErr != nil {
+				printer.VerboseLog("warn", "failed to emit strand_resolved event", map[string]interface{}{"error": writeErr.Error()})
+			}
+		}
+	}
+
 	// Clean up lock file for archived session
 	lockMgr.ForceRelease(sessionID)
 

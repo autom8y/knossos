@@ -21,6 +21,7 @@ const (
 	EventLockAcquired      EventType = "LOCK_ACQUIRED"
 	EventLockReleased      EventType = "LOCK_RELEASED"
 	EventSchemaMigrated    EventType = "SCHEMA_MIGRATED"
+	EventSessionFrayed     EventType = "SESSION_FRAYED"
 )
 
 // Event represents a session lifecycle event.
@@ -213,6 +214,24 @@ func (e *EventEmitter) EmitSchemaMigrated(sessionID, fromVersion, toVersion stri
 		Metadata: map[string]interface{}{
 			"from_version": fromVersion,
 			"to_version":   toVersion,
+		},
+	}
+	if err := e.Emit(event); err != nil {
+		return err
+	}
+	return e.EmitToAudit(sessionID, event)
+}
+
+// EmitFrayed emits a SESSION_FRAYED event.
+func (e *EventEmitter) EmitFrayed(sessionID, childID, frayPoint string) error {
+	event := Event{
+		Timestamp: time.Now().UTC().Format(time.RFC3339),
+		Event:     EventSessionFrayed,
+		From:      "ACTIVE",
+		To:        "PARKED",
+		Metadata: map[string]interface{}{
+			"child_id":   childID,
+			"fray_point": frayPoint,
 		},
 	}
 	if err := e.Emit(event); err != nil {

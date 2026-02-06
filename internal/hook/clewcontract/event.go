@@ -26,6 +26,8 @@ const (
 	EventTypeError           EventType = "error"
 	EventTypeHandoffPrepared EventType = "handoff_prepared"
 	EventTypeHandoffExecuted EventType = "handoff_executed"
+	EventTypeSessionFrayed   EventType = "session_frayed"
+	EventTypeStrandResolved  EventType = "strand_resolved"
 )
 
 // ArtifactType represents the type of artifact created during a session.
@@ -482,5 +484,33 @@ func (s Stamp) ToEvent() Event {
 		Type:      EventTypeDecision,
 		Summary:   s.Decision,
 		Meta:      meta,
+	}
+}
+
+// NewSessionFrayedEvent creates an event for session forking.
+func NewSessionFrayedEvent(parentID, childID, frayPoint string) Event {
+	return Event{
+		Timestamp: timestamp(),
+		Type:      EventTypeSessionFrayed,
+		Summary:   fmt.Sprintf("Session frayed: %s -> %s at %s", parentID, childID, frayPoint),
+		Meta: map[string]interface{}{
+			"parent_id":  parentID,
+			"child_id":   childID,
+			"fray_point": frayPoint,
+		},
+	}
+}
+
+// NewStrandResolvedEvent creates an event for strand resolution (frayed child wrapped).
+func NewStrandResolvedEvent(parentID, childID, resolution string) Event {
+	return Event{
+		Timestamp: timestamp(),
+		Type:      EventTypeStrandResolved,
+		Summary:   fmt.Sprintf("Strand resolved: %s from %s (%s)", childID, parentID, resolution),
+		Meta: map[string]interface{}{
+			"parent_id":  parentID,
+			"child_id":   childID,
+			"resolution": resolution,
+		},
 	}
 }

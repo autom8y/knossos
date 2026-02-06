@@ -544,3 +544,26 @@ type RecoverOutput struct {
 	DryRun        bool     `json:"dry_run"`
 	Summary       string   `json:"summary"`
 }
+
+// FrayOutput represents session fray (fork) result.
+type FrayOutput struct {
+	ParentID     string `json:"parent_id"`
+	ChildID      string `json:"child_id"`
+	ChildDir     string `json:"child_dir"`
+	FrayPoint    string `json:"fray_point"`
+	WorktreePath string `json:"worktree_path,omitempty"`
+	Status       string `json:"status"`
+	CreatedAt    string `json:"created_at"`
+}
+
+// Text implements Textable for FrayOutput.
+func (f FrayOutput) Text() string {
+	var b strings.Builder
+	b.WriteString(fmt.Sprintf("Frayed session: %s -> %s\n", f.ParentID, f.ChildID))
+	b.WriteString(fmt.Sprintf("Fray point: %s\n", f.FrayPoint))
+	b.WriteString(fmt.Sprintf("Status: %s\n", f.Status))
+	if f.WorktreePath != "" {
+		b.WriteString(fmt.Sprintf("Worktree: %s\n", f.WorktreePath))
+	}
+	return b.String()
+}
