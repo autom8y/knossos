@@ -200,31 +200,6 @@ func TestGetResolver_WithProjectDir(t *testing.T) {
 	}
 }
 
-func TestShouldEarlyExit_HooksDisabled(t *testing.T) {
-	// Clear USE_ARI_HOOKS
-	testutil.SetupEnv(t, &testutil.HookEnv{
-		UseAriHooks: false,
-	})
-
-	ctx := &cmdContext{}
-
-	if !ctx.shouldEarlyExit() {
-		t.Error("shouldEarlyExit() should return true when hooks disabled")
-	}
-}
-
-func TestShouldEarlyExit_HooksEnabled(t *testing.T) {
-	testutil.SetupEnv(t, &testutil.HookEnv{
-		UseAriHooks: true,
-	})
-
-	ctx := &cmdContext{}
-
-	if ctx.shouldEarlyExit() {
-		t.Error("shouldEarlyExit() should return false when hooks enabled")
-	}
-}
-
 func TestGetCurrentSessionID_FromContext(t *testing.T) {
 	sessionID := "test-session-123"
 	ctx := &cmdContext{
@@ -300,7 +275,6 @@ func TestGetHookEnv(t *testing.T) {
 		ToolName:    "Bash",
 		ToolInput:   `{"command":"ls"}`,
 		ProjectDir:  "/test/project",
-		UseAriHooks: true,
 	})
 
 	ctx := &cmdContext{}
@@ -379,7 +353,6 @@ func TestIntegration_ContextHook_NoSession(t *testing.T) {
 	testutil.SetupEnv(t, &testutil.HookEnv{
 		Event:       "SessionStart",
 		ProjectDir:  tmpDir,
-		UseAriHooks: true,
 	})
 
 	var stdout, stderr bytes.Buffer
@@ -433,8 +406,7 @@ func TestIntegration_ValidateHook_Chain(t *testing.T) {
 				Event:       "PreToolUse",
 				ToolName:    "Bash",
 				ToolInput:   tc.command,
-				UseAriHooks: true,
-			})
+					})
 
 			var stdout, stderr bytes.Buffer
 			printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
@@ -489,8 +461,7 @@ func TestIntegration_WriteguardHook_Chain(t *testing.T) {
 				Event:       "PreToolUse",
 				ToolName:    "Write",
 				ToolInput:   `{"file_path": "` + tc.path + `", "content": "test"}`,
-				UseAriHooks: true,
-			})
+					})
 
 			var stdout, stderr bytes.Buffer
 			printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
@@ -550,8 +521,7 @@ func TestIntegration_RouteHook_AllCategories(t *testing.T) {
 			testutil.SetupEnv(t, &testutil.HookEnv{
 				Event:       "UserPromptSubmit",
 				UserMessage: tc.message,
-				UseAriHooks: true,
-			})
+					})
 
 			var stdout, stderr bytes.Buffer
 			printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
@@ -597,9 +567,6 @@ func TestIntegration_RouteHook_AllCategories(t *testing.T) {
 // =============================================================================
 
 func BenchmarkHook_EarlyExitPath(b *testing.B) {
-	// Clear hooks to test early exit path
-	os.Unsetenv("USE_ARI_HOOKS")
-
 	outputFlag := "json"
 	verboseFlag := false
 	projectDir := ""
@@ -633,9 +600,6 @@ func BenchmarkHook_EarlyExitPath(b *testing.B) {
 }
 
 func BenchmarkHook_TimeoutOverhead(b *testing.B) {
-	os.Setenv("USE_ARI_HOOKS", "1")
-	defer os.Unsetenv("USE_ARI_HOOKS")
-
 	outputFlag := "json"
 	verboseFlag := false
 	projectDir := ""

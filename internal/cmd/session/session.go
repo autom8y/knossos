@@ -2,8 +2,6 @@
 package session
 
 import (
-	"os"
-
 	"github.com/spf13/cobra"
 
 	"github.com/autom8y/knossos/internal/cmd/common"
@@ -81,10 +79,11 @@ func (c *cmdContext) getEventEmitter(sessionID string) *session.EventEmitter {
 }
 
 // getActiveRite reads the active rite from ACTIVE_RITE file.
+// Returns "none" as a fallback if the file doesn't exist or is empty.
 func (c *cmdContext) getActiveRite() string {
-	ritePath := c.GetResolver().ActiveRiteFile()
-	if data, err := os.ReadFile(ritePath); err == nil {
-		return string(data)
+	rite := c.GetResolver().ReadActiveRite()
+	if rite == "" {
+		return "none"
 	}
-	return "none"
+	return rite
 }

@@ -238,7 +238,6 @@ func TestValidateCommand(t *testing.T) {
 
 func TestRunValidate_EarlyExit_HooksDisabled(t *testing.T) {
 	testutil.SetupEnv(t, &testutil.HookEnv{
-		UseAriHooks: false,
 	})
 
 	var stdout, stderr bytes.Buffer
@@ -277,7 +276,6 @@ func TestRunValidate_BypassEnvVar(t *testing.T) {
 		Event:       "PreToolUse",
 		ToolName:    "Bash",
 		ToolInput:   `{"command": "rm -rf .git"}`,
-		UseAriHooks: true,
 	})
 	env.SetVar(ValidateBypassEnvVar, "1")
 
@@ -317,7 +315,6 @@ func TestRunValidate_NonBashTool(t *testing.T) {
 		Event:       "PreToolUse",
 		ToolName:    "Write",
 		ToolInput:   `{"file_path": "/tmp/test.txt", "content": "hello"}`,
-		UseAriHooks: true,
 	})
 
 	var stdout, stderr bytes.Buffer
@@ -356,7 +353,6 @@ func TestRunValidate_AllowSafeCommand(t *testing.T) {
 		Event:       "PreToolUse",
 		ToolName:    "Bash",
 		ToolInput:   `{"command": "ls -la", "description": "List files"}`,
-		UseAriHooks: true,
 	})
 
 	var stdout, stderr bytes.Buffer
@@ -395,7 +391,6 @@ func TestRunValidate_BlockRmRfGit(t *testing.T) {
 		Event:       "PreToolUse",
 		ToolName:    "Bash",
 		ToolInput:   `{"command": "rm -rf .git"}`,
-		UseAriHooks: true,
 	})
 
 	var stdout, stderr bytes.Buffer
@@ -440,7 +435,6 @@ func TestRunValidate_BlockForcePush(t *testing.T) {
 		Event:       "PreToolUse",
 		ToolName:    "Bash",
 		ToolInput:   `{"command": "git push --force origin main"}`,
-		UseAriHooks: true,
 	})
 
 	var stdout, stderr bytes.Buffer
@@ -482,7 +476,6 @@ func TestRunValidate_BlockNoVerify(t *testing.T) {
 		Event:       "PreToolUse",
 		ToolName:    "Bash",
 		ToolInput:   `{"command": "git commit -m 'fix' --no-verify"}`,
-		UseAriHooks: true,
 	})
 
 	var stdout, stderr bytes.Buffer
@@ -524,7 +517,6 @@ func TestRunValidate_BlockResetHard(t *testing.T) {
 		Event:       "PreToolUse",
 		ToolName:    "Bash",
 		ToolInput:   `{"command": "git reset --hard HEAD~1"}`,
-		UseAriHooks: true,
 	})
 
 	var stdout, stderr bytes.Buffer
@@ -566,7 +558,6 @@ func TestRunValidate_BlockCleanFd(t *testing.T) {
 		Event:       "PreToolUse",
 		ToolName:    "Bash",
 		ToolInput:   `{"command": "git clean -fd"}`,
-		UseAriHooks: true,
 	})
 
 	var stdout, stderr bytes.Buffer
@@ -608,7 +599,6 @@ func TestRunValidate_StdinInput(t *testing.T) {
 		Event:       "PreToolUse",
 		ToolName:    "Bash",
 		ToolInput:   "", // Empty env, will use stdin
-		UseAriHooks: true,
 	})
 
 	var stdout, stderr bytes.Buffer

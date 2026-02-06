@@ -73,11 +73,6 @@ Performance: <100ms target execution time.`,
 func runClew(ctx *cmdContext) error {
 	printer := ctx.getPrinter()
 
-	// Early exit if hooks disabled
-	if ctx.shouldEarlyExit() {
-		return outputNotRecorded(printer, "hooks disabled")
-	}
-
 	// Get hook environment
 	hookEnv := ctx.getHookEnv()
 
@@ -192,10 +187,6 @@ func outputNotRecorded(printer *output.Printer, reason string) error {
 
 // runClewWithPrinter is a helper that uses an injected printer for testing.
 func runClewWithPrinter(ctx *cmdContext, printer *output.Printer) error {
-	// Early exit if hooks disabled
-	if ctx.shouldEarlyExit() {
-		return outputNotRecordedWithPrinter(printer, "hooks disabled")
-	}
 
 	// Get hook environment
 	hookEnv := ctx.getHookEnv()

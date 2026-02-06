@@ -48,51 +48,11 @@ func TestClewOutput_Text(t *testing.T) {
 	}
 }
 
-func TestRunClew_HooksDisabled(t *testing.T) {
-	// Clear environment to disable hooks
-	testutil.SetupEnv(t, &testutil.HookEnv{
-		Event:       "PostToolUse",
-		ToolName:    "Edit",
-		UseAriHooks: false,
-	})
-
-	var stdout, stderr bytes.Buffer
-	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
-
-	outputFlag := "json"
-	verboseFlag := false
-	ctx := &cmdContext{
-		SessionContext: common.SessionContext{
-			BaseContext: common.BaseContext{
-				Output:  &outputFlag,
-				Verbose: &verboseFlag,
-			},
-		},
-	}
-
-	err := runClewWithPrinter(ctx, printer)
-	if err != nil {
-		t.Fatalf("runThread() error = %v", err)
-	}
-
-	var result ClewOutput
-	if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
-		t.Fatalf("Failed to parse output: %v\nOutput: %s", err, stdout.String())
-	}
-
-	if result.Recorded {
-		t.Error("Expected Recorded=false when hooks disabled")
-	}
-	if result.Reason != "hooks disabled" {
-		t.Errorf("Reason = %q, want %q", result.Reason, "hooks disabled")
-	}
-}
 
 func TestRunClew_WrongEventType(t *testing.T) {
 	testutil.SetupEnv(t, &testutil.HookEnv{
 		Event:       "SessionStart",
 		ToolName:    "Edit",
-		UseAriHooks: true,
 	})
 
 	var stdout, stderr bytes.Buffer
@@ -136,7 +96,6 @@ func TestRunClew_NoActiveSession(t *testing.T) {
 		ToolName:    "Edit",
 		ProjectDir:  tmpDir,
 		ToolInput:   `{"file_path": "/some/file.go"}`,
-		UseAriHooks: true,
 	})
 
 	var stdout, stderr bytes.Buffer
@@ -197,7 +156,6 @@ func TestRunClew_WithActiveSession(t *testing.T) {
 		ToolName:    "Edit",
 		ProjectDir:  tmpDir,
 		ToolInput:   `{"file_path": "/some/file.go", "old_string": "foo", "new_string": "bar"}`,
-		UseAriHooks: true,
 	})
 
 	var stdout, stderr bytes.Buffer
@@ -282,7 +240,6 @@ throughline:
 		ProjectDir:  tmpDir,
 		ToolInput:   `{"agent": "orchestrator", "prompt": "Analyze requirements"}`,
 		ToolResult:  orchestratorResult,
-		UseAriHooks: true,
 	})
 
 	var stdout, stderr bytes.Buffer
@@ -376,7 +333,6 @@ Files modified:
 		ProjectDir:  tmpDir,
 		ToolInput:   `{"agent": "principal-engineer", "prompt": "Implement feature"}`,
 		ToolResult:  regularTaskResult,
-		UseAriHooks: true,
 	})
 
 	var stdout, stderr bytes.Buffer

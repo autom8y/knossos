@@ -1,8 +1,6 @@
 package manifest
 
 import (
-	"os"
-
 	"github.com/spf13/cobra"
 
 	"github.com/autom8y/knossos/internal/errors"
@@ -162,9 +160,4 @@ func runMerge(ctx *cmdContext, basePath, oursPath, theirsPath string, opts merge
 	}
 
 	return nil
-}
-
-// addFileFlagToMerge adds a helper for file output.
-func writeOutputFile(path string, content []byte) error {
-	return os.WriteFile(path, content, 0644)
 }

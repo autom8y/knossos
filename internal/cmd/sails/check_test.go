@@ -614,7 +614,7 @@ func TestComplexityThresholds_RequiredProofs(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.complexity, func(t *testing.T) {
-			requiredProofs := sails.GetRequiredProofs(tt.complexity)
+			requiredProofs := sails.GetRequiredProofsForColor(tt.complexity)
 
 			for _, proof := range tt.required {
 				assert.Contains(t, requiredProofs, proof,

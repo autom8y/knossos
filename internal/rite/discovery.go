@@ -4,7 +4,6 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
-	"strings"
 
 	"github.com/autom8y/knossos/internal/errors"
 	"github.com/autom8y/knossos/internal/paths"
@@ -37,18 +36,11 @@ type Discovery struct {
 
 // NewDiscovery creates a new rite discovery instance.
 func NewDiscovery(resolver *paths.Resolver) *Discovery {
-	d := &Discovery{
+	return &Discovery{
 		projectRitesDir: resolver.RitesDir(),
 		userRitesDir:    paths.UserRitesDir(),
+		activeRite:      resolver.ReadActiveRite(),
 	}
-
-	// Read active rite
-	ritePath := resolver.ActiveRiteFile()
-	if data, err := os.ReadFile(ritePath); err == nil {
-		d.activeRite = strings.TrimSpace(string(data))
-	}
-
-	return d
 }
 
 // NewDiscoveryWithPaths creates a discovery with explicit paths.

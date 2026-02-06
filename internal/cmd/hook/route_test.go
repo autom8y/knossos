@@ -260,8 +260,7 @@ func TestRunRoute_SessionCommands(t *testing.T) {
 			testutil.SetupEnv(t, &testutil.HookEnv{
 				Event:       "UserPromptSubmit",
 				UserMessage: tc.command + " some args",
-				UseAriHooks: true,
-			})
+					})
 
 			var stdout, stderr bytes.Buffer
 			printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
@@ -304,7 +303,6 @@ func TestRunRoute_OrchestratorCommands(t *testing.T) {
 	testutil.SetupEnv(t, &testutil.HookEnv{
 		Event:       "UserPromptSubmit",
 		UserMessage: "/consult Which workflow should I use?",
-		UseAriHooks: true,
 	})
 
 	var stdout, stderr bytes.Buffer
@@ -353,8 +351,7 @@ func TestRunRoute_InitiativeCommands(t *testing.T) {
 			testutil.SetupEnv(t, &testutil.HookEnv{
 				Event:       "UserPromptSubmit",
 				UserMessage: cmd + " Feature implementation",
-				UseAriHooks: true,
-			})
+					})
 
 			var stdout, stderr bytes.Buffer
 			printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
@@ -401,8 +398,7 @@ func TestRunRoute_GitCommands(t *testing.T) {
 			testutil.SetupEnv(t, &testutil.HookEnv{
 				Event:       "UserPromptSubmit",
 				UserMessage: cmd,
-				UseAriHooks: true,
-			})
+					})
 
 			var stdout, stderr bytes.Buffer
 			printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
@@ -445,7 +441,6 @@ func TestRunRoute_ThreadCommands(t *testing.T) {
 	testutil.SetupEnv(t, &testutil.HookEnv{
 		Event:       "UserPromptSubmit",
 		UserMessage: "/stamp Chose PostgreSQL for ACID compliance",
-		UseAriHooks: true,
 	})
 
 	var stdout, stderr bytes.Buffer
@@ -490,7 +485,6 @@ func TestRunRoute_RegularMessage(t *testing.T) {
 	testutil.SetupEnv(t, &testutil.HookEnv{
 		Event:       "UserPromptSubmit",
 		UserMessage: "Help me understand this code",
-		UseAriHooks: true,
 	})
 
 	var stdout, stderr bytes.Buffer
@@ -526,7 +520,6 @@ func TestRunRoute_EmptyMessage(t *testing.T) {
 	testutil.SetupEnv(t, &testutil.HookEnv{
 		Event:       "UserPromptSubmit",
 		UserMessage: "",
-		UseAriHooks: true,
 	})
 
 	var stdout, stderr bytes.Buffer
@@ -562,7 +555,6 @@ func TestRunRoute_WrongEventType(t *testing.T) {
 	testutil.SetupEnv(t, &testutil.HookEnv{
 		Event:       "SessionStart",
 		UserMessage: "/start Initialize session",
-		UseAriHooks: true,
 	})
 
 	var stdout, stderr bytes.Buffer
@@ -598,7 +590,6 @@ func TestRunRoute_UnknownCommand(t *testing.T) {
 	testutil.SetupEnv(t, &testutil.HookEnv{
 		Event:       "UserPromptSubmit",
 		UserMessage: "/unknown do something",
-		UseAriHooks: true,
 	})
 
 	var stdout, stderr bytes.Buffer
@@ -642,8 +633,7 @@ func TestRunRoute_PartialCommandMatch(t *testing.T) {
 			testutil.SetupEnv(t, &testutil.HookEnv{
 				Event:       "UserPromptSubmit",
 				UserMessage: msg,
-				UseAriHooks: true,
-			})
+					})
 
 			var stdout, stderr bytes.Buffer
 			printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)

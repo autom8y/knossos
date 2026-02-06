@@ -24,7 +24,6 @@ type HookEnv struct {
 	ConversationID string
 	UserMessage    string
 	AssistantText  string
-	UseAriHooks    bool
 }
 
 // SetupEnv creates a test environment with Claude Code hook variables.
@@ -48,12 +47,6 @@ func SetupEnv(t *testing.T, env *HookEnv) *EnvSetup {
 		"CLAUDE_CONVERSATION_ID":  env.ConversationID,
 		"CLAUDE_USER_MESSAGE":     env.UserMessage,
 		"CLAUDE_ASSISTANT_TEXT":   env.AssistantText,
-	}
-
-	if env.UseAriHooks {
-		vars["USE_ARI_HOOKS"] = "1"
-	} else {
-		vars["USE_ARI_HOOKS"] = "0"
 	}
 
 	for key, value := range vars {
@@ -116,35 +109,29 @@ var PresetEnvs = struct {
 	Stop HookEnv
 }{
 	PreToolUseBash: HookEnv{
-		Event:       "PreToolUse",
-		ToolName:    "Bash",
-		ToolInput:   `{"command":"ls -la","description":"List files"}`,
-		UseAriHooks: true,
+		Event:     "PreToolUse",
+		ToolName:  "Bash",
+		ToolInput: `{"command":"ls -la","description":"List files"}`,
 	},
 	PreToolUseWrite: HookEnv{
-		Event:       "PreToolUse",
-		ToolName:    "Write",
-		ToolInput:   `{"file_path":"/tmp/test.txt","content":"hello world"}`,
-		UseAriHooks: true,
+		Event:     "PreToolUse",
+		ToolName:  "Write",
+		ToolInput: `{"file_path":"/tmp/test.txt","content":"hello world"}`,
 	},
 	PreToolUseEdit: HookEnv{
-		Event:       "PreToolUse",
-		ToolName:    "Edit",
-		ToolInput:   `{"file_path":"/tmp/test.txt","old_string":"hello","new_string":"goodbye"}`,
-		UseAriHooks: true,
+		Event:     "PreToolUse",
+		ToolName:  "Edit",
+		ToolInput: `{"file_path":"/tmp/test.txt","old_string":"hello","new_string":"goodbye"}`,
 	},
 	PostToolUseBash: HookEnv{
-		Event:       "PostToolUse",
-		ToolName:    "Bash",
-		UseAriHooks: true,
+		Event:    "PostToolUse",
+		ToolName: "Bash",
 	},
 	SessionStart: HookEnv{
-		Event:       "SessionStart",
-		UseAriHooks: true,
+		Event: "SessionStart",
 	},
 	Stop: HookEnv{
-		Event:       "Stop",
-		UseAriHooks: true,
+		Event: "Stop",
 	},
 }
 
@@ -164,11 +151,5 @@ func (h HookEnv) WithToolInput(input string) HookEnv {
 // WithToolResult sets the tool result output.
 func (h HookEnv) WithToolResult(result string) HookEnv {
 	h.ToolResult = result
-	return h
-}
-
-// Disabled returns a copy with USE_ARI_HOOKS disabled.
-func (h HookEnv) Disabled() HookEnv {
-	h.UseAriHooks = false
 	return h
 }

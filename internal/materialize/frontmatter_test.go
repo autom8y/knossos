@@ -1,10 +1,13 @@
 package materialize
 
 import (
+	"bytes"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"gopkg.in/yaml.v3"
 )
 
 // TestFrontmatterAllMenaFiles validates frontmatter in all INDEX.dro.md and INDEX.lego.md files.
@@ -101,8 +104,29 @@ func validateMenaFile(t *testing.T, path string) error {
 		return err
 	}
 
-	fm, err := ParseMenaFrontmatter(content)
-	if err != nil {
+	// Inline frontmatter parsing (ParseMenaFrontmatter was deleted per Sprint 1 Batch 5)
+	if !bytes.HasPrefix(content, []byte("---\n")) && !bytes.HasPrefix(content, []byte("---\r\n")) {
+		return err
+	}
+
+	// Find closing delimiter
+	var endIndex int
+	if idx := bytes.Index(content[4:], []byte("\n---\n")); idx != -1 {
+		endIndex = idx
+	} else if idx := bytes.Index(content[4:], []byte("\n---\r\n")); idx != -1 {
+		endIndex = idx
+	} else if idx := bytes.Index(content[4:], []byte("\r\n---\r\n")); idx != -1 {
+		endIndex = idx
+	} else if idx := bytes.Index(content[4:], []byte("\r\n---\n")); idx != -1 {
+		endIndex = idx
+	} else {
+		return err
+	}
+
+	frontmatterBytes := content[4 : 4+endIndex]
+
+	var fm MenaFrontmatter
+	if err := yaml.Unmarshal(frontmatterBytes, &fm); err != nil {
 		return err
 	}
 

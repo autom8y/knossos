@@ -490,17 +490,6 @@ func (a AuditOutput) Rows() [][]string {
 	return rows
 }
 
-// LockOutput represents lock operation result.
-type LockOutput struct {
-	SessionID  string `json:"session_id"`
-	Locked     bool   `json:"locked"`
-	Unlocked   bool   `json:"unlocked,omitempty"`
-	LockPath   string `json:"lock_path,omitempty"`
-	HolderPID  int    `json:"holder_pid,omitempty"`
-	AcquiredAt string `json:"acquired_at,omitempty"`
-	WasStale   bool   `json:"was_stale,omitempty"`
-}
-
 // MigrateOutput represents migration result.
 type MigrateOutput struct {
 	Migrated      []MigrationResult `json:"migrated"`

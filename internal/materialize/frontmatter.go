@@ -2,7 +2,6 @@
 package materialize
 
 import (
-	"bytes"
 	"strings"
 
 	"github.com/autom8y/knossos/internal/errors"
@@ -76,37 +75,6 @@ func (f *MenaFrontmatter) Validate() error {
 	return nil
 }
 
-// ParseMenaFrontmatter extracts frontmatter from a command file.
-// Returns error if frontmatter is missing or invalid.
-func ParseMenaFrontmatter(content []byte) (*MenaFrontmatter, error) {
-	// Find frontmatter delimiters
-	if !bytes.HasPrefix(content, []byte("---\n")) && !bytes.HasPrefix(content, []byte("---\r\n")) {
-		return nil, errors.New(errors.CodeParseError, "missing frontmatter delimiter")
-	}
-
-	// Find closing delimiter
-	var endIndex int
-	if idx := bytes.Index(content[4:], []byte("\n---\n")); idx != -1 {
-		endIndex = idx
-	} else if idx := bytes.Index(content[4:], []byte("\n---\r\n")); idx != -1 {
-		endIndex = idx
-	} else if idx := bytes.Index(content[4:], []byte("\r\n---\r\n")); idx != -1 {
-		endIndex = idx
-	} else if idx := bytes.Index(content[4:], []byte("\r\n---\n")); idx != -1 {
-		endIndex = idx
-	} else {
-		return nil, errors.New(errors.CodeParseError, "missing closing frontmatter delimiter")
-	}
-
-	frontmatterBytes := content[4 : 4+endIndex]
-
-	var fm MenaFrontmatter
-	if err := yaml.Unmarshal(frontmatterBytes, &fm); err != nil {
-		return nil, errors.Wrap(errors.CodeParseError, "invalid frontmatter YAML", err)
-	}
-
-	return &fm, nil
-}
 
 // DetectMenaType determines content type from file extension convention.
 // Files with .dro.md extension are dromena (invokable, project to .claude/commands/).

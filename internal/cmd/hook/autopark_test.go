@@ -50,7 +50,6 @@ func TestAutoparkOutput_Text(t *testing.T) {
 
 func TestRunAutopark_EarlyExit_HooksDisabled(t *testing.T) {
 	testutil.SetupEnv(t, &testutil.HookEnv{
-		UseAriHooks: false,
 	})
 
 	var stdout, stderr bytes.Buffer
@@ -82,17 +81,13 @@ func TestRunAutopark_EarlyExit_HooksDisabled(t *testing.T) {
 	}
 
 	if result.WasParked {
-		t.Error("Expected WasParked=false when hooks disabled")
-	}
-	if result.Message != "hooks disabled" {
-		t.Errorf("Message = %q, want %q", result.Message, "hooks disabled")
+		t.Error("Expected WasParked=false when no context")
 	}
 }
 
 func TestRunAutopark_WrongEvent(t *testing.T) {
 	testutil.SetupEnv(t, &testutil.HookEnv{
 		Event:       "SessionStart", // Not a Stop event
-		UseAriHooks: true,
 	})
 
 	var stdout, stderr bytes.Buffer
@@ -143,7 +138,6 @@ func TestRunAutopark_NoSession(t *testing.T) {
 	testutil.SetupEnv(t, &testutil.HookEnv{
 		Event:       "Stop",
 		ProjectDir:  tmpDir,
-		UseAriHooks: true,
 	})
 
 	var stdout, stderr bytes.Buffer
@@ -214,7 +208,6 @@ current_phase: "implementation"
 	testutil.SetupEnv(t, &testutil.HookEnv{
 		Event:       "Stop",
 		ProjectDir:  tmpDir,
-		UseAriHooks: true,
 	})
 
 	var stdout, stderr bytes.Buffer
@@ -298,7 +291,6 @@ parked_reason: "manual"
 	testutil.SetupEnv(t, &testutil.HookEnv{
 		Event:       "Stop",
 		ProjectDir:  tmpDir,
-		UseAriHooks: true,
 	})
 
 	var stdout, stderr bytes.Buffer
@@ -373,11 +365,6 @@ func BenchmarkAutoparkHook_EarlyExit(b *testing.B) {
 
 // runAutoparkWithPrinter is a helper for testing with injected printer.
 func runAutoparkWithPrinter(ctx *cmdContext, printer *output.Printer) error {
-	// Early exit if hooks disabled
-	if ctx.shouldEarlyExit() {
-		return outputNoPark(printer, "hooks disabled")
-	}
-
 	// Get hook environment
 	hookEnv := ctx.getHookEnv()
 

@@ -103,7 +103,7 @@ func TestQuerier_QueryByPhase(t *testing.T) {
 	setupTestData(t, registry, aggregator)
 
 	// Query requirements phase
-	result, err := querier.QueryByPhase(PhaseRequirements)
+	result, err := querier.Query(QueryFilter{Phase: PhaseRequirements})
 	if err != nil {
 		t.Fatalf("Query failed: %v", err)
 	}
@@ -116,7 +116,7 @@ func TestQuerier_QueryByPhase(t *testing.T) {
 	}
 
 	// Query design phase
-	result, err = querier.QueryByPhase(PhaseDesign)
+	result, err = querier.Query(QueryFilter{Phase: PhaseDesign})
 	if err != nil {
 		t.Fatalf("Query failed: %v", err)
 	}
@@ -126,7 +126,7 @@ func TestQuerier_QueryByPhase(t *testing.T) {
 	}
 
 	// Query implementation phase
-	result, err = querier.QueryByPhase(PhaseImplementation)
+	result, err = querier.Query(QueryFilter{Phase: PhaseImplementation})
 	if err != nil {
 		t.Fatalf("Query failed: %v", err)
 	}
@@ -145,7 +145,7 @@ func TestQuerier_QueryByType(t *testing.T) {
 	setupTestData(t, registry, aggregator)
 
 	// Query PRD type
-	result, err := querier.QueryByType(TypePRD)
+	result, err := querier.Query(QueryFilter{Type: TypePRD})
 	if err != nil {
 		t.Fatalf("Query failed: %v", err)
 	}
@@ -155,7 +155,7 @@ func TestQuerier_QueryByType(t *testing.T) {
 	}
 
 	// Query TDD type
-	result, err = querier.QueryByType(TypeTDD)
+	result, err = querier.Query(QueryFilter{Type: TypeTDD})
 	if err != nil {
 		t.Fatalf("Query failed: %v", err)
 	}
@@ -165,7 +165,7 @@ func TestQuerier_QueryByType(t *testing.T) {
 	}
 
 	// Query ADR type
-	result, err = querier.QueryByType(TypeADR)
+	result, err = querier.Query(QueryFilter{Type: TypeADR})
 	if err != nil {
 		t.Fatalf("Query failed: %v", err)
 	}
@@ -175,7 +175,7 @@ func TestQuerier_QueryByType(t *testing.T) {
 	}
 
 	// Query code type
-	result, err = querier.QueryByType(TypeCode)
+	result, err = querier.Query(QueryFilter{Type: TypeCode})
 	if err != nil {
 		t.Fatalf("Query failed: %v", err)
 	}
@@ -194,7 +194,7 @@ func TestQuerier_QueryBySpecialist(t *testing.T) {
 	setupTestData(t, registry, aggregator)
 
 	// Query product-owner
-	result, err := querier.QueryBySpecialist("product-owner")
+	result, err := querier.Query(QueryFilter{Specialist: "product-owner"})
 	if err != nil {
 		t.Fatalf("Query failed: %v", err)
 	}
@@ -204,7 +204,7 @@ func TestQuerier_QueryBySpecialist(t *testing.T) {
 	}
 
 	// Query context-architect
-	result, err = querier.QueryBySpecialist("context-architect")
+	result, err = querier.Query(QueryFilter{Specialist: "context-architect"})
 	if err != nil {
 		t.Fatalf("Query failed: %v", err)
 	}
@@ -214,7 +214,7 @@ func TestQuerier_QueryBySpecialist(t *testing.T) {
 	}
 
 	// Query integration-engineer
-	result, err = querier.QueryBySpecialist("integration-engineer")
+	result, err = querier.Query(QueryFilter{Specialist: "integration-engineer"})
 	if err != nil {
 		t.Fatalf("Query failed: %v", err)
 	}
@@ -233,7 +233,7 @@ func TestQuerier_QueryBySession(t *testing.T) {
 	setupTestData(t, registry, aggregator)
 
 	// Query session 1
-	result, err := querier.QueryBySession("session-20260105-143022-abc12345")
+	result, err := querier.Query(QueryFilter{SessionID: "session-20260105-143022-abc12345"})
 	if err != nil {
 		t.Fatalf("Query failed: %v", err)
 	}
@@ -243,7 +243,7 @@ func TestQuerier_QueryBySession(t *testing.T) {
 	}
 
 	// Query session 2
-	result, err = querier.QueryBySession("session-20260105-153022-def67890")
+	result, err = querier.Query(QueryFilter{SessionID: "session-20260105-153022-def67890"})
 	if err != nil {
 		t.Fatalf("Query failed: %v", err)
 	}

@@ -55,7 +55,6 @@ Hooks process Claude Code tool events and can modify, validate,
 or enrich tool operations. Use subcommands for specific hook types.
 
 Environment Variables:
-  USE_ARI_HOOKS=0    Emergency kill switch to disable ari hooks (default: enabled)
   CLAUDE_HOOK_*      Standard Claude Code hook environment variables
 
 Performance Targets:
@@ -106,12 +105,6 @@ func (c *cmdContext) getPrinter() *output.Printer {
 // getHookEnv parses the hook environment variables.
 func (c *cmdContext) getHookEnv() *hook.Env {
 	return hook.ParseEnv()
-}
-
-// shouldEarlyExit determines if hook should exit early.
-// Returns true if hooks are disabled or no session context needed.
-func (c *cmdContext) shouldEarlyExit() bool {
-	return !hook.IsEnabled()
 }
 
 // withTimeout wraps a command execution function with context.WithTimeout.

@@ -49,26 +49,6 @@ func (q *Querier) Query(filter QueryFilter) (*QueryResult, error) {
 	}, nil
 }
 
-// QueryByPhase returns artifacts from a specific workflow phase.
-func (q *Querier) QueryByPhase(phase Phase) (*QueryResult, error) {
-	return q.Query(QueryFilter{Phase: phase})
-}
-
-// QueryByType returns artifacts of a specific type.
-func (q *Querier) QueryByType(artifactType ArtifactType) (*QueryResult, error) {
-	return q.Query(QueryFilter{Type: artifactType})
-}
-
-// QueryBySpecialist returns artifacts produced by a specific agent.
-func (q *Querier) QueryBySpecialist(specialist string) (*QueryResult, error) {
-	return q.Query(QueryFilter{Specialist: specialist})
-}
-
-// QueryBySession returns artifacts from a specific session.
-func (q *Querier) QueryBySession(sessionID string) (*QueryResult, error) {
-	return q.Query(QueryFilter{SessionID: sessionID})
-}
-
 // matchesFilter checks if an entry matches all non-empty filter criteria.
 func (q *Querier) matchesFilter(entry Entry, filter QueryFilter) bool {
 	if filter.Phase != "" && entry.Phase != filter.Phase {

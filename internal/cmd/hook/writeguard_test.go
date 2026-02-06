@@ -140,7 +140,6 @@ func TestParseFilePath(t *testing.T) {
 
 func TestRunWriteguard_EarlyExit_HooksDisabled(t *testing.T) {
 	testutil.SetupEnv(t, &testutil.HookEnv{
-		UseAriHooks: false,
 	})
 
 	var stdout, stderr bytes.Buffer
@@ -179,7 +178,6 @@ func TestRunWriteguard_BypassEnvVar(t *testing.T) {
 		Event:       "PreToolUse",
 		ToolName:    "Write",
 		ToolInput:   `{"file_path": ".claude/sessions/test/SESSION_CONTEXT.md"}`,
-		UseAriHooks: true,
 	})
 	env.SetVar("MOIRAI_BYPASS", "1")
 
@@ -219,7 +217,6 @@ func TestRunWriteguard_NonWriteTool(t *testing.T) {
 		Event:       "PreToolUse",
 		ToolName:    "Bash",
 		ToolInput:   `{"command": "ls"}`,
-		UseAriHooks: true,
 	})
 
 	var stdout, stderr bytes.Buffer
@@ -258,7 +255,6 @@ func TestRunWriteguard_BlockSessionContext(t *testing.T) {
 		Event:       "PreToolUse",
 		ToolName:    "Write",
 		ToolInput:   `{"file_path": ".claude/sessions/test/SESSION_CONTEXT.md", "content": "bad"}`,
-		UseAriHooks: true,
 	})
 
 	var stdout, stderr bytes.Buffer
@@ -303,7 +299,6 @@ func TestRunWriteguard_BlockSprintContext(t *testing.T) {
 		Event:       "PreToolUse",
 		ToolName:    "Edit",
 		ToolInput:   `{"file_path": ".claude/sprints/current/SPRINT_CONTEXT.md", "old_string": "x", "new_string": "y"}`,
-		UseAriHooks: true,
 	})
 
 	var stdout, stderr bytes.Buffer
@@ -345,7 +340,6 @@ func TestRunWriteguard_AllowRegularFile(t *testing.T) {
 		Event:       "PreToolUse",
 		ToolName:    "Write",
 		ToolInput:   `{"file_path": "src/main.go", "content": "package main"}`,
-		UseAriHooks: true,
 	})
 
 	var stdout, stderr bytes.Buffer
@@ -384,7 +378,6 @@ func TestRunWriteguard_StdinInput(t *testing.T) {
 		Event:       "PreToolUse",
 		ToolName:    "Write",
 		ToolInput:   "", // Empty env, will use stdin
-		UseAriHooks: true,
 	})
 
 	var stdout, stderr bytes.Buffer
@@ -499,11 +492,6 @@ func BenchmarkWriteguardHook_EarlyExit(b *testing.B) {
 
 // runWriteguardWithPrinter is a helper for testing with injected printer and stdin.
 func runWriteguardWithPrinter(ctx *cmdContext, printer *output.Printer, stdinInput string) error {
-	// Early exit if hooks disabled
-	if ctx.shouldEarlyExit() {
-		return outputAllow(printer)
-	}
-
 	// Check bypass env var
 	if os.Getenv(BypassEnvVar) == "1" {
 		return outputAllow(printer)

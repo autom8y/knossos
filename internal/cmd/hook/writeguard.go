@@ -69,11 +69,6 @@ Performance: <5ms for passthrough path.`,
 func runWriteguard(ctx *cmdContext) error {
 	printer := ctx.getPrinter()
 
-	// Early exit if hooks disabled - allow all writes
-	if ctx.shouldEarlyExit() {
-		return outputAllow(printer)
-	}
-
 	// Check bypass env var
 	if os.Getenv(BypassEnvVar) == "1" {
 		printer.VerboseLog("debug", "writeguard bypassed via env var", nil)

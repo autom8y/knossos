@@ -801,20 +801,7 @@ func (m *Materializer) materializeHooks(claudeDir string, resolved *ResolvedRite
 // materializeCLAUDEmd generates CLAUDE.md using the inscription system.
 // Returns the path to legacy backup if migration occurred, or empty string if no backup.
 func (m *Materializer) materializeCLAUDEmd(manifest *RiteManifest, claudeDir string, resolved *ResolvedRite) (string, error) {
-	// Load or create KNOSSOS_MANIFEST.yaml
-	knossosManifestPath := filepath.Join(claudeDir, "KNOSSOS_MANIFEST.yaml")
-	loader := inscription.NewManifestLoader(m.resolver.ProjectRoot())
-	loader.ManifestPath = knossosManifestPath
-
-	inscriptionManifest, err := loader.LoadOrCreate()
-	if err != nil {
-		return "", errors.Wrap(errors.CodeGeneralError, "failed to load or create KNOSSOS_MANIFEST.yaml", err)
-	}
-
-	// Update active rite in manifest from the incoming rite
-	inscriptionManifest.SetActiveRite(manifest.Name)
-
-	// Build render context
+	// Build render context with full agent details
 	agents := make([]inscription.AgentInfo, 0, len(manifest.Agents))
 	for _, agent := range manifest.Agents {
 		agents = append(agents, inscription.AgentInfo{
@@ -831,6 +818,59 @@ func (m *Materializer) materializeCLAUDEmd(manifest *RiteManifest, claudeDir str
 		Agents:      agents,
 		KnossosVars: make(map[string]string),
 		ProjectRoot: m.resolver.ProjectRoot(),
+	}
+
+	// Delegate to shared helper with manifest update and hash tracking enabled
+	return m.mergeCLAUDEmd(claudeDir, renderCtx, manifest.Name, resolved, true)
+}
+
+// materializeMinimalCLAUDEmd generates CLAUDE.md for cross-cutting mode (no agents).
+func (m *Materializer) materializeMinimalCLAUDEmd(claudeDir string) (string, error) {
+	// Build minimal render context (no agents, no rite)
+	renderCtx := &inscription.RenderContext{
+		ActiveRite:  "", // Cross-cutting mode has no rite
+		AgentCount:  0,
+		Agents:      []inscription.AgentInfo{},
+		KnossosVars: make(map[string]string),
+		ProjectRoot: m.resolver.ProjectRoot(),
+	}
+
+	// Delegate to shared helper without manifest update or hash tracking
+	return m.mergeCLAUDEmd(claudeDir, renderCtx, "", nil, false)
+}
+
+// mergeCLAUDEmd contains the shared logic for generating and merging CLAUDE.md content.
+// Parameters:
+//   - claudeDir: path to .claude/ directory
+//   - renderCtx: pre-built render context (full or minimal)
+//   - activeRite: name of active rite (empty string for minimal mode)
+//   - resolved: resolved rite information (nil for minimal mode)
+//   - updateManifest: if true, updates manifest hashes and saves; if false, only saves if newly created
+//
+// Returns the path to legacy backup if migration occurred, or empty string if no backup.
+func (m *Materializer) mergeCLAUDEmd(claudeDir string, renderCtx *inscription.RenderContext, activeRite string, resolved *ResolvedRite, updateManifest bool) (string, error) {
+	// Load or create KNOSSOS_MANIFEST.yaml
+	knossosManifestPath := filepath.Join(claudeDir, "KNOSSOS_MANIFEST.yaml")
+	loader := inscription.NewManifestLoader(m.resolver.ProjectRoot())
+	loader.ManifestPath = knossosManifestPath
+
+	manifestExists := loader.Exists()
+
+	inscriptionManifest, err := loader.LoadOrCreate()
+	if err != nil {
+		return "", errors.Wrap(errors.CodeGeneralError, "failed to load or create KNOSSOS_MANIFEST.yaml", err)
+	}
+
+	// Update active rite in manifest if provided
+	if activeRite != "" {
+		inscriptionManifest.SetActiveRite(activeRite)
+	}
+
+	// Save manifest if newly created (needed for minimal mode)
+	if !manifestExists {
+		if err := loader.Save(inscriptionManifest); err != nil {
+			return "", errors.Wrap(errors.CodeGeneralError, "failed to save KNOSSOS_MANIFEST.yaml", err)
+		}
 	}
 
 	// Create generator with template directory for section rendering.
@@ -880,84 +920,13 @@ func (m *Materializer) materializeCLAUDEmd(manifest *RiteManifest, claudeDir str
 		return "", errors.Wrap(errors.CodeGeneralError, "failed to write CLAUDE.md", err)
 	}
 
-	// Update manifest hashes from merge result, increment version, and save
-	merger.UpdateManifestHashes(mergeResult)
-	loader.IncrementVersion(inscriptionManifest)
-	if err := loader.Save(inscriptionManifest); err != nil {
-		return "", errors.Wrap(errors.CodeGeneralError, "failed to save KNOSSOS_MANIFEST.yaml", err)
-	}
-
-	return legacyBackupPath, nil
-}
-
-// materializeMinimalCLAUDEmd generates CLAUDE.md for cross-cutting mode (no agents).
-func (m *Materializer) materializeMinimalCLAUDEmd(claudeDir string) (string, error) {
-	// Load or create KNOSSOS_MANIFEST.yaml
-	knossosManifestPath := filepath.Join(claudeDir, "KNOSSOS_MANIFEST.yaml")
-	loader := inscription.NewManifestLoader(m.resolver.ProjectRoot())
-	loader.ManifestPath = knossosManifestPath
-
-	// Check if manifest exists before loading
-	manifestExists := loader.Exists()
-
-	inscriptionManifest, err := loader.LoadOrCreate()
-	if err != nil {
-		return "", errors.Wrap(errors.CodeGeneralError, "failed to load or create KNOSSOS_MANIFEST.yaml", err)
-	}
-
-	// Save manifest if newly created
-	if !manifestExists {
+	// Update manifest hashes and save (for full mode only)
+	if updateManifest {
+		merger.UpdateManifestHashes(mergeResult)
+		loader.IncrementVersion(inscriptionManifest)
 		if err := loader.Save(inscriptionManifest); err != nil {
 			return "", errors.Wrap(errors.CodeGeneralError, "failed to save KNOSSOS_MANIFEST.yaml", err)
 		}
-	}
-
-	// Build minimal render context (no agents, no rite)
-	renderCtx := &inscription.RenderContext{
-		ActiveRite:  "", // Cross-cutting mode has no rite
-		AgentCount:  0,
-		Agents:      []inscription.AgentInfo{},
-		KnossosVars: make(map[string]string),
-		ProjectRoot: m.resolver.ProjectRoot(),
-	}
-
-	// Create generator with template directory
-	generator := inscription.NewGenerator(m.templatesDir, inscriptionManifest, renderCtx)
-
-	// Generate all sections
-	sections, err := generator.GenerateAll()
-	if err != nil {
-		return "", errors.Wrap(errors.CodeGeneralError, "failed to generate CLAUDE.md sections", err)
-	}
-
-	// Read existing CLAUDE.md and check for legacy format
-	claudeMdPath := filepath.Join(claudeDir, "CLAUDE.md")
-	existingContent := ""
-	legacyBackupPath := ""
-
-	if data, err := os.ReadFile(claudeMdPath); err == nil {
-		existingContent = string(data)
-
-		// Detect legacy CLAUDE.md (no KNOSSOS markers) and backup before overwriting
-		if !strings.Contains(existingContent, "<!-- KNOSSOS:START") && len(existingContent) > 0 {
-			legacyBackupPath = fmt.Sprintf("%s.legacy-%s", claudeMdPath, time.Now().Format("20060102-150405"))
-			if err := os.WriteFile(legacyBackupPath, data, 0644); err != nil {
-				return "", errors.Wrap(errors.CodeGeneralError, "failed to backup legacy CLAUDE.md", err)
-			}
-			existingContent = ""
-		}
-	}
-
-	// Merge sections
-	merger := inscription.NewMerger(inscriptionManifest, generator)
-	mergeResult, err := merger.MergeRegions(existingContent, sections)
-	if err != nil {
-		return "", errors.Wrap(errors.CodeGeneralError, "failed to merge CLAUDE.md regions", err)
-	}
-
-	// Write CLAUDE.md
-	if err := os.WriteFile(claudeMdPath, []byte(mergeResult.Content), 0644); err != nil {
-		return "", errors.Wrap(errors.CodeGeneralError, "failed to write CLAUDE.md", err)
 	}
 
 	return legacyBackupPath, nil

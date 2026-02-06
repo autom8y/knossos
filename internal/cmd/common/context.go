@@ -50,13 +50,7 @@ func (c *BaseContext) GetResolver() *paths.Resolver {
 
 // GetActiveRite reads the active rite from the project.
 func (c *BaseContext) GetActiveRite() string {
-	resolver := c.GetResolver()
-	ritePath := resolver.ActiveRiteFile()
-	data, err := os.ReadFile(ritePath)
-	if err != nil {
-		return ""
-	}
-	return string(data)
+	return c.GetResolver().ReadActiveRite()
 }
 
 // GetSessionID returns the session ID from the flag or reads the current session.

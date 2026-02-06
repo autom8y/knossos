@@ -5,6 +5,7 @@ package paths
 import (
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/adrg/xdg"
 	"github.com/autom8y/knossos/internal/errors"
@@ -107,6 +108,16 @@ func (r *Resolver) CurrentSessionFile() string {
 // ActiveRiteFile returns the path to the ACTIVE_RITE file.
 func (r *Resolver) ActiveRiteFile() string {
 	return filepath.Join(r.ClaudeDir(), "ACTIVE_RITE")
+}
+
+// ReadActiveRite reads the ACTIVE_RITE file and returns its content.
+// Trims whitespace and returns empty string on error.
+func (r *Resolver) ReadActiveRite() string {
+	data, err := os.ReadFile(r.ActiveRiteFile())
+	if err != nil {
+		return ""
+	}
+	return strings.TrimSpace(string(data))
 }
 
 // ActiveWorkflowFile returns the path to the ACTIVE_WORKFLOW.yaml file.

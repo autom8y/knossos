@@ -54,7 +54,6 @@ func TestRunBudget_Disabled(t *testing.T) {
 	testutil.SetupEnv(t, &testutil.HookEnv{
 		Event:       "PostToolUse",
 		ToolName:    "Bash",
-		UseAriHooks: true,
 	})
 	t.Setenv(envBudgetDisable, "1")
 	t.Setenv(envSessionKey, "disabled-test")
@@ -75,29 +74,6 @@ func TestRunBudget_Disabled(t *testing.T) {
 	}
 }
 
-func TestRunBudget_HooksDisabled(t *testing.T) {
-	testutil.SetupEnv(t, &testutil.HookEnv{
-		Event:       "PostToolUse",
-		ToolName:    "Bash",
-		UseAriHooks: false,
-	})
-	t.Setenv(envSessionKey, "hooks-disabled-test")
-
-	// Clean up any state file from previous runs
-	expectedPath := filepath.Join(os.TempDir(), "ariadne-msg-count-hooks-disabled-test")
-	os.Remove(expectedPath)
-
-	ctx := newTestContext(t)
-	err := runBudget(ctx)
-	if err != nil {
-		t.Fatalf("runBudget() error = %v", err)
-	}
-
-	// When hooks disabled, no counter file should be created
-	if _, err := os.Stat(expectedPath); !os.IsNotExist(err) {
-		t.Error("Counter file should not be created when hooks are disabled")
-	}
-}
 
 func TestIncrementCounter(t *testing.T) {
 	tmpDir := t.TempDir()
@@ -200,7 +176,6 @@ func TestRunBudget_WarnThreshold(t *testing.T) {
 	testutil.SetupEnv(t, &testutil.HookEnv{
 		Event:       "PostToolUse",
 		ToolName:    "Bash",
-		UseAriHooks: true,
 	})
 	t.Setenv(envSessionKey, "warn-test")
 	t.Setenv(envMsgWarn, "3")
@@ -243,7 +218,6 @@ func TestRunBudget_ParkThreshold(t *testing.T) {
 	testutil.SetupEnv(t, &testutil.HookEnv{
 		Event:       "PostToolUse",
 		ToolName:    "Bash",
-		UseAriHooks: true,
 	})
 	t.Setenv(envSessionKey, "park-test")
 	t.Setenv(envMsgWarn, "1000") // high warn so we only test park
@@ -275,7 +249,6 @@ func TestRunBudget_OneShot(t *testing.T) {
 	testutil.SetupEnv(t, &testutil.HookEnv{
 		Event:       "PostToolUse",
 		ToolName:    "Bash",
-		UseAriHooks: true,
 	})
 	t.Setenv(envSessionKey, "oneshot-test")
 	t.Setenv(envMsgWarn, "1")
@@ -322,7 +295,6 @@ func TestRunBudget_CustomThresholds(t *testing.T) {
 	testutil.SetupEnv(t, &testutil.HookEnv{
 		Event:       "PostToolUse",
 		ToolName:    "Bash",
-		UseAriHooks: true,
 	})
 	t.Setenv(envSessionKey, "custom-thresh")
 	t.Setenv(envMsgWarn, "100")
@@ -357,7 +329,6 @@ func TestRunBudget_InvalidThresholds(t *testing.T) {
 	testutil.SetupEnv(t, &testutil.HookEnv{
 		Event:       "PostToolUse",
 		ToolName:    "Bash",
-		UseAriHooks: true,
 	})
 	t.Setenv(envSessionKey, "invalid-thresh")
 	t.Setenv(envMsgWarn, "not-a-number")

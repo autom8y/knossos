@@ -110,14 +110,14 @@ func TestGetRequiredProofs(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		got := GetRequiredProofs(tt.complexity)
+		got := GetRequiredProofsForColor(tt.complexity)
 		if len(got) != len(tt.expected) {
-			t.Errorf("GetRequiredProofs(%q) = %v, want %v", tt.complexity, got, tt.expected)
+			t.Errorf("GetRequiredProofsForColor(%q) = %v, want %v", tt.complexity, got, tt.expected)
 			continue
 		}
 		for i, exp := range tt.expected {
 			if got[i] != exp {
-				t.Errorf("GetRequiredProofs(%q)[%d] = %q, want %q", tt.complexity, i, got[i], exp)
+				t.Errorf("GetRequiredProofsForColor(%q)[%d] = %q, want %q", tt.complexity, i, got[i], exp)
 			}
 		}
 	}
@@ -142,9 +142,9 @@ func TestIsRequiredProof(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		got := IsRequiredProof(tt.complexity, tt.proofName)
+		got := IsRequiredProofForColor(tt.complexity, tt.proofName)
 		if got != tt.required {
-			t.Errorf("IsRequiredProof(%q, %q) = %v, want %v", tt.complexity, tt.proofName, got, tt.required)
+			t.Errorf("IsRequiredProofForColor(%q, %q) = %v, want %v", tt.complexity, tt.proofName, got, tt.required)
 		}
 	}
 }

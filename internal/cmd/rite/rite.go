@@ -2,9 +2,6 @@
 package rite
 
 import (
-	"os"
-	"strings"
-
 	"github.com/spf13/cobra"
 
 	"github.com/autom8y/knossos/internal/cmd/common"
@@ -78,9 +75,5 @@ func (c *cmdContext) getValidator() *rite.Validator {
 
 // getActiveRite reads the active rite from ACTIVE_RITE file.
 func (c *cmdContext) getActiveRite() string {
-	ritePath := c.GetResolver().ActiveRiteFile()
-	if data, err := os.ReadFile(ritePath); err == nil {
-		return strings.TrimSpace(string(data))
-	}
-	return ""
+	return c.GetResolver().ReadActiveRite()
 }

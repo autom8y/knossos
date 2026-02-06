@@ -72,11 +72,6 @@ func runBudget(ctx *cmdContext) error {
 		return printer.Print(BudgetOutput{Message: "budget tracking disabled"})
 	}
 
-	// Fast path: hooks disabled
-	if ctx.shouldEarlyExit() {
-		return printer.Print(BudgetOutput{Message: "hooks disabled"})
-	}
-
 	// Resolve thresholds
 	warnThreshold := defaultWarn
 	if v := os.Getenv(envMsgWarn); v != "" {

@@ -34,7 +34,6 @@ const (
 
 // Error codes for JSON output
 const (
-	CodeSuccess            = "SUCCESS"
 	CodeGeneralError       = "GENERAL_ERROR"
 	CodeUsageError         = "USAGE_ERROR"
 	CodeLockTimeout        = "LOCK_TIMEOUT"
@@ -85,11 +84,6 @@ func (e *Error) JSON() string {
 	return string(data)
 }
 
-// ErrorResponse is the wrapper for JSON error output.
-type ErrorResponse struct {
-	Error *Error `json:"error"`
-}
-
 // New creates a new Error with the given code and message.
 func New(code string, message string) *Error {
 	return &Error{
@@ -126,8 +120,6 @@ func Wrap(code string, message string, cause error) *Error {
 // exitCodeForCode maps error codes to exit codes.
 func exitCodeForCode(code string) int {
 	switch code {
-	case CodeSuccess:
-		return ExitSuccess
 	case CodeUsageError:
 		return ExitUsageError
 	case CodeLockTimeout, CodeLockStale:

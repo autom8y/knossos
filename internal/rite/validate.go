@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/autom8y/knossos/internal/materialize"
 	"github.com/autom8y/knossos/internal/paths"
 )
 
@@ -282,14 +283,16 @@ func (v *Validator) Fix(riteName string) error {
 	for _, fixable := range result.Fixable {
 		switch fixable {
 		case "CLAUDE_MD_SYNC":
-			// Update CLAUDE.md satellites
+			// Update CLAUDE.md via materialize
 			rite, err := v.discovery.Get(riteName)
 			if err != nil {
 				continue
 			}
 			if rite.Active {
-				updater := NewClaudeMDUpdater(v.resolver.ClaudeMDFile())
-				updater.UpdateForRite(rite)
+				m := materialize.NewMaterializer(v.resolver)
+				if err := m.Materialize(riteName); err != nil {
+					continue
+				}
 			}
 		}
 	}

@@ -395,16 +395,6 @@ func IsRequiredProofForColor(complexity, proofName string) bool {
 	return IsProofRequired(Complexity(complexity), proofName)
 }
 
-// GetRequiredProofs is a wrapper for GetRequiredProofsForColor for test compatibility.
-func GetRequiredProofs(complexity string) []string {
-	return GetRequiredProofsForColor(complexity)
-}
-
-// IsRequiredProof is a wrapper for IsRequiredProofForColor for test compatibility.
-func IsRequiredProof(complexity, proofName string) bool {
-	return IsRequiredProofForColor(complexity, proofName)
-}
-
 // ValidateColorInput validates the input for color computation.
 // Returns a list of validation errors (empty if valid).
 func ValidateColorInput(input ColorInput) []string {

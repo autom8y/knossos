@@ -89,9 +89,11 @@ func runStatus(ctx *cmdContext, opts statusOptions) error {
 		}
 	}
 
-	// Check CLAUDE.md sync
-	updater := ritelib.NewClaudeMDUpdater(resolver.ClaudeMDFile())
-	claudeMDSynced := updater.IsSynced(riteName)
+	// Check CLAUDE.md sync - simple check if rite name appears in file
+	claudeMDSynced := false
+	if content, err := os.ReadFile(resolver.ClaudeMDFile()); err == nil {
+		claudeMDSynced = strings.Contains(string(content), riteName)
+	}
 
 	// Orphans are now handled by materialization, not status command
 	var orphans []string

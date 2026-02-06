@@ -95,11 +95,6 @@ Performance: <5ms for passthrough path.`,
 func runValidate(ctx *cmdContext) error {
 	printer := ctx.getPrinter()
 
-	// Early exit if hooks disabled - allow all commands
-	if ctx.shouldEarlyExit() {
-		return outputValidateAllow(printer)
-	}
-
 	// Check bypass env var
 	if os.Getenv(ValidateBypassEnvVar) == "1" {
 		printer.VerboseLog("debug", "validate bypassed via env var", nil)
@@ -219,11 +214,6 @@ func outputValidateBlock(printer interface{ Print(interface{}) error }, reason s
 
 // runValidateWithPrinter is a helper for testing with injected printer.
 func runValidateWithPrinter(ctx *cmdContext, printer interface{ Print(interface{}) error }, stdinInput string) error {
-	// Early exit if hooks disabled
-	if ctx.shouldEarlyExit() {
-		return outputValidateAllow(printer)
-	}
-
 	// Check bypass env var
 	if os.Getenv(ValidateBypassEnvVar) == "1" {
 		return outputValidateAllow(printer)

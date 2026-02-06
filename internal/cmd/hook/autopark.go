@@ -58,11 +58,6 @@ Performance: <100ms target execution time.`,
 func runAutopark(ctx *cmdContext) error {
 	printer := ctx.getPrinter()
 
-	// Early exit if hooks disabled
-	if ctx.shouldEarlyExit() {
-		return outputNoPark(printer, "hooks disabled")
-	}
-
 	// Get hook environment
 	hookEnv := ctx.getHookEnv()
 

@@ -109,10 +109,8 @@ func TestDetermineExecutionMode(t *testing.T) {
 }
 
 func TestRunContext_EarlyExit_HooksDisabled(t *testing.T) {
-	// Clear the USE_ARI_HOOKS env var
-	testutil.SetupEnv(t, &testutil.HookEnv{
-		UseAriHooks: false,
-	})
+	// Test with no session context
+	testutil.SetupEnv(t, &testutil.HookEnv{})
 
 	var stdout, stderr bytes.Buffer
 	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
@@ -197,7 +195,6 @@ current_phase: "implementation"
 	testutil.SetupEnv(t, &testutil.HookEnv{
 		Event:       "SessionStart",
 		ProjectDir:  tmpDir,
-		UseAriHooks: true,
 	})
 
 	var stdout, stderr bytes.Buffer
@@ -255,7 +252,6 @@ func TestRunContext_NoSession(t *testing.T) {
 	testutil.SetupEnv(t, &testutil.HookEnv{
 		Event:       "SessionStart",
 		ProjectDir:  tmpDir,
-		UseAriHooks: true,
 	})
 
 	var stdout, stderr bytes.Buffer
@@ -291,9 +287,6 @@ func TestRunContext_NoSession(t *testing.T) {
 
 // BenchmarkContextHook_EarlyExit benchmarks the early exit path (<5ms target).
 func BenchmarkContextHook_EarlyExit(b *testing.B) {
-	// Clear environment to simulate disabled hooks
-	os.Unsetenv("USE_ARI_HOOKS")
-
 	outputFlag := "json"
 	verboseFlag := false
 	projectDir := ""
@@ -393,11 +386,6 @@ current_phase: "implementation"
 
 // runContextWithPrinter is a helper that uses an injected printer for testing.
 func runContextWithPrinter(ctx *cmdContext, printer *output.Printer) error {
-	// Early exit if hooks disabled
-	if ctx.shouldEarlyExit() {
-		return outputNoSession(printer)
-	}
-
 	// Get hook environment
 	hookEnv := ctx.getHookEnv()
 
@@ -431,7 +419,7 @@ func runContextWithPrinter(ctx *cmdContext, printer *output.Printer) error {
 	}
 
 	// Read active rite
-	activeRite := readActiveRite(resolver)
+	activeRite := resolver.ReadActiveRite()
 	if activeRite == "" {
 		activeRite = sessCtx.ActiveRite
 	}

@@ -81,9 +81,6 @@ type RiteManifest struct {
 	// Context budget metadata
 	Budget *BudgetInfo `yaml:"budget,omitempty" json:"budget,omitempty"`
 
-	// Migration metadata (for transition from legacy naming)
-	Migration *MigrationInfo `yaml:"migration,omitempty" json:"migration,omitempty"`
-
 	// Path is the directory containing this manifest (set during load, not serialized)
 	Path string `yaml:"-" json:"path,omitempty"`
 }
@@ -153,11 +150,6 @@ type BudgetInfo struct {
 	WorkflowCost    int `yaml:"workflow_cost,omitempty" json:"workflow_cost,omitempty"`
 }
 
-// MigrationInfo contains migration metadata from legacy naming.
-type MigrationInfo struct {
-	FromRite   string `yaml:"from_rite,omitempty" json:"from_rite,omitempty"`
-	MigratedAt string `yaml:"migrated_at,omitempty" json:"migrated_at,omitempty"`
-}
 
 // rawManifest is an intermediate struct for parsing manifests with flexible skills field.
 type rawManifest struct {
@@ -177,7 +169,6 @@ type rawManifest struct {
 	Workflow         *WorkflowConfig        `yaml:"workflow,omitempty"`
 	Hooks            interface{}            `yaml:"hooks,omitempty"`
 	Budget           *BudgetInfo            `yaml:"budget,omitempty"`
-	Migration        *MigrationInfo         `yaml:"migration,omitempty"`
 }
 
 // LoadManifest reads and parses a manifest.yaml file.
@@ -208,7 +199,6 @@ func LoadManifest(path string) (*RiteManifest, error) {
 		Workflow:         raw.Workflow,
 		Hooks:            raw.Hooks,
 		Budget:           raw.Budget,
-		Migration:        raw.Migration,
 		Path:             filepath.Dir(path),
 	}
 

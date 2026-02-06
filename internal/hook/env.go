@@ -4,11 +4,7 @@ package hook
 
 import (
 	"os"
-	"strings"
 )
-
-// FeatureFlagEnvVar is the environment variable that enables ari hooks.
-const FeatureFlagEnvVar = "USE_ARI_HOOKS"
 
 // Claude Code hook environment variable names.
 const (
@@ -86,17 +82,6 @@ func isValidHookEvent(event HookEvent) bool {
 	default:
 		return false
 	}
-}
-
-// IsEnabled returns true if ari hooks are enabled.
-// Defaults to true (enabled). Only returns false when explicitly disabled via
-// USE_ARI_HOOKS=0 or USE_ARI_HOOKS=false.
-func IsEnabled() bool {
-	val := os.Getenv(FeatureFlagEnvVar)
-	if val == "" {
-		return true // Default: enabled (ADR-0011 Phase 2 complete)
-	}
-	return val != "0" && strings.ToLower(val) != "false"
 }
 
 // IsPreToolUse returns true if this is a PreToolUse event.

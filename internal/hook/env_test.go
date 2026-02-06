@@ -59,46 +59,6 @@ func TestParseEnv(t *testing.T) {
 	}
 }
 
-func TestIsEnabled(t *testing.T) {
-	tests := []struct {
-		name     string
-		value    string
-		expected bool
-	}{
-		{"empty", "", true},
-		{"zero", "0", false},
-		{"one", "1", true},
-		{"true lowercase", "true", true},
-		{"TRUE uppercase", "TRUE", true},
-		{"True mixed", "True", true},
-		{"false", "false", false},
-		{"random", "random", true},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			original := os.Getenv(FeatureFlagEnvVar)
-			defer func() {
-				if original == "" {
-					os.Unsetenv(FeatureFlagEnvVar)
-				} else {
-					os.Setenv(FeatureFlagEnvVar, original)
-				}
-			}()
-
-			if tt.value == "" {
-				os.Unsetenv(FeatureFlagEnvVar)
-			} else {
-				os.Setenv(FeatureFlagEnvVar, tt.value)
-			}
-
-			if got := IsEnabled(); got != tt.expected {
-				t.Errorf("IsEnabled() = %v, want %v", got, tt.expected)
-			}
-		})
-	}
-}
-
 func TestEnvEventChecks(t *testing.T) {
 	tests := []struct {
 		event        HookEvent

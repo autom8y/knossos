@@ -807,36 +807,25 @@ func TestNewSailsGeneratedEvent_PartialEvidencePaths(t *testing.T) {
 	}
 }
 
-func TestArtifactType_WhiteSails(t *testing.T) {
-	// Test that ArtifactTypeWhiteSails is defined correctly
-	if ArtifactTypeWhiteSails != "white_sails" {
-		t.Errorf("ArtifactTypeWhiteSails = %v, want 'white_sails'", ArtifactTypeWhiteSails)
-	}
-}
-
 func TestArtifactType_Count(t *testing.T) {
-	// Test that we have 6 artifact types total
+	// Test that we have 4 artifact types total
 	artifactTypes := []ArtifactType{
 		ArtifactTypePRD,
 		ArtifactTypeTDD,
 		ArtifactTypeADR,
 		ArtifactTypeTestPlan,
-		ArtifactTypeCode,
-		ArtifactTypeWhiteSails,
 	}
 
-	if len(artifactTypes) != 6 {
-		t.Errorf("Expected 6 artifact types, got %d", len(artifactTypes))
+	if len(artifactTypes) != 4 {
+		t.Errorf("Expected 4 artifact types, got %d", len(artifactTypes))
 	}
 
 	// Verify each type has correct value
 	expected := map[ArtifactType]string{
-		ArtifactTypePRD:        "prd",
-		ArtifactTypeTDD:        "tdd",
-		ArtifactTypeADR:        "adr",
-		ArtifactTypeTestPlan:   "test_plan",
-		ArtifactTypeCode:       "code",
-		ArtifactTypeWhiteSails: "white_sails",
+		ArtifactTypePRD:      "prd",
+		ArtifactTypeTDD:      "tdd",
+		ArtifactTypeADR:      "adr",
+		ArtifactTypeTestPlan: "test_plan",
 	}
 
 	for artType, val := range expected {

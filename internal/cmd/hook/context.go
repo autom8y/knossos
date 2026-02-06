@@ -3,7 +3,6 @@ package hook
 
 import (
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -70,11 +69,6 @@ Performance: <100ms target execution time.`,
 func runContext(ctx *cmdContext) error {
 	printer := ctx.getPrinter()
 
-	// Early exit if hooks disabled
-	if ctx.shouldEarlyExit() {
-		return outputNoSession(printer)
-	}
-
 	// Get hook environment
 	hookEnv := ctx.getHookEnv()
 
@@ -120,7 +114,7 @@ func runContext(ctx *cmdContext) error {
 	}
 
 	// Read active rite with backward compatibility
-	activeRite := readActiveRite(resolver)
+	activeRite := resolver.ReadActiveRite()
 	if activeRite == "" {
 		activeRite = sessCtx.ActiveRite
 	}
@@ -146,16 +140,6 @@ func runContext(ctx *cmdContext) error {
 func outputNoSession(printer *output.Printer) error {
 	result := ContextOutput{HasSession: false}
 	return printer.Print(result)
-}
-
-// readActiveRite reads the ACTIVE_RITE file.
-func readActiveRite(resolver *paths.Resolver) string {
-	ritePath := resolver.ActiveRiteFile()
-	if data, err := os.ReadFile(ritePath); err == nil {
-		return strings.TrimSpace(string(data))
-	}
-
-	return ""
 }
 
 // determineExecutionMode determines the execution mode based on session and rite.
