@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"github.com/autom8y/knossos/internal/errors"
 	"github.com/autom8y/knossos/internal/materialize"
 	"github.com/autom8y/knossos/internal/paths"
@@ -657,6 +658,15 @@ func (m *Manager) setupWorktreeEcosystem(wtPath, riteName string) {
 	// Materialize .claude/ directory
 	resolver := paths.NewResolver(wtPath)
 	mat := materialize.NewMaterializer(resolver)
+	if embRites := common.EmbeddedRites(); embRites != nil {
+		mat.WithEmbeddedFS(embRites)
+	}
+	if embTemplates := common.EmbeddedTemplates(); embTemplates != nil {
+		mat.WithEmbeddedTemplates(embTemplates)
+	}
+	if embHooks := common.EmbeddedHooksYAML(); embHooks != nil {
+		mat.WithEmbeddedHooks(embHooks)
+	}
 	mat.MaterializeWithOptions(riteName, materialize.Options{
 		KeepAll: true,
 	})

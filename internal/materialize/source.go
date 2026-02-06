@@ -3,6 +3,7 @@ package materialize
 
 import (
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"sync"
@@ -24,6 +25,8 @@ const (
 	SourceKnossos SourceType = "knossos"
 	// SourceExplicit represents an explicitly specified path via --source flag.
 	SourceExplicit SourceType = "explicit"
+	// SourceEmbedded represents rites compiled into the binary via //go:embed.
+	SourceEmbedded SourceType = "embedded"
 )
 
 // RiteSource represents a location where rites can be found.
@@ -49,10 +52,11 @@ type ResolvedRite struct {
 
 // SourceResolver resolves rite sources with configurable fallback chain.
 type SourceResolver struct {
-	projectRoot    string
+	projectRoot     string
 	projectRitesDir string
 	userRitesDir    string
 	knossosHome     string
+	embeddedFS      fs.FS // Embedded rites filesystem (compiled-in fallback)
 
 	// Cached resolutions (lazy-loaded)
 	mu       sync.RWMutex
@@ -70,6 +74,13 @@ func NewSourceResolver(projectRoot string) *SourceResolver {
 	}
 }
 
+// WithEmbeddedFS sets the embedded filesystem for fallback rite resolution.
+// Returns the receiver for method chaining.
+func (r *SourceResolver) WithEmbeddedFS(fsys fs.FS) *SourceResolver {
+	r.embeddedFS = fsys
+	return r
+}
+
 // ResolveRite finds the source for a rite with the configured fallback chain.
 //
 // Resolution order (highest to lowest priority):
@@ -77,6 +88,7 @@ func NewSourceResolver(projectRoot string) *SourceResolver {
 //  2. Project rites (./rites/{rite}/)
 //  3. User rites (~/.local/share/knossos/rites/{rite}/)
 //  4. Knossos platform ($KNOSSOS_HOME/rites/{rite}/)
+//  5. Embedded rites (compiled into binary)
 //
 // Returns error if rite is not found in any source.
 func (r *SourceResolver) ResolveRite(riteName string, explicitSource string) (*ResolvedRite, error) {
@@ -150,6 +162,15 @@ func (r *SourceResolver) ResolveRite(riteName string, explicitSource string) (*R
 			result = res
 		} else {
 			checkedPaths = append(checkedPaths, source.Path)
+		}
+	}
+
+	// 5. Embedded rites (compiled-in fallback)
+	if result == nil && r.embeddedFS != nil {
+		if res, err := r.checkEmbeddedSource(riteName); err == nil {
+			result = res
+		} else {
+			checkedPaths = append(checkedPaths, "embedded://rites/"+riteName)
 		}
 	}
 
@@ -301,7 +322,43 @@ func (r *SourceResolver) ListAvailableRites() ([]ResolvedRite, error) {
 		}
 	}
 
+	// 5. Embedded rites (lowest priority)
+	if r.embeddedFS != nil {
+		entries, err := fs.ReadDir(r.embeddedFS, "rites")
+		if err == nil {
+			for _, entry := range entries {
+				if !entry.IsDir() || seen[entry.Name()] {
+					continue
+				}
+				if resolved, err := r.checkEmbeddedSource(entry.Name()); err == nil {
+					result = append(result, *resolved)
+					seen[entry.Name()] = true
+				}
+			}
+		}
+	}
+
 	return result, nil
+}
+
+// checkEmbeddedSource checks if a rite exists in the embedded filesystem.
+func (r *SourceResolver) checkEmbeddedSource(riteName string) (*ResolvedRite, error) {
+	manifestPath := "rites/" + riteName + "/manifest.yaml"
+	if _, err := fs.Stat(r.embeddedFS, manifestPath); err != nil {
+		return nil, err
+	}
+
+	return &ResolvedRite{
+		Name: riteName,
+		Source: RiteSource{
+			Type:        SourceEmbedded,
+			Path:        "embedded://rites/" + riteName,
+			Description: "compiled-in rite definition",
+		},
+		RitePath:     "rites/" + riteName,
+		ManifestPath: manifestPath,
+		TemplatesDir: "knossos/templates",
+	}, nil
 }
 
 // ClearCache clears the resolution cache.
@@ -325,6 +382,8 @@ func (r *SourceResolver) GetTemplatesDir(source RiteSource) string {
 			return templatesDir
 		}
 		return ""
+	case SourceEmbedded:
+		return "knossos/templates"
 	default:
 		return ""
 	}

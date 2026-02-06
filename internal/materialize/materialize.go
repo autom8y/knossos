@@ -79,11 +79,13 @@ type Agent struct {
 
 // Materializer handles .claude/ directory generation.
 type Materializer struct {
-	resolver       *paths.Resolver
-	sourceResolver *SourceResolver
-	explicitSource string // Optional explicit source from --source flag
-	ritesDir       string // Deprecated: use sourceResolver
-	templatesDir   string
+	resolver          *paths.Resolver
+	sourceResolver    *SourceResolver
+	explicitSource    string // Optional explicit source from --source flag
+	ritesDir          string // Deprecated: use sourceResolver
+	templatesDir      string
+	embeddedTemplates fs.FS  // Embedded templates filesystem
+	embeddedHooksYAML []byte // Embedded hooks.yaml content
 }
 
 // NewMaterializer creates a new materializer with default source resolution.
@@ -109,6 +111,74 @@ func NewMaterializerWithSource(resolver *paths.Resolver, source string) *Materia
 		ritesDir:       filepath.Join(projectRoot, "rites"),
 		templatesDir:   filepath.Join(projectRoot, "templates"),
 	}
+}
+
+// WithEmbeddedFS sets the embedded rites filesystem on both the materializer's
+// source resolver and stores it for rite content access. Returns the receiver.
+func (m *Materializer) WithEmbeddedFS(fsys fs.FS) *Materializer {
+	m.sourceResolver.WithEmbeddedFS(fsys)
+	return m
+}
+
+// WithEmbeddedTemplates sets the embedded templates filesystem.
+func (m *Materializer) WithEmbeddedTemplates(fsys fs.FS) *Materializer {
+	m.embeddedTemplates = fsys
+	return m
+}
+
+// WithEmbeddedHooks sets the embedded hooks.yaml content.
+func (m *Materializer) WithEmbeddedHooks(data []byte) *Materializer {
+	m.embeddedHooksYAML = data
+	return m
+}
+
+// riteFS returns a filesystem rooted at the rite's directory.
+// For embedded sources, returns a sub-FS of the embedded rites.
+// For filesystem sources, returns os.DirFS rooted at the rite path.
+func (m *Materializer) riteFS(resolved *ResolvedRite) fs.FS {
+	if resolved.Source.Type == SourceEmbedded && m.sourceResolver.embeddedFS != nil {
+		sub, err := fs.Sub(m.sourceResolver.embeddedFS, resolved.RitePath)
+		if err != nil {
+			return os.DirFS(resolved.RitePath)
+		}
+		return sub
+	}
+	return os.DirFS(resolved.RitePath)
+}
+
+// templatesFS returns a filesystem for templates.
+// For embedded sources, returns a sub-FS of the embedded templates.
+// For filesystem sources, returns os.DirFS rooted at the templates dir.
+func (m *Materializer) templatesFS(resolved *ResolvedRite) fs.FS {
+	if resolved.Source.Type == SourceEmbedded && m.embeddedTemplates != nil {
+		sub, err := fs.Sub(m.embeddedTemplates, resolved.TemplatesDir)
+		if err != nil {
+			return os.DirFS(m.templatesDir)
+		}
+		return sub
+	}
+	return os.DirFS(m.templatesDir)
+}
+
+// copyDirFromFS copies all files from an fs.FS to a destination directory on disk.
+func copyDirFromFS(fsys fs.FS, dst string) error {
+	return fs.WalkDir(fsys, ".", func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		destPath := filepath.Join(dst, path)
+		if d.IsDir() {
+			return os.MkdirAll(destPath, 0755)
+		}
+		content, err := fs.ReadFile(fsys, path)
+		if err != nil {
+			return err
+		}
+		if err := os.MkdirAll(filepath.Dir(destPath), 0755); err != nil {
+			return err
+		}
+		return os.WriteFile(destPath, content, 0644)
+	})
 }
 
 // Materialize generates the .claude/ directory from templates and the active rite.
@@ -142,7 +212,7 @@ func (m *Materializer) MaterializeMinimal(opts Options) (*Result, error) {
 	}
 
 	// Generate hooks from templates (if available)
-	hooksSkipped, err := m.materializeHooks(claudeDir)
+	hooksSkipped, err := m.materializeHooks(claudeDir, nil)
 	if err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize hooks", err)
 	}
@@ -202,7 +272,7 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 	}
 
 	// Load the rite manifest from resolved path
-	manifest, err := m.loadRiteManifest(ritePath)
+	manifest, err := m.loadRiteManifest(ritePath, resolved)
 	if err != nil {
 		return nil, errors.Wrap(errors.CodeFileNotFound, "failed to load rite manifest", err)
 	}
@@ -247,24 +317,24 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 	}
 
 	// 4. Generate agents/ directory from rite
-	if err := m.materializeAgents(manifest, ritePath, claudeDir); err != nil {
+	if err := m.materializeAgents(manifest, ritePath, claudeDir, resolved); err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize agents", err)
 	}
 
 	// 5. Generate commands/ and skills/ directories from rite + shared + dependencies + mena
-	if err := m.materializeMena(manifest, claudeDir); err != nil {
+	if err := m.materializeMena(manifest, claudeDir, resolved); err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize mena", err)
 	}
 
 	// 6. Generate hooks/ directory from templates/hooks
-	hooksSkipped, err := m.materializeHooks(claudeDir)
+	hooksSkipped, err := m.materializeHooks(claudeDir, resolved)
 	if err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize hooks", err)
 	}
 	result.HooksSkipped = hooksSkipped
 
 	// 7. Generate CLAUDE.md from inscription system
-	legacyBackupPath, err := m.materializeCLAUDEmd(manifest, claudeDir)
+	legacyBackupPath, err := m.materializeCLAUDEmd(manifest, claudeDir, resolved)
 	if err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize CLAUDE.md", err)
 	}
@@ -394,9 +464,17 @@ func (m *Materializer) promoteOrphans(orphans []string, claudeDir string) error 
 }
 
 // loadRiteManifest loads a rite's manifest.yaml file.
-func (m *Materializer) loadRiteManifest(ritePath string) (*RiteManifest, error) {
-	manifestPath := filepath.Join(ritePath, "manifest.yaml")
-	data, err := os.ReadFile(manifestPath)
+// When resolved is non-nil and the source is embedded, reads from the embedded FS.
+func (m *Materializer) loadRiteManifest(ritePath string, resolved *ResolvedRite) (*RiteManifest, error) {
+	var data []byte
+	var err error
+
+	if resolved != nil && resolved.Source.Type == SourceEmbedded && m.sourceResolver.embeddedFS != nil {
+		data, err = fs.ReadFile(m.sourceResolver.embeddedFS, resolved.ManifestPath)
+	} else {
+		manifestPath := filepath.Join(ritePath, "manifest.yaml")
+		data, err = os.ReadFile(manifestPath)
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -410,7 +488,7 @@ func (m *Materializer) loadRiteManifest(ritePath string) (*RiteManifest, error) 
 }
 
 // materializeAgents copies agent files from rite to .claude/agents/
-func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claudeDir string) error {
+func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claudeDir string, resolved *ResolvedRite) error {
 	agentsDir := filepath.Join(claudeDir, "agents")
 
 	// Remove existing agents directory
@@ -423,7 +501,21 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claud
 		return err
 	}
 
-	// Copy agent files
+	// For embedded sources, use fs.FS to read agent files
+	if resolved != nil && resolved.Source.Type == SourceEmbedded {
+		rFS := m.riteFS(resolved)
+		agentsSub, err := fs.Sub(rFS, "agents")
+		if err != nil {
+			return nil // No agents sub-dir in embedded FS
+		}
+		// Check if agents dir exists in embedded FS
+		if _, err := fs.Stat(rFS, "agents"); err != nil {
+			return nil // No agents in this rite
+		}
+		return copyDirFromFS(agentsSub, agentsDir)
+	}
+
+	// Filesystem path: use existing os-based copy
 	sourceAgentsDir := filepath.Join(ritePath, "agents")
 	if _, err := os.Stat(sourceAgentsDir); os.IsNotExist(err) {
 		return nil // No agents in this rite
@@ -459,11 +551,20 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claud
 	})
 }
 
+// menaSource represents a source for mena files, which can be either
+// a filesystem path or an embedded FS path.
+type menaSource struct {
+	path       string // Filesystem path (for os-based sources)
+	fsys       fs.FS  // Embedded filesystem (nil for os-based sources)
+	fsysPath   string // Path within fsys (e.g., "rites/shared/mena")
+	isEmbedded bool
+}
+
 // materializeMena copies mena files to .claude/commands/ or .claude/skills/
 // based on the filename convention (.dro.md for dromena, .lego.md for legomena).
 // Sources: mena/, rites/{rite}/mena/, rites/shared/mena/
 // Priority order (later sources override earlier): mena < shared < dependencies < current rite
-func (m *Materializer) materializeMena(manifest *RiteManifest, claudeDir string) error {
+func (m *Materializer) materializeMena(manifest *RiteManifest, claudeDir string, resolved *ResolvedRite) error {
 	commandsDir := filepath.Join(claudeDir, "commands")
 	skillsDir := filepath.Join(claudeDir, "skills")
 
@@ -483,63 +584,121 @@ func (m *Materializer) materializeMena(manifest *RiteManifest, claudeDir string)
 		return err
 	}
 
+	isEmbedded := resolved != nil && resolved.Source.Type == SourceEmbedded && m.sourceResolver.embeddedFS != nil
+
 	// Priority order for sources (later sources can override earlier)
-	sources := []string{}
+	var sources []menaSource
 
 	// 1. User-level mena (lowest priority, can be overridden)
+	// Always from filesystem, never from embedded
 	if menaDir := m.getMenaDir(); menaDir != "" {
-		sources = append(sources, menaDir)
+		sources = append(sources, menaSource{path: menaDir})
 	}
 
-	// 2. Shared rite mena
-	sharedMenaDir := filepath.Join(m.ritesDir, "shared", "mena")
-	sources = append(sources, sharedMenaDir)
+	if isEmbedded {
+		// For embedded sources, read mena from embedded FS
+		embFS := m.sourceResolver.embeddedFS
 
-	// 3. Dependency rite mena (in order)
-	for _, dep := range manifest.Dependencies {
-		if dep != "shared" { // Already added shared
-			sources = append(sources, filepath.Join(m.ritesDir, dep, "mena"))
+		// 2. Shared rite mena
+		sources = append(sources, menaSource{fsys: embFS, fsysPath: "rites/shared/mena", isEmbedded: true})
+
+		// 3. Dependency rite mena (in order)
+		for _, dep := range manifest.Dependencies {
+			if dep != "shared" {
+				sources = append(sources, menaSource{fsys: embFS, fsysPath: "rites/" + dep + "/mena", isEmbedded: true})
+			}
 		}
-	}
 
-	// 4. Current rite mena (highest priority)
-	currentRiteMenaDir := filepath.Join(m.ritesDir, manifest.Name, "mena")
-	sources = append(sources, currentRiteMenaDir)
+		// 4. Current rite mena (highest priority)
+		sources = append(sources, menaSource{fsys: embFS, fsysPath: "rites/" + manifest.Name + "/mena", isEmbedded: true})
+	} else {
+		// 2. Shared rite mena
+		sharedMenaDir := filepath.Join(m.ritesDir, "shared", "mena")
+		sources = append(sources, menaSource{path: sharedMenaDir})
+
+		// 3. Dependency rite mena (in order)
+		for _, dep := range manifest.Dependencies {
+			if dep != "shared" {
+				sources = append(sources, menaSource{path: filepath.Join(m.ritesDir, dep, "mena")})
+			}
+		}
+
+		// 4. Current rite mena (highest priority)
+		currentRiteMenaDir := filepath.Join(m.ritesDir, manifest.Name, "mena")
+		sources = append(sources, menaSource{path: currentRiteMenaDir})
+	}
 
 	// Pass 1: Collect command directories from all sources.
 	// Later sources override earlier ones for the same command name.
-	// Each entry maps commandName -> source directory path.
-	collected := make(map[string]string)
-	for _, source := range sources {
-		if _, err := os.Stat(source); os.IsNotExist(err) {
-			continue
-		}
-		entries, err := os.ReadDir(source)
-		if err != nil {
-			return err
-		}
-		for _, entry := range entries {
-			if !entry.IsDir() {
+	type collectedEntry struct {
+		source menaSource
+		name   string
+	}
+	collected := make(map[string]collectedEntry)
+
+	for _, src := range sources {
+		if src.isEmbedded {
+			entries, err := fs.ReadDir(src.fsys, src.fsysPath)
+			if err != nil {
+				continue // Path doesn't exist in embedded FS
+			}
+			for _, entry := range entries {
+				if !entry.IsDir() {
+					continue
+				}
+				collected[entry.Name()] = collectedEntry{
+					source: menaSource{
+						fsys:       src.fsys,
+						fsysPath:   src.fsysPath + "/" + entry.Name(),
+						isEmbedded: true,
+					},
+					name: entry.Name(),
+				}
+			}
+		} else {
+			if src.path == "" {
 				continue
 			}
-			// Later sources override earlier: same key gets overwritten
-			collected[entry.Name()] = filepath.Join(source, entry.Name())
+			if _, err := os.Stat(src.path); os.IsNotExist(err) {
+				continue
+			}
+			entries, err := os.ReadDir(src.path)
+			if err != nil {
+				return err
+			}
+			for _, entry := range entries {
+				if !entry.IsDir() {
+					continue
+				}
+				collected[entry.Name()] = collectedEntry{
+					source: menaSource{path: filepath.Join(src.path, entry.Name())},
+					name:   entry.Name(),
+				}
+			}
 		}
 	}
 
 	// Pass 2: Route each collected command directory by filename convention.
-	// Files with .dro.md -> .claude/commands/ (dromena, invokable)
-	// Files with .lego.md -> .claude/skills/ (legomena, reference)
-	// Default (INDEX.md or other) -> .claude/commands/ for backward compatibility
-	for name, srcDir := range collected {
+	for name, ce := range collected {
 		menaType := "dro" // default: route to commands/
 
-		// Check for INDEX.md variants to determine mena type
-		if entries, err := os.ReadDir(srcDir); err == nil {
-			for _, entry := range entries {
-				if !entry.IsDir() && strings.HasPrefix(entry.Name(), "INDEX") {
-					menaType = DetectMenaType(entry.Name())
-					break
+		if ce.source.isEmbedded {
+			entries, err := fs.ReadDir(ce.source.fsys, ce.source.fsysPath)
+			if err == nil {
+				for _, entry := range entries {
+					if !entry.IsDir() && strings.HasPrefix(entry.Name(), "INDEX") {
+						menaType = DetectMenaType(entry.Name())
+						break
+					}
+				}
+			}
+		} else {
+			if entries, err := os.ReadDir(ce.source.path); err == nil {
+				for _, entry := range entries {
+					if !entry.IsDir() && strings.HasPrefix(entry.Name(), "INDEX") {
+						menaType = DetectMenaType(entry.Name())
+						break
+					}
 				}
 			}
 		}
@@ -551,8 +710,18 @@ func (m *Materializer) materializeMena(manifest *RiteManifest, claudeDir string)
 			destDir = filepath.Join(skillsDir, name)
 		}
 
-		if err := m.copyDir(srcDir, destDir); err != nil {
-			return err
+		if ce.source.isEmbedded {
+			sub, err := fs.Sub(ce.source.fsys, ce.source.fsysPath)
+			if err != nil {
+				return err
+			}
+			if err := copyDirFromFS(sub, destDir); err != nil {
+				return err
+			}
+		} else {
+			if err := m.copyDir(ce.source.path, destDir); err != nil {
+				return err
+			}
 		}
 	}
 
@@ -581,8 +750,31 @@ func (m *Materializer) getMenaDir() string {
 
 // materializeHooks copies hook files from templates/hooks to .claude/hooks/
 // Returns (skipped bool, err error) where skipped=true if no templates/hooks dir exists.
-func (m *Materializer) materializeHooks(claudeDir string) (bool, error) {
+func (m *Materializer) materializeHooks(claudeDir string, resolved *ResolvedRite) (bool, error) {
 	hooksDir := filepath.Join(claudeDir, "hooks")
+
+	// For embedded sources, try embedded templates FS
+	if resolved != nil && resolved.Source.Type == SourceEmbedded && m.embeddedTemplates != nil {
+		tFS := m.templatesFS(resolved)
+		if _, err := fs.Stat(tFS, "hooks"); err != nil {
+			return true, nil // No hooks in embedded templates
+		}
+		hooksSub, err := fs.Sub(tFS, "hooks")
+		if err != nil {
+			return true, nil
+		}
+
+		// Remove existing hooks directory
+		if err := os.RemoveAll(hooksDir); err != nil && !os.IsNotExist(err) {
+			return false, err
+		}
+		if err := paths.EnsureDir(hooksDir); err != nil {
+			return false, err
+		}
+		return false, copyDirFromFS(hooksSub, hooksDir)
+	}
+
+	// Filesystem path
 	sourceHooksDir := filepath.Join(m.templatesDir, "hooks")
 
 	// Check if templates/hooks exists (it may not yet)
@@ -608,7 +800,7 @@ func (m *Materializer) materializeHooks(claudeDir string) (bool, error) {
 
 // materializeCLAUDEmd generates CLAUDE.md using the inscription system.
 // Returns the path to legacy backup if migration occurred, or empty string if no backup.
-func (m *Materializer) materializeCLAUDEmd(manifest *RiteManifest, claudeDir string) (string, error) {
+func (m *Materializer) materializeCLAUDEmd(manifest *RiteManifest, claudeDir string, resolved *ResolvedRite) (string, error) {
 	// Load or create KNOSSOS_MANIFEST.yaml
 	knossosManifestPath := filepath.Join(claudeDir, "KNOSSOS_MANIFEST.yaml")
 	loader := inscription.NewManifestLoader(m.resolver.ProjectRoot())
@@ -648,8 +840,15 @@ func (m *Materializer) materializeCLAUDEmd(manifest *RiteManifest, claudeDir str
 		ProjectRoot: m.resolver.ProjectRoot(),
 	}
 
-	// Create generator with template directory for section rendering
-	generator := inscription.NewGenerator(m.templatesDir, inscriptionManifest, renderCtx)
+	// Create generator with template directory for section rendering.
+	// When the source is embedded, pass the embedded templates FS to the generator.
+	var generator *inscription.Generator
+	if resolved != nil && resolved.Source.Type == SourceEmbedded && m.embeddedTemplates != nil {
+		tFS := m.templatesFS(resolved)
+		generator = inscription.NewGeneratorWithFS(tFS, inscriptionManifest, renderCtx)
+	} else {
+		generator = inscription.NewGenerator(m.templatesDir, inscriptionManifest, renderCtx)
+	}
 
 	// Generate all sections
 	sections, err := generator.GenerateAll()

@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/autom8y/knossos"
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"github.com/autom8y/knossos/internal/cmd/root"
 	"github.com/autom8y/knossos/internal/errors"
 )
@@ -19,6 +21,7 @@ var (
 
 func main() {
 	root.SetVersion(version, commit, date)
+	common.SetEmbeddedAssets(knossos.EmbeddedRites, knossos.EmbeddedTemplates, knossos.EmbeddedHooksYAML)
 	if err := root.Execute(); err != nil {
 		// Print error to stderr (SilenceErrors is enabled on root cmd)
 		fmt.Fprintln(os.Stderr, "Error:", err)

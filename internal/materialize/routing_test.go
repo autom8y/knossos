@@ -40,7 +40,7 @@ This is a test command.
 		Version: "1.0.0",
 	}
 
-	if err := m.materializeMena(manifest, claudeDir); err != nil {
+	if err := m.materializeMena(manifest, claudeDir, nil); err != nil {
 		t.Fatalf("materializeMena failed: %v", err)
 	}
 
@@ -89,7 +89,7 @@ This is a test reference.
 		Version: "1.0.0",
 	}
 
-	if err := m.materializeMena(manifest, claudeDir); err != nil {
+	if err := m.materializeMena(manifest, claudeDir, nil); err != nil {
 		t.Fatalf("materializeMena failed: %v", err)
 	}
 
@@ -138,7 +138,7 @@ This command has a plain INDEX.md and should default to dromena routing.
 		Version: "1.0.0",
 	}
 
-	if err := m.materializeMena(manifest, claudeDir); err != nil {
+	if err := m.materializeMena(manifest, claudeDir, nil); err != nil {
 		t.Fatalf("materializeMena failed: %v", err)
 	}
 
@@ -196,7 +196,7 @@ This is a test reference with supporting files.
 		Version: "1.0.0",
 	}
 
-	if err := m.materializeMena(manifest, claudeDir); err != nil {
+	if err := m.materializeMena(manifest, claudeDir, nil); err != nil {
 		t.Fatalf("materializeMena failed: %v", err)
 	}
 
@@ -284,7 +284,7 @@ description: A default command
 		Version: "1.0.0",
 	}
 
-	if err := m.materializeMena(manifest, claudeDir); err != nil {
+	if err := m.materializeMena(manifest, claudeDir, nil); err != nil {
 		t.Fatalf("materializeMena failed: %v", err)
 	}
 

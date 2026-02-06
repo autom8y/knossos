@@ -64,6 +64,16 @@ func (m *Materializer) loadHooksConfig() *HooksConfig {
 		return &cfg
 	}
 
+	// Fallback: embedded hooks.yaml (compiled into binary)
+	if m.embeddedHooksYAML != nil {
+		var cfg HooksConfig
+		if err := yaml.Unmarshal(m.embeddedHooksYAML, &cfg); err == nil {
+			if cfg.SchemaVersion == "2.0" {
+				return &cfg
+			}
+		}
+	}
+
 	return nil
 }
 

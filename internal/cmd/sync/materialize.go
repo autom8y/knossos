@@ -126,6 +126,17 @@ func runMaterialize(ctx *cmdContext, riteName string, source string, opts materi
 		m = materialize.NewMaterializer(resolver)
 	}
 
+	// Wire embedded assets if available
+	if embRites := common.EmbeddedRites(); embRites != nil {
+		m.WithEmbeddedFS(embRites)
+	}
+	if embTemplates := common.EmbeddedTemplates(); embTemplates != nil {
+		m.WithEmbeddedTemplates(embTemplates)
+	}
+	if embHooks := common.EmbeddedHooksYAML(); embHooks != nil {
+		m.WithEmbeddedHooks(embHooks)
+	}
+
 	// Handle minimal mode (cross-cutting, no rite required)
 	if opts.Minimal {
 		printer.VerboseLog("info", "Materializing minimal .claude/ (cross-cutting mode)", nil)

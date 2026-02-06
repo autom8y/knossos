@@ -2,6 +2,7 @@ package inscription
 
 import (
 	"bytes"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -43,6 +44,10 @@ type Generator struct {
 	// TemplateDir is the directory containing template files.
 	TemplateDir string
 
+	// TemplateFS is an optional fs.FS for reading templates (e.g., from embedded assets).
+	// When set, templates are read from this FS before falling back to TemplateDir.
+	TemplateFS fs.FS
+
 	// Manifest is the current KNOSSOS_MANIFEST.yaml.
 	Manifest *Manifest
 
@@ -60,6 +65,17 @@ type Generator struct {
 func NewGenerator(templateDir string, manifest *Manifest, ctx *RenderContext) *Generator {
 	return &Generator{
 		TemplateDir:      templateDir,
+		Manifest:         manifest,
+		Context:          ctx,
+		sectionTemplates: make(map[string]string),
+	}
+}
+
+// NewGeneratorWithFS creates a generator that reads templates from an fs.FS
+// instead of the filesystem. Used when materializing from embedded assets.
+func NewGeneratorWithFS(templateFS fs.FS, manifest *Manifest, ctx *RenderContext) *Generator {
+	return &Generator{
+		TemplateFS:       templateFS,
 		Manifest:         manifest,
 		Context:          ctx,
 		sectionTemplates: make(map[string]string),
@@ -170,12 +186,22 @@ func (g *Generator) renderSatelliteRegion(regionName string) (string, error) {
 }
 
 // getSectionTemplatePath returns the path to a section template if it exists.
+// When TemplateFS is set, returns the fs.FS-relative path if the template exists there.
+// Otherwise falls back to the filesystem TemplateDir.
 func (g *Generator) getSectionTemplatePath(regionName string) string {
+	// Try embedded FS first
+	if g.TemplateFS != nil {
+		fsPath := "sections/" + regionName + ".md.tpl"
+		if _, err := fs.Stat(g.TemplateFS, fsPath); err == nil {
+			return fsPath // Return FS-relative path
+		}
+	}
+
+	// Fall back to filesystem
 	if g.TemplateDir == "" {
 		return ""
 	}
 
-	// Check for section-specific template
 	path := filepath.Join(g.TemplateDir, "sections", regionName+".md.tpl")
 	if _, err := os.Stat(path); err == nil {
 		return path
@@ -185,8 +211,16 @@ func (g *Generator) getSectionTemplatePath(regionName string) string {
 }
 
 // renderTemplateFile renders a template from a file path.
+// When TemplateFS is set, reads from the embedded FS; otherwise reads from os filesystem.
 func (g *Generator) renderTemplateFile(path string) (string, error) {
-	data, err := os.ReadFile(path)
+	var data []byte
+	var err error
+
+	if g.TemplateFS != nil {
+		data, err = fs.ReadFile(g.TemplateFS, path)
+	} else {
+		data, err = os.ReadFile(path)
+	}
 	if err != nil {
 		return "", errors.Wrap(errors.CodeFileNotFound, "failed to read template file", err)
 	}
@@ -231,6 +265,11 @@ func (g *Generator) templateFuncs() template.FuncMap {
 
 // includePartial loads and renders a partial template.
 func (g *Generator) includePartial(partialPath string) (string, error) {
+	// When using TemplateFS, the path is already FS-relative
+	if g.TemplateFS != nil {
+		return g.renderTemplateFile(partialPath)
+	}
+
 	if g.TemplateDir == "" {
 		return "", errors.New(errors.CodeFileNotFound, "template directory not configured")
 	}
