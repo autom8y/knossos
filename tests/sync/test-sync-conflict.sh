@@ -5,20 +5,20 @@
 # Tests three-way classification, conflict detection, backup creation,
 # and conflict resolution with --force flag.
 #
-# Part of: roster-sync (TDD-cem-replacement task-015)
+# Part of: knossos-sync (TDD-cem-replacement task-015)
 
 # Note: We use -uo pipefail but NOT -e because we handle test failures explicitly
 set -uo pipefail
 
 # Test setup
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ROSTER_HOME="${ROSTER_HOME:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
+KNOSSOS_HOME="${KNOSSOS_HOME:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
 
 # Source dependencies in order
-source "$ROSTER_HOME/lib/sync/sync-config.sh"
-source "$ROSTER_HOME/lib/sync/sync-checksum.sh"
-source "$ROSTER_HOME/lib/sync/sync-manifest.sh"
-source "$ROSTER_HOME/lib/sync/sync-core.sh"
+source "$KNOSSOS_HOME/lib/sync/sync-config.sh"
+source "$KNOSSOS_HOME/lib/sync/sync-checksum.sh"
+source "$KNOSSOS_HOME/lib/sync/sync-manifest.sh"
+source "$KNOSSOS_HOME/lib/sync/sync-core.sh"
 
 # Test counters
 TESTS_RUN=0
@@ -52,7 +52,7 @@ setup() {
     echo "Test temp dir: $TEST_TMP"
 
     # Create test directory structure
-    mkdir -p "$TEST_TMP/roster/.claude"
+    mkdir -p "$TEST_TMP/knossos/.claude"
     mkdir -p "$TEST_TMP/local/.claude/.cem"
 
     # Override manifest location for tests
@@ -74,17 +74,17 @@ teardown() {
 
 # Helper to create a test manifest
 create_test_manifest() {
-    local roster_path="$1"
+    local knossos_path="$1"
 
     local manifest
     manifest=$(jq -n \
         --argjson sv 3 \
-        --arg rp "$roster_path" \
+        --arg rp "$knossos_path" \
         --arg rc "test-commit-hash" \
         --arg rr "main" \
         --arg ts "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" '{
         schema_version: $sv,
-        roster: {
+        knossos: {
             path: $rp,
             commit: $rc,
             ref: $rr,
@@ -115,7 +115,7 @@ add_file_to_manifest() {
             path: $p,
             strategy: $s,
             checksum: $c,
-            source: "roster",
+            source: "knossos",
             added_at: $t,
             last_sync: $t
         }]')
@@ -131,17 +131,17 @@ test_classify_skip_up_to_date() {
     run_test "classify_file: SKIP when up to date (no changes)"
 
     # Create identical files
-    echo "content" > "$TEST_TMP/roster/.claude/test.md"
+    echo "content" > "$TEST_TMP/knossos/.claude/test.md"
     echo "content" > "$TEST_TMP/local/.claude/test.md"
 
     # Create manifest with matching checksum
-    create_test_manifest "$TEST_TMP/roster"
+    create_test_manifest "$TEST_TMP/knossos"
     local checksum
-    checksum=$(compute_checksum "$TEST_TMP/roster/.claude/test.md")
+    checksum=$(compute_checksum "$TEST_TMP/knossos/.claude/test.md")
     add_file_to_manifest ".claude/test.md" "$checksum"
 
     local result
-    result=$(classify_file "test.md" "$TEST_TMP/roster/.claude/test.md" "$TEST_TMP/local/.claude/test.md")
+    result=$(classify_file "test.md" "$TEST_TMP/knossos/.claude/test.md" "$TEST_TMP/local/.claude/test.md")
 
     if [[ "$result" == "$CLASSIFY_SKIP" ]]; then
         test_pass "returns SKIP when no changes"
@@ -153,17 +153,17 @@ test_classify_skip_up_to_date() {
 test_classify_skip_preserve_local() {
     run_test "classify_file: SKIP when only local changed (preserve local)"
 
-    # Roster unchanged from manifest, local modified
-    echo "original" > "$TEST_TMP/roster/.claude/test.md"
+    # Knossos unchanged from manifest, local modified
+    echo "original" > "$TEST_TMP/knossos/.claude/test.md"
     echo "local changes" > "$TEST_TMP/local/.claude/test.md"
 
-    create_test_manifest "$TEST_TMP/roster"
-    local roster_checksum
-    roster_checksum=$(compute_checksum "$TEST_TMP/roster/.claude/test.md")
-    add_file_to_manifest ".claude/test.md" "$roster_checksum"
+    create_test_manifest "$TEST_TMP/knossos"
+    local knossos_checksum
+    knossos_checksum=$(compute_checksum "$TEST_TMP/knossos/.claude/test.md")
+    add_file_to_manifest ".claude/test.md" "$knossos_checksum"
 
     local result
-    result=$(classify_file "test.md" "$TEST_TMP/roster/.claude/test.md" "$TEST_TMP/local/.claude/test.md")
+    result=$(classify_file "test.md" "$TEST_TMP/knossos/.claude/test.md" "$TEST_TMP/local/.claude/test.md")
 
     if [[ "$result" == "$CLASSIFY_SKIP" ]]; then
         test_pass "returns SKIP to preserve local changes"
@@ -172,41 +172,41 @@ test_classify_skip_preserve_local() {
     fi
 }
 
-test_classify_update_roster_changed() {
-    run_test "classify_file: UPDATE when roster changed, local unchanged"
+test_classify_update_knossos_changed() {
+    run_test "classify_file: UPDATE when knossos changed, local unchanged"
 
-    # Setup: local matches old manifest, roster has new content
+    # Setup: local matches old manifest, knossos has new content
     echo "old content" > "$TEST_TMP/local/.claude/test.md"
-    echo "new content" > "$TEST_TMP/roster/.claude/test.md"
+    echo "new content" > "$TEST_TMP/knossos/.claude/test.md"
 
-    create_test_manifest "$TEST_TMP/roster"
+    create_test_manifest "$TEST_TMP/knossos"
     local old_checksum
     old_checksum=$(compute_checksum "$TEST_TMP/local/.claude/test.md")
     add_file_to_manifest ".claude/test.md" "$old_checksum"
 
     local result
-    result=$(classify_file "test.md" "$TEST_TMP/roster/.claude/test.md" "$TEST_TMP/local/.claude/test.md")
+    result=$(classify_file "test.md" "$TEST_TMP/knossos/.claude/test.md" "$TEST_TMP/local/.claude/test.md")
 
     if [[ "$result" == "$CLASSIFY_UPDATE" ]]; then
-        test_pass "returns UPDATE when roster changed"
+        test_pass "returns UPDATE when knossos changed"
     else
-        test_fail "classify_file roster updated" "$CLASSIFY_UPDATE" "$result"
+        test_fail "classify_file knossos updated" "$CLASSIFY_UPDATE" "$result"
     fi
 }
 
 test_classify_conflict_both_changed() {
-    run_test "classify_file: CONFLICT when both roster and local changed"
+    run_test "classify_file: CONFLICT when both knossos and local changed"
 
-    # Setup: manifest has original, both roster and local have different changes
+    # Setup: manifest has original, both knossos and local have different changes
     echo "local changes" > "$TEST_TMP/local/.claude/test.md"
-    echo "roster changes" > "$TEST_TMP/roster/.claude/test.md"
+    echo "knossos changes" > "$TEST_TMP/knossos/.claude/test.md"
 
-    create_test_manifest "$TEST_TMP/roster"
+    create_test_manifest "$TEST_TMP/knossos"
     # Manifest checksum is different from both
     add_file_to_manifest ".claude/test.md" "fake-original-checksum-12345"
 
     local result
-    result=$(classify_file "test.md" "$TEST_TMP/roster/.claude/test.md" "$TEST_TMP/local/.claude/test.md")
+    result=$(classify_file "test.md" "$TEST_TMP/knossos/.claude/test.md" "$TEST_TMP/local/.claude/test.md")
 
     if [[ "$result" == "$CLASSIFY_CONFLICT" ]]; then
         test_pass "returns CONFLICT when both changed"
@@ -218,12 +218,12 @@ test_classify_conflict_both_changed() {
 test_classify_new_local_missing() {
     run_test "classify_file: NEW when local file doesn't exist"
 
-    echo "roster content" > "$TEST_TMP/roster/.claude/new.md"
+    echo "knossos content" > "$TEST_TMP/knossos/.claude/new.md"
 
-    create_test_manifest "$TEST_TMP/roster"
+    create_test_manifest "$TEST_TMP/knossos"
 
     local result
-    result=$(classify_file "new.md" "$TEST_TMP/roster/.claude/new.md" "$TEST_TMP/local/.claude/new.md")
+    result=$(classify_file "new.md" "$TEST_TMP/knossos/.claude/new.md" "$TEST_TMP/local/.claude/new.md")
 
     if [[ "$result" == "$CLASSIFY_NEW" ]]; then
         test_pass "returns NEW when local missing"
@@ -236,13 +236,13 @@ test_classify_conflict_no_manifest() {
     run_test "classify_file: CONFLICT when no manifest and files differ"
 
     echo "local content" > "$TEST_TMP/local/.claude/test.md"
-    echo "roster content" > "$TEST_TMP/roster/.claude/test.md"
+    echo "knossos content" > "$TEST_TMP/knossos/.claude/test.md"
 
-    create_test_manifest "$TEST_TMP/roster"
+    create_test_manifest "$TEST_TMP/knossos"
     # No file entry in manifest
 
     local result
-    result=$(classify_file "test.md" "$TEST_TMP/roster/.claude/test.md" "$TEST_TMP/local/.claude/test.md")
+    result=$(classify_file "test.md" "$TEST_TMP/knossos/.claude/test.md" "$TEST_TMP/local/.claude/test.md")
 
     if [[ "$result" == "$CLASSIFY_CONFLICT" ]]; then
         test_pass "returns CONFLICT when no manifest and files differ"
@@ -255,13 +255,13 @@ test_classify_skip_no_manifest_identical() {
     run_test "classify_file: SKIP when no manifest but files identical"
 
     echo "same content" > "$TEST_TMP/local/.claude/test.md"
-    echo "same content" > "$TEST_TMP/roster/.claude/test.md"
+    echo "same content" > "$TEST_TMP/knossos/.claude/test.md"
 
-    create_test_manifest "$TEST_TMP/roster"
+    create_test_manifest "$TEST_TMP/knossos"
     # No file entry in manifest
 
     local result
-    result=$(classify_file "test.md" "$TEST_TMP/roster/.claude/test.md" "$TEST_TMP/local/.claude/test.md")
+    result=$(classify_file "test.md" "$TEST_TMP/knossos/.claude/test.md" "$TEST_TMP/local/.claude/test.md")
 
     if [[ "$result" == "$CLASSIFY_SKIP" ]]; then
         test_pass "returns SKIP when identical but no manifest"
@@ -277,13 +277,13 @@ test_classify_skip_no_manifest_identical() {
 test_classify_detailed_returns_json() {
     run_test "classify_file_detailed: returns valid JSON"
 
-    echo "content" > "$TEST_TMP/roster/.claude/test.md"
+    echo "content" > "$TEST_TMP/knossos/.claude/test.md"
     echo "content" > "$TEST_TMP/local/.claude/test.md"
 
-    create_test_manifest "$TEST_TMP/roster"
+    create_test_manifest "$TEST_TMP/knossos"
 
     local result
-    result=$(classify_file_detailed "test.md" "$TEST_TMP/roster/.claude/test.md" "$TEST_TMP/local/.claude/test.md")
+    result=$(classify_file_detailed "test.md" "$TEST_TMP/knossos/.claude/test.md" "$TEST_TMP/local/.claude/test.md")
 
     if echo "$result" | jq -e . >/dev/null 2>&1; then
         test_pass "returns valid JSON"
@@ -295,37 +295,37 @@ test_classify_detailed_returns_json() {
 test_classify_detailed_includes_checksums() {
     run_test "classify_file_detailed: includes all checksums"
 
-    echo "roster" > "$TEST_TMP/roster/.claude/test.md"
+    echo "knossos" > "$TEST_TMP/knossos/.claude/test.md"
     echo "local" > "$TEST_TMP/local/.claude/test.md"
 
-    create_test_manifest "$TEST_TMP/roster"
+    create_test_manifest "$TEST_TMP/knossos"
     add_file_to_manifest ".claude/test.md" "manifest-checksum"
 
     local result
-    result=$(classify_file_detailed "test.md" "$TEST_TMP/roster/.claude/test.md" "$TEST_TMP/local/.claude/test.md")
+    result=$(classify_file_detailed "test.md" "$TEST_TMP/knossos/.claude/test.md" "$TEST_TMP/local/.claude/test.md")
 
-    local has_roster has_local
-    has_roster=$(echo "$result" | jq -r '.roster_checksum')
+    local has_knossos has_local
+    has_knossos=$(echo "$result" | jq -r '.knossos_checksum')
     has_local=$(echo "$result" | jq -r '.local_checksum')
 
-    if [[ -n "$has_roster" && "$has_roster" != "null" && -n "$has_local" && "$has_local" != "null" ]]; then
-        test_pass "includes roster and local checksums"
+    if [[ -n "$has_knossos" && "$has_knossos" != "null" && -n "$has_local" && "$has_local" != "null" ]]; then
+        test_pass "includes knossos and local checksums"
     else
-        test_fail "classify_file_detailed checksums" "non-null checksums" "roster=$has_roster local=$has_local"
+        test_fail "classify_file_detailed checksums" "non-null checksums" "knossos=$has_knossos local=$has_local"
     fi
 }
 
 test_classify_detailed_includes_reason() {
     run_test "classify_file_detailed: includes reason"
 
-    echo "roster changes" > "$TEST_TMP/roster/.claude/test.md"
+    echo "knossos changes" > "$TEST_TMP/knossos/.claude/test.md"
     echo "local changes" > "$TEST_TMP/local/.claude/test.md"
 
-    create_test_manifest "$TEST_TMP/roster"
+    create_test_manifest "$TEST_TMP/knossos"
     add_file_to_manifest ".claude/test.md" "old-checksum"
 
     local result
-    result=$(classify_file_detailed "test.md" "$TEST_TMP/roster/.claude/test.md" "$TEST_TMP/local/.claude/test.md")
+    result=$(classify_file_detailed "test.md" "$TEST_TMP/knossos/.claude/test.md" "$TEST_TMP/local/.claude/test.md")
 
     local reason
     reason=$(echo "$result" | jq -r '.reason')
@@ -454,12 +454,12 @@ test_resolve_without_force_keeps_local() {
 
     local original_local="local content"
     echo "$original_local" > "$TEST_TMP/local/.claude/test.md"
-    echo "roster content" > "$TEST_TMP/roster/.claude/test.md"
+    echo "knossos content" > "$TEST_TMP/knossos/.claude/test.md"
 
-    create_test_manifest "$TEST_TMP/roster"
+    create_test_manifest "$TEST_TMP/knossos"
     init_conflict_backup_session "$TEST_TMP/backup"
 
-    resolve_conflict "$TEST_TMP/roster/.claude/test.md" "$TEST_TMP/local/.claude/test.md" "test.md" 0
+    resolve_conflict "$TEST_TMP/knossos/.claude/test.md" "$TEST_TMP/local/.claude/test.md" "test.md" 0
 
     local current_content
     current_content=$(cat "$TEST_TMP/local/.claude/test.md")
@@ -475,16 +475,16 @@ test_resolve_without_force_creates_backup() {
     run_test "resolve_conflict: without force creates backup"
 
     echo "local content" > "$TEST_TMP/local/.claude/test.md"
-    echo "roster content" > "$TEST_TMP/roster/.claude/test.md"
+    echo "knossos content" > "$TEST_TMP/knossos/.claude/test.md"
 
-    create_test_manifest "$TEST_TMP/roster"
+    create_test_manifest "$TEST_TMP/knossos"
     # Reset conflict tracking for this test
     _CONFLICT_BACKUP_DIR=""
     _CONFLICT_COUNT=0
     _CONFLICT_FILES=()
     init_conflict_backup_session "$TEST_TMP/backup"
 
-    resolve_conflict "$TEST_TMP/roster/.claude/test.md" "$TEST_TMP/local/.claude/test.md" "test.md" 0 2>/dev/null
+    resolve_conflict "$TEST_TMP/knossos/.claude/test.md" "$TEST_TMP/local/.claude/test.md" "test.md" 0 2>/dev/null
 
     if [[ $_CONFLICT_COUNT -eq 1 ]]; then
         test_pass "backup created without force"
@@ -496,22 +496,22 @@ test_resolve_without_force_creates_backup() {
 test_resolve_with_force_overwrites() {
     run_test "resolve_conflict: with force overwrites local"
 
-    local roster_content="roster content"
+    local knossos_content="knossos content"
     echo "local content" > "$TEST_TMP/local/.claude/test.md"
-    echo "$roster_content" > "$TEST_TMP/roster/.claude/test.md"
+    echo "$knossos_content" > "$TEST_TMP/knossos/.claude/test.md"
 
-    create_test_manifest "$TEST_TMP/roster"
+    create_test_manifest "$TEST_TMP/knossos"
     init_conflict_backup_session "$TEST_TMP/backup"
 
-    resolve_conflict "$TEST_TMP/roster/.claude/test.md" "$TEST_TMP/local/.claude/test.md" "test.md" 1
+    resolve_conflict "$TEST_TMP/knossos/.claude/test.md" "$TEST_TMP/local/.claude/test.md" "test.md" 1
 
     local current_content
     current_content=$(cat "$TEST_TMP/local/.claude/test.md")
 
-    if [[ "$current_content" == "$roster_content" ]]; then
+    if [[ "$current_content" == "$knossos_content" ]]; then
         test_pass "local file overwritten with force"
     else
-        test_fail "resolve with force" "$roster_content" "$current_content"
+        test_fail "resolve with force" "$knossos_content" "$current_content"
     fi
 }
 
@@ -519,16 +519,16 @@ test_resolve_with_force_still_creates_backup() {
     run_test "resolve_conflict: with force still creates backup"
 
     echo "local content" > "$TEST_TMP/local/.claude/test.md"
-    echo "roster content" > "$TEST_TMP/roster/.claude/test.md"
+    echo "knossos content" > "$TEST_TMP/knossos/.claude/test.md"
 
-    create_test_manifest "$TEST_TMP/roster"
+    create_test_manifest "$TEST_TMP/knossos"
     # Reset conflict tracking for this test
     _CONFLICT_BACKUP_DIR=""
     _CONFLICT_COUNT=0
     _CONFLICT_FILES=()
     init_conflict_backup_session "$TEST_TMP/backup"
 
-    resolve_conflict "$TEST_TMP/roster/.claude/test.md" "$TEST_TMP/local/.claude/test.md" "test.md" 1 2>/dev/null
+    resolve_conflict "$TEST_TMP/knossos/.claude/test.md" "$TEST_TMP/local/.claude/test.md" "test.md" 1 2>/dev/null
 
     if [[ $_CONFLICT_COUNT -eq 1 ]]; then
         test_pass "backup created even with force"
@@ -783,7 +783,7 @@ setup
 # Classification tests
 test_classify_skip_up_to_date
 test_classify_skip_preserve_local
-test_classify_update_roster_changed
+test_classify_update_knossos_changed
 test_classify_conflict_both_changed
 test_classify_new_local_missing
 test_classify_conflict_no_manifest

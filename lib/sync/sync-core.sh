@@ -5,7 +5,7 @@
 # Implements the core synchronization algorithm including three-way
 # checksum classification and conflict detection.
 #
-# Part of: roster-sync (TDD-cem-replacement)
+# Part of: knossos-sync (TDD-cem-replacement)
 #
 # Usage:
 #   source "$KNOSSOS_HOME/lib/sync/sync-core.sh"
@@ -15,7 +15,7 @@
 #   classify_file          - Three-way checksum classification
 #   process_copy_replace   - Process copy-replace items
 #   process_merge_items    - Process merge items
-#   detect_orphans         - Find files no longer in roster
+#   detect_orphans         - Find files no longer in knossos
 #   create_conflict_backup - Backup conflicting file
 
 # Guard against re-sourcing
@@ -38,8 +38,8 @@ readonly CLASSIFY_NEW="NEW"
 # Classify a file using three-way checksum comparison
 #
 # Decision Matrix:
-# | Roster Changed?        | Local Changed?         | Action    |
-# | (roster != manifest)   | (local != manifest)    |           |
+# | Knossos Changed?        | Local Changed?         | Action    |
+# | (knossos != manifest)   | (local != manifest)    |           |
 # |------------------------|------------------------|-----------|
 # | No                     | No                     | SKIP      |
 # | No                     | Yes                    | SKIP      |
@@ -97,11 +97,11 @@ classify_file() {
     fi
 
     # Three-way comparison
-    local roster_changed=0
+    local knossos_changed=0
     local local_changed=0
 
     if [[ "$knossos_checksum" != "$manifest_checksum" ]]; then
-        roster_changed=1
+        knossos_changed=1
     fi
 
     if [[ "$local_checksum" != "$manifest_checksum" ]]; then
@@ -109,13 +109,13 @@ classify_file() {
     fi
 
     # Apply decision matrix
-    if [[ $roster_changed -eq 0 && $local_changed -eq 0 ]]; then
+    if [[ $knossos_changed -eq 0 && $local_changed -eq 0 ]]; then
         sync_log_debug "  -> SKIP (up to date)"
         echo "$CLASSIFY_SKIP"
-    elif [[ $roster_changed -eq 0 && $local_changed -eq 1 ]]; then
+    elif [[ $knossos_changed -eq 0 && $local_changed -eq 1 ]]; then
         sync_log_debug "  -> SKIP (preserve local)"
         echo "$CLASSIFY_SKIP"
-    elif [[ $roster_changed -eq 1 && $local_changed -eq 0 ]]; then
+    elif [[ $knossos_changed -eq 1 && $local_changed -eq 0 ]]; then
         sync_log_debug "  -> UPDATE (safe to overwrite)"
         echo "$CLASSIFY_UPDATE"
     else
@@ -223,12 +223,12 @@ create_conflict_backup() {
     echo "$backup_file"
 }
 
-# Resolve a conflict by applying roster version
+# Resolve a conflict by applying knossos version
 # Usage: resolve_conflict "knossos_file" "local_file" "filename" [force]
 # Returns: 0 on success, 1 on failure
 #
 # Without force: Creates backup, reports conflict
-# With force: Creates backup, overwrites with roster version
+# With force: Creates backup, overwrites with knossos version
 resolve_conflict() {
     local knossos_file="$1"
     local local_file="$2"
@@ -269,7 +269,7 @@ resolve_conflict() {
     fi
 
     if [[ "$force" == "1" ]]; then
-        # Force mode: overwrite with roster version
+        # Force mode: overwrite with knossos version
         cp "$knossos_file" "$local_file" || {
             sync_log_error "Failed to overwrite conflict: $local_file"
             return 1
@@ -329,18 +329,18 @@ generate_conflict_report() {
         echo "----------------------------------------------"
         echo ""
         echo "These files have local modifications that conflict with"
-        echo "roster updates. Options:"
+        echo "knossos updates. Options:"
         echo ""
         echo "  1. Review changes and merge manually"
         echo "     - Backed up files are in: ${_CONFLICT_BACKUP_DIR:-}"
         echo "     - Compare with current files to merge changes"
         echo ""
-        echo "  2. Accept roster version (discard local changes)"
-        echo "     - Run: roster-sync sync --force"
+        echo "  2. Accept knossos version (discard local changes)"
+        echo "     - Run: knossos-sync sync --force"
         echo ""
         echo "  3. Keep local version"
         echo "     - No action needed, local files preserved"
-        echo "     - Run: roster-sync sync (will show conflicts again)"
+        echo "     - Run: knossos-sync sync (will show conflicts again)"
         echo ""
         echo "=============================================="
     } > "$output_file"
@@ -376,7 +376,7 @@ finalize_conflicts() {
         echo ""
         echo "To resolve:"
         echo "  - Review: cat ${_CONFLICT_BACKUP_DIR:-}/conflict-report.txt"
-        echo "  - Force overwrite: roster-sync sync --force"
+        echo "  - Force overwrite: knossos-sync sync --force"
         echo ""
         return $EXIT_SYNC_CONFLICTS
     fi
@@ -443,12 +443,12 @@ classify_file_detailed() {
     local classification="$CLASSIFY_SKIP"
     local reason=""
 
-    # Roster checksum
+    # Knossos checksum
     if [[ -f "$knossos_file" ]]; then
         knossos_checksum=$(compute_checksum "$knossos_file")
     else
         classification="$CLASSIFY_SKIP"
-        reason="roster_missing"
+        reason="knossos_missing"
         jq -n \
             --arg c "$classification" \
             --arg r "$reason" \
@@ -486,19 +486,19 @@ classify_file_detailed() {
         fi
     else
         # Three-way comparison
-        local roster_changed=0
+        local knossos_changed=0
         local local_changed=0
 
-        [[ "$knossos_checksum" != "$manifest_checksum" ]] && roster_changed=1
+        [[ "$knossos_checksum" != "$manifest_checksum" ]] && knossos_changed=1
         [[ "$local_checksum" != "$manifest_checksum" ]] && local_changed=1
 
-        if [[ $roster_changed -eq 0 && $local_changed -eq 0 ]]; then
+        if [[ $knossos_changed -eq 0 && $local_changed -eq 0 ]]; then
             classification="$CLASSIFY_SKIP"
             reason="up_to_date"
-        elif [[ $roster_changed -eq 0 && $local_changed -eq 1 ]]; then
+        elif [[ $knossos_changed -eq 0 && $local_changed -eq 1 ]]; then
             classification="$CLASSIFY_SKIP"
             reason="preserve_local"
-        elif [[ $roster_changed -eq 1 && $local_changed -eq 0 ]]; then
+        elif [[ $knossos_changed -eq 1 && $local_changed -eq 0 ]]; then
             classification="$CLASSIFY_UPDATE"
             reason="knossos_updated"
         else
@@ -522,14 +522,14 @@ classify_file_detailed() {
 # ============================================================================
 
 # Process all copy-replace items
-# Usage: process_copy_replace "roster_dir" "local_dir" [force]
+# Usage: process_copy_replace "knossos_dir" "local_dir" [force]
 # Returns: number of conflicts
 #
 # Per TDD 4.3:
 # - CONFLICT without --force: Report conflicts, exit code 5
-# - CONFLICT with --force: Backup local to .cem-backup/, overwrite with roster
+# - CONFLICT with --force: Backup local to .cem-backup/, overwrite with knossos
 process_copy_replace() {
-    local roster_dir="$1"
+    local knossos_dir="$1"
     local local_dir="$2"
     local force="${3:-0}"
 
@@ -539,7 +539,7 @@ process_copy_replace() {
     while IFS= read -r item; do
         [[ -z "$item" ]] && continue
 
-        knossos_file="$roster_dir/$item"
+        knossos_file="$knossos_dir/$item"
         local_file="$local_dir/$item"
 
         classification=$(classify_file "$item" "$knossos_file" "$local_file")
@@ -561,7 +561,7 @@ process_copy_replace() {
                 set_manifest_checksum "$item" "$new_checksum"
                 ;;
             "$CLASSIFY_CONFLICT")
-                sync_log_warning "Conflict: $item (local modified, roster updated)"
+                sync_log_warning "Conflict: $item (local modified, knossos updated)"
                 ((conflicts++)) || true
 
                 # Use resolve_conflict which handles backup and optional force
@@ -578,10 +578,10 @@ process_copy_replace() {
 # ============================================================================
 
 # Process all merge items
-# Usage: process_merge_items "roster_dir" "local_dir" [force]
+# Usage: process_merge_items "knossos_dir" "local_dir" [force]
 # Returns: number of errors
 process_merge_items() {
-    local roster_dir="$1"
+    local knossos_dir="$1"
     local local_dir="$2"
     local force="${3:-0}"
 
@@ -594,10 +594,10 @@ process_merge_items() {
         file="${line%%:*}"
         strategy="${line#*:}"
 
-        knossos_file="$roster_dir/$file"
+        knossos_file="$knossos_dir/$file"
         local_file="$local_dir/$file"
 
-        # Check if roster file changed
+        # Check if knossos file changed
         knossos_checksum=$(compute_checksum "$knossos_file")
         manifest_checksum=$(get_manifest_checksum "$file")
 
@@ -628,19 +628,19 @@ process_merge_items() {
 # Orphan Detection (per TDD 4.4 step 6)
 # ============================================================================
 
-# Detect orphaned files - files in manifest that are no longer in roster source
+# Detect orphaned files - files in manifest that are no longer in knossos source
 #
-# Per TDD: "File in manifest but not in roster source = orphan candidate"
+# Per TDD: "File in manifest but not in knossos source = orphan candidate"
 #
 # An orphan is a file that:
 # 1. Exists in the manifest (was previously synced)
-# 2. No longer exists in the roster source
+# 2. No longer exists in the knossos source
 # 3. The file was from a managed source (copy-replace or merge strategy)
 #
-# Usage: detect_orphans "roster_dir"
+# Usage: detect_orphans "knossos_dir"
 # Outputs: list of orphaned paths (one per line)
 detect_orphans() {
-    local roster_dir="$1"
+    local knossos_dir="$1"
     local manifest
 
     manifest=$(read_manifest) || return 1
@@ -652,7 +652,7 @@ detect_orphans() {
         file_path=$(echo "$file_entry" | jq -r '.path')
         strategy=$(echo "$file_entry" | jq -r '.strategy // "copy-replace"')
 
-        # Convert .claude/filename to just filename for roster lookup
+        # Convert .claude/filename to just filename for knossos lookup
         local filename="${file_path#.claude/}"
 
         # Skip ignored items (they're not synced)
@@ -660,12 +660,12 @@ detect_orphans() {
             continue
         fi
 
-        # Check if file exists in roster source
-        knossos_file="$roster_dir/$filename"
+        # Check if file exists in knossos source
+        knossos_file="$knossos_dir/$filename"
 
         if [[ ! -f "$knossos_file" ]]; then
-            # File was in manifest with a sync strategy but no longer in roster
-            # This is an orphan (the file was previously synced from roster)
+            # File was in manifest with a sync strategy but no longer in knossos
+            # This is an orphan (the file was previously synced from knossos)
             if [[ "$strategy" == "copy-replace" || "$strategy" == "merge-settings" || "$strategy" == "merge-docs" ]]; then
                 echo "$file_path"
             fi
@@ -827,7 +827,7 @@ prune_orphans() {
                 .managed_files = [.managed_files[] | select(.path != $p)]')
 
             # Track orphan removal in manifest
-            manifest=$(add_manifest_orphan "$manifest" "$orphan" "pruned - no longer in roster")
+            manifest=$(add_manifest_orphan "$manifest" "$orphan" "pruned - no longer in knossos")
         fi
     done
 
@@ -840,13 +840,13 @@ prune_orphans() {
 
 # Check if orphans exist
 #
-# Usage: has_orphans "roster_dir"
+# Usage: has_orphans "knossos_dir"
 # Returns: 0 if orphans exist, 1 if no orphans
 has_orphans() {
-    local roster_dir="$1"
+    local knossos_dir="$1"
     local orphan_count
 
-    orphan_count=$(detect_orphans "$roster_dir" | wc -l | tr -d ' ')
+    orphan_count=$(detect_orphans "$knossos_dir" | wc -l | tr -d ' ')
 
     [[ "$orphan_count" -gt 0 ]]
 }
@@ -855,13 +855,13 @@ has_orphans() {
 #
 # Per TDD: "Without --prune: Report orphans but don't remove"
 #
-# Usage: report_orphans "roster_dir"
+# Usage: report_orphans "knossos_dir"
 # Returns: EXIT_SYNC_ORPHAN_CONFLICTS if orphans exist, EXIT_SYNC_SUCCESS otherwise
 report_orphans() {
-    local roster_dir="$1"
+    local knossos_dir="$1"
     local orphans
 
-    orphans=$(detect_orphans "$roster_dir")
+    orphans=$(detect_orphans "$knossos_dir")
 
     if [[ -z "$orphans" ]]; then
         sync_log_debug "No orphans detected"
@@ -871,7 +871,7 @@ report_orphans() {
     local count
     count=$(echo "$orphans" | wc -l | tr -d ' ')
 
-    sync_log_warning "Found $count orphan(s) - files no longer in roster:"
+    sync_log_warning "Found $count orphan(s) - files no longer in knossos:"
     while IFS= read -r orphan; do
         [[ -z "$orphan" ]] && continue
         sync_log_warning "  - $orphan"
@@ -884,15 +884,15 @@ report_orphans() {
 
 # Handle orphans based on flags
 #
-# Usage: handle_orphans "roster_dir" "prune_flag" "force_flag"
+# Usage: handle_orphans "knossos_dir" "prune_flag" "force_flag"
 # Returns: appropriate exit code
 handle_orphans() {
-    local roster_dir="$1"
+    local knossos_dir="$1"
     local prune="${2:-0}"
     local force="${3:-0}"
 
     local orphans
-    orphans=$(detect_orphans "$roster_dir")
+    orphans=$(detect_orphans "$knossos_dir")
 
     if [[ -z "$orphans" ]]; then
         sync_log_debug "No orphans detected"
@@ -901,7 +901,7 @@ handle_orphans() {
 
     if [[ "$prune" != "1" ]]; then
         # Report only, don't remove
-        report_orphans "$roster_dir"
+        report_orphans "$knossos_dir"
         return "$EXIT_SYNC_ORPHAN_CONFLICTS"
     fi
 
@@ -924,38 +924,38 @@ handle_orphans() {
 # Version Checking
 # ============================================================================
 
-# Get current roster git commit
-get_roster_commit() {
-    local roster_path="${KNOSSOS_HOME:-$HOME/Code/roster}"
+# Get current knossos git commit
+get_knossos_commit() {
+    local knossos_path="${KNOSSOS_HOME:-$HOME/Code/knossos}"
 
-    if [[ -d "$roster_path/.git" ]]; then
-        git -C "$roster_path" rev-parse HEAD 2>/dev/null
+    if [[ -d "$knossos_path/.git" ]]; then
+        git -C "$knossos_path" rev-parse HEAD 2>/dev/null
     else
         echo ""
     fi
 }
 
-# Get current roster git ref (branch)
-get_roster_ref() {
-    local roster_path="${KNOSSOS_HOME:-$HOME/Code/roster}"
+# Get current knossos git ref (branch)
+get_knossos_ref() {
+    local knossos_path="${KNOSSOS_HOME:-$HOME/Code/knossos}"
 
-    if [[ -d "$roster_path/.git" ]]; then
-        git -C "$roster_path" rev-parse --abbrev-ref HEAD 2>/dev/null
+    if [[ -d "$knossos_path/.git" ]]; then
+        git -C "$knossos_path" rev-parse --abbrev-ref HEAD 2>/dev/null
     else
         echo "main"
     fi
 }
 
-# Check if roster has updates compared to manifest
+# Check if knossos has updates compared to manifest
 # Returns: 0 if updates available, 1 if up to date
-roster_has_updates() {
+knossos_has_updates() {
     local current_commit manifest_commit
 
-    current_commit=$(get_roster_commit)
-    manifest_commit=$(get_manifest_field ".roster.commit")
+    current_commit=$(get_knossos_commit)
+    manifest_commit=$(get_manifest_field ".knossos.commit")
 
     if [[ -z "$current_commit" ]]; then
-        sync_log_debug "Cannot determine roster commit"
+        sync_log_debug "Cannot determine.knossos.commit"
         return 0  # Assume updates available
     fi
 

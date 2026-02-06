@@ -3,7 +3,7 @@
 
 name: ecosystem
 version: "1.0.0"
-description: Ecosystem infrastructure lifecycle for CEM/roster changes (Analysis -> Design -> Implementation -> Documentation -> Validation)
+description: Ecosystem infrastructure lifecycle for CEM/knossos changes (Analysis -> Design -> Implementation -> Documentation -> Validation)
 
 entry_agent: orchestrator
 
@@ -22,7 +22,7 @@ phases:
   - name: implementation
     agent: integration-engineer
     produces: implementation
-    description: Implement CEM and roster infrastructure changes
+    description: Implement CEM and knossos infrastructure changes
 
   - name: documentation
     agent: documentation-engineer
@@ -40,13 +40,13 @@ agents:
     role: Coordinates ecosystem infrastructure phases
 
   - name: ecosystem-analyst
-    role: Traces CEM/roster problems to root causes and produces gap analysis
+    role: Traces CEM/knossos problems to root causes and produces gap analysis
 
   - name: context-architect
     role: Designs context solutions, schemas, and ecosystem patterns
 
   - name: integration-engineer
-    role: Implements CEM and roster changes with integration tests
+    role: Implements CEM and knossos changes with integration tests
 
   - name: documentation-engineer
     role: Creates migration runbooks and compatibility documentation
@@ -70,12 +70,20 @@ complexity_levels:
   - name: PATCH
     scope: "Single file/config change, no schema impact"
   - name: MODULE
-    scope: "Single system (CEM or roster)"
+    scope: "Single system (CEM or knossos)"
   - name: SYSTEM
-    scope: "Multi-system change affecting CEM + roster"
+    scope: "Multi-system change affecting CEM + knossos"
   - name: MIGRATION
     scope: "Cross-satellite rollout requiring coordination"
 
 metadata:
   domain: ecosystem infrastructure
   color: "#8B00FF"
+
+mcp_servers:
+  - name: go-semantic
+    command: go-semantic-mcp
+    args: []
+  - name: terraform
+    command: npx
+    args: ["-y", "@modelcontextprotocol/server-terraform"]

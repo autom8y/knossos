@@ -13,7 +13,7 @@
 export CLAUDE_PROJECT_DIR="${CLAUDE_PROJECT_DIR:-.}"
 
 # External repository paths - Knossos platform location
-export KNOSSOS_HOME="${KNOSSOS_HOME:-$HOME/Code/roster}"
+export KNOSSOS_HOME="${KNOSSOS_HOME:-$HOME/Code/knossos}"
 
 # Session paths
 export SESSIONS_DIR="$CLAUDE_PROJECT_DIR/.claude/sessions"

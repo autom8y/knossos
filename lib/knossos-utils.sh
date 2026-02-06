@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
 #
-# roster-utils.sh - Dynamic Team Roster Generation Utilities
+# knossos-utils.sh - Dynamic Rite Roster Generation Utilities
 #
 # Library functions for generating rite rosters from agent frontmatter
 # and workflow.yaml files. Designed to be sourced by swap-rite.sh.
 #
 # Usage:
-#   source "$KNOSSOS_HOME/lib/roster-utils.sh"
-#   generate_roster "10x-dev"
+#   source "$KNOSSOS_HOME/lib/knossos-utils.sh"
+#   generate_knossos "10x-dev"
 #
 # Functions:
 #   get_frontmatter   - Extract field from markdown frontmatter
 #   truncate          - Truncate text at word boundary
 #   get_produces      - Get agent produces from workflow.yaml
-#   generate_roster   - Generate formatted roster table
+#   generate_knossos   - Generate formatted roster table
 
 # Guard against re-sourcing
 [[ -n "${_KNOSSOS_UTILS_LOADED:-}" ]] && return 0
@@ -118,9 +118,9 @@ get_produces() {
 # ============================================================================
 
 # Generate roster table for a rite
-# Usage: generate_roster "rite-name"
+# Usage: generate_knossos "rite-name"
 # Output: Formatted markdown table to stdout
-generate_roster() {
+generate_knossos() {
     local rite_name="$1"
     local agents_dir="$KNOSSOS_HOME/rites/$rite_name/agents"
     local workflow_file="$KNOSSOS_HOME/rites/$rite_name/workflow.yaml"

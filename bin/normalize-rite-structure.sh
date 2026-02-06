@@ -63,7 +63,7 @@ main() {
 
     if [[ ! -d "$RITES_DIR" ]]; then
         echo "Error: Rites directory not found: $RITES_DIR"
-        echo "Set KNOSSOS_HOME environment variable to your roster repository"
+        echo "Set KNOSSOS_HOME environment variable to your knossos repository"
         exit 1
     fi
 

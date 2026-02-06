@@ -1,7 +1,7 @@
 #!/bin/bash
 # SessionStart hook - context injection (condensed by default)
 # Category: RECOVERABLE - can detect errors but must degrade gracefully
-# Outputs essential session context; use --verbose or ROSTER_VERBOSE=1 for full output
+# Outputs essential session context; use --verbose or KNOSSOS_VERBOSE=1 for full output
 # Output becomes Claude context on session start
 
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-.}"
@@ -15,7 +15,7 @@ for arg in "$@"; do
     [[ "$arg" == "--verbose" ]] && VERBOSE=true
 done
 # Also check environment variable (for hooks that can't pass args)
-[[ "${ROSTER_VERBOSE:-}" == "1" || "${ROSTER_VERBOSE:-}" == "true" ]] && VERBOSE=true
+[[ "${KNOSSOS_VERBOSE:-}" == "1" || "${KNOSSOS_VERBOSE:-}" == "true" ]] && VERBOSE=true
 
 # Library Resolution - per ADR-0002
 HOOKS_LIB="${CLAUDE_PROJECT_DIR:-.}/.claude/hooks/lib"

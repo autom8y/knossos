@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 #
-# install-hooks.sh - Install hooks from roster/user-hooks/ to a target .claude/hooks/
+# install-hooks.sh - Install hooks from knossos/user-hooks/ to a target .claude/hooks/
 #
-# Installs hooks from roster/user-hooks/ (canonical source) to a target location.
+# Installs hooks from knossos/user-hooks/ (canonical source) to a target location.
 # Works for both user-level (~/.claude/hooks/) and project-level (.claude/hooks/).
 #
 # Source Structure: Categorical subdirectories (context-injection/, session-guards/, etc.)
@@ -15,12 +15,11 @@
 #   ./install-hooks.sh --dry-run               # Preview changes
 #
 # Environment Variables:
-#   KNOSSOS_HOME   Knossos platform location (default: ~/Code/roster)
-#   ROSTER_HOME    Deprecated - use KNOSSOS_HOME instead
+#   KNOSSOS_HOME   Knossos platform location (default: ~/Code/knossos)
 
 set -euo pipefail
 
-# Source Knossos home resolution (handles ROSTER_HOME deprecation)
+# Source Knossos home resolution (resolves KNOSSOS_HOME)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/lib/knossos-home.sh"
 
@@ -53,7 +52,7 @@ while [[ $# -gt 0 ]]; do
         --help|-h)
             echo "Usage: $0 [--dry-run] [project-path]"
             echo ""
-            echo "Syncs hooks from roster/user-hooks/ to project .claude/hooks/"
+            echo "Syncs hooks from knossos/user-hooks/ to project .claude/hooks/"
             echo ""
             echo "Source Structure: Categorical subdirectories (context-injection/, session-guards/, etc.)"
             echo "Target Structure: Categorical with lib/ subdirectory preserved"

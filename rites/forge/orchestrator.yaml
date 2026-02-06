@@ -15,13 +15,13 @@ routing:
   agent-designer: "New agent team concept, design phase needed"
   prompt-architect: "Design complete, agent prompts needed"
   workflow-engineer: "Prompts ready, workflow configuration needed"
-  platform-engineer: "Workflow ready, roster integration needed"
+  platform-engineer: "Workflow ready, knossos integration needed"
   agent-curator: "Platform integration complete, catalog update needed"
   eval-specialist: "Catalog complete, evaluation and validation needed"
 
 workflow_position:
-  upstream: "Request to create new agent team or extend roster"
-  downstream: "New agent team integrated into roster ecosystem"
+  upstream: "Request to create new agent team or extend knossos"
+  downstream: "New agent team integrated into knossos ecosystem"
 
 handoff_criteria:
   design:
@@ -37,7 +37,7 @@ handoff_criteria:
     - "Phase transitions defined"
     - "Complexity levels documented"
   platform:
-    - "Agents registered in roster"
+    - "Agents registered in knossos"
     - "Integration tests passing"
     - "CEM sync validated"
   catalog:
@@ -52,11 +52,11 @@ handoff_criteria:
 skills:
   - "@agent-design for prompt engineering"
   - "@workflow-design for orchestration"
-  - "@platform-integration for roster patterns"
+  - "@platform-integration for knossos patterns"
 
 antipatterns:
   - "Creating agents without workflow context (agents must fit team lifecycle)"
   - "Skipping prompt validation (prompts must be tested before deployment)"
   - "Agent proliferation (consolidate similar roles, avoid agent sprawl)"
 
-cross_rite_protocol: "Notify ecosystem of roster changes affecting CEM/skeleton. Coordinate with target team on agent specifications."
+cross_rite_protocol: "Notify ecosystem of knossos changes affecting CEM/skeleton. Coordinate with target team on agent specifications."

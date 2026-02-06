@@ -9,10 +9,10 @@ set -euo pipefail
 
 # Test setup
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ROSTER_HOME="${ROSTER_HOME:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
+KNOSSOS_HOME="${KNOSSOS_HOME:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 
 # Source dependencies
-source "$ROSTER_HOME/lib/team/team-hooks-registration.sh"
+source "$KNOSSOS_HOME/lib/team/team-hooks-registration.sh"
 
 # Test counters
 TESTS_RUN=0
@@ -114,8 +114,8 @@ hooks:
     timeout: 120
 EOF
 
-    # Create settings.local.json with only roster hooks
-    cat > "$TEST_TMP/fixtures/settings-roster-only.json" <<'EOF'
+    # Create settings.local.json with only knossos hooks
+    cat > "$TEST_TMP/fixtures/settings-knossos-only.json" <<'EOF'
 {
   "hooks": {
     "SessionStart": [
@@ -142,7 +142,7 @@ EOF
         "hooks": [
           {
             "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/roster-hook.sh",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/knossos-hook.sh",
             "timeout": 5
           },
           {
@@ -190,8 +190,8 @@ EOF
     # Create corrupted JSON
     echo "{ invalid json" > "$TEST_TMP/fixtures/settings-corrupted.json"
 
-    # Override ROSTER_HOME for tests
-    ROSTER_HOME="$TEST_TMP"
+    # Override KNOSSOS_HOME for tests
+    KNOSSOS_HOME="$TEST_TMP"
 }
 
 teardown() {
@@ -321,27 +321,27 @@ test_parse_hooks_yaml_timeout_clamp() {
 }
 
 # ============================================================================
-# Tests for extract_non_roster_hooks()
+# Tests for extract_non_knossos_hooks()
 # ============================================================================
 
-test_extract_non_roster_roster_only() {
-    run_test "extract_non_roster_hooks returns {} for roster-only hooks"
+test_extract_non_knossos_knossos_only() {
+    run_test "extract_non_knossos_hooks returns {} for knossos-only hooks"
 
     local result
-    result=$(extract_non_roster_hooks "$TEST_TMP/fixtures/settings-roster-only.json")
+    result=$(extract_non_knossos_hooks "$TEST_TMP/fixtures/settings-knossos-only.json")
 
     if [[ "$result" == "{}" ]]; then
-        test_pass "returned empty for roster-only hooks"
+        test_pass "returned empty for knossos-only hooks"
     else
-        test_fail "extract_non_roster_hooks" "{}" "$result"
+        test_fail "extract_non_knossos_hooks" "{}" "$result"
     fi
 }
 
-test_extract_non_roster_mixed() {
-    run_test "extract_non_roster_hooks preserves user hooks only"
+test_extract_non_knossos_mixed() {
+    run_test "extract_non_knossos_hooks preserves user hooks only"
 
     local result
-    result=$(extract_non_roster_hooks "$TEST_TMP/fixtures/settings-mixed.json")
+    result=$(extract_non_knossos_hooks "$TEST_TMP/fixtures/settings-mixed.json")
 
     # Should have SessionStart with one user hook
     local has_session_start
@@ -354,23 +354,23 @@ test_extract_non_roster_mixed() {
             local command
             command=$(echo "$result" | jq -r '.SessionStart[0].hooks[0].command')
             if [[ "$command" == "/usr/local/bin/user-hook.sh" ]]; then
-                test_pass "preserved user hook, filtered roster hook"
+                test_pass "preserved user hook, filtered knossos hook"
             else
-                test_fail "extract_non_roster_hooks" "/usr/local/bin/user-hook.sh" "$command"
+                test_fail "extract_non_knossos_hooks" "/usr/local/bin/user-hook.sh" "$command"
             fi
         else
-            test_fail "extract_non_roster_hooks" "1 hook" "$hook_count hooks"
+            test_fail "extract_non_knossos_hooks" "1 hook" "$hook_count hooks"
         fi
     else
-        test_fail "extract_non_roster_hooks" "SessionStart present" "SessionStart missing"
+        test_fail "extract_non_knossos_hooks" "SessionStart present" "SessionStart missing"
     fi
 }
 
-test_extract_non_roster_user_only() {
-    run_test "extract_non_roster_hooks preserves all user hooks"
+test_extract_non_knossos_user_only() {
+    run_test "extract_non_knossos_hooks preserves all user hooks"
 
     local result
-    result=$(extract_non_roster_hooks "$TEST_TMP/fixtures/settings-user-only.json")
+    result=$(extract_non_knossos_hooks "$TEST_TMP/fixtures/settings-user-only.json")
 
     # Should have SessionStart and Stop
     local event_count
@@ -379,20 +379,20 @@ test_extract_non_roster_user_only() {
     if [[ "$event_count" -eq 2 ]]; then
         test_pass "preserved all user hooks for 2 events"
     else
-        test_fail "extract_non_roster_hooks" "2 events" "$event_count events"
+        test_fail "extract_non_knossos_hooks" "2 events" "$event_count events"
     fi
 }
 
-test_extract_non_roster_missing() {
-    run_test "extract_non_roster_hooks returns {} for missing file"
+test_extract_non_knossos_missing() {
+    run_test "extract_non_knossos_hooks returns {} for missing file"
 
     local result
-    result=$(extract_non_roster_hooks "$TEST_TMP/fixtures/nonexistent.json")
+    result=$(extract_non_knossos_hooks "$TEST_TMP/fixtures/nonexistent.json")
 
     if [[ "$result" == "{}" ]]; then
         test_pass "returned {} for missing file"
     else
-        test_fail "extract_non_roster_hooks" "{}" "$result"
+        test_fail "extract_non_knossos_hooks" "{}" "$result"
     fi
 }
 
@@ -591,7 +591,7 @@ test_merge_with_preserved_empty() {
 test_merge_with_preserved_append() {
     run_test "merge_with_preserved appends preserved to generated"
 
-    local generated='{"SessionStart":[{"hooks":[{"type":"command","command":"roster.sh","timeout":5}]}]}'
+    local generated='{"SessionStart":[{"hooks":[{"type":"command","command":"knossos.sh","timeout":5}]}]}'
     local preserved='{"SessionStart":[{"hooks":[{"type":"command","command":"user.sh","timeout":10}]}]}'
 
     local result
@@ -607,10 +607,10 @@ test_merge_with_preserved_append() {
         local second_command
         second_command=$(echo "$result" | jq -r '.SessionStart[1].hooks[0].command')
 
-        if [[ "$first_command" == "roster.sh" ]] && [[ "$second_command" == "user.sh" ]]; then
+        if [[ "$first_command" == "knossos.sh" ]] && [[ "$second_command" == "user.sh" ]]; then
             test_pass "appended preserved after generated"
         else
-            test_fail "merge_with_preserved" "roster.sh then user.sh" "$first_command then $second_command"
+            test_fail "merge_with_preserved" "knossos.sh then user.sh" "$first_command then $second_command"
         fi
     else
         test_fail "merge_with_preserved" "2 entries" "$entry_count entries"
@@ -821,10 +821,10 @@ main() {
     test_parse_hooks_yaml_timeout_clamp
 
     # JSON extraction tests
-    test_extract_non_roster_roster_only
-    test_extract_non_roster_mixed
-    test_extract_non_roster_user_only
-    test_extract_non_roster_missing
+    test_extract_non_knossos_knossos_only
+    test_extract_non_knossos_mixed
+    test_extract_non_knossos_user_only
+    test_extract_non_knossos_missing
 
     # Merge tests
     test_merge_hook_registrations

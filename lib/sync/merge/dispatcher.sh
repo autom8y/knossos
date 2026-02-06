@@ -5,10 +5,10 @@
 # Routes merge operations to appropriate strategy implementations.
 # Provides a unified interface for all merge strategies.
 #
-# Part of: roster-sync (TDD-cem-replacement)
+# Part of: knossos-sync (TDD-cem-replacement)
 #
 # Usage:
-#   source "$ROSTER_HOME/lib/sync/merge/dispatcher.sh"
+#   source "$KNOSSOS_HOME/lib/sync/merge/dispatcher.sh"
 #   dispatch_merge_strategy "merge-settings" "$knossos_file" "$local_file" "$output_file"
 #
 # Strategies:
@@ -36,13 +36,13 @@ dispatch_merge_strategy() {
     local output_file="$4"
 
     sync_log_debug "Dispatching merge: strategy=$strategy"
-    sync_log_debug "  roster: $knossos_file"
+    sync_log_debug "  knossos: $knossos_file"
     sync_log_debug "  local:  $local_file"
     sync_log_debug "  output: $output_file"
 
-    # Verify roster file exists
+    # Verify knossos file exists
     if [[ ! -f "$knossos_file" ]]; then
-        sync_log_error "Roster file not found: $knossos_file"
+        sync_log_error "Knossos file not found: $knossos_file"
         return 1
     fi
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# test-init.sh - Unit tests for roster-sync init command
+# test-init.sh - Unit tests for knossos-sync init command
 #
 # Tests initialization scenarios per TDD Section 3.2:
 #   - Fresh project initialization
@@ -14,8 +14,8 @@ set -euo pipefail
 
 # Test setup
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ROSTER_HOME="${ROSTER_HOME:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
-export ROSTER_HOME
+KNOSSOS_HOME="${KNOSSOS_HOME:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
+export KNOSSOS_HOME
 
 # Test counters
 TESTS_RUN=0
@@ -79,7 +79,7 @@ test_init_fresh_project() {
 
     # Run init
     local output
-    output=$("$ROSTER_HOME/roster-sync" init "$TEST_PROJECT" 2>&1) || {
+    output=$("$KNOSSOS_HOME/knossos-sync" init "$TEST_PROJECT" 2>&1) || {
         test_fail "init command" "exit 0" "exit $?"
         echo "$output"
         return
@@ -116,13 +116,13 @@ test_init_fresh_project() {
         test_fail "schema_version" "3" "$schema_version"
     fi
 
-    # Check roster.path in manifest
-    local roster_path
-    roster_path=$(jq -r '.roster.path' "$TEST_PROJECT/.claude/.cem/manifest.json" 2>/dev/null)
-    if [[ "$roster_path" == "$ROSTER_HOME" ]]; then
-        test_pass "roster.path set correctly"
+    # Check knossos.path in manifest
+    local knossos_path
+    knossos_path=$(jq -r '.knossos.path' "$TEST_PROJECT/.claude/.cem/manifest.json" 2>/dev/null)
+    if [[ "$knossos_path" == "$KNOSSOS_HOME" ]]; then
+        test_pass "knossos.path set correctly"
     else
-        test_fail "roster.path" "$ROSTER_HOME" "$roster_path"
+        test_fail "knossos.path" "$KNOSSOS_HOME" "$knossos_path"
     fi
 
     # Check managed_files array exists
@@ -161,17 +161,17 @@ test_init_creates_copy_replace_items() {
     reset_test_project
 
     # Run init
-    "$ROSTER_HOME/roster-sync" init "$TEST_PROJECT" >/dev/null 2>&1 || true
+    "$KNOSSOS_HOME/knossos-sync" init "$TEST_PROJECT" >/dev/null 2>&1 || true
 
     # Check COMMAND_REGISTRY.md (a copy-replace item)
     if [[ -f "$TEST_PROJECT/.claude/COMMAND_REGISTRY.md" ]]; then
         test_pass "COMMAND_REGISTRY.md created"
 
-        # Verify it matches roster version
-        if diff -q "$ROSTER_HOME/.claude/COMMAND_REGISTRY.md" "$TEST_PROJECT/.claude/COMMAND_REGISTRY.md" >/dev/null 2>&1; then
-            test_pass "COMMAND_REGISTRY.md matches roster"
+        # Verify it matches knossos version
+        if diff -q "$KNOSSOS_HOME/.claude/COMMAND_REGISTRY.md" "$TEST_PROJECT/.claude/COMMAND_REGISTRY.md" >/dev/null 2>&1; then
+            test_pass "COMMAND_REGISTRY.md matches knossos"
         else
-            test_fail "COMMAND_REGISTRY.md content" "matches roster" "differs"
+            test_fail "COMMAND_REGISTRY.md content" "matches knossos" "differs"
         fi
     else
         test_fail "COMMAND_REGISTRY.md" "exists" "missing"
@@ -183,7 +183,7 @@ test_init_creates_merge_items() {
     reset_test_project
 
     # Run init
-    "$ROSTER_HOME/roster-sync" init "$TEST_PROJECT" >/dev/null 2>&1 || true
+    "$KNOSSOS_HOME/knossos-sync" init "$TEST_PROJECT" >/dev/null 2>&1 || true
 
     # Check CLAUDE.md (a merge item)
     if [[ -f "$TEST_PROJECT/.claude/CLAUDE.md" ]]; then
@@ -209,11 +209,11 @@ test_init_already_initialized_error() {
     reset_test_project
 
     # Initialize first
-    "$ROSTER_HOME/roster-sync" init "$TEST_PROJECT" >/dev/null 2>&1 || true
+    "$KNOSSOS_HOME/knossos-sync" init "$TEST_PROJECT" >/dev/null 2>&1 || true
 
     # Try to initialize again
     local exit_code=0
-    "$ROSTER_HOME/roster-sync" init "$TEST_PROJECT" >/dev/null 2>&1 || exit_code=$?
+    "$KNOSSOS_HOME/knossos-sync" init "$TEST_PROJECT" >/dev/null 2>&1 || exit_code=$?
 
     if [[ $exit_code -eq 3 ]]; then
         test_pass "exits with code 3 (EXIT_SYNC_INIT_FAILED)"
@@ -227,14 +227,14 @@ test_init_force_reinitialize() {
     reset_test_project
 
     # Initialize first
-    "$ROSTER_HOME/roster-sync" init "$TEST_PROJECT" >/dev/null 2>&1 || true
+    "$KNOSSOS_HOME/knossos-sync" init "$TEST_PROJECT" >/dev/null 2>&1 || true
 
     # Modify a file to detect overwrite
     echo "modified content" > "$TEST_PROJECT/.claude/COMMAND_REGISTRY.md"
 
     # Reinitialize with --force
     local exit_code=0
-    "$ROSTER_HOME/roster-sync" --force init "$TEST_PROJECT" >/dev/null 2>&1 || exit_code=$?
+    "$KNOSSOS_HOME/knossos-sync" --force init "$TEST_PROJECT" >/dev/null 2>&1 || exit_code=$?
 
     if [[ $exit_code -eq 0 ]]; then
         test_pass "exits with code 0"
@@ -243,10 +243,10 @@ test_init_force_reinitialize() {
     fi
 
     # Check file was overwritten
-    if diff -q "$ROSTER_HOME/.claude/COMMAND_REGISTRY.md" "$TEST_PROJECT/.claude/COMMAND_REGISTRY.md" >/dev/null 2>&1; then
+    if diff -q "$KNOSSOS_HOME/.claude/COMMAND_REGISTRY.md" "$TEST_PROJECT/.claude/COMMAND_REGISTRY.md" >/dev/null 2>&1; then
         test_pass "COMMAND_REGISTRY.md was overwritten"
     else
-        test_fail "COMMAND_REGISTRY.md" "matches roster after --force" "still modified"
+        test_fail "COMMAND_REGISTRY.md" "matches knossos after --force" "still modified"
     fi
 }
 
@@ -255,7 +255,7 @@ test_init_force_preserves_existing_merge_items() {
     reset_test_project
 
     # Initialize first
-    "$ROSTER_HOME/roster-sync" init "$TEST_PROJECT" >/dev/null 2>&1 || true
+    "$KNOSSOS_HOME/knossos-sync" init "$TEST_PROJECT" >/dev/null 2>&1 || true
 
     # Modify a merge item
     echo "# Custom CLAUDE.md content" > "$TEST_PROJECT/.claude/CLAUDE.md"
@@ -263,7 +263,7 @@ test_init_force_preserves_existing_merge_items() {
     original_content=$(cat "$TEST_PROJECT/.claude/CLAUDE.md")
 
     # Reinitialize with --force
-    "$ROSTER_HOME/roster-sync" --force init "$TEST_PROJECT" >/dev/null 2>&1 || true
+    "$KNOSSOS_HOME/knossos-sync" --force init "$TEST_PROJECT" >/dev/null 2>&1 || true
 
     # Merge items should be preserved (only merged on sync, not init)
     local current_content
@@ -285,7 +285,7 @@ test_init_nonexistent_path() {
     local fake_path="$TEST_TMP/does-not-exist"
     local exit_code=0
 
-    "$ROSTER_HOME/roster-sync" init "$fake_path" >/dev/null 2>&1 || exit_code=$?
+    "$KNOSSOS_HOME/knossos-sync" init "$fake_path" >/dev/null 2>&1 || exit_code=$?
 
     if [[ $exit_code -eq 3 ]]; then
         test_pass "exits with code 3 for non-existent path"
@@ -294,14 +294,14 @@ test_init_nonexistent_path() {
     fi
 }
 
-test_init_inside_roster_fails() {
-    run_test "Init fails inside roster directory"
+test_init_inside_knossos_fails() {
+    run_test "Init fails inside knossos directory"
 
     local exit_code=0
-    "$ROSTER_HOME/roster-sync" init "$ROSTER_HOME" >/dev/null 2>&1 || exit_code=$?
+    "$KNOSSOS_HOME/knossos-sync" init "$KNOSSOS_HOME" >/dev/null 2>&1 || exit_code=$?
 
     if [[ $exit_code -eq 3 ]]; then
-        test_pass "exits with code 3 when inside roster"
+        test_pass "exits with code 3 when inside knossos"
     else
         test_fail "exit code" "3" "$exit_code"
     fi
@@ -314,7 +314,7 @@ test_init_current_directory() {
     # Change to test project and run init without path
     (
         cd "$TEST_PROJECT"
-        "$ROSTER_HOME/roster-sync" init >/dev/null 2>&1
+        "$KNOSSOS_HOME/knossos-sync" init >/dev/null 2>&1
     ) || {
         test_fail "init in current directory" "exit 0" "exit $?"
         return
@@ -337,7 +337,7 @@ test_init_with_rite_flag() {
 
     # Get first available rite
     local rite_name
-    rite_name=$(ls "$ROSTER_HOME/rites/" 2>/dev/null | head -1)
+    rite_name=$(ls "$KNOSSOS_HOME/rites/" 2>/dev/null | head -1)
 
     if [[ -z "$rite_name" ]]; then
         echo "  SKIP: No rites available"
@@ -346,7 +346,7 @@ test_init_with_rite_flag() {
 
     # Run init with rite
     local exit_code=0
-    "$ROSTER_HOME/roster-sync" init --rite="$rite_name" "$TEST_PROJECT" >/dev/null 2>&1 || exit_code=$?
+    "$KNOSSOS_HOME/knossos-sync" init --rite="$rite_name" "$TEST_PROJECT" >/dev/null 2>&1 || exit_code=$?
 
     if [[ $exit_code -eq 0 ]]; then
         test_pass "exits with code 0"
@@ -382,7 +382,7 @@ test_init_with_invalid_rite() {
     reset_test_project
 
     local exit_code=0
-    "$ROSTER_HOME/roster-sync" init --rite="nonexistent-rite" "$TEST_PROJECT" >/dev/null 2>&1 || exit_code=$?
+    "$KNOSSOS_HOME/knossos-sync" init --rite="nonexistent-rite" "$TEST_PROJECT" >/dev/null 2>&1 || exit_code=$?
 
     if [[ $exit_code -eq 3 ]]; then
         test_pass "exits with code 3 for invalid rite"
@@ -403,14 +403,14 @@ test_init_rite_equals_syntax() {
     reset_test_project
 
     local rite_name
-    rite_name=$(ls "$ROSTER_HOME/rites/" 2>/dev/null | head -1)
+    rite_name=$(ls "$KNOSSOS_HOME/rites/" 2>/dev/null | head -1)
 
     if [[ -z "$rite_name" ]]; then
         echo "  SKIP: No rites available"
         return
     fi
 
-    "$ROSTER_HOME/roster-sync" init "--rite=$rite_name" "$TEST_PROJECT" >/dev/null 2>&1 || {
+    "$KNOSSOS_HOME/knossos-sync" init "--rite=$rite_name" "$TEST_PROJECT" >/dev/null 2>&1 || {
         test_fail "init with --rite=value" "exit 0" "exit $?"
         return
     }
@@ -429,14 +429,14 @@ test_init_rite_space_syntax() {
     reset_test_project
 
     local rite_name
-    rite_name=$(ls "$ROSTER_HOME/rites/" 2>/dev/null | head -1)
+    rite_name=$(ls "$KNOSSOS_HOME/rites/" 2>/dev/null | head -1)
 
     if [[ -z "$rite_name" ]]; then
         echo "  SKIP: No rites available"
         return
     fi
 
-    "$ROSTER_HOME/roster-sync" init --rite "$rite_name" "$TEST_PROJECT" >/dev/null 2>&1 || {
+    "$KNOSSOS_HOME/knossos-sync" init --rite "$rite_name" "$TEST_PROJECT" >/dev/null 2>&1 || {
         test_fail "init with --rite value" "exit 0" "exit $?"
         return
     }
@@ -459,7 +459,7 @@ test_init_dry_run() {
     reset_test_project
 
     local exit_code=0
-    "$ROSTER_HOME/roster-sync" --dry-run init "$TEST_PROJECT" >/dev/null 2>&1 || exit_code=$?
+    "$KNOSSOS_HOME/knossos-sync" --dry-run init "$TEST_PROJECT" >/dev/null 2>&1 || exit_code=$?
 
     if [[ $exit_code -eq 0 ]]; then
         test_pass "exits with code 0"
@@ -483,17 +483,17 @@ test_init_manifest_structure() {
     run_test "Init creates valid manifest structure"
     reset_test_project
 
-    "$ROSTER_HOME/roster-sync" init "$TEST_PROJECT" >/dev/null 2>&1 || true
+    "$KNOSSOS_HOME/knossos-sync" init "$TEST_PROJECT" >/dev/null 2>&1 || true
 
     local manifest="$TEST_PROJECT/.claude/.cem/manifest.json"
 
     # Check all required v3 fields
-    local schema_version roster_path roster_commit roster_ref roster_last_sync
+    local schema_version knossos_path knossos_commit knossos_ref knossos_last_sync
     schema_version=$(jq -r '.schema_version' "$manifest" 2>/dev/null)
-    roster_path=$(jq -r '.roster.path' "$manifest" 2>/dev/null)
-    roster_commit=$(jq -r '.roster.commit' "$manifest" 2>/dev/null)
-    roster_ref=$(jq -r '.roster.ref' "$manifest" 2>/dev/null)
-    roster_last_sync=$(jq -r '.roster.last_sync' "$manifest" 2>/dev/null)
+    knossos_path=$(jq -r '.knossos.path' "$manifest" 2>/dev/null)
+    knossos_commit=$(jq -r '.knossos.commit' "$manifest" 2>/dev/null)
+    knossos_ref=$(jq -r '.knossos.ref' "$manifest" 2>/dev/null)
+    knossos_last_sync=$(jq -r '.knossos.last_sync' "$manifest" 2>/dev/null)
 
     if [[ "$schema_version" == "3" ]]; then
         test_pass "schema_version is 3"
@@ -501,28 +501,28 @@ test_init_manifest_structure() {
         test_fail "schema_version" "3" "$schema_version"
     fi
 
-    if [[ -n "$roster_path" && "$roster_path" != "null" ]]; then
-        test_pass "roster.path set"
+    if [[ -n "$knossos_path" && "$knossos_path" != "null" ]]; then
+        test_pass "knossos.path set"
     else
-        test_fail "roster.path" "set" "missing"
+        test_fail "knossos.path" "set" "missing"
     fi
 
-    if [[ -n "$roster_commit" && "$roster_commit" != "null" && "$roster_commit" != "" ]]; then
-        test_pass "roster.commit set"
+    if [[ -n "$knossos_commit" && "$knossos_commit" != "null" && "$knossos_commit" != "" ]]; then
+        test_pass "knossos.commit set"
     else
-        test_fail "roster.commit" "set" "missing"
+        test_fail "knossos.commit" "set" "missing"
     fi
 
-    if [[ -n "$roster_ref" && "$roster_ref" != "null" ]]; then
-        test_pass "roster.ref set"
+    if [[ -n "$knossos_ref" && "$knossos_ref" != "null" ]]; then
+        test_pass "knossos.ref set"
     else
-        test_fail "roster.ref" "set" "missing"
+        test_fail "knossos.ref" "set" "missing"
     fi
 
-    if [[ -n "$roster_last_sync" && "$roster_last_sync" != "null" ]]; then
-        test_pass "roster.last_sync set"
+    if [[ -n "$knossos_last_sync" && "$knossos_last_sync" != "null" ]]; then
+        test_pass "knossos.last_sync set"
     else
-        test_fail "roster.last_sync" "set" "missing"
+        test_fail "knossos.last_sync" "set" "missing"
     fi
 
     # Check managed_files array
@@ -548,7 +548,7 @@ test_init_managed_files_have_checksums() {
     run_test "Init managed files have checksums"
     reset_test_project
 
-    "$ROSTER_HOME/roster-sync" init "$TEST_PROJECT" >/dev/null 2>&1 || true
+    "$KNOSSOS_HOME/knossos-sync" init "$TEST_PROJECT" >/dev/null 2>&1 || true
 
     local manifest="$TEST_PROJECT/.claude/.cem/manifest.json"
 
@@ -576,7 +576,7 @@ test_init_managed_files_have_checksums() {
 # ============================================================================
 
 echo "=========================================="
-echo "Running roster-sync init tests"
+echo "Running knossos-sync init tests"
 echo "=========================================="
 
 setup
@@ -593,7 +593,7 @@ test_init_force_preserves_existing_merge_items
 
 # Invalid path tests
 test_init_nonexistent_path
-test_init_inside_roster_fails
+test_init_inside_knossos_fails
 test_init_current_directory
 
 # Rite flag tests

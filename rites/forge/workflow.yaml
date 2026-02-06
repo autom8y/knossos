@@ -27,7 +27,7 @@ phases:
 
   - name: platform
     agent: platform-engineer
-    produces: roster-integration
+    produces: knossos-integration
     next: catalog
     condition: "complexity >= MODULE"
 

@@ -2,21 +2,18 @@
 package config
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"sync"
 )
 
 var (
-	knossosHome      string
-	knossosHomeOnce  sync.Once
-	deprecationShown bool
+	knossosHome     string
+	knossosHomeOnce sync.Once
 )
 
 // KnossosHome returns the resolved Knossos platform home directory.
-// Falls back to ROSTER_HOME with deprecation warning (shown once per process).
-// Default: $HOME/Code/roster
+// Default: $HOME/Code/knossos
 func KnossosHome() string {
 	knossosHomeOnce.Do(func() {
 		knossosHome = resolveKnossosHome()
@@ -30,24 +27,13 @@ func resolveKnossosHome() string {
 		return home
 	}
 
-	// Fallback: ROSTER_HOME (deprecated)
-	if home := os.Getenv("ROSTER_HOME"); home != "" {
-		if !deprecationShown && os.Getenv("KNOSSOS_SUPPRESS_DEPRECATION") != "1" {
-			fmt.Fprintln(os.Stderr, "[DEPRECATED] ROSTER_HOME is deprecated. Set KNOSSOS_HOME instead.")
-			fmt.Fprintln(os.Stderr, "  ROSTER_HOME support will be removed in version 3.0")
-			deprecationShown = true
-		}
-		return home
-	}
-
 	// Default
 	homeDir, _ := os.UserHomeDir()
-	return filepath.Join(homeDir, "Code", "roster")
+	return filepath.Join(homeDir, "Code", "knossos")
 }
 
 // ResetKnossosHome resets the cached home directory (for testing only).
 func ResetKnossosHome() {
 	knossosHomeOnce = sync.Once{}
 	knossosHome = ""
-	deprecationShown = false
 }

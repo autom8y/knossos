@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 #
-# sync-user-hooks.sh - Sync roster hooks to ~/.claude/hooks/
+# sync-user-hooks.sh - Sync knossos hooks to ~/.claude/hooks/
 #
-# Syncs hooks from roster/hooks/ (canonical source) to user-level ~/.claude/hooks/.
+# Syncs hooks from knossos/hooks/ (canonical source) to user-level ~/.claude/hooks/.
 # Behavior:
 #   - Additive: Never removes existing hooks from ~/.claude/hooks/
-#   - Overwrites: Only hooks previously installed from roster (tracked in manifest)
-#   - Preserves: User-created hooks not from roster
+#   - Overwrites: Only hooks previously installed from knossos (tracked in manifest)
+#   - Preserves: User-created hooks not from knossos
 #   - Nested: Handles lib/ subdirectory preserving structure
 #
 # Usage:
@@ -16,13 +16,12 @@
 #   ./sync-user-hooks.sh --help       # Show usage
 #
 # Environment Variables:
-#   KNOSSOS_HOME   Knossos platform location (default: ~/Code/roster)
-#   ROSTER_HOME    Deprecated - use KNOSSOS_HOME instead
+#   KNOSSOS_HOME   Knossos platform location (default: ~/Code/knossos)
 #   KNOSSOS_DEBUG   Enable debug logging (set to 1)
 
 set -euo pipefail
 
-# Source Knossos home resolution (handles ROSTER_HOME deprecation)
+# Source Knossos home resolution (resolves KNOSSOS_HOME)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/lib/knossos-home.sh"
 
@@ -121,14 +120,14 @@ calculate_checksum() {
 # Returns 0 if found in a rite (collision), 1 if not found
 is_rite_hook() {
     local hook_name="$1"
-    local roster_rites="${KNOSSOS_HOME}/rites"
+    local knossos_rites="${KNOSSOS_HOME}/rites"
 
-    if [[ ! -d "$roster_rites" ]]; then
+    if [[ ! -d "$knossos_rites" ]]; then
         return 1
     fi
 
     # Search for hook in any rite's hooks/ directory
-    if find "$roster_rites" -path "*/hooks/$hook_name" -type f 2>/dev/null | grep -q .; then
+    if find "$knossos_rites" -path "*/hooks/$hook_name" -type f 2>/dev/null | grep -q .; then
         return 0
     fi
 
@@ -138,15 +137,15 @@ is_rite_hook() {
 # Get which rite(s) contain a hook
 get_rite_for_hook() {
     local hook_name="$1"
-    local roster_rites="${KNOSSOS_HOME}/rites"
+    local knossos_rites="${KNOSSOS_HOME}/rites"
 
-    if [[ ! -d "$roster_rites" ]]; then
+    if [[ ! -d "$knossos_rites" ]]; then
         echo ""
         return
     fi
 
     # Find rite directories containing this hook
-    find "$roster_rites" -path "*/hooks/$hook_name" -type f 2>/dev/null | while read -r path; do
+    find "$knossos_rites" -path "*/hooks/$hook_name" -type f 2>/dev/null | while read -r path; do
         # Extract rite name from path: .../rites/RITE_NAME/hooks/hook.sh
         echo "$path" | sed 's|.*/rites/\([^/]*\)/hooks/.*|\1|'
     done | tr '\n' ',' | sed 's/,$//'
@@ -165,8 +164,8 @@ read_manifest() {
     fi
 }
 
-# Check if hook is managed by roster (exists in manifest with source=roster)
-is_roster_managed() {
+# Check if hook is managed by knossos (exists in manifest with source=knossos)
+is_knossos_managed() {
     local hook_name="$1"
     local manifest
     manifest=$(read_manifest)
@@ -179,7 +178,7 @@ is_roster_managed() {
     if command -v jq >/dev/null 2>&1; then
         local source
         source=$(echo "$manifest" | jq -r --arg name "$hook_name" '.hooks[$name].source // empty' 2>/dev/null)
-        if [[ "$source" == "roster" || "$source" == "roster-diverged" ]]; then
+        if [[ "$source" == "knossos" || "$source" == "knossos-diverged" ]]; then
             return 0
         fi
         return 1
@@ -196,7 +195,7 @@ is_roster_managed() {
     local source
     source=$(echo "$hook_block" | grep '"source"' | sed 's/.*"source":[[:space:]]*"\([^"]*\)".*/\1/')
 
-    if [[ "$source" == "roster" || "$source" == "roster-diverged" ]]; then
+    if [[ "$source" == "knossos" || "$source" == "knossos-diverged" ]]; then
         return 0
     fi
 
@@ -331,7 +330,7 @@ find_source_hook() {
     return 1
 }
 
-# Recover manifest entries from existing files that match roster sources
+# Recover manifest entries from existing files that match knossos sources
 recover_manifest() {
     log_info "Recovering manifest from existing hooks..."
 
@@ -351,13 +350,13 @@ recover_manifest() {
         local hook_name
         hook_name=$(basename "$target_file")
 
-        # Skip if already in manifest as roster-managed
-        if is_roster_managed "$hook_name"; then
+        # Skip if already in manifest as knossos-managed
+        if is_knossos_managed "$hook_name"; then
             log_debug "Already managed: $hook_name"
             continue
         fi
 
-        # Check if source exists in roster (now categorical)
+        # Check if source exists in knossos (now categorical)
         local source_info
         if source_info=$(find_source_hook "$hook_name"); then
             local source_file category
@@ -369,26 +368,26 @@ recover_manifest() {
             target_checksum=$(calculate_checksum "$target_file")
 
             if [[ "$source_checksum" == "$target_checksum" ]]; then
-                # Exact match - adopt as roster-managed
+                # Exact match - adopt as knossos-managed
                 if [[ "$DRY_RUN_MODE" -eq 1 ]]; then
                     log_info "Would adopt: $hook_name (exact match, category: $category)"
                 else
-                    add_to_manifest "$hook_name" "roster" "root" "$target_checksum" "$category"
+                    add_to_manifest "$hook_name" "knossos" "root" "$target_checksum" "$category"
                     log_success "Adopted: $hook_name (exact match, category: $category)"
                 fi
                 ((recovered++)) || true
             else
-                # Diverged - mark as roster-diverged to preserve user changes
+                # Diverged - mark as knossos-diverged to preserve user changes
                 if [[ "$DRY_RUN_MODE" -eq 1 ]]; then
                     log_info "Would adopt (diverged): $hook_name (local modifications preserved)"
                 else
-                    add_to_manifest "$hook_name" "roster-diverged" "root" "$target_checksum" "$category"
+                    add_to_manifest "$hook_name" "knossos-diverged" "root" "$target_checksum" "$category"
                     log_warning "Adopted (diverged): $hook_name (local modifications preserved)"
                 fi
                 ((diverged++)) || true
             fi
         else
-            log_debug "Not in roster: $hook_name (user-created)"
+            log_debug "Not in knossos: $hook_name (user-created)"
         fi
     done
 
@@ -399,13 +398,13 @@ recover_manifest() {
             local hook_name
             hook_name="lib/$(basename "$target_file")"
 
-            # Skip if already in manifest as roster-managed
-            if is_roster_managed "$hook_name"; then
+            # Skip if already in manifest as knossos-managed
+            if is_knossos_managed "$hook_name"; then
                 log_debug "Already managed: $hook_name"
                 continue
             fi
 
-            # Check if source exists in roster
+            # Check if source exists in knossos
             local source_info
             if source_info=$(find_source_hook "$hook_name"); then
                 local source_file category
@@ -420,7 +419,7 @@ recover_manifest() {
                     if [[ "$DRY_RUN_MODE" -eq 1 ]]; then
                         log_info "Would adopt: $hook_name (exact match)"
                     else
-                        add_to_manifest "$hook_name" "roster" "lib" "$target_checksum" "$category"
+                        add_to_manifest "$hook_name" "knossos" "lib" "$target_checksum" "$category"
                         log_success "Adopted: $hook_name (exact match)"
                     fi
                     ((recovered++)) || true
@@ -428,13 +427,13 @@ recover_manifest() {
                     if [[ "$DRY_RUN_MODE" -eq 1 ]]; then
                         log_info "Would adopt (diverged): $hook_name (local modifications preserved)"
                     else
-                        add_to_manifest "$hook_name" "roster-diverged" "lib" "$target_checksum" "$category"
+                        add_to_manifest "$hook_name" "knossos-diverged" "lib" "$target_checksum" "$category"
                         log_warning "Adopted (diverged): $hook_name (local modifications preserved)"
                     fi
                     ((diverged++)) || true
                 fi
             else
-                log_debug "Not in roster: $hook_name (user-created)"
+                log_debug "Not in knossos: $hook_name (user-created)"
             fi
         done
     fi
@@ -442,7 +441,7 @@ recover_manifest() {
     log_info "Recovery complete: $recovered adopted, $diverged diverged"
 }
 
-# Write manifest with current roster-managed hooks
+# Write manifest with current knossos-managed hooks
 # Usage: write_manifest "hook1:checksum1:location1:category1" "hook2:checksum2:location2:category2" ...
 write_manifest() {
     local timestamp
@@ -484,7 +483,7 @@ write_manifest() {
         # Write hook entry
         {
             echo -n "    \"$hook_name\": {"
-            echo -n "\"source\": \"roster\", "
+            echo -n "\"source\": \"knossos\", "
             echo -n "\"location\": \"$location\", "
             echo -n "\"installed_at\": \"$timestamp\", "
             echo -n "\"checksum\": \"$checksum\", "
@@ -551,8 +550,8 @@ sync_file() {
 
     if [[ -f "$target_file" ]]; then
         # Target exists - check if we can overwrite
-        if is_roster_managed "$hook_name" || [[ "$FORCE_MODE" -eq 1 ]]; then
-            # Roster-managed or force mode: check if update needed
+        if is_knossos_managed "$hook_name" || [[ "$FORCE_MODE" -eq 1 ]]; then
+            # Knossos-managed or force mode: check if update needed
             local manifest_checksum
             manifest_checksum=$(get_manifest_checksum "$hook_name")
 
@@ -690,7 +689,7 @@ perform_sync() {
         done
     done
 
-    # Preserve existing roster-managed hooks that are no longer in source
+    # Preserve existing knossos-managed hooks that are no longer in source
     local manifest
     manifest=$(read_manifest)
     if [[ -n "$manifest" ]]; then
@@ -723,7 +722,7 @@ perform_sync() {
                         existing_location="root"
                     fi
                     manifest_entries+=("$existing:$checksum:$existing_location")
-                    log_debug "Preserved manifest entry: $existing (no longer in roster)"
+                    log_debug "Preserved manifest entry: $existing (no longer in knossos)"
                 fi
             fi
         done
@@ -786,7 +785,7 @@ show_status() {
     if [[ -d "$SOURCE_DIR" ]]; then
         local source_count
         source_count=$(count_source_hooks)
-        echo "Roster hooks:    $source_count"
+        echo "Knossos hooks:    $source_count"
 
         # Show breakdown by category
         if [[ -d "$SOURCE_DIR/lib" ]]; then
@@ -807,7 +806,7 @@ show_status() {
             [[ "$cat_count" -gt 0 ]] && echo "  $category: $cat_count"
         done
     else
-        echo "Roster hooks:    (directory not found)"
+        echo "Knossos hooks:    (directory not found)"
     fi
 
     echo ""
@@ -833,9 +832,9 @@ show_status() {
     # Check manifest
     if [[ -f "$USER_MANIFEST_FILE" ]]; then
         local manifest_count last_sync
-        manifest_count=$(grep -c '"source": "roster"' "$USER_MANIFEST_FILE" 2>/dev/null || echo "0")
+        manifest_count=$(grep -c '"source": "knossos"' "$USER_MANIFEST_FILE" 2>/dev/null || echo "0")
         last_sync=$(grep '"last_sync"' "$USER_MANIFEST_FILE" | sed 's/.*"last_sync":[[:space:]]*"\([^"]*\)".*/\1/' || echo "unknown")
-        echo "Roster-managed:  $manifest_count"
+        echo "Knossos-managed:  $manifest_count"
         echo "Last sync:       $last_sync"
     else
         echo "Manifest:        (not initialized)"
@@ -863,7 +862,7 @@ show_status() {
                 local target_file="$USER_HOOKS_DIR/lib/$file_name"
 
                 if [[ -f "$target_file" ]]; then
-                    if is_roster_managed "$hook_name"; then
+                    if is_knossos_managed "$hook_name"; then
                         local source_checksum manifest_checksum
                         source_checksum=$(calculate_checksum "$source_file")
                         manifest_checksum=$(get_manifest_checksum "$hook_name")
@@ -896,7 +895,7 @@ show_status() {
                 local target_file="$USER_HOOKS_DIR/$hook_name"
 
                 if [[ -f "$target_file" ]]; then
-                    if is_roster_managed "$hook_name"; then
+                    if is_knossos_managed "$hook_name"; then
                         local source_checksum manifest_checksum
                         source_checksum=$(calculate_checksum "$source_file")
                         manifest_checksum=$(get_manifest_checksum "$hook_name")
@@ -915,7 +914,7 @@ show_status() {
             done
         done
 
-        # Check for user hooks not in roster
+        # Check for user hooks not in knossos
         for target_file in "$USER_HOOKS_DIR"/*.sh; do
             [[ -f "$target_file" ]] || continue
 
@@ -929,8 +928,8 @@ show_status() {
             done
 
             if [[ "$in_source" == false ]]; then
-                if is_roster_managed "$hook_name"; then
-                    echo "  [-] $hook_name (was from roster, now removed from source)"
+                if is_knossos_managed "$hook_name"; then
+                    echo "  [-] $hook_name (was from knossos, now removed from source)"
                 else
                     echo "  [*] $hook_name (user-created)"
                 fi
@@ -953,8 +952,8 @@ show_status() {
                 done
 
                 if [[ "$in_source" == false ]]; then
-                    if is_roster_managed "$hook_name"; then
-                        echo "  [-] $hook_name (was from roster, now removed from source)"
+                    if is_knossos_managed "$hook_name"; then
+                        echo "  [-] $hook_name (was from knossos, now removed from source)"
                     else
                         echo "  [*] $hook_name (user-created)"
                     fi
@@ -969,7 +968,7 @@ usage() {
     cat <<EOF
 Usage: sync-user-hooks.sh [OPTIONS]
 
-Syncs roster hooks to ~/.claude/hooks/
+Syncs knossos hooks to ~/.claude/hooks/
 
 Options:
   --dry-run      Preview changes without applying
@@ -980,19 +979,19 @@ Options:
 
 Behavior:
   - Additive:    Never removes existing hooks from ~/.claude/hooks/
-  - Overwrites:  Only hooks previously installed from roster
-  - Preserves:   User-created hooks not from roster
+  - Overwrites:  Only hooks previously installed from knossos
+  - Preserves:   User-created hooks not from knossos
   - Nested:      lib/ subdirectory is preserved with structure
 
 The manifest at ~/.claude/USER_HOOKS_MANIFEST.json tracks which hooks
-were installed from roster, allowing safe updates while preserving
+were installed from knossos, allowing safe updates while preserving
 user-created hooks.
 
 Adopt Mode (--adopt):
   Scans existing hooks in ~/.claude/hooks/ and matches them against
-  roster sources. Hooks that match are adopted into the manifest:
-  - Exact matches: marked as "roster" (fully managed)
-  - Diverged files: marked as "roster-diverged" (preserves local changes)
+  knossos sources. Hooks that match are adopted into the manifest:
+  - Exact matches: marked as "knossos" (fully managed)
+  - Diverged files: marked as "knossos-diverged" (preserves local changes)
   - User-created: not added to manifest (remain user-owned)
 
   Use --adopt when:
@@ -1001,11 +1000,11 @@ Adopt Mode (--adopt):
   - Hooks were installed before manifest tracking existed
 
 Force Mode (--force):
-  Overwrites user-created hooks with roster versions. Use with caution
+  Overwrites user-created hooks with knossos versions. Use with caution
   as this will replace any local modifications.
 
 Source Structure:
-  roster/.claude/hooks/
+  knossos/.claude/hooks/
     *.sh             # Root-level hooks (artifact-tracker, session-context, etc.)
     lib/             # Shared hook utilities
       config.sh
@@ -1015,7 +1014,7 @@ Source Structure:
       worktree-manager.sh
 
 Environment Variables:
-  ROSTER_HOME    Roster repository location (default: ~/Code/roster)
+  KNOSSOS_HOME   Knossos platform location (default: ~/Code/knossos)
   KNOSSOS_DEBUG   Enable debug logging (set to 1)
 
 Exit Codes:

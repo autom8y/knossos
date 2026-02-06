@@ -7,7 +7,7 @@
 
 set -euo pipefail
 
-# Source Knossos home resolution (handles ROSTER_HOME deprecation)
+# Source Knossos home resolution (resolves KNOSSOS_HOME)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/lib/knossos-home.sh"
 
@@ -55,9 +55,9 @@ AUTO_RECOVER=0
 RECOVER_MODE=0
 VERIFY_MODE=0
 
-# roster-sync integration modes
-SYNC_FIRST_MODE=0     # --sync-first: run roster-sync before rite apply
-AUTO_SYNC_MODE=0      # --auto-sync: conditionally sync if roster has updates
+# knossos-sync integration modes
+SYNC_FIRST_MODE=0     # --sync-first: run knossos-sync before rite apply
+AUTO_SYNC_MODE=0      # --auto-sync: conditionally sync if knossos has updates
 
 # Orphan backup cleanup modes
 CLEANUP_ORPHANS_MODE=0    # --cleanup-orphans: manual cleanup of old orphan backups
@@ -639,7 +639,7 @@ complete_partial_commit() {
         fi
     fi
 
-    # CEM manifest update (critical for roster-sync staleness tracking)
+    # CEM manifest update (critical for knossos-sync staleness tracking)
     if ! is_commit_step_done "$COMMIT_STEP_CEM_MANIFEST"; then
         log "Completing: CEM manifest update"
         if update_cem_manifest_rite "$target_rite"; then
@@ -707,9 +707,9 @@ verify_state_consistency() {
             fi
         fi
 
-        # Check rite exists in roster
+        # Check rite exists in knossos
         if [[ ! -d "$KNOSSOS_HOME/rites/$active_rite" ]]; then
-            log_warning "Active rite $active_rite not found in roster (may be orphaned)"
+            log_warning "Active rite $active_rite not found in knossos (may be orphaned)"
         fi
     fi
 
@@ -789,7 +789,7 @@ commit_staged_resources() {
 # Library Imports
 # ============================================================================
 
-# Source roster utilities for dynamic roster generation
+# Source knossos utilities for dynamic knossos generation
 source "$KNOSSOS_HOME/lib/knossos-utils.sh"
 
 # Source transaction infrastructure for rite swaps
@@ -1409,15 +1409,15 @@ Commands:
   (no args)      Show current active rite
 
 Options:
-  --update, -u       Update agents from roster (even if already on rite)
+  --update, -u       Update agents from knossos (even if already on rite)
   --refresh, -r      [DEPRECATED] Alias for --update
   --dry-run          Preview changes without applying
   --keep-all         Preserve orphan agents in project
   --remove-all       Remove orphan agents/commands/skills/hooks (backup available)
   --promote-all      Move orphan agents to ~/.claude/agents/
   --auto-recover     Automatically rollback if interrupted swap detected (for CI/CD)
-  --sync-first       Run roster-sync before applying rite (waterfall pattern)
-  --auto-sync        Conditionally sync if roster has updates available
+  --sync-first       Run knossos-sync before applying rite (waterfall pattern)
+  --auto-sync        Conditionally sync if knossos has updates available
   --cleanup-orphans  Clean up old orphan backup directories (keep last 3)
   --auto-cleanup     Automatically clean orphan backups during swap
   --interactive      Force interactive prompts even without TTY (for containers)
@@ -1434,8 +1434,7 @@ Interactive Mode:
   and require explicit flags like --keep-all for orphan handling.
 
 Environment Variables:
-  KNOSSOS_HOME        Knossos platform location (default: ~/Code/roster)
-  ROSTER_HOME         Deprecated - use KNOSSOS_HOME instead
+  KNOSSOS_HOME        Knossos platform location (default: ~/Code/knossos)
   KNOSSOS_DEBUG       Enable debug logging (set to 1)
   KNOSSOS_AUTO_RECOVER Enable auto-recovery in non-interactive mode (set to 1)
 
@@ -1454,7 +1453,7 @@ Examples:
   ./swap-rite.sh --list                 # List available rites
   ./swap-rite.sh dev-pack --keep-all    # Keep all orphans during swap
   ./swap-rite.sh dev-pack --remove-all  # Remove all orphans during swap
-  ./swap-rite.sh --update               # Update current rite from roster
+  ./swap-rite.sh --update               # Update current rite from knossos
   ./swap-rite.sh dev-pack --update      # Update even if already on dev rite
   ./swap-rite.sh --update --dry-run     # Preview what update would change
   ./swap-rite.sh --reset                # Reset to baseline (no rite)
@@ -1463,7 +1462,7 @@ Examples:
   ./swap-rite.sh --recover              # Recover from interrupted swap
   ./swap-rite.sh --auto-recover dev-pack # CI/CD mode with auto-rollback
   ./swap-rite.sh dev-pack --sync-first  # Sync infrastructure then apply
-  ./swap-rite.sh dev-pack --auto-sync   # Sync only if roster has updates
+  ./swap-rite.sh dev-pack --auto-sync   # Sync only if knossos has updates
   ./swap-rite.sh --cleanup-orphans      # Clean up old orphan backups
   ./swap-rite.sh dev-pack --auto-cleanup # Swap rite and auto-clean orphan backups
   echo "rite" | ./swap-rite.sh --interactive --keep-all # Force prompts in pipe
@@ -1746,9 +1745,9 @@ query_current_rite() {
         exit "$EXIT_INVALID_ARGS"
     fi
 
-    # Check if rite still exists in roster
+    # Check if rite still exists in knossos
     if [[ ! -d "$KNOSSOS_HOME/rites/$current" ]]; then
-        log_warning "Active rite '$current' not found in roster (orphaned state)"
+        log_warning "Active rite '$current' not found in knossos (orphaned state)"
         log "Consider swapping to a valid rite"
     else
         log "Active rite: $current"
@@ -1764,7 +1763,7 @@ list_rites() {
     local rites_dir="$KNOSSOS_HOME/rites"
 
     if [[ ! -d "$rites_dir" ]]; then
-        log_error "Roster rites directory not found: $rites_dir"
+        log_error "Knossos rites directory not found: $rites_dir"
         exit "$EXIT_VALIDATION_FAILURE"
     fi
 
@@ -2229,7 +2228,7 @@ swap_hooks() {
     remove_rite_hooks
 
     # =========================================================================
-    # PHASE 1: Install base hooks from roster/user-hooks/
+    # PHASE 1: Install base hooks from knossos/user-hooks/
     # =========================================================================
     if [[ ! -d "$base_hooks_dir" ]]; then
         log_warning "Base hooks directory not found: $base_hooks_dir"
@@ -2418,7 +2417,7 @@ cleanup_orphan_backups() {
 # ============================================================================
 
 # REQ-3.1: Get produces field from workflow.yaml for an agent
-# Reads directly from roster source instead of hardcoded mapping
+# Reads directly from knossos source instead of hardcoded mapping
 get_produces_from_workflow() {
     local rite_name="$1"
     local agent_name="$2"
@@ -2502,7 +2501,7 @@ get_workflow_phases() {
 }
 
 # Update CLAUDE.md to reflect current team's agents
-# REQ-3.1: Reads from roster source instead of disk state after copy
+# REQ-3.1: Reads from knossos source instead of disk state after copy
 # This ensures Claude Code's context matches the swapped agents
 update_claude_md() {
     local rite_name="$1"
@@ -2515,7 +2514,7 @@ update_claude_md() {
 
     log_debug "Updating CLAUDE.md for rite $rite_name"
 
-    # REQ-3.1: Read from roster source directly, not disk state after copy
+    # REQ-3.1: Read from knossos source directly, not disk state after copy
     local source_agents="$KNOSSOS_HOME/rites/$rite_name/agents"
 
     # Create temp files for agent data
@@ -2524,7 +2523,7 @@ update_claude_md() {
     agent_table_file=$(mktemp)
     temp_file=$(mktemp)
 
-    # REQ-3.1: Build agent list from roster source, not .claude/agents/
+    # REQ-3.1: Build agent list from knossos source, not .claude/agents/
     for agent_file in "$source_agents"/*.md; do
         [[ -f "$agent_file" ]] || continue
 
@@ -2591,7 +2590,7 @@ update_claude_md() {
         echo "| **${name:-$basename}** | ${role} | ${produces} |" >> "$agent_table_file"
     done
 
-    # REQ-3.1: Count agents from roster source, not disk
+    # REQ-3.1: Count agents from knossos source, not disk
     local agent_count
     agent_count=$(find "$source_agents" -maxdepth 1 -name "*.md" -type f 2>/dev/null | wc -l | tr -d ' ')
 
@@ -2699,7 +2698,7 @@ preview_refresh() {
             if diff -q ".claude/agents/$agent_name" "$agent_file" >/dev/null 2>&1; then
                 echo "  = $agent_name (unchanged)"
             else
-                echo "  ~ $agent_name (modified in roster)"
+                echo "  ~ $agent_name (modified in knossos)"
             fi
         else
             echo "  + $agent_name (new)"
@@ -2713,7 +2712,7 @@ preview_refresh() {
             local agent_name
             agent_name=$(basename "$local_agent")
             if [[ ! -f "$source_dir/$agent_name" ]]; then
-                echo "  ? $agent_name (orphan - not in roster)"
+                echo "  ? $agent_name (orphan - not in knossos)"
             fi
         done
     fi
@@ -2789,21 +2788,21 @@ preview_refresh() {
 }
 
 # ============================================================================
-# roster-sync Integration (Waterfall Pattern)
+# knossos-sync Integration (Waterfall Pattern)
 # ============================================================================
 
-# Check if roster-sync is available
+# Check if knossos-sync is available
 # Returns: 0 if available, 1 if not
-roster_sync_available() {
-    local roster_sync="$KNOSSOS_HOME/roster-sync"
-    [[ -x "$roster_sync" ]]
+knossos_sync_available() {
+    local knossos_sync="$KNOSSOS_HOME/knossos-sync"
+    [[ -x "$knossos_sync" ]]
 }
 
-# Check if roster has updates compared to manifest
-# Uses roster-sync's logic via sync-core.sh if available
+# Check if knossos has updates compared to manifest
+# Uses knossos-sync's logic via sync-core.sh if available
 # Returns: 0 if updates available, 1 if up to date
-roster_has_updates() {
-    # Source sync-core if not already loaded (for roster_has_updates function)
+knossos_has_updates() {
+    # Source sync-core if not already loaded (for knossos_has_updates function)
     local sync_lib="$KNOSSOS_HOME/lib/sync"
     if [[ -d "$sync_lib" ]]; then
         # Need to source dependencies first
@@ -2818,14 +2817,14 @@ roster_has_updates() {
         source "$sync_lib/sync-manifest.sh" 2>/dev/null || true
         source "$sync_lib/sync-core.sh" 2>/dev/null || true
 
-        # Check if roster_has_updates function exists now
-        if type roster_has_updates_internal &>/dev/null 2>&1; then
-            roster_has_updates_internal
+        # Check if knossos_has_updates function exists now
+        if type knossos_has_updates_internal &>/dev/null 2>&1; then
+            knossos_has_updates_internal
             return $?
         fi
     fi
 
-    # Fallback: compare roster git commit with manifest
+    # Fallback: compare knossos git commit with manifest
     local manifest_file=".claude/.cem/manifest.json"
     if [[ ! -f "$manifest_file" ]]; then
         log_debug "No manifest found, assuming updates available"
@@ -2834,55 +2833,55 @@ roster_has_updates() {
 
     local current_commit manifest_commit
     current_commit=$(git -C "$KNOSSOS_HOME" rev-parse HEAD 2>/dev/null)
-    manifest_commit=$(jq -r '.roster.commit // empty' "$manifest_file" 2>/dev/null)
+    manifest_commit=$(jq -r '.knossos.commit // empty' "$manifest_file" 2>/dev/null)
 
     if [[ -z "$current_commit" ]]; then
-        log_debug "Cannot determine roster commit"
+        log_debug "Cannot determine knossos commit"
         return 0  # Assume updates available
     fi
 
     if [[ "$current_commit" != "$manifest_commit" ]]; then
-        log_debug "Roster has updates: $manifest_commit -> $current_commit"
+        log_debug "Knossos has updates: $manifest_commit -> $current_commit"
         return 0  # Updates available
     fi
 
-    log_debug "Roster is up to date"
+    log_debug "Knossos is up to date"
     return 1  # Up to date
 }
 
-# Run roster-sync before rite apply (waterfall pattern)
-# Usage: run_roster_sync_waterfall [--force]
+# Run knossos-sync before rite apply (waterfall pattern)
+# Usage: run_knossos_sync_waterfall [--force]
 # Returns: 0 on success, non-zero on failure
-run_roster_sync_waterfall() {
+run_knossos_sync_waterfall() {
     local force_flag=""
     [[ "${1:-}" == "--force" ]] && force_flag="--force"
 
-    local roster_sync="$KNOSSOS_HOME/roster-sync"
+    local knossos_sync="$KNOSSOS_HOME/knossos-sync"
 
-    if [[ ! -x "$roster_sync" ]]; then
-        log_warning "roster-sync not found, skipping infrastructure sync"
+    if [[ ! -x "$knossos_sync" ]]; then
+        log_warning "knossos-sync not found, skipping infrastructure sync"
         return 0
     fi
 
     log "Syncing infrastructure before rite apply..."
 
-    # Run roster-sync sync (without --refresh to avoid recursion)
+    # Run knossos-sync sync (without --refresh to avoid recursion)
     local sync_output
     local sync_exit
     if [[ -n "$force_flag" ]]; then
-        sync_output=$("$roster_sync" sync $force_flag 2>&1) || sync_exit=$?
+        sync_output=$("$knossos_sync" sync $force_flag 2>&1) || sync_exit=$?
     else
-        sync_output=$("$roster_sync" sync 2>&1) || sync_exit=$?
+        sync_output=$("$knossos_sync" sync 2>&1) || sync_exit=$?
     fi
     sync_exit=${sync_exit:-0}
 
     if [[ $sync_exit -ne 0 ]]; then
-        log_error "roster-sync failed (exit $sync_exit)"
+        log_error "knossos-sync failed (exit $sync_exit)"
         echo "$sync_output" >&2
         return $sync_exit
     fi
 
-    log_debug "roster-sync completed successfully"
+    log_debug "knossos-sync completed successfully"
     # Show summary if there were updates
     if [[ "$sync_output" == *"Updated:"* || "$sync_output" == *"Merging:"* ]]; then
         log "Infrastructure sync completed"
@@ -2899,7 +2898,7 @@ update_cem_manifest_rite() {
     local rite_name="$1"
     local manifest_file=".claude/.cem/manifest.json"
 
-    # Skip if no manifest exists (roster-sync not initialized)
+    # Skip if no manifest exists (knossos-sync not initialized)
     if [[ ! -f "$manifest_file" ]]; then
         log_debug "No CEM manifest found, skipping team section update"
         return 0
@@ -2921,13 +2920,13 @@ update_cem_manifest_rite() {
     updated=$(jq \
         --arg name "$rite_name" \
         --arg checksum "$team_checksum" \
-        --arg roster_path "$team_dir" \
+        --arg knossos_path "$team_dir" \
         --arg timestamp "$timestamp" '
         .team = {
             name: $name,
             checksum: (if $checksum != "" then $checksum else null end),
             last_refresh: $timestamp,
-            roster_path: $roster_path
+            knossos_path: $knossos_path
         }
     ' "$manifest_file") || {
         log_warning "Failed to update CEM manifest team section"
@@ -2964,24 +2963,24 @@ perform_swap() {
     check_journal_recovery
 
     # =========================================================================
-    # WATERFALL SYNC: roster-sync integration (--sync-first or --auto-sync)
+    # WATERFALL SYNC: knossos-sync integration (--sync-first or --auto-sync)
     # =========================================================================
     if [[ "$SYNC_FIRST_MODE" -eq 1 ]]; then
-        # --sync-first: Always run roster-sync before rite apply
-        run_roster_sync_waterfall || {
+        # --sync-first: Always run knossos-sync before rite apply
+        run_knossos_sync_waterfall || {
             log_error "Infrastructure sync failed, aborting team swap"
             exit "$EXIT_SWAP_FAILURE"
         }
     elif [[ "$AUTO_SYNC_MODE" -eq 1 ]]; then
-        # --auto-sync: Only sync if roster has updates
-        if roster_has_updates; then
-            log "Roster updates detected, syncing infrastructure..."
-            run_roster_sync_waterfall || {
+        # --auto-sync: Only sync if knossos has updates
+        if knossos_has_updates; then
+            log "Knossos updates detected, syncing infrastructure..."
+            run_knossos_sync_waterfall || {
                 log_error "Infrastructure sync failed, aborting team swap"
                 exit "$EXIT_SWAP_FAILURE"
             }
         else
-            log_debug "No roster updates, skipping infrastructure sync"
+            log_debug "No knossos updates, skipping infrastructure sync"
         fi
     fi
 
@@ -2995,7 +2994,7 @@ perform_swap() {
     if [[ -n "$source_rite" ]] && [[ "$UPDATE_MODE" -eq 0 ]]; then
         if [[ "$source_rite" == "$rite_name" ]]; then
             log "Already using $rite_name (no changes needed)"
-            log "Use --update to pull latest from roster"
+            log "Use --update to pull latest from knossos"
             exit "$EXIT_SUCCESS"
         fi
     fi
@@ -3221,12 +3220,12 @@ perform_swap() {
     # Mark point-of-no-return - after this, recovery must complete forward
     mark_commit_step "$COMMIT_STEP_ACTIVE_RITE"
 
-    # Update CEM manifest team section (critical for roster-sync staleness tracking)
+    # Update CEM manifest team section (critical for knossos-sync staleness tracking)
     # Note: This is after point-of-no-return, so failure cannot trigger rollback
-    # Instead, log warning and continue - CEM staleness is recoverable via roster-sync
+    # Instead, log warning and continue - CEM staleness is recoverable via knossos-sync
     if ! update_cem_manifest_rite "$rite_name"; then
         log_warning "Failed to update CEM manifest team section"
-        log_warning "CEM manifest may be stale - run roster-sync to update"
+        log_warning "CEM manifest may be stale - run knossos-sync to update"
         # Cannot rollback - we're past point-of-no-return (ACTIVE_RITE written)
         # Continue with swap completion - CEM staleness is recoverable
     fi
@@ -3301,7 +3300,7 @@ perform_swap() {
     fi
 
     # Display rite pantheon (dynamic generation from agent frontmatter)
-    generate_roster "$rite_name"
+    generate_knossos "$rite_name"
 
     # Success - show workflow info if available
     local workflow_file="$KNOSSOS_HOME/rites/$rite_name/workflow.yaml"

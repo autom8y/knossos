@@ -21,11 +21,11 @@ echo "# Orchestrator" > "$TEST_DIR/.claude/agents/orchestrator.md"
 echo "ecosystem" > "$TEST_DIR/.claude/ACTIVE_RITE"
 
 # Copy library dependencies
-cp /Users/tomtenuta/Code/roster/.claude/hooks/lib/{logging.sh,session-utils.sh,session-manager.sh} \
+cp /Users/tomtenuta/Code/knossos/.claude/hooks/lib/{logging.sh,session-utils.sh,session-manager.sh} \
    "$TEST_DIR/.claude/hooks/lib/"
 
 # Copy the fixed orchestrator-router.sh
-cp /Users/tomtenuta/Code/roster/user-hooks/validation/orchestrator-router.sh \
+cp /Users/tomtenuta/Code/knossos/user-hooks/validation/orchestrator-router.sh \
    "$TEST_DIR/.claude/hooks/validation/orchestrator-router.sh"
 
 chmod +x "$TEST_DIR/.claude/hooks/validation/orchestrator-router.sh"

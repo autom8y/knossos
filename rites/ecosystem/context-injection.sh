@@ -1,6 +1,6 @@
 #!/bin/bash
 # Ecosystem-Pack Context Injection
-# Provides CEM sync status, roster reference, and drift detection for ecosystem work
+# Provides CEM sync status, knossos reference, and drift detection for ecosystem work
 #
 # Called by: session-context.sh via rite-context-loader.sh
 # Output: Markdown table with ecosystem status
@@ -34,19 +34,19 @@ inject_rite_context() {
     fi
     output+="| **CEM Sync** | $cem_status ($cem_timestamp) |"$'\n'
 
-    # Roster Reference
-    local roster_ref="unknown"
-    local roster_home="${ROSTER_HOME:-$HOME/Code/roster}"
-    if [[ -d "$roster_home/.git" ]]; then
-        roster_ref=$(cd "$roster_home" && git rev-parse --short HEAD 2>/dev/null || echo "unknown")
-        local roster_branch=$(cd "$roster_home" && git branch --show-current 2>/dev/null || echo "detached")
-        roster_ref="$roster_branch@$roster_ref"
+    # Knossos Reference
+    local knossos_ref="unknown"
+    local knossos_home="${KNOSSOS_HOME:-$HOME/Code/knossos}"
+    if [[ -d "$knossos_home/.git" ]]; then
+        knossos_ref=$(cd "$knossos_home" && git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+        local knossos_branch=$(cd "$knossos_home" && git branch --show-current 2>/dev/null || echo "detached")
+        knossos_ref="$knossos_branch@$knossos_ref"
     fi
-    output+="| **Roster Ref** | $roster_ref |"$'\n'
+    output+="| **Knossos Ref** | $knossos_ref |"$'\n'
 
     # Drift Detection
     local drift_status="clean"
-    # Check if local .claude/ differs from roster (simplified check)
+    # Check if local .claude/ differs from knossos (simplified check)
     if [[ -f "$project_dir/.claude/.local-overrides" ]]; then
         local override_count=$(wc -l < "$project_dir/.claude/.local-overrides" 2>/dev/null | tr -d ' ')
         drift_status="$override_count local overrides"
@@ -54,7 +54,7 @@ inject_rite_context() {
     output+="| **Drift Status** | $drift_status |"$'\n'
 
     # Test Satellites (for compatibility testing context)
-    local satellites_dir="${ROSTER_HOME:-$HOME/Code/roster}/test-satellites"
+    local satellites_dir="${KNOSSOS_HOME:-$HOME/Code/knossos}/test-satellites"
     local satellite_count=0
     if [[ -d "$satellites_dir" ]]; then
         satellite_count=$(ls -1d "$satellites_dir"/*/ 2>/dev/null | wc -l | tr -d ' ')

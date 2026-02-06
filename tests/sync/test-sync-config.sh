@@ -8,10 +8,10 @@ set -euo pipefail
 
 # Test setup
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ROSTER_HOME="${ROSTER_HOME:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
+KNOSSOS_HOME="${KNOSSOS_HOME:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
 
 # Source the module under test
-source "$ROSTER_HOME/lib/sync/sync-config.sh"
+source "$KNOSSOS_HOME/lib/sync/sync-config.sh"
 
 # Test counters
 TESTS_RUN=0

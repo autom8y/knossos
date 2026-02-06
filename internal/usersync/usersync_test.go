@@ -1,7 +1,6 @@
 package usersync
 
 import (
-	"encoding/json"
 	"os"
 	"path/filepath"
 	"testing"
@@ -270,49 +269,6 @@ func TestManifest_LoadCorrupt(t *testing.T) {
 	backupPath := manifestPath + ".corrupt"
 	if _, err := os.Stat(backupPath); os.IsNotExist(err) {
 		t.Error("Should backup corrupt manifest")
-	}
-}
-
-// TestManifest_BackwardCompatibility tests reading shell script format manifests.
-func TestManifest_BackwardCompatibility(t *testing.T) {
-	tmpDir := t.TempDir()
-	manifestPath := filepath.Join(tmpDir, "legacy.json")
-
-	// Write manifest in shell script format
-	legacyManifest := map[string]any{
-		"manifest_version": "1.0",
-		"last_sync":        "2026-01-10T12:00:00Z",
-		"agents": map[string]any{
-			"test-agent.md": map[string]any{
-				"source":       "roster",
-				"installed_at": "2026-01-10T10:00:00Z",
-				"checksum":     "sha256:legacy123",
-			},
-		},
-	}
-
-	data, _ := json.MarshalIndent(legacyManifest, "", "  ")
-	if err := os.WriteFile(manifestPath, data, 0644); err != nil {
-		t.Fatal(err)
-	}
-
-	// Load with LoadManifest
-	manifest, err := LoadManifest(manifestPath, ResourceAgents)
-	if err != nil {
-		t.Fatalf("LoadManifest failed: %v", err)
-	}
-
-	entry, ok := manifest.Entries["test-agent.md"]
-	if !ok {
-		t.Fatal("Entry 'test-agent.md' not found")
-	}
-
-	if entry.Source != SourceKnossos {
-		t.Errorf("Source: got %s, want knossos", entry.Source)
-	}
-
-	if entry.Checksum != "sha256:legacy123" {
-		t.Errorf("Checksum: got %s, want sha256:legacy123", entry.Checksum)
 	}
 }
 

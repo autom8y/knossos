@@ -8,11 +8,11 @@ set -euo pipefail
 
 # Test setup
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ROSTER_HOME="${ROSTER_HOME:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
+KNOSSOS_HOME="${KNOSSOS_HOME:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
 
 # Source dependencies
-source "$ROSTER_HOME/lib/sync/sync-config.sh"
-source "$ROSTER_HOME/lib/sync/sync-checksum.sh"
+source "$KNOSSOS_HOME/lib/sync/sync-config.sh"
+source "$KNOSSOS_HOME/lib/sync/sync-checksum.sh"
 
 # Test counters
 TESTS_RUN=0

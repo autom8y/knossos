@@ -5,7 +5,7 @@
 # Handles reading, writing, and migrating manifest.json files.
 # Supports schema versions 1, 2, and 3 with automatic migration.
 #
-# Part of: roster-sync (TDD-cem-replacement)
+# Part of: knossos-sync (TDD-cem-replacement)
 #
 # Usage:
 #   source "$KNOSSOS_HOME/lib/sync/sync-manifest.sh"
@@ -55,7 +55,7 @@ read_manifest() {
 }
 
 # Get a specific field from manifest
-# Usage: get_manifest_field ".roster.commit"
+# Usage: get_manifest_field ".knossos.commit"
 # Returns: field value or empty
 get_manifest_field() {
     local field="$1"
@@ -175,11 +175,11 @@ set_manifest_checksum() {
 # ============================================================================
 
 # Create a new v3 manifest
-# Usage: create_manifest "/path/to/roster" "commit_hash" "branch_ref"
+# Usage: create_manifest "/path/to/knossos" "commit_hash" "branch_ref"
 create_manifest() {
-    local roster_path="$1"
-    local roster_commit="$2"
-    local roster_ref="${3:-main}"
+    local knossos_path="$1"
+    local knossos_commit="$2"
+    local knossos_ref="${3:-main}"
     local timestamp
 
     timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
@@ -187,12 +187,12 @@ create_manifest() {
     local manifest
     manifest=$(jq -n \
         --argjson sv "$SYNC_SCHEMA_VERSION" \
-        --arg rp "$roster_path" \
-        --arg rc "$roster_commit" \
-        --arg rr "$roster_ref" \
+        --arg rp "$knossos_path" \
+        --arg rc "$knossos_commit" \
+        --arg rr "$knossos_ref" \
         --arg ts "$timestamp" '{
         schema_version: $sv,
-        roster: {
+        knossos: {
             path: $rp,
             commit: $rc,
             ref: $rr,
@@ -226,15 +226,15 @@ add_managed_file() {
             path: $p,
             strategy: $s,
             checksum: $c,
-            source: "roster",
+            source: "knossos",
             added_at: $t,
             last_sync: $t
         }]'
 }
 
-# Update roster info in manifest
-# Usage: manifest=$(update_manifest_roster "$manifest" "commit" "ref")
-update_manifest_roster() {
+# Update knossos info in manifest
+# Usage: manifest=$(update_manifest_knossos "$manifest" "commit" "ref")
+update_manifest_knossos() {
     local manifest="$1"
     local commit="$2"
     local ref="${3:-}"
@@ -246,11 +246,11 @@ update_manifest_roster() {
     updated=$(echo "$manifest" | jq \
         --arg c "$commit" \
         --arg t "$timestamp" '
-        .roster.commit = $c |
-        .roster.last_sync = $t')
+        .knossos.commit = $c |
+        .knossos.last_sync = $t')
 
     if [[ -n "$ref" ]]; then
-        updated=$(echo "$updated" | jq --arg r "$ref" '.roster.ref = $r')
+        updated=$(echo "$updated" | jq --arg r "$ref" '.knossos.ref = $r')
     fi
 
     echo "$updated"
@@ -280,7 +280,7 @@ migrate_manifest_if_needed() {
             return 0
             ;;
         *)
-            sync_log_error "Legacy manifest v$schema_version found. Delete .claude/.cem/manifest.json and run 'roster-sync init' to create fresh v3 manifest."
+            sync_log_error "Legacy manifest v$schema_version found. Delete .claude/.cem/manifest.json and run 'knossos-sync init' to create fresh v3 manifest."
             return 1
             ;;
     esac
@@ -322,10 +322,10 @@ validate_manifest() {
     # Check required fields based on version
     case "$version" in
         3)
-            local roster_path
-            roster_path=$(echo "$manifest" | jq -r '.roster.path // empty')
-            if [[ -z "$roster_path" ]]; then
-                sync_log_warning "Missing roster.path"
+            local knossos_path
+            knossos_path=$(echo "$manifest" | jq -r '.knossos.path // empty')
+            if [[ -z "$knossos_path" ]]; then
+                sync_log_warning "Missing knossos.path"
                 ((warnings++)) || true
             fi
             ;;
@@ -377,7 +377,7 @@ update_manifest_rite() {
     local manifest="$1"
     local rite_name="$2"
     local checksum="${3:-}"
-    local roster_path="${KNOSSOS_HOME:-}"
+    local knossos_path="${KNOSSOS_HOME:-}"
     local timestamp
 
     timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
@@ -385,13 +385,13 @@ update_manifest_rite() {
     echo "$manifest" | jq \
         --arg n "$rite_name" \
         --arg c "$checksum" \
-        --arg rp "$roster_path/rites/$rite_name" \
+        --arg rp "$knossos_path/rites/$rite_name" \
         --arg t "$timestamp" '
         .rite = {
             name: $n,
             checksum: (if $c != "" then $c else null end),
             last_refresh: $t,
-            roster_path: $rp
+            knossos_path: $rp
         }'
 }
 
@@ -410,7 +410,7 @@ clear_manifest_rite() {
 add_manifest_orphan() {
     local manifest="$1"
     local path="$2"
-    local reason="${3:-removed from roster}"
+    local reason="${3:-removed from knossos}"
     local timestamp
 
     timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")

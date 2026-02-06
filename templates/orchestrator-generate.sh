@@ -101,7 +101,7 @@ EXAMPLES:
   ./orchestrator-generate.sh security --force
 
 ENVIRONMENT:
-  KNOSSOS_HOME     Root directory for roster (default: ~/Code/roster)
+  KNOSSOS_HOME     Root directory for knossos (default: ~/Code/knossos)
 
 EOF
 }

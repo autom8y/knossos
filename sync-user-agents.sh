@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 #
-# sync-user-agents.sh - Sync roster user-agents to ~/.claude/agents/
+# sync-user-agents.sh - Sync knossos user-agents to ~/.claude/agents/
 #
-# Syncs agents from roster/user-agents/ to the user-level agents directory.
+# Syncs agents from knossos/user-agents/ to the user-level agents directory.
 # Behavior:
 #   - Additive: Never removes existing agents from ~/.claude/agents/
-#   - Overwrites: Only agents previously installed from roster (tracked in manifest)
-#   - Preserves: User-created agents not from roster
+#   - Overwrites: Only agents previously installed from knossos (tracked in manifest)
+#   - Preserves: User-created agents not from knossos
 #
 # Usage:
 #   ./sync-user-agents.sh              # Sync user-agents to ~/.claude/agents/
@@ -15,13 +15,12 @@
 #   ./sync-user-agents.sh --help       # Show usage
 #
 # Environment Variables:
-#   KNOSSOS_HOME   Knossos platform location (default: ~/Code/roster)
-#   ROSTER_HOME    Deprecated - use KNOSSOS_HOME instead
+#   KNOSSOS_HOME   Knossos platform location (default: ~/Code/knossos)
 #   KNOSSOS_DEBUG   Enable debug logging (set to 1)
 
 set -euo pipefail
 
-# Source Knossos home resolution (handles ROSTER_HOME deprecation)
+# Source Knossos home resolution (resolves KNOSSOS_HOME)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/lib/knossos-home.sh"
 
@@ -112,14 +111,14 @@ calculate_checksum() {
 # Returns 0 if found in a rite (collision), 1 if not found
 is_rite_agent() {
     local agent_name="$1"
-    local roster_rites="${KNOSSOS_HOME}/rites"
+    local knossos_rites="${KNOSSOS_HOME}/rites"
 
-    if [[ ! -d "$roster_rites" ]]; then
+    if [[ ! -d "$knossos_rites" ]]; then
         return 1
     fi
 
     # Search for agent in any rite's agents/ directory
-    if find "$roster_rites" -path "*/agents/$agent_name" -type f 2>/dev/null | grep -q .; then
+    if find "$knossos_rites" -path "*/agents/$agent_name" -type f 2>/dev/null | grep -q .; then
         return 0
     fi
 
@@ -129,15 +128,15 @@ is_rite_agent() {
 # Get which rite(s) contain an agent
 get_rite_for_agent() {
     local agent_name="$1"
-    local roster_rites="${KNOSSOS_HOME}/rites"
+    local knossos_rites="${KNOSSOS_HOME}/rites"
 
-    if [[ ! -d "$roster_rites" ]]; then
+    if [[ ! -d "$knossos_rites" ]]; then
         echo ""
         return
     fi
 
     # Find rite directories containing this agent
-    find "$roster_rites" -path "*/agents/$agent_name" -type f 2>/dev/null | while read -r path; do
+    find "$knossos_rites" -path "*/agents/$agent_name" -type f 2>/dev/null | while read -r path; do
         # Extract rite name from path: .../rites/RITE_NAME/agents/agent.md
         echo "$path" | sed 's|.*/rites/\([^/]*\)/agents/.*|\1|'
     done | tr '\n' ',' | sed 's/,$//'
@@ -156,8 +155,8 @@ read_manifest() {
     fi
 }
 
-# Check if agent is managed by roster (exists in manifest with source=roster)
-is_roster_managed() {
+# Check if agent is managed by knossos (exists in manifest with source=knossos)
+is_knossos_managed() {
     local agent_name="$1"
     local manifest
     manifest=$(read_manifest)
@@ -170,7 +169,7 @@ is_roster_managed() {
     if command -v jq >/dev/null 2>&1; then
         local source
         source=$(echo "$manifest" | jq -r --arg name "$agent_name" '.agents[$name].source // empty' 2>/dev/null)
-        if [[ "$source" == "roster" || "$source" == "roster-diverged" ]]; then
+        if [[ "$source" == "knossos" || "$source" == "knossos-diverged" ]]; then
             return 0
         fi
         return 1
@@ -187,7 +186,7 @@ is_roster_managed() {
     local source
     source=$(echo "$agent_block" | grep '"source"' | sed 's/.*"source":[[:space:]]*"\([^"]*\)".*/\1/')
 
-    if [[ "$source" == "roster" || "$source" == "roster-diverged" ]]; then
+    if [[ "$source" == "knossos" || "$source" == "knossos-diverged" ]]; then
         return 0
     fi
 
@@ -226,7 +225,7 @@ add_to_manifest() {
     fi
 }
 
-# Recover manifest entries from existing agent files that match roster sources
+# Recover manifest entries from existing agent files that match knossos sources
 recover_manifest() {
     log_info "Recovering manifest from existing agents..."
 
@@ -246,13 +245,13 @@ recover_manifest() {
         local agent_name
         agent_name=$(basename "$target_file")
 
-        # Skip if already in manifest as roster-managed
-        if is_roster_managed "$agent_name"; then
+        # Skip if already in manifest as knossos-managed
+        if is_knossos_managed "$agent_name"; then
             log_debug "Already managed: $agent_name"
             continue
         fi
 
-        # Check if this agent exists in roster source
+        # Check if this agent exists in knossos source
         local source_file="$SOURCE_DIR/$agent_name"
         if [[ -f "$source_file" ]]; then
             local source_checksum target_checksum
@@ -260,26 +259,26 @@ recover_manifest() {
             target_checksum=$(calculate_checksum "$target_file")
 
             if [[ "$source_checksum" == "$target_checksum" ]]; then
-                # Exact match - adopt as roster-managed
+                # Exact match - adopt as knossos-managed
                 if [[ "$DRY_RUN_MODE" -eq 1 ]]; then
                     log_info "Would adopt: $agent_name (exact match)"
                 else
-                    add_to_manifest "$agent_name" "roster" "$target_checksum"
+                    add_to_manifest "$agent_name" "knossos" "$target_checksum"
                     log_success "Adopted: $agent_name (exact match)"
                 fi
                 ((recovered++)) || true
             else
-                # Diverged - mark as roster-diverged to preserve user changes
+                # Diverged - mark as knossos-diverged to preserve user changes
                 if [[ "$DRY_RUN_MODE" -eq 1 ]]; then
                     log_info "Would adopt (diverged): $agent_name (local modifications preserved)"
                 else
-                    add_to_manifest "$agent_name" "roster-diverged" "$target_checksum"
+                    add_to_manifest "$agent_name" "knossos-diverged" "$target_checksum"
                     log_warning "Adopted (diverged): $agent_name (local modifications preserved)"
                 fi
                 ((diverged++)) || true
             fi
         else
-            log_debug "Not in roster: $agent_name (user-created)"
+            log_debug "Not in knossos: $agent_name (user-created)"
         fi
     done
 
@@ -333,7 +332,7 @@ EOF
     log_debug "Initialized empty manifest at $USER_MANIFEST_FILE"
 }
 
-# Write manifest with current roster-managed agents
+# Write manifest with current knossos-managed agents
 # Usage: write_manifest agent1:checksum1 agent2:checksum2 ...
 write_manifest() {
     local timestamp
@@ -372,7 +371,7 @@ write_manifest() {
         # Write agent entry
         {
             echo -n "    \"$agent_name\": {"
-            echo -n "\"source\": \"roster\", "
+            echo -n "\"source\": \"knossos\", "
             echo -n "\"installed_at\": \"$timestamp\", "
             echo -n "\"checksum\": \"$checksum\""
             echo -n "}"
@@ -442,8 +441,8 @@ perform_sync() {
 
         if [[ -f "$target_file" ]]; then
             # Target exists - check if we can overwrite
-            if is_roster_managed "$agent_name"; then
-                # Roster-managed: check if update needed
+            if is_knossos_managed "$agent_name"; then
+                # Knossos-managed: check if update needed
                 local manifest_checksum
                 manifest_checksum=$(get_manifest_checksum "$agent_name")
 
@@ -482,8 +481,8 @@ perform_sync() {
         fi
     done
 
-    # Preserve existing roster-managed agents that are no longer in source
-    # (This handles the case where roster removes an agent - we still track it
+    # Preserve existing knossos-managed agents that are no longer in source
+    # (This handles the case where knossos removes an agent - we still track it
     # but don't remove it, honoring the additive-only requirement)
     local manifest
     manifest=$(read_manifest)
@@ -503,12 +502,12 @@ perform_sync() {
             done
 
             if [[ "$still_in_source" == false ]] && [[ -f "$USER_AGENTS_DIR/$existing" ]]; then
-                # Agent removed from roster but still exists - keep in manifest
-                # so we know it came from roster originally
+                # Agent removed from knossos but still exists - keep in manifest
+                # so we know it came from knossos originally
                 local checksum
                 checksum=$(calculate_checksum "$USER_AGENTS_DIR/$existing")
                 manifest_entries+=("$existing:$checksum")
-                log_debug "Preserved manifest entry: $existing (no longer in roster)"
+                log_debug "Preserved manifest entry: $existing (no longer in knossos)"
             fi
         done
     fi
@@ -547,9 +546,9 @@ show_status() {
     if [[ -d "$SOURCE_DIR" ]]; then
         local source_count
         source_count=$(find "$SOURCE_DIR" -maxdepth 1 -name "*.md" -type f 2>/dev/null | wc -l | tr -d ' ')
-        echo "Roster agents:  $source_count"
+        echo "Knossos agents:  $source_count"
     else
-        echo "Roster agents:  (directory not found)"
+        echo "Knossos agents:  (directory not found)"
     fi
 
     # Check target
@@ -564,9 +563,9 @@ show_status() {
     # Check manifest
     if [[ -f "$USER_MANIFEST_FILE" ]]; then
         local manifest_count last_sync
-        manifest_count=$(grep -c '"source": "roster"' "$USER_MANIFEST_FILE" 2>/dev/null || echo "0")
+        manifest_count=$(grep -c '"source": "knossos"' "$USER_MANIFEST_FILE" 2>/dev/null || echo "0")
         last_sync=$(grep '"last_sync"' "$USER_MANIFEST_FILE" | sed 's/.*"last_sync":[[:space:]]*"\([^"]*\)".*/\1/' || echo "unknown")
-        echo "Roster-managed: $manifest_count"
+        echo "Knossos-managed: $manifest_count"
         echo "Last sync:      $last_sync"
     else
         echo "Manifest:       (not initialized)"
@@ -588,7 +587,7 @@ show_status() {
             local target_file="$USER_AGENTS_DIR/$agent_name"
 
             if [[ -f "$target_file" ]]; then
-                if is_roster_managed "$agent_name"; then
+                if is_knossos_managed "$agent_name"; then
                     local source_checksum manifest_checksum
                     source_checksum=$(calculate_checksum "$source_file")
                     manifest_checksum=$(get_manifest_checksum "$agent_name")
@@ -606,7 +605,7 @@ show_status() {
             fi
         done
 
-        # Check for user agents not in roster
+        # Check for user agents not in knossos
         for target_file in "$USER_AGENTS_DIR"/*.md; do
             [[ -f "$target_file" ]] || continue
 
@@ -614,8 +613,8 @@ show_status() {
             agent_name=$(basename "$target_file")
 
             if [[ ! -f "$SOURCE_DIR/$agent_name" ]]; then
-                if is_roster_managed "$agent_name"; then
-                    echo "  [-] $agent_name (was from roster, now removed from source)"
+                if is_knossos_managed "$agent_name"; then
+                    echo "  [-] $agent_name (was from knossos, now removed from source)"
                 else
                     echo "  [*] $agent_name (user-created)"
                 fi
@@ -629,7 +628,7 @@ usage() {
     cat <<EOF
 Usage: sync-user-agents.sh [OPTIONS]
 
-Syncs roster user-agents to ~/.claude/agents/
+Syncs knossos user-agents to ~/.claude/agents/
 
 Options:
   --dry-run      Preview changes without applying
@@ -639,18 +638,18 @@ Options:
 
 Behavior:
   - Additive:   Never removes existing agents from ~/.claude/agents/
-  - Overwrites: Only agents previously installed from roster
-  - Preserves:  User-created agents not from roster
+  - Overwrites: Only agents previously installed from knossos
+  - Preserves:  User-created agents not from knossos
 
 The manifest at ~/.claude/USER_AGENT_MANIFEST.json tracks which agents
-were installed from roster, allowing safe updates while preserving
+were installed from knossos, allowing safe updates while preserving
 user-created agents.
 
 Adopt Mode (--adopt):
   Scans existing agents in ~/.claude/agents/ and matches them against
-  roster sources. Agents that match are adopted into the manifest:
-  - Exact matches: marked as "roster" (fully managed)
-  - Diverged files: marked as "roster-diverged" (preserves local changes)
+  knossos sources. Agents that match are adopted into the manifest:
+  - Exact matches: marked as "knossos" (fully managed)
+  - Diverged files: marked as "knossos-diverged" (preserves local changes)
   - User-created: not added to manifest (remain user-owned)
 
   Use --adopt when:
@@ -659,7 +658,7 @@ Adopt Mode (--adopt):
   - Agents were installed before manifest tracking existed
 
 Environment Variables:
-  ROSTER_HOME    Roster repository location (default: ~/Code/roster)
+  KNOSSOS_HOME   Knossos platform location (default: ~/Code/knossos)
   KNOSSOS_DEBUG   Enable debug logging (set to 1)
 
 Exit Codes:

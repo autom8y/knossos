@@ -271,11 +271,11 @@ remove_preferences_file() {
 }
 
 # =============================================================================
-# pref_007: export_preferences_env sets ROSTER_PREF_* variables
+# pref_007: export_preferences_env sets KNOSSOS_PREF_* variables
 # Requirement: Environment variable export
 # =============================================================================
 
-@test "pref_007: export_preferences_env sets ROSTER_PREF_* variables" {
+@test "pref_007: export_preferences_env sets KNOSSOS_PREF_* variables" {
     # Create custom preferences
     create_preferences_file "manual" "continue" "verbose"
 
@@ -287,22 +287,22 @@ remove_preferences_file() {
     export_preferences_env
 
     # Verify environment variables are set (string preferences)
-    [[ "$ROSTER_PREF_VERSION" == "1.0.0" ]]
-    [[ "$ROSTER_PREF_AUTONOMY_LEVEL" == "manual" ]]
-    [[ "$ROSTER_PREF_FAILURE_HANDLING" == "continue" ]]
-    [[ "$ROSTER_PREF_OUTPUT_FORMAT" == "verbose" ]]
-    [[ "$ROSTER_PREF_ORCHESTRATION_MODE" == "task_tool" ]]
-    [[ "$ROSTER_PREF_DEFAULT_BRANCH" == "main" ]]
+    [[ "$KNOSSOS_PREF_VERSION" == "1.0.0" ]]
+    [[ "$KNOSSOS_PREF_AUTONOMY_LEVEL" == "manual" ]]
+    [[ "$KNOSSOS_PREF_FAILURE_HANDLING" == "continue" ]]
+    [[ "$KNOSSOS_PREF_OUTPUT_FORMAT" == "verbose" ]]
+    [[ "$KNOSSOS_PREF_ORCHESTRATION_MODE" == "task_tool" ]]
+    [[ "$KNOSSOS_PREF_DEFAULT_BRANCH" == "main" ]]
 
     # Verify boolean preferences - note: false values fall back to defaults
     # because jq's `// empty` treats false as falsy
-    [[ "$ROSTER_PREF_COMMIT_AUTO_PUSH" == "false" ]]  # Default is "false", matches
-    [[ "$ROSTER_PREF_TEST_BEFORE_COMMIT" == "true" ]]
+    [[ "$KNOSSOS_PREF_COMMIT_AUTO_PUSH" == "false" ]]  # Default is "false", matches
+    [[ "$KNOSSOS_PREF_TEST_BEFORE_COMMIT" == "true" ]]
 
     # Verify nested preferences
-    [[ "$ROSTER_PREF_EDITOR_INTEGRATION_AUTO_OPEN_FILES" == "true" ]]
+    [[ "$KNOSSOS_PREF_EDITOR_INTEGRATION_AUTO_OPEN_FILES" == "true" ]]
     # preserve_cursor_position is false in file but falls back to default "true"
-    [[ "$ROSTER_PREF_EDITOR_INTEGRATION_PRESERVE_CURSOR_POSITION" == "true" ]]
+    [[ "$KNOSSOS_PREF_EDITOR_INTEGRATION_PRESERVE_CURSOR_POSITION" == "true" ]]
 }
 
 # =============================================================================
@@ -320,7 +320,7 @@ remove_preferences_file() {
 
     # Run session-context hook with verbose flag
     cd "$TEST_PROJECT_DIR"
-    export ROSTER_VERBOSE="1"
+    export KNOSSOS_VERBOSE="1"
     run bash "$SESSION_CONTEXT_HOOK" --verbose
 
     [ "$status" -eq 0 ]

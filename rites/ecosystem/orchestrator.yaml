@@ -12,7 +12,7 @@ rite:
 frontmatter:
   role: "Coordinates ecosystem phases"
   description: |
-    Coordinates ecosystem phases for CEM/roster infrastructure work. Use when: work spans multiple phases or requires cross-component coordination. Triggers: coordinate, orchestrate, multi-phase, ecosystem workflow.
+    Coordinates ecosystem phases for CEM/knossos infrastructure work. Use when: work spans multiple phases or requires cross-component coordination. Triggers: coordinate, orchestrate, multi-phase, ecosystem workflow.
 
 # Specialist routing conditions (when to route to each)
 # Specialist names come from workflow.yaml phases
@@ -54,7 +54,7 @@ handoff_criteria:
 
 # Skills references for this team
 skills:
-  - "@ecosystem-ref for CEM/roster patterns"
+  - "@ecosystem-ref for CEM/knossos patterns"
   - "@documentation for schema conventions"
   - "@10x-workflow for complexity assessment"
   - "@standards for naming conventions"

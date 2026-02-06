@@ -7,8 +7,8 @@ set -euo pipefail
 echo "=== D002 Output Format Verification (Simple) ==="
 echo ""
 
-# Test in actual roster directory (has all dependencies)
-cd /Users/tomtenuta/Code/roster
+# Test in actual knossos directory (has all dependencies)
+cd /Users/tomtenuta/Code/knossos
 
 # Execute the hook with test prompt
 export CLAUDE_USER_PROMPT="/start Test D002 Verification"
@@ -46,9 +46,9 @@ echo ""
 echo "=== D002 RESOLVED ==="
 echo ""
 echo "File Locations:"
-echo "  - Canonical: /Users/tomtenuta/Code/roster/user-hooks/validation/orchestrator-router.sh"
-echo "  - Active:    /Users/tomtenuta/Code/roster/.claude/hooks/validation/orchestrator-router.sh"
-echo "  - Reference: /Users/tomtenuta/Code/roster/.claude/settings.local.json"
+echo "  - Canonical: /Users/tomtenuta/Code/knossos/user-hooks/validation/orchestrator-router.sh"
+echo "  - Active:    /Users/tomtenuta/Code/knossos/.claude/hooks/validation/orchestrator-router.sh"
+echo "  - Reference: /Users/tomtenuta/Code/knossos/.claude/settings.local.json"
 echo ""
 echo "Output Format: Task(orchestrator...) invocation (per TDD-auto-orchestration.md lines 115-124)"
 echo "Previous Bug:  YAML CONSULTATION_REQUEST (old spec, incompatible with Claude Code)"

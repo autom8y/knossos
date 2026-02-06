@@ -224,9 +224,9 @@ cmd_create() {
     fi
 
     # Sync ecosystem in worktree (worktrees inherit .claude/ from parent, so use sync not init)
-    if [[ ! -x "$KNOSSOS_HOME/roster-sync" ]]; then
+    if [[ ! -x "$KNOSSOS_HOME/knossos-sync" ]]; then
         git worktree remove --force "$wt_path" 2>/dev/null || true
-        echo '{"error": "roster-sync not found at '"$KNOSSOS_HOME/roster-sync"'. Cannot create worktree without ecosystem."}' >&2
+        echo '{"error": "knossos-sync not found at '"$KNOSSOS_HOME/knossos-sync"'. Cannot create worktree without ecosystem."}' >&2
         exit 1
     fi
 
@@ -235,19 +235,19 @@ cmd_create() {
     local sync_output
     if [[ -f "$wt_path/.claude/.cem/manifest.json" ]]; then
         # Already initialized - just sync to get latest
-        if ! sync_output=$(cd "$wt_path" && "$KNOSSOS_HOME/roster-sync" sync 2>&1); then
+        if ! sync_output=$(cd "$wt_path" && "$KNOSSOS_HOME/knossos-sync" sync 2>&1); then
             # Sync failed - try force reinit
-            if ! sync_output=$(cd "$wt_path" && "$KNOSSOS_HOME/roster-sync" init --force 2>&1); then
+            if ! sync_output=$(cd "$wt_path" && "$KNOSSOS_HOME/knossos-sync" init --force 2>&1); then
                 git worktree remove --force "$wt_path" 2>/dev/null || true
-                echo '{"error": "roster-sync sync/init failed in worktree. Details: '"${sync_output:-unknown}"'"}' >&2
+                echo '{"error": "knossos-sync sync/init failed in worktree. Details: '"${sync_output:-unknown}"'"}' >&2
                 exit 1
             fi
         fi
     else
         # Not initialized - run init
-        if ! sync_output=$(cd "$wt_path" && "$KNOSSOS_HOME/roster-sync" init 2>&1); then
+        if ! sync_output=$(cd "$wt_path" && "$KNOSSOS_HOME/knossos-sync" init 2>&1); then
             git worktree remove --force "$wt_path" 2>/dev/null || true
-            echo '{"error": "roster-sync init failed in worktree. Details: '"${sync_output:-unknown}"'"}' >&2
+            echo '{"error": "knossos-sync init failed in worktree. Details: '"${sync_output:-unknown}"'"}' >&2
             exit 1
         fi
     fi

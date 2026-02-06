@@ -5,7 +5,7 @@
 # Consolidates backup, removal, orphan detection, and rite membership
 # checks for commands, skills, and hooks into parameterized functions.
 #
-# Part of: roster rite-swap infrastructure
+# Part of: knossos rite-swap infrastructure
 #
 # Usage:
 #   source "$KNOSSOS_HOME/lib/rite/rite-resource.sh"

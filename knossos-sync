@@ -1,22 +1,22 @@
 #!/usr/bin/env bash
 #
-# roster-sync - Roster-Native Ecosystem Synchronization
+# knossos-sync - Knossos-Native Ecosystem Synchronization
 #
-# Replaces CEM (Claude Ecosystem Manager) with roster-native functionality.
-# Manages ecosystem file synchronization between roster and satellite projects.
+# Replaces CEM (Claude Ecosystem Manager) with knossos-native functionality.
+# Manages ecosystem file synchronization between knossos and satellite projects.
 #
 # Part of: CEM Migration (TDD-cem-replacement)
 #
 # Usage:
-#   roster-sync <command> [options]
+#   knossos-sync <command> [options]
 #
 # Commands:
 #   init      Initialize project with ecosystem files
-#   sync      Pull updates from roster
+#   sync      Pull updates from knossos
 #   validate  Validate manifest integrity
 #   repair    Rebuild manifest from state
 #   status    Show sync status
-#   diff      Show differences with roster
+#   diff      Show differences with knossos
 #
 # Global Options:
 #   --force       Overwrite local changes
@@ -34,7 +34,7 @@ set -euo pipefail
 # Home Resolution
 # ============================================================================
 
-# Source Knossos home resolution (handles ROSTER_HOME deprecation)
+# Source Knossos home resolution (handles KNOSSOS_HOME deprecation)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/lib/knossos-home.sh"
 
@@ -43,8 +43,8 @@ source "$SCRIPT_DIR/lib/knossos-home.sh"
 # ============================================================================
 
 readonly KNOSSOS_HOME  # Already set by knossos-home.sh
-readonly ROSTER_SYNC_VERSION="1.0.0"
-readonly ROSTER_SYNC_DEBUG="${ROSTER_SYNC_DEBUG:-0}"
+readonly KNOSSOS_SYNC_VERSION="1.0.0"
+readonly KNOSSOS_SYNC_DEBUG="${KNOSSOS_SYNC_DEBUG:-0}"
 
 # Source library modules in dependency order
 readonly SYNC_LIB="$KNOSSOS_HOME/lib/sync"
@@ -69,24 +69,24 @@ else
 fi
 
 log() {
-    echo -e "${BLUE}[roster-sync]${NC} $*"
+    echo -e "${BLUE}[knossos-sync]${NC} $*"
 }
 
 log_error() {
-    echo -e "${RED}[roster-sync] Error:${NC} $*" >&2
+    echo -e "${RED}[knossos-sync] Error:${NC} $*" >&2
 }
 
 log_warning() {
-    echo -e "${YELLOW}[roster-sync] Warning:${NC} $*" >&2
+    echo -e "${YELLOW}[knossos-sync] Warning:${NC} $*" >&2
 }
 
 log_success() {
-    echo -e "${GREEN}[roster-sync]${NC} $*"
+    echo -e "${GREEN}[knossos-sync]${NC} $*"
 }
 
 log_debug() {
-    if [[ "${ROSTER_SYNC_DEBUG:-0}" == "1" || "${DEBUG:-}" == "1" ]]; then
-        echo -e "[roster-sync DEBUG] $*" >&2
+    if [[ "${KNOSSOS_SYNC_DEBUG:-0}" == "1" || "${DEBUG:-}" == "1" ]]; then
+        echo -e "[knossos-sync DEBUG] $*" >&2
     fi
 }
 
@@ -115,7 +115,7 @@ check_dependencies() {
 load_sync_library() {
     if [[ ! -d "$SYNC_LIB" ]]; then
         log_error "Sync library not found: $SYNC_LIB"
-        log_error "Ensure ROSTER_HOME is set correctly: $KNOSSOS_HOME"
+        log_error "Ensure KNOSSOS_HOME is set correctly: $KNOSSOS_HOME"
         exit 1
     fi
 
@@ -207,7 +207,7 @@ parse_global_flags() {
                 fi
                 ;;
             --debug|-d)
-                export ROSTER_SYNC_DEBUG=1
+                export KNOSSOS_SYNC_DEBUG=1
                 shift
                 ;;
             -*)
@@ -233,24 +233,24 @@ parse_global_flags() {
 
 show_help() {
     cat <<'EOF'
-roster-sync - Roster-Native Ecosystem Synchronization
+knossos-sync - Knossos-Native Ecosystem Synchronization
 
 USAGE:
-    roster-sync <command> [options] [project-path]
+    knossos-sync <command> [options] [project-path]
 
 COMMANDS:
-    init        Initialize project with ecosystem files from roster
-    sync        Pull updates from roster to satellite project
+    init        Initialize project with ecosystem files from knossos
+    sync        Pull updates from knossos to satellite project
     validate    Validate manifest integrity and file checksums
     repair      Rebuild manifest from current file state
     status      Show sync status and version information
-    diff        Show differences between local and roster files
+    diff        Show differences between local and knossos files
 
 GLOBAL OPTIONS:
     --force, -f       Overwrite local changes (resolve conflicts)
     --dry-run, -n     Preview changes without applying
     --refresh, -r     Also refresh active rite after sync
-    --prune, -p       Remove orphaned files no longer in roster
+    --prune, -p       Remove orphaned files no longer in knossos
     --auto-refresh    Auto-refresh rite if it has updates
     --verbose, -V     Show detailed output
     --rite, -t        Include rite validation (validate command)
@@ -260,34 +260,34 @@ GLOBAL OPTIONS:
 
 EXAMPLES:
     # Initialize a new project
-    roster-sync init
+    knossos-sync init
 
-    # Sync updates from roster
-    roster-sync sync
+    # Sync updates from knossos
+    knossos-sync sync
 
     # Sync with rite refresh
-    roster-sync sync --refresh
+    knossos-sync sync --refresh
 
     # Force sync, overwriting local conflicts
-    roster-sync sync --force
+    knossos-sync sync --force
 
     # Preview what would change
-    roster-sync sync --dry-run
+    knossos-sync sync --dry-run
 
     # Check sync status
-    roster-sync status
+    knossos-sync status
 
     # Validate manifest
-    roster-sync validate
+    knossos-sync validate
 
     # Validate with rite check and verbose output
-    roster-sync validate --rite --verbose
+    knossos-sync validate --rite --verbose
 
     # Repair manifest (dry-run)
-    roster-sync repair --dry-run
+    knossos-sync repair --dry-run
 
     # Repair and remove orphans
-    roster-sync repair --force
+    knossos-sync repair --force
 
 EXIT CODES:
     0 - Success / Valid
@@ -298,17 +298,17 @@ EXIT CODES:
     6 - Orphan conflicts
 
 ENVIRONMENT:
-    ROSTER_HOME        Path to roster repository (default: ~/Code/roster)
-    ROSTER_SYNC_DEBUG  Set to 1 for debug output
+    KNOSSOS_HOME        Path to knossos repository (default: ~/Code/knossos)
+    KNOSSOS_SYNC_DEBUG  Set to 1 for debug output
 
 For more information, see: TDD-cem-replacement
 EOF
 }
 
 show_version() {
-    echo "roster-sync $ROSTER_SYNC_VERSION"
+    echo "knossos-sync $KNOSSOS_SYNC_VERSION"
     echo "Schema version: 3"
-    echo "ROSTER_HOME: $KNOSSOS_HOME"
+    echo "KNOSSOS_HOME: $KNOSSOS_HOME"
 }
 
 # ============================================================================
@@ -364,13 +364,13 @@ cmd_init() {
         fi
     fi
 
-    log "Initializing project with roster ecosystem..."
+    log "Initializing project with knossos ecosystem..."
     log "  Project: $project_path"
 
-    # 1. Validate roster exists at $KNOSSOS_HOME
+    # 1. Validate knossos exists at $KNOSSOS_HOME
     if [[ ! -d "$KNOSSOS_HOME" ]]; then
-        log_error "Roster not found: $KNOSSOS_HOME"
-        log_error "Set ROSTER_HOME environment variable"
+        log_error "Knossos not found: $KNOSSOS_HOME"
+        log_error "Set KNOSSOS_HOME environment variable"
         return "$EXIT_SYNC_INIT_FAILED"
     fi
 
@@ -385,13 +385,13 @@ cmd_init() {
         return "$EXIT_SYNC_INIT_FAILED"
     fi
 
-    # Validate not in roster itself
-    local roster_realpath project_realpath
-    roster_realpath=$(cd "$KNOSSOS_HOME" && pwd -P)
+    # Validate not in knossos itself
+    local knossos_realpath project_realpath
+    knossos_realpath=$(cd "$KNOSSOS_HOME" && pwd -P)
     project_realpath=$(cd "$project_path" && pwd -P)
 
-    if [[ "$project_realpath" == "$roster_realpath" || "$project_realpath" == "$roster_realpath/"* ]]; then
-        log_error "Cannot initialize inside roster repository"
+    if [[ "$project_realpath" == "$knossos_realpath" || "$project_realpath" == "$knossos_realpath/"* ]]; then
+        log_error "Cannot initialize inside knossos repository"
         return "$EXIT_SYNC_INIT_FAILED"
     fi
 
@@ -425,7 +425,7 @@ cmd_init() {
 
     if [[ "$FLAG_DRY_RUN" == "1" ]]; then
         log "DRY-RUN: Would initialize project"
-        log "  Roster: $KNOSSOS_HOME"
+        log "  Knossos: $KNOSSOS_HOME"
         log "  Target: $project_path"
         [[ -n "$rite_name" ]] && log "  Rite: $rite_name"
         return 0
@@ -445,32 +445,32 @@ cmd_init() {
     mkdir -p .claude/hooks
     mkdir -p .claude/agents
 
-    # 6. Get roster commit hash and ref
-    local roster_commit roster_ref
-    roster_commit=$(get_roster_commit)
-    roster_ref=$(get_roster_ref)
+    # 6. Get knossos.commit hash and ref
+    local knossos_commit knossos_ref
+    knossos_commit=$(get_knossos_commit)
+    knossos_ref=$(get_knossos_ref)
 
-    log_debug "Roster commit: $roster_commit"
-    log_debug "Roster ref: $roster_ref"
+    log_debug "Roster commit: $knossos_commit"
+    log_debug "Roster ref: $knossos_ref"
 
     # Initialize checksum cache
     init_checksum_cache
 
     # Create manifest
     local manifest
-    manifest=$(create_manifest "$KNOSSOS_HOME" "$roster_commit" "$roster_ref")
+    manifest=$(create_manifest "$KNOSSOS_HOME" "$knossos_commit" "$knossos_ref")
 
-    # 7. Process COPY-REPLACE items (roster-owned files)
-    local item roster_file local_file checksum
+    # 7. Process COPY-REPLACE items (knossos-owned files)
+    local item knossos_file local_file checksum
     log "Processing copy-replace items..."
     while IFS= read -r item; do
         [[ -z "$item" ]] && continue
 
-        roster_file="$KNOSSOS_HOME/.claude/$item"
+        knossos_file="$KNOSSOS_HOME/.claude/$item"
         local_file=".claude/$item"
 
-        if [[ ! -f "$roster_file" ]]; then
-            log_warning "Source not found: $roster_file"
+        if [[ ! -f "$knossos_file" ]]; then
+            log_warning "Source not found: $knossos_file"
             continue
         fi
 
@@ -480,12 +480,12 @@ cmd_init() {
         else
             log "  Copying: $item"
             mkdir -p "$(dirname "$local_file")"
-            cp "$roster_file" "$local_file"
+            cp "$knossos_file" "$local_file"
             # Preserve permissions (cross-platform)
             if [[ "$(uname)" == "Darwin" ]]; then
-                chmod "$(stat -f '%A' "$roster_file" 2>/dev/null)" "$local_file" 2>/dev/null || true
+                chmod "$(stat -f '%A' "$knossos_file" 2>/dev/null)" "$local_file" 2>/dev/null || true
             else
-                chmod --reference="$roster_file" "$local_file" 2>/dev/null || true
+                chmod --reference="$knossos_file" "$local_file" 2>/dev/null || true
             fi
             checksum=$(compute_checksum "$local_file")
         fi
@@ -501,11 +501,11 @@ cmd_init() {
 
         item="${line%%:*}"
         strategy="${line#*:}"
-        roster_file="$KNOSSOS_HOME/.claude/$item"
+        knossos_file="$KNOSSOS_HOME/.claude/$item"
         local_file=".claude/$item"
 
-        if [[ ! -f "$roster_file" ]]; then
-            log_warning "Source not found: $roster_file"
+        if [[ ! -f "$knossos_file" ]]; then
+            log_warning "Source not found: $knossos_file"
             continue
         fi
 
@@ -514,12 +514,12 @@ cmd_init() {
         else
             log "  Copying: $item"
             mkdir -p "$(dirname "$local_file")"
-            cp "$roster_file" "$local_file"
+            cp "$knossos_file" "$local_file"
             # Preserve permissions (cross-platform)
             if [[ "$(uname)" == "Darwin" ]]; then
-                chmod "$(stat -f '%A' "$roster_file" 2>/dev/null)" "$local_file" 2>/dev/null || true
+                chmod "$(stat -f '%A' "$knossos_file" 2>/dev/null)" "$local_file" 2>/dev/null || true
             else
-                chmod --reference="$roster_file" "$local_file" 2>/dev/null || true
+                chmod --reference="$knossos_file" "$local_file" 2>/dev/null || true
             fi
         fi
 
@@ -589,12 +589,12 @@ SETTINGS_EOF
 # ============================================================================
 
 cmd_sync() {
-    log "Syncing from roster..."
+    log "Syncing from knossos..."
 
     # Validate initialized
     local manifest_file="${SYNC_MANIFEST_FILE:-.claude/.cem/manifest.json}"
     if [[ ! -f "$manifest_file" ]]; then
-        log_error "Not initialized. Run: roster-sync init"
+        log_error "Not initialized. Run: knossos-sync init"
         return "$EXIT_SYNC_ERROR"
     fi
 
@@ -612,7 +612,7 @@ cmd_sync() {
     }
 
     # Check if updates needed
-    if ! roster_has_updates && [[ "$FLAG_FORCE" != "1" && "$FLAG_PRUNE" != "1" ]]; then
+    if ! knossos_has_updates && [[ "$FLAG_FORCE" != "1" && "$FLAG_PRUNE" != "1" ]]; then
         log "Already up to date"
 
         if [[ "$FLAG_REFRESH" == "1" ]]; then
@@ -623,7 +623,7 @@ cmd_sync() {
     fi
 
     if [[ "$FLAG_DRY_RUN" == "1" ]]; then
-        log "DRY-RUN: Would sync from roster"
+        log "DRY-RUN: Would sync from knossos"
     fi
 
     # Process copy-replace items
@@ -644,10 +644,10 @@ cmd_sync() {
         merge_errors=$(process_merge_items "$KNOSSOS_HOME/.claude" ".claude" "$FLAG_FORCE")
     fi
 
-    # Update manifest with new roster info
+    # Update manifest with new knossos info
     if [[ "$FLAG_DRY_RUN" != "1" ]]; then
         manifest=$(read_manifest)
-        manifest=$(update_manifest_roster "$manifest" "$(get_roster_commit)" "$(get_roster_ref)")
+        manifest=$(update_manifest_knossos "$manifest" "$(get_knossos_commit)" "$(get_knossos_ref)")
         write_manifest "$manifest"
     fi
 
@@ -700,7 +700,7 @@ cmd_sync() {
     # Report results
     if [[ "$conflicts" -gt 0 && "$FLAG_FORCE" != "1" ]]; then
         log_warning "$conflicts conflict(s) detected"
-        log "Resolve manually or use: roster-sync sync --force"
+        log "Resolve manually or use: knossos-sync sync --force"
         return "$EXIT_SYNC_CONFLICTS"
     fi
 
@@ -741,7 +741,7 @@ cmd_validate() {
     # 1. Check manifest exists
     if [[ ! -f "$manifest_file" ]]; then
         log_error "Manifest not found: $manifest_file"
-        log "  Run: roster-sync init"
+        log "  Run: knossos-sync init"
         return "$EXIT_SYNC_INVALID_MANIFEST"
     fi
 
@@ -763,25 +763,25 @@ cmd_validate() {
 
     if [[ "$schema_version" != "3" ]]; then
         log_warning "Schema version $schema_version - migration to v3 recommended"
-        log "  Run: roster-sync sync  (auto-migrates)"
+        log "  Run: knossos-sync sync  (auto-migrates)"
         warnings=$((warnings + 1))
     fi
 
     # Check required fields (v3 schema only)
-    local roster_path roster_commit
-    roster_path=$(echo "$manifest" | jq -r '.roster.path // empty')
-    roster_commit=$(echo "$manifest" | jq -r '.roster.commit // empty')
+    local knossos_path knossos_commit
+    knossos_path=$(echo "$manifest" | jq -r '.knossos.path // empty')
+    knossos_commit=$(echo "$manifest" | jq -r '.knossos.commit // empty')
 
-    if [[ -z "$roster_path" ]]; then
-        log_error "Missing required field: roster.path"
+    if [[ -z "$knossos_path" ]]; then
+        log_error "Missing required field: knossos.path"
         errors=$((errors + 1))
-    elif [[ ! -d "$roster_path" ]]; then
-        log_warning "Roster path does not exist: $roster_path"
+    elif [[ ! -d "$knossos_path" ]]; then
+        log_warning "Knossos path does not exist: $knossos_path"
         warnings=$((warnings + 1))
     fi
 
-    if [[ -z "$roster_commit" ]]; then
-        log_warning "Missing field: roster.commit"
+    if [[ -z "$knossos_commit" ]]; then
+        log_warning "Missing field: knossos.commit"
         warnings=$((warnings + 1))
     fi
 
@@ -933,34 +933,34 @@ cmd_repair() {
     # Check .claude directory exists
     if [[ ! -d ".claude" ]]; then
         log_error "No .claude directory found - cannot repair"
-        log "  Run: roster-sync init"
+        log "  Run: knossos-sync init"
         return "$EXIT_SYNC_INVALID_MANIFEST"
     fi
 
-    # Validate roster is accessible
+    # Validate knossos is accessible
     if [[ ! -d "$KNOSSOS_HOME" ]]; then
-        log_error "Roster not found: $KNOSSOS_HOME"
-        log "  Set ROSTER_HOME environment variable"
+        log_error "Knossos not found: $KNOSSOS_HOME"
+        log "  Set KNOSSOS_HOME environment variable"
         return "$EXIT_SYNC_INVALID_MANIFEST"
     fi
 
     # Backup existing manifest if it exists
     local old_manifest=""
-    local old_roster_path=""
-    local old_roster_commit=""
-    local old_roster_ref=""
+    local old_knossos_path=""
+    local old_knossos_commit=""
+    local old_knossos_ref=""
 
     if [[ -f "$manifest_file" ]]; then
         local backup_file="${manifest_file}.repair-backup.$(date +%Y%m%d-%H%M%S)"
         cp "$manifest_file" "$backup_file"
         log "Backup created: $backup_file"
 
-        # Preserve roster info from old manifest
+        # Preserve knossos info from old manifest
         old_manifest=$(cat "$manifest_file" 2>/dev/null || echo "{}")
         if echo "$old_manifest" | jq -e . >/dev/null 2>&1; then
-            old_roster_path=$(echo "$old_manifest" | jq -r '.roster.path // empty')
-            old_roster_commit=$(echo "$old_manifest" | jq -r '.roster.commit // empty')
-            old_roster_ref=$(echo "$old_manifest" | jq -r '.roster.ref // "main"')
+            old_knossos_path=$(echo "$old_manifest" | jq -r '.knossos.path // empty')
+            old_knossos_commit=$(echo "$old_manifest" | jq -r '.knossos.commit // empty')
+            old_knossos_ref=$(echo "$old_manifest" | jq -r '.knossos.ref // "main"')
         fi
     fi
 
@@ -973,38 +973,38 @@ cmd_repair() {
         return 0
     fi
 
-    # Get current roster info
-    local roster_commit roster_ref roster_path
-    roster_commit=$(get_roster_commit)
-    roster_ref=$(get_roster_ref)
-    roster_path="$KNOSSOS_HOME"
+    # Get current knossos info
+    local knossos_commit knossos_ref knossos_path
+    knossos_commit=$(get_knossos_commit)
+    knossos_ref=$(get_knossos_ref)
+    knossos_path="$KNOSSOS_HOME"
 
-    # Preserve old roster info if current roster seems different
-    if [[ -n "$old_roster_path" && "$old_roster_path" != "$roster_path" ]]; then
-        log_warning "Roster path changed: $old_roster_path -> $roster_path"
+    # Preserve old knossos info if current knossos seems different
+    if [[ -n "$old_knossos_path" && "$old_knossos_path" != "$knossos_path" ]]; then
+        log_warning "Knossos path changed: $old_knossos_path -> $knossos_path"
     fi
 
     # Create new manifest
     local manifest
-    manifest=$(create_manifest "$roster_path" "$roster_commit" "$roster_ref")
+    manifest=$(create_manifest "$knossos_path" "$knossos_commit" "$knossos_ref")
 
-    # 1. Fix missing files by copying from roster
-    local item local_file roster_file checksum
+    # 1. Fix missing files by copying from knossos
+    local item local_file knossos_file checksum
     while IFS= read -r item; do
         [[ -z "$item" ]] && continue
 
         local_file=".claude/$item"
-        roster_file="$KNOSSOS_HOME/.claude/$item"
+        knossos_file="$KNOSSOS_HOME/.claude/$item"
 
         if [[ ! -f "$local_file" ]]; then
-            # File missing - try to restore from roster
-            if [[ -f "$roster_file" ]]; then
+            # File missing - try to restore from knossos
+            if [[ -f "$knossos_file" ]]; then
                 log "Restoring: $item"
                 mkdir -p "$(dirname "$local_file")"
-                cp "$roster_file" "$local_file"
+                cp "$knossos_file" "$local_file"
                 repaired_count=$((repaired_count + 1))
             else
-                log_warning "Cannot restore: $item (not in roster)"
+                log_warning "Cannot restore: $item (not in knossos)"
                 unrepairable=$((unrepairable + 1))
             fi
         fi
@@ -1025,17 +1025,17 @@ cmd_repair() {
         item="${line%%:*}"
         strategy="${line#*:}"
         local_file=".claude/$item"
-        roster_file="$KNOSSOS_HOME/.claude/$item"
+        knossos_file="$KNOSSOS_HOME/.claude/$item"
 
         if [[ ! -f "$local_file" ]]; then
-            # File missing - try to restore from roster
-            if [[ -f "$roster_file" ]]; then
+            # File missing - try to restore from knossos
+            if [[ -f "$knossos_file" ]]; then
                 log "Restoring: $item"
                 mkdir -p "$(dirname "$local_file")"
-                cp "$roster_file" "$local_file"
+                cp "$knossos_file" "$local_file"
                 repaired_count=$((repaired_count + 1))
             else
-                log_warning "Cannot restore: $item (not in roster)"
+                log_warning "Cannot restore: $item (not in knossos)"
                 unrepairable=$((unrepairable + 1))
             fi
         fi
@@ -1048,7 +1048,7 @@ cmd_repair() {
         fi
     done < <(get_merge_items)
 
-    # 3. Handle orphaned entries (files in old manifest but not in roster config)
+    # 3. Handle orphaned entries (files in old manifest but not in knossos config)
     if [[ -n "$old_manifest" && "$old_manifest" != "{}" ]]; then
         local orphan_count=0
         while IFS= read -r file_entry; do
@@ -1088,11 +1088,11 @@ cmd_repair() {
     timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
     manifest=$(echo "$manifest" | jq \
         --arg t "$timestamp" \
-        --arg from "${old_roster_path:-none}" '
+        --arg from "${old_knossos_path:-none}" '
         .repaired_at = $t |
         .repair_metadata = {
             repaired_at: $t,
-            previous_roster_path: $from
+            previous_knossos_path: $from
         }')
 
     # 6. Preserve rite info if present
@@ -1128,7 +1128,7 @@ cmd_repair() {
 
 # Helper: Preview missing files that would be restored
 repair_preview_missing_files() {
-    local item local_file roster_file
+    local item local_file knossos_file
 
     log "  Missing files to restore:"
     local count=0
@@ -1136,10 +1136,10 @@ repair_preview_missing_files() {
     while IFS= read -r item; do
         [[ -z "$item" ]] && continue
         local_file=".claude/$item"
-        roster_file="$KNOSSOS_HOME/.claude/$item"
+        knossos_file="$KNOSSOS_HOME/.claude/$item"
 
-        if [[ ! -f "$local_file" && -f "$roster_file" ]]; then
-            log "    + $item (from roster)"
+        if [[ ! -f "$local_file" && -f "$knossos_file" ]]; then
+            log "    + $item (from knossos)"
             count=$((count + 1))
         fi
     done < <(get_copy_replace_items)
@@ -1149,10 +1149,10 @@ repair_preview_missing_files() {
         [[ -z "$line" ]] && continue
         item="${line%%:*}"
         local_file=".claude/$item"
-        roster_file="$KNOSSOS_HOME/.claude/$item"
+        knossos_file="$KNOSSOS_HOME/.claude/$item"
 
-        if [[ ! -f "$local_file" && -f "$roster_file" ]]; then
-            log "    + $item (from roster)"
+        if [[ ! -f "$local_file" && -f "$knossos_file" ]]; then
+            log "    + $item (from knossos)"
             count=$((count + 1))
         fi
     done < <(get_merge_items)
@@ -1217,7 +1217,7 @@ repair_preview_orphan_removal() {
 cmd_status() {
     local manifest_file="${SYNC_MANIFEST_FILE:-.claude/.cem/manifest.json}"
 
-    echo "roster-sync status"
+    echo "knossos-sync status"
     echo "=================="
     echo ""
 
@@ -1225,7 +1225,7 @@ cmd_status() {
     if [[ ! -f "$manifest_file" ]]; then
         echo "Status: NOT INITIALIZED"
         echo ""
-        echo "Run: roster-sync init"
+        echo "Run: knossos-sync init"
         return 0
     fi
 
@@ -1236,28 +1236,28 @@ cmd_status() {
         return 1
     }
 
-    local schema_version roster_path roster_commit last_sync file_count
+    local schema_version knossos_path knossos_commit last_sync file_count
     schema_version=$(echo "$manifest" | jq -r '.schema_version // 1')
-    roster_path=$(echo "$manifest" | jq -r '.roster.path // "unknown"')
-    roster_commit=$(echo "$manifest" | jq -r '.roster.commit // "unknown"')
-    last_sync=$(echo "$manifest" | jq -r '.roster.last_sync // "never"')
+    knossos_path=$(echo "$manifest" | jq -r '.knossos.path // "unknown"')
+    knossos_commit=$(echo "$manifest" | jq -r '.knossos.commit // "unknown"')
+    last_sync=$(echo "$manifest" | jq -r '.knossos.last_sync // "never"')
     file_count=$(echo "$manifest" | jq '.managed_files | length')
 
     echo "Schema Version: $schema_version"
-    echo "Roster Path:    $roster_path"
+    echo "Knossos Path:    $knossos_path"
     echo "Last Sync:      $last_sync"
     echo "Managed Files:  $file_count"
     echo ""
 
     # Check for updates
     local current_commit
-    current_commit=$(get_roster_commit)
+    current_commit=$(get_knossos_commit)
 
-    if [[ -n "$current_commit" && "$current_commit" != "$roster_commit" ]]; then
+    if [[ -n "$current_commit" && "$current_commit" != "$knossos_commit" ]]; then
         echo -e "${YELLOW}Updates Available!${NC}"
-        if [[ -d "$roster_path/.git" ]]; then
+        if [[ -d "$knossos_path/.git" ]]; then
             local ahead_count
-            ahead_count=$(git -C "$roster_path" rev-list --count "$roster_commit".."$current_commit" 2>/dev/null || echo "?")
+            ahead_count=$(git -C "$knossos_path" rev-list --count "$knossos_commit".."$current_commit" 2>/dev/null || echo "?")
             echo "  Commits behind: $ahead_count"
         fi
     else
@@ -1294,11 +1294,11 @@ cmd_diff() {
 
     if [[ -n "$specific_file" ]]; then
         # Diff specific file
-        local roster_file=".claude/$specific_file"
+        local knossos_file=".claude/$specific_file"
         local local_file=".claude/$specific_file"
 
-        if [[ ! -f "$KNOSSOS_HOME/$roster_file" ]]; then
-            log_error "File not found in roster: $specific_file"
+        if [[ ! -f "$KNOSSOS_HOME/$knossos_file" ]]; then
+            log_error "File not found in knossos: $specific_file"
             return 1
         fi
 
@@ -1307,20 +1307,20 @@ cmd_diff() {
             return 1
         fi
 
-        diff -u "$KNOSSOS_HOME/$roster_file" "$local_file" || true
+        diff -u "$KNOSSOS_HOME/$knossos_file" "$local_file" || true
     else
         # Diff all managed files
-        log "Comparing managed files with roster..."
+        log "Comparing managed files with knossos..."
         echo ""
 
-        local item roster_file local_file
+        local item knossos_file local_file
         while IFS= read -r item; do
             [[ -z "$item" ]] && continue
 
-            roster_file="$KNOSSOS_HOME/.claude/$item"
+            knossos_file="$KNOSSOS_HOME/.claude/$item"
             local_file=".claude/$item"
 
-            if [[ ! -f "$roster_file" ]]; then
+            if [[ ! -f "$knossos_file" ]]; then
                 continue
             fi
 
@@ -1329,7 +1329,7 @@ cmd_diff() {
                 continue
             fi
 
-            if ! diff -q "$roster_file" "$local_file" >/dev/null 2>&1; then
+            if ! diff -q "$knossos_file" "$local_file" >/dev/null 2>&1; then
                 echo "DIFFERENT: $item"
             fi
         done < <(get_all_managed_files)

@@ -3,16 +3,16 @@
 # merge-docs.sh - Documentation Section-Based Merge
 #
 # Implements section-based merge for CLAUDE.md using ownership markers.
-# Supports SYNC (roster-owned) and PRESERVE (satellite-owned) markers.
+# Supports SYNC (knossos-owned) and PRESERVE (satellite-owned) markers.
 #
-# Part of: roster-sync (TDD-cem-replacement)
+# Part of: knossos-sync (TDD-cem-replacement)
 #
 # Usage:
-#   source "$ROSTER_HOME/lib/sync/merge/merge-docs.sh"
+#   source "$KNOSSOS_HOME/lib/sync/merge/merge-docs.sh"
 #   merge_documentation "$knossos_file" "$local_file" "$output_file"
 #
 # Markers:
-#   <!-- SYNC: roster-owned -->       - Always take roster version
+#   <!-- SYNC: knossos-owned -->       - Always take knossos version
 #   <!-- PRESERVE: satellite-owned --> - Keep satellite version
 #
 # Special Sections:
@@ -27,7 +27,7 @@ readonly _MERGE_DOCS_LOADED=1
 # Constants
 # ============================================================================
 
-readonly SYNC_MARKER_ROSTER="<!-- SYNC: roster-owned -->"
+readonly SYNC_MARKER_KNOSSOS="<!-- SYNC: knossos-owned -->"
 readonly PRESERVE_MARKER="<!-- PRESERVE: satellite-owned -->"
 
 # Sections that should be preserved by default if they exist locally
@@ -39,14 +39,14 @@ readonly PRESERVE_SECTIONS="Quick Start|Agent Configurations"
 
 # Merge CLAUDE.md with section-based ownership
 # Algorithm:
-#   1. If no local file: copy roster as-is
-#   2. Extract header/preamble from roster (before first ##)
-#   3. For each roster section:
-#      - If roster has SYNC marker -> use roster section
+#   1. If no local file: copy knossos as-is
+#   2. Extract header/preamble from knossos (before first ##)
+#   3. For each knossos section:
+#      - If knossos has SYNC marker -> use knossos section
 #      - If local has PRESERVE marker -> use local section
 #      - Fallback sections (Quick Start, Agent Configurations) -> preserve local if exists
-#      - Otherwise -> sync from roster
-#   4. Append satellite-only sections (not in roster)
+#      - Otherwise -> sync from knossos
+#   4. Append satellite-only sections (not in knossos)
 #   5. Append ## Project:* sections from local
 #
 # Usage: merge_documentation "knossos_file" "local_file" "output_file"
@@ -55,9 +55,9 @@ merge_documentation() {
     local local_file="$2"
     local output_file="$3"
 
-    # If no local file, copy roster as-is
+    # If no local file, copy knossos as-is
     if [[ ! -f "$local_file" ]]; then
-        sync_log_debug "merge-docs: no local file, copying roster"
+        sync_log_debug "merge-docs: no local file, copying knossos"
         cp "$knossos_file" "$output_file"
         return 0
     fi
@@ -67,34 +67,34 @@ merge_documentation() {
     temp_output=$(mktemp)
     trap "rm -f '$temp_output'" RETURN
 
-    # 1. Extract and write header/preamble from roster
+    # 1. Extract and write header/preamble from knossos
     extract_header "$knossos_file" > "$temp_output"
 
     # 2. Get section lists
-    local roster_sections local_sections
-    roster_sections=$(list_sections "$knossos_file")
+    local knossos_sections local_sections
+    knossos_sections=$(list_sections "$knossos_file")
     local_sections=$(list_sections "$local_file")
 
-    sync_log_debug "merge-docs: roster sections: $roster_sections"
+    sync_log_debug "merge-docs: knossos sections: $knossos_sections"
     sync_log_debug "merge-docs: local sections: $local_sections"
 
-    # 3. Process each roster section
+    # 3. Process each knossos section
     local section
     while IFS= read -r section; do
         [[ -z "$section" ]] && continue
 
-        local decision roster_marker local_marker
+        local decision knossos_marker local_marker
 
         # Check markers
-        roster_marker=$(get_section_marker "$knossos_file" "$section")
+        knossos_marker=$(get_section_marker "$knossos_file" "$section")
         local_marker=$(get_section_marker "$local_file" "$section")
 
-        sync_log_debug "merge-docs: section='$section' roster_marker='$roster_marker' local_marker='$local_marker'"
+        sync_log_debug "merge-docs: section='$section' knossos_marker='$knossos_marker' local_marker='$local_marker'"
 
         # Decision logic
-        if [[ "$roster_marker" == "SYNC" ]]; then
-            decision="roster"
-            sync_log_debug "merge-docs: decision=roster (roster has SYNC)"
+        if [[ "$knossos_marker" == "SYNC" ]]; then
+            decision="knossos"
+            sync_log_debug "merge-docs: decision=knossos (knossos has SYNC)"
         elif [[ "$local_marker" == "PRESERVE" ]]; then
             decision="local"
             sync_log_debug "merge-docs: decision=local (local has PRESERVE)"
@@ -102,8 +102,8 @@ merge_documentation() {
             decision="local"
             sync_log_debug "merge-docs: decision=local (preserve section with local content)"
         else
-            decision="roster"
-            sync_log_debug "merge-docs: decision=roster (default)"
+            decision="knossos"
+            sync_log_debug "merge-docs: decision=knossos (default)"
         fi
 
         # Write the section
@@ -114,14 +114,14 @@ merge_documentation() {
         fi
 
         echo "" >> "$temp_output"
-    done <<< "$roster_sections"
+    done <<< "$knossos_sections"
 
-    # 4. Append satellite-only sections (not in roster)
+    # 4. Append satellite-only sections (not in knossos)
     while IFS= read -r section; do
         [[ -z "$section" ]] && continue
 
-        # Skip if section is in roster
-        if echo "$roster_sections" | grep -q "^${section}$"; then
+        # Skip if section is in knossos
+        if echo "$knossos_sections" | grep -q "^${section}$"; then
             continue
         fi
 

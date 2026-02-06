@@ -93,7 +93,7 @@ func (s *Syncer) loadManifest() (*Manifest, error) {
 
 	for name, ej := range entries {
 		entry := Entry{
-			Source:   NormalizeSource(SourceType(ej.Source)),
+			Source:   SourceType(ej.Source),
 			Checksum: ej.Checksum,
 		}
 		if t, err := time.Parse(time.RFC3339, ej.InstalledAt); err == nil {

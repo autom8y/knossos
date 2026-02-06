@@ -14,7 +14,7 @@ HOOKS_LIB="${CLAUDE_PROJECT_DIR:-.}/.claude/hooks/lib"
 # Absolute fallback if hooks-init.sh itself fails
 source "$HOOKS_LIB/hooks-init.sh" 2>/dev/null || {
     # Minimal fallback - set defaults and continue
-    KNOSSOS_HOME="${KNOSSOS_HOME:-$HOME/Code/roster}"
+    KNOSSOS_HOME="${KNOSSOS_HOME:-$HOME/Code/knossos}"
     CLAUDE_PROJECT_DIR="${CLAUDE_PROJECT_DIR:-.}"
     exit 0
 }
@@ -94,19 +94,19 @@ if [[ "$COMMAND" =~ (^|[[:space:]/])swap-rite\.sh[[:space:]] ]]; then
 
     # Skip validation for --list or no argument
     if [[ -n "$TARGET_TEAM" ]] && [[ "$TARGET_TEAM" != "--list" ]]; then
-        ROSTER_DIR="$KNOSSOS_HOME/rites"
+        KNOSSOS_DIR="$KNOSSOS_HOME/rites"
 
         # Validate rite exists
-        if [[ ! -d "$ROSTER_DIR/$TARGET_TEAM" ]]; then
-            echo "Rite '$TARGET_TEAM' not found in $ROSTER_DIR" >&2
+        if [[ ! -d "$KNOSSOS_DIR/$TARGET_TEAM" ]]; then
+            echo "Rite '$TARGET_TEAM' not found in $KNOSSOS_DIR" >&2
             echo "Available rites:" >&2
-            ls -1 "$ROSTER_DIR" 2>/dev/null | sed 's/^/  - /' >&2 || echo "  (none found)" >&2
+            ls -1 "$KNOSSOS_DIR" 2>/dev/null | sed 's/^/  - /' >&2 || echo "  (none found)" >&2
             hooks_finalize 2
             exit 2  # Block the command
         fi
 
         # Validate rite has agents
-        AGENT_COUNT=$(find "$ROSTER_DIR/$TARGET_TEAM/agents/" -maxdepth 1 -name "*.md" 2>/dev/null | wc -l | tr -d ' ') || AGENT_COUNT="0"
+        AGENT_COUNT=$(find "$KNOSSOS_DIR/$TARGET_TEAM/agents/" -maxdepth 1 -name "*.md" 2>/dev/null | wc -l | tr -d ' ') || AGENT_COUNT="0"
         if [[ "$AGENT_COUNT" == "0" ]]; then
             echo "Rite '$TARGET_TEAM' has no agent files" >&2
             hooks_finalize 2
@@ -165,8 +165,8 @@ if [[ "$COMMAND" == *"swap-rite"* ]] || [[ "$COMMAND" == *"ACTIVE_WORKFLOW"* ]];
 
         # Skip validation for --list or no argument
         if [[ -n "$TARGET_TEAM" ]] && [[ "$TARGET_TEAM" != "--list" ]]; then
-            ROSTER_DIR="$KNOSSOS_HOME/rites"
-            WORKFLOW_FILE="$ROSTER_DIR/$TARGET_TEAM/workflow.yaml"
+            KNOSSOS_DIR="$KNOSSOS_HOME/rites"
+            WORKFLOW_FILE="$KNOSSOS_DIR/$TARGET_TEAM/workflow.yaml"
         fi
     elif [[ "$COMMAND" == *"ACTIVE_WORKFLOW"* ]]; then
         # Validate current active workflow (if it exists)

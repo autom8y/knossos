@@ -1,4 +1,4 @@
-# Roster-managed runtime directory
-# Canonical sources: roster (ecosystem), teams/*/ (team definitions)
-# .claude/ is regenerated via roster-sync and team swap
+# Knossos-managed runtime directory
+# Canonical sources: knossos (ecosystem), rites/*/ (team definitions)
+# .claude/ is regenerated via knossos-sync and rite swap
 .claude/

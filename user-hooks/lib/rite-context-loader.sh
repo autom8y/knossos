@@ -50,8 +50,8 @@ load_rite_context() {
     fi
 
     # Resolve rite context script path
-    local roster_home="${KNOSSOS_HOME:-$HOME/Code/roster}"
-    rite_script="$roster_home/rites/$active_rite/$RITE_CONTEXT_SCRIPT_NAME"
+    local knossos_home="${KNOSSOS_HOME:-$HOME/Code/knossos}"
+    rite_script="$knossos_home/rites/$active_rite/$RITE_CONTEXT_SCRIPT_NAME"
 
     # Check if rite has context script
     if [[ ! -f "$rite_script" ]]; then

@@ -318,7 +318,7 @@ const (
 	// LegacyPreserve indicates a `<!-- PRESERVE: satellite-owned -->` marker.
 	LegacyPreserve LegacyMarkerType = "preserve"
 
-	// LegacySync indicates a `<!-- SYNC: roster-owned -->` marker.
+	// LegacySync indicates a legacy `<!-- SYNC: ... -->` marker.
 	LegacySync LegacyMarkerType = "sync"
 )
 

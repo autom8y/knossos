@@ -76,7 +76,7 @@ fi
 echo ""
 
 # Test 6: Environment variables exported
-echo "Test 6: ROSTER_PREF_* environment variables exported"
+echo "Test 6: KNOSSOS_PREF_* environment variables exported"
 cd "$PROJECT_DIR"
 
 # Check bash version first
@@ -92,10 +92,10 @@ else
     load_user_preferences
     export_preferences_env
 
-    if [[ -n "${ROSTER_PREF_AUTONOMY_LEVEL:-}" ]] && \
-       [[ -n "${ROSTER_PREF_FAILURE_HANDLING:-}" ]] && \
-       [[ -n "${ROSTER_PREF_OUTPUT_FORMAT:-}" ]]; then
-        echo "✓ PASS: Environment variables exported (AUTONOMY=$ROSTER_PREF_AUTONOMY_LEVEL, FAILURE=$ROSTER_PREF_FAILURE_HANDLING, OUTPUT=$ROSTER_PREF_OUTPUT_FORMAT)"
+    if [[ -n "${KNOSSOS_PREF_AUTONOMY_LEVEL:-}" ]] && \
+       [[ -n "${KNOSSOS_PREF_FAILURE_HANDLING:-}" ]] && \
+       [[ -n "${KNOSSOS_PREF_OUTPUT_FORMAT:-}" ]]; then
+        echo "✓ PASS: Environment variables exported (AUTONOMY=$KNOSSOS_PREF_AUTONOMY_LEVEL, FAILURE=$KNOSSOS_PREF_FAILURE_HANDLING, OUTPUT=$KNOSSOS_PREF_OUTPUT_FORMAT)"
     else
         echo "✗ FAIL: Environment variables not exported"
         exit 1

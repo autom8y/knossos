@@ -7,7 +7,7 @@
 #
 # Environment Variables:
 #   KNOSSOS_HOME - Platform home directory
-#   Default: $HOME/Code/roster
+#   Default: $HOME/Code/knossos
 #
 # Part of the Knossos Platform
 
@@ -27,7 +27,7 @@ resolve_knossos_home() {
         export KNOSSOS_HOME
     else
         # Default
-        export KNOSSOS_HOME="$HOME/Code/roster"
+        export KNOSSOS_HOME="$HOME/Code/knossos"
     fi
 
     # Mark as resolved

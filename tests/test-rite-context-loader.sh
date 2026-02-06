@@ -202,7 +202,7 @@ test_knossos_home_fallback() {
     source "$SCRIPT_DIR/user-hooks/lib/rite-context-loader.sh"
     local output=$(load_rite_context)
 
-    # Should use default ~/Code/roster, so output depends on if that exists
+    # Should use default ~/Code/knossos, so output depends on if that exists
     # For this test, we just verify it doesn't crash
     local exit_code=0
     load_rite_context >/dev/null 2>&1 || exit_code=$?
@@ -217,11 +217,11 @@ test_knossos_home_fallback() {
 
 # Test 8: Integration with session-context.sh (smoke test)
 test_session_context_integration() {
-    # Test in actual roster project (not test satellite)
+    # Test in actual knossos project (not test satellite)
     cd "$SCRIPT_DIR"
     export CLAUDE_PROJECT_DIR="$SCRIPT_DIR"
 
-    # Run session-context hook in roster itself
+    # Run session-context hook in knossos itself
     local output=$("$SCRIPT_DIR/user-hooks/context-injection/session-context.sh" 2>/dev/null || echo "HOOK_FAILED")
 
     # Should either contain rite context OR run successfully

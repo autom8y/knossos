@@ -5,7 +5,7 @@
 # Provides atomic write, journal management, staging, and backup
 # operations for swap-rite.sh transaction safety.
 #
-# Part of: roster rite-swap infrastructure
+# Part of: knossos rite-swap infrastructure
 #
 # Usage:
 #   source "$KNOSSOS_HOME/lib/rite/rite-transaction.sh"
@@ -453,7 +453,7 @@ cleanup_staging() {
 # Parameters:
 #   $1 - rite_name: Rite to stage agents from
 # Returns: 0 on success, 1 on failure
-# Requires: ROSTER_HOME, STAGING_DIR
+# Requires: KNOSSOS_HOME, STAGING_DIR
 stage_agents() {
     local rite_name="$1"
     local source_dir="$KNOSSOS_HOME/rites/$rite_name/agents"
@@ -479,7 +479,7 @@ stage_agents() {
 # Parameters:
 #   $1 - rite_name: Rite to stage workflow from
 # Returns: 0 on success, 1 on failure (warning if no workflow.yaml)
-# Requires: ROSTER_HOME, STAGING_DIR
+# Requires: KNOSSOS_HOME, STAGING_DIR
 stage_workflow() {
     local rite_name="$1"
     local source_file="$KNOSSOS_HOME/rites/$rite_name/workflow.yaml"

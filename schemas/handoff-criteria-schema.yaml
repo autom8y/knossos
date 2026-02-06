@@ -137,7 +137,7 @@ artifact_types:
         blocking: true
       - id: gap-002
         description: "Affected systems specified"
-        validation: "count(affected_systems) >= 1 and all in ['roster', 'CEM']"
+        validation: "count(affected_systems) >= 1 and all in ['knossos', 'CEM']"
         blocking: true
       - id: gap-003
         description: "Issue count is accurate"
@@ -374,7 +374,7 @@ validation:
     validate_handoff() {
         local artifact_path="$1"
         local artifact_type="$2"
-        local criteria_file="${ROSTER_DIR}/schemas/handoff-criteria-schema.yaml"
+        local criteria_file="${KNOSSOS_DIR}/schemas/handoff-criteria-schema.yaml"
 
         # Load criteria for artifact type
         local criteria

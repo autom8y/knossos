@@ -68,14 +68,14 @@ setup() {
     SWAP_BACKUP_DIR="$TEST_TMP/.swap-backup"
     MANIFEST_FILE="$TEST_TMP/AGENT_MANIFEST.json"
 
-    # Create mock roster structure
-    mkdir -p "$TEST_TMP/mock-roster/rites/test-rite/agents"
-    echo "# Test Agent" > "$TEST_TMP/mock-roster/rites/test-rite/agents/test-agent.md"
-    echo "# Another Agent" > "$TEST_TMP/mock-roster/rites/test-rite/agents/other-agent.md"
-    echo "workflow: test" > "$TEST_TMP/mock-roster/rites/test-rite/workflow.yaml"
+    # Create mock knossos structure
+    mkdir -p "$TEST_TMP/mock-knossos/rites/test-rite/agents"
+    echo "# Test Agent" > "$TEST_TMP/mock-knossos/rites/test-rite/agents/test-agent.md"
+    echo "# Another Agent" > "$TEST_TMP/mock-knossos/rites/test-rite/agents/other-agent.md"
+    echo "workflow: test" > "$TEST_TMP/mock-knossos/rites/test-rite/workflow.yaml"
 
-    # Override ROSTER_HOME for tests
-    ROSTER_HOME="$TEST_TMP/mock-roster"
+    # Override KNOSSOS_HOME for tests
+    KNOSSOS_HOME="$TEST_TMP/mock-knossos"
 }
 
 teardown() {

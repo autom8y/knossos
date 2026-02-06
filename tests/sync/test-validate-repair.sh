@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# test-validate-repair.sh - Tests for roster-sync validate and repair commands
+# test-validate-repair.sh - Tests for knossos-sync validate and repair commands
 #
 # Tests per TDD-cem-replacement Sections 3.4 and 3.5:
 #   - validate: manifest integrity, file checksums, drift detection
@@ -14,8 +14,8 @@ set -euo pipefail
 
 # Test setup
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ROSTER_HOME="${ROSTER_HOME:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
-export ROSTER_HOME
+KNOSSOS_HOME="${KNOSSOS_HOME:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
+export KNOSSOS_HOME
 
 # Test counters
 TESTS_RUN=0
@@ -62,13 +62,13 @@ teardown() {
 # Create a valid v3 manifest
 create_test_manifest() {
     local project_dir="$1"
-    local roster_path="${2:-$ROSTER_HOME}"
+    local knossos_path="${2:-$KNOSSOS_HOME}"
 
     cat > "$project_dir/.claude/.cem/manifest.json" <<EOF
 {
     "schema_version": 3,
-    "roster": {
-        "path": "$roster_path",
+    "knossos": {
+        "path": "$knossos_path",
         "commit": "abc123def456",
         "ref": "main",
         "last_sync": "2026-01-01T00:00:00Z"
@@ -99,7 +99,7 @@ add_test_file() {
             path: $p,
             checksum: $c,
             strategy: $s,
-            source: "roster",
+            source: "knossos",
             added_at: "2026-01-01T00:00:00Z",
             last_sync: "2026-01-01T00:00:00Z"
         }]')
@@ -118,7 +118,7 @@ test_validate_no_manifest() {
     mkdir -p "$project_dir/.claude"
 
     local exit_code=0
-    "$ROSTER_HOME/roster-sync" validate "$project_dir" 2>/dev/null || exit_code=$?
+    "$KNOSSOS_HOME/knossos-sync" validate "$project_dir" 2>/dev/null || exit_code=$?
 
     if [[ $exit_code -eq 4 ]]; then
         test_pass "exit code 4 for missing manifest"
@@ -135,7 +135,7 @@ test_validate_invalid_json() {
     echo "not valid json" > "$project_dir/.claude/.cem/manifest.json"
 
     local exit_code=0
-    "$ROSTER_HOME/roster-sync" validate "$project_dir" 2>/dev/null || exit_code=$?
+    "$KNOSSOS_HOME/knossos-sync" validate "$project_dir" 2>/dev/null || exit_code=$?
 
     if [[ $exit_code -eq 4 ]]; then
         test_pass "exit code 4 for invalid JSON"
@@ -152,7 +152,7 @@ test_validate_valid_empty_manifest() {
     create_test_manifest "$project_dir"
 
     local exit_code=0
-    "$ROSTER_HOME/roster-sync" validate "$project_dir" 2>/dev/null || exit_code=$?
+    "$KNOSSOS_HOME/knossos-sync" validate "$project_dir" 2>/dev/null || exit_code=$?
 
     if [[ $exit_code -eq 0 ]]; then
         test_pass "exit code 0 for valid manifest"
@@ -171,7 +171,7 @@ test_validate_missing_files_detected() {
 
     local exit_code=0
     local output
-    output=$("$ROSTER_HOME/roster-sync" validate "$project_dir" 2>&1) || exit_code=$?
+    output=$("$KNOSSOS_HOME/knossos-sync" validate "$project_dir" 2>&1) || exit_code=$?
 
     # Should return 5 (integrity issues)
     if [[ $exit_code -eq 5 ]]; then
@@ -201,7 +201,7 @@ test_validate_checksum_mismatch_detected() {
 
     local exit_code=0
     local output
-    output=$("$ROSTER_HOME/roster-sync" validate --verbose "$project_dir" 2>&1) || exit_code=$?
+    output=$("$KNOSSOS_HOME/knossos-sync" validate --verbose "$project_dir" 2>&1) || exit_code=$?
 
     # Should pass (checksum mismatch is informational, not an error)
     # But should report modifications
@@ -218,12 +218,12 @@ test_validate_old_schema_warns() {
     local project_dir="$TEST_TMP/old-schema"
     mkdir -p "$project_dir/.claude/.cem"
 
-    # Create v2 manifest (has proper roster structure but old schema)
+    # Create v2 manifest (has proper knossos structure but old schema)
     cat > "$project_dir/.claude/.cem/manifest.json" << EOF
 {
     "schema_version": 2,
     "skeleton": {
-        "path": "$ROSTER_HOME",
+        "path": "$KNOSSOS_HOME",
         "commit": "abc123",
         "ref": "main",
         "last_sync": "2026-01-01T00:00:00Z"
@@ -234,7 +234,7 @@ EOF
 
     local exit_code=0
     local output
-    output=$("$ROSTER_HOME/roster-sync" validate "$project_dir" 2>&1) || exit_code=$?
+    output=$("$KNOSSOS_HOME/knossos-sync" validate "$project_dir" 2>&1) || exit_code=$?
 
     # Should return 1 (warnings) - old schema but valid structure
     if [[ $exit_code -eq 1 ]]; then
@@ -263,7 +263,7 @@ test_validate_with_rite_flag() {
 
     local exit_code=0
     local output
-    output=$("$ROSTER_HOME/roster-sync" validate --rite "$project_dir" 2>&1) || exit_code=$?
+    output=$("$KNOSSOS_HOME/knossos-sync" validate --rite "$project_dir" 2>&1) || exit_code=$?
 
     # Should warn about rite not in manifest (exit 1)
     if [[ $exit_code -eq 1 ]]; then
@@ -284,7 +284,7 @@ test_repair_no_claude_dir() {
     mkdir -p "$project_dir"
 
     local exit_code=0
-    "$ROSTER_HOME/roster-sync" repair "$project_dir" 2>/dev/null || exit_code=$?
+    "$KNOSSOS_HOME/knossos-sync" repair "$project_dir" 2>/dev/null || exit_code=$?
 
     if [[ $exit_code -eq 4 ]]; then
         test_pass "exit code 4 for no .claude directory"
@@ -299,12 +299,12 @@ test_repair_creates_valid_manifest() {
     local project_dir="$TEST_TMP/repair-new"
     mkdir -p "$project_dir/.claude/.cem"
 
-    # Run repair - may return 4 if some files don't exist in roster
-    # (e.g., forge-workflow.yaml is in config but not in roster)
+    # Run repair - may return 4 if some files don't exist in knossos
+    # (e.g., forge-workflow.yaml is in config but not in knossos)
     local exit_code=0
-    "$ROSTER_HOME/roster-sync" repair "$project_dir" 2>/dev/null || exit_code=$?
+    "$KNOSSOS_HOME/knossos-sync" repair "$project_dir" 2>/dev/null || exit_code=$?
 
-    # Accept 0 (success) or 4 (unrepairable due to missing roster files)
+    # Accept 0 (success) or 4 (unrepairable due to missing knossos files)
     if [[ $exit_code -eq 0 || $exit_code -eq 4 ]]; then
         test_pass "repair runs (exit $exit_code)"
     else
@@ -339,7 +339,7 @@ test_repair_dry_run() {
 
     local exit_code=0
     local output
-    output=$("$ROSTER_HOME/roster-sync" repair --dry-run "$project_dir" 2>&1) || exit_code=$?
+    output=$("$KNOSSOS_HOME/knossos-sync" repair --dry-run "$project_dir" 2>&1) || exit_code=$?
 
     if [[ $exit_code -eq 0 ]]; then
         test_pass "dry-run succeeds"
@@ -358,17 +358,17 @@ test_repair_dry_run() {
 }
 
 test_repair_fixes_missing_files() {
-    run_test "repair: restores missing files from roster"
+    run_test "repair: restores missing files from knossos"
 
     local project_dir="$TEST_TMP/repair-missing"
     mkdir -p "$project_dir/.claude/.cem"
 
-    # Run repair (should copy files from roster)
-    # May return 4 if some config files don't exist in roster
+    # Run repair (should copy files from knossos)
+    # May return 4 if some config files don't exist in knossos
     local exit_code=0
-    "$ROSTER_HOME/roster-sync" repair "$project_dir" 2>/dev/null || exit_code=$?
+    "$KNOSSOS_HOME/knossos-sync" repair "$project_dir" 2>/dev/null || exit_code=$?
 
-    # Accept 0 or 4 (some files may not exist in roster)
+    # Accept 0 or 4 (some files may not exist in knossos)
     if [[ $exit_code -eq 0 || $exit_code -eq 4 ]]; then
         test_pass "repair runs (exit $exit_code)"
     else
@@ -381,7 +381,7 @@ test_repair_fixes_missing_files() {
     if [[ "$count" -gt 0 ]]; then
         test_pass "managed files added to manifest"
     else
-        test_pass "no files needed (roster may not have copy-replace items)"
+        test_pass "no files needed (knossos may not have copy-replace items)"
     fi
 }
 
@@ -397,9 +397,9 @@ test_repair_updates_checksums() {
     add_test_file "$project_dir" "test.md" "oldchecksum"
 
     # We can't easily test this since test.md isn't in our managed file lists
-    # Just verify repair runs (may return 4 if some roster files missing)
+    # Just verify repair runs (may return 4 if some knossos files missing)
     local exit_code=0
-    "$ROSTER_HOME/roster-sync" repair "$project_dir" 2>/dev/null || exit_code=$?
+    "$KNOSSOS_HOME/knossos-sync" repair "$project_dir" 2>/dev/null || exit_code=$?
 
     # Accept 0 or 4
     if [[ $exit_code -eq 0 || $exit_code -eq 4 ]]; then
@@ -417,7 +417,7 @@ test_repair_backup_created() {
     create_test_manifest "$project_dir"
 
     local exit_code=0
-    "$ROSTER_HOME/roster-sync" repair "$project_dir" 2>/dev/null || exit_code=$?
+    "$KNOSSOS_HOME/knossos-sync" repair "$project_dir" 2>/dev/null || exit_code=$?
 
     # Check backup exists
     local backup_count
@@ -437,9 +437,9 @@ test_repair_preserves_rite() {
     echo "my-rite" > "$project_dir/.claude/ACTIVE_RITE"
 
     local exit_code=0
-    "$ROSTER_HOME/roster-sync" repair "$project_dir" 2>/dev/null || exit_code=$?
+    "$KNOSSOS_HOME/knossos-sync" repair "$project_dir" 2>/dev/null || exit_code=$?
 
-    # Accept 0 or 4 (some roster files may not exist)
+    # Accept 0 or 4 (some knossos files may not exist)
     if [[ $exit_code -eq 0 || $exit_code -eq 4 ]]; then
         test_pass "repair runs (exit $exit_code)"
     else
@@ -470,7 +470,7 @@ echo "=========================================="
 echo "Running validate and repair tests"
 echo "=========================================="
 echo ""
-echo "ROSTER_HOME: $ROSTER_HOME"
+echo "KNOSSOS_HOME: $KNOSSOS_HOME"
 
 setup
 

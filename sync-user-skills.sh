@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 #
-# sync-user-skills.sh - Sync roster user-skills to ~/.claude/skills/
+# sync-user-skills.sh - Sync knossos user-skills to ~/.claude/skills/
 #
-# Syncs skills from roster/user-skills/ to the user-level skills directory.
+# Syncs skills from knossos/user-skills/ to the user-level skills directory.
 # Skills are directories containing SKILL.md and supporting files.
 #
 # Behavior:
 #   - Additive: Never removes existing skills from ~/.claude/skills/
-#   - Overwrites: Only skills previously installed from roster (tracked in manifest)
-#   - Preserves: User-created skills not from roster
+#   - Overwrites: Only skills previously installed from knossos (tracked in manifest)
+#   - Preserves: User-created skills not from knossos
 #
 # Usage:
 #   ./sync-user-skills.sh              # Sync user-skills to ~/.claude/skills/
@@ -17,13 +17,12 @@
 #   ./sync-user-skills.sh --help       # Show usage
 #
 # Environment Variables:
-#   KNOSSOS_HOME   Knossos platform location (default: ~/Code/roster)
-#   ROSTER_HOME    Deprecated - use KNOSSOS_HOME instead
+#   KNOSSOS_HOME   Knossos platform location (default: ~/Code/knossos)
 #   KNOSSOS_DEBUG   Enable debug logging (set to 1)
 
 set -euo pipefail
 
-# Source Knossos home resolution (handles ROSTER_HOME deprecation)
+# Source Knossos home resolution (resolves KNOSSOS_HOME)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/lib/knossos-home.sh"
 
@@ -137,8 +136,8 @@ read_manifest() {
     fi
 }
 
-# Check if skill is managed by roster (exists in manifest with source=roster)
-is_roster_managed() {
+# Check if skill is managed by knossos (exists in manifest with source=knossos)
+is_knossos_managed() {
     local skill_name="$1"
     local manifest
     manifest=$(read_manifest)
@@ -151,7 +150,7 @@ is_roster_managed() {
     if command -v jq >/dev/null 2>&1; then
         local source
         source=$(echo "$manifest" | jq -r --arg name "$skill_name" '.skills[$name].source // empty' 2>/dev/null)
-        if [[ "$source" == "roster" || "$source" == "roster-diverged" ]]; then
+        if [[ "$source" == "knossos" || "$source" == "knossos-diverged" ]]; then
             return 0
         fi
         return 1
@@ -168,7 +167,7 @@ is_roster_managed() {
     local source
     source=$(echo "$skill_block" | grep '"source"' | sed 's/.*"source":[[:space:]]*"\([^"]*\)".*/\1/')
 
-    if [[ "$source" == "roster" || "$source" == "roster-diverged" ]]; then
+    if [[ "$source" == "knossos" || "$source" == "knossos-diverged" ]]; then
         return 0
     fi
 
@@ -234,7 +233,7 @@ find_source_skill() {
     return 1
 }
 
-# Recover manifest entries from existing skill directories that match roster sources
+# Recover manifest entries from existing skill directories that match knossos sources
 recover_manifest() {
     log_info "Recovering manifest from existing skills..."
 
@@ -260,13 +259,13 @@ recover_manifest() {
         # Skip if not a valid skill (no SKILL.md)
         [[ -f "$target_skill/SKILL.md" ]] || continue
 
-        # Skip if already in manifest as roster-managed
-        if is_roster_managed "$skill_name"; then
+        # Skip if already in manifest as knossos-managed
+        if is_knossos_managed "$skill_name"; then
             log_debug "Already managed: $skill_name"
             continue
         fi
 
-        # Check if this skill exists in roster source (now categorical)
+        # Check if this skill exists in knossos source (now categorical)
         local source_info
         if source_info=$(find_source_skill "$skill_name"); then
             local source_skill category
@@ -280,26 +279,26 @@ recover_manifest() {
             target_file_count=$(count_skill_files "$target_skill")
 
             if [[ "$source_checksum" == "$target_checksum" ]]; then
-                # Exact match - adopt as roster-managed
+                # Exact match - adopt as knossos-managed
                 if [[ "$DRY_RUN_MODE" -eq 1 ]]; then
                     log_info "Would adopt: $skill_name (exact match, $target_file_count files, category: $category)"
                 else
-                    add_to_manifest "$skill_name" "roster" "$target_checksum" "$target_file_count" "$category"
+                    add_to_manifest "$skill_name" "knossos" "$target_checksum" "$target_file_count" "$category"
                     log_success "Adopted: $skill_name (exact match, $target_file_count files, category: $category)"
                 fi
                 ((recovered++)) || true
             else
-                # Diverged - mark as roster-diverged to preserve user changes
+                # Diverged - mark as knossos-diverged to preserve user changes
                 if [[ "$DRY_RUN_MODE" -eq 1 ]]; then
                     log_info "Would adopt (diverged): $skill_name (local modifications preserved)"
                 else
-                    add_to_manifest "$skill_name" "roster-diverged" "$target_checksum" "$target_file_count" "$category"
+                    add_to_manifest "$skill_name" "knossos-diverged" "$target_checksum" "$target_file_count" "$category"
                     log_warning "Adopted (diverged): $skill_name (local modifications preserved)"
                 fi
                 ((diverged++)) || true
             fi
         else
-            log_debug "Not in roster: $skill_name (user-created)"
+            log_debug "Not in knossos: $skill_name (user-created)"
         fi
     done
 
@@ -384,7 +383,7 @@ EOF
     log_debug "Initialized empty manifest at $USER_MANIFEST_FILE"
 }
 
-# Write manifest with current roster-managed skills
+# Write manifest with current knossos-managed skills
 # Usage: write_manifest "skill1:checksum1:count1:category1" "skill2:checksum2:count2:category2" ...
 write_manifest() {
     local timestamp
@@ -426,7 +425,7 @@ write_manifest() {
         # Write skill entry
         {
             echo -n "    \"$skill_name\": {"
-            echo -n "\"source\": \"roster\", "
+            echo -n "\"source\": \"knossos\", "
             echo -n "\"installed_at\": \"$timestamp\", "
             echo -n "\"checksum\": \"$checksum\", "
             echo -n "\"file_count\": $file_count, "
@@ -487,8 +486,8 @@ sync_skill() {
 
     if [[ -d "$target_skill" ]]; then
         # Target exists - check if we can overwrite
-        if is_roster_managed "$skill_name"; then
-            # Roster-managed: check if update needed
+        if is_knossos_managed "$skill_name"; then
+            # Knossos-managed: check if update needed
             local manifest_checksum
             manifest_checksum=$(get_manifest_checksum "$skill_name")
 
@@ -627,8 +626,8 @@ perform_sync() {
         done
     done
 
-    # Preserve existing roster-managed skills that are no longer in source
-    # (This handles the case where roster removes a skill - we still track it
+    # Preserve existing knossos-managed skills that are no longer in source
+    # (This handles the case where knossos removes a skill - we still track it
     # but don't remove it, honoring the additive-only requirement)
     local manifest
     manifest=$(read_manifest)
@@ -648,13 +647,13 @@ perform_sync() {
             done
 
             if [[ "$still_in_source" == false ]] && [[ -d "$USER_SKILLS_DIR/$existing" ]]; then
-                # Skill removed from roster but still exists - keep in manifest
-                # so we know it came from roster originally
+                # Skill removed from knossos but still exists - keep in manifest
+                # so we know it came from knossos originally
                 local checksum file_count
                 checksum=$(calculate_skill_checksum "$USER_SKILLS_DIR/$existing")
                 file_count=$(count_skill_files "$USER_SKILLS_DIR/$existing")
                 manifest_entries+=("$existing:$checksum:$file_count")
-                log_debug "Preserved manifest entry: $existing (no longer in roster)"
+                log_debug "Preserved manifest entry: $existing (no longer in knossos)"
             fi
         done
     fi
@@ -721,7 +720,7 @@ show_status() {
     if [[ -d "$SOURCE_DIR" ]]; then
         local source_count
         source_count=$(count_source_skills)
-        echo "Roster skills:  $source_count"
+        echo "Knossos skills:  $source_count"
 
         # Show breakdown by category
         for category in root $SKILL_CATEGORIES; do
@@ -748,7 +747,7 @@ show_status() {
             [[ "$cat_count" -gt 0 ]] && echo "  $category: $cat_count"
         done
     else
-        echo "Roster skills:  (directory not found)"
+        echo "Knossos skills:  (directory not found)"
     fi
 
     echo ""
@@ -765,9 +764,9 @@ show_status() {
     # Check manifest
     if [[ -f "$USER_MANIFEST_FILE" ]]; then
         local manifest_count last_sync
-        manifest_count=$(grep -c '"source": "roster"' "$USER_MANIFEST_FILE" 2>/dev/null || echo "0")
+        manifest_count=$(grep -c '"source": "knossos"' "$USER_MANIFEST_FILE" 2>/dev/null || echo "0")
         last_sync=$(grep '"last_sync"' "$USER_MANIFEST_FILE" | sed 's/.*"last_sync":[[:space:]]*"\([^"]*\)".*/\1/' || echo "unknown")
-        echo "Roster-managed: $manifest_count"
+        echo "Knossos-managed: $manifest_count"
         echo "Last sync:      $last_sync"
     else
         echo "Manifest:       (not initialized)"
@@ -796,7 +795,7 @@ show_status() {
             local target_skill="$USER_SKILLS_DIR/$skill_name"
 
             if [[ -d "$target_skill" ]]; then
-                if is_roster_managed "$skill_name"; then
+                if is_knossos_managed "$skill_name"; then
                     local source_checksum manifest_checksum source_file_count
                     source_checksum=$(calculate_skill_checksum "$source_skill")
                     manifest_checksum=$(get_manifest_checksum "$skill_name")
@@ -834,7 +833,7 @@ show_status() {
                 local target_skill="$USER_SKILLS_DIR/$skill_name"
 
                 if [[ -d "$target_skill" ]]; then
-                    if is_roster_managed "$skill_name"; then
+                    if is_knossos_managed "$skill_name"; then
                         local source_checksum manifest_checksum source_file_count
                         source_checksum=$(calculate_skill_checksum "$source_skill")
                         manifest_checksum=$(get_manifest_checksum "$skill_name")
@@ -858,7 +857,7 @@ show_status() {
             done
         done
 
-        # Check for user skills not in roster
+        # Check for user skills not in knossos
         for target_skill in "$USER_SKILLS_DIR"/*/; do
             [[ -d "$target_skill" ]] || continue
 
@@ -872,8 +871,8 @@ show_status() {
             done
 
             if [[ "$in_source" == false ]]; then
-                if is_roster_managed "$skill_name"; then
-                    echo "  [-] $skill_name (was from roster, now removed from source)"
+                if is_knossos_managed "$skill_name"; then
+                    echo "  [-] $skill_name (was from knossos, now removed from source)"
                 else
                     echo "  [*] $skill_name (user-created)"
                 fi
@@ -887,7 +886,7 @@ usage() {
     cat <<EOF
 Usage: sync-user-skills.sh [OPTIONS]
 
-Syncs roster user-skills to ~/.claude/skills/
+Syncs knossos user-skills to ~/.claude/skills/
 
 Options:
   --dry-run      Preview changes without applying
@@ -897,8 +896,8 @@ Options:
 
 Behavior:
   - Additive:   Never removes existing skills from ~/.claude/skills/
-  - Overwrites: Only skills previously installed from roster
-  - Preserves:  User-created skills not from roster
+  - Overwrites: Only skills previously installed from knossos
+  - Preserves:  User-created skills not from knossos
   - Flattens:   Categorical source structure -> flat destination
 
 Skills are directories containing SKILL.md and supporting files.
@@ -906,14 +905,14 @@ Source uses categorical organization (session-lifecycle/, orchestration/, etc.)
 Destination is flat for Claude Code compatibility.
 
 The manifest at ~/.claude/USER_SKILL_MANIFEST.json tracks which skills
-were installed from roster, allowing safe updates while preserving
+were installed from knossos, allowing safe updates while preserving
 user-created skills. Manifest includes category metadata for provenance.
 
 Adopt Mode (--adopt):
   Scans existing skills in ~/.claude/skills/ and matches them against
-  roster sources. Skills that match are adopted into the manifest:
-  - Exact matches: marked as "roster" (fully managed)
-  - Diverged skills: marked as "roster-diverged" (preserves local changes)
+  knossos sources. Skills that match are adopted into the manifest:
+  - Exact matches: marked as "knossos" (fully managed)
+  - Diverged skills: marked as "knossos-diverged" (preserves local changes)
   - User-created: not added to manifest (remain user-owned)
 
   Use --adopt when:
@@ -922,7 +921,7 @@ Adopt Mode (--adopt):
   - Skills were installed before manifest tracking existed
 
 Environment Variables:
-  ROSTER_HOME    Roster repository location (default: ~/Code/roster)
+  KNOSSOS_HOME   Knossos platform location (default: ~/Code/knossos)
   KNOSSOS_DEBUG   Enable debug logging (set to 1)
 
 Exit Codes:

@@ -3,15 +3,15 @@
 # sync-config.sh - Sync Configuration and Constants
 #
 # Defines file classification lists, exit codes, and configuration
-# for the roster-sync ecosystem synchronization system.
+# for the knossos-sync ecosystem synchronization system.
 #
-# Part of: roster-sync (TDD-cem-replacement)
+# Part of: knossos-sync (TDD-cem-replacement)
 #
 # Usage:
 #   source "$KNOSSOS_HOME/lib/sync/sync-config.sh"
 #
 # Functions:
-#   get_copy_replace_items  - Files completely replaced from roster
+#   get_copy_replace_items  - Files completely replaced from knossos
 #   get_merge_items         - Files using intelligent merge strategies
 #   get_merge_dir_items     - Directories that sync contents
 #   get_ignore_items        - Files/directories never touched by sync
@@ -47,8 +47,8 @@ readonly SYNC_SCHEMA_VERSION=3
 # File Classification Functions (per TDD 5.2)
 # ============================================================================
 
-# Files that are completely replaced from roster
-# These files are owned by roster - local changes are overwritten on sync
+# Files that are completely replaced from knossos
+# These files are owned by knossos - local changes are overwritten on sync
 get_copy_replace_items() {
     cat <<'EOF'
 COMMAND_REGISTRY.md
@@ -181,7 +181,7 @@ sync_log() {
     if declare -F log >/dev/null 2>&1; then
         log "$@"
     else
-        echo "[roster-sync] $*" >&2
+        echo "[knossos-sync] $*" >&2
     fi
 }
 
@@ -189,7 +189,7 @@ sync_log_error() {
     if declare -F log_error >/dev/null 2>&1; then
         log_error "$@"
     else
-        echo "[roster-sync] Error: $*" >&2
+        echo "[knossos-sync] Error: $*" >&2
     fi
 }
 
@@ -197,14 +197,14 @@ sync_log_warning() {
     if declare -F log_warning >/dev/null 2>&1; then
         log_warning "$@"
     else
-        echo "[roster-sync] Warning: $*" >&2
+        echo "[knossos-sync] Warning: $*" >&2
     fi
 }
 
 sync_log_debug() {
     if declare -F log_debug >/dev/null 2>&1; then
         log_debug "$@"
-    elif [[ "${ROSTER_SYNC_DEBUG:-0}" == "1" ]]; then
-        echo "[roster-sync DEBUG] $*" >&2
+    elif [[ "${KNOSSOS_SYNC_DEBUG:-0}" == "1" ]]; then
+        echo "[knossos-sync DEBUG] $*" >&2
     fi
 }

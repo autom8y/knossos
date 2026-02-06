@@ -6,7 +6,7 @@
 #   ./get-workflow-field.sh name
 #   ./get-workflow-field.sh description
 
-# Source Knossos home resolution (handles ROSTER_HOME deprecation)
+# Source Knossos home resolution (resolves KNOSSOS_HOME)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/lib/knossos-home.sh"
 FIELD="$1"

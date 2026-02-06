@@ -5,7 +5,7 @@
 # Provides consistent checksum computation across macOS (shasum) and
 # Linux (sha256sum) with optional caching for performance.
 #
-# Part of: roster-sync (TDD-cem-replacement)
+# Part of: knossos-sync (TDD-cem-replacement)
 #
 # Usage:
 #   source "$KNOSSOS_HOME/lib/sync/sync-checksum.sh"

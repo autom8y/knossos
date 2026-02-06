@@ -25,8 +25,8 @@ phases:
 
   - name: platform
     agent: platform-engineer
-    produces: roster-integration
-    description: Integrate agents into roster ecosystem
+    produces: knossos-integration
+    description: Integrate agents into knossos ecosystem
     condition: "complexity >= MODULE"
 
   - name: catalog
@@ -54,7 +54,7 @@ agents:
     role: Configures workflow phases and orchestration
 
   - name: platform-engineer
-    role: Integrates agents into roster platform
+    role: Integrates agents into knossos platform
 
   - name: agent-curator
     role: Maintains agent catalog and knowledge base

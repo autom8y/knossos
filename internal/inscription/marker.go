@@ -305,7 +305,6 @@ func (p *MarkerParser) suggestRegionName(content string, lineNum int) string {
 	// Remove common suffixes
 	content = strings.TrimSuffix(content, "-owned")
 	content = strings.TrimSuffix(content, "satellite")
-	content = strings.TrimSuffix(content, "roster")
 	content = strings.TrimSuffix(content, "knossos")
 
 	// Convert to kebab-case

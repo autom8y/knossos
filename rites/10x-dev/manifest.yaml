@@ -72,3 +72,10 @@ complexity_levels:
 metadata:
   domain: software development
   color: blue
+
+mcp_servers:
+  - name: github
+    command: npx
+    args: ["-y", "@modelcontextprotocol/server-github"]
+    env:
+      GITHUB_PERSONAL_ACCESS_TOKEN: "${GITHUB_TOKEN}"

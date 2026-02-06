@@ -5,7 +5,7 @@
 # Parses hooks.yaml files and generates Claude Code hook registrations
 # in settings.local.json while preserving user-defined hooks.
 #
-# Part of: roster rite-swap infrastructure
+# Part of: knossos rite-swap infrastructure
 #
 # Usage:
 #   source "$KNOSSOS_HOME/lib/rite/rite-hooks-registration.sh"
@@ -17,7 +17,7 @@
 #   - Logging functions (log, log_debug, log_warning, log_error)
 #
 # Environment:
-#   KNOSSOS_HOME - Path to Knossos platform (formerly ROSTER_HOME)
+#   KNOSSOS_HOME - Path to Knossos platform 
 #   DRY_RUN_MODE - If set to 1, preview changes without writing
 
 # Guard against re-sourcing
@@ -188,13 +188,13 @@ parse_hooks_yaml() {
 # JSON Extraction
 # ============================================================================
 
-# Extract non-roster hooks from existing settings.local.json
+# Extract non-knossos hooks from existing settings.local.json
 # These are hooks whose command does NOT contain ".claude/hooks/"
 # Parameters:
 #   $1 - settings_file: Path to settings.local.json
 # Output: JSON object with preserved hooks by event type to stdout
 # Returns: 0 always (empty {} for missing file)
-extract_non_roster_hooks() {
+extract_non_knossos_hooks() {
     local settings_file="$1"
 
     # File doesn't exist - return empty object
@@ -211,8 +211,8 @@ extract_non_roster_hooks() {
         return 0
     fi
 
-    # For each event type, filter out roster-managed hooks
-    # Roster hooks contain ".claude/hooks/" in the command path
+    # For each event type, filter out knossos-managed hooks
+    # Knossos hooks contain ".claude/hooks/" in the command path
     local preserved="{}"
     local events=("SessionStart" "Stop" "PreToolUse" "PostToolUse" "UserPromptSubmit")
 
@@ -230,7 +230,7 @@ extract_non_roster_hooks() {
             local entry
             entry=$(echo "$event_entries" | jq -c ".[$i]")
 
-            # Filter hooks array within entry to exclude roster-managed ones
+            # Filter hooks array within entry to exclude knossos-managed ones
             local filtered_hooks
             filtered_hooks=$(echo "$entry" | jq -c '[.hooks // [] | .[] | select(.command | contains(".claude/hooks/") | not)]')
 
@@ -424,11 +424,11 @@ generate_hooks_json() {
 # Returns: 0 on success, 1 on error
 # Side effects:
 #   - Updates .claude/settings.local.json hooks section
-#   - Preserves non-roster hooks in settings
+#   - Preserves non-knossos hooks in settings
 #   - Creates settings.local.json if missing
 #   - Backs up corrupted settings.local.json
 # Environment:
-#   KNOSSOS_HOME - Must be set (ROSTER_HOME deprecated)
+#   KNOSSOS_HOME - Must be set 
 #   DRY_RUN_MODE - If 1, prints preview without writing
 swap_hook_registrations() {
     local rite_name="$1"
@@ -462,13 +462,13 @@ swap_hook_registrations() {
         log "Hook registrations preview (dry-run):"
     fi
 
-    # Step 1: Extract non-roster hooks for preservation
+    # Step 1: Extract non-knossos hooks for preservation
     local preserved_hooks
-    preserved_hooks=$(extract_non_roster_hooks "$settings_file")
+    preserved_hooks=$(extract_non_knossos_hooks "$settings_file")
     local preserved_count
     preserved_count=$(echo "$preserved_hooks" | jq '[.[] | length] | add // 0')
     if [[ "$preserved_count" -gt 0 ]]; then
-        log_debug "Preserved $preserved_count non-roster hook entries"
+        log_debug "Preserved $preserved_count non-knossos hook entries"
     fi
 
     # Step 2: Parse base hooks

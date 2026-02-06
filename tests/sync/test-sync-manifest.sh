@@ -8,12 +8,12 @@ set -euo pipefail
 
 # Test setup
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ROSTER_HOME="${ROSTER_HOME:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
+KNOSSOS_HOME="${KNOSSOS_HOME:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
 
 # Source dependencies
-source "$ROSTER_HOME/lib/sync/sync-config.sh"
-source "$ROSTER_HOME/lib/sync/sync-checksum.sh"
-source "$ROSTER_HOME/lib/sync/sync-manifest.sh"
+source "$KNOSSOS_HOME/lib/sync/sync-config.sh"
+source "$KNOSSOS_HOME/lib/sync/sync-checksum.sh"
+source "$KNOSSOS_HOME/lib/sync/sync-manifest.sh"
 
 # Test counters
 TESTS_RUN=0
@@ -65,7 +65,7 @@ test_create_manifest() {
     run_test "create_manifest function"
 
     local manifest
-    manifest=$(create_manifest "/path/to/roster" "abc123" "main")
+    manifest=$(create_manifest "/path/to/knossos" "abc123" "main")
 
     local version
     version=$(echo "$manifest" | jq -r '.schema_version')
@@ -76,19 +76,19 @@ test_create_manifest() {
     fi
 
     local path
-    path=$(echo "$manifest" | jq -r '.roster.path')
-    if [[ "$path" == "/path/to/roster" ]]; then
-        test_pass "roster.path set correctly"
+    path=$(echo "$manifest" | jq -r '.knossos.path')
+    if [[ "$path" == "/path/to/knossos" ]]; then
+        test_pass "knossos.path set correctly"
     else
-        test_fail "roster.path" "/path/to/roster" "$path"
+        test_fail "knossos.path" "/path/to/knossos" "$path"
     fi
 
     local commit
-    commit=$(echo "$manifest" | jq -r '.roster.commit')
+    commit=$(echo "$manifest" | jq -r '.knossos.commit')
     if [[ "$commit" == "abc123" ]]; then
-        test_pass "roster.commit set correctly"
+        test_pass "knossos.commit set correctly"
     else
-        test_fail "roster.commit" "abc123" "$commit"
+        test_fail "knossos.commit" "abc123" "$commit"
     fi
 }
 
@@ -96,7 +96,7 @@ test_write_read_manifest() {
     run_test "write and read manifest"
 
     local manifest
-    manifest=$(create_manifest "/test/roster" "def456" "main")
+    manifest=$(create_manifest "/test/knossos" "def456" "main")
 
     write_manifest "$manifest"
 
@@ -152,15 +152,15 @@ test_add_managed_file() {
     fi
 }
 
-test_update_manifest_roster() {
-    run_test "update_manifest_roster function"
+test_update_manifest_knossos() {
+    run_test "update_manifest_knossos function"
 
     local manifest
     manifest=$(create_manifest "/test" "old_commit" "main")
-    manifest=$(update_manifest_roster "$manifest" "new_commit" "feature")
+    manifest=$(update_manifest_knossos "$manifest" "new_commit" "feature")
 
     local commit
-    commit=$(echo "$manifest" | jq -r '.roster.commit')
+    commit=$(echo "$manifest" | jq -r '.knossos.commit')
     if [[ "$commit" == "new_commit" ]]; then
         test_pass "commit updated"
     else
@@ -168,7 +168,7 @@ test_update_manifest_roster() {
     fi
 
     local ref
-    ref=$(echo "$manifest" | jq -r '.roster.ref')
+    ref=$(echo "$manifest" | jq -r '.knossos.ref')
     if [[ "$ref" == "feature" ]]; then
         test_pass "ref updated"
     else
@@ -241,12 +241,12 @@ EOF
         test_fail "schema_version" "3" "$version"
     fi
 
-    local roster_path
-    roster_path=$(echo "$manifest" | jq -r '.roster.path')
-    if [[ "$roster_path" == "/old/skeleton" ]]; then
-        test_pass "roster.path migrated from skeleton_path"
+    local knossos_path
+    knossos_path=$(echo "$manifest" | jq -r '.knossos.path')
+    if [[ "$knossos_path" == "/old/skeleton" ]]; then
+        test_pass "knossos.path migrated from skeleton_path"
     else
-        test_fail "roster.path" "/old/skeleton" "$roster_path"
+        test_fail "knossos.path" "/old/skeleton" "$knossos_path"
     fi
 
     local skeleton_path
@@ -299,12 +299,12 @@ EOF
         test_fail "schema_version" "3" "$version"
     fi
 
-    local roster_path
-    roster_path=$(echo "$manifest" | jq -r '.roster.path')
-    if [[ "$roster_path" == "/old/skeleton" ]]; then
-        test_pass "roster.path migrated from skeleton.path"
+    local knossos_path
+    knossos_path=$(echo "$manifest" | jq -r '.knossos.path')
+    if [[ "$knossos_path" == "/old/skeleton" ]]; then
+        test_pass "knossos.path migrated from skeleton.path"
     else
-        test_fail "roster.path" "/old/skeleton" "$roster_path"
+        test_fail "knossos.path" "/old/skeleton" "$knossos_path"
     fi
 
     local rite_name
@@ -386,7 +386,7 @@ setup
 test_create_manifest
 test_write_read_manifest
 test_add_managed_file
-test_update_manifest_roster
+test_update_manifest_knossos
 test_get_manifest_version
 test_migrate_v1_to_v3
 test_migrate_v2_to_v3

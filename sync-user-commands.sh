@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 #
-# sync-user-commands.sh - Sync roster mena/ to ~/.claude/commands/
+# sync-user-commands.sh - Sync knossos mena/ to ~/.claude/commands/
 #
-# Syncs commands from roster/mena/ to the user-level commands directory.
+# Syncs commands from knossos/mena/ to the user-level commands directory.
 # Behavior:
 #   - Additive: Never removes existing commands from ~/.claude/commands/
-#   - Overwrites: Only commands previously installed from roster (tracked in manifest)
-#   - Preserves: User-created commands not from roster
+#   - Overwrites: Only commands previously installed from knossos (tracked in manifest)
+#   - Preserves: User-created commands not from knossos
 #   - Flattens: Subdirectories in source become flat list in target
 #
 # Collision Handling (Intentional Design):
@@ -22,13 +22,12 @@
 #   ./sync-user-commands.sh --help       # Show usage
 #
 # Environment Variables:
-#   KNOSSOS_HOME   Knossos platform location (default: ~/Code/roster)
-#   ROSTER_HOME    Deprecated - use KNOSSOS_HOME instead
+#   KNOSSOS_HOME   Knossos platform location (default: ~/Code/knossos)
 #   KNOSSOS_DEBUG   Enable debug logging (set to 1)
 
 set -euo pipefail
 
-# Source Knossos home resolution (handles ROSTER_HOME deprecation)
+# Source Knossos home resolution (resolves KNOSSOS_HOME)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/lib/knossos-home.sh"
 
@@ -120,14 +119,14 @@ calculate_checksum() {
 # Returns 0 if found in a rite (collision), 1 if not found
 is_rite_command() {
     local cmd_name="$1"
-    local roster_rites="${KNOSSOS_HOME}/rites"
+    local knossos_rites="${KNOSSOS_HOME}/rites"
 
-    if [[ ! -d "$roster_rites" ]]; then
+    if [[ ! -d "$knossos_rites" ]]; then
         return 1
     fi
 
     # Search for command in any rite's mena/ directory
-    if find "$roster_rites" -path "*/mena/$cmd_name" -type f 2>/dev/null | grep -q .; then
+    if find "$knossos_rites" -path "*/mena/$cmd_name" -type f 2>/dev/null | grep -q .; then
         return 0
     fi
 
@@ -137,15 +136,15 @@ is_rite_command() {
 # Get which rite(s) contain a command
 get_rite_for_command() {
     local cmd_name="$1"
-    local roster_rites="${KNOSSOS_HOME}/rites"
+    local knossos_rites="${KNOSSOS_HOME}/rites"
 
-    if [[ ! -d "$roster_rites" ]]; then
+    if [[ ! -d "$knossos_rites" ]]; then
         echo ""
         return
     fi
 
     # Find rite directories containing this command
-    find "$roster_rites" -path "*/mena/$cmd_name" -type f 2>/dev/null | while read -r path; do
+    find "$knossos_rites" -path "*/mena/$cmd_name" -type f 2>/dev/null | while read -r path; do
         # Extract rite name from path: .../rites/RITE_NAME/mena/command.md
         echo "$path" | sed 's|.*/rites/\([^/]*\)/mena/.*|\1|'
     done | tr '\n' ',' | sed 's/,$//'
@@ -158,8 +157,8 @@ get_rite_for_command() {
 # Clean up commands at user-level that should only exist at rite-level
 # These are commands that:
 #   1. Exist in ~/.claude/commands/
-#   2. Do NOT exist in roster/mena/
-#   3. DO exist in roster/rites/*/mena/ (rite-level resources)
+#   2. Do NOT exist in knossos/mena/
+#   3. DO exist in knossos/rites/*/mena/ (rite-level resources)
 cleanup_rite_orphans() {
     log_info "Scanning for rite-level commands that leaked to user-level..."
 
@@ -174,7 +173,7 @@ cleanup_rite_orphans() {
         local cmd_name
         cmd_name=$(basename "$target_file")
 
-        # Check if this command exists in roster/mena/ (legitimate user-level)
+        # Check if this command exists in knossos/mena/ (legitimate user-level)
         local found_in_user_commands=false
         for category_dir in "$SOURCE_DIR"/*/; do
             [[ -d "$category_dir" ]] || continue
@@ -207,14 +206,14 @@ cleanup_rite_orphans() {
                 log_debug "  Backup: $backup_dir/$cmd_name.*.bak"
 
                 # Remove from manifest if present
-                if is_roster_managed "$cmd_name"; then
+                if is_knossos_managed "$cmd_name"; then
                     remove_from_manifest "$cmd_name"
                 fi
             fi
             ((cleaned++)) || true
         else
             # Not in mena AND not a rite command = truly user-created
-            log_debug "Keeping: $cmd_name (user-created, not from any roster source)"
+            log_debug "Keeping: $cmd_name (user-created, not from any knossos source)"
             ((skipped++)) || true
         fi
     done
@@ -264,8 +263,8 @@ read_manifest() {
     fi
 }
 
-# Check if command is managed by roster (exists in manifest with source=roster)
-is_roster_managed() {
+# Check if command is managed by knossos (exists in manifest with source=knossos)
+is_knossos_managed() {
     local cmd_name="$1"
     local manifest
     manifest=$(read_manifest)
@@ -278,7 +277,7 @@ is_roster_managed() {
     if command -v jq >/dev/null 2>&1; then
         local source
         source=$(echo "$manifest" | jq -r --arg name "$cmd_name" '.commands[$name].source // empty' 2>/dev/null)
-        if [[ "$source" == "roster" || "$source" == "roster-diverged" ]]; then
+        if [[ "$source" == "knossos" || "$source" == "knossos-diverged" ]]; then
             return 0
         fi
         return 1
@@ -295,7 +294,7 @@ is_roster_managed() {
     local source
     source=$(echo "$cmd_block" | grep '"source"' | sed 's/.*"source":[[:space:]]*"\([^"]*\)".*/\1/')
 
-    if [[ "$source" == "roster" || "$source" == "roster-diverged" ]]; then
+    if [[ "$source" == "knossos" || "$source" == "knossos-diverged" ]]; then
         return 0
     fi
 
@@ -353,7 +352,7 @@ add_to_manifest() {
     fi
 }
 
-# Recover manifest entries from existing files that match roster sources
+# Recover manifest entries from existing files that match knossos sources
 recover_manifest() {
     log_info "Recovering manifest from existing commands..."
 
@@ -373,13 +372,13 @@ recover_manifest() {
         local cmd_name
         cmd_name=$(basename "$target_file")
 
-        # Skip if already in manifest as roster-managed
-        if is_roster_managed "$cmd_name"; then
+        # Skip if already in manifest as knossos-managed
+        if is_knossos_managed "$cmd_name"; then
             log_debug "Already managed: $cmd_name"
             continue
         fi
 
-        # Search for matching source file in roster (check all category subdirectories)
+        # Search for matching source file in knossos (check all category subdirectories)
         local source_file=""
         local category=""
         for category_dir in "$SOURCE_DIR"/*/; do
@@ -397,26 +396,26 @@ recover_manifest() {
             target_checksum=$(calculate_checksum "$target_file")
 
             if [[ "$source_checksum" == "$target_checksum" ]]; then
-                # Exact match - adopt as roster-managed
+                # Exact match - adopt as knossos-managed
                 if [[ "$DRY_RUN_MODE" -eq 1 ]]; then
                     log_info "Would adopt: $cmd_name (exact match)"
                 else
-                    add_to_manifest "$cmd_name" "roster" "$category" "$target_checksum"
+                    add_to_manifest "$cmd_name" "knossos" "$category" "$target_checksum"
                     log_success "Adopted: $cmd_name (exact match)"
                 fi
                 ((recovered++)) || true
             else
-                # Diverged - mark as roster-diverged to preserve user changes
+                # Diverged - mark as knossos-diverged to preserve user changes
                 if [[ "$DRY_RUN_MODE" -eq 1 ]]; then
                     log_info "Would adopt (diverged): $cmd_name (local modifications preserved)"
                 else
-                    add_to_manifest "$cmd_name" "roster-diverged" "$category" "$target_checksum"
+                    add_to_manifest "$cmd_name" "knossos-diverged" "$category" "$target_checksum"
                     log_warning "Adopted (diverged): $cmd_name (local modifications preserved)"
                 fi
                 ((diverged++)) || true
             fi
         else
-            log_debug "Not in roster: $cmd_name (user-created)"
+            log_debug "Not in knossos: $cmd_name (user-created)"
         fi
     done
 
@@ -470,7 +469,7 @@ EOF
     log_debug "Initialized empty manifest at $USER_MANIFEST_FILE"
 }
 
-# Write manifest with current roster-managed commands
+# Write manifest with current knossos-managed commands
 # Usage: write_manifest "cmd1:checksum1:category1" "cmd2:checksum2:category2" ...
 write_manifest() {
     local timestamp
@@ -510,7 +509,7 @@ write_manifest() {
         # Write command entry
         {
             echo -n "    \"$cmd_name\": {"
-            echo -n "\"source\": \"roster\", "
+            echo -n "\"source\": \"knossos\", "
             echo -n "\"category\": \"$category\", "
             echo -n "\"installed_at\": \"$timestamp\", "
             echo -n "\"checksum\": \"$checksum\""
@@ -587,8 +586,8 @@ perform_sync() {
 
             if [[ -f "$target_file" ]]; then
                 # Target exists - check if we can overwrite
-                if is_roster_managed "$cmd_name"; then
-                    # Roster-managed: check if update needed
+                if is_knossos_managed "$cmd_name"; then
+                    # Knossos-managed: check if update needed
                     local manifest_checksum
                     manifest_checksum=$(get_manifest_checksum "$cmd_name")
 
@@ -628,8 +627,8 @@ perform_sync() {
         done
     done
 
-    # Preserve existing roster-managed commands that are no longer in source
-    # (This handles the case where roster removes a command - we still track it
+    # Preserve existing knossos-managed commands that are no longer in source
+    # (This handles the case where knossos removes a command - we still track it
     # but don't remove it, honoring the additive-only requirement)
     local manifest
     manifest=$(read_manifest)
@@ -653,8 +652,8 @@ perform_sync() {
             done
 
             if [[ "$still_in_source" == false ]] && [[ -f "$USER_COMMANDS_DIR/$existing" ]]; then
-                # Command removed from roster but still exists - keep in manifest
-                # so we know it came from roster originally
+                # Command removed from knossos but still exists - keep in manifest
+                # so we know it came from knossos originally
                 local checksum
                 checksum=$(calculate_checksum "$USER_COMMANDS_DIR/$existing")
                 # Get existing category from manifest using jq if available
@@ -665,7 +664,7 @@ perform_sync() {
                     existing_category=$(echo "$manifest" | grep -A3 "\"$existing\":" | grep '"category"' | sed 's/.*"category":[[:space:]]*"\([^"]*\)".*/\1/' || echo "unknown")
                 fi
                 manifest_entries+=("$existing:$checksum:$existing_category")
-                log_debug "Preserved manifest entry: $existing (no longer in roster)"
+                log_debug "Preserved manifest entry: $existing (no longer in knossos)"
             fi
         done
     fi
@@ -709,7 +708,7 @@ show_status() {
             cat_count=$(find "$category_dir" -maxdepth 1 -name "*.md" -type f 2>/dev/null | wc -l | tr -d ' ')
             source_count=$((source_count + cat_count))
         done
-        echo "Roster commands: $source_count"
+        echo "Knossos commands: $source_count"
 
         # Show by category
         for category_dir in "$SOURCE_DIR"/*/; do
@@ -721,7 +720,7 @@ show_status() {
             echo "  $category: $cat_count"
         done
     else
-        echo "Roster commands: (directory not found)"
+        echo "Knossos commands: (directory not found)"
     fi
 
     echo ""
@@ -738,9 +737,9 @@ show_status() {
     # Check manifest
     if [[ -f "$USER_MANIFEST_FILE" ]]; then
         local manifest_count last_sync
-        manifest_count=$(grep -c '"source": "roster"' "$USER_MANIFEST_FILE" 2>/dev/null || echo "0")
+        manifest_count=$(grep -c '"source": "knossos"' "$USER_MANIFEST_FILE" 2>/dev/null || echo "0")
         last_sync=$(grep '"last_sync"' "$USER_MANIFEST_FILE" | sed 's/.*"last_sync":[[:space:]]*"\([^"]*\)".*/\1/' || echo "unknown")
-        echo "Roster-managed:  $manifest_count"
+        echo "Knossos-managed:  $manifest_count"
         echo "Last sync:       $last_sync"
     else
         echo "Manifest:        (not initialized)"
@@ -765,7 +764,7 @@ show_status() {
                 local target_file="$USER_COMMANDS_DIR/$cmd_name"
 
                 if [[ -f "$target_file" ]]; then
-                    if is_roster_managed "$cmd_name"; then
+                    if is_knossos_managed "$cmd_name"; then
                         local source_checksum manifest_checksum
                         source_checksum=$(calculate_checksum "$source_file")
                         manifest_checksum=$(get_manifest_checksum "$cmd_name")
@@ -784,7 +783,7 @@ show_status() {
             done
         done
 
-        # Check for user commands not in roster
+        # Check for user commands not in knossos
         for target_file in "$USER_COMMANDS_DIR"/*.md; do
             [[ -f "$target_file" ]] || continue
 
@@ -801,8 +800,8 @@ show_status() {
             done
 
             if [[ "$found_in_source" == false ]]; then
-                if is_roster_managed "$cmd_name"; then
-                    echo "  [-] $cmd_name (was from roster, now removed from source)"
+                if is_knossos_managed "$cmd_name"; then
+                    echo "  [-] $cmd_name (was from knossos, now removed from source)"
                 else
                     echo "  [*] $cmd_name (user-created)"
                 fi
@@ -816,7 +815,7 @@ usage() {
     cat <<EOF
 Usage: sync-user-commands.sh [OPTIONS]
 
-Syncs roster mena/ to ~/.claude/commands/
+Syncs knossos mena/ to ~/.claude/commands/
 
 Options:
   --dry-run      Preview changes without applying
@@ -827,19 +826,19 @@ Options:
 
 Behavior:
   - Additive:   Never removes existing commands from ~/.claude/commands/
-  - Overwrites: Only commands previously installed from roster
-  - Preserves:  User-created commands not from roster
+  - Overwrites: Only commands previously installed from knossos
+  - Preserves:  User-created commands not from knossos
   - Flattens:   Subdirectories (session/, workflow/, etc.) become flat
 
 The manifest at ~/.claude/USER_COMMAND_MANIFEST.json tracks which commands
-were installed from roster, allowing safe updates while preserving
+were installed from knossos, allowing safe updates while preserving
 user-created commands.
 
 Adopt Mode (--adopt):
   Scans existing commands in ~/.claude/commands/ and matches them against
-  roster sources. Commands that match are adopted into the manifest:
-  - Exact matches: marked as "roster" (fully managed)
-  - Diverged files: marked as "roster-diverged" (preserves local changes)
+  knossos sources. Commands that match are adopted into the manifest:
+  - Exact matches: marked as "knossos" (fully managed)
+  - Diverged files: marked as "knossos-diverged" (preserves local changes)
   - User-created: not added to manifest (remain user-owned)
 
   Use --adopt when:
@@ -849,8 +848,8 @@ Adopt Mode (--adopt):
 
 Cleanup Mode (--cleanup):
   Scans commands in ~/.claude/commands/ and removes any that:
-  - Do NOT exist in roster/mena/ (not user-level resources)
-  - DO exist in roster/rites/*/mena/ (rite-level resources)
+  - Do NOT exist in knossos/mena/ (not user-level resources)
+  - DO exist in knossos/rites/*/mena/ (rite-level resources)
 
   Rite-level commands should only exist in .claude/commands/ (per-project)
   when that rite is active, not in ~/.claude/commands/ (user-level global).
@@ -863,7 +862,7 @@ Cleanup Mode (--cleanup):
   Backups are saved to ~/.claude/.backup/commands/ before removal.
 
 Source Structure:
-  roster/mena/
+  knossos/mena/
     session/       # start, park, continue, handoff, wrap
     workflow/      # task, sprint, hotfix
     operations/    # architect, build, qa, code-review, commit
@@ -872,7 +871,7 @@ Source Structure:
     rite-switching/ # 10x, docs, hygiene, debt, sre, security, etc.
 
 Environment Variables:
-  ROSTER_HOME    Roster repository location (default: ~/Code/roster)
+  KNOSSOS_HOME   Knossos platform location (default: ~/Code/knossos)
   KNOSSOS_DEBUG   Enable debug logging (set to 1)
 
 Exit Codes:

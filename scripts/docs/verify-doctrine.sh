@@ -75,7 +75,7 @@ if command -v ari &>/dev/null; then
     rites=$(cd "$PROJECT_ROOT" && ari rite list 2>/dev/null | grep -E "^[a-z]" | awk '{print $1}' || echo "")
 else
     # Fallback: check manifest directories
-    rites=$(ls -1 "${PROJECT_ROOT}/roster/rites/" 2>/dev/null | grep -v "^_" || echo "")
+    rites=$(ls -1 "${PROJECT_ROOT}/knossos/rites/" 2>/dev/null | grep -v "^_" || echo "")
 fi
 
 for rite in $rites; do

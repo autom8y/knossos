@@ -3,16 +3,16 @@
 # merge-settings.sh - Settings JSON Union Merge
 #
 # Implements union merge semantics for settings.local.json.
-# Preserves satellite-specific permissions while updating from roster.
+# Preserves satellite-specific permissions while updating from knossos.
 #
-# Part of: roster-sync (TDD-cem-replacement)
+# Part of: knossos-sync (TDD-cem-replacement)
 #
 # Usage:
-#   source "$ROSTER_HOME/lib/sync/merge/merge-settings.sh"
+#   source "$KNOSSOS_HOME/lib/sync/merge/merge-settings.sh"
 #   merge_settings_json "$knossos_file" "$local_file" "$output_file"
 #
 # Merge Behavior:
-#   - Uses roster file as base
+#   - Uses knossos file as base
 #   - Adds satellite-specific permissions
 #   - Adds satellite-specific directories
 #   - Adds satellite-specific MCP servers
@@ -28,9 +28,9 @@ readonly _MERGE_SETTINGS_LOADED=1
 
 # Merge settings.local.json with union semantics
 # Algorithm:
-#   1. If no local file: copy roster as-is
+#   1. If no local file: copy knossos as-is
 #   2. Extract satellite extras (permissions, directories, MCP servers)
-#   3. Merge: roster base + satellite extras
+#   3. Merge: knossos base + satellite extras
 #   4. Preserve local enableAllProjectMcpServers if set
 #
 # Usage: merge_settings_json "knossos_file" "local_file" "output_file"
@@ -39,16 +39,16 @@ merge_settings_json() {
     local local_file="$2"
     local output_file="$3"
 
-    # If no local file, copy roster as-is
+    # If no local file, copy knossos as-is
     if [[ ! -f "$local_file" ]]; then
-        sync_log_debug "merge-settings: no local file, copying roster"
+        sync_log_debug "merge-settings: no local file, copying knossos"
         cp "$knossos_file" "$output_file"
         return 0
     fi
 
     # Validate both files are valid JSON
     if ! jq -e . "$knossos_file" >/dev/null 2>&1; then
-        sync_log_error "Invalid JSON in roster file: $knossos_file"
+        sync_log_error "Invalid JSON in knossos file: $knossos_file"
         return 1
     fi
 
@@ -57,7 +57,7 @@ merge_settings_json() {
         return 1
     fi
 
-    # Extract satellite-specific permissions (in local but not in roster)
+    # Extract satellite-specific permissions (in local but not in knossos)
     local extra_perms
     extra_perms=$(jq -n --slurpfile r "$knossos_file" --slurpfile l "$local_file" '
         ($l[0].permissions.allow // []) - ($r[0].permissions.allow // [])
@@ -81,7 +81,7 @@ merge_settings_json() {
     sync_log_debug "merge-settings: extra_dirs=$extra_dirs"
     sync_log_debug "merge-settings: extra_mcp=$extra_mcp"
 
-    # Merge: roster base + satellite extras
+    # Merge: knossos base + satellite extras
     jq --argjson ep "$extra_perms" \
        --argjson ed "$extra_dirs" \
        --argjson em "$extra_mcp" \

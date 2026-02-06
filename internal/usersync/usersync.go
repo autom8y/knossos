@@ -59,23 +59,7 @@ const (
 	SourceKnossos  SourceType = "knossos"          // Synced from knossos, unchanged
 	SourceDiverged SourceType = "knossos-diverged" // From knossos but locally modified
 	SourceUser     SourceType = "user"             // User-created, not from knossos
-
-	// Deprecated: Use SourceKnossos. Kept for manifest backward compatibility.
-	SourceRoster SourceType = "roster"
 )
-
-// NormalizeSource maps legacy source values to current ones.
-// This enables reading manifests written by older versions.
-func NormalizeSource(s SourceType) SourceType {
-	switch s {
-	case "roster":
-		return SourceKnossos
-	case "roster-diverged":
-		return SourceDiverged
-	default:
-		return s
-	}
-}
 
 // Options configures sync behavior.
 type Options struct {

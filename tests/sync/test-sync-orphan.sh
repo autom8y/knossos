@@ -8,13 +8,13 @@ set -euo pipefail
 
 # Test setup
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ROSTER_HOME="${ROSTER_HOME:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
+KNOSSOS_HOME="${KNOSSOS_HOME:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
 
 # Source dependencies
-source "$ROSTER_HOME/lib/sync/sync-config.sh"
-source "$ROSTER_HOME/lib/sync/sync-checksum.sh"
-source "$ROSTER_HOME/lib/sync/sync-manifest.sh"
-source "$ROSTER_HOME/lib/sync/sync-core.sh"
+source "$KNOSSOS_HOME/lib/sync/sync-config.sh"
+source "$KNOSSOS_HOME/lib/sync/sync-checksum.sh"
+source "$KNOSSOS_HOME/lib/sync/sync-manifest.sh"
+source "$KNOSSOS_HOME/lib/sync/sync-core.sh"
 
 # Test counters
 TESTS_RUN=0
@@ -23,7 +23,7 @@ TESTS_FAILED=0
 
 # Test temp directory
 TEST_TMP=""
-TEST_ROSTER_DIR=""
+TEST_KNOSSOS_DIR=""
 TEST_PROJECT_DIR=""
 
 # Test utilities
@@ -47,11 +47,11 @@ run_test() {
 
 setup() {
     TEST_TMP=$(mktemp -d)
-    TEST_ROSTER_DIR="$TEST_TMP/roster"
+    TEST_KNOSSOS_DIR="$TEST_TMP/knossos"
     TEST_PROJECT_DIR="$TEST_TMP/project"
 
-    # Create roster .claude directory (source)
-    mkdir -p "$TEST_ROSTER_DIR/.claude"
+    # Create knossos .claude directory (source)
+    mkdir -p "$TEST_KNOSSOS_DIR/.claude"
 
     # Create project .claude directory (satellite)
     mkdir -p "$TEST_PROJECT_DIR/.claude/.cem"
@@ -68,7 +68,7 @@ setup() {
     cd "$TEST_PROJECT_DIR"
 
     echo "Test temp dir: $TEST_TMP"
-    echo "Test roster: $TEST_ROSTER_DIR"
+    echo "Test knossos: $TEST_KNOSSOS_DIR"
     echo "Test project: $TEST_PROJECT_DIR"
 }
 
@@ -79,14 +79,14 @@ teardown() {
 
 create_test_manifest() {
     local manifest
-    manifest=$(create_manifest "$TEST_ROSTER_DIR" "test123" "main")
+    manifest=$(create_manifest "$TEST_KNOSSOS_DIR" "test123" "main")
     echo "$manifest"
 }
 
 # Clean test state between tests
 clean_test_state() {
-    # Remove all files in roster .claude/
-    rm -rf "$TEST_ROSTER_DIR/.claude/"*
+    # Remove all files in knossos .claude/
+    rm -rf "$TEST_KNOSSOS_DIR/.claude/"*
     # Remove all files in project .claude/ except .cem
     find "$TEST_PROJECT_DIR/.claude" -maxdepth 1 -type f -delete 2>/dev/null || true
     find "$TEST_PROJECT_DIR/.claude" -maxdepth 1 -type d ! -name ".claude" ! -name ".cem" -exec rm -rf {} + 2>/dev/null || true
@@ -104,8 +104,8 @@ test_detect_orphans_no_orphans() {
     run_test "detect_orphans with no orphans"
     clean_test_state
 
-    # Create file in both roster and project
-    echo "content" > "$TEST_ROSTER_DIR/.claude/COMMAND_REGISTRY.md"
+    # Create file in both knossos and project
+    echo "content" > "$TEST_KNOSSOS_DIR/.claude/COMMAND_REGISTRY.md"
     echo "content" > "$TEST_PROJECT_DIR/.claude/COMMAND_REGISTRY.md"
 
     # Create manifest with the file
@@ -116,20 +116,20 @@ test_detect_orphans_no_orphans() {
 
     # Detect orphans
     local orphans
-    orphans=$(detect_orphans "$TEST_ROSTER_DIR/.claude")
+    orphans=$(detect_orphans "$TEST_KNOSSOS_DIR/.claude")
 
     if [[ -z "$orphans" ]]; then
-        test_pass "no orphans detected when file exists in roster"
+        test_pass "no orphans detected when file exists in knossos"
     else
         test_fail "no orphans" "empty" "$orphans"
     fi
 }
 
 test_detect_orphans_finds_orphan() {
-    run_test "detect_orphans finds orphan when file removed from roster"
+    run_test "detect_orphans finds orphan when file removed from knossos"
     clean_test_state
 
-    # Create file only in project (not in roster)
+    # Create file only in project (not in knossos)
     echo "content" > "$TEST_PROJECT_DIR/.claude/COMMAND_REGISTRY.md"
 
     # Create manifest with the file
@@ -138,12 +138,12 @@ test_detect_orphans_finds_orphan() {
     manifest=$(add_managed_file "$manifest" ".claude/COMMAND_REGISTRY.md" "copy-replace" "abc123")
     write_manifest "$manifest"
 
-    # Detect orphans (file not in roster)
+    # Detect orphans (file not in knossos)
     local orphans
-    orphans=$(detect_orphans "$TEST_ROSTER_DIR/.claude")
+    orphans=$(detect_orphans "$TEST_KNOSSOS_DIR/.claude")
 
     if [[ "$orphans" == ".claude/COMMAND_REGISTRY.md" ]]; then
-        test_pass "orphan detected when file missing from roster"
+        test_pass "orphan detected when file missing from knossos"
     else
         test_fail "orphan detection" ".claude/COMMAND_REGISTRY.md" "$orphans"
     fi
@@ -165,7 +165,7 @@ test_detect_orphans_ignores_non_managed() {
 
     # Detect orphans
     local orphans
-    orphans=$(detect_orphans "$TEST_ROSTER_DIR/.claude")
+    orphans=$(detect_orphans "$TEST_KNOSSOS_DIR/.claude")
 
     # custom-file.txt with "satellite-only" strategy is not an orphan (not a managed strategy)
     if [[ -z "$orphans" ]]; then
@@ -192,7 +192,7 @@ test_detect_orphans_multiple() {
 
     # Detect orphans
     local orphans count
-    orphans=$(detect_orphans "$TEST_ROSTER_DIR/.claude")
+    orphans=$(detect_orphans "$TEST_KNOSSOS_DIR/.claude")
     count=$(echo "$orphans" | grep -c "." || true)
 
     if [[ "$count" -eq 2 ]]; then
@@ -387,8 +387,8 @@ test_has_orphans_returns_true() {
     manifest=$(add_managed_file "$manifest" ".claude/COMMAND_REGISTRY.md" "copy-replace" "abc123")
     write_manifest "$manifest"
 
-    # Check has_orphans (file not in roster)
-    if has_orphans "$TEST_ROSTER_DIR/.claude"; then
+    # Check has_orphans (file not in knossos)
+    if has_orphans "$TEST_KNOSSOS_DIR/.claude"; then
         test_pass "has_orphans returns true"
     else
         test_fail "has_orphans" "true" "false"
@@ -399,8 +399,8 @@ test_has_orphans_returns_false() {
     run_test "has_orphans returns false when no orphans"
     clean_test_state
 
-    # Create file in both roster and project
-    echo "content" > "$TEST_ROSTER_DIR/.claude/COMMAND_REGISTRY.md"
+    # Create file in both knossos and project
+    echo "content" > "$TEST_KNOSSOS_DIR/.claude/COMMAND_REGISTRY.md"
     echo "content" > "$TEST_PROJECT_DIR/.claude/COMMAND_REGISTRY.md"
 
     # Create manifest with the file
@@ -410,7 +410,7 @@ test_has_orphans_returns_false() {
     write_manifest "$manifest"
 
     # Check has_orphans
-    if ! has_orphans "$TEST_ROSTER_DIR/.claude"; then
+    if ! has_orphans "$TEST_KNOSSOS_DIR/.claude"; then
         test_pass "has_orphans returns false"
     else
         test_fail "has_orphans" "false" "true"
@@ -432,7 +432,7 @@ test_handle_orphans_reports_without_prune() {
 
     # Handle orphans without prune flag
     local exit_code=0
-    handle_orphans "$TEST_ROSTER_DIR/.claude" "0" "0" || exit_code=$?
+    handle_orphans "$TEST_KNOSSOS_DIR/.claude" "0" "0" || exit_code=$?
 
     if [[ "$exit_code" == "$EXIT_SYNC_ORPHAN_CONFLICTS" ]]; then
         test_pass "returns EXIT_SYNC_ORPHAN_CONFLICTS without prune"
@@ -463,7 +463,7 @@ test_handle_orphans_prunes_with_flag() {
 
     # Handle orphans with prune flag
     local exit_code=0
-    handle_orphans "$TEST_ROSTER_DIR/.claude" "1" "0" || exit_code=$?
+    handle_orphans "$TEST_KNOSSOS_DIR/.claude" "1" "0" || exit_code=$?
 
     if [[ "$exit_code" == "$EXIT_SYNC_SUCCESS" ]]; then
         test_pass "returns EXIT_SYNC_SUCCESS with prune"

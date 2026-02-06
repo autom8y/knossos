@@ -1,21 +1,21 @@
 #!/usr/bin/env bash
 #
-# test-swap-rite-integration.sh - Integration tests for swap-rite.sh with roster-sync
+# test-swap-rite-integration.sh - Integration tests for swap-rite.sh with knossos-sync
 #
 # Tests the waterfall sync pattern and manifest rite section updates per task-016:
-#   - --sync-first flag triggers roster-sync before rite apply
-#   - --auto-sync conditionally syncs if roster has updates
+#   - --sync-first flag triggers knossos-sync before rite apply
+#   - --auto-sync conditionally syncs if knossos has updates
 #   - manifest.json rite section updated on swap
 #   - No regression in existing swap-rite.sh behavior
 #
-# Part of: roster-sync integration (task-016)
+# Part of: knossos-sync integration (task-016)
 
 set -euo pipefail
 
 # Test setup
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ROSTER_HOME="${ROSTER_HOME:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
-export ROSTER_HOME
+KNOSSOS_HOME="${KNOSSOS_HOME:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
+export KNOSSOS_HOME
 
 # Test counters
 TESTS_RUN=0
@@ -78,8 +78,8 @@ create_test_manifest() {
     cat > "$TEST_PROJECT/.claude/.cem/manifest.json" << EOF
 {
     "schema_version": 3,
-    "roster": {
-        "path": "$ROSTER_HOME",
+    "knossos": {
+        "path": "$KNOSSOS_HOME",
         "commit": "$commit",
         "ref": "main",
         "last_sync": "2024-01-01T00:00:00Z"
@@ -91,9 +91,9 @@ create_test_manifest() {
 EOF
 }
 
-# Get current roster commit
+# Get current knossos commit
 get_current_commit() {
-    git -C "$ROSTER_HOME" rev-parse HEAD 2>/dev/null | head -c 7
+    git -C "$KNOSSOS_HOME" rev-parse HEAD 2>/dev/null | head -c 7
 }
 
 # ============================================================================
@@ -104,7 +104,7 @@ test_help_includes_new_flags() {
     run_test "Help includes --sync-first and --auto-sync flags"
 
     local output
-    output=$("$ROSTER_HOME/swap-rite.sh" --help 2>&1 || true)
+    output=$("$KNOSSOS_HOME/swap-rite.sh" --help 2>&1 || true)
 
     if echo "$output" | grep -q -- "--sync-first"; then
         test_pass "--sync-first flag in help"
@@ -120,60 +120,60 @@ test_help_includes_new_flags() {
 }
 
 # ============================================================================
-# Tests: roster_has_updates Function
+# Tests: knossos_has_updates Function
 # ============================================================================
 
-test_roster_has_updates_no_manifest() {
-    run_test "roster_has_updates returns true when no manifest exists"
+test_knossos_has_updates_no_manifest() {
+    run_test "knossos_has_updates returns true when no manifest exists"
     reset_test_project
 
     # Source the function we're testing
     cd "$TEST_PROJECT"
 
     # Source swap-rite.sh to get the function (won't execute main)
-    source "$ROSTER_HOME/swap-rite.sh" 2>/dev/null <<< "" || true
+    source "$KNOSSOS_HOME/swap-rite.sh" 2>/dev/null <<< "" || true
 
-    if roster_has_updates; then
+    if knossos_has_updates; then
         test_pass "Returns true (updates available) when no manifest"
     else
-        test_fail "roster_has_updates" "true (0)" "false (1)"
+        test_fail "knossos_has_updates" "true (0)" "false (1)"
     fi
 }
 
-test_roster_has_updates_stale_manifest() {
-    run_test "roster_has_updates returns true when manifest commit differs"
+test_knossos_has_updates_stale_manifest() {
+    run_test "knossos_has_updates returns true when manifest commit differs"
     reset_test_project
     create_test_manifest "old_commit_hash"
 
     cd "$TEST_PROJECT"
 
     # Source swap-rite.sh to get the function
-    source "$ROSTER_HOME/swap-rite.sh" 2>/dev/null <<< "" || true
+    source "$KNOSSOS_HOME/swap-rite.sh" 2>/dev/null <<< "" || true
 
-    if roster_has_updates; then
+    if knossos_has_updates; then
         test_pass "Returns true (updates available) with stale manifest"
     else
-        test_fail "roster_has_updates" "true (0)" "false (1)"
+        test_fail "knossos_has_updates" "true (0)" "false (1)"
     fi
 }
 
-test_roster_has_updates_current_manifest() {
-    run_test "roster_has_updates returns false when manifest matches current commit"
+test_knossos_has_updates_current_manifest() {
+    run_test "knossos_has_updates returns false when manifest matches current commit"
     reset_test_project
 
     local current_commit
-    current_commit=$(git -C "$ROSTER_HOME" rev-parse HEAD 2>/dev/null)
+    current_commit=$(git -C "$KNOSSOS_HOME" rev-parse HEAD 2>/dev/null)
     create_test_manifest "$current_commit"
 
     cd "$TEST_PROJECT"
 
     # Source swap-rite.sh to get the function
-    source "$ROSTER_HOME/swap-rite.sh" 2>/dev/null <<< "" || true
+    source "$KNOSSOS_HOME/swap-rite.sh" 2>/dev/null <<< "" || true
 
-    if ! roster_has_updates; then
+    if ! knossos_has_updates; then
         test_pass "Returns false (up to date) with current manifest"
     else
-        test_fail "roster_has_updates" "false (1)" "true (0)"
+        test_fail "knossos_has_updates" "false (1)" "true (0)"
     fi
 }
 
@@ -186,13 +186,13 @@ test_update_cem_manifest_rite_creates_rite_section() {
     reset_test_project
 
     local current_commit
-    current_commit=$(git -C "$ROSTER_HOME" rev-parse HEAD 2>/dev/null)
+    current_commit=$(git -C "$KNOSSOS_HOME" rev-parse HEAD 2>/dev/null)
     create_test_manifest "$current_commit"
 
     cd "$TEST_PROJECT"
 
     # Source swap-rite.sh
-    source "$ROSTER_HOME/swap-rite.sh" 2>/dev/null <<< "" || true
+    source "$KNOSSOS_HOME/swap-rite.sh" 2>/dev/null <<< "" || true
 
     # Call the function
     update_cem_manifest_rite "10x-dev"
@@ -218,14 +218,14 @@ test_update_cem_manifest_rite_creates_rite_section() {
             test_fail "last_refresh" "timestamp" "empty"
         fi
 
-        # Check roster_path is set
-        local roster_path
-        roster_path=$(jq -r '.rite.roster_path // empty' ".claude/.cem/manifest.json")
+        # Check knossos_path is set
+        local knossos_path
+        knossos_path=$(jq -r '.rite.knossos_path // empty' ".claude/.cem/manifest.json")
 
-        if [[ "$roster_path" == *"rites/10x-dev"* ]]; then
-            test_pass "roster_path set correctly"
+        if [[ "$knossos_path" == *"rites/10x-dev"* ]]; then
+            test_pass "knossos_path set correctly"
         else
-            test_fail "roster_path" "*rites/10x-dev*" "$roster_path"
+            test_fail "knossos_path" "*rites/10x-dev*" "$knossos_path"
         fi
     else
         test_fail "manifest exists" "true" "false"
@@ -242,7 +242,7 @@ test_update_cem_manifest_no_manifest() {
     cd "$TEST_PROJECT"
 
     # Source swap-rite.sh
-    source "$ROSTER_HOME/swap-rite.sh" 2>/dev/null <<< "" || true
+    source "$KNOSSOS_HOME/swap-rite.sh" 2>/dev/null <<< "" || true
 
     # Call the function - should not fail
     if update_cem_manifest_rite "10x-dev" 2>/dev/null; then
@@ -260,29 +260,29 @@ test_update_cem_manifest_no_manifest() {
 }
 
 # ============================================================================
-# Tests: roster_sync_available Function
+# Tests: knossos_sync_available Function
 # ============================================================================
 
-test_roster_sync_available() {
-    run_test "roster_sync_available returns true when roster-sync exists"
+test_knossos_sync_available() {
+    run_test "knossos_sync_available returns true when knossos-sync exists"
 
     cd "$TEST_PROJECT"
 
     # Source swap-rite.sh
-    source "$ROSTER_HOME/swap-rite.sh" 2>/dev/null <<< "" || true
+    source "$KNOSSOS_HOME/swap-rite.sh" 2>/dev/null <<< "" || true
 
-    if [[ -x "$ROSTER_HOME/roster-sync" ]]; then
-        if roster_sync_available; then
-            test_pass "Returns true when roster-sync is executable"
+    if [[ -x "$KNOSSOS_HOME/knossos-sync" ]]; then
+        if knossos_sync_available; then
+            test_pass "Returns true when knossos-sync is executable"
         else
-            test_fail "roster_sync_available" "true" "false"
+            test_fail "knossos_sync_available" "true" "false"
         fi
     else
-        # roster-sync doesn't exist yet
-        if ! roster_sync_available; then
-            test_pass "Returns false when roster-sync not found"
+        # knossos-sync doesn't exist yet
+        if ! knossos_sync_available; then
+            test_pass "Returns false when knossos-sync not found"
         else
-            test_fail "roster_sync_available" "false" "true"
+            test_fail "knossos_sync_available" "false" "true"
         fi
     fi
 }
@@ -296,7 +296,7 @@ test_existing_flags_still_work() {
 
     # Test --list works
     local output
-    output=$("$ROSTER_HOME/swap-rite.sh" --list 2>&1) || true
+    output=$("$KNOSSOS_HOME/swap-rite.sh" --list 2>&1) || true
 
     if echo "$output" | grep -q "Available rites"; then
         test_pass "--list flag works"
@@ -317,7 +317,7 @@ test_swap_without_new_flags() {
 
     # Dry-run swap to test the flow without actually swapping
     local output
-    output=$("$ROSTER_HOME/swap-rite.sh" "10x-dev" --dry-run 2>&1) || true
+    output=$("$KNOSSOS_HOME/swap-rite.sh" "10x-dev" --dry-run 2>&1) || true
 
     # Should show preview output, not an error about flags
     if echo "$output" | grep -qi "error.*sync\|unknown.*option"; then
@@ -333,22 +333,22 @@ test_swap_without_new_flags() {
 
 main() {
     echo "=========================================="
-    echo "swap-rite.sh + roster-sync Integration Tests"
+    echo "swap-rite.sh + knossos-sync Integration Tests"
     echo "=========================================="
     echo ""
-    echo "ROSTER_HOME: $ROSTER_HOME"
+    echo "KNOSSOS_HOME: $KNOSSOS_HOME"
     echo ""
 
     setup
 
     # Run tests
     test_help_includes_new_flags
-    test_roster_has_updates_no_manifest
-    test_roster_has_updates_stale_manifest
-    test_roster_has_updates_current_manifest
+    test_knossos_has_updates_no_manifest
+    test_knossos_has_updates_stale_manifest
+    test_knossos_has_updates_current_manifest
     test_update_cem_manifest_rite_creates_rite_section
     test_update_cem_manifest_no_manifest
-    test_roster_sync_available
+    test_knossos_sync_available
     test_existing_flags_still_work
     test_swap_without_new_flags
 
