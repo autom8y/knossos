@@ -134,7 +134,7 @@ Implement a three-phase deprecation timeline with explicit gates:
 
 **Actions**:
 1. Delete `.claude/hooks/.deprecated/` directory entirely
-2. Delete `roster/hooks/.deprecated/` if it exists
+2. Delete `knossos/hooks/.deprecated/` if it exists
 3. Archive MANIFEST.md to `docs/archive/` for historical reference
 4. Update this ADR status to "Implemented"
 
@@ -210,10 +210,10 @@ After Phase 2, this environment variable will have no effect:
 
 | Artifact | Absolute Path | Status |
 |----------|---------------|--------|
-| This ADR | `/Users/tomtenuta/Code/roster/docs/decisions/ADR-0011-hook-deprecation-timeline.md` | Created |
-| Deprecated hooks manifest | `/Users/tomtenuta/Code/roster/.claude/hooks/.deprecated/MANIFEST.md` | Existing |
-| New hooks configuration | `/Users/tomtenuta/Code/roster/.claude/hooks/ari/hooks.yaml` | Existing |
-| Related ADR (hooks architecture) | `/Users/tomtenuta/Code/roster/docs/decisions/ADR-0002-hook-library-resolution-architecture.md` | Existing |
+| This ADR | `/Users/tomtenuta/Code/knossos/docs/decisions/ADR-0011-hook-deprecation-timeline.md` | Created |
+| Deprecated hooks manifest | `/Users/tomtenuta/Code/knossos/.claude/hooks/.deprecated/MANIFEST.md` | Existing |
+| New hooks configuration | `/Users/tomtenuta/Code/knossos/.claude/hooks/ari/hooks.yaml` | Existing |
+| Related ADR (hooks architecture) | `/Users/tomtenuta/Code/knossos/docs/decisions/ADR-0002-hook-library-resolution-architecture.md` | Existing |
 
 ## Related Decisions
 

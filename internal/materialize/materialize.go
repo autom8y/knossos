@@ -806,20 +806,13 @@ func (m *Materializer) materializeCLAUDEmd(manifest *RiteManifest, claudeDir str
 	loader := inscription.NewManifestLoader(m.resolver.ProjectRoot())
 	loader.ManifestPath = knossosManifestPath
 
-	// Check if manifest exists before loading (for save decision later)
-	manifestExists := loader.Exists()
-
 	inscriptionManifest, err := loader.LoadOrCreate()
 	if err != nil {
 		return "", errors.Wrap(errors.CodeGeneralError, "failed to load or create KNOSSOS_MANIFEST.yaml", err)
 	}
 
-	// Save manifest if newly created (ensures it persists for future runs)
-	if !manifestExists {
-		if err := loader.Save(inscriptionManifest); err != nil {
-			return "", errors.Wrap(errors.CodeGeneralError, "failed to save KNOSSOS_MANIFEST.yaml", err)
-		}
-	}
+	// Update active rite in manifest from the incoming rite
+	inscriptionManifest.SetActiveRite(manifest.Name)
 
 	// Build render context
 	agents := make([]inscription.AgentInfo, 0, len(manifest.Agents))
@@ -885,6 +878,13 @@ func (m *Materializer) materializeCLAUDEmd(manifest *RiteManifest, claudeDir str
 	// Write CLAUDE.md
 	if err := os.WriteFile(claudeMdPath, []byte(mergeResult.Content), 0644); err != nil {
 		return "", errors.Wrap(errors.CodeGeneralError, "failed to write CLAUDE.md", err)
+	}
+
+	// Update manifest hashes from merge result, increment version, and save
+	merger.UpdateManifestHashes(mergeResult)
+	loader.IncrementVersion(inscriptionManifest)
+	if err := loader.Save(inscriptionManifest); err != nil {
+		return "", errors.Wrap(errors.CodeGeneralError, "failed to save KNOSSOS_MANIFEST.yaml", err)
 	}
 
 	return legacyBackupPath, nil
