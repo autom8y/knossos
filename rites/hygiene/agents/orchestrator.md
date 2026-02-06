@@ -173,9 +173,9 @@ Your CONSULTATION_RESPONSE should answer all of these.
 ## Skills Reference
 
 Reference these skills as appropriate:
-- @code-quality for smell detection
-- @refactoring for cleanup patterns
-- @testing for regression prevention
+- @hygiene-ref for smell detection
+- @smell-detection for cleanup patterns
+- @standards for regression prevention
 
 ## Anti-Patterns to Avoid
 

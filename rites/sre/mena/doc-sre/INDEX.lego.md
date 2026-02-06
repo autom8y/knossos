@@ -16,6 +16,9 @@ This skill provides templates for:
 - **Incident Management**: [Postmortem](#postmortem-template)
 - **Chaos Engineering**: [Chaos Experiment](#chaos-experiment-template), [Resilience Report](#resilience-report-template)
 - **Analytics**: [Tracking Plan](#tracking-plan-template)
+- **Infrastructure**: [Infrastructure Change](#infrastructure-change-template)
+- **Pipeline & Deployment**: [Pipeline Design](#pipeline-design-template)
+- **Communications**: [Incident Communication](#incident-communication-template)
 
 > **Note**: Technical Debt templates (Debt Ledger, Risk Matrix, Sprint Debt Packages) have moved to `@shared-templates` for cross-rite use.
 
@@ -376,6 +379,342 @@ The following templates have moved to `@shared-templates` for cross-rite use:
 
 ---
 
+## Infrastructure Change Template {#infrastructure-change-template}
+
+```markdown
+# Infrastructure Change: [System/Component]
+
+## Change Summary
+**Date**: [planned date]
+**Engineer**: [name]
+**Urgency**: [Standard / Expedited / Emergency]
+**Risk Level**: [Low / Medium / High / Critical]
+
+## Change Details
+
+### What's Changing
+[Description of infrastructure change]
+
+### Motivation
+[Why this change is needed]
+
+### Systems Affected
+| System | Component | Impact Level | Downtime Expected |
+|--------|-----------|--------------|-------------------|
+| [name] | [component] | [Low/Med/High] | [yes/no - duration] |
+
+## Pre-Change State
+[Current configuration, capacity, topology]
+
+## Post-Change State
+[Target configuration, capacity, topology]
+
+## Implementation Plan
+
+### Prerequisites
+- [ ] [Prerequisite 1]
+- [ ] [Prerequisite 2]
+
+### Change Steps
+1. [Step 1 with expected outcome]
+2. [Step 2 with expected outcome]
+3. [Step 3 with expected outcome]
+
+### Estimated Duration
+- Preparation: [time]
+- Execution: [time]
+- Verification: [time]
+- **Total**: [time]
+
+### Maintenance Window
+- Start: [date/time]
+- End: [date/time]
+- Timezone: [tz]
+
+## Risk Assessment
+
+### Risks
+| Risk | Likelihood | Impact | Mitigation |
+|------|------------|--------|------------|
+| [risk] | [Low/Med/High] | [description] | [how to prevent] |
+
+### Rollback Plan
+```
+[Step-by-step rollback procedure]
+[Include: how to detect need for rollback]
+[Include: time window for rollback decision]
+```
+
+### Abort Criteria
+- [Condition that triggers abort]
+- [Condition that triggers abort]
+
+## Testing & Verification
+
+### Pre-Change Validation
+- [ ] [Check 1]
+- [ ] [Check 2]
+
+### Post-Change Verification
+- [ ] [Verification 1]
+- [ ] [Verification 2]
+
+### Success Criteria
+- [Metric 1]: [expected value]
+- [Metric 2]: [expected value]
+
+## Communication Plan
+
+### Stakeholders
+- **Notify before**: [list]
+- **Notify during**: [list]
+- **Notify after**: [list]
+
+### Communication Template
+```
+Subject: [change summary]
+Start: [time]
+Expected impact: [description]
+```
+
+## Execution Log
+| Time | Action | Result | Notes |
+|------|--------|--------|-------|
+| [time] | [action] | [result] | [notes] |
+
+## Post-Change Review
+- Change successful: [yes/no]
+- Actual duration: [time]
+- Incidents triggered: [count]
+- Lessons learned: [list]
+```
+
+---
+
+## Pipeline Design Template {#pipeline-design-template}
+
+```markdown
+# Pipeline Design: [Pipeline Name]
+
+## Overview
+**Purpose**: [What this pipeline does]
+**Team**: [Owning team]
+**Status**: [Draft / In Review / Approved / Implemented]
+
+## Pipeline Summary
+
+### Trigger
+[What starts this pipeline - commit, schedule, manual, etc.]
+
+### Stages
+| Stage | Purpose | Duration | Failure Mode |
+|-------|---------|----------|--------------|
+| [name] | [description] | [time] | [what happens on fail] |
+
+### Artifacts
+- **Input**: [what pipeline consumes]
+- **Output**: [what pipeline produces]
+
+## Stage Details
+
+### Stage: [Name]
+**Purpose**: [Why this stage exists]
+
+**Steps**:
+1. [Step 1]
+2. [Step 2]
+3. [Step 3]
+
+**Success Criteria**: [What indicates success]
+**Failure Handling**: [What happens on failure]
+**Timeout**: [max duration]
+
+### Stage: [Name]
+[Repeat for each stage]
+
+## Environment & Infrastructure
+
+### Execution Environment
+- **Platform**: [Jenkins, GHA, GitLab, etc.]
+- **Agent Type**: [specs]
+- **Parallelism**: [max concurrent runs]
+- **Resource Limits**: [CPU, memory, disk]
+
+### Dependencies
+| Dependency | Type | Version | Purpose |
+|------------|------|---------|---------|
+| [tool/service] | [external/internal] | [version] | [why needed] |
+
+## Security & Compliance
+
+### Secrets Management
+| Secret | Storage | Rotation | Access Control |
+|--------|---------|----------|----------------|
+| [name] | [where] | [frequency] | [who can access] |
+
+### Compliance Requirements
+- [ ] [Requirement 1]
+- [ ] [Requirement 2]
+
+## Monitoring & Alerting
+
+### Metrics
+- Pipeline success rate
+- Average duration
+- Stage failure rate
+- Queue time
+
+### Alerts
+| Alert | Condition | Severity | Recipients |
+|-------|-----------|----------|------------|
+| [name] | [trigger] | [level] | [who to notify] |
+
+## Testing Strategy
+
+### Unit Tests
+[How stages are unit tested]
+
+### Integration Tests
+[How full pipeline is tested]
+
+### Rollout Plan
+1. [Phase 1 - e.g., test in dev]
+2. [Phase 2 - e.g., canary in staging]
+3. [Phase 3 - e.g., full rollout]
+
+## Disaster Recovery
+
+### Failure Scenarios
+| Scenario | Detection | Recovery | RTO |
+|----------|-----------|----------|-----|
+| [scenario] | [how to detect] | [how to recover] | [time] |
+
+### Rollback Procedure
+```
+[How to roll back to previous pipeline version]
+```
+
+## Cost Analysis
+- **Compute**: [estimated cost]
+- **Storage**: [estimated cost]
+- **External Services**: [estimated cost]
+- **Total Monthly**: [estimated total]
+
+## Open Questions
+- [ ] [Question 1]
+- [ ] [Question 2]
+
+## Approvals
+- **Engineering**: [name, date]
+- **Security**: [name, date]
+- **SRE**: [name, date]
+```
+
+---
+
+## Incident Communication Template {#incident-communication-template}
+
+```markdown
+# Incident Communication: SEV-[N]
+
+## Initial Notification
+
+**Subject**: [SEV-N] [Brief description]
+
+**Status**: INVESTIGATING / IDENTIFIED / MONITORING / RESOLVED
+
+**Detected**: [time]
+**Impact**: [description]
+**Affected users**: [estimate or "investigating"]
+**Services affected**: [list]
+
+**Current actions**: [what we're doing right now]
+
+**Next update**: [time] or when status changes
+
+---
+
+## Status Update Template
+
+**Time**: [timestamp]
+**Status**: [current status]
+
+**What we know**:
+- [Finding 1]
+- [Finding 2]
+
+**What we're doing**:
+- [Action 1]
+- [Action 2]
+
+**Impact**:
+- [Current impact assessment]
+- [Change from last update]
+
+**Next update**: [time]
+
+---
+
+## Resolution Notification
+
+**Subject**: [RESOLVED] [SEV-N] [Brief description]
+
+**Resolution time**: [time]
+**Total duration**: [hours/minutes]
+
+**Root cause** (brief): [one-sentence explanation]
+
+**Resolution**: [what fixed it]
+
+**Impact summary**:
+- Users affected: [final count]
+- Services affected: [list]
+- Duration: [time]
+
+**Follow-up**:
+- Postmortem: [link or ETA]
+- Action items: [count] tracked in [location]
+
+**Timeline**:
+| Time | Event |
+|------|-------|
+| [time] | [event] |
+
+---
+
+## Communication Guidelines
+
+### Severity-Based Frequency
+
+| Severity | Initial | Updates | Final |
+|----------|---------|---------|-------|
+| SEV-1 (Critical) | Immediate | Every 30 min | Immediate |
+| SEV-2 (High) | Within 15 min | Every 1 hour | Within 1 hour |
+| SEV-3 (Medium) | Within 1 hour | Every 4 hours | Within 4 hours |
+| SEV-4 (Low) | Within 4 hours | Daily | When resolved |
+
+### Channels
+- **Internal**: [Slack channel, email list]
+- **External**: [Status page, customer email]
+- **Stakeholders**: [Executive notification criteria]
+
+### Tone Guidelines
+- **Be clear**: Avoid jargon, explain technical terms
+- **Be honest**: Don't minimize or speculate
+- **Be timely**: Better to say "investigating" than go silent
+- **Be specific**: "3% of API requests" not "some users"
+- **Be empathetic**: Acknowledge impact on users
+
+### What NOT to Say
+- "Oops" or apologetic language in updates (save for final)
+- Root cause speculation without evidence
+- Blame (teams, vendors, systems)
+- Minimizing language ("just" or "only")
+- Promises without confidence ("will be fixed in 10 minutes")
+```
+
+---
+
 ## Usage Guidelines
 
 ### When to Use Which Template
@@ -386,6 +725,9 @@ The following templates have moved to `@shared-templates` for cross-rite use:
 **Chaos Experiment**: Before running any chaos engineering test
 **Resilience Report**: After series of chaos experiments to assess overall posture
 **Tracking Plan**: Before implementing new analytics events
+**Infrastructure Change**: Planning any infrastructure modification (scaling, migrations, config changes)
+**Pipeline Design**: Designing new CI/CD pipelines or major pipeline refactors
+**Incident Communication**: During active incidents to maintain consistent stakeholder updates
 
 > **For debt workflows**: Use `@shared-templates` for Debt Ledger, Risk Matrix, and Sprint Debt Packages templates.
 

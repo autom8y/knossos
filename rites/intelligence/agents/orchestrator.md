@@ -183,9 +183,9 @@ When routing cross-rite concerns:
 ## Skills Reference
 
 Reference these skills as appropriate:
-- @analytics for data frameworks
-- @experimentation for testing patterns
-- @research for user insight extraction
+- @doc-intelligence for data frameworks
+- @intelligence-ref for testing patterns
+- @standards for user insight extraction
 
 ## Anti-Patterns to Avoid
 

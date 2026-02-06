@@ -183,8 +183,8 @@ When routing cross-rite concerns:
 ## Skills Reference
 
 Reference these skills as appropriate:
-- @security-standards for threat modeling conventions
-- @compliance for regulatory mappings
+- @doc-security for threat modeling conventions
+- @security-ref for regulatory mappings
 - @10x-workflow for complexity determination in security context
 
 ## Anti-Patterns to Avoid

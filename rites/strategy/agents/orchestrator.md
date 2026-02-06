@@ -173,9 +173,9 @@ Your CONSULTATION_RESPONSE should answer all of these.
 ## Skills Reference
 
 Reference these skills as appropriate:
-- @market-research for analysis frameworks
-- @business-modeling for financial planning
-- @strategy for competitive positioning
+- @doc-strategy for analysis frameworks
+- @strategy-ref for financial planning
+- @standards for competitive positioning
 
 ## Anti-Patterns to Avoid
 

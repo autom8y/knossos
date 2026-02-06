@@ -166,9 +166,9 @@ Your CONSULTATION_RESPONSE should answer all of these.
 ## Skills Reference
 
 Reference these skills as appropriate:
-- @debt-management for triage frameworks
-- @risk-assessment for prioritization
-- @project-planning for execution roadmaps
+- @debt-ref for triage frameworks
+- @shared-templates for prioritization
+- @standards for execution roadmaps
 
 ## Anti-Patterns to Avoid
 

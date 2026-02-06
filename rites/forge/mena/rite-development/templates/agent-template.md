@@ -298,7 +298,7 @@ Reference these skills as appropriate:
 ```markdown
 ## Cross-Team Routing
 
-See `@shared/cross-rite-protocol` for handoff patterns to other teams.
+See `@cross-rite-handoff` for handoff patterns to other teams.
 
 [Optional: Common cross-rite scenarios specific to this agent]
 ```
@@ -515,7 +515,7 @@ If uncertain: Have someone outside the rite try to use the agent and note confus
 
 ## Cross-Team Routing
 
-See `@shared/cross-rite-protocol` for cross-rite patterns.
+See `@cross-rite-handoff` for cross-rite patterns.
 
 ## Anti-Patterns to Avoid
 

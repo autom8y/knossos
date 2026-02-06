@@ -130,7 +130,7 @@ Complete team implementations:
 - @documentation for artifact templates (PRD, TDD, ADR)
 - @standards for naming conventions and code patterns
 - @prompting for agent invocation patterns
-- **@consult-ref for ecosystem navigation** (MUST update when adding rites)
+- **consult for ecosystem navigation** (MUST update when adding rites)
 
 ---
 

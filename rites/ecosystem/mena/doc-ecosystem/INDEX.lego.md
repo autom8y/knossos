@@ -36,6 +36,7 @@ This skill provides templates for ecosystem-level documentation: CEM/satellite s
 |----------|---------|-------|
 | [Smell Report](templates/smell-report.md) | Code smell catalog and cleanup priorities | ecosystem-analyst |
 | [Refactoring Plan](templates/refactoring-plan.md) | Phased refactoring sequence | context-architect |
+| [Audit Report](templates/audit-report.md) | Quality signoff for completed refactoring | audit-lead |
 
 ## When to Use Each Template
 
@@ -45,7 +46,7 @@ This skill provides templates for ecosystem-level documentation: CEM/satellite s
 | Planning ecosystem change | Context Design |
 | Shipping breaking change | Migration Runbook |
 | Validating before release | Compatibility Report |
-| Cleaning up codebase | Smell Report + Refactoring Plan |
+| Cleaning up codebase | Smell Report + Refactoring Plan + Audit Report |
 
 ## Quality Gates Summary
 
@@ -57,6 +58,7 @@ This skill provides templates for ecosystem-level documentation: CEM/satellite s
 | **Compatibility Report** | All satellites tested, defects prioritized, recommendation justified |
 | **Smell Report** | Evidence-based, severity assigned, cleanup priority established |
 | **Refactoring Plan** | Phases sequenced by risk, invariants defined, commit scope clear |
+| **Audit Report** | All commits reviewed, regressions identified, quality verdict justified |
 
 ## Progressive Disclosure
 
@@ -69,6 +71,7 @@ This skill provides templates for ecosystem-level documentation: CEM/satellite s
 ### Hygiene Templates
 - [smell-report.md](templates/smell-report.md) - Code smell catalog template
 - [refactoring-plan.md](templates/refactoring-plan.md) - Phased cleanup template
+- [audit-report.md](templates/audit-report.md) - Quality signoff template
 
 ## Related Skills
 

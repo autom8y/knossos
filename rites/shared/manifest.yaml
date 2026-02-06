@@ -18,6 +18,7 @@ dromena: []
 
 legomena:
   - cross-rite-handoff
+  - orchestrator-templates
   - shared-templates
   - smell-detection
 

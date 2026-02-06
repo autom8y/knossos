@@ -173,9 +173,9 @@ Your CONSULTATION_RESPONSE should answer all of these.
 ## Skills Reference
 
 Reference these skills as appropriate:
-- @observability for monitoring patterns
-- @incident-response for runbook creation
-- @chaos-engineering for resilience testing
+- @doc-sre for monitoring patterns
+- @sre-ref for runbook creation
+- @standards for resilience testing
 
 ## Anti-Patterns to Avoid
 

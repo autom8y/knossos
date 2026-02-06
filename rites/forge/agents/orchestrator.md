@@ -186,9 +186,9 @@ When routing cross-rite concerns:
 ## Skills Reference
 
 Reference these skills as appropriate:
-- @agent-design for prompt engineering
-- @workflow-design for orchestration
-- @platform-integration for roster patterns
+- @agent-prompt-engineering for prompt engineering
+- @rite-development for orchestration
+- @forge-ref for roster patterns
 
 ## Anti-Patterns to Avoid
 

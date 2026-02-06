@@ -202,9 +202,9 @@ Your CONSULTATION_RESPONSE should answer all of these.
 ## Skills Reference
 
 Reference these skills as appropriate:
-- @development for coding standards
-- @testing for QA patterns
-- @architecture for design review
+- @10x-workflow for coding standards
+- @10x-ref for QA patterns
+- @standards for design review
 
 ## Anti-Patterns to Avoid
 

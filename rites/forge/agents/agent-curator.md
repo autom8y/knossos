@@ -201,7 +201,7 @@ If uncertain: Test the full discovery flow yourself before marking complete.
 ## Skills Reference
 
 Reference these skills as appropriate:
-- @consult-ref for Consultant patterns
+- consult for Consultant patterns
 - @rite-development for sync patterns
 - @documentation for document templates
 
