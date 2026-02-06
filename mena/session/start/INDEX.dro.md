@@ -4,6 +4,7 @@ description: Initialize a new work session
 argument-hint: <initiative> [--complexity=LEVEL] [--rite=PACK]
 allowed-tools: Bash, Read, Task
 model: opus
+disable-model-invocation: true
 ---
 
 ## Pre-computed Context

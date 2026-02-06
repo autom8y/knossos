@@ -52,10 +52,11 @@ type MenaFrontmatter struct {
 	Description string `yaml:"description"`
 
 	// Invocation Control
-	ArgumentHint string   `yaml:"argument-hint,omitempty"` // Only for dromena. Usage hint
-	Triggers     FlexibleStringSlice `yaml:"triggers,omitempty"`      // Auto-invocation keywords
-	AllowedTools FlexibleStringSlice `yaml:"allowed-tools,omitempty"` // Tool restrictions (only for dromena)
-	Model        string   `yaml:"model,omitempty"`         // Model selection (only for dromena)
+	ArgumentHint               string   `yaml:"argument-hint,omitempty"` // Only for dromena. Usage hint
+	Triggers                   FlexibleStringSlice `yaml:"triggers,omitempty"`      // Auto-invocation keywords
+	AllowedTools               FlexibleStringSlice `yaml:"allowed-tools,omitempty"` // Tool restrictions (only for dromena)
+	Model                      string   `yaml:"model,omitempty"`         // Model selection (only for dromena)
+	DisableModelInvocation     bool     `yaml:"disable-model-invocation,omitempty"` // Prevent Claude from auto-invoking (side-effect commands)
 
 	// Optional Metadata
 	Version      string `yaml:"version,omitempty"`       // Semantic version for tracking

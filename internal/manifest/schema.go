@@ -27,9 +27,8 @@ var schemaFS embed.FS
 
 // Schema names for different manifest types
 const (
-	SchemaManifest      = "manifest"
-	SchemaTeamManifest  = "team-manifest"
-	SchemaAgentManifest = "agent-manifest"
+	SchemaManifest     = "manifest"
+	SchemaTeamManifest = "team-manifest"
 )
 
 // SchemaValidator provides manifest schema validation.
@@ -97,8 +96,6 @@ func (v *SchemaValidator) Validate(m *Manifest, schemaName string, strict bool) 
 		validateManifestStructure(m.Content, result)
 	case SchemaTeamManifest:
 		validateTeamManifestStructure(m.Content, result)
-	case SchemaAgentManifest:
-		validateAgentManifestStructure(m.Content, result)
 	default:
 		// For unknown schemas, just check it's valid JSON (which it is if we loaded it)
 	}
@@ -166,47 +163,6 @@ func validateTeamManifestStructure(content map[string]interface{}, result *Valid
 	}
 }
 
-// validateAgentManifestStructure checks required fields for agent manifest.
-func validateAgentManifestStructure(content map[string]interface{}, result *ValidationResult) {
-	// Check for version or manifest_version
-	hasVersion := false
-	if _, ok := content["version"]; ok {
-		hasVersion = true
-	}
-	if _, ok := content["manifest_version"]; ok {
-		hasVersion = true
-	}
-	if !hasVersion {
-		result.Issues = append(result.Issues, ValidationIssue{
-			Path:     "$.version",
-			Message:  "missing version or manifest_version field",
-			Severity: "error",
-		})
-	}
-
-	// Required: active_rite, agents, generated_at
-	if _, ok := content["active_rite"]; !ok {
-		result.Issues = append(result.Issues, ValidationIssue{
-			Path:     "$.active_rite",
-			Message:  "missing required field",
-			Severity: "error",
-		})
-	}
-	if _, ok := content["agents"]; !ok {
-		result.Issues = append(result.Issues, ValidationIssue{
-			Path:     "$.agents",
-			Message:  "missing required field",
-			Severity: "error",
-		})
-	}
-	if _, ok := content["generated_at"]; !ok {
-		result.Issues = append(result.Issues, ValidationIssue{
-			Path:     "$.generated_at",
-			Message:  "missing required field",
-			Severity: "error",
-		})
-	}
-}
 
 // isValidVersion checks if a version string matches X.Y format.
 func isValidVersion(v string) bool {
@@ -413,7 +369,6 @@ func DetectSchemaFromPath(path string) (string, error) {
 	}{
 		{regexp.MustCompile(`\.claude[/\\]manifest\.json$`), SchemaManifest},
 		{regexp.MustCompile(`teams[/\\][^/\\]+[/\\]manifest\.ya?ml$`), SchemaTeamManifest},
-		{regexp.MustCompile(`AGENT_MANIFEST\.json$`), SchemaAgentManifest},
 	}
 
 	for _, p := range patterns {
@@ -432,8 +387,6 @@ func DetectSchemaFromPath(path string) (string, error) {
 		if strings.Contains(dir, "teams") {
 			return SchemaTeamManifest, nil
 		}
-	case "AGENT_MANIFEST.json":
-		return SchemaAgentManifest, nil
 	}
 
 	return "", errors.NewWithDetails(errors.CodeSchemaNotFound,
@@ -450,8 +403,6 @@ func GetSchemaInfo(m *Manifest) (*SchemaInfo, error) {
 			if _, hasAgents := m.Content["agents"]; hasAgents {
 				if _, hasWorkflow := m.Content["workflow"]; hasWorkflow {
 					schemaName = SchemaTeamManifest
-				} else {
-					schemaName = SchemaAgentManifest
 				}
 			} else {
 				schemaName = SchemaManifest

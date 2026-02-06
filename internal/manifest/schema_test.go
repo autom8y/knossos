@@ -64,26 +64,6 @@ func TestValidate(t *testing.T) {
 			schemaName: manifest.SchemaTeamManifest,
 			wantValid:  false,
 		},
-		{
-			name: "valid agent manifest",
-			content: map[string]interface{}{
-				"version":      "1.0",
-				"active_rite":  "default",
-				"agents":       map[string]interface{}{},
-				"generated_at": "2026-01-04T12:00:00Z",
-			},
-			schemaName: manifest.SchemaAgentManifest,
-			wantValid:  true,
-		},
-		{
-			name: "invalid agent manifest - missing active_rite",
-			content: map[string]interface{}{
-				"version": "1.0",
-				"agents":  map[string]interface{}{},
-			},
-			schemaName: manifest.SchemaAgentManifest,
-			wantValid:  false,
-		},
 	}
 
 	for _, tt := range tests {
@@ -122,10 +102,6 @@ func TestDetectSchemaFromPath(t *testing.T) {
 		{
 			path:       "/project/teams/my-team/manifest.yml",
 			wantSchema: manifest.SchemaTeamManifest,
-		},
-		{
-			path:       "/project/.claude/AGENT_MANIFEST.json",
-			wantSchema: manifest.SchemaAgentManifest,
 		},
 		{
 			path:    "/random/file.json",

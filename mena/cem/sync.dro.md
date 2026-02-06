@@ -1,8 +1,10 @@
 ---
-description: Sync project with roster ecosystem using ari CLI
+name: sync
+description: Sync project with knossos ecosystem using ari CLI
 argument-hint: [status|pull|push|diff|materialize|resolve|history|reset] [--rite=NAME] [--force]
 allowed-tools: Bash, Read
 model: haiku
+disable-model-invocation: true
 ---
 
 ## Context
@@ -10,7 +12,7 @@ Auto-injected by SessionStart hook (project, team, session, git).
 
 ## Your Task
 
-Execute ari sync to synchronize project with roster ecosystem.
+Execute ari sync to synchronize project with knossos ecosystem.
 
 ## Behavior
 
@@ -25,14 +27,14 @@ Execute ari sync to synchronize project with roster ecosystem.
 **IMPORTANT - Interpret status output**:
 - If status shows **empty table** (just headers, no rows): Project is NOT configured. Tell user:
   > "Project not yet configured for Knossos sync. To set up, run one of:"
-  > - `ari sync materialize --rite=10x-dev` (within roster repo)
+  > - `ari sync materialize --rite=10x-dev` (within knossos repo)
   > - `ari sync materialize --rite=10x-dev --source=knossos` (consumer project)
   > - `ari sync materialize --minimal --source=knossos` (cross-cutting mode, no agents)
 - If status shows tracked paths: Report the actual status
 
 **Handle errors**:
 - If "no ACTIVE_RITE found": Suggest `ari sync materialize --rite=<name> --source=knossos` or `--minimal`
-- If ari not found: `cd ~/Code/roster && CGO_ENABLED=0 go install ./cmd/ari`
+- If ari not found: `cd ~/Code/knossos && CGO_ENABLED=0 go install ./cmd/ari`
 
 ## Command Mapping
 
@@ -52,7 +54,7 @@ Execute ari sync to synchronize project with roster ecosystem.
 ## Legacy Compatibility
 
 The following legacy commands are deprecated:
-- `roster-sync` shell script → Use `ari sync` instead
+- `knossos-sync` shell script → Use `ari sync` instead
 - `/sync init` → Use `ari sync materialize` for new projects
 - `/sync validate` → Use `ari manifest validate` instead
 - `/sync repair` → Use `ari sync reset` followed by `ari sync materialize`
@@ -60,7 +62,7 @@ The following legacy commands are deprecated:
 ## Common Commands
 
 ```bash
-# Within roster repo (has local rites)
+# Within knossos repo (has local rites)
 /sync                             # Show sync status (default)
 /sync status                      # Show sync status
 /sync materialize                 # Generate .claude/ from templates

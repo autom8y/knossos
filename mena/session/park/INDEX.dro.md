@@ -4,6 +4,7 @@ description: Pause work session and preserve state for later
 argument-hint: "[reason]"
 allowed-tools: Bash, Read, Write
 model: sonnet
+disable-model-invocation: true
 ---
 
 ## Context

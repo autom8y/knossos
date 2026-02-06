@@ -114,9 +114,9 @@ func (r *Resolver) ActiveWorkflowFile() string {
 	return filepath.Join(r.ClaudeDir(), "ACTIVE_WORKFLOW.yaml")
 }
 
-// AgentManifestFile returns the path to the AGENT_MANIFEST.json file.
-func (r *Resolver) AgentManifestFile() string {
-	return filepath.Join(r.ClaudeDir(), "AGENT_MANIFEST.json")
+// KnossosManifestFile returns the path to the KNOSSOS_MANIFEST.yaml file.
+func (r *Resolver) KnossosManifestFile() string {
+	return filepath.Join(r.ClaudeDir(), "KNOSSOS_MANIFEST.yaml")
 }
 
 // AgentsDir returns the path to the .claude/agents/ directory.

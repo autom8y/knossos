@@ -75,7 +75,6 @@ func (v *Validator) Validate(riteName string) (*ValidationResult, error) {
 	v.checkAgentsDir(result, rite)
 	v.checkWorkflowYAML(result, rite)
 	v.checkAgentFiles(result, rite)
-	v.checkManifestSync(result, rite)
 	v.checkClaudeMDSync(result, rite)
 	v.checkValidEntryPoint(result, rite)
 
@@ -198,65 +197,6 @@ func (v *Validator) checkAgentFiles(result *ValidationResult, rite *Rite) {
 	}
 }
 
-// checkManifestSync verifies AGENT_MANIFEST.json matches installed agents.
-func (v *Validator) checkManifestSync(result *ValidationResult, rite *Rite) {
-	// Only check if this is the active rite
-	if !rite.Active {
-		result.Checks = append(result.Checks, ValidationCheck{
-			Check:   "MANIFEST_SYNC",
-			Status:  CheckPass,
-			Message: "Skipped (rite not active)",
-		})
-		return
-	}
-
-	manifest, err := LoadAgentManifest(v.resolver.AgentManifestFile())
-	if err != nil {
-		result.Checks = append(result.Checks, ValidationCheck{
-			Check:   "MANIFEST_SYNC",
-			Status:  CheckWarn,
-			Message: "Could not load manifest: " + err.Error(),
-		})
-		result.Warnings++
-		result.Fixable = append(result.Fixable, "MANIFEST_SYNC")
-		return
-	}
-
-	// Check if manifest's active rite matches
-	if manifest.ActiveRite != rite.Name {
-		result.Checks = append(result.Checks, ValidationCheck{
-			Check:   "MANIFEST_SYNC",
-			Status:  CheckWarn,
-			Message: "Manifest active rite mismatch: " + manifest.ActiveRite,
-		})
-		result.Warnings++
-		result.Fixable = append(result.Fixable, "MANIFEST_SYNC")
-		return
-	}
-
-	// Check installed agents match manifest
-	agentsDir := v.resolver.AgentsDir()
-	installedFiles, _ := listAgentFiles(agentsDir)
-	manifestAgents := manifest.GetRiteAgents(rite.Name)
-
-	// Quick check for count mismatch
-	if len(installedFiles) != len(manifestAgents) {
-		result.Checks = append(result.Checks, ValidationCheck{
-			Check:   "MANIFEST_SYNC",
-			Status:  CheckWarn,
-			Message: "Installed agent count differs from manifest",
-		})
-		result.Warnings++
-		result.Fixable = append(result.Fixable, "MANIFEST_SYNC")
-		return
-	}
-
-	result.Checks = append(result.Checks, ValidationCheck{
-		Check:   "MANIFEST_SYNC",
-		Status:  CheckPass,
-		Message: "Manifest matches installed agents",
-	})
-}
 
 // checkClaudeMDSync verifies CLAUDE.md satellite sections match active rite.
 func (v *Validator) checkClaudeMDSync(result *ValidationResult, rite *Rite) {
@@ -341,15 +281,6 @@ func (v *Validator) Fix(riteName string) error {
 
 	for _, fixable := range result.Fixable {
 		switch fixable {
-		case "MANIFEST_SYNC":
-			// Regenerate manifest from current state
-			rite, err := v.discovery.Get(riteName)
-			if err != nil {
-				continue
-			}
-			if rite.Active {
-				// Would need to run switch --update
-			}
 		case "CLAUDE_MD_SYNC":
 			// Update CLAUDE.md satellites
 			rite, err := v.discovery.Get(riteName)
@@ -366,18 +297,3 @@ func (v *Validator) Fix(riteName string) error {
 	return nil
 }
 
-// listAgentFiles returns a list of agent filenames in a directory.
-func listAgentFiles(dir string) ([]string, error) {
-	entries, err := os.ReadDir(dir)
-	if err != nil {
-		return nil, err
-	}
-
-	var files []string
-	for _, entry := range entries {
-		if !entry.IsDir() && filepath.Ext(entry.Name()) == ".md" {
-			files = append(files, entry.Name())
-		}
-	}
-	return files, nil
-}

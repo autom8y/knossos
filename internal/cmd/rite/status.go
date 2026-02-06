@@ -8,9 +8,11 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/autom8y/knossos/internal/errors"
+	"github.com/autom8y/knossos/internal/inscription"
 	"github.com/autom8y/knossos/internal/output"
 	"github.com/autom8y/knossos/internal/paths"
 	ritelib "github.com/autom8y/knossos/internal/rite"
+	"gopkg.in/yaml.v3"
 )
 
 type statusOptions struct {
@@ -77,19 +79,22 @@ func runStatus(ctx *cmdContext, opts statusOptions) error {
 	// Build agent status list
 	agents := buildAgentStatusList(t, workflow, resolver)
 
-	// Check manifest validity
-	manifest, manifestErr := ritelib.LoadAgentManifest(resolver.AgentManifestFile())
-	manifestValid := manifestErr == nil && manifest.ActiveRite == riteName
+	// Check manifest validity (KNOSSOS_MANIFEST.yaml)
+	manifestValid := false
+	knossosManifestPath := filepath.Join(resolver.ClaudeDir(), "KNOSSOS_MANIFEST.yaml")
+	if data, err := os.ReadFile(knossosManifestPath); err == nil {
+		var manifest inscription.Manifest
+		if err := yaml.Unmarshal(data, &manifest); err == nil {
+			manifestValid = manifest.ActiveRite == riteName
+		}
+	}
 
 	// Check CLAUDE.md sync
 	updater := ritelib.NewClaudeMDUpdater(resolver.ClaudeMDFile())
 	claudeMDSynced := updater.IsSynced(riteName)
 
-	// Get orphans if any
+	// Orphans are now handled by materialization, not status command
 	var orphans []string
-	if manifestErr == nil {
-		orphans = manifest.DetectOrphans(riteName)
-	}
 
 	result := output.RiteStatusOutput{
 		Rite:           t.Name,

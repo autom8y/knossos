@@ -15,7 +15,6 @@ import (
 	"github.com/autom8y/knossos/internal/errors"
 	"github.com/autom8y/knossos/internal/materialize"
 	"github.com/autom8y/knossos/internal/paths"
-	"github.com/autom8y/knossos/internal/rite"
 )
 
 // SyncResult provides detailed status about worktree synchronization with upstream.
@@ -90,8 +89,8 @@ func (m *Manager) Switch(idOrName string, opts WorktreeSwitchOptions) (*Worktree
 		if err := os.MkdirAll(filepath.Dir(activeRitePath), 0755); err == nil {
 			os.WriteFile(activeRitePath, []byte(wt.Rite+"\n"), 0644)
 		}
-		// Then attempt full rite switch (best-effort, may fail if rite source unavailable)
-		m.switchRite(wt.Path, wt.Rite)
+		// Materialization handles the full rite setup; if needed, could call materialize here
+		// but for worktree restoration, just the ACTIVE_RITE marker is sufficient
 	}
 
 	return wt, nil
@@ -671,18 +670,6 @@ func (m *Manager) setupWorktreeEcosystem(wtPath, riteName string) {
 		KeepAll: true,
 	})
 
-	// Switch rite if specified
-	if riteName != "" && riteName != "none" {
-		m.switchRite(wtPath, riteName)
-	}
-}
-
-// switchRite switches the active rite for a worktree using the Go rite package.
-func (m *Manager) switchRite(wtPath, riteName string) {
-	resolver := paths.NewResolver(wtPath)
-	switcher := rite.NewSwitcher(resolver)
-	switcher.Switch(rite.RiteSwitchOptions{
-		TargetRite: riteName,
-		KeepAll:    true,
-	})
+	// Materialization now handles everything including ACTIVE_RITE file
+	// No separate switch operation needed
 }
