@@ -2,12 +2,9 @@
 package hook
 
 import (
-	"context"
 	"encoding/json"
-	"io"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/spf13/cobra"
 
@@ -129,61 +126,6 @@ func parseFilePath(printer *output.Printer, toolInput string) string {
 		return fp
 	}
 	return ""
-}
-
-// parseFilePathFromStdin reads JSON input from stdin with a timeout.
-func parseFilePathFromStdin(printer *output.Printer) string {
-	// Create a context with timeout for stdin read (50ms should be plenty for piped input)
-	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
-	defer cancel()
-
-	// Channel to receive read result
-	type readResult struct {
-		data []byte
-		err  error
-	}
-	resultCh := make(chan readResult, 1)
-
-	// Read stdin in a goroutine
-	go func() {
-		// Read stdin with a limit to prevent excessive memory usage
-		data, err := io.ReadAll(io.LimitReader(os.Stdin, 8192))
-		resultCh <- readResult{data: data, err: err}
-	}()
-
-	// Wait for either read completion or timeout
-	var data []byte
-	var err error
-	select {
-	case result := <-resultCh:
-		data = result.data
-		err = result.err
-	case <-ctx.Done():
-		// Timeout - stdin is likely not piped or hung
-		printer.VerboseLog("debug", "stdin read timed out (no piped input)", nil)
-		return ""
-	}
-
-	if err != nil || len(data) == 0 {
-		return ""
-	}
-
-	var input ToolInput
-	if err := json.Unmarshal(data, &input); err != nil {
-		// Try the map form
-		var mapInput map[string]interface{}
-		if err2 := json.Unmarshal(data, &mapInput); err2 != nil {
-			printer.VerboseLog("warn", "failed to parse stdin JSON",
-				map[string]interface{}{"error": err.Error(), "error2": err2.Error(), "data": string(data)})
-			return ""
-		}
-		if fp, ok := mapInput["file_path"].(string); ok {
-			return fp
-		}
-		return ""
-	}
-
-	return input.FilePath
 }
 
 // isProtectedFile checks if the file path matches a protected pattern.
