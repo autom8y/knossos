@@ -22,7 +22,7 @@ Before executing any session-lifecycle command, validation checks ensure the env
 
 **Implementation**:
 ```bash
-session_dir=$(session-manager.sh status | jq -r '.session_dir')
+session_dir=$(ari session status | jq -r '.session_dir')
 if [[ -z "$session_dir" || ! -d "$session_dir" ]]; then
   ERROR: No active session
 fi
@@ -45,7 +45,7 @@ Use /start to begin a new session.
 
 **Implementation**:
 ```bash
-session_dir=$(session-manager.sh status | jq -r '.session_dir')
+session_dir=$(ari session status | jq -r '.session_dir')
 if [[ -n "$session_dir" && -d "$session_dir" ]]; then
   ERROR: Session already exists
 fi
@@ -269,17 +269,17 @@ Review changes before continuing? [y/n]:
 
 ## Validation Helpers
 
-### session-manager.sh Functions
+### ari session Functions
 
 ```bash
 # Get session directory
-session-manager.sh status | jq -r '.session_dir'
+ari session status | jq -r '.session_dir'
 
 # Get session state
-session-manager.sh status | jq -r '.session_state'  # active | parked | none
+ari session status | jq -r '.session_state'  # active | parked | none
 
 # Get session metadata
-session-manager.sh status | jq -r '.{field}'
+ari session status | jq -r '.{field}'
 ```
 
 ### YAML Extraction
@@ -315,7 +315,7 @@ yq e 'has("{field}")' SESSION_CONTEXT.md
 # Full pre-flight for /park command
 
 # 1. Session exists
-session_dir=$(session-manager.sh status | jq -r '.session_dir')
+session_dir=$(ari session status | jq -r '.session_dir')
 [[ -z "$session_dir" ]] && error "No active session to park. Use /start."
 
 # 2. Session not already parked

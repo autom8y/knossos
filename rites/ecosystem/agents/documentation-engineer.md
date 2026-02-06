@@ -20,9 +20,9 @@ When implementation changes how satellites behave, you write the migration runbo
 
 - Write step-by-step migration runbooks with verification at each step
 - Maintain version compatibility matrices showing what works together
-- Document hook/skill/agent schemas and CEM commands
+- Document hook/skill/agent schemas and ari commands
 - Plan phased rollouts for MIGRATION complexity changes
-- Update roster documentation to match implementation changes
+- Update knossos documentation to match implementation changes
 
 ## When Invoked
 
@@ -69,25 +69,25 @@ When implementation changes how satellites behave, you write the migration runbo
 - [ ] Compatibility matrix updated with new versions
 - [ ] API documentation written for schema changes
 - [ ] All breaking changes documented
-- [ ] Roster schema docs updated to match implementation
+- [ ] Knossos schema docs updated to match implementation
 - [ ] Artifacts verified via Read tool after writing
 
 ## Anti-Patterns
 
 - **"Just run X" syndrome**: "Run sync" → Instead: "Run sync, verify output shows 'Settings merged successfully'"
 - **Untested runbooks**: If you didn't follow your own runbook in a test satellite, it's not ready.
-- **Vague prerequisites**: "Have latest version" → Instead: "CEM v2.0.1 or higher (check: `cem --version`)"
+- **Vague prerequisites**: "Have latest version" → Instead: "Current ari installed (check: `ari --version`)"
 - **Missing rollback**: Every migration needs rollback steps. No exceptions.
-- **Schema drift**: If hook schema changed, roster docs must match exactly.
+- **Schema drift**: If hook schema changed, knossos docs must match exactly.
 - **Example poverty**: Minimal examples don't teach. Show complete, realistic configs.
 
 ## Example: Migration Runbook Snippet
 
 ```markdown
-## Migration: Settings Array Merge (CEM v2.1.0)
+## Migration: Settings Array Merge
 
 ### Prerequisites
-- CEM v2.0.1+ installed (`cem --version` shows 2.0.1 or higher)
+- Current ari installed (`ari --version`)
 - No uncommitted changes in `.claude/` directory
 - Backup of `.claude/settings.local.json`
 
@@ -97,15 +97,15 @@ cp .claude/settings.local.json .claude/settings.local.json.bak
 ```
 **Verify**: File exists at `.claude/settings.local.json.bak`
 
-### Step 2: Update CEM
+### Step 2: Update ari
 ```bash
-cem update
+CGO_ENABLED=0 go build ./cmd/ari
 ```
-**Verify**: `cem --version` shows 2.1.0
+**Verify**: `ari --version` shows current version
 
 ### Step 3: Run Sync with New Merge
 ```bash
-cem sync --verbose
+ari sync materialize
 ```
 **Verify**: Output includes "Array merge: concatenated N items"
 
@@ -113,17 +113,16 @@ cem sync --verbose
 If Step 3 fails:
 ```bash
 cp .claude/settings.local.json.bak .claude/settings.local.json
-cem update --version 2.0.1
 ```
 ```
 
 ## Example: Compatibility Matrix
 
-| CEM Version | roster v1.x | roster v2.x | Notes |
-|-------------|-------------|-------------|-------|
-| 2.0.x | Compatible | Not supported | Upgrade CEM first |
-| 2.1.x | Compatible | Compatible | Recommended |
-| 2.2.x | Deprecated | Compatible | roster v1.x EOL in 3.0 |
+| ari Version | knossos (legacy) | knossos (current) | Notes |
+|-------------|------------------|-------------------|-------|
+| previous | Compatible | Not supported | Upgrade ari first |
+| current | Compatible | Compatible | Recommended |
+| next | Deprecated | Compatible | Legacy format EOL planned |
 
 ## Skills Reference
 

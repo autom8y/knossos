@@ -18,8 +18,8 @@ Switch to the ecosystem infrastructure rite and display the pantheon. $ARGUMENTS
 2. Display the ari output (agents and their roles)
 3. If SESSION_CONTEXT exists, update `active_rite` to `ecosystem`
 
-**Note**: If `ari` is not in PATH, use `~/bin/ari` or fall back to legacy:
-`${KNOSSOS_HOME:-~/Code/roster}/swap-rite.sh ecosystem $ARGUMENTS`
+**Note**: If `ari` is not in PATH, use `~/bin/ari` or build with:
+`CGO_ENABLED=0 go build -o ~/bin/ari ${KNOSSOS_HOME:-~/Code/knossos}/cmd/ari`
 
 ## Flags
 

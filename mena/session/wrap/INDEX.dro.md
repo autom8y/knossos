@@ -17,17 +17,14 @@ Complete the current work session with quality validation and archival. $ARGUMEN
 ## Session Resolution
 
 ```bash
-# Uses portable hash from session-manager
-TTY_HASH=$(hooks/lib/session-manager.sh tty-hash | grep -o '"tty_hash": "[^"]*"' | cut -d'"' -f4)
-SESSION_ID=$(cat ".claude/sessions/.tty-map/$TTY_HASH" 2>/dev/null)
-SESSION_DIR=".claude/sessions/$SESSION_ID"
+# ari handles session resolution internally
+ari session status -o json
 ```
 
 ## Pre-flight
 
-1. Verify TTY has an active session mapping
-2. Verify `$SESSION_DIR/SESSION_CONTEXT.md` exists
-3. Check for uncommitted git changes (warn if present)
+1. Verify an active session exists (`ari session status` succeeds)
+2. Check for uncommitted git changes (warn if present)
 
 ## Behavior
 
@@ -44,20 +41,18 @@ SESSION_DIR=".claude/sessions/$SESSION_ID"
    - Decisions made (from handoff notes)
    - Lessons learned
 
-3. **Execute atomic wrap mutation**:
+3. **Execute atomic wrap**:
    ```bash
-   ARCHIVE="true"
-   [[ "$1" == "--no-archive" ]] && ARCHIVE="false"
-   hooks/lib/session-manager.sh mutate wrap "$ARCHIVE"
+   ari session wrap
    ```
    This will:
    - Acquire lock to prevent race conditions
    - Create backup of SESSION_CONTEXT.md
    - Add completed_at timestamp to frontmatter
    - Archive session directory (unless --no-archive)
-   - Clear TTY mapping
+   - Clear session marker
    - Validate the result
-   - Log to audit trail (.claude/sessions/.audit/session-mutations.log)
+   - Log to audit trail
    - Rollback on failure
 
 4. **Display completion summary**:

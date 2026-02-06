@@ -198,7 +198,7 @@ Checks:
 Resolution:
 - Set KNOSSOS_HOME environment variable
 - Point to roster installation directory
-- Example: export KNOSSOS_HOME=~/Code/roster
+- Example: export KNOSSOS_HOME=~/Code/knossos
 
 Related: /help, /status
 ```

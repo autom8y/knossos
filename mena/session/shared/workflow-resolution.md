@@ -26,7 +26,7 @@ Commands that invoke agents or switch rites:
 
 2. If command specifies team change:
    a. Verify team exists in roster
-   b. Invoke swap-rite.sh
+   b. Invoke `ari sync materialize --rite <name>`
    c. Confirm ACTIVE_RITE updated
 
 3. For session operations, check consistency:

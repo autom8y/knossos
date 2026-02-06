@@ -95,7 +95,7 @@ Sessions move through a simple state machine with three primary states: **Active
 **Invalid Commands**:
 - All session-lifecycle commands (session no longer active)
 
-**Note**: Can view archived session via `session-manager.sh history`
+**Note**: Can view archived session via `ari session audit`
 
 ---
 
@@ -217,7 +217,7 @@ See: [state-mate Invocation Pattern](../shared-sections/moirai-invocation.md)
 Get current session state:
 
 ```bash
-session-manager.sh status | jq -r '.session_state'
+ari session status | jq -r '.session_state'
 # Returns: "active" | "parked" | "none"
 ```
 

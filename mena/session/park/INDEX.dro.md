@@ -16,40 +16,35 @@ Pause the current work session and save state for later resumption. $ARGUMENTS
 
 ## Session Resolution
 
-This terminal's session is resolved via TTY mapping:
+The current session is resolved automatically by `ari session` via the session marker:
 ```bash
-# Uses portable hash from session-manager
-TTY_HASH=$(hooks/lib/session-manager.sh tty-hash | grep -o '"tty_hash": "[^"]*"' | cut -d'"' -f4)
-SESSION_ID=$(cat ".claude/sessions/.tty-map/$TTY_HASH" 2>/dev/null)
-SESSION_DIR=".claude/sessions/$SESSION_ID"
-SESSION_FILE="$SESSION_DIR/SESSION_CONTEXT.md"
+# ari handles resolution internally
+ari session status -o json
 ```
 
 ## Pre-flight
 
-1. Verify TTY has an active session mapping
-2. Verify `$SESSION_DIR/SESSION_CONTEXT.md` exists
-3. Check session not already parked (no `parked_at` field)
+1. Verify an active session exists (`ari session status` succeeds)
+2. Check session is not already parked
 
 ## Behavior
 
 1. **Capture state**:
    - Current phase and last agent
-   - Artifacts produced so far (from `$SESSION_DIR/artifacts.log`)
+   - Artifacts produced so far
    - Git status (warn about uncommitted changes)
    - Open questions and blockers
 
-2. **Execute atomic park mutation**:
+2. **Execute atomic park**:
    ```bash
-   REASON="${1:-Manual park}"
-   hooks/lib/session-manager.sh mutate park "$REASON"
+   ari session park -r "Manual park"
    ```
    This will:
    - Acquire lock to prevent race conditions
    - Create backup of SESSION_CONTEXT.md
    - Add park metadata to frontmatter (parked_at, park_reason, git_status_at_park)
    - Validate the result
-   - Log to audit trail (.claude/sessions/.audit/session-mutations.log)
+   - Log to audit trail
    - Rollback on failure
 
 3. **Generate parking summary**:

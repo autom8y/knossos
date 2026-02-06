@@ -27,19 +27,19 @@ git rev-parse HEAD
 
 ### "Failed to initialize ecosystem in worktree"
 
-**Cause:** Roster sync scripts not found or failed.
+**Cause:** Knossos sync failed or ari not found.
 
 **Check:**
 - Is `$KNOSSOS_HOME` set correctly?
-- Do the sync scripts exist and are executable?
+- Is `ari` in PATH?
 
 **Fix:**
 ```bash
-# Verify roster exists
-ls -la $KNOSSOS_HOME/sync-user-agents.sh
+# Verify knossos exists
+ls -la $KNOSSOS_HOME/cmd/ari
 
-# Make executable if needed
-chmod +x $KNOSSOS_HOME/sync-*.sh
+# Build ari if needed
+CGO_ENABLED=0 go build -o ~/bin/ari $KNOSSOS_HOME/cmd/ari
 ```
 
 ### "Worktree has uncommitted changes"
@@ -75,7 +75,7 @@ cd worktrees/wt-{id} && claude
 cd worktrees/wt-{id}
 
 # Check session status
-.claude/hooks/lib/session-manager.sh status
+ari session status
 
 # Wrap or park the session
 /wrap
@@ -101,7 +101,7 @@ git worktree prune
 **Fix:**
 ```bash
 cd worktrees/wt-{id}
-./swap-rite.sh <pack-name>
+ari sync materialize --rite <pack-name>
 ```
 
 ## Diagnostic Commands
@@ -117,5 +117,5 @@ cat worktrees/wt-{id}/.claude/.worktree-meta.json
 cd worktrees/wt-{id} && cem status
 
 # Check session state
-cd worktrees/wt-{id} && .claude/hooks/lib/session-manager.sh status
+cd worktrees/wt-{id} && ari session status
 ```

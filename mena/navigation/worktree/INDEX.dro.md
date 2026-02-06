@@ -25,17 +25,17 @@ $ARGUMENTS
 
 ## Commands
 
-### create [name] [--rite=PACK] [--from=REF]
+### create [name] [--rite=NAME]
 
 Create a new isolated worktree:
 
 ```bash
-hooks/lib/worktree-manager.sh create "$NAME" --rite="$RITE"
+ari worktree create "<name>" --rite "<rite-name>"
 ```
 
 **What happens:**
 1. Creates git worktree with detached HEAD (no branch pollution)
-2. Initializes ecosystem (fresh sync from roster)
+2. Initializes ecosystem (fresh materialize from knossos)
 3. Sets rite if specified
 4. Creates initial session
 5. Returns path for user to `cd` into
@@ -49,18 +49,18 @@ hooks/lib/worktree-manager.sh create "$NAME" --rite="$RITE"
 Show all worktrees:
 
 ```bash
-hooks/lib/worktree-manager.sh list
+ari worktree list
 ```
 
 Display as table:
-| ID | Name | Team | Created | Session | Changes |
+| ID | Name | Rite | Created | Session | Changes |
 
 ### status [id]
 
 Detailed worktree info:
 
 ```bash
-hooks/lib/worktree-manager.sh status "$ID"
+ari worktree status "<id>"
 ```
 
 ### remove <id> [--force]
@@ -68,27 +68,19 @@ hooks/lib/worktree-manager.sh status "$ID"
 Remove a worktree:
 
 ```bash
-hooks/lib/worktree-manager.sh remove "$ID" [--force]
+ari worktree remove "<id>" --force
 ```
 
 **Pre-checks:**
 - Warn if uncommitted changes exist
 - Require --force to override
 
-### cleanup [--force]
+### cleanup [--older-than=7d]
 
 Remove stale worktrees (7+ days old, no changes):
 
 ```bash
-hooks/lib/worktree-manager.sh cleanup [--force]
-```
-
-### gc
-
-Garbage collect orphaned refs:
-
-```bash
-hooks/lib/worktree-manager.sh gc
+ari worktree cleanup --older-than=7d
 ```
 
 ## Examples
@@ -96,9 +88,6 @@ hooks/lib/worktree-manager.sh gc
 ```bash
 # Create worktree for auth sprint with 10x rite
 /worktree create "auth-sprint" --rite=10x-dev
-
-# Create worktree from specific branch
-/worktree create "hotfix" --from=release-1.2
 
 # List all worktrees
 /worktree list
@@ -123,7 +112,7 @@ hooks/lib/worktree-manager.sh gc
    claude
    ```
 
-3. Work in complete isolation (different team, sprint, session)
+3. Work in complete isolation (different rite, sprint, session)
 
 4. When done:
    ```

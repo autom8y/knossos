@@ -92,7 +92,10 @@ Key sections: `directive`, `specialist` (with prompt), `information_needed`, `us
         +----------+----------+
                    |
                    v
-              moonshot-architect
+            moonshot-architect
+                   |
+                   v
+             tech-transfer
 ```
 
 **Upstream**: User request, SessionStart hook context
@@ -122,6 +125,7 @@ Key sections: `directive`, `specialist` (with prompt), `information_needed`, `us
 | integration-researcher | Tech assessment complete, need dependency mapping |
 | prototype-engineer | Integration map complete, need feasibility validation |
 | moonshot-architect | Prototype complete, need long-term architecture |
+| tech-transfer | Architecture validated, need production handoff packaging |
 
 ## Behavioral Constraints (DO NOT)
 
@@ -129,7 +133,7 @@ Key sections: `directive`, `specialist` (with prompt), `information_needed`, `us
 **INSTEAD**: Request information in `information_needed` field.
 
 **DO NOT** say: "I'll create the PRD now..."
-**INSTEAD**: Return specialist prompt for Requirements Analyst.
+**INSTEAD**: Return specialist prompt for the appropriate specialist.
 
 **DO NOT** say: "Let me verify the tests pass..."
 **INSTEAD**: Define verification criteria for main agent to check.
@@ -151,6 +155,7 @@ Key sections: `directive`, `specialist` (with prompt), `information_needed`, `us
 | integration-analysis | - Integration map documents all dependencies<- POC scope defined with time box<- Risk areas for prototype identified< |
 | prototyping | - Working prototype demonstrates core capability<- Deliberate shortcuts documented<- Go/no-go recommendation provided< |
 | future-architecture | - Long-term architecture documented<- Migration path from prototype defined<- Future dependencies identified< |
+| tech-transfer | - Production requirements translated from prototype<- Productionization gaps identified<- Handoff artifacts packaged for implementation teams< |
 
 ## Handling Failures
 

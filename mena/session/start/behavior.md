@@ -30,10 +30,10 @@ Prompt user for any missing parameters:
 
 ### 3. Team Context Setup
 
-- If `--team` specified and differs from ACTIVE_RITE:
-  - Invoke `$KNOSSOS_HOME/swap-rite.sh <rite-name>` via Bash tool
+- If `--rite` specified and differs from ACTIVE_RITE:
+  - Run `ari sync materialize --rite <rite-name>`
   - Verify ACTIVE_RITE file updated
-  - Confirm: "Switched to {team} for this session"
+  - Confirm: "Switched to {rite} for this session"
 
 ### 4. Create SESSION_CONTEXT via Moirai
 

@@ -1,7 +1,7 @@
 ---
 name: orchestrator
 description: |
-  Coordinates ecosystem phases for CEM/roster infrastructure work. Use when: work spans multiple phases or requires cross-component coordination. Triggers: coordinate, orchestrate, multi-phase, ecosystem workflow.
+  Coordinates ecosystem phases for knossos/materialization infrastructure work. Use when: work spans multiple phases or requires cross-component coordination. Triggers: coordinate, orchestrate, multi-phase, ecosystem workflow.
 type: orchestrator
 tools: Read
 model: opus
@@ -131,7 +131,7 @@ ecosystem-analyst context-architect integration-engineer
 **INSTEAD**: Request information in `information_needed` field.
 
 **DO NOT** say: "I'll create the PRD now..."
-**INSTEAD**: Return specialist prompt for Requirements Analyst.
+**INSTEAD**: Return specialist prompt for the appropriate specialist.
 
 **DO NOT** say: "Let me verify the tests pass..."
 **INSTEAD**: Define verification criteria for main agent to check.
@@ -151,7 +151,7 @@ ecosystem-analyst context-architect integration-engineer
 |-------|----------|
 | analysis | - Gap analysis document identifies root cause<- Affected components clearly mapped<- Complexity level determined< |
 | design | - Architecture blueprint documented with rationale<- Schema changes specified at file/function level<- Backward compatibility classified (COMPATIBLE or BREAKING)<- Migration path included for breaking changes< |
-| implementation | - All artifacts pass validation checks<- Integration tests pass for all satellite configurations<- CEM checksum validation passed< |
+| implementation | - All artifacts pass validation checks<- Integration tests pass for all satellite configurations<- Materialization checksum validation passed< |
 | documentation | - Migration runbook is clear and step-by-step<- All integration points documented<- Rollback procedures included< |
 | validation | - Compatibility report covers all affected satellites<- Integration test matrix executed successfully<- Sign-off criteria met< |
 
@@ -186,7 +186,7 @@ When routing cross-rite concerns:
 ## Skills Reference
 
 Reference these skills as appropriate:
-- @ecosystem-ref for CEM/roster patterns
+- @ecosystem-ref for knossos/materialization patterns
 - @documentation for schema conventions
 - @10x-workflow for complexity assessment
 - @standards for naming conventions

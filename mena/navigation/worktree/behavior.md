@@ -16,8 +16,8 @@ Create a new isolated worktree with full ecosystem initialization.
 **What Happens:**
 1. Creates git worktree with detached HEAD (no branch pollution)
 2. Initializes ecosystem (fresh sync from roster)
-3. Sets rite if specified via swap-rite.sh
-4. Creates initial session via session-manager.sh
+3. Sets rite if specified via `ari sync materialize --rite <name>`
+4. Creates initial session via `ari session create`
 5. Returns path for user to `cd` into
 
 **Example:**
@@ -126,20 +126,16 @@ Each worktree stores metadata in `.claude/.worktree-meta.json`:
 
 ## Implementation Details
 
-### worktree-manager.sh
+### ari worktree
 
-Core script at `.claude/hooks/lib/worktree-manager.sh` (~250 lines).
+Worktree management via the `ari worktree` subcommands.
 
-**Functions:**
-- `generate_worktree_id()` - Creates unique ID: `wt-YYYYMMDD-HHMMSS-xxxx`
-- `ensure_worktrees_dir()` - Creates `worktrees/` with `.gitignore`
-- `is_worktree()` - Detects if in a worktree
-- `cmd_create()` - Full creation flow
-- `cmd_list()` - JSON listing with status
-- `cmd_status()` - Detailed info
-- `cmd_remove()` - Safe removal with change check
-- `cmd_cleanup()` - Stale worktree cleanup
-- `cmd_gc()` - Git worktree prune
+**Commands:**
+- `ari worktree create` - Full creation flow with unique ID: `wt-YYYYMMDD-HHMMSS-xxxx`
+- `ari worktree list` - JSON listing with status
+- `ari worktree status` - Detailed info
+- `ari worktree remove` - Safe removal with change check
+- `ari worktree cleanup` - Stale worktree cleanup and git worktree prune
 
 ### CEM Integration
 

@@ -62,12 +62,12 @@ If not provided in arguments, ask the user:
 ### 3. Create Session (ONE command)
 
 ```bash
-hooks/lib/session-manager.sh create "<initiative>" "<complexity>" "<rite>"
+ari session create "<initiative>" -c "<complexity>"
 ```
 
 This atomically:
-- Creates session directory
-- Maps TTY to session
+- Creates session directory with unique ID
+- Sets current session marker
 - Creates SESSION_CONTEXT.md
 - Returns JSON with session_id, entry_agent
 
@@ -77,9 +77,6 @@ If user specified `--rite=NAME` and it differs from Active Rite:
 ```bash
 ari sync materialize --rite <rite-name>
 ```
-
-**Note**: If `ari` is not in PATH, use `~/bin/ari` or fall back to legacy:
-`${ROSTER_HOME:-~/Code/roster}/swap-rite.sh <rite-name>`
 
 ### 5. Invoke Entry Point Agent
 

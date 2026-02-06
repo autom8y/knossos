@@ -101,7 +101,7 @@ Worktree Status
 Name:         billing-sprint
 Rite:         10x-dev
 
-Roster:       /Users/user/Code/roster
+Knossos:      /Users/user/Code/knossos
 ...
 ```
 

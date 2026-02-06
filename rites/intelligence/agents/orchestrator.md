@@ -129,7 +129,7 @@ Key sections: `directive`, `specialist` (with prompt), `information_needed`, `us
 **INSTEAD**: Request information in `information_needed` field.
 
 **DO NOT** say: "I'll create the PRD now..."
-**INSTEAD**: Return specialist prompt for Requirements Analyst.
+**INSTEAD**: Return specialist prompt for the appropriate specialist.
 
 **DO NOT** say: "Let me verify the tests pass..."
 **INSTEAD**: Define verification criteria for main agent to check.

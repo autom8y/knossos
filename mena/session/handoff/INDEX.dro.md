@@ -38,12 +38,10 @@ Hand off work to a different agent with full context transfer. $ARGUMENTS
    - Artifacts produced with locations
    - Determine FROM agent (from SESSION_CONTEXT last_agent or infer from current phase)
 
-3. **Execute atomic handoff mutation**:
-   ```bash
-   FROM_AGENT="requirements-analyst"  # Get from SESSION_CONTEXT
-   TO_AGENT="$1"
-   NOTES="${2:-Agent handoff}"
-   hooks/lib/session-manager.sh mutate handoff "$FROM_AGENT" "$TO_AGENT" "$NOTES"
+3. **Execute atomic handoff** via Moirai agent:
+   Use the Task tool to invoke the moirai agent for state mutation:
+   ```
+   Task(moirai, "handoff from <FROM_AGENT> to <TO_AGENT> with notes: <NOTES>")
    ```
    This will:
    - Acquire lock to prevent race conditions
@@ -52,7 +50,7 @@ Hand off work to a different agent with full context transfer. $ARGUMENTS
    - Increment handoff_count
    - Add handoff note to body (from → to, timestamp, notes)
    - Validate the result
-   - Log to audit trail (.claude/sessions/.audit/session-mutations.log)
+   - Log to audit trail
    - Rollback on failure
 
 4. **Invoke target agent** via Task tool:

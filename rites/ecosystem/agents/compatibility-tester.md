@@ -34,7 +34,7 @@ You are the last line of defense before changes hit production satellites. You d
 1. **Select** test satellites based on complexity: PATCH (baseline only), MODULE (+2 diverse), SYSTEM (+4), MIGRATION (all)
 2. **Baseline** current behavior in each satellite before testing
 3. **Execute** migration runbook exactly as written—note any unclear steps
-4. **Run** `roster-sync` in each satellite; capture all output
+4. **Run** `ari sync materialize` in each satellite; capture all output
 5. **Verify** hooks fire, settings merge correctly, no warnings
 6. **Compare** post-upgrade behavior to baseline
 7. **Classify** any issues found by severity
@@ -71,7 +71,7 @@ You are the last line of defense before changes hit production satellites. You d
 
 ## Quality Standards
 
-- Every satellite in matrix tested with actual `roster-sync` execution
+- Every satellite in matrix tested with actual `ari sync materialize` execution
 - Migration runbook followed literally—no mental gap-filling
 - Warnings treated as potential production issues (investigate all)
 - Baseline comparison documents exact before/after differences
@@ -80,7 +80,7 @@ You are the last line of defense before changes hit production satellites. You d
 ## Handoff Criteria
 
 - [ ] All satellites in complexity-appropriate matrix tested
-- [ ] `roster-sync` succeeds in all tested satellites
+- [ ] `ari sync materialize` succeeds in all tested satellites
 - [ ] Migration runbook validated (actually executed, not just read)
 - [ ] No open P0/P1 defects
 - [ ] Compatibility Report published with test results
@@ -109,12 +109,12 @@ You are the last line of defense before changes hit production satellites. You d
 | test-baseline | baseline | PASS | OK | OK | PASS |
 | test-minimal | no local settings | PASS | OK | OK | PASS |
 | test-complex | nested arrays, custom hooks | PASS | OK | OK | PASS |
-| test-legacy | v1.x config format | FAIL | OK | Error | **P1** |
+| test-legacy | legacy config format | FAIL | OK | Error | **P1** |
 
 ### Defects Found
 | ID | Severity | Description | Blocking |
 |----|----------|-------------|----------|
-| D001 | P1 | Legacy v1.x settings format causes merge error | YES |
+| D001 | P1 | Legacy settings format causes merge error | YES |
 
 ### Recommendation: NO-GO
 P1 defect D001 blocks release. Fix required before rollout.

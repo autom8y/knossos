@@ -22,12 +22,12 @@ model: opus
 Auto-injected by SessionStart hook (project, rite, session, git).
 
 **Active rite**: !`cat .claude/ACTIVE_RITE 2>/dev/null || echo "none"`
-**Available rites**: !`ls ${KNOSSOS_HOME:-~/Code/roster}/rites/ 2>/dev/null | tr '\n' ' '`
+**Available rites**: !`ls ${KNOSSOS_HOME:-~/Code/knossos}/rites/ 2>/dev/null | tr '\n' ' '`
 
 ## Pre-flight
 
 1. **Knowledge base accessible**:
-   - Verify `${KNOSSOS_HOME:-~/Code/roster}/rites/` exists
+   - Verify `${KNOSSOS_HOME:-~/Code/knossos}/rites/` exists
    - If missing: WARN "Roster not found at expected location."
 
 ## Your Task

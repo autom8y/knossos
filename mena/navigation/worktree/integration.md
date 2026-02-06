@@ -83,25 +83,24 @@ Worktree Status
 Name:         billing-sprint
 Rite:         10x-dev
 
-Roster:       /Users/user/Code/roster
+Knossos:      /Users/user/Code/knossos
 ...
 ```
 
 ### Worktree Functions
 
-Worktree functions in `worktree-manager.sh`:
-- `is_worktree()` - Detect worktree context
-- `get_worktree_info()` - Read metadata
-- `get_worktree_id()` - Extract ID from metadata
+Worktree functions via `ari worktree`:
+- `ari worktree status` - Detect worktree context and read metadata
+- `ari worktree list` - List all worktrees with metadata
 
 ## Rite Integration
 
-### swap-rite.sh
+### Rite Switching
 
 Works identically in worktrees:
 ```bash
 cd worktrees/wt-{id}
-./swap-rite.sh 10x-dev
+ari sync materialize --rite 10x-dev
 ```
 
 ### ACTIVE_RITE
