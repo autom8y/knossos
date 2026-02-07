@@ -1,6 +1,7 @@
 package materialize
 
 import (
+	"io/fs"
 	"os"
 	"sort"
 	"strings"
@@ -31,18 +32,18 @@ const ariHookPrefix = "ari hook"
 
 // loadHooksConfig finds and parses hooks.yaml from the knossos platform.
 // Resolution order:
-//  1. user-hooks/ari/hooks.yaml in $KNOSSOS_HOME
-//  2. user-hooks/ari/hooks.yaml in project root (for self-hosting)
+//  1. hooks/hooks.yaml in $KNOSSOS_HOME
+//  2. hooks/hooks.yaml in project root (for self-hosting)
 //
 // Returns nil if no hooks.yaml is found (graceful).
 func (m *Materializer) loadHooksConfig() *HooksConfig {
 	candidates := []string{
 		// Knossos platform level
-		config.KnossosHome() + "/user-hooks/ari/hooks.yaml",
+		config.KnossosHome() + "/hooks/hooks.yaml",
 	}
 	// Project-level fallback (for satellites that bundle hooks.yaml)
 	if m.resolver != nil {
-		candidates = append(candidates, m.resolver.ProjectRoot()+"/user-hooks/ari/hooks.yaml")
+		candidates = append(candidates, m.resolver.ProjectRoot()+"/hooks/hooks.yaml")
 	}
 
 	for _, path := range candidates {
@@ -65,11 +66,14 @@ func (m *Materializer) loadHooksConfig() *HooksConfig {
 	}
 
 	// Fallback: embedded hooks.yaml (compiled into binary)
-	if m.embeddedHooksYAML != nil {
-		var cfg HooksConfig
-		if err := yaml.Unmarshal(m.embeddedHooksYAML, &cfg); err == nil {
-			if cfg.SchemaVersion == "2.0" {
-				return &cfg
+	if m.embeddedHooks != nil {
+		data, err := fs.ReadFile(m.embeddedHooks, "hooks.yaml")
+		if err == nil {
+			var cfg HooksConfig
+			if err := yaml.Unmarshal(data, &cfg); err == nil {
+				if cfg.SchemaVersion == "2.0" {
+					return &cfg
+				}
 			}
 		}
 	}

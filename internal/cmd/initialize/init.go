@@ -142,7 +142,7 @@ func runInit(ctx *cmdContext, riteName, source string, force bool, cmd *cobra.Co
 	if embTemplates := common.EmbeddedTemplates(); embTemplates != nil {
 		mat.WithEmbeddedTemplates(embTemplates)
 	}
-	if embHooks := common.EmbeddedHooksYAML(); embHooks != nil {
+	if embHooks := common.EmbeddedHooks(); embHooks != nil {
 		mat.WithEmbeddedHooks(embHooks)
 	}
 

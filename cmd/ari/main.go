@@ -21,7 +21,7 @@ var (
 
 func main() {
 	root.SetVersion(version, commit, date)
-	common.SetEmbeddedAssets(knossos.EmbeddedRites, knossos.EmbeddedTemplates, knossos.EmbeddedHooksYAML)
+	common.SetEmbeddedAssets(knossos.EmbeddedRites, knossos.EmbeddedTemplates, knossos.EmbeddedHooks)
 	if err := root.Execute(); err != nil {
 		// Print error to stderr (SilenceErrors is enabled on root cmd)
 		fmt.Fprintln(os.Stderr, "Error:", err)

@@ -27,7 +27,7 @@ func NewAgentCmd(outputFlag *string, verboseFlag *bool, projectDir *string) *cob
 		Short: "Agent management commands",
 		Long: `Validate and manage agent specifications.
 
-Agent commands work with agent files in rites and user-agents directories.
+Agent commands work with agent files in rites and agents directories.
 Use these commands to validate agent frontmatter, list agents, and check
 agent compliance with the agent schema.`,
 	}

@@ -85,7 +85,7 @@ type Materializer struct {
 	ritesDir          string // Deprecated: use sourceResolver
 	templatesDir      string
 	embeddedTemplates fs.FS  // Embedded templates filesystem
-	embeddedHooksYAML []byte // Embedded hooks.yaml content
+	embeddedHooks     fs.FS  // Embedded hooks filesystem
 }
 
 // NewMaterializer creates a new materializer with default source resolution.
@@ -126,9 +126,9 @@ func (m *Materializer) WithEmbeddedTemplates(fsys fs.FS) *Materializer {
 	return m
 }
 
-// WithEmbeddedHooks sets the embedded hooks.yaml content.
-func (m *Materializer) WithEmbeddedHooks(data []byte) *Materializer {
-	m.embeddedHooksYAML = data
+// WithEmbeddedHooks sets the embedded hooks filesystem.
+func (m *Materializer) WithEmbeddedHooks(fsys fs.FS) *Materializer {
+	m.embeddedHooks = fsys
 	return m
 }
 
@@ -551,60 +551,26 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claud
 	})
 }
 
-// menaSource represents a source for mena files, which can be either
-// a filesystem path or an embedded FS path.
-type menaSource struct {
-	path       string // Filesystem path (for os-based sources)
-	fsys       fs.FS  // Embedded filesystem (nil for os-based sources)
-	fsysPath   string // Path within fsys (e.g., "rites/shared/mena")
-	isEmbedded bool
-}
-
-// menaCollectedEntry represents a leaf mena directory collected for routing.
-type menaCollectedEntry struct {
-	source menaSource
-	name   string
-}
-
-// menaStandaloneFile represents a standalone file in a grouping directory.
-type menaStandaloneFile struct {
-	srcPath string
-	relPath string // e.g., "navigation/rite.dro.md"
-}
-
 // materializeMena copies mena files to .claude/commands/ or .claude/skills/
 // based on the filename convention (.dro.md for dromena, .lego.md for legomena).
 // Sources: mena/, rites/{rite}/mena/, rites/shared/mena/
 // Priority order (later sources override earlier): mena < shared < dependencies < current rite
+//
+// This method builds the source list and delegates to ProjectMena() for the
+// actual collection, routing, extension stripping, and file copying.
 func (m *Materializer) materializeMena(manifest *RiteManifest, claudeDir string, resolved *ResolvedRite) error {
 	commandsDir := filepath.Join(claudeDir, "commands")
 	skillsDir := filepath.Join(claudeDir, "skills")
 
-	// Remove and recreate commands directory
-	if err := os.RemoveAll(commandsDir); err != nil && !os.IsNotExist(err) {
-		return err
-	}
-	if err := paths.EnsureDir(commandsDir); err != nil {
-		return err
-	}
-
-	// Remove and recreate skills directory (routing places legomena here)
-	if err := os.RemoveAll(skillsDir); err != nil && !os.IsNotExist(err) {
-		return err
-	}
-	if err := paths.EnsureDir(skillsDir); err != nil {
-		return err
-	}
-
 	isEmbedded := resolved != nil && resolved.Source.Type == SourceEmbedded && m.sourceResolver.embeddedFS != nil
 
-	// Priority order for sources (later sources can override earlier)
-	var sources []menaSource
+	// Build priority-ordered source list (later sources override earlier)
+	var sources []MenaSource
 
 	// 1. User-level mena (lowest priority, can be overridden)
 	// Always from filesystem, never from embedded
 	if menaDir := m.getMenaDir(); menaDir != "" {
-		sources = append(sources, menaSource{path: menaDir})
+		sources = append(sources, MenaSource{Path: menaDir})
 	}
 
 	if isEmbedded {
@@ -612,128 +578,44 @@ func (m *Materializer) materializeMena(manifest *RiteManifest, claudeDir string,
 		embFS := m.sourceResolver.embeddedFS
 
 		// 2. Shared rite mena
-		sources = append(sources, menaSource{fsys: embFS, fsysPath: "rites/shared/mena", isEmbedded: true})
+		sources = append(sources, MenaSource{Fsys: embFS, FsysPath: "rites/shared/mena", IsEmbedded: true})
 
 		// 3. Dependency rite mena (in order)
 		for _, dep := range manifest.Dependencies {
 			if dep != "shared" {
-				sources = append(sources, menaSource{fsys: embFS, fsysPath: "rites/" + dep + "/mena", isEmbedded: true})
+				sources = append(sources, MenaSource{Fsys: embFS, FsysPath: "rites/" + dep + "/mena", IsEmbedded: true})
 			}
 		}
 
 		// 4. Current rite mena (highest priority)
-		sources = append(sources, menaSource{fsys: embFS, fsysPath: "rites/" + manifest.Name + "/mena", isEmbedded: true})
+		sources = append(sources, MenaSource{Fsys: embFS, FsysPath: "rites/" + manifest.Name + "/mena", IsEmbedded: true})
 	} else {
 		// 2. Shared rite mena
 		sharedMenaDir := filepath.Join(m.ritesDir, "shared", "mena")
-		sources = append(sources, menaSource{path: sharedMenaDir})
+		sources = append(sources, MenaSource{Path: sharedMenaDir})
 
 		// 3. Dependency rite mena (in order)
 		for _, dep := range manifest.Dependencies {
 			if dep != "shared" {
-				sources = append(sources, menaSource{path: filepath.Join(m.ritesDir, dep, "mena")})
+				sources = append(sources, MenaSource{Path: filepath.Join(m.ritesDir, dep, "mena")})
 			}
 		}
 
 		// 4. Current rite mena (highest priority)
 		currentRiteMenaDir := filepath.Join(m.ritesDir, manifest.Name, "mena")
-		sources = append(sources, menaSource{path: currentRiteMenaDir})
+		sources = append(sources, MenaSource{Path: currentRiteMenaDir})
 	}
 
-	// Pass 1: Collect mena entries from all sources.
-	// Later sources override earlier ones for the same command name.
-	// Directories with INDEX files are leaf entries; directories without
-	// INDEX files are grouping directories that are recursively descended.
-	collected := make(map[string]menaCollectedEntry)
-	standalones := make(map[string]menaStandaloneFile) // key: relPath
-
-	for _, src := range sources {
-		if src.isEmbedded {
-			collectMenaEntriesFS(src.fsys, src.fsysPath, "", collected)
-		} else {
-			if src.path == "" {
-				continue
-			}
-			if _, err := os.Stat(src.path); os.IsNotExist(err) {
-				continue
-			}
-			if err := collectMenaEntriesDir(src.path, "", collected, standalones); err != nil {
-				return err
-			}
-		}
+	// Delegate to ProjectMena with destructive mode
+	opts := MenaProjectionOptions{
+		Mode:              MenaProjectionDestructive,
+		Filter:            ProjectAll,
+		TargetCommandsDir: commandsDir,
+		TargetSkillsDir:   skillsDir,
 	}
 
-	// Pass 2: Route each collected command directory by filename convention.
-	for name, ce := range collected {
-		menaType := "dro" // default: route to commands/
-
-		if ce.source.isEmbedded {
-			entries, err := fs.ReadDir(ce.source.fsys, ce.source.fsysPath)
-			if err == nil {
-				for _, entry := range entries {
-					if !entry.IsDir() && strings.HasPrefix(entry.Name(), "INDEX") {
-						menaType = DetectMenaType(entry.Name())
-						break
-					}
-				}
-			}
-		} else {
-			if entries, err := os.ReadDir(ce.source.path); err == nil {
-				for _, entry := range entries {
-					if !entry.IsDir() && strings.HasPrefix(entry.Name(), "INDEX") {
-						menaType = DetectMenaType(entry.Name())
-						break
-					}
-				}
-			}
-		}
-
-		var destDir string
-		if menaType == "dro" {
-			destDir = filepath.Join(commandsDir, name)
-		} else {
-			destDir = filepath.Join(skillsDir, name)
-		}
-
-		if ce.source.isEmbedded {
-			sub, err := fs.Sub(ce.source.fsys, ce.source.fsysPath)
-			if err != nil {
-				return err
-			}
-			if err := copyDirFromFS(sub, destDir); err != nil {
-				return err
-			}
-		} else {
-			if err := m.copyDir(ce.source.path, destDir); err != nil {
-				return err
-			}
-		}
-	}
-
-	// Copy standalone files (e.g., mena/navigation/rite.dro.md)
-	// Route by extension: .dro.md → commands/, .lego.md → skills/
-	for _, sf := range standalones {
-		menaType := DetectMenaType(filepath.Base(sf.srcPath))
-		var baseDir string
-		if menaType == "dro" {
-			baseDir = commandsDir
-		} else {
-			baseDir = skillsDir
-		}
-		destPath := filepath.Join(baseDir, sf.relPath)
-		if err := os.MkdirAll(filepath.Dir(destPath), 0755); err != nil {
-			return err
-		}
-		data, err := os.ReadFile(sf.srcPath)
-		if err != nil {
-			return err
-		}
-		if err := os.WriteFile(destPath, data, 0644); err != nil {
-			return err
-		}
-	}
-
-	return nil
+	_, err := ProjectMena(sources, opts)
+	return err
 }
 
 // collectMenaEntriesDir recursively collects mena entries from a filesystem directory.
@@ -753,7 +635,7 @@ func collectMenaEntriesDir(dirPath string, prefix string, collected map[string]m
 			childPath := filepath.Join(dirPath, entry.Name())
 			if dirHasIndexFile(childPath) {
 				collected[name] = menaCollectedEntry{
-					source: menaSource{path: childPath},
+					source: MenaSource{Path: childPath},
 					name:   name,
 				}
 			} else {
@@ -789,10 +671,10 @@ func collectMenaEntriesFS(fsys fs.FS, fsysPath string, prefix string, collected 
 		childPath := fsysPath + "/" + entry.Name()
 		if fsHasIndexFile(fsys, childPath) {
 			collected[name] = menaCollectedEntry{
-				source: menaSource{
-					fsys:       fsys,
-					fsysPath:   childPath,
-					isEmbedded: true,
+				source: MenaSource{
+					Fsys:       fsys,
+					FsysPath:   childPath,
+					IsEmbedded: true,
 				},
 				name: name,
 			}

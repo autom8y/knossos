@@ -20,9 +20,8 @@ func newUserAllCmd(ctx *cmdContext) *cobra.Command {
 
 Runs sync for all resource types in sequence:
   1. agents
-  2. skills
-  3. commands
-  4. hooks
+  2. mena (commands + skills)
+  3. hooks
 
 Behavior:
   - Failures in one resource type don't prevent syncing others
@@ -79,8 +78,7 @@ func runUserSyncAll(ctx *cmdContext, opts usersync.Options) error {
 
 	resourceTypes := []usersync.ResourceType{
 		usersync.ResourceAgents,
-		usersync.ResourceSkills,
-		usersync.ResourceCommands,
+		usersync.ResourceMena,
 		usersync.ResourceHooks,
 	}
 

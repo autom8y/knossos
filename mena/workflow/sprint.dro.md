@@ -35,7 +35,7 @@ Plan and execute a sprint with multiple coordinated tasks. $ARGUMENTS
 
    IMPORTANT: Use Write tool with YAML frontmatter format. The file MUST start with `---` on line 1.
 
-   See `sprint-context-schema.md` in roster/user-skills/session-common/ for required fields and validation rules.
+   See `session-common` skill (mena/session/common/) for required fields and validation rules.
 
    Required fields:
    - Sprint metadata (links to session)

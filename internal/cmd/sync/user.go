@@ -13,13 +13,12 @@ func newUserCmd(ctx *cmdContext) *cobra.Command {
 		Long: `Sync user-level resources from knossos to ~/.claude/.
 
 User resources are globally available across all projects.
-They are stored in ~/.claude/ and synced from $KNOSSOS_HOME/user-{type}/.
+They are stored in ~/.claude/ and synced from $KNOSSOS_HOME/{type}/.
 
 Resources:
-  agents    - Agent prompts (user-agents/ -> ~/.claude/agents/)
-  skills    - Skill references (user-skills/ -> ~/.claude/skills/)
-  commands  - Slash commands (mena/ -> ~/.claude/commands/)
-  hooks     - Hook scripts (user-hooks/ -> ~/.claude/hooks/)
+  agents  - Agent prompts (agents/ -> ~/.claude/agents/)
+  mena    - Commands and skills (mena/ -> ~/.claude/commands/ + skills/)
+  hooks   - Hook scripts (hooks/ -> ~/.claude/hooks/)
 
 Sync Behavior:
   - Additive: Never removes user-created content
@@ -32,15 +31,11 @@ Source Types:
   - user             Created by user, not from knossos`,
 	}
 
-	// Add subcommands
 	cmd.AddCommand(newUserAgentsCmd(ctx))
-	cmd.AddCommand(newUserSkillsCmd(ctx))
-	cmd.AddCommand(newUserCommandsCmd(ctx))
+	cmd.AddCommand(newUserMenaCmd(ctx))
 	cmd.AddCommand(newUserHooksCmd(ctx))
 	cmd.AddCommand(newUserAllCmd(ctx))
 
-	// User sync doesn't require a project directory
 	common.SetNeedsProject(cmd, false, false)
-
 	return cmd
 }

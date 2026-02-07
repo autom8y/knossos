@@ -73,7 +73,7 @@ func (r AllResult) Text() string {
 	b.WriteString("Syncing all user resources...\n\n")
 
 	// Resource summaries
-	order := []ResourceType{ResourceAgents, ResourceSkills, ResourceCommands, ResourceHooks}
+	order := []ResourceType{ResourceAgents, ResourceMena, ResourceHooks}
 	for _, rt := range order {
 		if result, ok := r.Resources[string(rt)]; ok {
 			b.WriteString(fmt.Sprintf("%s: %d added, %d updated, %d skipped, %d unchanged",

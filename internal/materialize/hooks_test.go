@@ -378,7 +378,7 @@ func TestIsAriManagedGroup(t *testing.T) {
 func TestLoadHooksConfig(t *testing.T) {
 	// Create a temp directory structure with hooks.yaml
 	tmpDir := t.TempDir()
-	hooksDir := filepath.Join(tmpDir, "user-hooks", "ari")
+	hooksDir := filepath.Join(tmpDir, "hooks")
 	if err := os.MkdirAll(hooksDir, 0755); err != nil {
 		t.Fatal(err)
 	}
@@ -423,7 +423,7 @@ hooks:
 
 func TestLoadHooksConfig_RejectsV1Schema(t *testing.T) {
 	tmpDir := t.TempDir()
-	hooksDir := filepath.Join(tmpDir, "user-hooks", "ari")
+	hooksDir := filepath.Join(tmpDir, "hooks")
 	os.MkdirAll(hooksDir, 0755)
 
 	// v1 schema (no command field, has path field)

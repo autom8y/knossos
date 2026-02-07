@@ -30,7 +30,7 @@ func TestCollisionChecker_CheckCollision(t *testing.T) {
 	checker := &CollisionChecker{
 		knossosHome:  tmpDir,
 		ritesDir:     filepath.Join(tmpDir, "rites"),
-		resourceType: ResourceCommands,
+		resourceType: ResourceMena,
 		nested:       true,
 	}
 
@@ -55,7 +55,7 @@ func TestCollisionChecker_EmptyKnossosHome(t *testing.T) {
 	checker := &CollisionChecker{
 		knossosHome:  "",
 		ritesDir:     "",
-		resourceType: ResourceCommands,
+		resourceType: ResourceMena,
 		nested:       true,
 	}
 
@@ -71,7 +71,7 @@ func TestCollisionChecker_NoRitesDir(t *testing.T) {
 	checker := &CollisionChecker{
 		knossosHome:  tmpDir,
 		ritesDir:     filepath.Join(tmpDir, "nonexistent-rites"),
-		resourceType: ResourceCommands,
+		resourceType: ResourceMena,
 		nested:       true,
 	}
 
@@ -128,7 +128,7 @@ func TestCollisionChecker_MultipleRites(t *testing.T) {
 	checker := &CollisionChecker{
 		knossosHome:  tmpDir,
 		ritesDir:     filepath.Join(tmpDir, "rites"),
-		resourceType: ResourceCommands,
+		resourceType: ResourceMena,
 		nested:       true,
 	}
 
@@ -162,7 +162,7 @@ func TestCollisionChecker_UsesRiteSubDir(t *testing.T) {
 	checker := &CollisionChecker{
 		knossosHome:  tmpDir,
 		ritesDir:     filepath.Join(tmpDir, "rites"),
-		resourceType: ResourceCommands,
+		resourceType: ResourceMena,
 		nested:       true,
 	}
 

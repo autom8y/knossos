@@ -13,7 +13,7 @@ func newUserHooksCmd(ctx *cmdContext) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "hooks",
 		Short: "Sync user hooks to ~/.claude/hooks/",
-		Long: `Sync hook files from knossos user-hooks/ to ~/.claude/hooks/.
+		Long: `Sync hook files from knossos hooks/ to ~/.claude/hooks/.
 
 Hooks have special handling:
   - lib/ directory: Recursive copy of shared libraries

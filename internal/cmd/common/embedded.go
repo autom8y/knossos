@@ -7,15 +7,15 @@ import "io/fs"
 var (
 	embeddedRites     fs.FS
 	embeddedTemplates fs.FS
-	embeddedHooksYAML []byte
+	embeddedHooks     fs.FS
 )
 
 // SetEmbeddedAssets stores embedded rite definitions, templates, and hooks
 // configuration for use by commands that create Materializers.
-func SetEmbeddedAssets(rites, templates fs.FS, hooks []byte) {
+func SetEmbeddedAssets(rites, templates, hooks fs.FS) {
 	embeddedRites = rites
 	embeddedTemplates = templates
-	embeddedHooksYAML = hooks
+	embeddedHooks = hooks
 }
 
 // EmbeddedRites returns the embedded rites filesystem, or nil if not set.
@@ -24,5 +24,5 @@ func EmbeddedRites() fs.FS { return embeddedRites }
 // EmbeddedTemplates returns the embedded templates filesystem, or nil if not set.
 func EmbeddedTemplates() fs.FS { return embeddedTemplates }
 
-// EmbeddedHooksYAML returns the embedded hooks.yaml content, or nil if not set.
-func EmbeddedHooksYAML() []byte { return embeddedHooksYAML }
+// EmbeddedHooks returns the embedded hooks filesystem, or nil if not set.
+func EmbeddedHooks() fs.FS { return embeddedHooks }

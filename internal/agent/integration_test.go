@@ -83,23 +83,23 @@ func TestAllRiteAgentSpecs(t *testing.T) {
 	}
 }
 
-// TestAllUserAgentSpecs validates user-agents/*.md parse correctly.
+// TestAllUserAgentSpecs validates agents/*.md parse correctly.
 func TestAllUserAgentSpecs(t *testing.T) {
 	root := projectRoot(t)
-	pattern := filepath.Join(root, "user-agents", "*.md")
+	pattern := filepath.Join(root, "agents", "*.md")
 
 	files, err := filepath.Glob(pattern)
 	if err != nil {
-		t.Fatalf("failed to glob user-agent files: %v", err)
+		t.Fatalf("failed to glob agent files: %v", err)
 	}
 
 	if len(files) == 0 {
-		t.Skip("no user-agent files found")
+		t.Skip("no agent files found")
 	}
 
-	t.Logf("Found %d user-agent files", len(files))
+	t.Logf("Found %d agent files", len(files))
 
-	// Known YAML issues in user-agents (pre-existing, not introduced by this change).
+	// Known YAML issues in agents (pre-existing, not introduced by this change).
 	// context-engineer.md has an unquoted description containing ": " which is invalid YAML.
 	knownBroken := map[string]string{
 		"context-engineer.md": "description field contains unquoted YAML mapping character (colon-space)",
@@ -111,7 +111,7 @@ func TestAllUserAgentSpecs(t *testing.T) {
 		rel, _ := filepath.Rel(root, path)
 		base := filepath.Base(path)
 		t.Run(rel, func(t *testing.T) {
-			// user-agents always use WARN mode (they may predate enhanced schema)
+			// agents always use WARN mode (they may predate enhanced schema)
 			result, err := av.ValidateAgentFile(path, ValidationModeWarn)
 			if err != nil {
 				t.Fatalf("validation error: %v", err)

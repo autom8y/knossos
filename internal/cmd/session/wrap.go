@@ -171,11 +171,11 @@ func runWrap(ctx *cmdContext, opts wrapOptions) error {
 
 	// Save context
 	// Note: This direct save bypasses the Moirai write guard by design.
-	// The write guard (user-hooks/session-guards/session-write-guard.sh) only
+	// The write guard (hooks/session-guards/session-write-guard.sh) only
 	// protects against Claude Code's Write/Edit tools via PreToolUse hooks.
 	// Native ariadne commands like `ari session wrap` are the authorized mutation
 	// path and bypass the guard through direct Go file I/O (os.WriteFile).
-	// See: user-hooks/session-guards/session-write-guard.sh lines 32-35
+	// See: hooks/session-guards/session-write-guard.sh lines 32-35
 	if err := sessCtx.Save(ctxPath); err != nil {
 		printer.PrintError(err)
 		return err

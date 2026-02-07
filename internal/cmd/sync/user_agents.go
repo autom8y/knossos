@@ -13,7 +13,7 @@ func newUserAgentsCmd(ctx *cmdContext) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "agents",
 		Short: "Sync user agents to ~/.claude/agents/",
-		Long: `Sync agent files from knossos user-agents/ to ~/.claude/agents/.
+		Long: `Sync agent files from knossos agents/ to ~/.claude/agents/.
 
 Behavior:
   - Adds new agents from knossos

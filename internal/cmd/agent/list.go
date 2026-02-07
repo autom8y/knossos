@@ -123,7 +123,7 @@ func determineSource(agentPath string, resolver *paths.Resolver) string {
 	}
 
 	// Check if it's a user agent
-	userAgentsDir := filepath.Join(projectRoot, "user-agents")
+	userAgentsDir := filepath.Join(projectRoot, "agents")
 	if filepath.HasPrefix(agentPath, userAgentsDir) {
 		return "user"
 	}

@@ -141,7 +141,7 @@ work_packages:
       - path: "hooks/lib/session-state.sh"
         action: modify
         description: "Add validate_session_context() function"
-      - path: "roster/user-skills/session-common/session-context-schema.md"
+      - path: "mena/session/common/session-context-schema.md"
         action: create
         description: "Document validation schema"
     estimated_effort: "2 hours"

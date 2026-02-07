@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/autom8y/knossos/internal/config"
+	"github.com/autom8y/knossos/internal/materialize"
 	"github.com/autom8y/knossos/internal/paths"
 )
 
@@ -14,10 +15,9 @@ import (
 type ResourceType string
 
 const (
-	ResourceAgents   ResourceType = "agents"
-	ResourceSkills   ResourceType = "skills"
-	ResourceCommands ResourceType = "commands"
-	ResourceHooks    ResourceType = "hooks"
+	ResourceAgents ResourceType = "agents"
+	ResourceMena   ResourceType = "mena" // Replaces ResourceSkills + ResourceCommands
+	ResourceHooks  ResourceType = "hooks"
 )
 
 // Singular returns the singular form of the resource type.
@@ -25,10 +25,8 @@ func (r ResourceType) Singular() string {
 	switch r {
 	case ResourceAgents:
 		return "agent"
-	case ResourceSkills:
-		return "skill"
-	case ResourceCommands:
-		return "command"
+	case ResourceMena:
+		return "mena"
 	case ResourceHooks:
 		return "hook"
 	default:
@@ -38,15 +36,21 @@ func (r ResourceType) Singular() string {
 
 // SourceDir returns the source directory name for the resource type.
 func (r ResourceType) SourceDir() string {
-	if r == ResourceCommands {
+	switch r {
+	case ResourceMena:
 		return "mena"
+	case ResourceAgents:
+		return "agents"
+	case ResourceHooks:
+		return "hooks"
+	default:
+		return string(r)
 	}
-	return "user-" + string(r)
 }
 
 // RiteSubDir returns the subdirectory name within rites for the resource type.
 func (r ResourceType) RiteSubDir() string {
-	if r == ResourceCommands {
+	if r == ResourceMena {
 		return "mena"
 	}
 	return string(r)
@@ -105,12 +109,14 @@ type Summary struct {
 
 // Syncer handles user resource synchronization.
 type Syncer struct {
-	resourceType     ResourceType
-	sourceDir        string
-	targetDir        string
-	manifestPath     string
-	collisionChecker *CollisionChecker
-	nested           bool // true for skills, commands, hooks
+	resourceType      ResourceType
+	sourceDir         string
+	targetDir         string // Used by agents, hooks (single target)
+	targetCommandsDir string // Used by mena (dromena target)
+	targetSkillsDir   string // Used by mena (legomena target)
+	manifestPath      string
+	collisionChecker  *CollisionChecker
+	nested            bool // true for mena, hooks
 }
 
 // NewSyncer creates a syncer for the given resource type.
@@ -131,22 +137,18 @@ func NewSyncer(resourceType ResourceType) (*Syncer, error) {
 
 	switch resourceType {
 	case ResourceAgents:
-		s.sourceDir = filepath.Join(knossosHome, "user-agents")
+		s.sourceDir = filepath.Join(knossosHome, "agents")
 		s.targetDir = filepath.Join(homeDir, ".claude", "agents")
 		s.manifestPath = filepath.Join(homeDir, ".claude", "USER_AGENT_MANIFEST.json")
 		s.nested = false
-	case ResourceSkills:
-		s.sourceDir = filepath.Join(knossosHome, "user-skills")
-		s.targetDir = filepath.Join(homeDir, ".claude", "skills")
-		s.manifestPath = filepath.Join(homeDir, ".claude", "USER_SKILL_MANIFEST.json")
-		s.nested = true
-	case ResourceCommands:
+	case ResourceMena:
 		s.sourceDir = filepath.Join(knossosHome, "mena")
-		s.targetDir = filepath.Join(homeDir, ".claude", "commands")
-		s.manifestPath = filepath.Join(homeDir, ".claude", "USER_COMMAND_MANIFEST.json")
+		s.targetCommandsDir = filepath.Join(homeDir, ".claude", "commands")
+		s.targetSkillsDir = filepath.Join(homeDir, ".claude", "skills")
+		s.manifestPath = filepath.Join(homeDir, ".claude", "USER_MENA_MANIFEST.json")
 		s.nested = true
 	case ResourceHooks:
-		s.sourceDir = filepath.Join(knossosHome, "user-hooks")
+		s.sourceDir = filepath.Join(knossosHome, "hooks")
 		s.targetDir = filepath.Join(homeDir, ".claude", "hooks")
 		s.manifestPath = filepath.Join(homeDir, ".claude", "USER_HOOKS_MANIFEST.json")
 		s.nested = true
@@ -161,9 +163,11 @@ func NewSyncer(resourceType ResourceType) (*Syncer, error) {
 }
 
 // NewSyncerWithPaths creates a syncer with explicit paths (for testing).
+// For ResourceMena, targetDir is used as the commands target directory.
+// Use NewMenaSyncerWithPaths for explicit dual-target testing.
 func NewSyncerWithPaths(resourceType ResourceType, sourceDir, targetDir, manifestPath string) *Syncer {
 	nested := resourceType != ResourceAgents
-	return &Syncer{
+	s := &Syncer{
 		resourceType:     resourceType,
 		sourceDir:        sourceDir,
 		targetDir:        targetDir,
@@ -171,16 +175,41 @@ func NewSyncerWithPaths(resourceType ResourceType, sourceDir, targetDir, manifes
 		collisionChecker: NewCollisionChecker(resourceType, nested),
 		nested:           nested,
 	}
+	if resourceType == ResourceMena {
+		s.targetCommandsDir = targetDir
+		s.targetSkillsDir = targetDir // For simple tests, both point to same dir
+		s.targetDir = ""              // Mena does not use single targetDir
+	}
+	return s
+}
+
+// NewMenaSyncerWithPaths creates a mena syncer with explicit dual-target paths (for testing).
+func NewMenaSyncerWithPaths(sourceDir, targetCommandsDir, targetSkillsDir, manifestPath string) *Syncer {
+	return &Syncer{
+		resourceType:      ResourceMena,
+		sourceDir:         sourceDir,
+		targetCommandsDir: targetCommandsDir,
+		targetSkillsDir:   targetSkillsDir,
+		manifestPath:      manifestPath,
+		collisionChecker:  NewCollisionChecker(ResourceMena, true),
+		nested:            true,
+	}
 }
 
 // Sync performs the synchronization operation.
 func (s *Syncer) Sync(opts Options) (*Result, error) {
+	// Determine target display string
+	target := s.targetDir
+	if s.resourceType == ResourceMena {
+		target = s.targetCommandsDir + " + " + s.targetSkillsDir
+	}
+
 	result := &Result{
 		SyncedAt: time.Now().UTC(),
 		Resource: s.resourceType,
 		DryRun:   opts.DryRun,
 		Source:   s.sourceDir,
-		Target:   s.targetDir,
+		Target:   target,
 		Changes: Changes{
 			Added:     []string{},
 			Updated:   []string{},
@@ -196,8 +225,17 @@ func (s *Syncer) Sync(opts Options) (*Result, error) {
 
 	// Ensure target directory exists
 	if !opts.DryRun {
-		if err := paths.EnsureDir(s.targetDir); err != nil {
-			return nil, ErrTargetCreateFailed(s.targetDir, err)
+		if s.resourceType == ResourceMena {
+			if err := paths.EnsureDir(s.targetCommandsDir); err != nil {
+				return nil, ErrTargetCreateFailed(s.targetCommandsDir, err)
+			}
+			if err := paths.EnsureDir(s.targetSkillsDir); err != nil {
+				return nil, ErrTargetCreateFailed(s.targetSkillsDir, err)
+			}
+		} else {
+			if err := paths.EnsureDir(s.targetDir); err != nil {
+				return nil, ErrTargetCreateFailed(s.targetDir, err)
+			}
 		}
 	}
 
@@ -225,6 +263,7 @@ func (s *Syncer) Sync(opts Options) (*Result, error) {
 		if err := s.saveManifest(manifest); err != nil {
 			return nil, err
 		}
+		s.cleanupOldManifests()
 	}
 
 	// Calculate summary
@@ -268,6 +307,18 @@ func (s *Syncer) syncFiles(manifest *Manifest, result *Result, opts Options) err
 			manifestKey = filepath.Base(relPath)
 		}
 
+		// For mena: strip extension from manifest key and route to correct target.
+		// Manifest keys use STRIPPED filenames (e.g., "commit/INDEX.md" not "commit/INDEX.dro.md").
+		var menaType, menaTarget string
+		if s.resourceType == ResourceMena {
+			dir := filepath.Dir(manifestKey)
+			base := materialize.StripMenaExtension(filepath.Base(manifestKey))
+			manifestKey = filepath.Join(dir, base)
+			// Use ORIGINAL filename for routing
+			menaType = materialize.DetectMenaType(filepath.Base(relPath))
+			menaTarget = materialize.RouteMenaFile(filepath.Base(relPath))
+		}
+
 		// Check for rite collision
 		if collision, riteName := s.collisionChecker.CheckCollision(manifestKey); collision {
 			result.Changes.Skipped = append(result.Changes.Skipped, SkippedEntry{
@@ -285,7 +336,17 @@ func (s *Syncer) syncFiles(manifest *Manifest, result *Result, opts Options) err
 
 		// Check existing manifest entry
 		entry, exists := manifest.Entries[manifestKey]
-		targetPath := filepath.Join(s.targetDir, manifestKey)
+
+		// Determine target path based on resource type and mena routing
+		targetBase := s.targetDir
+		if s.resourceType == ResourceMena {
+			if menaTarget == "commands" {
+				targetBase = s.targetCommandsDir
+			} else {
+				targetBase = s.targetSkillsDir
+			}
+		}
+		targetPath := filepath.Join(targetBase, manifestKey)
 
 		if !exists {
 			// New file - check if target exists (untracked)
@@ -300,6 +361,8 @@ func (s *Syncer) syncFiles(manifest *Manifest, result *Result, opts Options) err
 								Source:      SourceKnossos,
 								InstalledAt: result.SyncedAt,
 								Checksum:    sourceChecksum,
+								MenaType:    menaType,
+								Target:      menaTarget,
 							}
 						}
 						result.Changes.Unchanged = append(result.Changes.Unchanged, manifestKey)
@@ -310,6 +373,8 @@ func (s *Syncer) syncFiles(manifest *Manifest, result *Result, opts Options) err
 								Source:      SourceDiverged,
 								InstalledAt: result.SyncedAt,
 								Checksum:    targetChecksum,
+								MenaType:    menaType,
+								Target:      menaTarget,
 							}
 						}
 						result.Changes.Skipped = append(result.Changes.Skipped, SkippedEntry{
@@ -325,6 +390,8 @@ func (s *Syncer) syncFiles(manifest *Manifest, result *Result, opts Options) err
 						Source:      SourceUser,
 						InstalledAt: result.SyncedAt,
 						Checksum:    "",
+						MenaType:    menaType,
+						Target:      menaTarget,
 					}
 				}
 				result.Changes.Skipped = append(result.Changes.Skipped, SkippedEntry{
@@ -343,6 +410,8 @@ func (s *Syncer) syncFiles(manifest *Manifest, result *Result, opts Options) err
 					Source:      SourceKnossos,
 					InstalledAt: result.SyncedAt,
 					Checksum:    sourceChecksum,
+					MenaType:    menaType,
+					Target:      menaTarget,
 				}
 			}
 			result.Changes.Added = append(result.Changes.Added, manifestKey)
@@ -369,6 +438,8 @@ func (s *Syncer) syncFiles(manifest *Manifest, result *Result, opts Options) err
 						Source:      SourceKnossos,
 						InstalledAt: result.SyncedAt,
 						Checksum:    sourceChecksum,
+						MenaType:    menaType,
+						Target:      menaTarget,
 					}
 				}
 				result.Changes.Updated = append(result.Changes.Updated, manifestKey)
@@ -398,6 +469,8 @@ func (s *Syncer) syncFiles(manifest *Manifest, result *Result, opts Options) err
 							Source:      SourceKnossos,
 							InstalledAt: result.SyncedAt,
 							Checksum:    sourceChecksum,
+							MenaType:    menaType,
+							Target:      menaTarget,
 						}
 					}
 					result.Changes.Updated = append(result.Changes.Updated, manifestKey)
@@ -408,6 +481,8 @@ func (s *Syncer) syncFiles(manifest *Manifest, result *Result, opts Options) err
 							Source:      SourceDiverged,
 							InstalledAt: entry.InstalledAt,
 							Checksum:    targetChecksum,
+							MenaType:    menaType,
+							Target:      menaTarget,
 						}
 					}
 					result.Changes.Skipped = append(result.Changes.Skipped, SkippedEntry{
@@ -424,13 +499,26 @@ func (s *Syncer) syncFiles(manifest *Manifest, result *Result, opts Options) err
 
 // recover adopts existing target files that match knossos sources.
 func (s *Syncer) recover(manifest *Manifest, result *Result, opts Options) error {
+	if s.resourceType == ResourceMena {
+		// For mena, walk both commands and skills directories
+		if err := s.recoverDir(s.targetCommandsDir, "commands", manifest, result, opts); err != nil {
+			return err
+		}
+		return s.recoverDir(s.targetSkillsDir, "skills", manifest, result, opts)
+	}
+	return s.recoverDir(s.targetDir, "", manifest, result, opts)
+}
+
+// recoverDir walks a single target directory recovering untracked files.
+// For mena resources, menaTarget should be "commands" or "skills".
+func (s *Syncer) recoverDir(recoverDir, menaTarget string, manifest *Manifest, result *Result, opts Options) error {
 	// Check if target directory exists
-	if _, err := os.Stat(s.targetDir); os.IsNotExist(err) {
+	if _, err := os.Stat(recoverDir); os.IsNotExist(err) {
 		return nil // Nothing to recover
 	}
 
 	// Walk target directory looking for untracked files
-	return filepath.WalkDir(s.targetDir, func(path string, d os.DirEntry, err error) error {
+	return filepath.WalkDir(recoverDir, func(path string, d os.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
@@ -438,7 +526,7 @@ func (s *Syncer) recover(manifest *Manifest, result *Result, opts Options) error
 			return nil
 		}
 
-		relPath, _ := filepath.Rel(s.targetDir, path)
+		relPath, _ := filepath.Rel(recoverDir, path)
 		manifestKey := relPath
 		if !s.nested {
 			manifestKey = filepath.Base(relPath)
@@ -449,9 +537,28 @@ func (s *Syncer) recover(manifest *Manifest, result *Result, opts Options) error
 			return nil
 		}
 
-		// Check if source exists
+		// For mena, we need to find the source file which may have .dro or .lego infix.
+		// The target file has the stripped name; we must search for the original source.
 		sourcePath := filepath.Join(s.sourceDir, relPath)
-		if _, err := os.Stat(sourcePath); os.IsNotExist(err) {
+		var menaType string
+		if s.resourceType == ResourceMena {
+			// Try to find the source file with any mena extension
+			sourcePath, menaType = s.findMenaSource(relPath)
+			if sourcePath == "" {
+				// Not in knossos source - mark as user
+				if !opts.DryRun {
+					targetChecksum, _ := ComputeFileChecksum(path)
+					manifest.Entries[manifestKey] = Entry{
+						Source:      SourceUser,
+						InstalledAt: result.SyncedAt,
+						Checksum:    targetChecksum,
+						MenaType:    menaType,
+						Target:      menaTarget,
+					}
+				}
+				return nil
+			}
+		} else if _, err := os.Stat(sourcePath); os.IsNotExist(err) {
 			// Not in knossos - mark as user
 			if !opts.DryRun {
 				targetChecksum, _ := ComputeFileChecksum(path)
@@ -474,18 +581,54 @@ func (s *Syncer) recover(manifest *Manifest, result *Result, opts Options) error
 					Source:      SourceKnossos,
 					InstalledAt: result.SyncedAt,
 					Checksum:    sourceChecksum,
+					MenaType:    menaType,
+					Target:      menaTarget,
 				}
 			} else {
 				manifest.Entries[manifestKey] = Entry{
 					Source:      SourceDiverged,
 					InstalledAt: result.SyncedAt,
 					Checksum:    targetChecksum,
+					MenaType:    menaType,
+					Target:      menaTarget,
 				}
 			}
 		}
 
 		return nil
 	})
+}
+
+// findMenaSource locates the source file for a stripped manifest key.
+// It checks for .dro and .lego variants of the filename.
+// Returns the source path and detected mena type, or ("", "") if not found.
+func (s *Syncer) findMenaSource(strippedRelPath string) (string, string) {
+	dir := filepath.Dir(strippedRelPath)
+	base := filepath.Base(strippedRelPath)
+
+	// Try original path (no infix)
+	candidate := filepath.Join(s.sourceDir, strippedRelPath)
+	if _, err := os.Stat(candidate); err == nil {
+		return candidate, materialize.DetectMenaType(base)
+	}
+
+	// Try .dro variant: insert .dro before the last extension
+	ext := filepath.Ext(base)
+	nameNoExt := base[:len(base)-len(ext)]
+	droName := nameNoExt + ".dro" + ext
+	candidate = filepath.Join(s.sourceDir, dir, droName)
+	if _, err := os.Stat(candidate); err == nil {
+		return candidate, "dro"
+	}
+
+	// Try .lego variant
+	legoName := nameNoExt + ".lego" + ext
+	candidate = filepath.Join(s.sourceDir, dir, legoName)
+	if _, err := os.Stat(candidate); err == nil {
+		return candidate, "lego"
+	}
+
+	return "", ""
 }
 
 // copyFile copies a file preserving permissions.
@@ -539,8 +682,19 @@ func (s *Syncer) SourceDir() string {
 }
 
 // TargetDir returns the target directory path.
+// For ResourceMena, returns empty string (use TargetCommandsDir/TargetSkillsDir instead).
 func (s *Syncer) TargetDir() string {
 	return s.targetDir
+}
+
+// TargetCommandsDir returns the commands target directory (mena only).
+func (s *Syncer) TargetCommandsDir() string {
+	return s.targetCommandsDir
+}
+
+// TargetSkillsDir returns the skills target directory (mena only).
+func (s *Syncer) TargetSkillsDir() string {
+	return s.targetSkillsDir
 }
 
 // ManifestPath returns the manifest file path.

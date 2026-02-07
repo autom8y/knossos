@@ -133,7 +133,7 @@ func runMaterialize(ctx *cmdContext, riteName string, source string, opts materi
 	if embTemplates := common.EmbeddedTemplates(); embTemplates != nil {
 		m.WithEmbeddedTemplates(embTemplates)
 	}
-	if embHooks := common.EmbeddedHooksYAML(); embHooks != nil {
+	if embHooks := common.EmbeddedHooks(); embHooks != nil {
 		m.WithEmbeddedHooks(embHooks)
 	}
 

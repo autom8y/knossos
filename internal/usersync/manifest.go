@@ -8,7 +8,8 @@ import (
 )
 
 // ManifestVersion is the current manifest schema version.
-const ManifestVersion = "1.0"
+// Version 2.0 adds mena_type and target fields for ResourceMena entries.
+const ManifestVersion = "2.0"
 
 // Manifest represents a user resource manifest.
 type Manifest struct {
@@ -22,16 +23,17 @@ type Entry struct {
 	Source      SourceType `json:"source"`
 	InstalledAt time.Time  `json:"installed_at"`
 	Checksum    string     `json:"checksum"`
+	MenaType    string     `json:"mena_type,omitempty"` // "dro" or "lego" (mena entries only)
+	Target      string     `json:"target,omitempty"`     // "commands" or "skills" (mena entries only)
 }
 
-// manifestJSON is the on-disk manifest format (for backward compatibility).
+// manifestJSON is the on-disk manifest format.
 // The entry key varies by resource type.
 type manifestJSON struct {
-	Version  string            `json:"manifest_version"`
-	LastSync string            `json:"last_sync"`
+	Version  string               `json:"manifest_version"`
+	LastSync string               `json:"last_sync"`
 	Agents   map[string]entryJSON `json:"agents,omitempty"`
-	Skills   map[string]entryJSON `json:"skills,omitempty"`
-	Commands map[string]entryJSON `json:"commands,omitempty"`
+	Mena     map[string]entryJSON `json:"mena,omitempty"`
 	Hooks    map[string]entryJSON `json:"hooks,omitempty"`
 }
 
@@ -39,6 +41,8 @@ type entryJSON struct {
 	Source      string `json:"source"`
 	InstalledAt string `json:"installed_at"`
 	Checksum    string `json:"checksum"`
+	MenaType    string `json:"mena_type,omitempty"` // "dro" or "lego" (mena entries only)
+	Target      string `json:"target,omitempty"`     // "commands" or "skills" (mena entries only)
 }
 
 // loadManifest reads the manifest from disk.
@@ -68,6 +72,18 @@ func (s *Syncer) loadManifest() (*Manifest, error) {
 		}, nil
 	}
 
+	// Version mismatch: backup old manifest and start fresh.
+	// This handles migration from v1.0 to v2.0 manifests (wipe-and-resync per D10).
+	if mj.Version != ManifestVersion {
+		backupPath := s.manifestPath + ".v1-backup"
+		os.WriteFile(backupPath, data, 0644) // Best effort backup
+		return &Manifest{
+			Version:  ManifestVersion,
+			LastSync: time.Time{},
+			Entries:  make(map[string]Entry),
+		}, nil
+	}
+
 	// Convert to internal format
 	manifest := &Manifest{
 		Version: mj.Version,
@@ -83,10 +99,8 @@ func (s *Syncer) loadManifest() (*Manifest, error) {
 	switch s.resourceType {
 	case ResourceAgents:
 		entries = mj.Agents
-	case ResourceSkills:
-		entries = mj.Skills
-	case ResourceCommands:
-		entries = mj.Commands
+	case ResourceMena:
+		entries = mj.Mena
 	case ResourceHooks:
 		entries = mj.Hooks
 	}
@@ -95,6 +109,8 @@ func (s *Syncer) loadManifest() (*Manifest, error) {
 		entry := Entry{
 			Source:   SourceType(ej.Source),
 			Checksum: ej.Checksum,
+			MenaType: ej.MenaType,
+			Target:   ej.Target,
 		}
 		if t, err := time.Parse(time.RFC3339, ej.InstalledAt); err == nil {
 			entry.InstalledAt = t
@@ -124,6 +140,8 @@ func (s *Syncer) saveManifest(manifest *Manifest) error {
 			Source:      string(entry.Source),
 			InstalledAt: entry.InstalledAt.Format(time.RFC3339),
 			Checksum:    entry.Checksum,
+			MenaType:    entry.MenaType,
+			Target:      entry.Target,
 		}
 	}
 
@@ -131,10 +149,8 @@ func (s *Syncer) saveManifest(manifest *Manifest) error {
 	switch s.resourceType {
 	case ResourceAgents:
 		mj.Agents = entries
-	case ResourceSkills:
-		mj.Skills = entries
-	case ResourceCommands:
-		mj.Commands = entries
+	case ResourceMena:
+		mj.Mena = entries
 	case ResourceHooks:
 		mj.Hooks = entries
 	}
@@ -156,6 +172,25 @@ func (s *Syncer) saveManifest(manifest *Manifest) error {
 	}
 
 	return nil
+}
+
+// cleanupOldManifests removes legacy manifest files after a successful
+// unified mena manifest save. Only applies to ResourceMena.
+func (s *Syncer) cleanupOldManifests() {
+	if s.resourceType != ResourceMena {
+		return
+	}
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return
+	}
+	oldManifests := []string{
+		filepath.Join(homeDir, ".claude", "USER_COMMAND_MANIFEST.json"),
+		filepath.Join(homeDir, ".claude", "USER_SKILL_MANIFEST.json"),
+	}
+	for _, path := range oldManifests {
+		os.Remove(path) // Ignore errors -- they may not exist
+	}
 }
 
 // LoadManifest loads a manifest from a file path directly.

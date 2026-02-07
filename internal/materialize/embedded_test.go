@@ -189,13 +189,17 @@ func TestMaterializeAgents_FromEmbedded(t *testing.T) {
 	}
 }
 
-func TestEmbeddedHooksYAML_Fallback(t *testing.T) {
-	hooksYAML := []byte(`schema_version: "2.0"
+func TestEmbeddedHooks_Fallback(t *testing.T) {
+	hooksFS := fstest.MapFS{
+		"hooks.yaml": &fstest.MapFile{
+			Data: []byte(`schema_version: "2.0"
 hooks:
   - event: PreToolUse
     command: "ari hook writeguard --output json"
     priority: 3
-`)
+`),
+		},
+	}
 
 	tmpDir := t.TempDir()
 
@@ -206,7 +210,7 @@ hooks:
 
 	resolver := paths.NewResolver(tmpDir)
 	m := NewMaterializer(resolver)
-	m.embeddedHooksYAML = hooksYAML
+	m.embeddedHooks = hooksFS
 
 	cfg := m.loadHooksConfig()
 	if cfg == nil {
@@ -223,10 +227,10 @@ hooks:
 	}
 }
 
-func TestEmbeddedHooksYAML_FilesystemOverrides(t *testing.T) {
+func TestEmbeddedHooks_FilesystemOverrides(t *testing.T) {
 	// Create filesystem hooks.yaml at project level
 	tmpDir := t.TempDir()
-	hooksDir := filepath.Join(tmpDir, "user-hooks", "ari")
+	hooksDir := filepath.Join(tmpDir, "hooks")
 	os.MkdirAll(hooksDir, 0755)
 	os.WriteFile(filepath.Join(hooksDir, "hooks.yaml"), []byte(`schema_version: "2.0"
 hooks:
@@ -236,12 +240,16 @@ hooks:
 `), 0644)
 
 	// Set embedded hooks (different from filesystem)
-	embeddedHooks := []byte(`schema_version: "2.0"
+	embeddedHooksFS := fstest.MapFS{
+		"hooks.yaml": &fstest.MapFile{
+			Data: []byte(`schema_version: "2.0"
 hooks:
   - event: PreToolUse
     command: "ari hook embedded --output json"
     priority: 3
-`)
+`),
+		},
+	}
 
 	// Point KNOSSOS_HOME at nonexistent so only project-level is found
 	config.ResetKnossosHome()
@@ -250,7 +258,7 @@ hooks:
 
 	resolver := paths.NewResolver(tmpDir)
 	m := NewMaterializer(resolver)
-	m.embeddedHooksYAML = embeddedHooks
+	m.embeddedHooks = embeddedHooksFS
 
 	cfg := m.loadHooksConfig()
 	if cfg == nil {
@@ -308,15 +316,15 @@ func TestMaterializeMena_FromEmbedded(t *testing.T) {
 		t.Fatalf("materializeMena from embedded failed: %v", err)
 	}
 
-	// Verify dromena routed to commands/
-	cmdPath := filepath.Join(claudeDir, "commands", "my-cmd", "INDEX.dro.md")
+	// Verify dromena routed to commands/ with extension stripped
+	cmdPath := filepath.Join(claudeDir, "commands", "my-cmd", "INDEX.md")
 	if _, err := os.Stat(cmdPath); err != nil {
-		t.Errorf("Expected dromena at %s, got error: %v", cmdPath, err)
+		t.Errorf("Expected dromena at %s (stripped from INDEX.dro.md), got error: %v", cmdPath, err)
 	}
 
-	// Verify legomena routed to skills/
-	skillPath := filepath.Join(claudeDir, "skills", "shared-ref", "INDEX.lego.md")
+	// Verify legomena routed to skills/ with extension stripped
+	skillPath := filepath.Join(claudeDir, "skills", "shared-ref", "INDEX.md")
 	if _, err := os.Stat(skillPath); err != nil {
-		t.Errorf("Expected legomena at %s, got error: %v", skillPath, err)
+		t.Errorf("Expected legomena at %s (stripped from INDEX.lego.md), got error: %v", skillPath, err)
 	}
 }

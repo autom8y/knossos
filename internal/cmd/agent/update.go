@@ -258,8 +258,8 @@ func findAllAgentFiles(resolver interface{ ProjectRoot() string }) ([]string, er
 		paths = append(paths, ritePaths...)
 	}
 
-	// Find in user-agents/
-	userAgentsDir := filepath.Join(resolver.ProjectRoot(), "user-agents")
+	// Find in agents/
+	userAgentsDir := filepath.Join(resolver.ProjectRoot(), "agents")
 	userPaths, err := findAgentFilesInDir(userAgentsDir)
 	if err == nil {
 		paths = append(paths, userPaths...)

@@ -2,7 +2,7 @@
 // for single-binary distribution.
 //
 // This file exists at the module root so that //go:embed directives can
-// reference rites/, knossos/templates/, and user-hooks/ which are adjacent.
+// reference rites/, knossos/templates/, and hooks/ which are adjacent.
 // The package is imported by cmd/ari/main.go to wire embedded assets
 // into the CLI binary.
 package knossos
@@ -21,7 +21,7 @@ var EmbeddedRites embed.FS
 //go:embed knossos/templates
 var EmbeddedTemplates embed.FS
 
-// EmbeddedHooksYAML contains the hooks.yaml configuration.
+// EmbeddedHooks contains the hooks directory (hooks.yaml and scripts).
 //
-//go:embed user-hooks/ari/hooks.yaml
-var EmbeddedHooksYAML []byte
+//go:embed hooks
+var EmbeddedHooks embed.FS

@@ -32,7 +32,7 @@ Examples:
   ari agent validate                              # Validate all agents
   ari agent validate --rite ecosystem            # Validate agents in ecosystem rite
   ari agent validate --strict                    # Strict validation (requires enhanced fields)
-  ari agent validate user-agents/moirai.md       # Validate specific agent file
+  ari agent validate agents/moirai.md             # Validate specific agent file
   ari agent validate rites/*/agents/*.md         # Validate all rite agents
 
 Exit Codes:
@@ -45,7 +45,7 @@ Exit Codes:
 
 	cmd.Flags().StringVarP(&opts.riteName, "rite", "r", "", "Rite to validate (validates all agents in rite)")
 	cmd.Flags().BoolVar(&opts.strict, "strict", false, "Enable strict validation mode (requires enhanced fields)")
-	cmd.Flags().BoolVar(&opts.all, "all", false, "Validate all agents in all rites and user-agents")
+	cmd.Flags().BoolVar(&opts.all, "all", false, "Validate all agents in all rites and agents")
 
 	return cmd
 }
@@ -185,9 +185,9 @@ func collectAllAgents(resolver *paths.Resolver) ([]string, error) {
 		}
 	}
 
-	// Collect agents from user-agents
+	// Collect agents from agents/
 	projectRoot := resolver.ProjectRoot()
-	userAgentsDir := filepath.Join(projectRoot, "user-agents")
+	userAgentsDir := filepath.Join(projectRoot, "agents")
 	userPaths, err := collectAgentsInDir(userAgentsDir)
 	if err == nil {
 		allPaths = append(allPaths, userPaths...)
