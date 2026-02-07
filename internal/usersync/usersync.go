@@ -301,6 +301,14 @@ func (s *Syncer) syncFiles(manifest *Manifest, result *Result, opts Options) err
 			return err
 		}
 
+		// Scope filtering for mena resources
+		if s.resourceType == ResourceMena {
+			if scope := s.readMenaScope(path, relPath); scope == materialize.MenaScopeProject {
+				// Entry is project-only -- skip in usersync pipeline
+				return nil
+			}
+		}
+
 		// For flat resources, use just the filename
 		manifestKey := relPath
 		if !s.nested {
@@ -629,6 +637,32 @@ func (s *Syncer) findMenaSource(strippedRelPath string) (string, string) {
 	}
 
 	return "", ""
+}
+
+// readMenaScope determines the scope of a mena source file.
+// For INDEX files, reads frontmatter from the file itself.
+// For companion files (non-INDEX files in a leaf directory), reads
+// frontmatter from the sibling INDEX file (scope is directory-level per EC-4).
+// Returns MenaScopeBoth if no scope is set or on any parse failure.
+func (s *Syncer) readMenaScope(absPath, relPath string) materialize.MenaScope {
+	baseName := filepath.Base(relPath)
+
+	if strings.HasPrefix(baseName, "INDEX") {
+		// This IS the INDEX file -- parse its own frontmatter
+		fm := materialize.ReadMenaFrontmatterFromFile(absPath)
+		return fm.Scope
+	}
+
+	// Companion or standalone file -- check sibling INDEX first (EC-4: directory-level scope)
+	dir := filepath.Dir(absPath)
+	fm := materialize.ReadMenaFrontmatterFromDir(dir)
+	if fm.Scope != materialize.MenaScopeBoth {
+		return fm.Scope // Directory-level scope from INDEX takes precedence
+	}
+
+	// No INDEX-level scope -- check the file's own frontmatter (standalone files)
+	fm = materialize.ReadMenaFrontmatterFromFile(absPath)
+	return fm.Scope
 }
 
 // copyFile copies a file preserving permissions.

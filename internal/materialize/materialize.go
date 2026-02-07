@@ -610,6 +610,7 @@ func (m *Materializer) materializeMena(manifest *RiteManifest, claudeDir string,
 	opts := MenaProjectionOptions{
 		Mode:              MenaProjectionDestructive,
 		Filter:            ProjectAll,
+		PipelineScope:     MenaScopeProject, // Filter out scope:user entries
 		TargetCommandsDir: commandsDir,
 		TargetSkillsDir:   skillsDir,
 	}

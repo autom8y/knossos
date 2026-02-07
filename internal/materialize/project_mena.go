@@ -1,11 +1,14 @@
 package materialize
 
 import (
+	"bytes"
 	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"gopkg.in/yaml.v3"
 )
 
 // StripMenaExtension removes the .dro or .lego infix from a filename.
@@ -76,6 +79,11 @@ type MenaProjectionOptions struct {
 	Mode   MenaProjectionMode
 	Filter MenaFilter
 
+	// PipelineScope indicates which pipeline is calling ProjectMena().
+	// When set, entries whose scope excludes this pipeline are skipped.
+	// When empty (zero value), no scope filtering is applied (backward compat).
+	PipelineScope MenaScope
+
 	// TargetCommandsDir is the absolute path to the commands/ output directory.
 	TargetCommandsDir string
 
@@ -99,6 +107,106 @@ type menaCollectedEntry struct {
 type menaStandaloneFile struct {
 	srcPath string
 	relPath string // e.g., "navigation/rite.dro.md"
+}
+
+// scopeIncludesPipeline returns true if the entry's scope allows inclusion
+// in the given pipeline. Returns true when either value is the zero value
+// (MenaScopeBoth), providing backward compatibility for callers that do not
+// set PipelineScope and for entries that do not set scope.
+func scopeIncludesPipeline(entryScope, pipelineScope MenaScope) bool {
+	if pipelineScope == MenaScopeBoth {
+		return true // Caller did not set pipeline scope -- no filtering
+	}
+	if entryScope == MenaScopeBoth {
+		return true // Entry has no scope restriction
+	}
+	return entryScope == pipelineScope
+}
+
+// ReadMenaFrontmatterFromDir reads the INDEX file from a filesystem directory,
+// parses its YAML frontmatter, and returns the result.
+// Returns a zero-value MenaFrontmatter (scope="") if the INDEX file has no
+// frontmatter or if parsing fails (with a logged warning for parse failures).
+func ReadMenaFrontmatterFromDir(dirPath string) MenaFrontmatter {
+	entries, err := os.ReadDir(dirPath)
+	if err != nil {
+		return MenaFrontmatter{}
+	}
+	for _, entry := range entries {
+		if !entry.IsDir() && strings.HasPrefix(entry.Name(), "INDEX") {
+			data, err := os.ReadFile(filepath.Join(dirPath, entry.Name()))
+			if err != nil {
+				return MenaFrontmatter{}
+			}
+			return parseMenaFrontmatterBytes(data)
+		}
+	}
+	return MenaFrontmatter{}
+}
+
+// readMenaFrontmatterFromFS reads the INDEX file from an fs.FS path,
+// parses its YAML frontmatter, and returns the result. Unexported: only
+// used within the materialize package by ProjectMena() for embedded sources.
+// Returns a zero-value MenaFrontmatter (scope="") if the INDEX file has no
+// frontmatter or if parsing fails.
+func readMenaFrontmatterFromFS(fsys fs.FS, dirPath string) MenaFrontmatter {
+	entries, err := fs.ReadDir(fsys, dirPath)
+	if err != nil {
+		return MenaFrontmatter{}
+	}
+	for _, entry := range entries {
+		if !entry.IsDir() && strings.HasPrefix(entry.Name(), "INDEX") {
+			data, err := fs.ReadFile(fsys, dirPath+"/"+entry.Name())
+			if err != nil {
+				return MenaFrontmatter{}
+			}
+			return parseMenaFrontmatterBytes(data)
+		}
+	}
+	return MenaFrontmatter{}
+}
+
+// ReadMenaFrontmatterFromFile reads a standalone mena file and parses its
+// YAML frontmatter. Returns a zero-value MenaFrontmatter if no frontmatter
+// is present or parsing fails.
+func ReadMenaFrontmatterFromFile(filePath string) MenaFrontmatter {
+	data, err := os.ReadFile(filePath)
+	if err != nil {
+		return MenaFrontmatter{}
+	}
+	return parseMenaFrontmatterBytes(data)
+}
+
+// parseMenaFrontmatterBytes extracts YAML frontmatter from raw file bytes.
+// Returns a zero-value MenaFrontmatter if no frontmatter delimiters are found
+// or if YAML parsing fails. Parse failures are silent (the entry is treated
+// as unscoped per EC-7 in the PRD).
+func parseMenaFrontmatterBytes(data []byte) MenaFrontmatter {
+	if !bytes.HasPrefix(data, []byte("---\n")) && !bytes.HasPrefix(data, []byte("---\r\n")) {
+		return MenaFrontmatter{}
+	}
+
+	// Find closing delimiter
+	var endIndex int
+	searchStart := 4
+	if idx := bytes.Index(data[searchStart:], []byte("\n---\n")); idx != -1 {
+		endIndex = idx
+	} else if idx := bytes.Index(data[searchStart:], []byte("\n---\r\n")); idx != -1 {
+		endIndex = idx
+	} else if idx := bytes.Index(data[searchStart:], []byte("\r\n---\r\n")); idx != -1 {
+		endIndex = idx
+	} else if idx := bytes.Index(data[searchStart:], []byte("\r\n---\n")); idx != -1 {
+		endIndex = idx
+	} else {
+		return MenaFrontmatter{}
+	}
+
+	var fm MenaFrontmatter
+	if err := yaml.Unmarshal(data[searchStart:searchStart+endIndex], &fm); err != nil {
+		// EC-7: malformed YAML -- treat as unscoped (include in both pipelines)
+		return MenaFrontmatter{}
+	}
+	return fm
 }
 
 // ProjectMena projects mena source files into commands/ and skills/ target
@@ -202,6 +310,23 @@ func ProjectMena(sources []MenaSource, opts MenaProjectionOptions) (*MenaProject
 			continue
 		}
 
+		// Apply scope filter
+		if opts.PipelineScope != MenaScopeBoth {
+			var fm MenaFrontmatter
+			if ce.source.IsEmbedded {
+				fm = readMenaFrontmatterFromFS(ce.source.Fsys, ce.source.FsysPath)
+			} else {
+				fm = ReadMenaFrontmatterFromDir(ce.source.Path)
+			}
+			if !scopeIncludesPipeline(fm.Scope, opts.PipelineScope) {
+				// EC-1: warn if rite-level mena has scope:user (goes nowhere)
+				if fm.Scope == MenaScopeUser && opts.PipelineScope == MenaScopeProject {
+					fmt.Fprintf(os.Stderr, "warning: mena %q has scope: user but is only reachable by materialize (will not be distributed)\n", name)
+				}
+				continue
+			}
+		}
+
 		var destDir string
 		if menaType == "dro" {
 			destDir = filepath.Join(opts.TargetCommandsDir, name)
@@ -242,6 +367,14 @@ func ProjectMena(sources []MenaSource, opts MenaProjectionOptions) (*MenaProject
 		}
 		if menaType == "lego" && opts.Filter&ProjectLego == 0 {
 			continue
+		}
+
+		// Apply scope filter
+		if opts.PipelineScope != MenaScopeBoth {
+			fm := ReadMenaFrontmatterFromFile(sf.srcPath)
+			if !scopeIncludesPipeline(fm.Scope, opts.PipelineScope) {
+				continue
+			}
 		}
 
 		var baseDir string

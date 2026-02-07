@@ -1046,3 +1046,186 @@ func TestMenaSyncer_UpdateWithStrippedKey(t *testing.T) {
 		t.Errorf("Target content: got %s, want v2", string(content))
 	}
 }
+
+// --- Scope filtering tests for usersync ---
+
+// TestMenaSyncer_ScopeProject_ExcludedFromUsersync verifies that scope:project
+// entries are excluded from the usersync pipeline.
+func TestMenaSyncer_ScopeProject_ExcludedFromUsersync(t *testing.T) {
+	tmpDir := t.TempDir()
+	sourceDir := filepath.Join(tmpDir, "source")
+	commandsDir := filepath.Join(tmpDir, "commands")
+	skillsDir := filepath.Join(tmpDir, "skills")
+	manifestPath := filepath.Join(tmpDir, "manifest.json")
+
+	// Create source with scope:project INDEX file
+	commitDir := filepath.Join(sourceDir, "commit")
+	if err := os.MkdirAll(commitDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(commitDir, "INDEX.dro.md"),
+		[]byte("---\nname: commit\ndescription: test\nscope: project\n---\n# Body\n"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	syncer := NewMenaSyncerWithPaths(sourceDir, commandsDir, skillsDir, manifestPath)
+	result, err := syncer.Sync(Options{})
+	if err != nil {
+		t.Fatalf("Sync failed: %v", err)
+	}
+
+	// Should not be synced
+	if len(result.Changes.Added) != 0 {
+		t.Errorf("scope:project should be excluded from usersync, got added: %v", result.Changes.Added)
+	}
+
+	// Verify file does not exist in target
+	if _, err := os.Stat(filepath.Join(commandsDir, "commit", "INDEX.md")); !os.IsNotExist(err) {
+		t.Error("scope:project file should not be synced to commands/")
+	}
+
+	// Verify manifest does not contain the entry
+	manifest, err := LoadManifest(manifestPath, ResourceMena)
+	if err != nil {
+		t.Fatalf("LoadManifest failed: %v", err)
+	}
+	if len(manifest.Entries) != 0 {
+		t.Errorf("manifest should be empty, got %d entries: %v", len(manifest.Entries), manifestKeys(manifest))
+	}
+}
+
+// TestMenaSyncer_ScopeUser_IncludedInUsersync verifies that scope:user
+// entries are included in the usersync pipeline.
+func TestMenaSyncer_ScopeUser_IncludedInUsersync(t *testing.T) {
+	tmpDir := t.TempDir()
+	sourceDir := filepath.Join(tmpDir, "source")
+	commandsDir := filepath.Join(tmpDir, "commands")
+	skillsDir := filepath.Join(tmpDir, "skills")
+	manifestPath := filepath.Join(tmpDir, "manifest.json")
+
+	commitDir := filepath.Join(sourceDir, "commit")
+	if err := os.MkdirAll(commitDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(commitDir, "INDEX.dro.md"),
+		[]byte("---\nname: commit\ndescription: test\nscope: user\n---\n# Body\n"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	syncer := NewMenaSyncerWithPaths(sourceDir, commandsDir, skillsDir, manifestPath)
+	result, err := syncer.Sync(Options{})
+	if err != nil {
+		t.Fatalf("Sync failed: %v", err)
+	}
+
+	if len(result.Changes.Added) != 1 {
+		t.Errorf("scope:user should be included in usersync, got %d added: %v",
+			len(result.Changes.Added), result.Changes.Added)
+	}
+
+	// Verify file exists in target
+	if _, err := os.Stat(filepath.Join(commandsDir, "commit", "INDEX.md")); os.IsNotExist(err) {
+		t.Error("scope:user file should be synced to commands/")
+	}
+}
+
+// TestMenaSyncer_NoScope_IncludedInUsersync verifies that entries without scope
+// are included in the usersync pipeline (backward compat).
+func TestMenaSyncer_NoScope_IncludedInUsersync(t *testing.T) {
+	tmpDir := t.TempDir()
+	sourceDir := filepath.Join(tmpDir, "source")
+	commandsDir := filepath.Join(tmpDir, "commands")
+	skillsDir := filepath.Join(tmpDir, "skills")
+	manifestPath := filepath.Join(tmpDir, "manifest.json")
+
+	commitDir := filepath.Join(sourceDir, "commit")
+	if err := os.MkdirAll(commitDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(commitDir, "INDEX.dro.md"),
+		[]byte("---\nname: commit\ndescription: test\n---\n# Body\n"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	syncer := NewMenaSyncerWithPaths(sourceDir, commandsDir, skillsDir, manifestPath)
+	result, err := syncer.Sync(Options{})
+	if err != nil {
+		t.Fatalf("Sync failed: %v", err)
+	}
+
+	if len(result.Changes.Added) != 1 {
+		t.Errorf("no-scope should be included in usersync, got %d added", len(result.Changes.Added))
+	}
+}
+
+// TestMenaSyncer_CompanionFile_InheritsIndexScope verifies that companion files
+// in a leaf directory inherit the scope from the INDEX file (EC-4).
+func TestMenaSyncer_CompanionFile_InheritsIndexScope(t *testing.T) {
+	tmpDir := t.TempDir()
+	sourceDir := filepath.Join(tmpDir, "source")
+	commandsDir := filepath.Join(tmpDir, "commands")
+	skillsDir := filepath.Join(tmpDir, "skills")
+	manifestPath := filepath.Join(tmpDir, "manifest.json")
+
+	// Create leaf dir with INDEX (scope:project) and a companion helper.md
+	commitDir := filepath.Join(sourceDir, "commit")
+	if err := os.MkdirAll(commitDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(commitDir, "INDEX.dro.md"),
+		[]byte("---\nname: commit\ndescription: test\nscope: project\n---\n# Body\n"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(commitDir, "helper.md"),
+		[]byte("# Helper content\n"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	syncer := NewMenaSyncerWithPaths(sourceDir, commandsDir, skillsDir, manifestPath)
+	result, err := syncer.Sync(Options{})
+	if err != nil {
+		t.Fatalf("Sync failed: %v", err)
+	}
+
+	// Both INDEX and helper should be excluded (scope:project)
+	if len(result.Changes.Added) != 0 {
+		t.Errorf("companion files should inherit scope:project and be excluded, got added: %v", result.Changes.Added)
+	}
+
+	if _, err := os.Stat(filepath.Join(commandsDir, "commit", "INDEX.md")); !os.IsNotExist(err) {
+		t.Error("INDEX should not be synced")
+	}
+	if _, err := os.Stat(filepath.Join(commandsDir, "commit", "helper.md")); !os.IsNotExist(err) {
+		t.Error("companion helper.md should not be synced")
+	}
+}
+
+// TestMenaSyncer_StandaloneFile_OwnScope verifies that standalone mena files
+// (not in an INDEX directory) use their own frontmatter scope.
+func TestMenaSyncer_StandaloneFile_OwnScope(t *testing.T) {
+	tmpDir := t.TempDir()
+	sourceDir := filepath.Join(tmpDir, "source")
+	commandsDir := filepath.Join(tmpDir, "commands")
+	skillsDir := filepath.Join(tmpDir, "skills")
+	manifestPath := filepath.Join(tmpDir, "manifest.json")
+
+	// Create a standalone file with scope:project (no INDEX sibling)
+	navDir := filepath.Join(sourceDir, "navigation")
+	if err := os.MkdirAll(navDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(navDir, "rite.dro.md"),
+		[]byte("---\nname: rite\ndescription: test\nscope: project\n---\n# Body\n"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	syncer := NewMenaSyncerWithPaths(sourceDir, commandsDir, skillsDir, manifestPath)
+	result, err := syncer.Sync(Options{})
+	if err != nil {
+		t.Fatalf("Sync failed: %v", err)
+	}
+
+	if len(result.Changes.Added) != 0 {
+		t.Errorf("standalone scope:project should be excluded from usersync, got added: %v", result.Changes.Added)
+	}
+}

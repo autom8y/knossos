@@ -2,6 +2,7 @@
 package materialize
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/autom8y/knossos/internal/errors"
@@ -43,12 +44,49 @@ func (f *FlexibleStringSlice) UnmarshalYAML(value *yaml.Node) error {
 	return nil
 }
 
+// MenaScope controls which distribution pipeline(s) include a mena entry.
+// The zero value (empty string) means "both pipelines" for backward compatibility.
+type MenaScope string
+
+const (
+	// MenaScopeBoth is the zero value -- entry is included in both pipelines.
+	MenaScopeBoth MenaScope = ""
+
+	// MenaScopeUser restricts the entry to the usersync pipeline (~/.claude/).
+	MenaScopeUser MenaScope = "user"
+
+	// MenaScopeProject restricts the entry to the materialize pipeline (.claude/).
+	MenaScopeProject MenaScope = "project"
+)
+
+// ValidScope returns true if s is a recognized MenaScope value.
+func (s MenaScope) ValidScope() bool {
+	switch s {
+	case MenaScopeBoth, MenaScopeUser, MenaScopeProject:
+		return true
+	default:
+		return false
+	}
+}
+
+// String returns the string representation of the scope.
+// Returns "both" for the zero value to aid logging/debugging.
+func (s MenaScope) String() string {
+	if s == MenaScopeBoth {
+		return "both"
+	}
+	return string(s)
+}
+
 // MenaFrontmatter represents the unified frontmatter schema for commands.
 // Mena content is either dromena (.dro.md, enacted via /name) or legomena (.lego.md, reference knowledge).
 type MenaFrontmatter struct {
 	// Identity (required for all)
 	Name        string `yaml:"name"`
 	Description string `yaml:"description"`
+
+	// Distribution Control
+	Scope MenaScope `yaml:"scope,omitempty"`
 
 	// Invocation Control
 	ArgumentHint               string   `yaml:"argument-hint,omitempty"` // Only for dromena. Usage hint
@@ -71,7 +109,10 @@ func (f *MenaFrontmatter) Validate() error {
 	if f.Description == "" {
 		return errors.New(errors.CodeValidationFailed, "frontmatter: description is required")
 	}
-
+	if !f.Scope.ValidScope() {
+		return errors.New(errors.CodeValidationFailed,
+			fmt.Sprintf("frontmatter: invalid scope %q (must be \"user\", \"project\", or omitted)", string(f.Scope)))
+	}
 	return nil
 }
 
