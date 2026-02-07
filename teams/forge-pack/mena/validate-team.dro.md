@@ -1,4 +1,5 @@
 ---
+name: validate-team
 description: Run validation suite on an existing team pack
 argument-hint: <team-name> [--verbose]
 allowed-tools: Bash, Glob, Grep, Read, Task, TodoWrite

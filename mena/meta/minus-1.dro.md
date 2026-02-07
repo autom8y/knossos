@@ -1,4 +1,5 @@
 ---
+name: minus-1
 description: Assess initiative readiness before Session 0 planning
 argument-hint: <initiative>
 model: opus

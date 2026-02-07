@@ -1,4 +1,5 @@
 ---
+name: sre
 description: Quick switch to sre (reliability workflow)
 argument-hint: [--force] [--dry-run] [--keep-all|--remove-all|--promote-all]
 allowed-tools: Bash, Read

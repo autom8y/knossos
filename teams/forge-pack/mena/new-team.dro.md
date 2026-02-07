@@ -1,4 +1,5 @@
 ---
+name: new-team
 description: Create a new agent team pack through The Forge workflow
 argument-hint: <team-name> [--complexity=PATCH|TEAM|ECOSYSTEM]
 allowed-tools: Bash, Glob, Grep, Read, Write, Edit, Task, TodoWrite

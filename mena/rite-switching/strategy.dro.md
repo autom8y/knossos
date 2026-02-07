@@ -1,4 +1,5 @@
 ---
+name: strategy
 description: Quick switch to strategy (business strategy workflow)
 argument-hint: [--update] [--dry-run] [--keep-all|--remove-all|--promote-all]
 allowed-tools: Bash, Read

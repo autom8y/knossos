@@ -1,4 +1,5 @@
 ---
+name: rite
 description: Switch rites or list available rites
 argument-hint: [pack-name] [--list] [--update] [--dry-run] [--keep-all|--remove-all|--promote-all]
 allowed-tools: Bash, Read

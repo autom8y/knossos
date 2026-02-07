@@ -1,4 +1,5 @@
 ---
+name: ecosystem
 description: Quick switch to ecosystem (CEM/skeleton/roster infrastructure workflow)
 argument-hint: [--update] [--dry-run] [--keep-all|--remove-all|--promote-all]
 allowed-tools: Bash, Read

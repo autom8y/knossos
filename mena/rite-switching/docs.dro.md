@@ -1,4 +1,5 @@
 ---
+name: docs
 description: Quick switch to docs (documentation workflow)
 argument-hint: [--update] [--dry-run] [--keep-all|--remove-all|--promote-all]
 allowed-tools: Bash, Read

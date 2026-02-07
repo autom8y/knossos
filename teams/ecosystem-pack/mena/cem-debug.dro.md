@@ -1,4 +1,5 @@
 ---
+name: cem-debug
 description: Diagnose CEM sync issues and conflicts (Ecosystem Analyst with CEM focus)
 allowed-tools: Bash, Read, Grep, Glob
 model: opus

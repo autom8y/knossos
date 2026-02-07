@@ -1,4 +1,5 @@
 ---
+name: zero
 description: Initialize Orchestrator with 4-agent workflow plan
 argument-hint: <initiative>
 model: opus

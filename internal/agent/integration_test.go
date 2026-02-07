@@ -99,11 +99,7 @@ func TestAllUserAgentSpecs(t *testing.T) {
 
 	t.Logf("Found %d agent files", len(files))
 
-	// Known YAML issues in agents (pre-existing, not introduced by this change).
-	// context-engineer.md has an unquoted description containing ": " which is invalid YAML.
-	knownBroken := map[string]string{
-		"context-engineer.md": "description field contains unquoted YAML mapping character (colon-space)",
-	}
+	knownBroken := map[string]string{}
 
 	av := newTestValidator(t)
 

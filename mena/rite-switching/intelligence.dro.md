@@ -1,4 +1,5 @@
 ---
+name: intelligence
 description: Quick switch to intelligence (product analytics workflow)
 argument-hint: [--update] [--dry-run] [--keep-all|--remove-all|--promote-all]
 allowed-tools: Bash, Read

@@ -1,29 +1,26 @@
-# Roster - Rite Management
+# Knossos - Context Engineering Meta-Framework
 
-## Scripts
+## Commands
 
-### User-Level Sync (roster -> ~/.claude/)
+### User-Level Sync (knossos -> ~/.claude/)
 
-| Script | Source | Target |
-|--------|--------|--------|
-| `sync-user-agents.sh` | `user-agents/` | `~/.claude/agents/` |
-| `sync-user-commands.sh` | `mena/` | `~/.claude/commands/` |
-| `sync-user-skills.sh` | `user-skills/` | `~/.claude/skills/` |
-| `sync-user-hooks.sh` | `user-hooks/` | `~/.claude/hooks/` |
+| Command | Source | Target |
+|---------|--------|--------|
+| `ari sync user agents` | `agents/` | `~/.claude/agents/` |
+| `ari sync user mena` | `mena/` | `~/.claude/commands/` + `~/.claude/skills/` |
+| `ari sync user hooks` | `hooks/` | `~/.claude/hooks/` |
 
 ### Rite/Project Management
 
-| Script | Purpose |
-|--------|---------|
-| `swap-team.sh` | Switch active rite (syncs to `.claude/`) |
-| `generate-team-context.sh` | Output team routing table (used by session hooks) |
-| `load-workflow.sh` | Load workflow.yaml for a team |
-| `get-workflow-field.sh` | Extract specific workflow fields |
+| Command | Purpose |
+|---------|---------|
+| `ari sync materialize --rite <name>` | Switch active rite (syncs to `.claude/`) |
+| `ari rite switch <name>` | Alias for rite switching |
 
 ### Architecture Note
 
-User-level content (`user-*/`) syncs to `~/.claude/` (global, available in all projects).
-Rite-level content (`rites/{rite}/`) syncs to `.claude/` (project-specific via swap-team).
+User-level content (`agents/`, `mena/`, `hooks/`) syncs to `~/.claude/` (global, available in all projects).
+Rite-level content (`rites/{rite}/`) syncs to `.claude/` (project-specific via ari sync materialize).
 
 **Important**: NO `.claude/user-*` directories should exist in satellite projects. These were stale migration artifacts.
 
@@ -31,115 +28,70 @@ See [docs/INTEGRATION.md](docs/INTEGRATION.md) for full artifact architecture de
 
 ## Usage
 
-### Generate Rite Context
-
-```bash
-# For active rite
-./generate-team-context.sh
-
-# For specific rite
-./generate-team-context.sh 10x-dev
-```
-
-Output: Markdown table of phase→agent mappings for session hook injection.
-
 ### Sync User Agents
 
-Syncs agents from `roster/user-agents/` to `~/.claude/agents/`.
+Syncs agents from `agents/` to `~/.claude/agents/`.
 
 ```bash
 # Sync user-agents
-./sync-user-agents.sh
+ari sync user agents
 
 # Preview changes
-./sync-user-agents.sh --dry-run
+ari sync user agents --dry-run
 
 # Show sync status
-./sync-user-agents.sh --status
+ari sync user agents --status
 ```
 
 **Behavior:**
 - Additive: Never removes existing agents from `~/.claude/agents/`
-- Overwrites: Only agents previously installed from roster (tracked in manifest)
-- Preserves: User-created agents not from roster
+- Overwrites: Only agents previously installed from knossos (tracked in manifest)
+- Preserves: User-created agents not from knossos
 
 **Integration Points:**
-- Run manually after pulling roster updates: `git pull && ./sync-user-agents.sh`
+- Run manually after pulling knossos updates: `git pull && ari sync user agents`
 - Add to shell profile for automatic sync on terminal open (optional)
-- Hook into roster post-merge git hook (optional)
 
-**Manifest:** `~/.claude/USER_AGENT_MANIFEST.json` tracks roster-managed agents.
+**Manifest:** `~/.claude/USER_AGENT_MANIFEST.json` tracks knossos-managed agents.
 
-### Sync User Commands
+### Sync User Mena
 
-Syncs slash commands from `roster/mena/` to `~/.claude/commands/`.
+Syncs mena (commands + skills) from `mena/` to `~/.claude/commands/` and `~/.claude/skills/`.
 
 ```bash
-# Sync user-commands
-./sync-user-commands.sh
+# Sync user mena
+ari sync user mena
 
 # Preview changes
-./sync-user-commands.sh --dry-run
+ari sync user mena --dry-run
 
 # Show sync status
-./sync-user-commands.sh --status
+ari sync user mena --status
 ```
 
 **Behavior:**
-- Additive: Never removes existing commands from `~/.claude/commands/`
-- Overwrites: Only commands previously installed from roster (tracked in manifest)
-- Preserves: User-created commands not from roster
-- Flattens: Source subdirectories (session/, workflow/, etc.) become flat in target
+- Additive: Never removes existing commands/skills from `~/.claude/`
+- Overwrites: Only mena previously installed from knossos (tracked in manifest)
+- Preserves: User-created commands/skills not from knossos
+- Distribution: `.dro.md` files → `commands/` (transient), `.lego.md` files → `skills/` (persistent)
+- Scope filtering: `scope: user` = user pipeline only, `scope: project` = project pipeline only, no scope = both
 
 **Source Structure:**
 ```
 mena/
-  session/       # start, park, continue, handoff, wrap (5)
-  workflow/      # task, sprint, hotfix (3)
-  operations/    # architect, build, qa, code-review, commit (5)
-  navigation/    # consult, team, worktree, sessions, ecosystem (5)
-  meta/          # minus-1, zero, one (3)
-  rite-switching/ # 10x, docs, hygiene, debt, sre, security, intelligence, rnd, strategy, forge (10)
+  session/        # Session management dromena
+  workflow/       # Workflow dromena
+  operations/     # Operation dromena
+  navigation/     # Navigation dromena
+  meta/           # Meta dromena
+  rite-switching/ # Rite-switching dromena
+  guidance/       # Guidance legomena
+  templates/      # Template legomena
 ```
 
-**Rite Commands:**
-Rite-specific commands live in `rites/<rite>/commands/` and are synced to `.claude/commands/` by `swap-team.sh`. Rite commands take precedence over user commands of the same name (project > user).
+**Rite Mena:**
+Rite-specific mena live in `rites/<rite>/mena/` and are synced to `.claude/commands/` and `.claude/skills/` by `ari sync materialize`. Rite mena take precedence over user mena of the same name (project > user).
 
-**Manifest:** `~/.claude/USER_COMMAND_MANIFEST.json` tracks roster-managed commands.
-
-### Sync User Skills
-
-Syncs skill directories from `roster/user-skills/` to `~/.claude/skills/`.
-
-```bash
-# Sync user-skills
-./sync-user-skills.sh
-
-# Preview changes
-./sync-user-skills.sh --dry-run
-
-# Show sync status
-./sync-user-skills.sh --status
-```
-
-**Behavior:**
-- Additive: Never removes existing skills from `~/.claude/skills/`
-- Overwrites: Only skills previously installed from roster (tracked in manifest)
-- Preserves: User-created skills not from roster
-- Uses `rsync --delete` for clean updates within roster-managed skills
-
-**Key Differences from User Agents:**
-- Skills are directories (containing INDEX.md + supporting files)
-- Checksum computed over all files in skill directory
-- Manifest tracks `file_count` in addition to checksum
-
-**Integration Points:**
-- Run manually after pulling roster updates: `git pull && ./sync-user-skills.sh`
-- Combine with agent sync: `./sync-user-agents.sh && ./sync-user-skills.sh`
-- Add to shell profile for automatic sync on terminal open (optional)
-
-**Manifest:** `~/.claude/USER_SKILL_MANIFEST.json` tracks roster-managed skills.
-
-**Included Skills:**
-- `consult-ref/` - Ecosystem navigation reference (command reference, playbooks, team profiles)
-- `forge-ref/` - Team creation patterns and evaluation harnesses
+**Manifests:**
+- `~/.claude/USER_COMMAND_MANIFEST.json` tracks knossos-managed commands
+- `~/.claude/USER_SKILL_MANIFEST.json` tracks knossos-managed skills

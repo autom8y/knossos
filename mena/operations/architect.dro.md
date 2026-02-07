@@ -1,4 +1,5 @@
 ---
+name: architect
 description: Design-only session producing design artifacts (no implementation)
 argument-hint: <feature-description> [--complexity=LEVEL]
 allowed-tools: Bash, Read, Write, Task, Glob, Grep

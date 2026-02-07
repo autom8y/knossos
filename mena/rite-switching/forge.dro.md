@@ -1,4 +1,5 @@
 ---
+name: forge
 description: Display The Forge meta-rite overview and available commands
 argument-hint: [--agents|--workflow|--commands]
 allowed-tools: Read, Glob
