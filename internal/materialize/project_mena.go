@@ -404,7 +404,7 @@ func ProjectMena(sources []MenaSource, opts MenaProjectionOptions) (*MenaProject
 		if err != nil {
 			return nil, err
 		}
-		if err := os.WriteFile(destPath, data, 0644); err != nil {
+		if _, err := writeIfChanged(destPath, data, 0644); err != nil {
 			return nil, err
 		}
 
@@ -448,7 +448,8 @@ func copyDirWithStripping(src, dst string) error {
 		if err := os.MkdirAll(filepath.Dir(destPath), 0755); err != nil {
 			return err
 		}
-		return os.WriteFile(destPath, content, 0644)
+		_, err = writeIfChanged(destPath, content, 0644)
+		return err
 	})
 }
 
@@ -477,6 +478,7 @@ func copyDirFromFSWithStripping(fsys fs.FS, dst string) error {
 		if err := os.MkdirAll(filepath.Dir(destPath), 0755); err != nil {
 			return err
 		}
-		return os.WriteFile(destPath, content, 0644)
+		_, err = writeIfChanged(destPath, content, 0644)
+		return err
 	})
 }

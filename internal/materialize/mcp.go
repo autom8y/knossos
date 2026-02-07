@@ -73,11 +73,13 @@ func loadExistingSettings(settingsPath string) (map[string]any, error) {
 }
 
 // saveSettings writes settings to settings.local.json with pretty formatting.
+// Only writes if content changed, to avoid triggering Claude Code file watcher.
 func saveSettings(settingsPath string, settings map[string]any) error {
 	data, err := json.MarshalIndent(settings, "", "  ")
 	if err != nil {
 		return err
 	}
 
-	return os.WriteFile(settingsPath, data, 0644)
+	_, err = writeIfChanged(settingsPath, data, 0644)
+	return err
 }

@@ -2,6 +2,7 @@
 package materialize
 
 import (
+	"bytes"
 	"fmt"
 	"io/fs"
 	"os"
@@ -160,6 +161,17 @@ func (m *Materializer) templatesFS(resolved *ResolvedRite) fs.FS {
 	return os.DirFS(m.templatesDir)
 }
 
+// writeIfChanged writes content to path only if it differs from existing content.
+// This prevents unnecessary file watcher triggers (e.g., Claude Code reloading
+// context when .claude/CLAUDE.md is rewritten with identical content).
+func writeIfChanged(path string, content []byte, perm os.FileMode) (bool, error) {
+	existing, err := os.ReadFile(path)
+	if err == nil && bytes.Equal(existing, content) {
+		return false, nil
+	}
+	return true, os.WriteFile(path, content, perm)
+}
+
 // copyDirFromFS copies all files from an fs.FS to a destination directory on disk.
 func copyDirFromFS(fsys fs.FS, dst string) error {
 	return fs.WalkDir(fsys, ".", func(path string, d fs.DirEntry, err error) error {
@@ -177,7 +189,8 @@ func copyDirFromFS(fsys fs.FS, dst string) error {
 		if err := os.MkdirAll(filepath.Dir(destPath), 0755); err != nil {
 			return err
 		}
-		return os.WriteFile(destPath, content, 0644)
+		_, err = writeIfChanged(destPath, content, 0644)
+		return err
 	})
 }
 
@@ -541,13 +554,14 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claud
 			return err
 		}
 
-		// Write to destination
+		// Write to destination (only if changed)
 		destPath := filepath.Join(agentsDir, relPath)
 		if err := os.MkdirAll(filepath.Dir(destPath), 0755); err != nil {
 			return err
 		}
 
-		return os.WriteFile(destPath, content, 0644)
+		_, err = writeIfChanged(destPath, content, 0644)
+		return err
 	})
 }
 
@@ -900,8 +914,8 @@ func (m *Materializer) mergeCLAUDEmd(claudeDir string, renderCtx *inscription.Re
 		return "", errors.Wrap(errors.CodeGeneralError, "failed to merge CLAUDE.md regions", err)
 	}
 
-	// Write CLAUDE.md
-	if err := os.WriteFile(claudeMdPath, []byte(mergeResult.Content), 0644); err != nil {
+	// Write CLAUDE.md (only if content changed, to avoid triggering Claude Code file watcher)
+	if _, err := writeIfChanged(claudeMdPath, []byte(mergeResult.Content), 0644); err != nil {
 		return "", errors.Wrap(errors.CodeGeneralError, "failed to write CLAUDE.md", err)
 	}
 
@@ -950,7 +964,7 @@ func (m *Materializer) materializeSettingsWithManifest(claudeDir string, manifes
 		existingSettings = mergeMCPServers(existingSettings, manifest.MCPServers)
 	}
 
-	// Write settings (always write, even if no changes, to ensure file exists)
+	// Write settings (only if content changed, to avoid triggering Claude Code file watcher)
 	return saveSettings(settingsPath, existingSettings)
 }
 
@@ -980,7 +994,8 @@ func (m *Materializer) trackState(manifest *RiteManifest, activeRiteName string)
 // writeActiveRite writes the ACTIVE_RITE marker file.
 func (m *Materializer) writeActiveRite(riteName, claudeDir string) error {
 	activeRitePath := filepath.Join(claudeDir, "ACTIVE_RITE")
-	return os.WriteFile(activeRitePath, []byte(riteName+"\n"), 0644)
+	_, err := writeIfChanged(activeRitePath, []byte(riteName+"\n"), 0644)
+	return err
 }
 
 // getCurrentRite reads the current active rite from ACTIVE_RITE file.
@@ -1012,12 +1027,13 @@ func (m *Materializer) copyDir(src, dst string) error {
 			return os.MkdirAll(destPath, 0755)
 		}
 
-		// Read and write file
+		// Read and write file (only if changed)
 		content, err := os.ReadFile(path)
 		if err != nil {
 			return err
 		}
 
-		return os.WriteFile(destPath, content, 0644)
+		_, err = writeIfChanged(destPath, content, 0644)
+		return err
 	})
 }

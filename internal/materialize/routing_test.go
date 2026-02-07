@@ -446,6 +446,75 @@ description: A flat command
 	}
 }
 
+// TestRematerializeMena_MutationFlagBypassesIdempotency verifies that
+// materializeMena populates commands/ and skills/ even when called for the
+// same rite (regression test for the idempotency guard bug where
+// --remove-all did not imply --force, causing MaterializeWithOptions to
+// skip the entire pipeline).
+func TestRematerializeMena_MutationFlagBypassesIdempotency(t *testing.T) {
+	tmpDir := t.TempDir()
+	claudeDir := filepath.Join(tmpDir, ".claude")
+
+	// Create mena with both dromena and legomena
+	menaBase := filepath.Join(tmpDir, "mena")
+
+	// A dromena (should go to commands/)
+	droDir := filepath.Join(menaBase, "test-cmd")
+	if err := os.MkdirAll(droDir, 0755); err != nil {
+		t.Fatalf("Failed to create dro dir: %v", err)
+	}
+	droContent := "---\nname: test-cmd\ndescription: A test command\n---\n# Test Command\n"
+	if err := os.WriteFile(filepath.Join(droDir, "INDEX.dro.md"), []byte(droContent), 0644); err != nil {
+		t.Fatalf("Failed to write INDEX.dro.md: %v", err)
+	}
+
+	// A legomena (should go to skills/)
+	legoDir := filepath.Join(menaBase, "test-ref")
+	if err := os.MkdirAll(legoDir, 0755); err != nil {
+		t.Fatalf("Failed to create lego dir: %v", err)
+	}
+	legoContent := "---\nname: test-ref\ndescription: A test reference\n---\n# Test Ref\n"
+	if err := os.WriteFile(filepath.Join(legoDir, "INDEX.lego.md"), []byte(legoContent), 0644); err != nil {
+		t.Fatalf("Failed to write INDEX.lego.md: %v", err)
+	}
+
+	resolver := paths.NewResolver(tmpDir)
+	m := NewMaterializer(resolver)
+
+	manifest := &RiteManifest{Name: "test", Version: "1.0.0"}
+
+	// First materialization — should populate both dirs
+	if err := m.materializeMena(manifest, claudeDir, nil); err != nil {
+		t.Fatalf("First materializeMena failed: %v", err)
+	}
+
+	commandsIndex := filepath.Join(claudeDir, "commands", "test-cmd", "INDEX.md")
+	skillsIndex := filepath.Join(claudeDir, "skills", "test-ref", "INDEX.md")
+
+	if _, err := os.Stat(commandsIndex); os.IsNotExist(err) {
+		t.Fatalf("First pass: expected %s to exist", commandsIndex)
+	}
+	if _, err := os.Stat(skillsIndex); os.IsNotExist(err) {
+		t.Fatalf("First pass: expected %s to exist", skillsIndex)
+	}
+
+	// Wipe the output dirs (simulating the state where they're empty)
+	os.RemoveAll(filepath.Join(claudeDir, "commands"))
+	os.RemoveAll(filepath.Join(claudeDir, "skills"))
+
+	// Second materialization (same rite) — should repopulate
+	if err := m.materializeMena(manifest, claudeDir, nil); err != nil {
+		t.Fatalf("Second materializeMena failed: %v", err)
+	}
+
+	if _, err := os.Stat(commandsIndex); os.IsNotExist(err) {
+		t.Errorf("Second pass: commands/ not repopulated — %s missing (idempotency guard regression)", commandsIndex)
+	}
+	if _, err := os.Stat(skillsIndex); os.IsNotExist(err) {
+		t.Errorf("Second pass: skills/ not repopulated — %s missing (idempotency guard regression)", skillsIndex)
+	}
+}
+
 // TestDetectMenaType verifies the extension-based type detection
 func TestDetectMenaType(t *testing.T) {
 	tests := []struct {

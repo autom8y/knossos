@@ -67,7 +67,7 @@ Orphan Handling:
 
 			// Build options
 			opts := materialize.Options{
-				Force:      force,
+				Force:      force || removeAll || promoteAll,
 				DryRun:     dryRun,
 				RemoveAll:  removeAll,
 				KeepAll:    keepAll || exclusiveCount == 0, // Default to keep
