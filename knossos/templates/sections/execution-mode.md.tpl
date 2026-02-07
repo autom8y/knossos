@@ -11,5 +11,5 @@ Three operating modes:
 | **Cross-Cutting** | Yes | No | Direct execution + session tracking |
 | **Orchestrated** | Yes | Yes (ACTIVE) | Coach pattern, delegate via Task tool |
 
-Use `/consult` for mode selection. Enforcement rules: `orchestration/execution-mode.md`
+Use `/consult` for mode selection.
 <!-- KNOSSOS:END execution-mode -->

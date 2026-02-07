@@ -235,7 +235,7 @@ func TestGenerator_LoadAgentTable(t *testing.T) {
 		{
 			name:   "empty agents",
 			agents: nil,
-			want:   "| Agent | Role | Produces |",
+			want:   "| Agent | Role |",
 		},
 		{
 			name: "with agents",
@@ -360,7 +360,6 @@ func TestGenerator_GetDefaultSectionContent(t *testing.T) {
 		"agent-routing",
 		"commands",
 		"platform-infrastructure",
-		"navigation",
 		"quick-start",
 		"agent-configurations",
 	}

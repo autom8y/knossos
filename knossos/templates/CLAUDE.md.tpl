@@ -32,8 +32,5 @@
 {{/* Infrastructure pointer (how to access platform tools) */}}
 {{include "sections/platform-infrastructure.md.tpl"}}
 
-{{/* Navigation pointer (where to find everything else) */}}
-{{include "sections/navigation.md.tpl"}}
-
 {{/* User customization (edit freely) */}}
 {{include "sections/user-content.md.tpl"}}

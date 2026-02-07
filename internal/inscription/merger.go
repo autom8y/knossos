@@ -232,6 +232,15 @@ func (m *Merger) MergeRegions(existingContent string, generatedContent map[strin
 		result.RegionsMerged = append(result.RegionsMerged, name)
 	}
 
+	// Clean deprecated regions from manifest (covers regions that were in
+	// SectionOrder and got processed above but should still be removed)
+	for name := range m.DeprecatedRegions {
+		if m.Manifest.HasRegion(name) {
+			m.Manifest.RemoveRegion(name)
+			result.RegionsDropped = append(result.RegionsDropped, name)
+		}
+	}
+
 	result.Content = strings.TrimSpace(output.String())
 	return result, nil
 }

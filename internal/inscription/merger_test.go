@@ -943,8 +943,8 @@ func TestMerger_MergeRegions_DeprecatedRegionDropped(t *testing.T) {
 	}
 	gen := NewGenerator("", manifest, nil)
 	merger := NewMerger(manifest, gen)
-	// Simulate a deprecated region
-	merger.DeprecatedRegions["old-section"] = true
+	// Reset to only test the deprecated region — dynamic detection flags test regions too
+	merger.DeprecatedRegions = map[string]bool{"old-section": true}
 
 	existing := `<!-- KNOSSOS:START known-section -->
 Known content
@@ -993,7 +993,8 @@ func TestMerger_MergeRegions_DeprecatedRegionCleanedFromManifest(t *testing.T) {
 	}
 	gen := NewGenerator("", manifest, nil)
 	merger := NewMerger(manifest, gen)
-	merger.DeprecatedRegions["zombie-region"] = true
+	// Reset to only test the zombie — dynamic detection flags test regions too
+	merger.DeprecatedRegions = map[string]bool{"zombie-region": true}
 
 	existing := `<!-- KNOSSOS:START known-section -->
 Known content
@@ -1037,7 +1038,8 @@ func TestMerger_MergeRegions_GenuineSatelliteStillPreserved(t *testing.T) {
 	}
 	gen := NewGenerator("", manifest, nil)
 	merger := NewMerger(manifest, gen)
-	// Note: "user-custom" is NOT in DeprecatedRegions
+	// Reset — dynamic detection flags test regions; we only care that "user-custom" is NOT deprecated
+	merger.DeprecatedRegions = map[string]bool{}
 
 	existing := `<!-- KNOSSOS:START known-section -->
 Known content
@@ -1138,6 +1140,9 @@ func TestMerger_SatelliteNameCollidingWithDeprecatedList(t *testing.T) {
 	if merger.DeprecatedRegions["slash-commands"] {
 		t.Fatal("NewMerger() should not mark satellite-owned region as deprecated even if in static list")
 	}
+
+	// Reset — dynamic detection flags known-section (no template); we only test satellite protection
+	merger.DeprecatedRegions = map[string]bool{}
 
 	existing := `<!-- KNOSSOS:START known-section -->
 Known content

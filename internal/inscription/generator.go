@@ -289,20 +289,18 @@ func (g *Generator) conditionalInclude(condition bool, content string) string {
 // loadAgentTable generates a markdown table of agents.
 func (g *Generator) loadAgentTable() string {
 	if g.Context == nil || len(g.Context.Agents) == 0 {
-		return "| Agent | Role | Produces |\n| ----- | ---- | -------- |\n"
+		return "| Agent | Role |\n| ----- | ---- |\n"
 	}
 
 	var sb strings.Builder
-	sb.WriteString("| Agent | Role | Produces |\n")
-	sb.WriteString("| ----- | ---- | -------- |\n")
+	sb.WriteString("| Agent | Role |\n")
+	sb.WriteString("| ----- | ---- |\n")
 
 	for _, agent := range g.Context.Agents {
 		sb.WriteString("| **")
 		sb.WriteString(agent.Name)
 		sb.WriteString("** | ")
 		sb.WriteString(agent.Role)
-		sb.WriteString(" | ")
-		sb.WriteString(agent.Produces)
 		sb.WriteString(" |\n")
 	}
 
@@ -381,7 +379,7 @@ func (g *Generator) generateQuickStartContent() (string, error) {
 	sb.WriteString("\n\n")
 
 	// Footer
-	sb.WriteString("Use `prompting` for agent invocation patterns. Use `initiative-scoping` for new projects.")
+	sb.WriteString("Use `prompting` for agent invocation patterns. Use `/consult` for routing guidance.")
 
 	return sb.String(), nil
 }
@@ -414,7 +412,6 @@ func (g *Generator) getDefaultSectionContent(regionName string) (string, error) 
 		"agent-routing":           g.getDefaultAgentRoutingContent(),
 		"commands":                g.getDefaultCommandsContent(),
 		"platform-infrastructure": g.getDefaultPlatformInfrastructureContent(),
-		"navigation":              g.getDefaultNavigationContent(),
 		"quick-start":             g.getDefaultQuickStartContent(),
 		"agent-configurations":    g.getDefaultAgentConfigsContent(),
 	}
@@ -446,7 +443,7 @@ Three operating modes:
 | **Cross-Cutting** | Yes | No | Direct execution + session tracking |
 | **Orchestrated** | Yes | Yes (ACTIVE) | Coach pattern, delegate via Task tool |
 
-Use ` + "`/consult`" + ` for mode selection. Enforcement rules: ` + "`orchestration/execution-mode.md`"
+Use ` + "`/consult`" + ` for mode selection.`
 }
 
 func (g *Generator) getDefaultAgentRoutingContent() string {
@@ -481,21 +478,15 @@ Hooks auto-inject session context. CLI reference: ` + "`ari --help`" + `.
 Mutate ` + "`*_CONTEXT.md`" + ` only via ` + "`Task(moirai, \"...\")`" + `.`
 }
 
-func (g *Generator) getDefaultNavigationContent() string {
-	return `## Navigation
-
-Workflow routing: ` + "`/consult`" + `. Domain knowledge: Skill tool. File locations: ` + "`MEMORY.md`" + `.`
-}
-
 func (g *Generator) getDefaultQuickStartContent() string {
 	return `## Quick Start
 
 This project uses a multi-agent workflow:
 
-| Agent | Role | Produces |
-| ----- | ---- | -------- |
+| Agent | Role |
+| ----- | ---- |
 
-Use ` + "`prompting`" + ` for agent invocation patterns. Use ` + "`initiative-scoping`" + ` for new projects.`
+Use ` + "`prompting`" + ` for agent invocation patterns. Use ` + "`/consult`" + ` for routing guidance.`
 }
 
 func (g *Generator) getDefaultAgentConfigsContent() string {
@@ -505,6 +496,9 @@ Prompts in ` + "`.claude/agents/`" + `.`
 }
 
 // GenerateAll generates content for all sections in section_order.
+// Non-satellite regions that the generator cannot produce (removed templates,
+// deprecated sections) are silently skipped — the merger will clean them from
+// the manifest during the merge phase.
 func (g *Generator) GenerateAll() (map[string]string, error) {
 	result := make(map[string]string)
 
@@ -515,9 +509,12 @@ func (g *Generator) GenerateAll() (map[string]string, error) {
 			continue
 		}
 
-		// Generate all regions including satellite
-		// For satellite regions, the merger will preserve existing content if present,
-		// but for new files we need the initial template content
+		// Skip non-satellite regions the generator can't produce (deprecated/removed).
+		// Satellite regions without templates return empty string, which is fine.
+		if region.Owner != OwnerSatellite && !g.CanGenerateRegion(regionName) {
+			continue
+		}
+
 		content, err := g.GenerateSection(regionName)
 		if err != nil {
 			return nil, err

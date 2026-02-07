@@ -1,10 +1,10 @@
 {{/* agent-table partial template */}}
 {{/* Renders an agent table from .Agents context */}}
 {{- if .Agents }}
-| Agent | Role | Produces |
-| ----- | ---- | -------- |
+| Agent | Role |
+| ----- | ---- |
 {{- range .Agents }}
-| **{{ .Name }}** | {{ .Role }} | {{ .Produces }} |
+| **{{ .Name }}** | {{ .Role }} |
 {{- end }}
 {{- else }}
 _No agents configured._

@@ -281,7 +281,6 @@ func TestManifestLoader_CreateDefault(t *testing.T) {
 		"agent-routing",
 		"commands",
 		"platform-infrastructure",
-		"navigation",
 	}
 
 	for _, name := range expectedKnossos {

@@ -204,7 +204,6 @@ func (m *ManifestLoader) CreateDefault() (*Manifest, error) {
 		"agent-routing",
 		"commands",
 		"platform-infrastructure",
-		"navigation",
 	}
 
 	for _, name := range defaultKnossosRegions {
@@ -248,9 +247,6 @@ func DefaultSectionOrder() []string {
 		// Infrastructure pointer (how to access platform tools)
 		"platform-infrastructure",
 
-		// Navigation pointer (where to find everything else)
-		"navigation",
-
 		// User customization (edit freely)
 		"user-content",
 	}
@@ -262,6 +258,7 @@ func DefaultSectionOrder() []string {
 func DeprecatedRegions() []string {
 	return []string{
 		"slash-commands", // Removed in v18, absorbed into commands Rosetta Stone
+		"navigation",    // Removed in v20, zero unique value (all content duplicated or tautological)
 	}
 }
 
