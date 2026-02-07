@@ -186,9 +186,12 @@ func parseMenaFrontmatterBytes(data []byte) MenaFrontmatter {
 		return MenaFrontmatter{}
 	}
 
-	// Find closing delimiter
+	// Find closing delimiter — searchStart skips past the opening "---\n" or "---\r\n"
 	var endIndex int
 	searchStart := 4
+	if bytes.HasPrefix(data, []byte("---\r\n")) {
+		searchStart = 5
+	}
 	if idx := bytes.Index(data[searchStart:], []byte("\n---\n")); idx != -1 {
 		endIndex = idx
 	} else if idx := bytes.Index(data[searchStart:], []byte("\n---\r\n")); idx != -1 {
@@ -319,8 +322,12 @@ func ProjectMena(sources []MenaSource, opts MenaProjectionOptions) (*MenaProject
 				fm = ReadMenaFrontmatterFromDir(ce.source.Path)
 			}
 			if !scopeIncludesPipeline(fm.Scope, opts.PipelineScope) {
-				// EC-1: warn if rite-level mena has scope:user (goes nowhere)
-				if fm.Scope == MenaScopeUser && opts.PipelineScope == MenaScopeProject {
+				// EC-1: warn if rite-level mena has scope:user (goes nowhere —
+				// usersync never sees rite-level mena, so it reaches no pipeline).
+				// Only warn for rite-level sources (path contains /rites/), not
+				// distribution-level mena which IS reachable by usersync.
+				if fm.Scope == MenaScopeUser && opts.PipelineScope == MenaScopeProject &&
+					!ce.source.IsEmbedded && strings.Contains(ce.source.Path, string(filepath.Separator)+"rites"+string(filepath.Separator)) {
 					fmt.Fprintf(os.Stderr, "warning: mena %q has scope: user but is only reachable by materialize (will not be distributed)\n", name)
 				}
 				continue
