@@ -319,6 +319,12 @@ func (g *Generator) lookupTerminology(term string) string {
 		"moirai":      "Session lifecycle agent - the Fates who spin, measure, and cut",
 		"white-sails": "Confidence signal - honest return indicator",
 		"rites":       "Practice bundles - invokable ceremonies",
+		"pantheon":    "Agent collection within a rite",
+		"dromena":     "Slash commands - user-invoked, transient",
+		"legomena":    "Skills - model-invoked, persistent",
+		"mena":        "Source directory for dromena + legomena",
+		"inscription":     "CLAUDE.md generation from templates",
+		"materialization": "Source to .claude/ projection",
 	}
 
 	if def, ok := terminology[strings.ToLower(term)]; ok {
@@ -409,7 +415,6 @@ func (g *Generator) getDefaultSectionContent(regionName string) (string, error) 
 		"commands":                g.getDefaultCommandsContent(),
 		"platform-infrastructure": g.getDefaultPlatformInfrastructureContent(),
 		"navigation":              g.getDefaultNavigationContent(),
-		"slash-commands":          g.getDefaultSlashCommandsContent(),
 		"quick-start":             g.getDefaultQuickStartContent(),
 		"agent-configurations":    g.getDefaultAgentConfigsContent(),
 	}
@@ -444,7 +449,6 @@ Three operating modes:
 Use ` + "`/consult`" + ` for mode selection. Enforcement rules: ` + "`orchestration/execution-mode.md`"
 }
 
-
 func (g *Generator) getDefaultAgentRoutingContent() string {
 	return `## Agent Routing
 
@@ -454,16 +458,21 @@ Routing guidance: ` + "`/consult`"
 }
 
 func (g *Generator) getDefaultCommandsContent() string {
-	return `## Commands
+	return `## CC Primitives
 
-Invoke via the **Skill tool**. Two types:
+| CC Primitive | Knossos Name | Invocation | Source |
+|---|---|---|---|
+| Slash command | **Dromena** | User types ` + "`/name`" + ` | ` + "`.claude/commands/`" + ` |
+| Skill tool | **Legomena** | Model calls ` + "`Skill(\"name\")`" + ` | ` + "`.claude/skills/`" + ` |
+| Task tool | **Agent** | Model calls ` + "`Task(subagent_type)`" + ` | ` + "`.claude/agents/`" + ` |
+| Hook | **Hook** | Auto-fires on lifecycle events | ` + "`.claude/settings.json`" + ` |
+| CLAUDE.md | **Inscription** | Always in context | ` + "`knossos/templates/`" + ` |
 
-- **Dromena** (` + "`/name`" + `): Enacted actions (` + "`/start`" + `, ` + "`/commit`" + `, ` + "`/pr`" + `)
-- **Legomena** (Skill tool): Sacred knowledge (` + "`prompting`" + `, ` + "`doc-artifacts`" + `, ` + "`standards`" + `)
+Dromena have side effects and are user-controlled. Legomena are reference knowledge Claude loads autonomously.
+Agents cannot spawn other agents — only the main thread has Task tool access.
 
-Full list: ` + "`.claude/commands/`" + ` and ` + "`.claude/skills/`"
+Full mapping: ` + "`lexicon`" + ` skill. Dromena list: ` + "`.claude/commands/`" + `. Legomena list: ` + "`.claude/skills/`" + `.`
 }
-
 
 func (g *Generator) getDefaultPlatformInfrastructureContent() string {
 	return `## Platform
@@ -476,12 +485,6 @@ func (g *Generator) getDefaultNavigationContent() string {
 	return `## Navigation
 
 Workflow routing: ` + "`/consult`" + `. Domain knowledge: Skill tool. File locations: ` + "`MEMORY.md`" + `.`
-}
-
-func (g *Generator) getDefaultSlashCommandsContent() string {
-	return `## Slash Commands
-
-Always respond with outcome. "No response" is never correct for explicit user requests.`
 }
 
 func (g *Generator) getDefaultQuickStartContent() string {

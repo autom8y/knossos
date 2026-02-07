@@ -35,8 +35,5 @@
 {{/* Navigation pointer (where to find everything else) */}}
 {{include "sections/navigation.md.tpl"}}
 
-{{/* Behavioral rules */}}
-{{include "sections/slash-commands.md.tpl"}}
-
 {{/* User customization (edit freely) */}}
 {{include "sections/user-content.md.tpl"}}

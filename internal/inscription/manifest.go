@@ -205,7 +205,6 @@ func (m *ManifestLoader) CreateDefault() (*Manifest, error) {
 		"commands",
 		"platform-infrastructure",
 		"navigation",
-		"slash-commands",
 	}
 
 	for _, name := range defaultKnossosRegions {
@@ -250,9 +249,6 @@ func DefaultSectionOrder() []string {
 
 		// Navigation pointer (where to find everything else)
 		"navigation",
-
-		// Behavioral rules
-		"slash-commands",
 
 		// User customization (edit freely)
 		"user-content",
