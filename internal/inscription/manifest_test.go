@@ -743,3 +743,16 @@ func TestManifest_ToJSON(t *testing.T) {
 		t.Error("ToJSON() missing region owner")
 	}
 }
+
+func TestDeprecatedRegions_NotInDefaultSectionOrder(t *testing.T) {
+	defaults := make(map[string]bool)
+	for _, name := range DefaultSectionOrder() {
+		defaults[name] = true
+	}
+
+	for _, name := range DeprecatedRegions() {
+		if defaults[name] {
+			t.Errorf("DeprecatedRegions() contains %q which is still in DefaultSectionOrder()", name)
+		}
+	}
+}

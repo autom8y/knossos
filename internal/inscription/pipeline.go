@@ -453,8 +453,18 @@ func (p *Pipeline) Validate() (*ValidationResult, error) {
 		}
 
 		// Check for regions in file but not in manifest
+		deprecated := make(map[string]bool)
+		for _, name := range DeprecatedRegions() {
+			deprecated[name] = true
+		}
 		for name := range parseResult.Regions {
-			if !manifest.HasRegion(name) {
+			if deprecated[name] {
+				result.Issues = append(result.Issues, ValidationIssue{
+					Severity: "warning",
+					Region:   name,
+					Message:  "Deprecated region found in CLAUDE.md — will be removed on next sync",
+				})
+			} else if !manifest.HasRegion(name) {
 				result.Issues = append(result.Issues, ValidationIssue{
 					Severity: "info",
 					Region:   name,

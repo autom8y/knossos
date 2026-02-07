@@ -528,3 +528,16 @@ func (g *Generator) GenerateAll() (map[string]string, error) {
 
 	return result, nil
 }
+
+// CanGenerateRegion returns true if the generator can produce content for the
+// named region via template file, inline template, or Go default.
+func (g *Generator) CanGenerateRegion(name string) bool {
+	if g.getSectionTemplatePath(name) != "" {
+		return true
+	}
+	if _, ok := g.sectionTemplates[name]; ok {
+		return true
+	}
+	_, err := g.getDefaultSectionContent(name)
+	return err == nil
+}

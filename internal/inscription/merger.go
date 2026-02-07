@@ -22,6 +22,9 @@ type MergeResult struct {
 
 	// RegionsOverwritten lists regions where user edits were overwritten.
 	RegionsOverwritten []string
+
+	// RegionsDropped lists deprecated regions that were removed during merge.
+	RegionsDropped []string
 }
 
 // Conflict represents a merge conflict detected during region merging.
@@ -72,14 +75,52 @@ type Merger struct {
 
 	// Parser parses existing content for markers.
 	Parser *MarkerParser
+
+	// DeprecatedRegions contains region names that should be dropped during
+	// merge instead of being adopted as satellite. Populated from both the
+	// static DeprecatedRegions() list and dynamic detection of non-satellite
+	// regions the generator can no longer produce.
+	DeprecatedRegions map[string]bool
 }
 
 // NewMerger creates a new merger with the given configuration.
+// Automatically detects deprecated regions from both the static list and
+// dynamic analysis of the manifest against the generator's capabilities.
 func NewMerger(manifest *Manifest, generator *Generator) *Merger {
+	deprecated := make(map[string]bool)
+
+	// Layer 1: static list of historically deprecated regions
+	for _, name := range DeprecatedRegions() {
+		deprecated[name] = true
+	}
+
+	// Layer 2: dynamic detection — non-satellite manifest regions the generator can't produce
+	if generator != nil && manifest != nil {
+		for name, region := range manifest.Regions {
+			if region.Owner == OwnerSatellite {
+				continue
+			}
+			if !generator.CanGenerateRegion(name) {
+				deprecated[name] = true
+			}
+		}
+	}
+
+	// Safety: never deprecate a region the user explicitly owns as satellite.
+	// The static list might contain a name that a user chose for their satellite.
+	if manifest != nil {
+		for name := range deprecated {
+			if region := manifest.GetRegion(name); region != nil && region.Owner == OwnerSatellite {
+				delete(deprecated, name)
+			}
+		}
+	}
+
 	return &Merger{
-		Manifest:  manifest,
-		Generator: generator,
-		Parser:    NewMarkerParser(),
+		Manifest:          manifest,
+		Generator:         generator,
+		Parser:            NewMarkerParser(),
+		DeprecatedRegions: deprecated,
 	}
 }
 
@@ -91,6 +132,7 @@ func (m *Merger) MergeRegions(existingContent string, generatedContent map[strin
 		RegionsMerged:      make([]string, 0),
 		RegionsPreserved:   make([]string, 0),
 		RegionsOverwritten: make([]string, 0),
+		RegionsDropped:     make([]string, 0),
 	}
 
 	// Parse existing content to extract regions
@@ -156,9 +198,19 @@ func (m *Merger) MergeRegions(existingContent string, generatedContent map[strin
 		result.RegionsMerged = append(result.RegionsMerged, regionName)
 	}
 
-	// Append unknown sections from existing content (satellite-owned by default)
+	// Append unknown sections from existing content (satellite-owned by default).
+	// Skip deprecated regions to prevent zombie adoption of stale knossos content.
 	for name, parsedRegion := range parseResult.Regions {
 		if processedRegions[name] {
+			continue
+		}
+
+		// Drop deprecated regions instead of adopting as satellite
+		if m.DeprecatedRegions[name] {
+			if m.Manifest.HasRegion(name) {
+				m.Manifest.RemoveRegion(name)
+			}
+			result.RegionsDropped = append(result.RegionsDropped, name)
 			continue
 		}
 
@@ -320,6 +372,7 @@ func (m *Merger) forceMerge(existingContent string, generatedContent map[string]
 		RegionsMerged:      make([]string, 0),
 		RegionsPreserved:   make([]string, 0),
 		RegionsOverwritten: make([]string, 0),
+		RegionsDropped:     make([]string, 0),
 	}
 
 	var output strings.Builder
@@ -355,6 +408,14 @@ func (m *Merger) forceMerge(existingContent string, generatedContent map[string]
 		result.RegionsMerged = append(result.RegionsMerged, regionName)
 	}
 
+	// Clean deprecated regions from manifest
+	for name := range m.DeprecatedRegions {
+		if m.Manifest.HasRegion(name) {
+			m.Manifest.RemoveRegion(name)
+			result.RegionsDropped = append(result.RegionsDropped, name)
+		}
+	}
+
 	result.Content = strings.TrimSpace(output.String())
 	return result, nil
 }
@@ -368,6 +429,7 @@ func (m *Merger) preserveMerge(existingContent string, generatedContent map[stri
 		RegionsMerged:      make([]string, 0),
 		RegionsPreserved:   make([]string, 0),
 		RegionsOverwritten: make([]string, 0),
+		RegionsDropped:     make([]string, 0),
 	}
 
 	var output strings.Builder
@@ -397,6 +459,14 @@ func (m *Merger) preserveMerge(existingContent string, generatedContent map[stri
 		}
 
 		result.RegionsMerged = append(result.RegionsMerged, regionName)
+	}
+
+	// Clean deprecated regions from manifest
+	for name := range m.DeprecatedRegions {
+		if m.Manifest.HasRegion(name) {
+			m.Manifest.RemoveRegion(name)
+			result.RegionsDropped = append(result.RegionsDropped, name)
+		}
 	}
 
 	result.Content = strings.TrimSpace(output.String())

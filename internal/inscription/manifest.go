@@ -233,6 +233,7 @@ func (m *ManifestLoader) CreateDefault() (*Manifest, error) {
 }
 
 // DefaultSectionOrder returns the default section order.
+// When removing a section from this list, add its name to DeprecatedRegions().
 func DefaultSectionOrder() []string {
 	return []string{
 		// Core behavior (determines agent mode)
@@ -252,6 +253,15 @@ func DefaultSectionOrder() []string {
 
 		// User customization (edit freely)
 		"user-content",
+	}
+}
+
+// DeprecatedRegions returns region names that were previously part of the
+// default section order but have been removed. These are dropped during merge
+// instead of being adopted as satellite content.
+func DeprecatedRegions() []string {
+	return []string{
+		"slash-commands", // Removed in v18, absorbed into commands Rosetta Stone
 	}
 }
 

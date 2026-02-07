@@ -933,3 +933,244 @@ func TestMerger_PreserveMerge_NoExisting(t *testing.T) {
 		t.Error("preserveMerge() should use new content when no existing")
 	}
 }
+
+func TestMerger_MergeRegions_DeprecatedRegionDropped(t *testing.T) {
+	manifest := &Manifest{
+		Regions: map[string]*Region{
+			"known-section": {Owner: OwnerKnossos},
+		},
+		SectionOrder: []string{"known-section"},
+	}
+	gen := NewGenerator("", manifest, nil)
+	merger := NewMerger(manifest, gen)
+	// Simulate a deprecated region
+	merger.DeprecatedRegions["old-section"] = true
+
+	existing := `<!-- KNOSSOS:START known-section -->
+Known content
+<!-- KNOSSOS:END known-section -->
+
+<!-- KNOSSOS:START old-section -->
+Zombie content from removed template
+<!-- KNOSSOS:END old-section -->`
+
+	generated := map[string]string{
+		"known-section": "New known content",
+	}
+
+	result, err := merger.MergeRegions(existing, generated)
+	if err != nil {
+		t.Fatalf("MergeRegions() error = %v", err)
+	}
+
+	// Deprecated region should NOT be in output
+	if strings.Contains(result.Content, "Zombie content") {
+		t.Error("MergeRegions() should drop deprecated regions")
+	}
+	if strings.Contains(result.Content, "old-section") {
+		t.Error("MergeRegions() should not include deprecated region markers")
+	}
+
+	// Should NOT be adopted into manifest
+	if manifest.HasRegion("old-section") {
+		t.Error("MergeRegions() should not add deprecated region to manifest")
+	}
+
+	// Should be tracked in RegionsDropped
+	if len(result.RegionsDropped) != 1 || result.RegionsDropped[0] != "old-section" {
+		t.Errorf("MergeRegions() RegionsDropped = %v, want [old-section]", result.RegionsDropped)
+	}
+}
+
+func TestMerger_MergeRegions_DeprecatedRegionCleanedFromManifest(t *testing.T) {
+	// Simulate a region that was previously zombie-adopted as satellite
+	manifest := &Manifest{
+		Regions: map[string]*Region{
+			"known-section": {Owner: OwnerKnossos},
+			"zombie-region": {Owner: OwnerSatellite}, // zombie-adopted
+		},
+		SectionOrder: []string{"known-section"},
+	}
+	gen := NewGenerator("", manifest, nil)
+	merger := NewMerger(manifest, gen)
+	merger.DeprecatedRegions["zombie-region"] = true
+
+	existing := `<!-- KNOSSOS:START known-section -->
+Known content
+<!-- KNOSSOS:END known-section -->
+
+<!-- KNOSSOS:START zombie-region -->
+Stale platform content
+<!-- KNOSSOS:END zombie-region -->`
+
+	generated := map[string]string{
+		"known-section": "New known content",
+	}
+
+	result, err := merger.MergeRegions(existing, generated)
+	if err != nil {
+		t.Fatalf("MergeRegions() error = %v", err)
+	}
+
+	// Zombie region should be dropped from output
+	if strings.Contains(result.Content, "Stale platform content") {
+		t.Error("MergeRegions() should drop zombie-adopted deprecated region")
+	}
+
+	// Zombie region should be removed from manifest
+	if manifest.HasRegion("zombie-region") {
+		t.Error("MergeRegions() should remove zombie-adopted region from manifest")
+	}
+
+	// Should be tracked
+	if len(result.RegionsDropped) != 1 || result.RegionsDropped[0] != "zombie-region" {
+		t.Errorf("MergeRegions() RegionsDropped = %v, want [zombie-region]", result.RegionsDropped)
+	}
+}
+
+func TestMerger_MergeRegions_GenuineSatelliteStillPreserved(t *testing.T) {
+	manifest := &Manifest{
+		Regions: map[string]*Region{
+			"known-section": {Owner: OwnerKnossos},
+		},
+		SectionOrder: []string{"known-section"},
+	}
+	gen := NewGenerator("", manifest, nil)
+	merger := NewMerger(manifest, gen)
+	// Note: "user-custom" is NOT in DeprecatedRegions
+
+	existing := `<!-- KNOSSOS:START known-section -->
+Known content
+<!-- KNOSSOS:END known-section -->
+
+<!-- KNOSSOS:START user-custom -->
+User created content
+<!-- KNOSSOS:END user-custom -->`
+
+	generated := map[string]string{
+		"known-section": "New known content",
+	}
+
+	result, err := merger.MergeRegions(existing, generated)
+	if err != nil {
+		t.Fatalf("MergeRegions() error = %v", err)
+	}
+
+	// User-created region should be preserved
+	if !strings.Contains(result.Content, "User created content") {
+		t.Error("MergeRegions() should preserve genuine user-created satellite regions")
+	}
+
+	// Should be adopted into manifest as satellite
+	if !manifest.HasRegion("user-custom") {
+		t.Error("MergeRegions() should add genuine satellite to manifest")
+	}
+	if manifest.GetRegion("user-custom").Owner != OwnerSatellite {
+		t.Error("MergeRegions() genuine satellite should be satellite-owned")
+	}
+
+	// Should NOT be in RegionsDropped
+	if len(result.RegionsDropped) != 0 {
+		t.Errorf("MergeRegions() RegionsDropped should be empty, got %v", result.RegionsDropped)
+	}
+}
+
+func TestMerger_ForceMerge_CleansDeprecatedFromManifest(t *testing.T) {
+	manifest := &Manifest{
+		Regions: map[string]*Region{
+			"knossos":   {Owner: OwnerKnossos},
+			"satellite": {Owner: OwnerSatellite},
+			"zombie":    {Owner: OwnerSatellite}, // zombie-adopted deprecated region
+		},
+		SectionOrder: []string{"knossos", "satellite"},
+	}
+	gen := NewGenerator("", manifest, nil)
+	merger := NewMerger(manifest, gen)
+	// Reset to only test the zombie — dynamic detection flags test regions too
+	merger.DeprecatedRegions = map[string]bool{"zombie": true}
+
+	existing := `<!-- KNOSSOS:START knossos -->
+Old knossos
+<!-- KNOSSOS:END knossos -->
+
+<!-- KNOSSOS:START satellite -->
+My custom content
+<!-- KNOSSOS:END satellite -->`
+
+	result, err := merger.forceMerge(existing, map[string]string{
+		"knossos": "Forced knossos",
+	})
+	if err != nil {
+		t.Fatalf("forceMerge() error = %v", err)
+	}
+
+	// Zombie should be cleaned from manifest
+	if manifest.HasRegion("zombie") {
+		t.Error("forceMerge() should remove deprecated region from manifest")
+	}
+
+	// Should track dropped
+	if len(result.RegionsDropped) != 1 || result.RegionsDropped[0] != "zombie" {
+		t.Errorf("forceMerge() RegionsDropped = %v, want [zombie]", result.RegionsDropped)
+	}
+
+	// Satellite should still be preserved
+	if !strings.Contains(result.Content, "My custom content") {
+		t.Error("forceMerge() should preserve satellite")
+	}
+}
+
+func TestMerger_SatelliteNameCollidingWithDeprecatedList(t *testing.T) {
+	// Q9: A user satellite with a name matching the static deprecated list
+	// must NOT be destroyed. Satellite protection takes precedence.
+	manifest := &Manifest{
+		Regions: map[string]*Region{
+			"known-section":  {Owner: OwnerKnossos},
+			"slash-commands": {Owner: OwnerSatellite}, // user chose this name
+		},
+		SectionOrder: []string{"known-section", "slash-commands"},
+	}
+	gen := NewGenerator("", manifest, nil)
+	merger := NewMerger(manifest, gen)
+
+	// "slash-commands" is in DeprecatedRegions() static list,
+	// but satellite protection should override
+	if merger.DeprecatedRegions["slash-commands"] {
+		t.Fatal("NewMerger() should not mark satellite-owned region as deprecated even if in static list")
+	}
+
+	existing := `<!-- KNOSSOS:START known-section -->
+Known content
+<!-- KNOSSOS:END known-section -->
+
+<!-- KNOSSOS:START slash-commands -->
+User's custom slash-commands content
+<!-- KNOSSOS:END slash-commands -->`
+
+	generated := map[string]string{
+		"known-section": "New known content",
+	}
+
+	result, err := merger.MergeRegions(existing, generated)
+	if err != nil {
+		t.Fatalf("MergeRegions() error = %v", err)
+	}
+
+	// User satellite content must be preserved
+	if !strings.Contains(result.Content, "User's custom slash-commands content") {
+		t.Error("MergeRegions() must preserve satellite content even when name matches deprecated list")
+	}
+
+	// Region must remain in manifest as satellite
+	if !manifest.HasRegion("slash-commands") {
+		t.Error("MergeRegions() must not remove satellite region from manifest")
+	}
+	if manifest.GetRegion("slash-commands").Owner != OwnerSatellite {
+		t.Error("MergeRegions() must not change satellite ownership")
+	}
+
+	// Must NOT be in RegionsDropped
+	if len(result.RegionsDropped) != 0 {
+		t.Errorf("MergeRegions() RegionsDropped should be empty, got %v", result.RegionsDropped)
+	}
+}
