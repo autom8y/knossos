@@ -2,6 +2,7 @@ package session
 
 import (
 	"bufio"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -9,6 +10,7 @@ import (
 
 // FindActiveSession scans session directories to find the currently ACTIVE session.
 // Returns empty string if no active session exists.
+// Returns error if multiple ACTIVE sessions detected (data corruption/race condition).
 // This is the authoritative source of truth — .current-session is a cache.
 func FindActiveSession(sessionsDir string) (string, error) {
 	entries, err := os.ReadDir(sessionsDir)
@@ -18,6 +20,8 @@ func FindActiveSession(sessionsDir string) (string, error) {
 		}
 		return "", err
 	}
+
+	var activeIDs []string
 
 	for _, entry := range entries {
 		if !entry.IsDir() {
@@ -33,8 +37,16 @@ func FindActiveSession(sessionsDir string) (string, error) {
 		contextPath := filepath.Join(sessionsDir, name, "SESSION_CONTEXT.md")
 		status := readStatusFromFrontmatter(contextPath)
 		if status == "ACTIVE" {
-			return name, nil
+			activeIDs = append(activeIDs, name)
 		}
+	}
+
+	if len(activeIDs) > 1 {
+		return "", fmt.Errorf("multiple active sessions detected: %v — resolve with 'ari session park' to park extras", activeIDs)
+	}
+
+	if len(activeIDs) == 1 {
+		return activeIDs[0], nil
 	}
 
 	return "", nil

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 )
@@ -185,12 +186,9 @@ func TestFindActiveSession_SkipsNonSessionDirs(t *testing.T) {
 // --- Dual-ACTIVE Session Scenario ---
 //
 // KNOWN BEHAVIOR: After a crash, two sessions could both have status ACTIVE.
-// FindActiveSession scans via os.ReadDir (alphabetical order on most OSes)
-// and returns the FIRST active session found. There is no conflict detection.
-//
-// This is documented and accepted behavior for now. The Fray initiative
-// (future work) will need to add conflict detection to handle this case
-// by either prompting the user or using timestamp-based resolution.
+// FindActiveSession enforces single-ACTIVE invariant by detecting multiple
+// ACTIVE sessions and returning an error. This prevents silent data corruption
+// from race conditions.
 
 func TestFindActiveSession_DualActive(t *testing.T) {
 	tmpDir, err := os.MkdirTemp("", "discovery-dual-test-*")
@@ -208,26 +206,27 @@ func TestFindActiveSession_DualActive(t *testing.T) {
 	writeSessionContext(t, sessionsDir, session2, "ACTIVE")
 
 	result, err := FindActiveSession(sessionsDir)
-	if err != nil {
-		t.Fatalf("FindActiveSession() error = %v", err)
+
+	// Must return an error for dual-ACTIVE
+	if err == nil {
+		t.Fatalf("FindActiveSession() expected error for dual-ACTIVE, got nil")
 	}
 
-	// Must return one of the two — not empty
-	if result == "" {
-		t.Fatal("FindActiveSession() returned empty string, expected one of the two ACTIVE sessions")
+	// Error message must mention both sessions
+	errMsg := err.Error()
+	if !strings.Contains(errMsg, "multiple active sessions") {
+		t.Errorf("Error message %q should contain 'multiple active sessions'", errMsg)
+	}
+	if !strings.Contains(errMsg, session1) || !strings.Contains(errMsg, session2) {
+		t.Errorf("Error message %q should mention both session IDs: %q, %q", errMsg, session1, session2)
 	}
 
-	// Must be one of the two sessions we created
-	if result != session1 && result != session2 {
-		t.Errorf("FindActiveSession() = %q, want either %q or %q", result, session1, session2)
+	// Result must be empty string on error
+	if result != "" {
+		t.Errorf("FindActiveSession() returned %q on error, want empty string", result)
 	}
 
-	// KNOWN BEHAVIOR: scan returns first-found by os.ReadDir order.
-	// On most systems, os.ReadDir returns entries sorted alphabetically,
-	// so session1 (active01) would be returned first. But we do NOT assert
-	// which specific one is returned — only that it IS one of them.
-	// The Fray initiative will need to add conflict detection here.
-	t.Logf("Dual-ACTIVE: FindActiveSession returned %q (first-found behavior)", result)
+	t.Logf("Dual-ACTIVE correctly detected: %v", err)
 }
 
 // --- Cache-Then-Scan Performance Sanity Check ---
