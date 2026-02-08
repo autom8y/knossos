@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -99,6 +100,15 @@ func runPrecompactCore(ctx *cmdContext, printer *output.Printer) error {
 		return outputAllowPrecompact(printer, "")
 	}
 
+	// Write compact checkpoint for SessionStart rehydration
+	if err := writeCompactCheckpoint(sessionDir); err != nil {
+		printer.VerboseLog("warn", "failed to write compact checkpoint", map[string]interface{}{
+			"error":      err.Error(),
+			"sessionDir": sessionDir,
+		})
+		// Non-fatal: checkpoint is best-effort
+	}
+
 	// Output result
 	if result.Rotated {
 		reason := fmt.Sprintf("rotated SESSION_CONTEXT (archived %d lines, kept %d)", result.ArchivedLines, result.KeptLines)
@@ -113,6 +123,52 @@ func runPrecompactCore(ctx *cmdContext, printer *output.Printer) error {
 // hookSpecificOutput schema for PreCompact, so we emit simple JSON.
 func outputAllowPrecompact(printer *output.Printer, reason string) error {
 	return printer.Print(precompactResult{Reason: reason})
+}
+
+// CompactCheckpointFile is the filename for the PreCompact state checkpoint.
+// This file is written during PreCompact and consumed during SessionStart
+// to rehydrate key session state after context window compaction.
+const CompactCheckpointFile = "COMPACT_STATE.md"
+
+// CompactCheckpointConsumed is the filename after the checkpoint has been injected.
+const CompactCheckpointConsumed = "COMPACT_STATE.consumed.md"
+
+// writeCompactCheckpoint writes a COMPACT_STATE.md checkpoint in the session directory.
+// It extracts key fields from SESSION_CONTEXT.md frontmatter and writes a minimal
+// markdown summary for rehydration after context compaction.
+func writeCompactCheckpoint(sessionDir string) error {
+	sessionContextPath := filepath.Join(sessionDir, "SESSION_CONTEXT.md")
+	sessCtx, err := session.LoadContext(sessionContextPath)
+	if err != nil {
+		return fmt.Errorf("load session context: %w", err)
+	}
+
+	// Build checkpoint content with key recovery fields
+	var content strings.Builder
+	content.WriteString("# Compact State Checkpoint\n\n")
+	content.WriteString("State captured at PreCompact for session recovery.\n\n")
+	content.WriteString("| Field | Value |\n")
+	content.WriteString("|-------|-------|\n")
+
+	if sessCtx.SessionID != "" {
+		content.WriteString(fmt.Sprintf("| session_id | %s |\n", sessCtx.SessionID))
+	}
+	if sessCtx.Initiative != "" {
+		content.WriteString(fmt.Sprintf("| initiative | %s |\n", sessCtx.Initiative))
+	}
+	if sessCtx.Complexity != "" {
+		content.WriteString(fmt.Sprintf("| complexity | %s |\n", sessCtx.Complexity))
+	}
+	if sessCtx.ActiveRite != "" {
+		content.WriteString(fmt.Sprintf("| active_rite | %s |\n", sessCtx.ActiveRite))
+	}
+	if sessCtx.CurrentPhase != "" {
+		content.WriteString(fmt.Sprintf("| current_phase | %s |\n", sessCtx.CurrentPhase))
+	}
+	content.WriteString(fmt.Sprintf("| status | %s |\n", sessCtx.Status))
+
+	checkpointPath := filepath.Join(sessionDir, CompactCheckpointFile)
+	return os.WriteFile(checkpointPath, []byte(content.String()), 0644)
 }
 
 // fileExists checks if a file exists.

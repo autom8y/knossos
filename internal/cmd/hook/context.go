@@ -3,6 +3,8 @@ package hook
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -21,6 +23,7 @@ type ContextOutput struct {
 	CurrentPhase  string `json:"current_phase,omitempty"`
 	ExecutionMode string `json:"execution_mode,omitempty"`
 	HasSession    bool   `json:"has_session"`
+	CompactState  string `json:"compact_state,omitempty"` // Rehydrated from COMPACT_STATE.md if present
 }
 
 // Text implements output.Textable for markdown output.
@@ -38,6 +41,10 @@ func (c ContextOutput) Text() string {
 	b.WriteString(fmt.Sprintf("| Initiative | %s |\n", c.Initiative))
 	b.WriteString(fmt.Sprintf("| Rite | %s |\n", c.Rite))
 	b.WriteString(fmt.Sprintf("| Mode | %s |\n", c.ExecutionMode))
+	if c.CompactState != "" {
+		b.WriteString("\n## Recovered State (from PreCompact checkpoint)\n")
+		b.WriteString(c.CompactState)
+	}
 	return b.String()
 }
 
@@ -122,6 +129,13 @@ func runContextCore(ctx *cmdContext, printer *output.Printer) error {
 		HasSession:    true,
 	}
 
+	// Rehydrate from COMPACT_STATE.md if present (written by PreCompact hook)
+	sessionDir := resolver.SessionDir(sessionID)
+	compactState := consumeCompactCheckpoint(sessionDir, printer)
+	if compactState != "" {
+		result.CompactState = compactState
+	}
+
 	return printer.Print(result)
 }
 
@@ -129,6 +143,27 @@ func runContextCore(ctx *cmdContext, printer *output.Printer) error {
 func outputNoSession(printer *output.Printer) error {
 	result := ContextOutput{HasSession: false}
 	return printer.Print(result)
+}
+
+// consumeCompactCheckpoint reads COMPACT_STATE.md from the session directory
+// and renames it to COMPACT_STATE.consumed.md to prevent re-injection.
+// Returns the checkpoint content or empty string if no checkpoint exists.
+func consumeCompactCheckpoint(sessionDir string, printer *output.Printer) string {
+	checkpointPath := filepath.Join(sessionDir, CompactCheckpointFile)
+	data, err := os.ReadFile(checkpointPath)
+	if err != nil {
+		return "" // No checkpoint — normal path
+	}
+
+	// Rename to consumed to prevent re-injection on next SessionStart
+	consumedPath := filepath.Join(sessionDir, CompactCheckpointConsumed)
+	if renameErr := os.Rename(checkpointPath, consumedPath); renameErr != nil {
+		printer.VerboseLog("warn", "failed to rename compact checkpoint",
+			map[string]interface{}{"error": renameErr.Error()})
+		// Still return the data — consumption is best-effort
+	}
+
+	return string(data)
 }
 
 // determineExecutionMode determines the execution mode based on session and rite.

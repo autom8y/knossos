@@ -268,3 +268,148 @@ Just a few lines
 		t.Error("file was modified when it shouldn't have been")
 	}
 }
+
+func TestPrecompact_WritesCompactCheckpoint(t *testing.T) {
+	tmpDir := t.TempDir()
+	sessionID := "session-checkpoint-001"
+	sessionsDir := filepath.Join(tmpDir, ".claude", "sessions")
+	sessionDir := filepath.Join(sessionsDir, sessionID)
+	os.MkdirAll(sessionDir, 0755)
+
+	// Write .current-session
+	currentSessionFile := filepath.Join(sessionsDir, ".current-session")
+	os.WriteFile(currentSessionFile, []byte(sessionID), 0644)
+
+	// Create large SESSION_CONTEXT.md to trigger rotation
+	sessionContextPath := filepath.Join(sessionDir, "SESSION_CONTEXT.md")
+	var b strings.Builder
+	b.WriteString(`---
+session_id: session-checkpoint-001
+status: ACTIVE
+created_at: 2026-02-08T10:00:00Z
+initiative: checkpoint test
+complexity: MODULE
+active_rite: ecosystem
+current_phase: implementation
+---
+`)
+	for i := 1; i <= 250; i++ {
+		b.WriteString("Body content line\n")
+	}
+	os.WriteFile(sessionContextPath, []byte(b.String()), 0644)
+
+	os.Setenv("CLAUDE_HOOK_EVENT", string(hook.EventPreCompact))
+	os.Setenv("CLAUDE_PROJECT_DIR", tmpDir)
+	defer func() {
+		os.Unsetenv("CLAUDE_HOOK_EVENT")
+		os.Unsetenv("CLAUDE_PROJECT_DIR")
+	}()
+
+	outputFlag := "json"
+	verboseFlag := false
+	ctx := &cmdContext{
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &tmpDir,
+			},
+		},
+	}
+
+	var stdout, stderr bytes.Buffer
+	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
+
+	if err := runPrecompactCore(ctx, printer); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// Verify COMPACT_STATE.md was written
+	checkpointPath := filepath.Join(sessionDir, CompactCheckpointFile)
+	checkpointData, err := os.ReadFile(checkpointPath)
+	if err != nil {
+		t.Fatalf("COMPACT_STATE.md was not created: %v", err)
+	}
+
+	content := string(checkpointData)
+	// Verify key fields are in the checkpoint
+	if !strings.Contains(content, "session-checkpoint-001") {
+		t.Error("checkpoint missing session_id")
+	}
+	if !strings.Contains(content, "checkpoint test") {
+		t.Error("checkpoint missing initiative")
+	}
+	if !strings.Contains(content, "ecosystem") {
+		t.Error("checkpoint missing active_rite")
+	}
+	if !strings.Contains(content, "implementation") {
+		t.Error("checkpoint missing current_phase")
+	}
+	if !strings.Contains(content, "MODULE") {
+		t.Error("checkpoint missing complexity")
+	}
+}
+
+func TestPrecompact_CheckpointSmallFile(t *testing.T) {
+	// Even without rotation, checkpoint should still be written
+	tmpDir := t.TempDir()
+	sessionID := "session-checkpoint-small"
+	sessionsDir := filepath.Join(tmpDir, ".claude", "sessions")
+	sessionDir := filepath.Join(sessionsDir, sessionID)
+	os.MkdirAll(sessionDir, 0755)
+
+	currentSessionFile := filepath.Join(sessionsDir, ".current-session")
+	os.WriteFile(currentSessionFile, []byte(sessionID), 0644)
+
+	// Small SESSION_CONTEXT.md (won't trigger rotation)
+	sessionContextPath := filepath.Join(sessionDir, "SESSION_CONTEXT.md")
+	sessionContent := `---
+session_id: session-checkpoint-small
+status: ACTIVE
+created_at: 2026-02-08T10:00:00Z
+initiative: small test
+complexity: simple
+active_rite: forge
+current_phase: requirements
+---
+Small body content.
+`
+	os.WriteFile(sessionContextPath, []byte(sessionContent), 0644)
+
+	os.Setenv("CLAUDE_HOOK_EVENT", string(hook.EventPreCompact))
+	os.Setenv("CLAUDE_PROJECT_DIR", tmpDir)
+	defer func() {
+		os.Unsetenv("CLAUDE_HOOK_EVENT")
+		os.Unsetenv("CLAUDE_PROJECT_DIR")
+	}()
+
+	outputFlag := "json"
+	verboseFlag := false
+	ctx := &cmdContext{
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &tmpDir,
+			},
+		},
+	}
+
+	var stdout, stderr bytes.Buffer
+	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
+
+	if err := runPrecompactCore(ctx, printer); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// Verify checkpoint was written even without rotation
+	checkpointPath := filepath.Join(sessionDir, CompactCheckpointFile)
+	checkpointData, err := os.ReadFile(checkpointPath)
+	if err != nil {
+		t.Fatalf("COMPACT_STATE.md was not created for small file: %v", err)
+	}
+
+	if !strings.Contains(string(checkpointData), "session-checkpoint-small") {
+		t.Error("checkpoint missing session_id")
+	}
+}

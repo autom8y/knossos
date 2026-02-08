@@ -285,6 +285,156 @@ func TestRunContext_NoSession(t *testing.T) {
 	}
 }
 
+func TestRunContext_RehydratesCompactState(t *testing.T) {
+	tmpDir := t.TempDir()
+	sessionID := "session-rehydrate-001"
+
+	// Create session structure
+	sessionsDir := filepath.Join(tmpDir, ".claude", "sessions")
+	sessionDir := filepath.Join(sessionsDir, sessionID)
+	os.MkdirAll(sessionDir, 0755)
+	os.WriteFile(filepath.Join(sessionsDir, ".current-session"), []byte(sessionID), 0644)
+
+	// Write SESSION_CONTEXT.md
+	sessionContext := `---
+schema_version: "2.1"
+session_id: "session-rehydrate-001"
+status: "ACTIVE"
+created_at: "2026-02-08T10:00:00Z"
+initiative: "Rehydration Test"
+complexity: "MODULE"
+active_rite: "ecosystem"
+current_phase: "implementation"
+---
+`
+	os.WriteFile(filepath.Join(sessionDir, "SESSION_CONTEXT.md"), []byte(sessionContext), 0644)
+	os.WriteFile(filepath.Join(tmpDir, ".claude", "ACTIVE_RITE"), []byte("ecosystem"), 0644)
+
+	// Write COMPACT_STATE.md (simulating PreCompact wrote it)
+	checkpointContent := "# Compact State Checkpoint\n\n| Field | Value |\n|-------|-------|\n| session_id | session-rehydrate-001 |\n| initiative | Rehydration Test |\n"
+	os.WriteFile(filepath.Join(sessionDir, CompactCheckpointFile), []byte(checkpointContent), 0644)
+
+	testutil.SetupEnv(t, &testutil.HookEnv{
+		Event:      "SessionStart",
+		ProjectDir: tmpDir,
+	})
+
+	var stdout, stderr bytes.Buffer
+	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
+
+	outputFlag := "json"
+	verboseFlag := false
+	ctx := &cmdContext{
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &tmpDir,
+			},
+			SessionID: nil,
+		},
+	}
+
+	err := runContextCore(ctx, printer)
+	if err != nil {
+		t.Fatalf("runContext() error = %v", err)
+	}
+
+	var result ContextOutput
+	if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
+		t.Fatalf("Failed to parse output: %v\nOutput: %s", err, stdout.String())
+	}
+
+	// Verify compact state was rehydrated
+	if result.CompactState == "" {
+		t.Error("Expected CompactState to be populated from COMPACT_STATE.md")
+	}
+	if !strings.Contains(result.CompactState, "session-rehydrate-001") {
+		t.Error("CompactState should contain session_id")
+	}
+	if !strings.Contains(result.CompactState, "Rehydration Test") {
+		t.Error("CompactState should contain initiative")
+	}
+
+	// Verify checkpoint was consumed (renamed)
+	checkpointPath := filepath.Join(sessionDir, CompactCheckpointFile)
+	if _, err := os.Stat(checkpointPath); err == nil {
+		t.Error("COMPACT_STATE.md should have been renamed after consumption")
+	}
+	consumedPath := filepath.Join(sessionDir, CompactCheckpointConsumed)
+	if _, err := os.Stat(consumedPath); os.IsNotExist(err) {
+		t.Error("COMPACT_STATE.consumed.md should exist after consumption")
+	}
+}
+
+func TestRunContext_NoCompactState(t *testing.T) {
+	tmpDir := t.TempDir()
+	sessionID := "session-no-checkpoint"
+
+	sessionsDir := filepath.Join(tmpDir, ".claude", "sessions")
+	sessionDir := filepath.Join(sessionsDir, sessionID)
+	os.MkdirAll(sessionDir, 0755)
+	os.WriteFile(filepath.Join(sessionsDir, ".current-session"), []byte(sessionID), 0644)
+
+	sessionContext := `---
+schema_version: "2.1"
+session_id: "session-no-checkpoint"
+status: "ACTIVE"
+created_at: "2026-02-08T10:00:00Z"
+initiative: "No Checkpoint"
+complexity: "simple"
+active_rite: "forge"
+current_phase: "requirements"
+---
+`
+	os.WriteFile(filepath.Join(sessionDir, "SESSION_CONTEXT.md"), []byte(sessionContext), 0644)
+	os.WriteFile(filepath.Join(tmpDir, ".claude", "ACTIVE_RITE"), []byte("forge"), 0644)
+
+	testutil.SetupEnv(t, &testutil.HookEnv{
+		Event:      "SessionStart",
+		ProjectDir: tmpDir,
+	})
+
+	var stdout, stderr bytes.Buffer
+	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
+
+	outputFlag := "json"
+	verboseFlag := false
+	ctx := &cmdContext{
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &tmpDir,
+			},
+			SessionID: nil,
+		},
+	}
+
+	err := runContextCore(ctx, printer)
+	if err != nil {
+		t.Fatalf("runContext() error = %v", err)
+	}
+
+	var result ContextOutput
+	if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
+		t.Fatalf("Failed to parse output: %v\nOutput: %s", err, stdout.String())
+	}
+
+	// No checkpoint means CompactState should be empty
+	if result.CompactState != "" {
+		t.Errorf("Expected empty CompactState, got: %s", result.CompactState)
+	}
+
+	// Normal fields should still work
+	if !result.HasSession {
+		t.Error("Expected HasSession=true")
+	}
+	if result.SessionID != sessionID {
+		t.Errorf("SessionID = %q, want %q", result.SessionID, sessionID)
+	}
+}
+
 // BenchmarkContextHook_EarlyExit benchmarks the early exit path (<5ms target).
 func BenchmarkContextHook_EarlyExit(b *testing.B) {
 	outputFlag := "json"
