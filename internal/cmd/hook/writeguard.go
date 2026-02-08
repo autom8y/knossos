@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/spf13/cobra"
 
@@ -18,8 +19,6 @@ type ToolInput struct {
 	FilePath string `json:"file_path"`
 }
 
-// BypassEnvVar is the environment variable to bypass writeguard.
-const BypassEnvVar = "MOIRAI_BYPASS"
 
 // Protected file patterns for context files.
 var protectedPatterns = []string{
@@ -38,10 +37,11 @@ This hook is triggered on PreToolUse events for Write/Edit tools. It:
 - Checks if the target file is a protected context file (*_CONTEXT.md)
 - Returns {"hookSpecificOutput": {"permissionDecision": "deny", "permissionDecisionReason": "..."}} to prevent the write
 - Returns {"hookSpecificOutput": {"permissionDecision": "allow"}} for all other files
-- Respects MOIRAI_BYPASS env var for override
+- Allows writes when Moirai holds a valid session lock
 
 Input (env vars):
   CLAUDE_TOOL_INPUT: {"file_path": ".claude/sessions/.../SESSION_CONTEXT.md"}
+  CLAUDE_PROJECT_DIR: project root directory
 
 Output (stdout JSON):
   {"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "deny", "permissionDecisionReason": "Use Moirai for SESSION_CONTEXT mutations"}}
@@ -65,11 +65,6 @@ func runWriteguard(ctx *cmdContext) error {
 // runWriteguardCore contains the actual logic with injected printer for testing.
 // stdinInput is used by tests to simulate stdin input.
 func runWriteguardCore(ctx *cmdContext, printer *output.Printer, stdinInput string) error {
-	// Check bypass env var
-	if os.Getenv(BypassEnvVar) == "1" {
-		return outputAllow(printer)
-	}
-
 	// Get hook environment
 	hookEnv := ctx.getHookEnv()
 
@@ -97,6 +92,10 @@ func runWriteguardCore(ctx *cmdContext, printer *output.Printer, stdinInput stri
 
 	// Check if file is protected
 	if isProtectedFile(filePath) {
+		// Check if Moirai lock is held
+		if isMoiraiLockHeld(hookEnv.GetProjectDir()) {
+			return outputAllow(printer)
+		}
 		return outputBlock(printer, filePath)
 	}
 
@@ -130,6 +129,64 @@ func isProtectedFile(filePath string) bool {
 		}
 	}
 	return false
+}
+
+// isMoiraiLockHeld checks if a valid Moirai lock exists for the current session.
+// Returns true only if:
+// - Current session can be resolved
+// - Lock file exists at .claude/sessions/{session-id}/.moirai-lock
+// - Lock agent field is "moirai"
+// - Lock is not stale (acquired_at + stale_after_seconds > now)
+// Returns false on any error (fail closed).
+func isMoiraiLockHeld(projectDir string) bool {
+	if projectDir == "" {
+		return false
+	}
+
+	// Read current session ID
+	currentSessionPath := strings.TrimSpace(projectDir) + "/.claude/sessions/.current-session"
+	sessionIDBytes, err := os.ReadFile(currentSessionPath)
+	if err != nil {
+		return false
+	}
+	sessionID := strings.TrimSpace(string(sessionIDBytes))
+	if sessionID == "" {
+		return false
+	}
+
+	// Check for lock file
+	lockPath := strings.TrimSpace(projectDir) + "/.claude/sessions/" + sessionID + "/.moirai-lock"
+	lockData, err := os.ReadFile(lockPath)
+	if err != nil {
+		return false
+	}
+
+	// Parse lock JSON
+	var lock struct {
+		Agent             string `json:"agent"`
+		AcquiredAt        string `json:"acquired_at"`
+		StaleAfterSeconds int    `json:"stale_after_seconds"`
+	}
+	if err := json.Unmarshal(lockData, &lock); err != nil {
+		return false
+	}
+
+	// Verify agent is moirai
+	if lock.Agent != "moirai" {
+		return false
+	}
+
+	// Check if stale
+	acquiredAt, err := time.Parse(time.RFC3339, lock.AcquiredAt)
+	if err != nil {
+		return false
+	}
+	staleThreshold := acquiredAt.Add(time.Duration(lock.StaleAfterSeconds) * time.Second)
+	if time.Now().UTC().After(staleThreshold) {
+		return false // stale lock
+	}
+
+	return true
 }
 
 // outputAllow outputs an allow decision in CC's hookSpecificOutput format.

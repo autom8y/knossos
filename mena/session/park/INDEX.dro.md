@@ -2,7 +2,7 @@
 name: park
 description: Pause work session and preserve state for later
 argument-hint: "[reason]"
-allowed-tools: Bash, Read, Write
+allowed-tools: Bash, Read, Task
 model: sonnet
 disable-model-invocation: true
 ---
@@ -35,24 +35,21 @@ ari session status -o json
    - Git status (warn about uncommitted changes)
    - Open questions and blockers
 
-2. **Execute atomic park**:
-   ```bash
-   ari session park -r "Manual park"
+2. **Delegate to Moirai** for session state mutation:
    ```
-   This will:
+   Task(moirai, "park_session reason=\"<REASON>\"")
+   ```
+   Moirai will:
    - Acquire lock to prevent race conditions
-   - Create backup of SESSION_CONTEXT.md
-   - Add park metadata to frontmatter (parked_at, park_reason, git_status_at_park)
-   - Validate the result
-   - Log to audit trail
-   - Rollback on failure
+   - Execute `ari session park --reason="<REASON>"`
+   - Validate the result and log to audit trail
+   - Return structured response
 
-3. **Generate parking summary**:
+3. **Display parking summary** to user:
    - Duration so far
    - Progress (completed/in-progress artifacts)
    - Next steps when resuming
-
-4. **Display summary** to user
+   - Park reason and timestamp
 
 ## Example
 

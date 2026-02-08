@@ -2,7 +2,7 @@
 name: handoff
 description: Transfer work to a different agent with context
 argument-hint: <agent-name> [notes]
-allowed-tools: Bash, Read, Write, Task
+allowed-tools: Bash, Read, Task
 model: opus
 disable-model-invocation: true
 ---

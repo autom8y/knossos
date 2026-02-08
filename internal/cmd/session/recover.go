@@ -64,7 +64,7 @@ func runRecover(ctx *cmdContext, opts recoverOptions) error {
 			}
 
 			lockPath := filepath.Join(locksDir, entry.Name())
-			if isLockStale(lockPath) {
+			if isAdvisoryLockStale(lockPath) {
 				staleLocks = append(staleLocks, entry.Name())
 
 				if !opts.dryRun {
@@ -122,8 +122,8 @@ func runRecover(ctx *cmdContext, opts recoverOptions) error {
 	return printer.PrintSuccess(result)
 }
 
-// isLockStale checks if a lock file is stale using the same logic as the lock package.
-func isLockStale(lockPath string) bool {
+// isAdvisoryLockStale checks if an advisory lock file is stale using the same logic as the lock package.
+func isAdvisoryLockStale(lockPath string) bool {
 	data, err := os.ReadFile(lockPath)
 	if err != nil {
 		return false

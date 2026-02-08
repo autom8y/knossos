@@ -23,7 +23,7 @@ func TestIsLockStale_EmptyFile(t *testing.T) {
 		t.Fatalf("Failed to write lock file: %v", err)
 	}
 
-	if !isLockStale(lockPath) {
+	if !isAdvisoryLockStale(lockPath) {
 		t.Error("Expected empty lock file to be stale")
 	}
 }
@@ -48,7 +48,7 @@ func TestIsLockStale_FreshJSON(t *testing.T) {
 		t.Fatalf("Failed to write lock file: %v", err)
 	}
 
-	if isLockStale(lockPath) {
+	if isAdvisoryLockStale(lockPath) {
 		t.Error("Expected fresh JSON lock to NOT be stale")
 	}
 }
@@ -73,7 +73,7 @@ func TestIsLockStale_OldJSON(t *testing.T) {
 		t.Fatalf("Failed to write lock file: %v", err)
 	}
 
-	if !isLockStale(lockPath) {
+	if !isAdvisoryLockStale(lockPath) {
 		t.Error("Expected old JSON lock (10 min) to be stale")
 	}
 }
@@ -90,7 +90,7 @@ func TestIsLockStale_LegacyPID(t *testing.T) {
 		t.Fatalf("Failed to write lock file: %v", err)
 	}
 
-	if !isLockStale(lockPath) {
+	if !isAdvisoryLockStale(lockPath) {
 		t.Error("Expected legacy PID lock to be stale (all legacy locks treated as stale)")
 	}
 }
@@ -107,13 +107,13 @@ func TestIsLockStale_Unparseable(t *testing.T) {
 		t.Fatalf("Failed to write lock file: %v", err)
 	}
 
-	if !isLockStale(lockPath) {
+	if !isAdvisoryLockStale(lockPath) {
 		t.Error("Expected unparseable lock to be stale")
 	}
 }
 
 func TestIsLockStale_NonexistentFile(t *testing.T) {
-	if isLockStale("/nonexistent/path/test.lock") {
+	if isAdvisoryLockStale("/nonexistent/path/test.lock") {
 		t.Error("Expected nonexistent file to NOT be reported as stale")
 	}
 }
@@ -130,7 +130,7 @@ func TestIsLockStale_NonexistentFile(t *testing.T) {
 //    - Legacy PID alive -> NOT stale (preserves running process's lock)
 //    - Legacy PID dead  -> stale
 //
-// 2. isLockStale() in internal/cmd/session/recover.go
+// 2. isAdvisoryLockStale() in internal/cmd/session/recover.go
 //    - Runs during RECOVERY (explicit user action: "ari session recover")
 //    - AGGRESSIVE: user asked for cleanup, so be thorough
 //    - Empty file       -> stale (empty lock is garbage; clean it up)
@@ -174,7 +174,7 @@ func TestStaleDivergence_LegacyPIDAlive(t *testing.T) {
 	}
 
 	// recover.isLockStale — AGGRESSIVE: all legacy -> stale
-	recoverIsStale := isLockStale(lockPath)
+	recoverIsStale := isAdvisoryLockStale(lockPath)
 	if !recoverIsStale {
 		t.Error("recover.isLockStale should return true for legacy PID (aggressive: all legacy is stale)")
 	}
@@ -212,7 +212,7 @@ func TestStaleDivergence_EmptyFile(t *testing.T) {
 	}
 
 	// recover.isLockStale — AGGRESSIVE: empty -> stale
-	recoverIsStale := isLockStale(lockPath)
+	recoverIsStale := isAdvisoryLockStale(lockPath)
 	if !recoverIsStale {
 		t.Error("recover.isLockStale should return true for empty file (aggressive)")
 	}
@@ -246,7 +246,7 @@ func TestStaleDivergence_AgreementCases(t *testing.T) {
 		if lockMgr.IsStaleForTest(lockPath) {
 			t.Error("lock.isStale should return false for fresh JSON")
 		}
-		if isLockStale(lockPath) {
+		if isAdvisoryLockStale(lockPath) {
 			t.Error("recover.isLockStale should return false for fresh JSON")
 		}
 	})
@@ -267,7 +267,7 @@ func TestStaleDivergence_AgreementCases(t *testing.T) {
 		if !lockMgr.IsStaleForTest(lockPath) {
 			t.Error("lock.isStale should return true for old JSON")
 		}
-		if !isLockStale(lockPath) {
+		if !isAdvisoryLockStale(lockPath) {
 			t.Error("recover.isLockStale should return true for old JSON")
 		}
 	})
@@ -282,7 +282,7 @@ func TestStaleDivergence_AgreementCases(t *testing.T) {
 		if !lockMgr.IsStaleForTest(lockPath) {
 			t.Error("lock.isStale should return true for dead PID")
 		}
-		if !isLockStale(lockPath) {
+		if !isAdvisoryLockStale(lockPath) {
 			t.Error("recover.isLockStale should return true for dead PID (all legacy is stale)")
 		}
 	})

@@ -175,12 +175,18 @@ func TestRunWriteguard_EarlyExit_HooksDisabled(t *testing.T) {
 }
 
 func TestRunWriteguard_BypassEnvVar(t *testing.T) {
-	env := testutil.SetupEnv(t, &testutil.HookEnv{
+	// This test has been updated to verify that writes to protected files
+	// are blocked when no Moirai lock is held. The old MOIRAI_BYPASS env var
+	// mechanism has been replaced with a lock file check.
+	//
+	// For a test of the lock bypass mechanism, see lock_test.go which tests
+	// the full lock acquisition and release flow.
+
+	testutil.SetupEnv(t, &testutil.HookEnv{
 		Event:       "PreToolUse",
 		ToolName:    "Write",
 		ToolInput:   `{"file_path": ".claude/sessions/test/SESSION_CONTEXT.md"}`,
 	})
-	env.SetVar("MOIRAI_BYPASS", "1")
 
 	var stdout, stderr bytes.Buffer
 	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
@@ -208,8 +214,9 @@ func TestRunWriteguard_BypassEnvVar(t *testing.T) {
 		t.Fatalf("Failed to parse output: %v", err)
 	}
 
-	if result.HookSpecificOutput.PermissionDecision != "allow" {
-		t.Errorf("PermissionDecision = %q, want %q (bypass should allow)", result.HookSpecificOutput.PermissionDecision, "allow")
+	// Without a valid Moirai lock, write should be denied
+	if result.HookSpecificOutput.PermissionDecision != "deny" {
+		t.Errorf("PermissionDecision = %q, want %q (no lock should deny)", result.HookSpecificOutput.PermissionDecision, "deny")
 	}
 }
 

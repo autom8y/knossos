@@ -2,7 +2,7 @@
 name: continue
 description: Resume a parked work session with full context
 argument-hint:
-allowed-tools: Bash, Read, Write, Task
+allowed-tools: Bash, Read, Task
 model: sonnet
 disable-model-invocation: true
 ---
@@ -32,23 +32,19 @@ No flags are accepted - the command operates on the current session only.
 
 ## Behavior
 
-1. **Acquire exclusive lock** on the session to prevent race conditions
+1. **Delegate to Moirai** for session state mutation:
+   ```
+   Task(moirai, "resume_session")
+   ```
+   Moirai will:
+   - Acquire lock to prevent race conditions
+   - Validate FSM allows PARKED -> ACTIVE transition
+   - Execute `ari session resume`
+   - Update session state (status, resumed_at, clear parked_at/reason)
+   - Validate the result and log to audit trail
+   - Return structured response
 
-2. **Load and validate session context**:
-   - Read SESSION_CONTEXT.md
-   - Verify FSM allows PARKED -> ACTIVE transition
-
-3. **Update session state**:
-   - Set status to ACTIVE
-   - Set `resumed_at` timestamp
-   - Clear `parked_at` timestamp
-   - Clear `parked_reason` field
-
-4. **Save updated context** to SESSION_CONTEXT.md
-
-5. **Emit resume event** to session event log
-
-6. **Display resumption summary**:
+2. **Display resumption summary** based on Moirai's response:
    ```json
    {
      "session_id": "session-20251224-143052-a1b2c3d4",

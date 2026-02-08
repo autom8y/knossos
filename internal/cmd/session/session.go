@@ -59,6 +59,8 @@ Examples:
 	cmd.AddCommand(newAuditCmd(ctx))
 	cmd.AddCommand(newRecoverCmd(ctx))
 	cmd.AddCommand(newFrayCmd(ctx))
+	cmd.AddCommand(newLockCmd(ctx))
+	cmd.AddCommand(newUnlockCmd(ctx))
 
 	// Session commands require project context
 	common.SetNeedsProject(cmd, true, true)

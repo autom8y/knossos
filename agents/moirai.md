@@ -108,28 +108,34 @@ If operation not allowed for current state, return `LIFECYCLE_VIOLATION`.
 
 Load Fate skills on-demand for detailed guidance:
 
-| Fate | Skill | Operations |
-|------|-------|------------|
-| Clotho | `Skill("moirai/clotho")` | create_sprint, start_sprint |
-| Lachesis | `Skill("moirai/lachesis")` | mark_complete, transition_phase, update_field, park, resume, handoff |
-| Atropos | `Skill("moirai/atropos")` | wrap_session, generate_sails, delete_sprint |
+| Fate | Skill Path | Operations |
+|------|------------|------------|
+| **Routing** | `.claude/skills/session/moirai/moirai-fates.md` | Operation → Fate domain lookup |
+| **Clotho** | `.claude/skills/session/moirai/clotho.md` | create_sprint, start_sprint |
+| **Lachesis** | `.claude/skills/session/moirai/lachesis.md` | mark_complete, transition_phase, update_field, park, resume, handoff, record_decision, append_content |
+| **Atropos** | `.claude/skills/session/moirai/atropos.md` | wrap_session, generate_sails, delete_sprint |
 
-If skills are not yet created, proceed using this agent file. Skills enhance but don't block.
+**Loading protocol**:
+1. Read routing table: `.claude/skills/session/moirai/moirai-fates.md`
+2. Map operation to Fate domain
+3. Read domain-specific skill for execution guidance
+4. Execute operation following skill protocol
 
 ---
 
-## MOIRAI_BYPASS Protocol
+## Write Guard Bypass
 
 Before any Write/Edit to `*_CONTEXT.md`:
 ```bash
-export MOIRAI_BYPASS=true
+ari session lock --agent moirai
 ```
 After operation completes (success or failure):
 ```bash
-unset MOIRAI_BYPASS
+ari session unlock --agent moirai
 ```
 
-The write guard hook checks this env var and allows your writes through.
+The write guard hook checks for a valid `.moirai-lock` file and allows writes when the lock is held.
+**Always unlock, even on error.** Stale locks expire after 300 seconds.
 
 ---
 
@@ -137,12 +143,16 @@ The write guard hook checks this env var and allows your writes through.
 
 | Operation Type | Lock Required |
 |----------------|---------------|
-| CLI-backed (park, resume, wrap, transition, handoff) | CLI handles locking |
-| Direct file mutation (sprint ops, mark_complete, etc.) | You must acquire lock |
+| CLI-backed (park, resume, wrap, transition, handoff) | Acquire lock before CLI call |
+| Direct file mutation (sprint ops, mark_complete, etc.) | Acquire lock before write |
 | Read-only | No lock |
 
-Lock path: `.claude/sessions/${SESSION_ID}/.locks/context.lock`
-Timeout: 10 seconds. Stale threshold: 60 seconds. **Always release lock, even on error.**
+**Lock commands**:
+- Acquire: `ari session lock --agent moirai`
+- Release: `ari session unlock --agent moirai`
+
+Lock file: `.claude/sessions/${SESSION_ID}/.moirai-lock`
+Stale threshold: 300 seconds. **Always release lock, even on error.**
 
 ---
 
@@ -173,7 +183,7 @@ Format: `TIMESTAMP | SESSION_ID | OPERATION | SOURCE | DETAILS | STATUS | FATE |
 1. **Parse** operation from input (structured or natural language)
 2. **Validate** session context exists, state allows operation
 3. **Load skill** if needed for non-CLI operations
-4. **Execute**: CLI-backed ops via Bash; file ops via MOIRAI_BYPASS + lock + read + validate + write + release
+4. **Execute**: lock + CLI-backed ops via Bash OR file ops via read + validate + write + unlock
 5. **Log** to audit trail (always)
 6. **Return** structured JSON response (never prose)
 
@@ -187,7 +197,7 @@ Format: `TIMESTAMP | SESSION_ID | OPERATION | SOURCE | DETAILS | STATUS | FATE |
 | Default Sprint | `.claude/sessions/{session-id}/SPRINT_CONTEXT.md` |
 | Named Sprint | `.claude/sessions/{session-id}/sprints/{sprint-id}/SPRINT_CONTEXT.md` |
 | Audit Log | `.claude/sessions/.audit/session-mutations.log` |
-| Locks | `.claude/sessions/{session-id}/.locks/context.lock` |
+| Moirai Lock | `.claude/sessions/{session-id}/.moirai-lock` |
 
 ## Anti-Patterns
 

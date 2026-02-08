@@ -2,7 +2,7 @@
 name: wrap
 description: Complete session with quality gates and summary
 argument-hint: "[--skip-checks] [--no-archive]"
-allowed-tools: Bash, Read, Write, Task, Glob
+allowed-tools: Bash, Read, Task, Glob
 model: sonnet
 disable-model-invocation: true
 ---
@@ -41,21 +41,21 @@ ari session status -o json
    - Decisions made (from handoff notes)
    - Lessons learned
 
-3. **Execute atomic wrap**:
-   ```bash
-   ari session wrap
+3. **Delegate to Moirai** for session state mutation:
    ```
-   This will:
+   Task(moirai, "wrap_session")
+   ```
+   Or with emergency flag:
+   ```
+   Task(moirai, "wrap_session --emergency")
+   ```
+   Moirai will:
    - Acquire lock to prevent race conditions
-   - Create backup of SESSION_CONTEXT.md
-   - Add completed_at timestamp to frontmatter
-   - Archive session directory (unless --no-archive)
-   - Clear session marker
-   - Validate the result
-   - Log to audit trail
-   - Rollback on failure
+   - Execute `ari session wrap` (with flags if specified)
+   - Validate the result and log to audit trail
+   - Return structured response with session summary
 
-4. **Display completion summary**:
+4. **Display completion summary** based on Moirai's response:
    ```
    Session Complete: {initiative}
    Session ID: {session-id}
@@ -72,7 +72,7 @@ ari session status -o json
    Next session: Use /start for new work
    ```
 
-6. **Worktree cleanup** (if in a worktree):
+5. **Worktree cleanup** (if in a worktree):
 
    Check if running in an isolated worktree:
    ```bash
