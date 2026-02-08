@@ -126,11 +126,6 @@ func NewSyncer(resourceType ResourceType) (*Syncer, error) {
 		return nil, ErrKnossosHomeNotSet
 	}
 
-	homeDir, err := os.UserHomeDir()
-	if err != nil {
-		return nil, err
-	}
-
 	s := &Syncer{
 		resourceType: resourceType,
 	}
@@ -138,19 +133,19 @@ func NewSyncer(resourceType ResourceType) (*Syncer, error) {
 	switch resourceType {
 	case ResourceAgents:
 		s.sourceDir = filepath.Join(knossosHome, "agents")
-		s.targetDir = filepath.Join(homeDir, ".claude", "agents")
-		s.manifestPath = filepath.Join(homeDir, ".claude", "USER_AGENT_MANIFEST.json")
+		s.targetDir = paths.UserAgentsDir()
+		s.manifestPath = paths.UserAgentManifest()
 		s.nested = false
 	case ResourceMena:
 		s.sourceDir = filepath.Join(knossosHome, "mena")
-		s.targetCommandsDir = filepath.Join(homeDir, ".claude", "commands")
-		s.targetSkillsDir = filepath.Join(homeDir, ".claude", "skills")
-		s.manifestPath = filepath.Join(homeDir, ".claude", "USER_MENA_MANIFEST.json")
+		s.targetCommandsDir = paths.UserCommandsDir()
+		s.targetSkillsDir = paths.UserSkillsDir()
+		s.manifestPath = paths.UserMenaManifest()
 		s.nested = true
 	case ResourceHooks:
 		s.sourceDir = filepath.Join(knossosHome, "hooks")
-		s.targetDir = filepath.Join(homeDir, ".claude", "hooks")
-		s.manifestPath = filepath.Join(homeDir, ".claude", "USER_HOOKS_MANIFEST.json")
+		s.targetDir = paths.UserHooksDir()
+		s.manifestPath = paths.UserHooksManifest()
 		s.nested = true
 	default:
 		return nil, ErrInvalidResourceType

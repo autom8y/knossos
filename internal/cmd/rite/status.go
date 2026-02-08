@@ -81,7 +81,7 @@ func runStatus(ctx *cmdContext, opts statusOptions) error {
 
 	// Check manifest validity (KNOSSOS_MANIFEST.yaml)
 	manifestValid := false
-	knossosManifestPath := filepath.Join(resolver.ClaudeDir(), "KNOSSOS_MANIFEST.yaml")
+	knossosManifestPath := resolver.KnossosManifestFile()
 	if data, err := os.ReadFile(knossosManifestPath); err == nil {
 		var manifest inscription.Manifest
 		if err := yaml.Unmarshal(data, &manifest); err == nil {

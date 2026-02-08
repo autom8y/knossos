@@ -319,6 +319,11 @@ func UserCommandManifest() string {
 	return filepath.Join(UserClaudeDir(), "USER_COMMAND_MANIFEST.json")
 }
 
+// UserMenaManifest returns the path to the user mena manifest.
+func UserMenaManifest() string {
+	return filepath.Join(UserClaudeDir(), "USER_MENA_MANIFEST.json")
+}
+
 // UserHooksManifest returns the path to the user hooks manifest.
 func UserHooksManifest() string {
 	return filepath.Join(UserClaudeDir(), "USER_HOOKS_MANIFEST.json")
