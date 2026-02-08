@@ -6,7 +6,7 @@ type: engineer
 tools: Bash, Glob, Grep, Read, Edit, Write, WebFetch, TodoWrite, WebSearch, Skill
 model: opus
 color: green
-maxTurns: 100
+maxTurns: 250
 ---
 
 # Principal Engineer

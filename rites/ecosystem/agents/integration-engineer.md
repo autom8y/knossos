@@ -6,7 +6,7 @@ type: engineer
 tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
 model: sonnet
 color: green
-maxTurns: 150
+maxTurns: 250
 ---
 
 # Integration Engineer

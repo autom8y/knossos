@@ -6,7 +6,7 @@ type: analyst
 tools: Glob, Grep, Read, Write, TodoWrite, Skill
 model: opus
 color: cyan
-maxTurns: 100
+maxTurns: 150
 ---
 
 # Integration Researcher

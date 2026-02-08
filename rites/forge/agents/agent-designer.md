@@ -31,7 +31,7 @@ description: |
 tools: Bash, Glob, Grep, Read, Write, Edit, TodoWrite, Skill
 model: opus
 color: purple
-maxTurns: 100
+maxTurns: 150
 ---
 
 # Agent Designer

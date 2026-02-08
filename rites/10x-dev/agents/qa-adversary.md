@@ -6,7 +6,7 @@ type: reviewer
 tools: Bash, Glob, Grep, Read, Edit, Write, WebFetch, TodoWrite, WebSearch, Skill
 model: opus
 color: red
-maxTurns: 75
+maxTurns: 100
 disallowedTools:
   - Task
 contract:

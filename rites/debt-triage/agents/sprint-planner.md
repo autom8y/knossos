@@ -6,7 +6,7 @@ type: specialist
 tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
 model: opus
 color: magenta
-maxTurns: 100
+maxTurns: 200
 ---
 
 # Sprint Planner

@@ -6,7 +6,7 @@ type: specialist
 tools: Bash, Edit, Glob, Grep, Read, Write, TodoWrite, Skill
 model: opus
 color: green
-maxTurns: 100
+maxTurns: 200
 ---
 
 # Penetration Tester

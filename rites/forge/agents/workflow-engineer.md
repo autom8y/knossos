@@ -30,7 +30,7 @@ description: |
 tools: Bash, Glob, Grep, Read, Write, Edit, TodoWrite, Skill
 model: opus
 color: green
-maxTurns: 100
+maxTurns: 250
 ---
 
 # Workflow Engineer

@@ -6,7 +6,7 @@ type: specialist
 tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
 model: opus
 color: red
-maxTurns: 100
+maxTurns: 200
 ---
 
 # Chaos Engineer

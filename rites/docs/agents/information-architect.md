@@ -6,7 +6,7 @@ type: designer
 tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
 model: sonnet
 color: cyan
-maxTurns: 100
+maxTurns: 150
 ---
 
 # Information Architect

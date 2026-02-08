@@ -6,7 +6,7 @@ type: orchestrator
 tools: Read
 model: opus
 color: cyan
-maxTurns: 3
+maxTurns: 40
 disallowedTools:
   - Bash
   - Write

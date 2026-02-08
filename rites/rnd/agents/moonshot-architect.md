@@ -6,7 +6,7 @@ type: designer
 tools: Glob, Grep, Read, Write, WebSearch, TodoWrite, Skill
 model: opus
 color: purple
-maxTurns: 100
+maxTurns: 150
 ---
 
 # Moonshot Architect

@@ -6,7 +6,7 @@ type: analyst
 tools: Bash, Glob, Grep, Read, Write, TodoWrite, Skill
 model: opus
 color: orange
-maxTurns: 100
+maxTurns: 150
 ---
 
 # Code Smeller

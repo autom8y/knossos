@@ -29,7 +29,7 @@ description: |
 tools: Bash, Glob, Grep, Read, TodoWrite, Skill
 model: opus
 color: red
-maxTurns: 75
+maxTurns: 100
 disallowedTools:
   - Task
 contract:
