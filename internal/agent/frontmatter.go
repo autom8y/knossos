@@ -1,12 +1,12 @@
 package agent
 
 import (
-	"bytes"
 	"fmt"
 	"regexp"
 	"strings"
 
 	"github.com/autom8y/knossos/internal/errors"
+	"github.com/autom8y/knossos/internal/frontmatter"
 	"gopkg.in/yaml.v3"
 )
 
@@ -81,29 +81,13 @@ var mcpToolPattern = regexp.MustCompile(`^mcp:[a-z0-9-]+(\/[a-z0-9_-]+)?$`)
 // ParseAgentFrontmatter extracts and parses frontmatter from an agent markdown file.
 // Returns error if frontmatter is missing or has invalid YAML.
 func ParseAgentFrontmatter(content []byte) (*AgentFrontmatter, error) {
-	// Find frontmatter delimiters
-	if !bytes.HasPrefix(content, []byte("---\n")) && !bytes.HasPrefix(content, []byte("---\r\n")) {
-		return nil, errors.New(errors.CodeParseError, "missing frontmatter delimiter")
+	yamlBytes, _, err := frontmatter.Parse(content)
+	if err != nil {
+		return nil, errors.New(errors.CodeParseError, err.Error())
 	}
-
-	// Find closing delimiter
-	var endIndex int
-	if idx := bytes.Index(content[4:], []byte("\n---\n")); idx != -1 {
-		endIndex = idx
-	} else if idx := bytes.Index(content[4:], []byte("\n---\r\n")); idx != -1 {
-		endIndex = idx
-	} else if idx := bytes.Index(content[4:], []byte("\r\n---\r\n")); idx != -1 {
-		endIndex = idx
-	} else if idx := bytes.Index(content[4:], []byte("\r\n---\n")); idx != -1 {
-		endIndex = idx
-	} else {
-		return nil, errors.New(errors.CodeParseError, "missing closing frontmatter delimiter")
-	}
-
-	frontmatterBytes := content[4 : 4+endIndex]
 
 	var fm AgentFrontmatter
-	if err := yaml.Unmarshal(frontmatterBytes, &fm); err != nil {
+	if err := yaml.Unmarshal(yamlBytes, &fm); err != nil {
 		return nil, errors.Wrap(errors.CodeParseError, "invalid frontmatter YAML", err)
 	}
 

@@ -2,46 +2,12 @@
 package agent
 
 import (
-	"strings"
-
-	"gopkg.in/yaml.v3"
+	"github.com/autom8y/knossos/internal/frontmatter"
 )
 
-// FlexibleStringSlice is a YAML type that accepts both a comma-separated string
-// (e.g., "Bash, Read, Glob") and a proper YAML list (e.g., [Bash, Read, Glob]).
-// This is a local copy of materialize.FlexibleStringSlice to avoid coupling
-// the agent package to the materialize package for a single utility type.
-type FlexibleStringSlice []string
-
-// UnmarshalYAML implements the yaml.Unmarshaler interface.
-func (f *FlexibleStringSlice) UnmarshalYAML(value *yaml.Node) error {
-	// Try as a sequence first
-	if value.Kind == yaml.SequenceNode {
-		var slice []string
-		if err := value.Decode(&slice); err != nil {
-			return err
-		}
-		*f = slice
-		return nil
-	}
-
-	// Fall back to comma-separated string
-	var str string
-	if err := value.Decode(&str); err != nil {
-		return err
-	}
-
-	parts := strings.Split(str, ",")
-	result := make([]string, 0, len(parts))
-	for _, part := range parts {
-		part = strings.TrimSpace(part)
-		if part != "" {
-			result = append(result, part)
-		}
-	}
-	*f = result
-	return nil
-}
+// FlexibleStringSlice is an alias for the shared frontmatter.FlexibleStringSlice type.
+// It accepts both comma-separated strings and YAML lists.
+type FlexibleStringSlice = frontmatter.FlexibleStringSlice
 
 // UpstreamRef describes an agent or source that feeds into this agent.
 type UpstreamRef struct {
