@@ -2,7 +2,7 @@
 name: consult
 description: Get ecosystem guidance, rite recommendations, and command-flows
 argument-hint: "[query] [--playbook=NAME] [--rite] [--commands]"
-allowed-tools: Bash, Read, Grep, Glob, Task
+allowed-tools: Bash, Read, Grep, Glob, WebSearch
 model: opus
 ---
 

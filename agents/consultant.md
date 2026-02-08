@@ -36,7 +36,7 @@ description: |
   commands organized by category: Session, Rite Management, Workflows, Operations."
   </example>
 type: meta
-tools: Bash, Glob, Grep, Read, Task, WebSearch
+tools: Bash, Glob, Grep, Read, WebSearch
 model: opus
 maxTurns: 20
 color: cyan

@@ -12,7 +12,7 @@
 - **Atropos** (termination): `wrap_session`, `generate_sails`, `delete_sprint`
 
 **Agent location**: `.claude/agents/moirai.md`
-**Skills location**: `.claude/skills/moirai/` (clotho.md, lachesis.md, atropos.md)
+**Skills location**: `.claude/skills/moirai/` (clotho.md, lachesis.md, atropos.md) -- not yet implemented, see docs/design/TDD-fate-skills.md
 
 ## When to Invoke
 
@@ -217,6 +217,6 @@ Task(moirai, "...")
 ## See Also
 
 - `.claude/agents/moirai.md` - Full Moirai agent specification
-- `.claude/skills/moirai/` - Fate skills (clotho.md, lachesis.md, atropos.md)
+- `.claude/skills/moirai/` - Fate skills (clotho.md, lachesis.md, atropos.md) -- not yet implemented, see docs/design/TDD-fate-skills.md
 - `.claude/hooks/PreToolUse.sh` - Direct write prevention
 - `schemas/artifacts/session-context.schema.json` - Validation schema

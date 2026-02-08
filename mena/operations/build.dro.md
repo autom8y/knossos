@@ -4,6 +4,7 @@ description: Implementation-only from approved design (no design phase)
 argument-hint: <feature-name> [--design=PATH]
 allowed-tools: Bash, Read, Write, Task, Glob, Grep
 model: opus
+disable-model-invocation: true
 ---
 
 ## Context
