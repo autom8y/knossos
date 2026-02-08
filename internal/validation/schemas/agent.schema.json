@@ -120,6 +120,26 @@
       "type": "array",
       "items": { "type": "string" },
       "description": "Tools explicitly denied to this agent"
+    },
+    "memory": {
+      "type": "boolean",
+      "description": "Enable agent memory for cross-session context retention"
+    },
+    "permissionMode": {
+      "type": "string",
+      "enum": ["default", "plan", "bypassPermissions"],
+      "description": "Permission mode controlling tool execution authorization"
+    },
+    "mcpServers": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/mcp_server_config"
+      },
+      "description": "MCP server configurations for this agent"
+    },
+    "hooks": {
+      "type": "object",
+      "description": "Hook configurations for agent lifecycle events"
     }
   },
 
@@ -218,6 +238,23 @@
         }
       },
       "additionalProperties": false
+    },
+    "mcp_server_config": {
+      "type": "object",
+      "required": ["name", "url"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "MCP server identifier"
+        },
+        "url": {
+          "type": "string",
+          "minLength": 1,
+          "description": "MCP server endpoint URL"
+        }
+      },
+      "additionalProperties": true
     },
     "behavioral_contract": {
       "type": "object",

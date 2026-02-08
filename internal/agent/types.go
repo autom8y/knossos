@@ -35,6 +35,14 @@ type ArtifactDecl struct {
 	Format string `yaml:"format,omitempty" json:"format,omitempty"`
 }
 
+// McpServerConfig describes an MCP server configuration for CC pass-through.
+type McpServerConfig struct {
+	// Name is the MCP server identifier.
+	Name string `yaml:"name" json:"name"`
+	// URL is the MCP server endpoint.
+	URL string `yaml:"url" json:"url"`
+}
+
 // BehavioralContract defines behavioral constraints and requirements.
 type BehavioralContract struct {
 	// MustUse lists tools or patterns the agent must use.

@@ -30,9 +30,13 @@ type AgentFrontmatter struct {
 	Aliases []string            `yaml:"aliases,omitempty" json:"aliases,omitempty"`
 
 	// CC-native fields (camelCase matches Claude Code's expected frontmatter schema)
-	MaxTurns        int                 `yaml:"maxTurns,omitempty" json:"maxTurns,omitempty"`
-	Skills          []string            `yaml:"skills,omitempty" json:"skills,omitempty"`
-	DisallowedTools FlexibleStringSlice `yaml:"disallowedTools,omitempty" json:"disallowedTools,omitempty"`
+	MaxTurns        int                    `yaml:"maxTurns,omitempty" json:"maxTurns,omitempty"`
+	Skills          []string               `yaml:"skills,omitempty" json:"skills,omitempty"`
+	DisallowedTools FlexibleStringSlice    `yaml:"disallowedTools,omitempty" json:"disallowedTools,omitempty"`
+	Memory          bool                   `yaml:"memory,omitempty" json:"memory,omitempty"`
+	PermissionMode  string                 `yaml:"permissionMode,omitempty" json:"permissionMode,omitempty"`
+	McpServers      []McpServerConfig      `yaml:"mcpServers,omitempty" json:"mcpServers,omitempty"`
+	Hooks           map[string]interface{} `yaml:"hooks,omitempty" json:"hooks,omitempty"`
 
 	// Workflow Position
 	Upstream   []UpstreamRef   `yaml:"upstream,omitempty" json:"upstream,omitempty"`
@@ -144,6 +148,17 @@ func (f *AgentFrontmatter) validateCore() error {
 		default:
 			return errors.New(errors.CodeValidationFailed,
 				fmt.Sprintf("agent frontmatter: invalid model %q, must be opus, sonnet, or haiku", f.Model))
+		}
+	}
+
+	// Validate permissionMode if present
+	if f.PermissionMode != "" {
+		switch f.PermissionMode {
+		case "default", "plan", "bypassPermissions":
+			// valid
+		default:
+			return errors.New(errors.CodeValidationFailed,
+				fmt.Sprintf("agent frontmatter: invalid permissionMode %q, must be default, plan, or bypassPermissions", f.PermissionMode))
 		}
 	}
 

@@ -649,6 +649,189 @@ func TestValidate_DisallowedToolsInvalid(t *testing.T) {
 	}
 }
 
+func TestParseAgentFrontmatter_WithMemoryField(t *testing.T) {
+	content := []byte(`---
+name: memory-agent
+description: "Agent with memory enabled"
+tools: Read, Bash
+memory: true
+---
+
+# Memory Agent
+`)
+
+	fm, err := ParseAgentFrontmatter(content)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if !fm.Memory {
+		t.Error("memory = false, want true")
+	}
+}
+
+func TestParseAgentFrontmatter_WithPermissionMode(t *testing.T) {
+	content := []byte(`---
+name: bypass-agent
+description: "Agent with bypassPermissions"
+tools: Read, Bash
+permissionMode: bypassPermissions
+---
+
+# Bypass Agent
+`)
+
+	fm, err := ParseAgentFrontmatter(content)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if fm.PermissionMode != "bypassPermissions" {
+		t.Errorf("permissionMode = %q, want %q", fm.PermissionMode, "bypassPermissions")
+	}
+}
+
+func TestValidate_PermissionMode_Valid(t *testing.T) {
+	modes := []string{"default", "plan", "bypassPermissions"}
+	for _, mode := range modes {
+		t.Run(mode, func(t *testing.T) {
+			fm := AgentFrontmatter{
+				Name:           "test-agent",
+				Description:    "A test agent",
+				PermissionMode: mode,
+			}
+			if err := fm.Validate(); err != nil {
+				t.Fatalf("unexpected error for permissionMode %q: %v", mode, err)
+			}
+		})
+	}
+}
+
+func TestValidate_PermissionMode_Invalid(t *testing.T) {
+	fm := AgentFrontmatter{
+		Name:           "test-agent",
+		Description:    "A test agent",
+		PermissionMode: "yolo",
+	}
+
+	err := fm.Validate()
+	if err == nil {
+		t.Fatal("expected error for invalid permissionMode")
+	}
+	if !containsStr(err.Error(), "permissionMode") {
+		t.Errorf("error = %q, want to contain 'permissionMode'", err.Error())
+	}
+}
+
+func TestParseAgentFrontmatter_WithMcpServers(t *testing.T) {
+	content := []byte(`---
+name: mcp-config-agent
+description: "Agent with MCP server configs"
+tools: Read
+mcpServers:
+  - name: github
+    url: https://mcp.github.com
+  - name: slack
+    url: https://mcp.slack.com
+---
+
+# MCP Config Agent
+`)
+
+	fm, err := ParseAgentFrontmatter(content)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if len(fm.McpServers) != 2 {
+		t.Fatalf("mcpServers count = %d, want 2", len(fm.McpServers))
+	}
+	if fm.McpServers[0].Name != "github" {
+		t.Errorf("mcpServers[0].name = %q, want %q", fm.McpServers[0].Name, "github")
+	}
+	if fm.McpServers[0].URL != "https://mcp.github.com" {
+		t.Errorf("mcpServers[0].url = %q, want %q", fm.McpServers[0].URL, "https://mcp.github.com")
+	}
+	if fm.McpServers[1].Name != "slack" {
+		t.Errorf("mcpServers[1].name = %q, want %q", fm.McpServers[1].Name, "slack")
+	}
+}
+
+func TestParseAgentFrontmatter_WithHooks(t *testing.T) {
+	content := []byte(`---
+name: hooks-agent
+description: "Agent with hooks configuration"
+tools: Read
+hooks:
+  PreToolUse:
+    - matcher: Bash
+      action: deny
+---
+
+# Hooks Agent
+`)
+
+	fm, err := ParseAgentFrontmatter(content)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if fm.Hooks == nil {
+		t.Fatal("hooks should not be nil")
+	}
+	if _, ok := fm.Hooks["PreToolUse"]; !ok {
+		t.Error("hooks should contain PreToolUse key")
+	}
+}
+
+func TestParseAgentFrontmatter_AllNewCCFields(t *testing.T) {
+	content := []byte(`---
+name: full-cc-agent
+description: "Agent with all CC-native fields"
+tools: Read, Bash
+model: opus
+maxTurns: 10
+skills:
+  - ecosystem-ref
+disallowedTools: Task
+memory: true
+permissionMode: plan
+mcpServers:
+  - name: github
+    url: https://mcp.github.com
+hooks:
+  PostToolUse:
+    - matcher: Write
+      action: log
+---
+
+# Full CC Agent
+`)
+
+	fm, err := ParseAgentFrontmatter(content)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if !fm.Memory {
+		t.Error("memory = false, want true")
+	}
+	if fm.PermissionMode != "plan" {
+		t.Errorf("permissionMode = %q, want %q", fm.PermissionMode, "plan")
+	}
+	if len(fm.McpServers) != 1 {
+		t.Errorf("mcpServers count = %d, want 1", len(fm.McpServers))
+	}
+	if fm.Hooks == nil {
+		t.Error("hooks should not be nil")
+	}
+
+	// Validate should pass
+	if err := fm.Validate(); err != nil {
+		t.Fatalf("Validate() error = %v", err)
+	}
+}
+
 func containsStr(s, substr string) bool {
 	return len(s) >= len(substr) && (s == substr || len(s) > 0 && containsSubstring(s, substr))
 }
