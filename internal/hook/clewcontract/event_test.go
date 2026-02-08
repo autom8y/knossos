@@ -14,7 +14,6 @@ func TestEventType_Constants(t *testing.T) {
 	}{
 		{EventTypeToolCall, "tool_call"},
 		{EventTypeFileChange, "file_change"},
-		{EventTypeCommand, "command"},
 		{EventTypeDecision, "decision"},
 		{EventTypeContextSwitch, "context_switch"},
 		{EventTypeSailsGenerated, "sails_generated"},
@@ -187,35 +186,6 @@ func TestNewFileChangeEvent(t *testing.T) {
 	}
 	if event.Meta["lines_changed"] != 42 {
 		t.Errorf("Meta.lines_changed = %v, want 42", event.Meta["lines_changed"])
-	}
-}
-
-func TestNewCommandEvent(t *testing.T) {
-	event := NewCommandEvent("go test ./...", 0, 1500)
-
-	if event.Type != EventTypeCommand {
-		t.Errorf("Type = %v, want %v", event.Type, EventTypeCommand)
-	}
-	if event.Summary != "go test ./..." {
-		t.Errorf("Summary = %v, want 'go test ./...'", event.Summary)
-	}
-	if event.Meta["exit_code"] != 0 {
-		t.Errorf("Meta.exit_code = %v, want 0", event.Meta["exit_code"])
-	}
-	if event.Meta["duration_ms"] != int64(1500) {
-		t.Errorf("Meta.duration_ms = %v, want 1500", event.Meta["duration_ms"])
-	}
-}
-
-func TestNewCommandEvent_LongCommand(t *testing.T) {
-	longCommand := "a_very_long_command_that_exceeds_eighty_characters_and_should_be_truncated_for_readability_purposes_in_the_summary"
-	event := NewCommandEvent(longCommand, 0, 100)
-
-	if len(event.Summary) > 80 {
-		t.Errorf("Summary length = %d, want <= 80", len(event.Summary))
-	}
-	if event.Summary[len(event.Summary)-3:] != "..." {
-		t.Error("Summary should end with '...'")
 	}
 }
 

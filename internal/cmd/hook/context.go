@@ -13,6 +13,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/autom8y/knossos/internal/hook"
+	"github.com/autom8y/knossos/internal/hook/clewcontract"
 	"github.com/autom8y/knossos/internal/output"
 	"github.com/autom8y/knossos/internal/session"
 )
@@ -171,6 +172,9 @@ func runContextCore(ctx *cmdContext, printer *output.Printer) error {
 		result.CompactState = compactState
 	}
 
+	// Emit session_start event to clew log (best-effort, non-blocking)
+	emitSessionStartEvent(sessionDir, sessCtx.SessionID, sessCtx.Initiative, sessCtx.Complexity, activeRite, printer)
+
 	return printer.Print(result)
 }
 
@@ -271,6 +275,27 @@ func listAvailableAgents(agentsDir string) []string {
 		}
 	}
 	return agents
+}
+
+// emitSessionStartEvent emits a session_start event to the clew log on SessionStart.
+// This bridges the gap between the session.EventEmitter (which writes SESSION_CREATED)
+// and the clewcontract event system (which expects session_start).
+// All emissions are best-effort -- failures do not affect the context hook result.
+func emitSessionStartEvent(sessionDir, sessionID, initiative, complexity, rite string, printer *output.Printer) {
+	if sessionDir == "" || sessionID == "" {
+		return
+	}
+
+	writer := clewcontract.NewBufferedEventWriter(sessionDir, clewcontract.DefaultFlushInterval)
+	defer writer.Close()
+
+	event := clewcontract.NewSessionStartEvent(sessionID, initiative, complexity, rite)
+	writer.Write(event)
+
+	if flushErr := writer.Flush(); flushErr != nil {
+		printer.VerboseLog("warn", "failed to emit session_start event",
+			map[string]interface{}{"error": flushErr.Error()})
+	}
 }
 
 // determineExecutionMode determines the execution mode based on session and rite.

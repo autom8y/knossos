@@ -12,10 +12,9 @@ type EventType string
 
 // Clew event types for tracking Claude Code activity.
 const (
-	EventTypeToolCall        EventType = "tool_call"
-	EventTypeFileChange      EventType = "file_change"
-	EventTypeCommand         EventType = "command"
-	EventTypeDecision        EventType = "decision"
+	EventTypeToolCall   EventType = "tool_call"
+	EventTypeFileChange EventType = "file_change"
+	EventTypeDecision   EventType = "decision"
 	EventTypeContextSwitch   EventType = "context_switch"
 	EventTypeSailsGenerated  EventType = "sails_generated"
 	EventTypeTaskStart       EventType = "task_start"
@@ -94,25 +93,6 @@ func NewFileChangeEvent(path string, linesChanged int) Event {
 		Type:      EventTypeFileChange,
 		Path:      path,
 		Summary:   "Changed " + path,
-		Meta:      meta,
-	}
-}
-
-// NewCommandEvent creates an event for a shell command execution.
-func NewCommandEvent(command string, exitCode int, durationMs int64) Event {
-	// Truncate long commands for summary
-	summary := command
-	if len(summary) > 80 {
-		summary = summary[:77] + "..."
-	}
-	meta := map[string]interface{}{
-		"exit_code":   exitCode,
-		"duration_ms": durationMs,
-	}
-	return Event{
-		Timestamp: timestamp(),
-		Type:      EventTypeCommand,
-		Summary:   summary,
 		Meta:      meta,
 	}
 }
