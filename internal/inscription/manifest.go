@@ -1,14 +1,13 @@
 package inscription
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
 	"encoding/json"
 	"os"
 	"path/filepath"
 	"strconv"
 	"time"
 
+	"github.com/autom8y/knossos/internal/checksum"
 	"github.com/autom8y/knossos/internal/errors"
 	"gopkg.in/yaml.v3"
 )
@@ -128,9 +127,9 @@ func (m *ManifestLoader) ValidateManifest(manifest *Manifest) error {
 			issues = append(issues, "region '"+name+"' with owner 'regenerate' requires source field")
 		}
 
-		// Validate hash format if present
-		if region.Hash != "" && len(region.Hash) != 64 {
-			issues = append(issues, "region '"+name+"' has invalid hash format (expected 64 hex characters)")
+		// Validate hash format if present (sha256: prefix + 64 hex chars or legacy 64 hex chars)
+		if region.Hash != "" && len(region.Hash) != 64 && len(region.Hash) != 71 {
+			issues = append(issues, "region '"+name+"' has invalid hash format (expected sha256: prefix + 64 hex characters)")
 		}
 	}
 
@@ -285,11 +284,9 @@ func (m *ManifestLoader) UpdateRegionHash(manifest *Manifest, regionName string,
 	region.SyncedAt = &now
 }
 
-// ComputeContentHash computes the SHA256 hash of content as a hex string.
+// ComputeContentHash computes the SHA256 hash of content with "sha256:" prefix.
 func ComputeContentHash(content string) string {
-	h := sha256.New()
-	h.Write([]byte(content))
-	return hex.EncodeToString(h.Sum(nil))
+	return checksum.Content(content)
 }
 
 // Exists checks if the manifest file exists.

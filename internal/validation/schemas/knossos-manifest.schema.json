@@ -82,8 +82,8 @@
         },
         "hash": {
           "type": "string",
-          "pattern": "^[a-f0-9]{64}$",
-          "description": "SHA256 hash of last synced content"
+          "pattern": "^(sha256:)?[a-f0-9]{64}$",
+          "description": "SHA256 hash of last synced content (with sha256: prefix per ADR-0026)"
         },
         "synced_at": {
           "type": "string",

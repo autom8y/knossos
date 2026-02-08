@@ -344,9 +344,9 @@ func TestManifestLoader_UpdateRegionHash(t *testing.T) {
 		t.Error("UpdateRegionHash() should set hash")
 	}
 
-	// Hash should be SHA256 hex (64 chars)
-	if len(region.Hash) != 64 {
-		t.Errorf("UpdateRegionHash() hash length = %d, want 64", len(region.Hash))
+	// Hash should be "sha256:" prefix + 64 hex chars = 71 chars
+	if len(region.Hash) != 71 {
+		t.Errorf("UpdateRegionHash() hash length = %d, want 71", len(region.Hash))
 	}
 
 	if region.SyncedAt == nil {
@@ -361,13 +361,13 @@ func TestComputeContentHash(t *testing.T) {
 	}{
 		{
 			content: "hello",
-			// SHA256 of "hello"
-			want: "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824",
+			// SHA256 of "hello" with sha256: prefix
+			want: "sha256:2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824",
 		},
 		{
 			content: "",
-			// SHA256 of ""
-			want: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+			// SHA256 of "" with sha256: prefix
+			want: "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
 		},
 	}
 

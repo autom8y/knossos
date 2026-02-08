@@ -3,14 +3,12 @@
 package sync
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
 	"encoding/json"
-	"io"
 	"os"
 	"path/filepath"
 	"time"
 
+	"github.com/autom8y/knossos/internal/checksum"
 	"github.com/autom8y/knossos/internal/errors"
 	"github.com/autom8y/knossos/internal/paths"
 )
@@ -165,29 +163,14 @@ func (m *StateManager) IsInitialized() bool {
 	return err == nil
 }
 
-// ComputeFileHash computes the SHA-256 hash of a file.
+// ComputeFileHash computes the SHA-256 hash of a file with "sha256:" prefix.
 func ComputeFileHash(path string) (string, error) {
-	f, err := os.Open(path)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return "", nil // Return empty hash for missing files
-		}
-		return "", err
-	}
-	defer f.Close()
-
-	h := sha256.New()
-	if _, err := io.Copy(h, f); err != nil {
-		return "", err
-	}
-
-	return hex.EncodeToString(h.Sum(nil)), nil
+	return checksum.File(path)
 }
 
-// ComputeContentHash computes the SHA-256 hash of content bytes.
+// ComputeContentHash computes the SHA-256 hash of content bytes with "sha256:" prefix.
 func ComputeContentHash(content []byte) string {
-	h := sha256.Sum256(content)
-	return hex.EncodeToString(h[:])
+	return checksum.Bytes(content)
 }
 
 // DetectChanges checks if a file has changed since last sync.
