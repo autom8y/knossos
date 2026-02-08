@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/autom8y/knossos/internal/errors"
+	"github.com/autom8y/knossos/internal/fileutil"
 	"github.com/autom8y/knossos/internal/validation"
 	"gopkg.in/yaml.v3"
 )
@@ -209,7 +210,7 @@ func (c *Context) Save(path string) error {
 	if err != nil {
 		return err
 	}
-	if err := os.WriteFile(path, data, 0644); err != nil {
+	if err := fileutil.AtomicWriteFile(path, data, 0644); err != nil {
 		return errors.Wrap(errors.CodeGeneralError, "failed to write session context", err)
 	}
 	return nil

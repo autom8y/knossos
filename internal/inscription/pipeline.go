@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/autom8y/knossos/internal/errors"
+	"github.com/autom8y/knossos/internal/fileutil"
 	"gopkg.in/yaml.v3"
 )
 
@@ -268,7 +269,7 @@ func (p *Pipeline) Sync(opts InscriptionSyncOptions) (*SyncResult, error) {
 	finalContent := p.buildFinalContent(mergeResult.Content, manifest)
 
 	// 11. Write CLAUDE.md atomically
-	if err := AtomicWriteFile(p.ClaudeMDPath, []byte(finalContent)); err != nil {
+	if err := fileutil.AtomicWriteFile(p.ClaudeMDPath, []byte(finalContent), 0644); err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to write CLAUDE.md", err)
 	}
 

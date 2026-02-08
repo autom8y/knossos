@@ -2,7 +2,6 @@
 package materialize
 
 import (
-	"bytes"
 	"fmt"
 	"io/fs"
 	"os"
@@ -13,6 +12,7 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"github.com/autom8y/knossos/internal/errors"
+	"github.com/autom8y/knossos/internal/fileutil"
 	"github.com/autom8y/knossos/internal/inscription"
 	"github.com/autom8y/knossos/internal/paths"
 	"github.com/autom8y/knossos/internal/sync"
@@ -175,26 +175,7 @@ func (m *Materializer) templatesFS(resolved *ResolvedRite) fs.FS {
 // Uses atomic writes (write to temp file, then rename) to prevent Claude Code's
 // file watcher from seeing partially-written files.
 func writeIfChanged(path string, content []byte, perm os.FileMode) (bool, error) {
-	existing, err := os.ReadFile(path)
-	if err == nil && bytes.Equal(existing, content) {
-		return false, nil
-	}
-	return true, atomicWriteFile(path, content, perm)
-}
-
-// atomicWriteFile writes content to a temp file in the same directory then
-// renames it over the target. rename(2) is atomic on POSIX, so the file
-// watcher never sees a partially-written file.
-func atomicWriteFile(path string, content []byte, perm os.FileMode) error {
-	tmp := path + ".tmp"
-	if err := os.WriteFile(tmp, content, perm); err != nil {
-		return err
-	}
-	if err := os.Rename(tmp, path); err != nil {
-		os.Remove(tmp) // best-effort cleanup
-		return err
-	}
-	return nil
+	return fileutil.WriteIfChanged(path, content, perm)
 }
 
 // copyDirFromFS copies all files from an fs.FS to a destination directory on disk.

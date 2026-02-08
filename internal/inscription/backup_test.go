@@ -452,31 +452,6 @@ func TestBackupManager_DeleteAllBackups(t *testing.T) {
 	}
 }
 
-func TestAtomicWriteFile(t *testing.T) {
-	tmpDir := t.TempDir()
-	targetPath := filepath.Join(tmpDir, "subdir", "file.txt")
-
-	content := []byte("Atomic content")
-	err := AtomicWriteFile(targetPath, content)
-	if err != nil {
-		t.Fatalf("AtomicWriteFile() error = %v", err)
-	}
-
-	// Verify file exists and content correct
-	read, err := os.ReadFile(targetPath)
-	if err != nil {
-		t.Fatalf("AtomicWriteFile() file not readable: %v", err)
-	}
-	if string(read) != string(content) {
-		t.Errorf("AtomicWriteFile() content = %q, want %q", string(read), string(content))
-	}
-
-	// Verify no temp file left behind
-	tmpPath := targetPath + ".tmp"
-	if _, err := os.Stat(tmpPath); !os.IsNotExist(err) {
-		t.Error("AtomicWriteFile() temp file should not exist")
-	}
-}
 
 func TestBackupManager_BackupAndWrite(t *testing.T) {
 	tmpDir := t.TempDir()

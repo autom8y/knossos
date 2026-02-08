@@ -344,29 +344,6 @@ func (b *BackupManager) DeleteAllBackups() error {
 	return nil
 }
 
-// AtomicWriteFile writes content to a file atomically.
-// This is a standalone function for use outside the BackupManager.
-func AtomicWriteFile(path string, content []byte) error {
-	// Ensure directory exists
-	dir := filepath.Dir(path)
-	if err := os.MkdirAll(dir, 0755); err != nil {
-		return errors.Wrap(errors.CodeGeneralError, "failed to create directory", err)
-	}
-
-	// Write to temp file first
-	tmpPath := path + ".tmp"
-	if err := os.WriteFile(tmpPath, content, 0644); err != nil {
-		return errors.Wrap(errors.CodeGeneralError, "failed to write temp file", err)
-	}
-
-	// Atomic rename
-	if err := os.Rename(tmpPath, path); err != nil {
-		os.Remove(tmpPath) // Clean up on failure
-		return errors.Wrap(errors.CodeGeneralError, "failed to rename temp file", err)
-	}
-
-	return nil
-}
 
 // BackupAndWrite creates a backup then writes new content atomically.
 // Returns the backup path if successful.

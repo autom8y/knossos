@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/autom8y/knossos/internal/errors"
+	"github.com/autom8y/knossos/internal/fileutil"
 )
 
 // Default rotation thresholds.
@@ -97,7 +98,7 @@ func RotateSessionContext(sessionDir string, maxLines int, keepLines int) (*Rota
 	newContent.WriteString(newBody)
 
 	// Write atomically (temp file + rename)
-	if err := atomicWriteFile(sessionContextPath, []byte(newContent.String())); err != nil {
+	if err := fileutil.AtomicWriteFile(sessionContextPath, []byte(newContent.String()), 0644); err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to write rotated context", err)
 	}
 
@@ -191,46 +192,3 @@ func appendToArchive(archivePath string, content string) error {
 	return nil
 }
 
-// atomicWriteFile writes data to a file atomically using a temp file + rename.
-func atomicWriteFile(path string, data []byte) error {
-	dir := filepath.Dir(path)
-	base := filepath.Base(path)
-
-	// Create temp file in the same directory
-	tmpFile, err := os.CreateTemp(dir, base+".tmp.*")
-	if err != nil {
-		return err
-	}
-	tmpPath := tmpFile.Name()
-
-	// Clean up temp file on error
-	defer func() {
-		if tmpFile != nil {
-			tmpFile.Close()
-			os.Remove(tmpPath)
-		}
-	}()
-
-	// Write data
-	if _, err := tmpFile.Write(data); err != nil {
-		return err
-	}
-
-	// Sync to disk
-	if err := tmpFile.Sync(); err != nil {
-		return err
-	}
-
-	// Close before rename
-	if err := tmpFile.Close(); err != nil {
-		return err
-	}
-	tmpFile = nil // Prevent defer cleanup
-
-	// Atomic rename
-	if err := os.Rename(tmpPath, path); err != nil {
-		return err
-	}
-
-	return nil
-}
