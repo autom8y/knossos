@@ -446,12 +446,10 @@ description: A flat command
 	}
 }
 
-// TestRematerializeMena_MutationFlagBypassesIdempotency verifies that
-// materializeMena populates commands/ and skills/ even when called for the
-// same rite (regression test for the idempotency guard bug where
-// --remove-all did not imply --force, causing MaterializeWithOptions to
-// skip the entire pipeline).
-func TestRematerializeMena_MutationFlagBypassesIdempotency(t *testing.T) {
+// TestRematerializeMena_RepopulatesAfterWipe verifies that materializeMena
+// repopulates commands/ and skills/ even when output dirs are wiped between
+// invocations. This validates the idempotent re-projection behavior.
+func TestRematerializeMena_RepopulatesAfterWipe(t *testing.T) {
 	tmpDir := t.TempDir()
 	claudeDir := filepath.Join(tmpDir, ".claude")
 

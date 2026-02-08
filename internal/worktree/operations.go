@@ -667,6 +667,7 @@ func (m *Manager) setupWorktreeEcosystem(wtPath, riteName string) {
 		mat.WithEmbeddedHooks(embHooks)
 	}
 	mat.MaterializeWithOptions(riteName, materialize.Options{
+		Force:   true,
 		KeepAll: true,
 	})
 

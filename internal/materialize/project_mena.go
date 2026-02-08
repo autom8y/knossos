@@ -227,35 +227,15 @@ func parseMenaFrontmatterBytes(data []byte) MenaFrontmatter {
 func ProjectMena(sources []MenaSource, opts MenaProjectionOptions) (*MenaProjectionResult, error) {
 	result := &MenaProjectionResult{}
 
-	if opts.Mode == MenaProjectionDestructive {
-		// Wipe and recreate target directories
-		if opts.Filter&ProjectDro != 0 {
-			if err := os.RemoveAll(opts.TargetCommandsDir); err != nil && !os.IsNotExist(err) {
-				return nil, fmt.Errorf("failed to remove commands dir: %w", err)
-			}
-			if err := os.MkdirAll(opts.TargetCommandsDir, 0755); err != nil {
-				return nil, fmt.Errorf("failed to create commands dir: %w", err)
-			}
+	// Ensure target directories exist (both modes — selective, not destructive)
+	if opts.Filter&ProjectDro != 0 {
+		if err := os.MkdirAll(opts.TargetCommandsDir, 0755); err != nil {
+			return nil, fmt.Errorf("failed to create commands dir: %w", err)
 		}
-		if opts.Filter&ProjectLego != 0 {
-			if err := os.RemoveAll(opts.TargetSkillsDir); err != nil && !os.IsNotExist(err) {
-				return nil, fmt.Errorf("failed to remove skills dir: %w", err)
-			}
-			if err := os.MkdirAll(opts.TargetSkillsDir, 0755); err != nil {
-				return nil, fmt.Errorf("failed to create skills dir: %w", err)
-			}
-		}
-	} else {
-		// Additive: ensure target directories exist but don't wipe
-		if opts.Filter&ProjectDro != 0 {
-			if err := os.MkdirAll(opts.TargetCommandsDir, 0755); err != nil {
-				return nil, fmt.Errorf("failed to create commands dir: %w", err)
-			}
-		}
-		if opts.Filter&ProjectLego != 0 {
-			if err := os.MkdirAll(opts.TargetSkillsDir, 0755); err != nil {
-				return nil, fmt.Errorf("failed to create skills dir: %w", err)
-			}
+	}
+	if opts.Filter&ProjectLego != 0 {
+		if err := os.MkdirAll(opts.TargetSkillsDir, 0755); err != nil {
+			return nil, fmt.Errorf("failed to create skills dir: %w", err)
 		}
 	}
 
@@ -341,6 +321,13 @@ func ProjectMena(sources []MenaSource, opts MenaProjectionOptions) (*MenaProject
 			destDir = filepath.Join(opts.TargetSkillsDir, name)
 		}
 
+		// In destructive mode, clean this specific entry's subdir before writing.
+		// This removes stale companion files from a previous version of the same entry.
+		// User-created entries (not in collected set) are never touched.
+		if opts.Mode == MenaProjectionDestructive {
+			os.RemoveAll(destDir)
+		}
+
 		if ce.source.IsEmbedded {
 			sub, err := fs.Sub(ce.source.Fsys, ce.source.FsysPath)
 			if err != nil {
@@ -414,6 +401,11 @@ func ProjectMena(sources []MenaSource, opts MenaProjectionOptions) (*MenaProject
 			result.SkillsProjected = append(result.SkillsProjected, strippedRel)
 		}
 	}
+
+	// Note: stale entries from previous rites (no longer in projection set) persist.
+	// Without provenance tracking, we cannot distinguish "stale knossos" from
+	// "user-created" entries. This is an acceptable tradeoff — user content is
+	// preserved at the cost of potential stale entries on rite switch.
 
 	return result, nil
 }

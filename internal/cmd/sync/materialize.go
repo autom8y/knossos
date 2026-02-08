@@ -240,13 +240,6 @@ func runMaterialize(ctx *cmdContext, riteName string, source string, opts materi
 		output["source_path"] = result.SourcePath
 	}
 
-	// Check if materialization was skipped (already on this rite)
-	if result.OrphanAction == "skipped" {
-		output["status"] = "skipped"
-		output["message"] = fmt.Sprintf("Already on rite '%s' (use --force to re-materialize)", riteName)
-		return printer.Print(output)
-	}
-
 	// Add orphan info if present
 	if len(result.OrphansDetected) > 0 {
 		output["orphans_detected"] = result.OrphansDetected

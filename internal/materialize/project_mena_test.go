@@ -64,7 +64,7 @@ func TestRouteMenaFile(t *testing.T) {
 }
 
 // TestProjectMena_Destructive verifies full projection with destructive mode:
-// wipes target dirs, projects with stripped filenames, correct routing.
+// selectively replaces managed entries while preserving user-created content.
 func TestProjectMena_Destructive(t *testing.T) {
 	tmpDir := t.TempDir()
 
@@ -114,9 +114,9 @@ func TestProjectMena_Destructive(t *testing.T) {
 		t.Fatalf("ProjectMena failed: %v", err)
 	}
 
-	// Verify stale file was wiped
-	if _, err := os.Stat(filepath.Join(commandsDir, "stale.md")); !os.IsNotExist(err) {
-		t.Errorf("Destructive mode should have wiped stale.md, but it still exists")
+	// Verify user-created file is preserved (selective write, not destructive nuke)
+	if _, err := os.Stat(filepath.Join(commandsDir, "stale.md")); os.IsNotExist(err) {
+		t.Errorf("Selective write should preserve user-created stale.md, but it was deleted")
 	}
 
 	// Verify dromena projected to commands/ with stripped names

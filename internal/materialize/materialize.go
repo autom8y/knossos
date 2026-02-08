@@ -30,6 +30,7 @@ type Options struct {
 
 // Result contains materialization outcome details.
 type Result struct {
+	Status           string   // Pipeline status: "success", "skipped", "minimal"
 	OrphansDetected  []string // List of orphan agent files detected
 	OrphanAction     string   // Action taken: "kept", "removed", "promoted"
 	BackupPath       string   // Path to backup if orphans were removed
@@ -327,8 +328,8 @@ func (m *Materializer) Materialize(activeRiteName string) error {
 // It does NOT create: agents/, skills/, ACTIVE_RITE
 func (m *Materializer) MaterializeMinimal(opts Options) (*Result, error) {
 	result := &Result{
+		Status:          "minimal",
 		OrphansDetected: []string{},
-		OrphanAction:    "minimal",
 		Source:          "minimal",
 	}
 
@@ -379,20 +380,16 @@ func (m *Materializer) MaterializeMinimal(opts Options) (*Result, error) {
 // MaterializeWithOptions generates the .claude/ directory with configurable orphan handling.
 func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Options) (*Result, error) {
 	result := &Result{
+		Status:          "success",
 		OrphansDetected: []string{},
 		OrphanAction:    "kept",
 	}
 
 	claudeDir := m.getClaudeDir()
 
-	// Check if already on this rite (skip unless --force)
-	if !opts.Force && !opts.DryRun {
-		currentRite, err := m.getCurrentRite(claudeDir)
-		if err == nil && currentRite == activeRiteName {
-			result.OrphanAction = "skipped"
-			return result, nil
-		}
-	}
+	// Note: the skip guard (skip-if-same-rite) was removed. The pipeline is safe
+	// to always run: selective write preserves user content, and writeIfChanged()
+	// prevents unnecessary disk writes. See ADR: "ari sync is safe to run repeatedly."
 
 	// 1. Resolve rite source using 4-tier resolution
 	resolved, err := m.sourceResolver.ResolveRite(activeRiteName, m.explicitSource)
@@ -642,17 +639,30 @@ func (m *Materializer) loadRiteManifest(ritePath string, resolved *ResolvedRite)
 }
 
 // materializeAgents copies agent files from rite to .claude/agents/
+// Uses selective write: only knossos-managed agents (from manifest) are replaced.
+// User-created agents not in the manifest are preserved.
 func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claudeDir string, resolved *ResolvedRite) error {
 	agentsDir := filepath.Join(claudeDir, "agents")
 
-	// Remove existing agents directory
-	if err := os.RemoveAll(agentsDir); err != nil && !os.IsNotExist(err) {
+	// Ensure agents directory exists (selective — do NOT RemoveAll)
+	if err := paths.EnsureDir(agentsDir); err != nil {
 		return err
 	}
 
-	// Create fresh agents directory
-	if err := paths.EnsureDir(agentsDir); err != nil {
-		return err
+	// Build managed agent set from manifest
+	managedAgents := make(map[string]bool)
+	for _, agent := range manifest.Agents {
+		managedAgents[agent.Name+".md"] = true
+	}
+
+	// Remove only knossos-managed agents (will be rewritten below).
+	// User-created agents not in manifest are untouched.
+	if entries, err := os.ReadDir(agentsDir); err == nil {
+		for _, entry := range entries {
+			if !entry.IsDir() && managedAgents[entry.Name()] {
+				os.Remove(filepath.Join(agentsDir, entry.Name()))
+			}
+		}
 	}
 
 	// For embedded sources, use fs.FS to read agent files
@@ -983,6 +993,8 @@ func (m *Materializer) materializeRules(claudeDir string, resolved *ResolvedRite
 }
 
 // materializeHooks copies hook files from templates/hooks to .claude/hooks/
+// Uses selective write: only knossos-managed hook files (from templates) are replaced.
+// User-created hook files not in the template source are preserved.
 // Returns (skipped bool, err error) where skipped=true if no templates/hooks dir exists.
 func (m *Materializer) materializeHooks(claudeDir string, resolved *ResolvedRite) (bool, error) {
 	hooksDir := filepath.Join(claudeDir, "hooks")
@@ -998,13 +1010,14 @@ func (m *Materializer) materializeHooks(claudeDir string, resolved *ResolvedRite
 			return true, nil
 		}
 
-		// Remove existing hooks directory
-		if err := os.RemoveAll(hooksDir); err != nil && !os.IsNotExist(err) {
-			return false, err
-		}
 		if err := paths.EnsureDir(hooksDir); err != nil {
 			return false, err
 		}
+
+		// Build managed set from embedded source, then selectively remove
+		managedHooks := collectFSFilenames(hooksSub)
+		removeManagedFiles(hooksDir, managedHooks)
+
 		return false, copyDirFromFS(hooksSub, hooksDir)
 	}
 
@@ -1018,18 +1031,60 @@ func (m *Materializer) materializeHooks(claudeDir string, resolved *ResolvedRite
 		return true, nil
 	}
 
-	// Remove existing hooks directory
-	if err := os.RemoveAll(hooksDir); err != nil && !os.IsNotExist(err) {
-		return false, err
-	}
-
-	// Create fresh hooks directory
 	if err := paths.EnsureDir(hooksDir); err != nil {
 		return false, err
 	}
 
-	// Copy hooks
+	// Build managed set from source, then selectively remove
+	managedHooks := collectDirFilenames(sourceHooksDir)
+	removeManagedFiles(hooksDir, managedHooks)
+
+	// Copy hooks (uses writeIfChanged internally)
 	return false, m.copyDir(sourceHooksDir, hooksDir)
+}
+
+// collectDirFilenames returns a set of all filenames in a directory (non-recursive).
+func collectDirFilenames(dir string) map[string]bool {
+	names := make(map[string]bool)
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return names
+	}
+	for _, entry := range entries {
+		if !entry.IsDir() {
+			names[entry.Name()] = true
+		}
+	}
+	return names
+}
+
+// collectFSFilenames returns a set of all filenames in an fs.FS root (non-recursive).
+func collectFSFilenames(fsys fs.FS) map[string]bool {
+	names := make(map[string]bool)
+	entries, err := fs.ReadDir(fsys, ".")
+	if err != nil {
+		return names
+	}
+	for _, entry := range entries {
+		if !entry.IsDir() {
+			names[entry.Name()] = true
+		}
+	}
+	return names
+}
+
+// removeManagedFiles removes files in dir whose names are in the managed set.
+// Files not in the managed set (user-created) are preserved.
+func removeManagedFiles(dir string, managed map[string]bool) {
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return
+	}
+	for _, entry := range entries {
+		if !entry.IsDir() && managed[entry.Name()] {
+			os.Remove(filepath.Join(dir, entry.Name()))
+		}
+	}
 }
 
 // materializeCLAUDEmd generates CLAUDE.md using the inscription system.
@@ -1243,15 +1298,19 @@ func (m *Materializer) clearInvocationState(claudeDir string) error {
 }
 
 // materializeWorkflow copies workflow.yaml from the rite to .claude/ACTIVE_WORKFLOW.yaml.
-// Returns nil if the rite has no workflow.yaml (non-fatal).
+// If the rite has no workflow.yaml, any existing ACTIVE_WORKFLOW.yaml is removed to
+// prevent stale workflow data from a previous rite persisting after switch.
 func (m *Materializer) materializeWorkflow(claudeDir string, resolved *ResolvedRite) error {
+	dstPath := filepath.Join(claudeDir, "ACTIVE_WORKFLOW.yaml")
 	rFS := m.riteFS(resolved)
 	content, err := fs.ReadFile(rFS, "workflow.yaml")
 	if err != nil {
-		// No workflow.yaml in this rite — not an error
+		// No workflow.yaml in this rite — remove any stale file from previous rite
+		if removeErr := os.Remove(dstPath); removeErr != nil && !os.IsNotExist(removeErr) {
+			return removeErr
+		}
 		return nil
 	}
-	dstPath := filepath.Join(claudeDir, "ACTIVE_WORKFLOW.yaml")
 	_, err = writeIfChanged(dstPath, content, 0644)
 	return err
 }
