@@ -22,16 +22,16 @@ func TestPrecompact_NoSession(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	var result PrecompactDecision
+	var result hook.PreCompactOutput
 	if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
 		t.Fatalf("failed to parse output: %v", err)
 	}
 
-	if result.Decision != "allow" {
-		t.Errorf("expected decision=allow, got %s", result.Decision)
+	if result.HookSpecificOutput.HookEventName != "PreCompact" {
+		t.Errorf("expected hookEventName=PreCompact, got: %s", result.HookSpecificOutput.HookEventName)
 	}
-	if result.PermissionDecision != "allow" {
-		t.Errorf("expected permissionDecision=allow, got %s", result.PermissionDecision)
+	if result.HookSpecificOutput.Reason != "" {
+		t.Errorf("expected empty reason for no session, got: %s", result.HookSpecificOutput.Reason)
 	}
 }
 
@@ -48,13 +48,13 @@ func TestPrecompact_NonPreCompactEvent(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	var result PrecompactDecision
+	var result hook.PreCompactOutput
 	if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
 		t.Fatalf("failed to parse output: %v", err)
 	}
 
-	if result.Decision != "allow" {
-		t.Errorf("expected decision=allow, got %s", result.Decision)
+	if result.HookSpecificOutput.Reason != "" {
+		t.Errorf("expected empty reason for wrong event, got: %s", result.HookSpecificOutput.Reason)
 	}
 }
 
@@ -96,16 +96,13 @@ func TestPrecompact_NoSessionContextFile(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	var result PrecompactDecision
+	var result hook.PreCompactOutput
 	if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
 		t.Fatalf("failed to parse output: %v", err)
 	}
 
-	if result.Decision != "allow" {
-		t.Errorf("expected decision=allow, got %s", result.Decision)
-	}
-	if result.Reason != "" {
-		t.Errorf("expected empty reason for no file, got: %s", result.Reason)
+	if result.HookSpecificOutput.Reason != "" {
+		t.Errorf("expected empty reason for no file, got: %s", result.HookSpecificOutput.Reason)
 	}
 }
 
@@ -167,22 +164,16 @@ current_phase: requirements
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	var result PrecompactDecision
+	var result hook.PreCompactOutput
 	if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
 		t.Fatalf("failed to parse output: %v", err)
 	}
 
-	if result.Decision != "allow" {
-		t.Errorf("expected decision=allow, got %s", result.Decision)
+	if !strings.Contains(result.HookSpecificOutput.Reason, "rotated SESSION_CONTEXT") {
+		t.Errorf("expected rotation reason, got: %s", result.HookSpecificOutput.Reason)
 	}
-	if result.PermissionDecision != "allow" {
-		t.Errorf("expected permissionDecision=allow, got %s", result.PermissionDecision)
-	}
-	if !strings.Contains(result.Reason, "rotated SESSION_CONTEXT") {
-		t.Errorf("expected rotation reason, got: %s", result.Reason)
-	}
-	if !strings.Contains(result.Reason, "archived") {
-		t.Errorf("expected archived count in reason, got: %s", result.Reason)
+	if !strings.Contains(result.HookSpecificOutput.Reason, "archived") {
+		t.Errorf("expected archived count in reason, got: %s", result.HookSpecificOutput.Reason)
 	}
 
 	// Verify archive was created
@@ -258,16 +249,13 @@ Just a few lines
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	var result PrecompactDecision
+	var result hook.PreCompactOutput
 	if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
 		t.Fatalf("failed to parse output: %v", err)
 	}
 
-	if result.Decision != "allow" {
-		t.Errorf("expected decision=allow, got %s", result.Decision)
-	}
-	if result.Reason != "" {
-		t.Errorf("expected empty reason for no rotation, got: %s", result.Reason)
+	if result.HookSpecificOutput.Reason != "" {
+		t.Errorf("expected empty reason for no rotation, got: %s", result.HookSpecificOutput.Reason)
 	}
 
 	// Verify no archive was created

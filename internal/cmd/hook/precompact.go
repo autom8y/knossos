@@ -13,12 +13,6 @@ import (
 	"github.com/autom8y/knossos/internal/session"
 )
 
-// PrecompactDecision represents the output of the precompact hook.
-type PrecompactDecision struct {
-	Decision           string `json:"decision"`
-	PermissionDecision string `json:"permissionDecision"`
-	Reason             string `json:"reason,omitempty"`
-}
 
 // newPrecompactCmd creates the precompact hook subcommand.
 func newPrecompactCmd(ctx *cmdContext) *cobra.Command {
@@ -35,8 +29,8 @@ This hook is triggered on PreCompact events. It:
 - Always returns "allow" (rotation is a side effect, never blocks)
 
 Output (stdout JSON):
-  {"decision": "allow", "permissionDecision": "allow"}
-  {"decision": "allow", "permissionDecision": "allow", "reason": "rotated SESSION_CONTEXT (archived 120 lines, kept 80)"}
+  {}
+  {"reason": "rotated SESSION_CONTEXT (archived 120 lines, kept 80)"}
 
 Performance: <100ms for rotation operation.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -107,12 +101,15 @@ func runPrecompactCore(ctx *cmdContext, printer *output.Printer) error {
 	return outputAllowPrecompact(printer, "")
 }
 
-// outputAllowPrecompact outputs an allow decision with optional reason.
+// outputAllowPrecompact outputs a precompact result in CC-native format.
+// PreCompact cannot block — decision is always "allow" (informational).
 func outputAllowPrecompact(printer *output.Printer, reason string) error {
-	result := PrecompactDecision{
-		Decision:           "allow",
-		PermissionDecision: "allow",
-		Reason:             reason,
+	result := hook.PreCompactOutput{
+		HookSpecificOutput: hook.PreCompactHookOutput{
+			HookEventName: "PreCompact",
+			Decision:      "allow",
+			Reason:        reason,
+		},
 	}
 	return printer.Print(result)
 }

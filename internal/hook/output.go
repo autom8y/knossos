@@ -30,7 +30,8 @@ const (
 	DecisionModify Decision = "modify"
 )
 
-// Result represents the structured output of a hook execution.
+// Deprecated: Result produces flat JSON without the hookSpecificOutput envelope that CC expects.
+// Use PreToolUseOutput for PreToolUse hooks, PreCompactOutput for PreCompact hooks.
 type Result struct {
 	// Decision indicates what action to take (legacy field)
 	Decision Decision `json:"decision"`
@@ -71,6 +72,20 @@ type HookSpecificOutput struct {
 	PermissionDecision       string          `json:"permissionDecision"`
 	PermissionDecisionReason string          `json:"permissionDecisionReason,omitempty"`
 	UpdatedInput             json.RawMessage `json:"updatedInput,omitempty"`
+}
+
+// PreCompactOutput is the CC-native output envelope for PreCompact hooks.
+// PreCompact fires before context compaction. Unlike PreToolUse, it has no
+// permission decision semantics — it is a side-effect hook (e.g., rotation).
+type PreCompactOutput struct {
+	HookSpecificOutput PreCompactHookOutput `json:"hookSpecificOutput"`
+}
+
+// PreCompactHookOutput contains the PreCompact event fields.
+type PreCompactHookOutput struct {
+	HookEventName string `json:"hookEventName"` // Always "PreCompact"
+	Decision      string `json:"decision"`       // "allow" (always, informational)
+	Reason        string `json:"reason,omitempty"`
 }
 
 // HookError represents an error from hook execution.
@@ -116,7 +131,7 @@ func (w *Writer) WriteResult(r *Result) error {
 	}
 }
 
-// WriteAllow outputs an allow decision.
+// Deprecated: WriteAllow uses the legacy Result type. Use WritePreToolUseAllow for PreToolUse hooks.
 func (w *Writer) WriteAllow(reason string) error {
 	return w.WriteResult(&Result{
 		Decision: DecisionAllow,
@@ -124,7 +139,7 @@ func (w *Writer) WriteAllow(reason string) error {
 	})
 }
 
-// WriteBlock outputs a block decision with a user message.
+// Deprecated: WriteBlock uses the legacy Result type. Use WritePreToolUseBlock for PreToolUse hooks.
 func (w *Writer) WriteBlock(reason, message string) error {
 	return w.WriteResult(&Result{
 		Decision: DecisionBlock,
@@ -133,7 +148,7 @@ func (w *Writer) WriteBlock(reason, message string) error {
 	})
 }
 
-// WriteModify outputs a modify decision with changed input.
+// Deprecated: WriteModify uses the legacy Result type. CC does not support modify decisions.
 func (w *Writer) WriteModify(reason string, modifiedInput interface{}) error {
 	var rawInput json.RawMessage
 	if modifiedInput != nil {
@@ -150,7 +165,7 @@ func (w *Writer) WriteModify(reason string, modifiedInput interface{}) error {
 	})
 }
 
-// WriteError outputs an error result.
+// Deprecated: WriteError uses the legacy Result type.
 func (w *Writer) WriteError(code, message string) error {
 	return w.WriteResult(&Result{
 		Decision: DecisionAllow, // Errors should not block by default (graceful degradation)
@@ -187,7 +202,7 @@ func (w *Writer) WritePreToolUseBlock(reason string) error {
 	return enc.Encode(output)
 }
 
-// WriteContext outputs an allow decision with injected context.
+// Deprecated: WriteContext uses the legacy Result type.
 func (w *Writer) WriteContext(context map[string]interface{}) error {
 	return w.WriteResult(&Result{
 		Decision: DecisionAllow,
@@ -240,28 +255,28 @@ func (w *Writer) WriteDebug(format string, args ...interface{}) {
 	fmt.Fprintf(w.err, "[DEBUG] "+format+"\n", args...)
 }
 
-// Allow is a helper that creates an allow result.
+// Deprecated: Allow creates a legacy Result. Use event-specific output types instead.
 func Allow(reason string) *Result {
 	return &Result{Decision: DecisionAllow, Reason: reason}
 }
 
-// Block is a helper that creates a block result.
+// Deprecated: Block creates a legacy Result. Use event-specific output types instead.
 func Block(reason, message string) *Result {
 	return &Result{Decision: DecisionBlock, Reason: reason, Message: message}
 }
 
-// Modify is a helper that creates a modify result.
+// Deprecated: Modify creates a legacy Result. CC does not support modify decisions.
 func Modify(reason string, modifiedInput json.RawMessage) *Result {
 	return &Result{Decision: DecisionModify, Reason: reason, ModifiedInput: modifiedInput}
 }
 
-// WithContext adds context to a result.
+// Deprecated: WithContext modifies a legacy Result.
 func (r *Result) WithContext(ctx map[string]interface{}) *Result {
 	r.Context = ctx
 	return r
 }
 
-// WithDuration adds timing information to a result.
+// Deprecated: WithDuration modifies a legacy Result.
 func (r *Result) WithDuration(ms int64) *Result {
 	r.DurationMs = ms
 	return r
