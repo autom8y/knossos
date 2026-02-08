@@ -96,7 +96,30 @@ func ParseAgentFrontmatter(content []byte) (*AgentFrontmatter, error) {
 
 // Validate checks that the frontmatter has required fields and valid values.
 // This performs Go-level semantic validation beyond what JSON Schema covers.
+// It is the canonical source of truth for struct-level validation rules.
 func (f *AgentFrontmatter) Validate() error {
+	// Core rules shared with the validator pipeline
+	if err := f.validateCore(); err != nil {
+		return err
+	}
+
+	// disallowedTools validation: errors in standalone Validate(), but
+	// the AgentValidator pipeline treats these as warnings instead.
+	for _, tool := range f.DisallowedTools {
+		if err := validateToolReference(tool); err != nil {
+			return errors.Wrap(errors.CodeValidationFailed,
+				fmt.Sprintf("agent frontmatter: invalid disallowedTools entry %q", tool), err)
+		}
+	}
+
+	return nil
+}
+
+// validateCore performs the core struct-level validation rules shared between
+// standalone Validate() and the AgentValidator pipeline. It validates name,
+// description, type, model, tools, and maxTurns. disallowedTools is excluded
+// because the pipeline treats unknown entries as warnings rather than errors.
+func (f *AgentFrontmatter) validateCore() error {
 	if f.Name == "" {
 		return errors.New(errors.CodeValidationFailed, "agent frontmatter: name is required")
 	}
@@ -135,14 +158,6 @@ func (f *AgentFrontmatter) Validate() error {
 	if f.MaxTurns < 0 {
 		return errors.New(errors.CodeValidationFailed,
 			fmt.Sprintf("agent frontmatter: maxTurns must be >= 0, got %d", f.MaxTurns))
-	}
-
-	// Validate disallowedTools if present
-	for _, tool := range f.DisallowedTools {
-		if err := validateToolReference(tool); err != nil {
-			return errors.Wrap(errors.CodeValidationFailed,
-				fmt.Sprintf("agent frontmatter: invalid disallowedTools entry %q", tool), err)
-		}
 	}
 
 	return nil

@@ -141,26 +141,36 @@ func (av *AgentValidator) validateSchema(fm *AgentFrontmatter) ([]ValidationIssu
 }
 
 // validateSemantics performs Go-level semantic validation beyond JSON Schema.
+// It delegates core field validation to fm.Validate() (the canonical source of
+// truth for struct-level rules) and then adds pipeline-specific rules that only
+// apply during the full AgentValidator flow: mode-dependent rules, archetype
+// rules, and structured warning generation.
+//
+// Note: fm.Validate() treats invalid disallowedTools as errors, but the pipeline
+// treats them as warnings. To preserve this behavior, we call validateCore()
+// which skips disallowedTools, then handle disallowedTools as warnings here.
 func (av *AgentValidator) validateSemantics(fm *AgentFrontmatter, mode ValidationMode) ([]ValidationIssue, []string) {
 	var issues []ValidationIssue
 	var warnings []string
 
-	// Required fields check
-	if fm.Name == "" {
+	// Canonical struct-level validation (name, description, type, model,
+	// tools, maxTurns). This is the single source of truth for these rules.
+	// We use validateCore() which skips disallowedTools since the pipeline
+	// intentionally treats unknown disallowedTools as warnings, not errors.
+	if err := fm.validateCore(); err != nil {
 		issues = append(issues, ValidationIssue{
-			Field:   "name",
-			Message: "name is required",
+			Message: err.Error(),
 		})
 	}
 
-	if fm.Description == "" {
-		issues = append(issues, ValidationIssue{
-			Field:   "description",
-			Message: "description is required",
-		})
+	// Pipeline-specific: disallowedTools unknown entries are warnings
+	for _, tool := range fm.DisallowedTools {
+		if err := validateToolReference(tool); err != nil {
+			warnings = append(warnings, fmt.Sprintf("disallowedTools contains unknown tool %q", tool))
+		}
 	}
 
-	// Tools: required in STRICT, warning in WARN
+	// Pipeline-specific: tools empty is mode-dependent (strict=error, warn=warning)
 	if len(fm.Tools) == 0 {
 		if mode == ValidationModeStrict {
 			issues = append(issues, ValidationIssue{
@@ -172,62 +182,12 @@ func (av *AgentValidator) validateSemantics(fm *AgentFrontmatter, mode Validatio
 		}
 	}
 
-	// Validate each tool reference
-	for _, tool := range fm.Tools {
-		if err := validateToolReference(tool); err != nil {
-			issues = append(issues, ValidationIssue{
-				Field:   "tools",
-				Message: err.Error(),
-				Value:   tool,
-			})
-		}
-	}
-
-	// Validate disallowedTools entries
-	for _, tool := range fm.DisallowedTools {
-		if err := validateToolReference(tool); err != nil {
-			warnings = append(warnings, fmt.Sprintf("disallowedTools contains unknown tool %q", tool))
-		}
-	}
-
-	// Validate maxTurns
-	if fm.MaxTurns < 0 {
-		issues = append(issues, ValidationIssue{
-			Field:   "maxTurns",
-			Message: fmt.Sprintf("maxTurns must be >= 0, got %d", fm.MaxTurns),
-			Value:   fm.MaxTurns,
-		})
-	}
-
-	// Strict mode: warn if maxTurns not set
+	// Pipeline-specific: maxTurns=0 warning in strict mode
 	if mode == ValidationModeStrict && fm.MaxTurns == 0 {
 		warnings = append(warnings, "maxTurns not set (0 means unlimited)")
 	}
 
-	// Validate type if present
-	if fm.Type != "" && !validAgentTypes[fm.Type] {
-		issues = append(issues, ValidationIssue{
-			Field:   "type",
-			Message: fmt.Sprintf("unknown agent type %q", fm.Type),
-			Value:   fm.Type,
-		})
-	}
-
-	// Validate model if present
-	if fm.Model != "" {
-		switch fm.Model {
-		case "opus", "sonnet", "haiku":
-			// valid
-		default:
-			issues = append(issues, ValidationIssue{
-				Field:   "model",
-				Message: fmt.Sprintf("unknown model %q, must be opus, sonnet, or haiku", fm.Model),
-				Value:   fm.Model,
-			})
-		}
-	}
-
-	// Strict mode: require enhanced fields
+	// Pipeline-specific: type required in strict mode
 	if mode == ValidationModeStrict {
 		if fm.Type == "" {
 			issues = append(issues, ValidationIssue{
