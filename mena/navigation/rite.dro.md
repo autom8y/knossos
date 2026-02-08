@@ -56,10 +56,8 @@ For CI/scripts (non-interactive), use flags:
 
 ## Agent Provenance
 
-Rite swaps track agent provenance in `.claude/AGENT_MANIFEST.json`:
-- **source**: `rite` (from roster) or `user` (project-added)
-- **origin**: Which rite installed this agent
-- **installed_at**: Timestamp of installation
+Agent provenance is derived from ACTIVE_RITE and the rite's manifest.yaml.
+Per-agent origin tracking (AGENT_MANIFEST.json) is planned but not yet implemented.
 
 **Note**: Rite context (phase->agent routing) is automatically injected into every session via the session-context hook.
 
