@@ -68,7 +68,6 @@ hooks:
   - event: PostToolUse
     command: "ari hook budget --output json"
     timeout: 3
-    async: true
     priority: 90
     description: "Tracks tool use count for cognitive budget warnings"
 
