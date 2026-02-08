@@ -748,3 +748,100 @@ func BenchmarkValidateHook_Validation(b *testing.B) {
 		b.Errorf("Validation took %.2f ms, target is <5ms", nsPerOp/1e6)
 	}
 }
+
+func TestValidate_StdinIntegration_AllowSafeCommand(t *testing.T) {
+	// Test that the full production path works with stdin JSON
+
+	// Save and restore original stdin
+	oldStdin := os.Stdin
+	defer func() { os.Stdin = oldStdin }()
+
+	// Create pipe with CC-format JSON for safe command
+	r, w, _ := os.Pipe()
+	payload := `{"hook_event_name":"PreToolUse","tool_name":"Bash","tool_input":{"command":"ls -la","description":"List files"},"session_id":"test-session"}`
+	go func() {
+		w.Write([]byte(payload))
+		w.Close()
+	}()
+	os.Stdin = r
+
+	var stdout, stderr bytes.Buffer
+	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
+
+	outputFlag := "json"
+	verboseFlag := false
+	projectDir := ""
+	ctx := &cmdContext{
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &projectDir,
+			},
+		},
+	}
+
+	err := runValidateCore(ctx, printer, "")
+	if err != nil {
+		t.Fatalf("runValidate() error = %v", err)
+	}
+
+	var result hook.PreToolUseOutput
+	if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
+		t.Fatalf("Failed to parse output: %v\nOutput: %s", err, stdout.String())
+	}
+
+	if result.HookSpecificOutput.PermissionDecision != "allow" {
+		t.Errorf("PermissionDecision = %q, want %q", result.HookSpecificOutput.PermissionDecision, "allow")
+	}
+}
+
+func TestValidate_StdinIntegration_BlockDangerousCommand(t *testing.T) {
+	// Test that the full production path blocks dangerous commands via stdin
+
+	// Save and restore original stdin
+	oldStdin := os.Stdin
+	defer func() { os.Stdin = oldStdin }()
+
+	// Create pipe with CC-format JSON for dangerous command
+	r, w, _ := os.Pipe()
+	payload := `{"hook_event_name":"PreToolUse","tool_name":"Bash","tool_input":{"command":"rm -rf .git","description":"Delete git repo"},"session_id":"test-session"}`
+	go func() {
+		w.Write([]byte(payload))
+		w.Close()
+	}()
+	os.Stdin = r
+
+	var stdout, stderr bytes.Buffer
+	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
+
+	outputFlag := "json"
+	verboseFlag := false
+	projectDir := ""
+	ctx := &cmdContext{
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &projectDir,
+			},
+		},
+	}
+
+	err := runValidateCore(ctx, printer, "")
+	if err != nil {
+		t.Fatalf("runValidate() error = %v", err)
+	}
+
+	var result hook.PreToolUseOutput
+	if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
+		t.Fatalf("Failed to parse output: %v\nOutput: %s", err, stdout.String())
+	}
+
+	if result.HookSpecificOutput.PermissionDecision != "deny" {
+		t.Errorf("PermissionDecision = %q, want %q (stdin should block dangerous command)", result.HookSpecificOutput.PermissionDecision, "deny")
+	}
+	if !bytes.Contains([]byte(result.HookSpecificOutput.PermissionDecisionReason), []byte(".git")) {
+		t.Errorf("Reason should mention .git, got: %q", result.HookSpecificOutput.PermissionDecisionReason)
+	}
+}

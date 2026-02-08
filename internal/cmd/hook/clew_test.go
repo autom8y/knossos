@@ -384,3 +384,85 @@ Files modified:
 		t.Error("events.jsonl should NOT have decision event for non-orchestrator Task")
 	}
 }
+
+func TestClew_StdinIntegration_RecordsToolEvent(t *testing.T) {
+	// Test that the full production path works with stdin JSON
+
+	// Create temp project structure with session
+	tmpDir := t.TempDir()
+	claudeDir := filepath.Join(tmpDir, ".claude")
+	sessionsDir := filepath.Join(claudeDir, "sessions")
+	sessionID := "test-stdin-session"
+	sessionDir := filepath.Join(sessionsDir, sessionID)
+
+	// Create session directory structure
+	if err := os.MkdirAll(sessionDir, 0755); err != nil {
+		t.Fatalf("Failed to create session dir: %v", err)
+	}
+
+	// Write current session file
+	currentSessionFile := filepath.Join(sessionsDir, ".current-session")
+	if err := os.WriteFile(currentSessionFile, []byte(sessionID), 0644); err != nil {
+		t.Fatalf("Failed to write current session file: %v", err)
+	}
+
+	// Save and restore original stdin
+	oldStdin := os.Stdin
+	defer func() { os.Stdin = oldStdin }()
+
+	// Create pipe with CC-format JSON
+	r, w, _ := os.Pipe()
+	payload := `{"hook_event_name":"PostToolUse","tool_name":"Write","tool_input":{"file_path":"/tmp/test.txt","content":"hello"},"tool_response":{"success":true},"session_id":"test-stdin-session","cwd":"` + tmpDir + `"}`
+	go func() {
+		w.Write([]byte(payload))
+		w.Close()
+	}()
+	os.Stdin = r
+
+	var stdout, stderr bytes.Buffer
+	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
+
+	outputFlag := "json"
+	verboseFlag := false
+	projectDir := tmpDir
+	ctx := &cmdContext{
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &projectDir,
+			},
+		},
+	}
+
+	err := runClewCore(ctx, printer)
+	if err != nil {
+		t.Fatalf("runClew() error = %v", err)
+	}
+
+	var result ClewOutput
+	if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
+		t.Fatalf("Failed to parse output: %v\nOutput: %s", err, stdout.String())
+	}
+
+	if !result.Recorded {
+		t.Errorf("Expected Recorded=true (stdin should work), got false with reason: %s", result.Reason)
+	}
+
+	// Verify events.jsonl was created and contains tool_call event with Write tool
+	eventsPath := filepath.Join(sessionDir, "events.jsonl")
+	eventsData, err := os.ReadFile(eventsPath)
+	if err != nil {
+		t.Fatalf("Failed to read events.jsonl: %v", err)
+	}
+
+	eventsContent := string(eventsData)
+
+	// Should have a tool_call event for Write
+	if !strings.Contains(eventsContent, `"type":"tool_call"`) {
+		t.Error("events.jsonl missing tool_call event")
+	}
+	if !strings.Contains(eventsContent, `"tool":"Write"`) {
+		t.Errorf("events.jsonl should contain Write tool, got: %s", eventsContent)
+	}
+}
