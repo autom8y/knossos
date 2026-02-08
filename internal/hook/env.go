@@ -23,17 +23,22 @@ const (
 type HookEvent string
 
 // Known hook events from Claude Code.
+// See: https://code.claude.com/docs/en/hooks
 const (
-	EventPreToolUse        HookEvent = "PreToolUse"
-	EventPostToolUse       HookEvent = "PostToolUse"
-	EventStop              HookEvent = "Stop"
-	EventSessionStart      HookEvent = "SessionStart"
-	EventUserPromptSubmit  HookEvent = "UserPromptSubmit"
-	EventPreCompact        HookEvent = "PreCompact"
-	EventSubagentStart     HookEvent = "SubagentStart"
-	EventSubagentEnd       HookEvent = "SubagentEnd"
-	EventNotification      HookEvent = "Notification"
-	EventToolError         HookEvent = "ToolError"
+	EventPreToolUse         HookEvent = "PreToolUse"
+	EventPostToolUse        HookEvent = "PostToolUse"
+	EventPostToolUseFailure HookEvent = "PostToolUseFailure"
+	EventPermissionRequest  HookEvent = "PermissionRequest"
+	EventStop               HookEvent = "Stop"
+	EventSessionStart       HookEvent = "SessionStart"
+	EventSessionEnd         HookEvent = "SessionEnd"
+	EventUserPromptSubmit   HookEvent = "UserPromptSubmit"
+	EventPreCompact         HookEvent = "PreCompact"
+	EventSubagentStart      HookEvent = "SubagentStart"
+	EventSubagentStop       HookEvent = "SubagentStop"
+	EventNotification       HookEvent = "Notification"
+	EventTeammateIdle       HookEvent = "TeammateIdle"
+	EventTaskCompleted      HookEvent = "TaskCompleted"
 )
 
 // Env holds parsed hook environment variables.
@@ -82,8 +87,10 @@ func ParseEnv() *Env {
 // isValidHookEvent checks if the provided event is a known HookEvent.
 func isValidHookEvent(event HookEvent) bool {
 	switch event {
-	case EventPreToolUse, EventPostToolUse, EventStop, EventSessionStart, EventUserPromptSubmit,
-		EventPreCompact, EventSubagentStart, EventSubagentEnd, EventNotification, EventToolError:
+	case EventPreToolUse, EventPostToolUse, EventPostToolUseFailure, EventPermissionRequest,
+		EventStop, EventSessionStart, EventSessionEnd, EventUserPromptSubmit,
+		EventPreCompact, EventSubagentStart, EventSubagentStop, EventNotification,
+		EventTeammateIdle, EventTaskCompleted:
 		return true
 	default:
 		return false
@@ -100,6 +107,16 @@ func (e *Env) IsPostToolUse() bool {
 	return e.Event == EventPostToolUse
 }
 
+// IsPostToolUseFailure returns true if this is a PostToolUseFailure event.
+func (e *Env) IsPostToolUseFailure() bool {
+	return e.Event == EventPostToolUseFailure
+}
+
+// IsPermissionRequest returns true if this is a PermissionRequest event.
+func (e *Env) IsPermissionRequest() bool {
+	return e.Event == EventPermissionRequest
+}
+
 // IsStop returns true if this is a Stop event.
 func (e *Env) IsStop() bool {
 	return e.Event == EventStop
@@ -108,6 +125,11 @@ func (e *Env) IsStop() bool {
 // IsSessionStart returns true if this is a SessionStart event.
 func (e *Env) IsSessionStart() bool {
 	return e.Event == EventSessionStart
+}
+
+// IsSessionEnd returns true if this is a SessionEnd event.
+func (e *Env) IsSessionEnd() bool {
+	return e.Event == EventSessionEnd
 }
 
 // IsPreCompact returns true if this is a PreCompact event.
@@ -120,9 +142,9 @@ func (e *Env) IsSubagentStart() bool {
 	return e.Event == EventSubagentStart
 }
 
-// IsSubagentEnd returns true if this is a SubagentEnd event.
-func (e *Env) IsSubagentEnd() bool {
-	return e.Event == EventSubagentEnd
+// IsSubagentStop returns true if this is a SubagentStop event.
+func (e *Env) IsSubagentStop() bool {
+	return e.Event == EventSubagentStop
 }
 
 // IsNotification returns true if this is a Notification event.
@@ -130,9 +152,14 @@ func (e *Env) IsNotification() bool {
 	return e.Event == EventNotification
 }
 
-// IsToolError returns true if this is a ToolError event.
-func (e *Env) IsToolError() bool {
-	return e.Event == EventToolError
+// IsTeammateIdle returns true if this is a TeammateIdle event.
+func (e *Env) IsTeammateIdle() bool {
+	return e.Event == EventTeammateIdle
+}
+
+// IsTaskCompleted returns true if this is a TaskCompleted event.
+func (e *Env) IsTaskCompleted() bool {
+	return e.Event == EventTaskCompleted
 }
 
 // HasTool returns true if tool information is available.

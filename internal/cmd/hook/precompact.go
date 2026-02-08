@@ -13,6 +13,13 @@ import (
 	"github.com/autom8y/knossos/internal/session"
 )
 
+// precompactResult is the output of the precompact hook.
+// PreCompact is a side-effect hook (rotation) — it cannot block.
+// CC has no hookSpecificOutput for PreCompact, so we emit plain JSON.
+type precompactResult struct {
+	Reason string `json:"reason,omitempty"`
+}
+
 
 // newPrecompactCmd creates the precompact hook subcommand.
 func newPrecompactCmd(ctx *cmdContext) *cobra.Command {
@@ -101,17 +108,11 @@ func runPrecompactCore(ctx *cmdContext, printer *output.Printer) error {
 	return outputAllowPrecompact(printer, "")
 }
 
-// outputAllowPrecompact outputs a precompact result in CC-native format.
-// PreCompact cannot block — decision is always "allow" (informational).
+// outputAllowPrecompact outputs a precompact result as plain JSON.
+// PreCompact is a side-effect hook — it cannot block. CC has no
+// hookSpecificOutput schema for PreCompact, so we emit simple JSON.
 func outputAllowPrecompact(printer *output.Printer, reason string) error {
-	result := hook.PreCompactOutput{
-		HookSpecificOutput: hook.PreCompactHookOutput{
-			HookEventName: "PreCompact",
-			Decision:      "allow",
-			Reason:        reason,
-		},
-	}
-	return printer.Print(result)
+	return printer.Print(precompactResult{Reason: reason})
 }
 
 // fileExists checks if a file exists.

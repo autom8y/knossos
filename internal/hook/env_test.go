@@ -108,14 +108,18 @@ func TestValidHookEvents(t *testing.T) {
 	validEvents := []HookEvent{
 		EventPreToolUse,
 		EventPostToolUse,
+		EventPostToolUseFailure,
+		EventPermissionRequest,
 		EventStop,
 		EventSessionStart,
+		EventSessionEnd,
 		EventUserPromptSubmit,
 		EventPreCompact,
 		EventSubagentStart,
-		EventSubagentEnd,
+		EventSubagentStop,
 		EventNotification,
-		EventToolError,
+		EventTeammateIdle,
+		EventTaskCompleted,
 	}
 
 	for _, event := range validEvents {
