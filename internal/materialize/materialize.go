@@ -43,9 +43,12 @@ type Result struct {
 // MCPServer represents an MCP server declaration in a rite manifest.
 type MCPServer struct {
 	Name    string            `yaml:"name" json:"name"`
-	Command string            `yaml:"command" json:"command"`
-	Args    []string          `yaml:"args,omitempty" json:"args,omitempty"`
+	Command string            `yaml:"command,omitempty" json:"command,omitempty"` // stdio only
+	Args    []string          `yaml:"args,omitempty" json:"args,omitempty"`       // stdio only
 	Env     map[string]string `yaml:"env,omitempty" json:"env,omitempty"`
+	Type    string            `yaml:"type,omitempty" json:"type,omitempty"`       // stdio (default), sse, http
+	URL     string            `yaml:"url,omitempty" json:"url,omitempty"`         // sse/http only
+	Headers map[string]string `yaml:"headers,omitempty" json:"headers,omitempty"` // sse/http only
 }
 
 // RiteManifest represents a rite manifest.yaml file.

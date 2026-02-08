@@ -36,10 +36,26 @@ func mergeMCPServers(existingSettings map[string]any, mcpServers []MCPServer) ma
 	// Merge rite manifest servers (add/update)
 	for _, server := range mcpServers {
 		serverConfig := make(map[string]any)
-		serverConfig["command"] = server.Command
 
-		if len(server.Args) > 0 {
-			serverConfig["args"] = server.Args
+		// Determine transport type: empty or "stdio" uses command/args;
+		// "sse" and "http" use url/headers.
+		transportType := server.Type
+		if transportType == "sse" || transportType == "http" {
+			serverConfig["type"] = transportType
+			if server.URL != "" {
+				serverConfig["url"] = server.URL
+			}
+			if len(server.Headers) > 0 {
+				serverConfig["headers"] = server.Headers
+			}
+		} else {
+			// stdio transport (default): emit command/args
+			if server.Command != "" {
+				serverConfig["command"] = server.Command
+			}
+			if len(server.Args) > 0 {
+				serverConfig["args"] = server.Args
+			}
 		}
 
 		if len(server.Env) > 0 {

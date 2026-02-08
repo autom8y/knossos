@@ -222,6 +222,140 @@ func TestRiteManifest_MCPServerNames_Empty(t *testing.T) {
 	assert.Empty(t, names)
 }
 
+func TestMergeMCPServers_StdioDefault(t *testing.T) {
+	// When no Type is set, server should be treated as stdio (backward compat)
+	settings := make(map[string]any)
+	mcpServers := []MCPServer{
+		{
+			Name:    "stdio-server",
+			Command: "npx",
+			Args:    []string{"-y", "server"},
+		},
+	}
+
+	result := mergeMCPServers(settings, mcpServers)
+
+	mcpMap, ok := result["mcpServers"].(map[string]any)
+	require.True(t, ok)
+
+	server, ok := mcpMap["stdio-server"].(map[string]any)
+	require.True(t, ok)
+
+	assert.Equal(t, "npx", server["command"])
+	assert.Equal(t, []string{"-y", "server"}, server["args"])
+	// Type should NOT be emitted for stdio default
+	assert.NotContains(t, server, "type")
+	assert.NotContains(t, server, "url")
+	assert.NotContains(t, server, "headers")
+}
+
+func TestMergeMCPServers_SSETransport(t *testing.T) {
+	settings := make(map[string]any)
+	mcpServers := []MCPServer{
+		{
+			Name: "sse-server",
+			Type: "sse",
+			URL:  "https://api.example.com/sse",
+			Headers: map[string]string{
+				"Authorization": "Bearer ${TOKEN}",
+			},
+		},
+	}
+
+	result := mergeMCPServers(settings, mcpServers)
+
+	mcpMap, ok := result["mcpServers"].(map[string]any)
+	require.True(t, ok)
+
+	server, ok := mcpMap["sse-server"].(map[string]any)
+	require.True(t, ok)
+
+	assert.Equal(t, "sse", server["type"])
+	assert.Equal(t, "https://api.example.com/sse", server["url"])
+	headers, ok := server["headers"].(map[string]string)
+	require.True(t, ok)
+	assert.Equal(t, "Bearer ${TOKEN}", headers["Authorization"])
+	// stdio fields should NOT be present
+	assert.NotContains(t, server, "command")
+	assert.NotContains(t, server, "args")
+}
+
+func TestMergeMCPServers_HTTPTransport(t *testing.T) {
+	settings := make(map[string]any)
+	mcpServers := []MCPServer{
+		{
+			Name: "http-server",
+			Type: "http",
+			URL:  "https://api.example.com/mcp",
+			Headers: map[string]string{
+				"X-API-Key": "${API_KEY}",
+				"Accept":    "application/json",
+			},
+			Env: map[string]string{
+				"API_KEY": "${SECRET}",
+			},
+		},
+	}
+
+	result := mergeMCPServers(settings, mcpServers)
+
+	mcpMap, ok := result["mcpServers"].(map[string]any)
+	require.True(t, ok)
+
+	server, ok := mcpMap["http-server"].(map[string]any)
+	require.True(t, ok)
+
+	assert.Equal(t, "http", server["type"])
+	assert.Equal(t, "https://api.example.com/mcp", server["url"])
+	headers, ok := server["headers"].(map[string]string)
+	require.True(t, ok)
+	assert.Equal(t, "${API_KEY}", headers["X-API-Key"])
+	assert.Equal(t, "application/json", headers["Accept"])
+	// Env should still work with http transport
+	envMap, ok := server["env"].(map[string]string)
+	require.True(t, ok)
+	assert.Equal(t, "${SECRET}", envMap["API_KEY"])
+	// stdio fields should NOT be present
+	assert.NotContains(t, server, "command")
+	assert.NotContains(t, server, "args")
+}
+
+func TestMergeMCPServers_BackwardCompat_ExistingStdio(t *testing.T) {
+	// Verify that existing stdio servers without Type field still work
+	settings := map[string]any{
+		"mcpServers": map[string]any{
+			"existing-stdio": map[string]any{
+				"command": "old-cmd",
+				"args":    []string{"--old"},
+			},
+		},
+	}
+
+	mcpServers := []MCPServer{
+		{
+			Name: "new-sse",
+			Type: "sse",
+			URL:  "https://example.com/sse",
+		},
+	}
+
+	result := mergeMCPServers(settings, mcpServers)
+
+	mcpMap, ok := result["mcpServers"].(map[string]any)
+	require.True(t, ok)
+
+	// Existing stdio server preserved
+	existingServer, ok := mcpMap["existing-stdio"].(map[string]any)
+	require.True(t, ok)
+	assert.Equal(t, "old-cmd", existingServer["command"])
+
+	// New SSE server added
+	newServer, ok := mcpMap["new-sse"].(map[string]any)
+	require.True(t, ok)
+	assert.Equal(t, "sse", newServer["type"])
+	assert.Equal(t, "https://example.com/sse", newServer["url"])
+}
+
 func TestMergeMCPServers_NoEnvOrArgs(t *testing.T) {
 	settings := make(map[string]any)
 	mcpServers := []MCPServer{
