@@ -90,6 +90,8 @@ Performance Targets:
 	cmd.AddCommand(newClewCmd(ctx))
 	cmd.AddCommand(newBudgetCmd(ctx))
 	cmd.AddCommand(newPrecompactCmd(ctx))
+	cmd.AddCommand(newSubagentStartCmd(ctx))
+	cmd.AddCommand(newSubagentStopCmd(ctx))
 
 	// Hook commands do NOT require project context
 	common.SetNeedsProject(cmd, false, true)
