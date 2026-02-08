@@ -144,16 +144,19 @@ func (m *Materializer) getClaudeDir() string {
 }
 
 // StagedMaterialize builds the .claude/ directory in a staging copy then
-// atomically swaps it into place. This prevents Claude Code's file watcher
-// from seeing intermediate states during multi-file writes.
+// atomically swaps it into place via directory rename.
+//
+// Deprecated: Do NOT use inside Claude Code sessions. The directory rename
+// (.claude/ → .claude.bak/) causes CC's file watcher to lose track of its
+// own configuration directory, resulting in a hard freeze. The direct
+// materialization path (MaterializeWithOptions) uses writeIfChanged() with
+// atomic per-file writes, which is safe for CC's file watcher.
 //
 // The flow:
 //  1. Clone current .claude/ → .claude.staging/ (preserves user content)
 //  2. Run materializeFn against the staging directory
 //  3. Rename .claude/ → .claude.bak/, .claude.staging/ → .claude/
 //  4. Clean up .claude.bak/
-//
-// The two-rename gap is microseconds — well below CC's file watcher debounce.
 func (m *Materializer) StagedMaterialize(materializeFn func(m *Materializer) (*Result, error)) (*Result, error) {
 	claudeDir := m.resolver.ClaudeDir()
 	stagingDir := claudeDir + ".staging"

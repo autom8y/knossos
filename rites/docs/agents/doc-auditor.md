@@ -6,7 +6,7 @@ type: reviewer
 tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
 model: sonnet
 color: blue
-maxTurns: 15
+maxTurns: 75
 disallowedTools:
   - Task
 contract:

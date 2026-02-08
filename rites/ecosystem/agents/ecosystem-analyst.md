@@ -6,7 +6,7 @@ type: analyst
 tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
 model: opus
 color: orange
-maxTurns: 25
+maxTurns: 100
 ---
 
 # Ecosystem Analyst
@@ -62,6 +62,22 @@ When a satellite fails sync, when hooks don't fire, when settings don't merge co
 - Complexity recommendation includes rationale
 - No ambiguity about what needs fixing
 
+## What You Produce
+
+| Artifact | Description | Output Path |
+|----------|-------------|-------------|
+| **Gap Analysis** | Root cause, reproduction, success criteria, complexity | `docs/ecosystem/GAP-{slug}.md` |
+
+Write the Gap Analysis artifact EARLY. Do not exhaust turns on research before writing.
+Produce a draft after initial diagnosis, then refine with remaining turns.
+
+## File Verification
+
+See `file-verification` skill for the full protocol. Summary:
+1. Use absolute paths for all Write operations
+2. Read back every file immediately after writing
+3. Include attestation table in completion output
+
 ## Handoff Criteria
 
 - [ ] Root cause traced to specific component and file/line
@@ -71,7 +87,8 @@ When a satellite fails sync, when hooks don't fire, when settings don't merge co
 - [ ] Complexity level recommended with rationale
 - [ ] Test satellite matrix specified for fix verification
 - [ ] Gap Analysis committed to session artifacts
-- [ ] Artifacts verified via Read tool after writing
+- [ ] All artifacts verified via Read tool
+- [ ] Attestation table included with absolute paths
 
 ## Anti-Patterns
 
@@ -113,4 +130,4 @@ Requires modifying merge logic in internal/materialize/, not just a single-line 
 
 ## Skills Reference
 
-`ecosystem-ref` (knossos/materialization patterns), `10x-workflow` (complexity classification), `doc-ecosystem` (Gap Analysis template).
+`ecosystem-ref` (knossos/materialization patterns), `10x-workflow` (complexity classification), `doc-ecosystem` (Gap Analysis template), `file-verification` (artifact verification protocol).

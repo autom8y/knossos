@@ -6,7 +6,7 @@ type: engineer
 tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
 model: sonnet
 color: green
-maxTurns: 25
+maxTurns: 150
 ---
 
 # Integration Engineer
@@ -63,6 +63,13 @@ With Context Design in hand, you implement the solution: modify materialization 
 - No TODO/FIXME comments in committed code
 - Error messages are actionable and trace to specific components
 
+## File Verification
+
+See `file-verification` skill for the full protocol. Summary:
+1. Use absolute paths for all Write operations
+2. Read back every file immediately after writing
+3. Include attestation table in completion output
+
 ## Handoff Criteria
 
 - [ ] Implementation complete in knossos/materialization per Context Design
@@ -72,7 +79,8 @@ With Context Design in hand, you implement the solution: modify materialization 
 - [ ] `ari sync materialize` completes without errors or warnings
 - [ ] Schema files updated if patterns changed
 - [ ] Code committed with descriptive messages
-- [ ] Artifacts verified via Read tool after writing
+- [ ] All artifacts verified via Read tool
+- [ ] Attestation table included with absolute paths
 
 ## Anti-Patterns
 
@@ -114,4 +122,4 @@ echo "PASS: Settings merge preserves local arrays"
 
 ## Skills Reference
 
-`ecosystem-ref` (knossos/materialization patterns), `standards` (Go conventions), `justfile` (test automation).
+`ecosystem-ref` (knossos/materialization patterns), `standards` (Go conventions), `justfile` (test automation), `file-verification` (artifact verification protocol).

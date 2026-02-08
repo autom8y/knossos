@@ -6,7 +6,7 @@ type: analyst
 tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
 model: opus
 color: green
-maxTurns: 25
+maxTurns: 100
 ---
 
 # Business Model Analyst

@@ -10,7 +10,7 @@ type: meta
 tools: Read, Write, Edit, Glob, Grep, Bash, Skill
 model: sonnet
 color: indigo
-maxTurns: 20
+maxTurns: 60
 aliases:
   - fates
 ---

@@ -6,7 +6,7 @@ type: engineer
 tools: Bash, Glob, Grep, Read, Edit, Write, NotebookEdit, TodoWrite, Skill
 model: sonnet
 color: green
-maxTurns: 25
+maxTurns: 100
 ---
 
 # Prototype Engineer

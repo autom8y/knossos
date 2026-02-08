@@ -22,7 +22,7 @@ description: |
 tools: Bash, Glob, Grep, Read, Write, Edit, TodoWrite, Skill
 model: opus
 color: cyan
-maxTurns: 25
+maxTurns: 100
 ---
 
 # Prompt Architect

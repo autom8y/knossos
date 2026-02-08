@@ -31,7 +31,7 @@ description: |
 tools: Bash, Glob, Grep, Read, Write, Edit, TodoWrite, Skill
 model: sonnet
 color: blue
-maxTurns: 25
+maxTurns: 100
 ---
 
 # Agent Curator

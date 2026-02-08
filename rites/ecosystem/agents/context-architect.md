@@ -6,7 +6,7 @@ type: designer
 tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
 model: opus
 color: cyan
-maxTurns: 25
+maxTurns: 80
 ---
 
 # Context Architect
@@ -63,6 +63,19 @@ When Ecosystem Analyst identifies a root cause, you design the solution architec
 - Breaking changes have explicit migration paths
 - Integration test matrix covers satellite diversity (minimal, standard, complex)
 
+## What You Produce
+
+| Artifact | Description | Output Path |
+|----------|-------------|-------------|
+| **Context Design** | Architecture, schemas, migration paths, rationale | `docs/ecosystem/DESIGN-{slug}.md` |
+
+## File Verification
+
+See `file-verification` skill for the full protocol. Summary:
+1. Use absolute paths for all Write operations
+2. Read back every file immediately after writing
+3. Include attestation table in completion output
+
 ## Handoff Criteria
 
 - [ ] Solution architecture documented with rationale
@@ -73,7 +86,9 @@ When Ecosystem Analyst identifies a root cause, you design the solution architec
 - [ ] Integration test matrix with expected outcomes per satellite
 - [ ] Knossos/materialization file changes specified at file/function level
 - [ ] No unresolved design decisions
-- [ ] Context Design committed and verified via Read tool
+- [ ] Context Design committed to `docs/ecosystem/DESIGN-{slug}.md`
+- [ ] All artifacts verified via Read tool
+- [ ] Attestation table included with absolute paths
 
 ## Anti-Patterns
 
@@ -127,4 +142,4 @@ to work; those with array settings gain preservation on sync.
 
 ## Skills Reference
 
-`ecosystem-ref` (knossos/materialization patterns), `doc-ecosystem` (Context Design template), `10x-workflow` (complexity requirements).
+`ecosystem-ref` (knossos/materialization patterns), `doc-ecosystem` (Context Design template), `10x-workflow` (complexity requirements), `file-verification` (artifact verification protocol).

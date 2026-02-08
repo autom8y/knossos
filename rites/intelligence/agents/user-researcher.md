@@ -6,7 +6,7 @@ type: specialist
 tools: Bash, Edit, Glob, Grep, Read, Write, WebSearch, TodoWrite, Skill
 model: opus
 color: magenta
-maxTurns: 25
+maxTurns: 100
 ---
 
 # User Researcher

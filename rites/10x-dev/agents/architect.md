@@ -6,7 +6,7 @@ type: designer
 tools: Bash, Glob, Grep, Read, Edit, Write, WebFetch, TodoWrite, WebSearch, Skill
 model: opus
 color: cyan
-maxTurns: 25
+maxTurns: 100
 ---
 
 # Architect

@@ -6,7 +6,7 @@ type: specialist
 tools: Bash, Glob, Grep, Read, Edit, Write, WebFetch, TodoWrite, WebSearch, Skill
 model: opus
 color: purple
-maxTurns: 25
+maxTurns: 100
 ---
 
 # Incident Commander

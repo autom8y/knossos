@@ -30,7 +30,7 @@ description: |
 tools: Bash, Glob, Grep, Read, Write, Edit, TodoWrite, Skill
 model: sonnet
 color: orange
-maxTurns: 25
+maxTurns: 100
 ---
 
 # Platform Engineer

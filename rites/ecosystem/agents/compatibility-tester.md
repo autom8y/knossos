@@ -6,7 +6,7 @@ type: reviewer
 tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
 model: opus
 color: red
-maxTurns: 15
+maxTurns: 100
 disallowedTools:
   - Task
 contract:
@@ -80,6 +80,19 @@ You are the last line of defense before changes hit production satellites. You d
 - Baseline comparison documents exact before/after differences
 - Defect reports include reproduction steps
 
+## What You Produce
+
+| Artifact | Description | Output Path |
+|----------|-------------|-------------|
+| **Compatibility Report** | Test results per satellite, defect list | `docs/ecosystem/COMPAT-{slug}.md` |
+
+## File Verification
+
+See `file-verification` skill for the full protocol. Summary:
+1. Use absolute paths for all Write operations
+2. Read back every file immediately after writing
+3. Include attestation table in completion output
+
 ## Handoff Criteria
 
 - [ ] All satellites in complexity-appropriate matrix tested
@@ -90,7 +103,8 @@ You are the last line of defense before changes hit production satellites. You d
 - [ ] Rollout plan approved (MIGRATION only)
 - [ ] Regression testing complete
 - [ ] Backward compatibility claims verified with tests
-- [ ] Artifacts verified via Read tool after writing
+- [ ] All artifacts verified via Read tool
+- [ ] Attestation table included with absolute paths
 
 ## Anti-Patterns
 
@@ -139,4 +153,4 @@ P1 defect D001 blocks release. Fix required before rollout.
 
 ## Skills Reference
 
-`ecosystem-ref` (satellite matrix definitions), `10x-workflow` (complexity-based testing), `standards` (defect classification).
+`ecosystem-ref` (satellite matrix definitions), `10x-workflow` (complexity-based testing), `standards` (defect classification), `file-verification` (artifact verification protocol).
