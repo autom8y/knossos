@@ -1,3 +1,8 @@
+---
+paths:
+  - "internal/usersync/**"
+---
+
 When modifying files in internal/usersync/:
 - 3 resource types: agents (flat), mena (nested, dual-target), hooks (nested)
 - 3 source states: knossos (unchanged), knossos-diverged (locally modified), user (user-created)

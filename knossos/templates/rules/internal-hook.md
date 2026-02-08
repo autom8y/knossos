@@ -1,3 +1,8 @@
+---
+paths:
+  - "internal/hook/**"
+---
+
 When modifying files in internal/hook/:
 - Two output formats: legacy Result (decision field) and CC-native PreToolUseOutput (hookSpecificOutput envelope)
 - CC reads permissionDecision from hookSpecificOutput, NOT from top-level decision field

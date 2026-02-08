@@ -1,3 +1,8 @@
+---
+paths:
+  - "internal/inscription/**"
+---
+
 When modifying files in internal/inscription/:
 - 3 owner types: knossos (always overwritten), satellite (never overwritten), regenerate (from source)
 - Marker format: <!-- KNOSSOS:START region-name --> ... <!-- KNOSSOS:END region-name -->

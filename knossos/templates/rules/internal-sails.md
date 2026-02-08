@@ -1,3 +1,8 @@
+---
+paths:
+  - "internal/sails/**"
+---
+
 When modifying files in internal/sails/:
 - Exactly 3 colors: WHITE (ship), GRAY (needs QA), BLACK (do not ship) -- no other states
 - Color algorithm: blockers->BLACK, proof failures->BLACK, open questions->GRAY, spike/hotfix->GRAY, all proofs pass->WHITE
