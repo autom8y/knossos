@@ -11,7 +11,7 @@
 - **Lachesis** (measurement): `mark_complete`, `transition_phase`, `park_session`, etc.
 - **Atropos** (termination): `wrap_session`, `generate_sails`, `delete_sprint`
 
-**Agent location**: `.claude/agents/moirai.md` (materialized per rite; may not exist in all rites)
+**Agent location**: `agents/moirai.md` (global agent at project root)
 **Skills location**: `.claude/skills/session/moirai/` (INDEX.md, clotho.md, lachesis.md, atropos.md)
 
 ## When to Invoke
@@ -211,12 +211,12 @@ Task(moirai, "...")
 - [Session State Machine](../session-common/session-state-machine.md) - Valid state transitions
 - [Session Context Schema](../session-common/session-context-schema.md) - Field definitions
 - [Agent Delegation](../session-common/agent-delegation.md) - General delegation patterns
-- ADR-0005-state-mate-centralized-state-authority.md - Design rationale
+- ADR-0005-moirai-centralized-state-authority.md - Design rationale
 - [Knossos Doctrine](../../../docs/philosophy/knossos-doctrine.md) - Moirai mythology
 
 ## See Also
 
-- `.claude/agents/moirai.md` - Full Moirai agent specification (materialized per rite; may not exist in all rites)
+- `agents/moirai.md` - Full Moirai agent specification (global agent at project root)
 - `.claude/skills/session/moirai/` - Fate skills (INDEX.md, clotho.md, lachesis.md, atropos.md)
-- `.claude/hooks/PreToolUse.sh` - Direct write prevention
+- `ari hook writeguard` - Direct write prevention (registered in `.claude/settings.local.json`)
 - `schemas/artifacts/session-context.schema.json` - Validation schema

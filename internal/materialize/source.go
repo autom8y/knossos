@@ -263,6 +263,14 @@ func (r *SourceResolver) checkSource(riteName string, source RiteSource) (*Resol
 		templatesDir = filepath.Join(filepath.Dir(source.Path), "knossos", "templates")
 	case SourceProject:
 		templatesDir = filepath.Join(r.projectRoot, "templates")
+		// For knossos platform self-hosting: templates live at knossos/templates/
+		// rather than the standard templates/ location. Detect via sections/ marker.
+		if _, err := os.Stat(filepath.Join(templatesDir, "sections")); err != nil {
+			alt := filepath.Join(r.projectRoot, "knossos", "templates")
+			if _, err := os.Stat(filepath.Join(alt, "sections")); err == nil {
+				templatesDir = alt
+			}
+		}
 	case SourceExplicit:
 		// Check if templates dir exists alongside rites dir
 		templatesDir = filepath.Join(filepath.Dir(source.Path), "templates")

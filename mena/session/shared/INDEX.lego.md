@@ -13,7 +13,7 @@ description: "Session resolution, workflow resolution, and Moirai invocation pat
 |---------|---------|---------|
 | [session-resolution](session-resolution.md) | Session existence and state validation | All 5 commands |
 | [workflow-resolution](workflow-resolution.md) | Team and agent validation | start, resume, handoff |
-| [moirai-invocation](moirai-invocation.md) | state-mate delegation pattern | park, resume, wrap |
+| [moirai-invocation](moirai-invocation.md) | Moirai delegation pattern | park, resume, wrap |
 
 ## Usage Pattern
 
@@ -39,7 +39,7 @@ Partials extract duplicated patterns to:
 
 | Directory | Contains | Example |
 |-----------|----------|---------|
-| `shared-sections/` | **How** (behavioral patterns, validation logic) | Session resolution logic, state-mate invocation |
+| `shared-sections/` | **How** (behavioral patterns, validation logic) | Session resolution logic, Moirai invocation |
 | `session-common/` | **What** (schemas, data structures, reference docs) | Field definitions, state values, complexity levels |
 
 Both are reference modules; neither is invoked directly.
