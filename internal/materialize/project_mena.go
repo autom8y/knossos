@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io/fs"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -165,7 +166,7 @@ func parseMenaFrontmatterBytes(data []byte) MenaFrontmatter {
 
 	var fm MenaFrontmatter
 	if err := yaml.Unmarshal(data[searchStart:searchStart+endIndex], &fm); err != nil {
-		// EC-7: malformed YAML -- treat as unscoped (include in both pipelines)
+		log.Printf("Warning: malformed YAML frontmatter, treating as unscoped: %v", err)
 		return MenaFrontmatter{}
 	}
 	return fm
