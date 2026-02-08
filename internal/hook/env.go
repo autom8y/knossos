@@ -29,6 +29,11 @@ const (
 	EventStop              HookEvent = "Stop"
 	EventSessionStart      HookEvent = "SessionStart"
 	EventUserPromptSubmit  HookEvent = "UserPromptSubmit"
+	EventPreCompact        HookEvent = "PreCompact"
+	EventSubagentStart     HookEvent = "SubagentStart"
+	EventSubagentEnd       HookEvent = "SubagentEnd"
+	EventNotification      HookEvent = "Notification"
+	EventToolError         HookEvent = "ToolError"
 )
 
 // Env holds parsed hook environment variables.
@@ -77,7 +82,8 @@ func ParseEnv() *Env {
 // isValidHookEvent checks if the provided event is a known HookEvent.
 func isValidHookEvent(event HookEvent) bool {
 	switch event {
-	case EventPreToolUse, EventPostToolUse, EventStop, EventSessionStart, EventUserPromptSubmit:
+	case EventPreToolUse, EventPostToolUse, EventStop, EventSessionStart, EventUserPromptSubmit,
+		EventPreCompact, EventSubagentStart, EventSubagentEnd, EventNotification, EventToolError:
 		return true
 	default:
 		return false
@@ -102,6 +108,31 @@ func (e *Env) IsStop() bool {
 // IsSessionStart returns true if this is a SessionStart event.
 func (e *Env) IsSessionStart() bool {
 	return e.Event == EventSessionStart
+}
+
+// IsPreCompact returns true if this is a PreCompact event.
+func (e *Env) IsPreCompact() bool {
+	return e.Event == EventPreCompact
+}
+
+// IsSubagentStart returns true if this is a SubagentStart event.
+func (e *Env) IsSubagentStart() bool {
+	return e.Event == EventSubagentStart
+}
+
+// IsSubagentEnd returns true if this is a SubagentEnd event.
+func (e *Env) IsSubagentEnd() bool {
+	return e.Event == EventSubagentEnd
+}
+
+// IsNotification returns true if this is a Notification event.
+func (e *Env) IsNotification() bool {
+	return e.Event == EventNotification
+}
+
+// IsToolError returns true if this is a ToolError event.
+func (e *Env) IsToolError() bool {
+	return e.Event == EventToolError
 }
 
 // HasTool returns true if tool information is available.

@@ -1,6 +1,6 @@
 ---
 name: session-common
-description: Shared schemas and patterns for session lifecycle
+description: "SESSION_CONTEXT.md field definitions, FSM state values, complexity levels, and validation rules. Use when: checking valid session field names, enum values, state transition rules, or error message meanings. Triggers: session schema, session fields, complexity level, state machine, session validation."
 ---
 
 # Session-Common Reference Module

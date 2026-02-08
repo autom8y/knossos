@@ -6,6 +6,7 @@ type: analyst
 tools: Bash, Glob, Grep, Read, Write, WebSearch, WebFetch, TodoWrite, Skill
 model: opus
 color: cyan
+maxTurns: 25
 ---
 
 # Competitive Analyst

@@ -49,7 +49,8 @@ const CurrentSchemaVersion = "1.0"
 
 // StateManager handles sync state operations.
 type StateManager struct {
-	resolver *paths.Resolver
+	resolver    *paths.Resolver
+	syncDirPath string // optional override for staging
 }
 
 // NewStateManager creates a new state manager.
@@ -57,8 +58,16 @@ func NewStateManager(resolver *paths.Resolver) *StateManager {
 	return &StateManager{resolver: resolver}
 }
 
+// SetSyncDir overrides the sync directory path (used during staged materialization).
+func (m *StateManager) SetSyncDir(dir string) {
+	m.syncDirPath = dir
+}
+
 // SyncDir returns the path to the .claude/sync directory.
 func (m *StateManager) SyncDir() string {
+	if m.syncDirPath != "" {
+		return m.syncDirPath
+	}
 	return filepath.Join(m.resolver.ClaudeDir(), "sync")
 }
 

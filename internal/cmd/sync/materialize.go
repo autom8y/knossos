@@ -137,10 +137,25 @@ func runMaterialize(ctx *cmdContext, riteName string, source string, opts materi
 		m.WithEmbeddedHooks(embHooks)
 	}
 
+	// Detect if running inside Claude Code — use staged materialization
+	// to prevent CC's file watcher from seeing intermediate states.
+	inSession := os.Getenv("CLAUDE_SESSION_ID") != ""
+	if inSession {
+		printer.VerboseLog("info", "Detected active Claude Code session — using staged materialization", nil)
+	}
+
 	// Handle minimal mode (cross-cutting, no rite required)
 	if opts.Minimal {
 		printer.VerboseLog("info", "Materializing minimal .claude/ (cross-cutting mode)", nil)
-		result, err := m.MaterializeMinimal(opts)
+		var result *materialize.Result
+		var err error
+		if inSession {
+			result, err = m.StagedMaterialize(func(sm *materialize.Materializer) (*materialize.Result, error) {
+				return sm.MaterializeMinimal(opts)
+			})
+		} else {
+			result, err = m.MaterializeMinimal(opts)
+		}
 		if err != nil {
 			printer.PrintError(err)
 			return err
@@ -198,7 +213,14 @@ func runMaterialize(ctx *cmdContext, riteName string, source string, opts materi
 	}
 	printer.VerboseLog("info", fmt.Sprintf("Materializing .claude/ for rite: %s", riteName), logDetails)
 
-	result, err := m.MaterializeWithOptions(riteName, opts)
+	var result *materialize.Result
+	if inSession {
+		result, err = m.StagedMaterialize(func(sm *materialize.Materializer) (*materialize.Result, error) {
+			return sm.MaterializeWithOptions(riteName, opts)
+		})
+	} else {
+		result, err = m.MaterializeWithOptions(riteName, opts)
+	}
 	if err != nil {
 		printer.PrintError(err)
 		return err

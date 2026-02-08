@@ -26,9 +26,12 @@ description: |
   assistant: "Invoking Eval Specialist: Testing principal-engineer in isolation.
   Running completeness checks, edge case prompts, and tool usage validation..."
   </example>
-tools: Bash, Glob, Grep, Read, Task, TodoWrite
+tools: Bash, Glob, Grep, Read, TodoWrite, Skill
 model: opus
 color: red
+maxTurns: 15
+disallowedTools:
+  - Task
 contract:
   must_not:
     - Modify agent prompts to fix eval failures

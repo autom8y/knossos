@@ -4,6 +4,7 @@ description: Transfer work to a different agent with context
 argument-hint: <agent-name> [notes]
 allowed-tools: Bash, Read, Write, Task
 model: opus
+disable-model-invocation: true
 ---
 
 ## Context

@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/autom8y/knossos/internal/hook"
 	"github.com/autom8y/knossos/internal/output"
 	"github.com/autom8y/knossos/test/hooks/testutil"
 
@@ -261,13 +262,13 @@ func TestRunValidate_EarlyExit_HooksDisabled(t *testing.T) {
 		t.Fatalf("runValidate() error = %v", err)
 	}
 
-	var result ValidateDecision
+	var result hook.PreToolUseOutput
 	if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
 		t.Fatalf("Failed to parse output: %v\nOutput: %s", err, stdout.String())
 	}
 
-	if result.Decision != "allow" {
-		t.Errorf("Decision = %q, want %q", result.Decision, "allow")
+	if result.HookSpecificOutput.PermissionDecision != "allow" {
+		t.Errorf("PermissionDecision = %q, want %q", result.HookSpecificOutput.PermissionDecision, "allow")
 	}
 }
 
@@ -300,13 +301,13 @@ func TestRunValidate_BypassEnvVar(t *testing.T) {
 		t.Fatalf("runValidate() error = %v", err)
 	}
 
-	var result ValidateDecision
+	var result hook.PreToolUseOutput
 	if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
 		t.Fatalf("Failed to parse output: %v", err)
 	}
 
-	if result.Decision != "allow" {
-		t.Errorf("Decision = %q, want %q (bypass should allow)", result.Decision, "allow")
+	if result.HookSpecificOutput.PermissionDecision != "allow" {
+		t.Errorf("PermissionDecision = %q, want %q (bypass should allow)", result.HookSpecificOutput.PermissionDecision, "allow")
 	}
 }
 
@@ -338,13 +339,13 @@ func TestRunValidate_NonBashTool(t *testing.T) {
 		t.Fatalf("runValidate() error = %v", err)
 	}
 
-	var result ValidateDecision
+	var result hook.PreToolUseOutput
 	if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
 		t.Fatalf("Failed to parse output: %v", err)
 	}
 
-	if result.Decision != "allow" {
-		t.Errorf("Decision = %q, want %q (non-Bash tool should allow)", result.Decision, "allow")
+	if result.HookSpecificOutput.PermissionDecision != "allow" {
+		t.Errorf("PermissionDecision = %q, want %q (non-Bash tool should allow)", result.HookSpecificOutput.PermissionDecision, "allow")
 	}
 }
 
@@ -376,13 +377,13 @@ func TestRunValidate_AllowSafeCommand(t *testing.T) {
 		t.Fatalf("runValidate() error = %v", err)
 	}
 
-	var result ValidateDecision
+	var result hook.PreToolUseOutput
 	if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
 		t.Fatalf("Failed to parse output: %v\nOutput: %s", err, stdout.String())
 	}
 
-	if result.Decision != "allow" {
-		t.Errorf("Decision = %q, want %q", result.Decision, "allow")
+	if result.HookSpecificOutput.PermissionDecision != "allow" {
+		t.Errorf("PermissionDecision = %q, want %q", result.HookSpecificOutput.PermissionDecision, "allow")
 	}
 }
 
@@ -414,19 +415,19 @@ func TestRunValidate_BlockRmRfGit(t *testing.T) {
 		t.Fatalf("runValidate() error = %v", err)
 	}
 
-	var result ValidateDecision
+	var result hook.PreToolUseOutput
 	if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
 		t.Fatalf("Failed to parse output: %v\nOutput: %s", err, stdout.String())
 	}
 
-	if result.Decision != "block" {
-		t.Errorf("Decision = %q, want %q", result.Decision, "block")
+	if result.HookSpecificOutput.PermissionDecision != "deny" {
+		t.Errorf("PermissionDecision = %q, want %q", result.HookSpecificOutput.PermissionDecision, "deny")
 	}
-	if result.Reason == "" {
+	if result.HookSpecificOutput.PermissionDecisionReason == "" {
 		t.Error("Reason should not be empty for blocked command")
 	}
-	if !bytes.Contains([]byte(result.Reason), []byte(".git")) {
-		t.Errorf("Reason should mention .git, got: %q", result.Reason)
+	if !bytes.Contains([]byte(result.HookSpecificOutput.PermissionDecisionReason), []byte(".git")) {
+		t.Errorf("Reason should mention .git, got: %q", result.HookSpecificOutput.PermissionDecisionReason)
 	}
 }
 
@@ -458,16 +459,16 @@ func TestRunValidate_BlockForcePush(t *testing.T) {
 		t.Fatalf("runValidate() error = %v", err)
 	}
 
-	var result ValidateDecision
+	var result hook.PreToolUseOutput
 	if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
 		t.Fatalf("Failed to parse output: %v\nOutput: %s", err, stdout.String())
 	}
 
-	if result.Decision != "block" {
-		t.Errorf("Decision = %q, want %q", result.Decision, "block")
+	if result.HookSpecificOutput.PermissionDecision != "deny" {
+		t.Errorf("PermissionDecision = %q, want %q", result.HookSpecificOutput.PermissionDecision, "deny")
 	}
-	if !bytes.Contains([]byte(result.Reason), []byte("Force push")) {
-		t.Errorf("Reason should mention Force push, got: %q", result.Reason)
+	if !bytes.Contains([]byte(result.HookSpecificOutput.PermissionDecisionReason), []byte("Force push")) {
+		t.Errorf("Reason should mention Force push, got: %q", result.HookSpecificOutput.PermissionDecisionReason)
 	}
 }
 
@@ -499,16 +500,16 @@ func TestRunValidate_BlockNoVerify(t *testing.T) {
 		t.Fatalf("runValidate() error = %v", err)
 	}
 
-	var result ValidateDecision
+	var result hook.PreToolUseOutput
 	if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
 		t.Fatalf("Failed to parse output: %v\nOutput: %s", err, stdout.String())
 	}
 
-	if result.Decision != "block" {
-		t.Errorf("Decision = %q, want %q", result.Decision, "block")
+	if result.HookSpecificOutput.PermissionDecision != "deny" {
+		t.Errorf("PermissionDecision = %q, want %q", result.HookSpecificOutput.PermissionDecision, "deny")
 	}
-	if !bytes.Contains([]byte(result.Reason), []byte("--no-verify")) {
-		t.Errorf("Reason should mention --no-verify, got: %q", result.Reason)
+	if !bytes.Contains([]byte(result.HookSpecificOutput.PermissionDecisionReason), []byte("--no-verify")) {
+		t.Errorf("Reason should mention --no-verify, got: %q", result.HookSpecificOutput.PermissionDecisionReason)
 	}
 }
 
@@ -540,16 +541,16 @@ func TestRunValidate_BlockResetHard(t *testing.T) {
 		t.Fatalf("runValidate() error = %v", err)
 	}
 
-	var result ValidateDecision
+	var result hook.PreToolUseOutput
 	if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
 		t.Fatalf("Failed to parse output: %v\nOutput: %s", err, stdout.String())
 	}
 
-	if result.Decision != "block" {
-		t.Errorf("Decision = %q, want %q", result.Decision, "block")
+	if result.HookSpecificOutput.PermissionDecision != "deny" {
+		t.Errorf("PermissionDecision = %q, want %q", result.HookSpecificOutput.PermissionDecision, "deny")
 	}
-	if !bytes.Contains([]byte(result.Reason), []byte("reset --hard")) {
-		t.Errorf("Reason should mention reset --hard, got: %q", result.Reason)
+	if !bytes.Contains([]byte(result.HookSpecificOutput.PermissionDecisionReason), []byte("reset --hard")) {
+		t.Errorf("Reason should mention reset --hard, got: %q", result.HookSpecificOutput.PermissionDecisionReason)
 	}
 }
 
@@ -581,16 +582,16 @@ func TestRunValidate_BlockCleanFd(t *testing.T) {
 		t.Fatalf("runValidate() error = %v", err)
 	}
 
-	var result ValidateDecision
+	var result hook.PreToolUseOutput
 	if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
 		t.Fatalf("Failed to parse output: %v\nOutput: %s", err, stdout.String())
 	}
 
-	if result.Decision != "block" {
-		t.Errorf("Decision = %q, want %q", result.Decision, "block")
+	if result.HookSpecificOutput.PermissionDecision != "deny" {
+		t.Errorf("PermissionDecision = %q, want %q", result.HookSpecificOutput.PermissionDecision, "deny")
 	}
-	if !bytes.Contains([]byte(result.Reason), []byte("clean -fd")) {
-		t.Errorf("Reason should mention clean -fd, got: %q", result.Reason)
+	if !bytes.Contains([]byte(result.HookSpecificOutput.PermissionDecisionReason), []byte("clean -fd")) {
+		t.Errorf("Reason should mention clean -fd, got: %q", result.HookSpecificOutput.PermissionDecisionReason)
 	}
 }
 
@@ -624,13 +625,13 @@ func TestRunValidate_StdinInput(t *testing.T) {
 		t.Fatalf("runValidate() error = %v", err)
 	}
 
-	var result ValidateDecision
+	var result hook.PreToolUseOutput
 	if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
 		t.Fatalf("Failed to parse output: %v", err)
 	}
 
-	if result.Decision != "block" {
-		t.Errorf("Decision = %q, want %q (stdin should work)", result.Decision, "block")
+	if result.HookSpecificOutput.PermissionDecision != "deny" {
+		t.Errorf("PermissionDecision = %q, want %q (stdin should work)", result.HookSpecificOutput.PermissionDecision, "deny")
 	}
 }
 

@@ -6,6 +6,7 @@ type: specialist
 tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
 model: opus
 color: purple
+maxTurns: 25
 ---
 
 # Roadmap Strategist

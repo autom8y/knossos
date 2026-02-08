@@ -61,17 +61,21 @@ func TestParseEnv(t *testing.T) {
 
 func TestEnvEventChecks(t *testing.T) {
 	tests := []struct {
-		event        HookEvent
-		isPreTool    bool
-		isPostTool   bool
-		isStop       bool
+		event          HookEvent
+		isPreTool      bool
+		isPostTool     bool
+		isStop         bool
 		isSessionStart bool
+		isPreCompact   bool
+		isSubagentStart bool
 	}{
-		{EventPreToolUse, true, false, false, false},
-		{EventPostToolUse, false, true, false, false},
-		{EventStop, false, false, true, false},
-		{EventSessionStart, false, false, false, true},
-		{"UnknownEvent", false, false, false, false},
+		{EventPreToolUse, true, false, false, false, false, false},
+		{EventPostToolUse, false, true, false, false, false, false},
+		{EventStop, false, false, true, false, false, false},
+		{EventSessionStart, false, false, false, true, false, false},
+		{EventPreCompact, false, false, false, false, true, false},
+		{EventSubagentStart, false, false, false, false, false, true},
+		{"UnknownEvent", false, false, false, false, false, false},
 	}
 
 	for _, tt := range tests {
@@ -89,6 +93,49 @@ func TestEnvEventChecks(t *testing.T) {
 			}
 			if got := env.IsSessionStart(); got != tt.isSessionStart {
 				t.Errorf("IsSessionStart() = %v, want %v", got, tt.isSessionStart)
+			}
+			if got := env.IsPreCompact(); got != tt.isPreCompact {
+				t.Errorf("IsPreCompact() = %v, want %v", got, tt.isPreCompact)
+			}
+			if got := env.IsSubagentStart(); got != tt.isSubagentStart {
+				t.Errorf("IsSubagentStart() = %v, want %v", got, tt.isSubagentStart)
+			}
+		})
+	}
+}
+
+func TestValidHookEvents(t *testing.T) {
+	validEvents := []HookEvent{
+		EventPreToolUse,
+		EventPostToolUse,
+		EventStop,
+		EventSessionStart,
+		EventUserPromptSubmit,
+		EventPreCompact,
+		EventSubagentStart,
+		EventSubagentEnd,
+		EventNotification,
+		EventToolError,
+	}
+
+	for _, event := range validEvents {
+		t.Run(string(event), func(t *testing.T) {
+			if !isValidHookEvent(event) {
+				t.Errorf("isValidHookEvent(%q) = false, want true", event)
+			}
+		})
+	}
+
+	invalidEvents := []HookEvent{
+		"UnknownEvent",
+		"InvalidEvent",
+		"",
+	}
+
+	for _, event := range invalidEvents {
+		t.Run(string(event), func(t *testing.T) {
+			if isValidHookEvent(event) {
+				t.Errorf("isValidHookEvent(%q) = true, want false", event)
 			}
 		})
 	}

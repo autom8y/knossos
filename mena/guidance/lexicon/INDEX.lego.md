@@ -1,10 +1,6 @@
 ---
 name: lexicon
-description: |
-  Framework-to-Claude-Code primitive mapping. Use when: writing or reviewing agent prompts,
-  understanding how knossos concepts map to CC runtime behavior, checking frontmatter field
-  semantics, or cleaning up stale syntax. Triggers: lexicon, CC primitives, invocation mapping,
-  frontmatter reference, knossos terminology.
+description: "Framework-to-Claude-Code primitive mapping. Use when: writing or reviewing agent prompts, understanding how knossos concepts map to CC runtime behavior, checking frontmatter field semantics, or cleaning up stale syntax. Triggers: lexicon, CC primitives, invocation mapping, frontmatter reference, knossos terminology."
 ---
 
 # Framework Lexicon

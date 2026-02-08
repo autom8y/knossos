@@ -4,6 +4,7 @@ description: Multi-task sprint orchestration
 argument-hint: <sprint-name> [--tasks="task1,task2,task3"]
 allowed-tools: Bash, Read, Write, Task, Glob, Grep
 model: opus
+disable-model-invocation: true
 ---
 
 ## Context

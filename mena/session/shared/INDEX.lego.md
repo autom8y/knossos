@@ -1,6 +1,6 @@
 ---
 name: session-shared
-description: Reusable behavior patterns for session lifecycle commands
+description: "Session resolution, workflow resolution, and Moirai invocation patterns. Use when: implementing session command pre-flight validation, delegating to Moirai, or resolving active sessions. Triggers: session resolution, moirai invocation, session pre-flight, workflow resolution."
 ---
 
 # Session-Lifecycle Shared Sections
@@ -22,7 +22,7 @@ Reference partials from behavior.md files:
 ```markdown
 ### Pre-flight Validation
 
-Apply [Session Resolution Pattern](../shared-sections/session-resolution.md):
+Apply [Session Resolution Pattern](session-resolution.md):
 - Requires: {state requirement}
 - Verb: "{command verb}"
 ```
@@ -44,7 +44,7 @@ Partials extract duplicated patterns to:
 
 Both are reference modules; neither is invoked directly.
 
-**Navigation**: For schemas and conceptual models, see [session-common INDEX](../session-common/INDEX.md)
+**Navigation**: For schemas and conceptual models, see the `session-common` skill
 
 ## Adding New Partials
 

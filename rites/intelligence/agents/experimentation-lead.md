@@ -6,6 +6,7 @@ type: designer
 tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
 model: opus
 color: cyan
+maxTurns: 25
 ---
 
 # Experimentation Lead

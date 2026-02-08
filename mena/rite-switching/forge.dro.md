@@ -1,20 +1,26 @@
 ---
 name: forge
-description: Display The Forge meta-rite overview and available commands
-argument-hint: [--agents|--workflow|--commands]
-allowed-tools: Read, Glob
+description: Quick switch to forge (meta-rite for building and maintaining rites)
+argument-hint: [--force] [--dry-run] [--keep-all|--remove-all|--promote-all]
+allowed-tools: Bash, Read
 model: haiku
+disable-model-invocation: true
 ---
+
+## Context
+Auto-injected by SessionStart hook (project, rite, session, git).
 
 ## Your Task
 
-Display information about The Forge - the meta-rite for creating and maintaining rites. $ARGUMENTS
+Switch to the forge rite and display the pantheon. $ARGUMENTS
 
 ## Behavior
 
-### Default (no arguments)
+1. Execute: `ari sync materialize --rite forge $ARGUMENTS`
+2. Display the pantheon output from ari (agents and their roles)
+3. If SESSION_CONTEXT exists, update `active_rite` to `forge`
 
-Display the Forge overview:
+After the switch, display this condensed overview:
 
 ```
 THE FORGE - Agent Factory Rite
@@ -23,59 +29,37 @@ THE FORGE - Agent Factory Rite
 The rite that builds rites. Global singleton (always available).
 
 AGENTS (6):
-  Agent Designer    (purple)  - Role specs and contracts
-  Prompt Architect  (cyan)    - System prompts (11 sections)
-  Workflow Engineer (green)   - Orchestration and commands
-  Platform Engineer (orange)  - Roster infrastructure
-  Eval Specialist   (red)     - Testing and validation
-  Agent Curator     (blue)    - Versioning and integration
+  Agent Designer    - Role specs and contracts
+  Prompt Architect  - System prompts (11 sections)
+  Workflow Engineer - Orchestration and commands
+  Platform Engineer - Roster infrastructure
+  Eval Specialist   - Testing and validation
+  Agent Curator     - Versioning and integration
 
 COMMANDS:
   /new-rite <name>      - Full rite creation workflow
   /validate-rite <name> - Run validation suite on rite
   /eval-agent <name>    - Test single agent in isolation
 
-COMPLEXITY LEVELS:
-  PATCH     - Single agent modification
-  RITE      - New rite with 3-5 agents
-  ECOSYSTEM - Multi-rite initiative
-
 Full docs: rites/forge/mena/forge-ref/INDEX.lego.md
 ```
 
-### With --agents
+## Flags
 
-List all 6 Forge agents with their responsibilities:
+| Flag | Description |
+|------|-------------|
+| `--force` | Force regeneration even if already on this rite |
+| `--dry-run` | Preview changes without applying |
+| `--keep-all` | Preserve all orphan agents in project (default) |
+| `--remove-all` | Remove orphans (backup in `.claude/.orphan-backup/`) |
+| `--promote-all` | Move orphans to user-level (`~/.claude/agents/`) |
 
-| Agent | Model | Produces | Handoff To |
-|-------|-------|----------|------------|
-| Agent Designer | opus | TEAM-SPEC | Prompt Architect |
-| Prompt Architect | opus | Agent .md files | Workflow Engineer |
-| Workflow Engineer | opus | workflow.yaml | Platform Engineer |
-| Platform Engineer | sonnet | Roster files | Eval Specialist |
-| Eval Specialist | opus | eval-report | Agent Curator |
-| Agent Curator | sonnet | Roster entry | (terminal) |
+## When to Use
 
-### With --workflow
-
-Display the Forge workflow:
-
-```
-Agent Designer → Prompt Architect → Workflow Engineer → Platform Engineer → Eval Specialist → Agent Curator
-     │               │                   │                    │                  │               │
-     ▼               ▼                   ▼                    ▼                  ▼               ▼
- TEAM-SPEC      Agent .md files    workflow.yaml      roster/rites/       eval-report      roster entry
-```
-
-### With --commands
-
-Display available Forge commands with usage:
-
-| Command | Purpose | Entry Agent |
-|---------|---------|-------------|
-| `/new-rite <name>` | Create a new rite | Agent Designer |
-| `/validate-rite <name>` | Validate existing rite | Eval Specialist |
-| `/eval-agent <name>` | Test single agent | Eval Specialist |
+- Creating or modifying rites
+- Designing new agents or workflows
+- Testing and validating agent behavior
+- Any meta-work on the Knossos platform itself
 
 ## Reference
 

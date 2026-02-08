@@ -38,6 +38,7 @@ description: |
 type: meta
 tools: Bash, Glob, Grep, Read, Task, WebSearch
 model: opus
+maxTurns: 20
 color: cyan
 ---
 

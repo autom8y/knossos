@@ -6,6 +6,7 @@ type: engineer
 tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
 model: opus
 color: magenta
+maxTurns: 25
 ---
 
 # Documentation Engineer

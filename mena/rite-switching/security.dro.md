@@ -4,6 +4,7 @@ description: Quick switch to security (security assessment workflow)
 argument-hint: [--update] [--dry-run] [--keep-all|--remove-all|--promote-all]
 allowed-tools: Bash, Read
 model: haiku
+disable-model-invocation: true
 ---
 
 ## Context

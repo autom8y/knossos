@@ -4,6 +4,7 @@ description: Quick switch to ecosystem (CEM/skeleton/roster infrastructure workf
 argument-hint: [--update] [--dry-run] [--keep-all|--remove-all|--promote-all]
 allowed-tools: Bash, Read
 model: sonnet
+disable-model-invocation: true
 ---
 
 ## Context

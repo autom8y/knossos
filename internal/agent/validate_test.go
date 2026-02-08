@@ -13,6 +13,65 @@ func newTestValidator(t *testing.T) *AgentValidator {
 	return av
 }
 
+func TestArchetypeDefaults_IncludeCCNativeFields(t *testing.T) {
+	tests := []struct {
+		name                string
+		expectedMaxTurns    int
+		expectedDisallowed  []string
+	}{
+		{
+			name:               "orchestrator",
+			expectedMaxTurns:   3,
+			expectedDisallowed: []string{"Bash", "Write", "Edit", "Glob", "Grep", "Task"},
+		},
+		{
+			name:               "specialist",
+			expectedMaxTurns:   25,
+			expectedDisallowed: nil,
+		},
+		{
+			name:               "reviewer",
+			expectedMaxTurns:   15,
+			expectedDisallowed: []string{"Task"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			arch, err := GetArchetype(tt.name)
+			if err != nil {
+				t.Fatalf("failed to get archetype %q: %v", tt.name, err)
+			}
+
+			if arch.Defaults.MaxTurns != tt.expectedMaxTurns {
+				t.Errorf("archetype %q: MaxTurns = %d, want %d",
+					tt.name, arch.Defaults.MaxTurns, tt.expectedMaxTurns)
+			}
+
+			if tt.expectedDisallowed == nil {
+				if arch.Defaults.DisallowedTools != nil {
+					t.Errorf("archetype %q: DisallowedTools = %v, want nil",
+						tt.name, arch.Defaults.DisallowedTools)
+				}
+			} else {
+				if len(arch.Defaults.DisallowedTools) != len(tt.expectedDisallowed) {
+					t.Errorf("archetype %q: DisallowedTools count = %d, want %d",
+						tt.name, len(arch.Defaults.DisallowedTools), len(tt.expectedDisallowed))
+				}
+				for i, tool := range arch.Defaults.DisallowedTools {
+					if i >= len(tt.expectedDisallowed) {
+						break
+					}
+					if tool != tt.expectedDisallowed[i] {
+						t.Errorf("archetype %q: DisallowedTools[%d] = %q, want %q",
+							tt.name, i, tool, tt.expectedDisallowed[i])
+					}
+				}
+			}
+		})
+	}
+}
+
 func TestValidateAgentFrontmatter_MinimalValid_WarnMode(t *testing.T) {
 	av := newTestValidator(t)
 
@@ -593,5 +652,214 @@ color: purple
 	}
 	if !foundModelWarning {
 		t.Errorf("expected warning about orchestrator model, got warnings: %v", result.Warnings)
+	}
+}
+
+func TestValidateAgentFrontmatter_CCNativeFields_Valid(t *testing.T) {
+	av := newTestValidator(t)
+
+	content := []byte(`---
+name: orchestrator
+description: "Coordinates ecosystem phases"
+type: orchestrator
+tools: Read
+model: opus
+color: purple
+maxTurns: 3
+skills:
+  - ecosystem-ref
+  - standards
+disallowedTools: Bash, Write, Edit, Glob, Grep, Task
+---
+
+# Orchestrator
+`)
+
+	result, err := av.ValidateAgentFrontmatter(content, ValidationModeStrict)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if !result.Valid {
+		t.Errorf("expected valid, got issues: %v", result.Issues)
+	}
+
+	if result.Frontmatter.MaxTurns != 3 {
+		t.Errorf("maxTurns = %d, want 3", result.Frontmatter.MaxTurns)
+	}
+	if len(result.Frontmatter.Skills) != 2 {
+		t.Errorf("skills count = %d, want 2", len(result.Frontmatter.Skills))
+	}
+	if len(result.Frontmatter.DisallowedTools) != 6 {
+		t.Errorf("disallowedTools count = %d, want 6", len(result.Frontmatter.DisallowedTools))
+	}
+}
+
+func TestValidateAgentFrontmatter_MaxTurnsNegative(t *testing.T) {
+	av := newTestValidator(t)
+
+	content := []byte(`---
+name: bad-agent
+description: "Agent with negative maxTurns"
+tools: Read
+maxTurns: -5
+---
+
+# Bad Agent
+`)
+
+	result, err := av.ValidateAgentFrontmatter(content, ValidationModeWarn)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if result.Valid {
+		t.Error("expected invalid for negative maxTurns")
+	}
+
+	foundMaxTurnsIssue := false
+	for _, issue := range result.Issues {
+		if containsStr(issue.Message, "maxTurns") || issue.Field == "maxTurns" {
+			foundMaxTurnsIssue = true
+			break
+		}
+	}
+	if !foundMaxTurnsIssue {
+		t.Errorf("expected issue about maxTurns, got: %v", result.Issues)
+	}
+}
+
+func TestValidateAgentFrontmatter_MaxTurnsZero_StrictMode(t *testing.T) {
+	av := newTestValidator(t)
+
+	content := []byte(`---
+name: specialist
+description: "Specialist with unlimited turns"
+type: specialist
+tools: Read, Bash
+maxTurns: 0
+---
+
+# Specialist
+`)
+
+	result, err := av.ValidateAgentFrontmatter(content, ValidationModeStrict)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// Should be valid but produce warning
+	if !result.Valid {
+		t.Errorf("expected valid for maxTurns=0, got issues: %v", result.Issues)
+	}
+
+	foundMaxTurnsWarning := false
+	for _, w := range result.Warnings {
+		if containsStr(w, "maxTurns") {
+			foundMaxTurnsWarning = true
+			break
+		}
+	}
+	if !foundMaxTurnsWarning {
+		t.Errorf("expected warning about maxTurns=0, got warnings: %v", result.Warnings)
+	}
+}
+
+func TestValidateAgentFrontmatter_DisallowedToolsUnknown(t *testing.T) {
+	av := newTestValidator(t)
+
+	content := []byte(`---
+name: test-agent
+description: "Agent with unknown disallowed tool"
+tools: Read
+disallowedTools: Bash, UnknownTool
+---
+
+# Test Agent
+`)
+
+	result, err := av.ValidateAgentFrontmatter(content, ValidationModeWarn)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// Should be valid but produce warning
+	if !result.Valid {
+		t.Errorf("expected valid with unknown disallowedTools, got issues: %v", result.Issues)
+	}
+
+	foundDisallowedToolsWarning := false
+	for _, w := range result.Warnings {
+		if containsStr(w, "disallowedTools") && containsStr(w, "UnknownTool") {
+			foundDisallowedToolsWarning = true
+			break
+		}
+	}
+	if !foundDisallowedToolsWarning {
+		t.Errorf("expected warning about unknown disallowedTools, got warnings: %v", result.Warnings)
+	}
+}
+
+func TestValidateAgentFrontmatter_OrchestratorHighMaxTurns(t *testing.T) {
+	av := newTestValidator(t)
+
+	content := []byte(`---
+name: orchestrator
+description: "Orchestrator with too many turns"
+type: orchestrator
+tools: Read
+model: opus
+maxTurns: 10
+---
+
+# Orchestrator
+`)
+
+	result, err := av.ValidateAgentFrontmatter(content, ValidationModeWarn)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	foundMaxTurnsWarning := false
+	for _, w := range result.Warnings {
+		if containsStr(w, "maxTurns") && containsStr(w, "5") {
+			foundMaxTurnsWarning = true
+			break
+		}
+	}
+	if !foundMaxTurnsWarning {
+		t.Errorf("expected warning about orchestrator maxTurns > 5, got warnings: %v", result.Warnings)
+	}
+}
+
+func TestValidateAgentFrontmatter_OrchestratorNoDisallowedTools(t *testing.T) {
+	av := newTestValidator(t)
+
+	content := []byte(`---
+name: orchestrator
+description: "Orchestrator without disallowedTools"
+type: orchestrator
+tools: Read
+model: opus
+maxTurns: 3
+---
+
+# Orchestrator
+`)
+
+	result, err := av.ValidateAgentFrontmatter(content, ValidationModeWarn)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	foundDisallowedToolsWarning := false
+	for _, w := range result.Warnings {
+		if containsStr(w, "disallowedTools") {
+			foundDisallowedToolsWarning = true
+			break
+		}
+	}
+	if !foundDisallowedToolsWarning {
+		t.Errorf("expected warning about missing disallowedTools for orchestrator, got warnings: %v", result.Warnings)
 	}
 }

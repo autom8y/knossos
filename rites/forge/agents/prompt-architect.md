@@ -19,9 +19,10 @@ description: |
   assistant: "Invoking Prompt Architect: I'll craft system prompts for all 4 agents
   following the standard template. Starting with API Architect..."
   </example>
-tools: Bash, Glob, Grep, Read, Write, Edit, Task, TodoWrite
+tools: Bash, Glob, Grep, Read, Write, Edit, TodoWrite, Skill
 model: opus
 color: cyan
+maxTurns: 25
 ---
 
 # Prompt Architect

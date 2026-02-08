@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/autom8y/knossos/internal/hook"
 	"github.com/autom8y/knossos/internal/output"
 	"github.com/autom8y/knossos/test/hooks/testutil"
 
@@ -395,8 +396,8 @@ func TestIntegration_ValidateHook_Chain(t *testing.T) {
 	}{
 		{`{"command": "ls -la"}`, "allow"},
 		{`{"command": "git status"}`, "allow"},
-		{`{"command": "rm -rf .git"}`, "block"},
-		{`{"command": "git push --force origin main"}`, "block"},
+		{`{"command": "rm -rf .git"}`, "deny"},
+		{`{"command": "git push --force origin main"}`, "deny"},
 		{`{"command": "cat README.md"}`, "allow"},
 	}
 
@@ -430,13 +431,13 @@ func TestIntegration_ValidateHook_Chain(t *testing.T) {
 				t.Fatalf("runValidate() error = %v", err)
 			}
 
-			var result ValidateDecision
+			var result hook.PreToolUseOutput
 			if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
 				t.Fatalf("Failed to parse output: %v", err)
 			}
 
-			if result.Decision != tc.expected {
-				t.Errorf("Decision = %q, want %q", result.Decision, tc.expected)
+			if result.HookSpecificOutput.PermissionDecision != tc.expected {
+				t.Errorf("Decision = %q, want %q", result.HookSpecificOutput.PermissionDecision, tc.expected)
 			}
 		})
 	}
@@ -449,8 +450,8 @@ func TestIntegration_WriteguardHook_Chain(t *testing.T) {
 		expected string
 	}{
 		{"src/main.go", "allow"},
-		{".claude/sessions/test/SESSION_CONTEXT.md", "block"},
-		{".claude/sprints/s1/SPRINT_CONTEXT.md", "block"},
+		{".claude/sessions/test/SESSION_CONTEXT.md", "deny"},
+		{".claude/sprints/s1/SPRINT_CONTEXT.md", "deny"},
 		{"docs/README.md", "allow"},
 		{"config.yaml", "allow"},
 	}
@@ -485,13 +486,13 @@ func TestIntegration_WriteguardHook_Chain(t *testing.T) {
 				t.Fatalf("runWriteguard() error = %v", err)
 			}
 
-			var result WriteGuardDecision
+			var result hook.PreToolUseOutput
 			if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
 				t.Fatalf("Failed to parse output: %v", err)
 			}
 
-			if result.Decision != tc.expected {
-				t.Errorf("Decision = %q, want %q for path %q", result.Decision, tc.expected, tc.path)
+			if result.HookSpecificOutput.PermissionDecision != tc.expected {
+				t.Errorf("Decision = %q, want %q for path %q", result.HookSpecificOutput.PermissionDecision, tc.expected, tc.path)
 			}
 		})
 	}

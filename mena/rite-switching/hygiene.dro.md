@@ -4,6 +4,7 @@ description: Quick switch to hygiene (code quality workflow)
 argument-hint: [--force] [--dry-run] [--keep-all|--remove-all|--promote-all]
 allowed-tools: Bash, Read
 model: haiku
+disable-model-invocation: true
 ---
 
 ## Context

@@ -89,6 +89,7 @@ Performance Targets:
 	cmd.AddCommand(newValidateCmd(ctx))
 	cmd.AddCommand(newClewCmd(ctx))
 	cmd.AddCommand(newBudgetCmd(ctx))
+	cmd.AddCommand(newPrecompactCmd(ctx))
 
 	// Hook commands do NOT require project context
 	common.SetNeedsProject(cmd, false, true)

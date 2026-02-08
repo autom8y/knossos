@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/autom8y/knossos/internal/hook"
 	"github.com/autom8y/knossos/internal/output"
 	"github.com/autom8y/knossos/test/hooks/testutil"
 
@@ -163,13 +164,13 @@ func TestRunWriteguard_EarlyExit_HooksDisabled(t *testing.T) {
 		t.Fatalf("runWriteguard() error = %v", err)
 	}
 
-	var result WriteGuardDecision
+	var result hook.PreToolUseOutput
 	if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
 		t.Fatalf("Failed to parse output: %v\nOutput: %s", err, stdout.String())
 	}
 
-	if result.Decision != "allow" {
-		t.Errorf("Decision = %q, want %q", result.Decision, "allow")
+	if result.HookSpecificOutput.PermissionDecision != "allow" {
+		t.Errorf("PermissionDecision = %q, want %q", result.HookSpecificOutput.PermissionDecision, "allow")
 	}
 }
 
@@ -202,13 +203,13 @@ func TestRunWriteguard_BypassEnvVar(t *testing.T) {
 		t.Fatalf("runWriteguard() error = %v", err)
 	}
 
-	var result WriteGuardDecision
+	var result hook.PreToolUseOutput
 	if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
 		t.Fatalf("Failed to parse output: %v", err)
 	}
 
-	if result.Decision != "allow" {
-		t.Errorf("Decision = %q, want %q (bypass should allow)", result.Decision, "allow")
+	if result.HookSpecificOutput.PermissionDecision != "allow" {
+		t.Errorf("PermissionDecision = %q, want %q (bypass should allow)", result.HookSpecificOutput.PermissionDecision, "allow")
 	}
 }
 
@@ -240,13 +241,13 @@ func TestRunWriteguard_NonWriteTool(t *testing.T) {
 		t.Fatalf("runWriteguard() error = %v", err)
 	}
 
-	var result WriteGuardDecision
+	var result hook.PreToolUseOutput
 	if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
 		t.Fatalf("Failed to parse output: %v", err)
 	}
 
-	if result.Decision != "allow" {
-		t.Errorf("Decision = %q, want %q (non-write tool should allow)", result.Decision, "allow")
+	if result.HookSpecificOutput.PermissionDecision != "allow" {
+		t.Errorf("PermissionDecision = %q, want %q (non-write tool should allow)", result.HookSpecificOutput.PermissionDecision, "allow")
 	}
 }
 
@@ -278,19 +279,19 @@ func TestRunWriteguard_BlockSessionContext(t *testing.T) {
 		t.Fatalf("runWriteguard() error = %v", err)
 	}
 
-	var result WriteGuardDecision
+	var result hook.PreToolUseOutput
 	if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
 		t.Fatalf("Failed to parse output: %v\nOutput: %s", err, stdout.String())
 	}
 
-	if result.Decision != "block" {
-		t.Errorf("Decision = %q, want %q", result.Decision, "block")
+	if result.HookSpecificOutput.PermissionDecision != "deny" {
+		t.Errorf("PermissionDecision = %q, want %q", result.HookSpecificOutput.PermissionDecision, "deny")
 	}
-	if result.Reason == "" {
+	if result.HookSpecificOutput.PermissionDecisionReason == "" {
 		t.Error("Reason should not be empty for blocked write")
 	}
-	if !bytes.Contains([]byte(result.Reason), []byte("Moirai")) {
-		t.Errorf("Reason should mention Moirai, got: %q", result.Reason)
+	if !bytes.Contains([]byte(result.HookSpecificOutput.PermissionDecisionReason), []byte("Moirai")) {
+		t.Errorf("Reason should mention Moirai, got: %q", result.HookSpecificOutput.PermissionDecisionReason)
 	}
 }
 
@@ -322,16 +323,16 @@ func TestRunWriteguard_BlockSprintContext(t *testing.T) {
 		t.Fatalf("runWriteguard() error = %v", err)
 	}
 
-	var result WriteGuardDecision
+	var result hook.PreToolUseOutput
 	if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
 		t.Fatalf("Failed to parse output: %v", err)
 	}
 
-	if result.Decision != "block" {
-		t.Errorf("Decision = %q, want %q", result.Decision, "block")
+	if result.HookSpecificOutput.PermissionDecision != "deny" {
+		t.Errorf("PermissionDecision = %q, want %q", result.HookSpecificOutput.PermissionDecision, "deny")
 	}
-	if !bytes.Contains([]byte(result.Reason), []byte("SPRINT_CONTEXT")) {
-		t.Errorf("Reason should mention SPRINT_CONTEXT, got: %q", result.Reason)
+	if !bytes.Contains([]byte(result.HookSpecificOutput.PermissionDecisionReason), []byte("SPRINT_CONTEXT")) {
+		t.Errorf("Reason should mention SPRINT_CONTEXT, got: %q", result.HookSpecificOutput.PermissionDecisionReason)
 	}
 }
 
@@ -363,13 +364,13 @@ func TestRunWriteguard_AllowRegularFile(t *testing.T) {
 		t.Fatalf("runWriteguard() error = %v", err)
 	}
 
-	var result WriteGuardDecision
+	var result hook.PreToolUseOutput
 	if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
 		t.Fatalf("Failed to parse output: %v", err)
 	}
 
-	if result.Decision != "allow" {
-		t.Errorf("Decision = %q, want %q (regular file should be allowed)", result.Decision, "allow")
+	if result.HookSpecificOutput.PermissionDecision != "allow" {
+		t.Errorf("PermissionDecision = %q, want %q (regular file should be allowed)", result.HookSpecificOutput.PermissionDecision, "allow")
 	}
 }
 
@@ -403,13 +404,13 @@ func TestRunWriteguard_StdinInput(t *testing.T) {
 		t.Fatalf("runWriteguard() error = %v", err)
 	}
 
-	var result WriteGuardDecision
+	var result hook.PreToolUseOutput
 	if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
 		t.Fatalf("Failed to parse output: %v", err)
 	}
 
-	if result.Decision != "block" {
-		t.Errorf("Decision = %q, want %q (stdin should work)", result.Decision, "block")
+	if result.HookSpecificOutput.PermissionDecision != "deny" {
+		t.Errorf("PermissionDecision = %q, want %q (stdin should work)", result.HookSpecificOutput.PermissionDecision, "deny")
 	}
 }
 

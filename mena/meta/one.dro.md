@@ -3,6 +3,7 @@ name: one
 description: Execute workflow phases autonomously via daisy-chain loop
 argument-hint: (uses session context from Session 0)
 model: opus
+disable-model-invocation: true
 ---
 
 # Session 1: Autonomous Execution

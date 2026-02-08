@@ -6,6 +6,9 @@ type: reviewer
 tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
 model: sonnet
 color: blue
+maxTurns: 15
+disallowedTools:
+  - Task
 contract:
   must_not:
     - Write or rewrite documentation content

@@ -6,6 +6,7 @@ type: engineer
 tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
 model: opus
 color: cyan
+maxTurns: 25
 ---
 
 # Platform Engineer

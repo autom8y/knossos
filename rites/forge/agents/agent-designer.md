@@ -28,9 +28,10 @@ description: |
   ensuring it doesn't overlap with existing Threat Modeler or Security Reviewer
   responsibilities. Let me define the handoff points..."
   </example>
-tools: Bash, Glob, Grep, Read, Write, Task, TodoWrite
+tools: Bash, Glob, Grep, Read, Write, Edit, TodoWrite, Skill
 model: opus
 color: purple
+maxTurns: 25
 ---
 
 # Agent Designer

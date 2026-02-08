@@ -106,6 +106,9 @@ func TestWriterHelpers(t *testing.T) {
 		if result.Reason != "allowed" {
 			t.Errorf("Reason = %v, want 'allowed'", result.Reason)
 		}
+		if result.PermissionDecision != "allow" {
+			t.Errorf("PermissionDecision = %v, want 'allow'", result.PermissionDecision)
+		}
 	})
 
 	t.Run("WriteBlock", func(t *testing.T) {
@@ -127,6 +130,9 @@ func TestWriterHelpers(t *testing.T) {
 		}
 		if result.Message != "Operation blocked" {
 			t.Errorf("Message = %v, want 'Operation blocked'", result.Message)
+		}
+		if result.PermissionDecision != "deny" {
+			t.Errorf("PermissionDecision = %v, want 'deny'", result.PermissionDecision)
 		}
 	})
 
@@ -150,6 +156,10 @@ func TestWriterHelpers(t *testing.T) {
 		}
 		if result.ModifiedInput == nil {
 			t.Error("ModifiedInput is nil")
+		}
+		// CC does not support modify, so it maps to "allow"
+		if result.PermissionDecision != "allow" {
+			t.Errorf("PermissionDecision = %v, want 'allow' (CC maps modify to allow)", result.PermissionDecision)
 		}
 	})
 
@@ -240,5 +250,56 @@ func TestDefaultWriter(t *testing.T) {
 	}
 	if w.format != FormatJSON {
 		t.Errorf("Default format = %v, want JSON", w.format)
+	}
+}
+
+func TestPermissionDecisionMapping(t *testing.T) {
+	tests := []struct {
+		name               string
+		decision           Decision
+		wantPermission     string
+	}{
+		{
+			name:           "allow maps to allow",
+			decision:       DecisionAllow,
+			wantPermission: "allow",
+		},
+		{
+			name:           "block maps to deny",
+			decision:       DecisionBlock,
+			wantPermission: "deny",
+		},
+		{
+			name:           "modify maps to allow",
+			decision:       DecisionModify,
+			wantPermission: "allow",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var buf bytes.Buffer
+			w := NewWriter(FormatJSON, &buf, nil)
+
+			result := &Result{Decision: tt.decision}
+			err := w.WriteResult(result)
+			if err != nil {
+				t.Fatalf("WriteResult() error = %v", err)
+			}
+
+			var parsed Result
+			if err := json.Unmarshal(buf.Bytes(), &parsed); err != nil {
+				t.Fatalf("Failed to parse output: %v", err)
+			}
+
+			if parsed.PermissionDecision != tt.wantPermission {
+				t.Errorf("PermissionDecision = %v, want %v", parsed.PermissionDecision, tt.wantPermission)
+			}
+
+			// Verify both fields present for dual output
+			if parsed.Decision != tt.decision {
+				t.Errorf("Decision = %v, want %v (legacy field)", parsed.Decision, tt.decision)
+			}
+		})
 	}
 }

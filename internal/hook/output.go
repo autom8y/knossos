@@ -32,8 +32,13 @@ const (
 
 // Result represents the structured output of a hook execution.
 type Result struct {
-	// Decision indicates what action to take
+	// Decision indicates what action to take (legacy field)
 	Decision Decision `json:"decision"`
+
+	// PermissionDecision is the CC-native field for PreToolUse hooks.
+	// CC reads this field; value must be exactly "allow" or "deny".
+	// Auto-populated from Decision field during JSON encoding.
+	PermissionDecision string `json:"permissionDecision,omitempty"`
 
 	// Reason explains the decision (for logging/debugging)
 	Reason string `json:"reason,omitempty"`
@@ -52,6 +57,20 @@ type Result struct {
 
 	// Performance tracking
 	DurationMs int64 `json:"duration_ms,omitempty"`
+}
+
+// PreToolUseOutput is the CC-native output format for PreToolUse hooks.
+// CC expects decisions wrapped in a hookSpecificOutput envelope.
+type PreToolUseOutput struct {
+	HookSpecificOutput HookSpecificOutput `json:"hookSpecificOutput"`
+}
+
+// HookSpecificOutput contains the PreToolUse decision fields CC reads.
+type HookSpecificOutput struct {
+	HookEventName            string          `json:"hookEventName"`
+	PermissionDecision       string          `json:"permissionDecision"`
+	PermissionDecisionReason string          `json:"permissionDecisionReason,omitempty"`
+	UpdatedInput             json.RawMessage `json:"updatedInput,omitempty"`
 }
 
 // HookError represents an error from hook execution.
@@ -142,6 +161,32 @@ func (w *Writer) WriteError(code, message string) error {
 	})
 }
 
+// WritePreToolUseAllow outputs an allow decision in CC's hookSpecificOutput format.
+func (w *Writer) WritePreToolUseAllow(reason string) error {
+	output := PreToolUseOutput{
+		HookSpecificOutput: HookSpecificOutput{
+			HookEventName:            "PreToolUse",
+			PermissionDecision:       "allow",
+			PermissionDecisionReason: reason,
+		},
+	}
+	enc := json.NewEncoder(w.out)
+	return enc.Encode(output)
+}
+
+// WritePreToolUseBlock outputs a deny decision in CC's hookSpecificOutput format.
+func (w *Writer) WritePreToolUseBlock(reason string) error {
+	output := PreToolUseOutput{
+		HookSpecificOutput: HookSpecificOutput{
+			HookEventName:            "PreToolUse",
+			PermissionDecision:       "deny",
+			PermissionDecisionReason: reason,
+		},
+	}
+	enc := json.NewEncoder(w.out)
+	return enc.Encode(output)
+}
+
 // WriteContext outputs an allow decision with injected context.
 func (w *Writer) WriteContext(context map[string]interface{}) error {
 	return w.WriteResult(&Result{
@@ -151,6 +196,19 @@ func (w *Writer) WriteContext(context map[string]interface{}) error {
 }
 
 func (w *Writer) writeJSON(r *Result) error {
+	// Auto-populate PermissionDecision from Decision for CC compatibility.
+	// This ensures dual output: both legacy "decision" and CC-native "permissionDecision".
+	switch r.Decision {
+	case DecisionAllow:
+		r.PermissionDecision = "allow"
+	case DecisionBlock:
+		r.PermissionDecision = "deny" // CC uses "deny", not "block"
+	case DecisionModify:
+		r.PermissionDecision = "allow" // CC does not support modify
+	default:
+		r.PermissionDecision = "allow" // Default to allow for unknown decisions
+	}
+
 	enc := json.NewEncoder(w.out)
 	// Compact JSON for easier parsing by bash wrappers
 	return enc.Encode(r)

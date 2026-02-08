@@ -183,6 +183,27 @@ func (av *AgentValidator) validateSemantics(fm *AgentFrontmatter, mode Validatio
 		}
 	}
 
+	// Validate disallowedTools entries
+	for _, tool := range fm.DisallowedTools {
+		if err := validateToolReference(tool); err != nil {
+			warnings = append(warnings, fmt.Sprintf("disallowedTools contains unknown tool %q", tool))
+		}
+	}
+
+	// Validate maxTurns
+	if fm.MaxTurns < 0 {
+		issues = append(issues, ValidationIssue{
+			Field:   "maxTurns",
+			Message: fmt.Sprintf("maxTurns must be >= 0, got %d", fm.MaxTurns),
+			Value:   fm.MaxTurns,
+		})
+	}
+
+	// Strict mode: warn if maxTurns not set
+	if mode == ValidationModeStrict && fm.MaxTurns == 0 {
+		warnings = append(warnings, "maxTurns not set (0 means unlimited)")
+	}
+
 	// Validate type if present
 	if fm.Type != "" && !validAgentTypes[fm.Type] {
 		issues = append(issues, ValidationIssue{
@@ -272,6 +293,16 @@ func (av *AgentValidator) archetypeWarnings(fm *AgentFrontmatter) []string {
 		// Orchestrators should use opus
 		if fm.Model != "" && fm.Model != "opus" {
 			warnings = append(warnings, fmt.Sprintf("orchestrator agents should use opus model, found %q", fm.Model))
+		}
+
+		// Orchestrators should have low maxTurns (≤ 5)
+		if fm.MaxTurns > 5 {
+			warnings = append(warnings, fmt.Sprintf("orchestrator agents should have maxTurns ≤ 5 for consultation pattern, found %d", fm.MaxTurns))
+		}
+
+		// Orchestrators should restrict write/execute tools
+		if len(fm.DisallowedTools) == 0 {
+			warnings = append(warnings, "orchestrator agents should set disallowedTools to prevent direct execution (typically: Bash, Write, Edit, Glob, Grep, Task)")
 		}
 
 	case "reviewer":

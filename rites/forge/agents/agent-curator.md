@@ -28,9 +28,10 @@ description: |
   Consultant to stop routing to it, archive the documentation, and note the
   replacement team..."
   </example>
-tools: Bash, Glob, Grep, Read, Write, Edit, Task, TodoWrite
+tools: Bash, Glob, Grep, Read, Write, Edit, TodoWrite, Skill
 model: sonnet
 color: blue
+maxTurns: 25
 ---
 
 # Agent Curator

@@ -6,6 +6,7 @@ type: analyst
 tools: Bash, Glob, Grep, Read, Edit, Write, WebFetch, TodoWrite, WebSearch, Skill
 model: opus
 color: magenta
+maxTurns: 25
 ---
 
 # Requirements Analyst

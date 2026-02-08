@@ -13,12 +13,6 @@ import (
 	"github.com/autom8y/knossos/internal/output"
 )
 
-// ValidateDecision represents the decision for a bash command validation.
-type ValidateDecision struct {
-	Decision string `json:"decision"`
-	Reason   string `json:"reason,omitempty"`
-}
-
 // ValidateBypassEnvVar is the environment variable to bypass validate hook.
 const ValidateBypassEnvVar = "ARI_VALIDATE_BYPASS"
 
@@ -47,7 +41,6 @@ var (
 
 	// git push --force or -f to main/master
 	forcePushMainPattern = regexp.MustCompile(`\bgit\s+push\s+[^|;]*?(--force|-f)\s+[^|;]*(main|master)\b`)
-	forcePushPattern     = regexp.MustCompile(`\bgit\s+push\s+[^|;]*(--force|-f)`)
 
 	// git commit with --no-verify
 	noVerifyPattern = regexp.MustCompile(`\bgit\s+(commit|push)\s+[^|;]*--no-verify`)
@@ -71,15 +64,15 @@ This hook is triggered on PreToolUse events for Bash tools. It:
 - Blocks force push to main/master branches
 - Blocks --no-verify on commits
 - Blocks destructive git commands (reset --hard, clean -fd)
-- Returns {"decision": "block", "reason": "..."} to prevent execution
-- Returns {"decision": "allow"} for safe commands
+- Returns {"hookSpecificOutput": {"permissionDecision": "deny", "permissionDecisionReason": "..."}} to prevent execution
+- Returns {"hookSpecificOutput": {"permissionDecision": "allow"}} for safe commands
 - Respects ARI_VALIDATE_BYPASS env var for override
 
-Input (stdin JSON):
-  {"command": "rm -rf .git", "description": "..."}
+Input (env vars):
+  CLAUDE_TOOL_INPUT: {"command": "rm -rf .git", "description": "..."}
 
 Output (stdout JSON):
-  {"decision": "block", "reason": "Cannot rm -rf protected path: .git"}
+  {"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "deny", "permissionDecisionReason": "Cannot rm -rf protected path: .git"}}
 
 Performance: <5ms for passthrough path.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -200,19 +193,25 @@ func validateCommand(command string) (bool, string) {
 	return false, ""
 }
 
-// outputValidateAllow outputs an allow decision.
+// outputValidateAllow outputs an allow decision in CC's hookSpecificOutput format.
 func outputValidateAllow(printer *output.Printer) error {
-	result := ValidateDecision{
-		Decision: "allow",
+	result := hook.PreToolUseOutput{
+		HookSpecificOutput: hook.HookSpecificOutput{
+			HookEventName:      "PreToolUse",
+			PermissionDecision: "allow",
+		},
 	}
 	return printer.Print(result)
 }
 
-// outputValidateBlock outputs a block decision with the reason.
+// outputValidateBlock outputs a block decision in CC's hookSpecificOutput format.
 func outputValidateBlock(printer *output.Printer, reason string) error {
-	result := ValidateDecision{
-		Decision: "block",
-		Reason:   reason,
+	result := hook.PreToolUseOutput{
+		HookSpecificOutput: hook.HookSpecificOutput{
+			HookEventName:            "PreToolUse",
+			PermissionDecision:       "deny",
+			PermissionDecisionReason: reason,
+		},
 	}
 	return printer.Print(result)
 }

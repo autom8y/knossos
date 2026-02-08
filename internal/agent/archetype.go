@@ -64,6 +64,12 @@ type ArchetypeDefaults struct {
 
 	// Color is the default color for the agent badge.
 	Color string
+
+	// MaxTurns is the default maximum conversation turns.
+	MaxTurns int
+
+	// DisallowedTools is the default list of tools the agent must not use.
+	DisallowedTools []string
 }
 
 // archetypes is the registry of known archetypes.
@@ -72,9 +78,11 @@ var archetypes = map[string]*Archetype{
 		Name:        "orchestrator",
 		Description: "Consultative coordinator that analyzes context, routes work to specialists, and maintains decision consistency across phases. Orchestrators do not execute work directly.",
 		Defaults: ArchetypeDefaults{
-			Model: "opus",
-			Tools: []string{"Read"},
-			Color: "purple",
+			Model:           "opus",
+			Tools:           []string{"Read"},
+			Color:           "purple",
+			MaxTurns:        3,
+			DisallowedTools: []string{"Bash", "Write", "Edit", "Glob", "Grep", "Task"},
 		},
 		Sections: []SectionDef{
 			{Name: "consultation-role", Heading: "## Consultation Role", Ownership: OwnerPlatform,
@@ -107,9 +115,11 @@ var archetypes = map[string]*Archetype{
 		Name:        "specialist",
 		Description: "Domain expert that executes focused work within a specific discipline. Specialists receive prompts from orchestrators, produce artifacts, and hand off to downstream agents.",
 		Defaults: ArchetypeDefaults{
-			Model: "opus",
-			Tools: []string{"Bash", "Glob", "Grep", "Read", "Edit", "Write", "TodoWrite", "Skill"},
-			Color: "orange",
+			Model:           "opus",
+			Tools:           []string{"Bash", "Glob", "Grep", "Read", "Edit", "Write", "TodoWrite", "Skill"},
+			Color:           "orange",
+			MaxTurns:        25,
+			DisallowedTools: nil,
 		},
 		Sections: []SectionDef{
 			{Name: "core-responsibilities", Heading: "## Core Responsibilities", Ownership: OwnerAuthor,
@@ -140,9 +150,11 @@ var archetypes = map[string]*Archetype{
 		Name:        "reviewer",
 		Description: "Quality gate that reviews work products against domain-specific criteria. Reviewers evaluate, classify findings by severity, and provide clear approve/reject decisions with actionable feedback.",
 		Defaults: ArchetypeDefaults{
-			Model: "opus",
-			Tools: []string{"Bash", "Glob", "Grep", "Read", "Edit", "Write", "WebFetch", "WebSearch", "TodoWrite", "Skill"},
-			Color: "red",
+			Model:           "opus",
+			Tools:           []string{"Bash", "Glob", "Grep", "Read", "Edit", "Write", "WebFetch", "WebSearch", "TodoWrite", "Skill"},
+			Color:           "red",
+			MaxTurns:        15,
+			DisallowedTools: []string{"Task"},
 		},
 		Sections: []SectionDef{
 			{Name: "core-purpose", Heading: "## Core Purpose", Ownership: OwnerAuthor,

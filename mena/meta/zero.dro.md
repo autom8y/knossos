@@ -3,6 +3,7 @@ name: zero
 description: Initialize Orchestrator with 4-agent workflow plan
 argument-hint: <initiative>
 model: opus
+disable-model-invocation: true
 ---
 
 # Session 0: Orchestrator Initialization

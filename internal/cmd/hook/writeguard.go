@@ -12,12 +12,6 @@ import (
 	"github.com/autom8y/knossos/internal/output"
 )
 
-// WriteGuardDecision represents the decision for a write operation.
-type WriteGuardDecision struct {
-	Decision string `json:"decision"`
-	Reason   string `json:"reason,omitempty"`
-}
-
 // ToolInput represents the input from Claude Code PreToolUse hook.
 type ToolInput struct {
 	ToolName string `json:"tool_name"`
@@ -42,15 +36,15 @@ func newWriteguardCmd(ctx *cmdContext) *cobra.Command {
 
 This hook is triggered on PreToolUse events for Write/Edit tools. It:
 - Checks if the target file is a protected context file (*_CONTEXT.md)
-- Returns {"decision": "block", "reason": "..."} to prevent the write
-- Returns {"decision": "allow"} for all other files
+- Returns {"hookSpecificOutput": {"permissionDecision": "deny", "permissionDecisionReason": "..."}} to prevent the write
+- Returns {"hookSpecificOutput": {"permissionDecision": "allow"}} for all other files
 - Respects MOIRAI_BYPASS env var for override
 
-Input (stdin JSON):
-  {"tool_name": "Write", "file_path": ".claude/sessions/.../SESSION_CONTEXT.md"}
+Input (env vars):
+  CLAUDE_TOOL_INPUT: {"file_path": ".claude/sessions/.../SESSION_CONTEXT.md"}
 
 Output (stdout JSON):
-  {"decision": "block", "reason": "Use Moirai for SESSION_CONTEXT mutations"}
+  {"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "deny", "permissionDecisionReason": "Use Moirai for SESSION_CONTEXT mutations"}}
 
 Performance: <5ms for passthrough path.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -138,15 +132,18 @@ func isProtectedFile(filePath string) bool {
 	return false
 }
 
-// outputAllow outputs an allow decision.
+// outputAllow outputs an allow decision in CC's hookSpecificOutput format.
 func outputAllow(printer *output.Printer) error {
-	result := WriteGuardDecision{
-		Decision: "allow",
+	result := hook.PreToolUseOutput{
+		HookSpecificOutput: hook.HookSpecificOutput{
+			HookEventName:      "PreToolUse",
+			PermissionDecision: "allow",
+		},
 	}
 	return printer.Print(result)
 }
 
-// outputBlock outputs a block decision with the reason.
+// outputBlock outputs a block decision in CC's hookSpecificOutput format.
 func outputBlock(printer *output.Printer, filePath string) error {
 	// Determine which context file type
 	var contextType string
@@ -158,9 +155,12 @@ func outputBlock(printer *output.Printer, filePath string) error {
 		contextType = "context file"
 	}
 
-	result := WriteGuardDecision{
-		Decision: "block",
-		Reason:   "Use Moirai for " + contextType + " mutations",
+	result := hook.PreToolUseOutput{
+		HookSpecificOutput: hook.HookSpecificOutput{
+			HookEventName:            "PreToolUse",
+			PermissionDecision:       "deny",
+			PermissionDecisionReason: "Use Moirai for " + contextType + " mutations",
+		},
 	}
 	return printer.Print(result)
 }

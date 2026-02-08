@@ -87,6 +87,7 @@ type Materializer struct {
 	templatesDir      string
 	embeddedTemplates fs.FS  // Embedded templates filesystem
 	embeddedHooks     fs.FS  // Embedded hooks filesystem
+	claudeDirOverride string // If set, materialize to this directory instead of .claude/
 }
 
 // NewMaterializer creates a new materializer with default source resolution.
@@ -133,6 +134,110 @@ func (m *Materializer) WithEmbeddedHooks(fsys fs.FS) *Materializer {
 	return m
 }
 
+// getClaudeDir returns the target .claude/ directory, respecting any override.
+func (m *Materializer) getClaudeDir() string {
+	if m.claudeDirOverride != "" {
+		return m.claudeDirOverride
+	}
+	return m.resolver.ClaudeDir()
+}
+
+// StagedMaterialize builds the .claude/ directory in a staging copy then
+// atomically swaps it into place. This prevents Claude Code's file watcher
+// from seeing intermediate states during multi-file writes.
+//
+// The flow:
+//  1. Clone current .claude/ → .claude.staging/ (preserves user content)
+//  2. Run materializeFn against the staging directory
+//  3. Rename .claude/ → .claude.bak/, .claude.staging/ → .claude/
+//  4. Clean up .claude.bak/
+//
+// The two-rename gap is microseconds — well below CC's file watcher debounce.
+func (m *Materializer) StagedMaterialize(materializeFn func(m *Materializer) (*Result, error)) (*Result, error) {
+	claudeDir := m.resolver.ClaudeDir()
+	stagingDir := claudeDir + ".staging"
+	backupDir := claudeDir + ".bak"
+
+	// Clean up any leftover staging/backup dirs from previous failed runs
+	os.RemoveAll(stagingDir)
+	os.RemoveAll(backupDir)
+
+	// Clone current .claude/ to staging (preserves sessions, user content, etc.)
+	if _, err := os.Stat(claudeDir); err == nil {
+		if err := cloneDir(claudeDir, stagingDir); err != nil {
+			os.RemoveAll(stagingDir)
+			return nil, errors.Wrap(errors.CodeGeneralError, "failed to create staging directory", err)
+		}
+	} else {
+		// No existing .claude/ — staging starts empty
+		if err := os.MkdirAll(stagingDir, 0755); err != nil {
+			return nil, errors.Wrap(errors.CodeGeneralError, "failed to create staging directory", err)
+		}
+	}
+
+	// Point materializer at staging directory
+	m.claudeDirOverride = stagingDir
+	defer func() { m.claudeDirOverride = "" }()
+
+	// Run the actual materialization into staging
+	result, err := materializeFn(m)
+	if err != nil {
+		os.RemoveAll(stagingDir)
+		return nil, err
+	}
+
+	// Atomic swap: .claude → .claude.bak, .claude.staging → .claude
+	if _, err := os.Stat(claudeDir); err == nil {
+		if err := os.Rename(claudeDir, backupDir); err != nil {
+			os.RemoveAll(stagingDir)
+			return nil, errors.Wrap(errors.CodeGeneralError, "failed to move .claude to backup", err)
+		}
+	}
+	if err := os.Rename(stagingDir, claudeDir); err != nil {
+		// Rollback: restore from backup
+		os.Rename(backupDir, claudeDir)
+		return nil, errors.Wrap(errors.CodeGeneralError, "failed to swap staging into place", err)
+	}
+
+	// Clean up backup
+	os.RemoveAll(backupDir)
+
+	return result, nil
+}
+
+// cloneDir recursively copies src to dst, preserving directory structure.
+func cloneDir(src, dst string) error {
+	return filepath.WalkDir(src, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+
+		relPath, err := filepath.Rel(src, path)
+		if err != nil {
+			return err
+		}
+		destPath := filepath.Join(dst, relPath)
+
+		if d.IsDir() {
+			return os.MkdirAll(destPath, 0755)
+		}
+
+		// Skip .tmp files from interrupted atomic writes
+		if strings.HasSuffix(path, ".tmp") {
+			return nil
+		}
+
+		content, err := os.ReadFile(path)
+		if err != nil {
+			return err
+		}
+		if err := os.MkdirAll(filepath.Dir(destPath), 0755); err != nil {
+			return err
+		}
+		return os.WriteFile(destPath, content, 0644)
+	})
+}
+
 // riteFS returns a filesystem rooted at the rite's directory.
 // For embedded sources, returns a sub-FS of the embedded rites.
 // For filesystem sources, returns os.DirFS rooted at the rite path.
@@ -162,14 +267,29 @@ func (m *Materializer) templatesFS(resolved *ResolvedRite) fs.FS {
 }
 
 // writeIfChanged writes content to path only if it differs from existing content.
-// This prevents unnecessary file watcher triggers (e.g., Claude Code reloading
-// context when .claude/CLAUDE.md is rewritten with identical content).
+// Uses atomic writes (write to temp file, then rename) to prevent Claude Code's
+// file watcher from seeing partially-written files.
 func writeIfChanged(path string, content []byte, perm os.FileMode) (bool, error) {
 	existing, err := os.ReadFile(path)
 	if err == nil && bytes.Equal(existing, content) {
 		return false, nil
 	}
-	return true, os.WriteFile(path, content, perm)
+	return true, atomicWriteFile(path, content, perm)
+}
+
+// atomicWriteFile writes content to a temp file in the same directory then
+// renames it over the target. rename(2) is atomic on POSIX, so the file
+// watcher never sees a partially-written file.
+func atomicWriteFile(path string, content []byte, perm os.FileMode) error {
+	tmp := path + ".tmp"
+	if err := os.WriteFile(tmp, content, perm); err != nil {
+		return err
+	}
+	if err := os.Rename(tmp, path); err != nil {
+		os.Remove(tmp) // best-effort cleanup
+		return err
+	}
+	return nil
 }
 
 // copyDirFromFS copies all files from an fs.FS to a destination directory on disk.
@@ -212,7 +332,7 @@ func (m *Materializer) MaterializeMinimal(opts Options) (*Result, error) {
 		Source:          "minimal",
 	}
 
-	claudeDir := m.resolver.ClaudeDir()
+	claudeDir := m.getClaudeDir()
 
 	// Dry-run: just return success
 	if opts.DryRun {
@@ -230,6 +350,11 @@ func (m *Materializer) MaterializeMinimal(opts Options) (*Result, error) {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize hooks", err)
 	}
 	result.HooksSkipped = hooksSkipped
+
+	// Generate rules from templates (if available)
+	if err := m.materializeRules(claudeDir, nil); err != nil {
+		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize rules", err)
+	}
 
 	// Generate minimal CLAUDE.md (no agents)
 	legacyBackupPath, err := m.materializeMinimalCLAUDEmd(claudeDir)
@@ -257,7 +382,7 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 		OrphanAction:    "kept",
 	}
 
-	claudeDir := m.resolver.ClaudeDir()
+	claudeDir := m.getClaudeDir()
 
 	// Check if already on this rite (skip unless --force)
 	if !opts.Force && !opts.DryRun {
@@ -345,6 +470,11 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize hooks", err)
 	}
 	result.HooksSkipped = hooksSkipped
+
+	// 6.5. Generate rules/ directory from templates/rules
+	if err := m.materializeRules(claudeDir, resolved); err != nil {
+		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize rules", err)
+	}
 
 	// 7. Generate CLAUDE.md from inscription system
 	legacyBackupPath, err := m.materializeCLAUDEmd(manifest, claudeDir, resolved)
@@ -747,6 +877,73 @@ func (m *Materializer) getMenaDir() string {
 	return ""
 }
 
+// materializeRules copies rule files from templates/rules to .claude/rules/
+// Platform rules (internal-*.md, mena.md) are overwritten from templates.
+// User-created rules (other .md files) are preserved.
+func (m *Materializer) materializeRules(claudeDir string, resolved *ResolvedRite) error {
+	rulesDir := filepath.Join(claudeDir, "rules")
+	if err := paths.EnsureDir(rulesDir); err != nil {
+		return err
+	}
+
+	// For embedded sources, try embedded templates FS
+	if resolved != nil && resolved.Source.Type == SourceEmbedded && m.embeddedTemplates != nil {
+		tFS := m.templatesFS(resolved)
+		if _, err := fs.Stat(tFS, "rules"); err != nil {
+			return nil // No rules in embedded templates
+		}
+		entries, err := fs.ReadDir(tFS, "rules")
+		if err != nil {
+			return nil // Path doesn't exist
+		}
+		for _, entry := range entries {
+			if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".md") {
+				continue
+			}
+			content, err := fs.ReadFile(tFS, "rules/"+entry.Name())
+			if err != nil {
+				return err
+			}
+			dstPath := filepath.Join(rulesDir, entry.Name())
+			_, err = writeIfChanged(dstPath, content, 0644)
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+
+	// Filesystem path: templates/rules/
+	sourceRulesDir := filepath.Join(m.templatesDir, "rules")
+
+	// Check if templates/rules exists
+	entries, err := os.ReadDir(sourceRulesDir)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil // No template rules = no-op
+		}
+		return err
+	}
+
+	// Copy each template rule file using writeIfChanged for idempotency
+	for _, entry := range entries {
+		if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".md") {
+			continue
+		}
+		content, err := os.ReadFile(filepath.Join(sourceRulesDir, entry.Name()))
+		if err != nil {
+			return err
+		}
+		dstPath := filepath.Join(rulesDir, entry.Name())
+		_, err = writeIfChanged(dstPath, content, 0644)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 // materializeHooks copies hook files from templates/hooks to .claude/hooks/
 // Returns (skipped bool, err error) where skipped=true if no templates/hooks dir exists.
 func (m *Materializer) materializeHooks(claudeDir string, resolved *ResolvedRite) (bool, error) {
@@ -971,6 +1168,11 @@ func (m *Materializer) materializeSettingsWithManifest(claudeDir string, manifes
 // trackState updates .claude/sync/state.json with materialization metadata.
 func (m *Materializer) trackState(manifest *RiteManifest, activeRiteName string) error {
 	stateManager := sync.NewStateManager(m.resolver)
+
+	// During staged materialization, override the sync dir to target the staging directory.
+	if m.claudeDirOverride != "" {
+		stateManager.SetSyncDir(filepath.Join(m.claudeDirOverride, "sync"))
+	}
 
 	// Load or initialize state
 	state, err := stateManager.Load()

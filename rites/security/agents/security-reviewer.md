@@ -6,6 +6,9 @@ type: reviewer
 tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
 model: opus
 color: red
+maxTurns: 15
+disallowedTools:
+  - Task
 contract:
   must_not:
     - Implement security fixes directly

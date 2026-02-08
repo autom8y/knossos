@@ -4,6 +4,7 @@ description: Quick switch to rnd (innovation lab workflow)
 argument-hint: [--force] [--dry-run] [--keep-all|--remove-all|--promote-all]
 allowed-tools: Bash, Read
 model: haiku
+disable-model-invocation: true
 ---
 
 ## Context

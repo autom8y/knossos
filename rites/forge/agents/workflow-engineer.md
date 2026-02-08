@@ -27,9 +27,10 @@ description: |
   assistant: "Invoking Workflow Engineer: I'll update the workflow.yaml command
   mapping and ensure the command file routes correctly..."
   </example>
-tools: Bash, Glob, Grep, Read, Write, Edit, Task, TodoWrite
+tools: Bash, Glob, Grep, Read, Write, Edit, TodoWrite, Skill
 model: opus
 color: green
+maxTurns: 25
 ---
 
 # Workflow Engineer

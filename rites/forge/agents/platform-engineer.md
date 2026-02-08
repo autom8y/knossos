@@ -27,9 +27,10 @@ description: |
   assistant: "Invoking Platform Engineer: I'll copy the new agent file to
   $ROSTER_HOME/rites/security/agents/ and verify the rite still loads..."
   </example>
-tools: Bash, Glob, Grep, Read, Write, Edit, Task, TodoWrite
+tools: Bash, Glob, Grep, Read, Write, Edit, TodoWrite, Skill
 model: sonnet
 color: orange
+maxTurns: 25
 ---
 
 # Platform Engineer

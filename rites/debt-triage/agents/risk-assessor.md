@@ -6,6 +6,7 @@ type: analyst
 tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, WebSearch, Skill
 model: opus
 color: yellow
+maxTurns: 25
 ---
 
 # Risk Assessor

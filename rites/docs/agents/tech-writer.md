@@ -6,6 +6,7 @@ type: specialist
 tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, WebFetch, WebSearch, Skill
 model: sonnet
 color: blue
+maxTurns: 25
 ---
 
 # Tech Writer

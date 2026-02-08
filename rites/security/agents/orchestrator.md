@@ -6,6 +6,14 @@ type: orchestrator
 tools: Read
 model: opus
 color: red
+maxTurns: 3
+disallowedTools:
+  - Bash
+  - Write
+  - Edit
+  - Glob
+  - Grep
+  - Task
 ---
 
 # Orchestrator

@@ -29,6 +29,11 @@ type AgentFrontmatter struct {
 	Color   string              `yaml:"color,omitempty" json:"color,omitempty"`
 	Aliases []string            `yaml:"aliases,omitempty" json:"aliases,omitempty"`
 
+	// CC-native fields (camelCase matches Claude Code's expected frontmatter schema)
+	MaxTurns        int                 `yaml:"maxTurns,omitempty" json:"maxTurns,omitempty"`
+	Skills          []string            `yaml:"skills,omitempty" json:"skills,omitempty"`
+	DisallowedTools FlexibleStringSlice `yaml:"disallowedTools,omitempty" json:"disallowedTools,omitempty"`
+
 	// Workflow Position
 	Upstream   []UpstreamRef   `yaml:"upstream,omitempty" json:"upstream,omitempty"`
 	Downstream []DownstreamRef `yaml:"downstream,omitempty" json:"downstream,omitempty"`
@@ -139,6 +144,20 @@ func (f *AgentFrontmatter) Validate() error {
 	for _, tool := range f.Tools {
 		if err := validateToolReference(tool); err != nil {
 			return err
+		}
+	}
+
+	// Validate maxTurns if present
+	if f.MaxTurns < 0 {
+		return errors.New(errors.CodeValidationFailed,
+			fmt.Sprintf("agent frontmatter: maxTurns must be >= 0, got %d", f.MaxTurns))
+	}
+
+	// Validate disallowedTools if present
+	for _, tool := range f.DisallowedTools {
+		if err := validateToolReference(tool); err != nil {
+			return errors.Wrap(errors.CodeValidationFailed,
+				fmt.Sprintf("agent frontmatter: invalid disallowedTools entry %q", tool), err)
 		}
 	}
 

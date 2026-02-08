@@ -6,6 +6,7 @@ type: specialist
 tools: Glob, Grep, Read, Edit, Write, TodoWrite, Skill
 model: opus
 color: blue
+maxTurns: 25
 ---
 
 # Tech Transfer

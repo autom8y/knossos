@@ -6,6 +6,7 @@ type: analyst
 tools: Bash, Edit, Glob, Grep, Read, Write, WebSearch, WebFetch, TodoWrite, Skill
 model: opus
 color: orange
+maxTurns: 25
 ---
 
 # Threat Modeler

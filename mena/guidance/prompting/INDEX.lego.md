@@ -21,7 +21,7 @@ description: "Copy-paste prompt patterns for agent invocation and workflow execu
 
 The orchestrator is NOT invoked to execute. It is CONSULTED for direction.
 
-See: [main-thread-guide.md](../../orchestration/orchestration/main-thread-guide.md) for the complete consultation loop pattern.
+See the `orchestrator-templates` skill for the complete consultation loop pattern, or reference the orchestrator agent prompt directly.
 
 **Quick Pattern**:
 ```

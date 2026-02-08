@@ -503,6 +503,152 @@ color: orange
 	}
 }
 
+func TestParseAgentFrontmatter_WithCCNativeFields(t *testing.T) {
+	content := []byte(`---
+name: orchestrator
+description: "Coordinates ecosystem phases"
+type: orchestrator
+tools: Read
+model: opus
+color: purple
+maxTurns: 3
+skills:
+  - ecosystem-ref
+  - standards
+disallowedTools: Bash, Write, Edit, Glob, Grep, Task
+---
+
+# Orchestrator
+`)
+
+	fm, err := ParseAgentFrontmatter(content)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if fm.MaxTurns != 3 {
+		t.Errorf("maxTurns = %d, want 3", fm.MaxTurns)
+	}
+
+	if len(fm.Skills) != 2 {
+		t.Fatalf("skills count = %d, want 2", len(fm.Skills))
+	}
+	if fm.Skills[0] != "ecosystem-ref" {
+		t.Errorf("skills[0] = %q, want %q", fm.Skills[0], "ecosystem-ref")
+	}
+	if fm.Skills[1] != "standards" {
+		t.Errorf("skills[1] = %q, want %q", fm.Skills[1], "standards")
+	}
+
+	expectedDisallowed := []string{"Bash", "Write", "Edit", "Glob", "Grep", "Task"}
+	if len(fm.DisallowedTools) != len(expectedDisallowed) {
+		t.Fatalf("disallowedTools count = %d, want %d", len(fm.DisallowedTools), len(expectedDisallowed))
+	}
+	for i, tool := range fm.DisallowedTools {
+		if tool != expectedDisallowed[i] {
+			t.Errorf("disallowedTools[%d] = %q, want %q", i, tool, expectedDisallowed[i])
+		}
+	}
+}
+
+func TestParseAgentFrontmatter_MaxTurnsOnly(t *testing.T) {
+	content := []byte(`---
+name: specialist
+description: "Domain expert"
+tools: Read, Bash
+maxTurns: 25
+---
+
+# Specialist
+`)
+
+	fm, err := ParseAgentFrontmatter(content)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if fm.MaxTurns != 25 {
+		t.Errorf("maxTurns = %d, want 25", fm.MaxTurns)
+	}
+	if len(fm.Skills) != 0 {
+		t.Errorf("skills should be empty, got %v", fm.Skills)
+	}
+	if len(fm.DisallowedTools) != 0 {
+		t.Errorf("disallowedTools should be empty, got %v", fm.DisallowedTools)
+	}
+}
+
+func TestValidate_MaxTurnsNegative(t *testing.T) {
+	fm := AgentFrontmatter{
+		Name:        "test-agent",
+		Description: "A test agent",
+		MaxTurns:    -1,
+	}
+
+	err := fm.Validate()
+	if err == nil {
+		t.Fatal("expected error for negative maxTurns")
+	}
+	if !containsStr(err.Error(), "maxTurns") {
+		t.Errorf("error = %q, want to contain 'maxTurns'", err.Error())
+	}
+}
+
+func TestValidate_MaxTurnsZero(t *testing.T) {
+	fm := AgentFrontmatter{
+		Name:        "test-agent",
+		Description: "A test agent",
+		MaxTurns:    0,
+	}
+
+	err := fm.Validate()
+	if err != nil {
+		t.Fatalf("unexpected error for maxTurns=0: %v", err)
+	}
+}
+
+func TestValidate_MaxTurnsPositive(t *testing.T) {
+	fm := AgentFrontmatter{
+		Name:        "test-agent",
+		Description: "A test agent",
+		MaxTurns:    15,
+	}
+
+	err := fm.Validate()
+	if err != nil {
+		t.Fatalf("unexpected error for maxTurns=15: %v", err)
+	}
+}
+
+func TestValidate_DisallowedToolsValid(t *testing.T) {
+	fm := AgentFrontmatter{
+		Name:            "test-agent",
+		Description:     "A test agent",
+		DisallowedTools: FlexibleStringSlice{"Bash", "Write", "Task"},
+	}
+
+	err := fm.Validate()
+	if err != nil {
+		t.Fatalf("unexpected error for valid disallowedTools: %v", err)
+	}
+}
+
+func TestValidate_DisallowedToolsInvalid(t *testing.T) {
+	fm := AgentFrontmatter{
+		Name:            "test-agent",
+		Description:     "A test agent",
+		DisallowedTools: FlexibleStringSlice{"Read", "InvalidTool"},
+	}
+
+	err := fm.Validate()
+	if err == nil {
+		t.Fatal("expected error for invalid disallowedTools")
+	}
+	if !containsStr(err.Error(), "disallowedTools") {
+		t.Errorf("error = %q, want to contain 'disallowedTools'", err.Error())
+	}
+}
+
 func containsStr(s, substr string) bool {
 	return len(s) >= len(substr) && (s == substr || len(s) > 0 && containsSubstring(s, substr))
 }
