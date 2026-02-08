@@ -114,16 +114,32 @@ func (m *Manager) Acquire(sessionID string, lockType LockType, timeout time.Dura
 			}, nil
 		}
 
-		// Check for stale lock
+		// Check for stale lock — reclaim atomically via flock on existing fd.
+		// This eliminates the TOCTOU race in the old remove+reopen pattern:
+		// we already hold `file` open, so try to flock IT directly.
 		if m.IsStale(lockPath, false) {
-			// Force remove stale lock and retry
-			os.Remove(lockPath)
-			file.Close()
-			file, err = os.OpenFile(lockPath, os.O_CREATE|os.O_RDWR, 0644)
-			if err != nil {
-				return nil, errors.Wrap(errors.CodeGeneralError, "failed to reopen lock file", err)
+			if flockErr := syscall.Flock(int(file.Fd()), syscall.LOCK_EX|syscall.LOCK_NB); flockErr == nil {
+				// We acquired the flock — reclaim by rewriting metadata
+				meta := &LockMetadata{
+					Session:  sessionID,
+					Acquired: time.Now().Unix(),
+					Holder:   holder,
+					Version:  "2",
+				}
+				file.Truncate(0)
+				file.Seek(0, 0)
+				data, _ := json.Marshal(meta)
+				file.Write(data)
+				file.Write([]byte("\n"))
+				return &Lock{
+					sessionID: sessionID,
+					file:      file,
+					lockType:  lockType,
+					lockPath:  lockPath,
+					metadata:  meta,
+				}, nil
 			}
-			continue
+			// Another process beat us to the reclaim — fall through to retry
 		}
 
 		// Wait before retry

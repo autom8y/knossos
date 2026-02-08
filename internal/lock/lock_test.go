@@ -2,6 +2,7 @@ package lock
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 	"sync"
@@ -473,6 +474,126 @@ func TestGetLockInfo_JSONFormat(t *testing.T) {
 	}
 	if meta.Version != "2" {
 		t.Errorf("Version = %q, want %q", meta.Version, "2")
+	}
+}
+
+func TestManager_StaleLockReclamation(t *testing.T) {
+	tmpDir, err := os.MkdirTemp("", "lock-test-*")
+	if err != nil {
+		t.Fatalf("Failed to create temp dir: %v", err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	mgr := NewManager(tmpDir)
+	sessionID := "stale-reclaim-test"
+
+	// Write a stale lock file (old timestamp, no flock held)
+	lockPath := filepath.Join(tmpDir, sessionID+".lock")
+	staleMeta := LockMetadata{
+		Session:  sessionID,
+		Acquired: time.Now().Add(-10 * time.Minute).Unix(), // Older than StaleThreshold
+		Holder:   "dead-process",
+		Version:  "2",
+	}
+	data, _ := json.Marshal(staleMeta)
+	if err := os.WriteFile(lockPath, data, 0644); err != nil {
+		t.Fatalf("Failed to write stale lock: %v", err)
+	}
+
+	// Acquire should succeed by reclaiming the stale lock atomically
+	lock, err := mgr.Acquire(sessionID, Exclusive, 2*time.Second, "reclaimer")
+	if err != nil {
+		t.Fatalf("Acquire() should succeed on stale lock, got: %v", err)
+	}
+	defer lock.Release()
+
+	// Verify the lock was reclaimed with new metadata
+	if lock.Metadata().Holder != "reclaimer" {
+		t.Errorf("Metadata().Holder = %q, want %q", lock.Metadata().Holder, "reclaimer")
+	}
+	if lock.Metadata().Session != sessionID {
+		t.Errorf("Metadata().Session = %q, want %q", lock.Metadata().Session, sessionID)
+	}
+
+	// Verify lock file on disk has new metadata
+	diskData, err := os.ReadFile(lockPath)
+	if err != nil {
+		t.Fatalf("Failed to read lock file: %v", err)
+	}
+	var diskMeta LockMetadata
+	if err := json.Unmarshal(diskData, &diskMeta); err != nil {
+		t.Fatalf("Lock file is not valid JSON after reclaim: %v", err)
+	}
+	if diskMeta.Holder != "reclaimer" {
+		t.Errorf("Disk holder = %q, want %q", diskMeta.Holder, "reclaimer")
+	}
+
+	// Verify the lock is actually held (second acquire should fail)
+	_, err = mgr.Acquire(sessionID, Exclusive, 200*time.Millisecond, "competitor")
+	if err == nil {
+		t.Error("Second Acquire() should fail while reclaimed lock is held")
+	}
+}
+
+func TestManager_StaleLockReclamation_Concurrent(t *testing.T) {
+	tmpDir, err := os.MkdirTemp("", "lock-test-*")
+	if err != nil {
+		t.Fatalf("Failed to create temp dir: %v", err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	mgr := NewManager(tmpDir)
+	sessionID := "stale-concurrent-test"
+
+	// Write a stale lock file
+	lockPath := filepath.Join(tmpDir, sessionID+".lock")
+	staleMeta := LockMetadata{
+		Session:  sessionID,
+		Acquired: time.Now().Add(-10 * time.Minute).Unix(),
+		Holder:   "dead-process",
+		Version:  "2",
+	}
+	data, _ := json.Marshal(staleMeta)
+	if err := os.WriteFile(lockPath, data, 0644); err != nil {
+		t.Fatalf("Failed to write stale lock: %v", err)
+	}
+
+	// Race two goroutines trying to reclaim the same stale lock
+	var wg sync.WaitGroup
+	results := make(chan *Lock, 2)
+	errors := make(chan error, 2)
+
+	for i := 0; i < 2; i++ {
+		wg.Add(1)
+		go func(n int) {
+			defer wg.Done()
+			lock, err := mgr.Acquire(sessionID, Exclusive, 2*time.Second, fmt.Sprintf("racer-%d", n))
+			if err != nil {
+				errors <- err
+				return
+			}
+			results <- lock
+		}(i)
+	}
+
+	wg.Wait()
+	close(results)
+	close(errors)
+
+	// Both should eventually succeed (one reclaims, the other gets it after release)
+	// but at minimum one must succeed
+	var locks []*Lock
+	for l := range results {
+		locks = append(locks, l)
+	}
+
+	if len(locks) == 0 {
+		t.Fatal("At least one goroutine should have acquired the lock")
+	}
+
+	// Release all acquired locks
+	for _, l := range locks {
+		l.Release()
 	}
 }
 
