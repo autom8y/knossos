@@ -61,8 +61,8 @@
     },
     "model": {
       "type": "string",
-      "enum": ["opus", "sonnet", "haiku"],
-      "description": "Model tier for this agent"
+      "enum": ["opus", "sonnet", "haiku", "inherit"],
+      "description": "Model tier for this agent. Use 'inherit' to inherit from parent context."
     },
     "color": {
       "type": "string",
@@ -156,8 +156,8 @@
       "then": {
         "properties": {
           "model": {
-            "const": "opus",
-            "description": "Orchestrators should use opus model for coordination quality"
+            "enum": ["opus", "inherit"],
+            "description": "Orchestrators should use opus model (or inherit) for coordination quality"
           }
         }
       }

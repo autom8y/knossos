@@ -649,6 +649,44 @@ func TestValidate_DisallowedToolsInvalid(t *testing.T) {
 	}
 }
 
+func TestValidate_ModelInherit(t *testing.T) {
+	fm := AgentFrontmatter{
+		Name:        "test-agent",
+		Description: "A test agent",
+		Model:       "inherit",
+	}
+
+	err := fm.Validate()
+	if err != nil {
+		t.Fatalf("unexpected error for model=inherit: %v", err)
+	}
+}
+
+func TestParseAgentFrontmatter_ModelInherit(t *testing.T) {
+	content := []byte(`---
+name: inherit-agent
+description: "Agent that inherits parent model"
+tools: Read, Bash
+model: inherit
+---
+
+# Inherit Agent
+`)
+
+	fm, err := ParseAgentFrontmatter(content)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if fm.Model != "inherit" {
+		t.Errorf("model = %q, want %q", fm.Model, "inherit")
+	}
+
+	if err := fm.Validate(); err != nil {
+		t.Fatalf("Validate() error = %v", err)
+	}
+}
+
 func TestParseAgentFrontmatter_WithMemoryField(t *testing.T) {
 	content := []byte(`---
 name: memory-agent

@@ -143,11 +143,11 @@ func (f *AgentFrontmatter) validateCore() error {
 	// Validate model if present
 	if f.Model != "" {
 		switch f.Model {
-		case "opus", "sonnet", "haiku":
+		case "opus", "sonnet", "haiku", "inherit":
 			// valid
 		default:
 			return errors.New(errors.CodeValidationFailed,
-				fmt.Sprintf("agent frontmatter: invalid model %q, must be opus, sonnet, or haiku", f.Model))
+				fmt.Sprintf("agent frontmatter: invalid model %q, must be opus, sonnet, haiku, or inherit", f.Model))
 		}
 	}
 
