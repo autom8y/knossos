@@ -164,20 +164,34 @@ func TestRiteSwitchIntegration_NoWorkflow(t *testing.T) {
 	templatesDir := filepath.Join(projectDir, "templates")
 	require.NoError(t, os.MkdirAll(filepath.Join(templatesDir, "sections"), 0755))
 
-	// Setup rite without workflow.yaml
+	// Setup rite-a WITH workflow, and no-workflow rite WITHOUT
+	setupRite(t, ritesDir, "has-workflow",
+		"name: has-wf\nphases:\n  - build\n",
+		[]Agent{{Name: "builder", Role: "builds"}})
 	setupRite(t, ritesDir, "no-workflow", "",
 		[]Agent{{Name: "worker", Role: "does work"}})
 
 	resolver := paths.NewResolver(projectDir)
-	m := NewMaterializer(resolver)
-	m.templatesDir = templatesDir
 
-	_, err := m.MaterializeWithOptions("no-workflow", Options{Force: true})
+	// Phase 1: Materialize rite with workflow
+	m1 := NewMaterializer(resolver)
+	m1.templatesDir = templatesDir
+	_, err := m1.MaterializeWithOptions("has-workflow", Options{Force: true})
 	require.NoError(t, err)
 
-	// ACTIVE_WORKFLOW.yaml should NOT exist
+	// Verify ACTIVE_WORKFLOW.yaml exists from rite with workflow
 	_, err = os.Stat(filepath.Join(claudeDir, "ACTIVE_WORKFLOW.yaml"))
-	assert.True(t, os.IsNotExist(err), "no ACTIVE_WORKFLOW.yaml when rite has no workflow")
+	require.NoError(t, err, "ACTIVE_WORKFLOW.yaml should exist after materializing rite with workflow")
+
+	// Phase 2: Switch to rite without workflow
+	m2 := NewMaterializer(resolver)
+	m2.templatesDir = templatesDir
+	_, err = m2.MaterializeWithOptions("no-workflow", Options{Force: true})
+	require.NoError(t, err)
+
+	// ACTIVE_WORKFLOW.yaml must be REMOVED (not stale from previous rite)
+	_, err = os.Stat(filepath.Join(claudeDir, "ACTIVE_WORKFLOW.yaml"))
+	assert.True(t, os.IsNotExist(err), "stale ACTIVE_WORKFLOW.yaml must be removed when switching to no-workflow rite")
 
 	// ACTIVE_RITE should exist
 	activeRite, err := os.ReadFile(filepath.Join(claudeDir, "ACTIVE_RITE"))

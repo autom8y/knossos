@@ -63,6 +63,36 @@ func TestMaterializeWorkflow_NoWorkflowFile(t *testing.T) {
 	assert.True(t, os.IsNotExist(err))
 }
 
+func TestMaterializeWorkflow_RemovesStaleOnNoWorkflow(t *testing.T) {
+	projectDir := t.TempDir()
+	claudeDir := filepath.Join(projectDir, ".claude")
+	require.NoError(t, os.MkdirAll(claudeDir, 0755))
+
+	// Pre-existing ACTIVE_WORKFLOW.yaml from a previous rite
+	staleContent := []byte("name: old-rite-workflow\nphases:\n  - stale\n")
+	require.NoError(t, os.WriteFile(
+		filepath.Join(claudeDir, "ACTIVE_WORKFLOW.yaml"), staleContent, 0644))
+
+	// New rite has no workflow.yaml
+	riteDir := filepath.Join(projectDir, "rites", "no-workflow")
+	require.NoError(t, os.MkdirAll(riteDir, 0755))
+
+	resolver := paths.NewResolver(projectDir)
+	m := NewMaterializer(resolver)
+
+	resolved := &ResolvedRite{
+		RitePath: riteDir,
+		Source:   RiteSource{Type: SourceProject, Path: riteDir},
+	}
+
+	err := m.materializeWorkflow(claudeDir, resolved)
+	require.NoError(t, err)
+
+	// Stale file must be removed
+	_, err = os.Stat(filepath.Join(claudeDir, "ACTIVE_WORKFLOW.yaml"))
+	assert.True(t, os.IsNotExist(err), "stale ACTIVE_WORKFLOW.yaml should be removed when new rite has no workflow")
+}
+
 func TestMaterializeWorkflow_Idempotent(t *testing.T) {
 	projectDir := t.TempDir()
 	claudeDir := filepath.Join(projectDir, ".claude")

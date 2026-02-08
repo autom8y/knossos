@@ -84,7 +84,6 @@ type Materializer struct {
 	resolver          *paths.Resolver
 	sourceResolver    *SourceResolver
 	explicitSource    string // Optional explicit source from --source flag
-	ritesDir          string // Deprecated: use sourceResolver
 	templatesDir      string
 	embeddedTemplates fs.FS  // Embedded templates filesystem
 	embeddedHooks     fs.FS  // Embedded hooks filesystem
@@ -98,7 +97,6 @@ func NewMaterializer(resolver *paths.Resolver) *Materializer {
 	return &Materializer{
 		resolver:       resolver,
 		sourceResolver: NewSourceResolver(projectRoot),
-		ritesDir:       filepath.Join(projectRoot, "rites"),
 		templatesDir:   filepath.Join(projectRoot, "templates"),
 	}
 }
@@ -111,7 +109,6 @@ func NewMaterializerWithSource(resolver *paths.Resolver, source string) *Materia
 		resolver:       resolver,
 		sourceResolver: NewSourceResolver(projectRoot),
 		explicitSource: source,
-		ritesDir:       filepath.Join(projectRoot, "rites"),
 		templatesDir:   filepath.Join(projectRoot, "templates"),
 	}
 }
@@ -632,20 +629,23 @@ func (m *Materializer) materializeMena(manifest *RiteManifest, claudeDir string,
 
 		// 4. Current rite mena (highest priority)
 		sources = append(sources, MenaSource{Fsys: embFS, FsysPath: "rites/" + manifest.Name + "/mena", IsEmbedded: true})
-	} else {
+	} else if resolved != nil {
+		// Derive rites base directory from the resolved rite path
+		ritesBase := filepath.Dir(resolved.RitePath)
+
 		// 2. Shared rite mena
-		sharedMenaDir := filepath.Join(m.ritesDir, "shared", "mena")
+		sharedMenaDir := filepath.Join(ritesBase, "shared", "mena")
 		sources = append(sources, MenaSource{Path: sharedMenaDir})
 
 		// 3. Dependency rite mena (in order)
 		for _, dep := range manifest.Dependencies {
 			if dep != "shared" {
-				sources = append(sources, MenaSource{Path: filepath.Join(m.ritesDir, dep, "mena")})
+				sources = append(sources, MenaSource{Path: filepath.Join(ritesBase, dep, "mena")})
 			}
 		}
 
 		// 4. Current rite mena (highest priority)
-		currentRiteMenaDir := filepath.Join(m.ritesDir, manifest.Name, "mena")
+		currentRiteMenaDir := filepath.Join(resolved.RitePath, "mena")
 		sources = append(sources, MenaSource{Path: currentRiteMenaDir})
 	}
 
@@ -653,7 +653,6 @@ func (m *Materializer) materializeMena(manifest *RiteManifest, claudeDir string,
 	opts := MenaProjectionOptions{
 		Mode:              MenaProjectionDestructive,
 		Filter:            ProjectAll,
-		PipelineScope:     MenaScopeProject, // Filter out scope:user entries
 		TargetCommandsDir: commandsDir,
 		TargetSkillsDir:   skillsDir,
 	}

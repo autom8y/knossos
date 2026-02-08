@@ -79,11 +79,6 @@ type MenaProjectionOptions struct {
 	Mode   MenaProjectionMode
 	Filter MenaFilter
 
-	// PipelineScope indicates which pipeline is calling ProjectMena().
-	// When set, entries whose scope excludes this pipeline are skipped.
-	// When empty (zero value), no scope filtering is applied (backward compat).
-	PipelineScope MenaScope
-
 	// TargetCommandsDir is the absolute path to the commands/ output directory.
 	TargetCommandsDir string
 
@@ -109,23 +104,9 @@ type menaStandaloneFile struct {
 	relPath string // e.g., "navigation/rite.dro.md"
 }
 
-// scopeIncludesPipeline returns true if the entry's scope allows inclusion
-// in the given pipeline. Returns true when either value is the zero value
-// (MenaScopeBoth), providing backward compatibility for callers that do not
-// set PipelineScope and for entries that do not set scope.
-func scopeIncludesPipeline(entryScope, pipelineScope MenaScope) bool {
-	if pipelineScope == MenaScopeBoth {
-		return true // Caller did not set pipeline scope -- no filtering
-	}
-	if entryScope == MenaScopeBoth {
-		return true // Entry has no scope restriction
-	}
-	return entryScope == pipelineScope
-}
-
 // ReadMenaFrontmatterFromDir reads the INDEX file from a filesystem directory,
 // parses its YAML frontmatter, and returns the result.
-// Returns a zero-value MenaFrontmatter (scope="") if the INDEX file has no
+// Returns a zero-value MenaFrontmatter if the INDEX file has no
 // frontmatter or if parsing fails (with a logged warning for parse failures).
 func ReadMenaFrontmatterFromDir(dirPath string) MenaFrontmatter {
 	entries, err := os.ReadDir(dirPath)
@@ -135,28 +116,6 @@ func ReadMenaFrontmatterFromDir(dirPath string) MenaFrontmatter {
 	for _, entry := range entries {
 		if !entry.IsDir() && strings.HasPrefix(entry.Name(), "INDEX") {
 			data, err := os.ReadFile(filepath.Join(dirPath, entry.Name()))
-			if err != nil {
-				return MenaFrontmatter{}
-			}
-			return parseMenaFrontmatterBytes(data)
-		}
-	}
-	return MenaFrontmatter{}
-}
-
-// readMenaFrontmatterFromFS reads the INDEX file from an fs.FS path,
-// parses its YAML frontmatter, and returns the result. Unexported: only
-// used within the materialize package by ProjectMena() for embedded sources.
-// Returns a zero-value MenaFrontmatter (scope="") if the INDEX file has no
-// frontmatter or if parsing fails.
-func readMenaFrontmatterFromFS(fsys fs.FS, dirPath string) MenaFrontmatter {
-	entries, err := fs.ReadDir(fsys, dirPath)
-	if err != nil {
-		return MenaFrontmatter{}
-	}
-	for _, entry := range entries {
-		if !entry.IsDir() && strings.HasPrefix(entry.Name(), "INDEX") {
-			data, err := fs.ReadFile(fsys, dirPath+"/"+entry.Name())
 			if err != nil {
 				return MenaFrontmatter{}
 			}
@@ -293,27 +252,6 @@ func ProjectMena(sources []MenaSource, opts MenaProjectionOptions) (*MenaProject
 			continue
 		}
 
-		// Apply scope filter
-		if opts.PipelineScope != MenaScopeBoth {
-			var fm MenaFrontmatter
-			if ce.source.IsEmbedded {
-				fm = readMenaFrontmatterFromFS(ce.source.Fsys, ce.source.FsysPath)
-			} else {
-				fm = ReadMenaFrontmatterFromDir(ce.source.Path)
-			}
-			if !scopeIncludesPipeline(fm.Scope, opts.PipelineScope) {
-				// EC-1: warn if rite-level mena has scope:user (goes nowhere —
-				// usersync never sees rite-level mena, so it reaches no pipeline).
-				// Only warn for rite-level sources (path contains /rites/), not
-				// distribution-level mena which IS reachable by usersync.
-				if fm.Scope == MenaScopeUser && opts.PipelineScope == MenaScopeProject &&
-					!ce.source.IsEmbedded && strings.Contains(ce.source.Path, string(filepath.Separator)+"rites"+string(filepath.Separator)) {
-					fmt.Fprintf(os.Stderr, "warning: mena %q has scope: user but is only reachable by materialize (will not be distributed)\n", name)
-				}
-				continue
-			}
-		}
-
 		var destDir string
 		if menaType == "dro" {
 			destDir = filepath.Join(opts.TargetCommandsDir, name)
@@ -361,14 +299,6 @@ func ProjectMena(sources []MenaSource, opts MenaProjectionOptions) (*MenaProject
 		}
 		if menaType == "lego" && opts.Filter&ProjectLego == 0 {
 			continue
-		}
-
-		// Apply scope filter
-		if opts.PipelineScope != MenaScopeBoth {
-			fm := ReadMenaFrontmatterFromFile(sf.srcPath)
-			if !scopeIncludesPipeline(fm.Scope, opts.PipelineScope) {
-				continue
-			}
 		}
 
 		var baseDir string
