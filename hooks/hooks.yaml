@@ -29,6 +29,15 @@ hooks:
     description: "Auto-parks session on stop via ari hook autopark"
 
   # ===========================================================================
+  # PreCompact Hooks
+  # ===========================================================================
+  - event: PreCompact
+    command: "ari hook precompact --output json"
+    timeout: 5
+    priority: 5
+    description: "Rotates SESSION_CONTEXT.md on context compaction"
+
+  # ===========================================================================
   # PreToolUse Hooks
   # ===========================================================================
   - event: PreToolUse
