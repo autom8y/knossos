@@ -105,6 +105,21 @@
     "schema_version": {
       "$ref": "embed:///schemas/common.schema.json#/$defs/schema_version",
       "description": "Agent schema version (e.g., 1.0)"
+    },
+    "maxTurns": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Maximum conversation turns for this agent"
+    },
+    "skills": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Skills to preload into agent context"
+    },
+    "disallowedTools": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Tools explicitly denied to this agent"
     }
   },
 
