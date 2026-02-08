@@ -110,13 +110,13 @@ Load Fate skills on-demand for detailed guidance:
 
 | Fate | Skill Path | Operations |
 |------|------------|------------|
-| **Routing** | `.claude/skills/session/moirai/moirai-fates.md` | Operation → Fate domain lookup |
+| **Routing** | `.claude/skills/session/moirai/INDEX.md` | Operation → Fate domain lookup |
 | **Clotho** | `.claude/skills/session/moirai/clotho.md` | create_sprint, start_sprint |
 | **Lachesis** | `.claude/skills/session/moirai/lachesis.md` | mark_complete, transition_phase, update_field, park, resume, handoff, record_decision, append_content |
 | **Atropos** | `.claude/skills/session/moirai/atropos.md` | wrap_session, generate_sails, delete_sprint |
 
 **Loading protocol**:
-1. Read routing table: `.claude/skills/session/moirai/moirai-fates.md`
+1. Read routing table: `.claude/skills/session/moirai/INDEX.md`
 2. Map operation to Fate domain
 3. Read domain-specific skill for execution guidance
 4. Execute operation following skill protocol
