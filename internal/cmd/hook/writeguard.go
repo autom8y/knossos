@@ -5,11 +5,11 @@ import (
 	"encoding/json"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/spf13/cobra"
 
 	"github.com/autom8y/knossos/internal/hook"
+	"github.com/autom8y/knossos/internal/lock"
 	"github.com/autom8y/knossos/internal/output"
 )
 
@@ -154,36 +154,21 @@ func isMoiraiLockHeld(projectDir string) bool {
 		return false
 	}
 
-	// Check for lock file
+	// Check for lock file using shared implementation
 	lockPath := strings.TrimSpace(projectDir) + "/.claude/sessions/" + sessionID + "/.moirai-lock"
-	lockData, err := os.ReadFile(lockPath)
+	moiraiLock, err := lock.ReadMoiraiLock(lockPath)
 	if err != nil {
-		return false
-	}
-
-	// Parse lock JSON
-	var lock struct {
-		Agent             string `json:"agent"`
-		AcquiredAt        string `json:"acquired_at"`
-		StaleAfterSeconds int    `json:"stale_after_seconds"`
-	}
-	if err := json.Unmarshal(lockData, &lock); err != nil {
 		return false
 	}
 
 	// Verify agent is moirai
-	if lock.Agent != "moirai" {
+	if moiraiLock.Agent != "moirai" {
 		return false
 	}
 
 	// Check if stale
-	acquiredAt, err := time.Parse(time.RFC3339, lock.AcquiredAt)
-	if err != nil {
+	if lock.IsMoiraiLockStale(moiraiLock) {
 		return false
-	}
-	staleThreshold := acquiredAt.Add(time.Duration(lock.StaleAfterSeconds) * time.Second)
-	if time.Now().UTC().After(staleThreshold) {
-		return false // stale lock
 	}
 
 	return true

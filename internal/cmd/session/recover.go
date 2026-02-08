@@ -1,11 +1,9 @@
 package session
 
 import (
-	"encoding/json"
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 
 	"github.com/spf13/cobra"
 
@@ -122,26 +120,8 @@ func runRecover(ctx *cmdContext, opts recoverOptions) error {
 	return printer.PrintSuccess(result)
 }
 
-// isAdvisoryLockStale checks if an advisory lock file is stale using the same logic as the lock package.
+// isAdvisoryLockStale checks if an advisory lock file is stale.
+// Uses treatLegacyAsStale=true because recovery should aggressively clean up legacy locks.
 func isAdvisoryLockStale(lockPath string) bool {
-	data, err := os.ReadFile(lockPath)
-	if err != nil {
-		return false
-	}
-
-	content := strings.TrimSpace(string(data))
-	if content == "" {
-		return true // Empty lock file is stale
-	}
-
-	// Try JSON format (v2)
-	var meta lock.LockMetadata
-	if json.Unmarshal(data, &meta) == nil && meta.Version == "2" {
-		acquired := time.Unix(meta.Acquired, 0)
-		return time.Since(acquired) > lock.StaleThreshold
-	}
-
-	// Legacy PID format — check if process is alive
-	// For recovery, treat all legacy locks as stale (they should have been migrated)
-	return true
+	return lock.IsStaleFile(lockPath, true)
 }

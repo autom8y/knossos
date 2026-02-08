@@ -279,6 +279,14 @@ func (m *Manager) ForceRelease(sessionID string) error {
 	return nil
 }
 
+// IsStaleFile checks if a lock file at the given path is stale.
+// This is a convenience function that does not require a Manager instance.
+// When treatLegacyAsStale is true, all legacy PID-format locks are treated as stale.
+func IsStaleFile(lockPath string, treatLegacyAsStale bool) bool {
+	m := &Manager{}
+	return m.IsStale(lockPath, treatLegacyAsStale)
+}
+
 // LocksDir returns the locks directory path.
 func (m *Manager) LocksDir() string {
 	return m.locksDir
