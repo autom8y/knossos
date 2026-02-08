@@ -58,7 +58,7 @@ Session Context:
 - Initiative: {initiative}
 - Complexity: {complexity}
 
-Create PRD following template at `.claude/skills/documentation/templates/prd.md`.
+Create PRD following template at `.claude/skills/documentation/templates/prd.md` -- template paths are illustrative; actual templates vary by rite.
 
 Clarify ambiguities with user before drafting.
 
@@ -88,9 +88,9 @@ Session Context:
 - Complexity: {complexity}
 - PRD: /docs/requirements/PRD-{slug}.md
 
-Create TDD following template at `.claude/skills/documentation/templates/tdd.md`.
+Create TDD following template at `.claude/skills/documentation/templates/tdd.md` -- template paths are illustrative; actual templates vary by rite.
 
-Identify architecture decisions and create ADRs using template at `.claude/skills/documentation/templates/adr.md`.
+Identify architecture decisions and create ADRs using template at `.claude/skills/documentation/templates/adr.md` -- template paths are illustrative; actual templates vary by rite.
 
 Save artifacts:
 - TDD: /docs/design/TDD-{slug}.md

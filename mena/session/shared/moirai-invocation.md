@@ -11,7 +11,7 @@
 - **Lachesis** (measurement): `mark_complete`, `transition_phase`, `park_session`, etc.
 - **Atropos** (termination): `wrap_session`, `generate_sails`, `delete_sprint`
 
-**Agent location**: `.claude/agents/moirai.md`
+**Agent location**: `.claude/agents/moirai.md` (materialized per rite; may not exist in all rites)
 **Skills location**: `.claude/skills/moirai/` (clotho.md, lachesis.md, atropos.md) -- not yet implemented, see docs/design/TDD-fate-skills.md
 
 ## When to Invoke
@@ -216,7 +216,7 @@ Task(moirai, "...")
 
 ## See Also
 
-- `.claude/agents/moirai.md` - Full Moirai agent specification
+- `.claude/agents/moirai.md` - Full Moirai agent specification (materialized per rite; may not exist in all rites)
 - `.claude/skills/moirai/` - Fate skills (clotho.md, lachesis.md, atropos.md) -- not yet implemented, see docs/design/TDD-fate-skills.md
 - `.claude/hooks/PreToolUse.sh` - Direct write prevention
 - `schemas/artifacts/session-context.schema.json` - Validation schema

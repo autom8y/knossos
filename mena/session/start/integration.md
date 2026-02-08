@@ -12,7 +12,7 @@ Act as **Requirements Analyst**.
 Initiative: {initiative-name}
 Complexity: {complexity}
 
-Create a PRD following the template at `.claude/skills/documentation/templates/prd.md`.
+Create a PRD following the template at `.claude/skills/documentation/templates/prd.md` -- template paths are illustrative; actual templates vary by rite.
 
 Clarify any ambiguities with the user before drafting. When complete, save to:
 `/docs/requirements/PRD-{initiative-slug}.md`
@@ -28,9 +28,9 @@ Act as **Architect**.
 Initiative: {initiative-name}
 PRD Location: /docs/requirements/PRD-{slug}.md
 
-Create TDD following template at `.claude/skills/documentation/templates/tdd.md`.
+Create TDD following template at `.claude/skills/documentation/templates/tdd.md` -- template paths are illustrative; actual templates vary by rite.
 
-Identify architecture decisions and create ADRs using template at `.claude/skills/documentation/templates/adr.md`.
+Identify architecture decisions and create ADRs using template at `.claude/skills/documentation/templates/adr.md` -- template paths are illustrative; actual templates vary by rite.
 
 When complete, save:
 - TDD to: /docs/design/TDD-{slug}.md

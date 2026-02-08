@@ -68,7 +68,7 @@ Session Context:
 - If PARKED, offer to auto-invoke `/resume` then retry wrap
 - If BLACK sails, display blockers and offer fix/override options
 
-See [Moirai agent](~/.claude/agents/moirai.md) and [Atropos skill](~/.claude/skills/moirai/atropos.md) for full WHITE_SAILS algorithm.
+See [Moirai agent](~/.claude/agents/moirai.md) and [Atropos skill](~/.claude/skills/moirai/atropos.md) -- not yet implemented, see docs/design/TDD-fate-skills.md for full WHITE_SAILS algorithm.
 
 ### 5. Generate Session Summary
 
