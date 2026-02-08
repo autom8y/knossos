@@ -315,44 +315,6 @@ Line 3
 	}
 }
 
-func TestMarkerParser_ParseLegacyMarkers(t *testing.T) {
-	content := `# Header
-<!-- PRESERVE: satellite-owned -->
-Some content
-<!-- SYNC: roster-owned -->
-More content
-`
-	p := NewMarkerParser()
-	legacy := p.ParseLegacyMarkers(content)
-
-	if len(legacy) != 2 {
-		t.Fatalf("ParseLegacyMarkers() got %d markers, want 2", len(legacy))
-	}
-
-	if legacy[0].Type != LegacyPreserve {
-		t.Errorf("ParseLegacyMarkers() [0].Type = %v, want %v", legacy[0].Type, LegacyPreserve)
-	}
-
-	if legacy[1].Type != LegacySync {
-		t.Errorf("ParseLegacyMarkers() [1].Type = %v, want %v", legacy[1].Type, LegacySync)
-	}
-
-	// Check suggested region names
-	if legacy[0].SuggestedRegionName == "" {
-		t.Error("ParseLegacyMarkers() [0].SuggestedRegionName should not be empty")
-	}
-}
-
-func TestMarkerParser_ParseLegacyMarkers_InCodeBlock(t *testing.T) {
-	content := "# Header\n```\n<!-- PRESERVE: satellite-owned -->\n```\n"
-	p := NewMarkerParser()
-	legacy := p.ParseLegacyMarkers(content)
-
-	if len(legacy) != 0 {
-		t.Errorf("ParseLegacyMarkers() should ignore markers in code blocks, got %d", len(legacy))
-	}
-}
-
 func TestValidateRegionName(t *testing.T) {
 	tests := []struct {
 		name    string

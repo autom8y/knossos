@@ -143,105 +143,6 @@ func (m *Materializer) getClaudeDir() string {
 	return m.resolver.ClaudeDir()
 }
 
-// StagedMaterialize builds the .claude/ directory in a staging copy then
-// atomically swaps it into place via directory rename.
-//
-// Deprecated: Do NOT use inside Claude Code sessions. The directory rename
-// (.claude/ → .claude.bak/) causes CC's file watcher to lose track of its
-// own configuration directory, resulting in a hard freeze. The direct
-// materialization path (MaterializeWithOptions) uses writeIfChanged() with
-// atomic per-file writes, which is safe for CC's file watcher.
-//
-// The flow:
-//  1. Clone current .claude/ → .claude.staging/ (preserves user content)
-//  2. Run materializeFn against the staging directory
-//  3. Rename .claude/ → .claude.bak/, .claude.staging/ → .claude/
-//  4. Clean up .claude.bak/
-func (m *Materializer) StagedMaterialize(materializeFn func(m *Materializer) (*Result, error)) (*Result, error) {
-	claudeDir := m.resolver.ClaudeDir()
-	stagingDir := claudeDir + ".staging"
-	backupDir := claudeDir + ".bak"
-
-	// Clean up any leftover staging/backup dirs from previous failed runs
-	os.RemoveAll(stagingDir)
-	os.RemoveAll(backupDir)
-
-	// Clone current .claude/ to staging (preserves sessions, user content, etc.)
-	if _, err := os.Stat(claudeDir); err == nil {
-		if err := cloneDir(claudeDir, stagingDir); err != nil {
-			os.RemoveAll(stagingDir)
-			return nil, errors.Wrap(errors.CodeGeneralError, "failed to create staging directory", err)
-		}
-	} else {
-		// No existing .claude/ — staging starts empty
-		if err := os.MkdirAll(stagingDir, 0755); err != nil {
-			return nil, errors.Wrap(errors.CodeGeneralError, "failed to create staging directory", err)
-		}
-	}
-
-	// Point materializer at staging directory
-	m.claudeDirOverride = stagingDir
-	defer func() { m.claudeDirOverride = "" }()
-
-	// Run the actual materialization into staging
-	result, err := materializeFn(m)
-	if err != nil {
-		os.RemoveAll(stagingDir)
-		return nil, err
-	}
-
-	// Atomic swap: .claude → .claude.bak, .claude.staging → .claude
-	if _, err := os.Stat(claudeDir); err == nil {
-		if err := os.Rename(claudeDir, backupDir); err != nil {
-			os.RemoveAll(stagingDir)
-			return nil, errors.Wrap(errors.CodeGeneralError, "failed to move .claude to backup", err)
-		}
-	}
-	if err := os.Rename(stagingDir, claudeDir); err != nil {
-		// Rollback: restore from backup
-		os.Rename(backupDir, claudeDir)
-		return nil, errors.Wrap(errors.CodeGeneralError, "failed to swap staging into place", err)
-	}
-
-	// Clean up backup
-	os.RemoveAll(backupDir)
-
-	return result, nil
-}
-
-// cloneDir recursively copies src to dst, preserving directory structure.
-func cloneDir(src, dst string) error {
-	return filepath.WalkDir(src, func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-
-		relPath, err := filepath.Rel(src, path)
-		if err != nil {
-			return err
-		}
-		destPath := filepath.Join(dst, relPath)
-
-		if d.IsDir() {
-			return os.MkdirAll(destPath, 0755)
-		}
-
-		// Skip .tmp files from interrupted atomic writes
-		if strings.HasSuffix(path, ".tmp") {
-			return nil
-		}
-
-		content, err := os.ReadFile(path)
-		if err != nil {
-			return err
-		}
-		if err := os.MkdirAll(filepath.Dir(destPath), 0755); err != nil {
-			return err
-		}
-		return os.WriteFile(destPath, content, 0644)
-	})
-}
-
 // riteFS returns a filesystem rooted at the rite's directory.
 // For embedded sources, returns a sub-FS of the embedded rites.
 // For filesystem sources, returns os.DirFS rooted at the rite path.
@@ -316,13 +217,6 @@ func copyDirFromFS(fsys fs.FS, dst string) error {
 		_, err = writeIfChanged(destPath, content, 0644)
 		return err
 	})
-}
-
-// Materialize generates the .claude/ directory from templates and the active rite.
-// This is the legacy method that uses default options (keep orphans).
-func (m *Materializer) Materialize(activeRiteName string) error {
-	_, err := m.MaterializeWithOptions(activeRiteName, Options{KeepAll: true})
-	return err
 }
 
 // MaterializeMinimal generates minimal .claude/ infrastructure without a rite.
@@ -1224,11 +1118,6 @@ func (m *Materializer) mergeCLAUDEmd(claudeDir string, renderCtx *inscription.Re
 	return legacyBackupPath, nil
 }
 
-// materializeSettings generates or updates settings.local.json with MCP servers from manifest.
-func (m *Materializer) materializeSettings(claudeDir string) error {
-	return m.materializeSettingsWithManifest(claudeDir, nil)
-}
-
 // materializeSettingsWithManifest generates or updates settings.local.json.
 // If manifest has MCP servers, merges them into existing settings.
 // Loads hooks.yaml and merges hook registrations into settings.
@@ -1323,16 +1212,6 @@ func (m *Materializer) writeActiveRite(riteName, claudeDir string) error {
 	activeRitePath := filepath.Join(claudeDir, "ACTIVE_RITE")
 	_, err := writeIfChanged(activeRitePath, []byte(riteName+"\n"), 0644)
 	return err
-}
-
-// getCurrentRite reads the current active rite from ACTIVE_RITE file.
-func (m *Materializer) getCurrentRite(claudeDir string) (string, error) {
-	activeRitePath := filepath.Join(claudeDir, "ACTIVE_RITE")
-	data, err := os.ReadFile(activeRitePath)
-	if err != nil {
-		return "", err
-	}
-	return strings.TrimSpace(string(data)), nil
 }
 
 // copyDir recursively copies a directory.

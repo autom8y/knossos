@@ -376,23 +376,3 @@ func (r *SourceResolver) ClearCache() {
 	r.mu.Unlock()
 }
 
-// GetTemplatesDir returns the templates directory for a given source.
-func (r *SourceResolver) GetTemplatesDir(source RiteSource) string {
-	switch source.Type {
-	case SourceKnossos:
-		// Knossos templates are in knossos/templates/ subdirectory
-		return filepath.Join(filepath.Dir(source.Path), "knossos", "templates")
-	case SourceProject:
-		return filepath.Join(r.projectRoot, "templates")
-	case SourceExplicit:
-		templatesDir := filepath.Join(filepath.Dir(source.Path), "templates")
-		if _, err := os.Stat(templatesDir); err == nil {
-			return templatesDir
-		}
-		return ""
-	case SourceEmbedded:
-		return "knossos/templates"
-	default:
-		return ""
-	}
-}

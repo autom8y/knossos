@@ -1,7 +1,6 @@
 package inscription
 
 import (
-	"bufio"
 	"regexp"
 	"strings"
 
@@ -29,12 +28,6 @@ var markerRegex = regexp.MustCompile(
 
 // optionRegex matches key=value pairs in marker options.
 var optionRegex = regexp.MustCompile(`([a-z_][a-z0-9_]*)=([^\s]+)`)
-
-// legacyPreserveRegex matches legacy PRESERVE markers.
-var legacyPreserveRegex = regexp.MustCompile(`<!--\s*PRESERVE:\s*([^>]+?)\s*-->`)
-
-// legacySyncRegex matches legacy SYNC markers.
-var legacySyncRegex = regexp.MustCompile(`<!--\s*SYNC:\s*([^>]+?)\s*-->`)
 
 // codeBlockStartRegex matches the start of a fenced code block.
 var codeBlockStartRegex = regexp.MustCompile("^```")
@@ -243,93 +236,6 @@ func (p *MarkerParser) parseMarkerLine(line string, lineNumber int) *Marker {
 		LineNumber: lineNumber,
 		Raw:        strings.TrimSpace(matches[0]),
 	}
-}
-
-// ParseLegacyMarkers finds legacy PRESERVE and SYNC markers for migration.
-func (p *MarkerParser) ParseLegacyMarkers(content string) []*LegacyMarker {
-	var legacy []*LegacyMarker
-
-	scanner := bufio.NewScanner(strings.NewReader(content))
-	lineNum := 0
-	inCodeBlock := false
-
-	for scanner.Scan() {
-		lineNum++
-		line := scanner.Text()
-
-		// Track code block state
-		if codeBlockStartRegex.MatchString(strings.TrimSpace(line)) {
-			if inCodeBlock {
-				if codeBlockEndRegex.MatchString(strings.TrimSpace(line)) {
-					inCodeBlock = false
-				}
-			} else {
-				inCodeBlock = true
-			}
-			continue
-		}
-
-		if inCodeBlock {
-			continue
-		}
-
-		// Check for PRESERVE marker
-		if matches := legacyPreserveRegex.FindStringSubmatch(line); matches != nil {
-			legacy = append(legacy, &LegacyMarker{
-				Type:                LegacyPreserve,
-				LineNumber:          lineNum,
-				Raw:                 strings.TrimSpace(matches[0]),
-				SuggestedRegionName: p.suggestRegionName(matches[1], lineNum),
-			})
-		}
-
-		// Check for SYNC marker
-		if matches := legacySyncRegex.FindStringSubmatch(line); matches != nil {
-			legacy = append(legacy, &LegacyMarker{
-				Type:                LegacySync,
-				LineNumber:          lineNum,
-				Raw:                 strings.TrimSpace(matches[0]),
-				SuggestedRegionName: p.suggestRegionName(matches[1], lineNum),
-			})
-		}
-	}
-
-	return legacy
-}
-
-// suggestRegionName generates a suggested region name from legacy marker content.
-func (p *MarkerParser) suggestRegionName(content string, lineNum int) string {
-	// Clean up the content
-	content = strings.ToLower(strings.TrimSpace(content))
-
-	// Remove common suffixes
-	content = strings.TrimSuffix(content, "-owned")
-	content = strings.TrimSuffix(content, "satellite")
-	content = strings.TrimSuffix(content, "knossos")
-
-	// Convert to kebab-case
-	content = strings.ReplaceAll(content, " ", "-")
-	content = strings.ReplaceAll(content, "_", "-")
-
-	// Remove non-alphanumeric characters except hyphens
-	var result strings.Builder
-	for _, c := range content {
-		if (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '-' {
-			result.WriteRune(c)
-		}
-	}
-
-	name := result.String()
-	if name == "" || name == "-" {
-		name = "region-" + itoa(lineNum)
-	}
-
-	// Ensure starts with letter
-	if name[0] >= '0' && name[0] <= '9' {
-		name = "region-" + name
-	}
-
-	return name
 }
 
 // ValidateRegionName checks if a region name follows naming conventions.

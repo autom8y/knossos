@@ -311,32 +311,6 @@ type UnmanagedSection struct {
 	Content string
 }
 
-// LegacyMarkerType represents the type of legacy marker found during migration.
-type LegacyMarkerType string
-
-const (
-	// LegacyPreserve indicates a `<!-- PRESERVE: satellite-owned -->` marker.
-	LegacyPreserve LegacyMarkerType = "preserve"
-
-	// LegacySync indicates a legacy `<!-- SYNC: ... -->` marker.
-	LegacySync LegacyMarkerType = "sync"
-)
-
-// LegacyMarker represents a legacy marker found during migration.
-type LegacyMarker struct {
-	// Type is the legacy marker type.
-	Type LegacyMarkerType
-
-	// LineNumber is the 1-indexed line number.
-	LineNumber int
-
-	// Raw is the original marker text.
-	Raw string
-
-	// SuggestedRegionName is the suggested region name for migration.
-	SuggestedRegionName string
-}
-
 // DefaultTemplatePath is the default path to the master CLAUDE.md template.
 const DefaultTemplatePath = "knossos/templates/CLAUDE.md.tpl"
 
