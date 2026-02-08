@@ -371,6 +371,7 @@ func (m *Materializer) MaterializeMinimal(opts Options) (*Result, error) {
 	// Remove rite-specific state files (cross-cutting mode has no rite)
 	os.Remove(filepath.Join(claudeDir, "ACTIVE_RITE"))
 	os.Remove(filepath.Join(claudeDir, "ACTIVE_WORKFLOW.yaml"))
+	os.Remove(filepath.Join(claudeDir, "INVOCATION_STATE.yaml"))
 
 	return result, nil
 }
@@ -428,6 +429,11 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 	// 2. Ensure .claude/ directory exists
 	if err := paths.EnsureDir(claudeDir); err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to create .claude directory", err)
+	}
+
+	// 2.5. Clear stale invocation state from previous rite
+	if err := m.clearInvocationState(claudeDir); err != nil {
+		return nil, errors.Wrap(errors.CodeGeneralError, "failed to clear invocation state", err)
 	}
 
 	// 3. Handle orphans before materializing agents
@@ -1197,6 +1203,16 @@ func (m *Materializer) trackState(manifest *RiteManifest, activeRiteName string)
 	state.ActiveRite = activeRiteName
 	state.LastSync = time.Now().UTC()
 	return stateManager.Save(state)
+}
+
+// clearInvocationState removes INVOCATION_STATE.yaml which becomes stale on rite switch.
+// The file tracks borrowed components from the previous rite's invocations.
+func (m *Materializer) clearInvocationState(claudeDir string) error {
+	err := os.Remove(filepath.Join(claudeDir, "INVOCATION_STATE.yaml"))
+	if err != nil && !os.IsNotExist(err) {
+		return err
+	}
+	return nil
 }
 
 // materializeWorkflow copies workflow.yaml from the rite to .claude/ACTIVE_WORKFLOW.yaml.

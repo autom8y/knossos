@@ -1,0 +1,42 @@
+package materialize
+
+import (
+	"os"
+	"path/filepath"
+	"testing"
+
+	"github.com/autom8y/knossos/internal/paths"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+)
+
+func TestClearInvocationState_RemovesFile(t *testing.T) {
+	projectDir := t.TempDir()
+	claudeDir := filepath.Join(projectDir, ".claude")
+	require.NoError(t, os.MkdirAll(claudeDir, 0755))
+
+	// Create INVOCATION_STATE.yaml
+	invPath := filepath.Join(claudeDir, "INVOCATION_STATE.yaml")
+	require.NoError(t, os.WriteFile(invPath, []byte("current_rite: old-rite\n"), 0644))
+
+	resolver := paths.NewResolver(projectDir)
+	m := NewMaterializer(resolver)
+
+	err := m.clearInvocationState(claudeDir)
+	require.NoError(t, err)
+
+	_, err = os.Stat(invPath)
+	assert.True(t, os.IsNotExist(err), "INVOCATION_STATE.yaml should be removed")
+}
+
+func TestClearInvocationState_NoFile(t *testing.T) {
+	projectDir := t.TempDir()
+	claudeDir := filepath.Join(projectDir, ".claude")
+	require.NoError(t, os.MkdirAll(claudeDir, 0755))
+
+	resolver := paths.NewResolver(projectDir)
+	m := NewMaterializer(resolver)
+
+	err := m.clearInvocationState(claudeDir)
+	require.NoError(t, err, "should not error when file doesn't exist")
+}
