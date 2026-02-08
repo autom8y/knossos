@@ -2,6 +2,7 @@ package hook
 
 import (
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -204,4 +205,155 @@ func TestEnvGetProjectDir(t *testing.T) {
 			t.Error("GetProjectDir() returned empty, expected cwd")
 		}
 	})
+}
+
+func TestParseStdin_PopulatesEnv(t *testing.T) {
+	// Save and restore original stdin
+	oldStdin := os.Stdin
+	defer func() { os.Stdin = oldStdin }()
+
+	// Create pipe with test data
+	r, w, _ := os.Pipe()
+	payload := `{"hook_event_name":"PostToolUse","tool_name":"Write","tool_input":{"file_path":"/tmp/test.txt","content":"hello"},"tool_response":{"success":true},"session_id":"test-123","cwd":"/home/user/project"}`
+	go func() {
+		w.Write([]byte(payload))
+		w.Close()
+	}()
+	os.Stdin = r
+
+	env := ParseEnv()
+
+	if env.Event != EventPostToolUse {
+		t.Errorf("Event = %q, want %q", env.Event, EventPostToolUse)
+	}
+	if env.ToolName != "Write" {
+		t.Errorf("ToolName = %q, want %q", env.ToolName, "Write")
+	}
+	if env.SessionID != "test-123" {
+		t.Errorf("SessionID = %q, want %q", env.SessionID, "test-123")
+	}
+	if env.ProjectDir != "/home/user/project" {
+		t.Errorf("ProjectDir = %q, want %q", env.ProjectDir, "/home/user/project")
+	}
+	// Verify ToolInput is re-serialized JSON string
+	if !strings.Contains(env.ToolInput, "file_path") {
+		t.Errorf("ToolInput should contain file_path, got %q", env.ToolInput)
+	}
+	if !strings.Contains(env.ToolInput, "/tmp/test.txt") {
+		t.Errorf("ToolInput should contain /tmp/test.txt, got %q", env.ToolInput)
+	}
+	// Verify ToolResult is re-serialized JSON string
+	if !strings.Contains(env.ToolResult, "success") {
+		t.Errorf("ToolResult should contain success, got %q", env.ToolResult)
+	}
+}
+
+func TestParseStdin_FallsBackToEnvVars(t *testing.T) {
+	// Save and restore original stdin and env
+	oldStdin := os.Stdin
+	defer func() { os.Stdin = oldStdin }()
+
+	// Clean environment
+	originalEnv := map[string]string{
+		EnvHookEvent: os.Getenv(EnvHookEvent),
+		EnvToolName:  os.Getenv(EnvToolName),
+		EnvSessionID: os.Getenv(EnvSessionID),
+	}
+	defer func() {
+		for k, v := range originalEnv {
+			if v == "" {
+				os.Unsetenv(k)
+			} else {
+				os.Setenv(k, v)
+			}
+		}
+	}()
+
+	// Set env vars
+	os.Setenv(EnvHookEvent, "PreToolUse")
+	os.Setenv(EnvToolName, "Bash")
+	os.Setenv(EnvSessionID, "env-session-456")
+
+	// Create a terminal-like stdin (no pipe)
+	r, w, _ := os.Pipe()
+	w.Close() // Close immediately so stdin appears empty
+	os.Stdin = r
+
+	env := ParseEnv()
+
+	// Should fall back to env vars
+	if env.Event != EventPreToolUse {
+		t.Errorf("Event = %q, want %q (should fall back to env)", env.Event, EventPreToolUse)
+	}
+	if env.ToolName != "Bash" {
+		t.Errorf("ToolName = %q, want %q (should fall back to env)", env.ToolName, "Bash")
+	}
+	if env.SessionID != "env-session-456" {
+		t.Errorf("SessionID = %q, want %q (should fall back to env)", env.SessionID, "env-session-456")
+	}
+}
+
+func TestParseStdin_ToolInputReserializedAsString(t *testing.T) {
+	// Save and restore original stdin
+	oldStdin := os.Stdin
+	defer func() { os.Stdin = oldStdin }()
+
+	// Create pipe with nested tool_input object
+	r, w, _ := os.Pipe()
+	payload := `{"hook_event_name":"PreToolUse","tool_name":"Edit","tool_input":{"file_path":"/src/main.go","old_string":"foo","new_string":"bar"}}`
+	go func() {
+		w.Write([]byte(payload))
+		w.Close()
+	}()
+	os.Stdin = r
+
+	env := ParseEnv()
+
+	// ToolInput should be a JSON string (not parsed object)
+	if env.ToolInput == "" {
+		t.Error("ToolInput should not be empty")
+	}
+
+	// Should be valid JSON string
+	if !strings.HasPrefix(env.ToolInput, "{") {
+		t.Errorf("ToolInput should be JSON string starting with {, got %q", env.ToolInput)
+	}
+
+	// Should contain all fields from original object
+	if !strings.Contains(env.ToolInput, "file_path") {
+		t.Errorf("ToolInput should contain file_path, got %q", env.ToolInput)
+	}
+	if !strings.Contains(env.ToolInput, "old_string") {
+		t.Errorf("ToolInput should contain old_string, got %q", env.ToolInput)
+	}
+	if !strings.Contains(env.ToolInput, "new_string") {
+		t.Errorf("ToolInput should contain new_string, got %q", env.ToolInput)
+	}
+}
+
+func TestParseStdin_UserPromptSubmit(t *testing.T) {
+	// Save and restore original stdin
+	oldStdin := os.Stdin
+	defer func() { os.Stdin = oldStdin }()
+
+	// Create pipe with UserPromptSubmit event
+	r, w, _ := os.Pipe()
+	payload := `{"hook_event_name":"UserPromptSubmit","session_id":"prompt-session","prompt":"/start my-initiative"}`
+	go func() {
+		w.Write([]byte(payload))
+		w.Close()
+	}()
+	os.Stdin = r
+
+	env := ParseEnv()
+
+	if env.Event != EventUserPromptSubmit {
+		t.Errorf("Event = %q, want %q", env.Event, EventUserPromptSubmit)
+	}
+	if env.UserMessage != "/start my-initiative" {
+		t.Errorf("UserMessage = %q, want %q", env.UserMessage, "/start my-initiative")
+	}
+	if env.SessionID != "prompt-session" {
+		t.Errorf("SessionID = %q, want %q", env.SessionID, "prompt-session")
+	}
 }

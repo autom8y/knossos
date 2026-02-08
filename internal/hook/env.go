@@ -3,10 +3,14 @@
 package hook
 
 import (
+	"encoding/json"
+	"io"
 	"os"
 )
 
 // Claude Code hook environment variable names.
+// Deprecated: CC sends these via stdin JSON, not env vars.
+// Kept for backwards compatibility with direct CLI invocation.
 const (
 	EnvHookEvent     = "CLAUDE_HOOK_EVENT"       // Hook event type (PreToolUse, PostToolUse, etc.)
 	EnvToolName      = "CLAUDE_TOOL_NAME"        // Name of the tool being used
@@ -41,6 +45,23 @@ const (
 	EventTaskCompleted      HookEvent = "TaskCompleted"
 )
 
+// StdinPayload represents the JSON data Claude Code sends to hooks via stdin.
+type StdinPayload struct {
+	SessionID      string          `json:"session_id"`
+	TranscriptPath string          `json:"transcript_path"`
+	CWD            string          `json:"cwd"`
+	PermissionMode string          `json:"permission_mode"`
+	HookEventName  string          `json:"hook_event_name"`
+	ToolName       string          `json:"tool_name"`
+	ToolInput      json.RawMessage `json:"tool_input"`
+	ToolResponse   json.RawMessage `json:"tool_response"`
+	ToolUseID      string          `json:"tool_use_id"`
+	Prompt         string          `json:"prompt"`
+	Source         string          `json:"source"`
+	StopHookActive bool            `json:"stop_hook_active"`
+	Trigger        string          `json:"trigger"`
+}
+
 // Env holds parsed hook environment variables.
 type Env struct {
 	// Event type that triggered this hook
@@ -61,9 +82,69 @@ type Env struct {
 	AssistantText string
 }
 
+// parseStdin reads and parses the JSON payload from stdin.
+// Returns nil if stdin is a terminal or empty.
+func parseStdin() *StdinPayload {
+	stat, err := os.Stdin.Stat()
+	if err != nil {
+		return nil
+	}
+	// If stdin is a terminal (no pipe), return nil
+	if (stat.Mode() & os.ModeCharDevice) != 0 {
+		return nil
+	}
+	data, err := io.ReadAll(os.Stdin)
+	if err != nil || len(data) == 0 {
+		return nil
+	}
+	var payload StdinPayload
+	if err := json.Unmarshal(data, &payload); err != nil {
+		return nil
+	}
+	return &payload
+}
+
 // ParseEnv reads hook-related environment variables and returns an Env.
 func ParseEnv() *Env {
+	// Read stdin first (primary source from CC)
+	stdin := parseStdin()
+
+	// Start with env var values (existing behavior)
 	event := HookEvent(os.Getenv(EnvHookEvent))
+	toolName := os.Getenv(EnvToolName)
+	toolInput := os.Getenv(EnvToolInput)
+	toolResult := os.Getenv(EnvToolResult)
+	sessionID := os.Getenv(EnvSessionID)
+	projectDir := os.Getenv(EnvProjectDir)
+	userMessage := os.Getenv(EnvUserMessage)
+	assistantText := os.Getenv(EnvAssistantText)
+	conversationID := os.Getenv(EnvConversation)
+
+	// Override with stdin values if available (CC's actual data)
+	if stdin != nil {
+		if stdin.HookEventName != "" {
+			event = HookEvent(stdin.HookEventName)
+		}
+		if stdin.ToolName != "" {
+			toolName = stdin.ToolName
+		}
+		if len(stdin.ToolInput) > 0 && string(stdin.ToolInput) != "null" {
+			toolInput = string(stdin.ToolInput)
+		}
+		if len(stdin.ToolResponse) > 0 && string(stdin.ToolResponse) != "null" {
+			toolResult = string(stdin.ToolResponse)
+		}
+		if stdin.SessionID != "" {
+			sessionID = stdin.SessionID
+		}
+		if stdin.CWD != "" && projectDir == "" {
+			projectDir = stdin.CWD
+		}
+		if stdin.Prompt != "" {
+			userMessage = stdin.Prompt
+		}
+	}
+
 	// Validate the event type if non-empty
 	if event != "" && !isValidHookEvent(event) {
 		// Log warning for invalid event type but don't fail
@@ -73,14 +154,14 @@ func ParseEnv() *Env {
 
 	return &Env{
 		Event:          event,
-		ToolName:       os.Getenv(EnvToolName),
-		ToolInput:      os.Getenv(EnvToolInput),
-		ToolResult:     os.Getenv(EnvToolResult),
-		SessionID:      os.Getenv(EnvSessionID),
-		ProjectDir:     os.Getenv(EnvProjectDir),
-		ConversationID: os.Getenv(EnvConversation),
-		UserMessage:    os.Getenv(EnvUserMessage),
-		AssistantText:  os.Getenv(EnvAssistantText),
+		ToolName:       toolName,
+		ToolInput:      toolInput,
+		ToolResult:     toolResult,
+		SessionID:      sessionID,
+		ProjectDir:     projectDir,
+		ConversationID: conversationID,
+		UserMessage:    userMessage,
+		AssistantText:  assistantText,
 	}
 }
 
