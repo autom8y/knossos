@@ -79,5 +79,6 @@ hooks:
     matcher: "^/"
     command: "ari hook route --output json"
     timeout: 5
+    async: true
     priority: 3
     description: "Routes slash commands via ari hook route"
