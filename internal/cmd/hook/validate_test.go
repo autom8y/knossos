@@ -257,7 +257,7 @@ func TestRunValidate_EarlyExit_HooksDisabled(t *testing.T) {
 		},
 	}
 
-	err := runValidateCore(ctx, printer, "")
+	err := runValidateCore(ctx, printer)
 	if err != nil {
 		t.Fatalf("runValidate() error = %v", err)
 	}
@@ -296,7 +296,7 @@ func TestRunValidate_BypassEnvVar(t *testing.T) {
 		},
 	}
 
-	err := runValidateCore(ctx, printer, "")
+	err := runValidateCore(ctx, printer)
 	if err != nil {
 		t.Fatalf("runValidate() error = %v", err)
 	}
@@ -334,7 +334,7 @@ func TestRunValidate_NonBashTool(t *testing.T) {
 		},
 	}
 
-	err := runValidateCore(ctx, printer, "")
+	err := runValidateCore(ctx, printer)
 	if err != nil {
 		t.Fatalf("runValidate() error = %v", err)
 	}
@@ -372,7 +372,7 @@ func TestRunValidate_AllowSafeCommand(t *testing.T) {
 		},
 	}
 
-	err := runValidateCore(ctx, printer, "")
+	err := runValidateCore(ctx, printer)
 	if err != nil {
 		t.Fatalf("runValidate() error = %v", err)
 	}
@@ -410,7 +410,7 @@ func TestRunValidate_BlockRmRfGit(t *testing.T) {
 		},
 	}
 
-	err := runValidateCore(ctx, printer, "")
+	err := runValidateCore(ctx, printer)
 	if err != nil {
 		t.Fatalf("runValidate() error = %v", err)
 	}
@@ -454,7 +454,7 @@ func TestRunValidate_BlockForcePush(t *testing.T) {
 		},
 	}
 
-	err := runValidateCore(ctx, printer, "")
+	err := runValidateCore(ctx, printer)
 	if err != nil {
 		t.Fatalf("runValidate() error = %v", err)
 	}
@@ -495,7 +495,7 @@ func TestRunValidate_BlockNoVerify(t *testing.T) {
 		},
 	}
 
-	err := runValidateCore(ctx, printer, "")
+	err := runValidateCore(ctx, printer)
 	if err != nil {
 		t.Fatalf("runValidate() error = %v", err)
 	}
@@ -536,7 +536,7 @@ func TestRunValidate_BlockResetHard(t *testing.T) {
 		},
 	}
 
-	err := runValidateCore(ctx, printer, "")
+	err := runValidateCore(ctx, printer)
 	if err != nil {
 		t.Fatalf("runValidate() error = %v", err)
 	}
@@ -577,7 +577,7 @@ func TestRunValidate_BlockCleanFd(t *testing.T) {
 		},
 	}
 
-	err := runValidateCore(ctx, printer, "")
+	err := runValidateCore(ctx, printer)
 	if err != nil {
 		t.Fatalf("runValidate() error = %v", err)
 	}
@@ -592,46 +592,6 @@ func TestRunValidate_BlockCleanFd(t *testing.T) {
 	}
 	if !bytes.Contains([]byte(result.HookSpecificOutput.PermissionDecisionReason), []byte("clean -fd")) {
 		t.Errorf("Reason should mention clean -fd, got: %q", result.HookSpecificOutput.PermissionDecisionReason)
-	}
-}
-
-func TestRunValidate_StdinInput(t *testing.T) {
-	testutil.SetupEnv(t, &testutil.HookEnv{
-		Event:       "PreToolUse",
-		ToolName:    "Bash",
-		ToolInput:   "", // Empty env, will use stdin
-	})
-
-	var stdout, stderr bytes.Buffer
-	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
-
-	outputFlag := "json"
-	verboseFlag := false
-	projectDir := ""
-	ctx := &cmdContext{
-		SessionContext: common.SessionContext{
-			BaseContext: common.BaseContext{
-				Output:     &outputFlag,
-				Verbose:    &verboseFlag,
-				ProjectDir: &projectDir,
-			},
-		},
-	}
-
-	// Simulate stdin input with dangerous command
-	stdinInput := `{"command": "rm -rf .git"}`
-	err := runValidateCore(ctx, printer, stdinInput)
-	if err != nil {
-		t.Fatalf("runValidate() error = %v", err)
-	}
-
-	var result hook.PreToolUseOutput
-	if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
-		t.Fatalf("Failed to parse output: %v", err)
-	}
-
-	if result.HookSpecificOutput.PermissionDecision != "deny" {
-		t.Errorf("PermissionDecision = %q, want %q (stdin should work)", result.HookSpecificOutput.PermissionDecision, "deny")
 	}
 }
 
@@ -666,7 +626,7 @@ func BenchmarkValidateHook_Passthrough(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		stdout.Reset()
-		runValidateCore(ctx, printer, "")
+		runValidateCore(ctx, printer)
 	}
 
 	elapsed := b.Elapsed()
@@ -698,7 +658,7 @@ func BenchmarkValidateHook_EarlyExit(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		stdout.Reset()
-		runValidateCore(ctx, printer, "")
+		runValidateCore(ctx, printer)
 	}
 
 	elapsed := b.Elapsed()
@@ -739,7 +699,7 @@ func BenchmarkValidateHook_Validation(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		stdout.Reset()
-		runValidateCore(ctx, printer, "")
+		runValidateCore(ctx, printer)
 	}
 
 	elapsed := b.Elapsed()
@@ -781,7 +741,7 @@ func TestValidate_StdinIntegration_AllowSafeCommand(t *testing.T) {
 		},
 	}
 
-	err := runValidateCore(ctx, printer, "")
+	err := runValidateCore(ctx, printer)
 	if err != nil {
 		t.Fatalf("runValidate() error = %v", err)
 	}
@@ -828,7 +788,7 @@ func TestValidate_StdinIntegration_BlockDangerousCommand(t *testing.T) {
 		},
 	}
 
-	err := runValidateCore(ctx, printer, "")
+	err := runValidateCore(ctx, printer)
 	if err != nil {
 		t.Fatalf("runValidate() error = %v", err)
 	}

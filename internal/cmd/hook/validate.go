@@ -68,8 +68,8 @@ This hook is triggered on PreToolUse events for Bash tools. It:
 - Returns {"hookSpecificOutput": {"permissionDecision": "allow"}} for safe commands
 - Respects ARI_VALIDATE_BYPASS env var for override
 
-Input (env vars):
-  CLAUDE_TOOL_INPUT: {"command": "rm -rf .git", "description": "..."}
+Input (stdin JSON):
+  {"hook_event_name":"PreToolUse","tool_name":"Bash","tool_input":{"command":"rm -rf .git"}}
 
 Output (stdout JSON):
   {"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "deny", "permissionDecisionReason": "Cannot rm -rf protected path: .git"}}
@@ -87,12 +87,11 @@ Performance: <5ms for passthrough path.`,
 
 func runValidate(ctx *cmdContext) error {
 	printer := ctx.getPrinter()
-	return runValidateCore(ctx, printer, "")
+	return runValidateCore(ctx, printer)
 }
 
 // runValidateCore contains the actual logic with injected printer for testing.
-// stdinInput is used by tests to simulate stdin input.
-func runValidateCore(ctx *cmdContext, printer *output.Printer, stdinInput string) error {
+func runValidateCore(ctx *cmdContext, printer *output.Printer) error {
 	// Check bypass env var
 	if os.Getenv(ValidateBypassEnvVar) == "1" {
 		return outputValidateAllow(printer)
@@ -113,11 +112,6 @@ func runValidateCore(ctx *cmdContext, printer *output.Printer, stdinInput string
 
 	// Parse command from tool input
 	command := parseCommand(printer, hookEnv.ToolInput)
-	if command == "" && stdinInput != "" {
-		// Try stdin input for testing
-		command = parseCommand(printer, stdinInput)
-	}
-
 	if command == "" {
 		return outputValidateAllow(printer)
 	}

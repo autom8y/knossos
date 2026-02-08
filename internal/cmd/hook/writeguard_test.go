@@ -159,7 +159,7 @@ func TestRunWriteguard_EarlyExit_HooksDisabled(t *testing.T) {
 		},
 	}
 
-	err := runWriteguardCore(ctx, printer, "")
+	err := runWriteguardCore(ctx, printer)
 	if err != nil {
 		t.Fatalf("runWriteguard() error = %v", err)
 	}
@@ -204,7 +204,7 @@ func TestRunWriteguard_BypassEnvVar(t *testing.T) {
 		},
 	}
 
-	err := runWriteguardCore(ctx, printer, "")
+	err := runWriteguardCore(ctx, printer)
 	if err != nil {
 		t.Fatalf("runWriteguard() error = %v", err)
 	}
@@ -243,7 +243,7 @@ func TestRunWriteguard_NonWriteTool(t *testing.T) {
 		},
 	}
 
-	err := runWriteguardCore(ctx, printer, "")
+	err := runWriteguardCore(ctx, printer)
 	if err != nil {
 		t.Fatalf("runWriteguard() error = %v", err)
 	}
@@ -281,7 +281,7 @@ func TestRunWriteguard_BlockSessionContext(t *testing.T) {
 		},
 	}
 
-	err := runWriteguardCore(ctx, printer, "")
+	err := runWriteguardCore(ctx, printer)
 	if err != nil {
 		t.Fatalf("runWriteguard() error = %v", err)
 	}
@@ -325,7 +325,7 @@ func TestRunWriteguard_BlockSprintContext(t *testing.T) {
 		},
 	}
 
-	err := runWriteguardCore(ctx, printer, "")
+	err := runWriteguardCore(ctx, printer)
 	if err != nil {
 		t.Fatalf("runWriteguard() error = %v", err)
 	}
@@ -366,7 +366,7 @@ func TestRunWriteguard_AllowRegularFile(t *testing.T) {
 		},
 	}
 
-	err := runWriteguardCore(ctx, printer, "")
+	err := runWriteguardCore(ctx, printer)
 	if err != nil {
 		t.Fatalf("runWriteguard() error = %v", err)
 	}
@@ -378,46 +378,6 @@ func TestRunWriteguard_AllowRegularFile(t *testing.T) {
 
 	if result.HookSpecificOutput.PermissionDecision != "allow" {
 		t.Errorf("PermissionDecision = %q, want %q (regular file should be allowed)", result.HookSpecificOutput.PermissionDecision, "allow")
-	}
-}
-
-func TestRunWriteguard_StdinInput(t *testing.T) {
-	testutil.SetupEnv(t, &testutil.HookEnv{
-		Event:       "PreToolUse",
-		ToolName:    "Write",
-		ToolInput:   "", // Empty env, will use stdin
-	})
-
-	var stdout, stderr bytes.Buffer
-	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
-
-	outputFlag := "json"
-	verboseFlag := false
-	projectDir := ""
-	ctx := &cmdContext{
-		SessionContext: common.SessionContext{
-			BaseContext: common.BaseContext{
-				Output:     &outputFlag,
-				Verbose:    &verboseFlag,
-				ProjectDir: &projectDir,
-			},
-		},
-	}
-
-	// Simulate stdin input
-	stdinInput := `{"tool_name": "Write", "file_path": ".claude/sessions/test/SESSION_CONTEXT.md"}`
-	err := runWriteguardCore(ctx, printer, stdinInput)
-	if err != nil {
-		t.Fatalf("runWriteguard() error = %v", err)
-	}
-
-	var result hook.PreToolUseOutput
-	if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
-		t.Fatalf("Failed to parse output: %v", err)
-	}
-
-	if result.HookSpecificOutput.PermissionDecision != "deny" {
-		t.Errorf("PermissionDecision = %q, want %q (stdin should work)", result.HookSpecificOutput.PermissionDecision, "deny")
 	}
 }
 
@@ -452,7 +412,7 @@ func BenchmarkWriteguardHook_Passthrough(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		stdout.Reset()
-		runWriteguardCore(ctx, printer, "")
+		runWriteguardCore(ctx, printer)
 	}
 
 	elapsed := b.Elapsed()
@@ -484,7 +444,7 @@ func BenchmarkWriteguardHook_EarlyExit(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		stdout.Reset()
-		runWriteguardCore(ctx, printer, "")
+		runWriteguardCore(ctx, printer)
 	}
 
 	elapsed := b.Elapsed()
@@ -527,7 +487,7 @@ func TestWriteguard_StdinIntegration_AllowRegularFile(t *testing.T) {
 		},
 	}
 
-	err := runWriteguardCore(ctx, printer, "")
+	err := runWriteguardCore(ctx, printer)
 	if err != nil {
 		t.Fatalf("runWriteguard() error = %v", err)
 	}
@@ -574,7 +534,7 @@ func TestWriteguard_StdinIntegration_BlockProtectedFile(t *testing.T) {
 		},
 	}
 
-	err := runWriteguardCore(ctx, printer, "")
+	err := runWriteguardCore(ctx, printer)
 	if err != nil {
 		t.Fatalf("runWriteguard() error = %v", err)
 	}

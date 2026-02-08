@@ -426,7 +426,7 @@ func TestIntegration_ValidateHook_Chain(t *testing.T) {
 				timeout: DefaultTimeout,
 			}
 
-			err := runValidateCore(ctx, printer, "")
+			err := runValidateCore(ctx, printer)
 			if err != nil {
 				t.Fatalf("runValidate() error = %v", err)
 			}
@@ -481,7 +481,7 @@ func TestIntegration_WriteguardHook_Chain(t *testing.T) {
 				timeout: DefaultTimeout,
 			}
 
-			err := runWriteguardCore(ctx, printer, "")
+			err := runWriteguardCore(ctx, printer)
 			if err != nil {
 				t.Fatalf("runWriteguard() error = %v", err)
 			}

@@ -2,8 +2,6 @@
 package hook
 
 import (
-	"os"
-
 	"github.com/spf13/cobra"
 
 	"github.com/autom8y/knossos/internal/hook"
@@ -118,10 +116,6 @@ func runClewCore(ctx *cmdContext, printer *output.Printer) error {
 
 	// Parse tool input from environment
 	toolInputJSON := hookEnv.ToolInput
-	if toolInputJSON == "" {
-		toolInputJSON = os.Getenv("CLAUDE_HOOK_TOOL_INPUT")
-	}
-
 	toolInput, err := hook.ParseToolInput(toolInputJSON)
 	if err != nil {
 		printer.VerboseLog("warn", "failed to parse tool input",

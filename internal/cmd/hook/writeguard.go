@@ -39,9 +39,8 @@ This hook is triggered on PreToolUse events for Write/Edit tools. It:
 - Returns {"hookSpecificOutput": {"permissionDecision": "allow"}} for all other files
 - Allows writes when Moirai holds a valid session lock
 
-Input (env vars):
-  CLAUDE_TOOL_INPUT: {"file_path": ".claude/sessions/.../SESSION_CONTEXT.md"}
-  CLAUDE_PROJECT_DIR: project root directory
+Input (stdin JSON):
+  {"hook_event_name":"PreToolUse","tool_name":"Write","tool_input":{"file_path":".claude/sessions/.../SESSION_CONTEXT.md"}}
 
 Output (stdout JSON):
   {"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "deny", "permissionDecisionReason": "Use Moirai for SESSION_CONTEXT mutations"}}
@@ -59,12 +58,11 @@ Performance: <5ms for passthrough path.`,
 
 func runWriteguard(ctx *cmdContext) error {
 	printer := ctx.getPrinter()
-	return runWriteguardCore(ctx, printer, "")
+	return runWriteguardCore(ctx, printer)
 }
 
 // runWriteguardCore contains the actual logic with injected printer for testing.
-// stdinInput is used by tests to simulate stdin input.
-func runWriteguardCore(ctx *cmdContext, printer *output.Printer, stdinInput string) error {
+func runWriteguardCore(ctx *cmdContext, printer *output.Printer) error {
 	// Get hook environment
 	hookEnv := ctx.getHookEnv()
 
@@ -81,11 +79,6 @@ func runWriteguardCore(ctx *cmdContext, printer *output.Printer, stdinInput stri
 
 	// Parse file path from tool input
 	filePath := parseFilePath(printer, hookEnv.ToolInput)
-	if filePath == "" && stdinInput != "" {
-		// Try stdin input for testing
-		filePath = parseFilePath(printer, stdinInput)
-	}
-
 	if filePath == "" {
 		return outputAllow(printer)
 	}
