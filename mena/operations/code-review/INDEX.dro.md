@@ -5,6 +5,7 @@ argument-hint: <pr-number-or-branch> [--focus=AREA]
 allowed-tools: Bash, Read, Glob, Grep
 model: opus
 disable-model-invocation: true
+context: fork
 ---
 
 ## Context

@@ -91,6 +91,57 @@ func TestFrontmatterAllMenaFiles(t *testing.T) {
 	}
 }
 
+// TestFrontmatterContextField validates that the context field parses correctly from YAML.
+func TestFrontmatterContextField(t *testing.T) {
+	tests := []struct {
+		name     string
+		yaml     string
+		wantCtx  string
+		wantName string
+	}{
+		{
+			name: "context fork parses",
+			yaml: `name: test-cmd
+description: A test command
+context: fork`,
+			wantCtx:  "fork",
+			wantName: "test-cmd",
+		},
+		{
+			name: "no context field",
+			yaml: `name: test-cmd
+description: A test command`,
+			wantCtx:  "",
+			wantName: "test-cmd",
+		},
+		{
+			name: "full frontmatter with context",
+			yaml: `name: code-review
+description: Structured review
+model: opus
+disable-model-invocation: true
+context: fork`,
+			wantCtx:  "fork",
+			wantName: "code-review",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var fm MenaFrontmatter
+			if err := yaml.Unmarshal([]byte(tt.yaml), &fm); err != nil {
+				t.Fatalf("failed to unmarshal: %v", err)
+			}
+			if fm.Context != tt.wantCtx {
+				t.Errorf("Context = %q, want %q", fm.Context, tt.wantCtx)
+			}
+			if fm.Name != tt.wantName {
+				t.Errorf("Name = %q, want %q", fm.Name, tt.wantName)
+			}
+		})
+	}
+}
+
 // isMenaIndex returns true if the filename is a mena index file
 // (INDEX.dro.md, INDEX.lego.md, or legacy INDEX.md).
 func isMenaIndex(name string) bool {

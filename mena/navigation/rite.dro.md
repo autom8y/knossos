@@ -5,6 +5,7 @@ argument-hint: [pack-name] [--list] [--update] [--dry-run] [--keep-all|--remove-
 allowed-tools: Bash, Read
 model: sonnet
 disable-model-invocation: true
+context: fork
 ---
 
 ## Context

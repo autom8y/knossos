@@ -5,6 +5,7 @@ argument-hint: <agent-name> [notes]
 allowed-tools: Bash, Read, Task
 model: opus
 disable-model-invocation: true
+context: fork
 ---
 
 ## Context
