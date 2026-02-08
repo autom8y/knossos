@@ -19,6 +19,7 @@ import (
 type State struct {
 	SchemaVersion string                 `json:"schema_version"`
 	Remote        string                 `json:"remote"`
+	ActiveRite    string                 `json:"active_rite,omitempty"`
 	LastSync      time.Time              `json:"last_sync"`
 	TrackedFiles  map[string]TrackedFile `json:"tracked_files"`
 	Conflicts     []Conflict             `json:"conflicts,omitempty"`

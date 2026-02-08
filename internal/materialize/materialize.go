@@ -368,9 +368,9 @@ func (m *Materializer) MaterializeMinimal(opts Options) (*Result, error) {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize settings", err)
 	}
 
-	// Remove ACTIVE_RITE file if it exists (cross-cutting mode has no rite)
-	activeRitePath := filepath.Join(claudeDir, "ACTIVE_RITE")
-	os.Remove(activeRitePath) // Ignore error if doesn't exist
+	// Remove rite-specific state files (cross-cutting mode has no rite)
+	os.Remove(filepath.Join(claudeDir, "ACTIVE_RITE"))
+	os.Remove(filepath.Join(claudeDir, "ACTIVE_WORKFLOW.yaml"))
 
 	return result, nil
 }
@@ -491,6 +491,11 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 	// 9. Track state in .claude/sync/state.json
 	if err := m.trackState(manifest, activeRiteName); err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to track state", err)
+	}
+
+	// 9.5. Copy workflow.yaml to ACTIVE_WORKFLOW.yaml
+	if err := m.materializeWorkflow(claudeDir, resolved); err != nil {
+		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize workflow", err)
 	}
 
 	// 10. Write ACTIVE_RITE marker
@@ -1188,9 +1193,24 @@ func (m *Materializer) trackState(manifest *RiteManifest, activeRiteName string)
 		}
 	}
 
-	// Update active rite in state (we'll need to extend the State struct for this)
-	// For now, just save the state
+	// Update active rite and last sync time
+	state.ActiveRite = activeRiteName
+	state.LastSync = time.Now().UTC()
 	return stateManager.Save(state)
+}
+
+// materializeWorkflow copies workflow.yaml from the rite to .claude/ACTIVE_WORKFLOW.yaml.
+// Returns nil if the rite has no workflow.yaml (non-fatal).
+func (m *Materializer) materializeWorkflow(claudeDir string, resolved *ResolvedRite) error {
+	rFS := m.riteFS(resolved)
+	content, err := fs.ReadFile(rFS, "workflow.yaml")
+	if err != nil {
+		// No workflow.yaml in this rite — not an error
+		return nil
+	}
+	dstPath := filepath.Join(claudeDir, "ACTIVE_WORKFLOW.yaml")
+	_, err = writeIfChanged(dstPath, content, 0644)
+	return err
 }
 
 // writeActiveRite writes the ACTIVE_RITE marker file.

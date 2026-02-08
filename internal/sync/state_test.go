@@ -3,6 +3,7 @@ package sync_test
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/autom8y/knossos/internal/paths"
@@ -135,6 +136,69 @@ func TestStateManager_Conflicts(t *testing.T) {
 
 	if state.HasConflicts() {
 		t.Error("expected no conflicts after RemoveConflict()")
+	}
+}
+
+func TestState_ActiveRiteField(t *testing.T) {
+	tmpDir := t.TempDir()
+	claudeDir := filepath.Join(tmpDir, ".claude")
+	if err := os.MkdirAll(claudeDir, 0755); err != nil {
+		t.Fatalf("failed to create .claude dir: %v", err)
+	}
+
+	resolver := paths.NewResolver(tmpDir)
+	manager := sync.NewStateManager(resolver)
+
+	state, err := manager.Initialize("local:hygiene")
+	if err != nil {
+		t.Fatalf("Initialize() error = %v", err)
+	}
+
+	// Set ActiveRite
+	state.ActiveRite = "hygiene"
+	if err := manager.Save(state); err != nil {
+		t.Fatalf("Save() error = %v", err)
+	}
+
+	// Reload and verify
+	loaded, err := manager.Load()
+	if err != nil {
+		t.Fatalf("Load() error = %v", err)
+	}
+
+	if loaded.ActiveRite != "hygiene" {
+		t.Errorf("ActiveRite = %q, want %q", loaded.ActiveRite, "hygiene")
+	}
+}
+
+func TestState_ActiveRiteOmittedWhenEmpty(t *testing.T) {
+	tmpDir := t.TempDir()
+	claudeDir := filepath.Join(tmpDir, ".claude")
+	if err := os.MkdirAll(claudeDir, 0755); err != nil {
+		t.Fatalf("failed to create .claude dir: %v", err)
+	}
+
+	resolver := paths.NewResolver(tmpDir)
+	manager := sync.NewStateManager(resolver)
+
+	state, err := manager.Initialize("local:none")
+	if err != nil {
+		t.Fatalf("Initialize() error = %v", err)
+	}
+
+	// Save without setting ActiveRite
+	if err := manager.Save(state); err != nil {
+		t.Fatalf("Save() error = %v", err)
+	}
+
+	// Read raw JSON and verify active_rite is absent
+	data, err := os.ReadFile(manager.StatePath())
+	if err != nil {
+		t.Fatalf("ReadFile() error = %v", err)
+	}
+
+	if strings.Contains(string(data), "active_rite") {
+		t.Error("expected active_rite to be omitted from JSON when empty")
 	}
 }
 
