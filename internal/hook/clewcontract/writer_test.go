@@ -2,6 +2,7 @@ package clewcontract
 
 import (
 	"bufio"
+	"bytes"
 	"encoding/json"
 	"os"
 	"path/filepath"
@@ -629,4 +630,68 @@ func TestBufferedEventWriter_FlushError(t *testing.T) {
 	if err := writer.FlushError(); err != nil {
 		t.Errorf("Expected no flush error after success, got: %v", err)
 	}
+}
+
+func TestSessionScopedEventIsolation(t *testing.T) {
+	// Verify that two separate session directories produce separate event files.
+	// This confirms the session-scoped design: each session writes to its own
+	// events.jsonl at .claude/sessions/<session-id>/events.jsonl.
+	tmpDir := t.TempDir()
+
+	sessionDirA := filepath.Join(tmpDir, "sessions", "session-aaa")
+	sessionDirB := filepath.Join(tmpDir, "sessions", "session-bbb")
+
+	// Write events to session A
+	writerA := NewBufferedEventWriter(sessionDirA, DefaultFlushInterval)
+	writerA.Write(NewToolCallEvent("Edit", "/file-a.go", nil))
+	writerA.Write(NewToolCallEvent("Edit", "/file-a2.go", nil))
+	if err := writerA.Close(); err != nil {
+		t.Fatalf("Close A failed: %v", err)
+	}
+
+	// Write events to session B
+	writerB := NewBufferedEventWriter(sessionDirB, DefaultFlushInterval)
+	writerB.Write(NewToolCallEvent("Write", "/file-b.go", nil))
+	if err := writerB.Close(); err != nil {
+		t.Fatalf("Close B failed: %v", err)
+	}
+
+	// Verify session A has 2 events and session B has 1 event (no interleaving)
+	eventsA, err := os.ReadFile(filepath.Join(sessionDirA, EventsFileName))
+	if err != nil {
+		t.Fatalf("Failed to read session A events: %v", err)
+	}
+	eventsB, err := os.ReadFile(filepath.Join(sessionDirB, EventsFileName))
+	if err != nil {
+		t.Fatalf("Failed to read session B events: %v", err)
+	}
+
+	linesA := countLines(eventsA)
+	linesB := countLines(eventsB)
+
+	if linesA != 2 {
+		t.Errorf("Session A: expected 2 events, got %d", linesA)
+	}
+	if linesB != 1 {
+		t.Errorf("Session B: expected 1 event, got %d", linesB)
+	}
+
+	// Verify the paths are distinct
+	pathA := filepath.Join(sessionDirA, EventsFileName)
+	pathB := filepath.Join(sessionDirB, EventsFileName)
+	if pathA == pathB {
+		t.Error("Session event file paths should be different")
+	}
+}
+
+// countLines counts non-empty lines in data.
+func countLines(data []byte) int {
+	count := 0
+	scanner := bufio.NewScanner(bytes.NewReader(data))
+	for scanner.Scan() {
+		if len(scanner.Text()) > 0 {
+			count++
+		}
+	}
+	return count
 }
