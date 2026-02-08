@@ -72,6 +72,26 @@ hooks:
     description: "Tracks tool use count for cognitive budget warnings"
 
   # ===========================================================================
+  # SubagentStart Hooks
+  # ===========================================================================
+  - event: SubagentStart
+    command: "ari hook subagent-start --output json"
+    timeout: 5
+    async: true
+    priority: 5
+    description: "Logs subagent spawn events to session clew"
+
+  # ===========================================================================
+  # SubagentStop Hooks
+  # ===========================================================================
+  - event: SubagentStop
+    command: "ari hook subagent-stop --output json"
+    timeout: 5
+    async: true
+    priority: 5
+    description: "Logs subagent completion events to session clew"
+
+  # ===========================================================================
   # UserPromptSubmit Hooks
   # ===========================================================================
   - event: UserPromptSubmit
