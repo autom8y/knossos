@@ -11,10 +11,7 @@ context: fork
 ## Context
 Auto-injected by SessionStart hook (project, team, session, git).
 
-**PR-specific**:
-- Base branch: !`git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@' || echo "main"`
-- Commits ahead: !`git rev-list --count HEAD ^origin/main 2>/dev/null || echo "unknown"`
-- Changed files: !`git diff --name-only origin/main 2>/dev/null | head -10 || echo "none"`
+Base branch is available in session context (`base_branch` field).
 
 ## Your Task
 
@@ -22,10 +19,11 @@ Create a GitHub pull request with auto-generated description. $ARGUMENTS
 
 ## Behavior
 
-1. **Analyze changes**:
-   - All commits since branch divergence
-   - Files changed
-   - Related PRD/TDD/ADR artifacts
+1. **Analyze changes** (gather fresh volatile context):
+   - Count divergent commits with `git rev-list --count HEAD ^origin/<base_branch>`
+   - List changed files with `git diff --name-only origin/<base_branch>`
+   - Review all commits since branch divergence
+   - Identify related PRD/TDD/ADR artifacts
 
 2. **Generate PR description**:
    ```markdown

@@ -11,12 +11,7 @@ context: fork
 ## Context
 Auto-injected by SessionStart hook (project, team, session, git).
 
-**Commit-specific**:
-- Staged files: !`git diff --staged --name-only 2>/dev/null | head -20 || echo "none"`
-- Unstaged changes: !`git diff --name-only 2>/dev/null | head -10 || echo "none"`
-- Untracked files: !`git ls-files --others --exclude-standard 2>/dev/null | head -10 || echo "none"`
-- Branch: !`git branch --show-current 2>/dev/null || echo "detached"`
-- Last 3 commits: !`git log --oneline -3 2>/dev/null || echo "no commits"`
+Your current branch is available in session context (`git_branch` field).
 
 ## Pre-flight
 
@@ -24,10 +19,12 @@ Auto-injected by SessionStart hook (project, team, session, git).
    - Verify in git repository
    - If not: ERROR "Not in a git repository."
 
-2. **Git state**:
-   - Check for staged changes: `git diff --cached --quiet`
-   - If no staged changes: Check for unstaged changes
-   - If neither: ERROR "Nothing to commit. Stage changes with git add first."
+2. **Git state** (gather fresh volatile context):
+   - Run `git diff --staged --name-only` to check staged files
+   - Run `git diff --name-only` to check unstaged changes
+   - Run `git ls-files --others --exclude-standard` to check untracked files
+   - Run `git log --oneline -3` to see recent commit history
+   - If no staged and no unstaged changes: ERROR "Nothing to commit. Stage changes with git add first."
 
 ## Your Task
 
