@@ -22,8 +22,8 @@ context: fork
 
 Auto-injected by SessionStart hook (project, rite, session, git).
 
-**Active rite**: !`cat .claude/ACTIVE_RITE 2>/dev/null || echo "none"`
-**Available rites**: !`ls ${KNOSSOS_HOME:-~/Code/knossos}/rites/ 2>/dev/null | tr '\n' ' '`
+The active rite is available in your session context (injected at session start via the `rite` field).
+Available rites are listed in your session context (`available_rites` field).
 
 ## Pre-flight
 

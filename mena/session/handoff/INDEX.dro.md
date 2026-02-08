@@ -11,7 +11,7 @@ context: fork
 ## Context
 Auto-injected by SessionStart hook (project, team, session, git).
 
-**Available agents**: !`ls .claude/agents/`
+Available agents are listed in your session context (`available_agents` field). If not available, run `ls .claude/agents/` to discover them.
 
 ## Your Task
 

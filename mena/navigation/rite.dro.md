@@ -11,7 +11,7 @@ context: fork
 ## Context
 Auto-injected by SessionStart hook (project, rite, session, git).
 
-**Available rites**: !`ls ${KNOSSOS_HOME:-~/Code/knossos}/rites/`
+Available rites are listed in your session context (`available_rites` field). If not available, run `ls rites/` to discover them.
 
 ## Your Task
 
