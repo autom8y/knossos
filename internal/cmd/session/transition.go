@@ -129,6 +129,18 @@ func runTransition(ctx *cmdContext, targetPhase string, opts transitionOptions) 
 		artifactsValidated = false
 	}
 
+	// Rotate SESSION_CONTEXT on phase transition to keep context compact
+	sessionDir := resolver.SessionDir(sessionID)
+	rotResult, rotErr := sess.RotateSessionContext(sessionDir, sess.DefaultMaxLines, sess.DefaultKeepLines)
+	if rotErr != nil {
+		printer.VerboseLog("warn", "failed to rotate SESSION_CONTEXT on transition", map[string]interface{}{"error": rotErr.Error()})
+	} else if rotResult.Rotated {
+		printer.VerboseLog("info", "rotated SESSION_CONTEXT on transition", map[string]interface{}{
+			"archived_lines": rotResult.ArchivedLines,
+			"kept_lines":     rotResult.KeptLines,
+		})
+	}
+
 	// Update phase
 	now := time.Now().UTC()
 	sessCtx.CurrentPhase = targetPhase

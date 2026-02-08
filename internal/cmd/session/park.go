@@ -96,6 +96,18 @@ func runPark(ctx *cmdContext, opts parkOptions) error {
 	sessCtx.ParkedAt = &now
 	sessCtx.ParkedReason = opts.reason
 
+	// Rotate SESSION_CONTEXT before parking to compact state for later resumption
+	sessionDir := resolver.SessionDir(sessionID)
+	rotResult, rotErr := session.RotateSessionContext(sessionDir, session.DefaultMaxLines, session.DefaultKeepLines)
+	if rotErr != nil {
+		printer.VerboseLog("warn", "failed to rotate SESSION_CONTEXT on park", map[string]interface{}{"error": rotErr.Error()})
+	} else if rotResult.Rotated {
+		printer.VerboseLog("info", "rotated SESSION_CONTEXT on park", map[string]interface{}{
+			"archived_lines": rotResult.ArchivedLines,
+			"kept_lines":     rotResult.KeptLines,
+		})
+	}
+
 	// Save context
 	if err := sessCtx.Save(ctxPath); err != nil {
 		printer.PrintError(err)
@@ -109,7 +121,6 @@ func runPark(ctx *cmdContext, opts parkOptions) error {
 	}
 
 	// Emit Clew Contract session_end event
-	sessionDir := resolver.SessionDir(sessionID)
 	tcWriter, err := clewcontract.NewEventWriter(sessionDir)
 	if err == nil {
 		durationMs := time.Since(sessCtx.CreatedAt).Milliseconds()
