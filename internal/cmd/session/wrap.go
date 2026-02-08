@@ -125,41 +125,40 @@ func runWrap(ctx *cmdContext, opts wrapOptions) error {
 		}
 
 		// Emit SAILS_GENERATED event to Clew Contract
-		writer, writerErr := clewcontract.NewEventWriter(sessionDir)
-		if writerErr != nil {
-			printer.VerboseLog("warn", "failed to create event writer for sails", map[string]interface{}{"error": writerErr.Error()})
-		} else {
-			// Build evidence paths from collected proofs
-			var evidencePaths *clewcontract.EvidencePaths
-			if sailsResult.Proofs != nil {
-				evidencePaths = &clewcontract.EvidencePaths{}
-				if proof, ok := sailsResult.Proofs["tests"]; ok && proof.EvidencePath != "" {
-					evidencePaths.Tests = proof.EvidencePath
-				}
-				if proof, ok := sailsResult.Proofs["build"]; ok && proof.EvidencePath != "" {
-					evidencePaths.Build = proof.EvidencePath
-				}
-				if proof, ok := sailsResult.Proofs["lint"]; ok && proof.EvidencePath != "" {
-					evidencePaths.Lint = proof.EvidencePath
-				}
-				if proof, ok := sailsResult.Proofs["adversarial"]; ok && proof.EvidencePath != "" {
-					evidencePaths.Adversarial = proof.EvidencePath
-				}
-				if proof, ok := sailsResult.Proofs["integration"]; ok && proof.EvidencePath != "" {
-					evidencePaths.Integration = proof.EvidencePath
-				}
-			}
+		sailsWriter := clewcontract.NewBufferedEventWriter(sessionDir, clewcontract.DefaultFlushInterval)
+		defer sailsWriter.Close()
 
-			sailsEvent := clewcontract.NewSailsGeneratedEvent(sessionID, clewcontract.SailsGeneratedData{
-				Color:         string(sailsResult.Color),
-				ComputedBase:  string(sailsResult.ComputedBase),
-				Reasons:       sailsResult.Reasons,
-				FilePath:      sailsResult.FilePath,
-				EvidencePaths: evidencePaths,
-			})
-			if writeErr := writer.Write(sailsEvent); writeErr != nil {
-				printer.VerboseLog("warn", "failed to emit sails event", map[string]interface{}{"error": writeErr.Error()})
+		// Build evidence paths from collected proofs
+		var evidencePaths *clewcontract.EvidencePaths
+		if sailsResult.Proofs != nil {
+			evidencePaths = &clewcontract.EvidencePaths{}
+			if proof, ok := sailsResult.Proofs["tests"]; ok && proof.EvidencePath != "" {
+				evidencePaths.Tests = proof.EvidencePath
 			}
+			if proof, ok := sailsResult.Proofs["build"]; ok && proof.EvidencePath != "" {
+				evidencePaths.Build = proof.EvidencePath
+			}
+			if proof, ok := sailsResult.Proofs["lint"]; ok && proof.EvidencePath != "" {
+				evidencePaths.Lint = proof.EvidencePath
+			}
+			if proof, ok := sailsResult.Proofs["adversarial"]; ok && proof.EvidencePath != "" {
+				evidencePaths.Adversarial = proof.EvidencePath
+			}
+			if proof, ok := sailsResult.Proofs["integration"]; ok && proof.EvidencePath != "" {
+				evidencePaths.Integration = proof.EvidencePath
+			}
+		}
+
+		sailsEvent := clewcontract.NewSailsGeneratedEvent(sessionID, clewcontract.SailsGeneratedData{
+			Color:         string(sailsResult.Color),
+			ComputedBase:  string(sailsResult.ComputedBase),
+			Reasons:       sailsResult.Reasons,
+			FilePath:      sailsResult.FilePath,
+			EvidencePaths: evidencePaths,
+		})
+		sailsWriter.Write(sailsEvent)
+		if flushErr := sailsWriter.Flush(); flushErr != nil {
+			printer.VerboseLog("warn", "failed to emit sails event", map[string]interface{}{"error": flushErr.Error()})
 		}
 	}
 
@@ -193,8 +192,9 @@ func runWrap(ctx *cmdContext, opts wrapOptions) error {
 	}
 
 	// Emit Clew Contract session_end event
-	tcWriter, err := clewcontract.NewEventWriter(sessionDir)
-	if err == nil {
+	endWriter := clewcontract.NewBufferedEventWriter(sessionDir, clewcontract.DefaultFlushInterval)
+	defer endWriter.Close()
+	{
 		durationMs := time.Since(sessCtx.CreatedAt).Milliseconds()
 
 		// Collect cognitive budget metadata if available
@@ -207,19 +207,21 @@ func runWrap(ctx *cmdContext, opts wrapOptions) error {
 			sessionEndEvent = clewcontract.NewSessionEndEvent(sessionID, "completed", durationMs)
 		}
 
-		if err := tcWriter.Write(sessionEndEvent); err != nil {
-			printer.VerboseLog("warn", "failed to emit session_end event", map[string]interface{}{"error": err.Error()})
+		endWriter.Write(sessionEndEvent)
+		if flushErr := endWriter.Flush(); flushErr != nil {
+			printer.VerboseLog("warn", "failed to emit session_end event", map[string]interface{}{"error": flushErr.Error()})
 		}
 	}
 
 	// If this was a frayed session, emit strand_resolved on parent
 	if sessCtx.FrayedFrom != "" {
 		parentDir := resolver.SessionDir(sessCtx.FrayedFrom)
-		if writer, err := clewcontract.NewEventWriter(parentDir); err == nil {
-			event := clewcontract.NewStrandResolvedEvent(sessCtx.FrayedFrom, sessionID, "wrapped")
-			if writeErr := writer.Write(event); writeErr != nil {
-				printer.VerboseLog("warn", "failed to emit strand_resolved event", map[string]interface{}{"error": writeErr.Error()})
-			}
+		strandWriter := clewcontract.NewBufferedEventWriter(parentDir, clewcontract.DefaultFlushInterval)
+		defer strandWriter.Close()
+		event := clewcontract.NewStrandResolvedEvent(sessCtx.FrayedFrom, sessionID, "wrapped")
+		strandWriter.Write(event)
+		if flushErr := strandWriter.Flush(); flushErr != nil {
+			printer.VerboseLog("warn", "failed to emit strand_resolved event", map[string]interface{}{"error": flushErr.Error()})
 		}
 	}
 

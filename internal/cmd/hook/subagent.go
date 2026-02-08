@@ -115,17 +115,13 @@ func runSubagentStartCore(ctx *cmdContext, printer *output.Printer) error {
 		},
 	}
 
-	writer, err := clewcontract.NewEventWriter(sessionDir)
-	if err != nil {
-		printer.VerboseLog("warn", "failed to create event writer",
-			map[string]interface{}{"error": err.Error()})
-		return outputSubagentResult(printer, false, "clew write failed")
-	}
+	writer := clewcontract.NewBufferedEventWriter(sessionDir, clewcontract.DefaultFlushInterval)
 	defer writer.Close()
 
-	if err := writer.Write(event); err != nil {
+	writer.Write(event)
+	if flushErr := writer.Flush(); flushErr != nil {
 		printer.VerboseLog("warn", "failed to write subagent start event",
-			map[string]interface{}{"error": err.Error()})
+			map[string]interface{}{"error": flushErr.Error()})
 		return outputSubagentResult(printer, false, "clew write failed")
 	}
 
@@ -163,17 +159,13 @@ func runSubagentStopCore(ctx *cmdContext, printer *output.Printer) error {
 		},
 	}
 
-	writer, err := clewcontract.NewEventWriter(sessionDir)
-	if err != nil {
-		printer.VerboseLog("warn", "failed to create event writer",
-			map[string]interface{}{"error": err.Error()})
-		return outputSubagentResult(printer, false, "clew write failed")
-	}
-	defer writer.Close()
+	stopWriter := clewcontract.NewBufferedEventWriter(sessionDir, clewcontract.DefaultFlushInterval)
+	defer stopWriter.Close()
 
-	if err := writer.Write(event); err != nil {
+	stopWriter.Write(event)
+	if flushErr := stopWriter.Flush(); flushErr != nil {
 		printer.VerboseLog("warn", "failed to write subagent stop event",
-			map[string]interface{}{"error": err.Error()})
+			map[string]interface{}{"error": flushErr.Error()})
 		return outputSubagentResult(printer, false, "clew write failed")
 	}
 

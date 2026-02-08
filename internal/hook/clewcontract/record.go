@@ -17,16 +17,19 @@ import (
 // The function extracts relevant information from the hook context and
 // writes an appropriate event to the session's events.jsonl file.
 func RecordToolEvent(sessionDir string, env *hook.Env, toolInput *hook.ToolInput) error {
-	writer, err := NewEventWriter(sessionDir)
-	if err != nil {
-		return err
-	}
+	writer := NewBufferedEventWriter(sessionDir, DefaultFlushInterval)
 	defer writer.Close()
 
 	// Build event based on tool type
 	event := BuildEventFromToolInput(env, toolInput)
 
-	return writer.Write(event)
+	writer.Write(event)
+
+	// Explicit flush for short-lived hook processes -- events must hit disk before exit
+	if err := writer.Flush(); err != nil {
+		return err
+	}
+	return writer.FlushError()
 }
 
 // BuildEventFromToolInput creates an Event from hook context.
@@ -130,13 +133,16 @@ func GetEventsPath(sessionDir string) string {
 // The stamp is converted to an Event with type="decision" and appended
 // to the session's events.jsonl file.
 func RecordStamp(sessionDir, decision, rationale string, rejected []string) error {
-	writer, err := NewEventWriter(sessionDir)
-	if err != nil {
-		return err
-	}
+	writer := NewBufferedEventWriter(sessionDir, DefaultFlushInterval)
 	defer writer.Close()
 
 	stamp := NewStamp(decision, rationale, rejected, nil)
 	event := stamp.ToEvent()
-	return writer.Write(event)
+	writer.Write(event)
+
+	// Explicit flush for short-lived hook processes
+	if err := writer.Flush(); err != nil {
+		return err
+	}
+	return writer.FlushError()
 }

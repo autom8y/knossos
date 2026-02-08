@@ -123,10 +123,9 @@ func runExecute(ctx *cmdContext, opts executeOptions) error {
 
 	// Emit task_start event for the receiving agent
 	sessionDir := resolver.SessionDir(sessionID)
-	tcWriter, err := clewcontract.NewEventWriter(sessionDir)
-	if err != nil {
-		printer.VerboseLog("warn", "failed to create event writer", map[string]interface{}{"error": err.Error()})
-	} else {
+	execWriter := clewcontract.NewBufferedEventWriter(sessionDir, clewcontract.DefaultFlushInterval)
+	defer execWriter.Close()
+	{
 		// Build task ID from session and agent
 		taskID := fmt.Sprintf("%s-%s", sessionID, opts.toAgent)
 		phase := targetPhase
@@ -137,17 +136,17 @@ func runExecute(ctx *cmdContext, opts executeOptions) error {
 			phase,
 			sessionID,
 		)
-		if err := tcWriter.Write(taskStartEvent); err != nil {
-			printer.VerboseLog("warn", "failed to emit task_start event", map[string]interface{}{"error": err.Error()})
-		}
+		execWriter.Write(taskStartEvent)
 
 		// Emit HANDOFF_EXECUTED event
 		// Infer fromAgent from current phase
 		fromAgent := phaseToAgent(sessCtx.CurrentPhase)
 		artifacts := []string{opts.artifactID}
 		handoffExecutedEvent := clewcontract.NewHandoffExecutedEvent(fromAgent, opts.toAgent, sessionID, artifacts)
-		if err := tcWriter.Write(handoffExecutedEvent); err != nil {
-			printer.VerboseLog("warn", "failed to emit handoff_executed event", map[string]interface{}{"error": err.Error()})
+		execWriter.Write(handoffExecutedEvent)
+
+		if flushErr := execWriter.Flush(); flushErr != nil {
+			printer.VerboseLog("warn", "failed to emit handoff events", map[string]interface{}{"error": flushErr.Error()})
 		}
 	}
 

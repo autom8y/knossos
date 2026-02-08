@@ -121,12 +121,14 @@ func runPark(ctx *cmdContext, opts parkOptions) error {
 	}
 
 	// Emit Clew Contract session_end event
-	tcWriter, err := clewcontract.NewEventWriter(sessionDir)
-	if err == nil {
+	parkWriter := clewcontract.NewBufferedEventWriter(sessionDir, clewcontract.DefaultFlushInterval)
+	defer parkWriter.Close()
+	{
 		durationMs := time.Since(sessCtx.CreatedAt).Milliseconds()
 		sessionEndEvent := clewcontract.NewSessionEndEvent(sessionID, "parked", durationMs)
-		if err := tcWriter.Write(sessionEndEvent); err != nil {
-			printer.VerboseLog("warn", "failed to emit session_end event", map[string]interface{}{"error": err.Error()})
+		parkWriter.Write(sessionEndEvent)
+		if flushErr := parkWriter.Flush(); flushErr != nil {
+			printer.VerboseLog("warn", "failed to emit session_end event", map[string]interface{}{"error": flushErr.Error()})
 		}
 	}
 

@@ -193,8 +193,9 @@ func emitFrayEvents(resolver *paths.Resolver, parentID, childID, frayPoint strin
 
 	// Emit clew session_frayed event on parent
 	parentDir := resolver.SessionDir(parentID)
-	if writer, err := clewcontract.NewEventWriter(parentDir); err == nil {
-		event := clewcontract.NewSessionFrayedEvent(parentID, childID, frayPoint)
-		writer.Write(event)
-	}
+	frayWriter := clewcontract.NewBufferedEventWriter(parentDir, clewcontract.DefaultFlushInterval)
+	defer frayWriter.Close()
+	frayEvent := clewcontract.NewSessionFrayedEvent(parentID, childID, frayPoint)
+	frayWriter.Write(frayEvent)
+	frayWriter.Flush() // Best-effort flush for fray events
 }

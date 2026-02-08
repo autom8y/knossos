@@ -186,10 +186,9 @@ func runPrepare(ctx *cmdContext, opts prepareOptions) error {
 
 	// Emit task_end event for the source agent
 	sessionDir := resolver.SessionDir(sessionID)
-	tcWriter, err := clewcontract.NewEventWriter(sessionDir)
-	if err != nil {
-		printer.VerboseLog("warn", "failed to create event writer", map[string]interface{}{"error": err.Error()})
-	} else {
+	prepWriter := clewcontract.NewBufferedEventWriter(sessionDir, clewcontract.DefaultFlushInterval)
+	defer prepWriter.Close()
+	{
 		// Build artifacts list (currently empty, could be populated from artifact registry)
 		artifacts := []string{}
 		if opts.artifactID != "" {
@@ -207,14 +206,14 @@ func runPrepare(ctx *cmdContext, opts prepareOptions) error {
 			durationMs,
 			artifacts,
 		)
-		if err := tcWriter.Write(taskEndEvent); err != nil {
-			printer.VerboseLog("warn", "failed to emit task_end event", map[string]interface{}{"error": err.Error()})
-		}
+		prepWriter.Write(taskEndEvent)
 
 		// Emit HANDOFF_PREPARED event
 		handoffPreparedEvent := clewcontract.NewHandoffPreparedEvent(opts.fromAgent, opts.toAgent, sessionID)
-		if err := tcWriter.Write(handoffPreparedEvent); err != nil {
-			printer.VerboseLog("warn", "failed to emit handoff_prepared event", map[string]interface{}{"error": err.Error()})
+		prepWriter.Write(handoffPreparedEvent)
+
+		if flushErr := prepWriter.Flush(); flushErr != nil {
+			printer.VerboseLog("warn", "failed to emit handoff events", map[string]interface{}{"error": flushErr.Error()})
 		}
 	}
 
