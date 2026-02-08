@@ -115,7 +115,7 @@ func (m *Manager) Acquire(sessionID string, lockType LockType, timeout time.Dura
 		}
 
 		// Check for stale lock
-		if m.isStale(lockPath) {
+		if m.IsStale(lockPath, false) {
 			// Force remove stale lock and retry
 			os.Remove(lockPath)
 			file.Close()
@@ -150,13 +150,12 @@ func (l *Lock) Release() error {
 	return nil
 }
 
-// isStale checks if a lock should be considered stale.
-// Strategy:
-// 1. JSON lock with acquired older than StaleThreshold → stale
-// 2. Legacy PID-only lock with dead process → stale
-// 3. Legacy PID-only lock with alive process → NOT stale
-// 4. Unparseable lock file → treat as stale
-func (m *Manager) isStale(lockPath string) bool {
+// IsStale checks if an advisory lock file should be considered stale.
+// When treatLegacyAsStale is true, all legacy PID-format locks are
+// treated as stale (suitable for recovery operations).
+// When false, legacy locks are checked for process liveness.
+// Empty lock files are always considered stale.
+func (m *Manager) IsStale(lockPath string, treatLegacyAsStale bool) bool {
 	data, err := os.ReadFile(lockPath)
 	if err != nil {
 		return false
@@ -164,7 +163,7 @@ func (m *Manager) isStale(lockPath string) bool {
 
 	content := strings.TrimSpace(string(data))
 	if content == "" {
-		return false
+		return true // Empty lock file is always stale
 	}
 
 	// Try JSON format first (v2)
@@ -175,7 +174,12 @@ func (m *Manager) isStale(lockPath string) bool {
 		return time.Since(acquired) > StaleThreshold
 	}
 
-	// Try legacy PID format
+	// Legacy PID format
+	if treatLegacyAsStale {
+		return true // Recovery mode: treat all legacy locks as stale
+	}
+
+	// Try legacy PID format with process liveness check
 	pid, err := strconv.Atoi(content)
 	if err != nil {
 		// Unparseable — treat as stale
@@ -278,13 +282,6 @@ func (m *Manager) ForceRelease(sessionID string) error {
 // LocksDir returns the locks directory path.
 func (m *Manager) LocksDir() string {
 	return m.locksDir
-}
-
-// IsStaleForTest exposes the isStale method for cross-package testing.
-// This allows the stale divergence tests to compare lock.isStale behavior
-// against recover.isLockStale behavior.
-func (m *Manager) IsStaleForTest(lockPath string) bool {
-	return m.isStale(lockPath)
 }
 
 // SessionID returns the session ID this lock is for.

@@ -371,8 +371,8 @@ func TestLockFileFormat_BackwardCompat(t *testing.T) {
 		t.Fatalf("Failed to write legacy lock: %v", err)
 	}
 
-	// isStale should detect dead PID in legacy format
-	stale := mgr.isStale(lockPath)
+	// IsStale should detect dead PID in legacy format
+	stale := mgr.IsStale(lockPath, false)
 	if !stale {
 		t.Error("Legacy lock with dead PID should be detected as stale")
 	}
@@ -401,7 +401,7 @@ func TestLockStale_AgeBased(t *testing.T) {
 		t.Fatalf("Failed to write lock file: %v", err)
 	}
 
-	if !mgr.isStale(lockPath) {
+	if !mgr.IsStale(lockPath, false) {
 		t.Error("Lock older than StaleThreshold should be stale")
 	}
 
@@ -412,7 +412,7 @@ func TestLockStale_AgeBased(t *testing.T) {
 		t.Fatalf("Failed to write lock file: %v", err)
 	}
 
-	if mgr.isStale(lockPath) {
+	if mgr.IsStale(lockPath, false) {
 		t.Error("Recent lock should NOT be stale")
 	}
 }
@@ -432,7 +432,7 @@ func TestLockStale_Unparseable(t *testing.T) {
 		t.Fatalf("Failed to write lock file: %v", err)
 	}
 
-	if !mgr.isStale(lockPath) {
+	if !mgr.IsStale(lockPath, false) {
 		t.Error("Unparseable lock file should be treated as stale")
 	}
 }

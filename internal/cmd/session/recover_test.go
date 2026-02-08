@@ -168,7 +168,7 @@ func TestStaleDivergence_LegacyPIDAlive(t *testing.T) {
 
 	// lock.Manager.isStale — CONSERVATIVE: alive PID -> NOT stale
 	lockMgr := lock.NewManager(tmpDir)
-	lockIsStale := lockMgr.IsStaleForTest(lockPath)
+	lockIsStale := lockMgr.IsStale(lockPath, false)
 	if lockIsStale {
 		t.Error("lock.isStale should return false for legacy PID with alive process (conservative)")
 	}
@@ -188,10 +188,7 @@ func TestStaleDivergence_LegacyPIDAlive(t *testing.T) {
 }
 
 func TestStaleDivergence_EmptyFile(t *testing.T) {
-	// Documents second divergence point: empty lock files.
-	//
-	// lock.isStale:     returns false (conservative — could be a partially-written lock)
-	// isLockStale:      returns true  (aggressive — empty file is garbage, clean it up)
+	// Empty lock files are stale in all contexts (stakeholder decision).
 
 	tmpDir, err := os.MkdirTemp("", "divergence-empty-test-*")
 	if err != nil {
@@ -204,17 +201,17 @@ func TestStaleDivergence_EmptyFile(t *testing.T) {
 		t.Fatalf("Failed to write lock file: %v", err)
 	}
 
-	// lock.Manager.isStale — CONSERVATIVE: empty -> NOT stale
+	// lock.Manager.IsStale — empty -> stale
 	lockMgr := lock.NewManager(tmpDir)
-	lockIsStale := lockMgr.IsStaleForTest(lockPath)
-	if lockIsStale {
-		t.Error("lock.isStale should return false for empty file (conservative)")
+	lockIsStale := lockMgr.IsStale(lockPath, false)
+	if !lockIsStale {
+		t.Error("lock.IsStale should return true for empty file")
 	}
 
-	// recover.isLockStale — AGGRESSIVE: empty -> stale
+	// recover.isLockStale — empty -> stale
 	recoverIsStale := isAdvisoryLockStale(lockPath)
 	if !recoverIsStale {
-		t.Error("recover.isLockStale should return true for empty file (aggressive)")
+		t.Error("recover.isLockStale should return true for empty file")
 	}
 }
 
@@ -243,7 +240,7 @@ func TestStaleDivergence_AgreementCases(t *testing.T) {
 			t.Fatalf("Failed to write lock file: %v", err)
 		}
 
-		if lockMgr.IsStaleForTest(lockPath) {
+		if lockMgr.IsStale(lockPath, false) {
 			t.Error("lock.isStale should return false for fresh JSON")
 		}
 		if isAdvisoryLockStale(lockPath) {
@@ -264,7 +261,7 @@ func TestStaleDivergence_AgreementCases(t *testing.T) {
 			t.Fatalf("Failed to write lock file: %v", err)
 		}
 
-		if !lockMgr.IsStaleForTest(lockPath) {
+		if !lockMgr.IsStale(lockPath, false) {
 			t.Error("lock.isStale should return true for old JSON")
 		}
 		if !isAdvisoryLockStale(lockPath) {
@@ -279,7 +276,7 @@ func TestStaleDivergence_AgreementCases(t *testing.T) {
 			t.Fatalf("Failed to write lock file: %v", err)
 		}
 
-		if !lockMgr.IsStaleForTest(lockPath) {
+		if !lockMgr.IsStale(lockPath, false) {
 			t.Error("lock.isStale should return true for dead PID")
 		}
 		if !isAdvisoryLockStale(lockPath) {

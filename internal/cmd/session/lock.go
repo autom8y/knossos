@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/autom8y/knossos/internal/errors"
+	"github.com/autom8y/knossos/internal/lock"
 )
 
 const (
@@ -16,14 +17,6 @@ const (
 	staleAfterSeconds       = 300
 	validAgent              = "moirai"
 )
-
-// MoiraiLock represents the lock file structure.
-type MoiraiLock struct {
-	Agent             string    `json:"agent"`
-	AcquiredAt        time.Time `json:"acquired_at"`
-	SessionID         string    `json:"session_id"`
-	StaleAfterSeconds int       `json:"stale_after_seconds"`
-}
 
 type lockOptions struct {
 	agent string
@@ -108,9 +101,9 @@ func runLock(ctx *cmdContext, opts lockOptions) error {
 	lockPath := filepath.Join(sessionDir, moiraiLockFilename)
 
 	// Check if lock already exists
-	if existingLock, err := readMoiraiLock(lockPath); err == nil {
+	if existingLock, err := lock.ReadMoiraiLock(lockPath); err == nil {
 		// Lock exists, check if stale
-		if !isLockStale(existingLock) {
+		if !lock.IsMoiraiLockStale(existingLock) {
 			err := errors.New(errors.CodeLifecycleViolation,
 				"lock already held by "+existingLock.Agent)
 			printer.PrintError(err)
@@ -123,7 +116,7 @@ func runLock(ctx *cmdContext, opts lockOptions) error {
 	}
 
 	// Create lock
-	lock := MoiraiLock{
+	moiraiLock := lock.MoiraiLock{
 		Agent:             opts.agent,
 		AcquiredAt:        time.Now().UTC(),
 		SessionID:         sessionID,
@@ -131,7 +124,7 @@ func runLock(ctx *cmdContext, opts lockOptions) error {
 	}
 
 	// Write lock file
-	data, err := json.MarshalIndent(lock, "", "  ")
+	data, err := json.MarshalIndent(moiraiLock, "", "  ")
 	if err != nil {
 		printer.PrintError(errors.Wrap(errors.CodeGeneralError, "failed to marshal lock", err))
 		return err
@@ -183,7 +176,7 @@ func runUnlock(ctx *cmdContext, opts lockOptions) error {
 	lockPath := filepath.Join(sessionDir, moiraiLockFilename)
 
 	// Read existing lock
-	existingLock, err := readMoiraiLock(lockPath)
+	existingLock, err := lock.ReadMoiraiLock(lockPath)
 	if err != nil {
 		if os.IsNotExist(err) {
 			err := errors.New(errors.CodeValidationFailed, "no lock exists to release")
@@ -219,24 +212,3 @@ func runUnlock(ctx *cmdContext, opts lockOptions) error {
 	return printer.PrintSuccess(result)
 }
 
-// readMoiraiLock reads and parses the Moirai lock file.
-func readMoiraiLock(lockPath string) (*MoiraiLock, error) {
-	data, err := os.ReadFile(lockPath)
-	if err != nil {
-		return nil, err
-	}
-
-	var lock MoiraiLock
-	if err := json.Unmarshal(data, &lock); err != nil {
-		return nil, err
-	}
-
-	return &lock, nil
-}
-
-// isLockStale checks if a lock is older than its stale threshold.
-func isLockStale(lock *MoiraiLock) bool {
-	age := time.Since(lock.AcquiredAt)
-	threshold := time.Duration(lock.StaleAfterSeconds) * time.Second
-	return age > threshold
-}

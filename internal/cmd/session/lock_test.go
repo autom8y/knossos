@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/autom8y/knossos/internal/cmd/common"
+	"github.com/autom8y/knossos/internal/lock"
 	"github.com/autom8y/knossos/internal/session"
 )
 
@@ -33,7 +34,7 @@ func TestLockCreation(t *testing.T) {
 	}
 
 	// Verify lock contents
-	lock, err := readMoiraiLock(lockPath)
+	lock, err := lock.ReadMoiraiLock(lockPath)
 	if err != nil {
 		t.Fatalf("failed to read lock file: %v", err)
 	}
@@ -60,13 +61,13 @@ func TestLockRemoval(t *testing.T) {
 	sessionID := td.createSession("test-unlock")
 	lockPath := filepath.Join(td.sessionDir(sessionID), moiraiLockFilename)
 
-	lock := MoiraiLock{
+	ml := lock.MoiraiLock{
 		Agent:             "moirai",
 		AcquiredAt:        time.Now().UTC(),
 		SessionID:         sessionID,
 		StaleAfterSeconds: staleAfterSeconds,
 	}
-	data, _ := json.Marshal(lock)
+	data, _ := json.Marshal(ml)
 	if err := os.WriteFile(lockPath, data, 0644); err != nil {
 		t.Fatalf("failed to create test lock: %v", err)
 	}
@@ -93,13 +94,13 @@ func TestDoubleLockError(t *testing.T) {
 	lockPath := filepath.Join(td.sessionDir(sessionID), moiraiLockFilename)
 
 	// Create existing lock
-	lock := MoiraiLock{
+	ml := lock.MoiraiLock{
 		Agent:             "moirai",
 		AcquiredAt:        time.Now().UTC(),
 		SessionID:         sessionID,
 		StaleAfterSeconds: staleAfterSeconds,
 	}
-	data, _ := json.Marshal(lock)
+	data, _ := json.Marshal(ml)
 	if err := os.WriteFile(lockPath, data, 0644); err != nil {
 		t.Fatalf("failed to create initial lock: %v", err)
 	}
@@ -121,7 +122,7 @@ func TestStaleLockDetection(t *testing.T) {
 	lockPath := filepath.Join(td.sessionDir(sessionID), moiraiLockFilename)
 
 	// Create stale lock (>300s old)
-	staleLock := MoiraiLock{
+	staleLock := lock.MoiraiLock{
 		Agent:             "moirai",
 		AcquiredAt:        time.Now().UTC().Add(-400 * time.Second),
 		SessionID:         sessionID,
@@ -141,7 +142,7 @@ func TestStaleLockDetection(t *testing.T) {
 	}
 
 	// Verify new lock has recent timestamp
-	newLock, err := readMoiraiLock(lockPath)
+	newLock, err := lock.ReadMoiraiLock(lockPath)
 	if err != nil {
 		t.Fatalf("failed to read new lock: %v", err)
 	}
@@ -174,13 +175,13 @@ func TestUnlockWithNonMoiraiLock(t *testing.T) {
 	lockPath := filepath.Join(td.sessionDir(sessionID), moiraiLockFilename)
 
 	// Create lock with different agent (simulating future multi-agent support)
-	lock := MoiraiLock{
+	ml := lock.MoiraiLock{
 		Agent:             "other",
 		AcquiredAt:        time.Now().UTC(),
 		SessionID:         sessionID,
 		StaleAfterSeconds: staleAfterSeconds,
 	}
-	data, _ := json.Marshal(lock)
+	data, _ := json.Marshal(ml)
 	if err := os.WriteFile(lockPath, data, 0644); err != nil {
 		t.Fatalf("failed to create test lock: %v", err)
 	}
