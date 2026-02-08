@@ -1,0 +1,180 @@
+package materialize
+
+import (
+	"os"
+	"path/filepath"
+	"testing"
+	"testing/fstest"
+
+	"github.com/autom8y/knossos/internal/paths"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+)
+
+func TestMaterializeRules_WipesOldKnossosRules(t *testing.T) {
+	projectDir := t.TempDir()
+	claudeDir := filepath.Join(projectDir, ".claude")
+	rulesDir := filepath.Join(claudeDir, "rules")
+	require.NoError(t, os.MkdirAll(rulesDir, 0755))
+
+	// Simulate a rule from a previous rite's templates
+	require.NoError(t, os.WriteFile(
+		filepath.Join(rulesDir, "internal-session.md"),
+		[]byte("old session rule"), 0644))
+
+	// Create templates with a different set of rules
+	templatesDir := filepath.Join(projectDir, "templates")
+	sourceRulesDir := filepath.Join(templatesDir, "rules")
+	require.NoError(t, os.MkdirAll(sourceRulesDir, 0755))
+	// internal-session.md still exists in templates (will be updated)
+	require.NoError(t, os.WriteFile(
+		filepath.Join(sourceRulesDir, "internal-session.md"),
+		[]byte("new session rule"), 0644))
+
+	resolver := paths.NewResolver(projectDir)
+	m := NewMaterializer(resolver)
+	m.templatesDir = templatesDir
+
+	err := m.materializeRules(claudeDir, nil)
+	require.NoError(t, err)
+
+	// The old rule should be replaced with new content
+	got, err := os.ReadFile(filepath.Join(rulesDir, "internal-session.md"))
+	require.NoError(t, err)
+	assert.Equal(t, "new session rule", string(got))
+}
+
+func TestMaterializeRules_PreservesUserRules(t *testing.T) {
+	projectDir := t.TempDir()
+	claudeDir := filepath.Join(projectDir, ".claude")
+	rulesDir := filepath.Join(claudeDir, "rules")
+	require.NoError(t, os.MkdirAll(rulesDir, 0755))
+
+	// User-created rule (not in templates)
+	require.NoError(t, os.WriteFile(
+		filepath.Join(rulesDir, "my-custom-rule.md"),
+		[]byte("user rule content"), 0644))
+
+	// Template rule
+	require.NoError(t, os.WriteFile(
+		filepath.Join(rulesDir, "internal-agent.md"),
+		[]byte("old agent rule"), 0644))
+
+	// Create templates
+	templatesDir := filepath.Join(projectDir, "templates")
+	sourceRulesDir := filepath.Join(templatesDir, "rules")
+	require.NoError(t, os.MkdirAll(sourceRulesDir, 0755))
+	require.NoError(t, os.WriteFile(
+		filepath.Join(sourceRulesDir, "internal-agent.md"),
+		[]byte("new agent rule"), 0644))
+
+	resolver := paths.NewResolver(projectDir)
+	m := NewMaterializer(resolver)
+	m.templatesDir = templatesDir
+
+	err := m.materializeRules(claudeDir, nil)
+	require.NoError(t, err)
+
+	// User rule should survive
+	got, err := os.ReadFile(filepath.Join(rulesDir, "my-custom-rule.md"))
+	require.NoError(t, err)
+	assert.Equal(t, "user rule content", string(got))
+
+	// Template rule should be updated
+	got, err = os.ReadFile(filepath.Join(rulesDir, "internal-agent.md"))
+	require.NoError(t, err)
+	assert.Equal(t, "new agent rule", string(got))
+}
+
+func TestMaterializeRules_RemovesStaleTemplateRule(t *testing.T) {
+	projectDir := t.TempDir()
+	claudeDir := filepath.Join(projectDir, ".claude")
+	rulesDir := filepath.Join(claudeDir, "rules")
+	require.NoError(t, os.MkdirAll(rulesDir, 0755))
+
+	// Old template rule that no longer has a template source
+	require.NoError(t, os.WriteFile(
+		filepath.Join(rulesDir, "mena.md"),
+		[]byte("old mena rule"), 0644))
+
+	// Templates directory has mena.md as a known template name
+	templatesDir := filepath.Join(projectDir, "templates")
+	sourceRulesDir := filepath.Join(templatesDir, "rules")
+	require.NoError(t, os.MkdirAll(sourceRulesDir, 0755))
+	require.NoError(t, os.WriteFile(
+		filepath.Join(sourceRulesDir, "mena.md"),
+		[]byte("updated mena rule"), 0644))
+
+	resolver := paths.NewResolver(projectDir)
+	m := NewMaterializer(resolver)
+	m.templatesDir = templatesDir
+
+	err := m.materializeRules(claudeDir, nil)
+	require.NoError(t, err)
+
+	got, err := os.ReadFile(filepath.Join(rulesDir, "mena.md"))
+	require.NoError(t, err)
+	assert.Equal(t, "updated mena rule", string(got))
+}
+
+func TestMaterializeRules_Idempotent(t *testing.T) {
+	projectDir := t.TempDir()
+	claudeDir := filepath.Join(projectDir, ".claude")
+	require.NoError(t, os.MkdirAll(filepath.Join(claudeDir, "rules"), 0755))
+
+	templatesDir := filepath.Join(projectDir, "templates")
+	sourceRulesDir := filepath.Join(templatesDir, "rules")
+	require.NoError(t, os.MkdirAll(sourceRulesDir, 0755))
+	require.NoError(t, os.WriteFile(
+		filepath.Join(sourceRulesDir, "internal-session.md"),
+		[]byte("session rule"), 0644))
+
+	resolver := paths.NewResolver(projectDir)
+	m := NewMaterializer(resolver)
+	m.templatesDir = templatesDir
+
+	// Run twice
+	require.NoError(t, m.materializeRules(claudeDir, nil))
+	require.NoError(t, m.materializeRules(claudeDir, nil))
+
+	// Same output
+	got, err := os.ReadFile(filepath.Join(claudeDir, "rules", "internal-session.md"))
+	require.NoError(t, err)
+	assert.Equal(t, "session rule", string(got))
+
+	// Only the template rule exists
+	entries, err := os.ReadDir(filepath.Join(claudeDir, "rules"))
+	require.NoError(t, err)
+	assert.Len(t, entries, 1)
+}
+
+func TestMaterializeRules_EmbeddedSource(t *testing.T) {
+	projectDir := t.TempDir()
+	claudeDir := filepath.Join(projectDir, ".claude")
+	require.NoError(t, os.MkdirAll(filepath.Join(claudeDir, "rules"), 0755))
+
+	embeddedTemplates := fstest.MapFS{
+		"rules/internal-agent.md": &fstest.MapFile{Data: []byte("embedded agent rule")},
+		"rules/mena.md":           &fstest.MapFile{Data: []byte("embedded mena rule")},
+	}
+
+	resolver := paths.NewResolver(projectDir)
+	m := NewMaterializer(resolver).WithEmbeddedTemplates(embeddedTemplates)
+
+	resolved := &ResolvedRite{
+		RitePath:     "rites/test",
+		TemplatesDir: ".",
+		Source:       RiteSource{Type: SourceEmbedded, Path: "embedded"},
+	}
+
+	err := m.materializeRules(claudeDir, resolved)
+	require.NoError(t, err)
+
+	got, err := os.ReadFile(filepath.Join(claudeDir, "rules", "internal-agent.md"))
+	require.NoError(t, err)
+	assert.Equal(t, "embedded agent rule", string(got))
+
+	got, err = os.ReadFile(filepath.Join(claudeDir, "rules", "mena.md"))
+	require.NoError(t, err)
+	assert.Equal(t, "embedded mena rule", string(got))
+}

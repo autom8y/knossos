@@ -889,15 +889,19 @@ func (m *Materializer) getMenaDir() string {
 }
 
 // materializeRules copies rule files from templates/rules to .claude/rules/
-// Platform rules (internal-*.md, mena.md) are overwritten from templates.
-// User-created rules (other .md files) are preserved.
+// Platform rules are overwritten from templates; user-created rules are preserved.
+// On rite switch, stale knossos-managed rules are removed before writing new ones.
+// Provenance is determined by template filename: any .md file whose name matches
+// a template source file is knossos-managed; all others are user-created.
 func (m *Materializer) materializeRules(claudeDir string, resolved *ResolvedRite) error {
 	rulesDir := filepath.Join(claudeDir, "rules")
 	if err := paths.EnsureDir(rulesDir); err != nil {
 		return err
 	}
 
-	// For embedded sources, try embedded templates FS
+	// Collect template rule names and content from appropriate source
+	templateRules := make(map[string][]byte)
+
 	if resolved != nil && resolved.Source.Type == SourceEmbedded && m.embeddedTemplates != nil {
 		tFS := m.templatesFS(resolved)
 		if _, err := fs.Stat(tFS, "rules"); err != nil {
@@ -905,7 +909,7 @@ func (m *Materializer) materializeRules(claudeDir string, resolved *ResolvedRite
 		}
 		entries, err := fs.ReadDir(tFS, "rules")
 		if err != nil {
-			return nil // Path doesn't exist
+			return nil
 		}
 		for _, entry := range entries {
 			if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".md") {
@@ -915,39 +919,62 @@ func (m *Materializer) materializeRules(claudeDir string, resolved *ResolvedRite
 			if err != nil {
 				return err
 			}
-			dstPath := filepath.Join(rulesDir, entry.Name())
-			_, err = writeIfChanged(dstPath, content, 0644)
+			templateRules[entry.Name()] = content
+		}
+	} else {
+		sourceRulesDir := filepath.Join(m.templatesDir, "rules")
+		entries, err := os.ReadDir(sourceRulesDir)
+		if err != nil {
+			if os.IsNotExist(err) {
+				return nil // No template rules = no-op
+			}
+			return err
+		}
+		for _, entry := range entries {
+			if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".md") {
+				continue
+			}
+			content, err := os.ReadFile(filepath.Join(sourceRulesDir, entry.Name()))
 			if err != nil {
 				return err
 			}
+			templateRules[entry.Name()] = content
 		}
-		return nil
 	}
 
-	// Filesystem path: templates/rules/
-	sourceRulesDir := filepath.Join(m.templatesDir, "rules")
-
-	// Check if templates/rules exists
-	entries, err := os.ReadDir(sourceRulesDir)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return nil // No template rules = no-op
+	// Also collect template names from the filesystem templates dir (for the
+	// provenance check even when using embedded sources). This ensures we know
+	// all possible knossos-managed filenames across sources.
+	allTemplateNames := make(map[string]bool)
+	for name := range templateRules {
+		allTemplateNames[name] = true
+	}
+	if fsRulesDir := filepath.Join(m.templatesDir, "rules"); fsRulesDir != "" {
+		if entries, err := os.ReadDir(fsRulesDir); err == nil {
+			for _, entry := range entries {
+				if !entry.IsDir() && strings.HasSuffix(entry.Name(), ".md") {
+					allTemplateNames[entry.Name()] = true
+				}
+			}
 		}
-		return err
 	}
 
-	// Copy each template rule file using writeIfChanged for idempotency
-	for _, entry := range entries {
-		if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".md") {
-			continue
+	// Remove stale knossos-managed rules (names matching any template source)
+	if existingRules, err := os.ReadDir(rulesDir); err == nil {
+		for _, entry := range existingRules {
+			if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".md") {
+				continue
+			}
+			if allTemplateNames[entry.Name()] {
+				os.Remove(filepath.Join(rulesDir, entry.Name()))
+			}
 		}
-		content, err := os.ReadFile(filepath.Join(sourceRulesDir, entry.Name()))
-		if err != nil {
-			return err
-		}
-		dstPath := filepath.Join(rulesDir, entry.Name())
-		_, err = writeIfChanged(dstPath, content, 0644)
-		if err != nil {
+	}
+
+	// Write current template rules
+	for name, content := range templateRules {
+		dstPath := filepath.Join(rulesDir, name)
+		if _, err := writeIfChanged(dstPath, content, 0644); err != nil {
 			return err
 		}
 	}
