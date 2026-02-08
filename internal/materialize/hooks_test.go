@@ -462,3 +462,37 @@ func TestLoadHooksConfig_NoFile(t *testing.T) {
 		t.Error("Expected nil when no hooks.yaml exists")
 	}
 }
+
+func TestBuildHooksSettings_IncludesAsync(t *testing.T) {
+	cfg := &HooksConfig{
+		SchemaVersion: "2.0",
+		Hooks: []HookEntry{
+			{Event: "PostToolUse", Command: "ari hook clew --output json", Async: true},
+		},
+	}
+
+	hooks := buildHooksSettings(cfg)
+	postToolUse := hooks["PostToolUse"].([]map[string]any)
+	hooksArr := postToolUse[0]["hooks"].([]map[string]any)
+
+	if hooksArr[0]["async"] != true {
+		t.Errorf("async = %v, want true", hooksArr[0]["async"])
+	}
+}
+
+func TestBuildHooksSettings_OmitsAsyncWhenFalse(t *testing.T) {
+	cfg := &HooksConfig{
+		SchemaVersion: "2.0",
+		Hooks: []HookEntry{
+			{Event: "PreToolUse", Command: "ari hook writeguard --output json", Async: false},
+		},
+	}
+
+	hooks := buildHooksSettings(cfg)
+	preToolUse := hooks["PreToolUse"].([]map[string]any)
+	hooksArr := preToolUse[0]["hooks"].([]map[string]any)
+
+	if _, exists := hooksArr[0]["async"]; exists {
+		t.Errorf("async field should not exist when false, got %v", hooksArr[0]["async"])
+	}
+}

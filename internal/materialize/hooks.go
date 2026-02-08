@@ -23,6 +23,7 @@ type HookEntry struct {
 	Matcher     string `yaml:"matcher,omitempty"`
 	Command     string `yaml:"command"`
 	Timeout     int    `yaml:"timeout,omitempty"`
+	Async       bool   `yaml:"async,omitempty"`
 	Priority    int    `yaml:"priority,omitempty"`
 	Description string `yaml:"description,omitempty"`
 }
@@ -120,6 +121,9 @@ func buildHooksSettings(cfg *HooksConfig) map[string]any {
 			}
 			if entry.Timeout > 0 {
 				hookHandler["timeout"] = entry.Timeout
+			}
+			if entry.Async {
+				hookHandler["async"] = true
 			}
 
 			matcherGroup := map[string]any{
