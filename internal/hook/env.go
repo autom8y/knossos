@@ -188,16 +188,6 @@ func (e *Env) IsPostToolUse() bool {
 	return e.Event == EventPostToolUse
 }
 
-// IsPostToolUseFailure returns true if this is a PostToolUseFailure event.
-func (e *Env) IsPostToolUseFailure() bool {
-	return e.Event == EventPostToolUseFailure
-}
-
-// IsPermissionRequest returns true if this is a PermissionRequest event.
-func (e *Env) IsPermissionRequest() bool {
-	return e.Event == EventPermissionRequest
-}
-
 // IsStop returns true if this is a Stop event.
 func (e *Env) IsStop() bool {
 	return e.Event == EventStop
@@ -208,11 +198,6 @@ func (e *Env) IsSessionStart() bool {
 	return e.Event == EventSessionStart
 }
 
-// IsSessionEnd returns true if this is a SessionEnd event.
-func (e *Env) IsSessionEnd() bool {
-	return e.Event == EventSessionEnd
-}
-
 // IsPreCompact returns true if this is a PreCompact event.
 func (e *Env) IsPreCompact() bool {
 	return e.Event == EventPreCompact
@@ -221,26 +206,6 @@ func (e *Env) IsPreCompact() bool {
 // IsSubagentStart returns true if this is a SubagentStart event.
 func (e *Env) IsSubagentStart() bool {
 	return e.Event == EventSubagentStart
-}
-
-// IsSubagentStop returns true if this is a SubagentStop event.
-func (e *Env) IsSubagentStop() bool {
-	return e.Event == EventSubagentStop
-}
-
-// IsNotification returns true if this is a Notification event.
-func (e *Env) IsNotification() bool {
-	return e.Event == EventNotification
-}
-
-// IsTeammateIdle returns true if this is a TeammateIdle event.
-func (e *Env) IsTeammateIdle() bool {
-	return e.Event == EventTeammateIdle
-}
-
-// IsTaskCompleted returns true if this is a TaskCompleted event.
-func (e *Env) IsTaskCompleted() bool {
-	return e.Event == EventTaskCompleted
 }
 
 // HasTool returns true if tool information is available.

@@ -168,12 +168,6 @@ func checkFailureRepeat(eventsPath string, currentEvent Event) TriggerResult {
 func checkFileCount(eventsPath string, currentEvent Event, threshold int) TriggerResult {
 	count := CountUniqueFiles(eventsPath)
 
-	// Include current event's path if it's a write operation
-	if currentEvent.Path != "" && (currentEvent.Tool == "Edit" || currentEvent.Tool == "Write") {
-		// The count already includes files from events.jsonl
-		// We just need to check against threshold
-	}
-
 	if count >= threshold {
 		return TriggerResult{
 			Triggered: true,

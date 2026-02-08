@@ -3,7 +3,6 @@ package hook
 import (
 	"encoding/json"
 	"io"
-	"os"
 
 	"github.com/autom8y/knossos/internal/errors"
 )
@@ -66,21 +65,6 @@ func ParseToolInputFromReader(r io.Reader) (*ToolInput, error) {
 	return ParseToolInputBytes(data)
 }
 
-// ParseToolInputFromStdin parses JSON tool input from stdin.
-func ParseToolInputFromStdin() (*ToolInput, error) {
-	// Check if there's data on stdin
-	stat, err := os.Stdin.Stat()
-	if err != nil {
-		return &ToolInput{}, nil
-	}
-
-	// If stdin is a terminal (no pipe), return empty input
-	if (stat.Mode() & os.ModeCharDevice) != 0 {
-		return &ToolInput{}, nil
-	}
-
-	return ParseToolInputFromReader(os.Stdin)
-}
 
 // Get returns a field value by key from the parsed data.
 func (t *ToolInput) Get(key string) interface{} {
@@ -131,14 +115,6 @@ func (t *ToolInput) GetMap(key string) map[string]interface{} {
 	return nil
 }
 
-// GetSlice returns a slice field value by key.
-func (t *ToolInput) GetSlice(key string) []interface{} {
-	val := t.Get(key)
-	if s, ok := val.([]interface{}); ok {
-		return s
-	}
-	return nil
-}
 
 // GetEffectivePath returns the most likely path field from tool input.
 // Different tools use different field names for paths.
