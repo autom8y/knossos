@@ -1,6 +1,6 @@
 ---
 name: debt-ref
-description: "Quick switch to debt-triage (technical debt management). Use when: inventorying technical debt, prioritizing remediation, planning debt paydown sprints, assessing codebase health. Triggers: /debt, debt team, debt triage, debt planning, technical debt."
+description: "Switch to debt-triage (technical debt management). Triggers: /debt, debt team, debt triage, debt planning, technical debt."
 ---
 
 # /debt - Quick Switch to Technical Debt Team

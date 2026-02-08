@@ -1,6 +1,6 @@
 ---
 name: rnd-ref
-description: "Innovation Lab (R&D) reference with technology scouting, prototyping, and moonshot architecture workflows. Use when: learning about rnd agents, understanding the innovation workflow, invoking R&D agents. Triggers: rnd, innovation lab, technology-scout, integration-researcher, prototype-engineer, moonshot-architect."
+description: "Innovation Lab (R&D) team reference. Triggers: rnd, innovation lab, technology-scout, prototype-engineer, moonshot-architect."
 ---
 
 # Innovation Lab (rnd)

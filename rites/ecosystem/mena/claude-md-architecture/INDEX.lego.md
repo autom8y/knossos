@@ -1,6 +1,6 @@
 ---
 name: claude-md-architecture
-description: "First principles for CLAUDE.md architecture. Use when: modifying CLAUDE.md content, deciding CEM sync behavior, determining content placement, validating CLAUDE.md changes. Triggers: CLAUDE.md architecture, CLAUDE.md sync, CLAUDE.md content placement, CLAUDE.md section ownership, CLAUDE.md behavioral contract, CLAUDE.md vs SESSION_CONTEXT, CLAUDE.md anti-patterns, CLAUDE.md validation."
+description: "CLAUDE.md architecture first principles. Triggers: CLAUDE.md architecture, CLAUDE.md sync, content placement, section ownership."
 ---
 
 # CLAUDE.md Architecture

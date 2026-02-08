@@ -1,6 +1,6 @@
 ---
 name: docs-ref
-description: "Quick switch to docs (documentation workflow). Use when: creating API documentation, writing README files, structuring documentation, auditing doc quality. Triggers: /docs, documentation team, doc workflow, tech writing."
+description: "Switch to docs (documentation workflow). Triggers: /docs, documentation team, doc workflow, tech writing."
 ---
 
 # /docs - Quick Switch to Documentation Team

@@ -1,6 +1,6 @@
 ---
 name: 10x-workflow
-description: "10x agentic workflow coordination. Use when: routing work between agents, understanding PRD-TDD-Code pipeline, coordinating handoffs, applying workflow rules, managing quality gates. Triggers: workflow, agent coordination, handoff, pipeline, phase transition, orchestration, sequential workflow, feedback loops."
+description: "10x workflow coordination and agent routing. Triggers: workflow, agent coordination, handoff, pipeline, phase transition, orchestration."
 ---
 
 # 10x Agentic Workflow

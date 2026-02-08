@@ -1,6 +1,6 @@
 ---
 name: agent-prompt-engineering
-description: "Standards for writing effective agent prompts. Use when: creating new agents, optimizing system prompts, auditing quality, debugging agent behavior. Triggers: agent prompt, system prompt engineering, agent template, system prompt quality, system prompt improvement, prompt rubric, prompt review, prompt checklist, prompt optimization, agent debugging, system prompt audit, agent design, writing agents."
+description: "Agent prompt engineering standards. Triggers: agent prompt, system prompt engineering, prompt rubric, prompt optimization, agent design."
 ---
 
 # Agent Prompt Engineering

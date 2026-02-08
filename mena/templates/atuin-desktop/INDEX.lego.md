@@ -1,6 +1,6 @@
 ---
 name: atuin-desktop
-description: "Atuin Desktop .atrb runbook file format, generation, and validation. Use when: creating runbooks, editing .atrb files, converting markdown to runbook format, validating runbook YAML structure. Triggers: atrb, runbook, Atuin Desktop, runbook file, .atrb format, runbook generation, runbook validation, markdown to runbook, script block, terminal block, var block."
+description: "Atuin Desktop .atrb runbook format and validation. Triggers: atrb, runbook, Atuin Desktop, .atrb format, runbook generation, runbook validation."
 ---
 
 # Atuin Desktop Runbooks (.atrb)

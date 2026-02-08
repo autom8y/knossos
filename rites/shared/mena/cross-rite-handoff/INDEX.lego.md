@@ -1,6 +1,6 @@
 ---
 name: cross-rite-handoff
-description: "HANDOFF artifact schema for cross-rite work transfer. Use when: work crosses rite boundaries, specialist review required, formal handoff needed. Triggers: cross-rite, handoff artifact, rite transfer, work handoff."
+description: "Cross-rite HANDOFF artifact schema. Triggers: cross-rite, handoff artifact, rite transfer, work handoff."
 ---
 
 # Cross-Rite Handoff Skill

@@ -1,6 +1,6 @@
 ---
 name: sre-ref
-description: "Quick switch to sre (reliability workflow). Use when: improving observability, coordinating incident response, building platform infrastructure, running chaos experiments. Triggers: /sre, reliability team, SRE workflow, observability, chaos engineering."
+description: "Switch to SRE (reliability workflow). Triggers: /sre, reliability team, SRE workflow, observability, chaos engineering."
 ---
 
 # /sre - Quick Switch to Reliability Team

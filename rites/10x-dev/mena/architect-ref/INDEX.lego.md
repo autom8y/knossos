@@ -1,6 +1,6 @@
 ---
 name: architect-ref
-description: "Design-only session producing TDD and ADRs without implementation. Use when: planning architecture before coding, getting design approval, documenting technical decisions, designing complex systems. Triggers: /architect, design session, architecture planning, technical design."
+description: "Design-only session producing TDD and ADRs. Triggers: /architect, design session, architecture planning, technical design."
 ---
 
 # /architect - Design-Only Session

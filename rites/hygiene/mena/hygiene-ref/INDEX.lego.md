@@ -1,6 +1,6 @@
 ---
 name: hygiene-ref
-description: "Quick switch to hygiene (code quality workflow). Use when: detecting code smells, enforcing architecture compliance, executing refactoring, running quality audits. Triggers: /hygiene, code quality, refactoring team, quality audit, code cleanup."
+description: "Switch to hygiene (code quality workflow). Triggers: /hygiene, code quality, refactoring team, quality audit, code cleanup."
 ---
 
 # /hygiene - Quick Switch to Code Hygiene Team

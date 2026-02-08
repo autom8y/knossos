@@ -1,6 +1,6 @@
 ---
 name: doc-security
-description: "Security-pack templates for threat modeling, compliance, penetration testing, and security reviews. Use when: conducting threat analysis, mapping compliance controls, documenting penetration tests, providing security signoffs. Triggers: threat model, STRIDE, DREAD, compliance requirements, SOC 2, GDPR, HIPAA, pentest, penetration test, security review, security signoff."
+description: "Security templates: threat modeling, compliance, pentesting. Triggers: threat model, STRIDE, compliance, SOC 2, GDPR, pentest, security review."
 ---
 
 # Security Documentation Templates

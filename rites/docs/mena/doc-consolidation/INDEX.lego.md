@@ -1,6 +1,6 @@
 ---
 name: doc-consolidation
-description: "Documentation consolidation workflow schemas. Use when: consolidating fragmented docs, building extraction artifacts, managing checkpoints, or creating file manifests. Triggers: consolidation, extraction, checkpoint, manifest, synthesis, topic mapping, staleness detection."
+description: "Doc consolidation schemas. Triggers: consolidation, extraction, checkpoint, manifest, synthesis, staleness detection."
 ---
 
 # Documentation Consolidation Workflow

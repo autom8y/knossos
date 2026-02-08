@@ -1,6 +1,6 @@
 ---
 name: doc-rnd
-description: "R&D-pack templates for technology assessment, integration research, prototyping, and moonshot planning. Use when: evaluating new technologies, mapping integration requirements, documenting prototypes, planning long-term architecture. Triggers: tech assessment, technology scout, integration map, prototype documentation, moonshot plan, future architecture, migration path."
+description: "R&D templates: tech assessment, prototyping, moonshot planning. Triggers: tech assessment, technology scout, prototype, moonshot plan, migration path."
 ---
 
 # R&D Documentation Templates

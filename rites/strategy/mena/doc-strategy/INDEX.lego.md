@@ -1,6 +1,6 @@
 ---
 name: doc-strategy
-description: "Strategy-pack templates for roadmaps, competitive intelligence, market analysis, and financial modeling. Use when: creating strategic roadmaps, analyzing competitors, sizing markets, modeling business economics. Triggers: strategic roadmap, prioritization, OKR, competitive analysis, market sizing, TAM/SAM/SOM, unit economics, financial model, pricing analysis."
+description: "Strategy templates: roadmaps, competitive analysis, financial modeling. Triggers: strategic roadmap, OKR, competitive analysis, market sizing."
 ---
 
 # Strategy Document Templates

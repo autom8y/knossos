@@ -1,6 +1,6 @@
 ---
 name: shared-templates
-description: "Multi-team document templates for debt-ledger, risk-matrix, and sprint-debt-package artifacts. Use when: creating debt triage artifacts, producing consistent handoff documents, or validating artifact structure. Triggers: debt ledger, risk matrix, sprint package, debt template, triage template."
+description: "Shared templates: debt-ledger, risk-matrix, sprint-debt. Triggers: debt ledger, risk matrix, sprint package, triage template."
 ---
 
 # Shared Templates

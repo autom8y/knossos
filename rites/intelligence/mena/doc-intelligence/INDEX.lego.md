@@ -1,6 +1,6 @@
 ---
 name: doc-intelligence
-description: "Intelligence-pack templates for user research, experimentation, and insights synthesis. Use when: conducting user research, designing experiments, synthesizing product insights. Triggers: research findings, user interview, usability test, experiment design, A/B test, sample size, insights report, product analytics."
+description: "User research, experimentation, and insights templates. Triggers: research findings, user interview, experiment design, A/B test, insights report."
 ---
 
 # Intelligence Templates

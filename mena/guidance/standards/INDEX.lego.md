@@ -1,6 +1,6 @@
 ---
 name: standards
-description: "Code conventions, tech stack, repository structure, tool selection. Use when: writing code, choosing libraries, organizing files, checking naming, selecting tools. Triggers: code conventions, tech stack, repository structure, where does code go, naming conventions, import order, test structure, which tool, native vs shell, Grep vs rg, file operations, tool selection."
+description: "Code conventions, tech stack, and tool selection. Triggers: code conventions, tech stack, naming conventions, tool selection, file operations."
 ---
 
 # Standards & Conventions

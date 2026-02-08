@@ -1,6 +1,6 @@
 ---
 name: doc-ecosystem
-description: "Ecosystem and hygiene templates for CEM sync, migration, compatibility, and code quality workflows. Use when: planning CEM migrations, validating compatibility across satellites, analyzing code smells, designing refactoring sequences, or documenting system-level changes. Triggers: gap analysis, context design, migration runbook, compatibility report, smell report, refactoring plan, CEM sync, satellite migration, code cleanup."
+description: "CEM sync, migration, and compatibility templates. Triggers: gap analysis, context design, migration runbook, compatibility report, CEM sync."
 ---
 
 # Documentation: Ecosystem & Hygiene

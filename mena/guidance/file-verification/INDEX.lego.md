@@ -1,6 +1,6 @@
 ---
 name: file-verification
-description: "Anti-hallucination verification protocol for file operations with post-write verification and path anchoring. Use when writing files, creating artifacts, or ensuring write operations succeed. Triggers: file verification, write verification, artifact check, path anchoring, post-write check, confirm file exists, validate artifact."
+description: "File write verification protocol with path anchoring. Triggers: file verification, write verification, artifact check, post-write check."
 ---
 
 # File Verification Protocol

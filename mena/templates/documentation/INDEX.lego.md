@@ -1,6 +1,6 @@
 ---
 name: documentation
-description: "Documentation standards routing hub. Routes to domain-specific template skills. Use when: choosing documentation approach, understanding doc standards. Triggers: documentation, doc standards, which template, documentation routing."
+description: "Doc standards routing hub. Triggers: documentation, doc standards, which template, documentation routing."
 ---
 
 # Documentation Standards & Templates

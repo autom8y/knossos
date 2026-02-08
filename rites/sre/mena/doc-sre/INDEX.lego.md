@@ -1,6 +1,6 @@
 ---
 name: doc-sre
-description: "SRE, reliability, and analytics templates for observability, incidents, and chaos engineering workflows. Use when: planning reliability improvements, documenting incidents, conducting chaos experiments, analyzing observability gaps, planning analytics tracking. Triggers: observability, reliability, postmortem, incident, chaos experiment, chaos engineering, tracking plan, analytics, SLO, SLI, MTTR. Note: Technical debt templates (debt ledger, risk matrix, sprint debt) moved to @shared-templates."
+description: "SRE templates: observability, incidents, chaos engineering. Triggers: observability, reliability, postmortem, incident, chaos engineering, SLO, MTTR."
 ---
 
 # SRE & Analytics Documentation Templates

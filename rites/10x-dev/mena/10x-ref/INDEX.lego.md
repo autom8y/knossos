@@ -1,6 +1,6 @@
 ---
 name: 10x-ref
-description: "Quick switch to 10x-dev (full development workflow). Use when: starting feature development, needing full PRD-TDD-Code-QA pipeline, switching from specialized team to general development. Triggers: /10x, development team, dev workflow, full stack team."
+description: "Switch to 10x-dev (full PRD-TDD-Code-QA pipeline). Triggers: /10x, development team, dev workflow, full stack team."
 ---
 
 # /10x - Quick Switch to Development Team

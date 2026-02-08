@@ -1,6 +1,6 @@
 ---
 name: justfile
-description: "Task automation with just command runner. Use when: creating justfiles, writing task recipes, organizing project commands, setting up dev/test/build automation, CI task orchestration. Triggers: justfile, just, task runner, make alternative, Makefile replacement, npm scripts alternative, cross-platform build, project commands, dev tasks, build automation, ci recipes, task dependencies."
+description: "Justfile task automation patterns. Triggers: justfile, just, task runner, make alternative, build automation, ci recipes, task dependencies."
 ---
 
 # Justfile Task Automation

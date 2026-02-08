@@ -1,6 +1,6 @@
 ---
 name: session-shared
-description: "Session resolution, workflow resolution, and Moirai invocation patterns. Use when: implementing session command pre-flight validation, delegating to Moirai, or resolving active sessions. Triggers: session resolution, moirai invocation, session pre-flight, workflow resolution."
+description: "Session and workflow resolution patterns. Triggers: session resolution, moirai invocation, session pre-flight, workflow resolution."
 ---
 
 # Session-Lifecycle Shared Sections

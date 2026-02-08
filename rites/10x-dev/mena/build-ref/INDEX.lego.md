@@ -1,6 +1,6 @@
 ---
 name: build-ref
-description: "Implementation-only session from approved TDD. Use when: TDD has been approved and ready to code, following up after /architect session, implementing from existing design. Triggers: /build, implement design, code from TDD, build approved design."
+description: "Implementation session from approved TDD. Triggers: /build, implement design, code from TDD, build approved design."
 ---
 
 # /build - Implementation-Only Session

@@ -1,6 +1,6 @@
 ---
 name: moirai-fates
-description: "Moirai operation routing table mapping session lifecycle operations to Fate domains (Clotho/Lachesis/Atropos). Use when: Moirai agent needs to determine which Fate skill to load for a given operation. Triggers: moirai routing, fate lookup, operation dispatch, session operation."
+description: "Moirai routing table for Fate domains (Clotho/Lachesis/Atropos). Triggers: moirai routing, fate lookup, operation dispatch, session operation."
 ---
 
 # Moirai Fates Routing Table
@@ -11,9 +11,8 @@ description: "Moirai operation routing table mapping session lifecycle operation
 
 | Operation | Fate | Domain | CLI Command |
 |-----------|------|--------|-------------|
-| create_sprint | Clotho | Creation | — |
-| start_sprint | Clotho | Creation | — |
-| mark_complete | Lachesis | Measurement | — |
+| create_sprint | Clotho | Creation | `ari session sprint create "{goal}" [--task "t1"]` |
+| mark_complete | Lachesis | Measurement | `ari session sprint mark-complete [sprint-id]` |
 | transition_phase | Lachesis | Measurement | `ari session transition --to={phase}` |
 | update_field | Lachesis | Measurement | — |
 | park_session | Lachesis | Measurement | `ari session park --reason="{reason}"` |
@@ -23,7 +22,7 @@ description: "Moirai operation routing table mapping session lifecycle operation
 | append_content | Lachesis | Measurement | — |
 | wrap_session | Atropos | Termination | `ari session wrap` |
 | generate_sails | Atropos | Termination | `ari sails check` |
-| delete_sprint | Atropos | Termination | — |
+| delete_sprint | Atropos | Termination | `ari session sprint delete {sprint-id}` |
 
 ## Loading Protocol
 

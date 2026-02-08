@@ -1,6 +1,6 @@
 ---
 name: smell-detection
-description: "Cross-rite code smell detection patterns with severity classification and debt integration. Use when: detecting code quality issues, cataloging smells for reports or debt ledgers, classifying smell severity. Triggers: smell detection, code smell, dead code, duplication, complexity, naming, imports, architecture smell, process smell, smell taxonomy, severity classification."
+description: "Code smell detection with severity classification. Triggers: smell detection, code smell, dead code, duplication, complexity."
 ---
 
 # smell-detection

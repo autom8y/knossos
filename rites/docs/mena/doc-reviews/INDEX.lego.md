@@ -1,6 +1,6 @@
 ---
 name: doc-reviews
-description: "Documentation audit, review, and architecture templates for doc-team workflows. Use when: conducting documentation audits, planning information architecture, reviewing documentation accuracy, planning migrations, creating documentation briefs. Triggers: doc audit, documentation review, information architecture, migration plan, content brief, documentation quality, staleness analysis."
+description: "Doc audit and architecture templates. Triggers: doc audit, documentation review, information architecture, content brief, staleness."
 ---
 
 # Documentation Reviews & Audits

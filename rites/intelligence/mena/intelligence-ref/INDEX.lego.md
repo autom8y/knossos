@@ -1,6 +1,6 @@
 ---
 name: intelligence-ref
-description: "Product Intelligence team reference with analytics, user research, and experimentation workflows. Use when: learning about intelligence agents, understanding the analytics workflow, invoking intelligence agents. Triggers: intelligence, product intelligence, analytics-engineer, user-researcher, experimentation-lead, insights-analyst."
+description: "Product Intelligence team reference. Triggers: intelligence, analytics-engineer, user-researcher, experimentation-lead, insights-analyst."
 ---
 
 # Product Intelligence Team (intelligence)

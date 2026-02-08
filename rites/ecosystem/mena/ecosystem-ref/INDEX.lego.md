@@ -1,6 +1,6 @@
 ---
 name: ecosystem-ref
-description: "Quick reference for roster ecosystem patterns. Use when: working with roster-sync, swap-rite.sh, manifest schema, rite management. Triggers: roster-sync, swap-rite, roster, manifest, ecosystem patterns."
+description: "Roster ecosystem patterns reference. Triggers: roster-sync, swap-rite, roster, manifest, ecosystem patterns."
 ---
 
 # ecosystem-ref

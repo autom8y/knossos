@@ -1,6 +1,6 @@
 ---
 name: cross-rite
-description: "Cross-team handoff protocols. Use when: completing work that routes to SRE, Security, or Documentation teams. Triggers: handoff, wrap, /wrap, team transition, deployment ready."
+description: "Cross-team handoff protocols. Triggers: handoff, wrap, /wrap, team transition, deployment ready."
 ---
 
 # Cross-Team Handoff Protocols

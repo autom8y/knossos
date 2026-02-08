@@ -1,6 +1,6 @@
 ---
 name: strategy-ref
-description: "Strategy team reference with market research, competitive analysis, and roadmap planning workflows. Use when: learning about strategy agents, understanding the strategy workflow, invoking strategy agents. Triggers: strategy, strategy team, market-researcher, competitive-analyst, business-model-analyst, roadmap-strategist."
+description: "Strategy team reference. Triggers: strategy, market-researcher, competitive-analyst, business-model-analyst, roadmap-strategist."
 ---
 
 # Strategy Team (strategy)

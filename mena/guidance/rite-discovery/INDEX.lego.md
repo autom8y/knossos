@@ -1,6 +1,6 @@
 ---
 name: rite-discovery
-description: "Dynamic team metadata discovery from roster. Use when: routing decisions need team profiles, displaying team inventory, matching intent to teams. Triggers: list rites, team capabilities, what teams exist, team metadata."
+description: "Dynamic team metadata from roster. Triggers: list rites, team capabilities, what teams exist, team metadata."
 ---
 
 # Team Discovery

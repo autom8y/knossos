@@ -1,6 +1,6 @@
 ---
 name: security-ref
-description: "Security team reference with threat modeling, compliance architecture, and penetration testing workflows. Use when: learning about security agents, understanding the security workflow, invoking security agents. Triggers: security, security team, threat-modeler, compliance-architect, penetration-tester, security-reviewer."
+description: "Security team reference. Triggers: security, threat-modeler, compliance-architect, penetration-tester, security-reviewer."
 ---
 
 # Security Team (security)

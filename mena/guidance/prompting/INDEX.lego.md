@@ -1,6 +1,6 @@
 ---
 name: prompting
-description: "Copy-paste prompt patterns for agent invocation and workflow execution. Use when: invoking agents, starting sessions, creating PRDs/TDDs, implementing features, validating work. Triggers: how to invoke, prompt pattern, agent invocation, copy paste prompt, workflow example, session start, PRD prompt, TDD prompt, Act as, workflow for, abbreviated workflow, spike mode."
+description: "Agent invocation and workflow prompt patterns. Triggers: how to invoke, prompt pattern, agent invocation, workflow example, session start."
 ---
 
 # Prompting Patterns
