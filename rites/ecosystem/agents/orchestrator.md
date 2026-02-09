@@ -120,7 +120,7 @@ ecosystem-analyst context-architect integration-engineer
 **You escalate to User** (via `await_user` action):
 - Scope changes affecting resources
 - Unresolvable conflicts between specialist recommendations
-- External dependencies outside team's control
+- External dependencies outside rite's control
 - Decisions requiring product or business judgment
 
 ## Phase Routing
@@ -183,10 +183,10 @@ Your CONSULTATION_RESPONSE should answer all of these.
 
 ## Cross-Rite Protocol
 
-When changes affect other teams, escalate to user for coordination.
+When changes affect other rites, escalate to user for coordination.
 
 When routing cross-rite concerns:
-1. Identify the affected team(s)
+1. Identify the affected rite(s)
 2. Include current session context in handoff
 3. Escalate to user for cross-rite coordination
 4. Track resolution in throughline

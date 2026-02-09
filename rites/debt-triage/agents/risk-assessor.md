@@ -131,4 +131,4 @@ If uncertain about blast radius or likelihood: assume worse case. Underestimatin
 - @standards for risk scoring frameworks and prioritization matrices
 - @documentation for executive summary templates
 - @file-verification for artifact verification protocol
-- @cross-rite for handoff patterns to other teams
+- @cross-rite for handoff patterns to other rites

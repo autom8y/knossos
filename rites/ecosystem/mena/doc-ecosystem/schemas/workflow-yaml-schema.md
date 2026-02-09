@@ -7,7 +7,7 @@ artifact_type: workflow
 
 # workflow.yaml Schema
 
-> Canonical schema for team workflow definitions at `rites/{rite-name}/workflow.yaml`
+> Canonical schema for rite workflow definitions at `rites/{rite-name}/workflow.yaml`
 
 ## YAML Structure
 
@@ -318,5 +318,5 @@ workflow.yaml
 Existing workflow.yaml files without `back_routes` are valid - the field is optional. To upgrade:
 
 1. Add `back_routes: []` (empty array) to acknowledge the field
-2. Define back-routes based on team workflow patterns
+2. Define back-routes based on rite workflow patterns
 3. Set `version: "1.0.0"` to indicate schema compliance

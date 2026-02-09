@@ -19,7 +19,7 @@ import (
 
 type createOptions struct {
 	complexity string
-	team       string
+	rite       string
 	seed       bool
 	seedPrefix string
 	seedKeep   bool
@@ -53,7 +53,7 @@ Examples:
 
 	cmd.Flags().StringVarP(&opts.complexity, "complexity", "c", "MODULE",
 		"Complexity level: PATCH, MODULE, SYSTEM, INITIATIVE, MIGRATION")
-	cmd.Flags().StringVarP(&opts.team, "rite", "r", "",
+	cmd.Flags().StringVarP(&opts.rite, "rite", "r", "",
 		"Rite (practice bundle) to activate (default: from ACTIVE_RITE)")
 	cmd.Flags().BoolVar(&opts.seed, "seed", false,
 		"Create session in ephemeral worktree, park it, and copy to main repo")
@@ -75,10 +75,10 @@ func runCreate(ctx *cmdContext, initiative string, opts createOptions) error {
 	resolver := ctx.GetResolver()
 	lockMgr := ctx.GetLockManager()
 
-	// Get team from flag or ACTIVE_RITE file
-	team := opts.team
-	if team == "" {
-		team = ctx.getActiveRite()
+	// Get rite from flag or ACTIVE_RITE file
+	rite := opts.rite
+	if rite == "" {
+		rite = ctx.getActiveRite()
 	}
 
 	// Validate complexity
@@ -126,7 +126,7 @@ func runCreate(ctx *cmdContext, initiative string, opts createOptions) error {
 	}
 
 	// Create new session context
-	newCtx := session.NewContext(initiative, opts.complexity, team)
+	newCtx := session.NewContext(initiative, opts.complexity, rite)
 	sessionDir := resolver.SessionDir(newCtx.SessionID)
 
 	// Create session directory
@@ -148,7 +148,7 @@ func runCreate(ctx *cmdContext, initiative string, opts createOptions) error {
 	// Emit lifecycle event
 	writer := clewcontract.NewBufferedEventWriter(sessionDir, clewcontract.DefaultFlushInterval)
 	defer writer.Close()
-	writer.Write(clewcontract.NewSessionCreatedEvent(newCtx.SessionID, initiative, opts.complexity, team))
+	writer.Write(clewcontract.NewSessionCreatedEvent(newCtx.SessionID, initiative, opts.complexity, rite))
 	if err := writer.Flush(); err != nil {
 		printer.VerboseLog("warn", "failed to write event", map[string]interface{}{"error": err.Error()})
 	}
@@ -160,7 +160,7 @@ func runCreate(ctx *cmdContext, initiative string, opts createOptions) error {
 		Status:        string(newCtx.Status),
 		Initiative:    initiative,
 		Complexity:    opts.complexity,
-		Rite:          team,
+		Rite:          rite,
 		CreatedAt:     newCtx.CreatedAt.Format(time.RFC3339),
 		SchemaVersion: newCtx.SchemaVersion,
 	}
@@ -175,10 +175,10 @@ func runCreateSeeded(ctx *cmdContext, initiative string, opts createOptions) err
 	printer := ctx.getPrinter()
 	resolver := ctx.GetResolver()
 
-	// Get team from flag or ACTIVE_RITE file
-	team := opts.team
-	if team == "" {
-		team = ctx.getActiveRite()
+	// Get rite from flag or ACTIVE_RITE file
+	rite := opts.rite
+	if rite == "" {
+		rite = ctx.getActiveRite()
 	}
 
 	// Validate complexity
@@ -232,7 +232,7 @@ func runCreateSeeded(ctx *cmdContext, initiative string, opts createOptions) err
 	}
 
 	// Create new session context (starts as ACTIVE)
-	newCtx := session.NewContext(initiative, opts.complexity, team)
+	newCtx := session.NewContext(initiative, opts.complexity, rite)
 	worktreeSessionDir := worktreeResolver.SessionDir(newCtx.SessionID)
 
 	// Create session directory in worktree
@@ -298,7 +298,7 @@ func runCreateSeeded(ctx *cmdContext, initiative string, opts createOptions) err
 		ParkReason:  newCtx.ParkedReason,
 		Initiative:  initiative,
 		Complexity:  opts.complexity,
-		Rite:        team,
+		Rite:        rite,
 		CreatedAt:   newCtx.CreatedAt.Format(time.RFC3339),
 		ParkedAt:    newCtx.ParkedAt.Format(time.RFC3339),
 		ProjectRoot: mainProjectRoot,

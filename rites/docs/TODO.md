@@ -30,7 +30,7 @@ Doc-rite is a **well-designed, production-ready documentation rite** with clear 
 
 **Changes required:**
 - [ ] Update `rites/10x-dev/agents/qa-adversary.md`: Add documentation assessment to release checklist
-- [ ] Add criteria: "User-facing changes documented or doc-team handoff planned"
+- [ ] Add criteria: "User-facing changes documented or docs rite handoff planned"
 - [ ] QA can mark "docs not needed" for internal-only changes, but must explicitly decide
 
 **Gate questions for QA:**
@@ -102,7 +102,7 @@ Based on audit, confirm this ownership matrix:
 | Item | Depends On |
 |------|------------|
 | P1 (10x gate) | Changes to 10x-dev/agents/qa-adversary.md |
-| P2 (staleness) | No dependencies - doc-team internal |
+| P2 (staleness) | No dependencies - docs rite internal |
 
 ---
 

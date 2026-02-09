@@ -77,8 +77,8 @@ Each smoke test validates:
 **Minimal HANDOFF**:
 ```yaml
 ---
-source_team: 10x-dev
-target_team: security
+source_rite: 10x-dev
+target_rite: security
 handoff_type: assessment
 created: 2026-01-02
 initiative: Smoke Test Feature
@@ -100,7 +100,7 @@ Smoke test for security assessment handoff path.
   - Does handoff schema support security context?
   - Can security team parse and respond?
 
-## Notes for Target Team
+## Notes for Target Rite
 This is a schema validation test.
 ```
 
@@ -121,8 +121,8 @@ This is a schema validation test.
 **Minimal HANDOFF**:
 ```yaml
 ---
-source_team: 10x-dev
-target_team: sre
+source_rite: 10x-dev
+target_rite: sre
 handoff_type: validation
 created: 2026-01-02
 initiative: Smoke Test Feature
@@ -146,7 +146,7 @@ Smoke test for production readiness validation path.
   - Reliability: Error handling and recovery
   - Scalability: Resource usage
 
-## Notes for Target Team
+## Notes for Target Rite
 This is a schema validation test.
 ```
 
@@ -167,8 +167,8 @@ This is a schema validation test.
 **Minimal HANDOFF**:
 ```yaml
 ---
-source_team: 10x-dev
-target_team: docs
+source_rite: 10x-dev
+target_rite: docs
 handoff_type: assessment
 created: 2026-01-02
 initiative: Smoke Test Feature
@@ -190,7 +190,7 @@ Smoke test for documentation assessment path.
   - What documentation is needed?
   - What format is appropriate?
 
-## Notes for Target Team
+## Notes for Target Rite
 This is a schema validation test.
 ```
 
@@ -211,8 +211,8 @@ This is a schema validation test.
 **Minimal HANDOFF**:
 ```yaml
 ---
-source_team: debt-triage
-target_team: hygiene
+source_rite: debt-triage
+target_rite: hygiene
 handoff_type: execution
 created: 2026-01-02
 initiative: Smoke Test Debt Sprint
@@ -236,7 +236,7 @@ Smoke test for debt execution handoff path.
   - Acceptance criteria are clear
   - Behavior preservation checkable
 
-## Notes for Target Team
+## Notes for Target Rite
 This is a schema validation test.
 ```
 
@@ -257,8 +257,8 @@ This is a schema validation test.
 **Minimal HANDOFF**:
 ```yaml
 ---
-source_team: strategy
-target_team: 10x-dev
+source_rite: strategy
+target_rite: 10x-dev
 handoff_type: implementation
 created: 2026-01-02
 initiative: Smoke Test Initiative
@@ -282,7 +282,7 @@ Smoke test for strategic implementation handoff path.
 - **Implementation Notes**:
   - This is a schema validation test
 
-## Notes for Target Team
+## Notes for Target Rite
 This is a schema validation test.
 ```
 
@@ -303,8 +303,8 @@ This is a schema validation test.
 **Minimal HANDOFF**:
 ```yaml
 ---
-source_team: intelligence
-target_team: strategy
+source_rite: intelligence
+target_rite: strategy
 handoff_type: strategic_input
 created: 2026-01-02
 initiative: Smoke Test Research
@@ -328,7 +328,7 @@ Smoke test for strategic input handoff path.
 - **Confidence**: Medium (schema validation only)
 - **Key Finding**: Handoff schema supports research inputs
 
-## Notes for Target Team
+## Notes for Target Rite
 This is a schema validation test.
 ```
 
@@ -349,8 +349,8 @@ This is a schema validation test.
 **Minimal HANDOFF**:
 ```yaml
 ---
-source_team: rnd
-target_team: strategy
+source_rite: rnd
+target_rite: strategy
 handoff_type: strategic_evaluation
 created: 2026-01-02
 initiative: Smoke Test Prototype
@@ -375,7 +375,7 @@ Smoke test for strategic evaluation handoff path.
 - **Prototype Results**:
   - Spike completed successfully (hypothetical)
 
-## Notes for Target Team
+## Notes for Target Rite
 This is a schema validation test.
 ```
 
@@ -396,8 +396,8 @@ This is a schema validation test.
 **Minimal HANDOFF**:
 ```yaml
 ---
-source_team: rnd
-target_team: 10x-dev
+source_rite: rnd
+target_rite: 10x-dev
 handoff_type: implementation
 created: 2026-01-02
 initiative: Smoke Test Prototype
@@ -423,7 +423,7 @@ Note: Typically flows through strategy first.
 - **Implementation Notes**:
   - Prototype validated by strategy (hypothetical)
 
-## Notes for Target Team
+## Notes for Target Rite
 This is a schema validation test.
 ```
 
@@ -444,8 +444,8 @@ This is a schema validation test.
 **Minimal HANDOFF**:
 ```yaml
 ---
-source_team: security
-target_team: 10x-dev
+source_rite: security
+target_rite: 10x-dev
 handoff_type: assessment
 created: 2026-01-02
 initiative: Smoke Test Feature
@@ -469,7 +469,7 @@ This is a return handoff after threat modeling.
   - Mitigations recommended
   - Verdict: APPROVED
 
-## Notes for Target Team
+## Notes for Target Rite
 Proceed with design incorporating mitigations.
 ```
 
@@ -490,8 +490,8 @@ Proceed with design incorporating mitigations.
 **Minimal HANDOFF**:
 ```yaml
 ---
-source_team: sre
-target_team: 10x-dev
+source_rite: sre
+target_rite: 10x-dev
 handoff_type: validation
 created: 2026-01-02
 initiative: Smoke Test Feature
@@ -515,7 +515,7 @@ This is a return handoff after production readiness check.
   - Reliability: PASS
   - Scalability: PASS
 
-## Notes for Target Team
+## Notes for Target Rite
 Approved for production deployment.
 ```
 
@@ -536,8 +536,8 @@ Approved for production deployment.
 **Minimal HANDOFF**:
 ```yaml
 ---
-source_team: hygiene
-target_team: debt-triage
+source_rite: hygiene
+target_rite: debt-triage
 handoff_type: execution
 created: 2026-01-02
 initiative: Smoke Test Debt Sprint
@@ -561,7 +561,7 @@ This is a return handoff after debt execution.
   - Behavior preservation confirmed
   - Tests passing
 
-## Notes for Target Team
+## Notes for Target Rite
 Sprint complete. Update debt ledger.
 ```
 
@@ -582,8 +582,8 @@ Sprint complete. Update debt ledger.
 **Minimal HANDOFF**:
 ```yaml
 ---
-source_team: ecosystem
-target_team: 10x-dev
+source_rite: ecosystem
+target_rite: 10x-dev
 handoff_type: implementation
 created: 2026-01-02
 initiative: Smoke Test Tooling
@@ -607,7 +607,7 @@ Smoke test for ecosystem tooling handoff.
 - **Implementation Notes**:
   - Follow migration guide
 
-## Notes for Target Team
+## Notes for Target Rite
 This is a schema validation test.
 ```
 

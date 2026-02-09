@@ -111,8 +111,8 @@ After sprint planning is complete, produce a HANDOFF artifact for hygiene execut
 
 ```yaml
 ---
-source_team: debt-triage
-target_team: hygiene
+source_rite: debt-triage
+target_rite: hygiene
 handoff_type: execution
 created: [YYYY-MM-DD]
 initiative: [Sprint/initiative name]
@@ -141,7 +141,7 @@ priority: [critical|high|medium|low]
 ### PKG-002: [Package Title]
 [repeat for each package]
 
-## Notes for Target Team
+## Notes for Target Rite
 - Sequencing recommendations (what to start first)
 - Dependencies between packages
 - Risk clusters or areas needing extra care
@@ -212,5 +212,5 @@ When work completes, capture:
 - @documentation for sprint package templates
 - @standards for estimation frameworks and capacity planning
 - @file-verification for artifact verification protocol
-- @cross-rite for handoff patterns to other teams
+- @cross-rite for handoff patterns to other rites
 - @cross-rite-handoff for HANDOFF artifact schema and examples

@@ -93,7 +93,7 @@ The intelligence rite is a **well-structured analytics and research rite** with 
 
 **Gap identified:** Both rites do "analysis" but different kinds. Boundary needs explicit documentation.
 
-**Decision:** Add explicit comparison to both team READMEs.
+**Decision:** Add explicit comparison to both rite READMEs.
 
 **Changes required:**
 - [ ] Update `rites/intelligence/README.md`: Add "When to Use Intelligence vs Strategy" section
@@ -102,7 +102,7 @@ The intelligence rite is a **well-structured analytics and research rite** with 
   ```markdown
   ## When to Use Intelligence vs Strategy
 
-  | Question Type | Team | Examples |
+  | Question Type | Rite | Examples |
   |---------------|------|----------|
   | How do our users behave? | intelligence | Funnel analysis, user research, A/B tests |
   | Why do users do X? | intelligence | Qualitative research, session analysis |

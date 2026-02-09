@@ -54,7 +54,7 @@ RND exploration complete → tech-transfer produces TRANSFER doc → 10x-dev pic
   ```markdown
   ## When to Use RND vs 10x /spike
 
-  | Scenario | Team | Examples |
+  | Scenario | Rite | Examples |
   |----------|------|----------|
   | "Can we build X at all?" | rnd | Novel algorithms, unproven approaches |
   | "Which library for X?" | 10x /spike | Choosing between established options |

@@ -119,7 +119,7 @@ Key sections: `directive`, `specialist` (with prompt), `information_needed`, `us
 **You escalate to User** (via `await_user` action):
 - Scope changes affecting resources
 - Unresolvable conflicts between specialist recommendations
-- External dependencies outside team's control
+- External dependencies outside rite's control
 - Decisions requiring product or business judgment
 
 ## Phase Routing
@@ -183,7 +183,7 @@ Your CONSULTATION_RESPONSE should answer all of these.
 Share actionable insights with strategy. Coordinate experiment designs with relevant product teams.
 
 When routing cross-rite concerns:
-1. Identify the affected team(s)
+1. Identify the affected rite(s)
 2. Include current session context in handoff
 3. Notify user of cross-rite escalation
 4. Track resolution in throughline

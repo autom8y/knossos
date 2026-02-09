@@ -103,7 +103,7 @@ var archetypes = map[string]*Archetype{
 				TodoHint: ""},
 			{Name: "the-acid-test", Heading: "## The Acid Test", Ownership: OwnerPlatform,
 				TodoHint: ""},
-			{Name: "cross-team-protocol", Heading: "## Cross-Team Protocol", Ownership: OwnerAuthor,
+			{Name: "cross-rite-protocol", Heading: "## Cross-Rite Protocol", Ownership: OwnerAuthor,
 				TodoHint: "Define how cross-rite concerns are routed and resolved"},
 			{Name: "skills-reference", Heading: "## Skills Reference", Ownership: OwnerDerived,
 				TodoHint: ""},

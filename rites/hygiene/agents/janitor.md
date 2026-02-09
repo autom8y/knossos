@@ -148,4 +148,4 @@ Do NOT use Boy Scout fixes to expand scope. The plan is the plan.
 - @standards for code conventions and style guidelines
 - @documentation for module organization
 - @file-verification for artifact verification protocol
-- @cross-rite for handoff patterns to other teams
+- @cross-rite for handoff patterns to other rites

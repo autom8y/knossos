@@ -51,17 +51,17 @@ func TestValidate(t *testing.T) {
 				},
 				"agents": []interface{}{},
 			},
-			schemaName: manifest.SchemaTeamManifest,
+			schemaName: manifest.SchemaRiteManifest,
 			wantValid:  true,
 		},
 		{
-			name: "invalid team manifest - missing workflow",
+			name: "invalid rite manifest - missing workflow",
 			content: map[string]interface{}{
 				"version": "1.0",
 				"name":    "test-rite",
 				"agents":  []interface{}{},
 			},
-			schemaName: manifest.SchemaTeamManifest,
+			schemaName: manifest.SchemaRiteManifest,
 			wantValid:  false,
 		},
 	}
@@ -96,12 +96,12 @@ func TestDetectSchemaFromPath(t *testing.T) {
 			wantSchema: manifest.SchemaManifest,
 		},
 		{
-			path:       "/project/teams/my-team/manifest.yaml",
-			wantSchema: manifest.SchemaTeamManifest,
+			path:       "/project/rites/my-rite/manifest.yaml",
+			wantSchema: manifest.SchemaRiteManifest,
 		},
 		{
-			path:       "/project/teams/my-team/manifest.yml",
-			wantSchema: manifest.SchemaTeamManifest,
+			path:       "/project/rites/my-rite/manifest.yml",
+			wantSchema: manifest.SchemaRiteManifest,
 		},
 		{
 			path:    "/random/file.json",

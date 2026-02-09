@@ -176,4 +176,4 @@ If uncertain: Don't approve. Request changes or additional review.
 
 ## Cross-Rite Routing
 
-See `cross-rite` skill for handoff patterns to other teams.
+See `cross-rite` skill for handoff patterns to other rites.

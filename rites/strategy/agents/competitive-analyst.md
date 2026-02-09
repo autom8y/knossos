@@ -152,4 +152,4 @@ Ready for Business Modeling when:
 
 ## Cross-Rite Routing
 
-See `cross-rite` skill for handoff patterns to other teams.
+See `cross-rite` skill for handoff patterns to other rites.

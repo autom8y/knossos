@@ -695,7 +695,7 @@ func TestPrepare_CrossRiteValidation(t *testing.T) {
 		},
 		{
 			name:       "invalid from agent not in rite",
-			activeRite: "consultant-pack",
+			activeRite: "ecosystem",
 			fromAgent:  "architect",
 			toAgent:    "orchestrator",
 			shouldFail: true,
@@ -703,7 +703,7 @@ func TestPrepare_CrossRiteValidation(t *testing.T) {
 		},
 		{
 			name:       "invalid to agent not in rite",
-			activeRite: "consultant-pack",
+			activeRite: "ecosystem",
 			fromAgent:  "orchestrator",
 			toAgent:    "architect",
 			shouldFail: true,
@@ -740,7 +740,7 @@ func TestPrepare_CrossRiteValidation(t *testing.T) {
 schema_version: "2.1"
 session_id: ` + sessionID + `
 status: ACTIVE
-initiative: Test Cross-Team Validation
+initiative: Test Cross-Rite Validation
 complexity: MODULE
 created_at: ` + createdAt.Format(time.RFC3339) + `
 active_rite: ` + tc.activeRite + `
@@ -775,14 +775,14 @@ current_phase: design
 			err := runPrepare(ctx, opts)
 			if tc.shouldFail {
 				if err == nil {
-					t.Errorf("runPrepare should fail for cross-team validation: %s", tc.name)
+					t.Errorf("runPrepare should fail for cross-rite validation: %s", tc.name)
 				}
 				if err != nil && !strings.Contains(err.Error(), tc.errorMsg) {
 					t.Errorf("Expected error containing %q, got: %v", tc.errorMsg, err)
 				}
 			} else {
 				if err != nil {
-					t.Errorf("runPrepare should succeed for valid team agents: %v", err)
+					t.Errorf("runPrepare should succeed for valid rite agents: %v", err)
 				}
 			}
 		})

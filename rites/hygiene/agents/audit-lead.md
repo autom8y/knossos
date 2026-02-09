@@ -174,4 +174,4 @@ Every commit reviewed. Every contract verified. "The Janitor is good" is not an 
 - @standards for code conventions and quality expectations
 - @documentation for understanding behavioral contracts
 - @file-verification for artifact verification protocol
-- @cross-rite for handoff patterns to other teams
+- @cross-rite for handoff patterns to other rites

@@ -353,8 +353,8 @@ Each package is independently deployable. Rollback by reverting PR.
 
 ```yaml
 ---
-source_team: debt-triage
-target_team: hygiene
+source_rite: debt-triage
+target_rite: hygiene
 handoff_type: execution
 created: 2026-01-02
 initiative: Q1 Technical Debt Remediation

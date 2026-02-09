@@ -233,7 +233,7 @@ Add optional `pending_handoffs` field to SESSION_CONTEXT:
 # In SESSION_CONTEXT.md frontmatter
 pending_handoffs:
   - artifact_id: string      # Reference to HANDOFF artifact
-    target_team: string      # Team waiting on
+    target_rite: string      # Team waiting on
     blocking: boolean        # Is this blocking progress
     created_at: string       # When handoff was created
     status: enum             # pending | in_progress
@@ -364,8 +364,8 @@ The 10x-dev has completed PRD and TDD for a major payment processing overhaul. T
 ---
 artifact_id: HANDOFF-10x-dev-to-security-2026-01-02
 schema_version: "1.0"
-source_team: 10x-dev
-target_team: security
+source_rite: 10x-dev
+target_rite: security
 handoff_type: assessment
 priority: critical
 blocking: true
@@ -415,8 +415,8 @@ Source team should:
 ---
 artifact_id: HANDOFF-debt-triage-to-hygiene-2026-01-03
 schema_version: "1.0"
-source_team: debt-triage
-target_team: hygiene
+source_rite: debt-triage
+target_rite: hygiene
 handoff_type: execution
 priority: high
 blocking: false
@@ -475,7 +475,7 @@ Execute in order: PKG-001, PKG-002 (no dependencies between them, but PKG-001 is
 
 validate_handoff() {
     local file="$1"
-    local required_fields=("artifact_id" "schema_version" "source_team" "target_team"
+    local required_fields=("artifact_id" "schema_version" "source_rite" "target_rite"
                            "handoff_type" "priority" "blocking" "initiative"
                            "created_at" "status" "items")
 
@@ -594,7 +594,7 @@ Add HANDOFF to the existing `schemas/handoff-criteria-schema.yaml`:
         blocking: true
       - id: handoff-002
         description: "Source and target teams are different"
-        validation: "source_team != target_team"
+        validation: "source_rite != target_rite"
         blocking: true
       - id: handoff-003
         description: "Handoff type is valid enum"
@@ -729,7 +729,7 @@ The `rites/shared/skills/cross-rite-handoff/` directory is synced to all satelli
 | `val_001` | Valid assessment handoff | Return 0 |
 | `val_002` | Missing artifact_id | Return 4 with HANDOFF-010 |
 | `val_003` | Invalid artifact_id pattern | Return 5 with HANDOFF-001 |
-| `val_004` | source_team == target_team | Return 5 with HANDOFF-030 |
+| `val_004` | source_rite == target_rite | Return 5 with HANDOFF-030 |
 | `val_005` | Invalid handoff_type | Return 5 with HANDOFF-004 |
 | `val_006` | status: rejected without reason | Return 5 with HANDOFF-031 |
 | `val_007` | Empty items array | Return 4 with HANDOFF-010 |

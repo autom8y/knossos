@@ -1,6 +1,6 @@
 # Rite Composition Patterns
 
-How to size and structure agent teams.
+How to size and structure agent pantheons.
 
 ---
 
@@ -35,7 +35,7 @@ Entry → Analyze → Plan
 - Domain has clear, linear flow
 - No implementation phase (planning only)
 - Single type of output
-- Teams that plan but don't execute
+- Rites that plan but don't execute
 
 ### Characteristics
 - Model mix: haiku → sonnet → sonnet
@@ -46,7 +46,7 @@ Entry → Analyze → Plan
 
 ## The 4-Role Model (Standard)
 
-Most common pattern for balanced teams.
+Most common pattern for balanced rites.
 
 ### Structure
 ```
@@ -65,7 +65,7 @@ Entry → Design → Execute → Validate
 - Domain requires discovery, planning, execution, and validation
 - Full lifecycle from assessment to verification
 - Multiple types of output
-- Teams that both plan and execute
+- Rites that both plan and execute
 
 ### Characteristics
 - Model mix: sonnet → opus → sonnet → opus
@@ -144,7 +144,7 @@ Entry → Design → Execute → Validate
 
 ## Agent Count Guidelines
 
-| Count | Phases | Complexity | Example Teams |
+| Count | Phases | Complexity | Example Rites |
 |-------|--------|------------|---------------|
 | 3 | 3 | Planning-focused | debt-triage |
 | 4 | 4 | Balanced lifecycle | doc, hygiene, sre |

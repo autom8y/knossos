@@ -98,8 +98,8 @@ Platform lacks payment processing capability, preventing monetization.
 
 ```yaml
 ---
-source_team: 10x-dev
-target_team: security
+source_rite: 10x-dev
+target_rite: security
 handoff_type: assessment
 created: 2026-01-02
 initiative: Payment Processing Integration
@@ -350,8 +350,8 @@ POST /api/v1/webhooks/stripe (Stripe signature verified)
 
 ```yaml
 ---
-source_team: 10x-dev
-target_team: security
+source_rite: 10x-dev
+target_rite: security
 handoff_type: validation
 created: 2026-01-02
 initiative: Payment Processing Integration

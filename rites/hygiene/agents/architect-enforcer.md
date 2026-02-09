@@ -153,4 +153,4 @@ A good refactoring plan executes mechanically. If the Janitor must make judgment
 - @standards for project code conventions
 - @documentation for architectural boundaries and module organization
 - @file-verification for artifact verification protocol
-- @cross-rite for handoff patterns to other teams
+- @cross-rite for handoff patterns to other rites

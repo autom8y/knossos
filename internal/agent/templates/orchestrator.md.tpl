@@ -134,7 +134,7 @@ You do NOT attempt to fix issues yourself.
 
 Your CONSULTATION_RESPONSE should answer all of these.
 
-## Cross-Team Protocol
+## Cross-Rite Protocol
 
 <!-- TODO: Define how cross-rite concerns are routed and resolved -->
 

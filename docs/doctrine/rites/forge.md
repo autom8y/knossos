@@ -1,6 +1,6 @@
 # Rite: forge
 
-> Agent team creation lifecycle for platform development.
+> Rite creation lifecycle for platform development.
 
 The forge rite is the meta-rite for building agents, tools, and platform infrastructure. Named after [Daedalus](../reference/GLOSSARY.md#daedalus), the builder of the labyrinth.
 
@@ -19,10 +19,10 @@ The forge rite is the meta-rite for building agents, tools, and platform infrast
 
 ## When to Use
 
-- Creating new agent teams
+- Creating new rites
 - Building platform tools
-- Designing new rites
-- Extending roster infrastructure
+- Designing new agent pantheons
+- Extending knossos infrastructure
 - Evaluating agent performance
 
 ---
@@ -31,15 +31,15 @@ The forge rite is the meta-rite for building agents, tools, and platform infrast
 
 | Agent | Role |
 |-------|------|
-| **orchestrator** | Coordinates agent team creation phases |
-| **agent-designer** | Designs agent team concepts and role specifications |
+| **orchestrator** | Coordinates rite creation phases |
+| **agent-designer** | Designs rite concepts and agent role specifications |
 | **prompt-architect** | Creates agent prompt files and system instructions |
 | **workflow-engineer** | Configures workflow phases and transitions |
-| **platform-engineer** | Integrates agents into roster ecosystem |
+| **platform-engineer** | Integrates agents into knossos ecosystem |
 | **agent-curator** | Updates knowledge base and documentation |
-| **eval-specialist** | Evaluates and validates agent team readiness |
+| **eval-specialist** | Evaluates and validates agent pantheon readiness |
 
-See agent files: `/roster/rites/forge/agents/`
+See agent files: `/knossos/rites/forge/agents/`
 
 ---
 
@@ -60,7 +60,7 @@ flowchart TD
 | design | agent-designer | Rite Spec | Always |
 | prompts | prompt-architect | Agent Files | Always |
 | workflow | workflow-engineer | Workflow Config | Always |
-| platform | platform-engineer | Roster Integration | complexity >= MODULE |
+| platform | platform-engineer | Knossos Integration | complexity >= MODULE |
 | catalog | agent-curator | Knowledge Update | complexity >= MODULE |
 | validation | eval-specialist | Eval Report | Always |
 
@@ -113,7 +113,7 @@ flowchart TD
 Task(orchestrator, "create new rite for code review workflow")
 
 # Design phase only
-Task(agent-designer, "design agent team for security auditing")
+Task(agent-designer, "design rite for security auditing")
 
 # Evaluate existing rite
 Task(eval-specialist, "evaluate 10x-dev rite performance")
@@ -134,7 +134,7 @@ Task(eval-specialist, "evaluate 10x-dev rite performance")
 
 ## Source
 
-**Manifest**: `/roster/rites/forge/manifest.yaml`
+**Manifest**: `/knossos/rites/forge/manifest.yaml`
 
 ---
 

@@ -85,7 +85,7 @@
 
     "rite_name": {
       "type": "string",
-      "pattern": "^[a-z0-9]+-pack$",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
       "description": "Rite name (e.g., ecosystem, security)"
     },
 

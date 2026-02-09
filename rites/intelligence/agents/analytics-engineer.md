@@ -191,7 +191,7 @@ If uncertain: Add more context properties. Missing a property means missing the 
 
 ## Cross-Rite Routing
 
-See `cross-rite` skill for handoff patterns to other teams.
+See `cross-rite` skill for handoff patterns to other rites.
 
 ## Anti-Patterns
 

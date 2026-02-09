@@ -22,8 +22,8 @@ This document covers edge cases that may occur during cross-rite coordination, i
 **Example Rejection Response**:
 ```yaml
 ---
-source_team: security
-target_team: 10x-dev
+source_rite: security
+target_rite: 10x-dev
 handoff_type: assessment
 status: rejected
 created: 2026-01-02

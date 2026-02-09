@@ -352,7 +352,7 @@ func getRiteAgents(rite string) []string {
 		"10x-dev": {
 			"requirements-analyst", "architect", "principal-engineer", "qa-adversary", "orchestrator",
 		},
-		"consultant-pack": {
+		"ecosystem": {
 			"orchestrator",
 		},
 		// Add more rites as needed

@@ -62,7 +62,7 @@ target_rite: string        # Rite receiving handoff (e.g., "hygiene")
 | Section | Purpose | When Included |
 |---------|---------|---------------|
 | Deferred Items | Items not included with rationale | When items deferred |
-| HANDOFF | Cross-rite handoff artifact | When target_team specified |
+| HANDOFF | Cross-rite handoff artifact | When target_rite specified |
 | Capacity Scenarios | What-if planning alternatives | For complex planning |
 
 ## Work Package Object Schema

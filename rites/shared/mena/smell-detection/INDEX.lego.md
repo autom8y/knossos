@@ -9,7 +9,7 @@ description: "Code smell detection with severity classification. Triggers: smell
 
 ## Purpose
 
-Provides canonical smell taxonomy, detection heuristics, and severity classification for use across debt-triage, hygiene, and any team assessing code quality.
+Provides canonical smell taxonomy, detection heuristics, and severity classification for use across debt-triage, hygiene, and any rite assessing code quality.
 
 ## Quick Reference
 

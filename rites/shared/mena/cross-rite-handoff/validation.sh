@@ -7,7 +7,7 @@ set -euo pipefail
 
 validate_handoff() {
     local file="$1"
-    local required_fields=("artifact_id" "schema_version" "source_team" "target_team"
+    local required_fields=("artifact_id" "schema_version" "source_rite" "target_rite"
                            "handoff_type" "priority" "blocking" "initiative"
                            "created_at" "status" "items")
 
@@ -64,12 +64,12 @@ validate_handoff() {
         return 5
     fi
 
-    # Validate source_team != target_team
-    local source_team target_team
-    source_team=$(echo "$frontmatter" | grep "^source_team:" | sed 's/source_team: *//' | tr -d '"')
-    target_team=$(echo "$frontmatter" | grep "^target_team:" | sed 's/target_team: *//' | tr -d '"')
-    if [[ "$source_team" == "$target_team" ]]; then
-        echo "HANDOFF-030: source_team and target_team must be different" >&2
+    # Validate source_rite != target_rite
+    local source_rite target_rite
+    source_rite=$(echo "$frontmatter" | grep "^source_rite:" | sed 's/source_rite: *//' | tr -d '"')
+    target_rite=$(echo "$frontmatter" | grep "^target_rite:" | sed 's/target_rite: *//' | tr -d '"')
+    if [[ "$source_rite" == "$target_rite" ]]; then
+        echo "HANDOFF-030: source_rite and target_rite must be different" >&2
         return 5
     fi
 

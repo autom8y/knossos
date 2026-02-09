@@ -124,15 +124,15 @@ When receiving a HANDOFF artifact from debt-triage, use it as the starting point
 **Expected HANDOFF Format** (see `cross-rite-handoff` skill for full schema):
 ```yaml
 ---
-source_team: debt-triage
-target_team: hygiene
+source_rite: debt-triage
+target_rite: hygiene
 handoff_type: execution
 ---
 ```
 
 **Consumption Protocol**:
 
-1. **Read HANDOFF frontmatter**: Verify `source_team: debt-triage` and `handoff_type: execution`
+1. **Read HANDOFF frontmatter**: Verify `source_rite: debt-triage` and `handoff_type: execution`
 2. **Review Context section**: Understand why these smells were prioritized
 3. **Check Source Artifacts**: Load referenced audits, risk matrices, or scoring from debt-triage
 4. **Process Items as work queue**: Each item from debt-triage becomes a confirmed smell—skip re-discovery
@@ -172,5 +172,5 @@ handoff_type: execution
 - @standards for project code conventions
 - @documentation for architectural context
 - @file-verification for artifact verification protocol
-- @cross-rite for handoff patterns to other teams
+- @cross-rite for handoff patterns to other rites
 - @cross-rite-handoff for HANDOFF schema reference

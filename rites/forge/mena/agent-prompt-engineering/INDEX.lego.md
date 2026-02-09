@@ -11,7 +11,7 @@ description: "Agent prompt engineering standards. Triggers: agent prompt, system
 
 **Target 150-200 lines per agent.** Agents exceeding 250 lines likely contain redundancy.
 
-This skill codifies learnings from 10 deep optimization sprints across production agent teams. Use it to create new agents, audit existing prompts, or debug agent behavior problems.
+This skill codifies learnings from 10 deep optimization sprints across production agent pantheons. Use it to create new agents, audit existing prompts, or debug agent behavior problems.
 
 Effective agent prompts share three qualities: **clarity** (the agent knows exactly what it does), **boundaries** (the agent knows what it owns vs. escalates), and **testability** (handoff criteria are objectively verifiable).
 

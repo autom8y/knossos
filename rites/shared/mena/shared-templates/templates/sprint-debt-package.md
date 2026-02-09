@@ -24,7 +24,7 @@ sprint:
 
 [{session_id: {session_id}}]
 [{initiative: {initiative}}]
-[{target_team: {target_team}}]
+[{target_rite: {target_rite}}]
 ---
 
 # {title}
@@ -148,9 +148,9 @@ sprint:
 
 [{## HANDOFF
 
-<!-- OPTIONAL: Cross-rite handoff artifact when target_team specified -->
+<!-- OPTIONAL: Cross-rite handoff artifact when target_rite specified -->
 
-**To:** {target_team}
+**To:** {target_rite}
 **From:** {author}
 **Date:** {created_at}
 

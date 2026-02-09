@@ -48,8 +48,8 @@ SRE accepts validation handoffs from 10x-dev for production readiness assessment
 **Expected HANDOFF Format** (see `cross-rite-handoff` skill for full schema):
 ```yaml
 ---
-source_team: 10x-dev
-target_team: sre
+source_rite: 10x-dev
+target_rite: sre
 handoff_type: validation
 ---
 ```

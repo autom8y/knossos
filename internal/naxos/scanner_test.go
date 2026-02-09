@@ -61,7 +61,7 @@ func (ts *testSetup) createSession(id, status string, createdAt time.Time, opts 
 		createdAt:    createdAt,
 		initiative:   "Test Initiative",
 		complexity:   "MODULE",
-		activeRite:   "test-pack",
+		activeRite:   "test-rite",
 		currentPhase: "requirements",
 	}
 	for _, opt := range opts {

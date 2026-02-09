@@ -116,7 +116,7 @@ func TestContext_Serialize(t *testing.T) {
 		CreatedAt:     now,
 		Initiative:    "Test Initiative",
 		Complexity:    "MODULE",
-		ActiveRite:    "test-pack",
+		ActiveRite:    "test-rite",
 		CurrentPhase:  "requirements",
 		Body:          "\n# Test\n",
 	}
@@ -156,7 +156,7 @@ func TestContext_RoundTrip(t *testing.T) {
 		CreatedAt:     now,
 		Initiative:    "Round Trip Test",
 		Complexity:    "SYSTEM",
-		ActiveRite:    "test-pack",
+		ActiveRite:    "test-rite",
 		CurrentPhase:  "design",
 		Body:          "\n# Test Body\n",
 	}
@@ -217,7 +217,7 @@ func TestNewContext(t *testing.T) {
 
 func TestContext_Validate(t *testing.T) {
 	// Valid context
-	ctx := NewContext("Test", "MODULE", "test-pack")
+	ctx := NewContext("Test", "MODULE", "test-rite")
 	issues := ctx.Validate()
 	if len(issues) > 0 {
 		t.Errorf("Validate() returned issues for valid context: %v", issues)
@@ -248,7 +248,7 @@ func TestContext_FrayFields_RoundTrip(t *testing.T) {
 		CreatedAt:     now,
 		Initiative:    "Fray Test",
 		Complexity:    "MODULE",
-		ActiveRite:    "test-pack",
+		ActiveRite:    "test-rite",
 		CurrentPhase:  "design",
 		FrayedFrom:    "session-20260101-120000-abcdef01",
 		FrayPoint:     "design",
@@ -330,7 +330,7 @@ func TestContext_FrayFields_StrandsArray(t *testing.T) {
 		CreatedAt:     now,
 		Initiative:    "Strands Test",
 		Complexity:    "MODULE",
-		ActiveRite:    "test-pack",
+		ActiveRite:    "test-rite",
 		CurrentPhase:  "design",
 		Strands:       []string{"session-20260201-100000-aaa11111", "session-20260202-110000-bbb22222"},
 		Body:          "\n# Test\n",

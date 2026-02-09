@@ -250,8 +250,8 @@ If user-facing documentation is required, produce a HANDOFF artifact for docs:
 
 ```yaml
 ---
-source_team: 10x-dev
-target_team: docs
+source_rite: 10x-dev
+target_rite: docs
 handoff_type: assessment
 created: 2026-01-02
 initiative: User Profile Settings Feature

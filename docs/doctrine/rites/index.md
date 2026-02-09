@@ -12,7 +12,7 @@ A **rite** is a practice bundle that provides specialized workflows for differen
 |------|------|--------|-------|---------|
 | [10x-dev](10x-dev.md) | Full | 5 | orchestrator | Full development lifecycle |
 | [docs](docs.md) | Full | 5 | orchestrator | Documentation workflow |
-| [forge](forge.md) | Meta | 7 | orchestrator | Agent team creation |
+| [forge](forge.md) | Meta | 7 | orchestrator | Rite creation |
 | [hygiene](hygiene.md) | Full | 5 | orchestrator | Code quality lifecycle |
 | [debt-triage](debt-triage.md) | Full | 4 | orchestrator | Technical debt management |
 | [security](security.md) | Full | 5 | orchestrator | Security assessment lifecycle |
@@ -49,7 +49,7 @@ Special rites that operate on the rite system itself. The **forge** rite is the 
 
 ### Documentation & Knowledge
 - [docs](docs.md) — Documentation creation and maintenance
-- [forge](forge.md) — Creating new agent teams (meta-rite)
+- [forge](forge.md) — Creating new rites (meta-rite)
 
 ### Security & Reliability
 - [security](security.md) — Security assessments and threat modeling

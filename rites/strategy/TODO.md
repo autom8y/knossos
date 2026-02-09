@@ -52,7 +52,7 @@ The strategy rite is a **well-designed, methodologically rigorous rite** with cl
   ```markdown
   ## When to Use Strategy vs Intelligence
 
-  | Question Type | Team | Examples |
+  | Question Type | Rite | Examples |
   |---------------|------|----------|
   | What's the market opportunity? | strategy | Market sizing, TAM/SAM/SOM analysis |
   | Who are our competitors? | strategy | Competitive intelligence, threat assessment |
@@ -99,8 +99,8 @@ The strategy rite is a **well-designed, methodologically rigorous rite** with cl
 
   **Handoff artifact**:
   ```yaml
-  source_team: rnd
-  target_team: strategy
+  source_rite: rnd
+  target_rite: strategy
   handoff_type: strategic_evaluation
   context:
     initiative: "Event-Driven Architecture Migration"
@@ -175,8 +175,8 @@ The strategy rite is a **well-designed, methodologically rigorous rite** with cl
 - [ ] Add to pattern documentation:
   ```yaml
   # Example: strategy → 10x handoff (strategic initiative ready for implementation)
-  source_team: strategy
-  target_team: 10x-dev
+  source_rite: strategy
+  target_rite: 10x-dev
   handoff_type: implementation
   context:
     initiative: "Mobile-First Checkout Redesign"

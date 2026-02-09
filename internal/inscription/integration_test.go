@@ -35,7 +35,7 @@ Produces: Test reports
 	}
 
 	// Create ACTIVE_RITE file
-	if err := os.WriteFile(filepath.Join(claudeDir, "ACTIVE_RITE"), []byte("test-pack"), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(claudeDir, "ACTIVE_RITE"), []byte("test-rite"), 0644); err != nil {
 		t.Fatalf("Failed to create ACTIVE_RITE file: %v", err)
 	}
 
@@ -636,7 +636,7 @@ func TestInscription_RiteSwitchTriggersSync(t *testing.T) {
 <!-- KNOSSOS:START quick-start regenerate=true source=ACTIVE_RITE -->
 ## Quick Start
 
-This project uses a 3-agent workflow (old-pack):
+This project uses a 3-agent workflow (old-rite):
 <!-- KNOSSOS:END quick-start -->
 `
 	claudeMDPath := filepath.Join(claudeDir, "CLAUDE.md")
@@ -647,7 +647,7 @@ This project uses a 3-agent workflow (old-pack):
 	// Create manifest with old rite
 	manifestContent := `schema_version: "1.0"
 inscription_version: "1"
-active_rite: "old-pack"
+active_rite: "old-rite"
 regions:
   quick-start:
     owner: regenerate
@@ -663,7 +663,7 @@ section_order:
 	// Sync with new rite name (simulating rite switch)
 	pipeline := NewPipeline(tmpDir)
 	result, err := pipeline.Sync(InscriptionSyncOptions{
-		RiteName: "new-pack",
+		RiteName: "new-rite",
 	})
 	if err != nil {
 		t.Fatalf("Sync() with new rite error = %v", err)
@@ -679,8 +679,8 @@ section_order:
 		t.Fatalf("Failed to read CLAUDE.md: %v", err)
 	}
 
-	// The Quick Start should now reference new-pack (from the regeneration)
-	if strings.Contains(string(content), "old-pack") {
+	// The Quick Start should now reference new-rite (from the regeneration)
+	if strings.Contains(string(content), "old-rite") {
 		t.Error("Sync() should regenerate content with new rite name")
 	}
 
@@ -691,8 +691,8 @@ section_order:
 		t.Fatalf("Failed to load manifest: %v", err)
 	}
 
-	if manifest.ActiveRite != "new-pack" {
-		t.Errorf("Manifest active_rite = %q, want 'new-pack'", manifest.ActiveRite)
+	if manifest.ActiveRite != "new-rite" {
+		t.Errorf("Manifest active_rite = %q, want 'new-rite'", manifest.ActiveRite)
 	}
 }
 

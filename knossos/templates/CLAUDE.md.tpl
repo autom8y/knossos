@@ -2,7 +2,7 @@
 {{/* This template assembles all sections into the final CLAUDE.md */}}
 {{/*
   Template variables available:
-  - .ActiveRite   - Current rite name (e.g., "10x-dev-pack")
+  - .ActiveRite   - Current rite name (e.g., "10x-dev")
   - .AgentCount   - Number of agents in active rite
   - .Agents       - List of AgentInfo (Name, Role, Produces, FilePath)
   - .KnossosVars  - Custom variables map for project-specific values
@@ -20,7 +20,7 @@
 {{/* Core behavior (determines agent mode) */}}
 {{include "sections/execution-mode.md.tpl"}}
 
-{{/* Team context (who is available) */}}
+{{/* Rite context (who is available) */}}
 {{include "sections/quick-start.md.tpl"}}
 
 {{include "sections/agent-routing.md.tpl"}}

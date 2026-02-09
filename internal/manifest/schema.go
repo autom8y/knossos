@@ -28,7 +28,7 @@ var schemaFS embed.FS
 // Schema names for different manifest types
 const (
 	SchemaManifest     = "manifest"
-	SchemaTeamManifest = "team-manifest"
+	SchemaRiteManifest = "rite-manifest"
 )
 
 // SchemaValidator provides manifest schema validation.
@@ -94,8 +94,8 @@ func (v *SchemaValidator) Validate(m *Manifest, schemaName string, strict bool) 
 	switch schemaName {
 	case SchemaManifest:
 		validateManifestStructure(m.Content, result)
-	case SchemaTeamManifest:
-		validateTeamManifestStructure(m.Content, result)
+	case SchemaRiteManifest:
+		validateRiteManifestStructure(m.Content, result)
 	default:
 		// For unknown schemas, just check it's valid JSON (which it is if we loaded it)
 	}
@@ -131,8 +131,8 @@ func validateManifestStructure(content map[string]interface{}, result *Validatio
 	}
 }
 
-// validateTeamManifestStructure checks required fields for team manifest.
-func validateTeamManifestStructure(content map[string]interface{}, result *ValidationResult) {
+// validateRiteManifestStructure checks required fields for rite manifest.
+func validateRiteManifestStructure(content map[string]interface{}, result *ValidationResult) {
 	required := []string{"version", "name", "workflow", "agents"}
 	for _, field := range required {
 		if _, ok := content[field]; !ok {
@@ -329,10 +329,10 @@ func checkAdditionalProperties(content map[string]interface{}, schemaName string
 	// Known fields for manifest schema
 	knownFields := map[string]map[string]bool{
 		SchemaManifest: {
-			"version": true, "project": true, "teams": true,
+			"version": true, "project": true, "rites": true,
 			"paths": true, "schemas": true, "settings": true,
 		},
-		SchemaTeamManifest: {
+		SchemaRiteManifest: {
 			"version": true, "name": true, "description": true,
 			"workflow": true, "agents": true, "skills": true, "hooks": true,
 		},
@@ -368,7 +368,7 @@ func DetectSchemaFromPath(path string) (string, error) {
 		schema  string
 	}{
 		{regexp.MustCompile(`\.claude[/\\]manifest\.json$`), SchemaManifest},
-		{regexp.MustCompile(`teams[/\\][^/\\]+[/\\]manifest\.ya?ml$`), SchemaTeamManifest},
+		{regexp.MustCompile(`rites[/\\][^/\\]+[/\\]manifest\.ya?ml$`), SchemaRiteManifest},
 	}
 
 	for _, p := range patterns {
@@ -384,8 +384,8 @@ func DetectSchemaFromPath(path string) (string, error) {
 			return SchemaManifest, nil
 		}
 	case "manifest.yaml", "manifest.yml":
-		if strings.Contains(dir, "teams") {
-			return SchemaTeamManifest, nil
+		if strings.Contains(dir, "rites") {
+			return SchemaRiteManifest, nil
 		}
 	}
 
@@ -402,7 +402,7 @@ func GetSchemaInfo(m *Manifest) (*SchemaInfo, error) {
 		if m.Content != nil {
 			if _, hasAgents := m.Content["agents"]; hasAgents {
 				if _, hasWorkflow := m.Content["workflow"]; hasWorkflow {
-					schemaName = SchemaTeamManifest
+					schemaName = SchemaRiteManifest
 				}
 			} else {
 				schemaName = SchemaManifest

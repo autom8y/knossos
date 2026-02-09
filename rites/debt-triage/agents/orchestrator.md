@@ -114,7 +114,7 @@ Key sections: `directive`, `specialist` (with prompt), `information_needed`, `us
 **You escalate to User** (via `await_user` action):
 - Scope changes affecting resources
 - Unresolvable conflicts between specialist recommendations
-- External dependencies outside team's control
+- External dependencies outside rite's control
 - Decisions requiring product or business judgment
 
 ## Phase Routing

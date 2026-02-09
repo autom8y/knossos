@@ -265,15 +265,15 @@ Validation occurs post-generation to ensure artifacts meet schema requirements a
 
 ### Sprint Debt Package → HANDOFF
 
-**Requirement**: HANDOFF schema valid when `target_team` specified.
+**Requirement**: HANDOFF schema valid when `target_rite` specified.
 
 **Validations**:
-1. If `target_team` specified, HANDOFF section MUST be present
+1. If `target_rite` specified, HANDOFF section MUST be present
 2. HANDOFF section MUST include: context, deliverables, success_criteria
 3. All packages in HANDOFF scope MUST have clear ownership transfer
 
 **Errors**:
-- "target_team specified but HANDOFF section missing"
+- "target_rite specified but HANDOFF section missing"
 - "HANDOFF missing required field: {field}"
 
 ## Validation Implementation
