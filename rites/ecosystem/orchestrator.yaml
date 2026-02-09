@@ -62,8 +62,8 @@ skills:
 # Rite-specific anti-patterns
 antipatterns:
   - "Skipping backward compatibility analysis (every change affects satellites)"
-  - "Designing without considering all 10 teams"
+  - "Designing without considering all rites"
   - "Making schema changes without versioning strategy"
 
 # Cross-rite protocol
-cross_rite_protocol: "When changes affect other teams, escalate to user for coordination."
+cross_rite_protocol: "When changes affect other rites, escalate to user for coordination."

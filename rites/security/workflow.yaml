@@ -19,7 +19,7 @@ entry_point:
       path_template: docs/security/REVIEW-{slug}.md
 
 # External consultation support
-# Allows other teams (primarily 10x-dev) to invoke threat-modeler
+# Allows other rites (primarily 10x-dev) to invoke threat-modeler
 # for design review without running full security workflow
 external_consultation:
   enabled: true

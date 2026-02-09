@@ -1,4 +1,4 @@
-# Debt Triage Pack
+# Debt Triage Rite
 
 Technical debt management lifecycle for cataloging, risk assessment, and sprint planning.
 

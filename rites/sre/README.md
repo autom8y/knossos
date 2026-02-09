@@ -1,4 +1,4 @@
-# SRE Pack
+# SRE Rite
 
 Reliability lifecycle for observability, incident management, infrastructure, and resilience testing.
 

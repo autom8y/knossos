@@ -1,4 +1,4 @@
-# 10x Dev Pack
+# 10x Dev Rite
 
 Full-lifecycle software development from product requirements through quality validation.
 

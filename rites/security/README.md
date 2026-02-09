@@ -1,4 +1,4 @@
-# Security Pack
+# Security Rite
 
 Security assessment, compliance mapping, penetration testing, and review for systems handling auth, crypto, PII, or external integrations.
 

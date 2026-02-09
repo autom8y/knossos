@@ -50,7 +50,7 @@ handoff_criteria:
 skills:
   - "@doc-rnd for artifact templates"
   - "@standards for technology philosophy"
-  - "@cross-rite for handoff patterns to other teams"
+  - "@cross-rite for handoff patterns to other rites"
 
 # Rite-specific anti-patterns
 antipatterns:

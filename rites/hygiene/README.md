@@ -1,4 +1,4 @@
-# Hygiene Pack
+# Hygiene Rite
 
 Code quality lifecycle rite for systematic cleanup and refactoring.
 

@@ -13,4 +13,4 @@ When modifying files in internal/provenance/:
 - Manifest validation enforces: schema_version (N.N), non-zero timestamps, valid owner/scope enums, sha256 checksums
 - migrateV1ToV2() handles backward compat: SourcePipeline→Scope, unknown→untracked
 - Two manifests: PROVENANCE_MANIFEST.yaml (rite scope), USER_PROVENANCE_MANIFEST.yaml (user scope)
-- One-way dependency: materialize and usersync import provenance, never the reverse
+- One-way dependency: materialize imports provenance, never the reverse

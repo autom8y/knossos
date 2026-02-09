@@ -1,4 +1,4 @@
-# R&D Pack
+# R&D Rite
 
 Technology scouting, integration analysis, prototyping, and future architecture.
 
