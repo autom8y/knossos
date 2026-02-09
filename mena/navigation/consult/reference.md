@@ -49,7 +49,7 @@ You're in a session without rite orchestration. In this mode:
 
 Options:
 1. Continue directly - You can implement this yourself
-2. Switch to orchestrated mode: /rite <pack-name>
+2. Switch to orchestrated mode: /rite <rite-name>
 3. Get routing advice - Describe your task and I'll suggest an approach
 ```
 

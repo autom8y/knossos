@@ -34,7 +34,7 @@ SESSION_CONTEXT is a YAML-frontmatter Markdown file that stores session metadata
 
 | Field | Type | Required | Set By | Description |
 |-------|------|----------|--------|-------------|
-| `active_rite` | string | Yes | /start | Rite pack name (e.g., "10x-dev") |
+| `active_rite` | string | Yes | /start | Rite name (e.g., "10x-dev") |
 | `current_phase` | enum | Yes | /start | requirements \| design \| implementation \| validation |
 | `last_agent` | string | No | Agent invocations | Last agent to work on session |
 | `handoff_count` | integer | No | /handoff | Number of agent handoffs |
@@ -220,10 +220,10 @@ context_version: "1.0"
 
 ## Mutation Authority
 
-**CRITICAL**: All SESSION_CONTEXT modifications MUST go through `state-mate` agent.
+**CRITICAL**: All SESSION_CONTEXT modifications MUST go through `moirai` agent.
 
 Direct writes via Edit/Write tools are **blocked** by the PreToolUse hook. See:
-- [state-mate invocation pattern](../shared/moirai-invocation.md)
+- [Moirai invocation pattern](../shared/moirai-invocation.md)
 - ADR-0005-state-mate-centralized-state-authority.md
 
 ## Cross-References

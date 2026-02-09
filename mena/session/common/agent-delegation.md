@@ -207,7 +207,7 @@ See: [Moirai Invocation Pattern](../shared/moirai-invocation.md)
 Agent completes task and returns artifacts:
 
 1. **Verify artifacts exist** via Read tool
-2. **Update SESSION_CONTEXT** via state-mate
+2. **Update SESSION_CONTEXT** via moirai
 3. **Display confirmation** to user
 4. **Proceed** to next step
 

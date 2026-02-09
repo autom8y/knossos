@@ -46,7 +46,7 @@ The Moirai will route to **Lachesis** (the Measurer), who will:
 - Preserve session for later resume
 - Validate lifecycle transition is legal
 
-**Note**: `state-mate` alias is supported for backward compatibility.
+**Note**: `moirai` is the current agent name (formerly state-mate).
 
 See [Moirai Invocation Pattern](../shared/moirai-invocation.md) for response handling and error types.
 

@@ -37,9 +37,9 @@ Apply [Workflow Resolution Pattern](../shared/workflow-resolution.md):
 - Target agent: Default to `last_agent` or override with `--agent=NAME`
 - Validate agent exists in current rite
 
-### 5. Invoke state-mate for Resume Mutation
+### 5. Invoke Moirai for Resume Mutation
 
-Apply [state-mate Invocation Pattern](../shared/moirai-invocation.md):
+Apply [Moirai Invocation Pattern](../shared/moirai-invocation.md):
 - Operation: `resume_session`
 - Post-action: Invoke selected agent with full session context
 

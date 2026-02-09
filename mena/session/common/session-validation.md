@@ -300,7 +300,7 @@ yq e 'has("{field}")' SESSION_CONTEXT.md
 | /park | Before state capture | Yes |
 | /resume | Before agent invocation | Yes (errors), No (warnings) |
 | /wrap | Before quality gates | Yes (unless --skip-checks) |
-| /handoff | Before state-mate call | Yes |
+| /handoff | Before moirai call | Yes |
 
 ## Error Handling Philosophy
 

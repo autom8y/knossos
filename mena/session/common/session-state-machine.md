@@ -4,7 +4,7 @@
 
 ## Overview
 
-Sessions move through a simple state machine with three primary states: **Active**, **Parked**, and **Archived**. State transitions are triggered by session-lifecycle commands and enforced by the state-mate agent.
+Sessions move through a simple state machine with three primary states: **Active**, **Parked**, and **Archived**. State transitions are triggered by session-lifecycle commands and enforced by the moirai agent.
 
 ## State Diagram
 
@@ -114,15 +114,15 @@ Sessions move through a simple state machine with three primary states: **Active
 **Actions**:
 1. Capture current work state (git status, phase, artifacts)
 2. Generate parking summary
-3. Invoke state-mate: `park_session reason='{reason}'`
-4. state-mate sets `parked_at`, `parked_reason`, `parked_phase`, etc.
+3. Invoke moirai: `park_session reason='{reason}'`
+4. moirai sets `parked_at`, `parked_reason`, `parked_phase`, etc.
 
 **Post-conditions**:
 - State → PARKED
 - `parked_at` timestamp set
 - Parking summary appended to SESSION_CONTEXT body
 
-**Rollback**: If state-mate fails, state remains ACTIVE (no mutation)
+**Rollback**: If moirai fails, state remains ACTIVE (no mutation)
 
 ---
 
@@ -139,8 +139,8 @@ Sessions move through a simple state machine with three primary states: **Active
 **Actions**:
 1. Display session summary (how long parked, reason, state)
 2. Validate team/git consistency (warnings only)
-3. Invoke state-mate: `resume_session`
-4. state-mate removes `parked_*` fields, sets `resumed_at`
+3. Invoke moirai: `resume_session`
+4. moirai removes `parked_*` fields, sets `resumed_at`
 5. Invoke selected agent with full context
 
 **Post-conditions**:
@@ -149,7 +149,7 @@ Sessions move through a simple state machine with three primary states: **Active
 - `resumed_at` timestamp set
 - `resume_count` incremented
 
-**Rollback**: If state-mate fails, state remains PARKED
+**Rollback**: If moirai fails, state remains PARKED
 
 ---
 
@@ -166,8 +166,8 @@ Sessions move through a simple state machine with three primary states: **Active
 **Actions**:
 1. Run quality gate validation
 2. Optionally offer QA review
-3. Invoke state-mate: `wrap_session`
-4. state-mate sets `completed_at`, generates summary
+3. Invoke moirai: `wrap_session`
+4. moirai sets `completed_at`, generates summary
 5. Move SESSION_CONTEXT to archive
 6. Create session summary in `/docs/sessions/`
 7. Update session index
@@ -178,7 +178,7 @@ Sessions move through a simple state machine with three primary states: **Active
 - SESSION_CONTEXT moved from `.claude/sessions/` to archive
 - Session summary created
 
-**Rollback**: If state-mate or archival fails, state remains ACTIVE
+**Rollback**: If moirai or archival fails, state remains ACTIVE
 
 ---
 
@@ -198,19 +198,19 @@ Sessions move through a simple state machine with three primary states: **Active
 
 ## State Enforcement
 
-### state-mate Authority
+### Moirai Authority
 
-All state transitions MUST go through `state-mate` agent. Direct file writes are blocked by PreToolUse hook.
+All state transitions MUST go through `moirai` agent. Direct file writes are blocked by PreToolUse hook.
 
-See: [state-mate Invocation Pattern](../shared/moirai-invocation.md)
+See: [Moirai Invocation Pattern](../shared/moirai-invocation.md)
 
 ### Validation Hooks
 
 | Hook | Check | Action |
 |------|-------|--------|
-| PreToolUse | Edit/Write to SESSION_CONTEXT | Block, suggest state-mate |
+| PreToolUse | Edit/Write to SESSION_CONTEXT | Block, suggest moirai |
 | SessionStart | Load session state | Display to user |
-| PostToolUse | state-mate response | Validate state transition |
+| PostToolUse | moirai response | Validate state transition |
 
 ### State Query
 
@@ -233,7 +233,7 @@ These transitions are **not allowed**:
 | None | PARKED | Can't park non-existent session |
 | None | ARCHIVED | Can't archive non-existent session |
 
-**Enforcement**: state-mate returns error, PreToolUse blocks direct writes
+**Enforcement**: moirai returns error, PreToolUse blocks direct writes
 
 ## State Metadata
 
@@ -299,7 +299,7 @@ total_duration=$(calculate_duration "$created_at" "$completed_at")
 
 ### State Transition Failures
 
-If state-mate returns error:
+If moirai returns error:
 
 1. **Parse error message** and `error_type`
 2. **Surface to user** with hint
@@ -318,7 +318,7 @@ Example error:
 
 ### Concurrent Mutation Prevention
 
-state-mate uses atomic file writes to prevent race conditions. If multiple commands run concurrently, last-write-wins with warning.
+moirai uses atomic file writes to prevent race conditions. If multiple commands run concurrently, last-write-wins with warning.
 
 **Best Practice**: One command at a time per session.
 
@@ -340,5 +340,5 @@ This creates a full history of session lifecycle.
 
 - [Session Context Schema](session-context-schema.md) - Field definitions
 - [Session Validation](session-validation.md) - Pre-flight checks
-- [state-mate Invocation](../shared/moirai-invocation.md) - Mutation pattern
+- [Moirai Invocation](../shared/moirai-invocation.md) - Mutation pattern
 - ADR-0005-state-mate-centralized-state-authority.md - Design rationale

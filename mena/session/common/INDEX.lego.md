@@ -39,7 +39,7 @@ See [session-context-schema](../../session-common/session-context-schema.md) for
 | Directory | Contains | Example |
 |-----------|----------|---------|
 | `session-common/` | **What** (schemas, data structures) | Field definitions, state values |
-| `shared/` | **How** (validation patterns, invocation) | Session resolution logic, state-mate calls |
+| `shared/` | **How** (validation patterns, invocation) | Session resolution logic, moirai calls |
 
 Both are reference modules; neither is invoked directly.
 

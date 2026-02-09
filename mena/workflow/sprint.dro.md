@@ -18,7 +18,7 @@ Auto-injected by SessionStart hook (project, team, session, git).
 
 2. **Rite context**:
    - Verify `.claude/ACTIVE_RITE` exists
-   - If missing: ERROR "No rite active. Use /rite <pack-name> to select a rite."
+   - If missing: ERROR "No rite active. Use /rite <rite-name> to select a rite."
 
 ## Your Task
 

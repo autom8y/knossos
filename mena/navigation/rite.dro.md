@@ -1,7 +1,7 @@
 ---
 name: rite
 description: Switch rites or list available rites
-argument-hint: [pack-name] [--list] [--overwrite-diverged] [--dry-run] [--keep-orphans]
+argument-hint: [rite-name] [--list] [--overwrite-diverged] [--dry-run] [--keep-orphans]
 allowed-tools: Bash, Read
 model: sonnet
 disable-model-invocation: true
@@ -27,8 +27,8 @@ Manage rites. $ARGUMENTS
 1. Execute: `ari rite list`
 2. Display all available rites
 
-**If `<pack-name>` provided:**
-1. Execute: `ari sync --rite <pack-name>`
+**If `<rite-name>` provided:**
+1. Execute: `ari sync --rite <rite-name>`
 2. If orphan agents exist (agents in current project but not in target rite):
    - **Interactive (TTY)**: Prompt user for each orphan agent
    - **Non-interactive**: Require `--keep-orphans` flag

@@ -101,7 +101,7 @@ git worktree prune
 **Fix:**
 ```bash
 cd worktrees/wt-{id}
-ari sync --rite <pack-name>
+ari sync --rite <rite-name>
 ```
 
 ## Diagnostic Commands
