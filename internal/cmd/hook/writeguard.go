@@ -20,10 +20,13 @@ type ToolInput struct {
 }
 
 
-// Protected file patterns for context files.
+// Protected file patterns for context and platform infrastructure files.
 var protectedPatterns = []string{
 	"SESSION_CONTEXT.md",
 	"SPRINT_CONTEXT.md",
+	"PROVENANCE_MANIFEST.yaml",
+	"KNOSSOS_MANIFEST.yaml",
+	"settings.local.json",
 }
 
 // newWriteguardCmd creates the writeguard hook subcommand.

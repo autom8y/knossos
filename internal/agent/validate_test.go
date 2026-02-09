@@ -21,17 +21,17 @@ func TestArchetypeDefaults_IncludeCCNativeFields(t *testing.T) {
 	}{
 		{
 			name:               "orchestrator",
-			expectedMaxTurns:   3,
+			expectedMaxTurns:   40,
 			expectedDisallowed: []string{"Bash", "Write", "Edit", "Glob", "Grep", "Task"},
 		},
 		{
 			name:               "specialist",
-			expectedMaxTurns:   25,
+			expectedMaxTurns:   150,
 			expectedDisallowed: nil,
 		},
 		{
 			name:               "reviewer",
-			expectedMaxTurns:   15,
+			expectedMaxTurns:   100,
 			expectedDisallowed: []string{"Task"},
 		},
 	}

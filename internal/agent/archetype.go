@@ -81,7 +81,7 @@ var archetypes = map[string]*Archetype{
 			Model:           "opus",
 			Tools:           []string{"Read"},
 			Color:           "purple",
-			MaxTurns:        3,
+			MaxTurns:        40,
 			DisallowedTools: []string{"Bash", "Write", "Edit", "Glob", "Grep", "Task"},
 		},
 		Sections: []SectionDef{
@@ -118,7 +118,7 @@ var archetypes = map[string]*Archetype{
 			Model:           "opus",
 			Tools:           []string{"Bash", "Glob", "Grep", "Read", "Edit", "Write", "TodoWrite", "Skill"},
 			Color:           "orange",
-			MaxTurns:        25,
+			MaxTurns:        150,
 			DisallowedTools: nil,
 		},
 		Sections: []SectionDef{
@@ -153,7 +153,7 @@ var archetypes = map[string]*Archetype{
 			Model:           "opus",
 			Tools:           []string{"Bash", "Glob", "Grep", "Read", "Edit", "Write", "WebFetch", "WebSearch", "TodoWrite", "Skill"},
 			Color:           "red",
-			MaxTurns:        15,
+			MaxTurns:        100,
 			DisallowedTools: []string{"Task"},
 		},
 		Sections: []SectionDef{
