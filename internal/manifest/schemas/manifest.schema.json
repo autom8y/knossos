@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Claude Extension Manifest",
+  "title": "Knossos Project Manifest",
   "description": "Project-level configuration for Claude Code workflows",
   "type": "object",
   "required": ["version"],

@@ -1,5 +1,5 @@
 // Package manifest provides manifest loading, validation, diffing, and merging for Ariadne.
-// It handles Claude Extension Manifests (CEM) and rite manifests.
+// It handles project manifests and rite manifests.
 package manifest
 
 import (

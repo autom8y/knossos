@@ -108,7 +108,7 @@ func TestValidateAgentFrontmatter_EnhancedValid_StrictMode(t *testing.T) {
 	content := []byte(`---
 name: context-architect
 description: "Infrastructure designer who architects context solutions and ecosystem patterns"
-role: "Designs CEM/knossos schemas"
+role: "Designs sync/knossos schemas"
 type: specialist
 tools:
   - Bash
@@ -362,7 +362,7 @@ func TestValidateAgentFrontmatter_OrchestratorWarnings(t *testing.T) {
 
 	content := []byte(`---
 name: orchestrator
-description: "Coordinates ecosystem phases for CEM/knossos infrastructure work"
+description: "Coordinates ecosystem phases for sync/knossos infrastructure work"
 type: orchestrator
 tools: Read, Bash, Write
 model: opus
@@ -395,7 +395,7 @@ func TestValidateAgentFrontmatter_OrchestratorReadOnly(t *testing.T) {
 
 	content := []byte(`---
 name: orchestrator
-description: "Coordinates ecosystem phases for CEM/knossos infrastructure work"
+description: "Coordinates ecosystem phases for sync/knossos infrastructure work"
 type: orchestrator
 tools: Read
 model: opus

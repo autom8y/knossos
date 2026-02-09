@@ -27,7 +27,7 @@ func NewManifestCmd(outputFlag *string, verboseFlag *bool, projectDir *string) *
 	cmd := &cobra.Command{
 		Use:   "manifest",
 		Short: "Manage manifest files",
-		Long:  `Show, validate, diff, and merge Claude Extension Manifest (CEM) files.`,
+		Long:  `Show, validate, diff, and merge Knossos project manifest files.`,
 	}
 
 	// Add subcommands

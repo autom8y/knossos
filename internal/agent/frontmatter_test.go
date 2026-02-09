@@ -42,7 +42,7 @@ func TestParseAgentFrontmatter_Enhanced(t *testing.T) {
 	content := []byte(`---
 name: context-architect
 description: "Infrastructure designer who architects context solutions"
-role: "Designs CEM/knossos schemas"
+role: "Designs sync/knossos schemas"
 type: specialist
 tools:
   - Bash
@@ -85,8 +85,8 @@ schema_version: "1.0"
 	if fm.Type != "specialist" {
 		t.Errorf("type = %q, want %q", fm.Type, "specialist")
 	}
-	if fm.Role != "Designs CEM/knossos schemas" {
-		t.Errorf("role = %q, want %q", fm.Role, "Designs CEM/knossos schemas")
+	if fm.Role != "Designs sync/knossos schemas" {
+		t.Errorf("role = %q, want %q", fm.Role, "Designs sync/knossos schemas")
 	}
 	if len(fm.Tools) != 6 {
 		t.Errorf("tools count = %d, want 6", len(fm.Tools))

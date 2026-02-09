@@ -110,7 +110,7 @@ func (v *SchemaValidator) Validate(m *Manifest, schemaName string, strict bool) 
 	return result, nil
 }
 
-// validateManifestStructure checks required fields for CEM manifest.
+// validateManifestStructure checks required fields for project manifest.
 func validateManifestStructure(content map[string]interface{}, result *ValidationResult) {
 	// Required: version
 	if _, ok := content["version"]; !ok {
