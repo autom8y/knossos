@@ -67,9 +67,7 @@ Generates the complete `.claude/` directory structure from [SOURCE](../../refere
 |------|------|---------|-------------|
 | `--dry-run` | bool | false | Preview changes without applying |
 | `-f, --force` | bool | false | Force regeneration, overwriting local changes |
-| `--keep-all` | bool | true | Preserve orphan agents in `.claude/agents/` |
-| `--promote-all` | bool | false | Move orphan agents to user-level (`~/.claude/agents/`) |
-| `--remove-all` | bool | false | Remove orphan agents (with backup) |
+| `--keep-orphans` | bool | true | Preserve orphan agents in `.claude/agents/` |
 | `--rite` | string | current | Rite to materialize |
 
 **Examples**:
@@ -86,18 +84,15 @@ ari sync materialize --rite=docs
 # Force regeneration
 ari sync materialize --force
 
-# Remove orphaned agents
-ari sync materialize --remove-all
+# Remove orphaned agents (default behavior)
+ari sync materialize
 ```
 
 **Orphan Handling**:
-When switching rites, agents from the previous rite become "orphans":
-- `--keep-all` (default): Preserve orphans
-- `--remove-all`: Delete with backup
-- `--promote-all`: Move to `~/.claude/agents/`
+When switching rites, agents from the previous rite become "orphans" and are removed by default (with backup). Use `--keep-orphans` to preserve them in `.claude/agents/`.
 
 **Related Commands**:
-- [`ari rite swap`](cli-rite.md#ari-rite-swap) — Switch rites (calls materialize)
+- [`ari sync --rite`](cli-rite.md#ari-rite-swap) — Switch rites (replaces `ari rite swap`)
 - [`ari inscription sync`](cli-inscription.md#ari-inscription-sync) — Sync CLAUDE.md only
 
 ---
@@ -136,7 +131,7 @@ Pulls changes from the remote source with three-way conflict detection. If remot
 ari sync pull
 
 # Pull from specific remote
-ari sync pull /path/to/roster
+ari sync pull /path/to/knossos
 
 # Pull specific files
 ari sync pull --path=agents/ --path=skills/
@@ -378,7 +373,7 @@ All sync commands support these global flags:
 
 ```mermaid
 flowchart LR
-    A[SOURCE /roster/] --> B[ari sync materialize]
+    A[SOURCE /knossos/] --> B[ari sync materialize]
     B --> C[PROJECTION .claude/]
 
     subgraph SOURCE

@@ -228,9 +228,7 @@ Performs a complete rite replacement (not additive). Releases any active invocat
 | Flag | Type | Default | Description |
 |------|------|---------|-------------|
 | `--dry-run` | bool | false | Preview changes without applying |
-| `-k, --keep-all` | bool | true | Keep orphaned agents in `.claude/agents/` |
-| `-r, --remove-all` | bool | false | Remove orphaned agents (with backup) |
-| `-P, --promote-all` | bool | false | Promote orphans to user-level agents |
+| `-k, --keep-orphans` | bool | false | Keep orphaned agents in `.claude/agents/` (default: remove with backup) |
 | `--no-sync` | bool | false | Skip CLAUDE.md inscription sync |
 
 **Examples**:
@@ -238,19 +236,16 @@ Performs a complete rite replacement (not additive). Releases any active invocat
 # Switch to security rite
 ari rite swap security
 
-# Switch and remove orphans
-ari rite swap 10x-dev --remove-all
-
 # Preview swap
 ari rite swap docs --dry-run
 
-# Promote orphaned agents to user level
-ari rite swap hygiene --promote-all
+# Keep orphaned agents (prevent removal)
+ari rite swap hygiene --keep-orphans
 ```
 
 **Related Commands**:
 - [`ari rite invoke`](#ari-rite-invoke) — Additive borrowing (not replacement)
-- [`ari sync materialize`](cli-sync.md#ari-sync-materialize) — Regenerate rite artifacts
+- [`ari sync --rite`](cli-sync.md#ari-sync-materialize) — Unified sync command (replaces `ari rite swap` and `ari sync materialize`)
 
 ---
 
