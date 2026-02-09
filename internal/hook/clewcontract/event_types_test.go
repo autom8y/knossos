@@ -30,6 +30,13 @@ func TestEventTypes_DotNamespaced(t *testing.T) {
 		{"SessionEnd", EventTypeSessionEnd, "session.ended", "session", "past"},
 		{"SessionFrayed", EventTypeSessionFrayed, "session.frayed", "session", "past"},
 		{"StrandResolved", EventTypeStrandResolved, "session.strand_resolved", "session", "past"},
+		{"SessionCreated", EventTypeSessionCreated, "session.created", "session", "past"},
+		{"SessionParked", EventTypeSessionParked, "session.parked", "session", "past"},
+		{"SessionResumed", EventTypeSessionResumed, "session.resumed", "session", "past"},
+		{"SessionArchived", EventTypeSessionArchived, "session.archived", "session", "past"},
+
+		// Phase namespace - past tense for state changes
+		{"PhaseTransitioned", EventTypePhaseTransitioned, "phase.transitioned", "phase", "past"},
 
 		// Quality namespace - past tense for state
 		{"SailsGenerated", EventTypeSailsGenerated, "quality.sails_generated", "quality", "past"},
@@ -48,7 +55,7 @@ func TestEventTypes_DotNamespaced(t *testing.T) {
 	}
 }
 
-// TestEventTypes_Count verifies we have exactly 15 event types (14 renamed + 1 deferred).
+// TestEventTypes_Count verifies we have exactly 20 event types (19 renamed + 1 deferred).
 func TestEventTypes_Count(t *testing.T) {
 	allTypes := []EventType{
 		EventTypeToolCall,
@@ -66,10 +73,15 @@ func TestEventTypes_Count(t *testing.T) {
 		EventTypeHandoffExecuted,
 		EventTypeSessionFrayed,
 		EventTypeStrandResolved,
+		EventTypeSessionCreated,
+		EventTypeSessionParked,
+		EventTypeSessionResumed,
+		EventTypeSessionArchived,
+		EventTypePhaseTransitioned,
 	}
 
-	if len(allTypes) != 15 {
-		t.Errorf("Expected 15 event types, got %d", len(allTypes))
+	if len(allTypes) != 20 {
+		t.Errorf("Expected 20 event types, got %d", len(allTypes))
 	}
 }
 
@@ -85,9 +97,28 @@ func TestEventTypes_NamingConventions(t *testing.T) {
 		{"session.ended", EventTypeSessionEnd, true},
 		{"session.frayed", EventTypeSessionFrayed, true},
 		{"session.strand_resolved", EventTypeStrandResolved, true},
+		{"session.created", EventTypeSessionCreated, true},
+		{"session.parked", EventTypeSessionParked, true},
+		{"session.resumed", EventTypeSessionResumed, true},
+		{"session.archived", EventTypeSessionArchived, true},
+	}
+
+	// Phase namespace: all past tense (state changes)
+	phaseTypes := []struct {
+		name      string
+		eventType EventType
+		wantPast  bool
+	}{
+		{"phase.transitioned", EventTypePhaseTransitioned, true},
 	}
 
 	for _, tt := range sessionTypes {
+		if !tt.wantPast {
+			t.Errorf("%s should use past tense (state change)", tt.name)
+		}
+	}
+
+	for _, tt := range phaseTypes {
 		if !tt.wantPast {
 			t.Errorf("%s should use past tense (state change)", tt.name)
 		}

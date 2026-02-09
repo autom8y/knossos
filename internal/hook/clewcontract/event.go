@@ -27,6 +27,11 @@ const (
 	EventTypeHandoffExecuted EventType = "agent.handoff_executed"
 	EventTypeSessionFrayed   EventType = "session.frayed"
 	EventTypeStrandResolved  EventType = "session.strand_resolved"
+	EventTypeSessionCreated     EventType = "session.created"
+	EventTypeSessionParked      EventType = "session.parked"
+	EventTypeSessionResumed     EventType = "session.resumed"
+	EventTypeSessionArchived    EventType = "session.archived"
+	EventTypePhaseTransitioned  EventType = "phase.transitioned"
 )
 
 // ArtifactType represents the type of artifact created during a session.
@@ -489,6 +494,107 @@ func NewStrandResolvedEvent(parentID, childID, resolution string) Event {
 			"parent_id":  parentID,
 			"child_id":   childID,
 			"resolution": resolution,
+		},
+	}
+}
+
+// NewSessionCreatedEvent creates an event for session creation.
+// This marks the creation of a new Claude Code session.
+//
+// Parameters:
+//   - sessionID: The unique session identifier
+//   - initiative: The initiative or goal for this session
+//   - complexity: Complexity rating (trivial, standard, complex, critical)
+//   - rite: The active rite (e.g., "10x-dev")
+func NewSessionCreatedEvent(sessionID, initiative, complexity, rite string) Event {
+	return Event{
+		Timestamp: timestamp(),
+		Type:      EventTypeSessionCreated,
+		Summary:   "Session created: " + sessionID,
+		Meta: map[string]interface{}{
+			"session_id": sessionID,
+			"initiative": initiative,
+			"complexity": complexity,
+			"rite":       rite,
+			"from":       "NONE",
+			"to":         "ACTIVE",
+		},
+	}
+}
+
+// NewSessionParkedEvent creates an event for session parking.
+// This marks the transition of a session from ACTIVE to PARKED status.
+//
+// Parameters:
+//   - sessionID: The unique session identifier
+//   - reason: The reason for parking the session
+func NewSessionParkedEvent(sessionID, reason string) Event {
+	return Event{
+		Timestamp: timestamp(),
+		Type:      EventTypeSessionParked,
+		Summary:   "Session parked: " + sessionID,
+		Meta: map[string]interface{}{
+			"session_id": sessionID,
+			"reason":     reason,
+			"from":       "ACTIVE",
+			"to":         "PARKED",
+		},
+	}
+}
+
+// NewSessionResumedEvent creates an event for session resumption.
+// This marks the transition of a session from PARKED to ACTIVE status.
+//
+// Parameters:
+//   - sessionID: The unique session identifier
+func NewSessionResumedEvent(sessionID string) Event {
+	return Event{
+		Timestamp: timestamp(),
+		Type:      EventTypeSessionResumed,
+		Summary:   "Session resumed: " + sessionID,
+		Meta: map[string]interface{}{
+			"session_id": sessionID,
+			"from":       "PARKED",
+			"to":         "ACTIVE",
+		},
+	}
+}
+
+// NewSessionArchivedEvent creates an event for session archival.
+// This marks the transition of a session to ARCHIVED status.
+//
+// Parameters:
+//   - sessionID: The unique session identifier
+//   - fromStatus: The status the session is transitioning from (e.g., "ACTIVE", "PARKED")
+func NewSessionArchivedEvent(sessionID, fromStatus string) Event {
+	return Event{
+		Timestamp: timestamp(),
+		Type:      EventTypeSessionArchived,
+		Summary:   "Session archived: " + sessionID,
+		Meta: map[string]interface{}{
+			"session_id": sessionID,
+			"from":       fromStatus,
+			"to":         "ARCHIVED",
+		},
+	}
+}
+
+// NewPhaseTransitionedEvent creates an event for workflow phase transition.
+// This marks a session moving from one phase to another.
+//
+// Parameters:
+//   - sessionID: The unique session identifier
+//   - fromPhase: The phase transitioning from (e.g., "design", "implementation")
+//   - toPhase: The phase transitioning to
+func NewPhaseTransitionedEvent(sessionID, fromPhase, toPhase string) Event {
+	return Event{
+		Timestamp: timestamp(),
+		Type:      EventTypePhaseTransitioned,
+		Summary:   fmt.Sprintf("Phase transitioned: %s -> %s", fromPhase, toPhase),
+		Meta: map[string]interface{}{
+			"session_id": sessionID,
+			"from_phase": fromPhase,
+			"to_phase":   toPhase,
 		},
 	}
 }
