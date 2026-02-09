@@ -50,7 +50,7 @@ All agents now include:
 ```
 $ ari sync --rite --dry-run intelligence
 
-[Roster] Dry-run: Would refresh intelligence
+[Sync] Dry-run: Would refresh intelligence
 
 Agent changes:
   + analytics-engineer.md (new)

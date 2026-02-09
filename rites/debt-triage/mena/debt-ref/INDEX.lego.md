@@ -405,7 +405,7 @@ items:
 ## Related Documentation
 
 - [COMMAND_REGISTRY.md](../../COMMAND_REGISTRY.md) - All registered commands
-- [ari sync --rite]($KNOSSOS_HOME/ari sync --rite) - Roster swap implementation
+- [ari sync --rite]($KNOSSOS_HOME/ari sync --rite) - Rite sync implementation
 
 ---
 

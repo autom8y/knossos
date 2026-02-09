@@ -54,7 +54,7 @@ If content changes more than once per session, it does not belong in CLAUDE.md.
 
 | Tier | Change Frequency | In CLAUDE.md? | Examples |
 |------|------------------|---------------|----------|
-| **STATIC** | Once (at init) | Rarely needed | Roster source reference |
+| **STATIC** | Once (at init) | Rarely needed | Rite catalog source reference |
 | **STABLE** | Weeks/months | **Yes** | Team, skills, workflow |
 | **DYNAMIC** | Days/weekly | **No** | Current initiative |
 | **EPHEMERAL** | Minutes/hourly | **No** | Git state, current task |

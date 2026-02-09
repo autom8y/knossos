@@ -59,4 +59,4 @@ antipatterns:
   - "Skipping prompt validation (prompts must be tested before deployment)"
   - "Agent proliferation (consolidate similar roles, avoid agent sprawl)"
 
-cross_rite_protocol: "Notify ecosystem of knossos changes affecting sync pipeline/skeleton. Coordinate with target team on agent specifications."
+cross_rite_protocol: "Notify ecosystem of knossos changes affecting sync pipeline/templates. Coordinate with target rite on agent specifications."

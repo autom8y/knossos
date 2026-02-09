@@ -34,9 +34,9 @@ description: |
 | **Agent Designer** | opus | purple | TEAM-SPEC, role definitions |
 | **Prompt Architect** | opus | cyan | Agent .md files (11 sections) |
 | **Workflow Engineer** | opus | green | workflow.yaml, commands |
-| **Platform Engineer** | sonnet | orange | Roster files, directory structure |
+| **Platform Engineer** | sonnet | orange | Rite catalog files, directory structure |
 | **Eval Specialist** | opus | red | eval-report.md, test results |
-| **Agent Curator** | sonnet | blue | Roster entry, Consultant sync |
+| **Agent Curator** | sonnet | blue | Catalog entry, Consultant sync |
 
 ### Workflow
 
@@ -194,7 +194,7 @@ Agent Designer → Prompt Architect → Workflow Engineer → Platform Engineer 
 - Version recording
 - Documentation
 
-**Produces**: Roster entry + Consultant sync
+**Produces**: Catalog entry + Consultant sync
 
 **Terminal**: Workflow completes here
 

@@ -287,7 +287,7 @@ If swap fails (unlikely - this is a core team):
 
 - [10x-workflow skill](../10x-workflow/INDEX.lego.md) - Agent coordination patterns
 - [COMMAND_REGISTRY.md](../../COMMAND_REGISTRY.md) - All registered commands
-- [ari sync --rite]($KNOSSOS_HOME/ari sync --rite) - Roster swap implementation
+- [ari sync --rite]($KNOSSOS_HOME/ari sync --rite) - Rite sync implementation
 
 ---
 

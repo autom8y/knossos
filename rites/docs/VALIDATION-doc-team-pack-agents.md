@@ -58,7 +58,7 @@ All agents have valid YAML frontmatter with required fields:
 ## ari sync --rite Dry-Run
 
 ```
-[Roster] Dry-run: Would refresh docs
+[Sync] Dry-run: Would refresh docs
 
 Agent changes:
   + doc-auditor.md (new)

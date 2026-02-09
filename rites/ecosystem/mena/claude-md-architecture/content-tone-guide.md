@@ -104,7 +104,7 @@ Use tables when behavior varies by state:
 ```markdown
 | Condition | Pattern |
 |-----------|---------|
-| Session active + team configured | Roster workflow applies |
+| Session active + rite configured | Knossos workflow applies |
 | Session active + no team | Partial workflow, native patterns may apply |
 | No session | Native Claude Code is fully valid |
 ```

@@ -57,7 +57,7 @@ The Agent Curator is the librarian. This agent maintains the canonical rite cata
                                     │
                                     ▼
                            Consultant Sync
-                          + Roster Entry
+                          + Catalog Entry
                           + Documentation
 ```
 

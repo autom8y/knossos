@@ -100,7 +100,7 @@ Expected: Agent either:
 
 Expected:
 - Team swaps successfully
-- Roster table displayed
+- Rite catalog table displayed
 - No errors
 
 ### Workflow Commands

@@ -53,7 +53,7 @@ All agents are now under the 200-line stretch goal.
 ## ari sync --rite Dry-Run Results
 
 ```
-[Roster] Dry-run: Would refresh sre
+[Sync] Dry-run: Would refresh sre
 
 Agent changes:
   + chaos-engineer.md (new)
