@@ -264,7 +264,7 @@ func GetExitCode(err error) int {
 	return ExitGeneralError
 }
 
-// --- Rite-domain error constructors (legacy team-domain) ---
+// --- Rite-domain error constructors ---
 
 // ErrOrphanConflict returns an error when orphaned agents detected without strategy.
 func ErrOrphanConflict(orphans []string, currentRite, targetRite string) *Error {

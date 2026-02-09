@@ -86,7 +86,7 @@ func newStatusCmd(ctx *cmdContext) *cobra.Command {
 		Use:   "status [id]",
 		Short: "Show worktree status",
 		Long: `Show detailed status for a worktree, including git state,
-session state, and team configuration.
+session state, and rite configuration.
 
 If no ID is specified and you're in a worktree, shows status for that worktree.
 

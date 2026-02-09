@@ -181,14 +181,14 @@ func TestMetadataManager(t *testing.T) {
 	}
 
 	// Update
-	wt.Rite = "new-team"
+	wt.Rite = "new-rite"
 	err = mgr.Update(wt)
 	if err != nil {
 		t.Fatalf("Failed to update: %v", err)
 	}
 	got, _ = mgr.Get(wt.ID)
-	if got.Rite != "new-team" {
-		t.Errorf("Expected rite new-team, got %s", got.Rite)
+	if got.Rite != "new-rite" {
+		t.Errorf("Expected rite new-rite, got %s", got.Rite)
 	}
 
 	// Remove
@@ -710,7 +710,7 @@ func TestMetadataJSON(t *testing.T) {
 		ID:         "wt-20260104-143052-a1b2",
 		Name:       "test",
 		Path:       "/tmp/test",
-		Rite:       "team",
+		Rite:       "test-rite",
 		CreatedAt:  time.Now().UTC(),
 		BaseBranch: "main",
 		FromRef:    "HEAD",

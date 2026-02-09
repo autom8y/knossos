@@ -39,7 +39,7 @@ func newExportCmd(ctx *cmdContext) *cobra.Command {
 
 The archive includes:
 - All worktree files (excluding .git)
-- Worktree metadata (team, complexity, etc.)
+- Worktree metadata (rite, complexity, etc.)
 - Current git ref for reproducibility
 
 Examples:

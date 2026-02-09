@@ -327,7 +327,7 @@ type RiteSwapOutput struct {
 
 // Text implements Textable for RiteSwapOutput.
 func (s RiteSwapOutput) Text() string {
-	// Silent on success per TDD (same as team switch)
+	// Silent on success per TDD (same as rite switch)
 	return ""
 }
 

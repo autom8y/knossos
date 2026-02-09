@@ -131,19 +131,19 @@ func TestDetermineExecutionMode(t *testing.T) {
 			want:       "native",
 		},
 		{
-			name:       "session with team is orchestrated",
+			name:       "session with rite is orchestrated",
 			hasSession: true,
 			activeRite: "10x-dev",
 			want:       "orchestrated",
 		},
 		{
-			name:       "session with 'none' team is cross-cutting",
+			name:       "session with 'none' rite is cross-cutting",
 			hasSession: true,
 			activeRite: "none",
 			want:       "cross-cutting",
 		},
 		{
-			name:       "session with empty team is cross-cutting",
+			name:       "session with empty rite is cross-cutting",
 			hasSession: true,
 			activeRite: "",
 			want:       "cross-cutting",

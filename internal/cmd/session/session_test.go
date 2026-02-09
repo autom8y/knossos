@@ -105,7 +105,7 @@ func TestCreate_BasicCreation(t *testing.T) {
 		t.Errorf("Complexity = %q, want %q", sessCtx.Complexity, "MODULE")
 	}
 
-	// Verify team (Team is a pointer, may be nil for cross-cutting sessions)
+	// Verify rite (Rite is a pointer, may be nil for cross-cutting sessions)
 	if sessCtx.Rite != nil && *sessCtx.Rite != "10x-dev" {
 		t.Errorf("Team = %q, want %q", *sessCtx.Rite, "10x-dev")
 	}

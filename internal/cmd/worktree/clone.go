@@ -55,7 +55,7 @@ func newCloneCmd(ctx *cmdContext) *cobra.Command {
 		Long: `Clone an existing worktree, creating a new one with copied metadata.
 
 The new worktree is created from the source worktree's current HEAD,
-preserving team, complexity, and other metadata settings.
+preserving rite, complexity, and other metadata settings.
 
 Examples:
   ari worktree clone feature-auth feature-auth-v2

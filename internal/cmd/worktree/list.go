@@ -76,7 +76,7 @@ func newListCmd(ctx *cmdContext) *cobra.Command {
 		Use:   "list",
 		Short: "List all worktrees",
 		Long: `List all git worktrees associated with this repository,
-including their session and team status.
+including their session and rite status.
 
 Examples:
   ari worktree list

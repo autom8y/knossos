@@ -88,7 +88,7 @@ func TestRiteContext_Validate(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "missing team name",
+			name: "missing rite name",
 			ctx: &RiteContext{
 				SchemaVersion: "1.0",
 			},
@@ -228,27 +228,27 @@ func TestContextLoader_Load_EmptyRiteName(t *testing.T) {
 func TestContextLoader_Load_MalformedYAML(t *testing.T) {
 	// Create a temporary directory with malformed YAML
 	tmpDir := t.TempDir()
-	teamDir := filepath.Join(tmpDir, "bad-team")
-	if err := os.MkdirAll(teamDir, 0755); err != nil {
-		t.Fatalf("failed to create team dir: %v", err)
+	riteDir := filepath.Join(tmpDir, "bad-rite")
+	if err := os.MkdirAll(riteDir, 0755); err != nil {
+		t.Fatalf("failed to create rite dir: %v", err)
 	}
 
 	// Write malformed YAML
 	malformedYAML := `schema_version: "1.0"
-rite_name: bad-team
+rite_name: bad-rite
 context_rows:
   - key: "unclosed string
     value: broken`
 
-	if err := os.WriteFile(filepath.Join(teamDir, "context.yaml"), []byte(malformedYAML), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(riteDir, "context.yaml"), []byte(malformedYAML), 0644); err != nil {
 		t.Fatalf("failed to write malformed YAML: %v", err)
 	}
 
 	loader := NewContextLoaderWithPaths(tmpDir, "")
 
-	_, err := loader.Load("bad-team")
+	_, err := loader.Load("bad-rite")
 	if err == nil {
-		t.Fatal("Load(bad-team) error = nil, want parse error")
+		t.Fatal("Load(bad-rite) error = nil, want parse error")
 	}
 }
 
@@ -299,12 +299,12 @@ func TestContextLoader_InvalidateAll(t *testing.T) {
 	ritesDir := getTestDataPath(t)
 	loader := NewContextLoaderWithPaths(ritesDir, "")
 
-	// Load multiple teams
+	// Load multiple rites
 	_, _ = loader.Load("valid-rite")
 	_, _ = loader.Load("minimal-rite")
 
 	if !loader.IsCached("valid-rite") || !loader.IsCached("minimal-rite") {
-		t.Error("teams not cached after Load")
+		t.Error("rites not cached after Load")
 	}
 
 	// Invalidate all
@@ -332,7 +332,7 @@ func TestContextLoader_HasContextFile(t *testing.T) {
 		t.Error("HasContextFile(minimal-rite) = true, want false")
 	}
 
-	// non-existent team
+	// non-existent rite
 	if loader.HasContextFile("non-existent") {
 		t.Error("HasContextFile(non-existent) = true, want false")
 	}
@@ -351,47 +351,47 @@ func TestContextLoader_GetContextPath(t *testing.T) {
 }
 
 func TestContextLoader_UserDirPriority(t *testing.T) {
-	// Create temp directories for project and user teams
+	// Create temp directories for project and user rites
 	projectDir := t.TempDir()
 	userDir := t.TempDir()
 
-	teamName := "priority-team"
+	riteName := "priority-rite"
 
-	// Create team in both directories
-	projectTeamDir := filepath.Join(projectDir, teamName)
-	userTeamDir := filepath.Join(userDir, teamName)
+	// Create rite in both directories
+	projectRiteDir := filepath.Join(projectDir, riteName)
+	userRiteDir := filepath.Join(userDir, riteName)
 
-	if err := os.MkdirAll(projectTeamDir, 0755); err != nil {
-		t.Fatalf("failed to create project team dir: %v", err)
+	if err := os.MkdirAll(projectRiteDir, 0755); err != nil {
+		t.Fatalf("failed to create project rite dir: %v", err)
 	}
-	if err := os.MkdirAll(userTeamDir, 0755); err != nil {
-		t.Fatalf("failed to create user team dir: %v", err)
+	if err := os.MkdirAll(userRiteDir, 0755); err != nil {
+		t.Fatalf("failed to create user rite dir: %v", err)
 	}
 
 	// Write project context
 	projectContext := `schema_version: "1.0"
-rite_name: priority-team
+rite_name: priority-rite
 context_rows:
   - key: Source
     value: Project`
 
 	// Write user context (should take priority)
 	userContext := `schema_version: "1.0"
-rite_name: priority-team
+rite_name: priority-rite
 context_rows:
   - key: Source
     value: User`
 
-	if err := os.WriteFile(filepath.Join(projectTeamDir, "context.yaml"), []byte(projectContext), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(projectRiteDir, "context.yaml"), []byte(projectContext), 0644); err != nil {
 		t.Fatalf("failed to write project context: %v", err)
 	}
-	if err := os.WriteFile(filepath.Join(userTeamDir, "context.yaml"), []byte(userContext), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(userRiteDir, "context.yaml"), []byte(userContext), 0644); err != nil {
 		t.Fatalf("failed to write user context: %v", err)
 	}
 
 	loader := NewContextLoaderWithPaths(projectDir, userDir)
 
-	ctx, err := loader.Load(teamName)
+	ctx, err := loader.Load(riteName)
 	if err != nil {
 		t.Fatalf("Load() error = %v", err)
 	}
@@ -405,16 +405,16 @@ context_rows:
 func TestContextLoader_SaveContext(t *testing.T) {
 	ritesDir := t.TempDir()
 
-	// Create team directory
-	teamDir := filepath.Join(ritesDir, "save-team")
-	if err := os.MkdirAll(teamDir, 0755); err != nil {
-		t.Fatalf("failed to create team dir: %v", err)
+	// Create rite directory
+	riteDir := filepath.Join(ritesDir, "save-rite")
+	if err := os.MkdirAll(riteDir, 0755); err != nil {
+		t.Fatalf("failed to create rite dir: %v", err)
 	}
 
 	loader := NewContextLoaderWithPaths(ritesDir, "")
 
-	ctx := NewRiteContext("save-team")
-	ctx.DisplayName = "Save Test Team"
+	ctx := NewRiteContext("save-rite")
+	ctx.DisplayName = "Save Test Rite"
 	ctx.Domain = "testing"
 	ctx.AddRow("Key", "Value")
 
@@ -423,19 +423,19 @@ func TestContextLoader_SaveContext(t *testing.T) {
 	}
 
 	// Verify file was created
-	contextPath := filepath.Join(teamDir, "context.yaml")
+	contextPath := filepath.Join(riteDir, "context.yaml")
 	if _, err := os.Stat(contextPath); os.IsNotExist(err) {
 		t.Fatalf("context.yaml not created at %s", contextPath)
 	}
 
 	// Load it back
-	loaded, err := loader.Load("save-team")
+	loaded, err := loader.Load("save-rite")
 	if err != nil {
 		t.Fatalf("Load() error = %v", err)
 	}
 
-	if loaded.DisplayName != "Save Test Team" {
-		t.Errorf("loaded DisplayName = %q, want %q", loaded.DisplayName, "Save Test Team")
+	if loaded.DisplayName != "Save Test Rite" {
+		t.Errorf("loaded DisplayName = %q, want %q", loaded.DisplayName, "Save Test Rite")
 	}
 
 	if loaded.GetRow("Key") != "Value" {

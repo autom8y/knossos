@@ -49,7 +49,7 @@ func newSwitchCmd(ctx *cmdContext) *cobra.Command {
 		Short: "Switch context to a different worktree",
 		Long: `Switch the active context to a different worktree.
 
-This command updates session context and optionally syncs the team configuration.
+This command updates session context and optionally syncs the rite configuration.
 Note: This does not change your shell's working directory. Use 'cd' to navigate.
 
 Examples:

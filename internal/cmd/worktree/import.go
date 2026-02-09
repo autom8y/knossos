@@ -46,7 +46,7 @@ func newImportCmd(ctx *cmdContext) *cobra.Command {
 
 The imported worktree will have:
 - A new unique ID (preserving original ID in metadata)
-- Same name and team as the exported worktree
+- Same name and rite as the exported worktree
 - Files restored to the archived git ref
 - Ecosystem setup (materialization, rite) applied
 

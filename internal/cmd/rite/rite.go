@@ -31,7 +31,7 @@ func NewRiteCmd(outputFlag *string, verboseFlag *bool, projectDir *string) *cobr
 
 Rites are composable practice bundles. The invoke operation is additive
 (borrow components without switching), while swap is replacement
-(same as team switch).`,
+(same as rite switch).`,
 	}
 
 	// Add subcommands

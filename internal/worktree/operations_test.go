@@ -138,7 +138,7 @@ func TestCloneWorktree(t *testing.T) {
 	// Create source worktree
 	source, err := mgr.Create(CreateOptions{
 		Name:       "source-wt",
-		Rite:       "source-team",
+		Rite:       "source-rite",
 		Complexity: "MODULE",
 	})
 	if err != nil {
@@ -340,7 +340,7 @@ func TestExportImportRoundtrip(t *testing.T) {
 	// Create a worktree with some content
 	wt, err := mgr.Create(CreateOptions{
 		Name:       "export-test",
-		Rite:       "export-team",
+		Rite:       "export-rite",
 		Complexity: "SYSTEM",
 	})
 	if err != nil {

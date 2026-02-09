@@ -13,7 +13,7 @@ import (
 )
 
 // AgentInfo holds agent metadata for template rendering.
-// This mirrors team.AgentInfo for the inscription package.
+// This mirrors rite.AgentInfo for the inscription package.
 type AgentInfo struct {
 	Name     string `json:"name"`
 	File     string `json:"file"`
@@ -361,7 +361,7 @@ func (g *Generator) generateQuickStartContent() (string, error) {
 
 	var sb strings.Builder
 
-	// Header with team info
+	// Header with rite info
 	sb.WriteString("## Quick Start\n\n")
 
 	if g.Context.ActiveRite != "" {

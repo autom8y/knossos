@@ -144,7 +144,7 @@ model: sonnet
 color: indigo
 aliases:
   - fates
-  - state-mate
+  - moirai
 ---
 
 # Moirai
@@ -158,8 +158,8 @@ aliases:
 	if len(fm.Aliases) != 2 {
 		t.Fatalf("aliases count = %d, want 2", len(fm.Aliases))
 	}
-	if fm.Aliases[0] != "fates" || fm.Aliases[1] != "state-mate" {
-		t.Errorf("aliases = %v, want [fates state-mate]", fm.Aliases)
+	if fm.Aliases[0] != "fates" || fm.Aliases[1] != "moirai" {
+		t.Errorf("aliases = %v, want [fates moirai]", fm.Aliases)
 	}
 }
 
