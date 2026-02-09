@@ -2,7 +2,7 @@
 name: start
 description: Initialize a new work session
 argument-hint: <initiative> [--complexity=LEVEL] [--rite=PACK]
-allowed-tools: Bash, Read, Task
+allowed-tools: Read, Task
 model: opus
 disable-model-invocation: true
 ---
@@ -59,17 +59,18 @@ If not provided in arguments, ask the user:
 | **Complexity** | PATCH \| MODULE \| SYSTEM \| INITIATIVE \| MIGRATION | MODULE |
 | **Rite** | Rite to use | Current rite from context |
 
-### 3. Create Session (ONE command)
+### 3. Create Session via Moirai
 
-```bash
-ari session create "<initiative>" -c "<complexity>"
+Delegate session creation to Moirai (Clotho) via Task tool:
+```
+Task(moirai, "create_session initiative='<initiative>' complexity=<COMPLEXITY> rite=<rite-name>")
 ```
 
-This atomically:
-- Creates session directory with unique ID
-- Sets current session marker
-- Creates SESSION_CONTEXT.md
-- Returns JSON with session_id, entry_agent
+Moirai will:
+- Generate session ID with timestamp
+- Create `.claude/sessions/{session_id}/SESSION_CONTEXT.md` with proper schema
+- Set initial phase to "requirements"
+- Return confirmation with session_id and entry_agent
 
 ### 4. Rite Switch (only if --rite differs)
 
