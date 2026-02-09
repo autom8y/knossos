@@ -3,7 +3,7 @@
 # Location: .consolidation/MANIFEST.yaml
 #
 # This example demonstrates a realistic manifest for consolidating
-# documentation about the settings merge system in the CEM ecosystem.
+# documentation about the settings merge system in the Knossos ecosystem.
 
 schema_version: "1.0"
 
@@ -28,7 +28,7 @@ files:
     authority:
       settings-merge: primary
       migration-runbooks: secondary
-    summary: "Ecosystem templates for CEM sync, migration, and compatibility workflows. Contains authoritative Settings Merge Rules section."
+    summary: "Ecosystem templates for sync pipeline, migration, and compatibility workflows. Contains authoritative Settings Merge Rules section."
     signals:
       - "Settings Merge Rules"
       - "Tier Precedence"
@@ -115,7 +115,7 @@ files:
       - "migration-runbooks"
     authority:
       migration-runbooks: primary
-    summary: "Step-by-step runbook for migrating satellites from CEM v2 to v3. Includes breaking changes and rollback procedures."
+    summary: "Step-by-step runbook for migrating satellites from sync v2 to v3. Includes breaking changes and rollback procedures."
     signals:
       - "Migration"
       - "Breaking Changes"
@@ -183,7 +183,7 @@ topics:
 
   - id: "migration-runbooks"
     name: "Migration Runbooks"
-    description: "Step-by-step guides for satellite owners to migrate between CEM versions, including breaking changes and rollback procedures."
+    description: "Step-by-step guides for satellite owners to migrate between sync versions, including breaking changes and rollback procedures."
     priority: normal
     estimated_sources: 3
     estimated_tokens: 10100

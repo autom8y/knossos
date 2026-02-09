@@ -42,7 +42,7 @@ Ecosystem-pack is a **5-agent infrastructure team** handling sync pipeline and k
 - [ ] Update `agents/compatibility-tester.md`: Remove satellite matrix references
 - [ ] Remove complexity-based satellite selection from workflow
 - [ ] Update `skills/doc-ecosystem/SKILL.md`: Remove satellite testing templates
-- [ ] Simplify to: "Test in test satellite, verify roster-sync works"
+- [ ] Simplify to: "Test in test satellite, verify ari sync works"
 
 **What to keep:**
 - ari sync validation (does `ari sync` succeed?)

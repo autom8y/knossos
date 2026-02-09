@@ -39,7 +39,7 @@ handoff_criteria:
   platform:
     - "Agents registered in knossos"
     - "Integration tests passing"
-    - "CEM sync validated"
+    - "Sync pipeline validated"
   catalog:
     - "Knowledge base updated"
     - "Team documentation added"
@@ -59,4 +59,4 @@ antipatterns:
   - "Skipping prompt validation (prompts must be tested before deployment)"
   - "Agent proliferation (consolidate similar roles, avoid agent sprawl)"
 
-cross_rite_protocol: "Notify ecosystem of knossos changes affecting CEM/skeleton. Coordinate with target team on agent specifications."
+cross_rite_protocol: "Notify ecosystem of knossos changes affecting sync pipeline/skeleton. Coordinate with target team on agent specifications."

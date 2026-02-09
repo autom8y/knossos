@@ -46,7 +46,7 @@ Content that satellites own and the sync pipeline never overwrites.
 |---------|---------|
 | `## Quick Start` | Satellite's team (regenerated from knossos if missing) |
 | `## Agent Configurations` | Satellite's agents (regenerated from knossos if missing) |
-| Custom sections not matching roster | Project-specific content |
+| Custom sections not matching knossos | Project-specific content |
 | Unknown sections | Default to preserve for safety |
 
 **Rule**: If content describes WHAT THIS PROJECT IS, satellite owns it.

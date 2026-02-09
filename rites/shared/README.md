@@ -1,6 +1,6 @@
 # Shared Skills Team
 
-> Cross-rite primitives shared across all roster teams
+> Cross-rite primitives shared across all knossos rites
 
 ## Purpose
 

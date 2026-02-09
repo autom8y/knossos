@@ -19,9 +19,9 @@ Usage examples, typical workflow phases, and operational notes for the hygiene t
 
 Output:
 ```
-[Roster] Switched to hygiene (4 agents loaded)
+[Knossos] Switched to hygiene (4 agents loaded)
 
-Pantheon:
+Knossos:
   - code-smeller: Detects code smells and anti-patterns
   - architect-enforcer: Validates architectural compliance
   - janitor: Cleans up code, refactors for quality
@@ -39,7 +39,7 @@ Ready for code quality workflow.
 
 Output:
 ```
-[Roster] Switched to hygiene (4 agents loaded)
+[Knossos] Switched to hygiene (4 agents loaded)
 Session started: Q4 Codebase Quality Audit
 Complexity: PLATFORM
 
@@ -57,7 +57,7 @@ After completing feature with `/10x`:
 
 Output:
 ```
-[Roster] Switched to hygiene (4 agents loaded)
+[Knossos] Switched to hygiene (4 agents loaded)
 Handing off to: code-smeller
 
 Code Smeller analyzing recent implementation...
@@ -135,8 +135,8 @@ Detecting code smells and refactoring opportunities...
 If swap fails:
 
 ```
-[Roster] Error: Rite 'hygiene' not found
-[Roster] Use '/rite --list' to see available packs
+[Knossos] Error: Rite 'hygiene' not found
+[Knossos] Use '/rite --list' to see available packs
 ```
 
 **Resolution**: Verify knossos installation at `$KNOSSOS_HOME/`
@@ -164,7 +164,7 @@ Both valid, continuous prevents accumulation.
 | Command | Behavior |
 |---------|----------|
 | `/rite hygiene` | Switches team, shows swap confirmation |
-| `/hygiene` | Switches team, shows roster with agent descriptions |
+| `/hygiene` | Switches team, shows rite catalog with agent descriptions |
 
 Use `/hygiene` when you want to see available agents after switching.
 

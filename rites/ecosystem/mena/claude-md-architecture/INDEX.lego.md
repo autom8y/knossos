@@ -272,7 +272,7 @@ After making changes:
 
 1. **Verify marker placement**: Ownership marker immediately precedes section header
 2. **Validate stability**: Content passes "accurate in 1 month" test
-3. **Check propagation intent**: SYNC content should be roster-owned infrastructure only
+3. **Check propagation intent**: SYNC content should be knossos-owned infrastructure only
 4. **No session state leaked**: No dates, "currently", git state, or task references
 5. **Descriptive tone verified**: No global MUST mandates in entry sections
 
@@ -281,7 +281,7 @@ After making changes:
 | Scenario | Pre-Flight | Post-Flight |
 |----------|------------|-------------|
 | Add project extension | Check `## Project:*` namespace available | Verify PRESERVE marker added |
-| Update workflow routing | Confirm this is roster content | Ensure SYNC marker preserved, descriptive tone |
+| Update workflow routing | Confirm this is knossos content | Ensure SYNC marker preserved, descriptive tone |
 | Fix team configuration | Read ACTIVE_RITE + agents/ | Verify regeneration source noted |
 | Remove stale content | Confirm it fails decay test | Verify no orphaned references |
 | Convert prescriptive to descriptive | Identify MUST mandates | Verify conditional tables used |

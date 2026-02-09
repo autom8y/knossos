@@ -72,7 +72,7 @@ For each doc file:
 **Decision:** Generalist model is correct. Domain teams (security, sre, etc.) own their specialized docs via doc-* skills. Doc-rite handles general user-facing content only.
 
 ### CI Integration for Staleness
-**Decision:** Out of scope for roster. Would require tooling integration outside Claude Code. On-demand `/doc-audit --staleness` is sufficient.
+**Decision:** Out of scope for knossos. Would require tooling integration outside Claude Code. On-demand `/doc-audit --staleness` is sufficient.
 
 ### Team-Specific Hooks
 **Decision:** Hooks directory intentionally empty. Doc-team doesn't need custom context injection - uses standard project hooks.

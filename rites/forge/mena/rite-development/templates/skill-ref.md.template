@@ -28,8 +28,8 @@ description: |
 
 | Component | Location | Purpose |
 |-----------|----------|---------|
-| Agents | `~/Code/roster/rites/{rite-name}/agents/` | Agent prompts |
-| Workflow | `~/Code/roster/rites/{rite-name}/workflow.yaml` | Phase configuration |
+| Agents | `$KNOSSOS_HOME/rites/{rite-name}/agents/` | Agent prompts |
+| Workflow | `$KNOSSOS_HOME/rites/{rite-name}/workflow.yaml` | Phase configuration |
 | Switch | `/{rite-name}` | Activate this rite |
 
 ## Pantheon

@@ -71,7 +71,7 @@ CLAUDE.md excludes: DYNAMIC + EPHEMERAL
 | Content | Stability | In CLAUDE.md? | Alternative |
 |---------|-----------|---------------|-------------|
 | Skill documentation | STABLE | Yes | - |
-| Agent roster | STABLE | Yes (regenerated) | - |
+| Agent catalog | STABLE | Yes (regenerated) | - |
 | Workflow patterns | STABLE | Yes (synced) | - |
 | Active rite name | STABLE | Yes (regenerated) | ACTIVE_RITE file |
 | Current initiative | DYNAMIC | No | SESSION_CONTEXT |
@@ -91,7 +91,7 @@ Each concern has exactly one owner. Content placement follows ownership.
 |---------|-------|---------------|---------------|
 | **Ecosystem Infrastructure** | Knossos | Yes | SYNC |
 | **Project Identity** | Satellite | Yes | PRESERVE |
-| **Team Configuration** | Team | Yes | REGENERATE |
+| **Team Configuration** | Rite | Yes | REGENERATE |
 | **Session State** | Session | **No** | N/A |
 | **Workflow Guidance** | Knossos | Yes | SYNC |
 
@@ -158,7 +158,7 @@ Hooks inject ephemeral context at session start. It appears in Claude's view but
 | Layer | Content Type | Modified By |
 |-------|--------------|-------------|
 | Global | Personal preferences, global tools | User manually |
-| Project | Team + Project + Infrastructure | ari sync, knossos |
+| Project | Rite + Project + Infrastructure | ari sync, knossos |
 | Session | Transient state, current work | Hooks (read-only to CLAUDE.md) |
 
 ### Hook Output Example
@@ -191,7 +191,7 @@ Each piece of content has one owner, one sync behavior, one location.
 |---------|-------|------|----------|
 | Skills Architecture table | Knossos | SYNC | CLAUDE.md |
 | Project-specific conventions | Satellite | PRESERVE | CLAUDE.md (## Project:*) |
-| Quick Start agent table | Team | REGENERATE | CLAUDE.md |
+| Quick Start agent table | Rite | REGENERATE | CLAUDE.md |
 | Current initiative | Session | N/A | SESSION_CONTEXT |
 | Git state | Hooks | N/A | Hook output only |
 
@@ -199,7 +199,7 @@ Each piece of content has one owner, one sync behavior, one location.
 
 If content exists in multiple places, one becomes stale. Pick the authoritative source and reference it:
 
-- **Derived content**: Regenerate from source (team sections from ACTIVE_RITE + agents/)
+- **Derived content**: Regenerate from source (rite sections from ACTIVE_RITE + agents/)
 - **Transient content**: Inject via hooks, never persist
 - **Project extensions**: Use `## Project:*` namespace
 
@@ -224,7 +224,7 @@ Content that decays (becomes stale) without active maintenance does not belong i
 |---------|---------------|----------|
 | Skills documentation | Still accurate | Yes |
 | Workflow patterns | Still accurate | Yes |
-| Agent roster | Still accurate (unless team swapped) | Yes |
+| Agent catalog | Still accurate (unless rite swapped) | Yes |
 | "Currently working on X" | Stale immediately | No |
 | Git branch name | Stale within hours | No |
 | "Last updated: DATE" | Stale immediately | No |
@@ -263,7 +263,7 @@ Key architectural decisions and their rationale:
 | Team sections regenerated, not copied | Satellites have their own teams from ACTIVE_RITE |
 | Hooks inject transient context | Separation of stable (file) vs ephemeral (context) |
 | PRESERVE as default for unknown sections | Encourages experimentation, safer than deletion |
-| `## Project:*` pattern for extensions | Clear namespace, prevents conflicts with roster sections |
+| `## Project:*` pattern for extensions | Clear namespace, prevents conflicts with knossos sections |
 
 ---
 

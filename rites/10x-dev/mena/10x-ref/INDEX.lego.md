@@ -11,7 +11,7 @@ description: "Switch to 10x-dev (full PRD-TDD-Code-QA pipeline). Triggers: /10x,
 
 Instantly switch to the 10x-dev, a comprehensive development team with full lifecycle agents for building features from requirements through implementation and testing.
 
-This is a convenience wrapper around `/rite 10x-dev` that also displays the pantheon after switching.
+This is a convenience wrapper around `/rite 10x-dev` that also displays the knossos after switching.
 
 ---
 
@@ -37,14 +37,14 @@ Execute via Bash tool:
 $KNOSSOS_HOME/ari sync --rite 10x-dev
 ```
 
-### 2. Display Pantheon
+### 2. Display Knossos
 
-After successful switch, show the active pantheon:
+After successful switch, show the active knossos:
 
 ```
 Switched to 10x-dev (5 agents loaded)
 
-Pantheon:
+Knossos:
 ┌─────────────────────────┬──────────────────────────────────────────────┐
 │ Agent                   │ Role                                         │
 ├─────────────────────────┼──────────────────────────────────────────────┤
@@ -139,9 +139,9 @@ If a session is active:
 
 Output:
 ```
-[Roster] Switched to 10x-dev (5 agents loaded)
+[Knossos] Switched to 10x-dev (5 agents loaded)
 
-Pantheon:
+Knossos:
   - orchestrator: Coordinates multi-phase workflows
   - requirements-analyst: Produces PRDs, clarifies intent
   - architect: Produces TDDs and ADRs, designs solutions
@@ -159,13 +159,13 @@ Ready for development workflow.
 
 Output:
 ```
-[Roster] Switched to 10x-dev (5 agents loaded)
+[Knossos] Switched to 10x-dev (5 agents loaded)
 
 Session context updated:
   Active rite: 10x-dev
   Handoff note: "Switched to development team for implementation phase"
 
-Pantheon:
+Knossos:
   [... agent list ...]
 
 Next step: Use /handoff architect to review design, or /handoff engineer to begin implementation.
@@ -179,9 +179,9 @@ Next step: Use /handoff architect to review design, or /handoff engineer to begi
 
 Output:
 ```
-[Roster] Already using 10x-dev (no changes needed)
+[Knossos] Already using 10x-dev (no changes needed)
 
-Pantheon:
+Knossos:
   [... agent list ...]
 ```
 
@@ -264,8 +264,8 @@ Use this team for:
 If swap fails (unlikely - this is a core team):
 
 ```
-[Roster] Error: Rite '10x-dev' not found
-[Roster] Use '/rite --list' to see available packs
+[Knossos] Error: Rite '10x-dev' not found
+[Knossos] Use '/rite --list' to see available packs
 ```
 
 **Resolution**: Verify knossos installation at `$KNOSSOS_HOME/`
@@ -307,7 +307,7 @@ This is the "default" team for general development work.
 | Command | Behavior |
 |---------|----------|
 | `/rite 10x-dev` | Switches team, shows swap confirmation |
-| `/10x` | Switches team, shows roster with agent descriptions |
+| `/10x` | Switches team, shows rite catalog with agent descriptions |
 
 Use `/10x` when you want to see available agents after switching.
 

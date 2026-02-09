@@ -44,7 +44,7 @@ description: |
 Agent Designer → Prompt Architect → Workflow Engineer → Platform Engineer → Eval Specialist → Agent Curator
      │               │                   │                    │                  │               │
      ▼               ▼                   ▼                    ▼                  ▼               ▼
- TEAM-SPEC      Agent .md files    workflow.yaml      roster/rites/       eval-report      roster entry
+ TEAM-SPEC      Agent .md files    workflow.yaml      knossos/rites/       eval-report      knossos entry
                                                          {team}/                           + Consultant
 ```
 
@@ -77,7 +77,7 @@ Agent Designer → Prompt Architect → Workflow Engineer → Platform Engineer 
 2. You collaborate to define 3-5 agent roles
 3. Prompt Architect creates agent files
 4. Workflow Engineer creates workflow.yaml
-5. Platform Engineer deploys to roster
+5. Platform Engineer deploys to knossos
 6. Eval Specialist validates
 7. Agent Curator integrates and syncs Consultant
 
@@ -158,7 +158,7 @@ Agent Designer → Prompt Architect → Workflow Engineer → Platform Engineer 
 
 ### Platform Engineer
 
-**Purpose**: Implements roster infrastructure.
+**Purpose**: Implements knossos infrastructure.
 
 **Domain**:
 - Directory structure creation
@@ -166,7 +166,7 @@ Agent Designer → Prompt Architect → Workflow Engineer → Platform Engineer 
 - ari sync --rite integration
 - Structure validation
 
-**Produces**: Rite deployed to roster
+**Produces**: Rite deployed to knossos
 
 **Handoff**: When ari sync --rite loads successfully
 

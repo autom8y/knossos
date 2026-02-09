@@ -11,7 +11,7 @@ description: "Switch to debt-triage (technical debt management). Triggers: /debt
 
 Instantly switch to the debt-triage, a specialized team focused on identifying, assessing, and planning remediation of technical debt across codebases and projects.
 
-This is a convenience wrapper around `/rite debt-triage` that also displays the pantheon after switching.
+This is a convenience wrapper around `/rite debt-triage` that also displays the knossos after switching.
 
 ---
 
@@ -37,14 +37,14 @@ Execute via Bash tool:
 $KNOSSOS_HOME/ari sync --rite debt-triage
 ```
 
-### 2. Display Pantheon
+### 2. Display Knossos
 
-After successful switch, show the active pantheon:
+After successful switch, show the active knossos:
 
 ```
 Switched to debt-triage (3 agents loaded)
 
-Pantheon:
+Knossos:
 ┌─────────────────────────┬──────────────────────────────────────────────┐
 │ Agent                   │ Role                                         │
 ├─────────────────────────┼──────────────────────────────────────────────┤
@@ -167,9 +167,9 @@ If a session is active:
 
 Output:
 ```
-[Roster] Switched to debt-triage (3 agents loaded)
+[Knossos] Switched to debt-triage (3 agents loaded)
 
-Pantheon:
+Knossos:
   - debt-collector: Identifies and catalogs technical debt
   - risk-assessor: Evaluates impact and urgency of debt
   - sprint-planner: Creates remediation plans and roadmaps
@@ -186,7 +186,7 @@ Ready for debt triage workflow.
 
 Output:
 ```
-[Roster] Switched to debt-triage (3 agents loaded)
+[Knossos] Switched to debt-triage (3 agents loaded)
 Session started: Q1 Technical Debt Assessment
 Complexity: PLATFORM
 
@@ -202,7 +202,7 @@ Next: Debt Collector will scan codebase for technical debt.
 
 Output:
 ```
-[Roster] Switched to debt-triage (3 agents loaded)
+[Knossos] Switched to debt-triage (3 agents loaded)
 Handing off to: debt-collector
 
 Debt Collector scanning repositories...
@@ -334,8 +334,8 @@ Use this team for:
 If swap fails:
 
 ```
-[Roster] Error: Rite 'debt-triage' not found
-[Roster] Use '/rite --list' to see available packs
+[Knossos] Error: Rite 'debt-triage' not found
+[Knossos] Use '/rite --list' to see available packs
 ```
 
 **Resolution**: Verify knossos installation at `$KNOSSOS_HOME/`
@@ -427,7 +427,7 @@ This enables evidence-based prioritization.
 | Command | Behavior |
 |---------|----------|
 | `/rite debt-triage` | Switches team, shows swap confirmation |
-| `/debt` | Switches team, shows roster with agent descriptions |
+| `/debt` | Switches team, shows rite catalog with agent descriptions |
 
 Use `/debt` when you want to see available agents after switching.
 

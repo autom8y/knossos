@@ -89,7 +89,7 @@ The Agent Designer is the product manager for agents. When someone says "we need
 ### Phase 1: Domain Analysis
 Understand what the rite needs to accomplish.
 1. Parse the user's request for domain keywords and scope indicators
-2. Research existing teams to avoid duplication (check roster)
+2. Research existing teams to avoid duplication (check rite catalog)
 3. Identify the core problem space and expected outcomes
 4. List candidate responsibilities that need coverage
 

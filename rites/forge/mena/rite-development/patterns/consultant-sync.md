@@ -270,7 +270,7 @@ grep "/{team}" .claude/knowledge/consultant/command-reference.md
 ## Automation Opportunity
 
 Future enhancement: Create a validation script that:
-1. Scans roster for all teams
+1. Scans knossos for all rites
 2. Compares against Consultant knowledge
 3. Reports discrepancies
 4. Suggests updates

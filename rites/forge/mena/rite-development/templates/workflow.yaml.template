@@ -1,5 +1,5 @@
 # Workflow Configuration Template
-# Copy to: ~/Code/roster/rites/{rite-name}/workflow.yaml
+# Copy to: $KNOSSOS_HOME/rites/{rite-name}/workflow.yaml
 # Replace all {placeholders} with actual values
 
 # =============================================================================

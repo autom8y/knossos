@@ -11,7 +11,7 @@ description: "Switch to docs (documentation workflow). Triggers: /docs, document
 
 Instantly switch to the docs, a specialized team focused on technical writing, API documentation, information architecture, and documentation quality audits.
 
-This is a convenience wrapper around `/rite docs` that also displays the pantheon after switching.
+This is a convenience wrapper around `/rite docs` that also displays the knossos after switching.
 
 ---
 
@@ -37,14 +37,14 @@ Execute via Bash tool:
 $KNOSSOS_HOME/ari sync --rite docs
 ```
 
-### 2. Display Pantheon
+### 2. Display Knossos
 
-After successful switch, show the active pantheon:
+After successful switch, show the active knossos:
 
 ```
 Switched to docs (4 agents loaded)
 
-Pantheon:
+Knossos:
 ┌─────────────────────────┬──────────────────────────────────────────────┐
 │ Agent                   │ Role                                         │
 ├─────────────────────────┼──────────────────────────────────────────────┤
@@ -133,9 +133,9 @@ If a session is active:
 
 Output:
 ```
-[Roster] Switched to docs (4 agents loaded)
+[Knossos] Switched to docs (4 agents loaded)
 
-Pantheon:
+Knossos:
   - doc-auditor: Reviews docs for accuracy and completeness
   - information-architect: Structures documentation for discoverability
   - tech-writer: Creates clear, concise technical content
@@ -153,7 +153,7 @@ Ready for documentation workflow.
 
 Output:
 ```
-[Roster] Switched to docs (4 agents loaded)
+[Knossos] Switched to docs (4 agents loaded)
 Session started: Document REST API
 Complexity: MODULE
 
@@ -171,7 +171,7 @@ After implementing a feature with `/10x`, switch to document it:
 
 Output:
 ```
-[Roster] Switched to docs (4 agents loaded)
+[Knossos] Switched to docs (4 agents loaded)
 Handing off to: tech-writer
 
 Tech Writer reviewing implementation artifacts...
@@ -265,8 +265,8 @@ Use this team for:
 If swap fails:
 
 ```
-[Roster] Error: Rite 'docs' not found
-[Roster] Use '/rite --list' to see available packs
+[Knossos] Error: Rite 'docs' not found
+[Knossos] Use '/rite --list' to see available packs
 ```
 
 **Resolution**: Verify knossos installation at `$KNOSSOS_HOME/`
@@ -330,7 +330,7 @@ For these, start with `/docs` instead of `/10x`.
 | Command | Behavior |
 |---------|----------|
 | `/rite docs` | Switches team, shows swap confirmation |
-| `/docs` | Switches team, shows roster with agent descriptions |
+| `/docs` | Switches team, shows rite catalog with agent descriptions |
 
 Use `/docs` when you want to see available agents after switching.
 

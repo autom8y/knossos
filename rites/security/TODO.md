@@ -128,7 +128,7 @@ SYSTEM complexity:
 ## Deferred / Not Prioritized
 
 ### Hard Enforcement Mechanism
-**Decision:** Trust-based is correct. Security signoff is documented; deployment gates voluntarily honor it. Building enforcement hooks is infrastructure work outside roster scope.
+**Decision:** Trust-based is correct. Security signoff is documented; deployment gates voluntarily honor it. Building enforcement hooks is infrastructure work outside knossos scope.
 
 ### Pre-Implementation for All Complexity
 **Decision:** Only SYSTEM requires proactive threat modeling. PATCH/FEATURE remain reactive to avoid slowing velocity on low-risk changes.

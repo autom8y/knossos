@@ -120,7 +120,7 @@ Complete team implementations:
 | rnd | 4 | Scouting → Integration → Prototyping → Future Architecture | technology-scout |
 | strategy | 4 | Market Research → Competitive Analysis → Business Modeling → Planning | market-researcher |
 
-*See roster repository for current rite/agent counts.*
+*See knossos rites/ directory for current rite/agent counts.*
 
 ---
 

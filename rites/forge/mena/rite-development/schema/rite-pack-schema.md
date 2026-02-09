@@ -4,7 +4,7 @@
 
 ## Overview
 
-A **rite** defines a specialized AI practice with agents, workflow, complexity levels, and command mappings. Rites live in `roster/rites/<rite-name>/` and sync to satellites via CEM.
+A **rite** defines a specialized AI practice with agents, workflow, complexity levels, and command mappings. Rites live in `rites/<rite-name>/` and sync to satellites via the sync pipeline.
 
 ## File Structure
 

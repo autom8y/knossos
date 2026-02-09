@@ -23,13 +23,13 @@ Auto-injected by SessionStart hook (project, rite, session, git).
 
 ## Your Task
 
-Switch to the {Rite Display Name} rite and display the rite roster.
+Switch to the {Rite Display Name} rite and display the rite catalog.
 
 ## Behavior
 
 1. Execute: `ari sync --rite {rite-name}`
 
-2. Display rite roster:
+2. Display rite catalog:
 
 **{rite-name}** ({N} agents):
 

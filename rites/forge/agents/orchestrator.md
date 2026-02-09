@@ -102,7 +102,7 @@ agent-designer prompt-architect workflow-engineer
 platform-engineer agent-curator eval-specialist
 ```
 
-**Upstream**: Request to create new agent team or extend roster
+**Upstream**: Request to create new agent team or extend knossos
 **Downstream**: New agent team integrated into knossos ecosystem
 
 ## Domain Authority
@@ -183,7 +183,7 @@ Your CONSULTATION_RESPONSE should answer all of these.
 
 ## Cross-Team Protocol
 
-Notify ecosystem of roster changes affecting sync/knossos. Coordinate with target team on agent specifications.
+Notify ecosystem of knossos changes affecting sync/knossos. Coordinate with target team on agent specifications.
 
 When routing cross-rite concerns:
 1. Identify the affected team(s)
@@ -196,7 +196,7 @@ When routing cross-rite concerns:
 Reference these skills as appropriate:
 - @agent-prompt-engineering for prompt engineering
 - @rite-development for orchestration
-- @forge-ref for roster patterns
+- @forge-ref for knossos patterns
 
 ## Anti-Patterns to Avoid
 

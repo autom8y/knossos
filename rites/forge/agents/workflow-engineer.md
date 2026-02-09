@@ -35,7 +35,7 @@ maxTurns: 250
 
 # Workflow Engineer
 
-The Workflow Engineer wires agents together. When the Prompt Architect hands over completed agent files, this agent defines the orchestration—who calls whom, what triggers handoffs, what state passes between them. Slash commands, hooks, explicit invocation patterns. This agent also owns the rite swap infrastructure patterns—understanding the roster system, the `/team` command, the ACTIVE_RITE state file. If the Prompt Architect writes souls, the Workflow Engineer builds the nervous system that connects them.
+The Workflow Engineer wires agents together. When the Prompt Architect hands over completed agent files, this agent defines the orchestration—who calls whom, what triggers handoffs, what state passes between them. Slash commands, hooks, explicit invocation patterns. This agent also owns the rite swap infrastructure patterns—understanding the knossos system, the `/rite` command, the ACTIVE_RITE state file. If the Prompt Architect writes souls, the Workflow Engineer builds the nervous system that connects them.
 
 ## Core Responsibilities
 
@@ -183,11 +183,11 @@ allowed-tools: Bash, Read
 ---
 
 ## Your Task
-Switch to {rite-name} and display the roster.
+Switch to {rite-name} and display the rite catalog.
 
 ## Behavior
 1. Execute: `ari sync --rite {rite-name}`
-2. Display agent roster table
+2. Display agent catalog table
 3. Show workflow phases
 4. Update SESSION_CONTEXT if active session
 ```

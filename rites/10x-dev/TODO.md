@@ -104,4 +104,4 @@ The 10x-dev is a **production-ready, well-documented team** implementing a 5-age
 
 ## Next Team
 
-Continue audit with: **ecosystem** (infrastructure, hooks, CEM, roster patterns)
+Continue audit with: **ecosystem** (infrastructure, hooks, sync pipeline, knossos patterns)

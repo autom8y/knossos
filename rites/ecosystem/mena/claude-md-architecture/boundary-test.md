@@ -67,7 +67,7 @@ A practical checklist for determining if content belongs in CLAUDE.md. Before ad
 
 ### Question 4: Propagation Test
 
-> "Should changes to this content flow between roster and satellites?"
+> "Should changes to this content flow between knossos and satellites?"
 
 | Answer | Sync Behavior | Section Type |
 |--------|---------------|--------------|

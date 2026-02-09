@@ -1,6 +1,6 @@
 # Pre-Deployment Validation Checklist
 
-> Verify agent prompts before adding to production roster
+> Verify agent prompts before adding to production rite catalog
 
 ## Quick Validation
 
@@ -123,7 +123,7 @@ Use this abbreviated checklist for rapid verification:
 
 ### Final Sign-Off
 
-Complete these checks before adding to roster:
+Complete these checks before adding to rite catalog:
 
 - [ ] Scored 4+ on all rubric dimensions (see [rubric.md](../scoring/rubric.md))
 - [ ] Zero anti-patterns (see [principles.md](../principles.md) Detection Checklist)

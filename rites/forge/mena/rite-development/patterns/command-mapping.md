@@ -99,11 +99,11 @@ Each team has a quick-switch command:
 
 | Command | Team | Action |
 |---------|------|--------|
-| `/10x` | 10x-dev | Switch and show roster |
-| `/docs` | doc-rite | Switch and show roster |
-| `/hygiene` | hygiene | Switch and show roster |
-| `/debt` | debt-triage | Switch and show roster |
-| `/sre` | sre | Switch and show roster |
+| `/10x` | 10x-dev | Switch and show rite catalog |
+| `/docs` | doc-rite | Switch and show rite catalog |
+| `/hygiene` | hygiene | Switch and show rite catalog |
+| `/debt` | debt-triage | Switch and show rite catalog |
+| `/sre` | sre | Switch and show rite catalog |
 
 ### Implementation Pattern
 ```yaml

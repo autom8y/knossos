@@ -224,7 +224,7 @@ files:
 topics:
   - id: "settings-merge"
     name: "Settings Merge Algorithm"
-    description: "How settings from multiple tiers combine during cem sync, including precedence rules and merge strategies."
+    description: "How settings from multiple tiers combine during ari sync, including precedence rules and merge strategies."
     priority: high
     estimated_sources: 2
     estimated_tokens: 5700
@@ -263,7 +263,7 @@ topics:
 
   - id: "migration-runbooks"
     name: "Migration Runbooks"
-    description: "Step-by-step guides for satellite owners to migrate to new CEM versions."
+    description: "Step-by-step guides for satellite owners to migrate to new sync versions."
     priority: normal
     estimated_sources: 1
     estimated_tokens: 4200

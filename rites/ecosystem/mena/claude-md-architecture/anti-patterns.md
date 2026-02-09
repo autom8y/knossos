@@ -18,7 +18,7 @@ What NOT to put in CLAUDE.md. Each anti-pattern includes the violation, why it's
 | 8 | "Last updated" timestamps | Immediately stale, git provides this | Git history |
 | 9 | Task lists/checkboxes | Session-scoped, better tools exist | TodoWrite, issue tracker |
 | 10 | Environment configuration | Security risk, varies by machine | .env files, secret managers |
-| 11 | Misplaced ownership markers | CEM cannot parse correctly | Marker BEFORE section header |
+| 11 | Misplaced ownership markers | Sync pipeline cannot parse correctly | Marker BEFORE section header |
 
 ---
 
@@ -128,7 +128,7 @@ What NOT to put in CLAUDE.md. Each anti-pattern includes the violation, why it's
 
 **Violation**: Marker appears AFTER section header, or no marker at all.
 
-**Why wrong**: CEM parses markers to determine ownership; misplaced markers cause sync errors.
+**Why wrong**: Sync pipeline parses markers to determine ownership; misplaced markers cause sync errors.
 
 **Correct**:
 ```markdown

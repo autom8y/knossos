@@ -10,7 +10,7 @@ schema_version: "1.0"
 topic:
   id: "settings-merge"
   name: "Settings Merge Algorithm"
-  scope: "How settings from multiple tiers combine during cem sync, including precedence rules, merge strategies, and conflict resolution"
+  scope: "How settings from multiple tiers combine during ari sync, including precedence rules, merge strategies, and conflict resolution"
 
 metadata:
   created_at: "2024-12-25T10:30:00Z"
@@ -245,9 +245,9 @@ synthesis_notes:
     6. Examples: Complete before/after scenarios
     7. Troubleshooting: Common issues and solutions
 
-  tone_guidance: "Technical but accessible. Assume reader knows JSON but not the CEM codebase. Use concrete examples for every abstract concept. Include copy-paste ready configuration snippets."
+  tone_guidance: "Technical but accessible. Assume reader knows JSON but not the Knossos codebase. Use concrete examples for every abstract concept. Include copy-paste ready configuration snippets."
 
-  audience: "Satellite developers configuring their projects. Secondary audience: CEM contributors maintaining the merge logic."
+  audience: "Satellite developers configuring their projects. Secondary audience: Knossos contributors maintaining the merge logic."
 
   special_handling:
     - "Resolved conflict-001 should be noted as a correction from earlier documentation"
