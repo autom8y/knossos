@@ -16,11 +16,8 @@ Pause the current work session and save state for later resumption. $ARGUMENTS
 
 ## Session Resolution
 
-The current session is resolved automatically by `ari session` via the session marker:
-```bash
-# ari handles resolution internally
-ari session status -o json
-```
+Session state is pre-computed by the SessionStart hook (injected above).
+Read Has Session, Session State from the context table — do not call `ari session status`.
 
 ## Pre-flight
 
@@ -68,6 +65,3 @@ Reason: Waiting for stakeholder feedback on PRD
 Resume with: /continue
 ```
 
-## Reference
-
-Full documentation: `.claude/commands/session/park/INDEX.md`

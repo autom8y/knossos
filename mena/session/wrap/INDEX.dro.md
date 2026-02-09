@@ -16,10 +16,8 @@ Complete the current work session with quality validation and archival. $ARGUMEN
 
 ## Session Resolution
 
-```bash
-# ari handles session resolution internally
-ari session status -o json
-```
+Session state is pre-computed by the SessionStart hook (injected above).
+Read Has Session, Session State from the context table — do not call `ari session status`.
 
 ## Pre-flight
 
@@ -106,6 +104,3 @@ ari session status -o json
 | Code | Implementation files exist |
 | Tests | Test files exist and pass |
 
-## Reference
-
-Full documentation: `.claude/commands/session/wrap/INDEX.md`

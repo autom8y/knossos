@@ -67,6 +67,3 @@ Hand off work to a different agent with full context transfer. $ARGUMENTS
 /handoff principal-engineer
 ```
 
-## Reference
-
-Full documentation: `.claude/commands/session/handoff/INDEX.md`
