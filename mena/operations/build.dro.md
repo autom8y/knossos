@@ -5,6 +5,7 @@ argument-hint: <feature-name> [--design=PATH]
 allowed-tools: Bash, Read, Write, Task, Glob, Grep
 model: opus
 disable-model-invocation: true
+context: fork
 ---
 
 ## Context

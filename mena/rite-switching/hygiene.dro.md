@@ -5,6 +5,7 @@ argument-hint: [--overwrite-diverged] [--dry-run] [--keep-orphans]
 allowed-tools: Bash, Read
 model: haiku
 disable-model-invocation: true
+context: fork
 ---
 
 ## Context

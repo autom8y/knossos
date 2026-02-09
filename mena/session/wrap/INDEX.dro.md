@@ -5,6 +5,7 @@ argument-hint: "[--skip-checks] [--no-archive]"
 allowed-tools: Bash, Read, Task, Glob
 model: sonnet
 disable-model-invocation: true
+context: fork
 ---
 
 ## Context

@@ -5,6 +5,7 @@ argument-hint: <create|list|remove|cleanup|status> [args]
 allowed-tools: Bash, Read
 model: sonnet
 disable-model-invocation: true
+context: fork
 ---
 
 ## Context

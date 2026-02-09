@@ -5,6 +5,7 @@ argument-hint: "[reason]"
 allowed-tools: Bash, Read, Task
 model: sonnet
 disable-model-invocation: true
+context: fork
 ---
 
 ## Context

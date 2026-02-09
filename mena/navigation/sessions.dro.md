@@ -4,6 +4,8 @@ description: List and manage active sessions
 argument-hint: [--list] [--switch ID] [--cleanup] [--all]
 allowed-tools: Bash, Read, Write
 model: sonnet
+disable-model-invocation: true
+context: fork
 ---
 
 ## Context

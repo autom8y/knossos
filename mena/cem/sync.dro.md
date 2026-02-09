@@ -5,6 +5,7 @@ argument-hint: [--scope=rite|user|all] [--rite=NAME] [--dry-run] [--overwrite-di
 allowed-tools: Bash, Read
 model: haiku
 disable-model-invocation: true
+context: fork
 ---
 
 ## Context

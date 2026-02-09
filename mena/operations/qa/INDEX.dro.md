@@ -2,9 +2,10 @@
 name: qa
 description: Validation-only with review and approval
 argument-hint: <feature-name> [--requirements=PATH]
-allowed-tools: Bash, Read, Write, Task, Glob, Grep
+allowed-tools: Bash, Read, Task, Glob, Grep
 model: opus
 disable-model-invocation: true
+context: fork
 ---
 
 ## Context

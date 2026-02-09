@@ -5,6 +5,7 @@ argument-hint: [--overwrite-diverged] [--dry-run] [--keep-orphans]
 allowed-tools: Bash, Read
 model: sonnet
 disable-model-invocation: true
+context: fork
 ---
 
 ## Context

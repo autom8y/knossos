@@ -5,6 +5,7 @@ argument-hint: <issue-description> [--severity=LEVEL]
 allowed-tools: Bash, Read, Task, Glob, Grep
 model: opus
 disable-model-invocation: true
+context: fork
 ---
 
 ## Context

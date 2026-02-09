@@ -1,10 +1,11 @@
 ---
 name: start
 description: Initialize a new work session
-argument-hint: <initiative> [--complexity=LEVEL] [--rite=PACK]
+argument-hint: <initiative> [--complexity=LEVEL] [--rite=NAME]
 allowed-tools: Bash, Read, Task
 model: opus
 disable-model-invocation: true
+context: fork
 ---
 
 ## Pre-computed Context
