@@ -269,7 +269,7 @@ func GetExitCode(err error) int {
 // ErrOrphanConflict returns an error when orphaned agents detected without strategy.
 func ErrOrphanConflict(orphans []string, currentRite, targetRite string) *Error {
 	return NewWithDetails(CodeOrphanConflict,
-		"Orphaned agents detected. Specify --remove-all, --keep-all, or --promote-all",
+		"Orphaned agents detected. Use --keep-orphans to preserve, or --overwrite-diverged to force update",
 		map[string]interface{}{
 			"orphans":      orphans,
 			"current_rite": currentRite,
