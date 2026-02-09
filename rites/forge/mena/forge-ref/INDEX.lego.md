@@ -1,20 +1,20 @@
 ---
 name: forge-ref
 description: |
-  Reference documentation for The Forge - the meta-team for creating and maintaining
-  agent teams. Use when: learning about team creation, understanding the Forge workflow,
-  invoking Forge commands. Triggers: /forge, /new-team, team creation, agent factory,
-  build team, create agents.
+  Reference documentation for The Forge - the meta-rite for creating and maintaining
+  agent rites. Use when: learning about rite creation, understanding the Forge workflow,
+  invoking Forge commands. Triggers: /forge, /new-rite, rite creation, agent factory,
+  build rite, create agents.
 ---
 
 # The Forge Reference
 
-> The rite that builds teams. Meta-level agent factory for the Claude Code ecosystem.
+> The rite that builds rites. Meta-level agent factory for the Claude Code ecosystem.
 
 ## Supporting Files
 
 - `patterns/` - Agent design patterns (role-definition, domain-authority, handoff-criteria)
-- `evals/` - Validation harnesses for team testing (agent-completeness, workflow-validity, integration-tests)
+- `evals/` - Validation harnesses for rite testing (agent-completeness, workflow-validity, integration-tests)
 
 ## Quick Reference
 
@@ -23,8 +23,8 @@ description: |
 | Command | Purpose | Entry Agent |
 |---------|---------|-------------|
 | `/forge` | Display Forge overview and help | (info only) |
-| `/new-team <name>` | Create a new rite | Agent Designer |
-| `/validate-team <name>` | Run validation on team | Eval Specialist |
+| `/new-rite <name>` | Create a new rite | Agent Designer |
+| `/validate-rite <name>` | Run validation on rite | Eval Specialist |
 | `/eval-agent <name>` | Test single agent | Eval Specialist |
 
 ### Agents
@@ -44,8 +44,8 @@ description: |
 Agent Designer → Prompt Architect → Workflow Engineer → Platform Engineer → Eval Specialist → Agent Curator
      │               │                   │                    │                  │               │
      ▼               ▼                   ▼                    ▼                  ▼               ▼
- TEAM-SPEC      Agent .md files    workflow.yaml      knossos/rites/       eval-report      knossos entry
-                                                         {team}/                           + Consultant
+ RITE-SPEC      Agent .md files    workflow.yaml      knossos/rites/       eval-report      knossos entry
+                                                         {rite}/                           + Consultant
 ```
 
 ---
@@ -55,25 +55,25 @@ Agent Designer → Prompt Architect → Workflow Engineer → Platform Engineer 
 | Level | Scope | Phases |
 |-------|-------|--------|
 | **PATCH** | Single agent modification | design, prompting, validation |
-| **TEAM** | New team with 3-5 agents | All 6 phases |
-| **ECOSYSTEM** | Multi-team initiative | All 6 phases |
+| **RITE** | New rite with 3-5 agents | All 6 phases |
+| **ECOSYSTEM** | Multi-rite initiative | All 6 phases |
 
 ---
 
 ## Using The Forge
 
-### Creating a New Team
+### Creating a New Rite
 
 ```bash
-# Start team creation workflow
-/new-team api-development
+# Start rite creation workflow
+/new-rite api-development
 
 # With specific complexity
-/new-team security-auditor --complexity=PATCH
+/new-rite security-auditor --complexity=PATCH
 ```
 
 **What happens**:
-1. Agent Designer asks about team purpose and scope
+1. Agent Designer asks about rite purpose and scope
 2. You collaborate to define 3-5 agent roles
 3. Prompt Architect creates agent files
 4. Workflow Engineer creates workflow.yaml
@@ -81,14 +81,14 @@ Agent Designer → Prompt Architect → Workflow Engineer → Platform Engineer 
 6. Eval Specialist validates
 7. Agent Curator integrates and syncs Consultant
 
-### Validating Existing Teams
+### Validating Existing Rites
 
 ```bash
 # Full validation
-/validate-team security
+/validate-rite security
 
 # With verbose output
-/validate-team 10x-dev --verbose
+/validate-rite 10x-dev --verbose
 ```
 
 **What's checked**:
@@ -103,8 +103,8 @@ Agent Designer → Prompt Architect → Workflow Engineer → Platform Engineer 
 # Test agent in active rite
 /eval-agent principal-engineer
 
-# Test agent in specific team
-/eval-agent threat-modeler --team=security
+# Test agent in specific rite
+/eval-agent threat-modeler --rite=security
 
 # Include adversarial prompts
 /eval-agent architect --adversarial
@@ -116,17 +116,17 @@ Agent Designer → Prompt Architect → Workflow Engineer → Platform Engineer 
 
 ### Agent Designer (Entry Point)
 
-**Purpose**: Creates team specifications and role definitions.
+**Purpose**: Creates rite specifications and role definitions.
 
 **Domain**:
-- Team purpose and scope
+- Rite purpose and scope
 - Agent role boundaries
 - Input/output contracts
 - Complexity level design
 
-**Produces**: TEAM-SPEC.md with all roles defined
+**Produces**: RITE-SPEC.md with all roles defined
 
-**Handoff**: When TEAM-SPEC is complete and approved
+**Handoff**: When RITE-SPEC is complete and approved
 
 ### Prompt Architect
 
@@ -172,7 +172,7 @@ Agent Designer → Prompt Architect → Workflow Engineer → Platform Engineer 
 
 ### Eval Specialist
 
-**Purpose**: Validates teams before shipment.
+**Purpose**: Validates rites before shipment.
 
 **Domain**:
 - Completeness checks
@@ -190,7 +190,7 @@ Agent Designer → Prompt Architect → Workflow Engineer → Platform Engineer 
 
 **Domain**:
 - Consultant knowledge sync
-- Team profile creation
+- Rite profile creation
 - Version recording
 - Documentation
 
@@ -226,9 +226,9 @@ Templates are documented inline in this skill and agent prompts.
 
 ## Best Practices
 
-### Team Design
+### Rite Design
 
-1. **Start with purpose**: What problem does this team solve?
+1. **Start with purpose**: What problem does this rite solve?
 2. **3-5 agents**: Less is more. Consolidate related responsibilities.
 3. **Clear boundaries**: No overlap between agent domains.
 4. **Linear flow**: Avoid circular dependencies.
@@ -254,7 +254,7 @@ Templates are documented inline in this skill and agent prompts.
 ### "ari sync --rite fails"
 
 Check:
-- Team directory exists at `$KNOSSOS_HOME/rites/{name}/`
+- Rite directory exists at `$KNOSSOS_HOME/rites/{name}/`
 - agents/ subdirectory has .md files
 - workflow.yaml exists
 - File permissions are correct
@@ -267,11 +267,11 @@ Check:
 - No YAML syntax errors
 - Token count under budget
 
-### "Consultant can't find team"
+### "Consultant can't find rite"
 
 Check:
 - ecosystem-map.md updated
-- rite-profiles/{team}.md exists
+- rite-profiles/{rite}.md exists
 - intent-patterns.md has keywords
 - command-reference.md lists command
 
@@ -308,18 +308,18 @@ Check:
 
 ## Global Singleton Architecture
 
-The Forge is a **global singleton team**—it's always available regardless of which rite is active.
+The Forge is a **global singleton rite**—it's always available regardless of which rite is active.
 
 ### How It Works
 
 1. Forge agents live in `~/.claude/agents/`
-2. `ari sync --rite` preserves global agents after team swaps
+2. `ari sync --rite` preserves global agents after rite swaps
 3. You can invoke any Forge agent from any rite context
 4. Forge has its own workflow config at `.claude/forge-workflow.yaml`
 
 ### Why Global?
 
-- Team creation is meta-level work (about teams, not within teams)
+- Rite creation is meta-level work (about rites, not within rites)
 - Should be accessible regardless of current work context
 - Similar to Consultant—always available for ecosystem operations
 

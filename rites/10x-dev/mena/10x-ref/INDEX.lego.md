@@ -1,15 +1,15 @@
 ---
 name: 10x-ref
-description: "Switch to 10x-dev (full PRD-TDD-Code-QA pipeline). Triggers: /10x, development team, dev workflow, full stack team."
+description: "Switch to 10x-dev (full PRD-TDD-Code-QA pipeline). Triggers: /10x, development rite, dev workflow, full stack rite."
 ---
 
-# /10x - Quick Switch to Development Team
+# /10x - Quick Switch to Development Rite
 
-> **Category**: Team Management | **Phase**: Team Switching
+> **Category**: Rite Management | **Phase**: Rite Switching
 
 ## Purpose
 
-Instantly switch to the 10x-dev, a comprehensive development team with full lifecycle agents for building features from requirements through implementation and testing.
+Instantly switch to the 10x-dev, a comprehensive development rite with full lifecycle agents for building features from requirements through implementation and testing.
 
 This is a convenience wrapper around `/rite 10x-dev` that also displays the knossos after switching.
 
@@ -29,7 +29,7 @@ No parameters required. This command:
 
 ## Behavior
 
-### 1. Invoke Team Switch
+### 1. Invoke Rite Switch
 
 Execute via Bash tool:
 
@@ -61,14 +61,14 @@ Use /handoff <agent> to delegate work.
 ### 3. Update SESSION_CONTEXT (if active)
 
 If a session is active:
-- Update `active_team` field to `10x-dev`
-- Add handoff note documenting team switch
+- Update `active_rite` field to `10x-dev`
+- Add handoff note documenting rite switch
 
 ---
 
-## Team Details
+## Rite Details
 
-**Team Name**: 10x-dev
+**Rite Name**: 10x-dev
 **Agent Count**: 5
 **Workflow**: Requirements → Design → Implementation → Testing
 

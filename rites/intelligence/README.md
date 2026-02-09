@@ -1,4 +1,4 @@
-# Intelligence Pack
+# Intelligence Rite
 
 Product analytics, user research, experimentation, and insights synthesis.
 
@@ -10,7 +10,7 @@ Product analytics, user research, experimentation, and insights synthesis.
 - "Should we A/B test this change?"
 - "What do the metrics tell us about this launch?"
 
-**Not for**: Implementation or feature development - this team analyzes and validates product decisions.
+**Not for**: Implementation or feature development - this rite analyzes and validates product decisions.
 
 ## Quick Start
 
@@ -40,7 +40,7 @@ See `workflow.md` for phase flow and complexity levels.
 
 **Core distinction**: Intelligence looks **inward** (our users, our product). Strategy looks **outward** (market, competitors, positioning).
 
-| Question | Team | Why |
+| Question | Rite | Why |
 |----------|------|-----|
 | "How do users navigate our checkout flow?" | Intelligence | User behavior within our product |
 | "What's the market opportunity in healthcare?" | Strategy | External market analysis |
@@ -62,4 +62,4 @@ See also: [strategy README](../strategy/README.md#when-to-use-strategy-vs-intell
 ## Related Rites
 
 - **strategy**: Hand off for business case development and strategic planning
-- **10x-dev**: Hand off instrumentation implementation to engineering teams
+- **10x-dev**: Hand off instrumentation implementation to engineering rites

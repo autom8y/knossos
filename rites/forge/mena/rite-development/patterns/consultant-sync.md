@@ -5,7 +5,7 @@
 ## Why This Matters
 
 The Consultant agent (`/consult`) is the ecosystem's meta-navigator. Users rely on it for:
-- Team recommendations
+- Rite recommendations
 - Command guidance
 - Workflow playbooks
 - Ecosystem navigation
@@ -22,11 +22,11 @@ The Consultant agent (`/consult`) is the ecosystem's meta-navigator. Users rely 
 ├── command-reference.md      # All commands
 ├── agent-reference.md        # All agents
 ├── routing/
-│   ├── intent-patterns.md    # Natural language → team/command
+│   ├── intent-patterns.md    # Natural language → rite/command
 │   ├── decision-trees.md     # Structured routing logic
 │   └── complexity-matrix.md  # Scope-based selection
 ├── rite-profiles/
-│   └── {team}-pack.md        # One per team
+│   └── {rite}.md             # One per rite
 └── playbooks/curated/
     └── {scenario}.md         # Common workflow playbooks
 ```
@@ -37,35 +37,35 @@ The Consultant agent (`/consult`) is the ecosystem's meta-navigator. Users rely 
 
 | Change Type | Files to Update |
 |-------------|-----------------|
-| **New team** | ecosystem-map, agent-reference, rite-profile (new), intent-patterns, decision-trees, complexity-matrix, command-reference |
-| **New agent to existing team** | agent-reference, rite-profile |
+| **New rite** | ecosystem-map, agent-reference, rite-profile (new), intent-patterns, decision-trees, complexity-matrix, command-reference |
+| **New agent to existing rite** | agent-reference, rite-profile |
 | **New command** | command-reference, ecosystem-map |
 | **Workflow change** | rite-profile, agent-reference (if phases change) |
-| **Rename team** | All files referencing old name |
-| **Remove team** | Remove from all files, delete rite-profile |
+| **Rename rite** | All files referencing old name |
+| **Remove rite** | Remove from all files, delete rite-profile |
 | **New playbook** | Create in playbooks/curated/ |
 
 ---
 
-## Step-by-Step: Adding a New Team
+## Step-by-Step: Adding a New Rite
 
 ### 1. Update ecosystem-map.md
 
-Add to Teams table:
+Add to Rites table:
 ```markdown
-| **{team}-pack** | `/{team}` | {N} | {Brief description} |
+| **{rite}** | `/{rite}` | {N} | {Brief description} |
 ```
 
 Update counts:
 ```markdown
-**Total Agents**: {new count} across all teams
+**Total Agents**: {new count} across all rites
 ```
 
 ### 2. Update agent-reference.md
 
 Add new section:
 ```markdown
-## {team}-pack ({N} agents)
+## {rite} ({N} agents)
 
 | Agent | Model | Phase | Produces |
 |-------|-------|-------|----------|
@@ -76,7 +76,7 @@ Add new section:
 **Workflow**: {phase-1} → {phase-2} → {phase-3} → {phase-4}
 ```
 
-### 3. Create rite-profiles/{team}-pack.md
+### 3. Create rite-profiles/{rite}.md
 
 Use template from INDEX.lego.md. Include:
 - Overview
@@ -90,14 +90,14 @@ Use template from INDEX.lego.md. Include:
 
 ### 4. Update routing/intent-patterns.md
 
-Add intent patterns for new team domain:
+Add intent patterns for new rite domain:
 ```markdown
 ## {Domain} Intents
 
 | User Says | Likely Need | Recommended |
 |-----------|-------------|-------------|
-| "{keyword 1}" | {description} | `/{team}` → `/task` |
-| "{keyword 2}" | {description} | `/{team}` → `/task` |
+| "{keyword 1}" | {description} | `/{rite}` → `/task` |
+| "{keyword 2}" | {description} | `/{rite}` → `/task` |
 ```
 
 ### 5. Update routing/decision-trees.md
@@ -105,20 +105,20 @@ Add intent patterns for new team domain:
 Add to Primary Router:
 ```markdown
 ├─ {DOMAIN} something?
-│   └─ → {team}-pack (/{team})
+│   └─ → {rite} (/{rite})
 ```
 
-Add to Team Selection Tree:
+Add to Rite Selection Tree:
 ```markdown
 ├─ {Domain}
-│   └─ → {team}-pack (/{team})
+│   └─ → {rite} (/{rite})
 ```
 
 ### 6. Update routing/complexity-matrix.md
 
-Add team's complexity levels:
+Add rite's complexity levels:
 ```markdown
-## {team}-pack Complexity
+## {rite} Complexity
 
 | Level | When to Use | Scope |
 |-------|-------------|-------|
@@ -128,34 +128,34 @@ Add team's complexity levels:
 
 ### 7. Update command-reference.md
 
-Add to Team Management section:
+Add to Rite Management section:
 ```markdown
-| `/{team}` | {team}-pack |
+| `/{rite}` | {rite} |
 ```
 
 ---
 
-## Step-by-Step: Modifying Existing Team
+## Step-by-Step: Modifying Existing Rite
 
 ### Agent Added
 
-1. **agent-reference.md**: Add agent to team section
-2. **rite-profiles/{team}.md**: Update Agents table
+1. **agent-reference.md**: Add agent to rite section
+2. **rite-profiles/{rite}.md**: Update Agents table
 
 ### Agent Removed
 
-1. **agent-reference.md**: Remove agent from team section
-2. **rite-profiles/{team}.md**: Update Agents table
+1. **agent-reference.md**: Remove agent from rite section
+2. **rite-profiles/{rite}.md**: Update Agents table
 
 ### Workflow Changed
 
-1. **rite-profiles/{team}.md**: Update Workflow diagram
+1. **rite-profiles/{rite}.md**: Update Workflow diagram
 2. **agent-reference.md**: Update workflow summary if needed
 
 ### Complexity Levels Changed
 
-1. **rite-profiles/{team}.md**: Update Complexity Levels table
-2. **routing/complexity-matrix.md**: Update team section
+1. **rite-profiles/{rite}.md**: Update Complexity Levels table
+2. **routing/complexity-matrix.md**: Update rite section
 
 ---
 
@@ -225,20 +225,20 @@ Add playbook to the list in `.claude/commands/navigation/consult/INDEX.md`:
 After any sync:
 
 ```bash
-# Verify ecosystem-map has correct team count
-grep "teams" .claude/knowledge/consultant/ecosystem-map.md
+# Verify ecosystem-map has correct rite count
+grep "rites" .claude/knowledge/consultant/ecosystem-map.md
 
-# Verify agent-reference has all teams
-grep "## .*-pack" .claude/knowledge/consultant/agent-reference.md
+# Verify agent-reference has all rites
+grep "## .*" .claude/knowledge/consultant/agent-reference.md
 
-# Verify all team profiles exist
+# Verify all rite profiles exist
 ls .claude/knowledge/consultant/rite-profiles/
 
-# Verify routing includes team
+# Verify routing includes rite
 grep "{rite-name}" .claude/knowledge/consultant/routing/intent-patterns.md
 
 # Verify command reference
-grep "/{team}" .claude/knowledge/consultant/command-reference.md
+grep "/{rite}" .claude/knowledge/consultant/command-reference.md
 ```
 
 ---
@@ -247,22 +247,22 @@ grep "/{team}" .claude/knowledge/consultant/command-reference.md
 
 ### Forgot to update ecosystem-map
 
-**Symptom**: `/consult --team` shows wrong count
-**Fix**: Update team count and add missing team to table
+**Symptom**: `/consult --rite` shows wrong count
+**Fix**: Update rite count and add missing rite to table
 
-### Missing team profile
+### Missing rite profile
 
-**Symptom**: `/consult` can't give detailed team guidance
-**Fix**: Create rite-profiles/{team}-pack.md
+**Symptom**: `/consult` can't give detailed rite guidance
+**Fix**: Create rite-profiles/{rite}.md
 
 ### Stale routing patterns
 
-**Symptom**: `/consult "query"` doesn't route to new team
+**Symptom**: `/consult "query"` doesn't route to new rite
 **Fix**: Add keywords to intent-patterns.md and decision-trees.md
 
 ### Wrong agent count
 
-**Symptom**: Consultant says team has N agents, but it has M
+**Symptom**: Consultant says rite has N agents, but it has M
 **Fix**: Update agent-reference.md and ecosystem-map.md
 
 ---
@@ -277,7 +277,7 @@ Future enhancement: Create a validation script that:
 
 ```bash
 # Future: $KNOSSOS_HOME/validate-consultant.sh
-# Would check all teams are reflected in knowledge base
+# Would check all rites are reflected in knowledge base
 ```
 
 ---

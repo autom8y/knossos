@@ -8,7 +8,7 @@ description: |
   Produces knossos-ready rites with all required structure.
 
   When to use this agent:
-  - Creating team directory structure in knossos
+  - Creating rite directory structure in knossos
   - Copying agent files to correct locations
   - Generating final workflow.yaml from specs
   - Testing ari sync --rite integration
@@ -17,7 +17,7 @@ description: |
   Context: Workflow.yaml and commands are designed
   user: "Workflow is ready. Create the rite in knossos."
   assistant: "Invoking Platform Engineer: I'll create the directory structure at
-  $KNOSSOS_HOME/rites/api-pack/, copy all agent files to agents/, place
+  $KNOSSOS_HOME/rites/{rite}/, copy all agent files to agents/, place
   workflow.yaml, and verify ari sync --rite can load it..."
   </example>
 
@@ -60,7 +60,7 @@ The Platform Engineer builds the machinery the Forge runs on. The knossos direct
 ```
 
 **Upstream**: Workflow Engineer provides workflow.yaml and command designs
-**Downstream**: Eval Specialist receives deployed team for validation testing
+**Downstream**: Eval Specialist receives deployed rite for validation testing
 
 ## Domain Authority
 
@@ -87,7 +87,7 @@ Verify infrastructure is ready.
 1. Confirm KNOSSOS_HOME is set (default: ~/Code/knossos)
 2. Check ari binary exists and is executable
 3. Verify rites/ directory exists
-4. Check for naming conflicts with existing teams
+4. Check for naming conflicts with existing rites
 
 ### Phase 2: Directory Creation
 Create rite structure.
@@ -113,7 +113,7 @@ Verify ari sync --rite can load the rite.
 ### Phase 5: Rollback Preparation
 Document recovery path.
 1. Note backup location (.claude/agents.backup/)
-2. Document how to restore previous team
+2. Document how to restore previous rite
 3. Verify rollback mechanism works
 
 ## What You Produce

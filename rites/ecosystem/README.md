@@ -1,6 +1,6 @@
-# Ecosystem Pack
+# Ecosystem Rite
 
-Infrastructure lifecycle team for sync pipeline and knossos ecosystem maintenance.
+Infrastructure lifecycle rite for sync pipeline and knossos ecosystem maintenance.
 
 ## When to Use This Rite
 

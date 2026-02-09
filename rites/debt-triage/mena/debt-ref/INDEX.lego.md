@@ -1,15 +1,15 @@
 ---
 name: debt-ref
-description: "Switch to debt-triage (technical debt management). Triggers: /debt, debt team, debt triage, debt planning, technical debt."
+description: "Switch to debt-triage (technical debt management). Triggers: /debt, debt rite, debt triage, debt planning, technical debt."
 ---
 
-# /debt - Quick Switch to Technical Debt Team
+# /debt - Quick Switch to Technical Debt Rite
 
-> **Category**: Team Management | **Phase**: Team Switching
+> **Category**: Rite Management | **Phase**: Rite Switching
 
 ## Purpose
 
-Instantly switch to the debt-triage, a specialized team focused on identifying, assessing, and planning remediation of technical debt across codebases and projects.
+Instantly switch to the debt-triage, a specialized rite focused on identifying, assessing, and planning remediation of technical debt across codebases and projects.
 
 This is a convenience wrapper around `/rite debt-triage` that also displays the knossos after switching.
 
@@ -29,7 +29,7 @@ No parameters required. This command:
 
 ## Behavior
 
-### 1. Invoke Team Switch
+### 1. Invoke Rite Switch
 
 Execute via Bash tool:
 
@@ -59,14 +59,14 @@ Use /handoff <agent> to delegate work.
 ### 3. Update SESSION_CONTEXT (if active)
 
 If a session is active:
-- Update `active_team` field to `debt-triage`
-- Add handoff note documenting team switch
+- Update `active_rite` field to `debt-triage`
+- Add handoff note documenting rite switch
 
 ---
 
-## Team Details
+## Rite Details
 
-**Team Name**: debt-triage
+**Rite Name**: debt-triage
 **Agent Count**: 3
 **Workflow**: Collect → Assess → Plan
 

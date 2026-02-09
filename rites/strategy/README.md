@@ -1,4 +1,4 @@
-# Strategy Pack
+# Strategy Rite
 
 Market research, competitive analysis, business modeling, and strategic planning for data-driven decision-making.
 
@@ -40,7 +40,7 @@ See `workflow.md` for phase flow and complexity levels.
 
 **Core distinction**: Strategy looks **outward** (market, competitors, positioning). Intelligence looks **inward** (our users, our product).
 
-| Question | Team | Why |
+| Question | Rite | Why |
 |----------|------|-----|
 | "What's the market opportunity in healthcare?" | Strategy | External market analysis |
 | "How do users navigate our checkout flow?" | Intelligence | User behavior within our product |
