@@ -681,7 +681,7 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claud
 				sourcePath := resolved.RitePath + "/agents/" + path
 				collector.Record(relPath, &provenance.ProvenanceEntry{
 					Owner:          provenance.OwnerKnossos,
-					SourcePipeline: "materialize",
+					Scope: provenance.ScopeRite,
 					SourcePath:     sourcePath,
 					SourceType:     string(resolved.Source.Type),
 					Checksum:       checksum.Bytes(content),
@@ -735,7 +735,7 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claud
 			srcRelPath, _ := filepath.Rel(m.resolver.ProjectRoot(), path)
 			collector.Record("agents/"+relPath, &provenance.ProvenanceEntry{
 				Owner:          provenance.OwnerKnossos,
-				SourcePipeline: "materialize",
+				Scope: provenance.ScopeRite,
 				SourcePath:     srcRelPath,
 				SourceType:     string(resolved.Source.Type),
 				Checksum:       checksum.Bytes(content),
@@ -861,7 +861,7 @@ func (m *Materializer) materializeMena(manifest *RiteManifest, claudeDir string,
 			}
 			collector.Record("commands/"+entry.Name()+"/", &provenance.ProvenanceEntry{
 				Owner:          provenance.OwnerKnossos,
-				SourcePipeline: "materialize",
+				Scope: provenance.ScopeRite,
 				SourcePath:     sourcePath,
 				SourceType:     sourceType,
 				Checksum:       hash,
@@ -905,7 +905,7 @@ func (m *Materializer) materializeMena(manifest *RiteManifest, claudeDir string,
 			}
 			collector.Record("skills/"+entry.Name()+"/", &provenance.ProvenanceEntry{
 				Owner:          provenance.OwnerKnossos,
-				SourcePipeline: "materialize",
+				Scope: provenance.ScopeRite,
 				SourcePath:     sourcePath,
 				SourceType:     sourceType,
 				Checksum:       hash,
@@ -1129,7 +1129,7 @@ func (m *Materializer) materializeRules(claudeDir string, resolved *ResolvedRite
 			srcRelPath, _ := filepath.Rel(projectRoot, sourcePath)
 			collector.Record("rules/"+name, &provenance.ProvenanceEntry{
 				Owner:          provenance.OwnerKnossos,
-				SourcePipeline: "materialize",
+				Scope: provenance.ScopeRite,
 				SourcePath:     srcRelPath,
 				SourceType:     "template",
 				Checksum:       checksum.Bytes(content),
@@ -1187,7 +1187,7 @@ func (m *Materializer) materializeHooks(claudeDir string, resolved *ResolvedRite
 				sourcePath := resolved.TemplatesDir + "/hooks/" + path
 				collector.Record("hooks/"+path, &provenance.ProvenanceEntry{
 					Owner:          provenance.OwnerKnossos,
-					SourcePipeline: "materialize",
+					Scope: provenance.ScopeRite,
 					SourcePath:     sourcePath,
 					SourceType:     "template",
 					Checksum:       checksum.Bytes(content),
@@ -1239,7 +1239,7 @@ func (m *Materializer) materializeHooks(claudeDir string, resolved *ResolvedRite
 			srcRelPath, _ := filepath.Rel(projectRoot, path)
 			collector.Record("hooks/"+relPath, &provenance.ProvenanceEntry{
 				Owner:          provenance.OwnerKnossos,
-				SourcePipeline: "materialize",
+				Scope: provenance.ScopeRite,
 				SourcePath:     srcRelPath,
 				SourceType:     "template",
 				Checksum:       checksum.Bytes(content),
@@ -1432,7 +1432,7 @@ func (m *Materializer) mergeCLAUDEmd(claudeDir string, renderCtx *inscription.Re
 		}
 		collector.Record("CLAUDE.md", &provenance.ProvenanceEntry{
 			Owner:          provenance.OwnerKnossos,
-			SourcePipeline: "materialize",
+			Scope: provenance.ScopeRite,
 			SourcePath:     srcRelPath,
 			SourceType:     "template",
 			Checksum:       checksum.Content(mergeResult.Content),
@@ -1492,7 +1492,7 @@ func (m *Materializer) materializeSettingsWithManifest(claudeDir string, manifes
 		now := time.Now().UTC()
 		collector.Record("settings.local.json", &provenance.ProvenanceEntry{
 			Owner:          provenance.OwnerKnossos,
-			SourcePipeline: "materialize",
+			Scope: provenance.ScopeRite,
 			SourcePath:     "(generated)",
 			SourceType:     "template",
 			Checksum:       hash,
@@ -1574,7 +1574,7 @@ func (m *Materializer) materializeWorkflow(claudeDir string, resolved *ResolvedR
 		srcRelPath, _ := filepath.Rel(projectRoot, sourcePath)
 		collector.Record("ACTIVE_WORKFLOW.yaml", &provenance.ProvenanceEntry{
 			Owner:          provenance.OwnerKnossos,
-			SourcePipeline: "materialize",
+			Scope: provenance.ScopeRite,
 			SourcePath:     srcRelPath,
 			SourceType:     string(resolved.Source.Type),
 			Checksum:       checksum.Bytes(content),
@@ -1687,10 +1687,10 @@ func (m *Materializer) saveProvenanceManifest(
 	}
 
 	// Step 3: Resolve unknown entries from previous manifest
-	// Files with owner:unknown that the pipeline did NOT write this sync are promoted to owner:user
+	// Files with owner:untracked that the pipeline did NOT write this sync are promoted to owner:user
 	if prevManifest != nil {
 		for path, entry := range prevManifest.Entries {
-			if entry.Owner == provenance.OwnerUnknown {
+			if entry.Owner == provenance.OwnerUntracked {
 				if _, writtenThisSync := collector.Entries()[path]; !writtenThisSync {
 					promotedEntry := *entry
 					promotedEntry.Owner = provenance.OwnerUser

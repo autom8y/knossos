@@ -34,6 +34,9 @@ func Load(path string) (*ProvenanceManifest, error) {
 			})
 	}
 
+	// Migrate v1 to v2 if needed
+	migrateV1ToV2(&manifest)
+
 	// Validate manifest
 	if err := validateManifest(&manifest); err != nil {
 		return nil, err
@@ -96,7 +99,7 @@ func structurallyEqual(a, b *ProvenanceManifest) bool {
 			return false
 		}
 		if entryA.Owner != entryB.Owner ||
-			entryA.SourcePipeline != entryB.SourcePipeline ||
+			entryA.Scope != entryB.Scope ||
 			entryA.SourcePath != entryB.SourcePath ||
 			entryA.SourceType != entryB.SourceType ||
 			entryA.Checksum != entryB.Checksum {
@@ -170,9 +173,11 @@ func validateManifest(manifest *ProvenanceManifest) error {
 			issues = append(issues, "entry '"+path+"' with owner 'knossos' requires non-empty source_type")
 		}
 
-		// If SourcePipeline is present, must be "materialize"
-		if entry.SourcePipeline != "" && entry.SourcePipeline != "materialize" {
-			issues = append(issues, "entry '"+path+"' has invalid source_pipeline: "+entry.SourcePipeline+" (expected 'materialize')")
+		// Required: Entry.Scope must be present and valid
+		if entry.Scope == "" {
+			issues = append(issues, "entry '"+path+"' missing required field: scope")
+		} else if !entry.Scope.IsValid() {
+			issues = append(issues, "entry '"+path+"' has invalid scope: "+string(entry.Scope))
 		}
 
 		// Required: Entry.Checksum must match ^sha256:[0-9a-f]{64}$
@@ -205,4 +210,29 @@ func isValidSchemaVersion(version string) bool {
 func isValidChecksum(checksum string) bool {
 	matched, _ := regexp.MatchString(`^sha256:[0-9a-f]{64}$`, checksum)
 	return matched
+}
+
+// migrateV1ToV2 migrates a v1.0 manifest to v2.0 schema in-place.
+// Converts SourcePipeline to Scope and "unknown" owner to "untracked".
+func migrateV1ToV2(m *ProvenanceManifest) {
+	// Only migrate if it's v1.0 (or missing version, treat as v1.0)
+	if m.SchemaVersion != "1.0" && m.SchemaVersion != "" {
+		return
+	}
+
+	// Update schema version
+	m.SchemaVersion = "2.0"
+
+	// Migrate entries
+	for _, entry := range m.Entries {
+		// Convert empty Scope to ScopeRite (all v1.0 entries were rite-scoped)
+		if entry.Scope == "" {
+			entry.Scope = ScopeRite
+		}
+
+		// Convert "unknown" owner to "untracked"
+		if entry.Owner == "unknown" {
+			entry.Owner = OwnerUntracked
+		}
+	}
 }

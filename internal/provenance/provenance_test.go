@@ -17,7 +17,7 @@ func TestCollectorAccumulation(t *testing.T) {
 	now := time.Now().UTC()
 	entry1 := &ProvenanceEntry{
 		Owner:          OwnerKnossos,
-		SourcePipeline: "materialize",
+		Scope: ScopeRite,
 		SourcePath:     "rites/ecosystem/agents/orchestrator.md",
 		SourceType:     "project",
 		Checksum:       "sha256:abc123",
@@ -25,7 +25,7 @@ func TestCollectorAccumulation(t *testing.T) {
 	}
 	entry2 := &ProvenanceEntry{
 		Owner:          OwnerKnossos,
-		SourcePipeline: "materialize",
+		Scope: ScopeRite,
 		SourcePath:     "mena/operations/commit/",
 		SourceType:     "project",
 		Checksum:       "sha256:def456",
@@ -95,7 +95,7 @@ func TestManifestRoundTrip(t *testing.T) {
 		Entries: map[string]*ProvenanceEntry{
 			"agents/orchestrator.md": {
 				Owner:          OwnerKnossos,
-				SourcePipeline: "materialize",
+				Scope: ScopeRite,
 				SourcePath:     "rites/ecosystem/agents/orchestrator.md",
 				SourceType:     "project",
 				Checksum:       "sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
@@ -103,7 +103,7 @@ func TestManifestRoundTrip(t *testing.T) {
 			},
 			"commands/commit/": {
 				Owner:          OwnerKnossos,
-				SourcePipeline: "materialize",
+				Scope: ScopeRite,
 				SourcePath:     "mena/operations/commit/",
 				SourceType:     "project",
 				Checksum:       "sha256:abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
@@ -191,7 +191,7 @@ func TestLoadOrBootstrapExistingFile(t *testing.T) {
 		Entries: map[string]*ProvenanceEntry{
 			"agents/orchestrator.md": {
 				Owner:          OwnerKnossos,
-				SourcePipeline: "materialize",
+				Scope: ScopeRite,
 				SourcePath:     "rites/ecosystem/agents/orchestrator.md",
 				SourceType:     "project",
 				Checksum:       "sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
@@ -244,7 +244,7 @@ func TestDivergenceChecksumMatch(t *testing.T) {
 		Entries: map[string]*ProvenanceEntry{
 			"test.md": {
 				Owner:          OwnerKnossos,
-				SourcePipeline: "materialize",
+				Scope: ScopeRite,
 				SourcePath:     "test/source.md",
 				SourceType:     "project",
 				Checksum:       hash,
@@ -292,7 +292,7 @@ func TestDivergenceChecksumMismatch(t *testing.T) {
 		Entries: map[string]*ProvenanceEntry{
 			"test.md": {
 				Owner:          OwnerKnossos,
-				SourcePipeline: "materialize",
+				Scope: ScopeRite,
 				SourcePath:     "test/source.md",
 				SourceType:     "project",
 				Checksum:       originalHash,
@@ -372,7 +372,7 @@ func TestDivergenceUnknownOwnedCarriedForward(t *testing.T) {
 		LastSync:      now,
 		Entries: map[string]*ProvenanceEntry{
 			"legacy-file.md": {
-				Owner:      OwnerUnknown,
+				Owner:      OwnerUntracked,
 				Checksum:   "sha256:unknownchecksum1234567890abcdef1234567890abcdef1234567890abcdef12",
 				LastSynced: now,
 			},
@@ -392,7 +392,7 @@ func TestDivergenceUnknownOwnedCarriedForward(t *testing.T) {
 	if !ok {
 		t.Fatal("legacy-file.md not in carried forward entries")
 	}
-	if carried.Owner != OwnerUnknown {
+	if carried.Owner != OwnerUntracked {
 		t.Errorf("expected Owner=unknown, got %s", carried.Owner)
 	}
 }
@@ -412,7 +412,7 @@ func TestDivergenceFileMissing(t *testing.T) {
 		Entries: map[string]*ProvenanceEntry{
 			"deleted.md": {
 				Owner:          OwnerKnossos,
-				SourcePipeline: "materialize",
+				Scope: ScopeRite,
 				SourcePath:     "test/deleted.md",
 				SourceType:     "project",
 				Checksum:       "sha256:deadbeef1234567890abcdef1234567890abcdef1234567890abcdef12345678",
@@ -504,7 +504,7 @@ func TestMenaDirectoryChecksum(t *testing.T) {
 		Entries: map[string]*ProvenanceEntry{
 			"commands/commit/": {
 				Owner:          OwnerKnossos,
-				SourcePipeline: "materialize",
+				Scope: ScopeRite,
 				SourcePath:     "mena/operations/commit/",
 				SourceType:     "project",
 				Checksum:       dirHash,
@@ -600,5 +600,100 @@ func TestValidationKnossosRequiresSource(t *testing.T) {
 	err := validateManifest(manifest)
 	if err == nil {
 		t.Fatal("expected validation error for missing source_path, got nil")
+	}
+}
+
+// TestScopeTypeIsValid tests that ScopeType.IsValid() returns correct values.
+func TestScopeTypeIsValid(t *testing.T) {
+	tests := []struct {
+		scope ScopeType
+		valid bool
+	}{
+		{ScopeRite, true},
+		{ScopeUser, true},
+		{ScopeType("invalid"), false},
+		{ScopeType(""), false},
+	}
+
+	for _, tt := range tests {
+		got := tt.scope.IsValid()
+		if got != tt.valid {
+			t.Errorf("ScopeType(%q).IsValid() = %v, want %v", tt.scope, got, tt.valid)
+		}
+	}
+}
+
+// TestOwnerTypeUnknownInvalid tests that the old "unknown" owner value is rejected.
+func TestOwnerTypeUnknownInvalid(t *testing.T) {
+	oldUnknown := OwnerType("unknown")
+	if oldUnknown.IsValid() {
+		t.Error("OwnerType(\"unknown\").IsValid() should return false")
+	}
+}
+
+// TestMigrateV1ToV2 tests that v1.0 manifests are correctly migrated to v2.0.
+func TestMigrateV1ToV2(t *testing.T) {
+	now := time.Now().UTC()
+	v1Manifest := &ProvenanceManifest{
+		SchemaVersion: "1.0",
+		LastSync:      now,
+		ActiveRite:    "ecosystem",
+		Entries: map[string]*ProvenanceEntry{
+			"agents/orchestrator.md": {
+				Owner:      OwnerKnossos,
+				SourcePath: "rites/ecosystem/agents/orchestrator.md",
+				SourceType: "project",
+				Checksum:   "sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+				LastSynced: now,
+				// Scope is empty (v1.0 format)
+			},
+			"custom-agent.md": {
+				Owner:      OwnerType("unknown"), // v1.0 used "unknown"
+				Checksum:   "sha256:abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
+				LastSynced: now,
+			},
+		},
+	}
+
+	// Migrate
+	migrateV1ToV2(v1Manifest)
+
+	// Check schema version updated
+	if v1Manifest.SchemaVersion != "2.0" {
+		t.Errorf("expected SchemaVersion 2.0, got %s", v1Manifest.SchemaVersion)
+	}
+
+	// Check Scope set to ScopeRite
+	if v1Manifest.Entries["agents/orchestrator.md"].Scope != ScopeRite {
+		t.Errorf("expected Scope=rite, got %s", v1Manifest.Entries["agents/orchestrator.md"].Scope)
+	}
+
+	// Check "unknown" owner converted to "untracked"
+	if v1Manifest.Entries["custom-agent.md"].Owner != OwnerUntracked {
+		t.Errorf("expected Owner=untracked, got %s", v1Manifest.Entries["custom-agent.md"].Owner)
+	}
+}
+
+// TestValidationMissingScope tests that entries without Scope fail validation.
+func TestValidationMissingScope(t *testing.T) {
+	now := time.Now().UTC()
+	manifest := &ProvenanceManifest{
+		SchemaVersion: CurrentSchemaVersion,
+		LastSync:      now,
+		Entries: map[string]*ProvenanceEntry{
+			"test.md": {
+				Owner:      OwnerKnossos,
+				SourcePath: "test/source.md",
+				SourceType: "project",
+				Checksum:   "sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+				LastSynced: now,
+				// Missing Scope
+			},
+		},
+	}
+
+	err := validateManifest(manifest)
+	if err == nil {
+		t.Fatal("expected validation error for missing scope, got nil")
 	}
 }

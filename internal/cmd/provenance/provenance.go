@@ -2,6 +2,7 @@
 package provenance
 
 import (
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -55,6 +56,8 @@ Examples:
 
 // newShowCmd creates the 'provenance show' subcommand.
 func newShowCmd(ctx *cmdContext) *cobra.Command {
+	var scopeFilter string
+
 	cmd := &cobra.Command{
 		Use:   "show",
 		Short: "Display provenance manifest",
@@ -63,76 +66,89 @@ func newShowCmd(ctx *cmdContext) *cobra.Command {
 The status column shows:
   - match:    File on disk matches the expected checksum
   - diverged: File has been modified (knossos -> user ownership promotion)
-  - -:        User or unknown file (no checksum validation)
+  - -:        User or untracked file (no checksum validation)
 
 Output formats:
   - text: Tabular output (default)
   - json: Full manifest as JSON
-  - yaml: Full manifest as YAML`,
+  - yaml: Full manifest as YAML
+
+Flags:
+  --scope: Filter by scope (rite, user). Default shows both scopes.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runShow(ctx)
+			return runShow(ctx, scopeFilter)
 		},
 	}
+
+	cmd.Flags().StringVar(&scopeFilter, "scope", "", "Filter by scope: rite, user (default: show both)")
 
 	common.SetNeedsProject(cmd, true, false)
 	return cmd
 }
 
 // runShow implements the 'provenance show' command.
-func runShow(ctx *cmdContext) error {
+func runShow(ctx *cmdContext, scopeFilter string) error {
 	printer := ctx.getPrinter()
 	resolver := ctx.GetResolver()
 
-	claudeDir := filepath.Join(resolver.ProjectRoot(), ".claude")
-	manifestPath := provenance.ManifestPath(claudeDir)
+	var allEntries []*ShowEntry
+	var combinedOutput CombinedOutput
 
-	// Load or bootstrap manifest
-	manifest, err := provenance.LoadOrBootstrap(manifestPath)
-	if err != nil {
-		printer.PrintError(err)
-		return err
+	// Load rite-scope manifest (from project .claude/)
+	if scopeFilter == "" || scopeFilter == "rite" {
+		claudeDir := filepath.Join(resolver.ProjectRoot(), ".claude")
+		manifestPath := provenance.ManifestPath(claudeDir)
+		manifest, err := provenance.LoadOrBootstrap(manifestPath)
+		if err == nil && len(manifest.Entries) > 0 {
+			combinedOutput.Rite = manifest
+			for path, entry := range manifest.Entries {
+				allEntries = append(allEntries, makeShowEntry(
+					path, entry, claudeDir, *ctx.Verbose))
+			}
+		}
 	}
 
-	// If manifest is empty (bootstrap case), show helpful message
-	if len(manifest.Entries) == 0 {
-		printer.PrintLine("No provenance manifest found. Run 'ari sync materialize' first.")
+	// Load user-scope manifest (from ~/.claude/)
+	if scopeFilter == "" || scopeFilter == "user" {
+		homeDir, err := os.UserHomeDir()
+		if err == nil {
+			userClaudeDir := filepath.Join(homeDir, ".claude")
+			userManifestPath := provenance.UserManifestPath(userClaudeDir)
+			userManifest, loadErr := provenance.LoadOrBootstrap(userManifestPath)
+			if loadErr == nil && len(userManifest.Entries) > 0 {
+				combinedOutput.User = userManifest
+				for path, entry := range userManifest.Entries {
+					displayPath := "~/" + path
+					showEntry := makeShowEntryWithDisplayPath(
+						displayPath, path, entry, userClaudeDir, *ctx.Verbose)
+					allEntries = append(allEntries, showEntry)
+				}
+			}
+		}
+	}
+
+	// If no entries found, show helpful message
+	if len(allEntries) == 0 {
+		printer.PrintLine("No provenance manifest found. Run 'ari sync materialize' or 'ari sync user all' first.")
 		return nil
-	}
-
-	// Compute status for each entry
-	entries := make([]*ShowEntry, 0, len(manifest.Entries))
-	for path, entry := range manifest.Entries {
-		showEntry := &ShowEntry{
-			Path:       path,
-			Owner:      string(entry.Owner),
-			SourcePath: entry.SourcePath,
-			SourceType: entry.SourceType,
-			Status:     computeStatus(claudeDir, path, entry, *ctx.Verbose),
-		}
-
-		// Add checksum if verbose
-		if *ctx.Verbose {
-			showEntry.Checksum = entry.Checksum
-		}
-
-		entries = append(entries, showEntry)
 	}
 
 	// Output based on format
 	format := output.ParseFormat(*ctx.Output)
 	if format == output.FormatJSON || format == output.FormatYAML {
-		// For JSON/YAML, output the raw manifest
-		return printer.Print(manifest)
+		// For JSON/YAML, output the combined structure
+		return printer.Print(&combinedOutput)
 	}
 
 	// For text, output as table
-	return printer.Print(&ShowOutput{Entries: entries})
+	return printer.Print(&ShowOutput{Entries: allEntries})
 }
 
 // ShowEntry represents a single provenance entry for display.
 type ShowEntry struct {
 	Path       string `json:"path"`
 	Owner      string `json:"owner"`
+	Scope      string `json:"scope"`
 	SourcePath string `json:"source_path,omitempty"`
 	SourceType string `json:"source_type,omitempty"`
 	Status     string `json:"status"`
@@ -144,9 +160,15 @@ type ShowOutput struct {
 	Entries []*ShowEntry
 }
 
+// CombinedOutput contains both rite and user provenance manifests for structured output.
+type CombinedOutput struct {
+	Rite *provenance.ProvenanceManifest `json:"rite,omitempty" yaml:"rite,omitempty"`
+	User *provenance.ProvenanceManifest `json:"user,omitempty" yaml:"user,omitempty"`
+}
+
 // Headers implements output.Tabular.
 func (s *ShowOutput) Headers() []string {
-	return []string{"PATH", "OWNER", "SOURCE", "STATUS"}
+	return []string{"PATH", "OWNER", "SCOPE", "SOURCE", "STATUS"}
 }
 
 // Rows implements output.Tabular.
@@ -154,14 +176,53 @@ func (s *ShowOutput) Rows() [][]string {
 	rows := make([][]string, len(s.Entries))
 	for i, e := range s.Entries {
 		source := formatSource(e.SourcePath, e.SourceType)
-		rows[i] = []string{e.Path, e.Owner, source, e.Status}
+		rows[i] = []string{e.Path, e.Owner, e.Scope, source, e.Status}
 	}
 	return rows
 }
 
+// makeShowEntry creates a ShowEntry from a ProvenanceEntry.
+func makeShowEntry(path string, entry *provenance.ProvenanceEntry, claudeDir string, verbose bool) *ShowEntry {
+	showEntry := &ShowEntry{
+		Path:       path,
+		Owner:      string(entry.Owner),
+		Scope:      string(entry.Scope),
+		SourcePath: entry.SourcePath,
+		SourceType: entry.SourceType,
+		Status:     computeStatus(claudeDir, path, entry),
+	}
+
+	// Add checksum if verbose
+	if verbose {
+		showEntry.Checksum = entry.Checksum
+	}
+
+	return showEntry
+}
+
+// makeShowEntryWithDisplayPath creates a ShowEntry with separate display and actual paths.
+// Used for user-scope entries where displayPath has "~/" prefix but actualPath is used for status.
+func makeShowEntryWithDisplayPath(displayPath, actualPath string, entry *provenance.ProvenanceEntry, claudeDir string, verbose bool) *ShowEntry {
+	showEntry := &ShowEntry{
+		Path:       displayPath,
+		Owner:      string(entry.Owner),
+		Scope:      string(entry.Scope),
+		SourcePath: entry.SourcePath,
+		SourceType: entry.SourceType,
+		Status:     computeStatus(claudeDir, actualPath, entry),
+	}
+
+	// Add checksum if verbose
+	if verbose {
+		showEntry.Checksum = entry.Checksum
+	}
+
+	return showEntry
+}
+
 // computeStatus determines the status of a file based on its checksum.
-func computeStatus(claudeDir, path string, entry *provenance.ProvenanceEntry, verbose bool) string {
-	// User and unknown files have no validation
+func computeStatus(claudeDir, path string, entry *provenance.ProvenanceEntry) string {
+	// User and untracked files have no validation
 	if entry.Owner != provenance.OwnerKnossos {
 		return "-"
 	}
@@ -192,7 +253,7 @@ func computeStatus(claudeDir, path string, entry *provenance.ProvenanceEntry, ve
 }
 
 // formatSource formats the source information for display.
-func formatSource(sourcePath, sourceType string) string {
+func formatSource(sourcePath, _ string) string {
 	if sourcePath == "" {
 		return "(user-created)"
 	}

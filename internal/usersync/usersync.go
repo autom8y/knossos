@@ -9,6 +9,7 @@ import (
 	"github.com/autom8y/knossos/internal/config"
 	"github.com/autom8y/knossos/internal/materialize"
 	"github.com/autom8y/knossos/internal/paths"
+	"github.com/autom8y/knossos/internal/provenance"
 )
 
 // ResourceType identifies the type of user resource.
@@ -56,14 +57,6 @@ func (r ResourceType) RiteSubDir() string {
 	return string(r)
 }
 
-// SourceType identifies the origin of a synced resource.
-type SourceType string
-
-const (
-	SourceKnossos  SourceType = "knossos"          // Synced from knossos, unchanged
-	SourceDiverged SourceType = "knossos-diverged" // From knossos but locally modified
-	SourceUser     SourceType = "user"             // User-created, not from knossos
-)
 
 // Options configures sync behavior.
 type Options struct {
@@ -130,29 +123,30 @@ func NewSyncer(resourceType ResourceType) (*Syncer, error) {
 		resourceType: resourceType,
 	}
 
+	// All resource types now use the unified provenance manifest
+	userClaudeDir := paths.UserClaudeDir()
+	s.manifestPath = provenance.UserManifestPath(userClaudeDir)
+
 	switch resourceType {
 	case ResourceAgents:
 		s.sourceDir = filepath.Join(knossosHome, "agents")
 		s.targetDir = paths.UserAgentsDir()
-		s.manifestPath = paths.UserAgentManifest()
 		s.nested = false
 	case ResourceMena:
 		s.sourceDir = filepath.Join(knossosHome, "mena")
 		s.targetCommandsDir = paths.UserCommandsDir()
 		s.targetSkillsDir = paths.UserSkillsDir()
-		s.manifestPath = paths.UserMenaManifest()
 		s.nested = true
 	case ResourceHooks:
 		s.sourceDir = filepath.Join(knossosHome, "hooks")
 		s.targetDir = paths.UserHooksDir()
-		s.manifestPath = paths.UserHooksManifest()
 		s.nested = true
 	default:
 		return nil, ErrInvalidResourceType
 	}
 
-	// Initialize collision checker
-	s.collisionChecker = NewCollisionChecker(resourceType, s.nested)
+	// Initialize collision checker (no project context for user sync)
+	s.collisionChecker = NewCollisionChecker(resourceType, s.nested, "")
 
 	return s, nil
 }
@@ -167,7 +161,7 @@ func NewSyncerWithPaths(resourceType ResourceType, sourceDir, targetDir, manifes
 		sourceDir:        sourceDir,
 		targetDir:        targetDir,
 		manifestPath:     manifestPath,
-		collisionChecker: NewCollisionChecker(resourceType, nested),
+		collisionChecker: NewCollisionChecker(resourceType, nested, ""),
 		nested:           nested,
 	}
 	if resourceType == ResourceMena {
@@ -186,7 +180,7 @@ func NewMenaSyncerWithPaths(sourceDir, targetCommandsDir, targetSkillsDir, manif
 		targetCommandsDir: targetCommandsDir,
 		targetSkillsDir:   targetSkillsDir,
 		manifestPath:      manifestPath,
-		collisionChecker:  NewCollisionChecker(ResourceMena, true),
+		collisionChecker:  NewCollisionChecker(ResourceMena, true, ""),
 		nested:            true,
 	}
 }
@@ -278,222 +272,9 @@ func (s *Syncer) Status() (*Result, error) {
 	return s.Sync(Options{DryRun: true})
 }
 
-// syncFiles iterates source files and syncs to target.
-func (s *Syncer) syncFiles(manifest *Manifest, result *Result, opts Options) error {
-	return filepath.WalkDir(s.sourceDir, func(path string, d os.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-
-		// Skip directories (we process files)
-		if d.IsDir() {
-			return nil
-		}
-
-		// Compute relative path for manifest key
-		relPath, err := filepath.Rel(s.sourceDir, path)
-		if err != nil {
-			return err
-		}
-
-		// For flat resources, use just the filename
-		manifestKey := relPath
-		if !s.nested {
-			manifestKey = filepath.Base(relPath)
-		}
-
-		// For mena: strip extension from manifest key and route to correct target.
-		// Manifest keys use STRIPPED filenames (e.g., "commit/INDEX.md" not "commit/INDEX.dro.md").
-		var menaType, menaTarget string
-		if s.resourceType == ResourceMena {
-			dir := filepath.Dir(manifestKey)
-			base := materialize.StripMenaExtension(filepath.Base(manifestKey))
-			manifestKey = filepath.Join(dir, base)
-			// Use ORIGINAL filename for routing
-			menaType = materialize.DetectMenaType(filepath.Base(relPath))
-			menaTarget = materialize.RouteMenaFile(filepath.Base(relPath))
-		}
-
-		// Check for rite collision
-		if collision, riteName := s.collisionChecker.CheckCollision(manifestKey); collision {
-			result.Changes.Skipped = append(result.Changes.Skipped, SkippedEntry{
-				Name:   manifestKey,
-				Reason: "collision with rite " + s.resourceType.Singular() + " (" + riteName + ")",
-			})
-			return nil
-		}
-
-		// Calculate source checksum
-		sourceChecksum, err := ComputeFileChecksum(path)
-		if err != nil {
-			return ErrChecksum(path, err)
-		}
-
-		// Check existing manifest entry
-		entry, exists := manifest.Entries[manifestKey]
-
-		// Determine target path based on resource type and mena routing
-		targetBase := s.targetDir
-		if s.resourceType == ResourceMena {
-			if menaTarget == "commands" {
-				targetBase = s.targetCommandsDir
-			} else {
-				targetBase = s.targetSkillsDir
-			}
-		}
-		targetPath := filepath.Join(targetBase, manifestKey)
-
-		if !exists {
-			// New file - check if target exists (untracked)
-			if _, err := os.Stat(targetPath); err == nil {
-				// Target exists but not in manifest
-				if opts.Recover {
-					targetChecksum, _ := ComputeFileChecksum(targetPath)
-					if targetChecksum == sourceChecksum {
-						// Exact match - adopt as knossos
-						if !opts.DryRun {
-							manifest.Entries[manifestKey] = Entry{
-								Source:      SourceKnossos,
-								InstalledAt: result.SyncedAt,
-								Checksum:    sourceChecksum,
-								MenaType:    menaType,
-								Target:      menaTarget,
-							}
-						}
-						result.Changes.Unchanged = append(result.Changes.Unchanged, manifestKey)
-					} else {
-						// Different - adopt as diverged
-						if !opts.DryRun {
-							manifest.Entries[manifestKey] = Entry{
-								Source:      SourceDiverged,
-								InstalledAt: result.SyncedAt,
-								Checksum:    targetChecksum,
-								MenaType:    menaType,
-								Target:      menaTarget,
-							}
-						}
-						result.Changes.Skipped = append(result.Changes.Skipped, SkippedEntry{
-							Name:   manifestKey,
-							Reason: "adopted as diverged (local modifications)",
-						})
-					}
-					return nil
-				}
-				// Not recovering - skip as user-created
-				if !opts.DryRun {
-					manifest.Entries[manifestKey] = Entry{
-						Source:      SourceUser,
-						InstalledAt: result.SyncedAt,
-						Checksum:    "",
-						MenaType:    menaType,
-						Target:      menaTarget,
-					}
-				}
-				result.Changes.Skipped = append(result.Changes.Skipped, SkippedEntry{
-					Name:   manifestKey,
-					Reason: "user-created",
-				})
-				return nil
-			}
-
-			// New file, target doesn't exist - add it
-			if !opts.DryRun {
-				if err := s.copyFile(path, targetPath); err != nil {
-					return err
-				}
-				manifest.Entries[manifestKey] = Entry{
-					Source:      SourceKnossos,
-					InstalledAt: result.SyncedAt,
-					Checksum:    sourceChecksum,
-					MenaType:    menaType,
-					Target:      menaTarget,
-				}
-			}
-			result.Changes.Added = append(result.Changes.Added, manifestKey)
-			return nil
-		}
-
-		// Existing entry
-		switch entry.Source {
-		case SourceUser:
-			// Never touch user-created files
-			result.Changes.Skipped = append(result.Changes.Skipped, SkippedEntry{
-				Name:   manifestKey,
-				Reason: "user-created",
-			})
-
-		case SourceDiverged:
-			if opts.Force {
-				// Force overwrite
-				if !opts.DryRun {
-					if err := s.copyFile(path, targetPath); err != nil {
-						return err
-					}
-					manifest.Entries[manifestKey] = Entry{
-						Source:      SourceKnossos,
-						InstalledAt: result.SyncedAt,
-						Checksum:    sourceChecksum,
-						MenaType:    menaType,
-						Target:      menaTarget,
-					}
-				}
-				result.Changes.Updated = append(result.Changes.Updated, manifestKey)
-			} else {
-				// Skip diverged without force
-				result.Changes.Skipped = append(result.Changes.Skipped, SkippedEntry{
-					Name:   manifestKey,
-					Reason: "diverged (use --force to overwrite)",
-				})
-			}
-
-		case SourceKnossos:
-			// Check if source changed
-			if entry.Checksum == sourceChecksum {
-				// No change in source
-				result.Changes.Unchanged = append(result.Changes.Unchanged, manifestKey)
-			} else {
-				// Source changed - check if target diverged
-				targetChecksum, _ := ComputeFileChecksum(targetPath)
-				if targetChecksum == entry.Checksum {
-					// Target unchanged, update from source
-					if !opts.DryRun {
-						if err := s.copyFile(path, targetPath); err != nil {
-							return err
-						}
-						manifest.Entries[manifestKey] = Entry{
-							Source:      SourceKnossos,
-							InstalledAt: result.SyncedAt,
-							Checksum:    sourceChecksum,
-							MenaType:    menaType,
-							Target:      menaTarget,
-						}
-					}
-					result.Changes.Updated = append(result.Changes.Updated, manifestKey)
-				} else {
-					// Target diverged - mark as diverged
-					if !opts.DryRun {
-						manifest.Entries[manifestKey] = Entry{
-							Source:      SourceDiverged,
-							InstalledAt: entry.InstalledAt,
-							Checksum:    targetChecksum,
-							MenaType:    menaType,
-							Target:      menaTarget,
-						}
-					}
-					result.Changes.Skipped = append(result.Changes.Skipped, SkippedEntry{
-						Name:   manifestKey,
-						Reason: "diverged (local modifications)",
-					})
-				}
-			}
-		}
-
-		return nil
-	})
-}
 
 // recover adopts existing target files that match knossos sources.
-func (s *Syncer) recover(manifest *Manifest, result *Result, opts Options) error {
+func (s *Syncer) recover(manifest *provenance.ProvenanceManifest, result *Result, opts Options) error {
 	if s.resourceType == ResourceMena {
 		// For mena, walk both commands and skills directories
 		if err := s.recoverDir(s.targetCommandsDir, "commands", manifest, result, opts); err != nil {
@@ -506,7 +287,7 @@ func (s *Syncer) recover(manifest *Manifest, result *Result, opts Options) error
 
 // recoverDir walks a single target directory recovering untracked files.
 // For mena resources, menaTarget should be "commands" or "skills".
-func (s *Syncer) recoverDir(recoverDir, menaTarget string, manifest *Manifest, result *Result, opts Options) error {
+func (s *Syncer) recoverDir(recoverDir, menaTarget string, manifest *provenance.ProvenanceManifest, result *Result, opts Options) error {
 	// Check if target directory exists
 	if _, err := os.Stat(recoverDir); os.IsNotExist(err) {
 		return nil // Nothing to recover
@@ -527,28 +308,36 @@ func (s *Syncer) recoverDir(recoverDir, menaTarget string, manifest *Manifest, r
 			manifestKey = filepath.Base(relPath)
 		}
 
+		// Add resource type prefix
+		fullManifestKey := s.prefixManifestKey(manifestKey)
+		if s.resourceType == ResourceMena {
+			if menaTarget == "commands" {
+				fullManifestKey = "commands/" + manifestKey
+			} else {
+				fullManifestKey = "skills/" + manifestKey
+			}
+		}
+
 		// Skip if already in manifest
-		if _, exists := manifest.Entries[manifestKey]; exists {
+		if _, exists := manifest.Entries[fullManifestKey]; exists {
 			return nil
 		}
 
 		// For mena, we need to find the source file which may have .dro or .lego infix.
 		// The target file has the stripped name; we must search for the original source.
 		sourcePath := filepath.Join(s.sourceDir, relPath)
-		var menaType string
 		if s.resourceType == ResourceMena {
 			// Try to find the source file with any mena extension
-			sourcePath, menaType = s.findMenaSource(relPath)
+			sourcePath, _ = s.findMenaSource(relPath)
 			if sourcePath == "" {
 				// Not in knossos source - mark as user
 				if !opts.DryRun {
 					targetChecksum, _ := ComputeFileChecksum(path)
-					manifest.Entries[manifestKey] = Entry{
-						Source:      SourceUser,
-						InstalledAt: result.SyncedAt,
-						Checksum:    targetChecksum,
-						MenaType:    menaType,
-						Target:      menaTarget,
+					manifest.Entries[fullManifestKey] = &provenance.ProvenanceEntry{
+						Owner:      provenance.OwnerUser,
+						Scope:      provenance.ScopeUser,
+						Checksum:   targetChecksum,
+						LastSynced: result.SyncedAt,
 					}
 				}
 				return nil
@@ -557,10 +346,11 @@ func (s *Syncer) recoverDir(recoverDir, menaTarget string, manifest *Manifest, r
 			// Not in knossos - mark as user
 			if !opts.DryRun {
 				targetChecksum, _ := ComputeFileChecksum(path)
-				manifest.Entries[manifestKey] = Entry{
-					Source:      SourceUser,
-					InstalledAt: result.SyncedAt,
-					Checksum:    targetChecksum,
+				manifest.Entries[fullManifestKey] = &provenance.ProvenanceEntry{
+					Owner:      provenance.OwnerUser,
+					Scope:      provenance.ScopeUser,
+					Checksum:   targetChecksum,
+					LastSynced: result.SyncedAt,
 				}
 			}
 			return nil
@@ -569,23 +359,24 @@ func (s *Syncer) recoverDir(recoverDir, menaTarget string, manifest *Manifest, r
 		// Compare checksums
 		sourceChecksum, _ := ComputeFileChecksum(sourcePath)
 		targetChecksum, _ := ComputeFileChecksum(path)
+		sourceRelPath, _ := filepath.Rel(s.sourceDir, sourcePath)
 
 		if !opts.DryRun {
 			if sourceChecksum == targetChecksum {
-				manifest.Entries[manifestKey] = Entry{
-					Source:      SourceKnossos,
-					InstalledAt: result.SyncedAt,
-					Checksum:    sourceChecksum,
-					MenaType:    menaType,
-					Target:      menaTarget,
+				manifest.Entries[fullManifestKey] = &provenance.ProvenanceEntry{
+					Owner:      provenance.OwnerKnossos,
+					Scope:      provenance.ScopeUser,
+					SourcePath: sourceRelPath,
+					SourceType: "user-sync",
+					Checksum:   sourceChecksum,
+					LastSynced: result.SyncedAt,
 				}
 			} else {
-				manifest.Entries[manifestKey] = Entry{
-					Source:      SourceDiverged,
-					InstalledAt: result.SyncedAt,
-					Checksum:    targetChecksum,
-					MenaType:    menaType,
-					Target:      menaTarget,
+				manifest.Entries[fullManifestKey] = &provenance.ProvenanceEntry{
+					Owner:      provenance.OwnerUser,
+					Scope:      provenance.ScopeUser,
+					Checksum:   targetChecksum,
+					LastSynced: result.SyncedAt,
 				}
 			}
 		}
@@ -696,4 +487,337 @@ func (s *Syncer) TargetSkillsDir() string {
 // ManifestPath returns the manifest file path.
 func (s *Syncer) ManifestPath() string {
 	return s.manifestPath
+}
+
+// prefixManifestKey adds the resource type prefix to the manifest key.
+func (s *Syncer) prefixManifestKey(key string) string {
+	switch s.resourceType {
+	case ResourceAgents:
+		return "agents/" + key
+	case ResourceMena:
+		// Mena keys need the target directory prefix (commands/ or skills/)
+		// This is handled in syncFiles where we know the mena target
+		return key
+	case ResourceHooks:
+		return "hooks/" + key
+	default:
+		return key
+	}
+}
+
+// keyToTargetPath converts a manifest key back to a target path.
+func (s *Syncer) keyToTargetPath(key string) string {
+	// Strip resource prefix
+	switch s.resourceType {
+	case ResourceAgents:
+		key = strings.TrimPrefix(key, "agents/")
+		return filepath.Join(s.targetDir, key)
+	case ResourceMena:
+		if strings.HasPrefix(key, "commands/") {
+			key = strings.TrimPrefix(key, "commands/")
+			return filepath.Join(s.targetCommandsDir, key)
+		} else if strings.HasPrefix(key, "skills/") {
+			key = strings.TrimPrefix(key, "skills/")
+			return filepath.Join(s.targetSkillsDir, key)
+		}
+		return ""
+	case ResourceHooks:
+		key = strings.TrimPrefix(key, "hooks/")
+		return filepath.Join(s.targetDir, key)
+	default:
+		return ""
+	}
+}
+
+// resourcePrefix returns the manifest key prefix for this resource type.
+func (s *Syncer) resourcePrefix() string {
+	switch s.resourceType {
+	case ResourceAgents:
+		return "agents/"
+	case ResourceMena:
+		return "" // Mena has two prefixes: commands/ and skills/
+	case ResourceHooks:
+		return "hooks/"
+	default:
+		return ""
+	}
+}
+
+// syncFiles iterates source files and syncs to target.
+func (s *Syncer) syncFiles(manifest *provenance.ProvenanceManifest, result *Result, opts Options) error {
+	// Phase 1: Snapshot current keys for this resource type
+	prefix := s.resourcePrefix()
+	existingKeys := make(map[string]bool)
+
+	for key, entry := range manifest.Entries {
+		// For mena, check both prefixes
+		if s.resourceType == ResourceMena {
+			if strings.HasPrefix(key, "commands/") || strings.HasPrefix(key, "skills/") {
+				if entry.Owner == provenance.OwnerKnossos {
+					existingKeys[key] = false
+				}
+			}
+		} else if prefix != "" && strings.HasPrefix(key, prefix) {
+			if entry.Owner == provenance.OwnerKnossos {
+				existingKeys[key] = false
+			}
+		}
+	}
+
+	// Phase 2: Walk source and sync
+	err := filepath.WalkDir(s.sourceDir, func(path string, d os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+
+		// Skip directories (we process files)
+		if d.IsDir() {
+			return nil
+		}
+
+		// Compute relative path for manifest key
+		relPath, err := filepath.Rel(s.sourceDir, path)
+		if err != nil {
+			return err
+		}
+
+		// For flat resources, use just the filename
+		manifestKey := relPath
+		if !s.nested {
+			manifestKey = filepath.Base(relPath)
+		}
+
+		// For mena: strip extension from manifest key and route to correct target.
+		// Manifest keys use STRIPPED filenames (e.g., "commit/INDEX.md" not "commit/INDEX.dro.md").
+		var menaTarget string
+		if s.resourceType == ResourceMena {
+			dir := filepath.Dir(manifestKey)
+			base := materialize.StripMenaExtension(filepath.Base(manifestKey))
+			manifestKey = filepath.Join(dir, base)
+			// Use ORIGINAL filename for routing
+			menaTarget = materialize.RouteMenaFile(filepath.Base(relPath))
+		}
+
+		// Add resource type prefix to manifest key
+		fullManifestKey := s.prefixManifestKey(manifestKey)
+		if s.resourceType == ResourceMena {
+			// Mena keys need the target directory prefix
+			if menaTarget == "commands" {
+				fullManifestKey = "commands/" + manifestKey
+			} else {
+				fullManifestKey = "skills/" + manifestKey
+			}
+		}
+
+		// Mark this key as seen
+		if _, tracked := existingKeys[fullManifestKey]; tracked {
+			existingKeys[fullManifestKey] = true
+		}
+
+		// Check for rite collision
+		if collision, riteName := s.collisionChecker.CheckCollision(manifestKey); collision {
+			result.Changes.Skipped = append(result.Changes.Skipped, SkippedEntry{
+				Name:   manifestKey,
+				Reason: "collision with rite " + s.resourceType.Singular() + " (" + riteName + ")",
+			})
+			return nil
+		}
+
+		// Calculate source checksum
+		sourceChecksum, err := ComputeFileChecksum(path)
+		if err != nil {
+			return ErrChecksum(path, err)
+		}
+
+		// Check existing manifest entry
+		entry, exists := manifest.Entries[fullManifestKey]
+
+		// Determine target path based on resource type and mena routing
+		targetBase := s.targetDir
+		if s.resourceType == ResourceMena {
+			if menaTarget == "commands" {
+				targetBase = s.targetCommandsDir
+			} else {
+				targetBase = s.targetSkillsDir
+			}
+		}
+		targetPath := filepath.Join(targetBase, manifestKey)
+
+		// Compute source path relative to knossos home for SourcePath field
+		sourceRelPath, _ := filepath.Rel(s.sourceDir, path)
+
+		if !exists {
+			// New file - check if target exists (untracked)
+			if _, err := os.Stat(targetPath); err == nil {
+				// Target exists but not in manifest
+				if opts.Recover {
+					targetChecksum, _ := ComputeFileChecksum(targetPath)
+					if targetChecksum == sourceChecksum {
+						// Exact match - adopt as knossos
+						if !opts.DryRun {
+							manifest.Entries[fullManifestKey] = &provenance.ProvenanceEntry{
+								Owner:      provenance.OwnerKnossos,
+								Scope:      provenance.ScopeUser,
+								SourcePath: sourceRelPath,
+								SourceType: "user-sync",
+								Checksum:   sourceChecksum,
+								LastSynced: result.SyncedAt,
+							}
+						}
+						result.Changes.Unchanged = append(result.Changes.Unchanged, manifestKey)
+					} else {
+						// Different - adopt as user (target has been modified)
+						if !opts.DryRun {
+							manifest.Entries[fullManifestKey] = &provenance.ProvenanceEntry{
+								Owner:      provenance.OwnerUser,
+								Scope:      provenance.ScopeUser,
+								Checksum:   targetChecksum,
+								LastSynced: result.SyncedAt,
+							}
+						}
+						result.Changes.Skipped = append(result.Changes.Skipped, SkippedEntry{
+							Name:   manifestKey,
+							Reason: "adopted as user (local modifications)",
+						})
+					}
+					return nil
+				}
+				// Not recovering - skip as user-created
+				if !opts.DryRun {
+					targetChecksum, _ := ComputeFileChecksum(targetPath)
+					manifest.Entries[fullManifestKey] = &provenance.ProvenanceEntry{
+						Owner:      provenance.OwnerUser,
+						Scope:      provenance.ScopeUser,
+						Checksum:   targetChecksum,
+						LastSynced: result.SyncedAt,
+					}
+				}
+				result.Changes.Skipped = append(result.Changes.Skipped, SkippedEntry{
+					Name:   manifestKey,
+					Reason: "user-created",
+				})
+				return nil
+			}
+
+			// New file, target doesn't exist - add it
+			if !opts.DryRun {
+				if err := s.copyFile(path, targetPath); err != nil {
+					return err
+				}
+				manifest.Entries[fullManifestKey] = &provenance.ProvenanceEntry{
+					Owner:      provenance.OwnerKnossos,
+					Scope:      provenance.ScopeUser,
+					SourcePath: sourceRelPath,
+					SourceType: "user-sync",
+					Checksum:   sourceChecksum,
+					LastSynced: result.SyncedAt,
+				}
+			}
+			result.Changes.Added = append(result.Changes.Added, manifestKey)
+			return nil
+		}
+
+		// Existing entry
+		switch entry.Owner {
+		case provenance.OwnerUser, provenance.OwnerUntracked:
+			// Never touch user-created files
+			result.Changes.Skipped = append(result.Changes.Skipped, SkippedEntry{
+				Name:   manifestKey,
+				Reason: "user-created",
+			})
+
+		case provenance.OwnerKnossos:
+			// Check if source changed
+			if entry.Checksum == sourceChecksum {
+				// No change in source
+				result.Changes.Unchanged = append(result.Changes.Unchanged, manifestKey)
+			} else {
+				// Source changed - check if target diverged
+				targetChecksum, _ := ComputeFileChecksum(targetPath)
+				if targetChecksum == entry.Checksum {
+					// Target unchanged, update from source
+					if !opts.DryRun {
+						if err := s.copyFile(path, targetPath); err != nil {
+							return err
+						}
+						manifest.Entries[fullManifestKey] = &provenance.ProvenanceEntry{
+							Owner:      provenance.OwnerKnossos,
+							Scope:      provenance.ScopeUser,
+							SourcePath: sourceRelPath,
+							SourceType: "user-sync",
+							Checksum:   sourceChecksum,
+							LastSynced: result.SyncedAt,
+						}
+					}
+					result.Changes.Updated = append(result.Changes.Updated, manifestKey)
+				} else {
+					// Target diverged - check if --force
+					if opts.Force {
+						// Force overwrite
+						if !opts.DryRun {
+							if err := s.copyFile(path, targetPath); err != nil {
+								return err
+							}
+							manifest.Entries[fullManifestKey] = &provenance.ProvenanceEntry{
+								Owner:      provenance.OwnerKnossos,
+								Scope:      provenance.ScopeUser,
+								SourcePath: sourceRelPath,
+								SourceType: "user-sync",
+								Checksum:   sourceChecksum,
+								LastSynced: result.SyncedAt,
+							}
+						}
+						result.Changes.Updated = append(result.Changes.Updated, manifestKey)
+					} else {
+						// Skip diverged without force
+						result.Changes.Skipped = append(result.Changes.Skipped, SkippedEntry{
+							Name:   manifestKey,
+							Reason: "diverged (use --force to overwrite)",
+						})
+					}
+				}
+			}
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return err
+	}
+
+	// Phase 3: Orphan removal
+	if !opts.DryRun {
+		for key, seen := range existingKeys {
+			if !seen {
+				s.removeOrphan(key, manifest)
+			}
+		}
+	}
+
+	return nil
+}
+
+// removeOrphan removes an orphaned knossos-owned entry.
+func (s *Syncer) removeOrphan(key string, manifest *provenance.ProvenanceManifest) {
+	entry := manifest.Entries[key]
+	if entry == nil || entry.Owner != provenance.OwnerKnossos {
+		return // Safety: only remove knossos-owned orphans
+	}
+
+	// Determine target path from key
+	targetPath := s.keyToTargetPath(key)
+	if targetPath == "" {
+		return
+	}
+
+	// Remove file or directory
+	if strings.HasSuffix(key, "/") {
+		os.RemoveAll(targetPath)
+	} else {
+		os.Remove(targetPath)
+	}
+
+	// Remove from manifest
+	delete(manifest.Entries, key)
 }

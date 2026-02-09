@@ -6,30 +6,83 @@ import (
 	"strings"
 
 	"github.com/autom8y/knossos/internal/config"
+	"github.com/autom8y/knossos/internal/provenance"
 )
 
 // CollisionChecker provides methods for detecting rite resource collisions.
 type CollisionChecker struct {
-	knossosHome  string
-	ritesDir     string
-	resourceType ResourceType
-	nested       bool
+	knossosHome    string
+	ritesDir       string
+	resourceType   ResourceType
+	nested         bool
+	riteEntries    map[string]bool // entries from rite manifest
+	manifestLoaded bool            // whether manifest was loaded
 }
 
 // NewCollisionChecker creates a new collision checker for the given resource type.
-func NewCollisionChecker(resourceType ResourceType, nested bool) *CollisionChecker {
+// If claudeDir is provided, it will attempt to load the rite manifest for faster lookups.
+func NewCollisionChecker(resourceType ResourceType, nested bool, claudeDir string) *CollisionChecker {
 	knossosHome := config.KnossosHome()
-	return &CollisionChecker{
+	c := &CollisionChecker{
 		knossosHome:  knossosHome,
 		ritesDir:     filepath.Join(knossosHome, "rites"),
 		resourceType: resourceType,
 		nested:       nested,
+	}
+	if claudeDir != "" {
+		c.loadRiteManifest(claudeDir)
+	}
+	return c
+}
+
+// loadRiteManifest attempts to load the rite manifest from the project .claude/ directory.
+func (c *CollisionChecker) loadRiteManifest(claudeDir string) {
+	if c.manifestLoaded {
+		return
+	}
+	c.manifestLoaded = true
+	c.riteEntries = make(map[string]bool)
+
+	manifestPath := provenance.ManifestPath(claudeDir)
+	manifest, err := provenance.Load(manifestPath)
+	if err != nil {
+		return // Fallback to directory scan
+	}
+
+	for key, entry := range manifest.Entries {
+		if entry.Scope == provenance.ScopeRite && entry.Owner == provenance.OwnerKnossos {
+			c.riteEntries[key] = true
+		}
+	}
+}
+
+// resourcePrefix returns the manifest key prefix for this resource type.
+func (c *CollisionChecker) resourcePrefix() string {
+	switch c.resourceType {
+	case ResourceAgents:
+		return "agents/"
+	case ResourceMena:
+		return "" // Mena keys already include commands/ or skills/ prefix
+	case ResourceHooks:
+		return "hooks/"
+	default:
+		return ""
 	}
 }
 
 // CheckCollision checks if a resource name exists in any rite.
 // Returns (hasCollision, riteName).
 func (c *CollisionChecker) CheckCollision(name string) (bool, string) {
+	// If manifest was loaded successfully, use manifest entries
+	if c.manifestLoaded && len(c.riteEntries) > 0 {
+		prefixedName := c.resourcePrefix() + name
+		if c.riteEntries[prefixedName] {
+			return true, "(from manifest)"
+		}
+		return false, ""
+	}
+
+	// Fallback: directory scan (original behavior)
 	if c.knossosHome == "" {
 		return false, ""
 	}

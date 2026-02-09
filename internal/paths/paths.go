@@ -296,16 +296,6 @@ func UserHooksDir() string {
 	return filepath.Join(UserClaudeDir(), "hooks")
 }
 
-// UserAgentManifest returns the path to the user agent manifest.
-func UserAgentManifest() string {
-	return filepath.Join(UserClaudeDir(), "USER_AGENT_MANIFEST.json")
-}
-
-// UserSkillManifest returns the path to the user skill manifest.
-func UserSkillManifest() string {
-	return filepath.Join(UserClaudeDir(), "USER_SKILL_MANIFEST.json")
-}
-
 // UserProvenanceManifest returns the path to the user-level provenance manifest.
 func UserProvenanceManifest() string {
 	return filepath.Join(UserClaudeDir(), "USER_PROVENANCE_MANIFEST.yaml")

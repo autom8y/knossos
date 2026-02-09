@@ -71,7 +71,7 @@ func DetectDivergence(previous *ProvenanceManifest, current map[string]*Provenan
 			promotedEntry := *entry
 			promotedEntry.Owner = OwnerUser
 			promotedEntry.Checksum = currentChecksum
-			// SourcePipeline, SourcePath, SourceType retained for provenance history
+			// Scope, SourcePath, SourceType retained for provenance history
 			report.Promoted[path] = &promotedEntry
 			continue
 		}

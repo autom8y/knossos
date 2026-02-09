@@ -227,9 +227,24 @@ Leverage the manifest for improved operations:
 2. Add `ari provenance show` CLI command for debugging.
 3. Implement divergence warnings: "File X was modified locally; use --force to overwrite."
 
-### Phase 4 (future sprint -- if schemas converge)
+### Phase 4a (complete -- schema unification)
 
-Evaluate whether usersync manifests and the provenance manifest can share a schema. The usersync `Entry` type and `ProvenanceEntry` are structurally similar. If the schemas converge, extract a shared provenance package (`internal/provenance/`) that both pipelines use.
+Unified usersync and provenance manifests under a single schema. 14 stakeholder decisions confirmed:
+
+1. Full schema unification — one `ProvenanceEntry` for both scopes
+2. Owner model: `knossos`/`user`/`untracked`. Divergence computed, not stored.
+3. `ScopeType` replaces `SourcePipeline`. Values: `rite`/`user`.
+4. Schema version bumped to `2.0` with `migrateV1ToV2()` for backward compat.
+5. Single user manifest: `USER_PROVENANCE_MANIFEST.yaml` replaces 3 JSON manifests.
+6. Manifest keys namespaced: `agents/`, `commands/`, `skills/`, `hooks/`.
+7. `CollisionChecker` reads rite provenance manifest (fallback: directory scan).
+8. Orphan parity: user-level auto-removes knossos-owned orphans.
+9. CLI: `ari provenance show` gains SCOPE column and `--scope` filter.
+10. Clean break migration: old JSON manifests backed up as `.v2-backup`.
+
+### Phase 4b (future -- pipeline absorption)
+
+Absorb usersync into materialize as a scope variant. `ari sync` becomes single entry point with `--scope=rite|user`. Usersync package deprecated and removed.
 
 ## Consequences
 

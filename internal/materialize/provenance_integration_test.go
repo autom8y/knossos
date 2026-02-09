@@ -70,10 +70,10 @@ func TestProvenanceIntegration_BasicMaterialization(t *testing.T) {
 	assert.Nil(t, manifest.Entries["sync/state.json"], "sync/state.json should NOT be tracked (always regenerated)")
 	assert.Nil(t, manifest.Entries["KNOSSOS_MANIFEST.yaml"], "KNOSSOS_MANIFEST.yaml should NOT be tracked (always regenerated)")
 
-	// Verify all recorded entries have knossos ownership
+	// Verify all recorded entries have knossos ownership and rite scope
 	for path, entry := range manifest.Entries {
 		assert.Equal(t, provenance.OwnerKnossos, entry.Owner, "entry %s should be knossos-owned", path)
-		assert.Equal(t, "materialize", entry.SourcePipeline, "entry %s should have materialize pipeline", path)
+		assert.Equal(t, provenance.ScopeRite, entry.Scope, "entry %s should have rite scope", path)
 		assert.NotEmpty(t, entry.Checksum, "entry %s should have checksum", path)
 		assert.NotZero(t, entry.LastSynced, "entry %s should have last_synced", path)
 	}

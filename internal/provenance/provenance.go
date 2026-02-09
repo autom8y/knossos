@@ -4,14 +4,20 @@
 // ownership transitions.
 package provenance
 
-import "time"
+import (
+	"path/filepath"
+	"time"
+)
 
 // ManifestFileName is the provenance manifest filename within .claude/.
 const ManifestFileName = "PROVENANCE_MANIFEST.yaml"
 
+// UserManifestFileName is the user-level provenance manifest filename.
+const UserManifestFileName = "USER_PROVENANCE_MANIFEST.yaml"
+
 // CurrentSchemaVersion is the current manifest schema version.
-// Starts at "1.0" for the provenance manifest (independent of inscription's "1.0").
-const CurrentSchemaVersion = "1.0"
+// Starts at "2.0" for the provenance manifest (independent of inscription's "1.0").
+const CurrentSchemaVersion = "2.0"
 
 // ProvenanceManifest is the unified file-level provenance tracker for .claude/.
 // Stored at .claude/PROVENANCE_MANIFEST.yaml.
@@ -37,9 +43,8 @@ type ProvenanceEntry struct {
 	// Owner determines sync behavior for this entry.
 	Owner OwnerType `yaml:"owner"`
 
-	// SourcePipeline identifies which pipeline placed this file.
-	// "materialize" for project-level, empty string for user-created files.
-	SourcePipeline string `yaml:"source_pipeline,omitempty"`
+	// Scope indicates whether this entry belongs to rite or user provenance.
+	Scope ScopeType `yaml:"scope"`
 
 	// SourcePath is the relative path (from project root) to the source file.
 	// Empty for user-created files.
@@ -73,16 +78,16 @@ const (
 	// These are NEVER overwritten by the pipeline.
 	OwnerUser OwnerType = "user"
 
-	// OwnerUnknown indicates pre-existing files discovered during bootstrap.
+	// OwnerUntracked indicates pre-existing files discovered during bootstrap.
 	// Treated as user-owned for safety. Promoted to OwnerUser or OwnerKnossos
 	// on the next sync that interacts with the file.
-	OwnerUnknown OwnerType = "unknown"
+	OwnerUntracked OwnerType = "untracked"
 )
 
 // IsValid returns true if the owner type is a recognized value.
 func (o OwnerType) IsValid() bool {
 	switch o {
-	case OwnerKnossos, OwnerUser, OwnerUnknown:
+	case OwnerKnossos, OwnerUser, OwnerUntracked:
 		return true
 	default:
 		return false
@@ -92,4 +97,35 @@ func (o OwnerType) IsValid() bool {
 // String returns the string representation.
 func (o OwnerType) String() string {
 	return string(o)
+}
+
+// ScopeType represents the provenance scope (rite or user).
+type ScopeType string
+
+const (
+	// ScopeRite indicates entries tracked in project-level PROVENANCE_MANIFEST.yaml.
+	ScopeRite ScopeType = "rite"
+
+	// ScopeUser indicates entries tracked in user-level USER_PROVENANCE_MANIFEST.yaml.
+	ScopeUser ScopeType = "user"
+)
+
+// IsValid returns true if the scope type is a recognized value.
+func (s ScopeType) IsValid() bool {
+	switch s {
+	case ScopeRite, ScopeUser:
+		return true
+	default:
+		return false
+	}
+}
+
+// String returns the string representation.
+func (s ScopeType) String() string {
+	return string(s)
+}
+
+// UserManifestPath returns the full path to USER_PROVENANCE_MANIFEST.yaml within the user .claude directory.
+func UserManifestPath(userClaudeDir string) string {
+	return filepath.Join(userClaudeDir, UserManifestFileName)
 }
