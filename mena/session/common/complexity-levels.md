@@ -203,7 +203,7 @@ If during design you discover:
 - **Multiple services** with complex interactions
 - **Infrastructure changes** (networking, security, deployment)
 - **Cross-cutting concerns** (observability, disaster recovery)
-- **Multi-team coordination**
+- **Multi-rite coordination**
 - **Phased rollout** required
 - **Too large for single session**
 

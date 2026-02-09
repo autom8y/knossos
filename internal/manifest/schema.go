@@ -298,8 +298,8 @@ func jsonPointerToPath(location string) string {
 	if location == "" {
 		return "$"
 	}
-	// Location is already in format like "/teams/default"
-	// Convert to $.teams.default
+	// Location is already in format like "/rites/default"
+	// Convert to $.rites.default
 	path := strings.ReplaceAll(location, "/", ".")
 	if strings.HasPrefix(path, ".") {
 		return "$" + path

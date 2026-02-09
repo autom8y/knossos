@@ -55,7 +55,7 @@ Inventory all documentation and produce a clear assessment of staleness, redunda
 - Evidence requirements per finding
 
 **You escalate to user:**
-- Ambiguous ownership (docs that may belong to another team)
+- Ambiguous ownership (docs that may belong to another rite)
 - Access restrictions preventing complete audit
 - Docs outside the repository (Confluence, Notion)
 - Retention policy questions (delete vs. archive old ADRs)
