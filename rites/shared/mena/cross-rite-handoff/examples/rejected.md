@@ -1,8 +1,8 @@
 ---
 artifact_id: HANDOFF-10x-dev-to-security-2026-01-02
 schema_version: "1.0"
-source_team: 10x-dev
-target_team: security
+source_rite: 10x-dev
+target_rite: security
 handoff_type: assessment
 priority: critical
 blocking: true
@@ -38,7 +38,7 @@ The handoff lacks sufficient context for security assessment:
 
 ### Recommended Next Steps
 
-Source team should:
+Source rite should:
 1. Complete TDD-payment-processing.md with architecture diagrams
 2. Create new HANDOFF referencing this rejection
 3. Set `resubmission_of: HANDOFF-10x-dev-to-security-2026-01-02`
@@ -59,7 +59,7 @@ The original handoff provided only:
 - High-level PRD
 - Single vague question ("Is it secure?")
 
-This created an impossible task for the security team - without architectural context, no meaningful threat model can be produced.
+This created an impossible task for the security rite - without architectural context, no meaningful threat model can be produced.
 
 ## Expected Resubmission
 
@@ -96,4 +96,4 @@ status: pending
 - Security assessment handoffs require completed TDD with architecture diagrams
 - Assessment questions must be specific and answerable
 - Don't hand off to specialists until prerequisite artifacts are complete
-- Use within-team `/consult` for early-stage security questions before formal handoff
+- Use within-rite `/consult` for early-stage security questions before formal handoff

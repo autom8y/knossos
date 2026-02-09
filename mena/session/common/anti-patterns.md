@@ -528,7 +528,7 @@ When you've fallen into an anti-pattern:
 | Excessive handoffs | Track handoff_count, warn at 6+ |
 | Wrong complexity | Upgrade prompt during session |
 | Uncommitted parks | Capture git status, warn |
-| Team mismatch | Validate on resume, warn |
+| Rite mismatch | Validate on resume, warn |
 | Stale resumes | Display park duration, warn > 2 weeks |
 | Quality skip | Log flag, add to summary |
 | Same agent handoff | Validate agent differs |

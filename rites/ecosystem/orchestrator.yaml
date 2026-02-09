@@ -2,7 +2,7 @@
 # Used by generate-orchestrator.sh to produce orchestrator.md
 # References workflow.yaml for phase/specialist data
 
-# Team metadata
+# Rite metadata
 rite:
   name: ecosystem
   domain: ecosystem infrastructure
@@ -52,14 +52,14 @@ handoff_criteria:
     - "Integration test matrix executed successfully"
     - "Sign-off criteria met"
 
-# Skills references for this team
+# Skills references for this rite
 skills:
   - "@ecosystem-ref for sync pipeline/knossos patterns"
   - "@documentation for schema conventions"
   - "@10x-workflow for complexity assessment"
   - "@standards for naming conventions"
 
-# Team-specific anti-patterns
+# Rite-specific anti-patterns
 antipatterns:
   - "Skipping backward compatibility analysis (every change affects satellites)"
   - "Designing without considering all 10 teams"

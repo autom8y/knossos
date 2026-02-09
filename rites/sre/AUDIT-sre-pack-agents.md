@@ -164,7 +164,7 @@
 
 3. **Skills Reference sections**: All agents have similar "Reference these skills" sections. Could be standardized.
 
-4. **Cross-Team Routing**: All agents reference cross-rite skill identically. One line sufficient.
+4. **Cross-Rite Routing**: All agents reference cross-rite skill identically. One line sufficient.
 
 5. **Template bloat**: Platform Engineer and Chaos Engineer have inline templates that should be skills.
 

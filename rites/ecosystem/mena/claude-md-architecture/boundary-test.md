@@ -73,7 +73,7 @@ A practical checklist for determining if content belongs in CLAUDE.md. Before ad
 |--------|---------------|--------------|
 | Yes, knossos -> satellites | SYNC | Infrastructure section |
 | No, satellite-only | PRESERVE | Identity/Extension section |
-| Regenerated from ACTIVE_RITE | REGENERATE | Team configuration |
+| Regenerated from ACTIVE_RITE | REGENERATE | Rite configuration |
 
 **Use this to determine section ownership**:
 - Infrastructure docs (skills, hooks, routing) = SYNC
@@ -132,7 +132,7 @@ A practical checklist for determining if content belongs in CLAUDE.md. Before ad
                               +------------+              |
                                                +----------+----------+
                                                |          |          |
-                                            KNOSSOS     TEAM    SATELLITE
+                                            KNOSSOS     RITE    SATELLITE
                                                |          |          |
                                                v          v          v
                                              SYNC     REGENERATE  PRESERVE

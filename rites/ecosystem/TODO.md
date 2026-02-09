@@ -6,7 +6,7 @@
 
 The ecosystem rite is a **5-agent infrastructure rite** handling sync pipeline and knossos patterns. The audit revealed it's well-documented but claims more scope than it actually needs:
 
-- Claims "hub team" status with cross-rite coordination → but no mechanism exists
+- Claims "hub rite" status with cross-rite coordination → but no mechanism exists
 - Defines satellite diversity matrix for testing → but doesn't actually work on satellites
 - Assumes orchestrated mode only → but users want direct agent access
 
@@ -22,12 +22,12 @@ The ecosystem rite is a **5-agent infrastructure rite** handling sync pipeline a
 
 **Decision**: Remove hub claims. The ecosystem rite is an infrastructure specialist with user-escalation only.
 
-**Rationale**: No team leads registry exists, no notification mechanism, no coordination protocol. Other teams discover impact via sync failures, which is fine.
+**Rationale**: No rite leads registry exists, no notification mechanism, no coordination protocol. Other rites discover impact via sync failures, which is fine.
 
 **Changes required:**
 - [ ] Update `orchestrator.yaml`: Remove `cross_team_protocol` hub language
-- [ ] Update `README.md`: Remove hub team positioning
-- [ ] Update `agents/orchestrator.md`: Change escalation path to user-only (not "all team leads")
+- [ ] Update `README.md`: Remove hub rite positioning
+- [ ] Update `agents/orchestrator.md`: Change escalation path to user-only (not "all rite leads")
 - [ ] Simplify cross-rite references to "escalate to user when changes affect other teams"
 
 ---

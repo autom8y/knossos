@@ -15,7 +15,7 @@ artifact_type: workflow
 # Required fields
 name: string               # Rite name (e.g., "10x-dev")
 workflow_type: enum        # sequential | parallel | hybrid
-description: string        # Team workflow description
+description: string        # Rite workflow description
 
 # Entry point
 entry_point:
@@ -66,7 +66,7 @@ version: string            # e.g., "1.0.0"
 |-------|------|-------------|
 | `name` | string | Rite identifier |
 | `workflow_type` | enum | Flow type (sequential/parallel/hybrid) |
-| `description` | string | Team workflow description |
+| `description` | string | Rite workflow description |
 | `entry_point` | object | First agent and artifact |
 | `phases` | array | Ordered phase definitions (min 1) |
 | `complexity_levels` | array | Complexity to phase mappings (min 1) |

@@ -1,8 +1,8 @@
 ---
 artifact_id: HANDOFF-debt-triage-to-hygiene-2026-01-03
 schema_version: "1.0"
-source_team: debt-triage
-target_team: hygiene
+source_rite: debt-triage
+target_rite: hygiene
 handoff_type: execution
 priority: high
 blocking: false
@@ -42,7 +42,7 @@ The debt-triage has completed assessment and planning for Q1 2026 debt remediati
 
 Execute in order: PKG-001, PKG-002 (no dependencies between them, but PKG-001 is higher priority).
 
-## Notes for Hygiene Team
+## Notes for Hygiene Rite
 
 - PKG-001 affects: user-service, billing-service, notification-service, auth-service
 - All changes must preserve existing behavior (see acceptance criteria)

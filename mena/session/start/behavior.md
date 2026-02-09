@@ -46,7 +46,7 @@ Session Context:
 - New session requested
 - Initiative: {user-provided-initiative}
 - Complexity: {SCRIPT|MODULE|SERVICE|PLATFORM}
-- Team: {rite-name}
+- Rite: {rite-name}
 - Phase: requirements")
 ```
 

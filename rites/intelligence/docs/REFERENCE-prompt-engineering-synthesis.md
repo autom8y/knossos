@@ -140,7 +140,7 @@ If uncertain: Guidance on what to do.
 
 ### Role Clarity (1-5)
 - [ ] Single, unambiguous purpose stated in first paragraph
-- [ ] Role distinct from other agents in the team
+- [ ] Role distinct from other agents in the pantheon
 - [ ] "WHO this is" is immediately clear
 - [ ] No overlapping responsibilities with other agents
 

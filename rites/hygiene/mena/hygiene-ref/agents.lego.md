@@ -1,11 +1,11 @@
 ---
 name: hygiene-ref:agents
-description: "Hygiene team agent profiles and capabilities. Triggers: code-smeller, architect-enforcer, janitor, audit-lead."
+description: "Hygiene pantheon agent profiles and capabilities. Triggers: code-smeller, architect-enforcer, janitor, audit-lead."
 ---
 
-# Hygiene Team Agents
+# Hygiene Pantheon
 
-Detailed profiles for each agent in the hygiene team.
+Detailed profiles for each agent in the hygiene pantheon.
 
 ---
 
@@ -105,7 +105,7 @@ Detailed profiles for each agent in the hygiene team.
 
 ## Integration with Standards Skill
 
-The hygiene team complements the `standards` skill:
+The hygiene pantheon complements the `standards` skill:
 
 ```bash
 /hygiene
@@ -120,4 +120,4 @@ Check for violations of:
 - Error handling patterns
 ```
 
-Standards skill defines rules, hygiene team enforces them.
+Standards skill defines rules, hygiene pantheon enforces them.

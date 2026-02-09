@@ -36,7 +36,7 @@ complexity_levels:
 # /architect  → risk-assessor (assessment/design role)
 # /build      → sprint-planner (planning is the "build" output)
 # /qa         → risk-assessor (validation role)
-# Note: This team has 3 agents, not 4. Some commands may not apply.
+# Note: This rite has 3 agents, not 4. Some commands may not apply.
 
 back_routes:
   - source_phase: planning

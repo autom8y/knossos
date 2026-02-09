@@ -91,7 +91,7 @@ The intelligence rite is a **well-structured analytics and research rite** with 
 
 ### P3: Clarify Intelligence vs Strategy Boundary
 
-**Gap identified:** Both teams do "analysis" but different kinds. Boundary needs explicit documentation.
+**Gap identified:** Both rites do "analysis" but different kinds. Boundary needs explicit documentation.
 
 **Decision:** Add explicit comparison to both team READMEs.
 

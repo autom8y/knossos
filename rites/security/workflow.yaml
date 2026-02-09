@@ -24,9 +24,9 @@ entry_point:
 external_consultation:
   enabled: true
   allowed_invokers:
-    - team: 10x-dev
+    - rite: 10x-dev
       agents: [architect, orchestrator]
-    - team: sre
+    - rite: sre
       agents: [incident-commander]
 
   # Pre-implementation phase for design review

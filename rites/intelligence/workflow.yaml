@@ -47,8 +47,8 @@ complexity_levels:
 # /architect   → experimentation-lead
 # /build       → analytics-engineer
 # /qa          → insights-analyst
-# /hotfix      → (N/A - research team)
-# /code-review → (N/A - research team)
+# /hotfix      → (N/A - intelligence rite)
+# /code-review → (N/A - intelligence rite)
 
 back_routes:
   - source_phase: synthesis

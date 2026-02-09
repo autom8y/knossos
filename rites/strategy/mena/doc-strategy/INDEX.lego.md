@@ -5,7 +5,7 @@ description: "Strategy templates: roadmaps, competitive analysis, financial mode
 
 # Strategy Document Templates
 
-Templates for strategic analysis and planning artifacts from the strategy team.
+Templates for strategic analysis and planning artifacts from the strategy rite.
 
 ## Template Index
 
@@ -398,5 +398,5 @@ Q4: {Focus and milestones}
 
 See the `documentation` skill hub for additional template categories:
 - Development artifacts (PRD, TDD, ADR, Test Plans)
-- Team formation (TEAM-SPEC templates)
+- Rite formation (RITE-SPEC templates)
 - Other strategic artifacts

@@ -218,14 +218,14 @@ Future: Script to run all integration tests:
 #!/bin/bash
 # run-integration-tests.sh {rite-name}
 
-TEAM=$1
-RESULTS="integration-report-${TEAM}.md"
+RITE=$1
+RESULTS="integration-report-${RITE}.md"
 
-echo "# Integration Test Report: ${TEAM}" > $RESULTS
+echo "# Integration Test Report: ${RITE}" > $RESULTS
 echo "**Date**: $(date -Iseconds)" >> $RESULTS
 
 # Swap test
 echo "## Swap Test" >> $RESULTS
-$KNOSSOS_HOME/ari sync --rite "$TEAM" 2>&1 | tee -a $RESULTS
+$KNOSSOS_HOME/ari sync --rite "$RITE" 2>&1 | tee -a $RESULTS
 # ... continue with other tests
 ```

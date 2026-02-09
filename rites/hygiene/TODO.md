@@ -75,7 +75,7 @@ The hygiene rite is a **well-designed, recently optimized rite** (36% compressio
 - [ ] Define handoff artifact format in `rites/debt-triage/` (debt-triage side)
 - [ ] Update `rites/hygiene/agents/code-smeller.md`: Accept debt-triage artifact as input
 - [ ] Add to code-smeller's approach: "If debt-triage artifact provided, use as starting point for assessment"
-- [ ] Document handoff in both team READMEs
+- [ ] Document handoff in both rite READMEs
 
 **Handoff artifact format (proposed):**
 ```yaml

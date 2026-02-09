@@ -10,7 +10,7 @@ Technology scouting, integration analysis, prototyping, and future architecture.
 - "Can we build a quick proof-of-concept?"
 - "What does our architecture look like in 2 years?"
 
-**Not for**: Production feature development or immediate shipping - this team explores and validates future bets.
+**Not for**: Production feature development or immediate shipping - this rite explores and validates future bets.
 
 ## Quick Start
 

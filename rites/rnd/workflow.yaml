@@ -47,8 +47,8 @@ complexity_levels:
 # /architect   → integration-researcher
 # /build       → prototype-engineer
 # /qa          → moonshot-architect
-# /hotfix      → (N/A - R&D team)
-# /code-review → (N/A - R&D team)
+# /hotfix      → (N/A - R&D rite)
+# /code-review → (N/A - R&D rite)
 
 back_routes:
   - source_phase: future-architecture

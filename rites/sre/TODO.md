@@ -15,9 +15,9 @@ The sre rite is a **production-ready, well-optimized rite** (44% token reduction
 - Orchestrator is properly consultative (read-only)
 
 **Architecture validated:**
-- Runbook ownership clear - SRE owns operational docs, doc-team owns external user docs
+- Runbook ownership clear - SRE owns operational docs, docs rite owns external user docs
 - Chaos blast radius progression is documentation-sufficient (trust + review)
-- Team is genuinely holistic reliability, not just infrastructure ops
+- Rite is genuinely holistic reliability, not just infrastructure ops
 
 ---
 
@@ -25,9 +25,9 @@ The sre rite is a **production-ready, well-optimized rite** (44% token reduction
 
 ### P1: Move Shared Templates to Ecosystem-Level Skill
 
-**Decision:** doc-sre templates used by multiple teams (debt ledger, risk matrix, sprint debt packages) should move to ecosystem-level shared skill.
+**Decision:** doc-sre templates used by multiple rites (debt ledger, risk matrix, sprint debt packages) should move to ecosystem-level shared skill.
 
-**Rationale:** Templates used by debt-triage, hygiene, and sre shouldn't be owned by one team. Ecosystem-level templates prevent cross-rite ownership confusion.
+**Rationale:** Templates used by debt-triage, hygiene, and sre shouldn't be owned by one rite. Ecosystem-level templates prevent cross-rite ownership confusion.
 
 **Changes required:**
 - [ ] Create `skills/shared-templates/` at ecosystem level (or extend existing skill)

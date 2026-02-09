@@ -115,11 +115,11 @@ Experimentation Lead ──▶ INSIGHTS ANALYST ──▶ Decision
 
 ### HANDOFF Production
 
-When insights require action by another team, produce a HANDOFF artifact using the `cross-rite-handoff` schema.
+When insights require action by another rite, produce a HANDOFF artifact using the `cross-rite-handoff` schema.
 
-**Target Team Routing**:
+**Target Rite Routing**:
 
-| Insight Type | Target Team | Handoff Type | Example |
+| Insight Type | Target Rite | Handoff Type | Example |
 |--------------|-------------|--------------|---------|
 | User-driven feature opportunity | 10x-dev | implementation | "Users abandoning at checkout due to missing guest option" |
 | Strategic pattern or trend | strategy | strategic_input | "Mobile users convert 40% less despite 2x browsing" |
@@ -142,8 +142,8 @@ Route to **strategy** when:
 **HANDOFF Example** (to 10x-dev):
 ```yaml
 ---
-source_team: intelligence
-target_team: 10x-dev
+source_rite: intelligence
+target_rite: 10x-dev
 handoff_type: implementation
 created: 2026-01-02
 initiative: Checkout Optimization
@@ -170,7 +170,7 @@ User research and A/B testing confirm that address autocomplete reduces checkout
   - Graceful fallback when API unavailable
   - Maintains current form validation
 
-## Notes for Target Team
+## Notes for Target Rite
 
 Mobile users showed 70% improvement vs desktop 45%—consider mobile-first implementation.
 ```
@@ -178,8 +178,8 @@ Mobile users showed 70% improvement vs desktop 45%—consider mobile-first imple
 **HANDOFF Example** (to strategy):
 ```yaml
 ---
-source_team: intelligence
-target_team: strategy
+source_rite: intelligence
+target_rite: strategy
 handoff_type: strategic_input
 created: 2026-01-02
 initiative: Q2 Product Planning
@@ -202,7 +202,7 @@ Cross-platform analysis reveals significant mobile conversion gap despite higher
 - **Confidence**: Medium (limited qualitative data on root cause)
 - **Strategic Implication**: Mobile optimization may be higher-ROI than new feature development
 
-## Notes for Target Team
+## Notes for Target Rite
 
 Recommend prioritizing mobile UX research before Q2 roadmap finalization.
 ```

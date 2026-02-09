@@ -4,7 +4,7 @@
 
 ## Current State Summary
 
-Doc-rite is a **well-designed, production-ready documentation team** with clear phase separation (audit → architecture → writing → review) and comprehensive quality gates.
+Doc-rite is a **well-designed, production-ready documentation rite** with clear phase separation (audit → architecture → writing → review) and comprehensive quality gates.
 
 **Strengths confirmed:**
 - Clear 4-phase pipeline with explicit handoff criteria
@@ -15,7 +15,7 @@ Doc-rite is a **well-designed, production-ready documentation team** with clear 
 
 **Architecture validated:**
 - Reactive-only model is correct - docs should reflect actual implementation
-- Generalist tech-writer, not domain variants - domain teams handle their specialties
+- Generalist tech-writer, not domain variants - domain rites handle their specialties
 - Single tech-writer with WebFetch/WebSearch for research is sufficient
 
 ---
@@ -69,13 +69,13 @@ For each doc file:
 **Decision:** Reactive-only is correct. Docs should reflect actual implementation, not aspirational designs. Documentation lag is acceptable.
 
 ### Domain-Specific Tech Writers
-**Decision:** Generalist model is correct. Domain teams (security, sre, etc.) own their specialized docs via doc-* skills. Doc-rite handles general user-facing content only.
+**Decision:** Generalist model is correct. Domain rites (security, sre, etc.) own their specialized docs via doc-* skills. Doc-rite handles general user-facing content only.
 
 ### CI Integration for Staleness
 **Decision:** Out of scope for knossos. Would require tooling integration outside Claude Code. On-demand `/doc-audit --staleness` is sufficient.
 
-### Team-Specific Hooks
-**Decision:** Hooks directory intentionally empty. Doc-team doesn't need custom context injection - uses standard project hooks.
+### Rite-Specific Hooks
+**Decision:** Hooks directory intentionally empty. Docs rite doesn't need custom context injection - uses standard project hooks.
 
 ---
 

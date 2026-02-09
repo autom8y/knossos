@@ -6,7 +6,7 @@ model: opus
 ---
 
 ## Context
-Auto-injected by SessionStart hook (project, team, session, git).
+Auto-injected by SessionStart hook (project, rite, session, git).
 
 ## Pre-flight
 

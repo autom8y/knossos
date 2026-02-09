@@ -43,7 +43,7 @@ sprint:
 # Optional fields
 session_id: string         # Associated session
 initiative: string         # Parent initiative
-target_team: string        # Team receiving handoff (e.g., "hygiene")
+target_rite: string        # Rite receiving handoff (e.g., "hygiene")
 ---
 ```
 

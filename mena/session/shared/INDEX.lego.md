@@ -12,7 +12,7 @@ description: "Session and workflow resolution patterns. Triggers: session resolu
 | Partial | Purpose | Used By |
 |---------|---------|---------|
 | [session-resolution](session-resolution.md) | Session existence and state validation | All 5 commands |
-| [workflow-resolution](workflow-resolution.md) | Team and agent validation | start, resume, handoff |
+| [workflow-resolution](workflow-resolution.md) | Rite and agent validation | start, resume, handoff |
 | [moirai-invocation](moirai-invocation.md) | Moirai delegation pattern | park, resume, wrap |
 
 ## Usage Pattern

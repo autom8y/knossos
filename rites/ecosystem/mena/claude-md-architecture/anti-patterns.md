@@ -150,7 +150,7 @@ Rules:
 | "Currently working on X" | Session state | SESSION_CONTEXT |
 | "Last updated: DATE" | Stale metadata | Git history |
 | "Git branch: X" | Changes constantly | Hook output |
-| Knossos team in satellite | Wrong team source | Regenerate from satellite's ACTIVE_RITE |
+| Knossos rite in satellite | Wrong rite source | Regenerate from satellite's ACTIVE_RITE |
 | Personal preferences | Wrong scope | ~/.claude/CLAUDE.md |
 | Sprint/initiative details | Too dynamic | PRD, session files |
 | Task checkboxes | Session-scoped | TodoWrite, issue tracker |

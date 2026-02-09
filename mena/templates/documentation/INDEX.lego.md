@@ -21,7 +21,7 @@ Do NOT use this skill to get templates directly—it's a routing hub.
 | Need | Skill | Templates |
 |------|-------|-----------|
 | Development artifacts | `doc-artifacts` | PRD, TDD, ADR, Test Plan |
-| Doc team workflows | `doc-reviews` | Audit, Info Arch, Content Brief, Review |
+| Docs rite workflows | `doc-reviews` | Audit, Info Arch, Content Brief, Review |
 | Ecosystem/hygiene | `doc-ecosystem` | Gap Analysis, Migration, Compatibility, Smells |
 | SRE/Debt/Analytics | `doc-sre` | Observability, Postmortem, Chaos, Debt, Tracking |
 | Strategy workflows | `doc-strategy` | Strategic Roadmap, Competitive Intel, Market Analysis, Financial Model |

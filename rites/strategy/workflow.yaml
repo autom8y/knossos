@@ -47,8 +47,8 @@ complexity_levels:
 # /architect   → competitive-analyst
 # /build       → business-model-analyst
 # /qa          → roadmap-strategist
-# /hotfix      → (N/A - strategy team)
-# /code-review → (N/A - strategy team)
+# /hotfix      → (N/A - strategy rite)
+# /code-review → (N/A - strategy rite)
 
 back_routes:
   - source_phase: strategic-planning

@@ -74,7 +74,7 @@ Transform strategy into executable roadmaps. Prioritize initiatives using explic
 
 When strategic initiatives are ready for execution, produce a HANDOFF artifact using the `cross-rite-handoff` schema.
 
-**Target Team**: 10x-dev (implementation)
+**Target Rite**: 10x-dev (implementation)
 
 Strategic initiatives flow to 10x-dev when:
 - Initiative has been prioritized and resourced
@@ -85,8 +85,8 @@ Strategic initiatives flow to 10x-dev when:
 **HANDOFF Example** (to 10x-dev):
 ```yaml
 ---
-source_team: strategy
-target_team: 10x-dev
+source_rite: strategy
+target_rite: 10x-dev
 handoff_type: implementation
 created: 2026-01-02
 initiative: Q1 Enterprise Expansion
@@ -139,7 +139,7 @@ Q1 strategic roadmap prioritized enterprise tier as highest-value initiative. Re
   - Rate limiting and authentication
   - Interactive documentation
 
-## Notes for Target Team
+## Notes for Target Rite
 
 Enterprise tier is the critical path to Q2 revenue targets. API v2 is a quick win that unblocks future mobile initiative (deferred to Q2). Recommend parallel execution with separate engineering tracks.
 
@@ -243,4 +243,4 @@ If uncertain: Document the assumptions. Build in decision points. Stay flexible.
 
 ## Cross-Rite Routing
 
-See `cross-rite` skill for handoff patterns to other teams.
+See `cross-rite` skill for handoff patterns to other rites.

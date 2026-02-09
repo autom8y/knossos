@@ -33,7 +33,7 @@ target_rite: string           # Rite receiving the handoff (e.g., "security")
 # Required: Handoff classification
 handoff_type: enum            # execution | validation | assessment | implementation | strategic_input | strategic_evaluation
 priority: enum                # critical | high | medium | low
-blocking: boolean             # If true, source team cannot proceed until response
+blocking: boolean             # If true, source rite cannot proceed until response
 
 # Required: Context
 initiative: string            # Initiative or feature name
@@ -162,7 +162,7 @@ rejected --resubmit--> pending (new artifact, references original)
 
 ## Trigger Conditions
 
-### Required Cross-Team Handoff
+### Required Cross-Rite Handoff
 
 A cross-rite HANDOFF artifact is **required** when:
 
@@ -175,7 +175,7 @@ A cross-rite HANDOFF artifact is **required** when:
 | User research synthesis complete | strategy | strategic_input |
 | Strategic go-decision for production build | 10x-dev | implementation |
 
-### Optional Cross-Team Handoff
+### Optional Cross-Rite Handoff
 
 A cross-rite HANDOFF artifact is **optional** when:
 

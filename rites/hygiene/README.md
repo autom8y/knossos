@@ -1,6 +1,6 @@
 # Hygiene Pack
 
-Code quality lifecycle team for systematic cleanup and refactoring.
+Code quality lifecycle rite for systematic cleanup and refactoring.
 
 ## When to Use This Rite
 

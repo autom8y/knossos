@@ -340,7 +340,7 @@ Next:
 
 - **TDD must exist** at `/docs/design/TDD-{feature-slug}.md`
 - PRD recommended but optional
-- 10x-dev or team with Principal Engineer
+- 10x-dev or rite with Principal Engineer
 - TDD has been reviewed and approved
 
 ---
@@ -456,7 +456,7 @@ This build → validate → fix cycle continues until QA approves.
 | TDD ambiguous | Can't implement unclear spec | Escalate to Architect for TDD update |
 | Tests failing | Implementation bugs | Engineer fixes, reruns tests |
 | Design flaw discovered | TDD won't work | Escalate to Architect, halt build |
-| Missing Engineer agent | Team doesn't have engineer | Switch to 10x-dev with `/10x` |
+| Missing Engineer agent | Rite doesn't include engineer | Switch to 10x-dev with `/10x` |
 
 ---
 

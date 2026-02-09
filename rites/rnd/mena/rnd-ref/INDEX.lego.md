@@ -1,6 +1,6 @@
 ---
 name: rnd-ref
-description: "Innovation Lab (R&D) team reference. Triggers: rnd, innovation lab, technology-scout, prototype-engineer, moonshot-architect."
+description: "Innovation Lab (R&D) rite reference. Triggers: rnd, innovation lab, technology-scout, prototype-engineer, moonshot-architect."
 ---
 
 # Innovation Lab (rnd)

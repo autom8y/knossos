@@ -1,8 +1,8 @@
 ---
 artifact_id: HANDOFF-10x-dev-to-security-2026-01-03
 schema_version: "1.0"
-source_team: 10x-dev
-target_team: security
+source_rite: 10x-dev
+target_rite: security
 handoff_type: assessment
 priority: critical
 blocking: true
@@ -48,7 +48,7 @@ The 10x-dev has completed PRD and TDD for a major payment processing overhaul. T
 | PRD-payment-processing.md | Approved | Sections 3.2, 3.3 cover security requirements |
 | TDD-payment-processing.md | In Review | Section 4.2 has data flow diagram |
 
-## Notes for Security Team
+## Notes for Security Rite
 
 1. Priority SEC-001 before SEC-002 (dependency)
 2. PCI-DSS Level 1 compliance required

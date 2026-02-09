@@ -76,7 +76,7 @@ tags:
 | Debt Ledger | Sprint Packages | Reference | `debt_id` field in package |
 | Sprint Packages | HANDOFF | Reference | `PKG-XXX` field |
 
-## Cross-Team Workflow
+## Cross-Rite Workflow
 
 ```
 smell-detection skill (patterns + severity classification)
@@ -225,7 +225,7 @@ Task(risk-assessor, "Create sprint packages from DEBT_LEDGER.yaml")
 # - Writes to SPRINT_PACKAGES/PKG-003.yaml
 ```
 
-### Step 4: HANDOFF to implementation team
+### Step 4: HANDOFF to implementation rite
 
 ```yaml
 # HANDOFF.md

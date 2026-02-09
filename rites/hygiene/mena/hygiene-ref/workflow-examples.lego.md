@@ -5,7 +5,7 @@ description: "Hygiene workflow phases, usage examples, and operational notes. Tr
 
 # Hygiene Workflow and Examples
 
-Usage examples, typical workflow phases, and operational notes for the hygiene team.
+Usage examples, typical workflow phases, and operational notes for the hygiene rite.
 
 ---
 
@@ -119,11 +119,11 @@ Detecting code smells and refactoring opportunities...
 |------|--------|-------------|
 | `.claude/ACTIVE_RITE` | Set to `hygiene` | Active rite state |
 | `.claude/agents/` | Populated | 4 agent files loaded |
-| `.claude/sessions/{session_id}/SESSION_CONTEXT.md` | `active_team` updated | If session active |
+| `.claude/sessions/{session_id}/SESSION_CONTEXT.md` | `active_rite` updated | If session active |
 
 ### Success Criteria
 
-- Team switched to hygiene
+- Rite switched to hygiene
 - 4 agent files present in `.claude/agents/`
 - Rite catalog displayed to user
 - If session active, SESSION_CONTEXT updated
@@ -159,18 +159,18 @@ If swap fails:
 
 Both valid, continuous prevents accumulation.
 
-### Difference from /team
+### Difference from /rite
 
 | Command | Behavior |
 |---------|----------|
-| `/rite hygiene` | Switches team, shows swap confirmation |
-| `/hygiene` | Switches team, shows rite catalog with agent descriptions |
+| `/rite hygiene` | Switches rite, shows swap confirmation |
+| `/hygiene` | Switches rite, shows rite catalog with agent descriptions |
 
 Use `/hygiene` when you want to see available agents after switching.
 
 ### Quality Metrics
 
-Hygiene team can track:
+Hygiene rite can track:
 - Cyclomatic complexity trends
 - Code duplication percentage
 - Test coverage

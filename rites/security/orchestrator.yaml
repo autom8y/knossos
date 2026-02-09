@@ -2,7 +2,7 @@
 # Used by generate-orchestrator.sh to produce orchestrator.md
 # References workflow.yaml for phase/specialist data
 
-# Team metadata
+# Rite metadata
 rite:
   name: security
   domain: security assessment
@@ -46,17 +46,17 @@ handoff_criteria:
     - "All findings addressed or risk-accepted"
     - "Deployment approval granted"
 
-# Skills references for this team
+# Skills references for this rite
 skills:
   - "@security-standards for threat modeling conventions"
   - "@compliance for regulatory mappings"
   - "@10x-workflow for complexity determination in security context"
 
-# Team-specific anti-patterns
+# Rite-specific anti-patterns
 antipatterns:
   - "Treating PATCH as SYSTEM (different scope requires different phases)"
   - "Skipping threat modeling for 'simple' features"
   - "Accepting unmitigated CRITICAL vulnerabilities"
 
-# Cross-rite protocol (security is a hub team)
+# Cross-rite protocol (security is a hub rite)
 cross_rite_protocol: "Escalate infrastructure security to sre. Coordinate with ecosystem on security hooks."

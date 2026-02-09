@@ -33,7 +33,7 @@ The debt-triage rite is a **well-designed, recently optimized rite** (34% compre
 - [ ] Define detection patterns: dead code, duplication, complexity, naming, imports, etc.
 - [ ] Update `agents/debt-collector.md`: Reference shared skill for detection phase
 - [ ] Update `rites/hygiene/agents/code-smeller.md`: Reference same shared skill
-- [ ] Each team post-processes differently:
+- [ ] Each rite post-processes differently:
   - Debt Collector: Adds business context, age, ownership → feeds Risk Assessor
   - Code Smeller: Adds ROI scoring, blast radius → feeds Architect Enforcer
 
@@ -53,19 +53,19 @@ skills/smell-detection/
 
 ---
 
-### P2: Generalized Cross-Team Handoff Artifact Pattern
+### P2: Generalized Cross-Rite Handoff Artifact Pattern
 
-**Decision:** Instead of debt-triage-specific DEBT-HANDOFF artifact, create a **generalized handoff artifact pattern** that any team can use when handing off to another team.
+**Decision:** Instead of debt-triage-specific DEBT-HANDOFF artifact, create a **generalized handoff artifact pattern** that any rite can use when handing off to another rite.
 
-**Rationale:** The debt→hygiene handoff is one instance of a broader pattern. 10x→doc-team, security→10x, etc. all need structured handoffs. Centralize the pattern.
+**Rationale:** The debt→hygiene handoff is one instance of a broader pattern. 10x→docs, security→10x, etc. all need structured handoffs. Centralize the pattern.
 
 **Changes required:**
 - [ ] Create ecosystem-level handoff artifact schema in `skills/cross-rite-handoff/`
 - [ ] Define generic HANDOFF artifact format:
   ```yaml
-  # HANDOFF-{source-team}-{target-team}-{slug}.yaml
-  source_team: debt-triage
-  target_team: hygiene
+  # HANDOFF-{source-rite}-{target-rite}-{slug}.yaml
+  source_rite: debt-triage
+  target_rite: hygiene
   created: 2026-01-02
   handoff_type: execution  # execution | review | consultation
   context:
@@ -125,7 +125,7 @@ skills/smell-detection/
 
 ## Cross-Rite Notes
 
-**For ecosystem:** P2 defines a generalized handoff artifact pattern that should live at ecosystem level, not team level. Consider adding to cross-rite skill or creating dedicated handoff-protocol skill.
+**For ecosystem:** P2 defines a generalized handoff artifact pattern that should live at ecosystem level, not rite level. Consider adding to cross-rite skill or creating dedicated handoff-protocol skill.
 
 **For hygiene:** Update P2 in hygiene TODO to reference this generalized pattern instead of debt-specific artifact.
 

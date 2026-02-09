@@ -311,7 +311,7 @@ After approval: Break into sprints with `/sprint`.
 ## Prerequisites
 
 - Clear feature/system description
-- 10x-dev or team with Architect agent
+- 10x-dev or rite with Architect agent
 - MODULE/SERVICE/PLATFORM complexity (SCRIPT doesn't need TDD)
 
 ---
@@ -432,7 +432,7 @@ Can be used with or without sessions:
 |-------|-----------|------------|
 | No PRD and requirements unclear | Can't design without requirements | Requirements Analyst asks clarifying questions |
 | SCRIPT complexity specified | SCRIPT doesn't need TDD | Error: "Use /task for SCRIPT complexity" |
-| Missing Architect agent | Team doesn't have architect | Switch to 10x-dev with `/10x` |
+| Missing Architect agent | Rite doesn't include architect | Switch to 10x-dev with `/10x` |
 | Design too vague | Architect can't specify interfaces | Escalate to Requirements Analyst for clarification |
 
 ---

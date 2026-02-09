@@ -1,6 +1,6 @@
 ---
 name: security-ref
-description: "Security team reference. Triggers: security, threat-modeler, compliance-architect, penetration-tester, security-reviewer."
+description: "Security rite reference. Triggers: security, threat-modeler, compliance-architect, penetration-tester, security-reviewer."
 ---
 
 # Security Rite (security)

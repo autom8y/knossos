@@ -94,9 +94,9 @@ ari session status
 git worktree prune
 ```
 
-### Team not active in worktree
+### Rite not active in worktree
 
-**Cause:** Team swap failed during creation or was never set.
+**Cause:** Rite swap failed during creation or was never set.
 
 **Fix:**
 ```bash

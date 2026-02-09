@@ -30,7 +30,7 @@ Examples and patterns for writing descriptive CLAUDE.md content.
 
 This project supports three operating modes:
 
-| Mode | Session | Team | Behavior |
+| Mode | Session | Rite | Behavior |
 |------|---------|------|----------|
 | **Native** | No | - | Direct execution, no tracking |
 | **Cross-Cutting** | Yes | No | Direct execution + session tracking |

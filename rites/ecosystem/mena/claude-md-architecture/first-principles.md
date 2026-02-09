@@ -55,7 +55,7 @@ If content changes more than once per session, it does not belong in CLAUDE.md.
 | Tier | Change Frequency | In CLAUDE.md? | Examples |
 |------|------------------|---------------|----------|
 | **STATIC** | Once (at init) | Rarely needed | Rite catalog source reference |
-| **STABLE** | Weeks/months | **Yes** | Team, skills, workflow |
+| **STABLE** | Weeks/months | **Yes** | Rite, skills, workflow |
 | **DYNAMIC** | Days/weekly | **No** | Current initiative |
 | **EPHEMERAL** | Minutes/hourly | **No** | Git state, current task |
 
@@ -91,14 +91,14 @@ Each concern has exactly one owner. Content placement follows ownership.
 |---------|-------|---------------|---------------|
 | **Ecosystem Infrastructure** | Knossos | Yes | SYNC |
 | **Project Identity** | Satellite | Yes | PRESERVE |
-| **Team Configuration** | Rite | Yes | REGENERATE |
+| **Rite Configuration** | Rite | Yes | REGENERATE |
 | **Session State** | Session | **No** | N/A |
 | **Workflow Guidance** | Knossos | Yes | SYNC |
 
 ### The Critical Distinction
 
 ```
-CLAUDE.md = Ecosystem Infrastructure + Project Identity + Team Configuration
+CLAUDE.md = Ecosystem Infrastructure + Project Identity + Rite Configuration
 
 CLAUDE.md != Session State
 ```
@@ -129,7 +129,7 @@ Hooks inject ephemeral context at session start. It appears in Claude's view but
 |  - Current git state                                             |
 |  - Active session info                                           |
 |  - Worktree context                                              |
-|  - Team routing hints                                            |
+|  - Rite routing hints                                            |
 +-----------------------------------------------------------------+
                             |
                             | supplements
@@ -137,7 +137,7 @@ Hooks inject ephemeral context at session start. It appears in Claude's view but
 +-----------------------------------------------------------------+
 |                PROJECT CLAUDE.md                                 |
 |  (.claude/CLAUDE.md)                                             |
-|  - Team configuration (from knossos)                              |
+|  - Rite configuration (from knossos)                              |
 |  - Project identity (satellite-owned)                            |
 |  - Ecosystem infrastructure (synced from knossos)                 |
 +-----------------------------------------------------------------+
@@ -169,7 +169,7 @@ Hooks inject ephemeral context at session start. It appears in Claude's view but
 | Property | Value |
 |----------|-------|
 | **Project** | /Users/dev/myproject |
-| **Active Team** | docs |
+| **Active Rite** | docs |
 | **Git** | feature/add-auth (3 uncommitted) |
 ```
 
@@ -260,7 +260,7 @@ Key architectural decisions and their rationale:
 | Decision | Rationale |
 |----------|-----------|
 | Session state excluded from CLAUDE.md | Changes too frequently, creates maintenance burden |
-| Team sections regenerated, not copied | Satellites have their own teams from ACTIVE_RITE |
+| Rite sections regenerated, not copied | Satellites have their own rites from ACTIVE_RITE |
 | Hooks inject transient context | Separation of stable (file) vs ephemeral (context) |
 | PRESERVE as default for unknown sections | Encourages experimentation, safer than deletion |
 | `## Project:*` pattern for extensions | Clear namespace, prevents conflicts with knossos sections |
@@ -288,7 +288,7 @@ Hook Output (ephemeral context)
 +-- Git state
 +-- Worktree info
 +-- Session suggestions
-+-- Team routing hints
++-- Rite routing hints
 
 ~/.claude/CLAUDE.md (user preferences)
 +-- Personal tool configs

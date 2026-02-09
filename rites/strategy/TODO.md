@@ -240,7 +240,7 @@ The strategy rite is a **well-designed, methodologically rigorous rite** with cl
 
 ## Summary of All Teams Audited
 
-This completes the 10-team audit:
+This completes the 10-rite audit:
 1. 10x-dev (mature, impact assessment + flexible entry needed)
 2. ecosystem (demote from hub, remove satellite testing)
 3. docs (add proactive gate, staleness detection)
@@ -253,7 +253,7 @@ This completes the 10-team audit:
 10. strategy (model fix, R&D integration, back-routes)
 
 **Cross-cutting patterns identified:**
-- Generalized HANDOFF artifact (applies to 6+ team pairs)
+- Generalized HANDOFF artifact (applies to 6+ rite pairs)
 - Shared templates at ecosystem level
 - Shared smell detection skill
 - Intelligence vs Strategy boundary

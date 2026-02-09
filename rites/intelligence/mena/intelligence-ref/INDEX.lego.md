@@ -1,6 +1,6 @@
 ---
 name: intelligence-ref
-description: "Product Intelligence team reference. Triggers: intelligence, analytics-engineer, user-researcher, experimentation-lead, insights-analyst."
+description: "Product Intelligence rite reference. Triggers: intelligence, analytics-engineer, user-researcher, experimentation-lead, insights-analyst."
 ---
 
 # Product Intelligence Rite (intelligence)

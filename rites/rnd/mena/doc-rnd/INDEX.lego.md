@@ -5,7 +5,7 @@ description: "R&D templates: tech assessment, prototyping, moonshot planning. Tr
 
 # R&D Documentation Templates
 
-Templates for research and development workflow artifacts from the rnd team.
+Templates for research and development workflow artifacts from the rnd rite.
 
 ## Template Index
 

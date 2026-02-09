@@ -23,7 +23,7 @@ Activate this skill when:
 
 CLAUDE.md serves as the **entry point** for Claude Code. It answers three questions:
 
-1. **What is this project?** (Team, agents, capabilities)
+1. **What is this project?** (Rite, agents, capabilities)
 2. **What patterns are available?** (Skills, hooks, workflows)
 3. **Where do I go for guidance?** (Routing, help resources)
 
