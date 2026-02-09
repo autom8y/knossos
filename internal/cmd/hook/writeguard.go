@@ -161,20 +161,15 @@ func outputAllow(printer *output.Printer) error {
 }
 
 // outputBlock outputs a block decision in CC's hookSpecificOutput format.
-// Includes additionalContext with the exact Moirai Task invocation pattern
-// so Claude knows how to delegate instead of retrying the blocked write.
 func outputBlock(printer *output.Printer, filePath string) error {
+	// Determine which context file type
 	var contextType string
-	var moiraiOp string
 	if strings.HasSuffix(filePath, "SESSION_CONTEXT.md") {
 		contextType = "SESSION_CONTEXT"
-		moiraiOp = `Task(moirai, "update_session ...")`
 	} else if strings.HasSuffix(filePath, "SPRINT_CONTEXT.md") {
 		contextType = "SPRINT_CONTEXT"
-		moiraiOp = `Task(moirai, "create_sprint ...")`
 	} else {
 		contextType = "context file"
-		moiraiOp = `Task(moirai, "<operation>")`
 	}
 
 	result := hook.PreToolUseOutput{
@@ -182,7 +177,6 @@ func outputBlock(printer *output.Printer, filePath string) error {
 			HookEventName:            "PreToolUse",
 			PermissionDecision:       "deny",
 			PermissionDecisionReason: "Use Moirai for " + contextType + " mutations",
-			AdditionalContext:        "To mutate " + contextType + ", delegate via: " + moiraiOp + ". Moirai is the session lifecycle agent that handles all *_CONTEXT.md mutations with proper locking and validation.",
 		},
 	}
 	return printer.Print(result)

@@ -2,7 +2,7 @@
 name: sprint
 description: Multi-task sprint orchestration
 argument-hint: <sprint-name> [--tasks="task1,task2,task3"]
-allowed-tools: Bash, Read, Task, Glob, Grep
+allowed-tools: Bash, Read, Write, Task, Glob, Grep
 model: opus
 disable-model-invocation: true
 ---
@@ -31,18 +31,19 @@ Plan and execute a sprint with multiple coordinated tasks. $ARGUMENTS
    - Task list (prompt if not provided)
    - Duration/timebox
 
-2. **Create SPRINT_CONTEXT via Moirai**:
+2. **Create SPRINT_CONTEXT** using the Write tool:
 
-   Delegate to Moirai for sprint state creation:
-   ```
-   Task(moirai, "create_sprint name='<sprint-name>' goal='<sprint-goal>' tasks='<task1,task2,task3>'")
-   ```
+   Path: `$SESSION_DIR/SPRINT_CONTEXT.md`
 
-   Moirai will:
-   - Create `SPRINT_CONTEXT.md` in the session directory with proper schema
-   - Initialize task breakdown with status tracking
-   - Set up sprint metadata linked to current session
-   - Return confirmation with sprint path
+   IMPORTANT: Use Write tool with YAML frontmatter format. The file MUST start with `---` on line 1.
+
+   See `session-common` skill (mena/session/common/) for required fields and validation rules.
+
+   Required fields:
+   - Sprint metadata (links to session)
+   - Task breakdown with status
+   - Dependencies between tasks
+   - Note: Uses session-scoped path to allow parallel sprints without collision
 
 3. **For each task**, invoke `/task` workflow:
    - PRD for each task
