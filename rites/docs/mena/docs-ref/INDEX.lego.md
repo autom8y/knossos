@@ -23,7 +23,7 @@ This is a convenience wrapper around `/rite docs` that also displays the pantheo
 
 No parameters required. This command:
 1. Switches to docs
-2. Displays team roster with agent descriptions
+2. Displays rite catalog with agent descriptions
 
 ---
 
@@ -34,7 +34,7 @@ No parameters required. This command:
 Execute via Bash tool:
 
 ```bash
-$ROSTER_HOME/swap-rite.sh docs
+$KNOSSOS_HOME/ari sync --rite docs
 ```
 
 ### 2. Display Pantheon
@@ -255,7 +255,7 @@ Use this team for:
 
 - Team switched to docs
 - 4 agent files present in `.claude/agents/`
-- Team roster displayed to user
+- Rite catalog displayed to user
 - If session active, SESSION_CONTEXT updated
 
 ---
@@ -269,7 +269,7 @@ If swap fails:
 [Roster] Use '/rite --list' to see available packs
 ```
 
-**Resolution**: Verify roster installation at `$ROSTER_HOME/`
+**Resolution**: Verify knossos installation at `$KNOSSOS_HOME/`
 
 ---
 
@@ -310,7 +310,7 @@ The documentation skill provides templates, this team provides specialized agent
 ## Related Documentation
 
 - [COMMAND_REGISTRY.md](../../COMMAND_REGISTRY.md) - All registered commands
-- [swap-rite.sh]($ROSTER_HOME/swap-rite.sh) - Roster swap implementation
+- [ari sync --rite]($KNOSSOS_HOME/ari sync --rite) - Roster swap implementation
 
 ---
 

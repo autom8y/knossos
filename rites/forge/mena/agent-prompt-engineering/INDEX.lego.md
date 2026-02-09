@@ -204,4 +204,4 @@ Full details with fixes: [principles.md](principles.md) (integrated into each pr
 
 - Agent template: `.claude/skills/rite-development/templates/agent-template.md`
 - Existing agents: `.claude/agents/*.md`
-- Team roster: Check `roster` repository for production examples
+- Rite catalog: Check `roster` repository for production examples

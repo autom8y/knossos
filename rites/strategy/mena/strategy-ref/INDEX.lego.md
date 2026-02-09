@@ -11,8 +11,8 @@ description: "Strategy team reference. Triggers: strategy, market-researcher, co
 
 | Component | Location | Purpose |
 |-----------|----------|---------|
-| Agents | `$ROSTER_HOME/rites/strategy/agents/` | Agent prompts |
-| Workflow | `$ROSTER_HOME/rites/strategy/workflow.yaml` | Phase configuration |
+| Agents | `$KNOSSOS_HOME/rites/strategy/agents/` | Agent prompts |
+| Workflow | `$KNOSSOS_HOME/rites/strategy/workflow.yaml` | Phase configuration |
 | Switch | `/strategy` | Activate this team |
 
 ## Pantheon

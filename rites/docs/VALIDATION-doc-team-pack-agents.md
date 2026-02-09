@@ -55,7 +55,7 @@ All agents have valid YAML frontmatter with required fields:
 | Handoff Criteria by Phase | ✓ |
 | Handling Failures | ✓ |
 
-## swap-rite.sh Dry-Run
+## ari sync --rite Dry-Run
 
 ```
 [Roster] Dry-run: Would refresh docs
@@ -64,7 +64,7 @@ Agent changes:
   + doc-auditor.md (new)
   + doc-reviewer.md (new)
   + information-architect.md (new)
-  ~ orchestrator.md (modified in roster)
+  ~ orchestrator.md (modified in knossos)
   + tech-writer.md (new)
 ```
 
@@ -104,6 +104,6 @@ Agent changes:
 | All YAML parses correctly | ✓ PASS |
 | All sections present | ✓ PASS |
 | Under 300 lines | ✓ PASS |
-| swap-rite.sh dry-run passes | ✓ PASS |
+| ari sync --rite dry-run passes | ✓ PASS |
 
 **Overall Validation Status: PASS**

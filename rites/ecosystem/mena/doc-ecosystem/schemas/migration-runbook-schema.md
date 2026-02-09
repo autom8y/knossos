@@ -174,7 +174,7 @@ steps:
     verification: "git log shows latest roster commit"
     command: "git pull origin main"
   - number: 2
-    action: "Run CEM sync to update hooks"
+    action: "Run ari sync to update hooks"
     verification: "No sync errors, hooks updated"
     command: "just cem-sync"
     expected_output: "Sync complete. 3 files updated."
@@ -301,7 +301,7 @@ git reset --hard HEAD~1
 ## Support
 
 If issues persist after troubleshooting:
-1. Open issue in roster repository
+1. Open issue in knossos repository
 2. Include: error message, session file content, git log
 ```
 

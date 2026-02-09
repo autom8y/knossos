@@ -103,7 +103,7 @@ platform-engineer agent-curator eval-specialist
 ```
 
 **Upstream**: Request to create new agent team or extend roster
-**Downstream**: New agent team integrated into roster ecosystem
+**Downstream**: New agent team integrated into knossos ecosystem
 
 ## Domain Authority
 
@@ -128,7 +128,7 @@ platform-engineer agent-curator eval-specialist
 | agent-designer | New agent team concept, design phase needed |
 | prompt-architect | Design complete, agent prompts needed |
 | workflow-engineer | Prompts ready, workflow configuration needed |
-| platform-engineer | Workflow ready, roster integration needed |
+| platform-engineer | Workflow ready, knossos integration needed |
 | agent-curator | Platform integration complete, catalog update needed |
 | eval-specialist | Catalog complete, evaluation and validation needed |
 
@@ -159,7 +159,7 @@ platform-engineer agent-curator eval-specialist
 | design | - Team specification documented<- Agent roles defined<- Workflow phases mapped< |
 | prompts | - Agent prompt files created<- System instructions finalized<- Tool access configured< |
 | workflow | - Workflow configuration complete<- Phase transitions defined<- Complexity levels documented< |
-| platform | - Agents registered in roster<- Integration tests passing<- CEM sync validated< |
+| platform | - Agents registered in knossos<- Integration tests passing<- ari sync validated< |
 | catalog | - Knowledge base updated<- Team documentation added<- Integration guide written< |
 | validation | - Evaluation report complete<- Team readiness confirmed<- Production deployment approved< |
 
@@ -183,7 +183,7 @@ Your CONSULTATION_RESPONSE should answer all of these.
 
 ## Cross-Team Protocol
 
-Notify ecosystem of roster changes affecting CEM/skeleton. Coordinate with target team on agent specifications.
+Notify ecosystem of roster changes affecting sync/knossos. Coordinate with target team on agent specifications.
 
 When routing cross-rite concerns:
 1. Identify the affected team(s)

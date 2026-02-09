@@ -1,6 +1,6 @@
 ---
 name: rite-development
-description: "Rite design and implementation guide. Triggers: new rite, rite development, workflow design, agent creation, roster integration."
+description: "Rite design and implementation guide. Triggers: new rite, rite development, workflow design, agent creation, knossos integration."
 ---
 
 # Team Development
@@ -15,7 +15,7 @@ This skill codifies the patterns discovered from building rites (10x-dev, docs, 
 
 | Component | Location | Key Decisions |
 |-----------|----------|---------------|
-| Rite | `$ROSTER_HOME/rites/{name}/` | Name, agent count, domain |
+| Rite | `$KNOSSOS_HOME/rites/{name}/` | Name, agent count, domain |
 | Workflow | `workflow.yaml` | Phases, complexity levels, entry point |
 | Agents | `agents/*.md` | Role, model, color, tools |
 | Command | `.claude/commands/{name}.md` | Quick-switch integration |
@@ -34,7 +34,7 @@ This skill codifies the patterns discovered from building rites (10x-dev, docs, 
 6. [ ] Create quick-switch command
 7. [ ] Create reference skill
 8. [ ] Update COMMAND_REGISTRY.md
-9. [ ] Validate with swap-rite.sh
+9. [ ] Validate with ari sync --rite
 10. [ ] **Update Consultant knowledge base** (REQUIRED)
 ```
 
@@ -152,7 +152,7 @@ To create a new rite:
 
 ```bash
 # 1. Create directory structure
-mkdir -p $ROSTER_HOME/rites/{name}/agents
+mkdir -p $KNOSSOS_HOME/rites/{name}/agents
 
 # 2. Copy and fill templates
 # - workflow.yaml from templates/workflow.yaml.template
@@ -166,7 +166,7 @@ mkdir -p $ROSTER_HOME/rites/{name}/agents
 # - Add to COMMAND_REGISTRY.md
 
 # 5. Validate
-$ROSTER_HOME/swap-rite.sh {name}
+$KNOSSOS_HOME/ari sync --rite {name}
 ```
 
 See [validation/validation.md](validation/validation.md) for full pre-flight checks.

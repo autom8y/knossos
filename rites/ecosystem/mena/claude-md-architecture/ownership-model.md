@@ -8,7 +8,7 @@ CLAUDE.md sections have explicit owners that determine sync behavior. This docum
 
 ### SYNC Sections (Roster-Owned)
 
-Content that comes from roster and overwrites satellite content during sync.
+Content that comes from knossos and overwrites satellite content during sync.
 
 **Characteristics**:
 - Source of truth: Roster's templates
@@ -26,7 +26,7 @@ Content that comes from roster and overwrites satellite content during sync.
 | `## Dynamic Context Syntax` | How `!` commands work |
 | `## Getting Help` | Navigation reference |
 
-**Rule**: If content describes HOW THE ECOSYSTEM WORKS, it syncs from roster.
+**Rule**: If content describes HOW THE ECOSYSTEM WORKS, it syncs from knossos.
 
 ---
 
@@ -44,8 +44,8 @@ Content that satellites own and CEM never overwrites.
 
 | Section | Content |
 |---------|---------|
-| `## Quick Start` | Satellite's team (regenerated from roster if missing) |
-| `## Agent Configurations` | Satellite's agents (regenerated from roster if missing) |
+| `## Quick Start` | Satellite's team (regenerated from knossos if missing) |
+| `## Agent Configurations` | Satellite's agents (regenerated from knossos if missing) |
 | Custom sections not matching roster | Project-specific content |
 | Unknown sections | Default to preserve for safety |
 
@@ -83,11 +83,11 @@ This project deploys via GitHub Actions to AWS ECS.
 
 ### REGENERATE Sections (Roster-Derived)
 
-Content derived from roster state (ACTIVE_RITE file + agents/ directory).
+Content derived from knossos state (ACTIVE_RITE file + agents/ directory).
 
 **Characteristics**:
 - Source of truth: ACTIVE_RITE + agents/
-- Regeneration trigger: `swap-rite.sh` or CEM sync with missing content
+- Regeneration trigger: `ari sync --rite` or ari sync with missing content
 - Generated locally: Each satellite has its own team
 - Represents: Which agents are available in THIS project
 
@@ -206,7 +206,7 @@ This project uses a 6-agent workflow (ecosystem):
 
 **Correct approach**:
 - Team sections are PRESERVE (keep satellite content) or REGENERATE (rebuild from satellite's own ACTIVE_RITE)
-- Never sync team content from roster's source templates
+- Never sync team content from knossos's source templates
 
 ---
 
@@ -246,7 +246,7 @@ Use HTML comments to mark section ownership. CEM uses these markers to determine
 
 | Marker | Meaning |
 |--------|---------|
-| `<!-- SYNC: roster-owned -->` | Section syncs from roster, overwrites satellite |
+| `<!-- SYNC: roster-owned -->` | Section syncs from knossos, overwrites satellite |
 | `<!-- PRESERVE: satellite-owned -->` | Section preserved from satellite, never overwritten |
 | `<!-- PRESERVE: satellite-owned, regenerated from ACTIVE_RITE + agents/ -->` | Preserved, with note about regeneration source |
 

@@ -169,7 +169,7 @@ files:
       settings-merge: primary
       migration-runbooks: secondary
       compatibility-testing: secondary
-    summary: "Ecosystem and hygiene templates for CEM sync, migration, compatibility, and code quality workflows."
+    summary: "Ecosystem and hygiene templates for ari sync, migration, compatibility, and code quality workflows."
     signals:
       - "Settings Merge Rules"
       - "Migration Runbook Template"

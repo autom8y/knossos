@@ -8,7 +8,7 @@ description: |
   documentation. Syncs Consultant knowledge base to make teams discoverable.
 
   When to use this agent:
-  - Completing a new team's roster integration
+  - Completing a new team's knossos integration
   - Updating Consultant knowledge after team changes
   - Versioning and documenting team changes
   - Deprecating or archiving old teams
@@ -100,7 +100,7 @@ Update all Consultant knowledge files.
 
 ### Phase 3: Documentation
 Create supporting documentation.
-1. Verify team README exists in roster
+1. Verify team README exists in knossos
 2. Create or update skill reference at .claude/skills/{team}-ref/
 3. Document complexity levels and use cases
 4. Add troubleshooting guidance

@@ -11,8 +11,8 @@ description: "Security team reference. Triggers: security, threat-modeler, compl
 
 | Component | Location | Purpose |
 |-----------|----------|---------|
-| Agents | `$ROSTER_HOME/rites/security/agents/` | Agent prompts |
-| Workflow | `$ROSTER_HOME/rites/security/workflow.yaml` | Phase configuration |
+| Agents | `$KNOSSOS_HOME/rites/security/agents/` | Agent prompts |
+| Workflow | `$KNOSSOS_HOME/rites/security/workflow.yaml` | Phase configuration |
 | Switch | `/security` | Activate this team |
 
 ## Pantheon

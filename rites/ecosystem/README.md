@@ -1,6 +1,6 @@
 # Ecosystem Pack
 
-Infrastructure lifecycle team for CEM and roster ecosystem maintenance.
+Infrastructure lifecycle team for sync pipeline and knossos ecosystem maintenance.
 
 ## When to Use This Rite
 

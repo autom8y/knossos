@@ -23,7 +23,7 @@ Validate the rite: $ARGUMENTS
 ### 2. Locate Rite
 
 Check rite exists at:
-- `$ROSTER_HOME/rites/{rite-name}/`
+- `$KNOSSOS_HOME/rites/{rite-name}/`
 
 If not found, report error and suggest checking rite name.
 
@@ -32,7 +32,7 @@ If not found, report error and suggest checking rite name.
 Use the Task tool to invoke the eval-specialist agent:
 
 ```
-"Validate the rite at $ROSTER_HOME/rites/{rite-name}/.
+"Validate the rite at $KNOSSOS_HOME/rites/{rite-name}/.
 
 Run the full validation suite:
 1. Structure Validation - Check all files exist

@@ -125,7 +125,7 @@ Detecting code smells and refactoring opportunities...
 
 - Team switched to hygiene
 - 4 agent files present in `.claude/agents/`
-- Team roster displayed to user
+- Rite catalog displayed to user
 - If session active, SESSION_CONTEXT updated
 
 ---
@@ -139,7 +139,7 @@ If swap fails:
 [Roster] Use '/rite --list' to see available packs
 ```
 
-**Resolution**: Verify roster installation at `$ROSTER_HOME/`
+**Resolution**: Verify knossos installation at `$KNOSSOS_HOME/`
 
 ---
 

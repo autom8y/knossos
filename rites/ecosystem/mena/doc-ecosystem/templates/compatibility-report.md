@@ -39,7 +39,7 @@ None
 **Satellite**: satellite-a (standard config)
 **Reproduction**:
 1. Configure settings with `"custom": {"nested": null}`
-2. Run `cem sync`
+2. Run `ari sync`
 3. Error: "jq: null cannot be iterated"
 
 **Expected**: Merge succeeds, null preserved

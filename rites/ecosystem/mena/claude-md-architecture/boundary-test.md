@@ -38,7 +38,7 @@ A practical checklist for determining if content belongs in CLAUDE.md. Before ad
 **Examples that fail**:
 - Git state (derived from repository)
 - Session state (derived from SESSION_CONTEXT)
-- Team roster (derived from ACTIVE_RITE + agents/)
+- Rite catalog (derived from ACTIVE_RITE + agents/)
 - Build status (derived from CI)
 
 **Correct approach**: Inject via hooks or regenerate from authoritative source
@@ -165,7 +165,7 @@ If your content contains any of these, reconsider:
 | Content Type | Correct Location | Why |
 |--------------|------------------|-----|
 | Skills documentation | CLAUDE.md (SYNC) | Stable, project-wide |
-| Agent roster | CLAUDE.md (REGENERATE) | Derived from roster |
+| Agent roster | CLAUDE.md (REGENERATE) | Derived from knossos |
 | Workflow patterns | CLAUDE.md (SYNC) | Stable infrastructure |
 | Project extensions | CLAUDE.md (`## Project:*`) | Satellite-owned |
 | Current task | SESSION_CONTEXT | Session-specific |

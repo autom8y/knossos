@@ -23,7 +23,7 @@ This is a convenience wrapper around `/rite 10x-dev` that also displays the pant
 
 No parameters required. This command:
 1. Switches to 10x-dev
-2. Displays team roster with agent descriptions
+2. Displays rite catalog with agent descriptions
 
 ---
 
@@ -34,7 +34,7 @@ No parameters required. This command:
 Execute via Bash tool:
 
 ```bash
-$ROSTER_HOME/swap-rite.sh 10x-dev
+$KNOSSOS_HOME/ari sync --rite 10x-dev
 ```
 
 ### 2. Display Pantheon
@@ -254,7 +254,7 @@ Use this team for:
 
 - Team switched to 10x-dev
 - 5 agent files present in `.claude/agents/`
-- Team roster displayed to user
+- Rite catalog displayed to user
 - If session active, SESSION_CONTEXT updated
 
 ---
@@ -268,7 +268,7 @@ If swap fails (unlikely - this is a core team):
 [Roster] Use '/rite --list' to see available packs
 ```
 
-**Resolution**: Verify roster installation at `$ROSTER_HOME/`
+**Resolution**: Verify knossos installation at `$KNOSSOS_HOME/`
 
 ---
 
@@ -287,7 +287,7 @@ If swap fails (unlikely - this is a core team):
 
 - [10x-workflow skill](../10x-workflow/INDEX.lego.md) - Agent coordination patterns
 - [COMMAND_REGISTRY.md](../../COMMAND_REGISTRY.md) - All registered commands
-- [swap-rite.sh]($ROSTER_HOME/swap-rite.sh) - Roster swap implementation
+- [ari sync --rite]($KNOSSOS_HOME/ari sync --rite) - Roster swap implementation
 
 ---
 

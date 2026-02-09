@@ -19,7 +19,7 @@ rites/shared/
 
 ## Sync Behavior
 
-`swap-rite.sh` automatically syncs shared team content alongside the active rite:
+`ari sync --rite` automatically syncs shared team content alongside the active rite:
 - Skills, hooks, and commands are synced to `.claude/skills/`, `.claude/hooks/`, `.claude/commands/`
 - Shared content is always available regardless of active rite
 - Team-specific content takes precedence over shared content (rite-privileged override)

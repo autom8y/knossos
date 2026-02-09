@@ -57,7 +57,7 @@ Each agent hands off to the next when their handoff criteria are met.
 ### 4. Completion
 
 When Agent Curator finishes, the rite is:
-- Deployed to `$ROSTER_HOME/rites/{rite-name}/`
+- Deployed to `$KNOSSOS_HOME/rites/{rite-name}/`
 - Discoverable via `/consult`
 - Ready for use via `/{rite-name}` or `/rite {rite-name}`
 

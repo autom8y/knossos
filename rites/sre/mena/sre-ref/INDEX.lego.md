@@ -23,7 +23,7 @@ This is a convenience wrapper around `/rite sre` that also displays the pantheon
 
 No parameters required. This command:
 1. Switches to sre
-2. Displays team roster with agent descriptions
+2. Displays rite catalog with agent descriptions
 
 ---
 
@@ -34,7 +34,7 @@ No parameters required. This command:
 Execute via Bash tool:
 
 ```bash
-$ROSTER_HOME/swap-rite.sh sre
+$KNOSSOS_HOME/ari sync --rite sre
 ```
 
 ### 2. Display Pantheon

@@ -276,7 +276,7 @@ Future enhancement: Create a validation script that:
 4. Suggests updates
 
 ```bash
-# Future: $ROSTER_HOME/validate-consultant.sh
+# Future: $KNOSSOS_HOME/validate-consultant.sh
 # Would check all teams are reflected in knowledge base
 ```
 

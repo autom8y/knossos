@@ -4,7 +4,7 @@
 
 ## Test Categories
 
-1. **Swap Test**: Can swap-rite.sh load this team?
+1. **Swap Test**: Can ari sync --rite load this team?
 2. **Agent Invocation**: Can each agent be invoked?
 3. **Handoff Test**: Do agents hand off correctly?
 4. **Command Test**: Do team commands work?
@@ -19,7 +19,7 @@
 ORIGINAL_TEAM=$(cat .claude/ACTIVE_RITE 2>/dev/null || echo "none")
 
 # Attempt swap
-$ROSTER_HOME/swap-rite.sh {rite-name}
+$KNOSSOS_HOME/ari sync --rite {rite-name}
 EXIT_CODE=$?
 
 # Verify
@@ -30,7 +30,7 @@ cat .claude/ACTIVE_WORKFLOW.yaml
 
 # Restore
 if [ "$ORIGINAL_TEAM" != "none" ]; then
-  $ROSTER_HOME/swap-rite.sh "$ORIGINAL_TEAM"
+  $KNOSSOS_HOME/ari sync --rite "$ORIGINAL_TEAM"
 fi
 ```
 
@@ -226,6 +226,6 @@ echo "**Date**: $(date -Iseconds)" >> $RESULTS
 
 # Swap test
 echo "## Swap Test" >> $RESULTS
-$ROSTER_HOME/swap-rite.sh "$TEAM" 2>&1 | tee -a $RESULTS
+$KNOSSOS_HOME/ari sync --rite "$TEAM" 2>&1 | tee -a $RESULTS
 # ... continue with other tests
 ```

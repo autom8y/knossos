@@ -7,7 +7,7 @@
 ## Pre-Flight Checklist
 
 ### Directory Structure
-- [ ] Directory exists: `$ROSTER_HOME/rites/{rite-name}/`
+- [ ] Directory exists: `$KNOSSOS_HOME/rites/{rite-name}/`
 - [ ] Name follows pattern: `{domain}-pack` (e.g., `sre`)
 - [ ] Agents directory exists with 3-5 `.md` files
 - [ ] `workflow.yaml` exists in team root
@@ -45,14 +45,14 @@
 ### Verification Commands
 ```bash
 # Test team swap
-$ROSTER_HOME/swap-rite.sh {rite-name}
+$KNOSSOS_HOME/ari sync --rite {rite-name}
 
 # Verify workflow and agents copied
 cat .claude/ACTIVE_WORKFLOW.yaml
 ls .claude/agents/
 
 # Verify terminal phase
-grep -B1 "next: null" $ROSTER_HOME/rites/{rite-name}/workflow.yaml
+grep -B1 "next: null" $KNOSSOS_HOME/rites/{rite-name}/workflow.yaml
 
 # Check Consultant knowledge
 grep "{rite-name}" .claude/knowledge/consultant/ecosystem-map.md
@@ -66,7 +66,7 @@ grep "{rite-name}" .claude/knowledge/consultant/ecosystem-map.md
 
 | Symptom | Cause | Fix |
 |---------|-------|-----|
-| "Team not found" | Directory missing or misnamed | Ensure `$ROSTER_HOME/rites/{domain}-pack/` exists |
+| "Team not found" | Directory missing or misnamed | Ensure `$KNOSSOS_HOME/rites/{domain}-pack/` exists |
 | "0 agents, N phases" | Agent files missing `.md` extension | Rename files to `{name}.md` |
 | "workflow.yaml not found" | Missing config | Create from `templates/workflow.yaml.template` |
 
@@ -108,7 +108,7 @@ grep "{rite-name}" .claude/knowledge/consultant/ecosystem-map.md
 
 ```bash
 # Full team validation
-$ROSTER_HOME/swap-rite.sh {rite-name} && \
+$KNOSSOS_HOME/ari sync --rite {rite-name} && \
 ls .claude/agents/ && \
 cat .claude/ACTIVE_WORKFLOW.yaml
 

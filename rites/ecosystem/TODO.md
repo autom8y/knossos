@@ -45,7 +45,7 @@ Ecosystem-pack is a **5-agent infrastructure team** handling CEM and roster patt
 - [ ] Simplify to: "Test in test satellite, verify roster-sync works"
 
 **What to keep:**
-- CEM sync validation (does `cem sync` succeed?)
+- ari sync validation (does `ari sync` succeed?)
 - Schema compatibility checks
 - Breaking change documentation
 
@@ -85,8 +85,8 @@ Ecosystem-pack is a **5-agent infrastructure team** handling CEM and roster patt
 ### Artifact Versioning
 **Decision**: Low priority. Current artifact structure is adequate for actual use patterns.
 
-### CEM Diagnostic Framework
-**Decision**: Keep `/cem-debug` command but don't expand. Most CEM issues are sync failures that self-diagnose.
+### Sync Diagnostic Framework
+**Decision**: Keep `/sync-debug` command but don't expand. Most sync issues are failures that self-diagnose.
 
 ---
 
@@ -94,7 +94,7 @@ Ecosystem-pack is a **5-agent infrastructure team** handling CEM and roster patt
 
 ### What Ecosystem-Pack Actually Does Well
 1. Gap Analysis for infrastructure bugs
-2. Context Design for CEM/roster changes
+2. Context Design for sync/knossos changes
 3. Migration Runbooks for breaking changes
 4. CLAUDE.md architecture governance (claude-md-architecture skill)
 
@@ -104,7 +104,7 @@ Ecosystem-pack is a **5-agent infrastructure team** handling CEM and roster patt
 3. Orchestrated-only execution (too rigid)
 
 ### Recommended Focus
-- **Core**: CEM and roster infrastructure changes
+- **Core**: Sync pipeline and knossos infrastructure changes
 - **Secondary**: CLAUDE.md governance
 - **Remove**: Cross-rite coordination, satellite testing matrix
 

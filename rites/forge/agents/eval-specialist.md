@@ -65,7 +65,7 @@ The Eval Specialist breaks agents before users do. This agent builds evaluation 
                               (pass/fail)
 ```
 
-**Upstream**: Platform Engineer provides deployed rite in roster
+**Upstream**: Platform Engineer provides deployed rite in knossos
 **Downstream**: Agent Curator receives validated team for integration (if passed)
 
 ## Domain Authority

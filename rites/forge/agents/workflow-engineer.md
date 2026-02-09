@@ -60,7 +60,7 @@ The Workflow Engineer wires agents together. When the Prompt Architect hands ove
 ```
 
 **Upstream**: Prompt Architect provides complete agent .md files
-**Downstream**: Platform Engineer receives workflow config to implement in roster
+**Downstream**: Platform Engineer receives workflow config to implement in knossos
 
 ## Domain Authority
 

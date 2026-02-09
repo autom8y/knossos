@@ -23,7 +23,7 @@ This is a convenience wrapper around `/rite debt-triage` that also displays the 
 
 No parameters required. This command:
 1. Switches to debt-triage
-2. Displays team roster with agent descriptions
+2. Displays rite catalog with agent descriptions
 
 ---
 
@@ -34,7 +34,7 @@ No parameters required. This command:
 Execute via Bash tool:
 
 ```bash
-$ROSTER_HOME/swap-rite.sh debt-triage
+$KNOSSOS_HOME/ari sync --rite debt-triage
 ```
 
 ### 2. Display Pantheon
@@ -324,7 +324,7 @@ Use this team for:
 
 - Team switched to debt-triage
 - 3 agent files present in `.claude/agents/`
-- Team roster displayed to user
+- Rite catalog displayed to user
 - If session active, SESSION_CONTEXT updated
 
 ---
@@ -338,7 +338,7 @@ If swap fails:
 [Roster] Use '/rite --list' to see available packs
 ```
 
-**Resolution**: Verify roster installation at `$ROSTER_HOME/`
+**Resolution**: Verify knossos installation at `$KNOSSOS_HOME/`
 
 ---
 
@@ -405,7 +405,7 @@ items:
 ## Related Documentation
 
 - [COMMAND_REGISTRY.md](../../COMMAND_REGISTRY.md) - All registered commands
-- [swap-rite.sh]($ROSTER_HOME/swap-rite.sh) - Roster swap implementation
+- [ari sync --rite]($KNOSSOS_HOME/ari sync --rite) - Roster swap implementation
 
 ---
 

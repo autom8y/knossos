@@ -11,8 +11,8 @@ description: "Product Intelligence team reference. Triggers: intelligence, analy
 
 | Component | Location | Purpose |
 |-----------|----------|---------|
-| Agents | `$ROSTER_HOME/rites/intelligence/agents/` | Agent prompts |
-| Workflow | `$ROSTER_HOME/rites/intelligence/workflow.yaml` | Phase configuration |
+| Agents | `$KNOSSOS_HOME/rites/intelligence/agents/` | Agent prompts |
+| Workflow | `$KNOSSOS_HOME/rites/intelligence/workflow.yaml` | Phase configuration |
 | Switch | `/intelligence` | Activate this team |
 
 ## Pantheon

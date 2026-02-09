@@ -211,7 +211,7 @@ All 12 tests passed:
 ### minimal-satellite (PASS)
 
 All 8 tests passed:
-- Schema inheritance from roster
+- Schema inheritance from knossos
 - Default hooks work
 - No regression in basic functionality
 

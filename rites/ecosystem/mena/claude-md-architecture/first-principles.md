@@ -42,7 +42,7 @@ This project uses a {N}-agent workflow ({rite-name}).
 {routing guidance: when to invoke which agent}
 ```
 
-Everything else is either infrastructure documentation (synced from roster) or project extensions (satellite-owned).
+Everything else is either infrastructure documentation (synced from knossos) or project extensions (satellite-owned).
 
 ---
 
@@ -137,9 +137,9 @@ Hooks inject ephemeral context at session start. It appears in Claude's view but
 +-----------------------------------------------------------------+
 |                PROJECT CLAUDE.md                                 |
 |  (.claude/CLAUDE.md)                                             |
-|  - Team configuration (from roster)                              |
+|  - Team configuration (from knossos)                              |
 |  - Project identity (satellite-owned)                            |
-|  - Ecosystem infrastructure (synced from roster)                 |
+|  - Ecosystem infrastructure (synced from knossos)                 |
 +-----------------------------------------------------------------+
                             |
                             | supplements
@@ -158,7 +158,7 @@ Hooks inject ephemeral context at session start. It appears in Claude's view but
 | Layer | Content Type | Modified By |
 |-------|--------------|-------------|
 | Global | Personal preferences, global tools | User manually |
-| Project | Team + Project + Infrastructure | CEM sync, roster |
+| Project | Team + Project + Infrastructure | ari sync, roster |
 | Session | Transient state, current work | Hooks (read-only to CLAUDE.md) |
 
 ### Hook Output Example

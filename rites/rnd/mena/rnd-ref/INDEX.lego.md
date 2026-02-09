@@ -11,8 +11,8 @@ description: "Innovation Lab (R&D) team reference. Triggers: rnd, innovation lab
 
 | Component | Location | Purpose |
 |-----------|----------|---------|
-| Agents | `$ROSTER_HOME/rites/rnd/agents/` | Agent prompts |
-| Workflow | `$ROSTER_HOME/rites/rnd/workflow.yaml` | Phase configuration |
+| Agents | `$KNOSSOS_HOME/rites/rnd/agents/` | Agent prompts |
+| Workflow | `$KNOSSOS_HOME/rites/rnd/workflow.yaml` | Phase configuration |
 | Switch | `/rnd` | Activate this team |
 
 ## Pantheon

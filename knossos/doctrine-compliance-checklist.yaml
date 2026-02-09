@@ -41,7 +41,7 @@ categories:
 
       - id: WE-002
         name: "Budget-aware session parking"
-        severity: ENHANCEMENT
+        severity: ENHANsync pipelineENT
         status: PARTIAL
         files:
           - ariadne/internal/cmd/hook/autopark.go
@@ -51,7 +51,7 @@ categories:
 
       - id: WE-003
         name: "Rite context weight measurement"
-        severity: ENHANCEMENT
+        severity: ENHANsync pipelineENT
         status: MISSING
         files:
           - TBD
@@ -215,7 +215,7 @@ categories:
 
       - id: MO-005
         name: "Moirai skill routing table"
-        severity: ENHANCEMENT
+        severity: ENHANsync pipelineENT
         status: IMPLEMENTED
         files:
           - .claude/skills/moirai/SKILL.md
@@ -263,7 +263,7 @@ categories:
 
       - id: MO-010
         name: "Moirai lock protocol"
-        severity: ENHANCEMENT
+        severity: ENHANsync pipelineENT
         status: PARTIAL
         files:
           - .claude/agents/moirai.md
@@ -302,7 +302,7 @@ categories:
 
       - id: WS-004
         name: "Open questions detection"
-        severity: ENHANCEMENT
+        severity: ENHANsync pipelineENT
         status: IMPLEMENTED
         files:
           - ariadne/internal/sails/generator.go
@@ -310,7 +310,7 @@ categories:
 
       - id: WS-005
         name: "Modifiers (DOWNGRADE_TO_GRAY, etc.)"
-        severity: ENHANCEMENT
+        severity: ENHANsync pipelineENT
         status: IMPLEMENTED
         files:
           - ariadne/internal/sails/generator.go
@@ -319,7 +319,7 @@ categories:
 
       - id: WS-006
         name: "QA upgrade (GRAY to WHITE)"
-        severity: ENHANCEMENT
+        severity: ENHANsync pipelineENT
         status: IMPLEMENTED
         files:
           - ariadne/internal/sails/generator.go
@@ -346,7 +346,7 @@ categories:
 
       - id: WS-009
         name: "Evidence paths in sails"
-        severity: ENHANCEMENT
+        severity: ENHANsync pipelineENT
         status: IMPLEMENTED
         files:
           - ariadne/internal/hook/threadcontract/event.go
@@ -367,7 +367,7 @@ categories:
 
       - id: RO-002
         name: "swap-rite command"
-        severity: ENHANCEMENT
+        severity: ENHANsync pipelineENT
         status: PARTIAL
         files:
           - swap-team.sh
@@ -377,7 +377,7 @@ categories:
 
       - id: RO-003
         name: "invoke-rite command"
-        severity: ENHANCEMENT
+        severity: ENHANsync pipelineENT
         status: MISSING
         files:
           - TBD
@@ -386,7 +386,7 @@ categories:
 
       - id: RO-004
         name: "current-rite command"
-        severity: ENHANCEMENT
+        severity: ENHANsync pipelineENT
         status: PARTIAL
         files:
           - ariadne/internal/cmd/rite/rite.go
@@ -426,7 +426,7 @@ categories:
 
       - id: IS-004
         name: "Dry-run mode"
-        severity: ENHANCEMENT
+        severity: ENHANsync pipelineENT
         status: IMPLEMENTED
         files:
           - ariadne/internal/inscription/pipeline.go
@@ -434,7 +434,7 @@ categories:
 
       - id: IS-005
         name: "Backup and rollback"
-        severity: ENHANCEMENT
+        severity: ENHANsync pipelineENT
         status: IMPLEMENTED
         files:
           - ariadne/internal/inscription/backup.go
@@ -442,7 +442,7 @@ categories:
 
       - id: IS-006
         name: "Agent table regeneration"
-        severity: ENHANCEMENT
+        severity: ENHANsync pipelineENT
         status: IMPLEMENTED
         files:
           - knossos/templates/partials/agent-table.md.tpl
@@ -464,7 +464,7 @@ categories:
 
       - id: NX-002
         name: "Orphan reasons (INACTIVE/STALE_SAILS/INCOMPLETE_WRAP)"
-        severity: ENHANCEMENT
+        severity: ENHANsync pipelineENT
         status: IMPLEMENTED
         files:
           - ariadne/internal/naxos/types.go
@@ -472,7 +472,7 @@ categories:
 
       - id: NX-003
         name: "Suggested actions (WRAP/RESUME/DELETE)"
-        severity: ENHANCEMENT
+        severity: ENHANsync pipelineENT
         status: IMPLEMENTED
         files:
           - ariadne/internal/naxos/types.go
@@ -489,7 +489,7 @@ categories:
 
       - id: NX-005
         name: "Scan report generation"
-        severity: ENHANCEMENT
+        severity: ENHANsync pipelineENT
         status: IMPLEMENTED
         files:
           - ariadne/internal/naxos/report.go
@@ -501,7 +501,7 @@ categories:
     items:
       - id: MT-001
         name: "TRIBUTE.md generation"
-        severity: ENHANCEMENT
+        severity: ENHANsync pipelineENT
         status: IMPLEMENTED
         files:
           - ariadne/internal/tribute/generator.go
@@ -510,7 +510,7 @@ categories:
 
       - id: MT-002
         name: "Artifact extraction from events"
-        severity: ENHANCEMENT
+        severity: ENHANsync pipelineENT
         status: IMPLEMENTED
         files:
           - ariadne/internal/tribute/extractor.go
@@ -518,7 +518,7 @@ categories:
 
       - id: MT-003
         name: "Phase progression rendering"
-        severity: ENHANCEMENT
+        severity: ENHANsync pipelineENT
         status: IMPLEMENTED
         files:
           - ariadne/internal/tribute/renderer.go
@@ -526,7 +526,7 @@ categories:
 
       - id: MT-004
         name: "TRIBUTE.md trigger on phase change"
-        severity: ENHANCEMENT
+        severity: ENHANsync pipelineENT
         status: MISSING
         files:
           - TBD
@@ -568,7 +568,7 @@ categories:
 
       - id: TM-004
         name: "Directory naming (teams/ vs rites/)"
-        severity: ENHANCEMENT
+        severity: ENHANsync pipelineENT
         status: MISSING
         files:
           - teams/
@@ -577,7 +577,7 @@ categories:
 
       - id: TM-005
         name: "Documentation consistency"
-        severity: ENHANCEMENT
+        severity: ENHANsync pipelineENT
         status: PARTIAL
         files:
           - docs/**/*.md
@@ -596,7 +596,7 @@ categories:
 
       - id: TM-007
         name: "Hook script terminology"
-        severity: ENHANCEMENT
+        severity: ENHANsync pipelineENT
         status: PARTIAL
         files:
           - user-hooks/lib/team-context-loader.sh
@@ -606,7 +606,7 @@ categories:
 
       - id: TM-008
         name: "Skill references"
-        severity: ENHANCEMENT
+        severity: ENHANsync pipelineENT
         status: PARTIAL
         files:
           - user-skills/guidance/team-ref/SKILL.md
@@ -632,7 +632,7 @@ cross_cutting:
 
     - id: CC-002
       name: "Clew naming in code (thread -> clew)"
-      severity: ENHANCEMENT
+      severity: ENHANsync pipelineENT
       status: PARTIAL
       categories:
         - terminology_migration

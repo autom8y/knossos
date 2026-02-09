@@ -229,7 +229,7 @@ extraction:
 
 concepts:
   - name: "tier precedence"
-    understanding: "Settings merge in strict order: skeleton < project < team < user. Higher tiers override lower for scalars."
+    understanding: "Settings merge in strict order: base < project < team < user. Higher tiers override lower for scalars."
     confidence: high
     source_refs:
       - "tier-precedence"

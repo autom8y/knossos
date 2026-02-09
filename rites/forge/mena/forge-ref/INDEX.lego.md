@@ -163,12 +163,12 @@ Agent Designer → Prompt Architect → Workflow Engineer → Platform Engineer 
 **Domain**:
 - Directory structure creation
 - File deployment
-- swap-rite.sh integration
+- ari sync --rite integration
 - Structure validation
 
 **Produces**: Rite deployed to roster
 
-**Handoff**: When swap-rite.sh loads successfully
+**Handoff**: When ari sync --rite loads successfully
 
 ### Eval Specialist
 
@@ -251,10 +251,10 @@ Templates are documented inline in this skill and agent prompts.
 
 ## Troubleshooting
 
-### "swap-rite.sh fails"
+### "ari sync --rite fails"
 
 Check:
-- Team directory exists at `$ROSTER_HOME/rites/{name}/`
+- Team directory exists at `$KNOSSOS_HOME/rites/{name}/`
 - agents/ subdirectory has .md files
 - workflow.yaml exists
 - File permissions are correct
@@ -313,7 +313,7 @@ The Forge is a **global singleton team**—it's always available regardless of w
 ### How It Works
 
 1. Forge agents live in `~/.claude/agents/`
-2. `swap-rite.sh` preserves global agents after team swaps
+2. `ari sync --rite` preserves global agents after team swaps
 3. You can invoke any Forge agent from any rite context
 4. Forge has its own workflow config at `.claude/forge-workflow.yaml`
 

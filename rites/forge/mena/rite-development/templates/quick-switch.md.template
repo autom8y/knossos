@@ -27,7 +27,7 @@ Switch to the {Rite Display Name} rite and display the rite roster.
 
 ## Behavior
 
-1. Execute: `~/Code/roster/swap-rite.sh {rite-name}`
+1. Execute: `ari sync --rite {rite-name}`
 
 2. Display rite roster:
 

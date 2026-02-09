@@ -114,8 +114,8 @@ model: haiku
 ---
 
 ## Behavior
-1. Execute: `$ROSTER_HOME/swap-rite.sh {rite-name}`
-2. Display team roster
+1. Execute: `$KNOSSOS_HOME/ari sync --rite {rite-name}`
+2. Display rite catalog
 3. Update SESSION_CONTEXT if active
 ```
 
@@ -221,7 +221,7 @@ Update the total command count at the top of COMMAND_REGISTRY.md.
 ### Pre-Flight Checks
 ```bash
 # Verify command mappings work
-$ROSTER_HOME/swap-rite.sh {rite-name}
+$KNOSSOS_HOME/ari sync --rite {rite-name}
 
 # Test /architect routing
 grep -B1 "produces: tdd" .claude/ACTIVE_WORKFLOW.yaml

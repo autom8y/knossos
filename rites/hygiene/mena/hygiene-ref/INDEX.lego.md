@@ -5,11 +5,11 @@ description: "Switch to hygiene (code quality workflow). Triggers: /hygiene, cod
 
 # /hygiene - Quick Switch to Code Hygiene Team
 
-> **Category**: Team Management | **Phase**: Team Switching
+> **Category**: Rite Management | **Phase**: Rite Switching
 
 ## Purpose
 
-Instantly switch to the hygiene, a specialized team focused on code quality, architectural compliance, refactoring, and technical cleanliness. This team detects code smells, enforces standards, and cleans up technical messes.
+Instantly switch to the hygiene rite, a specialized workflow focused on code quality, architectural compliance, refactoring, and technical cleanliness. This team detects code smells, enforces standards, and cleans up technical messes.
 
 This is a convenience wrapper around `/rite hygiene` that also displays the pantheon after switching.
 
@@ -23,7 +23,7 @@ This is a convenience wrapper around `/rite hygiene` that also displays the pant
 
 No parameters required. This command:
 1. Switches to hygiene
-2. Displays team roster with agent descriptions
+2. Displays rite catalog with agent descriptions
 
 ---
 
@@ -34,7 +34,7 @@ No parameters required. This command:
 Execute via Bash tool:
 
 ```bash
-$ROSTER_HOME/swap-rite.sh hygiene
+ari sync --rite hygiene
 ```
 
 ### 2. Display Pantheon
@@ -60,14 +60,14 @@ Use /handoff <agent> to delegate work.
 ### 3. Update SESSION_CONTEXT (if active)
 
 If a session is active:
-- Update `active_team` field to `hygiene`
-- Add handoff note documenting team switch
+- Update `active_rite` field to `hygiene`
+- Add handoff note documenting rite switch
 
 ---
 
-## Team Details
+## Rite Details
 
-**Team Name**: hygiene
+**Rite Name**: hygiene
 **Agent Count**: 4
 **Workflow**: Detect → Audit → Enforce → Clean
 
@@ -80,9 +80,9 @@ If a session is active:
 
 ---
 
-## When to Use Hygiene Team
+## When to Use Hygiene Rite
 
-Use this team for:
+Use this rite for:
 
 - **Code quality audits**: Regular health checks
 - **Refactoring initiatives**: Cleaning up technical mess
@@ -99,9 +99,9 @@ Use this team for:
 
 ---
 
-## Hygiene vs Debt Teams
+## Hygiene vs Debt Rites
 
-| Hygiene Team | Debt Team |
+| Hygiene Rite | Debt Rite |
 |--------------|-----------|
 | **Focus**: Code quality and cleanliness | **Focus**: Technical debt prioritization |
 | **Action**: Detect and fix issues | **Action**: Assess and plan remediation |

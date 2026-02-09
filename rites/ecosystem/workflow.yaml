@@ -58,7 +58,7 @@ complexity_levels:
 # /ecosystem-implement → integration-engineer (implementation only)
 # /ecosystem-document → documentation-engineer (documentation only)
 # /ecosystem-validate → compatibility-tester (validation only)
-# /cem-debug         → ecosystem-analyst (CEM diagnostic focus)
+# /sync-debug        → ecosystem-analyst (sync pipeline diagnostic focus)
 # /hook-design       → context-architect (new hook patterns)
 # /skill-design      → context-architect (new skill patterns)
 # /satellite-scaffold → integration-engineer (new satellite setup)

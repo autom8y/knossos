@@ -129,7 +129,7 @@ Complete these checks before adding to roster:
 - [ ] Zero anti-patterns (see [principles.md](../principles.md) Detection Checklist)
 - [ ] Reviewed by second person for clarity
 - [ ] Tested with sample input to verify expected behavior
-- [ ] Added to team roster manifest
+- [ ] Added to rite catalog manifest
 - [ ] CLAUDE.md updated with agent reference
 
 ---

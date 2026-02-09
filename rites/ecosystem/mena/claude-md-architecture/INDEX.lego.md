@@ -12,7 +12,7 @@ description: "CLAUDE.md architecture first principles. Triggers: CLAUDE.md archi
 Activate this skill when:
 
 - Modifying any CLAUDE.md content (roster or satellite)
-- Making CEM sync decisions (SYNC vs PRESERVE vs REGENERATE)
+- Making ari sync decisions (SYNC vs PRESERVE vs REGENERATE)
 - Determining where content belongs (CLAUDE.md vs SESSION_CONTEXT vs hooks)
 - Validating proposed CLAUDE.md changes
 - Resolving content placement disputes
@@ -145,7 +145,7 @@ What belongs in each CLAUDE.md section:
 
 ### Roster-Owned Sections (SYNC)
 
-These sections sync from roster to all satellites. Content describes ecosystem infrastructure.
+These sections sync from knossos to all satellites. Content describes ecosystem infrastructure.
 
 | Section | Purpose | Content Pattern |
 |---------|---------|-----------------|
@@ -162,12 +162,12 @@ These sections sync from roster to all satellites. Content describes ecosystem i
 
 ### Satellite-Owned Sections (PRESERVE)
 
-These sections are never overwritten by CEM sync. Content is project-specific.
+These sections are never overwritten by ari sync. Content is project-specific.
 
 | Section | Purpose | Content Pattern |
 |---------|---------|-----------------|
-| **Quick Start** | Orient to current team | Rite name, agent table (regenerated from roster) |
-| **Agent Configurations** | List available agents | Agent-to-file mapping (regenerated from roster) |
+| **Quick Start** | Orient to current team | Rite name, agent table (regenerated from knossos) |
+| **Agent Configurations** | List available agents | Agent-to-file mapping (regenerated from knossos) |
 | **Project:\*** namespace | Project extensions | Any project-specific patterns |
 | Custom sections | Satellite additions | Not matching roster section names |
 

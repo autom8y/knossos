@@ -50,7 +50,7 @@ All agents are now under the 200-line stretch goal.
 
 ---
 
-## swap-rite.sh Dry-Run Results
+## ari sync --rite Dry-Run Results
 
 ```
 [Roster] Dry-run: Would refresh sre
@@ -59,7 +59,7 @@ Agent changes:
   + chaos-engineer.md (new)
   + incident-commander.md (new)
   + observability-engineer.md (new)
-  ~ orchestrator.md (modified in roster)
+  ~ orchestrator.md (modified in knossos)
   + platform-engineer.md (new)
 ```
 
@@ -94,7 +94,7 @@ All 5 agents recognized and ready to deploy.
 - [x] All 5 agents under 200 lines
 - [x] YAML frontmatter parses correctly
 - [x] All required sections present
-- [x] swap-rite.sh dry-run passes
+- [x] ari sync --rite dry-run passes
 - [x] Active voice throughout
 - [x] Handoff criteria use checkboxes
 - [x] Anti-patterns documented

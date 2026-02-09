@@ -1,6 +1,6 @@
 ---
 name: doc-ecosystem
-description: "CEM sync, migration, and compatibility templates. Triggers: gap analysis, context design, migration runbook, compatibility report, CEM sync."
+description: "ari sync, migration, and compatibility templates. Triggers: gap analysis, context design, migration runbook, compatibility report, ari sync."
 ---
 
 # Documentation: Ecosystem & Hygiene
@@ -42,7 +42,7 @@ This skill provides templates for ecosystem-level documentation: CEM/satellite s
 
 | Scenario | Template |
 |----------|----------|
-| CEM sync failing | Gap Analysis |
+| ari sync failing | Gap Analysis |
 | Planning ecosystem change | Context Design |
 | Shipping breaking change | Migration Runbook |
 | Validating before release | Compatibility Report |

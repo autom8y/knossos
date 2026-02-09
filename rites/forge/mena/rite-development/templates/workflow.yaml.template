@@ -8,7 +8,7 @@
 # 1. Copy this file to your rite directory
 # 2. Replace all {placeholders} with actual values
 # 3. Ensure agent names match files in agents/ directory
-# 4. Validate with: ~/Code/roster/swap-rite.sh {rite-name}
+# 4. Validate with: ari sync --rite {rite-name}
 # =============================================================================
 
 name: {rite-name}

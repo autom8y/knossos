@@ -45,10 +45,10 @@ All agents now include:
 - [ ] **When Invoked (First Actions)**: Numbered sequence of first actions on invocation
 - [ ] **Concrete Examples**: At least one artifact example with format
 
-## swap-rite.sh Dry-Run
+## ari sync --rite Dry-Run
 
 ```
-$ swap-rite.sh --dry-run intelligence
+$ ari sync --rite --dry-run intelligence
 
 [Roster] Dry-run: Would refresh intelligence
 
@@ -56,7 +56,7 @@ Agent changes:
   + analytics-engineer.md (new)
   + experimentation-lead.md (new)
   + insights-analyst.md (new)
-  ~ orchestrator.md (modified in roster)
+  ~ orchestrator.md (modified in knossos)
   + user-researcher.md (new)
 
 No changes made (--dry-run mode)
