@@ -4,7 +4,7 @@
 
 ## Current State Summary
 
-Intelligence-pack is a **well-structured analytics and research team** with clear 4-phase workflow (instrumentation → research → experimentation → synthesis) and complexity-based phase skipping.
+The intelligence rite is a **well-structured analytics and research rite** with clear 4-phase workflow (instrumentation → research → experimentation → synthesis) and complexity-based phase skipping.
 
 **Strengths confirmed:**
 - Clear agent specialization (analytics, research, experimentation, synthesis)
@@ -100,7 +100,7 @@ Intelligence-pack is a **well-structured analytics and research team** with clea
 - [ ] Update `rites/strategy/README.md`: Add same section (mirror content)
 - [ ] Clarify:
   ```markdown
-  ## When to Use Intelligence-Pack vs Strategy-Pack
+  ## When to Use Intelligence vs Strategy
 
   | Question Type | Team | Examples |
   |---------------|------|----------|
@@ -179,7 +179,7 @@ Intelligence-pack is a **well-structured analytics and research team** with clea
 
 ## Deferred / Not Prioritized
 
-### Merge with Strategy-Pack
+### Merge with Strategy
 **Decision:** Keep separate. Intelligence (product analytics) and strategy (business analysis) are different disciplines with different workflows.
 
 ### Deprecate User-Researcher

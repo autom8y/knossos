@@ -62,4 +62,4 @@ See also: [strategy README](../strategy/README.md#when-to-use-strategy-vs-intell
 ## Related Rites
 
 - **strategy**: Hand off for business case development and strategic planning
-- **ship-pack**: Hand off instrumentation implementation to engineering teams
+- **10x-dev**: Hand off instrumentation implementation to engineering teams

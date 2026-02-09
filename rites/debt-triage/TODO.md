@@ -4,7 +4,7 @@
 
 ## Current State Summary
 
-Debt-triage-pack is a **well-designed, recently optimized team** (34% compression achieved) with clear strategic focus on debt inventory, risk assessment, and sprint planning.
+The debt-triage rite is a **well-designed, recently optimized rite** (34% compression achieved) with clear strategic focus on debt inventory, risk assessment, and sprint planning.
 
 **Strengths confirmed:**
 - Clear 3-phase pipeline (collection → assessment → planning)
@@ -106,7 +106,7 @@ skills/smell-detection/
 ### Calibration Loop
 **Decision:** Skip. Estimation improves naturally with experience. Formal calibration tracking is over-engineering.
 
-### Merge with Hygiene-Pack
+### Merge with Hygiene
 **Decision:** Keep separate. Strategic planning (debt-triage) and tactical execution (hygiene) are genuinely different workflows.
 
 ### Model Downgrade

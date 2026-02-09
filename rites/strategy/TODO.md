@@ -4,7 +4,7 @@
 
 ## Current State Summary
 
-Strategy-pack is a **well-designed, methodologically rigorous team** with clear 4-phase workflow (market-research → competitive-analysis → business-modeling → strategic-planning) and excellent role separation.
+The strategy rite is a **well-designed, methodologically rigorous rite** with clear 4-phase workflow (market-research → competitive-analysis → business-modeling → strategic-planning) and excellent role separation.
 
 **Strengths confirmed:**
 - Exceptional role clarity (market vs competitive vs financial vs roadmap)
@@ -50,7 +50,7 @@ Strategy-pack is a **well-designed, methodologically rigorous team** with clear 
 - [ ] Coordinate with intelligence P3 (mirror same table)
 - [ ] Clarify:
   ```markdown
-  ## When to Use Strategy-Pack vs Intelligence-Pack
+  ## When to Use Strategy vs Intelligence
 
   | Question Type | Team | Examples |
   |---------------|------|----------|
@@ -75,7 +75,7 @@ Strategy-pack is a **well-designed, methodologically rigorous team** with clear 
 
 ### P2: Define R&D → Strategy Integration
 
-**Gap identified:** R&D-pack's moonshot-architect produces long-term architecture plans but no pathway to roadmap-strategist exists.
+**Gap identified:** The rnd rite's moonshot-architect produces long-term architecture plans but no pathway to roadmap-strategist exists.
 
 **Decision:** Define explicit handoff workflow from moonshot-architect to roadmap-strategist.
 
@@ -86,7 +86,7 @@ Strategy-pack is a **well-designed, methodologically rigorous team** with clear 
   ```markdown
   ## Architecture Strategy Integration
 
-  When R&D-pack's moonshot-architect produces long-term architecture recommendations:
+  When rnd's moonshot-architect produces long-term architecture recommendations:
 
   **Trigger**: MOONSHOT-*.md artifact produced with business impact > "significant"
 
@@ -249,7 +249,7 @@ This completes the 10-team audit:
 6. sre (shared templates, 10x→sre handoff)
 7. security (proactive threat modeling, risk acceptance)
 8. intelligence (fix agent quality, boundary clarification, MCP plan)
-9. rnd (fix ship-pack refs, clarify spike overlap)
+9. rnd (clarify spike overlap)
 10. strategy (model fix, R&D integration, back-routes)
 
 **Cross-cutting patterns identified:**

@@ -4,7 +4,7 @@
 
 ## Current State Summary
 
-RND-pack is a **well-structured exploration and prototyping team** with clear 4-phase workflow (diverge → prototype → converge → productionize) and appropriate complexity-based phase skipping.
+The rnd rite is a **well-structured exploration and prototyping rite** with clear 4-phase workflow (diverge → prototype → converge → productionize) and appropriate complexity-based phase skipping.
 
 **Strengths confirmed:**
 - Clear agent specialization (explorer, prototype-builder, evaluator, tech-transfer)
@@ -52,7 +52,7 @@ RND exploration complete → tech-transfer produces TRANSFER doc → 10x-dev pic
 - [ ] Update `rites/10x-dev/README.md` or spike skill: Add same clarification
 - [ ] Clarify:
   ```markdown
-  ## When to Use RND-Pack vs 10x /spike
+  ## When to Use RND vs 10x /spike
 
   | Scenario | Team | Examples |
   |----------|------|----------|
@@ -125,7 +125,7 @@ RND exploration complete → tech-transfer produces TRANSFER doc → 10x-dev pic
 ### Merge with 10x /spike
 **Decision:** Keep separate. RND is multi-session exploration of unknowns; /spike is time-boxed evaluation of known options. Different concerns, different workflows.
 
-### Separate Ship-Pack
+### Separate Ship Rite
 **Decision:** Don't create. 10x-dev already handles production implementation. RND's tech-transfer provides the bridge.
 
 ---

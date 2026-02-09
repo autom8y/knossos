@@ -71,5 +71,5 @@ See `workflow.md` for phase flow and complexity levels.
 ## Related Rites
 
 - **docs**: When implementation is complete and needs documentation
-- **infrastructure-pack**: When deployment automation is required
+- **sre**: When deployment automation is required
 - **rnd**: When exploration scope exceeds a single session

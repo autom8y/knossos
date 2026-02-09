@@ -1,5 +1,5 @@
 #!/bin/bash
-# Ecosystem-Pack Context Injection
+# Ecosystem Rite Context Injection
 # Provides sync status, knossos reference, and drift detection for ecosystem work
 #
 # Called by: session-context.sh via rite-context-loader.sh

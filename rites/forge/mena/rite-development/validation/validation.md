@@ -8,9 +8,9 @@
 
 ### Directory Structure
 - [ ] Directory exists: `$KNOSSOS_HOME/rites/{rite-name}/`
-- [ ] Name follows pattern: `{domain}-pack` (e.g., `sre`)
+- [ ] Name follows pattern: `{domain}` (e.g., `sre`, `10x-dev`)
 - [ ] Agents directory exists with 3-5 `.md` files
-- [ ] `workflow.yaml` exists in team root
+- [ ] `workflow.yaml` exists in rite root
 
 ### Workflow Configuration
 - [ ] `name` matches directory name
@@ -66,7 +66,7 @@ grep "{rite-name}" .claude/knowledge/consultant/ecosystem-map.md
 
 | Symptom | Cause | Fix |
 |---------|-------|-----|
-| "Team not found" | Directory missing or misnamed | Ensure `$KNOSSOS_HOME/rites/{domain}-pack/` exists |
+| "Rite not found" | Directory missing or misnamed | Ensure `$KNOSSOS_HOME/rites/{domain}/` exists |
 | "0 agents, N phases" | Agent files missing `.md` extension | Rename files to `{name}.md` |
 | "workflow.yaml not found" | Missing config | Create from `templates/workflow.yaml.template` |
 

@@ -4,7 +4,7 @@
 
 ## Current State Summary
 
-Hygiene-pack is a **well-designed, recently optimized team** (36% compression achieved) with clear scope boundaries and explicit handoff criteria between phases.
+The hygiene rite is a **well-designed, recently optimized rite** (36% compression achieved) with clear scope boundaries and explicit handoff criteria between phases.
 
 **Strengths confirmed:**
 - Clear 4-phase pipeline (assessment → planning → execution → audit)
@@ -67,7 +67,7 @@ Hygiene-pack is a **well-designed, recently optimized team** (36% compression ac
 
 ### P2: Formalize Debt-Triage → Hygiene Handoff
 
-**Gap identified:** Debt-triage-pack plans what to fix; hygiene executes. But NO formal handoff mechanism exists. The relationship is documented but not operationalized.
+**Gap identified:** The debt-triage rite plans what to fix; hygiene executes. But NO formal handoff mechanism exists. The relationship is documented but not operationalized.
 
 **Decision:** Debt-triage output should be directly consumable by hygiene with explicit artifact format.
 

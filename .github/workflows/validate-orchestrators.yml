@@ -3,8 +3,8 @@ name: Validate Orchestrators
 on:
   pull_request:
     paths:
-      - 'teams/*/orchestrator.yaml'
-      - 'teams/*/agents/orchestrator.md'
+      - 'rites/*/orchestrator.yaml'
+      - 'rites/*/agents/orchestrator.md'
       - 'schemas/orchestrator.yaml.schema.json'
       - 'templates/orchestrator-*.sh'
       - '.github/workflows/validate-orchestrators.yml'
@@ -12,14 +12,14 @@ on:
     branches:
       - main
     paths:
-      - 'teams/*/orchestrator.yaml'
-      - 'teams/*/agents/orchestrator.md'
+      - 'rites/*/orchestrator.yaml'
+      - 'rites/*/agents/orchestrator.md'
       - 'schemas/orchestrator.yaml.schema.json'
       - 'templates/orchestrator-*.sh'
   workflow_dispatch:
     inputs:
       teams:
-        description: 'Specific teams to validate (comma-separated, or "all")'
+        description: 'Specific rites to validate (comma-separated, or "all")'
         required: false
         default: 'all'
 
@@ -52,21 +52,21 @@ jobs:
               IFS=',' read -ra TEAMS <<< "$TEAMS_INPUT"
               for team in "${TEAMS[@]}"; do
                 team=$(echo "$team" | xargs)  # trim whitespace
-                [[ -f "teams/$team/orchestrator.yaml" ]] && YAML_FILES="$YAML_FILES teams/$team/orchestrator.yaml"
-                [[ -f "teams/$team/agents/orchestrator.md" ]] && MD_FILES="$MD_FILES teams/$team/agents/orchestrator.md"
+                [[ -f "rites/$team/orchestrator.yaml" ]] && YAML_FILES="$YAML_FILES rites/$team/orchestrator.yaml"
+                [[ -f "rites/$team/agents/orchestrator.md" ]] && MD_FILES="$MD_FILES rites/$team/agents/orchestrator.md"
               done
             fi
           else
-            YAML_FILES=$(git diff --name-only "${{ github.event.pull_request.base.sha || 'origin/main' }}" HEAD | grep 'teams/.*/orchestrator\.yaml' || true)
-            MD_FILES=$(git diff --name-only "${{ github.event.pull_request.base.sha || 'origin/main' }}" HEAD | grep 'teams/.*/agents/orchestrator\.md' || true)
+            YAML_FILES=$(git diff --name-only "${{ github.event.pull_request.base.sha || 'origin/main' }}" HEAD | grep 'rites/.*/orchestrator\.yaml' || true)
+            MD_FILES=$(git diff --name-only "${{ github.event.pull_request.base.sha || 'origin/main' }}" HEAD | grep 'rites/.*/agents/orchestrator\.md' || true)
           fi
 
           # Output arrays as JSON
           YAML_JSON=$(echo "$YAML_FILES" | jq -R -s 'split("\n") | map(select(length > 0))')
           MD_JSON=$(echo "$MD_FILES" | jq -R -s 'split("\n") | map(select(length > 0))')
 
-          YAML_TEAMS=$(echo "$YAML_FILES" | sed -E 's|teams/([^/]+)/.*|\1|' | sort -u | jq -R -s 'split("\n") | map(select(length > 0))')
-          MD_TEAMS=$(echo "$MD_FILES" | sed -E 's|teams/([^/]+)/.*|\1|' | sort -u | jq -R -s 'split("\n") | map(select(length > 0))')
+          YAML_TEAMS=$(echo "$YAML_FILES" | sed -E 's|rites/([^/]+)/.*|\1|' | sort -u | jq -R -s 'split("\n") | map(select(length > 0))')
+          MD_TEAMS=$(echo "$MD_FILES" | sed -E 's|rites/([^/]+)/.*|\1|' | sort -u | jq -R -s 'split("\n") | map(select(length > 0))')
 
           HAS_CHANGES="false"
           [[ -n "$YAML_FILES" ]] || [[ -n "$MD_FILES" ]] && HAS_CHANGES="true"
@@ -151,7 +151,7 @@ jobs:
             echo "Validating: $yaml_file"
 
             # Extract team name
-            TEAM=$(echo "$yaml_file" | sed -E 's|teams/([^/]+)/.*|\1|')
+            TEAM=$(echo "$yaml_file" | sed -E 's|rites/([^/]+)/.*|\1|')
 
             # Run validator in validate-only mode
             if ! ./templates/orchestrator-generate.sh "$TEAM" --validate-only; then
@@ -215,7 +215,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: generated-orchestrators
-          path: teams/*/agents/orchestrator.md
+          path: rites/*/agents/orchestrator.md
           retention-days: 7
 
   compare-orchestrators:
@@ -251,7 +251,7 @@ jobs:
           echo "$YAML_TEAMS" | jq -r '.[]' | while read -r team; do
             if [[ -z "$team" ]]; then continue; fi
 
-            COMMITTED="teams/$team/agents/orchestrator.md"
+            COMMITTED="rites/$team/agents/orchestrator.md"
             GENERATED="/tmp/generated/orchestrator-$team.md"
 
             echo "Comparing: $team"
@@ -275,7 +275,7 @@ jobs:
               LINES_DIFF=$(diff "$COMMITTED" "$GENERATED.content" | wc -l)
               echo "⚠️  MISMATCH: $team ($LINES_DIFF lines differ)"
               echo "   Generated: $GENERATED.content"
-              echo "   Run: ./templates/orchestrator-generate.sh $team --force && git add teams/$team/agents/orchestrator.md"
+              echo "   Run: ./templates/orchestrator-generate.sh $team --force && git add rites/$team/agents/orchestrator.md"
               MISMATCHES=$((MISMATCHES + 1))
             else
               echo "✓ MATCH: $team (100% synchronized)"
@@ -368,8 +368,8 @@ jobs:
           echo "If comparison failed, regenerate with:" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
           echo "cd ${{ github.workspace }}" >> $GITHUB_STEP_SUMMARY
-          echo "./templates/orchestrator-generate.sh <team> --force" >> $GITHUB_STEP_SUMMARY
-          echo "git add teams/<team>/agents/orchestrator.md" >> $GITHUB_STEP_SUMMARY
+          echo "./templates/orchestrator-generate.sh <rite> --force" >> $GITHUB_STEP_SUMMARY
+          echo "git add rites/<rite>/agents/orchestrator.md" >> $GITHUB_STEP_SUMMARY
           echo "git commit --amend" >> $GITHUB_STEP_SUMMARY
           echo "git push -f  # Only if not shared" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY

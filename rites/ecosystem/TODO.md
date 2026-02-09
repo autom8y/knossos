@@ -4,7 +4,7 @@
 
 ## Current State Summary
 
-Ecosystem-pack is a **5-agent infrastructure team** handling sync pipeline and knossos patterns. The audit revealed it's well-documented but claims more scope than it actually needs:
+The ecosystem rite is a **5-agent infrastructure rite** handling sync pipeline and knossos patterns. The audit revealed it's well-documented but claims more scope than it actually needs:
 
 - Claims "hub team" status with cross-rite coordination → but no mechanism exists
 - Defines satellite diversity matrix for testing → but doesn't actually work on satellites
@@ -20,7 +20,7 @@ Ecosystem-pack is a **5-agent infrastructure team** handling sync pipeline and k
 
 ### P1: Demote from Hub to Specialist
 
-**Decision**: Remove hub claims. Ecosystem-pack is infrastructure specialist with user-escalation only.
+**Decision**: Remove hub claims. The ecosystem rite is an infrastructure specialist with user-escalation only.
 
 **Rationale**: No team leads registry exists, no notification mechanism, no coordination protocol. Other teams discover impact via sync failures, which is fine.
 
@@ -36,7 +36,7 @@ Ecosystem-pack is a **5-agent infrastructure team** handling sync pipeline and k
 
 **Decision**: Ditch satellite diversity matrix concept entirely.
 
-**Rationale**: Ecosystem-pack doesn't work on satellite projects. Satellites just sync from the ecosystem. The testing matrix (test-baseline, test-minimal, test-complex, test-legacy, test-production-like) adds complexity without value.
+**Rationale**: The ecosystem rite doesn't work on satellite projects. Satellites just sync from the ecosystem. The testing matrix (test-baseline, test-minimal, test-complex, test-legacy, test-production-like) adds complexity without value.
 
 **Changes required:**
 - [ ] Update `agents/compatibility-tester.md`: Remove satellite matrix references
@@ -53,7 +53,7 @@ Ecosystem-pack is a **5-agent infrastructure team** handling sync pipeline and k
 
 ### P3: Support Cross-Cutting Execution
 
-**Decision**: Ecosystem-pack should work in cross-cutting mode (session active, no team) for direct agent queries.
+**Decision**: The ecosystem rite should work in cross-cutting mode (session active, no rite) for direct agent queries.
 
 **Rationale**: Sometimes you just want to ask context-architect a design question without spinning up full orchestration.
 
@@ -92,7 +92,7 @@ Ecosystem-pack is a **5-agent infrastructure team** handling sync pipeline and k
 
 ## Architectural Observations
 
-### What Ecosystem-Pack Actually Does Well
+### What the Ecosystem Rite Actually Does Well
 1. Gap Analysis for infrastructure bugs
 2. Context Design for sync/knossos changes
 3. Migration Runbooks for breaking changes

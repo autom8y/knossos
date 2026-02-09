@@ -4,7 +4,7 @@
 
 ## Current State Summary
 
-SRE-pack is a **production-ready, well-optimized team** (44% token reduction achieved in Dec 2025) with clear agent roles and comprehensive templates.
+The sre rite is a **production-ready, well-optimized rite** (44% token reduction achieved in Dec 2025) with clear agent roles and comprehensive templates.
 
 **Strengths confirmed:**
 - 4-phase workflow (observation → coordination → implementation → resilience)

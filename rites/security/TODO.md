@@ -4,7 +4,7 @@
 
 ## Current State Summary
 
-Security-pack is a **well-structured security assessment team** with clear agent roles (threat-modeler, compliance-architect, penetration-tester, security-reviewer) and comprehensive templates.
+The security rite is a **well-structured security assessment rite** with clear agent roles (threat-modeler, compliance-architect, penetration-tester, security-reviewer) and comprehensive templates.
 
 **Strengths confirmed:**
 - Clear 4-phase sequential workflow with complexity-based skipping
@@ -24,7 +24,7 @@ Security-pack is a **well-structured security assessment team** with clear agent
 
 ### P1: Require Threat-Modeler for SYSTEM Complexity
 
-**Gap identified:** Security-pack is primarily reactive (post-implementation). No hook for proactive security input during design phase.
+**Gap identified:** The security rite is primarily reactive (post-implementation). No hook for proactive security input during design phase.
 
 **Decision:** SYSTEM-level work (auth, crypto, PII, external integrations) requires threat-modeler consultation BEFORE implementation begins.
 

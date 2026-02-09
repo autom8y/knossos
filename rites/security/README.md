@@ -39,4 +39,4 @@ See `workflow.md` for phase flow and complexity levels.
 ## Related Rites
 
 - **10x-dev**: Hand off security-approved features for implementation
-- **eval-pack**: When security findings need systematic testing validation
+- **hygiene**: When security findings need systematic testing validation
