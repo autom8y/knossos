@@ -3,7 +3,6 @@ package hook
 
 import (
 	"encoding/json"
-	"os"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -11,6 +10,7 @@ import (
 	"github.com/autom8y/knossos/internal/hook"
 	"github.com/autom8y/knossos/internal/lock"
 	"github.com/autom8y/knossos/internal/output"
+	"github.com/autom8y/knossos/internal/paths"
 )
 
 // ToolInput represents the input from Claude Code PreToolUse hook.
@@ -85,8 +85,9 @@ func runWriteguardCore(ctx *cmdContext, printer *output.Printer) error {
 
 	// Check if file is protected
 	if isProtectedFile(filePath) {
-		// Check if Moirai lock is held
-		if isMoiraiLockHeld(hookEnv.GetProjectDir()) {
+		// Resolve session via priority chain, then check Moirai lock
+		resolver, sessionID, _ := ctx.resolveSession(hookEnv)
+		if sessionID != "" && isMoiraiLockHeld(resolver, sessionID) {
 			return outputAllow(printer)
 		}
 		return outputBlock(printer, filePath)
@@ -124,42 +125,23 @@ func isProtectedFile(filePath string) bool {
 	return false
 }
 
-// isMoiraiLockHeld checks if a valid Moirai lock exists for the current session.
+// isMoiraiLockHeld checks if a valid Moirai lock exists for the given session.
 // Returns true only if:
-// - Current session can be resolved
 // - Lock file exists at .claude/sessions/{session-id}/.moirai-lock
 // - Lock agent field is "moirai"
 // - Lock is not stale (acquired_at + stale_after_seconds > now)
 // Returns false on any error (fail closed).
-func isMoiraiLockHeld(projectDir string) bool {
-	if projectDir == "" {
-		return false
-	}
-
-	// Read current session ID
-	currentSessionPath := strings.TrimSpace(projectDir) + "/.claude/sessions/.current-session"
-	sessionIDBytes, err := os.ReadFile(currentSessionPath)
-	if err != nil {
-		return false
-	}
-	sessionID := strings.TrimSpace(string(sessionIDBytes))
-	if sessionID == "" {
-		return false
-	}
-
-	// Check for lock file using shared implementation
-	lockPath := strings.TrimSpace(projectDir) + "/.claude/sessions/" + sessionID + "/.moirai-lock"
+func isMoiraiLockHeld(resolver *paths.Resolver, sessionID string) bool {
+	lockPath := resolver.SessionDir(sessionID) + "/.moirai-lock"
 	moiraiLock, err := lock.ReadMoiraiLock(lockPath)
 	if err != nil {
 		return false
 	}
 
-	// Verify agent is moirai
 	if moiraiLock.Agent != "moirai" {
 		return false
 	}
 
-	// Check if stale
 	if lock.IsMoiraiLockStale(moiraiLock) {
 		return false
 	}

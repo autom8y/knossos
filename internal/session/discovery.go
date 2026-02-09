@@ -116,6 +116,8 @@ func readStatusFromFrontmatter(path string) string {
 		// Look for "status: VALUE"
 		if strings.HasPrefix(trimmed, "status:") {
 			value := strings.TrimSpace(strings.TrimPrefix(trimmed, "status:"))
+			// Strip YAML quotes if present (e.g. "ACTIVE" -> ACTIVE)
+			value = strings.Trim(value, "\"'")
 			return value
 		}
 	}
