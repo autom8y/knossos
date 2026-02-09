@@ -4,6 +4,7 @@ package sync
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/spf13/cobra"
 
@@ -38,6 +39,7 @@ func NewSyncCmd(outputFlag *string, verboseFlag *bool, projectDir *string) *cobr
 		overwriteDiverged bool
 		keepOrphans       bool
 		soft              bool
+		budget            bool
 	)
 
 	cmd := &cobra.Command{
@@ -67,7 +69,8 @@ Examples:
   ari sync --dry-run                    # Preview
   ari sync --overwrite-diverged         # Overwrite locally modified files
   ari sync --recover                    # Adopt existing untracked files
-  ari sync --keep-orphans               # Don't auto-remove orphaned files`,
+  ari sync --keep-orphans               # Don't auto-remove orphaned files
+  ari sync --budget                     # Show context token budget after sync`,
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// Validate scope
@@ -98,7 +101,7 @@ Examples:
 				Soft:              soft,
 			}
 
-			return runSync(ctx, opts, cmd)
+			return runSync(ctx, opts, budget, cmd)
 		},
 	}
 
@@ -112,6 +115,7 @@ Examples:
 	cmd.Flags().BoolVar(&overwriteDiverged, "overwrite-diverged", false, "Overwrite locally modified files")
 	cmd.Flags().BoolVar(&keepOrphans, "keep-orphans", false, "Preserve orphaned knossos files")
 	cmd.Flags().BoolVar(&soft, "soft", false, "CC-safe mode: update only agents and CLAUDE.md (skip hooks/mena/rules)")
+	cmd.Flags().BoolVar(&budget, "budget", false, "Show context token budget after sync")
 
 	// Does NOT require project (user scope works without project)
 	common.SetNeedsProject(cmd, false, false)
@@ -119,7 +123,7 @@ Examples:
 	return cmd
 }
 
-func runSync(ctx *cmdContext, opts materialize.SyncOptions, cmd *cobra.Command) error {
+func runSync(ctx *cmdContext, opts materialize.SyncOptions, showBudget bool, cmd *cobra.Command) error {
 	printer := ctx.GetPrinter(output.FormatText)
 
 	// Resolve project directory for rite scope
@@ -162,7 +166,28 @@ func runSync(ctx *cmdContext, opts materialize.SyncOptions, cmd *cobra.Command) 
 		out["dry_run"] = true
 	}
 
-	return printer.Print(out)
+	// Budget report (appended to sync output)
+	if showBudget {
+		claudeDir := filepath.Join(projectDir, ".claude")
+		if err := formatBudgetReport(claudeDir, out); err != nil {
+			printer.VerboseLog("warn", "budget calculation failed", map[string]interface{}{"error": err.Error()})
+		}
+	}
+
+	if err := printer.Print(out); err != nil {
+		return err
+	}
+
+	// Print human-readable budget text after structured output
+	if showBudget {
+		claudeDir := filepath.Join(projectDir, ".claude")
+		text, err := budgetText(claudeDir)
+		if err == nil {
+			printer.PrintText(text)
+		}
+	}
+
+	return nil
 }
 
 func formatSyncResult(result *materialize.SyncResult, opts materialize.SyncOptions) map[string]any {
