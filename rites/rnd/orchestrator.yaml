@@ -21,6 +21,7 @@ routing:
   integration-researcher: "Tech assessment complete, need dependency mapping"
   prototype-engineer: "Integration map complete, need feasibility validation"
   moonshot-architect: "Prototype complete, need long-term architecture"
+  tech-transfer: "Architecture documented, need production handoff package"
 
 # Workflow position descriptors
 workflow_position:
@@ -45,6 +46,10 @@ handoff_criteria:
     - "Long-term architecture documented"
     - "Migration path from prototype defined"
     - "Future dependencies identified"
+  transfer:
+    - "Production requirements extracted from prototype"
+    - "Productionization gaps documented"
+    - "Handoff artifact created for implementation rite"
 
 # Skills references for this rite
 skills:

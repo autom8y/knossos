@@ -28,7 +28,13 @@ phases:
   - name: future-architecture
     agent: moonshot-architect
     produces: moonshot-plan
+    next: transfer
+
+  - name: transfer
+    agent: tech-transfer
+    produces: tech-transfer-package
     next: null
+    condition: "complexity >= EVALUATION"
 
 complexity_levels:
   - name: SPIKE
@@ -37,11 +43,11 @@ complexity_levels:
 
   - name: EVALUATION
     scope: "Full technology evaluation with integration analysis"
-    phases: [scouting, integration-analysis, prototyping, future-architecture]
+    phases: [scouting, integration-analysis, prototyping, future-architecture, transfer]
 
   - name: MOONSHOT
     scope: "Paradigm shift exploration, multi-year architecture"
-    phases: [scouting, integration-analysis, prototyping, future-architecture]
+    phases: [scouting, integration-analysis, prototyping, future-architecture, transfer]
 
 # Agent roles for command mapping:
 # /architect   → integration-researcher
