@@ -8,6 +8,7 @@ import (
 	"testing/fstest"
 
 	"github.com/autom8y/knossos/internal/paths"
+	"github.com/autom8y/knossos/internal/provenance"
 	"github.com/autom8y/knossos/internal/sync"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -237,14 +238,14 @@ func TestRiteSwitchIntegration_EmbeddedSource(t *testing.T) {
 	require.NoError(t, os.MkdirAll(claudeDir, 0755))
 
 	// Test workflow materialization from embedded
-	err := m.materializeWorkflow(claudeDir, resolved)
+	err := m.materializeWorkflow(claudeDir, resolved, provenance.NullCollector{})
 	require.NoError(t, err)
 	got, err := os.ReadFile(filepath.Join(claudeDir, "ACTIVE_WORKFLOW.yaml"))
 	require.NoError(t, err)
 	assert.Equal(t, string(workflowContent), string(got))
 
 	// Test rules materialization from embedded
-	err = m.materializeRules(claudeDir, resolved)
+	err = m.materializeRules(claudeDir, resolved, provenance.NullCollector{})
 	require.NoError(t, err)
 	got, err = os.ReadFile(filepath.Join(claudeDir, "rules", "internal-session.md"))
 	require.NoError(t, err)
@@ -256,7 +257,7 @@ func TestRiteSwitchIntegration_EmbeddedSource(t *testing.T) {
 		Agents:     []Agent{{Name: "tester", Role: "tests"}},
 		EntryAgent: "tester",
 	}
-	err = m.materializeAgents(manifest, resolved.RitePath, claudeDir, resolved)
+	err = m.materializeAgents(manifest, resolved.RitePath, claudeDir, resolved, provenance.NullCollector{})
 	require.NoError(t, err)
 	got, err = os.ReadFile(filepath.Join(claudeDir, "agents", "tester.md"))
 	require.NoError(t, err)

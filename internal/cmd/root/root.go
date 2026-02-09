@@ -19,6 +19,7 @@ import (
 	"github.com/autom8y/knossos/internal/cmd/manifest"
 	"github.com/autom8y/knossos/internal/cmd/migrate"
 	"github.com/autom8y/knossos/internal/cmd/naxos"
+	"github.com/autom8y/knossos/internal/cmd/provenance"
 	"github.com/autom8y/knossos/internal/cmd/rite"
 	"github.com/autom8y/knossos/internal/cmd/sails"
 	"github.com/autom8y/knossos/internal/cmd/session"
@@ -128,6 +129,7 @@ func init() {
 	rootCmd.AddCommand(tribute.NewTributeCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir, &globalOpts.SessionID))
 	rootCmd.AddCommand(migrate.NewMigrateCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
 	rootCmd.AddCommand(initcmd.NewInitCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
+	rootCmd.AddCommand(provenance.NewProvenanceCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
 	rootCmd.AddCommand(versionCmd)
 }
 

@@ -2,7 +2,7 @@
 
 | Field | Value |
 |-------|-------|
-| **Status** | Proposed |
+| **Status** | Accepted |
 | **Date** | 2026-02-08 |
 | **Deciders** | Architecture Team |
 | **Supersedes** | N/A (unifies three existing implicit strategies) |
@@ -299,8 +299,94 @@ Build one manifest package that handles both `~/.claude/` (user-level) and `{pro
 | Inscription Owner Types | `internal/inscription/types.go` -- `OwnerKnossos`, `OwnerSatellite`, `OwnerRegenerate` |
 | Hygiene Plan (provenance section) | `docs/hygiene/PLAN-distribution-readiness.md` -- WU-018, Provenance Design section |
 
+## Implementation
+
+The unified provenance model has been implemented across the materialization pipeline. Key implementation details:
+
+### Package Structure
+
+- **Package**: `internal/provenance/`
+- **Core files**:
+  - `provenance.go` - Core types (ProvenanceManifest, ProvenanceEntry, OwnerType)
+  - `manifest.go` - Manifest loading, saving, and validation
+  - `collector.go` - Provenance entry collection during materialization
+  - `divergence.go` - Divergence detection and ownership promotion
+
+### Pipeline Integration
+
+The provenance collector is wired into all 9 materialize stages:
+
+1. **CLAUDE.md inscription** - Records inscription-generated CLAUDE.md regions
+2. **Agent materialization** - Tracks agent files from rite manifests
+3. **Rules materialization** - Records rule files from templates
+4. **Hooks materialization** - Tracks hooks.yaml and hook scripts
+5. **Settings merge** - Records settings.json ownership
+6. **MCP server merge** - Tracks MCP server configurations
+7. **Workflow materialization** - Records workflow.md if present
+8. **Project mena projection** - Tracks projected commands and skills (directory-level)
+9. **Shared mena projection** - Tracks cross-rite shared mena
+
+Each stage calls `collector.Record()` after writing files, capturing:
+- Relative path within `.claude/`
+- Owner type (knossos, user, unknown)
+- Source path (where the file came from)
+- Source type (project, user, knossos, etc.)
+- SHA256 checksum with "sha256:" prefix
+- Timestamp
+
+### CLI Command
+
+**Command**: `ari provenance show`
+
+Displays a table of all files in `.claude/` with their ownership and divergence status:
+
+```
+PATH                          OWNER     SOURCE                          STATUS
+agents/orchestrator.md        knossos   rites/ecosystem/agents/...      match
+agents/my-custom.md           user      (user-created)                  -
+commands/commit/              knossos   mena/commit                     match
+rules/internal-hook.md        knossos   templates/rules/internal-...    diverged
+```
+
+Supports `--output json` for structured output and `--verbose` for full checksums.
+
+### Orphan Detection Refactor
+
+The `detectOrphans()` function in `internal/materialize/materialize.go` now uses manifest-based detection when a provenance manifest exists:
+
+- **With manifest**: An agent is an orphan if:
+  - Not in provenance manifest, OR
+  - Has `owner: user` in manifest, OR
+  - Has `owner: knossos` but not in current rite's agent list
+- **Without manifest**: Falls back to legacy rite manifest membership check (backward compatible)
+
+This replaces the previous rite-manifest-only detection, enabling accurate orphan detection across rite switches and user customizations.
+
+### Key Decisions
+
+Ten implementation decisions were made during stakeholder interview (documented in Context Design):
+
+1. **Owner type naming**: Use "knossos/user/unknown" (not "knossos/satellite/user") for simplicity
+2. **Manifest filename**: `PROVENANCE_MANIFEST.yaml` (not extending KNOSSOS_MANIFEST.yaml)
+3. **Unknown promotion**: Treat unknown as user-owned (safe default)
+4. **Mena directory tracking**: Track directories (not individual files) for mena commands
+5. **Divergence on deletion**: User-deleted files are promoted to user ownership
+6. **Bootstrap on missing manifest**: LoadOrBootstrap returns empty manifest (no error)
+7. **Checksum format**: Use "sha256:" prefix per ADR-0026 and internal/checksum convention
+8. **CLI status column**: Show "match/diverged/-/missing" for clarity
+9. **JSON output format**: Return raw manifest for structured consumption
+10. **User file source display**: Show "(user-created)" instead of empty fields
+
+### Validation
+
+- All existing tests pass (including integration tests)
+- Provenance collector tested with 9-stage materialization
+- Divergence detection validated with ownership promotion scenarios
+- Orphan detection tested with rite switching and user agent preservation
+
 ## Version History
 
 | Date | Author | Change |
 |------|--------|--------|
 | 2026-02-08 | Architect Enforcer (hygiene rite) | Initial proposal -- extracted from PLAN-distribution-readiness.md |
+| 2026-02-09 | Integration Engineer (hygiene rite) | Implementation complete -- package, pipeline, CLI, orphan detection |

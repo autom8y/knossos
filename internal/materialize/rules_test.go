@@ -6,6 +6,8 @@ import (
 	"testing"
 	"testing/fstest"
 
+	"github.com/autom8y/knossos/internal/provenance"
+
 	"github.com/autom8y/knossos/internal/paths"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -35,7 +37,7 @@ func TestMaterializeRules_WipesOldKnossosRules(t *testing.T) {
 	m := NewMaterializer(resolver)
 	m.templatesDir = templatesDir
 
-	err := m.materializeRules(claudeDir, nil)
+	err := m.materializeRules(claudeDir, nil, provenance.NullCollector{})
 	require.NoError(t, err)
 
 	// The old rule should be replaced with new content
@@ -72,7 +74,7 @@ func TestMaterializeRules_PreservesUserRules(t *testing.T) {
 	m := NewMaterializer(resolver)
 	m.templatesDir = templatesDir
 
-	err := m.materializeRules(claudeDir, nil)
+	err := m.materializeRules(claudeDir, nil, provenance.NullCollector{})
 	require.NoError(t, err)
 
 	// User rule should survive
@@ -109,7 +111,7 @@ func TestMaterializeRules_RemovesStaleTemplateRule(t *testing.T) {
 	m := NewMaterializer(resolver)
 	m.templatesDir = templatesDir
 
-	err := m.materializeRules(claudeDir, nil)
+	err := m.materializeRules(claudeDir, nil, provenance.NullCollector{})
 	require.NoError(t, err)
 
 	got, err := os.ReadFile(filepath.Join(rulesDir, "mena.md"))
@@ -134,8 +136,8 @@ func TestMaterializeRules_Idempotent(t *testing.T) {
 	m.templatesDir = templatesDir
 
 	// Run twice
-	require.NoError(t, m.materializeRules(claudeDir, nil))
-	require.NoError(t, m.materializeRules(claudeDir, nil))
+	require.NoError(t, m.materializeRules(claudeDir, nil, provenance.NullCollector{}))
+	require.NoError(t, m.materializeRules(claudeDir, nil, provenance.NullCollector{}))
 
 	// Same output
 	got, err := os.ReadFile(filepath.Join(claudeDir, "rules", "internal-session.md"))
@@ -167,7 +169,7 @@ func TestMaterializeRules_EmbeddedSource(t *testing.T) {
 		Source:       RiteSource{Type: SourceEmbedded, Path: "embedded"},
 	}
 
-	err := m.materializeRules(claudeDir, resolved)
+	err := m.materializeRules(claudeDir, resolved, provenance.NullCollector{})
 	require.NoError(t, err)
 
 	got, err := os.ReadFile(filepath.Join(claudeDir, "rules", "internal-agent.md"))

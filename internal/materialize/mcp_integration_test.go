@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/autom8y/knossos/internal/provenance"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -18,7 +20,7 @@ func TestMaterializeSettingsWithManifest_NoMCPServers(t *testing.T) {
 		Name: "test-rite",
 	}
 
-	err := (&Materializer{}).materializeSettingsWithManifest(tempDir, manifest)
+	err := (&Materializer{}).materializeSettingsWithManifest(tempDir, manifest, provenance.NullCollector{})
 	require.NoError(t, err)
 
 	// Verify settings file was created
@@ -63,7 +65,7 @@ func TestMaterializeSettingsWithManifest_WithMCPServers(t *testing.T) {
 		},
 	}
 
-	err := (&Materializer{}).materializeSettingsWithManifest(tempDir, manifest)
+	err := (&Materializer{}).materializeSettingsWithManifest(tempDir, manifest, provenance.NullCollector{})
 	require.NoError(t, err)
 
 	// Verify settings file was created
@@ -130,7 +132,7 @@ func TestMaterializeSettingsWithManifest_PreservesExisting(t *testing.T) {
 		},
 	}
 
-	err = (&Materializer{}).materializeSettingsWithManifest(tempDir, manifest)
+	err = (&Materializer{}).materializeSettingsWithManifest(tempDir, manifest, provenance.NullCollector{})
 	require.NoError(t, err)
 
 	// Verify both servers exist
@@ -188,7 +190,7 @@ func TestMaterializeSettingsWithManifest_UpdatesRiteOwnedServer(t *testing.T) {
 		},
 	}
 
-	err = (&Materializer{}).materializeSettingsWithManifest(tempDir, manifest)
+	err = (&Materializer{}).materializeSettingsWithManifest(tempDir, manifest, provenance.NullCollector{})
 	require.NoError(t, err)
 
 	// Verify github server was updated
@@ -215,7 +217,7 @@ func TestMaterializeSettingsWithManifest_UpdatesRiteOwnedServer(t *testing.T) {
 func TestMaterializeSettingsWithManifest_NilManifest(t *testing.T) {
 	tempDir := t.TempDir()
 
-	err := (&Materializer{}).materializeSettingsWithManifest(tempDir, nil)
+	err := (&Materializer{}).materializeSettingsWithManifest(tempDir, nil, provenance.NullCollector{})
 	require.NoError(t, err)
 
 	// Verify settings file was created with hooks

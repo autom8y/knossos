@@ -11,10 +11,12 @@ import (
 
 	"gopkg.in/yaml.v3"
 
+	"github.com/autom8y/knossos/internal/checksum"
 	"github.com/autom8y/knossos/internal/errors"
 	"github.com/autom8y/knossos/internal/fileutil"
 	"github.com/autom8y/knossos/internal/inscription"
 	"github.com/autom8y/knossos/internal/paths"
+	"github.com/autom8y/knossos/internal/provenance"
 	"github.com/autom8y/knossos/internal/sync"
 )
 
@@ -223,27 +225,33 @@ func (m *Materializer) MaterializeMinimal(opts Options) (*Result, error) {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to create .claude directory", err)
 	}
 
+	// Provenance: load previous manifest and detect divergence
+	manifestPath := provenance.ManifestPath(claudeDir)
+	prevManifest, _ := provenance.LoadOrBootstrap(manifestPath)
+	divergenceReport, _ := provenance.DetectDivergence(prevManifest, nil, claudeDir)
+	collector := provenance.NewCollector()
+
 	// Generate hooks from templates (if available)
-	hooksSkipped, err := m.materializeHooks(claudeDir, nil)
+	hooksSkipped, err := m.materializeHooks(claudeDir, nil, collector)
 	if err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize hooks", err)
 	}
 	result.HooksSkipped = hooksSkipped
 
 	// Generate rules from templates (if available)
-	if err := m.materializeRules(claudeDir, nil); err != nil {
+	if err := m.materializeRules(claudeDir, nil, collector); err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize rules", err)
 	}
 
 	// Generate minimal CLAUDE.md (no agents)
-	legacyBackupPath, err := m.materializeMinimalCLAUDEmd(claudeDir)
+	legacyBackupPath, err := m.materializeMinimalCLAUDEmd(claudeDir, collector)
 	if err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize CLAUDE.md", err)
 	}
 	result.LegacyBackupPath = legacyBackupPath
 
 	// Generate settings.local.json if needed (no manifest in minimal mode)
-	if err := m.materializeSettingsWithManifest(claudeDir, nil); err != nil {
+	if err := m.materializeSettingsWithManifest(claudeDir, nil, collector); err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize settings", err)
 	}
 
@@ -251,6 +259,11 @@ func (m *Materializer) MaterializeMinimal(opts Options) (*Result, error) {
 	os.Remove(filepath.Join(claudeDir, "ACTIVE_RITE"))
 	os.Remove(filepath.Join(claudeDir, "ACTIVE_WORKFLOW.yaml"))
 	os.Remove(filepath.Join(claudeDir, "INVOCATION_STATE.yaml"))
+
+	// Provenance: merge and save manifest
+	if err := m.saveProvenanceManifest(manifestPath, "", collector, divergenceReport, prevManifest); err != nil {
+		return nil, errors.Wrap(errors.CodeGeneralError, "failed to save provenance manifest", err)
+	}
 
 	return result, nil
 }
@@ -306,6 +319,12 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to create .claude directory", err)
 	}
 
+	// Provenance: load previous manifest and detect divergence
+	manifestPath := provenance.ManifestPath(claudeDir)
+	prevManifest, _ := provenance.LoadOrBootstrap(manifestPath)
+	divergenceReport, _ := provenance.DetectDivergence(prevManifest, nil, claudeDir)
+	collector := provenance.NewCollector()
+
 	// 2.5. Clear stale invocation state from previous rite
 	if err := m.clearInvocationState(claudeDir); err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to clear invocation state", err)
@@ -336,36 +355,36 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 	}
 
 	// 4. Generate agents/ directory from rite
-	if err := m.materializeAgents(manifest, ritePath, claudeDir, resolved); err != nil {
+	if err := m.materializeAgents(manifest, ritePath, claudeDir, resolved, collector); err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize agents", err)
 	}
 
 	// 5. Generate commands/ and skills/ directories from rite + shared + dependencies + mena
-	if err := m.materializeMena(manifest, claudeDir, resolved); err != nil {
+	if err := m.materializeMena(manifest, claudeDir, resolved, collector); err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize mena", err)
 	}
 
 	// 6. Generate hooks/ directory from templates/hooks
-	hooksSkipped, err := m.materializeHooks(claudeDir, resolved)
+	hooksSkipped, err := m.materializeHooks(claudeDir, resolved, collector)
 	if err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize hooks", err)
 	}
 	result.HooksSkipped = hooksSkipped
 
 	// 6.5. Generate rules/ directory from templates/rules
-	if err := m.materializeRules(claudeDir, resolved); err != nil {
+	if err := m.materializeRules(claudeDir, resolved, collector); err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize rules", err)
 	}
 
 	// 7. Generate CLAUDE.md from inscription system
-	legacyBackupPath, err := m.materializeCLAUDEmd(manifest, claudeDir, resolved)
+	legacyBackupPath, err := m.materializeCLAUDEmd(manifest, claudeDir, resolved, collector)
 	if err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize CLAUDE.md", err)
 	}
 	result.LegacyBackupPath = legacyBackupPath
 
 	// 8. Generate or update settings.local.json with MCP servers from manifest
-	if err := m.materializeSettingsWithManifest(claudeDir, manifest); err != nil {
+	if err := m.materializeSettingsWithManifest(claudeDir, manifest, collector); err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize settings", err)
 	}
 
@@ -375,7 +394,7 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 	}
 
 	// 9.5. Copy workflow.yaml to ACTIVE_WORKFLOW.yaml
-	if err := m.materializeWorkflow(claudeDir, resolved); err != nil {
+	if err := m.materializeWorkflow(claudeDir, resolved, collector); err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize workflow", err)
 	}
 
@@ -384,16 +403,100 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to write ACTIVE_RITE", err)
 	}
 
+	// Provenance: merge and save manifest
+	if err := m.saveProvenanceManifest(manifestPath, activeRiteName, collector, divergenceReport, prevManifest); err != nil {
+		return nil, errors.Wrap(errors.CodeGeneralError, "failed to save provenance manifest", err)
+	}
+
 	return result, nil
 }
 
 // detectOrphans finds agent files that are not in the incoming rite's manifest.
+// If a provenance manifest exists, uses manifest-based detection: files with
+// owner=user or files not in the provenance manifest are orphans.
+// Otherwise, falls back to rite manifest membership check (backward compatible).
 func (m *Materializer) detectOrphans(manifest *RiteManifest, claudeDir string) ([]string, error) {
 	agentsDir := filepath.Join(claudeDir, "agents")
 	if _, err := os.Stat(agentsDir); os.IsNotExist(err) {
 		return []string{}, nil
 	}
 
+	// Try loading provenance manifest for manifest-based detection
+	manifestPath := provenance.ManifestPath(claudeDir)
+	provenanceManifest, err := provenance.Load(manifestPath)
+
+	// If provenance manifest exists, use manifest-based orphan detection
+	if err == nil && provenanceManifest != nil {
+		return m.detectOrphansFromProvenance(manifest, claudeDir, provenanceManifest)
+	}
+
+	// Fallback: rite manifest membership check (backward compatible)
+	return m.detectOrphansLegacy(manifest, agentsDir)
+}
+
+// detectOrphansFromProvenance detects orphans using the provenance manifest.
+// An agent file is an orphan if:
+//   - It is NOT in the provenance manifest, OR
+//   - It has owner=user in the provenance manifest, OR
+//   - It is knossos-owned BUT not in the current rite's agent list
+func (m *Materializer) detectOrphansFromProvenance(manifest *RiteManifest, claudeDir string, provenanceManifest *provenance.ProvenanceManifest) ([]string, error) {
+	agentsDir := filepath.Join(claudeDir, "agents")
+
+	// Build set of expected agents from current rite manifest
+	expectedAgents := make(map[string]bool)
+	for _, agent := range manifest.Agents {
+		expectedAgents[agent.Name+".md"] = true
+	}
+
+	orphans := []string{}
+	entries, err := os.ReadDir(agentsDir)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, entry := range entries {
+		if entry.IsDir() {
+			continue
+		}
+
+		// Only consider .md files
+		if filepath.Ext(entry.Name()) != ".md" {
+			continue
+		}
+
+		// Construct relative path within .claude/
+		relativePath := filepath.Join("agents", entry.Name())
+
+		// Check if file is in provenance manifest
+		provenanceEntry, exists := provenanceManifest.Entries[relativePath]
+
+		// File not in provenance manifest -> orphan
+		if !exists {
+			orphans = append(orphans, entry.Name())
+			continue
+		}
+
+		// File with owner=user -> orphan (user-created or previously promoted)
+		if provenanceEntry.Owner == provenance.OwnerUser {
+			orphans = append(orphans, entry.Name())
+			continue
+		}
+
+		// Knossos-owned file not in current rite manifest -> orphan
+		if provenanceEntry.Owner == provenance.OwnerKnossos && !expectedAgents[entry.Name()] {
+			orphans = append(orphans, entry.Name())
+			continue
+		}
+
+		// Knossos-owned entries still in rite manifest are NOT orphans
+	}
+
+	return orphans, nil
+}
+
+// detectOrphansLegacy uses the legacy rite manifest membership check.
+// This is the fallback when no provenance manifest exists (backward compatible).
+func (m *Materializer) detectOrphansLegacy(manifest *RiteManifest, agentsDir string) ([]string, error) {
 	// Build set of expected agents from manifest
 	expectedAgents := make(map[string]bool)
 	for _, agent := range manifest.Agents {
@@ -519,7 +622,7 @@ func (m *Materializer) loadRiteManifest(ritePath string, resolved *ResolvedRite)
 // materializeAgents copies agent files from rite to .claude/agents/
 // Uses selective write: only knossos-managed agents (from manifest) are replaced.
 // User-created agents not in the manifest are preserved.
-func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claudeDir string, resolved *ResolvedRite) error {
+func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claudeDir string, resolved *ResolvedRite, collector provenance.Collector) error {
 	agentsDir := filepath.Join(claudeDir, "agents")
 
 	// Ensure agents directory exists (selective — do NOT RemoveAll)
@@ -543,6 +646,8 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claud
 		}
 	}
 
+	now := time.Now().UTC()
+
 	// For embedded sources, use fs.FS to read agent files
 	if resolved != nil && resolved.Source.Type == SourceEmbedded {
 		rFS := m.riteFS(resolved)
@@ -554,7 +659,38 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claud
 		if _, err := fs.Stat(rFS, "agents"); err != nil {
 			return nil // No agents in this rite
 		}
-		return copyDirFromFS(agentsSub, agentsDir)
+		// Copy agents and record provenance
+		err = fs.WalkDir(agentsSub, ".", func(path string, d fs.DirEntry, walkErr error) error {
+			if walkErr != nil || d.IsDir() {
+				return walkErr
+			}
+			content, err := fs.ReadFile(agentsSub, path)
+			if err != nil {
+				return err
+			}
+			destPath := filepath.Join(agentsDir, path)
+			if err := os.MkdirAll(filepath.Dir(destPath), 0755); err != nil {
+				return err
+			}
+			written, err := writeIfChanged(destPath, content, 0644)
+			if err != nil {
+				return err
+			}
+			if written {
+				relPath := "agents/" + path
+				sourcePath := resolved.RitePath + "/agents/" + path
+				collector.Record(relPath, &provenance.ProvenanceEntry{
+					Owner:          provenance.OwnerKnossos,
+					SourcePipeline: "materialize",
+					SourcePath:     sourcePath,
+					SourceType:     string(resolved.Source.Type),
+					Checksum:       checksum.Bytes(content),
+					LastSynced:     now,
+				})
+			}
+			return nil
+		})
+		return err
 	}
 
 	// Filesystem path: use existing os-based copy
@@ -589,8 +725,25 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claud
 			return err
 		}
 
-		_, err = writeIfChanged(destPath, content, 0644)
-		return err
+		written, err := writeIfChanged(destPath, content, 0644)
+		if err != nil {
+			return err
+		}
+
+		// Record provenance after successful write
+		if written {
+			srcRelPath, _ := filepath.Rel(m.resolver.ProjectRoot(), path)
+			collector.Record("agents/"+relPath, &provenance.ProvenanceEntry{
+				Owner:          provenance.OwnerKnossos,
+				SourcePipeline: "materialize",
+				SourcePath:     srcRelPath,
+				SourceType:     string(resolved.Source.Type),
+				Checksum:       checksum.Bytes(content),
+				LastSynced:     now,
+			})
+		}
+
+		return nil
 	})
 }
 
@@ -601,7 +754,7 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claud
 //
 // This method builds the source list and delegates to ProjectMena() for the
 // actual collection, routing, extension stripping, and file copying.
-func (m *Materializer) materializeMena(manifest *RiteManifest, claudeDir string, resolved *ResolvedRite) error {
+func (m *Materializer) materializeMena(manifest *RiteManifest, claudeDir string, resolved *ResolvedRite, collector provenance.Collector) error {
 	commandsDir := filepath.Join(claudeDir, "commands")
 	skillsDir := filepath.Join(claudeDir, "skills")
 
@@ -661,7 +814,107 @@ func (m *Materializer) materializeMena(manifest *RiteManifest, claudeDir string,
 	}
 
 	_, err := ProjectMena(sources, opts)
-	return err
+	if err != nil {
+		return err
+	}
+
+	// Record provenance for mena directories (directory-level granularity)
+	now := time.Now().UTC()
+	projectRoot := m.resolver.ProjectRoot()
+
+	// Scan commands/ directory
+	if entries, err := os.ReadDir(commandsDir); err == nil {
+		for _, entry := range entries {
+			if !entry.IsDir() {
+				continue
+			}
+			dirPath := filepath.Join(commandsDir, entry.Name())
+			hash, err := checksum.Dir(dirPath)
+			if err != nil {
+				continue
+			}
+			// Determine source path and type by checking sources in reverse order (highest priority first)
+			sourcePath := ""
+			sourceType := "project"
+			for i := len(sources) - 1; i >= 0; i-- {
+				src := sources[i]
+				var menaPath string
+				if src.IsEmbedded {
+					menaPath = src.FsysPath
+					if strings.Contains(menaPath, "/shared/") {
+						sourceType = "shared"
+					} else if i < len(sources)-1 {
+						sourceType = "dependency"
+					}
+				} else if src.Path != "" {
+					menaPath = src.Path
+					// Check if this entry directory exists in this source
+					checkPath := filepath.Join(menaPath, entry.Name())
+					if _, statErr := os.Stat(checkPath); statErr == nil {
+						sourcePath, _ = filepath.Rel(projectRoot, checkPath)
+						break
+					}
+				}
+			}
+			if sourcePath == "" {
+				sourcePath = "mena/" + entry.Name() + "/"
+			}
+			collector.Record("commands/"+entry.Name()+"/", &provenance.ProvenanceEntry{
+				Owner:          provenance.OwnerKnossos,
+				SourcePipeline: "materialize",
+				SourcePath:     sourcePath,
+				SourceType:     sourceType,
+				Checksum:       hash,
+				LastSynced:     now,
+			})
+		}
+	}
+
+	// Scan skills/ directory
+	if entries, err := os.ReadDir(skillsDir); err == nil {
+		for _, entry := range entries {
+			if !entry.IsDir() {
+				continue
+			}
+			dirPath := filepath.Join(skillsDir, entry.Name())
+			hash, err := checksum.Dir(dirPath)
+			if err != nil {
+				continue
+			}
+			// Determine source path and type similar to commands
+			sourcePath := ""
+			sourceType := "project"
+			for i := len(sources) - 1; i >= 0; i-- {
+				src := sources[i]
+				if src.IsEmbedded {
+					if strings.Contains(src.FsysPath, "/shared/") {
+						sourceType = "shared"
+					} else if i < len(sources)-1 {
+						sourceType = "dependency"
+					}
+				} else if src.Path != "" {
+					checkPath := filepath.Join(src.Path, entry.Name())
+					if _, statErr := os.Stat(checkPath); statErr == nil {
+						sourcePath, _ = filepath.Rel(projectRoot, checkPath)
+						break
+					}
+				}
+			}
+			if sourcePath == "" {
+				sourcePath = "mena/" + entry.Name() + "/"
+			}
+			collector.Record("skills/"+entry.Name()+"/", &provenance.ProvenanceEntry{
+				Owner:          provenance.OwnerKnossos,
+				SourcePipeline: "materialize",
+				SourcePath:     sourcePath,
+				SourceType:     sourceType,
+				Checksum:       hash,
+				LastSynced:     now,
+			})
+		}
+	}
+
+	return nil
 }
 
 // collectMenaEntriesDir recursively collects mena entries from a filesystem directory.
@@ -783,11 +1036,14 @@ func (m *Materializer) getMenaDir() string {
 // On rite switch, stale knossos-managed rules are removed before writing new ones.
 // Provenance is determined by template filename: any .md file whose name matches
 // a template source file is knossos-managed; all others are user-created.
-func (m *Materializer) materializeRules(claudeDir string, resolved *ResolvedRite) error {
+func (m *Materializer) materializeRules(claudeDir string, resolved *ResolvedRite, collector provenance.Collector) error {
 	rulesDir := filepath.Join(claudeDir, "rules")
 	if err := paths.EnsureDir(rulesDir); err != nil {
 		return err
 	}
+
+	now := time.Now().UTC()
+	projectRoot := m.resolver.ProjectRoot()
 
 	// Collect template rule names and content from appropriate source
 	templateRules := make(map[string][]byte)
@@ -861,11 +1117,24 @@ func (m *Materializer) materializeRules(claudeDir string, resolved *ResolvedRite
 		}
 	}
 
-	// Write current template rules
+	// Write current template rules and record provenance
 	for name, content := range templateRules {
 		dstPath := filepath.Join(rulesDir, name)
-		if _, err := writeIfChanged(dstPath, content, 0644); err != nil {
+		written, err := writeIfChanged(dstPath, content, 0644)
+		if err != nil {
 			return err
+		}
+		if written {
+			sourcePath := filepath.Join(m.templatesDir, "rules", name)
+			srcRelPath, _ := filepath.Rel(projectRoot, sourcePath)
+			collector.Record("rules/"+name, &provenance.ProvenanceEntry{
+				Owner:          provenance.OwnerKnossos,
+				SourcePipeline: "materialize",
+				SourcePath:     srcRelPath,
+				SourceType:     "template",
+				Checksum:       checksum.Bytes(content),
+				LastSynced:     now,
+			})
 		}
 	}
 
@@ -876,8 +1145,10 @@ func (m *Materializer) materializeRules(claudeDir string, resolved *ResolvedRite
 // Uses selective write: only knossos-managed hook files (from templates) are replaced.
 // User-created hook files not in the template source are preserved.
 // Returns (skipped bool, err error) where skipped=true if no templates/hooks dir exists.
-func (m *Materializer) materializeHooks(claudeDir string, resolved *ResolvedRite) (bool, error) {
+func (m *Materializer) materializeHooks(claudeDir string, resolved *ResolvedRite, collector provenance.Collector) (bool, error) {
 	hooksDir := filepath.Join(claudeDir, "hooks")
+	now := time.Now().UTC()
+	projectRoot := m.resolver.ProjectRoot()
 
 	// For embedded sources, try embedded templates FS
 	if resolved != nil && resolved.Source.Type == SourceEmbedded && m.embeddedTemplates != nil {
@@ -898,7 +1169,34 @@ func (m *Materializer) materializeHooks(claudeDir string, resolved *ResolvedRite
 		managedHooks := collectFSFilenames(hooksSub)
 		removeManagedFiles(hooksDir, managedHooks)
 
-		return false, copyDirFromFS(hooksSub, hooksDir)
+		// Copy hooks and record provenance
+		err = fs.WalkDir(hooksSub, ".", func(path string, d fs.DirEntry, walkErr error) error {
+			if walkErr != nil || d.IsDir() {
+				return walkErr
+			}
+			content, err := fs.ReadFile(hooksSub, path)
+			if err != nil {
+				return err
+			}
+			destPath := filepath.Join(hooksDir, path)
+			written, err := writeIfChanged(destPath, content, 0644)
+			if err != nil {
+				return err
+			}
+			if written {
+				sourcePath := resolved.TemplatesDir + "/hooks/" + path
+				collector.Record("hooks/"+path, &provenance.ProvenanceEntry{
+					Owner:          provenance.OwnerKnossos,
+					SourcePipeline: "materialize",
+					SourcePath:     sourcePath,
+					SourceType:     "template",
+					Checksum:       checksum.Bytes(content),
+					LastSynced:     now,
+				})
+			}
+			return nil
+		})
+		return false, err
 	}
 
 	// Filesystem path
@@ -919,8 +1217,38 @@ func (m *Materializer) materializeHooks(claudeDir string, resolved *ResolvedRite
 	managedHooks := collectDirFilenames(sourceHooksDir)
 	removeManagedFiles(hooksDir, managedHooks)
 
-	// Copy hooks (uses writeIfChanged internally)
-	return false, m.copyDir(sourceHooksDir, hooksDir)
+	// Copy hooks (uses writeIfChanged internally) and record provenance
+	err := filepath.WalkDir(sourceHooksDir, func(path string, d fs.DirEntry, walkErr error) error {
+		if walkErr != nil || d.IsDir() {
+			return walkErr
+		}
+		content, err := os.ReadFile(path)
+		if err != nil {
+			return err
+		}
+		relPath, err := filepath.Rel(sourceHooksDir, path)
+		if err != nil {
+			return err
+		}
+		destPath := filepath.Join(hooksDir, relPath)
+		written, err := writeIfChanged(destPath, content, 0644)
+		if err != nil {
+			return err
+		}
+		if written {
+			srcRelPath, _ := filepath.Rel(projectRoot, path)
+			collector.Record("hooks/"+relPath, &provenance.ProvenanceEntry{
+				Owner:          provenance.OwnerKnossos,
+				SourcePipeline: "materialize",
+				SourcePath:     srcRelPath,
+				SourceType:     "template",
+				Checksum:       checksum.Bytes(content),
+				LastSynced:     now,
+			})
+		}
+		return nil
+	})
+	return false, err
 }
 
 // collectDirFilenames returns a set of all filenames in a directory (non-recursive).
@@ -969,7 +1297,7 @@ func removeManagedFiles(dir string, managed map[string]bool) {
 
 // materializeCLAUDEmd generates CLAUDE.md using the inscription system.
 // Returns the path to legacy backup if migration occurred, or empty string if no backup.
-func (m *Materializer) materializeCLAUDEmd(manifest *RiteManifest, claudeDir string, resolved *ResolvedRite) (string, error) {
+func (m *Materializer) materializeCLAUDEmd(manifest *RiteManifest, claudeDir string, resolved *ResolvedRite, collector provenance.Collector) (string, error) {
 	// Build render context with full agent details
 	agents := make([]inscription.AgentInfo, 0, len(manifest.Agents))
 	for _, agent := range manifest.Agents {
@@ -990,11 +1318,11 @@ func (m *Materializer) materializeCLAUDEmd(manifest *RiteManifest, claudeDir str
 	}
 
 	// Delegate to shared helper with manifest update and hash tracking enabled
-	return m.mergeCLAUDEmd(claudeDir, renderCtx, manifest.Name, resolved, true)
+	return m.mergeCLAUDEmd(claudeDir, renderCtx, manifest.Name, resolved, true, collector)
 }
 
 // materializeMinimalCLAUDEmd generates CLAUDE.md for cross-cutting mode (no agents).
-func (m *Materializer) materializeMinimalCLAUDEmd(claudeDir string) (string, error) {
+func (m *Materializer) materializeMinimalCLAUDEmd(claudeDir string, collector provenance.Collector) (string, error) {
 	// Build minimal render context (no agents, no rite)
 	renderCtx := &inscription.RenderContext{
 		ActiveRite:  "", // Cross-cutting mode has no rite
@@ -1005,7 +1333,7 @@ func (m *Materializer) materializeMinimalCLAUDEmd(claudeDir string) (string, err
 	}
 
 	// Delegate to shared helper without manifest update or hash tracking
-	return m.mergeCLAUDEmd(claudeDir, renderCtx, "", nil, false)
+	return m.mergeCLAUDEmd(claudeDir, renderCtx, "", nil, false, collector)
 }
 
 // mergeCLAUDEmd contains the shared logic for generating and merging CLAUDE.md content.
@@ -1015,9 +1343,10 @@ func (m *Materializer) materializeMinimalCLAUDEmd(claudeDir string) (string, err
 //   - activeRite: name of active rite (empty string for minimal mode)
 //   - resolved: resolved rite information (nil for minimal mode)
 //   - updateManifest: if true, updates manifest hashes and saves; if false, only saves if newly created
+//   - collector: provenance collector for recording CLAUDE.md entry
 //
 // Returns the path to legacy backup if migration occurred, or empty string if no backup.
-func (m *Materializer) mergeCLAUDEmd(claudeDir string, renderCtx *inscription.RenderContext, activeRite string, resolved *ResolvedRite, updateManifest bool) (string, error) {
+func (m *Materializer) mergeCLAUDEmd(claudeDir string, renderCtx *inscription.RenderContext, activeRite string, resolved *ResolvedRite, updateManifest bool, collector provenance.Collector) (string, error) {
 	// Load or create KNOSSOS_MANIFEST.yaml
 	knossosManifestPath := filepath.Join(claudeDir, "KNOSSOS_MANIFEST.yaml")
 	loader := inscription.NewManifestLoader(m.resolver.ProjectRoot())
@@ -1085,8 +1414,30 @@ func (m *Materializer) mergeCLAUDEmd(claudeDir string, renderCtx *inscription.Re
 	}
 
 	// Write CLAUDE.md (only if content changed, to avoid triggering Claude Code file watcher)
-	if _, err := writeIfChanged(claudeMdPath, []byte(mergeResult.Content), 0644); err != nil {
+	written, err := writeIfChanged(claudeMdPath, []byte(mergeResult.Content), 0644)
+	if err != nil {
 		return "", errors.Wrap(errors.CodeGeneralError, "failed to write CLAUDE.md", err)
+	}
+
+	// Record provenance after successful write
+	if written {
+		now := time.Now().UTC()
+		srcRelPath := "(generated)"
+		if m.templatesDir != "" {
+			projectRoot := m.resolver.ProjectRoot()
+			sourcePath := filepath.Join(m.templatesDir, "CLAUDE.md.tpl")
+			if rel, err := filepath.Rel(projectRoot, sourcePath); err == nil && rel != "" {
+				srcRelPath = rel
+			}
+		}
+		collector.Record("CLAUDE.md", &provenance.ProvenanceEntry{
+			Owner:          provenance.OwnerKnossos,
+			SourcePipeline: "materialize",
+			SourcePath:     srcRelPath,
+			SourceType:     "template",
+			Checksum:       checksum.Content(mergeResult.Content),
+			LastSynced:     now,
+		})
 	}
 
 	// Update manifest hashes and save (for full mode only)
@@ -1105,7 +1456,7 @@ func (m *Materializer) mergeCLAUDEmd(claudeDir string, renderCtx *inscription.Re
 // If manifest has MCP servers, merges them into existing settings.
 // Loads hooks.yaml and merges hook registrations into settings.
 // If no manifest or no MCP servers, creates minimal settings if needed.
-func (m *Materializer) materializeSettingsWithManifest(claudeDir string, manifest *RiteManifest) error {
+func (m *Materializer) materializeSettingsWithManifest(claudeDir string, manifest *RiteManifest, collector provenance.Collector) error {
 	settingsPath := filepath.Join(claudeDir, "settings.local.json")
 
 	// Load existing settings or create empty map
@@ -1130,7 +1481,26 @@ func (m *Materializer) materializeSettingsWithManifest(claudeDir string, manifes
 	}
 
 	// Write settings (only if content changed, to avoid triggering Claude Code file watcher)
-	return saveSettings(settingsPath, existingSettings)
+	err = saveSettings(settingsPath, existingSettings)
+	if err != nil {
+		return err
+	}
+
+	// Record provenance after successful write
+	hash, err := checksum.File(settingsPath)
+	if err == nil && hash != "" {
+		now := time.Now().UTC()
+		collector.Record("settings.local.json", &provenance.ProvenanceEntry{
+			Owner:          provenance.OwnerKnossos,
+			SourcePipeline: "materialize",
+			SourcePath:     "(generated)",
+			SourceType:     "template",
+			Checksum:       hash,
+			LastSynced:     now,
+		})
+	}
+
+	return nil
 }
 
 // trackState updates .claude/sync/state.json with materialization metadata.
@@ -1159,7 +1529,12 @@ func (m *Materializer) trackState(manifest *RiteManifest, activeRiteName string)
 	// Update active rite and last sync time
 	state.ActiveRite = activeRiteName
 	state.LastSync = time.Now().UTC()
-	return stateManager.Save(state)
+	err = stateManager.Save(state)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // clearInvocationState removes INVOCATION_STATE.yaml which becomes stale on rite switch.
@@ -1175,7 +1550,7 @@ func (m *Materializer) clearInvocationState(claudeDir string) error {
 // materializeWorkflow copies workflow.yaml from the rite to .claude/ACTIVE_WORKFLOW.yaml.
 // If the rite has no workflow.yaml, any existing ACTIVE_WORKFLOW.yaml is removed to
 // prevent stale workflow data from a previous rite persisting after switch.
-func (m *Materializer) materializeWorkflow(claudeDir string, resolved *ResolvedRite) error {
+func (m *Materializer) materializeWorkflow(claudeDir string, resolved *ResolvedRite, collector provenance.Collector) error {
 	dstPath := filepath.Join(claudeDir, "ACTIVE_WORKFLOW.yaml")
 	rFS := m.riteFS(resolved)
 	content, err := fs.ReadFile(rFS, "workflow.yaml")
@@ -1186,15 +1561,40 @@ func (m *Materializer) materializeWorkflow(claudeDir string, resolved *ResolvedR
 		}
 		return nil
 	}
-	_, err = writeIfChanged(dstPath, content, 0644)
-	return err
+	written, err := writeIfChanged(dstPath, content, 0644)
+	if err != nil {
+		return err
+	}
+
+	// Record provenance after successful write
+	if written {
+		now := time.Now().UTC()
+		projectRoot := m.resolver.ProjectRoot()
+		sourcePath := resolved.RitePath + "/workflow.yaml"
+		srcRelPath, _ := filepath.Rel(projectRoot, sourcePath)
+		collector.Record("ACTIVE_WORKFLOW.yaml", &provenance.ProvenanceEntry{
+			Owner:          provenance.OwnerKnossos,
+			SourcePipeline: "materialize",
+			SourcePath:     srcRelPath,
+			SourceType:     string(resolved.Source.Type),
+			Checksum:       checksum.Bytes(content),
+			LastSynced:     now,
+		})
+	}
+
+	return nil
 }
 
 // writeActiveRite writes the ACTIVE_RITE marker file.
 func (m *Materializer) writeActiveRite(riteName, claudeDir string) error {
 	activeRitePath := filepath.Join(claudeDir, "ACTIVE_RITE")
-	_, err := writeIfChanged(activeRitePath, []byte(riteName+"\n"), 0644)
-	return err
+	content := []byte(riteName + "\n")
+	_, err := writeIfChanged(activeRitePath, content, 0644)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // copyDir recursively copies a directory.
@@ -1225,4 +1625,91 @@ func (m *Materializer) copyDir(src, dst string) error {
 		_, err = writeIfChanged(destPath, content, 0644)
 		return err
 	})
+}
+
+// saveProvenanceManifest merges collector entries with divergence report and previous manifest,
+// then writes the final manifest to disk. Implements the merge algorithm from TDD Section 6.
+func (m *Materializer) saveProvenanceManifest(
+	manifestPath string,
+	activeRite string,
+	collector provenance.Collector,
+	divergenceReport *provenance.DivergenceReport,
+	prevManifest *provenance.ProvenanceManifest,
+) error {
+	finalEntries := make(map[string]*provenance.ProvenanceEntry)
+
+	// Step 0: Carry forward knossos entries from previous manifest that still exist on disk
+	// but weren't re-written this sync (idempotency - files that didn't change)
+	if prevManifest != nil {
+		claudeDir := filepath.Dir(manifestPath)
+		for path, entry := range prevManifest.Entries {
+			if entry.Owner == provenance.OwnerKnossos {
+				// Check if file/directory still exists on disk (not removed)
+				fullPath := filepath.Join(claudeDir, path)
+				// For directory entries (mena), remove trailing slash before stat
+				if strings.HasSuffix(path, "/") {
+					fullPath = strings.TrimSuffix(fullPath, "/")
+				}
+				if _, err := os.Stat(fullPath); err == nil {
+					// File/directory exists, carry forward entry (will be overwritten if rewritten in Step 2)
+					finalEntries[path] = entry
+				}
+			}
+		}
+	}
+
+	// Step 1: Carry forward promoted entries (user-owned + unknown) from divergence detection
+	// Skip entries with empty checksums (deleted files) as they fail validation
+	if divergenceReport != nil {
+		for path, entry := range divergenceReport.Promoted {
+			if entry.Checksum != "" {
+				finalEntries[path] = entry
+			}
+		}
+		for path, entry := range divergenceReport.CarriedForward {
+			if entry.Checksum != "" {
+				finalEntries[path] = entry
+			}
+		}
+	}
+
+	// Step 2: Layer current sync entries on top
+	// Pipeline-written files take precedence unless path was promoted to user-owned in Step 1
+	for path, entry := range collector.Entries() {
+		if existing, ok := finalEntries[path]; ok {
+			if existing.Owner == provenance.OwnerUser {
+				// User promoted this file via divergence detection.
+				// Do NOT overwrite with the pipeline entry.
+				continue
+			}
+		}
+		finalEntries[path] = entry
+	}
+
+	// Step 3: Resolve unknown entries from previous manifest
+	// Files with owner:unknown that the pipeline did NOT write this sync are promoted to owner:user
+	if prevManifest != nil {
+		for path, entry := range prevManifest.Entries {
+			if entry.Owner == provenance.OwnerUnknown {
+				if _, writtenThisSync := collector.Entries()[path]; !writtenThisSync {
+					promotedEntry := *entry
+					promotedEntry.Owner = provenance.OwnerUser
+					if _, alreadyInFinal := finalEntries[path]; !alreadyInFinal {
+						finalEntries[path] = &promotedEntry
+					}
+				}
+			}
+		}
+	}
+
+	// Build final manifest
+	finalManifest := &provenance.ProvenanceManifest{
+		SchemaVersion: provenance.CurrentSchemaVersion,
+		LastSync:      time.Now().UTC(),
+		ActiveRite:    activeRite,
+		Entries:       finalEntries,
+	}
+
+	// Save manifest
+	return provenance.Save(manifestPath, finalManifest)
 }
