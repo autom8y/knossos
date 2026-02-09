@@ -70,6 +70,11 @@ func (r *Resolver) LocksDir() string {
 	return filepath.Join(r.projectRoot, ".claude", "sessions", ".locks")
 }
 
+// CCMapDir returns the path to the CC session map directory.
+func (r *Resolver) CCMapDir() string {
+	return filepath.Join(r.SessionsDir(), ".cc-map")
+}
+
 
 // ArchiveDir returns the path to the archive directory.
 func (r *Resolver) ArchiveDir() string {

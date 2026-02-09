@@ -52,6 +52,41 @@ func FindActiveSession(sessionsDir string) (string, error) {
 	return "", nil
 }
 
+// FindActiveSessions scans session directories and returns ALL active session IDs.
+// Unlike FindActiveSession (singular), this does not error on multiple active sessions.
+// Used by ResolveSession for CC-map-aware resolution where parallel sessions are valid.
+func FindActiveSessions(sessionsDir string) ([]string, error) {
+	entries, err := os.ReadDir(sessionsDir)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return []string{}, nil
+		}
+		return nil, err
+	}
+
+	activeIDs := []string{}
+
+	for _, entry := range entries {
+		if !entry.IsDir() {
+			continue
+		}
+
+		name := entry.Name()
+		// Quick check: session dirs start with "session-" and are 32+ chars
+		if len(name) < 32 || name[:8] != "session-" {
+			continue
+		}
+
+		contextPath := filepath.Join(sessionsDir, name, "SESSION_CONTEXT.md")
+		status := readStatusFromFrontmatter(contextPath)
+		if status == "ACTIVE" {
+			activeIDs = append(activeIDs, name)
+		}
+	}
+
+	return activeIDs, nil
+}
+
 // readStatusFromFrontmatter reads only the status field from YAML frontmatter.
 // Reads only until the closing "---" to minimize I/O. Returns empty string on any error.
 func readStatusFromFrontmatter(path string) string {
