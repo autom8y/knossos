@@ -63,9 +63,9 @@ Produces: Test reports
 		t.Fatalf("Failed to read CLAUDE.md: %v", err)
 	}
 
-	// Verify header is present
-	if !strings.Contains(string(content), "# CLAUDE.md") {
-		t.Error("CLAUDE.md should contain header")
+	// Verify KNOSSOS markers are present
+	if !strings.Contains(string(content), "<!-- KNOSSOS:START") {
+		t.Error("CLAUDE.md should contain KNOSSOS markers")
 	}
 
 	// Verify regions were synced

@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/autom8y/knossos/internal/errors"
-	"github.com/autom8y/knossos/internal/fileutil"
 	"gopkg.in/yaml.v3"
 )
 
@@ -192,103 +191,62 @@ func NewPipelineWithPaths(claudeMDPath, manifestPath, templateDir, backupDir str
 }
 
 // Sync performs the full sync pipeline.
-// This is the main entry point for CLAUDE.md synchronization.
+// This delegates to SyncCLAUDEmd for the core merge/write logic,
+// adding Pipeline-specific features (backup, dry-run).
 func (p *Pipeline) Sync(opts InscriptionSyncOptions) (*SyncResult, error) {
 	start := time.Now()
 
-	// 1. Load or create manifest
-	loader := NewManifestLoader(p.ProjectRoot)
-	manifest, err := loader.LoadOrCreate()
-	if err != nil {
-		return nil, errors.Wrap(errors.CodeGeneralError, "failed to load manifest", err)
-	}
-
-	// 2. Update active rite if specified
-	if opts.RiteName != "" {
-		manifest.SetActiveRite(opts.RiteName)
-	}
-
-	// 3. Build render context from project state
-	ctx, err := p.buildRenderContext(manifest)
-	if err != nil {
-		return nil, errors.Wrap(errors.CodeGeneralError, "failed to build render context", err)
-	}
-
-	// 4. Create generator
-	generator := NewGenerator(p.TemplateDir, manifest, ctx)
-
-	// 5. Generate content for all non-satellite regions
-	generatedContent, err := generator.GenerateAll()
-	if err != nil {
-		return nil, errors.Wrap(errors.CodeGeneralError, "failed to generate content", err)
-	}
-
-	// 6. Load existing CLAUDE.md content
-	existingContent := ""
-	if data, err := os.ReadFile(p.ClaudeMDPath); err == nil {
-		existingContent = string(data)
-	}
-
-	// 7. Create merger and merge regions
-	merger := NewMerger(manifest, generator)
-
-	mergeOpts := InscriptionMergeOptions{
-		Force:  opts.Force,
-		DryRun: opts.DryRun,
-	}
-
-	mergeResult, err := merger.MergeWithOptions(existingContent, generatedContent, mergeOpts)
-	if err != nil {
-		return nil, errors.Wrap(errors.CodeGeneralError, "failed to merge regions", err)
-	}
-
-	// 8. Handle dry-run
+	// Handle dry-run via DryRun method
 	if opts.DryRun {
+		preview, err := p.DryRun(opts)
+		if err != nil {
+			return nil, err
+		}
 		return &SyncResult{
 			Success:            true,
-			RegionsSynced:      mergeResult.RegionsMerged,
-			Conflicts:          mergeResult.Conflicts,
+			RegionsSynced:      preview.WouldSync,
+			Conflicts:          preview.Conflicts,
 			Duration:           time.Since(start),
-			InscriptionVersion: manifest.InscriptionVersion,
+			InscriptionVersion: preview.CurrentVersion,
 			DryRun:             true,
 		}, nil
 	}
 
-	// 9. Create backup before writing
+	// Build render context from project state
+	ctx, err := p.buildRenderContext(nil)
+	if err != nil {
+		return nil, errors.Wrap(errors.CodeGeneralError, "failed to build render context", err)
+	}
+
+	// Create backup before writing (Pipeline-specific feature)
 	backupPath := ""
-	if !opts.NoBackup && existingContent != "" {
-		backupMgr := NewBackupManager(p.ProjectRoot)
-		backupPath, err = backupMgr.CreateBackup()
-		if err != nil {
-			// Log warning but continue - backup failure shouldn't stop sync
-			backupPath = ""
+	if !opts.NoBackup {
+		if data, _ := os.ReadFile(p.ClaudeMDPath); len(data) > 0 {
+			backupMgr := NewBackupManager(p.ProjectRoot)
+			backupPath, _ = backupMgr.CreateBackup()
 		}
 	}
 
-	// 10. Build final content with header
-	finalContent := p.buildFinalContent(mergeResult.Content, manifest)
-
-	// 11. Write CLAUDE.md atomically
-	if err := fileutil.AtomicWriteFile(p.ClaudeMDPath, []byte(finalContent), 0644); err != nil {
-		return nil, errors.Wrap(errors.CodeGeneralError, "failed to write CLAUDE.md", err)
-	}
-
-	// 12. Update manifest hashes and version
-	merger.UpdateManifestHashes(mergeResult)
-	loader.IncrementVersion(manifest)
-
-	// 13. Save manifest
-	if err := loader.Save(manifest); err != nil {
-		return nil, errors.Wrap(errors.CodeGeneralError, "failed to save manifest", err)
+	// Delegate to unified SyncCLAUDEmd
+	claudeDir := filepath.Dir(p.ClaudeMDPath)
+	result, err := SyncCLAUDEmd(CLAUDEmdSyncOptions{
+		ClaudeDir:      claudeDir,
+		RenderCtx:      ctx,
+		ActiveRite:     opts.RiteName,
+		TemplateDir:    p.TemplateDir,
+		UpdateManifest: true,
+	})
+	if err != nil {
+		return nil, err
 	}
 
 	return &SyncResult{
 		Success:            true,
-		RegionsSynced:      mergeResult.RegionsMerged,
-		Conflicts:          mergeResult.Conflicts,
+		RegionsSynced:      result.MergeResult.RegionsMerged,
+		Conflicts:          result.MergeResult.Conflicts,
 		BackupPath:         backupPath,
 		Duration:           time.Since(start),
-		InscriptionVersion: manifest.InscriptionVersion,
+		InscriptionVersion: result.ManifestVersion,
 	}, nil
 }
 
@@ -577,11 +535,15 @@ func (p *Pipeline) GetDiff(regionName string) (string, error) {
 }
 
 // buildRenderContext creates a RenderContext from project state.
+// If manifest is nil, rite name is loaded from ACTIVE_RITE file.
 func (p *Pipeline) buildRenderContext(manifest *Manifest) (*RenderContext, error) {
 	ctx := &RenderContext{
-		ActiveRite:  manifest.ActiveRite,
 		ProjectRoot: p.ProjectRoot,
 		KnossosVars: make(map[string]string),
+	}
+
+	if manifest != nil {
+		ctx.ActiveRite = manifest.ActiveRite
 	}
 
 	// Load agent information from .claude/agents/
@@ -675,19 +637,6 @@ func (p *Pipeline) loadAgents(agentsDir string) ([]AgentInfo, error) {
 	return agents, nil
 }
 
-// buildFinalContent adds the file header to merged content.
-func (p *Pipeline) buildFinalContent(mergedContent string, manifest *Manifest) string {
-	var sb strings.Builder
-
-	// Header
-	sb.WriteString("# CLAUDE.md\n\n")
-	sb.WriteString("> Entry point for Claude Code. Skills-based progressive disclosure architecture.\n\n")
-
-	// Add merged content
-	sb.WriteString(mergedContent)
-
-	return sb.String()
-}
 
 // simpleDiff creates a simple diff output for a region.
 func simpleDiff(regionName, oldContent, newContent string) string {

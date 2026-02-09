@@ -8,8 +8,12 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"gopkg.in/yaml.v3"
+
+	"github.com/autom8y/knossos/internal/checksum"
+	"github.com/autom8y/knossos/internal/provenance"
 )
 
 // StripMenaExtension removes the .dro or .lego infix from a filename.
@@ -85,6 +89,13 @@ type MenaProjectionOptions struct {
 
 	// TargetSkillsDir is the absolute path to the skills/ output directory.
 	TargetSkillsDir string
+
+	// Collector records provenance at write time. If nil, provenance is not recorded.
+	Collector provenance.Collector
+
+	// ProjectRoot is the project root for computing relative source paths.
+	// Required when Collector is non-nil.
+	ProjectRoot string
 }
 
 // MenaProjectionResult reports what the projection did.
@@ -282,10 +293,17 @@ func ProjectMena(sources []MenaSource, opts MenaProjectionOptions) (*MenaProject
 		}
 
 		// Record what was projected
-		if menaType == "dro" {
-			result.CommandsProjected = append(result.CommandsProjected, name)
-		} else {
+		targetType := "commands"
+		if menaType == "lego" {
+			targetType = "skills"
 			result.SkillsProjected = append(result.SkillsProjected, name)
+		} else {
+			result.CommandsProjected = append(result.CommandsProjected, name)
+		}
+
+		// Record provenance at write time with exact source attribution
+		if opts.Collector != nil {
+			recordMenaProvenance(opts.Collector, opts.ProjectRoot, targetType, name, destDir, ce.source)
 		}
 	}
 
@@ -326,10 +344,32 @@ func ProjectMena(sources []MenaSource, opts MenaProjectionOptions) (*MenaProject
 			return nil, err
 		}
 
-		if menaType == "dro" {
-			result.CommandsProjected = append(result.CommandsProjected, strippedRel)
-		} else {
+		targetType := "commands"
+		if menaType == "lego" {
+			targetType = "skills"
 			result.SkillsProjected = append(result.SkillsProjected, strippedRel)
+		} else {
+			result.CommandsProjected = append(result.CommandsProjected, strippedRel)
+		}
+
+		// Record provenance for standalone file
+		if opts.Collector != nil {
+			now := time.Now().UTC()
+			sourcePath := sf.srcPath
+			if opts.ProjectRoot != "" {
+				if rel, err := filepath.Rel(opts.ProjectRoot, sf.srcPath); err == nil {
+					sourcePath = rel
+				}
+			}
+			collector := opts.Collector
+			collector.Record(targetType+"/"+strippedRel, &provenance.ProvenanceEntry{
+				Owner:      provenance.OwnerKnossos,
+				Scope:      provenance.ScopeRite,
+				SourcePath: sourcePath,
+				SourceType: "project",
+				Checksum:   checksum.Content(string(data)),
+				LastSynced: now,
+			})
 		}
 	}
 
@@ -339,6 +379,47 @@ func ProjectMena(sources []MenaSource, opts MenaProjectionOptions) (*MenaProject
 	// preserved at the cost of potential stale entries on rite switch.
 
 	return result, nil
+}
+
+// recordMenaProvenance records a provenance entry for a projected mena directory.
+// Uses directory checksum and exact source attribution.
+func recordMenaProvenance(collector provenance.Collector, projectRoot, targetType, name, destDir string, src MenaSource) {
+	now := time.Now().UTC()
+
+	hash, err := checksum.Dir(destDir)
+	if err != nil {
+		return // best-effort: skip if checksum fails
+	}
+
+	sourcePath := ""
+	sourceType := "project"
+
+	if src.IsEmbedded {
+		sourcePath = src.FsysPath
+		if strings.Contains(src.FsysPath, "/shared/") {
+			sourceType = "shared"
+		}
+	} else if src.Path != "" {
+		sourceType = "project"
+		// src.Path is already the full path to the leaf directory
+		if projectRoot != "" {
+			if rel, err := filepath.Rel(projectRoot, src.Path); err == nil {
+				sourcePath = rel
+			}
+		}
+		if sourcePath == "" {
+			sourcePath = "mena/" + name + "/"
+		}
+	}
+
+	collector.Record(targetType+"/"+name+"/", &provenance.ProvenanceEntry{
+		Owner:      provenance.OwnerKnossos,
+		Scope:      provenance.ScopeRite,
+		SourcePath: sourcePath,
+		SourceType: sourceType,
+		Checksum:   hash,
+		LastSynced: now,
+	})
 }
 
 // copyDirWithStripping copies all files from src to dst, applying

@@ -906,116 +906,18 @@ func (m *Materializer) materializeMena(manifest *RiteManifest, claudeDir string,
 		sources = append(sources, MenaSource{Path: currentRiteMenaDir})
 	}
 
-	// Delegate to ProjectMena with destructive mode
+	// Delegate to ProjectMena with destructive mode and provenance collector
 	opts := MenaProjectionOptions{
 		Mode:              MenaProjectionDestructive,
 		Filter:            ProjectAll,
 		TargetCommandsDir: commandsDir,
 		TargetSkillsDir:   skillsDir,
+		Collector:         collector,
+		ProjectRoot:       m.resolver.ProjectRoot(),
 	}
 
 	_, err := ProjectMena(sources, opts)
-	if err != nil {
-		return err
-	}
-
-	// Record provenance for mena directories (directory-level granularity)
-	now := time.Now().UTC()
-	projectRoot := m.resolver.ProjectRoot()
-
-	// Scan commands/ directory
-	if entries, err := os.ReadDir(commandsDir); err == nil {
-		for _, entry := range entries {
-			if !entry.IsDir() {
-				continue
-			}
-			dirPath := filepath.Join(commandsDir, entry.Name())
-			hash, err := checksum.Dir(dirPath)
-			if err != nil {
-				continue
-			}
-			// Determine source path and type by checking sources in reverse order (highest priority first)
-			sourcePath := ""
-			sourceType := "project"
-			for i := len(sources) - 1; i >= 0; i-- {
-				src := sources[i]
-				var menaPath string
-				if src.IsEmbedded {
-					menaPath = src.FsysPath
-					if strings.Contains(menaPath, "/shared/") {
-						sourceType = "shared"
-					} else if i < len(sources)-1 {
-						sourceType = "dependency"
-					}
-				} else if src.Path != "" {
-					menaPath = src.Path
-					// Check if this entry directory exists in this source
-					checkPath := filepath.Join(menaPath, entry.Name())
-					if _, statErr := os.Stat(checkPath); statErr == nil {
-						sourcePath, _ = filepath.Rel(projectRoot, checkPath)
-						break
-					}
-				}
-			}
-			if sourcePath == "" {
-				sourcePath = "mena/" + entry.Name() + "/"
-			}
-			collector.Record("commands/"+entry.Name()+"/", &provenance.ProvenanceEntry{
-				Owner:          provenance.OwnerKnossos,
-				Scope: provenance.ScopeRite,
-				SourcePath:     sourcePath,
-				SourceType:     sourceType,
-				Checksum:       hash,
-				LastSynced:     now,
-			})
-		}
-	}
-
-	// Scan skills/ directory
-	if entries, err := os.ReadDir(skillsDir); err == nil {
-		for _, entry := range entries {
-			if !entry.IsDir() {
-				continue
-			}
-			dirPath := filepath.Join(skillsDir, entry.Name())
-			hash, err := checksum.Dir(dirPath)
-			if err != nil {
-				continue
-			}
-			// Determine source path and type similar to commands
-			sourcePath := ""
-			sourceType := "project"
-			for i := len(sources) - 1; i >= 0; i-- {
-				src := sources[i]
-				if src.IsEmbedded {
-					if strings.Contains(src.FsysPath, "/shared/") {
-						sourceType = "shared"
-					} else if i < len(sources)-1 {
-						sourceType = "dependency"
-					}
-				} else if src.Path != "" {
-					checkPath := filepath.Join(src.Path, entry.Name())
-					if _, statErr := os.Stat(checkPath); statErr == nil {
-						sourcePath, _ = filepath.Rel(projectRoot, checkPath)
-						break
-					}
-				}
-			}
-			if sourcePath == "" {
-				sourcePath = "mena/" + entry.Name() + "/"
-			}
-			collector.Record("skills/"+entry.Name()+"/", &provenance.ProvenanceEntry{
-				Owner:          provenance.OwnerKnossos,
-				Scope: provenance.ScopeRite,
-				SourcePath:     sourcePath,
-				SourceType:     sourceType,
-				Checksum:       hash,
-				LastSynced:     now,
-			})
-		}
-	}
-
-	return nil
+	return err
 }
 
 // collectMenaEntriesDir recursively collects mena entries from a filesystem directory.
@@ -1243,6 +1145,8 @@ func (m *Materializer) materializeRules(claudeDir string, resolved *ResolvedRite
 }
 
 // materializeCLAUDEmd generates CLAUDE.md using the inscription system.
+// Delegates to inscription.SyncCLAUDEmd for the core merge/write logic,
+// then records provenance for the written file.
 // Returns the path to legacy backup if migration occurred, or empty string if no backup.
 func (m *Materializer) materializeCLAUDEmd(manifest *RiteManifest, claudeDir string, resolved *ResolvedRite, collector provenance.Collector) (string, error) {
 	// Build render context with full agent details
@@ -1264,110 +1168,27 @@ func (m *Materializer) materializeCLAUDEmd(manifest *RiteManifest, claudeDir str
 		ProjectRoot: m.resolver.ProjectRoot(),
 	}
 
-	// Delegate to shared helper with manifest update and hash tracking enabled
-	return m.mergeCLAUDEmd(claudeDir, renderCtx, manifest.Name, resolved, true, collector)
-}
-
-// materializeMinimalCLAUDEmd generates CLAUDE.md for cross-cutting mode (no agents).
-func (m *Materializer) materializeMinimalCLAUDEmd(claudeDir string, collector provenance.Collector) (string, error) {
-	// Build minimal render context (no agents, no rite)
-	renderCtx := &inscription.RenderContext{
-		ActiveRite:  "", // Cross-cutting mode has no rite
-		AgentCount:  0,
-		Agents:      []inscription.AgentInfo{},
-		KnossosVars: make(map[string]string),
-		ProjectRoot: m.resolver.ProjectRoot(),
-	}
-
-	// Delegate to shared helper without manifest update or hash tracking
-	return m.mergeCLAUDEmd(claudeDir, renderCtx, "", nil, false, collector)
-}
-
-// mergeCLAUDEmd contains the shared logic for generating and merging CLAUDE.md content.
-// Parameters:
-//   - claudeDir: path to .claude/ directory
-//   - renderCtx: pre-built render context (full or minimal)
-//   - activeRite: name of active rite (empty string for minimal mode)
-//   - resolved: resolved rite information (nil for minimal mode)
-//   - updateManifest: if true, updates manifest hashes and saves; if false, only saves if newly created
-//   - collector: provenance collector for recording CLAUDE.md entry
-//
-// Returns the path to legacy backup if migration occurred, or empty string if no backup.
-func (m *Materializer) mergeCLAUDEmd(claudeDir string, renderCtx *inscription.RenderContext, activeRite string, resolved *ResolvedRite, updateManifest bool, collector provenance.Collector) (string, error) {
-	// Load or create KNOSSOS_MANIFEST.yaml
-	knossosManifestPath := filepath.Join(claudeDir, "KNOSSOS_MANIFEST.yaml")
-	loader := inscription.NewManifestLoader(m.resolver.ProjectRoot())
-	loader.ManifestPath = knossosManifestPath
-
-	manifestExists := loader.Exists()
-
-	inscriptionManifest, err := loader.LoadOrCreate()
-	if err != nil {
-		return "", errors.Wrap(errors.CodeGeneralError, "failed to load or create KNOSSOS_MANIFEST.yaml", err)
-	}
-
-	// Update active rite in manifest if provided
-	if activeRite != "" {
-		inscriptionManifest.SetActiveRite(activeRite)
-	}
-
-	// Save manifest if newly created (needed for minimal mode)
-	if !manifestExists {
-		if err := loader.Save(inscriptionManifest); err != nil {
-			return "", errors.Wrap(errors.CodeGeneralError, "failed to save KNOSSOS_MANIFEST.yaml", err)
-		}
-	}
-
-	// Create generator with template directory for section rendering.
-	// When the source is embedded, pass the embedded templates FS to the generator.
-	var generator *inscription.Generator
+	// Resolve template source: embedded FS or filesystem directory
+	var templateFS fs.FS
 	if resolved != nil && resolved.Source.Type == SourceEmbedded && m.embeddedTemplates != nil {
-		tFS := m.templatesFS(resolved)
-		generator = inscription.NewGeneratorWithFS(tFS, inscriptionManifest, renderCtx)
-	} else {
-		generator = inscription.NewGenerator(m.templatesDir, inscriptionManifest, renderCtx)
+		templateFS = m.templatesFS(resolved)
 	}
 
-	// Generate all sections
-	sections, err := generator.GenerateAll()
+	// Delegate to canonical SyncCLAUDEmd
+	result, err := inscription.SyncCLAUDEmd(inscription.CLAUDEmdSyncOptions{
+		ClaudeDir:      claudeDir,
+		RenderCtx:      renderCtx,
+		ActiveRite:     manifest.Name,
+		TemplateDir:    m.templatesDir,
+		TemplateFS:     templateFS,
+		UpdateManifest: true,
+	})
 	if err != nil {
-		return "", errors.Wrap(errors.CodeGeneralError, "failed to generate CLAUDE.md sections", err)
+		return "", err
 	}
 
-	// Read existing CLAUDE.md and check for legacy format
-	claudeMdPath := filepath.Join(claudeDir, "CLAUDE.md")
-	existingContent := ""
-	legacyBackupPath := ""
-
-	if data, err := os.ReadFile(claudeMdPath); err == nil {
-		existingContent = string(data)
-
-		// Detect legacy CLAUDE.md (no KNOSSOS markers) and backup before overwriting
-		if !strings.Contains(existingContent, "<!-- KNOSSOS:START") && len(existingContent) > 0 {
-			legacyBackupPath = fmt.Sprintf("%s.legacy-%s", claudeMdPath, time.Now().Format("20060102-150405"))
-			if err := os.WriteFile(legacyBackupPath, data, 0644); err != nil {
-				return "", errors.Wrap(errors.CodeGeneralError, "failed to backup legacy CLAUDE.md", err)
-			}
-			// Clear existing content so merger generates fresh file
-			existingContent = ""
-		}
-	}
-
-	// Merge sections
-	merger := inscription.NewMerger(inscriptionManifest, generator)
-	mergeResult, err := merger.MergeRegions(existingContent, sections)
-	if err != nil {
-		return "", errors.Wrap(errors.CodeGeneralError, "failed to merge CLAUDE.md regions", err)
-	}
-
-	// Write CLAUDE.md (only if content changed, to avoid triggering Claude Code file watcher)
-	written, err := writeIfChanged(claudeMdPath, []byte(mergeResult.Content), 0644)
-	if err != nil {
-		return "", errors.Wrap(errors.CodeGeneralError, "failed to write CLAUDE.md", err)
-	}
-
-	// Record provenance after successful write
-	if written {
+	// Record provenance after successful write (materialization-specific concern)
+	if result.Written {
 		now := time.Now().UTC()
 		srcRelPath := "(generated)"
 		if m.templatesDir != "" {
@@ -1378,25 +1199,40 @@ func (m *Materializer) mergeCLAUDEmd(claudeDir string, renderCtx *inscription.Re
 			}
 		}
 		collector.Record("CLAUDE.md", &provenance.ProvenanceEntry{
-			Owner:          provenance.OwnerKnossos,
-			Scope: provenance.ScopeRite,
-			SourcePath:     srcRelPath,
-			SourceType:     "template",
-			Checksum:       checksum.Content(mergeResult.Content),
-			LastSynced:     now,
+			Owner:      provenance.OwnerKnossos,
+			Scope:      provenance.ScopeRite,
+			SourcePath: srcRelPath,
+			SourceType: "template",
+			Checksum:   checksum.Content(result.MergeResult.Content),
+			LastSynced: now,
 		})
 	}
 
-	// Update manifest hashes and save (for full mode only)
-	if updateManifest {
-		merger.UpdateManifestHashes(mergeResult)
-		loader.IncrementVersion(inscriptionManifest)
-		if err := loader.Save(inscriptionManifest); err != nil {
-			return "", errors.Wrap(errors.CodeGeneralError, "failed to save KNOSSOS_MANIFEST.yaml", err)
-		}
+	return result.LegacyBackupPath, nil
+}
+
+// materializeMinimalCLAUDEmd generates CLAUDE.md for cross-cutting mode (no agents).
+// Delegates to inscription.SyncCLAUDEmd without manifest updates.
+func (m *Materializer) materializeMinimalCLAUDEmd(claudeDir string, collector provenance.Collector) (string, error) {
+	renderCtx := &inscription.RenderContext{
+		ActiveRite:  "",
+		AgentCount:  0,
+		Agents:      []inscription.AgentInfo{},
+		KnossosVars: make(map[string]string),
+		ProjectRoot: m.resolver.ProjectRoot(),
 	}
 
-	return legacyBackupPath, nil
+	result, err := inscription.SyncCLAUDEmd(inscription.CLAUDEmdSyncOptions{
+		ClaudeDir:      claudeDir,
+		RenderCtx:      renderCtx,
+		TemplateDir:    m.templatesDir,
+		UpdateManifest: false,
+	})
+	if err != nil {
+		return "", err
+	}
+
+	return result.LegacyBackupPath, nil
 }
 
 // materializeSettingsWithManifest generates or updates settings.local.json.
