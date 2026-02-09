@@ -36,7 +36,6 @@ type Result struct {
 	OrphansDetected  []string // List of orphan agent files detected
 	OrphanAction     string   // Action taken: "kept", "removed", "promoted"
 	BackupPath       string   // Path to backup if orphans were removed
-	HooksSkipped     bool     // True if hooks were skipped (no templates/hooks dir)
 	Source           string   // Source type used: "project", "user", "knossos", "explicit"
 	SourcePath       string   // Actual path resolved for rite source
 	LegacyBackupPath string   // Path to legacy CLAUDE.md backup if migration occurred
@@ -231,13 +230,6 @@ func (m *Materializer) MaterializeMinimal(opts Options) (*Result, error) {
 	divergenceReport, _ := provenance.DetectDivergence(prevManifest, nil, claudeDir)
 	collector := provenance.NewCollector()
 
-	// Generate hooks from templates (if available)
-	hooksSkipped, err := m.materializeHooks(claudeDir, nil, collector)
-	if err != nil {
-		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize hooks", err)
-	}
-	result.HooksSkipped = hooksSkipped
-
 	// Generate rules from templates (if available)
 	if err := m.materializeRules(claudeDir, nil, collector); err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize rules", err)
@@ -364,14 +356,7 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize mena", err)
 	}
 
-	// 6. Generate hooks/ directory from templates/hooks
-	hooksSkipped, err := m.materializeHooks(claudeDir, resolved, collector)
-	if err != nil {
-		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize hooks", err)
-	}
-	result.HooksSkipped = hooksSkipped
-
-	// 6.5. Generate rules/ directory from templates/rules
+	// 6. Generate rules/ directory from templates/rules
 	if err := m.materializeRules(claudeDir, resolved, collector); err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize rules", err)
 	}
@@ -410,6 +395,102 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 
 	return result, nil
 }
+
+// Sync performs a unified sync operation across rite and/or user scopes.
+func (m *Materializer) Sync(opts SyncOptions) (*SyncResult, error) {
+	result := &SyncResult{}
+
+	// Normalize defaults
+	if opts.Scope == "" {
+		opts.Scope = ScopeAll
+	}
+	if !opts.Scope.IsValid() {
+		return nil, fmt.Errorf("invalid scope: %q", opts.Scope)
+	}
+	if !opts.Resource.IsValid() {
+		return nil, fmt.Errorf("invalid resource: %q", opts.Resource)
+	}
+
+	// Phase 1: Rite scope
+	if opts.Scope == ScopeAll || opts.Scope == ScopeRite {
+		riteResult, err := m.syncRiteScope(opts)
+		if err != nil {
+			if opts.Scope == ScopeRite {
+				return nil, err
+			}
+			// scope=all: skip rite, continue to user
+			result.RiteResult = &RiteScopeResult{Status: "skipped"}
+		} else {
+			result.RiteResult = riteResult
+		}
+	}
+
+	// Phase 2: User scope
+	if opts.Scope == ScopeAll || opts.Scope == ScopeUser {
+		userResult, err := m.syncUserScope(opts)
+		if err != nil {
+			return nil, err
+		}
+		result.UserResult = userResult
+	}
+
+	return result, nil
+}
+
+// syncRiteScope delegates to existing MaterializeWithOptions.
+func (m *Materializer) syncRiteScope(opts SyncOptions) (*RiteScopeResult, error) {
+	riteName := opts.RiteName
+	if riteName == "" {
+		// Try to read ACTIVE_RITE
+		activeRitePath := filepath.Join(m.resolver.ClaudeDir(), "ACTIVE_RITE")
+		data, err := os.ReadFile(activeRitePath)
+		if err != nil {
+			if opts.Scope == ScopeRite {
+				return nil, fmt.Errorf("no ACTIVE_RITE found, specify --rite")
+			}
+			// scope=all with no rite: run minimal
+			return m.syncRiteScopeMinimal(opts)
+		}
+		riteName = strings.TrimSpace(string(data))
+	}
+
+	legacyOpts := Options{
+		DryRun:    opts.DryRun,
+		RemoveAll: !opts.KeepOrphans,
+		KeepAll:   opts.KeepOrphans,
+	}
+
+	legacyResult, err := m.MaterializeWithOptions(riteName, legacyOpts)
+	if err != nil {
+		return nil, err
+	}
+
+	return &RiteScopeResult{
+		Status:           legacyResult.Status,
+		RiteName:         riteName,
+		Source:           legacyResult.Source,
+		SourcePath:       legacyResult.SourcePath,
+		OrphansDetected:  legacyResult.OrphansDetected,
+		OrphanAction:     legacyResult.OrphanAction,
+		BackupPath:       legacyResult.BackupPath,
+		LegacyBackupPath: legacyResult.LegacyBackupPath,
+	}, nil
+}
+
+// syncRiteScopeMinimal handles cross-cutting mode (no rite).
+func (m *Materializer) syncRiteScopeMinimal(opts SyncOptions) (*RiteScopeResult, error) {
+	legacyOpts := Options{DryRun: opts.DryRun, Minimal: true}
+	legacyResult, err := m.MaterializeMinimal(legacyOpts)
+	if err != nil {
+		return nil, err
+	}
+	return &RiteScopeResult{
+		Status: legacyResult.Status,
+		Source: "minimal",
+	}, nil
+}
+
+// syncUserScope is implemented in user_scope.go
 
 // detectOrphans finds agent files that are not in the incoming rite's manifest.
 // If a provenance manifest exists, uses manifest-based detection: files with
@@ -1139,160 +1220,6 @@ func (m *Materializer) materializeRules(claudeDir string, resolved *ResolvedRite
 	}
 
 	return nil
-}
-
-// materializeHooks copies hook files from templates/hooks to .claude/hooks/
-// Uses selective write: only knossos-managed hook files (from templates) are replaced.
-// User-created hook files not in the template source are preserved.
-// Returns (skipped bool, err error) where skipped=true if no templates/hooks dir exists.
-func (m *Materializer) materializeHooks(claudeDir string, resolved *ResolvedRite, collector provenance.Collector) (bool, error) {
-	hooksDir := filepath.Join(claudeDir, "hooks")
-	now := time.Now().UTC()
-	projectRoot := m.resolver.ProjectRoot()
-
-	// For embedded sources, try embedded templates FS
-	if resolved != nil && resolved.Source.Type == SourceEmbedded && m.embeddedTemplates != nil {
-		tFS := m.templatesFS(resolved)
-		if _, err := fs.Stat(tFS, "hooks"); err != nil {
-			return true, nil // No hooks in embedded templates
-		}
-		hooksSub, err := fs.Sub(tFS, "hooks")
-		if err != nil {
-			return true, nil
-		}
-
-		if err := paths.EnsureDir(hooksDir); err != nil {
-			return false, err
-		}
-
-		// Build managed set from embedded source, then selectively remove
-		managedHooks := collectFSFilenames(hooksSub)
-		removeManagedFiles(hooksDir, managedHooks)
-
-		// Copy hooks and record provenance
-		err = fs.WalkDir(hooksSub, ".", func(path string, d fs.DirEntry, walkErr error) error {
-			if walkErr != nil || d.IsDir() {
-				return walkErr
-			}
-			content, err := fs.ReadFile(hooksSub, path)
-			if err != nil {
-				return err
-			}
-			destPath := filepath.Join(hooksDir, path)
-			written, err := writeIfChanged(destPath, content, 0644)
-			if err != nil {
-				return err
-			}
-			if written {
-				sourcePath := resolved.TemplatesDir + "/hooks/" + path
-				collector.Record("hooks/"+path, &provenance.ProvenanceEntry{
-					Owner:          provenance.OwnerKnossos,
-					Scope: provenance.ScopeRite,
-					SourcePath:     sourcePath,
-					SourceType:     "template",
-					Checksum:       checksum.Bytes(content),
-					LastSynced:     now,
-				})
-			}
-			return nil
-		})
-		return false, err
-	}
-
-	// Filesystem path
-	sourceHooksDir := filepath.Join(m.templatesDir, "hooks")
-
-	// Check if templates/hooks exists (it may not yet)
-	if _, err := os.Stat(sourceHooksDir); os.IsNotExist(err) {
-		// No templates/hooks directory - this is expected for consumer projects
-		// or when hooks are managed separately. Preserve existing hooks if any.
-		return true, nil
-	}
-
-	if err := paths.EnsureDir(hooksDir); err != nil {
-		return false, err
-	}
-
-	// Build managed set from source, then selectively remove
-	managedHooks := collectDirFilenames(sourceHooksDir)
-	removeManagedFiles(hooksDir, managedHooks)
-
-	// Copy hooks (uses writeIfChanged internally) and record provenance
-	err := filepath.WalkDir(sourceHooksDir, func(path string, d fs.DirEntry, walkErr error) error {
-		if walkErr != nil || d.IsDir() {
-			return walkErr
-		}
-		content, err := os.ReadFile(path)
-		if err != nil {
-			return err
-		}
-		relPath, err := filepath.Rel(sourceHooksDir, path)
-		if err != nil {
-			return err
-		}
-		destPath := filepath.Join(hooksDir, relPath)
-		written, err := writeIfChanged(destPath, content, 0644)
-		if err != nil {
-			return err
-		}
-		if written {
-			srcRelPath, _ := filepath.Rel(projectRoot, path)
-			collector.Record("hooks/"+relPath, &provenance.ProvenanceEntry{
-				Owner:          provenance.OwnerKnossos,
-				Scope: provenance.ScopeRite,
-				SourcePath:     srcRelPath,
-				SourceType:     "template",
-				Checksum:       checksum.Bytes(content),
-				LastSynced:     now,
-			})
-		}
-		return nil
-	})
-	return false, err
-}
-
-// collectDirFilenames returns a set of all filenames in a directory (non-recursive).
-func collectDirFilenames(dir string) map[string]bool {
-	names := make(map[string]bool)
-	entries, err := os.ReadDir(dir)
-	if err != nil {
-		return names
-	}
-	for _, entry := range entries {
-		if !entry.IsDir() {
-			names[entry.Name()] = true
-		}
-	}
-	return names
-}
-
-// collectFSFilenames returns a set of all filenames in an fs.FS root (non-recursive).
-func collectFSFilenames(fsys fs.FS) map[string]bool {
-	names := make(map[string]bool)
-	entries, err := fs.ReadDir(fsys, ".")
-	if err != nil {
-		return names
-	}
-	for _, entry := range entries {
-		if !entry.IsDir() {
-			names[entry.Name()] = true
-		}
-	}
-	return names
-}
-
-// removeManagedFiles removes files in dir whose names are in the managed set.
-// Files not in the managed set (user-created) are preserved.
-func removeManagedFiles(dir string, managed map[string]bool) {
-	entries, err := os.ReadDir(dir)
-	if err != nil {
-		return
-	}
-	for _, entry := range entries {
-		if !entry.IsDir() && managed[entry.Name()] {
-			os.Remove(filepath.Join(dir, entry.Name()))
-		}
-	}
 }
 
 // materializeCLAUDEmd generates CLAUDE.md using the inscription system.
