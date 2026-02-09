@@ -17,4 +17,5 @@ type HookSpecificOutput struct {
 	PermissionDecision       string          `json:"permissionDecision"`
 	PermissionDecisionReason string          `json:"permissionDecisionReason,omitempty"`
 	UpdatedInput             json.RawMessage `json:"updatedInput,omitempty"`
+	AdditionalContext        string          `json:"additionalContext,omitempty"`
 }
