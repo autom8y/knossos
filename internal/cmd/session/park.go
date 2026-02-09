@@ -86,9 +86,6 @@ func runPark(ctx *cmdContext, opts parkOptions) error {
 		return err
 	}
 
-	// Get git status
-	gitStatus := getGitStatus()
-
 	// Update context
 	now := time.Now().UTC()
 	previousStatus := sessCtx.Status
@@ -114,21 +111,19 @@ func runPark(ctx *cmdContext, opts parkOptions) error {
 		return err
 	}
 
-	// Emit event
-	emitter := ctx.getEventEmitter(sessionID)
-	if err := emitter.EmitParked(sessionID, opts.reason, gitStatus); err != nil {
-		printer.VerboseLog("warn", "failed to emit park event", map[string]interface{}{"error": err.Error()})
-	}
-
-	// Emit Clew Contract session_end event
+	// Emit Clew Contract events
 	parkWriter := clewcontract.NewBufferedEventWriter(sessionDir, clewcontract.DefaultFlushInterval)
 	defer parkWriter.Close()
 	{
+		// Lifecycle event
+		parkWriter.Write(clewcontract.NewSessionParkedEvent(sessionID, opts.reason))
+
+		// Session end event
 		durationMs := time.Since(sessCtx.CreatedAt).Milliseconds()
-		sessionEndEvent := clewcontract.NewSessionEndEvent(sessionID, "parked", durationMs)
-		parkWriter.Write(sessionEndEvent)
+		parkWriter.Write(clewcontract.NewSessionEndEvent(sessionID, "parked", durationMs))
+
 		if flushErr := parkWriter.Flush(); flushErr != nil {
-			printer.VerboseLog("warn", "failed to emit session_end event", map[string]interface{}{"error": flushErr.Error()})
+			printer.VerboseLog("warn", "failed to write events", map[string]interface{}{"error": flushErr.Error()})
 		}
 	}
 

@@ -177,25 +177,20 @@ func fraySession(projectDir, parentID string, opts frayOptions) (*output.FrayOut
 	return result, nil
 }
 
-// emitFrayEvents emits session and clew events for a fray operation.
+// emitFrayEvents emits clew events for a fray operation.
 // All event emissions are non-fatal — failures are silently ignored.
 func emitFrayEvents(resolver *paths.Resolver, parentID, childID, frayPoint string) {
-	// Emit SESSION_FRAYED on parent's event log
-	parentEventsPath := resolver.SessionEventsFile(parentID)
-	parentAuditPath := resolver.TransitionsLog()
-	parentEmitter := session.NewEventEmitter(parentEventsPath, parentAuditPath)
-	parentEmitter.EmitFrayed(parentID, childID, frayPoint)
-
-	// Emit SESSION_CREATED on child's event log
-	childEventsPath := resolver.SessionEventsFile(childID)
-	childEmitter := session.NewEventEmitter(childEventsPath, parentAuditPath)
-	childEmitter.EmitCreated(childID, "", "", "")
-
 	// Emit clew session_frayed event on parent
 	parentDir := resolver.SessionDir(parentID)
 	frayWriter := clewcontract.NewBufferedEventWriter(parentDir, clewcontract.DefaultFlushInterval)
 	defer frayWriter.Close()
-	frayEvent := clewcontract.NewSessionFrayedEvent(parentID, childID, frayPoint)
-	frayWriter.Write(frayEvent)
+	frayWriter.Write(clewcontract.NewSessionFrayedEvent(parentID, childID, frayPoint))
 	frayWriter.Flush() // Best-effort flush for fray events
+
+	// Emit session_created lifecycle event on child
+	childDir := resolver.SessionDir(childID)
+	childWriter := clewcontract.NewBufferedEventWriter(childDir, clewcontract.DefaultFlushInterval)
+	defer childWriter.Close()
+	childWriter.Write(clewcontract.NewSessionCreatedEvent(childID, "", "", ""))
+	childWriter.Flush()
 }

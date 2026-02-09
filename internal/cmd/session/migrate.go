@@ -213,12 +213,6 @@ func migrateSession(ctx *cmdContext, resolver *paths.Resolver, lockMgr *lock.Man
 		}
 	}
 
-	// Emit migration event
-	emitter := ctx.getEventEmitter(sessionID)
-	if emitter != nil {
-		emitter.EmitSchemaMigrated(sessionID, sessCtx.SchemaVersion, "2.1")
-	}
-
 	return &output.MigrationResult{
 		SessionID:     sessionID,
 		FromVersion:   "1.0",

@@ -185,19 +185,15 @@ func runWrap(ctx *cmdContext, opts wrapOptions) error {
 		printer.VerboseLog("warn", "failed to clear current session", map[string]interface{}{"error": err.Error()})
 	}
 
-	// Emit event
-	emitter := ctx.getEventEmitter(sessionID)
-	if err := emitter.EmitArchived(sessionID, string(previousStatus)); err != nil {
-		printer.VerboseLog("warn", "failed to emit archive event", map[string]interface{}{"error": err.Error()})
-	}
-
-	// Emit Clew Contract session_end event
+	// Emit Clew Contract events
 	endWriter := clewcontract.NewBufferedEventWriter(sessionDir, clewcontract.DefaultFlushInterval)
 	defer endWriter.Close()
 	{
-		durationMs := time.Since(sessCtx.CreatedAt).Milliseconds()
+		// Lifecycle event
+		endWriter.Write(clewcontract.NewSessionArchivedEvent(sessionID, string(previousStatus)))
 
-		// Collect cognitive budget metadata if available
+		// Session end event with budget
+		durationMs := time.Since(sessCtx.CreatedAt).Milliseconds()
 		budget := collectCognitiveBudget(sessionDir)
 
 		var sessionEndEvent clewcontract.Event
@@ -209,7 +205,7 @@ func runWrap(ctx *cmdContext, opts wrapOptions) error {
 
 		endWriter.Write(sessionEndEvent)
 		if flushErr := endWriter.Flush(); flushErr != nil {
-			printer.VerboseLog("warn", "failed to emit session_end event", map[string]interface{}{"error": flushErr.Error()})
+			printer.VerboseLog("warn", "failed to write events", map[string]interface{}{"error": flushErr.Error()})
 		}
 	}
 

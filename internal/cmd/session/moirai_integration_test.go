@@ -516,36 +516,36 @@ func TestMoirai_AuditTrail_EventsEmitted(t *testing.T) {
 
 	sessionID := findCreatedSessionID(t, projectDir)
 
-	// Verify create event
-	createCount := countEventsOfType(t, projectDir, sessionID, "SESSION_CREATED")
+	// Verify create event (unified clew event system)
+	createCount := countEventsOfType(t, projectDir, sessionID, "session.created")
 	if createCount != 1 {
-		t.Errorf("After create: SESSION_CREATED events = %d, want 1", createCount)
+		t.Errorf("After create: session.created events = %d, want 1", createCount)
 	}
 
-	// Park -- should emit SESSION_PARKED and session.ended
+	// Park -- should emit session.parked and session.ended
 	err = runPark(ctx, parkOptions{reason: "Audit park"})
 	if err != nil {
 		t.Fatalf("Park failed: %v", err)
 	}
 
-	parkCount := countEventsOfType(t, projectDir, sessionID, "SESSION_PARKED")
+	parkCount := countEventsOfType(t, projectDir, sessionID, "session.parked")
 	if parkCount != 1 {
-		t.Errorf("After park: SESSION_PARKED events = %d, want 1", parkCount)
+		t.Errorf("After park: session.parked events = %d, want 1", parkCount)
 	}
 	parkEndCount := countEventsOfType(t, projectDir, sessionID, "session.ended")
 	if parkEndCount < 1 {
 		t.Errorf("After park: session.ended events = %d, want >= 1", parkEndCount)
 	}
 
-	// Resume -- should emit SESSION_RESUMED (NOT session.ended)
+	// Resume -- should emit session.resumed (NOT session.ended)
 	err = runResume(ctx)
 	if err != nil {
 		t.Fatalf("Resume failed: %v", err)
 	}
 
-	resumeCount := countEventsOfType(t, projectDir, sessionID, "SESSION_RESUMED")
+	resumeCount := countEventsOfType(t, projectDir, sessionID, "session.resumed")
 	if resumeCount != 1 {
-		t.Errorf("After resume: SESSION_RESUMED events = %d, want 1", resumeCount)
+		t.Errorf("After resume: session.resumed events = %d, want 1", resumeCount)
 	}
 	// session.ended count should NOT increase after resume
 	resumeEndCount := countEventsOfType(t, projectDir, sessionID, "session.ended")
@@ -554,15 +554,15 @@ func TestMoirai_AuditTrail_EventsEmitted(t *testing.T) {
 			parkEndCount, resumeEndCount)
 	}
 
-	// Wrap -- should emit SESSION_ARCHIVED and session.ended
+	// Wrap -- should emit session.archived and session.ended
 	err = runWrap(ctx, wrapOptions{noArchive: true})
 	if err != nil {
 		t.Fatalf("Wrap failed: %v", err)
 	}
 
-	archiveCount := countEventsOfType(t, projectDir, sessionID, "SESSION_ARCHIVED")
+	archiveCount := countEventsOfType(t, projectDir, sessionID, "session.archived")
 	if archiveCount != 1 {
-		t.Errorf("After wrap: SESSION_ARCHIVED events = %d, want 1", archiveCount)
+		t.Errorf("After wrap: session.archived events = %d, want 1", archiveCount)
 	}
 	wrapEndCount := countEventsOfType(t, projectDir, sessionID, "session.ended")
 	if wrapEndCount < parkEndCount+1 {
@@ -610,36 +610,33 @@ func TestMoirai_AuditTrail_EventsAreValidJSON(t *testing.T) {
 	}
 }
 
-func TestMoirai_AuditTrail_TransitionsLogPopulated(t *testing.T) {
+func TestMoirai_AuditTrail_EventsJSONLPopulated(t *testing.T) {
 	projectDir := setupProjectDir(t)
 	ctx := newTestContext(projectDir)
 
-	if err := runCreate(ctx, "Transitions log test", createOptions{complexity: "MODULE"}); err != nil {
+	if err := runCreate(ctx, "Events JSONL test", createOptions{complexity: "MODULE"}); err != nil {
 		t.Fatalf("Create failed: %v", err)
 	}
 
 	sessionID := findCreatedSessionID(t, projectDir)
-	_ = sessionID
 
-	// The transitions log is written to .claude/sessions/.audit/transitions.log
-	transitionsLog := filepath.Join(projectDir, ".claude", "sessions", ".audit", "transitions.log")
-
-	// Park to generate a transition entry
-	if err := runPark(ctx, parkOptions{reason: "Transitions log park"}); err != nil {
+	// Park to generate lifecycle events
+	if err := runPark(ctx, parkOptions{reason: "Events JSONL park"}); err != nil {
 		t.Fatalf("Park failed: %v", err)
 	}
 
-	// Verify transitions log exists and is non-empty
-	info, err := os.Stat(transitionsLog)
+	// Verify events.jsonl exists and is non-empty (replaces transitions.log)
+	eventsPath := filepath.Join(projectDir, ".claude", "sessions", sessionID, "events.jsonl")
+	info, err := os.Stat(eventsPath)
 	if err != nil {
 		if os.IsNotExist(err) {
-			t.Error("transitions.log does not exist after park operation")
+			t.Error("events.jsonl does not exist after park operation")
 			return
 		}
-		t.Fatalf("Failed to stat transitions.log: %v", err)
+		t.Fatalf("Failed to stat events.jsonl: %v", err)
 	}
 	if info.Size() == 0 {
-		t.Error("transitions.log is empty after park operation")
+		t.Error("events.jsonl is empty after park operation")
 	}
 }
 
@@ -1243,13 +1240,13 @@ func TestMoirai_EdgeCase_MultipleParkResumeCycles(t *testing.T) {
 		}
 	}
 
-	// Verify event counts
-	parkCount := countEventsOfType(t, projectDir, sessionID, "SESSION_PARKED")
+	// Verify event counts (unified clew event system)
+	parkCount := countEventsOfType(t, projectDir, sessionID, "session.parked")
 	if parkCount != cycles {
-		t.Errorf("SESSION_PARKED events = %d, want %d", parkCount, cycles)
+		t.Errorf("session.parked events = %d, want %d", parkCount, cycles)
 	}
-	resumeCount := countEventsOfType(t, projectDir, sessionID, "SESSION_RESUMED")
+	resumeCount := countEventsOfType(t, projectDir, sessionID, "session.resumed")
 	if resumeCount != cycles {
-		t.Errorf("SESSION_RESUMED events = %d, want %d", resumeCount, cycles)
+		t.Errorf("session.resumed events = %d, want %d", resumeCount, cycles)
 	}
 }

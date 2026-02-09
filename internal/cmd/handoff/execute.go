@@ -121,57 +121,30 @@ func runExecute(ctx *cmdContext, opts executeOptions) error {
 		return printer.Print(result)
 	}
 
-	// Emit task_start event for the receiving agent
+	// Emit Clew Contract events
 	sessionDir := resolver.SessionDir(sessionID)
 	execWriter := clewcontract.NewBufferedEventWriter(sessionDir, clewcontract.DefaultFlushInterval)
 	defer execWriter.Close()
 	{
 		// Build task ID from session and agent
 		taskID := fmt.Sprintf("%s-%s", sessionID, opts.toAgent)
-		phase := targetPhase
 
-		taskStartEvent := clewcontract.NewTaskStartEvent(
+		// Task start event
+		execWriter.Write(clewcontract.NewTaskStartEvent(
 			taskID,
 			opts.toAgent,
-			phase,
+			targetPhase,
 			sessionID,
-		)
-		execWriter.Write(taskStartEvent)
+		))
 
-		// Emit HANDOFF_EXECUTED event
-		// Infer fromAgent from current phase
+		// Handoff executed event
 		fromAgent := phaseToAgent(sessCtx.CurrentPhase)
 		artifacts := []string{opts.artifactID}
-		handoffExecutedEvent := clewcontract.NewHandoffExecutedEvent(fromAgent, opts.toAgent, sessionID, artifacts)
-		execWriter.Write(handoffExecutedEvent)
+		execWriter.Write(clewcontract.NewHandoffExecutedEvent(fromAgent, opts.toAgent, sessionID, artifacts))
 
 		if flushErr := execWriter.Flush(); flushErr != nil {
-			printer.VerboseLog("warn", "failed to emit handoff events", map[string]interface{}{"error": flushErr.Error()})
+			printer.VerboseLog("warn", "failed to write events", map[string]interface{}{"error": flushErr.Error()})
 		}
-	}
-
-	// Record handoff event in session events
-	emitter := session.NewEventEmitter(
-		resolver.SessionEventsFile(sessionID),
-		resolver.TransitionsLog(),
-	)
-
-	// Emit handoff executed event
-	handoffEvent := session.Event{
-		Timestamp: now.Format(time.RFC3339),
-		Event:     "HANDOFF_EXECUTED",
-		To:        opts.toAgent,
-		Metadata: map[string]interface{}{
-			"artifact_id":  opts.artifactID,
-			"target_phase": targetPhase,
-			"from_phase":   sessCtx.CurrentPhase,
-		},
-	}
-	if err := emitter.Emit(handoffEvent); err != nil {
-		printer.VerboseLog("warn", "failed to emit handoff event", map[string]interface{}{"error": err.Error()})
-	}
-	if err := emitter.EmitToAudit(sessionID, handoffEvent); err != nil {
-		printer.VerboseLog("warn", "failed to emit audit event", map[string]interface{}{"error": err.Error()})
 	}
 
 	result.Status = "executed"

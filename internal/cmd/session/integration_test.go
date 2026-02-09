@@ -405,17 +405,15 @@ standard
 			sessionEndCountAfterPark, sessionEndCountAfterResume)
 	}
 
-	// Also verify that SESSION_RESUMED event WAS emitted (to the session events file)
-	// This uses the session.EventEmitter, not threadcontract
+	// Verify session.resumed event WAS emitted (unified clew event system)
 	sessionEventsPath := filepath.Join(sessionDir, "events.jsonl")
 	content, err := os.ReadFile(sessionEventsPath)
 	if err != nil {
 		t.Fatalf("Failed to read session events: %v", err)
 	}
 
-	// Verify SESSION_RESUMED exists in the file
-	if !strings.Contains(string(content), "SESSION_RESUMED") {
-		t.Error("events.jsonl should contain SESSION_RESUMED event from resume operation")
+	if !strings.Contains(string(content), "session.resumed") {
+		t.Error("events.jsonl should contain session.resumed event from resume operation")
 	}
 
 	// Verify session status is ACTIVE after resume
@@ -428,8 +426,7 @@ standard
 	}
 }
 
-// TestPark_EmitsSessionParkedAndSessionEnd verifies both event types are emitted.
-// SESSION_PARKED comes from session.EventEmitter, session_end comes from clewcontract.
+// TestPark_EmitsBothEventTypes verifies both session.parked and session.ended events are emitted.
 func TestPark_EmitsBothEventTypes(t *testing.T) {
 	// Create temporary project structure
 	tmpDir := t.TempDir()
@@ -505,12 +502,12 @@ current_phase: implementation
 		t.Fatalf("Failed to read events.jsonl: %v", err)
 	}
 
-	// Verify SESSION_PARKED event exists (from session.EventEmitter)
-	if !strings.Contains(string(content), "SESSION_PARKED") {
-		t.Error("events.jsonl should contain SESSION_PARKED event")
+	// Verify session.parked event exists (unified clew event system)
+	if !strings.Contains(string(content), "session.parked") {
+		t.Error("events.jsonl should contain session.parked event")
 	}
 
-	// Verify session_end event exists (from threadcontract)
+	// Verify session.ended event exists
 	if !strings.Contains(string(content), `"type":"session.ended"`) {
 		t.Error("events.jsonl should contain session.ended event")
 	}

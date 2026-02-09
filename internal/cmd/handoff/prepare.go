@@ -184,7 +184,7 @@ func runPrepare(ctx *cmdContext, opts prepareOptions) error {
 	// Calculate duration (from session start to now)
 	durationMs := time.Since(sessCtx.CreatedAt).Milliseconds()
 
-	// Emit task_end event for the source agent
+	// Emit Clew Contract events
 	sessionDir := resolver.SessionDir(sessionID)
 	prepWriter := clewcontract.NewBufferedEventWriter(sessionDir, clewcontract.DefaultFlushInterval)
 	defer prepWriter.Close()
@@ -198,32 +198,25 @@ func runPrepare(ctx *cmdContext, opts prepareOptions) error {
 		// Build task ID from session and agent
 		taskID := fmt.Sprintf("%s-%s", sessionID, opts.fromAgent)
 
-		taskEndEvent := clewcontract.NewTaskEndEvent(
+		// Task end event
+		prepWriter.Write(clewcontract.NewTaskEndEvent(
 			taskID,
 			opts.fromAgent,
 			"success",
 			sessionID,
 			durationMs,
 			artifacts,
-		)
-		prepWriter.Write(taskEndEvent)
+		))
 
-		// Emit HANDOFF_PREPARED event
-		handoffPreparedEvent := clewcontract.NewHandoffPreparedEvent(opts.fromAgent, opts.toAgent, sessionID)
-		prepWriter.Write(handoffPreparedEvent)
+		// Handoff prepared event
+		prepWriter.Write(clewcontract.NewHandoffPreparedEvent(opts.fromAgent, opts.toAgent, sessionID))
+
+		// Lifecycle event
+		prepWriter.Write(clewcontract.NewPhaseTransitionedEvent(sessionID, opts.fromAgent, opts.toAgent))
 
 		if flushErr := prepWriter.Flush(); flushErr != nil {
-			printer.VerboseLog("warn", "failed to emit handoff events", map[string]interface{}{"error": flushErr.Error()})
+			printer.VerboseLog("warn", "failed to write events", map[string]interface{}{"error": flushErr.Error()})
 		}
-	}
-
-	// Emit handoff event to session events
-	emitter := session.NewEventEmitter(
-		resolver.SessionEventsFile(sessionID),
-		resolver.TransitionsLog(),
-	)
-	if err := emitter.EmitPhaseTransition(sessionID, opts.fromAgent, opts.toAgent, validationResult == nil || validationResult.Passed); err != nil {
-		printer.VerboseLog("warn", "failed to emit phase transition event", map[string]interface{}{"error": err.Error()})
 	}
 
 	// Build output

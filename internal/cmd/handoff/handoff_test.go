@@ -1792,9 +1792,9 @@ current_phase: design
 		t.Fatalf("Failed to read events.jsonl: %v", err)
 	}
 
-	// Verify HANDOFF_EXECUTED event
-	if !strings.Contains(string(content), "HANDOFF_EXECUTED") {
-		t.Error("events.jsonl missing HANDOFF_EXECUTED event")
+	// Verify agent.handoff_executed event (unified clew event system)
+	if !strings.Contains(string(content), "agent.handoff_executed") {
+		t.Error("events.jsonl missing agent.handoff_executed event")
 	}
 	if !strings.Contains(string(content), "TDD-full-structure") {
 		t.Error("events.jsonl missing artifact_id")

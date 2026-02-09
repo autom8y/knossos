@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/autom8y/knossos/internal/errors"
+	"github.com/autom8y/knossos/internal/hook/clewcontract"
 	"github.com/autom8y/knossos/internal/lock"
 	"github.com/autom8y/knossos/internal/output"
 	sess "github.com/autom8y/knossos/internal/session"
@@ -111,7 +112,6 @@ func runTransition(ctx *cmdContext, targetPhase string, opts transitionOptions) 
 	}
 
 	// Validate artifacts if not forced
-	artifactsValidated := true
 	if !opts.force {
 		missing := validateArtifacts(resolver.ProjectRoot(), sess.Phase(targetPhase))
 		if len(missing) > 0 {
@@ -125,8 +125,6 @@ func runTransition(ctx *cmdContext, targetPhase string, opts transitionOptions) 
 			printer.PrintError(err)
 			return err
 		}
-	} else {
-		artifactsValidated = false
 	}
 
 	// Rotate SESSION_CONTEXT on phase transition to keep context compact
@@ -151,10 +149,12 @@ func runTransition(ctx *cmdContext, targetPhase string, opts transitionOptions) 
 		return err
 	}
 
-	// Emit event
-	emitter := ctx.getEventEmitter(sessionID)
-	if err := emitter.EmitPhaseTransition(sessionID, fromPhase, targetPhase, artifactsValidated); err != nil {
-		printer.VerboseLog("warn", "failed to emit transition event", map[string]interface{}{"error": err.Error()})
+	// Emit lifecycle event
+	writer := clewcontract.NewBufferedEventWriter(sessionDir, clewcontract.DefaultFlushInterval)
+	defer writer.Close()
+	writer.Write(clewcontract.NewPhaseTransitionedEvent(sessionID, fromPhase, targetPhase))
+	if err := writer.Flush(); err != nil {
+		printer.VerboseLog("warn", "failed to write event", map[string]interface{}{"error": err.Error()})
 	}
 
 	// Output result

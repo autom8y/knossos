@@ -6,6 +6,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/autom8y/knossos/internal/errors"
+	"github.com/autom8y/knossos/internal/hook/clewcontract"
 	"github.com/autom8y/knossos/internal/lock"
 	"github.com/autom8y/knossos/internal/output"
 	"github.com/autom8y/knossos/internal/session"
@@ -93,10 +94,13 @@ func runResume(ctx *cmdContext) error {
 		printer.VerboseLog("warn", "failed to set current session", map[string]interface{}{"error": err.Error()})
 	}
 
-	// Emit event
-	emitter := ctx.getEventEmitter(sessionID)
-	if err := emitter.EmitResumed(sessionID); err != nil {
-		printer.VerboseLog("warn", "failed to emit resume event", map[string]interface{}{"error": err.Error()})
+	// Emit lifecycle event
+	sessionDir := resolver.SessionDir(sessionID)
+	writer := clewcontract.NewBufferedEventWriter(sessionDir, clewcontract.DefaultFlushInterval)
+	defer writer.Close()
+	writer.Write(clewcontract.NewSessionResumedEvent(sessionID))
+	if err := writer.Flush(); err != nil {
+		printer.VerboseLog("warn", "failed to write event", map[string]interface{}{"error": err.Error()})
 	}
 
 	// Output result

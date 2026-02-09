@@ -10,6 +10,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/autom8y/knossos/internal/errors"
+	"github.com/autom8y/knossos/internal/hook/clewcontract"
 	"github.com/autom8y/knossos/internal/lock"
 	"github.com/autom8y/knossos/internal/output"
 	"github.com/autom8y/knossos/internal/paths"
@@ -144,17 +145,12 @@ func runCreate(ctx *cmdContext, initiative string, opts createOptions) error {
 		return err
 	}
 
-	// Ensure audit directory exists
-	if err := paths.EnsureDir(resolver.AuditDir()); err != nil {
-		// Non-fatal, but log
-		printer.VerboseLog("warn", "failed to create audit directory", nil)
-	}
-
-	// Emit creation event
-	emitter := ctx.getEventEmitter(newCtx.SessionID)
-	if err := emitter.EmitCreated(newCtx.SessionID, initiative, opts.complexity, team); err != nil {
-		// Non-fatal
-		printer.VerboseLog("warn", "failed to emit creation event", map[string]interface{}{"error": err.Error()})
+	// Emit lifecycle event
+	writer := clewcontract.NewBufferedEventWriter(sessionDir, clewcontract.DefaultFlushInterval)
+	defer writer.Close()
+	writer.Write(clewcontract.NewSessionCreatedEvent(newCtx.SessionID, initiative, opts.complexity, team))
+	if err := writer.Flush(); err != nil {
+		printer.VerboseLog("warn", "failed to write event", map[string]interface{}{"error": err.Error()})
 	}
 
 	// Set as current session
