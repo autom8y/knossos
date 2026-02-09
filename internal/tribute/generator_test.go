@@ -122,9 +122,9 @@ archived_at: "2026-01-06T14:00:00Z"
 
 	// Create events.jsonl with various events
 	eventsContent := `{"timestamp":"2026-01-06T10:00:00Z","event":"SESSION_CREATED","from":"NONE","to":"ACTIVE","metadata":{"initiative":"events-test","complexity":"MODULE","team":"10x-dev"}}
-{"ts":"2026-01-06T11:00:00Z","type":"artifact_created","path":"docs/requirements/PRD-test.md","artifact_type":"PRD"}
-{"ts":"2026-01-06T12:00:00Z","type":"decision","decision":"Use Go for implementation","rationale":"Type safety and performance"}
-{"ts":"2026-01-06T13:00:00Z","type":"handoff_executed","from":"architect","to":"principal-engineer","notes":"TDD approved"}
+{"ts":"2026-01-06T11:00:00Z","type":"tool.artifact_created","path":"docs/requirements/PRD-test.md","artifact_type":"PRD"}
+{"ts":"2026-01-06T12:00:00Z","type":"agent.decision","decision":"Use Go for implementation","rationale":"Type safety and performance"}
+{"ts":"2026-01-06T13:00:00Z","type":"agent.handoff_executed","from":"architect","to":"principal-engineer","notes":"TDD approved"}
 {"timestamp":"2026-01-06T14:00:00Z","event":"SESSION_ARCHIVED","from":"ACTIVE","to":"ARCHIVED"}
 `
 	if err := os.WriteFile(filepath.Join(sessionDir, "events.jsonl"), []byte(eventsContent), 0644); err != nil {

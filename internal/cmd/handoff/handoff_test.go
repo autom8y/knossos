@@ -413,8 +413,8 @@ current_phase: design
 	// Seed some events in events.jsonl
 	eventsPath := filepath.Join(sessionDir, "events.jsonl")
 	events := []string{
-		`{"ts":"2026-01-05T14:00:00.000Z","type":"task_start","summary":"Task delegated to architect","meta":{"agent":"architect","description":"Design TDD","parent_session":"` + sessionID + `"}}`,
-		`{"ts":"2026-01-05T14:30:00.000Z","type":"task_end","summary":"Task completed by architect: success","meta":{"agent":"architect","status":"success","throughline":"TDD completed","artifacts":["docs/design/TDD-test.md"],"duration_ms":1800000}}`,
+		`{"ts":"2026-01-05T14:00:00.000Z","type":"agent.task_start","summary":"Task delegated to architect","meta":{"agent":"architect","description":"Design TDD","parent_session":"` + sessionID + `"}}`,
+		`{"ts":"2026-01-05T14:30:00.000Z","type":"agent.task_end","summary":"Task completed by architect: success","meta":{"agent":"architect","status":"success","throughline":"TDD completed","artifacts":["docs/design/TDD-test.md"],"duration_ms":1800000}}`,
 		`{"timestamp":"2026-01-05T14:30:01.000Z","event":"HANDOFF_EXECUTED","to":"principal-engineer","metadata":{"artifact_id":"TDD-test","from_phase":"design","target_phase":"implementation"}}`,
 	}
 	if err := os.WriteFile(eventsPath, []byte(strings.Join(events, "\n")+"\n"), 0644); err != nil {
@@ -1854,10 +1854,10 @@ current_phase: implementation
 	// Seed events with handoffs
 	eventsPath := filepath.Join(sessionDir, "events.jsonl")
 	events := []string{
-		`{"ts":"2026-01-05T13:00:00.000Z","type":"task_start","summary":"Task delegated to architect","meta":{"agent":"architect","description":"Design TDD","parent_session":"` + sessionID + `"}}`,
-		`{"ts":"2026-01-05T13:30:00.000Z","type":"task_end","summary":"Task completed by architect","meta":{"agent":"architect","status":"success","parent_session":"` + sessionID + `"}}`,
+		`{"ts":"2026-01-05T13:00:00.000Z","type":"agent.task_start","summary":"Task delegated to architect","meta":{"agent":"architect","description":"Design TDD","parent_session":"` + sessionID + `"}}`,
+		`{"ts":"2026-01-05T13:30:00.000Z","type":"agent.task_end","summary":"Task completed by architect","meta":{"agent":"architect","status":"success","parent_session":"` + sessionID + `"}}`,
 		`{"timestamp":"2026-01-05T13:30:01.000Z","event":"HANDOFF_EXECUTED","to":"principal-engineer","metadata":{"artifact_id":"TDD-test","from_phase":"design","target_phase":"implementation"}}`,
-		`{"ts":"2026-01-05T13:30:02.000Z","type":"task_start","summary":"Task delegated to principal-engineer","meta":{"agent":"principal-engineer","description":"Implement","parent_session":"` + sessionID + `"}}`,
+		`{"ts":"2026-01-05T13:30:02.000Z","type":"agent.task_start","summary":"Task delegated to principal-engineer","meta":{"agent":"principal-engineer","description":"Implement","parent_session":"` + sessionID + `"}}`,
 	}
 	if err := os.WriteFile(eventsPath, []byte(strings.Join(events, "\n")+"\n"), 0644); err != nil {
 		t.Fatalf("Failed to write events.jsonl: %v", err)
@@ -2008,12 +2008,12 @@ current_phase: validation
 	// Seed many events
 	eventsPath := filepath.Join(sessionDir, "events.jsonl")
 	events := []string{
-		`{"ts":"2026-01-05T12:00:00.000Z","type":"task_start","summary":"Task 1","meta":{"agent":"requirements-analyst","parent_session":"` + sessionID + `"}}`,
-		`{"ts":"2026-01-05T12:30:00.000Z","type":"task_end","summary":"End 1","meta":{"agent":"requirements-analyst","status":"success","parent_session":"` + sessionID + `"}}`,
-		`{"ts":"2026-01-05T13:00:00.000Z","type":"task_start","summary":"Task 2","meta":{"agent":"architect","parent_session":"` + sessionID + `"}}`,
-		`{"ts":"2026-01-05T13:30:00.000Z","type":"task_end","summary":"End 2","meta":{"agent":"architect","status":"success","parent_session":"` + sessionID + `"}}`,
-		`{"ts":"2026-01-05T14:00:00.000Z","type":"task_start","summary":"Task 3","meta":{"agent":"principal-engineer","parent_session":"` + sessionID + `"}}`,
-		`{"ts":"2026-01-05T14:30:00.000Z","type":"task_end","summary":"End 3","meta":{"agent":"principal-engineer","status":"success","parent_session":"` + sessionID + `"}}`,
+		`{"ts":"2026-01-05T12:00:00.000Z","type":"agent.task_start","summary":"Task 1","meta":{"agent":"requirements-analyst","parent_session":"` + sessionID + `"}}`,
+		`{"ts":"2026-01-05T12:30:00.000Z","type":"agent.task_end","summary":"End 1","meta":{"agent":"requirements-analyst","status":"success","parent_session":"` + sessionID + `"}}`,
+		`{"ts":"2026-01-05T13:00:00.000Z","type":"agent.task_start","summary":"Task 2","meta":{"agent":"architect","parent_session":"` + sessionID + `"}}`,
+		`{"ts":"2026-01-05T13:30:00.000Z","type":"agent.task_end","summary":"End 2","meta":{"agent":"architect","status":"success","parent_session":"` + sessionID + `"}}`,
+		`{"ts":"2026-01-05T14:00:00.000Z","type":"agent.task_start","summary":"Task 3","meta":{"agent":"principal-engineer","parent_session":"` + sessionID + `"}}`,
+		`{"ts":"2026-01-05T14:30:00.000Z","type":"agent.task_end","summary":"End 3","meta":{"agent":"principal-engineer","status":"success","parent_session":"` + sessionID + `"}}`,
 	}
 	if err := os.WriteFile(eventsPath, []byte(strings.Join(events, "\n")+"\n"), 0644); err != nil {
 		t.Fatalf("Failed to write events.jsonl: %v", err)
@@ -2089,7 +2089,7 @@ current_phase: implementation
 	eventsPath := filepath.Join(sessionDir, "events.jsonl")
 	events := []string{
 		`{"timestamp":"2026-01-05T13:00:00.000Z","event":"PHASE_TRANSITIONED","from_phase":"design","to_phase":"implementation"}`,
-		`{"ts":"2026-01-05T13:00:01.000Z","type":"task_start","summary":"Implementation started","meta":{"agent":"principal-engineer","parent_session":"` + sessionID + `"}}`,
+		`{"ts":"2026-01-05T13:00:01.000Z","type":"agent.task_start","summary":"Implementation started","meta":{"agent":"principal-engineer","parent_session":"` + sessionID + `"}}`,
 	}
 	if err := os.WriteFile(eventsPath, []byte(strings.Join(events, "\n")+"\n"), 0644); err != nil {
 		t.Fatalf("Failed to write events.jsonl: %v", err)

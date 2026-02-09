@@ -282,7 +282,7 @@ throughline:
 	eventsContent := string(eventsData)
 
 	// Should have a tool_call event for Task
-	if !strings.Contains(eventsContent, `"type":"tool_call"`) {
+	if !strings.Contains(eventsContent, `"type":"tool.call"`) {
 		t.Error("events.jsonl missing tool_call event")
 	}
 	if !strings.Contains(eventsContent, `"tool":"Task"`) {
@@ -290,7 +290,7 @@ throughline:
 	}
 
 	// Should have a decision event from the stamp
-	if !strings.Contains(eventsContent, `"type":"decision"`) {
+	if !strings.Contains(eventsContent, `"type":"agent.decision"`) {
 		t.Error("events.jsonl missing decision event from stamp")
 	}
 	if !strings.Contains(eventsContent, "Route to principal-engineer for implementation") {
@@ -375,12 +375,12 @@ Files modified:
 	eventsContent := string(eventsData)
 
 	// Should have a tool_call event for Task
-	if !strings.Contains(eventsContent, `"type":"tool_call"`) {
+	if !strings.Contains(eventsContent, `"type":"tool.call"`) {
 		t.Error("events.jsonl missing tool_call event")
 	}
 
 	// Should NOT have a decision event (no throughline in non-orchestrator Task)
-	if strings.Contains(eventsContent, `"type":"decision"`) {
+	if strings.Contains(eventsContent, `"type":"agent.decision"`) {
 		t.Error("events.jsonl should NOT have decision event for non-orchestrator Task")
 	}
 }
@@ -459,7 +459,7 @@ func TestClew_StdinIntegration_RecordsToolEvent(t *testing.T) {
 	eventsContent := string(eventsData)
 
 	// Should have a tool_call event for Write
-	if !strings.Contains(eventsContent, `"type":"tool_call"`) {
+	if !strings.Contains(eventsContent, `"type":"tool.call"`) {
 		t.Error("events.jsonl missing tool_call event")
 	}
 	if !strings.Contains(eventsContent, `"tool":"Write"`) {

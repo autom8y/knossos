@@ -906,8 +906,8 @@ open_questions: []
 	writeWhiteSails(t, sessionDir, sailsContent)
 
 	// Create events.jsonl with sails_generated event (as wrap command would)
-	eventsContent := `{"timestamp":"2026-01-05T14:30:00Z","type":"sails_generated","session_id":"session-20260105-143000-events","data":{"color":"WHITE","computed_base":"WHITE","file_path":"WHITE_SAILS.yaml"}}
-{"timestamp":"2026-01-05T14:30:01Z","type":"session_end","session_id":"session-20260105-143000-events","data":{"reason":"completed"}}
+	eventsContent := `{"timestamp":"2026-01-05T14:30:00Z","type":"quality.sails_generated","session_id":"session-20260105-143000-events","data":{"color":"WHITE","computed_base":"WHITE","file_path":"WHITE_SAILS.yaml"}}
+{"timestamp":"2026-01-05T14:30:01Z","type":"session.ended","session_id":"session-20260105-143000-events","data":{"reason":"completed"}}
 `
 	require.NoError(t, os.WriteFile(
 		filepath.Join(sessionDir, "events.jsonl"),

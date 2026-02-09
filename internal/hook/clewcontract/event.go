@@ -12,21 +12,21 @@ type EventType string
 
 // Clew event types for tracking Claude Code activity.
 const (
-	EventTypeToolCall   EventType = "tool_call"
-	EventTypeFileChange EventType = "file_change"
-	EventTypeDecision   EventType = "decision"
+	EventTypeToolCall   EventType = "tool.call"
+	EventTypeFileChange EventType = "tool.file_change"
+	EventTypeDecision   EventType = "agent.decision"
 	EventTypeContextSwitch   EventType = "context_switch"
-	EventTypeSailsGenerated  EventType = "sails_generated"
-	EventTypeTaskStart       EventType = "task_start"
-	EventTypeTaskEnd         EventType = "task_end"
-	EventTypeSessionStart    EventType = "session_start"
-	EventTypeSessionEnd      EventType = "session_end"
-	EventTypeArtifactCreated EventType = "artifact_created"
-	EventTypeError           EventType = "error"
-	EventTypeHandoffPrepared EventType = "handoff_prepared"
-	EventTypeHandoffExecuted EventType = "handoff_executed"
-	EventTypeSessionFrayed   EventType = "session_frayed"
-	EventTypeStrandResolved  EventType = "strand_resolved"
+	EventTypeSailsGenerated  EventType = "quality.sails_generated"
+	EventTypeTaskStart       EventType = "agent.task_start"
+	EventTypeTaskEnd         EventType = "agent.task_end"
+	EventTypeSessionStart    EventType = "session.started"
+	EventTypeSessionEnd      EventType = "session.ended"
+	EventTypeArtifactCreated EventType = "tool.artifact_created"
+	EventTypeError           EventType = "tool.error"
+	EventTypeHandoffPrepared EventType = "agent.handoff_prepared"
+	EventTypeHandoffExecuted EventType = "agent.handoff_executed"
+	EventTypeSessionFrayed   EventType = "session.frayed"
+	EventTypeStrandResolved  EventType = "session.strand_resolved"
 )
 
 // ArtifactType represents the type of artifact created during a session.

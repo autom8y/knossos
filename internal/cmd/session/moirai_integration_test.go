@@ -522,7 +522,7 @@ func TestMoirai_AuditTrail_EventsEmitted(t *testing.T) {
 		t.Errorf("After create: SESSION_CREATED events = %d, want 1", createCount)
 	}
 
-	// Park -- should emit SESSION_PARKED and session_end
+	// Park -- should emit SESSION_PARKED and session.ended
 	err = runPark(ctx, parkOptions{reason: "Audit park"})
 	if err != nil {
 		t.Fatalf("Park failed: %v", err)
@@ -532,12 +532,12 @@ func TestMoirai_AuditTrail_EventsEmitted(t *testing.T) {
 	if parkCount != 1 {
 		t.Errorf("After park: SESSION_PARKED events = %d, want 1", parkCount)
 	}
-	parkEndCount := countEventsOfType(t, projectDir, sessionID, "session_end")
+	parkEndCount := countEventsOfType(t, projectDir, sessionID, "session.ended")
 	if parkEndCount < 1 {
-		t.Errorf("After park: session_end events = %d, want >= 1", parkEndCount)
+		t.Errorf("After park: session.ended events = %d, want >= 1", parkEndCount)
 	}
 
-	// Resume -- should emit SESSION_RESUMED (NOT session_end)
+	// Resume -- should emit SESSION_RESUMED (NOT session.ended)
 	err = runResume(ctx)
 	if err != nil {
 		t.Fatalf("Resume failed: %v", err)
@@ -547,14 +547,14 @@ func TestMoirai_AuditTrail_EventsEmitted(t *testing.T) {
 	if resumeCount != 1 {
 		t.Errorf("After resume: SESSION_RESUMED events = %d, want 1", resumeCount)
 	}
-	// session_end count should NOT increase after resume
-	resumeEndCount := countEventsOfType(t, projectDir, sessionID, "session_end")
+	// session.ended count should NOT increase after resume
+	resumeEndCount := countEventsOfType(t, projectDir, sessionID, "session.ended")
 	if resumeEndCount != parkEndCount {
-		t.Errorf("After resume: session_end count changed from %d to %d (resume should NOT emit session_end)",
+		t.Errorf("After resume: session.ended count changed from %d to %d (resume should NOT emit session.ended)",
 			parkEndCount, resumeEndCount)
 	}
 
-	// Wrap -- should emit SESSION_ARCHIVED and session_end
+	// Wrap -- should emit SESSION_ARCHIVED and session.ended
 	err = runWrap(ctx, wrapOptions{noArchive: true})
 	if err != nil {
 		t.Fatalf("Wrap failed: %v", err)
@@ -564,9 +564,9 @@ func TestMoirai_AuditTrail_EventsEmitted(t *testing.T) {
 	if archiveCount != 1 {
 		t.Errorf("After wrap: SESSION_ARCHIVED events = %d, want 1", archiveCount)
 	}
-	wrapEndCount := countEventsOfType(t, projectDir, sessionID, "session_end")
+	wrapEndCount := countEventsOfType(t, projectDir, sessionID, "session.ended")
 	if wrapEndCount < parkEndCount+1 {
-		t.Errorf("After wrap: session_end count = %d, want > %d", wrapEndCount, parkEndCount)
+		t.Errorf("After wrap: session.ended count = %d, want > %d", wrapEndCount, parkEndCount)
 	}
 }
 

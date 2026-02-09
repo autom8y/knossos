@@ -72,7 +72,7 @@ func (e *Extractor) ExtractArtifacts(events []EventData) []Artifact {
 
 	for _, event := range events {
 		eventType := event.GetEventType()
-		if eventType != "artifact_created" {
+		if eventType != "tool.artifact_created" {
 			continue
 		}
 
@@ -111,7 +111,7 @@ func (e *Extractor) ExtractDecisions(events []EventData) []Decision {
 
 	for _, event := range events {
 		eventType := event.GetEventType()
-		if eventType != "decision" {
+		if eventType != "agent.decision" {
 			continue
 		}
 
@@ -202,12 +202,12 @@ func (e *Extractor) ExtractHandoffs(events []EventData) []Handoff {
 		eventType := event.GetEventType()
 
 		switch eventType {
-		case "handoff_prepared":
+		case "agent.handoff_prepared":
 			// Store for correlation
 			key := event.From + "->" + event.To
 			prepared[key] = event
 
-		case "handoff_executed":
+		case "agent.handoff_executed":
 			timestamp := parseTimestamp(event.GetTimestamp())
 			key := event.From + "->" + event.To
 
@@ -243,9 +243,9 @@ func (e *Extractor) ExtractMetrics(events []EventData) Metrics {
 		eventType := event.GetEventType()
 
 		switch eventType {
-		case "tool_call":
+		case "tool.call":
 			metrics.ToolCalls++
-		case "file_change":
+		case "tool.file_change":
 			metrics.FilesModified++
 			// Try to get line stats from metadata
 			if meta := event.GetMetadata(); meta != nil {

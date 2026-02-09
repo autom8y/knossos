@@ -11,19 +11,19 @@ func TestExtractor_ExtractArtifacts(t *testing.T) {
 	events := []EventData{
 		{
 			Ts:           "2026-01-06T11:00:00Z",
-			Type:         "artifact_created",
+			Type:         "tool.artifact_created",
 			Path:         "docs/requirements/PRD-test.md",
 			ArtifactType: "PRD",
 		},
 		{
 			Ts:   "2026-01-06T12:00:00Z",
-			Type: "artifact_created",
+			Type: "tool.artifact_created",
 			Path: "docs/design/TDD-test.md",
 			// ArtifactType inferred from path
 		},
 		{
 			Ts:   "2026-01-06T13:00:00Z",
-			Type: "tool_call", // Not an artifact event
+			Type: "tool.call", // Not an artifact event
 		},
 	}
 
@@ -52,14 +52,14 @@ func TestExtractor_ExtractDecisions(t *testing.T) {
 	events := []EventData{
 		{
 			Ts:        "2026-01-06T11:00:00Z",
-			Type:      "decision",
+			Type:      "agent.decision",
 			Decision:  "Use PostgreSQL over MySQL",
 			Rationale: "Better JSON support and performance",
 			Rejected:  []string{"MySQL", "SQLite"},
 		},
 		{
 			Ts:   "2026-01-06T12:00:00Z",
-			Type: "tool_call", // Not a decision event
+			Type: "tool.call", // Not a decision event
 		},
 	}
 
@@ -85,14 +85,14 @@ func TestExtractor_ExtractHandoffs(t *testing.T) {
 	events := []EventData{
 		{
 			Ts:    "2026-01-06T11:00:00Z",
-			Type:  "handoff_prepared",
+			Type:  "agent.handoff_prepared",
 			From:  "architect",
 			To:    "principal-engineer",
 			Notes: "TDD approved",
 		},
 		{
 			Ts:   "2026-01-06T11:00:01Z",
-			Type: "handoff_executed",
+			Type: "agent.handoff_executed",
 			From: "architect",
 			To:   "principal-engineer",
 		},
@@ -162,18 +162,18 @@ func TestExtractor_ExtractPhases(t *testing.T) {
 
 func TestExtractor_ExtractMetrics(t *testing.T) {
 	events := []EventData{
-		{Type: "tool_call"},
-		{Type: "tool_call"},
-		{Type: "tool_call"},
+		{Type: "tool.call"},
+		{Type: "tool.call"},
+		{Type: "tool.call"},
 		{
-			Type: "file_change",
+			Type: "tool.file_change",
 			Meta: map[string]interface{}{
 				"lines_added":   float64(100),
 				"lines_removed": float64(20),
 			},
 		},
 		{
-			Type: "file_change",
+			Type: "tool.file_change",
 			Meta: map[string]interface{}{
 				"lines_added":   float64(50),
 				"lines_removed": float64(10),
@@ -374,8 +374,8 @@ func TestEventData_GetEventType(t *testing.T) {
 	}
 
 	// Test with Type field
-	e2 := EventData{Type: "artifact_created"}
-	if e2.GetEventType() != "artifact_created" {
+	e2 := EventData{Type: "tool.artifact_created"}
+	if e2.GetEventType() != "tool.artifact_created" {
 		t.Errorf("GetEventType() with Type field failed")
 	}
 }

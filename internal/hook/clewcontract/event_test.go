@@ -12,11 +12,11 @@ func TestEventType_Constants(t *testing.T) {
 		eventType EventType
 		expected  string
 	}{
-		{EventTypeToolCall, "tool_call"},
-		{EventTypeFileChange, "file_change"},
-		{EventTypeDecision, "decision"},
+		{EventTypeToolCall, "tool.call"},
+		{EventTypeFileChange, "tool.file_change"},
+		{EventTypeDecision, "agent.decision"},
 		{EventTypeContextSwitch, "context_switch"},
-		{EventTypeSailsGenerated, "sails_generated"},
+		{EventTypeSailsGenerated, "quality.sails_generated"},
 	}
 
 	for _, tt := range tests {
@@ -53,8 +53,8 @@ func TestEvent_JSONMarshaling(t *testing.T) {
 	if raw["ts"] != "2024-01-04T10:23:45.123Z" {
 		t.Errorf("ts = %v, want 2024-01-04T10:23:45.123Z", raw["ts"])
 	}
-	if raw["type"] != "tool_call" {
-		t.Errorf("type = %v, want tool_call", raw["type"])
+	if raw["type"] != "tool.call" {
+		t.Errorf("type = %v, want tool.call", raw["type"])
 	}
 	if raw["tool"] != "Edit" {
 		t.Errorf("tool = %v, want Edit", raw["tool"])
@@ -79,7 +79,7 @@ func TestEvent_JSONMarshaling(t *testing.T) {
 func TestEvent_JSONUnmarshaling(t *testing.T) {
 	jsonStr := `{
 		"ts": "2024-01-04T10:23:45.123Z",
-		"type": "file_change",
+		"type": "tool.file_change",
 		"path": "/some/file.txt",
 		"summary": "Changed /some/file.txt",
 		"meta": {"lines_changed": 10}
@@ -409,8 +409,8 @@ func TestStamp_ToEvent_MinimalFields(t *testing.T) {
 }
 
 func TestEventTypeSailsGenerated_Constant(t *testing.T) {
-	if string(EventTypeSailsGenerated) != "sails_generated" {
-		t.Errorf("EventTypeSailsGenerated = %q, want %q", EventTypeSailsGenerated, "sails_generated")
+	if string(EventTypeSailsGenerated) != "quality.sails_generated" {
+		t.Errorf("EventTypeSailsGenerated = %q, want %q", EventTypeSailsGenerated, "quality.sails_generated")
 	}
 }
 
@@ -577,8 +577,8 @@ func TestNewSailsGeneratedEvent_JSONMarshaling(t *testing.T) {
 	}
 
 	// Check type in JSON
-	if raw["type"] != "sails_generated" {
-		t.Errorf("type = %v, want 'sails_generated'", raw["type"])
+	if raw["type"] != "quality.sails_generated" {
+		t.Errorf("type = %v, want 'quality.sails_generated'", raw["type"])
 	}
 
 	// Check meta is present
@@ -806,14 +806,14 @@ func TestArtifactType_Count(t *testing.T) {
 }
 
 func TestEventTypeTaskStart_Constant(t *testing.T) {
-	if string(EventTypeTaskStart) != "task_start" {
-		t.Errorf("EventTypeTaskStart = %q, want %q", EventTypeTaskStart, "task_start")
+	if string(EventTypeTaskStart) != "agent.task_start" {
+		t.Errorf("EventTypeTaskStart = %q, want %q", EventTypeTaskStart, "agent.task_start")
 	}
 }
 
 func TestEventTypeTaskEnd_Constant(t *testing.T) {
-	if string(EventTypeTaskEnd) != "task_end" {
-		t.Errorf("EventTypeTaskEnd = %q, want %q", EventTypeTaskEnd, "task_end")
+	if string(EventTypeTaskEnd) != "agent.task_end" {
+		t.Errorf("EventTypeTaskEnd = %q, want %q", EventTypeTaskEnd, "agent.task_end")
 	}
 }
 
@@ -953,8 +953,8 @@ func TestTaskEvents_JSONMarshaling(t *testing.T) {
 	}
 
 	// Check type in JSON
-	if startRaw["type"] != "task_start" {
-		t.Errorf("type = %v, want 'task_start'", startRaw["type"])
+	if startRaw["type"] != "agent.task_start" {
+		t.Errorf("type = %v, want 'agent.task_start'", startRaw["type"])
 	}
 
 	// Check meta is present
@@ -979,8 +979,8 @@ func TestTaskEvents_JSONMarshaling(t *testing.T) {
 	}
 
 	// Check type in JSON
-	if endRaw["type"] != "task_end" {
-		t.Errorf("type = %v, want 'task_end'", endRaw["type"])
+	if endRaw["type"] != "agent.task_end" {
+		t.Errorf("type = %v, want 'agent.task_end'", endRaw["type"])
 	}
 
 	// Check meta is present

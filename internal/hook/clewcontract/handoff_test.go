@@ -6,14 +6,14 @@ import (
 )
 
 func TestEventTypeHandoffPrepared_Constant(t *testing.T) {
-	if EventTypeHandoffPrepared != "handoff_prepared" {
-		t.Errorf("EventTypeHandoffPrepared = %q, want %q", EventTypeHandoffPrepared, "handoff_prepared")
+	if EventTypeHandoffPrepared != "agent.handoff_prepared" {
+		t.Errorf("EventTypeHandoffPrepared = %q, want %q", EventTypeHandoffPrepared, "agent.handoff_prepared")
 	}
 }
 
 func TestEventTypeHandoffExecuted_Constant(t *testing.T) {
-	if EventTypeHandoffExecuted != "handoff_executed" {
-		t.Errorf("EventTypeHandoffExecuted = %q, want %q", EventTypeHandoffExecuted, "handoff_executed")
+	if EventTypeHandoffExecuted != "agent.handoff_executed" {
+		t.Errorf("EventTypeHandoffExecuted = %q, want %q", EventTypeHandoffExecuted, "agent.handoff_executed")
 	}
 }
 
@@ -122,8 +122,8 @@ func TestHandoffPreparedEvent_JSONMarshaling(t *testing.T) {
 	}
 
 	// Check required fields
-	if result["type"] != "handoff_prepared" {
-		t.Errorf("type = %v, want %q", result["type"], "handoff_prepared")
+	if result["type"] != "agent.handoff_prepared" {
+		t.Errorf("type = %v, want %q", result["type"], "agent.handoff_prepared")
 	}
 
 	if result["summary"] != "Handoff prepared: architect -> integration-engineer" {
@@ -167,8 +167,8 @@ func TestHandoffExecutedEvent_JSONMarshaling(t *testing.T) {
 	}
 
 	// Check required fields
-	if result["type"] != "handoff_executed" {
-		t.Errorf("type = %v, want %q", result["type"], "handoff_executed")
+	if result["type"] != "agent.handoff_executed" {
+		t.Errorf("type = %v, want %q", result["type"], "agent.handoff_executed")
 	}
 
 	meta, ok := result["meta"].(map[string]interface{})

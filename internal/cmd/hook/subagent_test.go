@@ -163,8 +163,8 @@ func TestSubagentStart_LogsToClew(t *testing.T) {
 	if !strings.Contains(content, "Subagent started: integration-engineer") {
 		t.Error("events.jsonl missing subagent start summary")
 	}
-	if !strings.Contains(content, "task_start") {
-		t.Error("events.jsonl missing task_start event type")
+	if !strings.Contains(content, "agent.task_start") {
+		t.Error("events.jsonl missing agent.task_start event type")
 	}
 }
 
@@ -226,8 +226,8 @@ func TestSubagentStop_LogsToClew(t *testing.T) {
 	if !strings.Contains(content, "Subagent stopped: context-architect") {
 		t.Error("events.jsonl missing subagent stop summary")
 	}
-	if !strings.Contains(content, "task_end") {
-		t.Error("events.jsonl missing task_end event type")
+	if !strings.Contains(content, "agent.task_end") {
+		t.Error("events.jsonl missing agent.task_end event type")
 	}
 }
 

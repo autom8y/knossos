@@ -666,9 +666,9 @@ func TestReadEventsFromFile_MalformedLines(t *testing.T) {
 	eventsPath := filepath.Join(tmpDir, EventsFileName)
 
 	// Write some valid and invalid JSON lines
-	content := `{"ts":"2024-01-04T10:00:00.000Z","type":"tool_call","tool":"Read"}
+	content := `{"ts":"2024-01-04T10:00:00.000Z","type":"tool.call","tool":"Read"}
 not valid json
-{"ts":"2024-01-04T10:01:00.000Z","type":"tool_call","tool":"Edit","path":"/a.go"}
+{"ts":"2024-01-04T10:01:00.000Z","type":"tool.call","tool":"Edit","path":"/a.go"}
 `
 	if err := os.WriteFile(eventsPath, []byte(content), 0644); err != nil {
 		t.Fatal(err)

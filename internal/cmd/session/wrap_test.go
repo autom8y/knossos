@@ -135,8 +135,8 @@ exit code: 0`
 		t.Fatalf("Failed to read events.jsonl: %v", err)
 	}
 
-	if !strings.Contains(string(eventsContent), "sails_generated") {
-		t.Error("events.jsonl missing sails_generated event")
+	if !strings.Contains(string(eventsContent), "quality.sails_generated") {
+		t.Error("events.jsonl missing quality.sails_generated event")
 	}
 	if !strings.Contains(string(eventsContent), "WHITE_SAILS") {
 		t.Error("events.jsonl missing WHITE_SAILS reference")
@@ -871,9 +871,9 @@ created_at: 2025-01-05T12:00:00Z
 	}
 
 	// Create CLEW_RECORD.ndjson with some tool events
-	clewRecord := `{"timestamp":"2025-01-05T12:00:01Z","type":"tool_call","tool":"Read"}
-{"timestamp":"2025-01-05T12:00:02Z","type":"tool_call","tool":"Bash"}
-{"timestamp":"2025-01-05T12:00:03Z","type":"tool_call","tool":"Write"}
+	clewRecord := `{"timestamp":"2025-01-05T12:00:01Z","type":"tool.call","tool":"Read"}
+{"timestamp":"2025-01-05T12:00:02Z","type":"tool.call","tool":"Bash"}
+{"timestamp":"2025-01-05T12:00:03Z","type":"tool.call","tool":"Write"}
 `
 	if err := os.WriteFile(filepath.Join(sessionDir, "CLEW_RECORD.ndjson"), []byte(clewRecord), 0644); err != nil {
 		t.Fatalf("Failed to write CLEW_RECORD.ndjson: %v", err)
@@ -915,8 +915,8 @@ exit code: 0`
 	}
 
 	eventsStr := string(eventsContent)
-	if !strings.Contains(eventsStr, "session_end") {
-		t.Error("events.jsonl missing session_end event")
+	if !strings.Contains(eventsStr, "session.ended") {
+		t.Error("events.jsonl missing session.ended event")
 	}
 	if !strings.Contains(eventsStr, "cognitive_budget") {
 		t.Error("events.jsonl session_end event missing cognitive_budget field")

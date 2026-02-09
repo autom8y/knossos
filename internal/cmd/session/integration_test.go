@@ -511,8 +511,8 @@ current_phase: implementation
 	}
 
 	// Verify session_end event exists (from threadcontract)
-	if !strings.Contains(string(content), `"type":"session_end"`) {
-		t.Error("events.jsonl should contain session_end event")
+	if !strings.Contains(string(content), `"type":"session.ended"`) {
+		t.Error("events.jsonl should contain session.ended event")
 	}
 
 	// Verify both events have correct structure by parsing
