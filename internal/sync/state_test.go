@@ -50,15 +50,6 @@ func TestStateManager_InitializeAndLoad(t *testing.T) {
 	if loaded.Remote != "https://example.com/config" {
 		t.Errorf("Loaded Remote = %q, want %q", loaded.Remote, "https://example.com/config")
 	}
-
-	// Reset
-	if err := manager.Reset(); err != nil {
-		t.Fatalf("Reset() error = %v", err)
-	}
-
-	if manager.IsInitialized() {
-		t.Error("expected sync not to be initialized after Reset()")
-	}
 }
 
 func TestStateManager_TrackedFiles(t *testing.T) {
@@ -90,52 +81,6 @@ func TestStateManager_TrackedFiles(t *testing.T) {
 
 	if tracked.Status != "synced" {
 		t.Errorf("Status = %q, want %q", tracked.Status, "synced")
-	}
-}
-
-func TestStateManager_Conflicts(t *testing.T) {
-	tmpDir := t.TempDir()
-	claudeDir := filepath.Join(tmpDir, ".claude")
-	if err := os.MkdirAll(claudeDir, 0755); err != nil {
-		t.Fatalf("failed to create .claude dir: %v", err)
-	}
-
-	resolver := paths.NewResolver(tmpDir)
-	manager := sync.NewStateManager(resolver)
-
-	state, err := manager.Initialize("https://example.com")
-	if err != nil {
-		t.Fatalf("Initialize() error = %v", err)
-	}
-
-	// No conflicts initially
-	if state.HasConflicts() {
-		t.Error("expected no conflicts initially")
-	}
-
-	// Add conflict
-	manager.AddConflict(state, ".claude/CLAUDE.md", "local123", "remote456", "base789", "Both modified")
-
-	if !state.HasConflicts() {
-		t.Error("expected conflicts after AddConflict()")
-	}
-
-	conflict := state.GetConflict(".claude/CLAUDE.md")
-	if conflict == nil {
-		t.Fatal("expected to find conflict")
-	}
-
-	if conflict.LocalHash != "local123" {
-		t.Errorf("LocalHash = %q, want %q", conflict.LocalHash, "local123")
-	}
-
-	// Remove conflict
-	if !manager.RemoveConflict(state, ".claude/CLAUDE.md") {
-		t.Error("expected RemoveConflict to return true")
-	}
-
-	if state.HasConflicts() {
-		t.Error("expected no conflicts after RemoveConflict()")
 	}
 }
 
@@ -239,64 +184,5 @@ func TestComputeFileHash(t *testing.T) {
 	}
 	if hash != "" {
 		t.Errorf("hash for nonexistent = %q, want empty", hash)
-	}
-}
-
-func TestParseRemote(t *testing.T) {
-	tests := []struct {
-		name       string
-		input      string
-		wantType   sync.RemoteType
-		wantURL    string
-		wantErr    bool
-	}{
-		{
-			name:     "HTTPS URL",
-			input:    "https://example.com/config",
-			wantType: sync.RemoteTypeHTTP,
-			wantURL:  "https://example.com/config",
-		},
-		{
-			name:     "HTTP URL",
-			input:    "http://localhost:8080/config",
-			wantType: sync.RemoteTypeHTTP,
-			wantURL:  "http://localhost:8080/config",
-		},
-		{
-			name:     "GitHub shorthand",
-			input:    "anthropic/ariadne",
-			wantType: sync.RemoteTypeHTTP,
-			wantURL:  "https://raw.githubusercontent.com/anthropic/ariadne/main",
-		},
-		{
-			name:     "Absolute path",
-			input:    "/tmp/source",
-			wantType: sync.RemoteTypeLocal,
-		},
-		{
-			name:     "Relative path",
-			input:    "./source",
-			wantType: sync.RemoteTypeLocal,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			remote, err := sync.ParseRemote(tt.input)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("ParseRemote() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if tt.wantErr {
-				return
-			}
-
-			if remote.Type != tt.wantType {
-				t.Errorf("Type = %q, want %q", remote.Type, tt.wantType)
-			}
-			if tt.wantURL != "" && remote.URL != tt.wantURL {
-				t.Errorf("URL = %q, want %q", remote.URL, tt.wantURL)
-			}
-		})
 	}
 }

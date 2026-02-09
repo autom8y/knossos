@@ -376,3 +376,38 @@ func (r *SourceResolver) ClearCache() {
 	r.mu.Unlock()
 }
 
+// UserResourcePaths contains resolved source/target paths for user-scope resources.
+type UserResourcePaths struct {
+	ResourceType SyncResource
+	SourceDir    string // $KNOSSOS_HOME/{agents,mena,hooks}
+	TargetDir    string // ~/.claude/{agents,hooks} (single target)
+	CommandsDir  string // ~/.claude/commands/ (mena only)
+	SkillsDir    string // ~/.claude/skills/ (mena only)
+	Nested       bool   // true for mena, hooks
+}
+
+// ResolveUserResources resolves source/target paths for user-scope resources.
+func (r *SourceResolver) ResolveUserResources(knossosHome string) ([]UserResourcePaths, error) {
+	return []UserResourcePaths{
+		{
+			ResourceType: ResourceAgents,
+			SourceDir:    filepath.Join(knossosHome, "agents"),
+			TargetDir:    paths.UserAgentsDir(),
+			Nested:       false,
+		},
+		{
+			ResourceType: ResourceMena,
+			SourceDir:    filepath.Join(knossosHome, "mena"),
+			CommandsDir:  paths.UserCommandsDir(),
+			SkillsDir:    paths.UserSkillsDir(),
+			Nested:       true,
+		},
+		{
+			ResourceType: ResourceHooks,
+			SourceDir:    filepath.Join(knossosHome, "hooks"),
+			TargetDir:    paths.UserHooksDir(),
+			Nested:       true,
+		},
+	}, nil
+}
+

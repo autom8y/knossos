@@ -75,11 +75,6 @@ func (m *StateManager) StatePath() string {
 	return filepath.Join(m.SyncDir(), "state.json")
 }
 
-// HistoryPath returns the path to history.json.
-func (m *StateManager) HistoryPath() string {
-	return filepath.Join(m.SyncDir(), "history.json")
-}
-
 // EnsureSyncDir creates the sync directory if it doesn't exist.
 func (m *StateManager) EnsureSyncDir() error {
 	return paths.EnsureDir(m.SyncDir())
@@ -148,15 +143,6 @@ func (m *StateManager) Initialize(remote string) (*State, error) {
 	return state, nil
 }
 
-// Reset clears the sync state.
-func (m *StateManager) Reset() error {
-	statePath := m.StatePath()
-	if err := os.Remove(statePath); err != nil && !os.IsNotExist(err) {
-		return errors.Wrap(errors.CodeGeneralError, "failed to remove sync state", err)
-	}
-	return nil
-}
-
 // IsInitialized checks if sync has been initialized.
 func (m *StateManager) IsInitialized() bool {
 	_, err := os.Stat(m.StatePath())
@@ -171,68 +157,6 @@ func ComputeFileHash(path string) (string, error) {
 // ComputeContentHash computes the SHA-256 hash of content bytes with "sha256:" prefix.
 func ComputeContentHash(content []byte) string {
 	return checksum.Bytes(content)
-}
-
-// DetectChanges checks if a file has changed since last sync.
-func (m *StateManager) DetectChanges(state *State, path string) (bool, string, error) {
-	tracked, exists := state.TrackedFiles[path]
-	if !exists {
-		return true, "untracked", nil
-	}
-
-	currentHash, err := ComputeFileHash(filepath.Join(m.resolver.ProjectRoot(), path))
-	if err != nil {
-		return false, "", err
-	}
-
-	if currentHash == "" {
-		return true, "deleted", nil
-	}
-
-	if currentHash != tracked.LocalHash {
-		return true, "modified", nil
-	}
-
-	return false, "synced", nil
-}
-
-// AddConflict records a new conflict.
-func (m *StateManager) AddConflict(state *State, path, localHash, remoteHash, baseHash, description string) {
-	conflict := Conflict{
-		Path:        path,
-		Description: description,
-		LocalHash:   localHash,
-		RemoteHash:  remoteHash,
-		BaseHash:    baseHash,
-		DetectedAt:  time.Now().UTC().Format(time.RFC3339),
-	}
-	state.Conflicts = append(state.Conflicts, conflict)
-}
-
-// RemoveConflict removes a conflict by path.
-func (m *StateManager) RemoveConflict(state *State, path string) bool {
-	for i, c := range state.Conflicts {
-		if c.Path == path {
-			state.Conflicts = append(state.Conflicts[:i], state.Conflicts[i+1:]...)
-			return true
-		}
-	}
-	return false
-}
-
-// HasConflicts returns true if there are unresolved conflicts.
-func (state *State) HasConflicts() bool {
-	return len(state.Conflicts) > 0
-}
-
-// GetConflict returns the conflict for a path, if any.
-func (state *State) GetConflict(path string) *Conflict {
-	for i := range state.Conflicts {
-		if state.Conflicts[i].Path == path {
-			return &state.Conflicts[i]
-		}
-	}
-	return nil
 }
 
 // UpdateTrackedFile updates or adds a tracked file entry.

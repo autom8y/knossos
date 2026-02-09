@@ -242,9 +242,27 @@ Unified usersync and provenance manifests under a single schema. 14 stakeholder 
 9. CLI: `ari provenance show` gains SCOPE column and `--scope` filter.
 10. Clean break migration: old JSON manifests backed up as `.v2-backup`.
 
-### Phase 4b (future -- pipeline absorption)
+### Phase 4b (complete -- pipeline absorption)
 
-Absorb usersync into materialize as a scope variant. `ari sync` becomes single entry point with `--scope=rite|user`. Usersync package deprecated and removed.
+Absorbed usersync into materialize. 26 stakeholder decisions confirmed:
+
+1. Full code merge — `internal/usersync/` deleted, sync logic in `internal/materialize/user_scope.go`.
+2. Scope-gated pipeline — stages conditionally execute per scope (rite/user/all).
+3. Unified CLI: `ari sync [--scope] [--rite] [--source] [--resource] [--dry-run] [--recover] [--overwrite-diverged] [--keep-orphans]`.
+4. Default scope=all. `ari sync` syncs both rite and user scopes.
+5. Rite first, then user (collision detection needs fresh rite manifest).
+6. `--force` removed. Sync always idempotent. `--overwrite-diverged` for diverged files.
+7. `--minimal` eliminated. `ari init` or scope gating handles cross-cutting mode.
+8. Orphans: auto-remove knossos-owned by default. `--keep-orphans` override.
+9. Promotion dropped. Users put global agents in source dirs.
+10. Remote sync commands removed (status/pull/push/diff/resolve/history/reset).
+11. CollisionChecker moved to materialize (manifest-based, no directory scan fallback).
+12. SourceResolver extended for user-scope resolution.
+13. Smart fallback: scope=all skips rite silently if no ACTIVE_RITE; scope=rite errors.
+14. `internal/sync/` package pruned (remote sync methods deleted, state.go kept for trackState).
+15. 60+ mena/rites content files updated to reference new CLI.
+
+5 sprints: types+skeleton → user pipeline → CLI rebuild → dead code+tests → content migration.
 
 ## Consequences
 
