@@ -180,11 +180,6 @@ func runWrap(ctx *cmdContext, opts wrapOptions) error {
 		return err
 	}
 
-	// Clear current session
-	if err := ctx.ClearCurrentSessionID(); err != nil {
-		printer.VerboseLog("warn", "failed to clear current session", map[string]interface{}{"error": err.Error()})
-	}
-
 	// Emit Clew Contract events
 	endWriter := clewcontract.NewBufferedEventWriter(sessionDir, clewcontract.DefaultFlushInterval)
 	defer endWriter.Close()

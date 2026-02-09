@@ -74,43 +74,67 @@ func runRecover(ctx *cmdContext, opts recoverOptions) error {
 		}
 	}
 
-	// Step 2: Scan for active session and rebuild cache
+	// Step 2: Clean up orphaned CC map entries
+	ccMapDir := resolver.CCMapDir()
+	var ccMapOrphans []string
+	var removedCCMapOrphans []string
+	if entries, err := os.ReadDir(ccMapDir); err == nil {
+		for _, entry := range entries {
+			if entry.IsDir() {
+				continue
+			}
+			mapFile := filepath.Join(ccMapDir, entry.Name())
+			data, readErr := os.ReadFile(mapFile)
+			if readErr != nil {
+				continue
+			}
+			knossosID := strings.TrimSpace(string(data))
+			// Check if the mapped session still exists
+			sessionDir := resolver.SessionDir(knossosID)
+			if _, statErr := os.Stat(sessionDir); os.IsNotExist(statErr) {
+				ccMapOrphans = append(ccMapOrphans, entry.Name()+" -> "+knossosID)
+				if !opts.dryRun {
+					if removeErr := os.Remove(mapFile); removeErr == nil {
+						removedCCMapOrphans = append(removedCCMapOrphans, entry.Name())
+					}
+				}
+			}
+		}
+	}
+
+	// Step 3: Also clean up stale .current-session file if it still exists
+	currentSessionFile := resolver.CurrentSessionFile()
+	currentSessionCleaned := false
+	if _, err := os.Stat(currentSessionFile); err == nil {
+		if !opts.dryRun {
+			if removeErr := os.Remove(currentSessionFile); removeErr == nil {
+				currentSessionCleaned = true
+			}
+		} else {
+			currentSessionCleaned = true // would be cleaned
+		}
+	}
+
+	// Find active session
 	activeID, err := session.FindActiveSession(resolver.SessionsDir())
 	if err != nil {
 		printer.PrintError(err)
 		return err
 	}
 
-	cacheFile := resolver.CurrentSessionFile()
-	cacheStatus := "unchanged"
-	currentCacheID := ""
-	if data, err := os.ReadFile(cacheFile); err == nil {
-		currentCacheID = strings.TrimSpace(string(data))
-	}
-
-	if activeID != currentCacheID {
-		cacheStatus = "rebuilt"
-		if !opts.dryRun {
-			if activeID != "" {
-				os.WriteFile(cacheFile, []byte(activeID), 0644)
-			} else {
-				os.Remove(cacheFile)
-			}
-		}
-	}
-
 	// Build result
 	result := output.RecoverOutput{
-		StaleLocks:     staleLocks,
-		RemovedLocks:   removedLocks,
-		ActiveSession:  activeID,
-		CacheStatus:    cacheStatus,
-		PreviousCache:  currentCacheID,
-		DryRun:         opts.dryRun,
+		StaleLocks:            staleLocks,
+		RemovedLocks:          removedLocks,
+		ActiveSession:         activeID,
+		CCMapOrphans:          ccMapOrphans,
+		RemovedCCMapOrphans:   removedCCMapOrphans,
+		CurrentSessionCleaned: currentSessionCleaned,
+		DryRun:                opts.dryRun,
 	}
 
-	if len(staleLocks) == 0 && cacheStatus == "unchanged" {
-		result.Summary = "All healthy. No stale locks found, cache is consistent."
+	if len(staleLocks) == 0 && len(ccMapOrphans) == 0 && !currentSessionCleaned {
+		result.Summary = "All healthy. No stale locks, CC map orphans, or legacy cache files found."
 	} else if opts.dryRun {
 		result.Summary = "Issues found. Run without --dry-run to fix."
 	} else {

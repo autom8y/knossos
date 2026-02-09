@@ -63,10 +63,6 @@ func TestPrecompact_NoSessionContextFile(t *testing.T) {
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	os.MkdirAll(sessionDir, 0755)
 
-	// Write .current-session so resolveSession finds the session ID
-	currentSessionFile := filepath.Join(sessionsDir, ".current-session")
-	os.WriteFile(currentSessionFile, []byte(sessionID), 0644)
-
 	// Set environment for PreCompact event
 	os.Setenv("CLAUDE_HOOK_EVENT", string(hook.EventPreCompact))
 	os.Setenv("CLAUDE_PROJECT_DIR", tmpDir)
@@ -77,6 +73,7 @@ func TestPrecompact_NoSessionContextFile(t *testing.T) {
 
 	outputFlag := "json"
 	verboseFlag := false
+	sessionIDPtr := sessionID
 	ctx := &cmdContext{
 		SessionContext: common.SessionContext{
 			BaseContext: common.BaseContext{
@@ -84,6 +81,7 @@ func TestPrecompact_NoSessionContextFile(t *testing.T) {
 				Verbose:    &verboseFlag,
 				ProjectDir: &tmpDir,
 			},
+			SessionID: &sessionIDPtr,
 		},
 	}
 
@@ -110,10 +108,6 @@ func TestPrecompact_RotatesLargeFile(t *testing.T) {
 	sessionsDir := filepath.Join(tmpDir, ".claude", "sessions")
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	os.MkdirAll(sessionDir, 0755)
-
-	// Write .current-session so resolveSession finds the session ID
-	currentSessionFile := filepath.Join(sessionsDir, ".current-session")
-	os.WriteFile(currentSessionFile, []byte(sessionID), 0644)
 
 	// Create large SESSION_CONTEXT.md (frontmatter + 250 lines)
 	sessionContextPath := filepath.Join(sessionDir, "SESSION_CONTEXT.md")
@@ -145,6 +139,7 @@ current_phase: requirements
 
 	outputFlag := "json"
 	verboseFlag := false
+	sessionIDPtr := sessionID
 	ctx := &cmdContext{
 		SessionContext: common.SessionContext{
 			BaseContext: common.BaseContext{
@@ -152,6 +147,7 @@ current_phase: requirements
 				Verbose:    &verboseFlag,
 				ProjectDir: &tmpDir,
 			},
+			SessionID: &sessionIDPtr,
 		},
 	}
 
@@ -198,10 +194,6 @@ func TestPrecompact_NoRotationForSmallFile(t *testing.T) {
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	os.MkdirAll(sessionDir, 0755)
 
-	// Write .current-session so resolveSession finds the session ID
-	currentSessionFile := filepath.Join(sessionsDir, ".current-session")
-	os.WriteFile(currentSessionFile, []byte(sessionID), 0644)
-
 	// Create small SESSION_CONTEXT.md
 	sessionContextPath := filepath.Join(sessionDir, "SESSION_CONTEXT.md")
 	content := `---
@@ -230,6 +222,7 @@ Just a few lines
 
 	outputFlag := "json"
 	verboseFlag := false
+	sessionIDPtr := sessionID
 	ctx := &cmdContext{
 		SessionContext: common.SessionContext{
 			BaseContext: common.BaseContext{
@@ -237,6 +230,7 @@ Just a few lines
 				Verbose:    &verboseFlag,
 				ProjectDir: &tmpDir,
 			},
+			SessionID: &sessionIDPtr,
 		},
 	}
 
@@ -276,10 +270,6 @@ func TestPrecompact_WritesCompactCheckpoint(t *testing.T) {
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	os.MkdirAll(sessionDir, 0755)
 
-	// Write .current-session
-	currentSessionFile := filepath.Join(sessionsDir, ".current-session")
-	os.WriteFile(currentSessionFile, []byte(sessionID), 0644)
-
 	// Create large SESSION_CONTEXT.md to trigger rotation
 	sessionContextPath := filepath.Join(sessionDir, "SESSION_CONTEXT.md")
 	var b strings.Builder
@@ -307,6 +297,7 @@ current_phase: implementation
 
 	outputFlag := "json"
 	verboseFlag := false
+	sessionIDPtr := sessionID
 	ctx := &cmdContext{
 		SessionContext: common.SessionContext{
 			BaseContext: common.BaseContext{
@@ -314,6 +305,7 @@ current_phase: implementation
 				Verbose:    &verboseFlag,
 				ProjectDir: &tmpDir,
 			},
+			SessionID: &sessionIDPtr,
 		},
 	}
 
@@ -358,9 +350,6 @@ func TestPrecompact_CheckpointSmallFile(t *testing.T) {
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	os.MkdirAll(sessionDir, 0755)
 
-	currentSessionFile := filepath.Join(sessionsDir, ".current-session")
-	os.WriteFile(currentSessionFile, []byte(sessionID), 0644)
-
 	// Small SESSION_CONTEXT.md (won't trigger rotation)
 	sessionContextPath := filepath.Join(sessionDir, "SESSION_CONTEXT.md")
 	sessionContent := `---
@@ -385,6 +374,7 @@ Small body content.
 
 	outputFlag := "json"
 	verboseFlag := false
+	sessionIDPtr := sessionID
 	ctx := &cmdContext{
 		SessionContext: common.SessionContext{
 			BaseContext: common.BaseContext{
@@ -392,6 +382,7 @@ Small body content.
 				Verbose:    &verboseFlag,
 				ProjectDir: &tmpDir,
 			},
+			SessionID: &sessionIDPtr,
 		},
 	}
 

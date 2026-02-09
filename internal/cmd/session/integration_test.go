@@ -332,14 +332,10 @@ standard
 		t.Fatalf("Failed to write SESSION_CONTEXT.md: %v", err)
 	}
 
-	// Create current-session file
-	if err := os.WriteFile(filepath.Join(sessionsDir, ".current-session"), []byte(sessionID), 0644); err != nil {
-		t.Fatalf("Failed to write .current-session: %v", err)
-	}
-
 	// First, park the session
 	outputFormat := "json"
 	verbose := true
+	sessionIDPtr := sessionID
 	ctx := &cmdContext{
 		SessionContext: common.SessionContext{
 			BaseContext: common.BaseContext{
@@ -347,6 +343,7 @@ standard
 				Verbose:    &verbose,
 				ProjectDir: &projectDir,
 			},
+			SessionID: &sessionIDPtr,
 		},
 	}
 

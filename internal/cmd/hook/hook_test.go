@@ -219,18 +219,22 @@ func TestGetCurrentSessionID_FromContext(t *testing.T) {
 	}
 }
 
-func TestGetCurrentSessionID_FromFile(t *testing.T) {
+func TestGetSessionID_FromScan(t *testing.T) {
 	tmpDir := t.TempDir()
-	sessionID := "session-from-file"
+	sessionID := "session-20260209-120000-abcdef01"
 
-	// Create sessions directory and .current-session file
+	// Create sessions directory with an ACTIVE session
 	sessionsDir := filepath.Join(tmpDir, ".claude", "sessions")
 	if err := os.MkdirAll(sessionsDir, 0755); err != nil {
 		t.Fatalf("Failed to create sessions dir: %v", err)
 	}
-	currentSessionFile := filepath.Join(sessionsDir, ".current-session")
-	if err := os.WriteFile(currentSessionFile, []byte(sessionID), 0644); err != nil {
-		t.Fatalf("Failed to write .current-session: %v", err)
+	sessionDir := filepath.Join(sessionsDir, sessionID)
+	if err := os.MkdirAll(sessionDir, 0755); err != nil {
+		t.Fatalf("Failed to create session dir: %v", err)
+	}
+	contextFile := filepath.Join(sessionDir, "SESSION_CONTEXT.md")
+	if err := os.WriteFile(contextFile, []byte("---\nstatus: ACTIVE\n---\n"), 0644); err != nil {
+		t.Fatalf("Failed to write SESSION_CONTEXT.md: %v", err)
 	}
 
 	ctx := &cmdContext{
@@ -241,17 +245,23 @@ func TestGetCurrentSessionID_FromFile(t *testing.T) {
 		},
 	}
 
-	result, err := ctx.GetCurrentSessionID()
+	result, err := ctx.GetSessionID()
 	if err != nil {
-		t.Fatalf("getCurrentSessionID() error = %v", err)
+		t.Fatalf("GetSessionID() error = %v", err)
 	}
 	if result != sessionID {
-		t.Errorf("getCurrentSessionID() = %q, want %q", result, sessionID)
+		t.Errorf("GetSessionID() = %q, want %q", result, sessionID)
 	}
 }
 
-func TestGetCurrentSessionID_NoFile(t *testing.T) {
+func TestGetSessionID_NoActiveSession(t *testing.T) {
 	tmpDir := t.TempDir()
+
+	// Create sessions directory but no active sessions
+	sessionsDir := filepath.Join(tmpDir, ".claude", "sessions")
+	if err := os.MkdirAll(sessionsDir, 0755); err != nil {
+		t.Fatalf("Failed to create sessions dir: %v", err)
+	}
 
 	ctx := &cmdContext{
 		SessionContext: common.SessionContext{
@@ -261,12 +271,12 @@ func TestGetCurrentSessionID_NoFile(t *testing.T) {
 		},
 	}
 
-	result, err := ctx.GetCurrentSessionID()
+	result, err := ctx.GetSessionID()
 	if err != nil {
-		t.Fatalf("getCurrentSessionID() error = %v", err)
+		t.Fatalf("GetSessionID() error = %v", err)
 	}
 	if result != "" {
-		t.Errorf("getCurrentSessionID() = %q, want empty string", result)
+		t.Errorf("GetSessionID() = %q, want empty string", result)
 	}
 }
 

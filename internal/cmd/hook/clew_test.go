@@ -145,12 +145,6 @@ func TestRunClew_WithActiveSession(t *testing.T) {
 		t.Fatalf("Failed to create session dir: %v", err)
 	}
 
-	// Write current session file (must be in sessions/.current-session per paths.go)
-	currentSessionFile := filepath.Join(sessionsDir, ".current-session")
-	if err := os.WriteFile(currentSessionFile, []byte(sessionID), 0644); err != nil {
-		t.Fatalf("Failed to write current session file: %v", err)
-	}
-
 	testutil.SetupEnv(t, &testutil.HookEnv{
 		Event:       "PostToolUse",
 		ToolName:    "Edit",
@@ -164,6 +158,7 @@ func TestRunClew_WithActiveSession(t *testing.T) {
 	outputFlag := "json"
 	verboseFlag := false
 	projectDir := tmpDir
+	sessionIDPtr := sessionID
 	ctx := &cmdContext{
 		SessionContext: common.SessionContext{
 			BaseContext: common.BaseContext{
@@ -171,6 +166,7 @@ func TestRunClew_WithActiveSession(t *testing.T) {
 				Verbose:    &verboseFlag,
 				ProjectDir: &projectDir,
 			},
+			SessionID: &sessionIDPtr,
 		},
 	}
 
@@ -208,12 +204,6 @@ func TestRunClew_OrchestratorStamping(t *testing.T) {
 		t.Fatalf("Failed to create session dir: %v", err)
 	}
 
-	// Write current session file
-	currentSessionFile := filepath.Join(sessionsDir, ".current-session")
-	if err := os.WriteFile(currentSessionFile, []byte(sessionID), 0644); err != nil {
-		t.Fatalf("Failed to write current session file: %v", err)
-	}
-
 	// Simulate orchestrator CONSULTATION_RESPONSE with throughline
 	orchestratorResult := `request_id: req-001
 
@@ -248,6 +238,7 @@ throughline:
 	outputFlag := "json"
 	verboseFlag := false
 	projectDir := tmpDir
+	sessionIDPtr := sessionID
 	ctx := &cmdContext{
 		SessionContext: common.SessionContext{
 			BaseContext: common.BaseContext{
@@ -255,6 +246,7 @@ throughline:
 				Verbose:    &verboseFlag,
 				ProjectDir: &projectDir,
 			},
+			SessionID: &sessionIDPtr,
 		},
 	}
 
@@ -314,12 +306,6 @@ func TestRunClew_NonOrchestratorTask(t *testing.T) {
 		t.Fatalf("Failed to create session dir: %v", err)
 	}
 
-	// Write current session file
-	currentSessionFile := filepath.Join(sessionsDir, ".current-session")
-	if err := os.WriteFile(currentSessionFile, []byte(sessionID), 0644); err != nil {
-		t.Fatalf("Failed to write current session file: %v", err)
-	}
-
 	// Regular Task result without throughline (non-orchestrator)
 	regularTaskResult := `Task completed successfully.
 
@@ -341,6 +327,7 @@ Files modified:
 	outputFlag := "json"
 	verboseFlag := false
 	projectDir := tmpDir
+	sessionIDPtr := sessionID
 	ctx := &cmdContext{
 		SessionContext: common.SessionContext{
 			BaseContext: common.BaseContext{
@@ -348,6 +335,7 @@ Files modified:
 				Verbose:    &verboseFlag,
 				ProjectDir: &projectDir,
 			},
+			SessionID: &sessionIDPtr,
 		},
 	}
 
@@ -400,12 +388,6 @@ func TestClew_StdinIntegration_RecordsToolEvent(t *testing.T) {
 		t.Fatalf("Failed to create session dir: %v", err)
 	}
 
-	// Write current session file
-	currentSessionFile := filepath.Join(sessionsDir, ".current-session")
-	if err := os.WriteFile(currentSessionFile, []byte(sessionID), 0644); err != nil {
-		t.Fatalf("Failed to write current session file: %v", err)
-	}
-
 	// Save and restore original stdin
 	oldStdin := os.Stdin
 	defer func() { os.Stdin = oldStdin }()
@@ -425,6 +407,7 @@ func TestClew_StdinIntegration_RecordsToolEvent(t *testing.T) {
 	outputFlag := "json"
 	verboseFlag := false
 	projectDir := tmpDir
+	sessionIDPtr := sessionID
 	ctx := &cmdContext{
 		SessionContext: common.SessionContext{
 			BaseContext: common.BaseContext{
@@ -432,6 +415,7 @@ func TestClew_StdinIntegration_RecordsToolEvent(t *testing.T) {
 				Verbose:    &verboseFlag,
 				ProjectDir: &projectDir,
 			},
+			SessionID: &sessionIDPtr,
 		},
 	}
 

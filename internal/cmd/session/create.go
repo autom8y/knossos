@@ -104,7 +104,7 @@ func runCreate(ctx *cmdContext, initiative string, opts createOptions) error {
 	defer createLock.Release()
 
 	// Check for existing session
-	currentID, err := ctx.GetCurrentSessionID()
+	currentID, err := session.FindActiveSession(resolver.SessionsDir())
 	if err != nil {
 		err := errors.Wrap(errors.CodeGeneralError, "failed to read current session", err)
 		printer.PrintError(err)
@@ -151,11 +151,6 @@ func runCreate(ctx *cmdContext, initiative string, opts createOptions) error {
 	writer.Write(clewcontract.NewSessionCreatedEvent(newCtx.SessionID, initiative, opts.complexity, team))
 	if err := writer.Flush(); err != nil {
 		printer.VerboseLog("warn", "failed to write event", map[string]interface{}{"error": err.Error()})
-	}
-
-	// Set as current session
-	if err := ctx.SetCurrentSessionID(newCtx.SessionID); err != nil {
-		printer.VerboseLog("warn", "failed to set current session", map[string]interface{}{"error": err.Error()})
 	}
 
 	// Output result

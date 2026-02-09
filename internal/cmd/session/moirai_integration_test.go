@@ -33,9 +33,14 @@ import (
 // --- Test Helpers ---
 
 // newTestContext creates a cmdContext for testing with JSON output.
-func newTestContext(projectDir string) *cmdContext {
+// If sessionID is provided, it sets ctx.SessionID for explicit session resolution.
+func newTestContext(projectDir string, sessionID ...string) *cmdContext {
 	outputFormat := "json"
 	verbose := true
+	var sessionIDPtr *string
+	if len(sessionID) > 0 && sessionID[0] != "" {
+		sessionIDPtr = &sessionID[0]
+	}
 	return &cmdContext{
 		SessionContext: common.SessionContext{
 			BaseContext: common.BaseContext{
@@ -43,6 +48,7 @@ func newTestContext(projectDir string) *cmdContext {
 				Verbose:    &verbose,
 				ProjectDir: &projectDir,
 			},
+			SessionID: sessionIDPtr,
 		},
 	}
 }
@@ -103,11 +109,6 @@ func writeSessionContext(t *testing.T, projectDir, sessionID, status, initiative
 
 	if err := os.WriteFile(filepath.Join(sessionDir, "SESSION_CONTEXT.md"), []byte(content), 0644); err != nil {
 		t.Fatalf("Failed to write SESSION_CONTEXT.md: %v", err)
-	}
-
-	// Set as current session
-	if err := os.WriteFile(filepath.Join(sessionsDir, ".current-session"), []byte(sessionID), 0644); err != nil {
-		t.Fatalf("Failed to write .current-session: %v", err)
 	}
 }
 
@@ -218,14 +219,8 @@ func TestMoirai_CreateParkResumeWrap_GoldenPath(t *testing.T) {
 		t.Errorf("After create: status = %v, want ACTIVE", status)
 	}
 
-	// Verify .current-session points to the new session
-	currentData, err := os.ReadFile(filepath.Join(projectDir, ".claude", "sessions", ".current-session"))
-	if err != nil {
-		t.Fatalf("Failed to read .current-session: %v", err)
-	}
-	if string(currentData) != sessionID {
-		t.Errorf(".current-session = %q, want %q", string(currentData), sessionID)
-	}
+	// Update ctx with sessionID for subsequent operations
+	ctx = newTestContext(projectDir, sessionID)
 
 	// --- Step 2: Park (ACTIVE -> PARKED) ---
 	err = runPark(ctx, parkOptions{reason: "Moirai-initiated park"})
@@ -277,12 +272,6 @@ func TestMoirai_CreateParkResumeWrap_GoldenPath(t *testing.T) {
 	if sessCtx.ArchivedAt == nil {
 		t.Error("After wrap: ArchivedAt should be set")
 	}
-
-	// Verify .current-session is cleared
-	_, err = os.Stat(filepath.Join(projectDir, ".claude", "sessions", ".current-session"))
-	if !os.IsNotExist(err) {
-		t.Error("After wrap: .current-session should be removed")
-	}
 }
 
 func TestMoirai_WrapFromParked_DirectPath(t *testing.T) {
@@ -291,7 +280,7 @@ func TestMoirai_WrapFromParked_DirectPath(t *testing.T) {
 	sessionID := "session-20260205-100000-parkedwrp"
 	writeSessionContext(t, projectDir, sessionID, "PARKED", "Direct wrap test", &now, "Testing direct wrap")
 
-	ctx := newTestContext(projectDir)
+	ctx := newTestContext(projectDir, sessionID)
 	err := runWrap(ctx, wrapOptions{noArchive: true})
 	if err != nil {
 		t.Fatalf("Wrap from PARKED failed: %v", err)
@@ -354,6 +343,9 @@ func TestMoirai_ContextIntegrity_FieldPreservation(t *testing.T) {
 	origInitiative := origCtx.Initiative
 	origComplexity := origCtx.Complexity
 	origSchemaVersion := origCtx.SchemaVersion
+
+	// Update ctx with sessionID for subsequent operations
+	ctx = newTestContext(projectDir, sessionID)
 
 	// Park -- verify create-time fields survive
 	err = runPark(ctx, parkOptions{reason: "Preserve fields"})
@@ -423,6 +415,9 @@ func TestMoirai_ContextIntegrity_YAMLValid(t *testing.T) {
 	sessionID := findCreatedSessionID(t, projectDir)
 	ctxPath := filepath.Join(projectDir, ".claude", "sessions", sessionID, "SESSION_CONTEXT.md")
 
+	// Update ctx with sessionID for subsequent operations
+	ctx = newTestContext(projectDir, sessionID)
+
 	// Helper: verify file is loadable (valid frontmatter YAML)
 	verifyLoadable := func(label string) {
 		t.Helper()
@@ -464,6 +459,9 @@ func TestMoirai_ContextIntegrity_SessionIDStable(t *testing.T) {
 	}
 
 	sessionID := findCreatedSessionID(t, projectDir)
+
+	// Update ctx with sessionID for subsequent operations
+	ctx = newTestContext(projectDir, sessionID)
 
 	// Verify ID is valid format
 	if !session.IsValidSessionID(sessionID) {
@@ -515,6 +513,9 @@ func TestMoirai_AuditTrail_EventsEmitted(t *testing.T) {
 	}
 
 	sessionID := findCreatedSessionID(t, projectDir)
+
+	// Update ctx with sessionID for subsequent operations
+	ctx = newTestContext(projectDir, sessionID)
 
 	// Verify create event (unified clew event system)
 	createCount := countEventsOfType(t, projectDir, sessionID, "session.created")
@@ -580,6 +581,9 @@ func TestMoirai_AuditTrail_EventsAreValidJSON(t *testing.T) {
 	}
 	sessionID := findCreatedSessionID(t, projectDir)
 
+	// Update ctx with sessionID for subsequent operations
+	ctx = newTestContext(projectDir, sessionID)
+
 	if err := runPark(ctx, parkOptions{reason: "JSON test"}); err != nil {
 		t.Fatalf("Park failed: %v", err)
 	}
@@ -620,6 +624,9 @@ func TestMoirai_AuditTrail_EventsJSONLPopulated(t *testing.T) {
 
 	sessionID := findCreatedSessionID(t, projectDir)
 
+	// Update ctx with sessionID for subsequent operations
+	ctx = newTestContext(projectDir, sessionID)
+
 	// Park to generate lifecycle events
 	if err := runPark(ctx, parkOptions{reason: "Events JSONL park"}); err != nil {
 		t.Fatalf("Park failed: %v", err)
@@ -653,7 +660,7 @@ func TestMoirai_ErrorPath_ParkAlreadyParked(t *testing.T) {
 	sessionID := "session-20260205-110000-parkpark1"
 	writeSessionContext(t, projectDir, sessionID, "PARKED", "Double park test", &now, "Already parked")
 
-	ctx := newTestContext(projectDir)
+	ctx := newTestContext(projectDir, sessionID)
 	err := runPark(ctx, parkOptions{reason: "Second park attempt"})
 	if err == nil {
 		t.Fatal("Expected error when parking already-parked session, got nil")
@@ -674,7 +681,7 @@ func TestMoirai_ErrorPath_ResumeActiveSession(t *testing.T) {
 	sessionID := "session-20260205-120000-rsmactve"
 	writeSessionContext(t, projectDir, sessionID, "ACTIVE", "Resume active test", nil, "")
 
-	ctx := newTestContext(projectDir)
+	ctx := newTestContext(projectDir, sessionID)
 	err := runResume(ctx)
 	if err == nil {
 		t.Fatal("Expected error when resuming active session, got nil")
@@ -689,7 +696,7 @@ func TestMoirai_ErrorPath_ResumeArchivedSession(t *testing.T) {
 	sessionID := "session-20260205-130000-rsmarchv"
 	writeSessionContext(t, projectDir, sessionID, "ARCHIVED", "Resume archived test", nil, "")
 
-	ctx := newTestContext(projectDir)
+	ctx := newTestContext(projectDir, sessionID)
 	err := runResume(ctx)
 	if err == nil {
 		t.Fatal("Expected error when resuming archived session, got nil")
@@ -704,7 +711,7 @@ func TestMoirai_ErrorPath_ParkArchivedSession(t *testing.T) {
 	sessionID := "session-20260205-140000-parkarch"
 	writeSessionContext(t, projectDir, sessionID, "ARCHIVED", "Park archived test", nil, "")
 
-	ctx := newTestContext(projectDir)
+	ctx := newTestContext(projectDir, sessionID)
 	err := runPark(ctx, parkOptions{reason: "Cannot park archived"})
 	if err == nil {
 		t.Fatal("Expected error when parking archived session, got nil")
@@ -719,7 +726,7 @@ func TestMoirai_ErrorPath_WrapArchivedSession(t *testing.T) {
 	sessionID := "session-20260205-150000-wraparch"
 	writeSessionContext(t, projectDir, sessionID, "ARCHIVED", "Wrap archived test", nil, "")
 
-	ctx := newTestContext(projectDir)
+	ctx := newTestContext(projectDir, sessionID)
 	err := runWrap(ctx, wrapOptions{noArchive: true})
 	if err == nil {
 		t.Fatal("Expected error when wrapping archived session, got nil")
@@ -827,7 +834,7 @@ func TestMoirai_ConcurrentSafety_SerializedMutations(t *testing.T) {
 		wg.Add(1)
 		go func(idx int) {
 			defer wg.Done()
-			ctx := newTestContext(projectDir)
+			ctx := newTestContext(projectDir, sessionID)
 			results[idx] = runPark(ctx, parkOptions{reason: "Concurrent park " + string(rune('A'+idx))})
 		}(i)
 	}
@@ -924,7 +931,7 @@ func TestMoirai_ConcurrentSafety_ResumeResumeRace(t *testing.T) {
 		wg.Add(1)
 		go func(idx int) {
 			defer wg.Done()
-			ctx := newTestContext(projectDir)
+			ctx := newTestContext(projectDir, sessionID)
 			results[idx] = runResume(ctx)
 		}(i)
 	}
@@ -974,7 +981,7 @@ func TestMoirai_ParkReasonPreserved(t *testing.T) {
 			sessionID := "session-20260205-190000-reason01"
 			writeSessionContext(t, projectDir, sessionID, "ACTIVE", "Reason test", nil, "")
 
-			ctx := newTestContext(projectDir)
+			ctx := newTestContext(projectDir, sessionID)
 			err := runPark(ctx, parkOptions{reason: reason})
 			if err != nil {
 				t.Fatalf("Park failed: %v", err)
@@ -994,7 +1001,7 @@ func TestMoirai_ResumeClears_ParkFields(t *testing.T) {
 	sessionID := "session-20260205-200000-clrpark1"
 	writeSessionContext(t, projectDir, sessionID, "PARKED", "Clear park fields", &now, "Was parked")
 
-	ctx := newTestContext(projectDir)
+	ctx := newTestContext(projectDir, sessionID)
 	if err := runResume(ctx); err != nil {
 		t.Fatalf("Resume failed: %v", err)
 	}
@@ -1017,7 +1024,7 @@ func TestMoirai_WrapSetsArchiveTimestamp(t *testing.T) {
 	writeSessionContext(t, projectDir, sessionID, "ACTIVE", "Archive timestamp test", nil, "")
 
 	before := time.Now().UTC()
-	ctx := newTestContext(projectDir)
+	ctx := newTestContext(projectDir, sessionID)
 	if err := runWrap(ctx, wrapOptions{noArchive: true}); err != nil {
 		t.Fatalf("Wrap failed: %v", err)
 	}
@@ -1040,7 +1047,7 @@ func TestMoirai_WrapWithArchive_MovesDirectory(t *testing.T) {
 	sessionID := "session-20260205-220000-archive1"
 	writeSessionContext(t, projectDir, sessionID, "ACTIVE", "Archive move test", nil, "")
 
-	ctx := newTestContext(projectDir)
+	ctx := newTestContext(projectDir, sessionID)
 	// noArchive=false (default) -- should move to archive
 	if err := runWrap(ctx, wrapOptions{noArchive: false}); err != nil {
 		t.Fatalf("Wrap failed: %v", err)
@@ -1079,7 +1086,7 @@ func TestMoirai_PhaseTransition_RequiresActiveSession(t *testing.T) {
 	sessionID := "session-20260205-230000-phsprk01"
 	writeSessionContext(t, projectDir, sessionID, "PARKED", "Phase from parked", &now, "Parked")
 
-	ctx := newTestContext(projectDir)
+	ctx := newTestContext(projectDir, sessionID)
 	err := runTransition(ctx, "design", transitionOptions{force: true})
 	if err == nil {
 		t.Fatal("Expected error for phase transition on parked session, got nil")
@@ -1091,7 +1098,7 @@ func TestMoirai_PhaseTransition_ForwardOnly(t *testing.T) {
 	sessionID := "session-20260205-231000-phsfwd01"
 	writeSessionContext(t, projectDir, sessionID, "ACTIVE", "Phase forward test", nil, "")
 
-	ctx := newTestContext(projectDir)
+	ctx := newTestContext(projectDir, sessionID)
 
 	// Transition to design (force to skip artifact checks)
 	if err := runTransition(ctx, "design", transitionOptions{force: true}); err != nil {
@@ -1110,8 +1117,7 @@ func TestMoirai_PhaseTransition_ForwardOnly(t *testing.T) {
 // =============================================================================
 
 func TestMoirai_EdgeCase_CurrentSessionCleared_OnWrap(t *testing.T) {
-	// D2 finding: .current-session must be cleared on wrap.
-	// Verify this behavior at the command level.
+	// Verify wrap succeeds and transitions to ARCHIVED.
 	projectDir := setupProjectDir(t)
 	ctx := newTestContext(projectDir)
 
@@ -1119,43 +1125,38 @@ func TestMoirai_EdgeCase_CurrentSessionCleared_OnWrap(t *testing.T) {
 		t.Fatalf("Create failed: %v", err)
 	}
 
-	// Verify .current-session exists
-	currentFile := filepath.Join(projectDir, ".claude", "sessions", ".current-session")
-	if _, err := os.Stat(currentFile); err != nil {
-		t.Fatalf(".current-session should exist after create: %v", err)
-	}
+	sessionID := findCreatedSessionID(t, projectDir)
+
+	// Update ctx with sessionID for subsequent operations
+	ctx = newTestContext(projectDir, sessionID)
 
 	if err := runWrap(ctx, wrapOptions{noArchive: true}); err != nil {
 		t.Fatalf("Wrap failed: %v", err)
 	}
 
-	// Verify .current-session is removed
-	if _, err := os.Stat(currentFile); !os.IsNotExist(err) {
-		t.Error(".current-session should be removed after wrap")
+	// Verify session is ARCHIVED
+	status := loadSessionStatus(t, projectDir, sessionID)
+	if status != session.StatusArchived {
+		t.Errorf("After wrap: status = %v, want ARCHIVED", status)
 	}
 }
 
 func TestMoirai_EdgeCase_CurrentSessionSet_OnResume(t *testing.T) {
-	// D2 finding: resume writes .current-session.
-	// Verify this works correctly.
+	// Verify resume transitions session to ACTIVE.
 	projectDir := setupProjectDir(t)
 	now := time.Now().UTC()
 	sessionID := "session-20260205-232000-csresume"
 	writeSessionContext(t, projectDir, sessionID, "PARKED", "Current session resume", &now, "Parked")
 
-	ctx := newTestContext(projectDir)
+	ctx := newTestContext(projectDir, sessionID)
 	if err := runResume(ctx); err != nil {
 		t.Fatalf("Resume failed: %v", err)
 	}
 
-	// Verify .current-session is set to session ID
-	currentFile := filepath.Join(projectDir, ".claude", "sessions", ".current-session")
-	data, err := os.ReadFile(currentFile)
-	if err != nil {
-		t.Fatalf("Failed to read .current-session after resume: %v", err)
-	}
-	if string(data) != sessionID {
-		t.Errorf(".current-session = %q, want %q", string(data), sessionID)
+	// Verify session is ACTIVE
+	status := loadSessionStatus(t, projectDir, sessionID)
+	if status != session.StatusActive {
+		t.Errorf("After resume: status = %v, want ACTIVE", status)
 	}
 }
 
@@ -1178,13 +1179,8 @@ func TestMoirai_EdgeCase_CreateAfterWrap(t *testing.T) {
 		t.Fatalf("Second create failed: %v", err)
 	}
 
-	// Read .current-session to get the new session ID
-	currentFile := filepath.Join(projectDir, ".claude", "sessions", ".current-session")
-	data, err := os.ReadFile(currentFile)
-	if err != nil {
-		t.Fatalf("Failed to read .current-session: %v", err)
-	}
-	sessionID := string(data)
+	// Find the second session
+	sessionID := findCreatedSessionID(t, projectDir)
 
 	// Verify second session is ACTIVE
 	status := loadSessionStatus(t, projectDir, sessionID)
@@ -1212,6 +1208,9 @@ func TestMoirai_EdgeCase_MultipleParkResumeCycles(t *testing.T) {
 		t.Fatalf("Create failed: %v", err)
 	}
 	sessionID := findCreatedSessionID(t, projectDir)
+
+	// Update ctx with sessionID for subsequent operations
+	ctx = newTestContext(projectDir, sessionID)
 
 	cycles := 3
 	for i := 0; i < cycles; i++ {

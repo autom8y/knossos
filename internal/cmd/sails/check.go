@@ -9,7 +9,9 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/autom8y/knossos/internal/errors"
+	"github.com/autom8y/knossos/internal/paths"
 	"github.com/autom8y/knossos/internal/sails"
+	"github.com/autom8y/knossos/internal/session"
 )
 
 // checkFlags holds the flags for the check command.
@@ -75,7 +77,15 @@ func runCheck(ctx *cmdContext, flags *checkFlags, args []string) error {
 		if projectDir == "" {
 			return errors.New(errors.CodeProjectNotFound, "no project directory specified and none discovered")
 		}
-		result, err = sails.CheckGateForCurrentSession(projectDir)
+		// Find active session for gate check
+		activeID, findErr := session.FindActiveSession(paths.NewResolver(projectDir).SessionsDir())
+		if findErr != nil {
+			return findErr
+		}
+		if activeID == "" {
+			return errors.New(errors.CodeSessionNotFound, "no active session")
+		}
+		result, err = sails.CheckGateForSession(projectDir, activeID)
 	}
 
 	if err != nil {

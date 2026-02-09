@@ -216,17 +216,11 @@ func TestRunContext_WithActiveSession(t *testing.T) {
 		t.Fatalf("Failed to create session dir: %v", err)
 	}
 
-	// Write .current-session
-	currentSessionFile := filepath.Join(sessionsDir, ".current-session")
-	if err := os.WriteFile(currentSessionFile, []byte(sessionID), 0644); err != nil {
-		t.Fatalf("Failed to write current session: %v", err)
-	}
-
 	// Write SESSION_CONTEXT.md
 	sessionContext := `---
 schema_version: "2.1"
 session_id: "session-20260104-222613-05a12c6b"
-status: "ACTIVE"
+status: ACTIVE
 created_at: "2026-01-04T22:26:13Z"
 initiative: "Hooks Migration"
 complexity: "MODULE"
@@ -343,19 +337,18 @@ func TestRunContext_NoSession(t *testing.T) {
 
 func TestRunContext_RehydratesCompactState(t *testing.T) {
 	tmpDir := t.TempDir()
-	sessionID := "session-rehydrate-001"
+	sessionID := "session-20260208-100000-rehydrate"
 
 	// Create session structure
 	sessionsDir := filepath.Join(tmpDir, ".claude", "sessions")
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	os.MkdirAll(sessionDir, 0755)
-	os.WriteFile(filepath.Join(sessionsDir, ".current-session"), []byte(sessionID), 0644)
 
 	// Write SESSION_CONTEXT.md
 	sessionContext := `---
 schema_version: "2.1"
-session_id: "session-rehydrate-001"
-status: "ACTIVE"
+session_id: "session-20260208-100000-rehydrate"
+status: ACTIVE
 created_at: "2026-02-08T10:00:00Z"
 initiative: "Rehydration Test"
 complexity: "MODULE"
@@ -367,7 +360,7 @@ current_phase: "implementation"
 	os.WriteFile(filepath.Join(tmpDir, ".claude", "ACTIVE_RITE"), []byte("ecosystem"), 0644)
 
 	// Write COMPACT_STATE.md (simulating PreCompact wrote it)
-	checkpointContent := "# Compact State Checkpoint\n\n| Field | Value |\n|-------|-------|\n| session_id | session-rehydrate-001 |\n| initiative | Rehydration Test |\n"
+	checkpointContent := "# Compact State Checkpoint\n\n| Field | Value |\n|-------|-------|\n| session_id | session-20260208-100000-rehydrate |\n| initiative | Rehydration Test |\n"
 	os.WriteFile(filepath.Join(sessionDir, CompactCheckpointFile), []byte(checkpointContent), 0644)
 
 	testutil.SetupEnv(t, &testutil.HookEnv{
@@ -405,7 +398,7 @@ current_phase: "implementation"
 	if result.CompactState == "" {
 		t.Error("Expected CompactState to be populated from COMPACT_STATE.md")
 	}
-	if !strings.Contains(result.CompactState, "session-rehydrate-001") {
+	if !strings.Contains(result.CompactState, "session-20260208-100000-rehydrate") {
 		t.Error("CompactState should contain session_id")
 	}
 	if !strings.Contains(result.CompactState, "Rehydration Test") {
@@ -425,17 +418,16 @@ current_phase: "implementation"
 
 func TestRunContext_NoCompactState(t *testing.T) {
 	tmpDir := t.TempDir()
-	sessionID := "session-no-checkpoint"
+	sessionID := "session-20260208-100000-nochkpnt"
 
 	sessionsDir := filepath.Join(tmpDir, ".claude", "sessions")
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	os.MkdirAll(sessionDir, 0755)
-	os.WriteFile(filepath.Join(sessionsDir, ".current-session"), []byte(sessionID), 0644)
 
 	sessionContext := `---
 schema_version: "2.1"
-session_id: "session-no-checkpoint"
-status: "ACTIVE"
+session_id: "session-20260208-100000-nochkpnt"
+status: ACTIVE
 created_at: "2026-02-08T10:00:00Z"
 initiative: "No Checkpoint"
 complexity: "simple"
@@ -596,12 +588,11 @@ func TestRunContext_WithActiveSession_IncludesRitesAndAgents(t *testing.T) {
 	sessionsDir := filepath.Join(tmpDir, ".claude", "sessions")
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	os.MkdirAll(sessionDir, 0755)
-	os.WriteFile(filepath.Join(sessionsDir, ".current-session"), []byte(sessionID), 0644)
 
 	sessionContext := `---
 schema_version: "2.1"
 session_id: "session-20260208-100000-abcdef01"
-status: "ACTIVE"
+status: ACTIVE
 created_at: "2026-02-08T10:00:00Z"
 initiative: "Rites Test"
 complexity: "MODULE"
@@ -717,12 +708,11 @@ func BenchmarkContextHook_FullExecution(b *testing.B) {
 	sessionsDir := filepath.Join(tmpDir, ".claude", "sessions")
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	os.MkdirAll(sessionDir, 0755)
-	os.WriteFile(filepath.Join(sessionsDir, ".current-session"), []byte(sessionID), 0644)
 
 	sessionContext := `---
 schema_version: "2.1"
 session_id: "session-20260104-222613-05a12c6b"
-status: "ACTIVE"
+status: ACTIVE
 created_at: "2026-01-04T22:26:13Z"
 initiative: "Benchmark"
 complexity: "MODULE"

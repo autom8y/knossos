@@ -776,14 +776,14 @@ current_phase: implementation
 func TestGeneratorFromProject_NoActiveSession(t *testing.T) {
 	tmpDir := t.TempDir()
 
-	// Create .claude directory structure but no .current-session
+	// Create .claude directory structure but no sessions
 	mustMkdirAll(t, filepath.Join(tmpDir, ".claude", "sessions"))
 
-	_, err := GeneratorFromProject(tmpDir)
+	_, err := GeneratorFromProject(tmpDir, "")
 	if err == nil {
 		t.Fatal("Expected error for no active session")
 	}
-	if !strings.Contains(err.Error(), "no active session") {
+	if !strings.Contains(err.Error(), "no session ID") {
 		t.Errorf("Unexpected error message: %s", err.Error())
 	}
 }
@@ -800,10 +800,7 @@ func TestGeneratorFromProject_WithActiveSession(t *testing.T) {
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	mustMkdirAll(t, sessionDir)
 
-	// Set current session
-	mustWriteFile(t, filepath.Join(sessionsDir, ".current-session"), []byte(sessionID))
-
-	gen, err := GeneratorFromProject(tmpDir)
+	gen, err := GeneratorFromProject(tmpDir, sessionID)
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)
 	}

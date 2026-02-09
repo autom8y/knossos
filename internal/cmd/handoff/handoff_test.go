@@ -59,11 +59,6 @@ standard
 		t.Fatalf("Failed to write SESSION_CONTEXT.md: %v", err)
 	}
 
-	// Create current-session file
-	if err := os.WriteFile(filepath.Join(sessionsDir, ".current-session"), []byte(sessionID), 0644); err != nil {
-		t.Fatalf("Failed to write .current-session: %v", err)
-	}
-
 	// Run prepare command
 	outputFormat := "json"
 	verbose := true
@@ -74,6 +69,7 @@ standard
 				Verbose:    &verbose,
 				ProjectDir: &projectDir,
 			},
+			SessionID: &sessionID,
 		},
 	}
 
@@ -196,11 +192,6 @@ current_phase: design
 		t.Fatalf("Failed to write SESSION_CONTEXT.md: %v", err)
 	}
 
-	// Create current-session file
-	if err := os.WriteFile(filepath.Join(sessionsDir, ".current-session"), []byte(sessionID), 0644); err != nil {
-		t.Fatalf("Failed to write .current-session: %v", err)
-	}
-
 	// Run execute command
 	outputFormat := "json"
 	verbose := true
@@ -211,6 +202,7 @@ current_phase: design
 				Verbose:    &verbose,
 				ProjectDir: &projectDir,
 			},
+			SessionID: &sessionID,
 		},
 	}
 
@@ -336,11 +328,6 @@ current_phase: implementation
 		t.Fatalf("Failed to write SESSION_CONTEXT.md: %v", err)
 	}
 
-	// Create current-session file
-	if err := os.WriteFile(filepath.Join(sessionsDir, ".current-session"), []byte(sessionID), 0644); err != nil {
-		t.Fatalf("Failed to write .current-session: %v", err)
-	}
-
 	// Run status command
 	outputFormat := "json"
 	verbose := false
@@ -351,6 +338,7 @@ current_phase: implementation
 				Verbose:    &verbose,
 				ProjectDir: &projectDir,
 			},
+			SessionID: &sessionID,
 		},
 	}
 
@@ -405,11 +393,6 @@ current_phase: design
 		t.Fatalf("Failed to write SESSION_CONTEXT.md: %v", err)
 	}
 
-	// Create current-session file
-	if err := os.WriteFile(filepath.Join(sessionsDir, ".current-session"), []byte(sessionID), 0644); err != nil {
-		t.Fatalf("Failed to write .current-session: %v", err)
-	}
-
 	// Seed some events in events.jsonl
 	eventsPath := filepath.Join(sessionDir, "events.jsonl")
 	events := []string{
@@ -431,6 +414,7 @@ current_phase: design
 				Verbose:    &verbose,
 				ProjectDir: &projectDir,
 			},
+			SessionID: &sessionID,
 		},
 	}
 
@@ -489,11 +473,6 @@ current_phase: design
 		t.Fatalf("Failed to write SESSION_CONTEXT.md: %v", err)
 	}
 
-	// Create current-session file
-	if err := os.WriteFile(filepath.Join(sessionsDir, ".current-session"), []byte(sessionID), 0644); err != nil {
-		t.Fatalf("Failed to write .current-session: %v", err)
-	}
-
 	// Run prepare command with invalid sequence (architect -> qa-adversary skips principal-engineer)
 	outputFormat := "json"
 	verbose := false
@@ -504,6 +483,7 @@ current_phase: design
 				Verbose:    &verbose,
 				ProjectDir: &projectDir,
 			},
+			SessionID: &sessionID,
 		},
 	}
 
@@ -569,11 +549,6 @@ current_phase: design
 				t.Fatalf("Failed to write SESSION_CONTEXT.md: %v", err)
 			}
 
-			// Create current-session file
-			if err := os.WriteFile(filepath.Join(sessionsDir, ".current-session"), []byte(sessionID), 0644); err != nil {
-				t.Fatalf("Failed to write .current-session: %v", err)
-			}
-
 			// Run prepare command with self-handoff
 			outputFormat := "json"
 			verbose := false
@@ -584,6 +559,7 @@ current_phase: design
 				Verbose:    &verbose,
 				ProjectDir: &projectDir,
 			},
+			SessionID: &sessionID,
 		},
 	}
 
@@ -668,11 +644,6 @@ current_phase: design
 				t.Fatalf("Failed to write SESSION_CONTEXT.md: %v", err)
 			}
 
-			// Create current-session file
-			if err := os.WriteFile(filepath.Join(sessionsDir, ".current-session"), []byte(sessionID), 0644); err != nil {
-				t.Fatalf("Failed to write .current-session: %v", err)
-			}
-
 			// Run prepare command with invalid sequence
 			outputFormat := "json"
 			verbose := false
@@ -683,6 +654,7 @@ current_phase: design
 				Verbose:    &verbose,
 				ProjectDir: &projectDir,
 			},
+			SessionID: &sessionID,
 		},
 	}
 
@@ -781,11 +753,6 @@ current_phase: design
 				t.Fatalf("Failed to write SESSION_CONTEXT.md: %v", err)
 			}
 
-			// Create current-session file
-			if err := os.WriteFile(filepath.Join(sessionsDir, ".current-session"), []byte(sessionID), 0644); err != nil {
-				t.Fatalf("Failed to write .current-session: %v", err)
-			}
-
 			// Run prepare command
 			outputFormat := "json"
 			verbose := false
@@ -796,6 +763,7 @@ current_phase: design
 				Verbose:    &verbose,
 				ProjectDir: &projectDir,
 			},
+			SessionID: &sessionID,
 		},
 	}
 
@@ -893,11 +861,6 @@ current_phase: requirements
 		t.Fatalf("Failed to write SESSION_CONTEXT.md: %v", err)
 	}
 
-	// Create current-session file
-	if err := os.WriteFile(filepath.Join(sessionsDir, ".current-session"), []byte(sessionID), 0644); err != nil {
-		t.Fatalf("Failed to write .current-session: %v", err)
-	}
-
 	// Note: No events.jsonl file - should handle gracefully
 
 	// Run history command
@@ -910,6 +873,7 @@ current_phase: requirements
 				Verbose:    &verbose,
 				ProjectDir: &projectDir,
 			},
+			SessionID: &sessionID,
 		},
 	}
 
@@ -965,11 +929,6 @@ current_phase: design
 		t.Fatalf("Failed to write SESSION_CONTEXT.md: %v", err)
 	}
 
-	// Create current-session file
-	if err := os.WriteFile(filepath.Join(sessionsDir, ".current-session"), []byte(sessionID), 0644); err != nil {
-		t.Fatalf("Failed to write .current-session: %v", err)
-	}
-
 	// Test 1: dry-run with invalid agent should fail validation
 	outputFormat := "json"
 	verbose := false
@@ -980,6 +939,7 @@ current_phase: design
 				Verbose:    &verbose,
 				ProjectDir: &projectDir,
 			},
+			SessionID: &sessionID,
 		},
 	}
 
@@ -1057,11 +1017,6 @@ current_phase: design
 		t.Fatalf("Failed to write SESSION_CONTEXT.md: %v", err)
 	}
 
-	// Create current-session file
-	if err := os.WriteFile(filepath.Join(sessionsDir, ".current-session"), []byte(sessionID), 0644); err != nil {
-		t.Fatalf("Failed to write .current-session: %v", err)
-	}
-
 	// Run execute command with --dry-run
 	outputFormat := "json"
 	verbose := false
@@ -1072,6 +1027,7 @@ current_phase: design
 				Verbose:    &verbose,
 				ProjectDir: &projectDir,
 			},
+			SessionID: &sessionID,
 		},
 	}
 
@@ -1189,10 +1145,6 @@ current_phase: design
 				t.Fatalf("Failed to write SESSION_CONTEXT.md: %v", err)
 			}
 
-			if err := os.WriteFile(filepath.Join(sessionsDir, ".current-session"), []byte(sessionID), 0644); err != nil {
-				t.Fatalf("Failed to write .current-session: %v", err)
-			}
-
 			outputFormat := "json"
 			verbose := false
 			ctx := &cmdContext{
@@ -1202,6 +1154,7 @@ current_phase: design
 				Verbose:    &verbose,
 				ProjectDir: &projectDir,
 			},
+			SessionID: &sessionID,
 		},
 	}
 
@@ -1289,10 +1242,6 @@ current_phase: design
 		t.Fatalf("Failed to write SESSION_CONTEXT.md: %v", err)
 	}
 
-	if err := os.WriteFile(filepath.Join(sessionsDir, ".current-session"), []byte(sessionID), 0644); err != nil {
-		t.Fatalf("Failed to write .current-session: %v", err)
-	}
-
 	outputFormat := "json"
 	verbose := false
 	ctx := &cmdContext{
@@ -1302,6 +1251,7 @@ current_phase: design
 				Verbose:    &verbose,
 				ProjectDir: &projectDir,
 			},
+			SessionID: &sessionID,
 		},
 	}
 
@@ -1386,10 +1336,6 @@ current_phase: design
 				t.Fatalf("Failed to write SESSION_CONTEXT.md: %v", err)
 			}
 
-			if err := os.WriteFile(filepath.Join(sessionsDir, ".current-session"), []byte(sessionID), 0644); err != nil {
-				t.Fatalf("Failed to write .current-session: %v", err)
-			}
-
 			outputFormat := "json"
 			verbose := false
 			ctx := &cmdContext{
@@ -1399,6 +1345,7 @@ current_phase: design
 				Verbose:    &verbose,
 				ProjectDir: &projectDir,
 			},
+			SessionID: &sessionID,
 		},
 	}
 
@@ -1457,10 +1404,6 @@ current_phase: design
 		t.Fatalf("Failed to write SESSION_CONTEXT.md: %v", err)
 	}
 
-	if err := os.WriteFile(filepath.Join(sessionsDir, ".current-session"), []byte(sessionID), 0644); err != nil {
-		t.Fatalf("Failed to write .current-session: %v", err)
-	}
-
 	outputFormat := "json"
 	verbose := true
 	ctx := &cmdContext{
@@ -1470,6 +1413,7 @@ current_phase: design
 				Verbose:    &verbose,
 				ProjectDir: &projectDir,
 			},
+			SessionID: &sessionID,
 		},
 	}
 
@@ -1587,10 +1531,6 @@ current_phase: design
 		t.Fatalf("Failed to write SESSION_CONTEXT.md: %v", err)
 	}
 
-	if err := os.WriteFile(filepath.Join(sessionsDir, ".current-session"), []byte(sessionID), 0644); err != nil {
-		t.Fatalf("Failed to write .current-session: %v", err)
-	}
-
 	outputFormat := "json"
 	verbose := false
 	ctx := &cmdContext{
@@ -1600,6 +1540,7 @@ current_phase: design
 				Verbose:    &verbose,
 				ProjectDir: &projectDir,
 			},
+			SessionID: &sessionID,
 		},
 	}
 
@@ -1666,10 +1607,6 @@ current_phase: design
 				t.Fatalf("Failed to write SESSION_CONTEXT.md: %v", err)
 			}
 
-			if err := os.WriteFile(filepath.Join(sessionsDir, ".current-session"), []byte(sessionID), 0644); err != nil {
-				t.Fatalf("Failed to write .current-session: %v", err)
-			}
-
 			outputFormat := "json"
 			verbose := false
 			ctx := &cmdContext{
@@ -1679,6 +1616,7 @@ current_phase: design
 				Verbose:    &verbose,
 				ProjectDir: &projectDir,
 			},
+			SessionID: &sessionID,
 		},
 	}
 
@@ -1759,10 +1697,6 @@ current_phase: design
 		t.Fatalf("Failed to write SESSION_CONTEXT.md: %v", err)
 	}
 
-	if err := os.WriteFile(filepath.Join(sessionsDir, ".current-session"), []byte(sessionID), 0644); err != nil {
-		t.Fatalf("Failed to write .current-session: %v", err)
-	}
-
 	outputFormat := "json"
 	verbose := false
 	ctx := &cmdContext{
@@ -1772,6 +1706,7 @@ current_phase: design
 				Verbose:    &verbose,
 				ProjectDir: &projectDir,
 			},
+			SessionID: &sessionID,
 		},
 	}
 
@@ -1847,10 +1782,6 @@ current_phase: implementation
 		t.Fatalf("Failed to write SESSION_CONTEXT.md: %v", err)
 	}
 
-	if err := os.WriteFile(filepath.Join(sessionsDir, ".current-session"), []byte(sessionID), 0644); err != nil {
-		t.Fatalf("Failed to write .current-session: %v", err)
-	}
-
 	// Seed events with handoffs
 	eventsPath := filepath.Join(sessionDir, "events.jsonl")
 	events := []string{
@@ -1872,6 +1803,7 @@ current_phase: implementation
 				Verbose:    &verbose,
 				ProjectDir: &projectDir,
 			},
+			SessionID: &sessionID,
 		},
 	}
 
@@ -1934,10 +1866,6 @@ current_phase: ` + tc.phase + `
 				t.Fatalf("Failed to write SESSION_CONTEXT.md: %v", err)
 			}
 
-			if err := os.WriteFile(filepath.Join(sessionsDir, ".current-session"), []byte(sessionID), 0644); err != nil {
-				t.Fatalf("Failed to write .current-session: %v", err)
-			}
-
 			outputFormat := "json"
 			verbose := false
 			ctx := &cmdContext{
@@ -1947,6 +1875,7 @@ current_phase: ` + tc.phase + `
 				Verbose:    &verbose,
 				ProjectDir: &projectDir,
 			},
+			SessionID: &sessionID,
 		},
 	}
 
@@ -2001,10 +1930,6 @@ current_phase: validation
 		t.Fatalf("Failed to write SESSION_CONTEXT.md: %v", err)
 	}
 
-	if err := os.WriteFile(filepath.Join(sessionsDir, ".current-session"), []byte(sessionID), 0644); err != nil {
-		t.Fatalf("Failed to write .current-session: %v", err)
-	}
-
 	// Seed many events
 	eventsPath := filepath.Join(sessionDir, "events.jsonl")
 	events := []string{
@@ -2028,6 +1953,7 @@ current_phase: validation
 				Verbose:    &verbose,
 				ProjectDir: &projectDir,
 			},
+			SessionID: &sessionID,
 		},
 	}
 
@@ -2081,10 +2007,6 @@ current_phase: implementation
 		t.Fatalf("Failed to write SESSION_CONTEXT.md: %v", err)
 	}
 
-	if err := os.WriteFile(filepath.Join(sessionsDir, ".current-session"), []byte(sessionID), 0644); err != nil {
-		t.Fatalf("Failed to write .current-session: %v", err)
-	}
-
 	// Include PHASE_TRANSITIONED event
 	eventsPath := filepath.Join(sessionDir, "events.jsonl")
 	events := []string{
@@ -2104,6 +2026,7 @@ current_phase: implementation
 				Verbose:    &verbose,
 				ProjectDir: &projectDir,
 			},
+			SessionID: &sessionID,
 		},
 	}
 
@@ -2197,12 +2120,7 @@ current_phase: design
 		}
 	}
 
-	// Set current-session to session1
-	if err := os.WriteFile(filepath.Join(sessionsDir, ".current-session"), []byte(session1ID), 0644); err != nil {
-		t.Fatalf("Failed to write .current-session: %v", err)
-	}
-
-	// But explicitly use session2
+	// Explicitly use session2 (not session1)
 	outputFormat := "json"
 	verbose := false
 	ctx := &cmdContext{
@@ -2281,10 +2199,6 @@ current_phase: validation
 		t.Fatalf("Failed to write SESSION_CONTEXT.md: %v", err)
 	}
 
-	if err := os.WriteFile(filepath.Join(sessionsDir, ".current-session"), []byte(sessionID), 0644); err != nil {
-		t.Fatalf("Failed to write .current-session: %v", err)
-	}
-
 	outputFormat := "json"
 	verbose := false
 	ctx := &cmdContext{
@@ -2294,6 +2208,7 @@ current_phase: validation
 				Verbose:    &verbose,
 				ProjectDir: &projectDir,
 			},
+			SessionID: &sessionID,
 		},
 	}
 

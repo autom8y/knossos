@@ -182,17 +182,11 @@ func TestRunAutopark_ActiveSession(t *testing.T) {
 		t.Fatalf("Failed to create session dir: %v", err)
 	}
 
-	// Write .current-session
-	currentSessionFile := filepath.Join(sessionsDir, ".current-session")
-	if err := os.WriteFile(currentSessionFile, []byte(sessionID), 0644); err != nil {
-		t.Fatalf("Failed to write current session: %v", err)
-	}
-
-	// Write SESSION_CONTEXT.md with ACTIVE status
+	// Write SESSION_CONTEXT.md with ACTIVE status (unquoted for scan-based discovery)
 	sessionContext := `---
 schema_version: "2.1"
 session_id: "session-20260104-222613-05a12c6b"
-status: "ACTIVE"
+status: ACTIVE
 created_at: "2026-01-04T22:26:13Z"
 initiative: "Test"
 complexity: "MODULE"
@@ -269,13 +263,12 @@ func TestRunAutopark_AlreadyParked(t *testing.T) {
 	sessionsDir := filepath.Join(tmpDir, ".claude", "sessions")
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	os.MkdirAll(sessionDir, 0755)
-	os.WriteFile(filepath.Join(sessionsDir, ".current-session"), []byte(sessionID), 0644)
 
 	// Write SESSION_CONTEXT.md with PARKED status
 	sessionContext := `---
 schema_version: "2.1"
 session_id: "session-20260104-222613-05a12c6b"
-status: "PARKED"
+status: PARKED
 created_at: "2026-01-04T22:26:13Z"
 initiative: "Test"
 complexity: "MODULE"
@@ -298,6 +291,7 @@ parked_reason: "manual"
 
 	outputFlag := "json"
 	verboseFlag := false
+	sessionIDPtr := sessionID
 	ctx := &cmdContext{
 		SessionContext: common.SessionContext{
 			BaseContext: common.BaseContext{
@@ -305,7 +299,7 @@ parked_reason: "manual"
 				Verbose:    &verboseFlag,
 				ProjectDir: &tmpDir,
 			},
-			SessionID: nil,
+			SessionID: &sessionIDPtr,
 		},
 	}
 

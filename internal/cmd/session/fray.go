@@ -156,10 +156,6 @@ func fraySession(projectDir, parentID string, opts frayOptions) (*output.FrayOut
 		}
 	}
 
-	// Update current session cache to point to child
-	currentSessionFile := resolver.CurrentSessionFile()
-	os.WriteFile(currentSessionFile, []byte(childCtx.SessionID), 0644)
-
 	// Emit events (non-fatal)
 	emitFrayEvents(resolver, parentID, childCtx.SessionID, parentCtx.CurrentPhase)
 

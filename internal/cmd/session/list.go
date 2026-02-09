@@ -48,7 +48,7 @@ func runList(ctx *cmdContext, opts listOptions) error {
 	resolver := ctx.GetResolver()
 
 	// Get current session ID
-	currentID, _ := ctx.GetCurrentSessionID()
+	currentID, _ := session.FindActiveSession(resolver.SessionsDir())
 
 	var sessions []output.SessionSummary
 

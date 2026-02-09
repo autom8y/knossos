@@ -112,9 +112,6 @@ func TestSubagentStart_LogsToClew(t *testing.T) {
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	os.MkdirAll(sessionDir, 0755)
 
-	currentSessionFile := filepath.Join(sessionsDir, ".current-session")
-	os.WriteFile(currentSessionFile, []byte(sessionID), 0644)
-
 	os.Setenv("CLAUDE_HOOK_EVENT", string(hook.EventSubagentStart))
 	os.Setenv("CLAUDE_PROJECT_DIR", tmpDir)
 	os.Setenv("CLAUDE_TOOL_INPUT", `{"agent_name":"integration-engineer","agent_type":"specialist","task_id":"task-016"}`)
@@ -126,6 +123,7 @@ func TestSubagentStart_LogsToClew(t *testing.T) {
 
 	outputFlag := "json"
 	verboseFlag := false
+	sessionIDPtr := sessionID
 	ctx := &cmdContext{
 		SessionContext: common.SessionContext{
 			BaseContext: common.BaseContext{
@@ -133,6 +131,7 @@ func TestSubagentStart_LogsToClew(t *testing.T) {
 				Verbose:    &verboseFlag,
 				ProjectDir: &tmpDir,
 			},
+			SessionID: &sessionIDPtr,
 		},
 	}
 
@@ -175,9 +174,6 @@ func TestSubagentStop_LogsToClew(t *testing.T) {
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	os.MkdirAll(sessionDir, 0755)
 
-	currentSessionFile := filepath.Join(sessionsDir, ".current-session")
-	os.WriteFile(currentSessionFile, []byte(sessionID), 0644)
-
 	os.Setenv("CLAUDE_HOOK_EVENT", string(hook.EventSubagentStop))
 	os.Setenv("CLAUDE_PROJECT_DIR", tmpDir)
 	os.Setenv("CLAUDE_TOOL_INPUT", `{"agent_name":"context-architect","type":"specialist"}`)
@@ -189,6 +185,7 @@ func TestSubagentStop_LogsToClew(t *testing.T) {
 
 	outputFlag := "json"
 	verboseFlag := false
+	sessionIDPtr := sessionID
 	ctx := &cmdContext{
 		SessionContext: common.SessionContext{
 			BaseContext: common.BaseContext{
@@ -196,6 +193,7 @@ func TestSubagentStop_LogsToClew(t *testing.T) {
 				Verbose:    &verboseFlag,
 				ProjectDir: &tmpDir,
 			},
+			SessionID: &sessionIDPtr,
 		},
 	}
 

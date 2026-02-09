@@ -6,6 +6,8 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/autom8y/knossos/internal/errors"
+	"github.com/autom8y/knossos/internal/paths"
+	"github.com/autom8y/knossos/internal/session"
 	"github.com/autom8y/knossos/internal/tribute"
 )
 
@@ -98,7 +100,18 @@ func runGenerate(ctx *cmdContext, sessionDir string) error {
 		if ctx.ProjectDir == nil || *ctx.ProjectDir == "" {
 			return errors.New(errors.CodeProjectNotFound, "project directory required")
 		}
-		generator, err = tribute.GenerateFromProject(*ctx.ProjectDir)
+		// Find active session
+		activeID, findErr := session.FindActiveSession(paths.NewResolver(*ctx.ProjectDir).SessionsDir())
+		if findErr != nil {
+			printer.PrintError(findErr)
+			return findErr
+		}
+		if activeID == "" {
+			noSessionErr := errors.New(errors.CodeSessionNotFound, "no active session")
+			printer.PrintError(noSessionErr)
+			return noSessionErr
+		}
+		generator, err = tribute.GenerateFromProject(*ctx.ProjectDir, activeID)
 		if err != nil {
 			printer.PrintError(err)
 			return err

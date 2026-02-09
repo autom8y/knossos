@@ -128,27 +128,24 @@ func (g *Generator) Generate() (*GenerateResult, error) {
 	return result, nil
 }
 
-// GenerateFromProject creates a Generator for the current session in a project.
-func GenerateFromProject(projectRoot string) (*Generator, error) {
-	resolver := paths.NewResolver(projectRoot)
-
-	// Read current session ID
-	currentSessionPath := resolver.CurrentSessionFile()
-	sessionIDBytes, err := os.ReadFile(currentSessionPath)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return nil, errors.New(errors.CodeSessionNotFound, "no active session")
-		}
-		return nil, errors.Wrap(errors.CodeGeneralError, "failed to read current session", err)
+// GenerateFromProject creates a Generator for a specific session in a project.
+func GenerateFromProject(projectRoot string, sessionID string) (*Generator, error) {
+	if projectRoot == "" {
+		return nil, errors.New(errors.CodeUsageError, "project root is required")
 	}
-
-	sessionID := strings.TrimSpace(string(sessionIDBytes))
 	if sessionID == "" {
-		return nil, errors.New(errors.CodeSessionNotFound, "no active session")
+		return nil, errors.New(errors.CodeSessionNotFound, "no session ID provided")
 	}
 
-	sessionPath := resolver.SessionDir(sessionID)
-	return NewGenerator(sessionPath), nil
+	resolver := paths.NewResolver(projectRoot)
+	sessionDir := resolver.SessionDir(strings.TrimSpace(sessionID))
+
+	// Verify session directory exists
+	if _, err := os.Stat(sessionDir); os.IsNotExist(err) {
+		return nil, errors.New(errors.CodeSessionNotFound, "session directory not found: "+sessionID)
+	}
+
+	return NewGenerator(sessionDir), nil
 }
 
 // GenerateFromSessionID creates a Generator for a specific session ID.

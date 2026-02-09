@@ -89,11 +89,6 @@ func runResume(ctx *cmdContext) error {
 		return err
 	}
 
-	// Set as current session
-	if err := ctx.SetCurrentSessionID(sessionID); err != nil {
-		printer.VerboseLog("warn", "failed to set current session", map[string]interface{}{"error": err.Error()})
-	}
-
 	// Emit lifecycle event
 	sessionDir := resolver.SessionDir(sessionID)
 	writer := clewcontract.NewBufferedEventWriter(sessionDir, clewcontract.DefaultFlushInterval)

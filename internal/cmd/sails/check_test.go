@@ -38,12 +38,6 @@ func createTestSession(t *testing.T, projectDir, sessionID string) string {
 	return sessionDir
 }
 
-// setCurrentSession sets the current session for the project.
-func setCurrentSession(t *testing.T, projectDir, sessionID string) {
-	t.Helper()
-	currentPath := filepath.Join(projectDir, ".claude", "sessions", ".current-session")
-	require.NoError(t, os.WriteFile(currentPath, []byte(sessionID), 0644))
-}
 
 // writeWhiteSails writes a WHITE_SAILS.yaml file to the session directory.
 func writeWhiteSails(t *testing.T, sessionDir string, content string) {
@@ -216,15 +210,14 @@ open_questions: []
 	assert.Equal(t, sails.ColorWhite, result.Color)
 }
 
-// TestCheckCmd_CurrentSession verifies check works for current session.
-func TestCheckCmd_CurrentSession(t *testing.T) {
+// TestCheckCmd_ForSession verifies check works for a specific session.
+func TestCheckCmd_ForSession(t *testing.T) {
 	projectDir := createTestProject(t)
-	sessionID := "session-20260105-143000-current"
+	sessionID := "session-20260105-143000-current1"
 	sessionDir := createTestSession(t, projectDir, sessionID)
-	setCurrentSession(t, projectDir, sessionID)
 
 	sailsContent := `schema_version: "1.0"
-session_id: "session-20260105-143000-current"
+session_id: "session-20260105-143000-current1"
 generated_at: "2026-01-05T15:30:00Z"
 color: "WHITE"
 computed_base: "WHITE"
@@ -239,8 +232,8 @@ open_questions: []
 `
 	writeWhiteSails(t, sessionDir, sailsContent)
 
-	// Check current session via project root
-	result, err := sails.CheckGateForCurrentSession(projectDir)
+	// Check specific session via project root + session ID
+	result, err := sails.CheckGateForSession(projectDir, sessionID)
 	require.NoError(t, err)
 	assert.True(t, result.Pass)
 	assert.Equal(t, sessionID, result.SessionID)
@@ -953,18 +946,14 @@ func TestFormatGateResult(t *testing.T) {
 // Edge Cases and Error Recovery
 // =============================================================================
 
-// TestCheckCmd_WhitespaceInSessionID verifies handling of whitespace.
+// TestCheckCmd_WhitespaceInSessionID verifies handling of whitespace in session ID.
 func TestCheckCmd_WhitespaceInSessionID(t *testing.T) {
 	projectDir := createTestProject(t)
-	sessionID := "session-20260105-143000-whitespace"
+	sessionID := "session-20260105-143000-whitespac"
 	sessionDir := createTestSession(t, projectDir, sessionID)
 
-	// Set current session with trailing whitespace
-	currentPath := filepath.Join(projectDir, ".claude", "sessions", ".current-session")
-	require.NoError(t, os.WriteFile(currentPath, []byte(sessionID+"\n  "), 0644))
-
 	sailsContent := `schema_version: "1.0"
-session_id: "session-20260105-143000-whitespace"
+session_id: "session-20260105-143000-whitespac"
 color: "WHITE"
 computed_base: "WHITE"
 proofs:
@@ -978,8 +967,8 @@ open_questions: []
 `
 	writeWhiteSails(t, sessionDir, sailsContent)
 
-	// Should handle whitespace in session ID
-	result, err := sails.CheckGateForCurrentSession(projectDir)
+	// CheckGateForSession trims whitespace from session ID
+	result, err := sails.CheckGateForSession(projectDir, "  "+sessionID+"\n  ")
 	require.NoError(t, err)
 	assert.True(t, result.Pass)
 }

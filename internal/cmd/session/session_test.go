@@ -109,16 +109,6 @@ func TestCreate_BasicCreation(t *testing.T) {
 	if sessCtx.Rite != nil && *sessCtx.Rite != "10x-dev" {
 		t.Errorf("Team = %q, want %q", *sessCtx.Rite, "10x-dev")
 	}
-
-	// Verify current-session file was created
-	currentSessionFile := filepath.Join(sessionsDir, ".current-session")
-	currentID, err := os.ReadFile(currentSessionFile)
-	if err != nil {
-		t.Fatalf("Failed to read .current-session: %v", err)
-	}
-	if string(currentID) != sessionID {
-		t.Errorf("Current session = %q, want %q", string(currentID), sessionID)
-	}
 }
 
 // TestCreate_InvalidComplexity verifies that invalid complexity is rejected.
@@ -669,10 +659,10 @@ func TestFSM_FullLifecycle(t *testing.T) {
 		t.Fatalf("Step 1 (create) failed: %v", err)
 	}
 
-	// Get the session ID
-	currentID, err := ctx.GetCurrentSessionID()
+	// Get the session ID via scan-based discovery
+	currentID, err := session.FindActiveSession(sessionsDir)
 	if err != nil {
-		t.Fatalf("Failed to get current session ID: %v", err)
+		t.Fatalf("Failed to find active session: %v", err)
 	}
 
 	// Verify ACTIVE
@@ -684,6 +674,10 @@ func TestFSM_FullLifecycle(t *testing.T) {
 	if sessCtx.Status != session.StatusActive {
 		t.Errorf("Step 1: Status = %v, want ACTIVE", sessCtx.Status)
 	}
+
+	// Update ctx with sessionID for subsequent operations
+	currentIDPtr := currentID
+	ctx.SessionID = &currentIDPtr
 
 	// Step 2: ACTIVE -> PARKED (park)
 	parkOpts := parkOptions{
@@ -894,12 +888,9 @@ parked_reason: Testing wrap from parked
 		t.Fatalf("Failed to write SESSION_CONTEXT.md: %v", err)
 	}
 
-	if err := os.WriteFile(filepath.Join(sessionsDir, ".current-session"), []byte(sessionID), 0644); err != nil {
-		t.Fatalf("Failed to write .current-session: %v", err)
-	}
-
 	outputFormat := "json"
 	verbose := true
+	sessionIDPtr := sessionID
 	ctx := &cmdContext{
 		SessionContext: common.SessionContext{
 			BaseContext: common.BaseContext{
@@ -907,6 +898,7 @@ parked_reason: Testing wrap from parked
 				Verbose:    &verbose,
 				ProjectDir: &projectDir,
 			},
+			SessionID: &sessionIDPtr,
 		},
 	}
 

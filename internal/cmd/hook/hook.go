@@ -5,7 +5,6 @@ package hook
 import (
 	"context"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -14,6 +13,7 @@ import (
 	"github.com/autom8y/knossos/internal/hook"
 	"github.com/autom8y/knossos/internal/output"
 	"github.com/autom8y/knossos/internal/paths"
+	"github.com/autom8y/knossos/internal/session"
 )
 
 // Default timeout for hook operations (100ms target, 500ms max safety).
@@ -147,14 +147,15 @@ func (c *cmdContext) resolveSession(hookEnv *hook.Env) (*paths.Resolver, string,
 		}
 	}
 
-	// Get current session ID
-	sessionID, err := c.GetCurrentSessionID()
+	// Use ResolveSession priority chain: explicit flag > CC map > smart scan
+	explicitID := ""
+	if c.SessionID != nil {
+		explicitID = *c.SessionID
+	}
+	sessionID, err := session.ResolveSession(resolver, hookEnv.SessionID, explicitID)
 	if err != nil {
 		return resolver, "", err
 	}
-
-	// Trim any whitespace/newlines from session ID
-	sessionID = strings.TrimSpace(sessionID)
 
 	return resolver, sessionID, nil
 }

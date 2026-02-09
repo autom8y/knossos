@@ -525,13 +525,14 @@ type FailResult struct {
 
 // RecoverOutput represents session recovery result.
 type RecoverOutput struct {
-	StaleLocks    []string `json:"stale_locks,omitempty"`
-	RemovedLocks  []string `json:"removed_locks,omitempty"`
-	ActiveSession string   `json:"active_session,omitempty"`
-	CacheStatus   string   `json:"cache_status"`
-	PreviousCache string   `json:"previous_cache,omitempty"`
-	DryRun        bool     `json:"dry_run"`
-	Summary       string   `json:"summary"`
+	StaleLocks            []string `json:"stale_locks,omitempty"`
+	RemovedLocks          []string `json:"removed_locks,omitempty"`
+	ActiveSession         string   `json:"active_session,omitempty"`
+	CCMapOrphans          []string `json:"cc_map_orphans,omitempty"`
+	RemovedCCMapOrphans   []string `json:"removed_cc_map_orphans,omitempty"`
+	CurrentSessionCleaned bool     `json:"current_session_cleaned,omitempty"`
+	DryRun                bool     `json:"dry_run"`
+	Summary               string   `json:"summary"`
 }
 
 // FrayOutput represents session fray (fork) result.

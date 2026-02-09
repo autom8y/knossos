@@ -5,6 +5,7 @@ package sails
 import (
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/autom8y/knossos/internal/errors"
 	"github.com/autom8y/knossos/internal/paths"
@@ -157,34 +158,17 @@ func CheckGate(sessionPath string) (*GateResult, error) {
 	return result, nil
 }
 
-// CheckGateForCurrentSession checks the gate for the current active session.
-// This is a convenience function that finds the current session and checks its sails.
-func CheckGateForCurrentSession(projectRoot string) (*GateResult, error) {
+// CheckGateForSession checks the gate for a specific session.
+func CheckGateForSession(projectRoot string, sessionID string) (*GateResult, error) {
 	if projectRoot == "" {
 		return nil, errors.New(errors.CodeUsageError, "project root is required")
 	}
+	if sessionID == "" {
+		return nil, errors.New(errors.CodeSessionNotFound, "no session ID provided")
+	}
 
 	resolver := paths.NewResolver(projectRoot)
-
-	// Read current session ID
-	currentSessionPath := resolver.CurrentSessionFile()
-	sessionIDBytes, err := os.ReadFile(currentSessionPath)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return nil, errors.New(errors.CodeSessionNotFound, "no active session")
-		}
-		return nil, errors.Wrap(errors.CodeGeneralError, "failed to read current session", err)
-	}
-
-	sessionID := string(sessionIDBytes)
-	if sessionID == "" {
-		return nil, errors.New(errors.CodeSessionNotFound, "no active session")
-	}
-
-	// Trim whitespace
-	sessionID = trimWhitespace(sessionID)
-
-	sessionDir := resolver.SessionDir(sessionID)
+	sessionDir := resolver.SessionDir(strings.TrimSpace(sessionID))
 	return CheckGate(sessionDir)
 }
 
