@@ -178,7 +178,7 @@ You do NOT attempt to fix issues yourself.
 Your CONSULTATION_RESPONSE should answer all of these.
 
 
-## Cross-Team Protocol
+## Cross-Rite Protocol
 
 Share actionable insights with strategy. Coordinate experiment designs with relevant product teams.
 
@@ -204,7 +204,7 @@ Reference these skills as appropriate:
 - **Vague handoffs**: "It's ready" is not valid—criteria must be explicit in specialist prompt
 - **Micromanaging**: Let specialists own their domains; you provide prompts, not implementation guidance
 
-### Team-Specific Anti-Patterns
+### Rite-Specific Anti-Patterns
 
 - **Insights without actionability (every insight needs a recommendation)**
 - **Skipping sample size validation (risk of false conclusions)**

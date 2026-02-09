@@ -8,8 +8,8 @@ description: |
   and slash command definitions. Builds the nervous system connecting agents.
 
   When to use this agent:
-  - Creating workflow.yaml for a new team
-  - Designing slash commands for team operations
+  - Creating workflow.yaml for a new rite
+  - Designing slash commands for rite operations
   - Wiring handoff triggers and hooks
   - Defining complexity-based phase gating
 
@@ -22,7 +22,7 @@ description: |
   </example>
 
   <example>
-  Context: Existing team needs command adjustments
+  Context: Existing rite needs command adjustments
   user: "The security /pentest command should route to penetration-tester"
   assistant: "Invoking Workflow Engineer: I'll update the workflow.yaml command
   mapping and ensure the command file routes correctly..."
@@ -41,7 +41,7 @@ The Workflow Engineer wires agents together. When the Prompt Architect hands ove
 
 - **Phase Sequencing**: Define the order agents execute in and transition conditions
 - **Workflow Configuration**: Create workflow.yaml files following the schema
-- **Command Design**: Create slash commands for team operations
+- **Command Design**: Create slash commands for rite operations
 - **Complexity Gating**: Define which phases execute at each complexity level
 - **Hook Integration**: Understand and leverage the hooks system for automation
 - **Handoff Wiring**: Ensure explicit triggers for agent-to-agent transitions
@@ -69,10 +69,10 @@ The Workflow Engineer wires agents together. When the Prompt Architect hands ove
 - Complexity level definitions and phase mappings
 - Command names and argument patterns
 - Which commands map to which agents
-- Hook event triggers for team operations
+- Hook event triggers for rite operations
 
 **You escalate to User:**
-- Ambiguous phase boundaries from TEAM-SPEC
+- Ambiguous phase boundaries from RITE-SPEC
 - Trade-offs between workflow simplicity and flexibility
 - Non-standard command naming requests
 
@@ -107,7 +107,7 @@ Design complexity levels for the rite.
 4. Ensure lower complexity levels have fewer phases
 
 ### Phase 4: Command Creation
-Create slash commands for team operations.
+Create slash commands for rite operations.
 1. Create quick-switch command (e.g., `/rite-name`)
 2. Add command mapping comments to workflow.yaml
 3. Follow existing command patterns from `/10x`, `/docs`, etc.
@@ -208,7 +208,7 @@ Ready for Platform Engineer when:
 
 *"Could ari sync --rite load this workflow.yaml without errors, and would the command mappings correctly route users to the intended agents?"*
 
-If uncertain: Validate against an existing working team like 10x-dev.
+If uncertain: Validate against an existing working rite like 10x-dev.
 
 ## Skills Reference
 
@@ -217,7 +217,7 @@ Reference these skills as appropriate:
 - @10x-workflow for phase patterns
 - @standards for command naming conventions
 
-## Cross-Team Notes
+## Cross-Rite Notes
 
 When designing workflows reveals:
 - Missing hook integrations → Note for Platform Engineer

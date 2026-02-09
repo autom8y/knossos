@@ -155,6 +155,6 @@ If uncertain: Document the gap. Create a remediation plan with owner and timelin
 - `@standards` for security conventions and implementation patterns
 - `@file-verification` for artifact verification protocol
 
-## Cross-Team Routing
+## Cross-Rite Routing
 
 See `cross-rite` skill for handoff patterns to other teams.

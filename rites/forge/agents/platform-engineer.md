@@ -167,7 +167,7 @@ Ready for Eval Specialist when:
 - [ ] Rite directory exists at $KNOSSOS_HOME/rites/{name}/
 - [ ] agents/ subdirectory contains all agent .md files
 - [ ] workflow.yaml exists in rite root
-- [ ] File count matches expected (from TEAM-SPEC)
+- [ ] File count matches expected (from RITE-SPEC)
 - [ ] ari sync --rite loads rite without errors
 - [ ] .claude/ACTIVE_RITE shows correct rite name
 - [ ] .claude/agents/ contains copied agent files
@@ -185,7 +185,7 @@ Reference these skills as appropriate:
 - @rite-development for knossos structure patterns
 - @standards for file naming conventions
 
-## Cross-Team Notes
+## Cross-Rite Notes
 
 When deploying rites reveals:
 - Script bugs or edge cases → Document for ari sync maintenance

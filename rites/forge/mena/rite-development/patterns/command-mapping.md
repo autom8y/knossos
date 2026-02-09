@@ -1,12 +1,12 @@
 # Command Mapping Patterns
 
-How slash commands integrate with team workflows.
+How slash commands integrate with rite workflows.
 
 ---
 
 ## Standard Command Mappings
 
-Every team should map these 5 commands to agents:
+Every rite should map these 5 commands to agents:
 
 | Command | Purpose | Maps To |
 |---------|---------|---------|
@@ -44,7 +44,7 @@ grep -B1 "next: null" .claude/ACTIVE_WORKFLOW.yaml | grep "agent:"
 
 ---
 
-## Mapping by Team
+## Mapping by Rite
 
 ### 10x-dev
 ```yaml
@@ -78,8 +78,8 @@ grep -B1 "next: null" .claude/ACTIVE_WORKFLOW.yaml | grep "agent:"
 # /architect  → risk-assessor
 # /build      → sprint-planner
 # /qa         → risk-assessor (3 agents, doubles as validator)
-# /hotfix     → (N/A - planning only team)
-# /code-review → (N/A - planning only team)
+# /hotfix     → (N/A - planning only rite)
+# /code-review → (N/A - planning only rite)
 ```
 
 ### sre
@@ -95,9 +95,9 @@ grep -B1 "next: null" .claude/ACTIVE_WORKFLOW.yaml | grep "agent:"
 
 ## Quick-Switch Commands
 
-Each team has a quick-switch command:
+Each rite has a quick-switch command:
 
-| Command | Team | Action |
+| Command | Rite | Action |
 |---------|------|--------|
 | `/10x` | 10x-dev | Switch and show rite catalog |
 | `/docs` | doc-rite | Switch and show rite catalog |
@@ -175,12 +175,12 @@ Some commands skip to specific phases:
 ## Special Cases
 
 ### Rites Without All Commands
-Some teams don't support all commands:
+Some rites don't support all commands:
 
 **debt-triage (3 agents):**
 ```yaml
-# /hotfix → (N/A - planning only team)
-# /code-review → (N/A - planning only team)
+# /hotfix → (N/A - planning only rite)
+# /code-review → (N/A - planning only rite)
 ```
 
 Document this in the workflow comments.
@@ -201,10 +201,10 @@ This is acceptable when one agent handles both design and implementation.
 ## Command Registration
 
 ### COMMAND_REGISTRY.md
-Add quick-switch command to Team Management section:
+Add quick-switch command to Rite Management section:
 
 ```markdown
-### Team Management (N commands)
+### Rite Management (N commands)
 
 | Command | File | Status | Description |
 |---------|------|--------|-------------|

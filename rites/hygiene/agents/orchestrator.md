@@ -194,7 +194,7 @@ Reference these skills as appropriate:
 - **Vague handoffs**: "It's ready" is not valid—criteria must be explicit in specialist prompt
 - **Micromanaging**: Let specialists own their domains; you provide prompts, not implementation guidance
 
-### Team-Specific Anti-Patterns
+### Rite-Specific Anti-Patterns
 
 - **Refactoring without tests (risk of regression)**
 - **Overfitting to single codebase style**

@@ -1,15 +1,15 @@
 ---
 name: docs-ref
-description: "Switch to docs (documentation workflow). Triggers: /docs, documentation team, doc workflow, tech writing."
+description: "Switch to docs (documentation workflow). Triggers: /docs, documentation rite, doc workflow, tech writing."
 ---
 
-# /docs - Quick Switch to Documentation Team
+# /docs - Quick Switch to Documentation Rite
 
-> **Category**: Team Management | **Phase**: Team Switching
+> **Category**: Rite Management | **Phase**: Rite Switching
 
 ## Purpose
 
-Instantly switch to the docs, a specialized team focused on technical writing, API documentation, information architecture, and documentation quality audits.
+Instantly switch to the docs, a specialized rite focused on technical writing, API documentation, information architecture, and documentation quality audits.
 
 This is a convenience wrapper around `/rite docs` that also displays the knossos after switching.
 
@@ -29,7 +29,7 @@ No parameters required. This command:
 
 ## Behavior
 
-### 1. Invoke Team Switch
+### 1. Invoke Rite Switch
 
 Execute via Bash tool:
 
@@ -60,14 +60,14 @@ Use /handoff <agent> to delegate work.
 ### 3. Update SESSION_CONTEXT (if active)
 
 If a session is active:
-- Update `active_team` field to `docs`
-- Add handoff note documenting team switch
+- Update `active_rite` field to `docs`
+- Add handoff note documenting rite switch
 
 ---
 
-## Team Details
+## Rite Details
 
-**Team Name**: docs
+**Rite Name**: docs
 **Agent Count**: 4
 **Workflow**: Audit → Architecture → Writing → Review
 
@@ -179,7 +179,7 @@ Tech Writer reviewing implementation artifacts...
 
 ---
 
-## Typical Workflow with Docs Team
+## Typical Workflow with Docs Rite
 
 ### Phase 1: Audit
 ```bash
@@ -220,9 +220,9 @@ Tech Writer reviewing implementation artifacts...
 
 ---
 
-## When to Use Docs Team
+## When to Use Docs Rite
 
-Use this team for:
+Use this rite for:
 
 - **API documentation**: REST/GraphQL/gRPC endpoint documentation
 - **README creation**: Project onboarding, quickstart guides
@@ -247,13 +247,13 @@ Use this team for:
 |------|--------|-------------|
 | `.claude/ACTIVE_RITE` | Set to `docs` | Active rite state |
 | `.claude/agents/` | Populated | 4 agent files loaded |
-| `.claude/sessions/{session_id}/SESSION_CONTEXT.md` | `active_team` updated | If session active |
+| `.claude/sessions/{session_id}/SESSION_CONTEXT.md` | `active_rite` updated | If session active |
 
 ---
 
 ## Success Criteria
 
-- Team switched to docs
+- Switched to docs rite
 - 4 agent files present in `.claude/agents/`
 - Rite catalog displayed to user
 - If session active, SESSION_CONTEXT updated
@@ -275,7 +275,7 @@ If swap fails:
 
 ## Integration with Documentation Skill
 
-This team complements the `documentation` skill:
+This rite complements the `documentation` skill:
 
 ```bash
 /docs
@@ -286,17 +286,17 @@ Create API documentation for user authentication endpoints.
 Use template at `.claude/skills/documentation/templates/api-doc.md`.
 ```
 
-The documentation skill provides templates, this team provides specialized agents.
+The documentation skill provides templates, this rite provides specialized agents.
 
 ---
 
 ## Related Commands
 
-- `/team` - General rite switching with options
-- `/10x` - Quick switch to development team
-- `/hygiene` - Quick switch to code hygiene team
-- `/debt` - Quick switch to technical debt team
-- `/handoff` - Delegate to specific agent in current team
+- `/rite` - General rite switching with options
+- `/10x` - Quick switch to development rite
+- `/hygiene` - Quick switch to code hygiene rite
+- `/debt` - Quick switch to technical debt rite
+- `/handoff` - Delegate to specific agent in current rite
 
 ---
 
@@ -325,16 +325,16 @@ Some projects prioritize documentation:
 
 For these, start with `/docs` instead of `/10x`.
 
-### Difference from /team
+### Difference from /rite
 
 | Command | Behavior |
 |---------|----------|
-| `/rite docs` | Switches team, shows swap confirmation |
-| `/docs` | Switches team, shows rite catalog with agent descriptions |
+| `/rite docs` | Switches rite, shows swap confirmation |
+| `/docs` | Switches rite, shows rite catalog with agent descriptions |
 
 Use `/docs` when you want to see available agents after switching.
 
-### Cross-Team Handoffs
+### Cross-Rite Handoffs
 
 Common pattern: Implement with `/10x`, document with `/docs`:
 
@@ -347,4 +347,4 @@ Common pattern: Implement with `/10x`, document with `/docs`:
 # Tech Writer documents new OAuth2 endpoints
 ```
 
-This leverages specialized teams for each phase.
+This leverages specialized rites for each phase.

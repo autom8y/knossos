@@ -14,7 +14,7 @@ What NOT to put in CLAUDE.md. Each anti-pattern includes the violation, why it's
 | 4 | Personal preferences in project | User-specific, causes team conflicts | ~/.claude/CLAUDE.md |
 | 5 | Hardcoded dynamic values | Sprint/velocity/blockers become stale quickly | Project management tools |
 | 6 | Session history | CLAUDE.md is not a changelog | .claude/sessions/ |
-| 7 | Knossos team in satellites | Satellite has its own team | Regenerate from satellite's ACTIVE_RITE |
+| 7 | Knossos rite in satellites | Satellite has its own rite | Regenerate from satellite's ACTIVE_RITE |
 | 8 | "Last updated" timestamps | Immediately stale, git provides this | Git history |
 | 9 | Task lists/checkboxes | Session-scoped, better tools exist | TodoWrite, issue tracker |
 | 10 | Environment configuration | Security risk, varies by machine | .env files, secret managers |
@@ -46,11 +46,11 @@ What NOT to put in CLAUDE.md. Each anti-pattern includes the violation, why it's
 
 ### 3. Duplicating Knossos State
 
-**Violation**: `Active Team: docs, Swapped: 2024-12-25`
+**Violation**: `Active Rite: docs, Swapped: 2024-12-25`
 
 **Why wrong**: Duplicates ACTIVE_RITE file, dates become stale, creates two sources of truth.
 
-**Correct**: Team sections regenerated from ACTIVE_RITE + agents/ directory.
+**Correct**: Rite sections regenerated from ACTIVE_RITE + agents/ directory.
 
 ---
 
@@ -84,13 +84,13 @@ What NOT to put in CLAUDE.md. Each anti-pattern includes the violation, why it's
 
 ---
 
-### 7. Copying Knossos Team to Satellites
+### 7. Copying Knossos Rite to Satellites
 
-**Violation**: Satellite Quick Start shows `ecosystem` agents instead of satellite's own team.
+**Violation**: Satellite Quick Start shows `ecosystem` agents instead of satellite's own rite.
 
-**Why wrong**: Satellite has its own team, knossos team is irrelevant, creates incorrect routing.
+**Why wrong**: Satellite has its own rite, knossos rite is irrelevant, creates incorrect routing.
 
-**Correct**: Team sections are PRESERVE or REGENERATE from satellite's own ACTIVE_RITE, never SYNC.
+**Correct**: Rite sections are PRESERVE or REGENERATE from satellite's own ACTIVE_RITE, never SYNC.
 
 ---
 

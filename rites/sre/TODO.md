@@ -111,7 +111,7 @@ The sre rite is a **production-ready, well-optimized rite** (44% token reduction
 
 ---
 
-## Cross-Team Notes
+## Cross-Rite Notes
 
 **For ecosystem:** P1 requires creating or extending a shared-templates skill at ecosystem level.
 
@@ -121,6 +121,6 @@ The sre rite is a **production-ready, well-optimized rite** (44% token reduction
 
 ---
 
-## Next Team
+## Next Rite
 
 Continue audit with: **security** (security assessment)

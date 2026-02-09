@@ -69,7 +69,7 @@ When behavior varies by context, use conditional tables that show which pattern 
 
 **Three-Mode Model** (from hybrid session model):
 
-| Mode | Session | Team | Behavior |
+| Mode | Session | Rite | Behavior |
 |------|---------|------|----------|
 | **Native** | No | - | Direct execution, no tracking |
 | **Cross-Cutting** | Yes | No | Direct execution + session tracking |
@@ -134,7 +134,7 @@ CLAUDE.md excludes: DYNAMIC + EPHEMERAL content (changes daily/hourly)
 |-------|---------------|----------|
 | Knossos | SYNC | Skills docs, hooks docs, workflow patterns |
 | Satellite | PRESERVE | Project extensions, custom sections |
-| Team | REGENERATE | Quick Start, Agent Configurations |
+| Rite | REGENERATE | Quick Start, Agent Configurations |
 | Session | NOT IN CLAUDE.md | Current task, git state, handoff context |
 
 ---
@@ -166,7 +166,7 @@ These sections are never overwritten by ari sync. Content is project-specific.
 
 | Section | Purpose | Content Pattern |
 |---------|---------|-----------------|
-| **Quick Start** | Orient to current team | Rite name, agent table (regenerated from knossos) |
+| **Quick Start** | Orient to current rite | Rite name, agent table (regenerated from knossos) |
 | **Agent Configurations** | List available agents | Agent-to-file mapping (regenerated from knossos) |
 | **Project:\*** namespace | Project extensions | Any project-specific patterns |
 | Custom sections | Satellite additions | Not matching knossos section names |
@@ -224,7 +224,7 @@ New content to add to CLAUDE.md?
            v
   Who owns this content?
      /        |        \
-  KNOSSOS   TEAM    SATELLITE
+  KNOSSOS   RITE    SATELLITE
     |         |          |
     v         v          v
   SYNC    REGENERATE  PRESERVE
@@ -242,7 +242,7 @@ Before modifying CLAUDE.md:
 - [ ] Content passes Scope Test (project-wide, not session-specific)
 - [ ] No dates, timestamps, or "currently" language
 - [ ] No git state or file status references
-- [ ] Correct owner identified (knossos/team/satellite)
+- [ ] Correct owner identified (knossos/rite/satellite)
 - [ ] Correct sync behavior specified (SYNC/PRESERVE/REGENERATE)
 - [ ] **Descriptive tone** (no global MUST mandates in entry sections)
 - [ ] **Conditional guidance** where behavior varies by context
@@ -282,6 +282,6 @@ After making changes:
 |----------|------------|-------------|
 | Add project extension | Check `## Project:*` namespace available | Verify PRESERVE marker added |
 | Update workflow routing | Confirm this is knossos content | Ensure SYNC marker preserved, descriptive tone |
-| Fix team configuration | Read ACTIVE_RITE + agents/ | Verify regeneration source noted |
+| Fix rite configuration | Read ACTIVE_RITE + agents/ | Verify regeneration source noted |
 | Remove stale content | Confirm it fails decay test | Verify no orphaned references |
 | Convert prescriptive to descriptive | Identify MUST mandates | Verify conditional tables used |

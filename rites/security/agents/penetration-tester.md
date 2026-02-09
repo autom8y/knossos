@@ -172,6 +172,6 @@ Focus on enabling defense. Provide enough detail to fix, not enough to exploit w
 - `@standards` for secure coding guidance
 - `@file-verification` for artifact verification protocol
 
-## Cross-Team Routing
+## Cross-Rite Routing
 
 See `cross-rite` skill for handoff patterns to other teams.

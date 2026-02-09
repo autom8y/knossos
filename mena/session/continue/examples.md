@@ -17,7 +17,7 @@ Session Details:
 - Parked: 2025-12-24 12:30:00 (3 hours ago)
 - Park reason: Lunch break
 - Complexity: MODULE
-- Team: 10x-dev
+- Rite: 10x-dev
 - Current phase: design
 - Last agent: architect
 
@@ -27,7 +27,7 @@ Artifacts produced:
 
 ✓ No blockers
 ✓ Git status: Clean
-✓ Team consistent
+✓ Rite consistent
 
 Continue with architect? [Y/n]: Y
 
@@ -41,7 +41,7 @@ Architect is reviewing TDD and ready to proceed.
 
 ---
 
-## Example 2: Resume After Team Change
+## Example 2: Resume After Rite Change
 
 ```bash
 /resume
@@ -56,11 +56,11 @@ Session Details:
 - Parked: 2025-12-23 17:00:00 (1 day ago)
 - Park reason: Waiting for design review
 - Complexity: SERVICE
-- Team: 10x-dev
+- Rite: 10x-dev
 - Current phase: design
 - Last agent: architect
 
-⚠ Team Mismatch Detected
+⚠ Rite Mismatch Detected
 
 Session started with: 10x-dev
 Current active rite: docs
@@ -99,7 +99,7 @@ Session Details:
 - Parked: 2025-12-24 12:00:00 (4 hours ago)
 - Park reason: Design approved, ready for implementation
 - Complexity: MODULE
-- Team: 10x-dev
+- Rite: 10x-dev
 - Current phase: design
 - Last agent: architect
 

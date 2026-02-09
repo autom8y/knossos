@@ -9,10 +9,10 @@ Definitions and patterns for agent roles in rites.
 ### Entry Agents
 First agent in workflow, responsible for initial assessment or requirements gathering.
 
-| Examples | Team | Purpose |
+| Examples | Rite | Purpose |
 |----------|------|---------|
 | requirements-analyst | 10x-dev | Clarify intent, produce PRD |
-| doc-auditor | doc-team | Inventory docs, identify gaps |
+| doc-auditor | doc-rite | Inventory docs, identify gaps |
 | code-smeller | hygiene | Detect code quality issues |
 | debt-collector | debt-triage | Inventory technical debt |
 | observability-engineer | sre | Assess monitoring coverage |
@@ -27,10 +27,10 @@ First agent in workflow, responsible for initial assessment or requirements gath
 ### Design Agents
 Second phase, responsible for planning and architecture.
 
-| Examples | Team | Purpose |
+| Examples | Rite | Purpose |
 |----------|------|---------|
 | architect | 10x-dev | Technical design, ADRs |
-| information-architect | doc-team | Document structure |
+| information-architect | doc-rite | Document structure |
 | architect-enforcer | hygiene | Refactor planning |
 | risk-assessor | debt-triage | Evaluate debt risk |
 | incident-commander | sre | Reliability planning |
@@ -45,10 +45,10 @@ Second phase, responsible for planning and architecture.
 ### Implementation Agents
 Third phase, responsible for execution and building.
 
-| Examples | Team | Purpose |
+| Examples | Rite | Purpose |
 |----------|------|---------|
 | principal-engineer | 10x-dev | Write code |
-| tech-writer | doc-team | Write documentation |
+| tech-writer | doc-rite | Write documentation |
 | janitor | hygiene | Execute refactoring |
 | sprint-planner | debt-triage | Plan debt sprints |
 | platform-engineer | sre | Build infrastructure |
@@ -63,10 +63,10 @@ Third phase, responsible for execution and building.
 ### Validation Agents
 Final phase, responsible for testing and review.
 
-| Examples | Team | Purpose |
+| Examples | Rite | Purpose |
 |----------|------|---------|
 | qa-adversary | 10x-dev | Adversarial testing |
-| doc-reviewer | doc-team | Review documentation |
+| doc-reviewer | doc-rite | Review documentation |
 | audit-lead | hygiene | Audit refactoring |
 | chaos-engineer | sre | Resilience testing |
 
@@ -80,7 +80,7 @@ Final phase, responsible for testing and review.
 ### Coordination Agents
 Optional orchestrator for complex multi-phase work.
 
-| Examples | Team | Purpose |
+| Examples | Rite | Purpose |
 |----------|------|---------|
 | orchestrator | 10x-dev | Multi-phase coordination |
 
@@ -122,7 +122,7 @@ Colors provide quick visual identification in workflows and diagrams.
 | red | Validation | Testing, adversarial |
 | blue | Documentation | Writing, content |
 
-**Rule:** Each agent in a team should have a unique color.
+**Rule:** Each agent in a pantheon should have a unique color.
 
 ---
 

@@ -1,4 +1,4 @@
-# Team Composition Patterns
+# Rite Composition Patterns
 
 How to size and structure agent teams.
 
@@ -164,24 +164,24 @@ Entry → Design → Execute → Validate
 
 ---
 
-## Team Specialization
+## Rite Specialization
 
 ### Domain Alignment
-Each team should have a clear domain:
+Each rite should have a clear domain:
 
-| Team | Domain | What They Don't Do |
+| Rite | Domain | What They Don't Do |
 |------|--------|-------------------|
 | 10x-dev | Feature development | Documentation cleanup |
-| doc-team | Documentation | Code changes |
+| doc-rite | Documentation | Code changes |
 | hygiene | Code quality | New features |
 | debt-triage | Debt management | Debt paydown (plans only) |
 | sre | System reliability | Feature development |
 
-### Cross-Team Handoffs
-Teams note when work belongs elsewhere:
+### Cross-Rite Handoffs
+Rites note when work belongs elsewhere:
 
 ```markdown
-## Cross-Team Notes
+## Cross-Rite Notes
 
 When {finding} reveals:
 - Documentation gaps → Note for doc-rite

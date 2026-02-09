@@ -1,15 +1,15 @@
 ---
 name: sre-ref
-description: "Switch to SRE (reliability workflow). Triggers: /sre, reliability team, SRE workflow, observability, chaos engineering."
+description: "Switch to SRE (reliability workflow). Triggers: /sre, reliability rite, SRE workflow, observability, chaos engineering."
 ---
 
-# /sre - Quick Switch to Reliability Team
+# /sre - Quick Switch to Reliability Rite
 
-> **Category**: Team Management | **Phase**: Team Switching
+> **Category**: Rite Management | **Phase**: Rite Switching
 
 ## Purpose
 
-Instantly switch to the sre, a Site Reliability Engineering team focused on system reliability, observability, incident response, and chaos engineering.
+Instantly switch to the sre, a Site Reliability Engineering rite focused on system reliability, observability, incident response, and chaos engineering.
 
 This is a convenience wrapper around `/rite sre` that also displays the pantheon after switching.
 
@@ -29,7 +29,7 @@ No parameters required. This command:
 
 ## Behavior
 
-### 1. Invoke Team Switch
+### 1. Invoke Rite Switch
 
 Execute via Bash tool:
 
@@ -60,14 +60,14 @@ Use /handoff <agent> to delegate work.
 ### 3. Update SESSION_CONTEXT (if active)
 
 If a session is active:
-- Update `active_team` field to `sre`
-- Add handoff note documenting team switch
+- Update `active_rite` field to `sre`
+- Add handoff note documenting rite switch
 
 ---
 
-## Team Details
+## Rite Details
 
-**Team Name**: sre
+**Rite Name**: sre
 **Agent Count**: 4
 **Workflow**: Observation → Coordination → Implementation → Resilience
 
@@ -214,9 +214,9 @@ When sre is active, commands route to these agents:
 
 ---
 
-## Integration with Other Teams
+## Integration with Other Rites
 
-The SRE pack often collaborates with other teams:
+The SRE pack often collaborates with other rites:
 
 | Situation | Integration |
 |-----------|-------------|

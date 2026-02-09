@@ -40,7 +40,7 @@ color: [OPTIONAL] # purple | pink | cyan | green | red | orange | blue (for UI d
 | `description` | Yes | YAML multi-line (`\|`) | First line is role summary; includes usage triggers and examples |
 | `tools` | Yes | Comma-separated | Only include tools the agent actually needs |
 | `model` | No | Model identifier | Use opus for orchestration/design, sonnet for implementation |
-| `color` | No | Color name | Choose unused color within team for visual distinction |
+| `color` | No | Color name | Choose unused color within the pantheon for visual distinction |
 
 ### Tool Selection Guide
 
@@ -121,7 +121,7 @@ Example:
 **Downstream**: [What this agent produces and for whom]
 ```
 
-**Purpose**: Visual clarity on where agent fits in team pipeline.
+**Purpose**: Visual clarity on where agent fits in rite pipeline.
 
 **Guidelines**:
 - Use ASCII box drawing characters for consistency
@@ -289,26 +289,26 @@ Reference these skills as appropriate:
 - List 3-5 most relevant skills
 - Include purpose for each (not just skill name)
 - Common skills: @documentation, @standards, @10x-workflow
-- Team-specific skills should be included
+- Rite-specific skills should be included
 
 ---
 
-### 10. Cross-Team Routing
+### 10. Cross-Rite Routing
 
 ```markdown
-## Cross-Team Routing
+## Cross-Rite Routing
 
-See `@cross-rite-handoff` for handoff patterns to other teams.
+See `@cross-rite-handoff` for handoff patterns to other rites.
 
 [Optional: Common cross-rite scenarios specific to this agent]
 ```
 
-**Purpose**: Prevent work from getting stuck at team boundaries.
+**Purpose**: Prevent work from getting stuck at rite boundaries.
 
 **Guidelines**:
 - Reference shared protocol for standard patterns
 - Add agent-specific scenarios if commonly encountered
-- Include when to route OUT of team vs. escalate within team
+- Include when to route OUT of rite vs. escalate within the pantheon
 
 ---
 
@@ -383,7 +383,7 @@ Sections MUST appear in this order for consistency across agents:
 7. Handoff Criteria (H2)
 8. The Acid Test (H2)
 9. Skills Reference (H2)
-10. Cross-Team Routing (H2)
+10. Cross-Rite Routing (H2)
 11. Anti-Patterns to Avoid (H2)
 
 Optional sections (Behavioral Constraints, Consultation Protocol) may appear between Skills Reference and Anti-Patterns for specialized agents like orchestrators.
@@ -404,7 +404,7 @@ Optional sections (Behavioral Constraints, Consultation Protocol) may appear bet
 
 ## Color Assignment
 
-Assign colors to differentiate agents within a team. Avoid duplicates within the same team.
+Assign colors to differentiate agents within a pantheon. Avoid duplicates within the same pantheon.
 
 | Color | Typical Usage |
 |-------|---------------|
@@ -429,12 +429,12 @@ description: |
   Produces validated agent definitions.
 
   When to use this agent:
-  - New team needs agent definitions created
+  - New rite needs agent definitions created
   - Existing agent needs validation against template
   - Learning agent authoring patterns
 
   <example>
-  Context: New team being created
+  Context: New rite being created
   user: "Create an agent for code review"
   assistant: "Creating agent definition following canonical template with review-focused responsibilities."
   </example>
@@ -458,12 +458,12 @@ The Example Agent demonstrates proper agent definition structure. When invoked, 
 
 ```
 ┌──────────────┐      ┌──────────────┐      ┌──────────────┐
-│  Team Author │─────>│   EXAMPLE    │─────>│  Valid Agent │
+│  Rite Author │─────>│   EXAMPLE    │─────>│  Valid Agent │
 │              │      │    AGENT     │      │  Definition  │
 └──────────────┘      └──────────────┘      └──────────────┘
 ```
 
-**Upstream**: Team author with draft agent definition
+**Upstream**: Rite author with draft agent definition
 **Downstream**: Validated agent ready for use
 
 ## Domain Authority
@@ -476,7 +476,7 @@ The Example Agent demonstrates proper agent definition structure. When invoked, 
 - Ambiguous requirements for agent purpose
 - Trade-offs between template compliance and agent utility
 
-**You route to Team Author:**
+**You route to Rite Author:**
 - Validated definition ready for iteration
 - Specific feedback on gaps to address
 
@@ -503,7 +503,7 @@ Ready for use when:
 
 ## The Acid Test
 
-*"Could someone unfamiliar with our team invoke this agent successfully?"*
+*"Could someone unfamiliar with our rite invoke this agent successfully?"*
 
 If uncertain: Have someone outside the rite try to use the agent and note confusion points.
 
@@ -513,7 +513,7 @@ If uncertain: Have someone outside the rite try to use the agent and note confus
 - @standards for naming conventions
 - @10x-workflow for workflow integration
 
-## Cross-Team Routing
+## Cross-Rite Routing
 
 See `@cross-rite-handoff` for cross-rite patterns.
 

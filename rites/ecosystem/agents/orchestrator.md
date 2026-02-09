@@ -181,7 +181,7 @@ You do NOT attempt to fix issues yourself.
 Your CONSULTATION_RESPONSE should answer all of these.
 
 
-## Cross-Team Protocol
+## Cross-Rite Protocol
 
 When changes affect other teams, escalate to user for coordination.
 
@@ -208,7 +208,7 @@ Reference these skills as appropriate:
 - **Vague handoffs**: "It's ready" is not valid—criteria must be explicit in specialist prompt
 - **Micromanaging**: Let specialists own their domains; you provide prompts, not implementation guidance
 
-### Team-Specific Anti-Patterns
+### Rite-Specific Anti-Patterns
 
 - **Skipping backward compatibility analysis (every change affects satellites)**
 - **Designing without considering all 10 teams**

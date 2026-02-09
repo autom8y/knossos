@@ -47,7 +47,7 @@ color: {color name}                     # REQUIRED
 | 7 | Handoff Criteria | Checklist for next phase |
 | 8 | The Acid Test | Single pivotal question |
 | 9 | Skills Reference | Cross-references to skills |
-| 10 | Cross-Team Notes | When to flag for other teams |
+| 10 | Cross-Rite Notes | When to flag for other rites |
 | 11 | Anti-Patterns | 3-5 common mistakes |
 
 ### Section Detection Regex
@@ -62,7 +62,7 @@ grep -c "^## What You Produce" agent.md           # Should be 1
 grep -c "^## Handoff Criteria" agent.md           # Should be 1
 grep -c "^## The Acid Test" agent.md              # Should be 1
 grep -c "^## Skills Reference" agent.md           # Should be 1
-grep -c "^## Cross-Team Notes" agent.md           # Should be 1
+grep -c "^## Cross-Rite Notes" agent.md           # Should be 1
 grep -c "^## Anti-Patterns" agent.md              # Should be 1
 ```
 

@@ -163,7 +163,7 @@ Output:
 
 Session context updated:
   Active rite: 10x-dev
-  Handoff note: "Switched to development team for implementation phase"
+  Handoff note: "Switched to development rite for implementation phase"
 
 Knossos:
   [... agent list ...]
@@ -187,7 +187,7 @@ Knossos:
 
 ---
 
-## Typical Workflow with 10x Team
+## Typical Workflow with 10x Rite
 
 ### Phase 1: Requirements
 ```bash
@@ -221,9 +221,9 @@ Knossos:
 
 ---
 
-## When to Use 10x Team
+## When to Use 10x Rite
 
-Use this team for:
+Use this rite for:
 
 - **Feature development**: New capabilities requiring end-to-end workflow
 - **Bug fixes (complex)**: Issues requiring design review or architectural changes
@@ -246,13 +246,13 @@ Use this team for:
 |------|--------|-------------|
 | `.claude/ACTIVE_RITE` | Set to `10x-dev` | Active rite state |
 | `.claude/agents/` | Populated | 5 agent files loaded |
-| `.claude/sessions/{session_id}/SESSION_CONTEXT.md` | `active_team` updated | If session active |
+| `.claude/sessions/{session_id}/SESSION_CONTEXT.md` | `active_rite` updated | If session active |
 
 ---
 
 ## Success Criteria
 
-- Team switched to 10x-dev
+- Switched to 10x-dev rite
 - 5 agent files present in `.claude/agents/`
 - Rite catalog displayed to user
 - If session active, SESSION_CONTEXT updated
@@ -261,7 +261,7 @@ Use this team for:
 
 ## Error Handling
 
-If swap fails (unlikely - this is a core team):
+If swap fails (unlikely - this is a core rite):
 
 ```
 [Knossos] Error: Rite '10x-dev' not found
@@ -274,12 +274,12 @@ If swap fails (unlikely - this is a core team):
 
 ## Related Commands
 
-- `/team` - General rite switching with options
-- `/docs` - Quick switch to documentation team
-- `/hygiene` - Quick switch to code hygiene team
-- `/debt` - Quick switch to technical debt team
-- `/start` - Begin session (can specify team)
-- `/handoff` - Delegate to specific agent in current team
+- `/rite` - General rite switching with options
+- `/docs` - Quick switch to documentation rite
+- `/hygiene` - Quick switch to code hygiene rite
+- `/debt` - Quick switch to technical debt rite
+- `/start` - Begin session (can specify rite)
+- `/handoff` - Delegate to specific agent in current rite
 
 ---
 
@@ -300,14 +300,14 @@ The name reflects the full-spectrum development workflow:
 - Design documentation to implementation
 - Quality gates throughout
 
-This is the "default" team for general development work.
+This is the "default" rite for general development work.
 
-### Difference from /team
+### Difference from /rite
 
 | Command | Behavior |
 |---------|----------|
-| `/rite 10x-dev` | Switches team, shows swap confirmation |
-| `/10x` | Switches team, shows rite catalog with agent descriptions |
+| `/rite 10x-dev` | Switches rite, shows swap confirmation |
+| `/10x` | Switches rite, shows rite catalog with agent descriptions |
 
 Use `/10x` when you want to see available agents after switching.
 

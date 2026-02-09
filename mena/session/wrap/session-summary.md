@@ -12,7 +12,7 @@
 **Completed**: {now}
 **Duration**: {total duration}
 **Complexity**: {complexity}
-**Team**: {active_rite}
+**Rite**: {active_rite}
 
 ## Accomplishments
 
@@ -82,7 +82,7 @@ Potential follow-up initiatives:
 
 - Parks: {resume_count}
 - Handoffs: {handoff_count}
-- Team switches: {count}
+- Rite switches: {count}
 - Total time active: {active duration}
 ```
 

@@ -4,7 +4,7 @@
 
 ## Current State Summary
 
-The 10x-dev is a **production-ready, well-documented team** implementing a 5-agent sequential workflow (PRD → TDD → Code → QA) with mandatory quality gates.
+The 10x-dev is a **production-ready, well-documented rite** implementing a 5-agent sequential workflow (PRD → TDD → Code → QA) with mandatory quality gates.
 
 **Strengths confirmed:**
 - Clear agent separation of concerns with defined domain authority
@@ -66,13 +66,13 @@ The 10x-dev is a **production-ready, well-documented team** implementing a 5-age
 
 ---
 
-### P3: Strengthen Cross-Team Handoff Protocols
+### P3: Strengthen Cross-Rite Handoff Protocols
 
 **Gap identified:** Audit documented upstream/downstream relationships but no formal handoff protocols exist. The `/handoff` skill exists but cross-rite handoffs need specification.
 
 **Changes required:**
-- [ ] Create `skills/cross-rite-handoff/SKILL.md`: Formal protocols for handoffs to other teams
-- [ ] Document handoff artifacts expected by receiving teams:
+- [ ] Create `skills/cross-rite-handoff/SKILL.md`: Formal protocols for handoffs to other rites
+- [ ] Document handoff artifacts expected by receiving rites:
   - To SRE rite: deployment manifest, runbook draft, observability requirements
   - To Security rite: threat model, security-relevant code paths, auth flows
   - To Docs rite: feature summary, API changes, user-facing behavior changes
@@ -82,8 +82,8 @@ The 10x-dev is a **production-ready, well-documented team** implementing a 5-age
 
 ## Deferred / Not Prioritized
 
-### Team-Specific Hooks
-**Decision:** Undecided - will revisit after auditing other teams to see patterns. Currently using project-level hooks which may be sufficient.
+### Rite-Specific Hooks
+**Decision:** Undecided - will revisit after auditing other rites to see patterns. Currently using project-level hooks which may be sufficient.
 
 ### Acid Test Enforcement
 **Decision:** Keep as guidance only. Enforcement would create checkbox theater and slow velocity without improving quality. Acid tests work as mindset framing.
@@ -97,11 +97,11 @@ The 10x-dev is a **production-ready, well-documented team** implementing a 5-age
 
 | Item | Depends On |
 |------|------------|
-| Cross-rite handoffs | Audit of receiving teams (SRE, Security, Doc) to validate expected artifacts |
-| Team hooks decision | Pattern analysis across all team audits |
+| Cross-rite handoffs | Audit of receiving rites (SRE, Security, Doc) to validate expected artifacts |
+| Rite hooks decision | Pattern analysis across all rite audits |
 
 ---
 
-## Next Team
+## Next Rite
 
 Continue audit with: **ecosystem** (infrastructure, hooks, sync pipeline, knossos patterns)

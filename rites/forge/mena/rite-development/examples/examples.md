@@ -1,16 +1,16 @@
-# Team Examples
+# Rite Examples
 
 > Reference implementations for rite patterns.
 
-## 3-Agent Team: debt-triage
+## 3-Agent Rite: debt-triage
 
-A minimal team focused on planning, not implementation.
+A minimal rite focused on planning, not implementation.
 
 **Characteristics**:
 - 3 agents, 3 phases (collection -> assessment -> planning)
 - Planning-only output (produces plans, doesn't execute)
 - No orchestrator needed
-- Work handed off to other teams for execution
+- Work handed off to other rites for execution
 
 ### Directory Structure
 
@@ -63,8 +63,8 @@ complexity_levels:
 
 # Agent roles for command mapping:
 # /architect   -> risk-assessor (closest to design)
-# /build       -> (N/A - planning only team)
-# /qa          -> (N/A - planning only team)
+# /build       -> (N/A - planning only rite)
+# /qa          -> (N/A - planning only rite)
 ```
 
 ### Agent Frontmatter
@@ -127,7 +127,7 @@ color: pink
 - No implementation phase needed
 - Output is plans, reports, or assessments
 - Linear flow without branches
-- Other teams handle execution
+- Other rites handle execution
 
 **Avoid when**:
 - Implementation is part of the workflow
@@ -136,9 +136,9 @@ color: pink
 
 ---
 
-## 5-Agent Team: 10x-dev
+## 5-Agent Rite: 10x-dev
 
-A full lifecycle team with orchestrator for complex development.
+A full lifecycle rite with orchestrator for complex development.
 
 **Characteristics**:
 - 5 agents (4 phases + orchestrator)
@@ -337,10 +337,10 @@ SCRIPT complexity skips design (small changes don't need formal TDD):
 
 ## Comparison: 3 vs 4 vs 5 Agents
 
-| Team | Agents | Phases | Orchestrator | Use Case |
+| Rite | Agents | Phases | Orchestrator | Use Case |
 |------|--------|--------|--------------|----------|
 | debt-triage | 3 | 3 | No | Planning only |
 | sre | 4 | 4 | No | Standard lifecycle |
 | 10x-dev | 5 | 4 | Yes | Full lifecycle |
 
-The extra agent in 5-agent teams is typically the orchestrator, which coordinates but doesn't own a phase.
+The extra agent in 5-agent rites is typically the orchestrator, which coordinates but doesn't own a phase.

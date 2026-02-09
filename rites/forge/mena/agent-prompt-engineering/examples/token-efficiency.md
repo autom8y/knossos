@@ -38,7 +38,7 @@ For each artifact produced:
 
 **Issues annotated**:
 - 25+ lines of file handling repeated in 5 agents
-- Total waste: 125 lines across team
+- Total waste: 125 lines across pantheon
 - Same content, same wording, same order
 - Updates require 5 file edits
 
@@ -55,7 +55,7 @@ See `file-verification` skill for artifact verification protocol.
 - 1 line replaces 25 lines
 - Single source of truth for updates
 - Agents reference shared skill
-- Consistent verification across team
+- Consistent verification across pantheon
 
 **Token comparison per agent**: 25 lines -> 1 line
 **Token comparison across 5 agents**: 125 lines -> 5 lines (-96%)

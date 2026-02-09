@@ -211,7 +211,7 @@ Cataloging technical debt items...
 
 ---
 
-## Typical Workflow with Debt Team
+## Typical Workflow with Debt Rite
 
 ### Phase 1: Collection
 ```bash
@@ -247,10 +247,10 @@ Cataloging technical debt items...
 ### Phase 4: Execution (Hand off to other teams)
 ```bash
 /10x
-# Switch to dev team to implement debt fixes
+# Switch to dev rite to implement debt fixes
 # Or:
 /hygiene
-# Switch to hygiene team for refactoring work
+# Switch to hygiene rite for refactoring work
 ```
 
 ### Phase 5: Tracking
@@ -263,9 +263,9 @@ Cataloging technical debt items...
 
 ---
 
-## When to Use Debt Team
+## When to Use Debt Rite
 
-Use this team for:
+Use this rite for:
 
 - **Debt inventories**: Comprehensive scans of technical debt
 - **Risk assessment**: Prioritizing what debt to pay down
@@ -282,9 +282,9 @@ Use this team for:
 
 ---
 
-## Debt vs Hygiene Teams
+## Debt vs Hygiene Rites
 
-| Debt Team | Hygiene Team |
+| Debt Rite | Hygiene Rite |
 |-----------|--------------|
 | **Focus**: Strategic debt management | **Focus**: Tactical code cleanup |
 | **Scope**: Portfolio/project-level | **Scope**: Module/file-level |
@@ -316,13 +316,13 @@ Use this team for:
 |------|--------|-------------|
 | `.claude/ACTIVE_RITE` | Set to `debt-triage` | Active rite state |
 | `.claude/agents/` | Populated | 3 agent files loaded |
-| `.claude/sessions/{session_id}/SESSION_CONTEXT.md` | `active_team` updated | If session active |
+| `.claude/sessions/{session_id}/SESSION_CONTEXT.md` | `active_rite` updated | If session active |
 
 ---
 
 ## Success Criteria
 
-- Team switched to debt-triage
+- Switched to debt-triage rite
 - 3 agent files present in `.claude/agents/`
 - Rite catalog displayed to user
 - If session active, SESSION_CONTEXT updated
@@ -344,7 +344,7 @@ If swap fails:
 
 ## Debt Tracking Artifacts
 
-Debt team produces structured artifacts:
+Debt rite produces structured artifacts:
 
 ### debt-inventory.yaml
 ```yaml
@@ -387,11 +387,11 @@ items:
 
 ## Related Commands
 
-- `/team` - General rite switching with options
-- `/10x` - Quick switch to development team
-- `/docs` - Quick switch to documentation team
-- `/hygiene` - Quick switch to code hygiene team
-- `/handoff` - Delegate to specific agent in current team
+- `/rite` - General rite switching with options
+- `/10x` - Quick switch to development rite
+- `/docs` - Quick switch to documentation rite
+- `/hygiene` - Quick switch to code hygiene rite
+- `/handoff` - Delegate to specific agent in current rite
 
 ---
 
@@ -415,19 +415,19 @@ items:
 
 Leadership often asks: "Should we build features or pay down debt?"
 
-Debt team provides data for this decision:
+Debt rite provides data for this decision:
 - **Velocity impact**: "Debt costs us 20% velocity (2 days/sprint)"
 - **Risk quantification**: "CRITICAL items have 30% probability of production incident"
 - **ROI analysis**: "Fixing top 10 items yields 15% velocity gain for 1 sprint investment"
 
 This enables evidence-based prioritization.
 
-### Difference from /team
+### Difference from /rite
 
 | Command | Behavior |
 |---------|----------|
-| `/rite debt-triage` | Switches team, shows swap confirmation |
-| `/debt` | Switches team, shows rite catalog with agent descriptions |
+| `/rite debt-triage` | Switches rite, shows swap confirmation |
+| `/debt` | Switches rite, shows rite catalog with agent descriptions |
 
 Use `/debt` when you want to see available agents after switching.
 

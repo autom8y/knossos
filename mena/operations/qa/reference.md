@@ -537,7 +537,7 @@ Both are valuable, different perspectives:
 | PRD not found | No acceptance criteria | Run `/architect` or `/task` first |
 | Implementation not found | Nothing to test | Run `/build` or `/task` first |
 | Tests not passing | Unit tests failing | Fix tests before QA validation |
-| Missing QA agent | Team doesn't have QA | Switch to 10x-dev with `/10x` |
+| Missing QA agent | Rite doesn't have QA agent | Switch to 10x-dev with `/10x` |
 | Acceptance criteria ambiguous | Can't determine pass/fail | Escalate to Analyst for clarification |
 
 ---

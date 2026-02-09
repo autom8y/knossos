@@ -4,11 +4,11 @@
 
 ## Test Categories
 
-1. **Swap Test**: Can ari sync --rite load this team?
+1. **Swap Test**: Can ari sync --rite load this rite?
 2. **Agent Invocation**: Can each agent be invoked?
 3. **Handoff Test**: Do agents hand off correctly?
-4. **Command Test**: Do team commands work?
-5. **Consultant Test**: Is team discoverable via /consult?
+4. **Command Test**: Do rite commands work?
+5. **Consultant Test**: Is rite discoverable via /consult?
 
 ## 1. Swap Test
 
@@ -99,7 +99,7 @@ Expected: Agent either:
 ```
 
 Expected:
-- Team swaps successfully
+- Rite swaps successfully
 - Rite catalog table displayed
 - No errors
 
@@ -126,18 +126,18 @@ Test each mapped command:
 ### Test Queries
 
 ```bash
-/consult "{team domain keywords}"
-/consult --team
-/consult "which team for {use case}"
+/consult "{rite domain keywords}"
+/consult --rite
+/consult "which rite for {use case}"
 ```
 
 ### Pass Criteria
 
 | Check | Pass Condition |
 |-------|----------------|
-| Team listed | Appears in /consult --team |
-| Routing works | Domain query suggests this team |
-| Profile accessible | Team profile can be displayed |
+| Rite listed | Appears in /consult --rite |
+| Routing works | Domain query suggests this rite |
+| Profile accessible | Rite profile can be displayed |
 
 ## Adversarial Integration Tests
 
@@ -202,7 +202,7 @@ Result: {PASS|FAIL}
 | /{name} | {✓|✗} | {✓|✗} | {P|F} |
 
 ## Consultant Discovery
-- [ ] Listed in /consult --team
+- [ ] Listed in /consult --rite
 - [ ] Routing by domain works
 - [ ] Profile accessible
 Result: {PASS|FAIL}

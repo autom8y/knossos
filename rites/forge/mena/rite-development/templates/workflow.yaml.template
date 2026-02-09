@@ -13,7 +13,7 @@
 
 name: {rite-name}
 workflow_type: sequential
-description: {One-line description of what this team does}
+description: {One-line description of what this rite does}
 
 # -----------------------------------------------------------------------------
 # Entry Point

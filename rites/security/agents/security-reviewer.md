@@ -174,6 +174,6 @@ If uncertain: Don't approve. Request changes or additional review.
 - `@standards` for secure coding patterns
 - `@file-verification` for artifact verification protocol
 
-## Cross-Team Routing
+## Cross-Rite Routing
 
 See `cross-rite` skill for handoff patterns to other teams.

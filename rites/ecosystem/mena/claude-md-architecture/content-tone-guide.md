@@ -105,7 +105,7 @@ Use tables when behavior varies by state:
 | Condition | Pattern |
 |-----------|---------|
 | Session active + rite configured | Knossos workflow applies |
-| Session active + no team | Partial workflow, native patterns may apply |
+| Session active + no rite | Partial workflow, native patterns may apply |
 | No session | Native Claude Code is fully valid |
 ```
 

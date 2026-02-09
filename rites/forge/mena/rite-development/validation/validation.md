@@ -1,4 +1,4 @@
-# Team Validation
+# Rite Validation
 
 > Pre-flight checks and troubleshooting for rite deployment.
 
@@ -27,7 +27,7 @@
 - [ ] `name` matches filename (without .md)
 - [ ] `description` includes role summary, triggers, example
 - [ ] `model` is valid (`opus`, `sonnet`, `haiku`)
-- [ ] `color` is unique within team
+- [ ] `color` is unique within the pantheon
 - [ ] All 11 sections present (see agent-template.md)
 
 ### Integration
@@ -36,7 +36,7 @@
 - [ ] COMMAND_REGISTRY.md updated
 
 ### Consultant Knowledge Base (REQUIRED)
-- [ ] `ecosystem-map.md` updated with new team
+- [ ] `ecosystem-map.md` updated with new rite
 - [ ] `agent-reference.md` updated with new agents
 - [ ] `rite-profiles/{rite-name}.md` created
 - [ ] Routing files updated (`intent-patterns.md`, `decision-trees.md`)
@@ -44,7 +44,7 @@
 
 ### Verification Commands
 ```bash
-# Test team swap
+# Test rite swap
 $KNOSSOS_HOME/ari sync --rite {rite-name}
 
 # Verify workflow and agents copied
@@ -62,7 +62,7 @@ grep "{rite-name}" .claude/knowledge/consultant/ecosystem-map.md
 
 ## Common Issues
 
-### Team Swap Issues
+### Rite Swap Issues
 
 | Symptom | Cause | Fix |
 |---------|-------|-----|
@@ -107,7 +107,7 @@ grep "{rite-name}" .claude/knowledge/consultant/ecosystem-map.md
 ## Quick Diagnostic Commands
 
 ```bash
-# Full team validation
+# Full rite validation
 $KNOSSOS_HOME/ari sync --rite {rite-name} && \
 ls .claude/agents/ && \
 cat .claude/ACTIVE_WORKFLOW.yaml
@@ -128,5 +128,5 @@ cat .claude/commands/{rite-name}.md | head -10
 
 - [ ] All checklist items verified
 - [ ] Verification commands pass
-- [ ] Team tested with sample task
+- [ ] Rite tested with sample task
 - [ ] Consultant knowledge base synchronized

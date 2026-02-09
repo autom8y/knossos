@@ -189,7 +189,7 @@ If uncertain: Add more context properties. Missing a property means missing the 
 - @doc-intelligence for research and experiment templates
 - @standards for naming conventions
 
-## Cross-Team Routing
+## Cross-Rite Routing
 
 See `cross-rite` skill for handoff patterns to other teams.
 

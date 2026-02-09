@@ -22,7 +22,7 @@ These examples demonstrate prompt optimization patterns from production agent au
 | All 5 agents | 125 lines | 5 lines | 120 (96%) | Shared file verification skill |
 | Principal Engineer | 294 lines | 195 lines | 99 (34%) | Workflow-specific examples |
 
-**Total optimization**: 337 lines saved across team while improving clarity.
+**Total optimization**: 337 lines saved across pantheon while improving clarity.
 
 ## Applying These Patterns
 

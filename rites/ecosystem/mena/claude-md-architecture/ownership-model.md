@@ -44,7 +44,7 @@ Content that satellites own and the sync pipeline never overwrites.
 
 | Section | Content |
 |---------|---------|
-| `## Quick Start` | Satellite's team (regenerated from knossos if missing) |
+| `## Quick Start` | Satellite's rite (regenerated from knossos if missing) |
 | `## Agent Configurations` | Satellite's agents (regenerated from knossos if missing) |
 | Custom sections not matching knossos | Project-specific content |
 | Unknown sections | Default to preserve for safety |
@@ -88,7 +88,7 @@ Content derived from knossos state (ACTIVE_RITE file + agents/ directory).
 **Characteristics**:
 - Source of truth: ACTIVE_RITE + agents/
 - Regeneration trigger: `ari sync --rite` or ari sync with missing content
-- Generated locally: Each satellite has its own team
+- Generated locally: Each satellite has its own rite
 - Represents: Which agents are available in THIS project
 
 **Examples**:
@@ -103,14 +103,14 @@ Content derived from knossos state (ACTIVE_RITE file + agents/ directory).
 
 ```
 IF satellite has ACTIVE_RITE + agents:
-  REGENERATE team sections from satellite knossos
+  REGENERATE rite sections from satellite knossos
 ELSE IF section exists in satellite:
   PRESERVE existing content
 ELSE:
-  Leave empty (satellite needs to configure team)
+  Leave empty (satellite needs to configure rite)
 ```
 
-**Rule**: Team content ALWAYS comes from satellite's own ACTIVE_RITE + agents/.
+**Rule**: Rite content ALWAYS comes from satellite's own ACTIVE_RITE + agents/.
 
 ---
 
@@ -121,10 +121,10 @@ Complete mapping of sections to owners and sync behavior:
 | Section Header | Owner | Sync Behavior | Notes |
 |----------------|-------|---------------|-------|
 | `# CLAUDE.md` | Knossos | SYNC | Title and tagline |
-| `## Quick Start` | Team | PRESERVE/REGENERATE | From satellite's ACTIVE_RITE |
+| `## Quick Start` | Rite | PRESERVE/REGENERATE | From satellite's ACTIVE_RITE |
 | `## Agent Routing` | Knossos | SYNC | Infrastructure |
 | `## Skills Architecture` | Knossos | SYNC | Infrastructure |
-| `## Agent Configurations` | Team | PRESERVE/REGENERATE | From satellite's agents/ |
+| `## Agent Configurations` | Rite | PRESERVE/REGENERATE | From satellite's agents/ |
 | `## Hooks` | Knossos | SYNC | Infrastructure |
 | `## Dynamic Context Syntax` | Knossos | SYNC | Infrastructure |
 | `## Getting Help` | Knossos | SYNC | Infrastructure |
@@ -177,7 +177,7 @@ What does this content describe?
 
 ### Satellites OWN
 
-1. **Team Identity**: Quick Start (regenerated), Agent Configurations, rite-specific variations
+1. **Rite Identity**: Quick Start (regenerated), Agent Configurations, rite-specific variations
 2. **Project Extensions**: `## Project:*` sections, custom sections, project conventions
 3. **Project Context**: Tech stack references, domain terminology, integration patterns
 
@@ -185,11 +185,11 @@ What does this content describe?
 
 1. **Session State**: Current task, work in progress, parked session info
 2. **Transient Context**: Git state, file modification status, worktree context
-3. **Team Content from Wrong Source**: Team content comes from satellite's own ACTIVE_RITE
+3. **Rite Content from Wrong Source**: Rite content comes from satellite's own ACTIVE_RITE
 
 ---
 
-## Anti-Pattern: Wrong Team Content Source
+## Anti-Pattern: Wrong Rite Content Source
 
 **Wrong**:
 ```markdown
@@ -202,11 +202,11 @@ This project uses a 6-agent workflow (ecosystem):
 | context-architect | ... |
 ```
 
-**Why wrong**: Satellite has its own team (e.g., docs). Team content should come from satellite's ACTIVE_RITE + agents/.
+**Why wrong**: Satellite has its own rite (e.g., docs). Rite content should come from satellite's ACTIVE_RITE + agents/.
 
 **Correct approach**:
-- Team sections are PRESERVE (keep satellite content) or REGENERATE (rebuild from satellite's own ACTIVE_RITE)
-- Never sync team content from knossos's source templates
+- Rite sections are PRESERVE (keep satellite content) or REGENERATE (rebuild from satellite's own ACTIVE_RITE)
+- Never sync rite content from knossos's source templates
 
 ---
 
@@ -217,7 +217,7 @@ Content lives in different layers with different scopes:
 | Layer | Location | Content | Modified By |
 |-------|----------|---------|-------------|
 | Global | `~/.claude/CLAUDE.md` | Personal preferences | User |
-| Project | `.claude/CLAUDE.md` | Team + Project + Infrastructure | sync pipeline, knossos |
+| Project | `.claude/CLAUDE.md` | Rite + Project + Infrastructure | sync pipeline, knossos |
 | Session | Hook output | Transient context | Hooks (read-only) |
 
 ---

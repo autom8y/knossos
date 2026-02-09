@@ -207,7 +207,7 @@ Copy this checklist before any CLAUDE.md modification:
 - [ ] No dates, timestamps, or "currently" language
 - [ ] No git state or file status references
 - [ ] No session-specific information
-- [ ] Owner correctly identified (knossos/team/satellite)
+- [ ] Owner correctly identified (knossos/rite/satellite)
 - [ ] Correct sync behavior specified (SYNC/PRESERVE/REGENERATE/PROJECT)
 ```
 

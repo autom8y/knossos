@@ -127,12 +127,12 @@ items:
 
 ---
 
-## Cross-Team Note
+## Cross-Rite Note
 
 P2 creates a dependency: debt-triage must be updated to produce the handoff artifact. Add this to debt-triage TODO when audited.
 
 ---
 
-## Next Team
+## Next Rite
 
 Continue audit with: **debt-triage** (technical debt prioritization)

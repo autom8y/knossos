@@ -158,6 +158,6 @@ Proceed with price increase. Even bear case improves revenue by $4,500/mo. Monit
 - @doc-strategy for financial model templates and frameworks
 - @file-verification for post-write verification protocol
 
-## Cross-Team Routing
+## Cross-Rite Routing
 
 See `cross-rite` skill for handoff patterns to other teams.

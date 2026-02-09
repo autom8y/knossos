@@ -93,4 +93,4 @@ Specify what the agent receives and produces:
 - [ ] Boundary markers state what agent doesn't do
 - [ ] Input artifacts explicitly listed
 - [ ] Output artifacts explicitly listed
-- [ ] No overlap with other agents in team
+- [ ] No overlap with other agents in pantheon

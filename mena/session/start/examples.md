@@ -12,7 +12,7 @@ Interactive prompts:
 ```
 Initiative: Add retry logic to API client
 Complexity? [SCRIPT/MODULE/SERVICE/PLATFORM]: SCRIPT
-Team? [current: 10x-dev]: <Enter>
+Rite? [current: 10x-dev]: <Enter>
 
 ✓ Session started
 ✓ Requirements Analyst creating PRD...

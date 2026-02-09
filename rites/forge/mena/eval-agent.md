@@ -1,13 +1,13 @@
 ---
 description: Test a single agent in isolation
-argument-hint: <agent-name> [--team=<rite-name>] [--adversarial]
+argument-hint: <agent-name> [--rite=<rite-name>] [--adversarial]
 allowed-tools: Bash, Glob, Grep, Read, Task, TodoWrite
 model: opus
 ---
 
 ## Context
 
-Auto-injected by SessionStart hook (project, team, session context).
+Auto-injected by SessionStart hook (project, rite, session context).
 
 ## Your Task
 
@@ -18,14 +18,14 @@ Test the agent: $ARGUMENTS
 ### 1. Parse Arguments
 
 - `agent-name`: Required. Name of agent to test (e.g., `principal-engineer`)
-- `--team`: Optional. Team containing the agent. Defaults to active rite.
+- `--rite`: Optional. Rite containing the agent. Defaults to active rite.
 - `--adversarial`: Optional. Include adversarial prompts in testing.
 
 ### 2. Locate Agent
 
 Find agent file at:
 - `.claude/agents/{agent-name}.md` (if in active rite)
-- `$KNOSSOS_HOME/rites/{rite-name}/agents/{agent-name}.md` (if team specified)
+- `$KNOSSOS_HOME/rites/{rite-name}/agents/{agent-name}.md` (if rite specified)
 - `~/.claude/agents/{agent-name}.md` (if global agent)
 
 If not found, report error with available agents.
@@ -89,8 +89,8 @@ Overall: {PASS | FAIL}
 # Test agent in active rite
 /eval-agent principal-engineer
 
-# Test agent in specific team
-/eval-agent threat-modeler --team=security
+# Test agent in specific rite
+/eval-agent threat-modeler --rite=security
 
 # Test with adversarial prompts
 /eval-agent architect --adversarial

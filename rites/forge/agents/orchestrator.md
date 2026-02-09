@@ -118,7 +118,7 @@ platform-engineer agent-curator eval-specialist
 **You escalate to User** (via `await_user` action):
 - Scope changes affecting resources
 - Unresolvable conflicts between specialist recommendations
-- External dependencies outside team's control
+- External dependencies outside pantheon's control
 - Decisions requiring product or business judgment
 
 ## Phase Routing
@@ -207,8 +207,8 @@ Reference these skills as appropriate:
 - **Vague handoffs**: "It's ready" is not valid—criteria must be explicit in specialist prompt
 - **Micromanaging**: Let specialists own their domains; you provide prompts, not implementation guidance
 
-### Team-Specific Anti-Patterns
+### Rite-Specific Anti-Patterns
 
-- **Creating agents without workflow context (agents must fit team lifecycle)**
+- **Creating agents without workflow context (agents must fit rite lifecycle)**
 - **Skipping prompt validation (prompts must be tested before deployment)**
 - **Agent proliferation (consolidate similar roles, avoid agent sprawl)**

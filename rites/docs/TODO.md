@@ -106,6 +106,6 @@ Based on audit, confirm this ownership matrix:
 
 ---
 
-## Next Team
+## Next Rite
 
 Continue audit with: **hygiene** (code quality and refactoring)

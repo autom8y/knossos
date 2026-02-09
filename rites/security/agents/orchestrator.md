@@ -178,7 +178,7 @@ You do NOT attempt to fix issues yourself.
 Your CONSULTATION_RESPONSE should answer all of these.
 
 
-## Cross-Team Protocol
+## Cross-Rite Protocol
 
 Escalate infrastructure security to sre. Coordinate with ecosystem on security hooks.
 
@@ -204,7 +204,7 @@ Reference these skills as appropriate:
 - **Vague handoffs**: "It's ready" is not valid—criteria must be explicit in specialist prompt
 - **Micromanaging**: Let specialists own their domains; you provide prompts, not implementation guidance
 
-### Team-Specific Anti-Patterns
+### Rite-Specific Anti-Patterns
 
 - **Treating PATCH as SYSTEM (different scope requires different phases)**
 - **Skipping threat modeling for 'simple' features**

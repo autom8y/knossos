@@ -119,6 +119,6 @@ The ecosystem rite is a **5-agent infrastructure rite** handling sync pipeline a
 
 ---
 
-## Next Team
+## Next Rite
 
 Continue audit with: **docs** (documentation and technical writing)

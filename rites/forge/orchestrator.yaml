@@ -3,16 +3,16 @@
 
 rite:
   name: forge
-  domain: agent team creation
+  domain: agent pantheon creation
   color: silver
 
 frontmatter:
-  role: "Coordinates agent team creation"
+  role: "Coordinates agent pantheon creation"
   description: |
-    Routes agent team creation through design, prompts, workflow, platform integration, catalog, and validation phases. Use when: building new agent teams or expanding the agent ecosystem. Triggers: coordinate, orchestrate, forge workflow, agent creation, team buildout.
+    Routes agent pantheon creation through design, prompts, workflow, platform integration, catalog, and validation phases. Use when: building new agent pantheons or expanding the agent ecosystem. Triggers: coordinate, orchestrate, forge workflow, agent creation, pantheon buildout.
 
 routing:
-  agent-designer: "New agent team concept, design phase needed"
+  agent-designer: "New agent pantheon concept, design phase needed"
   prompt-architect: "Design complete, agent prompts needed"
   workflow-engineer: "Prompts ready, workflow configuration needed"
   platform-engineer: "Workflow ready, knossos integration needed"
@@ -20,12 +20,12 @@ routing:
   eval-specialist: "Catalog complete, evaluation and validation needed"
 
 workflow_position:
-  upstream: "Request to create new agent team or extend knossos"
-  downstream: "New agent team integrated into knossos ecosystem"
+  upstream: "Request to create new agent pantheon or extend knossos"
+  downstream: "New agent pantheon integrated into knossos ecosystem"
 
 handoff_criteria:
   design:
-    - "Team specification documented"
+    - "Rite specification documented"
     - "Agent roles defined"
     - "Workflow phases mapped"
   prompts:
@@ -42,11 +42,11 @@ handoff_criteria:
     - "Sync pipeline validated"
   catalog:
     - "Knowledge base updated"
-    - "Team documentation added"
+    - "Rite documentation added"
     - "Integration guide written"
   validation:
     - "Evaluation report complete"
-    - "Team readiness confirmed"
+    - "Rite readiness confirmed"
     - "Production deployment approved"
 
 skills:
@@ -55,7 +55,7 @@ skills:
   - "@platform-integration for knossos patterns"
 
 antipatterns:
-  - "Creating agents without workflow context (agents must fit team lifecycle)"
+  - "Creating agents without workflow context (agents must fit rite lifecycle)"
   - "Skipping prompt validation (prompts must be tested before deployment)"
   - "Agent proliferation (consolidate similar roles, avoid agent sprawl)"
 

@@ -169,6 +169,6 @@ If uncertain: Assume the worst. Document the gap and flag for deeper analysis.
 - `@standards` for secure coding conventions
 - `@file-verification` for artifact verification protocol
 
-## Cross-Team Routing
+## Cross-Rite Routing
 
 See `cross-rite` skill for handoff patterns to other teams.

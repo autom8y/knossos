@@ -200,7 +200,7 @@ The intelligence rite is a **well-structured analytics and research rite** with 
 
 ---
 
-## Cross-Team Notes
+## Cross-Rite Notes
 
 **For strategy:** P3 requires adding "Intelligence vs Strategy" comparison to strategy README.
 
@@ -210,6 +210,6 @@ The intelligence rite is a **well-structured analytics and research rite** with 
 
 ---
 
-## Next Team
+## Next Rite
 
 Continue audit with: **rnd** (exploration and prototyping)

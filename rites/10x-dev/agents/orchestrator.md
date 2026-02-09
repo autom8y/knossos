@@ -223,7 +223,7 @@ Reference these skills as appropriate:
 - **Vague handoffs**: "It's ready" is not valid—criteria must be explicit in specialist prompt
 - **Micromanaging**: Let specialists own their domains; you provide prompts, not implementation guidance
 
-### Team-Specific Anti-Patterns
+### Rite-Specific Anti-Patterns
 
 - **Skipping design phase for MODULE complexity (always design first)**
 - **Implementing without acceptance criteria defined**

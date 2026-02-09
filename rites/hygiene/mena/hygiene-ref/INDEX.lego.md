@@ -1,15 +1,15 @@
 ---
 name: hygiene-ref
-description: "Switch to hygiene (code quality workflow). Triggers: /hygiene, code quality, refactoring team, quality audit, code cleanup."
+description: "Switch to hygiene (code quality workflow). Triggers: /hygiene, code quality, refactoring rite, quality audit, code cleanup."
 ---
 
-# /hygiene - Quick Switch to Code Hygiene Team
+# /hygiene - Quick Switch to Code Hygiene Rite
 
 > **Category**: Rite Management | **Phase**: Rite Switching
 
 ## Purpose
 
-Instantly switch to the hygiene rite, a specialized workflow focused on code quality, architectural compliance, refactoring, and technical cleanliness. This team detects code smells, enforces standards, and cleans up technical messes.
+Instantly switch to the hygiene rite, a specialized workflow focused on code quality, architectural compliance, refactoring, and technical cleanliness. This rite detects code smells, enforces standards, and cleans up technical messes.
 
 This is a convenience wrapper around `/rite hygiene` that also displays the pantheon after switching.
 
@@ -29,7 +29,7 @@ No parameters required. This command:
 
 ## Behavior
 
-### 1. Invoke Team Switch
+### 1. Invoke Rite Switch
 
 Execute via Bash tool:
 
@@ -128,8 +128,8 @@ Use this rite for:
 
 ## Related Commands
 
-- `/team` - General rite switching with options
-- `/10x` - Quick switch to development team
-- `/docs` - Quick switch to documentation team
-- `/debt` - Quick switch to technical debt team
-- `/handoff` - Delegate to specific agent in current team
+- `/rite` - General rite switching with options
+- `/10x` - Quick switch to development rite
+- `/docs` - Quick switch to documentation rite
+- `/debt` - Quick switch to technical debt rite
+- `/handoff` - Delegate to specific agent in current rite

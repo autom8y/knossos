@@ -144,7 +144,7 @@ SYSTEM complexity:
 
 ---
 
-## Cross-Team Notes
+## Cross-Rite Notes
 
 **For 10x-dev:** P1 requires architect to consult threat-modeler for SYSTEM complexity before finalizing TDD. This is a new gate in the 10x workflow.
 
@@ -152,6 +152,6 @@ SYSTEM complexity:
 
 ---
 
-## Next Team
+## Next Rite
 
 Continue audit with: **intelligence** (analytics and research)

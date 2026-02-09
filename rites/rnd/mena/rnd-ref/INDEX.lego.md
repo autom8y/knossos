@@ -13,7 +13,7 @@ description: "Innovation Lab (R&D) team reference. Triggers: rnd, innovation lab
 |-----------|----------|---------|
 | Agents | `$KNOSSOS_HOME/rites/rnd/agents/` | Agent prompts |
 | Workflow | `$KNOSSOS_HOME/rites/rnd/workflow.yaml` | Phase configuration |
-| Switch | `/rnd` | Activate this team |
+| Switch | `/rnd` | Activate this rite |
 
 ## Pantheon
 
@@ -54,12 +54,12 @@ SCOUT-{slug}  INTEGRATE-{slug}    PROTO-{slug}   MOONSHOT-{slug}
 
 | Command | Maps To | Use When |
 |---------|---------|----------|
-| `/rnd` | Team switch | Activating this team |
+| `/rnd` | Rite switch | Activating this rite |
 | `/architect` | integration-researcher | Integration analysis only |
 | `/build` | prototype-engineer | Prototyping only |
 | `/qa` | moonshot-architect | Future architecture only |
-| `/hotfix` | N/A | Not applicable (R&D team) |
-| `/code-review` | N/A | Not applicable (R&D team) |
+| `/hotfix` | N/A | Not applicable (R&D rite) |
+| `/code-review` | N/A | Not applicable (R&D rite) |
 
 ## When to Use This Rite
 

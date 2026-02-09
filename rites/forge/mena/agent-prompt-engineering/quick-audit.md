@@ -34,5 +34,5 @@
 Use [scoring/rubric.md](scoring/rubric.md) for:
 - New agent creation (full 6-dimension 1-5 scoring)
 - Agents scoring 4/6 or below on quick audit
-- Team-wide agent reviews
+- Pantheon-wide agent reviews
 - Before major prompt changes

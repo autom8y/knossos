@@ -123,7 +123,7 @@ skills/smell-detection/
 
 ---
 
-## Cross-Team Notes
+## Cross-Rite Notes
 
 **For ecosystem:** P2 defines a generalized handoff artifact pattern that should live at ecosystem level, not team level. Consider adding to cross-rite skill or creating dedicated handoff-protocol skill.
 
@@ -131,6 +131,6 @@ skills/smell-detection/
 
 ---
 
-## Next Team
+## Next Rite
 
 Continue audit with: **sre** (operations and reliability)

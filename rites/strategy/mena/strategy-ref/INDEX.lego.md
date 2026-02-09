@@ -3,7 +3,7 @@ name: strategy-ref
 description: "Strategy team reference. Triggers: strategy, market-researcher, competitive-analyst, business-model-analyst, roadmap-strategist."
 ---
 
-# Strategy Team (strategy)
+# Strategy Rite (strategy)
 
 > Research. Analyze. Model. Strategize.
 
@@ -13,7 +13,7 @@ description: "Strategy team reference. Triggers: strategy, market-researcher, co
 |-----------|----------|---------|
 | Agents | `$KNOSSOS_HOME/rites/strategy/agents/` | Agent prompts |
 | Workflow | `$KNOSSOS_HOME/rites/strategy/workflow.yaml` | Phase configuration |
-| Switch | `/strategy` | Activate this team |
+| Switch | `/strategy` | Activate this rite |
 
 ## Pantheon
 
@@ -54,12 +54,12 @@ market-research → competitive-analysis → business-modeling → strategic-pla
 
 | Command | Maps To | Use When |
 |---------|---------|----------|
-| `/strategy` | Team switch | Activating this team |
+| `/strategy` | Rite switch | Activating this rite |
 | `/architect` | competitive-analyst | Competitive analysis only |
 | `/build` | business-model-analyst | Financial modeling only |
 | `/qa` | roadmap-strategist | Strategic planning only |
-| `/hotfix` | N/A | Not applicable (strategy team) |
-| `/code-review` | N/A | Not applicable (strategy team) |
+| `/hotfix` | N/A | Not applicable (strategy rite) |
+| `/code-review` | N/A | Not applicable (strategy rite) |
 
 ## When to Use This Rite
 

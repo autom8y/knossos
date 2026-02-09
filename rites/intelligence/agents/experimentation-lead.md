@@ -190,7 +190,7 @@ If uncertain: Tighten success criteria. Define the gray zone. Pre-commit to acti
 - @doc-intelligence for experiment design and insights templates
 - @standards for documentation conventions
 
-## Cross-Team Routing
+## Cross-Rite Routing
 
 See `cross-rite` skill for handoff patterns to other teams.
 

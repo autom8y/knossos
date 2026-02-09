@@ -45,7 +45,7 @@ Use this abbreviated checklist for rapid verification:
 - [ ] 4-6 responsibilities listed
 - [ ] Each starts with action verb (Analyze, Produce, Validate, etc.)
 - [ ] Each has measurable outcome
-- [ ] No overlap with other agents in same team
+- [ ] No overlap with other agents in same pantheon
 
 #### Position in Workflow
 - [ ] ASCII diagram present and renders correctly

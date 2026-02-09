@@ -47,13 +47,13 @@ docs/{category}/{PREFIX}-{slug}.md
 | `{PREFIX}` | Artifact type abbreviation (uppercase) | PRD, TDD, ADR, OBS |
 | `{slug}` | Dynamic name placeholder | user-auth, api-gateway |
 
-### Examples by Team
+### Examples by Rite
 
-| Team | Path Template | Example |
+| Rite | Path Template | Example |
 |------|--------------|---------|
 | 10x-dev | `docs/requirements/PRD-{slug}.md` | `docs/requirements/PRD-user-auth.md` |
 | 10x-dev | `docs/design/TDD-{slug}.md` | `docs/design/TDD-payment-api.md` |
-| doc-team | `docs/audits/AUDIT-{slug}.md` | `docs/audits/AUDIT-api-docs.md` |
+| doc-rite | `docs/audits/AUDIT-{slug}.md` | `docs/audits/AUDIT-api-docs.md` |
 | hygiene | `docs/hygiene/SMELL-{slug}.md` | `docs/hygiene/SMELL-legacy-utils.md` |
 | debt | `docs/debt/LEDGER-{slug}.md` | `docs/debt/LEDGER-2024-q4.md` |
 | sre | `docs/reliability/OBS-{slug}.md` | `docs/reliability/OBS-payment-svc.md` |
@@ -64,12 +64,12 @@ docs/{category}/{PREFIX}-{slug}.md
 
 ### Standard Prefixes
 
-| Prefix | Full Name | Team |
+| Prefix | Full Name | Rite |
 |--------|-----------|------|
 | PRD | Product Requirements Document | 10x-dev |
 | TDD | Technical Design Document | 10x-dev |
 | ADR | Architecture Decision Record | 10x-dev |
-| AUDIT | Audit Report | doc-team |
+| AUDIT | Audit Report | doc-rite |
 | SMELL | Smell Report | hygiene |
 | REFACTOR | Refactor Plan | hygiene |
 | LEDGER | Debt Ledger | debt-triage |
@@ -80,7 +80,7 @@ docs/{category}/{PREFIX}-{slug}.md
 ### Creating New Prefixes
 - 3-6 uppercase letters
 - Abbreviation of artifact name
-- Unique within team
+- Unique within rite
 - Clear meaning when seen in file listings
 
 ---
@@ -89,12 +89,12 @@ docs/{category}/{PREFIX}-{slug}.md
 
 ### Standard Categories
 
-| Category | Purpose | Teams |
+| Category | Purpose | Rites |
 |----------|---------|-------|
 | `requirements/` | PRDs and requirements | 10x-dev |
 | `design/` | TDDs and architecture | 10x-dev |
 | `decisions/` | ADRs | 10x-dev |
-| `audits/` | Audit reports | doc-team |
+| `audits/` | Audit reports | doc-rite |
 | `hygiene/` | Code quality reports | hygiene |
 | `debt/` | Debt tracking | debt-triage |
 | `reliability/` | SRE artifacts | sre |
@@ -102,7 +102,7 @@ docs/{category}/{PREFIX}-{slug}.md
 
 ### Creating New Categories
 - Lowercase, singular or plural (be consistent)
-- Describes the artifact type, not the team
+- Describes the artifact type, not the rite
 - Create at project root under `docs/`
 
 ---

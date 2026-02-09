@@ -3,7 +3,7 @@
 
 name: forge
 version: "1.0.0"
-description: Agent team creation lifecycle (Design -> Prompts -> Workflow -> Platform -> Catalog -> Validation)
+description: Agent pantheon creation lifecycle (Design -> Prompts -> Workflow -> Platform -> Catalog -> Validation)
 
 entry_agent: orchestrator
 
@@ -11,7 +11,7 @@ phases:
   - name: design
     agent: agent-designer
     produces: rite-spec
-    description: Design agent team concept and role definitions
+    description: Design agent pantheon concept and role definitions
 
   - name: prompts
     agent: prompt-architect
@@ -38,14 +38,14 @@ phases:
   - name: validation
     agent: eval-specialist
     produces: eval-report
-    description: Evaluate and validate agent team readiness
+    description: Evaluate and validate agent pantheon readiness
 
 agents:
   - name: orchestrator
-    role: Coordinates agent team creation phases
+    role: Coordinates agent pantheon creation phases
 
   - name: agent-designer
-    role: Designs agent team concepts and role specifications
+    role: Designs agent pantheon concepts and role specifications
 
   - name: prompt-architect
     role: Creates agent prompts and system instructions
@@ -76,12 +76,12 @@ dependencies:
 
 complexity_levels:
   - name: AGENT
-    scope: "Single agent addition to existing team"
+    scope: "Single agent addition to existing rite"
   - name: MODULE
     scope: "New rite with 3-5 agents"
   - name: SYSTEM
-    scope: "Major team redesign or cross-rite refactor"
+    scope: "Major rite redesign or cross-rite refactor"
 
 metadata:
-  domain: agent team creation
+  domain: agent pantheon creation
   color: silver

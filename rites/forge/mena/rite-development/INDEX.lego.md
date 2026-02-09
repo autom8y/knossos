@@ -3,7 +3,7 @@ name: rite-development
 description: "Rite design and implementation guide. Triggers: new rite, rite development, workflow design, agent creation, knossos integration."
 ---
 
-# Team Development
+# Rite Development
 
 > Design rites that work. Build workflows that flow.
 
@@ -49,7 +49,7 @@ This skill codifies the patterns discovered from building rites (10x-dev, docs, 
 | Count | Rite Type | Examples |
 |-------|-----------|----------|
 | 3 | Focused/specialized | debt-triage |
-| 4 | Standard rites | doc-team, hygiene, sre |
+| 4 | Standard rites | doc-rite, hygiene, sre |
 | 5 | Full lifecycle | 10x-dev |
 
 ### Model and Color Assignment
@@ -93,7 +93,7 @@ Codified design patterns:
 Copy-and-fill templates:
 - [templates/workflow.yaml.template](templates/workflow.yaml.template) - Workflow config
 - [templates/agent-template.md](templates/agent-template.md) - Agent prompt (11 sections)
-- [templates/quick-switch.md.template](templates/quick-switch.md.template) - Team command
+- [templates/quick-switch.md.template](templates/quick-switch.md.template) - Rite command
 - [templates/skill-ref.md.template](templates/skill-ref.md.template) - Reference skill
 
 ### Validation
@@ -101,8 +101,8 @@ Pre-flight checks and troubleshooting:
 - [validation/validation.md](validation/validation.md) - Checklist and common issues
 
 ### Examples
-Complete team implementations:
-- [examples/examples.md](examples/examples.md) - 3-agent and 5-agent team patterns
+Complete rite implementations:
+- [examples/examples.md](examples/examples.md) - 3-agent and 5-agent rite patterns
 
 ---
 

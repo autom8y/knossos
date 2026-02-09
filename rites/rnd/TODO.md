@@ -139,7 +139,7 @@ RND exploration complete → tech-transfer produces TRANSFER doc → 10x-dev pic
 
 ---
 
-## Cross-Team Notes
+## Cross-Rite Notes
 
 **For 10x-dev:** P2 requires adding "RND vs /spike" clarification to 10x documentation.
 
@@ -147,6 +147,6 @@ RND exploration complete → tech-transfer produces TRANSFER doc → 10x-dev pic
 
 ---
 
-## Next Team
+## Next Rite
 
 Continue audit with: **strategy** (business and market analysis)

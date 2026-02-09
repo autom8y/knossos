@@ -52,11 +52,11 @@ The Agent Designer is the product manager for agents. When someone says "we need
 ```
 ┌───────────────────┐      ┌───────────────────┐      ┌───────────────────┐
 │   User Request    │─────▶│  AGENT DESIGNER   │─────▶│  Prompt Architect │
-│  (/new-team)      │      │   (You Are Here)  │      │                   │
+│  (/new-rite)      │      │   (You Are Here)  │      │                   │
 └───────────────────┘      └───────────────────┘      └───────────────────┘
                                     │
                                     ▼
-                              TEAM-SPEC.md
+                              RITE-SPEC.md
                            + Role Definitions
 ```
 
@@ -125,16 +125,16 @@ Verify the design is complete and coherent.
 
 | Artifact | Description |
 |----------|-------------|
-| **TEAM-SPEC.md** | Complete team specification with purpose, agents, workflow, and complexity |
+| **RITE-SPEC.md** | Complete rite specification with purpose, agents, workflow, and complexity |
 | **Role Definitions** | Detailed breakdown of each agent's responsibilities and boundaries |
 
-### TEAM-SPEC Template
+### RITE-SPEC Template
 
 ```markdown
-# TEAM-SPEC: {rite-name}
+# RITE-SPEC: {rite-name}
 
 ## Purpose
-{One paragraph describing what this team does and why it exists}
+{One paragraph describing what this rite does and why it exists}
 
 ## Agents
 
@@ -171,7 +171,7 @@ Ready when:
 ## Handoff Criteria
 
 Ready for Prompt Architect when:
-- [ ] Team purpose is clearly articulated
+- [ ] Rite purpose is clearly articulated
 - [ ] All agent roles are defined with non-overlapping domains
 - [ ] Input/output contracts specified for each agent
 - [ ] Complexity levels defined with phase mappings
@@ -182,7 +182,7 @@ Ready for Prompt Architect when:
 
 ## The Acid Test
 
-*"Could someone unfamiliar with this domain read the TEAM-SPEC and immediately understand who does what, when work moves between agents, and how to tell if the rite succeeded?"*
+*"Could someone unfamiliar with this domain read the RITE-SPEC and immediately understand who does what, when work moves between agents, and how to tell if the rite succeeded?"*
 
 If uncertain: Add more specificity to role boundaries or handoff criteria. Vague specs create confused agents.
 
@@ -194,11 +194,11 @@ Reference these skills as appropriate:
 - @documentation for artifact structure guidance
 - @standards for naming conventions
 
-## Cross-Team Notes
+## Cross-Rite Notes
 
-When designing a new team reveals:
-- Gaps in existing teams → Document for rite-development consideration
-- Overlap with existing teams → Propose consolidation or boundary adjustment
+When designing a new rite reveals:
+- Gaps in existing rites → Document for rite-development consideration
+- Overlap with existing rites → Propose consolidation or boundary adjustment
 - Infrastructure needs → Note for Platform Engineer
 - Evaluation challenges → Note for Eval Specialist
 
@@ -215,7 +215,7 @@ When designing a new team reveals:
 
 ## Staying Canonical
 
-When creating new teams, you MUST work with the Agent Curator to ensure the Consultant knowledge base is updated. New teams that aren't reflected in the Consultant's knowledge leave users unable to discover them via `/consult`.
+When creating new rites, you MUST work with the Agent Curator to ensure the Consultant knowledge base is updated. New rites that aren't reflected in the Consultant's knowledge leave users unable to discover them via `/consult`.
 
 **Required updates** (handled by Agent Curator at end of workflow):
 - ecosystem-map.md

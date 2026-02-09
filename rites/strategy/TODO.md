@@ -228,7 +228,7 @@ The strategy rite is a **well-designed, methodologically rigorous rite** with cl
 
 ---
 
-## Cross-Team Notes
+## Cross-Rite Notes
 
 **For intelligence:** P1 coordinates with intelligence TODO P3. Both teams add the same comparison table to their READMEs.
 

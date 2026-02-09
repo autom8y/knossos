@@ -3,7 +3,7 @@ name: intelligence-ref
 description: "Product Intelligence team reference. Triggers: intelligence, analytics-engineer, user-researcher, experimentation-lead, insights-analyst."
 ---
 
-# Product Intelligence Team (intelligence)
+# Product Intelligence Rite (intelligence)
 
 > Instrument. Research. Experiment. Synthesize.
 
@@ -13,7 +13,7 @@ description: "Product Intelligence team reference. Triggers: intelligence, analy
 |-----------|----------|---------|
 | Agents | `$KNOSSOS_HOME/rites/intelligence/agents/` | Agent prompts |
 | Workflow | `$KNOSSOS_HOME/rites/intelligence/workflow.yaml` | Phase configuration |
-| Switch | `/intelligence` | Activate this team |
+| Switch | `/intelligence` | Activate this rite |
 
 ## Pantheon
 
@@ -54,12 +54,12 @@ instrumentation → research → experimentation → synthesis
 
 | Command | Maps To | Use When |
 |---------|---------|----------|
-| `/intelligence` | Team switch | Activating this team |
+| `/intelligence` | Rite switch | Activating this rite |
 | `/architect` | experimentation-lead | Experiment design only |
 | `/build` | analytics-engineer | Instrumentation only |
 | `/qa` | insights-analyst | Analysis only |
-| `/hotfix` | N/A | Not applicable (research team) |
-| `/code-review` | N/A | Not applicable (research team) |
+| `/hotfix` | N/A | Not applicable (research rite) |
+| `/code-review` | N/A | Not applicable (research rite) |
 
 ## When to Use This Rite
 

@@ -31,7 +31,7 @@ description: |
 
 | Agent | Model | Color | Produces |
 |-------|-------|-------|----------|
-| **Agent Designer** | opus | purple | TEAM-SPEC, role definitions |
+| **Agent Designer** | opus | purple | RITE-SPEC, role definitions |
 | **Prompt Architect** | opus | cyan | Agent .md files (11 sections) |
 | **Workflow Engineer** | opus | green | workflow.yaml, commands |
 | **Platform Engineer** | sonnet | orange | Rite catalog files, directory structure |
@@ -299,7 +299,7 @@ Check:
 
 ## Related Resources
 
-- [rite-development skill](../rite-development/INDEX.lego.md) - Manual team creation guidance
+- [rite-development skill](../rite-development/INDEX.lego.md) - Manual rite creation guidance
 - [10x-workflow skill](../../../10x-dev/mena/10x-workflow/INDEX.lego.md) - Workflow patterns
 - [consult](../../../../mena/navigation/consult/INDEX.dro.md) - Ecosystem navigation
 - [documentation skill](../../../../mena/templates/documentation/INDEX.lego.md) - Artifact templates

@@ -3,7 +3,7 @@ name: security-ref
 description: "Security team reference. Triggers: security, threat-modeler, compliance-architect, penetration-tester, security-reviewer."
 ---
 
-# Security Team (security)
+# Security Rite (security)
 
 > Map threats. Enforce compliance. Test defenses. Guard the gate.
 
@@ -13,7 +13,7 @@ description: "Security team reference. Triggers: security, threat-modeler, compl
 |-----------|----------|---------|
 | Agents | `$KNOSSOS_HOME/rites/security/agents/` | Agent prompts |
 | Workflow | `$KNOSSOS_HOME/rites/security/workflow.yaml` | Phase configuration |
-| Switch | `/security` | Activate this team |
+| Switch | `/security` | Activate this rite |
 
 ## Pantheon
 
@@ -54,7 +54,7 @@ threat-modeling → compliance-design → penetration-testing → security-revie
 
 | Command | Maps To | Use When |
 |---------|---------|----------|
-| `/security` | Team switch | Activating this team |
+| `/security` | Rite switch | Activating this rite |
 | `/architect` | compliance-architect | Compliance mapping only |
 | `/build` | penetration-tester | Testing only |
 | `/qa` | security-reviewer | Review only |

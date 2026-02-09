@@ -109,7 +109,7 @@ Transforms technical specifications into human-readable guides. The translator b
 | Execution/Implementation | green | principal-engineer, janitor, tech-writer |
 | Validation/Testing | red | qa-adversary, chaos-engineer |
 
-**Rule**: Avoid duplicate colors within the same team for visual distinction.
+**Rule**: Avoid duplicate colors within the same pantheon for visual distinction.
 
 ## Task Tool Patterns
 
@@ -160,7 +160,7 @@ Create or audit agents via Task tool delegation:
 Route to human when:
 - Designing entirely new agent patterns (not variations of existing)
 - Audit reveals systemic issues across 3+ agents
-- Team structure changes require workflow redesign
+- Rite structure changes require workflow redesign
 - Conflicting requirements between skill principles
 
 **Non-prompt issues**: Agent performance -> infrastructure team. Tool limitations -> platform team. Model behavior -> `/consult`.
