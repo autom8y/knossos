@@ -2,6 +2,36 @@
 
 > What is spun cannot be unspun. Every session begins with Clotho's thread.
 
+## create_session
+
+Creates a new session.
+
+**Syntax**: `create_session initiative="{initiative}" [complexity="{level}"] [rite="{rite}"]`
+
+**CLI**: `ari session create "{initiative}" -c "{complexity}" [-r "{rite}"]`
+
+**Parameters**:
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| initiative | Yes | What is being built |
+| complexity | No | PATCH|MODULE|SYSTEM|INITIATIVE|MIGRATION (default: MODULE) |
+| rite | No | Rite to use (default: current) |
+
+**Validation**:
+1. No other session currently ACTIVE
+2. Initiative must be non-empty
+
+**Execution**:
+1. Call `ari session create "{initiative}" -c "{complexity}" [-r "{rite}"]`
+2. CLI creates session directory, SESSION_CONTEXT.md, sets state to ACTIVE
+3. Return CLI output (JSON with session_id, entry_agent)
+
+**MOIRAI_BYPASS**: Not needed (CLI handles).
+
+**Lock**: CLI handles locking.
+
+---
+
 ## create_sprint
 
 Creates a new sprint within the active session.

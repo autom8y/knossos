@@ -16,19 +16,13 @@ Resume a parked work session with full context restoration. $ARGUMENTS
 
 ## Session Resolution
 
-The command uses the current session marker at `.claude/sessions/.current-session`:
-
-1. **Read current session**: Reads session ID from `.current-session` file
-2. **Fail if no session**: Returns error if no session is currently set
-3. **Validate status**: Session must be in PARKED status to resume
-
-No flags are accepted - the command operates on the current session only.
+Session is resolved automatically by `ari session` via scan-based discovery.
+No flags needed — the CLI scans `.claude/sessions/*/SESSION_CONTEXT.md` for PARKED status.
 
 ## Pre-flight
 
-1. Verify a current session exists (`.current-session` file)
+1. Verify a parked session exists (`ari session status` succeeds and shows PARKED)
 2. Load session context from `SESSION_CONTEXT.md`
-3. Verify session is in PARKED status (FSM validates PARKED -> ACTIVE transition)
 
 ## Behavior
 
@@ -56,7 +50,7 @@ No flags are accepted - the command operates on the current session only.
 
 ## Error Conditions
 
-- **No current session**: Fails if `.current-session` file doesn't exist
+- **No parked session**: Fails if no session in PARKED status found
 - **Session not found**: Fails if session directory doesn't exist
 - **Invalid transition**: Fails if session is not in PARKED status (e.g., already ACTIVE or WRAPPED)
 - **Lock contention**: Fails if another process holds the session lock
@@ -67,8 +61,3 @@ No flags are accepted - the command operates on the current session only.
 /continue
 ```
 
-## CLI Equivalent
-
-```bash
-ari session resume
-```

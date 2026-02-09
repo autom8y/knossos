@@ -2,7 +2,7 @@
 name: task
 description: Single task full lifecycle through team workflow phases
 argument-hint: <task-description> [--complexity=LEVEL]
-allowed-tools: Bash, Read, Write, Task, Glob, Grep
+allowed-tools: Bash, Read, Task, Glob, Grep
 model: opus
 disable-model-invocation: true
 ---
@@ -94,7 +94,7 @@ For each phase:
 3. Check phase.condition (skip if not met)
 4. Invoke agent via Task tool
 5. Verify artifact created
-6. Update session phase in SESSION_CONTEXT.md
+6. Delegate phase transition to Moirai: Task(moirai, "transition_phase to='{phase}'")
 7. Proceed to phase.next (or complete if null)
 ```
 
@@ -106,6 +106,3 @@ For each phase:
 /task "Clean up utils module" --complexity=MODULE
 ```
 
-## Reference
-
-Full documentation: `mena/workflow/task.dro.md` (self-contained)

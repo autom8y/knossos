@@ -11,6 +11,7 @@ description: "Moirai routing table for Fate domains (Clotho/Lachesis/Atropos). T
 
 | Operation | Fate | Domain | CLI Command |
 |-----------|------|--------|-------------|
+| create_session | Clotho | Creation | `ari session create "{initiative}" -c "{complexity}"` |
 | create_sprint | Clotho | Creation | `ari session sprint create "{goal}" [--task "t1"]` |
 | mark_complete | Lachesis | Measurement | `ari session sprint mark-complete [sprint-id]` |
 | transition_phase | Lachesis | Measurement | `ari session transition --to={phase}` |

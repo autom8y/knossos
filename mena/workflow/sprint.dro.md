@@ -50,10 +50,10 @@ Plan and execute a sprint with multiple coordinated tasks. $ARGUMENTS
    - Implementation
    - QA validation
 
-4. **Track progress**:
-   - Update task status (pending → in_progress → complete)
-   - Handle blockers
-   - Generate sprint burndown
+4. **Track progress** via Moirai:
+   - Mark tasks complete: `Task(moirai, "mark_complete task_id='{id}'")`
+   - Handle blockers and update task notes
+   - Generate sprint burndown summary
 
 5. **Complete sprint**:
    - Generate retrospective
@@ -104,6 +104,3 @@ cd worktrees/wt-zzz && claude
 **Single sprint, multiple tasks** → use this command directly
 **Multiple parallel sprints** → use `/worktree` per sprint
 
-## Reference
-
-Full documentation: `mena/workflow/sprint.dro.md` (self-contained)

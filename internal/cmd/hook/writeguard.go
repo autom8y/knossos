@@ -168,13 +168,13 @@ func outputBlock(printer *output.Printer, filePath string) error {
 	var moiraiOp string
 	if strings.HasSuffix(filePath, "SESSION_CONTEXT.md") {
 		contextType = "SESSION_CONTEXT"
-		moiraiOp = `Task(moirai, "update_session ...")`
+		moiraiOp = `Task(moirai, "<operation> ...") — operations: transition_phase, update_field, park_session, resume_session, handoff, record_decision`
 	} else if strings.HasSuffix(filePath, "SPRINT_CONTEXT.md") {
 		contextType = "SPRINT_CONTEXT"
-		moiraiOp = `Task(moirai, "create_sprint ...")`
+		moiraiOp = `Task(moirai, "<operation> ...") — operations: create_sprint, mark_complete, update_field`
 	} else {
 		contextType = "context file"
-		moiraiOp = `Task(moirai, "<operation>")`
+		moiraiOp = `Task(moirai, "<operation> ...")`
 	}
 
 	result := hook.PreToolUseOutput{

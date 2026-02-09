@@ -2,7 +2,7 @@
 name: start
 description: Initialize a new work session
 argument-hint: <initiative> [--complexity=LEVEL] [--rite=PACK]
-allowed-tools: Read, Task
+allowed-tools: Bash, Read, Task
 model: opus
 disable-model-invocation: true
 ---
@@ -113,6 +113,3 @@ Output to user:
 /start "New billing service" --complexity=SYSTEM --rite=10x-dev
 ```
 
-## Reference
-
-Full documentation: `.claude/commands/session/start/INDEX.md`

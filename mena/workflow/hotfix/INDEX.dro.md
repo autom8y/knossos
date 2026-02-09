@@ -2,7 +2,7 @@
 name: hotfix
 description: Rapid fix workflow for urgent issues
 argument-hint: <issue-description> [--severity=LEVEL]
-allowed-tools: Bash, Read, Write, Task, Glob, Grep
+allowed-tools: Bash, Read, Task, Glob, Grep
 model: opus
 disable-model-invocation: true
 ---
@@ -80,6 +80,3 @@ IMPL_AGENT=$(grep -B1 "produces: code\|produces: commits\|produces: documentatio
 /hotfix "Broken link in documentation"
 ```
 
-## Reference
-
-Full documentation: `.claude/commands/workflow/hotfix/INDEX.md`
