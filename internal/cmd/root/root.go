@@ -16,6 +16,7 @@ import (
 	"github.com/autom8y/knossos/internal/cmd/hook"
 	initcmd "github.com/autom8y/knossos/internal/cmd/initialize"
 	"github.com/autom8y/knossos/internal/cmd/inscription"
+	"github.com/autom8y/knossos/internal/cmd/lint"
 	"github.com/autom8y/knossos/internal/cmd/manifest"
 	"github.com/autom8y/knossos/internal/cmd/migrate"
 	"github.com/autom8y/knossos/internal/cmd/naxos"
@@ -130,6 +131,7 @@ func init() {
 	rootCmd.AddCommand(migrate.NewMigrateCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
 	rootCmd.AddCommand(initcmd.NewInitCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
 	rootCmd.AddCommand(provenance.NewProvenanceCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
+	rootCmd.AddCommand(lint.NewLintCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
 	rootCmd.AddCommand(versionCmd)
 }
 
