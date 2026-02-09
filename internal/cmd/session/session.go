@@ -6,7 +6,6 @@ import (
 
 	"github.com/autom8y/knossos/internal/cmd/common"
 	"github.com/autom8y/knossos/internal/output"
-	"github.com/autom8y/knossos/internal/session"
 )
 
 // cmdContext holds shared state for session commands.
@@ -75,10 +74,6 @@ func (c *cmdContext) getPrinter() *output.Printer {
 	return c.GetPrinter(output.FormatText)
 }
 
-// getEventEmitter creates an event emitter for a session.
-func (c *cmdContext) getEventEmitter(sessionID string) *session.EventEmitter {
-	return c.GetEventEmitter(sessionID)
-}
 
 // getActiveRite reads the active rite from ACTIVE_RITE file.
 // Returns "none" as a fallback if the file doesn't exist or is empty.

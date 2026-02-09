@@ -70,10 +70,6 @@ func (r *Resolver) LocksDir() string {
 	return filepath.Join(r.projectRoot, ".claude", "sessions", ".locks")
 }
 
-// AuditDir returns the path to the audit directory.
-func (r *Resolver) AuditDir() string {
-	return filepath.Join(r.projectRoot, ".claude", "sessions", ".audit")
-}
 
 // ArchiveDir returns the path to the archive directory.
 func (r *Resolver) ArchiveDir() string {
@@ -150,10 +146,6 @@ func (r *Resolver) RitesDir() string {
 	return filepath.Join(r.projectRoot, "rites")
 }
 
-// TransitionsLog returns the path to the global transitions log.
-func (r *Resolver) TransitionsLog() string {
-	return filepath.Join(r.AuditDir(), "transitions.log")
-}
 
 // --- Rite Path Methods ---
 
@@ -314,19 +306,9 @@ func UserSkillManifest() string {
 	return filepath.Join(UserClaudeDir(), "USER_SKILL_MANIFEST.json")
 }
 
-// UserCommandManifest returns the path to the user command manifest.
-func UserCommandManifest() string {
-	return filepath.Join(UserClaudeDir(), "USER_COMMAND_MANIFEST.json")
-}
-
-// UserMenaManifest returns the path to the user mena manifest.
-func UserMenaManifest() string {
-	return filepath.Join(UserClaudeDir(), "USER_MENA_MANIFEST.json")
-}
-
-// UserHooksManifest returns the path to the user hooks manifest.
-func UserHooksManifest() string {
-	return filepath.Join(UserClaudeDir(), "USER_HOOKS_MANIFEST.json")
+// UserProvenanceManifest returns the path to the user-level provenance manifest.
+func UserProvenanceManifest() string {
+	return filepath.Join(UserClaudeDir(), "USER_PROVENANCE_MANIFEST.yaml")
 }
 
 // --- Session ID Helpers ---

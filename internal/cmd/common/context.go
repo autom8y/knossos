@@ -121,10 +121,3 @@ func (c *SessionContext) GetLockManager() *lock.Manager {
 	return lock.NewManager(resolver.LocksDir())
 }
 
-// GetEventEmitter creates an event emitter for the given session.
-func (c *SessionContext) GetEventEmitter(sessionID string) *session.EventEmitter {
-	resolver := c.GetResolver()
-	eventsPath := resolver.SessionEventsFile(sessionID)
-	auditPath := resolver.TransitionsLog()
-	return session.NewEventEmitter(eventsPath, auditPath)
-}

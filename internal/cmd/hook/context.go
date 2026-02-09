@@ -278,8 +278,6 @@ func listAvailableAgents(agentsDir string) []string {
 }
 
 // emitSessionStartEvent emits a session_start event to the clew log on SessionStart.
-// This bridges the gap between the session.EventEmitter (which writes SESSION_CREATED)
-// and the clewcontract event system (which expects session_start).
 // All emissions are best-effort -- failures do not affect the context hook result.
 func emitSessionStartEvent(sessionDir, sessionID, initiative, complexity, rite string, printer *output.Printer) {
 	if sessionDir == "" || sessionID == "" {

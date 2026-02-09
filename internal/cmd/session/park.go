@@ -1,8 +1,6 @@
 package session
 
 import (
-	"os/exec"
-	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -139,14 +137,3 @@ func runPark(ctx *cmdContext, opts parkOptions) error {
 	return printer.PrintSuccess(result)
 }
 
-func getGitStatus() string {
-	cmd := exec.Command("git", "status", "--short")
-	out, err := cmd.Output()
-	if err != nil {
-		return "unknown"
-	}
-	if strings.TrimSpace(string(out)) == "" {
-		return "clean"
-	}
-	return "uncommitted changes"
-}
