@@ -196,7 +196,7 @@ Session Context:
 
 **Expected Response**: JSON with success/failure and state changes
 
-See: [Moirai Invocation Pattern](../shared-sections/moirai-invocation.md)
+See: [Moirai Invocation Pattern](../shared/moirai-invocation.md)
 
 **Duration**: < 1 second
 
@@ -334,5 +334,5 @@ If agent invocation times out (rare):
 
 - [Session Context Schema](session-context-schema.md) - Field definitions for context passing
 - [Session Phases](session-phases.md) - Agent-to-phase mapping
-- [Moirai Invocation](../shared-sections/moirai-invocation.md) - State mutation pattern
+- [Moirai Invocation](../shared/moirai-invocation.md) - State mutation pattern
 - [Handoff Notes](../handoff-ref/handoff-notes.md) - Transition-specific context

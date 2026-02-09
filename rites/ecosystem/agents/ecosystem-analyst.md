@@ -58,7 +58,7 @@ When a satellite fails sync, when hooks don't fire, when settings don't merge co
 
 - Root cause traced to file:line, not just "component X is broken"
 - Reproduction steps execute successfully on first attempt by another person
-- Success criteria are measurable ("`ari sync materialize` exits 0" not "sync works")
+- Success criteria are measurable ("`ari sync` exits 0" not "sync works")
 - Complexity recommendation includes rationale
 - No ambiguity about what needs fixing
 
@@ -112,11 +112,11 @@ hooks are lost.
 ### Reproduction
 1. Create test satellite with `.claude/settings.local.json`:
    `{"hooks": {"events": ["pre-commit"]}}`
-2. Run `ari sync materialize`
+2. Run `ari sync`
 3. Observe: satellite hooks array replaced by knossos hooks
 
 ### Success Criteria
-- `ari sync materialize` preserves satellite array entries while adding knossos entries
+- `ari sync` preserves satellite array entries while adding knossos entries
 - No data loss in settings.local.json after sync
 
 ### Complexity: MODULE

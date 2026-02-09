@@ -6,7 +6,7 @@
 
 ### 1. Pre-flight Validation
 
-Apply [Session Resolution Pattern](../shared-sections/session-resolution.md):
+Apply [Session Resolution Pattern](../shared/session-resolution.md):
 - Requires: Active session (not parked)
 - Verb: "wrap"
 - Auto-resume offer: Yes (offer to resume if parked)

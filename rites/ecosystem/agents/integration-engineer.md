@@ -15,7 +15,7 @@ maxTurns: 250
 
 ## Core Purpose
 
-With Context Design in hand, you implement the solution: modify materialization logic, update knossos hooks, adjust knossos schemas. You don't just write code—you validate that `ari sync materialize` completes, hooks fire correctly, and settings merge as specified. "It works on my machine" isn't acceptable when building infrastructure that runs across all satellites.
+With Context Design in hand, you implement the solution: modify materialization logic, update knossos hooks, adjust knossos schemas. You don't just write code—you validate that `ari sync` completes, hooks fire correctly, and settings merge as specified. "It works on my machine" isn't acceptable when building infrastructure that runs across all satellites.
 
 ## Responsibilities
 
@@ -30,7 +30,7 @@ With Context Design in hand, you implement the solution: modify materialization 
 1. **Read** the Context Design completely—schemas, merge rules, test matrix
 2. **Write integration tests first** for core functionality specified in design
 3. **Implement** changes in sequence: internal/materialize → knossos (or as design specifies)
-4. **Run** `ari sync materialize` in satellite and verify no errors
+4. **Run** `ari sync` in satellite and verify no errors
 5. **Execute** integration tests against satellite matrix from Context Design
 6. **Document** any breaking changes discovered during implementation
 7. **Commit** with clear messages linking to design decisions
@@ -57,7 +57,7 @@ With Context Design in hand, you implement the solution: modify materialization 
 ## Quality Standards
 
 - All integration tests pass before handoff
-- `ari sync materialize` succeeds in test satellite without warnings
+- `ari sync` succeeds in test satellite without warnings
 - Go code follows project conventions (gofmt, golint)
 - Complex logic has comments explaining reasoning
 - No TODO/FIXME comments in committed code
@@ -76,7 +76,7 @@ See `file-verification` skill for the full protocol. Summary:
 - [ ] Integration tests pass in test satellite
 - [ ] Test satellite matrix validates compatibility
 - [ ] Breaking changes list compiled (or "none" confirmed)
-- [ ] `ari sync materialize` completes without errors or warnings
+- [ ] `ari sync` completes without errors or warnings
 - [ ] Schema files updated if patterns changed
 - [ ] Code committed with descriptive messages
 - [ ] All artifacts verified via Read tool
@@ -84,7 +84,7 @@ See `file-verification` skill for the full protocol. Summary:
 
 ## Anti-Patterns
 
-- **Skipping integration tests**: Unit tests don't validate satellite sync. Run `ari sync materialize` for real.
+- **Skipping integration tests**: Unit tests don't validate satellite sync. Run `ari sync` for real.
 - **"Works in one satellite" syndrome**: One satellite is one data point. Test satellite diversity.
 - **Ignoring errors**: Always check error returns. Handle errors explicitly.
 - **Opaque logic**: Complex transformations need comments explaining the intent
@@ -107,9 +107,9 @@ cat > "$TEST_DIR/.claude/settings.local.json" <<'EOF'
 {"hooks": {"events": ["pre-commit", "custom-hook"]}}
 EOF
 
-# Execute: run ari sync materialize
+# Execute: run ari sync
 cd "$TEST_DIR"
-ari sync materialize 2>&1
+ari sync 2>&1
 
 # Verify: local hooks preserved AND knossos hooks added
 jq -e '.hooks.events | contains(["pre-commit", "custom-hook"])' \

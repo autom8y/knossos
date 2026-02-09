@@ -1,7 +1,7 @@
 ---
 name: rite
 description: Switch rites or list available rites
-argument-hint: [pack-name] [--list] [--update] [--dry-run] [--keep-all|--remove-all|--promote-all]
+argument-hint: [pack-name] [--list] [--overwrite-diverged] [--dry-run] [--keep-orphans]
 allowed-tools: Bash, Read
 model: sonnet
 disable-model-invocation: true
@@ -28,14 +28,14 @@ Manage rites. $ARGUMENTS
 2. Display all available rites
 
 **If `<pack-name>` provided:**
-1. Execute: `ari sync materialize --rite <pack-name>`
+1. Execute: `ari sync --rite <pack-name>`
 2. If orphan agents exist (agents in current project but not in target rite):
    - **Interactive (TTY)**: Prompt user for each orphan agent
-   - **Non-interactive**: Require `--keep-all`, `--remove-all`, or `--promote-all` flag
+   - **Non-interactive**: Require `--keep-orphans` flag
 3. Show confirmation with agent count
 4. If SESSION_CONTEXT exists, update `active_rite` field
 
-**Note**: The `ari sync materialize` command is the standard approach as of v0.1.0.
+**Note**: The `ari sync` command is the standard approach as of v0.2.0.
 
 ## Orphan Agent Handling
 
@@ -49,11 +49,9 @@ When switching rites, agents that exist in the current project but not in the ta
 | Apply to all | a | Apply same choice to remaining orphans |
 
 For CI/scripts (non-interactive), use flags:
-- `--update`, `-u`: Pull latest agent definitions from roster even if already on rite
+- `--overwrite-diverged`: Force regeneration of diverged files
 - `--dry-run`: Preview changes without applying
-- `--keep-all`: Preserve all orphan agents in project
-- `--remove-all`: Remove all orphans (backup available)
-- `--promote-all`: Move all orphans to user-level
+- `--keep-orphans`: Preserve orphaned knossos files (default: auto-remove)
 
 ## Agent Provenance
 
@@ -71,7 +69,7 @@ Quick-switch commands are derived from rite names:
 | 10x-dev | `/10x` | Full feature development |
 | debt-triage | `/debt` | Technical debt management |
 | docs | `/docs` | Documentation workflows |
-| ecosystem | `/ecosystem` | CEM/skeleton/roster infrastructure |
+| ecosystem | `/ecosystem` | Knossos infrastructure |
 | forge | `/forge` | Rite creation |
 | hygiene | `/hygiene` | Code quality, refactoring |
 | intelligence | `/intelligence` | Analytics, research |
@@ -87,10 +85,9 @@ Quick-switch commands are derived from rite names:
 ```bash
 /rite                           # Show current rite
 /rite --list                    # List all rites
-/rite 10x-dev              # Switch (prompts for orphans)
-/rite hygiene --keep-all   # Switch, keep all orphans
-/rite debt-pack --promote-all   # Switch, promote orphans to user-level
-/rite docs --update    # Update even if already on rite
+/rite 10x-dev                   # Switch (prompts for orphans)
+/rite hygiene --keep-orphans    # Switch, keep all orphans
+/rite docs --overwrite-diverged  # Force regeneration of diverged files
 ```
 
 ## Reference

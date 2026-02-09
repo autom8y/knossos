@@ -101,7 +101,7 @@ git worktree prune
 **Fix:**
 ```bash
 cd worktrees/wt-{id}
-ari sync materialize --rite <pack-name>
+ari sync --rite <pack-name>
 ```
 
 ## Diagnostic Commands
@@ -113,8 +113,8 @@ git worktree list
 # Check worktree metadata
 cat worktrees/wt-{id}/.claude/.worktree-meta.json
 
-# Verify CEM state
-cd worktrees/wt-{id} && cem status
+# Verify sync state
+cd worktrees/wt-{id} && ari sync --dry-run
 
 # Check session state
 cd worktrees/wt-{id} && ari session status

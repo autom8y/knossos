@@ -15,8 +15,8 @@ Create a new isolated worktree with full ecosystem initialization.
 
 **What Happens:**
 1. Creates git worktree with detached HEAD (no branch pollution)
-2. Initializes ecosystem (fresh sync from roster)
-3. Sets rite if specified via `ari sync materialize --rite <name>`
+2. Initializes ecosystem (fresh sync from knossos)
+3. Sets rite if specified via `ari sync --rite <name>`
 4. Creates initial session via `ari session create`
 5. Returns path for user to `cd` into
 
@@ -137,9 +137,6 @@ Worktree management via the `ari worktree` subcommands.
 - `ari worktree remove` - Safe removal with change check
 - `ari worktree cleanup` - Stale worktree cleanup and git worktree prune
 
-### CEM Integration
+### Worktree Detection
 
-CEM functions in `cem` script:
-- `is_worktree()` - Detect worktree context
-- `get_worktree_info()` - Read metadata
-- `get_worktree_id()` - Extract ID from metadata
+Worktree context is detected via `.claude/.worktree-meta.json` presence. Use `ari worktree status` for metadata.

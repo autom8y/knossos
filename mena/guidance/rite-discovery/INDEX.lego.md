@@ -54,7 +54,7 @@ Given a user query, compare against team routing conditions:
 **Total**: 11 rites, 46 agents
 
 Note: `shared` is a dependency bundle, not a user-facing rite.
-To refresh this table, run `ari sync materialize` which reads from `rites/*/orchestrator.yaml`.
+To refresh this table, run `ari sync` which reads from `rites/*/orchestrator.yaml`.
 
 ## Schema Reference
 

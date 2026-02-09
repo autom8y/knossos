@@ -75,7 +75,7 @@ This atomically:
 
 If user specified `--rite=NAME` and it differs from Active Rite:
 ```bash
-ari sync materialize --rite <rite-name>
+ari sync --rite <rite-name>
 ```
 
 ### 5. Invoke Entry Point Agent

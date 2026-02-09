@@ -122,7 +122,7 @@ CGO_ENABLED=0 go build ./cmd/ari
 
 ### Step 3: Run Sync with New Merge
 ```bash
-ari sync materialize
+ari sync
 ```
 **Verify**: Output includes "Array merge: concatenated N items"
 

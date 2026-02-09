@@ -6,11 +6,11 @@
 
 ### 1. Pre-flight Validation
 
-Apply [Session Resolution Pattern](../shared-sections/session-resolution.md):
+Apply [Session Resolution Pattern](../shared/session-resolution.md):
 - Requires: Active session (not parked)
 - Verb: "hand off"
 
-Apply [Workflow Resolution Pattern](../shared-sections/workflow-resolution.md):
+Apply [Workflow Resolution Pattern](../shared/workflow-resolution.md):
 - Target agent: User-specified agent name
 - Validate agent exists in current rite
 

@@ -6,11 +6,11 @@
 
 ### 1. Pre-flight Validation
 
-Apply [Session Resolution Pattern](../shared-sections/session-resolution.md) (inverse):
+Apply [Session Resolution Pattern](../shared/session-resolution.md) (inverse):
 - Requires: NO existing session
 - Error if session exists: "Session already active. Use `/resume` or `/wrap` first"
 
-Apply [Workflow Resolution Pattern](../shared-sections/workflow-resolution.md):
+Apply [Workflow Resolution Pattern](../shared/workflow-resolution.md):
 - Target team: User-specified or current ACTIVE_RITE
 - Validate team exists in roster
 
@@ -31,7 +31,7 @@ Prompt user for any missing parameters:
 ### 3. Team Context Setup
 
 - If `--rite` specified and differs from ACTIVE_RITE:
-  - Run `ari sync materialize --rite <rite-name>`
+  - Run `ari sync --rite <rite-name>`
   - Verify ACTIVE_RITE file updated
   - Confirm: "Switched to {rite} for this session"
 

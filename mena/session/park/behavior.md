@@ -6,7 +6,7 @@
 
 ### 1. Pre-flight Validation
 
-Apply [Session Resolution Pattern](../shared-sections/session-resolution.md):
+Apply [Session Resolution Pattern](../shared/session-resolution.md):
 - Requires: Active session (not parked)
 - Verb: "park"
 
@@ -48,7 +48,7 @@ The Moirai will route to **Lachesis** (the Measurer), who will:
 
 **Note**: `state-mate` alias is supported for backward compatibility.
 
-See [Moirai Invocation Pattern](../shared-sections/moirai-invocation.md) for response handling and error types.
+See [Moirai Invocation Pattern](../shared/moirai-invocation.md) for response handling and error types.
 
 ### 5. Confirm Result
 

@@ -34,7 +34,7 @@ Options:
 Choice [1/2/3]:
 ```
 
-**Option 1**: Invoke `ari sync materialize --rite {session.active_rite}`
+**Option 1**: Invoke `ari sync --rite {session.active_rite}`
 **Option 2**: Continue with potential agent mismatch
 **Option 3**: Abort resume
 

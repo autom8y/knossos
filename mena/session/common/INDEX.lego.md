@@ -9,7 +9,7 @@ description: "Session schema: fields, FSM states, complexity levels, validation.
 
 ## Purpose
 
-This directory contains reference documentation for session state management. These are **not** behavioral patterns (see `../shared-sections/` for those), but rather **schema definitions** and **conceptual models** that describe what session data looks like.
+This directory contains reference documentation for session state management. These are **not** behavioral patterns (see `../shared/` for those), but rather **schema definitions** and **conceptual models** that describe what session data looks like.
 
 ## Available References
 
@@ -39,7 +39,7 @@ See [session-context-schema](../../session-common/session-context-schema.md) for
 | Directory | Contains | Example |
 |-----------|----------|---------|
 | `session-common/` | **What** (schemas, data structures) | Field definitions, state values |
-| `shared-sections/` | **How** (validation patterns, invocation) | Session resolution logic, state-mate calls |
+| `shared/` | **How** (validation patterns, invocation) | Session resolution logic, state-mate calls |
 
 Both are reference modules; neither is invoked directly.
 

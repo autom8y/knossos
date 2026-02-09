@@ -345,7 +345,7 @@ fi
 
 ## Cross-References
 
-- [Session Resolution Pattern](../shared-sections/session-resolution.md) - Behavioral implementation
-- [Workflow Resolution Pattern](../shared-sections/workflow-resolution.md) - Team/agent validation
+- [Session Resolution Pattern](../shared/session-resolution.md) - Behavioral implementation
+- [Workflow Resolution Pattern](../shared/workflow-resolution.md) - Team/agent validation
 - [Session Context Schema](session-context-schema.md) - Field definitions
 - [Error Messages](error-messages.md) - Standard error templates

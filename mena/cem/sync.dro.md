@@ -1,7 +1,7 @@
 ---
 name: sync
 description: Sync project with knossos ecosystem using ari CLI
-argument-hint: [status|pull|push|diff|materialize|resolve|history|reset] [--rite=NAME] [--force]
+argument-hint: [--scope=rite|user|all] [--rite=NAME] [--dry-run] [--overwrite-diverged]
 allowed-tools: Bash, Read
 model: haiku
 disable-model-invocation: true
@@ -20,70 +20,49 @@ Execute ari sync to synchronize project with knossos ecosystem.
 
 | If $ARGUMENTS is... | Run this command |
 |---------------------|------------------|
-| Empty (no args) | `ari sync status` |
-| `--refresh` | `ari sync materialize` |
+| Empty (no args) | `ari sync` (sync everything) |
+| `--refresh` | `ari sync --scope=rite` *(dromena alias)* |
 | Anything else | `ari sync $ARGUMENTS` |
 
-**IMPORTANT - Interpret status output**:
-- If status shows **empty table** (just headers, no rows): Project is NOT configured. Tell user:
-  > "Project not yet configured for Knossos sync. To set up, run one of:"
-  > - `ari sync materialize --rite=10x-dev` (within knossos repo)
-  > - `ari sync materialize --rite=10x-dev --source=knossos` (consumer project)
-  > - `ari sync materialize --minimal --source=knossos` (cross-cutting mode, no agents)
-- If status shows tracked paths: Report the actual status
+**Interpret output**:
+- **"no ACTIVE_RITE"**: Relay the error. For consumer projects, suggest `ari sync --rite=<name> --source=knossos`.
+- **ari not found**: `cd ~/Code/knossos && CGO_ENABLED=0 go install ./cmd/ari`
+- Otherwise: Report the actual output
 
-**Handle errors**:
-- If "no ACTIVE_RITE found": Suggest `ari sync materialize --rite=<name> --source=knossos` or `--minimal`
-- If ari not found: `cd ~/Code/knossos && CGO_ENABLED=0 go install ./cmd/ari`
+## Command Flags
 
-## Command Mapping
+| Flag | Description |
+|------|-------------|
+| `--scope=SCOPE` | Sync scope: `rite`, `user`, or `all` (default: all) |
+| `--rite=NAME` | Generate for specific rite (defaults to ACTIVE_RITE) |
+| `--source=PATH` | Rite source: path or `knossos` alias (default: embedded) |
+| `--overwrite-diverged` | Overwrite files that have diverged from source |
+| `--keep-orphans` | Preserve orphaned knossos files (default: auto-remove) |
+| `--dry-run` | Preview changes without applying |
 
-| /sync command | ari sync command | Description |
-|---------------|------------------|-------------|
-| `/sync status` | `ari sync status` | Show sync status |
-| `/sync pull` | `ari sync pull` | Pull remote changes |
-| `/sync push` | `ari sync push` | Push local changes |
-| `/sync diff` | `ari sync diff` | Show differences |
-| `/sync materialize` | `ari sync materialize` | Generate .claude/ from templates |
-| `/sync materialize --rite=X` | `ari sync materialize --rite X` | Generate for specific rite |
-| `/sync --refresh` | `ari sync materialize` | Refresh/regenerate .claude/ |
-| `/sync resolve` | `ari sync resolve` | Resolve conflicts |
-| `/sync history` | `ari sync history` | Show audit log |
-| `/sync reset` | `ari sync reset` | Reset sync state (dangerous) |
+For all flags: `ari sync --help`
 
 ## Legacy Compatibility
 
-The following legacy commands are deprecated:
 - `knossos-sync` shell script → Use `ari sync` instead
-- `/sync init` → Use `ari sync materialize` for new projects
+- `ari sync materialize` → Use `ari sync` instead
+- `ari sync user` → Use `ari sync --scope=user` instead
+- `/sync init` → Use `ari sync` for new projects
 - `/sync validate` → Use `ari manifest validate` instead
-- `/sync repair` → Use `ari sync reset` followed by `ari sync materialize`
 
 ## Common Commands
 
 ```bash
 # Within knossos repo (has local rites)
-/sync                             # Show sync status (default)
-/sync status                      # Show sync status
-/sync materialize                 # Generate .claude/ from templates
-/sync materialize --rite=hygiene  # Generate for specific rite
+/sync                        # Sync everything (rite + user)
+/sync --scope=rite           # Sync only rite content
+/sync --rite=hygiene         # Switch to hygiene rite
 
 # Bootstrap NEW project (creates .claude/ if missing)
-/sync materialize --rite=10x-dev --source=knossos
+/sync --rite=10x-dev --source=knossos
 
 # Cross-cutting mode (no rite, just base infrastructure)
-/sync materialize --minimal --source=knossos
-```
-
-## Bootstrapping New Projects
-
-`materialize` can bootstrap a new project from scratch - it will create the `.claude/` directory if it doesn't exist:
-
-```bash
-cd ~/Code/my-new-project
-ari sync materialize --rite=10x-dev --source=knossos  # Full orchestrated workflow
-# OR
-ari sync materialize --minimal --source=knossos       # Just base infrastructure
+/sync --source=knossos
 ```
 
 ## Reference

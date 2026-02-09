@@ -1,7 +1,7 @@
 ---
 name: hygiene
 description: Quick switch to hygiene (code quality workflow)
-argument-hint: [--force] [--dry-run] [--keep-all|--remove-all|--promote-all]
+argument-hint: [--overwrite-diverged] [--dry-run] [--keep-orphans]
 allowed-tools: Bash, Read
 model: haiku
 disable-model-invocation: true
@@ -16,7 +16,7 @@ Switch to the code hygiene rite and display the pantheon. $ARGUMENTS
 
 ## Behavior
 
-1. Execute: `ari sync materialize --rite hygiene $ARGUMENTS`
+1. Execute: `ari sync --rite hygiene $ARGUMENTS`
 2. Display the pantheon output from ari (agents and their roles)
 3. If SESSION_CONTEXT exists, update `active_rite` to `hygiene`
 
@@ -24,11 +24,9 @@ Switch to the code hygiene rite and display the pantheon. $ARGUMENTS
 
 | Flag | Description |
 |------|-------------|
-| `--force` | Force regeneration even if already on this rite |
+| `--overwrite-diverged` | Force regeneration of diverged files |
 | `--dry-run` | Preview changes without applying |
-| `--keep-all` | Preserve all orphan agents in project (default) |
-| `--remove-all` | Remove orphans (backup in `.claude/.orphan-backup/`) |
-| `--promote-all` | Move orphans to user-level (`~/.claude/agents/`) |
+| `--keep-orphans` | Preserve orphaned knossos files (default: auto-remove) |
 
 ## When to Use
 

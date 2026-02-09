@@ -39,7 +39,7 @@ Partials extract duplicated patterns to:
 
 | Directory | Contains | Example |
 |-----------|----------|---------|
-| `shared-sections/` | **How** (behavioral patterns, validation logic) | Session resolution logic, Moirai invocation |
+| `shared/` | **How** (behavioral patterns, validation logic) | Session resolution logic, Moirai invocation |
 | `session-common/` | **What** (schemas, data structures, reference docs) | Field definitions, state values, complexity levels |
 
 Both are reference modules; neither is invoked directly.
@@ -49,7 +49,7 @@ Both are reference modules; neither is invoked directly.
 ## Adding New Partials
 
 1. Identify pattern duplicated across 2+ behavior.md files
-2. Extract to new `shared-sections/{pattern-name}.md`
+2. Extract to new `shared/{pattern-name}.md`
 3. Follow schema: When to Apply, Checks, Implementation, Errors, Customization
 4. Update INDEX.md with new entry
 5. Refactor behavior.md files to reference partial

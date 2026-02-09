@@ -1,7 +1,7 @@
 ---
 name: forge
 description: Quick switch to forge (meta-rite for building and maintaining rites)
-argument-hint: [--force] [--dry-run] [--keep-all|--remove-all|--promote-all]
+argument-hint: [--overwrite-diverged] [--dry-run] [--keep-orphans]
 allowed-tools: Bash, Read
 model: haiku
 disable-model-invocation: true
@@ -16,7 +16,7 @@ Switch to the forge rite and display the pantheon. $ARGUMENTS
 
 ## Behavior
 
-1. Execute: `ari sync materialize --rite forge $ARGUMENTS`
+1. Execute: `ari sync --rite forge $ARGUMENTS`
 2. Display the pantheon output from ari (agents and their roles)
 3. If SESSION_CONTEXT exists, update `active_rite` to `forge`
 
@@ -32,7 +32,7 @@ AGENTS (6):
   Agent Designer    - Role specs and contracts
   Prompt Architect  - System prompts (11 sections)
   Workflow Engineer - Orchestration and commands
-  Platform Engineer - Roster infrastructure
+  Platform Engineer - Knossos infrastructure
   Eval Specialist   - Testing and validation
   Agent Curator     - Versioning and integration
 
@@ -48,11 +48,9 @@ Full docs: rites/forge/mena/forge-ref/INDEX.lego.md
 
 | Flag | Description |
 |------|-------------|
-| `--force` | Force regeneration even if already on this rite |
+| `--overwrite-diverged` | Force regeneration of diverged files |
 | `--dry-run` | Preview changes without applying |
-| `--keep-all` | Preserve all orphan agents in project (default) |
-| `--remove-all` | Remove orphans (backup in `.claude/.orphan-backup/`) |
-| `--promote-all` | Move orphans to user-level (`~/.claude/agents/`) |
+| `--keep-orphans` | Preserve orphaned knossos files (default: auto-remove) |
 
 ## When to Use
 

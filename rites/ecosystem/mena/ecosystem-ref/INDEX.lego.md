@@ -1,23 +1,23 @@
 ---
 name: ecosystem-ref
-description: "Roster ecosystem patterns reference. Triggers: roster-sync, swap-rite, roster, manifest, ecosystem patterns."
+description: "Knossos ecosystem patterns reference. Triggers: knossos-sync, ari-sync, rite-switch, manifest, ecosystem patterns."
 ---
 
 # ecosystem-ref
 
-> Quick reference for roster ecosystem patterns.
+> Quick reference for knossos ecosystem patterns.
 
-## roster-sync (Ecosystem Manager)
+## ari sync (Ecosystem Manager)
 
-Roster-sync manages synchronization between roster repository and user/project Claude configurations.
+Ari sync manages synchronization between knossos repository and user/project Claude configurations.
 
 ### Sync Commands
 | Command | Purpose | Target |
 |---------|---------|--------|
-| `ari sync user agents` | Sync agents to user config | `~/.claude/agents/` |
-| `ari sync user mena` | Sync commands + skills to user config | `~/.claude/commands/` + `~/.claude/skills/` |
-| `ari sync user hooks` | Sync hooks to user config | `~/.claude/hooks/` |
-| `ari sync user` | Sync all user resources | All of the above |
+| `ari sync --scope=user --resource=agents` | Sync agents to user config | `~/.claude/agents/` |
+| `ari sync --scope=user --resource=mena` | Sync commands + skills to user config | `~/.claude/commands/` + `~/.claude/skills/` |
+| `ari sync --scope=user --resource=hooks` | Sync hooks to user config | `~/.claude/hooks/` |
+| `ari sync --scope=user` | Sync all user resources | All of the above |
 
 ### Key Paths
 - Knossos: `$KNOSSOS_HOME` or `~/Code/knossos`
@@ -27,15 +27,15 @@ Roster-sync manages synchronization between roster repository and user/project C
 
 ### Common Commands
 ```bash
-ari sync user agents           # Sync agents/ to ~/.claude/agents/
-ari sync user mena             # Sync mena/ to ~/.claude/commands/ + skills/
-ari sync user hooks            # Sync hooks/ to ~/.claude/hooks/
-ari sync user                  # Sync all user resources
+ari sync --scope=user --resource=agents  # Sync agents/ to ~/.claude/agents/
+ari sync --scope=user --resource=mena   # Sync mena/ to ~/.claude/commands/ + skills/
+ari sync --scope=user --resource=hooks  # Sync hooks/ to ~/.claude/hooks/
+ari sync --scope=user                   # Sync all user resources
 ari rite start <rite>          # Start a rite (includes materialize)
 ari rite list                  # List available rites
 ```
 
-## Roster (Rite Manager)
+## Rite Manager
 
 ### Rite Structure
 ```
@@ -47,49 +47,50 @@ rites/{name}/
   README.md         # Rite documentation
 ```
 
-### swap-rite.sh
+### Rite Switching
 ```bash
-swap-rite.sh <rite>           # Switch to rite
-swap-rite.sh --list           # List available rites
-swap-rite.sh --refresh        # Refresh current rite
-swap-rite.sh <rite> --keep-all    # Preserve orphan agents
-swap-rite.sh <rite> --remove-all  # Remove orphan agents
+ari sync --rite <rite>                    # Switch to rite
+ari rite list                             # List available rites
+ari sync --scope=rite                     # Refresh current rite
+ari sync --rite <rite> --keep-orphans     # Preserve orphan agents
 ```
 
 ### Orphan Handling
 Orphan = agent from previous rite not in new rite.
-- Interactive: k/p/r per agent (keep/promote/remove)
-- Non-interactive: `--keep-all`, `--remove-all`, `--promote-all`
+- Default: auto-remove knossos-owned orphans
+- `--keep-orphans` preserves orphaned files
 
 ## Two-Tier Layering
 
 ```
-roster (base) -> project (local overlay)
+knossos (base) -> project (local overlay)
 ```
 
 | Layer | Source | Precedence |
 |-------|--------|------------|
-| Roster | `$ROSTER_HOME/rites/{name}/` | Base agents and skills |
+| Knossos | `$KNOSSOS_HOME/rites/{name}/` | Base agents and skills |
 | Project | `.claude/agents/`, `.claude/skills/` | Local overrides |
 
 ## Rite Manifest Schema
 
-```json
-{
-  "schema_version": 1,
-  "rite": { "name": "", "last_swap": "" },
-  "managed": {
-    "agents": [],
-    "commands": [],
-    "skills": []
-  }
-}
+```yaml
+# rites/{name}/workflow.yaml
+name: ""
+workflow_type: sequential
+description: ""
+entry_point:
+  agent: ""
+phases:
+  - name: ""
+    agent: ""
+    produces: ""
+    next: ""
 ```
 
 ## Debugging
 
 ```bash
-ROSTER_DEBUG=1 swap-rite.sh   # Verbose roster output
+ari sync --dry-run             # Preview sync changes
 ```
 
 ## Progressive Disclosure

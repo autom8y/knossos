@@ -100,7 +100,7 @@ Worktree functions via `ari worktree`:
 Works identically in worktrees:
 ```bash
 cd worktrees/wt-{id}
-ari sync materialize --rite 10x-dev
+ari sync --rite 10x-dev
 ```
 
 ### ACTIVE_RITE

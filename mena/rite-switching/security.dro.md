@@ -1,7 +1,7 @@
 ---
 name: security
 description: Quick switch to security (security assessment workflow)
-argument-hint: [--update] [--dry-run] [--keep-all|--remove-all|--promote-all]
+argument-hint: [--overwrite-diverged] [--dry-run] [--keep-orphans]
 allowed-tools: Bash, Read
 model: haiku
 disable-model-invocation: true
@@ -16,19 +16,17 @@ Switch to the Security rite and display the pantheon. $ARGUMENTS
 
 ## Behavior
 
-1. Execute: `ari sync materialize --rite security $ARGUMENTS`
-2. Display the roster output from ari (agents and their roles)
+1. Execute: `ari sync --rite security $ARGUMENTS`
+2. Display the pantheon output from ari (agents and their roles)
 3. If SESSION_CONTEXT exists, update `active_rite` to `security`
 
 ## Flags
 
-| Flag | Short | Description | Handled By |
-|------|-------|-------------|------------|
-| `--update` | `-u` | Pull latest agent definitions from roster even if already on rite | ari sync materialize |
-| `--dry-run` | - | Preview changes without applying | ari sync materialize |
-| `--keep-all` | - | Preserve all orphan agents in project | ari sync materialize |
-| `--remove-all` | - | Remove all orphans (backup available) | ari sync materialize |
-| `--promote-all` | - | Move all orphans to user-level | ari sync materialize |
+| Flag | Description |
+|------|-------------|
+| `--overwrite-diverged` | Force regeneration of diverged files |
+| `--dry-run` | Preview changes without applying |
+| `--keep-orphans` | Preserve orphaned knossos files (default: auto-remove) |
 
 ## When to Use
 

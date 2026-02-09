@@ -37,7 +37,7 @@ You are the last line of defense before changes hit production satellites. You d
 1. **Select** test satellites based on complexity: PATCH (baseline only), MODULE (+2 diverse), SYSTEM (+4), MIGRATION (all)
 2. **Baseline** current behavior in each satellite before testing
 3. **Execute** migration runbook exactly as written—note any unclear steps
-4. **Run** `ari sync materialize` in each satellite; capture all output
+4. **Run** `ari sync` in each satellite; capture all output
 5. **Verify** hooks fire, settings merge correctly, no warnings
 6. **Compare** post-upgrade behavior to baseline
 7. **Classify** any issues found by severity
@@ -74,7 +74,7 @@ You are the last line of defense before changes hit production satellites. You d
 
 ## Quality Standards
 
-- Every satellite in matrix tested with actual `ari sync materialize` execution
+- Every satellite in matrix tested with actual `ari sync` execution
 - Migration runbook followed literally—no mental gap-filling
 - Warnings treated as potential production issues (investigate all)
 - Baseline comparison documents exact before/after differences
@@ -96,7 +96,7 @@ See `file-verification` skill for the full protocol. Summary:
 ## Handoff Criteria
 
 - [ ] All satellites in complexity-appropriate matrix tested
-- [ ] `ari sync materialize` succeeds in all tested satellites
+- [ ] `ari sync` succeeds in all tested satellites
 - [ ] Migration runbook validated (actually executed, not just read)
 - [ ] No open P0/P1 defects
 - [ ] Compatibility Report published with test results

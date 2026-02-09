@@ -36,7 +36,7 @@ findings: []
 
 ### 2. Research Execution
 
-Apply [Agent Invocation Pattern](../shared-sections/agent-invocation.md):
+Apply [Agent Invocation Pattern](../shared/agent-invocation.md):
 - Agent: Architect (design/architecture) or Principal Engineer (feasibility)
 - Mode: "SPIKE MODE (Time-boxed research)"
 
@@ -47,7 +47,7 @@ See [templates.md](templates.md) for full agent invocation templates:
 
 ### 3. Time-Boxing Enforcement
 
-Apply [Time-Boxing Pattern](../shared-sections/time-boxing.md):
+Apply [Time-Boxing Pattern](../shared/time-boxing.md):
 - Checkpoints: 25%, 50%, 75%, 100%
 - Hard stop at limit
 - Incomplete is acceptable

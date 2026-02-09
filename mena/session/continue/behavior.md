@@ -6,7 +6,7 @@
 
 ### 1. Pre-flight Validation
 
-Apply [Session Resolution Pattern](../shared-sections/session-resolution.md):
+Apply [Session Resolution Pattern](../shared/session-resolution.md):
 - Requires: Parked session
 - Verb: "resume"
 
@@ -22,7 +22,7 @@ Read SESSION_CONTEXT and display:
 
 ### 3. Validate Context
 
-Apply [Workflow Resolution Pattern](../shared-sections/workflow-resolution.md):
+Apply [Workflow Resolution Pattern](../shared/workflow-resolution.md):
 - Team consistency: Compare ACTIVE_RITE to session.active_rite
 - Allow override: Yes (user can continue with different team)
 
@@ -33,13 +33,13 @@ See [validation-checks.md](validation-checks.md) for details.
 
 ### 4. Agent Selection
 
-Apply [Workflow Resolution Pattern](../shared-sections/workflow-resolution.md):
+Apply [Workflow Resolution Pattern](../shared/workflow-resolution.md):
 - Target agent: Default to `last_agent` or override with `--agent=NAME`
 - Validate agent exists in current rite
 
 ### 5. Invoke state-mate for Resume Mutation
 
-Apply [state-mate Invocation Pattern](../shared-sections/moirai-invocation.md):
+Apply [state-mate Invocation Pattern](../shared/moirai-invocation.md):
 - Operation: `resume_session`
 - Post-action: Invoke selected agent with full session context
 

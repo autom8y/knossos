@@ -1,7 +1,7 @@
 ---
 name: ecosystem
-description: Quick switch to ecosystem (CEM/skeleton/roster infrastructure workflow)
-argument-hint: [--update] [--dry-run] [--keep-all|--remove-all|--promote-all]
+description: Quick switch to ecosystem (knossos infrastructure workflow)
+argument-hint: [--overwrite-diverged] [--dry-run] [--keep-orphans]
 allowed-tools: Bash, Read
 model: sonnet
 disable-model-invocation: true
@@ -16,7 +16,7 @@ Switch to the ecosystem infrastructure rite and display the pantheon. $ARGUMENTS
 
 ## Behavior
 
-1. Execute: `ari sync materialize --rite ecosystem $ARGUMENTS`
+1. Execute: `ari sync --rite ecosystem $ARGUMENTS`
 2. Display the ari output (agents and their roles)
 3. If SESSION_CONTEXT exists, update `active_rite` to `ecosystem`
 
@@ -25,13 +25,11 @@ Switch to the ecosystem infrastructure rite and display the pantheon. $ARGUMENTS
 
 ## Flags
 
-| Flag | Short | Description | Handled By |
-|------|-------|-------------|------------|
-| `--update` | `-u` | Pull latest agent definitions from roster even if already on rite | ari sync materialize |
-| `--dry-run` | - | Preview changes without applying | ari sync materialize |
-| `--keep-all` | - | Preserve all orphan agents in project | ari sync materialize |
-| `--remove-all` | - | Remove all orphans (backup available) | ari sync materialize |
-| `--promote-all` | - | Move all orphans to user-level | ari sync materialize |
+| Flag | Description |
+|------|-------------|
+| `--overwrite-diverged` | Force regeneration of diverged files |
+| `--dry-run` | Preview changes without applying |
+| `--keep-orphans` | Preserve orphaned knossos files (default: auto-remove) |
 
 ## When to Use
 
@@ -40,20 +38,20 @@ Switch to the ecosystem infrastructure rite and display the pantheon. $ARGUMENTS
 - Designing new hook or skill patterns
 - Migrating satellites to new ecosystem versions
 - Cross-satellite compatibility work
-- Infrastructure bug fixes in CEM/skeleton/roster
+- Infrastructure bug fixes in knossos internals
 
 ## Workflow Phases
 
 1. **Analysis** - Diagnose issues, trace root causes (Gap Analysis)
 2. **Design** - Design hooks/skills/schemas (Context Design) [MODULE+]
-3. **Implementation** - Code CEM/skeleton/roster changes
+3. **Implementation** - Code knossos infrastructure changes
 4. **Documentation** - Write migration runbooks [MODULE+]
 5. **Validation** - Test across satellite matrix (Compatibility Report)
 
 ## Complexity Levels
 
 - **PATCH**: Single file change, no schema impact (Analysis -> Implementation -> Validation)
-- **MODULE**: Single system change (CEM or skeleton or roster) - all phases
+- **MODULE**: Single system change (materialize, provenance, or hooks) - all phases
 - **SYSTEM**: Multi-system change - all phases + ADRs
 - **MIGRATION**: Cross-satellite rollout - all phases + extended validation
 

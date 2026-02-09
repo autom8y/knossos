@@ -6,7 +6,7 @@
 
 ### 1. Validate Git State
 
-Apply [Git Validation Pattern](../shared-sections/git-validation.md):
+Apply [Git Validation Pattern](../shared/git-validation.md):
 - Requirement: In git repository
 - Verb: "commit"
 
