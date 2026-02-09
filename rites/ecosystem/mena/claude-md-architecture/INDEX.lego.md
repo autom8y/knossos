@@ -11,7 +11,7 @@ description: "CLAUDE.md architecture first principles. Triggers: CLAUDE.md archi
 
 Activate this skill when:
 
-- Modifying any CLAUDE.md content (roster or satellite)
+- Modifying any CLAUDE.md content (knossos or satellite)
 - Making ari sync decisions (SYNC vs PRESERVE vs REGENERATE)
 - Determining where content belongs (CLAUDE.md vs SESSION_CONTEXT vs hooks)
 - Validating proposed CLAUDE.md changes
@@ -132,7 +132,7 @@ CLAUDE.md excludes: DYNAMIC + EPHEMERAL content (changes daily/hourly)
 
 | Owner | Sync Behavior | Examples |
 |-------|---------------|----------|
-| Roster | SYNC | Skills docs, hooks docs, workflow patterns |
+| Knossos | SYNC | Skills docs, hooks docs, workflow patterns |
 | Satellite | PRESERVE | Project extensions, custom sections |
 | Team | REGENERATE | Quick Start, Agent Configurations |
 | Session | NOT IN CLAUDE.md | Current task, git state, handoff context |
@@ -143,7 +143,7 @@ CLAUDE.md excludes: DYNAMIC + EPHEMERAL content (changes daily/hourly)
 
 What belongs in each CLAUDE.md section:
 
-### Roster-Owned Sections (SYNC)
+### Knossos-Owned Sections (SYNC)
 
 These sections sync from knossos to all satellites. Content describes ecosystem infrastructure.
 
@@ -169,7 +169,7 @@ These sections are never overwritten by ari sync. Content is project-specific.
 | **Quick Start** | Orient to current team | Rite name, agent table (regenerated from knossos) |
 | **Agent Configurations** | List available agents | Agent-to-file mapping (regenerated from knossos) |
 | **Project:\*** namespace | Project extensions | Any project-specific patterns |
-| Custom sections | Satellite additions | Not matching roster section names |
+| Custom sections | Satellite additions | Not matching knossos section names |
 
 **Tone for PRESERVE sections:** Contextual. Describes this specific project's configuration.
 
@@ -196,7 +196,7 @@ See [anti-patterns.md](anti-patterns.md) for the full list. Key exclusions:
 
 **Related Skills**:
 
-- [ecosystem-ref](../ecosystem-ref/INDEX.lego.md) - CEM implementation and sync mechanics
+- [ecosystem-ref](../ecosystem-ref/INDEX.lego.md) - Sync pipeline implementation and mechanics
 - [documentation](~/.claude/commands/templates/documentation/INDEX.md) - General documentation standards
 - [standards](~/.claude/commands/guidance/standards/INDEX.md) - Repository conventions
 
@@ -224,7 +224,7 @@ New content to add to CLAUDE.md?
            v
   Who owns this content?
      /        |        \
-  ROSTER    TEAM    SATELLITE
+  KNOSSOS   TEAM    SATELLITE
     |         |          |
     v         v          v
   SYNC    REGENERATE  PRESERVE
@@ -242,7 +242,7 @@ Before modifying CLAUDE.md:
 - [ ] Content passes Scope Test (project-wide, not session-specific)
 - [ ] No dates, timestamps, or "currently" language
 - [ ] No git state or file status references
-- [ ] Correct owner identified (roster/team/satellite)
+- [ ] Correct owner identified (knossos/team/satellite)
 - [ ] Correct sync behavior specified (SYNC/PRESERVE/REGENERATE)
 - [ ] **Descriptive tone** (no global MUST mandates in entry sections)
 - [ ] **Conditional guidance** where behavior varies by context

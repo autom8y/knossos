@@ -4,7 +4,7 @@
 
 ## Current State Summary
 
-Ecosystem-pack is a **5-agent infrastructure team** handling CEM and roster patterns. The audit revealed it's well-documented but claims more scope than it actually needs:
+Ecosystem-pack is a **5-agent infrastructure team** handling sync pipeline and knossos patterns. The audit revealed it's well-documented but claims more scope than it actually needs:
 
 - Claims "hub team" status with cross-rite coordination → but no mechanism exists
 - Defines satellite diversity matrix for testing → but doesn't actually work on satellites

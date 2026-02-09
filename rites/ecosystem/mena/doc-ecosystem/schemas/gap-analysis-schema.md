@@ -22,7 +22,7 @@ status: enum               # in-progress | ready-for-design | archived
 
 # Affected scope
 affected_systems:          # Systems impacted by this analysis
-  - enum                   # roster | CEM
+  - enum                   # knossos | sync
 
 # Issue summary
 issue_count: integer       # Total issues identified
@@ -55,7 +55,7 @@ schema_version: "1.0"      # Must be "1.0" for this version
 | `complexity` | enum | Scope classification | ecosystem-analyst |
 | `created_at` | string | ISO 8601 creation timestamp | ecosystem-analyst |
 | `status` | enum | Current analysis status | ecosystem-analyst |
-| `affected_systems` | array | roster, CEM | ecosystem-analyst |
+| `affected_systems` | array | knossos, sync | ecosystem-analyst |
 | `issue_count` | integer | Total issues found | ecosystem-analyst |
 | `critical_count` | integer | Critical severity issues | ecosystem-analyst |
 | `success_criteria` | array | Verification criteria | ecosystem-analyst |
@@ -100,7 +100,7 @@ ready-for-design --implement--> archived
 2. `complexity` MUST be one of: PATCH, MODULE, SYSTEM, MIGRATION
 3. `created_at` MUST be valid ISO 8601 timestamp
 4. `status` MUST be one of: in-progress, ready-for-design, archived
-5. `affected_systems` MUST be array with at least one of: roster, CEM
+5. `affected_systems` MUST be array with at least one of: knossos, sync
 6. `issue_count` MUST be non-negative integer
 7. `critical_count` MUST be non-negative integer and <= issue_count
 8. `success_criteria` MUST be array with at least one item
@@ -120,8 +120,8 @@ complexity: MODULE
 created_at: "2025-12-29T09:00:00Z"
 status: ready-for-design
 affected_systems:
-  - roster
-  - CEM
+  - knossos
+  - sync
 author: ecosystem-analyst
 issue_count: 5
 critical_count: 2

@@ -24,9 +24,9 @@
 
 - **PATCH**: Single file/config change, no schema impact
   - Phases: analysis, implementation, validation
-- **MODULE**: Single system (CEM or roster)
+- **MODULE**: Single system (sync pipeline or knossos)
   - Phases: analysis, design, implementation, documentation, validation
-- **SYSTEM**: Multi-system change affecting CEM + roster
+- **SYSTEM**: Multi-system change affecting sync pipeline + knossos
   - Phases: analysis, design, implementation, documentation, validation
 - **MIGRATION**: Cross-satellite rollout requiring coordination
   - Phases: analysis, design, implementation, documentation, validation

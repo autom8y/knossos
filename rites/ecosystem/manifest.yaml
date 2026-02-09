@@ -3,7 +3,7 @@
 
 name: ecosystem
 version: "1.0.0"
-description: Ecosystem infrastructure lifecycle for CEM/knossos changes (Analysis -> Design -> Implementation -> Documentation -> Validation)
+description: Ecosystem infrastructure lifecycle for sync pipeline/knossos changes (Analysis -> Design -> Implementation -> Documentation -> Validation)
 
 entry_agent: orchestrator
 
@@ -22,7 +22,7 @@ phases:
   - name: implementation
     agent: integration-engineer
     produces: implementation
-    description: Implement CEM and knossos infrastructure changes
+    description: Implement sync pipeline and knossos infrastructure changes
 
   - name: documentation
     agent: documentation-engineer
@@ -40,13 +40,13 @@ agents:
     role: Coordinates ecosystem infrastructure phases
 
   - name: ecosystem-analyst
-    role: Traces CEM/knossos problems to root causes and produces gap analysis
+    role: Traces sync pipeline/knossos problems to root causes and produces gap analysis
 
   - name: context-architect
     role: Designs context solutions, schemas, and ecosystem patterns
 
   - name: integration-engineer
-    role: Implements CEM and knossos changes with integration tests
+    role: Implements sync pipeline and knossos changes with integration tests
 
   - name: documentation-engineer
     role: Creates migration runbooks and compatibility documentation
@@ -70,9 +70,9 @@ complexity_levels:
   - name: PATCH
     scope: "Single file/config change, no schema impact"
   - name: MODULE
-    scope: "Single system (CEM or knossos)"
+    scope: "Single system (sync pipeline or knossos)"
   - name: SYSTEM
-    scope: "Multi-system change affecting CEM + knossos"
+    scope: "Multi-system change affecting sync pipeline + knossos"
   - name: MIGRATION
     scope: "Cross-satellite rollout requiring coordination"
 

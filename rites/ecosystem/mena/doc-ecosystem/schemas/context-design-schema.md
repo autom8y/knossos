@@ -25,7 +25,7 @@ gap_analysis: string       # Reference to source Gap Analysis file
 
 # Affected scope
 affected_systems:          # Systems impacted by this design
-  - enum                   # roster | CEM
+  - enum                   # knossos | sync
 
 # Work packages
 work_packages:             # At least one required
@@ -54,7 +54,7 @@ schema_version: "1.0"      # Must be "1.0" for this version
 | `created_at` | string | ISO 8601 creation timestamp | context-architect |
 | `status` | enum | Current design status | context-architect |
 | `gap_analysis` | string | Source Gap Analysis reference | context-architect |
-| `affected_systems` | array | roster, CEM | context-architect |
+| `affected_systems` | array | knossos, sync | context-architect |
 | `work_packages` | array | WP definitions (min 1) | context-architect |
 | `schema_version` | string | Schema version for compatibility | context-architect |
 
@@ -101,7 +101,7 @@ ready-for-implementation --implement--> archived
 3. `created_at` MUST be valid ISO 8601 timestamp
 4. `status` MUST be one of: in-progress, ready-for-implementation, archived
 5. `gap_analysis` MUST reference existing Gap Analysis file
-6. `affected_systems` MUST be array with at least one of: roster, CEM
+6. `affected_systems` MUST be array with at least one of: knossos, sync
 7. `work_packages` MUST be array with at least one item
 8. `schema_version` MUST be "1.0"
 
@@ -128,8 +128,8 @@ created_at: "2025-12-29T10:00:00Z"
 status: ready-for-implementation
 gap_analysis: GAP-session-validation.md
 affected_systems:
-  - roster
-  - CEM
+  - knossos
+  - sync
 author: context-architect
 backward_compatible: true
 migration_required: false

@@ -8,15 +8,15 @@
 ## Test Summary
 **Date**: [YYYY-MM-DD]
 **Complexity**: [PATCH | MODULE | SYSTEM | MIGRATION]
-**CEM Version**: [version]
-**roster Version**: [version]
+**Sync Pipeline Version**: [version]
+**Knossos Version**: [version]
 **Tester**: [agent/person]
 
 **Status**: [APPROVED | REJECTED | APPROVED WITH CAVEATS]
 
 ## Test Matrix Results
 
-| Satellite | Config Type | roster-sync | Hook Reg | Settings Merge | Migration | Status |
+| Satellite | Config Type | ari sync | Hook Reg | Settings Merge | Migration | Status |
 |-----------|-------------|-------------|----------|----------------|-----------|--------|
 | test-baseline | Minimal | Pass | Pass | Pass | Pass | PASS |
 | satellite-a | Standard | Pass | Pass | Fail | N/A | FAIL |
@@ -75,7 +75,7 @@ None
 
 ## Backward Compatibility Verification
 
-| CEM | roster | Tested | Result | Notes |
+| Sync Pipeline | Knossos | Tested | Result | Notes |
 |-----|--------|--------|--------|-------|
 | 2.0 | 2.0 | Yes | Pass | Fully compatible |
 | 2.0 | 1.9 | Yes | Pass | Backward compatible confirmed |

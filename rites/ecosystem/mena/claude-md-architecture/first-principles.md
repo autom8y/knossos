@@ -2,7 +2,7 @@
 
 > "Session-specific knowledge should NOT be in CLAUDE.md. CLAUDE.md should just maintain alignment with the active rite to ensure standardized workflows are followed."
 
-These six principles govern all CLAUDE.md architecture decisions across the roster/satellite ecosystem.
+These six principles govern all CLAUDE.md architecture decisions across the knossos/satellite ecosystem.
 
 ---
 
@@ -89,11 +89,11 @@ Each concern has exactly one owner. Content placement follows ownership.
 
 | Concern | Owner | In CLAUDE.md? | Sync Behavior |
 |---------|-------|---------------|---------------|
-| **Ecosystem Infrastructure** | Roster | Yes | SYNC |
+| **Ecosystem Infrastructure** | Knossos | Yes | SYNC |
 | **Project Identity** | Satellite | Yes | PRESERVE |
 | **Team Configuration** | Team | Yes | REGENERATE |
 | **Session State** | Session | **No** | N/A |
-| **Workflow Guidance** | Roster | Yes | SYNC |
+| **Workflow Guidance** | Knossos | Yes | SYNC |
 
 ### The Critical Distinction
 
@@ -109,7 +109,7 @@ Session state is injected by hooks at session start. It appears in Claude's cont
 
 | Test | Answer | Result |
 |------|--------|--------|
-| Roster | SYNC |
+| Knossos | SYNC |
 | Satellite | PRESERVE or PROJECT |
 | ACTIVE_RITE + agents/ | REGENERATE |
 | Session files | NOT IN CLAUDE.md |
@@ -158,7 +158,7 @@ Hooks inject ephemeral context at session start. It appears in Claude's view but
 | Layer | Content Type | Modified By |
 |-------|--------------|-------------|
 | Global | Personal preferences, global tools | User manually |
-| Project | Team + Project + Infrastructure | ari sync, roster |
+| Project | Team + Project + Infrastructure | ari sync, knossos |
 | Session | Transient state, current work | Hooks (read-only to CLAUDE.md) |
 
 ### Hook Output Example
@@ -189,7 +189,7 @@ Each piece of content has one owner, one sync behavior, one location.
 
 | Content | Owner | Sync | Location |
 |---------|-------|------|----------|
-| Skills Architecture table | Roster | SYNC | CLAUDE.md |
+| Skills Architecture table | Knossos | SYNC | CLAUDE.md |
 | Project-specific conventions | Satellite | PRESERVE | CLAUDE.md (## Project:*) |
 | Quick Start agent table | Team | REGENERATE | CLAUDE.md |
 | Current initiative | Session | N/A | SESSION_CONTEXT |

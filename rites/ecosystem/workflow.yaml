@@ -42,10 +42,10 @@ complexity_levels:
     scope: "Single file/config change, no schema impact"
     phases: [analysis, implementation, validation]
   - name: MODULE
-    scope: "Single system (CEM or knossos)"
+    scope: "Single system (sync pipeline or knossos)"
     phases: [analysis, design, implementation, documentation, validation]
   - name: SYSTEM
-    scope: "Multi-system change affecting CEM + knossos"
+    scope: "Multi-system change affecting sync pipeline + knossos"
     phases: [analysis, design, implementation, documentation, validation]
   - name: MIGRATION
     scope: "Cross-satellite rollout requiring coordination"

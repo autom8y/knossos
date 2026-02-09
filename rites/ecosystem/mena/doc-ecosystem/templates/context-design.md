@@ -11,8 +11,8 @@
 ## Architecture
 
 ### Components Affected
-- **CEM** (lib/sync, roster-sync): [what changes, why]
-- **roster** (user-*, rites/*): [what changes, why]
+- **Sync Pipeline** (lib/sync, ari sync): [what changes, why]
+- **Knossos** (user-*, rites/*): [what changes, why]
 
 ### Design Decisions
 [Key architectural choices and rationale]
@@ -35,12 +35,12 @@ lifecycle:
 
 ## Implementation Specification
 
-### CEM Changes (lib/sync)
+### Sync Pipeline Changes (lib/sync)
 **File**: `path/to/file`
 **Function**: `function_name`
 **Changes**: [detailed specification]
 
-### roster Changes (user-*, rites/*)
+### Knossos Changes (user-*, rites/*)
 **Location**: `path/to/content`
 **Changes**: [detailed specification]
 
@@ -56,7 +56,7 @@ lifecycle:
 - Version N+1: Old pattern removed
 
 **Compatibility Matrix**:
-| CEM Version | roster Version | Status |
+| Sync Pipeline Version | Knossos Version | Status |
 |-------------|----------------|--------|
 | 2.0 | 2.0 | Supported |
 | 2.0 | 1.9 | Backward compatible |
@@ -65,7 +65,7 @@ lifecycle:
 
 | Satellite | Test Case | Expected Outcome | Validates |
 |-----------|-----------|------------------|-----------|
-| test-baseline | `roster-sync` | No conflicts | Basic compatibility |
+| test-baseline | `ari sync` | No conflicts | Basic compatibility |
 | [satellite-2] | Hook registration | Fires on event | Schema enforcement |
 
 ## Notes for Integration Engineer

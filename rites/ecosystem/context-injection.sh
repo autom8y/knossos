@@ -1,6 +1,6 @@
 #!/bin/bash
 # Ecosystem-Pack Context Injection
-# Provides CEM sync status, knossos reference, and drift detection for ecosystem work
+# Provides sync status, knossos reference, and drift detection for ecosystem work
 #
 # Called by: session-context.sh via rite-context-loader.sh
 # Output: Markdown table with ecosystem status
@@ -14,25 +14,25 @@ inject_rite_context() {
     output="| | |"$'\n'
     output+="|---|---|"$'\n'
 
-    # CEM Sync Status
-    local cem_sync_file="$project_dir/.claude/.cem-sync"
-    local cem_status="unknown"
-    local cem_timestamp="never"
+    # Sync Status
+    local sync_file="$project_dir/.claude/.sync-timestamp"
+    local sync_status="unknown"
+    local sync_timestamp="never"
 
-    if [[ -f "$cem_sync_file" ]]; then
-        cem_timestamp=$(stat -f "%Sm" -t "%Y-%m-%d %H:%M" "$cem_sync_file" 2>/dev/null || \
-                        stat -c "%y" "$cem_sync_file" 2>/dev/null | cut -d'.' -f1 || \
+    if [[ -f "$sync_file" ]]; then
+        sync_timestamp=$(stat -f "%Sm" -t "%Y-%m-%d %H:%M" "$sync_file" 2>/dev/null || \
+                        stat -c "%y" "$sync_file" 2>/dev/null | cut -d'.' -f1 || \
                         echo "unknown")
         # Check staleness (>24h = stale)
-        if is_file_stale "$cem_sync_file" 1440 2>/dev/null; then
-            cem_status="stale"
+        if is_file_stale "$sync_file" 1440 2>/dev/null; then
+            sync_status="stale"
         else
-            cem_status="synced"
+            sync_status="synced"
         fi
     else
-        cem_status="never synced"
+        sync_status="never synced"
     fi
-    output+="| **CEM Sync** | $cem_status ($cem_timestamp) |"$'\n'
+    output+="| **Sync Status** | $sync_status ($sync_timestamp) |"$'\n'
 
     # Knossos Reference
     local knossos_ref="unknown"

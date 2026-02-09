@@ -8,14 +8,14 @@
 ## Overview
 **Affects**: [All satellites | Satellites with X configuration]
 **Breaking**: [YES | NO]
-**CEM Version**: [version]
-**roster Version**: [version]
+**Sync Pipeline Version**: [version]
+**Knossos Version**: [version]
 
 [2-3 sentences describing what changed and why satellite owners care]
 
 ## Before You Begin
 - [ ] Backup `.claude/` directory
-- [ ] Verify current CEM version: `cem --version`
+- [ ] Verify current ari version: `ari --version`
 - [ ] Read this runbook completely before starting
 
 ## Current Behavior
@@ -42,19 +42,19 @@
 
 ## Migration Steps
 
-### 1. Update CEM
+### 1. Update Knossos
 ```bash
-# Commands to upgrade CEM
-cd /path/to/cem
+# Commands to upgrade knossos
+cd /path/to/knossos
 git pull origin main
 ./install.sh
-cem --version  # Should show vX.Y.Z
+ari --version  # Should show vX.Y.Z
 ```
 
-### 2. Sync roster changes
+### 2. Sync knossos changes
 ```bash
 cd /path/to/satellite
-roster-sync sync  # Pulls latest roster changes
+ari sync  # Pulls latest knossos changes
 ```
 
 ### 3. Migrate Settings
@@ -67,7 +67,7 @@ mv .claude/settings.json .claude/settings.json.backup
 ### 4. Verify Migration
 ```bash
 # Verification commands
-cem sync  # Should complete without errors
+ari sync  # Should complete without errors
 # Check specific functionality...
 ```
 
@@ -84,7 +84,7 @@ If migration fails:
 ```bash
 # Restore backup
 cp .claude/settings.json.backup .claude/settings.json
-cem sync --force  # Reset to pre-migration state
+ari sync --force  # Reset to pre-migration state
 ```
 
 ## Troubleshooting
@@ -94,11 +94,11 @@ cem sync --force  # Reset to pre-migration state
 **Solution**: [fix]
 
 ## Compatibility
-| CEM | roster | Status |
+| Ari | Knossos | Status |
 |-----|--------|--------|
 | 2.0 | 2.0 | Fully supported |
 | 2.0 | 1.9 | Backward compatible |
-| 1.9 | 2.0 | Unsupported--upgrade CEM first |
+| 1.9 | 2.0 | Unsupported--upgrade ari first |
 
 ## Support
 Questions? Issues? [contact info or issue tracker]

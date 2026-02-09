@@ -170,13 +170,13 @@ prerequisites:
     verification: "Confirm backup exists at known location"
 steps:
   - number: 1
-    action: "Pull latest roster changes"
-    verification: "git log shows latest roster commit"
+    action: "Pull latest knossos changes"
+    verification: "git log shows latest knossos commit"
     command: "git pull origin main"
   - number: 2
     action: "Run ari sync to update hooks"
     verification: "No sync errors, hooks updated"
-    command: "just cem-sync"
+    command: "just ari-sync"
     expected_output: "Sync complete. 3 files updated."
   - number: 3
     action: "Migrate existing SESSION_CONTEXT.md files"
@@ -223,7 +223,7 @@ This runbook guides satellite owners through migrating from session schema v1.0 
 
 ## Migration Steps
 
-### Step 1: Pull Latest Roster Changes
+### Step 1: Pull Latest Knossos Changes
 
 ```bash
 git pull origin main
@@ -231,10 +231,10 @@ git pull origin main
 
 **Verification**: Check git log shows the session schema v2.0 commit.
 
-### Step 2: Run CEM Sync
+### Step 2: Run Ari Sync
 
 ```bash
-just cem-sync
+just ari-sync
 ```
 
 **Verification**: Output shows hooks updated without errors.

@@ -1,6 +1,6 @@
 # Gap Analysis Template
 
-> Issue diagnosis for CEM/satellite problems.
+> Issue diagnosis for knossos/satellite problems.
 
 ```markdown
 # Gap Analysis: [Issue Title]
@@ -13,17 +13,17 @@
 2. [Expected vs. actual behavior]
 
 ## Root Cause
-**Component**: [CEM | roster]
+**Component**: [Sync Pipeline | Knossos]
 **File**: [path/to/file:line]
 **Issue**: [technical explanation]
 
 ## Success Criteria
 - [ ] [Concrete, testable criterion]
-- [ ] [e.g., "roster-sync completes without errors"]
+- [ ] [e.g., "ari sync completes without errors"]
 
 ## Affected Systems
-- [ ] CEM (lib/sync, roster-sync)
-- [ ] roster (user-*, rites/*)
+- [ ] Sync Pipeline (lib/sync, ari sync)
+- [ ] Knossos (user-*, rites/*)
 
 ## Recommended Complexity
 **Level**: [PATCH | MODULE | SYSTEM | MIGRATION]

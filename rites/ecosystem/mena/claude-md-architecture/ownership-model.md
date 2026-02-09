@@ -1,20 +1,20 @@
 # Section Ownership Model
 
-CLAUDE.md sections have explicit owners that determine sync behavior. This document defines the ownership model and how CEM applies it.
+CLAUDE.md sections have explicit owners that determine sync behavior. This document defines the ownership model and how the sync pipeline applies it.
 
 ---
 
 ## Ownership Categories
 
-### SYNC Sections (Roster-Owned)
+### SYNC Sections (Knossos-Owned)
 
 Content that comes from knossos and overwrites satellite content during sync.
 
 **Characteristics**:
-- Source of truth: Roster's templates
+- Source of truth: Knossos templates
 - Change frequency: When ecosystem patterns evolve
 - Satellite modifications: Not allowed (use `## Project:*` to extend)
-- Propagation: Roster -> All satellites
+- Propagation: Knossos -> All satellites
 
 **Examples**:
 
@@ -32,12 +32,12 @@ Content that comes from knossos and overwrites satellite content during sync.
 
 ### PRESERVE Sections (Satellite-Owned)
 
-Content that satellites own and CEM never overwrites.
+Content that satellites own and the sync pipeline never overwrites.
 
 **Characteristics**:
 - Source of truth: Satellite itself
 - Change frequency: When project scope evolves
-- Roster modifications: Ignored for this section
+- Knossos modifications: Ignored for this section
 - Propagation: Never (satellite-specific)
 
 **Examples**:
@@ -55,12 +55,12 @@ Content that satellites own and CEM never overwrites.
 
 ### PROJECT Sections (Satellite Extensions)
 
-Content that extends roster patterns without conflicting. Uses `## Project:*` namespace.
+Content that extends knossos patterns without conflicting. Uses `## Project:*` namespace.
 
 **Characteristics**:
 - Source of truth: Satellite
 - Naming convention: `## Project: {name}` or `## Project:{name}`
-- Sync behavior: Never touched by CEM
+- Sync behavior: Never touched by sync pipeline
 - Purpose: Add project-specific extensions
 
 **Examples**:
@@ -81,7 +81,7 @@ This project deploys via GitHub Actions to AWS ECS.
 
 ---
 
-### REGENERATE Sections (Roster-Derived)
+### REGENERATE Sections (Knossos-Derived)
 
 Content derived from knossos state (ACTIVE_RITE file + agents/ directory).
 
@@ -103,7 +103,7 @@ Content derived from knossos state (ACTIVE_RITE file + agents/ directory).
 
 ```
 IF satellite has ACTIVE_RITE + agents:
-  REGENERATE team sections from satellite roster
+  REGENERATE team sections from satellite knossos
 ELSE IF section exists in satellite:
   PRESERVE existing content
 ELSE:
@@ -120,14 +120,14 @@ Complete mapping of sections to owners and sync behavior:
 
 | Section Header | Owner | Sync Behavior | Notes |
 |----------------|-------|---------------|-------|
-| `# CLAUDE.md` | Roster | SYNC | Title and tagline |
+| `# CLAUDE.md` | Knossos | SYNC | Title and tagline |
 | `## Quick Start` | Team | PRESERVE/REGENERATE | From satellite's ACTIVE_RITE |
-| `## Agent Routing` | Roster | SYNC | Infrastructure |
-| `## Skills Architecture` | Roster | SYNC | Infrastructure |
+| `## Agent Routing` | Knossos | SYNC | Infrastructure |
+| `## Skills Architecture` | Knossos | SYNC | Infrastructure |
 | `## Agent Configurations` | Team | PRESERVE/REGENERATE | From satellite's agents/ |
-| `## Hooks` | Roster | SYNC | Infrastructure |
-| `## Dynamic Context Syntax` | Roster | SYNC | Infrastructure |
-| `## Getting Help` | Roster | SYNC | Infrastructure |
+| `## Hooks` | Knossos | SYNC | Infrastructure |
+| `## Dynamic Context Syntax` | Knossos | SYNC | Infrastructure |
+| `## Getting Help` | Knossos | SYNC | Infrastructure |
 | `## Project:*` | Satellite | PRESERVE | Unlimited extensions |
 | `## (unknown)` | Satellite | PRESERVE | Default to preserve |
 
@@ -143,7 +143,7 @@ What does this content describe?
    - Skill activation rules
    - Hook behavior
    - Dynamic context syntax
-   └─> Roster-owned, SYNC
+   └─> Knossos-owned, SYNC
 
 2. WHAT this project is?
    - Project-specific conventions
@@ -153,10 +153,10 @@ What does this content describe?
    └─> Satellite-owned, PRESERVE or ## Project:*
 
 3. WHO is working (which agents)?
-   - Agent roster
+   - Agent rite catalog
    - Rite name
    - Agent configurations
-   └─> Roster-derived, REGENERATE from ACTIVE_RITE
+   └─> Knossos-derived, REGENERATE from ACTIVE_RITE
 
 4. WHAT is happening now?
    - Current task
@@ -169,7 +169,7 @@ What does this content describe?
 
 ## The Sync Contract
 
-### Roster PROVIDES
+### Knossos PROVIDES
 
 1. **Workflow Infrastructure**: Agent routing, handoff protocols, phase transitions
 2. **Capability Documentation**: Skills architecture, hooks documentation, dynamic context
@@ -217,19 +217,19 @@ Content lives in different layers with different scopes:
 | Layer | Location | Content | Modified By |
 |-------|----------|---------|-------------|
 | Global | `~/.claude/CLAUDE.md` | Personal preferences | User |
-| Project | `.claude/CLAUDE.md` | Team + Project + Infrastructure | CEM, roster |
+| Project | `.claude/CLAUDE.md` | Team + Project + Infrastructure | sync pipeline, knossos |
 | Session | Hook output | Transient context | Hooks (read-only) |
 
 ---
 
 ## Marker Syntax
 
-Use HTML comments to mark section ownership. CEM uses these markers to determine sync behavior.
+Use HTML comments to mark section ownership. The sync pipeline uses these markers to determine sync behavior.
 
 ### Format
 
 ```markdown
-<!-- SYNC: roster-owned -->
+<!-- SYNC: knossos-owned -->
 ## Section Name
 
 <!-- PRESERVE: satellite-owned, regenerated from ACTIVE_RITE + agents/ -->
@@ -246,7 +246,7 @@ Use HTML comments to mark section ownership. CEM uses these markers to determine
 
 | Marker | Meaning |
 |--------|---------|
-| `<!-- SYNC: roster-owned -->` | Section syncs from knossos, overwrites satellite |
+| `<!-- SYNC: knossos-owned -->` | Section syncs from knossos, overwrites satellite |
 | `<!-- PRESERVE: satellite-owned -->` | Section preserved from satellite, never overwritten |
 | `<!-- PRESERVE: satellite-owned, regenerated from ACTIVE_RITE + agents/ -->` | Preserved, with note about regeneration source |
 
@@ -263,23 +263,23 @@ Use HTML comments to mark section ownership. CEM uses these markers to determine
 This project uses a 5-agent workflow (docs):
 ...
 
-<!-- SYNC: roster-owned -->
+<!-- SYNC: knossos-owned -->
 ## Agent Routing
 
 Before implementing work, check:
 ...
 
-<!-- SYNC: roster-owned -->
+<!-- SYNC: knossos-owned -->
 ## Skills Architecture
 
 Skills provide domain knowledge on-demand.
 ...
 ```
 
-### CEM Behavior
+### Sync Pipeline Behavior
 
-- CEM reads markers during sync to determine ownership
-- If marker is missing, CEM uses section name matching as fallback
+- Sync pipeline reads markers during sync to determine ownership
+- If marker is missing, sync pipeline uses section name matching as fallback
 - Markers are preserved during sync (extracted with their section)
 
 ---

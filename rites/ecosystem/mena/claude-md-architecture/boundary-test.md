@@ -71,14 +71,14 @@ A practical checklist for determining if content belongs in CLAUDE.md. Before ad
 
 | Answer | Sync Behavior | Section Type |
 |--------|---------------|--------------|
-| Yes, roster -> satellites | SYNC | Infrastructure section |
+| Yes, knossos -> satellites | SYNC | Infrastructure section |
 | No, satellite-only | PRESERVE | Identity/Extension section |
 | Regenerated from ACTIVE_RITE | REGENERATE | Team configuration |
 
 **Use this to determine section ownership**:
 - Infrastructure docs (skills, hooks, routing) = SYNC
 - Project-specific content = PRESERVE or `## Project:*`
-- Agent roster = REGENERATE from ACTIVE_RITE
+- Agent rite catalog = REGENERATE from ACTIVE_RITE
 
 ---
 
@@ -132,7 +132,7 @@ A practical checklist for determining if content belongs in CLAUDE.md. Before ad
                               +------------+              |
                                                +----------+----------+
                                                |          |          |
-                                            ROSTER      TEAM    SATELLITE
+                                            KNOSSOS     TEAM    SATELLITE
                                                |          |          |
                                                v          v          v
                                              SYNC     REGENERATE  PRESERVE
@@ -165,7 +165,7 @@ If your content contains any of these, reconsider:
 | Content Type | Correct Location | Why |
 |--------------|------------------|-----|
 | Skills documentation | CLAUDE.md (SYNC) | Stable, project-wide |
-| Agent roster | CLAUDE.md (REGENERATE) | Derived from knossos |
+| Agent rite catalog | CLAUDE.md (REGENERATE) | Derived from knossos |
 | Workflow patterns | CLAUDE.md (SYNC) | Stable infrastructure |
 | Project extensions | CLAUDE.md (`## Project:*`) | Satellite-owned |
 | Current task | SESSION_CONTEXT | Session-specific |
@@ -207,7 +207,7 @@ Copy this checklist before any CLAUDE.md modification:
 - [ ] No dates, timestamps, or "currently" language
 - [ ] No git state or file status references
 - [ ] No session-specific information
-- [ ] Owner correctly identified (roster/team/satellite)
+- [ ] Owner correctly identified (knossos/team/satellite)
 - [ ] Correct sync behavior specified (SYNC/PRESERVE/REGENERATE/PROJECT)
 ```
 

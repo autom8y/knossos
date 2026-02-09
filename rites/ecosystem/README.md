@@ -8,7 +8,7 @@ Infrastructure lifecycle team for sync pipeline and knossos ecosystem maintenanc
 - Satellite sync failures or integration errors
 - Hook/skill/agent registration not working
 - Need to design new infrastructure patterns
-- CEM/roster bugs need diagnosis and fixes
+- Sync pipeline/knossos bugs need diagnosis and fixes
 - Breaking changes require migration planning
 - Cross-satellite compatibility issues
 
@@ -26,7 +26,7 @@ Infrastructure lifecycle team for sync pipeline and knossos ecosystem maintenanc
 |-------|------|----------|
 | ecosystem-analyst | Diagnose ecosystem issues | Gap Analysis |
 | context-architect | Design infrastructure solutions | Context Design |
-| integration-engineer | Implement CEM/roster changes | Working Implementation |
+| integration-engineer | Implement sync pipeline/knossos changes | Working Implementation |
 | documentation-engineer | Write migration runbooks | Migration Runbook |
 | compatibility-tester | Validate across satellite matrix | Compatibility Report |
 

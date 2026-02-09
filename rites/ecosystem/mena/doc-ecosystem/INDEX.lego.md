@@ -9,13 +9,13 @@ description: "ari sync, migration, and compatibility templates. Triggers: gap an
 
 ## Purpose
 
-This skill provides templates for ecosystem-level documentation: CEM/satellite synchronization, migration planning, compatibility validation, and code hygiene workflows. These templates support cross-repository changes, breaking changes, and systematic code cleanup.
+This skill provides templates for ecosystem-level documentation: knossos/satellite synchronization, migration planning, compatibility validation, and code hygiene workflows. These templates support cross-repository changes, breaking changes, and systematic code cleanup.
 
 ## Core Principles
 
 | Principle | Description |
 |-----------|-------------|
-| **Ecosystem Awareness** | Changes to CEM affect all satellites. Ensure backward compatibility and clear migration paths. |
+| **Ecosystem Awareness** | Changes to knossos affect all satellites. Ensure backward compatibility and clear migration paths. |
 | **Hygiene Before Features** | Refactoring and cleanup are first-class work. Templates support smell detection and phased cleanup. |
 | **Migration Safety** | Breaking changes require runbooks, rollback procedures, and compatibility matrices. |
 
@@ -25,7 +25,7 @@ This skill provides templates for ecosystem-level documentation: CEM/satellite s
 
 | Template | Purpose | Agent |
 |----------|---------|-------|
-| [Gap Analysis](templates/gap-analysis.md) | Issue diagnosis for CEM/satellite problems | ecosystem-analyst |
+| [Gap Analysis](templates/gap-analysis.md) | Issue diagnosis for knossos/satellite problems | ecosystem-analyst |
 | [Context Design](templates/context-design.md) | Technical design for ecosystem changes | context-architect |
 | [Migration Runbook](templates/migration-runbook.md) | Satellite owner migration guide | documentation-engineer |
 | [Compatibility Report](templates/compatibility-report.md) | Cross-satellite validation results | compatibility-tester |
@@ -75,6 +75,6 @@ This skill provides templates for ecosystem-level documentation: CEM/satellite s
 
 ## Related Skills
 
-- [ecosystem-ref](../ecosystem-ref/INDEX.lego.md) - CEM/roster quick reference
+- [ecosystem-ref](../ecosystem-ref/INDEX.lego.md) - Sync pipeline quick reference
 - [documentation](~/.claude/commands/templates/documentation/INDEX.md) - Core artifact templates (PRD, TDD, ADR)
 - [standards](~/.claude/commands/guidance/standards/INDEX.md) - Code conventions and repository structure
