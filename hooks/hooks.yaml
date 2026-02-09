@@ -20,6 +20,15 @@ hooks:
     description: "Injects session context via ari hook context"
 
   # ===========================================================================
+  # SessionEnd Hooks
+  # ===========================================================================
+  - event: SessionEnd
+    command: "ari hook sessionend --output json"
+    timeout: 5
+    priority: 5
+    description: "Emits session.ended event and auto-parks on session end"
+
+  # ===========================================================================
   # Stop Hooks
   # ===========================================================================
   - event: Stop
@@ -91,13 +100,3 @@ hooks:
     priority: 5
     description: "Logs subagent completion events to session clew"
 
-  # ===========================================================================
-  # UserPromptSubmit Hooks
-  # ===========================================================================
-  - event: UserPromptSubmit
-    matcher: "^/"
-    command: "ari hook route --output json"
-    timeout: 5
-    async: true
-    priority: 3
-    description: "Routes slash commands via ari hook route"

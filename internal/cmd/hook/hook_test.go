@@ -315,7 +315,7 @@ func TestNewHookCmd_SubcommandRegistration(t *testing.T) {
 	cmd := NewHookCmd(&outputFlag, &verboseFlag, &projectDir, &sessionID)
 
 	// Verify all subcommands are registered
-	subcommands := []string{"context", "autopark", "writeguard", "route", "validate", "clew"}
+	subcommands := []string{"context", "autopark", "writeguard", "validate", "clew", "sessionend"}
 
 	for _, name := range subcommands {
 		t.Run(name, func(t *testing.T) {
@@ -503,70 +503,6 @@ func TestIntegration_WriteguardHook_Chain(t *testing.T) {
 
 			if result.HookSpecificOutput.PermissionDecision != tc.expected {
 				t.Errorf("Decision = %q, want %q for path %q", result.HookSpecificOutput.PermissionDecision, tc.expected, tc.path)
-			}
-		})
-	}
-}
-
-func TestIntegration_RouteHook_AllCategories(t *testing.T) {
-	// Test all command categories
-	commands := []struct {
-		message  string
-		command  string
-		category CommandCategory
-	}{
-		{"/start Add feature", "/start", CategorySession},
-		{"/park", "/park", CategorySession},
-		{"/resume session-123", "/resume", CategorySession},
-		{"/wrap", "/wrap", CategorySession},
-		{"/consult Which team?", "/consult", CategoryOrchestrator},
-		{"/task Implement auth", "/task", CategoryInitiative},
-		{"/sprint Q1 work", "/sprint", CategoryInitiative},
-		{"/commit Fix bug", "/commit", CategoryGit},
-		{"/pr", "/pr", CategoryGit},
-		{"/stamp Chose PostgreSQL", "/stamp", CategoryClew},
-	}
-
-	for _, tc := range commands {
-		t.Run(tc.command, func(t *testing.T) {
-			testutil.SetupEnv(t, &testutil.HookEnv{
-				Event:       "UserPromptSubmit",
-				UserMessage: tc.message,
-					})
-
-			var stdout, stderr bytes.Buffer
-			printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
-
-			outputFlag := "json"
-			verboseFlag := false
-			ctx := &cmdContext{
-				SessionContext: common.SessionContext{
-					BaseContext: common.BaseContext{
-						Output:  &outputFlag,
-						Verbose: &verboseFlag,
-					},
-				},
-				timeout: DefaultTimeout,
-			}
-
-			err := runRouteCore(ctx, printer)
-			if err != nil {
-				t.Fatalf("runRoute() error = %v", err)
-			}
-
-			var result RouteOutput
-			if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
-				t.Fatalf("Failed to parse output: %v", err)
-			}
-
-			if !result.Routed {
-				t.Error("Expected Routed=true")
-			}
-			if result.Command != tc.command {
-				t.Errorf("Command = %q, want %q", result.Command, tc.command)
-			}
-			if result.Category != tc.category {
-				t.Errorf("Category = %q, want %q", result.Category, tc.category)
 			}
 		})
 	}

@@ -85,13 +85,13 @@ Performance Targets:
 	cmd.AddCommand(newContextCmd(ctx))
 	cmd.AddCommand(newAutoparkCmd(ctx))
 	cmd.AddCommand(newWriteguardCmd(ctx))
-	cmd.AddCommand(newRouteCmd(ctx))
 	cmd.AddCommand(newValidateCmd(ctx))
 	cmd.AddCommand(newClewCmd(ctx))
 	cmd.AddCommand(newBudgetCmd(ctx))
 	cmd.AddCommand(newPrecompactCmd(ctx))
 	cmd.AddCommand(newSubagentStartCmd(ctx))
 	cmd.AddCommand(newSubagentStopCmd(ctx))
+	cmd.AddCommand(newSessionEndCmd(ctx))
 
 	// Hook commands do NOT require project context
 	common.SetNeedsProject(cmd, false, true)
