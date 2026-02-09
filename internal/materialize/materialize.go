@@ -28,6 +28,7 @@ type Options struct {
 	KeepAll    bool // Preserve all orphan agents (default)
 	PromoteAll bool // Move orphan agents to user-level
 	Minimal    bool // Generate base infrastructure only (no rite/agents/skills)
+	Soft       bool // CC-safe mode: only update agents + CLAUDE.md
 }
 
 // Result contains materialization outcome details.
@@ -39,6 +40,8 @@ type Result struct {
 	Source           string   // Source type used: "project", "user", "knossos", "explicit"
 	SourcePath       string   // Actual path resolved for rite source
 	LegacyBackupPath string   // Path to legacy CLAUDE.md backup if migration occurred
+	SoftMode         bool     // true if soft mode was used
+	DeferredStages   []string // stages skipped in soft mode
 }
 
 // MCPServer represents an MCP server declaration in a rite manifest.
@@ -352,13 +355,17 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 	}
 
 	// 5. Generate commands/ and skills/ directories from rite + shared + dependencies + mena
-	if err := m.materializeMena(manifest, claudeDir, resolved, collector); err != nil {
-		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize mena", err)
+	if !opts.Soft {
+		if err := m.materializeMena(manifest, claudeDir, resolved, collector); err != nil {
+			return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize mena", err)
+		}
 	}
 
 	// 6. Generate rules/ directory from templates/rules
-	if err := m.materializeRules(claudeDir, resolved, collector); err != nil {
-		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize rules", err)
+	if !opts.Soft {
+		if err := m.materializeRules(claudeDir, resolved, collector); err != nil {
+			return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize rules", err)
+		}
 	}
 
 	// 7. Generate CLAUDE.md from inscription system
@@ -369,8 +376,10 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 	result.LegacyBackupPath = legacyBackupPath
 
 	// 8. Generate or update settings.local.json with MCP servers from manifest
-	if err := m.materializeSettingsWithManifest(claudeDir, manifest, collector); err != nil {
-		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize settings", err)
+	if !opts.Soft {
+		if err := m.materializeSettingsWithManifest(claudeDir, manifest, collector); err != nil {
+			return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize settings", err)
+		}
 	}
 
 	// 9. Track state in .claude/sync/state.json
@@ -379,8 +388,16 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 	}
 
 	// 9.5. Copy workflow.yaml to ACTIVE_WORKFLOW.yaml
-	if err := m.materializeWorkflow(claudeDir, resolved, collector); err != nil {
-		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize workflow", err)
+	if !opts.Soft {
+		if err := m.materializeWorkflow(claudeDir, resolved, collector); err != nil {
+			return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize workflow", err)
+		}
+	}
+
+	// Populate soft mode result fields
+	if opts.Soft {
+		result.SoftMode = true
+		result.DeferredStages = []string{"mena", "rules", "settings", "workflow"}
 	}
 
 	// 10. Write ACTIVE_RITE marker
@@ -458,6 +475,7 @@ func (m *Materializer) syncRiteScope(opts SyncOptions) (*RiteScopeResult, error)
 		DryRun:    opts.DryRun,
 		RemoveAll: !opts.KeepOrphans,
 		KeepAll:   opts.KeepOrphans,
+		Soft:      opts.Soft,
 	}
 
 	legacyResult, err := m.MaterializeWithOptions(riteName, legacyOpts)
@@ -474,6 +492,8 @@ func (m *Materializer) syncRiteScope(opts SyncOptions) (*RiteScopeResult, error)
 		OrphanAction:     legacyResult.OrphanAction,
 		BackupPath:       legacyResult.BackupPath,
 		LegacyBackupPath: legacyResult.LegacyBackupPath,
+		SoftMode:         legacyResult.SoftMode,
+		DeferredStages:   legacyResult.DeferredStages,
 	}, nil
 }
 
@@ -1394,7 +1414,13 @@ func (m *Materializer) materializeSettingsWithManifest(claudeDir string, manifes
 
 	// Load hooks.yaml and merge hook registrations
 	if hooksConfig := m.loadHooksConfig(); hooksConfig != nil {
-		existingSettings = mergeHooksSettings(existingSettings, hooksConfig)
+		var stripped []string
+		existingSettings, stripped = mergeHooksSettings(existingSettings, hooksConfig)
+		// Log stripped legacy hooks if any (for visibility into cleanup)
+		for _, msg := range stripped {
+			// TODO: Route to structured output when available
+			_ = msg // Suppress unused warning; will be used in future structured output
+		}
 	} else {
 		// No hooks.yaml found — ensure hooks key exists (empty)
 		if existingSettings["hooks"] == nil {

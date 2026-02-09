@@ -37,6 +37,7 @@ func NewSyncCmd(outputFlag *string, verboseFlag *bool, projectDir *string) *cobr
 		recover_          bool
 		overwriteDiverged bool
 		keepOrphans       bool
+		soft              bool
 	)
 
 	cmd := &cobra.Command{
@@ -94,6 +95,7 @@ Examples:
 				Recover:           recover_,
 				OverwriteDiverged: overwriteDiverged,
 				KeepOrphans:       keepOrphans,
+				Soft:              soft,
 			}
 
 			return runSync(ctx, opts, cmd)
@@ -109,6 +111,7 @@ Examples:
 	cmd.Flags().BoolVar(&recover_, "recover", false, "Adopt existing untracked files into manifest")
 	cmd.Flags().BoolVar(&overwriteDiverged, "overwrite-diverged", false, "Overwrite locally modified files")
 	cmd.Flags().BoolVar(&keepOrphans, "keep-orphans", false, "Preserve orphaned knossos files")
+	cmd.Flags().BoolVar(&soft, "soft", false, "CC-safe mode: update only agents and CLAUDE.md (skip hooks/mena/rules)")
 
 	// Does NOT require project (user scope works without project)
 	common.SetNeedsProject(cmd, false, false)
@@ -186,6 +189,10 @@ func formatSyncResult(result *materialize.SyncResult, opts materialize.SyncOptio
 		}
 		if result.RiteResult.LegacyBackupPath != "" {
 			rite["legacy_backup"] = result.RiteResult.LegacyBackupPath
+		}
+		if result.RiteResult.SoftMode {
+			rite["soft_mode"] = true
+			rite["deferred_stages"] = result.RiteResult.DeferredStages
 		}
 		out["rite"] = rite
 	}

@@ -50,6 +50,7 @@ type SyncOptions struct {
 	Recover           bool
 	OverwriteDiverged bool
 	KeepOrphans       bool
+	Soft              bool // CC-safe mode: only update agents + CLAUDE.md
 }
 
 // SyncResult contains unified outcome.
@@ -68,6 +69,8 @@ type RiteScopeResult struct {
 	OrphanAction     string   `json:"orphan_action,omitempty"`
 	BackupPath       string   `json:"backup_path,omitempty"`
 	LegacyBackupPath string   `json:"legacy_backup_path,omitempty"`
+	SoftMode         bool     `json:"soft_mode,omitempty"`       // true if soft mode was used
+	DeferredStages   []string `json:"deferred_stages,omitempty"` // stages skipped in soft mode
 }
 
 // UserScopeResult wraps user scope outcome.
