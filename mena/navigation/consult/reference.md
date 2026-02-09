@@ -107,7 +107,7 @@ When invoked without arguments, `/consult` provides ecosystem overview:
    - Git branch and status
    - Current complexity level (if in session)
 
-2. **Display Rite Roster**
+2. **Display Rite Catalog**
    - Show all rites with brief descriptions (dynamic count from rite-discovery)
    - Highlight quick-switch commands
    - Indicate which rite is currently active
@@ -311,7 +311,7 @@ This workflow guides you through full feature lifecycle:
 Requirements → Design → Implementation → Testing → Deployment
 
 Current Context:
-  Rite: none (will switch to 10x-dev)
+  Rite: none (will sync to 10x-dev)
   Session: none (will start new)
   Branch: main
 
@@ -416,7 +416,7 @@ Display all commands categorized by domain:
 
 --- Meta/Navigation (2) ---
 /consult            Ecosystem guidance (you are here)
-/sync               Sync project with roster
+/sync               Sync project with knossos
 
 --- Meta/Factory (4) ---
 /forge              The Forge overview
@@ -635,7 +635,7 @@ A good `/consult` response:
 
 | Command | Relationship |
 |---------|--------------|
-| `/rite` | Executes rite switches recommended by /consult |
+| `/rite` | Executes rite syncs recommended by /consult |
 | `/start` | Begins sessions recommended by /consult |
 | `/task`, `/sprint`, `/hotfix`, `/spike` | Executes workflows recommended by /consult |
 | `/forge` | Meta-level rite creation (vs /consult for navigation) |
@@ -685,7 +685,7 @@ The `/consult` command:
 ## Maintenance
 
 This skill is kept in sync with:
-- Rite roster changes (new rites, rite updates)
+- Rite catalog changes (new rites, rite updates)
 - Command registry updates (new commands, deprecations)
 - Playbook library (new curated workflows)
 - Intent patterns (improved routing heuristics)

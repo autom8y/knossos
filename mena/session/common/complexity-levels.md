@@ -289,7 +289,7 @@ Some rites specialize in complexity levels:
 | 10x-dev | MODULE, SERVICE (general development) |
 | rnd | SCRIPT, MODULE (experimentation, prototyping) |
 | sre | SERVICE, PLATFORM (infrastructure, reliability) |
-| ecosystem | PLATFORM (CEM/skeleton/roster infrastructure) |
+| ecosystem | PLATFORM (knossos sync infrastructure) |
 
 **Note**: Rite doesn't dictate complexity; complexity dictates which agents are invoked.
 

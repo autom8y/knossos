@@ -29,7 +29,7 @@ Available rites are listed in your session context (`available_rites` field).
 
 1. **Knowledge base accessible**:
    - Verify `${KNOSSOS_HOME:-~/Code/knossos}/rites/` exists
-   - If missing: WARN "Roster not found at expected location."
+   - If missing: WARN "Knossos not found at expected location."
 
 ## Your Task
 
@@ -65,7 +65,7 @@ Display all rites dynamically (use `rite-discovery` skill):
 | 10x-dev      | /10x          | Full feature development lifecycle |
 | debt-triage  | /debt         | Technical debt prioritization      |
 | docs     | /docs         | Documentation, technical writing   |
-| ecosystem    | /ecosystem    | CEM/skeleton/roster infrastructure |
+| ecosystem    | /ecosystem    | knossos sync infrastructure        |
 | forge        | /forge        | Rite creation and validation       |
 | hygiene      | /hygiene      | Code quality, refactoring          |
 | intelligence | /intelligence | Analytics, A/B testing, research   |
@@ -74,7 +74,7 @@ Display all rites dynamically (use `rite-discovery` skill):
 | sre          | /sre          | Operations, reliability            |
 | strategy     | /strategy     | Market research, business analysis |
 ```
-**Note**: This list reflects current roster inventory. Use `rite-discovery` skill for programmatic access.
+**Note**: This list reflects current rite catalog. Use `rite-discovery` skill for programmatic access.
 
 ### `--commands` flag
 Display all commands by category:

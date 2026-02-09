@@ -119,7 +119,7 @@ Continue working or use /park to pause.
 **Implementation**:
 ```bash
 if [[ -z "$KNOSSOS_HOME" ]]; then
-  ERROR: Roster system not configured
+  ERROR: Knossos system not configured
 fi
 
 team_dir="$KNOSSOS_HOME/rites/$target_team"
@@ -128,7 +128,7 @@ if [[ ! -d "$team_dir" ]]; then
 fi
 ```
 
-**Success**: Team directory exists in roster
+**Success**: Team directory exists in knossos
 
 **Failure**: Error listing available rites
 
@@ -137,7 +137,7 @@ fi
 Team '{team}' not found.
 
 Available teams:
-{list from roster}
+{list from knossos}
 
 Use /team to switch or check KNOSSOS_HOME.
 ```
@@ -199,7 +199,7 @@ Agent '{agent}' not found in team '{team}'.
 Available agents:
 {list from .claude/agents/}
 
-Use /roster to see agent descriptions.
+Use /rite to see agent descriptions.
 ```
 
 ### Check: Agent Different from Current

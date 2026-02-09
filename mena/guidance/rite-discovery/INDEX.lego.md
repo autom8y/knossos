@@ -1,6 +1,6 @@
 ---
 name: rite-discovery
-description: "Dynamic team metadata from roster. Triggers: list rites, team capabilities, what teams exist, team metadata."
+description: "Dynamic team metadata from knossos. Triggers: list rites, team capabilities, what teams exist, team metadata."
 ---
 
 # Team Discovery
@@ -9,7 +9,7 @@ description: "Dynamic team metadata from roster. Triggers: list rites, team capa
 
 ## Purpose
 
-Enables dynamic team discovery without hardcoding team counts or capabilities. Other skills (`consult-ref`, `rite-ref`) reference this skill for current rite inventory.
+Enables dynamic team discovery without hardcoding team counts or capabilities. Other skills (`consult-ref`, `rite-ref`) reference this skill for current rite catalog.
 
 ## Usage
 
@@ -20,7 +20,7 @@ This skill provides read-only team metadata. It does not switch rites.
 Read all orchestrator.yaml files from `$KNOSSOS_HOME/rites/*/orchestrator.yaml` and extract:
 - Rite name, domain, description
 - Quick-switch command
-- Agent roster (from rites/{name}/agents/*.md)
+- Agent catalog (from rites/{name}/agents/*.md)
 - Routing conditions (what triggers each specialist)
 
 ### Match Intent to Team

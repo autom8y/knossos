@@ -26,7 +26,7 @@
 | Decision | Rationale |
 |----------|-----------|
 | **Detached HEAD** | No branch pollution, ephemeral by design |
-| **Fresh CEM init** | Each worktree syncs independently |
+| **Fresh sync init** | Each worktree syncs independently |
 | **Auto-session creation** | Worktree comes ready with session |
 | **Subdirectory structure** | Clean organization under `worktrees/` |
 | **7-day cleanup threshold** | Stale worktrees auto-cleaned |
@@ -71,7 +71,7 @@ session-20251224-143052-a1b2 | ACTIVE | feature-auth | 2025-12-24T14:30:52Z
   session-20251224-150000-c3d4 | ACTIVE | billing-sprint
 ```
 
-## Roster Integration
+## Knossos Integration
 
 Worktree status can be checked via metadata:
 

@@ -102,8 +102,8 @@ Display confirmation message with:
 |-------|-----------|------------|
 | No active session | No session for current project | Use `/start` to begin a session |
 | Session parked | `parked_at` field set | Use `/resume` first, then `/handoff` |
-| Invalid agent | Agent not in roster | Use valid agent name or `/roster` to list |
-| Agent not in team | Agent file missing | Check active rite, switch if needed |
+| Invalid agent | Agent not in this rite | Use valid agent name or `/rite` to list |
+| Agent not in rite | Agent file missing | Check active rite, switch if needed |
 | Missing parameter | No agent specified | Provide: `/handoff <agent-name>` |
 
 ---

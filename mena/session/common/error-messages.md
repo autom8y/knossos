@@ -163,49 +163,49 @@ Related: /resume
 ```
 ✗ Rite Not Found
 
-Rite '{rite_name}' does not exist in roster.
+Rite '{rite_name}' does not exist in knossos.
 
 Available rites:
 {rite_list}
 
 Resolution:
 - Choose rite from list above
-- Check KNOSSOS_HOME: {roster_home}
+- Check KNOSSOS_HOME: {knossos_home}
 - Use /rite to see rite details
 
-Related: /rite, /roster
+Related: /rite
 ```
 
-**Variables**: `{rite_name}`, `{rite_list}`, `{roster_home}`
+**Variables**: `{rite_name}`, `{rite_list}`, `{knossos_home}`
 
 **Code**: `RITE_NOT_FOUND`
 
 ---
 
-### Roster System Unavailable
+### Knossos System Unavailable
 
 **When**: KNOSSOS_HOME not set or invalid
 
 ```
-✗ Roster System Unavailable
+✗ Knossos System Unavailable
 
-Roster system not found or configured.
+Knossos system not found or configured.
 
 Checks:
-- KNOSSOS_HOME: {roster_home_value}
+- KNOSSOS_HOME: {knossos_home_value}
 - Directory exists: {exists}
 
 Resolution:
 - Set KNOSSOS_HOME environment variable
-- Point to roster installation directory
+- Point to knossos installation directory
 - Example: export KNOSSOS_HOME=~/Code/knossos
 
 Related: /help, /status
 ```
 
-**Variables**: `{roster_home_value}`, `{exists}`
+**Variables**: `{knossos_home_value}`, `{exists}`
 
-**Code**: `ROSTER_UNAVAILABLE`
+**Code**: `KNOSSOS_UNAVAILABLE`
 
 ---
 
@@ -225,10 +225,10 @@ Available agents in {rite}:
 
 Resolution:
 - Choose agent from list above
-- Use /roster to see agent descriptions
+- Use /rite to see agent descriptions
 - Switch rites with /rite if needed
 
-Related: /roster, /rite
+Related: /rite
 ```
 
 **Variables**: `{agent_name}`, `{rite}`, `{agent_list}`
@@ -253,7 +253,7 @@ Resolution:
 - Continue working with current agent
 - Or specify different agent
 
-Related: /status, /roster
+Related: /status, /rite
 ```
 
 **Variables**: `{last_agent}`, `{target_agent}`
@@ -639,7 +639,7 @@ Continue wrap without validation? [y/n]:
 | NOT_PARKED | No | resume |
 | SESSION_PARKED | Yes | park, wrap, handoff |
 | RITE_NOT_FOUND | Yes | start, resume, handoff |
-| ROSTER_UNAVAILABLE | Yes | start, resume, handoff |
+| KNOSSOS_UNAVAILABLE | Yes | start, resume, handoff |
 | AGENT_NOT_FOUND | Yes | handoff, resume |
 | SAME_AGENT | No | handoff |
 | QUALITY_GATE_* | Yes* | wrap |

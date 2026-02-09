@@ -98,8 +98,8 @@ Display:
 |-------|-----------|------------|
 | No parked session | No session for project | Use `/start` to begin new session |
 | Session not parked | `parked_at` not set | Session is active, continue working |
-| Invalid agent | Agent not in team | Specify valid agent or switch rites |
-| Team unavailable | Session team not in roster | Install rite or choose different |
+| Invalid agent | Agent not in rite | Specify valid agent or switch rites |
+| Rite unavailable | Session rite not in knossos | Install rite or choose different |
 | Merge conflicts | Git detects conflicts | Resolve conflicts before resuming |
 
 ---

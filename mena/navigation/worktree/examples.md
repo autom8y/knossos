@@ -89,7 +89,7 @@ session-20251224-143052-a1b2 | ACTIVE | feature-auth | 2025-12-24T14:30:52Z
   session-20251224-150000-c3d4 | ACTIVE | billing-sprint
 ```
 
-### With Roster
+### With Knossos
 
 Worktree status can be checked via metadata:
 

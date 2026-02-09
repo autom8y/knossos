@@ -33,7 +33,7 @@ Switch to the ecosystem infrastructure rite and display the pantheon. $ARGUMENTS
 
 ## When to Use
 
-- CEM sync failures or conflicts
+- Sync failures or conflicts
 - Hook/skill registration issues
 - Designing new hook or skill patterns
 - Migrating satellites to new ecosystem versions

@@ -12,7 +12,7 @@ Apply [Session Resolution Pattern](../shared/session-resolution.md) (inverse):
 
 Apply [Workflow Resolution Pattern](../shared/workflow-resolution.md):
 - Target team: User-specified or current ACTIVE_RITE
-- Validate team exists in roster
+- Validate rite exists in knossos
 
 See [session-validation](../../session-common/session-validation.md) for validation patterns.
 
@@ -151,7 +151,7 @@ Display confirmation message with:
 | Error | Condition | Resolution |
 |-------|-----------|------------|
 | Session already active | Active session for current project | Use `/wrap` to complete current session or `/resume` to continue it |
-| Invalid rite name | Team not found in roster | Use `/roster` to list available rites |
-| Roster system unavailable | `$KNOSSOS_HOME/` not found | Set KNOSSOS_HOME environment variable or check installation |
+| Invalid rite name | Rite not found in knossos | Use `/rite` to list available rites |
+| Knossos system unavailable | `$KNOSSOS_HOME/` not found | Set KNOSSOS_HOME environment variable or check installation |
 | PRD creation failed | Analyst unable to produce PRD | Review error, provide more context, retry |
 | Missing parameters | User cancels prompts | Command aborted, no state changed |
