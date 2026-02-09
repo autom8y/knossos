@@ -280,11 +280,11 @@ If complexity decreases (rare):
 2. **Skip optional artifacts** (e.g., fewer ADRs)
 3. **Note in wrap summary**: "Initially MODULE, implemented as SCRIPT"
 
-## Complexity vs. Team Pack
+## Complexity vs. Rite
 
 Some rites specialize in complexity levels:
 
-| Team | Best For |
+| Rite | Best For |
 |------|----------|
 | 10x-dev | MODULE, SERVICE (general development) |
 | rnd | SCRIPT, MODULE (experimentation, prototyping) |

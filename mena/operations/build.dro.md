@@ -8,7 +8,7 @@ disable-model-invocation: true
 ---
 
 ## Context
-Auto-injected by SessionStart hook (project, team, session, git, workflow).
+Auto-injected by SessionStart hook (project, rite, session, git, workflow).
 
 ## Pre-flight
 
@@ -32,7 +32,7 @@ Read the implementation agent from workflow:
 
 ```bash
 # Find the "implementation" or "execution" or "writing" phase agent
-# This varies by team - 10x uses "implementation", hygiene uses "execution", etc.
+# This varies by rite - 10x uses "implementation", hygiene uses "execution", etc.
 IMPL_AGENT=$(grep -B1 "produces: code\|produces: commits\|produces: documentation" .claude/ACTIVE_WORKFLOW.yaml | grep "agent:" | awk '{print $2}')
 ```
 

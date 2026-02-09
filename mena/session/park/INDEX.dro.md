@@ -8,7 +8,7 @@ disable-model-invocation: true
 ---
 
 ## Context
-Auto-injected by SessionStart hook (project, team, session, git).
+Auto-injected by SessionStart hook (project, rite, session, git).
 
 ## Your Task
 

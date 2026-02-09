@@ -97,7 +97,7 @@ Act as Engineer, prototype to answer: {question}
 ## Cross-Skill Integration
 
 - [standards](../standards/INDEX.lego.md) - Code conventions
-- Team-specific skills - Each team provides documentation templates and workflow definitions
+- Rite-specific skills - Each rite provides documentation templates and workflow definitions
 
 ## When Patterns Don't Fit
 

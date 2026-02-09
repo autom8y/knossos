@@ -41,11 +41,11 @@ Options:
 4. /worktree create "<name>" - Start in ISOLATED worktree (parallel work)
 
 Tip: Use worktrees when you want to work on something different
-without affecting the current session/team.
+without affecting the current session/rite.
 ```
 
 The `/worktree` option is especially useful when:
-- Different team needed for the new work
+- Different rite needed for the new work
 - Want to keep current sprint context intact
 - Need true parallel sessions on same project
 

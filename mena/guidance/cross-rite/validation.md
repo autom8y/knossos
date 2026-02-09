@@ -1,4 +1,4 @@
-# Cross-Team Handoff Validation
+# Cross-Rite Handoff Validation
 
 > Hook integration specification for `ari hook handoff-validate`.
 

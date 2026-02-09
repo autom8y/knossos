@@ -276,7 +276,7 @@ Curated playbooks provide pre-built workflows for common scenarios:
 
 2. **Load and Present Playbook**
    - Show full workflow with phases
-   - Inject current context (team, session, git state)
+   - Inject current context (rite, session, git state)
    - Highlight where user is in the workflow (if applicable)
 
 3. **Provide Entry Point**

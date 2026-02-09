@@ -8,7 +8,7 @@ disable-model-invocation: true
 ---
 
 ## Context
-Auto-injected by SessionStart hook (project, team, session, git, workflow).
+Auto-injected by SessionStart hook (project, rite, session, git, workflow).
 
 ## Pre-flight
 
@@ -32,7 +32,7 @@ Read the design agent from workflow:
 
 ```bash
 # Find the design/architecture phase agent
-# This varies by team - 10x uses "design", doc-team uses "architecture", etc.
+# This varies by rite - 10x uses "design", doc-rite uses "architecture", etc.
 DESIGN_AGENT=$(grep -B1 "produces: tdd\|produces: doc-structure\|produces: refactor-plan\|produces: risk-report" .claude/ACTIVE_WORKFLOW.yaml | grep "agent:" | head -1 | awk '{print $2}')
 ```
 

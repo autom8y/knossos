@@ -78,7 +78,7 @@ Quick-switch commands are derived from rite names:
 | sre | `/sre` | Operations, reliability |
 | strategy | `/strategy` | Business analysis |
 
-**Note**: Use `team-discovery` skill for programmatic rite metadata access.
+**Note**: Use `rite-discovery` skill for programmatic rite metadata access.
 
 ## Examples
 

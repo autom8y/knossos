@@ -15,7 +15,7 @@ See [session-validation](../../session-common/session-validation.md) for validat
 ### 2. Load and Display Session Summary
 
 Read SESSION_CONTEXT and display:
-- Session details (started, parked, reason, complexity, team, phase, agent)
+- Session details (started, parked, reason, complexity, rite, phase, agent)
 - Artifacts produced
 - Blockers and open questions
 - Next steps from park time
@@ -23,8 +23,8 @@ Read SESSION_CONTEXT and display:
 ### 3. Validate Context
 
 Apply [Workflow Resolution Pattern](../shared/workflow-resolution.md):
-- Team consistency: Compare ACTIVE_RITE to session.active_rite
-- Allow override: Yes (user can continue with different team)
+- Rite consistency: Compare ACTIVE_RITE to session.active_rite
+- Allow override: Yes (user can continue with different rite)
 
 See [validation-checks.md](validation-checks.md) for details.
 

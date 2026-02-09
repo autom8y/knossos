@@ -9,7 +9,7 @@ context: fork
 ---
 
 ## Context
-Auto-injected by SessionStart hook (project, team, session, git).
+Auto-injected by SessionStart hook (project, rite, session, git).
 
 Base branch is available in session context (`base_branch` field).
 

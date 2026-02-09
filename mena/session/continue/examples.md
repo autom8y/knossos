@@ -72,7 +72,7 @@ Options:
 
 Choice [1/2/3]: 1
 
-Switching to team: 10x-dev
+Switching to rite: 10x-dev
 ✓ Swapped to 10x-dev (5 agents loaded)
 
 Continue with architect? [Y/n]: Y

@@ -416,7 +416,7 @@ Use `/qa` for production-critical features requiring audit trail.
 - **PRD must exist** at `/docs/requirements/PRD-{feature-slug}.md`
 - Implementation complete (code files exist)
 - TDD optional but helpful
-- 10x-dev or team with QA Adversary
+- 10x-dev or rite with QA Adversary
 - Tests should be passing (QA validates beyond unit tests)
 
 ---

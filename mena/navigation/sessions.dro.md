@@ -7,7 +7,7 @@ model: sonnet
 ---
 
 ## Context
-Auto-injected by SessionStart hook (project, team, session, git).
+Auto-injected by SessionStart hook (project, rite, session, git).
 
 ## Your Task
 
@@ -72,10 +72,10 @@ for wt in "$PROJECT_ROOT/worktrees"/wt-*; do
   [ -d "$wt" ] || continue
   WT_ID=$(basename "$wt")
   WT_NAME=$(jq -r '.name // "unnamed"' "$wt/.claude/.worktree-meta.json" 2>/dev/null)
-  WT_TEAM=$(jq -r '.team // "none"' "$wt/.claude/.worktree-meta.json" 2>/dev/null)
+  WT_RITE=$(jq -r '.rite // "none"' "$wt/.claude/.worktree-meta.json" 2>/dev/null)
 
   echo ""
-  echo "[$WT_ID] $WT_NAME (team: $WT_TEAM)"
+  echo "[$WT_ID] $WT_NAME (rite: $WT_RITE)"
   for dir in "$wt/.claude/sessions/session-*"; do
     [ -d "$dir" ] || continue
     SESSION_ID=$(basename "$dir")

@@ -11,7 +11,7 @@ Apply [Session Resolution Pattern](../shared/session-resolution.md) (inverse):
 - Error if session exists: "Session already active. Use `/resume` or `/wrap` first"
 
 Apply [Workflow Resolution Pattern](../shared/workflow-resolution.md):
-- Target team: User-specified or current ACTIVE_RITE
+- Target rite: User-specified or current ACTIVE_RITE
 - Validate rite exists in knossos
 
 See [session-validation](../../session-common/session-validation.md) for validation patterns.
@@ -26,9 +26,9 @@ Prompt user for any missing parameters:
   - `MODULE` - Multiple files, < 2000 LOC, clear interfaces
   - `SERVICE` - Multiple modules, APIs, data persistence
   - `PLATFORM` - Multiple services, infrastructure, complex integration
-- **Target team**: Defaults to current ACTIVE_RITE (read from `.claude/ACTIVE_RITE`)
+- **Target rite**: Defaults to current ACTIVE_RITE (read from `.claude/ACTIVE_RITE`)
 
-### 3. Team Context Setup
+### 3. Rite Context Setup
 
 - If `--rite` specified and differs from ACTIVE_RITE:
   - Run `ari sync --rite <rite-name>`
@@ -112,7 +112,7 @@ Lachesis will:
 ### 8. Confirmation
 
 Display confirmation message with:
-- Session name, complexity, team
+- Session name, complexity, rite
 - Artifacts produced (PRD, TDD, ADRs)
 - Next steps
 - Available commands (/park, /handoff, etc.)

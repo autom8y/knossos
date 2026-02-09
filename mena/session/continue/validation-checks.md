@@ -2,7 +2,7 @@
 
 > Context validation for resuming parked sessions.
 
-## Team Consistency Check
+## Rite Consistency Check
 
 ### Purpose
 
@@ -19,7 +19,7 @@ If different → Surface mismatch warning
 ### Mismatch Handling
 
 ```
-⚠ Team Mismatch Detected
+⚠ Rite Mismatch Detected
 
 Session started with: {session.active_rite}
 Current active rite: {current ACTIVE_RITE}
@@ -103,7 +103,7 @@ If not found → Error with agent list
 ### Error Message
 
 ```
-Agent '{agent}' not found in team '{active_rite}'.
+Agent '{agent}' not found in rite '{active_rite}'.
 
 Available agents:
 - requirements-analyst
@@ -121,7 +121,7 @@ Use --agent=NAME to specify a valid agent.
 ```
 1. Pre-flight (session exists, is parked)
       ↓
-2. Team consistency check
+2. Rite consistency check
    ├─ Match → Continue
    └─ Mismatch → User chooses action
       ↓

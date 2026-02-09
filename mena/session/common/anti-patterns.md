@@ -125,9 +125,9 @@ This document catalogs anti-patterns observed across all session-lifecycle comma
 
 ---
 
-### Starting Without Team Context
+### Starting Without Rite Context
 
-**Pattern**: Starting session without verifying team
+**Pattern**: Starting session without verifying rite
 
 **Symptoms**:
 - Wrong agents for the work
@@ -136,9 +136,9 @@ This document catalogs anti-patterns observed across all session-lifecycle comma
 
 **Fix**:
 - Check ACTIVE_RITE before /start
-- Use --team flag to switch explicitly
+- Use --rite flag to switch explicitly
 
-**Prevention**: /start displays team confirmation
+**Prevention**: /start displays rite confirmation
 
 **Why Bad**: Wrong agents mean wrong deliverables
 
@@ -247,9 +247,9 @@ This document catalogs anti-patterns observed across all session-lifecycle comma
 
 ---
 
-### Ignoring Team Mismatch Warning
+### Ignoring Rite Mismatch Warning
 
-**Pattern**: Resuming session with different team than when started
+**Pattern**: Resuming session with different rite than when started
 
 **Symptoms**:
 - Target agents don't exist
@@ -257,10 +257,10 @@ This document catalogs anti-patterns observed across all session-lifecycle comma
 - Handoff failures
 
 **Fix**:
-- /team to switch back to session's team
+- /rite to switch back to session's rite
 - Or explicitly override if intentional
 
-**Prevention**: Resume validates team consistency, warns on mismatch
+**Prevention**: Resume validates rite consistency, warns on mismatch
 
 **Why Bad**: Wrong agents for the work, inconsistent deliverables
 

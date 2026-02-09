@@ -1,21 +1,21 @@
 ---
 name: rite-discovery
-description: "Dynamic team metadata from knossos. Triggers: list rites, team capabilities, what teams exist, team metadata."
+description: "Dynamic rite metadata from knossos. Triggers: list rites, rite capabilities, what rites exist, rite metadata."
 ---
 
-# Team Discovery
+# Rite Discovery
 
-> Provides structured team metadata by reading from `rites/*/orchestrator.yaml`.
+> Provides structured rite metadata by reading from `rites/*/orchestrator.yaml`.
 
 ## Purpose
 
-Enables dynamic team discovery without hardcoding team counts or capabilities. Other skills (`consult-ref`, `rite-ref`) reference this skill for current rite catalog.
+Enables dynamic rite discovery without hardcoding rite counts or capabilities. Other skills (`consult-ref`, `rite-ref`) reference this skill for current rite catalog.
 
 ## Usage
 
-This skill provides read-only team metadata. It does not switch rites.
+This skill provides read-only rite metadata. It does not switch rites.
 
-### List All Teams
+### List All Rites
 
 Read all orchestrator.yaml files from `$KNOSSOS_HOME/rites/*/orchestrator.yaml` and extract:
 - Rite name, domain, description
@@ -23,11 +23,11 @@ Read all orchestrator.yaml files from `$KNOSSOS_HOME/rites/*/orchestrator.yaml` 
 - Agent catalog (from rites/{name}/agents/*.md)
 - Routing conditions (what triggers each specialist)
 
-### Match Intent to Team
+### Match Intent to Rite
 
-Given a user query, compare against team routing conditions:
+Given a user query, compare against rite routing conditions:
 1. Parse query for key verbs (build, fix, deploy, document, etc.)
-2. Match against team domains and routing conditions
+2. Match against rite domains and routing conditions
 3. Return ranked list with confidence scores
 
 ## Data Source
@@ -43,7 +43,7 @@ Given a user query, compare against team routing conditions:
 | debt-triage | /debt | Technical debt management | collection → assessment → planning | 3 |
 | docs | /docs | Documentation lifecycle | audit → architecture → writing → review | 4 |
 | ecosystem | /ecosystem | Ecosystem infrastructure | analysis → design → implementation → documentation → validation | 5 |
-| forge | /forge | Agent team creation | discovery → architecture → implementation → validation → publishing → catalog | 6 |
+| forge | /forge | Agent rite creation | discovery → architecture → implementation → validation → publishing → catalog | 6 |
 | hygiene | /hygiene | Code quality | assessment → planning → execution → audit | 4 |
 | intelligence | /intelligence | Product analytics | discovery → analysis → experimentation → measurement | 4 |
 | rnd | /rnd | Technology exploration | question → exploration → synthesis → recommendation | 4 |

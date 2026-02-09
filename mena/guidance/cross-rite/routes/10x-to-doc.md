@@ -156,8 +156,8 @@ Create `HANDOFF-10x-dev-to-docs-YYYY-MM-DD.md`:
 ---
 artifact_id: HANDOFF-10x-dev-to-docs-2026-01-05
 schema_version: "1.0"
-source_team: 10x-dev
-target_team: docs
+source_rite: 10x-dev
+target_rite: docs
 handoff_type: assessment
 priority: medium
 blocking: false
@@ -186,11 +186,11 @@ source_artifacts:
 
 ## After Handoff
 
-Doc team will:
+Doc rite will:
 1. Review feature for documentation scope
 2. Determine documentation deliverables (help article, API docs, changelog)
 3. Create or update documentation
-4. Request review from source team for accuracy
+4. Request review from source rite for accuracy
 5. Return HANDOFF-RESPONSE with published documentation links
 
 ## Common Issues

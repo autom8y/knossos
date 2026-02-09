@@ -157,5 +157,5 @@ Ready for [next phase] when:
 This skill is intentionally self-contained as a quick reference protocol. All verification patterns are documented inline for immediate agent access without additional file loads.
 
 **Related Skills**:
-- [cross-rite](../cross-rite/INDEX.lego.md) - Cross-team routing protocol
+- [cross-rite](../cross-rite/INDEX.lego.md) - Cross-rite routing protocol
 - [prompting](../prompting/INDEX.lego.md) - Agent invocation patterns

@@ -9,7 +9,7 @@ context: fork
 ---
 
 ## Context
-Auto-injected by SessionStart hook (project, team, session, git, workflow).
+Auto-injected by SessionStart hook (project, rite, session, git, workflow).
 
 ## Pre-flight
 
@@ -40,7 +40,7 @@ REVIEW_AGENT=$(grep -B1 "next: null" .claude/ACTIVE_WORKFLOW.yaml | grep "agent:
 2. **Invoke validation agent** (review mode) via Task tool:
    - Review all changed files/content
    - Apply multiple lenses
-   - Agent varies by team:
+   - Agent varies by rite:
      - 10x-dev → qa-adversary
      - docs → doc-reviewer
      - hygiene → audit-lead

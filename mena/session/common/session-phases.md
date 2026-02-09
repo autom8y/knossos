@@ -212,7 +212,7 @@ implementation → implementation  (bug fixes, refactoring)
 
 - **Multi-session by design**: Too large for single session
 - **Phased approach**: Break into MODULE-sized sessions
-- **Coordination**: May require multiple team handoffs
+- **Coordination**: May require multiple rite handoffs
 
 ## Phase Transitions via Commands
 

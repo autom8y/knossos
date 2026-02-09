@@ -117,8 +117,8 @@ Create `HANDOFF-10x-dev-to-security-YYYY-MM-DD.md`:
 ---
 artifact_id: HANDOFF-10x-dev-to-security-2026-01-05
 schema_version: "1.0"
-source_team: 10x-dev
-target_team: security
+source_rite: 10x-dev
+target_rite: security
 handoff_type: assessment
 priority: high
 blocking: true
@@ -149,7 +149,7 @@ source_artifacts:
 
 ## After Handoff
 
-Security team will:
+Security rite will:
 1. Review threat model completeness
 2. Audit security-relevant code paths
 3. Verify cryptographic implementations

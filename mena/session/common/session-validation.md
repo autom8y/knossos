@@ -10,7 +10,7 @@ Before executing any session-lifecycle command, validation checks ensure the env
 
 1. **Session Existence** - Does a session exist?
 2. **Session State** - Is session active or parked?
-3. **Team Context** - Is team configuration valid?
+3. **Rite Context** - Is rite configuration valid?
 4. **Agent Availability** - Does target agent exist?
 5. **Git State** - Is working directory clean?
 
@@ -110,9 +110,9 @@ Session is not parked. It's already active.
 Continue working or use /park to pause.
 ```
 
-## Team Context Validation
+## Rite Context Validation
 
-### Check: Team Exists
+### Check: Rite Exists
 
 **Used By**: start, resume, handoff
 
@@ -122,24 +122,24 @@ if [[ -z "$KNOSSOS_HOME" ]]; then
   ERROR: Knossos system not configured
 fi
 
-team_dir="$KNOSSOS_HOME/rites/$target_team"
-if [[ ! -d "$team_dir" ]]; then
-  ERROR: Team not found
+rite_dir="$KNOSSOS_HOME/rites/$target_rite"
+if [[ ! -d "$rite_dir" ]]; then
+  ERROR: Rite not found
 fi
 ```
 
-**Success**: Team directory exists in knossos
+**Success**: Rite directory exists in knossos
 
 **Failure**: Error listing available rites
 
 **Error Message**:
 ```
-Team '{team}' not found.
+Rite '{rite}' not found.
 
-Available teams:
+Available rites:
 {list from knossos}
 
-Use /team to switch or check KNOSSOS_HOME.
+Use /rite to switch or check KNOSSOS_HOME.
 ```
 
 ### Check: Rite Consistency
@@ -194,7 +194,7 @@ fi
 
 **Error Message**:
 ```
-Agent '{agent}' not found in team '{team}'.
+Agent '{agent}' not found in rite '{rite}'.
 
 Available agents:
 {list from .claude/agents/}
@@ -333,7 +333,7 @@ fi
 
 ## Validation Matrix
 
-| Command | Session Exists | Session State | Team Valid | Agent Valid | Git Clean |
+| Command | Session Exists | Session State | Rite Valid | Agent Valid | Git Clean |
 |---------|----------------|---------------|------------|-------------|-----------|
 | /start | ❌ Must NOT | N/A | ✓ Check | N/A | - |
 | /park | ✓ Must | Active | - | - | ⚠ Warn |
@@ -346,6 +346,6 @@ fi
 ## Cross-References
 
 - [Session Resolution Pattern](../shared/session-resolution.md) - Behavioral implementation
-- [Workflow Resolution Pattern](../shared/workflow-resolution.md) - Team/agent validation
+- [Workflow Resolution Pattern](../shared/workflow-resolution.md) - Rite/agent validation
 - [Session Context Schema](session-context-schema.md) - Field definitions
 - [Error Messages](error-messages.md) - Standard error templates

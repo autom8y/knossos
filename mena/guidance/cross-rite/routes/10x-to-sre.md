@@ -103,8 +103,8 @@ Create `HANDOFF-10x-dev-to-sre-YYYY-MM-DD.md`:
 ---
 artifact_id: HANDOFF-10x-dev-to-sre-2026-01-05
 schema_version: "1.0"
-source_team: 10x-dev
-target_team: sre
+source_rite: 10x-dev
+target_rite: sre
 handoff_type: validation
 priority: high
 blocking: true
@@ -129,7 +129,7 @@ source_artifacts:
 
 ## After Handoff
 
-SRE team will:
+SRE rite will:
 1. Review deployment configuration
 2. Validate in staging environment
 3. Schedule production deployment window

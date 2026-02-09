@@ -1,6 +1,6 @@
 ---
 name: task
-description: Single task full lifecycle through team workflow phases
+description: Single task full lifecycle through rite workflow phases
 argument-hint: <task-description> [--complexity=LEVEL]
 allowed-tools: Bash, Read, Task, Glob, Grep
 model: opus
@@ -8,7 +8,7 @@ disable-model-invocation: true
 ---
 
 ## Context
-Auto-injected by SessionStart hook (project, team, session, git, workflow).
+Auto-injected by SessionStart hook (project, rite, session, git, workflow).
 
 ## Pre-flight
 

@@ -9,7 +9,7 @@ context: fork
 ---
 
 ## Context
-Auto-injected by SessionStart hook (project, team, session, git).
+Auto-injected by SessionStart hook (project, rite, session, git).
 
 Available agents are listed in your session context (`available_agents` field). If not available, run `ls .claude/agents/` to discover them.
 

@@ -138,7 +138,7 @@ Sessions move through a simple state machine with three primary states: **Active
 
 **Actions**:
 1. Display session summary (how long parked, reason, state)
-2. Validate team/git consistency (warnings only)
+2. Validate rite/git consistency (warnings only)
 3. Invoke moirai: `resume_session`
 4. moirai removes `parked_*` fields, sets `resumed_at`
 5. Invoke selected agent with full context
