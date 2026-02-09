@@ -186,7 +186,7 @@ allowed-tools: Bash, Read
 Switch to {rite-name} and display the roster.
 
 ## Behavior
-1. Execute: `$ROSTER_HOME/swap-rite.sh {rite-name}`
+1. Execute: `ari sync --rite {rite-name}`
 2. Display agent roster table
 3. Show workflow phases
 4. Update SESSION_CONTEXT if active session
@@ -206,7 +206,7 @@ Ready for Platform Engineer when:
 
 ## The Acid Test
 
-*"Could swap-rite.sh load this workflow.yaml without errors, and would the command mappings correctly route users to the intended agents?"*
+*"Could ari sync --rite load this workflow.yaml without errors, and would the command mappings correctly route users to the intended agents?"*
 
 If uncertain: Validate against an existing working team like 10x-dev.
 
