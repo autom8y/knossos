@@ -1,6 +1,6 @@
 ---
 name: security-ref
-description: "Security rite reference. Triggers: security, threat-modeler, compliance-architect, penetration-tester, security-reviewer."
+description: "Security rite reference. Use when: activating the security rite, invoking security agents, performing threat modeling or compliance reviews. Triggers: security, threat-modeler, compliance-architect, penetration-tester, security-reviewer."
 ---
 
 # Security Rite (security)

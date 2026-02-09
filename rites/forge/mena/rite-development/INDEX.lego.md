@@ -1,6 +1,6 @@
 ---
 name: rite-development
-description: "Rite design and implementation guide. Triggers: new rite, rite development, workflow design, agent creation, knossos integration."
+description: "Rite design and implementation guide. Use when: building a new rite from scratch, designing workflow phases, creating agent pantheons, integrating with knossos. Triggers: new rite, rite development, workflow design, agent creation, knossos integration."
 ---
 
 # Rite Development

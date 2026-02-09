@@ -1,6 +1,6 @@
 ---
 name: doc-ecosystem
-description: "ari sync, migration, and compatibility templates. Triggers: gap analysis, context design, migration runbook, compatibility report, ari sync."
+description: "ari sync, migration, and compatibility templates. Use when: writing migration runbooks, producing gap analyses, creating compatibility reports for ecosystem changes. Triggers: gap analysis, context design, migration runbook, compatibility report, ari sync."
 ---
 
 # Documentation: Ecosystem & Hygiene

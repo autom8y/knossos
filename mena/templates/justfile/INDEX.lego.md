@@ -1,6 +1,6 @@
 ---
 name: justfile
-description: "Justfile task automation patterns. Triggers: justfile, just, task runner, make alternative, build automation, ci recipes, task dependencies."
+description: "Justfile task automation patterns. Use when: creating or editing justfiles, designing task runner recipes, setting up build automation. Triggers: justfile, just, task runner, make alternative, build automation, ci recipes, task dependencies."
 ---
 
 # Justfile Task Automation

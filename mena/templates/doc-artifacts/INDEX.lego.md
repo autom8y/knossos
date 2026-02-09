@@ -1,6 +1,6 @@
 ---
 name: doc-artifacts
-description: "PRD, TDD, ADR, and Test Plan templates for 10x development workflow. Canonical schemas and validation for core artifacts."
+description: "PRD, TDD, ADR, and Test Plan canonical schemas with validation rules. Use when: creating development artifacts, validating artifact structure, checking handoff criteria. Triggers: PRD schema, TDD schema, ADR schema, test plan schema, artifact validation, canonical template."
 ---
 
 # doc-artifacts

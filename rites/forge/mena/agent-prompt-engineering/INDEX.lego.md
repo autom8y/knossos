@@ -1,6 +1,6 @@
 ---
 name: agent-prompt-engineering
-description: "Agent prompt engineering standards. Triggers: agent prompt, system prompt engineering, prompt rubric, prompt optimization, agent design."
+description: "Agent prompt engineering standards. Use when: writing new agent prompts, auditing existing prompt quality, debugging agent behavior, optimizing prompt token cost. Triggers: agent prompt, system prompt engineering, prompt rubric, prompt optimization, agent design."
 ---
 
 # Agent Prompt Engineering

@@ -1,6 +1,6 @@
 ---
 name: 10x-workflow
-description: "10x workflow coordination and agent routing. Triggers: workflow, agent coordination, handoff, pipeline, phase transition, orchestration."
+description: "10x workflow coordination and agent routing. Use when: understanding phase transitions, routing work to specialist agents, coordinating multi-agent pipelines. Triggers: workflow, agent coordination, handoff, pipeline, phase transition, orchestration."
 ---
 
 # 10x Agentic Workflow

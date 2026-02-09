@@ -1,6 +1,6 @@
 ---
 name: ecosystem-ref
-description: "Knossos ecosystem patterns reference. Triggers: knossos-sync, ari-sync, rite-switch, manifest, ecosystem patterns."
+description: "Knossos ecosystem patterns reference. Use when: running ari sync commands, switching rites, understanding manifest lifecycle, debugging sync issues. Triggers: knossos-sync, ari-sync, rite-switch, manifest, ecosystem patterns."
 ---
 
 # ecosystem-ref

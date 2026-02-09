@@ -1,6 +1,6 @@
 ---
 name: orchestrator-templates
-description: "Shared schemas for orchestrator consultation patterns"
+description: "Shared schemas for orchestrator consultation patterns. Use when: consulting an orchestrator about next steps, structuring phase transition requests, formatting consultation responses. Triggers: orchestrator consultation, consultation request, consultation response, phase transition schema."
 invokable: skill
 ---
 

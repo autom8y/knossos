@@ -1,6 +1,6 @@
 ---
 name: rnd-ref
-description: "Innovation Lab (R&D) rite reference. Triggers: rnd, innovation lab, technology-scout, prototype-engineer, moonshot-architect."
+description: "Innovation Lab (R&D) rite reference. Use when: activating the rnd rite, invoking R&D agents, understanding technology scouting or prototyping workflow. Triggers: rnd, innovation lab, technology-scout, prototype-engineer, moonshot-architect."
 ---
 
 # Innovation Lab (rnd)

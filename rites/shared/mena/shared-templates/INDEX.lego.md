@@ -1,6 +1,6 @@
 ---
 name: shared-templates
-description: "Shared templates: debt-ledger, risk-matrix, sprint-debt. Triggers: debt ledger, risk matrix, sprint package, triage template."
+description: "Shared templates: debt-ledger, risk-matrix, sprint-debt. Use when: creating debt inventory documents, scoring risk matrices, packaging sprint-ready debt work. Triggers: debt ledger, risk matrix, sprint package, triage template."
 ---
 
 # Shared Templates

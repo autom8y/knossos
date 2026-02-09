@@ -1,6 +1,6 @@
 ---
 name: standards
-description: "Code conventions, tech stack, and tool selection. Triggers: code conventions, tech stack, naming conventions, tool selection, file operations."
+description: "Code conventions, tech stack, and tool selection. Use when: writing implementation code, choosing libraries, deciding between native and shell tools. Triggers: code conventions, tech stack, naming conventions, tool selection, file operations."
 ---
 
 # Standards & Conventions

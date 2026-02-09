@@ -1,6 +1,6 @@
 ---
 name: doc-artifacts
-description: "PRD, TDD, ADR, and Test Plan templates. Triggers: PRD, TDD, ADR, test plan, requirements document, technical design."
+description: "PRD, TDD, ADR, and Test Plan templates. Use when: writing requirements documents, creating technical designs, recording architecture decisions, building test plans. Triggers: PRD, TDD, ADR, test plan, requirements document, technical design."
 ---
 
 # Development Artifact Templates

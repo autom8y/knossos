@@ -1,6 +1,6 @@
 ---
 name: rite-discovery
-description: "Dynamic rite metadata from knossos. Triggers: list rites, rite capabilities, what rites exist, rite metadata."
+description: "Dynamic rite metadata from knossos. Use when: listing available rites, checking rite capabilities, looking up agent counts or domains for a rite. Triggers: list rites, rite capabilities, what rites exist, rite metadata."
 ---
 
 # Rite Discovery

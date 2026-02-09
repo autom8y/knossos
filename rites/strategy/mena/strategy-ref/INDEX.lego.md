@@ -1,6 +1,6 @@
 ---
 name: strategy-ref
-description: "Strategy rite reference. Triggers: strategy, market-researcher, competitive-analyst, business-model-analyst, roadmap-strategist."
+description: "Strategy rite reference. Use when: activating the strategy rite, invoking strategy agents, performing market research or competitive analysis. Triggers: strategy, market-researcher, competitive-analyst, business-model-analyst, roadmap-strategist."
 ---
 
 # Strategy Rite (strategy)

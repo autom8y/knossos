@@ -1,6 +1,6 @@
 ---
 name: lexicon
-description: "Knossos-to-CC primitive mapping. Triggers: lexicon, CC primitives, invocation mapping, frontmatter reference, knossos terminology."
+description: "Knossos-to-CC primitive mapping. Use when: understanding dromena vs legomena distinction, mapping knossos concepts to CC runtime, checking frontmatter schema. Triggers: lexicon, CC primitives, invocation mapping, frontmatter reference, knossos terminology."
 ---
 
 # Framework Lexicon

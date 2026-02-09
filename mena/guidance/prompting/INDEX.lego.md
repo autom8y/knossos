@@ -1,6 +1,6 @@
 ---
 name: prompting
-description: "Agent invocation and workflow prompt patterns. Triggers: how to invoke, prompt pattern, agent invocation, workflow example, session start."
+description: "Agent invocation and workflow prompt patterns. Use when: invoking specialist agents, starting orchestrated sessions, needing copy-paste prompt templates. Triggers: how to invoke, prompt pattern, agent invocation, workflow example, session start."
 ---
 
 # Prompting Patterns

@@ -1,6 +1,6 @@
 ---
 name: file-verification
-description: "File write verification protocol with path anchoring. Triggers: file verification, write verification, artifact check, post-write check."
+description: "File write verification protocol with path anchoring. Use when: verifying file writes succeeded, preventing hallucinated file operations, validating artifact existence after creation. Triggers: file verification, write verification, artifact check, post-write check."
 ---
 
 # File Verification Protocol

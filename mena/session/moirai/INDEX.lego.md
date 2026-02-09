@@ -1,6 +1,6 @@
 ---
 name: moirai-fates
-description: "Moirai routing table for Fate domains (Clotho/Lachesis/Atropos). Triggers: moirai routing, fate lookup, operation dispatch, session operation."
+description: "Moirai routing table for Fate domains (Clotho/Lachesis/Atropos). Use when: dispatching session operations to the correct Fate, looking up CLI commands for session lifecycle, understanding create/measure/cut domains. Triggers: moirai routing, fate lookup, operation dispatch, session operation."
 ---
 
 # Moirai Fates Routing Table

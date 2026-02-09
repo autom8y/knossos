@@ -1,6 +1,6 @@
 ---
 name: session-common
-description: "Session schema: fields, FSM states, complexity levels, validation. Triggers: session schema, session fields, state machine, session validation."
+description: "Session schema: fields, FSM states, complexity levels, validation. Use when: checking session field definitions, understanding state transitions, validating session data structure. Triggers: session schema, session fields, state machine, session validation."
 ---
 
 # Session-Common Reference Module

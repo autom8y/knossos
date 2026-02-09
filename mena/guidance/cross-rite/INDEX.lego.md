@@ -1,6 +1,6 @@
 ---
 name: cross-rite
-description: "Cross-rite handoff protocols. Triggers: handoff, wrap, /wrap, rite transition, deployment ready."
+description: "Cross-rite handoff protocols. Use when: completing 10x work that needs specialist handoff, wrapping sessions for deployment or review, transitioning between rites. Triggers: handoff, wrap, /wrap, rite transition, deployment ready."
 ---
 
 # Cross-Rite Handoff Protocols

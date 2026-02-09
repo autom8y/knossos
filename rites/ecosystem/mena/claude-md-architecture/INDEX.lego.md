@@ -1,6 +1,6 @@
 ---
 name: claude-md-architecture
-description: "CLAUDE.md architecture first principles. Triggers: CLAUDE.md architecture, CLAUDE.md sync, content placement, section ownership."
+description: "CLAUDE.md architecture first principles. Use when: modifying CLAUDE.md content, deciding where content belongs, making ari sync placement decisions. Triggers: CLAUDE.md architecture, CLAUDE.md sync, content placement, section ownership."
 ---
 
 # CLAUDE.md Architecture

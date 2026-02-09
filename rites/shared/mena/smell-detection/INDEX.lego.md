@@ -1,6 +1,6 @@
 ---
 name: smell-detection
-description: "Code smell detection with severity classification. Triggers: smell detection, code smell, dead code, duplication, complexity."
+description: "Code smell detection with severity classification. Use when: assessing code quality, classifying detected smells by severity, using canonical smell taxonomy. Triggers: smell detection, code smell, dead code, duplication, complexity."
 ---
 
 # smell-detection
