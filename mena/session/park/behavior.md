@@ -34,11 +34,7 @@ See [parking-summary.md](parking-summary.md) for template.
 Session parking is managed via the Moirai (Lachesis - the Measurer):
 
 ```
-Task(moirai, "park_session reason='{user_reason}'
-
-Session Context:
-- Session ID: {session_id}
-- Session Path: .claude/sessions/{session_id}/SESSION_CONTEXT.md")
+Task(moirai, "park_session reason=\"{user_reason}\" session_id=\"{session_id}\"")
 ```
 
 The Moirai will route to **Lachesis** (the Measurer), who will:

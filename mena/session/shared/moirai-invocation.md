@@ -13,7 +13,7 @@
 
 ## Invocation Format
 
-Short form is canonical. Moirai resolves the active session automatically via `ari session status`. No session ID needed.
+Short form is canonical. Pass the session ID from the hook-injected Session Context table when available.
 
 ```
 Task(moirai, "{operation} {parameters}")
@@ -23,15 +23,17 @@ Task(moirai, "{operation} {parameters}")
 
 ```
 Task(moirai, "create_session initiative='Add dark mode' complexity=MODULE")
-Task(moirai, "park_session reason='Waiting for feedback'")
-Task(moirai, "resume_session")
-Task(moirai, "wrap_session")
+Task(moirai, "park_session reason='Waiting for feedback' session_id=\"<session-id>\"")
+Task(moirai, "resume_session session_id=\"<session-id>\"")
+Task(moirai, "wrap_session session_id=\"<session-id>\"")
 Task(moirai, "transition_phase to='implementation'")
 Task(moirai, "update_field current_phase='implementation'")
 Task(moirai, "create_sprint name='Sprint 1' goal='Core features' tasks='task1,task2'")
 Task(moirai, "mark_complete task_id='task-1'")
 Task(moirai, "handoff from=architect to=principal-engineer with notes: 'Design approved'")
 ```
+
+**Note**: For `park_session`, `resume_session`, and `wrap_session`, extract the session ID from the hook-injected `| Session | session-xxx |` context table and pass it as `session_id=`. The CLI cannot discover sessions from Bash subprocesses without this.
 
 ## Expected Response
 
