@@ -5,7 +5,7 @@ name: rnd
 version: "1.0.0"
 description: Technology exploration lifecycle for scouting, integration analysis, prototyping, and future architecture
 
-entry_agent: orchestrator
+entry_agent: pythia
 
 phases:
   - name: scouting
@@ -30,7 +30,7 @@ phases:
     description: Design long-term architecture and migration paths
 
 agents:
-  - name: orchestrator
+  - name: pythia
     role: Coordinates technology exploration phases
 
   - name: technology-scout

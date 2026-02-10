@@ -125,4 +125,4 @@ If consolidation is interrupted:
 ## Reference
 
 Full workflow documentation: `rites/docs/mena/doc-consolidation/INDEX.lego.md`
-Agent details: `.claude/agents/orchestrator.md`
+Agent details: `.claude/agents/pythia.md`

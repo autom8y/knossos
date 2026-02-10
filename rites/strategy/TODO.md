@@ -12,7 +12,7 @@ The strategy rite is a **well-designed, methodologically rigorous rite** with cl
 - Concrete acid tests ("Would an investor believe this?" "Would a CFO trust this?")
 - Anti-pattern documentation prevents common mistakes
 - All agents appropriately assigned to opus for reasoning-heavy work
-- Proper coach pattern for orchestrator (consultative, not executing)
+- Proper coach pattern for Pythia (consultative, not executing)
 - Sequential workflow with logical phase dependencies
 - Back-routes for failure recovery (partial)
 
@@ -92,7 +92,7 @@ The strategy rite is a **well-designed, methodologically rigorous rite** with cl
 
   **Workflow**:
   1. moonshot-architect produces MOONSHOT-*.md with business implications
-  2. User/orchestrator routes to strategy for business case validation
+  2. User/Pythia routes to strategy for business case validation
   3. roadmap-strategist evaluates: Does architecture change merit strategic initiative?
   4. If yes: Creates STRATEGY-*.md with resource/timeline/priority
   5. Routes to 10x-dev for implementation
@@ -162,7 +162,7 @@ The strategy rite is a **well-designed, methodologically rigorous rite** with cl
       description: "Pricing/positioning assumptions don't match competitive reality"
       requires_confirmation: false
   ```
-- [ ] Document in orchestrator guidance: When to trigger each back-route
+- [ ] Document in Pythia guidance: When to trigger each back-route
 
 ---
 

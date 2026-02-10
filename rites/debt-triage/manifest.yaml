@@ -5,7 +5,7 @@ name: debt-triage
 version: "1.0.0"
 description: Debt management lifecycle for collecting, assessing, and planning technical debt paydown
 
-entry_agent: orchestrator
+entry_agent: pythia
 
 phases:
   - name: collection
@@ -24,7 +24,7 @@ phases:
     description: Plan debt paydown sprints with resource allocation
 
 agents:
-  - name: orchestrator
+  - name: pythia
     role: Coordinates debt assessment and planning phases
 
   - name: debt-collector

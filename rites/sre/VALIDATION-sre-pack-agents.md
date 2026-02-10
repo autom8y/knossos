@@ -12,7 +12,7 @@
 | chaos-engineer.md | 246 | 139 | 43% |
 | observability-engineer.md | 211 | 136 | 36% |
 | incident-commander.md | 216 | 148 | 31% |
-| orchestrator.md | 295 | 170 | 42% |
+| pythia.md | 295 | 170 | 42% |
 | **Total** | **1308** | **729** | **44%** |
 
 All agents are now under the 200-line stretch goal.
@@ -26,14 +26,14 @@ All agents are now under the 200-line stretch goal.
 | chaos-engineer | OK | OK | OK | OK | OK | OK | YES |
 | incident-commander | OK | OK | OK | OK | OK | OK | YES |
 | observability-engineer | OK | OK | OK | OK | OK | OK | YES |
-| orchestrator | OK | OK | OK | OK | OK | OK | YES |
+| pythia | OK | OK | OK | OK | OK | OK | YES |
 | platform-engineer | OK | OK | OK | OK | OK | OK | YES |
 
 ---
 
 ## Required Sections Verification
 
-| Section | chaos | incident | observability | orchestrator | platform |
+| Section | chaos | incident | observability | pythia | platform |
 |---------|-------|----------|---------------|--------------|----------|
 | Core Responsibilities | YES | YES | YES | N/A* | YES |
 | Position in Workflow | YES | YES | YES | YES | YES |
@@ -45,8 +45,8 @@ All agents are now under the 200-line stretch goal.
 | Anti-Patterns | YES | YES | YES | YES | YES |
 | File Verification | YES | YES | YES | N/A** | YES |
 
-*Orchestrator uses different structure (Consultation Role, Tool Access, Consultation Protocol, Routing Criteria) appropriate for its advisory role.
-**Orchestrator has Read-only access; file verification not applicable.
+*Pythia uses different structure (Consultation Role, Tool Access, Consultation Protocol, Routing Criteria) appropriate for its advisory role.
+**Pythia has Read-only access; file verification not applicable.
 
 ---
 
@@ -59,7 +59,7 @@ Agent changes:
   + chaos-engineer.md (new)
   + incident-commander.md (new)
   + observability-engineer.md (new)
-  ~ orchestrator.md (modified in knossos)
+  ~ pythia.md (modified in knossos)
   + platform-engineer.md (new)
 ```
 

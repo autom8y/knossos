@@ -5,7 +5,7 @@ name: hygiene
 version: "1.0.0"
 description: Code quality lifecycle for smell detection, planning, and cleanup (Smell -> Plan -> Clean -> Audit)
 
-entry_agent: orchestrator
+entry_agent: pythia
 
 phases:
   - name: assessment
@@ -29,7 +29,7 @@ phases:
     description: Audit cleanup and sign off on quality improvements
 
 agents:
-  - name: orchestrator
+  - name: pythia
     role: Coordinates code hygiene initiative phases
 
   - name: code-smeller

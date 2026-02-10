@@ -12,7 +12,7 @@ Quality gates prevent low-quality work from propagating downstream. **Failing a 
 
 ## PRD Quality Gate
 
-**Owner**: Requirements Analyst produces -> Orchestrator verifies
+**Owner**: Requirements Analyst produces -> Pythia verifies
 
 | Criterion | Validation |
 |-----------|------------|
@@ -43,7 +43,7 @@ For complete PRD structure and expanded quality checklist, see [documentation/te
 
 ## TDD Quality Gate
 
-**Owner**: Architect produces -> Orchestrator verifies
+**Owner**: Architect produces -> Pythia verifies
 
 | Criterion | Validation |
 |-----------|------------|
@@ -61,7 +61,7 @@ For complete TDD structure and expanded quality checklist, see [documentation/te
 
 ## Implementation Quality Gate
 
-**Owner**: Principal Engineer produces -> Orchestrator verifies
+**Owner**: Principal Engineer produces -> Pythia verifies
 
 | Criterion | Validation |
 |-----------|------------|
@@ -75,7 +75,7 @@ For complete TDD structure and expanded quality checklist, see [documentation/te
 
 ## Validation Quality Gate
 
-**Owner**: QA/Adversary produces -> Orchestrator verifies
+**Owner**: QA/Adversary produces -> Pythia verifies
 
 | Criterion | Validation |
 |-----------|------------|

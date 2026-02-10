@@ -9,7 +9,7 @@ description: "10x workflow coordination and agent routing. Use when: understandi
 
 ## Protocol Overview
 
-The 10x Agentic Workflow achieves 10x productivity through specialized AI agents coordinated by an orchestrator:
+The 10x Agentic Workflow achieves 10x productivity through specialized AI agents coordinated by Pythia:
 
 - **Early clarity** - Requirements and scope validated before implementation
 - **Right-sized effort** - Complexity calibrated to actual need
@@ -84,7 +84,7 @@ When uncertain, default to requirements-analyst. Skipping phases is cheaper than
 | **Architect** | System design, technology selection | TDD, ADRs |
 | **Principal Engineer** | Implementation approach, code structure | Code, tests |
 | **QA/Adversary** | Test strategy, validation, release readiness | Test Plan |
-| **Orchestrator** | Session planning, quality gates, adaptive routing | (Coordinates) |
+| **Pythia** | Session planning, quality gates, adaptive routing | (Coordinates) |
 
 ### When to Route
 
@@ -112,11 +112,11 @@ When uncertain, default to requirements-analyst. Skipping phases is cheaper than
 
 Every session follows **PLAN -> CLARIFY -> EXECUTE -> VERIFY -> HANDOFF**:
 
-1. **PLAN** (Orchestrator): Define goal, prerequisites, deliverables, quality gate
-2. **CLARIFY** (Orchestrator + User): Surface ambiguities, get confirmation
+1. **PLAN** (Pythia): Define goal, prerequisites, deliverables, quality gate
+2. **CLARIFY** (Pythia + User): Surface ambiguities, get confirmation
 3. **EXECUTE** (Specialist): Plan approach, execute work, document decisions
-4. **VERIFY** (Orchestrator): Check quality gate, confirm handoff readiness
-5. **HANDOFF** (Orchestrator): Summarize outcomes, identify next inputs
+4. **VERIFY** (Pythia): Check quality gate, confirm handoff readiness
+5. **HANDOFF** (Pythia): Summarize outcomes, identify next inputs
 
 **Critical Rule**: Never execute without explicit user confirmation ("Proceed with the plan").
 
@@ -160,7 +160,7 @@ See [quality-gates.md](quality-gates.md) for complete criteria and workflow inte
 > **Note**: When modifying workflows or agents, update the Consultant knowledge base at `.claude/knowledge/consultant/` to keep `/consult` guidance accurate. See [consultant-sync.md](../rite-development/patterns/consultant-sync.md).
 
 **Agent configurations**: See `.claude/agents/` for full agent prompts:
-- [orchestrator.md](../../agents/orchestrator.md)
+- [pythia.md](../../agents/pythia.md)
 - [requirements-analyst.md](../../agents/requirements-analyst.md)
 - [architect.md](../../agents/architect.md)
 - [principal-engineer.md](../../agents/principal-engineer.md)

@@ -75,7 +75,7 @@ When behavior varies by context, use conditional tables that show which pattern 
 | **Cross-Cutting** | Yes | No | Direct execution + session tracking |
 | **Orchestrated** | Yes | Yes (ACTIVE) | Coach pattern, delegate via Task tool |
 
-Entry-point text should acknowledge all three modes. The user or orchestrator determines which applies based on current state.
+Entry-point text should acknowledge all three modes. The user or Pythia determines which applies based on current state.
 
 ### Principle 3: Route to /consult for Uncertainty
 

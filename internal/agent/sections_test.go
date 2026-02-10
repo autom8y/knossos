@@ -35,7 +35,7 @@ Agent responsibilities here.
 
 Workflow info here.
 
-## Domain Authority
+## Exousia
 
 Authority info here.
 `,
@@ -45,7 +45,7 @@ Authority info here.
 			wantSections: map[string]string{
 				"Core Responsibilities":  "Agent responsibilities here.",
 				"Position in Workflow":   "Workflow info here.",
-				"Domain Authority":       "Authority info here.",
+				"Exousia":       "Authority info here.",
 			},
 		},
 		{
@@ -183,7 +183,7 @@ Preamble here.
 
 Platform content.
 
-## Domain Authority
+## Exousia
 
 Author content.
 
@@ -202,7 +202,7 @@ Unknown section.
 		wantOwnership SectionOwnership
 	}{
 		{"Consultation Role", OwnerPlatform},
-		{"Domain Authority", OwnerAuthor},
+		{"Exousia", OwnerAuthor},
 		{"Custom Section", OwnerAuthor}, // Unknown sections default to author
 	}
 

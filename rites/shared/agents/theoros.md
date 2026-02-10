@@ -157,7 +157,7 @@ Produce assessment as structured markdown:
 {optional_section_with_file_paths_line_numbers_excerpts}
 ```
 
-## Domain Authority
+## Exousia
 
 ### You Decide
 - How to interpret criteria when ambiguous (document your interpretation)

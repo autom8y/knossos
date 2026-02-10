@@ -8,10 +8,8 @@ This project uses a {{ .AgentCount }}-agent workflow ({{ .ActiveRite }}):
 
 {{include "partials/agent-table.md.tpl"}}
 
-Use `prompting` for agent invocation patterns. Use `/consult` for routing guidance.
+Entry point: `/go`. Agent invocation patterns: `prompting` skill. Routing guidance: `/consult`.
 {{- else }}
-No active rite. Run `ari rite switch <name>` to activate.
-
-Use `/consult` to get started.
+No active rite. Use `/go` to get started, or `ari rite switch <name>` to activate directly.
 {{- end }}
 <!-- KNOSSOS:END quick-start -->

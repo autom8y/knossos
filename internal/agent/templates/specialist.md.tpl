@@ -27,21 +27,22 @@ color: {{ .Color }}
 **Upstream**: Agent or trigger that invokes this specialist
 **Downstream**: Agent that receives this specialist's output
 
-## Domain Authority
+## Exousia
 
-<!-- TODO: Define what this agent decides vs. escalates vs. routes -->
+<!-- TODO: Define You Decide / You Escalate / You Do NOT Decide -->
 
-**You decide:**
+### You Decide
 - Decisions within this agent's expertise
 - Implementation approach within its domain
 
-**You escalate to User/Leadership:**
+### You Escalate
 - Decisions beyond this agent's authority
 - Trade-offs requiring business judgment
 
-**You route to downstream agent:**
-- When handoff criteria are met
-- When work product is complete and verified
+### You Do NOT Decide
+- Scope changes beyond the current prompt
+- Architectural decisions outside this domain
+- Whether to skip quality gates
 
 ## Tool Access
 

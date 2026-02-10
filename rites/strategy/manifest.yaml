@@ -5,7 +5,7 @@ name: strategy
 version: "1.0.0"
 description: Business strategy lifecycle for market research, competitive analysis, business modeling, and strategic planning
 
-entry_agent: orchestrator
+entry_agent: pythia
 
 phases:
   - name: market-research
@@ -30,7 +30,7 @@ phases:
     description: Create strategic roadmap with go/no-go recommendations
 
 agents:
-  - name: orchestrator
+  - name: pythia
     role: Coordinates strategic initiative phases
 
   - name: market-researcher

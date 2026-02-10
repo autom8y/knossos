@@ -379,7 +379,7 @@ func (g *Generator) generateQuickStartContent() (string, error) {
 	sb.WriteString("\n\n")
 
 	// Footer
-	sb.WriteString("Use `prompting` for agent invocation patterns. Use `/consult` for routing guidance.")
+	sb.WriteString("Entry point: `/go`. Agent invocation patterns: `prompting` skill. Routing guidance: `/consult`.")
 
 	return sb.String(), nil
 }
@@ -441,17 +441,22 @@ Three operating modes:
 |------|---------|------|---------------------|
 | **Native** | No | - | Direct execution, no tracking |
 | **Cross-Cutting** | Yes | No | Direct execution + session tracking |
-| **Orchestrated** | Yes | Yes (ACTIVE) | Coach pattern, delegate via Task tool |
+| **Orchestrated** | Yes | Yes (ACTIVE) | Pythia coordinates; delegate via Task tool |
 
-Use ` + "`/consult`" + ` for mode selection.`
+Use ` + "`/go`" + ` to start any session. Use ` + "`/consult`" + ` for mode selection.`
 }
 
 func (g *Generator) getDefaultAgentRoutingContent() string {
 	return `## Agent Routing
 
-In orchestrated sessions, delegate to specialists via Task tool. Without a session, execute directly or use ` + "`/task`" + `.
+**Pythia** coordinates each rite's workflow — routing tasks to specialists, verifying phase gates, and managing handoffs. In orchestrated sessions, the main thread delegates to specialists via Task tool.
 
-Routing guidance: ` + "`/consult`"
+Every agent defines its authority via **Exousia** (jurisdiction contract):
+- **You Decide**: Actions within the agent's autonomous authority
+- **You Escalate**: Situations requiring Pythia or user input
+- **You Do NOT Decide**: Boundaries the agent must never cross
+
+Without a session, execute directly or use ` + "`/task`" + `. Routing guidance: ` + "`/consult`" + `.`
 }
 
 func (g *Generator) getDefaultCommandsContent() string {
@@ -474,19 +479,17 @@ Full mapping: ` + "`lexicon`" + ` skill. Dromena list: ` + "`.claude/commands/`"
 func (g *Generator) getDefaultPlatformInfrastructureContent() string {
 	return `## Platform
 
-Hooks auto-inject session context. CLI reference: ` + "`ari --help`" + `.
-Mutate ` + "`*_CONTEXT.md`" + ` only via ` + "`Task(moirai, \"...\")`" + `.`
+**Entry**: ` + "`/go`" + ` — cold-start dispatcher. Detects session state, resumes parked work, or routes new tasks.
+
+**Sessions**: Managed by Moirai agent via ` + "`/start`" + `, ` + "`/park`" + `, ` + "`/continue`" + `, ` + "`/wrap`" + `. Moirai loads Fate skills (Clotho/Lachesis/Atropos) for progressive context. Mutate ` + "`*_CONTEXT.md`" + ` only via ` + "`Task(moirai, \"...\")`" + `.
+
+**Hooks**: Auto-inject session context on start; autopark on stop. CLI reference: ` + "`ari --help`" + `.`
 }
 
 func (g *Generator) getDefaultQuickStartContent() string {
 	return `## Quick Start
 
-This project uses a multi-agent workflow:
-
-| Agent | Role |
-| ----- | ---- |
-
-Use ` + "`prompting`" + ` for agent invocation patterns. Use ` + "`/consult`" + ` for routing guidance.`
+No active rite. Use ` + "`/go`" + ` to get started, or ` + "`ari rite switch <name>`" + ` to activate directly.`
 }
 
 func (g *Generator) getDefaultAgentConfigsContent() string {

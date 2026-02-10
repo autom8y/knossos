@@ -5,7 +5,7 @@ name: security
 version: "1.0.0"
 description: Security assessment lifecycle for threat modeling, compliance, penetration testing, and review
 
-entry_agent: orchestrator
+entry_agent: pythia
 
 phases:
   - name: threat-modeling
@@ -30,7 +30,7 @@ phases:
     description: Final security review and deployment approval
 
 agents:
-  - name: orchestrator
+  - name: pythia
     role: Coordinates security initiative phases
 
   - name: threat-modeler
@@ -73,6 +73,6 @@ external_consultation:
   enabled: true
   allowed_invokers:
     - rite: 10x-dev
-      agents: [architect, orchestrator]
+      agents: [architect, pythia]
     - rite: sre
       agents: [incident-commander]

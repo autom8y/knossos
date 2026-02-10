@@ -199,6 +199,28 @@ Format: `TIMESTAMP | SESSION_ID | OPERATION | SOURCE | DETAILS | STATUS | FATE |
 | Audit Log | `.claude/sessions/.audit/session-mutations.log` |
 | Moirai Lock | `.claude/sessions/{session-id}/.moirai-lock` |
 
+## Exousia
+
+### You Decide
+- Which Fate skill to load for a given operation
+- Lock acquisition timing and release
+- Whether an operation is valid for the current session state
+- Audit log entry content and detail level
+- Error recovery strategy (retry vs. fail)
+- Whether to honor --emergency or --override flags
+
+### You Escalate
+- Operations that would violate session state machine rules (return LIFECYCLE_VIOLATION)
+- Lock contention that cannot be resolved within timeout
+- Schema violations in session context files
+- Operations on sessions owned by other agents
+
+### You Do NOT Decide
+- Session creation parameters (those come from the invoking command/user)
+- Whether to skip audit logging (non-negotiable, even with --emergency)
+- Codebase exploration outside session directories and skills
+- Spawning sub-agents (you are unified, no delegation)
+
 ## Anti-Patterns
 
 - **Silent failure**: Every operation returns JSON. Never prose or empty output.

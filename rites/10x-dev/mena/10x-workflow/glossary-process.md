@@ -20,20 +20,20 @@
 ---
 
 ### Prompt 0 (Initialization Phase)
-**Definition**: The orchestrator initialization document that establishes mission context, defines success criteria, and structures the session-phased approach. Seeds the orchestrator with everything it needs to coordinate the workflow.
+**Definition**: The Pythia initialization document that establishes mission context, defines success criteria, and structures the session-phased approach. Seeds Pythia with everything it needs to coordinate the workflow.
 
-**Owner**: User (creates) -> Orchestrator (consumes)
+**Owner**: User (creates) -> Pythia (consumes)
 
 **Outputs**: Mission statement, session plan, trigger prompts, quality gates, context checklists
 
-**Key Principle**: The orchestrator should be able to execute the entire workflow from Prompt 0 without additional context gathering.
+**Key Principle**: Pythia should be able to execute the entire workflow from Prompt 0 without additional context gathering.
 
 ---
 
 ### Session
 **Definition**: A discrete phase of work with a specific agent, clear deliverable, and quality gate. Sessions are the atomic unit of the workflow.
 
-**Owner**: Orchestrator (defines) -> Specialist Agent (executes)
+**Owner**: Pythia (defines) -> Specialist Agent (executes)
 
 **Outputs**: Phase-specific deliverable (PRD, TDD, code, validation report)
 

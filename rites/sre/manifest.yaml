@@ -5,7 +5,7 @@ name: sre
 version: "1.0.0"
 description: Reliability engineering lifecycle for observability, coordination, implementation, and resilience testing
 
-entry_agent: orchestrator
+entry_agent: pythia
 
 phases:
   - name: observation
@@ -30,7 +30,7 @@ phases:
     description: Test system resilience through chaos engineering
 
 agents:
-  - name: orchestrator
+  - name: pythia
     role: Coordinates reliability engineering initiative phases
 
   - name: observability-engineer
