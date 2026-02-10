@@ -304,7 +304,7 @@ Validates workflow YAML files against schema requirements including required fie
 ```
 workflow.yaml
     |
-    +-- Defines phase sequence for orchestrator
+    +-- Defines phase sequence for Pythia
     |
     +-- Maps complexity to phase selection
     |

@@ -5,7 +5,7 @@ name: forge
 version: "1.0.0"
 description: Agent pantheon creation lifecycle (Design -> Prompts -> Workflow -> Platform -> Catalog -> Validation)
 
-entry_agent: orchestrator
+entry_agent: pythia
 
 phases:
   - name: design
@@ -41,7 +41,7 @@ phases:
     description: Evaluate and validate agent pantheon readiness
 
 agents:
-  - name: orchestrator
+  - name: pythia
     role: Coordinates agent pantheon creation phases
 
   - name: agent-designer

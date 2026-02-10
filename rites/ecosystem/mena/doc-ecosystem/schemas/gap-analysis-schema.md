@@ -268,7 +268,7 @@ validate_gap_analysis() {
 
 ## Handoff Criteria
 
-When Gap Analysis phase completes, orchestrator verifies:
+When Gap Analysis phase completes, Pythia verifies:
 
 - [ ] `type` is "gap-analysis"
 - [ ] `status` is "ready-for-design"

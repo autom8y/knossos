@@ -120,13 +120,15 @@ Minos does not enter the labyrinth. Minos waits. And the waiting is its own kind
 
 Before every great journey, Greeks traveled to Delphi to consult the **Pythia** -- the priestess who sat upon the tripod above the chasm, breathing the vapors of prophecy. Her words shaped expeditions, wars, and colonizations.
 
-In Knossos, the Pythia is the **orchestrator** -- the voice consulted before and during the journey. Unlike the historical Pythia, our oracle speaks clearly. The Pythia provides:
+In Knossos, the Pythia is the **rite entry agent** -- the voice consulted before and during the journey. Unlike the historical Pythia, our oracle speaks clearly. Each rite has its own Pythia at `rites/*/agents/pythia.md`. The Pythia provides:
 
 - Work breakdown and phase planning
 - Specialist routing (which hero for which labor)
 - Checkpoint guidance (what to do next)
 
-When uncertain, `/consult` the Pythia. The oracle's clarity is a design choice: ambiguity belongs to the labyrinth, not to the guide.
+Every Pythia (and every hero) carries an **Exousia** -- an authority contract declaring what the agent decides autonomously, what it escalates, and what it must never decide. Exousia makes jurisdiction explicit and auditable.
+
+When uncertain, `/consult` the Pythia. For cold starts without a session, `/go` dispatches to the appropriate Pythia. The oracle's clarity is a design choice: ambiguity belongs to the labyrinth, not to the guide.
 
 ### The Watchers: Aegeus
 
@@ -503,7 +505,8 @@ This is not bureaucracy—it is the only way to guarantee validity, consistency,
 | **Clotho** | Session bootstrap agent | The Fate who spins the clew into existence |
 | **Lachesis** | State mutation agent | The Fate who measures and tracks |
 | **Atropos** | Session termination agent | The Fate who cuts when complete |
-| **Pythia** | Orchestrator | The oracle who provides clear guidance |
+| **Pythia** | Rite entry agent (`rites/*/agents/pythia.md`) | The oracle who provides clear guidance |
+| **Exousia** | Authority contract (`## Exousia` in agents) | Jurisdictional boundaries -- Decide / Escalate / Do NOT Decide |
 | **Daedalus** | Forge-rite | The builder of tools and agents |
 | **Minos** | Stakeholder | The commissioner who demands tribute |
 | **Minotaur** | The task/initiative | The reason you entered the labyrinth |
@@ -578,6 +581,9 @@ For those encountering older documentation:
 | `domain-auditor` | `theoros` / `theoroi` | Working name from spike; mythological name in doctrine |
 | `state-of-ref` | `pinakes` | Working name from spike; mythological name for domain registry |
 | `/state-of` | `/theoria` | Working name from spike; mythological name for audit command |
+| `orchestrator.md` | `pythia.md` | All rite orchestrators renamed to `rites/*/agents/pythia.md` |
+| `Domain Authority` | `Exousia` | Agent jurisdiction section renamed; 3-part contract |
+| `user-agents/` | `agents/` or `rites/*/agents/` | Cross-cutting agents at `agents/`; rite-specific at `rites/*/agents/` |
 
 ---
 
@@ -607,7 +613,8 @@ This section documents known divergences between the doctrine and the current im
 | `Moirai` (3 agents) | `state-mate` (1 agent) | moirai.md created; split pending |
 | `Rite` | `team-pack` | Doctrine complete; rename pending |
 | `ACTIVE_RITE` | `ACTIVE_RITE` | COMPLETE |
-| `Pythia` | `orchestrator` | Name alignment pending |
+| `Pythia` | `pythia.md` | COMPLETE -- all rites renamed to `rites/*/agents/pythia.md` |
+| `Exousia` | `## Exousia` section | COMPLETE -- all ~60 agents carry 3-part authority contract |
 | `heroes` | `agents` | Mythology uses heroes; technical docs use agents |
 
 ### Concepts Documented but Not Fully Implemented

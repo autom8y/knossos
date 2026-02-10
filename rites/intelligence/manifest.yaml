@@ -5,7 +5,7 @@ name: intelligence
 version: "1.0.0"
 description: Product analytics lifecycle for instrumentation, research, experimentation, and insights synthesis
 
-entry_agent: orchestrator
+entry_agent: pythia
 
 phases:
   - name: instrumentation
@@ -30,7 +30,7 @@ phases:
     description: Synthesize data into actionable insights
 
 agents:
-  - name: orchestrator
+  - name: pythia
     role: Coordinates analytics and research initiative phases
 
   - name: analytics-engineer

@@ -6,7 +6,7 @@
 
 | Agent | Role Clarity | Instruction Precision | Constraint Completeness | Example Quality | Structure Adherence | Token Efficiency | **Total** |
 |-------|-------------|----------------------|------------------------|----------------|--------------------|-----------------:|-------:|
-| orchestrator | 4 | 4 | 5 | 4 | 5 | 3 | **25** |
+| pythia | 4 | 4 | 5 | 4 | 5 | 3 | **25** |
 | analytics-engineer | 4 | 4 | 4 | 2 | 4 | 4 | **22** |
 | user-researcher | 3 | 3 | 4 | 2 | 4 | 3 | **19** |
 | experimentation-lead | 3 | 3 | 4 | 2 | 4 | 4 | **20** |
@@ -18,11 +18,11 @@
 2. **insights-analyst** (19/30) - Tied for lowest
 3. **experimentation-lead** (20/30) - Close third
 4. **analytics-engineer** (22/30) - Moderate improvements needed
-5. **orchestrator** (25/30) - Best baseline, minor polish
+5. **pythia** (25/30) - Best baseline, minor polish
 
 ---
 
-## Detailed Audit: orchestrator.md
+## Detailed Audit: pythia.md
 
 **Lines**: 293 | **Current Quality**: Good baseline
 
@@ -270,4 +270,4 @@ Based on audit scores and improvement potential:
 2. **insights-analyst** (19/30) - Generic role definition, missing examples
 3. **experimentation-lead** (20/30) - Needs statistical specificity
 4. **analytics-engineer** (22/30) - Good structure, needs examples
-5. **orchestrator** (25/30) - Polish only, compress token usage
+5. **pythia** (25/30) - Polish only, compress token usage

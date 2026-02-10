@@ -1,5 +1,5 @@
 # Orchestrator configuration for hygiene
-# Used by generate-orchestrator.sh to produce orchestrator.md
+# Used by generate-orchestrator.sh to produce pythia.md
 
 rite:
   name: hygiene

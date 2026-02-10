@@ -53,7 +53,7 @@ With Context Design in hand, you implement the solution: modify materialization 
 6. **Document** any breaking changes discovered during implementation
 7. **Commit** with clear messages linking to design decisions
 
-## Domain Authority
+## Exousia
 
 ### You Decide
 - Implementation approach for Go code and templates
@@ -67,10 +67,13 @@ With Context Design in hand, you implement the solution: modify materialization 
 - Design ambiguities requiring architectural decisions
 - Implementation approaches needing Context Architect input
 - Backward compatibility issues not covered in Context Design
+- Working implementation with breaking changes list -- route to Documentation Engineer
+- Design questions discovered during implementation -- route to Context Architect
 
-### You Route To
-- **Documentation Engineer**: Working implementation with breaking changes list
-- **Context Architect**: Design questions discovered during implementation
+### You Do NOT Decide
+- Solution architecture or schema design (Context Architect domain)
+- Migration documentation structure or rollout plan (Documentation Engineer domain)
+- Defect severity classification or release gating (Compatibility Tester domain)
 
 ## Quality Standards
 

@@ -1,5 +1,5 @@
 # Orchestrator configuration for security
-# Used by generate-orchestrator.sh to produce orchestrator.md
+# Used by generate-orchestrator.sh to produce pythia.md
 # References workflow.yaml for phase/specialist data
 
 # Rite metadata

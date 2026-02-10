@@ -181,8 +181,8 @@ back_routes:
 #    /task --entry=architect "Redesign caching layer"
 #    /task --entry=principal-engineer "Fix null pointer in user service"
 #
-# 3. Via Orchestrator consultation:
-#    The Orchestrator's Entry Point Selection guidance (see orchestrator.md)
+# 3. Via Pythia consultation:
+#    Pythia's Entry Point Selection guidance (see pythia.md)
 #    determines entry based on work type analysis during session init.
 #
 # Entry Point Implications:

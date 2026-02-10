@@ -12,7 +12,7 @@ The sre rite is a **production-ready, well-optimized rite** (44% token reduction
 - Comprehensive doc-sre templates (9 templates)
 - Clear separation from other teams (10x builds, sre validates)
 - Chaos engineer blast radius controls are well-documented
-- Orchestrator is properly consultative (read-only)
+- Pythia is properly consultative (read-only)
 
 **Architecture validated:**
 - Runbook ownership clear - SRE owns operational docs, docs rite owns external user docs

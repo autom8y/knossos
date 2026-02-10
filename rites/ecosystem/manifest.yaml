@@ -5,7 +5,7 @@ name: ecosystem
 version: "1.0.0"
 description: Ecosystem infrastructure lifecycle for sync pipeline/knossos changes (Analysis -> Design -> Implementation -> Documentation -> Validation)
 
-entry_agent: orchestrator
+entry_agent: pythia
 
 phases:
   - name: analysis
@@ -36,7 +36,7 @@ phases:
     description: Validate ecosystem changes across satellite diversity
 
 agents:
-  - name: orchestrator
+  - name: pythia
     role: Coordinates ecosystem infrastructure phases
 
   - name: ecosystem-analyst

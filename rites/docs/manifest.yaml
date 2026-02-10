@@ -5,7 +5,7 @@ name: docs
 version: "1.0.0"
 description: Documentation lifecycle from audit through review (Audit -> Structure -> Write -> Review)
 
-entry_agent: orchestrator
+entry_agent: pythia
 
 phases:
   - name: audit
@@ -30,7 +30,7 @@ phases:
     description: Review documentation for accuracy and quality
 
 agents:
-  - name: orchestrator
+  - name: pythia
     role: Coordinates documentation workflow phases
 
   - name: doc-auditor

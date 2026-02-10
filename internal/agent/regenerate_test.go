@@ -23,7 +23,7 @@ Orchestrator for testing.
 
 OLD PLATFORM CONTENT - should be replaced.
 
-## Domain Authority
+## Exousia
 
 AUTHOR CONTENT - should be preserved exactly.
 
@@ -60,9 +60,9 @@ AUTHOR CONTENT - phase routing table.
 	}
 
 	// Verify author sections were preserved
-	domainAuthority := updated.FindSection("domain-authority")
+	domainAuthority := updated.FindSection("exousia")
 	if domainAuthority == nil {
-		t.Fatal("domain-authority section not found")
+		t.Fatal("exousia section not found")
 	}
 	if !strings.Contains(domainAuthority.Content, "AUTHOR CONTENT - should be preserved exactly") {
 		t.Errorf("author section was modified: %q", domainAuthority.Content)
@@ -121,9 +121,9 @@ Existing responsibilities.
 	}
 
 	// Verify missing author section was added with TODO
-	domainAuth := updated.FindSection("domain-authority")
+	domainAuth := updated.FindSection("exousia")
 	if domainAuth == nil {
-		t.Fatal("domain-authority section not found (should be added)")
+		t.Fatal("exousia section not found (should be added)")
 	}
 	if !strings.Contains(domainAuth.Content, "TODO") {
 		t.Error("missing author section should have TODO marker")
@@ -221,7 +221,7 @@ This is the preamble.
 
 Responsibilities here.
 
-## Domain Authority
+## Exousia
 
 Authority here.
 `

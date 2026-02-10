@@ -41,14 +41,19 @@ The transformer—code review process that elevates work from isolation to merge
 - **Related**: Code Review, QA, Elevation
 - **Source**: Review workflows, White Sails QA upgrade
 
+### Exousia
+Authority contract defining an agent's jurisdictional boundaries. Every agent declares three subsections: You Decide (autonomous authority), You Escalate (requires Pythia or user input), You Do NOT Decide (hard boundaries). Named from the Greek exousia (authority, jurisdiction).
+- **Related**: Pythia, Agent Contract, Jurisdiction
+- **Source**: `## Exousia` section in every agent `.md` file
+
 ### Heroes
 Specialist agents invoked via Task tool for specific labors, defined in rite manifests. Summoned mid-journey with clew context.
 - **Related**: Agents, Task Tool, Rite
-- **Source**: `user-agents/`, `rites/[rite-name]/agents/`
+- **Source**: `rites/[rite-name]/agents/`
 
 ### Inscription
-The `CLAUDE.md` file declaring available rites, agents, execution mode, and hooks. Words carved at the labyrinth entrance.
-- **Related**: CLAUDE.md, Knossos Sections
+The `CLAUDE.md` file declaring available rites, agents, execution mode, and hooks. Words carved at the labyrinth entrance. Mentions Pythia for routing, Exousia for authority contracts, `/go` for cold-start entry, and the Fates for session lifecycle.
+- **Related**: CLAUDE.md, Knossos Sections, Pythia, Exousia, `/go`
 - **Source**: `knossos/templates/CLAUDE.md.tpl`
 
 ### Knossos
@@ -69,7 +74,7 @@ Stakeholders who create initiatives and demand tribute (status reports and demos
 ### Moirai
 The Fates—centralized session lifecycle agent. Clotho spins (create), Lachesis measures (update), Atropos cuts (end).
 - **Related**: Session Lifecycle, State Authority
-- **Source**: `user-agents/moirai.md`
+- **Source**: `agents/moirai.md`
 
 ### Naxos
 Shore of abandonment—orphaned sessions created but never wrapped. Detected for cleanup or resumption.
@@ -82,9 +87,9 @@ The domain registry legomena for audit operations. Catalogs audit targets, evalu
 - **Source**: Planned: `rites/shared/mena/pinakes/`
 
 ### Pythia
-The Oracle—orchestrator agents providing work breakdown, specialist routing, and checkpoint guidance. Speaks clearly, not cryptically.
-- **Related**: Orchestrator, Consultation, Routing
-- **Source**: `user-agents/orchestrator.md`
+The Oracle—rite entry agents providing work breakdown, specialist routing, and checkpoint guidance. Speaks clearly, not cryptically. Each rite has its own Pythia.
+- **Related**: Orchestrator, Consultation, Routing, Exousia
+- **Source**: `rites/*/agents/pythia.md` (each rite has its own)
 
 ### Synkrisis
 Comparative synthesis step following parallel domain evaluations. Weaves individual theoros reports into cross-domain patterns and the final "State of the {X}" attestation. Named for Plutarch's comparative analysis technique in the *Parallel Lives*.

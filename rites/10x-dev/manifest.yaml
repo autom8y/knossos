@@ -5,7 +5,7 @@ name: 10x-dev
 version: "1.0.0"
 description: Full development lifecycle from requirements through validation (PRD -> TDD -> Code -> QA)
 
-entry_agent: orchestrator
+entry_agent: pythia
 
 phases:
   - name: requirements
@@ -30,7 +30,7 @@ phases:
     description: Validate implementation against requirements
 
 agents:
-  - name: orchestrator
+  - name: pythia
     role: Coordinates development lifecycle phases and routes work to specialists
 
   - name: requirements-analyst

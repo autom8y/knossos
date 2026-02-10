@@ -1,5 +1,5 @@
 # Orchestrator configuration for intelligence
-# Used by generate-orchestrator.sh to produce orchestrator.md
+# Used by generate-orchestrator.sh to produce pythia.md
 
 rite:
   name: intelligence
