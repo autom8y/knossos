@@ -30,7 +30,7 @@ You are a **prompter**. Your only skill is `prompting`. The Orchestrator is your
 - If failed: Orchestrator provides feedback, re-invoke specialist
 5. IF questions/concerns raised:
 - Present to me (the user) verbatim
-- Return my answers to the specialist (resume same instance)
+- Return my answers to the specialist (spawn new instance with context)
 - Continue from step 3
 
 **Continue autonomously** until:

@@ -11,7 +11,7 @@ description: "Moirai routing table for Fate domains (Clotho/Lachesis/Atropos). U
 
 | Operation | Fate | Domain | CLI Command |
 |-----------|------|--------|-------------|
-| create_session | Clotho | Creation | `ari session create "{initiative}" -c "{complexity}"` |
+| create_session | Clotho | Creation | `ari session create "{initiative}" -c "{complexity}" [-r {rite}]` |
 | create_sprint | Clotho | Creation | — |
 | mark_complete | Lachesis | Measurement | — |
 | transition_phase | Lachesis | Measurement | `ari session transition {phase}` |
@@ -21,7 +21,7 @@ description: "Moirai routing table for Fate domains (Clotho/Lachesis/Atropos). U
 | handoff | Lachesis | Measurement | `ari handoff execute --artifact={artifact} --to={agent}` |
 | record_decision | Lachesis | Measurement | — |
 | append_content | Lachesis | Measurement | — |
-| wrap_session | Atropos | Termination | `ari session wrap` |
+| wrap_session | Atropos | Termination | `ari session wrap [--force]` |
 | generate_sails | Atropos | Termination | `ari sails check` |
 | delete_sprint | Atropos | Termination | — |
 
@@ -51,5 +51,5 @@ When executing an operation:
 ## Control Flags
 
 - `--dry-run`: Preview operation without execution
-- `--emergency`: Bypass non-critical validations
+- `--force`: Bypass non-critical validations
 - `--override`: Bypass lifecycle rules (requires reason)

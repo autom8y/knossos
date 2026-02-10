@@ -1,4 +1,4 @@
-# /resume Examples
+# /continue Examples
 
 > Usage scenarios for resuming parked work sessions.
 
@@ -55,7 +55,7 @@ Session Details:
 - Started: 2025-12-23 14:00:00
 - Parked: 2025-12-23 17:00:00 (1 day ago)
 - Park reason: Waiting for design review
-- Complexity: SERVICE
+- Complexity: SYSTEM
 - Rite: 10x-dev
 - Current phase: design
 - Last agent: architect
@@ -137,7 +137,7 @@ Session Details:
 - Started: 2025-12-20 10:00:00
 - Parked: 2025-12-20 16:00:00 (4 days ago)
 - Park reason: End of sprint
-- Complexity: SERVICE
+- Complexity: SYSTEM
 - Current phase: implementation
 - Last agent: principal-engineer
 

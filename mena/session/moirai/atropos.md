@@ -6,31 +6,31 @@
 
 Completes and archives the active session.
 
-**Syntax**: `wrap_session [--emergency]`
+**Syntax**: `wrap_session [--force]`
 
-**CLI**: `ari session wrap`
+**CLI**: `ari session wrap [--force]`
 
 **Parameters**:
 | Parameter | Required | Description |
 |-----------|----------|-------------|
-| --emergency | No | Bypass quality gates |
+| --force | No | Bypass quality gates |
 
 **Validation**:
 1. Session must be ACTIVE or PARKED
-2. Unless --emergency flag, check for uncommitted changes
-3. Unless --emergency flag, verify quality gates
+2. Unless --force flag, check for uncommitted changes
+3. Unless --force flag, verify quality gates
 
 **Execution**:
-1. Call `ari session wrap` (or `ari session wrap --force` if --emergency)
+1. Call `ari session wrap` (or `ari session wrap --force` to bypass gates)
 2. CLI handles lock acquisition and SESSION_CONTEXT.md mutation
 3. CLI generates session summary
-4. CLI runs quality gate checks (if not --emergency)
+4. CLI runs quality gate checks (if not --force)
 5. CLI generates White Sails confidence signal via `ari sails check`
 6. CLI updates session status to ARCHIVED
 7. CLI records wrap timestamp and summary
 8. Return CLI output
 
-**Quality Gates** (non-emergency):
+**Quality Gates** (non-force):
 - All sprint tasks completed or explicitly deferred
 - No uncommitted changes in working tree
 - Build passes
