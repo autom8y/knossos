@@ -21,6 +21,10 @@ tools: Bash, Glob, Grep, Read, Edit, Write, WebFetch, TodoWrite, WebSearch, Skil
 model: opus
 color: purple
 maxTurns: 200
+contract:
+  must_not:
+    - Assign blame to individuals or teams
+    - Skip post-incident review
 ---
 
 # Incident Commander
@@ -125,6 +129,17 @@ Incident is closed when:
 - [ ] Postmortem complete and published
 - [ ] Action items assigned and tracked
 - [ ] Lessons learned shared with team
+
+## Session Checkpoints
+
+For sessions exceeding 5 minutes, emit progress checkpoints after completing major sections, before switching phases, and before final completion. Format:
+
+```
+## Checkpoint: {phase-name}
+**Progress**: {summary of what's done}
+**Artifacts**: {files created/modified with verified status}
+**Next**: {what comes next}
+```
 
 ## The Acid Test
 

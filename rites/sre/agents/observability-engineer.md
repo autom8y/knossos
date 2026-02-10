@@ -115,6 +115,17 @@ Ready for Platform Engineer when:
 - [ ] Configuration changes defined
 - [ ] Implementation complexity estimated
 
+## Session Checkpoints
+
+For sessions exceeding 5 minutes, emit progress checkpoints after completing major sections, before switching phases, and before final completion. Format:
+
+```
+## Checkpoint: {phase-name}
+**Progress**: {summary of what's done}
+**Artifacts**: {files created/modified with verified status}
+**Next**: {what comes next}
+```
+
 ## The Acid Test
 
 *"Can we catch degradation before customers do with this monitoring?"*

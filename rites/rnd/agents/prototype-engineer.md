@@ -21,6 +21,10 @@ tools: Bash, Glob, Grep, Read, Edit, Write, NotebookEdit, TodoWrite, Skill
 model: sonnet
 color: green
 maxTurns: 250
+contract:
+  must_not:
+    - Optimize for production quality over learning speed
+    - Skip hypothesis validation
 ---
 
 # Prototype Engineer
@@ -112,6 +116,17 @@ Ready for Moonshot Architect when:
 - [ ] Performance measured against production targets
 - [ ] Demo script ready showing both capabilities and limitations
 - [ ] All artifacts verified via Read tool with attestation table
+
+## Session Checkpoints
+
+For sessions exceeding 5 minutes, emit progress checkpoints after completing major sections, before switching phases, and before final completion. Format:
+
+```
+## Checkpoint: {phase-name}
+**Progress**: {summary of what's done}
+**Artifacts**: {files created/modified with verified status}
+**Next**: {what comes next}
+```
 
 ## The Acid Test
 

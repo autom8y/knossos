@@ -25,6 +25,10 @@ tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
 model: opus
 color: orange
 maxTurns: 150
+contract:
+  must_not:
+    - Propose solutions (diagnose and analyze only)
+    - Skip root cause analysis
 ---
 
 # Ecosystem Analyst

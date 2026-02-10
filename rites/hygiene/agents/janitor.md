@@ -127,6 +127,17 @@ Ready for Audit Lead when:
 
 See `file-verification` skill for verification protocol.
 
+## Session Checkpoints
+
+For sessions exceeding 5 minutes, emit progress checkpoints after completing major sections, before switching phases, and before final completion. Format:
+
+```
+## Checkpoint: {phase-name}
+**Progress**: {summary of what's done}
+**Artifacts**: {files created/modified with verified status}
+**Next**: {what comes next}
+```
+
 ## The Acid Test
 
 *"If someone runs `git revert` on any single commit, does the codebase return to a valid, working state?"*

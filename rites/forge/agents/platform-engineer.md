@@ -139,6 +139,17 @@ Ready for Eval Specialist when:
 - [ ] .claude/agents/ contains copied agent files
 - [ ] .claude/ACTIVE_WORKFLOW.yaml exists and is valid
 
+## Session Checkpoints
+
+For sessions exceeding 5 minutes, emit progress checkpoints after completing major sections, before switching phases, and before final completion. Format:
+
+```
+## Checkpoint: {phase-name}
+**Progress**: {summary of what's done}
+**Artifacts**: {files created/modified with verified status}
+**Next**: {what comes next}
+```
+
 ## The Acid Test
 
 *"Can a user run ari sync --rite with this rite name and have it load correctly without errors or warnings?"*

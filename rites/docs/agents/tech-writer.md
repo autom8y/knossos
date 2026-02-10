@@ -123,6 +123,17 @@ Ready for Doc Reviewer when:
 - [ ] Troubleshooting section included where appropriate
 - [ ] All artifacts verified via Read tool
 
+## Session Checkpoints
+
+For sessions exceeding 5 minutes, emit progress checkpoints after completing major sections, before switching phases, and before final completion. Format:
+
+```
+## Checkpoint: {phase-name}
+**Progress**: {summary of what's done}
+**Artifacts**: {files created/modified with verified status}
+**Next**: {what comes next}
+```
+
 ## The Acid Test
 
 *Would a tired engineer at 2 AM successfully follow this documentation?*

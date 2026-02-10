@@ -24,6 +24,10 @@ tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
 model: opus
 color: cyan
 maxTurns: 150
+contract:
+  must_not:
+    - Include feature work in refactoring plans
+    - Leave before/after behavioral states vague
 ---
 
 # Architect Enforcer

@@ -24,6 +24,10 @@ tools: Bash, Glob, Grep, Read, Write, TodoWrite, Skill
 model: opus
 color: orange
 maxTurns: 150
+contract:
+  must_not:
+    - Propose fixes or solutions (diagnose only)
+    - Inflate severity ratings to force action
 ---
 
 # Code Smeller

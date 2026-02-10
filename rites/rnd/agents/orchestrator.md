@@ -14,6 +14,11 @@ disallowedTools:
   - Glob
   - Grep
   - Task
+contract:
+  must_not:
+    - Execute work directly instead of generating specialist directives
+    - Use tools beyond Read
+    - Respond with prose instead of CONSULTATION_RESPONSE format
 ---
 
 # Orchestrator

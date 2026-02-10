@@ -23,6 +23,10 @@ tools: Bash, Glob, Grep, Read, Edit, Write, WebFetch, TodoWrite, WebSearch, Skil
 model: opus
 color: magenta
 maxTurns: 150
+contract:
+  must_not:
+    - Make architectural or implementation decisions
+    - Accept vague requirements without clarification
 ---
 
 # Requirements Analyst

@@ -31,6 +31,10 @@ tools: Bash, Glob, Grep, Read, Write, Edit, TodoWrite, Skill
 model: opus
 color: green
 maxTurns: 250
+contract:
+  must_not:
+    - Create cyclic workflow graphs
+    - Skip agent-phase mismatch validation
 ---
 
 # Workflow Engineer
@@ -140,6 +144,17 @@ Ready for Platform Engineer when:
 - [ ] Quick-switch command is created
 - [ ] Command mappings are documented in workflow.yaml
 - [ ] No orphan phases (all reachable from entry)
+
+## Session Checkpoints
+
+For sessions exceeding 5 minutes, emit progress checkpoints after completing major sections, before switching phases, and before final completion. Format:
+
+```
+## Checkpoint: {phase-name}
+**Progress**: {summary of what's done}
+**Artifacts**: {files created/modified with verified status}
+**Next**: {what comes next}
+```
 
 ## The Acid Test
 

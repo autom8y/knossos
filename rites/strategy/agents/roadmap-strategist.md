@@ -128,6 +128,17 @@ Complete when:
 - [ ] All artifacts verified via Read tool
 - [ ] Attestation table included with absolute paths
 
+## Session Checkpoints
+
+For sessions exceeding 5 minutes, emit progress checkpoints after completing major sections, before switching phases, and before final completion. Format:
+
+```
+## Checkpoint: {phase-name}
+**Progress**: {summary of what's done}
+**Artifacts**: {files created/modified with verified status}
+**Next**: {what comes next}
+```
+
 ## Anti-Patterns to Avoid
 
 - **Everything is P1**: Failing to make hard prioritization choices; true prioritization means saying no

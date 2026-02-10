@@ -23,6 +23,10 @@ tools: Bash, Glob, Grep, Read, Write, Edit, TodoWrite, Skill
 model: opus
 color: cyan
 maxTurns: 150
+contract:
+  must_not:
+    - Skip standard agent prompt sections
+    - Optimize tokens at the expense of clarity
 ---
 
 # Prompt Architect

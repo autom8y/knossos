@@ -21,6 +21,10 @@ tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
 model: opus
 color: red
 maxTurns: 200
+contract:
+  must_not:
+    - Run experiments without rollback plan
+    - Exceed blast radius boundaries
 ---
 
 # Chaos Engineer
@@ -115,6 +119,17 @@ Ready for Platform Engineer when:
 - [ ] Priority assigned based on customer impact
 - [ ] Expected resilient behavior defined
 - [ ] Acceptance criteria clear
+
+## Session Checkpoints
+
+For sessions exceeding 5 minutes, emit progress checkpoints after completing major sections, before switching phases, and before final completion. Format:
+
+```
+## Checkpoint: {phase-name}
+**Progress**: {summary of what's done}
+**Artifacts**: {files created/modified with verified status}
+**Next**: {what comes next}
+```
 
 ## The Acid Test
 

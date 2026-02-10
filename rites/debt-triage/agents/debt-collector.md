@@ -21,6 +21,10 @@ tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
 model: opus
 color: orange
 maxTurns: 200
+contract:
+  must_not:
+    - Inflate severity to force prioritization
+    - Ignore business context when scoring
 ---
 
 # Debt Collector
@@ -120,6 +124,17 @@ Ready for Risk Assessor when:
 - [ ] Obvious severity items flagged for priority attention
 - [ ] Audit limitations and gaps documented
 - [ ] All artifacts verified via Read tool
+
+## Session Checkpoints
+
+For sessions exceeding 5 minutes, emit progress checkpoints after completing major sections, before switching phases, and before final completion. Format:
+
+```
+## Checkpoint: {phase-name}
+**Progress**: {summary of what's done}
+**Artifacts**: {files created/modified with verified status}
+**Next**: {what comes next}
+```
 
 ## The Acid Test
 

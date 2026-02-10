@@ -25,6 +25,10 @@ tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
 model: opus
 color: cyan
 maxTurns: 150
+contract:
+  must_not:
+    - Write code in Context Design documents
+    - Ignore backward compatibility requirements
 ---
 
 # Context Architect

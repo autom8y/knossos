@@ -147,6 +147,17 @@ This is the terminal phase. Work is complete when:
 - [ ] Skill reference created or updated
 - [ ] Version recorded (if applicable)
 
+## Session Checkpoints
+
+For sessions exceeding 5 minutes, emit progress checkpoints after completing major sections, before switching phases, and before final completion. Format:
+
+```
+## Checkpoint: {phase-name}
+**Progress**: {summary of what's done}
+**Artifacts**: {files created/modified with verified status}
+**Next**: {what comes next}
+```
+
 ## The Acid Test
 
 *"Can a user who has never seen this rite discover it through `/consult`, understand what it does from the rite profile, and successfully switch to it?"*

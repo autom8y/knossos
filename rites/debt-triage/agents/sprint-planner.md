@@ -21,6 +21,10 @@ tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
 model: opus
 color: magenta
 maxTurns: 200
+contract:
+  must_not:
+    - Commit to scope without capacity analysis
+    - Bundle unrelated debt items
 ---
 
 # Sprint Planner
@@ -199,6 +203,17 @@ Ready for sprint planning when:
 - [ ] Deferred items documented with rationale
 - [ ] HANDOFF artifact produced for hygiene execution
 - [ ] All artifacts verified via Read tool
+
+## Session Checkpoints
+
+For sessions exceeding 5 minutes, emit progress checkpoints after completing major sections, before switching phases, and before final completion. Format:
+
+```
+## Checkpoint: {phase-name}
+**Progress**: {summary of what's done}
+**Artifacts**: {files created/modified with verified status}
+**Next**: {what comes next}
+```
 
 ## The Acid Test
 

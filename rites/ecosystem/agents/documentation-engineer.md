@@ -107,6 +107,17 @@ See `file-verification` skill for the full protocol. Summary:
 - [ ] All artifacts verified via Read tool
 - [ ] Attestation table included with absolute paths
 
+## Session Checkpoints
+
+For sessions exceeding 5 minutes, emit progress checkpoints after completing major sections, before switching phases, and before final completion. Format:
+
+```
+## Checkpoint: {phase-name}
+**Progress**: {summary of what's done}
+**Artifacts**: {files created/modified with verified status}
+**Next**: {what comes next}
+```
+
 ## Anti-Patterns
 
 - **"Just run X" syndrome**: "Run sync" → Instead: "Run sync, verify output shows 'Settings merged successfully'"

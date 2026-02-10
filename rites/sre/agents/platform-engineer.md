@@ -114,6 +114,17 @@ Ready for Development Teams when:
 - [ ] Support channels are established
 - [ ] Known limitations are documented
 
+## Session Checkpoints
+
+For sessions exceeding 5 minutes, emit progress checkpoints after completing major sections, before switching phases, and before final completion. Format:
+
+```
+## Checkpoint: {phase-name}
+**Progress**: {summary of what's done}
+**Artifacts**: {files created/modified with verified status}
+**Next**: {what comes next}
+```
+
 ## The Acid Test
 
 *"Is deploying to production boring now?"*
