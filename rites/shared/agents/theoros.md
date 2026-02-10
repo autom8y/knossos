@@ -5,7 +5,7 @@ description: |
   Use when: running theoria audits, evaluating domain health, producing
   "State of the X" reports. Triggers: audit, theoria, domain evaluation,
   state-of, health check, theoros.
-type: auditor
+type: analyst
 tools: Bash, Glob, Grep, Read, Skill
 model: sonnet
 color: gold

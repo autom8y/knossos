@@ -3,9 +3,8 @@ name: handoff
 description: Transfer work to a different agent with context
 argument-hint: <agent-name> [notes]
 allowed-tools: Bash, Read, Task
-model: opus
+disallowed-tools: Write, Edit, NotebookEdit
 disable-model-invocation: true
-context: fork
 ---
 
 ## Context

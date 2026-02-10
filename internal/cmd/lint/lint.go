@@ -136,6 +136,7 @@ func runLint(ctx *cmdContext, scope string) error {
 	}
 	if scope == "" || scope == "dromena" {
 		lintDromena(projectRoot, report)
+		lintMenaNamespace(projectRoot, report)
 	}
 	if scope == "" || scope == "legomena" {
 		lintLegomena(projectRoot, report)
@@ -363,16 +364,63 @@ func lintDromenFile(_, relPath string, data []byte, report *LintReport) {
 		})
 	}
 
-	// context:fork check — high-value finding from audit
+	// context:fork check — informational, not all dromena need fork
 	if strVal(fm, "context") != "fork" {
 		report.Dromena = append(report.Dromena, Finding{
-			File: relPath, Severity: SevHigh, Rule: "context-fork-missing",
-			Message: "dromena lacks 'context: fork' — may leak tokens into main conversation",
+			File: relPath, Severity: SevMedium, Rule: "context-fork-missing",
+			Message: "dromena runs in main conversation context (no context: fork)",
 		})
 	}
 
 	// @skill-name anti-pattern check
 	checkSkillAtRefs(string(body), relPath, &report.Dromena)
+}
+
+// --- Dromena namespace collision detection ---
+
+func lintMenaNamespace(projectRoot string, report *LintReport) {
+	// Collect all dromena names to detect collisions
+	type nameSource struct {
+		name    string
+		relPath string
+	}
+
+	var entries []nameSource
+
+	walkMena(projectRoot, ".dro.md", func(path, relPath string, data []byte) {
+		yamlBytes, _, err := frontmatter.Parse(data)
+		if err != nil {
+			return
+		}
+		fm := parseFrontmatterLenient(yamlBytes)
+		if fm == nil {
+			return
+		}
+		name := strVal(fm, "name")
+		if name == "" {
+			return // already flagged by name-missing rule
+		}
+		entries = append(entries, nameSource{name: name, relPath: relPath})
+	})
+
+	// Build name → files map
+	nameFiles := make(map[string][]string)
+	for _, e := range entries {
+		nameFiles[e.name] = append(nameFiles[e.name], e.relPath)
+	}
+
+	// Flag collisions
+	for name, files := range nameFiles {
+		if len(files) < 2 {
+			continue
+		}
+		for _, f := range files {
+			report.Dromena = append(report.Dromena, Finding{
+				File: f, Severity: SevHigh, Rule: "name-collision",
+				Message: fmt.Sprintf("dromena name %q collides with %d other file(s): %s", name, len(files)-1, strings.Join(files, ", ")),
+			})
+		}
+	}
 }
 
 // --- Legomena linting ---

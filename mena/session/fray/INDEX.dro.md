@@ -3,9 +3,8 @@ name: fray
 description: Fork current session into a parallel strand with optional worktree isolation
 argument-hint: "[--no-worktree] [--from=SESSION_ID]"
 allowed-tools: Bash, Read
-model: sonnet
+disallowed-tools: Write, Edit, NotebookEdit
 disable-model-invocation: true
-context: fork
 ---
 
 ## Context

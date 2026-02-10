@@ -3,9 +3,8 @@ name: wrap
 description: Complete session with quality gates and summary
 argument-hint: "[--skip-checks] [--no-archive]"
 allowed-tools: Bash, Read, Task, Glob
-model: sonnet
+disallowed-tools: Write, Edit, NotebookEdit
 disable-model-invocation: true
-context: fork
 ---
 
 ## Context

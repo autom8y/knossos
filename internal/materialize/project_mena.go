@@ -231,6 +231,9 @@ func ProjectMena(sources []MenaSource, opts MenaProjectionOptions) (*MenaProject
 		}
 	}
 
+	// Pass 1.5: Resolve flat namespace for dromena.
+	flatNames := resolveNamespace(collected, standalones, opts)
+
 	// Pass 2: Route each collected leaf directory by filename convention.
 	for name, ce := range collected {
 		menaType := "dro" // default: route to commands/
@@ -264,11 +267,19 @@ func ProjectMena(sources []MenaSource, opts MenaProjectionOptions) (*MenaProject
 			continue
 		}
 
+		// Use flat name for dromena if available
+		flatName := name
+		if menaType == "dro" {
+			if fn, ok := flatNames[name]; ok {
+				flatName = fn
+			}
+		}
+
 		var destDir string
 		if menaType == "dro" {
-			destDir = filepath.Join(opts.TargetCommandsDir, name)
+			destDir = filepath.Join(opts.TargetCommandsDir, flatName)
 		} else {
-			destDir = filepath.Join(opts.TargetSkillsDir, name)
+			destDir = filepath.Join(opts.TargetSkillsDir, flatName)
 		}
 
 		// In destructive mode, clean this specific entry's subdir before writing.
@@ -278,16 +289,19 @@ func ProjectMena(sources []MenaSource, opts MenaProjectionOptions) (*MenaProject
 			os.RemoveAll(destDir)
 		}
 
+		// Hide companions for dromena only
+		hideCompanions := menaType == "dro"
+
 		if ce.source.IsEmbedded {
 			sub, err := fs.Sub(ce.source.Fsys, ce.source.FsysPath)
 			if err != nil {
 				return nil, err
 			}
-			if err := copyDirFromFSWithStripping(sub, destDir); err != nil {
+			if err := copyDirFromFSWithStripping(sub, destDir, hideCompanions); err != nil {
 				return nil, err
 			}
 		} else {
-			if err := copyDirWithStripping(ce.source.Path, destDir); err != nil {
+			if err := copyDirWithStripping(ce.source.Path, destDir, hideCompanions); err != nil {
 				return nil, err
 			}
 		}
@@ -296,14 +310,14 @@ func ProjectMena(sources []MenaSource, opts MenaProjectionOptions) (*MenaProject
 		targetType := "commands"
 		if menaType == "lego" {
 			targetType = "skills"
-			result.SkillsProjected = append(result.SkillsProjected, name)
+			result.SkillsProjected = append(result.SkillsProjected, flatName)
 		} else {
-			result.CommandsProjected = append(result.CommandsProjected, name)
+			result.CommandsProjected = append(result.CommandsProjected, flatName)
 		}
 
 		// Record provenance at write time with exact source attribution
 		if opts.Collector != nil {
-			recordMenaProvenance(opts.Collector, opts.ProjectRoot, targetType, name, destDir, ce.source)
+			recordMenaProvenance(opts.Collector, opts.ProjectRoot, targetType, flatName, destDir, ce.source)
 		}
 	}
 
@@ -330,7 +344,18 @@ func ProjectMena(sources []MenaSource, opts MenaProjectionOptions) (*MenaProject
 		// Strip the mena extension from the relative path's filename
 		dir := filepath.Dir(sf.relPath)
 		base := StripMenaExtension(filepath.Base(sf.relPath))
-		strippedRel := filepath.Join(dir, base)
+
+		// Use flat name for dromena if available
+		var strippedRel string
+		if menaType == "dro" {
+			if flatName, ok := flatNames[sf.relPath]; ok {
+				strippedRel = flatName + ".md"
+			} else {
+				strippedRel = filepath.Join(dir, base)
+			}
+		} else {
+			strippedRel = filepath.Join(dir, base)
+		}
 
 		destPath := filepath.Join(baseDir, strippedRel)
 		if err := os.MkdirAll(filepath.Dir(destPath), 0755); err != nil {
@@ -373,10 +398,11 @@ func ProjectMena(sources []MenaSource, opts MenaProjectionOptions) (*MenaProject
 		}
 	}
 
-	// Note: stale entries from previous rites (no longer in projection set) persist.
-	// Without provenance tracking, we cannot distinguish "stale knossos" from
-	// "user-created" entries. This is an acceptable tradeoff — user content is
-	// preserved at the cost of potential stale entries on rite switch.
+	// Pass 4: Clean stale knossos-owned mena entries that were renamed by flattening.
+	// Uses provenance manifest to distinguish knossos-owned from user-created entries.
+	if opts.Mode == MenaProjectionDestructive {
+		cleanStaleMenaEntries(opts, result)
+	}
 
 	return result, nil
 }
@@ -422,9 +448,297 @@ func recordMenaProvenance(collector provenance.Collector, projectRoot, targetTyp
 	})
 }
 
+// cleanStaleMenaEntries removes knossos-owned command/skill directories that are
+// no longer in the current projection result. This handles namespace flattening
+// where entries move from nested paths (e.g., session/park/) to flat paths (e.g., park/).
+func cleanStaleMenaEntries(opts MenaProjectionOptions, result *MenaProjectionResult) {
+	// Build set of currently projected entries
+	projected := make(map[string]bool)
+	for _, name := range result.CommandsProjected {
+		projected["commands/"+name+"/"] = true
+		projected["commands/"+name] = true // standalone files don't have trailing /
+	}
+	for _, name := range result.SkillsProjected {
+		projected["skills/"+name+"/"] = true
+		projected["skills/"+name] = true
+	}
+
+	// Load existing provenance manifest to identify knossos-owned entries
+	claudeDir := filepath.Dir(opts.TargetCommandsDir)
+	manifestPath := filepath.Join(claudeDir, provenance.ManifestFileName)
+	manifest, err := provenance.Load(manifestPath)
+	if err != nil {
+		return // No manifest = no stale entries to clean
+	}
+
+	// Find knossos-owned mena entries not in current projection
+	for key, entry := range manifest.Entries {
+		if entry.Owner != provenance.OwnerKnossos {
+			continue
+		}
+		if !strings.HasPrefix(key, "commands/") && !strings.HasPrefix(key, "skills/") {
+			continue
+		}
+		if projected[key] {
+			continue
+		}
+
+		// Stale knossos-owned entry — remove it
+		absPath := filepath.Join(claudeDir, key)
+		// Trim trailing slash for directory entries
+		absPath = strings.TrimRight(absPath, "/")
+		if info, err := os.Stat(absPath); err == nil {
+			if info.IsDir() {
+				os.RemoveAll(absPath)
+			} else {
+				os.Remove(absPath)
+			}
+			log.Printf("Removed stale mena entry: %s", key)
+		}
+	}
+
+	// Also clean empty parent directories left behind by removal
+	for _, dir := range []string{opts.TargetCommandsDir, opts.TargetSkillsDir} {
+		cleanEmptyDirs(dir)
+	}
+}
+
+// cleanEmptyDirs removes empty subdirectories within a directory.
+func cleanEmptyDirs(root string) {
+	entries, err := os.ReadDir(root)
+	if err != nil {
+		return
+	}
+	for _, entry := range entries {
+		if !entry.IsDir() {
+			continue
+		}
+		subdir := filepath.Join(root, entry.Name())
+		subEntries, err := os.ReadDir(subdir)
+		if err != nil {
+			continue
+		}
+		if len(subEntries) == 0 {
+			os.Remove(subdir)
+		} else {
+			// Recurse to handle nested empty dirs
+			cleanEmptyDirs(subdir)
+			// Re-check after recursive cleanup
+			subEntries, _ = os.ReadDir(subdir)
+			if len(subEntries) == 0 {
+				os.Remove(subdir)
+			}
+		}
+	}
+}
+
+// injectCompanionHideFrontmatter adds user-invocable: false to companion file content.
+// If the file has existing YAML frontmatter, it merges the field into the existing block.
+// If the file has no frontmatter, it prepends a new frontmatter block.
+func injectCompanionHideFrontmatter(content []byte) []byte {
+	// Check if content starts with frontmatter delimiter
+	if bytes.HasPrefix(content, []byte("---\n")) {
+		// Find closing delimiter
+		searchStart := 4
+		var endIndex int
+		if idx := bytes.Index(content[searchStart:], []byte("\n---\n")); idx != -1 {
+			endIndex = searchStart + idx
+			// Insert "user-invocable: false\n" just before closing delimiter
+			result := make([]byte, 0, len(content)+len("user-invocable: false\n"))
+			result = append(result, content[:endIndex]...)
+			result = append(result, []byte("user-invocable: false\n")...)
+			result = append(result, content[endIndex:]...)
+			return result
+		} else if idx := bytes.Index(content[searchStart:], []byte("\n---\r\n")); idx != -1 {
+			endIndex = searchStart + idx
+			result := make([]byte, 0, len(content)+len("user-invocable: false\n"))
+			result = append(result, content[:endIndex]...)
+			result = append(result, []byte("user-invocable: false\n")...)
+			result = append(result, content[endIndex:]...)
+			return result
+		}
+		// No closing delimiter found, fall through to prepend
+	} else if bytes.HasPrefix(content, []byte("---\r\n")) {
+		searchStart := 5
+		var endIndex int
+		if idx := bytes.Index(content[searchStart:], []byte("\r\n---\r\n")); idx != -1 {
+			endIndex = searchStart + idx
+			result := make([]byte, 0, len(content)+len("user-invocable: false\r\n"))
+			result = append(result, content[:endIndex]...)
+			result = append(result, []byte("user-invocable: false\r\n")...)
+			result = append(result, content[endIndex:]...)
+			return result
+		} else if idx := bytes.Index(content[searchStart:], []byte("\r\n---\n")); idx != -1 {
+			endIndex = searchStart + idx
+			result := make([]byte, 0, len(content)+len("user-invocable: false\r\n"))
+			result = append(result, content[:endIndex]...)
+			result = append(result, []byte("user-invocable: false\r\n")...)
+			result = append(result, content[endIndex:]...)
+			return result
+		}
+		// No closing delimiter found, fall through to prepend
+	}
+
+	// No frontmatter: prepend a new frontmatter block
+	prefix := []byte("---\nuser-invocable: false\n---\n\n")
+	result := make([]byte, 0, len(prefix)+len(content))
+	result = append(result, prefix...)
+	result = append(result, content...)
+	return result
+}
+
+// resolveNamespace computes flat command names for dromena entries by reading
+// frontmatter name fields. Returns a map from source key to flat name.
+// On name collision between dromena, both entries fall back to source path.
+// On collision with user-owned commands in target dir, knossos entry falls back.
+func resolveNamespace(collected map[string]menaCollectedEntry, standalones map[string]menaStandaloneFile, opts MenaProjectionOptions) map[string]string {
+	flatNames := make(map[string]string)
+	nameToSources := make(map[string][]string) // flat name -> list of source keys
+
+	// Step 1: Read frontmatter names from collected entries (directories with INDEX files)
+	for sourceKey, ce := range collected {
+		// Only process dromena (commands/)
+		var menaType string
+		if ce.source.IsEmbedded {
+			entries, err := fs.ReadDir(ce.source.Fsys, ce.source.FsysPath)
+			if err == nil {
+				for _, entry := range entries {
+					if !entry.IsDir() && strings.HasPrefix(entry.Name(), "INDEX") {
+						menaType = DetectMenaType(entry.Name())
+						break
+					}
+				}
+			}
+		} else {
+			if entries, err := os.ReadDir(ce.source.Path); err == nil {
+				for _, entry := range entries {
+					if !entry.IsDir() && strings.HasPrefix(entry.Name(), "INDEX") {
+						menaType = DetectMenaType(entry.Name())
+						break
+					}
+				}
+			}
+		}
+
+		if menaType != "dro" {
+			continue // Only flatten dromena
+		}
+
+		// Read frontmatter name
+		var fm MenaFrontmatter
+		if ce.source.IsEmbedded {
+			// Read INDEX file from embedded FS
+			entries, err := fs.ReadDir(ce.source.Fsys, ce.source.FsysPath)
+			if err == nil {
+				for _, entry := range entries {
+					if !entry.IsDir() && strings.HasPrefix(entry.Name(), "INDEX") {
+						indexPath := ce.source.FsysPath + "/" + entry.Name()
+						data, err := fs.ReadFile(ce.source.Fsys, indexPath)
+						if err == nil {
+							fm = parseMenaFrontmatterBytes(data)
+						}
+						break
+					}
+				}
+			}
+		} else {
+			fm = ReadMenaFrontmatterFromDir(ce.source.Path)
+		}
+
+		if fm.Name != "" {
+			nameToSources[fm.Name] = append(nameToSources[fm.Name], sourceKey)
+		}
+	}
+
+	// Step 2: Read frontmatter names from standalone files
+	for sourceKey, sf := range standalones {
+		menaType := DetectMenaType(filepath.Base(sf.srcPath))
+		if menaType != "dro" {
+			continue // Only flatten dromena
+		}
+
+		fm := ReadMenaFrontmatterFromFile(sf.srcPath)
+		if fm.Name != "" {
+			nameToSources[fm.Name] = append(nameToSources[fm.Name], sourceKey)
+		}
+	}
+
+	// Step 3: Build flat name mapping, detect collisions
+	for flatName, sources := range nameToSources {
+		if len(sources) > 1 {
+			// Collision between knossos entries — both keep source path
+			log.Printf("Warning: name collision detected for '%s' (sources: %v), falling back to source paths", flatName, sources)
+			continue
+		}
+		// Single source for this name
+		sourceKey := sources[0]
+		flatNames[sourceKey] = flatName
+	}
+
+	// Step 4: Pre-scan target commands/ for user-created entries.
+	// If a flat name collides with an existing user-owned entry, knossos yields.
+	// Uses provenance manifest to distinguish knossos-owned (safe to overwrite) from user-owned.
+	if opts.TargetCommandsDir != "" {
+		// Load existing provenance manifest to identify ownership
+		claudeDir := filepath.Dir(opts.TargetCommandsDir)
+		manifestPath := filepath.Join(claudeDir, provenance.ManifestFileName)
+		oldManifest, _ := provenance.Load(manifestPath)
+
+		entries, err := os.ReadDir(opts.TargetCommandsDir)
+		if err == nil {
+			// Build reverse map: flat name -> source keys that want this name
+			flatToSource := make(map[string][]string)
+			for sourceKey, flatName := range flatNames {
+				flatToSource[flatName] = append(flatToSource[flatName], sourceKey)
+			}
+
+			for _, entry := range entries {
+				entryName := entry.Name()
+				// Strip .md extension for file entries to match flat name
+				if !entry.IsDir() && strings.HasSuffix(entryName, ".md") {
+					entryName = strings.TrimSuffix(entryName, ".md")
+				}
+
+				sourceKeys, isFlat := flatToSource[entryName]
+				if !isFlat {
+					continue // Not a name we're trying to flatten to
+				}
+
+				// Check if the existing entry is knossos-owned via provenance
+				isKnossosOwned := false
+				if oldManifest != nil {
+					// Check both dir and file provenance keys
+					for _, provenanceKey := range []string{
+						"commands/" + entryName + "/",
+						"commands/" + entryName + ".md",
+						"commands/" + entryName,
+					} {
+						if pe, ok := oldManifest.Entries[provenanceKey]; ok && pe.Owner == provenance.OwnerKnossos {
+							isKnossosOwned = true
+							break
+						}
+					}
+				}
+
+				if isKnossosOwned {
+					continue // Safe to overwrite knossos-owned entries
+				}
+
+				// User-owned or untracked entry — knossos yields
+				for _, sourceKey := range sourceKeys {
+					log.Printf("Warning: flat name '%s' collides with existing user entry, falling back to source path for source '%s'", entryName, sourceKey)
+					delete(flatNames, sourceKey)
+				}
+			}
+		}
+	}
+
+	return flatNames
+}
+
 // copyDirWithStripping copies all files from src to dst, applying
 // StripMenaExtension to filenames during copy.
-func copyDirWithStripping(src, dst string) error {
+func copyDirWithStripping(src, dst string, hideCompanions bool) error {
 	return filepath.WalkDir(src, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -449,6 +763,12 @@ func copyDirWithStripping(src, dst string) error {
 		if err != nil {
 			return err
 		}
+
+		// Apply companion hiding for dromena non-INDEX markdown files
+		if hideCompanions && base != "INDEX.md" && strings.HasSuffix(base, ".md") {
+			content = injectCompanionHideFrontmatter(content)
+		}
+
 		if err := os.MkdirAll(filepath.Dir(destPath), 0755); err != nil {
 			return err
 		}
@@ -459,7 +779,7 @@ func copyDirWithStripping(src, dst string) error {
 
 // copyDirFromFSWithStripping copies all files from an fs.FS to a destination
 // directory on disk, applying StripMenaExtension to filenames during copy.
-func copyDirFromFSWithStripping(fsys fs.FS, dst string) error {
+func copyDirFromFSWithStripping(fsys fs.FS, dst string, hideCompanions bool) error {
 	return fs.WalkDir(fsys, ".", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -479,6 +799,12 @@ func copyDirFromFSWithStripping(fsys fs.FS, dst string) error {
 		if err != nil {
 			return err
 		}
+
+		// Apply companion hiding for dromena non-INDEX markdown files
+		if hideCompanions && base != "INDEX.md" && strings.HasSuffix(base, ".md") {
+			content = injectCompanionHideFrontmatter(content)
+		}
+
 		if err := os.MkdirAll(filepath.Dir(destPath), 0755); err != nil {
 			return err
 		}

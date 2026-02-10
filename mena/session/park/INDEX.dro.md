@@ -3,9 +3,8 @@ name: park
 description: Pause work session and preserve state for later
 argument-hint: "[reason]"
 allowed-tools: Bash, Read, Task
-model: sonnet
+disallowed-tools: Write, Edit, NotebookEdit
 disable-model-invocation: true
-context: fork
 ---
 
 ## Context

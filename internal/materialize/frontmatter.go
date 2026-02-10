@@ -25,6 +25,7 @@ type MenaFrontmatter struct {
 	AllowedTools               FlexibleStringSlice `yaml:"allowed-tools,omitempty"` // Tool restrictions (only for dromena)
 	Model                      string   `yaml:"model,omitempty"`         // Model selection (only for dromena)
 	DisableModelInvocation     bool     `yaml:"disable-model-invocation,omitempty"` // Prevent Claude from auto-invoking (side-effect commands)
+	DisallowedTools            FlexibleStringSlice `yaml:"disallowed-tools,omitempty"`         // Tools to restrict (e.g., Write, Edit, NotebookEdit)
 	Context                    string   `yaml:"context,omitempty"`                  // CC context isolation: "fork" for side-effect commands
 
 	// Optional Metadata

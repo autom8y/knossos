@@ -428,16 +428,16 @@ description: A flat command
 		t.Errorf("Legomena guidance/standards should NOT be in commands/, but %s exists", commandsStandards)
 	}
 
-	// Verify: guidance/file-verification -> commands/guidance/file-verification/ (dromena, stripped)
-	commandsFV := filepath.Join(claudeDir, "commands", "guidance", "file-verification", "INDEX.md")
+	// Verify: guidance/file-verification -> commands/file-verification/ (dromena, flattened by name field)
+	commandsFV := filepath.Join(claudeDir, "commands", "file-verification", "INDEX.md")
 	if _, err := os.Stat(commandsFV); os.IsNotExist(err) {
-		t.Errorf("Expected guidance/file-verification to be in commands/ as INDEX.md (stripped), but %s does not exist", commandsFV)
+		t.Errorf("Expected file-verification to be in commands/ as INDEX.md (flattened by name), but %s does not exist", commandsFV)
 	}
 
-	// Verify: guidance/file-verification NOT in skills/
-	skillsFV := filepath.Join(claudeDir, "skills", "guidance", "file-verification", "INDEX.md")
+	// Verify: file-verification NOT in skills/
+	skillsFV := filepath.Join(claudeDir, "skills", "file-verification", "INDEX.md")
 	if _, err := os.Stat(skillsFV); err == nil {
-		t.Errorf("Dromena guidance/file-verification should NOT be in skills/, but %s exists", skillsFV)
+		t.Errorf("Dromena file-verification should NOT be in skills/, but %s exists", skillsFV)
 	}
 
 	// Verify: flat-cmd -> commands/ (still works, stripped)

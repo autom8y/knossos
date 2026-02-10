@@ -3,9 +3,8 @@ name: continue
 description: Resume a parked work session with full context
 argument-hint:
 allowed-tools: Bash, Read, Task
-model: sonnet
+disallowed-tools: Write, Edit, NotebookEdit
 disable-model-invocation: true
-context: fork
 ---
 
 ## Context
