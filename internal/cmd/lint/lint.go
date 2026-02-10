@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -14,6 +15,11 @@ import (
 	"github.com/autom8y/knossos/internal/frontmatter"
 	"github.com/autom8y/knossos/internal/output"
 )
+
+// skillAtPattern matches @skill-name references in body content.
+// Excludes email-style patterns (@user.com), @handles in examples,
+// and regex patterns. Matches: @word-word at word boundaries.
+var skillAtPattern = regexp.MustCompile(`(?m)(?:^|[\s(` + "`" + `])@([a-z][a-z0-9](?:[a-z0-9-]*[a-z0-9])?)(?:[#/\s` + "`" + `.,;:)\]]|$)`)
 
 // Severity levels for lint findings.
 const (
@@ -220,7 +226,7 @@ func lintAgentFile(path, relPath string, report *LintReport) {
 		return
 	}
 
-	yamlBytes, _, err := frontmatter.Parse(data)
+	yamlBytes, body, err := frontmatter.Parse(data)
 	if err != nil {
 		report.Agents = append(report.Agents, Finding{
 			File: relPath, Severity: SevCritical, Rule: "frontmatter-missing",
@@ -310,6 +316,9 @@ func lintAgentFile(path, relPath string, report *LintReport) {
 			Message: fmt.Sprintf("agent file is %d bytes — consider extracting reference content to skills", len(data)),
 		})
 	}
+
+	// @skill-name anti-pattern check (body content only)
+	checkSkillAtRefs(string(body), relPath, &report.Agents)
 }
 
 // --- Dromena linting ---
@@ -321,8 +330,8 @@ func lintDromena(projectRoot string, report *LintReport) {
 	})
 }
 
-func lintDromenFile(path, relPath string, data []byte, report *LintReport) {
-	yamlBytes, _, err := frontmatter.Parse(data)
+func lintDromenFile(_, relPath string, data []byte, report *LintReport) {
+	yamlBytes, body, err := frontmatter.Parse(data)
 	if err != nil {
 		report.Dromena = append(report.Dromena, Finding{
 			File: relPath, Severity: SevCritical, Rule: "frontmatter-missing",
@@ -361,6 +370,9 @@ func lintDromenFile(path, relPath string, data []byte, report *LintReport) {
 			Message: "dromena lacks 'context: fork' — may leak tokens into main conversation",
 		})
 	}
+
+	// @skill-name anti-pattern check
+	checkSkillAtRefs(string(body), relPath, &report.Dromena)
 }
 
 // --- Legomena linting ---
@@ -377,8 +389,8 @@ func lintLegomena(projectRoot string, report *LintReport) {
 	})
 }
 
-func lintLegomenFile(path, relPath string, data []byte, report *LintReport) {
-	yamlBytes, _, err := frontmatter.Parse(data)
+func lintLegomenFile(_, relPath string, data []byte, report *LintReport) {
+	yamlBytes, body, err := frontmatter.Parse(data)
 	if err != nil {
 		report.Legomena = append(report.Legomena, Finding{
 			File: relPath, Severity: SevCritical, Rule: "frontmatter-missing",
@@ -424,6 +436,38 @@ func lintLegomenFile(path, relPath string, data []byte, report *LintReport) {
 			Message: fmt.Sprintf("legomen file is %d bytes — consider INDEX + companion pattern", len(data)),
 		})
 	}
+
+	// @skill-name anti-pattern check
+	checkSkillAtRefs(string(body), relPath, &report.Legomena)
+}
+
+// --- @skill-name check ---
+
+// skillAtExclusions are known false positives: team handles, documentation examples.
+var skillAtExclusions = map[string]bool{
+	"api-team":      true,
+	"product-lead":  true,
+	"platform-team": true,
+	"skill-name":    true, // appears in anti-pattern documentation
+}
+
+// checkSkillAtRefs scans body content for @skill-name references and appends findings.
+func checkSkillAtRefs(body, relPath string, findings *[]Finding) {
+	matches := skillAtPattern.FindAllStringSubmatch(body, -1)
+	count := 0
+	for _, m := range matches {
+		if len(m) > 1 && skillAtExclusions[m[1]] {
+			continue
+		}
+		count++
+	}
+	if count == 0 {
+		return
+	}
+	*findings = append(*findings, Finding{
+		File: relPath, Severity: SevHigh, Rule: "skill-at-syntax",
+		Message: fmt.Sprintf("body contains %d @skill-name reference(s) — use plain skill name instead (see lexicon anti-patterns)", count),
+	})
 }
 
 // --- Helpers ---
