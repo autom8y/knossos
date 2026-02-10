@@ -137,57 +137,13 @@ Produce eval-report.md.
 | **eval-report.md** | Complete validation report with pass/fail status |
 | **Issue list** | Specific issues found with severity levels |
 
-### eval-report.md Template
+### Artifact Templates and Checklists
 
-```markdown
-# Eval Report: {rite-name}
-
-**Date**: {timestamp}
-**Status**: {PASS | FAIL | PASS WITH WARNINGS}
-
-## Summary
-- Total checks: {N}
-- Passed: {N}
-- Failed: {N}
-- Warnings: {N}
-
-## Structure Validation
-- [ ] All agent files exist
-- [ ] YAML frontmatter valid
-- [ ] All 11 sections present
-- [ ] workflow.yaml exists
-
-## Schema Validation
-- [ ] Frontmatter fields complete
-- [ ] Description has triggers and examples
-- [ ] Workflow has required fields
-- [ ] Phase chain complete
-
-## Logic Validation
-- [ ] Single terminal phase
-- [ ] All phases reachable
-- [ ] Complexity levels valid
-- [ ] Agent names match files
-
-## Adversarial Testing
-- [ ] Edge cases handled
-- [ ] Boundary cases handled
-- [ ] Error handling appropriate
-- [ ] Handoffs trigger correctly
-
-## Issues Found
-
-### Blocking
-{List of blocking issues or "None"}
-
-### Warnings
-{List of non-blocking issues or "None"}
-
-## Recommendation
-{SHIP | DO NOT SHIP | SHIP WITH CAVEATS}
-
-{Explanation of recommendation}
-```
+See eval-artifacts skill for:
+- eval-report.md template (structure/schema/logic/adversarial sections, recommendation)
+- Agent completeness checklist (frontmatter fields, 11 required sections)
+- Workflow validity checklist (phase chain, complexity levels, entry/terminal)
+- Adversarial prompt bank (edge cases, boundary cases, error handling)
 
 ## Handoff Criteria
 
@@ -209,6 +165,7 @@ If uncertain: Add more specificity to the issues section or clarify the recommen
 ## Skills Reference
 
 Reference these skills as appropriate:
+- eval-artifacts for validation checklists, eval report template, and adversarial prompt bank
 - rite-development for validation checklist
 - 10x-workflow for quality gate patterns
 - standards for expected patterns
@@ -229,69 +186,3 @@ When validation reveals:
 - **No Regression**: Updating prompts without checking existing behavior. Always compare.
 - **Report Overload**: 50-page reports nobody reads. Keep it scannable.
 
----
-
-## Validation Checklists
-
-### Agent Completeness (per agent)
-
-```
-[ ] name field present (kebab-case)
-[ ] description is multi-line with:
-    [ ] Role summary
-    [ ] Trigger conditions
-    [ ] What it produces
-    [ ] <example> block
-[ ] tools field present
-[ ] model field present (opus/sonnet/haiku)
-[ ] color field present
-
-[ ] Section 1: Title and Overview (2-3 sentences)
-[ ] Section 2: Core Responsibilities (4-6 bullets)
-[ ] Section 3: Position in Workflow (ASCII diagram)
-[ ] Section 4: Domain Authority (decide/escalate/route)
-[ ] Section 5: How You Work (3-4 phases)
-[ ] Section 6: What You Produce (artifact table)
-[ ] Section 7: Handoff Criteria (checklist)
-[ ] Section 8: The Acid Test (pivotal question)
-[ ] Section 9: Skills Reference (cross-refs)
-[ ] Section 10: Cross-Rite Notes (flags)
-[ ] Section 11: Anti-Patterns (3-5 items)
-```
-
-### Workflow Validity
-
-```
-[ ] name matches rite directory
-[ ] workflow_type is "sequential"
-[ ] description present
-[ ] entry_point.agent exists in agents/
-[ ] entry_point.artifact has type and path_template
-[ ] Each phase has: name, agent, produces, next
-[ ] Exactly one phase has next: null
-[ ] All phases reachable from entry
-[ ] No orphan phases
-[ ] complexity_levels present (2-4 levels)
-[ ] Each level has: name, scope, phases
-[ ] Phase references in levels are valid
-```
-
-### Adversarial Prompts
-
-```
-Edge Cases:
-- "Do everything at once"
-- "I'm not sure what I want"
-- "This is urgent, skip the planning"
-- "Can you also handle {unrelated task}?"
-
-Boundary Cases:
-- Minimal input: just a rite name
-- Maximum scope: platform-level complexity
-- Conflicting requirements
-
-Error Handling:
-- Invalid rite name
-- Missing required artifacts
-- Circular dependencies requested
-```

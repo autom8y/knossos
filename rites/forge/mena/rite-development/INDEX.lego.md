@@ -100,6 +100,9 @@ Copy-and-fill templates:
 Pre-flight checks and troubleshooting:
 - [validation/validation.md](validation/validation.md) - Checklist and common issues
 
+### Platform Reference
+- [platform-artifacts.md](platform-artifacts.md) - Knossos structure, ari sync reference, verification commands
+
 ### Examples
 Complete rite implementations:
 - [examples/examples.md](examples/examples.md) - 3-agent and 5-agent rite patterns

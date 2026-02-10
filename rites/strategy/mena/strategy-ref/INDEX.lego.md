@@ -130,6 +130,10 @@ market-research → competitive-analysis → business-modeling → strategic-pla
 
 **Produces**: `docs/strategy/STRATEGY-{slug}.md`
 
+## Progressive Disclosure
+
+- [roadmap-artifacts.md](roadmap-artifacts.md) - HANDOFF examples, RICE scoring templates, strategic roadmap patterns
+
 ## Cross-References
 
 - **Related Skills**: documentation (artifact templates)

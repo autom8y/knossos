@@ -44,6 +44,7 @@ Provides structured templates for documentation lifecycle management: health aud
 
 ## Progressive Disclosure
 
+- [staleness-detection.md](staleness-detection.md) - Staleness detection logic, categories, invocation, and example output
 - [audit-report.md](templates/audit-report.md) - Documentation health audit
 - [review-report.md](templates/review-report.md) - Accuracy validation
 - [information-architecture.md](templates/information-architecture.md) - Taxonomy and structure

@@ -1,6 +1,6 @@
 ---
 name: intelligence-ref
-description: "Product Intelligence rite reference. Use when: activating the intelligence rite, invoking analytics or research agents, planning experiments or user studies. Triggers: intelligence, analytics-engineer, user-researcher, experimentation-lead, insights-analyst."
+description: "Product Intelligence rite reference with insights artifacts. Use when: activating the intelligence rite, invoking analytics or research agents, planning experiments or user studies, producing insights reports or HANDOFF artifacts. Triggers: intelligence, analytics-engineer, user-researcher, experimentation-lead, insights-analyst, insights report, findings format."
 ---
 
 # Product Intelligence Rite (intelligence)
@@ -129,6 +129,10 @@ instrumentation → research → experimentation → synthesis
 - Stakeholder communication
 
 **Produces**: `docs/intelligence/INSIGHT-{slug}.md`
+
+## Supporting Files
+
+- [insights-artifacts.md](insights-artifacts.md) - HANDOFF templates, findings format, insights report guidance (insights-analyst)
 
 ## Cross-References
 
