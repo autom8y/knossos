@@ -6,7 +6,7 @@
 
 | Term | Definition |
 |------|------------|
-| **SOURCE** | The `/roster/` repository—versioned, canonical platform code |
+| **SOURCE** | The Knossos repository—versioned, canonical platform code |
 | **PROJECTION** | `.claude/` directories—gitignored, materialized by `ari sync materialize` |
 
 ## Mythology Terms
@@ -14,7 +14,12 @@
 ### Ariadne
 The CLI binary (`ari`) that provides the clew—ensuring return through event recording and session management.
 - **Related**: Clew, Theseus, Session
-- **Source**: `/roster/cmd/ari/`
+- **Source**: `cmd/ari/`
+
+### Argus Pattern
+N-agent parallel dispatch pattern. One main thread (body) launches multiple Task agents (eyes) simultaneously for distributed observation. Named for Argus Panoptes, the hundred-eyed giant. A reusable technique, not a specific component; envisioned for tactical playbook swarms and similar N-agent operations.
+- **Related**: Theoria, Theoroi, Task Tool, Parallel Dispatch
+- **Source**: Pattern (no single file)
 
 ### Athens
 The `main` branch—destination of merged PRs. Return from the labyrinth is incomplete until work reaches Athens.
@@ -24,12 +29,12 @@ The `main` branch—destination of merged PRs. Return from the labyrinth is inco
 ### Clew
 Session state + event log (`events.jsonl`) + provenance trail. The thread that unwinds through the labyrinth, providing a path back when context degrades.
 - **Related**: Thread, Events, Session
-- **Source**: `/roster/internal/hook/clewcontract/`
+- **Source**: `internal/hook/clewcontract/`
 
 ### Daedalus
 The builder—represented by the `forge-rite` for creating agents, tools, and platform infrastructure. Designed complexity is intentional architecture.
 - **Related**: Forge, Builder, Infrastructure
-- **Source**: `/roster/rites/forge/`
+- **Source**: `rites/forge/`
 
 ### Dionysus
 The transformer—code review process that elevates work from isolation to merged canon. Turns abandonment into elevation.
@@ -39,17 +44,17 @@ The transformer—code review process that elevates work from isolation to merge
 ### Heroes
 Specialist agents invoked via Task tool for specific labors, defined in rite manifests. Summoned mid-journey with clew context.
 - **Related**: Agents, Task Tool, Rite
-- **Source**: `/roster/user-agents/`, `/roster/rites/[rite-name]/agents/`
+- **Source**: `user-agents/`, `rites/[rite-name]/agents/`
 
 ### Inscription
 The `CLAUDE.md` file declaring available rites, agents, execution mode, and hooks. Words carved at the labyrinth entrance.
 - **Related**: CLAUDE.md, Knossos Sections
-- **Source**: `/roster/knossos/templates/CLAUDE.md.tpl`
+- **Source**: `knossos/templates/CLAUDE.md.tpl`
 
 ### Knossos
-The labyrinth—the `/roster/` repository itself (SOURCE), not the `.claude/` directories it generates (PROJECTION).
+The labyrinth—the Knossos repository itself (SOURCE), not the `.claude/` directories it generates (PROJECTION).
 - **Related**: SOURCE, Platform, Repository
-- **Source**: `/roster/` (repository root)
+- **Source**: Repository root
 
 ### Minotaur
 The initiative, feature, or task being pursued. The challenge at the labyrinth's heart—reason for the journey.
@@ -59,22 +64,42 @@ The initiative, feature, or task being pursued. The challenge at the labyrinth's
 ### Minos
 Stakeholders who create initiatives and demand tribute (status reports and demos).
 - **Related**: Tribute, Status Reports
-- **Source**: `/roster/internal/tribute/`
+- **Source**: `internal/tribute/`
 
 ### Moirai
 The Fates—centralized session lifecycle agent. Clotho spins (create), Lachesis measures (update), Atropos cuts (end).
 - **Related**: Session Lifecycle, State Authority
-- **Source**: `/roster/user-agents/moirai.md`
+- **Source**: `user-agents/moirai.md`
 
 ### Naxos
 Shore of abandonment—orphaned sessions created but never wrapped. Detected for cleanup or resumption.
 - **Related**: Orphaned Sessions, Cleanup
-- **Source**: `/roster/internal/naxos/`
+- **Source**: `internal/naxos/`
+
+### Pinakes
+The domain registry legomena for audit operations. Catalogs audit targets, evaluation criteria, grading rubrics, and report schemas. Named for Callimachus's catalog of the Library of Alexandria. Always qualified as "the Pinakes" to distinguish from manifest files.
+- **Related**: Theoria, Theoroi, Legomena, Domain Registry
+- **Source**: Planned: `rites/shared/mena/pinakes/`
 
 ### Pythia
 The Oracle—orchestrator agents providing work breakdown, specialist routing, and checkpoint guidance. Speaks clearly, not cryptically.
 - **Related**: Orchestrator, Consultation, Routing
-- **Source**: `/roster/user-agents/orchestrator.md`
+- **Source**: `user-agents/orchestrator.md`
+
+### Synkrisis
+Comparative synthesis step following parallel domain evaluations. Weaves individual theoros reports into cross-domain patterns and the final "State of the {X}" attestation. Named for Plutarch's comparative analysis technique in the *Parallel Lives*.
+- **Related**: Theoria, Theoroi, Synthesis, Report
+- **Source**: Planned: synthesis in `/theoria` dromena
+
+### Theoria
+The audit operation—a structured delegation of observers dispatched to assess domain health. Composite primitive: dromena (`/theoria`) + legomena (Pinakes) + agents (theoroi). Uses the Argus Pattern for parallel dispatch. Named for the Greek sacred state delegation.
+- **Related**: Theoroi, Pinakes, Synkrisis, Argus Pattern
+- **Source**: Planned: `/theoria` dromena + `rites/shared/mena/pinakes/` legomena
+
+### Theoroi
+Domain evaluator agents dispatched by a theoria. Each theoros observes a single domain using criteria from the Pinakes and produces a structured report. Read-only witnesses, not actors. Singular: theoros.
+- **Related**: Theoria, Pinakes, Heroes, Domain Evaluator
+- **Source**: Planned: `rites/shared/agents/theoros.md`
 
 ### Theseus
 The navigator—main Claude Code thread with agency but amnesia. The agentic intelligence making decisions and summoning heroes.
@@ -84,7 +109,7 @@ The navigator—main Claude Code thread with agency but amnesia. The agentic int
 ### White Sails
 Confidence signal (WHITE/GRAY/BLACK) generated at session wrap. Solves the Aegeus problem of false confidence.
 - **Related**: Confidence, Quality Signal, Wrap
-- **Source**: `/roster/internal/sails/`
+- **Source**: `internal/sails/`
 
 ## Technical Terms
 
@@ -101,12 +126,12 @@ Work product produced during a session (PRD, TDD, code, tests, docs). Tracked in
 ### Artifact Registry
 System tracking created artifacts with verification. Ensures work products are recorded and accessible.
 - **Related**: Artifact, Verification
-- **Source**: `/roster/internal/artifact/`
+- **Source**: `internal/artifact/`
 
 ### Clew Contract
 Event schema and types defining what gets recorded to `events.jsonl`.
 - **Related**: Events, Schema, Contract
-- **Source**: `/roster/internal/hook/clewcontract/`
+- **Source**: `internal/hook/clewcontract/`
 
 ### Cognitive Budget
 Tool usage tracking with configurable thresholds (warn, park). Monitors message count to prevent context degradation.
@@ -131,12 +156,12 @@ Operating mode (Native, Cross-Cutting, Orchestrated) determining session trackin
 ### Forge
 The `forge-rite` for platform development—building agents, tools, infrastructure. Daedalus's domain.
 - **Related**: Builder, Infrastructure, Platform
-- **Source**: `/roster/rites/forge/`
+- **Source**: `rites/forge/`
 
 ### Hook
 Code executed at lifecycle events (SessionStart, SessionStop, PostToolUse). Injects context and enforces contracts.
 - **Related**: Lifecycle, Contract, Context Injection
-- **Source**: `/roster/hooks/`, materialized to `.claude/hooks/`
+- **Source**: `hooks/`, materialized to `.claude/hooks/`
 
 ### Knossos Sections
 Delimited blocks in `CLAUDE.md` (`<!-- KNOSSOS:START -->` ... `<!-- KNOSSOS:END -->`) regenerated by `ari sync inscription`.
@@ -146,10 +171,10 @@ Delimited blocks in `CLAUDE.md` (`<!-- KNOSSOS:START -->` ... `<!-- KNOSSOS:END 
 ### Manifest
 YAML file defining rite composition (agents, skills, hooks, workflows).
 - **Related**: Rite, Composition, Configuration
-- **Source**: `/roster/rites/[rite-name]/manifest.yaml`
+- **Source**: `rites/[rite-name]/manifest.yaml`
 
 ### Materialization
-Process of generating `.claude/` PROJECTION from `/roster/` SOURCE via `ari sync materialize`.
+Process of generating `.claude/` PROJECTION from SOURCE via `ari sync materialize`.
 - **Related**: SOURCE, PROJECTION, Sync
 - **Command**: `ari sync materialize`
 
@@ -171,7 +196,7 @@ Pause current work session, preserving state for later resumption. Triggered man
 ### Rite
 Manifest-driven practice bundle containing agents, skills, hooks, and workflows. Invocable ceremonies for specific purposes.
 - **Related**: Manifest, Practice, Workflow
-- **Source**: `/roster/rites/`
+- **Source**: `rites/`
 
 ### Resume
 Restore parked session with full context from clew.
@@ -191,12 +216,12 @@ Tracked work context with lifecycle (create, park, resume, wrap). Managed by Moi
 ### Skill
 Reusable capability invoked via Skill tool. Defined in rite manifests or user skills directory.
 - **Related**: Rite, Tool, Capability
-- **Source**: `/roster/user-skills/`, `/roster/rites/[rite-name]/skills/`
+- **Source**: `user-skills/`, `rites/[rite-name]/skills/`
 
 ### SOURCE
-The `/roster/` repository—canonical, versioned platform code that generates PROJECTIONS.
+The Knossos repository—canonical, versioned platform code that generates PROJECTIONS.
 - **Related**: PROJECTION, Knossos, Repository
-- **Location**: `/roster/`
+- **Location**: Repository root
 
 ### Sprint
 Multi-task coordinated workflow tracked in `SPRINT_CONTEXT.md`.
@@ -215,7 +240,7 @@ See **Clew**. (Note: code sometimes uses "thread"; doctrine prefers "clew")
 ### Tribute
 Status reports and demos demanded by Minos. Periodic demonstration of progress.
 - **Related**: Minos, Status, Reporting
-- **Source**: `/roster/internal/tribute/`
+- **Source**: `internal/tribute/`
 
 ### Worktree
 Git worktree for parallel Claude sessions with filesystem isolation. Enables multiple simultaneous rites.
