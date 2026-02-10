@@ -354,6 +354,12 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize agents", err)
 	}
 
+	// 4.5. Add cross-rite agents (moirai, consultant, context-engineer) that don't conflict with rite agents
+	agentsDir := filepath.Join(claudeDir, "agents")
+	if err := m.materializeCrossRiteAgents(agentsDir, resolved, collector, manifest); err != nil {
+		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize cross-rite agents", err)
+	}
+
 	// 5. Generate commands/ and skills/ directories from rite + shared + dependencies + mena
 	if !opts.Soft {
 		if err := m.materializeMena(manifest, claudeDir, resolved, collector); err != nil {
@@ -723,6 +729,7 @@ func (m *Materializer) loadRiteManifest(ritePath string, resolved *ResolvedRite)
 // materializeAgents copies agent files from rite to .claude/agents/
 // Uses selective write: only knossos-managed agents (from manifest) are replaced.
 // User-created agents not in the manifest are preserved.
+// Also materializes cross-rite agents from top-level agents/ directory.
 func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claudeDir string, resolved *ResolvedRite, collector provenance.Collector) error {
 	agentsDir := filepath.Join(claudeDir, "agents")
 
@@ -731,10 +738,16 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claud
 		return err
 	}
 
-	// Build managed agent set from manifest
+	// Build managed agent set from manifest (rite agents)
 	managedAgents := make(map[string]bool)
 	for _, agent := range manifest.Agents {
 		managedAgents[agent.Name+".md"] = true
+	}
+
+	// Add cross-rite agents to managed set (so they get cleaned before re-write)
+	crossRiteAgents := m.listCrossRiteAgents(resolved)
+	for _, agentName := range crossRiteAgents {
+		managedAgents[agentName] = true
 	}
 
 	// Remove only knossos-managed agents (will be rewritten below).
@@ -846,6 +859,133 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claud
 
 		return nil
 	})
+}
+
+// listCrossRiteAgents returns a list of cross-rite agent filenames from top-level agents/.
+// Cross-rite agents are agents that should be available regardless of active rite.
+func (m *Materializer) listCrossRiteAgents(resolved *ResolvedRite) []string {
+	var agents []string
+
+	// For embedded sources, read from embedded FS
+	if resolved != nil && resolved.Source.Type == SourceEmbedded && m.sourceResolver.embeddedFS != nil {
+		entries, err := fs.ReadDir(m.sourceResolver.embeddedFS, "agents")
+		if err != nil {
+			return agents // No cross-rite agents in embedded FS
+		}
+		for _, entry := range entries {
+			if !entry.IsDir() && filepath.Ext(entry.Name()) == ".md" {
+				agents = append(agents, entry.Name())
+			}
+		}
+		return agents
+	}
+
+	// For filesystem sources, read from project root agents/
+	projectRoot := m.resolver.ProjectRoot()
+	crossRiteDir := filepath.Join(projectRoot, "agents")
+	entries, err := os.ReadDir(crossRiteDir)
+	if err != nil {
+		return agents // No cross-rite agents directory
+	}
+	for _, entry := range entries {
+		if !entry.IsDir() && filepath.Ext(entry.Name()) == ".md" {
+			agents = append(agents, entry.Name())
+		}
+	}
+	return agents
+}
+
+// materializeCrossRiteAgents copies cross-rite agents from top-level agents/ to .claude/agents/.
+// Cross-rite agents are available in all rites but do NOT override rite-scoped agents of the same name.
+func (m *Materializer) materializeCrossRiteAgents(agentsDir string, resolved *ResolvedRite, collector provenance.Collector, manifest *RiteManifest) error {
+	now := time.Now().UTC()
+
+	// Build set of rite agent names (these take priority)
+	riteAgents := make(map[string]bool)
+	for _, agent := range manifest.Agents {
+		riteAgents[agent.Name+".md"] = true
+	}
+
+	// For embedded sources, copy from embedded FS
+	if resolved != nil && resolved.Source.Type == SourceEmbedded && m.sourceResolver.embeddedFS != nil {
+		entries, err := fs.ReadDir(m.sourceResolver.embeddedFS, "agents")
+		if err != nil {
+			return nil // No cross-rite agents in embedded FS
+		}
+		for _, entry := range entries {
+			if entry.IsDir() || filepath.Ext(entry.Name()) != ".md" {
+				continue
+			}
+			// Skip if rite already has an agent with this name
+			if riteAgents[entry.Name()] {
+				continue
+			}
+			content, err := fs.ReadFile(m.sourceResolver.embeddedFS, "agents/"+entry.Name())
+			if err != nil {
+				return err
+			}
+			destPath := filepath.Join(agentsDir, entry.Name())
+			written, err := writeIfChanged(destPath, content, 0644)
+			if err != nil {
+				return err
+			}
+			if written {
+				collector.Record("agents/"+entry.Name(), &provenance.ProvenanceEntry{
+					Owner:      provenance.OwnerKnossos,
+					Scope:      provenance.ScopeRite,
+					SourcePath: "agents/" + entry.Name(),
+					SourceType: string(resolved.Source.Type),
+					Checksum:   checksum.Bytes(content),
+					LastSynced: now,
+				})
+			}
+		}
+		return nil
+	}
+
+	// For filesystem sources, copy from project root agents/
+	projectRoot := m.resolver.ProjectRoot()
+	crossRiteDir := filepath.Join(projectRoot, "agents")
+	entries, err := os.ReadDir(crossRiteDir)
+	if err != nil {
+		return nil // No cross-rite agents directory
+	}
+
+	for _, entry := range entries {
+		if entry.IsDir() || filepath.Ext(entry.Name()) != ".md" {
+			continue
+		}
+		// Skip if rite already has an agent with this name
+		if riteAgents[entry.Name()] {
+			continue
+		}
+
+		srcPath := filepath.Join(crossRiteDir, entry.Name())
+		content, err := os.ReadFile(srcPath)
+		if err != nil {
+			return err
+		}
+
+		destPath := filepath.Join(agentsDir, entry.Name())
+		written, err := writeIfChanged(destPath, content, 0644)
+		if err != nil {
+			return err
+		}
+
+		if written {
+			srcRelPath, _ := filepath.Rel(projectRoot, srcPath)
+			collector.Record("agents/"+entry.Name(), &provenance.ProvenanceEntry{
+				Owner:      provenance.OwnerKnossos,
+				Scope:      provenance.ScopeRite,
+				SourcePath: srcRelPath,
+				SourceType: "project",
+				Checksum:   checksum.Bytes(content),
+				LastSynced: now,
+			})
+		}
+	}
+
+	return nil
 }
 
 // materializeMena copies mena files to .claude/commands/ or .claude/skills/

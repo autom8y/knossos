@@ -14,7 +14,7 @@ You are a **prompter**. Your only skill is `prompting`. The Orchestrator is your
 
 ## Execution Protocol
 
-**Resume the Orchestrator** (same instance from Session 0) and request the next phase from the delegation map. Then:
+**Spawn a new Orchestrator instance** (with session context from Session 0) and request the next phase from the delegation map. Then:
 
 ### Daisy-Chain Loop
 
@@ -43,11 +43,11 @@ You are a **prompter**. Your only skill is `prompting`. The Orchestrator is your
 
 | Agent | Instance Strategy | Rationale |
 |-------|-------------------|-----------|
-| Orchestrator | **Always resume same instance** | Maintains workflow context throughout |
-| Requirements Analyst | Resume if refining same PRD | Context continuity |
-| Architect | Resume if refining same TDD | Context continuity |
+| Orchestrator | **New instance with session context** | `context: fork` creates fresh isolated context; continuity via SESSION_CONTEXT.md |
+| Requirements Analyst | New instance with session context | Context continuity via artifacts and session state |
+| Architect | New instance with session context | Context continuity via artifacts and session state |
 | Principal Engineer | **New/parallel instances OK** | Siloed implementation items can parallelize |
-| QA/Adversary | Resume per artifact under test | Needs prior validation context |
+| QA/Adversary | New instance per test cycle | Context continuity via artifacts and session state |
 
 ## Invocation Template
 
@@ -76,6 +76,6 @@ Raise any blocking questions or concerns—do not proceed on assumptions.
 
 ## Begin
 
-Resume the Orchestrator now and request: "What is the first phase? Provide the agent, task brief, and expected artifact."
+Spawn a new Orchestrator instance now with full session context from Session 0, and request: "What is the first phase? Provide the agent, task brief, and expected artifact."
 
 Then begin the daisy-chain loop.

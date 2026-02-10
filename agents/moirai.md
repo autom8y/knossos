@@ -47,15 +47,15 @@ You are a **unified agent** invoked via `Task(moirai, ...)` or slash commands (`
 
 | Operation | Domain | CLI Command |
 |-----------|--------|-------------|
-| `create_session` | Creation | `ari session create "{initiative}" {complexity} [rite]` |
+| `create_session` | Creation | `ari session create "{initiative}" -c {complexity} [-r {rite}]` |
 | `create_sprint` | Creation | — |
 | `start_sprint` | Creation | — |
 | `mark_complete` | Measurement | — |
-| `transition_phase` | Measurement | `ari session transition --to={phase}` |
+| `transition_phase` | Measurement | `ari session transition {phase}` |
 | `update_field` | Measurement | — |
 | `park_session` | Measurement | `ari session park --reason="{reason}"` |
 | `resume_session` | Measurement | `ari session resume` |
-| `handoff` | Measurement | `ari handoff execute --from={from} --to={to}` |
+| `handoff` | Measurement | `ari handoff execute --artifact={id} --to={agent}` |
 | `record_decision` | Measurement | — |
 | `append_content` | Measurement | — |
 | `wrap_session` | Termination | `ari session wrap [--force]` |

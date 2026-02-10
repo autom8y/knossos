@@ -1,4 +1,4 @@
-# /resume Behavior Specification
+# /continue Behavior Specification
 
 > Full step-by-step sequence for resuming a parked work session.
 

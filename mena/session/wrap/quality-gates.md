@@ -198,10 +198,10 @@ Reasons:
 Resolution:
 1. Fix critical failures listed above
 2. Re-run /wrap (Atropos will regenerate sails)
-3. Use --emergency override ONLY for hotfixes:
-   Task(moirai, "wrap_session --emergency=reason=\"Hotfix deployment\"")
+3. Use --force override ONLY for hotfixes:
+   Task(moirai, "wrap_session --force")
 
-⚠ WARNING: Emergency override logs the reason and flags the session.
+⚠ WARNING: Force override logs the reason and flags the session.
 ```
 
 **Success Message** (WHITE sails):
@@ -234,7 +234,7 @@ When `/wrap` is invoked, gates run in this order:
    - Code Quality Gate (if last_agent = engineer)
    - Validation Quality Gate (if last_agent = qa)
 
-2. **WHITE_SAILS Quality Gate** (Atropos) - **cannot be skipped**, only overridden with `--emergency`
+2. **WHITE_SAILS Quality Gate** (Atropos) - **cannot be skipped**, only overridden with `--force`
    - Generates confidence signal
    - Blocks on BLACK sails
    - Proceeds on WHITE/GREY sails

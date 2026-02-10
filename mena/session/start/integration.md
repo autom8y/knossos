@@ -20,7 +20,7 @@ Clarify any ambiguities with the user before drafting. When complete, save to:
 
 ## Architect Delegation
 
-Invoked when complexity > SCRIPT (MODULE, SERVICE, PLATFORM):
+Invoked when complexity > PATCH (MODULE, SYSTEM, INITIATIVE, MIGRATION):
 
 ```markdown
 Act as **Architect**.
@@ -41,10 +41,11 @@ When complete, save:
 
 | Complexity | Agents Invoked | Artifacts Produced |
 |------------|----------------|-------------------|
-| SCRIPT | Requirements Analyst | PRD only |
+| PATCH | Requirements Analyst | PRD only |
 | MODULE | Requirements Analyst → Architect | PRD, TDD, ADRs |
-| SERVICE | Requirements Analyst → Architect | PRD, TDD, ADRs |
-| PLATFORM | Requirements Analyst → Architect | PRD, TDD, multiple ADRs |
+| SYSTEM | Requirements Analyst → Architect | PRD, TDD, ADRs |
+| INITIATIVE | Requirements Analyst → Architect | PRD, TDD, multiple ADRs |
+| MIGRATION | Requirements Analyst → Architect | PRD, TDD, migration plan |
 
 ## Notes
 

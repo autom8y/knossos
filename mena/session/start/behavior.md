@@ -22,10 +22,11 @@ Prompt user for any missing parameters:
 
 - **Initiative name**: Clear, concise description (e.g., "Add dark mode toggle")
 - **Complexity level**:
-  - `SCRIPT` - Single file, < 200 LOC, no external dependencies
+  - `PATCH` - Single file, < 200 LOC, no external dependencies
   - `MODULE` - Multiple files, < 2000 LOC, clear interfaces
-  - `SERVICE` - Multiple modules, APIs, data persistence
-  - `PLATFORM` - Multiple services, infrastructure, complex integration
+  - `SYSTEM` - Multiple modules, APIs, data persistence
+  - `INITIATIVE` - Multiple services, infrastructure, complex integration
+  - `MIGRATION` - Cross-cutting migrations, large-scale refactors
 - **Target rite**: Defaults to current ACTIVE_RITE (read from `.claude/ACTIVE_RITE`)
 
 ### 3. Rite Context Setup
@@ -45,7 +46,7 @@ Task(moirai, "create_session initiative='{user-initiative}' complexity={COMPLEXI
 Session Context:
 - New session requested
 - Initiative: {user-provided-initiative}
-- Complexity: {SCRIPT|MODULE|SERVICE|PLATFORM}
+- Complexity: {PATCH|MODULE|SYSTEM|INITIATIVE|MIGRATION}
 - Rite: {rite-name}
 - Phase: requirements")
 ```
@@ -74,7 +75,7 @@ Wait for analyst to produce PRD artifact.
 
 ### 6. Conditional Architect Invocation
 
-If complexity is MODULE, SERVICE, or PLATFORM:
+If complexity is MODULE, SYSTEM, INITIATIVE, or MIGRATION:
 - Invoke **Architect** via Task tool
 - Architect produces TDD and ADRs
 
@@ -128,7 +129,7 @@ Display confirmation message with:
 
 **Via agent delegation**:
 - `/docs/requirements/PRD-{slug}.md` - Product requirements document (Requirements Analyst)
-- `/docs/design/TDD-{slug}.md` - Technical design (Architect, if complexity > SCRIPT)
+- `/docs/design/TDD-{slug}.md` - Technical design (Architect, if complexity > PATCH)
 - `/docs/decisions/ADR-{NNNN}-{slug}.md` - Architecture decisions (Architect, if applicable)
 
 ### Fields Set in SESSION_CONTEXT (by Moirai)

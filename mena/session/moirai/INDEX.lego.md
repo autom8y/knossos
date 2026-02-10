@@ -12,18 +12,18 @@ description: "Moirai routing table for Fate domains (Clotho/Lachesis/Atropos). U
 | Operation | Fate | Domain | CLI Command |
 |-----------|------|--------|-------------|
 | create_session | Clotho | Creation | `ari session create "{initiative}" -c "{complexity}"` |
-| create_sprint | Clotho | Creation | `ari session sprint create "{goal}" [--task "t1"]` |
-| mark_complete | Lachesis | Measurement | `ari session sprint mark-complete [sprint-id]` |
-| transition_phase | Lachesis | Measurement | `ari session transition --to={phase}` |
+| create_sprint | Clotho | Creation | — |
+| mark_complete | Lachesis | Measurement | — |
+| transition_phase | Lachesis | Measurement | `ari session transition {phase}` |
 | update_field | Lachesis | Measurement | — |
 | park_session | Lachesis | Measurement | `ari session park --reason="{reason}"` |
 | resume_session | Lachesis | Measurement | `ari session resume` |
-| handoff | Lachesis | Measurement | `ari handoff execute --from={from} --to={to}` |
+| handoff | Lachesis | Measurement | `ari handoff execute --artifact={artifact} --to={agent}` |
 | record_decision | Lachesis | Measurement | — |
 | append_content | Lachesis | Measurement | — |
 | wrap_session | Atropos | Termination | `ari session wrap` |
 | generate_sails | Atropos | Termination | `ari sails check` |
-| delete_sprint | Atropos | Termination | `ari session sprint delete {sprint-id}` |
+| delete_sprint | Atropos | Termination | — |
 
 ## Loading Protocol
 

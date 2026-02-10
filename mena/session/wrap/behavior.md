@@ -46,7 +46,7 @@ Session Context:
 
 **The Moirai (Atropos) will**:
 1. Invoke `ari session wrap` to generate WHITE_SAILS confidence signal
-2. Validate quality gate: **BLOCKS if sails are BLACK** (unless --emergency)
+2. Validate quality gate: **BLOCKS if sails are BLACK** (unless --force)
 3. Transition session state to ARCHIVED
 4. Record wrap in audit trail
 5. Return structured response with sails metadata
@@ -60,8 +60,8 @@ Session Context:
 - **WHITE sails**: All proofs pass, no open questions → Wrap succeeds
 - **GREY sails**: Some proofs missing or open questions → Wrap succeeds with warning
 - **BLACK sails**: Critical failures, major blockers → **Wrap blocked**
-  - Use `--emergency=reason` to override (logged and flagged)
-  - Example: `Task(moirai, "wrap_session --emergency=reason=\"Hotfix deployment\"")`
+  - Use `--force` to override (logged and flagged)
+  - Example: `Task(moirai, "wrap_session --force")`
 
 **Additional Error Handling**:
 - If quality gates fail (checked by skill BEFORE invoking Moirai), offer options

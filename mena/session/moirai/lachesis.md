@@ -35,7 +35,7 @@ Transitions the session to a new workflow phase.
 
 **Syntax**: `transition_phase to="{phase}"`
 
-**CLI**: `ari session transition --to={phase}`
+**CLI**: `ari session transition {phase}`
 
 **Parameters**:
 | Parameter | Required | Description |
@@ -47,7 +47,7 @@ Transitions the session to a new workflow phase.
 2. Current phase must allow transition to target
 
 **Execution**:
-1. Call `ari session transition --to={phase}`
+1. Call `ari session transition {phase}`
 2. CLI handles lock acquisition and SESSION_CONTEXT.md mutation
 3. Return CLI output
 
@@ -152,7 +152,7 @@ Records a handoff between agents.
 
 **Syntax**: `handoff from="{agent}" to="{agent}" [context="{notes}"]`
 
-**CLI**: `ari handoff execute --from={from} --to={to}`
+**CLI**: `ari handoff execute --artifact={artifact} --to={agent}`
 
 **Parameters**:
 | Parameter | Required | Description |
@@ -166,7 +166,7 @@ Records a handoff between agents.
 2. Source and target agents must be valid
 
 **Execution**:
-1. Call `ari handoff execute --from={from} --to={to}`
+1. Call `ari handoff execute --artifact={artifact} --to={agent}`
 2. CLI handles lock acquisition and SESSION_CONTEXT.md mutation
 3. CLI appends handoff record to session context
 4. Return CLI output

@@ -44,9 +44,9 @@ Read Has Session, Session State from the context table — do not call `ari sess
    ```
    Task(moirai, "wrap_session")
    ```
-   Or with emergency flag:
+   Or with force flag:
    ```
-   Task(moirai, "wrap_session --emergency")
+   Task(moirai, "wrap_session --force")
    ```
    Moirai will:
    - Acquire lock to prevent race conditions

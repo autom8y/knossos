@@ -11,10 +11,10 @@ context: fork
 ## Pre-computed Context
 
 The SessionStart hook has already injected all session state above. Check:
-- **Session Status** table → whether a session exists
-- **Has Session** → true/false
-- **Session State** → IDLE, ACTIVE, or PARKED
-- **Pre-computed Values** → suggested session ID, entry agent
+- **Session Context** table → whether a session exists
+- **Status** field → ACTIVE, PARKED, or ARCHIVED (empty if no session)
+- **Available Rites** → list of rites in this project
+- **Available Agents** → list of agents in the active rite
 
 ## Your Task
 
@@ -24,11 +24,11 @@ $ARGUMENTS
 
 ### 1. Check Pre-conditions (Read from context above)
 
-| If Session Status Shows | Action |
+| If Hook Output Shows | Action |
 |------------------------|--------|
-| `Has Session = false` | Proceed with session creation |
-| `Has Session = true, Parked = true` | Offer options (see below) |
-| `Has Session = true, Parked = false` | Offer options (see below) |
+| "No active session" | Proceed with session creation |
+| Session Context table with Status=PARKED | Offer options (see below) |
+| Session Context table with Status=ACTIVE | Offer options (see below) |
 
 **When session already exists, offer these options:**
 
@@ -71,7 +71,7 @@ Moirai will:
 - Generate session ID with timestamp
 - Create `.claude/sessions/{session_id}/SESSION_CONTEXT.md` with proper schema
 - Set initial phase to "requirements"
-- Return confirmation with session_id and entry_agent
+- Return confirmation with session_id
 
 ### 4. Rite Switch (only if --rite differs)
 
@@ -82,12 +82,19 @@ ari sync --rite <rite-name>
 
 ### 5. Invoke Entry Point Agent
 
-Read **Entry Agent** from context (or from session-manager response).
+Read **Available Agents** from the Session Context table (injected by SessionStart hook).
+Select the appropriate entry agent based on the active rite:
+- For rites with an orchestrator: Use the orchestrator as entry point
+- Otherwise: Use the first agent listed in Available Agents
 
 Use Task tool to invoke the entry agent:
-- Default: `requirements-analyst`
 - Task: "Create PRD for: <initiative>"
 - Include complexity level in task description
+
+Example:
+```
+Task(orchestrator, "Begin <initiative> at <COMPLEXITY> complexity")
+```
 
 ### 6. Confirm Success
 

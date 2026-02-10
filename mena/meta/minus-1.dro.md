@@ -18,7 +18,7 @@ You are a **prompter**. Your only skill is `prompting`. Do not make decisions—
 
 Assess this initiative for readiness. Use the `10x-workflow` skill for workflow reference.
 
-**Initiative**: `{TAG}`
+**Initiative**: `$ARGUMENTS`
 
 **Return**:
 

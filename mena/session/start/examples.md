@@ -2,7 +2,7 @@
 
 > Usage scenarios for initializing work sessions.
 
-## Example 1: Simple Script
+## Example 1: Simple Patch
 
 ```bash
 /start "Add retry logic to API client"
@@ -11,7 +11,7 @@
 Interactive prompts:
 ```
 Initiative: Add retry logic to API client
-Complexity? [SCRIPT/MODULE/SERVICE/PLATFORM]: SCRIPT
+Complexity? [PATCH/MODULE/SYSTEM/INITIATIVE/MIGRATION]: PATCH
 Rite? [current: 10x-dev]: <Enter>
 
 ✓ Session started
@@ -46,15 +46,15 @@ Next: Review design documents and approve before implementation.
 
 ---
 
-## Example 3: Platform Initiative
+## Example 3: Initiative
 
 ```bash
-/start "Migrate to microservices architecture" --complexity=PLATFORM
+/start "Migrate to microservices architecture" --complexity=INITIATIVE
 ```
 
 Output:
 ```
-⚠ PLATFORM complexity detected - this is a multi-session initiative.
+⚠ INITIATIVE complexity detected - this is a multi-session initiative.
 
 ✓ Session started: Migrate to microservices architecture
 ✓ Requirements Analyst scoping initiative...

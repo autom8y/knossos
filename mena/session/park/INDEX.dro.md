@@ -22,7 +22,7 @@ Read Has Session, Session State from the context table — do not call `ari sess
 
 ## Pre-flight
 
-1. Verify an active session exists (`ari session status` succeeds)
+1. Verify an active session exists (check Session State from injected context)
 2. Check session is not already parked
 
 ## Behavior

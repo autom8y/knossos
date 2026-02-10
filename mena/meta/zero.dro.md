@@ -20,7 +20,7 @@ Initialize for the 4-agent workflow. Use these skills by reference (do not repea
 - `10x-workflow` for workflow and quality gates
 - `documentation` for artifact templates
 
-**Initiative**: `{TAG}`
+**Initiative**: `$ARGUMENTS`
 
 **Return**:
 1. **North Star**: What "done" means (1-3 sentences)

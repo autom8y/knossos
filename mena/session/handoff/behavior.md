@@ -33,24 +33,27 @@ Note includes:
 - Context-specific guidance for target agent
 - Recommended next steps
 
-### 3. Append Handoff Note to SESSION_CONTEXT
+### 3. Execute Atomic Handoff via Moirai
 
-Add handoff note to SESSION_CONTEXT body, preserving chronological history.
+Delegate SESSION_CONTEXT mutation to Moirai agent using the Task tool:
 
-### 4. Update SESSION_CONTEXT Metadata
-
-Update YAML frontmatter:
-
-```yaml
----
-last_agent: "{target-agent}"
-handoff_count: {increment or set to 1}
-last_handoff_at: "2025-12-24T15:45:00Z"
-current_phase: "{inferred from target agent}"
----
+```
+Task(moirai, "handoff from <FROM_AGENT> to <TO_AGENT> with notes: <NOTES>")
 ```
 
-**Phase inference**:
+Moirai will:
+- Acquire lock to prevent race conditions
+- Create backup of SESSION_CONTEXT.md
+- Update last_agent in frontmatter
+- Increment handoff_count
+- Set last_handoff_at timestamp
+- Infer and update current_phase from target agent
+- Append handoff note to body (from → to, timestamp, notes)
+- Validate the result
+- Log to audit trail
+- Rollback on failure
+
+**Phase inference** (performed by Moirai):
 | Agent | Phase |
 |-------|-------|
 | requirements-analyst | requirements |
@@ -60,7 +63,7 @@ current_phase: "{inferred from target agent}"
 
 See [session-context-schema](../../session-common/session-context-schema.md) for field definitions.
 
-### 5. Invoke Target Agent
+### 4. Invoke Target Agent
 
 Use Task tool to invoke target agent with:
 - Full SESSION_CONTEXT content
@@ -68,7 +71,7 @@ Use Task tool to invoke target agent with:
 - List of all artifacts with paths
 - Explicit next steps
 
-### 6. Confirmation
+### 5. Confirmation
 
 Display confirmation message with:
 - Transition summary
