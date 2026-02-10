@@ -17,19 +17,23 @@ Resume a parked work session with full context restoration. $ARGUMENTS
 
 ## Session Resolution
 
-Session is resolved automatically by `ari session` via scan-based discovery.
-No flags needed — the CLI scans `.claude/sessions/*/SESSION_CONTEXT.md` for PARKED status.
+**CRITICAL**: Extract the session ID from the hook-injected Session Context table above.
+Look for: `| Session | <session-id> |`. The CLI cannot discover the session automatically
+from a Bash subprocess — you MUST pass the session ID explicitly to Moirai.
+
+If no Session Context table is present (no hook output), fall back to scan:
+`ari session status` to find PARKED sessions.
 
 ## Pre-flight
 
-1. Verify a parked session exists (`ari session status` succeeds and shows PARKED)
+1. Verify a parked session exists (check Session Context table or `ari session status`)
 2. Load session context from `SESSION_CONTEXT.md`
 
 ## Behavior
 
 1. **Delegate to Moirai** for session state mutation:
    ```
-   Task(moirai, "resume_session")
+   Task(moirai, "resume_session session_id=\"<session-id>\"")
    ```
    Moirai will:
    - Acquire lock to prevent race conditions

@@ -27,15 +27,19 @@ Read Has Session, Session State from the context table — do not call `ari sess
 
 ## Behavior
 
-1. **Capture state**:
+1. **Extract Session ID**:
+   Read the Session Context table injected above. Extract the session ID from: `| Session | <session-id> |`
+   You MUST pass this to Moirai — the CLI cannot discover it from a Bash subprocess.
+
+2. **Capture state**:
    - Current phase and last agent
    - Artifacts produced so far
    - Git status (warn about uncommitted changes)
    - Open questions and blockers
 
-2. **Delegate to Moirai** for session state mutation:
+3. **Delegate to Moirai** for session state mutation:
    ```
-   Task(moirai, "park_session reason=\"<REASON>\"")
+   Task(moirai, "park_session reason=\"<REASON>\" session_id=\"<session-id>\"")
    ```
    Moirai will:
    - Acquire lock to prevent race conditions

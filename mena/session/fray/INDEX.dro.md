@@ -28,19 +28,29 @@ Fork the current session into a parallel strand. $ARGUMENTS
 
 ## Behavior
 
-### 1. Build CLI Command
+### 1. Extract Session ID
+
+**CRITICAL**: The CLI cannot discover the session automatically from a Bash subprocess.
+You MUST extract the session ID from the hook-injected Session Context table above.
+
+Look for the row: `| Session | session-YYYYMMDD-HHMMSS-XXXXXXXX |`
+
+Store this value — you will pass it via `--from` to the CLI.
+
+### 2. Build CLI Command
 
 ```bash
-ari session fray [--no-worktree] [--from <session-id>]
+ari session fray --from <session-id> [--no-worktree]
 ```
 
 | User Says | Maps To |
 |-----------|---------|
-| `/fray` | `ari session fray` |
-| `/fray --no-worktree` | `ari session fray --no-worktree` |
-| `/fray --from session-xxx` | `ari session fray --from session-xxx` |
+| `/fray` | `ari session fray --from <session-id>` |
+| `/fray --no-worktree` | `ari session fray --from <session-id> --no-worktree` |
 
-### 2. Execute
+Always pass `--from` with the session ID extracted from the context table.
+
+### 3. Execute
 
 Run the command via Bash. The CLI handles all state mutation:
 - Parks parent session (reason: "Frayed to {child-id}")

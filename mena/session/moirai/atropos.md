@@ -6,14 +6,15 @@
 
 Completes and archives the active session.
 
-**Syntax**: `wrap_session [--force]`
+**Syntax**: `wrap_session [--force] [session_id="{id}"]`
 
-**CLI**: `ari session wrap [--force]`
+**CLI**: `ari session wrap -s "{session_id}" [--force]`
 
 **Parameters**:
 | Parameter | Required | Description |
 |-----------|----------|-------------|
 | --force | No | Bypass quality gates |
+| session_id | No | Session ID (pass via `-s` flag to CLI) |
 
 **Validation**:
 1. Session must be ACTIVE or PARKED
@@ -21,7 +22,7 @@ Completes and archives the active session.
 3. Unless --force flag, verify quality gates
 
 **Execution**:
-1. Call `ari session wrap` (or `ari session wrap --force` to bypass gates)
+1. Call `ari session wrap -s "{session_id}"` (add `--force` if specified; omit `-s` if no session_id)
 2. CLI handles lock acquisition and SESSION_CONTEXT.md mutation
 3. CLI generates session summary
 4. CLI runs quality gate checks (if not --force)

@@ -47,7 +47,7 @@ Transitions the session to a new workflow phase.
 2. Current phase must allow transition to target
 
 **Execution**:
-1. Call `ari session transition {phase}`
+1. Call `ari session transition -s "{session_id}" {phase}` (omit `-s` if no session_id provided)
 2. CLI handles lock acquisition and SESSION_CONTEXT.md mutation
 3. Return CLI output
 
@@ -96,21 +96,22 @@ Updates a field in SESSION_CONTEXT.md or SPRINT_CONTEXT.md.
 
 Pauses the active session.
 
-**Syntax**: `park_session reason="{reason}"`
+**Syntax**: `park_session reason="{reason}" [session_id="{id}"]`
 
-**CLI**: `ari session park --reason="{reason}"`
+**CLI**: `ari session park -s "{session_id}" --reason="{reason}"`
 
 **Parameters**:
 | Parameter | Required | Description |
 |-----------|----------|-------------|
 | reason | Yes | Reason for parking |
+| session_id | No | Session ID (pass via `-s` flag to CLI) |
 
 **Validation**:
 1. Session must be ACTIVE
 2. Reason must be non-empty
 
 **Execution**:
-1. Call `ari session park --reason="{reason}"`
+1. Call `ari session park -s "{session_id}" --reason="{reason}"` (omit `-s` if no session_id provided)
 2. CLI handles lock acquisition and SESSION_CONTEXT.md mutation
 3. CLI updates session status to PARKED
 4. CLI records park reason and timestamp
@@ -126,15 +127,15 @@ Pauses the active session.
 
 Resumes a parked session.
 
-**Syntax**: `resume_session`
+**Syntax**: `resume_session [session_id="{id}"]`
 
-**CLI**: `ari session resume`
+**CLI**: `ari session resume -s "{session_id}"`
 
 **Validation**:
 1. Session must be PARKED
 
 **Execution**:
-1. Call `ari session resume`
+1. Call `ari session resume -s "{session_id}"` (omit `-s` if no session_id provided)
 2. CLI handles lock acquisition and SESSION_CONTEXT.md mutation
 3. CLI updates session status to ACTIVE
 4. CLI records resume timestamp

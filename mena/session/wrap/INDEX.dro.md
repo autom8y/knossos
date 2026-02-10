@@ -27,26 +27,30 @@ Read Has Session, Session State from the context table — do not call `ari sess
 
 ## Behavior
 
-1. **Run quality gates** (unless `--skip-checks`):
+1. **Extract Session ID**:
+   Read the Session Context table injected above. Extract the session ID from: `| Session | <session-id> |`
+   You MUST pass this to Moirai — the CLI cannot discover it from a Bash subprocess.
+
+2. **Run quality gates** (unless `--skip-checks`):
    - PRD exists and complete
    - TDD exists (if MODULE+)
    - Implementation complete
    - Tests passing
 
-2. **Generate session summary**:
+3. **Generate session summary**:
    - Total duration
    - Phases completed
    - Artifacts produced (from `$SESSION_DIR/artifacts.log`)
    - Decisions made (from handoff notes)
    - Lessons learned
 
-3. **Delegate to Moirai** for session state mutation:
+4. **Delegate to Moirai** for session state mutation:
    ```
-   Task(moirai, "wrap_session")
+   Task(moirai, "wrap_session session_id=\"<session-id>\"")
    ```
    Or with force flag:
    ```
-   Task(moirai, "wrap_session --force")
+   Task(moirai, "wrap_session --force session_id=\"<session-id>\"")
    ```
    Moirai will:
    - Acquire lock to prevent race conditions
