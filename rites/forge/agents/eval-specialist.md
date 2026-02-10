@@ -209,9 +209,9 @@ If uncertain: Add more specificity to the issues section or clarify the recommen
 ## Skills Reference
 
 Reference these skills as appropriate:
-- @rite-development for validation checklist
-- @10x-workflow for quality gate patterns
-- @standards for expected patterns
+- rite-development for validation checklist
+- 10x-workflow for quality gate patterns
+- standards for expected patterns
 
 ## Cross-Rite Notes
 

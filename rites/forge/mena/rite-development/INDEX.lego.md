@@ -54,7 +54,7 @@ This skill codifies the patterns discovered from building rites (10x-dev, docs, 
 
 ### Model and Color Assignment
 
-See [@agent-prompt-engineering](../agent-prompt-engineering/INDEX.lego.md#model-and-color-assignment) for model selection and color assignment guidance.
+See [agent-prompt-engineering](../agent-prompt-engineering/INDEX.lego.md#model-and-color-assignment) for model selection and color assignment guidance.
 
 ### Workflow Phases
 
@@ -126,10 +126,10 @@ Complete rite implementations:
 
 ## Cross-Skill Integration
 
-- @10x-workflow for workflow mechanics and phase transitions
-- @documentation for artifact templates (PRD, TDD, ADR)
-- @standards for naming conventions and code patterns
-- @prompting for agent invocation patterns
+- 10x-workflow for workflow mechanics and phase transitions
+- documentation for artifact templates (PRD, TDD, ADR)
+- standards for naming conventions and code patterns
+- prompting for agent invocation patterns
 - **consult for ecosystem navigation** (MUST update when adding rites)
 
 ---

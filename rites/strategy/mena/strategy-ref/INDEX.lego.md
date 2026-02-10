@@ -132,6 +132,6 @@ market-research → competitive-analysis → business-modeling → strategic-pla
 
 ## Cross-References
 
-- **Related Skills**: @documentation (artifact templates)
+- **Related Skills**: documentation (artifact templates)
 - **Related Rites**: intelligence (product analytics), rnd (technology strategy)
 - **Commands**: See COMMAND_REGISTRY.md

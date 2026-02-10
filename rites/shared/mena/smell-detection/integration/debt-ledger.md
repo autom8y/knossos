@@ -193,7 +193,7 @@ evidence: "getUserData() modifies cache (smell-detection NM-MISLEAD heuristic, m
 # Invoked by user
 Task(code-smeller, "Analyze code quality for src/validators/")
 
-# code-smeller uses @smell-detection
+# code-smeller uses smell-detection skill
 # - Runs jscpd (DRY-COPY automated detection)
 # - Finds 85% similarity between user.ts and contact.ts
 # - Calculates severity: score=14, HIGH, P2
@@ -206,7 +206,7 @@ Task(code-smeller, "Analyze code quality for src/validators/")
 # Invoked by user
 Task(debt-collector, "Collect technical debt from src/")
 
-# debt-collector uses @smell-detection
+# debt-collector uses smell-detection skill
 # - Reads SMELL_REPORT.md (or re-scans codebase)
 # - Maps DRY-COPY-001 → C043-001
 # - Preserves smell_ref: DRY-COPY-001

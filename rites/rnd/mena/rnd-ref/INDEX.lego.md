@@ -132,6 +132,6 @@ SCOUT-{slug}  INTEGRATE-{slug}    PROTO-{slug}   MOONSHOT-{slug}
 
 ## Cross-References
 
-- **Related Skills**: @standards (architectural principles)
+- **Related Skills**: standards (architectural principles)
 - **Related Rites**: 10x-dev (implementation), strategy (strategic context)
 - **Commands**: See COMMAND_REGISTRY.md

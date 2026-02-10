@@ -213,9 +213,9 @@ If uncertain: Validate against an existing working rite like 10x-dev.
 ## Skills Reference
 
 Reference these skills as appropriate:
-- @rite-development for workflow.yaml.template
-- @10x-workflow for phase patterns
-- @standards for command naming conventions
+- rite-development for workflow.yaml.template
+- 10x-workflow for phase patterns
+- standards for command naming conventions
 
 ## Cross-Rite Notes
 

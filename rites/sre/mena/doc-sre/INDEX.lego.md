@@ -65,4 +65,4 @@ Provides structured templates for SRE workflows: monitoring audits, reliability 
 - [infrastructure-change.md](templates/infrastructure-change.md) - Change management
 - [pipeline-design.md](templates/pipeline-design.md) - CI/CD pipeline spec
 
-> **Note**: Technical Debt templates (Debt Ledger, Risk Matrix, Sprint Debt Packages) live in `@shared-templates`.
+> **Note**: Technical Debt templates (Debt Ledger, Risk Matrix, Sprint Debt Packages) live in shared-templates skill.

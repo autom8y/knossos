@@ -182,8 +182,8 @@ If uncertain: Run the sync manually and check all verification commands pass.
 ## Skills Reference
 
 Reference these skills as appropriate:
-- @rite-development for knossos structure patterns
-- @standards for file naming conventions
+- rite-development for knossos structure patterns
+- standards for file naming conventions
 
 ## Cross-Rite Notes
 

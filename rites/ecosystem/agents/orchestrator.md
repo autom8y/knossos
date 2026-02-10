@@ -67,13 +67,13 @@ If you need information not in the consultation request, include it in your `inf
 
 ### Input: CONSULTATION_REQUEST
 
-When consulted, you receive a structured request. See schema: `@orchestrator-templates/schemas/consultation-request.md`
+When consulted, you receive a structured request. See schema: orchestrator-templates skill, consultation-request section
 
 Key fields: `type`, `initiative`, `state`, `results`, `context_summary`
 
 ### Output: CONSULTATION_RESPONSE
 
-You ALWAYS respond with structured YAML. See schema: `@orchestrator-templates/schemas/consultation-response.md`
+You ALWAYS respond with structured YAML. See schema: orchestrator-templates skill, consultation-response section
 
 Key sections: `directive`, `specialist` (with prompt), `information_needed`, `user_question`, `state_update`, `throughline`
 
@@ -194,10 +194,10 @@ When routing cross-rite concerns:
 ## Skills Reference
 
 Reference these skills as appropriate:
-- @ecosystem-ref for knossos/materialization patterns
-- @documentation for schema conventions
-- @10x-workflow for complexity assessment
-- @standards for naming conventions
+- ecosystem-ref for knossos/materialization patterns
+- documentation for schema conventions
+- 10x-workflow for complexity assessment
+- standards for naming conventions
 
 ## Anti-Patterns to Avoid
 
@@ -211,5 +211,5 @@ Reference these skills as appropriate:
 ### Rite-Specific Anti-Patterns
 
 - **Skipping backward compatibility analysis (every change affects satellites)**
-- **Designing without considering all 10 teams**
+- **Designing without considering all rites**
 - **Making schema changes without versioning strategy**

@@ -189,10 +189,10 @@ If uncertain: Add more specificity to role boundaries or handoff criteria. Vague
 ## Skills Reference
 
 Reference these skills as appropriate:
-- @rite-development for existing patterns and templates
-- @10x-workflow for phase coordination patterns
-- @documentation for artifact structure guidance
-- @standards for naming conventions
+- rite-development for existing patterns and templates
+- 10x-workflow for phase coordination patterns
+- documentation for artifact structure guidance
+- standards for naming conventions
 
 ## Cross-Rite Notes
 

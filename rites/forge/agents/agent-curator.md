@@ -203,8 +203,8 @@ If uncertain: Test the full discovery flow yourself before marking complete.
 
 Reference these skills as appropriate:
 - consult for Consultant patterns
-- @rite-development for sync patterns
-- @documentation for document templates
+- rite-development for sync patterns
+- documentation for document templates
 
 ## Cross-Rite Notes
 

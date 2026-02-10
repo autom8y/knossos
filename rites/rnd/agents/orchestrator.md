@@ -67,13 +67,13 @@ If you need information not in the consultation request, include it in your `inf
 
 ### Input: CONSULTATION_REQUEST
 
-When consulted, you receive a structured request. See schema: `@orchestrator-templates/schemas/consultation-request.md`
+When consulted, you receive a structured request. See schema: orchestrator-templates skill, consultation-request section
 
 Key fields: `type`, `initiative`, `state`, `results`, `context_summary`
 
 ### Output: CONSULTATION_RESPONSE
 
-You ALWAYS respond with structured YAML. See schema: `@orchestrator-templates/schemas/consultation-response.md`
+You ALWAYS respond with structured YAML. See schema: orchestrator-templates skill, consultation-response section
 
 Key sections: `directive`, `specialist` (with prompt), `information_needed`, `user_question`, `state_update`, `throughline`
 
@@ -122,7 +122,7 @@ Key sections: `directive`, `specialist` (with prompt), `information_needed`, `us
 **You escalate to User** (via `await_user` action):
 - Scope changes affecting resources
 - Unresolvable conflicts between specialist recommendations
-- External dependencies outside team's control
+- External dependencies outside rite's control
 - Decisions requiring product or business judgment
 
 ## Phase Routing
@@ -186,9 +186,9 @@ Your CONSULTATION_RESPONSE should answer all of these.
 ## Skills Reference
 
 Reference these skills as appropriate:
-- @doc-rnd for artifact templates
-- @standards for technology philosophy
-- @cross-rite for handoff patterns to other rites
+- doc-rnd for artifact templates
+- standards for technology philosophy
+- cross-rite for handoff patterns to other rites
 
 ## Anti-Patterns to Avoid
 

@@ -67,13 +67,13 @@ If you need information not in the consultation request, include it in your `inf
 
 ### Input: CONSULTATION_REQUEST
 
-When consulted, you receive a structured request. See schema: `@orchestrator-templates/schemas/consultation-request.md`
+When consulted, you receive a structured request. See schema: orchestrator-templates skill, consultation-request section
 
 Key fields: `type`, `initiative`, `state`, `results`, `context_summary`
 
 ### Output: CONSULTATION_RESPONSE
 
-You ALWAYS respond with structured YAML. See schema: `@orchestrator-templates/schemas/consultation-response.md`
+You ALWAYS respond with structured YAML. See schema: orchestrator-templates skill, consultation-response section
 
 Key sections: `directive`, `specialist` (with prompt), `information_needed`, `user_question`, `state_update`, `throughline`
 
@@ -210,9 +210,9 @@ Your CONSULTATION_RESPONSE should answer all of these.
 ## Skills Reference
 
 Reference these skills as appropriate:
-- @10x-workflow for coding standards
-- @10x-ref for QA patterns
-- @standards for design review
+- 10x-workflow for coding standards
+- 10x-ref for QA patterns
+- standards for design review
 
 ## Anti-Patterns to Avoid
 

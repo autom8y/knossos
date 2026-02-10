@@ -200,7 +200,7 @@ Example:
 
 ### Artifact Production
 
-Produce [Primary Artifact] using `@[skill]#[template-name]`.
+Produce [Primary Artifact] using [skill] skill, [template-name] section.
 
 **Context customization**:
 - [Specific guidance for this agent's artifact variant]
@@ -277,10 +277,10 @@ If uncertain: [What to do when the answer isn't clearly yes - specific action]
 ## Skills Reference
 
 Reference these skills as appropriate:
-- @[skill-1] for [what guidance it provides]
-- @[skill-2] for [what guidance it provides]
-- @[skill-3] for [what guidance it provides]
-- @[domain-specific-skill] for [specific guidance]
+- [skill-1] for [what guidance it provides]
+- [skill-2] for [what guidance it provides]
+- [skill-3] for [what guidance it provides]
+- [domain-specific-skill] for [specific guidance]
 ```
 
 **Purpose**: Connect agent to broader knowledge base.
@@ -288,7 +288,7 @@ Reference these skills as appropriate:
 **Guidelines**:
 - List 3-5 most relevant skills
 - Include purpose for each (not just skill name)
-- Common skills: @documentation, @standards, @10x-workflow
+- Common skills: documentation, standards, 10x-workflow
 - Rite-specific skills should be included
 
 ---
@@ -298,7 +298,7 @@ Reference these skills as appropriate:
 ```markdown
 ## Cross-Rite Routing
 
-See `@cross-rite-handoff` for handoff patterns to other rites.
+See cross-rite-handoff skill for handoff patterns to other rites.
 
 [Optional: Common cross-rite scenarios specific to this agent]
 ```
@@ -509,13 +509,13 @@ If uncertain: Have someone outside the rite try to use the agent and note confus
 
 ## Skills Reference
 
-- @rite-development for agent patterns
-- @standards for naming conventions
-- @10x-workflow for workflow integration
+- rite-development for agent patterns
+- standards for naming conventions
+- 10x-workflow for workflow integration
 
 ## Cross-Rite Routing
 
-See `@cross-rite-handoff` for cross-rite patterns.
+See cross-rite-handoff skill for cross-rite patterns.
 
 ## Anti-Patterns to Avoid
 

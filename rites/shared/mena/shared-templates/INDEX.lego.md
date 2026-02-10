@@ -20,7 +20,7 @@ description: "Shared templates: debt-ledger, risk-matrix, sprint-debt. Use when:
 Reference templates in agent prompts:
 
 ```markdown
-Produce debt ledgers using `@shared-templates#debt-ledger-template`.
+Produce debt ledgers using shared-templates skill, debt-ledger-template section.
 ```
 
 ## Schemas
@@ -48,6 +48,6 @@ Templates follow semantic versioning. MINOR versions are backward compatible.
 
 ## Related
 
-- `@documentation` - Core PRD/TDD/ADR templates
-- `@doc-ecosystem` - Ecosystem change templates
-- `@cross-rite-handoff` - HANDOFF artifact schema
+- documentation - Core PRD/TDD/ADR templates
+- doc-ecosystem - Ecosystem change templates
+- cross-rite-handoff - HANDOFF artifact schema
