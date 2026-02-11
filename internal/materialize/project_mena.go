@@ -62,11 +62,11 @@ type MenaProjectionMode int
 
 const (
 	// MenaProjectionAdditive adds/updates files without removing unmanaged content.
-	// Used by usersync (ari sync user mena).
+	// Used by user scope sync (ari sync --scope=user).
 	MenaProjectionAdditive MenaProjectionMode = iota
 
 	// MenaProjectionDestructive wipes target commands/ and skills/ directories
-	// before projecting. Used by materialize (ari rite start).
+	// before projecting. Used by rite scope sync (ari sync --scope=rite).
 	MenaProjectionDestructive
 )
 

@@ -376,7 +376,7 @@ func ErrSyncConflict(conflicts []string) *Error {
 		map[string]interface{}{
 			"conflict_count":   len(conflicts),
 			"conflicts":        conflicts,
-			"resolution_hint": "Run 'ari sync resolve' to resolve conflicts",
+			"resolution_hint": "Resolve conflicts manually or re-run sync with --overwrite-diverged",
 		})
 }
 
