@@ -1,7 +1,7 @@
 ---
 name: rite
 description: Switch rites or list available rites
-argument-hint: [rite-name] [--list] [--overwrite-diverged] [--dry-run] [--keep-orphans]
+argument-hint: "[rite-name] [--list] [--overwrite-diverged] [--dry-run] [--keep-orphans]"
 allowed-tools: Bash, Read
 model: sonnet
 disable-model-invocation: true

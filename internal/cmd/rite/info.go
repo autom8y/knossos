@@ -44,14 +44,12 @@ func runInfo(ctx *cmdContext, riteName string, opts infoOptions) error {
 	// Get rite summary
 	riteSummary, err := discovery.Get(riteName)
 	if err != nil {
-		printer.PrintError(err)
 		return err
 	}
 
 	// Get full manifest
 	manifest, err := discovery.GetManifest(riteName)
 	if err != nil {
-		printer.PrintError(err)
 		return err
 	}
 

@@ -142,8 +142,14 @@ func runInit(ctx *cmdContext, riteName, source string, force bool, cmd *cobra.Co
 	if embTemplates := common.EmbeddedTemplates(); embTemplates != nil {
 		mat.WithEmbeddedTemplates(embTemplates)
 	}
-	if embHooks := common.EmbeddedHooks(); embHooks != nil {
-		mat.WithEmbeddedHooks(embHooks)
+	// Bootstrap config/hooks.yaml from embedded bytes if not already present.
+	if hooksYAML := common.EmbeddedHooksYAML(); len(hooksYAML) > 0 {
+		hooksPath := filepath.Join(projectDir, "config", "hooks.yaml")
+		if _, err := os.Stat(hooksPath); os.IsNotExist(err) {
+			if err := os.MkdirAll(filepath.Dir(hooksPath), 0755); err == nil {
+				os.WriteFile(hooksPath, hooksYAML, 0644)
+			}
+		}
 	}
 
 	// Materialize based on whether a rite was specified.

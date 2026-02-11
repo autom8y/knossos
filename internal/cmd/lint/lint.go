@@ -26,7 +26,55 @@ const (
 	SevCritical = "CRIT"
 	SevHigh     = "HIGH"
 	SevMedium   = "MED"
+	SevLow      = "LOW"
 )
+
+// expectedForkState defines the deliberate fork/inline classification for each dromena.
+// true = should have context: fork (self-contained, artifact output, no conversation context needed)
+// false = should NOT have context: fork (interactive, contextual, or orchestrating)
+var expectedForkState = map[string]bool{
+	// Inline: interactive, contextual, or orchestrating commands
+	"go":        false,
+	"start":     false,
+	"commit":    false,
+	"consult":   false,
+	"qa":        false,
+	"one":       false,
+	"task":      false,
+	"build":     false,
+	"architect": false,
+	"hotfix":    false,
+	"sprint":    false,
+	// Inline: session lifecycle (need hook-injected context)
+	"park":     false,
+	"continue": false,
+	"wrap":     false,
+	"handoff":  false,
+	"fray":     false,
+	// Fork: self-contained CLI wrappers and one-shot actions
+	"pr":          true,
+	"code-review": true,
+	"spike":       true,
+	"minus-1":     true,
+	"zero":        true,
+	"rite":        true,
+	"sessions":    true,
+	"worktree":    true,
+	"sync":        true,
+	"theoria":     true,
+	"ecosystem":   true,
+	// Fork: rite-switching commands (one-shot CLI wrappers)
+	"10x":          true,
+	"debt":         true,
+	"docs":         true,
+	"forge":        true,
+	"hygiene":      true,
+	"intelligence": true,
+	"rnd":          true,
+	"security":     true,
+	"sre":          true,
+	"strategy":     true,
+}
 
 // Finding is a single lint issue.
 type Finding struct {
@@ -46,6 +94,7 @@ type LintReport struct {
 		Critical int `json:"critical"`
 		High     int `json:"high"`
 		Medium   int `json:"medium"`
+		Low      int `json:"low"`
 		Files    int `json:"files_checked"`
 	} `json:"summary"`
 }
@@ -72,8 +121,8 @@ func (r LintReport) Text() string {
 	printSection("Dromena", r.Dromena)
 	printSection("Legomena", r.Legomena)
 
-	b.WriteString(fmt.Sprintf("\nSummary: %d issues (%d critical, %d high, %d medium) across %d files\n",
-		r.Summary.Total, r.Summary.Critical, r.Summary.High, r.Summary.Medium, r.Summary.Files))
+	b.WriteString(fmt.Sprintf("\nSummary: %d issues (%d critical, %d high, %d medium, %d low) across %d files\n",
+		r.Summary.Total, r.Summary.Critical, r.Summary.High, r.Summary.Medium, r.Summary.Low, r.Summary.Files))
 
 	return b.String()
 }
@@ -103,7 +152,7 @@ Checks agents, dromena (.dro.md), and legomena (.lego.md) for:
 - Missing or malformed frontmatter
 - Required fields (name, description, etc.)
 - Agent archetype mismatches (maxTurns, type, color)
-- Dromena missing context:fork
+- Dromena context:fork allowlist mismatches
 - Legomena missing Triggers keyword in description
 
 Examples:
@@ -153,6 +202,8 @@ func runLint(ctx *cmdContext, scope string) error {
 			report.Summary.High++
 		case SevMedium:
 			report.Summary.Medium++
+		case SevLow:
+			report.Summary.Low++
 		}
 	}
 
@@ -275,14 +326,20 @@ func lintAgentFile(path, relPath string, report *LintReport) {
 		}
 	}
 
-	// maxTurns archetype check
+	// maxTurns archetype check — generous tolerance for orchestrators
+	// which need 20-40 turns for multi-phase coordination
 	if fm.Type != "" && fm.MaxTurns > 0 {
 		if expected, ok := archetypeMaxTurns[fm.Type]; ok {
 			deviation := fm.MaxTurns - expected
 			if deviation < 0 {
 				deviation = -deviation
 			}
-			if deviation > 50 {
+			// Threshold: 50% of archetype default or 50, whichever is larger
+			threshold := expected / 2
+			if threshold < 50 {
+				threshold = 50
+			}
+			if deviation > threshold {
 				report.Agents = append(report.Agents, Finding{
 					File: relPath, Severity: SevMedium, Rule: "maxTurns-deviation",
 					Message: fmt.Sprintf("maxTurns=%d deviates from %s archetype default of %d by %d", fm.MaxTurns, fm.Type, expected, deviation),
@@ -364,11 +421,25 @@ func lintDromenFile(_, relPath string, data []byte, report *LintReport) {
 		})
 	}
 
-	// context:fork check — informational, not all dromena need fork
-	if strVal(fm, "context") != "fork" {
+	// context:fork allowlist check — enforce deliberate fork/inline classification
+	name := strVal(fm, "name")
+	hasFork := strVal(fm, "context") == "fork"
+	if expected, known := expectedForkState[name]; known {
+		if expected && !hasFork {
+			report.Dromena = append(report.Dromena, Finding{
+				File: relPath, Severity: SevMedium, Rule: "context-fork-expected",
+				Message: fmt.Sprintf("dromena %q should have context: fork (self-contained command)", name),
+			})
+		} else if !expected && hasFork {
+			report.Dromena = append(report.Dromena, Finding{
+				File: relPath, Severity: SevMedium, Rule: "context-fork-unexpected",
+				Message: fmt.Sprintf("dromena %q should NOT have context: fork (interactive/contextual command)", name),
+			})
+		}
+	} else if name != "" {
 		report.Dromena = append(report.Dromena, Finding{
-			File: relPath, Severity: SevMedium, Rule: "context-fork-missing",
-			Message: "dromena runs in main conversation context (no context: fork)",
+			File: relPath, Severity: SevLow, Rule: "context-fork-unclassified",
+			Message: fmt.Sprintf("dromena %q not in fork/inline allowlist — classify in lint.go expectedForkState", name),
 		})
 	}
 
@@ -379,10 +450,13 @@ func lintDromenFile(_, relPath string, data []byte, report *LintReport) {
 // --- Dromena namespace collision detection ---
 
 func lintMenaNamespace(projectRoot string, report *LintReport) {
-	// Collect all dromena names to detect collisions
+	// Collect all dromena names to detect collisions.
+	// Scope-aware: only flag collisions within the same scope (global or same rite).
+	// Cross-scope shadowing (rite overrides global) is intentional.
 	type nameSource struct {
 		name    string
 		relPath string
+		scope   string // "global" or rite name
 	}
 
 	var entries []nameSource
@@ -400,24 +474,39 @@ func lintMenaNamespace(projectRoot string, report *LintReport) {
 		if name == "" {
 			return // already flagged by name-missing rule
 		}
-		entries = append(entries, nameSource{name: name, relPath: relPath})
+
+		// Determine scope from path
+		scope := "global"
+		if strings.HasPrefix(relPath, "rites/") {
+			parts := strings.SplitN(relPath, "/", 3)
+			if len(parts) >= 2 {
+				scope = parts[1] // rite name
+			}
+		}
+
+		entries = append(entries, nameSource{name: name, relPath: relPath, scope: scope})
 	})
 
-	// Build name → files map
-	nameFiles := make(map[string][]string)
+	// Build (scope, name) → files map — only flag within-scope collisions
+	type scopeKey struct {
+		scope string
+		name  string
+	}
+	scopeFiles := make(map[scopeKey][]string)
 	for _, e := range entries {
-		nameFiles[e.name] = append(nameFiles[e.name], e.relPath)
+		key := scopeKey{scope: e.scope, name: e.name}
+		scopeFiles[key] = append(scopeFiles[key], e.relPath)
 	}
 
-	// Flag collisions
-	for name, files := range nameFiles {
+	// Flag collisions within same scope only
+	for key, files := range scopeFiles {
 		if len(files) < 2 {
 			continue
 		}
 		for _, f := range files {
 			report.Dromena = append(report.Dromena, Finding{
 				File: f, Severity: SevHigh, Rule: "name-collision",
-				Message: fmt.Sprintf("dromena name %q collides with %d other file(s): %s", name, len(files)-1, strings.Join(files, ", ")),
+				Message: fmt.Sprintf("dromena name %q collides with %d other file(s) in %s scope: %s", key.name, len(files)-1, key.scope, strings.Join(files, ", ")),
 			})
 		}
 	}

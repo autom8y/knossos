@@ -1,6 +1,6 @@
 ---
 description: Diagnose sync issues and conflicts (Ecosystem Analyst with sync pipeline focus)
-argument-hint: [issue-description]
+argument-hint: "[issue-description]"
 allowed-tools: Bash, Read, Grep, Glob
 model: opus
 ---

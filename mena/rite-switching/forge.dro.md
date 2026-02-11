@@ -1,7 +1,7 @@
 ---
 name: forge
 description: Quick switch to forge (meta-rite for building and maintaining rites)
-argument-hint: [--overwrite-diverged] [--dry-run] [--keep-orphans]
+argument-hint: "[--overwrite-diverged] [--dry-run] [--keep-orphans]"
 allowed-tools: Bash, Read
 model: haiku
 disable-model-invocation: true

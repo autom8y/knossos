@@ -1,7 +1,7 @@
 ---
 name: handoff
 description: Transfer work to a different agent with context
-argument-hint: <agent-name> [notes]
+argument-hint: "<agent-name> [notes]"
 allowed-tools: Bash, Read, Task
 disallowed-tools: Write, Edit, NotebookEdit
 disable-model-invocation: true

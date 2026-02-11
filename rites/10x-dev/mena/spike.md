@@ -1,6 +1,6 @@
 ---
 description: Time-boxed research and exploration (no production code)
-argument-hint: <question> [--timebox=DURATION]
+argument-hint: "<question> [--timebox=DURATION]"
 allowed-tools: Bash, Read, Write, Task, Glob, Grep, WebFetch, WebSearch
 model: opus
 ---

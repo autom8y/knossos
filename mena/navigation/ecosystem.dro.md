@@ -1,7 +1,7 @@
 ---
 name: ecosystem
 description: Quick switch to ecosystem (knossos infrastructure workflow)
-argument-hint: [--overwrite-diverged] [--dry-run] [--keep-orphans]
+argument-hint: "[--overwrite-diverged] [--dry-run] [--keep-orphans]"
 allowed-tools: Bash, Read
 model: sonnet
 disable-model-invocation: true

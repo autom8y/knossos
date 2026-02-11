@@ -102,9 +102,10 @@ Performance Targets:
 // helper functions for commands
 
 // getPrinter creates an output printer from the context.
-// Hook commands default to JSON format for machine-readable output.
+// Hook commands ALWAYS output JSON regardless of -o flag.
 func (c *cmdContext) getPrinter() *output.Printer {
-	return c.GetPrinter(output.FormatJSON)
+	verbose := c.Verbose != nil && *c.Verbose
+	return output.NewPrinter(output.FormatJSON, nil, nil, verbose)
 }
 
 // getHookEnv parses the hook environment variables.

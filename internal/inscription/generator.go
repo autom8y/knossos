@@ -26,11 +26,14 @@ type RenderContext struct {
 	// ActiveRite is the current rite name.
 	ActiveRite string
 
-	// AgentCount is the number of agents in the active rite.
+	// AgentCount is the number of rite-native agents.
 	AgentCount int
 
-	// Agents contains metadata for each agent.
+	// Agents contains metadata for rite-native agents.
 	Agents []AgentInfo
+
+	// CrossRiteAgents contains agents available across rites (moirai, consultant, etc.).
+	CrossRiteAgents []AgentInfo
 
 	// KnossosVars contains additional variables for template rendering.
 	KnossosVars map[string]string
@@ -364,19 +367,35 @@ func (g *Generator) generateQuickStartContent() (string, error) {
 	// Header with rite info
 	sb.WriteString("## Quick Start\n\n")
 
-	if g.Context.ActiveRite != "" {
+	if g.Context.ActiveRite != "" && g.Context.AgentCount > 0 {
 		sb.WriteString("This project uses a ")
 		sb.WriteString(itoa(g.Context.AgentCount))
 		sb.WriteString("-agent workflow (")
 		sb.WriteString(g.Context.ActiveRite)
 		sb.WriteString("):\n\n")
-	} else {
-		sb.WriteString("This project uses a multi-agent workflow:\n\n")
-	}
 
-	// Agent table
-	sb.WriteString(g.loadAgentTable())
-	sb.WriteString("\n\n")
+		// Rite-native agent table
+		sb.WriteString(g.loadAgentTable())
+		sb.WriteString("\n\n")
+
+		// Cross-rite agents (single-line summary)
+		if len(g.Context.CrossRiteAgents) > 0 {
+			var names []string
+			for _, a := range g.Context.CrossRiteAgents {
+				names = append(names, "`"+a.Name+"`")
+			}
+			sb.WriteString("Cross-rite agents also available: ")
+			sb.WriteString(strings.Join(names, ", "))
+			sb.WriteString("\n\n")
+		}
+	} else {
+		// Cross-cutting mode (no rite): show cross-rite agents only
+		sb.WriteString("This project uses a multi-agent workflow:\n\n")
+		if len(g.Context.CrossRiteAgents) > 0 {
+			sb.WriteString(g.loadCrossRiteAgentTable())
+			sb.WriteString("\n\n")
+		}
+	}
 
 	// Footer
 	sb.WriteString("Entry point: `/go`. Agent invocation patterns: `prompting` skill. Routing guidance: `/consult`.")
@@ -384,9 +403,33 @@ func (g *Generator) generateQuickStartContent() (string, error) {
 	return sb.String(), nil
 }
 
+// loadCrossRiteAgentTable generates a markdown table of cross-rite agents.
+func (g *Generator) loadCrossRiteAgentTable() string {
+	if g.Context == nil || len(g.Context.CrossRiteAgents) == 0 {
+		return "| Agent | Role |\n| ----- | ---- |\n"
+	}
+
+	var sb strings.Builder
+	sb.WriteString("| Agent | Role |\n")
+	sb.WriteString("| ----- | ---- |\n")
+
+	for _, agent := range g.Context.CrossRiteAgents {
+		sb.WriteString("| **")
+		sb.WriteString(agent.Name)
+		sb.WriteString("** | ")
+		sb.WriteString(agent.Role)
+		sb.WriteString(" |\n")
+	}
+
+	return strings.TrimSuffix(sb.String(), "\n")
+}
+
 // generateAgentConfigsContent generates the Agent Configurations section.
 func (g *Generator) generateAgentConfigsContent() (string, error) {
-	if g.Context == nil || len(g.Context.Agents) == 0 {
+	hasRiteAgents := g.Context != nil && len(g.Context.Agents) > 0
+	hasCrossRiteAgents := g.Context != nil && len(g.Context.CrossRiteAgents) > 0
+
+	if !hasRiteAgents && !hasCrossRiteAgents {
 		return g.getDefaultAgentConfigsContent(), nil
 	}
 
@@ -394,12 +437,27 @@ func (g *Generator) generateAgentConfigsContent() (string, error) {
 	sb.WriteString("## Agents\n\n")
 	sb.WriteString("Prompts in `.claude/agents/`:\n\n")
 
-	for _, agent := range g.Context.Agents {
-		sb.WriteString("- `")
-		sb.WriteString(agent.File)
-		sb.WriteString("` - ")
-		sb.WriteString(agent.Role)
-		sb.WriteString("\n")
+	if hasRiteAgents {
+		for _, agent := range g.Context.Agents {
+			sb.WriteString("- `")
+			sb.WriteString(agent.File)
+			sb.WriteString("` - ")
+			sb.WriteString(agent.Role)
+			sb.WriteString("\n")
+		}
+	}
+
+	if hasCrossRiteAgents {
+		if hasRiteAgents {
+			sb.WriteString("\nCross-rite agents:\n\n")
+		}
+		for _, agent := range g.Context.CrossRiteAgents {
+			sb.WriteString("- `")
+			sb.WriteString(agent.File)
+			sb.WriteString("` - ")
+			sb.WriteString(agent.Role)
+			sb.WriteString("\n")
+		}
 	}
 
 	return sb.String(), nil

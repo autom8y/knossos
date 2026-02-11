@@ -1,6 +1,6 @@
 ---
 description: Create a new rite through The Forge workflow
-argument-hint: <rite-name> [--complexity=PATCH|RITE|ECOSYSTEM]
+argument-hint: "<rite-name> [--complexity=PATCH|RITE|ECOSYSTEM]"
 allowed-tools: Bash, Glob, Grep, Read, Write, Edit, Task, TodoWrite
 model: opus
 ---

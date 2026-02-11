@@ -53,14 +53,11 @@ func runHistory(ctx *cmdContext, opts historyOptions) error {
 	// Get session ID
 	sessionID, err := ctx.GetSessionID()
 	if err != nil {
-		printer.PrintError(errors.Wrap(errors.CodeGeneralError, "failed to get session ID", err))
-		return err
+		return errors.Wrap(errors.CodeGeneralError, "failed to get session ID", err)
 	}
 
 	if sessionID == "" {
-		err := errors.New(errors.CodeSessionNotFound, "No active session. Use 'ari session create' first.")
-		printer.PrintError(err)
-		return err
+		return errors.New(errors.CodeSessionNotFound, "No active session. Use 'ari session create' first.")
 	}
 
 	// Read events from events.jsonl
@@ -76,8 +73,7 @@ func runHistory(ctx *cmdContext, opts historyOptions) error {
 			}
 			return printer.Print(result)
 		}
-		printer.PrintError(errors.Wrap(errors.CodeGeneralError, "failed to read events", err))
-		return err
+		return errors.Wrap(errors.CodeGeneralError, "failed to read events", err)
 	}
 
 	// Filter to handoff-related events

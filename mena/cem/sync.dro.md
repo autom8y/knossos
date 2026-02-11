@@ -1,7 +1,7 @@
 ---
 name: sync
 description: Sync project with knossos ecosystem using ari CLI
-argument-hint: [--scope=rite|user|all] [--rite=NAME] [--dry-run] [--overwrite-diverged]
+argument-hint: "[--scope=rite|user|all] [--rite=NAME] [--dry-run] [--overwrite-diverged]"
 allowed-tools: Bash, Read
 model: haiku
 disable-model-invocation: true

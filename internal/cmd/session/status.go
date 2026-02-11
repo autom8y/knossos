@@ -44,9 +44,7 @@ func runStatus(ctx *cmdContext) error {
 
 	sessionID, err := ctx.GetSessionID()
 	if err != nil {
-		err := errors.Wrap(errors.CodeGeneralError, "failed to get session ID", err)
-		printer.PrintError(err)
-		return err
+		return errors.Wrap(errors.CodeGeneralError, "failed to get session ID", err)
 	}
 
 	// If no session, return has_session: false
@@ -63,7 +61,11 @@ func runStatus(ctx *cmdContext) error {
 	ctxPath := resolver.SessionContextFile(sessionID)
 
 	if _, err := os.Stat(ctxPath); os.IsNotExist(err) {
-		// Session ID set but no context file
+		// Session ID was explicitly provided but doesn't exist — return error
+		if ctx.SessionID != nil && *ctx.SessionID != "" {
+			return errors.ErrSessionNotFound(sessionID)
+		}
+		// Discovered session ID but no context file
 		result := output.StatusOutput{
 			SessionID:  sessionID,
 			HasSession: false,
@@ -84,7 +86,6 @@ func runStatus(ctx *cmdContext) error {
 	// Load session context
 	sessCtx, err := session.LoadContext(ctxPath)
 	if err != nil {
-		printer.PrintError(err)
 		return err
 	}
 

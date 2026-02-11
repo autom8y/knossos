@@ -1,7 +1,7 @@
 ---
 name: security
 description: Quick switch to security (security assessment workflow)
-argument-hint: [--overwrite-diverged] [--dry-run] [--keep-orphans]
+argument-hint: "[--overwrite-diverged] [--dry-run] [--keep-orphans]"
 allowed-tools: Bash, Read
 model: haiku
 disable-model-invocation: true

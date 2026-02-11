@@ -93,7 +93,6 @@ type Materializer struct {
 	explicitSource    string // Optional explicit source from --source flag
 	templatesDir      string
 	embeddedTemplates fs.FS  // Embedded templates filesystem
-	embeddedHooks     fs.FS  // Embedded hooks filesystem
 	claudeDirOverride string // If set, materialize to this directory instead of .claude/
 }
 
@@ -133,11 +132,6 @@ func (m *Materializer) WithEmbeddedTemplates(fsys fs.FS) *Materializer {
 	return m
 }
 
-// WithEmbeddedHooks sets the embedded hooks filesystem.
-func (m *Materializer) WithEmbeddedHooks(fsys fs.FS) *Materializer {
-	m.embeddedHooks = fsys
-	return m
-}
 
 // getClaudeDir returns the target .claude/ directory, respecting any override.
 func (m *Materializer) getClaudeDir() string {
@@ -301,7 +295,7 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 
 	// Dry-run: just detect orphans and return
 	if opts.DryRun {
-		orphans, err := m.detectOrphans(manifest, claudeDir)
+		orphans, err := m.detectOrphans(manifest, claudeDir, resolved)
 		if err != nil {
 			return nil, errors.Wrap(errors.CodeGeneralError, "failed to detect orphans", err)
 		}
@@ -326,7 +320,7 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 	}
 
 	// 3. Handle orphans before materializing agents
-	orphans, err := m.detectOrphans(manifest, claudeDir)
+	orphans, err := m.detectOrphans(manifest, claudeDir, resolved)
 	if err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to detect orphans", err)
 	}
@@ -522,10 +516,19 @@ func (m *Materializer) syncRiteScopeMinimal(opts SyncOptions) (*RiteScopeResult,
 // If a provenance manifest exists, uses manifest-based detection: files with
 // owner=user or files not in the provenance manifest are orphans.
 // Otherwise, falls back to rite manifest membership check (backward compatible).
-func (m *Materializer) detectOrphans(manifest *RiteManifest, claudeDir string) ([]string, error) {
+func (m *Materializer) detectOrphans(manifest *RiteManifest, claudeDir string, resolved *ResolvedRite) ([]string, error) {
 	agentsDir := filepath.Join(claudeDir, "agents")
 	if _, err := os.Stat(agentsDir); os.IsNotExist(err) {
 		return []string{}, nil
+	}
+
+	// Build complete expected agent set: rite agents + cross-rite agents
+	expectedAgents := make(map[string]bool)
+	for _, agent := range manifest.Agents {
+		expectedAgents[agent.Name+".md"] = true
+	}
+	for _, agentName := range m.listCrossRiteAgents(resolved) {
+		expectedAgents[agentName] = true
 	}
 
 	// Try loading provenance manifest for manifest-based detection
@@ -534,26 +537,20 @@ func (m *Materializer) detectOrphans(manifest *RiteManifest, claudeDir string) (
 
 	// If provenance manifest exists, use manifest-based orphan detection
 	if err == nil && provenanceManifest != nil {
-		return m.detectOrphansFromProvenance(manifest, claudeDir, provenanceManifest)
+		return m.detectOrphansFromProvenance(expectedAgents, claudeDir, provenanceManifest)
 	}
 
 	// Fallback: rite manifest membership check (backward compatible)
-	return m.detectOrphansLegacy(manifest, agentsDir)
+	return m.detectOrphansLegacy(expectedAgents, agentsDir)
 }
 
 // detectOrphansFromProvenance detects orphans using the provenance manifest.
 // An agent file is an orphan if:
 //   - It is NOT in the provenance manifest, OR
 //   - It has owner=user in the provenance manifest, OR
-//   - It is knossos-owned BUT not in the current rite's agent list
-func (m *Materializer) detectOrphansFromProvenance(manifest *RiteManifest, claudeDir string, provenanceManifest *provenance.ProvenanceManifest) ([]string, error) {
+//   - It is knossos-owned BUT not in the expected agents set (rite + cross-rite)
+func (m *Materializer) detectOrphansFromProvenance(expectedAgents map[string]bool, claudeDir string, provenanceManifest *provenance.ProvenanceManifest) ([]string, error) {
 	agentsDir := filepath.Join(claudeDir, "agents")
-
-	// Build set of expected agents from current rite manifest
-	expectedAgents := make(map[string]bool)
-	for _, agent := range manifest.Agents {
-		expectedAgents[agent.Name+".md"] = true
-	}
 
 	orphans := []string{}
 	entries, err := os.ReadDir(agentsDir)
@@ -601,15 +598,9 @@ func (m *Materializer) detectOrphansFromProvenance(manifest *RiteManifest, claud
 	return orphans, nil
 }
 
-// detectOrphansLegacy uses the legacy rite manifest membership check.
+// detectOrphansLegacy uses manifest membership check.
 // This is the fallback when no provenance manifest exists (backward compatible).
-func (m *Materializer) detectOrphansLegacy(manifest *RiteManifest, agentsDir string) ([]string, error) {
-	// Build set of expected agents from manifest
-	expectedAgents := make(map[string]bool)
-	for _, agent := range manifest.Agents {
-		expectedAgents[agent.Name+".md"] = true
-	}
-
+func (m *Materializer) detectOrphansLegacy(expectedAgents map[string]bool, agentsDir string) ([]string, error) {
 	// Find files that aren't expected
 	orphans := []string{}
 	entries, err := os.ReadDir(agentsDir)
@@ -744,21 +735,16 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claud
 		managedAgents[agent.Name+".md"] = true
 	}
 
-	// Add cross-rite agents to managed set (so they get cleaned before re-write)
+	// Add cross-rite agents to managed set
 	crossRiteAgents := m.listCrossRiteAgents(resolved)
 	for _, agentName := range crossRiteAgents {
 		managedAgents[agentName] = true
 	}
 
-	// Remove only knossos-managed agents (will be rewritten below).
-	// User-created agents not in manifest are untouched.
-	if entries, err := os.ReadDir(agentsDir); err == nil {
-		for _, entry := range entries {
-			if !entry.IsDir() && managedAgents[entry.Name()] {
-				os.Remove(filepath.Join(agentsDir, entry.Name()))
-			}
-		}
-	}
+	// NOTE: We intentionally do NOT pre-delete managed agents before rewriting.
+	// writeIfChanged() handles overwrite-if-different atomically. Pre-deletion
+	// causes CC's file watcher to see DELETE events for files that are immediately
+	// recreated, which crashes/disrupts active Claude Code sessions.
 
 	now := time.Now().UTC()
 
@@ -993,7 +979,7 @@ func (m *Materializer) materializeCrossRiteAgents(agentsDir string, resolved *Re
 // Sources: mena/, rites/{rite}/mena/, rites/shared/mena/
 // Priority order (later sources override earlier): mena < shared < dependencies < current rite
 //
-// This method builds the source list and delegates to ProjectMena() for the
+// This method builds the source list and delegates to SyncMena() for the
 // actual collection, routing, extension stripping, and file copying.
 func (m *Materializer) materializeMena(manifest *RiteManifest, claudeDir string, resolved *ResolvedRite, collector provenance.Collector) error {
 	commandsDir := filepath.Join(claudeDir, "commands")
@@ -1046,7 +1032,7 @@ func (m *Materializer) materializeMena(manifest *RiteManifest, claudeDir string,
 		sources = append(sources, MenaSource{Path: currentRiteMenaDir})
 	}
 
-	// Delegate to ProjectMena with destructive mode and provenance collector
+	// Delegate to SyncMena with destructive mode and provenance collector
 	opts := MenaProjectionOptions{
 		Mode:              MenaProjectionDestructive,
 		Filter:            ProjectAll,
@@ -1056,14 +1042,14 @@ func (m *Materializer) materializeMena(manifest *RiteManifest, claudeDir string,
 		ProjectRoot:       m.resolver.ProjectRoot(),
 	}
 
-	_, err := ProjectMena(sources, opts)
+	_, err := SyncMena(sources, opts)
 	return err
 }
 
 // collectMenaEntriesDir recursively collects mena entries from a filesystem directory.
 // Leaf directories (containing INDEX files) are collected for routing.
 // Standalone files in grouping directories are collected separately.
-func collectMenaEntriesDir(dirPath string, prefix string, collected map[string]menaCollectedEntry, standalones map[string]menaStandaloneFile) error {
+func collectMenaEntriesDir(dirPath string, prefix string, collected map[string]menaCollectedEntry, standalones map[string]menaStandaloneFile, srcIdx int) error {
 	entries, err := os.ReadDir(dirPath)
 	if err != nil {
 		return err
@@ -1077,19 +1063,21 @@ func collectMenaEntriesDir(dirPath string, prefix string, collected map[string]m
 			childPath := filepath.Join(dirPath, entry.Name())
 			if dirHasIndexFile(childPath) {
 				collected[name] = menaCollectedEntry{
-					source: MenaSource{Path: childPath},
-					name:   name,
+					source:      MenaSource{Path: childPath},
+					name:        name,
+					sourceIndex: srcIdx,
 				}
 			} else {
-				if err := collectMenaEntriesDir(childPath, name, collected, standalones); err != nil {
+				if err := collectMenaEntriesDir(childPath, name, collected, standalones, srcIdx); err != nil {
 					return err
 				}
 			}
 		} else {
 			// Standalone file in a grouping directory
 			standalones[name] = menaStandaloneFile{
-				srcPath: filepath.Join(dirPath, entry.Name()),
-				relPath: name,
+				srcPath:     filepath.Join(dirPath, entry.Name()),
+				relPath:     name,
+				sourceIndex: srcIdx,
 			}
 		}
 	}
@@ -1097,7 +1085,7 @@ func collectMenaEntriesDir(dirPath string, prefix string, collected map[string]m
 }
 
 // collectMenaEntriesFS recursively collects mena entries from an embedded filesystem.
-func collectMenaEntriesFS(fsys fs.FS, fsysPath string, prefix string, collected map[string]menaCollectedEntry) {
+func collectMenaEntriesFS(fsys fs.FS, fsysPath string, prefix string, collected map[string]menaCollectedEntry, srcIdx int) {
 	entries, err := fs.ReadDir(fsys, fsysPath)
 	if err != nil {
 		return // Path doesn't exist in embedded FS
@@ -1118,10 +1106,11 @@ func collectMenaEntriesFS(fsys fs.FS, fsysPath string, prefix string, collected 
 					FsysPath:   childPath,
 					IsEmbedded: true,
 				},
-				name: name,
+				name:        name,
+				sourceIndex: srcIdx,
 			}
 		} else {
-			collectMenaEntriesFS(fsys, childPath, name, collected)
+			collectMenaEntriesFS(fsys, childPath, name, collected, srcIdx)
 		}
 	}
 }
@@ -1248,13 +1237,16 @@ func (m *Materializer) materializeRules(claudeDir string, resolved *ResolvedRite
 		}
 	}
 
-	// Remove stale knossos-managed rules (names matching any template source)
+	// Remove only STALE knossos-managed rules: files that match a known template name
+	// but are NOT in the current rite's template set. Do NOT pre-delete rules that will
+	// be rewritten — writeIfChanged() handles atomic overwrite. Pre-deletion causes
+	// CC's file watcher to see DELETE events that crash active sessions.
 	if existingRules, err := os.ReadDir(rulesDir); err == nil {
 		for _, entry := range existingRules {
 			if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".md") {
 				continue
 			}
-			if allTemplateNames[entry.Name()] {
+			if allTemplateNames[entry.Name()] && templateRules[entry.Name()] == nil {
 				os.Remove(filepath.Join(rulesDir, entry.Name()))
 			}
 		}
@@ -1390,13 +1382,7 @@ func (m *Materializer) materializeSettingsWithManifest(claudeDir string, manifes
 
 	// Load hooks.yaml and merge hook registrations
 	if hooksConfig := m.loadHooksConfig(); hooksConfig != nil {
-		var stripped []string
-		existingSettings, stripped = mergeHooksSettings(existingSettings, hooksConfig)
-		// Log stripped legacy hooks if any (for visibility into cleanup)
-		for _, msg := range stripped {
-			// TODO: Route to structured output when available
-			_ = msg // Suppress unused warning; will be used in future structured output
-		}
+		existingSettings = mergeHooksSettings(existingSettings, hooksConfig)
 	} else {
 		// No hooks.yaml found — ensure hooks key exists (empty)
 		if existingSettings["hooks"] == nil {

@@ -561,6 +561,76 @@ func (s RiteSwitchDryRunOutput) Text() string {
 	return b.String()
 }
 
+// PantheonOutput represents the agent pantheon for a rite.
+type PantheonOutput struct {
+	Rite   string          `json:"rite"`
+	Agents []PantheonAgent `json:"agents"`
+	Count  int             `json:"count"`
+}
+
+// PantheonAgent represents a single agent in the pantheon.
+type PantheonAgent struct {
+	Name        string `json:"name"`
+	File        string `json:"file"`
+	Description string `json:"description,omitempty"`
+	Model       string `json:"model,omitempty"`
+}
+
+// Headers implements Tabular for PantheonOutput.
+func (p PantheonOutput) Headers() []string {
+	return []string{"NAME", "MODEL", "ROLE"}
+}
+
+// Rows implements Tabular for PantheonOutput.
+func (p PantheonOutput) Rows() [][]string {
+	rows := make([][]string, len(p.Agents))
+	for i, a := range p.Agents {
+		model := a.Model
+		if model == "" {
+			model = "-"
+		}
+		desc := truncateDescription(a.Description)
+		if desc == "" {
+			desc = "-"
+		}
+		rows[i] = []string{a.Name, model, desc}
+	}
+	return rows
+}
+
+// truncateDescription extracts the first sentence from a description.
+func truncateDescription(s string) string {
+	s = strings.TrimSpace(s)
+	if s == "" {
+		return s
+	}
+	// Join first two lines for descriptions that wrap mid-sentence
+	lines := strings.SplitN(s, "\n", 3)
+	joined := lines[0]
+	if len(lines) > 1 && !strings.HasSuffix(strings.TrimSpace(lines[0]), ".") {
+		joined = strings.TrimSpace(lines[0]) + " " + strings.TrimSpace(lines[1])
+	}
+	// Truncate to first sentence
+	if idx := strings.Index(joined, ". "); idx != -1 {
+		return joined[:idx+1]
+	}
+	if strings.HasSuffix(joined, ".") {
+		return joined
+	}
+	// Cap at 80 chars
+	if len(joined) > 80 {
+		return joined[:77] + "..."
+	}
+	return joined
+}
+
+// Text implements Textable for PantheonOutput.
+func (p PantheonOutput) Text() string {
+	var b strings.Builder
+	b.WriteString(fmt.Sprintf("Rite: %s (%d agents)\n", p.Rite, p.Count))
+	return b.String()
+}
+
 // RiteValidateOutput represents validation result.
 type RiteValidateOutput struct {
 	Rite     string               `json:"rite"`

@@ -1,15 +1,14 @@
 ---
 name: go
-description: "Cold-start dispatcher — detects session state and gets you to productive work in seconds"
+description: "Session status dashboard — shows where you are and suggests next action"
 argument-hint: "[task description]"
-allowed-tools: Bash, Read, Glob, Grep, Skill
+allowed-tools: Bash, Read
 model: opus
-context: fork
 ---
 
 ## Purpose
 
-`/go` is the single entry point for every work session. It reads system state, decides what to do, and dispatches to existing commands. It never duplicates logic that lives in `/start`, `/continue`, or `/consult`.
+`/go` is a lightweight status dashboard. It reads system state, presents it, and suggests what to do next. It does NOT dispatch to other commands — the user decides what to invoke.
 
 ## Context
 
@@ -17,7 +16,7 @@ Auto-injected by SessionStart hook (project, rite, session, git).
 
 ## Your Task
 
-Get the user to productive work immediately. $ARGUMENTS
+Show session status and suggest next action. $ARGUMENTS
 
 ## Phase 1: Collect State (parallel)
 
@@ -33,32 +32,19 @@ ari session list --output json 2>/dev/null
 # 3. Active rite
 cat .claude/ACTIVE_RITE 2>/dev/null || echo "none"
 
-# 5. WIP artifacts
+# 4. WIP artifacts
 ls .wip/ 2>/dev/null
 ```
 
 Also read the session context table injected by the SessionStart hook (already in your context above).
 
-## Phase 2: Classify Scenario
+## Phase 2: Classify and Present
 
-Evaluate the collected state against exactly these four scenarios, in priority order:
+Evaluate the collected state and present the appropriate dashboard:
 
-| Priority | Scenario | Condition | Action |
-|----------|----------|-----------|--------|
-| 1 | ALREADY_ACTIVE | Session exists with status=ACTIVE | Show status, suggest next action |
-| 2 | RESUME_PARKED | One or more sessions with status=PARKED | Auto-resume (or choose if multiple) |
-| 3 | NEW_WORK | `$ARGUMENTS` contains a task description | Dispatch to `/consult` with intent |
-| 4 | ORIENTATION | Nothing active, no arguments | Show dashboard with options |
+### ALREADY_ACTIVE (session with status=ACTIVE)
 
-**Priority matters.** If a session is ACTIVE, that is always Scenario 1 regardless of arguments. If a session is PARKED with no active session, that is Scenario 2. Only if no session exists at all do Scenarios 3-4 apply.
-
-Exception: If a session is ACTIVE and the user provided `$ARGUMENTS`, acknowledge the active session AND relay the user's intent as the suggested next action.
-
-## Phase 3: Execute Scenario
-
-### Scenario 1: ALREADY_ACTIVE
-
-Display a compact status block. No preamble. Get to the point.
+Display a compact status block. No preamble.
 
 ```
 Session: {session_id}
@@ -73,59 +59,53 @@ Sprint Progress:
 Suggested next action: {inferred from phase and sprint state}
 ```
 
-Read the session's `SESSION_CONTEXT.md` and any `SPRINT_CONTEXT.md` to populate the sprint progress. If sprint data is not available, show the phase and initiative without a task list.
+Read the session's `SESSION_CONTEXT.md` and any `SPRINT_CONTEXT.md` to populate sprint progress. If sprint data is not available, show the phase and initiative without a task list.
 
-Time target: ~3 seconds.
+If the user provided `$ARGUMENTS`, acknowledge the active session AND relay their intent as the suggested next action.
 
-### Scenario 2: RESUME_PARKED
+### RESUME_PARKED (one or more sessions with status=PARKED, none ACTIVE)
 
-**Single parked session**: Resume immediately, no questions asked.
+**Single parked session**:
+```
+Parked session found: {session_id}
+Initiative: {initiative} (parked {relative_time})
 
-1. Invoke `/continue` (which delegates to Moirai for the state transition)
-2. After resume, show the Scenario 1 status block
+Resume with: /continue
+```
 
-**Multiple parked sessions**: Ask ONE question, then act.
-
+**Multiple parked sessions**:
 ```
 Found {n} parked sessions:
 
 1. {session_id_1} — {initiative_1} (parked {relative_time})
 2. {session_id_2} — {initiative_2} (parked {relative_time})
 
-Which session? (number, or "new" to start fresh)
+Resume one with: /continue
+Start fresh with: /start "<initiative>"
 ```
 
-After the user answers, resume the chosen session via `/continue` or dispatch to Scenario 3/4.
+### NEW_WORK ($ARGUMENTS provided, no active/parked sessions)
 
-**One question maximum.** Do not ask follow-ups.
+```
+No active sessions.
 
-Time target: ~8 seconds.
+Your intent: {$ARGUMENTS}
 
-### Scenario 3: NEW_WORK
+Get started:
+  /consult "{$ARGUMENTS}"  — Get rite recommendation and workflow routing
+  /start "{$ARGUMENTS}"    — Start directly with current rite ({active_rite})
+```
 
-The user typed `/go add dark mode support` or similar. Dispatch their intent to `/consult` for rite routing and session creation.
-
-1. Pass the user's intent to `/consult`: the arguments describe what they want to build
-2. `/consult` handles rite recommendation and workflow routing
-3. After routing, the user will invoke `/start` to create the session
-
-Do NOT create the session yourself. Do NOT ask what rite to use. Let `/consult` handle the cognitive load.
-
-If no rite is currently active, this is the expected path -- `/consult` is the universal pre-rite entry point.
-
-Time target: ~12 seconds.
-
-### Scenario 4: ORIENTATION
-
-Nothing is happening. Show a terse dashboard and offer clear options.
+### ORIENTATION (nothing active, no arguments)
 
 ```
 Rite: {active_rite or "none"}
 Sessions: {count active} active, {count parked} parked
 
 Options:
-  /go <task>     — Start new work (routes through /consult)
+  /go <task>     — Show dashboard with intent
   /consult       — Get guidance on what to do
+  /start <task>  — Start a new session
   /sessions      — Browse all sessions
   /rite --list   — See available rites
 ```
@@ -134,22 +114,20 @@ If `.wip/` artifacts exist without a session, mention them:
 
 ```
 Note: Found {n} artifacts in .wip/ with no active session.
-These may be from a previous session. Review with: ls .wip/
+Review with: ls .wip/
 ```
-
-Time target: ~5 seconds.
 
 ## Behavioral Rules
 
-1. **One question maximum.** If state is unambiguous, act. The only scenario that asks a question is RESUME_PARKED with multiple sessions.
+1. **Present, don't dispatch.** `/go` shows status and suggests commands. It does NOT invoke `/start`, `/continue`, `/consult`, or any other command. The user decides what to do next.
 
-2. **Dispatch, don't execute.** `/go` routes to `/start`, `/continue`, `/consult`. It does not contain session creation logic, resume logic, or rite routing logic.
+2. **Read everything, ask almost nothing.** Collect all state in parallel, then present. Never ask "do you have an active session?" — check it yourself.
 
-3. **Read everything, ask almost nothing.** Collect all state in parallel, then decide. Never ask "do you have an active session?" -- check it yourself.
+3. **One question maximum.** If state is unambiguous, present it. Only ask when multiple parked sessions exist and the user needs to choose.
 
-4. **No mythology.** Use plain operational vocabulary. Session, rite, phase, sprint. Not Clotho, Lachesis, Moirai.
+4. **No mythology.** Use plain operational vocabulary. Session, rite, phase, sprint.
 
-5. **No preamble.** Do not say "Let me check your session state..." Just collect, decide, and present the result. The user should see output, not process narration.
+5. **No preamble.** Do not say "Let me check your session state..." Just collect, decide, and present.
 
 6. **Terse output.** Tables and short lines, not paragraphs. Every extra line costs time-to-productive.
 
@@ -159,10 +137,10 @@ Time target: ~5 seconds.
 # Active session exists — shows status immediately
 /go
 
-# Parked session — auto-resumes
+# Parked session — shows resume suggestion
 /go
 
-# New work with intent — dispatches to /consult
+# New work with intent — shows start options
 /go "add user authentication to the API"
 
 # Nothing happening — shows dashboard

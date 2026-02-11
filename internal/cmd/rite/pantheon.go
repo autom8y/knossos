@@ -7,6 +7,8 @@ import (
 
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
+
+	"github.com/autom8y/knossos/internal/output"
 )
 
 func newPantheonCmd(ctx *cmdContext) *cobra.Command {
@@ -43,17 +45,17 @@ func runPantheon(ctx *cmdContext) error {
 	// Get active rite
 	activeRite := ctx.getActiveRite()
 	if activeRite == "" {
-		return printer.PrintError(fmt.Errorf("no active rite (use 'ari sync --rite=<name>' to activate)"))
+		return fmt.Errorf("no active rite (use 'ari sync --rite=<name>' to activate)")
 	}
 
 	// Read agents from .claude/agents/
 	agentsDir := filepath.Join(resolver.ClaudeDir(), "agents")
 	entries, err := os.ReadDir(agentsDir)
 	if err != nil {
-		return printer.PrintError(fmt.Errorf("failed to read agents directory: %w", err))
+		return fmt.Errorf("failed to read agents directory: %w", err)
 	}
 
-	agents := []map[string]interface{}{}
+	var agents []output.PantheonAgent
 	for _, entry := range entries {
 		if entry.IsDir() || filepath.Ext(entry.Name()) != ".md" {
 			continue
@@ -66,35 +68,26 @@ func runPantheon(ctx *cmdContext) error {
 			continue
 		}
 
-		fm, err := parseFrontmatter(content)
-		if err != nil {
-			// If frontmatter parsing fails, use filename as name
-			agents = append(agents, map[string]interface{}{
-				"name": entry.Name()[:len(entry.Name())-3], // Remove .md
-				"file": entry.Name(),
-			})
-			continue
+		agent := output.PantheonAgent{
+			File: entry.Name(),
 		}
 
-		agent := map[string]interface{}{
-			"name": fm.Name,
-			"file": entry.Name(),
-		}
-		if fm.Description != "" {
-			agent["description"] = fm.Description
-		}
-		if fm.Model != "" {
-			agent["model"] = fm.Model
+		fm, err := parseFrontmatter(content)
+		if err != nil || fm == nil {
+			agent.Name = entry.Name()[:len(entry.Name())-3] // Remove .md
+		} else {
+			agent.Name = fm.Name
+			agent.Description = fm.Description
+			agent.Model = fm.Model
 		}
 
 		agents = append(agents, agent)
 	}
 
-	// Build output
-	result := map[string]interface{}{
-		"rite":   activeRite,
-		"agents": agents,
-		"count":  len(agents),
+	result := output.PantheonOutput{
+		Rite:   activeRite,
+		Agents: agents,
+		Count:  len(agents),
 	}
 
 	return printer.Print(result)

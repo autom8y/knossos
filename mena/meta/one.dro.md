@@ -5,7 +5,6 @@ argument-hint: (uses session context from Session 0)
 model: opus
 disable-model-invocation: true
 allowed-tools: Task, Read
-context: fork
 ---
 
 # Session 1: Autonomous Execution

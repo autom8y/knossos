@@ -1,7 +1,7 @@
 ---
 name: intelligence
 description: Quick switch to intelligence (product analytics workflow)
-argument-hint: [--overwrite-diverged] [--dry-run] [--keep-orphans]
+argument-hint: "[--overwrite-diverged] [--dry-run] [--keep-orphans]"
 allowed-tools: Bash, Read
 model: haiku
 disable-model-invocation: true

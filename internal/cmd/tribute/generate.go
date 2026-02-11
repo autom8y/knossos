@@ -92,7 +92,6 @@ func runGenerate(ctx *cmdContext, sessionDir string) error {
 		}
 		generator, err = tribute.GenerateFromSessionID(*ctx.ProjectDir, *ctx.SessionID)
 		if err != nil {
-			printer.PrintError(err)
 			return err
 		}
 	} else {
@@ -103,17 +102,13 @@ func runGenerate(ctx *cmdContext, sessionDir string) error {
 		// Find active session
 		activeID, findErr := session.FindActiveSession(paths.NewResolver(*ctx.ProjectDir).SessionsDir())
 		if findErr != nil {
-			printer.PrintError(findErr)
 			return findErr
 		}
 		if activeID == "" {
-			noSessionErr := errors.New(errors.CodeSessionNotFound, "no active session")
-			printer.PrintError(noSessionErr)
-			return noSessionErr
+			return errors.New(errors.CodeSessionNotFound, "no active session")
 		}
 		generator, err = tribute.GenerateFromProject(*ctx.ProjectDir, activeID)
 		if err != nil {
-			printer.PrintError(err)
 			return err
 		}
 	}
@@ -124,7 +119,6 @@ func runGenerate(ctx *cmdContext, sessionDir string) error {
 
 	result, err := generator.Generate()
 	if err != nil {
-		printer.PrintError(err)
 		return err
 	}
 

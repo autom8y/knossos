@@ -106,14 +106,166 @@ type MenaProjectionResult struct {
 
 // menaCollectedEntry represents a leaf mena directory collected for routing.
 type menaCollectedEntry struct {
-	source MenaSource
-	name   string
+	source      MenaSource
+	name        string
+	sourceIndex int // index into sources array (higher = higher priority)
 }
 
 // menaStandaloneFile represents a standalone file in a grouping directory.
 type menaStandaloneFile struct {
-	srcPath string
-	relPath string // e.g., "navigation/rite.dro.md"
+	srcPath     string
+	relPath     string // e.g., "navigation/rite.dro.md"
+	sourceIndex int    // index into sources array (higher = higher priority)
+}
+
+// MenaResolution holds the resolved mena entries after collection and namespace flattening.
+// Returned by CollectMena for reuse by both rite-scope (SyncMena) and user-scope (syncUserMena).
+type MenaResolution struct {
+	Entries     map[string]MenaResolvedEntry      // source key → directory entry
+	Standalones map[string]MenaResolvedStandalone // source key → standalone file
+}
+
+// MenaResolvedEntry represents a resolved leaf mena directory with flat name and type.
+type MenaResolvedEntry struct {
+	Source   MenaSource
+	FlatName string // after resolveNamespace (e.g., "spike" from "operations/spike")
+	MenaType string // "dro" or "lego"
+}
+
+// MenaResolvedStandalone represents a resolved standalone mena file with flat name and type.
+type MenaResolvedStandalone struct {
+	SrcPath  string
+	RelPath  string // original relative path (e.g., "operations/architect.dro.md")
+	FlatName string // after resolveNamespace + strip (e.g., "architect.md")
+	MenaType string // "dro" or "lego"
+}
+
+// CollectMena collects and resolves mena entries from sources without writing files.
+// Returns the resolved entries with flat names and mena types.
+// Reused by both rite-scope (SyncMena) and user-scope (syncUserMena).
+func CollectMena(sources []MenaSource, opts MenaProjectionOptions) (*MenaResolution, error) {
+	resolution := &MenaResolution{
+		Entries:     make(map[string]MenaResolvedEntry),
+		Standalones: make(map[string]MenaResolvedStandalone),
+	}
+
+	// Pass 1: Collect mena entries from all sources.
+	// Later sources override earlier ones for the same command name.
+	collected := make(map[string]menaCollectedEntry)
+	standalones := make(map[string]menaStandaloneFile)
+
+	for srcIdx, src := range sources {
+		if src.IsEmbedded {
+			collectMenaEntriesFS(src.Fsys, src.FsysPath, "", collected, srcIdx)
+		} else {
+			if src.Path == "" {
+				continue
+			}
+			if _, err := os.Stat(src.Path); os.IsNotExist(err) {
+				continue
+			}
+			if err := collectMenaEntriesDir(src.Path, "", collected, standalones, srcIdx); err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	// Pass 1.5: Resolve flat namespace for dromena.
+	flatNames := resolveNamespace(collected, standalones, opts)
+
+	// Pass 2: Detect type and apply flat names for each directory entry.
+	for name, ce := range collected {
+		menaType := detectEntryMenaType(ce)
+
+		// Apply filter
+		if menaType == "dro" && opts.Filter&ProjectDro == 0 {
+			continue
+		}
+		if menaType == "lego" && opts.Filter&ProjectLego == 0 {
+			continue
+		}
+
+		// Use flat name for dromena if available
+		flatName := name
+		if menaType == "dro" {
+			if fn, ok := flatNames[name]; ok {
+				flatName = fn
+			}
+		}
+
+		resolution.Entries[name] = MenaResolvedEntry{
+			Source:   ce.source,
+			FlatName: flatName,
+			MenaType: menaType,
+		}
+	}
+
+	// Resolve standalones.
+	for key, sf := range standalones {
+		menaType := DetectMenaType(filepath.Base(sf.srcPath))
+
+		// Apply filter
+		if menaType == "dro" && opts.Filter&ProjectDro == 0 {
+			continue
+		}
+		if menaType == "lego" && opts.Filter&ProjectLego == 0 {
+			continue
+		}
+
+		// Strip the mena extension from the relative path's filename
+		dir := filepath.Dir(sf.relPath)
+		base := StripMenaExtension(filepath.Base(sf.relPath))
+
+		// Use flat name for dromena if available
+		var strippedRel string
+		if menaType == "dro" {
+			if flatName, ok := flatNames[sf.relPath]; ok {
+				strippedRel = flatName + ".md"
+			} else {
+				strippedRel = filepath.Join(dir, base)
+			}
+		} else {
+			strippedRel = filepath.Join(dir, base)
+		}
+
+		resolution.Standalones[key] = MenaResolvedStandalone{
+			SrcPath:  sf.srcPath,
+			RelPath:  sf.relPath,
+			FlatName: strippedRel,
+			MenaType: menaType,
+		}
+	}
+
+	return resolution, nil
+}
+
+// detectEntryMenaType determines the mena type for a collected directory entry
+// by examining its INDEX file. Returns "dro" as default.
+func detectEntryMenaType(ce menaCollectedEntry) string {
+	menaType := "dro" // default: route to commands/
+
+	if ce.source.IsEmbedded {
+		entries, err := fs.ReadDir(ce.source.Fsys, ce.source.FsysPath)
+		if err == nil {
+			for _, entry := range entries {
+				if !entry.IsDir() && strings.HasPrefix(entry.Name(), "INDEX") {
+					menaType = DetectMenaType(entry.Name())
+					break
+				}
+			}
+		}
+	} else {
+		if entries, err := os.ReadDir(ce.source.Path); err == nil {
+			for _, entry := range entries {
+				if !entry.IsDir() && strings.HasPrefix(entry.Name(), "INDEX") {
+					menaType = DetectMenaType(entry.Name())
+					break
+				}
+			}
+		}
+	}
+
+	return menaType
 }
 
 // ReadMenaFrontmatterFromDir reads the INDEX file from a filesystem directory,
@@ -183,7 +335,7 @@ func parseMenaFrontmatterBytes(data []byte) MenaFrontmatter {
 	return fm
 }
 
-// ProjectMena projects mena source files into commands/ and skills/ target
+// SyncMena projects mena source files into commands/ and skills/ target
 // directories. It handles extension stripping, mena type routing, and supports
 // both filesystem and embedded FS sources.
 //
@@ -195,7 +347,7 @@ func parseMenaFrontmatterBytes(data []byte) MenaFrontmatter {
 //
 // In Additive mode, existing files in target directories are preserved.
 // In Destructive mode, target directories are wiped before projection.
-func ProjectMena(sources []MenaSource, opts MenaProjectionOptions) (*MenaProjectionResult, error) {
+func SyncMena(sources []MenaSource, opts MenaProjectionOptions) (*MenaProjectionResult, error) {
 	result := &MenaProjectionResult{}
 
 	// Ensure target directories exist (both modes — selective, not destructive)
@@ -210,90 +362,34 @@ func ProjectMena(sources []MenaSource, opts MenaProjectionOptions) (*MenaProject
 		}
 	}
 
-	// Pass 1: Collect mena entries from all sources.
-	// Later sources override earlier ones for the same command name.
-	collected := make(map[string]menaCollectedEntry)
-	standalones := make(map[string]menaStandaloneFile)
-
-	for _, src := range sources {
-		if src.IsEmbedded {
-			collectMenaEntriesFS(src.Fsys, src.FsysPath, "", collected)
-		} else {
-			if src.Path == "" {
-				continue
-			}
-			if _, err := os.Stat(src.Path); os.IsNotExist(err) {
-				continue
-			}
-			if err := collectMenaEntriesDir(src.Path, "", collected, standalones); err != nil {
-				return nil, err
-			}
-		}
+	// Collect and resolve mena entries (shared with user-scope pipeline)
+	resolution, err := CollectMena(sources, opts)
+	if err != nil {
+		return nil, err
 	}
 
-	// Pass 1.5: Resolve flat namespace for dromena.
-	flatNames := resolveNamespace(collected, standalones, opts)
-
-	// Pass 2: Route each collected leaf directory by filename convention.
-	for name, ce := range collected {
-		menaType := "dro" // default: route to commands/
-
-		if ce.source.IsEmbedded {
-			entries, err := fs.ReadDir(ce.source.Fsys, ce.source.FsysPath)
-			if err == nil {
-				for _, entry := range entries {
-					if !entry.IsDir() && strings.HasPrefix(entry.Name(), "INDEX") {
-						menaType = DetectMenaType(entry.Name())
-						break
-					}
-				}
-			}
-		} else {
-			if entries, err := os.ReadDir(ce.source.Path); err == nil {
-				for _, entry := range entries {
-					if !entry.IsDir() && strings.HasPrefix(entry.Name(), "INDEX") {
-						menaType = DetectMenaType(entry.Name())
-						break
-					}
-				}
-			}
-		}
-
-		// Apply filter
-		if menaType == "dro" && opts.Filter&ProjectDro == 0 {
-			continue
-		}
-		if menaType == "lego" && opts.Filter&ProjectLego == 0 {
-			continue
-		}
-
-		// Use flat name for dromena if available
-		flatName := name
-		if menaType == "dro" {
-			if fn, ok := flatNames[name]; ok {
-				flatName = fn
-			}
-		}
-
+	// Pass 3: Write directory entries to target directories.
+	for _, entry := range resolution.Entries {
 		var destDir string
-		if menaType == "dro" {
-			destDir = filepath.Join(opts.TargetCommandsDir, flatName)
+		if entry.MenaType == "dro" {
+			destDir = filepath.Join(opts.TargetCommandsDir, entry.FlatName)
 		} else {
-			destDir = filepath.Join(opts.TargetSkillsDir, flatName)
-		}
-
-		// In destructive mode, clean this specific entry's subdir before writing.
-		// This removes stale companion files from a previous version of the same entry.
-		// User-created entries (not in collected set) are never touched.
-		if opts.Mode == MenaProjectionDestructive {
-			os.RemoveAll(destDir)
+			destDir = filepath.Join(opts.TargetSkillsDir, entry.FlatName)
 		}
 
 		// Hide companions for dromena only
-		hideCompanions := menaType == "dro"
+		hideCompanions := entry.MenaType == "dro"
 
-		if ce.source.IsEmbedded {
-			sub, err := fs.Sub(ce.source.Fsys, ce.source.FsysPath)
+		// Collect source filenames (with extension stripping) BEFORE writing,
+		// so we can remove only stale files afterwards instead of nuking the whole dir.
+		// This prevents CC's file watcher from seeing mass DELETE events that crash sessions.
+		var sourceFileNames map[string]bool
+		if opts.Mode == MenaProjectionDestructive {
+			sourceFileNames = collectSourceFileNames(entry.Source)
+		}
+
+		if entry.Source.IsEmbedded {
+			sub, err := fs.Sub(entry.Source.Fsys, entry.Source.FsysPath)
 			if err != nil {
 				return nil, err
 			}
@@ -301,67 +397,45 @@ func ProjectMena(sources []MenaSource, opts MenaProjectionOptions) (*MenaProject
 				return nil, err
 			}
 		} else {
-			if err := copyDirWithStripping(ce.source.Path, destDir, hideCompanions); err != nil {
+			if err := copyDirWithStripping(entry.Source.Path, destDir, hideCompanions); err != nil {
 				return nil, err
 			}
 		}
 
+		// In destructive mode, remove only stale files that are no longer in source.
+		if opts.Mode == MenaProjectionDestructive && sourceFileNames != nil {
+			removeStaleFiles(destDir, sourceFileNames)
+		}
+
 		// Record what was projected
 		targetType := "commands"
-		if menaType == "lego" {
+		if entry.MenaType == "lego" {
 			targetType = "skills"
-			result.SkillsProjected = append(result.SkillsProjected, flatName)
+			result.SkillsProjected = append(result.SkillsProjected, entry.FlatName)
 		} else {
-			result.CommandsProjected = append(result.CommandsProjected, flatName)
+			result.CommandsProjected = append(result.CommandsProjected, entry.FlatName)
 		}
 
 		// Record provenance at write time with exact source attribution
 		if opts.Collector != nil {
-			recordMenaProvenance(opts.Collector, opts.ProjectRoot, targetType, flatName, destDir, ce.source)
+			recordMenaProvenance(opts.Collector, opts.ProjectRoot, targetType, entry.FlatName, destDir, entry.Source)
 		}
 	}
 
-	// Copy standalone files (e.g., mena/navigation/rite.dro.md)
-	// Route by extension: .dro.md -> commands/, .lego.md -> skills/
-	for _, sf := range standalones {
-		menaType := DetectMenaType(filepath.Base(sf.srcPath))
-
-		// Apply filter
-		if menaType == "dro" && opts.Filter&ProjectDro == 0 {
-			continue
-		}
-		if menaType == "lego" && opts.Filter&ProjectLego == 0 {
-			continue
-		}
-
+	// Pass 4: Write standalone files (e.g., mena/navigation/rite.dro.md)
+	for _, sf := range resolution.Standalones {
 		var baseDir string
-		if menaType == "dro" {
+		if sf.MenaType == "dro" {
 			baseDir = opts.TargetCommandsDir
 		} else {
 			baseDir = opts.TargetSkillsDir
 		}
 
-		// Strip the mena extension from the relative path's filename
-		dir := filepath.Dir(sf.relPath)
-		base := StripMenaExtension(filepath.Base(sf.relPath))
-
-		// Use flat name for dromena if available
-		var strippedRel string
-		if menaType == "dro" {
-			if flatName, ok := flatNames[sf.relPath]; ok {
-				strippedRel = flatName + ".md"
-			} else {
-				strippedRel = filepath.Join(dir, base)
-			}
-		} else {
-			strippedRel = filepath.Join(dir, base)
-		}
-
-		destPath := filepath.Join(baseDir, strippedRel)
+		destPath := filepath.Join(baseDir, sf.FlatName)
 		if err := os.MkdirAll(filepath.Dir(destPath), 0755); err != nil {
 			return nil, err
 		}
-		data, err := os.ReadFile(sf.srcPath)
+		data, err := os.ReadFile(sf.SrcPath)
 		if err != nil {
 			return nil, err
 		}
@@ -370,24 +444,24 @@ func ProjectMena(sources []MenaSource, opts MenaProjectionOptions) (*MenaProject
 		}
 
 		targetType := "commands"
-		if menaType == "lego" {
+		if sf.MenaType == "lego" {
 			targetType = "skills"
-			result.SkillsProjected = append(result.SkillsProjected, strippedRel)
+			result.SkillsProjected = append(result.SkillsProjected, sf.FlatName)
 		} else {
-			result.CommandsProjected = append(result.CommandsProjected, strippedRel)
+			result.CommandsProjected = append(result.CommandsProjected, sf.FlatName)
 		}
 
 		// Record provenance for standalone file
 		if opts.Collector != nil {
 			now := time.Now().UTC()
-			sourcePath := sf.srcPath
+			sourcePath := sf.SrcPath
 			if opts.ProjectRoot != "" {
-				if rel, err := filepath.Rel(opts.ProjectRoot, sf.srcPath); err == nil {
+				if rel, err := filepath.Rel(opts.ProjectRoot, sf.SrcPath); err == nil {
 					sourcePath = rel
 				}
 			}
 			collector := opts.Collector
-			collector.Record(targetType+"/"+strippedRel, &provenance.ProvenanceEntry{
+			collector.Record(targetType+"/"+sf.FlatName, &provenance.ProvenanceEntry{
 				Owner:      provenance.OwnerKnossos,
 				Scope:      provenance.ScopeRite,
 				SourcePath: sourcePath,
@@ -398,7 +472,7 @@ func ProjectMena(sources []MenaSource, opts MenaProjectionOptions) (*MenaProject
 		}
 	}
 
-	// Pass 4: Clean stale knossos-owned mena entries that were renamed by flattening.
+	// Pass 5: Clean stale knossos-owned mena entries that were renamed by flattening.
 	// Uses provenance manifest to distinguish knossos-owned from user-created entries.
 	if opts.Mode == MenaProjectionDestructive {
 		cleanStaleMenaEntries(opts, result)
@@ -589,11 +663,17 @@ func injectCompanionHideFrontmatter(content []byte) []byte {
 
 // resolveNamespace computes flat command names for dromena entries by reading
 // frontmatter name fields. Returns a map from source key to flat name.
-// On name collision between dromena, both entries fall back to source path.
+// On name collision between dromena from different sources, the highest-priority
+// source wins (later in sources array = higher priority: user < shared < dep < rite).
 // On collision with user-owned commands in target dir, knossos entry falls back.
 func resolveNamespace(collected map[string]menaCollectedEntry, standalones map[string]menaStandaloneFile, opts MenaProjectionOptions) map[string]string {
 	flatNames := make(map[string]string)
-	nameToSources := make(map[string][]string) // flat name -> list of source keys
+
+	type nameCandidate struct {
+		sourceKey   string
+		sourceIndex int
+	}
+	nameToSources := make(map[string][]nameCandidate) // flat name -> candidates
 
 	// Step 1: Read frontmatter names from collected entries (directories with INDEX files)
 	for sourceKey, ce := range collected {
@@ -646,7 +726,10 @@ func resolveNamespace(collected map[string]menaCollectedEntry, standalones map[s
 		}
 
 		if fm.Name != "" {
-			nameToSources[fm.Name] = append(nameToSources[fm.Name], sourceKey)
+			nameToSources[fm.Name] = append(nameToSources[fm.Name], nameCandidate{
+				sourceKey:   sourceKey,
+				sourceIndex: ce.sourceIndex,
+			})
 		}
 	}
 
@@ -659,20 +742,28 @@ func resolveNamespace(collected map[string]menaCollectedEntry, standalones map[s
 
 		fm := ReadMenaFrontmatterFromFile(sf.srcPath)
 		if fm.Name != "" {
-			nameToSources[fm.Name] = append(nameToSources[fm.Name], sourceKey)
+			nameToSources[fm.Name] = append(nameToSources[fm.Name], nameCandidate{
+				sourceKey:   sourceKey,
+				sourceIndex: sf.sourceIndex,
+			})
 		}
 	}
 
-	// Step 3: Build flat name mapping, detect collisions
-	for flatName, sources := range nameToSources {
-		if len(sources) > 1 {
-			// Collision between knossos entries — both keep source path
-			log.Printf("Warning: name collision detected for '%s' (sources: %v), falling back to source paths", flatName, sources)
+	// Step 3: Build flat name mapping, resolve collisions by source priority
+	for flatName, candidates := range nameToSources {
+		if len(candidates) > 1 {
+			// Multiple sources want same flat name — highest sourceIndex wins
+			winner := candidates[0]
+			for _, c := range candidates[1:] {
+				if c.sourceIndex > winner.sourceIndex {
+					winner = c
+				}
+			}
+			flatNames[winner.sourceKey] = flatName
+			// Losers keep their source paths (no flat name assigned)
 			continue
 		}
-		// Single source for this name
-		sourceKey := sources[0]
-		flatNames[sourceKey] = flatName
+		flatNames[candidates[0].sourceKey] = flatName
 	}
 
 	// Step 4: Pre-scan target commands/ for user-created entries.
@@ -811,4 +902,62 @@ func copyDirFromFSWithStripping(fsys fs.FS, dst string, hideCompanions bool) err
 		_, err = writeIfChanged(destPath, content, 0644)
 		return err
 	})
+}
+
+// collectSourceFileNames builds the set of destination-relative file paths
+// that a mena source will produce (after extension stripping).
+// Used to identify stale files in the destination that should be removed.
+func collectSourceFileNames(src MenaSource) map[string]bool {
+	names := make(map[string]bool)
+
+	if src.IsEmbedded {
+		sub, err := fs.Sub(src.Fsys, src.FsysPath)
+		if err != nil {
+			return names
+		}
+		fs.WalkDir(sub, ".", func(path string, d fs.DirEntry, walkErr error) error {
+			if walkErr != nil || d.IsDir() {
+				return walkErr
+			}
+			dir := filepath.Dir(path)
+			base := StripMenaExtension(filepath.Base(path))
+			names[filepath.Join(dir, base)] = true
+			return nil
+		})
+	} else if src.Path != "" {
+		filepath.WalkDir(src.Path, func(path string, d fs.DirEntry, walkErr error) error {
+			if walkErr != nil || d.IsDir() {
+				return walkErr
+			}
+			relPath, relErr := filepath.Rel(src.Path, path)
+			if relErr != nil {
+				return nil
+			}
+			dir := filepath.Dir(relPath)
+			base := StripMenaExtension(filepath.Base(relPath))
+			names[filepath.Join(dir, base)] = true
+			return nil
+		})
+	}
+
+	return names
+}
+
+// removeStaleFiles removes files in destDir that are NOT in the sourceFileNames set.
+// Only removes files, not directories. Cleans empty dirs afterwards.
+func removeStaleFiles(destDir string, sourceFileNames map[string]bool) {
+	filepath.WalkDir(destDir, func(path string, d fs.DirEntry, walkErr error) error {
+		if walkErr != nil || d.IsDir() {
+			return walkErr
+		}
+		relPath, relErr := filepath.Rel(destDir, path)
+		if relErr != nil {
+			return nil
+		}
+		if !sourceFileNames[relPath] {
+			os.Remove(path)
+		}
+		return nil
+	})
+	cleanEmptyDirs(destDir)
 }

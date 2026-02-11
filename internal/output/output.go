@@ -38,6 +38,16 @@ func ParseFormat(s string) Format {
 	}
 }
 
+// ValidateFormat checks if a format string is valid.
+func ValidateFormat(s string) error {
+	switch strings.ToLower(s) {
+	case "text", "json", "yaml", "":
+		return nil
+	default:
+		return fmt.Errorf("invalid output format %q (must be text, json, or yaml)", s)
+	}
+}
+
 // Printer handles formatted output.
 type Printer struct {
 	format  Format
@@ -163,7 +173,8 @@ func (p *Printer) printText(data interface{}) error {
 		return nil
 	}
 
-	// Fallback to fmt
+	// Fallback: warn that a type is missing Text()/Tabular interface, then dump anyway
+	fmt.Fprintf(p.errOut, "warning: output type %T has no Text() or Tabular() interface\n", data)
 	fmt.Fprintln(p.out, data)
 	return nil
 }
@@ -555,6 +566,67 @@ func (f FrayOutput) Text() string {
 	if f.WorktreePath != "" {
 		b.WriteString(fmt.Sprintf("Worktree: %s\n", f.WorktreePath))
 	}
+	return b.String()
+}
+
+// --- Sync Output Structures ---
+
+// SyncResultOutput represents the result of a sync operation.
+type SyncResultOutput struct {
+	Status string          `json:"status"`
+	DryRun bool            `json:"dry_run,omitempty"`
+	Rite   *SyncRiteResult `json:"rite,omitempty"`
+	User   *SyncUserResult `json:"user,omitempty"`
+	Budget interface{}     `json:"budget,omitempty"`
+}
+
+// SyncRiteResult represents rite scope sync result.
+type SyncRiteResult struct {
+	Status         string   `json:"status"`
+	RiteName       string   `json:"rite,omitempty"`
+	Source         string   `json:"source,omitempty"`
+	SourcePath     string   `json:"source_path,omitempty"`
+	OrphansDetected []string `json:"orphans_detected,omitempty"`
+	OrphanAction   string   `json:"orphan_action,omitempty"`
+	LegacyBackup   string   `json:"legacy_backup,omitempty"`
+	SoftMode       bool     `json:"soft_mode,omitempty"`
+	DeferredStages []string `json:"deferred_stages,omitempty"`
+}
+
+// SyncUserResult represents user scope sync result.
+type SyncUserResult struct {
+	Status    string                 `json:"status"`
+	Totals    interface{}            `json:"totals"`
+	Resources map[string]interface{} `json:"resources,omitempty"`
+	Errors    interface{}            `json:"errors,omitempty"`
+}
+
+// Text implements Textable for SyncResultOutput.
+func (s SyncResultOutput) Text() string {
+	var b strings.Builder
+	if s.DryRun {
+		b.WriteString("[DRY RUN] ")
+	}
+	b.WriteString(fmt.Sprintf("Sync: %s\n", s.Status))
+
+	if s.Rite != nil {
+		b.WriteString(fmt.Sprintf("  Rite: %s", s.Rite.Status))
+		if s.Rite.RiteName != "" {
+			b.WriteString(fmt.Sprintf(" (%s)", s.Rite.RiteName))
+		}
+		b.WriteString("\n")
+		if len(s.Rite.OrphansDetected) > 0 {
+			b.WriteString(fmt.Sprintf("  Orphans: %d detected (%s)\n", len(s.Rite.OrphansDetected), s.Rite.OrphanAction))
+		}
+		if s.Rite.SoftMode {
+			b.WriteString(fmt.Sprintf("  Soft mode: deferred %s\n", strings.Join(s.Rite.DeferredStages, ", ")))
+		}
+	}
+
+	if s.User != nil {
+		b.WriteString(fmt.Sprintf("  User: %s\n", s.User.Status))
+	}
+
 	return b.String()
 }
 

@@ -1,6 +1,8 @@
 package materialize
 
 import (
+	"strings"
+
 	"github.com/autom8y/knossos/internal/provenance"
 )
 
@@ -37,12 +39,22 @@ func (c *CollisionChecker) loadRiteManifest(claudeDir string) {
 }
 
 // CheckCollision checks if a manifest key collides with a rite entry.
+// Detects both exact matches and prefix containment (user file inside rite-owned directory).
+// Rite manifest uses trailing "/" for directories (e.g., "skills/guidance/standards/"),
+// user manifest uses full file paths (e.g., "skills/guidance/standards/code-conventions.md").
 func (c *CollisionChecker) CheckCollision(manifestKey string) (bool, string) {
 	if !c.manifestLoaded || len(c.riteEntries) == 0 {
 		return false, ""
 	}
+	// Exact match (e.g., agents/consultant.md)
 	if c.riteEntries[manifestKey] {
 		return true, "(from manifest)"
+	}
+	// Prefix containment: user file inside rite-owned directory
+	for riteKey := range c.riteEntries {
+		if strings.HasSuffix(riteKey, "/") && strings.HasPrefix(manifestKey, riteKey) {
+			return true, "(inside rite directory)"
+		}
 	}
 	return false, ""
 }

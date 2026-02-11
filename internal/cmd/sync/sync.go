@@ -149,28 +149,26 @@ func runSync(ctx *cmdContext, opts materialize.SyncOptions, showBudget bool, cmd
 	if embTemplates := common.EmbeddedTemplates(); embTemplates != nil {
 		m.WithEmbeddedTemplates(embTemplates)
 	}
-	if embHooks := common.EmbeddedHooks(); embHooks != nil {
-		m.WithEmbeddedHooks(embHooks)
-	}
-
 	// Execute unified sync
 	result, err := m.Sync(opts)
 	if err != nil {
-		printer.PrintError(err)
 		return err
 	}
 
 	// Format output
 	out := formatSyncResult(result, opts)
 	if opts.DryRun {
-		out["dry_run"] = true
+		out.DryRun = true
 	}
 
 	// Budget report (appended to sync output)
 	if showBudget {
 		claudeDir := filepath.Join(projectDir, ".claude")
-		if err := formatBudgetReport(claudeDir, out); err != nil {
+		budgetData := map[string]any{}
+		if err := formatBudgetReport(claudeDir, budgetData); err != nil {
 			printer.VerboseLog("warn", "budget calculation failed", map[string]interface{}{"error": err.Error()})
+		} else if b, ok := budgetData["budget"]; ok {
+			out.Budget = b
 		}
 	}
 
@@ -190,54 +188,41 @@ func runSync(ctx *cmdContext, opts materialize.SyncOptions, showBudget bool, cmd
 	return nil
 }
 
-func formatSyncResult(result *materialize.SyncResult, opts materialize.SyncOptions) map[string]any {
-	out := map[string]any{
-		"status": "success",
+func formatSyncResult(result *materialize.SyncResult, opts materialize.SyncOptions) *output.SyncResultOutput {
+	out := &output.SyncResultOutput{
+		Status: "success",
 	}
 
 	if result.RiteResult != nil {
-		rite := map[string]any{
-			"status": result.RiteResult.Status,
+		out.Rite = &output.SyncRiteResult{
+			Status:          result.RiteResult.Status,
+			RiteName:        result.RiteResult.RiteName,
+			Source:          result.RiteResult.Source,
+			SourcePath:      result.RiteResult.SourcePath,
+			OrphansDetected: result.RiteResult.OrphansDetected,
+			OrphanAction:    result.RiteResult.OrphanAction,
+			LegacyBackup:    result.RiteResult.LegacyBackupPath,
+			SoftMode:        result.RiteResult.SoftMode,
+			DeferredStages:  result.RiteResult.DeferredStages,
 		}
-		if result.RiteResult.RiteName != "" {
-			rite["rite"] = result.RiteResult.RiteName
-		}
-		if result.RiteResult.Source != "" {
-			rite["source"] = result.RiteResult.Source
-		}
-		if result.RiteResult.SourcePath != "" {
-			rite["source_path"] = result.RiteResult.SourcePath
-		}
-		if len(result.RiteResult.OrphansDetected) > 0 {
-			rite["orphans_detected"] = result.RiteResult.OrphansDetected
-			rite["orphan_action"] = result.RiteResult.OrphanAction
-		}
-		if result.RiteResult.LegacyBackupPath != "" {
-			rite["legacy_backup"] = result.RiteResult.LegacyBackupPath
-		}
-		if result.RiteResult.SoftMode {
-			rite["soft_mode"] = true
-			rite["deferred_stages"] = result.RiteResult.DeferredStages
-		}
-		out["rite"] = rite
 	}
 
 	if result.UserResult != nil {
-		user := map[string]any{
-			"status": result.UserResult.Status,
-			"totals": result.UserResult.Totals,
+		userOut := &output.SyncUserResult{
+			Status: result.UserResult.Status,
+			Totals: result.UserResult.Totals,
 		}
 		if len(result.UserResult.Errors) > 0 {
-			user["errors"] = result.UserResult.Errors
+			userOut.Errors = result.UserResult.Errors
 		}
 		if len(result.UserResult.Resources) > 0 {
-			resources := map[string]any{}
+			resources := map[string]interface{}{}
 			for k, v := range result.UserResult.Resources {
 				resources[string(k)] = v
 			}
-			user["resources"] = resources
+			userOut.Resources = resources
 		}
-		out["user"] = user
+		out.User = userOut
 	}
 
 	return out

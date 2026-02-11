@@ -63,9 +63,9 @@ func TestRouteMenaFile(t *testing.T) {
 	}
 }
 
-// TestProjectMena_Destructive verifies full projection with destructive mode:
+// TestSyncMena_Destructive verifies full projection with destructive mode:
 // selectively replaces managed entries while preserving user-created content.
-func TestProjectMena_Destructive(t *testing.T) {
+func TestSyncMena_Destructive(t *testing.T) {
 	tmpDir := t.TempDir()
 
 	// Create mena source with a dromena and a legomena
@@ -109,9 +109,9 @@ func TestProjectMena_Destructive(t *testing.T) {
 		TargetSkillsDir:   skillsDir,
 	}
 
-	result, err := ProjectMena(sources, opts)
+	result, err := SyncMena(sources, opts)
 	if err != nil {
-		t.Fatalf("ProjectMena failed: %v", err)
+		t.Fatalf("SyncMena failed: %v", err)
 	}
 
 	// Verify user-created file is preserved (selective write, not destructive nuke)
@@ -156,8 +156,8 @@ func TestProjectMena_Destructive(t *testing.T) {
 	}
 }
 
-// TestProjectMena_Additive verifies additive mode preserves existing files.
-func TestProjectMena_Additive(t *testing.T) {
+// TestSyncMena_Additive verifies additive mode preserves existing files.
+func TestSyncMena_Additive(t *testing.T) {
 	tmpDir := t.TempDir()
 
 	// Create pre-existing files that should be preserved
@@ -194,9 +194,9 @@ func TestProjectMena_Additive(t *testing.T) {
 		TargetSkillsDir:   skillsDir,
 	}
 
-	_, err := ProjectMena(sources, opts)
+	_, err := SyncMena(sources, opts)
 	if err != nil {
-		t.Fatalf("ProjectMena additive failed: %v", err)
+		t.Fatalf("SyncMena additive failed: %v", err)
 	}
 
 	// Verify user-created file is preserved
@@ -211,9 +211,9 @@ func TestProjectMena_Additive(t *testing.T) {
 	}
 }
 
-// TestProjectMena_PriorityOverride verifies that later sources override earlier
+// TestSyncMena_PriorityOverride verifies that later sources override earlier
 // sources for the same mena name.
-func TestProjectMena_PriorityOverride(t *testing.T) {
+func TestSyncMena_PriorityOverride(t *testing.T) {
 	tmpDir := t.TempDir()
 
 	// Create low-priority source
@@ -249,9 +249,9 @@ func TestProjectMena_PriorityOverride(t *testing.T) {
 		TargetSkillsDir:   skillsDir,
 	}
 
-	_, err := ProjectMena(sources, opts)
+	_, err := SyncMena(sources, opts)
 	if err != nil {
-		t.Fatalf("ProjectMena priority override failed: %v", err)
+		t.Fatalf("SyncMena priority override failed: %v", err)
 	}
 
 	// Verify the high-priority content wins (stripped to INDEX.md)
@@ -266,10 +266,10 @@ func TestProjectMena_PriorityOverride(t *testing.T) {
 	}
 }
 
-// TestProjectMena_EmbeddedFS verifies projection from an embedded FS source
+// TestSyncMena_EmbeddedFS verifies projection from an embedded FS source
 // with extension stripping. Uses a realistic path structure matching how
 // materializeMena builds embedded sources (e.g., "rites/shared/mena").
-func TestProjectMena_EmbeddedFS(t *testing.T) {
+func TestSyncMena_EmbeddedFS(t *testing.T) {
 	tmpDir := t.TempDir()
 
 	// Build an in-memory FS mimicking real embedded rite structure
@@ -298,9 +298,9 @@ func TestProjectMena_EmbeddedFS(t *testing.T) {
 		TargetSkillsDir:   skillsDir,
 	}
 
-	result, err := ProjectMena(sources, opts)
+	result, err := SyncMena(sources, opts)
 	if err != nil {
-		t.Fatalf("ProjectMena embedded failed: %v", err)
+		t.Fatalf("SyncMena embedded failed: %v", err)
 	}
 
 	// Verify dromena projected to commands/ with stripped name
@@ -334,8 +334,8 @@ func TestProjectMena_EmbeddedFS(t *testing.T) {
 	}
 }
 
-// TestProjectMena_Filter_DroOnly verifies that ProjectDro filter only projects dromena.
-func TestProjectMena_Filter_DroOnly(t *testing.T) {
+// TestSyncMena_Filter_DroOnly verifies that ProjectDro filter only projects dromena.
+func TestSyncMena_Filter_DroOnly(t *testing.T) {
 	tmpDir := t.TempDir()
 
 	menaDir := filepath.Join(tmpDir, "mena")
@@ -365,9 +365,9 @@ func TestProjectMena_Filter_DroOnly(t *testing.T) {
 		TargetSkillsDir:   skillsDir,
 	}
 
-	result, err := ProjectMena(sources, opts)
+	result, err := SyncMena(sources, opts)
 	if err != nil {
-		t.Fatalf("ProjectMena failed: %v", err)
+		t.Fatalf("SyncMena failed: %v", err)
 	}
 
 	// Commands should exist
@@ -385,9 +385,9 @@ func TestProjectMena_Filter_DroOnly(t *testing.T) {
 	}
 }
 
-// TestProjectMena_StandaloneFileStripping verifies that standalone files in
+// TestSyncMena_StandaloneFileStripping verifies that standalone files in
 // grouping directories also have their extensions stripped.
-func TestProjectMena_StandaloneFileStripping(t *testing.T) {
+func TestSyncMena_StandaloneFileStripping(t *testing.T) {
 	tmpDir := t.TempDir()
 
 	// Create a grouping directory with standalone files
@@ -418,9 +418,9 @@ func TestProjectMena_StandaloneFileStripping(t *testing.T) {
 		TargetSkillsDir:   skillsDir,
 	}
 
-	_, err := ProjectMena(sources, opts)
+	_, err := SyncMena(sources, opts)
 	if err != nil {
-		t.Fatalf("ProjectMena failed: %v", err)
+		t.Fatalf("SyncMena failed: %v", err)
 	}
 
 	// Verify standalone dro stripped and routed to commands/
@@ -444,8 +444,8 @@ func TestProjectMena_StandaloneFileStripping(t *testing.T) {
 	}
 }
 
-// TestProjectMena_EmptySources verifies graceful handling of empty sources.
-func TestProjectMena_EmptySources(t *testing.T) {
+// TestSyncMena_EmptySources verifies graceful handling of empty sources.
+func TestSyncMena_EmptySources(t *testing.T) {
 	tmpDir := t.TempDir()
 
 	commandsDir := filepath.Join(tmpDir, "commands")
@@ -459,9 +459,9 @@ func TestProjectMena_EmptySources(t *testing.T) {
 		TargetSkillsDir:   skillsDir,
 	}
 
-	result, err := ProjectMena(sources, opts)
+	result, err := SyncMena(sources, opts)
 	if err != nil {
-		t.Fatalf("ProjectMena with empty sources should not fail: %v", err)
+		t.Fatalf("SyncMena with empty sources should not fail: %v", err)
 	}
 
 	if len(result.CommandsProjected) != 0 {
@@ -480,9 +480,9 @@ func TestProjectMena_EmptySources(t *testing.T) {
 	}
 }
 
-// TestProjectMena_NonexistentSource verifies graceful handling of sources that
+// TestSyncMena_NonexistentSource verifies graceful handling of sources that
 // don't exist on disk.
-func TestProjectMena_NonexistentSource(t *testing.T) {
+func TestSyncMena_NonexistentSource(t *testing.T) {
 	tmpDir := t.TempDir()
 
 	commandsDir := filepath.Join(tmpDir, "commands")
@@ -498,9 +498,9 @@ func TestProjectMena_NonexistentSource(t *testing.T) {
 		TargetSkillsDir:   skillsDir,
 	}
 
-	result, err := ProjectMena(sources, opts)
+	result, err := SyncMena(sources, opts)
 	if err != nil {
-		t.Fatalf("ProjectMena with nonexistent source should not fail: %v", err)
+		t.Fatalf("SyncMena with nonexistent source should not fail: %v", err)
 	}
 
 	if len(result.CommandsProjected) != 0 || len(result.SkillsProjected) != 0 {

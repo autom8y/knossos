@@ -81,9 +81,9 @@ func TestMaterializeAgents_KeepAllPreservesOrphans(t *testing.T) {
 	assert.FileExists(t, deployerPath, "deployer should exist after rite-b materialization")
 }
 
-// TestProjectMena_PreservesUserCommands verifies that user-created commands
+// TestSyncMena_PreservesUserCommands verifies that user-created commands
 // in .claude/commands/ survive destructive mode projection.
-func TestProjectMena_PreservesUserCommands(t *testing.T) {
+func TestSyncMena_PreservesUserCommands(t *testing.T) {
 	tmpDir := t.TempDir()
 
 	// Create mena source with one command
@@ -112,7 +112,7 @@ func TestProjectMena_PreservesUserCommands(t *testing.T) {
 		TargetSkillsDir:   skillsDir,
 	}
 
-	_, err := ProjectMena(sources, opts)
+	_, err := SyncMena(sources, opts)
 	require.NoError(t, err)
 
 	// Verify projected command exists
@@ -129,9 +129,9 @@ func TestProjectMena_PreservesUserCommands(t *testing.T) {
 	assert.Equal(t, "# User Custom Command\n", string(content))
 }
 
-// TestProjectMena_PreservesUserSkills verifies that user-created skills
+// TestSyncMena_PreservesUserSkills verifies that user-created skills
 // in .claude/skills/ survive destructive mode projection.
-func TestProjectMena_PreservesUserSkills(t *testing.T) {
+func TestSyncMena_PreservesUserSkills(t *testing.T) {
 	tmpDir := t.TempDir()
 
 	// Create mena source with one legomena
@@ -160,7 +160,7 @@ func TestProjectMena_PreservesUserSkills(t *testing.T) {
 		TargetSkillsDir:   skillsDir,
 	}
 
-	_, err := ProjectMena(sources, opts)
+	_, err := SyncMena(sources, opts)
 	require.NoError(t, err)
 
 	// Verify projected skill exists
@@ -174,9 +174,9 @@ func TestProjectMena_PreservesUserSkills(t *testing.T) {
 		"user-created skill should survive destructive projection")
 }
 
-// TestProjectMena_CleansStaleCompanionFiles verifies that when a managed entry
+// TestSyncMena_CleansStaleCompanionFiles verifies that when a managed entry
 // is re-projected with fewer files, stale companion files are cleaned.
-func TestProjectMena_CleansStaleCompanionFiles(t *testing.T) {
+func TestSyncMena_CleansStaleCompanionFiles(t *testing.T) {
 	tmpDir := t.TempDir()
 
 	commandsDir := filepath.Join(tmpDir, "commands")
@@ -208,7 +208,7 @@ func TestProjectMena_CleansStaleCompanionFiles(t *testing.T) {
 		TargetSkillsDir:   skillsDir,
 	}
 
-	_, err := ProjectMena(sources, opts)
+	_, err := SyncMena(sources, opts)
 	require.NoError(t, err)
 
 	// New INDEX should exist with updated content

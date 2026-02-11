@@ -54,16 +54,13 @@ func runStatus(ctx *cmdContext, opts statusOptions) error {
 	if riteName == "" {
 		riteName = discovery.ActiveRiteName()
 		if riteName == "" {
-			err := errors.New(errors.CodeFileNotFound, "No active rite set")
-			printer.PrintError(err)
-			return err
+			return errors.New(errors.CodeFileNotFound, "No active rite set")
 		}
 	}
 
 	// Get rite info
 	t, err := discovery.Get(riteName)
 	if err != nil {
-		printer.PrintError(err)
 		return err
 	}
 
@@ -71,13 +68,19 @@ func runStatus(ctx *cmdContext, opts statusOptions) error {
 	workflowPath := filepath.Join(t.Path, "workflow.yaml")
 	workflow, err := ritelib.LoadWorkflow(workflowPath)
 	if err != nil {
-		wrappedErr := errors.Wrap(errors.CodeGeneralError, "failed to load workflow", err)
-		printer.PrintError(wrappedErr)
-		return wrappedErr
+		return errors.Wrap(errors.CodeGeneralError, "failed to load workflow", err)
 	}
 
-	// Build agent status list
-	agents := buildAgentStatusList(t, workflow, resolver)
+	// Load rite manifest for canonical agent list
+	manifest, manifestErr := discovery.GetManifest(riteName)
+
+	// Build agent status list from manifest (canonical) or workflow (fallback)
+	var agents []output.AgentStatus
+	if manifestErr == nil && len(manifest.Agents) > 0 {
+		agents = buildAgentStatusFromManifest(manifest, resolver)
+	} else {
+		agents = buildAgentStatusList(t, workflow, resolver)
+	}
 
 	// Check manifest validity (KNOSSOS_MANIFEST.yaml)
 	manifestValid := false
@@ -113,6 +116,37 @@ func runStatus(ctx *cmdContext, opts statusOptions) error {
 	}
 
 	return printer.Print(result)
+}
+
+func buildAgentStatusFromManifest(manifest *ritelib.RiteManifest, resolver *paths.Resolver) []output.AgentStatus {
+	agents := make([]output.AgentStatus, 0, len(manifest.Agents))
+
+	// Get list of installed agents
+	installedAgents := make(map[string]bool)
+	agentsDir := resolver.AgentsDir()
+	if entries, err := os.ReadDir(agentsDir); err == nil {
+		for _, entry := range entries {
+			if !entry.IsDir() && strings.HasSuffix(entry.Name(), ".md") {
+				installedAgents[entry.Name()] = true
+			}
+		}
+	}
+
+	for _, ref := range manifest.Agents {
+		file := ref.File
+		if file == "" {
+			file = ref.Name + ".md"
+		}
+		agents = append(agents, output.AgentStatus{
+			Name:      ref.Name,
+			File:      file,
+			Role:      ref.Role,
+			Produces:  ref.Produces,
+			Installed: installedAgents[file],
+		})
+	}
+
+	return agents
 }
 
 func buildAgentStatusList(t *ritelib.Rite, workflow *ritelib.Workflow, resolver *paths.Resolver) []output.AgentStatus {

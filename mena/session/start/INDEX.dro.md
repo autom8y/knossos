@@ -1,12 +1,11 @@
 ---
 name: start
 description: Initialize a new work session
-argument-hint: <initiative> [--complexity=LEVEL] [--rite=NAME]
+argument-hint: "<initiative> [--complexity=LEVEL] [--rite=NAME]"
 allowed-tools: Bash, Read, Task
 disallowed-tools: Write, Edit, NotebookEdit
 model: opus
 disable-model-invocation: true
-context: fork
 ---
 
 ## Pre-computed Context

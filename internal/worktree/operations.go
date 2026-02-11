@@ -663,9 +663,6 @@ func (m *Manager) setupWorktreeEcosystem(wtPath, riteName string) {
 	if embTemplates := common.EmbeddedTemplates(); embTemplates != nil {
 		mat.WithEmbeddedTemplates(embTemplates)
 	}
-	if embHooks := common.EmbeddedHooks(); embHooks != nil {
-		mat.WithEmbeddedHooks(embHooks)
-	}
 	mat.MaterializeWithOptions(riteName, materialize.Options{
 		Force:   true,
 		KeepAll: true,

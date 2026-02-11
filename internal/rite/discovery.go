@@ -147,7 +147,17 @@ func (d *Discovery) GetManifest(name string) (*RiteManifest, error) {
 		return nil, err
 	}
 
-	return LoadManifestFromDir(rite.Path)
+	manifest, err := LoadManifestFromDir(rite.Path)
+	if err != nil {
+		return nil, err
+	}
+
+	// Derive form if not explicitly set (consistent with loadRite)
+	if manifest.Form == "" {
+		manifest.Form = deriveForm(manifest)
+	}
+
+	return manifest, nil
 }
 
 // GetActive returns the currently active rite.

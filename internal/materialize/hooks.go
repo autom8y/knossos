@@ -1,7 +1,6 @@
 package materialize
 
 import (
-	"io/fs"
 	"os"
 	"sort"
 	"strings"
@@ -31,20 +30,21 @@ type HookEntry struct {
 // ariHookPrefix identifies knossos-managed hooks in settings.local.json.
 const ariHookPrefix = "ari hook"
 
-// loadHooksConfig finds and parses hooks.yaml from the knossos platform.
+// loadHooksConfig finds and parses hooks.yaml from the filesystem.
 // Resolution order:
-//  1. hooks/hooks.yaml in $KNOSSOS_HOME
-//  2. hooks/hooks.yaml in project root (for self-hosting)
+//  1. config/hooks.yaml in $KNOSSOS_HOME
+//  2. config/hooks.yaml in project root (for self-hosting and satellites)
 //
 // Returns nil if no hooks.yaml is found (graceful).
+// For fresh projects, "ari init" bootstraps config/hooks.yaml from embedded bytes.
 func (m *Materializer) loadHooksConfig() *HooksConfig {
 	candidates := []string{
 		// Knossos platform level
-		config.KnossosHome() + "/hooks/hooks.yaml",
+		config.KnossosHome() + "/config/hooks.yaml",
 	}
-	// Project-level fallback (for satellites that bundle hooks.yaml)
+	// Project-level (for self-hosting and satellites bootstrapped by ari init)
 	if m.resolver != nil {
-		candidates = append(candidates, m.resolver.ProjectRoot()+"/hooks/hooks.yaml")
+		candidates = append(candidates, m.resolver.ProjectRoot()+"/config/hooks.yaml")
 	}
 
 	for _, path := range candidates {
@@ -64,19 +64,6 @@ func (m *Materializer) loadHooksConfig() *HooksConfig {
 		}
 
 		return &cfg
-	}
-
-	// Fallback: embedded hooks.yaml (compiled into binary)
-	if m.embeddedHooks != nil {
-		data, err := fs.ReadFile(m.embeddedHooks, "hooks.yaml")
-		if err == nil {
-			var cfg HooksConfig
-			if err := yaml.Unmarshal(data, &cfg); err == nil {
-				if cfg.SchemaVersion == "2.0" {
-					return &cfg
-				}
-			}
-		}
 	}
 
 	return nil
@@ -144,21 +131,17 @@ func buildHooksSettings(cfg *HooksConfig) map[string]any {
 // mergeHooksSettings merges knossos-managed hooks into existing settings.
 // Preserves user-defined matcher groups (those without "ari hook" commands).
 // Replaces all knossos-managed matcher groups with the new configuration.
-// Strips legacy platform hooks (bash hooks referencing missing .sh files).
-//
-// Returns the merged settings and a list of stripped legacy hooks for reporting.
-func mergeHooksSettings(existingSettings map[string]any, hooksConfig *HooksConfig) (map[string]any, []string) {
+func mergeHooksSettings(existingSettings map[string]any, hooksConfig *HooksConfig) map[string]any {
 	newHooks := buildHooksSettings(hooksConfig)
-	var stripped []string
 
 	// Get existing hooks section
 	existingHooks, _ := existingSettings["hooks"].(map[string]any)
 	if existingHooks == nil {
 		existingSettings["hooks"] = newHooks
-		return existingSettings, stripped
+		return existingSettings
 	}
 
-	// For each event type, merge: replace ari groups, strip legacy, preserve user groups
+	// For each event type, merge: replace ari groups, preserve user groups
 	mergedHooks := make(map[string]any)
 
 	// First, collect all event types from both sources
@@ -174,7 +157,7 @@ func mergeHooksSettings(existingSettings map[string]any, hooksConfig *HooksConfi
 		var userEntries []map[string]any
 
 		// Extract user-defined matcher groups from existing settings
-		// Three-way classification: ari (skip), legacy (strip), user (preserve)
+		// Two-way classification: ari (replace), user (preserve)
 		if existingList, ok := existingHooks[event]; ok {
 			if entries, ok := existingList.([]any); ok {
 				for _, e := range entries {
@@ -182,15 +165,9 @@ func mergeHooksSettings(existingSettings map[string]any, hooksConfig *HooksConfi
 						if isAriManagedGroup(group) {
 							// Skip -- will be replaced by new ari hooks
 							continue
-						} else if isLegacyPlatformHook(group) {
-							// Strip legacy hook and record it
-							cmd := extractCommandForReport(group)
-							stripped = append(stripped, event+": stripped legacy hook: "+cmd)
-							continue
-						} else {
-							// Genuine user hook -- preserve
-							userEntries = append(userEntries, group)
 						}
+						// User hook -- preserve
+						userEntries = append(userEntries, group)
 					}
 				}
 			}
@@ -215,7 +192,7 @@ func mergeHooksSettings(existingSettings map[string]any, hooksConfig *HooksConfi
 	}
 
 	existingSettings["hooks"] = mergedHooks
-	return existingSettings, stripped
+	return existingSettings
 }
 
 // isAriManagedGroup checks if a matcher group is managed by ari.
@@ -260,93 +237,3 @@ func isAriManagedGroup(group map[string]any) bool {
 	return false
 }
 
-// isLegacyPlatformHook checks if a matcher group contains legacy bash hooks
-// that reference missing .sh files. Returns true if ANY hook in the group
-// matches ANY legacy pattern.
-//
-// Legacy patterns:
-//  1. Command contains $CLAUDE_PROJECT_DIR (env var expansion pattern)
-//  2. Command contains .claude/hooks/ (legacy hook directory)
-//  3. Command ends with .sh AND does not start with "ari"
-//
-// Handles both new nested format ({hooks: [{command: "..."}]})
-// and old flat format ({command: "..."}).
-func isLegacyPlatformHook(group map[string]any) bool {
-	checkCommand := func(cmd string) bool {
-		if cmd == "" {
-			return false
-		}
-		// Pattern 1: Contains $CLAUDE_PROJECT_DIR
-		if strings.Contains(cmd, "$CLAUDE_PROJECT_DIR") {
-			return true
-		}
-		// Pattern 2: Contains .claude/hooks/
-		if strings.Contains(cmd, ".claude/hooks/") {
-			return true
-		}
-		// Pattern 3: Ends with .sh AND does not start with "ari"
-		if strings.HasSuffix(cmd, ".sh") && !strings.HasPrefix(cmd, "ari") {
-			return true
-		}
-		return false
-	}
-
-	// New format: check hooks array
-	if hooksArr, ok := group["hooks"]; ok {
-		// After JSON unmarshal: []any
-		if hooks, ok := hooksArr.([]any); ok {
-			for _, h := range hooks {
-				if hook, ok := h.(map[string]any); ok {
-					cmd, _ := hook["command"].(string)
-					if checkCommand(cmd) {
-						return true
-					}
-				}
-			}
-		}
-		// In-memory (before JSON round-trip): []map[string]any
-		if hooks, ok := hooksArr.([]map[string]any); ok {
-			for _, hook := range hooks {
-				cmd, _ := hook["command"].(string)
-				if checkCommand(cmd) {
-					return true
-				}
-			}
-		}
-	}
-
-	// Old flat format: check top-level command field
-	if cmd, ok := group["command"].(string); ok {
-		return checkCommand(cmd)
-	}
-
-	return false
-}
-
-// extractCommandForReport extracts a command string from a group for reporting purposes.
-// Handles both nested and flat formats, returns a truncated substring for readability.
-func extractCommandForReport(group map[string]any) string {
-	// Try nested format first
-	if hooksArr, ok := group["hooks"]; ok {
-		if hooks, ok := hooksArr.([]any); ok && len(hooks) > 0 {
-			if hook, ok := hooks[0].(map[string]any); ok {
-				if cmd, ok := hook["command"].(string); ok {
-					return truncate(cmd, 80)
-				}
-			}
-		}
-	}
-	// Try flat format
-	if cmd, ok := group["command"].(string); ok {
-		return truncate(cmd, 80)
-	}
-	return "(unknown)"
-}
-
-// truncate returns s truncated to maxLen characters, with "..." if truncated.
-func truncate(s string, maxLen int) string {
-	if len(s) <= maxLen {
-		return s
-	}
-	return s[:maxLen-3] + "..."
-}

@@ -44,14 +44,11 @@ func runStatus(ctx *cmdContext) error {
 	// Get session ID
 	sessionID, err := ctx.GetSessionID()
 	if err != nil {
-		printer.PrintError(errors.Wrap(errors.CodeGeneralError, "failed to get session ID", err))
-		return err
+		return errors.Wrap(errors.CodeGeneralError, "failed to get session ID", err)
 	}
 
 	if sessionID == "" {
-		err := errors.New(errors.CodeSessionNotFound, "No active session. Use 'ari session create' first.")
-		printer.PrintError(err)
-		return err
+		return errors.New(errors.CodeSessionNotFound, "No active session. Use 'ari session create' first.")
 	}
 
 	// Load session context
@@ -59,9 +56,8 @@ func runStatus(ctx *cmdContext) error {
 	sessCtx, err := session.LoadContext(ctxPath)
 	if err != nil {
 		if errors.IsNotFound(err) {
-			err = errors.ErrSessionNotFound(sessionID)
+			return errors.ErrSessionNotFound(sessionID)
 		}
-		printer.PrintError(err)
 		return err
 	}
 
@@ -326,7 +322,7 @@ func (h HandoffStatusOutput) Text() string {
 	b.WriteString(fmt.Sprintf("Session: %s\n", h.SessionID))
 	b.WriteString(fmt.Sprintf("Status: %s\n", h.SessionStatus))
 	b.WriteString(fmt.Sprintf("Initiative: %s\n", h.Initiative))
-	b.WriteString(fmt.Sprintf("Team: %s\n", h.ActiveRite))
+	b.WriteString(fmt.Sprintf("Rite: %s\n", h.ActiveRite))
 	b.WriteString("\n")
 	b.WriteString(fmt.Sprintf("Current Phase: %s\n", h.CurrentPhase))
 	b.WriteString(fmt.Sprintf("Current Agent: %s\n", h.CurrentAgent))

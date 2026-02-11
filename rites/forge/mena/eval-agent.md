@@ -1,6 +1,6 @@
 ---
 description: Test a single agent in isolation
-argument-hint: <agent-name> [--rite=<rite-name>] [--adversarial]
+argument-hint: "<agent-name> [--rite=<rite-name>] [--adversarial]"
 allowed-tools: Bash, Glob, Grep, Read, Task, TodoWrite
 model: opus
 ---

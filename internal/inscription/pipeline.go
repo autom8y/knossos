@@ -546,14 +546,6 @@ func (p *Pipeline) buildRenderContext(manifest *Manifest) (*RenderContext, error
 		ctx.ActiveRite = manifest.ActiveRite
 	}
 
-	// Load agent information from .claude/agents/
-	agentsDir := filepath.Join(p.ProjectRoot, ".claude", "agents")
-	agents, err := p.loadAgents(agentsDir)
-	if err == nil {
-		ctx.Agents = agents
-		ctx.AgentCount = len(agents)
-	}
-
 	// Try to load active rite if not set
 	if ctx.ActiveRite == "" {
 		activeRitePath := filepath.Join(p.ProjectRoot, ".claude", "ACTIVE_RITE")
@@ -562,7 +554,61 @@ func (p *Pipeline) buildRenderContext(manifest *Manifest) (*RenderContext, error
 		}
 	}
 
+	// Load agent information from .claude/agents/
+	agentsDir := filepath.Join(p.ProjectRoot, ".claude", "agents")
+	allAgents, err := p.loadAgents(agentsDir)
+	if err != nil {
+		return ctx, nil
+	}
+
+	// Scope agents by rite manifest if a rite is active
+	if ctx.ActiveRite != "" {
+		riteAgentNames := p.loadRiteAgentNames(ctx.ActiveRite)
+		if len(riteAgentNames) > 0 {
+			for _, agent := range allAgents {
+				if riteAgentNames[agent.Name] {
+					ctx.Agents = append(ctx.Agents, agent)
+				} else {
+					ctx.CrossRiteAgents = append(ctx.CrossRiteAgents, agent)
+				}
+			}
+			ctx.AgentCount = len(ctx.Agents)
+		} else {
+			// Fallback: couldn't load rite manifest, show all agents
+			ctx.Agents = allAgents
+			ctx.AgentCount = len(allAgents)
+		}
+	} else {
+		// No active rite (cross-cutting mode): all agents are cross-rite
+		ctx.CrossRiteAgents = allAgents
+		ctx.AgentCount = 0
+	}
+
 	return ctx, nil
+}
+
+// loadRiteAgentNames loads agent names from a rite's manifest.yaml.
+func (p *Pipeline) loadRiteAgentNames(riteName string) map[string]bool {
+	manifestPath := filepath.Join(p.ProjectRoot, "rites", riteName, "manifest.yaml")
+	data, err := os.ReadFile(manifestPath)
+	if err != nil {
+		return nil
+	}
+
+	var manifest struct {
+		Agents []struct {
+			Name string `yaml:"name"`
+		} `yaml:"agents"`
+	}
+	if err := yaml.Unmarshal(data, &manifest); err != nil {
+		return nil
+	}
+
+	names := make(map[string]bool, len(manifest.Agents))
+	for _, a := range manifest.Agents {
+		names[a.Name] = true
+	}
+	return names
 }
 
 // loadAgents reads agent metadata from a directory.
@@ -594,9 +640,9 @@ func (p *Pipeline) loadAgents(agentsDir string) ([]AgentInfo, error) {
 		if fm := extractFrontmatter(string(content)); fm != nil {
 			// Use description as Role if role is empty (description is more verbose)
 			if fm.Description != "" {
-				agent.Role = fm.Description
+				agent.Role = firstSentence(fm.Description)
 			} else if fm.Role != "" {
-				agent.Role = fm.Role
+				agent.Role = firstSentence(fm.Role)
 			}
 			// Look for produces in frontmatter (future extension)
 			agents = append(agents, agent)
@@ -696,6 +742,21 @@ func contains(slice []string, s string) bool {
 		}
 	}
 	return false
+}
+
+// firstSentence extracts the first sentence from a string.
+// Returns up to the first ". " or "." at end, or truncates to 80 chars.
+func firstSentence(s string) string {
+	s = strings.TrimSpace(s)
+	// Check for first sentence boundary
+	if idx := strings.Index(s, ". "); idx > 0 {
+		return s[:idx+1]
+	}
+	// Check for period at end
+	if strings.HasSuffix(s, ".") && len(s) <= 80 {
+		return s
+	}
+	return truncate(s, 80)
 }
 
 // truncate truncates a string to maxLen characters.

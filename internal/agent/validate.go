@@ -255,9 +255,10 @@ func (av *AgentValidator) archetypeWarnings(fm *AgentFrontmatter) []string {
 			warnings = append(warnings, fmt.Sprintf("orchestrator agents should use opus model, found %q", fm.Model))
 		}
 
-		// Orchestrators should have low maxTurns (≤ 5)
-		if fm.MaxTurns > 5 {
-			warnings = append(warnings, fmt.Sprintf("orchestrator agents should have maxTurns ≤ 5 for consultation pattern, found %d", fm.MaxTurns))
+		// Orchestrators should have bounded maxTurns (≤ 50)
+		// Orchestrators need 20-40 turns for multi-phase coordination
+		if fm.MaxTurns > 50 {
+			warnings = append(warnings, fmt.Sprintf("orchestrator agents should have maxTurns ≤ 50, found %d", fm.MaxTurns))
 		}
 
 		// Orchestrators should restrict write/execute tools

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
 
 	"github.com/autom8y/knossos/internal/config"
@@ -44,14 +43,13 @@ func TestBuildHooksSettings(t *testing.T) {
 			{Event: "PostToolUse", Command: "ari hook budget --output json", Priority: 90},
 			{Event: "SessionStart", Command: "ari hook context --output json", Priority: 5},
 			{Event: "Stop", Command: "ari hook autopark --output json", Priority: 5},
-			{Event: "UserPromptSubmit", Matcher: "^/", Command: "ari hook route --output json", Priority: 3},
 		},
 	}
 
 	hooks := buildHooksSettings(cfg)
 
 	// Check all event types are present
-	expectedEvents := []string{"PreToolUse", "PostToolUse", "SessionStart", "Stop", "UserPromptSubmit"}
+	expectedEvents := []string{"PreToolUse", "PostToolUse", "SessionStart", "Stop"}
 	for _, event := range expectedEvents {
 		if hooks[event] == nil {
 			t.Errorf("Missing event type %s", event)
@@ -154,11 +152,7 @@ func TestMergeHooksSettings_FreshSettings(t *testing.T) {
 	}
 
 	settings := make(map[string]any)
-	result, stripped := mergeHooksSettings(settings, cfg)
-
-	if len(stripped) != 0 {
-		t.Errorf("Expected no stripped hooks, got %d", len(stripped))
-	}
+	result := mergeHooksSettings(settings, cfg)
 
 	hooks, ok := result["hooks"].(map[string]any)
 	if !ok {
@@ -206,11 +200,7 @@ func TestMergeHooksSettings_PreservesUserHooks(t *testing.T) {
 		},
 	}
 
-	result, stripped := mergeHooksSettings(settings, cfg)
-
-	if len(stripped) != 0 {
-		t.Errorf("Expected no stripped hooks, got %d", len(stripped))
-	}
+	result := mergeHooksSettings(settings, cfg)
 
 	hooks := result["hooks"].(map[string]any)
 	preToolUse := hooks["PreToolUse"].([]map[string]any)
@@ -249,11 +239,7 @@ func TestMergeHooksSettings_PreservesOldFlatUserHooks(t *testing.T) {
 		},
 	}
 
-	result, stripped := mergeHooksSettings(settings, cfg)
-
-	if len(stripped) != 0 {
-		t.Errorf("Expected no stripped hooks, got %d", len(stripped))
-	}
+	result := mergeHooksSettings(settings, cfg)
 
 	hooks := result["hooks"].(map[string]any)
 	preToolUse := hooks["PreToolUse"].([]map[string]any)
@@ -300,11 +286,7 @@ func TestMergeHooksSettings_RemovesOldAriHooks(t *testing.T) {
 		},
 	}
 
-	result, stripped := mergeHooksSettings(settings, cfg)
-
-	if len(stripped) != 0 {
-		t.Errorf("Expected no stripped hooks, got %d", len(stripped))
-	}
+	result := mergeHooksSettings(settings, cfg)
 
 	hooks := result["hooks"].(map[string]any)
 	postToolUse := hooks["PostToolUse"].([]map[string]any)
@@ -328,14 +310,14 @@ func TestMergeHooksSettings_Idempotent(t *testing.T) {
 	}
 
 	settings := make(map[string]any)
-	result1, _ := mergeHooksSettings(settings, cfg)
+	result1 := mergeHooksSettings(settings, cfg)
 
 	// Serialize to JSON and back (simulates load/save cycle)
 	data, _ := json.Marshal(result1)
 	var settings2 map[string]any
 	json.Unmarshal(data, &settings2)
 
-	result2, _ := mergeHooksSettings(settings2, cfg)
+	result2 := mergeHooksSettings(settings2, cfg)
 
 	// Marshal both and compare
 	data1, _ := json.MarshalIndent(result1, "", "  ")
@@ -405,7 +387,7 @@ func TestIsAriManagedGroup(t *testing.T) {
 func TestLoadHooksConfig(t *testing.T) {
 	// Create a temp directory structure with hooks.yaml
 	tmpDir := t.TempDir()
-	hooksDir := filepath.Join(tmpDir, "hooks")
+	hooksDir := filepath.Join(tmpDir, "config")
 	if err := os.MkdirAll(hooksDir, 0755); err != nil {
 		t.Fatal(err)
 	}
@@ -450,7 +432,7 @@ hooks:
 
 func TestLoadHooksConfig_RejectsV1Schema(t *testing.T) {
 	tmpDir := t.TempDir()
-	hooksDir := filepath.Join(tmpDir, "hooks")
+	hooksDir := filepath.Join(tmpDir, "config")
 	os.MkdirAll(hooksDir, 0755)
 
 	// v1 schema (no command field, has path field)
@@ -524,230 +506,3 @@ func TestBuildHooksSettings_OmitsAsyncWhenFalse(t *testing.T) {
 	}
 }
 
-func TestIsLegacyPlatformHook_CLAUDEProjectDir(t *testing.T) {
-	group := map[string]any{
-		"hooks": []any{
-			map[string]any{
-				"type":    "command",
-				"command": "$CLAUDE_PROJECT_DIR/.claude/hooks/session-context.sh",
-			},
-		},
-	}
-	if !isLegacyPlatformHook(group) {
-		t.Error("Expected true for hook containing $CLAUDE_PROJECT_DIR")
-	}
-}
-
-func TestIsLegacyPlatformHook_DotClaudeHooksPath(t *testing.T) {
-	group := map[string]any{
-		"hooks": []any{
-			map[string]any{
-				"type":    "command",
-				"command": "/path/to/.claude/hooks/delegation-check.sh",
-			},
-		},
-	}
-	if !isLegacyPlatformHook(group) {
-		t.Error("Expected true for hook containing .claude/hooks/")
-	}
-}
-
-func TestIsLegacyPlatformHook_ShSuffix(t *testing.T) {
-	group := map[string]any{
-		"hooks": []any{
-			map[string]any{
-				"type":    "command",
-				"command": "./hooks/custom-hook.sh",
-			},
-		},
-	}
-	if !isLegacyPlatformHook(group) {
-		t.Error("Expected true for hook ending with .sh (not ari)")
-	}
-}
-
-func TestIsLegacyPlatformHook_AriShSuffix(t *testing.T) {
-	group := map[string]any{
-		"hooks": []any{
-			map[string]any{
-				"type":    "command",
-				"command": "ari hook context.sh",
-			},
-		},
-	}
-	if isLegacyPlatformHook(group) {
-		t.Error("Expected false for ari command (even with .sh in name)")
-	}
-}
-
-func TestIsLegacyPlatformHook_UserTool(t *testing.T) {
-	group := map[string]any{
-		"hooks": []any{
-			map[string]any{
-				"type":    "command",
-				"command": "my-custom-tool check",
-			},
-		},
-	}
-	if isLegacyPlatformHook(group) {
-		t.Error("Expected false for genuine user tool")
-	}
-}
-
-func TestIsLegacyPlatformHook_PythonScript(t *testing.T) {
-	group := map[string]any{
-		"hooks": []any{
-			map[string]any{
-				"type":    "command",
-				"command": "python lint.py",
-			},
-		},
-	}
-	if isLegacyPlatformHook(group) {
-		t.Error("Expected false for user Python script")
-	}
-}
-
-func TestIsLegacyPlatformHook_FlatFormat(t *testing.T) {
-	// Test old flat format with legacy pattern
-	group := map[string]any{
-		"command": "$CLAUDE_PROJECT_DIR/.claude/hooks/validation.sh",
-	}
-	if !isLegacyPlatformHook(group) {
-		t.Error("Expected true for flat format legacy hook")
-	}
-}
-
-func TestIsLegacyPlatformHook_FlatFormatUser(t *testing.T) {
-	// Test old flat format with user hook
-	group := map[string]any{
-		"command": "user-custom-check",
-	}
-	if isLegacyPlatformHook(group) {
-		t.Error("Expected false for flat format user hook")
-	}
-}
-
-func TestMergeHooks_StripsLegacyPreservesUser(t *testing.T) {
-	cfg := &HooksConfig{
-		SchemaVersion: "2.0",
-		Hooks: []HookEntry{
-			{Event: "SessionStart", Command: "ari hook context --output json", Priority: 5},
-		},
-	}
-
-	// Existing settings with ari + legacy + user hooks
-	settings := map[string]any{
-		"hooks": map[string]any{
-			"SessionStart": []any{
-				// Old ari hook (will be replaced)
-				map[string]any{
-					"hooks": []any{
-						map[string]any{
-							"type":    "command",
-							"command": "ari hook context --output json",
-						},
-					},
-				},
-				// Legacy bash hook (will be stripped)
-				map[string]any{
-					"hooks": []any{
-						map[string]any{
-							"type":    "command",
-							"command": "$CLAUDE_PROJECT_DIR/.claude/hooks/session-context.sh",
-						},
-					},
-				},
-				// User hook (will be preserved)
-				map[string]any{
-					"hooks": []any{
-						map[string]any{
-							"type":    "command",
-							"command": "my-notification-tool notify",
-						},
-					},
-				},
-			},
-		},
-	}
-
-	result, stripped := mergeHooksSettings(settings, cfg)
-
-	hooks := result["hooks"].(map[string]any)
-	sessionStart := hooks["SessionStart"].([]map[string]any)
-
-	// Should have 2 entries: ari + user (no legacy)
-	if len(sessionStart) != 2 {
-		t.Fatalf("Expected 2 entries (ari + user), got %d", len(sessionStart))
-	}
-
-	// First should be ari hook
-	ariCmd := extractHookCommand(sessionStart[0])
-	if ariCmd != "ari hook context --output json" {
-		t.Errorf("First entry should be ari hook, got %v", ariCmd)
-	}
-
-	// Second should be user hook
-	userCmd := extractHookCommand(sessionStart[1])
-	if userCmd != "my-notification-tool notify" {
-		t.Errorf("Second entry should be user hook, got %v", userCmd)
-	}
-
-	// Check stripped report
-	if len(stripped) != 1 {
-		t.Fatalf("Expected 1 stripped entry, got %d", len(stripped))
-	}
-	if !strings.Contains(stripped[0], "session-context.sh") {
-		t.Errorf("Stripped report should mention session-context.sh, got: %v", stripped[0])
-	}
-	if !strings.Contains(stripped[0], "SessionStart") {
-		t.Errorf("Stripped report should mention event name, got: %v", stripped[0])
-	}
-}
-
-func TestMergeHooks_AllLegacyNoUser(t *testing.T) {
-	cfg := &HooksConfig{
-		SchemaVersion: "2.0",
-		Hooks: []HookEntry{
-			{Event: "PreToolUse", Command: "ari hook writeguard --output json", Priority: 3},
-		},
-	}
-
-	// Settings with only legacy hooks
-	settings := map[string]any{
-		"hooks": map[string]any{
-			"PreToolUse": []any{
-				map[string]any{
-					"command": ".claude/hooks/validate.sh",
-				},
-				map[string]any{
-					"hooks": []any{
-						map[string]any{
-							"type":    "command",
-							"command": "./legacy-hook.sh",
-						},
-					},
-				},
-			},
-		},
-	}
-
-	result, stripped := mergeHooksSettings(settings, cfg)
-
-	hooks := result["hooks"].(map[string]any)
-	preToolUse := hooks["PreToolUse"].([]map[string]any)
-
-	// Should have only 1 entry (ari, all legacy stripped)
-	if len(preToolUse) != 1 {
-		t.Fatalf("Expected 1 entry (ari only), got %d", len(preToolUse))
-	}
-
-	if extractHookCommand(preToolUse[0]) != "ari hook writeguard --output json" {
-		t.Errorf("Expected ari hook, got %v", extractHookCommand(preToolUse[0]))
-	}
-
-	// Should have 2 stripped entries
-	if len(stripped) != 2 {
-		t.Fatalf("Expected 2 stripped entries, got %d: %v", len(stripped), stripped)
-	}
-}

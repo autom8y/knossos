@@ -1,6 +1,6 @@
 ---
 description: Run validation suite on an existing rite
-argument-hint: <rite-name> [--verbose]
+argument-hint: "<rite-name> [--verbose]"
 allowed-tools: Bash, Glob, Grep, Read, Task, TodoWrite
 model: opus
 ---

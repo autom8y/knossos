@@ -1,7 +1,7 @@
 ---
 name: theoria
 description: "Structured domain audit producing State of the {target} report with letter grades"
-argument-hint: <domain|all> [--target=NAME] [--domains=DOMAIN1,DOMAIN2]
+argument-hint: "<domain|all> [--target=NAME] [--domains=DOMAIN1,DOMAIN2]"
 allowed-tools: Bash, Read, Glob, Grep, Task, Skill, Write
 model: opus
 context: fork

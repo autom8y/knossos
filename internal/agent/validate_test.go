@@ -809,7 +809,7 @@ description: "Orchestrator with too many turns"
 type: orchestrator
 tools: Read
 model: opus
-maxTurns: 10
+maxTurns: 100
 ---
 
 # Orchestrator
@@ -822,13 +822,13 @@ maxTurns: 10
 
 	foundMaxTurnsWarning := false
 	for _, w := range result.Warnings {
-		if containsStr(w, "maxTurns") && containsStr(w, "5") {
+		if containsStr(w, "maxTurns") && containsStr(w, "50") {
 			foundMaxTurnsWarning = true
 			break
 		}
 	}
 	if !foundMaxTurnsWarning {
-		t.Errorf("expected warning about orchestrator maxTurns > 5, got warnings: %v", result.Warnings)
+		t.Errorf("expected warning about orchestrator maxTurns > 50, got warnings: %v", result.Warnings)
 	}
 }
 

@@ -5,7 +5,6 @@ argument-hint: <sprint-name> [--tasks="task1,task2,task3"]
 allowed-tools: Bash, Read, Task, Glob, Grep
 model: opus
 disable-model-invocation: true
-context: fork
 ---
 
 ## Context

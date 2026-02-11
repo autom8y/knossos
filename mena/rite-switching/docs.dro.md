@@ -1,7 +1,7 @@
 ---
 name: docs
 description: Quick switch to docs (documentation workflow)
-argument-hint: [--overwrite-diverged] [--dry-run] [--keep-orphans]
+argument-hint: "[--overwrite-diverged] [--dry-run] [--keep-orphans]"
 allowed-tools: Bash, Read
 model: haiku
 disable-model-invocation: true

@@ -1,11 +1,10 @@
 ---
 name: architect
 description: Design-only session producing design artifacts (no implementation)
-argument-hint: <feature-description> [--complexity=LEVEL]
+argument-hint: "<feature-description> [--complexity=LEVEL]"
 allowed-tools: Bash, Read, Write, Task, Glob, Grep
 model: opus
 disable-model-invocation: true
-context: fork
 ---
 
 ## Context

@@ -76,6 +76,11 @@ The clew that makes the maze survivable.`,
 			return nil
 		}
 
+		// Validate output format
+		if err := output.ValidateFormat(globalOpts.Output); err != nil {
+			return err
+		}
+
 		// Initialize config
 		if err := initConfig(); err != nil {
 			return err

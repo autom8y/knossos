@@ -4,7 +4,6 @@ description: Get ecosystem guidance, rite recommendations, and command-flows
 argument-hint: "[query] [--playbook=NAME] [--rite] [--commands]"
 allowed-tools: Bash, Read, Grep, Glob, WebSearch
 model: opus
-context: fork
 ---
 
 ## Cognitive Load Absorber Role
