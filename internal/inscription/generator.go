@@ -489,7 +489,7 @@ func (g *Generator) getDefaultPlatformInfrastructureContent() string {
 func (g *Generator) getDefaultQuickStartContent() string {
 	return `## Quick Start
 
-No active rite. Use ` + "`/go`" + ` to get started, or ` + "`ari rite switch <name>`" + ` to activate directly.`
+No active rite. Use ` + "`/go`" + ` to get started, or ` + "`ari sync --rite=<name>`" + ` to activate directly.`
 }
 
 func (g *Generator) getDefaultAgentConfigsContent() string {

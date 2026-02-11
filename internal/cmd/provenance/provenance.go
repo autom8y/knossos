@@ -129,7 +129,7 @@ func runShow(ctx *cmdContext, scopeFilter string) error {
 
 	// If no entries found, show helpful message
 	if len(allEntries) == 0 {
-		printer.PrintLine("No provenance manifest found. Run 'ari sync materialize' or 'ari sync user all' first.")
+		printer.PrintLine("No provenance manifest found. Run 'ari sync' first.")
 		return nil
 	}
 

@@ -43,7 +43,7 @@ func runPantheon(ctx *cmdContext) error {
 	// Get active rite
 	activeRite := ctx.getActiveRite()
 	if activeRite == "" {
-		return printer.PrintError(fmt.Errorf("no active rite (use 'ari sync materialize --rite <name>' to activate)"))
+		return printer.PrintError(fmt.Errorf("no active rite (use 'ari sync --rite=<name>' to activate)"))
 	}
 
 	// Read agents from .claude/agents/

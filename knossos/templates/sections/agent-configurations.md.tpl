@@ -10,6 +10,6 @@ Prompts in `.claude/agents/`:
 - `{{ .File }}` - {{ .Role }}
 {{- end }}
 {{- else }}
-No agents installed. Run `ari rite switch <name>` to install.
+No agents installed. Run `ari sync --rite=<name>` to install.
 {{- end }}
 <!-- KNOSSOS:END agent-configurations -->

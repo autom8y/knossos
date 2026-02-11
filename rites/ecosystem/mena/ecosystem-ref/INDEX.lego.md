@@ -31,7 +31,7 @@ ari sync --scope=user --resource=agents  # Sync agents/ to ~/.claude/agents/
 ari sync --scope=user --resource=mena   # Sync mena/ to ~/.claude/commands/ + skills/
 ari sync --scope=user --resource=hooks  # Sync hooks/ to ~/.claude/hooks/
 ari sync --scope=user                   # Sync all user resources
-ari rite start <rite>          # Start a rite (includes materialize)
+ari sync --rite=<name>         # Switch/activate a rite
 ari rite list                  # List available rites
 ```
 
@@ -91,6 +91,9 @@ phases:
 
 ```bash
 ari sync --dry-run             # Preview sync changes
+ari sync --help                # Full flag reference
+ari rite --help                # Rite management subcommands
+ari session --help             # Session management subcommands
 ```
 
 ## Progressive Disclosure

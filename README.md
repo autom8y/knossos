@@ -14,13 +14,12 @@
 
 | Command | Purpose |
 |---------|---------|
-| `ari sync materialize --rite <name>` | Switch active rite (syncs to `.claude/`) |
-| `ari rite switch <name>` | Alias for rite switching |
+| `ari sync --rite=<name>` | Switch active rite (syncs to `.claude/`) |
 
 ### Architecture Note
 
 User-level content (`agents/`, `mena/`, `hooks/`) syncs to `~/.claude/` (global, available in all projects).
-Rite-level content (`rites/{rite}/`) syncs to `.claude/` (project-specific via ari sync materialize).
+Rite-level content (`rites/{rite}/`) syncs to `.claude/` (project-specific via `ari sync --rite=<name>`).
 
 **Important**: NO `.claude/user-*` directories should exist in satellite projects. These were stale migration artifacts.
 
@@ -90,7 +89,7 @@ mena/
 ```
 
 **Rite Mena:**
-Rite-specific mena live in `rites/<rite>/mena/` and are synced to `.claude/commands/` and `.claude/skills/` by `ari sync materialize`. Rite mena take precedence over user mena of the same name (project > user).
+Rite-specific mena live in `rites/<rite>/mena/` and are synced to `.claude/commands/` and `.claude/skills/` by `ari sync`. Rite mena take precedence over user mena of the same name (project > user).
 
 **Manifests:**
 - `~/.claude/USER_COMMAND_MANIFEST.json` tracks knossos-managed commands

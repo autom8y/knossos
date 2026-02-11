@@ -96,8 +96,10 @@ Switch this terminal to a different session:
 
 ```bash
 # Session resolution is handled internally by ari
-ari session switch "$SESSION_ID"
+ari session resume "$SESSION_ID"
 ```
+
+> For full subcommand list: `ari session --help`
 
 ### --cleanup
 
