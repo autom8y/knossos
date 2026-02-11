@@ -71,8 +71,8 @@ The sre rite is a **production-ready, well-optimized rite** (44% token reduction
 - [ ] Add to pattern documentation:
   ```yaml
   # Example: 10x → sre handoff
-  source_team: 10x-dev
-  target_team: sre
+  source_rite: 10x-dev
+  target_rite: sre
   handoff_type: validation
   context:
     initiative: "OAuth2 Implementation"

@@ -79,8 +79,8 @@ RND exploration complete → tech-transfer produces TRANSFER doc → 10x-dev pic
 - [ ] Add to pattern documentation:
   ```yaml
   # Example: rnd → 10x handoff (prototype ready for productionization)
-  source_team: rnd
-  target_team: 10x-dev
+  source_rite: rnd
+  target_rite: 10x-dev
   handoff_type: productionization
   context:
     initiative: "ML-Powered Search"
@@ -101,8 +101,8 @@ RND exploration complete → tech-transfer produces TRANSFER doc → 10x-dev pic
         - Graceful degradation to keyword search
 
   # Example: rnd → strategy handoff (exploration informing roadmap)
-  source_team: rnd
-  target_team: strategy
+  source_rite: rnd
+  target_rite: strategy
   handoff_type: strategic_input
   context:
     initiative: "Technology Radar Update"

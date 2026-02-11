@@ -165,7 +165,7 @@ prerequisites:
   - description: "Git working directory is clean"
     verification: "Run: git status --porcelain (should return empty)"
   - description: "No active sessions"
-    verification: "Run: ls .claude/sessions/.current-session (should not exist)"
+    verification: "Run: ari session status (should show no active session)"
   - description: "Backup of .claude/ directory"
     verification: "Confirm backup exists at known location"
 steps:

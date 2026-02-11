@@ -100,8 +100,8 @@ SYSTEM complexity:
 - [ ] Add to pattern documentation:
   ```yaml
   # Example: 10x → security handoff
-  source_team: 10x-dev
-  target_team: security
+  source_rite: 10x-dev
+  target_rite: security
   handoff_type: assessment
   context:
     initiative: "User Authentication Redesign"

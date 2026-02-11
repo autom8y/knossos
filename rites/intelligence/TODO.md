@@ -127,8 +127,8 @@ The intelligence rite is a **well-structured analytics and research rite** with 
 - [ ] Add to pattern documentation:
   ```yaml
   # Example: intelligence → 10x handoff (experiment results driving implementation)
-  source_team: intelligence
-  target_team: 10x-dev
+  source_rite: intelligence
+  target_rite: 10x-dev
   handoff_type: implementation
   context:
     initiative: "Checkout Flow Optimization"
@@ -144,8 +144,8 @@ The intelligence rite is a **well-structured analytics and research rite** with 
         - Estimate accuracy within $2 of actual
 
   # Example: intelligence → strategy handoff (insights informing roadmap)
-  source_team: intelligence
-  target_team: strategy
+  source_rite: intelligence
+  target_rite: strategy
   handoff_type: strategic_input
   context:
     initiative: "Q2 Roadmap Planning"
