@@ -104,7 +104,6 @@ When invoked without arguments, `/consult` provides ecosystem overview:
 1. **Summarize Current State**
    - Active rite (from `.claude/ACTIVE_RITE`)
    - Active session (from `.claude/sessions/`)
-   - Git branch and status
    - Current complexity level (if in session)
 
 2. **Display Rite Catalog**
@@ -131,7 +130,6 @@ When invoked without arguments, `/consult` provides ecosystem overview:
 === Ecosystem Status ===
 Active Rite: 10x-dev (5 agents)
 Session: ACTIVE - "Add authentication" (MODULE complexity)
-Git: feature/auth-system (clean)
 
 === Available Rites ===
   10x-dev       /10x          Full feature development
@@ -313,7 +311,6 @@ Requirements → Design → Implementation → Testing → Deployment
 Current Context:
   Rite: none (will sync to 10x-dev)
   Session: none (will start new)
-  Branch: main
 
 --- Phase 1: Requirements ---
 Command: /10x && /start "Feature name" --complexity=MODULE

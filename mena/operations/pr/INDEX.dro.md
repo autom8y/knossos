@@ -9,9 +9,9 @@ context: fork
 ---
 
 ## Context
-Auto-injected by SessionStart hook (project, rite, session, git).
+Auto-injected by SessionStart hook (project, rite, session).
 
-Base branch is available in session context (`base_branch` field).
+Base branch for PR targeting: detect via `git symbolic-ref refs/remotes/origin/HEAD` or default to `main`.
 
 ## Your Task
 

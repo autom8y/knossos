@@ -30,11 +30,7 @@ ari session status --output json 2>/dev/null
 # 2. Session list (recent, any status)
 ari session list --output json 2>/dev/null
 
-# 3. Git state
-git rev-parse --abbrev-ref HEAD 2>/dev/null
-git status --porcelain 2>/dev/null | head -20
-
-# 4. Active rite
+# 3. Active rite
 cat .claude/ACTIVE_RITE 2>/dev/null || echo "none"
 
 # 5. WIP artifacts
@@ -66,7 +62,7 @@ Display a compact status block. No preamble. Get to the point.
 
 ```
 Session: {session_id}
-Rite: {active_rite} | Phase: {current_phase} | Branch: {branch}
+Rite: {active_rite} | Phase: {current_phase}
 Initiative: {initiative}
 
 Sprint Progress:
@@ -124,8 +120,6 @@ Time target: ~12 seconds.
 Nothing is happening. Show a terse dashboard and offer clear options.
 
 ```
-Worktree: {worktree_name or "main"}
-Branch: {branch_name}
 Rite: {active_rite or "none"}
 Sessions: {count active} active, {count parked} parked
 

@@ -52,12 +52,6 @@ func (c ContextOutput) Text() string {
 	b.WriteString(fmt.Sprintf("| Initiative | %s |\n", c.Initiative))
 	b.WriteString(fmt.Sprintf("| Rite | %s |\n", c.Rite))
 	b.WriteString(fmt.Sprintf("| Mode | %s |\n", c.ExecutionMode))
-	if c.GitBranch != "" {
-		b.WriteString(fmt.Sprintf("| Git Branch | %s |\n", c.GitBranch))
-	}
-	if c.BaseBranch != "" {
-		b.WriteString(fmt.Sprintf("| Base Branch | %s |\n", c.BaseBranch))
-	}
 	if len(c.AvailableRites) > 0 {
 		b.WriteString(fmt.Sprintf("| Available Rites | %s |\n", strings.Join(c.AvailableRites, ", ")))
 	}

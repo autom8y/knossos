@@ -40,16 +40,9 @@ Options:
 1. /continue - Resume the parked session
 2. /park + /start - Park current, then start new
 3. /wrap - Complete current session first
-4. /worktree create "<name>" - Start in ISOLATED worktree (parallel work)
 
-Tip: Use worktrees when you want to work on something different
-without affecting the current session/rite.
+See also: /worktree for parallel work in isolated worktrees
 ```
-
-The `/worktree` option is especially useful when:
-- Different rite needed for the new work
-- Want to keep current sprint context intact
-- Need true parallel sessions on same project
 
 ### 2. Gather Parameters
 

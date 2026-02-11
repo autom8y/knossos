@@ -233,35 +233,6 @@ Status: HOTFIX ABORTED (escalated to /task)
 
 ---
 
-## Integration with Git
-
-**Recommended git workflow for hotfixes**:
-
-```bash
-# Create hotfix branch
-git checkout -b hotfix/login-500-error
-
-# Make fix
-/hotfix "API returning 500 on login"
-
-# Commit (done by Principal Engineer during /hotfix)
-# Message should include: what, why, rollback
-
-# Push and create PR
-git push origin hotfix/login-500-error
-gh pr create --title "HOTFIX: Fix login 500 error" --body "..."
-
-# Fast-track review and merge
-# Deploy immediately
-```
-
-**For CRITICAL fixes, consider**:
-- Merge directly to main (skip PR if necessary)
-- Deploy immediately
-- Create PR retroactively for audit trail
-
----
-
 ## Example Commit Message
 
 **Good hotfix commit message**:

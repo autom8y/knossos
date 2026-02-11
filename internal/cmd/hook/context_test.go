@@ -60,8 +60,6 @@ func TestContextOutput_Text(t *testing.T) {
 				AvailableAgents: []string{"orchestrator", "context-architect"},
 			},
 			contains: []string{
-				"| Git Branch | feat/backtick-migration |",
-				"| Base Branch | main |",
 				"| Available Rites | 10x-dev, hygiene, ecosystem |",
 				"| Available Agents | orchestrator, context-architect |",
 			},
@@ -114,6 +112,24 @@ func TestContextOutput_Text_OmitsEmptyFields(t *testing.T) {
 	}
 	if strings.Contains(text, "Available Agents") {
 		t.Error("Text() should not contain Available Agents when nil")
+	}
+
+	// Verify that populated git fields are also excluded from Text()
+	// (git fields are only in JSON, never in Text() output)
+	out2 := ContextOutput{
+		SessionID:     "session-004",
+		Status:        "ACTIVE",
+		ExecutionMode: "orchestrated",
+		HasSession:    true,
+		GitBranch:     "feature/something",
+		BaseBranch:    "main",
+	}
+	text2 := out2.Text()
+	if strings.Contains(text2, "Git Branch") {
+		t.Error("Text() should never contain Git Branch (removed from text output)")
+	}
+	if strings.Contains(text2, "Base Branch") {
+		t.Error("Text() should never contain Base Branch (removed from text output)")
 	}
 }
 

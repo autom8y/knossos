@@ -449,6 +449,28 @@ This document catalogs anti-patterns observed across all session-lifecycle comma
 
 ## Cross-Cutting Anti-Patterns
 
+### Proactive Branch/Worktree Creation
+
+**Pattern**: Creating git branches or worktrees without the user explicitly requesting parallel work
+
+**Symptoms**:
+- Branch created that the user did not ask for
+- Worktree suggested when user just wants to work in current directory
+- `git checkout -b` commands appearing in workflow without user keyword trigger
+- Output displays branch state as a primary status element
+
+**Fix**:
+- Only create branches or worktrees when the user uses explicit keywords: `branch`, `worktree`, `isolate`, `parallel`
+- Work on the current branch unless the user requests otherwise
+- Do not display branch name as a primary status field
+- Do not suggest worktree creation as a default option
+
+**Prevention**: Branch/worktree operations require explicit user intent
+
+**Why Bad**: Creates unwanted git artifacts, pollutes branch namespace, adds complexity the user did not request, and derails the user's intended workflow
+
+---
+
 ### Treating Sessions as Todo Lists
 
 **Pattern**: One massive session tracking unrelated tasks

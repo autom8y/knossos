@@ -72,36 +72,7 @@ Plan and execute a sprint with multiple coordinated tasks. $ARGUMENTS
 - Time-boxed work periods
 - Feature epics spanning multiple components
 
-## Parallel Sprint Pattern
+## Parallel Sprints
 
-For truly parallel sprints across multiple rites/focuses, use **worktrees**:
-
-```bash
-# Create isolated worktrees per sprint
-/worktree create "sprint-backend" --rite=10x-dev
-/worktree create "sprint-frontend" --rite=10x-dev
-/worktree create "sprint-docs" --rite=docs
-
-# In each terminal, navigate and start sprint independently:
-# Terminal 1:
-cd worktrees/wt-xxx && claude
-/sprint "Backend Sprint" --tasks="API,Database,Auth"
-
-# Terminal 2:
-cd worktrees/wt-yyy && claude
-/sprint "Frontend Sprint" --tasks="Components,State,Tests"
-
-# Terminal 3:
-cd worktrees/wt-zzz && claude
-/sprint "Docs Sprint" --tasks="API Docs,User Guide,Examples"
-```
-
-**Why worktrees for parallel sprints?**
-- Each sprint gets isolated SPRINT_CONTEXT (no collision)
-- Different rites can work simultaneously
-- Changes don't affect each other
-- Use `/sessions --all` to monitor all sprints
-
-**Single sprint, multiple tasks** → use this command directly
-**Multiple parallel sprints** → use `/worktree` per sprint
+For multiple parallel sprints, see `/worktree` command.
 

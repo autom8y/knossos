@@ -51,7 +51,7 @@ git worktree remove --force worktrees/wt-20251224-150000-xyz
 
 ### With /start
 
-When `/start` detects an existing session, it now offers worktree as an option:
+When `/start` detects an existing session, it offers these options and references worktree:
 
 ```
 A session already exists in this terminal.
@@ -60,7 +60,8 @@ Options:
 1. /continue - Resume the parked session
 2. /park + /start - Park current, then start new
 3. /wrap - Complete current session first
-4. /worktree create "<name>" - Start in ISOLATED worktree (parallel work)
+
+See also: /worktree for parallel work in isolated worktrees
 ```
 
 ### With /wrap

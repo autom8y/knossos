@@ -35,7 +35,7 @@
 
 ### /start Interaction
 
-When `/start` detects an existing session, it offers worktree as an option:
+When `/start` detects an existing session, it offers these options and references worktree:
 
 ```
 A session already exists in this terminal.
@@ -44,7 +44,8 @@ Options:
 1. /continue - Resume the parked session
 2. /park + /start - Park current, then start new
 3. /wrap - Complete current session first
-4. /worktree create "<name>" - Start in ISOLATED worktree (parallel work)
+
+See also: /worktree for parallel work in isolated worktrees
 ```
 
 ### /wrap Interaction
