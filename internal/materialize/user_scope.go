@@ -322,15 +322,50 @@ func (m *Materializer) syncUserResource(
 		// Existing entry
 		switch entry.Owner {
 		case provenance.OwnerUser, provenance.OwnerUntracked:
-			// Never touch user-created files
-			result.Changes.Skipped = append(result.Changes.Skipped, UserSkippedEntry{
-				Name:   manifestKey,
-				Reason: "user-created",
-			})
+			// If file was deleted from disk, clear stale manifest entry so it can be re-created
+			if _, statErr := os.Stat(targetPath); os.IsNotExist(statErr) {
+				delete(manifest.Entries, manifestKey)
+				// Re-create from source
+				if !opts.DryRun {
+					if err := copyUserFile(path, targetPath); err != nil {
+						return err
+					}
+					manifest.Entries[manifestKey] = &provenance.ProvenanceEntry{
+						Owner:      provenance.OwnerKnossos,
+						Scope:      provenance.ScopeUser,
+						SourcePath: sourceRelPath,
+						SourceType: "user-sync",
+						Checksum:   sourceChecksum,
+						LastSynced: now,
+					}
+				}
+				result.Changes.Added = append(result.Changes.Added, manifestKey)
+			} else {
+				// File exists on disk — never touch user-created files
+				result.Changes.Skipped = append(result.Changes.Skipped, UserSkippedEntry{
+					Name:   manifestKey,
+					Reason: "user-created",
+				})
+			}
 
 		case provenance.OwnerKnossos:
-			// Check if source changed
-			if entry.Checksum == sourceChecksum {
+			// If target was deleted from disk, re-create unconditionally
+			if _, statErr := os.Stat(targetPath); os.IsNotExist(statErr) {
+				if !opts.DryRun {
+					if err := copyUserFile(path, targetPath); err != nil {
+						return err
+					}
+					manifest.Entries[manifestKey] = &provenance.ProvenanceEntry{
+						Owner:      provenance.OwnerKnossos,
+						Scope:      provenance.ScopeUser,
+						SourcePath: sourceRelPath,
+						SourceType: "user-sync",
+						Checksum:   sourceChecksum,
+						LastSynced: now,
+					}
+				}
+				result.Changes.Added = append(result.Changes.Added, manifestKey)
+			} else if entry.Checksum == sourceChecksum {
 				// No change in source
 				result.Changes.Unchanged = append(result.Changes.Unchanged, manifestKey)
 			} else {
@@ -518,13 +553,54 @@ func (m *Materializer) syncUserResourceFromEmbedded(
 		// Existing entry
 		switch entry.Owner {
 		case provenance.OwnerUser, provenance.OwnerUntracked:
-			result.Changes.Skipped = append(result.Changes.Skipped, UserSkippedEntry{
-				Name:   manifestKey,
-				Reason: "user-created",
-			})
+			// If file was deleted from disk, clear stale manifest entry so it can be re-created
+			if _, statErr := os.Stat(targetPath); os.IsNotExist(statErr) {
+				delete(manifest.Entries, manifestKey)
+				if !opts.DryRun {
+					if err := paths.EnsureDir(filepath.Dir(targetPath)); err != nil {
+						return err
+					}
+					if err := os.WriteFile(targetPath, content, 0644); err != nil {
+						return err
+					}
+					manifest.Entries[manifestKey] = &provenance.ProvenanceEntry{
+						Owner:      provenance.OwnerKnossos,
+						Scope:      provenance.ScopeUser,
+						SourcePath: "embedded:" + path,
+						SourceType: "embedded",
+						Checksum:   sourceChecksum,
+						LastSynced: now,
+					}
+				}
+				result.Changes.Added = append(result.Changes.Added, manifestKey)
+			} else {
+				result.Changes.Skipped = append(result.Changes.Skipped, UserSkippedEntry{
+					Name:   manifestKey,
+					Reason: "user-created",
+				})
+			}
 
 		case provenance.OwnerKnossos:
-			if entry.Checksum == sourceChecksum {
+			// If target was deleted from disk, re-create unconditionally
+			if _, statErr := os.Stat(targetPath); os.IsNotExist(statErr) {
+				if !opts.DryRun {
+					if err := paths.EnsureDir(filepath.Dir(targetPath)); err != nil {
+						return err
+					}
+					if err := os.WriteFile(targetPath, content, 0644); err != nil {
+						return err
+					}
+					manifest.Entries[manifestKey] = &provenance.ProvenanceEntry{
+						Owner:      provenance.OwnerKnossos,
+						Scope:      provenance.ScopeUser,
+						SourcePath: "embedded:" + path,
+						SourceType: "embedded",
+						Checksum:   sourceChecksum,
+						LastSynced: now,
+					}
+				}
+				result.Changes.Added = append(result.Changes.Added, manifestKey)
+			} else if entry.Checksum == sourceChecksum {
 				result.Changes.Unchanged = append(result.Changes.Unchanged, manifestKey)
 			} else {
 				targetChecksum, _ := checksum.File(targetPath)
@@ -1036,13 +1112,54 @@ func syncUserMenaFile(
 	// Existing entry
 	switch entry.Owner {
 	case provenance.OwnerUser, provenance.OwnerUntracked:
-		result.Changes.Skipped = append(result.Changes.Skipped, UserSkippedEntry{
-			Name:   manifestKey,
-			Reason: "user-created",
-		})
+		// If file was deleted from disk, clear stale manifest entry so it can be re-created
+		if _, statErr := os.Stat(targetPath); os.IsNotExist(statErr) {
+			delete(manifest.Entries, manifestKey)
+			if !opts.DryRun {
+				if err := paths.EnsureDir(filepath.Dir(targetPath)); err != nil {
+					return err
+				}
+				if err := os.WriteFile(targetPath, content, 0644); err != nil {
+					return err
+				}
+				manifest.Entries[manifestKey] = &provenance.ProvenanceEntry{
+					Owner:      provenance.OwnerKnossos,
+					Scope:      provenance.ScopeUser,
+					SourcePath: sourceRelPath,
+					SourceType: "user-sync",
+					Checksum:   sourceChecksum,
+					LastSynced: now,
+				}
+			}
+			result.Changes.Added = append(result.Changes.Added, manifestKey)
+		} else {
+			result.Changes.Skipped = append(result.Changes.Skipped, UserSkippedEntry{
+				Name:   manifestKey,
+				Reason: "user-created",
+			})
+		}
 
 	case provenance.OwnerKnossos:
-		if entry.Checksum == sourceChecksum {
+		// If target was deleted from disk, re-create unconditionally
+		if _, statErr := os.Stat(targetPath); os.IsNotExist(statErr) {
+			if !opts.DryRun {
+				if err := paths.EnsureDir(filepath.Dir(targetPath)); err != nil {
+					return err
+				}
+				if err := os.WriteFile(targetPath, content, 0644); err != nil {
+					return err
+				}
+				manifest.Entries[manifestKey] = &provenance.ProvenanceEntry{
+					Owner:      provenance.OwnerKnossos,
+					Scope:      provenance.ScopeUser,
+					SourcePath: sourceRelPath,
+					SourceType: "user-sync",
+					Checksum:   sourceChecksum,
+					LastSynced: now,
+				}
+			}
+			result.Changes.Added = append(result.Changes.Added, manifestKey)
+		} else if entry.Checksum == sourceChecksum {
 			result.Changes.Unchanged = append(result.Changes.Unchanged, manifestKey)
 		} else {
 			targetChecksum, _ := checksum.File(targetPath)

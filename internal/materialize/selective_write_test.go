@@ -115,10 +115,10 @@ func TestSyncMena_PreservesUserCommands(t *testing.T) {
 	_, err := SyncMena(sources, opts)
 	require.NoError(t, err)
 
-	// Verify projected command exists
+	// Verify projected command exists (promoted to parent level)
 	assert.FileExists(t,
-		filepath.Join(commandsDir, "my-cmd", "INDEX.md"),
-		"projected command should exist")
+		filepath.Join(commandsDir, "my-cmd.md"),
+		"projected command should exist (promoted)")
 
 	// Verify user-created command survived
 	assert.FileExists(t,
@@ -211,10 +211,16 @@ func TestSyncMena_CleansStaleCompanionFiles(t *testing.T) {
 	_, err := SyncMena(sources, opts)
 	require.NoError(t, err)
 
-	// New INDEX should exist with updated content
-	content, err := os.ReadFile(filepath.Join(entryDir, "INDEX.md"))
+	// New INDEX should be promoted to parent level (commands/my-cmd.md)
+	promotedPath := filepath.Join(commandsDir, "my-cmd.md")
+	content, err := os.ReadFile(promotedPath)
 	require.NoError(t, err)
 	assert.Equal(t, "# New Index\n", string(content))
+
+	// Old INDEX.md in subdirectory should be cleaned up
+	assert.NoFileExists(t,
+		filepath.Join(entryDir, "INDEX.md"),
+		"old INDEX.md should be cleaned from subdirectory after promotion")
 
 	// Old companion should be gone (entry subdir was cleaned before rewrite)
 	assert.NoFileExists(t,

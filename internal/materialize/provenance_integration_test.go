@@ -279,12 +279,15 @@ func TestProvenanceIntegration_MenaDirectories(t *testing.T) {
 	assert.Equal(t, provenance.OwnerKnossos, skillEntry.Owner)
 	assert.NotEmpty(t, skillEntry.Checksum, "skill directory should have checksum")
 
-	// Verify checksums match directory state
-	commandDirPath := filepath.Join(claudeDir, "commands", "test-command")
-	commandHash, err := checksum.Dir(commandDirPath)
-	require.NoError(t, err)
-	assert.Equal(t, commandHash, commandEntry.Checksum, "command directory checksum should match")
+	// Verify command checksum matches promoted file (INDEX.md promoted to test-command.md)
+	// Dromena without companions have no subdirectory — checksum is from promoted file
+	promotedCommandPath := filepath.Join(claudeDir, "commands", "test-command.md")
+	promotedData, err := os.ReadFile(promotedCommandPath)
+	require.NoError(t, err, "promoted command file should exist")
+	commandHash := checksum.Content(string(promotedData))
+	assert.Equal(t, commandHash, commandEntry.Checksum, "command checksum should match promoted file")
 
+	// Verify skill checksum matches directory (legomena are not promoted)
 	skillDirPath := filepath.Join(claudeDir, "skills", "test-skill")
 	skillHash, err := checksum.Dir(skillDirPath)
 	require.NoError(t, err)

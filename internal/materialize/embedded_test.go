@@ -233,13 +233,13 @@ func TestMaterializeMena_FromEmbedded(t *testing.T) {
 		t.Fatalf("materializeMena from embedded failed: %v", err)
 	}
 
-	// Verify dromena routed to commands/ with extension stripped
-	cmdPath := filepath.Join(claudeDir, "commands", "my-cmd", "INDEX.md")
+	// Verify dromena INDEX promoted to parent level
+	cmdPath := filepath.Join(claudeDir, "commands", "my-cmd.md")
 	if _, err := os.Stat(cmdPath); err != nil {
-		t.Errorf("Expected dromena at %s (stripped from INDEX.dro.md), got error: %v", cmdPath, err)
+		t.Errorf("Expected promoted dromena at %s, got error: %v", cmdPath, err)
 	}
 
-	// Verify legomena routed to skills/ with extension stripped
+	// Verify legomena routed to skills/ with extension stripped (no promotion)
 	skillPath := filepath.Join(claudeDir, "skills", "shared-ref", "INDEX.md")
 	if _, err := os.Stat(skillPath); err != nil {
 		t.Errorf("Expected legomena at %s (stripped from INDEX.lego.md), got error: %v", skillPath, err)

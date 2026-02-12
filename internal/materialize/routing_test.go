@@ -45,19 +45,23 @@ This is a test command.
 		t.Fatalf("materializeMena failed: %v", err)
 	}
 
-	// Verify: file should be in .claude/commands/ with stripped name, NOT in .claude/skills/
-	commandsPath := filepath.Join(claudeDir, "commands", "test-cmd", "INDEX.md")
+	// Verify: dromena INDEX promoted to parent level (.claude/commands/test-cmd.md)
+	commandsPath := filepath.Join(claudeDir, "commands", "test-cmd.md")
 	skillsPath := filepath.Join(claudeDir, "skills", "test-cmd", "INDEX.md")
 
 	if _, err := os.Stat(commandsPath); os.IsNotExist(err) {
-		t.Errorf("Expected dromena to be in .claude/commands/test-cmd/INDEX.md (stripped), but it does not exist")
+		t.Errorf("Expected promoted dromena at .claude/commands/test-cmd.md, but it does not exist")
 	}
 
 	if _, err := os.Stat(skillsPath); err == nil {
 		t.Errorf("Dromena should NOT be in .claude/skills/test-cmd/, but it exists")
 	}
 
-	// Verify: old un-stripped name should NOT exist
+	// Verify: old paths should NOT exist
+	oldSubdirPath := filepath.Join(claudeDir, "commands", "test-cmd", "INDEX.md")
+	if _, err := os.Stat(oldSubdirPath); err == nil {
+		t.Errorf("INDEX.md should not exist in subdirectory (promoted to test-cmd.md)")
+	}
 	oldPath := filepath.Join(claudeDir, "commands", "test-cmd", "INDEX.dro.md")
 	if _, err := os.Stat(oldPath); err == nil {
 		t.Errorf("Extension stripping failed: INDEX.dro.md should not exist in output, but it does")
@@ -155,12 +159,12 @@ This command has a plain INDEX.md and should default to dromena routing.
 		t.Fatalf("materializeMena failed: %v", err)
 	}
 
-	// Verify: plain INDEX.md defaults to .claude/commands/ (no stripping needed)
-	commandsPath := filepath.Join(claudeDir, "commands", "test-default", "INDEX.md")
+	// Verify: plain INDEX.md defaults to dromena, promoted to .claude/commands/test-default.md
+	commandsPath := filepath.Join(claudeDir, "commands", "test-default.md")
 	skillsPath := filepath.Join(claudeDir, "skills", "test-default", "INDEX.md")
 
 	if _, err := os.Stat(commandsPath); os.IsNotExist(err) {
-		t.Errorf("Expected default to be in .claude/commands/test-default/INDEX.md, but it does not exist")
+		t.Errorf("Expected promoted default at .claude/commands/test-default.md, but it does not exist")
 	}
 
 	if _, err := os.Stat(skillsPath); err == nil {
@@ -309,25 +313,25 @@ description: A default command
 		t.Fatalf("materializeMena failed: %v", err)
 	}
 
-	// Verify dromena is in .claude/commands/ (stripped to INDEX.md)
-	droPath := filepath.Join(claudeDir, "commands", "dro-cmd", "INDEX.md")
+	// Verify dromena promoted to parent level
+	droPath := filepath.Join(claudeDir, "commands", "dro-cmd.md")
 	if _, err := os.Stat(droPath); os.IsNotExist(err) {
-		t.Errorf("Expected dro-cmd to be in .claude/commands/ as INDEX.md (stripped), but it does not exist")
+		t.Errorf("Expected dro-cmd.md at .claude/commands/ (promoted), but it does not exist")
 	}
 
-	// Verify legomena is in .claude/skills/ (stripped to INDEX.md)
+	// Verify legomena is in .claude/skills/ (stripped to INDEX.md, no promotion)
 	legoPath := filepath.Join(claudeDir, "skills", "lego-ref", "INDEX.md")
 	if _, err := os.Stat(legoPath); os.IsNotExist(err) {
 		t.Errorf("Expected lego-ref to be in .claude/skills/ as INDEX.md (stripped), but it does not exist")
 	}
 
-	// Verify default is in .claude/commands/
-	defaultPath := filepath.Join(claudeDir, "commands", "default-cmd", "INDEX.md")
+	// Verify default promoted to parent level
+	defaultPath := filepath.Join(claudeDir, "commands", "default-cmd.md")
 	if _, err := os.Stat(defaultPath); os.IsNotExist(err) {
-		t.Errorf("Expected default-cmd to be in .claude/commands/, but it does not exist")
+		t.Errorf("Expected default-cmd.md at .claude/commands/ (promoted), but it does not exist")
 	}
 
-	// Verify no cross-contamination (check stripped names)
+	// Verify no cross-contamination
 	droInSkills := filepath.Join(claudeDir, "skills", "dro-cmd", "INDEX.md")
 	if _, err := os.Stat(droInSkills); err == nil {
 		t.Errorf("dro-cmd should NOT be in .claude/skills/, but it exists")
@@ -428,10 +432,10 @@ description: A flat command
 		t.Errorf("Legomena guidance/standards should NOT be in commands/, but %s exists", commandsStandards)
 	}
 
-	// Verify: guidance/file-verification -> commands/file-verification/ (dromena, flattened by name field)
-	commandsFV := filepath.Join(claudeDir, "commands", "file-verification", "INDEX.md")
+	// Verify: guidance/file-verification -> commands/file-verification.md (dromena, promoted)
+	commandsFV := filepath.Join(claudeDir, "commands", "file-verification.md")
 	if _, err := os.Stat(commandsFV); os.IsNotExist(err) {
-		t.Errorf("Expected file-verification to be in commands/ as INDEX.md (flattened by name), but %s does not exist", commandsFV)
+		t.Errorf("Expected file-verification.md at commands/ (promoted), but %s does not exist", commandsFV)
 	}
 
 	// Verify: file-verification NOT in skills/
@@ -440,10 +444,10 @@ description: A flat command
 		t.Errorf("Dromena file-verification should NOT be in skills/, but %s exists", skillsFV)
 	}
 
-	// Verify: flat-cmd -> commands/ (still works, stripped)
-	flatPath := filepath.Join(claudeDir, "commands", "flat-cmd", "INDEX.md")
+	// Verify: flat-cmd -> commands/flat-cmd.md (promoted)
+	flatPath := filepath.Join(claudeDir, "commands", "flat-cmd.md")
 	if _, err := os.Stat(flatPath); os.IsNotExist(err) {
-		t.Errorf("Expected flat-cmd to still be in commands/ as INDEX.md (stripped), but %s does not exist", flatPath)
+		t.Errorf("Expected flat-cmd.md at commands/ (promoted), but %s does not exist", flatPath)
 	}
 }
 
@@ -487,11 +491,11 @@ func TestRematerializeMena_RepopulatesAfterWipe(t *testing.T) {
 		t.Fatalf("First materializeMena failed: %v", err)
 	}
 
-	commandsIndex := filepath.Join(claudeDir, "commands", "test-cmd", "INDEX.md")
+	commandsPromoted := filepath.Join(claudeDir, "commands", "test-cmd.md")
 	skillsIndex := filepath.Join(claudeDir, "skills", "test-ref", "INDEX.md")
 
-	if _, err := os.Stat(commandsIndex); os.IsNotExist(err) {
-		t.Fatalf("First pass: expected %s to exist", commandsIndex)
+	if _, err := os.Stat(commandsPromoted); os.IsNotExist(err) {
+		t.Fatalf("First pass: expected %s to exist", commandsPromoted)
 	}
 	if _, err := os.Stat(skillsIndex); os.IsNotExist(err) {
 		t.Fatalf("First pass: expected %s to exist", skillsIndex)
@@ -506,8 +510,8 @@ func TestRematerializeMena_RepopulatesAfterWipe(t *testing.T) {
 		t.Fatalf("Second materializeMena failed: %v", err)
 	}
 
-	if _, err := os.Stat(commandsIndex); os.IsNotExist(err) {
-		t.Errorf("Second pass: commands/ not repopulated — %s missing (idempotency guard regression)", commandsIndex)
+	if _, err := os.Stat(commandsPromoted); os.IsNotExist(err) {
+		t.Errorf("Second pass: commands/ not repopulated — %s missing (idempotency guard regression)", commandsPromoted)
 	}
 	if _, err := os.Stat(skillsIndex); os.IsNotExist(err) {
 		t.Errorf("Second pass: skills/ not repopulated — %s missing (idempotency guard regression)", skillsIndex)

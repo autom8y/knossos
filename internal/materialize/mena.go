@@ -402,6 +402,21 @@ func SyncMena(sources []MenaSource, opts MenaProjectionOptions) (*MenaProjection
 			}
 		}
 
+		// For dromena: INDEX.md was promoted to destDir.md at parent level.
+		// Clean up old destDir/INDEX.md from previous syncs and remove
+		// empty subdirectories left behind (dirs with only INDEX.md).
+		if hideCompanions {
+			oldIndex := filepath.Join(destDir, "INDEX.md")
+			if _, statErr := os.Stat(oldIndex); statErr == nil {
+				os.Remove(oldIndex)
+			}
+			cleanEmptyDirs(destDir)
+			// Remove destDir itself if now empty (only had INDEX.md)
+			if entries, readErr := os.ReadDir(destDir); readErr == nil && len(entries) == 0 {
+				os.Remove(destDir)
+			}
+		}
+
 		// In destructive mode, remove only stale files that are no longer in source.
 		if opts.Mode == MenaProjectionDestructive && sourceFileNames != nil {
 			removeStaleFiles(destDir, sourceFileNames)
@@ -483,12 +498,21 @@ func SyncMena(sources []MenaSource, opts MenaProjectionOptions) (*MenaProjection
 
 // recordMenaProvenance records a provenance entry for a projected mena directory.
 // Uses directory checksum and exact source attribution.
+// For promoted dromena (INDEX.md elevated to parent level), falls back to
+// file checksum of the promoted file when the directory is empty or absent.
 func recordMenaProvenance(collector provenance.Collector, projectRoot, targetType, name, destDir string, src MenaSource) {
 	now := time.Now().UTC()
 
 	hash, err := checksum.Dir(destDir)
 	if err != nil {
-		return // best-effort: skip if checksum fails
+		// Directory may not exist if INDEX.md was promoted and there were no companions.
+		// Fall back to checksum of the promoted file.
+		promotedFile := destDir + ".md"
+		if data, readErr := os.ReadFile(promotedFile); readErr == nil {
+			hash = checksum.Content(string(data))
+		} else {
+			return // best-effort: skip if both fail
+		}
 	}
 
 	sourcePath := ""
@@ -569,6 +593,12 @@ func cleanStaleMenaEntries(opts MenaProjectionOptions, result *MenaProjectionRes
 			}
 			log.Printf("Removed stale mena entry: %s", key)
 		}
+		// Also remove promoted file if it exists (dromena INDEX.md promoted to parent level)
+		promotedFile := absPath + ".md"
+		if _, statErr := os.Stat(promotedFile); statErr == nil {
+			os.Remove(promotedFile)
+			log.Printf("Removed stale promoted file: %s.md", key)
+		}
 	}
 
 	// Also clean empty parent directories left behind by removal
@@ -616,7 +646,7 @@ func injectCompanionHideFrontmatter(content []byte) []byte {
 		searchStart := 4
 		var endIndex int
 		if idx := bytes.Index(content[searchStart:], []byte("\n---\n")); idx != -1 {
-			endIndex = searchStart + idx
+			endIndex = searchStart + idx + 1 // +1 to include the \n before ---
 			// Insert "user-invocable: false\n" just before closing delimiter
 			result := make([]byte, 0, len(content)+len("user-invocable: false\n"))
 			result = append(result, content[:endIndex]...)
@@ -624,7 +654,7 @@ func injectCompanionHideFrontmatter(content []byte) []byte {
 			result = append(result, content[endIndex:]...)
 			return result
 		} else if idx := bytes.Index(content[searchStart:], []byte("\n---\r\n")); idx != -1 {
-			endIndex = searchStart + idx
+			endIndex = searchStart + idx + 1 // +1 to include the \n before ---
 			result := make([]byte, 0, len(content)+len("user-invocable: false\n"))
 			result = append(result, content[:endIndex]...)
 			result = append(result, []byte("user-invocable: false\n")...)
@@ -636,14 +666,14 @@ func injectCompanionHideFrontmatter(content []byte) []byte {
 		searchStart := 5
 		var endIndex int
 		if idx := bytes.Index(content[searchStart:], []byte("\r\n---\r\n")); idx != -1 {
-			endIndex = searchStart + idx
+			endIndex = searchStart + idx + 2 // +2 to include the \r\n before ---
 			result := make([]byte, 0, len(content)+len("user-invocable: false\r\n"))
 			result = append(result, content[:endIndex]...)
 			result = append(result, []byte("user-invocable: false\r\n")...)
 			result = append(result, content[endIndex:]...)
 			return result
 		} else if idx := bytes.Index(content[searchStart:], []byte("\r\n---\n")); idx != -1 {
-			endIndex = searchStart + idx
+			endIndex = searchStart + idx + 2 // +2 to include the \r\n before ---
 			result := make([]byte, 0, len(content)+len("user-invocable: false\r\n"))
 			result = append(result, content[:endIndex]...)
 			result = append(result, []byte("user-invocable: false\r\n")...)
@@ -829,6 +859,10 @@ func resolveNamespace(collected map[string]menaCollectedEntry, standalones map[s
 
 // copyDirWithStripping copies all files from src to dst, applying
 // StripMenaExtension to filenames during copy.
+//
+// For dromena directories (hideCompanions=true), INDEX.md is promoted to
+// dst.md at the parent level so CC shows "/qa" instead of "/qa:INDEX".
+// Companion files remain in dst/ with user-invocable: false injected.
 func copyDirWithStripping(src, dst string, hideCompanions bool) error {
 	return filepath.WalkDir(src, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
@@ -855,6 +889,12 @@ func copyDirWithStripping(src, dst string, hideCompanions bool) error {
 			return err
 		}
 
+		// For dromena: promote top-level INDEX.md to parent level (dst.md)
+		// so CC discovers it as /cmd instead of /cmd:INDEX
+		if hideCompanions && base == "INDEX.md" && dir == "." {
+			destPath = dst + ".md"
+		}
+
 		// Apply companion hiding for dromena non-INDEX markdown files
 		if hideCompanions && base != "INDEX.md" && strings.HasSuffix(base, ".md") {
 			content = injectCompanionHideFrontmatter(content)
@@ -870,6 +910,9 @@ func copyDirWithStripping(src, dst string, hideCompanions bool) error {
 
 // copyDirFromFSWithStripping copies all files from an fs.FS to a destination
 // directory on disk, applying StripMenaExtension to filenames during copy.
+//
+// For dromena directories (hideCompanions=true), INDEX.md is promoted to
+// dst.md at the parent level so CC shows "/qa" instead of "/qa:INDEX".
 func copyDirFromFSWithStripping(fsys fs.FS, dst string, hideCompanions bool) error {
 	return fs.WalkDir(fsys, ".", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
@@ -889,6 +932,11 @@ func copyDirFromFSWithStripping(fsys fs.FS, dst string, hideCompanions bool) err
 		content, err := fs.ReadFile(fsys, path)
 		if err != nil {
 			return err
+		}
+
+		// For dromena: promote top-level INDEX.md to parent level (dst.md)
+		if hideCompanions && base == "INDEX.md" && dir == "." {
+			destPath = dst + ".md"
 		}
 
 		// Apply companion hiding for dromena non-INDEX markdown files

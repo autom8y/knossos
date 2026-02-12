@@ -425,10 +425,10 @@ dromena:
 		t.Errorf("Expected no deferred stages in full mode, got %v", result.DeferredStages)
 	}
 
-	// Verify mena was materialized (command should exist)
-	commandDir := filepath.Join(claudeDir, "commands", "test-command")
-	if _, err := os.Stat(commandDir); os.IsNotExist(err) {
-		t.Error("Expected commands directory to be created in full mode")
+	// Verify mena was materialized (promoted command file should exist)
+	commandFile := filepath.Join(claudeDir, "commands", "test-command.md")
+	if _, err := os.Stat(commandFile); os.IsNotExist(err) {
+		t.Error("Expected promoted command file to be created in full mode")
 	}
 
 	// Verify settings was created

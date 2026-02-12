@@ -119,10 +119,15 @@ func TestSyncMena_Destructive(t *testing.T) {
 		t.Errorf("Selective write should preserve user-created stale.md, but it was deleted")
 	}
 
-	// Verify dromena projected to commands/ with stripped names
-	cmdIndex := filepath.Join(commandsDir, "my-cmd", "INDEX.md")
-	if _, err := os.Stat(cmdIndex); os.IsNotExist(err) {
-		t.Errorf("Expected dromena INDEX.md (stripped) at %s, but it does not exist", cmdIndex)
+	// Verify dromena INDEX.md promoted to parent level (commands/my-cmd.md)
+	cmdPromoted := filepath.Join(commandsDir, "my-cmd.md")
+	if _, err := os.Stat(cmdPromoted); os.IsNotExist(err) {
+		t.Errorf("Expected promoted dromena at %s, but it does not exist", cmdPromoted)
+	}
+	// Verify old INDEX.md does NOT exist in subdirectory
+	cmdOldIndex := filepath.Join(commandsDir, "my-cmd", "INDEX.md")
+	if _, err := os.Stat(cmdOldIndex); err == nil {
+		t.Errorf("INDEX.md should not exist in subdirectory (should be promoted to my-cmd.md)")
 	}
 	cmdHelper := filepath.Join(commandsDir, "my-cmd", "helper.md")
 	if _, err := os.Stat(cmdHelper); os.IsNotExist(err) {
@@ -132,7 +137,7 @@ func TestSyncMena_Destructive(t *testing.T) {
 	// Verify un-stripped name does NOT exist
 	cmdOld := filepath.Join(commandsDir, "my-cmd", "INDEX.dro.md")
 	if _, err := os.Stat(cmdOld); err == nil {
-		t.Errorf("INDEX.dro.md should not exist in output (should be stripped to INDEX.md)")
+		t.Errorf("INDEX.dro.md should not exist in output")
 	}
 
 	// Verify legomena projected to skills/ with stripped names
@@ -204,10 +209,10 @@ func TestSyncMena_Additive(t *testing.T) {
 		t.Errorf("Additive mode should preserve user-created.md, but it was deleted")
 	}
 
-	// Verify new command was projected with stripped name
-	newCmd := filepath.Join(commandsDir, "new-cmd", "INDEX.md")
+	// Verify new command was promoted to parent level
+	newCmd := filepath.Join(commandsDir, "new-cmd.md")
 	if _, err := os.Stat(newCmd); os.IsNotExist(err) {
-		t.Errorf("Expected new command at %s, but it does not exist", newCmd)
+		t.Errorf("Expected promoted command at %s, but it does not exist", newCmd)
 	}
 }
 
@@ -254,11 +259,11 @@ func TestSyncMena_PriorityOverride(t *testing.T) {
 		t.Fatalf("SyncMena priority override failed: %v", err)
 	}
 
-	// Verify the high-priority content wins (stripped to INDEX.md)
-	cmdIndex := filepath.Join(commandsDir, "my-cmd", "INDEX.md")
-	content, err := os.ReadFile(cmdIndex)
+	// Verify the high-priority content wins (promoted to my-cmd.md)
+	cmdPromoted := filepath.Join(commandsDir, "my-cmd.md")
+	content, err := os.ReadFile(cmdPromoted)
 	if err != nil {
-		t.Fatalf("Failed to read projected INDEX.md: %v", err)
+		t.Fatalf("Failed to read promoted command file: %v", err)
 	}
 
 	if string(content) != "high-priority content\n" {
@@ -303,13 +308,13 @@ func TestSyncMena_EmbeddedFS(t *testing.T) {
 		t.Fatalf("SyncMena embedded failed: %v", err)
 	}
 
-	// Verify dromena projected to commands/ with stripped name
-	cmdIndex := filepath.Join(commandsDir, "my-cmd", "INDEX.md")
-	if _, err := os.Stat(cmdIndex); os.IsNotExist(err) {
-		t.Errorf("Expected embedded dromena at %s (stripped), but it does not exist", cmdIndex)
+	// Verify dromena INDEX promoted to parent level
+	cmdPromoted := filepath.Join(commandsDir, "my-cmd.md")
+	if _, err := os.Stat(cmdPromoted); os.IsNotExist(err) {
+		t.Errorf("Expected promoted dromena at %s, but it does not exist", cmdPromoted)
 	}
 
-	// Verify legomena projected to skills/ with stripped name
+	// Verify legomena stays in subdirectory (no promotion for skills)
 	skillIndex := filepath.Join(skillsDir, "my-ref", "INDEX.md")
 	if _, err := os.Stat(skillIndex); os.IsNotExist(err) {
 		t.Errorf("Expected embedded legomena at %s (stripped), but it does not exist", skillIndex)
@@ -370,9 +375,9 @@ func TestSyncMena_Filter_DroOnly(t *testing.T) {
 		t.Fatalf("SyncMena failed: %v", err)
 	}
 
-	// Commands should exist
-	if _, err := os.Stat(filepath.Join(commandsDir, "cmd1", "INDEX.md")); os.IsNotExist(err) {
-		t.Errorf("Expected cmd1 to be projected to commands/")
+	// Commands should exist (promoted to parent level)
+	if _, err := os.Stat(filepath.Join(commandsDir, "cmd1.md")); os.IsNotExist(err) {
+		t.Errorf("Expected cmd1.md to be projected to commands/ (promoted)")
 	}
 
 	// Skills should NOT be created (filter excludes lego)
