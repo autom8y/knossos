@@ -663,9 +663,16 @@ func (m *Manager) setupWorktreeEcosystem(wtPath, riteName string) {
 	if embTemplates := common.EmbeddedTemplates(); embTemplates != nil {
 		mat.WithEmbeddedTemplates(embTemplates)
 	}
-	mat.MaterializeWithOptions(riteName, materialize.Options{
-		Force:   true,
-		KeepAll: true,
+	if embAgents := common.EmbeddedAgents(); embAgents != nil {
+		mat.WithEmbeddedAgents(embAgents)
+	}
+	if embMena := common.EmbeddedMena(); embMena != nil {
+		mat.WithEmbeddedMena(embMena)
+	}
+	mat.Sync(materialize.SyncOptions{
+		Scope:       materialize.ScopeAll,
+		RiteName:    riteName,
+		KeepOrphans: true,
 	})
 
 	// Materialization now handles everything including ACTIVE_RITE file

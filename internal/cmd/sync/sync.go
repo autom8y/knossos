@@ -149,6 +149,12 @@ func runSync(ctx *cmdContext, opts materialize.SyncOptions, showBudget bool, cmd
 	if embTemplates := common.EmbeddedTemplates(); embTemplates != nil {
 		m.WithEmbeddedTemplates(embTemplates)
 	}
+	if embAgents := common.EmbeddedAgents(); embAgents != nil {
+		m.WithEmbeddedAgents(embAgents)
+	}
+	if embMena := common.EmbeddedMena(); embMena != nil {
+		m.WithEmbeddedMena(embMena)
+	}
 	// Execute unified sync
 	result, err := m.Sync(opts)
 	if err != nil {

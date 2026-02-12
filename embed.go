@@ -26,3 +26,15 @@ var EmbeddedTemplates embed.FS
 //
 //go:embed config/hooks.yaml
 var EmbeddedHooksYAML []byte
+
+// EmbeddedAgents contains cross-rite agent definitions from agents/.
+// Used as fallback when KNOSSOS_HOME is unavailable.
+//
+//go:embed agents
+var EmbeddedAgents embed.FS
+
+// EmbeddedMena contains platform mena definitions from mena/.
+// Used as fallback when KNOSSOS_HOME is unavailable.
+//
+//go:embed mena
+var EmbeddedMena embed.FS

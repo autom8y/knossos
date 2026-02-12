@@ -62,8 +62,9 @@ func TestCollectMena_CompanionHiding(t *testing.T) {
 		Entries: map[string]*provenance.ProvenanceEntry{},
 	}
 	collisionChecker := &CollisionChecker{}
+	m := &Materializer{}
 
-	result, err := syncUserMena(tmpDir, userClaudeDir, manifest, collisionChecker, SyncOptions{})
+	result, err := m.syncUserMena(tmpDir, userClaudeDir, manifest, collisionChecker, SyncOptions{})
 	if err != nil {
 		t.Fatalf("syncUserMena failed: %v", err)
 	}
@@ -177,8 +178,9 @@ func TestSyncUserMena_CollisionSkipsRiteContent(t *testing.T) {
 	manifest := &provenance.ProvenanceManifest{
 		Entries: map[string]*provenance.ProvenanceEntry{},
 	}
+	m := &Materializer{}
 
-	result, err := syncUserMena(tmpDir, userClaudeDir, manifest, checker, SyncOptions{})
+	result, err := m.syncUserMena(tmpDir, userClaudeDir, manifest, checker, SyncOptions{})
 	if err != nil {
 		t.Fatalf("syncUserMena failed: %v", err)
 	}
@@ -216,8 +218,9 @@ func TestSyncUserMena_PreservesUserOwned(t *testing.T) {
 		},
 	}
 	checker := &CollisionChecker{}
+	m := &Materializer{}
 
-	_, err := syncUserMena(tmpDir, userClaudeDir, manifest, checker, SyncOptions{})
+	_, err := m.syncUserMena(tmpDir, userClaudeDir, manifest, checker, SyncOptions{})
 	if err != nil {
 		t.Fatalf("syncUserMena failed: %v", err)
 	}
@@ -246,9 +249,10 @@ func TestSyncUserMena_Idempotent(t *testing.T) {
 		Entries: map[string]*provenance.ProvenanceEntry{},
 	}
 	checker := &CollisionChecker{}
+	m := &Materializer{}
 
 	// First sync
-	result1, err := syncUserMena(tmpDir, userClaudeDir, manifest, checker, SyncOptions{})
+	result1, err := m.syncUserMena(tmpDir, userClaudeDir, manifest, checker, SyncOptions{})
 	if err != nil {
 		t.Fatalf("First sync failed: %v", err)
 	}
@@ -257,7 +261,7 @@ func TestSyncUserMena_Idempotent(t *testing.T) {
 	}
 
 	// Second sync - should produce zero changes
-	result2, err := syncUserMena(tmpDir, userClaudeDir, manifest, checker, SyncOptions{})
+	result2, err := m.syncUserMena(tmpDir, userClaudeDir, manifest, checker, SyncOptions{})
 	if err != nil {
 		t.Fatalf("Second sync failed: %v", err)
 	}

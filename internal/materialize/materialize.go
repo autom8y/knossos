@@ -94,6 +94,8 @@ type Materializer struct {
 	templatesDir      string
 	embeddedTemplates fs.FS  // Embedded templates filesystem
 	claudeDirOverride string // If set, materialize to this directory instead of .claude/
+	embeddedAgents    fs.FS  // Embedded cross-rite agents (fallback for user scope)
+	embeddedMena      fs.FS  // Embedded platform mena (fallback for user scope)
 }
 
 // NewMaterializer creates a new materializer with default source resolution.
@@ -129,6 +131,18 @@ func (m *Materializer) WithEmbeddedFS(fsys fs.FS) *Materializer {
 // WithEmbeddedTemplates sets the embedded templates filesystem.
 func (m *Materializer) WithEmbeddedTemplates(fsys fs.FS) *Materializer {
 	m.embeddedTemplates = fsys
+	return m
+}
+
+// WithEmbeddedAgents sets the embedded agents filesystem for user scope fallback.
+func (m *Materializer) WithEmbeddedAgents(fsys fs.FS) *Materializer {
+	m.embeddedAgents = fsys
+	return m
+}
+
+// WithEmbeddedMena sets the embedded mena filesystem for user scope fallback.
+func (m *Materializer) WithEmbeddedMena(fsys fs.FS) *Materializer {
+	m.embeddedMena = fsys
 	return m
 }
 
@@ -446,9 +460,17 @@ func (m *Materializer) Sync(opts SyncOptions) (*SyncResult, error) {
 	if opts.Scope == ScopeAll || opts.Scope == ScopeUser {
 		userResult, err := m.syncUserScope(opts)
 		if err != nil {
-			return nil, err
+			if opts.Scope == ScopeUser {
+				return nil, err // hard fail only if explicitly user-only
+			}
+			// scope=all: log and skip, don't block rite results
+			result.UserResult = &UserScopeResult{
+				Status: "skipped",
+				Errors: []UserResourceError{{Resource: ResourceAll, Err: err.Error()}},
+			}
+		} else {
+			result.UserResult = userResult
 		}
-		result.UserResult = userResult
 	}
 
 	return result, nil

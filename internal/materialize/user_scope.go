@@ -1,6 +1,7 @@
 package materialize
 
 import (
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -23,7 +24,7 @@ func (m *Materializer) syncUserScope(opts SyncOptions) (*UserScopeResult, error)
 
 	// Resolve KNOSSOS_HOME
 	knossosHome := config.KnossosHome()
-	if knossosHome == "" {
+	if knossosHome == "" && m.embeddedAgents == nil && m.embeddedMena == nil {
 		return nil, ErrKnossosHomeNotSet()
 	}
 
@@ -39,7 +40,9 @@ func (m *Materializer) syncUserScope(opts SyncOptions) (*UserScopeResult, error)
 
 	// Wipe stale knossos-produced mena entries before sync.
 	// One-time migration from old non-flattening pipeline; subsequent runs are no-ops.
-	wipeKnossosOwnedMenaEntries(knossosHome, userClaudeDir, manifest, opts.DryRun)
+	if knossosHome != "" {
+		wipeKnossosOwnedMenaEntries(knossosHome, userClaudeDir, manifest, opts.DryRun)
+	}
 
 	// Initialize collision checker with project .claude/ directory
 	projectClaudeDir := m.resolver.ClaudeDir()
@@ -55,7 +58,7 @@ func (m *Materializer) syncUserScope(opts SyncOptions) (*UserScopeResult, error)
 
 	// Sync each resource type
 	for _, resourceType := range resourcesToSync {
-		resourceResult, err := syncUserResource(
+		resourceResult, err := m.syncUserResource(
 			resourceType,
 			knossosHome,
 			userClaudeDir,
@@ -95,7 +98,7 @@ func (m *Materializer) syncUserScope(opts SyncOptions) (*UserScopeResult, error)
 }
 
 // syncUserResource syncs a single resource type from KNOSSOS_HOME to ~/.claude/.
-func syncUserResource(
+func (m *Materializer) syncUserResource(
 	resourceType SyncResource,
 	knossosHome string,
 	userClaudeDir string,
@@ -106,7 +109,7 @@ func syncUserResource(
 	// Mena uses dedicated CollectMena-based pipeline for namespace flattening
 	// and companion hiding parity with rite-scope.
 	if resourceType == ResourceMena {
-		return syncUserMena(knossosHome, userClaudeDir, manifest, collisionChecker, opts)
+		return m.syncUserMena(knossosHome, userClaudeDir, manifest, collisionChecker, opts)
 	}
 
 	// Resolve paths based on resource type
@@ -139,8 +142,21 @@ func syncUserResource(
 	}
 
 	// Check if source directory exists
+	sourceExists := true
 	if _, err := os.Stat(sourceDir); os.IsNotExist(err) {
-		return result, nil // No source = no-op
+		sourceExists = false
+	}
+
+	// If filesystem source doesn't exist, try embedded fallback
+	if !sourceExists {
+		if resourceType == ResourceAgents && m.embeddedAgents != nil {
+			return m.syncUserResourceFromEmbedded(
+				resourceType, m.embeddedAgents, "agents",
+				userClaudeDir, manifest, collisionChecker, opts,
+			)
+		}
+		// Hooks: no embedded fallback (KNOSSOS_HOME-only)
+		return result, nil
 	}
 
 	// Ensure target directories exist (unless dry-run)
@@ -393,10 +409,195 @@ func syncUserResource(
 	return result, nil
 }
 
+// syncUserResourceFromEmbedded syncs agents from an embedded filesystem
+// when KNOSSOS_HOME is unavailable. Simplified version: no recovery mode,
+// no orphan removal (embedded source is authoritative).
+func (m *Materializer) syncUserResourceFromEmbedded(
+	resourceType SyncResource,
+	embeddedFS fs.FS,
+	embeddedRoot string,
+	userClaudeDir string,
+	manifest *provenance.ProvenanceManifest,
+	collisionChecker *CollisionChecker,
+	opts SyncOptions,
+) (*UserResourceResult, error) {
+	prefix := resourcePrefixForType(resourceType)
+	targetDir := filepath.Join(userClaudeDir, string(resourceType))
+
+	result := &UserResourceResult{
+		Source: "embedded:" + embeddedRoot,
+		Target: targetDir,
+		Changes: UserSyncChanges{
+			Added:     []string{},
+			Updated:   []string{},
+			Skipped:   []UserSkippedEntry{},
+			Unchanged: []string{},
+		},
+	}
+
+	// Walk embedded filesystem
+	err := fs.WalkDir(embeddedFS, embeddedRoot, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			return nil
+		}
+
+		// Compute relative path from embedded root
+		relPath, err := filepath.Rel(embeddedRoot, path)
+		if err != nil {
+			return err
+		}
+
+		manifestKey := prefix + filepath.Base(relPath)
+		targetPath := filepath.Join(targetDir, filepath.Base(relPath))
+
+		// Check for collision with rite
+		if collision, _ := collisionChecker.CheckCollision(manifestKey); collision {
+			result.Changes.Skipped = append(result.Changes.Skipped, UserSkippedEntry{
+				Name:   manifestKey,
+				Reason: "collision with rite resource",
+			})
+			return nil
+		}
+
+		// Read embedded content
+		content, err := fs.ReadFile(embeddedFS, path)
+		if err != nil {
+			return err
+		}
+
+		sourceChecksum := checksum.Bytes(content)
+		now := time.Now().UTC()
+
+		// Check existing manifest entry
+		entry, exists := manifest.Entries[manifestKey]
+
+		if !exists {
+			// Check if target exists (untracked)
+			if _, statErr := os.Stat(targetPath); statErr == nil {
+				// Exists untracked — mark as user-created, don't overwrite
+				if !opts.DryRun {
+					targetChecksum, _ := checksum.File(targetPath)
+					manifest.Entries[manifestKey] = &provenance.ProvenanceEntry{
+						Owner:      provenance.OwnerUser,
+						Scope:      provenance.ScopeUser,
+						Checksum:   targetChecksum,
+						LastSynced: now,
+					}
+				}
+				result.Changes.Skipped = append(result.Changes.Skipped, UserSkippedEntry{
+					Name:   manifestKey,
+					Reason: "user-created",
+				})
+				return nil
+			}
+
+			// New file — write it
+			if !opts.DryRun {
+				if err := paths.EnsureDir(filepath.Dir(targetPath)); err != nil {
+					return err
+				}
+				if err := os.WriteFile(targetPath, content, 0644); err != nil {
+					return err
+				}
+				manifest.Entries[manifestKey] = &provenance.ProvenanceEntry{
+					Owner:      provenance.OwnerKnossos,
+					Scope:      provenance.ScopeUser,
+					SourcePath: "embedded:" + path,
+					SourceType: "embedded",
+					Checksum:   sourceChecksum,
+					LastSynced: now,
+				}
+			}
+			result.Changes.Added = append(result.Changes.Added, manifestKey)
+			return nil
+		}
+
+		// Existing entry
+		switch entry.Owner {
+		case provenance.OwnerUser, provenance.OwnerUntracked:
+			result.Changes.Skipped = append(result.Changes.Skipped, UserSkippedEntry{
+				Name:   manifestKey,
+				Reason: "user-created",
+			})
+
+		case provenance.OwnerKnossos:
+			if entry.Checksum == sourceChecksum {
+				result.Changes.Unchanged = append(result.Changes.Unchanged, manifestKey)
+			} else {
+				targetChecksum, _ := checksum.File(targetPath)
+				if targetChecksum == entry.Checksum {
+					// Target unchanged, update from embedded source
+					if !opts.DryRun {
+						if err := paths.EnsureDir(filepath.Dir(targetPath)); err != nil {
+							return err
+						}
+						if err := os.WriteFile(targetPath, content, 0644); err != nil {
+							return err
+						}
+						manifest.Entries[manifestKey] = &provenance.ProvenanceEntry{
+							Owner:      provenance.OwnerKnossos,
+							Scope:      provenance.ScopeUser,
+							SourcePath: "embedded:" + path,
+							SourceType: "embedded",
+							Checksum:   sourceChecksum,
+							LastSynced: now,
+						}
+					}
+					result.Changes.Updated = append(result.Changes.Updated, manifestKey)
+				} else {
+					if opts.OverwriteDiverged {
+						if !opts.DryRun {
+							if err := paths.EnsureDir(filepath.Dir(targetPath)); err != nil {
+								return err
+							}
+							if err := os.WriteFile(targetPath, content, 0644); err != nil {
+								return err
+							}
+							manifest.Entries[manifestKey] = &provenance.ProvenanceEntry{
+								Owner:      provenance.OwnerKnossos,
+								Scope:      provenance.ScopeUser,
+								SourcePath: "embedded:" + path,
+								SourceType: "embedded",
+								Checksum:   sourceChecksum,
+								LastSynced: now,
+							}
+						}
+						result.Changes.Updated = append(result.Changes.Updated, manifestKey)
+					} else {
+						result.Changes.Skipped = append(result.Changes.Skipped, UserSkippedEntry{
+							Name:   manifestKey,
+							Reason: "diverged (use --overwrite-diverged to force)",
+						})
+					}
+				}
+			}
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	result.Summary = UserSyncSummary{
+		Added:      len(result.Changes.Added),
+		Updated:    len(result.Changes.Updated),
+		Skipped:    len(result.Changes.Skipped),
+		Unchanged:  len(result.Changes.Unchanged),
+		Collisions: countUserCollisions(result.Changes.Skipped),
+	}
+
+	return result, nil
+}
+
 // syncUserMena syncs mena files from KNOSSOS_HOME/mena to ~/.claude/{commands,skills}
 // using the CollectMena pipeline for namespace flattening and companion hiding parity
 // with the rite-scope pipeline (SyncMena).
-func syncUserMena(
+func (m *Materializer) syncUserMena(
 	knossosHome string,
 	userClaudeDir string,
 	manifest *provenance.ProvenanceManifest,
@@ -420,6 +621,10 @@ func syncUserMena(
 
 	// Check if source directory exists
 	if _, err := os.Stat(sourceDir); os.IsNotExist(err) {
+		// Try embedded mena fallback
+		if m.embeddedMena != nil {
+			return m.syncUserMenaFromEmbedded(userClaudeDir, manifest, collisionChecker, opts)
+		}
 		return result, nil // No source = no-op
 	}
 
@@ -563,6 +768,156 @@ func syncUserMena(
 	}
 
 	// Calculate summary
+	result.Summary = UserSyncSummary{
+		Added:      len(result.Changes.Added),
+		Updated:    len(result.Changes.Updated),
+		Skipped:    len(result.Changes.Skipped),
+		Unchanged:  len(result.Changes.Unchanged),
+		Collisions: countUserCollisions(result.Changes.Skipped),
+	}
+
+	return result, nil
+}
+
+// syncUserMenaFromEmbedded syncs mena from the embedded filesystem
+// when KNOSSOS_HOME is unavailable.
+func (m *Materializer) syncUserMenaFromEmbedded(
+	userClaudeDir string,
+	manifest *provenance.ProvenanceManifest,
+	collisionChecker *CollisionChecker,
+	opts SyncOptions,
+) (*UserResourceResult, error) {
+	commandsDir := filepath.Join(userClaudeDir, "commands")
+	skillsDir := filepath.Join(userClaudeDir, "skills")
+
+	result := &UserResourceResult{
+		Source: "embedded:mena",
+		Target: commandsDir + " + " + skillsDir,
+		Changes: UserSyncChanges{
+			Added:     []string{},
+			Updated:   []string{},
+			Skipped:   []UserSkippedEntry{},
+			Unchanged: []string{},
+		},
+	}
+
+	// Ensure target directories exist (unless dry-run)
+	if !opts.DryRun {
+		if err := paths.EnsureDir(commandsDir); err != nil {
+			return nil, err
+		}
+		if err := paths.EnsureDir(skillsDir); err != nil {
+			return nil, err
+		}
+	}
+
+	// Use embedded FS as a MenaSource via the CollectMena pipeline.
+	// CollectMena supports fs.FS sources via MenaSource.Fsys field.
+	sources := []MenaSource{{Fsys: m.embeddedMena, FsysPath: "mena", IsEmbedded: true}}
+	collectOpts := MenaProjectionOptions{
+		Filter: ProjectAll,
+	}
+	resolution, err := CollectMena(sources, collectOpts)
+	if err != nil {
+		return nil, err
+	}
+
+	now := time.Now().UTC()
+
+	// Process resolved entries — read content from embedded FS
+	for _, entry := range resolution.Entries {
+		var targetBaseDir string
+		var manifestPrefix string
+		if entry.MenaType == "dro" {
+			targetBaseDir = commandsDir
+			manifestPrefix = "commands/"
+		} else {
+			targetBaseDir = skillsDir
+			manifestPrefix = "skills/"
+		}
+
+		// Walk embedded source directory
+		if entry.Source.Fsys == nil {
+			continue
+		}
+		walkErr := fs.WalkDir(entry.Source.Fsys, entry.Source.FsysPath, func(path string, d fs.DirEntry, wErr error) error {
+			if wErr != nil {
+				return wErr
+			}
+			if d.IsDir() {
+				return nil
+			}
+
+			relPath, err := filepath.Rel(entry.Source.FsysPath, path)
+			if err != nil {
+				return err
+			}
+
+			// Strip mena extension
+			strippedName := StripMenaExtension(filepath.Base(relPath))
+			fileDir := filepath.Dir(relPath)
+			strippedRel := filepath.Join(fileDir, strippedName)
+
+			// Manifest key uses flat name
+			manifestKey := manifestPrefix + filepath.Join(entry.FlatName, strippedRel)
+			targetPath := filepath.Join(targetBaseDir, entry.FlatName, strippedRel)
+
+			// Read embedded content
+			content, err := fs.ReadFile(entry.Source.Fsys, path)
+			if err != nil {
+				return err
+			}
+
+			// Apply companion hiding for dro non-INDEX markdown files
+			if entry.MenaType == "dro" && strippedName != "INDEX.md" && strings.HasSuffix(strippedName, ".md") {
+				content = injectCompanionHideFrontmatter(content)
+			}
+
+			sourceChecksum := checksum.Bytes(content)
+
+			return syncUserMenaFile(
+				manifestKey, targetPath, content, sourceChecksum,
+				"embedded:mena/"+filepath.Join(entry.FlatName, strippedRel),
+				manifest, collisionChecker, nil, result, opts, now,
+			)
+		})
+		if walkErr != nil {
+			return nil, walkErr
+		}
+	}
+
+	// Process standalone files
+	for _, sf := range resolution.Standalones {
+		var targetBaseDir string
+		var manifestPrefix string
+		if sf.MenaType == "dro" {
+			targetBaseDir = commandsDir
+			manifestPrefix = "commands/"
+		} else {
+			targetBaseDir = skillsDir
+			manifestPrefix = "skills/"
+		}
+
+		manifestKey := manifestPrefix + sf.FlatName
+		targetPath := filepath.Join(targetBaseDir, sf.FlatName)
+
+		// Read from embedded FS
+		content, err := fs.ReadFile(m.embeddedMena, sf.SrcPath)
+		if err != nil {
+			return nil, err
+		}
+
+		sourceChecksum := checksum.Bytes(content)
+
+		if err := syncUserMenaFile(
+			manifestKey, targetPath, content, sourceChecksum,
+			"embedded:mena/"+sf.RelPath,
+			manifest, collisionChecker, nil, result, opts, now,
+		); err != nil {
+			return nil, err
+		}
+	}
+
 	result.Summary = UserSyncSummary{
 		Added:      len(result.Changes.Added),
 		Updated:    len(result.Changes.Updated),

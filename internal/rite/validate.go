@@ -290,7 +290,7 @@ func (v *Validator) Fix(riteName string) error {
 			}
 			if rite.Active {
 				m := materialize.NewMaterializer(v.resolver)
-				if _, err := m.MaterializeWithOptions(riteName, materialize.Options{KeepAll: true}); err != nil {
+				if _, err := m.Sync(materialize.SyncOptions{Scope: materialize.ScopeRite, RiteName: riteName, KeepOrphans: true}); err != nil {
 					continue
 				}
 			}

@@ -142,6 +142,12 @@ func runInit(ctx *cmdContext, riteName, source string, force bool, cmd *cobra.Co
 	if embTemplates := common.EmbeddedTemplates(); embTemplates != nil {
 		mat.WithEmbeddedTemplates(embTemplates)
 	}
+	if embAgents := common.EmbeddedAgents(); embAgents != nil {
+		mat.WithEmbeddedAgents(embAgents)
+	}
+	if embMena := common.EmbeddedMena(); embMena != nil {
+		mat.WithEmbeddedMena(embMena)
+	}
 	// Bootstrap config/hooks.yaml from embedded bytes if not already present.
 	if hooksYAML := common.EmbeddedHooksYAML(); len(hooksYAML) > 0 {
 		hooksPath := filepath.Join(projectDir, "config", "hooks.yaml")
@@ -160,18 +166,19 @@ func runInit(ctx *cmdContext, riteName, source string, force bool, cmd *cobra.Co
 			"source":      source,
 		})
 
-		result, err := mat.MaterializeWithOptions(riteName, materialize.Options{
-			Force:   force,
-			KeepAll: true,
+		syncResult, err := mat.Sync(materialize.SyncOptions{
+			Scope:       materialize.ScopeAll,
+			RiteName:    riteName,
+			KeepOrphans: true,
 		})
 		if err != nil {
 			printer.PrintError(err)
 			return err
 		}
 
-		sourceType := result.Source
-		if sourceType == "" {
-			sourceType = "filesystem"
+		sourceType := "filesystem"
+		if syncResult.RiteResult != nil && syncResult.RiteResult.Source != "" {
+			sourceType = syncResult.RiteResult.Source
 		}
 
 		out := initOutput{
