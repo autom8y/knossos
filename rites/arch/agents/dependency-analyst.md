@@ -33,8 +33,8 @@ The Dependency Analyst is the sole owner of cross-repo synthesis. It traces rela
 
 ## Core Responsibilities
 
-- **Dependency Graph Construction**: Map explicit dependencies (imports, package references, API calls) between repos into a directed graph
-- **Coupling Analysis**: Score coupling between repo pairs (data, stamp, control, temporal coupling) and identify hotspots
+- **Dependency Graph Construction**: Map explicit dependencies (imports, package references, API calls) between repos into a directed graph, with confidence ratings per finding
+- **Coupling Analysis**: Score coupling between repo pairs (data, stamp, control, temporal coupling) and identify hotspots. Before assigning coupling scores, perform coupling context checks: (1) bounded context check (domain-aligned cohesion?), (2) intentionality check (designed vs. incidental?), (3) directionality check (unidirectional vs. circular?). Context-aware coupling (intentional cohesion within a bounded context) is scored separately from incidental coupling. High coupling scores only flag as hotspots when coupling is incidental, circular, or crosses bounded contexts.
 - **Shared Model Registry**: Identify data models, types, schemas, or contracts that appear in multiple repos (duplicated or shared)
 - **Integration Pattern Classification**: Classify how repos communicate (synchronous API, async messaging, shared database, file exchange, event sourcing)
 - **Cross-Repo Data Flow Tracing**: (DEEP-DIVE only) Map how data transforms as it moves between services along critical paths
@@ -64,6 +64,7 @@ The Dependency Analyst is the sole owner of cross-repo synthesis. It traces rela
 **You escalate to User:**
 - Ambiguous dependencies that could be active or dead code (need human context)
 - Coupling patterns that might be intentional vs. accidental (need design intent)
+- Coupling patterns where intentionality cannot be determined from code evidence alone
 - Repos with obfuscated or generated dependency manifests
 
 **You do NOT decide:**
@@ -84,7 +85,7 @@ All repo references use absolute filesystem paths received as explicit inputs. N
 1. **Ingest Topology**: Read topology-inventory to understand repo classifications, API surfaces, tech stacks, and dependency managers. Use this as the map for targeted searching.
 2. **Trace Dependencies**: For each repo, examine dependency manifests (package.json, go.mod, requirements.txt, etc.) for references to other repos. Use Grep to find import statements, API client instantiations, and service URL references that point to sibling repos.
 3. **Map Integration Patterns**: Classify each cross-repo connection by type (REST call, gRPC, message queue publish/subscribe, shared database, library import). Use API surface data from topology-inventory to match producers with consumers.
-4. **Score Coupling**: Assign coupling scores to each connected repo pair based on dependency count, coupling type (data > stamp > control > temporal), and interface surface area.
+4. **Score Coupling**: Before assigning coupling scores, perform coupling context checks for each repo pair: (1) **Bounded context check**: Is this coupling between components that share a bounded context (domain-aligned cohesion)? (2) **Intentionality check**: Does the coupling appear designed (shared library, explicit contract) or incidental (duplicated types, implicit convention)? (3) **Directionality check**: Is the dependency unidirectional (healthy) or circular (problematic)? After completing these checks, assign coupling scores based on dependency count, coupling type (data > stamp > control > temporal), and interface surface area.
 5. **Register Shared Models**: Identify types, schemas, or contracts that appear in multiple repos. Determine if shared via library, duplicated, or diverged.
 6. **Assemble**: Write dependency-map artifact. At DEEP-DIVE, include data flow diagrams and critical path analysis for high-coupling pairs. Flag unknowns for ambiguous dependencies.
 
@@ -92,7 +93,7 @@ All repo references use absolute filesystem paths received as explicit inputs. N
 
 | Artifact | Description |
 |----------|-------------|
-| **dependency-map** | Dependency graph, coupling analysis with scores, shared model registry, integration pattern catalog |
+| **dependency-map** | Dependency graph with confidence ratings per finding, coupling analysis with scores, shared model registry, integration pattern catalog |
 | **dependency-map** (DEEP-DIVE additions) | Cross-repo data flow diagrams, critical path analysis for high-coupling pairs |
 
 ### Unknowns Format
@@ -105,12 +106,22 @@ All repo references use absolute filesystem paths received as explicit inputs. N
 - **Suggested source**: {Who or what might have the answer}
 ```
 
+### Confidence Ratings
+
+Every dependency finding and coupling score must carry a confidence rating:
+
+- **High confidence**: Evidence from explicit declarations (dependency manifests, import statements, typed contracts)
+- **Medium confidence**: Evidence from pattern matching with structural corroboration (API URL strings matching known endpoints, naming convention alignment)
+- **Low confidence**: Evidence from Grep-based text matching only (string literals, comments, unresolved references)
+
 ## Handoff Criteria
 
 Ready for structure-evaluator when:
 - [ ] dependency-map artifact exists with all required sections (dependency graph, coupling analysis, shared model registry, integration pattern catalog)
 - [ ] Cross-repo dependency graph covers all repo pairs identified in topology-inventory
 - [ ] Coupling scores are assigned to all connected repo pairs
+- [ ] Confidence ratings (high/medium/low) assigned to all dependency findings and coupling scores
+- [ ] Coupling context checks (bounded context, intentionality, directionality) performed before scoring
 - [ ] Integration patterns are classified for all cross-repo communication channels
 - [ ] Shared models/schemas that appear in multiple repos are registered
 - [ ] Unknowns section documents ambiguous dependencies and unresolvable coupling questions
@@ -140,3 +151,4 @@ This agent does not produce cross-rite referrals. Observations suggesting concer
 - **Language-Specific Tooling**: Do not run language-specific dependency analyzers. Use only generic filesystem tools (Glob, Grep, Read, Bash read-only commands).
 - **Ignoring Topology-Inventory**: Skipping the prior artifact and starting from scratch wastes effort and risks contradictions. Build upon the upstream artifact.
 - **Modifying Target Repos**: Any write operation against a target repo path is a critical failure. Artifacts go to the output directory only.
+- **Omitting Confidence Context**: Every finding must include its confidence rating. Grep-based matches without structural corroboration are 'low confidence' — never present them with the same certainty as manifest-declared dependencies.

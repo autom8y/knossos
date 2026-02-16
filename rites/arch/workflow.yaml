@@ -1,7 +1,14 @@
 name: arch
 version: "1.0.0"
 workflow_type: sequential
-description: Multi-repo architecture analysis producing topology maps, dependency analysis, and remediation plans
+description: Architecture analysis producing topology maps, dependency analysis, and remediation plans
+
+inputs:
+  - name: analysis_unit
+    type: string
+    description: "Type of analysis unit: repo, directory, or module"
+    allowed_values: [repo, directory, module]
+    default: repo
 
 entry_point:
   agent: topology-cartographer
@@ -39,7 +46,7 @@ complexity_levels:
     phases: [discovery]
 
   - name: ANALYSIS
-    scope: "Full topology + per-repo analysis, cross-repo dependency tracing, structural evaluation, recommendations"
+    scope: "Full topology + per-unit analysis, cross-unit dependency tracing, structural evaluation, recommendations"
     phases: [discovery, synthesis, evaluation, remediation]
 
   - name: DEEP-DIVE
@@ -61,10 +68,15 @@ commands:
     primary_agent: topology-cartographer
     workflow_phase: all
 
-# No back_routes defined.
-# Rationale: The arch rite is a read-only analysis pipeline with no implementation
-# phase. Back-routes in forge exist because validation can fail and trigger rework
-# of design or implementation. In arch, each phase produces analysis artifacts that
-# accumulate -- there is no "failure" that would send work backward. If an earlier
-# phase produced incomplete data, the downstream agent escalates to Pythia for
-# re-invocation rather than using a structural back-route.
+back_routes:
+  # ADVISORY: These do not alter the sequential phase structure.
+  # Pythia reads these to decide when to recommend re-invocation of an earlier phase.
+  - from: synthesis
+    to: discovery
+    trigger: "Incomplete topology-inventory: missing API surfaces or unscanned units"
+  - from: evaluation
+    to: synthesis
+    trigger: "Incomplete dependency-map: missing coupling scores or unclassified integration patterns"
+  - from: remediation
+    to: evaluation
+    trigger: "Incomplete architecture-assessment: findings lack evidence or leverage ratings"

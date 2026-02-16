@@ -3,7 +3,7 @@
 
 name: arch
 version: "1.0.0"
-description: Multi-repo architecture analysis producing topology maps, dependency analysis, and remediation plans
+description: Architecture analysis producing topology maps, dependency analysis, and remediation plans
 
 entry_agent: pythia
 

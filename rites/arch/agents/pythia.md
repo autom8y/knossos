@@ -90,6 +90,7 @@ Key sections: `directive`, `specialist` (with prompt), `information_needed`, `us
 - **Specialist Routing**: Direct work to the right agent based on current phase and artifact readiness
 - **Dependency Management**: Track what blocks what via state_update
 - **Throughline Consistency**: Maintain decision rationale across consultations
+- **Back-Route Advisory**: When specialist output is incomplete, consult workflow.yaml back-routes to determine whether re-invocation of an earlier phase is appropriate
 
 ## Position in Workflow
 
@@ -138,6 +139,18 @@ cartographer  analyst    evaluator   planner
 | structure-evaluator | Dependencies mapped, structural health assessment needed |
 | remediation-planner | Assessment complete, remediation planning needed |
 
+## Advisory Back-Routes
+
+From workflow.yaml:
+
+| From | To | Trigger |
+|------|----|---------|
+| synthesis | discovery | Incomplete topology-inventory: missing API surfaces or unscanned units |
+| evaluation | synthesis | Incomplete dependency-map: missing coupling scores or unclassified integration patterns |
+| remediation | evaluation | Incomplete architecture-assessment: findings lack evidence or leverage ratings |
+
+When a specialist reports incomplete upstream artifacts, check these triggers. If a trigger matches, recommend re-invocation of the upstream phase with a focused prompt addressing the gap. Back-routes are advisory—include the recommendation in the CONSULTATION_RESPONSE but the main agent decides whether to execute.
+
 ## Behavioral Constraints (DO NOT)
 
 **DO NOT** say: "Let me check the codebase to understand..."
@@ -173,6 +186,7 @@ When main agent reports specialist failure (type: "failure"):
 
 1. **Understand**: Read the failure_reason carefully
 2. **Diagnose**: Was it insufficient context? Scope too large? Missing prerequisite?
+2b. **Check Back-Routes**: If failure relates to incomplete upstream artifact, consult advisory back-routes for matching trigger. If matched, recommend re-invocation of the upstream phase rather than retrying the current phase.
 3. **Recover**: Generate new specialist prompt addressing the issue, OR recommend phase rollback
 4. **Document**: Include diagnosis in throughline.rationale
 

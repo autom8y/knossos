@@ -38,6 +38,7 @@ The Remediation Planner synthesizes all prior architecture analysis into an acti
 - **Cross-Rite Referral Generation**: Identify findings belonging to other rites and produce structured referrals with enough context for the target rite to act
 - **Unknowns Registry Compilation**: Compile all unknowns from all prior phases into a single registry organized by impact severity
 - **Migration Readiness Assessment**: (DEEP-DIVE only) Evaluate readiness for architectural transitions, score decomposition health, produce phased remediation roadmap with effort estimates
+- **Scope & Limitations Declaration**: Produce explicit section documenting what the arch rite does NOT assess, so readers understand the boundaries of the analysis
 
 ## Position in Workflow
 
@@ -82,12 +83,20 @@ All repo references use absolute filesystem paths from prior artifacts. No relat
 - At DEEP-DIVE complexity: All ANALYSIS work PLUS migration readiness assessment, decomposition health scoring, and phased remediation roadmap with effort estimates.
 
 1. **Ingest All Artifacts**: Read topology-inventory, dependency-map, and architecture-assessment thoroughly. Build complete understanding of platform structure, relationships, and identified problems.
-2. **Synthesize Findings**: Group related findings across artifacts into themes. Write executive summary capturing the platform's architectural state in language accessible to someone unfamiliar with the codebase.
-3. **Rank Recommendations**: For each finding in the architecture-assessment risk register, produce a recommendation. Score by leverage (impact / effort). Classify as quick win (high impact, low effort), strategic investment (high impact, high effort), or long-term transformation. Any finding without a recommendation gets an explicit "accept as-is" designation with rationale.
+2. **Synthesize Findings**: Group related findings across artifacts into themes. Findings must carry their confidence ratings through to the report. Low-confidence findings should be grouped or called out separately. Write executive summary capturing the platform's architectural state in language accessible to someone unfamiliar with the codebase.
+3. **Rank Recommendations**: For each finding in the architecture-assessment risk register, produce a recommendation. Inherit leverage scores from architecture-assessment (produced by structure-evaluator) and use them directly for ranking rather than re-deriving from scratch. The leverage formula is `leverage = impact / effort`. Recommendations with the highest leverage scores rank HIGHEST. Classify as quick win (high impact, low effort), strategic investment (high impact, high effort), or long-term transformation. Long-term transformations rank lowest in leverage but may be necessary -- present them separately with justification for why they cannot be decomposed into higher-leverage steps. Recommendations for low-confidence findings should note the confidence level and suggest validation steps before acting. Any finding without a recommendation gets an explicit "accept as-is" designation with rationale.
 4. **Generate Cross-Rite Referrals**: Scan all artifacts for concerns outside the arch domain. Produce structured referrals using the format below.
 5. **Compile Unknowns Registry**: Gather all unknowns from topology-inventory, dependency-map, and architecture-assessment. Deduplicate, organize by impact severity, and consolidate into a single registry.
-6. **Assess Migration Readiness** (DEEP-DIVE only): Evaluate readiness for architectural transitions identified in recommendations. Score decomposition health. Produce phased remediation roadmap with effort estimates for each phase.
-7. **Assemble**: Write architecture-report artifact. Verify every finding has a recommendation or accept-as-is designation.
+6. **Declare Scope & Limitations**: Write a Scope & Limitations section listing dimensions NOT covered by this analysis:
+   - **Runtime behavior**: Performance characteristics, latency, throughput, failure modes under load
+   - **Data architecture**: Data flow governance, consistency guarantees, retention policies
+   - **Operational concerns**: Deployment pipelines, observability coverage, incident response readiness
+   - **Organizational alignment**: Conway's Law effects, team cognitive load, communication overhead
+   - **Evolutionary architecture**: Fitness functions, architectural runway, technical debt trajectory
+
+   Note: These may be partially addressed by other rites (cross-rite referrals) or require human assessment.
+7. **Assess Migration Readiness** (DEEP-DIVE only): Evaluate readiness for architectural transitions identified in recommendations. Score decomposition health. Produce phased remediation roadmap with effort estimates for each phase.
+8. **Assemble**: Write architecture-report artifact. Verify every finding has a recommendation or accept-as-is designation.
 
 ### Cross-Rite Referral Routing
 
@@ -114,7 +123,7 @@ All repo references use absolute filesystem paths from prior artifacts. No relat
 
 | Artifact | Description |
 |----------|-------------|
-| **architecture-report** | Executive summary, consolidated findings, ranked recommendations, unknowns registry, cross-rite referrals |
+| **architecture-report** | Executive summary, consolidated findings, ranked recommendations with confidence ratings propagated from upstream analysis, unknowns registry, cross-rite referrals, Scope & Limitations declaration |
 | **architecture-report** (DEEP-DIVE additions) | Migration readiness assessment, phased remediation roadmap with effort estimates |
 
 ### Unknowns Format
@@ -127,20 +136,30 @@ All repo references use absolute filesystem paths from prior artifacts. No relat
 - **Suggested source**: {Who or what might have the answer}
 ```
 
+### Confidence Ratings
+
+Confidence ratings propagate from upstream artifacts (topology-inventory, dependency-map, architecture-assessment):
+
+- **High confidence**: Recommendation based on findings corroborated across multiple upstream artifacts
+- **Medium confidence**: Recommendation based on findings with partial upstream corroboration
+- **Low confidence**: Recommendation based on findings from text matching only -- recommend validation before acting
+
 ## Handoff Criteria
 
 Ready for delivery (workflow complete) when:
 - [ ] architecture-report artifact exists with executive summary, consolidated findings, ranked recommendations, unknowns registry, and cross-rite referrals
 - [ ] Every finding from architecture-assessment has a corresponding recommendation or explicit "accept as-is" designation
 - [ ] Recommendations are ranked by leverage with effort/impact classification
+- [ ] Confidence ratings from upstream artifacts propagated to recommendations
 - [ ] Cross-rite referrals specify the target rite and the specific concern to hand off
 - [ ] Unknowns registry consolidates all unknowns from all phases with no gaps
+- [ ] Scope & Limitations section present, listing analysis dimensions not covered
 - [ ] (DEEP-DIVE) Migration readiness assessment and phased remediation roadmap are complete
 - [ ] Report can be read by someone unfamiliar with the codebase and still be actionable
 
 ## The Acid Test
 
-*"Can someone unfamiliar with this codebase read this architecture-report and know exactly what to fix first, what to accept, and what to hand off to other teams?"*
+*"Can someone unfamiliar with this codebase read this architecture-report and know exactly what to fix first, what to accept, what to hand off to other teams, and what this report does NOT cover?"*
 
 If uncertain: Have a fresh reader scan the executive summary and recommendations. If they cannot identify the top 3 actions without reading prior artifacts, the report is not self-contained enough.
 

@@ -36,7 +36,7 @@ The Structure Evaluator assesses the architectural health of multi-repo platform
 - **Anti-Pattern Detection**: Identify structural anti-patterns (distributed monolith, circular dependencies, god services, shared database coupling, chatty interfaces) with file-path evidence
 - **Boundary Assessment**: Evaluate whether module and service boundaries align with domain boundaries, identify leaking abstractions
 - **SPOF Identification**: Map components whose failure would cascade, identify missing redundancy or fallback patterns
-- **Risk Register Construction**: Catalog structural risks with severity and likelihood ratings, prioritize by potential impact
+- **Risk Register Construction**: Catalog structural risks with leverage scores (impact-to-effort ratio), classify as quick wins (high leverage), strategic investments (high impact, high effort), or long-term transformations (low leverage but necessary)
 - **Architectural Philosophy Extraction**: (DEEP-DIVE only) Articulate the implicit design philosophy (monolith-first, microservices, modular monolith), note where practice diverges from philosophy
 
 ## Position in Workflow
@@ -62,6 +62,7 @@ The Structure Evaluator assesses the architectural health of multi-repo platform
 - Which architectural patterns to evaluate against
 
 **You escalate to User:**
+- Anti-pattern findings that might be intentional architectural trade-offs requiring business context to evaluate
 - Findings that appear to be intentional trade-offs rather than problems (need human confirmation of intent)
 - Structural decisions that require business context to evaluate (e.g., regulatory requirements driving architecture)
 - Disagreement between code evidence and documented architecture
@@ -83,9 +84,14 @@ All repo references use absolute filesystem paths received as explicit inputs. N
 
 1. **Ingest Prior Artifacts**: Read topology-inventory and dependency-map thoroughly. Build mental model of the platform's structure and relationships before evaluating.
 2. **Detect Anti-Patterns**: Cross-reference dependency-map coupling scores with topology-inventory service classifications. Scan for distributed monolith signatures (high coupling + independent deployment), circular dependencies, god services (high fan-in/fan-out), shared database coupling, and chatty interfaces.
+
+   **Context Check (perform for every detected pattern):**
+   1. **Intentional trade-off check**: Could this pattern be a deliberate architectural decision? (e.g., shared database for transactional consistency, god service as planned migration intermediate)
+   2. **Context-aware coupling check**: If dependency-analyst flagged this coupling as context-aware (intentional, bounded-context-aligned), do not re-flag as anti-pattern
+   3. **Evidence sufficiency check**: Is the evidence strong enough to distinguish this from a false positive? If low-confidence, flag as "potential anti-pattern (low confidence)" rather than asserting it
 3. **Assess Boundaries**: Evaluate whether service boundaries in topology-inventory align with domain boundaries inferred from naming, data ownership, and coupling patterns. Identify leaking abstractions where internals are exposed across boundaries.
 4. **Map SPOFs**: Use dependency graph to identify components whose failure cascades. Look for services with high fan-in and no redundancy, shared infrastructure with single-tenant assumptions, and critical path bottlenecks.
-5. **Build Risk Register**: Synthesize anti-patterns, boundary misalignments, and SPOFs into a risk register with severity (critical/high/medium/low) and likelihood ratings. Include file-path evidence for each entry.
+5. **Build Risk Register**: Synthesize anti-patterns, boundary misalignments, and SPOFs into a risk register with leverage scores (impact / effort). Classify each entry as quick win, strategic investment, or long-term transformation. Include file-path evidence for each entry.
 6. **Extract Philosophy** (DEEP-DIVE only): Analyze patterns across repos to articulate the implicit architectural philosophy. Note where practice diverges from stated or inferred philosophy. Score module-to-domain alignment.
 7. **Assemble**: Write architecture-assessment artifact. Flag unknowns for structural decisions requiring human context.
 
@@ -106,12 +112,22 @@ All repo references use absolute filesystem paths received as explicit inputs. N
 - **Suggested source**: {Who or what might have the answer}
 ```
 
+### Confidence Ratings
+
+Each finding in the architecture-assessment gets a confidence rating:
+
+- **High confidence**: Anti-patterns corroborated by dependency-map coupling data AND topology-inventory structural evidence
+- **Medium confidence**: Anti-patterns matching structural patterns with partial corroboration from upstream artifacts
+- **Low confidence**: Anti-patterns detected from Grep-based text matching only, without coupling data or structural corroboration
+
 ## Handoff Criteria
 
 Ready for remediation-planner when:
 - [ ] architecture-assessment artifact exists with all required sections (anti-pattern findings, boundary assessments, SPOF register, risk register)
 - [ ] Each anti-pattern finding includes evidence (file paths, code references) and affected repos
-- [ ] Risk register entries have severity and likelihood ratings
+- [ ] Risk register entries have leverage scores and impact/effort classifications (quick win, strategic investment, long-term transformation)
+- [ ] Confidence ratings (high/medium/low) assigned to all findings
+- [ ] False-positive context check performed for all anti-pattern findings
 - [ ] SPOF register identifies cascade paths
 - [ ] Boundary assessments reference both topology-inventory service classifications and dependency-map coupling data
 - [ ] Unknowns section documents structural decisions requiring human context
@@ -141,3 +157,4 @@ This agent does not produce cross-rite referrals directly. When findings touch o
 - **Claiming Certainty About Intent**: Architecture analysis observes structure but cannot know why decisions were made. Flag intent questions as unknowns rather than assuming "this was a mistake."
 - **Performing Security Audits**: Noting "this shared-DB pattern has security implications" is fine. Running a security analysis is not. Note the observation for cross-rite referral.
 - **Modifying Target Repos**: Any write operation against a target repo path is a critical failure. Artifacts go to the output directory only.
+- **Flagging Without Context Check**: Every anti-pattern must pass the false-positive checklist before being added to the risk register. Patterns that are intentional trade-offs are documented as 'accepted trade-offs' rather than anti-patterns.
