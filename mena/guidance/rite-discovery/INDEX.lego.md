@@ -40,6 +40,7 @@ Given a user query, compare against rite routing conditions:
 | Rite | Command | Domain | Workflow | Agents |
 |------|---------|--------|----------|--------|
 | 10x-dev | /10x | Software development | requirements → design → implementation → validation | 4 |
+| arch | /arch | Architecture analysis | discovery → synthesis → evaluation → remediation | 4 |
 | debt-triage | /debt | Technical debt management | collection → assessment → planning | 3 |
 | docs | /docs | Documentation lifecycle | audit → architecture → writing → review | 4 |
 | ecosystem | /ecosystem | Ecosystem infrastructure | analysis → design → implementation → documentation → validation | 5 |
@@ -51,7 +52,7 @@ Given a user query, compare against rite routing conditions:
 | sre | /sre | Site reliability | discovery → analysis → implementation → verification | 4 |
 | strategy | /strategy | Business strategy | market-research → competitive-analysis → business-modeling → strategic-planning | 4 |
 
-**Total**: 11 rites, 46 agents
+**Total**: 12 rites, 50 agents
 
 Note: `shared` is a dependency bundle, not a user-facing rite.
 To refresh this table, run `ari sync` which reads from `rites/*/orchestrator.yaml`.

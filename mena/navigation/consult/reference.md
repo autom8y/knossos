@@ -114,6 +114,7 @@ When invoked without arguments, `/consult` provides ecosystem overview:
 3. **List Common Starting Points**
    Based on typical user goals:
    - Feature development → `/10x` + `/start`
+   - Architecture analysis → `/arch` + `/task`
    - Documentation → `/docs` + `/task`
    - Code quality → `/hygiene` + `/task`
    - Bug fixes → `/hotfix`
@@ -144,6 +145,7 @@ Session: ACTIVE - "Add authentication" (MODULE complexity)
 
 === Common Starting Points ===
   Build a feature:     /10x && /start "Feature name"
+  Analyze architecture:/arch && /task "Architecture scope"
   Fix a bug:           /hotfix
   Improve quality:     /hygiene && /task "Audit scope"
   Write docs:          /docs && /task "Documentation goal"
@@ -355,6 +357,7 @@ Display complete rite reference table:
 | Rite              | Command       | Agents | Best For                           |
 |-------------------|---------------|--------|------------------------------------|
 | 10x-dev      | /10x          | 5      | Full feature development lifecycle |
+| arch         | /arch         | 4      | Multi-repo architecture analysis   |
 | docs     | /docs         | 4      | Documentation, technical writing   |
 | hygiene      | /hygiene      | 4      | Code quality, refactoring          |
 | debt-triage  | /debt         | 3      | Technical debt prioritization      |
@@ -364,7 +367,7 @@ Display complete rite reference table:
 | rnd          | /rnd          | 4      | Exploration, prototyping           |
 | strategy     | /strategy     | 4      | Market research, business analysis |
 
-Total: 41 agents across all rites
+Total: 45 agents across all rites
 
 Use /rite <name> or quick-switch commands (e.g., /10x) to activate.
 ```
@@ -386,9 +389,10 @@ Display all commands categorized by domain:
 /wrap               Finalize session, run quality gates
 /worktree           Manage isolated worktrees
 
---- Rite Management (10) ---
+--- Rite Management (11) ---
 /rite               Switch rite or list available
 /10x                Quick switch to 10x-dev
+/arch               Quick switch to arch
 /docs               Quick switch to docs
 /hygiene            Quick switch to hygiene
 /debt               Quick switch to debt-triage
@@ -523,6 +527,7 @@ When recommending rites, `/consult` retrieves current rite inventory from:
 | Rite | Command | Complexity Levels | Use When |
 |------|---------|-------------------|----------|
 | **10x-dev** | `/10x` | SCRIPT, MODULE, SERVICE, PLATFORM | Building features, fixing complex bugs |
+| **arch** | `/arch` | SURVEY, ANALYSIS, DEEP-DIVE | Multi-repo architecture analysis, dependency mapping |
 | **docs** | `/docs` | PAGE, SECTION, SITE | Writing or updating documentation |
 | **hygiene** | `/hygiene` | SPOT, MODULE, CODEBASE | Refactoring, code quality improvements |
 | **debt-triage** | `/debt` | QUICK, AUDIT | Assessing and prioritizing technical debt |
