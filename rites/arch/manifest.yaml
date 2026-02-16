@@ -1,0 +1,72 @@
+# Rite Manifest: arch
+# Generated per ADR-0015 (Content Organization)
+
+name: arch
+version: "1.0.0"
+description: Multi-repo architecture analysis producing topology maps, dependency analysis, and remediation plans
+
+entry_agent: pythia
+
+phases:
+  - name: discovery
+    agent: topology-cartographer
+    produces: topology-inventory
+    description: Discover and catalog multi-repo platform topology
+
+  - name: synthesis
+    agent: dependency-analyst
+    produces: dependency-map
+    description: Trace cross-repo dependencies, coupling, and integration patterns
+    condition: "complexity >= ANALYSIS"
+
+  - name: evaluation
+    agent: structure-evaluator
+    produces: architecture-assessment
+    description: Evaluate architectural health, anti-patterns, and boundary alignment
+    condition: "complexity >= ANALYSIS"
+
+  - name: remediation
+    agent: remediation-planner
+    produces: architecture-report
+    description: Synthesize findings into actionable recommendations and cross-rite referrals
+    condition: "complexity >= ANALYSIS"
+
+agents:
+  - name: pythia
+    role: Coordinates multi-repo architecture analysis phases
+
+  - name: topology-cartographer
+    role: Discovers and catalogs multi-repo platform topology
+
+  - name: dependency-analyst
+    role: Traces cross-repo dependencies, coupling, and integration patterns
+
+  - name: structure-evaluator
+    role: Evaluates architectural health, anti-patterns, and boundary alignment
+
+  - name: remediation-planner
+    role: Synthesizes findings into actionable recommendations
+
+dromena: []
+
+legomena:
+  - rite-development
+  - agent-prompt-engineering
+  - forge-ref
+
+hooks: []
+
+dependencies:
+  - shared
+
+complexity_levels:
+  - name: SURVEY
+    scope: "30,000ft ecosystem snapshot: service catalog, tech stacks, API surfaces"
+  - name: ANALYSIS
+    scope: "Full topology + per-repo analysis, cross-repo dependency tracing, structural evaluation, recommendations"
+  - name: DEEP-DIVE
+    scope: "All ANALYSIS work + coupling hotspot deep dives, philosophy extraction, migration readiness, phased roadmap"
+
+metadata:
+  domain: multi-repo architecture analysis
+  color: cyan

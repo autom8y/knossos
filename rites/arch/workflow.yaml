@@ -1,0 +1,70 @@
+name: arch
+version: "1.0.0"
+workflow_type: sequential
+description: Multi-repo architecture analysis producing topology maps, dependency analysis, and remediation plans
+
+entry_point:
+  agent: topology-cartographer
+  artifact:
+    type: topology-inventory
+    path_template: docs/architecture/TOPOLOGY-{slug}.md
+
+phases:
+  - name: discovery
+    agent: topology-cartographer
+    produces: topology-inventory
+    next: synthesis
+
+  - name: synthesis
+    agent: dependency-analyst
+    produces: dependency-map
+    next: evaluation
+    condition: "complexity >= ANALYSIS"
+
+  - name: evaluation
+    agent: structure-evaluator
+    produces: architecture-assessment
+    next: remediation
+    condition: "complexity >= ANALYSIS"
+
+  - name: remediation
+    agent: remediation-planner
+    produces: architecture-report
+    next: null
+    condition: "complexity >= ANALYSIS"
+
+complexity_levels:
+  - name: SURVEY
+    scope: "30,000ft ecosystem snapshot: service catalog, tech stacks, API surfaces"
+    phases: [discovery]
+
+  - name: ANALYSIS
+    scope: "Full topology + per-repo analysis, cross-repo dependency tracing, structural evaluation, recommendations"
+    phases: [discovery, synthesis, evaluation, remediation]
+
+  - name: DEEP-DIVE
+    scope: "All ANALYSIS work + 1,000ft coupling hotspot deep dives, philosophy extraction, migration readiness, phased roadmap"
+    phases: [discovery, synthesis, evaluation, remediation]
+
+# Agent roles for command mapping:
+# /arch              -> topology-cartographer (full pipeline)
+# /arch-discover     -> topology-cartographer (discovery only)
+# /arch-dependencies -> dependency-analyst (synthesis only)
+# /arch-evaluate     -> structure-evaluator (evaluation only)
+# /arch-remediate    -> remediation-planner (remediation only)
+
+# Rite-specific commands (synced on rite swap):
+commands:
+  - name: arch
+    file: arch.md
+    description: "Switch to arch rite for multi-repo architecture analysis"
+    primary_agent: topology-cartographer
+    workflow_phase: all
+
+# No back_routes defined.
+# Rationale: The arch rite is a read-only analysis pipeline with no implementation
+# phase. Back-routes in forge exist because validation can fail and trigger rework
+# of design or implementation. In arch, each phase produces analysis artifacts that
+# accumulate -- there is no "failure" that would send work backward. If an earlier
+# phase produced incomplete data, the downstream agent escalates to Pythia for
+# re-invocation rather than using a structural back-route.

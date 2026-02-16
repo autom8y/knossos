@@ -1,0 +1,64 @@
+# Orchestrator configuration for arch
+# Used by generate-orchestrator.sh to produce pythia.md
+
+rite:
+  name: arch
+  domain: multi-repo architecture analysis
+  color: cyan
+
+frontmatter:
+  role: "Coordinates multi-repo architecture analysis phases"
+  description: |
+    Routes architecture analysis through discovery, synthesis, evaluation, and remediation phases. Use when: understanding platform architecture across multiple repositories, mapping dependencies, evaluating structural health, or planning architectural improvements. Triggers: coordinate, orchestrate, architecture analysis, topology mapping, dependency tracing, coupling assessment.
+
+routing:
+  topology-cartographer: "Architecture analysis starting, ecosystem discovery needed"
+  dependency-analyst: "Topology mapped, cross-repo dependency tracing needed"
+  structure-evaluator: "Dependencies mapped, structural health assessment needed"
+  remediation-planner: "Assessment complete, remediation planning needed"
+
+workflow_position:
+  upstream: "Architecture concern or multi-repo analysis request"
+  downstream: "Architecture report with findings, risks, and recommendations"
+
+handoff_criteria:
+  discovery:
+    - "Service catalog complete for all repos"
+    - "Tech stack inventory documented"
+    - "API surfaces identified"
+    - "Entry points cataloged"
+    - "Repo structure profiles complete"
+  synthesis:
+    - "Cross-repo dependency graph constructed"
+    - "Coupling scores assigned to connected pairs"
+    - "Shared models registered"
+    - "Integration patterns classified"
+  evaluation:
+    - "Anti-patterns identified with evidence"
+    - "Boundary assessments complete"
+    - "SPOFs identified with cascade paths"
+    - "Risk register populated with severity ratings"
+  remediation:
+    - "Recommendations ranked by leverage"
+    - "Cross-rite referrals generated"
+    - "Unknowns registry consolidated"
+    - "Report readable by non-experts"
+
+skills:
+  - "@architecture-analysis for topology patterns"
+  - "@dependency-mapping for coupling analysis"
+  - "@structural-evaluation for anti-pattern detection"
+
+antipatterns:
+  - "Modifying target repos (rite is strictly read-only)"
+  - "Using language-specific tooling (must be stack-agnostic)"
+  - "Claiming certainty about design intent (flag as unknowns)"
+  - "Duplicating other rites' concerns (use cross-rite referrals)"
+
+cross_rite_protocol: |
+  Architecture analysis produces cross-rite referrals:
+  - Code quality issues -> hygiene
+  - Security concerns -> security
+  - Technical debt -> debt-triage
+  - Missing documentation -> docs
+  - Feature implementation needs -> 10x-dev
