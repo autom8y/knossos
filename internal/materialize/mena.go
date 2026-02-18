@@ -13,6 +13,7 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"github.com/autom8y/knossos/internal/checksum"
+	"github.com/autom8y/knossos/internal/errors"
 	"github.com/autom8y/knossos/internal/provenance"
 )
 
@@ -803,7 +804,10 @@ func resolveNamespace(collected map[string]menaCollectedEntry, standalones map[s
 		// Load existing provenance manifest to identify ownership
 		claudeDir := filepath.Dir(opts.TargetCommandsDir)
 		manifestPath := filepath.Join(claudeDir, provenance.ManifestFileName)
-		oldManifest, _ := provenance.Load(manifestPath)
+		oldManifest, loadErr := provenance.Load(manifestPath)
+		if loadErr != nil && !errors.IsNotFound(loadErr) {
+			log.Printf("Warning: failed to load provenance manifest for collision check: %v", loadErr)
+		}
 
 		entries, err := os.ReadDir(opts.TargetCommandsDir)
 		if err == nil {
