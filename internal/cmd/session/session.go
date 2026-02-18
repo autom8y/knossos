@@ -60,6 +60,7 @@ Examples:
 	cmd.AddCommand(newFrayCmd(ctx))
 	cmd.AddCommand(newLockCmd(ctx))
 	cmd.AddCommand(newUnlockCmd(ctx))
+	cmd.AddCommand(newGcCmd(ctx))
 
 	// Session commands require project context
 	common.SetNeedsProject(cmd, true, true)
