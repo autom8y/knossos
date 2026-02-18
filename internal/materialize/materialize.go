@@ -4,6 +4,7 @@ package materialize
 import (
 	"fmt"
 	"io/fs"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -237,8 +238,18 @@ func (m *Materializer) MaterializeMinimal(opts Options) (*Result, error) {
 
 	// Provenance: load previous manifest and detect divergence
 	manifestPath := provenance.ManifestPath(claudeDir)
-	prevManifest, _ := provenance.LoadOrBootstrap(manifestPath)
-	divergenceReport, _ := provenance.DetectDivergence(prevManifest, nil, claudeDir)
+	prevManifest, err := provenance.LoadOrBootstrap(manifestPath)
+	if err != nil {
+		log.Printf("Warning: failed to load provenance manifest, starting fresh: %v", err)
+		prevManifest = &provenance.ProvenanceManifest{
+			SchemaVersion: provenance.CurrentSchemaVersion,
+			Entries:       make(map[string]*provenance.ProvenanceEntry),
+		}
+	}
+	divergenceReport, err := provenance.DetectDivergence(prevManifest, nil, claudeDir)
+	if err != nil {
+		log.Printf("Warning: failed to detect provenance divergence: %v", err)
+	}
 	collector := provenance.NewCollector()
 
 	// Generate rules from templates (if available)
@@ -324,8 +335,18 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 
 	// Provenance: load previous manifest and detect divergence
 	manifestPath := provenance.ManifestPath(claudeDir)
-	prevManifest, _ := provenance.LoadOrBootstrap(manifestPath)
-	divergenceReport, _ := provenance.DetectDivergence(prevManifest, nil, claudeDir)
+	prevManifest, err := provenance.LoadOrBootstrap(manifestPath)
+	if err != nil {
+		log.Printf("Warning: failed to load provenance manifest, starting fresh: %v", err)
+		prevManifest = &provenance.ProvenanceManifest{
+			SchemaVersion: provenance.CurrentSchemaVersion,
+			Entries:       make(map[string]*provenance.ProvenanceEntry),
+		}
+	}
+	divergenceReport, err := provenance.DetectDivergence(prevManifest, nil, claudeDir)
+	if err != nil {
+		log.Printf("Warning: failed to detect provenance divergence: %v", err)
+	}
 	collector := provenance.NewCollector()
 
 	// 2.5. Clear stale invocation state from previous rite
