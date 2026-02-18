@@ -1,6 +1,8 @@
 // Package session provides core session domain logic for Ariadne.
 package session
 
+import "strings"
+
 // Status represents session lifecycle state.
 type Status string
 
@@ -33,4 +35,26 @@ func (s Status) IsValid() bool {
 // IsTerminal returns true if this is a terminal state.
 func (s Status) IsTerminal() bool {
 	return s == StatusArchived
+}
+
+// statusAliases maps known non-FSM status names to their canonical equivalents.
+// These phantom values appear in real session files written by legacy scripts
+// or Moirai prompts that used informal status names.
+var statusAliases = map[string]Status{
+	"COMPLETE":  StatusArchived,
+	"COMPLETED": StatusArchived,
+}
+
+// NormalizeStatus maps known status aliases to canonical FSM values.
+// Valid FSM statuses pass through unchanged. Unknown values are returned
+// as-is for downstream validation to catch.
+func NormalizeStatus(raw string) Status {
+	s := Status(strings.ToUpper(strings.TrimSpace(raw)))
+	if s.IsValid() {
+		return s
+	}
+	if canonical, ok := statusAliases[string(s)]; ok {
+		return canonical
+	}
+	return s
 }

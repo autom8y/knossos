@@ -183,6 +183,28 @@ func TestFindActiveSession_SkipsNonSessionDirs(t *testing.T) {
 	}
 }
 
+func TestFindActiveSession_PhantomStatusNotActive(t *testing.T) {
+	// A session with phantom status "COMPLETED" should NOT appear as active.
+	// After normalization, COMPLETED → ARCHIVED, which != ACTIVE.
+	tmpDir, err := os.MkdirTemp("", "discovery-phantom-test-*")
+	if err != nil {
+		t.Fatalf("Failed to create temp dir: %v", err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	sessionsDir := filepath.Join(tmpDir, "sessions")
+	writeSessionContext(t, sessionsDir, "session-20260201-100000-complet1", "COMPLETED")
+	writeSessionContext(t, sessionsDir, "session-20260202-100000-complet2", "COMPLETE")
+
+	result, err := FindActiveSession(sessionsDir)
+	if err != nil {
+		t.Fatalf("FindActiveSession() error = %v", err)
+	}
+	if result != "" {
+		t.Errorf("FindActiveSession() = %q, want empty (phantom statuses should not match ACTIVE)", result)
+	}
+}
+
 // --- Dual-ACTIVE Session Scenario ---
 //
 // KNOWN BEHAVIOR: After a crash, two sessions could both have status ACTIVE.

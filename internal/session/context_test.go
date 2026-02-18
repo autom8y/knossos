@@ -238,6 +238,54 @@ func TestContext_Validate(t *testing.T) {
 	}
 }
 
+func TestParseContext_NormalizesPhantomStatus(t *testing.T) {
+	// "COMPLETED" is a phantom status — not in the FSM, but written by
+	// legacy scripts. ParseContext should normalize it to ARCHIVED.
+	content := `---
+schema_version: "2.1"
+session_id: "session-20260104-160414-563c681e"
+status: "COMPLETED"
+created_at: "2026-01-04T16:04:14Z"
+initiative: "Phantom status test"
+complexity: "MODULE"
+active_rite: "10x-dev"
+current_phase: "complete"
+---
+`
+
+	ctx, err := ParseContext([]byte(content))
+	if err != nil {
+		t.Fatalf("ParseContext() error = %v", err)
+	}
+
+	if ctx.Status != StatusArchived {
+		t.Errorf("Status = %q, want %q (COMPLETED should normalize to ARCHIVED)", ctx.Status, StatusArchived)
+	}
+}
+
+func TestParseContext_NormalizesComplete(t *testing.T) {
+	content := `---
+schema_version: "2.1"
+session_id: "session-20260104-160414-563c681e"
+status: "COMPLETE"
+created_at: "2026-01-04T16:04:14Z"
+initiative: "Phantom status test"
+complexity: "MODULE"
+active_rite: "10x-dev"
+current_phase: "complete"
+---
+`
+
+	ctx, err := ParseContext([]byte(content))
+	if err != nil {
+		t.Fatalf("ParseContext() error = %v", err)
+	}
+
+	if ctx.Status != StatusArchived {
+		t.Errorf("Status = %q, want %q (COMPLETE should normalize to ARCHIVED)", ctx.Status, StatusArchived)
+	}
+}
+
 func TestContext_FrayFields_RoundTrip(t *testing.T) {
 	now := time.Now().UTC().Truncate(time.Second)
 

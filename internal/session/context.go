@@ -94,7 +94,7 @@ func ParseContext(content []byte) (*Context, error) {
 	ctx := &Context{
 		SchemaVersion: yamlData.SchemaVersion,
 		SessionID:     yamlData.SessionID,
-		Status:        Status(yamlData.Status),
+		Status:        NormalizeStatus(yamlData.Status),
 		Initiative:    yamlData.Initiative,
 		Complexity:    yamlData.Complexity,
 		ActiveRite:    yamlData.ActiveRite,
