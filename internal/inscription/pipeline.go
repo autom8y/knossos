@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/autom8y/knossos/internal/errors"
+	"github.com/autom8y/knossos/internal/frontmatter"
 	"gopkg.in/yaml.v3"
 )
 
@@ -23,34 +24,15 @@ type AgentFrontmatter struct {
 
 // extractFrontmatter extracts and parses YAML frontmatter from markdown content.
 // Returns nil if no valid frontmatter is found.
+// Delegates to frontmatter.Parse which handles both \n and \r\n line endings.
 func extractFrontmatter(content string) *AgentFrontmatter {
-	lines := strings.Split(content, "\n")
-	if len(lines) < 3 {
+	yamlBytes, _, err := frontmatter.Parse([]byte(content))
+	if err != nil {
 		return nil
 	}
-
-	// Check for opening ---
-	if strings.TrimSpace(lines[0]) != "---" {
-		return nil
-	}
-
-	// Find closing ---
-	endIdx := -1
-	for i := 1; i < len(lines); i++ {
-		if strings.TrimSpace(lines[i]) == "---" {
-			endIdx = i
-			break
-		}
-	}
-	if endIdx == -1 {
-		return nil
-	}
-
-	// Extract frontmatter content
-	frontmatterYAML := strings.Join(lines[1:endIdx], "\n")
 
 	var fm AgentFrontmatter
-	if err := yaml.Unmarshal([]byte(frontmatterYAML), &fm); err != nil {
+	if err := yaml.Unmarshal(yamlBytes, &fm); err != nil {
 		return nil
 	}
 

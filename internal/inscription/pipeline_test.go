@@ -644,6 +644,13 @@ description: "Tests everything adversarially"
 			wantRole: "",
 			wantDesc: "",
 		},
+		{
+			name:     "CRLF line endings",
+			content:  "---\r\nname: architect\r\nrole: \"Evaluates tradeoffs\"\r\ndescription: \"System design authority\"\r\n---\r\n# Architect",
+			wantNil:  false,
+			wantRole: "Evaluates tradeoffs",
+			wantDesc: "System design authority",
+		},
 	}
 
 	for _, tt := range tests {
