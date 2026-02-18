@@ -1478,7 +1478,7 @@ func (m *Materializer) trackState(manifest *RiteManifest, activeRiteName string)
 
 	if state == nil {
 		// Initialize new state
-		state, err = stateManager.Initialize(fmt.Sprintf("local:%s", activeRiteName))
+		state, err = stateManager.Initialize()
 		if err != nil {
 			return err
 		}

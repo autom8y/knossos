@@ -1,5 +1,5 @@
 // Package sync provides sync state management for Ariadne.
-// It handles tracking of synced files, checksums, and conflict detection.
+// It handles tracking the active rite and last sync timestamp.
 package sync
 
 import (
@@ -15,32 +15,9 @@ import (
 
 // State represents the sync state stored in .claude/sync/state.json.
 type State struct {
-	SchemaVersion string                 `json:"schema_version"`
-	Remote        string                 `json:"remote"`
-	ActiveRite    string                 `json:"active_rite,omitempty"`
-	LastSync      time.Time              `json:"last_sync"`
-	TrackedFiles  map[string]TrackedFile `json:"tracked_files"`
-	Conflicts     []Conflict             `json:"conflicts,omitempty"`
-}
-
-// TrackedFile represents a file being tracked for sync.
-type TrackedFile struct {
-	Path         string    `json:"path"`
-	LocalHash    string    `json:"local_hash"`
-	RemoteHash   string    `json:"remote_hash"`
-	BaseHash     string    `json:"base_hash"` // Common ancestor hash for conflict detection
-	LastModified time.Time `json:"last_modified"`
-	Status       string    `json:"status"` // synced, modified, conflict
-}
-
-// Conflict represents a sync conflict.
-type Conflict struct {
-	Path        string `json:"path"`
-	Description string `json:"description"`
-	LocalHash   string `json:"local_hash"`
-	RemoteHash  string `json:"remote_hash"`
-	BaseHash    string `json:"base_hash"`
-	DetectedAt  string `json:"detected_at"`
+	SchemaVersion string    `json:"schema_version"`
+	ActiveRite    string    `json:"active_rite,omitempty"`
+	LastSync      time.Time `json:"last_sync"`
 }
 
 // CurrentSchemaVersion is the current state schema version.
@@ -126,14 +103,11 @@ func (m *StateManager) Save(state *State) error {
 	return nil
 }
 
-// Initialize creates a new sync state for the given remote.
-func (m *StateManager) Initialize(remote string) (*State, error) {
+// Initialize creates a new sync state.
+func (m *StateManager) Initialize() (*State, error) {
 	state := &State{
 		SchemaVersion: CurrentSchemaVersion,
-		Remote:        remote,
 		LastSync:      time.Now().UTC(),
-		TrackedFiles:  make(map[string]TrackedFile),
-		Conflicts:     []Conflict{},
 	}
 
 	if err := m.Save(state); err != nil {
@@ -157,16 +131,4 @@ func ComputeFileHash(path string) (string, error) {
 // ComputeContentHash computes the SHA-256 hash of content bytes with "sha256:" prefix.
 func ComputeContentHash(content []byte) string {
 	return checksum.Bytes(content)
-}
-
-// UpdateTrackedFile updates or adds a tracked file entry.
-func (m *StateManager) UpdateTrackedFile(state *State, path, localHash, remoteHash, baseHash, status string) {
-	state.TrackedFiles[path] = TrackedFile{
-		Path:         path,
-		LocalHash:    localHash,
-		RemoteHash:   remoteHash,
-		BaseHash:     baseHash,
-		LastModified: time.Now().UTC(),
-		Status:       status,
-	}
 }

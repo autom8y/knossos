@@ -27,13 +27,13 @@ func TestStateManager_InitializeAndLoad(t *testing.T) {
 	}
 
 	// Initialize
-	state, err := manager.Initialize("https://example.com/config")
+	state, err := manager.Initialize()
 	if err != nil {
 		t.Fatalf("Initialize() error = %v", err)
 	}
 
-	if state.Remote != "https://example.com/config" {
-		t.Errorf("Remote = %q, want %q", state.Remote, "https://example.com/config")
+	if state.SchemaVersion != "1.0" {
+		t.Errorf("SchemaVersion = %q, want %q", state.SchemaVersion, "1.0")
 	}
 
 	// Now should be initialized
@@ -47,40 +47,8 @@ func TestStateManager_InitializeAndLoad(t *testing.T) {
 		t.Fatalf("Load() error = %v", err)
 	}
 
-	if loaded.Remote != "https://example.com/config" {
-		t.Errorf("Loaded Remote = %q, want %q", loaded.Remote, "https://example.com/config")
-	}
-}
-
-func TestStateManager_TrackedFiles(t *testing.T) {
-	tmpDir := t.TempDir()
-	claudeDir := filepath.Join(tmpDir, ".claude")
-	if err := os.MkdirAll(claudeDir, 0755); err != nil {
-		t.Fatalf("failed to create .claude dir: %v", err)
-	}
-
-	resolver := paths.NewResolver(tmpDir)
-	manager := sync.NewStateManager(resolver)
-
-	state, err := manager.Initialize("https://example.com")
-	if err != nil {
-		t.Fatalf("Initialize() error = %v", err)
-	}
-
-	// Add tracked file
-	manager.UpdateTrackedFile(state, ".claude/CLAUDE.md", "abc123", "abc123", "abc123", "synced")
-
-	if len(state.TrackedFiles) != 1 {
-		t.Errorf("TrackedFiles count = %d, want 1", len(state.TrackedFiles))
-	}
-
-	tracked := state.TrackedFiles[".claude/CLAUDE.md"]
-	if tracked.LocalHash != "abc123" {
-		t.Errorf("LocalHash = %q, want %q", tracked.LocalHash, "abc123")
-	}
-
-	if tracked.Status != "synced" {
-		t.Errorf("Status = %q, want %q", tracked.Status, "synced")
+	if loaded.SchemaVersion != "1.0" {
+		t.Errorf("Loaded SchemaVersion = %q, want %q", loaded.SchemaVersion, "1.0")
 	}
 }
 
@@ -94,7 +62,7 @@ func TestState_ActiveRiteField(t *testing.T) {
 	resolver := paths.NewResolver(tmpDir)
 	manager := sync.NewStateManager(resolver)
 
-	state, err := manager.Initialize("local:hygiene")
+	state, err := manager.Initialize()
 	if err != nil {
 		t.Fatalf("Initialize() error = %v", err)
 	}
@@ -126,7 +94,7 @@ func TestState_ActiveRiteOmittedWhenEmpty(t *testing.T) {
 	resolver := paths.NewResolver(tmpDir)
 	manager := sync.NewStateManager(resolver)
 
-	state, err := manager.Initialize("local:none")
+	state, err := manager.Initialize()
 	if err != nil {
 		t.Fatalf("Initialize() error = %v", err)
 	}
