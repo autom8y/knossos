@@ -287,8 +287,17 @@ func (m *Manager) GetLockInfo(sessionID string) (*LockMetadata, error) {
 }
 
 // ForceRelease forcibly removes a lock file (for stale lock cleanup).
+// Emits a diagnostic warning if the lock appears live (not stale).
 func (m *Manager) ForceRelease(sessionID string) error {
 	lockPath := m.lockFilePath(sessionID)
+	if !m.IsStale(lockPath, false) {
+		if meta, err := m.getLockMetadata(lockPath); err == nil {
+			fmt.Fprintf(os.Stderr, "warning: force-releasing lock that appears live (holder=%s, acquired=%s)\n",
+				meta.Holder, time.Unix(meta.Acquired, 0).Format(time.RFC3339))
+		} else {
+			fmt.Fprintf(os.Stderr, "warning: force-releasing lock that appears live (metadata unreadable)\n")
+		}
+	}
 	if err := os.Remove(lockPath); err != nil && !os.IsNotExist(err) {
 		return errors.Wrap(errors.CodeGeneralError, "failed to remove lock file", err)
 	}

@@ -9,9 +9,23 @@ import (
 	"github.com/autom8y/knossos/internal/errors"
 )
 
-// Event represents a session event (legacy format for compatibility with audit command).
-// This format is used for reading old EventEmitter events that may still exist in events.jsonl.
-// New events are written using clewcontract format.
+// Dual Event Structs — ADR-0027 Backward Compatibility Bridge
+//
+// This file maintains two event structs (Event and ClewEvent) to support reading
+// events.jsonl files that contain both pre-ADR-0027 (EventEmitter) and post-ADR-0027
+// (clewcontract) format entries. The canonical write type is clewcontract.Event —
+// all new event emission goes through clewcontract constructors and BufferedEventWriter.
+//
+// This dual-read capability exists solely for the `ari session audit` command, which
+// must read historical event logs spanning the format migration. It is a deliberate
+// ADR-0027 exception: the write path is fully unified, but the read path bridges both.
+//
+// Removal trigger: once all sessions created before ADR-0027 sprint 3 (commit 1a0e8f7)
+// have been wrapped and archived, legacy Event entries will no longer appear in any
+// active session's events.jsonl. At that point, the legacy Event struct and the
+// format-sniffing logic in ReadEvents() can be removed.
+
+// Event represents a session event in the pre-ADR-0027 EventEmitter format.
 type Event struct {
 	Timestamp string                 `json:"timestamp"`
 	Event     string                 `json:"event"`

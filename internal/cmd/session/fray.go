@@ -9,6 +9,7 @@ import (
 
 	"github.com/autom8y/knossos/internal/errors"
 	"github.com/autom8y/knossos/internal/hook/clewcontract"
+	"github.com/autom8y/knossos/internal/lock"
 	"github.com/autom8y/knossos/internal/output"
 	"github.com/autom8y/knossos/internal/paths"
 	"github.com/autom8y/knossos/internal/session"
@@ -86,6 +87,15 @@ func runFray(ctx *cmdContext, opts frayOptions) error {
 // fraySession performs the core fray operation. Extracted for testability.
 func fraySession(projectDir, parentID string, opts frayOptions) (*output.FrayOutput, error) {
 	resolver := paths.NewResolver(projectDir)
+	lockMgr := lock.NewManager(resolver.LocksDir())
+	fsm := session.NewFSM()
+
+	// Acquire exclusive lock on parent session
+	parentLock, err := lockMgr.Acquire(parentID, lock.Exclusive, lock.DefaultTimeout, "ari-session-fray")
+	if err != nil {
+		return nil, err
+	}
+	defer parentLock.Release()
 
 	// Load parent context
 	parentCtxPath := resolver.SessionContextFile(parentID)
@@ -97,10 +107,9 @@ func fraySession(projectDir, parentID string, opts frayOptions) (*output.FrayOut
 		return nil, err
 	}
 
-	// Validate parent is ACTIVE
-	if parentCtx.Status != session.StatusActive {
-		return nil, errors.ErrLifecycleViolation(string(parentCtx.Status), "PARKED",
-			"can only fray an ACTIVE session")
+	// Validate parent can transition to PARKED (fray parks the parent)
+	if err := fsm.ValidateTransition(parentCtx.Status, session.StatusParked); err != nil {
+		return nil, err
 	}
 
 	// Create child session inheriting parent's attributes

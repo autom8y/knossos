@@ -125,6 +125,13 @@ func runCreate(ctx *cmdContext, initiative string, opts createOptions) error {
 		}
 	}
 
+	// Validate FSM transition (defense-in-depth: NONE -> ACTIVE)
+	fsm := session.NewFSM()
+	if err := fsm.ValidateTransition(session.StatusNone, session.StatusActive); err != nil {
+		printer.PrintError(err)
+		return err
+	}
+
 	// Create new session context
 	newCtx := session.NewContext(initiative, opts.complexity, rite)
 	sessionDir := resolver.SessionDir(newCtx.SessionID)
@@ -256,6 +263,15 @@ func runCreateSeeded(ctx *cmdContext, initiative string, opts createOptions) err
 		cleanupWorktree()
 		printer.PrintError(err)
 		return err
+	}
+
+	// Emit lifecycle events in worktree before copying
+	writer := clewcontract.NewBufferedEventWriter(worktreeSessionDir, clewcontract.DefaultFlushInterval)
+	defer writer.Close()
+	writer.Write(clewcontract.NewSessionCreatedEvent(newCtx.SessionID, initiative, opts.complexity, rite))
+	writer.Write(clewcontract.NewSessionParkedEvent(newCtx.SessionID, "seeded creation"))
+	if err := writer.Flush(); err != nil {
+		printer.VerboseLog("warn", "failed to write seeded events", map[string]interface{}{"error": err.Error()})
 	}
 
 	// Copy session from worktree to main repo
