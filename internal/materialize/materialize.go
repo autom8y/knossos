@@ -159,8 +159,8 @@ func (m *Materializer) getClaudeDir() string {
 // For embedded sources, returns a sub-FS of the embedded rites.
 // For filesystem sources, returns os.DirFS rooted at the rite path.
 func (m *Materializer) riteFS(resolved *ResolvedRite) fs.FS {
-	if resolved.Source.Type == SourceEmbedded && m.sourceResolver.embeddedFS != nil {
-		sub, err := fs.Sub(m.sourceResolver.embeddedFS, resolved.RitePath)
+	if resolved.Source.Type == SourceEmbedded && m.sourceResolver.EmbeddedFS != nil {
+		sub, err := fs.Sub(m.sourceResolver.EmbeddedFS, resolved.RitePath)
 		if err != nil {
 			return os.DirFS(resolved.RitePath)
 		}
@@ -741,8 +741,8 @@ func (m *Materializer) loadRiteManifest(ritePath string, resolved *ResolvedRite)
 	var data []byte
 	var err error
 
-	if resolved != nil && resolved.Source.Type == SourceEmbedded && m.sourceResolver.embeddedFS != nil {
-		data, err = fs.ReadFile(m.sourceResolver.embeddedFS, resolved.ManifestPath)
+	if resolved != nil && resolved.Source.Type == SourceEmbedded && m.sourceResolver.EmbeddedFS != nil {
+		data, err = fs.ReadFile(m.sourceResolver.EmbeddedFS, resolved.ManifestPath)
 	} else {
 		manifestPath := filepath.Join(ritePath, "manifest.yaml")
 		data, err = os.ReadFile(manifestPath)
@@ -899,8 +899,8 @@ func (m *Materializer) listCrossRiteAgents(resolved *ResolvedRite) []string {
 	var agents []string
 
 	// For embedded sources, read from embedded FS
-	if resolved != nil && resolved.Source.Type == SourceEmbedded && m.sourceResolver.embeddedFS != nil {
-		entries, err := fs.ReadDir(m.sourceResolver.embeddedFS, "agents")
+	if resolved != nil && resolved.Source.Type == SourceEmbedded && m.sourceResolver.EmbeddedFS != nil {
+		entries, err := fs.ReadDir(m.sourceResolver.EmbeddedFS, "agents")
 		if err != nil {
 			return agents // No cross-rite agents in embedded FS
 		}
@@ -937,8 +937,8 @@ func (m *Materializer) materializeCrossRiteAgents(agentsDir string, resolved *Re
 	}
 
 	// For embedded sources, copy from embedded FS
-	if resolved != nil && resolved.Source.Type == SourceEmbedded && m.sourceResolver.embeddedFS != nil {
-		entries, err := fs.ReadDir(m.sourceResolver.embeddedFS, "agents")
+	if resolved != nil && resolved.Source.Type == SourceEmbedded && m.sourceResolver.EmbeddedFS != nil {
+		entries, err := fs.ReadDir(m.sourceResolver.EmbeddedFS, "agents")
 		if err != nil {
 			return nil // No cross-rite agents in embedded FS
 		}
@@ -950,7 +950,7 @@ func (m *Materializer) materializeCrossRiteAgents(agentsDir string, resolved *Re
 			if riteAgents[entry.Name()] {
 				continue
 			}
-			content, err := fs.ReadFile(m.sourceResolver.embeddedFS, "agents/"+entry.Name())
+			content, err := fs.ReadFile(m.sourceResolver.EmbeddedFS, "agents/"+entry.Name())
 			if err != nil {
 				return err
 			}
@@ -1025,7 +1025,7 @@ func (m *Materializer) materializeMena(manifest *RiteManifest, claudeDir string,
 	commandsDir := filepath.Join(claudeDir, "commands")
 	skillsDir := filepath.Join(claudeDir, "skills")
 
-	isEmbedded := resolved != nil && resolved.Source.Type == SourceEmbedded && m.sourceResolver.embeddedFS != nil
+	isEmbedded := resolved != nil && resolved.Source.Type == SourceEmbedded && m.sourceResolver.EmbeddedFS != nil
 
 	// Build priority-ordered source list (later sources override earlier)
 	var sources []MenaSource
@@ -1038,7 +1038,7 @@ func (m *Materializer) materializeMena(manifest *RiteManifest, claudeDir string,
 
 	if isEmbedded {
 		// For embedded sources, read mena from embedded FS
-		embFS := m.sourceResolver.embeddedFS
+		embFS := m.sourceResolver.EmbeddedFS
 
 		// 2. Shared rite mena
 		sources = append(sources, MenaSource{Fsys: embFS, FsysPath: "rites/shared/mena", IsEmbedded: true})
@@ -1197,8 +1197,8 @@ func (m *Materializer) getMenaDir() string {
 	}
 
 	// Fall back to Knossos platform mena
-	if m.sourceResolver.knossosHome != "" {
-		knossosMena := filepath.Join(m.sourceResolver.knossosHome, "mena")
+	if m.sourceResolver.KnossosHome() != "" {
+		knossosMena := filepath.Join(m.sourceResolver.KnossosHome(), "mena")
 		if _, err := os.Stat(knossosMena); err == nil {
 			return knossosMena
 		}

@@ -1,4 +1,4 @@
-package materialize
+package source
 
 import (
 	"os"
