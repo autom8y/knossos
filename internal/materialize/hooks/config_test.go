@@ -1,4 +1,4 @@
-package materialize
+package hooks
 
 import (
 	"encoding/json"
@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	"github.com/autom8y/knossos/internal/config"
-	"github.com/autom8y/knossos/internal/paths"
 )
 
 // extractHookCommand extracts the command from the first hook handler in a matcher group.
@@ -46,7 +45,7 @@ func TestBuildHooksSettings(t *testing.T) {
 		},
 	}
 
-	hooks := buildHooksSettings(cfg)
+	hooks := BuildHooksSettings(cfg)
 
 	// Check all event types are present
 	expectedEvents := []string{"PreToolUse", "PostToolUse", "SessionStart", "Stop"}
@@ -115,7 +114,7 @@ func TestBuildHooksSettings_IncludesTimeout(t *testing.T) {
 		},
 	}
 
-	hooks := buildHooksSettings(cfg)
+	hooks := BuildHooksSettings(cfg)
 	preToolUse := hooks["PreToolUse"].([]map[string]any)
 	hooksArr := preToolUse[0]["hooks"].([]map[string]any)
 
@@ -133,7 +132,7 @@ func TestBuildHooksSettings_SkipsEmptyCommand(t *testing.T) {
 		},
 	}
 
-	hooks := buildHooksSettings(cfg)
+	hooks := BuildHooksSettings(cfg)
 	preToolUse, ok := hooks["PreToolUse"].([]map[string]any)
 	if !ok {
 		t.Fatalf("PreToolUse is not []map[string]any")
@@ -152,7 +151,7 @@ func TestMergeHooksSettings_FreshSettings(t *testing.T) {
 	}
 
 	settings := make(map[string]any)
-	result := mergeHooksSettings(settings, cfg)
+	result := MergeHooksSettings(settings, cfg)
 
 	hooks, ok := result["hooks"].(map[string]any)
 	if !ok {
@@ -200,7 +199,7 @@ func TestMergeHooksSettings_PreservesUserHooks(t *testing.T) {
 		},
 	}
 
-	result := mergeHooksSettings(settings, cfg)
+	result := MergeHooksSettings(settings, cfg)
 
 	hooks := result["hooks"].(map[string]any)
 	preToolUse := hooks["PreToolUse"].([]map[string]any)
@@ -239,7 +238,7 @@ func TestMergeHooksSettings_PreservesOldFlatUserHooks(t *testing.T) {
 		},
 	}
 
-	result := mergeHooksSettings(settings, cfg)
+	result := MergeHooksSettings(settings, cfg)
 
 	hooks := result["hooks"].(map[string]any)
 	preToolUse := hooks["PreToolUse"].([]map[string]any)
@@ -286,7 +285,7 @@ func TestMergeHooksSettings_RemovesOldAriHooks(t *testing.T) {
 		},
 	}
 
-	result := mergeHooksSettings(settings, cfg)
+	result := MergeHooksSettings(settings, cfg)
 
 	hooks := result["hooks"].(map[string]any)
 	postToolUse := hooks["PostToolUse"].([]map[string]any)
@@ -310,14 +309,14 @@ func TestMergeHooksSettings_Idempotent(t *testing.T) {
 	}
 
 	settings := make(map[string]any)
-	result1 := mergeHooksSettings(settings, cfg)
+	result1 := MergeHooksSettings(settings, cfg)
 
 	// Serialize to JSON and back (simulates load/save cycle)
 	data, _ := json.Marshal(result1)
 	var settings2 map[string]any
 	json.Unmarshal(data, &settings2)
 
-	result2 := mergeHooksSettings(settings2, cfg)
+	result2 := MergeHooksSettings(settings2, cfg)
 
 	// Marshal both and compare
 	data1, _ := json.MarshalIndent(result1, "", "  ")
@@ -376,9 +375,9 @@ func TestIsAriManagedGroup(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := isAriManagedGroup(tt.group)
+			got := IsAriManagedGroup(tt.group)
 			if got != tt.want {
-				t.Errorf("isAriManagedGroup() = %v, want %v", got, tt.want)
+				t.Errorf("IsAriManagedGroup() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -405,16 +404,12 @@ hooks:
 		t.Fatal(err)
 	}
 
-	// Create a materializer pointing at the temp dir
-	resolver := paths.NewResolver(tmpDir)
-	mat := NewMaterializer(resolver)
-
 	// Override knossosHome to point at tmpDir via env var
 	config.ResetKnossosHome()
 	t.Setenv("KNOSSOS_HOME", tmpDir)
 	t.Cleanup(config.ResetKnossosHome)
 
-	cfg := mat.loadHooksConfig()
+	cfg := LoadHooksConfig(tmpDir)
 	if cfg == nil {
 		t.Fatal("Expected hooks config, got nil")
 	}
@@ -448,10 +443,7 @@ hooks:
 	t.Setenv("KNOSSOS_HOME", tmpDir)
 	t.Cleanup(config.ResetKnossosHome)
 
-	resolver := paths.NewResolver(tmpDir)
-	mat := NewMaterializer(resolver)
-
-	cfg := mat.loadHooksConfig()
+	cfg := LoadHooksConfig(tmpDir)
 	if cfg != nil {
 		t.Error("Expected nil for v1 schema, got config")
 	}
@@ -463,10 +455,7 @@ func TestLoadHooksConfig_NoFile(t *testing.T) {
 	t.Setenv("KNOSSOS_HOME", tmpDir)
 	t.Cleanup(config.ResetKnossosHome)
 
-	resolver := paths.NewResolver(tmpDir)
-	mat := NewMaterializer(resolver)
-
-	cfg := mat.loadHooksConfig()
+	cfg := LoadHooksConfig(tmpDir)
 	if cfg != nil {
 		t.Error("Expected nil when no hooks.yaml exists")
 	}
@@ -480,7 +469,7 @@ func TestBuildHooksSettings_IncludesAsync(t *testing.T) {
 		},
 	}
 
-	hooks := buildHooksSettings(cfg)
+	hooks := BuildHooksSettings(cfg)
 	postToolUse := hooks["PostToolUse"].([]map[string]any)
 	hooksArr := postToolUse[0]["hooks"].([]map[string]any)
 
@@ -497,7 +486,7 @@ func TestBuildHooksSettings_OmitsAsyncWhenFalse(t *testing.T) {
 		},
 	}
 
-	hooks := buildHooksSettings(cfg)
+	hooks := BuildHooksSettings(cfg)
 	preToolUse := hooks["PreToolUse"].([]map[string]any)
 	hooksArr := preToolUse[0]["hooks"].([]map[string]any)
 
@@ -505,4 +494,3 @@ func TestBuildHooksSettings_OmitsAsyncWhenFalse(t *testing.T) {
 		t.Errorf("async field should not exist when false, got %v", hooksArr[0]["async"])
 	}
 }
-
