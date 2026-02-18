@@ -71,6 +71,20 @@ func runWrap(ctx *cmdContext, opts wrapOptions) error {
 		return err
 	}
 
+	// Check if session is already archived before acquiring lock
+	archiveSessionPath := resolver.ArchiveDir() + "/" + sessionID
+	if _, statErr := os.Stat(archiveSessionPath); statErr == nil {
+		err := errors.NewWithDetails(errors.CodeLifecycleViolation,
+			fmt.Sprintf("Session %s is already archived", sessionID),
+			map[string]interface{}{
+				"session_id":   sessionID,
+				"archive_path": archiveSessionPath,
+				"hint":         "Session was previously wrapped and cannot be wrapped again.",
+			})
+		printer.PrintError(err)
+		return err
+	}
+
 	// Acquire exclusive lock
 	sessionLock, err := lockMgr.Acquire(sessionID, lock.Exclusive, lock.DefaultTimeout, "ari-session-wrap")
 	if err != nil {
@@ -234,6 +248,21 @@ func runWrap(ctx *cmdContext, opts wrapOptions) error {
 					printer.VerboseLog("warn", "failed to move to archive", map[string]interface{}{"error": err.Error()})
 				} else {
 					archived = true
+					// Defensive: verify source directory is gone after rename
+					// (os.Rename should be atomic, but guard against edge cases)
+					if _, statErr := os.Stat(sessionDir); statErr == nil {
+						if removeErr := os.RemoveAll(sessionDir); removeErr != nil {
+							printer.VerboseLog("warn", "failed to remove ghost session directory after archive", map[string]interface{}{"error": removeErr.Error()})
+						}
+					}
+				}
+			} else if err == nil {
+				// Archive target already exists (from a previous interrupted wrap).
+				// The session context was already updated to ARCHIVED above,
+				// so the live directory is a stale ghost — remove it.
+				archived = true
+				if removeErr := os.RemoveAll(sessionDir); removeErr != nil {
+					printer.VerboseLog("warn", "failed to remove ghost session directory", map[string]interface{}{"error": removeErr.Error()})
 				}
 			}
 		}
