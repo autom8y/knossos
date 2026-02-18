@@ -1,4 +1,4 @@
-package materialize
+package mena
 
 import (
 	"os"
@@ -63,12 +63,10 @@ func TestRouteMenaFile(t *testing.T) {
 	}
 }
 
-// TestSyncMena_Destructive verifies full projection with destructive mode:
-// selectively replaces managed entries while preserving user-created content.
+// TestSyncMena_Destructive verifies full projection with destructive mode.
 func TestSyncMena_Destructive(t *testing.T) {
 	tmpDir := t.TempDir()
 
-	// Create mena source with a dromena and a legomena
 	menaDir := filepath.Join(tmpDir, "mena")
 	droDir := filepath.Join(menaDir, "my-cmd")
 	legoDir := filepath.Join(menaDir, "my-ref")
@@ -89,7 +87,6 @@ func TestSyncMena_Destructive(t *testing.T) {
 		t.Fatalf("Failed to write lego INDEX: %v", err)
 	}
 
-	// Create pre-existing files that should be wiped
 	commandsDir := filepath.Join(tmpDir, "commands")
 	skillsDir := filepath.Join(tmpDir, "skills")
 	if err := os.MkdirAll(commandsDir, 0755); err != nil {
@@ -99,9 +96,7 @@ func TestSyncMena_Destructive(t *testing.T) {
 		t.Fatalf("Failed to write stale file: %v", err)
 	}
 
-	sources := []MenaSource{
-		{Path: menaDir},
-	}
+	sources := []MenaSource{{Path: menaDir}}
 	opts := MenaProjectionOptions{
 		Mode:              MenaProjectionDestructive,
 		Filter:            ProjectAll,
@@ -114,45 +109,30 @@ func TestSyncMena_Destructive(t *testing.T) {
 		t.Fatalf("SyncMena failed: %v", err)
 	}
 
-	// Verify user-created file is preserved (selective write, not destructive nuke)
 	if _, err := os.Stat(filepath.Join(commandsDir, "stale.md")); os.IsNotExist(err) {
-		t.Errorf("Selective write should preserve user-created stale.md, but it was deleted")
+		t.Errorf("Selective write should preserve user-created stale.md")
 	}
 
-	// Verify dromena INDEX.md promoted to parent level (commands/my-cmd.md)
 	cmdPromoted := filepath.Join(commandsDir, "my-cmd.md")
 	if _, err := os.Stat(cmdPromoted); os.IsNotExist(err) {
-		t.Errorf("Expected promoted dromena at %s, but it does not exist", cmdPromoted)
+		t.Errorf("Expected promoted dromena at %s", cmdPromoted)
 	}
-	// Verify old INDEX.md does NOT exist in subdirectory
+
 	cmdOldIndex := filepath.Join(commandsDir, "my-cmd", "INDEX.md")
 	if _, err := os.Stat(cmdOldIndex); err == nil {
-		t.Errorf("INDEX.md should not exist in subdirectory (should be promoted to my-cmd.md)")
+		t.Errorf("INDEX.md should not exist in subdirectory")
 	}
+
 	cmdHelper := filepath.Join(commandsDir, "my-cmd", "helper.md")
 	if _, err := os.Stat(cmdHelper); os.IsNotExist(err) {
-		t.Errorf("Expected helper.md at %s, but it does not exist", cmdHelper)
+		t.Errorf("Expected helper.md at %s", cmdHelper)
 	}
 
-	// Verify un-stripped name does NOT exist
-	cmdOld := filepath.Join(commandsDir, "my-cmd", "INDEX.dro.md")
-	if _, err := os.Stat(cmdOld); err == nil {
-		t.Errorf("INDEX.dro.md should not exist in output")
-	}
-
-	// Verify legomena projected to skills/ with stripped names
 	skillIndex := filepath.Join(skillsDir, "my-ref", "INDEX.md")
 	if _, err := os.Stat(skillIndex); os.IsNotExist(err) {
-		t.Errorf("Expected legomena INDEX.md (stripped) at %s, but it does not exist", skillIndex)
+		t.Errorf("Expected legomena INDEX.md at %s", skillIndex)
 	}
 
-	// Verify un-stripped name does NOT exist
-	skillOld := filepath.Join(skillsDir, "my-ref", "INDEX.lego.md")
-	if _, err := os.Stat(skillOld); err == nil {
-		t.Errorf("INDEX.lego.md should not exist in output (should be stripped to INDEX.md)")
-	}
-
-	// Verify result tracking
 	if len(result.CommandsProjected) == 0 {
 		t.Errorf("Expected CommandsProjected to be non-empty")
 	}
@@ -165,7 +145,6 @@ func TestSyncMena_Destructive(t *testing.T) {
 func TestSyncMena_Additive(t *testing.T) {
 	tmpDir := t.TempDir()
 
-	// Create pre-existing files that should be preserved
 	commandsDir := filepath.Join(tmpDir, "commands")
 	skillsDir := filepath.Join(tmpDir, "skills")
 	if err := os.MkdirAll(commandsDir, 0755); err != nil {
@@ -179,7 +158,6 @@ func TestSyncMena_Additive(t *testing.T) {
 		t.Fatalf("Failed to write user file: %v", err)
 	}
 
-	// Create mena source
 	menaDir := filepath.Join(tmpDir, "mena")
 	droDir := filepath.Join(menaDir, "new-cmd")
 	if err := os.MkdirAll(droDir, 0755); err != nil {
@@ -189,9 +167,7 @@ func TestSyncMena_Additive(t *testing.T) {
 		t.Fatalf("Failed to write INDEX.dro.md: %v", err)
 	}
 
-	sources := []MenaSource{
-		{Path: menaDir},
-	}
+	sources := []MenaSource{{Path: menaDir}}
 	opts := MenaProjectionOptions{
 		Mode:              MenaProjectionAdditive,
 		Filter:            ProjectAll,
@@ -204,24 +180,20 @@ func TestSyncMena_Additive(t *testing.T) {
 		t.Fatalf("SyncMena additive failed: %v", err)
 	}
 
-	// Verify user-created file is preserved
 	if _, err := os.Stat(userFile); os.IsNotExist(err) {
-		t.Errorf("Additive mode should preserve user-created.md, but it was deleted")
+		t.Errorf("Additive mode should preserve user-created.md")
 	}
 
-	// Verify new command was promoted to parent level
 	newCmd := filepath.Join(commandsDir, "new-cmd.md")
 	if _, err := os.Stat(newCmd); os.IsNotExist(err) {
-		t.Errorf("Expected promoted command at %s, but it does not exist", newCmd)
+		t.Errorf("Expected promoted command at %s", newCmd)
 	}
 }
 
-// TestSyncMena_PriorityOverride verifies that later sources override earlier
-// sources for the same mena name.
+// TestSyncMena_PriorityOverride verifies later sources override earlier ones.
 func TestSyncMena_PriorityOverride(t *testing.T) {
 	tmpDir := t.TempDir()
 
-	// Create low-priority source
 	lowDir := filepath.Join(tmpDir, "low", "my-cmd")
 	if err := os.MkdirAll(lowDir, 0755); err != nil {
 		t.Fatalf("Failed to create low dir: %v", err)
@@ -230,7 +202,6 @@ func TestSyncMena_PriorityOverride(t *testing.T) {
 		t.Fatalf("Failed to write low INDEX: %v", err)
 	}
 
-	// Create high-priority source
 	highDir := filepath.Join(tmpDir, "high", "my-cmd")
 	if err := os.MkdirAll(highDir, 0755); err != nil {
 		t.Fatalf("Failed to create high dir: %v", err)
@@ -242,7 +213,6 @@ func TestSyncMena_PriorityOverride(t *testing.T) {
 	commandsDir := filepath.Join(tmpDir, "commands")
 	skillsDir := filepath.Join(tmpDir, "skills")
 
-	// Low priority first, high priority second (later overrides)
 	sources := []MenaSource{
 		{Path: filepath.Join(tmpDir, "low")},
 		{Path: filepath.Join(tmpDir, "high")},
@@ -259,7 +229,6 @@ func TestSyncMena_PriorityOverride(t *testing.T) {
 		t.Fatalf("SyncMena priority override failed: %v", err)
 	}
 
-	// Verify the high-priority content wins (promoted to my-cmd.md)
 	cmdPromoted := filepath.Join(commandsDir, "my-cmd.md")
 	content, err := os.ReadFile(cmdPromoted)
 	if err != nil {
@@ -271,13 +240,10 @@ func TestSyncMena_PriorityOverride(t *testing.T) {
 	}
 }
 
-// TestSyncMena_EmbeddedFS verifies projection from an embedded FS source
-// with extension stripping. Uses a realistic path structure matching how
-// materializeMena builds embedded sources (e.g., "rites/shared/mena").
+// TestSyncMena_EmbeddedFS verifies projection from an embedded FS source.
 func TestSyncMena_EmbeddedFS(t *testing.T) {
 	tmpDir := t.TempDir()
 
-	// Build an in-memory FS mimicking real embedded rite structure
 	fsys := fstest.MapFS{
 		"rites/test-rite/mena/my-cmd/INDEX.dro.md": &fstest.MapFile{
 			Data: []byte("---\nname: my-cmd\n---\n# Embedded Command\n"),
@@ -290,7 +256,6 @@ func TestSyncMena_EmbeddedFS(t *testing.T) {
 	commandsDir := filepath.Join(tmpDir, "commands")
 	skillsDir := filepath.Join(tmpDir, "skills")
 
-	// Sources use FsysPath matching the real embedded directory structure
 	sources := []MenaSource{
 		{Fsys: fsys, FsysPath: "rites/shared/mena", IsEmbedded: true},
 		{Fsys: fsys, FsysPath: "rites/test-rite/mena", IsEmbedded: true},
@@ -308,34 +273,21 @@ func TestSyncMena_EmbeddedFS(t *testing.T) {
 		t.Fatalf("SyncMena embedded failed: %v", err)
 	}
 
-	// Verify dromena INDEX promoted to parent level
 	cmdPromoted := filepath.Join(commandsDir, "my-cmd.md")
 	if _, err := os.Stat(cmdPromoted); os.IsNotExist(err) {
-		t.Errorf("Expected promoted dromena at %s, but it does not exist", cmdPromoted)
+		t.Errorf("Expected promoted dromena at %s", cmdPromoted)
 	}
 
-	// Verify legomena stays in subdirectory (no promotion for skills)
 	skillIndex := filepath.Join(skillsDir, "my-ref", "INDEX.md")
 	if _, err := os.Stat(skillIndex); os.IsNotExist(err) {
-		t.Errorf("Expected embedded legomena at %s (stripped), but it does not exist", skillIndex)
+		t.Errorf("Expected embedded legomena at %s", skillIndex)
 	}
 
-	// Verify un-stripped names do NOT exist
-	cmdOld := filepath.Join(commandsDir, "my-cmd", "INDEX.dro.md")
-	if _, err := os.Stat(cmdOld); err == nil {
-		t.Errorf("INDEX.dro.md should not exist in embedded output")
-	}
-	skillOld := filepath.Join(skillsDir, "my-ref", "INDEX.lego.md")
-	if _, err := os.Stat(skillOld); err == nil {
-		t.Errorf("INDEX.lego.md should not exist in embedded output")
-	}
-
-	// Verify result tracking
 	if len(result.CommandsProjected) == 0 {
-		t.Errorf("Expected CommandsProjected to be non-empty for embedded source")
+		t.Errorf("Expected CommandsProjected to be non-empty")
 	}
 	if len(result.SkillsProjected) == 0 {
-		t.Errorf("Expected SkillsProjected to be non-empty for embedded source")
+		t.Errorf("Expected SkillsProjected to be non-empty")
 	}
 }
 
@@ -375,12 +327,10 @@ func TestSyncMena_Filter_DroOnly(t *testing.T) {
 		t.Fatalf("SyncMena failed: %v", err)
 	}
 
-	// Commands should exist (promoted to parent level)
 	if _, err := os.Stat(filepath.Join(commandsDir, "cmd1.md")); os.IsNotExist(err) {
-		t.Errorf("Expected cmd1.md to be projected to commands/ (promoted)")
+		t.Errorf("Expected cmd1.md to be projected to commands/")
 	}
 
-	// Skills should NOT be created (filter excludes lego)
 	if _, err := os.Stat(filepath.Join(skillsDir, "ref1", "INDEX.md")); !os.IsNotExist(err) {
 		t.Errorf("Expected ref1 to NOT be projected when filter is ProjectDro")
 	}
@@ -390,24 +340,18 @@ func TestSyncMena_Filter_DroOnly(t *testing.T) {
 	}
 }
 
-// TestSyncMena_StandaloneFileStripping verifies that standalone files in
-// grouping directories also have their extensions stripped.
+// TestSyncMena_StandaloneFileStripping verifies standalone files have extensions stripped.
 func TestSyncMena_StandaloneFileStripping(t *testing.T) {
 	tmpDir := t.TempDir()
 
-	// Create a grouping directory with standalone files
 	menaDir := filepath.Join(tmpDir, "mena")
 	groupDir := filepath.Join(menaDir, "navigation")
 	if err := os.MkdirAll(groupDir, 0755); err != nil {
 		t.Fatalf("Failed to create group dir: %v", err)
 	}
-
-	// Standalone file with .dro extension
 	if err := os.WriteFile(filepath.Join(groupDir, "rite.dro.md"), []byte("# Rite Navigation\n"), 0644); err != nil {
 		t.Fatalf("Failed to write standalone dro: %v", err)
 	}
-
-	// Standalone file with .lego extension
 	if err := os.WriteFile(filepath.Join(groupDir, "reference.lego.md"), []byte("# Reference\n"), 0644); err != nil {
 		t.Fatalf("Failed to write standalone lego: %v", err)
 	}
@@ -428,24 +372,13 @@ func TestSyncMena_StandaloneFileStripping(t *testing.T) {
 		t.Fatalf("SyncMena failed: %v", err)
 	}
 
-	// Verify standalone dro stripped and routed to commands/
 	droStripped := filepath.Join(commandsDir, "navigation", "rite.md")
 	if _, err := os.Stat(droStripped); os.IsNotExist(err) {
-		t.Errorf("Expected standalone dro at %s (stripped from rite.dro.md), but it does not exist", droStripped)
+		t.Errorf("Expected standalone dro at %s", droStripped)
 	}
-	droOld := filepath.Join(commandsDir, "navigation", "rite.dro.md")
-	if _, err := os.Stat(droOld); err == nil {
-		t.Errorf("Un-stripped rite.dro.md should not exist in output")
-	}
-
-	// Verify standalone lego stripped and routed to skills/
 	legoStripped := filepath.Join(skillsDir, "navigation", "reference.md")
 	if _, err := os.Stat(legoStripped); os.IsNotExist(err) {
-		t.Errorf("Expected standalone lego at %s (stripped from reference.lego.md), but it does not exist", legoStripped)
-	}
-	legoOld := filepath.Join(skillsDir, "navigation", "reference.lego.md")
-	if _, err := os.Stat(legoOld); err == nil {
-		t.Errorf("Un-stripped reference.lego.md should not exist in output")
+		t.Errorf("Expected standalone lego at %s", legoStripped)
 	}
 }
 
@@ -469,33 +402,19 @@ func TestSyncMena_EmptySources(t *testing.T) {
 		t.Fatalf("SyncMena with empty sources should not fail: %v", err)
 	}
 
-	if len(result.CommandsProjected) != 0 {
-		t.Errorf("Expected no commands projected from empty sources")
-	}
-	if len(result.SkillsProjected) != 0 {
-		t.Errorf("Expected no skills projected from empty sources")
-	}
-
-	// Directories should still be created
-	if _, err := os.Stat(commandsDir); os.IsNotExist(err) {
-		t.Errorf("commands/ dir should be created even with empty sources")
-	}
-	if _, err := os.Stat(skillsDir); os.IsNotExist(err) {
-		t.Errorf("skills/ dir should be created even with empty sources")
+	if len(result.CommandsProjected) != 0 || len(result.SkillsProjected) != 0 {
+		t.Errorf("Expected no projections from empty sources")
 	}
 }
 
-// TestSyncMena_NonexistentSource verifies graceful handling of sources that
-// don't exist on disk.
+// TestSyncMena_NonexistentSource verifies graceful handling of missing sources.
 func TestSyncMena_NonexistentSource(t *testing.T) {
 	tmpDir := t.TempDir()
 
 	commandsDir := filepath.Join(tmpDir, "commands")
 	skillsDir := filepath.Join(tmpDir, "skills")
 
-	sources := []MenaSource{
-		{Path: filepath.Join(tmpDir, "nonexistent-mena")},
-	}
+	sources := []MenaSource{{Path: filepath.Join(tmpDir, "nonexistent-mena")}}
 	opts := MenaProjectionOptions{
 		Mode:              MenaProjectionDestructive,
 		Filter:            ProjectAll,
@@ -520,33 +439,42 @@ func TestParseMenaFrontmatterBytes(t *testing.T) {
 		data     string
 		wantName string
 	}{
-		{
-			"with frontmatter",
-			"---\nname: test\ndescription: d\n---\n# Body\n",
-			"test",
-		},
-		{
-			"no frontmatter delimiters",
-			"# Just a file with no frontmatter\n",
-			"",
-		},
-		{
-			"malformed YAML",
-			"---\n: [invalid yaml\n---\n# Body\n",
-			"",
-		},
-		{
-			"empty content",
-			"",
-			"",
-		},
+		{"with frontmatter", "---\nname: test\ndescription: d\n---\n# Body\n", "test"},
+		{"no frontmatter delimiters", "# Just a file with no frontmatter\n", ""},
+		{"malformed YAML", "---\n: [invalid yaml\n---\n# Body\n", ""},
+		{"empty content", "", ""},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			fm := parseMenaFrontmatterBytes([]byte(tt.data))
+			fm := ParseMenaFrontmatterBytes([]byte(tt.data))
 			if fm.Name != tt.wantName {
 				t.Errorf("name = %q, want %q", fm.Name, tt.wantName)
+			}
+		})
+	}
+}
+
+// TestDetectMenaType verifies the extension-based type detection
+func TestDetectMenaType(t *testing.T) {
+	tests := []struct {
+		filename string
+		expected string
+	}{
+		{"INDEX.dro.md", "dro"},
+		{"INDEX.lego.md", "lego"},
+		{"INDEX.md", "dro"},
+		{"commit.dro.md", "dro"},
+		{"standards.lego.md", "lego"},
+		{"behavior.md", "dro"},
+		{"README.md", "dro"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.filename, func(t *testing.T) {
+			got := DetectMenaType(tt.filename)
+			if got != tt.expected {
+				t.Errorf("DetectMenaType(%q) = %q, want %q", tt.filename, got, tt.expected)
 			}
 		})
 	}
