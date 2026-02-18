@@ -3,6 +3,7 @@ package hook
 
 import (
 	"encoding/json"
+	"os"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -98,6 +99,12 @@ func runWriteguardCore(ctx *cmdContext, printer *output.Printer) error {
 		if sessionID != "" && isMoiraiLockHeld(resolver, sessionID) {
 			return outputAllow(printer)
 		}
+		// If Moirai lock not held, check whether the session is archived.
+		// Archived sessions are terminal — deny with a clear message instead
+		// of the generic "Use Moirai" guidance which implies a recoverable state.
+		if sessionID != "" && isSessionArchived(resolver, sessionID) {
+			return outputBlockArchived(printer, sessionID)
+		}
 		return outputBlock(printer, filePath)
 	}
 
@@ -168,6 +175,30 @@ func isMoiraiLockHeld(resolver *paths.Resolver, sessionID string) bool {
 	}
 
 	return true
+}
+
+// isSessionArchived checks if a session exists in the archive directory.
+// Returns true only if the archive directory for the given session ID exists.
+// This check is O(1) — a single stat call. Only runs when Moirai lock is not held.
+func isSessionArchived(resolver *paths.Resolver, sessionID string) bool {
+	archivePath := resolver.ArchiveDir() + "/" + sessionID
+	_, err := os.Stat(archivePath)
+	return err == nil
+}
+
+// outputBlockArchived outputs a deny decision with a message specific to archived sessions.
+// Archived sessions are terminal — the "Use Moirai" delegation guidance is inappropriate
+// because Moirai cannot operate on archived sessions either.
+func outputBlockArchived(printer *output.Printer, sessionID string) error {
+	result := hook.PreToolUseOutput{
+		HookSpecificOutput: hook.HookSpecificOutput{
+			HookEventName:            "PreToolUse",
+			PermissionDecision:       "deny",
+			PermissionDecisionReason: "Session " + sessionID + " is archived (terminal state). Context files cannot be mutated after archiving.",
+			AdditionalContext:        "Session " + sessionID + " was previously wrapped with 'ari session wrap' and is now immutable. Archived session data is preserved at .claude/.archive/sessions/" + sessionID + "/",
+		},
+	}
+	return printer.Print(result)
 }
 
 // outputAllow outputs an allow decision in CC's hookSpecificOutput format.

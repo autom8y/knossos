@@ -230,8 +230,24 @@ func runWrap(ctx *cmdContext, opts wrapOptions) error {
 		}
 	}
 
-	// Clean up lock file for archived session
+	// Clean up all lock artifacts for this session before archive move.
+	// All cleanup is best-effort: failures are logged as warnings but do not
+	// block the wrap, since the session context is already ARCHIVED.
+
+	// 1. Advisory session lock (.locks/{id}.lock)
 	lockMgr.ForceRelease(sessionID)
+
+	// 2. Moirai lock (.moirai-lock in session dir)
+	// Must be removed before the archive move so it doesn't persist in the archive.
+	moiraiLockPath := sessionDir + "/.moirai-lock"
+	if removeErr := os.Remove(moiraiLockPath); removeErr != nil && !os.IsNotExist(removeErr) {
+		printer.VerboseLog("warn", "failed to remove moirai lock before archive", map[string]interface{}{"error": removeErr.Error()})
+	}
+
+	// 3. CC map entries pointing to this session
+	if clearErr := session.ClearCCMapForSession(resolver, sessionID); clearErr != nil {
+		printer.VerboseLog("warn", "failed to clear CC map entries", map[string]interface{}{"error": clearErr.Error()})
+	}
 
 	// Move to archive if requested
 	var archivePath string

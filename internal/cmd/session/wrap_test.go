@@ -1196,3 +1196,94 @@ created_at: 2025-01-05T12:00:00Z
 		t.Errorf("Expected 'already archived' error, got: %v", err)
 	}
 }
+
+// TestWrapCleansAllLockArtifacts verifies that wrapping a session removes all
+// three lock artifacts: advisory lock, moirai lock, and CC map entries.
+func TestWrapCleansAllLockArtifacts(t *testing.T) {
+	tmpDir := t.TempDir()
+	projectDir := tmpDir
+
+	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionID := "session-20250105-120023-locks123"
+	sessionDir := filepath.Join(sessionsDir, sessionID)
+	locksDir := filepath.Join(sessionsDir, ".locks")
+	ccMapDir := filepath.Join(sessionsDir, ".cc-map")
+	auditDir := filepath.Join(sessionsDir, ".audit")
+
+	for _, dir := range []string{sessionDir, locksDir, ccMapDir, auditDir} {
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			t.Fatalf("Failed to create dir %s: %v", dir, err)
+		}
+	}
+
+	// Create SESSION_CONTEXT.md
+	contextContent := `---
+schema_version: "2.1"
+session_id: ` + sessionID + `
+status: ACTIVE
+initiative: Lock Cleanup Test
+complexity: MODULE
+created_at: 2025-01-05T12:00:00Z
+---
+
+# Session Context
+`
+	if err := os.WriteFile(filepath.Join(sessionDir, "SESSION_CONTEXT.md"), []byte(contextContent), 0644); err != nil {
+		t.Fatalf("Failed to write SESSION_CONTEXT.md: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(sessionsDir, ".current-session"), []byte(sessionID), 0644); err != nil {
+		t.Fatalf("Failed to write .current-session: %v", err)
+	}
+
+	// Pre-create a moirai lock in the session dir (simulating an active Moirai lock)
+	moiraiLockContent := `{"agent":"moirai","acquired_at":"2025-01-05T12:00:00Z","session_id":"` + sessionID + `","stale_after_seconds":300}`
+	if err := os.WriteFile(filepath.Join(sessionDir, ".moirai-lock"), []byte(moiraiLockContent), 0644); err != nil {
+		t.Fatalf("Failed to write .moirai-lock: %v", err)
+	}
+
+	// Pre-create a CC map entry pointing to this session
+	if err := os.WriteFile(filepath.Join(ccMapDir, "cc-test-session-123"), []byte(sessionID), 0644); err != nil {
+		t.Fatalf("Failed to write CC map entry: %v", err)
+	}
+	// Also create a CC map entry pointing to a DIFFERENT session (should NOT be removed)
+	if err := os.WriteFile(filepath.Join(ccMapDir, "cc-other-session-456"), []byte("session-other-123"), 0644); err != nil {
+		t.Fatalf("Failed to write other CC map entry: %v", err)
+	}
+
+	// Run wrap
+	outputFormat := "json"
+	verbose := true
+	ctx := &cmdContext{
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
+	}
+
+	opts := wrapOptions{noArchive: true} // noArchive to keep session dir for easier lock verification
+	err := runWrap(ctx, opts)
+	if err != nil {
+		t.Fatalf("runWrap failed: %v", err)
+	}
+
+	// Verify: .moirai-lock should be removed from session dir
+	moiraiLockPath := filepath.Join(sessionDir, ".moirai-lock")
+	if _, statErr := os.Stat(moiraiLockPath); !os.IsNotExist(statErr) {
+		t.Error("Moirai lock should have been removed by wrap, but still exists")
+	}
+
+	// Verify: CC map entry for this session should be removed
+	ccMapEntryPath := filepath.Join(ccMapDir, "cc-test-session-123")
+	if _, statErr := os.Stat(ccMapEntryPath); !os.IsNotExist(statErr) {
+		t.Error("CC map entry for wrapped session should have been removed, but still exists")
+	}
+
+	// Verify: CC map entry for OTHER session should still exist
+	otherCCMapPath := filepath.Join(ccMapDir, "cc-other-session-456")
+	if _, statErr := os.Stat(otherCCMapPath); os.IsNotExist(statErr) {
+		t.Error("CC map entry for unrelated session should NOT have been removed")
+	}
+}

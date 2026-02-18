@@ -93,6 +93,39 @@ func ClearCCMap(resolver *paths.Resolver, ccSessionID string) error {
 	return nil
 }
 
+// ClearCCMapForSession scans the CC map directory and removes all entries
+// that map to the given Knossos session ID. This is used during session wrap
+// to prevent stale CC map entries from accumulating.
+//
+// The scan is O(n) where n is the number of entries in .cc-map/. In practice
+// there is at most one entry per active CC conversation.
+// Returns nil if no entries found or directory doesn't exist.
+func ClearCCMapForSession(resolver *paths.Resolver, knossosSessionID string) error {
+	ccMapDir := resolver.CCMapDir()
+	entries, err := os.ReadDir(ccMapDir)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil
+		}
+		return fmt.Errorf("failed to read cc-map directory: %w", err)
+	}
+
+	for _, entry := range entries {
+		if entry.IsDir() {
+			continue
+		}
+		mapFile := filepath.Join(ccMapDir, entry.Name())
+		data, readErr := os.ReadFile(mapFile)
+		if readErr != nil {
+			continue
+		}
+		if strings.TrimSpace(string(data)) == knossosSessionID {
+			_ = os.Remove(mapFile) // best-effort, ignore errors
+		}
+	}
+	return nil
+}
+
 // sanitizeCCSessionID sanitizes a CC session ID for use as a filename.
 // Uses filepath.Base to prevent directory traversal.
 // Returns empty string for invalid inputs (empty, ".", "..").

@@ -760,3 +760,72 @@ func TestWriteguard_StdinIntegration_BlockProtectedFile(t *testing.T) {
 	}
 }
 
+// TestWriteguard_ArchivedSession_DeniesWithClearMessage verifies that writes to
+// an archived session's context file are denied with a helpful "session is archived"
+// message instead of the generic "Use Moirai" message.
+func TestWriteguard_ArchivedSession_DeniesWithClearMessage(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	// Create the archive directory with an archived session
+	sessionID := "session-20250105-120030-arctest1"
+	archiveSessionDir := tmpDir + "/.claude/.archive/sessions/" + sessionID
+	if err := os.MkdirAll(archiveSessionDir, 0755); err != nil {
+		t.Fatalf("Failed to create archive session dir: %v", err)
+	}
+
+	// Create an archived SESSION_CONTEXT.md in the archive
+	contextContent := `---
+schema_version: "2.1"
+session_id: ` + sessionID + `
+status: ARCHIVED
+---
+`
+	if err := os.WriteFile(archiveSessionDir+"/SESSION_CONTEXT.md", []byte(contextContent), 0644); err != nil {
+		t.Fatalf("Failed to write archived context: %v", err)
+	}
+
+	// Simulate write attempt to the LIVE session path (which no longer exists after proper archiving)
+	liveContextPath := ".claude/sessions/" + sessionID + "/SESSION_CONTEXT.md"
+
+	testutil.SetupEnv(t, &testutil.HookEnv{
+		Event:     "PreToolUse",
+		ToolName:  "Write",
+		ToolInput: `{"file_path": "` + liveContextPath + `"}`,
+	})
+
+	var stdout, stderr bytes.Buffer
+	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
+
+	outputFlag := "json"
+	verboseFlag := false
+	ctx := &cmdContext{
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &tmpDir,
+			},
+		},
+	}
+
+	err := runWriteguardCore(ctx, printer)
+	if err != nil {
+		t.Fatalf("runWriteguard() error = %v", err)
+	}
+
+	var result hook.PreToolUseOutput
+	if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
+		t.Fatalf("Failed to parse output: %v\nOutput: %s", err, stdout.String())
+	}
+
+	// Should deny
+	if result.HookSpecificOutput.PermissionDecision != "deny" {
+		t.Errorf("PermissionDecision = %q, want deny", result.HookSpecificOutput.PermissionDecision)
+	}
+
+	// Should say "archived" not the generic Moirai delegation message
+	if !bytes.Contains([]byte(result.HookSpecificOutput.PermissionDecisionReason), []byte("archived")) {
+		t.Errorf("Reason should mention 'archived', got: %q", result.HookSpecificOutput.PermissionDecisionReason)
+	}
+}
+
