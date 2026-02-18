@@ -15,6 +15,11 @@ import (
 
 // syncUserScope implements the full user-scope sync logic.
 // It syncs resources from KNOSSOS_HOME/{agents,mena,hooks} to ~/.claude/ directories.
+//
+// Note: This file uses os.WriteFile rather than writeIfChanged because user-scope
+// targets (~/.claude/) are outside CC's project-level file watcher scope. The
+// writeIfChanged optimization prevents unnecessary file watcher triggers in the
+// project .claude/ directory, but that concern does not apply here.
 func (m *Materializer) syncUserScope(opts SyncOptions) (*UserScopeResult, error) {
 	result := &UserScopeResult{
 		Status:    "success",
