@@ -108,7 +108,8 @@ type MenaProjectionResult struct {
 type menaCollectedEntry struct {
 	source      MenaSource
 	name        string
-	sourceIndex int // index into sources array (higher = higher priority)
+	sourceIndex int    // index into sources array (higher = higher priority)
+	menaType    string // "dro" or "lego", detected during Pass 1 collection
 }
 
 // menaStandaloneFile represents a standalone file in a grouping directory.
@@ -173,9 +174,9 @@ func CollectMena(sources []MenaSource, opts MenaProjectionOptions) (*MenaResolut
 	// Pass 1.5: Resolve flat namespace for dromena.
 	flatNames := resolveNamespace(collected, standalones, opts)
 
-	// Pass 2: Detect type and apply flat names for each directory entry.
+	// Pass 2: Apply flat names for each directory entry using the cached mena type.
 	for name, ce := range collected {
-		menaType := detectEntryMenaType(ce)
+		menaType := ce.menaType
 
 		// Apply filter
 		if menaType == "dro" && opts.Filter&ProjectDro == 0 {

@@ -1092,11 +1092,13 @@ func collectMenaEntriesDir(dirPath string, prefix string, collected map[string]m
 		if entry.IsDir() {
 			childPath := filepath.Join(dirPath, entry.Name())
 			if dirHasIndexFile(childPath) {
-				collected[name] = menaCollectedEntry{
+				ce := menaCollectedEntry{
 					source:      MenaSource{Path: childPath},
 					name:        name,
 					sourceIndex: srcIdx,
 				}
+				ce.menaType = detectEntryMenaType(ce)
+				collected[name] = ce
 			} else {
 				if err := collectMenaEntriesDir(childPath, name, collected, standalones, srcIdx); err != nil {
 					return err
@@ -1130,7 +1132,7 @@ func collectMenaEntriesFS(fsys fs.FS, fsysPath string, prefix string, collected 
 		}
 		childPath := fsysPath + "/" + entry.Name()
 		if fsHasIndexFile(fsys, childPath) {
-			collected[name] = menaCollectedEntry{
+			ce := menaCollectedEntry{
 				source: MenaSource{
 					Fsys:       fsys,
 					FsysPath:   childPath,
@@ -1139,6 +1141,8 @@ func collectMenaEntriesFS(fsys fs.FS, fsysPath string, prefix string, collected 
 				name:        name,
 				sourceIndex: srcIdx,
 			}
+			ce.menaType = detectEntryMenaType(ce)
+			collected[name] = ce
 		} else {
 			collectMenaEntriesFS(fsys, childPath, name, collected, srcIdx)
 		}
