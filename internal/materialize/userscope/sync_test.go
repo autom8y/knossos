@@ -1,15 +1,16 @@
-package materialize
+package userscope
 
 import (
 	"os"
 	"path/filepath"
 	"testing"
 
+	"github.com/autom8y/knossos/internal/materialize/mena"
 	"github.com/autom8y/knossos/internal/provenance"
 )
 
 // TestCollectMena_FlattensDromena verifies that CollectMena resolves dromena
-// flat names from frontmatter, flattening nested paths like operations/spike → spike.
+// flat names from frontmatter, flattening nested paths like operations/spike -> spike.
 func TestCollectMena_FlattensDromena(t *testing.T) {
 	tmpDir := t.TempDir()
 
@@ -19,10 +20,10 @@ func TestCollectMena_FlattensDromena(t *testing.T) {
 	os.WriteFile(filepath.Join(spikeDir, "INDEX.dro.md"), []byte("---\nname: spike\n---\n# Spike\n"), 0644)
 	os.WriteFile(filepath.Join(spikeDir, "examples.md"), []byte("# Examples\n"), 0644)
 
-	sources := []MenaSource{{Path: filepath.Join(tmpDir, "mena")}}
-	opts := MenaProjectionOptions{Filter: ProjectAll}
+	sources := []mena.MenaSource{{Path: filepath.Join(tmpDir, "mena")}}
+	opts := mena.MenaProjectionOptions{Filter: mena.ProjectAll}
 
-	resolution, err := CollectMena(sources, opts)
+	resolution, err := mena.CollectMena(sources, opts)
 	if err != nil {
 		t.Fatalf("CollectMena failed: %v", err)
 	}
@@ -62,9 +63,9 @@ func TestCollectMena_CompanionHiding(t *testing.T) {
 		Entries: map[string]*provenance.ProvenanceEntry{},
 	}
 	collisionChecker := &CollisionChecker{}
-	m := &Materializer{}
+	s := &syncer{}
 
-	result, err := m.syncUserMena(tmpDir, userClaudeDir, manifest, collisionChecker, SyncOptions{})
+	result, err := s.syncUserMena(tmpDir, userClaudeDir, manifest, collisionChecker, SyncOptions{})
 	if err != nil {
 		t.Fatalf("syncUserMena failed: %v", err)
 	}
@@ -104,10 +105,10 @@ func TestCollectMena_LegoPreservesPath(t *testing.T) {
 	os.WriteFile(filepath.Join(legoDir, "INDEX.lego.md"), []byte("---\nname: standards\n---\n# Standards\n"), 0644)
 	os.WriteFile(filepath.Join(legoDir, "code-conventions.md"), []byte("# Code\n"), 0644)
 
-	sources := []MenaSource{{Path: filepath.Join(tmpDir, "mena")}}
-	opts := MenaProjectionOptions{Filter: ProjectAll}
+	sources := []mena.MenaSource{{Path: filepath.Join(tmpDir, "mena")}}
+	opts := mena.MenaProjectionOptions{Filter: mena.ProjectAll}
 
-	resolution, err := CollectMena(sources, opts)
+	resolution, err := mena.CollectMena(sources, opts)
 	if err != nil {
 		t.Fatalf("CollectMena failed: %v", err)
 	}
@@ -134,10 +135,10 @@ func TestCollectMena_StandaloneFlattening(t *testing.T) {
 	os.MkdirAll(groupDir, 0755)
 	os.WriteFile(filepath.Join(groupDir, "architect.dro.md"), []byte("---\nname: architect\n---\n# Architect\n"), 0644)
 
-	sources := []MenaSource{{Path: filepath.Join(tmpDir, "mena")}}
-	opts := MenaProjectionOptions{Filter: ProjectAll}
+	sources := []mena.MenaSource{{Path: filepath.Join(tmpDir, "mena")}}
+	opts := mena.MenaProjectionOptions{Filter: mena.ProjectAll}
 
-	resolution, err := CollectMena(sources, opts)
+	resolution, err := mena.CollectMena(sources, opts)
 	if err != nil {
 		t.Fatalf("CollectMena failed: %v", err)
 	}
@@ -178,9 +179,9 @@ func TestSyncUserMena_CollisionSkipsRiteContent(t *testing.T) {
 	manifest := &provenance.ProvenanceManifest{
 		Entries: map[string]*provenance.ProvenanceEntry{},
 	}
-	m := &Materializer{}
+	s := &syncer{}
 
-	result, err := m.syncUserMena(tmpDir, userClaudeDir, manifest, checker, SyncOptions{})
+	result, err := s.syncUserMena(tmpDir, userClaudeDir, manifest, checker, SyncOptions{})
 	if err != nil {
 		t.Fatalf("syncUserMena failed: %v", err)
 	}
@@ -218,9 +219,9 @@ func TestSyncUserMena_PreservesUserOwned(t *testing.T) {
 		},
 	}
 	checker := &CollisionChecker{}
-	m := &Materializer{}
+	s := &syncer{}
 
-	_, err := m.syncUserMena(tmpDir, userClaudeDir, manifest, checker, SyncOptions{})
+	_, err := s.syncUserMena(tmpDir, userClaudeDir, manifest, checker, SyncOptions{})
 	if err != nil {
 		t.Fatalf("syncUserMena failed: %v", err)
 	}
@@ -249,10 +250,10 @@ func TestSyncUserMena_Idempotent(t *testing.T) {
 		Entries: map[string]*provenance.ProvenanceEntry{},
 	}
 	checker := &CollisionChecker{}
-	m := &Materializer{}
+	s := &syncer{}
 
 	// First sync
-	result1, err := m.syncUserMena(tmpDir, userClaudeDir, manifest, checker, SyncOptions{})
+	result1, err := s.syncUserMena(tmpDir, userClaudeDir, manifest, checker, SyncOptions{})
 	if err != nil {
 		t.Fatalf("First sync failed: %v", err)
 	}
@@ -261,7 +262,7 @@ func TestSyncUserMena_Idempotent(t *testing.T) {
 	}
 
 	// Second sync - should produce zero changes
-	result2, err := m.syncUserMena(tmpDir, userClaudeDir, manifest, checker, SyncOptions{})
+	result2, err := s.syncUserMena(tmpDir, userClaudeDir, manifest, checker, SyncOptions{})
 	if err != nil {
 		t.Fatalf("Second sync failed: %v", err)
 	}
@@ -473,7 +474,7 @@ func TestWipeKnossosOwnedMenaEntries_DryRun(t *testing.T) {
 }
 
 // Helper: get keys of resolved entries map
-func keysOf(m map[string]MenaResolvedEntry) []string {
+func keysOf(m map[string]mena.MenaResolvedEntry) []string {
 	keys := make([]string, 0, len(m))
 	for k := range m {
 		keys = append(keys, k)
@@ -482,7 +483,7 @@ func keysOf(m map[string]MenaResolvedEntry) []string {
 }
 
 // Helper: get keys of resolved standalones map
-func keysOfStandalone(m map[string]MenaResolvedStandalone) []string {
+func keysOfStandalone(m map[string]mena.MenaResolvedStandalone) []string {
 	keys := make([]string, 0, len(m))
 	for k := range m {
 		keys = append(keys, k)

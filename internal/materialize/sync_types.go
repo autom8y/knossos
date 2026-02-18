@@ -1,6 +1,10 @@
 // Package materialize provides unified sync types for both rite and user scopes.
 package materialize
 
+import (
+	"github.com/autom8y/knossos/internal/materialize/userscope"
+)
+
 // SyncScope determines which scopes to execute during sync.
 type SyncScope string
 
@@ -20,25 +24,17 @@ func (s SyncScope) IsValid() bool {
 	}
 }
 
-// SyncResource identifies a filterable resource type.
-type SyncResource string
+// SyncResource is a type alias to userscope.SyncResource for backward compatibility.
+// This ensures the map key type in UserScopeResult.Resources matches core constants.
+type SyncResource = userscope.SyncResource
 
+// Re-export resource constants from the userscope package.
 const (
-	ResourceAll    SyncResource = ""
-	ResourceAgents SyncResource = "agents"
-	ResourceMena   SyncResource = "mena"
-	ResourceHooks  SyncResource = "hooks"
+	ResourceAll    = userscope.ResourceAll
+	ResourceAgents = userscope.ResourceAgents
+	ResourceMena   = userscope.ResourceMena
+	ResourceHooks  = userscope.ResourceHooks
 )
-
-// IsValid returns true if the resource is a recognized value.
-func (r SyncResource) IsValid() bool {
-	switch r {
-	case ResourceAll, ResourceAgents, ResourceMena, ResourceHooks:
-		return true
-	default:
-		return false
-	}
-}
 
 // SyncOptions configures the unified sync pipeline.
 type SyncOptions struct {
@@ -73,47 +69,12 @@ type RiteScopeResult struct {
 	DeferredStages   []string `json:"deferred_stages,omitempty"` // stages skipped in soft mode
 }
 
-// UserScopeResult wraps user scope outcome.
-type UserScopeResult struct {
-	Status    string                               `json:"status"`
-	Resources map[SyncResource]*UserResourceResult `json:"resources,omitempty"`
-	Totals    UserSyncSummary                      `json:"totals"`
-	Errors    []UserResourceError                  `json:"errors,omitempty"`
-}
-
-// UserResourceResult is per-resource outcome.
-type UserResourceResult struct {
-	Source  string          `json:"source"`
-	Target  string          `json:"target"`
-	Changes UserSyncChanges `json:"changes"`
-	Summary UserSyncSummary `json:"summary"`
-}
-
-// UserSyncChanges tracks files changed during user sync.
-type UserSyncChanges struct {
-	Added     []string           `json:"added"`
-	Updated   []string           `json:"updated"`
-	Skipped   []UserSkippedEntry `json:"skipped"`
-	Unchanged []string           `json:"unchanged"`
-}
-
-// UserSkippedEntry explains why a file was skipped.
-type UserSkippedEntry struct {
-	Name   string `json:"name"`
-	Reason string `json:"reason"`
-}
-
-// UserSyncSummary provides aggregate counts.
-type UserSyncSummary struct {
-	Added      int `json:"added"`
-	Updated    int `json:"updated"`
-	Skipped    int `json:"skipped"`
-	Unchanged  int `json:"unchanged"`
-	Collisions int `json:"collisions"`
-}
-
-// UserResourceError captures errors for a specific resource.
-type UserResourceError struct {
-	Resource SyncResource `json:"resource"`
-	Err      string       `json:"error"`
-}
+// Type aliases for user-scope types from the userscope sub-package.
+type (
+	UserScopeResult    = userscope.UserScopeResult
+	UserResourceResult = userscope.UserResourceResult
+	UserSyncChanges    = userscope.UserSyncChanges
+	UserSkippedEntry   = userscope.UserSkippedEntry
+	UserSyncSummary    = userscope.UserSyncSummary
+	UserResourceError  = userscope.UserResourceError
+)

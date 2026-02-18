@@ -552,7 +552,7 @@ func (m *Materializer) syncRiteScopeMinimal(opts SyncOptions) (*RiteScopeResult,
 	}, nil
 }
 
-// syncUserScope is implemented in user_scope.go
+// syncUserScope is implemented in user_scope.go (delegates to userscope sub-package)
 
 // detectOrphans finds agent files that are not in the incoming rite's manifest.
 // If a provenance manifest exists, uses manifest-based detection: files with
