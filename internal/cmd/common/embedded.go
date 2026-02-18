@@ -1,44 +1,35 @@
 package common
 
-import "io/fs"
+import (
+	"io/fs"
 
-// Package-level storage for embedded assets, set by main.go via SetEmbeddedAssets.
-// These are accessed by any command that creates a Materializer.
-var (
-	embeddedRites     fs.FS
-	embeddedTemplates fs.FS
-	embeddedHooksYAML []byte
-	embeddedAgents    fs.FS
-	embeddedMena      fs.FS
+	"github.com/autom8y/knossos/internal/assets"
 )
 
 // SetEmbeddedAssets stores embedded rite definitions, templates, and hooks
 // configuration for use by commands that create Materializers.
 func SetEmbeddedAssets(rites, templates fs.FS, hooksYAML []byte) {
-	embeddedRites = rites
-	embeddedTemplates = templates
-	embeddedHooksYAML = hooksYAML
+	assets.SetEmbedded(rites, templates, hooksYAML)
 }
 
 // EmbeddedRites returns the embedded rites filesystem, or nil if not set.
-func EmbeddedRites() fs.FS { return embeddedRites }
+func EmbeddedRites() fs.FS { return assets.Rites() }
 
 // EmbeddedTemplates returns the embedded templates filesystem, or nil if not set.
-func EmbeddedTemplates() fs.FS { return embeddedTemplates }
+func EmbeddedTemplates() fs.FS { return assets.Templates() }
 
 // EmbeddedHooksYAML returns the embedded hooks.yaml bytes, or nil if not set.
 // Used by "ari init" to bootstrap config/hooks.yaml in new projects.
-func EmbeddedHooksYAML() []byte { return embeddedHooksYAML }
+func EmbeddedHooksYAML() []byte { return assets.HooksYAML() }
 
 // SetEmbeddedUserAssets stores embedded agent and mena definitions
 // for use as fallback when KNOSSOS_HOME is unavailable.
 func SetEmbeddedUserAssets(agents, mena fs.FS) {
-	embeddedAgents = agents
-	embeddedMena = mena
+	assets.SetUserAssets(agents, mena)
 }
 
 // EmbeddedAgents returns the embedded agents filesystem, or nil if not set.
-func EmbeddedAgents() fs.FS { return embeddedAgents }
+func EmbeddedAgents() fs.FS { return assets.Agents() }
 
 // EmbeddedMena returns the embedded mena filesystem, or nil if not set.
-func EmbeddedMena() fs.FS { return embeddedMena }
+func EmbeddedMena() fs.FS { return assets.Mena() }
