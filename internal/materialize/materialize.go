@@ -1561,7 +1561,7 @@ func (m *Materializer) copyDir(src, dst string) error {
 }
 
 // saveProvenanceManifest merges collector entries with divergence report and previous manifest,
-// then writes the final manifest to disk. Implements the merge algorithm from TDD Section 6.
+// then writes the final manifest to disk. Delegates to provenance.Merge() for the algorithm.
 func (m *Materializer) saveProvenanceManifest(
 	manifestPath string,
 	activeRite string,
@@ -1569,80 +1569,7 @@ func (m *Materializer) saveProvenanceManifest(
 	divergenceReport *provenance.DivergenceReport,
 	prevManifest *provenance.ProvenanceManifest,
 ) error {
-	finalEntries := make(map[string]*provenance.ProvenanceEntry)
-
-	// Step 0: Carry forward knossos entries from previous manifest that still exist on disk
-	// but weren't re-written this sync (idempotency - files that didn't change)
-	if prevManifest != nil {
-		claudeDir := filepath.Dir(manifestPath)
-		for path, entry := range prevManifest.Entries {
-			if entry.Owner == provenance.OwnerKnossos {
-				// Check if file/directory still exists on disk (not removed)
-				fullPath := filepath.Join(claudeDir, path)
-				// For directory entries (mena), remove trailing slash before stat
-				if strings.HasSuffix(path, "/") {
-					fullPath = strings.TrimSuffix(fullPath, "/")
-				}
-				if _, err := os.Stat(fullPath); err == nil {
-					// File/directory exists, carry forward entry (will be overwritten if rewritten in Step 2)
-					finalEntries[path] = entry
-				}
-			}
-		}
-	}
-
-	// Step 1: Carry forward promoted entries (user-owned + unknown) from divergence detection
-	// Skip entries with empty checksums (deleted files) as they fail validation
-	if divergenceReport != nil {
-		for path, entry := range divergenceReport.Promoted {
-			if entry.Checksum != "" {
-				finalEntries[path] = entry
-			}
-		}
-		for path, entry := range divergenceReport.CarriedForward {
-			if entry.Checksum != "" {
-				finalEntries[path] = entry
-			}
-		}
-	}
-
-	// Step 2: Layer current sync entries on top
-	// Pipeline-written files take precedence unless path was promoted to user-owned in Step 1
-	for path, entry := range collector.Entries() {
-		if existing, ok := finalEntries[path]; ok {
-			if existing.Owner == provenance.OwnerUser {
-				// User promoted this file via divergence detection.
-				// Do NOT overwrite with the pipeline entry.
-				continue
-			}
-		}
-		finalEntries[path] = entry
-	}
-
-	// Step 3: Resolve unknown entries from previous manifest
-	// Files with owner:untracked that the pipeline did NOT write this sync are promoted to owner:user
-	if prevManifest != nil {
-		for path, entry := range prevManifest.Entries {
-			if entry.Owner == provenance.OwnerUntracked {
-				if _, writtenThisSync := collector.Entries()[path]; !writtenThisSync {
-					promotedEntry := *entry
-					promotedEntry.Owner = provenance.OwnerUser
-					if _, alreadyInFinal := finalEntries[path]; !alreadyInFinal {
-						finalEntries[path] = &promotedEntry
-					}
-				}
-			}
-		}
-	}
-
-	// Build final manifest
-	finalManifest := &provenance.ProvenanceManifest{
-		SchemaVersion: provenance.CurrentSchemaVersion,
-		LastSync:      time.Now().UTC(),
-		ActiveRite:    activeRite,
-		Entries:       finalEntries,
-	}
-
-	// Save manifest
+	claudeDir := filepath.Dir(manifestPath)
+	finalManifest := provenance.Merge(claudeDir, activeRite, collector, divergenceReport, prevManifest)
 	return provenance.Save(manifestPath, finalManifest)
 }
