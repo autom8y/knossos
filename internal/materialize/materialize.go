@@ -789,6 +789,7 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claud
 	// recreated, which crashes/disrupts active Claude Code sessions.
 
 	// For embedded sources, use fs.FS to read agent files
+	var writeErr error
 	if resolved != nil && resolved.Source.Type == SourceEmbedded {
 		rFS := m.riteFS(resolved)
 		agentsSub, err := fs.Sub(rFS, "agents")
@@ -800,7 +801,7 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claud
 			return nil // No agents in this rite
 		}
 		// Copy agents and record provenance
-		err = fs.WalkDir(agentsSub, ".", func(path string, d fs.DirEntry, walkErr error) error {
+		writeErr = fs.WalkDir(agentsSub, ".", func(path string, d fs.DirEntry, walkErr error) error {
 			if walkErr != nil || d.IsDir() {
 				return walkErr
 			}
@@ -828,59 +829,68 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claud
 			}
 			return nil
 		})
-		return err
-	}
-
-	// Filesystem path: use existing os-based copy
-	sourceAgentsDir := filepath.Join(ritePath, "agents")
-	if _, err := os.Stat(sourceAgentsDir); os.IsNotExist(err) {
-		return nil // No agents in this rite
-	}
-
-	return filepath.WalkDir(sourceAgentsDir, func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
+	} else {
+		// Filesystem path: use existing os-based copy
+		sourceAgentsDir := filepath.Join(ritePath, "agents")
+		if _, err := os.Stat(sourceAgentsDir); os.IsNotExist(err) {
+			return nil // No agents in this rite
 		}
-		if d.IsDir() {
+
+		writeErr = filepath.WalkDir(sourceAgentsDir, func(path string, d fs.DirEntry, err error) error {
+			if err != nil {
+				return err
+			}
+			if d.IsDir() {
+				return nil
+			}
+
+			// Read source file
+			content, err := os.ReadFile(path)
+			if err != nil {
+				return err
+			}
+
+			// Compute relative path
+			relPath, err := filepath.Rel(sourceAgentsDir, path)
+			if err != nil {
+				return err
+			}
+
+			// Write to destination (only if changed)
+			destPath := filepath.Join(agentsDir, relPath)
+			if err := os.MkdirAll(filepath.Dir(destPath), 0755); err != nil {
+				return err
+			}
+
+			written, err := writeIfChanged(destPath, content, 0644)
+			if err != nil {
+				return err
+			}
+
+			// Record provenance after successful write
+			if written {
+				srcRelPath, _ := filepath.Rel(m.resolver.ProjectRoot(), path)
+				collector.Record("agents/"+relPath, provenance.NewKnossosEntry(
+					provenance.ScopeRite,
+					srcRelPath,
+					string(resolved.Source.Type),
+					checksum.Bytes(content),
+				))
+			}
+
 			return nil
-		}
+		})
+	}
 
-		// Read source file
-		content, err := os.ReadFile(path)
-		if err != nil {
-			return err
+	// Validate: warn about phantom agents (declared in manifest but not found on disk)
+	for _, agent := range manifest.Agents {
+		agentPath := filepath.Join(agentsDir, agent.Name+".md")
+		if _, err := os.Stat(agentPath); os.IsNotExist(err) {
+			log.Printf("Warning: agent '%s' declared in rite manifest but no .md file found at %s", agent.Name, agentPath)
 		}
+	}
 
-		// Compute relative path
-		relPath, err := filepath.Rel(sourceAgentsDir, path)
-		if err != nil {
-			return err
-		}
-
-		// Write to destination (only if changed)
-		destPath := filepath.Join(agentsDir, relPath)
-		if err := os.MkdirAll(filepath.Dir(destPath), 0755); err != nil {
-			return err
-		}
-
-		written, err := writeIfChanged(destPath, content, 0644)
-		if err != nil {
-			return err
-		}
-
-		// Record provenance after successful write
-		if written {
-			srcRelPath, _ := filepath.Rel(m.resolver.ProjectRoot(), path)
-			collector.Record("agents/"+relPath, provenance.NewKnossosEntry(
-				provenance.ScopeRite,
-				srcRelPath,
-				string(resolved.Source.Type),
-				checksum.Bytes(content),
-			))
-		}
-
-		return nil
-	})
+	return writeErr
 }
 
 // listCrossRiteAgents returns a list of cross-rite agent filenames from top-level agents/.
