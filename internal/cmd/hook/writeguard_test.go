@@ -381,6 +381,214 @@ func TestRunWriteguard_AllowRegularFile(t *testing.T) {
 	}
 }
 
+func TestExtractSessionIDFromPath(t *testing.T) {
+	tests := []struct {
+		name     string
+		filePath string
+		want     string
+	}{
+		{
+			name:     "standard session context path",
+			filePath: ".claude/sessions/session-20260209-120000-abcdef01/SESSION_CONTEXT.md",
+			want:     "session-20260209-120000-abcdef01",
+		},
+		{
+			name:     "absolute path",
+			filePath: "/home/user/project/.claude/sessions/session-20260209-120000-abcdef01/SESSION_CONTEXT.md",
+			want:     "session-20260209-120000-abcdef01",
+		},
+		{
+			name:     "sprint context in session dir",
+			filePath: ".claude/sessions/session-20260209-120000-abcdef01/SPRINT_CONTEXT.md",
+			want:     "session-20260209-120000-abcdef01",
+		},
+		{
+			name:     "no session ID in path",
+			filePath: "src/main.go",
+			want:     "",
+		},
+		{
+			name:     "session prefix too short",
+			filePath: ".claude/sessions/session-short/SESSION_CONTEXT.md",
+			want:     "",
+		},
+		{
+			name:     "empty path",
+			filePath: "",
+			want:     "",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := extractSessionIDFromPath(tt.filePath)
+			if got != tt.want {
+				t.Errorf("extractSessionIDFromPath(%q) = %q, want %q", tt.filePath, got, tt.want)
+			}
+		})
+	}
+}
+
+func TestWriteguard_ParkedSession_MoiraiLockAllow(t *testing.T) {
+	// Simulate a PARKED session where resolveSession() returns empty
+	// but the file path contains the session ID and a valid Moirai lock exists.
+	sessionID := "session-20260209-120000-abcdef01"
+	tmpDir := t.TempDir()
+
+	// Create session directory with valid Moirai lock
+	sessionDir := tmpDir + "/.claude/sessions/" + sessionID
+	if err := os.MkdirAll(sessionDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	lockData := `{"agent":"moirai","acquired_at":"` + time.Now().Format(time.RFC3339) + `","session_id":"` + sessionID + `","stale_after_seconds":300}`
+	if err := os.WriteFile(sessionDir+"/.moirai-lock", []byte(lockData), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	filePath := ".claude/sessions/" + sessionID + "/SESSION_CONTEXT.md"
+	testutil.SetupEnv(t, &testutil.HookEnv{
+		Event:      "PreToolUse",
+		ToolName:   "Write",
+		ToolInput:  `{"file_path":"` + filePath + `","content":"status: ACTIVE"}`,
+		ProjectDir: tmpDir,
+	})
+
+	var stdout, stderr bytes.Buffer
+	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
+
+	outputFlag := "json"
+	verboseFlag := false
+	ctx := &cmdContext{
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &tmpDir,
+			},
+		},
+	}
+
+	err := runWriteguardCore(ctx, printer)
+	if err != nil {
+		t.Fatalf("runWriteguard() error = %v", err)
+	}
+
+	var result hook.PreToolUseOutput
+	if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
+		t.Fatalf("Failed to parse output: %v\nOutput: %s", err, stdout.String())
+	}
+
+	if result.HookSpecificOutput.PermissionDecision != "allow" {
+		t.Errorf("PermissionDecision = %q, want %q (PARKED session with valid Moirai lock should allow)",
+			result.HookSpecificOutput.PermissionDecision, "allow")
+	}
+}
+
+func TestWriteguard_ParkedSession_NoLock(t *testing.T) {
+	// PARKED session without a Moirai lock should still be blocked.
+	sessionID := "session-20260209-120000-abcdef01"
+	tmpDir := t.TempDir()
+
+	// Create session directory WITHOUT a lock file
+	sessionDir := tmpDir + "/.claude/sessions/" + sessionID
+	if err := os.MkdirAll(sessionDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	filePath := ".claude/sessions/" + sessionID + "/SESSION_CONTEXT.md"
+	testutil.SetupEnv(t, &testutil.HookEnv{
+		Event:      "PreToolUse",
+		ToolName:   "Write",
+		ToolInput:  `{"file_path":"` + filePath + `","content":"status: ACTIVE"}`,
+		ProjectDir: tmpDir,
+	})
+
+	var stdout, stderr bytes.Buffer
+	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
+
+	outputFlag := "json"
+	verboseFlag := false
+	ctx := &cmdContext{
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &tmpDir,
+			},
+		},
+	}
+
+	err := runWriteguardCore(ctx, printer)
+	if err != nil {
+		t.Fatalf("runWriteguard() error = %v", err)
+	}
+
+	var result hook.PreToolUseOutput
+	if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
+		t.Fatalf("Failed to parse output: %v\nOutput: %s", err, stdout.String())
+	}
+
+	if result.HookSpecificOutput.PermissionDecision != "deny" {
+		t.Errorf("PermissionDecision = %q, want %q (PARKED session without lock should deny)",
+			result.HookSpecificOutput.PermissionDecision, "deny")
+	}
+}
+
+func TestWriteguard_ParkedSession_StaleLock(t *testing.T) {
+	// PARKED session with a stale Moirai lock should be blocked.
+	sessionID := "session-20260209-120000-abcdef01"
+	tmpDir := t.TempDir()
+
+	// Create session directory with stale Moirai lock (acquired 10 minutes ago, stale after 5 seconds)
+	sessionDir := tmpDir + "/.claude/sessions/" + sessionID
+	if err := os.MkdirAll(sessionDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	staleTime := time.Now().Add(-10 * time.Minute).Format(time.RFC3339)
+	lockData := `{"agent":"moirai","acquired_at":"` + staleTime + `","session_id":"` + sessionID + `","stale_after_seconds":5}`
+	if err := os.WriteFile(sessionDir+"/.moirai-lock", []byte(lockData), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	filePath := ".claude/sessions/" + sessionID + "/SESSION_CONTEXT.md"
+	testutil.SetupEnv(t, &testutil.HookEnv{
+		Event:      "PreToolUse",
+		ToolName:   "Write",
+		ToolInput:  `{"file_path":"` + filePath + `","content":"status: ACTIVE"}`,
+		ProjectDir: tmpDir,
+	})
+
+	var stdout, stderr bytes.Buffer
+	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
+
+	outputFlag := "json"
+	verboseFlag := false
+	ctx := &cmdContext{
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &tmpDir,
+			},
+		},
+	}
+
+	err := runWriteguardCore(ctx, printer)
+	if err != nil {
+		t.Fatalf("runWriteguard() error = %v", err)
+	}
+
+	var result hook.PreToolUseOutput
+	if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
+		t.Fatalf("Failed to parse output: %v\nOutput: %s", err, stdout.String())
+	}
+
+	if result.HookSpecificOutput.PermissionDecision != "deny" {
+		t.Errorf("PermissionDecision = %q, want %q (PARKED session with stale lock should deny)",
+			result.HookSpecificOutput.PermissionDecision, "deny")
+	}
+}
+
 // BenchmarkWriteguardHook_Passthrough benchmarks the passthrough path (<5ms target).
 func BenchmarkWriteguardHook_Passthrough(b *testing.B) {
 	os.Setenv("CLAUDE_HOOK_EVENT", "PreToolUse")

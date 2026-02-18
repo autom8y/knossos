@@ -90,6 +90,11 @@ func runWriteguardCore(ctx *cmdContext, printer *output.Printer) error {
 	if isProtectedFile(filePath) {
 		// Resolve session via priority chain, then check Moirai lock
 		resolver, sessionID, _ := ctx.resolveSession(hookEnv)
+		// Fallback: extract session ID from file path for PARKED sessions
+		// that aren't visible to FindActiveSessions()
+		if sessionID == "" {
+			sessionID = extractSessionIDFromPath(filePath)
+		}
 		if sessionID != "" && isMoiraiLockHeld(resolver, sessionID) {
 			return outputAllow(printer)
 		}
@@ -126,6 +131,19 @@ func isProtectedFile(filePath string) bool {
 		}
 	}
 	return false
+}
+
+// extractSessionIDFromPath extracts a session ID from a file path.
+// Looks for path segments matching the session-YYYYMMDD-HHMMSS-{hex} pattern.
+// Returns empty string if no session ID found.
+func extractSessionIDFromPath(filePath string) string {
+	parts := strings.Split(filePath, "/")
+	for _, part := range parts {
+		if paths.IsSessionDir(part) {
+			return part
+		}
+	}
+	return ""
 }
 
 // isMoiraiLockHeld checks if a valid Moirai lock exists for the given session.
