@@ -200,7 +200,6 @@ func (m *Materializer) syncUserResource(
 	}
 
 	// Phase 2: Walk source directory and sync files
-	now := time.Now().UTC()
 	err := filepath.WalkDir(sourceDir, func(path string, d os.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -262,25 +261,17 @@ func (m *Materializer) syncUserResource(
 					if targetChecksum == sourceChecksum {
 						// Adopt as knossos-owned
 						if !opts.DryRun {
-							manifest.Entries[manifestKey] = &provenance.ProvenanceEntry{
-								Owner:      provenance.OwnerKnossos,
-								Scope:      provenance.ScopeUser,
-								SourcePath: sourceRelPath,
-								SourceType: "user-sync",
-								Checksum:   sourceChecksum,
-								LastSynced: now,
-							}
+							manifest.Entries[manifestKey] = provenance.NewKnossosEntry(
+								provenance.ScopeUser, sourceRelPath, "user-sync", sourceChecksum,
+							)
 						}
 						result.Changes.Unchanged = append(result.Changes.Unchanged, manifestKey)
 					} else {
 						// Adopt as user-owned (modified)
 						if !opts.DryRun {
-							manifest.Entries[manifestKey] = &provenance.ProvenanceEntry{
-								Owner:      provenance.OwnerUser,
-								Scope:      provenance.ScopeUser,
-								Checksum:   targetChecksum,
-								LastSynced: now,
-							}
+							manifest.Entries[manifestKey] = provenance.NewUserEntry(
+								provenance.ScopeUser, targetChecksum,
+							)
 						}
 						result.Changes.Skipped = append(result.Changes.Skipped, UserSkippedEntry{
 							Name:   manifestKey,
@@ -292,12 +283,9 @@ func (m *Materializer) syncUserResource(
 				// Not recovering - mark as user-created
 				if !opts.DryRun {
 					targetChecksum, _ := checksum.File(targetPath)
-					manifest.Entries[manifestKey] = &provenance.ProvenanceEntry{
-						Owner:      provenance.OwnerUser,
-						Scope:      provenance.ScopeUser,
-						Checksum:   targetChecksum,
-						LastSynced: now,
-					}
+					manifest.Entries[manifestKey] = provenance.NewUserEntry(
+						provenance.ScopeUser, targetChecksum,
+					)
 				}
 				result.Changes.Skipped = append(result.Changes.Skipped, UserSkippedEntry{
 					Name:   manifestKey,
@@ -311,14 +299,9 @@ func (m *Materializer) syncUserResource(
 				if err := copyUserFile(path, targetPath); err != nil {
 					return err
 				}
-				manifest.Entries[manifestKey] = &provenance.ProvenanceEntry{
-					Owner:      provenance.OwnerKnossos,
-					Scope:      provenance.ScopeUser,
-					SourcePath: sourceRelPath,
-					SourceType: "user-sync",
-					Checksum:   sourceChecksum,
-					LastSynced: now,
-				}
+				manifest.Entries[manifestKey] = provenance.NewKnossosEntry(
+					provenance.ScopeUser, sourceRelPath, "user-sync", sourceChecksum,
+				)
 			}
 			result.Changes.Added = append(result.Changes.Added, manifestKey)
 			return nil
@@ -335,14 +318,9 @@ func (m *Materializer) syncUserResource(
 					if err := copyUserFile(path, targetPath); err != nil {
 						return err
 					}
-					manifest.Entries[manifestKey] = &provenance.ProvenanceEntry{
-						Owner:      provenance.OwnerKnossos,
-						Scope:      provenance.ScopeUser,
-						SourcePath: sourceRelPath,
-						SourceType: "user-sync",
-						Checksum:   sourceChecksum,
-						LastSynced: now,
-					}
+					manifest.Entries[manifestKey] = provenance.NewKnossosEntry(
+						provenance.ScopeUser, sourceRelPath, "user-sync", sourceChecksum,
+					)
 				}
 				result.Changes.Added = append(result.Changes.Added, manifestKey)
 			} else {
@@ -360,14 +338,9 @@ func (m *Materializer) syncUserResource(
 					if err := copyUserFile(path, targetPath); err != nil {
 						return err
 					}
-					manifest.Entries[manifestKey] = &provenance.ProvenanceEntry{
-						Owner:      provenance.OwnerKnossos,
-						Scope:      provenance.ScopeUser,
-						SourcePath: sourceRelPath,
-						SourceType: "user-sync",
-						Checksum:   sourceChecksum,
-						LastSynced: now,
-					}
+					manifest.Entries[manifestKey] = provenance.NewKnossosEntry(
+						provenance.ScopeUser, sourceRelPath, "user-sync", sourceChecksum,
+					)
 				}
 				result.Changes.Added = append(result.Changes.Added, manifestKey)
 			} else if entry.Checksum == sourceChecksum {
@@ -382,14 +355,9 @@ func (m *Materializer) syncUserResource(
 						if err := copyUserFile(path, targetPath); err != nil {
 							return err
 						}
-						manifest.Entries[manifestKey] = &provenance.ProvenanceEntry{
-							Owner:      provenance.OwnerKnossos,
-							Scope:      provenance.ScopeUser,
-							SourcePath: sourceRelPath,
-							SourceType: "user-sync",
-							Checksum:   sourceChecksum,
-							LastSynced: now,
-						}
+						manifest.Entries[manifestKey] = provenance.NewKnossosEntry(
+							provenance.ScopeUser, sourceRelPath, "user-sync", sourceChecksum,
+						)
 					}
 					result.Changes.Updated = append(result.Changes.Updated, manifestKey)
 				} else {
@@ -400,14 +368,9 @@ func (m *Materializer) syncUserResource(
 							if err := copyUserFile(path, targetPath); err != nil {
 								return err
 							}
-							manifest.Entries[manifestKey] = &provenance.ProvenanceEntry{
-								Owner:      provenance.OwnerKnossos,
-								Scope:      provenance.ScopeUser,
-								SourcePath: sourceRelPath,
-								SourceType: "user-sync",
-								Checksum:   sourceChecksum,
-								LastSynced: now,
-							}
+							manifest.Entries[manifestKey] = provenance.NewKnossosEntry(
+								provenance.ScopeUser, sourceRelPath, "user-sync", sourceChecksum,
+							)
 						}
 						result.Changes.Updated = append(result.Changes.Updated, manifestKey)
 					} else {
@@ -509,7 +472,6 @@ func (m *Materializer) syncUserResourceFromEmbedded(
 		}
 
 		sourceChecksum := checksum.Bytes(content)
-		now := time.Now().UTC()
 
 		// Check existing manifest entry
 		entry, exists := manifest.Entries[manifestKey]
@@ -520,12 +482,9 @@ func (m *Materializer) syncUserResourceFromEmbedded(
 				// Exists untracked — mark as user-created, don't overwrite
 				if !opts.DryRun {
 					targetChecksum, _ := checksum.File(targetPath)
-					manifest.Entries[manifestKey] = &provenance.ProvenanceEntry{
-						Owner:      provenance.OwnerUser,
-						Scope:      provenance.ScopeUser,
-						Checksum:   targetChecksum,
-						LastSynced: now,
-					}
+					manifest.Entries[manifestKey] = provenance.NewUserEntry(
+						provenance.ScopeUser, targetChecksum,
+					)
 				}
 				result.Changes.Skipped = append(result.Changes.Skipped, UserSkippedEntry{
 					Name:   manifestKey,
@@ -542,14 +501,9 @@ func (m *Materializer) syncUserResourceFromEmbedded(
 				if err := os.WriteFile(targetPath, content, 0644); err != nil {
 					return err
 				}
-				manifest.Entries[manifestKey] = &provenance.ProvenanceEntry{
-					Owner:      provenance.OwnerKnossos,
-					Scope:      provenance.ScopeUser,
-					SourcePath: "embedded:" + path,
-					SourceType: "embedded",
-					Checksum:   sourceChecksum,
-					LastSynced: now,
-				}
+				manifest.Entries[manifestKey] = provenance.NewKnossosEntry(
+					provenance.ScopeUser, "embedded:"+path, "embedded", sourceChecksum,
+				)
 			}
 			result.Changes.Added = append(result.Changes.Added, manifestKey)
 			return nil
@@ -568,14 +522,9 @@ func (m *Materializer) syncUserResourceFromEmbedded(
 					if err := os.WriteFile(targetPath, content, 0644); err != nil {
 						return err
 					}
-					manifest.Entries[manifestKey] = &provenance.ProvenanceEntry{
-						Owner:      provenance.OwnerKnossos,
-						Scope:      provenance.ScopeUser,
-						SourcePath: "embedded:" + path,
-						SourceType: "embedded",
-						Checksum:   sourceChecksum,
-						LastSynced: now,
-					}
+					manifest.Entries[manifestKey] = provenance.NewKnossosEntry(
+						provenance.ScopeUser, "embedded:"+path, "embedded", sourceChecksum,
+					)
 				}
 				result.Changes.Added = append(result.Changes.Added, manifestKey)
 			} else {
@@ -595,14 +544,9 @@ func (m *Materializer) syncUserResourceFromEmbedded(
 					if err := os.WriteFile(targetPath, content, 0644); err != nil {
 						return err
 					}
-					manifest.Entries[manifestKey] = &provenance.ProvenanceEntry{
-						Owner:      provenance.OwnerKnossos,
-						Scope:      provenance.ScopeUser,
-						SourcePath: "embedded:" + path,
-						SourceType: "embedded",
-						Checksum:   sourceChecksum,
-						LastSynced: now,
-					}
+					manifest.Entries[manifestKey] = provenance.NewKnossosEntry(
+						provenance.ScopeUser, "embedded:"+path, "embedded", sourceChecksum,
+					)
 				}
 				result.Changes.Added = append(result.Changes.Added, manifestKey)
 			} else if entry.Checksum == sourceChecksum {
@@ -618,14 +562,9 @@ func (m *Materializer) syncUserResourceFromEmbedded(
 						if err := os.WriteFile(targetPath, content, 0644); err != nil {
 							return err
 						}
-						manifest.Entries[manifestKey] = &provenance.ProvenanceEntry{
-							Owner:      provenance.OwnerKnossos,
-							Scope:      provenance.ScopeUser,
-							SourcePath: "embedded:" + path,
-							SourceType: "embedded",
-							Checksum:   sourceChecksum,
-							LastSynced: now,
-						}
+						manifest.Entries[manifestKey] = provenance.NewKnossosEntry(
+							provenance.ScopeUser, "embedded:"+path, "embedded", sourceChecksum,
+						)
 					}
 					result.Changes.Updated = append(result.Changes.Updated, manifestKey)
 				} else {
@@ -637,14 +576,9 @@ func (m *Materializer) syncUserResourceFromEmbedded(
 							if err := os.WriteFile(targetPath, content, 0644); err != nil {
 								return err
 							}
-							manifest.Entries[manifestKey] = &provenance.ProvenanceEntry{
-								Owner:      provenance.OwnerKnossos,
-								Scope:      provenance.ScopeUser,
-								SourcePath: "embedded:" + path,
-								SourceType: "embedded",
-								Checksum:   sourceChecksum,
-								LastSynced: now,
-							}
+							manifest.Entries[manifestKey] = provenance.NewKnossosEntry(
+								provenance.ScopeUser, "embedded:"+path, "embedded", sourceChecksum,
+							)
 						}
 						result.Changes.Updated = append(result.Changes.Updated, manifestKey)
 					} else {
@@ -740,8 +674,6 @@ func (m *Materializer) syncUserMena(
 		}
 	}
 
-	now := time.Now().UTC()
-
 	// Phase 2a: Sync resolved directory entries
 	for _, entry := range resolution.Entries {
 		var targetBaseDir string
@@ -799,7 +731,7 @@ func (m *Materializer) syncUserMena(
 			return syncUserMenaFile(
 				manifestKey, targetPath, content, sourceChecksum,
 				filepath.Join("mena", entry.FlatName, strippedRel),
-				manifest, collisionChecker, snapshot, result, opts, now,
+				manifest, collisionChecker, snapshot, result, opts,
 			)
 		})
 		if walkErr != nil {
@@ -833,7 +765,7 @@ func (m *Materializer) syncUserMena(
 		if err := syncUserMenaFile(
 			manifestKey, targetPath, content, sourceChecksum,
 			sourceRelPath,
-			manifest, collisionChecker, snapshot, result, opts, now,
+			manifest, collisionChecker, snapshot, result, opts,
 		); err != nil {
 			return nil, err
 		}
@@ -903,8 +835,6 @@ func (m *Materializer) syncUserMenaFromEmbedded(
 		return nil, err
 	}
 
-	now := time.Now().UTC()
-
 	// Process resolved entries — read content from embedded FS
 	for _, entry := range resolution.Entries {
 		var targetBaseDir string
@@ -959,7 +889,7 @@ func (m *Materializer) syncUserMenaFromEmbedded(
 			return syncUserMenaFile(
 				manifestKey, targetPath, content, sourceChecksum,
 				"embedded:mena/"+filepath.Join(entry.FlatName, strippedRel),
-				manifest, collisionChecker, nil, result, opts, now,
+				manifest, collisionChecker, nil, result, opts,
 			)
 		})
 		if walkErr != nil {
@@ -993,7 +923,7 @@ func (m *Materializer) syncUserMenaFromEmbedded(
 		if err := syncUserMenaFile(
 			manifestKey, targetPath, content, sourceChecksum,
 			"embedded:mena/"+sf.RelPath,
-			manifest, collisionChecker, nil, result, opts, now,
+			manifest, collisionChecker, nil, result, opts,
 		); err != nil {
 			return nil, err
 		}
@@ -1023,7 +953,6 @@ func syncUserMenaFile(
 	snapshot map[string]bool,
 	result *UserResourceResult,
 	opts SyncOptions,
-	now time.Time,
 ) error {
 	// Mark as seen in snapshot
 	if _, tracked := snapshot[manifestKey]; tracked {
@@ -1050,24 +979,16 @@ func syncUserMenaFile(
 				targetChecksum, _ := checksum.File(targetPath)
 				if targetChecksum == sourceChecksum {
 					if !opts.DryRun {
-						manifest.Entries[manifestKey] = &provenance.ProvenanceEntry{
-							Owner:      provenance.OwnerKnossos,
-							Scope:      provenance.ScopeUser,
-							SourcePath: sourceRelPath,
-							SourceType: "user-sync",
-							Checksum:   sourceChecksum,
-							LastSynced: now,
-						}
+						manifest.Entries[manifestKey] = provenance.NewKnossosEntry(
+							provenance.ScopeUser, sourceRelPath, "user-sync", sourceChecksum,
+						)
 					}
 					result.Changes.Unchanged = append(result.Changes.Unchanged, manifestKey)
 				} else {
 					if !opts.DryRun {
-						manifest.Entries[manifestKey] = &provenance.ProvenanceEntry{
-							Owner:      provenance.OwnerUser,
-							Scope:      provenance.ScopeUser,
-							Checksum:   targetChecksum,
-							LastSynced: now,
-						}
+						manifest.Entries[manifestKey] = provenance.NewUserEntry(
+							provenance.ScopeUser, targetChecksum,
+						)
 					}
 					result.Changes.Skipped = append(result.Changes.Skipped, UserSkippedEntry{
 						Name:   manifestKey,
@@ -1079,12 +1000,9 @@ func syncUserMenaFile(
 			// Not recovering - mark as user-created
 			if !opts.DryRun {
 				targetChecksum, _ := checksum.File(targetPath)
-				manifest.Entries[manifestKey] = &provenance.ProvenanceEntry{
-					Owner:      provenance.OwnerUser,
-					Scope:      provenance.ScopeUser,
-					Checksum:   targetChecksum,
-					LastSynced: now,
-				}
+				manifest.Entries[manifestKey] = provenance.NewUserEntry(
+					provenance.ScopeUser, targetChecksum,
+				)
 			}
 			result.Changes.Skipped = append(result.Changes.Skipped, UserSkippedEntry{
 				Name:   manifestKey,
@@ -1101,14 +1019,9 @@ func syncUserMenaFile(
 			if err := os.WriteFile(targetPath, content, 0644); err != nil {
 				return err
 			}
-			manifest.Entries[manifestKey] = &provenance.ProvenanceEntry{
-				Owner:      provenance.OwnerKnossos,
-				Scope:      provenance.ScopeUser,
-				SourcePath: sourceRelPath,
-				SourceType: "user-sync",
-				Checksum:   sourceChecksum,
-				LastSynced: now,
-			}
+			manifest.Entries[manifestKey] = provenance.NewKnossosEntry(
+				provenance.ScopeUser, sourceRelPath, "user-sync", sourceChecksum,
+			)
 		}
 		result.Changes.Added = append(result.Changes.Added, manifestKey)
 		return nil
@@ -1127,14 +1040,9 @@ func syncUserMenaFile(
 				if err := os.WriteFile(targetPath, content, 0644); err != nil {
 					return err
 				}
-				manifest.Entries[manifestKey] = &provenance.ProvenanceEntry{
-					Owner:      provenance.OwnerKnossos,
-					Scope:      provenance.ScopeUser,
-					SourcePath: sourceRelPath,
-					SourceType: "user-sync",
-					Checksum:   sourceChecksum,
-					LastSynced: now,
-				}
+				manifest.Entries[manifestKey] = provenance.NewKnossosEntry(
+					provenance.ScopeUser, sourceRelPath, "user-sync", sourceChecksum,
+				)
 			}
 			result.Changes.Added = append(result.Changes.Added, manifestKey)
 		} else {
@@ -1154,14 +1062,9 @@ func syncUserMenaFile(
 				if err := os.WriteFile(targetPath, content, 0644); err != nil {
 					return err
 				}
-				manifest.Entries[manifestKey] = &provenance.ProvenanceEntry{
-					Owner:      provenance.OwnerKnossos,
-					Scope:      provenance.ScopeUser,
-					SourcePath: sourceRelPath,
-					SourceType: "user-sync",
-					Checksum:   sourceChecksum,
-					LastSynced: now,
-				}
+				manifest.Entries[manifestKey] = provenance.NewKnossosEntry(
+					provenance.ScopeUser, sourceRelPath, "user-sync", sourceChecksum,
+				)
 			}
 			result.Changes.Added = append(result.Changes.Added, manifestKey)
 		} else if entry.Checksum == sourceChecksum {
@@ -1177,14 +1080,9 @@ func syncUserMenaFile(
 					if err := os.WriteFile(targetPath, content, 0644); err != nil {
 						return err
 					}
-					manifest.Entries[manifestKey] = &provenance.ProvenanceEntry{
-						Owner:      provenance.OwnerKnossos,
-						Scope:      provenance.ScopeUser,
-						SourcePath: sourceRelPath,
-						SourceType: "user-sync",
-						Checksum:   sourceChecksum,
-						LastSynced: now,
-					}
+					manifest.Entries[manifestKey] = provenance.NewKnossosEntry(
+						provenance.ScopeUser, sourceRelPath, "user-sync", sourceChecksum,
+					)
 				}
 				result.Changes.Updated = append(result.Changes.Updated, manifestKey)
 			} else {
@@ -1197,14 +1095,9 @@ func syncUserMenaFile(
 						if err := os.WriteFile(targetPath, content, 0644); err != nil {
 							return err
 						}
-						manifest.Entries[manifestKey] = &provenance.ProvenanceEntry{
-							Owner:      provenance.OwnerKnossos,
-							Scope:      provenance.ScopeUser,
-							SourcePath: sourceRelPath,
-							SourceType: "user-sync",
-							Checksum:   sourceChecksum,
-							LastSynced: now,
-						}
+						manifest.Entries[manifestKey] = provenance.NewKnossosEntry(
+							provenance.ScopeUser, sourceRelPath, "user-sync", sourceChecksum,
+						)
 					}
 					result.Changes.Updated = append(result.Changes.Updated, manifestKey)
 				} else {
@@ -1339,8 +1232,6 @@ func recoverUserResource(
 		return nil // Nothing to recover
 	}
 
-	now := time.Now().UTC()
-
 	return filepath.WalkDir(targetDir, func(path string, d os.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -1383,12 +1274,9 @@ func recoverUserResource(
 				// Not in knossos source - mark as user
 				if !opts.DryRun {
 					targetChecksum, _ := checksum.File(path)
-					manifest.Entries[manifestKey] = &provenance.ProvenanceEntry{
-						Owner:      provenance.OwnerUser,
-						Scope:      provenance.ScopeUser,
-						Checksum:   targetChecksum,
-						LastSynced: now,
-					}
+					manifest.Entries[manifestKey] = provenance.NewUserEntry(
+						provenance.ScopeUser, targetChecksum,
+					)
 				}
 				return nil
 			}
@@ -1398,12 +1286,9 @@ func recoverUserResource(
 				// Not in knossos - mark as user
 				if !opts.DryRun {
 					targetChecksum, _ := checksum.File(path)
-					manifest.Entries[manifestKey] = &provenance.ProvenanceEntry{
-						Owner:      provenance.OwnerUser,
-						Scope:      provenance.ScopeUser,
-						Checksum:   targetChecksum,
-						LastSynced: now,
-					}
+					manifest.Entries[manifestKey] = provenance.NewUserEntry(
+						provenance.ScopeUser, targetChecksum,
+					)
 				}
 				return nil
 			}
@@ -1416,21 +1301,13 @@ func recoverUserResource(
 
 		if !opts.DryRun {
 			if sourceChecksum == targetChecksum {
-				manifest.Entries[manifestKey] = &provenance.ProvenanceEntry{
-					Owner:      provenance.OwnerKnossos,
-					Scope:      provenance.ScopeUser,
-					SourcePath: sourceRelPath,
-					SourceType: "user-sync",
-					Checksum:   sourceChecksum,
-					LastSynced: now,
-				}
+				manifest.Entries[manifestKey] = provenance.NewKnossosEntry(
+					provenance.ScopeUser, sourceRelPath, "user-sync", sourceChecksum,
+				)
 			} else {
-				manifest.Entries[manifestKey] = &provenance.ProvenanceEntry{
-					Owner:      provenance.OwnerUser,
-					Scope:      provenance.ScopeUser,
-					Checksum:   targetChecksum,
-					LastSynced: now,
-				}
+				manifest.Entries[manifestKey] = provenance.NewUserEntry(
+					provenance.ScopeUser, targetChecksum,
+				)
 			}
 		}
 

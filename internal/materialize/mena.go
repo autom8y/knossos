@@ -8,7 +8,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 
 	"gopkg.in/yaml.v3"
 
@@ -469,22 +468,18 @@ func SyncMena(sources []MenaSource, opts MenaProjectionOptions) (*MenaProjection
 
 		// Record provenance for standalone file
 		if opts.Collector != nil {
-			now := time.Now().UTC()
 			sourcePath := sf.SrcPath
 			if opts.ProjectRoot != "" {
 				if rel, err := filepath.Rel(opts.ProjectRoot, sf.SrcPath); err == nil {
 					sourcePath = rel
 				}
 			}
-			collector := opts.Collector
-			collector.Record(targetType+"/"+sf.FlatName, &provenance.ProvenanceEntry{
-				Owner:      provenance.OwnerKnossos,
-				Scope:      provenance.ScopeRite,
-				SourcePath: sourcePath,
-				SourceType: "project",
-				Checksum:   checksum.Content(string(data)),
-				LastSynced: now,
-			})
+			opts.Collector.Record(targetType+"/"+sf.FlatName, provenance.NewKnossosEntry(
+				provenance.ScopeRite,
+				sourcePath,
+				"project",
+				checksum.Content(string(data)),
+			))
 		}
 	}
 
@@ -502,8 +497,6 @@ func SyncMena(sources []MenaSource, opts MenaProjectionOptions) (*MenaProjection
 // For promoted dromena (INDEX.md elevated to parent level), falls back to
 // file checksum of the promoted file when the directory is empty or absent.
 func recordMenaProvenance(collector provenance.Collector, projectRoot, targetType, name, destDir string, src MenaSource) {
-	now := time.Now().UTC()
-
 	hash, err := checksum.Dir(destDir)
 	if err != nil {
 		// Directory may not exist if INDEX.md was promoted and there were no companions.
@@ -537,14 +530,12 @@ func recordMenaProvenance(collector provenance.Collector, projectRoot, targetTyp
 		}
 	}
 
-	collector.Record(targetType+"/"+name+"/", &provenance.ProvenanceEntry{
-		Owner:      provenance.OwnerKnossos,
-		Scope:      provenance.ScopeRite,
-		SourcePath: sourcePath,
-		SourceType: sourceType,
-		Checksum:   hash,
-		LastSynced: now,
-	})
+	collector.Record(targetType+"/"+name+"/", provenance.NewKnossosEntry(
+		provenance.ScopeRite,
+		sourcePath,
+		sourceType,
+		hash,
+	))
 }
 
 // cleanStaleMenaEntries removes knossos-owned command/skill directories that are

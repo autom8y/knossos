@@ -63,10 +63,10 @@ type RiteManifest struct {
 	Description  string      `yaml:"description"`
 	EntryAgent   string      `yaml:"entry_agent"`
 	Agents       []Agent     `yaml:"agents"`
-	Dromena      []string    `yaml:"dromena"`                // Invokable commands (project to .claude/commands/)
-	Legomena     []string    `yaml:"legomena"`               // Reference knowledge (project to .claude/skills/)
-	Commands     []string    `yaml:"commands"`               // Backward compat: populates from dromena+legomena if empty
-	Skills       []string    `yaml:"skills"`                 // Deprecated: use Legomena instead
+	Dromena      []string    `yaml:"dromena"`  // Invokable commands (project to .claude/commands/)
+	Legomena     []string    `yaml:"legomena"` // Reference knowledge (project to .claude/skills/)
+	Commands     []string    `yaml:"commands"` // Backward compat: populates from dromena+legomena if empty
+	Skills       []string    `yaml:"skills"`   // Deprecated: use Legomena instead
 	Hooks        []string    `yaml:"hooks"`
 	Dependencies []string    `yaml:"dependencies"`
 	MCPServers   []MCPServer `yaml:"mcp_servers,omitempty"` // MCP server declarations
@@ -146,7 +146,6 @@ func (m *Materializer) WithEmbeddedMena(fsys fs.FS) *Materializer {
 	m.embeddedMena = fsys
 	return m
 }
-
 
 // getClaudeDir returns the target .claude/ directory, respecting any override.
 func (m *Materializer) getClaudeDir() string {
@@ -789,8 +788,6 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claud
 	// causes CC's file watcher to see DELETE events for files that are immediately
 	// recreated, which crashes/disrupts active Claude Code sessions.
 
-	now := time.Now().UTC()
-
 	// For embedded sources, use fs.FS to read agent files
 	if resolved != nil && resolved.Source.Type == SourceEmbedded {
 		rFS := m.riteFS(resolved)
@@ -822,14 +819,12 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claud
 			if written {
 				relPath := "agents/" + path
 				sourcePath := resolved.RitePath + "/agents/" + path
-				collector.Record(relPath, &provenance.ProvenanceEntry{
-					Owner:          provenance.OwnerKnossos,
-					Scope: provenance.ScopeRite,
-					SourcePath:     sourcePath,
-					SourceType:     string(resolved.Source.Type),
-					Checksum:       checksum.Bytes(content),
-					LastSynced:     now,
-				})
+				collector.Record(relPath, provenance.NewKnossosEntry(
+					provenance.ScopeRite,
+					sourcePath,
+					string(resolved.Source.Type),
+					checksum.Bytes(content),
+				))
 			}
 			return nil
 		})
@@ -876,14 +871,12 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claud
 		// Record provenance after successful write
 		if written {
 			srcRelPath, _ := filepath.Rel(m.resolver.ProjectRoot(), path)
-			collector.Record("agents/"+relPath, &provenance.ProvenanceEntry{
-				Owner:          provenance.OwnerKnossos,
-				Scope: provenance.ScopeRite,
-				SourcePath:     srcRelPath,
-				SourceType:     string(resolved.Source.Type),
-				Checksum:       checksum.Bytes(content),
-				LastSynced:     now,
-			})
+			collector.Record("agents/"+relPath, provenance.NewKnossosEntry(
+				provenance.ScopeRite,
+				srcRelPath,
+				string(resolved.Source.Type),
+				checksum.Bytes(content),
+			))
 		}
 
 		return nil
@@ -927,8 +920,6 @@ func (m *Materializer) listCrossRiteAgents(resolved *ResolvedRite) []string {
 // materializeCrossRiteAgents copies cross-rite agents from top-level agents/ to .claude/agents/.
 // Cross-rite agents are available in all rites but do NOT override rite-scoped agents of the same name.
 func (m *Materializer) materializeCrossRiteAgents(agentsDir string, resolved *ResolvedRite, collector provenance.Collector, manifest *RiteManifest) error {
-	now := time.Now().UTC()
-
 	// Build set of rite agent names (these take priority)
 	riteAgents := make(map[string]bool)
 	for _, agent := range manifest.Agents {
@@ -959,14 +950,12 @@ func (m *Materializer) materializeCrossRiteAgents(agentsDir string, resolved *Re
 				return err
 			}
 			if written {
-				collector.Record("agents/"+entry.Name(), &provenance.ProvenanceEntry{
-					Owner:      provenance.OwnerKnossos,
-					Scope:      provenance.ScopeRite,
-					SourcePath: "agents/" + entry.Name(),
-					SourceType: string(resolved.Source.Type),
-					Checksum:   checksum.Bytes(content),
-					LastSynced: now,
-				})
+				collector.Record("agents/"+entry.Name(), provenance.NewKnossosEntry(
+					provenance.ScopeRite,
+					"agents/"+entry.Name(),
+					string(resolved.Source.Type),
+					checksum.Bytes(content),
+				))
 			}
 		}
 		return nil
@@ -1003,14 +992,12 @@ func (m *Materializer) materializeCrossRiteAgents(agentsDir string, resolved *Re
 
 		if written {
 			srcRelPath, _ := filepath.Rel(projectRoot, srcPath)
-			collector.Record("agents/"+entry.Name(), &provenance.ProvenanceEntry{
-				Owner:      provenance.OwnerKnossos,
-				Scope:      provenance.ScopeRite,
-				SourcePath: srcRelPath,
-				SourceType: "project",
-				Checksum:   checksum.Bytes(content),
-				LastSynced: now,
-			})
+			collector.Record("agents/"+entry.Name(), provenance.NewKnossosEntry(
+				provenance.ScopeRite,
+				srcRelPath,
+				"project",
+				checksum.Bytes(content),
+			))
 		}
 	}
 
@@ -1217,7 +1204,6 @@ func (m *Materializer) materializeRules(claudeDir string, resolved *ResolvedRite
 		return err
 	}
 
-	now := time.Now().UTC()
 	projectRoot := m.resolver.ProjectRoot()
 
 	// Collect template rule names and content from appropriate source
@@ -1305,14 +1291,12 @@ func (m *Materializer) materializeRules(claudeDir string, resolved *ResolvedRite
 		if written {
 			sourcePath := filepath.Join(m.templatesDir, "rules", name)
 			srcRelPath, _ := filepath.Rel(projectRoot, sourcePath)
-			collector.Record("rules/"+name, &provenance.ProvenanceEntry{
-				Owner:          provenance.OwnerKnossos,
-				Scope: provenance.ScopeRite,
-				SourcePath:     srcRelPath,
-				SourceType:     "template",
-				Checksum:       checksum.Bytes(content),
-				LastSynced:     now,
-			})
+			collector.Record("rules/"+name, provenance.NewKnossosEntry(
+				provenance.ScopeRite,
+				srcRelPath,
+				"template",
+				checksum.Bytes(content),
+			))
 		}
 	}
 
@@ -1364,7 +1348,6 @@ func (m *Materializer) materializeCLAUDEmd(manifest *RiteManifest, claudeDir str
 
 	// Record provenance after successful write (materialization-specific concern)
 	if result.Written {
-		now := time.Now().UTC()
 		srcRelPath := "(generated)"
 		if m.templatesDir != "" {
 			projectRoot := m.resolver.ProjectRoot()
@@ -1373,14 +1356,12 @@ func (m *Materializer) materializeCLAUDEmd(manifest *RiteManifest, claudeDir str
 				srcRelPath = rel
 			}
 		}
-		collector.Record("CLAUDE.md", &provenance.ProvenanceEntry{
-			Owner:      provenance.OwnerKnossos,
-			Scope:      provenance.ScopeRite,
-			SourcePath: srcRelPath,
-			SourceType: "template",
-			Checksum:   checksum.Content(result.MergeResult.Content),
-			LastSynced: now,
-		})
+		collector.Record("CLAUDE.md", provenance.NewKnossosEntry(
+			provenance.ScopeRite,
+			srcRelPath,
+			"template",
+			checksum.Content(result.MergeResult.Content),
+		))
 	}
 
 	return result.LegacyBackupPath, nil
@@ -1447,15 +1428,12 @@ func (m *Materializer) materializeSettingsWithManifest(claudeDir string, manifes
 	// Record provenance after successful write
 	hash, err := checksum.File(settingsPath)
 	if err == nil && hash != "" {
-		now := time.Now().UTC()
-		collector.Record("settings.local.json", &provenance.ProvenanceEntry{
-			Owner:          provenance.OwnerKnossos,
-			Scope: provenance.ScopeRite,
-			SourcePath:     "(generated)",
-			SourceType:     "template",
-			Checksum:       hash,
-			LastSynced:     now,
-		})
+		collector.Record("settings.local.json", provenance.NewKnossosEntry(
+			provenance.ScopeRite,
+			"(generated)",
+			"template",
+			hash,
+		))
 	}
 
 	return nil
@@ -1526,18 +1504,15 @@ func (m *Materializer) materializeWorkflow(claudeDir string, resolved *ResolvedR
 
 	// Record provenance after successful write
 	if written {
-		now := time.Now().UTC()
 		projectRoot := m.resolver.ProjectRoot()
 		sourcePath := resolved.RitePath + "/workflow.yaml"
 		srcRelPath, _ := filepath.Rel(projectRoot, sourcePath)
-		collector.Record("ACTIVE_WORKFLOW.yaml", &provenance.ProvenanceEntry{
-			Owner:          provenance.OwnerKnossos,
-			Scope: provenance.ScopeRite,
-			SourcePath:     srcRelPath,
-			SourceType:     string(resolved.Source.Type),
-			Checksum:       checksum.Bytes(content),
-			LastSynced:     now,
-		})
+		collector.Record("ACTIVE_WORKFLOW.yaml", provenance.NewKnossosEntry(
+			provenance.ScopeRite,
+			srcRelPath,
+			string(resolved.Source.Type),
+			checksum.Bytes(content),
+		))
 	}
 
 	return nil

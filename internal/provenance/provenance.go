@@ -129,3 +129,39 @@ func (s ScopeType) String() string {
 func UserManifestPath(userClaudeDir string) string {
 	return filepath.Join(userClaudeDir, UserManifestFileName)
 }
+
+// NewKnossosEntry constructs a ProvenanceEntry for a knossos-managed file.
+// Sets Owner=OwnerKnossos, LastSynced=time.Now().UTC().
+func NewKnossosEntry(scope ScopeType, sourcePath, sourceType, checksum string) *ProvenanceEntry {
+	return &ProvenanceEntry{
+		Owner:      OwnerKnossos,
+		Scope:      scope,
+		SourcePath: sourcePath,
+		SourceType: sourceType,
+		Checksum:   checksum,
+		LastSynced: time.Now().UTC(),
+	}
+}
+
+// NewUserEntry constructs a ProvenanceEntry for a user-managed file.
+// Sets Owner=OwnerUser, LastSynced=time.Now().UTC().
+// SourcePath and SourceType are intentionally left empty (user files have no knossos source).
+func NewUserEntry(scope ScopeType, checksum string) *ProvenanceEntry {
+	return &ProvenanceEntry{
+		Owner:      OwnerUser,
+		Scope:      scope,
+		Checksum:   checksum,
+		LastSynced: time.Now().UTC(),
+	}
+}
+
+// NewUntrackedEntry constructs a ProvenanceEntry for a pre-existing untracked file.
+// Sets Owner=OwnerUntracked, LastSynced=time.Now().UTC().
+func NewUntrackedEntry(scope ScopeType, checksum string) *ProvenanceEntry {
+	return &ProvenanceEntry{
+		Owner:      OwnerUntracked,
+		Scope:      scope,
+		Checksum:   checksum,
+		LastSynced: time.Now().UTC(),
+	}
+}

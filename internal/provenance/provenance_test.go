@@ -16,20 +16,20 @@ func TestCollectorAccumulation(t *testing.T) {
 
 	now := time.Now().UTC()
 	entry1 := &ProvenanceEntry{
-		Owner:          OwnerKnossos,
-		Scope: ScopeRite,
-		SourcePath:     "rites/ecosystem/agents/orchestrator.md",
-		SourceType:     "project",
-		Checksum:       "sha256:abc123",
-		LastSynced:     now,
+		Owner:      OwnerKnossos,
+		Scope:      ScopeRite,
+		SourcePath: "rites/ecosystem/agents/orchestrator.md",
+		SourceType: "project",
+		Checksum:   "sha256:abc123",
+		LastSynced: now,
 	}
 	entry2 := &ProvenanceEntry{
-		Owner:          OwnerKnossos,
-		Scope: ScopeRite,
-		SourcePath:     "mena/operations/commit/",
-		SourceType:     "project",
-		Checksum:       "sha256:def456",
-		LastSynced:     now,
+		Owner:      OwnerKnossos,
+		Scope:      ScopeRite,
+		SourcePath: "mena/operations/commit/",
+		SourceType: "project",
+		Checksum:   "sha256:def456",
+		LastSynced: now,
 	}
 
 	collector.Record("agents/orchestrator.md", entry1)
@@ -94,20 +94,20 @@ func TestManifestRoundTrip(t *testing.T) {
 		ActiveRite:    "ecosystem",
 		Entries: map[string]*ProvenanceEntry{
 			"agents/orchestrator.md": {
-				Owner:          OwnerKnossos,
-				Scope: ScopeRite,
-				SourcePath:     "rites/ecosystem/agents/orchestrator.md",
-				SourceType:     "project",
-				Checksum:       "sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
-				LastSynced:     now,
+				Owner:      OwnerKnossos,
+				Scope:      ScopeRite,
+				SourcePath: "rites/ecosystem/agents/orchestrator.md",
+				SourceType: "project",
+				Checksum:   "sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+				LastSynced: now,
 			},
 			"commands/commit/": {
-				Owner:          OwnerKnossos,
-				Scope: ScopeRite,
-				SourcePath:     "mena/operations/commit/",
-				SourceType:     "project",
-				Checksum:       "sha256:abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
-				LastSynced:     now,
+				Owner:      OwnerKnossos,
+				Scope:      ScopeRite,
+				SourcePath: "mena/operations/commit/",
+				SourceType: "project",
+				Checksum:   "sha256:abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
+				LastSynced: now,
 			},
 		},
 	}
@@ -190,12 +190,12 @@ func TestLoadOrBootstrapExistingFile(t *testing.T) {
 		ActiveRite:    "ecosystem",
 		Entries: map[string]*ProvenanceEntry{
 			"agents/orchestrator.md": {
-				Owner:          OwnerKnossos,
-				Scope: ScopeRite,
-				SourcePath:     "rites/ecosystem/agents/orchestrator.md",
-				SourceType:     "project",
-				Checksum:       "sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
-				LastSynced:     now,
+				Owner:      OwnerKnossos,
+				Scope:      ScopeRite,
+				SourcePath: "rites/ecosystem/agents/orchestrator.md",
+				SourceType: "project",
+				Checksum:   "sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+				LastSynced: now,
 			},
 		},
 	}
@@ -243,12 +243,12 @@ func TestDivergenceChecksumMatch(t *testing.T) {
 		LastSync:      now,
 		Entries: map[string]*ProvenanceEntry{
 			"test.md": {
-				Owner:          OwnerKnossos,
-				Scope: ScopeRite,
-				SourcePath:     "test/source.md",
-				SourceType:     "project",
-				Checksum:       hash,
-				LastSynced:     now,
+				Owner:      OwnerKnossos,
+				Scope:      ScopeRite,
+				SourcePath: "test/source.md",
+				SourceType: "project",
+				Checksum:   hash,
+				LastSynced: now,
 			},
 		},
 	}
@@ -291,12 +291,12 @@ func TestDivergenceChecksumMismatch(t *testing.T) {
 		LastSync:      now,
 		Entries: map[string]*ProvenanceEntry{
 			"test.md": {
-				Owner:          OwnerKnossos,
-				Scope: ScopeRite,
-				SourcePath:     "test/source.md",
-				SourceType:     "project",
-				Checksum:       originalHash,
-				LastSynced:     now,
+				Owner:      OwnerKnossos,
+				Scope:      ScopeRite,
+				SourcePath: "test/source.md",
+				SourceType: "project",
+				Checksum:   originalHash,
+				LastSynced: now,
 			},
 		},
 	}
@@ -411,12 +411,12 @@ func TestDivergenceFileMissing(t *testing.T) {
 		LastSync:      now,
 		Entries: map[string]*ProvenanceEntry{
 			"deleted.md": {
-				Owner:          OwnerKnossos,
-				Scope: ScopeRite,
-				SourcePath:     "test/deleted.md",
-				SourceType:     "project",
-				Checksum:       "sha256:deadbeef1234567890abcdef1234567890abcdef1234567890abcdef12345678",
-				LastSynced:     now,
+				Owner:      OwnerKnossos,
+				Scope:      ScopeRite,
+				SourcePath: "test/deleted.md",
+				SourceType: "project",
+				Checksum:   "sha256:deadbeef1234567890abcdef1234567890abcdef1234567890abcdef12345678",
+				LastSynced: now,
 			},
 		},
 	}
@@ -503,12 +503,12 @@ func TestMenaDirectoryChecksum(t *testing.T) {
 		LastSync:      now,
 		Entries: map[string]*ProvenanceEntry{
 			"commands/commit/": {
-				Owner:          OwnerKnossos,
-				Scope: ScopeRite,
-				SourcePath:     "mena/operations/commit/",
-				SourceType:     "project",
-				Checksum:       dirHash,
-				LastSynced:     now,
+				Owner:      OwnerKnossos,
+				Scope:      ScopeRite,
+				SourcePath: "mena/operations/commit/",
+				SourceType: "project",
+				Checksum:   dirHash,
+				LastSynced: now,
 			},
 		},
 	}
@@ -600,6 +600,96 @@ func TestValidationKnossosRequiresSource(t *testing.T) {
 	err := validateManifest(manifest)
 	if err == nil {
 		t.Fatal("expected validation error for missing source_path, got nil")
+	}
+}
+
+// TestNewKnossosEntry tests that NewKnossosEntry sets all fields correctly.
+func TestNewKnossosEntry(t *testing.T) {
+	before := time.Now().UTC()
+	entry := NewKnossosEntry(ScopeRite, "rites/eco/agents/foo.md", "project", "sha256:abc123")
+	after := time.Now().UTC()
+
+	if entry.Owner != OwnerKnossos {
+		t.Errorf("expected Owner=knossos, got %s", entry.Owner)
+	}
+	if entry.Scope != ScopeRite {
+		t.Errorf("expected Scope=rite, got %s", entry.Scope)
+	}
+	if entry.SourcePath != "rites/eco/agents/foo.md" {
+		t.Errorf("unexpected SourcePath: %s", entry.SourcePath)
+	}
+	if entry.SourceType != "project" {
+		t.Errorf("unexpected SourceType: %s", entry.SourceType)
+	}
+	if entry.Checksum != "sha256:abc123" {
+		t.Errorf("unexpected Checksum: %s", entry.Checksum)
+	}
+	if entry.LastSynced.Before(before) || entry.LastSynced.After(after) {
+		t.Errorf("LastSynced %v outside expected range [%v, %v]", entry.LastSynced, before, after)
+	}
+}
+
+// TestNewKnossosEntryScopeUser tests NewKnossosEntry with ScopeUser.
+func TestNewKnossosEntryScopeUser(t *testing.T) {
+	entry := NewKnossosEntry(ScopeUser, "agents/foo.md", "embedded", "sha256:def456")
+
+	if entry.Owner != OwnerKnossos {
+		t.Errorf("expected Owner=knossos, got %s", entry.Owner)
+	}
+	if entry.Scope != ScopeUser {
+		t.Errorf("expected Scope=user, got %s", entry.Scope)
+	}
+}
+
+// TestNewUserEntry tests that NewUserEntry sets all fields correctly.
+func TestNewUserEntry(t *testing.T) {
+	before := time.Now().UTC()
+	entry := NewUserEntry(ScopeUser, "sha256:usercheck")
+	after := time.Now().UTC()
+
+	if entry.Owner != OwnerUser {
+		t.Errorf("expected Owner=user, got %s", entry.Owner)
+	}
+	if entry.Scope != ScopeUser {
+		t.Errorf("expected Scope=user, got %s", entry.Scope)
+	}
+	if entry.SourcePath != "" {
+		t.Errorf("expected empty SourcePath, got %s", entry.SourcePath)
+	}
+	if entry.SourceType != "" {
+		t.Errorf("expected empty SourceType, got %s", entry.SourceType)
+	}
+	if entry.Checksum != "sha256:usercheck" {
+		t.Errorf("unexpected Checksum: %s", entry.Checksum)
+	}
+	if entry.LastSynced.Before(before) || entry.LastSynced.After(after) {
+		t.Errorf("LastSynced %v outside expected range [%v, %v]", entry.LastSynced, before, after)
+	}
+}
+
+// TestNewUntrackedEntry tests that NewUntrackedEntry sets all fields correctly.
+func TestNewUntrackedEntry(t *testing.T) {
+	before := time.Now().UTC()
+	entry := NewUntrackedEntry(ScopeUser, "sha256:untrackedcheck")
+	after := time.Now().UTC()
+
+	if entry.Owner != OwnerUntracked {
+		t.Errorf("expected Owner=untracked, got %s", entry.Owner)
+	}
+	if entry.Scope != ScopeUser {
+		t.Errorf("expected Scope=user, got %s", entry.Scope)
+	}
+	if entry.SourcePath != "" {
+		t.Errorf("expected empty SourcePath, got %s", entry.SourcePath)
+	}
+	if entry.SourceType != "" {
+		t.Errorf("expected empty SourceType, got %s", entry.SourceType)
+	}
+	if entry.Checksum != "sha256:untrackedcheck" {
+		t.Errorf("unexpected Checksum: %s", entry.Checksum)
+	}
+	if entry.LastSynced.Before(before) || entry.LastSynced.After(after) {
+		t.Errorf("LastSynced %v outside expected range [%v, %v]", entry.LastSynced, before, after)
 	}
 }
 
