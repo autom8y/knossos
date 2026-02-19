@@ -57,16 +57,19 @@ type SyncResult struct {
 
 // RiteScopeResult wraps rite scope outcome.
 type RiteScopeResult struct {
-	Status           string   `json:"status"`
-	RiteName         string   `json:"rite_name,omitempty"`
-	Source           string   `json:"source,omitempty"`
-	SourcePath       string   `json:"source_path,omitempty"`
-	OrphansDetected  []string `json:"orphans_detected,omitempty"`
-	OrphanAction     string   `json:"orphan_action,omitempty"`
-	BackupPath       string   `json:"backup_path,omitempty"`
-	LegacyBackupPath string   `json:"legacy_backup_path,omitempty"`
-	SoftMode         bool     `json:"soft_mode,omitempty"`       // true if soft mode was used
-	DeferredStages   []string `json:"deferred_stages,omitempty"` // stages skipped in soft mode
+	Status                string   `json:"status"`
+	RiteName              string   `json:"rite_name,omitempty"`
+	Source                string   `json:"source,omitempty"`
+	SourcePath            string   `json:"source_path,omitempty"`
+	OrphansDetected       []string `json:"orphans_detected,omitempty"`
+	OrphanAction          string   `json:"orphan_action,omitempty"`
+	BackupPath            string   `json:"backup_path,omitempty"`
+	LegacyBackupPath      string   `json:"legacy_backup_path,omitempty"`
+	SoftMode              bool     `json:"soft_mode,omitempty"`              // true if soft mode was used
+	DeferredStages        []string `json:"deferred_stages,omitempty"`        // stages skipped in soft mode
+	RiteSwitched          bool     `json:"rite_switched,omitempty"`          // true if rite changed from previous
+	PreviousRite          string   `json:"previous_rite,omitempty"`          // previous ACTIVE_RITE name
+	ThroughlineIDsCleaned int      `json:"throughline_ids_cleaned,omitempty"` // count of .throughline-ids.json files removed
 }
 
 // Type aliases for user-scope types from the userscope sub-package.

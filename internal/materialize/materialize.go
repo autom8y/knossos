@@ -499,18 +499,23 @@ func (m *Materializer) Sync(opts SyncOptions) (*SyncResult, error) {
 // syncRiteScope delegates to existing MaterializeWithOptions.
 func (m *Materializer) syncRiteScope(opts SyncOptions) (*RiteScopeResult, error) {
 	riteName := opts.RiteName
+
+	// Always read previous ACTIVE_RITE for rite-switch detection
+	var previousRite string
+	activeRitePath := filepath.Join(m.resolver.ClaudeDir(), "ACTIVE_RITE")
+	if data, err := os.ReadFile(activeRitePath); err == nil {
+		previousRite = strings.TrimSpace(string(data))
+	}
+
 	if riteName == "" {
-		// Try to read ACTIVE_RITE
-		activeRitePath := filepath.Join(m.resolver.ClaudeDir(), "ACTIVE_RITE")
-		data, err := os.ReadFile(activeRitePath)
-		if err != nil {
+		if previousRite == "" {
 			if opts.Scope == ScopeRite {
 				return nil, fmt.Errorf("no ACTIVE_RITE found, specify --rite")
 			}
 			// scope=all with no rite: run minimal
 			return m.syncRiteScopeMinimal(opts)
 		}
-		riteName = strings.TrimSpace(string(data))
+		riteName = previousRite
 	}
 
 	legacyOpts := Options{
@@ -525,7 +530,7 @@ func (m *Materializer) syncRiteScope(opts SyncOptions) (*RiteScopeResult, error)
 		return nil, err
 	}
 
-	return &RiteScopeResult{
+	result := &RiteScopeResult{
 		Status:           legacyResult.Status,
 		RiteName:         riteName,
 		Source:           legacyResult.Source,
@@ -536,7 +541,16 @@ func (m *Materializer) syncRiteScope(opts SyncOptions) (*RiteScopeResult, error)
 		LegacyBackupPath: legacyResult.LegacyBackupPath,
 		SoftMode:         legacyResult.SoftMode,
 		DeferredStages:   legacyResult.DeferredStages,
-	}, nil
+	}
+
+	// Rite-switch cleanup: remove stale throughline IDs from all sessions
+	if previousRite != "" && previousRite != riteName && !opts.DryRun {
+		result.RiteSwitched = true
+		result.PreviousRite = previousRite
+		result.ThroughlineIDsCleaned = m.cleanupThroughlineIDs()
+	}
+
+	return result, nil
 }
 
 // syncRiteScopeMinimal handles cross-cutting mode (no rite).
@@ -1394,6 +1408,36 @@ func (m *Materializer) clearInvocationState(claudeDir string) error {
 		return err
 	}
 	return nil
+}
+
+// throughlineIDsFile is the filename for session-scoped throughline agent ID maps.
+// Defined locally to avoid importing internal/cmd/hook from materialize.
+const throughlineIDsFile = ".throughline-ids.json"
+
+// cleanupThroughlineIDs removes .throughline-ids.json from all session directories.
+// Called on rite switch because agent IDs are rite-specific — stale IDs from the
+// previous rite cause wasted resume attempts before falling back to fresh invocation.
+// Best-effort: errors on individual files are logged, not fatal.
+func (m *Materializer) cleanupThroughlineIDs() int {
+	sessionsDir := m.resolver.SessionsDir()
+	entries, err := os.ReadDir(sessionsDir)
+	if err != nil {
+		return 0
+	}
+
+	cleaned := 0
+	for _, entry := range entries {
+		if !entry.IsDir() || !paths.IsSessionDir(entry.Name()) {
+			continue
+		}
+		idFile := filepath.Join(sessionsDir, entry.Name(), throughlineIDsFile)
+		if err := os.Remove(idFile); err == nil {
+			cleaned++
+		} else if !os.IsNotExist(err) {
+			log.Printf("Warning: failed to remove %s: %v", idFile, err)
+		}
+	}
+	return cleaned
 }
 
 // materializeWorkflow copies workflow.yaml from the rite to .claude/ACTIVE_WORKFLOW.yaml.
