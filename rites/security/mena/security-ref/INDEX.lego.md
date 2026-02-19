@@ -134,4 +134,4 @@ threat-modeling → compliance-design → penetration-testing → security-revie
 
 - **Related Skills**: standards (secure coding)
 - **Related Rites**: 10x-dev (implementation), sre (infrastructure security)
-- **Commands**: See COMMAND_REGISTRY.md
+- **Commands**: Run `ari rite --list` or `/consult --commands`

@@ -134,4 +134,4 @@ SCOUT-{slug}  INTEGRATE-{slug}    PROTO-{slug}   MOONSHOT-{slug}
 
 - **Related Skills**: standards (architectural principles)
 - **Related Rites**: 10x-dev (implementation), strategy (strategic context)
-- **Commands**: See COMMAND_REGISTRY.md
+- **Commands**: Run `ari rite --list` or `/consult --commands`

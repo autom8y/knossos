@@ -138,4 +138,4 @@ instrumentation → research → experimentation → synthesis
 
 - **Related Skills**: documentation (artifact templates)
 - **Related Rites**: 10x-dev (implementation), strategy (strategic context)
-- **Commands**: See COMMAND_REGISTRY.md
+- **Commands**: Run `ari rite --list` or `/consult --commands`

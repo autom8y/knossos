@@ -33,7 +33,7 @@ This skill codifies the patterns discovered from building rites (10x-dev, docs, 
 5. [ ] Write agent prompts (use template)
 6. [ ] Create quick-switch command
 7. [ ] Create reference skill
-8. [ ] Update COMMAND_REGISTRY.md
+8. [ ] Run `ari sync --rite {rite-name}`
 9. [ ] Validate with ari sync --rite
 10. [ ] **Update Consultant knowledge base** (REQUIRED)
 ```
@@ -165,8 +165,8 @@ mkdir -p $KNOSSOS_HOME/rites/{name}/agents
 # - .claude/commands/{name}.md
 # - rites/{name}/mena/{name}-ref/INDEX.lego.md
 
-# 4. Update registry
-# - Add to COMMAND_REGISTRY.md
+# 4. Sync to project
+# - ari sync --rite {name}
 
 # 5. Validate
 $KNOSSOS_HOME/ari sync --rite {name}

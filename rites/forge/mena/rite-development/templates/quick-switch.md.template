@@ -7,7 +7,7 @@
 # =============================================================================
 # 1. Copy this file to .claude/commands/{rite-name}.md
 # 2. Replace all {placeholders}
-# 3. Update COMMAND_REGISTRY.md with new command
+# 3. Run: ari sync --rite {rite-name}
 # 4. Test with: /{rite-name}
 # =============================================================================
 

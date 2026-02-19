@@ -145,4 +145,4 @@ description: |
 
 - **Related Skills**: @10x-workflow, @documentation, @standards
 - **Rites**: {related-rite-1}, {related-rite-2}
-- **Commands**: See COMMAND_REGISTRY.md
+- **Commands**: Run `ari rite --list` or `/consult --commands`

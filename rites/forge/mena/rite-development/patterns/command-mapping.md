@@ -200,19 +200,15 @@ This is acceptable when one agent handles both design and implementation.
 
 ## Command Registration
 
-### COMMAND_REGISTRY.md
-Add quick-switch command to Rite Management section:
+After the quick-switch command is materialized, verify it appears:
 
-```markdown
-### Rite Management (N commands)
-
-| Command | File | Status | Description |
-|---------|------|--------|-------------|
-| `/sre` | [commands/sre.md](commands/sre.md) | Active | Quick switch to sre |
+```bash
+ari sync --rite {rite-name}
+ari rite --list
 ```
 
-### Update Count
-Update the total command count at the top of COMMAND_REGISTRY.md.
+The new rite should appear in the list. Run `/consult --commands` to verify the
+quick-switch command is discoverable.
 
 ---
 

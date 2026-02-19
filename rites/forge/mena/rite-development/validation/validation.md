@@ -33,14 +33,11 @@
 ### Integration
 - [ ] Command file exists: `.claude/commands/{rite-name}.md`
 - [ ] Skill directory exists: `rites/{rite-name}/mena/{rite-name}-ref/`
-- [ ] COMMAND_REGISTRY.md updated
+- [ ] `ari sync --rite {rite-name}` completes without error
 
 ### Consultant Knowledge Base (REQUIRED)
-- [ ] `ecosystem-map.md` updated with new rite
-- [ ] `agent-reference.md` updated with new agents
-- [ ] `rite-profiles/{rite-name}.md` created
-- [ ] Routing files updated (`intent-patterns.md`, `decision-trees.md`)
-- [ ] `command-reference.md` updated
+- [ ] agent-curator completed Consultant catalog update
+- [ ] `ari rite --list` shows new rite
 
 ### Verification Commands
 ```bash
