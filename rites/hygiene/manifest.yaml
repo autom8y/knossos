@@ -44,10 +44,10 @@ agents:
   - name: audit-lead
     role: Audits cleanup results and provides quality signoff
 
-dromena: []
-
-legomena:
+dromena:
   - hygiene-ref
+
+legomena: []
 
 hooks: []
 
