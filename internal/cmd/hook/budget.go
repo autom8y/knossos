@@ -57,7 +57,9 @@ Environment Variables:
 
 Performance: <5ms target execution time (file I/O only).`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runBudget(ctx)
+			return ctx.withTimeout(func() error {
+				return runBudget(ctx)
+			})
 		},
 	}
 
