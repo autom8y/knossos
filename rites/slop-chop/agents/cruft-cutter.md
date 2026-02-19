@@ -4,6 +4,7 @@ description: |
   Detects temporal debt in AI-generated code: dead backwards-compatibility shims,
   stale feature flags, ephemeral comment artifacts (ticket refs, ADR links, resolved TODOs),
   and deprecation cruft. Produces decay-report. Findings are always advisory.
+type: specialist
 tools: Bash, Glob, Grep, Read, Write, TodoWrite
 model: sonnet
 color: orange

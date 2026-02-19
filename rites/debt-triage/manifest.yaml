@@ -39,7 +39,8 @@ agents:
 dromena:
   - debt-ref
 
-legomena: []
+legomena:
+  - debt-catalog
 
 hooks: []
 

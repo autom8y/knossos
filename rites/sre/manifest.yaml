@@ -45,11 +45,12 @@ agents:
   - name: chaos-engineer
     role: Designs and executes chaos experiments to verify resilience
 
-dromena: []
+dromena:
+  - sre-ref
 
 legomena:
   - doc-sre
-  - sre-ref
+  - sre-catalog
 
 hooks: []
 

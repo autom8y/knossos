@@ -22,6 +22,8 @@ description: |
   user: "Run DEEP-DIVE structural evaluation -- extract the implicit architectural philosophy"
   assistant: "Running full structural assessment plus architectural philosophy extraction, module-to-domain alignment scoring, and deep boundary decision analysis."
   </example>
+type: specialist
+maxTurns: 150
 tools: Bash, Glob, Grep, Read, Write, TodoWrite
 model: opus
 color: cyan

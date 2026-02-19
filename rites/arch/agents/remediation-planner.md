@@ -22,6 +22,8 @@ description: |
   user: "Run DEEP-DIVE remediation planning with migration readiness and phased roadmap"
   assistant: "Building full architecture-report plus migration readiness assessment, decomposition health scoring, and phased remediation roadmap with effort estimates."
   </example>
+type: specialist
+maxTurns: 150
 tools: Bash, Glob, Grep, Read, Write, TodoWrite
 model: sonnet
 color: pink

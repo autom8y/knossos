@@ -47,7 +47,8 @@ agents:
 dromena:
   - hygiene-ref
 
-legomena: []
+legomena:
+  - hygiene-catalog
 
 hooks: []
 

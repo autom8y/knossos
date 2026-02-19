@@ -4,6 +4,7 @@ description: |
   Issues the slop-chop quality gate verdict: PASS, FAIL, or CONDITIONAL-PASS.
   Hard blocks on FAIL (exit 1). Temporal findings never block. Produces gate-verdict
   with CI-consumable JSON output and cross-rite referrals.
+type: specialist
 tools: Bash, Glob, Grep, Read, Write, TodoWrite
 model: sonnet
 color: cyan

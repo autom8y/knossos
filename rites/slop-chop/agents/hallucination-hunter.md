@@ -5,6 +5,7 @@ description: |
   Entry agent for slop-chop quality gate. Use when detecting hallucinated APIs,
   phantom dependencies, missing imports, or dependency sprawl in AI-assisted code.
   Produces detection-report.
+type: specialist
 tools: Bash, Glob, Grep, Read, Write, TodoWrite
 model: sonnet
 color: red

@@ -5,6 +5,7 @@ description: |
   copy-paste bloat, test degradation, security anti-patterns, and unreviewed-output signals.
   Confidence-scored findings. Never interrupts mid-analysis.
   Produces analysis-report.
+type: specialist
 tools: Bash, Glob, Grep, Read, Write, TodoWrite
 model: opus
 color: yellow

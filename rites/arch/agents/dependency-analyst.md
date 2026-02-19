@@ -22,6 +22,8 @@ description: |
   user: "Run DEEP-DIVE dependency analysis -- we need data flow diagrams for high-coupling pairs"
   assistant: "Running full dependency analysis plus deep coupling hotspot analysis, critical path tracing, and data flow diagrams for the highest-coupling repo pairs."
   </example>
+type: specialist
+maxTurns: 150
 tools: Bash, Glob, Grep, Read, Write, TodoWrite
 model: opus
 color: purple

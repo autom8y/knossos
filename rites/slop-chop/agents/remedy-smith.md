@@ -4,6 +4,7 @@ description: |
   Transforms slop-chop findings into actionable remediation. AUTO patches for
   mechanically safe fixes. MANUAL instructions for judgment-dependent fixes.
   Effort estimates. Never judges pass/fail. Produces remedy-plan.
+type: specialist
 tools: Bash, Glob, Grep, Read, Write, TodoWrite
 model: sonnet
 color: green

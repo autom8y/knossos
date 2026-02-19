@@ -22,6 +22,8 @@ description: |
   user: "Map the topology of /projects/acme/services/* at directory level"
   assistant: "Running discovery-only pass with directory as analysis unit: module catalog, tech stack inventory, API surface listing, and directory structure profiles."
   </example>
+type: specialist
+maxTurns: 150
 tools: Bash, Glob, Grep, Read, Write, TodoWrite
 model: opus
 color: orange
