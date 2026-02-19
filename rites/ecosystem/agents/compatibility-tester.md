@@ -21,7 +21,7 @@ description: |
 
   Triggers: validate, test compatibility, regression test, satellite matrix, pre-release.
 type: reviewer
-tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
+tools: Bash, Glob, Grep, Read, Write, TodoWrite, Skill
 model: opus
 color: red
 maxTurns: 100
@@ -30,7 +30,15 @@ skills:
   - guidance/standards
   - guidance/file-verification
 disallowedTools:
+  - Edit
   - Task
+hooks:
+  PreToolUse:
+    - matcher: "Write"
+      hooks:
+        - type: command
+          command: "ari hook agent-guard --agent compatibility-tester --allow-path .wip/ --allow-path docs/ecosystem/ --output json"
+          timeout: 3
 contract:
   must_not:
     - Implement fixes for compatibility issues found

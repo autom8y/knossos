@@ -21,13 +21,22 @@ description: |
 
   Triggers: ecosystem issue, sync failure, root cause, gap analysis, diagnostic.
 type: analyst
-tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
+tools: Bash, Glob, Grep, Read, Write, TodoWrite, Skill
 model: opus
 color: orange
 maxTurns: 150
 skills:
   - ecosystem-ref
   - guidance/file-verification
+disallowedTools:
+  - Edit
+hooks:
+  PreToolUse:
+    - matcher: "Write"
+      hooks:
+        - type: command
+          command: "ari hook agent-guard --agent ecosystem-analyst --allow-path .wip/ --allow-path docs/ecosystem/ --output json"
+          timeout: 3
 contract:
   must_not:
     - Propose solutions (diagnose and analyze only)

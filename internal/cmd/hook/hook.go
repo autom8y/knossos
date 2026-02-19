@@ -91,6 +91,7 @@ Performance Targets:
 	cmd.AddCommand(newPrecompactCmd(ctx))
 	cmd.AddCommand(newSubagentStartCmd(ctx))
 	cmd.AddCommand(newSubagentStopCmd(ctx))
+	cmd.AddCommand(newAgentGuardCmd(ctx))
 	cmd.AddCommand(newSessionEndCmd(ctx))
 
 	// Hook commands do NOT require project context
