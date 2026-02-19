@@ -11,6 +11,15 @@ color: green
 maxTurns: 80
 skills:
   - slop-chop-ref
+disallowedTools:
+  - Edit
+hooks:
+  PreToolUse:
+    - matcher: "Write"
+      hooks:
+        - type: command
+          command: "ari hook agent-guard --agent remedy-smith --allow-path .wip/ --output json"
+          timeout: 3
 ---
 
 # Remedy Smith

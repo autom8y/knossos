@@ -12,6 +12,15 @@ color: yellow
 maxTurns: 100
 skills:
   - slop-chop-ref
+disallowedTools:
+  - Edit
+hooks:
+  PreToolUse:
+    - matcher: "Write"
+      hooks:
+        - type: command
+          command: "ari hook agent-guard --agent logic-surgeon --allow-path .wip/ --output json"
+          timeout: 3
 ---
 
 # Logic Surgeon

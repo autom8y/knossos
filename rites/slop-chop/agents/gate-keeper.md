@@ -11,6 +11,15 @@ color: cyan
 maxTurns: 60
 skills:
   - slop-chop-ref
+disallowedTools:
+  - Edit
+hooks:
+  PreToolUse:
+    - matcher: "Write"
+      hooks:
+        - type: command
+          command: "ari hook agent-guard --agent gate-keeper --allow-path .wip/ --output json"
+          timeout: 3
 ---
 
 # Gate Keeper

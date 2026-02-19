@@ -24,6 +24,15 @@ maxTurns: 150
 skills:
   - debt-catalog
   - guidance/standards
+disallowedTools:
+  - Edit
+hooks:
+  PreToolUse:
+    - matcher: "Write"
+      hooks:
+        - type: command
+          command: "ari hook agent-guard --agent risk-assessor --allow-path .wip/ --allow-path docs/ --output json"
+          timeout: 3
 ---
 
 # Risk Assessor
