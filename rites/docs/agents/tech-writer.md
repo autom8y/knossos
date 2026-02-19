@@ -25,6 +25,7 @@ color: blue
 maxTurns: 200
 skills:
   - doc-consolidation
+memory: "project"
 ---
 
 # Tech Writer

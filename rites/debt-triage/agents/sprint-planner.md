@@ -24,6 +24,7 @@ maxTurns: 200
 skills:
   - debt-catalog
   - shared-templates
+memory: "project"
 contract:
   must_not:
     - Commit to scope without capacity analysis

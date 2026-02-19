@@ -23,6 +23,7 @@ color: orange
 maxTurns: 200
 skills:
   - debt-catalog
+memory: "project"
 contract:
   must_not:
     - Inflate severity to force prioritization

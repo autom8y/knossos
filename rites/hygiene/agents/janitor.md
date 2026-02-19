@@ -26,6 +26,7 @@ color: green
 maxTurns: 250
 skills:
   - hygiene-catalog
+memory: "project"
 ---
 
 # Janitor

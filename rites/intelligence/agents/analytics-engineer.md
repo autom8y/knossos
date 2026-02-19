@@ -23,6 +23,7 @@ color: orange
 maxTurns: 250
 skills:
   - intelligence-ref
+memory: "project"
 ---
 
 # Analytics Engineer

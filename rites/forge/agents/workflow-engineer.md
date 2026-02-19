@@ -31,6 +31,7 @@ tools: Bash, Glob, Grep, Read, Write, Edit, TodoWrite, Skill
 model: opus
 color: green
 maxTurns: 250
+memory: "project"
 contract:
   must_not:
     - Create cyclic workflow graphs

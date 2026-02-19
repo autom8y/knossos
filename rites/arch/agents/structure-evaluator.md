@@ -27,6 +27,7 @@ maxTurns: 150
 tools: Bash, Glob, Grep, Read, Write, TodoWrite
 model: opus
 color: cyan
+memory: "project"
 ---
 
 # Structure Evaluator

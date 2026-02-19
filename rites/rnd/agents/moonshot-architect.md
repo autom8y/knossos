@@ -23,6 +23,7 @@ color: purple
 maxTurns: 150
 skills:
   - rnd-ref
+memory: "project"
 ---
 
 # Moonshot Architect

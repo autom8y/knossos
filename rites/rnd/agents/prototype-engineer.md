@@ -23,6 +23,7 @@ color: green
 maxTurns: 250
 skills:
   - rnd-ref
+memory: "project"
 contract:
   must_not:
     - Optimize for production quality over learning speed

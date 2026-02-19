@@ -26,6 +26,7 @@ color: orange
 maxTurns: 150
 skills:
   - hygiene-catalog
+memory: "project"
 disallowedTools:
   - Edit
 hooks:

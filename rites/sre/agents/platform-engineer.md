@@ -23,6 +23,7 @@ color: cyan
 maxTurns: 250
 skills:
   - sre-catalog
+memory: "project"
 ---
 
 # Platform Engineer

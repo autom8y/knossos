@@ -23,6 +23,7 @@ color: red
 maxTurns: 100
 skills:
   - security-ref
+memory: "project"
 disallowedTools:
   - Task
 contract:

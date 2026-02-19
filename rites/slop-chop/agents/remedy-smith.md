@@ -11,6 +11,7 @@ color: green
 maxTurns: 80
 skills:
   - slop-chop-ref
+memory: "project"
 disallowedTools:
   - Edit
 hooks:

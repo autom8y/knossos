@@ -25,6 +25,7 @@ color: cyan
 maxTurns: 150
 skills:
   - doc-artifacts
+memory: "project"
 ---
 
 # Architect
