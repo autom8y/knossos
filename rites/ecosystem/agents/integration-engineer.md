@@ -25,6 +25,8 @@ tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
 model: sonnet
 color: green
 maxTurns: 250
+skills:
+  - ecosystem-ref
 ---
 
 # Integration Engineer

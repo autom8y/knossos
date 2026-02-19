@@ -25,6 +25,9 @@ tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
 model: opus
 color: orange
 maxTurns: 150
+skills:
+  - ecosystem-ref
+  - guidance/file-verification
 contract:
   must_not:
     - Propose solutions (diagnose and analyze only)

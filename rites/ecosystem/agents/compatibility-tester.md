@@ -25,6 +25,10 @@ tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
 model: opus
 color: red
 maxTurns: 100
+skills:
+  - ecosystem-ref
+  - guidance/standards
+  - guidance/file-verification
 disallowedTools:
   - Task
 contract:
