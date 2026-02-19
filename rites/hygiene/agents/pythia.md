@@ -7,6 +7,9 @@ tools: Read
 model: opus
 color: green
 maxTurns: 40
+skills:
+  - orchestrator-templates
+  - hygiene-catalog
 disallowedTools:
   - Bash
   - Write

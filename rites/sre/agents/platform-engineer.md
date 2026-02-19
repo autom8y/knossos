@@ -21,6 +21,8 @@ tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
 model: opus
 color: cyan
 maxTurns: 250
+skills:
+  - sre-catalog
 ---
 
 # Platform Engineer

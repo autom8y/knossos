@@ -21,6 +21,8 @@ tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
 model: opus
 color: cyan
 maxTurns: 150
+skills:
+  - intelligence-ref
 ---
 
 # Experimentation Lead

@@ -21,6 +21,8 @@ tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
 model: opus
 color: purple
 maxTurns: 150
+skills:
+  - intelligence-ref
 ---
 
 # Insights Analyst

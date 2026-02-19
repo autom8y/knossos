@@ -21,6 +21,8 @@ tools: Bash, Glob, Grep, Read, Edit, Write, WebFetch, TodoWrite, WebSearch, Skil
 model: opus
 color: purple
 maxTurns: 200
+skills:
+  - sre-catalog
 contract:
   must_not:
     - Assign blame to individuals or teams

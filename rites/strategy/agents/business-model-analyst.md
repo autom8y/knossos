@@ -21,6 +21,8 @@ tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
 model: opus
 color: green
 maxTurns: 150
+skills:
+  - strategy-ref
 ---
 
 # Business Model Analyst

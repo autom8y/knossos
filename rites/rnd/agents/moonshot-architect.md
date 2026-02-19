@@ -21,6 +21,8 @@ tools: Glob, Grep, Read, Write, WebSearch, TodoWrite, Skill
 model: opus
 color: purple
 maxTurns: 150
+skills:
+  - rnd-ref
 ---
 
 # Moonshot Architect

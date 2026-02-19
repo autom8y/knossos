@@ -21,6 +21,8 @@ tools: Bash, Edit, Glob, Grep, Read, Write, WebSearch, TodoWrite, Skill
 model: opus
 color: pink
 maxTurns: 200
+skills:
+  - intelligence-ref
 ---
 
 # User Researcher

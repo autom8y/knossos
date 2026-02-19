@@ -21,6 +21,8 @@ tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
 model: opus
 color: red
 maxTurns: 200
+skills:
+  - sre-catalog
 contract:
   must_not:
     - Run experiments without rollback plan

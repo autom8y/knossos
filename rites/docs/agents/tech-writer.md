@@ -23,6 +23,8 @@ tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, WebFetch, WebSearch, Skil
 model: sonnet
 color: blue
 maxTurns: 200
+skills:
+  - doc-consolidation
 ---
 
 # Tech Writer

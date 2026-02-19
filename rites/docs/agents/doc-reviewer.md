@@ -23,6 +23,8 @@ tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
 model: sonnet
 color: red
 maxTurns: 100
+skills:
+  - doc-reviews
 disallowedTools:
   - Task
 contract:

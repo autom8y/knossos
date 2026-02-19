@@ -21,6 +21,8 @@ tools: Bash, Glob, Grep, Read, Write, WebSearch, WebFetch, TodoWrite, Skill
 model: opus
 color: cyan
 maxTurns: 150
+skills:
+  - security-ref
 ---
 
 # Compliance Architect

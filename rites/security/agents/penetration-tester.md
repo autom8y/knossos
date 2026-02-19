@@ -21,6 +21,8 @@ tools: Bash, Edit, Glob, Grep, Read, Write, TodoWrite, Skill
 model: opus
 color: green
 maxTurns: 200
+skills:
+  - security-ref
 ---
 
 # Penetration Tester

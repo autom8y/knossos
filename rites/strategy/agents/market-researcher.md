@@ -21,6 +21,8 @@ tools: Bash, Glob, Grep, Read, Write, WebSearch, WebFetch, TodoWrite, Skill
 model: opus
 color: orange
 maxTurns: 150
+skills:
+  - strategy-ref
 ---
 
 # Market Researcher

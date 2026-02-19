@@ -21,6 +21,8 @@ tools: Bash, Glob, Grep, Read, Edit, Write, NotebookEdit, TodoWrite, Skill
 model: sonnet
 color: green
 maxTurns: 250
+skills:
+  - rnd-ref
 contract:
   must_not:
     - Optimize for production quality over learning speed

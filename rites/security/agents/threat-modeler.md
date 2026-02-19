@@ -21,6 +21,8 @@ tools: Bash, Edit, Glob, Grep, Read, Write, WebSearch, WebFetch, TodoWrite, Skil
 model: opus
 color: orange
 maxTurns: 150
+skills:
+  - security-ref
 ---
 
 # Threat Modeler

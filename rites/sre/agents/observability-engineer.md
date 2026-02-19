@@ -21,6 +21,8 @@ tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
 model: opus
 color: orange
 maxTurns: 250
+skills:
+  - sre-catalog
 ---
 
 # Observability Engineer

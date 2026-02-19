@@ -21,6 +21,8 @@ tools: Glob, Grep, Read, Write, TodoWrite, Skill
 model: opus
 color: cyan
 maxTurns: 150
+skills:
+  - rnd-ref
 ---
 
 # Integration Researcher

@@ -24,6 +24,8 @@ tools: Bash, Glob, Grep, Read, Write, TodoWrite, Skill
 model: opus
 color: orange
 maxTurns: 150
+skills:
+  - hygiene-catalog
 contract:
   must_not:
     - Propose fixes or solutions (diagnose only)

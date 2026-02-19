@@ -21,6 +21,8 @@ tools: Glob, Grep, Read, Edit, Write, TodoWrite, Skill
 model: opus
 color: blue
 maxTurns: 200
+skills:
+  - rnd-ref
 ---
 
 # Tech Transfer
