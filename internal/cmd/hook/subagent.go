@@ -4,6 +4,8 @@ package hook
 import (
 	"encoding/json"
 	"fmt"
+	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -26,7 +28,20 @@ type subagentPayload struct {
 	AgentName string `json:"agent_name"`
 	AgentType string `json:"agent_type"`
 	TaskID    string `json:"task_id"`
+	AgentID   string `json:"agent_id"`
 }
+
+// throughlineAgentNames is the set of agent names tracked as throughline agents.
+// These are long-running orchestrator agents whose IDs must survive compaction.
+var throughlineAgentNames = map[string]bool{
+	"pythia":           true,
+	"moirai":           true,
+	"consultant":       true,
+	"context-engineer": true,
+}
+
+// ThroughlineIDsFile is the filename for the session-scoped throughline agent ID map.
+const ThroughlineIDsFile = ".throughline-ids.json"
 
 // newSubagentStartCmd creates the SubagentStart hook subcommand.
 func newSubagentStartCmd(ctx *cmdContext) *cobra.Command {
@@ -103,16 +118,21 @@ func runSubagentStartCore(ctx *cmdContext, printer *output.Printer) error {
 	agentInfo := parseSubagentInfo(hookEnv.ToolInput)
 
 	// Log to clew using a task_start event
+	meta := map[string]interface{}{
+		"agent_name": agentInfo.AgentName,
+		"agent_type": agentInfo.AgentType,
+		"task_id":    agentInfo.TaskID,
+		"hook_event": "SubagentStart",
+	}
+	if agentInfo.AgentID != "" {
+		meta["agent_id"] = agentInfo.AgentID
+	}
+
 	event := clewcontract.Event{
 		Timestamp: time.Now().UTC().Format("2006-01-02T15:04:05.000Z"),
 		Type:      clewcontract.EventTypeTaskStart,
 		Summary:   fmt.Sprintf("Subagent started: %s", agentInfo.AgentName),
-		Meta: map[string]interface{}{
-			"agent_name": agentInfo.AgentName,
-			"agent_type": agentInfo.AgentType,
-			"task_id":    agentInfo.TaskID,
-			"hook_event": "SubagentStart",
-		},
+		Meta:      meta,
 	}
 
 	writer := clewcontract.NewBufferedEventWriter(sessionDir, clewcontract.DefaultFlushInterval)
@@ -123,6 +143,18 @@ func runSubagentStartCore(ctx *cmdContext, printer *output.Printer) error {
 		printer.VerboseLog("warn", "failed to write subagent start event",
 			map[string]interface{}{"error": flushErr.Error()})
 		return outputSubagentResult(printer, false, "clew write failed")
+	}
+
+	// Persist throughline agent ID if this agent is a throughline agent.
+	// Best-effort: failures are logged but never block the hook.
+	if agentInfo.AgentID != "" && throughlineAgentNames[agentInfo.AgentName] {
+		if err := upsertThroughlineID(sessionDir, agentInfo.AgentName, agentInfo.AgentID); err != nil {
+			printer.VerboseLog("warn", "failed to persist throughline agent ID",
+				map[string]interface{}{
+					"agent_name": agentInfo.AgentName,
+					"error":      err.Error(),
+				})
+		}
 	}
 
 	return outputSubagentResult(printer, true, "")
@@ -147,16 +179,21 @@ func runSubagentStopCore(ctx *cmdContext, printer *output.Printer) error {
 	agentInfo := parseSubagentInfo(hookEnv.ToolInput)
 
 	// Log to clew using a task_end event
+	stopMeta := map[string]interface{}{
+		"agent_name": agentInfo.AgentName,
+		"agent_type": agentInfo.AgentType,
+		"task_id":    agentInfo.TaskID,
+		"hook_event": "SubagentStop",
+	}
+	if agentInfo.AgentID != "" {
+		stopMeta["agent_id"] = agentInfo.AgentID
+	}
+
 	event := clewcontract.Event{
 		Timestamp: time.Now().UTC().Format("2006-01-02T15:04:05.000Z"),
 		Type:      clewcontract.EventTypeTaskEnd,
 		Summary:   fmt.Sprintf("Subagent stopped: %s", agentInfo.AgentName),
-		Meta: map[string]interface{}{
-			"agent_name": agentInfo.AgentName,
-			"agent_type": agentInfo.AgentType,
-			"task_id":    agentInfo.TaskID,
-			"hook_event": "SubagentStop",
-		},
+		Meta:      stopMeta,
 	}
 
 	stopWriter := clewcontract.NewBufferedEventWriter(sessionDir, clewcontract.DefaultFlushInterval)
@@ -211,5 +248,63 @@ func parseSubagentInfo(toolInputJSON string) subagentPayload {
 		info.TaskID = taskID
 	}
 
+	// Extract agent_id with fallback to "id" field, matching the same fallback
+	// pattern used for agent_name above.
+	if agentID, ok := raw["agent_id"].(string); ok && agentID != "" {
+		info.AgentID = agentID
+	} else if agentID, ok := raw["id"].(string); ok && agentID != "" {
+		info.AgentID = agentID
+	}
+
 	return info
+}
+
+// upsertThroughlineID atomically writes the agent_id for a throughline agent
+// into the session-scoped .throughline-ids.json file.
+// It reads the existing file (if any), updates the key, and writes back via
+// a temp-file rename for atomicity.
+func upsertThroughlineID(sessionDir, agentName, agentID string) error {
+	idFile := filepath.Join(sessionDir, ThroughlineIDsFile)
+
+	// Read existing IDs (if any).
+	ids := make(map[string]string)
+	if data, err := os.ReadFile(idFile); err == nil {
+		// Best-effort unmarshal — corrupt file is treated as empty.
+		_ = json.Unmarshal(data, &ids)
+	}
+
+	// Update the key for this agent.
+	ids[agentName] = agentID
+
+	// Marshal to JSON.
+	data, err := json.Marshal(ids)
+	if err != nil {
+		return fmt.Errorf("marshal throughline IDs: %w", err)
+	}
+
+	// Write to a temp file in the same directory, then rename for atomicity.
+	tmpFile := idFile + ".tmp"
+	if err := os.WriteFile(tmpFile, data, 0644); err != nil {
+		return fmt.Errorf("write throughline IDs temp file: %w", err)
+	}
+	if err := os.Rename(tmpFile, idFile); err != nil {
+		return fmt.Errorf("rename throughline IDs file: %w", err)
+	}
+
+	return nil
+}
+
+// readThroughlineIDs reads the .throughline-ids.json file from sessionDir.
+// Returns an empty map if the file does not exist or cannot be parsed.
+func readThroughlineIDs(sessionDir string) map[string]string {
+	idFile := filepath.Join(sessionDir, ThroughlineIDsFile)
+	data, err := os.ReadFile(idFile)
+	if err != nil {
+		return nil
+	}
+	var ids map[string]string
+	if err := json.Unmarshal(data, &ids); err != nil {
+		return nil
+	}
+	return ids
 }

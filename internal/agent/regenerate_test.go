@@ -19,7 +19,7 @@ color: purple
 
 Orchestrator for testing.
 
-## Consultation Role
+## Consultation Role (CRITICAL)
 
 OLD PLATFORM CONTENT - should be replaced.
 
@@ -55,7 +55,7 @@ AUTHOR CONTENT - phase routing table.
 	if strings.Contains(consultationRole.Content, "OLD PLATFORM CONTENT") {
 		t.Error("platform section still contains old content")
 	}
-	if !strings.Contains(consultationRole.Content, "stateless advisor") {
+	if !strings.Contains(consultationRole.Content, "consultative throughline") {
 		t.Error("platform section missing expected template content")
 	}
 

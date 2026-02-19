@@ -136,6 +136,8 @@ const CompactCheckpointConsumed = "COMPACT_STATE.consumed.md"
 // writeCompactCheckpoint writes a COMPACT_STATE.md checkpoint in the session directory.
 // It extracts key fields from SESSION_CONTEXT.md frontmatter and writes a minimal
 // markdown summary for rehydration after context compaction.
+// Throughline agent IDs (if any) are included in the checkpoint so they survive
+// compaction and can be re-injected by the SessionStart context hook.
 func writeCompactCheckpoint(sessionDir string) error {
 	sessionContextPath := filepath.Join(sessionDir, "SESSION_CONTEXT.md")
 	sessCtx, err := session.LoadContext(sessionContextPath)
@@ -166,6 +168,17 @@ func writeCompactCheckpoint(sessionDir string) error {
 		content.WriteString(fmt.Sprintf("| current_phase | %s |\n", sessCtx.CurrentPhase))
 	}
 	content.WriteString(fmt.Sprintf("| status | %s |\n", sessCtx.Status))
+
+	// Include throughline agent IDs so they survive compaction.
+	// readThroughlineIDs returns nil when no file exists — safe to skip.
+	if ids := readThroughlineIDs(sessionDir); len(ids) > 0 {
+		content.WriteString("\n## Throughline Agents\n\n")
+		content.WriteString("| Agent | ID |\n")
+		content.WriteString("|-------|----|\n")
+		for name, id := range ids {
+			content.WriteString(fmt.Sprintf("| %s | %s |\n", name, id))
+		}
+	}
 
 	checkpointPath := filepath.Join(sessionDir, CompactCheckpointFile)
 	return os.WriteFile(checkpointPath, []byte(content.String()), 0644)

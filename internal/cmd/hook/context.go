@@ -23,18 +23,19 @@ const gitCommandTimeout = 50 * time.Millisecond
 
 // ContextOutput represents the output of the context hook.
 type ContextOutput struct {
-	SessionID       string   `json:"session_id,omitempty"`
-	Status          string   `json:"status,omitempty"`
-	Initiative      string   `json:"initiative,omitempty"`
-	Rite            string   `json:"rite,omitempty"`
-	CurrentPhase    string   `json:"current_phase,omitempty"`
-	ExecutionMode   string   `json:"execution_mode,omitempty"`
-	HasSession      bool     `json:"has_session"`
-	CompactState    string   `json:"compact_state,omitempty"` // Rehydrated from COMPACT_STATE.md if present
-	GitBranch       string   `json:"git_branch,omitempty"`
-	BaseBranch      string   `json:"base_branch,omitempty"`
-	AvailableRites  []string `json:"available_rites,omitempty"`
-	AvailableAgents []string `json:"available_agents,omitempty"`
+	SessionID       string            `json:"session_id,omitempty"`
+	Status          string            `json:"status,omitempty"`
+	Initiative      string            `json:"initiative,omitempty"`
+	Rite            string            `json:"rite,omitempty"`
+	CurrentPhase    string            `json:"current_phase,omitempty"`
+	ExecutionMode   string            `json:"execution_mode,omitempty"`
+	HasSession      bool              `json:"has_session"`
+	CompactState    string            `json:"compact_state,omitempty"`    // Rehydrated from COMPACT_STATE.md if present
+	ThroughlineIDs  map[string]string `json:"throughline_ids,omitempty"` // Active throughline agent IDs
+	GitBranch       string            `json:"git_branch,omitempty"`
+	BaseBranch      string            `json:"base_branch,omitempty"`
+	AvailableRites  []string          `json:"available_rites,omitempty"`
+	AvailableAgents []string          `json:"available_agents,omitempty"`
 }
 
 // Text implements output.Textable for markdown output.
@@ -58,11 +59,35 @@ func (c ContextOutput) Text() string {
 	if len(c.AvailableAgents) > 0 {
 		b.WriteString(fmt.Sprintf("| Available Agents | %s |\n", strings.Join(c.AvailableAgents, ", ")))
 	}
+	// Throughline agent IDs are shown unconditionally when present.
+	// Omit the section entirely when no IDs are tracked.
+	if len(c.ThroughlineIDs) > 0 {
+		b.WriteString("\nThroughline Agents:\n")
+		// Use sorted keys for deterministic output.
+		keys := make([]string, 0, len(c.ThroughlineIDs))
+		for k := range c.ThroughlineIDs {
+			keys = append(keys, k)
+		}
+		sortStrings(keys)
+		for _, k := range keys {
+			b.WriteString(fmt.Sprintf("  %s: %s\n", k, c.ThroughlineIDs[k]))
+		}
+	}
 	if c.CompactState != "" {
 		b.WriteString("\n## Recovered State (from PreCompact checkpoint)\n")
 		b.WriteString(c.CompactState)
 	}
 	return b.String()
+}
+
+// sortStrings sorts a slice of strings in place.
+// Defined here to avoid importing sort just for this helper.
+func sortStrings(s []string) {
+	for i := 1; i < len(s); i++ {
+		for j := i; j > 0 && s[j] < s[j-1]; j-- {
+			s[j], s[j-1] = s[j-1], s[j]
+		}
+	}
 }
 
 // newContextCmd creates the context hook subcommand.
@@ -164,6 +189,12 @@ func runContextCore(ctx *cmdContext, printer *output.Printer) error {
 	compactState := consumeCompactCheckpoint(sessionDir, printer)
 	if compactState != "" {
 		result.CompactState = compactState
+	}
+
+	// Include active throughline agent IDs so they survive compaction re-injection.
+	// readThroughlineIDs returns nil when no file exists — omitempty handles it.
+	if ids := readThroughlineIDs(sessionDir); len(ids) > 0 {
+		result.ThroughlineIDs = ids
 	}
 
 	// Emit session_start event to clew log (best-effort, non-blocking)

@@ -776,3 +776,180 @@ current_phase: "implementation"
 	}
 }
 
+func TestContextOutput_Text_ShowsThroughlineIDs(t *testing.T) {
+	out := ContextOutput{
+		SessionID:     "session-005",
+		Status:        "ACTIVE",
+		ExecutionMode: "orchestrated",
+		HasSession:    true,
+		ThroughlineIDs: map[string]string{
+			"pythia": "agent-pythia-abc",
+			"moirai": "agent-moirai-def",
+		},
+	}
+	text := out.Text()
+	if !strings.Contains(text, "Throughline Agents:") {
+		t.Errorf("Text() should contain 'Throughline Agents:' section\nGot: %s", text)
+	}
+	if !strings.Contains(text, "pythia: agent-pythia-abc") {
+		t.Errorf("Text() should contain pythia ID\nGot: %s", text)
+	}
+	if !strings.Contains(text, "moirai: agent-moirai-def") {
+		t.Errorf("Text() should contain moirai ID\nGot: %s", text)
+	}
+}
+
+func TestContextOutput_Text_OmitsThroughlineIDsWhenEmpty(t *testing.T) {
+	out := ContextOutput{
+		SessionID:     "session-006",
+		Status:        "ACTIVE",
+		ExecutionMode: "orchestrated",
+		HasSession:    true,
+	}
+	text := out.Text()
+	if strings.Contains(text, "Throughline Agents") {
+		t.Errorf("Text() should not contain 'Throughline Agents' when map is nil\nGot: %s", text)
+	}
+}
+
+func TestRunContext_IncludesThroughlineIDs(t *testing.T) {
+	tmpDir := t.TempDir()
+	sessionID := "session-20260208-100000-throughline"
+
+	// Create session structure
+	sessionsDir := filepath.Join(tmpDir, ".claude", "sessions")
+	sessionDir := filepath.Join(sessionsDir, sessionID)
+	os.MkdirAll(sessionDir, 0755)
+
+	sessionContext := `---
+schema_version: "2.1"
+session_id: "session-20260208-100000-throughline"
+status: ACTIVE
+created_at: "2026-02-08T10:00:00Z"
+initiative: "Throughline Test"
+complexity: "MODULE"
+active_rite: "ecosystem"
+current_phase: "implementation"
+---
+`
+	os.WriteFile(filepath.Join(sessionDir, "SESSION_CONTEXT.md"), []byte(sessionContext), 0644)
+	os.WriteFile(filepath.Join(tmpDir, ".claude", "ACTIVE_RITE"), []byte("ecosystem"), 0644)
+
+	// Write .throughline-ids.json as if SubagentStart had fired
+	idData := `{"pythia":"agent-pythia-xyz","moirai":"agent-moirai-uvw"}`
+	os.WriteFile(filepath.Join(sessionDir, ThroughlineIDsFile), []byte(idData), 0644)
+
+	testutil.SetupEnv(t, &testutil.HookEnv{
+		Event:      "SessionStart",
+		ProjectDir: tmpDir,
+	})
+
+	var stdout, stderr bytes.Buffer
+	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
+
+	outputFlag := "json"
+	verboseFlag := false
+	ctx := &cmdContext{
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &tmpDir,
+			},
+			SessionID: nil,
+		},
+	}
+
+	if err := runContextCore(ctx, printer); err != nil {
+		t.Fatalf("runContextCore() error = %v", err)
+	}
+
+	var result ContextOutput
+	if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
+		t.Fatalf("Failed to parse output: %v\nOutput: %s", err, stdout.String())
+	}
+
+	if !result.HasSession {
+		t.Error("Expected HasSession=true")
+	}
+	if len(result.ThroughlineIDs) == 0 {
+		t.Error("Expected ThroughlineIDs to be populated")
+	}
+	if result.ThroughlineIDs["pythia"] != "agent-pythia-xyz" {
+		t.Errorf("pythia ID = %q, want %q", result.ThroughlineIDs["pythia"], "agent-pythia-xyz")
+	}
+	if result.ThroughlineIDs["moirai"] != "agent-moirai-uvw" {
+		t.Errorf("moirai ID = %q, want %q", result.ThroughlineIDs["moirai"], "agent-moirai-uvw")
+	}
+
+	// Verify Text() output includes the IDs
+	text := result.Text()
+	if !strings.Contains(text, "Throughline Agents:") {
+		t.Errorf("Text() missing Throughline Agents section\nGot: %s", text)
+	}
+}
+
+func TestRunContext_NoThroughlineIDsFile(t *testing.T) {
+	// When no .throughline-ids.json exists, ThroughlineIDs should be nil (omitted from JSON)
+	tmpDir := t.TempDir()
+	sessionID := "session-20260208-100000-nothroughline"
+
+	sessionsDir := filepath.Join(tmpDir, ".claude", "sessions")
+	sessionDir := filepath.Join(sessionsDir, sessionID)
+	os.MkdirAll(sessionDir, 0755)
+
+	sessionContext := `---
+schema_version: "2.1"
+session_id: "session-20260208-100000-nothroughline"
+status: ACTIVE
+created_at: "2026-02-08T10:00:00Z"
+initiative: "No Throughline"
+complexity: "simple"
+active_rite: "forge"
+current_phase: "requirements"
+---
+`
+	os.WriteFile(filepath.Join(sessionDir, "SESSION_CONTEXT.md"), []byte(sessionContext), 0644)
+	os.WriteFile(filepath.Join(tmpDir, ".claude", "ACTIVE_RITE"), []byte("forge"), 0644)
+
+	testutil.SetupEnv(t, &testutil.HookEnv{
+		Event:      "SessionStart",
+		ProjectDir: tmpDir,
+	})
+
+	var stdout, stderr bytes.Buffer
+	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
+
+	outputFlag := "json"
+	verboseFlag := false
+	ctx := &cmdContext{
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &tmpDir,
+			},
+			SessionID: nil,
+		},
+	}
+
+	if err := runContextCore(ctx, printer); err != nil {
+		t.Fatalf("runContextCore() error = %v", err)
+	}
+
+	var result ContextOutput
+	if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
+		t.Fatalf("Failed to parse output: %v\nOutput: %s", err, stdout.String())
+	}
+
+	if len(result.ThroughlineIDs) != 0 {
+		t.Errorf("Expected empty ThroughlineIDs when no file exists, got: %v", result.ThroughlineIDs)
+	}
+
+	// Text() should not mention Throughline Agents
+	text := result.Text()
+	if strings.Contains(text, "Throughline Agents") {
+		t.Errorf("Text() should not include Throughline Agents section when none tracked\nGot: %s", text)
+	}
+}
+

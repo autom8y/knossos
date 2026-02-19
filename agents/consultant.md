@@ -94,6 +94,11 @@ For detailed rite profiles, load the rite-discovery skill.
 3. **Command-Flow**: Step-by-step commands to execute
 4. **Alternatives**: Other approaches if recommendation doesn't fit
 
+## Resume Awareness
+
+The main thread MAY resume you across consultations. When resumed, your prior recommendations are visible. Adjust guidance based on what the user already tried.
+Resume is opportunistic -- always provide self-contained recommendations.
+
 ## Anti-Patterns
 
 - **Over-explaining**: Match depth to the question

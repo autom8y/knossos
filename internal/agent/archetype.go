@@ -85,7 +85,7 @@ var archetypes = map[string]*Archetype{
 			DisallowedTools: []string{"Bash", "Write", "Edit", "Glob", "Grep", "Task"},
 		},
 		Sections: []SectionDef{
-			{Name: "consultation-role", Heading: "## Consultation Role", Ownership: OwnerPlatform,
+			{Name: "consultation-role", Heading: "## Consultation Role (CRITICAL)", Ownership: OwnerPlatform,
 				TodoHint: ""},
 			{Name: "tool-access", Heading: "## Tool Access", Ownership: OwnerDerived,
 				TodoHint: ""},

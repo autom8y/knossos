@@ -112,7 +112,7 @@ tools: Read
 
 # Test Agent
 
-## Consultation Role
+## Consultation Role (CRITICAL)
 
 Line 1
 Line 2
@@ -127,8 +127,8 @@ Tools listed here.
 			wantTitle:       "Test Agent",
 			wantNumSections: 2,
 			wantSections: map[string]string{
-				"Consultation Role": "Line 1\nLine 2\nLine 3\n\nMore content here.",
-				"Tool Access":       "Tools listed here.",
+				"Consultation Role (CRITICAL)": "Line 1\nLine 2\nLine 3\n\nMore content here.",
+				"Tool Access":                  "Tools listed here.",
 			},
 		},
 	}
@@ -179,7 +179,7 @@ tools: Read
 
 Preamble here.
 
-## Consultation Role
+## Consultation Role (CRITICAL)
 
 Platform content.
 
@@ -201,7 +201,7 @@ Unknown section.
 		heading       string
 		wantOwnership SectionOwnership
 	}{
-		{"Consultation Role", OwnerPlatform},
+		{"Consultation Role (CRITICAL)", OwnerPlatform},
 		{"Exousia", OwnerAuthor},
 		{"Custom Section", OwnerAuthor}, // Unknown sections default to author
 	}

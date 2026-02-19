@@ -189,6 +189,18 @@ Format: `TIMESTAMP | SESSION_ID | OPERATION | SOURCE | DETAILS | STATUS | FATE |
 
 ---
 
+## Resume Awareness
+
+The main thread MAY resume you across invocations. When resumed, you have visibility into your prior mutations within this session. Use this to:
+- Avoid redundant lock/unlock cycles for sequential operations
+- Detect mutation sequence violations (e.g., park after already parked)
+- Skip re-reading session state when your last mutation is still current
+
+Do NOT use resume to skip audit logging. Every mutation is logged regardless.
+Resume is opportunistic -- always validate current state before mutating.
+
+---
+
 ## File Paths
 
 | Resource | Path |
