@@ -45,12 +45,12 @@ agents:
   - name: doc-reviewer
     role: Reviews documentation for technical accuracy and quality
 
-dromena: []
+dromena:
+  - docs-ref
 
 legomena:
   - doc-consolidation
   - doc-reviews
-  - docs-ref
 
 hooks: []
 

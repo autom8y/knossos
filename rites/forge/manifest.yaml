@@ -62,7 +62,8 @@ agents:
   - name: eval-specialist
     role: Evaluates agent performance and validates readiness
 
-dromena: []
+dromena:
+  - theoria
 
 legomena:
   - agent-prompt-engineering
