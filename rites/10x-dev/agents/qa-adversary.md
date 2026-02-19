@@ -23,6 +23,8 @@ tools: Bash, Glob, Grep, Read, Edit, Write, WebFetch, TodoWrite, WebSearch, Skil
 model: opus
 color: red
 maxTurns: 100
+skills:
+  - doc-artifacts
 disallowedTools:
   - Task
 contract:

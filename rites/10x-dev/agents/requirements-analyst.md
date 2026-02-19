@@ -23,6 +23,8 @@ tools: Bash, Glob, Grep, Read, Edit, Write, WebFetch, TodoWrite, WebSearch, Skil
 model: opus
 color: pink
 maxTurns: 150
+skills:
+  - doc-artifacts
 contract:
   must_not:
     - Make architectural or implementation decisions

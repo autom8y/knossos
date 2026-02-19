@@ -9,6 +9,8 @@ tools: Bash, Glob, Grep, Read, Write, TodoWrite
 model: sonnet
 color: cyan
 maxTurns: 60
+skills:
+  - slop-chop-ref
 ---
 
 # Gate Keeper

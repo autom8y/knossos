@@ -10,6 +10,9 @@ tools: Read
 model: opus
 color: red
 maxTurns: 40
+skills:
+  - orchestrator-templates
+  - slop-chop-ref
 disallowedTools:
   - Bash
   - Write

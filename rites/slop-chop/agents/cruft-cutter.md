@@ -9,6 +9,8 @@ tools: Bash, Glob, Grep, Read, Write, TodoWrite
 model: sonnet
 color: orange
 maxTurns: 80
+skills:
+  - slop-chop-ref
 ---
 
 # Cruft Cutter

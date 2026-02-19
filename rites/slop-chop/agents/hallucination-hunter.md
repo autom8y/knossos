@@ -10,6 +10,8 @@ tools: Bash, Glob, Grep, Read, Write, TodoWrite
 model: sonnet
 color: red
 maxTurns: 60
+skills:
+  - slop-chop-ref
 ---
 
 # Hallucination Hunter

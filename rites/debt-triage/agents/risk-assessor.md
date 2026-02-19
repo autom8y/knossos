@@ -21,6 +21,9 @@ tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, WebSearch, Skill
 model: opus
 color: yellow
 maxTurns: 150
+skills:
+  - debt-catalog
+  - guidance/standards
 ---
 
 # Risk Assessor

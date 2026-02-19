@@ -23,6 +23,8 @@ tools: Bash, Glob, Grep, Read, Edit, Write, WebFetch, TodoWrite, WebSearch, Skil
 model: opus
 color: cyan
 maxTurns: 150
+skills:
+  - doc-artifacts
 ---
 
 # Architect

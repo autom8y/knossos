@@ -21,6 +21,9 @@ tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
 model: opus
 color: yellow
 maxTurns: 200
+skills:
+  - debt-catalog
+  - shared-templates
 contract:
   must_not:
     - Commit to scope without capacity analysis

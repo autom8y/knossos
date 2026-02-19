@@ -7,6 +7,9 @@ tools: Read
 model: opus
 color: cyan
 maxTurns: 40
+skills:
+  - orchestrator-templates
+  - forge-ref
 disallowedTools:
   - Bash
   - Write

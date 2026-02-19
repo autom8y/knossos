@@ -7,6 +7,9 @@ tools: Read
 model: opus
 color: orange
 maxTurns: 40
+skills:
+  - orchestrator-templates
+  - debt-catalog
 disallowedTools:
   - Bash
   - Write

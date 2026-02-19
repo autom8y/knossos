@@ -10,6 +10,8 @@ tools: Bash, Glob, Grep, Read, Write, TodoWrite
 model: opus
 color: yellow
 maxTurns: 100
+skills:
+  - slop-chop-ref
 ---
 
 # Logic Surgeon
