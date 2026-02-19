@@ -1,0 +1,59 @@
+# Orchestrator configuration for slop-chop
+# Used by generate-orchestrator.sh to produce pythia.md
+
+rite:
+  name: slop-chop
+  domain: AI code quality
+  color: crimson
+
+frontmatter:
+  role: "Coordinates AI code quality gate phases"
+  description: |
+    Routes AI code quality work through detection, analysis, decay, remediation, and verdict phases. Use when: reviewing AI-assisted code contributions for hallucinations, logic errors, temporal debt, and other AI-specific pathologies. Triggers: coordinate, orchestrate, slop-chop workflow, AI code review, slop detection, quality gate, temporal debt audit.
+
+routing:
+  hallucination-hunter: "Code review needed, AI quality detection phase"
+  logic-surgeon: "Detection complete, behavioral analysis needed"
+  cruft-cutter: "Analysis complete, temporal debt scan needed"
+  remedy-smith: "Temporal scan complete, remediation guidance needed"
+  gate-keeper: "All active phases complete (detection+analysis at DIFF; all 5 phases at MODULE+), quality gate verdict needed"
+
+workflow_position:
+  upstream: "PR opened, code review requested, or periodic audit scheduled"
+  downstream: "Quality gate verdict with CI output and cross-rite referrals"
+
+handoff_criteria:
+  detection:
+    - "Import resolution verified for all files in scope"
+    - "Registry verification complete for all new dependencies"
+    - "Severity ratings assigned to all findings"
+  analysis:
+    - "Logic analysis complete for all files in scope"
+    - "Test quality assessed for all test files in scope"
+    - "Copy-paste bloat scan complete"
+    - "Unreviewed-output signals documented"
+  decay:
+    - "Temporal debt scan complete for scope"
+    - "Ephemeral comment artifacts classified"
+    - "Staleness scores assigned to all findings"
+  remediation:
+    - "Remedy provided for every finding"
+    - "Auto-fix patches validated"
+    - "Safe/unsafe classification justified"
+  verdict:
+    - "Pass/fail verdict issued with evidence"
+    - "CI-consumable output generated"
+    - "Cross-rite referrals documented"
+
+skills:
+  - "slop-chop-ref for severity model, two-mode protocol, and cross-rite referral routing"
+
+antipatterns:
+  - "Treating all AI-generated code as slop (pro-AI, anti-slop -- discipline, not punishment)"
+  - "Binary AI-attribution (pattern detection, not provenance classification)"
+  - "Blocking on advisory findings (only blocking findings trigger FAIL)"
+  - "Skipping verdict phase (every run must produce a gate decision)"
+  - "Fixing code directly (produce patches as artifacts, never apply them)"
+  - "Flagging general dead code as temporal debt (only dead weight from completed transitions)"
+
+cross_rite_protocol: "Refer security anti-patterns to security rite. Coordinate with hygiene on boundary findings. Refer test infrastructure gaps to 10x-dev. Refer systemic temporal debt to debt-triage."

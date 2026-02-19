@@ -8,6 +8,8 @@ import (
 	"strings"
 	"testing"
 
+	hookpkg "github.com/autom8y/knossos/internal/hook"
+	"github.com/autom8y/knossos/internal/hook/clewcontract"
 	"github.com/autom8y/knossos/internal/output"
 	"github.com/autom8y/knossos/test/hooks/testutil"
 
@@ -448,5 +450,260 @@ func TestClew_StdinIntegration_RecordsToolEvent(t *testing.T) {
 	}
 	if !strings.Contains(eventsContent, `"tool":"Write"`) {
 		t.Errorf("events.jsonl should contain Write tool, got: %s", eventsContent)
+	}
+}
+
+// --- .wip/ artifact detection tests (C1-C6) ---
+
+// makeClewSession creates a temp session dir and returns (tmpDir, sessionDir, ctx).
+func makeClewSession(t *testing.T, sessionID string) (string, string, *cmdContext) {
+	t.Helper()
+	tmpDir := t.TempDir()
+	sessionDir := filepath.Join(tmpDir, ".claude", "sessions", sessionID)
+	if err := os.MkdirAll(sessionDir, 0755); err != nil {
+		t.Fatalf("Failed to create session dir: %v", err)
+	}
+	outputFlag := "json"
+	verboseFlag := false
+	projectDir := tmpDir
+	sessionIDPtr := sessionID
+	ctx := &cmdContext{
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &projectDir,
+			},
+			SessionID: &sessionIDPtr,
+		},
+	}
+	return tmpDir, sessionDir, ctx
+}
+
+// runClewWithStdin runs runClewCore with the given JSON payload on stdin and returns parsed output.
+func runClewWithStdin(t *testing.T, ctx *cmdContext, payload string) ClewOutput {
+	t.Helper()
+	oldStdin := os.Stdin
+	defer func() { os.Stdin = oldStdin }()
+
+	r, w, _ := os.Pipe()
+	go func() {
+		w.Write([]byte(payload))
+		w.Close()
+	}()
+	os.Stdin = r
+
+	var stdout, stderr bytes.Buffer
+	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
+	if err := runClewCore(ctx, printer); err != nil {
+		t.Fatalf("runClewCore() error = %v", err)
+	}
+	var result ClewOutput
+	if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
+		t.Fatalf("failed to parse output: %v\nOutput: %s", err, stdout.String())
+	}
+	return result
+}
+
+// C1: .wip/ write with valid frontmatter emits artifact_created with correct metadata.
+func TestClew_WipWrite_ValidFrontmatter_EmitsArtifact(t *testing.T) {
+	_, sessionDir, ctx := makeClewSession(t, "test-wip-c1")
+	content := "---\\ntype: design\\n---\\n\\n# Design doc"
+	payload := `{"hook_event_name":"PostToolUse","tool_name":"Write","tool_input":{"file_path":".wip/DESIGN-foo.md","content":"---\ntype: design\n---\n\n# Design doc"},"session_id":"test-wip-c1"}`
+
+	result := runClewWithStdin(t, ctx, payload)
+	if !result.Recorded {
+		t.Fatalf("Expected Recorded=true, got false: %s", result.Reason)
+	}
+
+	_ = content // used in payload above
+	eventsData, err := os.ReadFile(filepath.Join(sessionDir, "events.jsonl"))
+	if err != nil {
+		t.Fatalf("Failed to read events.jsonl: %v", err)
+	}
+	eventsContent := string(eventsData)
+
+	if !strings.Contains(eventsContent, `"type":"tool.artifact_created"`) {
+		t.Error("events.jsonl missing artifact_created event for .wip/ write")
+	}
+	if !strings.Contains(eventsContent, `"ephemeral"`) {
+		t.Error("events.jsonl missing artifact_type ephemeral")
+	}
+	if !strings.Contains(eventsContent, `"design"`) {
+		t.Error("events.jsonl missing wip_type design")
+	}
+	if !strings.Contains(eventsContent, `"DESIGN-foo"`) {
+		t.Error("events.jsonl missing slug DESIGN-foo")
+	}
+}
+
+// C2: .wip/ write with missing frontmatter still emits artifact_created with wip_type "unknown".
+func TestClew_WipWrite_MissingFrontmatter_EmitsUnknown(t *testing.T) {
+	_, sessionDir, ctx := makeClewSession(t, "test-wip-c2")
+	payload := `{"hook_event_name":"PostToolUse","tool_name":"Write","tool_input":{"file_path":".wip/BAD.md","content":"# no frontmatter"},"session_id":"test-wip-c2"}`
+
+	result := runClewWithStdin(t, ctx, payload)
+	if !result.Recorded {
+		t.Fatalf("Expected Recorded=true, got false: %s", result.Reason)
+	}
+
+	eventsData, err := os.ReadFile(filepath.Join(sessionDir, "events.jsonl"))
+	if err != nil {
+		t.Fatalf("Failed to read events.jsonl: %v", err)
+	}
+	eventsContent := string(eventsData)
+
+	if !strings.Contains(eventsContent, `"type":"tool.artifact_created"`) {
+		t.Error("events.jsonl should emit artifact_created even for missing frontmatter")
+	}
+	if !strings.Contains(eventsContent, `"ephemeral"`) {
+		t.Error("events.jsonl missing artifact_type ephemeral")
+	}
+	if !strings.Contains(eventsContent, `"unknown"`) {
+		t.Error("events.jsonl missing wip_type unknown for missing frontmatter")
+	}
+}
+
+// C3: Non-.wip/ Write does NOT emit artifact_created (regression).
+func TestClew_NonWipWrite_NoArtifactCreated(t *testing.T) {
+	_, sessionDir, ctx := makeClewSession(t, "test-wip-c3")
+	payload := `{"hook_event_name":"PostToolUse","tool_name":"Write","tool_input":{"file_path":"src/main.go","content":"package main"},"session_id":"test-wip-c3"}`
+
+	result := runClewWithStdin(t, ctx, payload)
+	if !result.Recorded {
+		t.Fatalf("Expected Recorded=true, got false: %s", result.Reason)
+	}
+
+	eventsData, err := os.ReadFile(filepath.Join(sessionDir, "events.jsonl"))
+	if err != nil {
+		t.Fatalf("Failed to read events.jsonl: %v", err)
+	}
+	eventsContent := string(eventsData)
+
+	// Should NOT contain artifact_created for a regular source file
+	if strings.Contains(eventsContent, `"type":"tool.artifact_created"`) {
+		t.Error("events.jsonl should NOT have artifact_created for non-.wip/ write")
+	}
+}
+
+// C4: Existing PRD pattern unchanged — artifact_created with artifact_type "prd" (regression).
+func TestClew_PRDPattern_Unchanged(t *testing.T) {
+	_, sessionDir, ctx := makeClewSession(t, "test-wip-c4")
+	payload := `{"hook_event_name":"PostToolUse","tool_name":"Write","tool_input":{"file_path":"PRD-foo.md","content":"# PRD content"},"session_id":"test-wip-c4"}`
+
+	result := runClewWithStdin(t, ctx, payload)
+	if !result.Recorded {
+		t.Fatalf("Expected Recorded=true, got false: %s", result.Reason)
+	}
+
+	eventsData, err := os.ReadFile(filepath.Join(sessionDir, "events.jsonl"))
+	if err != nil {
+		t.Fatalf("Failed to read events.jsonl: %v", err)
+	}
+	eventsContent := string(eventsData)
+
+	if !strings.Contains(eventsContent, `"type":"tool.artifact_created"`) {
+		t.Error("events.jsonl missing artifact_created for PRD file")
+	}
+	if !strings.Contains(eventsContent, `"prd"`) {
+		t.Error("events.jsonl missing artifact_type prd for PRD file")
+	}
+}
+
+// C5: .wip/ Edit does NOT emit artifact_created — only file_change.
+func TestClew_WipEdit_NoArtifactCreated(t *testing.T) {
+	_, sessionDir, ctx := makeClewSession(t, "test-wip-c5")
+	payload := `{"hook_event_name":"PostToolUse","tool_name":"Edit","tool_input":{"file_path":".wip/existing.md","old_string":"old","new_string":"new"},"session_id":"test-wip-c5"}`
+
+	result := runClewWithStdin(t, ctx, payload)
+	if !result.Recorded {
+		t.Fatalf("Expected Recorded=true, got false: %s", result.Reason)
+	}
+
+	eventsData, err := os.ReadFile(filepath.Join(sessionDir, "events.jsonl"))
+	if err != nil {
+		t.Fatalf("Failed to read events.jsonl: %v", err)
+	}
+	eventsContent := string(eventsData)
+
+	// Edit tool: file_change emitted, artifact_created NOT emitted
+	if !strings.Contains(eventsContent, `"type":"tool.file_change"`) {
+		t.Error("events.jsonl missing file_change event for Edit tool")
+	}
+	if strings.Contains(eventsContent, `"type":"tool.artifact_created"`) {
+		t.Error("events.jsonl should NOT have artifact_created for Edit tool (only Write triggers it)")
+	}
+}
+
+// C6: Slug derivation — strips only final extension.
+func TestWipSlug(t *testing.T) {
+	tests := []struct {
+		path string
+		want string
+	}{
+		{".wip/DESIGN-ephemeral-artifacts.md", "DESIGN-ephemeral-artifacts"},
+		{".wip/SPIKE-complex-name.analysis.md", "SPIKE-complex-name.analysis"},
+		{".wip/scratch.md", "scratch"},
+		{"/home/user/.wip/TRIAGE-foo.md", "TRIAGE-foo"},
+	}
+	for _, tt := range tests {
+		got := wipSlug(tt.path)
+		if got != tt.want {
+			t.Errorf("wipSlug(%q) = %q, want %q", tt.path, got, tt.want)
+		}
+	}
+}
+
+// TestMatchWipArtifact covers matchWipArtifact directly.
+func TestMatchWipArtifact(t *testing.T) {
+	tests := []struct {
+		name        string
+		path        string
+		content     string
+		wantArtType clewcontract.ArtifactType
+		wantWipType string
+	}{
+		{
+			name:        "valid design frontmatter",
+			path:        ".wip/DESIGN-foo.md",
+			content:     "---\ntype: design\n---\n\nbody",
+			wantArtType: clewcontract.ArtifactTypeEphemeral,
+			wantWipType: "design",
+		},
+		{
+			name:        "missing frontmatter yields unknown",
+			path:        ".wip/BAD.md",
+			content:     "# just markdown",
+			wantArtType: clewcontract.ArtifactTypeEphemeral,
+			wantWipType: "unknown",
+		},
+		{
+			name:        "invalid type yields unknown",
+			path:        ".wip/BAD.md",
+			content:     "---\ntype: memo\n---\n",
+			wantArtType: clewcontract.ArtifactTypeEphemeral,
+			wantWipType: "unknown",
+		},
+		{
+			name:        "non-wip path returns empty",
+			path:        "src/main.go",
+			content:     "package main",
+			wantArtType: "",
+			wantWipType: "",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			input := &hookpkg.ToolInput{}
+			input.Content = tt.content
+			artType, wipType := matchWipArtifact(tt.path, input)
+			if artType != tt.wantArtType {
+				t.Errorf("artType = %q, want %q", artType, tt.wantArtType)
+			}
+			if wipType != tt.wantWipType {
+				t.Errorf("wipType = %q, want %q", wipType, tt.wantWipType)
+			}
+		})
 	}
 }

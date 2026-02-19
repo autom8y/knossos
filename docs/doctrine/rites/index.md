@@ -21,6 +21,7 @@ A **rite** is a practice bundle that provides specialized workflows for differen
 | [strategy](strategy.md) | Full | 5 | orchestrator | Business strategy |
 | [rnd](rnd.md) | Full | 6 | orchestrator | Technology exploration |
 | [ecosystem](ecosystem.md) | Full | 5 | orchestrator | Platform infrastructure |
+| [slop-chop](slop-chop.md) | Full | 6 | orchestrator | AI code quality gate |
 
 ---
 
@@ -46,6 +47,7 @@ Special rites that operate on the rite system itself. The **forge** rite is the 
 - [10x-dev](10x-dev.md) — Full feature development from PRD to QA
 - [hygiene](hygiene.md) — Code quality audits and improvements
 - [debt-triage](debt-triage.md) — Technical debt assessment and remediation
+- [slop-chop](slop-chop.md) — AI code quality gate; hallucination detection and temporal debt audit
 
 ### Documentation & Knowledge
 - [docs](docs.md) — Documentation creation and maintenance
@@ -73,6 +75,7 @@ flowchart TD
     B -->|Feature| C[10x-dev]
     B -->|Quality| D[hygiene]
     B -->|Debt| E[debt-triage]
+    B -->|AI Code Review| SC[slop-chop]
 
     A --> F{Documentation?}
     F -->|Yes| G[docs]
@@ -111,6 +114,7 @@ flowchart TD
 /rnd          # R&D
 /ecosystem    # Infrastructure
 /forge        # Meta-rite
+/slop-chop    # AI code quality gate
 ```
 
 ### CLI Commands

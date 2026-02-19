@@ -3,11 +3,14 @@ package hook
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"strings"
 
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v3"
 
+	"github.com/autom8y/knossos/internal/frontmatter"
 	"github.com/autom8y/knossos/internal/hook"
 	"github.com/autom8y/knossos/internal/lock"
 	"github.com/autom8y/knossos/internal/output"
@@ -28,6 +31,19 @@ var protectedPatterns = []string{
 	"PROVENANCE_MANIFEST.yaml",
 	"KNOSSOS_MANIFEST.yaml",
 	"settings.local.json",
+}
+
+// validWipTypes is the closed taxonomy of valid .wip/ artifact type values.
+// Values are case-sensitive lowercase. The set is intentionally small to keep
+// the classification meaningful.
+var validWipTypes = map[string]bool{
+	"spike":   true,
+	"spec":    true,
+	"audit":   true,
+	"design":  true,
+	"triage":  true,
+	"qa":      true,
+	"scratch": true,
 }
 
 // newWriteguardCmd creates the writeguard hook subcommand.
@@ -85,6 +101,18 @@ func runWriteguardCore(ctx *cmdContext, printer *output.Printer) error {
 	filePath := parseFilePath(printer, hookEnv.ToolInput)
 	if filePath == "" {
 		return outputAllow(printer)
+	}
+
+	// .wip/ validation: only applies to Write tool (not Edit — edits to existing files
+	// skip frontmatter re-validation per design). .wip/ paths are never protected, so
+	// we return early here and skip the protected-file check entirely.
+	if toolName == "Write" && isWipPath(filePath) {
+		content := parseContentField(printer, hookEnv.ToolInput)
+		valid, _, reason := validateWipFrontmatter(content)
+		if valid {
+			return outputAllow(printer)
+		}
+		return outputAllowWithContext(printer, reason)
 	}
 
 	// Check if file is protected
@@ -207,6 +235,79 @@ func outputAllow(printer *output.Printer) error {
 		HookSpecificOutput: hook.HookSpecificOutput{
 			HookEventName:      "PreToolUse",
 			PermissionDecision: "allow",
+		},
+	}
+	return printer.Print(result)
+}
+
+// isWipPath returns true if filePath targets a .wip/ directory.
+// Matches both relative paths starting with ".wip/" and absolute paths containing
+// "/.wip/" as a path segment. The matching is intentionally broad: a false positive
+// (validating a non-root .wip/ write) is harmless — it just advises on frontmatter.
+func isWipPath(filePath string) bool {
+	return strings.HasPrefix(filePath, ".wip/") || strings.Contains(filePath, "/.wip/")
+}
+
+// parseContentField extracts the "content" field from a JSON tool_input string.
+// Reuses the same pattern as parseFilePath. Returns empty string if the field is
+// missing or the JSON is unparseable. Logs a verbose warning on parse failure.
+func parseContentField(printer *output.Printer, toolInput string) string {
+	if toolInput == "" {
+		return ""
+	}
+
+	var input map[string]interface{}
+	if err := json.Unmarshal([]byte(toolInput), &input); err != nil {
+		printer.VerboseLog("warn", "failed to parse tool input JSON for content field",
+			map[string]interface{}{"error": err.Error()})
+		return ""
+	}
+
+	if content, ok := input["content"].(string); ok {
+		return content
+	}
+	return ""
+}
+
+// validateWipFrontmatter parses YAML frontmatter from content and validates the type field.
+// Returns (true, typeValue, "") on success.
+// Returns (false, "", reason) on failure with an actionable reason string.
+func validateWipFrontmatter(content string) (bool, string, string) {
+	yamlBytes, _, err := frontmatter.Parse([]byte(content))
+	if err != nil {
+		return false, "", ".wip/ files require YAML frontmatter. Add to the top of your file:\n---\ntype: <spike|spec|audit|design|triage|qa|scratch>\n---"
+	}
+
+	var fields map[string]interface{}
+	if err := yaml.Unmarshal(yamlBytes, &fields); err != nil {
+		return false, "", ".wip/ files require YAML frontmatter. Add to the top of your file:\n---\ntype: <spike|spec|audit|design|triage|qa|scratch>\n---"
+	}
+
+	typeVal, ok := fields["type"]
+	if !ok {
+		return false, "", ".wip/ frontmatter must include a type field. Valid types: spike, spec, audit, design, triage, qa, scratch"
+	}
+
+	typeStr, ok := typeVal.(string)
+	if !ok || typeStr == "" {
+		return false, "", ".wip/ frontmatter must include a type field. Valid types: spike, spec, audit, design, triage, qa, scratch"
+	}
+
+	if !validWipTypes[typeStr] {
+		return false, "", fmt.Sprintf(".wip/ frontmatter type %q is not valid. Valid types: spike, spec, audit, design, triage, qa, scratch", typeStr)
+	}
+
+	return true, typeStr, ""
+}
+
+// outputAllowWithContext outputs an allow decision with advisory additionalContext.
+// CC surfaces additionalContext to the model so it can self-correct on the next write.
+func outputAllowWithContext(printer *output.Printer, context string) error {
+	result := hook.PreToolUseOutput{
+		HookSpecificOutput: hook.HookSpecificOutput{
+			HookEventName:      "PreToolUse",
+			PermissionDecision: "allow",
+			AdditionalContext:  context,
 		},
 	}
 	return printer.Print(result)

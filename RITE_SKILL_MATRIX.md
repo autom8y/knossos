@@ -25,18 +25,18 @@ This matrix documents which skills are relevant to each rite. Use it to:
 
 These skills provide templates for artifacts produced by rites.
 
-| Skill | 10x-dev | ecosystem | doc-team | debt | sre | security | strategy | hygiene | intelligence | rnd |
-|-------|:-------:|:---------:|:--------:|:----:|:---:|:--------:|:--------:|:-------:|:------------:|:---:|
-| doc-artifacts | **P** | S | S | S | S | S | S | S | S | S |
-| doc-consolidation | S | **P** | **P** | S | | | | S | | |
-| doc-ecosystem | S | **P** | S | | | | | **P** | | |
-| doc-intelligence | | | S | | | | S | | **P** | |
-| doc-reviews | S | S | **P** | | | | | S | | |
-| doc-rnd | | S | S | | | | | | | **P** |
-| doc-security | | | | | S | **P** | | | | |
-| doc-sre | | | | **P** | **P** | | | | | |
-| doc-strategy | | | | | | | **P** | | S | |
-| documentation | S | S | **P** | S | S | S | S | S | S | S |
+| Skill | 10x-dev | ecosystem | doc-team | debt | sre | security | strategy | hygiene | intelligence | rnd | slop-chop |
+|-------|:-------:|:---------:|:--------:|:----:|:---:|:--------:|:--------:|:-------:|:------------:|:---:|:---------:|
+| doc-artifacts | **P** | S | S | S | S | S | S | S | S | S | S |
+| doc-consolidation | S | **P** | **P** | S | | | | S | | | |
+| doc-ecosystem | S | **P** | S | | | | | **P** | | | |
+| doc-intelligence | | | S | | | | S | | **P** | | |
+| doc-reviews | S | S | **P** | | | | | S | | | S |
+| doc-rnd | | S | S | | | | | | | **P** | |
+| doc-security | | | | | S | **P** | | | | | |
+| doc-sre | | | | **P** | **P** | | | | | | |
+| doc-strategy | | | | | | | **P** | | S | | |
+| documentation | S | S | **P** | S | S | S | S | S | S | S | S |
 
 ---
 
@@ -44,19 +44,19 @@ These skills provide templates for artifacts produced by rites.
 
 Core workflow execution patterns for development and operations.
 
-| Skill | 10x-dev | ecosystem | doc-team | debt | sre | security | strategy | hygiene | intelligence | rnd |
-|-------|:-------:|:---------:|:--------:|:----:|:---:|:--------:|:--------:|:-------:|:------------:|:---:|
-| 10x-workflow | **P** | S | S | S | S | S | S | S | S | S |
-| architect-ref | **P** | S | | | S | S | | S | | S |
-| build-ref | **P** | S | | | S | S | | S | | S |
-| hotfix-ref | **P** | | | | **P** | S | | S | | |
-| orchestration | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** |
-| pr-ref | **P** | **P** | S | | S | S | | S | | S |
-| qa-ref | **P** | S | **P** | | S | **P** | | **P** | | |
-| review | **P** | S | **P** | S | S | **P** | | **P** | | |
-| spike-ref | **P** | S | | | S | S | | | S | **P** |
-| sprint-ref | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** |
-| task-ref | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** |
+| Skill | 10x-dev | ecosystem | doc-team | debt | sre | security | strategy | hygiene | intelligence | rnd | slop-chop |
+|-------|:-------:|:---------:|:--------:|:----:|:---:|:--------:|:--------:|:-------:|:------------:|:---:|:---------:|
+| 10x-workflow | **P** | S | S | S | S | S | S | S | S | S | S |
+| architect-ref | **P** | S | | | S | S | | S | | S | |
+| build-ref | **P** | S | | | S | S | | S | | S | |
+| hotfix-ref | **P** | | | | **P** | S | | S | | | |
+| orchestration | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** |
+| pr-ref | **P** | **P** | S | | S | S | | S | | S | **P** |
+| qa-ref | **P** | S | **P** | | S | **P** | | **P** | | | **P** |
+| review | **P** | S | **P** | S | S | **P** | | **P** | | | **P** |
+| spike-ref | **P** | S | | | S | S | | | S | **P** | |
+| sprint-ref | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** |
+| task-ref | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** |
 
 ---
 
@@ -64,14 +64,14 @@ Core workflow execution patterns for development and operations.
 
 Session lifecycle control for all teams.
 
-| Skill | 10x-dev | ecosystem | doc-team | debt | sre | security | strategy | hygiene | intelligence | rnd |
-|-------|:-------:|:---------:|:--------:|:----:|:---:|:--------:|:--------:|:-------:|:------------:|:---:|
-| start-ref | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** |
-| park-ref | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** |
-| resume | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** |
-| wrap-ref | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** |
-| handoff-ref | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** |
-| initiative-scoping | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** |
+| Skill | 10x-dev | ecosystem | doc-team | debt | sre | security | strategy | hygiene | intelligence | rnd | slop-chop |
+|-------|:-------:|:---------:|:--------:|:----:|:---:|:--------:|:--------:|:-------:|:------------:|:---:|:---------:|
+| start-ref | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** |
+| park-ref | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** |
+| resume | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** |
+| wrap-ref | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** |
+| handoff-ref | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** |
+| initiative-scoping | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** |
 
 ---
 
@@ -79,14 +79,15 @@ Session lifecycle control for all teams.
 
 Quick team context switching.
 
-| Skill | 10x-dev | ecosystem | doc-team | debt | sre | security | strategy | hygiene | intelligence | rnd |
-|-------|:-------:|:---------:|:--------:|:----:|:---:|:--------:|:--------:|:-------:|:------------:|:---:|
-| 10x-ref | **P** | S | S | S | S | S | S | S | S | S |
-| debt-ref | S | S | S | **P** | S | | | S | | |
-| docs-ref | S | S | **P** | S | S | S | S | S | S | S |
-| hygiene-ref | S | **P** | S | S | S | | | **P** | | |
-| sre-ref | S | S | S | S | **P** | S | | S | | |
-| team-ref | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** |
+| Skill | 10x-dev | ecosystem | doc-team | debt | sre | security | strategy | hygiene | intelligence | rnd | slop-chop |
+|-------|:-------:|:---------:|:--------:|:----:|:---:|:--------:|:--------:|:-------:|:------------:|:---:|:---------:|
+| 10x-ref | **P** | S | S | S | S | S | S | S | S | S | |
+| debt-ref | S | S | S | **P** | S | | | S | | | |
+| docs-ref | S | S | **P** | S | S | S | S | S | S | S | |
+| hygiene-ref | S | **P** | S | S | S | | | **P** | | | |
+| slop-chop-ref | | | | | | | | | | | **P** |
+| sre-ref | S | S | S | S | **P** | S | | S | | | |
+| team-ref | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** |
 
 ---
 
@@ -94,12 +95,12 @@ Quick team context switching.
 
 Documentation for specific rites.
 
-| Skill | 10x-dev | ecosystem | doc-team | debt | sre | security | strategy | hygiene | intelligence | rnd |
-|-------|:-------:|:---------:|:--------:|:----:|:---:|:--------:|:--------:|:-------:|:------------:|:---:|
-| intelligence-ref | S | | S | | | | S | | **P** | |
-| rnd-ref | S | | S | | | | S | | | **P** |
-| security-ref | S | | S | | | **P** | | | | |
-| strategy-ref | S | | S | | | | **P** | | S | |
+| Skill | 10x-dev | ecosystem | doc-team | debt | sre | security | strategy | hygiene | intelligence | rnd | slop-chop |
+|-------|:-------:|:---------:|:--------:|:----:|:---:|:--------:|:--------:|:-------:|:------------:|:---:|:---------:|
+| intelligence-ref | S | | S | | | | S | | **P** | | |
+| rnd-ref | S | | S | | | | S | | | **P** | |
+| security-ref | S | | S | | | **P** | | | | | S |
+| strategy-ref | S | | S | | | | **P** | | S | | |
 
 ---
 
@@ -107,11 +108,11 @@ Documentation for specific rites.
 
 CEM, skeleton, roster infrastructure and CLAUDE.md architecture.
 
-| Skill | 10x-dev | ecosystem | doc-team | debt | sre | security | strategy | hygiene | intelligence | rnd |
-|-------|:-------:|:---------:|:--------:|:----:|:---:|:--------:|:--------:|:-------:|:------------:|:---:|
-| ecosystem-ref | S | **P** | S | | | | | **P** | | |
-| claude-md-architecture | S | **P** | | | | | | S | | |
-| consult-ref | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** |
+| Skill | 10x-dev | ecosystem | doc-team | debt | sre | security | strategy | hygiene | intelligence | rnd | slop-chop |
+|-------|:-------:|:---------:|:--------:|:----:|:---:|:--------:|:--------:|:-------:|:------------:|:---:|:---------:|
+| ecosystem-ref | S | **P** | S | | | | | **P** | | | |
+| claude-md-architecture | S | **P** | | | | | | S | | | |
+| consult-ref | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** |
 
 ---
 
@@ -119,10 +120,10 @@ CEM, skeleton, roster infrastructure and CLAUDE.md architecture.
 
 Creating and managing rites.
 
-| Skill | 10x-dev | ecosystem | doc-team | debt | sre | security | strategy | hygiene | intelligence | rnd |
-|-------|:-------:|:---------:|:--------:|:----:|:---:|:--------:|:--------:|:-------:|:------------:|:---:|
-| forge-ref | S | **P** | | | | | | | | S |
-| team-development | S | **P** | | | | | | | | S |
+| Skill | 10x-dev | ecosystem | doc-team | debt | sre | security | strategy | hygiene | intelligence | rnd | slop-chop |
+|-------|:-------:|:---------:|:--------:|:----:|:---:|:--------:|:--------:|:-------:|:------------:|:---:|:---------:|
+| forge-ref | S | **P** | | | | | | | | S | |
+| team-development | S | **P** | | | | | | | | S | |
 
 ---
 
@@ -130,10 +131,10 @@ Creating and managing rites.
 
 Standards, patterns, and invocation guides.
 
-| Skill | 10x-dev | ecosystem | doc-team | debt | sre | security | strategy | hygiene | intelligence | rnd |
-|-------|:-------:|:---------:|:--------:|:----:|:---:|:--------:|:--------:|:-------:|:------------:|:---:|
-| prompting | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** |
-| standards | **P** | **P** | S | S | **P** | **P** | S | **P** | S | **P** |
+| Skill | 10x-dev | ecosystem | doc-team | debt | sre | security | strategy | hygiene | intelligence | rnd | slop-chop |
+|-------|:-------:|:---------:|:--------:|:----:|:---:|:--------:|:--------:|:-------:|:------------:|:---:|:---------:|
+| prompting | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** |
+| standards | **P** | **P** | S | S | **P** | **P** | S | **P** | S | **P** | **P** |
 
 ---
 
@@ -141,11 +142,11 @@ Standards, patterns, and invocation guides.
 
 External tool integrations and automation.
 
-| Skill | 10x-dev | ecosystem | doc-team | debt | sre | security | strategy | hygiene | intelligence | rnd |
-|-------|:-------:|:---------:|:--------:|:----:|:---:|:--------:|:--------:|:-------:|:------------:|:---:|
-| atuin-desktop | S | **P** | **P** | S | S | S | S | S | S | S |
-| justfile | **P** | **P** | S | S | **P** | S | | S | S | **P** |
-| worktree-ref | **P** | S | S | S | S | S | S | S | S | S |
+| Skill | 10x-dev | ecosystem | doc-team | debt | sre | security | strategy | hygiene | intelligence | rnd | slop-chop |
+|-------|:-------:|:---------:|:--------:|:----:|:---:|:--------:|:--------:|:-------:|:------------:|:---:|:---------:|
+| atuin-desktop | S | **P** | **P** | S | S | S | S | S | S | S | |
+| justfile | **P** | **P** | S | S | **P** | S | | S | S | **P** | |
+| worktree-ref | **P** | S | S | S | S | S | S | S | S | S | S |
 
 ---
 
@@ -231,6 +232,20 @@ External tool integrations and automation.
 
 ---
 
+### slop-chop (AI Code Quality Gate)
+
+**Primary Skills (9)**: orchestration, pr-ref, qa-ref, review, sprint-ref, task-ref, start-ref, park-ref, resume, wrap-ref, handoff-ref, initiative-scoping, slop-chop-ref, team-ref, consult-ref, prompting, standards
+
+**Complexity Levels**: DIFF (PR-level, 3 phases), MODULE (module-level, 5 phases), CODEBASE (full audit, 5 phases)
+
+**Agents**: pythia (orchestrator), hallucination-hunter, logic-surgeon, cruft-cutter, remedy-smith, gate-keeper (6 total)
+
+**Focus**: Detect to Diagnose to Cut to Remedy to Gate. AI-generated code review with hard block on FAIL. Temporal findings always advisory.
+
+**Philosophy**: Pro-AI, anti-slop. Butcher metaphor: trim the fat, keep the meat.
+
+---
+
 ## Skill Categories by Team Relevance
 
 ### Universal Skills (Primary for All Rites)
@@ -279,6 +294,7 @@ These skills are core infrastructure used by every rite:
    - Smells/Refactor/Cleanup -> hygiene
    - Research/Experiments/Insights -> intelligence
    - Scouting/Prototypes/Moonshots -> rnd
+   - AI code review/Hallucinations/Temporal debt -> slop-chop
 
 ---
 
@@ -290,5 +306,5 @@ This matrix should be updated when:
 - Rite workflows change significantly
 - Skill activation patterns shift based on usage
 
-**Last updated**: 2025-12-25
-**Source**: SKILL_REGISTRY.md (47 skills), roster/rites/ (10 rites)
+**Last updated**: 2026-02-19
+**Source**: SKILL_REGISTRY.md (48 skills), roster/rites/ (11 rites)

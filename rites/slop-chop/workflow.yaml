@@ -1,0 +1,105 @@
+name: slop-chop
+workflow_type: sequential
+description: AI code quality gate lifecycle (Detect -> Analyze -> Decay -> Remediate -> Verdict)
+
+entry_point:
+  agent: hallucination-hunter
+  artifact:
+    type: detection-report
+    path_template: docs/slop-chop/DETECTION-{slug}.md
+
+phases:
+  - name: detection
+    agent: hallucination-hunter
+    produces: detection-report
+    next: analysis
+
+  - name: analysis
+    agent: logic-surgeon
+    produces: analysis-report
+    next: decay
+    # At DIFF complexity, runtime uses complexity_levels.phases [detection, analysis, verdict]
+    # to skip decay and route directly to verdict. complexity_levels.phases is authoritative.
+    condition_for_next: "complexity >= MODULE"
+
+  - name: decay
+    agent: cruft-cutter
+    produces: decay-report
+    next: remediation
+    condition: "complexity >= MODULE"
+
+  - name: remediation
+    agent: remedy-smith
+    produces: remedy-plan
+    next: verdict
+    condition: "complexity >= MODULE"
+
+  - name: verdict
+    agent: gate-keeper
+    produces: gate-verdict
+    next: null
+
+complexity_levels:
+  - name: DIFF
+    scope: "PR-level: changed files + immediate context, < 5 min target"
+    phases: [detection, analysis, verdict]
+
+  - name: MODULE
+    scope: "Module-level: full modules containing changes, < 15 min target"
+    phases: [detection, analysis, decay, remediation, verdict]
+
+  - name: CODEBASE
+    scope: "Full repository audit with trend analysis, < 60 min target"
+    phases: [detection, analysis, decay, remediation, verdict]
+
+# Agent roles for command mapping:
+# /slop-chop        -> hallucination-hunter (full pipeline)
+# /slop-detect      -> hallucination-hunter (detection only)
+# /slop-analyze     -> logic-surgeon (analysis only)
+# /slop-decay       -> cruft-cutter (temporal analysis only)
+# /slop-remedy      -> remedy-smith (remediation only)
+# /slop-gate        -> gate-keeper (verdict only)
+# /slop-audit       -> hallucination-hunter (CODEBASE mode)
+
+back_routes:
+  - source_phase: verdict
+    trigger: "fail(acceptance_criteria)"
+    target_phase: detection
+    target_agent: hallucination-hunter
+    requires_user_confirmation: true
+    condition: "Failure reveals detection gap, not implementation bug"
+
+  - source_phase: verdict
+    trigger: "fail(implementation)"
+    target_phase: remediation
+    target_agent: remedy-smith
+    requires_user_confirmation: false
+    condition: "Failure is in remedy quality, not detection"
+    complexity: ">= MODULE"  # remediation phase does not exist at DIFF
+
+  - source_phase: remediation
+    trigger: "analysis_conflict"
+    target_phase: analysis
+    target_agent: logic-surgeon
+    requires_user_confirmation: false
+    condition: "Remediation reveals analysis flaw"
+
+  - source_phase: decay
+    trigger: "detection_overlap"
+    target_phase: analysis
+    target_agent: logic-surgeon
+    requires_user_confirmation: false
+    condition: "Temporal finding overlaps with behavioral finding, needs deconfliction"
+
+external_consultation:
+  enabled: true
+  allowed_invokers:
+    - rite: 10x-dev
+      agents: [principal-engineer, qa-adversary]
+    - rite: hygiene
+      agents: [code-smeller, janitor]
+  consultation_phases:
+    - name: quick-scan
+      agent: hallucination-hunter
+      produces: detection-report
+      next: null

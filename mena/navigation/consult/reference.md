@@ -142,6 +142,7 @@ Session: ACTIVE - "Add authentication" (MODULE complexity)
   intelligence  /intelligence Analytics & research
   rnd           /rnd          Exploration & prototyping
   strategy      /strategy     Business analysis
+  slop-chop     /slop-chop    AI code quality gate
 
 === Common Starting Points ===
   Build a feature:     /10x && /start "Feature name"
@@ -366,8 +367,9 @@ Display complete rite reference table:
 | intelligence | /intelligence | 4      | Analytics, A/B testing, research   |
 | rnd          | /rnd          | 4      | Exploration, prototyping           |
 | strategy     | /strategy     | 4      | Market research, business analysis |
+| slop-chop    | /slop-chop    | 6      | AI code quality gate, hallucination detection |
 
-Total: 45 agents across all rites
+Total: 51 agents across all rites
 
 Use /rite <name> or quick-switch commands (e.g., /10x) to activate.
 ```
@@ -379,7 +381,7 @@ Use /rite <name> or quick-switch commands (e.g., /10x) to activate.
 Display all commands categorized by domain:
 
 ```
-=== Command Registry (31 Total) ===
+=== Command Registry (32 Total) ===
 
 --- Session Lifecycle (6) ---
 /start              Initialize new work session
@@ -389,7 +391,7 @@ Display all commands categorized by domain:
 /wrap               Finalize session, run quality gates
 /worktree           Manage isolated worktrees
 
---- Rite Management (11) ---
+--- Rite Management (12) ---
 /rite               Switch rite or list available
 /10x                Quick switch to 10x-dev
 /arch               Quick switch to arch
@@ -401,6 +403,7 @@ Display all commands categorized by domain:
 /intelligence       Quick switch to intelligence
 /rnd                Quick switch to rnd
 /strategy           Quick switch to strategy
+/slop-chop          Quick switch to slop-chop
 
 --- Development Workflows (4) ---
 /task               Single task through full lifecycle
@@ -536,6 +539,7 @@ When recommending rites, `/consult` retrieves current rite inventory from:
 | **intelligence** | `/intelligence` | METRIC, FEATURE, INITIATIVE | Analytics, A/B tests, data research |
 | **rnd** | `/rnd` | SPIKE, EVALUATION, MOONSHOT | Exploration, prototyping, research |
 | **strategy** | `/strategy` | TACTICAL, STRATEGIC, TRANSFORMATION | Business planning, market research |
+| **slop-chop** | `/slop-chop` | DIFF, MODULE, CODEBASE | AI code review, hallucination detection, temporal debt |
 
 ---
 

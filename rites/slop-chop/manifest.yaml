@@ -1,0 +1,86 @@
+# Rite Manifest: slop-chop
+# Generated per ADR-0015 (Content Organization)
+
+name: slop-chop
+version: "1.0.0"
+description: AI code quality gate lifecycle for detecting, measuring, and remediating AI-generated code pathologies (Detect -> Analyze -> Decay -> Remediate -> Verdict)
+
+entry_agent: pythia
+
+phases:
+  - name: detection
+    agent: hallucination-hunter
+    produces: detection-report
+    description: Static verification of imports, dependencies, and API references
+
+  - name: analysis
+    agent: logic-surgeon
+    produces: analysis-report
+    description: Behavioral analysis of logic, tests, copy-paste patterns, security anti-patterns, and unreviewed-output signals
+
+  - name: decay
+    agent: cruft-cutter
+    produces: decay-report
+    description: Temporal debt detection -- dead shims, stale flags, ephemeral comment artifacts, deprecation cruft
+    condition: "complexity >= MODULE"
+
+  - name: remediation
+    agent: remedy-smith
+    produces: remedy-plan
+    description: Auto-fix patches for safe categories, manual fix guidance for unsafe categories
+    condition: "complexity >= MODULE"
+
+  - name: verdict
+    agent: gate-keeper
+    produces: gate-verdict
+    description: Quality gate verdict with CI output and cross-rite referrals
+
+agents:
+  - name: pythia
+    role: Coordinates AI code quality gate phases
+
+  - name: hallucination-hunter
+    role: Verifies imports, dependencies, and API references against actual existence
+
+  - name: logic-surgeon
+    role: Analyzes code behavior for logic errors, bloat, test degradation, security anti-patterns, and unreviewed-output signals
+
+  - name: cruft-cutter
+    role: Detects temporal debt -- dead shims, stale flags, ephemeral comment artifacts, and deprecation cruft
+
+  - name: remedy-smith
+    role: Produces auto-fix patches and manual remediation guidance for all findings
+
+  - name: gate-keeper
+    role: Issues quality gate verdict with CI-consumable output and cross-rite referrals
+
+dromena:
+  - slop-chop-switch
+
+legomena:
+  - slop-chop-ref
+
+hooks: []
+
+dependencies:
+  - shared
+
+complexity_levels:
+  - name: DIFF
+    scope: "PR-level: changed files + immediate context"
+  - name: MODULE
+    scope: "Module-level: full modules containing changes"
+  - name: CODEBASE
+    scope: "Full repository audit with trend analysis"
+
+metadata:
+  domain: AI code quality
+  color: crimson
+
+external_consultation:
+  enabled: true
+  allowed_invokers:
+    - rite: 10x-dev
+      agents: [principal-engineer, qa-adversary]
+    - rite: hygiene
+      agents: [code-smeller, janitor]

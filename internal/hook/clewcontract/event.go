@@ -42,10 +42,11 @@ type ArtifactType string
 
 // Artifact types for tracking deliverables produced during Claude Code sessions.
 const (
-	ArtifactTypePRD      ArtifactType = "prd"
-	ArtifactTypeTDD      ArtifactType = "tdd"
-	ArtifactTypeADR      ArtifactType = "adr"
-	ArtifactTypeTestPlan ArtifactType = "test_plan"
+	ArtifactTypePRD       ArtifactType = "prd"
+	ArtifactTypeTDD       ArtifactType = "tdd"
+	ArtifactTypeADR       ArtifactType = "adr"
+	ArtifactTypeTestPlan  ArtifactType = "test_plan"
+	ArtifactTypeEphemeral ArtifactType = "ephemeral"
 )
 
 // Event represents a clew event in the events.jsonl log.

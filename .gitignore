@@ -2,3 +2,7 @@
 # Canonical sources: knossos (ecosystem), rites/*/ (team definitions)
 # .claude/ is regenerated via knossos-sync and rite swap
 .claude/
+
+# Ephemeral working artifacts (pre-permanent scratch layer)
+# Canonical convention defined in rites/shared/mena/ephemeral-artifacts/
+.wip/

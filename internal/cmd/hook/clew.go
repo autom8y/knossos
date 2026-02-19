@@ -6,7 +6,9 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v3"
 
+	"github.com/autom8y/knossos/internal/frontmatter"
 	"github.com/autom8y/knossos/internal/hook"
 	"github.com/autom8y/knossos/internal/hook/clewcontract"
 	"github.com/autom8y/knossos/internal/output"
@@ -224,6 +226,15 @@ func emitSupplementalEvents(sessionDir, toolName string, toolInput *hook.ToolInp
 			artifactEvent := clewcontract.NewArtifactCreatedEvent(artType, path, phase, "")
 			writer.Write(artifactEvent)
 		}
+
+		// Emit artifact_created for .wip/ writes (path-based detection, not prefix-based).
+		// Fires even when frontmatter is missing so observability is complete.
+		if artType, wipType := matchWipArtifact(path, toolInput); artType != "" {
+			artifactEvent := clewcontract.NewArtifactCreatedEvent(artType, path, wipType, "")
+			artifactEvent.Meta["wip_type"] = wipType
+			artifactEvent.Meta["slug"] = wipSlug(path)
+			writer.Write(artifactEvent)
+		}
 	}
 
 	if flushErr := writer.Flush(); flushErr != nil {
@@ -260,6 +271,54 @@ func artifactTypeToPhase(artType clewcontract.ArtifactType) string {
 	default:
 		return ""
 	}
+}
+
+// matchWipArtifact detects whether path is a .wip/ write and extracts the frontmatter type.
+// Returns (ArtifactTypeEphemeral, typeValue) when path is a .wip/ target.
+// Returns (ArtifactTypeEphemeral, "unknown") when path is .wip/ but frontmatter is invalid
+// or absent — we still emit the event so the write is visible in the event stream.
+// Returns ("", "") when path is not a .wip/ path.
+//
+// isWipPath is defined in writeguard.go (same package). toolInput.Content is the
+// file content being written — we read from memory, not from disk, to avoid I/O
+// and TOCTOU races between PostToolUse and an actual disk read.
+func matchWipArtifact(path string, toolInput *hook.ToolInput) (clewcontract.ArtifactType, string) {
+	if !isWipPath(path) {
+		return "", ""
+	}
+
+	content := toolInput.Content
+	yamlBytes, _, err := frontmatter.Parse([]byte(content))
+	if err != nil {
+		return clewcontract.ArtifactTypeEphemeral, "unknown"
+	}
+
+	var fields map[string]interface{}
+	if err := yaml.Unmarshal(yamlBytes, &fields); err != nil {
+		return clewcontract.ArtifactTypeEphemeral, "unknown"
+	}
+
+	typeVal, ok := fields["type"]
+	if !ok {
+		return clewcontract.ArtifactTypeEphemeral, "unknown"
+	}
+
+	typeStr, ok := typeVal.(string)
+	if !ok || typeStr == "" || !validWipTypes[typeStr] {
+		return clewcontract.ArtifactTypeEphemeral, "unknown"
+	}
+
+	return clewcontract.ArtifactTypeEphemeral, typeStr
+}
+
+// wipSlug derives a slug from a .wip/ file path by taking the base name and
+// stripping only the final file extension.
+// Example: ".wip/DESIGN-ephemeral-artifacts.md" -> "DESIGN-ephemeral-artifacts"
+// Example: ".wip/SPIKE-complex-name.analysis.md" -> "SPIKE-complex-name.analysis"
+func wipSlug(path string) string {
+	base := filepath.Base(path)
+	ext := filepath.Ext(base)
+	return strings.TrimSuffix(base, ext)
 }
 
 // emitErrorEvent emits a structured error event to the clew log.
