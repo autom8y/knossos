@@ -5,8 +5,6 @@ description: "Doc consolidation schemas. Use when: merging fragmented documentat
 
 # Documentation Consolidation Workflow
 
-> **Status**: Complete (Sprint 1, 2, & 5)
-
 ## Purpose
 
 This skill defines the artifact schemas for the Documentation Consolidation Workflow - a phased approach to consolidating fragmented documentation into authoritative consolidated documents.
