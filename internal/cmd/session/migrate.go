@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/autom8y/knossos/internal/errors"
+	"github.com/autom8y/knossos/internal/hook/clewcontract"
 	"github.com/autom8y/knossos/internal/lock"
 	"github.com/autom8y/knossos/internal/output"
 	"github.com/autom8y/knossos/internal/paths"
@@ -189,6 +190,7 @@ func migrateSession(ctx *cmdContext, resolver *paths.Resolver, lockMgr *lock.Man
 		}
 	}
 	defer sessionLock.Release()
+	emitLockEvent(resolver, sessionID, "ari-session-migrate")
 
 	// Create backup
 	backupPath := ctxPath + ".v1.backup"
@@ -212,6 +214,13 @@ func migrateSession(ctx *cmdContext, resolver *paths.Resolver, lockMgr *lock.Man
 			Error:     "Failed to save migrated context: " + err.Error(),
 		}
 	}
+
+	// Emit schema_migrated event (non-fatal)
+	sessionDir := resolver.SessionDir(sessionID)
+	writer := clewcontract.NewBufferedEventWriter(sessionDir, clewcontract.DefaultFlushInterval)
+	writer.Write(clewcontract.NewSchemaMigratedEvent(sessionID, "1.0", "2.1"))
+	writer.Flush()
+	writer.Close()
 
 	return &output.MigrationResult{
 		SessionID:     sessionID,

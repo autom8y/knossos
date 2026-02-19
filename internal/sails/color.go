@@ -6,6 +6,7 @@
 package sails
 
 import (
+	"strings"
 	"time"
 )
 
@@ -40,6 +41,28 @@ func (c Color) IsValid() bool {
 	default:
 		return false
 	}
+}
+
+// ParseColorFromYAML extracts the sails color from YAML content.
+// Looks for a "color:" key and maps its value to a Color constant.
+// Returns ColorGray if the color cannot be determined.
+func ParseColorFromYAML(content []byte) Color {
+	for _, line := range strings.Split(string(content), "\n") {
+		line = strings.TrimSpace(line)
+		if strings.HasPrefix(line, "color:") {
+			value := strings.TrimSpace(strings.TrimPrefix(line, "color:"))
+			value = strings.Trim(value, "\"'")
+			switch strings.ToUpper(value) {
+			case "WHITE":
+				return ColorWhite
+			case "GRAY":
+				return ColorGray
+			case "BLACK":
+				return ColorBlack
+			}
+		}
+	}
+	return ColorGray
 }
 
 // ModifierType represents the type of color modifier.

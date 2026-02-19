@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/autom8y/knossos/internal/paths"
+	"github.com/autom8y/knossos/internal/sails"
 	"github.com/autom8y/knossos/internal/session"
 )
 
@@ -207,32 +208,11 @@ func (s *Scanner) isIncompleteWrap(ctx *session.Context) bool {
 // checkSailsColor reads the sails color from a session's sails.yaml if present.
 func (s *Scanner) checkSailsColor(sessionDir string) string {
 	sailsPath := filepath.Join(sessionDir, "sails.yaml")
-	_, err := os.Stat(sailsPath)
-	if os.IsNotExist(err) {
-		return "" // No sails file = unknown/gray
-	}
-
-	// For simplicity, if sails.yaml exists, read it
-	// In a real implementation, we'd parse the YAML
-	// For now, just return empty to indicate we should check
 	data, err := os.ReadFile(sailsPath)
 	if err != nil {
-		return ""
+		return "" // No sails file or unreadable = unknown
 	}
-
-	// Simple string search for color
-	content := string(data)
-	if contains(content, "color: WHITE") || contains(content, "color: white") {
-		return "WHITE"
-	}
-	if contains(content, "color: BLACK") || contains(content, "color: black") {
-		return "BLACK"
-	}
-	if contains(content, "color: GRAY") || contains(content, "color: gray") {
-		return "GRAY"
-	}
-
-	return "GRAY" // Default to gray if we can't determine
+	return string(sails.ParseColorFromYAML(data))
 }
 
 // suggestActionForInactive determines the best action for an inactive session.
@@ -263,20 +243,6 @@ func (s *Scanner) suggestActionForStaleSails(ctx *session.Context) SuggestedActi
 
 	// No reason given, probably should be wrapped
 	return ActionWrap
-}
-
-// contains is a simple string contains check.
-func contains(s, substr string) bool {
-	return len(s) >= len(substr) && (s == substr || len(s) > 0 && containsImpl(s, substr))
-}
-
-func containsImpl(s, substr string) bool {
-	for i := 0; i <= len(s)-len(substr); i++ {
-		if s[i:i+len(substr)] == substr {
-			return true
-		}
-	}
-	return false
 }
 
 // FormatDuration formats a duration in a human-readable way.

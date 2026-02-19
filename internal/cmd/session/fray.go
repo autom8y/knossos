@@ -96,6 +96,7 @@ func fraySession(projectDir, parentID string, opts frayOptions) (*output.FrayOut
 		return nil, err
 	}
 	defer parentLock.Release()
+	emitLockEvent(resolver, parentID, "ari-session-fray")
 
 	// Load parent context
 	parentCtxPath := resolver.SessionContextFile(parentID)

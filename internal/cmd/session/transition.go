@@ -77,6 +77,7 @@ func runTransition(ctx *cmdContext, targetPhase string, opts transitionOptions) 
 		return err
 	}
 	defer sessionLock.Release()
+	emitLockEvent(resolver, sessionID, "ari-session-transition")
 
 	// Load session context
 	ctxPath := resolver.SessionContextFile(sessionID)

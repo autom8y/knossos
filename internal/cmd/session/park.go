@@ -66,6 +66,7 @@ func runPark(ctx *cmdContext, opts parkOptions) error {
 		return err
 	}
 	defer sessionLock.Release()
+	emitLockEvent(resolver, sessionID, "ari-session-park")
 
 	// Load session context
 	ctxPath := resolver.SessionContextFile(sessionID)

@@ -5,7 +5,9 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/autom8y/knossos/internal/cmd/common"
+	"github.com/autom8y/knossos/internal/hook/clewcontract"
 	"github.com/autom8y/knossos/internal/output"
+	"github.com/autom8y/knossos/internal/paths"
 )
 
 // cmdContext holds shared state for session commands.
@@ -75,6 +77,16 @@ func (c *cmdContext) getPrinter() *output.Printer {
 	return c.GetPrinter(output.FormatText)
 }
 
+
+// emitLockEvent emits a lock.acquired event to the session's event log.
+// All emissions are non-fatal — failures are silently ignored.
+func emitLockEvent(resolver *paths.Resolver, sessionID, holder string) {
+	sessionDir := resolver.SessionDir(sessionID)
+	w := clewcontract.NewBufferedEventWriter(sessionDir, clewcontract.DefaultFlushInterval)
+	w.Write(clewcontract.NewLockAcquiredEvent(sessionID, holder))
+	w.Flush()
+	w.Close()
+}
 
 // getActiveRite reads the active rite from ACTIVE_RITE file.
 // Returns "none" as a fallback if the file doesn't exist or is empty.

@@ -7,8 +7,10 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/autom8y/knossos/internal/hook/clewcontract"
 	"github.com/autom8y/knossos/internal/lock"
 	"github.com/autom8y/knossos/internal/output"
+	"github.com/autom8y/knossos/internal/paths"
 	"github.com/autom8y/knossos/internal/session"
 )
 
@@ -68,6 +70,18 @@ func runRecover(ctx *cmdContext, opts recoverOptions) error {
 				if !opts.dryRun {
 					if err := os.Remove(lockPath); err == nil {
 						removedLocks = append(removedLocks, entry.Name())
+						// Emit recovery event to affected session (non-fatal)
+						sessionID := strings.TrimSuffix(entry.Name(), ".lock")
+						if paths.IsSessionDir(sessionID) {
+							sessionDir := resolver.SessionDir(sessionID)
+							w := clewcontract.NewBufferedEventWriter(sessionDir, clewcontract.DefaultFlushInterval)
+							w.Write(clewcontract.NewToolCallEvent("recover", lockPath, map[string]interface{}{
+								"action":     "stale_lock_removed",
+								"session_id": sessionID,
+							}))
+							w.Flush()
+							w.Close()
+						}
 					}
 				}
 			}

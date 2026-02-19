@@ -32,6 +32,9 @@ const (
 	EventTypeSessionResumed     EventType = "session.resumed"
 	EventTypeSessionArchived    EventType = "session.archived"
 	EventTypePhaseTransitioned  EventType = "phase.transitioned"
+	EventTypeSchemaMigrated     EventType = "session.schema_migrated"
+	EventTypeLockAcquired       EventType = "lock.acquired"
+	EventTypeLockReleased       EventType = "lock.released"
 )
 
 // ArtifactType represents the type of artifact created during a session.
@@ -595,6 +598,46 @@ func NewPhaseTransitionedEvent(sessionID, fromPhase, toPhase string) Event {
 			"session_id": sessionID,
 			"from_phase": fromPhase,
 			"to_phase":   toPhase,
+		},
+	}
+}
+
+// NewSchemaMigratedEvent creates an event for session schema migration.
+func NewSchemaMigratedEvent(sessionID, fromVersion, toVersion string) Event {
+	return Event{
+		Timestamp: timestamp(),
+		Type:      EventTypeSchemaMigrated,
+		Summary:   fmt.Sprintf("Schema migrated from %s to %s", fromVersion, toVersion),
+		Meta: map[string]interface{}{
+			"session_id":   sessionID,
+			"from_version": fromVersion,
+			"to_version":   toVersion,
+		},
+	}
+}
+
+// NewLockAcquiredEvent creates an event for lock acquisition.
+func NewLockAcquiredEvent(sessionID, holder string) Event {
+	return Event{
+		Timestamp: timestamp(),
+		Type:      EventTypeLockAcquired,
+		Summary:   fmt.Sprintf("Lock acquired on %s by %s", sessionID, holder),
+		Meta: map[string]interface{}{
+			"session_id": sessionID,
+			"holder":     holder,
+		},
+	}
+}
+
+// NewLockReleasedEvent creates an event for lock release.
+func NewLockReleasedEvent(sessionID, holder string) Event {
+	return Event{
+		Timestamp: timestamp(),
+		Type:      EventTypeLockReleased,
+		Summary:   fmt.Sprintf("Lock released on %s by %s", sessionID, holder),
+		Meta: map[string]interface{}{
+			"session_id": sessionID,
+			"holder":     holder,
 		},
 	}
 }

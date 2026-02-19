@@ -57,6 +57,7 @@ func runResume(ctx *cmdContext) error {
 		return err
 	}
 	defer sessionLock.Release()
+	emitLockEvent(resolver, sessionID, "ari-session-resume")
 
 	// Load session context
 	ctxPath := resolver.SessionContextFile(sessionID)

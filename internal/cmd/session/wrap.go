@@ -92,6 +92,7 @@ func runWrap(ctx *cmdContext, opts wrapOptions) error {
 		return err
 	}
 	defer sessionLock.Release()
+	emitLockEvent(resolver, sessionID, "ari-session-wrap")
 
 	// Load session context
 	sessionDir := resolver.SessionDir(sessionID)
