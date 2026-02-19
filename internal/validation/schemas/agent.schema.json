@@ -122,8 +122,18 @@
       "description": "Tools explicitly denied to this agent"
     },
     "memory": {
-      "type": "boolean",
-      "description": "Enable agent memory for cross-session context retention"
+      "oneOf": [
+        {
+          "type": "boolean",
+          "description": "true enables memory with 'project' scope; false disables"
+        },
+        {
+          "type": "string",
+          "enum": ["user", "project", "local"],
+          "description": "Memory scope: user (global), project (per-project), local (per-directory)"
+        }
+      ],
+      "description": "Agent memory for cross-session context retention. Accepts boolean (true = project scope) or explicit scope string."
     },
     "permissionMode": {
       "type": "string",

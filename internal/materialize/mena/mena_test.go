@@ -128,9 +128,15 @@ func TestSyncMena_Destructive(t *testing.T) {
 		t.Errorf("Expected helper.md at %s", cmdHelper)
 	}
 
-	skillIndex := filepath.Join(skillsDir, "my-ref", "INDEX.md")
-	if _, err := os.Stat(skillIndex); os.IsNotExist(err) {
-		t.Errorf("Expected legomena INDEX.md at %s", skillIndex)
+	skillEntrypoint := filepath.Join(skillsDir, "my-ref", "SKILL.md")
+	if _, err := os.Stat(skillEntrypoint); os.IsNotExist(err) {
+		t.Errorf("Expected legomena entrypoint at %s (CC expects SKILL.md, not INDEX.md)", skillEntrypoint)
+	}
+
+	// Verify INDEX.md was NOT produced (CC does not read it as skill entrypoint)
+	skillOldIndex := filepath.Join(skillsDir, "my-ref", "INDEX.md")
+	if _, err := os.Stat(skillOldIndex); err == nil {
+		t.Errorf("INDEX.md must not exist at %s; legomena entrypoint must be SKILL.md", skillOldIndex)
 	}
 
 	if len(result.CommandsProjected) == 0 {
@@ -278,9 +284,15 @@ func TestSyncMena_EmbeddedFS(t *testing.T) {
 		t.Errorf("Expected promoted dromena at %s", cmdPromoted)
 	}
 
-	skillIndex := filepath.Join(skillsDir, "my-ref", "INDEX.md")
-	if _, err := os.Stat(skillIndex); os.IsNotExist(err) {
-		t.Errorf("Expected embedded legomena at %s", skillIndex)
+	skillEntrypoint := filepath.Join(skillsDir, "my-ref", "SKILL.md")
+	if _, err := os.Stat(skillEntrypoint); os.IsNotExist(err) {
+		t.Errorf("Expected embedded legomena entrypoint at %s (CC expects SKILL.md, not INDEX.md)", skillEntrypoint)
+	}
+
+	// Verify INDEX.md was NOT produced (CC does not read it as skill entrypoint)
+	skillOldIndex := filepath.Join(skillsDir, "my-ref", "INDEX.md")
+	if _, err := os.Stat(skillOldIndex); err == nil {
+		t.Errorf("INDEX.md must not exist at %s; legomena entrypoint must be SKILL.md", skillOldIndex)
 	}
 
 	if len(result.CommandsProjected) == 0 {
@@ -331,7 +343,7 @@ func TestSyncMena_Filter_DroOnly(t *testing.T) {
 		t.Errorf("Expected cmd1.md to be projected to commands/")
 	}
 
-	if _, err := os.Stat(filepath.Join(skillsDir, "ref1", "INDEX.md")); !os.IsNotExist(err) {
+	if _, err := os.Stat(filepath.Join(skillsDir, "ref1", "SKILL.md")); !os.IsNotExist(err) {
 		t.Errorf("Expected ref1 to NOT be projected when filter is ProjectDro")
 	}
 

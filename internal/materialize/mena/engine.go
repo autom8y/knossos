@@ -62,7 +62,7 @@ func SyncMena(sources []MenaSource, opts MenaProjectionOptions) (*MenaProjection
 		// so we can remove only stale files afterwards instead of nuking the whole dir.
 		var sourceFileNames map[string]bool
 		if opts.Mode == MenaProjectionDestructive {
-			sourceFileNames = collectSourceFileNames(entry.Source)
+			sourceFileNames = collectSourceFileNames(entry.Source, hideCompanions)
 		}
 
 		if entry.Source.IsEmbedded {
@@ -326,6 +326,13 @@ func copyDirWithStripping(src, dst string, hideCompanions bool) error {
 			destPath = dst + ".md"
 		}
 
+		// For legomena: rename top-level INDEX.md → SKILL.md (CC entrypoint convention).
+		// CC reads SKILL.md as the skill entrypoint; INDEX.md is not recognized.
+		if !hideCompanions && base == "INDEX.md" && dir == "." {
+			base = "SKILL.md"
+			destPath = filepath.Join(dst, "SKILL.md")
+		}
+
 		// Apply companion hiding for dromena non-INDEX markdown files
 		if hideCompanions && base != "INDEX.md" && strings.HasSuffix(base, ".md") {
 			content = InjectCompanionHideFrontmatter(content)
@@ -366,6 +373,13 @@ func copyDirFromFSWithStripping(fsys fs.FS, dst string, hideCompanions bool) err
 			destPath = dst + ".md"
 		}
 
+		// For legomena: rename top-level INDEX.md → SKILL.md (CC entrypoint convention).
+		// CC reads SKILL.md as the skill entrypoint; INDEX.md is not recognized.
+		if !hideCompanions && base == "INDEX.md" && dir == "." {
+			base = "SKILL.md"
+			destPath = filepath.Join(dst, "SKILL.md")
+		}
+
 		// Apply companion hiding for dromena non-INDEX markdown files
 		if hideCompanions && base != "INDEX.md" && strings.HasSuffix(base, ".md") {
 			content = InjectCompanionHideFrontmatter(content)
@@ -380,8 +394,10 @@ func copyDirFromFSWithStripping(fsys fs.FS, dst string, hideCompanions bool) err
 }
 
 // collectSourceFileNames builds the set of destination-relative file paths
-// that a mena source will produce (after extension stripping).
-func collectSourceFileNames(src MenaSource) map[string]bool {
+// that a mena source will produce (after extension stripping and promotion).
+// hideCompanions must match the value passed to copyDirWithStripping/copyDirFromFSWithStripping
+// so that the legomena INDEX.md → SKILL.md rename is reflected in the expected filenames.
+func collectSourceFileNames(src MenaSource, hideCompanions bool) map[string]bool {
 	names := make(map[string]bool)
 
 	if src.IsEmbedded {
@@ -395,6 +411,10 @@ func collectSourceFileNames(src MenaSource) map[string]bool {
 			}
 			dir := filepath.Dir(path)
 			base := StripMenaExtension(filepath.Base(path))
+			// Mirror legomena promotion: INDEX.md → SKILL.md at root level
+			if !hideCompanions && base == "INDEX.md" && dir == "." {
+				base = "SKILL.md"
+			}
 			names[filepath.Join(dir, base)] = true
 			return nil
 		})
@@ -409,6 +429,10 @@ func collectSourceFileNames(src MenaSource) map[string]bool {
 			}
 			dir := filepath.Dir(relPath)
 			base := StripMenaExtension(filepath.Base(relPath))
+			// Mirror legomena promotion: INDEX.md → SKILL.md at root level
+			if !hideCompanions && base == "INDEX.md" && dir == "." {
+				base = "SKILL.md"
+			}
 			names[filepath.Join(dir, base)] = true
 			return nil
 		})

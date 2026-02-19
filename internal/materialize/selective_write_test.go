@@ -163,9 +163,9 @@ func TestSyncMena_PreservesUserSkills(t *testing.T) {
 	_, err := SyncMena(sources, opts)
 	require.NoError(t, err)
 
-	// Verify projected skill exists
+	// Verify projected skill exists (CC entrypoint is SKILL.md, not INDEX.md)
 	assert.FileExists(t,
-		filepath.Join(skillsDir, "my-ref", "INDEX.md"),
+		filepath.Join(skillsDir, "my-ref", "SKILL.md"),
 		"projected skill should exist")
 
 	// Verify user-created skill survived

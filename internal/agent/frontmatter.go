@@ -33,7 +33,7 @@ type AgentFrontmatter struct {
 	MaxTurns        int                    `yaml:"maxTurns,omitempty" json:"maxTurns,omitempty"`
 	Skills          []string               `yaml:"skills,omitempty" json:"skills,omitempty"`
 	DisallowedTools FlexibleStringSlice    `yaml:"disallowedTools,omitempty" json:"disallowedTools,omitempty"`
-	Memory          bool                   `yaml:"memory,omitempty" json:"memory,omitempty"`
+	Memory          MemoryField            `yaml:"memory,omitempty" json:"memory,omitempty"`
 	PermissionMode  string                 `yaml:"permissionMode,omitempty" json:"permissionMode,omitempty"`
 	McpServers      []McpServerConfig      `yaml:"mcpServers,omitempty" json:"mcpServers,omitempty"`
 	Hooks           map[string]interface{} `yaml:"hooks,omitempty" json:"hooks,omitempty"`
@@ -159,6 +159,14 @@ func (f *AgentFrontmatter) validateCore() error {
 		default:
 			return errors.New(errors.CodeValidationFailed,
 				fmt.Sprintf("agent frontmatter: invalid permissionMode %q, must be default, plan, or bypassPermissions", f.PermissionMode))
+		}
+	}
+
+	// Validate memory scope if present
+	if f.Memory != "" {
+		if !validMemoryScopes[string(f.Memory)] {
+			return errors.New(errors.CodeValidationFailed,
+				fmt.Sprintf("agent frontmatter: invalid memory scope %q, must be user, project, or local", f.Memory))
 		}
 	}
 

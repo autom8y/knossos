@@ -47,7 +47,7 @@ This is a test command.
 
 	// Verify: dromena INDEX promoted to parent level (.claude/commands/test-cmd.md)
 	commandsPath := filepath.Join(claudeDir, "commands", "test-cmd.md")
-	skillsPath := filepath.Join(claudeDir, "skills", "test-cmd", "INDEX.md")
+	skillsPath := filepath.Join(claudeDir, "skills", "test-cmd", "SKILL.md")
 
 	if _, err := os.Stat(commandsPath); os.IsNotExist(err) {
 		t.Errorf("Expected promoted dromena at .claude/commands/test-cmd.md, but it does not exist")
@@ -104,12 +104,12 @@ This is a test reference.
 		t.Fatalf("materializeMena failed: %v", err)
 	}
 
-	// Verify: file should be in .claude/skills/ with stripped name, NOT in .claude/commands/
-	skillsPath := filepath.Join(claudeDir, "skills", "test-ref", "INDEX.md")
-	commandsPath := filepath.Join(claudeDir, "commands", "test-ref", "INDEX.md")
+	// Verify: file should be in .claude/skills/ as SKILL.md (CC entrypoint), NOT in .claude/commands/
+	skillsPath := filepath.Join(claudeDir, "skills", "test-ref", "SKILL.md")
+	commandsPath := filepath.Join(claudeDir, "commands", "test-ref", "SKILL.md")
 
 	if _, err := os.Stat(skillsPath); os.IsNotExist(err) {
-		t.Errorf("Expected legomena to be in .claude/skills/test-ref/INDEX.md (stripped), but it does not exist")
+		t.Errorf("Expected legomena to be in .claude/skills/test-ref/SKILL.md (CC entrypoint), but it does not exist")
 	}
 
 	if _, err := os.Stat(commandsPath); err == nil {
@@ -161,7 +161,7 @@ This command has a plain INDEX.md and should default to dromena routing.
 
 	// Verify: plain INDEX.md defaults to dromena, promoted to .claude/commands/test-default.md
 	commandsPath := filepath.Join(claudeDir, "commands", "test-default.md")
-	skillsPath := filepath.Join(claudeDir, "skills", "test-default", "INDEX.md")
+	skillsPath := filepath.Join(claudeDir, "skills", "test-default", "SKILL.md")
 
 	if _, err := os.Stat(commandsPath); os.IsNotExist(err) {
 		t.Errorf("Expected promoted default at .claude/commands/test-default.md, but it does not exist")
@@ -219,13 +219,13 @@ This is a test reference with supporting files.
 	}
 
 	// Verify: ALL files should be in .claude/skills/ (following INDEX.lego.md)
-	// INDEX.lego.md is stripped to INDEX.md in output
-	skillsIndexPath := filepath.Join(claudeDir, "skills", "test-with-files", "INDEX.md")
+	// INDEX.lego.md is renamed to SKILL.md (CC entrypoint convention)
+	skillsIndexPath := filepath.Join(claudeDir, "skills", "test-with-files", "SKILL.md")
 	skillsBehaviorPath := filepath.Join(claudeDir, "skills", "test-with-files", "behavior.md")
 	skillsExamplesPath := filepath.Join(claudeDir, "skills", "test-with-files", "examples.md")
 
 	if _, err := os.Stat(skillsIndexPath); os.IsNotExist(err) {
-		t.Errorf("Expected INDEX.md (stripped from INDEX.lego.md) to be in .claude/skills/test-with-files/, but it does not exist")
+		t.Errorf("Expected SKILL.md (renamed from INDEX.lego.md, CC entrypoint) to be in .claude/skills/test-with-files/, but it does not exist")
 	}
 
 	if _, err := os.Stat(skillsBehaviorPath); os.IsNotExist(err) {
@@ -319,10 +319,10 @@ description: A default command
 		t.Errorf("Expected dro-cmd.md at .claude/commands/ (promoted), but it does not exist")
 	}
 
-	// Verify legomena is in .claude/skills/ (stripped to INDEX.md, no promotion)
-	legoPath := filepath.Join(claudeDir, "skills", "lego-ref", "INDEX.md")
+	// Verify legomena is in .claude/skills/ as SKILL.md (CC entrypoint convention)
+	legoPath := filepath.Join(claudeDir, "skills", "lego-ref", "SKILL.md")
 	if _, err := os.Stat(legoPath); os.IsNotExist(err) {
-		t.Errorf("Expected lego-ref to be in .claude/skills/ as INDEX.md (stripped), but it does not exist")
+		t.Errorf("Expected lego-ref to be in .claude/skills/ as SKILL.md (CC entrypoint), but it does not exist")
 	}
 
 	// Verify default promoted to parent level
@@ -332,12 +332,12 @@ description: A default command
 	}
 
 	// Verify no cross-contamination
-	droInSkills := filepath.Join(claudeDir, "skills", "dro-cmd", "INDEX.md")
+	droInSkills := filepath.Join(claudeDir, "skills", "dro-cmd", "SKILL.md")
 	if _, err := os.Stat(droInSkills); err == nil {
 		t.Errorf("dro-cmd should NOT be in .claude/skills/, but it exists")
 	}
 
-	legoInCommands := filepath.Join(claudeDir, "commands", "lego-ref", "INDEX.md")
+	legoInCommands := filepath.Join(claudeDir, "commands", "lego-ref", "SKILL.md")
 	if _, err := os.Stat(legoInCommands); err == nil {
 		t.Errorf("lego-ref should NOT be in .claude/commands/, but it exists")
 	}
@@ -416,10 +416,10 @@ description: A flat command
 		t.Fatalf("materializeMena failed: %v", err)
 	}
 
-	// Verify: guidance/standards -> skills/guidance/standards/ (legomena, stripped)
-	skillsStandards := filepath.Join(claudeDir, "skills", "guidance", "standards", "INDEX.md")
+	// Verify: guidance/standards -> skills/guidance/standards/ (legomena, SKILL.md entrypoint)
+	skillsStandards := filepath.Join(claudeDir, "skills", "guidance", "standards", "SKILL.md")
 	if _, err := os.Stat(skillsStandards); os.IsNotExist(err) {
-		t.Errorf("Expected guidance/standards to be in skills/ as INDEX.md (stripped), but %s does not exist", skillsStandards)
+		t.Errorf("Expected guidance/standards to be in skills/ as SKILL.md (CC entrypoint), but %s does not exist", skillsStandards)
 	}
 	skillsConventions := filepath.Join(claudeDir, "skills", "guidance", "standards", "code-conventions.md")
 	if _, err := os.Stat(skillsConventions); os.IsNotExist(err) {
@@ -427,7 +427,7 @@ description: A flat command
 	}
 
 	// Verify: guidance/standards NOT in commands/
-	commandsStandards := filepath.Join(claudeDir, "commands", "guidance", "standards", "INDEX.md")
+	commandsStandards := filepath.Join(claudeDir, "commands", "guidance", "standards", "SKILL.md")
 	if _, err := os.Stat(commandsStandards); err == nil {
 		t.Errorf("Legomena guidance/standards should NOT be in commands/, but %s exists", commandsStandards)
 	}
@@ -439,7 +439,7 @@ description: A flat command
 	}
 
 	// Verify: file-verification NOT in skills/
-	skillsFV := filepath.Join(claudeDir, "skills", "file-verification", "INDEX.md")
+	skillsFV := filepath.Join(claudeDir, "skills", "file-verification", "SKILL.md")
 	if _, err := os.Stat(skillsFV); err == nil {
 		t.Errorf("Dromena file-verification should NOT be in skills/, but %s exists", skillsFV)
 	}
@@ -492,7 +492,7 @@ func TestRematerializeMena_RepopulatesAfterWipe(t *testing.T) {
 	}
 
 	commandsPromoted := filepath.Join(claudeDir, "commands", "test-cmd.md")
-	skillsIndex := filepath.Join(claudeDir, "skills", "test-ref", "INDEX.md")
+	skillsIndex := filepath.Join(claudeDir, "skills", "test-ref", "SKILL.md")
 
 	if _, err := os.Stat(commandsPromoted); os.IsNotExist(err) {
 		t.Fatalf("First pass: expected %s to exist", commandsPromoted)

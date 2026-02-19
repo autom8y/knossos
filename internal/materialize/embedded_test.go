@@ -239,9 +239,9 @@ func TestMaterializeMena_FromEmbedded(t *testing.T) {
 		t.Errorf("Expected promoted dromena at %s, got error: %v", cmdPath, err)
 	}
 
-	// Verify legomena routed to skills/ with extension stripped (no promotion)
-	skillPath := filepath.Join(claudeDir, "skills", "shared-ref", "INDEX.md")
+	// Verify legomena routed to skills/ as SKILL.md (CC entrypoint convention)
+	skillPath := filepath.Join(claudeDir, "skills", "shared-ref", "SKILL.md")
 	if _, err := os.Stat(skillPath); err != nil {
-		t.Errorf("Expected legomena at %s (stripped from INDEX.lego.md), got error: %v", skillPath, err)
+		t.Errorf("Expected legomena at %s (renamed from INDEX.lego.md, CC entrypoint), got error: %v", skillPath, err)
 	}
 }

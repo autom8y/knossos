@@ -703,8 +703,11 @@ memory: true
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if !fm.Memory {
-		t.Error("memory = false, want true")
+	if !fm.Memory.IsEnabled() {
+		t.Error("memory.IsEnabled() = false, want true")
+	}
+	if fm.Memory.Scope() != "project" {
+		t.Errorf("memory.Scope() = %q, want %q", fm.Memory.Scope(), "project")
 	}
 }
 
@@ -851,8 +854,11 @@ hooks:
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if !fm.Memory {
-		t.Error("memory = false, want true")
+	if !fm.Memory.IsEnabled() {
+		t.Error("memory.IsEnabled() = false, want true")
+	}
+	if fm.Memory.Scope() != "project" {
+		t.Errorf("memory.Scope() = %q, want %q", fm.Memory.Scope(), "project")
 	}
 	if fm.PermissionMode != "plan" {
 		t.Errorf("permissionMode = %q, want %q", fm.PermissionMode, "plan")
@@ -867,6 +873,157 @@ hooks:
 	// Validate should pass
 	if err := fm.Validate(); err != nil {
 		t.Fatalf("Validate() error = %v", err)
+	}
+}
+
+func TestParseAgentFrontmatter_MemoryFalse(t *testing.T) {
+	content := []byte(`---
+name: no-memory-agent
+description: "Agent with memory explicitly disabled"
+tools: Read
+memory: false
+---
+
+# No Memory Agent
+`)
+
+	fm, err := ParseAgentFrontmatter(content)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if fm.Memory.IsEnabled() {
+		t.Error("memory.IsEnabled() = true, want false")
+	}
+	if fm.Memory.Scope() != "" {
+		t.Errorf("memory.Scope() = %q, want %q", fm.Memory.Scope(), "")
+	}
+}
+
+func TestParseAgentFrontmatter_MemoryStringProject(t *testing.T) {
+	content := []byte(`---
+name: project-memory-agent
+description: "Agent with explicit project memory scope"
+tools: Read
+memory: "project"
+---
+
+# Project Memory Agent
+`)
+
+	fm, err := ParseAgentFrontmatter(content)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if !fm.Memory.IsEnabled() {
+		t.Error("memory.IsEnabled() = false, want true")
+	}
+	if fm.Memory.Scope() != "project" {
+		t.Errorf("memory.Scope() = %q, want %q", fm.Memory.Scope(), "project")
+	}
+}
+
+func TestParseAgentFrontmatter_MemoryStringUser(t *testing.T) {
+	content := []byte(`---
+name: user-memory-agent
+description: "Agent with user memory scope"
+tools: Read
+memory: "user"
+---
+
+# User Memory Agent
+`)
+
+	fm, err := ParseAgentFrontmatter(content)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if !fm.Memory.IsEnabled() {
+		t.Error("memory.IsEnabled() = false, want true")
+	}
+	if fm.Memory.Scope() != "user" {
+		t.Errorf("memory.Scope() = %q, want %q", fm.Memory.Scope(), "user")
+	}
+}
+
+func TestParseAgentFrontmatter_MemoryStringLocal(t *testing.T) {
+	content := []byte(`---
+name: local-memory-agent
+description: "Agent with local memory scope"
+tools: Read
+memory: "local"
+---
+
+# Local Memory Agent
+`)
+
+	fm, err := ParseAgentFrontmatter(content)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if !fm.Memory.IsEnabled() {
+		t.Error("memory.IsEnabled() = false, want true")
+	}
+	if fm.Memory.Scope() != "local" {
+		t.Errorf("memory.Scope() = %q, want %q", fm.Memory.Scope(), "local")
+	}
+}
+
+func TestValidate_MemoryScope_Invalid(t *testing.T) {
+	fm := AgentFrontmatter{
+		Name:        "test-agent",
+		Description: "A test agent",
+		Memory:      MemoryField("invalid"),
+	}
+
+	err := fm.Validate()
+	if err == nil {
+		t.Fatal("Validate() expected error for invalid memory scope, got nil")
+	}
+	if !containsStr(err.Error(), "invalid memory scope") {
+		t.Errorf("Validate() error = %q, want to contain %q", err.Error(), "invalid memory scope")
+	}
+}
+
+func TestParseAgentFrontmatter_MemoryAbsent(t *testing.T) {
+	content := []byte(`---
+name: no-memory-field-agent
+description: "Agent without a memory field"
+tools: Read
+---
+
+# No Memory Field Agent
+`)
+
+	fm, err := ParseAgentFrontmatter(content)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if fm.Memory.IsEnabled() {
+		t.Error("memory.IsEnabled() = true, want false (absent field should be disabled)")
+	}
+	if fm.Memory.Scope() != "" {
+		t.Errorf("memory.Scope() = %q, want %q (absent field should be empty)", fm.Memory.Scope(), "")
+	}
+}
+
+func TestValidate_MemoryScope_Valid(t *testing.T) {
+	scopes := []string{"user", "project", "local"}
+	for _, scope := range scopes {
+		t.Run(scope, func(t *testing.T) {
+			fm := AgentFrontmatter{
+				Name:        "test-agent",
+				Description: "A test agent",
+				Memory:      MemoryField(scope),
+			}
+			if err := fm.Validate(); err != nil {
+				t.Errorf("Validate() error = %v, want nil for scope %q", err, scope)
+			}
+		})
 	}
 }
 
