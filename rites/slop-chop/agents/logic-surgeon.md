@@ -7,7 +7,7 @@ description: |
   Produces analysis-report.
 tools: Bash, Glob, Grep, Read, Write, TodoWrite
 model: opus
-color: amber
+color: yellow
 maxTurns: 100
 ---
 

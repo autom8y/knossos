@@ -19,7 +19,7 @@ description: |
 type: specialist
 tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
 model: opus
-color: magenta
+color: yellow
 maxTurns: 200
 contract:
   must_not:

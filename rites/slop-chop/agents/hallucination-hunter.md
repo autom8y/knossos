@@ -7,7 +7,7 @@ description: |
   Produces detection-report.
 tools: Bash, Glob, Grep, Read, Write, TodoWrite
 model: sonnet
-color: crimson
+color: red
 maxTurns: 60
 ---
 

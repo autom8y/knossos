@@ -66,8 +66,8 @@
     },
     "color": {
       "type": "string",
-      "pattern": "^[a-z]+$",
-      "description": "Display color for agent identification"
+      "enum": ["red", "blue", "green", "yellow", "purple", "orange", "pink", "cyan"],
+      "description": "Display color for agent identification. Must be a valid Claude Code color."
     },
     "aliases": {
       "type": "array",

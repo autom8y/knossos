@@ -6,7 +6,7 @@ description: |
   with CI-consumable JSON output and cross-rite referrals.
 tools: Bash, Glob, Grep, Read, Write, TodoWrite
 model: sonnet
-color: bone
+color: cyan
 maxTurns: 60
 ---
 

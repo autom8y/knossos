@@ -359,11 +359,15 @@ func lintAgentFile(path, relPath string, report *LintReport) {
 		}
 	}
 
-	// Orchestrator color check
-	if fm.Type == "orchestrator" && fm.Color != "" && fm.Color != "purple" {
+	// Valid CC color check
+	validAgentColors := map[string]bool{
+		"red": true, "blue": true, "green": true, "yellow": true,
+		"purple": true, "orange": true, "pink": true, "cyan": true,
+	}
+	if fm.Color != "" && !validAgentColors[fm.Color] {
 		report.Agents = append(report.Agents, Finding{
-			File: relPath, Severity: SevMedium, Rule: "orchestrator-color",
-			Message: fmt.Sprintf("orchestrator has color=%q (convention: purple)", fm.Color),
+			File: relPath, Severity: SevHigh, Rule: "agent-invalid-color",
+			Message: fmt.Sprintf("color=%q is not a valid CC color (valid: red, blue, green, yellow, purple, orange, pink, cyan)", fm.Color),
 		})
 	}
 

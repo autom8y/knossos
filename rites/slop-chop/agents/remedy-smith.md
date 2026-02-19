@@ -6,7 +6,7 @@ description: |
   Effort estimates. Never judges pass/fail. Produces remedy-plan.
 tools: Bash, Glob, Grep, Read, Write, TodoWrite
 model: sonnet
-color: steel
+color: green
 maxTurns: 80
 ---
 

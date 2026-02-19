@@ -19,7 +19,7 @@ description: |
 type: specialist
 tools: Bash, Edit, Glob, Grep, Read, Write, WebSearch, TodoWrite, Skill
 model: opus
-color: magenta
+color: pink
 maxTurns: 200
 ---
 

@@ -28,7 +28,7 @@ description: | # [REQUIRED] Multi-line description block
 
 tools: [REQUIRED] # Comma-separated list from: Bash, Glob, Grep, Read, Edit, Write, Task, TodoWrite
 model: [OPTIONAL] # opus | sonnet | claude-haiku-4 (default: sonnet)
-color: [OPTIONAL] # purple | pink | cyan | green | red | orange | blue (for UI display)
+color: [OPTIONAL] # red | blue | green | yellow | purple | orange | pink | cyan (for UI display)
 ---
 ```
 
@@ -408,13 +408,14 @@ Assign colors to differentiate agents within a pantheon. Avoid duplicates within
 
 | Color | Typical Usage |
 |-------|---------------|
-| `purple` | Orchestrator/Coordinator |
+| `purple` | Orchestrator/Strategist/Visionary |
 | `cyan` | Architect/Designer |
-| `orange` | Analyst/Diagnostic |
+| `orange` | Analyst/Diagnostic/Scout |
 | `green` | Engineer/Builder |
-| `pink` | Documentation |
-| `red` | Tester/Validator |
-| `blue` | General purpose |
+| `yellow` | Planner/Assessor/Coordinator |
+| `pink` | Researcher/Human-facing |
+| `red` | Tester/Adversary/Validator |
+| `blue` | Knowledge/Documentation/Curator |
 
 ---
 

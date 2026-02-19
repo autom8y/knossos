@@ -23,7 +23,7 @@ description: |
 type: engineer
 tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
 model: opus
-color: magenta
+color: blue
 maxTurns: 250
 ---
 

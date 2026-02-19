@@ -141,7 +141,7 @@ name: moirai
 description: "Session lifecycle agent"
 tools: Read, Write, Edit, Glob, Grep, Bash, Skill
 model: sonnet
-color: indigo
+color: purple
 aliases:
   - fates
   - moirai

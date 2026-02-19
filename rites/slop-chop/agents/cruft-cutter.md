@@ -6,7 +6,7 @@ description: |
   and deprecation cruft. Produces decay-report. Findings are always advisory.
 tools: Bash, Glob, Grep, Read, Write, TodoWrite
 model: sonnet
-color: rust
+color: orange
 maxTurns: 80
 ---
 

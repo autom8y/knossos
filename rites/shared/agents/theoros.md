@@ -8,7 +8,7 @@ description: |
 type: analyst
 tools: Bash, Glob, Grep, Read, Skill
 model: sonnet
-color: gold
+color: yellow
 maxTurns: 150
 disallowedTools:
   - Write

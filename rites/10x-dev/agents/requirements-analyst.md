@@ -21,7 +21,7 @@ description: |
 type: analyst
 tools: Bash, Glob, Grep, Read, Edit, Write, WebFetch, TodoWrite, WebSearch, Skill
 model: opus
-color: magenta
+color: pink
 maxTurns: 150
 contract:
   must_not:

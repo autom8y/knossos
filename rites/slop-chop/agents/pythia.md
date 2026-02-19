@@ -8,7 +8,7 @@ description: |
 type: orchestrator
 tools: Read
 model: opus
-color: crimson
+color: red
 maxTurns: 40
 disallowedTools:
   - Bash
