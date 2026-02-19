@@ -10,10 +10,19 @@ tools: Bash, Glob, Grep, Read, Skill
 model: sonnet
 color: yellow
 maxTurns: 150
+skills:
+  - pinakes
 disallowedTools:
   - Write
   - Edit
   - Task
+  - NotebookEdit
+contract:
+  must_not:
+    - Modify any files (read-only observer)
+    - Inflate grades without evidence
+    - Make recommendations outside audit scope
+    - Use subjective language in assessments
 ---
 
 # Theoros

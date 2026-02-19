@@ -11,7 +11,8 @@ entry_agent: null
 
 phases: []
 
-# Shared has no agents - it's skills-only infrastructure
+# Shared has no rite-scoped agents — cross-rite agents live in top-level agents/
+# (theoros, moirai, consultant, context-engineer)
 agents: []
 
 dromena: []
@@ -29,9 +30,9 @@ dependencies: []
 metadata:
   type: infrastructure
   description: |
-    The shared rite is a special infrastructure rite that contains no agents
-    or workflow phases. It provides common skills, hooks, and commands that
-    are universally available regardless of which rite is currently active.
+    The shared rite is a special infrastructure rite with no workflow phases.
+    It provides common agents, skills, hooks, and commands that are
+    universally available regardless of which rite is currently active.
 
     Sync behavior:
     - ari sync automatically syncs shared content alongside active rite

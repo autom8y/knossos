@@ -22,6 +22,8 @@ This table IS the registry. A domain exists when it has a row here and a criteri
 | **dromena** | `domains/dromena.lego.md` | framework | Slash commands: naming, structure, completeness |
 | **legomena** | `domains/legomena.lego.md` | framework | Skills: description quality, trigger precision |
 | **agents** | `domains/agents.lego.md` | framework | Agent prompts: role clarity, handoff criteria |
+| **hooks** | `domains/hooks.lego.md` | framework | Hook wiring: lifecycle coverage, matchers, timeouts |
+| **mena-structure** | `domains/mena-structure.lego.md` | framework | Mena directories: naming, INDEX files, manifest registration |
 
 ### Scope Values
 
@@ -62,6 +64,8 @@ No +/- modifiers. Simplicity prevents grade inflation and gaming.
 - [dromena.lego.md](domains/dromena.lego.md) - Slash command audit criteria
 - [legomena.lego.md](domains/legomena.lego.md) - Skill audit criteria
 - [agents.lego.md](domains/agents.lego.md) - Agent prompt audit criteria
+- [hooks.lego.md](domains/hooks.lego.md) - Hook wiring audit criteria
+- [mena-structure.lego.md](domains/mena-structure.lego.md) - Mena directory audit criteria
 
 ### Schemas
 - [registry-format.lego.md](registry-format.lego.md) - How to add new domains
