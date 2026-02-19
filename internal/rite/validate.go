@@ -6,7 +6,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/autom8y/knossos/internal/materialize"
 	"github.com/autom8y/knossos/internal/paths"
 )
 
@@ -40,13 +39,15 @@ type ValidationResult struct {
 type Validator struct {
 	resolver  *paths.Resolver
 	discovery *Discovery
+	syncer    Syncer // injected; breaks dependency on materialize package
 }
 
 // NewValidator creates a new rite validator.
-func NewValidator(resolver *paths.Resolver) *Validator {
+func NewValidator(resolver *paths.Resolver, syncer Syncer) *Validator {
 	return &Validator{
 		resolver:  resolver,
 		discovery: NewDiscovery(resolver),
+		syncer:    syncer,
 	}
 }
 
@@ -283,14 +284,12 @@ func (v *Validator) Fix(riteName string) error {
 	for _, fixable := range result.Fixable {
 		switch fixable {
 		case "CLAUDE_MD_SYNC":
-			// Update CLAUDE.md via materialize
 			rite, err := v.discovery.Get(riteName)
 			if err != nil {
 				continue
 			}
-			if rite.Active {
-				m := materialize.NewMaterializer(v.resolver)
-				if _, err := m.Sync(materialize.SyncOptions{Scope: materialize.ScopeRite, RiteName: riteName, KeepOrphans: true}); err != nil {
+			if rite.Active && v.syncer != nil {
+				if err := v.syncer.SyncRite(riteName, true); err != nil {
 					continue
 				}
 			}

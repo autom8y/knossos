@@ -5,6 +5,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/autom8y/knossos/internal/cmd/common"
+	"github.com/autom8y/knossos/internal/materialize"
 	"github.com/autom8y/knossos/internal/output"
 	"github.com/autom8y/knossos/internal/rite"
 )
@@ -70,7 +71,9 @@ func (c *cmdContext) getInvoker() *rite.Invoker {
 
 // getValidator creates a rite validator.
 func (c *cmdContext) getValidator() *rite.Validator {
-	return rite.NewValidator(c.GetResolver())
+	resolver := c.GetResolver()
+	m := materialize.NewMaterializer(resolver)
+	return rite.NewValidator(resolver, m)
 }
 
 // getActiveRite reads the active rite from ACTIVE_RITE file.
