@@ -14,3 +14,4 @@ When modifying files in internal/provenance/:
 - migrateV1ToV2() handles backward compat: SourcePipeline→Scope, unknown→untracked
 - Two manifests: PROVENANCE_MANIFEST.yaml (rite scope), USER_PROVENANCE_MANIFEST.yaml (user scope)
 - One-way dependency: materialize imports provenance, never the reverse
+- Architecture review: see materialize-review skill for provenance boundary findings (R1, R3, R4)

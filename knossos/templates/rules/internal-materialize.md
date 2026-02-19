@@ -18,3 +18,4 @@ When modifying files in internal/materialize/:
 - Orphan detection: auto-remove knossos-owned by default; --keep-orphans prevents removal
 - CollisionChecker reads rite PROVENANCE_MANIFEST.yaml to prevent user scope from shadowing rite resources
 - User scope files: user_scope.go (sync logic), collision.go (collision detection), sync_types.go (unified types)
+- Architecture review: load materialize-review skill for ARCH-REVIEW-1 findings (health 7.5/10, R1-R8 recommendations)
