@@ -6,3 +6,7 @@
 # Ephemeral working artifacts (pre-permanent scratch layer)
 # Canonical convention defined in rites/shared/mena/ephemeral-artifacts/
 .wip/
+
+# Agent memory (persistent per-agent learning state, not committed)
+.claude/agent-memory/
+.claude/agent-memory-local/

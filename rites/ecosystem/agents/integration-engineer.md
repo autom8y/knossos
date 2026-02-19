@@ -27,6 +27,7 @@ color: green
 maxTurns: 250
 skills:
   - ecosystem-ref
+memory: "project"
 ---
 
 # Integration Engineer

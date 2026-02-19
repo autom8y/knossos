@@ -28,6 +28,7 @@ maxTurns: 150
 skills:
   - ecosystem-ref
   - guidance/file-verification
+memory: "project"
 contract:
   must_not:
     - Write code in Context Design documents
