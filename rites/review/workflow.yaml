@@ -1,0 +1,34 @@
+name: review
+workflow_type: sequential
+description: Language-agnostic code review lifecycle (Scan -> Assess -> Report)
+
+entry_point:
+  agent: scanner
+  artifact:
+    type: scan-findings
+    path_template: .claude/wip/review/SCAN-{slug}.md
+
+phases:
+  - name: scan
+    agent: scanner
+    produces: scan-findings
+    next: assess
+
+  - name: assess
+    agent: assessor
+    produces: assessment
+    next: report
+
+  - name: report
+    agent: reporter
+    produces: review-report
+    next: null
+
+complexity_levels:
+  - name: QUICK
+    scope: "Focused review of specific files or module"
+    phases: [scan, assess, report]
+
+  - name: FULL
+    scope: "Complete repository review with prioritized findings"
+    phases: [scan, assess, report]

@@ -377,11 +377,12 @@ func TestRenderArchetype_DefaultContractMustNot(t *testing.T) {
 }
 
 func TestRenderArchetype_MissingTemplate(t *testing.T) {
-	_, err := RenderArchetype("/nonexistent", "orchestrator.md.tpl", tenxDevData())
+	// Use a template name that doesn't exist anywhere (not just a bad projectRoot).
+	_, err := RenderArchetype("/nonexistent", "nonexistent-archetype.md.tpl", tenxDevData())
 	if err == nil {
 		t.Fatal("expected error for missing template, got nil")
 	}
-	if !strings.Contains(err.Error(), "failed to read archetype template") {
+	if !strings.Contains(err.Error(), "not found") {
 		t.Errorf("unexpected error message: %v", err)
 	}
 }

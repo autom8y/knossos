@@ -1,0 +1,92 @@
+# Rite Manifest: review
+# Simplest multi-phase orchestrated workflow — works on any codebase.
+
+name: review
+version: "1.0.0"
+description: Language-agnostic code review lifecycle (Scan -> Assess -> Report)
+
+entry_agent: pythia
+
+phases:
+  - name: scan
+    agent: scanner
+    produces: scan-findings
+    description: Read codebase structure and identify areas of concern
+
+  - name: assess
+    agent: assessor
+    produces: assessment
+    description: Evaluate findings by impact and recommend priorities
+
+  - name: report
+    agent: reporter
+    produces: review-report
+    description: Produce structured review document with actionable items
+
+agents:
+  - name: pythia
+    role: Coordinates code review phases
+    archetype: orchestrator
+
+  - name: scanner
+    role: Reads codebase and identifies areas of concern
+
+  - name: assessor
+    role: Evaluates scan findings and prioritizes by impact
+
+  - name: reporter
+    role: Produces structured review document
+
+agent_defaults:
+  type: specialist
+  model: sonnet
+  maxTurns: 30
+  skills:
+    - review-ref
+  disallowedTools:
+    - Edit
+
+dromena: []
+
+legomena:
+  - review-ref
+
+hooks: []
+
+dependencies:
+  - shared
+
+complexity_levels:
+  - name: QUICK
+    scope: "Focused review of specific files or module"
+  - name: FULL
+    scope: "Complete repository review with prioritized findings"
+
+metadata:
+  domain: code review
+  color: teal
+
+archetype_data:
+  orchestrator:
+    description: "Coordinates code review phases"
+    color: teal
+    skills:
+      - orchestrator-templates
+      - review-ref
+    phase_routing: |
+      | scanner | Initial phase — codebase scan needed |
+      | assessor | Scan complete, findings need evaluation and prioritization |
+      | reporter | Assessment complete, structured report needed |
+    handoff_criteria: |
+      | scan | Scan findings document produced with categorized concerns, file/module scope identified |
+      | assess | Findings prioritized by impact (critical/high/medium/low) with actionable recommendations |
+      | report | Structured review document with executive summary and traced findings |
+    rite_anti_patterns: |
+      - **Language-specific assumptions**: Review must work on ANY codebase
+      - **Modifying target code**: Review is read-only observation, never auto-fix
+      - **Skipping assessment**: Raw scan findings without prioritization are not useful
+    cross_rite_protocol: |
+      When review findings suggest deeper investigation, escalate to user:
+      - Security concerns -> security rite (if available)
+      - Technical debt patterns -> debt-triage rite (if available)
+      - AI-generated code quality -> slop-chop rite (if available)

@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 	"text/template"
+
+	"github.com/autom8y/knossos/internal/config"
 )
 
 // OrchestratorData provides template variables for the orchestrator archetype.
@@ -137,17 +139,32 @@ func buildOrchestratorData(agent Agent, manifest *RiteManifest) *OrchestratorDat
 	return data
 }
 
-// RenderArchetype loads a template from knossos/archetypes/ relative to projectRoot
-// and renders it with the provided data.
+// RenderArchetype loads a template from knossos/archetypes/ and renders it.
+// Resolution order: projectRoot → KnossosHome → embedded FS.
 func RenderArchetype(projectRoot, templateName string, data interface{}) ([]byte, error) {
-	tplPath := filepath.Join(projectRoot, "knossos", "archetypes", templateName)
+	relPath := filepath.Join("knossos", "archetypes", templateName)
 
-	tplContent, err := os.ReadFile(tplPath)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read archetype template %s: %w", templateName, err)
+	// 1. Try project root (knossos-on-knossos case)
+	tplPath := filepath.Join(projectRoot, relPath)
+	if tplContent, err := os.ReadFile(tplPath); err == nil {
+		return RenderArchetypeFromString(string(tplContent), templateName, data)
 	}
 
-	return RenderArchetypeFromString(string(tplContent), templateName, data)
+	// 2. Try KnossosHome (developer case, foreign project)
+	if knossosHome := config.KnossosHome(); knossosHome != "" {
+		tplPath = filepath.Join(knossosHome, relPath)
+		if tplContent, err := os.ReadFile(tplPath); err == nil {
+			return RenderArchetypeFromString(string(tplContent), templateName, data)
+		}
+	}
+
+	// 3. Try XDG data dir (installed user case)
+	xdgPath := filepath.Join(config.XDGDataDir(), "archetypes", templateName)
+	if tplContent, err := os.ReadFile(xdgPath); err == nil {
+		return RenderArchetypeFromString(string(tplContent), templateName, data)
+	}
+
+	return nil, fmt.Errorf("archetype template %s not found in project, KnossosHome, or XDG data dir", templateName)
 }
 
 // RenderArchetypeFromString parses and renders a template from a raw string.
