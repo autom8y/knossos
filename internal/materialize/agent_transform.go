@@ -30,12 +30,13 @@ var knossosOnlyFields = map[string]bool{
 //
 // Transformation:
 //  1. Parse frontmatter YAML
-//  2. Capture write-guard value (needed for hook resolution)
-//  3. Strip all knossosOnlyFields from the frontmatter map
-//  4. Inject name from agentName parameter
-//  5. If write-guard was present, resolve against defaults and merge hooks
-//  6. Reserialize frontmatter + body
-func transformAgentContent(content []byte, agentName string, defaults *WriteGuardDefaults) ([]byte, error) {
+//  2. Merge agent_defaults from manifest (defaults before agent, agent wins)
+//  3. Capture write-guard value (needed for hook resolution)
+//  4. Strip all knossosOnlyFields from the frontmatter map
+//  5. Inject name from agentName parameter
+//  6. If write-guard was present, resolve against defaults and merge hooks
+//  7. Reserialize frontmatter + body
+func transformAgentContent(content []byte, agentName string, defaults *WriteGuardDefaults, agentDefaults map[string]interface{}) ([]byte, error) {
 	yamlBytes, body, err := frontmatter.Parse(content)
 	if err != nil {
 		return content, nil // Not valid frontmatter — pass through unchanged
@@ -45,6 +46,11 @@ func transformAgentContent(content []byte, agentName string, defaults *WriteGuar
 	var fmMap map[string]interface{}
 	if err := yaml.Unmarshal(yamlBytes, &fmMap); err != nil {
 		return content, nil // Invalid YAML — pass through unchanged
+	}
+
+	// Merge manifest-level agent_defaults before any stripping
+	if len(agentDefaults) > 0 {
+		fmMap = MergeAgentDefaults(agentDefaults, fmMap)
 	}
 
 	// Capture write-guard value before stripping

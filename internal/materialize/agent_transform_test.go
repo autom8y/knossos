@@ -24,7 +24,7 @@ disallowedTools:
 
 Body content here.
 `
-	result, err := transformAgentContent([]byte(source), "cruft-cutter", testDefaults)
+	result, err := transformAgentContent([]byte(source), "cruft-cutter", testDefaults, nil)
 	if err != nil {
 		t.Fatalf("transformAgentContent() error = %v", err)
 	}
@@ -61,7 +61,7 @@ write-guard:
 
 # Risk Assessor
 `
-	result, err := transformAgentContent([]byte(source), "risk-assessor", testDefaults)
+	result, err := transformAgentContent([]byte(source), "risk-assessor", testDefaults, nil)
 	if err != nil {
 		t.Fatalf("transformAgentContent() error = %v", err)
 	}
@@ -94,7 +94,7 @@ write-guard: false
 
 # Some Agent
 `
-	result, err := transformAgentContent([]byte(source), "some-agent", testDefaults)
+	result, err := transformAgentContent([]byte(source), "some-agent", testDefaults, nil)
 	if err != nil {
 		t.Fatalf("transformAgentContent() error = %v", err)
 	}
@@ -126,7 +126,7 @@ tools: Bash, Read, Write, Edit
 
 # Integration Engineer
 `
-	result, err := transformAgentContent([]byte(source), "integration-engineer", testDefaults)
+	result, err := transformAgentContent([]byte(source), "integration-engineer", testDefaults, nil)
 	if err != nil {
 		t.Fatalf("transformAgentContent() error = %v", err)
 	}
@@ -171,7 +171,7 @@ The fat trimmer. Detects code that was correct at time-of-write.
 
 	source := "---\nname: cruft-cutter\nwrite-guard: true\n---\n" + body
 
-	result, err := transformAgentContent([]byte(source), "cruft-cutter", testDefaults)
+	result, err := transformAgentContent([]byte(source), "cruft-cutter", testDefaults, nil)
 	if err != nil {
 		t.Fatalf("transformAgentContent() error = %v", err)
 	}
@@ -199,7 +199,7 @@ hooks:
 
 # Test Agent
 `
-	result, err := transformAgentContent([]byte(source), "test-agent", testDefaults)
+	result, err := transformAgentContent([]byte(source), "test-agent", testDefaults, nil)
 	if err != nil {
 		t.Fatalf("transformAgentContent() error = %v", err)
 	}
@@ -232,7 +232,7 @@ write-guard: true
 
 # Test Agent
 `
-	result, err := transformAgentContent([]byte(source), "test-agent", testDefaults)
+	result, err := transformAgentContent([]byte(source), "test-agent", testDefaults, nil)
 	if err != nil {
 		t.Fatalf("transformAgentContent() error = %v", err)
 	}
@@ -267,7 +267,7 @@ aliases:
 
 # Test Agent
 `
-	result, err := transformAgentContent([]byte(source), "test-agent", testDefaults)
+	result, err := transformAgentContent([]byte(source), "test-agent", testDefaults, nil)
 	if err != nil {
 		t.Fatalf("transformAgentContent() error = %v", err)
 	}
@@ -310,7 +310,7 @@ tools: Bash
 
 # Nameless Agent
 `
-	result, err := transformAgentContent([]byte(source), "injected-name", testDefaults)
+	result, err := transformAgentContent([]byte(source), "injected-name", testDefaults, nil)
 	if err != nil {
 		t.Fatalf("transformAgentContent() error = %v", err)
 	}
@@ -335,7 +335,7 @@ description: Agent with mismatched name
 
 # Agent
 `
-	result, err := transformAgentContent([]byte(source), "filename-name", testDefaults)
+	result, err := transformAgentContent([]byte(source), "filename-name", testDefaults, nil)
 	if err != nil {
 		t.Fatalf("transformAgentContent() error = %v", err)
 	}
@@ -359,7 +359,7 @@ write-guard: true
 # Test Agent
 `
 	// With nil defaults, even write-guard: true should produce no hooks
-	result, err := transformAgentContent([]byte(source), "test-agent", nil)
+	result, err := transformAgentContent([]byte(source), "test-agent", nil, nil)
 	if err != nil {
 		t.Fatalf("transformAgentContent() error = %v", err)
 	}
@@ -376,7 +376,7 @@ write-guard: true
 func TestTransformAgentContent_InvalidFrontmatter(t *testing.T) {
 	// No frontmatter delimiters — should pass through unchanged
 	source := "# Just a markdown file\n\nNo frontmatter here.\n"
-	result, err := transformAgentContent([]byte(source), "test", testDefaults)
+	result, err := transformAgentContent([]byte(source), "test", testDefaults, nil)
 	if err != nil {
 		t.Fatalf("transformAgentContent() error = %v", err)
 	}

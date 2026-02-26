@@ -69,8 +69,9 @@ type RiteManifest struct {
 	Skills       []string    `yaml:"skills"`   // Deprecated: use Legomena instead
 	Hooks        []string    `yaml:"hooks"`
 	Dependencies []string    `yaml:"dependencies"`
-	MCPServers   []MCPServer   `yaml:"mcp_servers,omitempty"` // MCP server declarations
-	HookDefaults *HookDefaults `yaml:"hook_defaults,omitempty"`
+	MCPServers    []MCPServer            `yaml:"mcp_servers,omitempty"` // MCP server declarations
+	HookDefaults  *HookDefaults          `yaml:"hook_defaults,omitempty"`
+	AgentDefaults map[string]interface{} `yaml:"agent_defaults,omitempty"` // Manifest-level defaults merged into agent frontmatter during sync
 }
 
 // MCPServerNames returns the list of MCP server names declared in the manifest.
@@ -828,9 +829,9 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claud
 			if err != nil {
 				return err
 			}
-			// Project agent source into CC-consumable form (strip knossos metadata, inject name, resolve hooks)
+			// Project agent source into CC-consumable form (merge defaults, strip knossos metadata, inject name, resolve hooks)
 			agentName := strings.TrimSuffix(filepath.Base(path), ".md")
-			if transformed, tErr := transformAgentContent(content, agentName, writeGuardDefaults); tErr == nil {
+			if transformed, tErr := transformAgentContent(content, agentName, writeGuardDefaults, manifest.AgentDefaults); tErr == nil {
 				content = transformed
 			} else {
 				log.Printf("Warning: agent transform failed for %s: %v", agentName, tErr)
@@ -876,9 +877,9 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claud
 				return err
 			}
 
-			// Project agent source into CC-consumable form (strip knossos metadata, inject name, resolve hooks)
+			// Project agent source into CC-consumable form (merge defaults, strip knossos metadata, inject name, resolve hooks)
 			agentName := strings.TrimSuffix(filepath.Base(path), ".md")
-			if transformed, tErr := transformAgentContent(content, agentName, writeGuardDefaults); tErr == nil {
+			if transformed, tErr := transformAgentContent(content, agentName, writeGuardDefaults, manifest.AgentDefaults); tErr == nil {
 				content = transformed
 			} else {
 				log.Printf("Warning: agent transform failed for %s: %v", agentName, tErr)
