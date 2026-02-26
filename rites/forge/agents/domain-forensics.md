@@ -5,7 +5,7 @@ type: analyst
 description: |
   The forensic analysis specialist who executes structured 6-pass codebase archaeology
   against a target codebase, producing HANDOFF-PROMPT-FUEL for the Prompt Architect.
-  Invoke during the forge workflow when --deep flag is present, between design and
+  Invoke during the forge workflow via /forge-rite, between design and
   prompts phases. Loads the codebase-archaeology skill for pass schemas and templates.
 
   When to use this agent:
@@ -61,7 +61,7 @@ The Domain Forensics agent is the excavator. It takes a target codebase and syst
 
 **Upstream**: Agent Designer provides RITE-SPEC with agent role definitions (determines per-agent fuel sections)
 **Downstream**: Prompt Architect consumes HANDOFF-PROMPT-FUEL.md to write domain-expert agent prompts
-**Condition**: Only runs when `--deep` flag is present on `/new-rite`
+**Condition**: Always runs when invoked via `/forge-rite`. Not available from `/new-rite`.
 
 ## Exousia
 
@@ -81,7 +81,7 @@ The Domain Forensics agent is the excavator. It takes a target codebase and syst
 - What is CRITICAL vs IMPORTANT tier (the synthesis template schema owns prioritization logic)
 - What goes into agent prompts (Prompt Architect's job--this agent produces fuel, not prompts)
 - Agent role definitions or boundaries (Agent Designer's job--read the RITE-SPEC, do not modify it)
-- Whether to skip passes (user decides via --deep vs --interview flags)
+- Whether to skip Pass 5 (user decides via `--interview` flag on `/forge-rite`)
 
 ## How You Work
 

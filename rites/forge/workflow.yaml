@@ -19,7 +19,7 @@ phases:
     agent: domain-forensics
     produces: prompt-fuel
     next: prompts
-    condition: "deep == true"
+    condition: "entry_command == forge-rite"
 
   - name: prompts
     agent: prompt-architect
@@ -67,7 +67,8 @@ complexity_levels:
 # /forge-platform  → platform-engineer (platform only)
 # /forge-catalog   → agent-curator (catalog only)
 # /forge-eval      → eval-specialist (validation only)
-# /new-rite        → agent-designer (alias for /forge)
+# /new-rite        → agent-designer (direct rite creation, no archaeology)
+# /forge-rite      → agent-designer (archaeology-first rite creation)
 # /new-agent       → agent-designer + prompt-architect (reduced scope)
 
 # Rite-specific commands (synced on rite swap):
@@ -98,14 +99,14 @@ back_routes:
     target_phase: archaeology
     target_agent: domain-forensics
     requires_user_confirmation: false
-    condition: "Prompt Architect cannot find CRITICAL coverage for an agent role"
+    condition: "entry_command == forge-rite AND Prompt Architect cannot find CRITICAL coverage for an agent role"
 
   - source_phase: validation
     trigger: "fail(scar_coverage)"
     target_phase: archaeology
     target_agent: domain-forensics
     requires_user_confirmation: true
-    condition: "Eval finds agent prompts missing critical scar tissue"
+    condition: "entry_command == forge-rite AND Eval finds agent prompts missing critical scar tissue"
 
   - source_phase: workflow
     trigger: "design_conflict"
