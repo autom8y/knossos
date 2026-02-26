@@ -13,6 +13,7 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"github.com/autom8y/knossos/internal/checksum"
+	"github.com/autom8y/knossos/internal/config"
 	"github.com/autom8y/knossos/internal/errors"
 	"github.com/autom8y/knossos/internal/fileutil"
 	"github.com/autom8y/knossos/internal/inscription"
@@ -1115,16 +1116,16 @@ func (m *Materializer) materializeMena(manifest *RiteManifest, claudeDir string,
 	// Build priority-ordered source list (later sources override earlier)
 	var sources []MenaSource
 
-	// 1. User-level mena (lowest priority, can be overridden)
-	// Only include platform-level mena when it lives inside the project root.
-	// getMenaDir() falls back to KnossosHome()/mena/ which defaults to ~/Code/knossos/mena/,
-	// leaking ALL 78+ platform operations/rite-switching/guidance commands onto foreign projects.
-	// The project-level check ("mena/ inside project") is the correct scope for rite sync.
+	// 1. Platform-level mena (lowest priority, can be overridden by rite-specific)
+	// Resolution order: project-level mena/ → XDG data dir → KnossosHome → embedded fallback.
+	// Platform mena IS the product — operations, guidance, session skills ship to all users.
 	if menaDir := m.getMenaDir(); menaDir != "" {
-		projectRoot := m.resolver.ProjectRoot()
-		if strings.HasPrefix(menaDir, projectRoot) {
-			sources = append(sources, MenaSource{Path: menaDir})
-		}
+		sources = append(sources, MenaSource{Path: menaDir})
+	} else if isEmbedded && m.embeddedMena != nil {
+		// No filesystem mena found; fall back to embedded platform mena.
+		// This is the expected path for users who installed via `go install`
+		// and don't have the knossos source tree.
+		sources = append(sources, MenaSource{Fsys: m.embeddedMena, FsysPath: "mena", IsEmbedded: true})
 	}
 
 	if isEmbedded {
@@ -1178,15 +1179,23 @@ func (m *Materializer) materializeMena(manifest *RiteManifest, claudeDir string,
 }
 
 // getMenaDir returns the mena directory path.
-// Checks project-level first, then falls back to Knossos platform level.
+// Resolution order: project-level → XDG data dir → KnossosHome.
+// Returns "" if none found (caller should try embedded fallback).
 func (m *Materializer) getMenaDir() string {
-	// Check for project-level mena first
+	// 1. Check for project-level mena first (knossos-on-knossos case)
 	projectMena := filepath.Join(m.resolver.ProjectRoot(), "mena")
 	if _, err := os.Stat(projectMena); err == nil {
 		return projectMena
 	}
 
-	// Fall back to Knossos platform mena
+	// 2. Check XDG data dir (installed user case)
+	if xdgMena := xdgMenaPath(); xdgMena != "" {
+		if _, err := os.Stat(xdgMena); err == nil {
+			return xdgMena
+		}
+	}
+
+	// 3. Fall back to Knossos platform mena (developer case)
 	if m.sourceResolver.KnossosHome() != "" {
 		knossosMena := filepath.Join(m.sourceResolver.KnossosHome(), "mena")
 		if _, err := os.Stat(knossosMena); err == nil {
@@ -1196,6 +1205,13 @@ func (m *Materializer) getMenaDir() string {
 
 	return ""
 }
+
+// xdgMenaPath returns the XDG data directory path for platform mena.
+func xdgMenaPath() string {
+	return filepath.Join(config.XDGDataDir(), "mena")
+}
+
+
 
 // knownRuleTemplateNames returns the set of knossos-managed rule filenames from the
 // filesystem templates dir. Used by materializeRules to identify stale files to remove.

@@ -5,10 +5,13 @@ package initialize
 
 import (
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 
 	"github.com/spf13/cobra"
+
+	"github.com/autom8y/knossos/internal/config"
 
 	"github.com/autom8y/knossos/internal/cmd/common"
 	"github.com/autom8y/knossos/internal/materialize"
@@ -147,6 +150,10 @@ func runInit(ctx *cmdContext, riteName, source string, force bool, cmd *cobra.Co
 	}
 	if embMena := common.EmbeddedMena(); embMena != nil {
 		mat.WithEmbeddedMena(embMena)
+		// Extract embedded platform mena to XDG data dir if not already present.
+		// This provides /commit, /start, /go, guidance skills, etc. to all users
+		// regardless of whether KNOSSOS_HOME is set or the source tree exists.
+		extractEmbeddedMenaToXDG(embMena)
 	}
 	// Bootstrap config/hooks.yaml from embedded bytes if not already present.
 	if hooksYAML := common.EmbeddedHooksYAML(); len(hooksYAML) > 0 {
@@ -218,6 +225,41 @@ func runInit(ctx *cmdContext, riteName, source string, force bool, cmd *cobra.Co
 		Message:     "Initialized Knossos project (minimal scaffold)",
 	}
 	return printer.Print(out)
+}
+
+// extractEmbeddedMenaToXDG extracts platform mena from the embedded FS to the
+// XDG data directory. This is the hybrid distribution model: binary embeds mena,
+// first init extracts to XDG cache so subsequent syncs read from filesystem.
+// Idempotent: skips extraction if XDG mena dir already exists.
+func extractEmbeddedMenaToXDG(embMena fs.FS) {
+	xdgMena := filepath.Join(config.XDGDataDir(), "mena")
+	if _, err := os.Stat(xdgMena); err == nil {
+		return // Already extracted
+	}
+	if err := os.MkdirAll(xdgMena, 0755); err != nil {
+		return // Best-effort
+	}
+	fs.WalkDir(embMena, "mena", func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return nil // skip errors
+		}
+		rel, relErr := filepath.Rel("mena", path)
+		if relErr != nil || rel == "." {
+			return nil
+		}
+		dest := filepath.Join(xdgMena, rel)
+		if d.IsDir() {
+			os.MkdirAll(dest, 0755)
+			return nil
+		}
+		content, readErr := fs.ReadFile(embMena, path)
+		if readErr != nil {
+			return nil
+		}
+		os.MkdirAll(filepath.Dir(dest), 0755)
+		os.WriteFile(dest, content, 0644)
+		return nil
+	})
 }
 
 // writeDefaultSettings writes settings.json with the agent-guard hook configuration

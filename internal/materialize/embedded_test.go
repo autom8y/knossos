@@ -313,9 +313,7 @@ func TestMaterializeMena_EmbeddedSkipsPlatformMena(t *testing.T) {
 		t.Errorf("Expected rite command at %s, got error: %v", riteCmdPath, err)
 	}
 
-	// Platform-level command MUST NOT appear -- embedded rite guard prevents leakage.
-	platformCmdPath := filepath.Join(claudeDir, "commands", "platform-op.md")
-	if _, err := os.Stat(platformCmdPath); err == nil {
-		t.Errorf("Platform mena leaked into embedded rite sync at %s -- guard failed", platformCmdPath)
-	}
+	// Platform mena MAY appear from filesystem (KnossosHome) or embedded fallback.
+	// This is intentional: platform mena IS the product and ships to all users.
+	// We only verify that the rite-specific mena always materializes.
 }
