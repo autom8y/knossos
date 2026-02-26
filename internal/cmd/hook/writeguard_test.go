@@ -1137,3 +1137,681 @@ status: ARCHIVED
 	}
 }
 
+// =============================================================================
+// Section Classification Unit Tests (SC-01 through SC-18)
+// Tests classifyEditSection() directly against the decision table in SESSION-4 Section 9.1.
+// =============================================================================
+
+func TestClassifyEditSection(t *testing.T) {
+	tests := []struct {
+		id          string
+		description string
+		toolInput   string
+		want        SectionClass
+	}{
+		{
+			id:          "SC-01",
+			description: "Single timeline entry",
+			toolInput:   `{"old_string":"- 14:30 | SESSION  | created: Add dark mode"}`,
+			want:        SectionTimeline,
+		},
+		{
+			id:          "SC-02",
+			description: "Multiple timeline entries",
+			toolInput:   `{"old_string":"- 14:30 | SESSION  | created\n- 14:35 | AGENT    | delegated"}`,
+			want:        SectionTimeline,
+		},
+		{
+			id:          "SC-03",
+			description: "Timeline heading only",
+			toolInput:   `{"old_string":"## Timeline"}`,
+			want:        SectionTimeline,
+		},
+		{
+			id:          "SC-04",
+			description: "Timeline heading + entry",
+			toolInput:   `{"old_string":"## Timeline\n- 14:30 | SESSION  | created"}`,
+			want:        SectionTimeline,
+		},
+		{
+			id:          "SC-05",
+			description: "Frontmatter delimiter only",
+			toolInput:   `{"old_string":"---"}`,
+			want:        SectionFrontmatter,
+		},
+		{
+			id:          "SC-06",
+			description: "Frontmatter key: status",
+			toolInput:   `{"old_string":"status: ACTIVE"}`,
+			want:        SectionFrontmatter,
+		},
+		{
+			id:          "SC-07",
+			description: "Multiple frontmatter keys",
+			toolInput:   `{"old_string":"status: ACTIVE\ncurrent_phase: requirements"}`,
+			want:        SectionFrontmatter,
+		},
+		{
+			id:          "SC-08",
+			description: "Other section heading: Artifacts",
+			toolInput:   `{"old_string":"## Artifacts"}`,
+			want:        SectionOther,
+		},
+		{
+			id:          "SC-09",
+			description: "Other section heading: Blockers",
+			toolInput:   `{"old_string":"## Blockers"}`,
+			want:        SectionOther,
+		},
+		{
+			id:          "SC-10",
+			description: "Other section heading: Next Steps",
+			toolInput:   `{"old_string":"## Next Steps"}`,
+			want:        SectionOther,
+		},
+		{
+			id:          "SC-11",
+			description: "Custom section heading",
+			toolInput:   `{"old_string":"## Design Decisions"}`,
+			want:        SectionOther,
+		},
+		{
+			id:          "SC-12",
+			description: "Mixed: timeline entry + frontmatter key",
+			toolInput:   `{"old_string":"- 14:30 | SESSION  | created\nstatus: ACTIVE"}`,
+			want:        SectionMixed,
+		},
+		{
+			id:          "SC-13",
+			description: "Mixed: timeline entry + other section heading",
+			toolInput:   `{"old_string":"- 14:30 | SESSION  | created\n## Artifacts"}`,
+			want:        SectionMixed,
+		},
+		{
+			id:          "SC-14",
+			description: "Mixed: frontmatter delimiter + other section heading",
+			toolInput:   `{"old_string":"---\n## Blockers"}`,
+			want:        SectionMixed,
+		},
+		{
+			id:          "SC-15",
+			description: "Unknown: only context lines",
+			toolInput:   `{"old_string":"Some random text\nAnother line"}`,
+			want:        SectionUnknown,
+		},
+		{
+			id:          "SC-16",
+			description: "Unknown: empty old_string",
+			toolInput:   `{"old_string":""}`,
+			want:        SectionUnknown,
+		},
+		{
+			id:          "SC-17",
+			description: "Timeline entry + blank lines (blanks are neutral)",
+			toolInput:   `{"old_string":"\n- 14:30 | SESSION  | created\n\n"}`,
+			want:        SectionTimeline,
+		},
+		{
+			id:          "SC-18",
+			description: "Timeline entry + context lines (context lines are neutral)",
+			toolInput:   `{"old_string":"- 14:30 | SESSION  | created\nSome note"}`,
+			want:        SectionTimeline,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.id+"_"+tt.description, func(t *testing.T) {
+			got := classifyEditSection(tt.toolInput)
+			if got != tt.want {
+				t.Errorf("classifyEditSection(%q) = %v, want %v", tt.toolInput, got, tt.want)
+			}
+		})
+	}
+}
+
+// TestClassifyEditSection_MissingOldString covers the absent old_string field.
+func TestClassifyEditSection_MissingOldString(t *testing.T) {
+	// No old_string field at all — should fail closed.
+	got := classifyEditSection(`{"file_path":"foo.md","new_string":"bar"}`)
+	if got != SectionUnknown {
+		t.Errorf("classifyEditSection() = %v, want SectionUnknown (missing old_string)", got)
+	}
+}
+
+// TestClassifyEditSection_InvalidJSON covers malformed JSON input — should fail closed.
+func TestClassifyEditSection_InvalidJSON(t *testing.T) {
+	got := classifyEditSection("not json")
+	if got != SectionUnknown {
+		t.Errorf("classifyEditSection(%q) = %v, want SectionUnknown (invalid JSON)", "not json", got)
+	}
+}
+
+// TestClassifyEditSection_FrontmatterKeys validates each of the 17 frontmatter keys.
+func TestClassifyEditSection_FrontmatterKeys(t *testing.T) {
+	keys := []string{
+		"schema_version", "session_id", "status", "created_at",
+		"initiative", "complexity", "active_rite", "rite",
+		"current_phase", "timeline_version", "parked_at", "parked_reason",
+		"archived_at", "resumed_at", "frayed_from", "fray_point", "strands",
+	}
+	for _, key := range keys {
+		toolInput := `{"old_string":"` + key + `: somevalue"}`
+		got := classifyEditSection(toolInput)
+		if got != SectionFrontmatter {
+			t.Errorf("key %q: classifyEditSection() = %v, want SectionFrontmatter", key, got)
+		}
+	}
+}
+
+// =============================================================================
+// Integration Tests (WG-E1 through WG-R2)
+// Tests runWriteguardCore() end-to-end for SESSION_CONTEXT.md section routing.
+// =============================================================================
+
+// makeSessionCtxWithLock creates a temp project dir with an optional Moirai lock for a session.
+func makeSessionCtxWithLock(t *testing.T, sessionID string, withLock bool) (string, *cmdContext) {
+	t.Helper()
+	tmpDir := t.TempDir()
+	sessionDir := tmpDir + "/.claude/sessions/" + sessionID
+	if err := os.MkdirAll(sessionDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if withLock {
+		lockData := `{"agent":"moirai","acquired_at":"` + time.Now().Format(time.RFC3339) + `","session_id":"` + sessionID + `","stale_after_seconds":300}`
+		if err := os.WriteFile(sessionDir+"/.moirai-lock", []byte(lockData), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	outputFlag := "json"
+	verboseFlag := false
+	ctx := &cmdContext{
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &tmpDir,
+			},
+		},
+	}
+	return tmpDir, ctx
+}
+
+// WG-E1: Edit timeline entry, no lock → ALLOW with advisory
+func TestWriteguard_SectionEdit_TimelineNoLock_Allow(t *testing.T) {
+	sessionID := "session-20260226-120000-abcdef01"
+	tmpDir, ctx := makeSessionCtxWithLock(t, sessionID, false)
+	filePath := ".claude/sessions/" + sessionID + "/SESSION_CONTEXT.md"
+	toolInputJSON, _ := json.Marshal(map[string]any{
+		"file_path":  filePath,
+		"old_string": "- 14:30 | SESSION  | created: Add dark mode",
+		"new_string": "- 14:30 | SESSION  | created: Add dark mode\n- 14:35 | AGENT    | delegated",
+	})
+
+	testutil.SetupEnv(t, &testutil.HookEnv{
+		Event:      "PreToolUse",
+		ToolName:   "Edit",
+		ToolInput:  string(toolInputJSON),
+		ProjectDir: tmpDir,
+	})
+
+	var stdout, stderr bytes.Buffer
+	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
+	if err := runWriteguardCore(ctx, printer); err != nil {
+		t.Fatalf("runWriteguardCore() error = %v", err)
+	}
+	var result hook.PreToolUseOutput
+	if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
+		t.Fatalf("failed to parse output: %v\nOutput: %s", err, stdout.String())
+	}
+
+	if result.HookSpecificOutput.PermissionDecision != "allow" {
+		t.Errorf("WG-E1: PermissionDecision = %q, want allow", result.HookSpecificOutput.PermissionDecision)
+	}
+	// Advisory context must be present (E1 advisory reminder)
+	if result.HookSpecificOutput.AdditionalContext == "" {
+		t.Error("WG-E1: AdditionalContext should be present for timeline allow")
+	}
+	if !bytes.Contains([]byte(result.HookSpecificOutput.AdditionalContext), []byte("Timeline append allowed")) {
+		t.Errorf("WG-E1: AdditionalContext should mention 'Timeline append allowed', got: %q",
+			result.HookSpecificOutput.AdditionalContext)
+	}
+}
+
+// WG-E2: Edit frontmatter, lock held → ALLOW
+func TestWriteguard_SectionEdit_FrontmatterWithLock_Allow(t *testing.T) {
+	sessionID := "session-20260226-120000-abcdef02"
+	tmpDir, ctx := makeSessionCtxWithLock(t, sessionID, true)
+	filePath := ".claude/sessions/" + sessionID + "/SESSION_CONTEXT.md"
+	toolInputJSON, _ := json.Marshal(map[string]any{
+		"file_path":  filePath,
+		"old_string": "status: ACTIVE",
+		"new_string": "status: PARKED",
+	})
+
+	testutil.SetupEnv(t, &testutil.HookEnv{
+		Event:      "PreToolUse",
+		ToolName:   "Edit",
+		ToolInput:  string(toolInputJSON),
+		ProjectDir: tmpDir,
+	})
+
+	var stdout, stderr bytes.Buffer
+	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
+	if err := runWriteguardCore(ctx, printer); err != nil {
+		t.Fatalf("runWriteguardCore() error = %v", err)
+	}
+	var result hook.PreToolUseOutput
+	if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
+		t.Fatalf("failed to parse output: %v\nOutput: %s", err, stdout.String())
+	}
+
+	if result.HookSpecificOutput.PermissionDecision != "allow" {
+		t.Errorf("WG-E2: PermissionDecision = %q, want allow (frontmatter + lock)", result.HookSpecificOutput.PermissionDecision)
+	}
+}
+
+// WG-E3: Edit frontmatter, no lock → DENY with frontmatter advisory
+func TestWriteguard_SectionEdit_FrontmatterNoLock_Deny(t *testing.T) {
+	sessionID := "session-20260226-120000-abcdef03"
+	tmpDir, ctx := makeSessionCtxWithLock(t, sessionID, false)
+	filePath := ".claude/sessions/" + sessionID + "/SESSION_CONTEXT.md"
+	toolInputJSON, _ := json.Marshal(map[string]any{
+		"file_path":  filePath,
+		"old_string": "status: ACTIVE",
+		"new_string": "status: PARKED",
+	})
+
+	testutil.SetupEnv(t, &testutil.HookEnv{
+		Event:      "PreToolUse",
+		ToolName:   "Edit",
+		ToolInput:  string(toolInputJSON),
+		ProjectDir: tmpDir,
+	})
+
+	var stdout, stderr bytes.Buffer
+	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
+	if err := runWriteguardCore(ctx, printer); err != nil {
+		t.Fatalf("runWriteguardCore() error = %v", err)
+	}
+	var result hook.PreToolUseOutput
+	if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
+		t.Fatalf("failed to parse output: %v\nOutput: %s", err, stdout.String())
+	}
+
+	if result.HookSpecificOutput.PermissionDecision != "deny" {
+		t.Errorf("WG-E3: PermissionDecision = %q, want deny", result.HookSpecificOutput.PermissionDecision)
+	}
+	if !bytes.Contains([]byte(result.HookSpecificOutput.PermissionDecisionReason), []byte("frontmatter")) {
+		t.Errorf("WG-E3: Reason should mention 'frontmatter', got: %q", result.HookSpecificOutput.PermissionDecisionReason)
+	}
+	if !bytes.Contains([]byte(result.HookSpecificOutput.AdditionalContext), []byte("field-set")) {
+		t.Errorf("WG-E3: AdditionalContext should mention 'field-set', got: %q", result.HookSpecificOutput.AdditionalContext)
+	}
+}
+
+// WG-E4: Edit Artifacts section, lock held → ALLOW
+func TestWriteguard_SectionEdit_ArtifactsWithLock_Allow(t *testing.T) {
+	sessionID := "session-20260226-120000-abcdef04"
+	tmpDir, ctx := makeSessionCtxWithLock(t, sessionID, true)
+	filePath := ".claude/sessions/" + sessionID + "/SESSION_CONTEXT.md"
+	toolInputJSON, _ := json.Marshal(map[string]any{
+		"file_path":  filePath,
+		"old_string": "## Artifacts",
+		"new_string": "## Artifacts\n- PRD: complete",
+	})
+
+	testutil.SetupEnv(t, &testutil.HookEnv{
+		Event:      "PreToolUse",
+		ToolName:   "Edit",
+		ToolInput:  string(toolInputJSON),
+		ProjectDir: tmpDir,
+	})
+
+	var stdout, stderr bytes.Buffer
+	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
+	if err := runWriteguardCore(ctx, printer); err != nil {
+		t.Fatalf("runWriteguardCore() error = %v", err)
+	}
+	var result hook.PreToolUseOutput
+	if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
+		t.Fatalf("failed to parse output: %v\nOutput: %s", err, stdout.String())
+	}
+
+	if result.HookSpecificOutput.PermissionDecision != "allow" {
+		t.Errorf("WG-E4: PermissionDecision = %q, want allow (Artifacts + lock)", result.HookSpecificOutput.PermissionDecision)
+	}
+}
+
+// WG-E5: Edit Artifacts section, no lock → DENY with body section advisory
+func TestWriteguard_SectionEdit_ArtifactsNoLock_Deny(t *testing.T) {
+	sessionID := "session-20260226-120000-abcdef05"
+	tmpDir, ctx := makeSessionCtxWithLock(t, sessionID, false)
+	filePath := ".claude/sessions/" + sessionID + "/SESSION_CONTEXT.md"
+	toolInputJSON, _ := json.Marshal(map[string]any{
+		"file_path":  filePath,
+		"old_string": "## Artifacts",
+		"new_string": "## Artifacts\n- PRD: complete",
+	})
+
+	testutil.SetupEnv(t, &testutil.HookEnv{
+		Event:      "PreToolUse",
+		ToolName:   "Edit",
+		ToolInput:  string(toolInputJSON),
+		ProjectDir: tmpDir,
+	})
+
+	var stdout, stderr bytes.Buffer
+	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
+	if err := runWriteguardCore(ctx, printer); err != nil {
+		t.Fatalf("runWriteguardCore() error = %v", err)
+	}
+	var result hook.PreToolUseOutput
+	if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
+		t.Fatalf("failed to parse output: %v\nOutput: %s", err, stdout.String())
+	}
+
+	if result.HookSpecificOutput.PermissionDecision != "deny" {
+		t.Errorf("WG-E5: PermissionDecision = %q, want deny", result.HookSpecificOutput.PermissionDecision)
+	}
+	if !bytes.Contains([]byte(result.HookSpecificOutput.PermissionDecisionReason), []byte("body section")) {
+		t.Errorf("WG-E5: Reason should mention 'body section', got: %q", result.HookSpecificOutput.PermissionDecisionReason)
+	}
+	if !bytes.Contains([]byte(result.HookSpecificOutput.AdditionalContext), []byte("Moirai-managed")) {
+		t.Errorf("WG-E5: AdditionalContext should mention 'Moirai-managed', got: %q", result.HookSpecificOutput.AdditionalContext)
+	}
+}
+
+// WG-E6: Edit mixed timeline + frontmatter → DENY always (regardless of lock)
+func TestWriteguard_SectionEdit_Mixed_Deny(t *testing.T) {
+	sessionID := "session-20260226-120000-abcdef06"
+	tmpDir, ctx := makeSessionCtxWithLock(t, sessionID, true) // lock held — still must deny
+	filePath := ".claude/sessions/" + sessionID + "/SESSION_CONTEXT.md"
+	toolInputJSON, _ := json.Marshal(map[string]any{
+		"file_path":  filePath,
+		"old_string": "- 14:30 | SESSION  | created\nstatus: ACTIVE",
+		"new_string": "- 14:30 | SESSION  | created\nstatus: PARKED",
+	})
+
+	testutil.SetupEnv(t, &testutil.HookEnv{
+		Event:      "PreToolUse",
+		ToolName:   "Edit",
+		ToolInput:  string(toolInputJSON),
+		ProjectDir: tmpDir,
+	})
+
+	var stdout, stderr bytes.Buffer
+	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
+	if err := runWriteguardCore(ctx, printer); err != nil {
+		t.Fatalf("runWriteguardCore() error = %v", err)
+	}
+	var result hook.PreToolUseOutput
+	if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
+		t.Fatalf("failed to parse output: %v\nOutput: %s", err, stdout.String())
+	}
+
+	if result.HookSpecificOutput.PermissionDecision != "deny" {
+		t.Errorf("WG-E6: PermissionDecision = %q, want deny (mixed edit, fail-closed)", result.HookSpecificOutput.PermissionDecision)
+	}
+	if !bytes.Contains([]byte(result.HookSpecificOutput.PermissionDecisionReason), []byte("multiple")) {
+		t.Errorf("WG-E6: Reason should mention 'multiple', got: %q", result.HookSpecificOutput.PermissionDecisionReason)
+	}
+}
+
+// WG-E7: Edit unknown content → DENY always
+func TestWriteguard_SectionEdit_Unknown_Deny(t *testing.T) {
+	sessionID := "session-20260226-120000-abcdef07"
+	tmpDir, ctx := makeSessionCtxWithLock(t, sessionID, false)
+	filePath := ".claude/sessions/" + sessionID + "/SESSION_CONTEXT.md"
+	toolInputJSON, _ := json.Marshal(map[string]any{
+		"file_path":  filePath,
+		"old_string": "some random text without any section indicators",
+		"new_string": "some modified text",
+	})
+
+	testutil.SetupEnv(t, &testutil.HookEnv{
+		Event:      "PreToolUse",
+		ToolName:   "Edit",
+		ToolInput:  string(toolInputJSON),
+		ProjectDir: tmpDir,
+	})
+
+	var stdout, stderr bytes.Buffer
+	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
+	if err := runWriteguardCore(ctx, printer); err != nil {
+		t.Fatalf("runWriteguardCore() error = %v", err)
+	}
+	var result hook.PreToolUseOutput
+	if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
+		t.Fatalf("failed to parse output: %v\nOutput: %s", err, stdout.String())
+	}
+
+	if result.HookSpecificOutput.PermissionDecision != "deny" {
+		t.Errorf("WG-E7: PermissionDecision = %q, want deny (unknown section, fail-closed)", result.HookSpecificOutput.PermissionDecision)
+	}
+	if !bytes.Contains([]byte(result.HookSpecificOutput.PermissionDecisionReason), []byte("Cannot determine")) {
+		t.Errorf("WG-E7: Reason should mention 'Cannot determine', got: %q", result.HookSpecificOutput.PermissionDecisionReason)
+	}
+}
+
+// WG-W1: Write SESSION_CONTEXT, lock held → ALLOW
+func TestWriteguard_SessionContextWrite_WithLock_Allow(t *testing.T) {
+	sessionID := "session-20260226-120000-abcdef08"
+	tmpDir, ctx := makeSessionCtxWithLock(t, sessionID, true)
+	filePath := ".claude/sessions/" + sessionID + "/SESSION_CONTEXT.md"
+	toolInputJSON, _ := json.Marshal(map[string]any{
+		"file_path": filePath,
+		"content":   "---\nschema_version: \"3.0\"\n---\n\n## Timeline\n",
+	})
+
+	testutil.SetupEnv(t, &testutil.HookEnv{
+		Event:      "PreToolUse",
+		ToolName:   "Write",
+		ToolInput:  string(toolInputJSON),
+		ProjectDir: tmpDir,
+	})
+
+	var stdout, stderr bytes.Buffer
+	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
+	if err := runWriteguardCore(ctx, printer); err != nil {
+		t.Fatalf("runWriteguardCore() error = %v", err)
+	}
+	var result hook.PreToolUseOutput
+	if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
+		t.Fatalf("failed to parse output: %v\nOutput: %s", err, stdout.String())
+	}
+
+	if result.HookSpecificOutput.PermissionDecision != "allow" {
+		t.Errorf("WG-W1: PermissionDecision = %q, want allow (Write + lock)", result.HookSpecificOutput.PermissionDecision)
+	}
+}
+
+// WG-W2: Write SESSION_CONTEXT, no lock → DENY
+func TestWriteguard_SessionContextWrite_NoLock_Deny(t *testing.T) {
+	sessionID := "session-20260226-120000-abcdef09"
+	tmpDir, ctx := makeSessionCtxWithLock(t, sessionID, false)
+	filePath := ".claude/sessions/" + sessionID + "/SESSION_CONTEXT.md"
+	toolInputJSON, _ := json.Marshal(map[string]any{
+		"file_path": filePath,
+		"content":   "---\nschema_version: \"3.0\"\n---\n",
+	})
+
+	testutil.SetupEnv(t, &testutil.HookEnv{
+		Event:      "PreToolUse",
+		ToolName:   "Write",
+		ToolInput:  string(toolInputJSON),
+		ProjectDir: tmpDir,
+	})
+
+	var stdout, stderr bytes.Buffer
+	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
+	if err := runWriteguardCore(ctx, printer); err != nil {
+		t.Fatalf("runWriteguardCore() error = %v", err)
+	}
+	var result hook.PreToolUseOutput
+	if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
+		t.Fatalf("failed to parse output: %v\nOutput: %s", err, stdout.String())
+	}
+
+	if result.HookSpecificOutput.PermissionDecision != "deny" {
+		t.Errorf("WG-W2: PermissionDecision = %q, want deny (Write without lock)", result.HookSpecificOutput.PermissionDecision)
+	}
+	if !bytes.Contains([]byte(result.HookSpecificOutput.PermissionDecisionReason), []byte("Moirai")) {
+		t.Errorf("WG-W2: Reason should mention 'Moirai', got: %q", result.HookSpecificOutput.PermissionDecisionReason)
+	}
+}
+
+// WG-P1: Edit SPRINT_CONTEXT.md, no lock → DENY (unchanged behavior, no section detection)
+func TestWriteguard_SprintContextEdit_NoLock_Deny(t *testing.T) {
+	result := runWipTest(t, &testutil.HookEnv{
+		Event:     "PreToolUse",
+		ToolName:  "Edit",
+		ToolInput: `{"file_path":".claude/sprints/current/SPRINT_CONTEXT.md","old_string":"status: ACTIVE","new_string":"status: DONE"}`,
+	})
+	if result.HookSpecificOutput.PermissionDecision != "deny" {
+		t.Errorf("WG-P1: PermissionDecision = %q, want deny (SPRINT_CONTEXT no lock)", result.HookSpecificOutput.PermissionDecision)
+	}
+	// Should NOT give frontmatter-specific message — uses generic block for non-SESSION_CONTEXT
+	if bytes.Contains([]byte(result.HookSpecificOutput.PermissionDecisionReason), []byte("frontmatter")) {
+		t.Errorf("WG-P1: SPRINT_CONTEXT should not use frontmatter message, got: %q",
+			result.HookSpecificOutput.PermissionDecisionReason)
+	}
+}
+
+// WG-R1: Edit regular file → ALLOW (regression test: section detection does not apply)
+func TestWriteguard_RegularFileEdit_Allow(t *testing.T) {
+	result := runWipTest(t, &testutil.HookEnv{
+		Event:     "PreToolUse",
+		ToolName:  "Edit",
+		ToolInput: `{"file_path":"src/main.go","old_string":"old code","new_string":"new code"}`,
+	})
+	if result.HookSpecificOutput.PermissionDecision != "allow" {
+		t.Errorf("WG-R1: PermissionDecision = %q, want allow (regular file)", result.HookSpecificOutput.PermissionDecision)
+	}
+}
+
+// WG-R2: Write .wip/ file → ALLOW (regression: wip path handled before protected check)
+func TestWriteguard_WipWrite_Regression(t *testing.T) {
+	result := runWipTest(t, &testutil.HookEnv{
+		Event:     "PreToolUse",
+		ToolName:  "Write",
+		ToolInput: makeToolInput(".wip/SPIKE-x.md", "---\ntype: spike\n---\n\n# Spike"),
+	})
+	if result.HookSpecificOutput.PermissionDecision != "allow" {
+		t.Errorf("WG-R2: PermissionDecision = %q, want allow (.wip/ regression)", result.HookSpecificOutput.PermissionDecision)
+	}
+}
+
+// =============================================================================
+// Benchmarks for new section-detection paths
+// =============================================================================
+
+// BenchmarkWriteguardHook_TimelineAllow benchmarks the timeline allow path.
+func BenchmarkWriteguardHook_TimelineAllow(b *testing.B) {
+	sessionID := "session-20260226-120000-bench0001"
+	tmpDir := b.TempDir()
+	sessionDir := tmpDir + "/.claude/sessions/" + sessionID
+	if err := os.MkdirAll(sessionDir, 0o755); err != nil {
+		b.Fatal(err)
+	}
+
+	filePath := ".claude/sessions/" + sessionID + "/SESSION_CONTEXT.md"
+	toolInputJSON, _ := json.Marshal(map[string]any{
+		"file_path":  filePath,
+		"old_string": "- 14:30 | SESSION  | created: benchmark test",
+		"new_string": "- 14:30 | SESSION  | created: benchmark test\n- 14:31 | AGENT    | next",
+	})
+
+	os.Setenv("CLAUDE_HOOK_EVENT", "PreToolUse")
+	os.Setenv("CLAUDE_TOOL_NAME", "Edit")
+	os.Setenv("CLAUDE_TOOL_INPUT", string(toolInputJSON))
+	os.Setenv("CLAUDE_PROJECT_DIR", tmpDir)
+	defer func() {
+		os.Unsetenv("CLAUDE_HOOK_EVENT")
+		os.Unsetenv("CLAUDE_TOOL_NAME")
+		os.Unsetenv("CLAUDE_TOOL_INPUT")
+		os.Unsetenv("CLAUDE_PROJECT_DIR")
+	}()
+
+	outputFlag := "json"
+	verboseFlag := false
+	ctx := &cmdContext{
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &tmpDir,
+			},
+		},
+	}
+
+	var stdout, stderr bytes.Buffer
+	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		stdout.Reset()
+		runWriteguardCore(ctx, printer)
+	}
+
+	elapsed := b.Elapsed()
+	nsPerOp := float64(elapsed.Nanoseconds()) / float64(b.N)
+	if nsPerOp > float64(5*time.Millisecond) {
+		b.Errorf("TimelineAllow took %.2f ms, target is <5ms", nsPerOp/1e6)
+	}
+}
+
+// BenchmarkWriteguardHook_FrontmatterBlock benchmarks the frontmatter block path (no lock).
+func BenchmarkWriteguardHook_FrontmatterBlock(b *testing.B) {
+	sessionID := "session-20260226-120000-bench0002"
+	tmpDir := b.TempDir()
+	sessionDir := tmpDir + "/.claude/sessions/" + sessionID
+	if err := os.MkdirAll(sessionDir, 0o755); err != nil {
+		b.Fatal(err)
+	}
+
+	filePath := ".claude/sessions/" + sessionID + "/SESSION_CONTEXT.md"
+	toolInputJSON, _ := json.Marshal(map[string]any{
+		"file_path":  filePath,
+		"old_string": "status: ACTIVE",
+		"new_string": "status: PARKED",
+	})
+
+	os.Setenv("CLAUDE_HOOK_EVENT", "PreToolUse")
+	os.Setenv("CLAUDE_TOOL_NAME", "Edit")
+	os.Setenv("CLAUDE_TOOL_INPUT", string(toolInputJSON))
+	os.Setenv("CLAUDE_PROJECT_DIR", tmpDir)
+	defer func() {
+		os.Unsetenv("CLAUDE_HOOK_EVENT")
+		os.Unsetenv("CLAUDE_TOOL_NAME")
+		os.Unsetenv("CLAUDE_TOOL_INPUT")
+		os.Unsetenv("CLAUDE_PROJECT_DIR")
+	}()
+
+	outputFlag := "json"
+	verboseFlag := false
+	ctx := &cmdContext{
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &tmpDir,
+			},
+		},
+	}
+
+	var stdout, stderr bytes.Buffer
+	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		stdout.Reset()
+		runWriteguardCore(ctx, printer)
+	}
+
+	elapsed := b.Elapsed()
+	nsPerOp := float64(elapsed.Nanoseconds()) / float64(b.N)
+	if nsPerOp > float64(5*time.Millisecond) {
+		b.Errorf("FrontmatterBlock took %.2f ms, target is <5ms", nsPerOp/1e6)
+	}
+}
+

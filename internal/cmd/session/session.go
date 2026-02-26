@@ -67,6 +67,7 @@ Examples:
 	cmd.AddCommand(newFieldGetCmd(ctx))
 	cmd.AddCommand(newLogCmd(ctx))
 	cmd.AddCommand(newTimelineCmd(ctx))
+	cmd.AddCommand(newContextCmd(ctx))
 
 	// Session commands require project context
 	common.SetNeedsProject(cmd, true, true)

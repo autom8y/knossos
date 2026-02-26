@@ -750,6 +750,19 @@ func (f FieldAllOutput) Text() string {
 	return b.String()
 }
 
+// SnapshotOutput is a wrapper around a rendered session context snapshot.
+// The Text() method returns the pre-rendered markdown for text output.
+// For JSON output, the command bypasses this struct and writes raw JSON directly.
+type SnapshotOutput struct {
+	// Markdown is the pre-rendered markdown for text output.
+	Markdown string
+}
+
+// Text implements Textable for SnapshotOutput.
+func (s SnapshotOutput) Text() string {
+	return s.Markdown
+}
+
 // Text implements Textable for RosterMigrateOutput.
 func (r RosterMigrateOutput) Text() string {
 	var b strings.Builder

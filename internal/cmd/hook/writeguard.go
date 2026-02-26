@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"regexp"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -23,6 +24,39 @@ type ToolInput struct {
 	FilePath string `json:"file_path"`
 }
 
+// SectionClass identifies which section of SESSION_CONTEXT.md an Edit targets.
+// Used by classifyEditSection to route to the appropriate permission path.
+type SectionClass int
+
+const (
+	// SectionUnknown means no recognizable section indicators were found. Fail closed.
+	SectionUnknown SectionClass = iota
+	// SectionTimeline means the edit targets only the Timeline section. Lockless allow.
+	SectionTimeline
+	// SectionFrontmatter means the edit targets only YAML frontmatter. Requires Moirai lock.
+	SectionFrontmatter
+	// SectionOther means the edit targets only a non-Timeline body section. Requires Moirai lock.
+	SectionOther
+	// SectionMixed means multiple section types were detected in old_string. Fail closed.
+	SectionMixed
+)
+
+// Compiled regex patterns for section detection in SESSION_CONTEXT.md.
+// Compiled at package init (not per-invocation) per performance requirement D7.
+var (
+	// timelineEntryRe matches SESSION-2 timeline entry format: "- HH:MM | CATEGORY | summary"
+	timelineEntryRe = regexp.MustCompile(`^- \d{2}:\d{2} \| `)
+	// timelineHeadingRe matches the exact Timeline section heading.
+	timelineHeadingRe = regexp.MustCompile(`^## Timeline$`)
+	// frontmatterDelimRe matches YAML frontmatter delimiter on its own line.
+	frontmatterDelimRe = regexp.MustCompile(`^---$`)
+	// frontmatterKeyRe matches any known SESSION_CONTEXT.md frontmatter key at line start.
+	// All 17 keys from SESSION-3 Section 2.1 are listed to prevent false negatives.
+	frontmatterKeyRe = regexp.MustCompile(`^(schema_version|session_id|status|created_at|initiative|complexity|active_rite|rite|current_phase|timeline_version|parked_at|parked_reason|archived_at|resumed_at|frayed_from|fray_point|strands):`)
+	// otherSectionRe matches any H2 heading. Combined with timelineHeadingRe exclusion,
+	// this catches standard sections (Artifacts, Blockers, Next Steps) and custom sections.
+	otherSectionRe = regexp.MustCompile(`^## .+$`)
+)
 
 // Protected file patterns for context and platform infrastructure files.
 var protectedPatterns = []string{
@@ -117,6 +151,30 @@ func runWriteguardCore(ctx *cmdContext, printer *output.Printer) error {
 
 	// Check if file is protected
 	if isProtectedFile(filePath) {
+		// SESSION_CONTEXT.md gets section-aware permission routing for Edit tool.
+		// Only old_string is analyzed (decision D1: new_string does not indicate location).
+		// Write tool always requires Moirai lock (decision D6: full file replacement).
+		//
+		// sectionClass tracks the classification for SESSION_CONTEXT Edit operations so
+		// the lock-miss path can emit the correct E3/E5 advisory vs. generic W2.
+		sectionClass := SectionUnknown
+		if isSessionContext(filePath) && toolName == "Edit" {
+			sectionClass = classifyEditSection(hookEnv.ToolInput)
+			switch sectionClass {
+			case SectionTimeline:
+				// E1: Timeline edits are lockless. Advisory context reminds model that
+				// other sections still require Moirai lock.
+				return outputAllowTimeline(printer)
+			case SectionMixed:
+				// E6: Edit spans multiple sections. Block and advise split edits.
+				return outputBlockMixed(printer)
+			case SectionUnknown:
+				// E7: No recognizable indicators. Fail closed.
+				return outputBlockUnknown(printer)
+			// SectionFrontmatter and SectionOther fall through to Moirai lock check.
+			}
+		}
+
 		// Resolve session via priority chain, then check Moirai lock
 		resolver, sessionID, _ := ctx.resolveSession(hookEnv)
 		// Fallback: extract session ID from file path for PARKED sessions
@@ -133,6 +191,16 @@ func runWriteguardCore(ctx *cmdContext, printer *output.Printer) error {
 		if sessionID != "" && isSessionArchived(resolver, sessionID) {
 			return outputBlockArchived(printer, sessionID)
 		}
+		// Emit section-specific advisory for SESSION_CONTEXT Edit operations (E3/E5).
+		// For Write operations and other protected files, use the generic block message.
+		if isSessionContext(filePath) && toolName == "Edit" {
+			switch sectionClass {
+			case SectionFrontmatter:
+				return outputBlockFrontmatter(printer)
+			case SectionOther:
+				return outputBlockOtherSection(printer)
+			}
+		}
 		return outputBlock(printer, filePath)
 	}
 
@@ -145,10 +213,10 @@ func parseFilePath(printer *output.Printer, toolInput string) string {
 		return ""
 	}
 
-	var input map[string]interface{}
+	var input map[string]any
 	if err := json.Unmarshal([]byte(toolInput), &input); err != nil {
 		printer.VerboseLog("warn", "failed to parse tool input JSON",
-			map[string]interface{}{"error": err.Error(), "input": toolInput})
+			map[string]any{"error": err.Error(), "input": toolInput})
 		return ""
 	}
 
@@ -156,6 +224,113 @@ func parseFilePath(printer *output.Printer, toolInput string) string {
 		return fp
 	}
 	return ""
+}
+
+// isSessionContext returns true if filePath targets a SESSION_CONTEXT.md file.
+// Section-aware permission routing only applies to SESSION_CONTEXT.md (decision D5).
+func isSessionContext(filePath string) bool {
+	return strings.HasSuffix(filePath, "SESSION_CONTEXT.md")
+}
+
+// parseOldString extracts the old_string field from a JSON tool_input string.
+// Follows the same pattern as parseFilePath. Returns empty string if absent or
+// if JSON is unparseable (which results in SectionUnknown / fail-closed).
+func parseOldString(toolInput string) string {
+	if toolInput == "" {
+		return ""
+	}
+	var input map[string]any
+	if err := json.Unmarshal([]byte(toolInput), &input); err != nil {
+		return ""
+	}
+	if s, ok := input["old_string"].(string); ok {
+		return s
+	}
+	return ""
+}
+
+// isTimelineIndicator returns true if line matches a Timeline section indicator.
+// Checks T1 (timeline entry format) and T2 (## Timeline heading).
+func isTimelineIndicator(line string) bool {
+	return timelineEntryRe.MatchString(line) || timelineHeadingRe.MatchString(line)
+}
+
+// isFrontmatterIndicator returns true if line matches a frontmatter indicator.
+// Checks F1 (YAML delimiter ---) and F2 (known frontmatter key at line start).
+func isFrontmatterIndicator(line string) bool {
+	return frontmatterDelimRe.MatchString(line) || frontmatterKeyRe.MatchString(line)
+}
+
+// isOtherSectionIndicator returns true if line is an H2 heading that is not ## Timeline.
+// This matches standard sections (Artifacts, Blockers, Next Steps) and custom sections.
+// Note: ## Timeline is handled by isTimelineIndicator (T2), so it is excluded here.
+func isOtherSectionIndicator(line string) bool {
+	return otherSectionRe.MatchString(line) && !timelineHeadingRe.MatchString(line)
+}
+
+// classifyEditSection inspects old_string from toolInput JSON and determines
+// which section of SESSION_CONTEXT.md the Edit targets.
+//
+// Algorithm (per SESSION-4 Section 4.2):
+//   - Each non-blank line is classified against Timeline, Frontmatter, or OtherSection indicators.
+//   - Lines that match no indicator are "context lines" and are neutral (decision D4).
+//   - If no positive indicators are found: Unknown (fail-closed, decision D2).
+//   - If multiple indicator types are found: Mixed (fail-closed, decision D3).
+//   - Otherwise: the single indicator type found.
+func classifyEditSection(toolInput string) SectionClass {
+	oldString := parseOldString(toolInput)
+	if oldString == "" {
+		// Empty old_string: no indicators possible. Fail closed.
+		return SectionUnknown
+	}
+
+	lines := strings.Split(oldString, "\n")
+	hasTimeline := false
+	hasFrontmatter := false
+	hasOther := false
+
+	for _, line := range lines {
+		trimmed := strings.TrimSpace(line)
+		if trimmed == "" {
+			// Blank lines are neutral — skip.
+			continue
+		}
+		if isTimelineIndicator(trimmed) {
+			hasTimeline = true
+		} else if isFrontmatterIndicator(trimmed) {
+			hasFrontmatter = true
+		} else if isOtherSectionIndicator(trimmed) {
+			hasOther = true
+		}
+		// Lines matching no indicator are context lines — they do not influence
+		// classification. This prevents bypass via generic text (decision D4).
+	}
+
+	// Aggregate: count how many indicator types fired.
+	flagCount := 0
+	if hasTimeline {
+		flagCount++
+	}
+	if hasFrontmatter {
+		flagCount++
+	}
+	if hasOther {
+		flagCount++
+	}
+
+	if flagCount == 0 {
+		return SectionUnknown // No recognizable indicators: fail closed.
+	}
+	if flagCount > 1 {
+		return SectionMixed // Multiple section types: fail closed.
+	}
+	if hasTimeline {
+		return SectionTimeline
+	}
+	if hasFrontmatter {
+		return SectionFrontmatter
+	}
+	return SectionOther
 }
 
 // isProtectedFile checks if the file path matches a protected pattern.
@@ -256,10 +431,10 @@ func parseContentField(printer *output.Printer, toolInput string) string {
 		return ""
 	}
 
-	var input map[string]interface{}
+	var input map[string]any
 	if err := json.Unmarshal([]byte(toolInput), &input); err != nil {
 		printer.VerboseLog("warn", "failed to parse tool input JSON for content field",
-			map[string]interface{}{"error": err.Error()})
+			map[string]any{"error": err.Error()})
 		return ""
 	}
 
@@ -278,7 +453,7 @@ func validateWipFrontmatter(content string) (bool, string, string) {
 		return false, "", ".wip/ files require YAML frontmatter. Add to the top of your file:\n---\ntype: <spike|spec|audit|design|triage|qa|scratch>\n---"
 	}
 
-	var fields map[string]interface{}
+	var fields map[string]any
 	if err := yaml.Unmarshal(yamlBytes, &fields); err != nil {
 		return false, "", ".wip/ files require YAML frontmatter. Add to the top of your file:\n---\ntype: <spike|spec|audit|design|triage|qa|scratch>\n---"
 	}
@@ -308,6 +483,78 @@ func outputAllowWithContext(printer *output.Printer, context string) error {
 			HookEventName:      "PreToolUse",
 			PermissionDecision: "allow",
 			AdditionalContext:  context,
+		},
+	}
+	return printer.Print(result)
+}
+
+// outputAllowTimeline outputs an allow decision with advisory context for E1 (Timeline edits).
+// The advisory reminds the model that only timeline writes are lockless — other sections
+// still require the Moirai lock or ari CLI commands (decision D8).
+func outputAllowTimeline(printer *output.Printer) error {
+	return outputAllowWithContext(printer,
+		"Timeline append allowed without Moirai lock. For frontmatter or body section changes, "+
+			"use ari session field-set (frontmatter) or Task(moirai, '...') (lifecycle transitions).")
+}
+
+// outputBlockFrontmatter outputs a deny decision for E3 (frontmatter Edit without lock).
+// Directs the model to ari session field-set or Moirai delegation.
+func outputBlockFrontmatter(printer *output.Printer) error {
+	result := hook.PreToolUseOutput{
+		HookSpecificOutput: hook.HookSpecificOutput{
+			HookEventName:            "PreToolUse",
+			PermissionDecision:       "deny",
+			PermissionDecisionReason: "SESSION_CONTEXT frontmatter requires Moirai lock",
+			AdditionalContext: "To modify frontmatter fields, use: ari session field-set <field> <value> " +
+				"(for settable fields: initiative, complexity, active_rite), or " +
+				"Task(moirai, 'park'/'wrap'/'resume'/'transition') for lifecycle-controlled fields.",
+		},
+	}
+	return printer.Print(result)
+}
+
+// outputBlockOtherSection outputs a deny decision for E5 (body section Edit without lock).
+// Directs the model to Moirai delegation or ari session log for timeline appends.
+func outputBlockOtherSection(printer *output.Printer) error {
+	result := hook.PreToolUseOutput{
+		HookSpecificOutput: hook.HookSpecificOutput{
+			HookEventName:            "PreToolUse",
+			PermissionDecision:       "deny",
+			PermissionDecisionReason: "SESSION_CONTEXT body section requires Moirai lock",
+			AdditionalContext: "Body sections (Artifacts, Blockers, Next Steps) are Moirai-managed. " +
+				"Use Task(moirai, '<operation>') for section updates. " +
+				"For timeline appends, use: ari session log --type=<type> '<summary>'.",
+		},
+	}
+	return printer.Print(result)
+}
+
+// outputBlockMixed outputs a deny decision for E6 (Mixed section edit).
+// The edit's old_string spans multiple sections; model must split into separate edits.
+func outputBlockMixed(printer *output.Printer) error {
+	result := hook.PreToolUseOutput{
+		HookSpecificOutput: hook.HookSpecificOutput{
+			HookEventName:            "PreToolUse",
+			PermissionDecision:       "deny",
+			PermissionDecisionReason: "Edit targets multiple SESSION_CONTEXT sections",
+			AdditionalContext: "This edit spans multiple sections (e.g., timeline + frontmatter or timeline + body). " +
+				"Split into separate edits: use ari session log for timeline appends and Task(moirai, '...') for other mutations.",
+		},
+	}
+	return printer.Print(result)
+}
+
+// outputBlockUnknown outputs a deny decision for E7 (Unknown section).
+// No recognizable section indicators were found in old_string. Fail closed.
+func outputBlockUnknown(printer *output.Printer) error {
+	result := hook.PreToolUseOutput{
+		HookSpecificOutput: hook.HookSpecificOutput{
+			HookEventName:            "PreToolUse",
+			PermissionDecision:       "deny",
+			PermissionDecisionReason: "Cannot determine target section in SESSION_CONTEXT",
+			AdditionalContext: "The edit content did not match any recognized section pattern. " +
+				"Use ari session log --type=<type> '<summary>' for timeline entries, " +
+				"ari session field-set for frontmatter fields, or Task(moirai, '...') for lifecycle operations.",
 		},
 	}
 	return printer.Print(result)
