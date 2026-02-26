@@ -181,11 +181,15 @@ func runInit(ctx *cmdContext, riteName, source string, force bool, cmd *cobra.Co
 			sourceType = syncResult.RiteResult.Source
 		}
 
+		// Generate settings.json with required hooks if it doesn't exist.
+		// This ensures agent-guard hooks fire on foreign projects.
+		writeDefaultSettings(claudeDir)
+
 		out := initOutput{
 			Initialized: true,
 			ProjectDir:  projectDir,
 			Rite:        riteName,
-			Source:       sourceType,
+			Source:      sourceType,
 			Mode:        "rite",
 			Message:     fmt.Sprintf("Initialized with rite '%s' (source: %s)", riteName, sourceType),
 		}
@@ -203,6 +207,9 @@ func runInit(ctx *cmdContext, riteName, source string, force bool, cmd *cobra.Co
 		return err
 	}
 
+	// Generate settings.json with required hooks if it doesn't exist.
+	writeDefaultSettings(claudeDir)
+
 	out := initOutput{
 		Initialized: true,
 		ProjectDir:  projectDir,
@@ -211,4 +218,32 @@ func runInit(ctx *cmdContext, riteName, source string, force bool, cmd *cobra.Co
 		Message:     "Initialized Knossos project (minimal scaffold)",
 	}
 	return printer.Print(out)
+}
+
+// writeDefaultSettings writes settings.json with the agent-guard hook configuration
+// if no settings.json exists yet. Non-fatal: hooks are optional infrastructure.
+func writeDefaultSettings(claudeDir string) {
+	settingsPath := filepath.Join(claudeDir, "settings.json")
+	if _, err := os.Stat(settingsPath); !os.IsNotExist(err) {
+		// Already exists (or stat error) -- don't overwrite user settings.
+		return
+	}
+	settingsContent := []byte(`{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "ari hook agent-guard --output json"
+          }
+        ]
+      }
+    ]
+  }
+}
+`)
+	// Best-effort write -- failures are non-fatal since hooks are optional.
+	os.WriteFile(settingsPath, settingsContent, 0644)
 }

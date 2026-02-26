@@ -54,8 +54,9 @@ Later agents receive ALL prior artifacts. At DIFF complexity, phases 3-4 are ski
 ## Cross-Rite Referral Routing
 
 Gate-keeper produces advisory referrals. Target rites decide whether to act.
+Referrals are conditional -- omit if the target rite is not available in your environment.
 
-| Condition | Target Rite |
+| Condition | Target Rite (if available) |
 |-----------|-------------|
 | Security anti-patterns (unvalidated inputs, hardcoded secrets) | security |
 | General code quality (complexity, naming, architecture) | hygiene |

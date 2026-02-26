@@ -1116,9 +1116,15 @@ func (m *Materializer) materializeMena(manifest *RiteManifest, claudeDir string,
 	var sources []MenaSource
 
 	// 1. User-level mena (lowest priority, can be overridden)
-	// Always from filesystem, never from embedded
+	// Only include platform-level mena when it lives inside the project root.
+	// getMenaDir() falls back to KnossosHome()/mena/ which defaults to ~/Code/knossos/mena/,
+	// leaking ALL 78+ platform operations/rite-switching/guidance commands onto foreign projects.
+	// The project-level check ("mena/ inside project") is the correct scope for rite sync.
 	if menaDir := m.getMenaDir(); menaDir != "" {
-		sources = append(sources, MenaSource{Path: menaDir})
+		projectRoot := m.resolver.ProjectRoot()
+		if strings.HasPrefix(menaDir, projectRoot) {
+			sources = append(sources, MenaSource{Path: menaDir})
+		}
 	}
 
 	if isEmbedded {
@@ -1191,6 +1197,21 @@ func (m *Materializer) getMenaDir() string {
 	return ""
 }
 
+// knownRuleTemplateNames returns the set of knossos-managed rule filenames from the
+// filesystem templates dir. Used by materializeRules to identify stale files to remove.
+func (m *Materializer) knownRuleTemplateNames(_ *ResolvedRite) map[string]bool {
+	names := make(map[string]bool)
+	fsRulesDir := filepath.Join(m.templatesDir, "rules")
+	if entries, err := os.ReadDir(fsRulesDir); err == nil {
+		for _, entry := range entries {
+			if !entry.IsDir() && strings.HasSuffix(entry.Name(), ".md") {
+				names[entry.Name()] = true
+			}
+		}
+	}
+	return names
+}
+
 // materializeRules copies rule files from templates/rules to .claude/rules/
 // Platform rules are overwritten from templates; user-created rules are preserved.
 // On rite switch, stale knossos-managed rules are removed before writing new ones.
@@ -1204,29 +1225,43 @@ func (m *Materializer) materializeRules(claudeDir string, resolved *ResolvedRite
 
 	projectRoot := m.resolver.ProjectRoot()
 
-	// Collect template rule names and content from appropriate source
+	// Skip knossos-internal rules when templates come from outside the project.
+	// Template rules (trigger on internal/**, rites/**, knossos/**) are development
+	// guides for the knossos codebase — harmful noise on foreign projects.
+	// Also clean up stale knossos-managed rules from any previous sync.
+	if m.templatesDir != "" && !strings.HasPrefix(m.templatesDir, projectRoot) {
+		knownTemplateNames := m.knownRuleTemplateNames(resolved)
+		if existingRules, err := os.ReadDir(rulesDir); err == nil {
+			for _, entry := range existingRules {
+				if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".md") {
+					continue
+				}
+				if knownTemplateNames[entry.Name()] {
+					os.Remove(filepath.Join(rulesDir, entry.Name()))
+				}
+			}
+		}
+		return nil
+	}
+	if resolved != nil && resolved.Source.Type == SourceEmbedded {
+		knownTemplateNames := m.knownRuleTemplateNames(resolved)
+		if existingRules, err := os.ReadDir(rulesDir); err == nil {
+			for _, entry := range existingRules {
+				if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".md") {
+					continue
+				}
+				if knownTemplateNames[entry.Name()] {
+					os.Remove(filepath.Join(rulesDir, entry.Name()))
+				}
+			}
+		}
+		return nil
+	}
+
+	// Collect template rule names and content from filesystem templates dir.
 	templateRules := make(map[string][]byte)
 
-	if resolved != nil && resolved.Source.Type == SourceEmbedded && m.embeddedTemplates != nil {
-		tFS := m.templatesFS(resolved)
-		if _, err := fs.Stat(tFS, "rules"); err != nil {
-			return nil // No rules in embedded templates
-		}
-		entries, err := fs.ReadDir(tFS, "rules")
-		if err != nil {
-			return nil
-		}
-		for _, entry := range entries {
-			if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".md") {
-				continue
-			}
-			content, err := fs.ReadFile(tFS, "rules/"+entry.Name())
-			if err != nil {
-				return err
-			}
-			templateRules[entry.Name()] = content
-		}
-	} else {
+	{
 		sourceRulesDir := filepath.Join(m.templatesDir, "rules")
 		entries, err := os.ReadDir(sourceRulesDir)
 		if err != nil {
@@ -1247,21 +1282,11 @@ func (m *Materializer) materializeRules(claudeDir string, resolved *ResolvedRite
 		}
 	}
 
-	// Also collect template names from the filesystem templates dir (for the
-	// provenance check even when using embedded sources). This ensures we know
-	// all possible knossos-managed filenames across sources.
+	// Build the complete set of known template names for stale rule detection.
+	// templateRules already contains all filesystem template entries.
 	allTemplateNames := make(map[string]bool)
 	for name := range templateRules {
 		allTemplateNames[name] = true
-	}
-	if fsRulesDir := filepath.Join(m.templatesDir, "rules"); fsRulesDir != "" {
-		if entries, err := os.ReadDir(fsRulesDir); err == nil {
-			for _, entry := range entries {
-				if !entry.IsDir() && strings.HasSuffix(entry.Name(), ".md") {
-					allTemplateNames[entry.Name()] = true
-				}
-			}
-		}
 	}
 
 	// Remove only STALE knossos-managed rules: files that match a known template name

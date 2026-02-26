@@ -207,16 +207,17 @@ func TestRiteSwitchIntegration_EmbeddedSource(t *testing.T) {
 	workflowContent := []byte("name: embedded-wf\nphases:\n  - test\n")
 	agentContent := []byte("# tester\n\nRole: tests\n")
 	manifestContent := []byte("name: embedded-rite\nversion: \"1.0\"\ndescription: test\nentry_agent: tester\nagents:\n  - name: tester\n    role: tests\n")
-	ruleContent := []byte("embedded session rule")
 
 	embeddedFS := fstest.MapFS{
-		"rites/embedded-rite/manifest.yaml":  &fstest.MapFile{Data: manifestContent},
-		"rites/embedded-rite/workflow.yaml":   &fstest.MapFile{Data: workflowContent},
+		"rites/embedded-rite/manifest.yaml":    &fstest.MapFile{Data: manifestContent},
+		"rites/embedded-rite/workflow.yaml":    &fstest.MapFile{Data: workflowContent},
 		"rites/embedded-rite/agents/tester.md": &fstest.MapFile{Data: agentContent},
 	}
+	// embeddedTemplates still includes a rules/ entry to prove the guard works --
+	// materializeRules must skip rules for embedded source regardless of template content.
 	embeddedTemplates := fstest.MapFS{
-		"sections/.gitkeep":        &fstest.MapFile{Data: []byte{}},
-		"rules/internal-session.md": &fstest.MapFile{Data: ruleContent},
+		"sections/.gitkeep":         &fstest.MapFile{Data: []byte{}},
+		"rules/internal-session.md": &fstest.MapFile{Data: []byte("embedded session rule")},
 	}
 
 	resolver := paths.NewResolver(projectDir)
@@ -244,12 +245,13 @@ func TestRiteSwitchIntegration_EmbeddedSource(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, string(workflowContent), string(got))
 
-	// Test rules materialization from embedded
+	// Test rules materialization from embedded -- expect NO rules written.
+	// Embedded rites are for foreign projects; knossos-internal rules (internal/**,
+	// rites/**, etc.) are harmful noise on non-knossos codebases.
 	err = m.materializeRules(claudeDir, resolved, provenance.NullCollector{})
 	require.NoError(t, err)
-	got, err = os.ReadFile(filepath.Join(claudeDir, "rules", "internal-session.md"))
-	require.NoError(t, err)
-	assert.Equal(t, string(ruleContent), string(got))
+	_, err = os.Stat(filepath.Join(claudeDir, "rules", "internal-session.md"))
+	assert.True(t, os.IsNotExist(err), "embedded rules must NOT be written to foreign projects")
 
 	// Test agents materialization from embedded
 	manifest := &RiteManifest{
@@ -257,7 +259,7 @@ func TestRiteSwitchIntegration_EmbeddedSource(t *testing.T) {
 		Agents:     []Agent{{Name: "tester", Role: "tests"}},
 		EntryAgent: "tester",
 	}
-	err = m.materializeAgents(manifest, resolved.RitePath, claudeDir, resolved, provenance.NullCollector{})
+	err = m.materializeAgents(manifest, resolved.RitePath, claudeDir, resolved, provenance.NullCollector{}, nil)
 	require.NoError(t, err)
 	got, err = os.ReadFile(filepath.Join(claudeDir, "agents", "tester.md"))
 	require.NoError(t, err)

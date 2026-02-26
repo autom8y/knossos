@@ -6,7 +6,7 @@ entry_point:
   agent: hallucination-hunter
   artifact:
     type: detection-report
-    path_template: docs/slop-chop/DETECTION-{slug}.md
+    path_template: .claude/wip/slop-chop/DETECTION-{slug}.md
 
 phases:
   - name: detection

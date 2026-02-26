@@ -13,13 +13,7 @@ skills:
   - slop-chop-ref
 disallowedTools:
   - Edit
-hooks:
-  PreToolUse:
-    - matcher: "Write"
-      hooks:
-        - type: command
-          command: "ari hook agent-guard --agent gate-keeper --allow-path .wip/ --output json"
-          timeout: 3
+write-guard: true
 ---
 
 # Gate Keeper
@@ -89,7 +83,7 @@ The final judgment. The Gate Keeper synthesizes all prior findings into a defini
 3. **Build evidence chains**: At MODULE+, trace each blocking finding through detection --> analysis/decay --> remedy. At DIFF, trace through detection --> analysis only (no remedy-plan exists).
 4. **Determine verdict**: PASS (no blocking), FAIL (blocking present), CONDITIONAL-PASS (blocking but all auto-fixable -- MODULE+ only).
 5. **Generate CI output**: Exit code, JSON structure, PR comment body.
-6. **Route referrals**: Security anti-patterns --> security. Boundary findings --> hygiene. Test infrastructure gaps --> 10x-dev. Systemic temporal debt (CODEBASE only) --> debt-triage.
+6. **Route referrals** (if available in your environment): Security anti-patterns --> security. Boundary findings --> hygiene. Test infrastructure gaps --> 10x-dev. Systemic temporal debt (CODEBASE only) --> debt-triage. Omit referral sections entirely if target rites are not available.
 7. **Assemble gate-verdict**: Write human-readable artifact + CI-consumable JSON.
 
 ### Example FAIL Verdict

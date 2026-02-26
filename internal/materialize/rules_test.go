@@ -4,7 +4,6 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
-	"testing/fstest"
 
 	"github.com/autom8y/knossos/internal/provenance"
 
@@ -150,33 +149,49 @@ func TestMaterializeRules_Idempotent(t *testing.T) {
 	assert.Len(t, entries, 1)
 }
 
+// TestMaterializeRules_EmbeddedSource verifies that embedded rites produce zero rules
+// AND clean up stale knossos-managed rules from a previous filesystem-sourced sync.
+// Template rules are knossos-internal development guides (internal/**, rites/**, etc.)
+// and are harmful noise on foreign (non-knossos) projects.
 func TestMaterializeRules_EmbeddedSource(t *testing.T) {
 	projectDir := t.TempDir()
 	claudeDir := filepath.Join(projectDir, ".claude")
-	require.NoError(t, os.MkdirAll(filepath.Join(claudeDir, "rules"), 0755))
+	rulesDir := filepath.Join(claudeDir, "rules")
+	require.NoError(t, os.MkdirAll(rulesDir, 0755))
 
-	embeddedTemplates := fstest.MapFS{
-		"rules/internal-agent.md": &fstest.MapFile{Data: []byte("embedded agent rule")},
-		"rules/mena.md":           &fstest.MapFile{Data: []byte("embedded mena rule")},
-	}
+	// Pre-populate stale knossos-managed rules simulating a prior filesystem sync.
+	require.NoError(t, os.WriteFile(filepath.Join(rulesDir, "internal-agent.md"), []byte("stale rule"), 0644))
+	require.NoError(t, os.WriteFile(filepath.Join(rulesDir, "mena.md"), []byte("stale mena"), 0644))
+	// User-created rule that must survive.
+	require.NoError(t, os.WriteFile(filepath.Join(rulesDir, "my-custom.md"), []byte("user rule"), 0644))
+
+	// Set up filesystem templates dir so knownRuleTemplateNames() can resolve stale names.
+	templatesDir := filepath.Join(projectDir, "knossos", "templates")
+	require.NoError(t, os.MkdirAll(filepath.Join(templatesDir, "rules"), 0755))
+	require.NoError(t, os.WriteFile(filepath.Join(templatesDir, "rules", "internal-agent.md"), []byte("source"), 0644))
+	require.NoError(t, os.WriteFile(filepath.Join(templatesDir, "rules", "mena.md"), []byte("source"), 0644))
 
 	resolver := paths.NewResolver(projectDir)
-	m := NewMaterializer(resolver).WithEmbeddedTemplates(embeddedTemplates)
+	m := NewMaterializer(resolver)
+	m.templatesDir = templatesDir
 
 	resolved := &ResolvedRite{
-		RitePath:     "rites/test",
-		TemplatesDir: ".",
-		Source:       RiteSource{Type: SourceEmbedded, Path: "embedded"},
+		RitePath: "rites/test",
+		Source:   RiteSource{Type: SourceEmbedded, Path: "embedded"},
 	}
 
 	err := m.materializeRules(claudeDir, resolved, provenance.NullCollector{})
 	require.NoError(t, err)
 
-	got, err := os.ReadFile(filepath.Join(claudeDir, "rules", "internal-agent.md"))
-	require.NoError(t, err)
-	assert.Equal(t, "embedded agent rule", string(got))
+	// Stale knossos-managed rules must be removed.
+	_, err = os.Stat(filepath.Join(rulesDir, "internal-agent.md"))
+	assert.True(t, os.IsNotExist(err), "stale internal-agent.md must be removed for embedded source")
 
-	got, err = os.ReadFile(filepath.Join(claudeDir, "rules", "mena.md"))
+	_, err = os.Stat(filepath.Join(rulesDir, "mena.md"))
+	assert.True(t, os.IsNotExist(err), "stale mena.md must be removed for embedded source")
+
+	// User-created rule must survive.
+	got, err := os.ReadFile(filepath.Join(rulesDir, "my-custom.md"))
 	require.NoError(t, err)
-	assert.Equal(t, "embedded mena rule", string(got))
+	assert.Equal(t, "user rule", string(got))
 }
