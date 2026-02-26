@@ -19,7 +19,7 @@ description: |
 type: analyst
 tools: Read, Write, TodoWrite, Glob, Grep
 model: sonnet
-color: "#008B8B"
+color: cyan
 maxTurns: 30
 skills:
   - review-ref

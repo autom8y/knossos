@@ -16,10 +16,10 @@ description: |
   </example>
 
   Triggers: report, write report, final review, case file, health report, executive summary.
-type: scribe
+type: specialist
 tools: Read, Write, TodoWrite
 model: sonnet
-color: "#20B2AA"
+color: cyan
 maxTurns: 30
 skills:
   - review-ref

@@ -23,6 +23,7 @@ color: green
 maxTurns: 250
 skills:
   - rnd-ref
+  - conventions
 memory: "project"
 contract:
   must_not:

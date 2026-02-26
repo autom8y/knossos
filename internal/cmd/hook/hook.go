@@ -93,6 +93,7 @@ Performance Targets:
 	cmd.AddCommand(newSubagentStopCmd(ctx))
 	cmd.AddCommand(newAgentGuardCmd(ctx))
 	cmd.AddCommand(newSessionEndCmd(ctx))
+	cmd.AddCommand(newGitConventionsCmd(ctx))
 
 	// Hook commands do NOT require project context
 	common.SetNeedsProject(cmd, false, true)

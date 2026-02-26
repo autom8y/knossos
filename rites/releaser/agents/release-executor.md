@@ -24,6 +24,8 @@ color: orange
 maxTurns: 60
 skills:
   - releaser-ref
+  - conventions
+  - commit-conventions
 disallowedTools:
   - NotebookEdit
 contract:

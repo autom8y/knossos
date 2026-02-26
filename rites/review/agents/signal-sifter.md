@@ -19,7 +19,7 @@ description: |
 type: analyst
 tools: Bash, Glob, Grep, Read, Write, TodoWrite
 model: sonnet
-color: "#00CED1"
+color: cyan
 maxTurns: 30
 skills:
   - review-ref

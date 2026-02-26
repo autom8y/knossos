@@ -19,7 +19,7 @@ description: |
   Triggers: coordinate, orchestrate, review workflow, code review, health check, codebase audit.
 type: orchestrator
 tools: Read
-model: sonnet
+model: opus
 color: cyan
 maxTurns: 25
 skills:

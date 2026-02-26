@@ -26,6 +26,7 @@ color: cyan
 maxTurns: 150
 skills:
   - hygiene-catalog
+  - conventions
 contract:
   must_not:
     - Include feature work in refactoring plans

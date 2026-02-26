@@ -63,6 +63,13 @@ hooks:
     priority: 5
     description: "Validates bash commands via ari hook validate"
 
+  - event: PreToolUse
+    matcher: "Bash"
+    command: "ari hook git-conventions --output json"
+    timeout: 5
+    priority: 5
+    description: "Validates git commit messages against conventional format"
+
   # ===========================================================================
   # PostToolUse Hooks
   # ===========================================================================
