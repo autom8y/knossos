@@ -1,7 +1,7 @@
 ---
 name: know
 description: "Generate persistent codebase knowledge via theoros observation. Produces .know/{domain}.md with schema-validated frontmatter and structured knowledge sections."
-argument-hint: "[domain] [--force] [--expires=DURATION]"
+argument-hint: "[domain|--all] [--force] [--expires=DURATION]"
 allowed-tools: Bash, Read, Write, Glob, Grep, Task, Skill
 model: opus
 context: fork
@@ -19,20 +19,26 @@ This command operates in forked context (transient session). It generates `.know
 
 1. **Parse arguments**:
    - `domain`: Optional. Default: `"architecture"`. Must be a registered pinakes domain with `codebase` scope.
+   - `--all`: Generate ALL codebase-scoped domains. Overrides `domain` argument. Uses **Argus Pattern** (parallel theoros dispatch).
    - `--force`: Skip expiry check, regenerate even if current.
    - `--expires=DURATION`: Override default expiry (e.g., `--expires=14d`). Default: `"7d"`.
 
-2. **Validate domain exists**:
+2. **Load domain registry**:
    - Load pinakes skill: `Skill("pinakes")`
    - Read pinakes INDEX to find the Domain Registry table
-   - Verify requested domain appears in the table with scope `codebase`
+   - If `--all`: collect ALL domains with scope `codebase` from the registry
+   - If single domain: verify requested domain appears in the table with scope `codebase`
    - If not found: ERROR "Domain '{domain}' not registered in pinakes or not codebase-scoped. Available codebase domains: {list}"
 
-3. **Check expiry** (skip if `--force`):
-   - If `.know/{domain}.md` exists, read its YAML frontmatter
-   - Parse `generated_at` and `expires_after`
-   - If `generated_at + expires_after > now`: report "Knowledge for '{domain}' is current (generated {date}, expires {date}). Use --force to regenerate." and STOP.
-   - If expired or file does not exist: proceed to generation.
+3. **Build generation queue**:
+   - For each domain (single or all):
+     - If `.know/{domain}.md` exists AND `--force` not set:
+       - Read its YAML frontmatter, parse `generated_at` and `expires_after`
+       - Check git-diff staleness: compare `source_hash` to current HEAD
+       - If time-fresh AND code-fresh: report "Knowledge for '{domain}' is current" and SKIP this domain
+     - If expired, code-stale, or file does not exist: ADD to generation queue
+   - If generation queue is empty: report "All domains are current. Use --force to regenerate." and STOP.
+   - Report: "Generating {N} domain(s): {list}"
 
 4. **Compute source_hash**:
    - Run: `git rev-parse --short HEAD`
@@ -42,6 +48,8 @@ This command operates in forked context (transient session). It generates `.know
    - Run: `mkdir -p .know`
 
 ## Phase 1: Criteria Loading
+
+For EACH domain in the generation queue:
 
 1. Read the domain criteria file from the pinakes source:
    ```
@@ -54,9 +62,19 @@ This command operates in forked context (transient session). It generates `.know
 
 2. Extract the full criteria content for injection into the theoros dispatch prompt.
 
-## Phase 2: Theoros Dispatch
+Store all loaded criteria keyed by domain name.
 
-Dispatch theoros with reframed instructions. The dispatch prompt transforms theoros from auditor to knowledge producer WITHOUT modifying the theoros agent prompt.
+## Phase 2: Theoros Dispatch — Argus Pattern
+
+> "One body, a hundred eyes, nothing unseen." — The Argus Pattern dispatches one theoros per domain in parallel.
+
+**If `--all` (multiple domains)**: Launch ALL theoros agents in a SINGLE response block using multiple Task tool calls. This is the Argus Pattern — parallel dispatch, concurrent observation. Each theoros receives its own domain criteria and operates independently.
+
+**If single domain**: Launch one theoros as before.
+
+**CRITICAL**: When dispatching multiple domains, ALL Task calls MUST appear in the same response block to enable CC's parallel execution. Do NOT dispatch sequentially.
+
+For each domain in the generation queue, construct:
 
 ```
 Task(subagent_type="theoros", prompt="
@@ -124,7 +142,9 @@ Read the **Scope** section in the domain criteria file above. It defines the tar
 
 ## Phase 3: Output Assembly
 
-After theoros returns:
+After ALL theoros agents return (wait for all parallel dispatches to complete):
+
+For EACH domain's theoros output, perform the following assembly:
 
 1. **Parse theoros output**:
    - Extract the knowledge reference body (everything before the ` ```metadata` fence)
@@ -164,7 +184,7 @@ After theoros returns:
 
 ## Phase 4: Report
 
-Display summary to the user:
+**For single domain**, display:
 
 ```
 ## Knowledge Generated: .know/{domain}.md
@@ -186,6 +206,25 @@ Display summary to the user:
 
 This file is consumable by any CC agent via `Read(".know/{domain}.md")`.
 Regenerate with: `/know {domain} --force`
+```
+
+**For `--all` (Argus Pattern)**, display a combined report:
+
+```
+## Argus Pattern: {N} Domains Generated
+
+| Domain | Grade | Confidence | Lines | Status |
+|--------|-------|------------|-------|--------|
+| {domain_1} | {grade} ({pct}%) | {confidence} | {line_count} | Generated |
+| {domain_2} | {grade} ({pct}%) | {confidence} | {line_count} | Generated |
+| ... | ... | ... | ... | ... |
+| {skipped_domain} | - | - | - | Skipped (fresh) |
+
+Source hash: {source_hash} | Expires: {expiry_date}
+
+All files consumable via `Read(".know/{domain}.md")`.
+Check freshness: `ari knows`
+Regenerate all: `/know --all --force`
 ```
 
 ## Error Handling
