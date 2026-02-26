@@ -4,7 +4,7 @@ description: |
   Evaluates scan findings by impact and groups by theme.
   Adds actionable recommendations. Produces assessment.
 tools: Read, Write, TodoWrite, Glob, Grep
-color: teal
+color: cyan
 ---
 
 # Assessor

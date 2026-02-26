@@ -4,7 +4,7 @@ description: |
   Produces structured review document from scan and assessment.
   Includes executive summary, prioritized findings, and recommendations.
 tools: Read, Write, TodoWrite
-color: teal
+color: cyan
 ---
 
 # Reporter

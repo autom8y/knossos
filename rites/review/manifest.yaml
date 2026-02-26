@@ -64,12 +64,12 @@ complexity_levels:
 
 metadata:
   domain: code review
-  color: teal
+  color: cyan
 
 archetype_data:
   orchestrator:
     description: "Coordinates code review phases"
-    color: teal
+    color: cyan
     skills:
       - orchestrator-templates
       - review-ref

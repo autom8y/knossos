@@ -40,9 +40,29 @@ func (o initOutput) Text() string {
 		return o.Message
 	}
 	if o.Rite != "" {
-		return fmt.Sprintf("Initialized Knossos project with rite '%s' (source: %s)", o.Rite, o.Source)
+		return fmt.Sprintf(`Initialized project with rite '%s'
+
+What was created:
+  .claude/agents/     Agent prompts for the %s workflow
+  .claude/skills/     Reference knowledge agents can load
+  .claude/commands/   Slash commands (type / in Claude Code to see them)
+  .claude/CLAUDE.md   Project instructions (always in context)
+  .claude/settings.json  Hook configuration
+
+Next steps:
+  1. Open this project in Claude Code
+  2. Type /go to start a session
+  3. Describe what you want to do — the agents will coordinate`, o.Rite, o.Rite)
 	}
-	return "Initialized Knossos project (minimal scaffold)"
+	return `Initialized project (minimal scaffold)
+
+What was created:
+  .claude/CLAUDE.md   Project instructions (always in context)
+
+Next steps:
+  1. Open this project in Claude Code
+  2. Run 'ari init --rite review' to add a workflow
+  3. Available rites: review, slop-chop, 10x-dev, and more`
 }
 
 // NewInitCmd creates the "ari init" command.

@@ -4,7 +4,7 @@ description: |
   Reads codebase structure and identifies areas of concern using
   language-agnostic structural heuristics. Produces scan-findings.
 tools: Bash, Glob, Grep, Read, Write, TodoWrite
-color: teal
+color: cyan
 ---
 
 # Scanner
