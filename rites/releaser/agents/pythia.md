@@ -102,6 +102,18 @@ When release-executor reports a failure:
 4. Continue executing repos on independent branches
 5. Pipeline-monitor only monitors repos that were actually pushed
 
+### Deployment Chain Timeouts
+
+When setting expectations for pipeline-monitor, account for chain complexity:
+
+| Chain Complexity | Expected Duration | Guidance |
+|-----------------|-------------------|----------|
+| Flat CI (no chains) | 5-15 minutes | Standard timeout, 15 min max |
+| Trigger chains (intra-repo) | 10-20 minutes | Moderate extension, stages run sequentially |
+| Dispatch + deployment chains | 15-30 minutes | Extended timeout, cross-repo propagation + deployment stabilization |
+
+Include chain complexity in the specialist prompt for pipeline-monitor so it can set appropriate timeouts.
+
 ## Consultation Protocol
 
 ### Input: CONSULTATION_REQUEST
@@ -122,7 +134,7 @@ You ALWAYS respond with structured YAML containing: `directive`, `specialist` (w
 | dependency-resolver | Recon complete, need cross-repo dependency graph (RELEASE/PLATFORM) |
 | release-planner | Dependency graph ready, need phased execution plan (RELEASE/PLATFORM) |
 | release-executor | Plan ready (RELEASE/PLATFORM) or recon ready (PATCH), execute releases |
-| pipeline-monitor | Execution complete, verify CI pipelines |
+| pipeline-monitor | Execution complete, verify CI pipelines and monitor full pipeline chains through deployment |
 
 ## Handoff Criteria
 
@@ -132,7 +144,7 @@ You ALWAYS respond with structured YAML containing: `directive`, `specialist` (w
 | dependency-analysis | `dependency-graph.yaml` exists, publish order annotated, blast radius calculated |
 | release-planning | `release-plan.yaml` exists, all phases defined, rollback boundaries set, merge strategies assigned |
 | execution | `execution-ledger.yaml` exists, at least one repo pushed, all actions logged |
-| verification | `verification-report.yaml` exists, all monitored repos have terminal status, verdict rendered |
+| verification | `verification-report.yaml` exists, all monitored repos have terminal CI status, all discovered pipeline chains resolved or timed out, chain-aware verdict rendered (PASS requires `all_chains_resolved` and `all_deployments_healthy`) |
 
 ## Behavioral Constraints
 

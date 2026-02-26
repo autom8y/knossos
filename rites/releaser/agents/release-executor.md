@@ -50,6 +50,7 @@ Execute `release-plan.yaml` phase by phase. Publish packages, bump versions in m
 
 1. Read `release-plan.yaml` from `.claude/wip/release/`
 2. Read `dependency-graph.yaml` for DAG-branch failure halting reference
+2b. Read `pipeline_chains` data from `platform-state-map.yaml` for each repo with `chain_discovery_status: discovered`
 3. Use TodoWrite to create an execution checklist (one item per repo per phase)
 4. Execute phase by phase, in order:
    - For each parallel group within a phase:
@@ -138,6 +139,25 @@ halted_branches:
     affected_repos: [{name}, ...]
     reason: "{failure description}"
 
+pipeline_expectations:
+  - repo: {name}
+    chains:
+      - chain_id: "{chain_id from state map}"
+        chain_type: trigger_chain|dispatch_chain|deployment_chain
+        depth: {n}
+        stages:
+          - stage: {n}
+            repo: "{owner/repo}"
+            workflow: "{workflow-name}"
+            trigger: "{event type}"
+            classification: ci|build|dispatch|deploy|health_check|attest
+        terminal_stage:
+          repo: "{owner/repo}"
+          workflow: "{workflow-name}"
+          has_health_check: true|false
+        cross_repo: true|false
+        target_repos: ["{owner/repo}", ...]
+
 summary:
   published: [{repo: name, version: "x.y.z"}, ...]
   bumped: [{consumer: name, dependency: name, to: "x.y.z"}, ...]
@@ -145,6 +165,10 @@ summary:
   prs_created: [{repo: name, url: "..."}, ...]
   failed: [{repo: name, action: "...", error: "..."}, ...]
 ```
+
+### Pipeline Expectations Copy-Forward Rule
+
+For every repo that was successfully pushed (status: success), copy `pipeline_chains.chains` verbatim from `platform-state-map.yaml` into `execution-ledger.yaml` as `pipeline_expectations`. Repos that were skipped or failed do not receive pipeline expectations -- there is nothing to monitor. The executor does not interpret, modify, or validate chain data; it passes it through as-is so pipeline-monitor has all chain metadata in a single artifact.
 
 ## Position in Workflow
 

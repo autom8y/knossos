@@ -20,7 +20,7 @@ type: specialist
 tools: Bash, Glob, Grep, Read, Write, TodoWrite
 model: sonnet
 color: orange
-maxTurns: 40
+maxTurns: 50
 skills:
   - releaser-ref
 disallowedTools:
@@ -88,8 +88,61 @@ Map justfile targets to semantic actions:
 
 > **Discovered repos are read-only.** You observe their state. You do not modify, build, install, or execute anything in them.
 
-Allowed Bash: `ls`, `git status`, `git branch`, `git log`, `git rev-list`, `git remote`, `cat`, `head`.
+Allowed Bash: `ls`, `git status`, `git branch`, `git log`, `git rev-list`, `git remote`, `cat`, `head`, `gh api` (read-only, for cross-repo workflow file scanning).
 Prohibited: `git push`, `git reset`, `git clean`, `rm`, `npm install`, `pip install`, `cargo build`, any mutating command.
+
+## Pipeline Chain Discovery
+
+After ecosystem detection, scan each release-candidate repo's CI workflow definitions to discover pipeline chains that extend beyond the initial CI run.
+
+### Scan Procedure
+
+1. List workflow files in the repo's CI configuration directory (e.g., `.github/workflows/`)
+2. For each workflow file, read its contents and scan for chain indicators
+3. For cross-repo dispatches, use `gh api` to read the receiver repo's workflow files:
+   ```
+   gh api repos/{owner}/{repo}/contents/{path-to-workflow-file} --jq '.content' | base64 -d
+   ```
+4. Classify each discovered chain link using the heuristic table below
+5. Build the chain graph from trigger source to terminal stage
+
+### Chain Indicator Heuristics
+
+| Pattern Category | Indicators (file content patterns) | Classification |
+|-----------------|-----------------------------------|----------------|
+| Downstream trigger | `workflow_run`, `workflow_call`, triggered-by references | trigger_chain |
+| Cross-repo dispatch | `repository_dispatch`, `workflow_dispatch` with external trigger, dispatch event names | dispatch_chain |
+| Deployment stage | deploy, release, publish to infrastructure, task/service update, health check, smoke test, rollout | deployment_chain |
+| Attestation/signing | attest, sign, sbom, provenance | deployment_chain (intermediate stage) |
+| Auxiliary | scheduled, cron, manual-only triggers with no chain relationship | auxiliary (exclude from chain) |
+
+When uncertain whether a workflow is part of the release chain or auxiliary, include it as a chain link. False positives are preferable to missed deployment stages.
+
+### Cross-Repo Scanning
+
+When a workflow dispatches to another repository:
+1. Extract the target repository identifier from the dispatch configuration
+2. Use `gh api` to list and read workflow files in the target repo
+3. Identify which workflow in the target repo receives the dispatch event
+4. Continue scanning the receiver's workflows for further chain links (up to depth 5)
+5. Record each cross-repo link with source repo, target repo, and dispatch event name
+
+### Retry Protocol for Cross-Repo Discovery
+
+Cross-repo API calls may fail due to permissions or rate limits:
+- Attempt 1: immediate
+- Attempt 2: after 30 second wait
+- Attempt 3: after 60 second wait
+- After 3 failures: log warning, set `chain_discovery_status: failed`, continue with remaining repos
+
+### Graceful Degradation
+
+If chain discovery fails for a repo (API errors, permission denied, unparseable workflow files):
+- Set `chain_discovery_status: failed` for that repo
+- Log the failure reason
+- The repo proceeds through the pipeline with flat (chain-unaware) monitoring
+- Pipeline-monitor treats repos with `chain_discovery_status: failed` as flat CI monitoring targets
+- This is a warning, not a blocking error
 
 ## Output Schema
 
@@ -123,6 +176,36 @@ repos:
       targets: [{name: "build", semantic: "build"}, ...]
     release_candidate: true|false
     has_dependents: true|false
+    pipeline_chains:
+      chain_discovery_status: discovered|none|failed
+      chains:
+        - chain_id: "{repo}:{trigger-workflow-name}"
+          chain_type: trigger_chain|dispatch_chain|deployment_chain
+          depth: {n}  # total stages in the chain
+          stages:
+            - stage: 1
+              repo: "{owner/repo}"
+              workflow: "{workflow-name}"
+              trigger: "{event type that starts this stage}"
+              classification: ci|build|dispatch|deploy|health_check|attest
+            - stage: 2
+              repo: "{owner/repo}"  # may differ from stage 1 for dispatch_chain
+              workflow: "{workflow-name}"
+              trigger: "{event type}"
+              classification: deploy
+          terminal_stage:
+            repo: "{owner/repo}"
+            workflow: "{workflow-name}"
+            has_health_check: true|false
+          cross_repo: true|false
+          target_repos: ["{owner/repo}", ...]  # repos involved beyond the source
+```
+
+When no chains are discovered for a repo:
+```yaml
+    pipeline_chains:
+      chain_discovery_status: none
+      chains: []
 ```
 
 ## Position in Workflow
@@ -166,6 +249,8 @@ Ready for downstream when:
 - [ ] Every repo has ecosystem identified or marked unknown
 - [ ] Dirty repos flagged with `release_candidate: false`
 - [ ] `has_dependents` field populated for each repo
+- [ ] Chain discovery attempted for all release-candidate repos
+- [ ] `pipeline_chains` field populated for each repo (discovered, none, or failed)
 - [ ] Both artifacts verified via Read tool
 
 ## Anti-Patterns

@@ -17,7 +17,7 @@ routing:
   dependency-resolver: "Reconnaissance complete, dependency graph needed (RELEASE and PLATFORM complexity)"
   release-planner: "Dependency graph complete, phased execution plan needed (RELEASE and PLATFORM complexity)"
   release-executor: "Release plan ready (or PATCH reconnaissance complete), execute publishes and pushes"
-  pipeline-monitor: "Execution complete, CI pipeline verification needed"
+  pipeline-monitor: "Execution complete, CI pipeline and deployment chain verification needed"
 
 workflow_position:
   upstream: "10x-dev (feature development complete, code committed locally) or direct user invocation"
@@ -50,8 +50,9 @@ handoff_criteria:
   verification:
     - "verification-report.yaml exists at .claude/wip/release/"
     - "All pushed repos have terminal CI status (green/red/timeout)"
+    - "All discovered pipeline chains resolved or timed out"
     - "Failure classifications provided for red repos"
-    - "verdict rendered (PASS/FAIL/PARTIAL)"
+    - "Chain-aware verdict rendered (PASS requires all_chains_resolved + all_deployments_healthy)"
 
 skills:
   - "releaser-ref for artifact chain, ecosystem detection, complexity levels, DAG-branch halting, cross-rite routing"

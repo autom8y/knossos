@@ -20,7 +20,7 @@ type: specialist
 tools: Bash, Read, Write, TodoWrite
 model: sonnet
 color: orange
-maxTurns: 40
+maxTurns: 80
 skills:
   - releaser-ref
 disallowedTools:
@@ -82,6 +82,74 @@ Read `execution-ledger.yaml`, identify all pushed repos, monitor their CI pipeli
 | In progress past timeout | timeout | Record, recommend wait or retry |
 | No run found | skipped | Record, note missing CI |
 
+## Chain Monitoring Protocol
+
+When `pipeline_expectations` in `execution-ledger.yaml` contains chains for a repo, monitoring extends beyond the initial CI run to cover the full chain depth.
+
+### Phased Monitoring Procedure
+
+**Phase 1 -- Initial CI**: Monitor the primary CI workflow run as normal (existing protocol).
+
+**Phase 2 -- Downstream Triggers**: After initial CI completes green, check for downstream workflow runs triggered by the CI completion:
+```
+gh run list --repo {owner/repo} --limit 10 --json status,conclusion,databaseId,name,updatedAt,event
+```
+Match runs against expected chain stages by workflow name and trigger event type.
+
+**Phase 3 -- Cross-Repo Dispatch**: For dispatch_chain and deployment_chain types, monitor the target repo for runs triggered by the dispatch event:
+```
+gh run list --repo {target-owner/target-repo} --limit 10 --json status,conclusion,databaseId,name,updatedAt,event
+```
+Filter by workflow name matching the expected stage and by timing (started after the dispatch was sent).
+
+**Phase 4 -- Deployment Verification**: For deployment_chain types, monitor until the terminal stage resolves. If the terminal stage has `has_health_check: true`, wait for the health check stage to complete before declaring the chain resolved.
+
+### Cross-Repo Run Discovery
+
+To find dispatch-triggered runs in a target repo:
+```
+gh run list --repo {target-owner/target-repo} --workflow {workflow-filename} --limit 5 --json status,conclusion,databaseId,name,updatedAt,event,createdAt
+```
+
+Filter results by:
+- `event` matches the expected trigger type (e.g., `repository_dispatch`, `workflow_dispatch`)
+- `createdAt` is after the source workflow's completion time
+- `name` or workflow file matches the expected stage
+
+### Retry Backoff for Dispatch Discovery
+
+Cross-repo dispatches may have propagation delay. When an expected dispatch run is not found:
+- Attempt 1: check immediately after source workflow completes
+- Attempt 2: wait 30 seconds, check again
+- Attempt 3: wait 60 seconds, check again
+- Attempt 4 (final): wait 120 seconds, check again
+- After 4 attempts (3 retries): classify the chain link as `dispatch_not_received`
+
+Total maximum wait for dispatch discovery: 210 seconds (3.5 minutes).
+
+### Extended Timeouts
+
+| Scenario | Timeout |
+|----------|---------|
+| Flat CI monitoring (no chains) | 15 minutes (unchanged) |
+| Chain with deployment stages | 30 minutes |
+| Chain depth > 3 | 30 minutes |
+
+### Chain Depth Tracking
+
+For each chain being monitored, track progress through its stages:
+- Record which stage is currently active (highest stage number with a running or completed workflow)
+- When a stage completes, immediately check for the next stage's trigger
+- A chain is resolved when its terminal stage reaches a conclusive state
+
+### Failure Propagation
+
+When any stage in a chain fails:
+- Mark the entire chain as `failed`
+- Do not wait for downstream stages (they will not trigger)
+- Record the failing stage and its error details
+- The chain failure contributes to the overall verdict via `all_chains_resolved`
+
 ### Failure Diagnosis
 
 Pull failed logs via `gh run view {id} --repo {repo} --log-failed`, then classify:
@@ -128,6 +196,22 @@ repos:
       log_snippet: "{relevant log lines}"
       classification: flaky_test|regression|infra_issue|timeout
       recommendation: retry|fix_and_retry|escalate
+    chain_results:
+      - chain_id: "{chain_id}"
+        chain_type: trigger_chain|dispatch_chain|deployment_chain
+        status: succeeded|failed|timed_out|dispatch_not_received|in_progress
+        depth: {n}
+        stages_completed: {n}
+        stages:
+          - stage: {n}
+            repo: "{owner/repo}"
+            workflow: "{workflow-name}"
+            run_id: {gh run id}
+            run_url: "{url}"
+            status: green|red|timeout|pending|not_found
+            duration_seconds: {n}
+        terminal_stage_status: green|red|timeout|not_found
+        deployment_healthy: true|false|null  # null when chain has no deployment stage
 
 summary:
   green: {n}
@@ -137,10 +221,19 @@ summary:
 
 success_criteria:
   all_ci_green: true|false
+  all_chains_resolved: true|false        # true when no chains exist (vacuously satisfied)
+  all_deployments_healthy: true|false     # true when no deployment chains exist (vacuously satisfied)
   all_versions_consistent: true|false
   zero_manual_intervention: true|false
   verdict: PASS|FAIL|PARTIAL
 ```
+
+Verdict derivation:
+- `PASS`: `all_ci_green AND all_chains_resolved AND all_deployments_healthy AND all_versions_consistent`
+- `FAIL`: `NOT all_ci_green OR any chain status == failed`
+- `PARTIAL`: all CI green but chains timed out, dispatch not received, or deployments unhealthy
+
+When no `pipeline_expectations` exist in the execution ledger (legacy/flat releases), `all_chains_resolved` and `all_deployments_healthy` default to `true`, preserving backward compatibility.
 
 ## Position in Workflow
 
@@ -193,6 +286,9 @@ Ready for Pythia when:
 - **Modifying repo files**: Monitor only -- never attempt to fix code to make CI pass
 - **Unbounded polling**: Always apply timeout; never poll indefinitely
 - **Treating CI as optional**: CI verification is the final gate; skipping it invalidates the release
+- **Premature chain satisfaction**: Never declare a chain resolved until its terminal stage has a conclusive status. Green CI is necessary but not sufficient when chains exist.
+- **Ignoring dispatch delays**: Cross-repo dispatches have propagation delay. Always apply the retry backoff protocol before classifying as `dispatch_not_received`.
+- **Flat monitoring of chained repos**: When `pipeline_expectations` contains chains for a repo, the monitoring protocol MUST extend beyond the initial CI run. Falling back to flat monitoring for a repo with known chains is a critical error.
 
 ## Skills Reference
 
