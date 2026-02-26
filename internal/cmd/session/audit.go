@@ -23,16 +23,24 @@ func newAuditCmd(ctx *cmdContext) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "audit",
 		Short: "Show session event history",
-		Long: `Displays session event history from events.jsonl.
+		Long: `Display session event history from events.jsonl.
 
 Events include session lifecycle transitions, handoffs, phase changes,
-and other significant actions recorded during the session.
+and other significant actions recorded during the session. Reads all
+event types, not just curated timeline events.
 
 Examples:
   ari session audit
   ari session audit -n 10
   ari session audit -e HANDOFF_EXECUTED
-  ari session audit --since 2026-01-05T14:00:00Z`,
+  ari session audit --since 2026-01-05T14:00:00Z
+  ari session audit -o json
+
+Context:
+  Low-level event inspection. Prefer 'ari session timeline' for curated view.
+  Use -e to filter by event type for debugging specific lifecycle issues.
+  Use --since with ISO8601 timestamps for time-bounded queries.
+  Acquires shared lock -- safe for concurrent reads.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runAudit(ctx, opts)
 		},
@@ -66,7 +74,7 @@ func runAudit(ctx *cmdContext, opts auditOptions) error {
 	sessionLock, err := lockMgr.Acquire(sessionID, lock.Shared, lock.DefaultTimeout, "ari-session-audit")
 	if err != nil {
 		// Non-fatal - continue without lock
-		printer.VerboseLog("warn", "failed to acquire lock", map[string]interface{}{"error": err.Error()})
+		printer.VerboseLog("warn", "failed to acquire lock", map[string]any{"error": err.Error()})
 	} else {
 		defer sessionLock.Release()
 	}

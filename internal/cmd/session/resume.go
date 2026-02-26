@@ -16,14 +16,21 @@ func newResumeCmd(ctx *cmdContext) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "resume",
 		Short: "Resume a parked session",
-		Long: `Resumes a parked session (PARKED -> ACTIVE).
+		Long: `Resume a parked session (PARKED -> ACTIVE).
 
 The session must be in PARKED state. Use 'ari session status' to check.
 Use -s to specify a session ID if not resuming the current session.
 
 Examples:
   ari session resume
-  ari session resume -s session-20260105-143000-abc12345`,
+  ari session resume -s session-20260105-143000-abc12345
+
+Context:
+  Lifecycle command -- invoke via Moirai, not specialists directly.
+  Requires PARKED state. Use 'ari session status -o json' to check first.
+  Clears parked_at and parked_reason fields on success.
+  Emits session.resumed event to the backplane.
+  Use -s to target a specific parked session when multiple exist.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runResume(ctx)
 		},
@@ -96,7 +103,7 @@ func runResume(ctx *cmdContext) error {
 	defer writer.Close()
 	writer.Write(clewcontract.NewSessionResumedEvent(sessionID))
 	if err := writer.Flush(); err != nil {
-		printer.VerboseLog("warn", "failed to write event", map[string]interface{}{"error": err.Error()})
+		printer.VerboseLog("warn", "failed to write event", map[string]any{"error": err.Error()})
 	}
 
 	// Output result

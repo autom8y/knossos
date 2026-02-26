@@ -51,7 +51,7 @@ type fieldGetOptions struct {
 func newFieldSetCmd(ctx *cmdContext) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "field-set <key> <value>",
-		Short: "Set a session frontmatter field",
+		Short: "Set a session metadata field",
 		Long: `Set a validated session frontmatter field and persist it.
 
 Settable fields:
@@ -59,7 +59,7 @@ Settable fields:
   initiative    Any non-empty string (max 200 chars)
   active_rite   Valid rite name (non-empty)
 
-Read-only fields (use dedicated commands instead):
+Read-only fields return actionable error redirects:
   current_phase   Use 'ari session transition <phase>'
   status          Use lifecycle commands (park/resume/wrap)
   session_id      Immutable
@@ -72,9 +72,11 @@ Examples:
   ari session field-set active_rite review
 
 Context:
-  Agents should use this to update session metadata without going through
-  Moirai. The field is validated before writing. Acquires exclusive lock
-  for consistency. Emits a field.updated event to the session log.`,
+  Update session metadata directly without Moirai coordination.
+  For phase changes, use 'ari session transition'. For status, use lifecycle commands.
+  Acquires exclusive lock and emits field.updated event automatically.
+  Read-only fields return actionable errors pointing to the correct command.
+  Prefer this over editing SESSION_CONTEXT.md directly.`,
 		Args: cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runFieldSet(ctx, args[0], args[1])
@@ -89,10 +91,11 @@ func newFieldGetCmd(ctx *cmdContext) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "field-get [key]",
-		Short: "Get a session frontmatter field",
+		Short: "Get a session metadata field",
 		Long: `Get the value of a session frontmatter field.
 
-Use --all to return all fields as a structured snapshot.
+Use --all to return all fields as a structured snapshot. Any field from
+the session frontmatter is readable, including read-only fields.
 
 Examples:
   ari session field-get complexity
@@ -101,8 +104,10 @@ Examples:
   ari session field-get --all -o json
 
 Context:
-  Agents can read any field. Use --all for a complete snapshot.
-  For richer session context, prefer 'ari session status'.`,
+  Read any session field. Use --all -o json for structured snapshots.
+  For richer context with timeline and decisions, prefer 'ari session status'.
+  For role-scoped context injection, use 'ari session context snapshot'.
+  Acquires shared lock -- safe for concurrent reads.`,
 		Args: cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			key := ""

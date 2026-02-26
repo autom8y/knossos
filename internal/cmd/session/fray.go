@@ -25,8 +25,8 @@ func newFrayCmd(ctx *cmdContext) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "fray",
-		Short: "Fork session into a parallel strand",
-		Long: `Forks the current (or specified) session into a new parallel strand.
+		Short: "Fork session into parallel strand",
+		Long: `Fork the current (or specified) session into a new parallel strand.
 
 The parent session is parked and a new child session is created that carries
 forward the parent's initiative, complexity, rite, and phase. The child's
@@ -38,7 +38,14 @@ By default, a git worktree is created for filesystem isolation. Use
 Examples:
   ari session fray
   ari session fray --no-worktree
-  ari session fray --from session-20260206-120000-abcdef01`,
+  ari session fray --from session-20260206-120000-abcdef01
+
+Context:
+  Use for parallel workstreams within the same initiative.
+  Parent is auto-parked; child inherits phase, rite, and complexity.
+  The child emits strand_resolved on its parent when wrapped.
+  Worktree creation is best-effort -- failure does not block the fray.
+  Use --from to fray a specific session instead of the current one.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runFray(ctx, opts)
 		},

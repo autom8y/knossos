@@ -26,11 +26,24 @@ func newListCmd(ctx *cmdContext) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "List sessions",
-		Long: `Lists sessions with optional filtering by status.
+		Short: "List sessions with status filtering",
+		Long: `List sessions with optional filtering by status.
 
 Parked sessions older than ARIADNE_STALE_SESSION_DAYS (default: 2 days)
-are annotated as stale with a suggestion to wrap them.`,
+are annotated as stale with a suggestion to wrap them. Use --all to
+include archived sessions from the archive directory.
+
+Examples:
+  ari session list
+  ari session list --status PARKED
+  ari session list --all -n 50
+  ari session list -o json
+
+Context:
+  Use this to discover parked sessions before creating new ones.
+  Stale annotations help agents identify sessions to wrap or gc.
+  Prefer 'ari session status' for current session detail.
+  Use 'ari session gc' to batch-archive stale parked sessions.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runList(ctx, opts)
 		},

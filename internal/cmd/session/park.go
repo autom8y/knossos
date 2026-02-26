@@ -22,15 +22,23 @@ func newParkCmd(ctx *cmdContext) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "park",
 		Short: "Suspend the current session",
-		Long: `Suspends the current session (ACTIVE -> PARKED).
+		Long: `Suspend the current session (ACTIVE -> PARKED).
 
 Parked sessions preserve their state and can be resumed later
 with 'ari session resume'. A reason can be provided for the audit log.
+Rotates SESSION_CONTEXT.md to compact state before parking.
 
 Examples:
   ari session park
   ari session park -r "switching to higher priority work"
-  ari session park --reason "end of day"`,
+  ari session park --reason "end of day"
+
+Context:
+  Lifecycle command -- invoke via Moirai, not specialists directly.
+  Autopark hook calls this on CC session stop events.
+  Use 'ari session resume' to reactivate. Use 'ari session wrap' to archive.
+  Always provide --reason for audit trail clarity.
+  Emits session.parked and session.end events to the backplane.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runPark(ctx, opts)
 		},
@@ -96,9 +104,9 @@ func runPark(ctx *cmdContext, opts parkOptions) error {
 	sessionDir := resolver.SessionDir(sessionID)
 	rotResult, rotErr := session.RotateSessionContext(sessionDir, session.DefaultMaxLines, session.DefaultKeepLines)
 	if rotErr != nil {
-		printer.VerboseLog("warn", "failed to rotate SESSION_CONTEXT on park", map[string]interface{}{"error": rotErr.Error()})
+		printer.VerboseLog("warn", "failed to rotate SESSION_CONTEXT on park", map[string]any{"error": rotErr.Error()})
 	} else if rotResult.Rotated {
-		printer.VerboseLog("info", "rotated SESSION_CONTEXT on park", map[string]interface{}{
+		printer.VerboseLog("info", "rotated SESSION_CONTEXT on park", map[string]any{
 			"archived_lines": rotResult.ArchivedLines,
 			"kept_lines":     rotResult.KeptLines,
 		})
@@ -122,7 +130,7 @@ func runPark(ctx *cmdContext, opts parkOptions) error {
 		parkWriter.Write(clewcontract.NewSessionEndEvent(sessionID, "parked", durationMs))
 
 		if flushErr := parkWriter.Flush(); flushErr != nil {
-			printer.VerboseLog("warn", "failed to write events", map[string]interface{}{"error": flushErr.Error()})
+			printer.VerboseLog("warn", "failed to write events", map[string]any{"error": flushErr.Error()})
 		}
 	}
 

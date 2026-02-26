@@ -378,7 +378,7 @@ func TestCreateSeedJSONOutput(t *testing.T) {
 	}
 
 	// Unmarshal and verify key fields
-	var result map[string]interface{}
+	var result map[string]any
 	if err := json.Unmarshal(jsonBytes, &result); err != nil {
 		t.Fatalf("Failed to unmarshal: %v", err)
 	}

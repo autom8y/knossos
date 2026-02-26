@@ -28,20 +28,27 @@ func newWrapCmd(ctx *cmdContext) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "wrap",
 		Short: "Complete and archive a session",
-		Long: `Completes a session, transitioning to ARCHIVED state.
+		Long: `Complete a session, transitioning to ARCHIVED state.
 
-Before archiving, generates a White Sails confidence signal. If sails
+Before archiving, generate a White Sails confidence signal. If sails
 are BLACK (explicit blockers present), the wrap is blocked unless --force
 is used. The session directory is moved to the archive unless --no-archive
 is specified.
 
-After a successful wrap, scans for stale parked sessions and reports
+After a successful wrap, scan for stale parked sessions and report
 them to stderr with a suggestion to wrap them as well.
 
 Examples:
   ari session wrap
   ari session wrap --no-archive
-  ari session wrap --force          # Wrap even with BLACK sails`,
+  ari session wrap --force          # Wrap even with BLACK sails
+
+Context:
+  Lifecycle command -- invoke via Moirai, not specialists directly.
+  BLACK sails block wrap by default (quality gate). Use --force to override.
+  Cleans up all lock artifacts, CC map entries, and Moirai locks.
+  Emits session.archived and session.end events with cognitive budget.
+  Use 'ari session gc' to batch-archive stale parked sessions.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runWrap(ctx, opts)
 		},
@@ -76,7 +83,7 @@ func runWrap(ctx *cmdContext, opts wrapOptions) error {
 	if _, statErr := os.Stat(archiveSessionPath); statErr == nil {
 		err := errors.NewWithDetails(errors.CodeLifecycleViolation,
 			fmt.Sprintf("Session %s is already archived", sessionID),
-			map[string]interface{}{
+			map[string]any{
 				"session_id":   sessionID,
 				"archive_path": archiveSessionPath,
 				"hint":         "Session was previously wrapped and cannot be wrapped again.",
@@ -118,14 +125,14 @@ func runWrap(ctx *cmdContext, opts wrapOptions) error {
 	sailsResult, sailsErr := sailsGen.Generate()
 	if sailsErr != nil {
 		// Don't block wrap on sails generation failure - warn and continue
-		printer.VerboseLog("warn", "failed to generate sails", map[string]interface{}{"error": sailsErr.Error()})
+		printer.VerboseLog("warn", "failed to generate sails", map[string]any{"error": sailsErr.Error()})
 	} else {
 		// Quality gate: Block wrap if sails are BLACK (unless --force)
 		if sailsResult.Color == sails.ColorBlack {
 			if !opts.force {
 				err := errors.NewWithDetails(errors.CodeQualityGateFailed,
 					"cannot wrap session with BLACK sails: explicit blockers present",
-					map[string]interface{}{
+					map[string]any{
 						"color":   string(sailsResult.Color),
 						"reasons": sailsResult.Reasons,
 					})
@@ -133,7 +140,7 @@ func runWrap(ctx *cmdContext, opts wrapOptions) error {
 				return err
 			}
 			// If --force, emit warning but continue
-			printer.VerboseLog("warn", "wrapping session with BLACK sails (--force used)", map[string]interface{}{
+			printer.VerboseLog("warn", "wrapping session with BLACK sails (--force used)", map[string]any{
 				"color":   string(sailsResult.Color),
 				"reasons": sailsResult.Reasons,
 			})
@@ -173,7 +180,7 @@ func runWrap(ctx *cmdContext, opts wrapOptions) error {
 		})
 		sailsWriter.Write(sailsEvent)
 		if flushErr := sailsWriter.Flush(); flushErr != nil {
-			printer.VerboseLog("warn", "failed to emit sails event", map[string]interface{}{"error": flushErr.Error()})
+			printer.VerboseLog("warn", "failed to emit sails event", map[string]any{"error": flushErr.Error()})
 		}
 	}
 
@@ -215,7 +222,7 @@ func runWrap(ctx *cmdContext, opts wrapOptions) error {
 
 		endWriter.Write(sessionEndEvent)
 		if flushErr := endWriter.Flush(); flushErr != nil {
-			printer.VerboseLog("warn", "failed to write events", map[string]interface{}{"error": flushErr.Error()})
+			printer.VerboseLog("warn", "failed to write events", map[string]any{"error": flushErr.Error()})
 		}
 	}
 
@@ -227,7 +234,7 @@ func runWrap(ctx *cmdContext, opts wrapOptions) error {
 		event := clewcontract.NewStrandResolvedEvent(sessCtx.FrayedFrom, sessionID, "wrapped")
 		strandWriter.Write(event)
 		if flushErr := strandWriter.Flush(); flushErr != nil {
-			printer.VerboseLog("warn", "failed to emit strand_resolved event", map[string]interface{}{"error": flushErr.Error()})
+			printer.VerboseLog("warn", "failed to emit strand_resolved event", map[string]any{"error": flushErr.Error()})
 		}
 	}
 
@@ -242,12 +249,12 @@ func runWrap(ctx *cmdContext, opts wrapOptions) error {
 	// Must be removed before the archive move so it doesn't persist in the archive.
 	moiraiLockPath := sessionDir + "/.moirai-lock"
 	if removeErr := os.Remove(moiraiLockPath); removeErr != nil && !os.IsNotExist(removeErr) {
-		printer.VerboseLog("warn", "failed to remove moirai lock before archive", map[string]interface{}{"error": removeErr.Error()})
+		printer.VerboseLog("warn", "failed to remove moirai lock before archive", map[string]any{"error": removeErr.Error()})
 	}
 
 	// 3. CC map entries pointing to this session
 	if clearErr := session.ClearCCMapForSession(resolver, sessionID); clearErr != nil {
-		printer.VerboseLog("warn", "failed to clear CC map entries", map[string]interface{}{"error": clearErr.Error()})
+		printer.VerboseLog("warn", "failed to clear CC map entries", map[string]any{"error": clearErr.Error()})
 	}
 
 	// Move to archive if requested
@@ -256,20 +263,20 @@ func runWrap(ctx *cmdContext, opts wrapOptions) error {
 	if !opts.noArchive {
 		archiveDir := resolver.ArchiveDir()
 		if err := paths.EnsureDir(archiveDir); err != nil {
-			printer.VerboseLog("warn", "failed to create archive directory", map[string]interface{}{"error": err.Error()})
+			printer.VerboseLog("warn", "failed to create archive directory", map[string]any{"error": err.Error()})
 		} else {
 			archivePath = archiveDir + "/" + sessionID
 			// Only move if target doesn't exist
 			if _, err := os.Stat(archivePath); os.IsNotExist(err) {
 				if err := os.Rename(sessionDir, archivePath); err != nil {
-					printer.VerboseLog("warn", "failed to move to archive", map[string]interface{}{"error": err.Error()})
+					printer.VerboseLog("warn", "failed to move to archive", map[string]any{"error": err.Error()})
 				} else {
 					archived = true
 					// Defensive: verify source directory is gone after rename
 					// (os.Rename should be atomic, but guard against edge cases)
 					if _, statErr := os.Stat(sessionDir); statErr == nil {
 						if removeErr := os.RemoveAll(sessionDir); removeErr != nil {
-							printer.VerboseLog("warn", "failed to remove ghost session directory after archive", map[string]interface{}{"error": removeErr.Error()})
+							printer.VerboseLog("warn", "failed to remove ghost session directory after archive", map[string]any{"error": removeErr.Error()})
 						}
 					}
 				}
@@ -279,7 +286,7 @@ func runWrap(ctx *cmdContext, opts wrapOptions) error {
 				// so the live directory is a stale ghost — remove it.
 				archived = true
 				if removeErr := os.RemoveAll(sessionDir); removeErr != nil {
-					printer.VerboseLog("warn", "failed to remove ghost session directory", map[string]interface{}{"error": removeErr.Error()})
+					printer.VerboseLog("warn", "failed to remove ghost session directory", map[string]any{"error": removeErr.Error()})
 				}
 			}
 		}
@@ -326,7 +333,7 @@ func runWrap(ctx *cmdContext, opts wrapOptions) error {
 // Returns nil if CLEW_RECORD.ndjson doesn't exist or cannot be read.
 // Falls back to THREAD_RECORD.ndjson for legacy sessions.
 // Future: Integrate with ARIADNE_MSG_WARN/ARIADNE_MSG_PARK thresholds.
-func collectCognitiveBudget(sessionDir string) map[string]interface{} {
+func collectCognitiveBudget(sessionDir string) map[string]any {
 	// Try new path first, fall back to legacy path
 	clewRecordPath := sessionDir + "/CLEW_RECORD.ndjson"
 	threadRecordPath := sessionDir + "/THREAD_RECORD.ndjson"
@@ -371,7 +378,7 @@ func collectCognitiveBudget(sessionDir string) map[string]interface{} {
 	// - Parse individual events to categorize by tool type
 	// - Track message count vs thresholds (ARIADNE_MSG_WARN)
 	// - Include park suggestions if threshold exceeded
-	return map[string]interface{}{
+	return map[string]any{
 		"total_tool_calls": totalEvents,
 		"tool_counts":      toolCounts, // Placeholder for future detailed counts
 	}

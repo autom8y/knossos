@@ -29,22 +29,15 @@ func newTimelineCmd(ctx *cmdContext) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "timeline",
 		Short: "Show session timeline",
-		Long: `Reads and displays the curated timeline for the current session.
+		Long: `Read and display the curated timeline for the current session.
 
-The default source is the ## Timeline section of SESSION_CONTEXT.md, which
+The default source is the Timeline section of SESSION_CONTEXT.md, which
 contains the curated view of significant events (decisions, agent delegations,
 commits, phase transitions, and session lifecycle events).
 
 Use --from-events to query the raw event backplane (events.jsonl) instead.
 This includes all v3 TypedEvents that project to the timeline, even if the
 timeline section has not been updated yet.
-
-Context:
-  Use this command to review what happened during the session.
-  The default source is the Timeline section of SESSION_CONTEXT.md (curated view).
-  Use --from-events for the full raw event stream (includes backplane-only events).
-  Agents should prefer the curated view unless they need low-level detail.
-  Use 'ari session status' for session metadata (status, phase, initiative).
 
 Examples:
   ari session timeline
@@ -53,7 +46,14 @@ Examples:
   ari session timeline --last=10
   ari session timeline --from-events
   ari session timeline --from-events --type=agent.delegated
-  ari session timeline -o json`,
+  ari session timeline -o json
+
+Context:
+  Review session narrative. Default reads curated SESSION_CONTEXT.md timeline.
+  Use --from-events for raw event history including backplane-only events.
+  Use --since=30m to get recent activity for stale-context refresh.
+  Prefer 'ari session context snapshot' for role-scoped context injection.
+  Use 'ari session status' for session metadata, not timeline.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runTimeline(ctx, opts)
 		},

@@ -25,19 +25,25 @@ func newGcCmd(ctx *cmdContext) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "gc",
 		Short: "Archive stale parked sessions",
-		Long: `Scans for PARKED sessions older than the stale threshold and archives them.
+		Long: `Scan for PARKED sessions older than the stale threshold and archive them.
 
 The default stale threshold is set by ARIADNE_STALE_SESSION_DAYS (default: 2 days).
 Override with --stale-after for a one-off run.
 
-Without --force, prompts for confirmation before wrapping each session.
-With --dry-run, only lists stale sessions without archiving them.
+Without --force, prompt for confirmation before wrapping each session.
+With --dry-run, only list stale sessions without archiving them.
 
 Examples:
   ari session gc
   ari session gc --stale-after 7
   ari session gc --force
-  ari session gc --dry-run`,
+  ari session gc --dry-run
+
+Context:
+  Batch housekeeping command. Run periodically or after 'ari session wrap'.
+  Delegates to runWrap internally -- each archived session gets full wrap treatment.
+  Use --dry-run first to preview which sessions would be archived.
+  Agents should not call this directly -- it is a user-facing maintenance tool.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runGc(ctx, opts)
 		},

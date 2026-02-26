@@ -15,8 +15,12 @@ import (
 func newContextCmd(ctx *cmdContext) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "context",
-		Short: "Session context operations",
-		Long:  `Commands for querying and projecting session context for agents.`,
+		Short: "Query and project session context",
+		Long: `Commands for querying and projecting session context for agents.
+
+Context:
+  Subcommands provide role-adaptive context projections.
+  The SubagentStart hook calls 'snapshot' automatically on agent spawn.`,
 	}
 
 	cmd.AddCommand(newSnapshotCmd(ctx))
@@ -36,21 +40,29 @@ func newSnapshotCmd(ctx *cmdContext) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "snapshot",
-		Short: "Generate a role-adaptive session context snapshot",
-		Long: `Generates a session context projection sized for the target agent's role.
+		Short: "Generate role-adaptive context snapshot",
+		Long: `Generate a session context projection sized for the target agent role.
 
 Orchestrators get full context (last 10 timeline entries, all decisions, blockers).
 Specialists get a scoped view (last 5 + up to 3 agent-scoped entries, blockers).
 Background agents get minimal context (phase, complexity, status only).
 
 The SubagentStart hook calls this automatically when spawning subagents.
-Use this command directly to preview what a spawned agent would receive.
+Use this command directly to preview what a spawned agent would receive,
+or to refresh stale context mid-conversation.
 
 Examples:
   ari session context snapshot --role=orchestrator
   ari session context snapshot --role=specialist --agent=context-architect
   ari session context snapshot --role=background
-  ari session context snapshot -o json`,
+  ari session context snapshot -o json
+
+Context:
+  SubagentStart hook calls this automatically -- agents rarely need direct calls.
+  Call directly to refresh stale context mid-conversation or preview agent views.
+  Read-only: no locks, no writes, no events emitted.
+  Use -o json for structured consumption; default output is markdown.
+  Prefer this over 'ari session timeline' for injecting context into agents.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runSnapshot(ctx, opts)
 		},

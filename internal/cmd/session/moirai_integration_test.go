@@ -167,7 +167,7 @@ func countEventsOfType(t *testing.T, projectDir, sessionID, eventType string) in
 }
 
 // readEventsJSONL reads events.jsonl and returns parsed JSON objects.
-func readEventsJSONL(t *testing.T, projectDir, sessionID string) []map[string]interface{} {
+func readEventsJSONL(t *testing.T, projectDir, sessionID string) []map[string]any {
 	t.Helper()
 	eventsPath := filepath.Join(projectDir, ".claude", "sessions", sessionID, "events.jsonl")
 	file, err := os.Open(eventsPath)
@@ -179,14 +179,14 @@ func readEventsJSONL(t *testing.T, projectDir, sessionID string) []map[string]in
 	}
 	defer file.Close()
 
-	var events []map[string]interface{}
+	var events []map[string]any
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		line := scanner.Text()
 		if strings.TrimSpace(line) == "" {
 			continue
 		}
-		var event map[string]interface{}
+		var event map[string]any
 		if err := json.Unmarshal([]byte(line), &event); err != nil {
 			// Skip unparseable lines (legacy format)
 			continue

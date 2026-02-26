@@ -18,17 +18,23 @@ import (
 func newStatusCmd(ctx *cmdContext) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "status",
-		Short: "Show session state",
-		Long: `Returns current session state with comprehensive metadata.
+		Short: "Show current session state",
+		Long: `Return current session state with comprehensive metadata.
 
-Includes session ID, status, initiative, complexity, current phase,
+Include session ID, status, initiative, complexity, current phase,
 active rite, execution mode, git branch, and White Sails color.
-Returns has_session=false if no active session exists.
+Return has_session=false when no active session exists.
 
 Examples:
   ari session status
   ari session status -o json
-  ari session status -s session-20260105-143000-abc12345`,
+  ari session status -s session-20260105-143000-abc12345
+
+Context:
+  Primary session query command. Always use -o json for machine parsing.
+  Check has_session first before reading other fields.
+  Prefer 'ari session context snapshot' for role-scoped rich context.
+  Use 'ari session field-get' for single-field reads.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runStatus(ctx)
 		},
@@ -78,7 +84,7 @@ func runStatus(ctx *cmdContext) error {
 	sessionLock, err := lockMgr.Acquire(sessionID, lock.Shared, lock.DefaultTimeout, "ari-session-status")
 	if err != nil {
 		// Non-fatal - continue without lock
-		printer.VerboseLog("warn", "failed to acquire lock", map[string]interface{}{"error": err.Error()})
+		printer.VerboseLog("warn", "failed to acquire lock", map[string]any{"error": err.Error()})
 	} else {
 		defer sessionLock.Release()
 	}

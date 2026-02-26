@@ -34,7 +34,8 @@ func newCreateCmd(ctx *cmdContext) *cobra.Command {
 		Long: `Create a new session, transitioning from NONE to ACTIVE state.
 
 The initiative argument is a short description of the work being done.
-Complexity defaults to MODULE if not specified.
+Complexity defaults to MODULE if not specified. Fails if an active or
+parked session already exists. Returns the new session_id on success.
 
 Seed mode (--seed) creates the session in an ephemeral worktree, immediately
 parks it, and copies it to the main repo. This enables parallel session
@@ -44,7 +45,13 @@ Examples:
   ari session create "user-auth feature"
   ari session create "deploy pipeline" -c SYSTEM -r sre
   ari session create "hotfix login" -c PATCH
-  ari session create "parallel work" --seed`,
+  ari session create "parallel work" --seed
+
+Context:
+  Used by Moirai during /start. Returns session_id in output.
+  Fails if an active or parked session exists (use 'wrap' or 'park' first).
+  Agents should never call this directly -- Moirai owns session creation.
+  Use --seed for parallel session preparation in CI or batch workflows.`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runCreate(ctx, args[0], opts)
@@ -157,7 +164,7 @@ func runCreate(ctx *cmdContext, initiative string, opts createOptions) error {
 	defer writer.Close()
 	writer.Write(clewcontract.NewSessionCreatedEvent(newCtx.SessionID, initiative, opts.complexity, rite))
 	if err := writer.Flush(); err != nil {
-		printer.VerboseLog("warn", "failed to write event", map[string]interface{}{"error": err.Error()})
+		printer.VerboseLog("warn", "failed to write event", map[string]any{"error": err.Error()})
 	}
 
 	// Output result
@@ -202,7 +209,7 @@ func runCreateSeeded(ctx *cmdContext, initiative string, opts createOptions) err
 	mainProjectRoot := resolver.ProjectRoot()
 
 	// Create ephemeral worktree
-	printer.VerboseLog("info", "creating ephemeral worktree", map[string]interface{}{"path": worktreePath})
+	printer.VerboseLog("info", "creating ephemeral worktree", map[string]any{"path": worktreePath})
 	if err := createWorktree(worktreePath); err != nil {
 		err := errors.Wrap(errors.CodeGeneralError, "failed to create worktree", err)
 		printer.PrintError(err)
@@ -212,10 +219,10 @@ func runCreateSeeded(ctx *cmdContext, initiative string, opts createOptions) err
 	// Ensure cleanup of worktree unless --seed-keep is set
 	cleanupWorktree := func() {
 		if opts.seedKeep {
-			printer.VerboseLog("info", "keeping worktree for debugging", map[string]interface{}{"path": worktreePath})
+			printer.VerboseLog("info", "keeping worktree for debugging", map[string]any{"path": worktreePath})
 			return
 		}
-		printer.VerboseLog("info", "removing ephemeral worktree", map[string]interface{}{"path": worktreePath})
+		printer.VerboseLog("info", "removing ephemeral worktree", map[string]any{"path": worktreePath})
 		removeWorktree(worktreePath)
 	}
 
@@ -271,7 +278,7 @@ func runCreateSeeded(ctx *cmdContext, initiative string, opts createOptions) err
 	writer.Write(clewcontract.NewSessionCreatedEvent(newCtx.SessionID, initiative, opts.complexity, rite))
 	writer.Write(clewcontract.NewSessionParkedEvent(newCtx.SessionID, "seeded creation"))
 	if err := writer.Flush(); err != nil {
-		printer.VerboseLog("warn", "failed to write seeded events", map[string]interface{}{"error": err.Error()})
+		printer.VerboseLog("warn", "failed to write seeded events", map[string]any{"error": err.Error()})
 	}
 
 	// Copy session from worktree to main repo
@@ -284,7 +291,7 @@ func runCreateSeeded(ctx *cmdContext, initiative string, opts createOptions) err
 	}
 
 	mainSessionDir := resolver.SessionDir(newCtx.SessionID)
-	printer.VerboseLog("info", "copying session to main repo", map[string]interface{}{
+	printer.VerboseLog("info", "copying session to main repo", map[string]any{
 		"from": worktreeSessionDir,
 		"to":   mainSessionDir,
 	})
@@ -292,7 +299,7 @@ func runCreateSeeded(ctx *cmdContext, initiative string, opts createOptions) err
 	if err := copyDir(worktreeSessionDir, mainSessionDir); err != nil {
 		// On copy failure, keep worktree for debugging unless explicitly asked to remove
 		if !opts.seedKeep {
-			printer.VerboseLog("warn", "copy failed, keeping worktree for debugging", map[string]interface{}{
+			printer.VerboseLog("warn", "copy failed, keeping worktree for debugging", map[string]any{
 				"path":  worktreePath,
 				"error": err.Error(),
 			})

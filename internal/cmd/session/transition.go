@@ -24,17 +24,25 @@ func newTransitionCmd(ctx *cmdContext) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "transition <phase>",
 		Short: "Transition between workflow phases",
-		Long: `Transitions between workflow phases within an active session.
+		Long: `Transition between workflow phases within an active session.
 
 Valid phases: requirements, design, implementation, validation, complete
 
 Phases must progress forward. Artifact validation is performed by default
-and can be skipped with --force.
+and can be skipped with --force. Rotates SESSION_CONTEXT.md to keep
+context compact across phase boundaries.
 
 Examples:
   ari session transition design
   ari session transition implementation
-  ari session transition complete --force`,
+  ari session transition complete --force
+
+Context:
+  Use this instead of 'ari session field-set current_phase' -- field-set
+  rejects phase mutations and redirects here.
+  Validates forward-only progression and checks for required artifacts.
+  Use --force to skip artifact validation during rapid prototyping.
+  Emits phase.transitioned event. Orchestrators call this at phase gates.`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runTransition(ctx, args[0], opts)
@@ -104,7 +112,7 @@ func runTransition(ctx *cmdContext, targetPhase string, opts transitionOptions) 
 	if !sess.CanTransitionPhase(sess.Phase(fromPhase), sess.Phase(targetPhase)) {
 		err := errors.NewWithDetails(errors.CodeLifecycleViolation,
 			"invalid phase transition: phases must progress forward",
-			map[string]interface{}{
+			map[string]any{
 				"from_phase": fromPhase,
 				"to_phase":   targetPhase,
 			})
@@ -118,7 +126,7 @@ func runTransition(ctx *cmdContext, targetPhase string, opts transitionOptions) 
 		if len(missing) > 0 {
 			err := errors.NewWithDetails(errors.CodeLifecycleViolation,
 				"cannot transition: missing required artifacts",
-				map[string]interface{}{
+				map[string]any{
 					"from_phase":       fromPhase,
 					"to_phase":         targetPhase,
 					"missing_artifacts": missing,
@@ -132,9 +140,9 @@ func runTransition(ctx *cmdContext, targetPhase string, opts transitionOptions) 
 	sessionDir := resolver.SessionDir(sessionID)
 	rotResult, rotErr := sess.RotateSessionContext(sessionDir, sess.DefaultMaxLines, sess.DefaultKeepLines)
 	if rotErr != nil {
-		printer.VerboseLog("warn", "failed to rotate SESSION_CONTEXT on transition", map[string]interface{}{"error": rotErr.Error()})
+		printer.VerboseLog("warn", "failed to rotate SESSION_CONTEXT on transition", map[string]any{"error": rotErr.Error()})
 	} else if rotResult.Rotated {
-		printer.VerboseLog("info", "rotated SESSION_CONTEXT on transition", map[string]interface{}{
+		printer.VerboseLog("info", "rotated SESSION_CONTEXT on transition", map[string]any{
 			"archived_lines": rotResult.ArchivedLines,
 			"kept_lines":     rotResult.KeptLines,
 		})
@@ -155,7 +163,7 @@ func runTransition(ctx *cmdContext, targetPhase string, opts transitionOptions) 
 	defer writer.Close()
 	writer.Write(clewcontract.NewPhaseTransitionedEvent(sessionID, fromPhase, targetPhase))
 	if err := writer.Flush(); err != nil {
-		printer.VerboseLog("warn", "failed to write event", map[string]interface{}{"error": err.Error()})
+		printer.VerboseLog("warn", "failed to write event", map[string]any{"error": err.Error()})
 	}
 
 	// Output result

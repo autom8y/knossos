@@ -22,26 +22,28 @@ func newLogCmd(ctx *cmdContext) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "log <message>",
-		Short: "Append a typed event to the session timeline",
-		Long: `Appends a typed event to events.jsonl AND a formatted entry to the
-## Timeline section of SESSION_CONTEXT.md.
+		Short: "Append a typed event to the timeline",
+		Long: `Append a typed event to events.jsonl and the Timeline section of
+SESSION_CONTEXT.md.
 
-This command does NOT acquire a Moirai lock. Timeline appends are
-intentionally lock-free because hooks may call this command at high frequency.
-If two concurrent appends race, both events are preserved in events.jsonl and
-the timeline entry can be reconstructed via 'ari session timeline --from-events'.
-
-Context:
-  Use this command to record significant events in the session timeline.
-  Agents should log decisions with --type=decision and include --rationale.
-  Hook handlers should log agent delegations and commit events automatically.
+Does NOT acquire a Moirai lock. Timeline appends are intentionally
+lock-free because hooks may call this command at high frequency.
+If two concurrent appends race, both events are preserved in events.jsonl
+and the timeline can be reconstructed via 'ari session timeline --from-events'.
 
 Examples:
   ari session log "started architect handoff"
   ari session log --type=decision "chose CSS vars over styled-components" --rationale="runtime perf"
   ari session log --type=agent --agent=architect "designing components"
   ari session log --type=commit --sha=abc123f "feat: theme provider"
-  ari session log --type=command "invoked /consult"`,
+  ari session log --type=command "invoked /consult"
+
+Context:
+  Log decisions (--type=decision), delegations (--type=agent), and milestones.
+  No lock needed -- safe to call from hooks and concurrent agents.
+  Hooks auto-log commits via --type=commit; agents should not duplicate these.
+  Always include --rationale with decisions for timeline auditability.
+  Reconstructible: lost timeline entries can be rebuilt from events.jsonl.`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runLog(ctx, args[0], opts)

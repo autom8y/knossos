@@ -27,15 +27,21 @@ func newLockCmd(ctx *cmdContext) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "lock",
-		Short: "Acquire a Moirai lock for session state mutation",
-		Long: `Acquires an exclusive advisory lock for Moirai to mutate session context files.
+		Short: "Acquire Moirai advisory lock",
+		Long: `Acquire an exclusive advisory lock for Moirai to mutate session context files.
 
 This lock is checked by the writeguard hook to allow Moirai to write to
 protected *_CONTEXT.md files. The lock is session-scoped and stale after
-300 seconds.
+300 seconds. Stale locks are automatically overwritten with a warning.
 
 Examples:
-  ari session lock --agent moirai`,
+  ari session lock --agent moirai
+
+Context:
+  Only Moirai should call this. The writeguard hook checks this lock.
+  Always pair with 'ari session unlock' after mutations, even on error.
+  Lock auto-expires after 300 seconds to prevent deadlocks.
+  Other agents should use 'ari session field-set' or lifecycle commands.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runLock(ctx, opts)
 		},
@@ -52,14 +58,19 @@ func newUnlockCmd(ctx *cmdContext) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "unlock",
-		Short: "Release a Moirai lock for session state mutation",
-		Long: `Releases the Moirai lock, allowing other operations to proceed.
+		Short: "Release Moirai advisory lock",
+		Long: `Release the Moirai lock, allowing other operations to proceed.
 
 The agent name must match the lock holder. Always unlock after completing
-mutations, even on error.
+mutations, even on error. Fails if no lock exists or agent does not match.
 
 Examples:
-  ari session unlock --agent moirai`,
+  ari session unlock --agent moirai
+
+Context:
+  Only Moirai should call this. Always call after lock, even on error.
+  Fails cleanly if lock was already released or expired.
+  Use 'ari session recover' to clean up stale locks in bulk.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runUnlock(ctx, opts)
 		},
@@ -110,7 +121,7 @@ func runLock(ctx *cmdContext, opts lockOptions) error {
 			return err
 		}
 		// Stale lock, will overwrite with warning
-		printer.VerboseLog("warn", "overwriting stale lock", map[string]interface{}{
+		printer.VerboseLog("warn", "overwriting stale lock", map[string]any{
 			"stale_age_seconds": time.Since(existingLock.AcquiredAt).Seconds(),
 		})
 	}
@@ -136,7 +147,7 @@ func runLock(ctx *cmdContext, opts lockOptions) error {
 	}
 
 	// Output success
-	result := map[string]interface{}{
+	result := map[string]any{
 		"success":    true,
 		"action":     "lock",
 		"agent":      opts.agent,
@@ -202,7 +213,7 @@ func runUnlock(ctx *cmdContext, opts lockOptions) error {
 	}
 
 	// Output success
-	result := map[string]interface{}{
+	result := map[string]any{
 		"success":    true,
 		"action":     "unlock",
 		"agent":      opts.agent,

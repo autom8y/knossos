@@ -26,16 +26,24 @@ func newMigrateCmd(ctx *cmdContext) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "migrate",
-		Short: "Migrate sessions to v2 schema",
-		Long: `Migrates session(s) from v1 to v2.1 schema format.
+		Short: "Migrate sessions to latest schema",
+		Long: `Migrate session(s) from v1 to v2.1 schema format.
 
-Creates a backup of each session before migrating. Status is derived
-from v1 fields (parked_at, archived_at, etc.).
+Create a backup of each session before migrating. Status is derived
+from v1 fields (parked_at, archived_at, etc.). Already-migrated sessions
+are skipped automatically.
 
 Examples:
   ari session migrate                    # Migrate current session
   ari session migrate --all              # Migrate all v1 sessions
-  ari session migrate --all --dry-run    # Preview without applying`,
+  ari session migrate --all --dry-run    # Preview without applying
+
+Context:
+  Run once after upgrading ari to migrate legacy sessions.
+  Always use --dry-run first to preview what would change.
+  Creates .v1.backup files for each migrated session (rollback-safe).
+  Emits schema.migrated event for auditability.
+  Skips sessions already at v2.0 or v2.1 -- safe to run repeatedly.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runMigrate(ctx, opts)
 		},

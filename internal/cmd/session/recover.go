@@ -23,20 +23,27 @@ func newRecoverCmd(ctx *cmdContext) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "recover",
-		Short: "Clean up stale locks and rebuild session cache",
-		Long: `Recovers from stale locks and inconsistent session state.
+		Short: "Repair stale locks and session state",
+		Long: `Recover from stale locks and inconsistent session state.
 
 Actions performed:
-  1. Scans all lock files for stale entries (older than 5 minutes)
-  2. Removes stale lock files
-  3. Scans session directories for the ACTIVE session
-  4. Rebuilds .current-session cache
+  1. Scan all lock files for stale entries (older than 5 minutes)
+  2. Remove stale lock files
+  3. Clean up orphaned CC map entries
+  4. Remove legacy .current-session cache file
+  5. Find active session from directory scan
 
 Use --dry-run to preview what would be fixed without making changes.
 
 Examples:
   ari session recover
-  ari session recover --dry-run`,
+  ari session recover --dry-run
+
+Context:
+  Run this when session commands fail with lock errors or stale state.
+  Safe to run anytime -- only removes stale artifacts, never active state.
+  Use --dry-run first to preview what would be cleaned.
+  Agents should suggest this when encountering lock acquisition failures.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runRecover(ctx, opts)
 		},
@@ -75,7 +82,7 @@ func runRecover(ctx *cmdContext, opts recoverOptions) error {
 						if paths.IsSessionDir(sessionID) {
 							sessionDir := resolver.SessionDir(sessionID)
 							w := clewcontract.NewBufferedEventWriter(sessionDir, clewcontract.DefaultFlushInterval)
-							w.Write(clewcontract.NewToolCallEvent("recover", lockPath, map[string]interface{}{
+							w.Write(clewcontract.NewToolCallEvent("recover", lockPath, map[string]any{
 								"action":     "stale_lock_removed",
 								"session_id": sessionID,
 							}))
