@@ -63,3 +63,24 @@ Create a GitHub pull request with auto-generated description. $ARGUMENTS
 ## Reference
 
 Full documentation: `.claude/commands/operations/pr/INDEX.md`
+
+## Sigil
+
+### On Success
+
+End your response with:
+
+📬 opened · next: {hint}
+
+**Fork-context note**: This command may run without conversation history. To resolve the hint, read session state from disk:
+- Find active session: look for `status: "ACTIVE"` in `.claude/sessions/*/SESSION_CONTEXT.md`
+- Read `current_phase` from its frontmatter and check `.claude/ACTIVE_WORKFLOW.yaml` for phase ordering
+- No active session found → output `📬 opened` without hint.
+
+Natural follow-on: `next: /code-review {pr_number}` or `next: merge when green`.
+
+### On Failure
+
+❌ pr failed: {brief reason} · fix: {recovery}
+
+Infer recovery: no divergent commits → `/commit` first; not on a branch → create a branch; gh CLI error → check `gh auth status`; uncertain → `/consult`.

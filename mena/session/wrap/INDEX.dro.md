@@ -108,3 +108,17 @@ Read Has Session, Session State from the context table — do not call `ari sess
 | Code | Implementation files exist |
 | Tests | Test files exist and pass |
 
+## Sigil
+
+### On Success
+
+End your response with:
+
+🎁 wrapped · next: /start (for new work)
+
+### On Failure
+
+❌ wrap failed: {brief reason} · fix: {recovery}
+
+Infer recovery: quality gates failed → `/qa`; no active session → `/start`; uncommitted changes → `/commit`; uncertain → `/consult`.
+

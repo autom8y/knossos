@@ -154,3 +154,19 @@ When recommending rites, retrieve current rite inventory from:
 ## Reference
 
 Full documentation: `.claude/commands/navigation/consult/INDEX.md`
+
+## Sigil
+
+### On Success
+
+End your response with:
+
+🧭 guided · next: {primary recommended command from your consultation}
+
+The hint should be the primary command you recommended (e.g., `next: /start "the initiative"` or `next: /rite 10x-dev`). If you recommended multiple options, use the first/primary one.
+
+### On Failure
+
+❌ consult failed: {brief reason} · fix: {recovery}
+
+Infer recovery: knowledge base not found → check knossos installation; no rites available → `ari init`; uncertain → try `/go` for orientation.
