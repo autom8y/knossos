@@ -5,6 +5,9 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/autom8y/knossos/internal/paths"
+	"github.com/autom8y/knossos/internal/provenance"
 )
 
 // projectRoot returns the knossos project root by walking up from the test file location.
@@ -135,8 +138,8 @@ func slopChopData() OrchestratorData {
 - Temporal staleness classification (cruft-cutter)`,
 		PhaseRouting: `<!-- TODO: Define which specialist handles which phase and routing conditions -->
 `,
-		HandoffCriteria: "",
-		RiteAntiPatterns: "",
+		HandoffCriteria:   "",
+		RiteAntiPatterns:  "",
 		CrossRiteProtocol: "<!-- TODO: Define how cross-rite concerns are routed and resolved -->",
 		CustomSections: `## Phase Routing and Complexity Gating
 
@@ -441,5 +444,489 @@ func TestRenderArchetype_SkillsYAMLList(t *testing.T) {
 			end = len(output)
 		}
 		t.Errorf("skills not rendered as expected YAML list.\nGot:\n%s", output[start:end])
+	}
+}
+
+// --- Integration tests: archetype wiring in materializeAgents ---
+
+// setupArchetypeRite creates a minimal rite directory with an archetype agent and
+// a normal source agent. Returns (projectDir, claudeDir).
+func setupArchetypeRite(t *testing.T) (string, string) {
+	t.Helper()
+	root := projectRoot(t) // real project root for archetype templates
+
+	projectDir := t.TempDir()
+	claudeDir := filepath.Join(projectDir, ".claude")
+
+	ritesDir := filepath.Join(projectDir, "rites", "test-arch")
+	if err := os.MkdirAll(filepath.Join(ritesDir, "agents"), 0755); err != nil {
+		t.Fatalf("setup: %v", err)
+	}
+
+	// Symlink knossos/archetypes into the temp project so RenderArchetype finds templates
+	knossosDir := filepath.Join(projectDir, "knossos")
+	if err := os.MkdirAll(knossosDir, 0755); err != nil {
+		t.Fatalf("setup: %v", err)
+	}
+	if err := os.Symlink(
+		filepath.Join(root, "knossos", "archetypes"),
+		filepath.Join(knossosDir, "archetypes"),
+	); err != nil {
+		t.Fatalf("setup symlink: %v", err)
+	}
+
+	// Write a source agent file for the non-archetype agent
+	agentContent := "---\nname: engineer\ndescription: Implements code\ntools: Bash, Read\n---\n\n# Engineer\n\nBody.\n"
+	if err := os.WriteFile(filepath.Join(ritesDir, "agents", "engineer.md"), []byte(agentContent), 0644); err != nil {
+		t.Fatalf("setup: %v", err)
+	}
+
+	// Also write a source file for pythia (should be SKIPPED because archetype takes precedence)
+	pythiaSource := "# This should not appear — archetype rendering takes precedence\n"
+	if err := os.WriteFile(filepath.Join(ritesDir, "agents", "pythia.md"), []byte(pythiaSource), 0644); err != nil {
+		t.Fatalf("setup: %v", err)
+	}
+
+	return projectDir, claudeDir
+}
+
+func TestMaterializeAgents_ArchetypeRendersFromTemplate(t *testing.T) {
+	projectDir, claudeDir := setupArchetypeRite(t)
+
+	manifest := &RiteManifest{
+		Name:        "test-arch",
+		Description: "Test rite for archetype wiring",
+		EntryAgent:  "pythia",
+		Agents: []Agent{
+			{Name: "pythia", Role: "Coordinates workflow", Archetype: "orchestrator"},
+			{Name: "engineer", Role: "Implements code"},
+		},
+		ArchetypeData: map[string]map[string]interface{}{
+			"orchestrator": {
+				"description":         "Coordinates test phases",
+				"color":               "green",
+				"skills":              []interface{}{"orchestrator-templates"},
+				"phase_routing":       "| engineer | Implementation needed |\n",
+				"handoff_criteria":    "| impl | - Code complete |\n",
+				"rite_anti_patterns":  "- **Test anti-pattern**",
+				"cross_rite_protocol": "<!-- TODO -->",
+			},
+		},
+	}
+
+	resolver := paths.NewResolver(projectDir)
+	m := NewMaterializer(resolver)
+
+	resolved := &ResolvedRite{
+		Name:         "test-arch",
+		RitePath:     filepath.Join(projectDir, "rites", "test-arch"),
+		ManifestPath: filepath.Join(projectDir, "rites", "test-arch", "manifest.yaml"),
+		Source:       RiteSource{Type: SourceProject, Path: filepath.Join(projectDir, "rites", "test-arch")},
+	}
+
+	err := m.materializeAgents(manifest, resolved.RitePath, claudeDir, resolved, provenance.NullCollector{}, nil)
+	if err != nil {
+		t.Fatalf("materializeAgents() error = %v", err)
+	}
+
+	// Verify pythia was rendered from archetype template
+	pythiaPath := filepath.Join(claudeDir, "agents", "pythia.md")
+	pythiaContent, err := os.ReadFile(pythiaPath)
+	if err != nil {
+		t.Fatalf("expected pythia agent at %s: %v", pythiaPath, err)
+	}
+
+	output := string(pythiaContent)
+
+	// Must contain archetype-rendered content, NOT the source file content
+	if strings.Contains(output, "This should not appear") {
+		t.Error("pythia should be rendered from archetype, not copied from source file")
+	}
+
+	// Must contain template-rendered content
+	checks := []struct {
+		name    string
+		content string
+	}{
+		{"rite name in body", "consultative throughline** for test-arch"},
+		{"color", "green"},
+		{"phase routing", "| engineer | Implementation needed |"},
+		{"handoff criteria", "| impl | - Code complete |"},
+		{"anti-patterns", "Test anti-pattern"},
+		{"heading", "# Pythia"},
+	}
+	for _, tc := range checks {
+		if !strings.Contains(output, tc.content) {
+			t.Errorf("archetype pythia missing %q: expected %q", tc.name, tc.content)
+		}
+	}
+}
+
+func TestMaterializeAgents_NonArchetypeAgentCopiedFromSource(t *testing.T) {
+	projectDir, claudeDir := setupArchetypeRite(t)
+
+	manifest := &RiteManifest{
+		Name:        "test-arch",
+		Description: "Test rite",
+		EntryAgent:  "pythia",
+		Agents: []Agent{
+			{Name: "pythia", Role: "Coordinates", Archetype: "orchestrator"},
+			{Name: "engineer", Role: "Implements code"},
+		},
+		ArchetypeData: map[string]map[string]interface{}{
+			"orchestrator": {
+				"description":         "Coordinates test phases",
+				"color":               "green",
+				"skills":              []interface{}{"orchestrator-templates"},
+				"phase_routing":       "| engineer | Impl needed |\n",
+				"handoff_criteria":    "| impl | - Done |\n",
+				"rite_anti_patterns":  "- None",
+				"cross_rite_protocol": "<!-- TODO -->",
+			},
+		},
+	}
+
+	resolver := paths.NewResolver(projectDir)
+	m := NewMaterializer(resolver)
+
+	resolved := &ResolvedRite{
+		Name:         "test-arch",
+		RitePath:     filepath.Join(projectDir, "rites", "test-arch"),
+		ManifestPath: filepath.Join(projectDir, "rites", "test-arch", "manifest.yaml"),
+		Source:       RiteSource{Type: SourceProject, Path: filepath.Join(projectDir, "rites", "test-arch")},
+	}
+
+	err := m.materializeAgents(manifest, resolved.RitePath, claudeDir, resolved, provenance.NullCollector{}, nil)
+	if err != nil {
+		t.Fatalf("materializeAgents() error = %v", err)
+	}
+
+	// Verify engineer was copied from source (not archetype)
+	engPath := filepath.Join(claudeDir, "agents", "engineer.md")
+	engContent, err := os.ReadFile(engPath)
+	if err != nil {
+		t.Fatalf("expected engineer agent at %s: %v", engPath, err)
+	}
+
+	output := string(engContent)
+
+	// Must contain source file content
+	if !strings.Contains(output, "# Engineer") {
+		t.Errorf("engineer should contain source heading:\n%s", output)
+	}
+	if !strings.Contains(output, "Body.") {
+		t.Errorf("engineer should contain source body:\n%s", output)
+	}
+}
+
+func TestMaterializeAgents_ArchetypeGoesThruTransformPipeline(t *testing.T) {
+	projectDir, claudeDir := setupArchetypeRite(t)
+
+	manifest := &RiteManifest{
+		Name:        "test-arch",
+		Description: "Test rite",
+		EntryAgent:  "pythia",
+		Agents: []Agent{
+			{Name: "pythia", Role: "Coordinates", Archetype: "orchestrator"},
+		},
+		ArchetypeData: map[string]map[string]interface{}{
+			"orchestrator": {
+				"description":         "Coordinates phases",
+				"color":               "purple",
+				"skills":              []interface{}{"orchestrator-templates"},
+				"phase_routing":       "| eng | Impl |\n",
+				"handoff_criteria":    "| impl | - Done |\n",
+				"rite_anti_patterns":  "- None",
+				"cross_rite_protocol": "<!-- TODO -->",
+			},
+		},
+	}
+
+	resolver := paths.NewResolver(projectDir)
+	m := NewMaterializer(resolver)
+
+	resolved := &ResolvedRite{
+		Name:         "test-arch",
+		RitePath:     filepath.Join(projectDir, "rites", "test-arch"),
+		ManifestPath: filepath.Join(projectDir, "rites", "test-arch", "manifest.yaml"),
+		Source:       RiteSource{Type: SourceProject, Path: filepath.Join(projectDir, "rites", "test-arch")},
+	}
+
+	err := m.materializeAgents(manifest, resolved.RitePath, claudeDir, resolved, provenance.NullCollector{}, nil)
+	if err != nil {
+		t.Fatalf("materializeAgents() error = %v", err)
+	}
+
+	pythiaPath := filepath.Join(claudeDir, "agents", "pythia.md")
+	pythiaContent, err := os.ReadFile(pythiaPath)
+	if err != nil {
+		t.Fatalf("expected pythia at %s: %v", pythiaPath, err)
+	}
+
+	output := string(pythiaContent)
+
+	// The archetype template outputs type: orchestrator in frontmatter.
+	// transformAgentContent strips knossos-only fields including "type".
+	if strings.Contains(output, "\ntype:") {
+		t.Error("transform pipeline should strip 'type' from archetype output")
+	}
+
+	// Name should be injected by transform pipeline
+	if !strings.Contains(output, "name: pythia") {
+		t.Errorf("transform pipeline should inject name:\n%s", output)
+	}
+}
+
+func TestMaterializeAgents_NoArchetypeNoChange(t *testing.T) {
+	// When no agents have archetype set, behavior is identical to before.
+	projectDir := t.TempDir()
+	claudeDir := filepath.Join(projectDir, ".claude")
+
+	ritesDir := filepath.Join(projectDir, "rites", "plain")
+	if err := os.MkdirAll(filepath.Join(ritesDir, "agents"), 0755); err != nil {
+		t.Fatal(err)
+	}
+
+	agentContent := "---\nname: worker\ndescription: Works\n---\n\n# Worker\n"
+	if err := os.WriteFile(filepath.Join(ritesDir, "agents", "worker.md"), []byte(agentContent), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	manifest := &RiteManifest{
+		Name:       "plain",
+		EntryAgent: "worker",
+		Agents:     []Agent{{Name: "worker", Role: "Works"}},
+	}
+
+	resolver := paths.NewResolver(projectDir)
+	m := NewMaterializer(resolver)
+
+	resolved := &ResolvedRite{
+		Name:         "plain",
+		RitePath:     filepath.Join(projectDir, "rites", "plain"),
+		ManifestPath: filepath.Join(projectDir, "rites", "plain", "manifest.yaml"),
+		Source:       RiteSource{Type: SourceProject, Path: filepath.Join(projectDir, "rites", "plain")},
+	}
+
+	err := m.materializeAgents(manifest, resolved.RitePath, claudeDir, resolved, provenance.NullCollector{}, nil)
+	if err != nil {
+		t.Fatalf("materializeAgents() error = %v", err)
+	}
+
+	// Verify worker was copied from source
+	workerPath := filepath.Join(claudeDir, "agents", "worker.md")
+	data, err := os.ReadFile(workerPath)
+	if err != nil {
+		t.Fatalf("expected worker at %s: %v", workerPath, err)
+	}
+
+	if !strings.Contains(string(data), "# Worker") {
+		t.Error("worker content should come from source file")
+	}
+}
+
+func TestMaterializeAgents_UnknownArchetypeErrors(t *testing.T) {
+	projectDir := t.TempDir()
+	claudeDir := filepath.Join(projectDir, ".claude")
+
+	ritesDir := filepath.Join(projectDir, "rites", "bad")
+	if err := os.MkdirAll(filepath.Join(ritesDir, "agents"), 0755); err != nil {
+		t.Fatal(err)
+	}
+
+	manifest := &RiteManifest{
+		Name:       "bad",
+		EntryAgent: "test",
+		Agents:     []Agent{{Name: "test", Role: "Tests", Archetype: "nonexistent"}},
+	}
+
+	resolver := paths.NewResolver(projectDir)
+	m := NewMaterializer(resolver)
+
+	resolved := &ResolvedRite{
+		Name:         "bad",
+		RitePath:     filepath.Join(projectDir, "rites", "bad"),
+		ManifestPath: filepath.Join(projectDir, "rites", "bad", "manifest.yaml"),
+		Source:       RiteSource{Type: SourceProject, Path: filepath.Join(projectDir, "rites", "bad")},
+	}
+
+	err := m.materializeAgents(manifest, resolved.RitePath, claudeDir, resolved, provenance.NullCollector{}, nil)
+	if err == nil {
+		t.Fatal("expected error for unknown archetype, got nil")
+	}
+	if !strings.Contains(err.Error(), "unknown archetype") {
+		t.Errorf("unexpected error: %v", err)
+	}
+}
+
+func TestMaterializeAgents_ArchetypeProvenanceRecorded(t *testing.T) {
+	projectDir, claudeDir := setupArchetypeRite(t)
+
+	manifest := &RiteManifest{
+		Name:        "test-arch",
+		Description: "Test rite",
+		EntryAgent:  "pythia",
+		Agents: []Agent{
+			{Name: "pythia", Role: "Coordinates", Archetype: "orchestrator"},
+			{Name: "engineer", Role: "Implements"},
+		},
+		ArchetypeData: map[string]map[string]interface{}{
+			"orchestrator": {
+				"description":         "Coordinates",
+				"color":               "blue",
+				"skills":              []interface{}{"orchestrator-templates"},
+				"phase_routing":       "| eng | Impl |\n",
+				"handoff_criteria":    "| impl | - Done |\n",
+				"rite_anti_patterns":  "- None",
+				"cross_rite_protocol": "<!-- TODO -->",
+			},
+		},
+	}
+
+	resolver := paths.NewResolver(projectDir)
+	m := NewMaterializer(resolver)
+
+	resolved := &ResolvedRite{
+		Name:         "test-arch",
+		RitePath:     filepath.Join(projectDir, "rites", "test-arch"),
+		ManifestPath: filepath.Join(projectDir, "rites", "test-arch", "manifest.yaml"),
+		Source:       RiteSource{Type: SourceProject, Path: filepath.Join(projectDir, "rites", "test-arch")},
+	}
+
+	// Use a real collector to capture provenance records
+	collector := provenance.NewCollector()
+
+	err := m.materializeAgents(manifest, resolved.RitePath, claudeDir, resolved, collector, nil)
+	if err != nil {
+		t.Fatalf("materializeAgents() error = %v", err)
+	}
+
+	// Check that archetype agent has provenance with "archetype" source type
+	entries := collector.Entries()
+	pythiaEntry, ok := entries["agents/pythia.md"]
+	if !ok {
+		t.Fatal("missing provenance entry for agents/pythia.md")
+	}
+	if pythiaEntry.SourceType != "archetype" {
+		t.Errorf("pythia provenance source_type = %q, want %q", pythiaEntry.SourceType, "archetype")
+	}
+	if pythiaEntry.SourcePath != "knossos/archetypes/orchestrator.md.tpl" {
+		t.Errorf("pythia provenance source_path = %q, want %q", pythiaEntry.SourcePath, "knossos/archetypes/orchestrator.md.tpl")
+	}
+
+	// Check that source agent has provenance with "project" source type
+	engEntry, ok := entries["agents/engineer.md"]
+	if !ok {
+		t.Fatal("missing provenance entry for agents/engineer.md")
+	}
+	if engEntry.SourceType != "project" {
+		t.Errorf("engineer provenance source_type = %q, want %q", engEntry.SourceType, "project")
+	}
+}
+
+func TestBuildOrchestratorData_ExtractsAllFields(t *testing.T) {
+	manifest := &RiteManifest{
+		Name:        "test-rite",
+		Description: "Test description",
+		ArchetypeData: map[string]map[string]interface{}{
+			"orchestrator": {
+				"description":                  "Custom orchestrator desc",
+				"color":                        "red",
+				"skills":                       []interface{}{"skill-a", "skill-b"},
+				"contract_must_not":            []interface{}{"Don't do X", "Don't do Y"},
+				"phase_routing":                "| agent | route |\n",
+				"handoff_criteria":             "| phase | criteria |\n",
+				"rite_anti_patterns":           "- Pattern A",
+				"cross_rite_protocol":          "Protocol text",
+				"entry_point_section":          "## Entry\nContent",
+				"custom_sections":              "## Custom\nContent",
+				"exousia_you_decide":           "- Decide this",
+				"exousia_you_escalate":         "- Escalate this",
+				"exousia_you_do_not_decide":    "- Not this",
+				"tool_access_section":          "Custom tools",
+				"consultation_protocol_input":  "Custom input",
+				"consultation_protocol_output": "Custom output",
+				"position_in_workflow":         "Custom position",
+				"core_responsibilities":        "- Extra responsibility",
+				"skills_reference":             "Custom refs",
+				"behavioral_constraints_do":    "Custom constraints",
+			},
+		},
+	}
+
+	agent := Agent{Name: "pythia", Role: "Coordinates", Archetype: "orchestrator"}
+	data := buildOrchestratorData(agent, manifest)
+
+	tests := []struct {
+		name string
+		got  string
+		want string
+	}{
+		{"RiteName", data.RiteName, "test-rite"},
+		{"Description", data.Description, "Custom orchestrator desc"},
+		{"Color", data.Color, "red"},
+		{"PhaseRouting", data.PhaseRouting, "| agent | route |\n"},
+		{"HandoffCriteria", data.HandoffCriteria, "| phase | criteria |\n"},
+		{"RiteAntiPatterns", data.RiteAntiPatterns, "- Pattern A"},
+		{"CrossRiteProtocol", data.CrossRiteProtocol, "Protocol text"},
+		{"EntryPointSection", data.EntryPointSection, "## Entry\nContent"},
+		{"CustomSections", data.CustomSections, "## Custom\nContent"},
+		{"ExousiaYouDecide", data.ExousiaYouDecide, "- Decide this"},
+		{"ExousiaYouEscalate", data.ExousiaYouEscalate, "- Escalate this"},
+		{"ExousiaYouDoNotDecide", data.ExousiaYouDoNotDecide, "- Not this"},
+		{"ToolAccessSection", data.ToolAccessSection, "Custom tools"},
+		{"ConsultationProtocolInput", data.ConsultationProtocolInput, "Custom input"},
+		{"ConsultationProtocolOutput", data.ConsultationProtocolOutput, "Custom output"},
+		{"PositionInWorkflow", data.PositionInWorkflow, "Custom position"},
+		{"CoreResponsibilities", data.CoreResponsibilities, "- Extra responsibility"},
+		{"SkillsReference", data.SkillsReference, "Custom refs"},
+		{"BehavioralConstraintsDO", data.BehavioralConstraintsDO, "Custom constraints"},
+	}
+
+	for _, tc := range tests {
+		if tc.got != tc.want {
+			t.Errorf("buildOrchestratorData().%s = %q, want %q", tc.name, tc.got, tc.want)
+		}
+	}
+
+	// Verify slice fields
+	if len(data.Skills) != 2 || data.Skills[0] != "skill-a" || data.Skills[1] != "skill-b" {
+		t.Errorf("Skills = %v, want [skill-a, skill-b]", data.Skills)
+	}
+	if len(data.ContractMustNot) != 2 || data.ContractMustNot[0] != "Don't do X" {
+		t.Errorf("ContractMustNot = %v, want [Don't do X, Don't do Y]", data.ContractMustNot)
+	}
+}
+
+func TestBuildOrchestratorData_MissingArchetypeData(t *testing.T) {
+	manifest := &RiteManifest{
+		Name:        "empty-rite",
+		Description: "No archetype data",
+	}
+	agent := Agent{Name: "pythia", Archetype: "orchestrator"}
+	data := buildOrchestratorData(agent, manifest)
+
+	if data.RiteName != "empty-rite" {
+		t.Errorf("RiteName = %q, want %q", data.RiteName, "empty-rite")
+	}
+	if data.Description != "" {
+		t.Errorf("Description should be empty when no archetype_data: %q", data.Description)
+	}
+	if data.Color != "" {
+		t.Errorf("Color should be empty when no archetype_data: %q", data.Color)
+	}
+}
+
+func TestRenderArchetypeAgent_UnknownArchetype(t *testing.T) {
+	root := projectRoot(t)
+	agent := Agent{Name: "test", Archetype: "unknown-type"}
+	manifest := &RiteManifest{Name: "test"}
+
+	_, err := renderArchetypeAgent(root, agent, manifest)
+	if err == nil {
+		t.Fatal("expected error for unknown archetype")
+	}
+	if !strings.Contains(err.Error(), "unknown archetype: unknown-type") {
+		t.Errorf("unexpected error: %v", err)
 	}
 }

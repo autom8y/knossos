@@ -58,20 +58,21 @@ type MCPServer struct {
 
 // RiteManifest represents a rite manifest.yaml file.
 type RiteManifest struct {
-	Name         string      `yaml:"name"`
-	Version      string      `yaml:"version"`
-	Description  string      `yaml:"description"`
-	EntryAgent   string      `yaml:"entry_agent"`
-	Agents       []Agent     `yaml:"agents"`
-	Dromena      []string    `yaml:"dromena"`  // Invokable commands (project to .claude/commands/)
-	Legomena     []string    `yaml:"legomena"` // Reference knowledge (project to .claude/skills/)
-	Commands     []string    `yaml:"commands"` // Backward compat: populates from dromena+legomena if empty
-	Skills       []string    `yaml:"skills"`   // Deprecated: use Legomena instead
-	Hooks        []string    `yaml:"hooks"`
-	Dependencies []string    `yaml:"dependencies"`
-	MCPServers    []MCPServer            `yaml:"mcp_servers,omitempty"` // MCP server declarations
-	HookDefaults  *HookDefaults          `yaml:"hook_defaults,omitempty"`
-	AgentDefaults map[string]interface{} `yaml:"agent_defaults,omitempty"` // Manifest-level defaults merged into agent frontmatter during sync
+	Name          string                            `yaml:"name"`
+	Version       string                            `yaml:"version"`
+	Description   string                            `yaml:"description"`
+	EntryAgent    string                            `yaml:"entry_agent"`
+	Agents        []Agent                           `yaml:"agents"`
+	Dromena       []string                          `yaml:"dromena"`  // Invokable commands (project to .claude/commands/)
+	Legomena      []string                          `yaml:"legomena"` // Reference knowledge (project to .claude/skills/)
+	Commands      []string                          `yaml:"commands"` // Backward compat: populates from dromena+legomena if empty
+	Skills        []string                          `yaml:"skills"`   // Deprecated: use Legomena instead
+	Hooks         []string                          `yaml:"hooks"`
+	Dependencies  []string                          `yaml:"dependencies"`
+	MCPServers    []MCPServer                       `yaml:"mcp_servers,omitempty"` // MCP server declarations
+	HookDefaults  *HookDefaults                     `yaml:"hook_defaults,omitempty"`
+	AgentDefaults map[string]interface{}            `yaml:"agent_defaults,omitempty"` // Manifest-level defaults merged into agent frontmatter during sync
+	ArchetypeData map[string]map[string]interface{} `yaml:"archetype_data,omitempty"` // Per-archetype template data keyed by archetype name
 }
 
 // MCPServerNames returns the list of MCP server names declared in the manifest.
@@ -85,8 +86,9 @@ func (m *RiteManifest) MCPServerNames() []string {
 
 // Agent represents an agent definition in a rite manifest.
 type Agent struct {
-	Name string `yaml:"name"`
-	Role string `yaml:"role"`
+	Name      string `yaml:"name"`
+	Role      string `yaml:"role"`
+	Archetype string `yaml:"archetype,omitempty"` // Template name: "orchestrator", etc.
 }
 
 // Materializer handles .claude/ directory generation.
@@ -808,6 +810,46 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claud
 	// causes CC's file watcher to see DELETE events for files that are immediately
 	// recreated, which crashes/disrupts active Claude Code sessions.
 
+	// Phase 1: Render archetype agents (before source file walk).
+	// Archetype agents are rendered from templates in knossos/archetypes/ and do NOT
+	// need a source file in the rite's agents/ directory.
+	archetypeAgents := make(map[string]bool)
+	for _, agent := range manifest.Agents {
+		if agent.Archetype == "" {
+			continue
+		}
+		archetypeAgents[agent.Name+".md"] = true
+
+		content, err := renderArchetypeAgent(m.resolver.ProjectRoot(), agent, manifest)
+		if err != nil {
+			return fmt.Errorf("archetype render failed for %s: %w", agent.Name, err)
+		}
+
+		// Run through the same transform pipeline as source-copied agents
+		if transformed, tErr := transformAgentContent(content, agent.Name, writeGuardDefaults, manifest.AgentDefaults); tErr == nil {
+			content = transformed
+		} else {
+			log.Printf("Warning: agent transform failed for archetype agent %s: %v", agent.Name, tErr)
+		}
+
+		destPath := filepath.Join(agentsDir, agent.Name+".md")
+		written, err := writeIfChanged(destPath, content, 0644)
+		if err != nil {
+			return err
+		}
+		if written {
+			relPath := "agents/" + agent.Name + ".md"
+			sourcePath := "knossos/archetypes/" + agent.Archetype + ".md.tpl"
+			collector.Record(relPath, provenance.NewKnossosEntry(
+				provenance.ScopeRite,
+				sourcePath,
+				"archetype",
+				checksum.Bytes(content),
+			))
+		}
+	}
+
+	// Phase 2: Copy source agents from rite directory (skip archetype-rendered agents).
 	// For embedded sources, use fs.FS to read agent files
 	var writeErr error
 	if resolved != nil && resolved.Source.Type == SourceEmbedded {
@@ -824,6 +866,10 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claud
 		writeErr = fs.WalkDir(agentsSub, ".", func(path string, d fs.DirEntry, walkErr error) error {
 			if walkErr != nil || d.IsDir() {
 				return walkErr
+			}
+			// Skip agents already rendered from archetype
+			if archetypeAgents[filepath.Base(path)] {
+				return nil
 			}
 			content, err := fs.ReadFile(agentsSub, path)
 			if err != nil {
@@ -868,6 +914,10 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claud
 				return err
 			}
 			if d.IsDir() {
+				return nil
+			}
+			// Skip agents already rendered from archetype
+			if archetypeAgents[filepath.Base(path)] {
 				return nil
 			}
 

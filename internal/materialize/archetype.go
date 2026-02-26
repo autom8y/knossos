@@ -23,8 +23,8 @@ type OrchestratorData struct {
 	CustomSections    string   // Any rite-unique sections (arch back-routes, slop-chop artifact chain, etc.)
 
 	// Exousia overrides — empty strings use the boilerplate defaults in the template.
-	ExousiaYouDecide    string
-	ExousiaYouEscalate  string
+	ExousiaYouDecide      string
+	ExousiaYouEscalate    string
 	ExousiaYouDoNotDecide string
 
 	// Optional overrides for sections that are mostly identical but occasionally differ.
@@ -44,6 +44,97 @@ func defaultContractMustNot() []string {
 		"Use tools beyond Read",
 		"Respond with prose instead of CONSULTATION_RESPONSE format",
 	}
+}
+
+// renderArchetypeAgent constructs archetype-specific data from the manifest and
+// renders the corresponding template. Currently only the "orchestrator" archetype
+// is supported; unknown archetypes return an error.
+func renderArchetypeAgent(projectRoot string, agent Agent, manifest *RiteManifest) ([]byte, error) {
+	switch agent.Archetype {
+	case "orchestrator":
+		data := buildOrchestratorData(agent, manifest)
+		return RenderArchetype(projectRoot, "orchestrator.md.tpl", data)
+	default:
+		return nil, fmt.Errorf("unknown archetype: %s", agent.Archetype)
+	}
+}
+
+// buildOrchestratorData constructs an OrchestratorData from the manifest's
+// ArchetypeData["orchestrator"] section combined with top-level manifest fields.
+//
+// Manifest-level fields provide RiteName and Description.
+// The archetype_data.orchestrator map provides all template-specific fields:
+// color, skills, phase_routing, handoff_criteria, rite_anti_patterns,
+// cross_rite_protocol, entry_point_section, custom_sections, and all
+// optional override fields.
+func buildOrchestratorData(agent Agent, manifest *RiteManifest) *OrchestratorData {
+	data := &OrchestratorData{
+		RiteName: manifest.Name,
+	}
+
+	raw, ok := manifest.ArchetypeData["orchestrator"]
+	if !ok {
+		return data
+	}
+
+	// Helper to extract a string field from the raw map.
+	str := func(key string) string {
+		if v, ok := raw[key]; ok {
+			if s, ok := v.(string); ok {
+				return s
+			}
+		}
+		return ""
+	}
+
+	// Helper to extract a []string from the raw map (YAML list).
+	strSlice := func(key string) []string {
+		v, ok := raw[key]
+		if !ok {
+			return nil
+		}
+		switch typed := v.(type) {
+		case []interface{}:
+			result := make([]string, 0, len(typed))
+			for _, item := range typed {
+				if s, ok := item.(string); ok {
+					result = append(result, s)
+				}
+			}
+			return result
+		case []string:
+			return typed
+		default:
+			return nil
+		}
+	}
+
+	data.Description = str("description")
+	data.Color = str("color")
+	data.Skills = strSlice("skills")
+	data.ContractMustNot = strSlice("contract_must_not")
+	data.PhaseRouting = str("phase_routing")
+	data.HandoffCriteria = str("handoff_criteria")
+	data.RiteAntiPatterns = str("rite_anti_patterns")
+	data.CrossRiteProtocol = str("cross_rite_protocol")
+	data.EntryPointSection = str("entry_point_section")
+	data.CustomSections = str("custom_sections")
+
+	// Exousia overrides
+	data.ExousiaYouDecide = str("exousia_you_decide")
+	data.ExousiaYouEscalate = str("exousia_you_escalate")
+	data.ExousiaYouDoNotDecide = str("exousia_you_do_not_decide")
+
+	// Optional section overrides
+	data.ToolAccessSection = str("tool_access_section")
+	data.ConsultationProtocolInput = str("consultation_protocol_input")
+	data.ConsultationProtocolOutput = str("consultation_protocol_output")
+	data.PositionInWorkflow = str("position_in_workflow")
+	data.CoreResponsibilities = str("core_responsibilities")
+	data.SkillsReference = str("skills_reference")
+	data.BehavioralConstraintsDO = str("behavioral_constraints_do")
+
+	return data
 }
 
 // RenderArchetype loads a template from knossos/archetypes/ relative to projectRoot
