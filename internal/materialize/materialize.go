@@ -815,7 +815,7 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claud
 		}
 
 		// Run through the same transform pipeline as source-copied agents
-		if transformed, tErr := transformAgentContent(content, agent.Name, writeGuardDefaults, manifest.AgentDefaults); tErr == nil {
+		if transformed, tErr := transformAgentContent(content, &TransformContext{AgentName: agent.Name, WriteGuardDefaults: writeGuardDefaults, AgentDefaults: manifest.AgentDefaults}); tErr == nil {
 			content = transformed
 		} else {
 			log.Printf("Warning: agent transform failed for archetype agent %s: %v", agent.Name, tErr)
@@ -866,7 +866,7 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claud
 			}
 			// Project agent source into CC-consumable form (merge defaults, strip knossos metadata, inject name, resolve hooks)
 			agentName := strings.TrimSuffix(filepath.Base(path), ".md")
-			if transformed, tErr := transformAgentContent(content, agentName, writeGuardDefaults, manifest.AgentDefaults); tErr == nil {
+			if transformed, tErr := transformAgentContent(content, &TransformContext{AgentName: agentName, WriteGuardDefaults: writeGuardDefaults, AgentDefaults: manifest.AgentDefaults}); tErr == nil {
 				content = transformed
 			} else {
 				log.Printf("Warning: agent transform failed for %s: %v", agentName, tErr)
@@ -918,7 +918,7 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claud
 
 			// Project agent source into CC-consumable form (merge defaults, strip knossos metadata, inject name, resolve hooks)
 			agentName := strings.TrimSuffix(filepath.Base(path), ".md")
-			if transformed, tErr := transformAgentContent(content, agentName, writeGuardDefaults, manifest.AgentDefaults); tErr == nil {
+			if transformed, tErr := transformAgentContent(content, &TransformContext{AgentName: agentName, WriteGuardDefaults: writeGuardDefaults, AgentDefaults: manifest.AgentDefaults}); tErr == nil {
 				content = transformed
 			} else {
 				log.Printf("Warning: agent transform failed for %s: %v", agentName, tErr)

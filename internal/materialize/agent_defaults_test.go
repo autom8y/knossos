@@ -367,7 +367,7 @@ description: Test agent
 			"type": "specialist",
 		}
 
-		result, err := transformAgentContent([]byte(source), "test-agent", nil, agentDefaults)
+		result, err := transformAgentContent([]byte(source), &TransformContext{AgentName: "test-agent", AgentDefaults: agentDefaults})
 		if err != nil {
 			t.Fatalf("transformAgentContent() error = %v", err)
 		}
@@ -410,7 +410,7 @@ maxTurns: 40
 			"maxTurns": 20,
 		}
 
-		result, err := transformAgentContent([]byte(source), "test-agent", nil, agentDefaults)
+		result, err := transformAgentContent([]byte(source), &TransformContext{AgentName: "test-agent", AgentDefaults: agentDefaults})
 		if err != nil {
 			t.Fatalf("transformAgentContent() error = %v", err)
 		}
@@ -438,7 +438,7 @@ skills:
 			"skills": []interface{}{"orchestrator-templates"},
 		}
 
-		result, err := transformAgentContent([]byte(source), "test-agent", nil, agentDefaults)
+		result, err := transformAgentContent([]byte(source), &TransformContext{AgentName: "test-agent", AgentDefaults: agentDefaults})
 		if err != nil {
 			t.Fatalf("transformAgentContent() error = %v", err)
 		}
@@ -466,7 +466,7 @@ write-guard: true
 			"model": "sonnet",
 		}
 
-		result, err := transformAgentContent([]byte(source), "test-agent", testDefaults, agentDefaults)
+		result, err := transformAgentContent([]byte(source), &TransformContext{AgentName: "test-agent", WriteGuardDefaults: testDefaults, AgentDefaults: agentDefaults})
 		if err != nil {
 			t.Fatalf("transformAgentContent() error = %v", err)
 		}

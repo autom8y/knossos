@@ -26,6 +26,14 @@ var knossosOnlyFields = map[string]bool{
 	"aliases":        true,
 }
 
+// TransformContext bundles all policy inputs for agent content transformation.
+// Introduced to prevent parameter list growth as new policy types are added.
+type TransformContext struct {
+	AgentName          string
+	WriteGuardDefaults *WriteGuardDefaults
+	AgentDefaults      map[string]interface{}
+}
+
 // transformAgentContent projects agent source into CC-consumable form.
 //
 // Transformation:
@@ -36,7 +44,7 @@ var knossosOnlyFields = map[string]bool{
 //  5. Inject name from agentName parameter
 //  6. If write-guard was present, resolve against defaults and merge hooks
 //  7. Reserialize frontmatter + body
-func transformAgentContent(content []byte, agentName string, defaults *WriteGuardDefaults, agentDefaults map[string]interface{}) ([]byte, error) {
+func transformAgentContent(content []byte, ctx *TransformContext) ([]byte, error) {
 	yamlBytes, body, err := frontmatter.Parse(content)
 	if err != nil {
 		return content, nil // Not valid frontmatter — pass through unchanged
@@ -49,8 +57,8 @@ func transformAgentContent(content []byte, agentName string, defaults *WriteGuar
 	}
 
 	// Merge manifest-level agent_defaults before any stripping
-	if len(agentDefaults) > 0 {
-		fmMap = MergeAgentDefaults(agentDefaults, fmMap)
+	if len(ctx.AgentDefaults) > 0 {
+		fmMap = MergeAgentDefaults(ctx.AgentDefaults, fmMap)
 	}
 
 	// Capture write-guard value before stripping
@@ -62,11 +70,11 @@ func transformAgentContent(content []byte, agentName string, defaults *WriteGuar
 	}
 
 	// Auto-inject name from filename
-	fmMap["name"] = agentName
+	fmMap["name"] = ctx.AgentName
 
 	// Write-guard resolution (conditional on original presence)
 	if hasWriteGuard {
-		resolved := ResolveWriteGuard(defaults, agentName, agentWG)
+		resolved := ResolveWriteGuard(ctx.WriteGuardDefaults, ctx.AgentName, agentWG)
 		if resolved != nil {
 			generatedHooks := GenerateWriteGuardHooks(resolved)
 			mergeHooksIntoMap(fmMap, generatedHooks)
