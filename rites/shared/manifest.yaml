@@ -15,7 +15,8 @@ phases: []
 # (theoros, moirai, consultant, context-engineer)
 agents: []
 
-dromena: []
+dromena:
+  - know
 
 legomena:
   - cross-rite-handoff

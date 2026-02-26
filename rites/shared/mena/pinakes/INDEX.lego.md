@@ -24,6 +24,7 @@ This table IS the registry. A domain exists when it has a row here and a criteri
 | **agents** | `domains/agents.lego.md` | framework | Agent prompts: role clarity, handoff criteria |
 | **hooks** | `domains/hooks.lego.md` | framework | Hook wiring: lifecycle coverage, matchers, timeouts |
 | **mena-structure** | `domains/mena-structure.lego.md` | framework | Mena directories: naming, INDEX files, manifest registration |
+| **architecture** | `domains/architecture.lego.md` | codebase | Source code structure: packages, layers, entry points, abstractions, data flow |
 
 ### Scope Values
 
