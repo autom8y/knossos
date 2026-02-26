@@ -1,0 +1,76 @@
+# Orchestrator configuration for releaser
+# Used by generate-orchestrator.sh to produce pythia.md
+
+rite:
+  name: releaser
+  domain: release engineering
+  color: orange
+
+frontmatter:
+  role: "Coordinates release phases, gates complexity, manages DAG-branch failure halting"
+  description: |
+    Routes release work through reconnaissance, dependency analysis, planning, execution, and verification phases. Use when: publishing packages to registries, bumping consumer versions across a dependency graph, running a full platform release, or monitoring CI pipelines after a multi-repo push.
+    Triggers: coordinate, orchestrate, release workflow, publish, ship, push all repos, platform release, bump versions, CI status, multi-repo release, release engineering.
+
+routing:
+  cartographer: "Initial phase -- discover repos, map git state, identify ecosystems"
+  dependency-resolver: "Reconnaissance complete, dependency graph needed (RELEASE and PLATFORM complexity)"
+  release-planner: "Dependency graph complete, phased execution plan needed (RELEASE and PLATFORM complexity)"
+  release-executor: "Release plan ready (or PATCH reconnaissance complete), execute publishes and pushes"
+  pipeline-monitor: "Execution complete, CI pipeline verification needed"
+
+workflow_position:
+  upstream: "10x-dev (feature development complete, code committed locally) or direct user invocation"
+  downstream: "sre (deployment/monitoring after CI green), or peer rites via cross-rite routing (arch, hygiene, review, security, debt-triage)"
+
+handoff_criteria:
+  reconnaissance:
+    - "platform-state-map.yaml exists at .claude/wip/release/"
+    - "All repos matching glob pattern scanned"
+    - "Ecosystem identified for each repo (python_uv, node_npm, go_mod, rust_cargo)"
+    - "Dirty repos flagged and excluded from release_candidate"
+    - "has_dependents flag set for each release-candidate repo"
+  dependency-analysis:
+    - "dependency-graph.yaml exists at .claude/wip/release/"
+    - "Publish order annotated (topological sort phases)"
+    - "Blast radius calculated for each repo"
+    - "Version mismatches identified with severity"
+    - "No unresolved circular dependencies"
+  release-planning:
+    - "release-plan.yaml exists at .claude/wip/release/"
+    - "All phases defined with parallel groups"
+    - "Rollback boundaries set for each phase"
+    - "Merge strategies assigned per repo"
+    - "No unresolvable conflicts flagged"
+  execution:
+    - "execution-ledger.yaml exists at .claude/wip/release/"
+    - "At least one repo successfully pushed or published"
+    - "All actions logged with timestamps and status"
+    - "Halted DAG branches documented with reason"
+  verification:
+    - "verification-report.yaml exists at .claude/wip/release/"
+    - "All pushed repos have terminal CI status (green/red/timeout)"
+    - "Failure classifications provided for red repos"
+    - "verdict rendered (PASS/FAIL/PARTIAL)"
+
+skills:
+  - "releaser-ref for artifact chain, ecosystem detection, complexity levels, DAG-branch halting, cross-rite routing"
+
+antipatterns:
+  - "Publishing consumer before SDK dependency is confirmed published"
+  - "Force-pushing to any branch (never allowed)"
+  - "Bumping versions without actually publishing the new version (always coupled)"
+  - "Treating CI failures as non-blocking (verification-report.verdict gates success)"
+  - "Losing track of processed repos (execution-ledger tracks every action)"
+  - "Assuming uniform package managers across repos (always detect per-repo)"
+
+cross_rite_protocol: |
+  Releaser is an operations rite focused on publishing and CI. Route concerns outside its domain to:
+  - arch: Architectural boundary violations discovered during reconnaissance
+  - sre: Deployment, scaling, or infrastructure concerns revealed by CI
+  - hygiene: Code quality issues blocking publish (lint failures, format gates)
+  - review: Systematic test failures suggesting deeper code issues
+  - security: Security vulnerabilities flagged by CI scanning
+  - debt-triage: Version drift or dependency rot blocking clean release
+  Route by reference only -- pipeline-monitor names the target rite in recommendations.
+  User decides whether to switch. No transitive routing chains.

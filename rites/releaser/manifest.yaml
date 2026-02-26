@@ -1,0 +1,97 @@
+# Rite Manifest: releaser
+# Multi-repo release orchestration engine.
+
+name: releaser
+version: "1.0.0"
+description: "Multi-repo release orchestration (Reconnaissance -> Dependency Analysis -> Release Planning -> Execution -> Verification)"
+
+entry_agent: pythia
+
+phases:
+  - name: reconnaissance
+    agent: cartographer
+    produces: platform-state-map
+    description: Discover repos, map git state, identify ecosystems and available commands
+
+  - name: dependency-analysis
+    agent: dependency-resolver
+    produces: dependency-graph
+    description: Build cross-repo dependency DAG, detect version mismatches, calculate blast radius
+    condition: "complexity >= RELEASE"
+
+  - name: release-planning
+    agent: release-planner
+    produces: release-plan
+    description: Create phased execution plan with parallel groups, rollback boundaries, and CI time estimates
+    condition: "complexity >= RELEASE"
+
+  - name: execution
+    agent: release-executor
+    produces: execution-ledger
+    description: Execute the release plan — publish packages, bump versions, push code, create PRs
+
+  - name: verification
+    agent: pipeline-monitor
+    produces: verification-report
+    description: Monitor CI pipelines, report green/red matrix, diagnose failures
+
+agents:
+  - name: pythia
+    role: Coordinates release phases, gates complexity, manages DAG-branch failure halting
+    archetype: orchestrator
+
+  - name: cartographer
+    role: Discovers repos, maps git state, identifies package ecosystems and available commands
+
+  - name: dependency-resolver
+    role: Builds cross-repo dependency DAG, detects version mismatches, calculates blast radius
+
+  - name: release-planner
+    role: Creates phased execution plan with parallel groups, rollback boundaries, and CI time estimates
+
+  - name: release-executor
+    role: Executes the release plan — publishes packages, bumps versions, pushes code, creates PRs
+
+  - name: pipeline-monitor
+    role: Monitors CI pipelines via gh CLI, reports green/red matrix, diagnoses failures
+
+agent_defaults:
+  type: specialist
+  model: sonnet
+  maxTurns: 30
+  skills:
+    - releaser-ref
+  disallowedTools:
+    - Edit
+    - NotebookEdit
+
+dromena:
+  - releaser-switch
+
+legomena:
+  - releaser-ref
+
+hooks:
+  - agent-guard
+
+hook_defaults:
+  write_guard:
+    allow_paths: [".claude/wip/release/"]
+
+dependencies:
+  - shared
+
+complexity_levels:
+  - name: PATCH
+    scope: "Single repo push + CI watch (auto-escalates to RELEASE if dependents detected)"
+    phases: [reconnaissance, execution, verification]
+  - name: RELEASE
+    scope: "SDK publish + consumer version bumps across dependent repos"
+    phases: [reconnaissance, dependency-analysis, release-planning, execution, verification]
+  - name: PLATFORM
+    scope: "Full platform release — all matching repos, full transitive DAG, extended CI monitoring"
+    phases: [reconnaissance, dependency-analysis, release-planning, execution, verification]
+
+metadata:
+  domain: release engineering
+  color: orange

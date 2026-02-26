@@ -69,6 +69,7 @@ Display all rites dynamically (use `rite-discovery` skill):
 | forge        | /forge        | Rite creation and validation       |
 | hygiene      | /hygiene      | Code quality, refactoring          |
 | intelligence | /intelligence | Analytics, A/B testing, research   |
+| releaser     | /releaser     | Multi-repo release orchestration, publish packages, bump consumers, CI monitoring |
 | review       | /review       | Language-agnostic codebase health assessment |
 | rnd          | /rnd          | Exploration, prototyping           |
 | security     | /security     | Security assessment, compliance    |
@@ -81,7 +82,7 @@ Display all rites dynamically (use `rite-discovery` skill):
 Display all commands by category:
 ```
 Session (5): /start, /park, /continue, /handoff, /wrap
-Rite (12): /rite, /10x, /arch, /docs, /hygiene, /debt, /review, /sre, /security, /intelligence, /rnd, /strategy
+Rite (14): /rite, /10x, /arch, /docs, /hygiene, /debt, /releaser, /review, /sre, /security, /intelligence, /rnd, /strategy, /slop-chop
 Workflow (4): /task, /sprint, /hotfix, /spike
 Operations (5): /architect, /build, /qa, /pr, /code-review
 ```
