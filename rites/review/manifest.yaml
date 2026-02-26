@@ -41,11 +41,14 @@ agent_defaults:
   type: specialist
   model: sonnet
   maxTurns: 30
-  skills:
-    - review-ref
   disallowedTools:
     - Edit
     - NotebookEdit
+
+skill_policies:
+  - skill: review-ref
+    mode: inject
+    requires_tools: [Read]
 
 dromena:
   - review-switch

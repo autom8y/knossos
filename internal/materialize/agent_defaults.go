@@ -2,9 +2,8 @@ package materialize
 
 // appendListFields are list fields where agent values are APPENDED to defaults.
 // Deduplication preserves first-occurrence order (defaults before agent).
-var appendListFields = map[string]bool{
-	"skills": true,
-}
+// skills was removed: skill injection is now handled exclusively by skill_policies.
+var appendListFields = map[string]bool{}
 
 // replaceListFields are list fields where agent values REPLACE defaults entirely.
 // If the agent doesn't define the field, the default is used.
@@ -19,7 +18,8 @@ var replaceListFields = map[string]bool{
 //
 // Merge semantics:
 //   - Scalars: agent overrides default
-//   - skills: APPEND (agent extends default, deduplicated)
+//   - skills: scalar semantics (agent replaces default entirely); skill injection is
+//     handled exclusively by skill_policies — not agent_defaults
 //   - disallowedTools, tools, allowedTools: REPLACE (agent overrides entirely)
 //   - Maps: deep merge, agent keys win
 //   - Missing agent value: use default

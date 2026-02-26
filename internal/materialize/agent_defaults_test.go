@@ -51,7 +51,7 @@ func TestMergeAgentDefaults(t *testing.T) {
 			},
 		},
 		{
-			name: "skills append: default + agent merged, deduplicated",
+			name: "skills scalar: agent wins over default (skill_policies is sole injection mechanism)",
 			defaults: map[string]interface{}{
 				"skills": []interface{}{"orchestrator-templates"},
 			},
@@ -59,11 +59,11 @@ func TestMergeAgentDefaults(t *testing.T) {
 				"skills": []interface{}{"ecosystem-ref"},
 			},
 			want: map[string]interface{}{
-				"skills": []interface{}{"orchestrator-templates", "ecosystem-ref"},
+				"skills": []interface{}{"ecosystem-ref"},
 			},
 		},
 		{
-			name: "skills dedup: same skill in both, no duplicate",
+			name: "skills scalar: agent wins, default ignored entirely",
 			defaults: map[string]interface{}{
 				"skills": []interface{}{"orchestrator-templates", "shared-ref"},
 			},
@@ -71,7 +71,7 @@ func TestMergeAgentDefaults(t *testing.T) {
 				"skills": []interface{}{"orchestrator-templates", "ecosystem-ref"},
 			},
 			want: map[string]interface{}{
-				"skills": []interface{}{"orchestrator-templates", "shared-ref", "ecosystem-ref"},
+				"skills": []interface{}{"orchestrator-templates", "ecosystem-ref"},
 			},
 		},
 		{
@@ -287,11 +287,11 @@ func TestMergeAgentDefaults(t *testing.T) {
 				},
 			},
 			want: map[string]interface{}{
-				"model":           "opus",                                                  // agent wins
-				"maxTurns":        20,                                                      // default (agent lacks)
-				"skills":          []interface{}{"orchestrator-templates", "ecosystem-ref"}, // appended
-				"disallowedTools": []interface{}{"Bash"},                                    // agent replaces
-				"color":           "blue",                                                   // default (agent lacks)
+				"model":           "opus",                   // agent wins
+				"maxTurns":        20,                       // default (agent lacks)
+				"skills":          []interface{}{"ecosystem-ref"}, // agent wins (scalar semantics)
+				"disallowedTools": []interface{}{"Bash"},    // agent replaces
+				"color":           "blue",                   // default (agent lacks)
 				"hooks": map[string]interface{}{ // deep merged
 					"PreToolUse":  "default-hook",
 					"PostToolUse": "agent-hook",
@@ -425,7 +425,7 @@ maxTurns: 40
 		}
 	})
 
-	t.Run("skills from defaults and agent append", func(t *testing.T) {
+	t.Run("skills: agent wins over defaults (scalar semantics)", func(t *testing.T) {
 		source := `---
 description: Test agent
 skills:
@@ -445,9 +445,9 @@ skills:
 
 		output := string(result)
 
-		// Both skills should be present
-		if !strings.Contains(output, "orchestrator-templates") {
-			t.Errorf("default skill should be present:\n%s", output)
+		// Agent skill wins; default skill is NOT injected (skill_policies handles injection)
+		if strings.Contains(output, "orchestrator-templates") {
+			t.Errorf("default skill should NOT be present (agent value wins):\n%s", output)
 		}
 		if !strings.Contains(output, "ecosystem-ref") {
 			t.Errorf("agent skill should be present:\n%s", output)

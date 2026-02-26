@@ -48,10 +48,13 @@ agents:
 agent_defaults:
   type: specialist
   maxTurns: 30
-  skills:
-    - clinic-ref
   disallowedTools:
     - NotebookEdit
+
+skill_policies:
+  - skill: clinic-ref
+    mode: inject
+    requires_tools: [Read]
 
 dromena:
   - clinic-switch
