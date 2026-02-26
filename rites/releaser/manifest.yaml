@@ -38,7 +38,6 @@ phases:
 agents:
   - name: pythia
     role: Coordinates release phases, gates complexity, manages DAG-branch failure halting
-    archetype: orchestrator
 
   - name: cartographer
     role: Discovers repos, maps git state, identifies package ecosystems and available commands
