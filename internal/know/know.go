@@ -6,6 +6,7 @@ package know
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -30,12 +31,15 @@ type Meta struct {
 
 // DomainStatus reports freshness for a single .know/ domain.
 type DomainStatus struct {
-	Domain     string  `json:"domain"`
-	Generated  string  `json:"generated_at"`
-	Expires    string  `json:"expires_at"`
-	Fresh      bool    `json:"fresh"`
-	SourceHash string  `json:"source_hash"`
-	Confidence float64 `json:"confidence"`
+	Domain      string  `json:"domain"`
+	Generated   string  `json:"generated_at"`
+	Expires     string  `json:"expires_at"`
+	Fresh       bool    `json:"fresh"`
+	TimeExpired bool    `json:"time_expired"`
+	SourceHash  string  `json:"source_hash"`
+	CurrentHash string  `json:"current_hash"`
+	CodeChanged bool    `json:"code_changed"`
+	Confidence  float64 `json:"confidence"`
 }
 
 // ReadMeta reads and parses all .know/*.md files in knowDir.
@@ -51,6 +55,11 @@ func ReadMeta(knowDir string) ([]DomainStatus, error) {
 	}
 
 	now := time.Now().UTC()
+
+	// Resolve current git HEAD hash once for all domains in this call.
+	// An empty string means git is unavailable; code-changed check is skipped.
+	currentHash := resolveGitHead()
+
 	var results []DomainStatus
 
 	for _, entry := range entries {
@@ -82,21 +91,33 @@ func ReadMeta(knowDir string) ([]DomainStatus, error) {
 			meta.Domain = strings.TrimSuffix(entry.Name(), ".md")
 		}
 
-		status := buildDomainStatus(meta, now)
+		status := buildDomainStatus(meta, now, currentHash)
 		results = append(results, status)
 	}
 
 	return results, nil
 }
 
+// resolveGitHead returns the short git SHA of HEAD in the current working directory.
+// Returns an empty string if git is unavailable or the directory is not a git repo.
+func resolveGitHead() string {
+	out, err := exec.Command("git", "rev-parse", "--short", "HEAD").Output()
+	if err != nil {
+		return ""
+	}
+	return strings.TrimSpace(string(out))
+}
+
 // buildDomainStatus computes freshness for a single domain.
-func buildDomainStatus(meta Meta, now time.Time) DomainStatus {
+// currentHash is the current git HEAD short SHA; empty means unavailable.
+func buildDomainStatus(meta Meta, now time.Time, currentHash string) DomainStatus {
 	status := DomainStatus{
-		Domain:     meta.Domain,
-		Generated:  meta.GeneratedAt,
-		SourceHash: meta.SourceHash,
-		Confidence: meta.Confidence,
-		Fresh:      true, // default: assume fresh if unparseable
+		Domain:      meta.Domain,
+		Generated:   meta.GeneratedAt,
+		SourceHash:  meta.SourceHash,
+		CurrentHash: currentHash,
+		Confidence:  meta.Confidence,
+		Fresh:       true, // default: assume fresh if unparseable
 	}
 
 	// Parse generation time
@@ -104,6 +125,7 @@ func buildDomainStatus(meta Meta, now time.Time) DomainStatus {
 	if err != nil {
 		// Unparseable timestamp: treat as stale to be safe
 		status.Fresh = false
+		status.TimeExpired = true
 		status.Expires = "unknown"
 		return status
 	}
@@ -113,13 +135,27 @@ func buildDomainStatus(meta Meta, now time.Time) DomainStatus {
 	if err != nil {
 		// Unparseable duration: treat as stale to be safe
 		status.Fresh = false
+		status.TimeExpired = true
 		status.Expires = "unknown"
 		return status
 	}
 
 	expiresAt := generatedAt.Add(expiresAfter)
 	status.Expires = expiresAt.UTC().Format("2006-01-02")
-	status.Fresh = now.Before(expiresAt)
+
+	// Time-based staleness
+	timeExpired := !now.Before(expiresAt)
+
+	// Code-based staleness: stale when source_hash differs from HEAD.
+	// Skip this check when either value is unavailable (empty string).
+	var codeChanged bool
+	if currentHash != "" && meta.SourceHash != "" {
+		codeChanged = meta.SourceHash != currentHash
+	}
+
+	status.TimeExpired = timeExpired
+	status.CodeChanged = codeChanged
+	status.Fresh = !timeExpired && !codeChanged
 
 	return status
 }

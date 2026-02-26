@@ -104,9 +104,6 @@ format_version: "1.0"
 	if got.Domain != "architecture" {
 		t.Errorf("domain = %q, want %q", got.Domain, "architecture")
 	}
-	if !got.Fresh {
-		t.Errorf("Fresh = false, want true (generated 1d ago, expires in 7d)")
-	}
 	if got.SourceHash != "abc1234" {
 		t.Errorf("SourceHash = %q, want %q", got.SourceHash, "abc1234")
 	}
@@ -138,6 +135,9 @@ format_version: "1.0"
 	got := results[0]
 	if got.Fresh {
 		t.Errorf("Fresh = true, want false (generated 10d ago, expires in 7d)")
+	}
+	if !got.TimeExpired {
+		t.Errorf("TimeExpired = false, want true")
 	}
 }
 
@@ -194,11 +194,9 @@ format_version: "1.0"
 		byDomain[r.Domain] = r
 	}
 
-	arch, ok := byDomain["architecture"]
+	_, ok := byDomain["architecture"]
 	if !ok {
 		t.Error("missing architecture domain")
-	} else if !arch.Fresh {
-		t.Error("architecture should be fresh")
 	}
 
 	conv, ok := byDomain["conventions"]
@@ -231,5 +229,115 @@ format_version: "1.0"
 	}
 	if len(results) != 1 {
 		t.Fatalf("want 1 result (txt ignored), got %d", len(results))
+	}
+}
+
+// TestBuildDomainStatus_MatchingHash verifies that a domain with matching source_hash is fresh.
+func TestBuildDomainStatus_MatchingHash(t *testing.T) {
+	now := time.Now().UTC()
+	generatedAt := now.Add(-1 * time.Hour).Format(time.RFC3339)
+	meta := Meta{
+		Domain:       "architecture",
+		GeneratedAt:  generatedAt,
+		ExpiresAfter: "7d",
+		SourceHash:   "abc1234",
+	}
+	// Same hash as current HEAD
+	status := buildDomainStatus(meta, now, "abc1234")
+	if !status.Fresh {
+		t.Errorf("Fresh = false, want true: matching hash and within expiry")
+	}
+	if status.CodeChanged {
+		t.Errorf("CodeChanged = true, want false: hashes match")
+	}
+	if status.TimeExpired {
+		t.Errorf("TimeExpired = true, want false: generated 1h ago with 7d expiry")
+	}
+}
+
+// TestBuildDomainStatus_DifferingHash verifies that a differing source_hash marks domain stale.
+func TestBuildDomainStatus_DifferingHash(t *testing.T) {
+	now := time.Now().UTC()
+	generatedAt := now.Add(-1 * time.Hour).Format(time.RFC3339)
+	meta := Meta{
+		Domain:       "architecture",
+		GeneratedAt:  generatedAt,
+		ExpiresAfter: "7d",
+		SourceHash:   "oldsha1",
+	}
+	// Different hash: code has changed since knowledge was generated
+	status := buildDomainStatus(meta, now, "newsha9")
+	if status.Fresh {
+		t.Errorf("Fresh = true, want false: source_hash differs from HEAD")
+	}
+	if !status.CodeChanged {
+		t.Errorf("CodeChanged = false, want true: hashes differ")
+	}
+	if status.TimeExpired {
+		t.Errorf("TimeExpired = true, want false: generated 1h ago with 7d expiry")
+	}
+	if status.CurrentHash != "newsha9" {
+		t.Errorf("CurrentHash = %q, want %q", status.CurrentHash, "newsha9")
+	}
+}
+
+// TestBuildDomainStatus_ExpiredAndCodeChanged verifies combined staleness reasons.
+func TestBuildDomainStatus_ExpiredAndCodeChanged(t *testing.T) {
+	now := time.Now().UTC()
+	generatedAt := now.Add(-10 * 24 * time.Hour).Format(time.RFC3339) // 10 days ago
+	meta := Meta{
+		Domain:       "conventions",
+		GeneratedAt:  generatedAt,
+		ExpiresAfter: "7d",
+		SourceHash:   "oldsha1",
+	}
+	status := buildDomainStatus(meta, now, "newsha9")
+	if status.Fresh {
+		t.Errorf("Fresh = true, want false: both expired and code changed")
+	}
+	if !status.TimeExpired {
+		t.Errorf("TimeExpired = false, want true: generated 10d ago with 7d expiry")
+	}
+	if !status.CodeChanged {
+		t.Errorf("CodeChanged = false, want true: hashes differ")
+	}
+}
+
+// TestBuildDomainStatus_EmptyCurrentHash verifies that missing git hash skips code check.
+func TestBuildDomainStatus_EmptyCurrentHash(t *testing.T) {
+	now := time.Now().UTC()
+	generatedAt := now.Add(-1 * time.Hour).Format(time.RFC3339)
+	meta := Meta{
+		Domain:       "architecture",
+		GeneratedAt:  generatedAt,
+		ExpiresAfter: "7d",
+		SourceHash:   "abc1234",
+	}
+	// Empty currentHash: git unavailable -- code check skipped
+	status := buildDomainStatus(meta, now, "")
+	if !status.Fresh {
+		t.Errorf("Fresh = false, want true: git unavailable, should not penalize")
+	}
+	if status.CodeChanged {
+		t.Errorf("CodeChanged = true, want false: cannot check when currentHash is empty")
+	}
+}
+
+// TestBuildDomainStatus_EmptySourceHash verifies that missing stored hash skips code check.
+func TestBuildDomainStatus_EmptySourceHash(t *testing.T) {
+	now := time.Now().UTC()
+	generatedAt := now.Add(-1 * time.Hour).Format(time.RFC3339)
+	meta := Meta{
+		Domain:       "architecture",
+		GeneratedAt:  generatedAt,
+		ExpiresAfter: "7d",
+		SourceHash:   "", // not set in frontmatter
+	}
+	status := buildDomainStatus(meta, now, "abc1234")
+	if !status.Fresh {
+		t.Errorf("Fresh = false, want true: no stored hash, cannot determine code change")
+	}
+	if status.CodeChanged {
+		t.Errorf("CodeChanged = true, want false: no stored hash to compare")
 	}
 }

@@ -25,6 +25,10 @@ This table IS the registry. A domain exists when it has a row here and a criteri
 | **hooks** | `domains/hooks.lego.md` | framework | Hook wiring: lifecycle coverage, matchers, timeouts |
 | **mena-structure** | `domains/mena-structure.lego.md` | framework | Mena directories: naming, INDEX files, manifest registration |
 | **architecture** | `domains/architecture.lego.md` | codebase | Source code structure: packages, layers, entry points, abstractions, data flow |
+| **conventions** | `domains/conventions.lego.md` | codebase | Naming patterns, error handling style, test patterns, file organization, code style |
+| **dependencies** | `domains/dependencies.lego.md` | codebase | Dependency graph, version currency, health signals, vulnerability exposure |
+| **test-coverage** | `domains/test-coverage.lego.md` | codebase | Test structure, coverage patterns, testing conventions, fixture patterns |
+| **api-surface** | `domains/api-surface.lego.md` | codebase | CLI command contracts, exported interfaces, public type signatures |
 
 ### Scope Values
 
@@ -61,12 +65,19 @@ No +/- modifiers. Simplicity prevents grade inflation and gaming.
 
 ## Progressive Disclosure
 
-### Domain Criteria
+### Domain Criteria — Framework
 - [dromena.lego.md](domains/dromena.lego.md) - Slash command audit criteria
 - [legomena.lego.md](domains/legomena.lego.md) - Skill audit criteria
 - [agents.lego.md](domains/agents.lego.md) - Agent prompt audit criteria
 - [hooks.lego.md](domains/hooks.lego.md) - Hook wiring audit criteria
 - [mena-structure.lego.md](domains/mena-structure.lego.md) - Mena directory audit criteria
+
+### Domain Criteria — Codebase
+- [architecture.lego.md](domains/architecture.lego.md) - Architecture knowledge capture
+- [conventions.lego.md](domains/conventions.lego.md) - Conventions knowledge capture
+- [dependencies.lego.md](domains/dependencies.lego.md) - Dependency landscape knowledge capture
+- [test-coverage.lego.md](domains/test-coverage.lego.md) - Test structure knowledge capture
+- [api-surface.lego.md](domains/api-surface.lego.md) - API surface knowledge capture
 
 ### Schemas
 - [registry-format.lego.md](registry-format.lego.md) - How to add new domains

@@ -87,15 +87,10 @@ Produce your output in TWO parts:
 
 Structured markdown with one section per criterion. Each section documents what you observed in the codebase. Use specific file paths, type names, and package references. This becomes the body of the .know/ file.
 
-Start with a top-level heading:
-# Codebase Architecture
+Start with a top-level heading derived from the domain name:
+# Codebase {Domain Title}
 
-Then one H2 section per criterion, named EXACTLY:
-## Package Structure
-## Layer Boundaries
-## Entry Points and API Surface
-## Key Abstractions
-## Data Flow
+Then one H2 section per criterion from the criteria file, named EXACTLY as the criterion title appears (e.g., if the criterion is "Criterion 1: Package Structure", the section is "## Package Structure"). Follow the criteria order.
 
 End with:
 ## Knowledge Gaps
@@ -112,20 +107,18 @@ overall_grade: {A-F}
 overall_percentage: {N.N}%
 confidence: {0.0-1.0}
 criteria_grades:
-  package_structure: {grade}
-  layer_boundaries: {grade}
-  entry_points: {grade}
-  key_abstractions: {grade}
-  data_flow: {grade}
+  {criterion_1_snake_case}: {grade}
+  {criterion_2_snake_case}: {grade}
+  ...one entry per criterion from the criteria file...
 ```
 
-The confidence value is your self-assessment of how completely you covered the source scope. 1.0 = every package and file examined. 0.5 = significant areas unexplored due to scope or turn limits.
+The criteria_grades keys should be snake_case versions of the criterion names from the criteria file (e.g., "Package Structure" -> "package_structure", "Error Handling Style" -> "error_handling_style").
+
+The confidence value is your self-assessment of how completely you covered the source scope. 1.0 = every file in scope examined. 0.5 = significant areas unexplored due to scope or turn limits.
 
 ### Scope Reminder
 
-Target: ./cmd/, ./internal/, root-level Go files (*.go, go.mod)
-Do NOT document rites/, knossos/, .claude/, or non-Go files.
-Focus on the Go source code that comprises the ari binary.
+Read the **Scope** section in the domain criteria file above. It defines the target files and observation focus. Stay within the defined scope.
 ")
 ```
 
@@ -187,11 +180,9 @@ Display summary to the user:
 ### Criteria Completeness
 | Criterion | Grade |
 |-----------|-------|
-| Package Structure | {grade} |
-| Layer Boundaries | {grade} |
-| Entry Points | {grade} |
-| Key Abstractions | {grade} |
-| Data Flow | {grade} |
+| {criterion_1_name} | {grade} |
+| {criterion_2_name} | {grade} |
+| ... | ... |
 
 This file is consumable by any CC agent via `Read(".know/{domain}.md")`.
 Regenerate with: `/know {domain} --force`

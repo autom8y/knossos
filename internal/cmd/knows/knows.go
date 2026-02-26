@@ -20,6 +20,29 @@ type KnowsOutput struct {
 	AllFresh bool                `json:"all_fresh"`
 }
 
+// stalenessLabel returns the human-readable status string for a domain:
+//   - "fresh"                          -- time-fresh AND code-unchanged
+//   - "stale (expired)"                -- time-expired only
+//   - "stale (code changed)"           -- time-fresh but source_hash differs from HEAD
+//   - "stale (expired + code changed)" -- both conditions
+//   - "stale"                          -- unparseable timestamp/duration
+func stalenessLabel(d know.DomainStatus) string {
+	if d.Fresh {
+		return "fresh"
+	}
+	switch {
+	case d.TimeExpired && d.CodeChanged:
+		return "stale (expired + code changed)"
+	case d.TimeExpired:
+		return "stale (expired)"
+	case d.CodeChanged:
+		return "stale (code changed)"
+	default:
+		// Stale due to unparseable timestamp or duration
+		return "stale"
+	}
+}
+
 // Text implements output.Textable for human-readable table output.
 func (k KnowsOutput) Text() string {
 	if len(k.Domains) == 0 {
@@ -28,15 +51,12 @@ func (k KnowsOutput) Text() string {
 
 	var b strings.Builder
 	// Header row
-	b.WriteString(fmt.Sprintf("%-16s %-20s %-12s %-10s %-10s %-10s\n",
+	b.WriteString(fmt.Sprintf("%-16s %-20s %-12s %-30s %-10s %-10s\n",
 		"Domain", "Generated", "Expires", "Status", "Source", "Confidence"))
-	b.WriteString(strings.Repeat("-", 82) + "\n")
+	b.WriteString(strings.Repeat("-", 102) + "\n")
 
 	for _, d := range k.Domains {
-		status := "fresh"
-		if !d.Fresh {
-			status = "STALE"
-		}
+		status := stalenessLabel(d)
 		// Trim generated timestamp for readability: "2026-02-26T21:17:58Z" -> "2026-02-26T21:17"
 		generated := d.Generated
 		if len(generated) >= 16 {
@@ -47,7 +67,7 @@ func (k KnowsOutput) Text() string {
 		if len(srcHash) > 7 {
 			srcHash = srcHash[:7]
 		}
-		b.WriteString(fmt.Sprintf("%-16s %-20s %-12s %-10s %-10s %.2f\n",
+		b.WriteString(fmt.Sprintf("%-16s %-20s %-12s %-30s %-10s %.2f\n",
 			d.Domain, generated, d.Expires, status, srcHash, d.Confidence))
 	}
 
@@ -132,10 +152,10 @@ func runKnows(ctx *cmdContext, args []string, checkFlag bool) error {
 			printer.PrintLine("OK: all domains fresh")
 			return nil
 		}
-		// Print stale domains before exiting
+		// Print stale domains with reason before exiting
 		for _, d := range domains {
 			if !d.Fresh {
-				printer.PrintLine(fmt.Sprintf("STALE: %s (expired %s)", d.Domain, d.Expires))
+				printer.PrintLine(fmt.Sprintf("STALE: %s (%s, expires %s)", d.Domain, stalenessLabel(d), d.Expires))
 			}
 		}
 		os.Exit(1)

@@ -32,12 +32,14 @@ func TestKnowsOutput_Text_Empty(t *testing.T) {
 func TestKnowsOutput_Text_WithDomains(t *testing.T) {
 	domains := []know.DomainStatus{
 		{
-			Domain:     "architecture",
-			Generated:  "2026-02-26T21:17:58Z",
-			Expires:    "2026-03-05",
-			Fresh:      true,
-			SourceHash: "a9149e7",
-			Confidence: 0.88,
+			Domain:      "architecture",
+			Generated:   "2026-02-26T21:17:58Z",
+			Expires:     "2026-03-05",
+			Fresh:       true,
+			TimeExpired: false,
+			CodeChanged: false,
+			SourceHash:  "a9149e7",
+			Confidence:  0.88,
 		},
 	}
 	out := KnowsOutput{Domains: domains, AllFresh: true}
@@ -54,22 +56,104 @@ func TestKnowsOutput_Text_WithDomains(t *testing.T) {
 	}
 }
 
-func TestKnowsOutput_Text_StaleDomain(t *testing.T) {
+func TestKnowsOutput_Text_StaleDomain_Expired(t *testing.T) {
 	domains := []know.DomainStatus{
 		{
-			Domain:     "architecture",
-			Generated:  "2026-01-01T00:00:00Z",
-			Expires:    "2026-01-08",
-			Fresh:      false,
-			SourceHash: "old1234",
-			Confidence: 0.70,
+			Domain:      "architecture",
+			Generated:   "2026-01-01T00:00:00Z",
+			Expires:     "2026-01-08",
+			Fresh:       false,
+			TimeExpired: true,
+			CodeChanged: false,
+			SourceHash:  "old1234",
+			Confidence:  0.70,
 		},
 	}
 	out := KnowsOutput{Domains: domains, AllFresh: false}
 	text := out.Text()
 
-	if !strings.Contains(text, "STALE") {
-		t.Errorf("Text() should contain 'STALE' for expired domain, got: %q", text)
+	if !strings.Contains(text, "stale (expired)") {
+		t.Errorf("Text() should contain 'stale (expired)' for time-expired domain, got: %q", text)
+	}
+}
+
+func TestKnowsOutput_Text_StaleDomain_CodeChanged(t *testing.T) {
+	domains := []know.DomainStatus{
+		{
+			Domain:      "architecture",
+			Generated:   "2026-02-26T00:00:00Z",
+			Expires:     "2026-03-05",
+			Fresh:       false,
+			TimeExpired: false,
+			CodeChanged: true,
+			SourceHash:  "old1234",
+			CurrentHash: "newsha9",
+			Confidence:  0.85,
+		},
+	}
+	out := KnowsOutput{Domains: domains, AllFresh: false}
+	text := out.Text()
+
+	if !strings.Contains(text, "stale (code changed)") {
+		t.Errorf("Text() should contain 'stale (code changed)', got: %q", text)
+	}
+}
+
+func TestKnowsOutput_Text_StaleDomain_BothReasons(t *testing.T) {
+	domains := []know.DomainStatus{
+		{
+			Domain:      "architecture",
+			Generated:   "2026-01-01T00:00:00Z",
+			Expires:     "2026-01-08",
+			Fresh:       false,
+			TimeExpired: true,
+			CodeChanged: true,
+			SourceHash:  "old1234",
+			CurrentHash: "newsha9",
+			Confidence:  0.70,
+		},
+	}
+	out := KnowsOutput{Domains: domains, AllFresh: false}
+	text := out.Text()
+
+	if !strings.Contains(text, "stale (expired + code changed)") {
+		t.Errorf("Text() should contain 'stale (expired + code changed)', got: %q", text)
+	}
+}
+
+func TestStalenessLabel_Fresh(t *testing.T) {
+	d := know.DomainStatus{Fresh: true}
+	if got := stalenessLabel(d); got != "fresh" {
+		t.Errorf("stalenessLabel(fresh) = %q, want %q", got, "fresh")
+	}
+}
+
+func TestStalenessLabel_ExpiredOnly(t *testing.T) {
+	d := know.DomainStatus{Fresh: false, TimeExpired: true, CodeChanged: false}
+	if got := stalenessLabel(d); got != "stale (expired)" {
+		t.Errorf("stalenessLabel(expired only) = %q, want %q", got, "stale (expired)")
+	}
+}
+
+func TestStalenessLabel_CodeChangedOnly(t *testing.T) {
+	d := know.DomainStatus{Fresh: false, TimeExpired: false, CodeChanged: true}
+	if got := stalenessLabel(d); got != "stale (code changed)" {
+		t.Errorf("stalenessLabel(code changed only) = %q, want %q", got, "stale (code changed)")
+	}
+}
+
+func TestStalenessLabel_BothReasons(t *testing.T) {
+	d := know.DomainStatus{Fresh: false, TimeExpired: true, CodeChanged: true}
+	if got := stalenessLabel(d); got != "stale (expired + code changed)" {
+		t.Errorf("stalenessLabel(both) = %q, want %q", got, "stale (expired + code changed)")
+	}
+}
+
+func TestStalenessLabel_Default(t *testing.T) {
+	// Stale but neither TimeExpired nor CodeChanged: unparseable timestamp case
+	d := know.DomainStatus{Fresh: false, TimeExpired: false, CodeChanged: false}
+	if got := stalenessLabel(d); got != "stale" {
+		t.Errorf("stalenessLabel(default) = %q, want %q", got, "stale")
 	}
 }
 
@@ -132,8 +216,10 @@ format_version: "1.0"
 	if len(domains) != 1 {
 		t.Fatalf("want 1 domain, got %d", len(domains))
 	}
-	if !domains[0].Fresh {
-		t.Error("domain generated 1d ago with 7d expiry should be fresh")
+	// Note: Fresh may be false if current git HEAD differs from "abc1234".
+	// We only assert TimeExpired is false since we cannot control git hash in tests.
+	if domains[0].TimeExpired {
+		t.Error("domain generated 1d ago with 7d expiry should not be time-expired")
 	}
 }
 
@@ -158,6 +244,9 @@ format_version: "1.0"
 	}
 	if domains[0].Fresh {
 		t.Error("domain generated 10d ago with 7d expiry should be stale")
+	}
+	if !domains[0].TimeExpired {
+		t.Error("domain generated 10d ago with 7d expiry should have TimeExpired=true")
 	}
 }
 
@@ -189,5 +278,29 @@ func TestMalformedFrontmatter(t *testing.T) {
 	// Broken file should be skipped silently
 	if len(domains) != 0 {
 		t.Errorf("want 0 domains (broken skipped), got %d", len(domains))
+	}
+}
+
+// TestCheckMode_CodeStale verifies that --check logic treats code-stale domains as stale.
+// We test this through the stalenessLabel function and domain status fields rather than
+// the full cobra command (which requires project resolution).
+func TestCheckMode_CodeStale(t *testing.T) {
+	// Simulate a domain that is time-fresh but code-changed
+	d := know.DomainStatus{
+		Domain:      "architecture",
+		Fresh:       false,
+		TimeExpired: false,
+		CodeChanged: true,
+		SourceHash:  "oldsha1",
+		CurrentHash: "newsha9",
+		Expires:     "2026-03-05",
+	}
+
+	if d.Fresh {
+		t.Error("code-stale domain should have Fresh=false")
+	}
+	label := stalenessLabel(d)
+	if label != "stale (code changed)" {
+		t.Errorf("stalenessLabel = %q, want %q", label, "stale (code changed)")
 	}
 }
