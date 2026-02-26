@@ -31,13 +31,7 @@ skills:
 memory: "project"
 disallowedTools:
   - Edit
-hooks:
-  PreToolUse:
-    - matcher: "Write"
-      hooks:
-        - type: command
-          command: "ari hook agent-guard --agent ecosystem-analyst --allow-path .wip/ --allow-path docs/ecosystem/ --output json"
-          timeout: 3
+write-guard: true
 contract:
   must_not:
     - Propose solutions (diagnose and analyze only)

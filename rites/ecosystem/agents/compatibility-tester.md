@@ -32,13 +32,7 @@ skills:
 disallowedTools:
   - Edit
   - Task
-hooks:
-  PreToolUse:
-    - matcher: "Write"
-      hooks:
-        - type: command
-          command: "ari hook agent-guard --agent compatibility-tester --allow-path .wip/ --allow-path docs/ecosystem/ --output json"
-          timeout: 3
+write-guard: true
 contract:
   must_not:
     - Implement fixes for compatibility issues found

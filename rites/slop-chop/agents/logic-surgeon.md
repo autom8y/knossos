@@ -15,13 +15,7 @@ skills:
 memory: "project"
 disallowedTools:
   - Edit
-hooks:
-  PreToolUse:
-    - matcher: "Write"
-      hooks:
-        - type: command
-          command: "ari hook agent-guard --agent logic-surgeon --allow-path .wip/ --output json"
-          timeout: 3
+write-guard: true
 ---
 
 # Logic Surgeon

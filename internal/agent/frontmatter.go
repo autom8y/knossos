@@ -37,6 +37,7 @@ type AgentFrontmatter struct {
 	PermissionMode  string                 `yaml:"permissionMode,omitempty" json:"permissionMode,omitempty"`
 	McpServers      []McpServerConfig      `yaml:"mcpServers,omitempty" json:"mcpServers,omitempty"`
 	Hooks           map[string]interface{} `yaml:"hooks,omitempty" json:"hooks,omitempty"`
+	WriteGuard      interface{}            `yaml:"write-guard,omitempty" json:"write-guard,omitempty"` // Source-only: consumed during materialization
 
 	// Workflow Position
 	Upstream   []UpstreamRef   `yaml:"upstream,omitempty" json:"upstream,omitempty"`

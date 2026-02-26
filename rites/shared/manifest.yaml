@@ -25,6 +25,11 @@ legomena:
 
 hooks: []
 
+hook_defaults:
+  write_guard:
+    allow_paths: [".wip/", "wip/"]
+    timeout: 3
+
 dependencies: []
 
 metadata:

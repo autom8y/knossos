@@ -259,6 +259,30 @@ func TestIsAllowedPath(t *testing.T) {
 			allowPaths: []string{"docs/ecosystem/"},
 			want:       false,
 		},
+		{
+			name:       "relative .claude/wip/ matches wip/ prefix via contains",
+			filePath:   ".claude/wip/report.md",
+			allowPaths: []string{".wip/", "wip/"},
+			want:       true,
+		},
+		{
+			name:       "absolute .claude/wip/ matches wip/ prefix via contains",
+			filePath:   "/Users/tom/project/.claude/wip/report.md",
+			allowPaths: []string{".wip/", "wip/"},
+			want:       true,
+		},
+		{
+			name:       "deep nested wip/ matches via contains",
+			filePath:   "deep/path/wip/report.md",
+			allowPaths: []string{"wip/"},
+			want:       true,
+		},
+		{
+			name:       ".claude/wip/ does not match .wip/ alone",
+			filePath:   ".claude/wip/report.md",
+			allowPaths: []string{".wip/"},
+			want:       false,
+		},
 	}
 
 	for _, tt := range tests {
