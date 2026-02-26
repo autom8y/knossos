@@ -1,3 +1,7 @@
+---
+last_verified: 2026-02-26
+---
+
 # CLI Reference: artifact
 
 > Register, query, and manage workflow artifacts.

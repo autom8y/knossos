@@ -1,3 +1,7 @@
+---
+last_verified: 2026-02-26
+---
+
 # Rite Catalog Index
 
 > Comprehensive catalog of all rites in the Knossos ecosystem.
@@ -10,18 +14,20 @@ A **rite** is a practice bundle that provides specialized workflows for differen
 
 | Rite | Form | Agents | Entry | Purpose |
 |------|------|--------|-------|---------|
-| [10x-dev](10x-dev.md) | Full | 5 | orchestrator | Full development lifecycle |
-| [docs](docs.md) | Full | 5 | orchestrator | Documentation workflow |
-| [forge](forge.md) | Meta | 7 | orchestrator | Rite creation |
-| [hygiene](hygiene.md) | Full | 5 | orchestrator | Code quality lifecycle |
-| [debt-triage](debt-triage.md) | Full | 4 | orchestrator | Technical debt management |
-| [security](security.md) | Full | 5 | orchestrator | Security assessment lifecycle |
-| [sre](sre.md) | Full | 5 | orchestrator | Reliability engineering |
-| [intelligence](intelligence.md) | Full | 5 | orchestrator | Product analytics |
-| [strategy](strategy.md) | Full | 5 | orchestrator | Business strategy |
-| [rnd](rnd.md) | Full | 6 | orchestrator | Technology exploration |
-| [ecosystem](ecosystem.md) | Full | 5 | orchestrator | Platform infrastructure |
-| [slop-chop](slop-chop.md) | Full | 6 | orchestrator | AI code quality gate |
+| [10x-dev](10x-dev.md) | Full | 5 | pythia | Full development lifecycle |
+| [arch](arch.md) | Full | 5 | pythia | Architecture assessment |
+| [docs](docs.md) | Full | 5 | pythia | Documentation workflow |
+| [forge](forge.md) | Meta | 7 | pythia | Rite creation |
+| [hygiene](hygiene.md) | Full | 5 | pythia | Code quality lifecycle |
+| [debt-triage](debt-triage.md) | Full | 4 | pythia | Technical debt management |
+| [security](security.md) | Full | 5 | pythia | Security assessment lifecycle |
+| [sre](sre.md) | Full | 5 | pythia | Reliability engineering |
+| [intelligence](intelligence.md) | Full | 5 | pythia | Product analytics |
+| [strategy](strategy.md) | Full | 5 | pythia | Business strategy |
+| [rnd](rnd.md) | Full | 6 | pythia | Technology exploration |
+| [ecosystem](ecosystem.md) | Full | 6 | pythia | Platform infrastructure |
+| [slop-chop](slop-chop.md) | Full | 6 | pythia | AI code quality gate |
+| [shared](shared.md) | Cross-rite | 1 | — | Cross-rite resources (theoros) |
 
 ---
 
@@ -45,6 +51,7 @@ Special rites that operate on the rite system itself. The **forge** rite is the 
 
 ### Development & Quality
 - [10x-dev](10x-dev.md) — Full feature development from PRD to QA
+- [arch](arch.md) — Architecture assessment and remediation
 - [hygiene](hygiene.md) — Code quality audits and improvements
 - [debt-triage](debt-triage.md) — Technical debt assessment and remediation
 - [slop-chop](slop-chop.md) — AI code quality gate; hallucination detection and temporal debt audit
@@ -73,6 +80,7 @@ Special rites that operate on the rite system itself. The **forge** rite is the 
 flowchart TD
     A[What type of work?] --> B{Development?}
     B -->|Feature| C[10x-dev]
+    B -->|Architecture| AR[arch]
     B -->|Quality| D[hygiene]
     B -->|Debt| E[debt-triage]
     B -->|AI Code Review| SC[slop-chop]
@@ -104,6 +112,7 @@ flowchart TD
 ```bash
 # Switch to a rite
 /10x          # Development
+/arch         # Architecture assessment
 /docs         # Documentation
 /hygiene      # Code quality
 /debt         # Technical debt
@@ -167,12 +176,12 @@ ari rite release
 
 ## Rite Anatomy
 
-Each rite is defined by a manifest at `/roster/rites/{rite-name}/manifest.yaml`:
+Each rite is defined by a manifest at `rites/{rite-name}/manifest.yaml`:
 
 ```yaml
 name: example-rite
 form: full
-entry_agent: orchestrator
+entry_agent: pythia
 
 agents:
   - name: orchestrator

@@ -69,7 +69,8 @@ type RiteManifest struct {
 	Skills       []string    `yaml:"skills"`   // Deprecated: use Legomena instead
 	Hooks        []string    `yaml:"hooks"`
 	Dependencies []string    `yaml:"dependencies"`
-	MCPServers   []MCPServer `yaml:"mcp_servers,omitempty"` // MCP server declarations
+	MCPServers   []MCPServer   `yaml:"mcp_servers,omitempty"` // MCP server declarations
+	HookDefaults *HookDefaults `yaml:"hook_defaults,omitempty"`
 }
 
 // MCPServerNames returns the list of MCP server names declared in the manifest.
@@ -377,8 +378,12 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 		// KeepAll: do nothing (orphans remain)
 	}
 
+	// 3.5. Resolve hook defaults: shared → rite cascade
+	sharedHookDefaults := m.loadSharedHookDefaults(resolved)
+	mergedWriteGuardDefaults := ResolveHookDefaults(sharedHookDefaults, manifest.HookDefaults)
+
 	// 4. Generate agents/ directory from rite
-	if err := m.materializeAgents(manifest, ritePath, claudeDir, resolved, collector); err != nil {
+	if err := m.materializeAgents(manifest, ritePath, claudeDir, resolved, collector, mergedWriteGuardDefaults); err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize agents", err)
 	}
 
@@ -777,7 +782,7 @@ func (m *Materializer) loadRiteManifest(ritePath string, resolved *ResolvedRite)
 // Uses selective write: only knossos-managed agents (from manifest) are replaced.
 // User-created agents not in the manifest are preserved.
 // Also materializes cross-rite agents from top-level agents/ directory.
-func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claudeDir string, resolved *ResolvedRite, collector provenance.Collector) error {
+func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claudeDir string, resolved *ResolvedRite, collector provenance.Collector, writeGuardDefaults *WriteGuardDefaults) error {
 	agentsDir := filepath.Join(claudeDir, "agents")
 
 	// Ensure agents directory exists (selective — do NOT RemoveAll)
@@ -823,6 +828,13 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claud
 			if err != nil {
 				return err
 			}
+			// Project agent source into CC-consumable form (strip knossos metadata, inject name, resolve hooks)
+			agentName := strings.TrimSuffix(filepath.Base(path), ".md")
+			if transformed, tErr := transformAgentContent(content, agentName, writeGuardDefaults); tErr == nil {
+				content = transformed
+			} else {
+				log.Printf("Warning: agent transform failed for %s: %v", agentName, tErr)
+			}
 			destPath := filepath.Join(agentsDir, path)
 			if err := os.MkdirAll(filepath.Dir(destPath), 0755); err != nil {
 				return err
@@ -862,6 +874,14 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claud
 			content, err := os.ReadFile(path)
 			if err != nil {
 				return err
+			}
+
+			// Project agent source into CC-consumable form (strip knossos metadata, inject name, resolve hooks)
+			agentName := strings.TrimSuffix(filepath.Base(path), ".md")
+			if transformed, tErr := transformAgentContent(content, agentName, writeGuardDefaults); tErr == nil {
+				content = transformed
+			} else {
+				log.Printf("Warning: agent transform failed for %s: %v", agentName, tErr)
 			}
 
 			// Compute relative path

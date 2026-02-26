@@ -1,3 +1,7 @@
+---
+last_verified: 2026-02-26
+---
+
 # CLI Reference
 
 > Complete reference for all `ari` commands.
@@ -10,22 +14,28 @@
 
 | Family | Commands | Description |
 |--------|----------|-------------|
-| [session](cli-session.md) | 11 | Create, list, park, resume, wrap sessions |
+| [session](cli-session.md) | 15 | Create, list, park, resume, wrap sessions |
 | [rite](cli-rite.md) | 10 | List, invoke, release, swap rites |
-| [worktree](cli-worktree.md) | 10 | Parallel sessions with filesystem isolation |
+| [worktree](cli-worktree.md) | 11 | Parallel sessions with filesystem isolation |
 | [sync](cli-sync.md) | 8 | Synchronize .claude/ with remotes |
-| [hook](cli-hook.md) | 6 | Claude Code hook infrastructure |
+| [hook](cli-hook.md) | 11 | Hook infrastructure + agent-guard |
 | [handoff](cli-handoff.md) | 4 | Agent handoffs between phases |
 | [inscription](cli-inscription.md) | 5 | CLAUDE.md inscription system |
 | [artifact](cli-artifact.md) | 4 | Register and query workflow artifacts |
 | [validate](cli-validate.md) | 3 | Validate artifacts and handoffs |
 | [manifest](cli-manifest.md) | 4 | Show, validate, diff manifests |
+| agent | 3 | Agent operations. See `ari agent --help` |
+| initialize | 2 | Project initialization. See `ari initialize --help` |
+| migrate | 2 | Migration utilities. See `ari migrate --help` |
+| lint | 2 | Lint and validation. See `ari lint --help` |
+| provenance | 2 | Provenance tracking. See `ari provenance --help` |
 | [sails](cli-sails.md) | 1 | White Sails quality gates |
 | [naxos](cli-naxos.md) | 1 | Orphaned session cleanup |
 | [tribute](cli-tribute.md) | 1 | Session summary generation |
 | [completion](cli-completion.md) | 4 | Shell autocompletion |
+| version | 1 | Version info |
 
-**Total**: 72 commands across 14 families
+**Total**: 84+ commands across 20 families
 
 ---
 
@@ -34,13 +44,12 @@
 The `ari` binary is built from Go source:
 
 ```bash
-cd /path/to/roster/ariadne
-just build
+CGO_ENABLED=0 go build ./cmd/ari
 ```
 
-Or install directly:
+Install to PATH:
 ```bash
-go install github.com/your-org/roster/ariadne/cmd/ari@latest
+go install ./cmd/ari
 ```
 
 ---

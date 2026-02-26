@@ -1,3 +1,7 @@
+---
+last_verified: 2026-02-26
+---
+
 # Rite: strategy
 
 > Business strategy lifecycle for market research, competitive analysis, and strategic planning.
@@ -13,7 +17,7 @@ The strategy rite provides workflows for strategic business decisions through ma
 | **Name** | strategy |
 | **Form** | Full (multi-agent workflow) |
 | **Agents** | 5 |
-| **Entry Agent** | orchestrator |
+| **Entry Agent** | pythia |
 
 ---
 
@@ -31,13 +35,13 @@ The strategy rite provides workflows for strategic business decisions through ma
 
 | Agent | Role |
 |-------|------|
-| **orchestrator** | Coordinates strategic initiative phases |
+| **pythia** | Coordinates strategic initiative phases |
 | **market-researcher** | Researches markets and identifies customer segments |
 | **competitive-analyst** | Analyzes competitive landscape and identifies opportunities |
 | **business-model-analyst** | Builds financial models and analyzes unit economics |
 | **roadmap-strategist** | Creates strategic roadmaps with execution timelines |
 
-See agent files: `/roster/rites/strategy/agents/`
+See agent files: `rites/strategy/agents/`
 
 ---
 
@@ -87,7 +91,7 @@ Task(business-model-analyst, "model unit economics for new pricing tier")
 
 ## Source
 
-**Manifest**: `/roster/rites/strategy/manifest.yaml`
+**Manifest**: `rites/strategy/manifest.yaml`
 
 ---
 

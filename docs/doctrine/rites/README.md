@@ -1,9 +1,13 @@
+---
+last_verified: 2026-02-26
+---
+
 # Rite Catalog
 
 > Practice bundles for specialized workflows in the Knossos ecosystem.
 
 **Status**: Complete
-**Rites Documented**: 11
+**Rites Documented**: 14
 
 ---
 
@@ -18,6 +22,7 @@
 | Rite | Purpose | Doc |
 |------|---------|-----|
 | 10x-dev | Full development lifecycle | [10x-dev.md](10x-dev.md) |
+| arch | Architecture assessment | [arch.md](arch.md) |
 | docs | Documentation workflow | [docs.md](docs.md) |
 | forge | Meta-rite for creating rites | [forge.md](forge.md) |
 | hygiene | Code quality lifecycle | [hygiene.md](hygiene.md) |
@@ -28,6 +33,8 @@
 | strategy | Business strategy | [strategy.md](strategy.md) |
 | rnd | Technology exploration | [rnd.md](rnd.md) |
 | ecosystem | Platform infrastructure | [ecosystem.md](ecosystem.md) |
+| slop-chop | AI code quality gate | [slop-chop.md](slop-chop.md) |
+| shared | Cross-rite resources | [shared.md](shared.md) |
 
 ---
 

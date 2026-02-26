@@ -1,3 +1,7 @@
+---
+last_verified: 2026-02-26
+---
+
 # Doctrine Reference Index
 
 > Navigation hub for the Knossos philosophical and architectural foundation.
@@ -43,8 +47,6 @@ The complete philosophical foundation—The Coda that gives the platform its mea
 - XI. Design Principles (the eight revelations)
 - XII. Terminology Concordance
 - XIII. The Coda (philosophical summary)
-- XIV. Implementation Drift Registry
-
 **Audience:** All contributors, architects, anyone seeking to understand the "why" behind Knossos.
 
 ---
@@ -90,8 +92,8 @@ Authoritative mapping from Greek mythology to SOURCE implementation (not project
 
 **For each mythological element:**
 - Mythological origin (brief context)
-- Knossos implementation (CORRECT source locations)
-- Key files (actual paths in `/roster/`)
+- Knossos implementation (source locations)
+- Key files (paths relative to repo root)
 - Design rationale (why this mapping)
 
 **Audience:** New contributors learning the mythology, engineers needing to locate source code, anyone confused by SOURCE vs PROJECTION.
@@ -121,16 +123,16 @@ Architecture Decision Records documenting significant platform decisions.
 
 **Path:** [`../operations/cli-reference/`](../operations/cli-reference/)
 
-Complete reference for all Ariadne CLI commands (72 commands across 14 families).
+Complete reference for all Ariadne CLI commands (84+ commands across 20 families).
 
 **Command Families:**
-- [session](../operations/cli-reference/cli-session.md) — Session lifecycle (11 commands)
+- [session](../operations/cli-reference/cli-session.md) — Session lifecycle (15 commands)
 - [rite](../operations/cli-reference/cli-rite.md) — Rite management (10 commands)
-- [worktree](../operations/cli-reference/cli-worktree.md) — Parallel sessions (10 commands)
+- [worktree](../operations/cli-reference/cli-worktree.md) — Parallel sessions (11 commands)
 - [sync](../operations/cli-reference/cli-sync.md) — Materialization (8 commands)
-- [hook](../operations/cli-reference/cli-hook.md) — Hook operations (6 commands)
+- [hook](../operations/cli-reference/cli-hook.md) — Hook operations (11 commands)
 - [handoff](../operations/cli-reference/cli-handoff.md) — Agent handoffs (4 commands)
-- Plus 8 additional families (inscription, artifact, validate, manifest, sails, naxos, tribute, completion)
+- Plus 14 additional families (inscription, artifact, validate, manifest, agent, initialize, migrate, lint, provenance, sails, naxos, tribute, completion, version)
 
 **Entry Point:** [CLI Reference Index](../operations/cli-reference/index.md)
 
@@ -144,8 +146,9 @@ Complete reference for all Ariadne CLI commands (72 commands across 14 families)
 
 Documentation for each canonical rite (practice bundle).
 
-**Available Rites:**
+**Available Rites (14):**
 - [10x-dev](../rites/10x-dev.md) — Full development lifecycle
+- [arch](../rites/arch.md) — Architecture assessment
 - [docs](../rites/docs.md) — Documentation workflow
 - [forge](../rites/forge.md) — Agent and tool creation (meta-rite)
 - [hygiene](../rites/hygiene.md) — Code quality maintenance
@@ -156,6 +159,8 @@ Documentation for each canonical rite (practice bundle).
 - [rnd](../rites/rnd.md) — Exploration and prototypes
 - [strategy](../rites/strategy.md) — Business analysis
 - [ecosystem](../rites/ecosystem.md) — Platform infrastructure
+- [slop-chop](../rites/slop-chop.md) — AI code quality gate
+- [shared](../rites/shared.md) — Cross-rite resources
 
 **Entry Point:** [Rite Catalog Index](../rites/index.md)
 
@@ -177,6 +182,26 @@ Comprehensive guide to running parallel Claude Code sessions with filesystem iso
 - Architecture and best practices
 
 **Audience:** Developers running parallel sessions, CI/CD engineers, anyone needing worktree patterns.
+
+---
+
+### Agent Capabilities (CC-OPP)
+
+**Path:** [`agent-capabilities.md`](agent-capabilities.md)
+
+Reference for the CC Operational Platform Properties uplift — memory, skills, hooks, and resume capabilities for agents.
+
+**Audience:** Agent authors, platform engineers, anyone configuring agent frontmatter.
+
+---
+
+### Architecture Map
+
+**Path:** [`architecture-map.md`](architecture-map.md)
+
+Subsystem table mapping Go packages to entry points and purpose. CLI-to-package mapping and key flow descriptions.
+
+**Audience:** Engineers navigating the codebase, contributors seeking implementation entry points.
 
 ---
 
@@ -320,12 +345,12 @@ Executive summary of the doctrine—concise overview for stakeholders and new co
 
 ### Source Code
 
-- Repository: `/roster/` (the Knossos SOURCE)
-- CLI: `/roster/cmd/ari/`
-- Internal packages: `/roster/internal/`
-- Rites: `/roster/rites/`
-- Agents: `/roster/user-agents/`
-- Skills: `/roster/user-skills/`
+- Repository root (the Knossos SOURCE)
+- CLI: `cmd/ari/`
+- Internal packages: `internal/`
+- Rites: `rites/`
+- Cross-cutting agents: `agents/`
+- Rite-specific agents: `rites/*/agents/`
 
 ---
 
@@ -358,13 +383,16 @@ If you notice implementation drift from doctrine:
 | **Doctrine** | Philosophical foundation of Knossos | `philosophy/knossos-doctrine.md` |
 | **Principle** | Architectural revelation (one of eight) | `philosophy/design-principles.md` |
 | **Myth** | Mythological element mapped to implementation | `philosophy/mythology-concordance.md` |
-| **SOURCE** | Canonical code in `/roster/` | `philosophy/mythology-concordance.md` |
+| **SOURCE** | Canonical code in Knossos repository | `philosophy/mythology-concordance.md` |
 | **PROJECTION** | Materialized `.claude/` directories | `philosophy/mythology-concordance.md` |
 | **ADR** | Architecture Decision Record | `../../decisions/` |
 | **Rite** | Practice bundle (agents, skills, hooks, workflows) | `../rites/` |
 | **Clew** | Session state + event log (the thread) | `philosophy/knossos-doctrine.md` Section VI |
 | **White Sails** | Confidence signal (WHITE/GRAY/BLACK) | `philosophy/knossos-doctrine.md` Section VII |
 | **Moirai** | Session lifecycle authority (Clotho, Lachesis, Atropos) | `philosophy/knossos-doctrine.md` Section II |
+| **CC-OPP** | CC Operational Platform Properties — agent capability uplift | `reference/agent-capabilities.md` |
+| **Frontmatter** | Agent YAML frontmatter declaring capabilities (memory, skills, hooks) | `reference/agent-capabilities.md` |
+| **Mena** | Dromena (transient commands) + legomena (persistent knowledge) lifecycle | `philosophy/knossos-doctrine.md` Section XII |
 
 ---
 

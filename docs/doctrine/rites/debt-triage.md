@@ -1,3 +1,7 @@
+---
+last_verified: 2026-02-26
+---
+
 # Rite: debt-triage
 
 > Debt management lifecycle for assessing and planning technical debt paydown.
@@ -13,7 +17,7 @@ The debt-triage rite provides workflows for collecting, assessing, and planning 
 | **Name** | debt-triage |
 | **Form** | Full (multi-agent workflow) |
 | **Agents** | 4 |
-| **Entry Agent** | orchestrator |
+| **Entry Agent** | pythia |
 
 ---
 
@@ -30,12 +34,12 @@ The debt-triage rite provides workflows for collecting, assessing, and planning 
 
 | Agent | Role |
 |-------|------|
-| **orchestrator** | Coordinates debt assessment and planning phases |
+| **pythia** | Coordinates debt assessment and planning phases |
 | **debt-collector** | Collects and inventories technical debt across the codebase |
 | **risk-assessor** | Assesses risk and impact of debt items for prioritization |
 | **sprint-planner** | Plans debt paydown sprints with timelines and resources |
 
-See agent files: `/roster/rites/debt-triage/agents/`
+See agent files: `rites/debt-triage/agents/`
 
 ---
 
@@ -79,7 +83,7 @@ Task(risk-assessor, "assess risk of database migration debt")
 
 ## Source
 
-**Manifest**: `/roster/rites/debt-triage/manifest.yaml`
+**Manifest**: `rites/debt-triage/manifest.yaml`
 
 ---
 

@@ -1,3 +1,7 @@
+---
+last_verified: 2026-02-26
+---
+
 # Rite: 10x-dev
 
 > Full development lifecycle from requirements through validation.
@@ -13,7 +17,7 @@ The 10x-dev rite provides a complete workflow for feature implementation: PRD â†
 | **Name** | 10x-dev |
 | **Form** | Full (multi-agent workflow) |
 | **Agents** | 5 |
-| **Entry Agent** | orchestrator |
+| **Entry Agent** | pythia |
 
 ---
 
@@ -30,13 +34,13 @@ The 10x-dev rite provides a complete workflow for feature implementation: PRD â†
 
 | Agent | Role |
 |-------|------|
-| **orchestrator** | Coordinates development lifecycle phases and routes work to specialists |
+| **pythia** | Coordinates development lifecycle phases and routes work to specialists |
 | **requirements-analyst** | Gathers requirements and produces PRD artifacts |
 | **architect** | Creates technical design documents and architecture decisions |
 | **principal-engineer** | Implements code according to design specifications |
 | **qa-adversary** | Validates implementation through adversarial testing |
 
-See agent files: `/roster/rites/10x-dev/agents/`
+See agent files: `rites/10x-dev/agents/`
 
 ---
 
@@ -95,7 +99,7 @@ Task(orchestrator, "implement user authentication")
 
 ## Source
 
-**Manifest**: `/roster/rites/10x-dev/manifest.yaml`
+**Manifest**: `rites/10x-dev/manifest.yaml`
 
 ---
 

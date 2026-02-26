@@ -1,3 +1,7 @@
+---
+last_verified: 2026-02-26
+---
+
 # Rite: docs
 
 > Documentation lifecycle from audit through review.
@@ -13,7 +17,7 @@ The docs rite provides a complete workflow for documentation: Audit → Structur
 | **Name** | docs |
 | **Form** | Full (multi-agent workflow) |
 | **Agents** | 5 |
-| **Entry Agent** | orchestrator |
+| **Entry Agent** | pythia |
 
 ---
 
@@ -31,13 +35,13 @@ The docs rite provides a complete workflow for documentation: Audit → Structur
 
 | Agent | Role |
 |-------|------|
-| **orchestrator** | Coordinates documentation workflow phases |
+| **pythia** | Coordinates documentation workflow phases |
 | **doc-auditor** | Audits existing documentation and identifies gaps and priorities |
 | **information-architect** | Designs documentation structure aligned with user mental models |
 | **tech-writer** | Writes clear, accurate technical documentation |
 | **doc-reviewer** | Reviews documentation for technical accuracy and quality |
 
-See agent files: `/roster/rites/docs/agents/`
+See agent files: `rites/docs/agents/`
 
 ---
 
@@ -96,7 +100,7 @@ Task(tech-writer, "write getting started guide")
 
 ## Source
 
-**Manifest**: `/roster/rites/docs/manifest.yaml`
+**Manifest**: `rites/docs/manifest.yaml`
 
 ---
 

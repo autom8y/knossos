@@ -1,3 +1,7 @@
+---
+last_verified: 2026-02-26
+---
+
 # Rite: sre
 
 > Reliability engineering lifecycle for observability, coordination, and resilience testing.
@@ -13,7 +17,7 @@ The SRE rite provides workflows for maintaining production reliability through o
 | **Name** | sre |
 | **Form** | Full (multi-agent workflow) |
 | **Agents** | 5 |
-| **Entry Agent** | orchestrator |
+| **Entry Agent** | pythia |
 
 ---
 
@@ -31,13 +35,13 @@ The SRE rite provides workflows for maintaining production reliability through o
 
 | Agent | Role |
 |-------|------|
-| **orchestrator** | Coordinates reliability engineering initiative phases |
+| **pythia** | Coordinates reliability engineering initiative phases |
 | **observability-engineer** | Designs observability strategy and establishes SLO/SLI baselines |
 | **incident-commander** | Coordinates reliability plans and creates incident runbooks |
 | **platform-engineer** | Implements infrastructure changes and reliability improvements |
 | **chaos-engineer** | Designs and executes chaos experiments to verify resilience |
 
-See agent files: `/roster/rites/sre/agents/`
+See agent files: `rites/sre/agents/`
 
 ---
 
@@ -87,7 +91,7 @@ Task(chaos-engineer, "design chaos experiment for network partition")
 
 ## Source
 
-**Manifest**: `/roster/rites/sre/manifest.yaml`
+**Manifest**: `rites/sre/manifest.yaml`
 
 ---
 

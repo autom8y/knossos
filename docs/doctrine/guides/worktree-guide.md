@@ -1,3 +1,7 @@
+---
+last_verified: 2026-02-26
+---
+
 # Worktree Guide
 
 > Git worktrees for running parallel Claude Code sessions with filesystem isolation.

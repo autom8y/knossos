@@ -1,3 +1,7 @@
+---
+last_verified: 2026-02-26
+---
+
 # CLI Reference: validate
 
 > Validate workflow artifacts against schemas.

@@ -1,3 +1,7 @@
+---
+last_verified: 2026-02-26
+---
+
 # Rite: rnd
 
 > Technology exploration lifecycle for scouting, prototyping, and future architecture.
@@ -13,7 +17,7 @@ The R&D rite provides workflows for exploring emerging technologies and building
 | **Name** | rnd |
 | **Form** | Full (multi-agent workflow) |
 | **Agents** | 6 |
-| **Entry Agent** | orchestrator |
+| **Entry Agent** | pythia |
 
 ---
 
@@ -31,14 +35,14 @@ The R&D rite provides workflows for exploring emerging technologies and building
 
 | Agent | Role |
 |-------|------|
-| **orchestrator** | Coordinates technology exploration phases |
+| **pythia** | Coordinates technology exploration phases |
 | **technology-scout** | Scouts emerging technologies and provides build vs buy analysis |
 | **integration-researcher** | Maps integration dependencies and assesses compatibility |
 | **prototype-engineer** | Builds proof-of-concept prototypes with deliberate shortcuts |
 | **moonshot-architect** | Designs visionary long-term architecture plans |
 | **tech-transfer** | Facilitates technology transfer from R&D to production teams |
 
-See agent files: `/roster/rites/rnd/agents/`
+See agent files: `rites/rnd/agents/`
 
 ---
 
@@ -81,7 +85,7 @@ Task(moonshot-architect, "design architecture for multi-agent orchestration")
 
 ## Source
 
-**Manifest**: `/roster/rites/rnd/manifest.yaml`
+**Manifest**: `rites/rnd/manifest.yaml`
 
 ---
 

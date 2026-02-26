@@ -1,3 +1,7 @@
+---
+last_verified: 2026-02-26
+---
+
 # CLI Reference: sync
 
 > Synchronize .claude/ configuration with remotes.
@@ -373,13 +377,13 @@ All sync commands support these global flags:
 
 ```mermaid
 flowchart LR
-    A[SOURCE /knossos/] --> B[ari sync materialize]
+    A[SOURCE knossos/] --> B[ari sync materialize]
     B --> C[PROJECTION .claude/]
 
     subgraph SOURCE
         D[rites/]
-        E[user-agents/]
-        F[user-skills/]
+        E[agents/]
+        F[rites/*/mena/]
         G[knossos/templates/]
     end
 

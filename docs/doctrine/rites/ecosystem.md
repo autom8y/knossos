@@ -1,3 +1,7 @@
+---
+last_verified: 2026-02-26
+---
+
 # Rite: ecosystem
 
 > Ecosystem infrastructure lifecycle for CEM/roster changes.
@@ -12,8 +16,8 @@ The ecosystem rite provides workflows for maintaining and evolving the Knossos p
 |----------|-------|
 | **Name** | ecosystem |
 | **Form** | Full (multi-agent workflow) |
-| **Agents** | 5 |
-| **Entry Agent** | orchestrator |
+| **Agents** | 6 |
+| **Entry Agent** | pythia |
 
 ---
 
@@ -31,14 +35,14 @@ The ecosystem rite provides workflows for maintaining and evolving the Knossos p
 
 | Agent | Role |
 |-------|------|
-| **orchestrator** | Coordinates ecosystem infrastructure phases |
+| **pythia** | Coordinates ecosystem infrastructure phases |
 | **ecosystem-analyst** | Traces CEM/roster problems to root causes and produces gap analysis |
 | **context-architect** | Designs context solutions, schemas, and ecosystem patterns |
 | **integration-engineer** | Implements CEM and roster changes with integration tests |
 | **documentation-engineer** | Documents migrations and creates runbooks |
 | **compatibility-tester** | Validates ecosystem changes across satellite diversity |
 
-See agent files: `/roster/rites/ecosystem/agents/`
+See agent files: `rites/ecosystem/agents/`
 
 ---
 
@@ -83,7 +87,7 @@ Task(compatibility-tester, "validate CEM schema change across all satellites")
 
 ## Source
 
-**Manifest**: `/roster/rites/ecosystem/manifest.yaml`
+**Manifest**: `rites/ecosystem/manifest.yaml`
 
 ---
 

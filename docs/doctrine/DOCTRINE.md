@@ -1,3 +1,7 @@
+---
+last_verified: 2026-02-26
+---
+
 # The Knossos Doctrine
 
 > **Entry point to the philosophical and compliance documentation of the Knossos platform.**
@@ -41,46 +45,46 @@ docs/doctrine/
 │   ├── ADR-0005-moirai-centralized-state-authority.md
 │   └── ADR-0009-knossos-roster-identity.md
 │
-├── compliance/                 # Validation, audits, status
-│   ├── COMPLIANCE-STATUS.md    # Current implementation status
-│   └── audits/                 # Documentation audit reports
-│       ├── doctrine-audit-20260108.md
-│       ├── ia-assessment-20260108.md
-│       ├── refinement-recommendations-20260108.md
-│       └── quality-review-20260108.md
+├── compliance/                 # Validation, status
+│   └── COMPLIANCE-STATUS.md    # Current implementation status
 │
 ├── operations/                 # How to use the platform
-│   └── cli-reference/          # CLI command reference (72 commands, 14 families)
+│   └── cli-reference/          # CLI command reference (84+ commands, 20 families)
 │       ├── index.md            # Quick reference and navigation
-│       ├── cli-session.md      # Session lifecycle (11 commands)
+│       ├── cli-session.md      # Session lifecycle (15 commands)
 │       ├── cli-rite.md         # Rite management (10 commands)
-│       ├── cli-worktree.md     # Worktree operations (10 commands)
-│       └── ...                 # All 14 command families
+│       ├── cli-worktree.md     # Worktree operations (11 commands)
+│       └── ...                 # All 20 command families
 │
-├── rites/                      # Catalog of 11 rites
+├── rites/                      # Catalog of 14 rites
 │   ├── index.md                # Rite selection guide
 │   ├── 10x-dev.md              # Full development lifecycle
-│   ├── forge.md                # Meta-rite for rite creation
-│   └── ...                     # All 11 rites documented
+│   ├── arch.md                 # Architecture assessment
+│   ├── slop-chop.md            # AI code quality gate
+│   └── ...                     # All 14 rites documented
 │
 ├── guides/                     # Operational guides
 │   └── worktree-guide.md       # Worktree production patterns
 │
 └── reference/                  # Navigation and lookup
     ├── INDEX.md                # Master navigation hub
-    └── GLOSSARY.md             # Terminology reference
+    ├── GLOSSARY.md             # Terminology reference
+    ├── agent-capabilities.md   # CC-OPP capability reference
+    └── architecture-map.md     # Subsystem and package map
 ```
 
 ### Structure Notes
 
 **Canonical Identity** (per ADR-0009 Amendment):
-- **SOURCE** = `/roster/` repository (what Knossos IS)
+- **SOURCE** = Knossos repository (what Knossos IS)
 - **PROJECTION** = `.claude/` directories (materialized by `ari sync materialize`)
 
-**Completed** (2026-01-08 Sprint 2):
-- `operations/cli-reference/` - 14 CLI reference files (72 commands)
-- `rites/` - 11 rite documentation files with selection guide
+**Completed**:
+- `operations/cli-reference/` - CLI reference (84+ commands across 20 families)
+- `rites/` - 14 rite documentation files with selection guide
 - `guides/worktree-guide.md` - Worktree production patterns
+- `reference/agent-capabilities.md` - CC-OPP capability reference
+- `reference/architecture-map.md` - Subsystem and package map
 
 **Removed** (2026-01-08):
 - Empty scaffolding directories collapsed (architecture/, evolution/ subdirs)
@@ -105,20 +109,14 @@ docs/doctrine/
 
 ---
 
-## The Journey So Far
+## Current State
 
-**Doctrine Launch Sprint Achievement**: 82% → 95%+ compliance
-
-| Category | Status |
-|----------|--------|
-| Weight Economy | 90% |
-| Thread Contract | 100% (14 event types) |
-| Moirai | 85% (unified agent) |
-| White Sails | 100% |
-| Rite Operations | 90% |
-| Inscription System | 95% |
-| Naxos Detection | 100% |
-| Terminology | 95%+ |
+| Metric | Value |
+|--------|-------|
+| Go source lines | 105,609 |
+| CLI commands | 84+ across 20 families |
+| Agents | 75 across 14 rites |
+| ADRs | 27 |
 
 See [compliance/COMPLIANCE-STATUS.md](compliance/COMPLIANCE-STATUS.md) for the complete report.
 
@@ -129,7 +127,7 @@ See [compliance/COMPLIANCE-STATUS.md](compliance/COMPLIANCE-STATUS.md) for the c
 This doctrine is **living**—it evolves with the platform. Key principles:
 
 1. **Bidirectional alignment**: Doctrine informs implementation; implementation refines doctrine
-2. **Gaps are acknowledged**: Section XIV of the Coda explicitly lists implementation drift
+2. **Gaps are acknowledged**: Compliance status tracks honest gap assessment
 3. **The working system matters**: What runs in production is truth; documentation follows
 
 ---

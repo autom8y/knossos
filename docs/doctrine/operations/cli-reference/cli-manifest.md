@@ -1,3 +1,7 @@
+---
+last_verified: 2026-02-26
+---
+
 # CLI Reference: manifest
 
 > Show, validate, diff, and merge Claude Extension Manifest (CEM) files.

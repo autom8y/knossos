@@ -1,3 +1,7 @@
+---
+last_verified: 2026-02-26
+---
+
 # Rite: security
 
 > Security assessment lifecycle for threat modeling, compliance, and penetration testing.
@@ -13,7 +17,7 @@ The security rite provides workflows for comprehensive security assessment inclu
 | **Name** | security |
 | **Form** | Full (multi-agent workflow) |
 | **Agents** | 5 |
-| **Entry Agent** | orchestrator |
+| **Entry Agent** | pythia |
 
 ---
 
@@ -31,13 +35,13 @@ The security rite provides workflows for comprehensive security assessment inclu
 
 | Agent | Role |
 |-------|------|
-| **orchestrator** | Coordinates security initiative phases |
+| **pythia** | Coordinates security initiative phases |
 | **threat-modeler** | Models threats and identifies security risks and attack vectors |
 | **compliance-architect** | Maps compliance requirements and designs control frameworks |
 | **penetration-tester** | Executes penetration tests and documents vulnerabilities |
 | **security-reviewer** | Performs final security review and grants deployment approval |
 
-See agent files: `/roster/rites/security/agents/`
+See agent files: `rites/security/agents/`
 
 ---
 
@@ -87,7 +91,7 @@ Task(penetration-tester, "test authentication endpoints")
 
 ## Source
 
-**Manifest**: `/roster/rites/security/manifest.yaml`
+**Manifest**: `rites/security/manifest.yaml`
 
 ---
 

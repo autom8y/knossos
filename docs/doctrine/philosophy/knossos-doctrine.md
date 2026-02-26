@@ -1,3 +1,7 @@
+---
+last_verified: 2026-02-26
+---
+
 # The Knossos Doctrine
 
 > Mythology as architecture. The myth is the system; the system is the myth.
@@ -287,17 +291,20 @@ You can invoke a documentation rite while still practicing under the quality rit
 
 | Rite | Domain | Key Heroes |
 |------|--------|------------|
-| **10x-dev-rite** | Full development lifecycle | analyst, architect, engineer, adversary |
-| **forge-rite** | Agent and tool creation (Daedalus's domain) | architect, prompt-engineer |
-| **documentation-rite** | Knowledge crystallization | writer, editor |
-| **hygiene-rite** | Code quality maintenance | reviewer, refactorer |
-| **debt-triage-rite** | Technical debt remediation | archaeologist, surgeon |
-| **security-rite** | Threat modeling and compliance | threat-modeler, auditor |
-| **sre-rite** | Operations and reliability | operator, incident-commander |
-| **intelligence-rite** | Research and synthesis | researcher, synthesizer |
-| **exploration-rite** | Spikes and prototypes | explorer, evaluator |
-| **strategy-rite** | Business analysis | strategist, analyst |
-| **ecosystem-rite** | Platform infrastructure | integrator, validator |
+| **10x-dev** | Full development lifecycle | requirements-analyst, architect, principal-engineer, qa-adversary |
+| **arch** | Architecture assessment | topology-cartographer, structure-evaluator, dependency-analyst, remediation-planner |
+| **forge** | Agent and tool creation (Daedalus's domain) | agent-designer, prompt-architect, workflow-engineer, platform-engineer, agent-curator, eval-specialist |
+| **docs** | Knowledge crystallization | doc-auditor, information-architect, tech-writer, doc-reviewer |
+| **hygiene** | Code quality maintenance | audit-lead, code-smeller, architect-enforcer, janitor |
+| **debt-triage** | Technical debt remediation | debt-collector, risk-assessor, sprint-planner |
+| **security** | Threat modeling and compliance | threat-modeler, security-reviewer, penetration-tester, compliance-architect |
+| **sre** | Operations and reliability | observability-engineer, incident-commander, chaos-engineer, platform-engineer |
+| **intelligence** | Research and synthesis | user-researcher, insights-analyst, analytics-engineer, experimentation-lead |
+| **rnd** | Spikes and prototypes | technology-scout, moonshot-architect, prototype-engineer, integration-researcher, tech-transfer |
+| **strategy** | Business analysis | market-researcher, competitive-analyst, business-model-analyst, roadmap-strategist |
+| **ecosystem** | Platform infrastructure | ecosystem-analyst, context-architect, integration-engineer, documentation-engineer, compatibility-tester |
+| **slop-chop** | AI code quality gate | hallucination-hunter, logic-surgeon, cruft-cutter, gate-keeper, remedy-smith |
+| **shared** | Cross-rite resources | theoros |
 
 ---
 
@@ -564,6 +571,44 @@ Slaying the Minotaur matters less than returning to Athens. A merged PR with hon
 
 CLAUDE.md is not documentation—it is the labyrinth speaking. Keep the Inscription current, and travelers arrive prepared.
 
+### Principle Relationships
+
+These principles interlock:
+
+```
+Principle 1 (Clew Sacred) ──enables──▶ Principle 7 (Return)
+                  ▲
+                  │
+Principle 3 (Mutation via Fates) ──validates──▶ Principle 1
+                  │
+                  ▼
+Principle 2 (Honest Signals) ──informs──▶ Principle 7
+
+Principle 5 (Heroes Mortal) ──constrains──▶ Principle 4 (Rites > Teams)
+                  │
+                  ▼
+Principle 6 (Labyrinth Grows) ──requires──▶ Principle 4
+
+Principle 8 (Inscription) ──prepares──▶ Principle 5
+```
+
+The principles form a system, not a checklist. Violating one weakens the others.
+
+### Anti-Patterns (Principle Violations)
+
+| Anti-Pattern | Violated Principle | Consequence |
+|--------------|-------------------|-------------|
+| Direct `SESSION_CONTEXT.md` edits | 3 (Mutation via Fates) | Validation bypassed, inconsistent state |
+| Ignoring GRAY signals, forcing WHITE | 2 (Honest Signals) | Aegeus problem—false confidence |
+| Loading all rites simultaneously | 5 (Heroes Mortal) | Context overflow, diluted summoning |
+| Abandoning sessions instead of wrapping | 7 (Return) | Orphaned sessions on Naxos |
+| Manual Inscription edits in Knossos sections | 8 (Inscription) | Materialization conflicts |
+| Unrecorded decisions or actions | 1 (Clew Sacred) | Lost provenance, no audit trail |
+
+### Evolution
+
+These principles emerged from production experience navigating complex codebases. They are **descriptive** (what works) as much as **prescriptive** (what to do). As the platform evolves, new principles may emerge. The current eight represent foundational truths discovered through practice.
+
 ---
 
 ## XII. Terminology Concordance
@@ -575,15 +620,16 @@ For those encountering older documentation:
 | `thread` | `clew` | Historically accurate; the ball that unwinds |
 | `state-mate` | `Moirai` | The three Fates (Clotho, Lachesis, Atropos) |
 | `team-pack` | `Rite` | Practice bundle |
-| `ACTIVE_RITE` | `ACTIVE_RITE` | Current practice file |
 | `agents` | `heroes` | In mythology; keep "agents" in technical contexts |
-| `roster` (repository) | `knossos` | Platform name (pending rename) |
+| `roster` (repository) | `knossos` | COMPLETE — repository renamed |
 | `domain-auditor` | `theoros` / `theoroi` | Working name from spike; mythological name in doctrine |
 | `state-of-ref` | `pinakes` | Working name from spike; mythological name for domain registry |
 | `/state-of` | `/theoria` | Working name from spike; mythological name for audit command |
 | `orchestrator.md` | `pythia.md` | All rite orchestrators renamed to `rites/*/agents/pythia.md` |
 | `Domain Authority` | `Exousia` | Agent jurisdiction section renamed; 3-part contract |
 | `user-agents/` | `agents/` or `rites/*/agents/` | Cross-cutting agents at `agents/`; rite-specific at `rites/*/agents/` |
+| — | `mena` | Dromena (transient commands) + legomena (persistent reference knowledge) lifecycle model |
+| — | `Frontmatter` | Agent YAML frontmatter declaring CC-OPP capabilities (memory, skills, hooks, resume) |
 
 ---
 
@@ -598,57 +644,6 @@ Knossos is not a system for making agents smarter. It is a system for making age
 The labyrinth will always be complex. The Minotaur will always wait. But with the clew, with the Fates spinning and measuring and cutting, with honest signals on the mast, the journey through is possible.
 
 Enter with the clew. Return with confidence.
-
----
-
-## XIV. Implementation Drift Registry
-
-This section documents known divergences between the doctrine and the current implementation.
-
-### Terminology Not Yet Migrated
-
-| Doctrinal Term | Current Implementation | Status |
-|----------------|------------------------|--------|
-| `clew` | `thread` (in code) | Documentation uses clew; code uses thread |
-| `Moirai` (3 agents) | `state-mate` (1 agent) | moirai.md created; split pending |
-| `Rite` | `team-pack` | Doctrine complete; rename pending |
-| `ACTIVE_RITE` | `ACTIVE_RITE` | COMPLETE |
-| `Pythia` | `pythia.md` | COMPLETE -- all rites renamed to `rites/*/agents/pythia.md` |
-| `Exousia` | `## Exousia` section | COMPLETE -- all ~60 agents carry 3-part authority contract |
-| `heroes` | `agents` | Mythology uses heroes; technical docs use agents |
-
-### Concepts Documented but Not Fully Implemented
-
-| Concept | Status | Gap |
-|---------|--------|-----|
-| Three separate Moirai | Pending | Event-driven activation not yet implemented |
-| The Inscription seeding | Partial | CLAUDE.md exists but dynamic seeding is basic |
-| Naxos cleanup | COMPLETE | `ari naxos scan` fully operational |
-| Dionysus integration | Partial | Code review exists but not mythologically named |
-| Theoria audit primitive | Doctrine only | Spike complete (SPIKE-state-of-x-audit-primitive.md); `/theoria` dromena not yet forged |
-| Theoroi (domain evaluators) | Doctrine only | Requires theoros agent at `rites/shared/agents/theoros.md` |
-| Pinakes (domain registry) | Doctrine only | Requires domain criteria legomena at `rites/shared/mena/pinakes/` |
-| Synkrisis (synthesis step) | Doctrine only | Main-thread or dedicated synthesis agent; approach undecided |
-| Argus Pattern (N-agent parallel dispatch) | Named pattern | Reusable parallel dispatch pattern; envisioned for tactical playbook swarms and similar N-agent operations |
-
-### Concepts Implemented Beyond Doctrine
-
-| Capability | Status | Documentation Gap |
-|------------|--------|-------------------|
-| Worktree system | Complete (11 commands) | Parallel session support not mentioned in doctrine |
-| TLA+ formal verification | Complete | Session FSM formally specified but not explained |
-| 68 CLI commands | Complete | Underdocumented scope (only ~8 documented) |
-| Artifact registry | Complete | Not documented |
-| Tribute generation | Complete | Vaguely documented |
-
-### Prioritized Alignment Work
-
-1. **High Priority**: Split Moirai into event-driven agents
-2. **High Priority**: Enhance CLAUDE.md seeding (The Inscription)
-3. **Medium Priority**: Document worktree system in doctrine
-4. **Low Priority**: Document TLA+ specification
-5. **Low Priority**: Expand CLI reference documentation
-6. **Low Priority**: Rename files from thread→clew in codebase
 
 ---
 

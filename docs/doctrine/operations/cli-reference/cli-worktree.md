@@ -1,3 +1,7 @@
+---
+last_verified: 2026-02-26
+---
+
 # CLI Reference: worktree
 
 > Manage git worktrees for parallel Claude sessions.

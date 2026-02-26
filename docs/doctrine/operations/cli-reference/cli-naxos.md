@@ -1,3 +1,7 @@
+---
+last_verified: 2026-02-26
+---
+
 # CLI Reference: naxos
 
 > Cleanup tooling for abandoned sessions.

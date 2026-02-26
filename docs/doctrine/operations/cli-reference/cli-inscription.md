@@ -1,3 +1,7 @@
+---
+last_verified: 2026-02-26
+---
+
 # CLI Reference: inscription
 
 > Manage the CLAUDE.md inscription system.

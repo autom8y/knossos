@@ -1,3 +1,7 @@
+---
+last_verified: 2026-02-26
+---
+
 # Rite: forge
 
 > Rite creation lifecycle for platform development.
@@ -13,7 +17,7 @@ The forge rite is the meta-rite for building agents, tools, and platform infrast
 | **Name** | forge |
 | **Form** | Full (multi-agent workflow) |
 | **Agents** | 7 |
-| **Entry Agent** | orchestrator |
+| **Entry Agent** | pythia |
 
 ---
 
@@ -31,7 +35,7 @@ The forge rite is the meta-rite for building agents, tools, and platform infrast
 
 | Agent | Role |
 |-------|------|
-| **orchestrator** | Coordinates rite creation phases |
+| **pythia** | Coordinates rite creation phases |
 | **agent-designer** | Designs rite concepts and agent role specifications |
 | **prompt-architect** | Creates agent prompt files and system instructions |
 | **workflow-engineer** | Configures workflow phases and transitions |
@@ -39,7 +43,7 @@ The forge rite is the meta-rite for building agents, tools, and platform infrast
 | **agent-curator** | Updates knowledge base and documentation |
 | **eval-specialist** | Evaluates and validates agent pantheon readiness |
 
-See agent files: `/knossos/rites/forge/agents/`
+See agent files: `rites/forge/agents/`
 
 ---
 
@@ -134,7 +138,7 @@ Task(eval-specialist, "evaluate 10x-dev rite performance")
 
 ## Source
 
-**Manifest**: `/knossos/rites/forge/manifest.yaml`
+**Manifest**: `rites/forge/manifest.yaml`
 
 ---
 

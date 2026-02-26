@@ -1,3 +1,7 @@
+---
+last_verified: 2026-02-26
+---
+
 # Rite: intelligence
 
 > Product analytics lifecycle for instrumentation, research, experimentation, and insights.
@@ -13,7 +17,7 @@ The intelligence rite provides workflows for data-driven decision making through
 | **Name** | intelligence |
 | **Form** | Full (multi-agent workflow) |
 | **Agents** | 5 |
-| **Entry Agent** | orchestrator |
+| **Entry Agent** | pythia |
 
 ---
 
@@ -31,13 +35,13 @@ The intelligence rite provides workflows for data-driven decision making through
 
 | Agent | Role |
 |-------|------|
-| **orchestrator** | Coordinates analytics and research initiative phases |
+| **pythia** | Coordinates analytics and research initiative phases |
 | **analytics-engineer** | Designs tracking plans and implements event instrumentation |
 | **user-researcher** | Conducts user research and extracts qualitative insights |
 | **experimentation-lead** | Designs experiments with proper statistical methodology |
 | **insights-analyst** | Synthesizes quantitative and qualitative data into insights |
 
-See agent files: `/roster/rites/intelligence/agents/`
+See agent files: `rites/intelligence/agents/`
 
 ---
 
@@ -87,7 +91,7 @@ Task(experimentation-lead, "design A/B test for new pricing")
 
 ## Source
 
-**Manifest**: `/roster/rites/intelligence/manifest.yaml`
+**Manifest**: `rites/intelligence/manifest.yaml`
 
 ---
 
