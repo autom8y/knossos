@@ -335,6 +335,7 @@ func checkAdditionalProperties(content map[string]interface{}, schemaName string
 		SchemaRiteManifest: {
 			"version": true, "name": true, "description": true,
 			"workflow": true, "agents": true, "skills": true, "hooks": true,
+			"skill_policies": true,
 		},
 	}
 

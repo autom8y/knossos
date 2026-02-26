@@ -19,6 +19,7 @@ import (
 	"github.com/autom8y/knossos/internal/inscription"
 	"github.com/autom8y/knossos/internal/paths"
 	"github.com/autom8y/knossos/internal/provenance"
+	"github.com/autom8y/knossos/internal/registry"
 	"github.com/autom8y/knossos/internal/sync"
 )
 
@@ -73,6 +74,7 @@ type RiteManifest struct {
 	MCPServers    []MCPServer                       `yaml:"mcp_servers,omitempty"` // MCP server declarations
 	HookDefaults  *HookDefaults                     `yaml:"hook_defaults,omitempty"`
 	AgentDefaults map[string]interface{}            `yaml:"agent_defaults,omitempty"` // Manifest-level defaults merged into agent frontmatter during sync
+	SkillPolicies []SkillPolicy                     `yaml:"skill_policies,omitempty"` // Capability-driven skill wiring rules evaluated per-agent during sync
 	ArchetypeData map[string]map[string]interface{} `yaml:"archetype_data,omitempty"` // Per-archetype template data keyed by archetype name
 }
 
@@ -311,6 +313,14 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 	result.Source = string(resolved.Source.Type)
 	result.SourcePath = resolved.Source.Path
 
+	// Validate rite references: warn about stale agents/mena entries in the manifest.
+	// Non-blocking: validation errors (missing manifest, parse failure) are silently skipped.
+	if warnings, err := registry.ValidateRiteReferences(ritePath); err == nil {
+		for _, w := range warnings {
+			log.Printf("Warning: %s: %s (%s)", w.File, w.Message, w.RefName)
+		}
+	}
+
 	// Update templates dir if resolved from different source
 	if resolved.TemplatesDir != "" {
 		m.templatesDir = resolved.TemplatesDir
@@ -386,8 +396,12 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 	sharedHookDefaults := m.loadSharedHookDefaults(resolved)
 	mergedWriteGuardDefaults := ResolveHookDefaults(sharedHookDefaults, manifest.HookDefaults)
 
+	// 3.6. Resolve skill policies: shared → rite cascade
+	sharedSkillPolicies := m.loadSharedSkillPolicies(resolved)
+	mergedSkillPolicies := MergeSkillPolicies(sharedSkillPolicies, manifest.SkillPolicies)
+
 	// 4. Generate agents/ directory from rite
-	if err := m.materializeAgents(manifest, ritePath, claudeDir, resolved, collector, mergedWriteGuardDefaults); err != nil {
+	if err := m.materializeAgents(manifest, ritePath, claudeDir, resolved, collector, mergedWriteGuardDefaults, mergedSkillPolicies); err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize agents", err)
 	}
 
@@ -779,7 +793,7 @@ func (m *Materializer) loadRiteManifest(ritePath string, resolved *ResolvedRite)
 // Uses selective write: only knossos-managed agents (from manifest) are replaced.
 // User-created agents not in the manifest are preserved.
 // Cross-rite agents (consultant, moirai, etc.) are user-scope owned and NOT handled here.
-func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claudeDir string, resolved *ResolvedRite, collector provenance.Collector, writeGuardDefaults *WriteGuardDefaults) error {
+func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claudeDir string, resolved *ResolvedRite, collector provenance.Collector, writeGuardDefaults *WriteGuardDefaults, skillPolicies []SkillPolicy) error {
 	agentsDir := filepath.Join(claudeDir, "agents")
 
 	// Ensure agents directory exists (selective — do NOT RemoveAll)
@@ -815,7 +829,7 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claud
 		}
 
 		// Run through the same transform pipeline as source-copied agents
-		if transformed, tErr := transformAgentContent(content, &TransformContext{AgentName: agent.Name, WriteGuardDefaults: writeGuardDefaults, AgentDefaults: manifest.AgentDefaults}); tErr == nil {
+		if transformed, tErr := transformAgentContent(content, &TransformContext{AgentName: agent.Name, WriteGuardDefaults: writeGuardDefaults, AgentDefaults: manifest.AgentDefaults, SkillPolicies: skillPolicies}); tErr == nil {
 			content = transformed
 		} else {
 			log.Printf("Warning: agent transform failed for archetype agent %s: %v", agent.Name, tErr)
@@ -866,7 +880,7 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claud
 			}
 			// Project agent source into CC-consumable form (merge defaults, strip knossos metadata, inject name, resolve hooks)
 			agentName := strings.TrimSuffix(filepath.Base(path), ".md")
-			if transformed, tErr := transformAgentContent(content, &TransformContext{AgentName: agentName, WriteGuardDefaults: writeGuardDefaults, AgentDefaults: manifest.AgentDefaults}); tErr == nil {
+			if transformed, tErr := transformAgentContent(content, &TransformContext{AgentName: agentName, WriteGuardDefaults: writeGuardDefaults, AgentDefaults: manifest.AgentDefaults, SkillPolicies: skillPolicies}); tErr == nil {
 				content = transformed
 			} else {
 				log.Printf("Warning: agent transform failed for %s: %v", agentName, tErr)
@@ -918,7 +932,7 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claud
 
 			// Project agent source into CC-consumable form (merge defaults, strip knossos metadata, inject name, resolve hooks)
 			agentName := strings.TrimSuffix(filepath.Base(path), ".md")
-			if transformed, tErr := transformAgentContent(content, &TransformContext{AgentName: agentName, WriteGuardDefaults: writeGuardDefaults, AgentDefaults: manifest.AgentDefaults}); tErr == nil {
+			if transformed, tErr := transformAgentContent(content, &TransformContext{AgentName: agentName, WriteGuardDefaults: writeGuardDefaults, AgentDefaults: manifest.AgentDefaults, SkillPolicies: skillPolicies}); tErr == nil {
 				content = transformed
 			} else {
 				log.Printf("Warning: agent transform failed for %s: %v", agentName, tErr)

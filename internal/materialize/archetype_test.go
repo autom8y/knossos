@@ -525,7 +525,7 @@ func TestMaterializeAgents_ArchetypeRendersFromTemplate(t *testing.T) {
 		Source:       RiteSource{Type: SourceProject, Path: filepath.Join(projectDir, "rites", "test-arch")},
 	}
 
-	err := m.materializeAgents(manifest, resolved.RitePath, claudeDir, resolved, provenance.NullCollector{}, nil)
+	err := m.materializeAgents(manifest, resolved.RitePath, claudeDir, resolved, provenance.NullCollector{}, nil, nil)
 	if err != nil {
 		t.Fatalf("materializeAgents() error = %v", err)
 	}
@@ -597,7 +597,7 @@ func TestMaterializeAgents_NonArchetypeAgentCopiedFromSource(t *testing.T) {
 		Source:       RiteSource{Type: SourceProject, Path: filepath.Join(projectDir, "rites", "test-arch")},
 	}
 
-	err := m.materializeAgents(manifest, resolved.RitePath, claudeDir, resolved, provenance.NullCollector{}, nil)
+	err := m.materializeAgents(manifest, resolved.RitePath, claudeDir, resolved, provenance.NullCollector{}, nil, nil)
 	if err != nil {
 		t.Fatalf("materializeAgents() error = %v", err)
 	}
@@ -653,7 +653,7 @@ func TestMaterializeAgents_ArchetypeGoesThruTransformPipeline(t *testing.T) {
 		Source:       RiteSource{Type: SourceProject, Path: filepath.Join(projectDir, "rites", "test-arch")},
 	}
 
-	err := m.materializeAgents(manifest, resolved.RitePath, claudeDir, resolved, provenance.NullCollector{}, nil)
+	err := m.materializeAgents(manifest, resolved.RitePath, claudeDir, resolved, provenance.NullCollector{}, nil, nil)
 	if err != nil {
 		t.Fatalf("materializeAgents() error = %v", err)
 	}
@@ -709,7 +709,7 @@ func TestMaterializeAgents_NoArchetypeNoChange(t *testing.T) {
 		Source:       RiteSource{Type: SourceProject, Path: filepath.Join(projectDir, "rites", "plain")},
 	}
 
-	err := m.materializeAgents(manifest, resolved.RitePath, claudeDir, resolved, provenance.NullCollector{}, nil)
+	err := m.materializeAgents(manifest, resolved.RitePath, claudeDir, resolved, provenance.NullCollector{}, nil, nil)
 	if err != nil {
 		t.Fatalf("materializeAgents() error = %v", err)
 	}
@@ -751,7 +751,7 @@ func TestMaterializeAgents_UnknownArchetypeErrors(t *testing.T) {
 		Source:       RiteSource{Type: SourceProject, Path: filepath.Join(projectDir, "rites", "bad")},
 	}
 
-	err := m.materializeAgents(manifest, resolved.RitePath, claudeDir, resolved, provenance.NullCollector{}, nil)
+	err := m.materializeAgents(manifest, resolved.RitePath, claudeDir, resolved, provenance.NullCollector{}, nil, nil)
 	if err == nil {
 		t.Fatal("expected error for unknown archetype, got nil")
 	}
@@ -797,7 +797,7 @@ func TestMaterializeAgents_ArchetypeProvenanceRecorded(t *testing.T) {
 	// Use a real collector to capture provenance records
 	collector := provenance.NewCollector()
 
-	err := m.materializeAgents(manifest, resolved.RitePath, claudeDir, resolved, collector, nil)
+	err := m.materializeAgents(manifest, resolved.RitePath, claudeDir, resolved, collector, nil, nil)
 	if err != nil {
 		t.Fatalf("materializeAgents() error = %v", err)
 	}

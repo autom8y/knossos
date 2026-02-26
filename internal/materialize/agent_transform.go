@@ -15,15 +15,16 @@ import (
 // CC does not consume these. Unknown fields pass through for forward compatibility.
 // NOTE: `color` is NOT stripped — CC uses it for subagent UI identification.
 var knossosOnlyFields = map[string]bool{
-	"type":           true,
-	"role":           true,
-	"upstream":       true,
-	"downstream":     true,
-	"produces":       true,
-	"contract":       true,
-	"schema_version": true,
-	"write-guard":    true,
-	"aliases":        true,
+	"type":                 true,
+	"role":                 true,
+	"upstream":             true,
+	"downstream":           true,
+	"produces":             true,
+	"contract":             true,
+	"schema_version":       true,
+	"write-guard":          true,
+	"aliases":              true,
+	"skill_policy_exclude": true,
 }
 
 // TransformContext bundles all policy inputs for agent content transformation.
@@ -32,6 +33,7 @@ type TransformContext struct {
 	AgentName          string
 	WriteGuardDefaults *WriteGuardDefaults
 	AgentDefaults      map[string]interface{}
+	SkillPolicies      []SkillPolicy
 }
 
 // transformAgentContent projects agent source into CC-consumable form.
@@ -59,6 +61,11 @@ func transformAgentContent(content []byte, ctx *TransformContext) ([]byte, error
 	// Merge manifest-level agent_defaults before any stripping
 	if len(ctx.AgentDefaults) > 0 {
 		fmMap = MergeAgentDefaults(ctx.AgentDefaults, fmMap)
+	}
+
+	// Apply skill policies (step 3.5 — after tools resolved from agent_defaults)
+	if len(ctx.SkillPolicies) > 0 {
+		fmMap = applySkillPolicies(fmMap, ctx.SkillPolicies)
 	}
 
 	// Capture write-guard value before stripping
