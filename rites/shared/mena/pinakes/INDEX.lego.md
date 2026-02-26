@@ -29,6 +29,9 @@ This table IS the registry. A domain exists when it has a row here and a criteri
 | **dependencies** | `domains/dependencies.lego.md` | codebase | Dependency graph, version currency, health signals, vulnerability exposure |
 | **test-coverage** | `domains/test-coverage.lego.md` | codebase | Test structure, coverage patterns, testing conventions, fixture patterns |
 | **api-surface** | `domains/api-surface.lego.md` | codebase | CLI command contracts, exported interfaces, public type signatures |
+| **scar-tissue** | `domains/scar-tissue.lego.md` | codebase | Past bugs, regressions, fix locations, defensive patterns born from failures |
+| **defensive-patterns** | `domains/defensive-patterns.lego.md` | codebase | Guard inventory, risk zones, assertion patterns, constraint catalog |
+| **design-constraints** | `domains/design-constraints.lego.md` | codebase | Structural tensions, load-bearing jank, abstraction gaps, evolution constraints |
 
 ### Scope Values
 
@@ -78,6 +81,9 @@ No +/- modifiers. Simplicity prevents grade inflation and gaming.
 - [dependencies.lego.md](domains/dependencies.lego.md) - Dependency landscape knowledge capture
 - [test-coverage.lego.md](domains/test-coverage.lego.md) - Test structure knowledge capture
 - [api-surface.lego.md](domains/api-surface.lego.md) - API surface knowledge capture
+- [scar-tissue.lego.md](domains/scar-tissue.lego.md) - Scar tissue knowledge capture (failure history, regressions)
+- [defensive-patterns.lego.md](domains/defensive-patterns.lego.md) - Defensive pattern knowledge capture (guards, risk zones)
+- [design-constraints.lego.md](domains/design-constraints.lego.md) - Design constraint knowledge capture (tensions, load-bearing code)
 
 ### Schemas
 - [registry-format.lego.md](registry-format.lego.md) - How to add new domains

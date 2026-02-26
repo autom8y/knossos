@@ -89,6 +89,12 @@ The Domain Forensics agent is the excavator. It takes a target codebase and syst
 1. Read the RITE-SPEC to extract agent role names and responsibility domains
 2. Load the codebase-archaeology skill for pass schemas and execution templates
 3. Identify the target codebase root path and create `.claude/wip/ARCHAEOLOGY/`
+4. Check for fresh .know/ seed context in the target codebase:
+   - Look for `.know/scar-tissue.md`, `.know/defensive-patterns.md`, `.know/design-constraints.md`
+   - For each that exists, read its YAML frontmatter: check `generated_at` + `expires_after` for time-freshness, and `source_hash` against current HEAD for code-freshness
+   - If fresh (not expired AND source_hash matches HEAD): load the file body as seed context for the corresponding pass
+   - If stale or missing: note as "no seed available" for that pass -- the pass runs from zero as before
+   - Report seed status: "Seed context: scar-tissue (fresh, 0.85 confidence) | defensive-patterns (stale) | design-constraints (not found)"
 
 ### Step 2: Execute Passes 1-3 (Independent)
 Run sequentially. For each pass: read the pass reference file from the skill, execute search queries against the target codebase, categorize findings using the schema, write output.
@@ -96,6 +102,13 @@ Run sequentially. For each pass: read the pass reference file from the skill, ex
 - **Pass 1 -- Scar Tissue**: Commit history, comments, defensive code from production failures. Write `PASS1-SCAR-TISSUE.md`.
 - **Pass 2 -- Defensive Patterns**: Guards, assertions, constraints, risk zones. Write `PASS2-DEFENSIVE-PATTERNS.md`.
 - **Pass 3 -- Design Tensions**: Structural conflicts, load-bearing jank, abstraction gaps. Write `PASS3-DESIGN-TENSIONS.md`.
+
+**Seed Context Protocol**: When fresh .know/ seed context is available for a pass:
+- Load the seed body BEFORE executing search queries
+- Use the seed as a baseline: validate existing entries against current code, extend with new findings, flag stale entries (code changed since .know/ generation)
+- Do NOT skip search queries because seed exists -- the seed is a starting point, not a replacement for fresh archaeology
+- Deduplicate: if a search query finds something already documented in the seed, reference the seed entry rather than creating a duplicate
+- Net new findings are appended with sequential numbering continuing from the seed's highest entry number
 
 ### Step 3: Execute Pass 4 (Depends on 1-3)
 **Pass 4 -- Golden Paths**: Best-in-class exemplars paired with anti-exemplars identified in Passes 1-3. Write `PASS4-GOLDEN-PATHS.md`.
