@@ -1,0 +1,338 @@
+name: clinic
+workflow_type: sequential
+description: Investigation lifecycle for production errors (Intake -> Examination -> Diagnosis -> Treatment)
+
+# =============================================================================
+# ENTRY POINTS
+# =============================================================================
+# The clinic has two inbound paths: standalone user entry and SRE escalation.
+# Both route to triage-nurse as the first agent. The difference is artifact
+# format, not workflow structure.
+
+entry_point:
+  agent: triage-nurse
+  artifact:
+    type: intake-report
+    path_template: .claude/wip/ERRORS/{investigation-slug}/intake-report.md
+
+  # Entry selection by source
+  by_source:
+    standalone: triage-nurse       # User invokes /clinic directly
+    sre_escalation: triage-nurse   # SRE incident-commander routes here
+
+  # SRE inbound artifact format:
+  # When the SRE incident-commander escalates to clinic, it provides a
+  # structured payload. The triage-nurse consumes this and incorporates
+  # any pre-collected evidence into the intake report rather than starting
+  # from zero.
+  #
+  # Expected fields in SRE escalation context:
+  #   incident_id: string          # SRE incident identifier for cross-reference
+  #   timeline: string             # Chronological event sequence from war room
+  #   affected_services: list      # Services identified during incident triage
+  #   symptoms_observed: list      # Symptoms the incident team has documented
+  #   initial_findings: string     # Free-text notes from responders
+  #   severity: critical|high      # SRE-assessed severity (clinic may adjust)
+  #   responders: list             # Who has been involved (for context, not action)
+  #   evidence_urls: list          # Optional: CloudWatch links, dashboard URLs, etc.
+  #
+  # The triage-nurse treats this as a head start, not gospel. It may reclassify
+  # severity, expand or narrow affected systems, and always produces its own
+  # structured intake-report.md and index.yaml regardless of input quality.
+
+# =============================================================================
+# PHASES
+# =============================================================================
+# Four phases, always sequential, always all four. No phase skipping.
+# Depth variance is emergent (how long each phase takes), not structural
+# (which phases run). See complexity_levels section for rationale.
+
+phases:
+  # Phase 1: Intake
+  # Agent: triage-nurse
+  # Turn vague complaints into structured investigations.
+  - name: intake
+    agent: triage-nurse
+    produces: intake-report
+    next: examination
+
+  # Phase 2: Examination
+  # Agent: pathologist
+  # Collect evidence across systems. Write to files, not context.
+  # This is the most token-intensive phase (80-120k+ tokens).
+  - name: examination
+    agent: pathologist
+    produces: evidence-catalog
+    next: diagnosis
+
+  # Phase 3: Diagnosis
+  # Agent: diagnostician
+  # Analyze evidence, form hypotheses, identify root causes.
+  # Reads index.yaml first (~2-5k tokens), then selectively loads evidence files.
+  - name: diagnosis
+    agent: diagnostician
+    produces: diagnosis-report
+    next: treatment
+
+  # Phase 4: Treatment (Terminal)
+  # Agent: attending
+  # Produce treatment plan and cross-rite handoff artifacts.
+  - name: treatment
+    agent: attending
+    produces: treatment-plan
+    next: null
+
+# =============================================================================
+# COMPLEXITY LEVELS
+# =============================================================================
+# DELIBERATE DEPARTURE FROM STANDARD PATTERN.
+#
+# Every other knossos rite uses 2-4 complexity levels to skip phases for
+# simpler work. The clinic uses exactly one level: INVESTIGATION.
+#
+# Rationale: There is no such thing as a simple investigation that skips
+# intake or evidence collection. Even a trivial stack trace needs:
+# - Intake: to document what the user actually observed
+# - Examination: to collect the evidence (even if it is one log file)
+# - Diagnosis: to confirm the root cause (even if it is obvious)
+# - Treatment: to produce a handoff artifact (even if it is one paragraph)
+#
+# The variance is in DEPTH, not in PHASE COUNT:
+# - Simple bug: 4 agent invocations, ~30k tokens, no back-routes
+# - Compound failure: 6-8 invocations, ~150k tokens, 1-2 back-routes
+#
+# Pythia does not select complexity. There is nothing to select.
+
+complexity_levels:
+  - name: INVESTIGATION
+    scope: "All investigations enter at intake. Depth emerges from findings."
+    phases: [intake, examination, diagnosis, treatment]
+
+# =============================================================================
+# BACK-ROUTES
+# =============================================================================
+# The clinic's defining workflow characteristic. Real debugging loops require
+# returning to earlier phases when new information invalidates assumptions or
+# reveals gaps. These are expected workflow patterns, not failure modes.
+#
+# IMPORTANT: Pythia enforces a maximum of 3 iterations on the evidence_gap
+# back-route per investigation. This is a hard limit. Rationale: if three
+# rounds of targeted evidence collection have not resolved the gap, the
+# investigation likely needs human domain expertise or scope redefinition,
+# not more automated evidence gathering. Pythia should escalate to the user
+# after hitting the limit rather than allowing unbounded looping.
+#
+# The diagnosis_insufficient back-route has a limit of 2. If the diagnostician
+# cannot produce an actionable diagnosis after two attempts, escalate to user.
+
+back_routes:
+  # Back-route 1: Evidence Gap (diagnosis -> examination)
+  # Most common back-route. Expected in ~40% of non-trivial investigations.
+  # The diagnostician identifies specific evidence needed that was not collected.
+  # Pythia routes the targeted request directly to pathologist -- does NOT
+  # re-gate intake or re-scope the investigation.
+  - source_phase: diagnosis
+    trigger: "evidence_gap"
+    target_phase: examination
+    target_agent: pathologist
+    requires_user_confirmation: false
+    condition: "Diagnostician identifies specific evidence needed that was not collected"
+    max_iterations: 3
+    escalation_on_limit: "Escalate to user: three evidence collection rounds have not resolved the gap. Investigation may need human domain expertise or scope redefinition."
+
+  # Back-route 2: Diagnosis Insufficient (treatment -> diagnosis)
+  # The attending cannot translate the diagnosis into an actionable fix
+  # specification. Pushes diagnostician to deepen analysis -- localize the
+  # affected code, clarify the failure mechanism, or raise confidence level.
+  - source_phase: treatment
+    trigger: "diagnosis_insufficient"
+    target_phase: diagnosis
+    target_agent: diagnostician
+    requires_user_confirmation: false
+    condition: "Attending cannot produce actionable fix spec from current diagnosis"
+    max_iterations: 2
+    escalation_on_limit: "Escalate to user: diagnosis has not reached actionable specificity after two deepening attempts. User domain knowledge likely needed."
+
+  # Back-route 3: Scope Expansion (diagnosis -> intake)
+  # The diagnostician discovers that the investigation involves systems outside
+  # the original scope. This requires user confirmation because expanding scope
+  # is a resource decision -- the user may prefer to open a second investigation
+  # rather than expand the current one.
+  - source_phase: diagnosis
+    trigger: "scope_expansion"
+    target_phase: intake
+    target_agent: triage-nurse
+    requires_user_confirmation: true
+    condition: "Investigation reveals involvement of systems outside original scope"
+    max_iterations: 1
+    escalation_on_limit: "Hard limit: scope can only expand once. Further expansion suggests the investigation should be split into multiple investigations."
+
+# =============================================================================
+# EVIDENCE ARCHITECTURE
+# =============================================================================
+# All investigation artifacts live in a structured directory. This is NOT just
+# an output location -- it is a coordination mechanism. Agents read and write
+# to this directory throughout the investigation. The index.yaml is the shared
+# state artifact that all agents reference.
+
+evidence_architecture:
+  base_path: ".claude/wip/ERRORS/{investigation-slug}/"
+  artifacts:
+    intake_report:
+      file: "intake-report.md"
+      owner: triage-nurse
+      consumers: [pathologist, diagnostician, attending]
+    evidence_index:
+      file: "index.yaml"
+      owner: current-phase-agent  # Ownership transfers with phase
+      consumers: [all]
+      description: "Lightweight coordination artifact (~2-5k tokens). All agents read this first."
+    evidence_files:
+      pattern: "E{NNN}.txt"
+      owner: pathologist
+      consumers: [diagnostician, attending]
+      description: "Individual evidence files. Diagnostician loads selectively, not all at once."
+    diagnosis:
+      file: "diagnosis.md"
+      owner: diagnostician
+      consumers: [attending]
+    treatment_plan:
+      file: "treatment-plan.md"
+      owner: attending
+      consumers: [downstream-rites]
+
+# =============================================================================
+# SESSION RESUME PROTOCOL
+# =============================================================================
+# How investigation state survives park/continue cycles.
+#
+# Evidence files persist on disk naturally. The index.yaml status field provides
+# the recovery signal. On /continue, Pythia reads index.yaml to determine where
+# the investigation left off, then dispatches to the appropriate agent.
+#
+# Resume logic:
+#   1. Pythia reads .claude/wip/ERRORS/{slug}/index.yaml
+#   2. Check the `status` field:
+#      - status: intake      -> dispatch to triage-nurse
+#      - status: examination  -> dispatch to pathologist
+#      - status: diagnosis    -> dispatch to diagnostician
+#      - status: treatment    -> dispatch to attending
+#      - status: complete     -> investigation finished, report to user
+#   3. The dispatched agent reads index.yaml and its own prior artifacts
+#      to reconstruct working context
+#   4. For mid-back-route resumes: if the status field includes a back-route
+#      marker (e.g., "examination:evidence_gap_round_2"), Pythia passes this
+#      context so the agent knows it is in a back-route iteration, not a
+#      fresh phase entry
+#
+# Key invariant: index.yaml is ALWAYS the source of truth for investigation
+# state. If the status field says "diagnosis" but no diagnosis.md exists, the
+# investigation is mid-phase (diagnostician was working but did not finish).
+# Pythia resumes at that phase.
+#
+# Multiple investigations: If multiple investigation directories exist under
+# .claude/wip/ERRORS/, Pythia presents the list to the user and asks which
+# to resume. It does not auto-select.
+
+session_resume:
+  state_source: ".claude/wip/ERRORS/{investigation-slug}/index.yaml"
+  state_field: "status"
+  phase_mapping:
+    intake: triage-nurse
+    examination: pathologist
+    diagnosis: diagnostician
+    treatment: attending
+    complete: null  # Investigation finished
+  back_route_marker_format: "{phase}:{back_route_trigger}_round_{N}"
+  multi_investigation_behavior: "prompt_user_to_select"
+
+# =============================================================================
+# CROSS-RITE HANDOFF PROTOCOL
+# =============================================================================
+# The attending produces handoff artifacts for downstream rites. These are
+# placed in the investigation directory and formatted for the target rite's
+# consumption. The attending decides which rite(s) receive handoff based on
+# the diagnosis.
+#
+# Handoff artifacts are always RECOMMENDATIONS. The user decides whether to
+# act on them. Clinic never auto-invokes downstream rites.
+
+cross_rite_handoffs:
+  # To 10x-dev: Fix implementation
+  # Produced when: Root cause identified with fixable code/config changes
+  - target_rite: 10x-dev
+    artifact:
+      file: "handoff-10x-dev.md"
+      path: ".claude/wip/ERRORS/{investigation-slug}/handoff-10x-dev.md"
+    format:
+      required_fields:
+        - root_cause_summary      # From diagnosis, not re-derived
+        - affected_files           # Specific files/paths to modify
+        - fix_approach             # Recommended implementation strategy
+        - acceptance_criteria      # How to verify the fix works
+      optional_fields:
+        - fix_ordering             # For compound failures: which bug to fix first
+        - risk_assessment          # What could go wrong with the fix
+        - related_tests            # Existing tests to update or new tests to write
+    trigger: "Root cause is fixable code or configuration"
+
+  # To SRE: Monitoring gap report
+  # Produced when: Investigation reveals observability or monitoring gaps
+  - target_rite: sre
+    artifact:
+      file: "handoff-sre.md"
+      path: ".claude/wip/ERRORS/{investigation-slug}/handoff-sre.md"
+    format:
+      required_fields:
+        - signals_missing          # What monitoring/observability was absent
+        - recommended_alerts       # Specific alerts that would have caught this
+        - recommended_dashboards   # Dashboards that would aid future debugging
+      optional_fields:
+        - slo_impact               # How this incident affected service level objectives
+        - runbook_recommendation   # Incident response procedure for this failure class
+    trigger: "Investigation reveals monitoring or observability gaps"
+
+  # To debt-triage: Systemic issue report
+  # Produced when: Investigation reveals architectural or systemic problems
+  - target_rite: debt-triage
+    artifact:
+      file: "handoff-debt-triage.md"
+      path: ".claude/wip/ERRORS/{investigation-slug}/handoff-debt-triage.md"
+    format:
+      required_fields:
+        - pattern_analysis         # How this issue manifests across the codebase
+        - scope_of_problem         # How widespread the systemic issue is
+        - remediation_approach     # Long-term fix strategy (not just this instance)
+      optional_fields:
+        - debt_classification      # Type: architectural, dependency, test, design
+        - affected_components      # Broader list beyond the immediate investigation
+        - effort_estimate          # Rough sizing for remediation work
+    trigger: "Investigation reveals systemic or architectural issue, not just a point bug"
+
+# =============================================================================
+# COMMAND MAPPING
+# =============================================================================
+# How slash commands and entry patterns route to agents.
+#
+# /clinic          -> pythia (orchestrated investigation, full lifecycle)
+# SRE escalation   -> pythia (receives incident-commander context, same workflow)
+#
+# Agent roles for command mapping:
+# /clinic    -> triage-nurse (entry agent, via Pythia orchestration)
+# /build     -> not applicable (clinic does not implement fixes)
+# /qa        -> not applicable (clinic does not validate fixes)
+
+# =============================================================================
+# ARTIFACT CHAIN SUMMARY
+# =============================================================================
+# .claude/wip/ERRORS/{investigation-slug}/
+#   intake-report.md        (triage-nurse -> pathologist, diagnostician, attending)
+#   index.yaml              (shared coordination artifact, all agents read/write)
+#   E001.txt                (pathologist -> diagnostician)
+#   E002.txt                (pathologist -> diagnostician)
+#   ...                     (pathologist -> diagnostician)
+#   diagnosis.md            (diagnostician -> attending)
+#   treatment-plan.md       (attending -> user)
+#   handoff-10x-dev.md      (attending -> 10x-dev, if applicable)
+#   handoff-sre.md          (attending -> sre, if applicable)
+#   handoff-debt-triage.md  (attending -> debt-triage, if applicable)

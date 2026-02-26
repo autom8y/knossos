@@ -1,0 +1,83 @@
+# Rite Manifest: clinic
+# Investigation and debugging lifecycle for production errors.
+
+name: clinic
+version: "1.0.0"
+description: "Investigation lifecycle for production errors (Intake -> Examination -> Diagnosis -> Treatment)"
+
+entry_agent: pythia
+
+phases:
+  - name: intake
+    agent: triage-nurse
+    produces: intake-report
+    description: Document symptoms, scope investigation, create evidence architecture
+
+  - name: examination
+    agent: pathologist
+    produces: evidence-catalog
+    description: Collect evidence across systems, catalog findings in index.yaml
+
+  - name: diagnosis
+    agent: diagnostician
+    produces: diagnosis-report
+    description: Analyze evidence, form hypotheses, identify root causes
+
+  - name: treatment
+    agent: attending
+    produces: treatment-plan
+    description: Produce fix specifications and cross-rite handoff artifacts
+
+agents:
+  - name: pythia
+    role: Coordinates investigation phases, gates transitions, manages back-routes (loose-leash)
+    archetype: orchestrator
+
+  - name: triage-nurse
+    role: Intake and symptom documentation, evidence architecture setup, investigation scoping
+
+  - name: pathologist
+    role: Evidence collection across systems, raw data extraction, evidence cataloging
+
+  - name: diagnostician
+    role: Hypothesis formation, evidence analysis, root cause identification
+
+  - name: attending
+    role: Treatment planning, fix specification, cross-rite handoff artifact production
+
+agent_defaults:
+  type: specialist
+  maxTurns: 30
+  skills:
+    - clinic-ref
+  disallowedTools:
+    - NotebookEdit
+
+dromena:
+  - clinic-switch
+
+legomena:
+  - clinic-ref
+
+hooks:
+  - agent-guard
+
+hook_defaults:
+  write_guard:
+    allow_paths: [".claude/wip/ERRORS/"]
+
+dependencies:
+  - shared
+
+# Deliberate departure: Single complexity level.
+# The clinic never skips phases. All investigations enter at intake.
+# Depth is emergent from what agents find, not pre-classified.
+# See RITE-DESIGN-clinic.md "Emergent Complexity" section for rationale.
+complexity_levels:
+  - name: INVESTIGATION
+    scope: "All investigations enter at intake. Depth emerges from findings, not pre-classification."
+    phases: [intake, examination, diagnosis, treatment]
+
+metadata:
+  domain: debugging and investigation
+  color: red
