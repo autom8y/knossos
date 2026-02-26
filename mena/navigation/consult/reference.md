@@ -360,6 +360,7 @@ Display complete rite reference table:
 |-------------------|---------------|--------|------------------------------------|
 | 10x-dev      | /10x          | 5      | Full feature development lifecycle |
 | arch         | /arch         | 4      | Multi-repo architecture analysis   |
+| clinic       | /clinic       | 5      | Production debugging, root cause analysis |
 | docs     | /docs         | 4      | Documentation, technical writing   |
 | hygiene      | /hygiene      | 4      | Code quality, refactoring          |
 | debt-triage  | /debt         | 3      | Technical debt prioritization      |
@@ -371,7 +372,7 @@ Display complete rite reference table:
 | review       | /review       | 4      | Language-agnostic codebase health assessment  |
 | slop-chop    | /slop-chop    | 6      | AI code quality gate, hallucination detection |
 
-Total: 55 agents across all rites
+Total: 60 agents across all rites
 
 Use /rite <name> or quick-switch commands (e.g., /10x) to activate.
 ```
@@ -393,10 +394,11 @@ Display all commands categorized by domain:
 /wrap               Finalize session, run quality gates
 /worktree           Manage isolated worktrees
 
---- Rite Management (13) ---
+--- Rite Management (14) ---
 /rite               Switch rite or list available
 /10x                Quick switch to 10x-dev
 /arch               Quick switch to arch
+/clinic             Quick switch to clinic
 /docs               Quick switch to docs
 /hygiene            Quick switch to hygiene
 /debt               Quick switch to debt-triage
@@ -534,6 +536,7 @@ When recommending rites, `/consult` retrieves current rite inventory from:
 |------|---------|-------------------|----------|
 | **10x-dev** | `/10x` | SCRIPT, MODULE, SERVICE, PLATFORM | Building features, fixing complex bugs |
 | **arch** | `/arch` | SURVEY, ANALYSIS, DEEP-DIVE | Multi-repo architecture analysis, dependency mapping |
+| **clinic** | `/clinic` | INVESTIGATION | Production errors, intermittent failures, SRE escalations, root cause analysis |
 | **docs** | `/docs` | PAGE, SECTION, SITE | Writing or updating documentation |
 | **hygiene** | `/hygiene` | SPOT, MODULE, CODEBASE | Refactoring, code quality improvements |
 | **debt-triage** | `/debt` | QUICK, AUDIT | Assessing and prioritizing technical debt |
@@ -612,10 +615,10 @@ When recommending rites, `/consult` retrieves current rite inventory from:
 ```
 
 **Response:**
-- Assessment: Urgent production issue, security/availability concern
-- Recommendation: /hotfix for immediate fix, then /sre for root cause
-- Command-Flow: `/hotfix` → diagnose → fix → deploy → `/sre` for postmortem
-- Alternatives: If security breach suspected, involve `/security` rite
+- Assessment: Urgent production issue, requires structured root cause analysis
+- Recommendation: `/clinic` for investigation lifecycle (intake → examination → diagnosis → treatment)
+- Command-Flow: `/clinic` → triage-nurse scopes → pathologist collects evidence → diagnostician diagnoses → attending produces fix spec + handoff artifacts
+- Alternatives: If the cause is already known and the fix is urgent, use `/hotfix`. If security breach suspected, involve `/security` rite after clinic diagnosis
 
 ---
 

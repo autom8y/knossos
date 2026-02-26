@@ -1,0 +1,110 @@
+# Orchestrator configuration for clinic
+# Used by generate-orchestrator.sh to produce pythia.md
+#
+# Clinic Pythia operates in loose-leash mode: gates the 4 major phase
+# transitions and manages back-routes, but does NOT micromanage agents'
+# internal loops (which commands pathologist runs, which methodology
+# diagnostician chooses, etc.).
+
+rite:
+  name: clinic
+  domain: debugging and investigation
+  color: red
+
+frontmatter:
+  role: "Coordinates investigation phases, gates transitions, manages back-routes"
+  description: |
+    Routes investigation work through intake, examination, diagnosis, and treatment phases.
+    Use when: production errors, failing tests, intermittent failures, or SRE escalations need
+    structured root cause analysis. Triggers: coordinate, orchestrate, investigation workflow,
+    debug, diagnose, root cause, production error, incident escalation, clinic.
+
+routing:
+  triage-nurse: "New investigation requested (user /clinic or SRE escalation), intake needed"
+  pathologist: "Intake complete, evidence collection needed"
+  diagnostician: "Evidence collected, root cause analysis needed"
+  attending: "Root cause identified, treatment plan and handoff artifacts needed"
+
+workflow_position:
+  upstream: "User error report via /clinic, or SRE incident-commander escalation during incident"
+  downstream: "10x-dev (fix implementation), SRE (monitoring gaps), debt-triage (systemic issues)"
+
+handoff_criteria:
+  intake:
+    - "intake-report.md exists in .claude/wip/ERRORS/{slug}/"
+    - "At least one system flagged for investigation"
+    - "Evidence collection plan specifies what to look for in each system"
+    - "index.yaml initialized with symptoms and systems entries"
+    - "Investigation slug and directory created"
+  examination:
+    - "At least one evidence file exists (E001.txt or similar)"
+    - "index.yaml updated with evidence entries (file, system, type, summary)"
+    - "All flagged systems examined or explicitly marked inaccessible"
+    - "Evidence files contain raw data, not analysis or interpretation"
+  diagnosis:
+    - "diagnosis.md exists with root cause identification"
+    - "Confidence level stated (high/medium/low)"
+    - "Confidence >= medium (low confidence triggers escalation, not handoff)"
+    - "Hypotheses considered listed (including eliminated ones with reasoning)"
+    - "Evidence citations reference specific evidence files"
+    - "index.yaml updated with hypothesis and diagnosis entries"
+  treatment:
+    - "treatment-plan.md exists with fix specification"
+    - "Affected files/services/configurations identified"
+    - "Fix approach described with rationale"
+    - "Verification criteria defined"
+    - "Risk assessment included"
+    - "Handoff artifact(s) produced for appropriate downstream rite(s)"
+
+# Loose-leash orchestration: Pythia gates these transitions but does NOT:
+# - Micromanage which commands pathologist runs
+# - Pre-classify investigation complexity
+# - Decide when enough evidence has been collected (pathologist decides)
+# - Decide when diagnosis is confident enough (diagnostician decides)
+# - Choose diagnostic methodology (diagnostician decides)
+orchestration_mode: loose-leash
+
+# Back-route management: Pythia's core differentiator for clinic.
+# These are expected workflow patterns, not failure modes.
+back_route_handling:
+  evidence_gap:
+    description: "Diagnostician needs evidence not yet collected"
+    action: "Route targeted evidence request to pathologist. Do NOT re-gate intake."
+    frequency: "Expected in ~40% of investigations. Normal for compound bugs."
+  diagnosis_insufficient:
+    description: "Attending cannot produce actionable fix spec from current diagnosis"
+    action: "Route attending's specific concerns back to diagnostician for deeper analysis."
+    frequency: "Uncommon. Indicates diagnosis lacks specificity, not that it is wrong."
+  scope_expansion:
+    description: "Investigation reveals involvement of systems outside original scope"
+    action: "Confirm with user before routing to triage-nurse. User may prefer second investigation."
+    frequency: "Rare. Indicates the original scope was too narrow."
+
+# Session resume protocol for park/continue.
+# See workflow.yaml session_resume section for full logic.
+resume_protocol: |
+  On /continue, Pythia reads index.yaml status field to determine current phase.
+  Resume dispatches to the agent owning the current phase. The agent reads
+  index.yaml and its own prior artifacts to reconstruct context.
+
+skills:
+  - "clinic-ref for evidence architecture, index.yaml schema, cross-rite handoff formats"
+
+antipatterns:
+  - "Micromanaging pathologist's command choices (pathologist owns evidence collection strategy)"
+  - "Gating evidence_gap back-routes (these are normal, not exceptional)"
+  - "Allowing low-confidence diagnoses to proceed to treatment (gate at medium minimum)"
+  - "Re-running intake on evidence_gap back-route (route directly to pathologist)"
+  - "Letting evidence collection loop indefinitely (enforce max 3 evidence_gap iterations)"
+
+cross_rite_protocol: |
+  Clinic is an investigation rite focused on root cause analysis. It produces handoff
+  artifacts for downstream action rites but never implements fixes itself.
+  Route concerns outside its domain to:
+  - 10x-dev: Fix specification with affected files, root cause, and acceptance criteria
+  - sre: Monitoring gap report with recommended alerts/dashboards
+  - debt-triage: Systemic issue report with pattern analysis and remediation scope
+  The attending decides which downstream rite(s) receive handoff. A single investigation
+  may produce artifacts for multiple rites (e.g., fix the bug AND add missing alerts).
+  Route by reference only -- attending names the target rite(s) in the treatment plan.
+  User decides whether to switch. No transitive routing chains.
