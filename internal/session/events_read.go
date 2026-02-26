@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/autom8y/knossos/internal/errors"
+	"github.com/autom8y/knossos/internal/hook/clewcontract"
 )
 
 // Dual Event Structs — ADR-0027 Backward Compatibility Bridge
@@ -47,9 +48,23 @@ type ClewEvent struct {
 	Meta      map[string]interface{} `json:"meta,omitempty"`
 }
 
-// ReadEvents reads events from a JSONL file, supporting both legacy and Clew formats.
-// It attempts to parse each line as a legacy Event first, then as a ClewEvent.
-// Returns normalized Event structs for backward compatibility with audit command.
+// typedClewEventDetector is a minimal struct used to detect v3 TypedEvent lines.
+// Detection rule per SESSION-1 spec Section 5.1: presence of "data" field -> v3.
+// We use json.RawMessage so we can check for the field without full parsing.
+type typedClewEventDetector struct {
+	Data json.RawMessage `json:"data"`
+}
+
+// ReadEvents reads events from a JSONL file, supporting v1 legacy, v2 flat, and v3 typed formats.
+// All three formats may be interleaved in the same file.
+//
+// Format detection per SESSION-1 spec Section 5.1:
+//   - JSON has "data" field -> v3 TypedEvent (highest precedence)
+//   - JSON has "event" field with non-empty value -> v1 legacy Event
+//   - JSON has "type" field with non-empty value -> v2 flat ClewEvent
+//   - Otherwise -> malformed line, skipped
+//
+// Returns normalized Event structs for backward compatibility with the audit command.
 func ReadEvents(path string) ([]Event, error) {
 	f, err := os.Open(path)
 	if err != nil {
@@ -65,17 +80,29 @@ func ReadEvents(path string) ([]Event, error) {
 	for scanner.Scan() {
 		line := scanner.Bytes()
 
-		// Try legacy format first
+		// v3 detection: check for "data" field first (highest precedence per spec).
+		// A line with "data" is a TypedEvent regardless of whether "meta" is also present.
+		var detector typedClewEventDetector
+		if err := json.Unmarshal(line, &detector); err == nil && detector.Data != nil {
+			// Parse as full v3 TypedEvent and normalize to audit-compatible Event.
+			var te clewcontract.TypedEvent
+			if err := json.Unmarshal(line, &te); err == nil && string(te.Type) != "" {
+				events = append(events, typedEventToLegacy(te))
+				continue
+			}
+		}
+
+		// v1 detection: "event" field with non-empty string value.
 		var legacyEvent Event
 		if err := json.Unmarshal(line, &legacyEvent); err == nil && legacyEvent.Event != "" {
 			events = append(events, legacyEvent)
 			continue
 		}
 
-		// Try Clew format
+		// v2 detection: "type" field with non-empty string value.
 		var clewEvent ClewEvent
 		if err := json.Unmarshal(line, &clewEvent); err == nil && clewEvent.Type != "" {
-			// Convert Clew event to legacy format for audit compatibility
+			// Convert v2 Clew event to legacy format for audit compatibility.
 			events = append(events, Event{
 				Timestamp: clewEvent.Timestamp,
 				Event:     clewEvent.Type,
@@ -89,7 +116,7 @@ func ReadEvents(path string) ([]Event, error) {
 			continue
 		}
 
-		// Skip malformed lines (matches previous behavior)
+		// Skip malformed lines (matches previous behavior).
 	}
 
 	if err := scanner.Err(); err != nil {
@@ -97,6 +124,32 @@ func ReadEvents(path string) ([]Event, error) {
 	}
 
 	return events, nil
+}
+
+// typedEventToLegacy converts a v3 TypedEvent to a normalized legacy Event struct.
+// This provides backward compatibility for the audit command which expects the legacy format.
+//
+// Conversion rules per SESSION-1 spec Section 5.3:
+//   - type: apply v2->v3 rename map (RenameV2Type is a no-op on already-renamed types)
+//   - source: stored in Metadata["source"]
+//   - data: stored in Metadata["data"] as the parsed JSON object
+func typedEventToLegacy(te clewcontract.TypedEvent) Event {
+	// Parse the Data field to include in Metadata.
+	var dataMap map[string]interface{}
+	_ = json.Unmarshal(te.Data, &dataMap)
+
+	// Apply rename: v3 type strings are already canonical; this is a no-op for v3 events
+	// but ensures consistency if a hybrid event is encountered.
+	normalizedType := clewcontract.RenameV2Type(string(te.Type))
+
+	return Event{
+		Timestamp: te.Ts,
+		Event:     normalizedType,
+		Metadata: map[string]interface{}{
+			"source": string(te.Source),
+			"data":   dataMap,
+		},
+	}
 }
 
 // FilterEvents filters events by type and/or timestamp.

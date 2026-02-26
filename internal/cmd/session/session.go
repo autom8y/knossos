@@ -63,6 +63,8 @@ Examples:
 	cmd.AddCommand(newLockCmd(ctx))
 	cmd.AddCommand(newUnlockCmd(ctx))
 	cmd.AddCommand(newGcCmd(ctx))
+	cmd.AddCommand(newFieldSetCmd(ctx))
+	cmd.AddCommand(newFieldGetCmd(ctx))
 
 	// Session commands require project context
 	common.SetNeedsProject(cmd, true, true)

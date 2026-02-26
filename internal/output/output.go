@@ -662,6 +662,47 @@ type EnvVarDetected struct {
 	Value   string `json:"value"`
 }
 
+// FieldOutput represents a single field get or set result.
+type FieldOutput struct {
+	Key           string `json:"key"`
+	Value         string `json:"value"`
+	PreviousValue string `json:"previous_value,omitempty"`
+}
+
+// Text implements Textable for FieldOutput.
+func (f FieldOutput) Text() string {
+	if f.PreviousValue != "" {
+		return fmt.Sprintf("%s: %s (was: %s)\n", f.Key, f.Value, f.PreviousValue)
+	}
+	return fmt.Sprintf("%s: %s\n", f.Key, f.Value)
+}
+
+// FieldAllOutput represents a full snapshot of all session frontmatter fields.
+type FieldAllOutput struct {
+	SessionID     string `json:"session_id"`
+	Status        string `json:"status"`
+	Initiative    string `json:"initiative"`
+	Complexity    string `json:"complexity"`
+	CurrentPhase  string `json:"current_phase"`
+	ActiveRite    string `json:"active_rite"`
+	SchemaVersion string `json:"schema_version"`
+	CreatedAt     string `json:"created_at"`
+}
+
+// Text implements Textable for FieldAllOutput.
+func (f FieldAllOutput) Text() string {
+	var b strings.Builder
+	b.WriteString(fmt.Sprintf("session_id: %s\n", f.SessionID))
+	b.WriteString(fmt.Sprintf("status: %s\n", f.Status))
+	b.WriteString(fmt.Sprintf("initiative: %s\n", f.Initiative))
+	b.WriteString(fmt.Sprintf("complexity: %s\n", f.Complexity))
+	b.WriteString(fmt.Sprintf("current_phase: %s\n", f.CurrentPhase))
+	b.WriteString(fmt.Sprintf("active_rite: %s\n", f.ActiveRite))
+	b.WriteString(fmt.Sprintf("schema_version: %s\n", f.SchemaVersion))
+	b.WriteString(fmt.Sprintf("created_at: %s\n", f.CreatedAt))
+	return b.String()
+}
+
 // Text implements Textable for RosterMigrateOutput.
 func (r RosterMigrateOutput) Text() string {
 	var b strings.Builder

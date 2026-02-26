@@ -83,6 +83,32 @@ func (w *EventWriter) Write(event Event) error {
 	return nil
 }
 
+// WriteTyped appends a v3 TypedEvent to the JSONL file.
+// Thread-safe: can be called concurrently with Write.
+// Both Write and WriteTyped produce valid JSONL lines in the same file.
+// Format detection on read uses the presence of the "data" field.
+func (w *EventWriter) WriteTyped(event TypedEvent) error {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+
+	data, err := json.Marshal(event)
+	if err != nil {
+		return errors.Wrap(errors.CodeGeneralError, "failed to marshal typed event", err)
+	}
+
+	f, err := os.OpenFile(w.filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return errors.Wrap(errors.CodePermissionDenied, "failed to open events file", err)
+	}
+	defer f.Close()
+
+	if _, err := f.Write(append(data, '\n')); err != nil {
+		return errors.Wrap(errors.CodeGeneralError, "failed to write typed event", err)
+	}
+
+	return nil
+}
+
 // WriteMultiple appends multiple events atomically.
 // All events are written in a single lock acquisition for better performance.
 func (w *EventWriter) WriteMultiple(events []Event) error {
@@ -132,15 +158,21 @@ func (w *EventWriter) Path() string {
 // This provides better performance than synchronous writes while accepting
 // a bounded data loss window (up to flushInterval) on crash.
 //
+// Both v2 flat events (Write) and v3 typed events (WriteTyped) are buffered
+// and flushed together. Within a flush cycle, v2 events are written before
+// v3 events; interleaving between cycles is ordered by flush time.
+//
 // Usage:
 //
 //	w := NewBufferedEventWriter(sessionDir, 5*time.Second)
-//	w.Write(event) // Non-blocking, returns immediately
+//	w.Write(event)      // Non-blocking, returns immediately
+//	w.WriteTyped(event) // Non-blocking, returns immediately
 //	// ... later
 //	w.Close() // Ensures final flush before shutdown
 type BufferedEventWriter struct {
 	sessionDir    string
 	events        []Event
+	typedEvents   []TypedEvent
 	mu            sync.Mutex
 	done          chan struct{}
 	flushed       chan struct{} // Signals final flush complete
@@ -159,6 +191,7 @@ func NewBufferedEventWriter(sessionDir string, flushInterval time.Duration) *Buf
 	w := &BufferedEventWriter{
 		sessionDir:    sessionDir,
 		events:        make([]Event, 0, 100),
+		typedEvents:   make([]TypedEvent, 0, 100),
 		done:          make(chan struct{}),
 		flushed:       make(chan struct{}),
 		flushInterval: flushInterval,
@@ -196,20 +229,35 @@ func (w *BufferedEventWriter) Write(event Event) {
 	w.events = append(w.events, event)
 }
 
+// WriteTyped buffers a v3 TypedEvent for async flush. Non-blocking, returns immediately.
+// Thread-safe: multiple goroutines can call WriteTyped concurrently with Write.
+func (w *BufferedEventWriter) WriteTyped(event TypedEvent) {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+
+	if w.closed {
+		return // Silently drop writes after close
+	}
+
+	w.typedEvents = append(w.typedEvents, event)
+}
+
 // Flush writes all buffered events to disk.
 // This is called automatically by the background goroutine, but can also be called
 // manually if immediate persistence is required.
-// Thread-safe: can be called concurrently with Write.
+// Thread-safe: can be called concurrently with Write and WriteTyped.
 func (w *BufferedEventWriter) Flush() error {
 	w.mu.Lock()
-	if len(w.events) == 0 {
+	if len(w.events) == 0 && len(w.typedEvents) == 0 {
 		w.mu.Unlock()
 		return nil
 	}
 
-	// Swap buffer to minimize lock hold time
+	// Swap buffers to minimize lock hold time
 	toFlush := w.events
+	toFlushTyped := w.typedEvents
 	w.events = make([]Event, 0, 100)
+	w.typedEvents = make([]TypedEvent, 0, 100)
 	w.mu.Unlock()
 
 	// Use existing EventWriter for atomic batch write
@@ -219,20 +267,36 @@ func (w *BufferedEventWriter) Flush() error {
 		w.flushErr = err
 		// Re-queue events that failed to flush (prepend to preserve order)
 		w.events = append(toFlush, w.events...)
+		w.typedEvents = append(toFlushTyped, w.typedEvents...)
 		w.mu.Unlock()
 		return err
 	}
 	defer syncWriter.Close()
 
-	err = syncWriter.WriteMultiple(toFlush)
-	if err != nil {
+	// Write v2 flat events first (preserves relative order within this flush cycle)
+	if err = syncWriter.WriteMultiple(toFlush); err != nil {
 		w.mu.Lock()
 		w.flushErr = err
 		// Re-queue events that failed to flush
 		w.events = append(toFlush, w.events...)
+		w.typedEvents = append(toFlushTyped, w.typedEvents...)
 		w.mu.Unlock()
+		return err
 	}
-	return err
+
+	// Write v3 typed events
+	for _, te := range toFlushTyped {
+		if err = syncWriter.WriteTyped(te); err != nil {
+			w.mu.Lock()
+			w.flushErr = err
+			// Re-queue remaining typed events
+			w.typedEvents = append(toFlushTyped, w.typedEvents...)
+			w.mu.Unlock()
+			return err
+		}
+	}
+
+	return nil
 }
 
 // Close stops the background flush goroutine and performs a final flush.
@@ -273,10 +337,11 @@ func (w *BufferedEventWriter) FlushError() error {
 	return w.flushErr
 }
 
-// Len returns the number of events currently buffered (not yet flushed).
+// Len returns the total number of events currently buffered (not yet flushed).
+// Includes both v2 flat events and v3 typed events.
 // Useful for testing and diagnostics.
 func (w *BufferedEventWriter) Len() int {
 	w.mu.Lock()
 	defer w.mu.Unlock()
-	return len(w.events)
+	return len(w.events) + len(w.typedEvents)
 }
