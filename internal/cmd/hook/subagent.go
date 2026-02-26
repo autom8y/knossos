@@ -13,6 +13,7 @@ import (
 	"github.com/autom8y/knossos/internal/hook"
 	"github.com/autom8y/knossos/internal/hook/clewcontract"
 	"github.com/autom8y/knossos/internal/output"
+	"github.com/autom8y/knossos/internal/registry"
 )
 
 // subagentResult is the output of subagent hooks.
@@ -33,12 +34,7 @@ type subagentPayload struct {
 
 // throughlineAgentNames is the set of agent names tracked as throughline agents.
 // These are long-running orchestrator agents whose IDs must survive compaction.
-var throughlineAgentNames = map[string]bool{
-	"pythia":           true,
-	"moirai":           true,
-	"consultant":       true,
-	"context-engineer": true,
-}
+var throughlineAgentNames = registry.ThroughlineAgents()
 
 // ThroughlineIDsFile is the filename for the session-scoped throughline agent ID map.
 const ThroughlineIDsFile = ".throughline-ids.json"

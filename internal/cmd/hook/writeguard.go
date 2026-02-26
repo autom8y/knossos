@@ -16,6 +16,7 @@ import (
 	"github.com/autom8y/knossos/internal/lock"
 	"github.com/autom8y/knossos/internal/output"
 	"github.com/autom8y/knossos/internal/paths"
+	"github.com/autom8y/knossos/internal/registry"
 )
 
 // ToolInput represents the input from Claude Code PreToolUse hook.
@@ -369,7 +370,7 @@ func isMoiraiLockHeld(resolver *paths.Resolver, sessionID string) bool {
 		return false
 	}
 
-	if moiraiLock.Agent != "moirai" {
+	if moiraiLock.Agent != registry.Ref(registry.AgentMoirai) {
 		return false
 	}
 
@@ -398,7 +399,7 @@ func outputBlockArchived(printer *output.Printer, sessionID string) error {
 			HookEventName:            "PreToolUse",
 			PermissionDecision:       "deny",
 			PermissionDecisionReason: "Session " + sessionID + " is archived (terminal state). Context files cannot be mutated after archiving.",
-			AdditionalContext:        "Session " + sessionID + " was previously wrapped with 'ari session wrap' and is now immutable. Archived session data is preserved at .claude/.archive/sessions/" + sessionID + "/",
+			AdditionalContext:        "Session " + sessionID + " was previously wrapped with '" + registry.Ref(registry.CLISessionWrap) + "' and is now immutable. Archived session data is preserved at .claude/.archive/sessions/" + sessionID + "/",
 		},
 	}
 	return printer.Print(result)
@@ -494,7 +495,7 @@ func outputAllowWithContext(printer *output.Printer, context string) error {
 func outputAllowTimeline(printer *output.Printer) error {
 	return outputAllowWithContext(printer,
 		"Timeline append allowed without Moirai lock. For frontmatter or body section changes, "+
-			"use ari session field-set (frontmatter) or Task(moirai, '...') (lifecycle transitions).")
+			"use "+registry.Ref(registry.CLISessionFieldSet)+" (frontmatter) or "+registry.TaskDelegation(registry.AgentMoirai)+" (lifecycle transitions).")
 }
 
 // outputBlockFrontmatter outputs a deny decision for E3 (frontmatter Edit without lock).
@@ -505,9 +506,9 @@ func outputBlockFrontmatter(printer *output.Printer) error {
 			HookEventName:            "PreToolUse",
 			PermissionDecision:       "deny",
 			PermissionDecisionReason: "SESSION_CONTEXT frontmatter requires Moirai lock",
-			AdditionalContext: "To modify frontmatter fields, use: ari session field-set <field> <value> " +
+			AdditionalContext: "To modify frontmatter fields, use: " + registry.Ref(registry.CLISessionFieldSet) + " <field> <value> " +
 				"(for settable fields: initiative, complexity, active_rite), or " +
-				"Task(moirai, 'park'/'wrap'/'resume'/'transition') for lifecycle-controlled fields.",
+				registry.TaskDelegation(registry.AgentMoirai) + " for lifecycle-controlled fields.",
 		},
 	}
 	return printer.Print(result)
@@ -522,8 +523,8 @@ func outputBlockOtherSection(printer *output.Printer) error {
 			PermissionDecision:       "deny",
 			PermissionDecisionReason: "SESSION_CONTEXT body section requires Moirai lock",
 			AdditionalContext: "Body sections (Artifacts, Blockers, Next Steps) are Moirai-managed. " +
-				"Use Task(moirai, '<operation>') for section updates. " +
-				"For timeline appends, use: ari session log --type=<type> '<summary>'.",
+				"Use " + registry.TaskDelegation(registry.AgentMoirai) + " for section updates. " +
+				"For timeline appends, use: " + registry.Ref(registry.CLISessionLog) + " --type=<type> '<summary>'.",
 		},
 	}
 	return printer.Print(result)
@@ -538,7 +539,7 @@ func outputBlockMixed(printer *output.Printer) error {
 			PermissionDecision:       "deny",
 			PermissionDecisionReason: "Edit targets multiple SESSION_CONTEXT sections",
 			AdditionalContext: "This edit spans multiple sections (e.g., timeline + frontmatter or timeline + body). " +
-				"Split into separate edits: use ari session log for timeline appends and Task(moirai, '...') for other mutations.",
+				"Split into separate edits: use " + registry.Ref(registry.CLISessionLog) + " for timeline appends and " + registry.TaskDelegation(registry.AgentMoirai) + " for other mutations.",
 		},
 	}
 	return printer.Print(result)
@@ -553,8 +554,8 @@ func outputBlockUnknown(printer *output.Printer) error {
 			PermissionDecision:       "deny",
 			PermissionDecisionReason: "Cannot determine target section in SESSION_CONTEXT",
 			AdditionalContext: "The edit content did not match any recognized section pattern. " +
-				"Use ari session log --type=<type> '<summary>' for timeline entries, " +
-				"ari session field-set for frontmatter fields, or Task(moirai, '...') for lifecycle operations.",
+				"Use " + registry.Ref(registry.CLISessionLog) + " --type=<type> '<summary>' for timeline entries, " +
+				registry.Ref(registry.CLISessionFieldSet) + " for frontmatter fields, or " + registry.TaskDelegation(registry.AgentMoirai) + " for lifecycle operations.",
 		},
 	}
 	return printer.Print(result)
@@ -568,13 +569,13 @@ func outputBlock(printer *output.Printer, filePath string) error {
 	var moiraiOp string
 	if strings.HasSuffix(filePath, "SESSION_CONTEXT.md") {
 		contextType = "SESSION_CONTEXT"
-		moiraiOp = `Task(moirai, "<operation> ...") — operations: transition_phase, update_field, park_session, resume_session, handoff, record_decision`
+		moiraiOp = registry.TaskDelegation(registry.AgentMoirai, "transition_phase", "update_field", "park_session", "resume_session", "handoff", "record_decision")
 	} else if strings.HasSuffix(filePath, "SPRINT_CONTEXT.md") {
 		contextType = "SPRINT_CONTEXT"
-		moiraiOp = `Task(moirai, "<operation> ...") — operations: create_sprint, mark_complete, update_field`
+		moiraiOp = registry.TaskDelegation(registry.AgentMoirai, "create_sprint", "mark_complete", "update_field")
 	} else {
 		contextType = "context file"
-		moiraiOp = `Task(moirai, "<operation> ...")`
+		moiraiOp = registry.TaskDelegation(registry.AgentMoirai)
 	}
 
 	result := hook.PreToolUseOutput{

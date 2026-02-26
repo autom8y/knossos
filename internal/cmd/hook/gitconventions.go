@@ -8,6 +8,7 @@ import (
 
 	"github.com/autom8y/knossos/internal/hook"
 	"github.com/autom8y/knossos/internal/output"
+	"github.com/autom8y/knossos/internal/registry"
 )
 
 // Regex patterns for git commit convention validation.
@@ -31,8 +32,8 @@ var (
 )
 
 // conventionDenyReason is the denial message pointing agents to the conventions skill.
-const conventionDenyReason = "Commit message does not follow conventional format. " +
-	"Load skill commit:behavior for full specification. " +
+var conventionDenyReason = "Commit message does not follow conventional format. " +
+	registry.Recovery(registry.SkillCommitBehavior) + " " +
 	"Expected: type(scope): subject where type is one of: feat|fix|docs|style|refactor|test|chore|perf|ci|build"
 
 // newGitConventionsCmd creates the git-conventions hook subcommand.

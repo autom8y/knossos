@@ -9,6 +9,8 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
+
+	"github.com/autom8y/knossos/internal/registry"
 )
 
 // BudgetOutput represents the output of the budget hook.
@@ -113,8 +115,8 @@ func runBudget(ctx *cmdContext) error {
 		if _, err := os.Stat(warnMarker); os.IsNotExist(err) {
 			out.Severity = "warn"
 			out.Message = fmt.Sprintf(
-				"Tool use count (%d) reached warning threshold (%d). Consider using /park to preserve session state.",
-				count, warnThreshold)
+				"Tool use count (%d) reached warning threshold (%d). Consider using %s to preserve session state.",
+				count, warnThreshold, registry.Ref(registry.DromenaPark))
 			// Write marker (best-effort)
 			os.WriteFile(warnMarker, []byte("1"), 0644)
 			fmt.Fprintf(os.Stderr, "[cognitive-budget] Warning: %s\n", out.Message)
@@ -127,8 +129,8 @@ func runBudget(ctx *cmdContext) error {
 		if _, err := os.Stat(parkMarker); os.IsNotExist(err) {
 			out.Severity = "park"
 			out.Message = fmt.Sprintf(
-				"Tool use count (%d) reached park threshold (%d). Recommend /park now to preserve session state and avoid context degradation.",
-				count, parkThreshold)
+				"Tool use count (%d) reached park threshold (%d). Recommend %s now to preserve session state and avoid context degradation.",
+				count, parkThreshold, registry.Ref(registry.DromenaPark))
 			// Write marker (best-effort)
 			os.WriteFile(parkMarker, []byte("1"), 0644)
 			fmt.Fprintf(os.Stderr, "[cognitive-budget] Alert: %s\n", out.Message)

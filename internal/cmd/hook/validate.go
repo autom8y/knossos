@@ -11,6 +11,7 @@ import (
 
 	"github.com/autom8y/knossos/internal/hook"
 	"github.com/autom8y/knossos/internal/output"
+	"github.com/autom8y/knossos/internal/registry"
 )
 
 // ValidateBypassEnvVar is the environment variable to bypass validate hook.
@@ -159,29 +160,29 @@ func validateCommand(command string) (bool, string) {
 		for _, path := range protectedPaths {
 			// Check if the protected path appears after rm -rf
 			if strings.Contains(command, path) {
-				return true, "Cannot rm -rf protected path: " + strings.TrimSuffix(path, "/") + ". Load skill conventions for safe git workflow guidance."
+				return true, "Cannot rm -rf protected path: " + strings.TrimSuffix(path, "/") + ". " + registry.Recovery(registry.SkillConventions)
 			}
 		}
 	}
 
 	// Check for force push to main/master
 	if forcePushMainPattern.MatchString(cmd) {
-		return true, "Force push to main/master is blocked. Use --force-with-lease or push to a feature branch. Load skill conventions for safe git workflow guidance."
+		return true, "Force push to main/master is blocked. Use --force-with-lease or push to a feature branch. " + registry.Recovery(registry.SkillConventions)
 	}
 
 	// Check for --no-verify on commits or pushes
 	if noVerifyPattern.MatchString(cmd) {
-		return true, "Skipping hooks with --no-verify is blocked. Pre-commit hooks exist for a reason. Load skill conventions for safe git workflow guidance."
+		return true, "Skipping hooks with --no-verify is blocked. Pre-commit hooks exist for a reason. " + registry.Recovery(registry.SkillConventions)
 	}
 
 	// Check for git reset --hard
 	if resetHardPattern.MatchString(cmd) {
-		return true, "git reset --hard is blocked. Use git stash or git checkout for safer alternatives. Load skill conventions for safe git workflow guidance."
+		return true, "git reset --hard is blocked. Use git stash or git checkout for safer alternatives. " + registry.Recovery(registry.SkillConventions)
 	}
 
 	// Check for git clean -fd
 	if cleanFdPattern.MatchString(cmd) {
-		return true, "git clean -fd is blocked on protected branches. Use git stash or manual cleanup. Load skill conventions for safe git workflow guidance."
+		return true, "git clean -fd is blocked on protected branches. Use git stash or manual cleanup. " + registry.Recovery(registry.SkillConventions)
 	}
 
 	return false, ""
