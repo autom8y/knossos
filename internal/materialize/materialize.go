@@ -391,12 +391,6 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize agents", err)
 	}
 
-	// 4.5. Add cross-rite agents (moirai, consultant, context-engineer) that don't conflict with rite agents
-	agentsDir := filepath.Join(claudeDir, "agents")
-	if err := m.materializeCrossRiteAgents(agentsDir, resolved, collector, manifest); err != nil {
-		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize cross-rite agents", err)
-	}
-
 	// 5. Generate commands/ and skills/ directories from rite + shared + dependencies + mena
 	if !opts.Soft {
 		if err := m.materializeMena(manifest, claudeDir, resolved, collector); err != nil {
@@ -587,13 +581,12 @@ func (m *Materializer) detectOrphans(manifest *RiteManifest, claudeDir string, r
 		return []string{}, nil
 	}
 
-	// Build complete expected agent set: rite agents + cross-rite agents
+	// Build expected agent set from rite manifest only.
+	// Cross-rite agents (consultant, moirai, etc.) are user-scope owned — they
+	// live at ~/.claude/agents/ and are NOT expected at project level.
 	expectedAgents := make(map[string]bool)
 	for _, agent := range manifest.Agents {
 		expectedAgents[agent.Name+".md"] = true
-	}
-	for _, agentName := range m.listCrossRiteAgents(resolved) {
-		expectedAgents[agentName] = true
 	}
 
 	// Try loading provenance manifest for manifest-based detection
@@ -782,10 +775,10 @@ func (m *Materializer) loadRiteManifest(ritePath string, resolved *ResolvedRite)
 	return &manifest, nil
 }
 
-// materializeAgents copies agent files from rite to .claude/agents/
+// materializeAgents copies rite-scoped agent files to .claude/agents/.
 // Uses selective write: only knossos-managed agents (from manifest) are replaced.
 // User-created agents not in the manifest are preserved.
-// Also materializes cross-rite agents from top-level agents/ directory.
+// Cross-rite agents (consultant, moirai, etc.) are user-scope owned and NOT handled here.
 func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claudeDir string, resolved *ResolvedRite, collector provenance.Collector, writeGuardDefaults *WriteGuardDefaults) error {
 	agentsDir := filepath.Join(claudeDir, "agents")
 
@@ -794,16 +787,11 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claud
 		return err
 	}
 
-	// Build managed agent set from manifest (rite agents)
+	// Build managed agent set from rite manifest only.
+	// Cross-rite agents are user-scope owned (synced to ~/.claude/agents/).
 	managedAgents := make(map[string]bool)
 	for _, agent := range manifest.Agents {
 		managedAgents[agent.Name+".md"] = true
-	}
-
-	// Add cross-rite agents to managed set
-	crossRiteAgents := m.listCrossRiteAgents(resolved)
-	for _, agentName := range crossRiteAgents {
-		managedAgents[agentName] = true
 	}
 
 	// NOTE: We intentionally do NOT pre-delete managed agents before rewriting.
@@ -979,126 +967,10 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claud
 	return writeErr
 }
 
-// listCrossRiteAgents returns a list of cross-rite agent filenames from top-level agents/.
-// Cross-rite agents are agents that should be available regardless of active rite.
-func (m *Materializer) listCrossRiteAgents(resolved *ResolvedRite) []string {
-	var agents []string
-
-	// For embedded sources, read from embedded FS
-	if resolved != nil && resolved.Source.Type == SourceEmbedded && m.sourceResolver.EmbeddedFS != nil {
-		entries, err := fs.ReadDir(m.sourceResolver.EmbeddedFS, "agents")
-		if err != nil {
-			return agents // No cross-rite agents in embedded FS
-		}
-		for _, entry := range entries {
-			if !entry.IsDir() && filepath.Ext(entry.Name()) == ".md" {
-				agents = append(agents, entry.Name())
-			}
-		}
-		return agents
-	}
-
-	// For filesystem sources, read from project root agents/
-	projectRoot := m.resolver.ProjectRoot()
-	crossRiteDir := filepath.Join(projectRoot, "agents")
-	entries, err := os.ReadDir(crossRiteDir)
-	if err != nil {
-		return agents // No cross-rite agents directory
-	}
-	for _, entry := range entries {
-		if !entry.IsDir() && filepath.Ext(entry.Name()) == ".md" {
-			agents = append(agents, entry.Name())
-		}
-	}
-	return agents
-}
-
-// materializeCrossRiteAgents copies cross-rite agents from top-level agents/ to .claude/agents/.
-// Cross-rite agents are available in all rites but do NOT override rite-scoped agents of the same name.
-func (m *Materializer) materializeCrossRiteAgents(agentsDir string, resolved *ResolvedRite, collector provenance.Collector, manifest *RiteManifest) error {
-	// Build set of rite agent names (these take priority)
-	riteAgents := make(map[string]bool)
-	for _, agent := range manifest.Agents {
-		riteAgents[agent.Name+".md"] = true
-	}
-
-	// For embedded sources, copy from embedded FS
-	if resolved != nil && resolved.Source.Type == SourceEmbedded && m.sourceResolver.EmbeddedFS != nil {
-		entries, err := fs.ReadDir(m.sourceResolver.EmbeddedFS, "agents")
-		if err != nil {
-			return nil // No cross-rite agents in embedded FS
-		}
-		for _, entry := range entries {
-			if entry.IsDir() || filepath.Ext(entry.Name()) != ".md" {
-				continue
-			}
-			// Skip if rite already has an agent with this name
-			if riteAgents[entry.Name()] {
-				continue
-			}
-			content, err := fs.ReadFile(m.sourceResolver.EmbeddedFS, "agents/"+entry.Name())
-			if err != nil {
-				return err
-			}
-			destPath := filepath.Join(agentsDir, entry.Name())
-			written, err := writeIfChanged(destPath, content, 0644)
-			if err != nil {
-				return err
-			}
-			if written {
-				collector.Record("agents/"+entry.Name(), provenance.NewKnossosEntry(
-					provenance.ScopeRite,
-					"agents/"+entry.Name(),
-					string(resolved.Source.Type),
-					checksum.Bytes(content),
-				))
-			}
-		}
-		return nil
-	}
-
-	// For filesystem sources, copy from project root agents/
-	projectRoot := m.resolver.ProjectRoot()
-	crossRiteDir := filepath.Join(projectRoot, "agents")
-	entries, err := os.ReadDir(crossRiteDir)
-	if err != nil {
-		return nil // No cross-rite agents directory
-	}
-
-	for _, entry := range entries {
-		if entry.IsDir() || filepath.Ext(entry.Name()) != ".md" {
-			continue
-		}
-		// Skip if rite already has an agent with this name
-		if riteAgents[entry.Name()] {
-			continue
-		}
-
-		srcPath := filepath.Join(crossRiteDir, entry.Name())
-		content, err := os.ReadFile(srcPath)
-		if err != nil {
-			return err
-		}
-
-		destPath := filepath.Join(agentsDir, entry.Name())
-		written, err := writeIfChanged(destPath, content, 0644)
-		if err != nil {
-			return err
-		}
-
-		if written {
-			srcRelPath, _ := filepath.Rel(projectRoot, srcPath)
-			collector.Record("agents/"+entry.Name(), provenance.NewKnossosEntry(
-				provenance.ScopeRite,
-				srcRelPath,
-				"project",
-				checksum.Bytes(content),
-			))
-		}
-	}
-
-	return nil
-}
+// NOTE: listCrossRiteAgents and materializeCrossRiteAgents were removed.
+// Cross-rite agents (consultant, moirai, context-engineer, theoros) are
+// user-scope owned: synced from KNOSSOS_HOME/agents/ to ~/.claude/agents/
+// by user-scope sync. They are NOT copied to project .claude/agents/.
 
 // materializeMena copies mena files to .claude/commands/ or .claude/skills/
 // based on the filename convention (.dro.md for dromena, .lego.md for legomena).
