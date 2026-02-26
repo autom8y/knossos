@@ -162,7 +162,7 @@ You ALWAYS respond with structured YAML containing: `directive`, `specialist` (w
 
 ## Position in Workflow
 
-**Upstream**: User release request or `/releaser` trigger
+**Upstream**: `/release` command (orchestration loop) or direct user invocation
 **Downstream**: Verification report with CI green/red matrix and release summary
 
 ## Exousia

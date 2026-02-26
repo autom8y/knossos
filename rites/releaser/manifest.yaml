@@ -67,6 +67,7 @@ agent_defaults:
 
 dromena:
   - releaser-switch
+  - release
 
 legomena:
   - releaser-ref
