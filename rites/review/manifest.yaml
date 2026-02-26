@@ -1,5 +1,5 @@
 # Rite Manifest: review
-# Simplest multi-phase orchestrated workflow — works on any codebase.
+# Simplest multi-phase orchestrated workflow -- works on any codebase.
 
 name: review
 version: "1.0.0"
@@ -9,33 +9,33 @@ entry_agent: pythia
 
 phases:
   - name: scan
-    agent: scanner
+    agent: signal-sifter
     produces: scan-findings
-    description: Read codebase structure and identify areas of concern
+    description: Sift codebase structure for signals using language-agnostic heuristics
 
   - name: assess
-    agent: assessor
+    agent: pattern-profiler
     produces: assessment
-    description: Evaluate findings by impact and recommend priorities
+    description: Profile patterns across signals, assign severity and health grades
 
   - name: report
-    agent: reporter
+    agent: case-reporter
     produces: review-report
-    description: Produce structured review document with actionable items
+    description: Write the definitive case file with health report card and routing
 
 agents:
   - name: pythia
-    role: Coordinates code review phases
+    role: Coordinates code review phases, gates complexity, manages back-routes
     archetype: orchestrator
 
-  - name: scanner
-    role: Reads codebase and identifies areas of concern
+  - name: signal-sifter
+    role: Reads codebase and sifts signal from noise using structural heuristics
 
-  - name: assessor
-    role: Evaluates scan findings and prioritizes by impact
+  - name: pattern-profiler
+    role: Connects dots across signals, builds severity profile and health grades
 
-  - name: reporter
-    role: Produces structured review document
+  - name: case-reporter
+    role: Writes the definitive case file with health report card
 
 agent_defaults:
   type: specialist
@@ -45,48 +45,32 @@ agent_defaults:
     - review-ref
   disallowedTools:
     - Edit
+    - NotebookEdit
 
-dromena: []
+dromena:
+  - review-switch
 
 legomena:
   - review-ref
 
-hooks: []
+hooks:
+  - agent-guard
+
+hook_defaults:
+  write_guard:
+    allow_paths: [".claude/wip/review/"]
 
 dependencies:
   - shared
 
 complexity_levels:
   - name: QUICK
-    scope: "Focused review of specific files or module"
+    scope: "Focused triage of specific files or module"
+    phases: [scan, report]
   - name: FULL
-    scope: "Complete repository review with prioritized findings"
+    scope: "Complete repository review with health grading"
+    phases: [scan, assess, report]
 
 metadata:
   domain: code review
   color: cyan
-
-archetype_data:
-  orchestrator:
-    description: "Coordinates code review phases"
-    color: cyan
-    skills:
-      - orchestrator-templates
-      - review-ref
-    phase_routing: |
-      | scanner | Initial phase — codebase scan needed |
-      | assessor | Scan complete, findings need evaluation and prioritization |
-      | reporter | Assessment complete, structured report needed |
-    handoff_criteria: |
-      | scan | Scan findings document produced with categorized concerns, file/module scope identified |
-      | assess | Findings prioritized by impact (critical/high/medium/low) with actionable recommendations |
-      | report | Structured review document with executive summary and traced findings |
-    rite_anti_patterns: |
-      - **Language-specific assumptions**: Review must work on ANY codebase
-      - **Modifying target code**: Review is read-only observation, never auto-fix
-      - **Skipping assessment**: Raw scan findings without prioritization are not useful
-    cross_rite_protocol: |
-      When review findings suggest deeper investigation, escalate to user:
-      - Security concerns -> security rite (if available)
-      - Technical debt patterns -> debt-triage rite (if available)
-      - AI-generated code quality -> slop-chop rite (if available)

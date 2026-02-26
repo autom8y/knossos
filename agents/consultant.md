@@ -70,6 +70,7 @@ The Consultant is the ecosystem navigator. When users are unsure where to start,
 | Document | docs | `/docs` |
 | Code Quality | hygiene | `/hygiene` |
 | Tech Debt | debt-triage | `/debt` |
+| Code Review / Health Check | review | `/review` |
 | Operations | sre | `/sre` |
 | Security | security | `/security` |
 | Analytics | intelligence | `/intelligence` |

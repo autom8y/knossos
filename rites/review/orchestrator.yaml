@@ -1,0 +1,76 @@
+# Orchestrator configuration for review
+# Used by generate-orchestrator.sh to produce pythia.md
+# References workflow.yaml for phase/specialist data
+
+# Rite metadata
+rite:
+  name: review
+  domain: code review
+  color: cyan
+
+# Frontmatter customization
+frontmatter:
+  role: "Coordinates code review phases"
+  description: |
+    Routes code review work through scan, assess, and report phases.
+    Use when: performing language-agnostic codebase health assessment, triaging unknown codebases, generating health report cards.
+    Triggers: coordinate, orchestrate, review workflow, code review, health check, codebase audit, triage unknown codebase.
+
+# Specialist routing conditions (when to route to each)
+# Specialist names come from workflow.yaml phases
+routing:
+  signal-sifter: "Initial phase -- codebase scan needed, sift signal from noise"
+  pattern-profiler: "Scan complete, findings need evaluation and health grading (FULL complexity only)"
+  case-reporter: "Assessment complete (FULL) or scan complete (QUICK), case file needed"
+
+# Workflow position descriptors
+workflow_position:
+  upstream: "User review request, /review trigger, or first contact with unknown codebase"
+  downstream: "security, debt-triage, slop-chop, hygiene, arch, 10x-dev, docs, sre (via cross-rite routing recommendations)"
+
+# Handoff criteria between phases (checklist items)
+handoff_criteria:
+  scan:
+    - "SCAN-{slug}.md produced at .claude/wip/review/"
+    - "All five categories have signals or explicit 'no findings'"
+    - "Metrics summary complete with file counts and language detection"
+    - "No pending scan areas flagged as incomplete"
+  assess:
+    - "ASSESS-{slug}.md produced at .claude/wip/review/"
+    - "Health grades assigned for all 5 categories plus overall"
+    - "All findings have severity assigned (Critical/High/Medium/Low)"
+    - "Cross-rite routing recommendations documented"
+    - "No unresolved coverage gaps that would trigger back-route"
+  report:
+    - "REVIEW-{slug}.md produced at .claude/wip/review/"
+    - "Executive summary present (3-5 sentences)"
+    - "Health report card with A-F grades for all categories"
+    - "Cross-rite recommendations section complete"
+    - "Next steps prioritized by impact-to-effort ratio"
+
+# Skills references for this rite
+skills:
+  - "review-ref for methodology, severity model, health grading, and cross-rite routing"
+
+# Rite-specific anti-patterns
+antipatterns:
+  - "Language-specific assumptions: review must work on ANY codebase without language tooling"
+  - "Modifying target code: review is read-only observation, never auto-fix (crime scene protocol)"
+  - "Skipping assessment at FULL complexity: raw scan findings without health grading are not useful"
+  - "Running test suites: read test files for structure signals, never execute them"
+  - "Averaging health grades: use weakest-link model, not arithmetic mean"
+  - "Routing without evidence: every cross-rite recommendation must cite a specific finding"
+
+# Cross-rite protocol (review is the generalist triage rite)
+cross_rite_protocol: |
+  Review is the generalist triage rite -- the intake funnel for the rite ecosystem.
+  Route findings to specialist rites via the case-reporter's recommendations:
+  - security: auth flaws, hardcoded secrets, crypto misuse, unvalidated inputs
+  - debt-triage: systemic debt patterns, accumulation trends, cost-of-delay indicators
+  - slop-chop: AI code pathologies, hallucinated imports, phantom dependencies
+  - hygiene: code smells, naming inconsistency, complexity hotspots, dead code
+  - arch: boundary violations, layering problems, coupling analysis
+  - 10x-dev: missing test infrastructure, CI/CD pipeline concerns
+  - docs: documentation gaps, stale READMEs, missing API docs
+  - sre: deployment concerns, observability gaps, reliability risks
+  Reference rite names directly in recommendations. User decides whether to switch.
