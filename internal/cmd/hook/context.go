@@ -14,6 +14,7 @@ import (
 
 	"github.com/autom8y/knossos/internal/hook"
 	"github.com/autom8y/knossos/internal/hook/clewcontract"
+	"github.com/autom8y/knossos/internal/know"
 	"github.com/autom8y/knossos/internal/output"
 	"github.com/autom8y/knossos/internal/session"
 )
@@ -30,12 +31,13 @@ type ContextOutput struct {
 	CurrentPhase    string            `json:"current_phase,omitempty"`
 	ExecutionMode   string            `json:"execution_mode,omitempty"`
 	HasSession      bool              `json:"has_session"`
-	CompactState    string            `json:"compact_state,omitempty"`    // Rehydrated from COMPACT_STATE.md if present
+	CompactState    string            `json:"compact_state,omitempty"`   // Rehydrated from COMPACT_STATE.md if present
 	ThroughlineIDs  map[string]string `json:"throughline_ids,omitempty"` // Active throughline agent IDs
 	GitBranch       string            `json:"git_branch,omitempty"`
 	BaseBranch      string            `json:"base_branch,omitempty"`
 	AvailableRites  []string          `json:"available_rites,omitempty"`
 	AvailableAgents []string          `json:"available_agents,omitempty"`
+	KnowStatus      string            `json:"know_status,omitempty"` // .know/ freshness summary line
 }
 
 // Text implements output.Textable for markdown output.
@@ -72,6 +74,9 @@ func (c ContextOutput) Text() string {
 		for _, k := range keys {
 			b.WriteString(fmt.Sprintf("  %s: %s\n", k, c.ThroughlineIDs[k]))
 		}
+	}
+	if c.KnowStatus != "" {
+		b.WriteString(fmt.Sprintf("\n%s\n", c.KnowStatus))
 	}
 	if c.CompactState != "" {
 		b.WriteString("\n## Recovered State (from PreCompact checkpoint)\n")
@@ -197,6 +202,11 @@ func runContextCore(ctx *cmdContext, printer *output.Printer) error {
 		result.ThroughlineIDs = ids
 	}
 
+	// Check .know/ status (best-effort, <100ms — just readdir + parse frontmatter)
+	if knowLine := knowStatus(projectDir); knowLine != "" {
+		result.KnowStatus = knowLine
+	}
+
 	// Emit session_start event to clew log (best-effort, non-blocking)
 	emitSessionStartEvent(sessionDir, sessCtx.SessionID, sessCtx.Initiative, sessCtx.Complexity, activeRite, printer)
 
@@ -319,6 +329,44 @@ func emitSessionStartEvent(sessionDir, sessionID, initiative, complexity, rite s
 		printer.VerboseLog("warn", "failed to emit session_start event",
 			map[string]interface{}{"error": flushErr.Error()})
 	}
+}
+
+// knowStatus checks .know/ domain freshness and returns a one-line summary string.
+// Returns "" if .know/ doesn't exist or is empty. This runs in <100ms:
+// it only reads directory entries and parses frontmatter (no full file reads beyond header).
+func knowStatus(projectDir string) string {
+	if projectDir == "" {
+		return ""
+	}
+	knowDir := filepath.Join(projectDir, ".know")
+	domains, err := know.ReadMeta(knowDir)
+	if err != nil || len(domains) == 0 {
+		return ""
+	}
+
+	// Build per-domain status fragments
+	count := len(domains)
+	hasStale := false
+	parts := make([]string, 0, count)
+	for _, d := range domains {
+		status := "fresh"
+		if !d.Fresh {
+			status = "STALE"
+			hasStale = true
+		}
+		parts = append(parts, fmt.Sprintf("%s: %s, expires %s", d.Domain, status, d.Expires))
+	}
+
+	domainWord := "domain"
+	if count != 1 {
+		domainWord = "domains"
+	}
+
+	summary := fmt.Sprintf("Codebase knowledge: %d %s (%s).", count, domainWord, strings.Join(parts, ", "))
+	if hasStale {
+		summary += " Run /know to refresh."
+	}
+	return summary
 }
 
 // determineExecutionMode determines the execution mode based on session and rite.

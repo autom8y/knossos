@@ -203,6 +203,7 @@ func (m *ManifestLoader) CreateDefault() (*Manifest, error) {
 		"agent-routing",
 		"commands",
 		"platform-infrastructure",
+		"know",
 	}
 
 	for _, name := range defaultKnossosRegions {
@@ -246,9 +247,53 @@ func DefaultSectionOrder() []string {
 		// Infrastructure pointer (how to access platform tools)
 		"platform-infrastructure",
 
+		// Codebase knowledge (pre-computed context from theoros)
+		"know",
+
 		// User customization (edit freely)
 		"user-content",
 	}
+}
+
+// defaultRegionDefs returns the default region definitions for all standard sections.
+// Extracted from CreateDefault() so AdoptNewDefaults() can add missing regions
+// with the correct owner and source.
+func defaultRegionDefs() map[string]*Region {
+	return map[string]*Region{
+		"execution-mode":          {Owner: OwnerKnossos},
+		"agent-routing":           {Owner: OwnerKnossos},
+		"commands":                {Owner: OwnerKnossos},
+		"platform-infrastructure": {Owner: OwnerKnossos},
+		"know":                    {Owner: OwnerKnossos},
+		"quick-start":             {Owner: OwnerRegenerate, Source: "ACTIVE_RITE+agents"},
+		"agent-configurations":    {Owner: OwnerRegenerate, Source: "agents/*.md"},
+		"user-content":            {Owner: OwnerSatellite},
+	}
+}
+
+// AdoptNewDefaults ensures the manifest includes all current default sections.
+// When knossos adds new inscription sections (like "know"), existing satellites
+// pick them up on next sync via this reconciliation.
+//
+// Behavior:
+//   - Adds missing regions from defaultRegionDefs() with correct owner/source
+//   - Updates SectionOrder to DefaultSectionOrder() (knossos owns ordering)
+//   - Never removes existing regions or modifies existing region metadata
+func (manifest *Manifest) AdoptNewDefaults() {
+	defaults := defaultRegionDefs()
+
+	// Add missing regions
+	for name, def := range defaults {
+		if !manifest.HasRegion(name) {
+			manifest.Regions[name] = &Region{
+				Owner:  def.Owner,
+				Source: def.Source,
+			}
+		}
+	}
+
+	// Update section order to current default (knossos owns ordering)
+	manifest.SectionOrder = DefaultSectionOrder()
 }
 
 // DeprecatedRegions returns region names that were previously part of the

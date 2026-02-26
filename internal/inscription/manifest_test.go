@@ -743,6 +743,75 @@ func TestManifest_ToJSON(t *testing.T) {
 	}
 }
 
+func TestAdoptNewDefaults_AddsMissingRegion(t *testing.T) {
+	// Simulate an existing manifest without the "know" region (pre-Layer 2)
+	manifest := &Manifest{
+		SchemaVersion:      "1.0",
+		InscriptionVersion: "42",
+		Regions: map[string]*Region{
+			"execution-mode":       {Owner: OwnerKnossos},
+			"agent-routing":        {Owner: OwnerKnossos},
+			"commands":             {Owner: OwnerKnossos},
+			"platform-infrastructure": {Owner: OwnerKnossos},
+			"quick-start":          {Owner: OwnerRegenerate, Source: "ACTIVE_RITE+agents"},
+			"agent-configurations": {Owner: OwnerRegenerate, Source: "agents/*.md"},
+			"user-content":         {Owner: OwnerSatellite},
+		},
+		SectionOrder: []string{
+			"execution-mode", "quick-start", "agent-routing",
+			"commands", "agent-configurations", "platform-infrastructure", "user-content",
+		},
+	}
+
+	manifest.AdoptNewDefaults()
+
+	// "know" should now be present
+	if !manifest.HasRegion("know") {
+		t.Fatal("AdoptNewDefaults() did not add 'know' region")
+	}
+	knowRegion := manifest.GetRegion("know")
+	if knowRegion.Owner != OwnerKnossos {
+		t.Errorf("know region owner = %q, want %q", knowRegion.Owner, OwnerKnossos)
+	}
+
+	// Section order should include "know"
+	found := false
+	for _, s := range manifest.SectionOrder {
+		if s == "know" {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Error("AdoptNewDefaults() did not add 'know' to SectionOrder")
+	}
+
+	// Existing regions should be untouched
+	if manifest.GetRegion("execution-mode").Owner != OwnerKnossos {
+		t.Error("AdoptNewDefaults() modified existing region")
+	}
+}
+
+func TestAdoptNewDefaults_DoesNotOverwriteExisting(t *testing.T) {
+	manifest := &Manifest{
+		SchemaVersion:      "1.0",
+		InscriptionVersion: "5",
+		Regions: map[string]*Region{
+			"execution-mode": {Owner: OwnerKnossos, Hash: "sha256:abc123"},
+			"know":           {Owner: OwnerKnossos, Hash: "sha256:existing"},
+			"user-content":   {Owner: OwnerSatellite},
+		},
+		SectionOrder: []string{"execution-mode", "know", "user-content"},
+	}
+
+	manifest.AdoptNewDefaults()
+
+	// Existing "know" hash should be preserved
+	if manifest.GetRegion("know").Hash != "sha256:existing" {
+		t.Error("AdoptNewDefaults() overwrote existing region metadata")
+	}
+}
+
 func TestDeprecatedRegions_NotInDefaultSectionOrder(t *testing.T) {
 	defaults := make(map[string]bool)
 	for _, name := range DefaultSectionOrder() {

@@ -75,12 +75,16 @@ func SyncCLAUDEmd(opts CLAUDEmdSyncOptions) (*CLAUDEmdSyncResult, error) {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to load or create KNOSSOS_MANIFEST.yaml", err)
 	}
 
+	// Adopt new default sections that may have been added in newer knossos versions.
+	// This is how existing satellites pick up new inscription sections (e.g. "know").
+	manifest.AdoptNewDefaults()
+
 	// Update active rite in manifest if provided
 	if opts.ActiveRite != "" {
 		manifest.SetActiveRite(opts.ActiveRite)
 	}
 
-	// Save manifest if newly created
+	// Save manifest if newly created or defaults were adopted
 	if !manifestExists {
 		if err := loader.Save(manifest); err != nil {
 			return nil, errors.Wrap(errors.CodeGeneralError, "failed to save KNOSSOS_MANIFEST.yaml", err)

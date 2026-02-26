@@ -16,6 +16,7 @@ import (
 	"github.com/autom8y/knossos/internal/cmd/hook"
 	initcmd "github.com/autom8y/knossos/internal/cmd/initialize"
 	"github.com/autom8y/knossos/internal/cmd/inscription"
+	"github.com/autom8y/knossos/internal/cmd/knows"
 	"github.com/autom8y/knossos/internal/cmd/lint"
 	"github.com/autom8y/knossos/internal/cmd/manifest"
 	"github.com/autom8y/knossos/internal/cmd/migrate"
@@ -127,6 +128,7 @@ func init() {
 	rootCmd.AddCommand(handoff.NewHandoffCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir, &globalOpts.SessionID))
 	rootCmd.AddCommand(worktree.NewWorktreeCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
 	rootCmd.AddCommand(hook.NewHookCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir, &globalOpts.SessionID))
+	rootCmd.AddCommand(knows.NewKnowsCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
 	rootCmd.AddCommand(artifact.NewArtifactCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir, &globalOpts.SessionID))
 	rootCmd.AddCommand(sails.NewSailsCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir, &globalOpts.SessionID))
 	rootCmd.AddCommand(naxos.NewNaxosCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
