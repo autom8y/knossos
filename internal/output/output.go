@@ -662,6 +662,53 @@ type EnvVarDetected struct {
 	Value   string `json:"value"`
 }
 
+// TimelineEntryOutput represents a single timeline entry in JSON output.
+type TimelineEntryOutput struct {
+	Time     string `json:"time"`
+	Category string `json:"category"`
+	Summary  string `json:"summary"`
+}
+
+// TimelineOutput represents the timeline for a session.
+type TimelineOutput struct {
+	SessionID string                `json:"session_id"`
+	Entries   []TimelineEntryOutput `json:"entries"`
+	Total     int                   `json:"total"`
+	Filtered  int                   `json:"filtered"`
+}
+
+// Text implements Textable for TimelineOutput.
+func (t TimelineOutput) Text() string {
+	var b strings.Builder
+
+	if t.SessionID != "" {
+		b.WriteString(fmt.Sprintf("Timeline for %s:\n", t.SessionID))
+	}
+
+	if len(t.Entries) == 0 {
+		b.WriteString("(no entries)\n")
+		return b.String()
+	}
+
+	for _, e := range t.Entries {
+		b.WriteString(fmt.Sprintf("- %s | %-8s | %s\n", e.Time, e.Category, e.Summary))
+	}
+
+	return b.String()
+}
+
+// LogOutput represents the result of an `ari session log` command.
+type LogOutput struct {
+	SessionID string `json:"session_id"`
+	Type      string `json:"type"`
+	Entry     string `json:"entry"`
+}
+
+// Text implements Textable for LogOutput.
+func (l LogOutput) Text() string {
+	return fmt.Sprintf("logged: %s\n", l.Entry)
+}
+
 // FieldOutput represents a single field get or set result.
 type FieldOutput struct {
 	Key           string `json:"key"`
