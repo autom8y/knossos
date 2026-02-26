@@ -172,6 +172,8 @@ Reference these skills as appropriate:
 - 10x-workflow for phase patterns
 - standards for command naming conventions
 
+Load `conventions` before git operations. Load `guidance/standards` for command naming and code convention decisions.
+
 ## Cross-Rite Notes
 
 When designing workflows reveals:

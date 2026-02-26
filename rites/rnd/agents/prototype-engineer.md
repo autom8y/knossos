@@ -24,6 +24,7 @@ maxTurns: 250
 skills:
   - rnd-ref
   - conventions
+  - guidance/standards
 memory: "project"
 contract:
   must_not:

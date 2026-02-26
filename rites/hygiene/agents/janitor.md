@@ -27,6 +27,7 @@ maxTurns: 250
 skills:
   - hygiene-catalog
   - conventions
+  - guidance/standards
 memory: "project"
 ---
 
@@ -181,3 +182,5 @@ Do NOT use Boy Scout fixes to expand scope. The plan is the plan.
 - documentation for module organization
 - file-verification for artifact verification protocol
 - cross-rite for handoff patterns to other rites
+
+Load `conventions` before git operations. Load `guidance/standards` for code conventions and style guidelines.

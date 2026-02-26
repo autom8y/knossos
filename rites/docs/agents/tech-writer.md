@@ -25,6 +25,7 @@ color: blue
 maxTurns: 200
 skills:
   - doc-consolidation
+  - guidance/file-verification
 memory: "project"
 ---
 

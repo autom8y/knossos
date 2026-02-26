@@ -162,4 +162,4 @@ Requires modifying merge logic in internal/materialize/, not just a single-line 
 
 ## Skills Reference
 
-`ecosystem-ref` (knossos/materialization patterns), `10x-workflow` (complexity classification), `doc-ecosystem` (Gap Analysis template), `file-verification` (artifact verification protocol).
+`ecosystem-ref` (knossos/materialization patterns), `10x-workflow` (complexity classification), `doc-ecosystem` (Gap Analysis template), `file-verification` (artifact verification protocol). Load `guidance/standards` for code convention and tech stack context during analysis.

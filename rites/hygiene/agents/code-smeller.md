@@ -204,3 +204,5 @@ handoff_type: execution
 - file-verification for artifact verification protocol
 - cross-rite for handoff patterns to other rites
 - cross-rite-handoff for HANDOFF schema reference
+
+Load `guidance/standards` for code convention and project standards context during analysis.

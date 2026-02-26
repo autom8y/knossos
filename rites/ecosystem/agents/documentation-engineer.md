@@ -27,6 +27,7 @@ color: blue
 maxTurns: 250
 skills:
   - ecosystem-ref
+  - guidance/file-verification
 ---
 
 # Documentation Engineer
@@ -177,4 +178,4 @@ cp .claude/settings.local.json.bak .claude/settings.local.json
 
 ## Skills Reference
 
-`doc-ecosystem` (runbook template), `ecosystem-ref` (compatibility conventions), `10x-workflow` (rollout planning by complexity), `file-verification` (artifact verification protocol).
+`doc-ecosystem` (runbook template), `ecosystem-ref` (compatibility conventions), `10x-workflow` (rollout planning by complexity), `file-verification` (artifact verification protocol). Load `conventions` before git operations. Load `guidance/standards` for code convention decisions.

@@ -210,5 +210,5 @@ This is a specification by reference—and the reference is ambiguous. What spec
 
 ## Related Skills
 
-`doc-artifacts` (PRD templates), `10x-workflow` (phase gates, handoff expectations), `standards` (technical constraints).
+`doc-artifacts` (PRD templates), `10x-workflow` (phase gates, handoff expectations), `standards` (technical constraints). Load `conventions` before git operations. Load `guidance/standards` for technical constraint reference.
 

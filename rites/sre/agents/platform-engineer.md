@@ -23,6 +23,8 @@ color: cyan
 maxTurns: 250
 skills:
   - sre-catalog
+  - guidance/standards
+  - guidance/file-verification
 memory: "project"
 ---
 

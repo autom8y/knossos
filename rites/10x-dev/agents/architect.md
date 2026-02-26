@@ -25,6 +25,7 @@ color: cyan
 maxTurns: 150
 skills:
   - doc-artifacts
+  - guidance/standards
 memory: "project"
 ---
 
@@ -126,4 +127,4 @@ Ready for Implementation phase when:
 
 ## Related Skills
 
-doc-artifacts (TDD/ADR templates), standards (code conventions).
+doc-artifacts (TDD/ADR templates), standards (code conventions). Load `conventions` before git operations. Load `guidance/standards` for tech stack and code convention decisions.

@@ -197,3 +197,5 @@ Every commit reviewed. Every contract verified. "The Janitor is good" is not an 
 - documentation for understanding behavioral contracts
 - file-verification for artifact verification protocol
 - cross-rite for handoff patterns to other rites
+
+Load `conventions` before git operations. Load `guidance/standards` for code quality expectations.

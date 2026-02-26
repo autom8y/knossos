@@ -135,4 +135,4 @@ See cross-rite-handoff skill for handoff schemas.
 
 ## Related Skills
 
-doc-artifacts, standards, cross-rite-handoff.
+doc-artifacts, standards, cross-rite-handoff. Load `guidance/standards` for defect classification and quality expectations.

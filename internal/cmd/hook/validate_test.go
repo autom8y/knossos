@@ -125,31 +125,31 @@ func TestValidateCommand(t *testing.T) {
 			name:    "rm -rf .git",
 			command: "rm -rf .git",
 			blocked: true,
-			reason:  "Cannot rm -rf protected path: .git",
+			reason:  "Cannot rm -rf protected path: .git. Load skill conventions for safe git workflow guidance.",
 		},
 		{
 			name:    "rm -rf .claude",
 			command: "rm -rf .claude/",
 			blocked: true,
-			reason:  "Cannot rm -rf protected path: .claude",
+			reason:  "Cannot rm -rf protected path: .claude. Load skill conventions for safe git workflow guidance.",
 		},
 		{
 			name:    "rm -rf .github",
 			command: "rm -rf .github",
 			blocked: true,
-			reason:  "Cannot rm -rf protected path: .github",
+			reason:  "Cannot rm -rf protected path: .github. Load skill conventions for safe git workflow guidance.",
 		},
 		{
 			name:    "rm -rf node_modules",
 			command: "rm -rf node_modules",
 			blocked: true,
-			reason:  "Cannot rm -rf protected path: node_modules",
+			reason:  "Cannot rm -rf protected path: node_modules. Load skill conventions for safe git workflow guidance.",
 		},
 		{
 			name:    "rm -fr variant",
 			command: "rm -fr .git",
 			blocked: true,
-			reason:  "Cannot rm -rf protected path: .git",
+			reason:  "Cannot rm -rf protected path: .git. Load skill conventions for safe git workflow guidance.",
 		},
 
 		// Blocked: force push to main/master
@@ -157,13 +157,13 @@ func TestValidateCommand(t *testing.T) {
 			name:    "git push --force origin main",
 			command: "git push --force origin main",
 			blocked: true,
-			reason:  "Force push to main/master is blocked. Use --force-with-lease or push to a feature branch.",
+			reason:  "Force push to main/master is blocked. Use --force-with-lease or push to a feature branch. Load skill conventions for safe git workflow guidance.",
 		},
 		{
 			name:    "git push -f origin master",
 			command: "git push -f origin master",
 			blocked: true,
-			reason:  "Force push to main/master is blocked. Use --force-with-lease or push to a feature branch.",
+			reason:  "Force push to main/master is blocked. Use --force-with-lease or push to a feature branch. Load skill conventions for safe git workflow guidance.",
 		},
 		{
 			name:    "git push --force to feature branch allowed",
@@ -176,13 +176,13 @@ func TestValidateCommand(t *testing.T) {
 			name:    "git commit --no-verify",
 			command: "git commit -m 'test' --no-verify",
 			blocked: true,
-			reason:  "Skipping hooks with --no-verify is blocked. Pre-commit hooks exist for a reason.",
+			reason:  "Skipping hooks with --no-verify is blocked. Pre-commit hooks exist for a reason. Load skill conventions for safe git workflow guidance.",
 		},
 		{
 			name:    "git push --no-verify",
 			command: "git push --no-verify",
 			blocked: true,
-			reason:  "Skipping hooks with --no-verify is blocked. Pre-commit hooks exist for a reason.",
+			reason:  "Skipping hooks with --no-verify is blocked. Pre-commit hooks exist for a reason. Load skill conventions for safe git workflow guidance.",
 		},
 
 		// Blocked: reset --hard
@@ -190,13 +190,13 @@ func TestValidateCommand(t *testing.T) {
 			name:    "git reset --hard",
 			command: "git reset --hard HEAD~1",
 			blocked: true,
-			reason:  "git reset --hard is blocked. Use git stash or git checkout for safer alternatives.",
+			reason:  "git reset --hard is blocked. Use git stash or git checkout for safer alternatives. Load skill conventions for safe git workflow guidance.",
 		},
 		{
 			name:    "git reset --hard HEAD",
 			command: "git reset --hard HEAD",
 			blocked: true,
-			reason:  "git reset --hard is blocked. Use git stash or git checkout for safer alternatives.",
+			reason:  "git reset --hard is blocked. Use git stash or git checkout for safer alternatives. Load skill conventions for safe git workflow guidance.",
 		},
 		{
 			name:    "git reset --soft allowed",
@@ -209,13 +209,13 @@ func TestValidateCommand(t *testing.T) {
 			name:    "git clean -fd",
 			command: "git clean -fd",
 			blocked: true,
-			reason:  "git clean -fd is blocked on protected branches. Use git stash or manual cleanup.",
+			reason:  "git clean -fd is blocked on protected branches. Use git stash or manual cleanup. Load skill conventions for safe git workflow guidance.",
 		},
 		{
 			name:    "git clean -df variant",
 			command: "git clean -df",
 			blocked: true,
-			reason:  "git clean -fd is blocked on protected branches. Use git stash or manual cleanup.",
+			reason:  "git clean -fd is blocked on protected branches. Use git stash or manual cleanup. Load skill conventions for safe git workflow guidance.",
 		},
 		{
 			name:    "git clean -n allowed (dry run)",
@@ -429,6 +429,9 @@ func TestRunValidate_BlockRmRfGit(t *testing.T) {
 	if !bytes.Contains([]byte(result.HookSpecificOutput.PermissionDecisionReason), []byte(".git")) {
 		t.Errorf("Reason should mention .git, got: %q", result.HookSpecificOutput.PermissionDecisionReason)
 	}
+	if !bytes.Contains([]byte(result.HookSpecificOutput.PermissionDecisionReason), []byte("conventions")) {
+		t.Errorf("Reason should mention conventions, got: %q", result.HookSpecificOutput.PermissionDecisionReason)
+	}
 }
 
 func TestRunValidate_BlockForcePush(t *testing.T) {
@@ -469,6 +472,9 @@ func TestRunValidate_BlockForcePush(t *testing.T) {
 	}
 	if !bytes.Contains([]byte(result.HookSpecificOutput.PermissionDecisionReason), []byte("Force push")) {
 		t.Errorf("Reason should mention Force push, got: %q", result.HookSpecificOutput.PermissionDecisionReason)
+	}
+	if !bytes.Contains([]byte(result.HookSpecificOutput.PermissionDecisionReason), []byte("conventions")) {
+		t.Errorf("Reason should mention conventions, got: %q", result.HookSpecificOutput.PermissionDecisionReason)
 	}
 }
 
@@ -511,6 +517,9 @@ func TestRunValidate_BlockNoVerify(t *testing.T) {
 	if !bytes.Contains([]byte(result.HookSpecificOutput.PermissionDecisionReason), []byte("--no-verify")) {
 		t.Errorf("Reason should mention --no-verify, got: %q", result.HookSpecificOutput.PermissionDecisionReason)
 	}
+	if !bytes.Contains([]byte(result.HookSpecificOutput.PermissionDecisionReason), []byte("conventions")) {
+		t.Errorf("Reason should mention conventions, got: %q", result.HookSpecificOutput.PermissionDecisionReason)
+	}
 }
 
 func TestRunValidate_BlockResetHard(t *testing.T) {
@@ -552,6 +561,9 @@ func TestRunValidate_BlockResetHard(t *testing.T) {
 	if !bytes.Contains([]byte(result.HookSpecificOutput.PermissionDecisionReason), []byte("reset --hard")) {
 		t.Errorf("Reason should mention reset --hard, got: %q", result.HookSpecificOutput.PermissionDecisionReason)
 	}
+	if !bytes.Contains([]byte(result.HookSpecificOutput.PermissionDecisionReason), []byte("conventions")) {
+		t.Errorf("Reason should mention conventions, got: %q", result.HookSpecificOutput.PermissionDecisionReason)
+	}
 }
 
 func TestRunValidate_BlockCleanFd(t *testing.T) {
@@ -592,6 +604,9 @@ func TestRunValidate_BlockCleanFd(t *testing.T) {
 	}
 	if !bytes.Contains([]byte(result.HookSpecificOutput.PermissionDecisionReason), []byte("clean -fd")) {
 		t.Errorf("Reason should mention clean -fd, got: %q", result.HookSpecificOutput.PermissionDecisionReason)
+	}
+	if !bytes.Contains([]byte(result.HookSpecificOutput.PermissionDecisionReason), []byte("conventions")) {
+		t.Errorf("Reason should mention conventions, got: %q", result.HookSpecificOutput.PermissionDecisionReason)
 	}
 }
 
@@ -803,5 +818,8 @@ func TestValidate_StdinIntegration_BlockDangerousCommand(t *testing.T) {
 	}
 	if !bytes.Contains([]byte(result.HookSpecificOutput.PermissionDecisionReason), []byte(".git")) {
 		t.Errorf("Reason should mention .git, got: %q", result.HookSpecificOutput.PermissionDecisionReason)
+	}
+	if !bytes.Contains([]byte(result.HookSpecificOutput.PermissionDecisionReason), []byte("conventions")) {
+		t.Errorf("Reason should mention conventions, got: %q", result.HookSpecificOutput.PermissionDecisionReason)
 	}
 }

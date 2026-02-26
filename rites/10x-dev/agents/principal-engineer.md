@@ -25,6 +25,8 @@ color: green
 maxTurns: 250
 skills:
   - conventions
+  - guidance/standards
+  - guidance/file-verification
 memory: "project"
 ---
 
@@ -131,4 +133,4 @@ Ready for QA phase when:
 
 ## Related Skills
 
-doc-artifacts, standards, file-verification.
+doc-artifacts, standards, file-verification. Load `conventions` before git operations. Load `guidance/standards` for code conventions and tech stack decisions.

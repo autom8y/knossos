@@ -28,6 +28,8 @@ maxTurns: 250
 skills:
   - ecosystem-ref
   - conventions
+  - guidance/standards
+  - guidance/file-verification
 memory: "project"
 ---
 

@@ -133,10 +133,10 @@ func parseCommand(printer *output.Printer, toolInput string) string {
 	var input BashToolInput
 	if err := json.Unmarshal([]byte(toolInput), &input); err != nil {
 		// Try the map form
-		var mapInput map[string]interface{}
+		var mapInput map[string]any
 		if err2 := json.Unmarshal([]byte(toolInput), &mapInput); err2 != nil {
 			printer.VerboseLog("warn", "failed to parse tool input JSON",
-				map[string]interface{}{"error": err.Error(), "error2": err2.Error(), "input": toolInput})
+				map[string]any{"error": err.Error(), "error2": err2.Error(), "input": toolInput})
 			return ""
 		}
 		if cmd, ok := mapInput["command"].(string); ok {
@@ -159,29 +159,29 @@ func validateCommand(command string) (bool, string) {
 		for _, path := range protectedPaths {
 			// Check if the protected path appears after rm -rf
 			if strings.Contains(command, path) {
-				return true, "Cannot rm -rf protected path: " + strings.TrimSuffix(path, "/")
+				return true, "Cannot rm -rf protected path: " + strings.TrimSuffix(path, "/") + ". Load skill conventions for safe git workflow guidance."
 			}
 		}
 	}
 
 	// Check for force push to main/master
 	if forcePushMainPattern.MatchString(cmd) {
-		return true, "Force push to main/master is blocked. Use --force-with-lease or push to a feature branch."
+		return true, "Force push to main/master is blocked. Use --force-with-lease or push to a feature branch. Load skill conventions for safe git workflow guidance."
 	}
 
 	// Check for --no-verify on commits or pushes
 	if noVerifyPattern.MatchString(cmd) {
-		return true, "Skipping hooks with --no-verify is blocked. Pre-commit hooks exist for a reason."
+		return true, "Skipping hooks with --no-verify is blocked. Pre-commit hooks exist for a reason. Load skill conventions for safe git workflow guidance."
 	}
 
 	// Check for git reset --hard
 	if resetHardPattern.MatchString(cmd) {
-		return true, "git reset --hard is blocked. Use git stash or git checkout for safer alternatives."
+		return true, "git reset --hard is blocked. Use git stash or git checkout for safer alternatives. Load skill conventions for safe git workflow guidance."
 	}
 
 	// Check for git clean -fd
 	if cleanFdPattern.MatchString(cmd) {
-		return true, "git clean -fd is blocked on protected branches. Use git stash or manual cleanup."
+		return true, "git clean -fd is blocked on protected branches. Use git stash or manual cleanup. Load skill conventions for safe git workflow guidance."
 	}
 
 	return false, ""
