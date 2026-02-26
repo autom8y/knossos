@@ -7,9 +7,25 @@ description: "Observation criteria for codebase scar tissue knowledge capture. U
 
 > The theoros observes and documents codebase scar tissue -- producing a knowledge reference that catalogs past failures, their fixes, and the defensive patterns they spawned, enabling any CC agent to avoid re-introducing known failure modes.
 
+## Language Detection
+
+Before beginning observation, identify the primary language(s) in the project:
+- Check for: `go.mod` (Go), `package.json` (JS/TS), `pyproject.toml`/`setup.py` (Python),
+  `Cargo.toml` (Rust), `pom.xml`/`build.gradle` (Java/Kotlin)
+- Adapt scope targets, evidence collection, and tooling references accordingly
+
+### Scope Adaptation
+
+| Criteria Element | Go | TypeScript | Python |
+|---|---|---|---|
+| Source directories | `cmd/`, `internal/` | `src/`, `lib/` | `src/`, `app/` |
+| Test files | `*_test.go` | `*.test.ts`, `*.spec.ts` | `test_*.py`, `*_test.py` |
+| Code markers | `CRITICAL`, `HACK`, `FIXME`, `BUG-`, `SCAR-`, `DEF-`, `WORKAROUND` | same markers apply | same markers apply |
+| Git evidence | `git log --oneline` filtered for fix/bug/regression/revert/hotfix | same command | same command |
+
 ## Scope
 
-**Target files**: `./cmd/`, `./internal/`, root-level Go files, `*_test.go`, git commit history
+**Target files**: Primary source directories, test files, git commit history (see Scope Adaptation table)
 
 **Observation focus**: Past bugs, regressions, defensive code born from production failures, fix locations, and the failure mode categories they represent. Evidence from git log (fix/bug/revert commits), code comments (CRITICAL, HACK, FIXME, BUG-, SCAR-, DEF-, WORKAROUND markers), and regression test names.
 
@@ -131,4 +147,4 @@ Final grade is weighted average of all criteria midpoint scores (see `schemas/gr
 
 - [Pinakes INDEX](../INDEX.lego.md) -- Full audit system documentation
 - [architecture-criteria](architecture.lego.md) -- Codebase architecture knowledge capture
-- [defensive-patterns-criteria](defensive-patterns.lego.md) -- Guard inventory, risk zones, assertion patterns
+- [design-constraints-criteria](design-constraints.lego.md) -- Design constraints, load-bearing code, risk zone mapping

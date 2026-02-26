@@ -7,11 +7,28 @@ description: "Observation criteria for codebase architecture knowledge capture. 
 
 > The theoros observes and documents codebase architecture -- producing a knowledge reference that enables any CC agent to navigate the source code with zero prior context.
 
+## Language Detection
+
+Before beginning observation, identify the primary language(s) in the project:
+- Check for: `go.mod` (Go), `package.json` (JS/TS), `pyproject.toml`/`setup.py` (Python),
+  `Cargo.toml` (Rust), `pom.xml`/`build.gradle` (Java/Kotlin)
+- Adapt scope targets, evidence collection, and tooling references accordingly
+
+### Scope Adaptation
+
+| Criteria Element | Go | TypeScript | Python |
+|---|---|---|---|
+| Source directories | `cmd/`, `internal/` | `src/`, `lib/` | `src/`, `app/` |
+| Package/module unit | package (directory) | module (file or directory) | module (file) or package (directory) |
+| Dependency manifest | `go.mod` | `package.json` | `pyproject.toml` |
+| Entry point | `cmd/*/main.go` | `src/index.ts` | `__main__.py`, `app.py` |
+| Layer model | `cmd/` → `internal/cmd/` → `internal/*` | `app/` → `lib/` → `utils/` | `app/` → `core/` → `utils/` |
+
 ## Scope
 
-**Target files**: `./cmd/`, `./internal/`, root-level Go files (`*.go`, `go.mod`, `go.sum`)
+**Target files**: Primary source directories (see Scope Adaptation table), root-level config files
 
-**Observation focus**: Source code structure, package organization, layer boundaries, and data flow paths that a new CC agent needs to understand before making changes.
+**Observation focus**: Source code structure, package/module organization, layer boundaries, and data flow paths that a new CC agent needs to understand before making changes.
 
 **NOTE**: This domain uses knowledge-capture grading. Instead of grading compliance ratios ("90% of packages have X"), grade the COMPLETENESS of the knowledge reference produced. A = comprehensive documentation of the codebase with evidence. F = incomplete or inaccurate documentation.
 

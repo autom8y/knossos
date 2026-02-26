@@ -7,9 +7,26 @@ description: "Observation criteria for codebase design constraint knowledge capt
 
 > The theoros observes and documents codebase design constraints -- producing a knowledge reference that catalogs structural tensions, load-bearing jank, and abstraction boundaries, enabling any CC agent to work WITH constraints rather than reflexively removing them.
 
+## Language Detection
+
+Before beginning observation, identify the primary language(s) in the project:
+- Check for: `go.mod` (Go), `package.json` (JS/TS), `pyproject.toml`/`setup.py` (Python),
+  `Cargo.toml` (Rust), `pom.xml`/`build.gradle` (Java/Kotlin)
+- Adapt scope targets, evidence collection, and tooling references accordingly
+
+### Scope Adaptation
+
+| Criteria Element | Go | TypeScript | Python |
+|---|---|---|---|
+| Source directories | `cmd/`, `internal/` | `src/`, `lib/` | `src/`, `app/` |
+| Dependency manifest | `go.mod` | `package.json` | `pyproject.toml` |
+| Import graph tool | `go list -json ./...` | `ts-prune`, `dependency-cruiser` | `pydeps`, `importlab` |
+| Deprecated markers | `// Deprecated:` godoc convention | `@deprecated` JSDoc | `warnings.warn(DeprecationWarning)` |
+| Layering violations | import direction in `go.mod` graph | circular imports in bundler | circular imports via `importlab` |
+
 ## Scope
 
-**Target files**: `./cmd/`, `./internal/`, root-level Go files, import graph, backward-compatibility markers
+**Target files**: Primary source directories, import graph, backward-compatibility markers (see Scope Adaptation table)
 
 **Observation focus**: Structural conflicts, naming mismatches, layering violations, under/over-engineering, missing/premature abstractions, and load-bearing jank that agents must navigate rather than "fix." Evidence from type hierarchies, import graphs, naming audits, deprecated markers, and dual-system patterns.
 
@@ -17,7 +34,7 @@ description: "Observation criteria for codebase design constraint knowledge capt
 
 ## Criteria
 
-### Criterion 1: Tension Catalog Completeness (weight: 30%)
+### Criterion 1: Tension Catalog Completeness (weight: 27%)
 
 **What to observe**: Exhaustive identification of structural tensions in the codebase -- naming mismatches, layering violations, under/over-engineering, and missing/premature abstractions. The knowledge reference must catalog every tension a CC agent might stumble into.
 
@@ -38,7 +55,7 @@ description: "Observation criteria for codebase design constraint knowledge capt
 
 ---
 
-### Criterion 2: Trade-off Documentation (weight: 25%)
+### Criterion 2: Trade-off Documentation (weight: 22%)
 
 **What to observe**: Explicit documentation of design trade-offs -- what was chosen, what was rejected, and why each tension persists. The knowledge reference must explain why the current state is what it is, not just that a tension exists.
 
@@ -58,7 +75,7 @@ description: "Observation criteria for codebase design constraint knowledge capt
 
 ---
 
-### Criterion 3: Abstraction Gap Mapping (weight: 20%)
+### Criterion 3: Abstraction Gap Mapping (weight: 18%)
 
 **What to observe**: Missing abstractions (duplicated logic that should be unified) and premature abstractions (generalizations that serve only one use case). The knowledge reference must map where abstraction failures create maintenance burden or hidden coupling.
 
@@ -78,7 +95,7 @@ description: "Observation criteria for codebase design constraint knowledge capt
 
 ---
 
-### Criterion 4: Load-Bearing Code Identification (weight: 15%)
+### Criterion 4: Load-Bearing Code Identification (weight: 13%)
 
 **What to observe**: Code that MUST NOT be refactored without coordinated multi-file effort -- load-bearing jank with multiple dependents, partial fixes that would be worse than the status quo, and code that has survived prior refactoring attempts because the cost is too high.
 
@@ -118,19 +135,40 @@ description: "Observation criteria for codebase design constraint knowledge capt
 
 ---
 
+### Criterion 6: Risk Zone Mapping (weight: 10%)
+
+**What to observe**: Identification of unguarded areas where defenses are missing but should exist. The knowledge reference must document where the safety net has holes so agents do not introduce new failures in these areas.
+
+**Evidence to collect**:
+- Identify code paths where validation is absent but caller-responsibility is assumed (look for comments like "caller must ensure", "assumes valid", "precondition:")
+- Scan for silent fallbacks that swallow errors or use zero-values without logging
+- Note input paths from external sources (CLI flags, config files, stdin, environment variables) that lack validation
+- Record RISK-NNN entries: location, type of missing guard, evidence of missing protection, and recommended guard
+- Cross-reference each RISK-NNN entry to any TENSION-NNN entries it relates to (a risk zone often corresponds to a known tension)
+
+| Grade | Threshold | Evidence Required |
+|-------|-----------|-------------------|
+| A | 90-100% completeness | All significant risk zones documented with RISK-NNN entries. Each entry includes location, missing guard type, evidence, and recommended guard. Cross-references to related TENSION-NNN entries provided. Silent fallbacks cataloged. |
+| B | 80-89% completeness | Major risk zones identified. Most entries have location and missing guard type. Cross-references present for major risk zones. Minor gaps in silent fallback cataloging. |
+| C | 70-79% completeness | Some risk zones noted but coverage is incomplete. Entries lack recommended guards. Cross-references to tensions not documented. |
+| D | 60-69% completeness | Risk zones mentioned vaguely without specific locations or evidence. No RISK-NNN entries. |
+| F | < 60% completeness | Risk zones not documented or only trivially identified. |
+
+---
+
 ## Grading Calculation
 
 Final grade is weighted average of all criteria midpoint scores (see `schemas/grading.lego.md`). Example:
-- Tension Catalog: A (midpoint 95%) x 30% = 28.5
-- Trade-off Docs: B (midpoint 85%) x 25% = 21.25
-- Abstraction Gaps: A (midpoint 95%) x 20% = 19.0
-- Load-Bearing Code: B (midpoint 85%) x 15% = 12.75
+- Tension Catalog: A (midpoint 95%) x 27% = 25.65
+- Trade-off Docs: B (midpoint 85%) x 22% = 18.7
+- Abstraction Gaps: A (midpoint 95%) x 18% = 17.1
+- Load-Bearing Code: B (midpoint 85%) x 13% = 11.05
 - Evolution Constraints: B (midpoint 85%) x 10% = 8.5
-- **Total: 90.0 -> A**
+- Risk Zone Mapping: B (midpoint 85%) x 10% = 8.5
+- **Total: 89.5 -> B**
 
 ## Related
 
 - [Pinakes INDEX](../INDEX.lego.md) -- Full audit system documentation
 - [architecture-criteria](architecture.lego.md) -- Codebase architecture knowledge capture
 - [scar-tissue-criteria](scar-tissue.lego.md) -- Scar tissue knowledge capture (failure history, regressions)
-- [defensive-patterns-criteria](defensive-patterns.lego.md) -- Defensive pattern knowledge capture (guards, risk zones)
