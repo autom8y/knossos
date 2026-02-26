@@ -24,7 +24,8 @@ var knossosOnlyFields = map[string]bool{
 	"schema_version":       true,
 	"write-guard":          true,
 	"aliases":              true,
-	"skill_policy_exclude": true,
+	"skill_policy_exclude":  true,
+	"skill_policy_override": true,
 }
 
 // TransformContext bundles all policy inputs for agent content transformation.
@@ -65,7 +66,7 @@ func transformAgentContent(content []byte, ctx *TransformContext) ([]byte, error
 
 	// Apply skill policies (step 3.5 — after tools resolved from agent_defaults)
 	if len(ctx.SkillPolicies) > 0 {
-		fmMap = applySkillPolicies(fmMap, ctx.SkillPolicies)
+		fmMap, body = applySkillPolicies(fmMap, body, ctx.SkillPolicies)
 	}
 
 	// Capture write-guard value before stripping

@@ -123,7 +123,7 @@ func TestApplySkillPolicies_InjectMatchesAll(t *testing.T) {
 	policies := []SkillPolicy{
 		{Skill: "new-skill", Mode: "inject"},
 	}
-	result := applySkillPolicies(fm, policies)
+	result, _ := applySkillPolicies(fm, nil, policies)
 	skills := toStringSlice(result["skills"])
 	// new-skill should be prepended
 	if len(skills) != 2 || skills[0] != "new-skill" || skills[1] != "existing-skill" {
@@ -139,7 +139,7 @@ func TestApplySkillPolicies_InjectRequiresTool_Missing(t *testing.T) {
 	policies := []SkillPolicy{
 		{Skill: "bash-skill", Mode: "inject", RequiresTools: []string{"Bash"}},
 	}
-	result := applySkillPolicies(fm, policies)
+	result, _ := applySkillPolicies(fm, nil, policies)
 	skills := toStringSlice(result["skills"])
 	if len(skills) != 0 {
 		t.Errorf("expected no skills injected, got %v", skills)
@@ -154,7 +154,7 @@ func TestApplySkillPolicies_InjectRequiresTool_Present(t *testing.T) {
 	policies := []SkillPolicy{
 		{Skill: "bash-skill", Mode: "inject", RequiresTools: []string{"Bash"}},
 	}
-	result := applySkillPolicies(fm, policies)
+	result, _ := applySkillPolicies(fm, nil, policies)
 	skills := toStringSlice(result["skills"])
 	if len(skills) != 1 || skills[0] != "bash-skill" {
 		t.Errorf("expected [bash-skill], got %v", skills)
@@ -169,7 +169,7 @@ func TestApplySkillPolicies_RequiresNone_Blocked(t *testing.T) {
 	policies := []SkillPolicy{
 		{Skill: "non-bash-skill", Mode: "inject", RequiresNone: []string{"Bash"}},
 	}
-	result := applySkillPolicies(fm, policies)
+	result, _ := applySkillPolicies(fm, nil, policies)
 	skills := toStringSlice(result["skills"])
 	if len(skills) != 0 {
 		t.Errorf("expected no skills (blocked by requires_none), got %v", skills)
@@ -184,7 +184,7 @@ func TestApplySkillPolicies_RequiresNone_NotBlocked(t *testing.T) {
 	policies := []SkillPolicy{
 		{Skill: "non-bash-skill", Mode: "inject", RequiresNone: []string{"Bash"}},
 	}
-	result := applySkillPolicies(fm, policies)
+	result, _ := applySkillPolicies(fm, nil, policies)
 	skills := toStringSlice(result["skills"])
 	if len(skills) != 1 || skills[0] != "non-bash-skill" {
 		t.Errorf("expected [non-bash-skill], got %v", skills)
@@ -199,7 +199,7 @@ func TestApplySkillPolicies_ExcludeSpecific(t *testing.T) {
 		{Skill: "excluded-skill", Mode: "inject"},
 		{Skill: "other-skill", Mode: "inject"},
 	}
-	result := applySkillPolicies(fm, policies)
+	result, _ := applySkillPolicies(fm, nil, policies)
 	skills := toStringSlice(result["skills"])
 	if len(skills) != 1 || skills[0] != "other-skill" {
 		t.Errorf("expected [other-skill], got %v", skills)
@@ -214,7 +214,7 @@ func TestApplySkillPolicies_ExcludeAll(t *testing.T) {
 	policies := []SkillPolicy{
 		{Skill: "injected-skill", Mode: "inject"},
 	}
-	result := applySkillPolicies(fm, policies)
+	result, _ := applySkillPolicies(fm, nil, policies)
 	skills := toStringSlice(result["skills"])
 	// Only the original agent skill should remain; nothing injected
 	if len(skills) != 1 || skills[0] != "agent-skill" {
@@ -228,7 +228,7 @@ func TestApplySkillPolicies_EmptyRequiresTools_MatchesAll(t *testing.T) {
 	policies := []SkillPolicy{
 		{Skill: "universal-skill", Mode: "inject"},
 	}
-	result := applySkillPolicies(fm, policies)
+	result, _ := applySkillPolicies(fm, nil, policies)
 	skills := toStringSlice(result["skills"])
 	if len(skills) != 1 || skills[0] != "universal-skill" {
 		t.Errorf("expected [universal-skill], got %v", skills)
@@ -243,7 +243,7 @@ func TestApplySkillPolicies_Dedup_NoDouble(t *testing.T) {
 	policies := []SkillPolicy{
 		{Skill: "ecosystem-ref", Mode: "inject"},
 	}
-	result := applySkillPolicies(fm, policies)
+	result, _ := applySkillPolicies(fm, nil, policies)
 	skills := toStringSlice(result["skills"])
 	if len(skills) != 1 {
 		t.Errorf("expected dedup to 1 skill, got %v", skills)
@@ -259,7 +259,7 @@ func TestApplySkillPolicies_MultipleOrdering(t *testing.T) {
 		{Skill: "first-injected", Mode: "inject"},
 		{Skill: "second-injected", Mode: "inject"},
 	}
-	result := applySkillPolicies(fm, policies)
+	result, _ := applySkillPolicies(fm, nil, policies)
 	skills := toStringSlice(result["skills"])
 	// Expected: first-injected, second-injected, agent-skill
 	expected := []string{"first-injected", "second-injected", "agent-skill"}
@@ -268,16 +268,62 @@ func TestApplySkillPolicies_MultipleOrdering(t *testing.T) {
 	}
 }
 
-func TestApplySkillPolicies_ReferenceModeSkipped(t *testing.T) {
-	// Reference mode policies are skipped in Sprint 2
+func TestApplySkillPolicies_ReferenceMode_AddsComment(t *testing.T) {
+	// Reference mode prepends an HTML comment to the body
+	fm := map[string]interface{}{}
+	body := []byte("# Agent Body\n")
+	policies := []SkillPolicy{
+		{Skill: "conventions", Mode: "reference"},
+	}
+	_, resultBody := applySkillPolicies(fm, body, policies)
+	bodyStr := string(resultBody)
+	expected := "<!-- skill_policies: conventions (invoke via Skill tool when needed) -->\n# Agent Body\n"
+	if bodyStr != expected {
+		t.Errorf("expected body %q, got %q", expected, bodyStr)
+	}
+}
+
+func TestApplySkillPolicies_ReferenceMode_ExactFormat(t *testing.T) {
+	// Verify the exact comment format produced by reference mode
 	fm := map[string]interface{}{}
 	policies := []SkillPolicy{
-		{Skill: "ref-skill", Mode: "reference"},
+		{Skill: "ecosystem-ref", Mode: "reference"},
 	}
-	result := applySkillPolicies(fm, policies)
+	_, resultBody := applySkillPolicies(fm, nil, policies)
+	bodyStr := string(resultBody)
+	expectedLine := "<!-- skill_policies: ecosystem-ref (invoke via Skill tool when needed) -->\n"
+	if bodyStr != expectedLine {
+		t.Errorf("expected exact comment line %q, got %q", expectedLine, bodyStr)
+	}
+}
+
+func TestApplySkillPolicies_DeadReferenceGuard_SkillToolDisallowed(t *testing.T) {
+	// Agent has Skill in disallowedTools — reference comment must NOT be added
+	fm := map[string]interface{}{
+		"disallowedTools": []interface{}{"Skill"},
+	}
+	body := []byte("# Agent Body\n")
+	policies := []SkillPolicy{
+		{Skill: "conventions", Mode: "reference"},
+	}
+	_, resultBody := applySkillPolicies(fm, body, policies)
+	if string(resultBody) != "# Agent Body\n" {
+		t.Errorf("expected body unchanged (dead reference guard), got %q", string(resultBody))
+	}
+}
+
+func TestApplySkillPolicies_DeadReferenceGuard_InjectNotAffected(t *testing.T) {
+	// Agent has Skill in disallowedTools — inject mode is NOT affected by dead reference guard
+	fm := map[string]interface{}{
+		"disallowedTools": []interface{}{"Skill"},
+	}
+	policies := []SkillPolicy{
+		{Skill: "conventions", Mode: "inject"},
+	}
+	result, _ := applySkillPolicies(fm, nil, policies)
 	skills := toStringSlice(result["skills"])
-	if len(skills) != 0 {
-		t.Errorf("expected no skills injected for reference mode, got %v", skills)
+	if len(skills) != 1 || skills[0] != "conventions" {
+		t.Errorf("expected [conventions] injected despite disallowedTools, got %v", skills)
 	}
 }
 
@@ -285,7 +331,7 @@ func TestApplySkillPolicies_NoopWhenEmpty(t *testing.T) {
 	fm := map[string]interface{}{
 		"skills": []interface{}{"existing"},
 	}
-	result := applySkillPolicies(fm, nil)
+	result, _ := applySkillPolicies(fm, nil, nil)
 	skills := toStringSlice(result["skills"])
 	if len(skills) != 1 || skills[0] != "existing" {
 		t.Errorf("expected unchanged [existing], got %v", skills)
@@ -300,7 +346,7 @@ func TestApplySkillPolicies_CommaSeperatedTools(t *testing.T) {
 	policies := []SkillPolicy{
 		{Skill: "bash-skill", Mode: "inject", RequiresTools: []string{"Bash"}},
 	}
-	result := applySkillPolicies(fm, policies)
+	result, _ := applySkillPolicies(fm, nil, policies)
 	skills := toStringSlice(result["skills"])
 	if len(skills) != 1 || skills[0] != "bash-skill" {
 		t.Errorf("expected [bash-skill] for comma-separated tools, got %v", skills)
@@ -335,5 +381,117 @@ func TestParseToolsSet_Missing(t *testing.T) {
 	set := parseToolsSet(fm, "tools")
 	if set != nil {
 		t.Errorf("expected nil for missing field, got %v", set)
+	}
+}
+
+// --- Agent override tests ---
+
+func TestApplySkillPolicies_Override_ReferenceToInject(t *testing.T) {
+	// Policy is reference, agent override says inject → skill added to skills:, no comment
+	fm := map[string]interface{}{
+		"skill_policy_override": []interface{}{
+			map[string]interface{}{"skill": "conventions", "mode": "inject"},
+		},
+	}
+	body := []byte("# Body\n")
+	policies := []SkillPolicy{
+		{Skill: "conventions", Mode: "reference"},
+	}
+	result, resultBody := applySkillPolicies(fm, body, policies)
+	skills := toStringSlice(result["skills"])
+	if len(skills) != 1 || skills[0] != "conventions" {
+		t.Errorf("expected [conventions] injected via override, got %v", skills)
+	}
+	// No comment should have been added
+	if string(resultBody) != "# Body\n" {
+		t.Errorf("expected body unchanged (no reference comment), got %q", string(resultBody))
+	}
+}
+
+func TestApplySkillPolicies_Override_InjectToReference(t *testing.T) {
+	// Policy is inject, agent override says reference → comment added, not in skills:
+	fm := map[string]interface{}{
+		"skill_policy_override": []interface{}{
+			map[string]interface{}{"skill": "conventions", "mode": "reference"},
+		},
+	}
+	body := []byte("# Body\n")
+	policies := []SkillPolicy{
+		{Skill: "conventions", Mode: "inject"},
+	}
+	result, resultBody := applySkillPolicies(fm, body, policies)
+	skills := toStringSlice(result["skills"])
+	if len(skills) != 0 {
+		t.Errorf("expected no skills in frontmatter (overridden to reference), got %v", skills)
+	}
+	expectedBody := "<!-- skill_policies: conventions (invoke via Skill tool when needed) -->\n# Body\n"
+	if string(resultBody) != expectedBody {
+		t.Errorf("expected reference comment in body, got %q", string(resultBody))
+	}
+}
+
+func TestApplySkillPolicies_ExcludeWinsOverOverride(t *testing.T) {
+	// Agent both excludes and overrides same skill — exclude wins, skill skipped entirely
+	fm := map[string]interface{}{
+		"skill_policy_exclude": []interface{}{"conventions"},
+		"skill_policy_override": []interface{}{
+			map[string]interface{}{"skill": "conventions", "mode": "inject"},
+		},
+	}
+	body := []byte("# Body\n")
+	policies := []SkillPolicy{
+		{Skill: "conventions", Mode: "reference"},
+	}
+	result, resultBody := applySkillPolicies(fm, body, policies)
+	skills := toStringSlice(result["skills"])
+	if len(skills) != 0 {
+		t.Errorf("expected no skills (exclude wins over override), got %v", skills)
+	}
+	if string(resultBody) != "# Body\n" {
+		t.Errorf("expected body unchanged (excluded), got %q", string(resultBody))
+	}
+}
+
+func TestApplySkillPolicies_MixedModes(t *testing.T) {
+	// Some policies inject, some reference → correct outputs for each
+	fm := map[string]interface{}{}
+	body := []byte("# Body\n")
+	policies := []SkillPolicy{
+		{Skill: "inject-skill", Mode: "inject"},
+		{Skill: "ref-skill", Mode: "reference"},
+		{Skill: "another-inject", Mode: "inject"},
+	}
+	result, resultBody := applySkillPolicies(fm, body, policies)
+
+	// inject-skill and another-inject should be in frontmatter
+	skills := toStringSlice(result["skills"])
+	expectedSkills := []string{"inject-skill", "another-inject"}
+	if !reflect.DeepEqual(skills, expectedSkills) {
+		t.Errorf("expected injected skills %v, got %v", expectedSkills, skills)
+	}
+
+	// ref-skill should appear as HTML comment in body
+	bodyStr := string(resultBody)
+	expectedComment := "<!-- skill_policies: ref-skill (invoke via Skill tool when needed) -->\n"
+	if bodyStr != expectedComment+"# Body\n" {
+		t.Errorf("expected body with ref comment %q, got %q", expectedComment+"# Body\n", bodyStr)
+	}
+}
+
+func TestApplySkillPolicies_MultipleReferenceComments_Order(t *testing.T) {
+	// Multiple reference policies — all comments prepended in policy order
+	fm := map[string]interface{}{}
+	body := []byte("# Body\n")
+	policies := []SkillPolicy{
+		{Skill: "first-ref", Mode: "reference"},
+		{Skill: "second-ref", Mode: "reference"},
+	}
+	_, resultBody := applySkillPolicies(fm, body, policies)
+	bodyStr := string(resultBody)
+	expected := "<!-- skill_policies: first-ref (invoke via Skill tool when needed) -->\n" +
+		"<!-- skill_policies: second-ref (invoke via Skill tool when needed) -->\n" +
+		"# Body\n"
+	if bodyStr != expected {
+		t.Errorf("expected two reference comments in order, got %q", bodyStr)
 	}
 }

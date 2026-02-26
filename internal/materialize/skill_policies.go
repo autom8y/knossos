@@ -51,39 +51,52 @@ func MergeSkillPolicies(shared, rite []SkillPolicy) []SkillPolicy {
 }
 
 // applySkillPolicies evaluates skill policies against a single agent's frontmatter map
-// and injects matching skills. For Sprint 2, only mode:"inject" is handled.
-// mode:"reference" policies are skipped (implemented in Sprint 3).
+// and applies matching skills. Supports two modes:
+//   - inject: adds skill to fmMap["skills"] (prepended before agent-declared skills)
+//   - reference: prepends an HTML comment to body directing agent to invoke via Skill tool
 //
-// Injection order: policy-injected skills are prepended BEFORE agent-declared skills.
-// Deduplication preserves first-occurrence order.
-func applySkillPolicies(fmMap map[string]interface{}, policies []SkillPolicy) map[string]interface{} {
+// Dead reference guard: if mode is "reference" and the agent has "Skill" in
+// disallowedTools, the reference comment is silently skipped (agent cannot use Skill tool).
+//
+// Agent overrides: skill_policy_override frontmatter field allows per-agent mode overrides.
+// If an agent overrides a policy's mode, the override mode is used instead.
+// Exclude always wins over override (excluded skills are never applied).
+//
+// Returns the modified fmMap AND the modified body.
+func applySkillPolicies(fmMap map[string]interface{}, body []byte, policies []SkillPolicy) (map[string]interface{}, []byte) {
 	if len(policies) == 0 {
-		return fmMap
+		return fmMap, body
 	}
 
 	// Parse skill_policy_exclude directive
 	excludeAll, excludeSet := parseSkillPolicyExclude(fmMap)
 	if excludeAll {
-		return fmMap
+		return fmMap, body
 	}
 
 	// Build tools set from agent frontmatter (post agent_defaults merge)
 	toolsSet := parseToolsSet(fmMap, "tools")
 
-	// Build disallowedTools set for requires_none matching
+	// Build disallowedTools set for requires_none matching and dead reference guard
 	disallowedSet := parseToolsSet(fmMap, "disallowedTools")
 
-	// Collect skills to inject (policy order = injection order)
+	// Parse agent-level overrides: skill_policy_override: [{skill: foo, mode: inject}]
+	overrideMap := parseSkillPolicyOverride(fmMap)
+
+	// Collect skills to inject and reference comments to prepend
 	toInject := make([]string, 0, len(policies))
+	toReference := make([]string, 0, len(policies))
+
 	for _, policy := range policies {
-		// Only handle inject mode in this sprint
-		if policy.Mode != "inject" {
+		// Exclude wins over everything — skip entirely
+		if excludeSet[policy.Skill] {
 			continue
 		}
 
-		// Skip if this skill is explicitly excluded
-		if excludeSet[policy.Skill] {
-			continue
+		// Determine effective mode: agent override wins over policy mode
+		effectiveMode := policy.Mode
+		if override, hasOverride := overrideMap[policy.Skill]; hasOverride {
+			effectiveMode = override
 		}
 
 		// requires_tools: skip if agent lacks ANY required tool
@@ -114,24 +127,78 @@ func applySkillPolicies(fmMap map[string]interface{}, policies []SkillPolicy) ma
 			}
 		}
 
-		toInject = append(toInject, policy.Skill)
+		switch effectiveMode {
+		case "inject":
+			toInject = append(toInject, policy.Skill)
+		case "reference":
+			// Dead reference guard: if agent cannot use Skill tool, skip silently
+			if disallowedSet["Skill"] {
+				continue
+			}
+			toReference = append(toReference, policy.Skill)
+		}
 	}
 
-	if len(toInject) == 0 {
-		return fmMap
+	// Apply inject: prepend policy skills before agent-declared skills, deduplicated
+	if len(toInject) > 0 {
+		agentSkills := toStringSlice(fmMap["skills"])
+		combined := make([]string, 0, len(toInject)+len(agentSkills))
+		combined = append(combined, toInject...)
+		combined = append(combined, agentSkills...)
+		fmMap["skills"] = toInterfaceSlice(dedup(combined))
 	}
 
-	// Build merged skills: policy-injected BEFORE agent-declared, deduplicated
-	agentSkills := toStringSlice(fmMap["skills"])
+	// Apply reference: prepend HTML comments to body, one per skill
+	if len(toReference) > 0 {
+		var commentLines []byte
+		for _, skillName := range toReference {
+			line := "<!-- skill_policies: " + skillName + " (invoke via Skill tool when needed) -->\n"
+			commentLines = append(commentLines, []byte(line)...)
+		}
+		// Prepend comments before existing body
+		body = append(commentLines, body...)
+	}
 
-	// Combine: injected first, then agent-declared, dedup
-	combined := make([]string, 0, len(toInject)+len(agentSkills))
-	combined = append(combined, toInject...)
-	combined = append(combined, agentSkills...)
-	deduplicated := dedup(combined)
+	return fmMap, body
+}
 
-	fmMap["skills"] = toInterfaceSlice(deduplicated)
-	return fmMap
+// parseSkillPolicyOverride reads the skill_policy_override field from the frontmatter map.
+// Returns a map of skill-name → override-mode for O(1) lookup during policy evaluation.
+// The field is expected to be a list of {skill: name, mode: mode} objects.
+func parseSkillPolicyOverride(fmMap map[string]interface{}) map[string]string {
+	val, ok := fmMap["skill_policy_override"]
+	if !ok {
+		return nil
+	}
+
+	// Expected YAML structure: list of maps with "skill" and "mode" keys
+	items, ok := val.([]interface{})
+	if !ok {
+		return nil
+	}
+
+	overrides := make(map[string]string, len(items))
+	for _, item := range items {
+		entry, ok := item.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		skillVal, hasSkill := entry["skill"]
+		modeVal, hasMode := entry["mode"]
+		if !hasSkill || !hasMode {
+			continue
+		}
+		skillName, ok1 := skillVal.(string)
+		modeName, ok2 := modeVal.(string)
+		if ok1 && ok2 && skillName != "" && modeName != "" {
+			overrides[skillName] = modeName
+		}
+	}
+
+	if len(overrides) == 0 {
+		return nil
+	}
+	return overrides
 }
 
 // parseSkillPolicyExclude reads the skill_policy_exclude field from the frontmatter map.
