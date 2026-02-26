@@ -1,7 +1,7 @@
 name: forge
 version: "1.0.0"
 workflow_type: sequential
-description: Agent pantheon creation lifecycle (Design → Prompts → Workflow → Platform → Catalog → Validation)
+description: Agent pantheon creation lifecycle (Design → [Archaeology] → Prompts → Workflow → Platform → Catalog → Validation)
 
 entry_point:
   agent: agent-designer
@@ -13,7 +13,13 @@ phases:
   - name: design
     agent: agent-designer
     produces: rite-spec
+    next: archaeology
+
+  - name: archaeology
+    agent: domain-forensics
+    produces: prompt-fuel
     next: prompts
+    condition: "deep == true"
 
   - name: prompts
     agent: prompt-architect
@@ -48,10 +54,10 @@ complexity_levels:
     phases: [design, prompts, validation]
   - name: MODULE
     scope: "New rite with 3-5 agents"
-    phases: [design, prompts, workflow, platform, catalog, validation]
+    phases: [design, archaeology, prompts, workflow, platform, catalog, validation]
   - name: SYSTEM
     scope: "Major rite redesign or cross-rite refactor"
-    phases: [design, prompts, workflow, platform, catalog, validation]
+    phases: [design, archaeology, prompts, workflow, platform, catalog, validation]
 
 # Agent roles for command mapping:
 # /forge           → agent-designer (full pipeline)
@@ -86,6 +92,20 @@ back_routes:
     target_agent: workflow-engineer
     requires_user_confirmation: false
     condition: "Failure is implementation bug"
+
+  - source_phase: prompts
+    trigger: "insufficient_domain_knowledge"
+    target_phase: archaeology
+    target_agent: domain-forensics
+    requires_user_confirmation: false
+    condition: "Prompt Architect cannot find CRITICAL coverage for an agent role"
+
+  - source_phase: validation
+    trigger: "fail(scar_coverage)"
+    target_phase: archaeology
+    target_agent: domain-forensics
+    requires_user_confirmation: true
+    condition: "Eval finds agent prompts missing critical scar tissue"
 
   - source_phase: workflow
     trigger: "design_conflict"

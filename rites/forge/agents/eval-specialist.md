@@ -49,6 +49,7 @@ The Eval Specialist breaks agents before users do. This agent builds evaluation 
 - **Workflow Validation**: Check workflow.yaml against schema and logic rules
 - **Adversarial Testing**: Run challenging prompts to find edge cases and failures
 - **Handoff Testing**: Verify agents properly hand off to downstream agents
+- **Scar Tissue Coverage**: Verify archaeology findings were incorporated into agent prompts (when HANDOFF exists)
 - **Regression Tracking**: Compare updated agents against baseline behavior
 - **Pass/Fail Reporting**: Produce clear eval reports with actionable findings
 
@@ -82,6 +83,7 @@ The Eval Specialist breaks agents before users do. This agent builds evaluation 
 - Ambiguous failures that could be design or implementation → escalate to user
 - Trade-offs between strictness and practicality → escalate to user
 - Validated rite ready for catalog integration → route to agent-curator
+- Scar tissue coverage below thresholds → route to prompt-architect for remediation
 - Prompt issues → route to prompt-architect
 - Workflow issues → route to workflow-engineer
 - Infrastructure issues → route to platform-engineer
@@ -122,7 +124,43 @@ Run challenging scenarios.
 3. Error handling (invalid inputs, missing context)
 4. Handoff testing (verify transitions trigger correctly)
 
-### Phase 5: Report Generation
+### Phase 5: Scar Tissue Coverage (conditional)
+Verify archaeology findings reached agent prompts. Skip this phase entirely if no HANDOFF-PROMPT-FUEL.md exists in the rite's wip/ARCHAEOLOGY/ directory.
+
+1. **CRITICAL Item Traceability**
+   - Read the HANDOFF's per-agent CRITICAL tier entries
+   - Read the corresponding agent prompt file
+   - Verify each CRITICAL item appears in the agent's Domain Knowledge or equivalent section
+   - Report: "N/M CRITICAL items traced to prompt lines"
+
+2. **Exousia Calibration**
+   - Read the HANDOFF's Exousia Overrides section (EX-NN entries)
+   - Read each affected agent's Exousia section
+   - Verify each EX-NN appears as a "You Do NOT Decide" or "You Escalate" entry
+   - Report: "N/M Exousia overrides encoded"
+
+3. **Anti-Pattern Coverage**
+   - Read the HANDOFF's Anti-Pattern Catalog (AP-NN entries)
+   - Check each relevant agent prompt for corresponding DO NOT constraints
+   - Report: "N/M anti-patterns addressed"
+
+4. **Golden Path Inclusion**
+   - Check if agent prompts reference GOLD-NNN exemplars from the HANDOFF where relevant
+   - Report: "N/M golden paths referenced"
+
+5. **Cross-Agent Knowledge Distribution**
+   - Read the HANDOFF's Cross-Agent Knowledge section (CK-NN entries)
+   - Verify each CK-NN item appears across all agent prompts that operate in the relevant domain
+   - Report: "N/M cross-agent rules distributed"
+
+**Gate thresholds**:
+- CRITICAL item traceability below 80% → BLOCKING. Back-route to prompt-architect for remediation.
+- Exousia calibration below 70% → BLOCKING. Back-route to prompt-architect for remediation.
+- Anti-pattern coverage → reported as warning (not blocking)
+- Golden path inclusion → reported as warning (not blocking)
+- Cross-agent knowledge → reported as warning (not blocking)
+
+### Phase 6: Report Generation
 Produce eval-report.md.
 1. List all checks with pass/fail status
 2. Document any failures with specifics
@@ -151,6 +189,7 @@ Ready for Agent Curator when:
 - [ ] All schema validations pass
 - [ ] All logic validations pass
 - [ ] Adversarial tests produce acceptable results
+- [ ] Scar tissue coverage meets thresholds (when HANDOFF exists)
 - [ ] No blocking issues remain
 - [ ] eval-report.md is generated
 - [ ] Recommendation is SHIP or SHIP WITH CAVEATS
@@ -184,4 +223,5 @@ When validation reveals:
 - **Skipping Adversarial**: Structured checks aren't enough. Agents need stress testing.
 - **No Regression**: Updating prompts without checking existing behavior. Always compare.
 - **Report Overload**: 50-page reports nobody reads. Keep it scannable.
+- **Ignoring Archaeology**: When HANDOFF-PROMPT-FUEL.md exists, scar tissue coverage is not optional. Domain forensics that never reach prompts is wasted effort.
 

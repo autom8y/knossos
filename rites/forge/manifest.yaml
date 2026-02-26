@@ -3,7 +3,7 @@
 
 name: forge
 version: "1.0.0"
-description: Agent pantheon creation lifecycle (Design -> Prompts -> Workflow -> Platform -> Catalog -> Validation)
+description: Agent pantheon creation lifecycle (Design -> [Archaeology] -> Prompts -> Workflow -> Platform -> Catalog -> Validation)
 
 entry_agent: pythia
 
@@ -12,6 +12,12 @@ phases:
     agent: agent-designer
     produces: rite-spec
     description: Design agent pantheon concept and role definitions
+
+  - name: archaeology
+    agent: domain-forensics
+    produces: prompt-fuel
+    description: Execute codebase archaeology to extract domain expertise
+    condition: "deep == true"
 
   - name: prompts
     agent: prompt-architect
@@ -47,6 +53,9 @@ agents:
   - name: agent-designer
     role: Designs agent pantheon concepts and role specifications
 
+  - name: domain-forensics
+    role: Executes codebase archaeology to extract domain expertise for agent prompts
+
   - name: prompt-architect
     role: Creates agent prompts and system instructions
 
@@ -68,6 +77,7 @@ dromena:
 legomena:
   - agent-prompt-engineering
   - forge-ref
+  - prompt-fuel-reference
   - rite-development
 
 hooks: []
