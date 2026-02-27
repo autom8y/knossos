@@ -45,7 +45,7 @@ Parse `$ARGUMENTS` to determine audit scope:
 
 2. Read the domain registry table from pinakes INDEX:
    ```
-   Read("rites/shared/mena/pinakes/INDEX.lego.md")
+   Read(".claude/skills/pinakes/INDEX.md")
    ```
 
 3. Parse the Domain Registry table to extract:

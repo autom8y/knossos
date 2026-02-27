@@ -52,11 +52,7 @@ This command operates in forked context (transient session). It generates `.know
 
 For EACH domain in the generation queue:
 
-1. Read the domain criteria file from the pinakes source:
-   ```
-   Read("rites/shared/mena/pinakes/domains/{domain}.lego.md")
-   ```
-   If that path doesn't exist, fall back to the materialized skill:
+1. Read the domain criteria file:
    ```
    Read(".claude/skills/pinakes/domains/{domain}.md")
    ```

@@ -88,7 +88,7 @@ If source targets are not met after all search queries, note this in the output 
 
 For each source in the catalog:
 
-1. **Read companion reference**: Read the evidence grading framework from the literature-review skill for tier definitions: `Read("rites/shared/mena/literature-review/evidence-grading.md")` (or from the materialized skill at `.claude/skills/literature-review/evidence-grading.md`).
+1. **Read companion reference**: Read the evidence grading framework from the literature-review skill for tier definitions: `Read(".claude/skills/literature-review/evidence-grading.md")`.
 
 2. **Extract key claims**: Identify the 2-5 most relevant claims from the source for the domain question.
 
@@ -104,7 +104,7 @@ For each source in the catalog:
 
 Skip this phase for SURVEY depth.
 
-1. **Read synthesis schema**: `Read("rites/shared/mena/literature-review/schemas/synthesis.md")` (or from materialized skill path).
+1. **Read synthesis schema**: `Read(".claude/skills/literature-review/schemas/synthesis.md")`.
 
 2. **Identify themes**: Group claims across sources into thematic clusters. Minimum 3 themes for REVIEW depth.
 
