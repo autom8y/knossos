@@ -150,10 +150,10 @@ See [quality-gates.md](quality-gates.md) for complete criteria and workflow inte
 
 **Related skills**:
 
-- [documentation](../../../../mena/templates/documentation/INDEX.lego.md) - PRD/TDD/ADR/Test Plan templates and formats
-- [prompting](../../../../mena/guidance/prompting/INDEX.lego.md) - Copy-paste prompt patterns for agent invocation
-- [consult](../../../../mena/navigation/consult/INDEX.dro.md) - Ecosystem navigation and guidance
-- [rite-development](../../../forge/mena/rite-development/INDEX.lego.md) - Creating new rites
+- `documentation` skill — PRD/TDD/ADR/Test Plan templates and formats
+- `prompting` skill — Copy-paste prompt patterns for agent invocation
+- `/consult` command — Ecosystem navigation and guidance
+- `rite-development` skill — Creating new rites (forge rite)
 
 > **Note**: When modifying workflows or agents, update the Consultant knowledge base at `.claude/knowledge/consultant/` to keep `/consult` guidance accurate. See [consultant-sync.md](../rite-development/patterns/consultant-sync.md).
 

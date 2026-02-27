@@ -184,6 +184,6 @@ Quality gates and validation checklists to ensure consolidation correctness:
 
 ## Related Skills
 
-- [doc-ecosystem](../../../ecosystem/mena/doc-ecosystem/INDEX.lego.md) - Ecosystem templates (Gap Analysis, Context Design)
-- [documentation](../../../../mena/templates/documentation/INDEX.lego.md) - Core artifact templates (PRD, TDD, ADR)
-- [10x-workflow](../../../10x-dev/mena/10x-workflow/INDEX.lego.md) - Agent coordination patterns
+- `doc-ecosystem` skill — Ecosystem templates (Gap Analysis, Context Design)
+- `documentation` skill — Core artifact templates (PRD, TDD, ADR)
+- `10x-workflow` skill — Agent coordination patterns

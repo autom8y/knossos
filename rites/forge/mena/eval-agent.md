@@ -101,5 +101,5 @@ Overall: {PASS | FAIL}
 
 ## Reference
 
-Full documentation: `rites/forge/mena/forge-ref/INDEX.lego.md`
+Full documentation: `.claude/skills/forge-ref/INDEX.md`
 Agent completeness checklist: `~/.claude/knowledge/forge/evals/agent-completeness.md`

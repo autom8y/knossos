@@ -79,5 +79,5 @@ Adversarial: {✓|✗} Edge cases handled
 
 ## Reference
 
-Full documentation: `rites/forge/mena/forge-ref/INDEX.lego.md`
+Full documentation: `.claude/skills/forge-ref/INDEX.md`
 Validation checklist: `~/.claude/knowledge/forge/evals/`

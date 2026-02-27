@@ -299,10 +299,10 @@ Check:
 
 ## Related Resources
 
-- [rite-development skill](../rite-development/INDEX.lego.md) - Manual rite creation guidance
-- [10x-workflow skill](../../../10x-dev/mena/10x-workflow/INDEX.lego.md) - Workflow patterns
-- [consult](../../../../mena/navigation/consult/INDEX.dro.md) - Ecosystem navigation
-- [documentation skill](../../../../mena/templates/documentation/INDEX.lego.md) - Artifact templates
+- `rite-development` skill — Manual rite creation guidance
+- `10x-workflow` skill — Workflow patterns
+- `/consult` command — Ecosystem navigation
+- `documentation` skill — Artifact templates
 
 ---
 

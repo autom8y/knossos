@@ -79,4 +79,4 @@ Pairs with: `/architect` (design) and `/qa` (validation)
 
 ## Reference
 
-Full documentation: `rites/10x-dev/mena/build-ref/INDEX.lego.md`
+Full documentation: `.claude/skills/build-ref/INDEX.md`

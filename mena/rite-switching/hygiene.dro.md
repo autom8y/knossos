@@ -38,4 +38,4 @@ Switch to the code hygiene rite and display the pantheon. $ARGUMENTS
 
 ## Reference
 
-Full documentation: `rites/hygiene/mena/hygiene-ref/INDEX.lego.md`
+Full documentation: `.claude/skills/hygiene-ref/INDEX.md`

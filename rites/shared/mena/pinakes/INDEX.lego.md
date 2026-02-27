@@ -99,5 +99,5 @@ No +/- modifiers. Simplicity prevents grade inflation and gaming.
 
 ## Related Skills
 
-- [smell-detection](../smell-detection/INDEX.lego.md) - Code quality smell taxonomy
-- [doc-ecosystem](../../../ecosystem/mena/doc-ecosystem/INDEX.lego.md) - Template patterns
+- `smell-detection` skill — Code quality smell taxonomy
+- `doc-ecosystem` skill — Template patterns

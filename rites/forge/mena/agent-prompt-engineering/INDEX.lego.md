@@ -169,10 +169,10 @@ Route to human when:
 
 | Skill | Relationship |
 |-------|--------------|
-| [rite-development](../rite-development/INDEX.lego.md) | Uses this skill's template for new agents |
-| [documentation](../../../../mena/templates/documentation/INDEX.lego.md) | Artifact templates referenced by agents |
-| [standards](../../../../mena/guidance/standards/INDEX.lego.md) | Code conventions agents should enforce |
-| [file-verification](../../../../mena/guidance/file-verification/INDEX.lego.md) | Verification protocol agents should reference |
+| `rite-development` skill | Uses this skill's template for new agents |
+| `documentation` skill | Artifact templates referenced by agents |
+| `standards` skill | Code conventions agents should enforce |
+| `file-verification` skill | Verification protocol agents should reference |
 
 ## Quality Targets
 

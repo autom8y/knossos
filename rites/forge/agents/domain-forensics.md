@@ -23,7 +23,7 @@ description: |
   </example>
 tools: Bash, Glob, Grep, Read, Write
 model: opus
-color: amber
+color: yellow
 maxTurns: 250
 skills:
   - codebase-archaeology

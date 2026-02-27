@@ -81,4 +81,4 @@ Pairs with: `/build` (implementation from approved design)
 
 ## Reference
 
-Full documentation: `rites/10x-dev/mena/architect-ref/INDEX.lego.md`
+Full documentation: `.claude/skills/architect-ref/INDEX.md`

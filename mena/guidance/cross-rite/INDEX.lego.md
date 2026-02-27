@@ -121,6 +121,6 @@ assessment. Suggest next step: Create hygiene ticket for DRY violation review."
 
 | Skill | When to Use |
 |-------|-------------|
-| [cross-rite-handoff](../../../rites/shared/mena/cross-rite-handoff/INDEX.lego.md) | HANDOFF artifact schema for formal transfers |
-| [wrap](../../session/wrap/INDEX.dro.md) | Session completion with quality gates |
-| [handoff](../../session/handoff/INDEX.dro.md) | Within-rite agent transitions |
+| `cross-rite-handoff` skill | HANDOFF artifact schema for formal transfers |
+| `/wrap` command | Session completion with quality gates |
+| `/handoff` command | Within-rite agent transitions |

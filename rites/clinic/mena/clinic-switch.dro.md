@@ -53,4 +53,4 @@ Back-routes: diagnosis->examination (evidence gap), treatment->diagnosis (insuff
 
 ## Reference
 
-Full documentation: `rites/clinic/mena/clinic-ref/INDEX.lego.md`
+Full documentation: `.claude/skills/clinic-ref/INDEX.md`

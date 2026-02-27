@@ -197,12 +197,12 @@ See [anti-patterns.md](anti-patterns.md) for the full list. Key exclusions:
 **Related Skills**:
 
 - [ecosystem-ref](../ecosystem-ref/INDEX.lego.md) - Sync pipeline implementation and mechanics
-- [documentation](~/.claude/commands/templates/documentation/INDEX.md) - General documentation standards
-- [standards](~/.claude/commands/guidance/standards/INDEX.md) - Repository conventions
+- `documentation` skill — General documentation standards
+- `standards` skill — Repository conventions
 
 **Enforcement Reference**:
 
-- [execution-mode.md](~/.claude/skills/orchestration/execution-mode.md) - When delegation is required (source of enforcement rules)
+- `execution-mode` skill — When delegation is required (source of enforcement rules)
 
 ---
 
