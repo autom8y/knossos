@@ -169,6 +169,11 @@ func resolveNamespace(collected map[string]menaCollectedEntry, standalones map[s
 					continue // Safe to overwrite knossos-owned entries
 				}
 
+				if opts.OverwriteDiverged {
+					log.Printf("Info: flat name '%s' overwriting user entry (--overwrite-diverged)", entryName)
+					continue
+				}
+
 				// User-owned or untracked entry -- knossos yields
 				for _, sourceKey := range sourceKeys {
 					log.Printf("Warning: flat name '%s' collides with existing user entry, falling back to source path for source '%s'", entryName, sourceKey)

@@ -5,6 +5,9 @@ import (
 	"path/filepath"
 	"testing"
 	"testing/fstest"
+	"time"
+
+	"github.com/autom8y/knossos/internal/provenance"
 )
 
 // TestStripMenaExtension verifies all extension stripping cases.
@@ -489,5 +492,217 @@ func TestDetectMenaType(t *testing.T) {
 				t.Errorf("DetectMenaType(%q) = %q, want %q", tt.filename, got, tt.expected)
 			}
 		})
+	}
+}
+
+// TestSyncMena_NamespaceCollision_YieldsToUserEntry verifies that a flat name
+// collision with a user-owned entry in commands/ causes the dromenon to fall back
+// to its source path instead of overwriting the user file.
+func TestSyncMena_NamespaceCollision_YieldsToUserEntry(t *testing.T) {
+	tmpDir := t.TempDir()
+	claudeDir := tmpDir // provenance manifest lives here
+	commandsDir := filepath.Join(tmpDir, "commands")
+	skillsDir := filepath.Join(tmpDir, "skills")
+
+	// Create a user-owned entry at the flat path
+	if err := os.MkdirAll(commandsDir, 0755); err != nil {
+		t.Fatalf("mkdir: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(commandsDir, "my-cmd.md"), []byte("user content"), 0644); err != nil {
+		t.Fatalf("write user file: %v", err)
+	}
+
+	// Write a provenance manifest marking it as user-owned
+	manifest := &provenance.ProvenanceManifest{
+		SchemaVersion: provenance.CurrentSchemaVersion,
+		LastSync:      time.Now().UTC(),
+		ActiveRite:    "test",
+		Entries: map[string]*provenance.ProvenanceEntry{
+			"commands/my-cmd.md": provenance.NewUserEntry(provenance.ScopeRite, "sha256:abc123"),
+		},
+	}
+	if err := provenance.Save(filepath.Join(claudeDir, provenance.ManifestFileName), manifest); err != nil {
+		t.Fatalf("save provenance: %v", err)
+	}
+
+	// Create a mena source with a dromenon that wants flat name "my-cmd"
+	menaDir := filepath.Join(tmpDir, "mena")
+	droDir := filepath.Join(menaDir, "group", "my-cmd")
+	if err := os.MkdirAll(droDir, 0755); err != nil {
+		t.Fatalf("mkdir dro: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(droDir, "INDEX.dro.md"), []byte("---\nname: my-cmd\ndescription: test\n---\n# Platform cmd\n"), 0644); err != nil {
+		t.Fatalf("write INDEX: %v", err)
+	}
+
+	sources := []MenaSource{{Path: menaDir}}
+	opts := MenaProjectionOptions{
+		Mode:              MenaProjectionDestructive,
+		Filter:            ProjectDro,
+		TargetCommandsDir: commandsDir,
+		TargetSkillsDir:   skillsDir,
+		OverwriteDiverged: false, // default: yield to user
+	}
+
+	result, err := SyncMena(sources, opts)
+	if err != nil {
+		t.Fatalf("SyncMena failed: %v", err)
+	}
+
+	// The flat path should NOT be overwritten (user file preserved)
+	content, err := os.ReadFile(filepath.Join(commandsDir, "my-cmd.md"))
+	if err != nil {
+		t.Fatalf("read user file: %v", err)
+	}
+	if string(content) != "user content" {
+		t.Errorf("user file was overwritten; got %q, want %q", string(content), "user content")
+	}
+
+	// The dromenon should have fallen back to source path
+	found := false
+	for _, projected := range result.CommandsProjected {
+		if projected == "group/my-cmd" {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Errorf("expected dromenon to fall back to source path 'group/my-cmd', projected: %v", result.CommandsProjected)
+	}
+}
+
+// TestSyncMena_NamespaceCollision_OverwriteDivergedReclaims verifies that
+// --overwrite-diverged allows the platform to reclaim a flat name from a
+// user-owned entry.
+func TestSyncMena_NamespaceCollision_OverwriteDivergedReclaims(t *testing.T) {
+	tmpDir := t.TempDir()
+	claudeDir := tmpDir
+	commandsDir := filepath.Join(tmpDir, "commands")
+	skillsDir := filepath.Join(tmpDir, "skills")
+
+	// Create a user-owned entry at the flat path
+	if err := os.MkdirAll(commandsDir, 0755); err != nil {
+		t.Fatalf("mkdir: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(commandsDir, "my-cmd.md"), []byte("user content"), 0644); err != nil {
+		t.Fatalf("write user file: %v", err)
+	}
+
+	// Write provenance manifest marking it user-owned
+	manifest := &provenance.ProvenanceManifest{
+		SchemaVersion: provenance.CurrentSchemaVersion,
+		LastSync:      time.Now().UTC(),
+		ActiveRite:    "test",
+		Entries: map[string]*provenance.ProvenanceEntry{
+			"commands/my-cmd.md": provenance.NewUserEntry(provenance.ScopeRite, "sha256:abc123"),
+		},
+	}
+	if err := provenance.Save(filepath.Join(claudeDir, provenance.ManifestFileName), manifest); err != nil {
+		t.Fatalf("save provenance: %v", err)
+	}
+
+	// Create a mena source with a dromenon that wants flat name "my-cmd"
+	menaDir := filepath.Join(tmpDir, "mena")
+	droDir := filepath.Join(menaDir, "group", "my-cmd")
+	if err := os.MkdirAll(droDir, 0755); err != nil {
+		t.Fatalf("mkdir dro: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(droDir, "INDEX.dro.md"), []byte("---\nname: my-cmd\ndescription: test\n---\n# Platform cmd\n"), 0644); err != nil {
+		t.Fatalf("write INDEX: %v", err)
+	}
+
+	sources := []MenaSource{{Path: menaDir}}
+	opts := MenaProjectionOptions{
+		Mode:              MenaProjectionDestructive,
+		Filter:            ProjectDro,
+		TargetCommandsDir: commandsDir,
+		TargetSkillsDir:   skillsDir,
+		OverwriteDiverged: true, // reclaim flat name
+	}
+
+	result, err := SyncMena(sources, opts)
+	if err != nil {
+		t.Fatalf("SyncMena failed: %v", err)
+	}
+
+	// The flat path should now contain the platform content (overwritten)
+	content, err := os.ReadFile(filepath.Join(commandsDir, "my-cmd.md"))
+	if err != nil {
+		t.Fatalf("read reclaimed file: %v", err)
+	}
+	if string(content) == "user content" {
+		t.Errorf("user file was NOT overwritten; OverwriteDiverged should have reclaimed the flat name")
+	}
+
+	// The dromenon should be projected at the flat name, not the source path
+	foundFlat := false
+	for _, projected := range result.CommandsProjected {
+		if projected == "my-cmd" {
+			foundFlat = true
+			break
+		}
+	}
+	if !foundFlat {
+		t.Errorf("expected dromenon at flat name 'my-cmd', projected: %v", result.CommandsProjected)
+	}
+}
+
+// TestSyncMena_NamespaceCollision_UntrackedEntry verifies that entries on disk
+// without provenance (untracked) are also treated as user content and yield,
+// unless OverwriteDiverged is set.
+func TestSyncMena_NamespaceCollision_UntrackedEntry(t *testing.T) {
+	tmpDir := t.TempDir()
+	commandsDir := filepath.Join(tmpDir, "commands")
+	skillsDir := filepath.Join(tmpDir, "skills")
+
+	// Create an entry on disk with NO provenance manifest at all
+	if err := os.MkdirAll(commandsDir, 0755); err != nil {
+		t.Fatalf("mkdir: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(commandsDir, "my-cmd.md"), []byte("untracked content"), 0644); err != nil {
+		t.Fatalf("write untracked file: %v", err)
+	}
+
+	// Create a mena source with a dromenon that wants flat name "my-cmd"
+	menaDir := filepath.Join(tmpDir, "mena")
+	droDir := filepath.Join(menaDir, "group", "my-cmd")
+	if err := os.MkdirAll(droDir, 0755); err != nil {
+		t.Fatalf("mkdir dro: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(droDir, "INDEX.dro.md"), []byte("---\nname: my-cmd\ndescription: test\n---\n# Platform cmd\n"), 0644); err != nil {
+		t.Fatalf("write INDEX: %v", err)
+	}
+
+	sources := []MenaSource{{Path: menaDir}}
+
+	// Without OverwriteDiverged: should yield to untracked entry
+	opts := MenaProjectionOptions{
+		Mode:              MenaProjectionDestructive,
+		Filter:            ProjectDro,
+		TargetCommandsDir: commandsDir,
+		TargetSkillsDir:   skillsDir,
+		OverwriteDiverged: false,
+	}
+
+	_, err := SyncMena(sources, opts)
+	if err != nil {
+		t.Fatalf("SyncMena failed: %v", err)
+	}
+
+	content, _ := os.ReadFile(filepath.Join(commandsDir, "my-cmd.md"))
+	if string(content) != "untracked content" {
+		t.Errorf("untracked file was overwritten without --overwrite-diverged")
+	}
+
+	// With OverwriteDiverged: should reclaim
+	opts.OverwriteDiverged = true
+	_, err = SyncMena(sources, opts)
+	if err != nil {
+		t.Fatalf("SyncMena with OverwriteDiverged failed: %v", err)
+	}
+
+	content, _ = os.ReadFile(filepath.Join(commandsDir, "my-cmd.md"))
+	if string(content) == "untracked content" {
+		t.Errorf("untracked file was NOT overwritten with --overwrite-diverged")
 	}
 }

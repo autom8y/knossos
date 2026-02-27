@@ -229,7 +229,7 @@ func TestMaterializeMena_FromEmbedded(t *testing.T) {
 		TemplatesDir: "knossos/templates",
 	}
 
-	if err := m.materializeMena(manifest, claudeDir, resolved, provenance.NullCollector{}); err != nil {
+	if err := m.materializeMena(manifest, claudeDir, resolved, provenance.NullCollector{}, false); err != nil {
 		t.Fatalf("materializeMena from embedded failed: %v", err)
 	}
 
@@ -303,7 +303,7 @@ func TestMaterializeMena_EmbeddedSkipsPlatformMena(t *testing.T) {
 		TemplatesDir: "knossos/templates",
 	}
 
-	if err := m.materializeMena(manifest, claudeDir, resolved, provenance.NullCollector{}); err != nil {
+	if err := m.materializeMena(manifest, claudeDir, resolved, provenance.NullCollector{}, false); err != nil {
 		t.Fatalf("materializeMena failed: %v", err)
 	}
 

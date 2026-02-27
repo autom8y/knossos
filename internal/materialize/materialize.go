@@ -25,13 +25,14 @@ import (
 
 // Options configures materialization behavior.
 type Options struct {
-	Force      bool // Skip idempotency check; proceed even if already on this rite
-	DryRun     bool // Preview changes without applying
-	RemoveAll  bool // Remove all orphan agents (with backup)
-	KeepAll    bool // Preserve all orphan agents (default)
-	PromoteAll bool // Move orphan agents to user-level
-	Minimal    bool // Generate base infrastructure only (no rite/agents/skills)
-	Soft       bool // CC-safe mode: only update agents + CLAUDE.md
+	Force             bool // Skip idempotency check; proceed even if already on this rite
+	DryRun            bool // Preview changes without applying
+	RemoveAll         bool // Remove all orphan agents (with backup)
+	KeepAll           bool // Preserve all orphan agents (default)
+	PromoteAll        bool // Move orphan agents to user-level
+	Minimal           bool // Generate base infrastructure only (no rite/agents/skills)
+	Soft              bool // CC-safe mode: only update agents + CLAUDE.md
+	OverwriteDiverged bool // Allow overwriting user-owned mena entries on flat-name collision
 }
 
 // Result contains materialization outcome details.
@@ -316,7 +317,8 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 	// Validate rite references: warn about stale agents/mena entries in the manifest.
 	// Non-blocking: validation errors (missing manifest, parse failure) are silently skipped.
 	ritesBase := filepath.Dir(ritePath)
-	if warnings, err := registry.ValidateRiteReferences(ritePath, ritesBase); err == nil {
+	platformMenaDir := m.getMenaDir()
+	if warnings, err := registry.ValidateRiteReferences(ritePath, ritesBase, platformMenaDir); err == nil {
 		for _, w := range warnings {
 			log.Printf("Warning: %s: %s (%s)", w.File, w.Message, w.RefName)
 		}
@@ -408,7 +410,7 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 
 	// 5. Generate commands/ and skills/ directories from rite + shared + dependencies + mena
 	if !opts.Soft {
-		if err := m.materializeMena(manifest, claudeDir, resolved, collector); err != nil {
+		if err := m.materializeMena(manifest, claudeDir, resolved, collector, opts.OverwriteDiverged); err != nil {
 			return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize mena", err)
 		}
 	}
@@ -537,10 +539,11 @@ func (m *Materializer) syncRiteScope(opts SyncOptions) (*RiteScopeResult, error)
 	}
 
 	legacyOpts := Options{
-		DryRun:    opts.DryRun,
-		RemoveAll: !opts.KeepOrphans,
-		KeepAll:   opts.KeepOrphans,
-		Soft:      opts.Soft,
+		DryRun:            opts.DryRun,
+		RemoveAll:         !opts.KeepOrphans,
+		KeepAll:           opts.KeepOrphans,
+		Soft:              opts.Soft,
+		OverwriteDiverged: opts.OverwriteDiverged,
 	}
 
 	legacyResult, err := m.MaterializeWithOptions(riteName, legacyOpts)
@@ -994,7 +997,7 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claud
 //
 // This method builds the source list and delegates to SyncMena() for the
 // actual collection, routing, extension stripping, and file copying.
-func (m *Materializer) materializeMena(manifest *RiteManifest, claudeDir string, resolved *ResolvedRite, collector provenance.Collector) error {
+func (m *Materializer) materializeMena(manifest *RiteManifest, claudeDir string, resolved *ResolvedRite, collector provenance.Collector, overwriteDiverged bool) error {
 	commandsDir := filepath.Join(claudeDir, "commands")
 	skillsDir := filepath.Join(claudeDir, "skills")
 
@@ -1059,6 +1062,7 @@ func (m *Materializer) materializeMena(manifest *RiteManifest, claudeDir string,
 		TargetSkillsDir:   skillsDir,
 		Collector:         collector,
 		ProjectRoot:       m.resolver.ProjectRoot(),
+		OverwriteDiverged: overwriteDiverged,
 	}
 
 	_, err := SyncMena(sources, opts)

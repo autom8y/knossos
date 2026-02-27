@@ -1,6 +1,7 @@
 package registry
 
 import (
+	"bytes"
 	"os"
 	"path/filepath"
 	"testing"
@@ -59,7 +60,7 @@ func TestValidateRiteReferences_ValidRite(t *testing.T) {
 	// Create dromena (directory-based INDEX pattern).
 	writeFile(t, filepath.Join(dir, "mena", "go", "INDEX.dro.md"))
 
-	warnings, err := ValidateRiteReferences(dir, "")
+	warnings, err := ValidateRiteReferences(dir, "", "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -85,7 +86,7 @@ func TestValidateRiteReferences_MissingAgentFile(t *testing.T) {
 	// Create only pythia, not ghost.
 	writeFile(t, filepath.Join(dir, "agents", "pythia.md"))
 
-	warnings, err := ValidateRiteReferences(dir, "")
+	warnings, err := ValidateRiteReferences(dir, "", "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -108,7 +109,7 @@ func TestValidateRiteReferences_MissingLegomena(t *testing.T) {
 	}
 	writeManifest(t, dir, m)
 
-	warnings, err := ValidateRiteReferences(dir, "")
+	warnings, err := ValidateRiteReferences(dir, "", "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -126,7 +127,7 @@ func TestValidateRiteReferences_NoManifest(t *testing.T) {
 	dir := t.TempDir()
 	// Intentionally do NOT write manifest.yaml.
 
-	_, err := ValidateRiteReferences(dir, "")
+	_, err := ValidateRiteReferences(dir, "", "")
 	if err == nil {
 		t.Error("expected error for missing manifest, got nil")
 	}
@@ -149,7 +150,7 @@ func TestValidateRiteReferences_EntryAgentNotInList(t *testing.T) {
 	// Create the declared agent file to avoid an extra warning.
 	writeFile(t, filepath.Join(dir, "agents", "analyst.md"))
 
-	warnings, err := ValidateRiteReferences(dir, "")
+	warnings, err := ValidateRiteReferences(dir, "", "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -179,7 +180,7 @@ func TestValidateRiteReferences_DromeneFlatPattern(t *testing.T) {
 	// Use flat file pattern instead of directory INDEX.
 	writeFile(t, filepath.Join(dir, "mena", "park.dro.md"))
 
-	warnings, err := ValidateRiteReferences(dir, "")
+	warnings, err := ValidateRiteReferences(dir, "", "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -218,7 +219,7 @@ func TestValidateRiteReferences_LegomenaResolvedFromShared(t *testing.T) {
 	// Skill exists in shared, not rite-local.
 	writeFile(t, filepath.Join(ritesBase, "shared", "mena", "shared-skill", "INDEX.lego.md"))
 
-	warnings, err := ValidateRiteReferences(ritePath, ritesBase)
+	warnings, err := ValidateRiteReferences(ritePath, ritesBase, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -242,7 +243,7 @@ func TestValidateRiteReferences_LegomenaResolvedFromDependency(t *testing.T) {
 	// Skill exists in provider dependency, not rite-local or shared.
 	writeFile(t, filepath.Join(ritesBase, "provider", "mena", "provider-ref", "INDEX.lego.md"))
 
-	warnings, err := ValidateRiteReferences(ritePath, ritesBase)
+	warnings, err := ValidateRiteReferences(ritePath, ritesBase, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -268,7 +269,7 @@ func TestValidateRiteReferences_DromenaResolvedFromShared(t *testing.T) {
 	// Flat pattern in shared.
 	writeFile(t, filepath.Join(ritesBase, "shared", "mena", "flat-cmd.dro.md"))
 
-	warnings, err := ValidateRiteReferences(ritePath, ritesBase)
+	warnings, err := ValidateRiteReferences(ritePath, ritesBase, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -294,7 +295,7 @@ func TestValidateRiteReferences_MissingInAllSources(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	warnings, err := ValidateRiteReferences(ritePath, ritesBase)
+	warnings, err := ValidateRiteReferences(ritePath, ritesBase, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -321,7 +322,7 @@ func TestValidateRiteReferences_EmptyRitesBaseFallback(t *testing.T) {
 	// Skill exists in shared but we pass empty ritesBase.
 	writeFile(t, filepath.Join(ritesBase, "shared", "mena", "shared-only", "INDEX.lego.md"))
 
-	warnings, err := ValidateRiteReferences(ritePath, "")
+	warnings, err := ValidateRiteReferences(ritePath, "", "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -345,11 +346,231 @@ func TestValidateRiteReferences_NonexistentDependencyDir(t *testing.T) {
 	// Skill exists rite-locally. "phantom" dependency dir does NOT exist.
 	writeFile(t, filepath.Join(ritePath, "mena", "local-skill", "INDEX.lego.md"))
 
-	warnings, err := ValidateRiteReferences(ritePath, ritesBase)
+	warnings, err := ValidateRiteReferences(ritePath, ritesBase, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	if len(warnings) != 0 {
 		t.Errorf("expected 0 warnings (resolved rite-locally despite phantom dep), got %d: %+v", len(warnings), warnings)
+	}
+}
+
+// --- Agent skill reference validation tests ---
+
+// writeAgentWithSkills creates an agent .md file with frontmatter containing skills.
+func writeAgentWithSkills(t *testing.T, agentDir string, name string, skills []string) {
+	t.Helper()
+	var buf bytes.Buffer
+	buf.WriteString("---\nname: " + name + "\ndescription: test agent\n")
+	if len(skills) > 0 {
+		buf.WriteString("skills:\n")
+		for _, s := range skills {
+			buf.WriteString("  - " + s + "\n")
+		}
+	}
+	buf.WriteString("---\n")
+	path := filepath.Join(agentDir, name+".md")
+	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
+		t.Fatalf("writeAgentWithSkills: mkdir: %v", err)
+	}
+	if err := os.WriteFile(path, buf.Bytes(), 0644); err != nil {
+		t.Fatalf("writeAgentWithSkills: write: %v", err)
+	}
+}
+
+// TestValidateRiteReferences_AgentSkillsValid verifies that agent skills
+// that resolve to existing legomena produce no warnings.
+func TestValidateRiteReferences_AgentSkillsValid(t *testing.T) {
+	dir := t.TempDir()
+
+	m := riteManifest{
+		Name:   "test-rite",
+		Agents: []manifestAgent{{Name: "analyst"}},
+	}
+	writeManifest(t, dir, m)
+	writeAgentWithSkills(t, filepath.Join(dir, "agents"), "analyst", []string{"conventions"})
+	writeFile(t, filepath.Join(dir, "mena", "conventions", "INDEX.lego.md"))
+
+	warnings, err := ValidateRiteReferences(dir, "", "")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(warnings) != 0 {
+		t.Errorf("expected 0 warnings, got %d: %+v", len(warnings), warnings)
+	}
+}
+
+// TestValidateRiteReferences_AgentSkillsMissing verifies that an agent
+// declaring a non-existent skill produces a warning.
+func TestValidateRiteReferences_AgentSkillsMissing(t *testing.T) {
+	dir := t.TempDir()
+
+	m := riteManifest{
+		Name:   "test-rite",
+		Agents: []manifestAgent{{Name: "analyst"}},
+	}
+	writeManifest(t, dir, m)
+	writeAgentWithSkills(t, filepath.Join(dir, "agents"), "analyst", []string{"ghost-skill"})
+
+	warnings, err := ValidateRiteReferences(dir, "", "")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	found := false
+	for _, w := range warnings {
+		if w.RefName == "ghost-skill" && w.File == filepath.Join("agents", "analyst.md") {
+			found = true
+		}
+	}
+	if !found {
+		t.Errorf("expected warning for ghost-skill in agents/analyst.md, got: %+v", warnings)
+	}
+}
+
+// TestValidateRiteReferences_AgentDefaultsSkillsMissing verifies that
+// agent_defaults.skills with a non-existent skill produces a warning.
+func TestValidateRiteReferences_AgentDefaultsSkillsMissing(t *testing.T) {
+	dir := t.TempDir()
+
+	m := riteManifest{
+		Name:          "test-rite",
+		AgentDefaults: manifestAgentDefaults{Skills: []string{"ghost-default"}},
+	}
+	writeManifest(t, dir, m)
+
+	warnings, err := ValidateRiteReferences(dir, "", "")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	found := false
+	for _, w := range warnings {
+		if w.RefName == "ghost-default" && w.File == "manifest.yaml" {
+			found = true
+		}
+	}
+	if !found {
+		t.Errorf("expected warning for ghost-default in manifest.yaml, got: %+v", warnings)
+	}
+}
+
+// TestValidateRiteReferences_AgentDefaultsSkillsValid verifies that
+// agent_defaults.skills with existing legomena produce no skill warnings.
+func TestValidateRiteReferences_AgentDefaultsSkillsValid(t *testing.T) {
+	dir := t.TempDir()
+
+	m := riteManifest{
+		Name:          "test-rite",
+		AgentDefaults: manifestAgentDefaults{Skills: []string{"valid-default"}},
+	}
+	writeManifest(t, dir, m)
+	writeFile(t, filepath.Join(dir, "mena", "valid-default", "INDEX.lego.md"))
+
+	warnings, err := ValidateRiteReferences(dir, "", "")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(warnings) != 0 {
+		t.Errorf("expected 0 warnings, got %d: %+v", len(warnings), warnings)
+	}
+}
+
+// TestValidateRiteReferences_SkillPoliciesMissing verifies that a
+// skill_policies entry referencing a non-existent skill produces a warning.
+func TestValidateRiteReferences_SkillPoliciesMissing(t *testing.T) {
+	dir := t.TempDir()
+
+	m := riteManifest{
+		Name:          "test-rite",
+		SkillPolicies: []manifestSkillPolicy{{Skill: "ghost-policy"}},
+	}
+	writeManifest(t, dir, m)
+
+	warnings, err := ValidateRiteReferences(dir, "", "")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	found := false
+	for _, w := range warnings {
+		if w.RefName == "ghost-policy" && w.File == "manifest.yaml" {
+			found = true
+		}
+	}
+	if !found {
+		t.Errorf("expected warning for ghost-policy in manifest.yaml, got: %+v", warnings)
+	}
+}
+
+// TestValidateRiteReferences_SkillPoliciesValid verifies that a
+// skill_policies entry referencing an existing legomena produces no warning.
+func TestValidateRiteReferences_SkillPoliciesValid(t *testing.T) {
+	dir := t.TempDir()
+
+	m := riteManifest{
+		Name:          "test-rite",
+		SkillPolicies: []manifestSkillPolicy{{Skill: "valid-policy"}},
+	}
+	writeManifest(t, dir, m)
+	writeFile(t, filepath.Join(dir, "mena", "valid-policy", "INDEX.lego.md"))
+
+	warnings, err := ValidateRiteReferences(dir, "", "")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(warnings) != 0 {
+		t.Errorf("expected 0 warnings, got %d: %+v", len(warnings), warnings)
+	}
+}
+
+// TestValidateRiteReferences_NestedSkillPath verifies that agent skills
+// with nested paths (e.g., "guidance/file-verification") resolve correctly
+// via the platform mena source.
+func TestValidateRiteReferences_NestedSkillPath(t *testing.T) {
+	dir := t.TempDir()
+	platformMena := t.TempDir()
+
+	m := riteManifest{
+		Name:   "test-rite",
+		Agents: []manifestAgent{{Name: "architect"}},
+	}
+	writeManifest(t, dir, m)
+	writeAgentWithSkills(t, filepath.Join(dir, "agents"), "architect", []string{"guidance/file-verification"})
+
+	// Nested skill exists in platform mena.
+	writeFile(t, filepath.Join(platformMena, "guidance", "file-verification", "INDEX.lego.md"))
+
+	warnings, err := ValidateRiteReferences(dir, "", platformMena)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(warnings) != 0 {
+		t.Errorf("expected 0 warnings for nested skill path, got %d: %+v", len(warnings), warnings)
+	}
+}
+
+// TestValidateRiteReferences_AgentSkillResolvedFromShared verifies that
+// agent skills resolve from the shared mena source.
+func TestValidateRiteReferences_AgentSkillResolvedFromShared(t *testing.T) {
+	ritePath, ritesBase := makeRitesDir(t, "myrite")
+
+	m := riteManifest{
+		Name:         "myrite",
+		Agents:       []manifestAgent{{Name: "analyst"}},
+		Dependencies: []string{"shared"},
+	}
+	writeManifest(t, ritePath, m)
+	writeAgentWithSkills(t, filepath.Join(ritePath, "agents"), "analyst", []string{"shared-skill"})
+
+	// Skill exists in shared mena, not rite-local.
+	writeFile(t, filepath.Join(ritesBase, "shared", "mena", "shared-skill", "INDEX.lego.md"))
+
+	warnings, err := ValidateRiteReferences(ritePath, ritesBase, "")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(warnings) != 0 {
+		t.Errorf("expected 0 warnings (skill in shared), got %d: %+v", len(warnings), warnings)
 	}
 }

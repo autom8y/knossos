@@ -4,20 +4,13 @@
 package mena
 
 import (
-	"io/fs"
-	"strings"
-
+	menapkg "github.com/autom8y/knossos/internal/mena"
 	"github.com/autom8y/knossos/internal/provenance"
 )
 
-// MenaSource represents a source for mena files. It can be either a
-// filesystem path or an embedded FS path.
-type MenaSource struct {
-	Path       string // Filesystem path (for os-based sources)
-	Fsys       fs.FS  // Embedded filesystem (nil for os-based sources)
-	FsysPath   string // Path within Fsys (e.g., "rites/shared/mena")
-	IsEmbedded bool
-}
+// MenaSource is a re-export alias for menapkg.MenaSource.
+// The type is defined in internal/mena to allow shared use by the registry validator.
+type MenaSource = menapkg.MenaSource
 
 // MenaProjectionMode controls whether projection is additive or destructive.
 type MenaProjectionMode int
@@ -58,6 +51,11 @@ type MenaProjectionOptions struct {
 	// ProjectRoot is the project root for computing relative source paths.
 	// Required when Collector is non-nil.
 	ProjectRoot string
+
+	// OverwriteDiverged allows overwriting user-owned/untracked entries
+	// that collide with flat-name projection. When false (default),
+	// knossos yields and falls back to source-path routing.
+	OverwriteDiverged bool
 }
 
 // MenaProjectionResult reports what the projection did.
@@ -103,51 +101,14 @@ type MenaResolvedStandalone struct {
 	MenaType string // "dro" or "lego"
 }
 
-// StripMenaExtension removes the .dro or .lego infix from a filename.
-// Examples:
-//
-//	"INDEX.dro.md"      -> "INDEX.md"
-//	"INDEX.lego.md"     -> "INDEX.md"
-//	"commit.dro.md"     -> "commit.md"
-//	"prompting.lego.md" -> "prompting.md"
-//	"helper.md"         -> "helper.md"    (no infix, unchanged)
-//	"README.md"         -> "README.md"    (no infix, unchanged)
-//	"data.json"         -> "data.json"    (no infix, unchanged)
-//
-// Only the first infix is stripped (handles pathological "foo.dro.dro.md").
-func StripMenaExtension(filename string) string {
-	if strings.Contains(filename, ".dro.") {
-		return strings.Replace(filename, ".dro.", ".", 1)
-	}
-	if strings.Contains(filename, ".lego.") {
-		return strings.Replace(filename, ".lego.", ".", 1)
-	}
-	return filename
-}
-
-// RouteMenaFile determines whether a file routes to commands/ or skills/.
-// Returns "commands" or "skills".
-func RouteMenaFile(filename string) string {
-	menaType := DetectMenaType(filename)
-	if menaType == "lego" {
-		return "skills"
-	}
-	return "commands"
-}
-
-// DetectMenaType determines content type from file extension convention.
-// Files with .dro.md extension are dromena (invokable, project to .claude/commands/).
-// Files with .lego.md extension are legomena (reference, project to .claude/skills/).
-// Returns "dro" as default for backward compatibility.
-func DetectMenaType(filename string) string {
-	if strings.Contains(filename, ".dro.") {
-		return "dro"
-	}
-	if strings.Contains(filename, ".lego.") {
-		return "lego"
-	}
-	return "dro" // default for backward compat
-}
+// Re-export moved utility functions from internal/mena/ leaf package.
+// These are re-exported so that existing callers within this package and
+// via internal/materialize/mena.go continue to work without changes.
+var (
+	StripMenaExtension = menapkg.StripMenaExtension
+	RouteMenaFile      = menapkg.RouteMenaFile
+	DetectMenaType     = menapkg.DetectMenaType
+)
 
 // ReadMenaFrontmatterFromDir reads the INDEX file from a filesystem directory,
 // parses its YAML frontmatter, and returns the result.

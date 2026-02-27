@@ -9,6 +9,9 @@ import (
 	"path/filepath"
 
 	"gopkg.in/yaml.v3"
+
+	"github.com/autom8y/knossos/internal/frontmatter"
+	"github.com/autom8y/knossos/internal/mena"
 )
 
 // Warning describes a reference in a rite manifest that could not be resolved
@@ -25,12 +28,30 @@ type Warning struct {
 // riteManifest is a minimal struct for parsing manifest.yaml.
 // It avoids importing the full materialize package.
 type riteManifest struct {
-	Name         string          `yaml:"name"`
-	EntryAgent   string          `yaml:"entry_agent"`
-	Agents       []manifestAgent `yaml:"agents"`
-	Legomena     []string        `yaml:"legomena"`
-	Dromena      []string        `yaml:"dromena"`
-	Dependencies []string        `yaml:"dependencies"`
+	Name          string                `yaml:"name"`
+	EntryAgent    string                `yaml:"entry_agent"`
+	Agents        []manifestAgent       `yaml:"agents"`
+	Legomena      []string              `yaml:"legomena"`
+	Dromena       []string              `yaml:"dromena"`
+	Dependencies  []string              `yaml:"dependencies"`
+	AgentDefaults manifestAgentDefaults `yaml:"agent_defaults,omitempty"`
+	SkillPolicies []manifestSkillPolicy `yaml:"skill_policies,omitempty"`
+}
+
+// manifestAgentDefaults captures only the skills field from agent_defaults.
+type manifestAgentDefaults struct {
+	Skills []string `yaml:"skills"`
+}
+
+// manifestSkillPolicy captures only the skill name from a skill_policies entry.
+type manifestSkillPolicy struct {
+	Skill string `yaml:"skill"`
+}
+
+// agentSkills is a minimal struct for extracting the skills field from
+// agent frontmatter. Avoids importing internal/agent.
+type agentSkills struct {
+	Skills []string `yaml:"skills"`
 }
 
 // manifestAgent represents a single agent entry in a manifest.
@@ -46,9 +67,13 @@ type manifestAgent struct {
 // in addition to the rite-local mena directory. When empty, only rite-local
 // mena is checked.
 //
+// platformMenaDir is the resolved platform mena directory path (e.g., from
+// the materializer's getMenaDir()). When non-empty, it is added as the
+// lowest-priority source in the chain. Pass "" if not available.
+//
 // Returns a (possibly empty) slice of warnings and nil on success.
 // Returns a non-nil error only if the manifest is missing or unparseable.
-func ValidateRiteReferences(ritePath string, ritesBase string) ([]Warning, error) {
+func ValidateRiteReferences(ritePath string, ritesBase string, platformMenaDir string) ([]Warning, error) {
 	manifestPath := filepath.Join(ritePath, "manifest.yaml")
 	data, err := os.ReadFile(manifestPath)
 	if err != nil {
@@ -78,13 +103,19 @@ func ValidateRiteReferences(ritePath string, ritesBase string) ([]Warning, error
 		}
 	}
 
-	// Build mena lookup chain: rite-local -> shared -> dependencies.
+	// Build mena source chain using the unified internal/mena package.
+	// Priority order (lowest to highest): platform -> shared -> dependencies -> rite-local.
 	// This mirrors the materializeMena() source priority order.
-	menaDirs := buildMenaDirs(ritePath, ritesBase, m.Dependencies)
+	sources := mena.BuildSourceChain(mena.SourceChainOptions{
+		RitePath:        ritePath,
+		RitesBase:       ritesBase,
+		Dependencies:    m.Dependencies,
+		PlatformMenaDir: platformMenaDir,
+	})
 
 	// Check each legomena INDEX file exists in any source.
 	for _, lego := range m.Legomena {
-		if !menaExistsInSources(lego, "lego", menaDirs) {
+		if !mena.Exists(lego, "lego", sources) {
 			warnings = append(warnings, Warning{
 				File:    filepath.Join("mena", lego, "INDEX.lego.md"),
 				RefName: lego,
@@ -96,7 +127,7 @@ func ValidateRiteReferences(ritePath string, ritesBase string) ([]Warning, error
 	// Check each dromena exists in any source — try directory-based INDEX
 	// pattern first, then flat file pattern. Both are valid knossos conventions.
 	for _, dro := range m.Dromena {
-		if !menaExistsInSources(dro, "dro", menaDirs) {
+		if !mena.Exists(dro, "dro", sources) {
 			warnings = append(warnings, Warning{
 				File:    filepath.Join("mena", dro),
 				RefName: dro,
@@ -117,50 +148,56 @@ func ValidateRiteReferences(ritePath string, ritesBase string) ([]Warning, error
 		})
 	}
 
+	// Validate agent_defaults.skills — manifest-level, one check per skill.
+	for _, skill := range m.AgentDefaults.Skills {
+		if !mena.Exists(skill, "lego", sources) {
+			warnings = append(warnings, Warning{
+				File:    "manifest.yaml",
+				RefName: skill,
+				Message: fmt.Sprintf("agent_defaults.skills: skill %q not found in mena sources", skill),
+			})
+		}
+	}
+
+	// Validate skill_policies[].skill — manifest-level.
+	for _, policy := range m.SkillPolicies {
+		if policy.Skill == "" {
+			continue
+		}
+		if !mena.Exists(policy.Skill, "lego", sources) {
+			warnings = append(warnings, Warning{
+				File:    "manifest.yaml",
+				RefName: policy.Skill,
+				Message: fmt.Sprintf("skill_policies: skill %q not found in mena sources", policy.Skill),
+			})
+		}
+	}
+
+	// Validate per-agent frontmatter skills.
+	for _, agent := range m.Agents {
+		agentFile := filepath.Join(ritePath, "agents", agent.Name+".md")
+		content, err := os.ReadFile(agentFile)
+		if err != nil {
+			continue // already warned above if file is missing
+		}
+		yamlBytes, _, err := frontmatter.Parse(content)
+		if err != nil {
+			continue // not a skill validation concern
+		}
+		var as agentSkills
+		if err := yaml.Unmarshal(yamlBytes, &as); err != nil {
+			continue
+		}
+		for _, skill := range as.Skills {
+			if !mena.Exists(skill, "lego", sources) {
+				warnings = append(warnings, Warning{
+					File:    filepath.Join("agents", agent.Name+".md"),
+					RefName: skill,
+					Message: fmt.Sprintf("skill %q not found in mena sources", skill),
+				})
+			}
+		}
+	}
+
 	return warnings, nil
-}
-
-// buildMenaDirs returns the ordered list of mena directories to search.
-// Priority: rite-local -> shared -> each dependency.
-func buildMenaDirs(ritePath string, ritesBase string, dependencies []string) []string {
-	dirs := []string{filepath.Join(ritePath, "mena")}
-
-	if ritesBase == "" {
-		return dirs
-	}
-
-	// Shared rite mena.
-	dirs = append(dirs, filepath.Join(ritesBase, "shared", "mena"))
-
-	// Dependency rite mena (in manifest order).
-	for _, dep := range dependencies {
-		if dep != "shared" {
-			dirs = append(dirs, filepath.Join(ritesBase, dep, "mena"))
-		}
-	}
-
-	return dirs
-}
-
-// menaExistsInSources checks whether a mena entry can be resolved from any of
-// the provided mena source directories.
-// For legomena: checks for {dir}/{name}/INDEX.lego.md
-// For dromena: checks for {dir}/{name}/INDEX.dro.md or {dir}/{name}.dro.md
-func menaExistsInSources(name string, menaType string, menaDirs []string) bool {
-	for _, dir := range menaDirs {
-		switch menaType {
-		case "lego":
-			if _, err := os.Stat(filepath.Join(dir, name, "INDEX.lego.md")); err == nil {
-				return true
-			}
-		case "dro":
-			if _, err := os.Stat(filepath.Join(dir, name, "INDEX.dro.md")); err == nil {
-				return true
-			}
-			if _, err := os.Stat(filepath.Join(dir, name+".dro.md")); err == nil {
-				return true
-			}
-		}
-	}
-	return false
 }
