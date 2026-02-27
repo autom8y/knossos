@@ -11,9 +11,11 @@ description: Cache architecture consultation lifecycle (Assessment -> Architectu
 
 entry_point:
   agent: pythia
-  artifact:
-    type: thermal-assessment
-    path_template: .claude/wip/thermia/thermal-assessment.md
+  # Pythia is the orchestrator entry point. It does not produce an artifact —
+  # it reads the user's consultation request and routes to heat-mapper first.
+  # The first artifact produced is thermal-assessment.md (by heat-mapper).
+  first_specialist: heat-mapper
+  consultation_dir: .claude/wip/thermia/
 
 # =============================================================================
 # PHASES
