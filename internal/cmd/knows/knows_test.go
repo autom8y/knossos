@@ -304,3 +304,96 @@ func TestCheckMode_CodeStale(t *testing.T) {
 		t.Errorf("stalenessLabel = %q, want %q", label, "stale (code changed)")
 	}
 }
+
+// TestValidateOutput_Text_AllValid verifies text output when all domains are valid.
+func TestValidateOutput_Text_AllValid(t *testing.T) {
+	out := ValidateOutput{
+		Reports: []know.ValidationReport{
+			{Domain: "architecture", TotalRefs: 23, BrokenCount: 0},
+			{Domain: "conventions", TotalRefs: 18, BrokenCount: 0},
+		},
+		AllValid:   true,
+		TotalRefs:  41,
+		BrokenRefs: 0,
+	}
+	text := out.Text()
+
+	if !strings.Contains(text, "architecture") {
+		t.Errorf("Text() should contain 'architecture', got: %q", text)
+	}
+	if !strings.Contains(text, "conventions") {
+		t.Errorf("Text() should contain 'conventions', got: %q", text)
+	}
+	if !strings.Contains(text, "valid") {
+		t.Errorf("Text() should contain 'valid' status label, got: %q", text)
+	}
+	if strings.Contains(text, "BROKEN") {
+		t.Errorf("Text() should not contain 'BROKEN' when all valid, got: %q", text)
+	}
+	if strings.Contains(text, "Broken References:") {
+		t.Errorf("Text() should not show broken ref details when all valid, got: %q", text)
+	}
+}
+
+// TestValidateOutput_Text_WithBroken verifies text output when some domains have broken refs.
+func TestValidateOutput_Text_WithBroken(t *testing.T) {
+	out := ValidateOutput{
+		Reports: []know.ValidationReport{
+			{
+				Domain:      "scar-tissue",
+				TotalRefs:   41,
+				BrokenCount: 2,
+				Broken: []know.BrokenRef{
+					{
+						Type:    "file",
+						Ref:     "internal/materialize/throughline_cleanup_test.go",
+						Context: "See `internal/materialize/throughline_cleanup_test.go` for the fix.",
+						Error:   "file not found",
+					},
+					{
+						Type:    "commit",
+						Ref:     "80b176e",
+						Context: "Fixed in `80b176e`.",
+						Error:   "git object not found",
+					},
+				},
+			},
+			{
+				Domain:      "architecture",
+				TotalRefs:   23,
+				BrokenCount: 0,
+			},
+		},
+		AllValid:   false,
+		TotalRefs:  64,
+		BrokenRefs: 2,
+	}
+	text := out.Text()
+
+	if !strings.Contains(text, "BROKEN") {
+		t.Errorf("Text() should contain 'BROKEN' label for broken domain, got: %q", text)
+	}
+	if !strings.Contains(text, "Broken References:") {
+		t.Errorf("Text() should contain 'Broken References:' section, got: %q", text)
+	}
+	if !strings.Contains(text, "scar-tissue") {
+		t.Errorf("Text() should contain 'scar-tissue' domain name, got: %q", text)
+	}
+	if !strings.Contains(text, "[file]") {
+		t.Errorf("Text() should contain '[file]' type label, got: %q", text)
+	}
+	if !strings.Contains(text, "[commit]") {
+		t.Errorf("Text() should contain '[commit]' type label, got: %q", text)
+	}
+	if !strings.Contains(text, "80b176e") {
+		t.Errorf("Text() should contain the broken commit hash, got: %q", text)
+	}
+	if !strings.Contains(text, "file not found") {
+		t.Errorf("Text() should contain error description, got: %q", text)
+	}
+
+	// The valid domain should still appear as valid.
+	if !strings.Contains(text, "architecture") {
+		t.Errorf("Text() should still contain 'architecture' domain, got: %q", text)
+	}
+}

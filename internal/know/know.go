@@ -17,6 +17,22 @@ import (
 	"github.com/autom8y/knossos/internal/frontmatter"
 )
 
+// gitDiffNameOnly is the function used to get changed files between two commits.
+// Replaceable in tests to avoid real git invocations.
+var gitDiffNameOnly = defaultGitDiffNameOnly
+
+func defaultGitDiffNameOnly(fromHash, toHash string) ([]string, error) {
+	out, err := exec.Command("git", "diff", "--name-only", fromHash+".."+toHash).Output()
+	if err != nil {
+		return nil, err
+	}
+	lines := strings.Split(strings.TrimSpace(string(out)), "\n")
+	if len(lines) == 1 && lines[0] == "" {
+		return nil, nil
+	}
+	return lines, nil
+}
+
 // Meta holds the frontmatter of a .know/ domain file.
 type Meta struct {
 	Domain        string   `yaml:"domain"`
@@ -108,6 +124,90 @@ func resolveGitHead() string {
 	return strings.TrimSpace(string(out))
 }
 
+// scopedStaleness checks whether any files matching sourceScope globs changed
+// between sourceHash and currentHash. Returns true if in-scope files changed.
+// Returns false (not stale) if git is unavailable, either hash is empty,
+// or sourceScope is empty (caller falls back to hash comparison).
+func scopedStaleness(sourceHash, currentHash string, sourceScope []string) bool {
+	if len(sourceScope) == 0 || sourceHash == "" || currentHash == "" {
+		return false
+	}
+
+	changedFiles, err := gitDiffNameOnly(sourceHash, currentHash)
+	if err != nil {
+		// git unavailable or error: assume not stale (graceful degradation).
+		return false
+	}
+
+	for _, changedFile := range changedFiles {
+		if changedFile == "" {
+			continue
+		}
+		for _, glob := range sourceScope {
+			if matchScope(glob, changedFile) {
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
+// matchScope returns true if path matches the scope glob pattern.
+// Handles ** as "any number of path segments". Strips leading "./" from pattern.
+// This handles the two patterns actually used in source_scope without external deps:
+//   - "internal/**/*.go" -> prefix match on "internal/" + suffix match on ".go"
+//   - "cmd/**/*.go"      -> prefix match on "cmd/" + suffix match on ".go"
+//   - "go.mod"           -> exact or filepath.Match
+func matchScope(pattern, path string) bool {
+	// Normalize: strip leading "./" from source_scope values.
+	pattern = strings.TrimPrefix(pattern, "./")
+
+	if !strings.Contains(pattern, "**") {
+		// No double-star: use filepath.Match for standard glob handling.
+		matched, err := filepath.Match(pattern, path)
+		if err != nil {
+			return false
+		}
+		return matched
+	}
+
+	// Split on "**" to get the prefix and suffix portions.
+	// Pattern like "internal/**/*.go" splits into ["internal/", "/*.go"].
+	parts := strings.SplitN(pattern, "**", 2)
+	prefix := parts[0] // e.g., "internal/"
+	suffix := parts[1] // e.g., "/*.go"
+
+	// Check prefix match: path must start with the prefix (if non-empty).
+	if prefix != "" && !strings.HasPrefix(path, prefix) {
+		return false
+	}
+
+	if suffix == "" {
+		// Pattern like "internal/**": matches anything under the prefix.
+		return true
+	}
+
+	// Strip leading "/" from suffix to get the trailing pattern.
+	// e.g., "/*.go" -> "*.go"
+	suffixPattern := strings.TrimPrefix(suffix, "/")
+	if suffixPattern == "" {
+		return true
+	}
+
+	// The remaining path (after the prefix) must match the suffix pattern.
+	remaining := strings.TrimPrefix(path, prefix)
+	// Use filepath.Match on the base name component for simple suffix patterns.
+	// For "*.go", we want to match any .go file at any depth under prefix.
+	// Check if the last segment matches the suffix pattern.
+	base := filepath.Base(remaining)
+	matched, err := filepath.Match(suffixPattern, base)
+	if err != nil {
+		return false
+	}
+	return matched
+}
+
 // buildDomainStatus computes freshness for a single domain.
 // currentHash is the current git HEAD short SHA; empty means unavailable.
 func buildDomainStatus(meta Meta, now time.Time, currentHash string) DomainStatus {
@@ -146,11 +246,20 @@ func buildDomainStatus(meta Meta, now time.Time, currentHash string) DomainStatu
 	// Time-based staleness
 	timeExpired := !now.Before(expiresAt)
 
-	// Code-based staleness: stale when source_hash differs from HEAD.
-	// Skip this check when either value is unavailable (empty string).
+	// Code-based staleness: compares source_hash against HEAD.
+	// Skip when either value is unavailable (empty string).
+	// When source_scope is set and hashes differ, use scoped staleness to check
+	// whether any in-scope files actually changed — avoiding false staleness
+	// from commits that only touched docs or other out-of-scope files.
 	var codeChanged bool
 	if currentHash != "" && meta.SourceHash != "" {
-		codeChanged = meta.SourceHash != currentHash
+		if currentHash == meta.SourceHash {
+			codeChanged = false // identical hash, definitely fresh
+		} else if len(meta.SourceScope) > 0 {
+			codeChanged = scopedStaleness(meta.SourceHash, currentHash, meta.SourceScope)
+		} else {
+			codeChanged = true // no scope defined, fall back to hash inequality
+		}
 	}
 
 	status.TimeExpired = timeExpired

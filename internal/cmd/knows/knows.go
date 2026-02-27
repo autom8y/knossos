@@ -14,6 +14,55 @@ import (
 	"github.com/autom8y/knossos/internal/output"
 )
 
+// ValidateOutput is the structured output for the --validate flag.
+type ValidateOutput struct {
+	Reports    []know.ValidationReport `json:"reports"`
+	AllValid   bool                    `json:"all_valid"`
+	TotalRefs  int                     `json:"total_refs"`
+	BrokenRefs int                     `json:"broken_refs"`
+}
+
+// Text implements output.Textable for human-readable validation output.
+func (v ValidateOutput) Text() string {
+	var b strings.Builder
+
+	// Header table.
+	b.WriteString(fmt.Sprintf("%-20s %-12s %-8s %s\n", "Domain", "Total Refs", "Broken", "Status"))
+	b.WriteString(strings.Repeat("-", 54) + "\n")
+
+	for _, r := range v.Reports {
+		status := "valid"
+		if r.BrokenCount > 0 {
+			status = "BROKEN"
+		}
+		b.WriteString(fmt.Sprintf("%-20s %-12d %-8d %s\n", r.Domain, r.TotalRefs, r.BrokenCount, status))
+	}
+
+	// Broken reference details.
+	hasBroken := false
+	for _, r := range v.Reports {
+		if r.BrokenCount > 0 {
+			hasBroken = true
+			break
+		}
+	}
+
+	if hasBroken {
+		b.WriteString("\nBroken References:\n")
+		for _, r := range v.Reports {
+			if r.BrokenCount == 0 {
+				continue
+			}
+			b.WriteString(fmt.Sprintf("  %s:\n", r.Domain))
+			for _, br := range r.Broken {
+				b.WriteString(fmt.Sprintf("    [%s] %s -- %s\n", br.Type, br.Ref, br.Error))
+			}
+		}
+	}
+
+	return b.String()
+}
+
 // KnowsOutput is the structured output for the knows command.
 type KnowsOutput struct {
 	Domains  []know.DomainStatus `json:"domains"`
@@ -89,6 +138,7 @@ func NewKnowsCmd(outputFlag *string, verboseFlag *bool, projectDir *string) *cob
 	}
 
 	var checkFlag bool
+	var validateFlag bool
 
 	cmd := &cobra.Command{
 		Use:   "knows [domain]",
@@ -102,25 +152,33 @@ Examples:
   ari knows                    # List all domains with freshness
   ari knows architecture       # Print full .know/architecture.md content
   ari knows --check            # Exit 0 if all fresh, exit 1 if any stale
+  ari knows --validate         # Validate references in all .know/ files
+  ari knows --validate arch    # Validate references in a single domain
   ari knows -o json            # JSON output for scripting`,
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runKnows(ctx, args, checkFlag)
+			return runKnows(ctx, args, checkFlag, validateFlag)
 		},
 	}
 
 	cmd.Flags().BoolVar(&checkFlag, "check", false, "Exit 1 if any domain is stale (for CI/hooks)")
+	cmd.Flags().BoolVar(&validateFlag, "validate", false, "Validate references in .know/ files against codebase")
 
 	common.SetNeedsProject(cmd, true, true)
 
 	return cmd
 }
 
-func runKnows(ctx *cmdContext, args []string, checkFlag bool) error {
+func runKnows(ctx *cmdContext, args []string, checkFlag, validateFlag bool) error {
 	printer := ctx.GetPrinter(output.FormatText)
 	resolver := ctx.GetResolver()
 	projectDir := resolver.ProjectRoot()
 	knowDir := filepath.Join(projectDir, ".know")
+
+	// --validate mode: check references in .know/ files against the codebase.
+	if validateFlag {
+		return runValidate(printer, projectDir, args)
+	}
 
 	// Single domain read: just cat the file to stdout
 	if len(args) == 1 {
@@ -167,6 +225,52 @@ func runKnows(ctx *cmdContext, args []string, checkFlag bool) error {
 		AllFresh: allFresh,
 	}
 	return printer.Print(result)
+}
+
+// runValidate executes the --validate flag logic.
+// With a domain arg: validates that single domain and prints its report.
+// Without a domain arg: validates all domains and prints a summary table.
+// Exits with code 1 if any broken references are found.
+func runValidate(printer interface {
+	Print(data any) error
+	PrintLine(text string)
+}, projectDir string, args []string) error {
+	var validateOut ValidateOutput
+
+	if len(args) == 1 {
+		// Single domain validation.
+		report, err := know.ValidateDomain(projectDir, args[0])
+		if err != nil {
+			return fmt.Errorf("validating domain %q: %w", args[0], err)
+		}
+		validateOut.Reports = []know.ValidationReport{*report}
+		validateOut.TotalRefs = report.TotalRefs
+		validateOut.BrokenRefs = report.BrokenCount
+		validateOut.AllValid = report.BrokenCount == 0
+	} else {
+		// All domains validation.
+		reports, err := know.ValidateAll(projectDir)
+		if err != nil {
+			return fmt.Errorf("validating .know/: %w", err)
+		}
+		validateOut.Reports = reports
+		for _, r := range reports {
+			validateOut.TotalRefs += r.TotalRefs
+			validateOut.BrokenRefs += r.BrokenCount
+		}
+		validateOut.AllValid = validateOut.BrokenRefs == 0
+	}
+
+	if err := printer.Print(validateOut); err != nil {
+		return err
+	}
+
+	// Exit 1 if any broken references found, matching the --check pattern.
+	if validateOut.BrokenRefs > 0 {
+		os.Exit(1)
+	}
+
+	return nil
 }
 
 // readSingleDomain reads and prints a single domain file to stdout.

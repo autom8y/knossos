@@ -341,3 +341,157 @@ func TestBuildDomainStatus_EmptySourceHash(t *testing.T) {
 		t.Errorf("CodeChanged = true, want false: no stored hash to compare")
 	}
 }
+
+// TestBuildDomainStatus_ScopedStaleness_OutOfScope verifies that when source_scope is set
+// and only out-of-scope files changed, the domain is treated as fresh (not stale).
+func TestBuildDomainStatus_ScopedStaleness_OutOfScope(t *testing.T) {
+	// Override gitDiffNameOnly to return only out-of-scope files.
+	orig := gitDiffNameOnly
+	defer func() { gitDiffNameOnly = orig }()
+	gitDiffNameOnly = func(fromHash, toHash string) ([]string, error) {
+		// Only docs changed -- not in internal/ or cmd/ scope.
+		return []string{"docs/README.md", "rites/shared/mena/foo.lego.md"}, nil
+	}
+
+	now := time.Now().UTC()
+	generatedAt := now.Add(-1 * time.Hour).Format(time.RFC3339)
+	meta := Meta{
+		Domain:       "architecture",
+		GeneratedAt:  generatedAt,
+		ExpiresAfter: "7d",
+		SourceHash:   "oldsha1",
+		SourceScope:  []string{"internal/**/*.go", "cmd/**/*.go"},
+	}
+	status := buildDomainStatus(meta, now, "newsha9")
+	if status.CodeChanged {
+		t.Errorf("CodeChanged = true, want false: only out-of-scope files changed")
+	}
+	if !status.Fresh {
+		t.Errorf("Fresh = false, want true: out-of-scope changes should not cause staleness")
+	}
+}
+
+// TestBuildDomainStatus_ScopedStaleness_InScope verifies that when source_scope is set
+// and in-scope files changed, the domain is treated as stale.
+func TestBuildDomainStatus_ScopedStaleness_InScope(t *testing.T) {
+	// Override gitDiffNameOnly to return an in-scope file.
+	orig := gitDiffNameOnly
+	defer func() { gitDiffNameOnly = orig }()
+	gitDiffNameOnly = func(fromHash, toHash string) ([]string, error) {
+		// A Go source file in internal/ changed.
+		return []string{"internal/know/know.go", "docs/README.md"}, nil
+	}
+
+	now := time.Now().UTC()
+	generatedAt := now.Add(-1 * time.Hour).Format(time.RFC3339)
+	meta := Meta{
+		Domain:       "architecture",
+		GeneratedAt:  generatedAt,
+		ExpiresAfter: "7d",
+		SourceHash:   "oldsha1",
+		SourceScope:  []string{"internal/**/*.go", "cmd/**/*.go"},
+	}
+	status := buildDomainStatus(meta, now, "newsha9")
+	if !status.CodeChanged {
+		t.Errorf("CodeChanged = false, want true: in-scope file changed")
+	}
+	if status.Fresh {
+		t.Errorf("Fresh = true, want false: in-scope change marks domain stale")
+	}
+}
+
+// TestBuildDomainStatus_ScopedStaleness_EmptyScope verifies fallback to hash comparison
+// when SourceScope is empty.
+func TestBuildDomainStatus_ScopedStaleness_EmptyScope(t *testing.T) {
+	// Ensure gitDiffNameOnly is never called when SourceScope is empty.
+	orig := gitDiffNameOnly
+	defer func() { gitDiffNameOnly = orig }()
+	gitDiffNameOnly = func(fromHash, toHash string) ([]string, error) {
+		t.Error("gitDiffNameOnly called unexpectedly with empty SourceScope")
+		return nil, nil
+	}
+
+	now := time.Now().UTC()
+	generatedAt := now.Add(-1 * time.Hour).Format(time.RFC3339)
+	meta := Meta{
+		Domain:       "architecture",
+		GeneratedAt:  generatedAt,
+		ExpiresAfter: "7d",
+		SourceHash:   "oldsha1",
+		SourceScope:  nil, // empty: fall back to hash comparison
+	}
+	status := buildDomainStatus(meta, now, "newsha9")
+	if !status.CodeChanged {
+		t.Errorf("CodeChanged = false, want true: hashes differ and no scope defined")
+	}
+}
+
+// TestMatchScope verifies glob pattern matching for various source_scope values.
+func TestMatchScope(t *testing.T) {
+	tests := []struct {
+		pattern string
+		path    string
+		want    bool
+	}{
+		// Double-star glob patterns
+		{"internal/**/*.go", "internal/know/know.go", true},
+		{"internal/**/*.go", "internal/materialize/mena/types.go", true},
+		{"internal/**/*.go", "internal/cmd/session/session.go", true},
+		{"internal/**/*.go", "cmd/ari/main.go", false},
+		{"internal/**/*.go", "rites/shared/mena/foo.lego.md", false},
+		{"cmd/**/*.go", "cmd/ari/main.go", true},
+		{"cmd/**/*.go", "internal/know/know.go", false},
+		// Exact match (no glob)
+		{"go.mod", "go.mod", true},
+		{"go.mod", "go.sum", false},
+		// Leading "./" stripped
+		{"./internal/**/*.go", "internal/know/know.go", true},
+		{"./cmd/**/*.go", "cmd/ari/main.go", true},
+		// Non-Go files should not match *.go patterns
+		{"internal/**/*.go", "internal/know/README.md", false},
+	}
+
+	for _, tt := range tests {
+		t.Run(fmt.Sprintf("%s~%s", tt.pattern, tt.path), func(t *testing.T) {
+			got := matchScope(tt.pattern, tt.path)
+			if got != tt.want {
+				t.Errorf("matchScope(%q, %q) = %v, want %v", tt.pattern, tt.path, got, tt.want)
+			}
+		})
+	}
+}
+
+// TestScopedStaleness_GitUnavailable verifies that scopedStaleness returns false
+// (not stale) when git is unavailable.
+func TestScopedStaleness_GitUnavailable(t *testing.T) {
+	orig := gitDiffNameOnly
+	defer func() { gitDiffNameOnly = orig }()
+	gitDiffNameOnly = func(fromHash, toHash string) ([]string, error) {
+		return nil, fmt.Errorf("git: command not found")
+	}
+
+	result := scopedStaleness("abc1234", "def5678", []string{"internal/**/*.go"})
+	if result {
+		t.Error("scopedStaleness with unavailable git: want false (not stale), got true")
+	}
+}
+
+// TestScopedStaleness_EmptyScope verifies that scopedStaleness returns false when scope is empty.
+func TestScopedStaleness_EmptyScope(t *testing.T) {
+	result := scopedStaleness("abc1234", "def5678", nil)
+	if result {
+		t.Error("scopedStaleness with empty scope: want false, got true")
+	}
+}
+
+// TestScopedStaleness_EmptyHashes verifies that scopedStaleness returns false for empty hashes.
+func TestScopedStaleness_EmptyHashes(t *testing.T) {
+	result := scopedStaleness("", "def5678", []string{"internal/**/*.go"})
+	if result {
+		t.Error("scopedStaleness with empty fromHash: want false, got true")
+	}
+	result = scopedStaleness("abc1234", "", []string{"internal/**/*.go"})
+	if result {
+		t.Error("scopedStaleness with empty toHash: want false, got true")
+	}
+}
