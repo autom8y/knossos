@@ -13,6 +13,7 @@ import (
 
 	"github.com/autom8y/knossos/internal/cmd/common"
 	"github.com/autom8y/knossos/internal/frontmatter"
+	"github.com/autom8y/knossos/internal/mena"
 	"github.com/autom8y/knossos/internal/output"
 )
 
@@ -187,6 +188,7 @@ func runLint(ctx *cmdContext, scope string) error {
 	printer := ctx.GetPrinter(output.FormatText)
 	resolver := ctx.GetResolver()
 	projectRoot := resolver.ProjectRoot()
+	sources := buildAllMenaSources(projectRoot)
 
 	report := &LintReport{}
 
@@ -194,11 +196,11 @@ func runLint(ctx *cmdContext, scope string) error {
 		lintAgents(projectRoot, report)
 	}
 	if scope == "" || scope == "dromena" {
-		lintDromena(projectRoot, report)
-		lintMenaNamespace(projectRoot, report)
+		lintDromena(projectRoot, sources, report)
+		lintMenaNamespace(projectRoot, sources, report)
 	}
 	if scope == "" || scope == "legomena" {
-		lintLegomena(projectRoot, report)
+		lintLegomena(projectRoot, sources, report)
 	}
 
 	// Compute summary
@@ -395,10 +397,11 @@ func lintAgentFile(path, relPath string, report *LintReport) {
 
 // --- Dromena linting ---
 
-func lintDromena(projectRoot string, report *LintReport) {
-	walkMena(projectRoot, ".dro.md", func(path, relPath string, data []byte) {
+func lintDromena(projectRoot string, sources []mena.MenaSource, report *LintReport) {
+	mena.Walk(sources, ".dro.md", func(entry mena.WalkEntry) {
 		report.Summary.Files++
-		lintDromenFile(path, relPath, data, report)
+		relPath := mustRel(projectRoot, entry.Path)
+		lintDromenFile(entry.Path, relPath, entry.Data, report)
 	})
 }
 
@@ -466,7 +469,7 @@ func lintDromenFile(_, relPath string, data []byte, report *LintReport) {
 
 // --- Dromena namespace collision detection ---
 
-func lintMenaNamespace(projectRoot string, report *LintReport) {
+func lintMenaNamespace(projectRoot string, sources []mena.MenaSource, report *LintReport) {
 	// Collect all dromena names to detect collisions.
 	// Scope-aware: only flag collisions within the same scope (global or same rite).
 	// Cross-scope shadowing (rite overrides global) is intentional.
@@ -478,8 +481,8 @@ func lintMenaNamespace(projectRoot string, report *LintReport) {
 
 	var entries []nameSource
 
-	walkMena(projectRoot, ".dro.md", func(path, relPath string, data []byte) {
-		yamlBytes, _, err := frontmatter.Parse(data)
+	mena.Walk(sources, ".dro.md", func(entry mena.WalkEntry) {
+		yamlBytes, _, err := frontmatter.Parse(entry.Data)
 		if err != nil {
 			return
 		}
@@ -491,6 +494,8 @@ func lintMenaNamespace(projectRoot string, report *LintReport) {
 		if name == "" {
 			return // already flagged by name-missing rule
 		}
+
+		relPath := mustRel(projectRoot, entry.Path)
 
 		// Determine scope from path
 		scope := "global"
@@ -536,10 +541,11 @@ type legomenFrontmatter struct {
 	Description string `yaml:"description"`
 }
 
-func lintLegomena(projectRoot string, report *LintReport) {
-	walkMena(projectRoot, ".lego.md", func(path, relPath string, data []byte) {
+func lintLegomena(projectRoot string, sources []mena.MenaSource, report *LintReport) {
+	mena.Walk(sources, ".lego.md", func(entry mena.WalkEntry) {
 		report.Summary.Files++
-		lintLegomenFile(path, relPath, data, report)
+		relPath := mustRel(projectRoot, entry.Path)
+		lintLegomenFile(entry.Path, relPath, entry.Data, report)
 	})
 }
 
@@ -693,41 +699,31 @@ func checkSourcePathLeaks(body, relPath string, findings *[]Finding) {
 
 // --- Helpers ---
 
-func walkMena(projectRoot, suffix string, fn func(path, relPath string, data []byte)) {
-	// Walk mena/ directory tree
-	menaDir := filepath.Join(projectRoot, "mena")
-	filepath.Walk(menaDir, func(path string, info os.FileInfo, err error) error {
-		if err != nil || info.IsDir() || !strings.HasSuffix(path, suffix) {
-			return nil
-		}
-		data, readErr := os.ReadFile(path)
-		if readErr != nil {
-			return nil
-		}
-		fn(path, mustRel(projectRoot, path), data)
-		return nil
+// buildAllMenaSources constructs MenaSource entries for platform mena and all
+// rite mena directories. Unlike BuildSourceChain (which builds a
+// priority-ordered chain for the active rite), this function discovers ALL
+// rites for source validation. Walk handles nonexistent directories
+// gracefully, so sources pointing to rites without mena/ are harmless.
+func buildAllMenaSources(projectRoot string) []mena.MenaSource {
+	var sources []mena.MenaSource
+
+	// Platform mena
+	sources = append(sources, mena.MenaSource{
+		Path: filepath.Join(projectRoot, "mena"),
 	})
 
-	// Also walk rites/*/mena/
+	// All rites (including shared)
 	riteDir := filepath.Join(projectRoot, "rites")
 	rites, _ := os.ReadDir(riteDir)
 	for _, r := range rites {
-		if !r.IsDir() {
-			continue
+		if r.IsDir() {
+			sources = append(sources, mena.MenaSource{
+				Path: filepath.Join(riteDir, r.Name(), "mena"),
+			})
 		}
-		riteMena := filepath.Join(riteDir, r.Name(), "mena")
-		filepath.Walk(riteMena, func(path string, info os.FileInfo, err error) error {
-			if err != nil || info.IsDir() || !strings.HasSuffix(path, suffix) {
-				return nil
-			}
-			data, readErr := os.ReadFile(path)
-			if readErr != nil {
-				return nil
-			}
-			fn(path, mustRel(projectRoot, path), data)
-			return nil
-		})
 	}
+
+	return sources
 }
 
 // parseFrontmatterLenient tries strict YAML first, then falls back to line-by-line
