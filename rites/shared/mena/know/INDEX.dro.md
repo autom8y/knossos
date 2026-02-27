@@ -29,6 +29,7 @@ This command operates in forked context (transient session). It generates `.know
    - If `--all`: collect ALL domains with scope `codebase` from the registry
    - If single domain: verify requested domain appears in the table with scope `codebase`
    - If not found: ERROR "Domain '{domain}' not registered in pinakes or not codebase-scoped. Available codebase domains: {list}"
+   - **Scan for satellite-authored criteria**: Check if `.know/criteria/` exists and contains any `*.md` files. If it does, read each file and merge its domain entry into the registry alongside the pinakes domains. Each criteria file follows the same format as pinakes domain files. If `.know/criteria/` does not exist or is empty, continue normally with only pinakes domains.
 
 3. **Build generation queue**:
    - For each domain (single or all):
@@ -153,6 +154,12 @@ For EACH domain's theoros output, perform the following assembly:
    - If metadata block is missing or unparseable: use defaults (confidence: 0.5, grade: C)
 
 2. **Construct the .know/ file**:
+   Before assembling frontmatter, detect the project language by checking for manifest files in the project root:
+   - If `go.mod` exists: set `source_scope` to `["./cmd/**/*.go", "./internal/**/*.go", "./go.mod"]`
+   - Else if `package.json` exists: set `source_scope` to `["./src/**/*.ts", "./lib/**/*.ts", "./package.json"]`
+   - Else if `pyproject.toml` exists: set `source_scope` to `["./src/**/*.py", "./app/**/*.py", "./pyproject.toml"]`
+   - Else (no recognized manifest): set `source_scope` to `["./src/**/*"]`
+
    Build YAML frontmatter:
    ```yaml
    ---
@@ -160,9 +167,9 @@ For EACH domain's theoros output, perform the following assembly:
    generated_at: "{current ISO 8601 UTC timestamp}"
    expires_after: "{expires_duration, default 7d}"
    source_scope:
-     - "./cmd/**/*.go"
-     - "./internal/**/*.go"
-     - "./go.mod"
+     - "{first scope entry}"
+     - "{second scope entry}"
+     - "{third scope entry}"
    generator: theoros
    source_hash: "{git short SHA from pre-flight}"
    confidence: {confidence from theoros metadata}
