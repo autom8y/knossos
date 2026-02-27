@@ -33,13 +33,14 @@ type ValidationReport struct {
 // Regex patterns for reference extraction from .know/ markdown files.
 // Scoped to internal/ and cmd/ trees to avoid false positives on prose, URLs, or config paths.
 var (
-	// reFilePath matches backtick-quoted file paths in internal/ or cmd/ trees.
-	// Example: `internal/know/know.go`
-	reFilePath = regexp.MustCompile("`((?:internal|cmd)/[a-zA-Z0-9_/.-]+\\.go)`")
+	// reFilePath matches backtick-quoted file paths in recognized source trees.
+	// Covers Go (internal/, cmd/), TypeScript/Python (src/, lib/, app/), and config files.
+	// Example: `internal/know/know.go`, `src/lib/utils.ts`
+	reFilePath = regexp.MustCompile("`((?:internal|cmd|src|lib|app)/[a-zA-Z0-9_/.-]+\\.[a-zA-Z0-9]+)`")
 
-	// reBareFilePath matches unquoted file paths in internal/ or cmd/ trees.
+	// reBareFilePath matches unquoted file paths in recognized source trees.
 	// Example: internal/know/know.go at word boundary.
-	reBareFilePath = regexp.MustCompile(`(?:^|[\s(])((internal|cmd)/[a-zA-Z0-9_/.-]+\.go)(?:[\s),:]|$)`)
+	reBareFilePath = regexp.MustCompile(`(?:^|[\s(])((internal|cmd|src|lib|app)/[a-zA-Z0-9_/.-]+\.[a-zA-Z0-9]+)(?:[\s),:]|$)`)
 
 	// reFuncRef matches backtick-quoted exported function names (PascalCase, 3+ chars).
 	// Excludes single-letter or two-letter identifiers to avoid noise.
@@ -230,9 +231,10 @@ func verifyFuncRef(rootDir string, r extractedRef) *BrokenRef {
 		funcName = funcName[:idx]
 	}
 
-	// git grep -l searches for the function definition pattern across all .go files.
-	pattern := "func.*" + funcName
-	cmd := exec.Command("git", "grep", "-l", pattern, "--", "*.go")
+	// git grep -l searches for the identifier as a func, const, type, or var declaration.
+	// This covers exported functions, constants, types, and package-level variables.
+	pattern := "(func|const|type|var).*" + funcName
+	cmd := exec.Command("git", "grep", "-l", "-E", pattern, "--", "*.go")
 	cmd.Dir = rootDir
 	out, err := cmd.Output()
 	if err != nil {

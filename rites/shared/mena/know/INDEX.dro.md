@@ -117,6 +117,8 @@ End with:
 
 Be thorough. Include file paths, type names, function signatures, and import relationships. This document will be the primary reference for CC agents working in this codebase.
 
+**IMPORTANT**: Always use FULL file paths from the project root (e.g., `internal/cmd/hook/budget.go`, NOT `cmd/hook/budget.go`). Abbreviated or package-relative paths break automated validation.
+
 **Part 2: Assessment Metadata**
 
 After the knowledge body, on its own line produce a fenced metadata block:
