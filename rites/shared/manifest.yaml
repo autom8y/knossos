@@ -17,10 +17,12 @@ agents: []
 
 dromena:
   - know
+  - research
 
 legomena:
   - codebase-archaeology
   - cross-rite-handoff
+  - literature-review
   - orchestrator-templates
   - shared-templates
   - smell-detection

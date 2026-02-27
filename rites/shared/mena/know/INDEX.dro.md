@@ -69,9 +69,11 @@ Store all loaded criteria keyed by domain name.
 
 > "One body, a hundred eyes, nothing unseen." — The Argus Pattern dispatches one theoros per domain in parallel.
 
+**YOU MUST USE THE TASK TOOL TO DISPATCH THEOROS SUBAGENTS.** Do NOT attempt to observe the codebase yourself. Do NOT read source files and write .know/ files directly. Each domain MUST be delegated to a theoros subagent via `Task(subagent_type="theoros", ...)`. Theoros agents have dedicated context windows (150 turns each) for thorough codebase observation — performing observation in-context will exhaust your capacity and produce incomplete results.
+
 **If `--all` (multiple domains)**: Launch ALL theoros agents in a SINGLE response block using multiple Task tool calls. This is the Argus Pattern — parallel dispatch, concurrent observation. Each theoros receives its own domain criteria and operates independently.
 
-**If single domain**: Launch one theoros as before.
+**If single domain**: Launch one theoros agent.
 
 **CRITICAL**: When dispatching multiple domains, ALL Task calls MUST appear in the same response block to enable CC's parallel execution. Do NOT dispatch sequentially.
 
@@ -248,6 +250,7 @@ Regenerate all: `/know --all --force`
 
 ## Anti-Patterns
 
+- **Performing observation yourself instead of dispatching theoros**: You are the ORCHESTRATOR, not the observer. Your job is to load criteria, dispatch theoros subagents via Task tool, then assemble their output into .know/ files. If you find yourself reading source code and writing knowledge sections, STOP — you are violating the dispatch pattern. Each theoros gets its own 150-turn context window, which is why parallel dispatch produces better results than in-context observation.
 - **Modifying theoros agent prompt**: The reframing happens in THIS dispatch prompt, not in the agent definition. Theoros remains a general-purpose domain auditor.
 - **Skipping verification**: Always Read the .know/ file after writing to confirm correctness.
 - **Ignoring expiry**: Respect the expiry mechanism. Regenerating current knowledge wastes theoros capacity.
