@@ -1,0 +1,206 @@
+name: thermia
+workflow_type: sequential
+description: Cache architecture consultation lifecycle (Assessment -> Architecture -> Specification -> Validation)
+
+# =============================================================================
+# ENTRY POINT
+# =============================================================================
+# Pythia is the entry point. It reads the user's problem statement, determines
+# complexity (QUICK/STANDARD/DEEP), and routes to the first specialist.
+# Thermia is a single-entry rite -- all consultations begin with Pythia.
+
+entry_point:
+  agent: pythia
+  artifact:
+    type: thermal-assessment
+    path_template: .claude/wip/thermia/thermal-assessment.md
+
+# =============================================================================
+# PHASES
+# =============================================================================
+# Four phases in the full chain. QUICK complexity skips architecture and
+# specification, routing directly from assessment to validation (lite).
+# STANDARD and DEEP execute all four phases -- the difference between them
+# is depth expectation communicated by Pythia, not structural.
+
+phases:
+  # Phase 1: Assessment
+  # Agent: heat-mapper
+  # Map thermal landscape, evaluate alternatives, apply 6-gate framework.
+  # Always executes regardless of complexity level.
+  - name: assessment
+    agent: heat-mapper
+    produces: thermal-assessment
+    next: architecture
+
+  # Phase 2: Architecture
+  # Agent: systems-thermodynamicist
+  # Select patterns, consistency models, failure modes, hierarchy design.
+  # Skipped at QUICK complexity.
+  - name: architecture
+    agent: systems-thermodynamicist
+    produces: cache-architecture
+    next: specification
+    condition: "complexity >= STANDARD"
+
+  # Phase 3: Specification
+  # Agent: capacity-engineer
+  # Working set analysis, eviction policy, stampede protection, TTL design, costs.
+  # Skipped at QUICK complexity.
+  - name: specification
+    agent: capacity-engineer
+    produces: capacity-specification
+    next: validation
+    condition: "complexity >= STANDARD"
+
+  # Phase 4: Validation (Terminal)
+  # Agent: thermal-monitor
+  # Observability design, alerting, runbooks, cross-architecture validation.
+  # In QUICK mode: operates in lite mode (validation checklist only).
+  # In STANDARD/DEEP mode: full observability design with derived thresholds.
+  - name: validation
+    agent: thermal-monitor
+    produces: observability-plan
+    next: null
+
+# =============================================================================
+# COMPLEXITY LEVELS
+# =============================================================================
+# Three levels. QUICK is structurally different (2 phases). STANDARD and DEEP
+# are structurally identical (4 phases) -- the difference is depth expectation.
+# Pythia determines complexity from scope indicators in the user's request and
+# communicates depth to each specialist in its directives.
+#
+# Depth variance between STANDARD and DEEP:
+#   STANDARD: Standard-depth analysis per phase
+#   DEEP: Extended scope -- full existing-cache audit, multi-level hierarchy,
+#         full MRC reasoning + cost modeling, comprehensive runbooks
+#
+# Pythia communicates the depth expectation. The workflow engine treats
+# STANDARD and DEEP identically; agents self-regulate depth from Pythia's
+# directive.
+
+complexity_levels:
+  - name: QUICK
+    scope: "Single caching question, yes/no triage. Assessment + lite validation only."
+    phases: [assessment, validation]
+
+  - name: STANDARD
+    scope: "New cache design or existing cache review. Full 4-phase consultation."
+    phases: [assessment, architecture, specification, validation]
+
+  - name: DEEP
+    scope: "Post-mortem, production crisis, or full system redesign. All 4 phases at extended depth."
+    phases: [assessment, architecture, specification, validation]
+
+# =============================================================================
+# BACK-ROUTES
+# =============================================================================
+# Thermia is a forward-flow consultative rite. Artifacts are immutable once
+# produced (thermal-assessment.md is not modified after handoff to architecture).
+# This means structural back-routes are rare.
+#
+# Two back-routes exist for cases where downstream agents discover gaps:
+#
+# 1. Architecture reveals assessment gaps (systems-thermodynamicist finds the
+#    assessment did not cover a data path that affects architecture decisions).
+#    This is uncommon but possible when users provide incomplete system context.
+#
+# 2. Validation reveals architecture/specification inconsistencies that cannot
+#    be resolved by the thermal-monitor alone (e.g., a failure mode was designed
+#    but no capacity headroom exists to support it).
+#
+# Both require Pythia confirmation because they extend consultation scope.
+
+back_routes:
+  # Back-route 1: Assessment Gap (architecture -> assessment)
+  # The systems-thermodynamicist discovers data paths or access patterns not
+  # covered in the thermal assessment that are needed for architecture decisions.
+  # Pythia routes heat-mapper to produce a targeted supplement, not a full redo.
+  - source_phase: architecture
+    trigger: "assessment_gap"
+    target_phase: assessment
+    target_agent: heat-mapper
+    requires_user_confirmation: false
+    condition: "Systems-thermodynamicist identifies uncovered data paths or access patterns needed for architecture decisions"
+    max_iterations: 1
+    escalation_on_limit: "Escalate to user: assessment has been supplemented once. Further gaps suggest incomplete system context -- user needs to provide more information."
+
+  # Back-route 2: Design Inconsistency (validation -> specification)
+  # The thermal-monitor's cross-architecture validation reveals a gap between
+  # the architecture design and the capacity specification that creates an
+  # unmonitorable failure mode. Capacity-engineer must reconcile.
+  - source_phase: validation
+    trigger: "design_inconsistency"
+    target_phase: specification
+    target_agent: capacity-engineer
+    requires_user_confirmation: false
+    condition: "Thermal-monitor identifies capacity/architecture inconsistency that creates an operational blind spot"
+    max_iterations: 1
+    escalation_on_limit: "Escalate to user: specification has been revised once. Persistent inconsistency suggests an architecture-level trade-off that needs user input."
+
+# =============================================================================
+# ARTIFACT CHAIN
+# =============================================================================
+# All consultation artifacts live in .claude/wip/thermia/. Artifacts are
+# immutable once produced -- downstream agents read but do not modify them.
+#
+# STANDARD/DEEP chain:
+#   .claude/wip/thermia/
+#     thermal-assessment.md      (heat-mapper -> systems-thermodynamicist, capacity-engineer, thermal-monitor)
+#     cache-architecture.md      (systems-thermodynamicist -> capacity-engineer, thermal-monitor)
+#     capacity-specification.md  (capacity-engineer -> thermal-monitor)
+#     observability-plan.md      (thermal-monitor -> user, terminal artifact)
+#
+# QUICK chain:
+#   .claude/wip/thermia/
+#     thermal-assessment.md      (heat-mapper -> thermal-monitor)
+#     observability-plan.md      (thermal-monitor lite -> user, terminal artifact)
+
+# =============================================================================
+# CONSULTATIVE PROTOCOL
+# =============================================================================
+# Thermia agents operate as consultants, not code generators. Key behaviors:
+#
+# 1. Exhaust alternatives first: heat-mapper evaluates non-cache solutions
+#    before recommending caching. This is the defining constraint of the rite.
+#
+# 2. Every number has a derivation: capacity-engineer does not produce bare
+#    numbers. "2GB" is not a capacity plan.
+#
+# 3. Every pattern has a failure mode: systems-thermodynamicist specifies
+#    behavior for cache down, origin down, and network partition.
+#
+# 4. Miss rate, not hit rate: thermal-monitor uses miss rate as the primary
+#    health signal. Hit rate is a vanity metric.
+#
+# 5. Probing questions: All agents ask clarifying questions when assumptions
+#    are detected. They challenge common caching instincts.
+
+# =============================================================================
+# CROSS-RITE ROUTING
+# =============================================================================
+# Thermia produces design artifacts, not implementation. Routing is by
+# reference only -- thermal-monitor names the target rite, user decides.
+#
+# Primary outbound:
+#   10x-dev    - Implementation of the cache design
+#
+# Secondary outbound (situation-dependent):
+#   clinic     - Active cache incident requiring forensic investigation
+#   sre        - Monitoring infrastructure that needs building
+#   arch       - Broader architectural concerns surfaced during consultation
+#   hygiene    - Cache implementation code quality issues found in audit
+#   debt-triage - Systemic cache debt across multiple services
+
+# =============================================================================
+# COMMAND MAPPING
+# =============================================================================
+# /thermia       -> pythia (orchestrated consultation, determines complexity)
+# /heat-map      -> heat-mapper (direct assessment-only, no orchestration)
+# /cache-design  -> systems-thermodynamicist (direct architecture work)
+#
+# Agent roles for command mapping:
+# /thermia       -> pythia (entry agent, orchestrates full consultation)
+# /heat-map      -> heat-mapper (assessment phase, quick-switch)
+# /cache-design  -> systems-thermodynamicist (architecture phase, quick-switch)

@@ -1,0 +1,89 @@
+# Rite Manifest: thermia
+# Cache architecture consultation engine.
+
+name: thermia
+version: "1.0.0"
+description: "Cache architecture consultation lifecycle (Assessment -> Architecture -> Specification -> Validation)"
+
+entry_agent: pythia
+
+phases:
+  - name: assessment
+    agent: heat-mapper
+    produces: thermal-assessment
+    description: Map thermal landscape, evaluate alternatives, apply 6-gate framework
+
+  - name: architecture
+    agent: systems-thermodynamicist
+    produces: cache-architecture
+    description: Select patterns, consistency models, failure modes, hierarchy design
+    condition: "complexity >= STANDARD"
+
+  - name: specification
+    agent: capacity-engineer
+    produces: capacity-specification
+    description: Working set analysis, eviction policy, stampede protection, TTL design, costs
+    condition: "complexity >= STANDARD"
+
+  - name: validation
+    agent: thermal-monitor
+    produces: observability-plan
+    description: Observability design, alerting, runbooks, cross-architecture validation
+
+agents:
+  - name: pythia
+    role: Coordinates cache consultation phases, gates complexity, manages consultative flow
+    archetype: orchestrator
+
+  - name: heat-mapper
+    role: Maps thermal landscape, assesses whether caching is warranted, evaluates alternatives using 6-gate framework
+
+  - name: systems-thermodynamicist
+    role: Designs cache architecture, selects patterns, consistency models, failure modes, and hierarchy
+
+  - name: capacity-engineer
+    role: Sizes cache capacity, designs eviction policies, stampede protection, TTL strategy, and cost estimates
+
+  - name: thermal-monitor
+    role: Designs observability, alerting thresholds, operational runbooks, and cross-architecture validation
+
+agent_defaults:
+  type: specialist
+  maxTurns: 30
+  skills:
+    - thermia-ref
+  disallowedTools:
+    - NotebookEdit
+
+dromena:
+  - thermia-switch
+
+legomena:
+  - thermia-ref
+
+hooks:
+  - agent-guard
+
+hook_defaults:
+  write_guard:
+    allow_paths: [".claude/wip/thermia/"]
+
+dependencies:
+  - shared
+
+complexity_levels:
+  - name: QUICK
+    scope: "Single caching question, yes/no triage. Assessment + lite validation only."
+    phases: [assessment, validation]
+
+  - name: STANDARD
+    scope: "New cache design or existing cache review. Full 4-phase consultation."
+    phases: [assessment, architecture, specification, validation]
+
+  - name: DEEP
+    scope: "Post-mortem, production crisis, or full system redesign. All 4 phases at extended depth."
+    phases: [assessment, architecture, specification, validation]
+
+metadata:
+  domain: cache architecture
+  color: blue
