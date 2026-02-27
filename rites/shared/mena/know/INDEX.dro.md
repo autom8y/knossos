@@ -4,7 +4,6 @@ description: "Generate persistent codebase knowledge via theoros observation. Pr
 argument-hint: "[domain|--all] [--force] [--expires=DURATION]"
 allowed-tools: Bash, Read, Write, Glob, Grep, Task, Skill
 model: opus
-context: fork
 ---
 
 # /know -- Codebase Knowledge Generator
@@ -13,7 +12,7 @@ Dispatches theoros to observe and document codebase architecture, producing pers
 
 ## Context
 
-This command operates in forked context (transient session). It generates `.know/` files at the project root.
+This command runs in the main thread (requires Task tool for theoros dispatch). It generates `.know/` files at the project root. The Argus Pattern requires main-thread execution because agents cannot spawn agents — only the main thread has Task tool access.
 
 ## Pre-flight
 
