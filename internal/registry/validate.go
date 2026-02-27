@@ -25,11 +25,12 @@ type Warning struct {
 // riteManifest is a minimal struct for parsing manifest.yaml.
 // It avoids importing the full materialize package.
 type riteManifest struct {
-	Name       string          `yaml:"name"`
-	EntryAgent string          `yaml:"entry_agent"`
-	Agents     []manifestAgent `yaml:"agents"`
-	Legomena   []string        `yaml:"legomena"`
-	Dromena    []string        `yaml:"dromena"`
+	Name         string          `yaml:"name"`
+	EntryAgent   string          `yaml:"entry_agent"`
+	Agents       []manifestAgent `yaml:"agents"`
+	Legomena     []string        `yaml:"legomena"`
+	Dromena      []string        `yaml:"dromena"`
+	Dependencies []string        `yaml:"dependencies"`
 }
 
 // manifestAgent represents a single agent entry in a manifest.
@@ -40,9 +41,14 @@ type manifestAgent struct {
 // ValidateRiteReferences parses the manifest.yaml in ritePath and checks that
 // every referenced agent, legomena, and dromena file exists on disk.
 //
+// ritesBase is the parent directory containing all rites (e.g., "rites/").
+// When non-empty, the validator checks shared and dependency mena sources
+// in addition to the rite-local mena directory. When empty, only rite-local
+// mena is checked.
+//
 // Returns a (possibly empty) slice of warnings and nil on success.
 // Returns a non-nil error only if the manifest is missing or unparseable.
-func ValidateRiteReferences(ritePath string) ([]Warning, error) {
+func ValidateRiteReferences(ritePath string, ritesBase string) ([]Warning, error) {
 	manifestPath := filepath.Join(ritePath, "manifest.yaml")
 	data, err := os.ReadFile(manifestPath)
 	if err != nil {
@@ -72,10 +78,13 @@ func ValidateRiteReferences(ritePath string) ([]Warning, error) {
 		}
 	}
 
-	// Check each legomena INDEX file exists.
+	// Build mena lookup chain: rite-local -> shared -> dependencies.
+	// This mirrors the materializeMena() source priority order.
+	menaDirs := buildMenaDirs(ritePath, ritesBase, m.Dependencies)
+
+	// Check each legomena INDEX file exists in any source.
 	for _, lego := range m.Legomena {
-		indexFile := filepath.Join(ritePath, "mena", lego, "INDEX.lego.md")
-		if _, err := os.Stat(indexFile); os.IsNotExist(err) {
+		if !menaExistsInSources(lego, "lego", menaDirs) {
 			warnings = append(warnings, Warning{
 				File:    filepath.Join("mena", lego, "INDEX.lego.md"),
 				RefName: lego,
@@ -84,16 +93,10 @@ func ValidateRiteReferences(ritePath string) ([]Warning, error) {
 		}
 	}
 
-	// Check each dromena exists — try directory-based INDEX pattern first,
-	// then flat file pattern. Both are valid knossos conventions.
+	// Check each dromena exists in any source — try directory-based INDEX
+	// pattern first, then flat file pattern. Both are valid knossos conventions.
 	for _, dro := range m.Dromena {
-		indexPattern := filepath.Join(ritePath, "mena", dro, "INDEX.dro.md")
-		flatPattern := filepath.Join(ritePath, "mena", dro+".dro.md")
-
-		_, errIndex := os.Stat(indexPattern)
-		_, errFlat := os.Stat(flatPattern)
-
-		if os.IsNotExist(errIndex) && os.IsNotExist(errFlat) {
+		if !menaExistsInSources(dro, "dro", menaDirs) {
 			warnings = append(warnings, Warning{
 				File:    filepath.Join("mena", dro),
 				RefName: dro,
@@ -115,4 +118,49 @@ func ValidateRiteReferences(ritePath string) ([]Warning, error) {
 	}
 
 	return warnings, nil
+}
+
+// buildMenaDirs returns the ordered list of mena directories to search.
+// Priority: rite-local -> shared -> each dependency.
+func buildMenaDirs(ritePath string, ritesBase string, dependencies []string) []string {
+	dirs := []string{filepath.Join(ritePath, "mena")}
+
+	if ritesBase == "" {
+		return dirs
+	}
+
+	// Shared rite mena.
+	dirs = append(dirs, filepath.Join(ritesBase, "shared", "mena"))
+
+	// Dependency rite mena (in manifest order).
+	for _, dep := range dependencies {
+		if dep != "shared" {
+			dirs = append(dirs, filepath.Join(ritesBase, dep, "mena"))
+		}
+	}
+
+	return dirs
+}
+
+// menaExistsInSources checks whether a mena entry can be resolved from any of
+// the provided mena source directories.
+// For legomena: checks for {dir}/{name}/INDEX.lego.md
+// For dromena: checks for {dir}/{name}/INDEX.dro.md or {dir}/{name}.dro.md
+func menaExistsInSources(name string, menaType string, menaDirs []string) bool {
+	for _, dir := range menaDirs {
+		switch menaType {
+		case "lego":
+			if _, err := os.Stat(filepath.Join(dir, name, "INDEX.lego.md")); err == nil {
+				return true
+			}
+		case "dro":
+			if _, err := os.Stat(filepath.Join(dir, name, "INDEX.dro.md")); err == nil {
+				return true
+			}
+			if _, err := os.Stat(filepath.Join(dir, name+".dro.md")); err == nil {
+				return true
+			}
+		}
+	}
+	return false
 }

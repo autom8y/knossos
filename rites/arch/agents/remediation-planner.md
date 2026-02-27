@@ -165,12 +165,6 @@ Ready for delivery (workflow complete) when:
 
 If uncertain: Have a fresh reader scan the executive summary and recommendations. If they cannot identify the top 3 actions without reading prior artifacts, the report is not self-contained enough.
 
-## Skills Reference
-
-- rite-development for artifact templates and agent patterns
-- agent-prompt-engineering for prompt quality standards
-- forge-ref for handoff criteria and cross-rite referral patterns
-
 ## Cross-Rite Routing
 
 This agent is the sole producer of cross-rite referrals in the arch rite. Use the routing table and referral format in the Approach section. Every referral must include enough context (evidence, scope, priority) for the target rite to act without re-analyzing the codebase.

@@ -315,7 +315,8 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 
 	// Validate rite references: warn about stale agents/mena entries in the manifest.
 	// Non-blocking: validation errors (missing manifest, parse failure) are silently skipped.
-	if warnings, err := registry.ValidateRiteReferences(ritePath); err == nil {
+	ritesBase := filepath.Dir(ritePath)
+	if warnings, err := registry.ValidateRiteReferences(ritePath, ritesBase); err == nil {
 		for _, w := range warnings {
 			log.Printf("Warning: %s: %s (%s)", w.File, w.Message, w.RefName)
 		}

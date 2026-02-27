@@ -129,12 +129,6 @@ Ready for dependency-analyst when:
 
 If uncertain: Check that every API surface entry includes endpoint paths, protocols, and enough interface detail to match against consumers in other units.
 
-## Skills Reference
-
-- rite-development for artifact templates and agent patterns
-- agent-prompt-engineering for prompt quality standards
-- forge-ref for role definition and handoff patterns
-
 ## Cross-Rite Routing
 
 This agent does not produce cross-rite referrals. Observations that suggest concerns in other domains (security, code quality, documentation gaps) are noted as unknowns for the remediation-planner to route.

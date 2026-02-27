@@ -49,10 +49,7 @@ agents:
 
 dromena: []
 
-legomena:
-  - rite-development
-  - agent-prompt-engineering
-  - forge-ref
+legomena: []
 
 hooks: []
 

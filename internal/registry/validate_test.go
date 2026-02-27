@@ -59,7 +59,7 @@ func TestValidateRiteReferences_ValidRite(t *testing.T) {
 	// Create dromena (directory-based INDEX pattern).
 	writeFile(t, filepath.Join(dir, "mena", "go", "INDEX.dro.md"))
 
-	warnings, err := ValidateRiteReferences(dir)
+	warnings, err := ValidateRiteReferences(dir, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -85,7 +85,7 @@ func TestValidateRiteReferences_MissingAgentFile(t *testing.T) {
 	// Create only pythia, not ghost.
 	writeFile(t, filepath.Join(dir, "agents", "pythia.md"))
 
-	warnings, err := ValidateRiteReferences(dir)
+	warnings, err := ValidateRiteReferences(dir, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -108,7 +108,7 @@ func TestValidateRiteReferences_MissingLegomena(t *testing.T) {
 	}
 	writeManifest(t, dir, m)
 
-	warnings, err := ValidateRiteReferences(dir)
+	warnings, err := ValidateRiteReferences(dir, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -126,7 +126,7 @@ func TestValidateRiteReferences_NoManifest(t *testing.T) {
 	dir := t.TempDir()
 	// Intentionally do NOT write manifest.yaml.
 
-	_, err := ValidateRiteReferences(dir)
+	_, err := ValidateRiteReferences(dir, "")
 	if err == nil {
 		t.Error("expected error for missing manifest, got nil")
 	}
@@ -149,7 +149,7 @@ func TestValidateRiteReferences_EntryAgentNotInList(t *testing.T) {
 	// Create the declared agent file to avoid an extra warning.
 	writeFile(t, filepath.Join(dir, "agents", "analyst.md"))
 
-	warnings, err := ValidateRiteReferences(dir)
+	warnings, err := ValidateRiteReferences(dir, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -179,11 +179,177 @@ func TestValidateRiteReferences_DromeneFlatPattern(t *testing.T) {
 	// Use flat file pattern instead of directory INDEX.
 	writeFile(t, filepath.Join(dir, "mena", "park.dro.md"))
 
-	warnings, err := ValidateRiteReferences(dir)
+	warnings, err := ValidateRiteReferences(dir, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	if len(warnings) != 0 {
 		t.Errorf("expected 0 warnings for flat dromena pattern, got %d: %+v", len(warnings), warnings)
+	}
+}
+
+// --- Multi-source mena resolution tests ---
+
+// makeRitesDir creates a rites/ base with a rite subdirectory and returns
+// (ritePath, ritesBase).
+func makeRitesDir(t *testing.T, riteName string) (string, string) {
+	t.Helper()
+	base := t.TempDir()
+	ritesBase := filepath.Join(base, "rites")
+	ritePath := filepath.Join(ritesBase, riteName)
+	if err := os.MkdirAll(ritePath, 0755); err != nil {
+		t.Fatalf("makeRitesDir: %v", err)
+	}
+	return ritePath, ritesBase
+}
+
+// TestValidateRiteReferences_LegomenaResolvedFromShared verifies that a
+// legomena declared in the rite manifest resolves from rites/shared/mena/.
+func TestValidateRiteReferences_LegomenaResolvedFromShared(t *testing.T) {
+	ritePath, ritesBase := makeRitesDir(t, "myrite")
+
+	m := riteManifest{
+		Name:         "myrite",
+		Legomena:     []string{"shared-skill"},
+		Dependencies: []string{"shared"},
+	}
+	writeManifest(t, ritePath, m)
+
+	// Skill exists in shared, not rite-local.
+	writeFile(t, filepath.Join(ritesBase, "shared", "mena", "shared-skill", "INDEX.lego.md"))
+
+	warnings, err := ValidateRiteReferences(ritePath, ritesBase)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(warnings) != 0 {
+		t.Errorf("expected 0 warnings (resolved from shared), got %d: %+v", len(warnings), warnings)
+	}
+}
+
+// TestValidateRiteReferences_LegomenaResolvedFromDependency verifies that a
+// legomena resolves from a dependency rite's mena directory.
+func TestValidateRiteReferences_LegomenaResolvedFromDependency(t *testing.T) {
+	ritePath, ritesBase := makeRitesDir(t, "consumer")
+
+	m := riteManifest{
+		Name:         "consumer",
+		Legomena:     []string{"provider-ref"},
+		Dependencies: []string{"shared", "provider"},
+	}
+	writeManifest(t, ritePath, m)
+
+	// Skill exists in provider dependency, not rite-local or shared.
+	writeFile(t, filepath.Join(ritesBase, "provider", "mena", "provider-ref", "INDEX.lego.md"))
+
+	warnings, err := ValidateRiteReferences(ritePath, ritesBase)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(warnings) != 0 {
+		t.Errorf("expected 0 warnings (resolved from dependency), got %d: %+v", len(warnings), warnings)
+	}
+}
+
+// TestValidateRiteReferences_DromenaResolvedFromShared verifies that dromena
+// (both INDEX and flat patterns) resolve from shared mena.
+func TestValidateRiteReferences_DromenaResolvedFromShared(t *testing.T) {
+	ritePath, ritesBase := makeRitesDir(t, "myrite")
+
+	m := riteManifest{
+		Name:         "myrite",
+		Dromena:      []string{"index-cmd", "flat-cmd"},
+		Dependencies: []string{"shared"},
+	}
+	writeManifest(t, ritePath, m)
+
+	// INDEX pattern in shared.
+	writeFile(t, filepath.Join(ritesBase, "shared", "mena", "index-cmd", "INDEX.dro.md"))
+	// Flat pattern in shared.
+	writeFile(t, filepath.Join(ritesBase, "shared", "mena", "flat-cmd.dro.md"))
+
+	warnings, err := ValidateRiteReferences(ritePath, ritesBase)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(warnings) != 0 {
+		t.Errorf("expected 0 warnings (dromena in shared), got %d: %+v", len(warnings), warnings)
+	}
+}
+
+// TestValidateRiteReferences_MissingInAllSources verifies that a legomena
+// missing from rite-local, shared, and all dependencies still produces a warning.
+func TestValidateRiteReferences_MissingInAllSources(t *testing.T) {
+	ritePath, ritesBase := makeRitesDir(t, "myrite")
+
+	m := riteManifest{
+		Name:         "myrite",
+		Legomena:     []string{"nonexistent"},
+		Dependencies: []string{"shared"},
+	}
+	writeManifest(t, ritePath, m)
+
+	// Create shared mena dir but NOT the skill.
+	if err := os.MkdirAll(filepath.Join(ritesBase, "shared", "mena"), 0755); err != nil {
+		t.Fatal(err)
+	}
+
+	warnings, err := ValidateRiteReferences(ritePath, ritesBase)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(warnings) != 1 {
+		t.Errorf("expected 1 warning, got %d: %+v", len(warnings), warnings)
+	}
+	if len(warnings) > 0 && warnings[0].RefName != "nonexistent" {
+		t.Errorf("expected warning for 'nonexistent', got RefName=%q", warnings[0].RefName)
+	}
+}
+
+// TestValidateRiteReferences_EmptyRitesBaseFallback verifies that an empty
+// ritesBase degrades to rite-local-only checking.
+func TestValidateRiteReferences_EmptyRitesBaseFallback(t *testing.T) {
+	ritePath, ritesBase := makeRitesDir(t, "myrite")
+
+	m := riteManifest{
+		Name:         "myrite",
+		Legomena:     []string{"shared-only"},
+		Dependencies: []string{"shared"},
+	}
+	writeManifest(t, ritePath, m)
+
+	// Skill exists in shared but we pass empty ritesBase.
+	writeFile(t, filepath.Join(ritesBase, "shared", "mena", "shared-only", "INDEX.lego.md"))
+
+	warnings, err := ValidateRiteReferences(ritePath, "")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(warnings) != 1 {
+		t.Errorf("expected 1 warning (empty ritesBase = rite-local only), got %d: %+v", len(warnings), warnings)
+	}
+}
+
+// TestValidateRiteReferences_NonexistentDependencyDir verifies graceful
+// handling when a declared dependency directory does not exist on disk.
+func TestValidateRiteReferences_NonexistentDependencyDir(t *testing.T) {
+	ritePath, ritesBase := makeRitesDir(t, "myrite")
+
+	m := riteManifest{
+		Name:         "myrite",
+		Legomena:     []string{"local-skill"},
+		Dependencies: []string{"shared", "phantom"},
+	}
+	writeManifest(t, ritePath, m)
+
+	// Skill exists rite-locally. "phantom" dependency dir does NOT exist.
+	writeFile(t, filepath.Join(ritePath, "mena", "local-skill", "INDEX.lego.md"))
+
+	warnings, err := ValidateRiteReferences(ritePath, ritesBase)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(warnings) != 0 {
+		t.Errorf("expected 0 warnings (resolved rite-locally despite phantom dep), got %d: %+v", len(warnings), warnings)
 	}
 }

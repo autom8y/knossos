@@ -142,12 +142,6 @@ Ready for remediation-planner when:
 
 If uncertain: Verify that every risk register entry has severity, likelihood, evidence, and enough context to understand the concern without re-analyzing the code.
 
-## Skills Reference
-
-- rite-development for artifact templates and agent patterns
-- agent-prompt-engineering for prompt quality standards
-- forge-ref for domain authority and handoff patterns
-
 ## Cross-Rite Routing
 
 This agent does not produce cross-rite referrals directly. When findings touch other domains (security vulnerabilities, code quality issues, documentation gaps), note them as observations for the remediation-planner to convert into structured cross-rite referrals.
