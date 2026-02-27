@@ -121,3 +121,77 @@ func TestCheckSkillAtRefs(t *testing.T) {
 		}
 	})
 }
+
+func TestCheckSourcePathLeaks(t *testing.T) {
+	t.Run("clean body produces no findings", func(t *testing.T) {
+		var findings []Finding
+		body := "Read the domain criteria:\n```\nRead(\".claude/skills/pinakes/domains/arch.md\")\n```"
+		checkSourcePathLeaks(body, "test.md", &findings)
+		if len(findings) != 0 {
+			t.Errorf("expected 0 findings, got %d", len(findings))
+		}
+	})
+
+	t.Run("Read with rites path produces HIGH finding", func(t *testing.T) {
+		var findings []Finding
+		body := "Load criteria:\n```\nRead(\"rites/shared/mena/pinakes/domains/arch.lego.md\")\n```"
+		checkSourcePathLeaks(body, "test.md", &findings)
+		var hasRead bool
+		for _, f := range findings {
+			if f.Rule == "source-path-read" {
+				hasRead = true
+				if f.Severity != SevHigh {
+					t.Errorf("expected severity HIGH, got %s", f.Severity)
+				}
+			}
+		}
+		if !hasRead {
+			t.Error("expected source-path-read finding")
+		}
+	})
+
+	t.Run("rites/*/mena/ reference produces MEDIUM finding", func(t *testing.T) {
+		var findings []Finding
+		body := "Full documentation: `rites/strategy/mena/strategy-ref/INDEX.lego.md`"
+		checkSourcePathLeaks(body, "test.md", &findings)
+		var hasRef bool
+		for _, f := range findings {
+			if f.Rule == "source-path-ref" {
+				hasRef = true
+				if f.Severity != SevMedium {
+					t.Errorf("expected severity MED, got %s", f.Severity)
+				}
+			}
+		}
+		if !hasRef {
+			t.Error("expected source-path-ref finding")
+		}
+	})
+
+	t.Run("source extension produces LOW finding", func(t *testing.T) {
+		var findings []Finding
+		body := "- [documentation](../templates/documentation/INDEX.lego.md) - templates"
+		checkSourcePathLeaks(body, "test.md", &findings)
+		var hasExt bool
+		for _, f := range findings {
+			if f.Rule == "source-path-ext" {
+				hasExt = true
+				if f.Severity != SevLow {
+					t.Errorf("expected severity LOW, got %s", f.Severity)
+				}
+			}
+		}
+		if !hasExt {
+			t.Error("expected source-path-ext finding")
+		}
+	})
+
+	t.Run("materialization documentation excluded", func(t *testing.T) {
+		var findings []Finding
+		body := "**Target files**: .claude/skills/**/*.md (projected from rites/*/mena/**/*.lego.md)"
+		checkSourcePathLeaks(body, "test.md", &findings)
+		if len(findings) != 0 {
+			t.Errorf("expected 0 findings for materialization docs, got %d", len(findings))
+		}
+	})
+}

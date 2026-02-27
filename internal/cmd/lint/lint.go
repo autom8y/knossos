@@ -21,6 +21,16 @@ import (
 // and regex patterns. Matches: @word-word at word boundaries.
 var skillAtPattern = regexp.MustCompile(`(?m)(?:^|[\s(` + "`" + `])@([a-z][a-z0-9](?:[a-z0-9-]*[a-z0-9])?)(?:[#/\s` + "`" + `.,;:)\]]|$)`)
 
+// Source path leak detection patterns.
+var (
+	// Read() calls with knossos source paths — functional breakage in satellites.
+	readSourcePathPattern = regexp.MustCompile(`Read\("rites/`)
+	// rites/*/mena/ references in links or documentation.
+	riteMenaPathPattern = regexp.MustCompile(`rites/[^/]+/mena/`)
+	// Source extensions (.lego.md or .dro.md) in body references.
+	sourceExtPattern = regexp.MustCompile(`\.(lego|dro)\.md`)
+)
+
 // Severity levels for lint findings.
 const (
 	SevCritical = "CRIT"
@@ -449,6 +459,9 @@ func lintDromenFile(_, relPath string, data []byte, report *LintReport) {
 
 	// @skill-name anti-pattern check
 	checkSkillAtRefs(string(body), relPath, &report.Dromena)
+
+	// Source path leak check
+	checkSourcePathLeaks(string(body), relPath, &report.Dromena)
 }
 
 // --- Dromena namespace collision detection ---
@@ -580,6 +593,9 @@ func lintLegomenFile(_, relPath string, data []byte, report *LintReport) {
 
 	// @skill-name anti-pattern check
 	checkSkillAtRefs(string(body), relPath, &report.Legomena)
+
+	// Source path leak check
+	checkSourcePathLeaks(string(body), relPath, &report.Legomena)
 }
 
 // --- @skill-name check ---
@@ -609,6 +625,70 @@ func checkSkillAtRefs(body, relPath string, findings *[]Finding) {
 		File: relPath, Severity: SevHigh, Rule: "skill-at-syntax",
 		Message: fmt.Sprintf("body contains %d @skill-name reference(s) — use plain skill name instead (see lexicon anti-patterns)", count),
 	})
+}
+
+// --- Source path leak check ---
+
+// checkSourcePathLeaks scans body content for knossos source paths that leak
+// into materialized artifacts, causing failures or confusion in satellites.
+func checkSourcePathLeaks(body, relPath string, findings *[]Finding) {
+	lines := strings.Split(body, "\n")
+	inCodeBlock := false
+
+	var readLeaks, refLeaks, extLeaks int
+
+	for _, line := range lines {
+		trimmed := strings.TrimSpace(line)
+		if strings.HasPrefix(trimmed, "```") {
+			inCodeBlock = !inCodeBlock
+			continue
+		}
+
+		// Skip lines that document the materialization pipeline itself
+		lower := strings.ToLower(line)
+		if strings.Contains(lower, "materializ") || strings.Contains(lower, "projected from") || strings.Contains(lower, "sync pipeline") {
+			continue
+		}
+
+		// Pattern 1: Read() calls with rites/ source paths (HIGH)
+		if readSourcePathPattern.MatchString(line) {
+			readLeaks++
+		}
+
+		// Pattern 2: rites/*/mena/ in links or documentation (MEDIUM)
+		// Only check outside code blocks to avoid false positives in examples
+		if !inCodeBlock && riteMenaPathPattern.MatchString(line) && !readSourcePathPattern.MatchString(line) {
+			refLeaks++
+		}
+
+		// Pattern 3: .lego.md or .dro.md extensions in references (LOW)
+		// Only in markdown link syntax or backtick paths, not in prose about the extension
+		if !inCodeBlock && sourceExtPattern.MatchString(line) {
+			// Exclude lines that discuss extensions conceptually
+			if !strings.Contains(lower, "extension") && !strings.Contains(lower, "suffix") && !strings.Contains(lower, "infix") {
+				extLeaks++
+			}
+		}
+	}
+
+	if readLeaks > 0 {
+		*findings = append(*findings, Finding{
+			File: relPath, Severity: SevHigh, Rule: "source-path-read",
+			Message: fmt.Sprintf("body contains %d Read() call(s) with rites/ source paths — use .claude/skills/ or .claude/commands/ materialized paths", readLeaks),
+		})
+	}
+	if refLeaks > 0 {
+		*findings = append(*findings, Finding{
+			File: relPath, Severity: SevMedium, Rule: "source-path-ref",
+			Message: fmt.Sprintf("body contains %d reference(s) to rites/*/mena/ source paths — use materialized paths or skill names", refLeaks),
+		})
+	}
+	if extLeaks > 0 {
+		*findings = append(*findings, Finding{
+			File: relPath, Severity: SevLow, Rule: "source-path-ext",
+			Message: fmt.Sprintf("body contains %d reference(s) with .lego.md or .dro.md extensions — materialized files use .md", extLeaks),
+		})
+	}
 }
 
 // --- Helpers ---
