@@ -49,6 +49,8 @@ dromena:
   - 10x-ref
   - architect-ref
   - build-ref
+  - pr
+  - spike
 
 legomena:
   - 10x-workflow
