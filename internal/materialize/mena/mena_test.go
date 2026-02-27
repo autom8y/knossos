@@ -518,7 +518,7 @@ func TestSyncMena_NamespaceCollision_YieldsToUserEntry(t *testing.T) {
 		LastSync:      time.Now().UTC(),
 		ActiveRite:    "test",
 		Entries: map[string]*provenance.ProvenanceEntry{
-			"commands/my-cmd.md": provenance.NewUserEntry(provenance.ScopeRite, "sha256:abc123"),
+			"commands/my-cmd.md": provenance.NewUserEntry(provenance.ScopeRite, "sha256:0000000000000000000000000000000000000000000000000000000000000000"),
 		},
 	}
 	if err := provenance.Save(filepath.Join(claudeDir, provenance.ManifestFileName), manifest); err != nil {
@@ -594,7 +594,7 @@ func TestSyncMena_NamespaceCollision_OverwriteDivergedReclaims(t *testing.T) {
 		LastSync:      time.Now().UTC(),
 		ActiveRite:    "test",
 		Entries: map[string]*provenance.ProvenanceEntry{
-			"commands/my-cmd.md": provenance.NewUserEntry(provenance.ScopeRite, "sha256:abc123"),
+			"commands/my-cmd.md": provenance.NewUserEntry(provenance.ScopeRite, "sha256:0000000000000000000000000000000000000000000000000000000000000000"),
 		},
 	}
 	if err := provenance.Save(filepath.Join(claudeDir, provenance.ManifestFileName), manifest); err != nil {
