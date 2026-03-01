@@ -1,0 +1,106 @@
+name: E2E Distribution Validation
+
+# Trigger: on every published release AND manually via workflow_dispatch.
+#
+# DELIBERATE SHORTCUTS (prototype):
+#   - No retry logic on flaky brew operations
+#   - macOS job uses macos-latest (arm64) -- macos-26 label pending GA rollout timing
+#   - Linux job builds Docker image on each run (no BuildKit cache between runs)
+#   - Version auto-detected from the triggering release tag; manual runs detect from latest release
+#   - No artifact upload of e2e logs (pass/fail is sufficient for go/no-go)
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to validate (e.g. v0.3.0). Leave blank to auto-detect latest release.'
+        required: false
+        default: ''
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # macOS E2E: real Homebrew on Apple Silicon
+  # This is the high-fidelity job -- tests the exact dogfooder environment.
+  # ---------------------------------------------------------------------------
+  macos-e2e:
+    name: macOS E2E (Homebrew)
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Resolve target version
+        id: version
+        run: |
+          if [[ "${{ github.event_name }}" == "release" ]]; then
+            VERSION="${{ github.event.release.tag_name }}"
+          elif [[ -n "${{ inputs.version }}" ]]; then
+            VERSION="${{ inputs.version }}"
+          else
+            VERSION=$(gh release view --repo autom8y/knossos --json tagName --jq '.tagName' 2>/dev/null || echo "")
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Resolved version: $VERSION"
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Ensure clean tap state
+        # Remove any cached tap to guarantee a clean install from autom8y/tap
+        run: brew untap autom8y/tap 2>/dev/null || true
+
+      - name: Run E2E validation
+        run: |
+          chmod +x ./scripts/e2e-validate.sh
+          VERSION="${{ steps.version.outputs.version }}"
+          if [[ -n "$VERSION" ]]; then
+            ./scripts/e2e-validate.sh --version "$VERSION"
+          else
+            ./scripts/e2e-validate.sh
+          fi
+        env:
+          # Pass HOMEBREW_NO_AUTO_UPDATE to speed up brew operations in CI
+          HOMEBREW_NO_AUTO_UPDATE: "1"
+          HOMEBREW_NO_INSTALL_CLEANUP: "1"
+
+  # ---------------------------------------------------------------------------
+  # Linux E2E: Docker with Linuxbrew
+  # Fast feedback via the homebrew/brew Docker image.
+  # Tests formula/tap correctness and binary on linux_arm64.
+  # ---------------------------------------------------------------------------
+  linux-e2e:
+    name: Linux E2E (Docker + Linuxbrew)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Resolve target version
+        id: version
+        run: |
+          if [[ "${{ github.event_name }}" == "release" ]]; then
+            VERSION="${{ github.event.release.tag_name }}"
+          elif [[ -n "${{ inputs.version }}" ]]; then
+            VERSION="${{ inputs.version }}"
+          else
+            VERSION=$(gh release view --repo autom8y/knossos --json tagName --jq '.tagName' 2>/dev/null || echo "")
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Resolved version: $VERSION"
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Build Docker E2E image
+        run: docker build -f Dockerfile.e2e -t ari-e2e .
+
+      - name: Run E2E validation (Docker)
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          if [[ -n "$VERSION" ]]; then
+            docker run --rm ari-e2e --version "$VERSION"
+          else
+            docker run --rm ari-e2e
+          fi

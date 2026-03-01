@@ -1,0 +1,43 @@
+# Dockerfile.e2e -- Docker-based Linux E2E harness for ari distribution validation
+#
+# Uses the official homebrew/brew image (Ubuntu-based, includes Linuxbrew).
+# Validates the full install-to-use pipeline on Linux.
+#
+# DELIBERATE SHORTCUTS (prototype):
+#   - homebrew/brew image is 1.4 GB; acceptable for occasional CI use, heavy locally
+#   - Linuxbrew is not identical to macOS Homebrew; see SPIKE-e2e-distribution-harness.md
+#   - No image caching layer optimization (prototype, not production CI)
+#   - Build args (VERSION, SKIP_INSTALL) passed through but not validated here
+#
+# Usage:
+#   docker build -f Dockerfile.e2e -t ari-e2e .
+#   docker run --rm ari-e2e
+#   docker run --rm ari-e2e --version v0.3.0
+#
+# Or via Makefile:
+#   make e2e-linux
+
+FROM homebrew/brew:latest
+
+# Switch to linuxbrew user (homebrew/brew image runs as linuxbrew by default)
+# Linuxbrew is at /home/linuxbrew/.linuxbrew/
+USER linuxbrew
+
+# Install gh CLI for version auto-detection (optional; script degrades gracefully if absent)
+# Deliberate shortcut: brew install gh adds ~100MB and time; skip in prototype
+# Uncomment if version pinning is needed:
+# RUN brew install gh
+
+# Copy the validation script into the image
+COPY --chown=linuxbrew:linuxbrew scripts/e2e-validate.sh /home/linuxbrew/e2e-validate.sh
+RUN chmod +x /home/linuxbrew/e2e-validate.sh
+
+# PATH is set by homebrew/brew image already
+# Verify Linuxbrew is usable
+RUN brew --version
+
+WORKDIR /home/linuxbrew
+
+ENTRYPOINT ["/home/linuxbrew/e2e-validate.sh"]
+# Default: run with no args (auto-detect version, full install)
+CMD []
