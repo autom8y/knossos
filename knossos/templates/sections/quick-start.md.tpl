@@ -7,9 +7,12 @@
 {{ .AgentCount }}-agent workflow ({{ .ActiveRite }}):
 
 {{include "partials/agent-table.md.tpl"}}
-
+{{ if .IsKnossosProject -}}
 Entry point: `/go`. Agent invocation patterns: `prompting` skill. Routing guidance: `/consult`.
+{{- else -}}
+Delegate to specialists via Task tool.
+{{- end }}
 {{- else }}
-No active rite. Use `/go` to get started, or `ari sync --rite=<name>` to activate directly.
+No active rite. Use {{ if .IsKnossosProject }}`/go` to get started, or {{ end }}`ari sync --rite=<name>` to activate{{ if .IsKnossosProject }} directly{{ end }}.
 {{- end }}
 <!-- KNOSSOS:END quick-start -->

@@ -34,7 +34,7 @@ func TestGenerator_GenerateSection_Knossos(t *testing.T) {
 			"execution-mode": {Owner: OwnerKnossos},
 		},
 	}
-	ctx := &RenderContext{ActiveRite: "10x-dev"}
+	ctx := &RenderContext{ActiveRite: "10x-dev", IsKnossosProject: true}
 	gen := NewGenerator("", manifest, ctx)
 
 	content, err := gen.GenerateSection("execution-mode")
@@ -298,8 +298,9 @@ func TestGenerator_LookupTerminology_CustomVars(t *testing.T) {
 
 func TestGenerator_GenerateQuickStartContent(t *testing.T) {
 	ctx := &RenderContext{
-		ActiveRite: "10x-dev",
-		AgentCount: 5,
+		ActiveRite:       "10x-dev",
+		AgentCount:       5,
+		IsKnossosProject: true,
 		Agents: []AgentInfo{
 			{Name: "architect", Role: "System design", Produces: "TDD"},
 		},

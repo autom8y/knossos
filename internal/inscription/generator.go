@@ -40,6 +40,10 @@ type RenderContext struct {
 
 	// ProjectRoot is the root directory of the project.
 	ProjectRoot string
+
+	// IsKnossosProject is true when materializing the knossos repo itself
+	// (templates are within the project). False for satellite projects.
+	IsKnossosProject bool
 }
 
 // Generator handles content generation for CLAUDE.md regions.
@@ -397,7 +401,11 @@ func (g *Generator) generateQuickStartContent() (string, error) {
 	}
 
 	// Footer
-	sb.WriteString("Entry point: `/go`. Agent invocation patterns: `prompting` skill. Routing guidance: `/consult`.")
+	if g.Context.IsKnossosProject {
+		sb.WriteString("Entry point: `/go`. Agent invocation patterns: `prompting` skill. Routing guidance: `/consult`.")
+	} else {
+		sb.WriteString("Delegate to specialists via Task tool.")
+	}
 
 	return sb.String(), nil
 }
@@ -490,6 +498,11 @@ func (g *Generator) SetSectionTemplate(regionName, template string) {
 // Default content generators for each section type
 
 func (g *Generator) getDefaultExecutionModeContent() string {
+	if g.Context != nil && !g.Context.IsKnossosProject {
+		return `## Execution Mode
+
+Use the available agents and slash commands. Delegate complex work to specialists via Task tool.`
+	}
 	return `## Execution Mode
 
 Three operating modes:
@@ -504,6 +517,12 @@ Use ` + "`/go`" + ` to start any session. Use ` + "`/consult`" + ` for mode sele
 }
 
 func (g *Generator) getDefaultAgentRoutingContent() string {
+	if g.Context != nil && !g.Context.IsKnossosProject {
+		return `## Agent Routing
+
+Delegate to specialists via Task tool.
+Agents cannot spawn agents — only the main thread has Task tool access.`
+	}
 	return `## Agent Routing
 
 Delegate to specialists via Task tool. Pythia coordinates phases and handoffs.
@@ -512,6 +531,18 @@ Without a session, execute directly or use ` + "`/task`" + `. Routing guidance: 
 }
 
 func (g *Generator) getDefaultCommandsContent() string {
+	if g.Context != nil && !g.Context.IsKnossosProject {
+		return `## CC Primitives
+
+| CC Primitive | Invocation | Source |
+|---|---|---|
+| Slash command | User types ` + "`/name`" + ` | ` + "`.claude/commands/`" + ` |
+| Skill tool | Model calls ` + "`Skill(\"name\")`" + ` | ` + "`.claude/skills/`" + ` |
+| Task tool | Model calls ` + "`Task(subagent_type)`" + ` | ` + "`.claude/agents/`" + ` |
+| Hook | Auto-fires on lifecycle events | ` + "`.claude/settings.json`" + ` |
+
+Agents cannot spawn other agents — only the main thread has Task tool access.`
+	}
 	return `## CC Primitives
 
 | CC Primitive | Knossos Name | Invocation | Source |
@@ -526,6 +557,11 @@ Agents cannot spawn other agents — only the main thread has Task tool access.`
 }
 
 func (g *Generator) getDefaultPlatformInfrastructureContent() string {
+	if g.Context != nil && !g.Context.IsKnossosProject {
+		return `## Platform
+
+CLI reference: ` + "`ari --help`" + `.`
+	}
 	return `## Platform
 
 **Entry**: ` + "`/go`" + ` — detects session state, resumes parked work, or routes new tasks.
@@ -536,6 +572,11 @@ func (g *Generator) getDefaultPlatformInfrastructureContent() string {
 }
 
 func (g *Generator) getDefaultQuickStartContent() string {
+	if g.Context != nil && !g.Context.IsKnossosProject {
+		return `## Quick Start
+
+No active rite. Use ` + "`ari sync --rite=<name>`" + ` to activate a rite.`
+	}
 	return `## Quick Start
 
 No active rite. Use ` + "`/go`" + ` to get started, or ` + "`ari sync --rite=<name>`" + ` to activate directly.`

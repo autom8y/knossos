@@ -1276,12 +1276,14 @@ func (m *Materializer) materializeCLAUDEmd(manifest *RiteManifest, claudeDir str
 		})
 	}
 
+	projectRoot := m.resolver.ProjectRoot()
 	renderCtx := &inscription.RenderContext{
-		ActiveRite:  manifest.Name,
-		AgentCount:  len(manifest.Agents),
-		Agents:      agents,
-		KnossosVars: make(map[string]string),
-		ProjectRoot: m.resolver.ProjectRoot(),
+		ActiveRite:       manifest.Name,
+		AgentCount:       len(manifest.Agents),
+		Agents:           agents,
+		KnossosVars:      make(map[string]string),
+		ProjectRoot:      projectRoot,
+		IsKnossosProject: m.templatesDir != "" && strings.HasPrefix(m.templatesDir, projectRoot),
 	}
 
 	// Resolve template source: embedded FS or filesystem directory
@@ -1327,12 +1329,14 @@ func (m *Materializer) materializeCLAUDEmd(manifest *RiteManifest, claudeDir str
 // materializeMinimalCLAUDEmd generates CLAUDE.md for cross-cutting mode (no agents).
 // Delegates to inscription.SyncCLAUDEmd without manifest updates.
 func (m *Materializer) materializeMinimalCLAUDEmd(claudeDir string, collector provenance.Collector) (string, error) {
+	projectRoot := m.resolver.ProjectRoot()
 	renderCtx := &inscription.RenderContext{
-		ActiveRite:  "",
-		AgentCount:  0,
-		Agents:      []inscription.AgentInfo{},
-		KnossosVars: make(map[string]string),
-		ProjectRoot: m.resolver.ProjectRoot(),
+		ActiveRite:       "",
+		AgentCount:       0,
+		Agents:           []inscription.AgentInfo{},
+		KnossosVars:      make(map[string]string),
+		ProjectRoot:      projectRoot,
+		IsKnossosProject: m.templatesDir != "" && strings.HasPrefix(m.templatesDir, projectRoot),
 	}
 
 	result, err := inscription.SyncCLAUDEmd(inscription.CLAUDEmdSyncOptions{
