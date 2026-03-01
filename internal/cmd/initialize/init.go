@@ -48,6 +48,9 @@ What was created:
   .claude/commands/   Slash commands (type / in Claude Code to see them)
   .claude/CLAUDE.md   Project instructions (always in context)
   .claude/settings.json  Hook configuration
+  .knossos/           Satellite project config (rite overrides)
+  .sos/               Session state and lifecycle
+  .ledge/             Work product artifacts
 
 Next steps:
   1. Open this project in Claude Code
@@ -58,6 +61,9 @@ Next steps:
 
 What was created:
   .claude/CLAUDE.md   Project instructions (always in context)
+  .knossos/           Satellite project config (rite overrides)
+  .sos/               Session state and lifecycle
+  .ledge/             Work product artifacts
 
 Next steps:
   1. Open this project in Claude Code
@@ -186,6 +192,9 @@ func runInit(ctx *cmdContext, riteName, source string, force bool, cmd *cobra.Co
 	}
 
 	// Materialize based on whether a rite was specified.
+	// Scaffold project-level directories (.knossos/, .sos/, .ledge/).
+	scaffoldProjectDirs(projectDir)
+
 	if riteName != "" {
 		printer.VerboseLog("info", fmt.Sprintf("Initializing with rite: %s", riteName), map[string]any{
 			"project_dir": projectDir,
@@ -280,6 +289,23 @@ func extractEmbeddedMenaToXDG(embMena fs.FS) {
 		os.WriteFile(dest, content, 0644)
 		return nil
 	})
+}
+
+// scaffoldProjectDirs creates the project-level directory structure:
+//   - .knossos/ — satellite project config (rites, mena overrides)
+//   - .sos/ — session state and lifecycle
+//   - .ledge/ — work product artifacts
+//
+// Idempotent: directories are created only if they don't already exist.
+func scaffoldProjectDirs(projectDir string) {
+	dirs := []string{
+		filepath.Join(projectDir, ".knossos"),
+		filepath.Join(projectDir, ".sos"),
+		filepath.Join(projectDir, ".ledge"),
+	}
+	for _, d := range dirs {
+		os.MkdirAll(d, 0755) // Best-effort, non-fatal.
+	}
 }
 
 // writeDefaultSettings writes settings.json with the agent-guard hook configuration

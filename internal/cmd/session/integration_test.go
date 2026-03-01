@@ -22,8 +22,8 @@ func TestPark_EmitsSessionEnd(t *testing.T) {
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
 
-	// Create .claude/sessions directory structure
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	// Create .sos/sessions directory structure
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	sessionID := "session-20260105-120000-park1234"
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	locksDir := filepath.Join(sessionsDir, ".locks")
@@ -153,8 +153,8 @@ func TestWrap_EmitsSessionEnd(t *testing.T) {
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
 
-	// Create .claude/sessions directory structure
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	// Create .sos/sessions directory structure
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	sessionID := "session-20260105-120001-wrap5678"
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	locksDir := filepath.Join(sessionsDir, ".locks")
@@ -293,8 +293,8 @@ func TestResume_NoSessionEnd(t *testing.T) {
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
 
-	// Create .claude/sessions directory structure
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	// Create .sos/sessions directory structure
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	sessionID := "session-20260105-120002-rsum9012"
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	locksDir := filepath.Join(sessionsDir, ".locks")
@@ -429,8 +429,8 @@ func TestPark_EmitsBothEventTypes(t *testing.T) {
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
 
-	// Create .claude/sessions directory structure
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	// Create .sos/sessions directory structure
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	sessionID := "session-20260105-120003-both3456"
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	locksDir := filepath.Join(sessionsDir, ".locks")

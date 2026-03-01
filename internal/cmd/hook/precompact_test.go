@@ -59,7 +59,7 @@ func TestPrecompact_NonPreCompactEvent(t *testing.T) {
 func TestPrecompact_NoSessionContextFile(t *testing.T) {
 	tmpDir := t.TempDir()
 	sessionID := "session-test-123"
-	sessionsDir := filepath.Join(tmpDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(tmpDir, ".sos", "sessions")
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	os.MkdirAll(sessionDir, 0755)
 
@@ -105,7 +105,7 @@ func TestPrecompact_NoSessionContextFile(t *testing.T) {
 func TestPrecompact_RotatesLargeFile(t *testing.T) {
 	tmpDir := t.TempDir()
 	sessionID := "session-test-456"
-	sessionsDir := filepath.Join(tmpDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(tmpDir, ".sos", "sessions")
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	os.MkdirAll(sessionDir, 0755)
 
@@ -190,7 +190,7 @@ current_phase: requirements
 func TestPrecompact_NoRotationForSmallFile(t *testing.T) {
 	tmpDir := t.TempDir()
 	sessionID := "session-test-789"
-	sessionsDir := filepath.Join(tmpDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(tmpDir, ".sos", "sessions")
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	os.MkdirAll(sessionDir, 0755)
 
@@ -266,7 +266,7 @@ Just a few lines
 func TestPrecompact_WritesCompactCheckpoint(t *testing.T) {
 	tmpDir := t.TempDir()
 	sessionID := "session-checkpoint-001"
-	sessionsDir := filepath.Join(tmpDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(tmpDir, ".sos", "sessions")
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	os.MkdirAll(sessionDir, 0755)
 
@@ -346,7 +346,7 @@ func TestPrecompact_CheckpointSmallFile(t *testing.T) {
 	// Even without rotation, checkpoint should still be written
 	tmpDir := t.TempDir()
 	sessionID := "session-checkpoint-small"
-	sessionsDir := filepath.Join(tmpDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(tmpDir, ".sos", "sessions")
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	os.MkdirAll(sessionDir, 0755)
 
@@ -408,7 +408,7 @@ Small body content.
 func TestPrecompact_CheckpointIncludesThroughlineIDs(t *testing.T) {
 	tmpDir := t.TempDir()
 	sessionID := "session-checkpoint-throughline"
-	sessionsDir := filepath.Join(tmpDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(tmpDir, ".sos", "sessions")
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	os.MkdirAll(sessionDir, 0755)
 
@@ -481,7 +481,7 @@ func TestPrecompact_CheckpointNoThroughlineIDsSection(t *testing.T) {
 	// When no .throughline-ids.json exists, the Throughline Agents section should NOT appear
 	tmpDir := t.TempDir()
 	sessionID := "session-checkpoint-no-throughline"
-	sessionsDir := filepath.Join(tmpDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(tmpDir, ".sos", "sessions")
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	os.MkdirAll(sessionDir, 0755)
 

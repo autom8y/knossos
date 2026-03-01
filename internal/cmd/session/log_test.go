@@ -20,7 +20,7 @@ func setupLogTestSession(t *testing.T) (*cmdContext, string, string) {
 
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	locksDir := filepath.Join(sessionsDir, ".locks")
 	sessionID := "session-20260226-100000-logtestxx"
 	sessionDir := filepath.Join(sessionsDir, sessionID)
@@ -339,7 +339,7 @@ func TestRunLog_InvalidType(t *testing.T) {
 func TestRunLog_NoActiveSession(t *testing.T) {
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	locksDir := filepath.Join(sessionsDir, ".locks")
 	if err := os.MkdirAll(locksDir, 0755); err != nil {
 		t.Fatalf("failed to create locks dir: %v", err)

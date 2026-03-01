@@ -40,7 +40,7 @@ func setupRite(t *testing.T, ritesDir, riteName, workflowContent string, agents 
 func TestRiteSwitchIntegration_StateConsistency(t *testing.T) {
 	projectDir := t.TempDir()
 	claudeDir := filepath.Join(projectDir, ".claude")
-	ritesDir := filepath.Join(projectDir, "rites")
+	ritesDir := filepath.Join(projectDir, ".knossos", "rites")
 
 	// Create templates/rules with a known template rule
 	templatesDir := filepath.Join(projectDir, "templates")
@@ -159,7 +159,7 @@ func TestRiteSwitchIntegration_StateConsistency(t *testing.T) {
 func TestRiteSwitchIntegration_NoWorkflow(t *testing.T) {
 	projectDir := t.TempDir()
 	claudeDir := filepath.Join(projectDir, ".claude")
-	ritesDir := filepath.Join(projectDir, "rites")
+	ritesDir := filepath.Join(projectDir, ".knossos", "rites")
 
 	// Create templates dir
 	templatesDir := filepath.Join(projectDir, "templates")
@@ -268,7 +268,7 @@ func TestRiteSwitchIntegration_EmbeddedSource(t *testing.T) {
 
 func TestRiteSwitchIntegration_SyncStateJSON(t *testing.T) {
 	projectDir := t.TempDir()
-	ritesDir := filepath.Join(projectDir, "rites")
+	ritesDir := filepath.Join(projectDir, ".knossos", "rites")
 
 	templatesDir := filepath.Join(projectDir, "templates")
 	require.NoError(t, os.MkdirAll(filepath.Join(templatesDir, "sections"), 0755))

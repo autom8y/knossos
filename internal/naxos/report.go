@@ -131,7 +131,7 @@ func (o ScanOutput) Text() string {
 	b.WriteString("Actions:\n")
 	b.WriteString("  To wrap:   ari session wrap --session <id>\n")
 	b.WriteString("  To resume: ari session resume <id>\n")
-	b.WriteString("  To delete: rm -rf .claude/sessions/<id>\n")
+	b.WriteString("  To delete: rm -rf .sos/sessions/<id>\n")
 
 	return b.String()
 }

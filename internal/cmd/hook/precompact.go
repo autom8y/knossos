@@ -79,8 +79,7 @@ func runPrecompactCore(ctx *cmdContext, printer *output.Printer) error {
 	}
 
 	// Find session directory
-	sessionsDir := filepath.Join(resolver.ProjectRoot(), ".claude", "sessions")
-	sessionDir := filepath.Join(sessionsDir, sessionID)
+	sessionDir := resolver.SessionDir(sessionID)
 
 	// Check if session directory exists
 	sessionContextPath := filepath.Join(sessionDir, "SESSION_CONTEXT.md")

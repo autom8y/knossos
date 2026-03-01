@@ -29,7 +29,7 @@ type SourceResolver struct {
 func NewSourceResolver(projectRoot string) *SourceResolver {
 	return &SourceResolver{
 		projectRoot:     projectRoot,
-		projectRitesDir: filepath.Join(projectRoot, "rites"),
+		projectRitesDir: filepath.Join(projectRoot, ".knossos", "rites"),
 		userRitesDir:    paths.UserRitesDir(),
 		knossosHome:     config.KnossosHome(),
 		resolved:        make(map[string]*ResolvedRite),
@@ -52,7 +52,7 @@ func (r *SourceResolver) WithEmbeddedFS(fsys fs.FS) *SourceResolver {
 //
 // Resolution order (highest to lowest priority):
 //  1. ExplicitSource (if --source flag provided)
-//  2. Project rites (./rites/{rite}/)
+//  2. Project satellite rites (.knossos/rites/{rite}/)
 //  3. User rites (~/.local/share/knossos/rites/{rite}/)
 //  4. Knossos platform ($KNOSSOS_HOME/rites/{rite}/)
 //  5. Embedded rites (compiled into binary)

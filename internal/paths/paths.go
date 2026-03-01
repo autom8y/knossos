@@ -60,14 +60,19 @@ func (r *Resolver) ClaudeDir() string {
 	return filepath.Join(r.projectRoot, ".claude")
 }
 
+// SOSDir returns the path to the .sos/ directory (Session Or State).
+func (r *Resolver) SOSDir() string {
+	return filepath.Join(r.projectRoot, ".sos")
+}
+
 // SessionsDir returns the path to the sessions directory.
 func (r *Resolver) SessionsDir() string {
-	return filepath.Join(r.projectRoot, ".claude", "sessions")
+	return filepath.Join(r.SOSDir(), "sessions")
 }
 
 // LocksDir returns the path to the locks directory.
 func (r *Resolver) LocksDir() string {
-	return filepath.Join(r.projectRoot, ".claude", "sessions", ".locks")
+	return filepath.Join(r.SessionsDir(), ".locks")
 }
 
 // CCMapDir returns the path to the CC session map directory.
@@ -75,10 +80,9 @@ func (r *Resolver) CCMapDir() string {
 	return filepath.Join(r.SessionsDir(), ".cc-map")
 }
 
-
 // ArchiveDir returns the path to the archive directory.
 func (r *Resolver) ArchiveDir() string {
-	return filepath.Join(r.projectRoot, ".claude", ".archive", "sessions")
+	return filepath.Join(r.SOSDir(), "archive")
 }
 
 // SessionDir returns the path to a specific session directory.
@@ -146,9 +150,39 @@ func (r *Resolver) ClaudeMDFile() string {
 	return filepath.Join(r.ClaudeDir(), "CLAUDE.md")
 }
 
-// RitesDir returns the path to the project's rites/ directory.
+// KnossosDir returns the path to the .knossos/ directory (framework configuration).
+func (r *Resolver) KnossosDir() string {
+	return filepath.Join(r.projectRoot, ".knossos")
+}
+
+// RitesDir returns the path to the project's satellite rites directory.
 func (r *Resolver) RitesDir() string {
-	return filepath.Join(r.projectRoot, "rites")
+	return filepath.Join(r.KnossosDir(), "rites")
+}
+
+// LedgeDir returns the path to the .ledge/ directory (work product artifacts).
+func (r *Resolver) LedgeDir() string {
+	return filepath.Join(r.projectRoot, ".ledge")
+}
+
+// LedgeDecisionsDir returns the path to the .ledge/decisions/ directory.
+func (r *Resolver) LedgeDecisionsDir() string {
+	return filepath.Join(r.LedgeDir(), "decisions")
+}
+
+// LedgeSpecsDir returns the path to the .ledge/specs/ directory.
+func (r *Resolver) LedgeSpecsDir() string {
+	return filepath.Join(r.LedgeDir(), "specs")
+}
+
+// LedgeReviewsDir returns the path to the .ledge/reviews/ directory.
+func (r *Resolver) LedgeReviewsDir() string {
+	return filepath.Join(r.LedgeDir(), "reviews")
+}
+
+// LedgeSpikesDir returns the path to the .ledge/spikes/ directory.
+func (r *Resolver) LedgeSpikesDir() string {
+	return filepath.Join(r.LedgeDir(), "spikes")
 }
 
 
@@ -160,9 +194,9 @@ func (r *Resolver) InvocationStateFile() string {
 }
 
 // RiteDir returns the path to a rite directory.
-// Checks project rites first, then user rites.
+// Checks project satellite rites (.knossos/rites/) first, then user rites.
 func (r *Resolver) RiteDir(riteName string) string {
-	// Check project rites first
+	// Check project satellite rites first
 	projectPath := filepath.Join(r.RitesDir(), riteName)
 	if _, err := os.Stat(filepath.Join(projectPath, "manifest.yaml")); err == nil {
 		return projectPath

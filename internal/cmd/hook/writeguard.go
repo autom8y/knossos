@@ -95,7 +95,7 @@ This hook is triggered on PreToolUse events for Write/Edit tools. It:
 - Allows writes when Moirai holds a valid session lock
 
 Input (stdin JSON):
-  {"hook_event_name":"PreToolUse","tool_name":"Write","tool_input":{"file_path":".claude/sessions/.../SESSION_CONTEXT.md"}}
+  {"hook_event_name":"PreToolUse","tool_name":"Write","tool_input":{"file_path":".sos/sessions/.../SESSION_CONTEXT.md"}}
 
 Output (stdout JSON):
   {"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "deny", "permissionDecisionReason": "Use Moirai for SESSION_CONTEXT mutations"}}
@@ -359,7 +359,7 @@ func extractSessionIDFromPath(filePath string) string {
 
 // isMoiraiLockHeld checks if a valid Moirai lock exists for the given session.
 // Returns true only if:
-// - Lock file exists at .claude/sessions/{session-id}/.moirai-lock
+// - Lock file exists at .sos/sessions/{session-id}/.moirai-lock
 // - Lock agent field is "moirai"
 // - Lock is not stale (acquired_at + stale_after_seconds > now)
 // Returns false on any error (fail closed).
@@ -399,7 +399,7 @@ func outputBlockArchived(printer *output.Printer, sessionID string) error {
 			HookEventName:            "PreToolUse",
 			PermissionDecision:       "deny",
 			PermissionDecisionReason: "Session " + sessionID + " is archived (terminal state). Context files cannot be mutated after archiving.",
-			AdditionalContext:        "Session " + sessionID + " was previously wrapped with '" + registry.Ref(registry.CLISessionWrap) + "' and is now immutable. Archived session data is preserved at .claude/.archive/sessions/" + sessionID + "/",
+			AdditionalContext:        "Session " + sessionID + " was previously wrapped with '" + registry.Ref(registry.CLISessionWrap) + "' and is now immutable. Archived session data is preserved at .sos/archive/" + sessionID + "/",
 		},
 	}
 	return printer.Print(result)

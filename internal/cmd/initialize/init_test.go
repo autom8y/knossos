@@ -63,6 +63,14 @@ func TestInit_FreshDirectory(t *testing.T) {
 	if _, err := os.Stat(settingsPath); os.IsNotExist(err) {
 		t.Error("settings.local.json was not created")
 	}
+
+	// Verify project-level directories were scaffolded.
+	for _, dirName := range []string{".knossos", ".sos", ".ledge"} {
+		dirPath := filepath.Join(dir, dirName)
+		if _, err := os.Stat(dirPath); os.IsNotExist(err) {
+			t.Errorf("%s/ directory was not created", dirName)
+		}
+	}
 }
 
 func TestInit_WithRite(t *testing.T) {
@@ -155,6 +163,14 @@ dependencies:
 	manifestPath := filepath.Join(claudeDir, "KNOSSOS_MANIFEST.yaml")
 	if _, err := os.Stat(manifestPath); os.IsNotExist(err) {
 		t.Error("KNOSSOS_MANIFEST.yaml was not created")
+	}
+
+	// Verify project-level directories were scaffolded.
+	for _, dirName := range []string{".knossos", ".sos", ".ledge"} {
+		dirPath := filepath.Join(dir, dirName)
+		if _, err := os.Stat(dirPath); os.IsNotExist(err) {
+			t.Errorf("%s/ directory was not created", dirName)
+		}
 	}
 }
 

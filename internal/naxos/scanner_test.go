@@ -25,7 +25,7 @@ func newTestSetup(t *testing.T) *testSetup {
 	}
 
 	projectRoot := tempDir
-	sessionsDir := filepath.Join(projectRoot, ".claude", "sessions")
+	sessionsDir := filepath.Join(projectRoot, ".sos", "sessions")
 	if err := os.MkdirAll(sessionsDir, 0755); err != nil {
 		t.Fatalf("Failed to create sessions dir: %v", err)
 	}

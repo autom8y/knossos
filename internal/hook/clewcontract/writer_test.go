@@ -635,7 +635,7 @@ func TestBufferedEventWriter_FlushError(t *testing.T) {
 func TestSessionScopedEventIsolation(t *testing.T) {
 	// Verify that two separate session directories produce separate event files.
 	// This confirms the session-scoped design: each session writes to its own
-	// events.jsonl at .claude/sessions/<session-id>/events.jsonl.
+	// events.jsonl at .sos/sessions/<session-id>/events.jsonl.
 	tmpDir := t.TempDir()
 
 	sessionDirA := filepath.Join(tmpDir, "sessions", "session-aaa")

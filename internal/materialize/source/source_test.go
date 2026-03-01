@@ -224,7 +224,7 @@ func TestSourceResolver_EmbeddedCaching(t *testing.T) {
 // createTestRite creates a minimal rite directory structure for testing.
 func createTestRite(t *testing.T, baseDir, riteName string) {
 	t.Helper()
-	riteDir := filepath.Join(baseDir, "rites", riteName)
+	riteDir := filepath.Join(baseDir, ".knossos", "rites", riteName)
 	if err := os.MkdirAll(riteDir, 0755); err != nil {
 		t.Fatalf("Failed to create rite dir: %v", err)
 	}

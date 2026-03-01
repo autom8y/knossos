@@ -109,7 +109,7 @@ func applyDefaults(content map[string]interface{}) {
 	paths, _ := content["paths"].(map[string]interface{})
 
 	defaults := map[string]string{
-		"sessions": ".claude/sessions",
+		"sessions": ".sos/sessions",
 		"agents":   ".claude/agents",
 		"skills":   ".claude/skills",
 		"hooks":    ".claude/hooks",

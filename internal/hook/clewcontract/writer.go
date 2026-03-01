@@ -16,7 +16,7 @@ import (
 const DefaultFlushInterval = 5 * time.Second
 
 // EventsFileName is the standard name for the clew events log.
-// Each session gets its own events.jsonl at .claude/sessions/<session-id>/events.jsonl,
+// Each session gets its own events.jsonl at .sos/sessions/<session-id>/events.jsonl,
 // providing natural session-scoped event isolation without explicit rotation.
 const EventsFileName = "events.jsonl"
 

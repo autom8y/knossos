@@ -17,7 +17,7 @@ import (
 func TestProvenanceIntegration_BasicMaterialization(t *testing.T) {
 	projectDir := t.TempDir()
 	claudeDir := filepath.Join(projectDir, ".claude")
-	ritesDir := filepath.Join(projectDir, "rites")
+	ritesDir := filepath.Join(projectDir, ".knossos", "rites")
 	templatesDir := filepath.Join(projectDir, "templates")
 
 	// Setup templates (required for CLAUDE.md)
@@ -84,7 +84,7 @@ func TestProvenanceIntegration_BasicMaterialization(t *testing.T) {
 func TestProvenanceIntegration_DivergenceDetection(t *testing.T) {
 	projectDir := t.TempDir()
 	claudeDir := filepath.Join(projectDir, ".claude")
-	ritesDir := filepath.Join(projectDir, "rites")
+	ritesDir := filepath.Join(projectDir, ".knossos", "rites")
 	templatesDir := filepath.Join(projectDir, "templates")
 
 	// Setup templates
@@ -144,7 +144,7 @@ func TestProvenanceIntegration_DivergenceDetection(t *testing.T) {
 func TestProvenanceIntegration_Idempotency(t *testing.T) {
 	projectDir := t.TempDir()
 	claudeDir := filepath.Join(projectDir, ".claude")
-	ritesDir := filepath.Join(projectDir, "rites")
+	ritesDir := filepath.Join(projectDir, ".knossos", "rites")
 	templatesDir := filepath.Join(projectDir, "templates")
 
 	// Setup templates
@@ -198,7 +198,7 @@ func TestProvenanceIntegration_Idempotency(t *testing.T) {
 func TestProvenanceIntegration_DryRun(t *testing.T) {
 	projectDir := t.TempDir()
 	claudeDir := filepath.Join(projectDir, ".claude")
-	ritesDir := filepath.Join(projectDir, "rites")
+	ritesDir := filepath.Join(projectDir, ".knossos", "rites")
 	templatesDir := filepath.Join(projectDir, "templates")
 
 	// Setup templates
@@ -229,9 +229,9 @@ func TestProvenanceIntegration_DryRun(t *testing.T) {
 func TestProvenanceIntegration_MenaDirectories(t *testing.T) {
 	projectDir := t.TempDir()
 	claudeDir := filepath.Join(projectDir, ".claude")
-	ritesDir := filepath.Join(projectDir, "rites")
+	ritesDir := filepath.Join(projectDir, ".knossos", "rites")
 	templatesDir := filepath.Join(projectDir, "templates")
-	menaDir := filepath.Join(projectDir, "mena")
+	menaDir := filepath.Join(projectDir, ".knossos", "mena")
 
 	// Setup templates
 	require.NoError(t, os.MkdirAll(filepath.Join(templatesDir, "sections"), 0755))

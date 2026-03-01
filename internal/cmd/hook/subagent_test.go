@@ -108,7 +108,7 @@ func TestSubagentStop_WrongEvent(t *testing.T) {
 func TestSubagentStart_LogsToClew(t *testing.T) {
 	tmpDir := t.TempDir()
 	sessionID := "session-subagent-start"
-	sessionsDir := filepath.Join(tmpDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(tmpDir, ".sos", "sessions")
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	os.MkdirAll(sessionDir, 0755)
 
@@ -170,7 +170,7 @@ func TestSubagentStart_LogsToClew(t *testing.T) {
 func TestSubagentStop_LogsToClew(t *testing.T) {
 	tmpDir := t.TempDir()
 	sessionID := "session-subagent-stop"
-	sessionsDir := filepath.Join(tmpDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(tmpDir, ".sos", "sessions")
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	os.MkdirAll(sessionDir, 0755)
 
@@ -264,7 +264,7 @@ func TestParseSubagentInfo_AgentIDMissing(t *testing.T) {
 func TestSubagentStart_PersistsThroughlineID(t *testing.T) {
 	tmpDir := t.TempDir()
 	sessionID := "session-throughline-persist"
-	sessionsDir := filepath.Join(tmpDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(tmpDir, ".sos", "sessions")
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	os.MkdirAll(sessionDir, 0755)
 
@@ -326,7 +326,7 @@ func TestSubagentStart_PersistsThroughlineID(t *testing.T) {
 func TestSubagentStart_NonThroughlineAgentNotPersisted(t *testing.T) {
 	tmpDir := t.TempDir()
 	sessionID := "session-non-throughline"
-	sessionsDir := filepath.Join(tmpDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(tmpDir, ".sos", "sessions")
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	os.MkdirAll(sessionDir, 0755)
 
@@ -372,7 +372,7 @@ func TestSubagentStart_ThroughlineIDUpsert(t *testing.T) {
 	// Verify that a second call updates the entry rather than overwriting others
 	tmpDir := t.TempDir()
 	sessionID := "session-throughline-upsert"
-	sessionsDir := filepath.Join(tmpDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(tmpDir, ".sos", "sessions")
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	os.MkdirAll(sessionDir, 0755)
 
@@ -410,7 +410,7 @@ func TestSubagentStart_NoAgentIDSkipsPersistence(t *testing.T) {
 	// When agent_id is missing, hook must still succeed and NOT write the IDs file
 	tmpDir := t.TempDir()
 	sessionID := "session-no-agent-id"
-	sessionsDir := filepath.Join(tmpDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(tmpDir, ".sos", "sessions")
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	os.MkdirAll(sessionDir, 0755)
 

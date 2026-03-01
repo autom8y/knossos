@@ -37,7 +37,7 @@ import (
 //  10. Verify: second wrap attempt returns clear lifecycle violation
 func TestArchiveBoundary_FullLifecycle(t *testing.T) {
 	projectDir := setupProjectDir(t)
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	ccMapDir := filepath.Join(sessionsDir, ".cc-map")
 	if err := os.MkdirAll(ccMapDir, 0755); err != nil {
 		t.Fatalf("Failed to create cc-map dir: %v", err)
@@ -58,7 +58,7 @@ func TestArchiveBoundary_FullLifecycle(t *testing.T) {
 	}
 
 	sessionDir := filepath.Join(sessionsDir, sessionID)
-	archivePath := filepath.Join(projectDir, ".claude", ".archive", "sessions", sessionID)
+	archivePath := filepath.Join(projectDir, ".sos", "archive", sessionID)
 
 	// Step 2: Park session
 	parkCtx := newTestContext(projectDir, sessionID)
@@ -146,7 +146,7 @@ func TestArchiveBoundary_FullLifecycle(t *testing.T) {
 // verifying that isSessionArchived() returns the correct result after wrap.
 func TestArchiveBoundary_WriteGuardDetectsArchivedAfterWrap(t *testing.T) {
 	projectDir := setupProjectDir(t)
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 
 	// Create and immediately wrap a session
 	createCtx := newTestContext(projectDir)
@@ -167,7 +167,7 @@ func TestArchiveBoundary_WriteGuardDetectsArchivedAfterWrap(t *testing.T) {
 	}
 
 	// Verify: after wrap, the archive directory exists
-	archivePath := filepath.Join(projectDir, ".claude", ".archive", "sessions", sessionID)
+	archivePath := filepath.Join(projectDir, ".sos", "archive", sessionID)
 	if _, statErr := os.Stat(archivePath); os.IsNotExist(statErr) {
 		t.Fatalf("Archive directory should exist after wrap, but doesn't: %s", archivePath)
 	}

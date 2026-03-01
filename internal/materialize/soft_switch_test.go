@@ -15,7 +15,7 @@ func TestMaterializeWithOptions_SoftMode_AgentsUpdated(t *testing.T) {
 	claudeDir := filepath.Join(tmpDir, ".claude")
 
 	// Create test rite with an agent
-	riteDir := filepath.Join(tmpDir, "rites", "test-rite")
+	riteDir := filepath.Join(tmpDir, ".knossos", "rites", "test-rite")
 	if err := os.MkdirAll(filepath.Join(riteDir, "agents"), 0755); err != nil {
 		t.Fatal(err)
 	}
@@ -80,7 +80,7 @@ func TestMaterializeWithOptions_SoftMode_CLAUDEmdUpdated(t *testing.T) {
 	claudeDir := filepath.Join(tmpDir, ".claude")
 
 	// Create test rite
-	riteDir := filepath.Join(tmpDir, "rites", "test-rite")
+	riteDir := filepath.Join(tmpDir, ".knossos", "rites", "test-rite")
 	if err := os.MkdirAll(filepath.Join(riteDir, "agents"), 0755); err != nil {
 		t.Fatal(err)
 	}
@@ -140,7 +140,7 @@ func TestMaterializeWithOptions_SoftMode_MenaSkipped(t *testing.T) {
 	}
 
 	// Create test rite with mena
-	riteDir := filepath.Join(tmpDir, "rites", "test-rite")
+	riteDir := filepath.Join(tmpDir, ".knossos", "rites", "test-rite")
 	menaDirs := []string{
 		filepath.Join(riteDir, "mena", "test-command"),
 		filepath.Join(riteDir, "mena", "test-skill"),
@@ -225,7 +225,7 @@ func TestMaterializeWithOptions_SoftMode_SettingsSkipped(t *testing.T) {
 	}
 
 	// Create test rite
-	riteDir := filepath.Join(tmpDir, "rites", "test-rite")
+	riteDir := filepath.Join(tmpDir, ".knossos", "rites", "test-rite")
 	if err := os.MkdirAll(riteDir, 0755); err != nil {
 		t.Fatal(err)
 	}
@@ -276,7 +276,7 @@ func TestMaterializeWithOptions_SoftMode_ActiveRiteUpdated(t *testing.T) {
 	claudeDir := filepath.Join(tmpDir, ".claude")
 
 	// Create test rite
-	riteDir := filepath.Join(tmpDir, "rites", "new-rite")
+	riteDir := filepath.Join(tmpDir, ".knossos", "rites", "new-rite")
 	if err := os.MkdirAll(riteDir, 0755); err != nil {
 		t.Fatal(err)
 	}
@@ -322,7 +322,7 @@ func TestMaterializeWithOptions_SoftMode_ResultReporting(t *testing.T) {
 	claudeDir := filepath.Join(tmpDir, ".claude")
 
 	// Create minimal test rite
-	riteDir := filepath.Join(tmpDir, "rites", "test-rite")
+	riteDir := filepath.Join(tmpDir, ".knossos", "rites", "test-rite")
 	if err := os.MkdirAll(riteDir, 0755); err != nil {
 		t.Fatal(err)
 	}
@@ -379,7 +379,7 @@ func TestMaterializeWithOptions_FullMode_Unchanged(t *testing.T) {
 	claudeDir := filepath.Join(tmpDir, ".claude")
 
 	// Create test rite with mena
-	riteDir := filepath.Join(tmpDir, "rites", "test-rite")
+	riteDir := filepath.Join(tmpDir, ".knossos", "rites", "test-rite")
 	menaDir := filepath.Join(riteDir, "mena", "test-command")
 	if err := os.MkdirAll(menaDir, 0755); err != nil {
 		t.Fatal(err)

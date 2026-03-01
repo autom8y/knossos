@@ -16,7 +16,7 @@ func TestRoutingDroToCommands(t *testing.T) {
 	claudeDir := filepath.Join(tmpDir, ".claude")
 
 	// Create mena directory with a dromena command
-	menaDir := filepath.Join(tmpDir, "mena", "test-cmd")
+	menaDir := filepath.Join(tmpDir, ".knossos", "mena", "test-cmd")
 	if err := os.MkdirAll(menaDir, 0755); err != nil {
 		t.Fatalf("Failed to create mena dir: %v", err)
 	}
@@ -75,7 +75,7 @@ func TestRoutingLegoToSkills(t *testing.T) {
 	claudeDir := filepath.Join(tmpDir, ".claude")
 
 	// Create mena directory with a legomena reference
-	menaDir := filepath.Join(tmpDir, "mena", "test-ref")
+	menaDir := filepath.Join(tmpDir, ".knossos", "mena", "test-ref")
 	if err := os.MkdirAll(menaDir, 0755); err != nil {
 		t.Fatalf("Failed to create mena dir: %v", err)
 	}
@@ -130,7 +130,7 @@ func TestRoutingDefaultIsDro(t *testing.T) {
 	claudeDir := filepath.Join(tmpDir, ".claude")
 
 	// Create mena directory with a plain INDEX.md (no .dro/.lego extension)
-	menaDir := filepath.Join(tmpDir, "mena", "test-default")
+	menaDir := filepath.Join(tmpDir, ".knossos", "mena", "test-default")
 	if err := os.MkdirAll(menaDir, 0755); err != nil {
 		t.Fatalf("Failed to create mena dir: %v", err)
 	}
@@ -180,7 +180,7 @@ func TestRoutingSupportingFilesFollowIndex(t *testing.T) {
 	claudeDir := filepath.Join(tmpDir, ".claude")
 
 	// Create mena directory with legomena INDEX and supporting files
-	menaDir := filepath.Join(tmpDir, "mena", "test-with-files")
+	menaDir := filepath.Join(tmpDir, ".knossos", "mena", "test-with-files")
 	if err := os.MkdirAll(menaDir, 0755); err != nil {
 		t.Fatalf("Failed to create mena dir: %v", err)
 	}
@@ -254,7 +254,7 @@ This is a test reference with supporting files.
 func TestRoutingMixedMena(t *testing.T) {
 	tmpDir := t.TempDir()
 	claudeDir := filepath.Join(tmpDir, ".claude")
-	menaBaseDir := filepath.Join(tmpDir, "mena")
+	menaBaseDir := filepath.Join(tmpDir, ".knossos", "mena")
 
 	// Create dromena command
 	droDir := filepath.Join(menaBaseDir, "dro-cmd")
@@ -351,7 +351,7 @@ description: A default command
 func TestRoutingNestedGrouping(t *testing.T) {
 	tmpDir := t.TempDir()
 	claudeDir := filepath.Join(tmpDir, ".claude")
-	menaBaseDir := filepath.Join(tmpDir, "mena")
+	menaBaseDir := filepath.Join(tmpDir, ".knossos", "mena")
 
 	// Create grouping dir "guidance" (no INDEX file -- just a container)
 	// with two leaf dirs: one legomena, one dromena
@@ -459,7 +459,7 @@ func TestRematerializeMena_RepopulatesAfterWipe(t *testing.T) {
 	claudeDir := filepath.Join(tmpDir, ".claude")
 
 	// Create mena with both dromena and legomena
-	menaBase := filepath.Join(tmpDir, "mena")
+	menaBase := filepath.Join(tmpDir, ".knossos", "mena")
 
 	// A dromena (should go to commands/)
 	droDir := filepath.Join(menaBase, "test-cmd")

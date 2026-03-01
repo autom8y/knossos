@@ -1100,8 +1100,8 @@ func (m *Materializer) materializeMena(manifest *RiteManifest, claudeDir string,
 // Resolution order: project-level → XDG data dir → KnossosHome.
 // Returns "" if none found (caller should try embedded fallback).
 func (m *Materializer) getMenaDir() string {
-	// 1. Check for project-level mena first (knossos-on-knossos case)
-	projectMena := filepath.Join(m.resolver.ProjectRoot(), "mena")
+	// 1. Check for project-level mena first (.knossos/mena/ satellite overrides)
+	projectMena := filepath.Join(m.resolver.ProjectRoot(), ".knossos", "mena")
 	if _, err := os.Stat(projectMena); err == nil {
 		return projectMena
 	}

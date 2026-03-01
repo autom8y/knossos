@@ -776,8 +776,8 @@ current_phase: implementation
 func TestGeneratorFromProject_NoActiveSession(t *testing.T) {
 	tmpDir := t.TempDir()
 
-	// Create .claude directory structure but no sessions
-	mustMkdirAll(t, filepath.Join(tmpDir, ".claude", "sessions"))
+	// Create .sos directory structure but no sessions
+	mustMkdirAll(t, filepath.Join(tmpDir, ".sos", "sessions"))
 
 	_, err := GeneratorFromProject(tmpDir, "")
 	if err == nil {
@@ -791,8 +791,8 @@ func TestGeneratorFromProject_NoActiveSession(t *testing.T) {
 func TestGeneratorFromProject_WithActiveSession(t *testing.T) {
 	tmpDir := t.TempDir()
 
-	// Create .claude directory structure
-	sessionsDir := filepath.Join(tmpDir, ".claude", "sessions")
+	// Create .sos directory structure
+	sessionsDir := filepath.Join(tmpDir, ".sos", "sessions")
 	mustMkdirAll(t, sessionsDir)
 
 	// Create a session directory

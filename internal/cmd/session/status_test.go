@@ -15,7 +15,7 @@ func TestStatus_WithSailsColor(t *testing.T) {
 	projectDir := tmpDir
 
 	// Create session directory structure
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	sessionID := "session-20260106-100000-sailstest"
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	locksDir := filepath.Join(sessionsDir, ".locks")
@@ -99,7 +99,7 @@ func TestStatus_WithGraySails(t *testing.T) {
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
 
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	sessionID := "session-20260106-110000-graysails"
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	locksDir := filepath.Join(sessionsDir, ".locks")
@@ -178,7 +178,7 @@ func TestStatus_NoSailsFile(t *testing.T) {
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
 
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	sessionID := "session-20260106-120000-nosails"
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	locksDir := filepath.Join(sessionsDir, ".locks")
@@ -234,7 +234,7 @@ func TestStatus_MalformedSailsFile(t *testing.T) {
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
 
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	sessionID := "session-20260106-130000-badsails"
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	locksDir := filepath.Join(sessionsDir, ".locks")
@@ -295,7 +295,7 @@ func TestStatus_ArchivedSessionWithSails(t *testing.T) {
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
 
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	sessionID := "session-20260106-140000-archivedsails"
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	locksDir := filepath.Join(sessionsDir, ".locks")

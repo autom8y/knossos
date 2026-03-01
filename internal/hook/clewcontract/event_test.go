@@ -419,7 +419,7 @@ func TestNewSailsGeneratedEvent(t *testing.T) {
 		Color:        "WHITE",
 		ComputedBase: "WHITE",
 		Reasons:      []string{"all required proofs present and passing"},
-		FilePath:     ".claude/sessions/session-20260105-143000-abc12345/WHITE_SAILS.yaml",
+		FilePath:     ".sos/sessions/session-20260105-143000-abc12345/WHITE_SAILS.yaml",
 	}
 
 	event := NewSailsGeneratedEvent("session-20260105-143000-abc12345", data)
@@ -481,7 +481,7 @@ func TestNewSailsGeneratedEvent_WithModifier(t *testing.T) {
 			"all required proofs present and passing",
 			"modifier DOWNGRADE_TO_GRAY applied: Changed retry logic in payment flow",
 		},
-		FilePath: ".claude/sessions/session-20260105-143000-def67890/WHITE_SAILS.yaml",
+		FilePath: ".sos/sessions/session-20260105-143000-def67890/WHITE_SAILS.yaml",
 	}
 
 	event := NewSailsGeneratedEvent("session-20260105-143000-def67890", data)
@@ -514,7 +514,7 @@ func TestNewSailsGeneratedEvent_Gray(t *testing.T) {
 		Color:        "GRAY",
 		ComputedBase: "GRAY",
 		Reasons:      []string{"open questions present: gray ceiling applied"},
-		FilePath:     ".claude/sessions/session-20260105-160000-ghi11111/WHITE_SAILS.yaml",
+		FilePath:     ".sos/sessions/session-20260105-160000-ghi11111/WHITE_SAILS.yaml",
 	}
 
 	event := NewSailsGeneratedEvent("session-20260105-160000-ghi11111", data)
@@ -539,7 +539,7 @@ func TestNewSailsGeneratedEvent_Black(t *testing.T) {
 		Color:        "BLACK",
 		ComputedBase: "BLACK",
 		Reasons:      []string{"proof 'tests' has status FAIL"},
-		FilePath:     ".claude/sessions/session-20260105-170000-jkl22222/WHITE_SAILS.yaml",
+		FilePath:     ".sos/sessions/session-20260105-170000-jkl22222/WHITE_SAILS.yaml",
 	}
 
 	event := NewSailsGeneratedEvent("session-20260105-170000-jkl22222", data)
@@ -559,7 +559,7 @@ func TestNewSailsGeneratedEvent_JSONMarshaling(t *testing.T) {
 		Color:        "WHITE",
 		ComputedBase: "WHITE",
 		Reasons:      []string{"all required proofs present and passing"},
-		FilePath:     ".claude/sessions/session-20260105-143000-abc12345/WHITE_SAILS.yaml",
+		FilePath:     ".sos/sessions/session-20260105-143000-abc12345/WHITE_SAILS.yaml",
 	}
 
 	event := NewSailsGeneratedEvent("session-20260105-143000-abc12345", data)
@@ -609,7 +609,7 @@ func TestSailsGeneratedData_EmptyReasons(t *testing.T) {
 		Color:        "WHITE",
 		ComputedBase: "WHITE",
 		Reasons:      []string{},
-		FilePath:     ".claude/sessions/session-20260105-143000-xyz99999/WHITE_SAILS.yaml",
+		FilePath:     ".sos/sessions/session-20260105-143000-xyz99999/WHITE_SAILS.yaml",
 	}
 
 	event := NewSailsGeneratedEvent("session-20260105-143000-xyz99999", data)
@@ -628,11 +628,11 @@ func TestNewSailsGeneratedEvent_WithEvidencePaths(t *testing.T) {
 		Color:        "WHITE",
 		ComputedBase: "WHITE",
 		Reasons:      []string{"all required proofs present and passing"},
-		FilePath:     ".claude/sessions/session-20260105-143000-abc12345/WHITE_SAILS.yaml",
+		FilePath:     ".sos/sessions/session-20260105-143000-abc12345/WHITE_SAILS.yaml",
 		EvidencePaths: &EvidencePaths{
-			Tests: ".claude/sessions/session-20260105-143000-abc12345/test-output.log",
-			Build: ".claude/sessions/session-20260105-143000-abc12345/build-output.log",
-			Lint:  ".claude/sessions/session-20260105-143000-abc12345/lint-output.log",
+			Tests: ".sos/sessions/session-20260105-143000-abc12345/test-output.log",
+			Build: ".sos/sessions/session-20260105-143000-abc12345/build-output.log",
+			Lint:  ".sos/sessions/session-20260105-143000-abc12345/lint-output.log",
 		},
 	}
 
@@ -649,13 +649,13 @@ func TestNewSailsGeneratedEvent_WithEvidencePaths(t *testing.T) {
 		t.Fatal("Meta.evidence_paths is not a map[string]string")
 	}
 
-	if evidencePaths["tests"] != ".claude/sessions/session-20260105-143000-abc12345/test-output.log" {
+	if evidencePaths["tests"] != ".sos/sessions/session-20260105-143000-abc12345/test-output.log" {
 		t.Errorf("evidence_paths.tests = %v, want test-output.log path", evidencePaths["tests"])
 	}
-	if evidencePaths["build"] != ".claude/sessions/session-20260105-143000-abc12345/build-output.log" {
+	if evidencePaths["build"] != ".sos/sessions/session-20260105-143000-abc12345/build-output.log" {
 		t.Errorf("evidence_paths.build = %v, want build-output.log path", evidencePaths["build"])
 	}
-	if evidencePaths["lint"] != ".claude/sessions/session-20260105-143000-abc12345/lint-output.log" {
+	if evidencePaths["lint"] != ".sos/sessions/session-20260105-143000-abc12345/lint-output.log" {
 		t.Errorf("evidence_paths.lint = %v, want lint-output.log path", evidencePaths["lint"])
 	}
 }
@@ -665,13 +665,13 @@ func TestNewSailsGeneratedEvent_WithAllEvidencePaths(t *testing.T) {
 		Color:        "WHITE",
 		ComputedBase: "WHITE",
 		Reasons:      []string{"all proofs passing"},
-		FilePath:     ".claude/sessions/session-test/WHITE_SAILS.yaml",
+		FilePath:     ".sos/sessions/session-test/WHITE_SAILS.yaml",
 		EvidencePaths: &EvidencePaths{
-			Tests:       ".claude/sessions/session-test/test-output.log",
-			Build:       ".claude/sessions/session-test/build-output.log",
-			Lint:        ".claude/sessions/session-test/lint-output.log",
-			Adversarial: ".claude/sessions/session-test/adversarial-output.log",
-			Integration: ".claude/sessions/session-test/integration-output.log",
+			Tests:       ".sos/sessions/session-test/test-output.log",
+			Build:       ".sos/sessions/session-test/build-output.log",
+			Lint:        ".sos/sessions/session-test/lint-output.log",
+			Adversarial: ".sos/sessions/session-test/adversarial-output.log",
+			Integration: ".sos/sessions/session-test/integration-output.log",
 		},
 	}
 
@@ -706,7 +706,7 @@ func TestNewSailsGeneratedEvent_NoEvidencePaths(t *testing.T) {
 		Color:         "GRAY",
 		ComputedBase:  "GRAY",
 		Reasons:       []string{"missing proofs"},
-		FilePath:      ".claude/sessions/session-test/WHITE_SAILS.yaml",
+		FilePath:      ".sos/sessions/session-test/WHITE_SAILS.yaml",
 		EvidencePaths: nil,
 	}
 
@@ -724,7 +724,7 @@ func TestNewSailsGeneratedEvent_EmptyEvidencePaths(t *testing.T) {
 		Color:         "GRAY",
 		ComputedBase:  "GRAY",
 		Reasons:       []string{"proofs not found"},
-		FilePath:      ".claude/sessions/session-test/WHITE_SAILS.yaml",
+		FilePath:      ".sos/sessions/session-test/WHITE_SAILS.yaml",
 		EvidencePaths: &EvidencePaths{},
 	}
 
@@ -742,10 +742,10 @@ func TestNewSailsGeneratedEvent_PartialEvidencePaths(t *testing.T) {
 		Color:        "WHITE",
 		ComputedBase: "WHITE",
 		Reasons:      []string{"required proofs passing"},
-		FilePath:     ".claude/sessions/session-test/WHITE_SAILS.yaml",
+		FilePath:     ".sos/sessions/session-test/WHITE_SAILS.yaml",
 		EvidencePaths: &EvidencePaths{
-			Tests: ".claude/sessions/session-test/test-output.log",
-			Build: ".claude/sessions/session-test/build-output.log",
+			Tests: ".sos/sessions/session-test/test-output.log",
+			Build: ".sos/sessions/session-test/build-output.log",
 			// Lint, Adversarial, Integration are empty
 		},
 	}

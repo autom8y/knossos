@@ -21,7 +21,7 @@ func setupTimelineTestSession(t *testing.T) (*cmdContext, string, string, string
 
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	locksDir := filepath.Join(sessionsDir, ".locks")
 	sessionID := "session-20260226-120000-tltestxx"
 	sessionDir := filepath.Join(sessionsDir, sessionID)
@@ -114,7 +114,7 @@ func TestRunTimeline_EmptyTimeline(t *testing.T) {
 func TestRunTimeline_NoActiveSession(t *testing.T) {
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	locksDir := filepath.Join(sessionsDir, ".locks")
 	if err := os.MkdirAll(locksDir, 0755); err != nil {
 		t.Fatalf("failed to create locks dir: %v", err)

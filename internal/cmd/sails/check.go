@@ -40,7 +40,7 @@ Examples:
   ari sails check
 
   # Check specific session directory
-  ari sails check .claude/sessions/session-20260105-143000-abc12345
+  ari sails check .sos/sessions/session-20260105-143000-abc12345
 
   # Check specific WHITE_SAILS.yaml file
   ari sails check path/to/WHITE_SAILS.yaml

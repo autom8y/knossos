@@ -22,7 +22,7 @@ func TestIsProtectedFile(t *testing.T) {
 	}{
 		{
 			name:      "SESSION_CONTEXT.md is protected",
-			filePath:  ".claude/sessions/session-123/SESSION_CONTEXT.md",
+			filePath:  ".sos/sessions/session-123/SESSION_CONTEXT.md",
 			protected: true,
 		},
 		{
@@ -32,7 +32,7 @@ func TestIsProtectedFile(t *testing.T) {
 		},
 		{
 			name:      "absolute path SESSION_CONTEXT.md",
-			filePath:  "/home/user/project/.claude/sessions/foo/SESSION_CONTEXT.md",
+			filePath:  "/home/user/project/.sos/sessions/foo/SESSION_CONTEXT.md",
 			protected: true,
 		},
 		{
@@ -185,7 +185,7 @@ func TestRunWriteguard_BypassEnvVar(t *testing.T) {
 	testutil.SetupEnv(t, &testutil.HookEnv{
 		Event:       "PreToolUse",
 		ToolName:    "Write",
-		ToolInput:   `{"file_path": ".claude/sessions/test/SESSION_CONTEXT.md"}`,
+		ToolInput:   `{"file_path": ".sos/sessions/test/SESSION_CONTEXT.md"}`,
 	})
 
 	var stdout, stderr bytes.Buffer
@@ -262,7 +262,7 @@ func TestRunWriteguard_BlockSessionContext(t *testing.T) {
 	testutil.SetupEnv(t, &testutil.HookEnv{
 		Event:       "PreToolUse",
 		ToolName:    "Write",
-		ToolInput:   `{"file_path": ".claude/sessions/test/SESSION_CONTEXT.md", "content": "bad"}`,
+		ToolInput:   `{"file_path": ".sos/sessions/test/SESSION_CONTEXT.md", "content": "bad"}`,
 	})
 
 	var stdout, stderr bytes.Buffer
@@ -389,17 +389,17 @@ func TestExtractSessionIDFromPath(t *testing.T) {
 	}{
 		{
 			name:     "standard session context path",
-			filePath: ".claude/sessions/session-20260209-120000-abcdef01/SESSION_CONTEXT.md",
+			filePath: ".sos/sessions/session-20260209-120000-abcdef01/SESSION_CONTEXT.md",
 			want:     "session-20260209-120000-abcdef01",
 		},
 		{
 			name:     "absolute path",
-			filePath: "/home/user/project/.claude/sessions/session-20260209-120000-abcdef01/SESSION_CONTEXT.md",
+			filePath: "/home/user/project/.sos/sessions/session-20260209-120000-abcdef01/SESSION_CONTEXT.md",
 			want:     "session-20260209-120000-abcdef01",
 		},
 		{
 			name:     "sprint context in session dir",
-			filePath: ".claude/sessions/session-20260209-120000-abcdef01/SPRINT_CONTEXT.md",
+			filePath: ".sos/sessions/session-20260209-120000-abcdef01/SPRINT_CONTEXT.md",
 			want:     "session-20260209-120000-abcdef01",
 		},
 		{
@@ -409,7 +409,7 @@ func TestExtractSessionIDFromPath(t *testing.T) {
 		},
 		{
 			name:     "session prefix too short",
-			filePath: ".claude/sessions/session-short/SESSION_CONTEXT.md",
+			filePath: ".sos/sessions/session-short/SESSION_CONTEXT.md",
 			want:     "",
 		},
 		{
@@ -436,7 +436,7 @@ func TestWriteguard_ParkedSession_MoiraiLockAllow(t *testing.T) {
 	tmpDir := t.TempDir()
 
 	// Create session directory with valid Moirai lock
-	sessionDir := tmpDir + "/.claude/sessions/" + sessionID
+	sessionDir := tmpDir + "/.sos/sessions/" + sessionID
 	if err := os.MkdirAll(sessionDir, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -445,7 +445,7 @@ func TestWriteguard_ParkedSession_MoiraiLockAllow(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	filePath := ".claude/sessions/" + sessionID + "/SESSION_CONTEXT.md"
+	filePath := ".sos/sessions/" + sessionID + "/SESSION_CONTEXT.md"
 	testutil.SetupEnv(t, &testutil.HookEnv{
 		Event:      "PreToolUse",
 		ToolName:   "Write",
@@ -490,12 +490,12 @@ func TestWriteguard_ParkedSession_NoLock(t *testing.T) {
 	tmpDir := t.TempDir()
 
 	// Create session directory WITHOUT a lock file
-	sessionDir := tmpDir + "/.claude/sessions/" + sessionID
+	sessionDir := tmpDir + "/.sos/sessions/" + sessionID
 	if err := os.MkdirAll(sessionDir, 0o755); err != nil {
 		t.Fatal(err)
 	}
 
-	filePath := ".claude/sessions/" + sessionID + "/SESSION_CONTEXT.md"
+	filePath := ".sos/sessions/" + sessionID + "/SESSION_CONTEXT.md"
 	testutil.SetupEnv(t, &testutil.HookEnv{
 		Event:      "PreToolUse",
 		ToolName:   "Write",
@@ -540,7 +540,7 @@ func TestWriteguard_ParkedSession_StaleLock(t *testing.T) {
 	tmpDir := t.TempDir()
 
 	// Create session directory with stale Moirai lock (acquired 10 minutes ago, stale after 5 seconds)
-	sessionDir := tmpDir + "/.claude/sessions/" + sessionID
+	sessionDir := tmpDir + "/.sos/sessions/" + sessionID
 	if err := os.MkdirAll(sessionDir, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -550,7 +550,7 @@ func TestWriteguard_ParkedSession_StaleLock(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	filePath := ".claude/sessions/" + sessionID + "/SESSION_CONTEXT.md"
+	filePath := ".sos/sessions/" + sessionID + "/SESSION_CONTEXT.md"
 	testutil.SetupEnv(t, &testutil.HookEnv{
 		Event:      "PreToolUse",
 		ToolName:   "Write",
@@ -766,7 +766,7 @@ func TestWipWrite_ProtectedFile_Unchanged(t *testing.T) {
 	result := runWipTest(t, &testutil.HookEnv{
 		Event:     "PreToolUse",
 		ToolName:  "Write",
-		ToolInput: `{"file_path":".claude/sessions/test/SESSION_CONTEXT.md","content":"bad"}`,
+		ToolInput: `{"file_path":".sos/sessions/test/SESSION_CONTEXT.md","content":"bad"}`,
 	})
 	if result.HookSpecificOutput.PermissionDecision != "deny" {
 		t.Errorf("PermissionDecision = %q, want deny (protected file unchanged)", result.HookSpecificOutput.PermissionDecision)
@@ -814,7 +814,7 @@ func TestIsWipPath(t *testing.T) {
 		{"/home/user/project/.wip/DESIGN-x.md", true},
 		{"/Users/tom/.wip/bar.md", true},
 		{"src/main.go", false},
-		{".claude/sessions/test/SESSION_CONTEXT.md", false},
+		{".sos/sessions/test/SESSION_CONTEXT.md", false},
 		{"docs/wip-notes.md", false}, // "wip" in name but not .wip/ dir
 		{"", false},
 	}
@@ -1027,7 +1027,7 @@ func TestWriteguard_StdinIntegration_BlockProtectedFile(t *testing.T) {
 
 	// Create pipe with CC-format JSON targeting SESSION_CONTEXT.md
 	r, w, _ := os.Pipe()
-	payload := `{"hook_event_name":"PreToolUse","tool_name":"Write","tool_input":{"file_path":".claude/sessions/test-session/SESSION_CONTEXT.md","content":"bad"},"session_id":"test-session"}`
+	payload := `{"hook_event_name":"PreToolUse","tool_name":"Write","tool_input":{"file_path":".sos/sessions/test-session/SESSION_CONTEXT.md","content":"bad"},"session_id":"test-session"}`
 	go func() {
 		w.Write([]byte(payload))
 		w.Close()
@@ -1076,7 +1076,7 @@ func TestWriteguard_ArchivedSession_DeniesWithClearMessage(t *testing.T) {
 
 	// Create the archive directory with an archived session
 	sessionID := "session-20250105-120030-arctest1"
-	archiveSessionDir := tmpDir + "/.claude/.archive/sessions/" + sessionID
+	archiveSessionDir := tmpDir + "/.sos/archive/" + sessionID
 	if err := os.MkdirAll(archiveSessionDir, 0755); err != nil {
 		t.Fatalf("Failed to create archive session dir: %v", err)
 	}
@@ -1093,7 +1093,7 @@ status: ARCHIVED
 	}
 
 	// Simulate write attempt to the LIVE session path (which no longer exists after proper archiving)
-	liveContextPath := ".claude/sessions/" + sessionID + "/SESSION_CONTEXT.md"
+	liveContextPath := ".sos/sessions/" + sessionID + "/SESSION_CONTEXT.md"
 
 	testutil.SetupEnv(t, &testutil.HookEnv{
 		Event:     "PreToolUse",
@@ -1312,7 +1312,7 @@ func TestClassifyEditSection_FrontmatterKeys(t *testing.T) {
 func makeSessionCtxWithLock(t *testing.T, sessionID string, withLock bool) (string, *cmdContext) {
 	t.Helper()
 	tmpDir := t.TempDir()
-	sessionDir := tmpDir + "/.claude/sessions/" + sessionID
+	sessionDir := tmpDir + "/.sos/sessions/" + sessionID
 	if err := os.MkdirAll(sessionDir, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -1340,7 +1340,7 @@ func makeSessionCtxWithLock(t *testing.T, sessionID string, withLock bool) (stri
 func TestWriteguard_SectionEdit_TimelineNoLock_Allow(t *testing.T) {
 	sessionID := "session-20260226-120000-abcdef01"
 	tmpDir, ctx := makeSessionCtxWithLock(t, sessionID, false)
-	filePath := ".claude/sessions/" + sessionID + "/SESSION_CONTEXT.md"
+	filePath := ".sos/sessions/" + sessionID + "/SESSION_CONTEXT.md"
 	toolInputJSON, _ := json.Marshal(map[string]any{
 		"file_path":  filePath,
 		"old_string": "- 14:30 | SESSION  | created: Add dark mode",
@@ -1381,7 +1381,7 @@ func TestWriteguard_SectionEdit_TimelineNoLock_Allow(t *testing.T) {
 func TestWriteguard_SectionEdit_FrontmatterWithLock_Allow(t *testing.T) {
 	sessionID := "session-20260226-120000-abcdef02"
 	tmpDir, ctx := makeSessionCtxWithLock(t, sessionID, true)
-	filePath := ".claude/sessions/" + sessionID + "/SESSION_CONTEXT.md"
+	filePath := ".sos/sessions/" + sessionID + "/SESSION_CONTEXT.md"
 	toolInputJSON, _ := json.Marshal(map[string]any{
 		"file_path":  filePath,
 		"old_string": "status: ACTIVE",
@@ -1414,7 +1414,7 @@ func TestWriteguard_SectionEdit_FrontmatterWithLock_Allow(t *testing.T) {
 func TestWriteguard_SectionEdit_FrontmatterNoLock_Deny(t *testing.T) {
 	sessionID := "session-20260226-120000-abcdef03"
 	tmpDir, ctx := makeSessionCtxWithLock(t, sessionID, false)
-	filePath := ".claude/sessions/" + sessionID + "/SESSION_CONTEXT.md"
+	filePath := ".sos/sessions/" + sessionID + "/SESSION_CONTEXT.md"
 	toolInputJSON, _ := json.Marshal(map[string]any{
 		"file_path":  filePath,
 		"old_string": "status: ACTIVE",
@@ -1453,7 +1453,7 @@ func TestWriteguard_SectionEdit_FrontmatterNoLock_Deny(t *testing.T) {
 func TestWriteguard_SectionEdit_ArtifactsWithLock_Allow(t *testing.T) {
 	sessionID := "session-20260226-120000-abcdef04"
 	tmpDir, ctx := makeSessionCtxWithLock(t, sessionID, true)
-	filePath := ".claude/sessions/" + sessionID + "/SESSION_CONTEXT.md"
+	filePath := ".sos/sessions/" + sessionID + "/SESSION_CONTEXT.md"
 	toolInputJSON, _ := json.Marshal(map[string]any{
 		"file_path":  filePath,
 		"old_string": "## Artifacts",
@@ -1486,7 +1486,7 @@ func TestWriteguard_SectionEdit_ArtifactsWithLock_Allow(t *testing.T) {
 func TestWriteguard_SectionEdit_ArtifactsNoLock_Deny(t *testing.T) {
 	sessionID := "session-20260226-120000-abcdef05"
 	tmpDir, ctx := makeSessionCtxWithLock(t, sessionID, false)
-	filePath := ".claude/sessions/" + sessionID + "/SESSION_CONTEXT.md"
+	filePath := ".sos/sessions/" + sessionID + "/SESSION_CONTEXT.md"
 	toolInputJSON, _ := json.Marshal(map[string]any{
 		"file_path":  filePath,
 		"old_string": "## Artifacts",
@@ -1525,7 +1525,7 @@ func TestWriteguard_SectionEdit_ArtifactsNoLock_Deny(t *testing.T) {
 func TestWriteguard_SectionEdit_Mixed_Deny(t *testing.T) {
 	sessionID := "session-20260226-120000-abcdef06"
 	tmpDir, ctx := makeSessionCtxWithLock(t, sessionID, true) // lock held — still must deny
-	filePath := ".claude/sessions/" + sessionID + "/SESSION_CONTEXT.md"
+	filePath := ".sos/sessions/" + sessionID + "/SESSION_CONTEXT.md"
 	toolInputJSON, _ := json.Marshal(map[string]any{
 		"file_path":  filePath,
 		"old_string": "- 14:30 | SESSION  | created\nstatus: ACTIVE",
@@ -1561,7 +1561,7 @@ func TestWriteguard_SectionEdit_Mixed_Deny(t *testing.T) {
 func TestWriteguard_SectionEdit_Unknown_Deny(t *testing.T) {
 	sessionID := "session-20260226-120000-abcdef07"
 	tmpDir, ctx := makeSessionCtxWithLock(t, sessionID, false)
-	filePath := ".claude/sessions/" + sessionID + "/SESSION_CONTEXT.md"
+	filePath := ".sos/sessions/" + sessionID + "/SESSION_CONTEXT.md"
 	toolInputJSON, _ := json.Marshal(map[string]any{
 		"file_path":  filePath,
 		"old_string": "some random text without any section indicators",
@@ -1597,7 +1597,7 @@ func TestWriteguard_SectionEdit_Unknown_Deny(t *testing.T) {
 func TestWriteguard_SessionContextWrite_WithLock_Allow(t *testing.T) {
 	sessionID := "session-20260226-120000-abcdef08"
 	tmpDir, ctx := makeSessionCtxWithLock(t, sessionID, true)
-	filePath := ".claude/sessions/" + sessionID + "/SESSION_CONTEXT.md"
+	filePath := ".sos/sessions/" + sessionID + "/SESSION_CONTEXT.md"
 	toolInputJSON, _ := json.Marshal(map[string]any{
 		"file_path": filePath,
 		"content":   "---\nschema_version: \"3.0\"\n---\n\n## Timeline\n",
@@ -1629,7 +1629,7 @@ func TestWriteguard_SessionContextWrite_WithLock_Allow(t *testing.T) {
 func TestWriteguard_SessionContextWrite_NoLock_Deny(t *testing.T) {
 	sessionID := "session-20260226-120000-abcdef09"
 	tmpDir, ctx := makeSessionCtxWithLock(t, sessionID, false)
-	filePath := ".claude/sessions/" + sessionID + "/SESSION_CONTEXT.md"
+	filePath := ".sos/sessions/" + sessionID + "/SESSION_CONTEXT.md"
 	toolInputJSON, _ := json.Marshal(map[string]any{
 		"file_path": filePath,
 		"content":   "---\nschema_version: \"3.0\"\n---\n",
@@ -1709,12 +1709,12 @@ func TestWriteguard_WipWrite_Regression(t *testing.T) {
 func BenchmarkWriteguardHook_TimelineAllow(b *testing.B) {
 	sessionID := "session-20260226-120000-bench0001"
 	tmpDir := b.TempDir()
-	sessionDir := tmpDir + "/.claude/sessions/" + sessionID
+	sessionDir := tmpDir + "/.sos/sessions/" + sessionID
 	if err := os.MkdirAll(sessionDir, 0o755); err != nil {
 		b.Fatal(err)
 	}
 
-	filePath := ".claude/sessions/" + sessionID + "/SESSION_CONTEXT.md"
+	filePath := ".sos/sessions/" + sessionID + "/SESSION_CONTEXT.md"
 	toolInputJSON, _ := json.Marshal(map[string]any{
 		"file_path":  filePath,
 		"old_string": "- 14:30 | SESSION  | created: benchmark test",
@@ -1764,12 +1764,12 @@ func BenchmarkWriteguardHook_TimelineAllow(b *testing.B) {
 func BenchmarkWriteguardHook_FrontmatterBlock(b *testing.B) {
 	sessionID := "session-20260226-120000-bench0002"
 	tmpDir := b.TempDir()
-	sessionDir := tmpDir + "/.claude/sessions/" + sessionID
+	sessionDir := tmpDir + "/.sos/sessions/" + sessionID
 	if err := os.MkdirAll(sessionDir, 0o755); err != nil {
 		b.Fatal(err)
 	}
 
-	filePath := ".claude/sessions/" + sessionID + "/SESSION_CONTEXT.md"
+	filePath := ".sos/sessions/" + sessionID + "/SESSION_CONTEXT.md"
 	toolInputJSON, _ := json.Marshal(map[string]any{
 		"file_path":  filePath,
 		"old_string": "status: ACTIVE",

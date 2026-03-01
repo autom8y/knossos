@@ -19,7 +19,7 @@ func setupFieldTestSession(t *testing.T, complexity, initiative string) (*cmdCon
 
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	locksDir := filepath.Join(sessionsDir, ".locks")
 	sessionID := "session-20260226-100000-fieldtest"
 	sessionDir := filepath.Join(sessionsDir, sessionID)
@@ -77,7 +77,7 @@ func TestFieldSet_ValidComplexity(t *testing.T) {
 	}
 
 	// Reload context and verify mutation
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	ctxPath := filepath.Join(sessionsDir, sessionID, "SESSION_CONTEXT.md")
 	loaded, err := session.LoadContext(ctxPath)
 	if err != nil {
@@ -162,7 +162,7 @@ func TestFieldGet_ReturnsCorrectValueAfterSet(t *testing.T) {
 	verbose := false
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	locksDir := filepath.Join(sessionsDir, ".locks")
 	sessionID := "session-20260226-100000-roundtrip"
 	sessionDir := filepath.Join(sessionsDir, sessionID)
@@ -243,7 +243,7 @@ func TestFieldGet_All(t *testing.T) {
 
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	locksDir := filepath.Join(sessionsDir, ".locks")
 	sessionID := "session-20260226-100000-allfields"
 	sessionDir := filepath.Join(sessionsDir, sessionID)

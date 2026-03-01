@@ -12,5 +12,11 @@ Persistent knowledge in `.know/`. Generate with `/know --all` if not present.
 - `Read(".know/test-coverage.md")` — test gaps, coverage patterns
 {{- if .IsKnossosProject }}
 - `Read(".know/literature-{domain}.md")` — external scholarship (generate with `/research`)
-{{ end -}}
+{{ end }}
+Work product artifacts in `.ledge/`:
+
+- `.ledge/decisions/` — ADRs and design decisions
+- `.ledge/specs/` — PRDs and technical specs
+- `.ledge/reviews/` — audit reports and code reviews
+- `.ledge/spikes/` — exploration and research artifacts
 <!-- KNOSSOS:END know -->

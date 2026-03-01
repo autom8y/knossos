@@ -222,8 +222,8 @@ type lockTestData struct {
 func setupTestEnv(t *testing.T) *lockTestData {
 	projectDir := t.TempDir()
 
-	// Create .claude/sessions directory
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	// Create .sos/sessions directory
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	if err := os.MkdirAll(sessionsDir, 0755); err != nil {
 		t.Fatalf("failed to create sessions dir: %v", err)
 	}
@@ -254,7 +254,7 @@ func (td *lockTestData) newContext() *cmdContext {
 }
 
 func (td *lockTestData) sessionDir(sessionID string) string {
-	return filepath.Join(td.projectDir, ".claude", "sessions", sessionID)
+	return filepath.Join(td.projectDir, ".sos", "sessions", sessionID)
 }
 
 func (td *lockTestData) createSession(initiative string) string {
@@ -279,7 +279,7 @@ func (td *lockTestData) createSession(initiative string) string {
 	}
 
 	// Set as current session
-	currentPath := filepath.Join(td.projectDir, ".claude", "sessions", ".current-session")
+	currentPath := filepath.Join(td.projectDir, ".sos", "sessions", ".current-session")
 	if err := os.WriteFile(currentPath, []byte(sessionID), 0644); err != nil {
 		td.t.Fatalf("failed to write current session: %v", err)
 	}

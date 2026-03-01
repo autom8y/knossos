@@ -10,7 +10,7 @@ import (
 func TestRegistry_SessionRegistryPath(t *testing.T) {
 	registry := NewRegistry("/test/project")
 	path := registry.SessionRegistryPath("session-20260105-143022-abc12345")
-	expected := "/test/project/.claude/sessions/session-20260105-143022-abc12345/artifacts.yaml"
+	expected := "/test/project/.sos/sessions/session-20260105-143022-abc12345/artifacts.yaml"
 	if path != expected {
 		t.Errorf("Expected %s, got %s", expected, path)
 	}
@@ -266,7 +266,7 @@ func TestRegistry_SaveSessionRegistry_CreatesDirectory(t *testing.T) {
 	}
 
 	// Verify directory was created
-	sessionDir := filepath.Join(tmpDir, ".claude", "sessions", sessionID)
+	sessionDir := filepath.Join(tmpDir, ".sos", "sessions", sessionID)
 	info, err := os.Stat(sessionDir)
 	if err != nil {
 		t.Fatalf("Session directory not created: %v", err)

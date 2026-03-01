@@ -21,7 +21,7 @@ func TestStatusIntegration_WithSailsColor(t *testing.T) {
 	projectDir := tmpDir
 
 	// Create session directory structure
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	sessionID := "session-20260106-integration-sails"
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	locksDir := filepath.Join(sessionsDir, ".locks")
@@ -123,7 +123,7 @@ func TestStatusIntegration_NoSailsFile(t *testing.T) {
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
 
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	sessionID := "session-20260106-integration-nosails"
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	locksDir := filepath.Join(sessionsDir, ".locks")
@@ -191,7 +191,7 @@ func TestStatusIntegration_TextOutput(t *testing.T) {
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
 
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	sessionID := "session-20260106-integration-text"
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	locksDir := filepath.Join(sessionsDir, ".locks")

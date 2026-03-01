@@ -53,7 +53,7 @@ func newTestContext(projectDir string, sessionID ...string) *cmdContext {
 	}
 }
 
-// setupProjectDir creates the minimal .claude directory structure for tests.
+// setupProjectDir creates the minimal directory structure for tests.
 // Returns the project root directory path.
 func setupProjectDir(t *testing.T) string {
 	t.Helper()
@@ -61,9 +61,9 @@ func setupProjectDir(t *testing.T) string {
 
 	dirs := []string{
 		filepath.Join(tmpDir, ".claude"),
-		filepath.Join(tmpDir, ".claude", "sessions"),
-		filepath.Join(tmpDir, ".claude", "sessions", ".locks"),
-		filepath.Join(tmpDir, ".claude", "sessions", ".audit"),
+		filepath.Join(tmpDir, ".sos", "sessions"),
+		filepath.Join(tmpDir, ".sos", "sessions", ".locks"),
+		filepath.Join(tmpDir, ".sos", "sessions", ".audit"),
 	}
 	for _, d := range dirs {
 		if err := os.MkdirAll(d, 0755); err != nil {
@@ -84,7 +84,7 @@ func setupProjectDir(t *testing.T) string {
 func writeSessionContext(t *testing.T, projectDir, sessionID, status, initiative string, parkedAt *time.Time, parkedReason string) {
 	t.Helper()
 
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	if err := os.MkdirAll(sessionDir, 0755); err != nil {
 		t.Fatalf("Failed to create session dir: %v", err)
@@ -115,7 +115,7 @@ func writeSessionContext(t *testing.T, projectDir, sessionID, status, initiative
 // loadSessionStatus loads and returns the session status from SESSION_CONTEXT.md.
 func loadSessionStatus(t *testing.T, projectDir, sessionID string) session.Status {
 	t.Helper()
-	ctxPath := filepath.Join(projectDir, ".claude", "sessions", sessionID, "SESSION_CONTEXT.md")
+	ctxPath := filepath.Join(projectDir, ".sos", "sessions", sessionID, "SESSION_CONTEXT.md")
 	ctx, err := session.LoadContext(ctxPath)
 	if err != nil {
 		t.Fatalf("Failed to load session context: %v", err)
@@ -126,7 +126,7 @@ func loadSessionStatus(t *testing.T, projectDir, sessionID string) session.Statu
 // loadSessionContext loads and returns the full session context.
 func loadSessionContext(t *testing.T, projectDir, sessionID string) *session.Context {
 	t.Helper()
-	ctxPath := filepath.Join(projectDir, ".claude", "sessions", sessionID, "SESSION_CONTEXT.md")
+	ctxPath := filepath.Join(projectDir, ".sos", "sessions", sessionID, "SESSION_CONTEXT.md")
 	ctx, err := session.LoadContext(ctxPath)
 	if err != nil {
 		t.Fatalf("Failed to load session context: %v", err)
@@ -137,7 +137,7 @@ func loadSessionContext(t *testing.T, projectDir, sessionID string) *session.Con
 // findCreatedSessionID discovers the session ID from the sessions directory.
 func findCreatedSessionID(t *testing.T, projectDir string) string {
 	t.Helper()
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	entries, err := os.ReadDir(sessionsDir)
 	if err != nil {
 		t.Fatalf("Failed to read sessions dir: %v", err)
@@ -155,7 +155,7 @@ func findCreatedSessionID(t *testing.T, projectDir string) string {
 // countEventsOfType counts events of a specific type in events.jsonl.
 func countEventsOfType(t *testing.T, projectDir, sessionID, eventType string) int {
 	t.Helper()
-	eventsPath := filepath.Join(projectDir, ".claude", "sessions", sessionID, "events.jsonl")
+	eventsPath := filepath.Join(projectDir, ".sos", "sessions", sessionID, "events.jsonl")
 	content, err := os.ReadFile(eventsPath)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -169,7 +169,7 @@ func countEventsOfType(t *testing.T, projectDir, sessionID, eventType string) in
 // readEventsJSONL reads events.jsonl and returns parsed JSON objects.
 func readEventsJSONL(t *testing.T, projectDir, sessionID string) []map[string]any {
 	t.Helper()
-	eventsPath := filepath.Join(projectDir, ".claude", "sessions", sessionID, "events.jsonl")
+	eventsPath := filepath.Join(projectDir, ".sos", "sessions", sessionID, "events.jsonl")
 	file, err := os.Open(eventsPath)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -413,7 +413,7 @@ func TestMoirai_ContextIntegrity_YAMLValid(t *testing.T) {
 	}
 
 	sessionID := findCreatedSessionID(t, projectDir)
-	ctxPath := filepath.Join(projectDir, ".claude", "sessions", sessionID, "SESSION_CONTEXT.md")
+	ctxPath := filepath.Join(projectDir, ".sos", "sessions", sessionID, "SESSION_CONTEXT.md")
 
 	// Update ctx with sessionID for subsequent operations
 	ctx = newTestContext(projectDir, sessionID)
@@ -589,7 +589,7 @@ func TestMoirai_AuditTrail_EventsAreValidJSON(t *testing.T) {
 	}
 
 	// Read events file and verify every line is valid JSON
-	eventsPath := filepath.Join(projectDir, ".claude", "sessions", sessionID, "events.jsonl")
+	eventsPath := filepath.Join(projectDir, ".sos", "sessions", sessionID, "events.jsonl")
 	file, err := os.Open(eventsPath)
 	if err != nil {
 		t.Fatalf("Failed to open events.jsonl: %v", err)
@@ -633,7 +633,7 @@ func TestMoirai_AuditTrail_EventsJSONLPopulated(t *testing.T) {
 	}
 
 	// Verify events.jsonl exists and is non-empty (replaces transitions.log)
-	eventsPath := filepath.Join(projectDir, ".claude", "sessions", sessionID, "events.jsonl")
+	eventsPath := filepath.Join(projectDir, ".sos", "sessions", sessionID, "events.jsonl")
 	info, err := os.Stat(eventsPath)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -797,7 +797,7 @@ func TestMoirai_ErrorPath_CreateBlocksDuplicate(t *testing.T) {
 func TestMoirai_ErrorPath_MissingSessionDir(t *testing.T) {
 	// Write .current-session pointing to a session ID whose directory does not exist
 	projectDir := setupProjectDir(t)
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	fakeID := "session-20260205-160000-nosuchid"
 	if err := os.WriteFile(filepath.Join(sessionsDir, ".current-session"), []byte(fakeID), 0644); err != nil {
 		t.Fatalf("Failed to write .current-session: %v", err)
@@ -899,7 +899,7 @@ func TestMoirai_ConcurrentSafety_CreateCreateRace(t *testing.T) {
 	}
 
 	// Verify exactly one session directory exists
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	entries, err := os.ReadDir(sessionsDir)
 	if err != nil {
 		t.Fatalf("Failed to read sessions dir: %v", err)
@@ -1054,13 +1054,13 @@ func TestMoirai_WrapWithArchive_MovesDirectory(t *testing.T) {
 	}
 
 	// Original session dir should be gone
-	originalDir := filepath.Join(projectDir, ".claude", "sessions", sessionID)
+	originalDir := filepath.Join(projectDir, ".sos", "sessions", sessionID)
 	if _, err := os.Stat(originalDir); !os.IsNotExist(err) {
 		t.Error("Original session directory should be removed after archive")
 	}
 
 	// Archive directory should exist
-	archiveDir := filepath.Join(projectDir, ".claude", ".archive", "sessions", sessionID)
+	archiveDir := filepath.Join(projectDir, ".sos", "archive", sessionID)
 	if _, err := os.Stat(archiveDir); err != nil {
 		t.Errorf("Archive directory should exist at %s: %v", archiveDir, err)
 	}

@@ -738,7 +738,7 @@ func TestProofCollector_CollectForSession(t *testing.T) {
 
 	// Create session directory structure
 	sessionID := "session-20260105-143022-abc12345"
-	sessionDir := filepath.Join(tmpDir, ".claude", "sessions", sessionID)
+	sessionDir := filepath.Join(tmpDir, ".sos", "sessions", sessionID)
 	if err := os.MkdirAll(sessionDir, 0755); err != nil {
 		t.Fatalf("Failed to create session dir: %v", err)
 	}

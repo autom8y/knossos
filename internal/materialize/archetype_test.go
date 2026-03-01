@@ -459,7 +459,7 @@ func setupArchetypeRite(t *testing.T) (string, string) {
 	projectDir := t.TempDir()
 	claudeDir := filepath.Join(projectDir, ".claude")
 
-	ritesDir := filepath.Join(projectDir, "rites", "test-arch")
+	ritesDir := filepath.Join(projectDir, ".knossos", "rites", "test-arch")
 	if err := os.MkdirAll(filepath.Join(ritesDir, "agents"), 0755); err != nil {
 		t.Fatalf("setup: %v", err)
 	}
@@ -520,9 +520,9 @@ func TestMaterializeAgents_ArchetypeRendersFromTemplate(t *testing.T) {
 
 	resolved := &ResolvedRite{
 		Name:         "test-arch",
-		RitePath:     filepath.Join(projectDir, "rites", "test-arch"),
-		ManifestPath: filepath.Join(projectDir, "rites", "test-arch", "manifest.yaml"),
-		Source:       RiteSource{Type: SourceProject, Path: filepath.Join(projectDir, "rites", "test-arch")},
+		RitePath:     filepath.Join(projectDir, ".knossos", "rites", "test-arch"),
+		ManifestPath: filepath.Join(projectDir, ".knossos", "rites", "test-arch", "manifest.yaml"),
+		Source:       RiteSource{Type: SourceProject, Path: filepath.Join(projectDir, ".knossos", "rites", "test-arch")},
 	}
 
 	err := m.materializeAgents(manifest, resolved.RitePath, claudeDir, resolved, provenance.NullCollector{}, nil, nil)
@@ -592,9 +592,9 @@ func TestMaterializeAgents_NonArchetypeAgentCopiedFromSource(t *testing.T) {
 
 	resolved := &ResolvedRite{
 		Name:         "test-arch",
-		RitePath:     filepath.Join(projectDir, "rites", "test-arch"),
-		ManifestPath: filepath.Join(projectDir, "rites", "test-arch", "manifest.yaml"),
-		Source:       RiteSource{Type: SourceProject, Path: filepath.Join(projectDir, "rites", "test-arch")},
+		RitePath:     filepath.Join(projectDir, ".knossos", "rites", "test-arch"),
+		ManifestPath: filepath.Join(projectDir, ".knossos", "rites", "test-arch", "manifest.yaml"),
+		Source:       RiteSource{Type: SourceProject, Path: filepath.Join(projectDir, ".knossos", "rites", "test-arch")},
 	}
 
 	err := m.materializeAgents(manifest, resolved.RitePath, claudeDir, resolved, provenance.NullCollector{}, nil, nil)
@@ -648,9 +648,9 @@ func TestMaterializeAgents_ArchetypeGoesThruTransformPipeline(t *testing.T) {
 
 	resolved := &ResolvedRite{
 		Name:         "test-arch",
-		RitePath:     filepath.Join(projectDir, "rites", "test-arch"),
-		ManifestPath: filepath.Join(projectDir, "rites", "test-arch", "manifest.yaml"),
-		Source:       RiteSource{Type: SourceProject, Path: filepath.Join(projectDir, "rites", "test-arch")},
+		RitePath:     filepath.Join(projectDir, ".knossos", "rites", "test-arch"),
+		ManifestPath: filepath.Join(projectDir, ".knossos", "rites", "test-arch", "manifest.yaml"),
+		Source:       RiteSource{Type: SourceProject, Path: filepath.Join(projectDir, ".knossos", "rites", "test-arch")},
 	}
 
 	err := m.materializeAgents(manifest, resolved.RitePath, claudeDir, resolved, provenance.NullCollector{}, nil, nil)
@@ -683,7 +683,7 @@ func TestMaterializeAgents_NoArchetypeNoChange(t *testing.T) {
 	projectDir := t.TempDir()
 	claudeDir := filepath.Join(projectDir, ".claude")
 
-	ritesDir := filepath.Join(projectDir, "rites", "plain")
+	ritesDir := filepath.Join(projectDir, ".knossos", "rites", "plain")
 	if err := os.MkdirAll(filepath.Join(ritesDir, "agents"), 0755); err != nil {
 		t.Fatal(err)
 	}
@@ -704,9 +704,9 @@ func TestMaterializeAgents_NoArchetypeNoChange(t *testing.T) {
 
 	resolved := &ResolvedRite{
 		Name:         "plain",
-		RitePath:     filepath.Join(projectDir, "rites", "plain"),
-		ManifestPath: filepath.Join(projectDir, "rites", "plain", "manifest.yaml"),
-		Source:       RiteSource{Type: SourceProject, Path: filepath.Join(projectDir, "rites", "plain")},
+		RitePath:     filepath.Join(projectDir, ".knossos", "rites", "plain"),
+		ManifestPath: filepath.Join(projectDir, ".knossos", "rites", "plain", "manifest.yaml"),
+		Source:       RiteSource{Type: SourceProject, Path: filepath.Join(projectDir, ".knossos", "rites", "plain")},
 	}
 
 	err := m.materializeAgents(manifest, resolved.RitePath, claudeDir, resolved, provenance.NullCollector{}, nil, nil)
@@ -730,7 +730,7 @@ func TestMaterializeAgents_UnknownArchetypeErrors(t *testing.T) {
 	projectDir := t.TempDir()
 	claudeDir := filepath.Join(projectDir, ".claude")
 
-	ritesDir := filepath.Join(projectDir, "rites", "bad")
+	ritesDir := filepath.Join(projectDir, ".knossos", "rites", "bad")
 	if err := os.MkdirAll(filepath.Join(ritesDir, "agents"), 0755); err != nil {
 		t.Fatal(err)
 	}
@@ -746,9 +746,9 @@ func TestMaterializeAgents_UnknownArchetypeErrors(t *testing.T) {
 
 	resolved := &ResolvedRite{
 		Name:         "bad",
-		RitePath:     filepath.Join(projectDir, "rites", "bad"),
-		ManifestPath: filepath.Join(projectDir, "rites", "bad", "manifest.yaml"),
-		Source:       RiteSource{Type: SourceProject, Path: filepath.Join(projectDir, "rites", "bad")},
+		RitePath:     filepath.Join(projectDir, ".knossos", "rites", "bad"),
+		ManifestPath: filepath.Join(projectDir, ".knossos", "rites", "bad", "manifest.yaml"),
+		Source:       RiteSource{Type: SourceProject, Path: filepath.Join(projectDir, ".knossos", "rites", "bad")},
 	}
 
 	err := m.materializeAgents(manifest, resolved.RitePath, claudeDir, resolved, provenance.NullCollector{}, nil, nil)
@@ -789,9 +789,9 @@ func TestMaterializeAgents_ArchetypeProvenanceRecorded(t *testing.T) {
 
 	resolved := &ResolvedRite{
 		Name:         "test-arch",
-		RitePath:     filepath.Join(projectDir, "rites", "test-arch"),
-		ManifestPath: filepath.Join(projectDir, "rites", "test-arch", "manifest.yaml"),
-		Source:       RiteSource{Type: SourceProject, Path: filepath.Join(projectDir, "rites", "test-arch")},
+		RitePath:     filepath.Join(projectDir, ".knossos", "rites", "test-arch"),
+		ManifestPath: filepath.Join(projectDir, ".knossos", "rites", "test-arch", "manifest.yaml"),
+		Source:       RiteSource{Type: SourceProject, Path: filepath.Join(projectDir, ".knossos", "rites", "test-arch")},
 	}
 
 	// Use a real collector to capture provenance records

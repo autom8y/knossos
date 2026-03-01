@@ -137,8 +137,8 @@ func TestRunClew_NoActiveSession(t *testing.T) {
 func TestRunClew_WithActiveSession(t *testing.T) {
 	// Create temp project structure with session
 	tmpDir := t.TempDir()
-	claudeDir := filepath.Join(tmpDir, ".claude")
-	sessionsDir := filepath.Join(claudeDir, "sessions")
+	sosDir := filepath.Join(tmpDir, ".sos")
+	sessionsDir := filepath.Join(sosDir, "sessions")
 	sessionID := "test-session-001"
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 
@@ -196,8 +196,8 @@ func TestRunClew_WithActiveSession(t *testing.T) {
 func TestRunClew_OrchestratorStamping(t *testing.T) {
 	// Create temp project structure with session
 	tmpDir := t.TempDir()
-	claudeDir := filepath.Join(tmpDir, ".claude")
-	sessionsDir := filepath.Join(claudeDir, "sessions")
+	sosDir := filepath.Join(tmpDir, ".sos")
+	sessionsDir := filepath.Join(sosDir, "sessions")
 	sessionID := "test-session-orchestrator"
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 
@@ -298,8 +298,8 @@ throughline:
 func TestRunClew_NonOrchestratorTask(t *testing.T) {
 	// Create temp project structure with session
 	tmpDir := t.TempDir()
-	claudeDir := filepath.Join(tmpDir, ".claude")
-	sessionsDir := filepath.Join(claudeDir, "sessions")
+	sosDir := filepath.Join(tmpDir, ".sos")
+	sessionsDir := filepath.Join(sosDir, "sessions")
 	sessionID := "test-session-regular-task"
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 
@@ -380,8 +380,8 @@ func TestClew_StdinIntegration_RecordsToolEvent(t *testing.T) {
 
 	// Create temp project structure with session
 	tmpDir := t.TempDir()
-	claudeDir := filepath.Join(tmpDir, ".claude")
-	sessionsDir := filepath.Join(claudeDir, "sessions")
+	sosDir := filepath.Join(tmpDir, ".sos")
+	sessionsDir := filepath.Join(sosDir, "sessions")
 	sessionID := "test-stdin-session"
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 
@@ -459,7 +459,7 @@ func TestClew_StdinIntegration_RecordsToolEvent(t *testing.T) {
 func makeClewSession(t *testing.T, sessionID string) (string, string, *cmdContext) {
 	t.Helper()
 	tmpDir := t.TempDir()
-	sessionDir := filepath.Join(tmpDir, ".claude", "sessions", sessionID)
+	sessionDir := filepath.Join(tmpDir, ".sos", "sessions", sessionID)
 	if err := os.MkdirAll(sessionDir, 0755); err != nil {
 		t.Fatalf("Failed to create session dir: %v", err)
 	}

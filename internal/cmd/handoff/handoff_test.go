@@ -20,8 +20,8 @@ func TestPrepare_EmitsTaskEnd(t *testing.T) {
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
 
-	// Create .claude/sessions directory structure
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	// Create .sos/sessions directory structure
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	sessionID := "session-20260105-140000-prep1234"
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	locksDir := filepath.Join(sessionsDir, ".locks")
@@ -156,8 +156,8 @@ func TestExecute_EmitsTaskStart(t *testing.T) {
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
 
-	// Create .claude/sessions directory structure
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	// Create .sos/sessions directory structure
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	sessionID := "session-20260105-140001-exec5678"
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	locksDir := filepath.Join(sessionsDir, ".locks")
@@ -292,8 +292,8 @@ func TestStatus_ReturnsCurrentState(t *testing.T) {
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
 
-	// Create .claude/sessions directory structure
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	// Create .sos/sessions directory structure
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	sessionID := "session-20260105-140002-stat9012"
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	locksDir := filepath.Join(sessionsDir, ".locks")
@@ -357,8 +357,8 @@ func TestHistory_QueriesEvents(t *testing.T) {
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
 
-	// Create .claude/sessions directory structure
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	// Create .sos/sessions directory structure
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	sessionID := "session-20260105-140003-hist3456"
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	locksDir := filepath.Join(sessionsDir, ".locks")
@@ -437,8 +437,8 @@ func TestPrepare_InvalidHandoffSequence(t *testing.T) {
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
 
-	// Create .claude/sessions directory structure
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	// Create .sos/sessions directory structure
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	sessionID := "session-20260105-140004-invl7890"
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	locksDir := filepath.Join(sessionsDir, ".locks")
@@ -513,8 +513,8 @@ func TestPrepare_SelfHandoff(t *testing.T) {
 			tmpDir := t.TempDir()
 			projectDir := tmpDir
 
-			// Create .claude/sessions directory structure
-			sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+			// Create .sos/sessions directory structure
+			sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 			sessionID := "session-20260105-self-" + agent
 			sessionDir := filepath.Join(sessionsDir, sessionID)
 			locksDir := filepath.Join(sessionsDir, ".locks")
@@ -608,8 +608,8 @@ func TestPrepare_AllInvalidSequences(t *testing.T) {
 			tmpDir := t.TempDir()
 			projectDir := tmpDir
 
-			// Create .claude/sessions directory structure
-			sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+			// Create .sos/sessions directory structure
+			sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 			sessionID := "session-20260105-inv-" + tc.from + "-" + tc.to
 			sessionDir := filepath.Join(sessionsDir, sessionID)
 			locksDir := filepath.Join(sessionsDir, ".locks")
@@ -717,8 +717,8 @@ func TestPrepare_CrossRiteValidation(t *testing.T) {
 			tmpDir := t.TempDir()
 			projectDir := tmpDir
 
-			// Create .claude/sessions directory structure
-			sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+			// Create .sos/sessions directory structure
+			sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 			sessionID := "session-20260105-team-" + tc.name
 			sessionDir := filepath.Join(sessionsDir, sessionID)
 			locksDir := filepath.Join(sessionsDir, ".locks")
@@ -796,7 +796,7 @@ func TestStatus_NoSession(t *testing.T) {
 	projectDir := tmpDir
 
 	// Create minimal .claude structure but no session
-	if err := os.MkdirAll(filepath.Join(projectDir, ".claude", "sessions"), 0755); err != nil {
+	if err := os.MkdirAll(filepath.Join(projectDir, ".sos", "sessions"), 0755); err != nil {
 		t.Fatalf("Failed to create sessions dir: %v", err)
 	}
 
@@ -825,8 +825,8 @@ func TestHistory_EmptyEvents(t *testing.T) {
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
 
-	// Create .claude/sessions directory structure
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	// Create .sos/sessions directory structure
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	sessionID := "session-20260105-140005-empt1234"
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	locksDir := filepath.Join(sessionsDir, ".locks")
@@ -893,8 +893,8 @@ func TestExecute_DryRunValidation(t *testing.T) {
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
 
-	// Create .claude/sessions directory structure
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	// Create .sos/sessions directory structure
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	sessionID := "session-20260105-dryval-1234"
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	locksDir := filepath.Join(sessionsDir, ".locks")
@@ -981,8 +981,8 @@ func TestExecute_DryRun(t *testing.T) {
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
 
-	// Create .claude/sessions directory structure
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	// Create .sos/sessions directory structure
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	sessionID := "session-20260105-140006-dryr5678"
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	locksDir := filepath.Join(sessionsDir, ".locks")
@@ -1111,7 +1111,7 @@ func TestPrepare_ValidHandoffSequences(t *testing.T) {
 			tmpDir := t.TempDir()
 			projectDir := tmpDir
 
-			sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+			sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 			sessionID := "session-20260105-valid-" + tc.from + "-" + tc.to
 			sessionDir := filepath.Join(sessionsDir, sessionID)
 			locksDir := filepath.Join(sessionsDir, ".locks")
@@ -1176,7 +1176,7 @@ func TestPrepare_NoActiveSession(t *testing.T) {
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
 
-	if err := os.MkdirAll(filepath.Join(projectDir, ".claude", "sessions"), 0755); err != nil {
+	if err := os.MkdirAll(filepath.Join(projectDir, ".sos", "sessions"), 0755); err != nil {
 		t.Fatalf("Failed to create sessions dir: %v", err)
 	}
 
@@ -1208,7 +1208,7 @@ func TestPrepare_ParkedSession(t *testing.T) {
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
 
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	sessionID := "session-20260105-parked-test"
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	locksDir := filepath.Join(sessionsDir, ".locks")
@@ -1302,7 +1302,7 @@ func TestPrepare_UnknownAgent(t *testing.T) {
 			tmpDir := t.TempDir()
 			projectDir := tmpDir
 
-			sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+			sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 			sessionID := "session-20260105-unknown-" + tc.name
 			sessionDir := filepath.Join(sessionsDir, sessionID)
 			locksDir := filepath.Join(sessionsDir, ".locks")
@@ -1370,7 +1370,7 @@ func TestPrepare_WithArtifactID(t *testing.T) {
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
 
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	sessionID := "session-20260105-artifact-test"
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	locksDir := filepath.Join(sessionsDir, ".locks")
@@ -1465,7 +1465,7 @@ func TestExecute_NoActiveSession(t *testing.T) {
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
 
-	if err := os.MkdirAll(filepath.Join(projectDir, ".claude", "sessions"), 0755); err != nil {
+	if err := os.MkdirAll(filepath.Join(projectDir, ".sos", "sessions"), 0755); err != nil {
 		t.Fatalf("Failed to create sessions dir: %v", err)
 	}
 
@@ -1497,7 +1497,7 @@ func TestExecute_ParkedSession(t *testing.T) {
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
 
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	sessionID := "session-20260105-exec-parked"
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	locksDir := filepath.Join(sessionsDir, ".locks")
@@ -1573,7 +1573,7 @@ func TestExecute_AllTargetAgents(t *testing.T) {
 			tmpDir := t.TempDir()
 			projectDir := tmpDir
 
-			sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+			sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 			sessionID := "session-20260105-exec-" + tc.agent
 			sessionDir := filepath.Join(sessionsDir, sessionID)
 			locksDir := filepath.Join(sessionsDir, ".locks")
@@ -1663,7 +1663,7 @@ func TestExecute_VerifyEventStructure(t *testing.T) {
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
 
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	sessionID := "session-20260105-exec-struct"
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	locksDir := filepath.Join(sessionsDir, ".locks")
@@ -1748,7 +1748,7 @@ func TestStatus_WithHandoffHistory(t *testing.T) {
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
 
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	sessionID := "session-20260105-status-hist"
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	locksDir := filepath.Join(sessionsDir, ".locks")
@@ -1832,7 +1832,7 @@ func TestStatus_AllPhases(t *testing.T) {
 			tmpDir := t.TempDir()
 			projectDir := tmpDir
 
-			sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+			sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 			sessionID := "session-20260105-phase-" + tc.phase
 			sessionDir := filepath.Join(sessionsDir, sessionID)
 			locksDir := filepath.Join(sessionsDir, ".locks")
@@ -1896,7 +1896,7 @@ func TestHistory_WithLimit(t *testing.T) {
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
 
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	sessionID := "session-20260105-hist-limit"
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	locksDir := filepath.Join(sessionsDir, ".locks")
@@ -1973,7 +1973,7 @@ func TestHistory_PhaseTransitionEvents(t *testing.T) {
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
 
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	sessionID := "session-20260105-hist-phase"
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	locksDir := filepath.Join(sessionsDir, ".locks")
@@ -2045,7 +2045,7 @@ func TestHistory_NoSession(t *testing.T) {
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
 
-	if err := os.MkdirAll(filepath.Join(projectDir, ".claude", "sessions"), 0755); err != nil {
+	if err := os.MkdirAll(filepath.Join(projectDir, ".sos", "sessions"), 0755); err != nil {
 		t.Fatalf("Failed to create sessions dir: %v", err)
 	}
 
@@ -2080,7 +2080,7 @@ func TestPrepare_WithExplicitSessionID(t *testing.T) {
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
 
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 
 	// Create two sessions
 	session1ID := "session-20260105-explicit-1"
@@ -2165,7 +2165,7 @@ func TestExecute_CompletedSession(t *testing.T) {
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
 
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	sessionID := "session-20260105-exec-completed"
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	locksDir := filepath.Join(sessionsDir, ".locks")

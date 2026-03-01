@@ -43,7 +43,7 @@ func TestCreateSeedMode(t *testing.T) {
 	}
 
 	// Create sessions directory
-	sessionsDir := filepath.Join(claudeDir, "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	if err := os.MkdirAll(sessionsDir, 0755); err != nil {
 		t.Fatalf("Failed to create sessions dir: %v", err)
 	}
@@ -149,7 +149,7 @@ func TestCreateSeedMultiple(t *testing.T) {
 	}
 
 	// Create sessions directory
-	sessionsDir := filepath.Join(claudeDir, "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	if err := os.MkdirAll(sessionsDir, 0755); err != nil {
 		t.Fatalf("Failed to create sessions dir: %v", err)
 	}
@@ -231,7 +231,7 @@ func TestCreateSeedCleanup(t *testing.T) {
 		t.Fatalf("Failed to init git repo: %v", err)
 	}
 
-	// Create .claude directory but NOT sessions directory
+	// Create .claude directory but NOT .sos/sessions directory
 	// This will cause session creation to succeed but demonstrates cleanup
 	claudeDir := filepath.Join(projectDir, ".claude")
 	if err := os.MkdirAll(claudeDir, 0755); err != nil {
@@ -311,7 +311,7 @@ func TestCreateSeedJSONOutput(t *testing.T) {
 	}
 
 	// Create sessions directory
-	sessionsDir := filepath.Join(claudeDir, "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	if err := os.MkdirAll(sessionsDir, 0755); err != nil {
 		t.Fatalf("Failed to create sessions dir: %v", err)
 	}

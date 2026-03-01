@@ -138,7 +138,7 @@ func TestCheckTriggers_SacredPath_ContextMd(t *testing.T) {
 	event := Event{
 		Type: EventTypeToolCall,
 		Tool: "Edit",
-		Path: "/project/.claude/sessions/abc/SESSION_CONTEXT.md",
+		Path: "/project/.sos/sessions/abc/SESSION_CONTEXT.md",
 	}
 
 	config := DefaultTriggerConfig()

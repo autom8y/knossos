@@ -11,7 +11,7 @@ import (
 func TestFray_NoActiveSession(t *testing.T) {
 	// Setup: empty project dir with no sessions
 	tmpDir := t.TempDir()
-	sessionsDir := filepath.Join(tmpDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(tmpDir, ".sos", "sessions")
 	os.MkdirAll(sessionsDir, 0755)
 
 	// Call fraySession with empty session ID - should return error
@@ -24,8 +24,8 @@ func TestFray_NoActiveSession(t *testing.T) {
 func TestFray_ParkParent(t *testing.T) {
 	// Setup: create a real session on disk
 	tmpDir := t.TempDir()
-	sessionsDir := filepath.Join(tmpDir, ".claude", "sessions")
-	locksDir := filepath.Join(tmpDir, ".claude", "locks")
+	sessionsDir := filepath.Join(tmpDir, ".sos", "sessions")
+	locksDir := filepath.Join(tmpDir, ".sos", "sessions", ".locks")
 	os.MkdirAll(sessionsDir, 0755)
 	os.MkdirAll(locksDir, 0755)
 
@@ -68,8 +68,8 @@ func TestFray_ParkParent(t *testing.T) {
 func TestFray_CreateChild(t *testing.T) {
 	// Setup
 	tmpDir := t.TempDir()
-	sessionsDir := filepath.Join(tmpDir, ".claude", "sessions")
-	locksDir := filepath.Join(tmpDir, ".claude", "locks")
+	sessionsDir := filepath.Join(tmpDir, ".sos", "sessions")
+	locksDir := filepath.Join(tmpDir, ".sos", "sessions", ".locks")
 	os.MkdirAll(sessionsDir, 0755)
 	os.MkdirAll(locksDir, 0755)
 
@@ -122,8 +122,8 @@ func TestFray_CreateChild(t *testing.T) {
 func TestFray_NoWorktreeFlag(t *testing.T) {
 	// Setup
 	tmpDir := t.TempDir()
-	sessionsDir := filepath.Join(tmpDir, ".claude", "sessions")
-	locksDir := filepath.Join(tmpDir, ".claude", "locks")
+	sessionsDir := filepath.Join(tmpDir, ".sos", "sessions")
+	locksDir := filepath.Join(tmpDir, ".sos", "sessions", ".locks")
 	os.MkdirAll(sessionsDir, 0755)
 	os.MkdirAll(locksDir, 0755)
 

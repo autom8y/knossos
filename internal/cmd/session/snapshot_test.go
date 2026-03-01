@@ -21,7 +21,7 @@ func setupSnapshotTestSession(t *testing.T, contextBody string) (*cmdContext, st
 
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	locksDir := filepath.Join(sessionsDir, ".locks")
 	sessionID := "session-20260226-120000-snaptst1"
 	sessionDir := filepath.Join(sessionsDir, sessionID)
@@ -170,7 +170,7 @@ func TestNewSnapshotCmd(t *testing.T) {
 func TestRunSnapshot_NoActiveSession(t *testing.T) {
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
-	locksDir := filepath.Join(projectDir, ".claude", "sessions", ".locks")
+	locksDir := filepath.Join(projectDir, ".sos", "sessions", ".locks")
 	if err := os.MkdirAll(locksDir, 0755); err != nil {
 		t.Fatalf("failed to create locks dir: %v", err)
 	}

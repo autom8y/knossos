@@ -25,7 +25,7 @@ import (
 func createTestProject(t *testing.T) string {
 	t.Helper()
 	tmpDir := t.TempDir()
-	sessionsDir := filepath.Join(tmpDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(tmpDir, ".sos", "sessions")
 	require.NoError(t, os.MkdirAll(sessionsDir, 0755))
 	return tmpDir
 }
@@ -33,7 +33,7 @@ func createTestProject(t *testing.T) string {
 // createTestSession creates a session directory with the given ID.
 func createTestSession(t *testing.T, projectDir, sessionID string) string {
 	t.Helper()
-	sessionDir := filepath.Join(projectDir, ".claude", "sessions", sessionID)
+	sessionDir := filepath.Join(projectDir, ".sos", "sessions", sessionID)
 	require.NoError(t, os.MkdirAll(sessionDir, 0755))
 	return sessionDir
 }

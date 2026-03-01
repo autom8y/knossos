@@ -99,7 +99,7 @@ func writeActiveRite(t *testing.T, claudeDir, riteName string) {
 func TestUnifiedSync_RiteOnly(t *testing.T) {
 	projectDir := t.TempDir()
 	claudeDir := filepath.Join(projectDir, ".claude")
-	riteDir := filepath.Join(projectDir, "rites", "test-rite")
+	riteDir := filepath.Join(projectDir, ".knossos", "rites", "test-rite")
 
 	setupTestRite(t, riteDir)
 	writeActiveRite(t, claudeDir, "test-rite")
@@ -182,7 +182,7 @@ func TestUnifiedSync_ScopeAll(t *testing.T) {
 
 	projectDir := t.TempDir()
 	claudeDir := filepath.Join(projectDir, ".claude")
-	riteDir := filepath.Join(projectDir, "rites", "test-rite")
+	riteDir := filepath.Join(projectDir, ".knossos", "rites", "test-rite")
 
 	knossosHome := t.TempDir()
 	os.Setenv("KNOSSOS_HOME", knossosHome)
@@ -288,7 +288,7 @@ func TestUnifiedSync_CollisionDetection(t *testing.T) {
 
 	projectDir := t.TempDir()
 	claudeDir := filepath.Join(projectDir, ".claude")
-	riteDir := filepath.Join(projectDir, "rites", "test-rite")
+	riteDir := filepath.Join(projectDir, ".knossos", "rites", "test-rite")
 
 	knossosHome := t.TempDir()
 	os.Setenv("KNOSSOS_HOME", knossosHome)
@@ -590,7 +590,7 @@ func TestUnifiedSync_DryRun(t *testing.T) {
 
 	projectDir := t.TempDir()
 	claudeDir := filepath.Join(projectDir, ".claude")
-	riteDir := filepath.Join(projectDir, "rites", "test-rite")
+	riteDir := filepath.Join(projectDir, ".knossos", "rites", "test-rite")
 
 	knossosHome := t.TempDir()
 	os.Setenv("KNOSSOS_HOME", knossosHome)
@@ -630,7 +630,7 @@ func TestUnifiedSync_DryRun(t *testing.T) {
 func TestUnifiedSync_Idempotency(t *testing.T) {
 	projectDir := t.TempDir()
 	claudeDir := filepath.Join(projectDir, ".claude")
-	riteDir := filepath.Join(projectDir, "rites", "test-rite")
+	riteDir := filepath.Join(projectDir, ".knossos", "rites", "test-rite")
 
 	setupTestRite(t, riteDir)
 	writeActiveRite(t, claudeDir, "test-rite")

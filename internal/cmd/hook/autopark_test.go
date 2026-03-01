@@ -129,10 +129,10 @@ func TestRunAutopark_WrongEvent(t *testing.T) {
 func TestRunAutopark_NoSession(t *testing.T) {
 	tmpDir := t.TempDir()
 
-	// Create minimal .claude structure (no session)
-	claudeDir := filepath.Join(tmpDir, ".claude", "sessions")
-	if err := os.MkdirAll(claudeDir, 0755); err != nil {
-		t.Fatalf("Failed to create claude dir: %v", err)
+	// Create minimal .sos structure (no session)
+	sessionsDir := filepath.Join(tmpDir, ".sos", "sessions")
+	if err := os.MkdirAll(sessionsDir, 0755); err != nil {
+		t.Fatalf("Failed to create sessions dir: %v", err)
 	}
 
 	testutil.SetupEnv(t, &testutil.HookEnv{
@@ -176,7 +176,7 @@ func TestRunAutopark_ActiveSession(t *testing.T) {
 	sessionID := "session-20260104-222613-05a12c6b"
 
 	// Create session structure
-	sessionsDir := filepath.Join(tmpDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(tmpDir, ".sos", "sessions")
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	if err := os.MkdirAll(sessionDir, 0755); err != nil {
 		t.Fatalf("Failed to create session dir: %v", err)
@@ -260,7 +260,7 @@ func TestRunAutopark_AlreadyParked(t *testing.T) {
 	tmpDir := t.TempDir()
 	sessionID := "session-20260104-222613-05a12c6b"
 
-	sessionsDir := filepath.Join(tmpDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(tmpDir, ".sos", "sessions")
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	os.MkdirAll(sessionDir, 0755)
 

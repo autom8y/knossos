@@ -224,7 +224,7 @@ func TestGetSessionID_FromScan(t *testing.T) {
 	sessionID := "session-20260209-120000-abcdef01"
 
 	// Create sessions directory with an ACTIVE session
-	sessionsDir := filepath.Join(tmpDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(tmpDir, ".sos", "sessions")
 	if err := os.MkdirAll(sessionsDir, 0755); err != nil {
 		t.Fatalf("Failed to create sessions dir: %v", err)
 	}
@@ -258,7 +258,7 @@ func TestGetSessionID_NoActiveSession(t *testing.T) {
 	tmpDir := t.TempDir()
 
 	// Create sessions directory but no active sessions
-	sessionsDir := filepath.Join(tmpDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(tmpDir, ".sos", "sessions")
 	if err := os.MkdirAll(sessionsDir, 0755); err != nil {
 		t.Fatalf("Failed to create sessions dir: %v", err)
 	}
@@ -355,10 +355,10 @@ func TestNewHookCmd_TimeoutFlag(t *testing.T) {
 func TestIntegration_ContextHook_NoSession(t *testing.T) {
 	tmpDir := t.TempDir()
 
-	// Create minimal .claude structure (no session)
-	claudeDir := filepath.Join(tmpDir, ".claude", "sessions")
-	if err := os.MkdirAll(claudeDir, 0755); err != nil {
-		t.Fatalf("Failed to create claude dir: %v", err)
+	// Create minimal .sos structure (no session)
+	sessionsDir := filepath.Join(tmpDir, ".sos", "sessions")
+	if err := os.MkdirAll(sessionsDir, 0755); err != nil {
+		t.Fatalf("Failed to create sessions dir: %v", err)
 	}
 
 	testutil.SetupEnv(t, &testutil.HookEnv{
@@ -460,7 +460,7 @@ func TestIntegration_WriteguardHook_Chain(t *testing.T) {
 		expected string
 	}{
 		{"src/main.go", "allow"},
-		{".claude/sessions/test/SESSION_CONTEXT.md", "deny"},
+		{".sos/sessions/test/SESSION_CONTEXT.md", "deny"},
 		{".claude/sprints/s1/SPRINT_CONTEXT.md", "deny"},
 		{"docs/README.md", "allow"},
 		{"config.yaml", "allow"},

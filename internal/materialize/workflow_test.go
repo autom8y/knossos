@@ -18,7 +18,7 @@ func TestMaterializeWorkflow_WritesFile(t *testing.T) {
 	require.NoError(t, os.MkdirAll(claudeDir, 0755))
 
 	// Create a rite with workflow.yaml
-	riteDir := filepath.Join(projectDir, "rites", "test-rite")
+	riteDir := filepath.Join(projectDir, ".knossos", "rites", "test-rite")
 	require.NoError(t, os.MkdirAll(riteDir, 0755))
 	workflowContent := []byte("name: test-workflow\nphases:\n  - build\n")
 	require.NoError(t, os.WriteFile(filepath.Join(riteDir, "workflow.yaml"), workflowContent, 0644))
@@ -45,7 +45,7 @@ func TestMaterializeWorkflow_NoWorkflowFile(t *testing.T) {
 	require.NoError(t, os.MkdirAll(claudeDir, 0755))
 
 	// Create a rite without workflow.yaml
-	riteDir := filepath.Join(projectDir, "rites", "no-workflow")
+	riteDir := filepath.Join(projectDir, ".knossos", "rites", "no-workflow")
 	require.NoError(t, os.MkdirAll(riteDir, 0755))
 
 	resolver := paths.NewResolver(projectDir)
@@ -75,7 +75,7 @@ func TestMaterializeWorkflow_RemovesStaleOnNoWorkflow(t *testing.T) {
 		filepath.Join(claudeDir, "ACTIVE_WORKFLOW.yaml"), staleContent, 0644))
 
 	// New rite has no workflow.yaml
-	riteDir := filepath.Join(projectDir, "rites", "no-workflow")
+	riteDir := filepath.Join(projectDir, ".knossos", "rites", "no-workflow")
 	require.NoError(t, os.MkdirAll(riteDir, 0755))
 
 	resolver := paths.NewResolver(projectDir)
@@ -99,7 +99,7 @@ func TestMaterializeWorkflow_Idempotent(t *testing.T) {
 	claudeDir := filepath.Join(projectDir, ".claude")
 	require.NoError(t, os.MkdirAll(claudeDir, 0755))
 
-	riteDir := filepath.Join(projectDir, "rites", "test-rite")
+	riteDir := filepath.Join(projectDir, ".knossos", "rites", "test-rite")
 	require.NoError(t, os.MkdirAll(riteDir, 0755))
 	workflowContent := []byte("name: test-workflow\n")
 	require.NoError(t, os.WriteFile(filepath.Join(riteDir, "workflow.yaml"), workflowContent, 0644))
@@ -159,7 +159,7 @@ func TestMaterializeWorkflow_OverwritesOld(t *testing.T) {
 		[]byte("name: old-workflow\n"), 0644))
 
 	// New rite with different workflow
-	riteDir := filepath.Join(projectDir, "rites", "new-rite")
+	riteDir := filepath.Join(projectDir, ".knossos", "rites", "new-rite")
 	require.NoError(t, os.MkdirAll(riteDir, 0755))
 	newContent := []byte("name: new-workflow\nphases:\n  - deploy\n")
 	require.NoError(t, os.WriteFile(filepath.Join(riteDir, "workflow.yaml"), newContent, 0644))

@@ -273,7 +273,7 @@ func TestAggregator_AggregateAll_MultipleSessions(t *testing.T) {
 	aggregator := NewAggregator(registry)
 
 	// Create sessions directory
-	sessionsDir := filepath.Join(tmpDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(tmpDir, ".sos", "sessions")
 	if err := os.MkdirAll(sessionsDir, 0755); err != nil {
 		t.Fatalf("Failed to create sessions directory: %v", err)
 	}
@@ -342,7 +342,7 @@ func TestAggregator_AggregateAll_IgnoresNonSessionDirs(t *testing.T) {
 	aggregator := NewAggregator(registry)
 
 	// Create sessions directory with mixed content
-	sessionsDir := filepath.Join(tmpDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(tmpDir, ".sos", "sessions")
 	if err := os.MkdirAll(sessionsDir, 0755); err != nil {
 		t.Fatalf("Failed to create sessions directory: %v", err)
 	}

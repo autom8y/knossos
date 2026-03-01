@@ -12,7 +12,7 @@ import (
 // TestGc_NoStaleSessions verifies that gc exits cleanly with no sessions to archive.
 func TestGc_NoStaleSessions(t *testing.T) {
 	projectDir := setupProjectDir(t)
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 
 	// Create a PARKED session but with a very recent parked_at (not stale)
 	createCtx := newTestContext(projectDir)
@@ -48,7 +48,7 @@ func TestGc_NoStaleSessions(t *testing.T) {
 // TestGc_DryRun verifies that --dry-run lists stale sessions but does not archive them.
 func TestGc_DryRun(t *testing.T) {
 	projectDir := setupProjectDir(t)
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 
 	// Create a session and park it, then manually backdate its parked_at to make it stale
 	createCtx := newTestContext(projectDir)
@@ -87,8 +87,8 @@ func TestGc_DryRun(t *testing.T) {
 // TestGc_Force verifies that --force archives stale sessions without prompting.
 func TestGc_Force(t *testing.T) {
 	projectDir := setupProjectDir(t)
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
-	archiveDir := filepath.Join(projectDir, ".claude", ".archive", "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
+	archiveDir := filepath.Join(projectDir, ".sos", "archive")
 
 	// Create and park a session
 	createCtx := newTestContext(projectDir)
@@ -131,8 +131,8 @@ func TestGc_Force(t *testing.T) {
 // - Archive has ARCHIVED status
 func TestGc_ForceRespectsBoundaryFixes(t *testing.T) {
 	projectDir := setupProjectDir(t)
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
-	archiveDir := filepath.Join(projectDir, ".claude", ".archive", "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
+	archiveDir := filepath.Join(projectDir, ".sos", "archive")
 
 	// Create, park, and backdate two sessions
 	ids := make([]string, 2)

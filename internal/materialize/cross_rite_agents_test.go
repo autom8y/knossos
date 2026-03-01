@@ -15,7 +15,7 @@ import (
 // Cross-rite agents are user-scope owned (synced to ~/.claude/agents/ by user-scope sync).
 func TestCrossRiteAgents_NotMaterializedToProject(t *testing.T) {
 	projectDir := t.TempDir()
-	ritesDir := filepath.Join(projectDir, "rites")
+	ritesDir := filepath.Join(projectDir, ".knossos", "rites")
 	claudeDir := filepath.Join(projectDir, ".claude")
 	agentsDir := filepath.Join(claudeDir, "agents")
 
@@ -48,7 +48,7 @@ func TestCrossRiteAgents_NotMaterializedToProject(t *testing.T) {
 // cross-rite agents at project level are detected as orphans after this change.
 func TestCrossRiteAgents_OrphanedOnRiteSwitch(t *testing.T) {
 	projectDir := t.TempDir()
-	ritesDir := filepath.Join(projectDir, "rites")
+	ritesDir := filepath.Join(projectDir, ".knossos", "rites")
 	claudeDir := filepath.Join(projectDir, ".claude")
 	agentsDir := filepath.Join(claudeDir, "agents")
 

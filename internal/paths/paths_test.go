@@ -30,22 +30,29 @@ func TestResolver_PathMethods(t *testing.T) {
 	}{
 		{"ProjectRoot", r.ProjectRoot(), "/tmp/testroot"},
 		{"ClaudeDir", r.ClaudeDir(), "/tmp/testroot/.claude"},
-		{"SessionsDir", r.SessionsDir(), "/tmp/testroot/.claude/sessions"},
-		{"LocksDir", r.LocksDir(), "/tmp/testroot/.claude/sessions/.locks"},
-		{"CCMapDir", r.CCMapDir(), "/tmp/testroot/.claude/sessions/.cc-map"},
-		{"ArchiveDir", r.ArchiveDir(), "/tmp/testroot/.claude/.archive/sessions"},
-		{"SessionDir", r.SessionDir("s1"), "/tmp/testroot/.claude/sessions/s1"},
-		{"SessionContextFile", r.SessionContextFile("s1"), "/tmp/testroot/.claude/sessions/s1/SESSION_CONTEXT.md"},
-		{"SessionEventsFile", r.SessionEventsFile("s1"), "/tmp/testroot/.claude/sessions/s1/events.jsonl"},
-		{"LockFile", r.LockFile("s1"), "/tmp/testroot/.claude/sessions/.locks/s1.lock"},
-		{"CurrentSessionFile", r.CurrentSessionFile(), "/tmp/testroot/.claude/sessions/.current-session"},
+		{"SOSDir", r.SOSDir(), "/tmp/testroot/.sos"},
+		{"SessionsDir", r.SessionsDir(), "/tmp/testroot/.sos/sessions"},
+		{"LocksDir", r.LocksDir(), "/tmp/testroot/.sos/sessions/.locks"},
+		{"CCMapDir", r.CCMapDir(), "/tmp/testroot/.sos/sessions/.cc-map"},
+		{"ArchiveDir", r.ArchiveDir(), "/tmp/testroot/.sos/archive"},
+		{"SessionDir", r.SessionDir("s1"), "/tmp/testroot/.sos/sessions/s1"},
+		{"SessionContextFile", r.SessionContextFile("s1"), "/tmp/testroot/.sos/sessions/s1/SESSION_CONTEXT.md"},
+		{"SessionEventsFile", r.SessionEventsFile("s1"), "/tmp/testroot/.sos/sessions/s1/events.jsonl"},
+		{"LockFile", r.LockFile("s1"), "/tmp/testroot/.sos/sessions/.locks/s1.lock"},
+		{"CurrentSessionFile", r.CurrentSessionFile(), "/tmp/testroot/.sos/sessions/.current-session"},
 		{"ActiveRiteFile", r.ActiveRiteFile(), "/tmp/testroot/.claude/ACTIVE_RITE"},
 		{"ActiveWorkflowFile", r.ActiveWorkflowFile(), "/tmp/testroot/.claude/ACTIVE_WORKFLOW.yaml"},
 		{"KnossosManifestFile", r.KnossosManifestFile(), "/tmp/testroot/.claude/KNOSSOS_MANIFEST.yaml"},
 		{"AgentsDir", r.AgentsDir(), "/tmp/testroot/.claude/agents"},
 		{"AgentFile", r.AgentFile("pythia.md"), "/tmp/testroot/.claude/agents/pythia.md"},
 		{"ClaudeMDFile", r.ClaudeMDFile(), "/tmp/testroot/.claude/CLAUDE.md"},
-		{"RitesDir", r.RitesDir(), "/tmp/testroot/rites"},
+		{"KnossosDir", r.KnossosDir(), "/tmp/testroot/.knossos"},
+		{"RitesDir", r.RitesDir(), "/tmp/testroot/.knossos/rites"},
+		{"LedgeDir", r.LedgeDir(), "/tmp/testroot/.ledge"},
+		{"LedgeDecisionsDir", r.LedgeDecisionsDir(), "/tmp/testroot/.ledge/decisions"},
+		{"LedgeSpecsDir", r.LedgeSpecsDir(), "/tmp/testroot/.ledge/specs"},
+		{"LedgeReviewsDir", r.LedgeReviewsDir(), "/tmp/testroot/.ledge/reviews"},
+		{"LedgeSpikesDir", r.LedgeSpikesDir(), "/tmp/testroot/.ledge/spikes"},
 		{"InvocationStateFile", r.InvocationStateFile(), "/tmp/testroot/.claude/INVOCATION_STATE.yaml"},
 	}
 
@@ -100,8 +107,8 @@ func TestResolver_RiteDir_ProjectOverride(t *testing.T) {
 	r := NewResolver(root)
 	rite := "my-rite"
 
-	// Create project-level rite with manifest.yaml
-	riteDir := filepath.Join(root, "rites", rite)
+	// Create project-level satellite rite with manifest.yaml
+	riteDir := filepath.Join(root, ".knossos", "rites", rite)
 	if err := os.MkdirAll(riteDir, 0755); err != nil {
 		t.Fatalf("MkdirAll: %v", err)
 	}
@@ -162,7 +169,7 @@ func TestSessionIDFromDir(t *testing.T) {
 		want  string
 	}{
 		{"bare_name", "session-20260218-120000-abcd1234", "session-20260218-120000-abcd1234"},
-		{"full_path", "/tmp/root/.claude/sessions/session-20260218-120000-abcd1234", "session-20260218-120000-abcd1234"},
+		{"full_path", "/tmp/root/.sos/sessions/session-20260218-120000-abcd1234", "session-20260218-120000-abcd1234"},
 		{"nested", "/a/b/c/my-session", "my-session"},
 		{"trailing_slash_removed", "session-id", "session-id"},
 	}

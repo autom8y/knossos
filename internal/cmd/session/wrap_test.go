@@ -18,8 +18,8 @@ func TestWrapGeneratesWhiteSails(t *testing.T) {
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
 
-	// Create .claude/sessions directory structure
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	// Create .sos/sessions directory structure
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	sessionID := "session-20250105-120000-abc12345"
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	locksDir := filepath.Join(sessionsDir, ".locks")
@@ -149,8 +149,8 @@ func TestWrapWithFailingTests(t *testing.T) {
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
 
-	// Create .claude/sessions directory structure
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	// Create .sos/sessions directory structure
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	sessionID := "session-20250105-120001-def67890"
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	locksDir := filepath.Join(sessionsDir, ".locks")
@@ -321,8 +321,8 @@ func TestWrapContinuesOnSailsError(t *testing.T) {
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
 
-	// Create .claude/sessions directory structure
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	// Create .sos/sessions directory structure
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	sessionID := "session-20250105-120002-ghi11111"
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	locksDir := filepath.Join(sessionsDir, ".locks")
@@ -399,7 +399,7 @@ func TestWrapWithQAUpgrade(t *testing.T) {
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
 
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	sessionID := "session-20250105-120003-qa123456"
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	locksDir := filepath.Join(sessionsDir, ".locks")
@@ -507,7 +507,7 @@ func TestWrapBlocksOnBlackSails(t *testing.T) {
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
 
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	sessionID := "session-20250105-120010-black123"
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	locksDir := filepath.Join(sessionsDir, ".locks")
@@ -610,7 +610,7 @@ func TestWrapWithForceBypassesBlackSails(t *testing.T) {
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
 
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	sessionID := "session-20250105-120011-force123"
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	locksDir := filepath.Join(sessionsDir, ".locks")
@@ -719,7 +719,7 @@ func TestWrapSucceedsWithWhiteSails(t *testing.T) {
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
 
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	sessionID := "session-20250105-120012-white123"
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	locksDir := filepath.Join(sessionsDir, ".locks")
@@ -835,7 +835,7 @@ func TestWrapEmitsSessionEndWithBudget(t *testing.T) {
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
 
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	sessionID := "session-20250105-120004-budget123"
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	locksDir := filepath.Join(sessionsDir, ".locks")
@@ -932,8 +932,8 @@ func TestWrapAlreadyArchived(t *testing.T) {
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
 
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
-	archiveDir := filepath.Join(projectDir, ".claude", ".archive", "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
+	archiveDir := filepath.Join(projectDir, ".sos", "archive")
 	sessionID := "session-20250105-120020-archived1"
 	locksDir := filepath.Join(sessionsDir, ".locks")
 
@@ -997,7 +997,7 @@ func TestWrapNoGhostDirectory(t *testing.T) {
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
 
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	sessionID := "session-20250105-120021-noghost1"
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	locksDir := filepath.Join(sessionsDir, ".locks")
@@ -1059,7 +1059,7 @@ created_at: 2025-01-05T12:00:00Z
 	}
 
 	// Verify: archive directory SHOULD exist
-	archivePath := filepath.Join(projectDir, ".claude", ".archive", "sessions", sessionID)
+	archivePath := filepath.Join(projectDir, ".sos", "archive", sessionID)
 	if _, statErr := os.Stat(archivePath); os.IsNotExist(statErr) {
 		t.Errorf("Archive directory missing: %s does not exist", archivePath)
 	}
@@ -1081,8 +1081,8 @@ func TestWrapCleansGhostWhenArchiveExists(t *testing.T) {
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
 
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
-	archiveDir := filepath.Join(projectDir, ".claude", ".archive", "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
+	archiveDir := filepath.Join(projectDir, ".sos", "archive")
 	sessionID := "session-20250105-120022-ghost123"
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	locksDir := filepath.Join(sessionsDir, ".locks")
@@ -1203,7 +1203,7 @@ func TestWrapCleansAllLockArtifacts(t *testing.T) {
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
 
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	sessionID := "session-20250105-120023-locks123"
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	locksDir := filepath.Join(sessionsDir, ".locks")

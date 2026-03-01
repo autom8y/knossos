@@ -14,7 +14,7 @@ import (
 // in .claude/agents/ survive materialization (selective write, not destructive nuke).
 func TestMaterializeAgents_PreservesUserAgents(t *testing.T) {
 	projectDir := t.TempDir()
-	ritesDir := filepath.Join(projectDir, "rites")
+	ritesDir := filepath.Join(projectDir, ".knossos", "rites")
 	claudeDir := filepath.Join(projectDir, ".claude")
 
 	// Setup a rite with one agent
@@ -48,7 +48,7 @@ func TestMaterializeAgents_PreservesUserAgents(t *testing.T) {
 // from a previous rite survive with KeepAll (the default) after rite switch.
 func TestMaterializeAgents_KeepAllPreservesOrphans(t *testing.T) {
 	projectDir := t.TempDir()
-	ritesDir := filepath.Join(projectDir, "rites")
+	ritesDir := filepath.Join(projectDir, ".knossos", "rites")
 	claudeDir := filepath.Join(projectDir, ".claude")
 
 	// Setup rite-a with agent "designer"
@@ -232,7 +232,7 @@ func TestSyncMena_CleansStaleCompanionFiles(t *testing.T) {
 // runs the full pipeline even when already on the same rite (skip guard removed).
 func TestMaterialize_NoSkipGuard_AlwaysRuns(t *testing.T) {
 	projectDir := t.TempDir()
-	ritesDir := filepath.Join(projectDir, "rites")
+	ritesDir := filepath.Join(projectDir, ".knossos", "rites")
 	claudeDir := filepath.Join(projectDir, ".claude")
 
 	agents := []Agent{{Name: "tester", Role: "tests things"}}

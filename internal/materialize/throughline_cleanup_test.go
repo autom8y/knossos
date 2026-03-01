@@ -13,9 +13,9 @@ import (
 
 func TestCleanupThroughlineIDs_RiteSwitch(t *testing.T) {
 	projectDir := t.TempDir()
-	claudeDir := filepath.Join(projectDir, ".claude")
-	sessionsDir := filepath.Join(claudeDir, "sessions")
-	ritesDir := filepath.Join(projectDir, "rites")
+	sosDir := filepath.Join(projectDir, ".sos")
+	sessionsDir := filepath.Join(sosDir, "sessions")
+	ritesDir := filepath.Join(projectDir, ".knossos", "rites")
 
 	// Create templates
 	templatesDir := filepath.Join(projectDir, "templates")
@@ -72,9 +72,9 @@ func TestCleanupThroughlineIDs_RiteSwitch(t *testing.T) {
 
 func TestCleanupThroughlineIDs_SameRiteNoCleanup(t *testing.T) {
 	projectDir := t.TempDir()
-	claudeDir := filepath.Join(projectDir, ".claude")
-	sessionsDir := filepath.Join(claudeDir, "sessions")
-	ritesDir := filepath.Join(projectDir, "rites")
+	sosDir := filepath.Join(projectDir, ".sos")
+	sessionsDir := filepath.Join(sosDir, "sessions")
+	ritesDir := filepath.Join(projectDir, ".knossos", "rites")
 
 	templatesDir := filepath.Join(projectDir, "templates")
 	require.NoError(t, os.MkdirAll(filepath.Join(templatesDir, "sections"), 0755))
@@ -120,7 +120,7 @@ func TestCleanupThroughlineIDs_SameRiteNoCleanup(t *testing.T) {
 
 func TestCleanupThroughlineIDs_NoSessionDirs(t *testing.T) {
 	projectDir := t.TempDir()
-	ritesDir := filepath.Join(projectDir, "rites")
+	ritesDir := filepath.Join(projectDir, ".knossos", "rites")
 
 	templatesDir := filepath.Join(projectDir, "templates")
 	require.NoError(t, os.MkdirAll(filepath.Join(templatesDir, "sections"), 0755))
@@ -158,9 +158,9 @@ func TestCleanupThroughlineIDs_NoSessionDirs(t *testing.T) {
 
 func TestCleanupThroughlineIDs_SkipsNonSessionDirs(t *testing.T) {
 	projectDir := t.TempDir()
-	claudeDir := filepath.Join(projectDir, ".claude")
-	sessionsDir := filepath.Join(claudeDir, "sessions")
-	ritesDir := filepath.Join(projectDir, "rites")
+	sosDir := filepath.Join(projectDir, ".sos")
+	sessionsDir := filepath.Join(sosDir, "sessions")
+	ritesDir := filepath.Join(projectDir, ".knossos", "rites")
 
 	templatesDir := filepath.Join(projectDir, "templates")
 	require.NoError(t, os.MkdirAll(filepath.Join(templatesDir, "sections"), 0755))
@@ -223,9 +223,9 @@ func TestCleanupThroughlineIDs_SkipsNonSessionDirs(t *testing.T) {
 
 func TestCleanupThroughlineIDs_DryRunSkipsCleanup(t *testing.T) {
 	projectDir := t.TempDir()
-	claudeDir := filepath.Join(projectDir, ".claude")
-	sessionsDir := filepath.Join(claudeDir, "sessions")
-	ritesDir := filepath.Join(projectDir, "rites")
+	sosDir := filepath.Join(projectDir, ".sos")
+	sessionsDir := filepath.Join(sosDir, "sessions")
+	ritesDir := filepath.Join(projectDir, ".knossos", "rites")
 
 	templatesDir := filepath.Join(projectDir, "templates")
 	require.NoError(t, os.MkdirAll(filepath.Join(templatesDir, "sections"), 0755))

@@ -225,8 +225,8 @@ func TestRunContext_WithActiveSession(t *testing.T) {
 	tmpDir := t.TempDir()
 	sessionID := "session-20260104-222613-05a12c6b"
 
-	// Create .claude/sessions structure
-	sessionsDir := filepath.Join(tmpDir, ".claude", "sessions")
+	// Create .sos/sessions structure
+	sessionsDir := filepath.Join(tmpDir, ".sos", "sessions")
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	if err := os.MkdirAll(sessionDir, 0755); err != nil {
 		t.Fatalf("Failed to create session dir: %v", err)
@@ -251,8 +251,12 @@ current_phase: "implementation"
 		t.Fatalf("Failed to write session context: %v", err)
 	}
 
-	// Write ACTIVE_RITE
-	activeRiteFile := filepath.Join(tmpDir, ".claude", "ACTIVE_RITE")
+	// Write ACTIVE_RITE (requires .claude/ dir for CC runtime state)
+	claudeDir := filepath.Join(tmpDir, ".claude")
+	if err := os.MkdirAll(claudeDir, 0755); err != nil {
+		t.Fatalf("Failed to create .claude dir: %v", err)
+	}
+	activeRiteFile := filepath.Join(claudeDir, "ACTIVE_RITE")
 	if err := os.WriteFile(activeRiteFile, []byte("10x-dev"), 0644); err != nil {
 		t.Fatalf("Failed to write ACTIVE_RITE: %v", err)
 	}
@@ -309,10 +313,10 @@ current_phase: "implementation"
 func TestRunContext_NoSession(t *testing.T) {
 	tmpDir := t.TempDir()
 
-	// Create minimal .claude structure (no session)
-	claudeDir := filepath.Join(tmpDir, ".claude", "sessions")
-	if err := os.MkdirAll(claudeDir, 0755); err != nil {
-		t.Fatalf("Failed to create claude dir: %v", err)
+	// Create minimal .sos structure (no session)
+	sessionsDir := filepath.Join(tmpDir, ".sos", "sessions")
+	if err := os.MkdirAll(sessionsDir, 0755); err != nil {
+		t.Fatalf("Failed to create sessions dir: %v", err)
 	}
 
 	testutil.SetupEnv(t, &testutil.HookEnv{
@@ -356,7 +360,7 @@ func TestRunContext_RehydratesCompactState(t *testing.T) {
 	sessionID := "session-20260208-100000-rehydrate"
 
 	// Create session structure
-	sessionsDir := filepath.Join(tmpDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(tmpDir, ".sos", "sessions")
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	os.MkdirAll(sessionDir, 0755)
 
@@ -436,7 +440,7 @@ func TestRunContext_NoCompactState(t *testing.T) {
 	tmpDir := t.TempDir()
 	sessionID := "session-20260208-100000-nochkpnt"
 
-	sessionsDir := filepath.Join(tmpDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(tmpDir, ".sos", "sessions")
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	os.MkdirAll(sessionDir, 0755)
 
@@ -601,7 +605,7 @@ func TestRunContext_WithActiveSession_IncludesRitesAndAgents(t *testing.T) {
 	sessionID := "session-20260208-100000-abcdef01"
 
 	// Create session structure
-	sessionsDir := filepath.Join(tmpDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(tmpDir, ".sos", "sessions")
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	os.MkdirAll(sessionDir, 0755)
 
@@ -617,10 +621,14 @@ current_phase: "implementation"
 ---
 `
 	os.WriteFile(filepath.Join(sessionDir, "SESSION_CONTEXT.md"), []byte(sessionContext), 0644)
-	os.WriteFile(filepath.Join(tmpDir, ".claude", "ACTIVE_RITE"), []byte("alpha"), 0644)
 
-	// Create rites directory with manifests
-	ritesDir := filepath.Join(tmpDir, "rites")
+	// Create .claude/ for CC runtime state (ACTIVE_RITE, agents, etc.)
+	claudeDir := filepath.Join(tmpDir, ".claude")
+	os.MkdirAll(claudeDir, 0755)
+	os.WriteFile(filepath.Join(claudeDir, "ACTIVE_RITE"), []byte("alpha"), 0644)
+
+	// Create rites directory with manifests (.knossos/rites/)
+	ritesDir := filepath.Join(tmpDir, ".knossos", "rites")
 	os.MkdirAll(filepath.Join(ritesDir, "alpha"), 0755)
 	os.WriteFile(filepath.Join(ritesDir, "alpha", "manifest.yaml"), []byte("name: alpha"), 0644)
 	os.MkdirAll(filepath.Join(ritesDir, "beta"), 0755)
@@ -721,7 +729,7 @@ func BenchmarkContextHook_FullExecution(b *testing.B) {
 	sessionID := "session-20260104-222613-05a12c6b"
 
 	// Setup session structure
-	sessionsDir := filepath.Join(tmpDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(tmpDir, ".sos", "sessions")
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	os.MkdirAll(sessionDir, 0755)
 
@@ -817,7 +825,7 @@ func TestRunContext_IncludesThroughlineIDs(t *testing.T) {
 	sessionID := "session-20260208-100000-throughline"
 
 	// Create session structure
-	sessionsDir := filepath.Join(tmpDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(tmpDir, ".sos", "sessions")
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	os.MkdirAll(sessionDir, 0755)
 
@@ -894,7 +902,7 @@ func TestRunContext_NoThroughlineIDsFile(t *testing.T) {
 	tmpDir := t.TempDir()
 	sessionID := "session-20260208-100000-nothroughline"
 
-	sessionsDir := filepath.Join(tmpDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(tmpDir, ".sos", "sessions")
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	os.MkdirAll(sessionDir, 0755)
 

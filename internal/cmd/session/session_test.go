@@ -31,7 +31,7 @@ func TestCreate_BasicCreation(t *testing.T) {
 	}
 
 	// Create sessions directory
-	sessionsDir := filepath.Join(claudeDir, "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	if err := os.MkdirAll(sessionsDir, 0755); err != nil {
 		t.Fatalf("Failed to create sessions dir: %v", err)
 	}
@@ -164,7 +164,7 @@ func TestCreate_BlocksSecondActiveSession(t *testing.T) {
 	}
 
 	// Create sessions directory
-	sessionsDir := filepath.Join(claudeDir, "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	locksDir := filepath.Join(sessionsDir, ".locks")
 	if err := os.MkdirAll(locksDir, 0755); err != nil {
 		t.Fatalf("Failed to create locks dir: %v", err)
@@ -209,8 +209,8 @@ func TestList_NoSessions(t *testing.T) {
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
 
-	// Create .claude/sessions directory (empty)
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	// Create .sos/sessions directory (empty)
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	if err := os.MkdirAll(sessionsDir, 0755); err != nil {
 		t.Fatalf("Failed to create sessions dir: %v", err)
 	}
@@ -244,7 +244,7 @@ func TestList_WithStatusFilter(t *testing.T) {
 	projectDir := tmpDir
 
 	// Create sessions directory structure
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	locksDir := filepath.Join(sessionsDir, ".locks")
 	if err := os.MkdirAll(locksDir, 0755); err != nil {
 		t.Fatalf("Failed to create locks dir: %v", err)
@@ -345,7 +345,7 @@ func TestList_ExcludesArchivedByDefault(t *testing.T) {
 	projectDir := tmpDir
 
 	// Create sessions directory structure
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	locksDir := filepath.Join(sessionsDir, ".locks")
 	if err := os.MkdirAll(locksDir, 0755); err != nil {
 		t.Fatalf("Failed to create locks dir: %v", err)
@@ -436,7 +436,7 @@ func TestAudit_WithEvents(t *testing.T) {
 	projectDir := tmpDir
 
 	// Create session directory structure
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	sessionID := "session-20260105-120000-audit123"
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	locksDir := filepath.Join(sessionsDir, ".locks")
@@ -509,7 +509,7 @@ func TestAudit_WithEventTypeFilter(t *testing.T) {
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
 
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	sessionID := "session-20260105-130000-filter456"
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	locksDir := filepath.Join(sessionsDir, ".locks")
@@ -579,7 +579,7 @@ func TestAudit_NoSession(t *testing.T) {
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
 
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	locksDir := filepath.Join(sessionsDir, ".locks")
 
 	if err := os.MkdirAll(locksDir, 0755); err != nil {
@@ -626,7 +626,7 @@ func TestFSM_FullLifecycle(t *testing.T) {
 		t.Fatalf("Failed to write ACTIVE_RITE: %v", err)
 	}
 
-	sessionsDir := filepath.Join(claudeDir, "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	locksDir := filepath.Join(sessionsDir, ".locks")
 	auditDir := filepath.Join(sessionsDir, ".audit")
 
@@ -733,7 +733,7 @@ func TestFSM_CannotResumeArchived(t *testing.T) {
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
 
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	sessionID := "session-20260105-140000-archived789"
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	locksDir := filepath.Join(sessionsDir, ".locks")
@@ -791,7 +791,7 @@ func TestFSM_CannotParkParked(t *testing.T) {
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
 
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	sessionID := "session-20260105-150000-parkedparkd"
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	locksDir := filepath.Join(sessionsDir, ".locks")
@@ -855,7 +855,7 @@ func TestFSM_WrapFromParked(t *testing.T) {
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
 
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	sessionID := "session-20260105-160000-parkedwrap"
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	locksDir := filepath.Join(sessionsDir, ".locks")
@@ -931,7 +931,7 @@ func TestTransition_RequirementsToDesign(t *testing.T) {
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
 
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	sessionID := "session-20260105-170000-phase123"
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	locksDir := filepath.Join(sessionsDir, ".locks")
@@ -1013,7 +1013,7 @@ func TestTransition_InvalidPhase(t *testing.T) {
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
 
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	sessionID := "session-20260105-180000-invalid456"
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	locksDir := filepath.Join(sessionsDir, ".locks")
@@ -1075,7 +1075,7 @@ func TestTransition_CannotTransitionParkedSession(t *testing.T) {
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
 
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	sessionID := "session-20260105-190000-parkedtrans"
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	locksDir := filepath.Join(sessionsDir, ".locks")
@@ -1139,7 +1139,7 @@ func TestTransition_ForceSkipsArtifactValidation(t *testing.T) {
 	tmpDir := t.TempDir()
 	projectDir := tmpDir
 
-	sessionsDir := filepath.Join(projectDir, ".claude", "sessions")
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
 	sessionID := "session-20260105-200000-force789"
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	locksDir := filepath.Join(sessionsDir, ".locks")

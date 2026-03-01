@@ -53,7 +53,7 @@ func setupKnossosRiteDepMena(t *testing.T, knossosHome, depName string) {
 func setupSatelliteRite(t *testing.T, riteName string) string {
 	t.Helper()
 	satelliteRoot := t.TempDir()
-	riteDir := filepath.Join(satelliteRoot, "rites", riteName)
+	riteDir := filepath.Join(satelliteRoot, ".knossos", "rites", riteName)
 	agentsDir := filepath.Join(riteDir, "agents")
 
 	if err := os.MkdirAll(agentsDir, 0755); err != nil {
@@ -91,12 +91,12 @@ func TestMaterializeMena_SatelliteLocalRite_SharedMenaResolvesFromKnossosHome(t 
 
 	// Create a resolved rite pointing to the satellite's local rite directory
 	// (simulating how the source resolver resolves a satellite-local rite)
-	ritePath := filepath.Join(satelliteRoot, "rites", "data-analyst")
+	ritePath := filepath.Join(satelliteRoot, ".knossos", "rites", "data-analyst")
 	resolved := &ResolvedRite{
 		Name: "data-analyst",
 		Source: RiteSource{
 			Type:        SourceProject,
-			Path:        filepath.Join(satelliteRoot, "rites"),
+			Path:        filepath.Join(satelliteRoot, ".knossos", "rites"),
 			Description: "satellite project rites",
 		},
 		RitePath:     ritePath,
@@ -146,12 +146,12 @@ func TestMaterializeMena_SatelliteLocalRite_DependencyMenaResolvesFromKnossosHom
 	satelliteRoot := setupSatelliteRite(t, "data-analyst")
 	claudeDir := filepath.Join(satelliteRoot, ".claude")
 
-	ritePath := filepath.Join(satelliteRoot, "rites", "data-analyst")
+	ritePath := filepath.Join(satelliteRoot, ".knossos", "rites", "data-analyst")
 	resolved := &ResolvedRite{
 		Name: "data-analyst",
 		Source: RiteSource{
 			Type:        SourceProject,
-			Path:        filepath.Join(satelliteRoot, "rites"),
+			Path:        filepath.Join(satelliteRoot, ".knossos", "rites"),
 			Description: "satellite project rites",
 		},
 		RitePath:     ritePath,
@@ -199,7 +199,7 @@ func TestMaterializeMena_SatelliteLocalRite_RiteMenaOverridesShared(t *testing.T
 
 	// Create a rite-local mena entry with the same name as the shared one ("shared-cmd")
 	// but different content — the rite version should win.
-	riteLocalMenaDir := filepath.Join(satelliteRoot, "rites", "data-analyst", "mena", "shared-cmd")
+	riteLocalMenaDir := filepath.Join(satelliteRoot, ".knossos", "rites", "data-analyst", "mena", "shared-cmd")
 	if err := os.MkdirAll(riteLocalMenaDir, 0755); err != nil {
 		t.Fatalf("mkdir rite mena: %v", err)
 	}
@@ -207,12 +207,12 @@ func TestMaterializeMena_SatelliteLocalRite_RiteMenaOverridesShared(t *testing.T
 		t.Fatalf("write rite mena: %v", err)
 	}
 
-	ritePath := filepath.Join(satelliteRoot, "rites", "data-analyst")
+	ritePath := filepath.Join(satelliteRoot, ".knossos", "rites", "data-analyst")
 	resolved := &ResolvedRite{
 		Name: "data-analyst",
 		Source: RiteSource{
 			Type:        SourceProject,
-			Path:        filepath.Join(satelliteRoot, "rites"),
+			Path:        filepath.Join(satelliteRoot, ".knossos", "rites"),
 			Description: "satellite project rites",
 		},
 		RitePath:     ritePath,

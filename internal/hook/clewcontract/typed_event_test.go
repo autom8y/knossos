@@ -409,10 +409,10 @@ func TestSailsGeneratedTypedData_RoundTrip(t *testing.T) {
 		Color:        "WHITE",
 		ComputedBase: "WHITE",
 		Reasons:      []string{"all proofs passing"},
-		FilePath:     ".claude/sessions/s-001/WHITE_SAILS.yaml",
+		FilePath:     ".sos/sessions/s-001/WHITE_SAILS.yaml",
 		Evidence: map[string]string{
-			"tests": ".claude/sessions/s-001/test-output.log",
-			"build": ".claude/sessions/s-001/build-output.log",
+			"tests": ".sos/sessions/s-001/test-output.log",
+			"build": ".sos/sessions/s-001/build-output.log",
 		},
 	}
 

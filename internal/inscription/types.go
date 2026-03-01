@@ -136,7 +136,7 @@ type Region struct {
 // Conditional represents a conditional inclusion rule for regions.
 type Conditional struct {
 	// When is the condition expression.
-	// Examples: "file_exists('.claude/sessions')", "env_set(VAR)", "always", "never"
+	// Examples: "file_exists('.sos/sessions')", "env_set(VAR)", "always", "never"
 	When string `yaml:"when" json:"when"`
 
 	// Include lists regions to include when condition is true.
