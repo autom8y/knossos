@@ -52,7 +52,7 @@ The `--seed` flag creates sessions through an ephemeral worktree lifecycle:
 |  -----------------          ------------------       ----------------       |
 |                                                                             |
 |  git worktree add           ari session create       cp -r worktree/        |
-|    /tmp/roster-seed-xxx       "Initiative"             .claude/sessions/    |
+|    /tmp/roster-seed-xxx       "Initiative"             .sos/sessions/    |
 |    --detach                                            session-xxx/         |
 |                             ari session park         -> main/.claude/       |
 |  cd /tmp/roster-seed-xxx      "Ready for parallel"     sessions/            |
@@ -66,12 +66,12 @@ The `--seed` flag creates sessions through an ephemeral worktree lifecycle:
 ### Step-by-Step Flow
 
 1. **Create ephemeral worktree**: A detached worktree is created at a temporary location
-2. **Create session in worktree**: Normal session creation runs in the isolated worktree (which has its own `.claude/sessions/`)
+2. **Create session in worktree**: Normal session creation runs in the isolated worktree (which has its own `.sos/sessions/`)
 3. **Park session immediately**: Seeded sessions are automatically parked with reason "Seeded for parallel execution"
-4. **Copy session to main branch**: The session directory is copied back to the main repository's `.claude/sessions/`
+4. **Copy session to main branch**: The session directory is copied back to the main repository's `.sos/sessions/`
 5. **Cleanup worktree**: The ephemeral worktree is removed, leaving no artifacts
 
-**Result**: Session exists in main branch's `.claude/sessions/` with status `PARKED`, ready for `/resume` in any terminal.
+**Result**: Session exists in main branch's `.sos/sessions/` with status `PARKED`, ready for `/resume` in any terminal.
 
 ## Command Reference
 
@@ -97,7 +97,7 @@ The `--seed` flag creates sessions through an ephemeral worktree lifecycle:
   "session_id": "session-20260105-100000-aaaa1111",
   "status": "PARKED",
   "seeded": true,
-  "seeded_to": "/Users/tom/Code/roster/.claude/sessions/session-20260105-100000-aaaa1111",
+  "seeded_to": "/Users/tom/Code/roster/.sos/sessions/session-20260105-100000-aaaa1111",
   "park_reason": "Seeded for parallel execution"
 }
 ```
@@ -178,13 +178,13 @@ ari session create "Feature" --complexity=MODULE --seed
 **Solution**:
 ```bash
 # Verify session directory exists
-ls -la .claude/sessions/
+ls -la .sos/sessions/
 
 # Check if worktree still exists (use --seed-keep for debugging)
 git worktree list
 
 # If worktree still exists, manually copy
-cp -r /tmp/roster-seed-xxx/.claude/sessions/session-* .claude/sessions/
+cp -r /tmp/roster-seed-xxx/.sos/sessions/session-* .sos/sessions/
 git worktree remove /tmp/roster-seed-xxx --force
 ```
 
@@ -211,10 +211,10 @@ git worktree remove /tmp/roster-seed-xxx --force
 **Solution**:
 ```bash
 # Check session directory permissions
-ls -la .claude/sessions/
+ls -la .sos/sessions/
 
 # Fix permissions if needed
-chmod 755 .claude/sessions/
+chmod 755 .sos/sessions/
 
 # Ensure .claude exists
 mkdir -p .claude/sessions

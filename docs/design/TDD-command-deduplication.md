@@ -323,7 +323,7 @@ Task(moirai, "{operation}
 
 Session Context:
 - Session ID: {session_id}
-- Session Path: .claude/sessions/{session_id}/SESSION_CONTEXT.md")
+- Session Path: .sos/sessions/{session_id}/SESSION_CONTEXT.md")
 ```
 
 ### Operations
@@ -376,7 +376,7 @@ Session Context:
 ```
 1. Get session context:
    session_id=$(session-manager.sh status | jq -r '.session_id')
-   session_path=".claude/sessions/${session_id}/SESSION_CONTEXT.md"
+   session_path=".sos/sessions/${session_id}/SESSION_CONTEXT.md"
 
 2. Invoke state-mate via Task tool:
    Task(moirai, "{operation}

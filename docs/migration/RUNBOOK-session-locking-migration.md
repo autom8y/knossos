@@ -78,7 +78,7 @@ cp -r .claude/sessions "$BACKUP_DIR" 2>/dev/null && echo "Backup created: $BACKU
 
 ```bash
 # List current session count
-ls -d .claude/sessions/session-* 2>/dev/null | wc -l
+ls -d .sos/sessions/session-* 2>/dev/null | wc -l
 ```
 **Note**: Record this number for post-deployment verification
 
@@ -86,8 +86,8 @@ ls -d .claude/sessions/session-* 2>/dev/null | wc -l
 
 ```bash
 # Check for existing lock files (should be empty/nonexistent)
-ls -la .claude/sessions/.locks/ 2>/dev/null || echo "No lock directory (expected)"
-ls -la .claude/sessions/.create.lock 2>/dev/null || echo "No create lock (expected)"
+ls -la .sos/sessions/.locks/ 2>/dev/null || echo "No lock directory (expected)"
+ls -la .sos/sessions/.create.lock 2>/dev/null || echo "No create lock (expected)"
 ```
 **Verify**: No orphaned lock files present. If locks exist, see Troubleshooting section 6.1
 
@@ -159,13 +159,13 @@ find .claude/sessions -name "*.lock.d" -type d 2>/dev/null
 
 ```bash
 # Verify sessions directory structure
-ls -la .claude/sessions/ | head -20
+ls -la .sos/sessions/ | head -20
 ```
 **Verify**: Directory structure looks normal
 
 ```bash
 # Record current session (if any)
-cat .claude/sessions/.current-session 2>/dev/null || echo "No current session"
+cat .sos/sessions/.current-session 2>/dev/null || echo "No current session"
 ```
 **Note**: Record this for verification after deployment
 
@@ -214,7 +214,7 @@ echo "Exit code: $?"
 ```bash
 # Test session-write-guard blocking (PreToolUse)
 export CLAUDE_HOOK_TOOL_NAME="Write"
-export CLAUDE_HOOK_FILE_PATH=".claude/sessions/test/SESSION_CONTEXT.md"
+export CLAUDE_HOOK_FILE_PATH=".sos/sessions/test/SESSION_CONTEXT.md"
 .claude/hooks/session-guards/session-write-guard.sh 2>&1 | head -20
 echo "Exit code: ${PIPESTATUS[0]}"
 ```
@@ -253,7 +253,7 @@ Sessions migrate automatically on first access. To trigger immediate migration:
 
 ```bash
 # Spot-check a migrated session (if any exist)
-FIRST_SESSION=$(ls -d .claude/sessions/session-* 2>/dev/null | head -1)
+FIRST_SESSION=$(ls -d .sos/sessions/session-* 2>/dev/null | head -1)
 if [[ -n "$FIRST_SESSION" ]]; then
     grep "schema_version:" "$FIRST_SESSION/SESSION_CONTEXT.md"
 fi
@@ -289,8 +289,8 @@ echo "Created session: $TEST_SESSION_ID"
 
 ```bash
 # Verify no orphan locks after create
-ls .claude/sessions/.locks/ 2>/dev/null || echo "No lock directory (expected after operation completes)"
-ls .claude/sessions/.create.lock 2>/dev/null || echo "No create lock (expected after operation completes)"
+ls .sos/sessions/.locks/ 2>/dev/null || echo "No lock directory (expected after operation completes)"
+ls .sos/sessions/.create.lock 2>/dev/null || echo "No create lock (expected after operation completes)"
 ```
 **Verify**: No orphaned locks
 
@@ -298,9 +298,9 @@ ls .claude/sessions/.create.lock 2>/dev/null || echo "No create lock (expected a
 
 ```bash
 # Check audit logs populate
-ls -la .claude/sessions/.audit/ 2>/dev/null || echo "Audit directory will be created on first mutation"
-tail -5 .claude/sessions/.audit/session-mutations.log 2>/dev/null || echo "No mutations logged yet"
-tail -5 .claude/sessions/.audit/migrations.log 2>/dev/null || echo "No migrations logged yet"
+ls -la .sos/sessions/.audit/ 2>/dev/null || echo "Audit directory will be created on first mutation"
+tail -5 .sos/sessions/.audit/session-mutations.log 2>/dev/null || echo "No mutations logged yet"
+tail -5 .sos/sessions/.audit/migrations.log 2>/dev/null || echo "No migrations logged yet"
 ```
 **Verify**: Logs exist and show recent entries (if sessions were migrated/mutated)
 
@@ -357,12 +357,12 @@ For a specific session that had issues after v1->v2 migration:
 
 ```bash
 # Check if backup exists
-ls -la .claude/sessions/<session_id>/SESSION_CONTEXT.md.v1.backup
+ls -la .sos/sessions/<session_id>/SESSION_CONTEXT.md.v1.backup
 
 # Rollback to v1
 .claude/hooks/lib/session-migrate.sh rollback <session_id>
 ```
-**Verify**: `grep "schema_version:" .claude/sessions/<session_id>/SESSION_CONTEXT.md` returns nothing (v1 format)
+**Verify**: `grep "schema_version:" .sos/sessions/<session_id>/SESSION_CONTEXT.md` returns nothing (v1 format)
 
 ### 5.4 Batch Migration Rollback
 
@@ -386,7 +386,7 @@ find .claude/sessions -name "*.lock.d" -mmin +10
 **Resolution**:
 ```bash
 # Check if owning process is dead
-LOCK_FILE=".claude/sessions/.create.lock"
+LOCK_FILE=".sos/sessions/.create.lock"
 if [[ -d "$LOCK_FILE" && -f "$LOCK_FILE/pid" ]]; then
     PID=$(cat "$LOCK_FILE/pid")
     if ! ps -p "$PID" >/dev/null 2>&1; then
@@ -402,14 +402,14 @@ fi
 
 **Detection**:
 ```bash
-file .claude/sessions/.current-session
+file .sos/sessions/.current-session
 ```
 Shows "directory" instead of "ASCII text"
 
 **Resolution**:
 ```bash
 # Remove the erroneously created directory
-rm -rf .claude/sessions/.current-session
+rm -rf .sos/sessions/.current-session
 
 # Let the system recreate it as a file
 .claude/hooks/lib/session-manager.sh status
@@ -422,16 +422,16 @@ rm -rf .claude/sessions/.current-session
 **Resolution**:
 ```bash
 # Check for stuck lock
-ls -la .claude/sessions/.locks/
-ls -la .claude/sessions/.create.lock
+ls -la .sos/sessions/.locks/
+ls -la .sos/sessions/.create.lock
 
 # Find and kill stalled process
 ps aux | grep session-manager
 kill -9 <pid>
 
 # Clean locks and retry
-rm -rf .claude/sessions/.locks/
-rm -rf .claude/sessions/.create.lock
+rm -rf .sos/sessions/.locks/
+rm -rf .sos/sessions/.create.lock
 
 # Retry operation
 .claude/hooks/lib/session-manager.sh create "retry-test" MODULE
@@ -446,18 +446,18 @@ rm -rf .claude/sessions/.create.lock
 SESSION_ID="<session_id>"
 
 # Check backup exists
-ls .claude/sessions/$SESSION_ID/SESSION_CONTEXT.md.v1.backup
+ls .sos/sessions/$SESSION_ID/SESSION_CONTEXT.md.v1.backup
 
 # Restore from backup
-cp .claude/sessions/$SESSION_ID/SESSION_CONTEXT.md.v1.backup \
-   .claude/sessions/$SESSION_ID/SESSION_CONTEXT.md
+cp .sos/sessions/$SESSION_ID/SESSION_CONTEXT.md.v1.backup \
+   .sos/sessions/$SESSION_ID/SESSION_CONTEXT.md
 
 # Investigate the original content
-cat .claude/sessions/$SESSION_ID/SESSION_CONTEXT.md
+cat .sos/sessions/$SESSION_ID/SESSION_CONTEXT.md
 
 # Check which required fields are missing
 grep -E "^(session_id|created_at|initiative|complexity|active_rite|current_phase):" \
-    .claude/sessions/$SESSION_ID/SESSION_CONTEXT.md
+    .sos/sessions/$SESSION_ID/SESSION_CONTEXT.md
 ```
 
 ### 6.5 Symptom: "Session ID format rejected"
@@ -504,7 +504,7 @@ FSM_LOCK_TIMEOUT=30 .claude/hooks/lib/session-manager.sh create "test" MODULE
 ### 7.2 If Performance Below Expectations
 
 Check:
-1. **Filesystem latency**: `.claude/sessions/` on slow storage (network drive, encrypted volume)
+1. **Filesystem latency**: `.sos/sessions/` on slow storage (network drive, encrypted volume)
 2. **System load**: High CPU/IO may slow lock acquisition
 3. **Bash version**: Ensure bash 4.1+ for `{fd}` syntax
 
@@ -565,8 +565,8 @@ A: Falls back to mkdir-based locking (portable but treats shared locks as exclus
 If issues arise:
 
 1. **Check troubleshooting section** (Section 6)
-2. **Review audit logs**: `.claude/sessions/.audit/session-mutations.log`
-3. **Verify file permissions** on `.claude/sessions/` and `.claude/hooks/`
+2. **Review audit logs**: `.sos/sessions/.audit/session-mutations.log`
+3. **Verify file permissions** on `.sos/sessions/` and `.claude/hooks/`
 4. **Check bash version**: `bash --version` (need 4.1+)
 5. **Escalate with**:
    - Error message text

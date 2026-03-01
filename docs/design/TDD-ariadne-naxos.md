@@ -130,7 +130,7 @@ ari naxos scan [--inactive-threshold=DURATION] [--stale-threshold=DURATION] [--i
   "orphaned_sessions": [
     {
       "session_id": "session-20260102-120000-abcd1234",
-      "session_dir": ".claude/sessions/session-20260102-120000-abcd1234",
+      "session_dir": ".sos/sessions/session-20260102-120000-abcd1234",
       "status": "ACTIVE",
       "initiative": "Feature implementation",
       "reason": "INACTIVE",
@@ -184,7 +184,7 @@ Orphaned Sessions:
 Actions:
   To wrap:   ari session wrap --session <id>
   To resume: ari session resume <id>
-  To delete: rm -rf .claude/sessions/<id>
+  To delete: rm -rf .sos/sessions/<id>
 ```
 
 **Exit Codes**:
@@ -538,7 +538,7 @@ ari naxos scan
 # If orphans found:
 #   - Resume: ari session resume <id>
 #   - Wrap:   ari session wrap --session <id>
-#   - Delete: rm -rf .claude/sessions/<id>
+#   - Delete: rm -rf .sos/sessions/<id>
 ```
 
 ### 11.2 Automated CI Check

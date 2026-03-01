@@ -141,7 +141,7 @@ operation_name [arg1=value1] [arg2=value2] [--flag]
 
 Session Context:
 - Session ID: {session-id}
-- Session Path: .claude/sessions/{session-id}/SESSION_CONTEXT.md
+- Session Path: .sos/sessions/{session-id}/SESSION_CONTEXT.md
 ```
 
 **Natural Language Format**:
@@ -150,7 +150,7 @@ Session Context:
 
 Session Context:
 - Session ID: {session-id}
-- Session Path: .claude/sessions/{session-id}/SESSION_CONTEXT.md
+- Session Path: .sos/sessions/{session-id}/SESSION_CONTEXT.md
 ```
 
 ### 3.2 Operation Syntax
@@ -435,7 +435,7 @@ fi
 ### 7.1 Audit Log Location
 
 ```
-.claude/sessions/.audit/session-mutations.log
+.sos/sessions/.audit/session-mutations.log
 ```
 
 ### 7.2 Audit Log Format
@@ -472,7 +472,7 @@ log_mutation() {
     local timestamp
     timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
-    local log_file=".claude/sessions/.audit/session-mutations.log"
+    local log_file=".sos/sessions/.audit/session-mutations.log"
     mkdir -p "$(dirname "$log_file")"
 
     echo "$timestamp | $session_id | $operation | moirai | $details | $status | $fate | reasoning=\"$reasoning\"" >> "$log_file"
@@ -510,7 +510,7 @@ Slash command skills obtain session context before invoking Moirai:
 ```bash
 # Get current session
 session_id=$(/Users/tomtenuta/Code/roster/ari session status -o json | jq -r '.session_id')
-session_path=".claude/sessions/$session_id/SESSION_CONTEXT.md"
+session_path=".sos/sessions/$session_id/SESSION_CONTEXT.md"
 
 # Build Moirai invocation
 cat <<EOF
@@ -531,7 +531,7 @@ EOF
 Moirai follows the locking protocol from `moirai-shared.md`:
 
 ```bash
-LOCK_DIR=".claude/sessions/${SESSION_ID}/.locks"
+LOCK_DIR=".sos/sessions/${SESSION_ID}/.locks"
 LOCK_FILE="${LOCK_DIR}/context.lock"
 mkdir -p "$LOCK_DIR"
 

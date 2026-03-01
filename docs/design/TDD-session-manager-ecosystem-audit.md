@@ -234,7 +234,7 @@ When writing to *_CONTEXT.md files, set the bypass marker:
    }
    ```
 
-3. **Audit trail guarantees**: state-mate logs all mutations to `.claude/sessions/.audit/session-mutations.log`. This audit trail is append-only (no concurrent write corruption risk).
+3. **Audit trail guarantees**: state-mate logs all mutations to `.sos/sessions/.audit/session-mutations.log`. This audit trail is append-only (no concurrent write corruption risk).
 
 ### 2.4 state-mate Operations and FSM Mapping
 
@@ -706,7 +706,7 @@ EOF
 @test "HOOK-002: session-write-guard blocks CONTEXT writes" {
     # Setup: Create active session
     export CLAUDE_HOOK_TOOL_NAME="Write"
-    export CLAUDE_HOOK_FILE_PATH=".claude/sessions/test/SESSION_CONTEXT.md"
+    export CLAUDE_HOOK_FILE_PATH=".sos/sessions/test/SESSION_CONTEXT.md"
 
     # Execute
     run .claude/hooks/session-guards/session-write-guard.sh
@@ -721,8 +721,8 @@ EOF
     local session_id
     session_id=$(.claude/hooks/lib/session-manager.sh create "test" MODULE | jq -r '.session_id')
     # Set workflow.active in context
-    echo "workflow:" >> ".claude/sessions/$session_id/SESSION_CONTEXT.md"
-    echo "  active: true" >> ".claude/sessions/$session_id/SESSION_CONTEXT.md"
+    echo "workflow:" >> ".sos/sessions/$session_id/SESSION_CONTEXT.md"
+    echo "  active: true" >> ".sos/sessions/$session_id/SESSION_CONTEXT.md"
 
     export CLAUDE_PROJECT_DIR="."
     echo '{"tool_name": "Write", "tool_input": {"file_path": "src/main.ts"}}' | run .claude/hooks/validation/delegation-check.sh
@@ -738,7 +738,7 @@ EOF
     session_id=$(.claude/hooks/lib/session-manager.sh create "test" MODULE | jq -r '.session_id')
 
     # Execute: Run auto-park hook
-    export SESSION_DIR=".claude/sessions/$session_id"
+    export SESSION_DIR=".sos/sessions/$session_id"
     run .claude/hooks/session-guards/auto-park.sh
 
     # Assert: State is now PARKED
@@ -872,7 +872,7 @@ EOF
 
 @test "MATE-001: STATE_MATE_BYPASS allows write" {
     export CLAUDE_HOOK_TOOL_NAME="Write"
-    export CLAUDE_HOOK_FILE_PATH=".claude/sessions/test/SESSION_CONTEXT.md"
+    export CLAUDE_HOOK_FILE_PATH=".sos/sessions/test/SESSION_CONTEXT.md"
     export STATE_MATE_BYPASS="true"
 
     run .claude/hooks/session-guards/session-write-guard.sh
@@ -882,7 +882,7 @@ EOF
 
 @test "MATE-002: Regular agent blocked" {
     export CLAUDE_HOOK_TOOL_NAME="Write"
-    export CLAUDE_HOOK_FILE_PATH=".claude/sessions/test/SESSION_CONTEXT.md"
+    export CLAUDE_HOOK_FILE_PATH=".sos/sessions/test/SESSION_CONTEXT.md"
     unset STATE_MATE_BYPASS
 
     run .claude/hooks/session-guards/session-write-guard.sh
@@ -951,10 +951,10 @@ git revert <commit-sha>
 
 ```bash
 # Detect
-ls -la .claude/sessions/.locks/
+ls -la .sos/sessions/.locks/
 
 # Clean stale locks (process dead)
-for lock in .claude/sessions/.locks/*.lock.d; do
+for lock in .sos/sessions/.locks/*.lock.d; do
     pid=$(cat "$lock/pid" 2>/dev/null || echo "")
     if [[ -n "$pid" ]] && ! kill -0 "$pid" 2>/dev/null; then
         rm -rf "$lock"
@@ -967,28 +967,28 @@ done
 
 ```bash
 # Check for backup
-ls -la .claude/sessions/<session_id>/SESSION_CONTEXT.md.*
+ls -la .sos/sessions/<session_id>/SESSION_CONTEXT.md.*
 
 # Restore from v1 backup
-cp .claude/sessions/<session_id>/SESSION_CONTEXT.md.v1.backup \
-   .claude/sessions/<session_id>/SESSION_CONTEXT.md
+cp .sos/sessions/<session_id>/SESSION_CONTEXT.md.v1.backup \
+   .sos/sessions/<session_id>/SESSION_CONTEXT.md
 
 # Or restore from FSM backup
-cp .claude/sessions/<session_id>/SESSION_CONTEXT.md.backup \
-   .claude/sessions/<session_id>/SESSION_CONTEXT.md
+cp .sos/sessions/<session_id>/SESSION_CONTEXT.md.backup \
+   .sos/sessions/<session_id>/SESSION_CONTEXT.md
 ```
 
 **Scenario 3: All sessions inaccessible**
 
 ```bash
 # Remove current session pointer (forces re-selection)
-rm .claude/sessions/.current-session
+rm .sos/sessions/.current-session
 
 # List all sessions
-ls .claude/sessions/
+ls .sos/sessions/
 
 # Manually set current session
-echo "session-XXXXXXXX-XXXXXX-XXXXXXXX" > .claude/sessions/.current-session
+echo "session-XXXXXXXX-XXXXXX-XXXXXXXX" > .sos/sessions/.current-session
 ```
 
 ### 5.4 Monitoring Checklist
@@ -1000,7 +1000,7 @@ Post-implementation, verify:
 - [ ] `session-fsm.sh transition <id> PARKED` works
 - [ ] Hooks execute without errors in Claude Code
 - [ ] No orphan lock files after normal operations
-- [ ] Audit logs populate in `.claude/sessions/.audit/`
+- [ ] Audit logs populate in `.sos/sessions/.audit/`
 - [ ] v1 sessions auto-migrate on first access
 
 ---

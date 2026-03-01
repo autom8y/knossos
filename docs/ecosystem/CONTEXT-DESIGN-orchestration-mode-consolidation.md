@@ -213,7 +213,7 @@ if [[ "$MODE" == "orchestrated" ]]; then ...
    - Selected: Easy to analyze per-session
    - Selected: Automatically archived with session
 
-2. **Global audit log** - Store in `.claude/sessions/.audit/orchestration.log`
+2. **Global audit log** - Store in `.sos/sessions/.audit/orchestration.log`
    - Rejected: Grows unbounded
    - Rejected: Harder to correlate with sessions
 
@@ -601,7 +601,7 @@ All warnings are logged to `sessions/{id}/orchestration-audit.jsonl`:
 - `DELEGATION_WARNING` - Edit/Write in orchestrated mode
 - `BYPASS_WARNING` - Specialist invoked without orchestrator
 
-Review with: `cat .claude/sessions/{session-id}/orchestration-audit.jsonl | jq .`
+Review with: `cat .sos/sessions/{session-id}/orchestration-audit.jsonl | jq .`
 
 ### Important
 
@@ -629,7 +629,7 @@ Repeated pattern: Reconsider workflow choice.
 ### Logging
 
 All violations are logged for post-session analysis. Review with:
-\`cat .claude/sessions/{session-id}/orchestration-audit.jsonl | jq .\`
+\`cat .sos/sessions/{session-id}/orchestration-audit.jsonl | jq .\`
 ```
 
 ---

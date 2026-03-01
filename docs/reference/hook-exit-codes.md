@@ -154,12 +154,12 @@ set -euo pipefail
 FILE_PATH="${CLAUDE_HOOK_FILE_PATH:-}"
 
 # Only audit session files
-[[ ! "$FILE_PATH" =~ ^\.claude/sessions/session-.* ]] && exit 0
+[[ ! "$FILE_PATH" =~ ^\.sos/sessions/session-.* ]] && exit 0
 
 # Extract session ID, log mutation
 SESSION_ID=$(echo "$FILE_PATH" | grep -o 'session-[^/]*' | head -1)
 TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-echo "$TIMESTAMP | $SESSION_ID | WRITE | file=$(basename "$FILE_PATH")" >> .claude/sessions/.audit/mutations.log
+echo "$TIMESTAMP | $SESSION_ID | WRITE | file=$(basename "$FILE_PATH")" >> .sos/sessions/.audit/mutations.log
 
 # Always exit 0 - don't block on logging failure
 exit 0

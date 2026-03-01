@@ -12,7 +12,7 @@ This Technical Design Document specifies the implementation of automatic session
 | orchestrator-router.sh | `/Users/tomtenuta/Code/roster/.claude/hooks/validation/orchestrator-router.sh` |
 | start-preflight.sh | `/Users/tomtenuta/Code/roster/.claude/hooks/session-guards/start-preflight.sh` |
 | session-manager.sh | `/Users/tomtenuta/Code/roster/.claude/hooks/lib/session-manager.sh` |
-| Session Context | `/Users/tomtenuta/Code/roster/.claude/sessions/session-20260104-022401-5552866f/SESSION_CONTEXT.md` |
+| Session Context | `/Users/tomtenuta/Code/roster/.sos/sessions/session-20260104-022401-5552866f/SESSION_CONTEXT.md` |
 
 ### Problem Statement
 
@@ -129,7 +129,7 @@ When orchestrator needs a state change:
 
    Session Context:
    - Session ID: session-xyz
-   - Session Path: .claude/sessions/session-xyz/SESSION_CONTEXT.md")"
+   - Session Path: .sos/sessions/session-xyz/SESSION_CONTEXT.md")"
 
 3. Main thread (or user) invokes state-mate
 
@@ -215,7 +215,7 @@ Task(orchestrator, "Break down initiative into phases and tasks
 
 Session Context:
 - Session ID: session-20260104-022401-abcd1234
-- Session Path: .claude/sessions/session-20260104-022401-abcd1234/SESSION_CONTEXT.md
+- Session Path: .sos/sessions/session-20260104-022401-abcd1234/SESSION_CONTEXT.md
 - Initiative: Auto-Orchestration Hook Enhancement
 - Complexity: MODULE
 - Team: ecosystem")
@@ -307,7 +307,7 @@ fi
 # Build session path
 SESSION_PATH=""
 if [[ -n "$SESSION_ID" ]]; then
-    SESSION_PATH=".claude/sessions/$SESSION_ID/SESSION_CONTEXT.md"
+    SESSION_PATH=".sos/sessions/$SESSION_ID/SESSION_CONTEXT.md"
 fi
 
 # Determine request type based on command
@@ -484,7 +484,7 @@ Task(moirai, "transition_phase from=<current> to=<next>
 
 Session Context:
 - Session ID: session-20260104-022401-abcd1234
-- Session Path: .claude/sessions/session-20260104-022401-abcd1234/SESSION_CONTEXT.md")
+- Session Path: .sos/sessions/session-20260104-022401-abcd1234/SESSION_CONTEXT.md")
 \`\`\`
 
 ---
@@ -530,7 +530,7 @@ teardown() {
 
 @test "boot_001: /start creates session when none exists" {
     # Ensure no session
-    rm -f ".claude/sessions/.current-session"
+    rm -f ".sos/sessions/.current-session"
 
     # Simulate /start command via orchestrator-router.sh
     export CLAUDE_USER_PROMPT='/start "Test Initiative"'
@@ -543,9 +543,9 @@ teardown() {
 
     # Verify session file exists
     local session_id
-    session_id=$(cat ".claude/sessions/.current-session" 2>/dev/null)
+    session_id=$(cat ".sos/sessions/.current-session" 2>/dev/null)
     [ -n "$session_id" ]
-    [ -f ".claude/sessions/$session_id/SESSION_CONTEXT.md" ]
+    [ -f ".sos/sessions/$session_id/SESSION_CONTEXT.md" ]
 }
 
 @test "boot_002: /start with existing session reuses it" {
@@ -564,7 +564,7 @@ teardown() {
 }
 
 @test "boot_003: parallel /start commands don't race" {
-    rm -f ".claude/sessions/.current-session"
+    rm -f ".sos/sessions/.current-session"
 
     # Run two /start commands in parallel
     export CLAUDE_USER_PROMPT='/start "Parallel Test 1"'
@@ -580,7 +580,7 @@ teardown() {
 
     # Only one session should exist
     local session_count
-    session_count=$(ls -1 .claude/sessions/session-* 2>/dev/null | wc -l)
+    session_count=$(ls -1 .sos/sessions/session-* 2>/dev/null | wc -l)
     [ "$session_count" -eq 1 ]
 }
 ```
@@ -684,7 +684,7 @@ Task(moirai, \"mark_complete task-001 artifact=docs/PRD.md
 
 Session Context:
 - Session ID: session-test-123
-- Session Path: .claude/sessions/session-test-123/SESSION_CONTEXT.md\")"
+- Session Path: .sos/sessions/session-test-123/SESSION_CONTEXT.md\")"
 
     # Verify no direct writes in output
     ! [[ "$orchestrator_output" == *"Write("*"SESSION_CONTEXT"* ]]
@@ -704,7 +704,7 @@ Session Context:
 
     # Simulate PreToolUse hook invocation
     export TOOL_NAME="Edit"
-    export FILE_PATH=".claude/sessions/session-test/SESSION_CONTEXT.md"
+    export FILE_PATH=".sos/sessions/session-test/SESSION_CONTEXT.md"
 
     run bash .claude/hooks/session-guards/session-write-guard.sh
 
@@ -926,6 +926,6 @@ No migration required. Changes are:
 | orchestrator-router.sh | `/Users/tomtenuta/Code/roster/.claude/hooks/validation/orchestrator-router.sh` | Read |
 | start-preflight.sh | `/Users/tomtenuta/Code/roster/.claude/hooks/session-guards/start-preflight.sh` | Read |
 | session-manager.sh | `/Users/tomtenuta/Code/roster/.claude/hooks/lib/session-manager.sh` | Read |
-| SESSION_CONTEXT.md | `/Users/tomtenuta/Code/roster/.claude/sessions/session-20260104-022401-5552866f/SESSION_CONTEXT.md` | Read |
+| SESSION_CONTEXT.md | `/Users/tomtenuta/Code/roster/.sos/sessions/session-20260104-022401-5552866f/SESSION_CONTEXT.md` | Read |
 | state-mate agent | `/Users/tomtenuta/Code/roster/user-agents/state-mate.md` | Read |
 | ADR-0005 | `/Users/tomtenuta/Code/roster/docs/decisions/ADR-0005-state-mate-centralized-state-authority.md` | Read |

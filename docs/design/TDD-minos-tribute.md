@@ -597,8 +597,8 @@ Rationale:
 
 Location:
 ```
-.claude/sessions/{session_id}/TRIBUTE.md          # Before archival
-.claude/.archive/sessions/{session_id}/TRIBUTE.md # After archival
+.sos/sessions/{session_id}/TRIBUTE.md          # Before archival
+.sos/archive/{session_id}/TRIBUTE.md # After archival
 ```
 
 ---
@@ -755,6 +755,6 @@ Location:
 | Wrap Command | `/Users/tomtenuta/Code/roster/ariadne/internal/cmd/session/wrap.go` | Read |
 | Events Package | `/Users/tomtenuta/Code/roster/ariadne/internal/session/events.go` | Read |
 | Sails Generator | `/Users/tomtenuta/Code/roster/ariadne/internal/sails/generator.go` | Read |
-| Example SESSION_CONTEXT | `/Users/tomtenuta/Code/roster/.claude/.archive/sessions/session-20260105-163956-15ab643b/SESSION_CONTEXT.md` | Read |
-| Example events.jsonl | `/Users/tomtenuta/Code/roster/.claude/.archive/sessions/session-20260105-163956-15ab643b/events.jsonl` | Read |
-| Example WHITE_SAILS.yaml | `/Users/tomtenuta/Code/roster/.claude/.archive/sessions/session-20260105-163956-15ab643b/WHITE_SAILS.yaml` | Read |
+| Example SESSION_CONTEXT | `/Users/tomtenuta/Code/roster/.sos/archive/session-20260105-163956-15ab643b/SESSION_CONTEXT.md` | Read |
+| Example events.jsonl | `/Users/tomtenuta/Code/roster/.sos/archive/session-20260105-163956-15ab643b/events.jsonl` | Read |
+| Example WHITE_SAILS.yaml | `/Users/tomtenuta/Code/roster/.sos/archive/session-20260105-163956-15ab643b/WHITE_SAILS.yaml` | Read |

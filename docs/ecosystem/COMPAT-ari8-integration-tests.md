@@ -111,7 +111,7 @@ The writeguard section-based detection has comprehensive coverage (25 tests cove
 **Integration Engineer**: Implement test files for gaps G1-G4. All are P3 priority. The compatibility-tester agent cannot write to `internal/cmd/session/` or `internal/cmd/hook/` (agent-guard restriction). Complete test specifications are provided in the ARI-8 workstream description above.
 
 **Key patterns to follow** (from existing tests):
-- Helper: `setupProjectDir(t)` creates `.claude/sessions/`, `.locks/`, `.audit/`, `ACTIVE_RITE`
+- Helper: `setupProjectDir(t)` creates `.sos/sessions/`, `.locks/`, `.audit/`, `ACTIVE_RITE`
 - Helper: `newTestContext(projectDir, sessionID)` creates `cmdContext` with JSON output
 - Helper: `findCreatedSessionID(t, projectDir)` discovers session ID after create
 - Helper: `loadSessionContext(t, projectDir, sessionID)` loads and returns `*session.Context`

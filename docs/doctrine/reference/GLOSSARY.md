@@ -240,12 +240,12 @@ Restore parked session with full context from clew.
 ### Session
 Tracked work context with lifecycle (create, park, resume, wrap). Managed by Moirai, recorded via clew.
 - **Related**: Moirai, Clew, Lifecycle
-- **Source**: `.claude/sessions/[session-id]/`
+- **Source**: `.sos/sessions/[session-id]/`
 
 ### Session Context
 `SESSION_CONTEXT.md` file containing session state (initiative, complexity, phase, tasks, artifacts).
 - **Related**: Session, State, Moirai
-- **Source**: `.claude/sessions/[session-id]/SESSION_CONTEXT.md`
+- **Source**: `.sos/sessions/[session-id]/SESSION_CONTEXT.md`
 
 ### Skill
 Reusable capability invoked via Skill tool. Defined in rite manifests. Legomena that persist in context.

@@ -91,7 +91,7 @@ When work is complete:
 ```
 
 This:
-1. Moves session to `.claude/.archive/sessions/`
+1. Moves session to `.sos/archive/`
 2. Sets status to ARCHIVED (terminal state)
 3. No further transitions are possible
 
@@ -214,14 +214,14 @@ Sessions are automatically migrated on first access via `session-manager.sh stat
 ps aux | grep "claude"
 
 # 2. Check lock status
-ls -la .claude/sessions/.locks/
+ls -la .sos/sessions/.locks/
 
 # 3. Remove stale lock (if PID is dead)
 # First, check the PID
-cat .claude/sessions/.locks/<session-id>.lock.d/pid
+cat .sos/sessions/.locks/<session-id>.lock.d/pid
 
 # If that process is not running:
-rm -rf .claude/sessions/.locks/<session-id>.lock.d/
+rm -rf .sos/sessions/.locks/<session-id>.lock.d/
 
 # 4. Increase timeout (temporary)
 FSM_LOCK_TIMEOUT=30 ./user-hooks/lib/session-manager.sh mutate resume
@@ -265,11 +265,11 @@ FSM_LOCK_TIMEOUT=30 ./user-hooks/lib/session-manager.sh mutate resume
 
 ```bash
 # 1. Validate the file directly
-./user-hooks/lib/session-fsm.sh validate .claude/sessions/<session_id>/SESSION_CONTEXT.md
+./user-hooks/lib/session-fsm.sh validate .sos/sessions/<session_id>/SESSION_CONTEXT.md
 
 # 2. Check for missing required fields
 grep -E "^(schema_version|session_id|status|created_at|initiative|complexity|active_rite|current_phase):" \
-  .claude/sessions/<session_id>/SESSION_CONTEXT.md
+  .sos/sessions/<session_id>/SESSION_CONTEXT.md
 
 # 3. Fix missing fields manually or re-migrate
 ./user-hooks/lib/session-migrate.sh migrate <session_id>
@@ -295,13 +295,13 @@ grep -E "^(schema_version|session_id|status|created_at|initiative|complexity|act
 
 ```bash
 # 1. List existing sessions
-ls -la .claude/sessions/
+ls -la .sos/sessions/
 
 # 2. Check if session was archived
-ls -la .claude/.archive/sessions/
+ls -la .sos/archive/
 
 # 3. Check current session link
-cat .claude/sessions/.current 2>/dev/null || echo "No current session"
+cat .sos/sessions/.current 2>/dev/null || echo "No current session"
 ```
 
 ### Error: No Active Session
@@ -314,13 +314,13 @@ cat .claude/sessions/.current 2>/dev/null || echo "No current session"
 
 ```bash
 # 1. List available sessions
-ls -d .claude/sessions/session-* 2>/dev/null
+ls -d .sos/sessions/session-* 2>/dev/null
 
 # 2. Create a new session
 ./user-hooks/lib/session-manager.sh create "My Initiative" "MODULE"
 
 # 3. Or set an existing session as current
-echo "session-20251231-120000-abc" > .claude/sessions/.current
+echo "session-20251231-120000-abc" > .sos/sessions/.current
 ```
 
 ### Migration Fails: Missing Required Fields
@@ -333,10 +333,10 @@ echo "session-20251231-120000-abc" > .claude/sessions/.current
 
 ```bash
 # 1. Check what fields exist
-grep "^[a-z_]*:" .claude/sessions/<session_id>/SESSION_CONTEXT.md
+grep "^[a-z_]*:" .sos/sessions/<session_id>/SESSION_CONTEXT.md
 
 # 2. Add missing fields manually
-cat >> .claude/sessions/<session_id>/SESSION_CONTEXT.md << 'EOF'
+cat >> .sos/sessions/<session_id>/SESSION_CONTEXT.md << 'EOF'
 initiative: "Unknown"
 complexity: "MODULE"
 active_rite: "10x-dev"
@@ -355,13 +355,13 @@ EOF
 
 ```bash
 # 1. Check the raw context file
-cat .claude/sessions/<session_id>/SESSION_CONTEXT.md
+cat .sos/sessions/<session_id>/SESSION_CONTEXT.md
 
 # 2. Check event history
-cat .claude/sessions/<session_id>/events.jsonl
+cat .sos/sessions/<session_id>/events.jsonl
 
 # 3. If backup exists, consider rollback
-ls -la .claude/sessions/<session_id>/SESSION_CONTEXT.md.v1.backup
+ls -la .sos/sessions/<session_id>/SESSION_CONTEXT.md.v1.backup
 
 # 4. If no backup, manually fix the status field
 # Edit the file and ensure status: "ACTIVE" (or appropriate state)
@@ -375,11 +375,11 @@ Each migration creates a `.v1.backup` file:
 
 ```bash
 # Check if backup exists
-ls -la .claude/sessions/<session_id>/SESSION_CONTEXT.md.v1.backup
+ls -la .sos/sessions/<session_id>/SESSION_CONTEXT.md.v1.backup
 
 # Restore backup
-mv .claude/sessions/<session_id>/SESSION_CONTEXT.md.v1.backup \
-   .claude/sessions/<session_id>/SESSION_CONTEXT.md
+mv .sos/sessions/<session_id>/SESSION_CONTEXT.md.v1.backup \
+   .sos/sessions/<session_id>/SESSION_CONTEXT.md
 ```
 
 ### Manual State Repair
@@ -388,13 +388,13 @@ If state is corrupted and no backup exists:
 
 ```bash
 # 1. Determine correct state from events log
-tail -5 .claude/sessions/<session_id>/events.jsonl
+tail -5 .sos/sessions/<session_id>/events.jsonl
 
 # 2. Edit SESSION_CONTEXT.md directly
 # Ensure the status field matches the last known good state
 
 # 3. Validate the repair
-./user-hooks/lib/session-fsm.sh validate .claude/sessions/<session_id>/SESSION_CONTEXT.md
+./user-hooks/lib/session-fsm.sh validate .sos/sessions/<session_id>/SESSION_CONTEXT.md
 ```
 
 ### Clearing Stale Locks
@@ -403,10 +403,10 @@ If system crashed while holding lock:
 
 ```bash
 # Remove all lock files for a session
-rm -rf .claude/sessions/.locks/<session_id>.lock*
+rm -rf .sos/sessions/.locks/<session_id>.lock*
 
 # Or remove all locks (nuclear option)
-rm -rf .claude/sessions/.locks/
+rm -rf .sos/sessions/.locks/
 ```
 
 ### Recreating Missing Audit Logs
@@ -415,9 +415,9 @@ If audit logs are lost:
 
 ```bash
 # Recreate from session event logs
-mkdir -p .claude/sessions/.audit
+mkdir -p .sos/sessions/.audit
 
-for events_file in .claude/sessions/*/events.jsonl; do
+for events_file in .sos/sessions/*/events.jsonl; do
     session_id=$(basename $(dirname "$events_file"))
     while read -r line; do
         ts=$(echo "$line" | grep -o '"timestamp":"[^"]*"' | cut -d'"' -f4)
@@ -426,7 +426,7 @@ for events_file in .claude/sessions/*/events.jsonl; do
         to=$(echo "$line" | grep -o '"to":"[^"]*"' | cut -d'"' -f4)
         echo "$ts | $session_id | $event | $from -> $to"
     done < "$events_file"
-done >> .claude/sessions/.audit/transitions.log
+done >> .sos/sessions/.audit/transitions.log
 ```
 
 ## Error Codes Reference
@@ -479,24 +479,24 @@ export FSM_EMIT_EVENTS=false
 
 ```bash
 # Real-time transition monitoring
-tail -f .claude/sessions/.audit/transitions.log
+tail -f .sos/sessions/.audit/transitions.log
 ```
 
 ### Check for Errors
 
 ```bash
 # Recent errors
-tail -20 .claude/sessions/.audit/errors.log
+tail -20 .sos/sessions/.audit/errors.log
 
 # Count errors by type
-awk -F'|' '{print $4}' .claude/sessions/.audit/errors.log | sort | uniq -c
+awk -F'|' '{print $4}' .sos/sessions/.audit/errors.log | sort | uniq -c
 ```
 
 ### Session Statistics
 
 ```bash
 # Count sessions by state
-for dir in .claude/sessions/session-*; do
+for dir in .sos/sessions/session-*; do
     if [[ -f "$dir/SESSION_CONTEXT.md" ]]; then
         grep "^status:" "$dir/SESSION_CONTEXT.md" | cut -d: -f2 | tr -d ' "'
     fi

@@ -53,7 +53,7 @@ Session Context:
 
 Clotho will:
 - Generate session ID with timestamp
-- Create `.claude/sessions/{session_id}/SESSION_CONTEXT.md`
+- Create `.sos/sessions/{session_id}/SESSION_CONTEXT.md`
 - Initialize session state with proper schema
 - Set initial phase to "requirements"
 - Return confirmation with session details
@@ -125,7 +125,7 @@ Display confirmation message with:
 ### Files Created
 
 **Via Moirai delegation**:
-- `.claude/sessions/{session_id}/SESSION_CONTEXT.md` - Session metadata and state (created by Clotho)
+- `.sos/sessions/{session_id}/SESSION_CONTEXT.md` - Session metadata and state (created by Clotho)
 
 **Via agent delegation**:
 - `/docs/requirements/PRD-{slug}.md` - Product requirements document (Requirements Analyst)

@@ -195,7 +195,7 @@ ari session create <initiative> [--complexity=MODULE] [--team=NAME]
 ```json
 {
   "session_id": "session-20260104-160414-563c681e",
-  "session_dir": ".claude/sessions/session-20260104-160414-563c681e",
+  "session_dir": ".sos/sessions/session-20260104-160414-563c681e",
   "status": "ACTIVE",
   "initiative": "Ariadne Go CLI",
   "complexity": "MODULE",
@@ -239,9 +239,9 @@ Team: 10x-dev
 
 **Implementation Notes**:
 - Generates session ID: `session-YYYYMMDD-HHMMSS-{8-hex}`
-- Creates session directory at `.claude/sessions/{session-id}/`
+- Creates session directory at `.sos/sessions/{session-id}/`
 - Creates SESSION_CONTEXT.md with schema_version 2.1
-- Sets `.claude/sessions/.current-session` to new session ID
+- Sets `.sos/sessions/.current-session` to new session ID
 - Emits `SESSION_CREATED` event to `events.jsonl`
 - Acquires exclusive lock during creation, releases after
 
@@ -264,7 +264,7 @@ ari session status [--session-id=ID]
 ```json
 {
   "session_id": "session-20260104-160414-563c681e",
-  "session_dir": ".claude/sessions/session-20260104-160414-563c681e",
+  "session_dir": ".sos/sessions/session-20260104-160414-563c681e",
   "has_session": true,
   "status": "ACTIVE",
   "initiative": "Ariadne Go CLI",
@@ -364,8 +364,8 @@ Total: 2 sessions (* = current)
 | 9 | No .claude/ directory found |
 
 **Implementation Notes**:
-- Scans `.claude/sessions/session-*` directories
-- With `--all`, also scans `.claude/.archive/sessions/`
+- Scans `.sos/sessions/session-*` directories
+- With `--all`, also scans `.sos/archive/`
 - No locking required (reads directory listing)
 - Sorts by created_at descending (most recent first)
 
@@ -494,7 +494,7 @@ ari session wrap [--session-id=ID] [--skip-checks] [--no-archive]
   "previous_status": "ACTIVE",
   "wrapped_at": "2026-01-04T20:00:00Z",
   "archived": true,
-  "archive_path": ".claude/.archive/sessions/session-20260104-160414-563c681e"
+  "archive_path": ".sos/archive/session-20260104-160414-563c681e"
 }
 ```
 
@@ -512,7 +512,7 @@ ari session wrap [--session-id=ID] [--skip-checks] [--no-archive]
 **Implementation Notes**:
 - Valid transitions: ACTIVE -> ARCHIVED, PARKED -> ARCHIVED
 - Clears `.current-session` file
-- Moves session directory to `.claude/.archive/sessions/` unless `--no-archive`
+- Moves session directory to `.sos/archive/` unless `--no-archive`
 - Emits `SESSION_ARCHIVED` event to `events.jsonl`
 
 ### 3.8 Command: `ari session transition`
@@ -609,7 +609,7 @@ ari session migrate [--session-id=ID] [--all] [--dry-run]
       "to_version": "2.1",
       "status_derived": "PARKED",
       "fields_migrated": ["session_state -> status", "parked_at -> events.jsonl"],
-      "backup_path": ".claude/sessions/session-20251230-100000-old12345/SESSION_CONTEXT.v1.backup"
+      "backup_path": ".sos/sessions/session-20251230-100000-old12345/SESSION_CONTEXT.v1.backup"
     }
   ],
   "skipped": [
@@ -751,7 +751,7 @@ Total: 3 events
 
 **Implementation Notes**:
 - Reads from `{session-dir}/events.jsonl`
-- Also reads from `.claude/sessions/.audit/transitions.log` for global view
+- Also reads from `.sos/sessions/.audit/transitions.log` for global view
 - Supports filtering by event type and timestamp range
 
 ### 3.11 Command: `ari session lock`
@@ -775,7 +775,7 @@ ari session lock [--session-id=ID] [--timeout=SECONDS]
 {
   "session_id": "session-20260104-160414-563c681e",
   "locked": true,
-  "lock_path": ".claude/sessions/.locks/session-20260104-160414-563c681e.lock",
+  "lock_path": ".sos/sessions/.locks/session-20260104-160414-563c681e.lock",
   "holder_pid": 12345,
   "acquired_at": "2026-01-04T19:00:00Z"
 }
@@ -1042,7 +1042,7 @@ func (l *Lock) Release() error {
 ### 5.2 Lock File Location
 
 ```
-.claude/sessions/.locks/
+.sos/sessions/.locks/
     {session-id}.lock       # flock target file
 ```
 

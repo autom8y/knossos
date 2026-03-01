@@ -31,7 +31,7 @@ Task(orchestrator, "Break down initiative into phases and tasks
 
 Session Context:
 - Session ID: session-20260104-022401-5552866f
-- Session Path: .claude/sessions/session-20260104-022401-5552866f/SESSION_CONTEXT.md
+- Session Path: .sos/sessions/session-20260104-022401-5552866f/SESSION_CONTEXT.md
 - Initiative: Your Initiative Name
 - Complexity: MODULE
 - Team: ecosystem")
@@ -135,7 +135,7 @@ Two hooks coordinate the auto-orchestration flow:
 **Eliminated steps**:
 1. Manual `session-manager.sh create` invocation
 2. Parsing YAML CONSULTATION_REQUEST output
-3. Looking up session ID from `.claude/sessions/.current`
+3. Looking up session ID from `.sos/sessions/.current`
 4. Constructing Task invocation with session context fields
 
 **Remaining steps**:
@@ -261,8 +261,8 @@ If auto-orchestration fails or you prefer manual control:
 Task(orchestrator, "Break down initiative into phases and tasks
 
 Session Context:
-- Session ID: <from .claude/sessions/.current>
-- Session Path: .claude/sessions/<session-id>/SESSION_CONTEXT.md
+- Session ID: <from .sos/sessions/.current>
+- Session Path: .sos/sessions/<session-id>/SESSION_CONTEXT.md
 - Initiative: Initiative Name
 - Complexity: MODULE
 - Team: team-name")
@@ -310,7 +310,7 @@ The `/consult` command provides guided routing without auto-orchestration:
 **Resolution**:
 ```bash
 # Check for lock issues
-ls -la .claude/sessions/.locks/
+ls -la .sos/sessions/.locks/
 
 # Create session manually
 .claude/hooks/lib/session-manager.sh create "Initiative" "MODULE"

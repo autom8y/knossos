@@ -15,7 +15,7 @@ The lock package (`internal/lock/lock.go`) implements advisory file locking usin
 
 - **Lock types**: Shared (`LOCK_SH`) and Exclusive (`LOCK_EX`), defined at `lock.go:20-25`.
 - **Lock granularity**: Per-session. Each session gets its own lock file at `{sessionID}.lock` -- `lock.go:49-51`.
-- **Lock file location**: `.claude/sessions/.locks/{sessionID}.lock` -- `paths.go:68-69`.
+- **Lock file location**: `.sos/sessions/.locks/{sessionID}.lock` -- `paths.go:68-69`.
 - **Default timeout**: 10 seconds (`DefaultTimeout`, `lock.go:28`), configurable per call.
 - **Retry interval**: 100ms polling loop with non-blocking `Flock` attempts -- `lock.go:74-108`.
 - **PID tracking**: On exclusive lock acquisition, the holder's PID is written to the lock file -- `lock.go:80-84`.
@@ -53,7 +53,7 @@ All mutating commands acquire exclusive locks on the session ID and use `defer l
 The single-active-session constraint is enforced by application logic, NOT by the lock system:
 
 1. `create` acquires an exclusive lock on the synthetic ID `__create__` -- `create.go:85`.
-2. It reads `.claude/sessions/.current-session` to get the current session ID -- `create.go:93` via `GetCurrentSessionID()`.
+2. It reads `.sos/sessions/.current-session` to get the current session ID -- `create.go:93` via `GetCurrentSessionID()`.
 3. If a current session exists and its `SESSION_CONTEXT.md` is loadable, it rejects creation with `ErrSessionExists` -- `create.go:107`.
 
 The `__create__` lock serializes concurrent create attempts, but does NOT protect `.current-session` writes from other commands. Specifically:
@@ -66,7 +66,7 @@ The `__create__` lock serializes concurrent create attempts, but does NOT protec
 
 The `--seed` flow (`create.go:170-304`) bypasses the lock entirely:
 
-- Creates a session in an ephemeral worktree with its own `.claude/sessions/.locks/` -- `create.go:222-228`.
+- Creates a session in an ephemeral worktree with its own `.sos/sessions/.locks/` -- `create.go:222-228`.
 - Sets status directly to PARKED without FSM transition -- `create.go:243-244`.
 - Copies the session directory to the main repo via filesystem operations -- `create.go:272`.
 - Does NOT acquire the `__create__` lock.
@@ -157,7 +157,7 @@ Stale detection (`lock.go:131-149`) relies on PID liveness. If a process crashes
 
 **2.4 Lock File Accumulation**
 
-Lock files are never deleted by `Release()` (`lock.go:117-128`). They persist in `.claude/sessions/.locks/` indefinitely. When `wrap` archives a session (`wrap.go:211`), the lock file is NOT cleaned up.
+Lock files are never deleted by `Release()` (`lock.go:117-128`). They persist in `.sos/sessions/.locks/` indefinitely. When `wrap` archives a session (`wrap.go:211`), the lock file is NOT cleaned up.
 
 **Likelihood**: Certain. Every session creates a lock file that persists.
 
@@ -304,7 +304,7 @@ If the holder is dead, run: ari session unlock --force"
 
 ### Q3: What is the correct lock scope for worktree scenarios?
 
-**Current**: Lock files live at `.claude/sessions/.locks/` relative to the project root. In git worktrees, `.claude/` is typically per-worktree (copies, not symlinks). This means locks are naturally isolated per worktree.
+**Current**: Lock files live at `.sos/sessions/.locks/` relative to the project root. In git worktrees, `.claude/` is typically per-worktree (copies, not symlinks). This means locks are naturally isolated per worktree.
 
 **Decision needed**: Is per-worktree isolation correct? If so, document it. If worktrees should share session state, a different lock location is needed (e.g., inside `.git/` which IS shared across worktrees).
 

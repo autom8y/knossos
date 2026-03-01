@@ -607,7 +607,7 @@ func runTemplate(ctx *cmdContext) error {
 
 - Claude Code environment variables remain stable
 - `USE_ARI_HOOKS` feature flag controls ari vs shell
-- Session state is stored in `.claude/sessions/<id>/SESSION_CONTEXT.md`
+- Session state is stored in `.sos/sessions/<id>/SESSION_CONTEXT.md`
 - Ari binary is available in PATH or project-relative location
 
 ### 8.3 Risks

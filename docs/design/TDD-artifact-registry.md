@@ -82,7 +82,7 @@ metadata: object               # Type-specific metadata (optional)
 ### 2.2 Session-Level Registry Schema
 
 ```yaml
-# .claude/sessions/{session-id}/artifacts.yaml
+# .sos/sessions/{session-id}/artifacts.yaml
 schema_version: "1.0"
 session_id: "session-20260105-143022-abc12345"
 created_at: "2026-01-05T14:30:22Z"
@@ -1001,7 +1001,7 @@ For existing sessions without artifact registries:
 ### 10.1 Session-Level
 
 ```
-.claude/sessions/{session-id}/artifacts.yaml
+.sos/sessions/{session-id}/artifacts.yaml
 ```
 
 ### 10.2 Project-Level

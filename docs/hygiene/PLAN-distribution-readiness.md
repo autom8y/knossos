@@ -214,7 +214,7 @@ Phases 2-4: ~8 commits grouped by theme (lock, fileutil, consumers, hook format,
 **Moirai lock reading** -- two independent implementations:
 
 1. `internal/cmd/hook/writeguard.go:141-190` -- `isMoiraiLockHeld(projectDir string) bool`:
-   - Reads `.claude/sessions/{id}/.moirai-lock`
+   - Reads `.sos/sessions/{id}/.moirai-lock`
    - Parses with anonymous struct: `Agent string`, `AcquiredAt string`, `StaleAfterSeconds int`
    - Time parse: `time.Parse(time.RFC3339, lock.AcquiredAt)`
    - Stale check: `acquiredAt.Add(Duration(StaleAfterSeconds) * Second)` vs `time.Now().UTC()`

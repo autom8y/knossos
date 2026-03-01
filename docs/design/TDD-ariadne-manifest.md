@@ -1497,7 +1497,7 @@ State-mate agent can invoke manifest commands for validation:
 
 ```bash
 # Validate session context before writing
-ari manifest validate .claude/sessions/$SESSION_ID/SESSION_CONTEXT.md --schema=session-context
+ari manifest validate .sos/sessions/$SESSION_ID/SESSION_CONTEXT.md --schema=session-context
 
 # Check for manifest drift
 ari manifest diff .claude/manifest.json HEAD:.claude/manifest.json

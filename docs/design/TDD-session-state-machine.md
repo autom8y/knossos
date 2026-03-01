@@ -156,7 +156,7 @@ active_rite: "10x-dev"
 
 **Preserved Metadata** (moved to event log):
 ```yaml
-# .claude/sessions/<session-id>/events.jsonl
+# .sos/sessions/<session-id>/events.jsonl
 {"timestamp":"2025-12-31T14:00:00Z","event":"PARKED","reason":"Lunch break","git_status":"clean"}
 {"timestamp":"2025-12-31T15:00:00Z","event":"RESUMED"}
 ```
@@ -169,7 +169,7 @@ Substates are derived from `ACTIVE_WORKFLOW.yaml`, not stored redundantly:
 # Get current phase (substate) when status=ACTIVE
 get_current_phase() {
     local session_id="$1"
-    local ctx_file=".claude/sessions/$session_id/SESSION_CONTEXT.md"
+    local ctx_file=".sos/sessions/$session_id/SESSION_CONTEXT.md"
 
     # Only valid if status=ACTIVE
     local status
@@ -197,7 +197,7 @@ Returns current state with proper locking.
 
 fsm_get_state() {
     local session_id="$1"
-    local ctx_file=".claude/sessions/$session_id/SESSION_CONTEXT.md"
+    local ctx_file=".sos/sessions/$session_id/SESSION_CONTEXT.md"
 
     # Acquire shared lock for read
     _fsm_lock_shared "$session_id" || return 1
@@ -246,7 +246,7 @@ fsm_transition() {
     fi
 
     # Create backup
-    local ctx_file=".claude/sessions/$session_id/SESSION_CONTEXT.md"
+    local ctx_file=".sos/sessions/$session_id/SESSION_CONTEXT.md"
     local backup_file="$ctx_file.backup"
     cp "$ctx_file" "$backup_file"
 
@@ -289,7 +289,7 @@ fsm_create_session() {
     session_id=$(generate_session_id)
 
     # Initialize context file
-    local session_dir=".claude/sessions/$session_id"
+    local session_dir=".sos/sessions/$session_id"
     mkdir -p "$session_dir"
 
     local timestamp
@@ -359,7 +359,7 @@ Fallback mechanism: `mkdir`-based locking (portable, less elegant)
 #### Lock File Location
 
 ```
-.claude/sessions/.locks/
+.sos/sessions/.locks/
     <session-id>.lock       # flock target file
     <session-id>.lock.d/    # mkdir fallback directory
         pid                 # Owner process ID
@@ -370,7 +370,7 @@ Fallback mechanism: `mkdir`-based locking (portable, less elegant)
 ```bash
 _fsm_lock_shared() {
     local session_id="$1"
-    local lock_file=".claude/sessions/.locks/${session_id}.lock"
+    local lock_file=".sos/sessions/.locks/${session_id}.lock"
     local timeout="${FSM_LOCK_TIMEOUT:-10}"
 
     mkdir -p "$(dirname "$lock_file")" 2>/dev/null
@@ -391,7 +391,7 @@ _fsm_lock_shared() {
 ```bash
 _fsm_lock_exclusive() {
     local session_id="$1"
-    local lock_file=".claude/sessions/.locks/${session_id}.lock"
+    local lock_file=".sos/sessions/.locks/${session_id}.lock"
     local timeout="${FSM_LOCK_TIMEOUT:-10}"
 
     mkdir -p "$(dirname "$lock_file")" 2>/dev/null
@@ -441,7 +441,7 @@ _fsm_lock_exclusive() {
 ```bash
 _fsm_unlock() {
     local session_id="$1"
-    local lock_file=".claude/sessions/.locks/${session_id}.lock"
+    local lock_file=".sos/sessions/.locks/${session_id}.lock"
     local lock_marker="${lock_file}.d"
 
     # Release flock
@@ -819,7 +819,7 @@ EOF
 
     # Log to audit trail
     echo "$timestamp | ERROR | $session_id | $error_type | $details" >> \
-        ".claude/sessions/.audit/errors.log"
+        ".sos/sessions/.audit/errors.log"
 }
 ```
 
@@ -888,7 +888,7 @@ _fsm_safe_mutate() {
 Events are stored in JSONL format for efficient append and parsing:
 
 ```bash
-# Location: .claude/sessions/<session-id>/events.jsonl
+# Location: .sos/sessions/<session-id>/events.jsonl
 
 _fsm_emit_event() {
     local session_id="$1"
@@ -908,7 +908,7 @@ _fsm_emit_event() {
         *)                event_type="STATE_CHANGED" ;;
     esac
 
-    local events_file=".claude/sessions/$session_id/events.jsonl"
+    local events_file=".sos/sessions/$session_id/events.jsonl"
 
     # Build event JSON
     local event="{\"timestamp\":\"$timestamp\",\"event\":\"$event_type\",\"from\":\"$from_state\",\"to\":\"$to_state\""
@@ -921,7 +921,7 @@ _fsm_emit_event() {
 
     # Also log to global audit log
     echo "$timestamp | $session_id | $event_type | $from_state -> $to_state" >> \
-        ".claude/sessions/.audit/transitions.log"
+        ".sos/sessions/.audit/transitions.log"
 }
 ```
 
@@ -1085,7 +1085,7 @@ get_session_state() {
     local session_id="${1:-$(get_session_id)}"
 
     # Check if v2 schema
-    local ctx_file=".claude/sessions/$session_id/SESSION_CONTEXT.md"
+    local ctx_file=".sos/sessions/$session_id/SESSION_CONTEXT.md"
     local version
     version=$(get_yaml_field "$ctx_file" "schema_version" 2>/dev/null)
 

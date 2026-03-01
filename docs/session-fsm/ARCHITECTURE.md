@@ -131,7 +131,7 @@ tests/session-fsm/
   test_helpers.bash             # Test utilities
   fixtures/                     # Test fixtures
 
-.claude/sessions/
+.sos/sessions/
   .locks/                       # Advisory lock files
     <session-id>.lock           # flock target
     <session-id>.lock.d/        # mkdir fallback
@@ -334,7 +334,7 @@ current_phase: "requirements"
 
 ### Audit Trail
 
-Global logs in `.claude/sessions/.audit/`:
+Global logs in `.sos/sessions/.audit/`:
 
 ```
 # transitions.log

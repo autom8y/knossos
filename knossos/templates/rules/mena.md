@@ -1,9 +1,9 @@
 ---
 paths:
-  - "mena/**"
+  - ".knossos/mena/**"
 ---
 
-When modifying files in mena/:
+When modifying files in .knossos/mena/:
 - .dro.md = dromena (commands): TRANSIENT, user-invoked, side effects OK
 - .lego.md = legomena (skills): PERSISTENT, model-invoked, reference only
 - These are fundamentally different — context lifecycle, not just routing

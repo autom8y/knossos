@@ -1,6 +1,6 @@
 # SESSION_CONTEXT Schema
 
-> Field definitions for `.claude/sessions/{session_id}/SESSION_CONTEXT.md`
+> Field definitions for `.sos/sessions/{session_id}/SESSION_CONTEXT.md`
 
 ## Overview
 

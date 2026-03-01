@@ -329,15 +329,15 @@ Contents:
 
 ## File Paths
 
-Session Context: `.claude/sessions/{session-id}/SESSION_CONTEXT.md`
-Default Sprint: `.claude/sessions/{session-id}/SPRINT_CONTEXT.md`
-Named Sprint: `.claude/sessions/{session-id}/sprints/{sprint-id}/SPRINT_CONTEXT.md`
-Audit Log: `.claude/sessions/.audit/session-mutations.log`
-Locks: `.claude/sessions/{session-id}/.locks/context.lock`
+Session Context: `.sos/sessions/{session-id}/SESSION_CONTEXT.md`
+Default Sprint: `.sos/sessions/{session-id}/SPRINT_CONTEXT.md`
+Named Sprint: `.sos/sessions/{session-id}/sprints/{sprint-id}/SPRINT_CONTEXT.md`
+Audit Log: `.sos/sessions/.audit/session-mutations.log`
+Locks: `.sos/sessions/{session-id}/.locks/context.lock`
 
 ## Lock Protocol
 
-1. Create lock directory: `.claude/sessions/{session-id}/.locks/`
+1. Create lock directory: `.sos/sessions/{session-id}/.locks/`
 2. Attempt atomic lock: `mkdir context.lock`
 3. Wait up to 10 seconds on contention
 4. On timeout: return LOCK_TIMEOUT error

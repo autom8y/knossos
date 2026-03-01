@@ -701,7 +701,7 @@ For breaking changes: feat(schemas)!: description [ADR-XXXX]
 | 10x.md (rite-switching) | /Users/tomtenuta/Code/roster/user-commands/rite-switching/10x.md | READ |
 | hygiene-ref skill.md | /Users/tomtenuta/Code/roster/rites/hygiene/skills/hygiene-ref/skill.md | READ |
 | common.schema.json | /Users/tomtenuta/Code/roster/schemas/artifacts/common.schema.json | READ |
-| Existing SESSION_CONTEXT.md files | .claude/sessions/**/*CONTEXT*.md | GREP (no legacy keys found) |
+| Existing SESSION_CONTEXT.md files | .sos/sessions/**/*CONTEXT*.md | GREP (no legacy keys found) |
 
 ---
 

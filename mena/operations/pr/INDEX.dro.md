@@ -73,7 +73,7 @@ End your response with:
 📬 opened · next: {hint}
 
 **Fork-context note**: This command may run without conversation history. To resolve the hint, read session state from disk:
-- Find active session: look for `status: "ACTIVE"` in `.claude/sessions/*/SESSION_CONTEXT.md`
+- Find active session: look for `status: "ACTIVE"` in `.sos/sessions/*/SESSION_CONTEXT.md`
 - Read `current_phase` from its frontmatter and check `.claude/ACTIVE_WORKFLOW.yaml` for phase ordering
 - No active session found → output `📬 opened` without hint.
 

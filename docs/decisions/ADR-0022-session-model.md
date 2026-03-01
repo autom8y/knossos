@@ -157,7 +157,7 @@ Write `{pid} {unix-timestamp}` to lock files instead of just `{pid}`. This enabl
 
 Git's default behavior places `.claude/` in each worktree's working directory, not in the shared `.git/` directory. This means:
 
-- Each worktree has its own `.claude/sessions/`, `.claude/sessions/.locks/`, and `.current-session`
+- Each worktree has its own `.sos/sessions/`, `.sos/sessions/.locks/`, and `.current-session`
 - Sessions created in one worktree are invisible to another worktree
 - Locks in one worktree do not contend with locks in another worktree
 
@@ -171,8 +171,8 @@ This is correct because:
 
 | Data | Shared? | Location | Rationale |
 |------|---------|----------|-----------|
-| Session state | No | `.claude/sessions/` (per-worktree) | Independent work contexts |
-| Session locks | No | `.claude/sessions/.locks/` (per-worktree) | Locks must be co-located with the data they protect |
+| Session state | No | `.sos/sessions/` (per-worktree) | Independent work contexts |
+| Session locks | No | `.sos/sessions/.locks/` (per-worktree) | Locks must be co-located with the data they protect |
 | Rite definitions | Yes | `rites/` (tracked in git) | Source content shared via git |
 | CLAUDE.md | Yes | `.claude/CLAUDE.md` (tracked in git, regenerated per-worktree by materialization) | Configuration shared via git, projection per-worktree |
 | Archive | No | `.claude/.archive/` (per-worktree) | Historical data stays with the worktree that created it |

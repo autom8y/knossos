@@ -62,7 +62,7 @@ These are knossos-owned sections in the current `.claude/CLAUDE.md` that contain
 | `getting-help`* | 140 | `docs/guides/knossos-integration.md` | FIX | Source-repo doc path. |
 | `getting-help`* | 141 | `docs/guides/knossos-migration.md` | FIX | Source-repo doc path. |
 | `state-management`* | 164 | `docs/requirements/PRD-foo.md` | KEEP | Example path pattern (uses placeholder `PRD-foo`), not a real reference. |
-| `state-management`* | 168 | `.claude/sessions/{session-id}/SESSION_CONTEXT.md` | KEEP | Templated path with placeholder; satellites would have this structure. |
+| `state-management`* | 168 | `.sos/sessions/{session-id}/SESSION_CONTEXT.md` | KEEP | Templated path with placeholder; satellites would have this structure. |
 | `state-management`* | 171 | `.claude/hooks/lib/session-manager.sh` | FIX | Source-repo hook path. Satellites may not have this file. |
 | `state-management`* | 185 | `user-agents/moirai.md` | FIX | Source-repo agent file path. Not materialized to `.claude/`. |
 | `state-management`* | 185 | `docs/philosophy/knossos-doctrine.md` | FIX | Source-repo doc path. |

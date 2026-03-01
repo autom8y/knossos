@@ -102,7 +102,7 @@ export ROSTER_HOME="$HOME/Code/roster"
 ## Team Pack Structure
 
 ```
-rites/<team-name>/
+.knossos/rites/<team-name>/
   +-- agents/           # Agent prompt files (*.md)
   |   +-- orchestrator.md
   |   +-- specialist.md
@@ -124,15 +124,15 @@ Roster uses a **two-tier destination model**: user-level artifacts go to `~/.cla
 | `mena/` | `~/.claude/commands/` | `sync-user-commands.sh` | User (global) |
 | `user-skills/` | `~/.claude/skills/` | `sync-user-skills.sh` | User (global) |
 | `user-hooks/` | `~/.claude/hooks/` | `sync-user-hooks.sh` | User (global) |
-| `rites/{pack}/agents/` | `.claude/agents/` | `swap-rite.sh` | Project |
-| `rites/{pack}/skills/` | `.claude/skills/` | `swap-rite.sh` | Project |
-| `rites/{pack}/commands/` | `.claude/commands/` | `swap-rite.sh` | Project |
+| `.knossos/rites/{pack}/agents/` | `.claude/agents/` | `swap-rite.sh` | Project |
+| `.knossos/rites/{pack}/skills/` | `.claude/skills/` | `swap-rite.sh` | Project |
+| `.knossos/rites/{pack}/commands/` | `.claude/commands/` | `swap-rite.sh` | Project |
 | `.claude/` (roster) | `.claude/` (satellite) | `roster-sync` | Project |
 
 ### Key Points
 
 1. **User-level content** (`user-*/`) syncs to `~/.claude/` (available in all projects)
-2. **Team-level content** (`rites/{pack}/`) syncs to `.claude/` (project-specific)
+2. **Team-level content** (`.knossos/rites/{pack}/`) syncs to `.claude/` (project-specific)
 3. **NO `.claude/user-*` directories should exist** - these were stale migration artifacts from the skeleton deprecation
 4. **Precedence**: Project-level (`.claude/`) takes precedence over user-level (`~/.claude/`)
 
@@ -146,7 +146,7 @@ Roster Repository
     +-- user-skills/    -> sync-user-skills.sh    -> ~/.claude/skills/   (global)
     +-- user-hooks/     -> sync-user-hooks.sh     -> ~/.claude/hooks/    (global)
     |
-    +-- rites/{pack}/   -> swap-rite.sh           -> .claude/agents/     (project)
+    +-- .knossos/rites/{pack}/   -> swap-rite.sh           -> .claude/agents/     (project)
     |                                             -> .claude/skills/     (project)
     |                                             -> .claude/commands/   (project)
     |

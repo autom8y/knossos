@@ -73,7 +73,7 @@ When a user runs `ari init --rite 10x-dev` on a fresh machine:
 |-----------|-------------|--------|
 | Source code (Go) | No | Binary is compiled; source not needed at runtime |
 | `.know/` files | No | Generated per-project by `/know --all`; not portable |
-| `.claude/sessions/` | No | Session state is per-project, per-user |
+| `.sos/sessions/` | No | Session state is per-project, per-user |
 | User memory seeds | No | Created during agent enablement sprints; lazy-created on first invocation |
 | `KNOSSOS_HOME` env var | No | Not needed -- embedded assets provide the fallback |
 | ADRs, TDDs, spikes | No (in archive only) | Included in release tarball for documentation but not embedded in binary |

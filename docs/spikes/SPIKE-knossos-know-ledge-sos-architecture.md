@@ -125,15 +125,15 @@ rite work        →  .ledge/    (graduated artifacts)
 
 ### 4. `.sos/` — Session Or State (SESSION MIGRATION)
 
-**What moves**: `.claude/sessions/` → `.sos/sessions/`, `.claude/.archive/sessions/` → `.sos/archive/`
+**What moves**: `.sos/sessions/` → `.sos/sessions/`, `.sos/archive/` → `.sos/archive/`
 
 **Production code changes (1 file, ~4 methods)**:
 
 | File | Method | Current | Proposed |
 |------|--------|---------|----------|
 | `internal/paths/paths.go` | `SessionsDir()` | `.claude/sessions` | `.sos/sessions` |
-| `internal/paths/paths.go` | `LocksDir()` | `.claude/sessions/.locks` | `.sos/sessions/.locks` |
-| `internal/paths/paths.go` | `CCMapDir()` | `.claude/sessions/.cc-map` | `.sos/sessions/.cc-map` |
+| `internal/paths/paths.go` | `LocksDir()` | `.sos/sessions/.locks` | `.sos/sessions/.locks` |
+| `internal/paths/paths.go` | `CCMapDir()` | `.sos/sessions/.cc-map` | `.sos/sessions/.cc-map` |
 | `internal/paths/paths.go` | `ArchiveDir()` | `.claude/.archive/sessions` | `.sos/archive` |
 
 **Key finding**: ALL 175+ session path references across 52 files flow through these 4 `Resolver` methods. Changing them propagates everywhere automatically.

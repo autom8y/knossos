@@ -219,7 +219,7 @@ Two P1 defects block release:
 - Full BATS test results: 70 passed, 3 failed (test data issues), 2 skipped
 - Performance benchmark data captured
 - Regression suite passed 6/6 checks
-- Audit logs verified in `.claude/sessions/.audit/`
+- Audit logs verified in `.sos/sessions/.audit/`
 
 ---
 

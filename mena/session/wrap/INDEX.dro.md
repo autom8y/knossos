@@ -69,7 +69,7 @@ Read Has Session, Session State from the context table — do not call `ari sess
    - Code: /src/...
 
    Quality: All gates passed
-   Archived to: .claude/.archive/sessions/{session-id}/
+   Archived to: .sos/archive/{session-id}/
 
    Next session: Use /start for new work
    ```

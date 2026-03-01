@@ -141,7 +141,7 @@ In Go, PPID is obtained via `os.Getppid()`.
 
 **Location**: `/tmp/ariadne-budget-{session_key}` (renamed from `ariadne-msg-count-` to match Go naming but functionally identical)
 
-**Rationale for keeping /tmp**: Session-scoped temp files are the correct abstraction. They auto-clean on reboot, have no cross-session leakage, and avoid polluting project directories. The session directory (`$PROJECT/.claude/sessions/{id}/`) was considered but rejected because budget tracking is not session-critical data and should not survive session recovery.
+**Rationale for keeping /tmp**: Session-scoped temp files are the correct abstraction. They auto-clean on reboot, have no cross-session leakage, and avoid polluting project directories. The session directory (`$PROJECT/.sos/sessions/{id}/`) was considered but rejected because budget tracking is not session-critical data and should not survive session recovery.
 
 **File format**: Plain text integer (matches bash implementation for cross-version compatibility during rollout).
 

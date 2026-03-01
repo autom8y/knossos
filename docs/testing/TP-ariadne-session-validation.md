@@ -64,7 +64,7 @@ All JSON outputs follow the PRD Section 4.4 contract:
 // session create - Success
 {
   "session_id": "session-20260104-172636-32198db1",
-  "session_dir": ".claude/sessions/session-...",
+  "session_dir": ".sos/sessions/session-...",
   "status": "ACTIVE",
   "initiative": "...",
   "complexity": "MODULE",

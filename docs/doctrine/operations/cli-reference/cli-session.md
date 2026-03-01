@@ -26,7 +26,7 @@ ari session create <initiative> [flags]
 ```
 
 **Description**:
-Initializes a new tracked work session. Creates session directory in `.claude/sessions/`, initializes `SESSION_CONTEXT.md`, and records `SessionCreated` event. The session ID is automatically generated.
+Initializes a new tracked work session. Creates session directory in `.sos/sessions/`, initializes `SESSION_CONTEXT.md`, and records `SessionCreated` event. The session ID is automatically generated.
 
 **Arguments**:
 - `initiative` (string, required): Session title/goal describing the work

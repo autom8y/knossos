@@ -130,7 +130,7 @@ fi
 
 **Reproduction**:
 1. Run parallel session creations
-2. One process removes `.claude/sessions/` while another creates within it
+2. One process removes `.sos/sessions/` while another creates within it
 3. `mkdir -p` may succeed for parent but fail for child
 4. `fsm_create_session` returns session ID even though directory is incomplete
 
@@ -280,9 +280,9 @@ local required_fields=("schema_version" "session_id" "status" "created_at"
 **Severity**: CRITICAL | **Component**: session-core.sh | **Line**: 86-94
 
 **Description**:
-`set_current_session()` calls `atomic_write()` which calls `mkdir -p "$(dirname "$dest_file")"`. If the destination file path is `.claude/sessions/.current-session`, the parent is `.claude/sessions/`. However, if `.current-session` already exists as a directory (from a race condition), `atomic_write` will:
+`set_current_session()` calls `atomic_write()` which calls `mkdir -p "$(dirname "$dest_file")"`. If the destination file path is `.sos/sessions/.current-session`, the parent is `.sos/sessions/`. However, if `.current-session` already exists as a directory (from a race condition), `atomic_write` will:
 
-1. Create temp file in `.claude/sessions/`
+1. Create temp file in `.sos/sessions/`
 2. Try to `mv` temp to `.current-session`
 3. `mv` will move the temp FILE INTO the `.current-session` DIRECTORY
 
@@ -290,7 +290,7 @@ local required_fields=("schema_version" "session_id" "status" "created_at"
 
 **Reproduction**:
 1. Process A: starts `set_current_session("session-123")`
-2. Process B: runs `mkdir .claude/sessions/.current-session` (bug in other code)
+2. Process B: runs `mkdir .sos/sessions/.current-session` (bug in other code)
 3. Process A: `atomic_write` succeeds but writes inside directory
 4. Process A: reports success
 5. `get_current_session()` later tries to read file, finds directory

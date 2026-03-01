@@ -7,12 +7,12 @@
 
 ## Executive Summary
 
-The writeguard hook currently blocks Moirai writes to PARKED sessions because session resolution only finds ACTIVE sessions. The target file path always contains the session ID (e.g., `.claude/sessions/session-20260209-120000-abcdef01/SESSION_CONTEXT.md`), making file-path-based extraction a reliable, low-risk fallback.
+The writeguard hook currently blocks Moirai writes to PARKED sessions because session resolution only finds ACTIVE sessions. The target file path always contains the session ID (e.g., `.sos/sessions/session-20260209-120000-abcdef01/SESSION_CONTEXT.md`), making file-path-based extraction a reliable, low-risk fallback.
 
 ### Key Findings
 
 1. **Bug confirmed**: PARKED sessions with valid Moirai locks are denied writes because `ResolveSession()` calls `FindActiveSessions()` which only scans for `status: ACTIVE`
-2. **File path always contains session ID**: Protected files live at `.claude/sessions/{session-id}/SESSION_CONTEXT.md` -- the session ID is structurally embedded
+2. **File path always contains session ID**: Protected files live at `.sos/sessions/{session-id}/SESSION_CONTEXT.md` -- the session ID is structurally embedded
 3. **Lock validation is already correct**: `isMoiraiLockHeld()` checks agent, staleness, and reads from the correct session directory -- it just never gets called because `sessionID` is empty
 4. **Fix is surgical**: 5-10 lines in `writeguard.go`, no changes to `ResolveSession()` or the session FSM
 
@@ -27,7 +27,7 @@ The writeguard hook currently blocks Moirai writes to PARKED sessions because se
 ### 1.1 Current Flow (writeguard.go:62-99)
 
 ```
-PreToolUse(Write, ".claude/sessions/{session-id}/SESSION_CONTEXT.md")
+PreToolUse(Write, ".sos/sessions/{session-id}/SESSION_CONTEXT.md")
   -> isProtectedFile() -> true
   -> resolveSession()
     -> ResolveSession(resolver, ccSessionID, explicitID)
@@ -109,7 +109,7 @@ The file-path extraction is safe because:
 
 ### 3.2 Trust Boundary
 
-The file path comes from CC's tool_input JSON (stdin payload). CC controls what file paths Claude generates. A malicious path like `.claude/sessions/session-20260209-120000-abcdef01/../../../etc/passwd` would:
+The file path comes from CC's tool_input JSON (stdin payload). CC controls what file paths Claude generates. A malicious path like `.sos/sessions/session-20260209-120000-abcdef01/../../../etc/passwd` would:
 - Pass `isProtectedFile()` only if it ends with a protected suffix (it doesn't in this case)
 - Fail `isMoiraiLockHeld()` because no `.moirai-lock` exists at the traversed path
 - Be blocked by the existing check chain
@@ -155,7 +155,7 @@ The `ari session lock` command (`internal/cmd/session/lock.go:87`) calls `ctx.Ge
 ## 7. Test Plan
 
 ### Unit Tests
-- `TestExtractSessionIDFromPath_ValidPath`: `.claude/sessions/session-20260209-120000-abcdef01/SESSION_CONTEXT.md` -> `session-20260209-120000-abcdef01`
+- `TestExtractSessionIDFromPath_ValidPath`: `.sos/sessions/session-20260209-120000-abcdef01/SESSION_CONTEXT.md` -> `session-20260209-120000-abcdef01`
 - `TestExtractSessionIDFromPath_NoSessionID`: `src/main.go` -> `""`
 - `TestExtractSessionIDFromPath_NestedPath`: Deep paths with session ID in the middle
 - `TestExtractSessionIDFromPath_InvalidSessionPattern`: Paths with `session-` prefix but wrong format

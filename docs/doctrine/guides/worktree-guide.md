@@ -14,7 +14,7 @@ Git worktrees enable running multiple independent Claude sessions simultaneously
 
 ### The Problem
 
-Claude Code sessions are designed for single-terminal execution. Each terminal tracks one active session in `.claude/sessions/.current-session`. Running multiple features simultaneously creates conflicts:
+Claude Code sessions are designed for single-terminal execution. Each terminal tracks one active session in `.sos/sessions/.current-session`. Running multiple features simultaneously creates conflicts:
 
 - Session state corruption from concurrent modifications
 - Branch conflicts when features touch overlapping files
@@ -336,7 +336,7 @@ ari session create "Feature A" --complexity=MODULE --seed
 ari session create "Feature B" --complexity=MODULE --seed
 ari session create "Feature C" --complexity=MODULE --seed
 
-# Sessions exist in .claude/sessions/ but none are active
+# Sessions exist in .sos/sessions/ but none are active
 # Resume each in separate terminals
 cd terminal-1 && ari session resume session-xxx-a
 cd terminal-2 && ari session resume session-xxx-b

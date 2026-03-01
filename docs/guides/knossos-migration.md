@@ -63,7 +63,7 @@ Ariadne managing Knossos sessions (dog-fooding milestone):
 
 ```bash
 # Old: Direct file manipulation
-SESSION_DIR=".claude/sessions/current"
+SESSION_DIR=".sos/sessions/current"
 echo "status: ACTIVE" >> "$SESSION_DIR/SESSION_CONTEXT.md"
 ```
 

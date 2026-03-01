@@ -180,7 +180,7 @@ The parallel model allows:
 
     Session Context:
     - Session ID: session-20260104-022401-5552866f
-    - Session Path: .claude/sessions/session-20260104-022401-5552866f/SESSION_CONTEXT.md
+    - Session Path: .sos/sessions/session-20260104-022401-5552866f/SESSION_CONTEXT.md
     - Initiative: Initiative Name
     - Complexity: MODULE")
     ```
@@ -356,6 +356,6 @@ The parallel model allows:
 | orchestrator-router.sh | `/Users/tomtenuta/Code/roster/.claude/hooks/validation/orchestrator-router.sh` | Read |
 | start-preflight.sh | `/Users/tomtenuta/Code/roster/.claude/hooks/session-guards/start-preflight.sh` | Read |
 | session-manager.sh | `/Users/tomtenuta/Code/roster/.claude/hooks/lib/session-manager.sh` | Read |
-| SESSION_CONTEXT.md | `/Users/tomtenuta/Code/roster/.claude/sessions/session-20260104-022401-5552866f/SESSION_CONTEXT.md` | Read |
+| SESSION_CONTEXT.md | `/Users/tomtenuta/Code/roster/.sos/sessions/session-20260104-022401-5552866f/SESSION_CONTEXT.md` | Read |
 | state-mate agent | `/Users/tomtenuta/Code/roster/user-agents/state-mate.md` | Read |
 | ADR-0005 | `/Users/tomtenuta/Code/roster/docs/decisions/ADR-0005-state-mate-centralized-state-authority.md` | Read |

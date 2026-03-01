@@ -186,7 +186,7 @@ The relationship between SOURCE and PROJECTION is:
 | Term | Definition | Example Paths |
 |------|------------|---------------|
 | **SOURCE** | The `/roster/` repository (versioned, canonical, what Knossos IS) | `/roster/internal/`, `/roster/rites/`, `/roster/cmd/ari/` |
-| **PROJECTION** | The `.claude/` directories (gitignored, materialized by `ari sync materialize`) | `.claude/hooks/`, `.claude/agents/`, `.claude/sessions/` |
+| **PROJECTION** | The `.claude/` directories (gitignored, materialized by `ari sync materialize`) | `.claude/hooks/`, `.claude/agents/`, `.sos/sessions/` |
 
 **Corrected Identity Statement**:
 

@@ -18,7 +18,7 @@ Before migrating, understand where artifacts belong:
 | `mena/` | `~/.claude/commands/` | User (global) |
 | `user-skills/` | `~/.claude/skills/` | User (global) |
 | `user-hooks/` | `~/.claude/hooks/` | User (global) |
-| `rites/{pack}/` | `.claude/` | Project |
+| `.knossos/rites/{pack}/` | `.claude/` | Project |
 
 **Critical**: NO `.claude/user-*` directories should exist in satellite projects. If you see `.claude/user-agents/`, `.claude/user-commands/`, `.claude/user-skills/`, or `.claude/user-hooks/` in a satellite project, these are stale migration artifacts from skeleton deprecation and should be removed.
 

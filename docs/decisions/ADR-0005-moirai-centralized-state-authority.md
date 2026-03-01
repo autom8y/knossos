@@ -72,7 +72,7 @@ Task(moirai, "mark_complete task-001 artifact=docs/requirements/PRD-foo.md
 
 Session Context:
 - Session ID: session-20251231-120000-abcd1234
-- Session Path: .claude/sessions/session-20251231-120000-abcd1234/SESSION_CONTEXT.md")
+- Session Path: .sos/sessions/session-20251231-120000-abcd1234/SESSION_CONTEXT.md")
 ```
 
 moirai provides:
@@ -147,7 +147,7 @@ Task(moirai, "--override=reason='Data recovery from corrupted state' transition_
 
 ### 5. Audit Trail
 
-All mutations are logged to `.claude/sessions/.audit/session-mutations.log`:
+All mutations are logged to `.sos/sessions/.audit/session-mutations.log`:
 
 ```
 TIMESTAMP | SESSION_ID | OPERATION | SOURCE | DETAILS | STATUS | REASONING
@@ -221,7 +221,7 @@ moirai returns structured JSON for all operations:
 | Write guard hook | `.claude/hooks/session-guards/session-write-guard.sh` | PreToolUse interceptor |
 | Session schemas | `schemas/artifacts/session-context.schema.json` | Validation schema |
 | Sprint schemas | `schemas/artifacts/sprint-context.schema.json` | Validation schema |
-| Audit log | `.claude/sessions/.audit/session-mutations.log` | Mutation history |
+| Audit log | `.sos/sessions/.audit/session-mutations.log` | Mutation history |
 
 ### Hook Registration
 

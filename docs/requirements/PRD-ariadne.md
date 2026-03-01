@@ -208,7 +208,7 @@ ari
     "code": "LOCK_TIMEOUT",
     "message": "Could not acquire lock within 10s",
     "details": {
-      "lock_path": ".claude/sessions/.locks/session-abc.lock",
+      "lock_path": ".sos/sessions/.locks/session-abc.lock",
       "holder_pid": 12345
     }
   }
@@ -260,7 +260,7 @@ When encountering corrupt SESSION_CONTEXT.md:
 
 **Strategy**: File locking via `flock()` with stale detection
 
-1. Attempt to acquire advisory lock on `.claude/sessions/.locks/{session-id}.lock`
+1. Attempt to acquire advisory lock on `.sos/sessions/.locks/{session-id}.lock`
 2. If lock held, check if holder PID is alive:
    - **Alive**: Wait up to 10s, then fail with `LOCK_TIMEOUT`
    - **Dead**: Steal lock (stale detection), log warning

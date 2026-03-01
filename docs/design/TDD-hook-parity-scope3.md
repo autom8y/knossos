@@ -118,7 +118,7 @@ PreToolUse Hook (Edit|Write)
 ### Pre-computed Values (for /start)
 - **Suggested Session ID**: `session-20251231-130851-31a99f4c`
 - **Entry Agent**: requirements-analyst
-- **Sessions Directory**: `.claude/sessions/`
+- **Sessions Directory**: `.sos/sessions/`
 
 ---
 

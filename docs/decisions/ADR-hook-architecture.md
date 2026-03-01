@@ -90,7 +90,7 @@ Claude Code hooks enable customization of agent behavior at key lifecycle events
 │ └─────────────────────────────────────────────────────────┘ │
 │ ┌─────────────────────────────────────────────────────────┐ │
 │ │ Hook Logic (varies)                                     │ │
-│ │ - Load session context from .claude/sessions/<id>/     │ │
+│ │ - Load session context from .sos/sessions/<id>/     │ │
 │ │ - Parse tool input JSON                                 │ │
 │ │ - Execute business logic                                │ │
 │ │ - Write results (events.jsonl, session context, etc.)   │ │

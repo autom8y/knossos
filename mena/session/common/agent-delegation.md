@@ -185,7 +185,7 @@ Task(moirai, "{operation}
 
 Session Context:
 - Session ID: {session_id}
-- Session Path: .claude/sessions/{session_id}/SESSION_CONTEXT.md")
+- Session Path: .sos/sessions/{session_id}/SESSION_CONTEXT.md")
 ```
 
 **Operations**:

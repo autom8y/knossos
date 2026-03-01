@@ -161,7 +161,7 @@ The current writeguard uses `MOIRAI_BYPASS` env var (line 69 of `writeguard.go`)
 1. Main thread: Task(moirai, "park_session ...")
 2. Moirai subagent starts
 3. Moirai: Bash("ari session lock --agent moirai")
-   -> Creates .claude/sessions/{session}/.moirai-lock (JSON)
+   -> Creates .sos/sessions/{session}/.moirai-lock (JSON)
 4. Moirai: Write(SESSION_CONTEXT.md, ...)
    -> writeguard fires
    -> Checks for .moirai-lock
@@ -187,7 +187,7 @@ The current writeguard uses `MOIRAI_BYPASS` env var (line 69 of `writeguard.go`)
 1. Remove lines 22-23 (`BypassEnvVar` constant) -- env var bypass is dead code
 2. Remove lines 68-71 (env var check block)
 3. Add new function `isMoiraiLockHeld(projectDir string) bool`:
-   - Resolve session directory from `.claude/sessions/.current-session`
+   - Resolve session directory from `.sos/sessions/.current-session`
    - Check for `.moirai-lock` file in session directory
    - Parse JSON, verify `agent` field is `moirai`
    - Check `stale_after_seconds` -- if lock is older than threshold, treat as not held (stale lock protection)

@@ -84,8 +84,8 @@ The system uses a two-tier lock hierarchy:
 
 | Lock Type | Scope | Operations | Location |
 |-----------|-------|------------|----------|
-| **Global Create Lock** | `.claude/sessions/.create.lock` | `cmd_create`, `cmd_wrap` | `session-manager.sh` |
-| **Session Lock** | `.claude/sessions/.locks/${session_id}.lock` | All FSM operations | `session-fsm.sh` |
+| **Global Create Lock** | `.sos/sessions/.create.lock` | `cmd_create`, `cmd_wrap` | `session-manager.sh` |
+| **Session Lock** | `.sos/sessions/.locks/${session_id}.lock` | All FSM operations | `session-fsm.sh` |
 
 ### Lock Acquisition Order
 
@@ -509,7 +509,7 @@ fi
 **Option B: Directory Existence**
 ```bash
 # Validate by checking directory exists
-local session_dir="$project_dir/.claude/sessions/$session_id"
+local session_dir="$project_dir/.sos/sessions/$session_id"
 if [[ ! -d "$session_dir" ]]; then
     echo "Error: Session not found: $session_id" >&2
     return 1
@@ -598,7 +598,7 @@ get_session_state() {
 _legacy_get_session_state() {
     local session_id="$1"
     local project_dir="${CLAUDE_PROJECT_DIR:-.}"
-    local session_file="$project_dir/.claude/sessions/$session_id/SESSION_CONTEXT.md"
+    local session_file="$project_dir/.sos/sessions/$session_id/SESSION_CONTEXT.md"
 
     if [ ! -f "$session_file" ]; then
         echo "NONE"
@@ -881,7 +881,7 @@ for i in {1..5}; do
 done
 wait
 # Verify: At most 1 succeeds, no orphan locks
-ls .claude/sessions/.create.lock 2>/dev/null && echo "FAIL: orphan lock"
+ls .sos/sessions/.create.lock 2>/dev/null && echo "FAIL: orphan lock"
 ```
 
 ### Phase 3: Verification Layer (Day 4-5)

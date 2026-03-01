@@ -13,7 +13,7 @@ What NOT to put in CLAUDE.md. Each anti-pattern includes the violation, why it's
 | 3 | Duplicating knossos state | Creates two sources of truth, can desync | ACTIVE_RITE + agents/ |
 | 4 | Personal preferences in project | User-specific, causes team conflicts | ~/.claude/CLAUDE.md |
 | 5 | Hardcoded dynamic values | Sprint/velocity/blockers become stale quickly | Project management tools |
-| 6 | Session history | CLAUDE.md is not a changelog | .claude/sessions/ |
+| 6 | Session history | CLAUDE.md is not a changelog | .sos/sessions/ |
 | 7 | Knossos rite in satellites | Satellite has its own rite | Regenerate from satellite's ACTIVE_RITE |
 | 8 | "Last updated" timestamps | Immediately stale, git provides this | Git history |
 | 9 | Task lists/checkboxes | Session-scoped, better tools exist | TodoWrite, issue tracker |
@@ -30,7 +30,7 @@ What NOT to put in CLAUDE.md. Each anti-pattern includes the violation, why it's
 
 **Why wrong**: Changes every session, stale within hours, clutters behavioral contract.
 
-**Correct**: Session state in `SESSION_CONTEXT` (`.claude/sessions/session-id/`), injected by hooks.
+**Correct**: Session state in `SESSION_CONTEXT` (`.sos/sessions/session-id/`), injected by hooks.
 
 ---
 
@@ -80,7 +80,7 @@ What NOT to put in CLAUDE.md. Each anti-pattern includes the violation, why it's
 
 **Why wrong**: CLAUDE.md is not a changelog, grows without bound.
 
-**Correct**: Session summaries in `.claude/sessions/`, use `/sessions` command to list.
+**Correct**: Session summaries in `.sos/sessions/`, use `/sessions` command to list.
 
 ---
 

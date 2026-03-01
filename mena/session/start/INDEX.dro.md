@@ -62,7 +62,7 @@ Task(moirai, "create_session initiative='<initiative>' complexity=<COMPLEXITY> r
 
 Moirai will:
 - Generate session ID with timestamp
-- Create `.claude/sessions/{session_id}/SESSION_CONTEXT.md` with proper schema
+- Create `.sos/sessions/{session_id}/SESSION_CONTEXT.md` with proper schema
 - Set initial phase to "requirements"
 - Return confirmation with session_id
 

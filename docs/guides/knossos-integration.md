@@ -261,7 +261,7 @@ The `sails_generated` event includes evidence paths from WHITE_SAILS.yaml:
     "color": "white",
     "computed_base": "green",
     "session_id": "session-20260105-143000-abc12345",
-    "file_path": ".claude/sessions/.../WHITE_SAILS.yaml",
+    "file_path": ".sos/sessions/.../WHITE_SAILS.yaml",
     "evidence_paths": {
       "tests": "ariadne/internal/..._test.go",
       "build": "ariadne/ari",
@@ -315,7 +315,7 @@ ari session park --reason="blocked on review"
 
 ### SESSION_CONTEXT.md
 
-Session state lives in `.claude/sessions/<session-id>/SESSION_CONTEXT.md`:
+Session state lives in `.sos/sessions/<session-id>/SESSION_CONTEXT.md`:
 
 ```yaml
 ---

@@ -145,7 +145,7 @@ The global audit log (`EmitToAudit()`) is dropped. Its pipe-delimited plaintext 
 
 Note: currently all three contexts use `DefaultMaxLines=200` / `DefaultKeepLines=80`. The park context should use the more generous constants to preserve context for session resume. This is a follow-up implementation item.
 
-`events.jsonl` does NOT have rotation. Each session gets its own `events.jsonl` at `.claude/sessions/<session-id>/events.jsonl`. Session-scoped files are naturally bounded by session lifetime.
+`events.jsonl` does NOT have rotation. Each session gets its own `events.jsonl` at `.sos/sessions/<session-id>/events.jsonl`. Session-scoped files are naturally bounded by session lifetime.
 
 ### Consequences
 
@@ -174,13 +174,13 @@ Note: currently all three contexts use `DefaultMaxLines=200` / `DefaultKeepLines
 
 ### Context
 
-Knossos uses a singleton `.current-session` file (at `.claude/sessions/.current-session`) to track the active session. ADR-0022 demoted this file from authoritative source to TTL cache, with scan-based discovery (`FindActiveSession()`) as the source of truth. However, the fundamental model remains one-active-session-per-repo.
+Knossos uses a singleton `.current-session` file (at `.sos/sessions/.current-session`) to track the active session. ADR-0022 demoted this file from authoritative source to TTL cache, with scan-based discovery (`FindActiveSession()`) as the source of truth. However, the fundamental model remains one-active-session-per-repo.
 
 This creates a conflict when multiple Claude Code instances work on the same project simultaneously. CC provides a stable `session_id` per conversation, delivered via stdin JSON in every hook invocation (see `StdinPayload.SessionID` in `internal/hook/env.go`). This session ID is the CC conversation identifier -- it persists across resume, compact, and clear events within the same CC conversation.
 
 The current resolution chain for "which Knossos session am I in?" is:
 
-1. Scan `.claude/sessions/` for `status: ACTIVE` directories
+1. Scan `.sos/sessions/` for `status: ACTIVE` directories
 2. Expect exactly 0 or 1 results
 3. If 2+ results, error ("multiple active sessions found")
 
@@ -192,7 +192,7 @@ Implement a CC-to-Knossos session mapping system. Deprecate `.current-session`.
 
 #### Architecture
 
-**Storage**: Directory-based mapping at `.claude/sessions/.cc-map/{cc-session-id}`. Each file contains the Knossos session ID as its sole content (plaintext, no JSON wrapper). Directory-based storage avoids the single-file contention that `.current-session` suffered from.
+**Storage**: Directory-based mapping at `.sos/sessions/.cc-map/{cc-session-id}`. Each file contains the Knossos session ID as its sole content (plaintext, no JSON wrapper). Directory-based storage avoids the single-file contention that `.current-session` suffered from.
 
 **Resolution function**: `ResolveSession(ccSessionID string, explicitID string) (string, error)` with the following precedence:
 
@@ -261,7 +261,7 @@ Priority 3 is the existing `FindActiveSession()` behavior from ADR-0022, preserv
 **Neutral**
 
 1. No schema changes to `SESSION_CONTEXT.md`. Session state, FSM transitions, and serialization are unchanged.
-2. The `.cc-map/` directory lives inside `.claude/sessions/`, which is already gitignored. No git implications.
+2. The `.cc-map/` directory lives inside `.sos/sessions/`, which is already gitignored. No git implications.
 3. Tests that set up `.current-session` will be migrated to use `.cc-map/` instead. The test surface area is moderate (approximately 10 test files reference `.current-session`).
 
 ---

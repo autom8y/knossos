@@ -248,7 +248,7 @@ Hotfix sessions (urgent production fixes) always have a GRAY ceiling:
 The sails artifact is generated at:
 
 ```
-.claude/sessions/{session-id}/WHITE_SAILS.yaml
+.sos/sessions/{session-id}/WHITE_SAILS.yaml
 ```
 
 ### Example: WHITE Sails
@@ -265,19 +265,19 @@ type: "standard"
 proofs:
   tests:
     status: "PASS"
-    evidence_path: ".claude/sessions/session-20260105-143000-abc12345/test-output.log"
+    evidence_path: ".sos/sessions/session-20260105-143000-abc12345/test-output.log"
     summary: "47 tests passed, 0 failed, 0 skipped"
     exit_code: 0
     timestamp: "2026-01-05T15:28:00Z"
   build:
     status: "PASS"
-    evidence_path: ".claude/sessions/session-20260105-143000-abc12345/build-output.log"
+    evidence_path: ".sos/sessions/session-20260105-143000-abc12345/build-output.log"
     summary: "go build succeeded"
     exit_code: 0
     timestamp: "2026-01-05T15:29:00Z"
   lint:
     status: "PASS"
-    evidence_path: ".claude/sessions/session-20260105-143000-abc12345/lint-output.log"
+    evidence_path: ".sos/sessions/session-20260105-143000-abc12345/lint-output.log"
     summary: "golangci-lint clean"
     exit_code: 0
     timestamp: "2026-01-05T15:29:30Z"

@@ -28,7 +28,7 @@ The Ariadne CLI enforces a single active session per terminal to prevent state c
    }
    ```
 
-2. **Current session tracking** (`.claude/sessions/.current-session`):
+2. **Current session tracking** (`.sos/sessions/.current-session`):
    - Stores the active session ID for the terminal
    - Checked before any session creation
 
@@ -83,7 +83,7 @@ Sessions created with `--seed` follow this lifecycle:
 │  ─────────────────          ──────────────────       ────────────────       │
 │                                                                             │
 │  git worktree add           ari session create       cp -r worktree/        │
-│    /tmp/roster-seed-xxx       "Initiative"             .claude/sessions/    │
+│    /tmp/roster-seed-xxx       "Initiative"             .sos/sessions/    │
 │    --detach                                            session-xxx/         │
 │                             ari session park         → main/.claude/        │
 │  cd /tmp/roster-seed-xxx      "Ready for parallel"     sessions/            │
@@ -102,7 +102,7 @@ Sessions created with `--seed` follow this lifecycle:
    git worktree add "$WORKTREE_PATH" --detach HEAD
    ```
 
-2. **Create session in worktree** (worktree has its own `.claude/sessions/`):
+2. **Create session in worktree** (worktree has its own `.sos/sessions/`):
    ```bash
    cd "$WORKTREE_PATH"
    ari session create "$INITIATIVE" --complexity="$COMPLEXITY"
@@ -116,8 +116,8 @@ Sessions created with `--seed` follow this lifecycle:
 
 4. **Copy session to main branch's sessions directory**:
    ```bash
-   cp -r "$WORKTREE_PATH/.claude/sessions/$SESSION_ID" \
-         "$MAIN_REPO/.claude/sessions/"
+   cp -r "$WORKTREE_PATH/.sos/sessions/$SESSION_ID" \
+         "$MAIN_REPO/.sos/sessions/"
    ```
 
 5. **Cleanup worktree**:
@@ -126,7 +126,7 @@ Sessions created with `--seed` follow this lifecycle:
    git worktree remove "$WORKTREE_PATH" --force
    ```
 
-**Result**: Session exists in main branch's `.claude/sessions/` with status `PARKED`, ready for `/resume` in any terminal.
+**Result**: Session exists in main branch's `.sos/sessions/` with status `PARKED`, ready for `/resume` in any terminal.
 
 ### 3. CLI Contract: `--seed` Flag
 
@@ -151,7 +151,7 @@ ari session create "Initiative Name" \
   "session_id": "session-20260105-100000-aaaa1111",
   "status": "PARKED",
   "seeded": true,
-  "seeded_to": "/Users/tom/Code/roster/.claude/sessions/session-20260105-100000-aaaa1111",
+  "seeded_to": "/Users/tom/Code/roster/.sos/sessions/session-20260105-100000-aaaa1111",
   "park_reason": "Seeded for parallel execution"
 }
 ```
@@ -178,7 +178,7 @@ fi
 **Audit Schema** (`.claude/audit/fail-open.jsonl`):
 
 ```json
-{"timestamp": "2026-01-05T10:00:00Z", "hook": "session-write-guard.sh", "operation": "Edit", "error": "ari binary not found", "context": {"file_path": ".claude/sessions/session-xxx/SESSION_CONTEXT.md", "tool_name": "Edit"}}
+{"timestamp": "2026-01-05T10:00:00Z", "hook": "session-write-guard.sh", "operation": "Edit", "error": "ari binary not found", "context": {"file_path": ".sos/sessions/session-xxx/SESSION_CONTEXT.md", "tool_name": "Edit"}}
 {"timestamp": "2026-01-05T10:00:01Z", "hook": "orchestrator-router.sh", "operation": "TaskComplete", "error": "ari session status failed: exit 1", "context": {"session_id": "session-xxx", "exit_code": 1}}
 ```
 
@@ -359,5 +359,5 @@ On macOS arm64, CGO-enabled binaries can encounter dyld issues related to LC_UUI
 - Session creation logic: `ariadne/internal/cmd/session/create.go`
 - Write guard hook: `.claude/hooks/session-guards/session-write-guard.sh`
 - Build configuration: `ariadne/justfile`
-- Current session tracking: `.claude/sessions/.current-session`
+- Current session tracking: `.sos/sessions/.current-session`
 - Worktree skill: `.claude/skills/session-lifecycle/worktree-ref.md`

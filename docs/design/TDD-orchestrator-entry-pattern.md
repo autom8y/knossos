@@ -291,7 +291,7 @@ if [[ "$command" == "start" ]] && ! has_session; then
         session_id=$(echo "$result" | jq -r '.session_id')
 
         # Log as hook-triggered creation
-        local audit_log="$PROJECT_DIR/.claude/sessions/.audit/session-mutations.log"
+        local audit_log="$PROJECT_DIR/.sos/sessions/.audit/session-mutations.log"
         mkdir -p "$(dirname "$audit_log")"
         echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) | $session_id | CREATE | HOOK | start-preflight.sh" >> "$audit_log"
 

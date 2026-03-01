@@ -113,7 +113,7 @@ C. Engage external security consultant (COST)
 
 **Recovery**:
 1. Check all possible storage locations:
-   - `.claude/sessions/{session-id}/`
+   - `.sos/sessions/{session-id}/`
    - `docs/handoffs/`
    - Source team's working directory
 2. Regenerate from session context if available
@@ -459,10 +459,10 @@ Full security pack not invoked due to embedded specialist.
 1. **Assess Current State**
    ```bash
    # Check session context
-   cat .claude/sessions/{session-id}/SESSION_CONTEXT.md
+   cat .sos/sessions/{session-id}/SESSION_CONTEXT.md
 
    # Find any handoff artifacts
-   find .claude/sessions/{session-id} -name "HANDOFF-*.md"
+   find .sos/sessions/{session-id} -name "HANDOFF-*.md"
 
    # Check git status for uncommitted work
    git status

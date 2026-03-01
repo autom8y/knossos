@@ -151,14 +151,14 @@ The write guard hook checks for a valid `.moirai-lock` file and allows writes wh
 - Acquire: `ari session lock --agent moirai`
 - Release: `ari session unlock --agent moirai`
 
-Lock file: `.claude/sessions/${SESSION_ID}/.moirai-lock`
+Lock file: `.sos/sessions/${SESSION_ID}/.moirai-lock`
 Stale threshold: 300 seconds. **Always release lock, even on error.**
 
 ---
 
 ## Audit Protocol
 
-Log path: `.claude/sessions/.audit/session-mutations.log`
+Log path: `.sos/sessions/.audit/session-mutations.log`
 Format: `TIMESTAMP | SESSION_ID | OPERATION | SOURCE | DETAILS | STATUS | FATE | reasoning="..."`
 
 **Every mutation logged.** No silent mutations, even with `--emergency`.
@@ -205,11 +205,11 @@ Resume is opportunistic -- always validate current state before mutating.
 
 | Resource | Path |
 |----------|------|
-| Session Context | `.claude/sessions/{session-id}/SESSION_CONTEXT.md` |
-| Default Sprint | `.claude/sessions/{session-id}/SPRINT_CONTEXT.md` |
-| Named Sprint | `.claude/sessions/{session-id}/sprints/{sprint-id}/SPRINT_CONTEXT.md` |
-| Audit Log | `.claude/sessions/.audit/session-mutations.log` |
-| Moirai Lock | `.claude/sessions/{session-id}/.moirai-lock` |
+| Session Context | `.sos/sessions/{session-id}/SESSION_CONTEXT.md` |
+| Default Sprint | `.sos/sessions/{session-id}/SPRINT_CONTEXT.md` |
+| Named Sprint | `.sos/sessions/{session-id}/sprints/{sprint-id}/SPRINT_CONTEXT.md` |
+| Audit Log | `.sos/sessions/.audit/session-mutations.log` |
+| Moirai Lock | `.sos/sessions/{session-id}/.moirai-lock` |
 
 ## Exousia
 

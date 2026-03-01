@@ -304,8 +304,8 @@ Manual verification of HANDOFF schema compliance. Future work should include sch
 | Artifact | Path |
 |----------|------|
 | Implementation Blueprint | `rites/IMPLEMENTATION_BLUEPRINT.md` |
-| Sprint Context | `.claude/sessions/session-20260102-201916-f6254ce1/SPRINT_CONTEXT.md` |
-| Session Context | `.claude/sessions/session-20260102-201916-f6254ce1/SESSION_CONTEXT.md` |
+| Sprint Context | `.sos/sessions/session-20260102-201916-f6254ce1/SPRINT_CONTEXT.md` |
+| Session Context | `.sos/sessions/session-20260102-201916-f6254ce1/SESSION_CONTEXT.md` |
 
 ### Team TODO Files
 | File | Path |

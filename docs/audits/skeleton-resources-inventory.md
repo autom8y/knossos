@@ -12,7 +12,7 @@ final destinations in roster. For the correct roster artifact architecture, see 
 
 After migration, the correct locations are:
 - User-level content: `roster/user-*/` syncs to `~/.claude/*/`
-- Team content: `roster/rites/{pack}/` syncs to `.claude/` (project-level)
+- Team content: `roster/.knossos/rites/{pack}/` syncs to `.claude/` (project-level)
 
 ---
 

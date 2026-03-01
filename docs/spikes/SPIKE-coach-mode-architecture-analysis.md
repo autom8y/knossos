@@ -110,7 +110,7 @@ The PRD-orchestrator-entry-pattern statement "Coach mode is legacy tech debt - H
 
 | Artifact | Location |
 |----------|----------|
-| Gap Analysis | `.claude/sessions/session-20260102-022932-a8a79927/artifacts/spike-coach-mode-analysis.md` |
+| Gap Analysis | `.sos/sessions/session-20260102-022932-a8a79927/artifacts/spike-coach-mode-analysis.md` |
 | Context Design | `docs/ecosystem/CONTEXT-DESIGN-orchestration-mode-consolidation.md` |
 | This Spike Report | `docs/spikes/SPIKE-coach-mode-architecture-analysis.md` |
 

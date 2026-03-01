@@ -664,7 +664,7 @@ cross_cutting:
         - thread_contract
       files:
         - .claude/agents/moirai.md
-        - .claude/sessions/.audit/session-mutations.log
+        - .sos/sessions/.audit/session-mutations.log
       validation_criteria: "Every Moirai mutation logged to audit trail with timestamp, operation, fate domain"
 
 golden_paths:

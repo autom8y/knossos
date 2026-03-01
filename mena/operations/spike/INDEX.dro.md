@@ -76,7 +76,7 @@ End your response with:
 🔭 explored · next: {hint}
 
 **Fork-context note**: This command may run without conversation history. To resolve the hint, read session state from disk:
-- Find active session: look for `status: "ACTIVE"` in `.claude/sessions/*/SESSION_CONTEXT.md`
+- Find active session: look for `status: "ACTIVE"` in `.sos/sessions/*/SESSION_CONTEXT.md`
 - No active session found → output `🔭 explored` without hint.
 
 Natural follow-on: `next: /consult` (to plan next steps based on findings) or `next: /start` (if the spike informed a new initiative).

@@ -90,7 +90,7 @@ grep "coach-mode" .claude/hooks/base_hooks.yaml  # Still references old name
 
 ### Audit Log Verification (omc_005, omc_006)
 
-Confirmed events logged to `.claude/sessions/session-20260102-022932-a8a79927/orchestration-audit.jsonl`:
+Confirmed events logged to `.sos/sessions/session-20260102-022932-a8a79927/orchestration-audit.jsonl`:
 
 ```json
 {"timestamp":"2026-01-02T12:59:14Z","event":"DELEGATION_WARNING","hook":"delegation-check.sh","details":{"tool":"Edit","file_path":"/Users/tomtenuta/Code/roster/src/test.ts","mode":"orchestrated"},"outcome":"CONTINUED"}

@@ -61,6 +61,6 @@ Request Claude Code support a "reload configuration" signal so materialization c
 
 ## Related
 
-- D2 lock audit: Lock file in `.claude/sessions/.locks/` also modified during materialization
+- D2 lock audit: Lock file in `.sos/sessions/.locks/` also modified during materialization
 - C3 verification: Could not complete gate verification due to this bug
 - ADR-0022: Session model should account for "no self-modification during active session" constraint

@@ -17,7 +17,7 @@ This document explains:
 - Manual coordination required for updates
 
 ### After (New Model)
-- `.claude/` is generated from `templates/` and `rites/{name}/`
+- `.claude/` is generated from `templates/` and `.knossos/rites/{name}/`
 - `.claude/` is gitignored (not tracked)
 - Single `ari sync materialize` command regenerates everything
 - Idempotent and safe to run multiple times
@@ -28,7 +28,7 @@ This document explains:
 ┌───────────────────────────────────────────────────────────────┐
 │                        TEMPLATE SOURCES                        │
 ├───────────────────────────────────────────────────────────────┤
-│  rites/{active}/      │  rites/shared/     │  templates/      │
+│  .knossos/rites/{active}/      │  rites/shared/     │  templates/      │
 │  ├── agents/          │  └── skills/       │  └── hooks/      │
 │  ├── skills/          │                    │  (future)        │
 │  └── manifest.yaml    │                    │                  │
@@ -72,10 +72,10 @@ ari sync materialize --force
 
 The materialize command:
 
-1. **Reads** the rite manifest from `rites/{name}/manifest.yaml`
-2. **Copies** agent files from `rites/{name}/agents/` → `.claude/agents/`
+1. **Reads** the rite manifest from `.knossos/rites/{name}/manifest.yaml`
+2. **Copies** agent files from `.knossos/rites/{name}/agents/` → `.claude/agents/`
 3. **Merges** skills from:
-   - `rites/{name}/skills/`
+   - `.knossos/rites/{name}/skills/`
    - `rites/shared/skills/` (from dependencies)
    - Into `.claude/skills/`
 4. **Preserves** hooks in `.claude/hooks/` (until templates/hooks exists)
@@ -193,7 +193,7 @@ ari sync materialize --rite ecosystem
 
 **Cause**: Rite manifest may not list all agents/skills.
 
-**Solution**: Check `rites/{name}/manifest.yaml` and ensure all agents are listed.
+**Solution**: Check `.knossos/rites/{name}/manifest.yaml` and ensure all agents are listed.
 
 ### Issue: CLAUDE.md sections missing
 
@@ -205,7 +205,7 @@ ari sync materialize --rite ecosystem
 
 **Cause**: The rite directory or manifest.yaml is missing.
 
-**Solution**: Verify `rites/{name}/manifest.yaml` exists and is valid YAML.
+**Solution**: Verify `.knossos/rites/{name}/manifest.yaml` exists and is valid YAML.
 
 ## References
 

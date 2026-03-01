@@ -383,7 +383,7 @@ create_sprint name="Sprint Name" [depends_on=sprint-id]
 
 **File Creation**:
 ```
-.claude/sessions/{session-id}/sprints/{sprint-id}/SPRINT_CONTEXT.md
+.sos/sessions/{session-id}/sprints/{sprint-id}/SPRINT_CONTEXT.md
 ```
 
 **Sprint Context Initial State**:
@@ -440,7 +440,7 @@ Validation:
 3. Glob for existing sprint names -> no duplicate (pass)
 
 Create:
-Write .claude/sessions/{session-id}/sprints/sprint-api-impl-20260107/SPRINT_CONTEXT.md
+Write .sos/sessions/{session-id}/sprints/sprint-api-impl-20260107/SPRINT_CONTEXT.md
 
 Log:
 2026-01-07T10:00:00Z | session-abc | create_sprint | moirai | name="API Implementation" | SUCCESS | clotho
@@ -1019,7 +1019,7 @@ wrap_session invoked
     "session_state": "ARCHIVED",
     "archived_at": "2026-01-07T14:00:00Z",
     "sails_color": "WHITE",
-    "sails_path": ".claude/sessions/session-abc123/WHITE_SAILS.yaml"
+    "sails_path": ".sos/sessions/session-abc123/WHITE_SAILS.yaml"
   },
   "changes": {
     "session_state": "ACTIVE -> ARCHIVED",
@@ -1073,7 +1073,7 @@ generate_sails [--skip-proofs] [--modifier=TYPE:JUSTIFICATION]
 
 **Output Location**:
 ```
-.claude/sessions/{session-id}/WHITE_SAILS.yaml
+.sos/sessions/{session-id}/WHITE_SAILS.yaml
 ```
 
 **CLI Command**: `ari sails check`
@@ -1111,7 +1111,7 @@ generate_sails [--skip-proofs] [--modifier=TYPE:JUSTIFICATION]
   "message": "White Sails generated",
   "reasoning": "All proofs collected, confidence computed",
   "fate": "atropos",
-  "sails_path": ".claude/sessions/session-abc123/WHITE_SAILS.yaml",
+  "sails_path": ".sos/sessions/session-abc123/WHITE_SAILS.yaml",
   "color": "WHITE",
   "computed_base": "WHITE",
   "proofs_collected": ["tests", "build", "lint"],
@@ -1174,10 +1174,10 @@ delete_sprint sprint_id [--archive]
   "reasoning": "Sprint completed, preserved in archive for reference",
   "fate": "atropos",
   "state_before": {
-    "sprint_path": ".claude/sessions/session-abc/sprints/{sprint_id}/"
+    "sprint_path": ".sos/sessions/session-abc/sprints/{sprint_id}/"
   },
   "state_after": {
-    "sprint_path": ".claude/sessions/session-abc/archive/{sprint_id}/"
+    "sprint_path": ".sos/sessions/session-abc/archive/{sprint_id}/"
   },
   "changes": {
     "location": "sprints/ -> archive/"

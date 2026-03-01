@@ -74,7 +74,7 @@ Per comprehensive interview, the following decisions are locked:
 
 | Dimension | Decision | Rationale |
 |-----------|----------|-----------|
-| Location | `.claude/sessions/{id}/WHITE_SAILS.yaml` | Co-located with SESSION_CONTEXT.md |
+| Location | `.sos/sessions/{id}/WHITE_SAILS.yaml` | Co-located with SESSION_CONTEXT.md |
 | Thread Integration | Terminal event + artifact | Record in events.jsonl + persist as file |
 | Interruption Handling | Atomic -- no sails = session stays active | Cannot wrap without sails generation |
 | Schema Format | YAML + JSON Schema validation | Human readable, machine validated |
@@ -256,19 +256,19 @@ type: "standard"
 proofs:
   tests:
     status: "PASS"
-    evidence_path: ".claude/sessions/session-20260105-143000-abc12345/test-output.log"
+    evidence_path: ".sos/sessions/session-20260105-143000-abc12345/test-output.log"
     summary: "47 tests passed, 0 failed, 0 skipped"
     exit_code: 0
     timestamp: "2026-01-05T15:28:00Z"
   build:
     status: "PASS"
-    evidence_path: ".claude/sessions/session-20260105-143000-abc12345/build-output.log"
+    evidence_path: ".sos/sessions/session-20260105-143000-abc12345/build-output.log"
     summary: "go build succeeded"
     exit_code: 0
     timestamp: "2026-01-05T15:29:00Z"
   lint:
     status: "PASS"
-    evidence_path: ".claude/sessions/session-20260105-143000-abc12345/lint-output.log"
+    evidence_path: ".sos/sessions/session-20260105-143000-abc12345/lint-output.log"
     summary: "golangci-lint clean"
     exit_code: 0
     timestamp: "2026-01-05T15:29:30Z"
@@ -292,12 +292,12 @@ type: "standard"
 proofs:
   tests:
     status: "PASS"
-    evidence_path: ".claude/sessions/session-20260105-143000-def67890/test-output.log"
+    evidence_path: ".sos/sessions/session-20260105-143000-def67890/test-output.log"
     summary: "89 tests passed"
     exit_code: 0
   build:
     status: "PASS"
-    evidence_path: ".claude/sessions/session-20260105-143000-def67890/build-output.log"
+    evidence_path: ".sos/sessions/session-20260105-143000-def67890/build-output.log"
     summary: "docker build succeeded"
     exit_code: 0
   lint:
@@ -500,7 +500,7 @@ generate_sails [--skip-proofs] [--modifier=TYPE:JUSTIFICATION]
 {
   "success": true,
   "operation": "generate_sails",
-  "sails_path": ".claude/sessions/{session-id}/WHITE_SAILS.yaml",
+  "sails_path": ".sos/sessions/{session-id}/WHITE_SAILS.yaml",
   "color": "WHITE",
   "computed_base": "WHITE",
   "proofs_collected": ["tests", "build", "lint"],
@@ -683,7 +683,7 @@ RULE: Data/log files use lowercase with extension
 RULE: Index files use ALL_CAPS (e.g., INDEX.md)
 
 Session Directory Structure:
-.claude/sessions/{session-id}/
+.sos/sessions/{session-id}/
     SESSION_CONTEXT.md     # Policy: session state
     SPRINT_CONTEXT.md      # Policy: sprint state
     WHITE_SAILS.yaml       # Policy: confidence signal

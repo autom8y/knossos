@@ -92,7 +92,7 @@ if len(violations) > 0 {
 ari sails check
 
 # Check specific session
-ari sails check .claude/sessions/session-20260106-120000-abc12345
+ari sails check .sos/sessions/session-20260106-120000-abc12345
 
 # Quiet mode (exit code only)
 ari sails check --quiet
@@ -106,7 +106,7 @@ FAIL: Quality gate failed
 Color:        GRAY
 Computed:     WHITE (before modifiers)
 Session:      session-20260106-120000-abc12345
-File:         .claude/sessions/.../WHITE_SAILS.yaml
+File:         .sos/sessions/.../WHITE_SAILS.yaml
 
 Reasons:
   - sails color is WHITE: high confidence, ship without QA

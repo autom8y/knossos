@@ -202,7 +202,7 @@ verification:
     command: "just validate-sessions"
   - description: "New sessions use v2.0 schema"
     expected: "schema_version: 2.0 in new sessions"
-    command: "/start test-session && head -20 .claude/sessions/*/SESSION_CONTEXT.md"
+    command: "/start test-session && head -20 .sos/sessions/*/SESSION_CONTEXT.md"
   - description: "Hooks load without error"
     expected: "No bash errors on session start"
     manual: true

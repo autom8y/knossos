@@ -337,6 +337,6 @@ SESSION_CONTEXT.md observed sizes: up to 355 lines / 15.9KB — unbounded growth
 | `.claude/ACTIVE_RITE` | writeActiveRite | writeIfChanged |
 | `.claude/ACTIVE_WORKFLOW.yaml` | materializeWorkflow | writeIfChanged |
 | `.claude/sync/state.json` | trackState | writeIfChanged |
-| `.claude/sessions/*/SESSION_CONTEXT.md` | session commands | os.WriteFile (via Moirai) |
-| `.claude/sessions/*/.moirai-lock` | lock command | os.WriteFile |
-| `.claude/sessions/*/events.jsonl` | EventEmitter | append |
+| `.sos/sessions/*/SESSION_CONTEXT.md` | session commands | os.WriteFile (via Moirai) |
+| `.sos/sessions/*/.moirai-lock` | lock command | os.WriteFile |
+| `.sos/sessions/*/events.jsonl` | EventEmitter | append |

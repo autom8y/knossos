@@ -103,7 +103,7 @@ When invoked without arguments, `/consult` provides ecosystem overview:
 
 1. **Summarize Current State**
    - Active rite (from `.claude/ACTIVE_RITE`)
-   - Active session (from `.claude/sessions/`)
+   - Active session (from `.sos/sessions/`)
    - Current complexity level (if in session)
 
 2. **Display Rite Catalog**

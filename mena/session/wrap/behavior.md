@@ -41,7 +41,7 @@ Task(moirai, "wrap_session
 
 Session Context:
 - Session ID: {current session}
-- Session Path: .claude/sessions/{session-id}/SESSION_CONTEXT.md")
+- Session Path: .sos/sessions/{session-id}/SESSION_CONTEXT.md")
 ```
 
 **The Moirai (Atropos) will**:
@@ -88,7 +88,7 @@ Archival is performed by Ariadne (`ari session wrap`) as part of the wrap ceremo
 
 The session directory is moved from:
 ```
-.claude/sessions/{session_id}/ → .claude/.archive/sessions/{session_id}/
+.sos/sessions/{session_id}/ → .sos/archive/{session_id}/
 ```
 
 Note: Archival is handled by `ari` binary, not by the skill directly.
@@ -123,7 +123,7 @@ Display:
 
 - `/docs/sessions/SUMMARY-{session_id}.md` - Summary report
 - `/docs/sessions/INDEX.md` - Session index (if first wrap)
-- `.claude/.archive/sessions/{session_id}/` - Archived directory
+- `.sos/archive/{session_id}/` - Archived directory
 
 ### Files Modified
 
@@ -131,7 +131,7 @@ Display:
 
 ### Files Deleted/Moved
 
-- `.claude/sessions/{session_id}/` - Removed or moved to archive
+- `.sos/sessions/{session_id}/` - Removed or moved to archive
 
 ---
 

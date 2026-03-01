@@ -50,7 +50,7 @@ if len(args) > 0 {
 
 | Component | Session Required? | Reason |
 |-----------|------------------|--------|
-| WHITE_SAILS.yaml location | Yes | Lives in `.claude/sessions/{session-id}/` |
+| WHITE_SAILS.yaml location | Yes | Lives in `.sos/sessions/{session-id}/` |
 | Generator | Yes | Reads SESSION_CONTEXT.md, session ID is in schema |
 | CheckGateForCurrentSession | Yes | Reads `.current-session` to find active session |
 | CheckGate (with path) | No | Can validate any WHITE_SAILS.yaml file |
