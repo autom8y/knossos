@@ -25,6 +25,7 @@ import (
 	"github.com/autom8y/knossos/internal/cmd/rite"
 	"github.com/autom8y/knossos/internal/cmd/sails"
 	"github.com/autom8y/knossos/internal/cmd/session"
+	"github.com/autom8y/knossos/internal/cmd/status"
 	"github.com/autom8y/knossos/internal/cmd/sync"
 	"github.com/autom8y/knossos/internal/cmd/tribute"
 	"github.com/autom8y/knossos/internal/cmd/validate"
@@ -139,6 +140,7 @@ func init() {
 	rootCmd.AddCommand(initcmd.NewInitCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
 	rootCmd.AddCommand(provenance.NewProvenanceCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
 	rootCmd.AddCommand(lint.NewLintCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
+	rootCmd.AddCommand(status.NewStatusCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
 	rootCmd.AddCommand(versionCmd)
 }
 
