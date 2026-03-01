@@ -4,7 +4,7 @@
 ## Quick Start
 
 {{- if .ActiveRite }}
-This project uses a {{ .AgentCount }}-agent workflow ({{ .ActiveRite }}):
+{{ .AgentCount }}-agent workflow ({{ .ActiveRite }}):
 
 {{include "partials/agent-table.md.tpl"}}
 

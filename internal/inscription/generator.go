@@ -368,7 +368,6 @@ func (g *Generator) generateQuickStartContent() (string, error) {
 	sb.WriteString("## Quick Start\n\n")
 
 	if g.Context.ActiveRite != "" && g.Context.AgentCount > 0 {
-		sb.WriteString("This project uses a ")
 		sb.WriteString(itoa(g.Context.AgentCount))
 		sb.WriteString("-agent workflow (")
 		sb.WriteString(g.Context.ActiveRite)
@@ -390,7 +389,7 @@ func (g *Generator) generateQuickStartContent() (string, error) {
 		}
 	} else {
 		// Cross-cutting mode (no rite): show cross-rite agents only
-		sb.WriteString("This project uses a multi-agent workflow:\n\n")
+		sb.WriteString("Multi-agent workflow:\n\n")
 		if len(g.Context.CrossRiteAgents) > 0 {
 			sb.WriteString(g.loadCrossRiteAgentTable())
 			sb.WriteString("\n\n")
@@ -495,8 +494,8 @@ func (g *Generator) getDefaultExecutionModeContent() string {
 
 Three operating modes:
 
-| Mode | Session | Rite | Main Agent Behavior |
-|------|---------|------|---------------------|
+| Mode | Session | Rite | Behavior |
+|------|---------|------|----------|
 | **Native** | No | - | Direct execution, no tracking |
 | **Cross-Cutting** | Yes | No | Direct execution + session tracking |
 | **Orchestrated** | Yes | Yes (ACTIVE) | Pythia coordinates; delegate via Task tool |
@@ -507,13 +506,8 @@ Use ` + "`/go`" + ` to start any session. Use ` + "`/consult`" + ` for mode sele
 func (g *Generator) getDefaultAgentRoutingContent() string {
 	return `## Agent Routing
 
-**Pythia** coordinates each rite's workflow — routing tasks to specialists, verifying phase gates, and managing handoffs. In orchestrated sessions, the main thread delegates to specialists via Task tool.
-
-Every agent defines its authority via **Exousia** (jurisdiction contract):
-- **You Decide**: Actions within the agent's autonomous authority
-- **You Escalate**: Situations requiring Pythia or user input
-- **You Do NOT Decide**: Boundaries the agent must never cross
-
+Delegate to specialists via Task tool. Pythia coordinates phases and handoffs.
+Agents cannot spawn agents — only the main thread has Task tool access.
 Without a session, execute directly or use ` + "`/task`" + `. Routing guidance: ` + "`/consult`" + `.`
 }
 
@@ -528,18 +522,15 @@ func (g *Generator) getDefaultCommandsContent() string {
 | Hook | **Hook** | Auto-fires on lifecycle events | ` + "`.claude/settings.json`" + ` |
 | CLAUDE.md | **Inscription** | Always in context | ` + "`knossos/templates/`" + ` |
 
-Dromena have side effects and are user-controlled. Legomena are reference knowledge Claude loads autonomously.
-Agents cannot spawn other agents — only the main thread has Task tool access.
-
-Full mapping: ` + "`lexicon`" + ` skill. Dromena list: ` + "`.claude/commands/`" + `. Legomena list: ` + "`.claude/skills/`" + `.`
+Agents cannot spawn other agents — only the main thread has Task tool access.`
 }
 
 func (g *Generator) getDefaultPlatformInfrastructureContent() string {
 	return `## Platform
 
-**Entry**: ` + "`/go`" + ` — cold-start dispatcher. Detects session state, resumes parked work, or routes new tasks.
+**Entry**: ` + "`/go`" + ` — detects session state, resumes parked work, or routes new tasks.
 
-**Sessions**: Managed by Moirai agent via ` + "`/start`" + `, ` + "`/park`" + `, ` + "`/continue`" + `, ` + "`/wrap`" + `. Moirai loads Fate skills (Clotho/Lachesis/Atropos) for progressive context. Mutate ` + "`*_CONTEXT.md`" + ` only via ` + "`Task(moirai, \"...\")`" + `.
+**Sessions**: ` + "`/start`" + `, ` + "`/park`" + `, ` + "`/continue`" + `, ` + "`/wrap`" + `. Mutate ` + "`*_CONTEXT.md`" + ` only via ` + "`Task(moirai, \"...\")`" + `.
 
 **Hooks**: Auto-inject session context on start; autopark on stop. CLI reference: ` + "`ari --help`" + `.`
 }

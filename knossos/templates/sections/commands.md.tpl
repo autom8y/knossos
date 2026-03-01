@@ -11,8 +11,5 @@
 | Hook | **Hook** | Auto-fires on lifecycle events | `.claude/settings.json` |
 | CLAUDE.md | **Inscription** | Always in context | `knossos/templates/` |
 
-Dromena have side effects and are user-controlled. Legomena are reference knowledge Claude loads autonomously.
 Agents cannot spawn other agents — only the main thread has Task tool access.
-
-Full mapping: `lexicon` skill. Dromena list: `.claude/commands/`. Legomena list: `.claude/skills/`.
 <!-- KNOSSOS:END commands -->

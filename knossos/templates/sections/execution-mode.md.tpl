@@ -5,8 +5,8 @@
 
 Three operating modes:
 
-| Mode | Session | Rite | Main Agent Behavior |
-|------|---------|------|---------------------|
+| Mode | Session | Rite | Behavior |
+|------|---------|------|----------|
 | **Native** | No | - | Direct execution, no tracking |
 | **Cross-Cutting** | Yes | No | Direct execution + session tracking |
 | **Orchestrated** | Yes | Yes (ACTIVE) | Pythia coordinates; delegate via Task tool |
