@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/autom8y/knossos/internal/artifact"
 	"github.com/autom8y/knossos/internal/errors"
 	"github.com/autom8y/knossos/internal/session"
 	"gopkg.in/yaml.v3"
@@ -98,6 +99,9 @@ func (e *Extractor) ExtractArtifacts(events []EventData) []Artifact {
 		if artifact.Type == "" {
 			artifact.Type = inferArtifactType(artifact.Path)
 		}
+
+		// Resolve graduated .ledge/ path for non-code artifact types
+		artifact.Path = graduatedArtifactPath(artifact.Type, artifact.Path)
 
 		artifacts = append(artifacts, artifact)
 	}
@@ -349,6 +353,43 @@ func parseTimestamp(ts string) time.Time {
 	}
 
 	return time.Time{}
+}
+
+// graduatedArtifactPath resolves a tribute artifact path to its .ledge/ location.
+// Maps the tribute artifact type string to an artifact.ArtifactType for ledge resolution.
+// Returns the original path for types that stay in the source tree.
+func graduatedArtifactPath(artifactType string, path string) string {
+	at := tributeTypeToArtifactType(artifactType)
+	category := artifact.LedgeCategoryForType(at)
+	if category == "" {
+		return path
+	}
+	filename := filepath.Base(path)
+	return filepath.Join(".ledge", category, filename)
+}
+
+// tributeTypeToArtifactType maps tribute type strings to artifact.ArtifactType.
+func tributeTypeToArtifactType(t string) artifact.ArtifactType {
+	switch strings.ToLower(t) {
+	case "prd":
+		return artifact.TypePRD
+	case "tdd":
+		return artifact.TypeTDD
+	case "adr":
+		return artifact.TypeADR
+	case "test-plan":
+		return artifact.TypeTestPlan
+	case "runbook":
+		return artifact.TypeRunbook
+	case "review":
+		return artifact.TypeReview
+	case "spike":
+		return artifact.TypeSpike
+	case "code", "tests":
+		return artifact.TypeCode
+	default:
+		return artifact.TypeCode // unknown types stay in source tree
+	}
 }
 
 // inferArtifactType infers artifact type from file path.

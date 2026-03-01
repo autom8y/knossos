@@ -175,8 +175,8 @@ func TestAggregator_AggregateSession_UpdateExisting(t *testing.T) {
 	if len(projectReg.Artifacts) != 1 {
 		t.Fatalf("Expected 1 artifact (not duplicated), got %d", len(projectReg.Artifacts))
 	}
-	if projectReg.Artifacts[0].Path != "docs/design/TDD-update-v2.md" {
-		t.Errorf("Expected updated path, got %s", projectReg.Artifacts[0].Path)
+	if projectReg.Artifacts[0].Path != ".ledge/specs/TDD-update-v2.md" {
+		t.Errorf("Expected graduated path .ledge/specs/TDD-update-v2.md, got %s", projectReg.Artifacts[0].Path)
 	}
 	if projectReg.Artifacts[0].Validated != true {
 		t.Errorf("Expected validated=true, got %v", projectReg.Artifacts[0].Validated)
@@ -385,5 +385,101 @@ func TestAggregator_AggregateAll_IgnoresNonSessionDirs(t *testing.T) {
 
 	if len(projectReg.Artifacts) != 1 {
 		t.Fatalf("Expected 1 artifact (ignoring non-session dirs), got %d", len(projectReg.Artifacts))
+	}
+}
+
+func TestAggregator_AggregateSession_GraduatesPaths(t *testing.T) {
+	tmpDir := t.TempDir()
+	registry := NewRegistry(tmpDir)
+	aggregator := NewAggregator(registry)
+
+	sessionID := "session-20260302-100000-grad1234"
+
+	// Register artifacts of different types
+	entries := []Entry{
+		{
+			ArtifactID: "ADR-auth", ArtifactType: TypeADR,
+			Path: ".sos/sessions/" + sessionID + "/ADR-auth.md",
+			Phase: PhaseDesign, Specialist: "architect", SessionID: sessionID,
+			RegisteredAt: time.Now().UTC(), Validated: true,
+		},
+		{
+			ArtifactID: "PRD-billing", ArtifactType: TypePRD,
+			Path: "docs/requirements/PRD-billing.md",
+			Phase: PhaseRequirements, Specialist: "product-owner", SessionID: sessionID,
+			RegisteredAt: time.Now().UTC(), Validated: true,
+		},
+		{
+			ArtifactID: "review-auth", ArtifactType: TypeReview,
+			Path: ".sos/sessions/" + sessionID + "/review-auth.md",
+			Phase: PhaseValidation, Specialist: "audit-lead", SessionID: sessionID,
+			RegisteredAt: time.Now().UTC(), Validated: true,
+		},
+		{
+			ArtifactID: "code-handler", ArtifactType: TypeCode,
+			Path: "internal/auth/handler.go",
+			Phase: PhaseImplementation, Specialist: "developer", SessionID: sessionID,
+			RegisteredAt: time.Now().UTC(), Validated: true,
+		},
+		{
+			ArtifactID: "spike-caching", ArtifactType: TypeSpike,
+			Path: ".sos/sessions/" + sessionID + "/spike-caching.md",
+			Phase: PhaseDesign, Specialist: "architect", SessionID: sessionID,
+			RegisteredAt: time.Now().UTC(), Validated: true,
+		},
+	}
+
+	for _, entry := range entries {
+		if err := registry.Register(sessionID, entry); err != nil {
+			t.Fatalf("Failed to register %s: %v", entry.ArtifactID, err)
+		}
+	}
+
+	// Verify session registry has original paths (not graduated)
+	sessionReg, err := registry.LoadSessionRegistry(sessionID)
+	if err != nil {
+		t.Fatalf("Failed to load session registry: %v", err)
+	}
+	for _, a := range sessionReg.Artifacts {
+		if a.ArtifactType != TypeCode && a.Path != entries[0].Path && a.ArtifactType == TypeADR {
+			// Session registry should have original path
+			if a.Path != ".sos/sessions/"+sessionID+"/ADR-auth.md" {
+				t.Errorf("Session registry should have original path, got %s", a.Path)
+			}
+		}
+	}
+
+	// Aggregate (graduation point)
+	if err := aggregator.AggregateSession(sessionID); err != nil {
+		t.Fatalf("Failed to aggregate session: %v", err)
+	}
+
+	projectReg, err := registry.LoadProjectRegistry()
+	if err != nil {
+		t.Fatalf("Failed to load project registry: %v", err)
+	}
+
+	if len(projectReg.Artifacts) != 5 {
+		t.Fatalf("Expected 5 artifacts, got %d", len(projectReg.Artifacts))
+	}
+
+	// Verify graduated paths
+	pathMap := make(map[string]string) // artifactID -> path
+	for _, a := range projectReg.Artifacts {
+		pathMap[a.ArtifactID] = a.Path
+	}
+
+	expectations := map[string]string{
+		"ADR-auth":      ".ledge/decisions/ADR-auth.md",
+		"PRD-billing":   ".ledge/specs/PRD-billing.md",
+		"review-auth":   ".ledge/reviews/review-auth.md",
+		"code-handler":  "internal/auth/handler.go", // unchanged
+		"spike-caching": ".ledge/spikes/spike-caching.md",
+	}
+
+	for id, expected := range expectations {
+		if got := pathMap[id]; got != expected {
+			t.Errorf("Artifact %s: path = %q, want %q", id, got, expected)
+		}
 	}
 }

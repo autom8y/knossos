@@ -49,8 +49,9 @@ func (a *Aggregator) AggregateSession(sessionID string) error {
 		sessionsSet[entry.SessionID] = true
 	}
 
-	// Merge session artifacts
+	// Merge session artifacts, graduating paths to .ledge/ locations
 	for _, entry := range sessionReg.Artifacts {
+		entry.Path = a.registry.GraduatedPath(entry)
 		if idx, exists := existingMap[entry.ArtifactID]; exists {
 			// Update existing entry
 			projectReg.Artifacts[idx] = entry
@@ -111,6 +112,7 @@ func (a *Aggregator) AggregateAll() error {
 		}
 
 		for _, artifact := range sessionReg.Artifacts {
+			artifact.Path = a.registry.GraduatedPath(artifact)
 			projectReg.Artifacts = append(projectReg.Artifacts, artifact)
 			sessionsSet[sessionID] = true
 		}

@@ -309,3 +309,87 @@ func TestRegistry_SaveProjectRegistry_CreatesDirectory(t *testing.T) {
 		t.Error("Expected artifacts directory to be a directory")
 	}
 }
+
+func TestLedgeCategoryForType(t *testing.T) {
+	tests := []struct {
+		artifactType ArtifactType
+		want         string
+	}{
+		{TypeADR, "decisions"},
+		{TypePRD, "specs"},
+		{TypeTDD, "specs"},
+		{TypeTestPlan, "specs"},
+		{TypeRunbook, "specs"},
+		{TypeReview, "reviews"},
+		{TypeSpike, "spikes"},
+		{TypeCode, ""},
+		{ArtifactType("unknown"), ""},
+	}
+
+	for _, tt := range tests {
+		got := LedgeCategoryForType(tt.artifactType)
+		if got != tt.want {
+			t.Errorf("LedgeCategoryForType(%q) = %q, want %q", tt.artifactType, got, tt.want)
+		}
+	}
+}
+
+func TestRegistry_GraduatedPath(t *testing.T) {
+	registry := NewRegistry("/test/project")
+
+	tests := []struct {
+		name  string
+		entry Entry
+		want  string
+	}{
+		{
+			name:  "ADR goes to decisions",
+			entry: Entry{ArtifactType: TypeADR, Path: ".sos/sessions/session-123/ADR-001.md"},
+			want:  ".ledge/decisions/ADR-001.md",
+		},
+		{
+			name:  "PRD goes to specs",
+			entry: Entry{ArtifactType: TypePRD, Path: "docs/requirements/PRD-feature.md"},
+			want:  ".ledge/specs/PRD-feature.md",
+		},
+		{
+			name:  "TDD goes to specs",
+			entry: Entry{ArtifactType: TypeTDD, Path: "docs/design/TDD-feature.md"},
+			want:  ".ledge/specs/TDD-feature.md",
+		},
+		{
+			name:  "test-plan goes to specs",
+			entry: Entry{ArtifactType: TypeTestPlan, Path: "session/test-plan-auth.md"},
+			want:  ".ledge/specs/test-plan-auth.md",
+		},
+		{
+			name:  "runbook goes to specs",
+			entry: Entry{ArtifactType: TypeRunbook, Path: "docs/runbook-deploy.md"},
+			want:  ".ledge/specs/runbook-deploy.md",
+		},
+		{
+			name:  "review goes to reviews",
+			entry: Entry{ArtifactType: TypeReview, Path: "session/review-auth.md"},
+			want:  ".ledge/reviews/review-auth.md",
+		},
+		{
+			name:  "spike goes to spikes",
+			entry: Entry{ArtifactType: TypeSpike, Path: "session/spike-caching.md"},
+			want:  ".ledge/spikes/spike-caching.md",
+		},
+		{
+			name:  "code stays in source tree",
+			entry: Entry{ArtifactType: TypeCode, Path: "internal/auth/handler.go"},
+			want:  "internal/auth/handler.go",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := registry.GraduatedPath(tt.entry)
+			if got != tt.want {
+				t.Errorf("GraduatedPath() = %q, want %q", got, tt.want)
+			}
+		})
+	}
+}

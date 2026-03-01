@@ -23,6 +23,8 @@ const (
 	TypeTestPlan ArtifactType = "test-plan"
 	TypeCode     ArtifactType = "code"
 	TypeRunbook  ArtifactType = "runbook"
+	TypeReview   ArtifactType = "review"
+	TypeSpike    ArtifactType = "spike"
 )
 
 // Phase represents the workflow phase that produced the artifact.
@@ -78,6 +80,23 @@ type ProjectIndexes struct {
 	ByType       map[ArtifactType][]string   `yaml:"by_type" json:"by_type"`
 	BySpecialist map[string][]string         `yaml:"by_specialist" json:"by_specialist"`
 	BySession    map[string][]string         `yaml:"by_session" json:"by_session"`
+}
+
+// LedgeCategoryForType maps an artifact type to its .ledge/ subdirectory name.
+// Returns empty string for types that stay in the source tree (e.g., code).
+func LedgeCategoryForType(t ArtifactType) string {
+	switch t {
+	case TypeADR:
+		return "decisions"
+	case TypePRD, TypeTDD, TypeTestPlan, TypeRunbook:
+		return "specs"
+	case TypeReview:
+		return "reviews"
+	case TypeSpike:
+		return "spikes"
+	default:
+		return "" // code and unknown types stay in source tree
+	}
 }
 
 // Registry provides CRUD operations for artifact registries.
@@ -226,4 +245,15 @@ func (r *Registry) SaveProjectRegistry(registry *ProjectRegistry) error {
 	}
 
 	return os.WriteFile(path, data, 0644)
+}
+
+// GraduatedPath returns the .ledge/{category}/{filename} path for an artifact.
+// Returns the original path unchanged for types that stay in the source tree (e.g., code).
+func (r *Registry) GraduatedPath(entry Entry) string {
+	category := LedgeCategoryForType(entry.ArtifactType)
+	if category == "" {
+		return entry.Path // stays in source tree
+	}
+	filename := filepath.Base(entry.Path)
+	return filepath.Join(".ledge", category, filename)
 }

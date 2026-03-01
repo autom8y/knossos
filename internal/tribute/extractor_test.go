@@ -38,8 +38,8 @@ func TestExtractor_ExtractArtifacts(t *testing.T) {
 	if artifacts[0].Type != "PRD" {
 		t.Errorf("artifacts[0].Type = %q, want %q", artifacts[0].Type, "PRD")
 	}
-	if artifacts[0].Path != "docs/requirements/PRD-test.md" {
-		t.Errorf("artifacts[0].Path = %q, want %q", artifacts[0].Path, "docs/requirements/PRD-test.md")
+	if artifacts[0].Path != ".ledge/specs/PRD-test.md" {
+		t.Errorf("artifacts[0].Path = %q, want %q", artifacts[0].Path, ".ledge/specs/PRD-test.md")
 	}
 
 	// Second artifact - type inferred
