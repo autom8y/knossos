@@ -51,6 +51,10 @@ What was created:
   .knossos/           Satellite project config (rite overrides)
   .sos/               Session state and lifecycle
   .ledge/             Work product artifacts
+    decisions/        ADRs and design decisions
+    specs/            PRDs and technical specs
+    reviews/          Audit reports and code reviews
+    spikes/           Exploration and research (git-ignored by default)
 
 Next steps:
   1. Open this project in Claude Code
@@ -64,6 +68,10 @@ What was created:
   .knossos/           Satellite project config (rite overrides)
   .sos/               Session state and lifecycle
   .ledge/             Work product artifacts
+    decisions/        ADRs and design decisions
+    specs/            PRDs and technical specs
+    reviews/          Audit reports and code reviews
+    spikes/           Exploration and research (git-ignored by default)
 
 Next steps:
   1. Open this project in Claude Code
@@ -294,18 +302,71 @@ func extractEmbeddedMenaToXDG(embMena fs.FS) {
 // scaffoldProjectDirs creates the project-level directory structure:
 //   - .knossos/ — satellite project config (rites, mena overrides)
 //   - .sos/ — session state and lifecycle
-//   - .ledge/ — work product artifacts
+//   - .ledge/ — work product artifacts (with subdirectories)
 //
 // Idempotent: directories are created only if they don't already exist.
+// Each .ledge subdirectory gets a .gitkeep so empty dirs survive git.
 func scaffoldProjectDirs(projectDir string) {
 	dirs := []string{
 		filepath.Join(projectDir, ".knossos"),
 		filepath.Join(projectDir, ".sos"),
-		filepath.Join(projectDir, ".ledge"),
 	}
 	for _, d := range dirs {
 		os.MkdirAll(d, 0755) // Best-effort, non-fatal.
 	}
+
+	ledgeDir := filepath.Join(projectDir, ".ledge")
+	ledgeSubdirs := []string{"decisions", "specs", "reviews", "spikes"}
+	for _, sub := range ledgeSubdirs {
+		subDir := filepath.Join(ledgeDir, sub)
+		os.MkdirAll(subDir, 0755)
+		// .gitkeep so empty dirs survive git.
+		gitkeep := filepath.Join(subDir, ".gitkeep")
+		if _, err := os.Stat(gitkeep); os.IsNotExist(err) {
+			os.WriteFile(gitkeep, []byte(""), 0644)
+		}
+	}
+
+	// Root .ledge/.gitignore: preserve decisions and specs, ignore session scratch.
+	writeLedgeGitignore(ledgeDir)
+
+	// .ledge/spikes/.gitignore: spike artifacts may be large, opt-in tracking.
+	writeSpikesGitignore(filepath.Join(ledgeDir, "spikes"))
+}
+
+// writeLedgeGitignore writes the root .ledge/.gitignore that ignores session-scratch
+// patterns while preserving decisions/ and specs/ content. Idempotent.
+func writeLedgeGitignore(ledgeDir string) {
+	gitignorePath := filepath.Join(ledgeDir, ".gitignore")
+	if _, err := os.Stat(gitignorePath); !os.IsNotExist(err) {
+		return
+	}
+	content := []byte(`# Session scratch — not committed
+*.scratch
+*.tmp
+*.wip
+
+# Subdirectories managed individually
+# decisions/ and specs/ are fully tracked
+# reviews/ is tracked
+# spikes/ has its own .gitignore (opt-in)
+`)
+	os.WriteFile(gitignorePath, content, 0644)
+}
+
+// writeSpikesGitignore writes .ledge/spikes/.gitignore with an opt-in policy.
+// Spike artifacts may be large; add specific files to git as needed. Idempotent.
+func writeSpikesGitignore(spikesDir string) {
+	gitignorePath := filepath.Join(spikesDir, ".gitignore")
+	if _, err := os.Stat(gitignorePath); !os.IsNotExist(err) {
+		return
+	}
+	content := []byte(`# Spike artifacts may be large; add specific files to git as needed
+*
+!.gitignore
+!.gitkeep
+`)
+	os.WriteFile(gitignorePath, content, 0644)
 }
 
 // writeDefaultSettings writes settings.json with the agent-guard hook configuration

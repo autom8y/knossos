@@ -3,6 +3,7 @@ package initialize
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"testing/fstest"
 
@@ -71,6 +72,9 @@ func TestInit_FreshDirectory(t *testing.T) {
 			t.Errorf("%s/ directory was not created", dirName)
 		}
 	}
+
+	// Verify .ledge subdirectories and .gitkeep files.
+	verifyLedgeSubdirs(t, dir)
 }
 
 func TestInit_WithRite(t *testing.T) {
@@ -172,6 +176,9 @@ dependencies:
 			t.Errorf("%s/ directory was not created", dirName)
 		}
 	}
+
+	// Verify .ledge subdirectories and .gitkeep files.
+	verifyLedgeSubdirs(t, dir)
 }
 
 func TestInit_AlreadyInitialized(t *testing.T) {
@@ -342,5 +349,60 @@ func TestInit_NeedsProjectFalse(t *testing.T) {
 	cmd := NewInitCmd(&outputFlag, &verbose, &projectDir)
 	if common.NeedsProject(cmd) {
 		t.Error("init command should have needsProject=false, got true")
+	}
+}
+
+func TestInit_LedgeIdempotent(t *testing.T) {
+	dir := t.TempDir()
+
+	// Run scaffoldProjectDirs twice — should not error or overwrite.
+	scaffoldProjectDirs(dir)
+	scaffoldProjectDirs(dir)
+
+	verifyLedgeSubdirs(t, dir)
+}
+
+// verifyLedgeSubdirs checks that .ledge subdirectories, .gitkeep files,
+// and .gitignore policies were created correctly.
+func verifyLedgeSubdirs(t *testing.T, projectDir string) {
+	t.Helper()
+	ledgeDir := filepath.Join(projectDir, ".ledge")
+
+	// Verify subdirectories exist with .gitkeep.
+	for _, sub := range []string{"decisions", "specs", "reviews", "spikes"} {
+		subDir := filepath.Join(ledgeDir, sub)
+		if _, err := os.Stat(subDir); os.IsNotExist(err) {
+			t.Errorf(".ledge/%s/ directory was not created", sub)
+		}
+		gitkeep := filepath.Join(subDir, ".gitkeep")
+		if _, err := os.Stat(gitkeep); os.IsNotExist(err) {
+			t.Errorf(".ledge/%s/.gitkeep was not created", sub)
+		}
+	}
+
+	// Verify root .ledge/.gitignore exists and has expected content.
+	rootGitignore := filepath.Join(ledgeDir, ".gitignore")
+	data, err := os.ReadFile(rootGitignore)
+	if err != nil {
+		t.Fatalf("failed to read .ledge/.gitignore: %v", err)
+	}
+	rootContent := string(data)
+	for _, pattern := range []string{"*.scratch", "*.tmp", "*.wip"} {
+		if !strings.Contains(rootContent, pattern) {
+			t.Errorf(".ledge/.gitignore missing pattern %q", pattern)
+		}
+	}
+
+	// Verify .ledge/spikes/.gitignore exists with opt-in policy.
+	spikesGitignore := filepath.Join(ledgeDir, "spikes", ".gitignore")
+	data, err = os.ReadFile(spikesGitignore)
+	if err != nil {
+		t.Fatalf("failed to read .ledge/spikes/.gitignore: %v", err)
+	}
+	spikesContent := string(data)
+	for _, pattern := range []string{"# Spike artifacts may be large", "*", "!.gitignore", "!.gitkeep"} {
+		if !strings.Contains(spikesContent, pattern) {
+			t.Errorf(".ledge/spikes/.gitignore missing pattern %q", pattern)
+		}
 	}
 }
