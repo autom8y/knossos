@@ -143,8 +143,17 @@ func (m *Materializer) loadSharedHookDefaults(resolved *ResolvedRite) *HookDefau
 		// Embedded FS: look for shared manifest relative to rite
 		data, err = fs.ReadFile(m.sourceResolver.EmbeddedFS, "rites/shared/manifest.yaml")
 	} else {
-		// Filesystem: look relative to project root
-		sharedPath := filepath.Join(m.resolver.ProjectRoot(), "rites", "shared", "manifest.yaml")
+		// Filesystem: resolve shared manifest from knossos-core ($KNOSSOS_HOME/rites/),
+		// not from the project root. For satellite-local rites the project root is the
+		// satellite directory, which has no rites/shared/. Shared rites always live in
+		// $KNOSSOS_HOME/rites/ regardless of which project is being synced.
+		sharedBase := m.sourceResolver.KnossosHome()
+		if sharedBase == "" {
+			// No KNOSSOS_HOME configured; fall back to project root (knossos-on-knossos
+			// case where the project itself is knossos).
+			sharedBase = m.resolver.ProjectRoot()
+		}
+		sharedPath := filepath.Join(sharedBase, "rites", "shared", "manifest.yaml")
 		data, err = os.ReadFile(sharedPath)
 	}
 	if err != nil {

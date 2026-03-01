@@ -1035,21 +1035,48 @@ func (m *Materializer) materializeMena(manifest *RiteManifest, claudeDir string,
 		// 4. Current rite mena (highest priority)
 		sources = append(sources, MenaSource{Fsys: embFS, FsysPath: "rites/" + manifest.Name + "/mena", IsEmbedded: true})
 	} else if resolved != nil {
-		// Derive rites base directory from the resolved rite path
+		// Determine the base directory for shared/dependency rites.
+		//
+		// For knossos-core rites (SourceKnossos or SourceProject where the project IS
+		// knossos), ritesBase derived from resolved.RitePath is correct — shared/ and
+		// dependency rites live alongside the active rite in the same rites/ directory.
+		//
+		// For satellite-local rites (SourceProject where the project is a satellite),
+		// resolved.RitePath points to {satellite}/rites/{name}/, so ritesBase would be
+		// {satellite}/rites/ — which has no shared/ or dependency rite directories.
+		// Shared and dependency rites always live in $KNOSSOS_HOME/rites/, so we must
+		// resolve them from knossosHome instead of from the satellite's rites directory.
+		//
+		// Strategy: use KnossosHome for shared/dependency if it is set and differs from
+		// the project root's rites dir. Fall back to ritesBase when they are the same
+		// (knossos-core self-hosting case) so there is no regression.
 		ritesBase := filepath.Dir(resolved.RitePath)
 
-		// 2. Shared rite mena
-		sharedMenaDir := filepath.Join(ritesBase, "shared", "mena")
-		sources = append(sources, MenaSource{Path: sharedMenaDir})
-
-		// 3. Dependency rite mena (in order)
-		for _, dep := range manifest.Dependencies {
-			if dep != "shared" {
-				sources = append(sources, MenaSource{Path: filepath.Join(ritesBase, dep, "mena")})
+		// sharedRitesBase is the rites directory containing shared/ and dependency rites.
+		// For satellite-local rites this is $KNOSSOS_HOME/rites/; for knossos-core it is
+		// the same as ritesBase (derived from the active rite path).
+		sharedRitesBase := ritesBase
+		if knossosHome := m.sourceResolver.KnossosHome(); knossosHome != "" {
+			knossosRitesDir := filepath.Join(knossosHome, "rites")
+			// Use the knossos rites dir only when it differs from the satellite's ritesBase.
+			// When they match (knossos syncing its own rites) keep ritesBase as-is.
+			if knossosRitesDir != ritesBase {
+				sharedRitesBase = knossosRitesDir
 			}
 		}
 
-		// 4. Current rite mena (highest priority)
+		// 2. Shared rite mena (resolved from knossos-core, not from satellite rites dir)
+		sharedMenaDir := filepath.Join(sharedRitesBase, "shared", "mena")
+		sources = append(sources, MenaSource{Path: sharedMenaDir})
+
+		// 3. Dependency rite mena (dependencies are knossos-core rites, same base)
+		for _, dep := range manifest.Dependencies {
+			if dep != "shared" {
+				sources = append(sources, MenaSource{Path: filepath.Join(sharedRitesBase, dep, "mena")})
+			}
+		}
+
+		// 4. Current rite mena (highest priority — always from the resolved rite path)
 		currentRiteMenaDir := filepath.Join(resolved.RitePath, "mena")
 		sources = append(sources, MenaSource{Path: currentRiteMenaDir})
 	}

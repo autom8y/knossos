@@ -16,6 +16,7 @@ phases: []
 agents: []
 
 dromena:
+  - frame
   - know
   - research
 
