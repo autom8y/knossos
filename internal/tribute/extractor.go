@@ -318,6 +318,33 @@ func (e *Extractor) ExtractWhiteSails() (*WhiteSailsData, error) {
 	return data, nil
 }
 
+// ExtractGraduatedArtifacts reads the session artifact registry and returns
+// entries that have been (or would be) graduated to .ledge/.
+func (e *Extractor) ExtractGraduatedArtifacts(sessionID string, projectRoot string) []GraduatedArtifact {
+	registry := artifact.NewRegistry(projectRoot)
+
+	sessionReg, err := registry.LoadSessionRegistry(sessionID)
+	if err != nil || len(sessionReg.Artifacts) == 0 {
+		return nil
+	}
+
+	var graduated []GraduatedArtifact
+	for _, entry := range sessionReg.Artifacts {
+		category := artifact.LedgeCategoryForType(entry.ArtifactType)
+		if category == "" {
+			continue
+		}
+		graduated = append(graduated, GraduatedArtifact{
+			Type:          string(entry.ArtifactType),
+			OriginalPath:  entry.Path,
+			GraduatedPath: registry.GraduatedPath(entry),
+			Category:      category,
+		})
+	}
+
+	return graduated
+}
+
 // ExtractNotes extracts relevant notes from SESSION_CONTEXT body.
 // Filters out boilerplate sections.
 func (e *Extractor) ExtractNotes(body string) string {

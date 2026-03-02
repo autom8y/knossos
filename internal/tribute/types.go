@@ -52,6 +52,9 @@ type GenerateResult struct {
 	// Handoffs contains agent handoff records.
 	Handoffs []Handoff
 
+	// GraduatedArtifacts contains artifacts graduated to .ledge/.
+	GraduatedArtifacts []GraduatedArtifact
+
 	// Commits contains git commits (Phase 2 - placeholder for now).
 	Commits []Commit
 
@@ -135,6 +138,21 @@ type Handoff struct {
 
 	// Notes contains handoff notes.
 	Notes string
+}
+
+// GraduatedArtifact represents an artifact graduated to .ledge/.
+type GraduatedArtifact struct {
+	// Type is the artifact type (ADR, PRD, TDD, etc.)
+	Type string
+
+	// OriginalPath is where the artifact lived in the session.
+	OriginalPath string
+
+	// GraduatedPath is the permanent .ledge/ path.
+	GraduatedPath string
+
+	// Category is the ledge subdirectory (decisions, specs, reviews, spikes).
+	Category string
 }
 
 // Commit represents a git commit (Phase 2 - placeholder).
