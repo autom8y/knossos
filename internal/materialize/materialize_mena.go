@@ -108,6 +108,7 @@ func (m *Materializer) materializeMena(manifest *RiteManifest, claudeDir string,
 		Collector:         collector,
 		ProjectRoot:       m.resolver.ProjectRoot(),
 		OverwriteDiverged: overwriteDiverged,
+		RiteName:          manifest.Name,
 	}
 
 	_, err := SyncMena(sources, opts)

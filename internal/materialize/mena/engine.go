@@ -248,6 +248,13 @@ func cleanStaleMenaEntries(opts MenaProjectionOptions, result *MenaProjectionRes
 			continue
 		}
 
+		// Scope stale cleanup to the current rite only. Entries from other
+		// rites (or from shared/platform sources) are left untouched so that
+		// rite switches do not delete cross-rite mena files.
+		if opts.RiteName != "" && !isFromRite(entry.SourcePath, opts.RiteName) {
+			continue
+		}
+
 		// Stale knossos-owned entry -- remove it
 		absPath := filepath.Join(claudeDir, key)
 		absPath = strings.TrimRight(absPath, "/")
@@ -274,6 +281,13 @@ func cleanStaleMenaEntries(opts MenaProjectionOptions, result *MenaProjectionRes
 			result.Warnings = append(result.Warnings, cleanErr.Error())
 		}
 	}
+}
+
+// isFromRite checks whether a provenance source_path belongs to a specific rite.
+// It matches the pattern "rites/{riteName}/mena/" anywhere in the path, handling
+// both relative (rites/10x-dev/mena/) and absolute paths.
+func isFromRite(sourcePath, riteName string) bool {
+	return strings.Contains(sourcePath, "rites/"+riteName+"/mena/")
 }
 
 // CleanEmptyDirs removes empty subdirectories within a directory.

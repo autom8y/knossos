@@ -56,6 +56,11 @@ type MenaProjectionOptions struct {
 	// that collide with flat-name projection. When false (default),
 	// knossos yields and falls back to source-path routing.
 	OverwriteDiverged bool
+
+	// RiteName is the name of the rite being synced. When non-empty,
+	// stale mena cleanup is scoped to entries originating from this rite,
+	// preventing cross-rite entry deletion during rite switches.
+	RiteName string
 }
 
 // MenaProjectionResult reports what the projection did.
