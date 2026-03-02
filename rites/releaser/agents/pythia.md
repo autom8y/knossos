@@ -25,8 +25,7 @@ maxTurns: 40
 skills:
   - orchestrator-templates
   - releaser-ref
-memory:
-  - releaser-pythia
+memory: "project"
 disallowedTools:
   - Bash
   - Write

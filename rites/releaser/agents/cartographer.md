@@ -23,8 +23,7 @@ color: orange
 maxTurns: 50
 skills:
   - releaser-ref
-memory:
-  - releaser-cartographer
+memory: "project"
 disallowedTools:
   - Edit
   - NotebookEdit

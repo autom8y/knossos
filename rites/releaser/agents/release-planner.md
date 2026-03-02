@@ -23,8 +23,7 @@ color: orange
 maxTurns: 25
 skills:
   - releaser-ref
-memory:
-  - releaser-release-planner
+memory: "project"
 disallowedTools:
   - Bash
   - Edit

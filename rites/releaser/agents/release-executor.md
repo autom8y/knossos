@@ -25,8 +25,7 @@ maxTurns: 60
 skills:
   - releaser-ref
   - commit-conventions
-memory:
-  - releaser-release-executor
+memory: "project"
 disallowedTools:
   - NotebookEdit
 contract:

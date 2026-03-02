@@ -23,8 +23,7 @@ color: orange
 maxTurns: 80
 skills:
   - releaser-ref
-memory:
-  - releaser-pipeline-monitor
+memory: "project"
 disallowedTools:
   - Edit
   - NotebookEdit
