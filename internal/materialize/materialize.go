@@ -467,8 +467,29 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 	return result, nil
 }
 
+// ensureProjectDirs creates the minimum directory structure required for sync
+// to function. It is idempotent and zero-cost when the directories already exist.
+// This covers worktrees, fresh clones, and any scenario where gitignored
+// directories are absent. Errors are intentionally ignored: if a directory
+// cannot be created, the subsequent sync steps will fail with actionable errors.
+func (m *Materializer) ensureProjectDirs() {
+	dirs := []string{
+		m.resolver.ClaudeDir(),    // .claude/
+		m.resolver.SessionsDir(), // .sos/sessions/ (implies .sos/)
+		m.resolver.KnossosDir(),  // .knossos/
+	}
+	for _, d := range dirs {
+		_ = os.MkdirAll(d, 0755)
+	}
+}
+
 // Sync performs a unified sync operation across rite and/or user scopes.
 func (m *Materializer) Sync(opts SyncOptions) (*SyncResult, error) {
+	// Pre-flight: ensure framework directories exist before any scope dispatch.
+	// This is idempotent and handles worktrees, fresh clones, and any env where
+	// the gitignored directories (.claude/, .sos/, .knossos/) are absent.
+	m.ensureProjectDirs()
+
 	result := &SyncResult{}
 
 	// Normalize defaults
