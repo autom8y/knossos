@@ -66,7 +66,7 @@ Discover all repos matching a glob pattern, map their git state and package ecos
 
 ## Ecosystem Detection
 
-> See releaser-ref: Ecosystem Detection Matrix
+> See `releaser-ref/ecosystem-detection.md` for the full ecosystem detection matrix.
 
 Additional cartographer-specific fields:
 
@@ -104,7 +104,9 @@ When `.goreleaser.yaml` is present, read and extract the following fields for th
 | GitHub release target | `release.github.{owner,name}` | `goreleaser_release_repo` (formatted as `owner/name`) |
 | Homebrew token env var | `brews[].repository.token` | `goreleaser_brew_token_env` (extract env var name, e.g., `HOMEBREW_TAP_TOKEN`) |
 
-Expected asset names follow the pattern `{project_name}_{version}_{os}_{arch}.tar.gz`. Record these as `goreleaser_expected_assets` using the cross-product of `goos` x `goarch` (e.g., for darwin+linux x amd64+arm64: four archives plus `checksums.txt`).
+Expected asset names follow the pattern `{project_name}_{version}_{os}_{arch}.tar.gz`. Note: GoReleaser's `{{ .Version }}` strips the `v` prefix from tags — use the bare version (e.g., `0.3.0`, not `v0.3.0`) when constructing expected asset names. Record these as `goreleaser_expected_assets` using the cross-product of `goos` x `goarch` (e.g., for darwin+linux x amd64+arm64: four archives plus `checksums.txt`).
+
+Also check `version:` at the top of the goreleaser config — `version: 2` indicates GoReleaser v2 configuration syntax. Record as `goreleaser_config_version`.
 
 If any of these fields are absent, record `null` for the specific key and note the absence — do not fail detection.
 
@@ -162,7 +164,7 @@ After ecosystem detection, scan each release-candidate repo's CI workflow defini
 2. For each workflow file, read its contents and scan for chain indicators
 3. For cross-repo dispatches, use `gh api` to read the receiver repo's workflow files:
    ```
-   gh api repos/{owner}/{repo}/contents/{path-to-workflow-file} --jq '.content' | base64 -d
+   gh api -H "Accept: application/vnd.github.raw+json" repos/{owner}/{repo}/contents/{path-to-workflow-file}
    ```
 4. Classify each discovered chain link using the heuristic table below
 5. Build the chain graph from trigger source to terminal stage
@@ -192,8 +194,8 @@ When a workflow dispatches to another repository:
 
 Cross-repo API calls may fail due to permissions or rate limits:
 - Attempt 1: immediate
-- Attempt 2: after 30 second wait
-- Attempt 3: after 60 second wait
+- Attempt 2: immediate retry
+- Attempt 3: immediate retry
 - After 3 failures: log warning, set `chain_discovery_status: failed`, continue with remaining repos
 
 ### Graceful Degradation

@@ -114,7 +114,7 @@ gh run list --repo {target-owner/target-repo} --workflow {workflow-filename} --l
 ```
 
 Filter results by:
-- `event` matches the expected trigger type (e.g., `repository_dispatch`, `workflow_dispatch`)
+- `event` matches the expected trigger type (e.g., `repository_dispatch`, `workflow_dispatch`, or `release` for binary release E2E chains)
 - `createdAt` is after the source workflow's completion time
 - `name` or workflow file matches the expected stage
 
@@ -183,7 +183,7 @@ Required artifact checks (use `goreleaser_expected_assets` from the state map as
 # Check for GoReleaser formula commit in tap repo after the tag push timestamp
 gh api repos/{goreleaser_brew_tap}/commits --jq '.[0] | {sha: .sha, message: .commit.message, date: .commit.author.date}'
 ```
-The most recent commit message should match `Brew formula update for {goreleaser_project_name} version v{version}`. If the commit predates the tag push, apply one retry cycle (wait 60 seconds, check again) before marking `homebrew_tap_updated: false`. GoReleaser pushes the tap commit as the final step of CI — it may trail the Release creation by 30-90 seconds.
+The most recent commit message should match `Brew formula update for {goreleaser_project_name} version {tag}` (where `{tag}` is the full tag string like `v0.3.0` — GoReleaser's `{{ .Tag }}` includes the `v` prefix). If the commit predates the tag push, apply one retry cycle (wait 60 seconds, check again) before marking `homebrew_tap_updated: false`. GoReleaser pushes the tap commit as the final step of CI — it may trail the Release creation by 30-90 seconds.
 
 Record Stage 1 results in the `binary_release` sub-object:
 ```yaml
@@ -199,8 +199,8 @@ binary_release:
 
 The GitHub Release creation event (`release: types: [published]`) automatically triggers `e2e-distribution.yml`. This is NOT a `workflow_run` trigger — it fires when GoReleaser creates (publishes) the GitHub Release object. The E2E workflow runs TWO parallel jobs:
 
-- **macOS E2E** (`macos-e2e`): Apple Silicon runner — validates Homebrew install path
-- **Linux E2E** (`linux-e2e`): Ubuntu runner with Docker + Linuxbrew — validates Linux distribution
+- **macOS E2E** (`macos-e2e`): Apple Silicon runner (arm64) — validates Homebrew install path
+- **Linux E2E** (`linux-e2e`): Ubuntu runner (amd64) with Docker + Linuxbrew — validates Linux distribution (amd64 only; arm64 Linux is not validated by CI)
 
 Discover the E2E workflow run:
 ```bash
@@ -216,12 +216,10 @@ Filter for runs with `event: release` started after the GoReleaser CI completion
 
 | Assertion | What passes |
 |-----------|-------------|
-| `brew tap autom8y/tap` | Tap is reachable; formula exists in `autom8y/homebrew-tap` |
-| `brew install autom8y/tap/ari` (or `brew install ari`) | Formula installs without error on macOS arm64 and Linuxbrew |
-| `ari version` | Binary output matches the release tag version |
-| `ari init` | Exits 0 in a fresh temporary directory |
-| `ari sync --rite 10x-dev` | Core sync pipeline completes without error |
-| `.claude/` directory structure | Expected dirs/files created by init + sync |
+| `brew tap {goreleaser_brew_tap}` | Tap is reachable; formula exists |
+| `brew install {goreleaser_brew_tap}/{goreleaser_project_name}` | Formula installs without error on macOS arm64 and Linuxbrew (amd64) |
+| `{binary_name} version` | Binary output matches the release tag version |
+| Smoke test commands | Project-specific functional validation (e.g., init, basic CLI operation) |
 
 Monitor both macOS and Linux E2E jobs. Both must be green. If either fails, classify with the standard failure table (flaky_test / regression / infra_issue / timeout). E2E macOS failure on brew operations is often `infra_issue` (slow CI, brew rate limits); E2E Linux failure on Docker image build is often `infra_issue`.
 
@@ -246,7 +244,7 @@ Pull failed logs via `gh run view {id} --repo {repo} --log-failed`, then classif
 | infra_issue | Docker pull failure, network timeout, runner unavailable | retry |
 | timeout | Run exceeded time limit | escalate |
 
-> See releaser-ref: Cross-Rite Routing Table
+> See `releaser-ref/cross-rite-routing.md` for the full routing table.
 
 ## Output Schema
 

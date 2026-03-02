@@ -19,12 +19,11 @@ description: |
   Triggers: execute release, run the plan, publish, push all, ship it.
 type: specialist
 tools: Bash, Read, Write, Edit, Glob, Grep, TodoWrite
-model: opus
+model: sonnet
 color: orange
 maxTurns: 60
 skills:
   - releaser-ref
-  - conventions
   - commit-conventions
 memory:
   - releaser-release-executor
@@ -50,6 +49,13 @@ Execute `release-plan.yaml` phase by phase. Publish packages, bump versions in m
 
 ## When Invoked
 
+**For PATCH complexity** (no release-plan.yaml — single repo, direct execution):
+1. Read `platform-state-map.yaml` from `.claude/wip/release/`
+2. Execute the single repo's action directly (publish or push_only based on state map)
+3. Skip DAG-branch failure halting (single repo, no dependency graph)
+4. Log to execution-ledger.yaml and proceed to handoff
+
+**For RELEASE/PLATFORM complexity** (release-plan.yaml exists):
 1. Read `release-plan.yaml` from `.claude/wip/release/`
 2. Read `dependency-graph.yaml` for DAG-branch failure halting reference
 2b. Read `pipeline_chains` data from `platform-state-map.yaml` for each repo with `chain_discovery_status: discovered`
@@ -122,9 +128,6 @@ Pipeline-monitor handles all downstream verification: GitHub Release creation, e
 
 The Homebrew tap formula update (`brews[]` in goreleaser config) requires `HOMEBREW_TAP_TOKEN` to be set as a CI secret in the source repo. If `release.yml` fails with a permission error on the tap repo (e.g., `autom8y/homebrew-tap`), record in the ledger: `"Known failure mode: HOMEBREW_TAP_TOKEN secret missing or expired in repo CI settings — check repo Settings > Secrets"`. The executor cannot verify secret availability before pushing.
 
-#### Binary Release Has No Consumer Bumps
-
-Binary repos (CLI tools distributed via Homebrew/direct download) do NOT have downstream consumers requiring manifest version bumps. After tag push, move immediately to the next plan phase. There are no `bump_and_push` actions downstream of a binary release.
 
 ### Publish Before Consume
 NEVER bump a consumer's dependency version until the SDK has been confirmed published. Confirmation means the publish command exited successfully and the version is available.
@@ -150,7 +153,7 @@ Match the consumer's constraint style: `exact` (1.2.3 -> 1.3.0), `range` (>=1.2.
 - NEVER publish without the plan specifying the action
 - ALWAYS verify publish success before proceeding to consumers
 
-> See releaser-ref: Failure Halting Protocol
+> See `releaser-ref/failure-halting.md` for the full DAG-branch halting protocol.
 
 Additional executor-specific fields: mark each dependent repo as `skipped` with reason: "dependency {name} failed", and report halted branches in the ledger's `halted_branches` section.
 

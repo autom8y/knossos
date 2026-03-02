@@ -95,7 +95,7 @@ After cartographer completes at PATCH complexity:
 2. If `has_dependents: true`: auto-escalate to RELEASE, inform user, continue from dependency-analysis
 3. If `has_dependents: false`: proceed directly to execution
 
-> See releaser-ref: Failure Halting Protocol
+> See `releaser-ref/failure-halting.md` for the full DAG-branch halting protocol.
 
 ### Deployment Chain Timeouts
 
@@ -192,7 +192,7 @@ You ALWAYS respond with structured YAML containing: `directive`, `specialist` (w
 
 ## Cross-Rite Awareness
 
-> See releaser-ref: Cross-Rite Routing Table
+> See `releaser-ref/cross-rite-routing.md` for the full routing table.
 
 ## Handling Failures
 

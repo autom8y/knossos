@@ -32,33 +32,7 @@ Downstream agents consume YAML only. Never parse the MD summaries programmatical
 | RELEASE | All 5 phases | SDK publish + consumer version bumps |
 | PLATFORM | All 5 phases, full scope | Full platform release, all matching repos |
 
-PATCH auto-escalation: if cartographer finds `has_dependents: true` on target repo,
-Pythia auto-escalates to RELEASE and informs user before proceeding to dependency-analysis.
-
-## Auto-Escalation (PATCH → RELEASE)
-
-Trigger: cartographer sets `has_dependents: true` on any release-candidate repo.
-
-Pythia response:
-1. Read `has_dependents` flag from `platform-state-map.yaml`
-2. If true: escalate to RELEASE, notify user ("Target repo has N downstream consumers. Escalating to RELEASE.")
-3. Continue from dependency-analysis phase — do NOT re-run cartographer
-
-## Anti-Patterns
-
-| Anti-Pattern | Prevention |
-|--------------|------------|
-| Publishing consumer before SDK dependency | Topological sort in dependency-graph.yaml enforces order; release-executor checks publish confirmation |
-| Force-pushing to main without CI | release-executor contract forbids force-push; pipeline-monitor verifies CI before success |
-| Bumping versions without publishing | release-executor tracks bump and publish as coupled actions; ledger flags mismatches |
-| Treating CI failures as non-blocking | pipeline-monitor contract: never dismiss failures; verification-report.verdict gates success |
-| Losing track of processed repos | execution-ledger.yaml tracks every action with timestamps and status |
-| Assuming uniform package managers | cartographer detects ecosystem per-repo; release-planner generates repo-specific commands |
-
-## Pre-Flight
-
-Cartographer runs `gh auth status` during reconnaissance. If gh CLI is not authenticated,
-fail fast and escalate rather than discovering auth issues 3 phases later during execution.
+PATCH auto-escalates to RELEASE if cartographer finds `has_dependents: true`.
 
 ## Companion Files
 

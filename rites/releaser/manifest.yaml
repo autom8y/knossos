@@ -73,6 +73,7 @@ dromena:
 
 legomena:
   - releaser-ref
+  - commit-conventions
 
 hooks:
   - agent-guard

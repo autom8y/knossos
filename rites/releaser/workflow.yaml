@@ -3,10 +3,9 @@ workflow_type: sequential
 description: Multi-repo release orchestration lifecycle (Reconnaissance -> Dependencies -> Planning -> Execution -> Verification)
 
 entry_point:
-  agent: cartographer
-  artifact:
-    type: platform-state-map
-    path_template: .claude/wip/release/platform-state-map.yaml
+  agent: pythia  # Orchestrator entry; pythia routes to cartographer for reconnaissance
+  first_phase: reconnaissance
+  first_phase_agent: cartographer
 
 phases:
   - name: reconnaissance

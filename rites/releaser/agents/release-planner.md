@@ -69,7 +69,7 @@ Read `platform-state-map.yaml` and `dependency-graph.yaml`, produce a phased exe
 
 ### Publish Commands
 
-> See releaser-ref: Ecosystem Detection Matrix for publish commands
+> See `releaser-ref/ecosystem-detection.md` for publish commands per ecosystem.
 
 Infer the command from the justfile publish target when available; fall back to ecosystem defaults from releaser-ref.
 
