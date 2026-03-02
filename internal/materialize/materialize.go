@@ -550,13 +550,26 @@ func (m *Materializer) syncRiteScope(opts SyncOptions) (*RiteScopeResult, error)
 
 	if riteName == "" {
 		if previousRite == "" {
+			// Before falling to minimal, check if we are in a linked git worktree
+			// and inherit the rite from the main worktree's ACTIVE_RITE.
+			if isGitWorktree(m.resolver.ProjectRoot()) {
+				if mainDir, err := getMainWorktreeDir(m.resolver.ProjectRoot()); err == nil {
+					if inherited := inheritRiteFromMainWorktree(mainDir); inherited != "" {
+						riteName = inherited
+					}
+				}
+			}
+		}
+		if riteName == "" && previousRite == "" {
 			if opts.Scope == ScopeRite {
 				return nil, fmt.Errorf("no ACTIVE_RITE found, specify --rite")
 			}
 			// scope=all with no rite: run minimal
 			return m.syncRiteScopeMinimal(opts)
 		}
-		riteName = previousRite
+		if riteName == "" {
+			riteName = previousRite
+		}
 	}
 
 	legacyOpts := Options{
