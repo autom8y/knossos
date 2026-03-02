@@ -18,6 +18,7 @@ agents: []
 dromena:
   - frame
   - know
+  - radar
   - research
 
 legomena:

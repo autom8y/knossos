@@ -29,6 +29,18 @@ This table IS the registry. A domain exists when it has a row here and a criteri
 | **test-coverage** | `domains/test-coverage.lego.md` | codebase | Test gaps, coverage patterns, testing conventions, fixture patterns |
 | **scar-tissue** | `domains/scar-tissue.lego.md` | codebase | Past bugs, regressions, fix locations, defensive patterns born from failures |
 | **design-constraints** | `domains/design-constraints.lego.md` | codebase | Structural tensions, load-bearing jank, abstraction gaps, evolution constraints, risk zones |
+| **radar-confidence-gaps** | `domains/radar-confidence-gaps.lego.md` | radar | Flags .know/ domains where confidence < 0.80 |
+| **radar-staleness** | `domains/radar-staleness.lego.md` | radar | Flags .know/ domains past their expires_after window |
+| **radar-unguarded-scars** | `domains/radar-unguarded-scars.lego.md` | radar | Matches SCAR locations against untested packages — scars in untested code are unguarded regressions |
+| **radar-constraint-violations** | `domains/radar-constraint-violations.lego.md` | radar | Checks documented design constraints and frozen areas against codebase patterns |
+| **radar-convention-drift** | `domains/radar-convention-drift.lego.md` | radar | Samples files and checks adherence to documented conventions (error handling, naming, testing style) |
+| **radar-architecture-decay** | `domains/radar-architecture-decay.lego.md` | radar | Checks import graph against documented layer model for boundary violations and undocumented cross-cutting imports |
+| **radar-recurring-scars** | `domains/radar-recurring-scars.lego.md` | radar | Counts SCARs by category; flags categories with 3+ entries as systemic patterns |
+| **advocatus-conventions** | `domains/advocatus-conventions.lego.md` | adversarial | Finds code that contradicts documented conventions in .know/conventions.md |
+| **advocatus-architecture** | `domains/advocatus-architecture.lego.md` | adversarial | Finds structural evidence that contradicts documented architecture in .know/architecture.md |
+| **advocatus-scar-tissue** | `domains/advocatus-scar-tissue.lego.md` | adversarial | Finds undocumented scars or scars whose fixes have regressed |
+| **socratic-architecture** | `domains/socratic-architecture.lego.md` | socratic | Surfaces unstated assumptions in .know/architecture.md |
+| **socratic-design-constraints** | `domains/socratic-design-constraints.lego.md` | socratic | Surfaces constraints present in the code but missing from .know/design-constraints.md |
 
 ### Scope Values
 
@@ -38,6 +50,9 @@ This table IS the registry. A domain exists when it has a row here and a criteri
 | `codebase` | Source code quality (Go, Python, shell scripts) |
 | `process` | Development workflow (git, CI/CD, testing) |
 | `culture` | Team practices (docs, naming, conventions) |
+| `radar` | Cross-reference signals: reads .know/ files and detects gaps, drift, decay, and violations |
+| `adversarial` | Advocatus diaboli mode: actively searches for evidence that contradicts .know/ claims |
+| `socratic` | Socratic mode: surfaces unstated assumptions and undocumented constraints in .know/ files |
 
 ### Grading Scale
 
@@ -78,6 +93,24 @@ No +/- modifiers. Simplicity prevents grade inflation and gaming.
 - [test-coverage.lego.md](domains/test-coverage.lego.md) - Test structure and coverage knowledge capture
 - [scar-tissue.lego.md](domains/scar-tissue.lego.md) - Scar tissue knowledge capture (failure history, regressions)
 - [design-constraints.lego.md](domains/design-constraints.lego.md) - Design constraint knowledge capture (tensions, load-bearing code, risk zones)
+
+### Domain Criteria — Radar (cross-reference signals)
+- [radar-confidence-gaps.lego.md](domains/radar-confidence-gaps.lego.md) - Flag .know/ domains with confidence < 0.80
+- [radar-staleness.lego.md](domains/radar-staleness.lego.md) - Flag .know/ domains past their expiry window
+- [radar-unguarded-scars.lego.md](domains/radar-unguarded-scars.lego.md) - Scars in untested packages (unguarded regressions)
+- [radar-constraint-violations.lego.md](domains/radar-constraint-violations.lego.md) - Design constraints contradicted by codebase patterns
+- [radar-convention-drift.lego.md](domains/radar-convention-drift.lego.md) - Convention adherence gaps in active packages
+- [radar-architecture-decay.lego.md](domains/radar-architecture-decay.lego.md) - Import boundary violations against documented layer model
+- [radar-recurring-scars.lego.md](domains/radar-recurring-scars.lego.md) - Scar categories with 3+ entries (systemic patterns)
+
+### Domain Criteria — Adversarial (advocatus diaboli)
+- [advocatus-conventions.lego.md](domains/advocatus-conventions.lego.md) - Find code contradicting documented conventions
+- [advocatus-architecture.lego.md](domains/advocatus-architecture.lego.md) - Find structural evidence contradicting documented architecture
+- [advocatus-scar-tissue.lego.md](domains/advocatus-scar-tissue.lego.md) - Find undocumented scars or regressed fixes
+
+### Domain Criteria — Socratic
+- [socratic-architecture.lego.md](domains/socratic-architecture.lego.md) - Surface unstated assumptions in architecture documentation
+- [socratic-design-constraints.lego.md](domains/socratic-design-constraints.lego.md) - Surface undocumented constraints present in code
 
 ### Schemas
 - [registry-format.lego.md](registry-format.lego.md) - How to add new domains
