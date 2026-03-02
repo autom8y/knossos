@@ -12,9 +12,11 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"github.com/autom8y/knossos/internal/hook"
 	"github.com/autom8y/knossos/internal/hook/clewcontract"
 	"github.com/autom8y/knossos/internal/know"
+	"github.com/autom8y/knossos/internal/materialize/source"
 	"github.com/autom8y/knossos/internal/output"
 	"github.com/autom8y/knossos/internal/session"
 )
@@ -170,8 +172,19 @@ func runContextCore(ctx *cmdContext, printer *output.Printer) error {
 	gitBranch := getGitBranch(projectDir)
 	baseBranch := getBaseBranch(projectDir)
 
-	// Gather rite and agent context from project structure
-	availableRites := listAvailableRites(resolver.RitesDir())
+	// Gather rite context using the 4-tier SourceResolver (project > user > knossos >
+	// embedded). The old listAvailableRites() only read .knossos/rites/ which is
+	// empty in most projects — rites come from KNOSSOS_HOME/rites/ or embedded.
+	srcResolver := source.NewSourceResolver(projectDir)
+	if embRites := common.EmbeddedRites(); embRites != nil {
+		srcResolver.WithEmbeddedFS(embRites)
+	}
+	resolvedRites, _ := srcResolver.ListAvailableRites()
+	availableRites := make([]string, len(resolvedRites))
+	for i, r := range resolvedRites {
+		availableRites[i] = r.Name
+	}
+
 	availableAgents := listAvailableAgents(resolver.AgentsDir())
 
 	// Build output

@@ -9,11 +9,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/autom8y/knossos/internal/cmd/common"
+	"github.com/autom8y/knossos/internal/config"
 	"github.com/autom8y/knossos/internal/output"
 	"github.com/autom8y/knossos/internal/session"
 	"github.com/autom8y/knossos/test/hooks/testutil"
-
-	"github.com/autom8y/knossos/internal/cmd/common"
 )
 
 func TestContextOutput_Text(t *testing.T) {
@@ -601,6 +601,17 @@ func TestListAvailableAgents_NonexistentDir(t *testing.T) {
 }
 
 func TestRunContext_WithActiveSession_IncludesRitesAndAgents(t *testing.T) {
+	// Isolate KNOSSOS_HOME so SourceResolver only sees project-local rites.
+	// Without this, the SourceResolver picks up rites from the developer's
+	// KNOSSOS_HOME and the count assertion becomes environment-dependent.
+	isolatedHome := t.TempDir()
+	t.Setenv("KNOSSOS_HOME", isolatedHome)
+	config.ResetKnossosHome()
+	t.Cleanup(config.ResetKnossosHome)
+
+	// Also isolate HOME to avoid picking up user rites from ~/.claude/rites/.
+	t.Setenv("HOME", isolatedHome)
+
 	tmpDir := t.TempDir()
 	sessionID := "session-20260208-100000-abcdef01"
 
@@ -627,7 +638,9 @@ current_phase: "implementation"
 	os.MkdirAll(claudeDir, 0755)
 	os.WriteFile(filepath.Join(claudeDir, "ACTIVE_RITE"), []byte("alpha"), 0644)
 
-	// Create rites directory with manifests (.knossos/rites/)
+	// Create rites in .knossos/rites/ (project-local satellite rites).
+	// SourceResolver checks project-local rites first, so these appear in
+	// AvailableRites even when KNOSSOS_HOME is empty.
 	ritesDir := filepath.Join(tmpDir, ".knossos", "rites")
 	os.MkdirAll(filepath.Join(ritesDir, "alpha"), 0755)
 	os.WriteFile(filepath.Join(ritesDir, "alpha", "manifest.yaml"), []byte("name: alpha"), 0644)
@@ -671,9 +684,26 @@ current_phase: "implementation"
 		t.Fatalf("Failed to parse output: %v\nOutput: %s", err, stdout.String())
 	}
 
-	// Verify rites
+	// Verify that the two project-local rites are included.
+	// SourceResolver also checks user and knossos sources, but both are
+	// pointed at the isolated empty temp dir, so exactly 2 rites appear.
 	if len(result.AvailableRites) != 2 {
 		t.Errorf("AvailableRites length = %d, want 2: %v", len(result.AvailableRites), result.AvailableRites)
+	}
+	foundAlpha, foundBeta := false, false
+	for _, r := range result.AvailableRites {
+		if r == "alpha" {
+			foundAlpha = true
+		}
+		if r == "beta" {
+			foundBeta = true
+		}
+	}
+	if !foundAlpha {
+		t.Errorf("AvailableRites missing 'alpha': %v", result.AvailableRites)
+	}
+	if !foundBeta {
+		t.Errorf("AvailableRites missing 'beta': %v", result.AvailableRites)
 	}
 
 	// Verify agents
