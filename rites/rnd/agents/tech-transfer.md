@@ -168,4 +168,3 @@ If uncertain: Add more context. The prototype engineer won't be available foreve
 
 - doc-rnd for TRANSFER and HANDOFF artifact templates (transfer-artifacts companion page)
 - cross-rite-handoff for HANDOFF schema and cross-rite patterns
-- file-verification for artifact verification protocol

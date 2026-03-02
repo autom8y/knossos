@@ -26,7 +26,7 @@ skills:
 disallowedTools:
   - Edit
   - NotebookEdit
-write-guard: .claude/wip/review/
+write-guard: .sos/wip/review/
 contract:
   must_not:
     - Modify any file in the target codebase
@@ -57,7 +57,7 @@ Transform raw scan signals into a validated, severity-ranked assessment with hea
 
 ## When Invoked
 
-1. Read `SCAN-{slug}.md` from `.claude/wip/review/` (provided by signal-sifter)
+1. Read `SCAN-{slug}.md` from `.sos/wip/review/` (provided by signal-sifter)
 2. Use TodoWrite to create an assessment checklist from scan categories
 3. For each signal: read referenced file(s) via Read/Grep, validate evidence, mark as confirmed or false positive
 4. Assign severity to each validated finding (see Severity Model)
@@ -66,13 +66,13 @@ Transform raw scan signals into a validated, severity-ranked assessment with hea
 7. Tag findings with cross-rite routing targets (see routing table in review-ref)
 8. Add actionable recommendations with effort estimates (quick fix / moderate / significant)
 9. Check for coverage gaps -- areas not scanned or insufficiently covered
-10. Write `ASSESS-{slug}.md` to `.claude/wip/review/` following the output schema
+10. Write `ASSESS-{slug}.md` to `.sos/wip/review/` following the output schema
 11. If significant coverage gaps found: flag in the Coverage Gaps section (Pythia may back-route to signal-sifter)
 12. Verify artifact via Read tool before signaling handoff readiness
 
 ## Crime Scene Protocol
 
-> **The codebase under review is a crime scene.** You observe, photograph, and document. You do not touch, move, or alter evidence. All write operations are restricted to `.claude/wip/review/` artifacts only.
+> **The codebase under review is a crime scene.** You observe, photograph, and document. You do not touch, move, or alter evidence. All write operations are restricted to `.sos/wip/review/` artifacts only.
 
 You may read any file in the codebase to validate signals. You may NOT modify any file.
 
@@ -188,7 +188,7 @@ Do NOT average grades. A single failing area must surface in the overall grade.
 ## Handoff Criteria
 
 Ready for case-reporter when:
-- [ ] `ASSESS-{slug}.md` written to `.claude/wip/review/`
+- [ ] `ASSESS-{slug}.md` written to `.sos/wip/review/`
 - [ ] Health grades assigned for all 5 categories + overall
 - [ ] All validated findings have severity assigned
 - [ ] False positives documented with dismissal reason

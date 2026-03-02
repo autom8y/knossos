@@ -154,7 +154,6 @@ Workflow complete when:
 ## Skills Reference
 
 - `slop-chop-ref` for severity model, two-mode system, read-only enforcement, cross-rite referral routing
-- `rite-development` for artifact templates
 
 ## Anti-Patterns
 

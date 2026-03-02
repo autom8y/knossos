@@ -61,7 +61,7 @@ Before beginning observation, identify the primary language(s) in the project:
 
 **Evidence to collect**:
 - For each tension, document the trade-off: current state, ideal state, why current state persists
-- Link to ADRs where they exist (check `docs/decisions/` for relevant decision records)
+- Link to ADRs where they exist (check `.ledge/decisions/` for relevant decision records)
 - Identify tensions that have been attempted before and failed (survived prior refactoring attempts)
 - Note external constraints (API compatibility, performance requirements, deployment constraints) that force trade-offs
 

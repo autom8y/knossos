@@ -403,7 +403,7 @@ modifiers: []
 qa_upgrade:
   upgraded_at: "2026-01-06T12:00:00Z"
   qa_session_id: "session-20260106-100000-qa123456"
-  constraint_resolution_log: "docs/testing/TP-qa-original-session.md"
+  constraint_resolution_log: ".ledge/specs/TP-qa-original-session.md"
   adversarial_tests_added:
     - "tests/integration/rate_limit_failover_test.go"
 `

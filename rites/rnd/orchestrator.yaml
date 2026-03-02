@@ -1,6 +1,4 @@
 # Orchestrator configuration for rnd
-# Used by generate-orchestrator.sh to produce pythia.md
-# References workflow.yaml for phase/specialist data
 
 # Rite metadata
 rite:
@@ -52,10 +50,7 @@ handoff_criteria:
     - "Handoff artifact created for implementation rite"
 
 # Skills references for this rite
-skills:
-  - "@doc-rnd for artifact templates"
-  - "@standards for technology philosophy"
-  - "@cross-rite for handoff patterns to other rites"
+skills: []
 
 # Rite-specific anti-patterns
 antipatterns:

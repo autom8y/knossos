@@ -88,8 +88,8 @@ After artifacts are produced, delegate to Moirai (Lachesis - the Measurer) to up
 ```
 Task(moirai, "update_session session_id={session-id}
   artifacts=[
-    {type: PRD, path: /docs/requirements/PRD-{slug}.md, status: approved},
-    {type: TDD, path: /docs/design/TDD-{slug}.md, status: draft}
+    {type: PRD, path: .ledge/specs/PRD-{slug}.md, status: approved},
+    {type: TDD, path: .ledge/specs/TDD-{slug}.md, status: draft}
   ]
   last_agent={architect|analyst}
   current_phase={design|requirements}
@@ -128,9 +128,9 @@ Display confirmation message with:
 - `.sos/sessions/{session_id}/SESSION_CONTEXT.md` - Session metadata and state (created by Clotho)
 
 **Via agent delegation**:
-- `/docs/requirements/PRD-{slug}.md` - Product requirements document (Requirements Analyst)
-- `/docs/design/TDD-{slug}.md` - Technical design (Architect, if complexity > PATCH)
-- `/docs/decisions/ADR-{NNNN}-{slug}.md` - Architecture decisions (Architect, if applicable)
+- `.ledge/specs/PRD-{slug}.md` - Product requirements document (Requirements Analyst)
+- `.ledge/specs/TDD-{slug}.md` - Technical design (Architect, if complexity > PATCH)
+- `.ledge/decisions/ADR-{NNNN}-{slug}.md` - Architecture decisions (Architect, if applicable)
 
 ### Fields Set in SESSION_CONTEXT (by Moirai)
 

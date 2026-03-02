@@ -175,8 +175,7 @@ Proceed with price increase. Even bear case improves revenue by $4,500/mo. Monit
 ## Skills Reference
 
 - doc-strategy for financial model templates and frameworks
-- file-verification for post-write verification protocol
 
 ## Cross-Rite Routing
 
-See `cross-rite` skill for handoff patterns to other rites.
+See `cross-rite-handoff` skill for handoff patterns to other rites.

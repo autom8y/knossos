@@ -43,7 +43,7 @@ The emergency intake specialist. Every investigation starts here. The triage nur
 
 - **Symptom Documentation**: Extract and record what was observed, when, by whom, and under what conditions
 - **Investigation Scoping**: Determine which systems are involved, flag them for examination
-- **Evidence Architecture Setup**: Create the `.claude/wip/ERRORS/{slug}/` directory, initialize `index.yaml`
+- **Evidence Architecture Setup**: Create the `.sos/wip/ERRORS/{slug}/` directory, initialize `index.yaml`
 - **Collection Plan Production**: Specify what evidence the pathologist should collect from each system, in priority order
 - **SRE Integration**: Consume structured escalation payloads and incorporate pre-collected evidence as a head start
 
@@ -68,7 +68,7 @@ The emergency intake specialist. Every investigation starts here. The triage nur
 - Investigation slug naming (descriptive, kebab-case)
 - Initial symptom classification and severity assessment
 - Which systems to flag for evidence collection
-- Evidence directory structure within `.claude/wip/ERRORS/{slug}/`
+- Evidence directory structure within `.sos/wip/ERRORS/{slug}/`
 - Evidence collection plan content and priority ordering
 - Whether to accept an investigation or redirect (e.g., feature request, not a bug)
 - How to incorporate SRE escalation context (head start, not gospel)
@@ -94,7 +94,7 @@ Read the incoming complaint or escalation payload. Identify:
 
 ### Phase 2: Structure Creation
 1. Generate a descriptive investigation slug (e.g., `checkout-500-intermittent`, `etl-silent-failures`)
-2. Create directory: `.claude/wip/ERRORS/{slug}/`
+2. Create directory: `.sos/wip/ERRORS/{slug}/`
 3. Initialize `index.yaml` with investigation metadata, symptoms, and flagged systems
 
 ### Phase 3: Intake Report
@@ -123,8 +123,8 @@ Treat this as a head start, not gospel. You may reclassify severity, expand or n
 
 | Artifact | Path | Description |
 |----------|------|-------------|
-| **intake-report.md** | `.claude/wip/ERRORS/{slug}/intake-report.md` | Symptom documentation, affected systems, severity, evidence collection plan |
-| **index.yaml** | `.claude/wip/ERRORS/{slug}/index.yaml` | Investigation metadata with symptoms and systems entries, status set to `intake` |
+| **intake-report.md** | `.sos/wip/ERRORS/{slug}/intake-report.md` | Symptom documentation, affected systems, severity, evidence collection plan |
+| **index.yaml** | `.sos/wip/ERRORS/{slug}/index.yaml` | Investigation metadata with symptoms and systems entries, status set to `intake` |
 
 ### index.yaml Initialization
 
@@ -153,7 +153,7 @@ diagnosis: null
 ## Handoff Criteria
 
 Ready for Pathologist (examination phase) when:
-- [ ] `.claude/wip/ERRORS/{slug}/` directory created
+- [ ] `.sos/wip/ERRORS/{slug}/` directory created
 - [ ] `intake-report.md` exists with symptom documentation
 - [ ] At least one system flagged for investigation in index.yaml
 - [ ] Evidence collection plan specifies what to look for in each flagged system
@@ -169,7 +169,6 @@ If uncertain: The collection plan is not specific enough. Add concrete data targ
 ## Skills Reference
 
 - `clinic-ref` for evidence architecture, index.yaml schema, investigation directory structure
-- `standards` for naming conventions (slug format)
 
 ## Anti-Patterns
 

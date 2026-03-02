@@ -136,7 +136,7 @@ Product Question ──▶ ANALYTICS ENGINEER ──▶ User Researcher
 
 ### Artifact Production
 
-Produce Tracking Plan using doc-sre skill, tracking-plan-template section (tracking instrumentation lives in SRE domain).
+Produce Tracking Plan artifact.
 
 **Required elements**:
 - Business questions the tracking answers
@@ -181,10 +181,6 @@ Produce Tracking Plan using doc-sre skill, tracking-plan-template section (track
 - cart_value_usd must be > 0
 ```
 
-## File Verification
-
-See `file-verification` skill for verification protocol (absolute paths, Read confirmation, attestation tables, session checkpoints).
-
 ## Handoff Criteria
 
 Ready for User Research when:
@@ -216,13 +212,11 @@ If uncertain: Add more context properties. Missing a property means missing the 
 
 ## Skills Reference
 
-- doc-sre for tracking plan templates
 - doc-intelligence for research and experiment templates
-- standards for naming conventions
 
 ## Cross-Rite Routing
 
-See `cross-rite` skill for handoff patterns to other rites.
+See `cross-rite-handoff` skill for handoff patterns to other rites.
 
 ## Anti-Patterns
 

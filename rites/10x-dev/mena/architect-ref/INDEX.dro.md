@@ -21,7 +21,7 @@ Act as **Requirements Analyst**.
 Feature: {feature-description}
 
 Create PRD following documentation templates.
-Save to: docs/requirements/PRD-{feature-slug}.md
+Save to: .ledge/specs/PRD-{feature-slug}.md
 ```
 
 ### 2. Invoke Architect
@@ -32,7 +32,7 @@ Once PRD exists, delegate to Architect:
 Act as **Architect**.
 
 Feature: {feature-description}
-PRD: docs/requirements/PRD-{feature-slug}.md
+PRD: .ledge/specs/PRD-{feature-slug}.md
 Complexity: {complexity}
 
 Create TDD following documentation templates.
@@ -46,8 +46,8 @@ Create ADRs for significant architectural decisions:
 - Architectural patterns and rejected alternatives
 
 Save:
-- TDD to: docs/design/TDD-{feature-slug}.md
-- ADRs to: docs/decisions/ADR-{NNNN}-{decision-slug}.md
+- TDD to: .ledge/specs/TDD-{feature-slug}.md
+- ADRs to: .ledge/decisions/ADR-{NNNN}-{decision-slug}.md
 
 DO NOT implement any code. Design only.
 ```

@@ -1,6 +1,4 @@
 # Orchestrator configuration for security
-# Used by generate-orchestrator.sh to produce pythia.md
-# References workflow.yaml for phase/specialist data
 
 # Rite metadata
 rite:
@@ -47,10 +45,7 @@ handoff_criteria:
     - "Deployment approval granted"
 
 # Skills references for this rite
-skills:
-  - "@security-standards for threat modeling conventions"
-  - "@compliance for regulatory mappings"
-  - "@10x-workflow for complexity determination in security context"
+skills: []
 
 # Rite-specific anti-patterns
 antipatterns:

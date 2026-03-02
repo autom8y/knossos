@@ -436,7 +436,7 @@ func TestSchemaCmd_DeprecatedSchemaFlag_Exists(t *testing.T) {
 func TestArtifactOutput_Text_ValidNoType(t *testing.T) {
 	out := ArtifactOutput{
 		Valid:    true,
-		FilePath: "docs/requirements/PRD-foo.md",
+		FilePath: ".ledge/specs/PRD-foo.md",
 	}
 	text := out.Text()
 	if !strings.Contains(text, "VALID") {
@@ -450,7 +450,7 @@ func TestArtifactOutput_Text_ValidNoType(t *testing.T) {
 func TestArtifactOutput_Text_ValidWithType(t *testing.T) {
 	out := ArtifactOutput{
 		Valid:        true,
-		FilePath:     "docs/requirements/PRD-foo.md",
+		FilePath:     ".ledge/specs/PRD-foo.md",
 		ArtifactType: "prd",
 	}
 	text := out.Text()
@@ -465,7 +465,7 @@ func TestArtifactOutput_Text_ValidWithType(t *testing.T) {
 func TestArtifactOutput_Text_InvalidWithIssues(t *testing.T) {
 	out := ArtifactOutput{
 		Valid:        false,
-		FilePath:     "docs/requirements/PRD-foo.md",
+		FilePath:     ".ledge/specs/PRD-foo.md",
 		ArtifactType: "prd",
 		Issues: []validation.ValidationIssue{
 			{Field: "title", Message: "title is required"},
@@ -541,7 +541,7 @@ func TestHandoffOutput_Text_PassedWithFilePath(t *testing.T) {
 		Passed:       true,
 		Phase:        "design",
 		ArtifactType: "tdd",
-		FilePath:     "docs/design/TDD-foo.md",
+		FilePath:     ".ledge/specs/TDD-foo.md",
 	}
 	text := out.Text()
 	if !strings.Contains(text, "TDD-foo.md") {
@@ -646,7 +646,7 @@ func TestSchemaOutput_Text_Valid(t *testing.T) {
 	out := SchemaOutput{
 		Valid:      true,
 		SchemaName: "prd",
-		FilePath:   "docs/requirements/PRD-foo.md",
+		FilePath:   ".ledge/specs/PRD-foo.md",
 	}
 	text := out.Text()
 	if !strings.Contains(text, "VALID") {
@@ -664,7 +664,7 @@ func TestSchemaOutput_Text_InvalidWithIssues(t *testing.T) {
 	out := SchemaOutput{
 		Valid:      false,
 		SchemaName: "prd",
-		FilePath:   "docs/requirements/PRD-foo.md",
+		FilePath:   ".ledge/specs/PRD-foo.md",
 		Issues: []validation.ValidationIssue{
 			{Field: "status", Message: "invalid status value"},
 			{Message: "unknown error"},
@@ -683,7 +683,7 @@ func TestSchemaOutput_Text_IssueWithField_ShowsBrackets(t *testing.T) {
 	out := SchemaOutput{
 		Valid:      false,
 		SchemaName: "adr",
-		FilePath:   "docs/decisions/ADR-0001.md",
+		FilePath:   ".ledge/decisions/ADR-0001.md",
 		Issues: []validation.ValidationIssue{
 			{Field: "number", Message: "number is required"},
 		},

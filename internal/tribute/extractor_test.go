@@ -12,13 +12,13 @@ func TestExtractor_ExtractArtifacts(t *testing.T) {
 		{
 			Ts:           "2026-01-06T11:00:00Z",
 			Type:         "tool.artifact_created",
-			Path:         "docs/requirements/PRD-test.md",
+			Path:         ".ledge/specs/PRD-test.md",
 			ArtifactType: "PRD",
 		},
 		{
 			Ts:   "2026-01-06T12:00:00Z",
 			Type: "tool.artifact_created",
-			Path: "docs/design/TDD-test.md",
+			Path: ".ledge/specs/TDD-test.md",
 			// ArtifactType inferred from path
 		},
 		{
@@ -306,9 +306,9 @@ func TestInferArtifactType(t *testing.T) {
 		path     string
 		expected string
 	}{
-		{"docs/requirements/PRD-feature.md", "PRD"},
-		{"docs/design/TDD-feature.md", "TDD"},
-		{"docs/decisions/ADR-0001-approach.md", "ADR"},
+		{".ledge/specs/PRD-feature.md", "PRD"},
+		{".ledge/specs/TDD-feature.md", "TDD"},
+		{".ledge/decisions/ADR-0001-approach.md", "ADR"},
 		{"src/feature_test.go", "Tests"},
 		{"tests/integration/test_api.py", "Tests"},
 		{"src/main.go", "Code"},

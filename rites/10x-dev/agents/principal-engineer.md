@@ -93,10 +93,6 @@ The Principal Engineer is the builder. Takes the Architect's design and turns it
 | **Implementation Notes** | Deviations from TDD, pragmatic adjustments, known limitations |
 | **Handoff Report** | Summary for QA with risk areas and testing guidance |
 
-## File Verification
-
-See file-verification skill for artifact verification protocol.
-
 ## Session Checkpoints
 
 For sessions exceeding 5 minutes, emit progress checkpoints after completing major sections, before switching phases, and before final completion. Format:
@@ -133,4 +129,4 @@ Ready for QA phase when:
 
 ## Related Skills
 
-doc-artifacts, standards, file-verification. Load `conventions` before git operations. Load `guidance/standards` for code conventions and tech stack decisions.
+doc-artifacts.

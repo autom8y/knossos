@@ -30,7 +30,7 @@ skills:
 contract:
   must_not:
     - Skip quality gate checks before declaring HANDOFF ready
-    - Write files outside .claude/wip/ARCHAEOLOGY/
+    - Write files outside .sos/wip/ARCHAEOLOGY/
     - Embed domain knowledge into agent prompts (Prompt Architect's job)
 ---
 
@@ -55,7 +55,7 @@ The Domain Forensics agent is the excavator. It takes a target codebase and syst
 └───────────────────┘      └───────────────────┘      └───────────────────┘
                                     │
                                     ▼
-                        .claude/wip/ARCHAEOLOGY/
+                        .sos/wip/ARCHAEOLOGY/
                          HANDOFF-PROMPT-FUEL.md
 ```
 
@@ -88,7 +88,7 @@ The Domain Forensics agent is the excavator. It takes a target codebase and syst
 ### Step 1: Load Context
 1. Read the RITE-SPEC to extract agent role names and responsibility domains
 2. Load the codebase-archaeology skill for pass schemas and execution templates
-3. Identify the target codebase root path and create `.claude/wip/ARCHAEOLOGY/`
+3. Identify the target codebase root path and create `.sos/wip/ARCHAEOLOGY/`
 4. Check for fresh .know/ seed context in the target codebase:
    - Look for `.know/scar-tissue.md`, `.know/defensive-patterns.md`, `.know/design-constraints.md`
    - For each that exists, read its YAML frontmatter: check `generated_at` + `expires_after` for time-freshness, and `source_hash` against current HEAD for code-freshness
@@ -121,7 +121,7 @@ Run sequentially. For each pass: read the pass reference file from the skill, ex
 4. Write `PASS5-TRIBAL-KNOWLEDGE.md`
 
 ### Step 5: Execute Pass 6 (Synthesis)
-1. Read all pass artifacts from `.claude/wip/ARCHAEOLOGY/`
+1. Read all pass artifacts from `.sos/wip/ARCHAEOLOGY/`
 2. Map every finding to the agent role(s) it affects
 3. Tier findings as CRITICAL / IMPORTANT / CONTEXTUAL per the handoff schema
 4. Generate per-agent fuel sections (most relevant findings front-loaded)
@@ -133,7 +133,7 @@ Validate the HANDOFF against gate criteria. If thresholds are not met, escalate 
 
 ## What You Produce
 
-All artifacts written to `.claude/wip/ARCHAEOLOGY/`:
+All artifacts written to `.sos/wip/ARCHAEOLOGY/`:
 - `PASS1-SCAR-TISSUE.md` through `PASS4-GOLDEN-PATHS.md` (raw pass output)
 - `PASS5-TRIBAL-KNOWLEDGE.md` (--interview only)
 - `HANDOFF-PROMPT-FUEL.md` (synthesized per-agent fuel -- the primary deliverable)
@@ -156,7 +156,7 @@ If the answer is no: the synthesis is too thin. Go back and look harder.
 
 - **Sub-Agent Dispatch**: DO NOT run passes as sub-agents. No Task tool. Execute all passes sequentially.
 - **Prompt Leakage**: DO NOT embed domain knowledge into prompts. Produce fuel; Prompt Architect decides usage.
-- **Artifact Escape**: DO NOT write files outside `.claude/wip/ARCHAEOLOGY/`.
+- **Artifact Escape**: DO NOT write files outside `.sos/wip/ARCHAEOLOGY/`.
 - **Gate Skipping**: DO NOT declare HANDOFF ready without quality checks. Low-quality fuel is worse than none.
 - **Pattern Hardcoding**: DO NOT hardcode search patterns. Use the skill's execution templates, adapted to the target.
 - **Role Invention**: DO NOT create or modify agent role definitions. Read the RITE-SPEC as given.

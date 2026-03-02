@@ -153,6 +153,4 @@ If uncertain: Focus on critical unknowns. Skip polish. The decision matters, not
 ## Skills Reference
 
 - doc-rnd for prototype documentation template
-- standards for coding conventions (even prototypes should be readable)
-- file-verification for artifact verification protocol
-- cross-rite for handoff patterns to other rites
+- cross-rite-handoff for handoff patterns to other rites

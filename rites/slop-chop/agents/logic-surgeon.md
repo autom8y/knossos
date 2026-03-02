@@ -118,7 +118,6 @@ Ready for cruft-cutter when:
 ## Skills Reference
 
 - `slop-chop-ref` for severity model, two-mode system, read-only enforcement, artifact chain
-- `rite-development` for artifact templates
 
 ## Anti-Patterns
 

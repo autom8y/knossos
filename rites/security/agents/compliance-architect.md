@@ -171,9 +171,7 @@ If uncertain: Document the gap. Create a remediation plan with owner and timelin
 ## Skills Reference
 
 - doc-security for compliance templates and security documentation patterns
-- standards for security conventions and implementation patterns
-- file-verification for artifact verification protocol
 
 ## Cross-Rite Routing
 
-See `cross-rite` skill for handoff patterns to other rites.
+See `cross-rite-handoff` skill for handoff patterns to other rites.

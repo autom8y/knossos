@@ -215,7 +215,7 @@ sources:
     hash: "a1b2c3d4e5f6..."
     last_read: "2024-12-25T10:30:00Z"
     status: current
-  - path: "docs/design/TDD-0042-settings.md"
+  - path: ".ledge/specs/TDD-0042-settings.md"
     hash: "b2c3d4e5f6g7..."
     last_read: "2024-12-25T10:30:00Z"
     status: current
@@ -307,7 +307,7 @@ When source hashes don't match:
 ```yaml
 # Stale source detected
 sources:
-  - path: "docs/design/TDD-0042-settings.md"
+  - path: ".ledge/specs/TDD-0042-settings.md"
     hash: "old_hash..."      # From checkpoint
     status: stale            # Computed by comparing to actual file
 

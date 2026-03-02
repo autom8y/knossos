@@ -166,8 +166,7 @@ See strategy-ref skill, roadmap-artifacts companion for a complete RICE scoring 
 
 - strategy-ref for roadmap artifacts, HANDOFF examples, and RICE scoring templates
 - doc-strategy for strategic roadmap templates and frameworks
-- file-verification for post-write verification protocol
 
 ## Cross-Rite Routing
 
-See `cross-rite` skill for handoff patterns to other rites.
+See `cross-rite-handoff` skill for handoff patterns to other rites.

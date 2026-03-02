@@ -149,8 +149,6 @@ Ready to route back when:
 - [ ] Upstream agent identified (Janitor, Enforcer, or Smeller)
 - [ ] Remediation requirements actionable and clear
 
-See `file-verification` skill for verification protocol.
-
 ## The Acid Test
 
 *"Would I stake my reputation on this refactoring not causing a production incident?"*
@@ -193,9 +191,4 @@ Every commit reviewed. Every contract verified. "The Janitor is good" is not an 
 
 ## Skills Reference
 
-- standards for code conventions and quality expectations
-- documentation for understanding behavioral contracts
-- file-verification for artifact verification protocol
-- cross-rite for handoff patterns to other rites
-
-Load `conventions` before git operations. Load `guidance/standards` for code quality expectations.
+- cross-rite-handoff for handoff patterns to other rites

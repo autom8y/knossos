@@ -121,7 +121,7 @@ Back-routes are expected workflow patterns, not failure modes.
 
 ## Session Resume Protocol
 
-On /continue, read `.claude/wip/ERRORS/{slug}/index.yaml` to determine current phase.
+On /continue, read `.sos/wip/ERRORS/{slug}/index.yaml` to determine current phase.
 
 | Status Field | Dispatch To |
 |--------------|-------------|
@@ -132,7 +132,7 @@ On /continue, read `.claude/wip/ERRORS/{slug}/index.yaml` to determine current p
 | complete | Report to user: investigation finished |
 | {phase}:{back_route}_round_{N} | Appropriate agent with back-route context |
 
-If multiple investigation directories exist under `.claude/wip/ERRORS/`, present the list to the user and ask which to resume. Do not auto-select.
+If multiple investigation directories exist under `.sos/wip/ERRORS/`, present the list to the user and ask which to resume. Do not auto-select.
 
 ## Consultation Protocol
 

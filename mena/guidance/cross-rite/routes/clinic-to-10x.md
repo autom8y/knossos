@@ -15,7 +15,7 @@ The attending produces `handoff-10x-dev.md` when the investigation concludes tha
 
 ## Inbound Artifact
 
-The clinic produces `handoff-10x-dev.md` in `.claude/wip/ERRORS/{investigation-slug}/`. This file contains:
+The clinic produces `handoff-10x-dev.md` in `.sos/wip/ERRORS/{investigation-slug}/`. This file contains:
 
 | Field | Required | Description |
 |-------|----------|-------------|
@@ -42,7 +42,7 @@ Confidence: {high|medium}
 Fix specification is ready for implementation. Suggest next step:
   /10x && /task "Fix {investigation-slug}" --complexity={SCRIPT|MODULE|SERVICE}
 
-Handoff artifact: .claude/wip/ERRORS/{slug}/handoff-10x-dev.md
+Handoff artifact: .sos/wip/ERRORS/{slug}/handoff-10x-dev.md
 ```
 
 ## 10x-dev Intake

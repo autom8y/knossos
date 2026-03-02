@@ -175,7 +175,6 @@ Reference these skills as appropriate:
 - agent-catalog for rite profile template, Consultant sync checklist, versioning scheme
 - consult for Consultant patterns
 - rite-development for sync patterns
-- documentation for document templates
 
 ## Cross-Rite Notes
 

@@ -60,7 +60,7 @@ The clinic does not have complexity tiers. Every investigation runs all four pha
 
 ## Evidence Architecture
 
-All artifacts live in `.claude/wip/ERRORS/{investigation-slug}/`:
+All artifacts live in `.sos/wip/ERRORS/{investigation-slug}/`:
 
 ```
 intake-report.md       <- triage-nurse

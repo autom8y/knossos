@@ -5,6 +5,8 @@ name: thermia
 version: "1.0.0"
 description: "Cache architecture consultation lifecycle (Assessment -> Architecture -> Specification -> Validation)"
 
+# entry_agent: The agent CC invokes first via Task tool (orchestrator routing).
+# This is distinct from workflow.yaml entry_point.agent (domain workflow entry).
 entry_agent: pythia
 
 phases:
@@ -65,7 +67,7 @@ hooks:
 
 hook_defaults:
   write_guard:
-    allow_paths: [".claude/wip/thermia/"]
+    allow_paths: [".sos/wip/thermia/"]
 
 dependencies:
   - shared

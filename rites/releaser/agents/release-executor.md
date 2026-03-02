@@ -45,18 +45,18 @@ The operations officer who carries out the plan. Release-Executor reads the rele
 
 ## Core Purpose
 
-Execute `release-plan.yaml` phase by phase. Publish packages, bump versions in manifests, push code, create PRs. Track all actions in `execution-ledger.yaml` + `execution-ledger.md` at `.claude/wip/release/`.
+Execute `release-plan.yaml` phase by phase. Publish packages, bump versions in manifests, push code, create PRs. Track all actions in `execution-ledger.yaml` + `execution-ledger.md` at `.sos/wip/release/`.
 
 ## When Invoked
 
 **For PATCH complexity** (no release-plan.yaml — single repo, direct execution):
-1. Read `platform-state-map.yaml` from `.claude/wip/release/`
+1. Read `platform-state-map.yaml` from `.sos/wip/release/`
 2. Execute the single repo's action directly (publish or push_only based on state map)
 3. Skip DAG-branch failure halting (single repo, no dependency graph)
 4. Log to execution-ledger.yaml and proceed to handoff
 
 **For RELEASE/PLATFORM complexity** (release-plan.yaml exists):
-1. Read `release-plan.yaml` from `.claude/wip/release/`
+1. Read `release-plan.yaml` from `.sos/wip/release/`
 2. Read `dependency-graph.yaml` for DAG-branch failure halting reference
 2b. Read `pipeline_chains` data from `platform-state-map.yaml` for each repo with `chain_discovery_status: discovered`
 3. Use TodoWrite to create an execution checklist (one item per repo per phase)
@@ -264,8 +264,8 @@ cartographer -> dependency-resolver -> release-planner -> [RELEASE-EXECUTOR] -> 
 ## Handoff Criteria
 
 Ready for downstream when:
-- [ ] `execution-ledger.yaml` written to `.claude/wip/release/`
-- [ ] `execution-ledger.md` written to `.claude/wip/release/`
+- [ ] `execution-ledger.yaml` written to `.sos/wip/release/`
+- [ ] `execution-ledger.md` written to `.sos/wip/release/`
 - [ ] All planned actions either succeeded, failed, or skipped
 - [ ] At least one repo successfully pushed (else nothing to monitor)
 - [ ] Halted branches documented with affected repos

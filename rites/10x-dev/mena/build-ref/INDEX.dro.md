@@ -16,7 +16,7 @@ Implement code from an approved TDD without re-doing the design phase. Assumes T
 Check that design artifacts exist:
 
 ```bash
-find docs/design -name "TDD-*.md" | grep -i "{feature-slug}"
+find .ledge/specs -name "TDD-*.md" | grep -i "{feature-slug}"
 ```
 
 - **TDD not found**: Error. Suggest `/architect` first or `/task` for integrated workflow.
@@ -30,8 +30,8 @@ Delegate to Principal Engineer with the approved TDD:
 Act as **Principal Engineer**.
 
 Feature: {feature-description}
-PRD: docs/requirements/PRD-{feature-slug}.md (if exists)
-TDD: docs/design/TDD-{feature-slug}.md
+PRD: .ledge/specs/PRD-{feature-slug}.md (if exists)
+TDD: .ledge/specs/TDD-{feature-slug}.md
 
 Implement the solution following the approved TDD:
 

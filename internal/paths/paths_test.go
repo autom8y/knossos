@@ -52,6 +52,7 @@ func TestResolver_PathMethods(t *testing.T) {
 		{"LedgeSpecsDir", r.LedgeSpecsDir(), "/tmp/testroot/.ledge/specs"},
 		{"LedgeReviewsDir", r.LedgeReviewsDir(), "/tmp/testroot/.ledge/reviews"},
 		{"LedgeSpikesDir", r.LedgeSpikesDir(), "/tmp/testroot/.ledge/spikes"},
+		{"WipDir", r.WipDir(), "/tmp/testroot/.sos/wip"},
 		{"InvocationStateFile", r.InvocationStateFile(), "/tmp/testroot/.claude/INVOCATION_STATE.yaml"},
 	}
 

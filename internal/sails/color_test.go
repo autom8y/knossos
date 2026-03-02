@@ -621,7 +621,7 @@ func TestComputeColor_sails_008_QAUpgradeGrayToWhite(t *testing.T) {
 		QAUpgrade: &QAUpgrade{
 			UpgradedAt:              &now,
 			QASessionID:             "session-20260106-100000-qa123456",
-			ConstraintResolutionLog: "docs/testing/TP-qa-original-session.md",
+			ConstraintResolutionLog: ".ledge/specs/TP-qa-original-session.md",
 			AdversarialTestsAdded: []string{
 				"tests/integration/rate_limit_failover_test.go",
 				"tests/integration/index_edge_cases_test.go",
@@ -723,7 +723,7 @@ func TestComputeColor_QAUpgradeWithoutAdversarialTests(t *testing.T) {
 		QAUpgrade: &QAUpgrade{
 			UpgradedAt:              &now,
 			QASessionID:             "session-20260106-100000-qa123456",
-			ConstraintResolutionLog: "docs/testing/log.md",
+			ConstraintResolutionLog: ".ledge/specs/log.md",
 			AdversarialTestsAdded:   []string{}, // Empty!
 		},
 	}
@@ -750,7 +750,7 @@ func TestComputeColor_QAUpgradeNotAppliedToWhite(t *testing.T) {
 		QAUpgrade: &QAUpgrade{
 			UpgradedAt:              &now,
 			QASessionID:             "session-20260106-100000-qa123456",
-			ConstraintResolutionLog: "docs/testing/log.md",
+			ConstraintResolutionLog: ".ledge/specs/log.md",
 			AdversarialTestsAdded:   []string{"test.go"},
 		},
 	}
@@ -780,7 +780,7 @@ func TestComputeColor_QAUpgradeNotAppliedToBlack(t *testing.T) {
 		QAUpgrade: &QAUpgrade{
 			UpgradedAt:              &now,
 			QASessionID:             "session-20260106-100000-qa123456",
-			ConstraintResolutionLog: "docs/testing/log.md",
+			ConstraintResolutionLog: ".ledge/specs/log.md",
 			AdversarialTestsAdded:   []string{"test.go"},
 		},
 	}
@@ -814,7 +814,7 @@ func TestComputeColor_QAUpgradeNotAppliedWhenDowngradedToBlack(t *testing.T) {
 		QAUpgrade: &QAUpgrade{
 			UpgradedAt:              &now,
 			QASessionID:             "session-20260106-100000-qa123456",
-			ConstraintResolutionLog: "docs/testing/log.md",
+			ConstraintResolutionLog: ".ledge/specs/log.md",
 			AdversarialTestsAdded:   []string{"test.go"},
 		},
 	}

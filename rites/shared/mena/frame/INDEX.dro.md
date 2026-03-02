@@ -1,6 +1,6 @@
 ---
 name: frame
-description: "Invoke context-engineer to decompose initiatives into workstreams or frame rite handoffs. Produces .claude/wip/frames/{slug}.md."
+description: "Invoke context-engineer to decompose initiatives into workstreams or frame rite handoffs. Produces .sos/wip/frames/{slug}.md."
 argument-hint: "<brief>"
 allowed-tools: Read, Glob, Grep, Write, Task, Skill
 model: opus
@@ -23,10 +23,10 @@ This command runs in the main thread. Main-thread execution is required because 
 2. **Normalize to slug**:
    - Convert the brief to kebab-case: lowercase, spaces to hyphens, strip non-alphanumeric except hyphens.
    - Truncate to 60 characters if longer.
-   - The output path will be: `.claude/wip/frames/{slug}.md`
+   - The output path will be: `.sos/wip/frames/{slug}.md`
 
 3. **Ensure output directory exists**:
-   - Write a placeholder or use Bash: `mkdir -p .claude/wip/frames`
+   - Write a placeholder or use Bash: `mkdir -p .sos/wip/frames`
    - This is a side effect -- execute it before the Task dispatch.
 
 4. **Read session context** (if available):
@@ -68,7 +68,7 @@ You have full discretion over the framing document's structure -- there are no p
 
 ### Output
 
-Write the framing document to: .claude/wip/frames/{slug}.md
+Write the framing document to: .sos/wip/frames/{slug}.md
 
 The document must end with a '## Next Commands' section listing the exact commands the user should run next (with arguments), in priority order.
 ")
@@ -80,16 +80,16 @@ After context-engineer returns:
 
 1. Confirm the artifact was written:
    ```
-   Read(".claude/wip/frames/{slug}.md", limit=20)
+   Read(".sos/wip/frames/{slug}.md", limit=20)
    ```
 
 2. Display to the user:
    ```
-   ## Frame: .claude/wip/frames/{slug}.md
+   ## Frame: .sos/wip/frames/{slug}.md
 
    {CE's suggested next commands, extracted from the ## Next Commands section}
 
-   Read the full framing document: .claude/wip/frames/{slug}.md
+   Read the full framing document: .sos/wip/frames/{slug}.md
    ```
 
 If the file was not written (CE did not produce output at the expected path), WARN: "context-engineer did not write the expected file. Check the CE output above for the framing document."

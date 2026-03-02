@@ -58,7 +58,7 @@ The `review` rite is a good starting point — it's a 3-phase code review workfl
    - **Assessor** evaluates findings and prioritizes by impact
    - **Reporter** produces a structured review document
 
-5. Find the results in `.claude/wip/review/`.
+5. Find the results in `.sos/wip/review/`.
 
 ## What Just Happened
 

@@ -1,10 +1,9 @@
 # Orchestrator configuration for strategy
-# Used by generate-orchestrator.sh to produce pythia.md
 
 rite:
   name: strategy
   domain: business strategy
-  color: gold
+  color: yellow
 
 frontmatter:
   role: "Coordinates strategic initiatives"
@@ -39,10 +38,7 @@ handoff_criteria:
     - "Go/no-go recommendation provided"
     - "Resource and timeline estimates included"
 
-skills:
-  - "@market-research for analysis frameworks"
-  - "@business-modeling for financial planning"
-  - "@strategy for competitive positioning"
+skills: []
 
 antipatterns:
   - "Analysis paralysis (set timebox, decide with available data)"

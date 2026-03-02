@@ -302,3 +302,112 @@ Workflow.
 		t.Errorf("FindSection(nonexistent) returned %v, want nil", section)
 	}
 }
+
+// TestMapSectionsToArchetype_PrefixMatching verifies that heading variants are matched to their
+// archetype section via prefix matching when exact matching fails.
+func TestMapSectionsToArchetype_PrefixMatching(t *testing.T) {
+	tests := []struct {
+		name          string
+		heading       string
+		wantName      string
+		wantOwnership SectionOwnership
+	}{
+		{
+			name:          "exact match still works (regression guard)",
+			heading:       "Behavioral Constraints",
+			wantName:      "behavioral-constraints",
+			wantOwnership: OwnerPlatform,
+		},
+		{
+			name:          "behavioral constraints with DO NOT suffix",
+			heading:       "Behavioral Constraints (DO NOT)",
+			wantName:      "behavioral-constraints",
+			wantOwnership: OwnerPlatform,
+		},
+		{
+			name:          "anti-patterns exact match (regression guard)",
+			heading:       "Anti-Patterns",
+			wantName:      "anti-patterns",
+			wantOwnership: OwnerPlatform,
+		},
+		{
+			name:          "anti-patterns with to Avoid suffix",
+			heading:       "Anti-Patterns to Avoid",
+			wantName:      "anti-patterns",
+			wantOwnership: OwnerPlatform,
+		},
+		{
+			name:          "anti-patterns with colon suffix",
+			heading:       "Anti-Patterns: Key Warnings",
+			wantName:      "anti-patterns",
+			wantOwnership: OwnerPlatform,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			content := "---\nname: test\ndescription: test\ntype: orchestrator\ntools: Read\n---\n\n# Test\n\n## " + tt.heading + "\n\nContent.\n"
+			parsed, err := ParseAgentSections([]byte(content))
+			if err != nil {
+				t.Fatalf("ParseAgentSections() error = %v", err)
+			}
+
+			section := parsed.FindSectionByHeading(tt.heading)
+			if section == nil {
+				t.Fatalf("section %q not found", tt.heading)
+			}
+
+			if section.Name != tt.wantName {
+				t.Errorf("section %q Name = %q, want %q", tt.heading, section.Name, tt.wantName)
+			}
+			if section.Ownership != tt.wantOwnership {
+				t.Errorf("section %q Ownership = %v, want %v", tt.heading, section.Ownership, tt.wantOwnership)
+			}
+		})
+	}
+}
+
+// TestMapSectionsToArchetype_NoPrefixFalseMatch verifies that the prefix matching is conservative
+// and does not produce false positives for headings that merely share a prefix.
+func TestMapSectionsToArchetype_NoPrefixFalseMatch(t *testing.T) {
+	tests := []struct {
+		name    string
+		heading string
+	}{
+		{
+			// "Tool Access" must not match a heading "Tool Accessibility".
+			name:    "tool accessibility not matched as tool access",
+			heading: "Tool Accessibility",
+		},
+		{
+			// "Anti-Patterns" must not match "Anti-Pattern Counter-Examples" with no separator
+			// — actually "anti-pattern" is a prefix of "anti-patterns", so test something
+			// that truly has no separator: a concatenated variant.
+			name:    "unrelated heading stays unmapped",
+			heading: "Completely Unrelated Heading",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			content := "---\nname: test\ndescription: test\ntype: specialist\ntools: Read\n---\n\n# Test\n\n## " + tt.heading + "\n\nContent.\n"
+			parsed, err := ParseAgentSections([]byte(content))
+			if err != nil {
+				t.Fatalf("ParseAgentSections() error = %v", err)
+			}
+
+			section := parsed.FindSectionByHeading(tt.heading)
+			if section == nil {
+				t.Fatalf("section %q not found", tt.heading)
+			}
+
+			// Should remain unmapped (no archetype section matches).
+			if section.Name != "" {
+				t.Errorf("section %q should be unmapped but got Name=%q", tt.heading, section.Name)
+			}
+			if section.Ownership != OwnerAuthor {
+				t.Errorf("section %q should be OwnerAuthor but got %v", tt.heading, section.Ownership)
+			}
+		})
+	}
+}

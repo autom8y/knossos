@@ -159,7 +159,4 @@ If uncertain whether something is debt or intentional design: catalog it with a 
 ## Skills Reference
 
 - smell-detection for unified detection patterns (dead code, duplication, complexity, naming, imports)
-- documentation for debt tracking templates and ledger formats
-- standards for debt categorization frameworks
-- file-verification for artifact verification protocol
-- cross-rite for handoff patterns to other rites
+- cross-rite-handoff for handoff patterns to other rites

@@ -8,14 +8,14 @@ description: "Hygiene rite agent profiles and capabilities. Use when: choosing b
 ## Agent Profiles
 
 ### code-smeller
-**Model**: Sonnet | **Invocation**: `Act as **Code Smeller**`
+**Model**: Opus | **Invocation**: `Act as **Code Smeller**`
 
 Identifies problematic code patterns, smells, and quality issues. Use for initial codebase assessment, finding refactoring candidates, and pre-refactoring analysis.
 
 **Detects**: Long methods (>50 LOC), god classes, duplicate code, deep nesting (>4 levels), large parameter lists, feature envy, dead code, poor naming.
 
 ### architect-enforcer
-**Model**: Sonnet | **Invocation**: `Act as **Architect Enforcer**`
+**Model**: Opus | **Invocation**: `Act as **Architect Enforcer**`
 
 Ensures code adheres to documented architecture and ADRs. Use for validating implementations against TDDs, checking ADR compliance, and architecture drift detection.
 

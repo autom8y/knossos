@@ -853,8 +853,8 @@ func TestNewTaskStartEvent(t *testing.T) {
 
 func TestNewTaskEndEvent(t *testing.T) {
 	artifacts := []string{
-		"/Users/tomtenuta/Code/knossos/docs/requirements/PRD-test.md",
-		"/Users/tomtenuta/Code/knossos/docs/design/TDD-test.md",
+		"/Users/tomtenuta/Code/knossos/.ledge/specs/PRD-test.md",
+		"/Users/tomtenuta/Code/knossos/.ledge/specs/TDD-test.md",
 	}
 	event := NewTaskEndEvent("task-001", "architect", "success", "session-20260106-123456-abc", 15000, artifacts)
 

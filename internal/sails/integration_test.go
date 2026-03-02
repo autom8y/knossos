@@ -439,7 +439,7 @@ None.
 	qaUpgrade := &QAUpgrade{
 		UpgradedAt:              &qaUpgradeTime,
 		QASessionID:             "session-20260106-100000-qa123456",
-		ConstraintResolutionLog: "docs/testing/TP-qa-findings.md",
+		ConstraintResolutionLog: ".ledge/specs/TP-qa-findings.md",
 		AdversarialTestsAdded: []string{
 			"tests/integration/edge_case_test.go",
 		},
@@ -511,7 +511,7 @@ func TestIntegration_sails_009_CannotSelfUpgrade(t *testing.T) {
 		OpenQuestions: []string{"Unresolved question?"},
 		QAUpgrade: &QAUpgrade{
 			QASessionID:             "session-20260106-100000-qa123456",
-			ConstraintResolutionLog: "docs/testing/TP-qa-findings.md",
+			ConstraintResolutionLog: ".ledge/specs/TP-qa-findings.md",
 			// Missing AdversarialTestsAdded
 		},
 	}
@@ -527,7 +527,7 @@ func TestIntegration_sails_009_CannotSelfUpgrade(t *testing.T) {
 		OpenQuestions: nil, // No open questions = WHITE base
 		QAUpgrade: &QAUpgrade{
 			QASessionID:             "session-20260106-100000-qa123456",
-			ConstraintResolutionLog: "docs/testing/TP-qa-findings.md",
+			ConstraintResolutionLog: ".ledge/specs/TP-qa-findings.md",
 			AdversarialTestsAdded:   []string{"some_test.go"},
 		},
 	}

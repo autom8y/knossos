@@ -136,6 +136,4 @@ If uncertain: Dig deeper. Hidden dependencies kill integrations. Surface them no
 ## Skills Reference
 
 - doc-rnd for integration map template
-- standards for architecture patterns
-- file-verification for artifact verification protocol
-- cross-rite for handoff patterns to other rites
+- cross-rite-handoff for handoff patterns to other rites

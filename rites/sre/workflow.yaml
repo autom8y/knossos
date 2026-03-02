@@ -2,6 +2,8 @@ name: sre
 workflow_type: sequential
 description: Reliability lifecycle (Observe → Coordinate → Build → Verify)
 
+# entry_point: The first specialist in the domain workflow (not the CC routing agent).
+# The CC routing agent is manifest.yaml:entry_agent (always pythia for orchestrated rites).
 entry_point:
   agent: observability-engineer
   artifact:

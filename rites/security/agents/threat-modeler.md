@@ -185,9 +185,7 @@ If uncertain: Assume the worst. Document the gap and flag for deeper analysis.
 ## Skills Reference
 
 - doc-security for threat model templates and security documentation patterns
-- standards for secure coding conventions
-- file-verification for artifact verification protocol
 
 ## Cross-Rite Routing
 
-See `cross-rite` skill for handoff patterns to other rites.
+See `cross-rite-handoff` skill for handoff patterns to other rites.

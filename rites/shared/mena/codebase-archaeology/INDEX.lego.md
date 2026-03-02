@@ -42,7 +42,7 @@ RITE-SPEC (agent definitions) -------------------------+
 **STANDARD mode** (recommended): Execute Passes 1-4, then Pass 6.
 **DEEP mode**: Execute Passes 1-5 (including domain expert interview), then Pass 6.
 
-For each pass: read the pass reference file, execute the search queries against the target codebase, categorize findings using the schema, and write output to `.claude/wip/ARCHAEOLOGY/`.
+For each pass: read the pass reference file, execute the search queries against the target codebase, categorize findings using the schema, and write output to `.sos/wip/ARCHAEOLOGY/`.
 
 ## Token Budget
 
@@ -58,10 +58,10 @@ For each pass: read the pass reference file, execute the search queries against 
 
 ## Output Convention
 
-All archaeology artifacts are written to `.claude/wip/ARCHAEOLOGY/`:
+All archaeology artifacts are written to `.sos/wip/ARCHAEOLOGY/`:
 
 ```
-.claude/wip/ARCHAEOLOGY/
+.sos/wip/ARCHAEOLOGY/
     PASS1-SCAR-TISSUE.md
     PASS2-DEFENSIVE-PATTERNS.md
     PASS3-DESIGN-TENSIONS.md

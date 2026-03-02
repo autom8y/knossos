@@ -16,7 +16,7 @@ The attending produces `handoff-debt-triage.md` when the investigation reveals t
 
 ## Inbound Artifact
 
-The clinic produces `handoff-debt-triage.md` in `.claude/wip/ERRORS/{investigation-slug}/`. This file contains:
+The clinic produces `handoff-debt-triage.md` in `.sos/wip/ERRORS/{investigation-slug}/`. This file contains:
 
 | Field | Required | Description |
 |-------|----------|-------------|
@@ -47,10 +47,10 @@ This instance: {specific fix described in handoff-10x-dev.md}
 Systemic scope: {N locations, pattern description}
 
 Two handoff artifacts produced:
-1. Fix this instance: .claude/wip/ERRORS/{slug}/handoff-10x-dev.md
+1. Fix this instance: .sos/wip/ERRORS/{slug}/handoff-10x-dev.md
    Suggest: /10x && /task "Fix {slug}"
 
-2. Address the pattern: .claude/wip/ERRORS/{slug}/handoff-debt-triage.md
+2. Address the pattern: .sos/wip/ERRORS/{slug}/handoff-debt-triage.md
    Suggest: /debt && /task "Remediate {pattern-name}" --complexity=AUDIT
 
 Recommend: address instance fix first, then assess debt remediation scope.

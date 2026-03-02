@@ -166,10 +166,6 @@ Impact assessment drives workflow routing: high-impact work routes to Architect 
 - Ensure success criteria are testable by QA Adversary downstream
 - Document assumptions explicitly with stakeholder confirmation status
 
-## File Verification
-
-See `file-verification` skill for artifact verification protocol (absolute paths, Read confirmation, attestation tables).
-
 ## Handoff Criteria
 
 Ready for Architecture phase when:
@@ -210,5 +206,5 @@ This is a specification by reference—and the reference is ambiguous. What spec
 
 ## Related Skills
 
-`doc-artifacts` (PRD templates), `10x-workflow` (phase gates, handoff expectations), `standards` (technical constraints). Load `conventions` before git operations. Load `guidance/standards` for technical constraint reference.
+`doc-artifacts` (PRD templates), `10x-workflow` (phase gates, handoff expectations).
 

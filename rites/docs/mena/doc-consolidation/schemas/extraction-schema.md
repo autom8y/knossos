@@ -182,7 +182,7 @@ sources:
     sections_used:
       - heading: "Settings Merge Rules"
         line_range: [145, 210]
-  - path: "docs/design/TDD-0042-settings.md"
+  - path: ".ledge/specs/TDD-0042-settings.md"
     hash: "e5f6g7h8..."
     authority: secondary
     sections_used:
@@ -209,11 +209,11 @@ canonical_sections:
             "user": {"timeout": 60}
           }
           // Result: {"timeout": 60}
-        source: "docs/design/TDD-0042-settings.md:72"
+        source: ".ledge/specs/TDD-0042-settings.md:72"
 
   - id: "array-strategies"
     heading: "Array Merge Strategies"
-    authority_source: "docs/design/TDD-0042-settings.md"
+    authority_source: ".ledge/specs/TDD-0042-settings.md"
     content_summary: "Arrays support three merge strategies configured per-key: replace (default), append, and merge (union)."
     key_points:
       - "replace: Higher tier array replaces lower tier entirely"
@@ -229,7 +229,7 @@ shared_concepts:
     sources:
       - path: ".claude/skills/doc-ecosystem/INDEX.lego.md"
         treatment: "Defines the four-tier model with examples"
-      - path: "docs/design/TDD-0042-settings.md"
+      - path: ".ledge/specs/TDD-0042-settings.md"
         treatment: "Technical implementation of tier loading order"
 
 conflicts:
@@ -241,7 +241,7 @@ conflicts:
       - path: ".claude/skills/doc-ecosystem/INDEX.lego.md"
         position: "Default strategy is 'append'"
         evidence: "Line 178: 'Arrays append by default...'"
-      - path: "docs/design/TDD-0042-settings.md"
+      - path: ".ledge/specs/TDD-0042-settings.md"
         position: "Default strategy is 'replace'"
         evidence: "Line 85: 'replace (default)'"
     resolution:

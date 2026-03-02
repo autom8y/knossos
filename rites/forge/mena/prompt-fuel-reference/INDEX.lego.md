@@ -9,7 +9,7 @@ description: "Guide for translating archaeology HANDOFF-PROMPT-FUEL into agent p
 
 ## When This Skill Is Needed
 
-A `HANDOFF-PROMPT-FUEL.md` exists in `.claude/wip/{RITE_NAME}/` (produced by the domain-forensics agent during the archaeology phase). You are about to write agent prompts for this rite.
+A `HANDOFF-PROMPT-FUEL.md` exists in `.sos/wip/{RITE_NAME}/` (produced by the domain-forensics agent during the archaeology phase). You are about to write agent prompts for this rite.
 
 Without this skill, you write generic prompts. With it, you embed hard-won domain knowledge that prevents agents from repeating historical mistakes.
 

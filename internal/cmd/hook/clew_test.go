@@ -453,7 +453,7 @@ func TestClew_StdinIntegration_RecordsToolEvent(t *testing.T) {
 	}
 }
 
-// --- .wip/ artifact detection tests (C1-C6) ---
+// --- .sos/wip/ artifact detection tests (C1-C6) ---
 
 // makeClewSession creates a temp session dir and returns (tmpDir, sessionDir, ctx).
 func makeClewSession(t *testing.T, sessionID string) (string, string, *cmdContext) {
@@ -505,11 +505,11 @@ func runClewWithStdin(t *testing.T, ctx *cmdContext, payload string) ClewOutput 
 	return result
 }
 
-// C1: .wip/ write with valid frontmatter emits artifact_created with correct metadata.
+// C1: .sos/wip/ write with valid frontmatter emits artifact_created with correct metadata.
 func TestClew_WipWrite_ValidFrontmatter_EmitsArtifact(t *testing.T) {
 	_, sessionDir, ctx := makeClewSession(t, "test-wip-c1")
 	content := "---\\ntype: design\\n---\\n\\n# Design doc"
-	payload := `{"hook_event_name":"PostToolUse","tool_name":"Write","tool_input":{"file_path":".wip/DESIGN-foo.md","content":"---\ntype: design\n---\n\n# Design doc"},"session_id":"test-wip-c1"}`
+	payload := `{"hook_event_name":"PostToolUse","tool_name":"Write","tool_input":{"file_path":".sos/wip/DESIGN-foo.md","content":"---\ntype: design\n---\n\n# Design doc"},"session_id":"test-wip-c1"}`
 
 	result := runClewWithStdin(t, ctx, payload)
 	if !result.Recorded {
@@ -524,7 +524,7 @@ func TestClew_WipWrite_ValidFrontmatter_EmitsArtifact(t *testing.T) {
 	eventsContent := string(eventsData)
 
 	if !strings.Contains(eventsContent, `"type":"tool.artifact_created"`) {
-		t.Error("events.jsonl missing artifact_created event for .wip/ write")
+		t.Error("events.jsonl missing artifact_created event for .sos/wip/ write")
 	}
 	if !strings.Contains(eventsContent, `"ephemeral"`) {
 		t.Error("events.jsonl missing artifact_type ephemeral")
@@ -537,10 +537,10 @@ func TestClew_WipWrite_ValidFrontmatter_EmitsArtifact(t *testing.T) {
 	}
 }
 
-// C2: .wip/ write with missing frontmatter still emits artifact_created with wip_type "unknown".
+// C2: .sos/wip/ write with missing frontmatter still emits artifact_created with wip_type "unknown".
 func TestClew_WipWrite_MissingFrontmatter_EmitsUnknown(t *testing.T) {
 	_, sessionDir, ctx := makeClewSession(t, "test-wip-c2")
-	payload := `{"hook_event_name":"PostToolUse","tool_name":"Write","tool_input":{"file_path":".wip/BAD.md","content":"# no frontmatter"},"session_id":"test-wip-c2"}`
+	payload := `{"hook_event_name":"PostToolUse","tool_name":"Write","tool_input":{"file_path":".sos/wip/BAD.md","content":"# no frontmatter"},"session_id":"test-wip-c2"}`
 
 	result := runClewWithStdin(t, ctx, payload)
 	if !result.Recorded {
@@ -564,7 +564,7 @@ func TestClew_WipWrite_MissingFrontmatter_EmitsUnknown(t *testing.T) {
 	}
 }
 
-// C3: Non-.wip/ Write does NOT emit artifact_created (regression).
+// C3: Non-.sos/wip/ Write does NOT emit artifact_created (regression).
 func TestClew_NonWipWrite_NoArtifactCreated(t *testing.T) {
 	_, sessionDir, ctx := makeClewSession(t, "test-wip-c3")
 	payload := `{"hook_event_name":"PostToolUse","tool_name":"Write","tool_input":{"file_path":"src/main.go","content":"package main"},"session_id":"test-wip-c3"}`
@@ -582,7 +582,7 @@ func TestClew_NonWipWrite_NoArtifactCreated(t *testing.T) {
 
 	// Should NOT contain artifact_created for a regular source file
 	if strings.Contains(eventsContent, `"type":"tool.artifact_created"`) {
-		t.Error("events.jsonl should NOT have artifact_created for non-.wip/ write")
+		t.Error("events.jsonl should NOT have artifact_created for non-.sos/wip/ write")
 	}
 }
 
@@ -610,10 +610,10 @@ func TestClew_PRDPattern_Unchanged(t *testing.T) {
 	}
 }
 
-// C5: .wip/ Edit does NOT emit artifact_created — only file_change.
+// C5: .sos/wip/ Edit does NOT emit artifact_created — only file_change.
 func TestClew_WipEdit_NoArtifactCreated(t *testing.T) {
 	_, sessionDir, ctx := makeClewSession(t, "test-wip-c5")
-	payload := `{"hook_event_name":"PostToolUse","tool_name":"Edit","tool_input":{"file_path":".wip/existing.md","old_string":"old","new_string":"new"},"session_id":"test-wip-c5"}`
+	payload := `{"hook_event_name":"PostToolUse","tool_name":"Edit","tool_input":{"file_path":".sos/wip/existing.md","old_string":"old","new_string":"new"},"session_id":"test-wip-c5"}`
 
 	result := runClewWithStdin(t, ctx, payload)
 	if !result.Recorded {
@@ -641,10 +641,10 @@ func TestWipSlug(t *testing.T) {
 		path string
 		want string
 	}{
-		{".wip/DESIGN-ephemeral-artifacts.md", "DESIGN-ephemeral-artifacts"},
-		{".wip/SPIKE-complex-name.analysis.md", "SPIKE-complex-name.analysis"},
-		{".wip/scratch.md", "scratch"},
-		{"/home/user/.wip/TRIAGE-foo.md", "TRIAGE-foo"},
+		{".sos/wip/DESIGN-ephemeral-artifacts.md", "DESIGN-ephemeral-artifacts"},
+		{".sos/wip/SPIKE-complex-name.analysis.md", "SPIKE-complex-name.analysis"},
+		{".sos/wip/scratch.md", "scratch"},
+		{"/home/user/.sos/wip/TRIAGE-foo.md", "TRIAGE-foo"},
 	}
 	for _, tt := range tests {
 		got := wipSlug(tt.path)
@@ -665,21 +665,21 @@ func TestMatchWipArtifact(t *testing.T) {
 	}{
 		{
 			name:        "valid design frontmatter",
-			path:        ".wip/DESIGN-foo.md",
+			path:        ".sos/wip/DESIGN-foo.md",
 			content:     "---\ntype: design\n---\n\nbody",
 			wantArtType: clewcontract.ArtifactTypeEphemeral,
 			wantWipType: "design",
 		},
 		{
 			name:        "missing frontmatter yields unknown",
-			path:        ".wip/BAD.md",
+			path:        ".sos/wip/BAD.md",
 			content:     "# just markdown",
 			wantArtType: clewcontract.ArtifactTypeEphemeral,
 			wantWipType: "unknown",
 		},
 		{
 			name:        "invalid type yields unknown",
-			path:        ".wip/BAD.md",
+			path:        ".sos/wip/BAD.md",
 			content:     "---\ntype: memo\n---\n",
 			wantArtType: clewcontract.ArtifactTypeEphemeral,
 			wantWipType: "unknown",

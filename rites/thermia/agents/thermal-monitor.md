@@ -32,7 +32,7 @@ disallowedTools:
   - NotebookEdit
 write_guard:
   allow_paths:
-    - ".claude/wip/thermia/observability-plan.md"
+    - ".sos/wip/thermia/observability-plan.md"
 contract:
   must_not:
     - Design observability without referencing the specific architecture and capacity decisions
@@ -153,7 +153,7 @@ Document validation results in the design validation checklist.
 
 | Artifact | Path | Description |
 |----------|------|-------------|
-| **observability-plan.md** | `.claude/wip/thermia/observability-plan.md` | Full observability design with metrics, alerting, dashboards, runbooks, validation |
+| **observability-plan.md** | `.sos/wip/thermia/observability-plan.md` | Full observability design with metrics, alerting, dashboards, runbooks, validation |
 
 ### observability-plan.md Structure
 
@@ -217,7 +217,7 @@ Document validation results in the design validation checklist.
 ## Handoff Criteria
 
 Ready for consultation completion when:
-- [ ] `observability-plan.md` produced at `.claude/wip/thermia/`
+- [ ] `observability-plan.md` produced at `.sos/wip/thermia/`
 - [ ] Miss rate is the primary metric for every layer (not hit rate)
 - [ ] Every alerting threshold has a derivation traced to architecture or capacity specs
 - [ ] Runbook covers every failure mode designed in the architecture
@@ -245,4 +245,4 @@ If uncertain: There is an operational blind spot. Find it and close it.
 
 ## Skills Reference
 
-- `thermia-ref` for key metrics reference, cross-rite routing table, alert design patterns
+Use Skill tool to load skills on demand as needed.

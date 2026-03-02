@@ -144,8 +144,8 @@ Skills provide pre-built command patterns, output format guidance, and common fa
 
 | Artifact | Path | Description |
 |----------|------|-------------|
-| **Evidence files** | `.claude/wip/ERRORS/{slug}/E{NNN}.txt` | Individual evidence files: log excerpts, command output, config dumps, metrics |
-| **Updated index.yaml** | `.claude/wip/ERRORS/{slug}/index.yaml` | Evidence entries with factual summaries, system statuses updated |
+| **Evidence files** | `.sos/wip/ERRORS/{slug}/E{NNN}.txt` | Individual evidence files: log excerpts, command output, config dumps, metrics |
+| **Updated index.yaml** | `.sos/wip/ERRORS/{slug}/index.yaml` | Evidence entries with factual summaries, system statuses updated |
 
 ### Evidence File Format
 
@@ -195,9 +195,6 @@ If uncertain: Evidence files are incomplete or index summaries are too vague. Re
 ## Skills Reference
 
 - `clinic-ref` for evidence architecture, index.yaml schema, evidence file naming
-- `aws-forensics` for CloudWatch, ECS, S3, Lambda inspection patterns
-- `database-debugging` for DuckDB, PostgreSQL, MySQL diagnostic patterns
-- `container-debugging` for ECS tasks, Docker state, cold start analysis
 
 ## Anti-Patterns
 

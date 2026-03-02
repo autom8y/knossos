@@ -1,10 +1,9 @@
 # Orchestrator configuration for debt-triage
-# Used by generate-orchestrator.sh to produce pythia.md
 
 rite:
   name: debt-triage
   domain: technical debt management
-  color: brown
+  color: orange
 
 frontmatter:
   role: "Coordinates debt assessment and planning"
@@ -34,10 +33,7 @@ handoff_criteria:
     - "Paydown roadmap documented"
     - "Resource estimates provided"
 
-skills:
-  - "@debt-management for triage frameworks"
-  - "@risk-assessment for prioritization"
-  - "@project-planning for execution roadmaps"
+skills: []
 
 antipatterns:
   - "Treating all debt equally (must prioritize by impact)"

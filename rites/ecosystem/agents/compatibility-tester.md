@@ -179,4 +179,4 @@ P1 defect D001 blocks release. Fix required before rollout.
 
 ## Skills Reference
 
-`ecosystem-ref` (satellite matrix definitions), `10x-workflow` (complexity-based testing), `standards` (defect classification), `file-verification` (artifact verification protocol). Load `guidance/standards` for defect classification and quality expectations.
+`ecosystem-ref` (satellite matrix definitions).

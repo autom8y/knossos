@@ -5,6 +5,8 @@ name: debt-triage
 version: "1.0.0"
 description: Debt management lifecycle for collecting, assessing, and planning technical debt paydown
 
+# entry_agent: The agent CC invokes first via Task tool (orchestrator routing).
+# This is distinct from workflow.yaml entry_point.agent (domain workflow entry).
 entry_agent: pythia
 
 phases:
@@ -59,4 +61,4 @@ complexity_levels:
 
 metadata:
   domain: technical debt management
-  color: brown
+  color: orange

@@ -133,8 +133,8 @@ type ArtifactCreatedData struct {
 	Path             string `json:"path"`                        // required, absolute path
 	Phase            string `json:"phase"`                       // required, workflow phase
 	ValidatesAgainst string `json:"validates_against,omitempty"` // optional, path to upstream artifact
-	WipType          string `json:"wip_type,omitempty"`          // optional, for .wip/ artifacts
-	Slug             string `json:"slug,omitempty"`              // optional, for .wip/ artifacts
+	WipType          string `json:"wip_type,omitempty"`          // optional, for .sos/wip/ artifacts
+	Slug             string `json:"slug,omitempty"`              // optional, for .sos/wip/ artifacts
 }
 
 // ErrorOccurredData is the data payload for the "error.occurred" event.

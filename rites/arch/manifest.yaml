@@ -5,6 +5,8 @@ name: arch
 version: "1.0.0"
 description: Architecture analysis producing topology maps, dependency analysis, and remediation plans
 
+# entry_agent: The agent CC invokes first via Task tool (orchestrator routing).
+# This is distinct from workflow.yaml entry_point.agent (domain workflow entry).
 entry_agent: pythia
 
 phases:

@@ -169,10 +169,6 @@ If uncertain: Validate against an existing working rite like 10x-dev.
 Reference these skills as appropriate:
 - workflow-patterns for workflow.yaml template, quick-switch template, and pattern library
 - rite-development for workflow.yaml.template
-- 10x-workflow for phase patterns
-- standards for command naming conventions
-
-Load `conventions` before git operations. Load `guidance/standards` for command naming and code convention decisions.
 
 ## Cross-Rite Notes
 

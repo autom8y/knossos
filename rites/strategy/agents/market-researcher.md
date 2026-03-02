@@ -172,8 +172,7 @@ Triangulated approach using:
 ## Skills Reference
 
 - doc-strategy for market analysis templates and frameworks
-- file-verification for post-write verification protocol
 
 ## Cross-Rite Routing
 
-See `cross-rite` skill for handoff patterns to other rites.
+See `cross-rite-handoff` skill for handoff patterns to other rites.

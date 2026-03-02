@@ -80,6 +80,11 @@ func (r *Resolver) CCMapDir() string {
 	return filepath.Join(r.SessionsDir(), ".cc-map")
 }
 
+// WipDir returns the path to the .sos/wip/ directory (ephemeral working artifacts).
+func (r *Resolver) WipDir() string {
+	return filepath.Join(r.SOSDir(), "wip")
+}
+
 // ArchiveDir returns the path to the archive directory.
 func (r *Resolver) ArchiveDir() string {
 	return filepath.Join(r.SOSDir(), "archive")

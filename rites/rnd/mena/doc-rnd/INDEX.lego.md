@@ -15,10 +15,10 @@ Provides structured templates for R&D workflows: technology evaluation with adop
 
 | Template | Purpose | Agent |
 |----------|---------|-------|
-| [Tech Assessment](templates/tech-assessment.md) | Technology evaluation with ecosystem and risk analysis | tech-scout |
-| [Integration Map](templates/integration-map.md) | Integration analysis with gap identification and effort estimation | integration-analyst |
+| [Tech Assessment](templates/tech-assessment.md) | Technology evaluation with ecosystem and risk analysis | technology-scout |
+| [Integration Map](templates/integration-map.md) | Integration analysis with gap identification and effort estimation | integration-researcher |
 | [Prototype Doc](templates/prototype-doc.md) | Prototype results, feasibility verdict, production path | prototype-engineer |
-| [Moonshot Plan](templates/moonshot-plan.md) | Long-term architecture vision with migration phases | architecture-lead |
+| [Moonshot Plan](templates/moonshot-plan.md) | Long-term architecture vision with migration phases | moonshot-architect |
 | [Transfer Artifacts](templates/transfer-artifacts.md) | TRANSFER template, HANDOFF examples, target rite routing | tech-transfer |
 
 ## When to Use Each Template

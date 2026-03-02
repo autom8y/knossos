@@ -154,10 +154,6 @@ If uncertain: Verify against code before writing. Default to more explanation (e
 - **Dead examples**: Code snippets that don't actually run
 - **Passive voice**: "The config is loaded" instead of "Load the config"
 
-## File Verification
-
-See `file-verification` skill for artifact verification protocol.
-
 ## Related Skills
 
-`documentation` (templates and standards), `standards` (style guides).
+Use Skill tool to load skills on demand as needed.

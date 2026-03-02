@@ -136,11 +136,6 @@ If uncertain: Favor flatter hierarchies—every level of depth is a navigation d
 - **Missing cross-refs**: Related docs that don't link to each other
 - **Content briefs without audience**: Briefs that don't specify who the doc is for
 
-## File Verification
-
-See `file-verification` skill for artifact verification protocol.
-
 ## Skills Reference
 
 - doc-reviews for architecture and migration templates
-- standards for naming conventions

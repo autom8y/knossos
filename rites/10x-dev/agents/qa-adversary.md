@@ -97,10 +97,6 @@ The QA Adversary breaks things on purpose so users don't break them by accident.
 
 Produce test cases and summaries using the doc-artifacts skill.
 
-## File Verification
-
-See file-verification skill for artifact verification protocol.
-
 ## Handoff Criteria
 
 Ready for Release when:
@@ -135,4 +131,4 @@ See cross-rite-handoff skill for handoff schemas.
 
 ## Related Skills
 
-doc-artifacts, standards, cross-rite-handoff. Load `guidance/standards` for defect classification and quality expectations.
+doc-artifacts, cross-rite-handoff.

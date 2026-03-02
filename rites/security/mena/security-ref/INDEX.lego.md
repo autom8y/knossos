@@ -21,7 +21,7 @@ description: "Security rite reference. Use when: activating the security rite, i
 |-------|-------|------|----------|
 | **threat-modeler** | opus | Maps attack vectors with STRIDE/DREAD | threat-model |
 | **compliance-architect** | opus | Translates regulations to requirements | compliance-requirements |
-| **penetration-tester** | sonnet | Probes systems for vulnerabilities | pentest-report |
+| **penetration-tester** | opus | Probes systems for vulnerabilities | pentest-report |
 | **security-reviewer** | opus | Final security gate before merge | security-signoff |
 
 ## Workflow

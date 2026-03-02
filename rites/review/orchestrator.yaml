@@ -31,18 +31,18 @@ workflow_position:
 # Handoff criteria between phases (checklist items)
 handoff_criteria:
   scan:
-    - "SCAN-{slug}.md produced at .claude/wip/review/"
+    - "SCAN-{slug}.md produced at .sos/wip/review/"
     - "All five categories have signals or explicit 'no findings'"
     - "Metrics summary complete with file counts and language detection"
     - "No pending scan areas flagged as incomplete"
   assess:
-    - "ASSESS-{slug}.md produced at .claude/wip/review/"
+    - "ASSESS-{slug}.md produced at .sos/wip/review/"
     - "Health grades assigned for all 5 categories plus overall"
     - "All findings have severity assigned (Critical/High/Medium/Low)"
     - "Cross-rite routing recommendations documented"
     - "No unresolved coverage gaps that would trigger back-route"
   report:
-    - "REVIEW-{slug}.md produced at .claude/wip/review/"
+    - "REVIEW-{slug}.md produced at .sos/wip/review/"
     - "Executive summary present (3-5 sentences)"
     - "Health report card with A-F grades for all categories"
     - "Cross-rite recommendations section complete"

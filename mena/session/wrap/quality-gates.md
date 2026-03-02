@@ -17,7 +17,7 @@
 ⚠ Quality Gate Failure: PRD
 
 Issues:
-- PRD file not found at /docs/requirements/PRD-{slug}.md
+- PRD file not found at .ledge/specs/PRD-{slug}.md
 - PRD missing required sections: {list}
 - PRD has {count} unanswered blocking questions
 

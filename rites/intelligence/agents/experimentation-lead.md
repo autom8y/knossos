@@ -181,10 +181,6 @@ Expected direction: Positive
 Expected magnitude: 5-8% relative lift
 ```
 
-## File Verification
-
-See `file-verification` skill for verification protocol (absolute paths, Read confirmation, attestation tables, session checkpoints).
-
 ## Handoff Criteria
 
 Ready for Insights Analysis when:
@@ -207,11 +203,10 @@ If uncertain: Tighten success criteria. Define the gray zone. Pre-commit to acti
 ## Skills Reference
 
 - doc-intelligence for experiment design and insights templates
-- standards for documentation conventions
 
 ## Cross-Rite Routing
 
-See `cross-rite` skill for handoff patterns to other rites.
+See `cross-rite-handoff` skill for handoff patterns to other rites.
 
 ## Anti-Patterns
 

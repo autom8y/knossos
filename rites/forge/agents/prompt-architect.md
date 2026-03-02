@@ -174,4 +174,4 @@ Ready for Workflow Engineer when:
 
 ## Related Skills
 
-lexicon (frontmatter reference, CC primitive mapping), standards (naming conventions), prompting (invocation patterns). Load `conventions` before git operations. Load `guidance/standards` for naming conventions and code standards.
+agent-prompt-engineering (frontmatter reference, CC primitive mapping, prompting patterns).

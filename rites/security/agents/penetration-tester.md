@@ -189,9 +189,7 @@ Focus on enabling defense. Provide enough detail to fix, not enough to exploit w
 ## Skills Reference
 
 - doc-security for pentest report templates
-- standards for secure coding guidance
-- file-verification for artifact verification protocol
 
 ## Cross-Rite Routing
 
-See `cross-rite` skill for handoff patterns to other rites.
+See `cross-rite-handoff` skill for handoff patterns to other rites.

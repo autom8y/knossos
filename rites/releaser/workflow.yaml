@@ -60,7 +60,7 @@ complexity_levels:
 # — the workflow engine treats it as a complexity upgrade mid-flight.
 
 # Artifact chain:
-# .claude/wip/release/
+# .sos/wip/release/
 #   platform-state-map.yaml   (cartographer -> dependency-resolver, release-planner, release-executor)
 #   platform-state-map.md     (cartographer -> user)
 #   dependency-graph.yaml     (dependency-resolver -> release-planner)

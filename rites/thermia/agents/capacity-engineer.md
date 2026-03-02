@@ -31,7 +31,7 @@ disallowedTools:
   - NotebookEdit
 write_guard:
   allow_paths:
-    - ".claude/wip/thermia/capacity-specification.md"
+    - ".sos/wip/thermia/capacity-specification.md"
 contract:
   must_not:
     - Size caches by gut feel -- every number must have a derivation
@@ -135,7 +135,7 @@ Write `capacity-specification.md` with per-layer specifications, aggregate resou
 
 | Artifact | Path | Description |
 |----------|------|-------------|
-| **capacity-specification.md** | `.claude/wip/thermia/capacity-specification.md` | Full specification with derived sizing, policies, stampede protection, TTLs, costs |
+| **capacity-specification.md** | `.sos/wip/thermia/capacity-specification.md` | Full specification with derived sizing, policies, stampede protection, TTLs, costs |
 
 ### capacity-specification.md Structure
 
@@ -192,7 +192,7 @@ Write `capacity-specification.md` with per-layer specifications, aggregate resou
 ## Handoff Criteria
 
 Ready for thermal-monitor when:
-- [ ] `capacity-specification.md` produced at `.claude/wip/thermia/`
+- [ ] `capacity-specification.md` produced at `.sos/wip/thermia/`
 - [ ] Every layer has: capacity analysis with derivation (not bare numbers), eviction policy with access-pattern rationale
 - [ ] Stampede protection specified for every shared cache layer
 - [ ] TTL design with jitter for every layer
@@ -216,4 +216,4 @@ If uncertain: The specification contains gut-feel numbers. Go back and show the 
 
 ## Skills Reference
 
-- `thermia-ref` for eviction policy quick reference, stampede protection hierarchy, capacity theory citations
+Use Skill tool to load skills on demand as needed.

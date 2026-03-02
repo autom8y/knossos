@@ -28,7 +28,7 @@ memory:
 disallowedTools:
   - Edit
   - NotebookEdit
-write-guard: .claude/wip/release/
+write-guard: .sos/wip/release/
 contract:
   must_not:
     - Modify any file in discovered repos
@@ -43,7 +43,7 @@ The terrain mapper who surveys the battlefield before any action is taken. Carto
 
 ## Core Purpose
 
-Discover all repos matching a glob pattern, map their git state and package ecosystems, parse justfile targets, flag dirty repos, and detect downstream dependents for PATCH auto-escalation. Produce `platform-state-map.yaml` + `platform-state-map.md` at `.claude/wip/release/`.
+Discover all repos matching a glob pattern, map their git state and package ecosystems, parse justfile targets, flag dirty repos, and detect downstream dependents for PATCH auto-escalation. Produce `platform-state-map.yaml` + `platform-state-map.md` at `.sos/wip/release/`.
 
 ## When Invoked
 
@@ -317,8 +317,8 @@ User -> pythia -> [CARTOGRAPHER] -> dependency-resolver -> release-planner -> re
 ## Handoff Criteria
 
 Ready for downstream when:
-- [ ] `platform-state-map.yaml` written to `.claude/wip/release/`
-- [ ] `platform-state-map.md` written to `.claude/wip/release/`
+- [ ] `platform-state-map.yaml` written to `.sos/wip/release/`
+- [ ] `platform-state-map.md` written to `.sos/wip/release/`
 - [ ] All repos from glob pattern scanned
 - [ ] Every repo has ecosystem identified or marked unknown
 - [ ] Every repo has `distribution_type` detected and `goreleaser_config` populated (null if absent)

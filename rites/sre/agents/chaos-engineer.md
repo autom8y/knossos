@@ -105,10 +105,6 @@ The Chaos Engineer breaks production on purpose—carefully, in controlled blast
 - Document blast radius control progression
 - Classify outcomes with rationale
 
-## File Verification
-
-See `file-verification` skill for artifact verification protocol.
-
 ## Handoff Criteria
 
 Ready for Release when:
@@ -171,5 +167,4 @@ Always progress: dev → staging → prod canary → prod partial → prod full.
 ## Skills Reference
 
 Reference these skills as appropriate:
-- standards for resilience requirements
 - doc-sre for experiment and report templates

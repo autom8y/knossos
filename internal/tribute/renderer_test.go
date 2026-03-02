@@ -18,7 +18,7 @@ func TestRenderer_Render(t *testing.T) {
 		EndedAt:     time.Date(2026, 1, 6, 14, 30, 0, 0, time.UTC),
 		GeneratedAt: time.Date(2026, 1, 6, 14, 30, 0, 0, time.UTC),
 		Artifacts: []Artifact{
-			{Type: "PRD", Path: "docs/requirements/PRD-test.md", Status: "Approved"},
+			{Type: "PRD", Path: ".ledge/specs/PRD-test.md", Status: "Approved"},
 		},
 		Decisions: []Decision{
 			{

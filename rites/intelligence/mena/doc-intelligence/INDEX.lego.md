@@ -15,9 +15,9 @@ Provides structured templates for intelligence workflows: user research synthesi
 
 | Template | Purpose | Agent |
 |----------|---------|-------|
-| [Research Findings](templates/research-findings.md) | User research synthesis with participant quotes and themes | research-analyst |
-| [Experiment Design](templates/experiment-design.md) | A/B test pre-registration with sample size and stopping rules | experiment-designer |
-| [Insights Report](templates/insights-report.md) | Data-driven decision recommendation with segment analysis | data-analyst |
+| [Research Findings](templates/research-findings.md) | User research synthesis with participant quotes and themes | user-researcher |
+| [Experiment Design](templates/experiment-design.md) | A/B test pre-registration with sample size and stopping rules | experimentation-lead |
+| [Insights Report](templates/insights-report.md) | Data-driven decision recommendation with segment analysis | insights-analyst |
 
 ## When to Use Each Template
 

@@ -141,7 +141,7 @@ Directory location provides topic context.
 | `.claude/skills/{skill-name}/` | `{skill-name}` | High |
 | `.claude/agents/` | agent-routing | Medium |
 | `.claude/hooks/` | hook-lifecycle | High |
-| `docs/design/` | Inspect content | Low |
+| `.ledge/specs/` | Inspect content | Low |
 | `docs/guides/` | Inspect content | Low |
 | `docs/api/` | API reference (new topic) | Medium |
 

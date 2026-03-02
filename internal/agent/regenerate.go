@@ -171,7 +171,7 @@ func generateDerivedContent(agent *ParsedAgent, sectionName string) string {
 	case "position-in-workflow":
 		return generateWorkflowPosition(agent)
 	case "skills-reference":
-		return generateSkillsReference()
+		return generateSkillsReference(agent.Frontmatter.Skills)
 	default:
 		return fmt.Sprintf("<!-- Derived section %q not implemented -->", sectionName)
 	}
@@ -235,11 +235,22 @@ func generateWorkflowPosition(agent *ParsedAgent) string {
 	return buf.String()
 }
 
-// generateSkillsReference generates the skills reference section.
-func generateSkillsReference() string {
-	return `Reference these skills as appropriate:
-- @standards for naming and coding conventions
-- @file-verification for artifact verification protocol`
+// generateSkillsReference generates the skills reference section from the agent's frontmatter
+// skills list. If the agent has skills defined, each skill is listed by its actual name without
+// the @-prefix anti-pattern. If no skills are defined, a generic instruction is returned.
+func generateSkillsReference(skills []string) string {
+	if len(skills) == 0 {
+		return "Load skills on demand via Skill tool as needed."
+	}
+
+	var buf strings.Builder
+	buf.WriteString("Reference these skills as appropriate:\n")
+	for _, skill := range skills {
+		buf.WriteString("- ")
+		buf.WriteString(skill)
+		buf.WriteString("\n")
+	}
+	return strings.TrimRight(buf.String(), "\n")
 }
 
 // AssembleAgentFile reassembles a parsed agent into markdown content.

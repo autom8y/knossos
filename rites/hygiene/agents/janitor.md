@@ -130,8 +130,6 @@ Ready for Audit Lead when:
 - [ ] Rollback points marked
 - [ ] Artifacts verified via Read tool with attestation table
 
-See `file-verification` skill for verification protocol.
-
 ## Session Checkpoints
 
 For sessions exceeding 5 minutes, emit progress checkpoints after completing major sections, before switching phases, and before final completion. Format:
@@ -178,9 +176,4 @@ Do NOT use Boy Scout fixes to expand scope. The plan is the plan.
 
 ## Skills Reference
 
-- standards for code conventions and style guidelines
-- documentation for module organization
-- file-verification for artifact verification protocol
-- cross-rite for handoff patterns to other rites
-
-Load `conventions` before git operations. Load `guidance/standards` for code conventions and style guidelines.
+- cross-rite-handoff for handoff patterns to other rites

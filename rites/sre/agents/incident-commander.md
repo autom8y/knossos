@@ -109,10 +109,6 @@ The Incident Commander runs the war room when systems are on fire. You coordinat
 - Include "What Went Well" and "Where We Got Lucky" sections
 - Link action items to owners with due dates
 
-## File Verification
-
-See `file-verification` skill for artifact verification protocol.
-
 ## Handoff Criteria
 
 Ready for Platform Engineer when:
@@ -179,4 +175,3 @@ If uncertain: Action items are too vague, or contributing factors weren't unders
 
 Reference these skills as appropriate:
 - doc-sre for postmortem and reliability plan templates
-- standards for incident severity definitions

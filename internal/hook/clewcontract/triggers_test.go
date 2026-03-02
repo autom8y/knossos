@@ -37,7 +37,7 @@ func TestDefaultTriggerConfig(t *testing.T) {
 	}
 
 	// Verify default sacred paths
-	expectedPaths := []string{".claude/", "*_CONTEXT.md", "CLAUDE.md", "docs/decisions/", "docs/requirements/"}
+	expectedPaths := []string{".claude/", "*_CONTEXT.md", "CLAUDE.md", ".ledge/decisions/", ".ledge/specs/"}
 	for _, expected := range expectedPaths {
 		found := false
 		for _, path := range config.SacredPaths {
@@ -180,14 +180,14 @@ func TestCheckTriggers_SacredPath_DecisionsDir(t *testing.T) {
 	event := Event{
 		Type: EventTypeToolCall,
 		Tool: "Write",
-		Path: "/project/docs/decisions/ADR-001.md",
+		Path: "/project/.ledge/decisions/ADR-001.md",
 	}
 
 	config := DefaultTriggerConfig()
 	result := CheckTriggers(eventsPath, event, config)
 
 	if !result.Triggered {
-		t.Error("Expected trigger for docs/decisions/ path")
+		t.Error("Expected trigger for .ledge/decisions/ path")
 	}
 	if result.Type != TriggerSacredPath {
 		t.Errorf("Type = %v, want %v", result.Type, TriggerSacredPath)
@@ -582,9 +582,9 @@ func TestMatchSacredPattern(t *testing.T) {
 		{"/project/README.md", "CLAUDE.md", false},
 
 		// Path patterns
-		{"/project/docs/decisions/ADR-001.md", "docs/decisions/", true},
-		{"/project/docs/requirements/PRD-001.md", "docs/requirements/", true},
-		{"/project/docs/other/file.md", "docs/decisions/", false},
+		{"/project/.ledge/decisions/ADR-001.md", ".ledge/decisions/", true},
+		{"/project/.ledge/specs/PRD-001.md", ".ledge/specs/", true},
+		{"/project/docs/other/file.md", ".ledge/decisions/", false},
 	}
 
 	for _, tt := range tests {

@@ -171,4 +171,4 @@ to work; those with array settings gain preservation on sync.
 
 ## Skills Reference
 
-`ecosystem-ref` (knossos/materialization patterns), `doc-ecosystem` (Context Design template), `10x-workflow` (complexity requirements), `file-verification` (artifact verification protocol). Load `conventions` before git operations. Load `guidance/standards` for code convention decisions.
+`ecosystem-ref` (knossos/materialization patterns), `doc-ecosystem` (Context Design template).

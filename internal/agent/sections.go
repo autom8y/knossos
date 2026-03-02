@@ -219,10 +219,34 @@ func mapSectionsToArchetype(agent *ParsedAgent) error {
 		normalizedHeading := strings.ToLower(strings.TrimSpace(parsedSection.Heading))
 
 		if sectionDef, found := sectionMap[normalizedHeading]; found {
+			// Exact match found — use it directly.
 			parsedSection.Name = sectionDef.Name
 			parsedSection.Ownership = sectionDef.Ownership
+			continue
 		}
-		// If not found, section remains unmapped (Name="", Ownership=OwnerAuthor)
+
+		// Exact match failed. Try prefix matching: if any archetype heading is a prefix of
+		// the parsed heading, treat it as a match. This handles heading variants like
+		// "Behavioral Constraints (DO NOT)" matching archetype "Behavioral Constraints", or
+		// "Anti-Patterns to Avoid" matching archetype "Anti-Patterns".
+		//
+		// We require the archetype prefix to be followed by whitespace, a parenthesis, a dash,
+		// a colon, or end-of-string — preventing false matches (e.g., "tool access" must not
+		// match a heading "tool accessibility").
+		for archetypeNorm, sectionDef := range sectionMap {
+			if !strings.HasPrefix(normalizedHeading, archetypeNorm) {
+				continue
+			}
+			// Confirm the character immediately after the prefix is a valid separator.
+			remainder := normalizedHeading[len(archetypeNorm):]
+			if remainder == "" || remainder[0] == ' ' || remainder[0] == '(' ||
+				remainder[0] == '-' || remainder[0] == ':' {
+				parsedSection.Name = sectionDef.Name
+				parsedSection.Ownership = sectionDef.Ownership
+				break
+			}
+		}
+		// If still not found, section remains unmapped (Name="", Ownership=OwnerAuthor)
 	}
 
 	return nil

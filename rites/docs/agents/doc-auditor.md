@@ -143,10 +143,6 @@ See doc-reviews skill, staleness-detection companion for full detection logic, c
 - **Missing quantification**: Report lacks counts/percentages for prioritization
 - **Scope creep**: Attempting to fix issues instead of documenting them for downstream agents
 
-## File Verification
-
-See `file-verification` skill for artifact verification protocol.
-
 ## Skills Reference
 
 - doc-reviews for audit report template and staleness-detection companion

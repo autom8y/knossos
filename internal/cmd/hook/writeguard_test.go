@@ -589,7 +589,7 @@ func TestWriteguard_ParkedSession_StaleLock(t *testing.T) {
 	}
 }
 
-// --- .wip/ validation tests (W1-W12) ---
+// --- .sos/wip/ validation tests (W1-W12) ---
 
 // makeWipCtx builds a minimal cmdContext for writeguard tests.
 func makeWipCtx() *cmdContext {
@@ -630,12 +630,12 @@ func makeToolInput(filePath, content string) string {
 	return `{"file_path":"` + filePath + `","content":` + string(contentJSON) + `}`
 }
 
-// W1: .wip/ write with valid frontmatter (spike) — allow, no additionalContext.
+// W1: .sos/wip/ write with valid frontmatter (spike) — allow, no additionalContext.
 func TestWipWrite_ValidFrontmatter_Spike(t *testing.T) {
 	result := runWipTest(t, &testutil.HookEnv{
 		Event:     "PreToolUse",
 		ToolName:  "Write",
-		ToolInput: makeToolInput(".wip/SPIKE-test.md", "---\ntype: spike\n---\n\n# Spike content"),
+		ToolInput: makeToolInput(".sos/wip/SPIKE-test.md", "---\ntype: spike\n---\n\n# Spike content"),
 	})
 	if result.HookSpecificOutput.PermissionDecision != "allow" {
 		t.Errorf("PermissionDecision = %q, want allow", result.HookSpecificOutput.PermissionDecision)
@@ -645,12 +645,12 @@ func TestWipWrite_ValidFrontmatter_Spike(t *testing.T) {
 	}
 }
 
-// W2: .wip/ write with valid frontmatter (design) — allow, no additionalContext.
+// W2: .sos/wip/ write with valid frontmatter (design) — allow, no additionalContext.
 func TestWipWrite_ValidFrontmatter_Design(t *testing.T) {
 	result := runWipTest(t, &testutil.HookEnv{
 		Event:     "PreToolUse",
 		ToolName:  "Write",
-		ToolInput: makeToolInput(".wip/DESIGN-foo.md", "---\ntype: design\n---\n\n# Design doc"),
+		ToolInput: makeToolInput(".sos/wip/DESIGN-foo.md", "---\ntype: design\n---\n\n# Design doc"),
 	})
 	if result.HookSpecificOutput.PermissionDecision != "allow" {
 		t.Errorf("PermissionDecision = %q, want allow", result.HookSpecificOutput.PermissionDecision)
@@ -660,12 +660,12 @@ func TestWipWrite_ValidFrontmatter_Design(t *testing.T) {
 	}
 }
 
-// W3: .wip/ write with valid frontmatter (scratch) — allow, no additionalContext.
+// W3: .sos/wip/ write with valid frontmatter (scratch) — allow, no additionalContext.
 func TestWipWrite_ValidFrontmatter_Scratch(t *testing.T) {
 	result := runWipTest(t, &testutil.HookEnv{
 		Event:     "PreToolUse",
 		ToolName:  "Write",
-		ToolInput: makeToolInput(".wip/scratch-notes.md", "---\ntype: scratch\n---\n\nsome notes"),
+		ToolInput: makeToolInput(".sos/wip/scratch-notes.md", "---\ntype: scratch\n---\n\nsome notes"),
 	})
 	if result.HookSpecificOutput.PermissionDecision != "allow" {
 		t.Errorf("PermissionDecision = %q, want allow", result.HookSpecificOutput.PermissionDecision)
@@ -675,12 +675,12 @@ func TestWipWrite_ValidFrontmatter_Scratch(t *testing.T) {
 	}
 }
 
-// W4: .wip/ write with missing frontmatter — allow with advisory additionalContext.
+// W4: .sos/wip/ write with missing frontmatter — allow with advisory additionalContext.
 func TestWipWrite_MissingFrontmatter(t *testing.T) {
 	result := runWipTest(t, &testutil.HookEnv{
 		Event:     "PreToolUse",
 		ToolName:  "Write",
-		ToolInput: makeToolInput(".wip/BAD.md", "# No frontmatter here"),
+		ToolInput: makeToolInput(".sos/wip/BAD.md", "# No frontmatter here"),
 	})
 	if result.HookSpecificOutput.PermissionDecision != "allow" {
 		t.Errorf("PermissionDecision = %q, want allow (must not block)", result.HookSpecificOutput.PermissionDecision)
@@ -690,12 +690,12 @@ func TestWipWrite_MissingFrontmatter(t *testing.T) {
 	}
 }
 
-// W5: .wip/ write with frontmatter but missing type field — allow with advisory additionalContext.
+// W5: .sos/wip/ write with frontmatter but missing type field — allow with advisory additionalContext.
 func TestWipWrite_MissingTypeField(t *testing.T) {
 	// JSON-encode the content so embedded newlines are valid JSON escape sequences.
 	content := "---\nstatus: draft\n---\n\n# Content"
 	contentJSON, _ := json.Marshal(content)
-	toolInput := `{"file_path":".wip/BAD.md","content":` + string(contentJSON) + `}`
+	toolInput := `{"file_path":".sos/wip/BAD.md","content":` + string(contentJSON) + `}`
 	result := runWipTest(t, &testutil.HookEnv{
 		Event:     "PreToolUse",
 		ToolName:  "Write",
@@ -709,11 +709,11 @@ func TestWipWrite_MissingTypeField(t *testing.T) {
 	}
 }
 
-// W6: .wip/ write with invalid type value — allow with advisory additionalContext listing valid types.
+// W6: .sos/wip/ write with invalid type value — allow with advisory additionalContext listing valid types.
 func TestWipWrite_InvalidTypeValue(t *testing.T) {
 	content := "---\ntype: memo\n---\n\n# Content"
 	contentJSON, _ := json.Marshal(content)
-	toolInput := `{"file_path":".wip/BAD.md","content":` + string(contentJSON) + `}`
+	toolInput := `{"file_path":".sos/wip/BAD.md","content":` + string(contentJSON) + `}`
 	result := runWipTest(t, &testutil.HookEnv{
 		Event:     "PreToolUse",
 		ToolName:  "Write",
@@ -731,12 +731,12 @@ func TestWipWrite_InvalidTypeValue(t *testing.T) {
 	}
 }
 
-// W7: .wip/ Edit does NOT trigger validation — allow with no additionalContext.
+// W7: .sos/wip/ Edit does NOT trigger validation — allow with no additionalContext.
 func TestWipEdit_BypassesValidation(t *testing.T) {
 	result := runWipTest(t, &testutil.HookEnv{
 		Event:     "PreToolUse",
 		ToolName:  "Edit",
-		ToolInput: `{"file_path":".wip/existing.md","old_string":"old","new_string":"new"}`,
+		ToolInput: `{"file_path":".sos/wip/existing.md","old_string":"old","new_string":"new"}`,
 	})
 	if result.HookSpecificOutput.PermissionDecision != "allow" {
 		t.Errorf("PermissionDecision = %q, want allow (edit bypasses wip validation)", result.HookSpecificOutput.PermissionDecision)
@@ -746,7 +746,7 @@ func TestWipEdit_BypassesValidation(t *testing.T) {
 	}
 }
 
-// W8: Non-.wip/ Write is unchanged (regression) — allow, no additionalContext.
+// W8: Non-.sos/wip/ Write is unchanged (regression) — allow, no additionalContext.
 func TestWipWrite_NonWipPath_Unchanged(t *testing.T) {
 	result := runWipTest(t, &testutil.HookEnv{
 		Event:     "PreToolUse",
@@ -773,27 +773,27 @@ func TestWipWrite_ProtectedFile_Unchanged(t *testing.T) {
 	}
 }
 
-// W10: .wip/ with absolute path and valid frontmatter — allow, no additionalContext.
+// W10: .sos/wip/ with absolute path and valid frontmatter — allow, no additionalContext.
 func TestWipWrite_AbsolutePath_ValidFrontmatter(t *testing.T) {
 	result := runWipTest(t, &testutil.HookEnv{
 		Event:     "PreToolUse",
 		ToolName:  "Write",
-		ToolInput: makeToolInput("/Users/tom/project/.wip/SPIKE-x.md", "---\ntype: spike\n---\n\n# Spike"),
+		ToolInput: makeToolInput("/Users/tom/project/.sos/wip/SPIKE-x.md", "---\ntype: spike\n---\n\n# Spike"),
 	})
 	if result.HookSpecificOutput.PermissionDecision != "allow" {
-		t.Errorf("PermissionDecision = %q, want allow (absolute .wip/ path)", result.HookSpecificOutput.PermissionDecision)
+		t.Errorf("PermissionDecision = %q, want allow (absolute .sos/wip/ path)", result.HookSpecificOutput.PermissionDecision)
 	}
 	if result.HookSpecificOutput.AdditionalContext != "" {
 		t.Errorf("AdditionalContext should be empty for valid frontmatter, got: %q", result.HookSpecificOutput.AdditionalContext)
 	}
 }
 
-// W11: .wip/ write with empty content — allow with advisory additionalContext.
+// W11: .sos/wip/ write with empty content — allow with advisory additionalContext.
 func TestWipWrite_EmptyContent(t *testing.T) {
 	result := runWipTest(t, &testutil.HookEnv{
 		Event:     "PreToolUse",
 		ToolName:  "Write",
-		ToolInput: `{"file_path":".wip/empty.md","content":""}`,
+		ToolInput: `{"file_path":".sos/wip/empty.md","content":""}`,
 	})
 	if result.HookSpecificOutput.PermissionDecision != "allow" {
 		t.Errorf("PermissionDecision = %q, want allow (empty content must not block)", result.HookSpecificOutput.PermissionDecision)
@@ -809,13 +809,16 @@ func TestIsWipPath(t *testing.T) {
 		path string
 		want bool
 	}{
-		{".wip/SPIKE-foo.md", true},
-		{".wip/scratch.md", true},
-		{"/home/user/project/.wip/DESIGN-x.md", true},
-		{"/Users/tom/.wip/bar.md", true},
+		{".sos/wip/SPIKE-foo.md", true},
+		{".sos/wip/scratch.md", true},
+		{"/home/user/project/.sos/wip/DESIGN-x.md", true},
+		{"/Users/tom/project/.sos/wip/bar.md", true},
 		{"src/main.go", false},
 		{".sos/sessions/test/SESSION_CONTEXT.md", false},
-		{"docs/wip-notes.md", false}, // "wip" in name but not .wip/ dir
+		{"docs/wip-notes.md", false},
+		{".wip/SPIKE-foo.md", false},          // legacy .wip/ no longer matches
+		{"/Users/tom/.wip/bar.md", false},      // legacy .wip/ no longer matches
+		{".claude/wip/report.md", false},        // legacy .claude/wip/ no longer matches
 		{"", false},
 	}
 	for _, tt := range tests {
@@ -1689,15 +1692,15 @@ func TestWriteguard_RegularFileEdit_Allow(t *testing.T) {
 	}
 }
 
-// WG-R2: Write .wip/ file → ALLOW (regression: wip path handled before protected check)
+// WG-R2: Write .sos/wip/ file → ALLOW (regression: wip path handled before protected check)
 func TestWriteguard_WipWrite_Regression(t *testing.T) {
 	result := runWipTest(t, &testutil.HookEnv{
 		Event:     "PreToolUse",
 		ToolName:  "Write",
-		ToolInput: makeToolInput(".wip/SPIKE-x.md", "---\ntype: spike\n---\n\n# Spike"),
+		ToolInput: makeToolInput(".sos/wip/SPIKE-x.md", "---\ntype: spike\n---\n\n# Spike"),
 	})
 	if result.HookSpecificOutput.PermissionDecision != "allow" {
-		t.Errorf("WG-R2: PermissionDecision = %q, want allow (.wip/ regression)", result.HookSpecificOutput.PermissionDecision)
+		t.Errorf("WG-R2: PermissionDecision = %q, want allow (.sos/wip/ regression)", result.HookSpecificOutput.PermissionDecision)
 	}
 }
 

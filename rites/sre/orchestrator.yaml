@@ -1,5 +1,4 @@
 # Orchestrator configuration for sre
-# Used by generate-orchestrator.sh to produce pythia.md
 
 rite:
   name: sre
@@ -39,10 +38,7 @@ handoff_criteria:
     - "Failure scenarios validated"
     - "System resilience confirmed"
 
-skills:
-  - "@observability for monitoring patterns"
-  - "@incident-response for runbook creation"
-  - "@chaos-engineering for resilience testing"
+skills: []
 
 antipatterns:
   - "Creating alerts without runbooks (every alert needs response procedure)"

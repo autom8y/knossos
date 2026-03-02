@@ -54,7 +54,7 @@ func TestRegistry_SaveAndLoadSessionRegistry(t *testing.T) {
 	entry := Entry{
 		ArtifactID:   "TDD-test-artifact",
 		ArtifactType: TypeTDD,
-		Path:         "docs/design/TDD-test.md",
+		Path:         ".ledge/specs/TDD-test.md",
 		Phase:        PhaseDesign,
 		Specialist:   "context-architect",
 		SessionID:    sessionID,
@@ -98,7 +98,7 @@ func TestRegistry_Register_NewEntry(t *testing.T) {
 	entry := Entry{
 		ArtifactID:   "TDD-new-artifact",
 		ArtifactType: TypeTDD,
-		Path:         "docs/design/TDD-new.md",
+		Path:         ".ledge/specs/TDD-new.md",
 		Phase:        PhaseDesign,
 		Specialist:   "context-architect",
 		SessionID:    sessionID,
@@ -131,7 +131,7 @@ func TestRegistry_Register_UpdateExisting(t *testing.T) {
 	entry1 := Entry{
 		ArtifactID:   "TDD-update-test",
 		ArtifactType: TypeTDD,
-		Path:         "docs/design/TDD-update.md",
+		Path:         ".ledge/specs/TDD-update.md",
 		Phase:        PhaseDesign,
 		Specialist:   "context-architect",
 		SessionID:    sessionID,
@@ -147,7 +147,7 @@ func TestRegistry_Register_UpdateExisting(t *testing.T) {
 	entry2 := Entry{
 		ArtifactID:   "TDD-update-test",
 		ArtifactType: TypeTDD,
-		Path:         "docs/design/TDD-update-v2.md",
+		Path:         ".ledge/specs/TDD-update-v2.md",
 		Phase:        PhaseDesign,
 		Specialist:   "context-architect",
 		SessionID:    sessionID,
@@ -170,7 +170,7 @@ func TestRegistry_Register_UpdateExisting(t *testing.T) {
 	if loaded.Artifacts[0].Validated != true {
 		t.Errorf("Expected validated=true, got %v", loaded.Artifacts[0].Validated)
 	}
-	if loaded.Artifacts[0].Path != "docs/design/TDD-update-v2.md" {
+	if loaded.Artifacts[0].Path != ".ledge/specs/TDD-update-v2.md" {
 		t.Errorf("Expected updated path, got %s", loaded.Artifacts[0].Path)
 	}
 }
@@ -205,7 +205,7 @@ func TestRegistry_SaveAndLoadProjectRegistry(t *testing.T) {
 	entry := Entry{
 		ArtifactID:   "PRD-test-project",
 		ArtifactType: TypePRD,
-		Path:         "docs/requirements/PRD-test.md",
+		Path:         ".ledge/specs/PRD-test.md",
 		Phase:        PhaseRequirements,
 		Specialist:   "product-owner",
 		SessionID:    "session-20260105-143022-abc12345",
@@ -349,12 +349,12 @@ func TestRegistry_GraduatedPath(t *testing.T) {
 		},
 		{
 			name:  "PRD goes to specs",
-			entry: Entry{ArtifactType: TypePRD, Path: "docs/requirements/PRD-feature.md"},
+			entry: Entry{ArtifactType: TypePRD, Path: ".ledge/specs/PRD-feature.md"},
 			want:  ".ledge/specs/PRD-feature.md",
 		},
 		{
 			name:  "TDD goes to specs",
-			entry: Entry{ArtifactType: TypeTDD, Path: "docs/design/TDD-feature.md"},
+			entry: Entry{ArtifactType: TypeTDD, Path: ".ledge/specs/TDD-feature.md"},
 			want:  ".ledge/specs/TDD-feature.md",
 		},
 		{

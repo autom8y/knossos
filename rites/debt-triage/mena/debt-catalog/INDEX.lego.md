@@ -8,7 +8,7 @@ description: "Debt-triage rite agent profiles and artifact schemas. Use when: un
 ## Agent Profiles
 
 ### debt-collector
-**Model**: Sonnet | **Invocation**: `Act as **Debt Collector**`
+**Model**: Opus | **Invocation**: `Act as **Debt Collector**`
 
 Systematically finds and documents technical debt across codebase. Use for initial inventory creation, quarterly scans, new codebase assessment, and portfolio health checks.
 
@@ -17,7 +17,7 @@ Systematically finds and documents technical debt across codebase. Use for initi
 **Produces**: Debt inventory (structured YAML catalog), categories/tags, severity estimates, source locations.
 
 ### risk-assessor
-**Model**: Sonnet | **Invocation**: `Act as **Risk Assessor**`
+**Model**: Opus | **Invocation**: `Act as **Risk Assessor**`
 
 Prioritizes technical debt by risk, impact, and business value. Use after debt collection, before planning remediation, for ROI analysis.
 
@@ -26,7 +26,7 @@ Prioritizes technical debt by risk, impact, and business value. Use after debt c
 **Produces**: Priority matrix, risk scores (impact x probability), ROI estimates (value/cost), urgency timeline.
 
 ### sprint-planner
-**Model**: Sonnet | **Invocation**: `Act as **Sprint Planner**`
+**Model**: Opus | **Invocation**: `Act as **Sprint Planner**`
 
 Creates actionable plans to pay down technical debt. Use after risk assessment, for planning sprints, creating quarterly roadmaps.
 

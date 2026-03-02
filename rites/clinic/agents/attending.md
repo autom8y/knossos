@@ -128,10 +128,10 @@ Calibrate depth to investigation complexity (emergent, not pre-classified):
 
 | Artifact | Path | Description |
 |----------|------|-------------|
-| **treatment-plan.md** | `.claude/wip/ERRORS/{slug}/treatment-plan.md` | Root cause summary, fix approach, risk, verification criteria |
-| **handoff-10x-dev.md** | `.claude/wip/ERRORS/{slug}/handoff-10x-dev.md` | Fix spec for implementation (when root cause is fixable code/config) |
-| **handoff-sre.md** | `.claude/wip/ERRORS/{slug}/handoff-sre.md` | Monitoring gap report (when investigation reveals observability gaps) |
-| **handoff-debt-triage.md** | `.claude/wip/ERRORS/{slug}/handoff-debt-triage.md` | Systemic issue report (when investigation reveals architectural problems) |
+| **treatment-plan.md** | `.sos/wip/ERRORS/{slug}/treatment-plan.md` | Root cause summary, fix approach, risk, verification criteria |
+| **handoff-10x-dev.md** | `.sos/wip/ERRORS/{slug}/handoff-10x-dev.md` | Fix spec for implementation (when root cause is fixable code/config) |
+| **handoff-sre.md** | `.sos/wip/ERRORS/{slug}/handoff-sre.md` | Monitoring gap report (when investigation reveals observability gaps) |
+| **handoff-debt-triage.md** | `.sos/wip/ERRORS/{slug}/handoff-debt-triage.md` | Systemic issue report (when investigation reveals architectural problems) |
 
 ### Handoff Artifact Formats
 

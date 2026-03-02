@@ -5,6 +5,8 @@ name: review
 version: "1.0.0"
 description: Language-agnostic code review lifecycle (Scan -> Assess -> Report)
 
+# entry_agent: The agent CC invokes first via Task tool (orchestrator routing).
+# This is distinct from workflow.yaml entry_point.agent (domain workflow entry).
 entry_agent: pythia
 
 phases:
@@ -61,7 +63,7 @@ hooks:
 
 hook_defaults:
   write_guard:
-    allow_paths: [".claude/wip/review/"]
+    allow_paths: [".sos/wip/review/"]
 
 dependencies:
   - shared

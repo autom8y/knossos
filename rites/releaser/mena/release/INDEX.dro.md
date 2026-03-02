@@ -26,7 +26,7 @@ If no positional argument is given, ask the user what they want to release.
 
 1. **Verify releaser rite is active**: Check `.claude/CLAUDE.md` for `releaser` in the agent configurations section. If not active, run `ari sync --rite releaser` first and inform the user.
 2. **Verify gh auth**: Run `gh auth status` -- if unauthenticated, ERROR and stop.
-3. **Clean slate**: Check `.claude/wip/release/` for artifacts from a prior run. If found, ask the user whether to clear them or resume from where the prior run left off.
+3. **Clean slate**: Check `.sos/wip/release/` for artifacts from a prior run. If found, ask the user whether to clear them or resume from where the prior run left off.
 4. **Parse arguments**: Extract glob pattern or repo list from `$ARGUMENTS`. Extract `--complexity` and `--dry-run` flags.
 
 ### Phase 1 -- Initial Pythia Consultation
@@ -58,7 +58,7 @@ consultation:
     User invoked /release with scope: {glob_or_repos}
     Complexity override: {--complexity value or 'auto-detect'}
     Dry run: {true|false}
-    Artifact directory: .claude/wip/release/
+    Artifact directory: .sos/wip/release/
     {any additional context from pre-flight}
 ")
 ```
@@ -77,7 +77,7 @@ Loop until Pythia returns `directive.action: complete`:
    Task(subagent_type="{specialist.agent}", prompt="{specialist.prompt}")
    ```
 3. When the specialist completes, verify its artifacts exist:
-   - cartographer: `platform-state-map.yaml` at `.claude/wip/release/`
+   - cartographer: `platform-state-map.yaml` at `.sos/wip/release/`
    - dependency-resolver: `dependency-graph.yaml`
    - release-planner: `release-plan.yaml`
    - release-executor: `execution-ledger.yaml`
@@ -100,7 +100,7 @@ Loop until Pythia returns `directive.action: complete`:
        last_specialist: '{agent name}'
        last_outcome: success
        artifacts_ready:
-         - '{artifact}: .claude/wip/release/{filename}'
+         - '{artifact}: .sos/wip/release/{filename}'
      context_summary: |
        {Brief summary of specialist results}
        {Any notable findings -- dirty repos, dependency issues, failures}
@@ -140,7 +140,7 @@ After the reconnaissance phase (cartographer produces `platform-state-map.yaml`)
 
 When Pythia returns `directive.action: complete`:
 
-1. Read `verification-report.yaml` from `.claude/wip/release/`
+1. Read `verification-report.yaml` from `.sos/wip/release/`
 2. Display the verdict to the user:
 
    **On PASS**:
@@ -185,7 +185,7 @@ Store Pythia's agent ID after the first consultation. On subsequent consultation
 | Specialist times out (maxTurns exceeded) | Report to Pythia as failure; Pythia may retry with narrower scope |
 | gh auth expires mid-workflow | Stop, inform user, they re-auth, then `/release --resume` |
 | Artifact missing after specialist claims completion | Report to Pythia as failure with details |
-| User Ctrl+C during long CI monitoring | Artifacts remain in `.claude/wip/release/`; next `/release` detects and offers resume |
+| User Ctrl+C during long CI monitoring | Artifacts remain in `.sos/wip/release/`; next `/release` detects and offers resume |
 
 ## Anti-Patterns
 

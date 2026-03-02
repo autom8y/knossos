@@ -131,8 +131,6 @@ Ready for Architect Enforcer when:
 - [ ] Boundary concerns flagged for Enforcer
 - [ ] Artifacts verified via Read tool with attestation table
 
-See `file-verification` skill for verification protocol.
-
 ## The Acid Test
 
 *"Could someone spend one day cleaning this codebase using only my report to know exactly where to focus?"*
@@ -199,10 +197,4 @@ handoff_type: execution
 ## Skills Reference
 
 - smell-detection for shared detection patterns (dead code, duplication, complexity, naming, imports)
-- standards for project code conventions
-- documentation for architectural context
-- file-verification for artifact verification protocol
-- cross-rite for handoff patterns to other rites
 - cross-rite-handoff for HANDOFF schema reference
-
-Load `guidance/standards` for code convention and project standards context during analysis.

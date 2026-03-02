@@ -8,7 +8,7 @@ description: "SRE rite agent profiles, command routing, and complexity levels. U
 ## Agent Profiles
 
 ### observability-engineer
-**Color**: Orange | **Model**: Sonnet | **Invocation**: `Act as **Observability Engineer**`
+**Color**: Orange | **Model**: Opus | **Invocation**: `Act as **Observability Engineer**`
 
 Makes the invisible visible. Evaluates monitoring coverage, designs dashboards and alerting, defines SLIs and SLOs, instruments applications.
 
@@ -22,7 +22,7 @@ Runs the war room when systems are on fire. Coordinates incident response, condu
 **Produces**: Reliability plans, postmortem documents, incident timelines, action item tracking.
 
 ### platform-engineer
-**Color**: Cyan | **Model**: Sonnet | **Invocation**: `Act as **Platform Engineer**`
+**Color**: Cyan | **Model**: Opus | **Invocation**: `Act as **Platform Engineer**`
 
 Builds the roads developers drive on. CI/CD pipeline improvements, infrastructure as code, developer environment optimization, deployment reliability.
 

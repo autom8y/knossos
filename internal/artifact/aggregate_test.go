@@ -38,7 +38,7 @@ func TestAggregator_AggregateSession_SingleArtifact(t *testing.T) {
 	entry := Entry{
 		ArtifactID:   "TDD-test",
 		ArtifactType: TypeTDD,
-		Path:         "docs/design/TDD-test.md",
+		Path:         ".ledge/specs/TDD-test.md",
 		Phase:        PhaseDesign,
 		Specialist:   "context-architect",
 		SessionID:    sessionID,
@@ -80,7 +80,7 @@ func TestAggregator_AggregateSession_MultipleSessions(t *testing.T) {
 	entry1 := Entry{
 		ArtifactID:   "PRD-feature-a",
 		ArtifactType: TypePRD,
-		Path:         "docs/requirements/PRD-feature-a.md",
+		Path:         ".ledge/specs/PRD-feature-a.md",
 		Phase:        PhaseRequirements,
 		Specialist:   "product-owner",
 		SessionID:    session1,
@@ -99,7 +99,7 @@ func TestAggregator_AggregateSession_MultipleSessions(t *testing.T) {
 	entry2 := Entry{
 		ArtifactID:   "TDD-feature-a",
 		ArtifactType: TypeTDD,
-		Path:         "docs/design/TDD-feature-a.md",
+		Path:         ".ledge/specs/TDD-feature-a.md",
 		Phase:        PhaseDesign,
 		Specialist:   "context-architect",
 		SessionID:    session2,
@@ -135,7 +135,7 @@ func TestAggregator_AggregateSession_UpdateExisting(t *testing.T) {
 	entry1 := Entry{
 		ArtifactID:   "TDD-update",
 		ArtifactType: TypeTDD,
-		Path:         "docs/design/TDD-update-v1.md",
+		Path:         ".ledge/specs/TDD-update-v1.md",
 		Phase:        PhaseDesign,
 		Specialist:   "context-architect",
 		SessionID:    sessionID,
@@ -153,7 +153,7 @@ func TestAggregator_AggregateSession_UpdateExisting(t *testing.T) {
 	entry2 := Entry{
 		ArtifactID:   "TDD-update",
 		ArtifactType: TypeTDD,
-		Path:         "docs/design/TDD-update-v2.md",
+		Path:         ".ledge/specs/TDD-update-v2.md",
 		Phase:        PhaseDesign,
 		Specialist:   "context-architect",
 		SessionID:    sessionID,
@@ -283,7 +283,7 @@ func TestAggregator_AggregateAll_MultipleSessions(t *testing.T) {
 	entry1 := Entry{
 		ArtifactID:   "PRD-test-1",
 		ArtifactType: TypePRD,
-		Path:         "docs/requirements/PRD-test-1.md",
+		Path:         ".ledge/specs/PRD-test-1.md",
 		Phase:        PhaseRequirements,
 		Specialist:   "product-owner",
 		SessionID:    session1,
@@ -299,7 +299,7 @@ func TestAggregator_AggregateAll_MultipleSessions(t *testing.T) {
 	entry2 := Entry{
 		ArtifactID:   "TDD-test-2",
 		ArtifactType: TypeTDD,
-		Path:         "docs/design/TDD-test-2.md",
+		Path:         ".ledge/specs/TDD-test-2.md",
 		Phase:        PhaseDesign,
 		Specialist:   "context-architect",
 		SessionID:    session2,
@@ -362,7 +362,7 @@ func TestAggregator_AggregateAll_IgnoresNonSessionDirs(t *testing.T) {
 	entry := Entry{
 		ArtifactID:   "PRD-valid",
 		ArtifactType: TypePRD,
-		Path:         "docs/requirements/PRD-valid.md",
+		Path:         ".ledge/specs/PRD-valid.md",
 		Phase:        PhaseRequirements,
 		Specialist:   "product-owner",
 		SessionID:    sessionID,
@@ -405,7 +405,7 @@ func TestAggregator_AggregateSession_GraduatesPaths(t *testing.T) {
 		},
 		{
 			ArtifactID: "PRD-billing", ArtifactType: TypePRD,
-			Path: "docs/requirements/PRD-billing.md",
+			Path: ".ledge/specs/PRD-billing.md",
 			Phase: PhaseRequirements, Specialist: "product-owner", SessionID: sessionID,
 			RegisteredAt: time.Now().UTC(), Validated: true,
 		},

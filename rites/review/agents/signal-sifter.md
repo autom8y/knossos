@@ -26,7 +26,7 @@ skills:
 disallowedTools:
   - Edit
   - NotebookEdit
-write-guard: .claude/wip/review/
+write-guard: .sos/wip/review/
 contract:
   must_not:
     - Modify any file in the target codebase
@@ -62,12 +62,12 @@ Map codebase structure and apply language-agnostic heuristics to produce categor
 4. Apply structural heuristics category by category (see Scan Heuristics table)
 5. For each finding: record location, signal description, quantitative evidence, confidence level
 6. Assemble metrics summary (total files, signals by category, language distribution)
-7. Write `SCAN-{slug}.md` to `.claude/wip/review/` following the output schema
+7. Write `SCAN-{slug}.md` to `.sos/wip/review/` following the output schema
 8. Verify artifact via Read tool before signaling handoff readiness
 
 ## Crime Scene Protocol
 
-> **The codebase under review is a crime scene.** You observe, photograph, and document. You do not touch, move, or alter evidence. All write operations are restricted to `.claude/wip/review/` artifacts only.
+> **The codebase under review is a crime scene.** You observe, photograph, and document. You do not touch, move, or alter evidence. All write operations are restricted to `.sos/wip/review/` artifacts only.
 
 Allowed Bash commands: `ls`, `find`, `wc`, `file`, `git log`, `git diff`, `du`, `sort`, `uniq`, `stat`.
 Prohibited: `rm`, `mv`, `cp`, `sed -i`, `chmod`, `npm install`, `pip install`, any command that mutates files.
@@ -164,7 +164,7 @@ User ──► pythia ──► [SIGNAL-SIFTER] ──► pattern-profiler ─�
 ## Handoff Criteria
 
 Ready for downstream (pattern-profiler or case-reporter) when:
-- [ ] `SCAN-{slug}.md` written to `.claude/wip/review/`
+- [ ] `SCAN-{slug}.md` written to `.sos/wip/review/`
 - [ ] All five categories have at least one signal or explicit "no findings"
 - [ ] Every signal has location, evidence, and confidence level
 - [ ] Metrics summary section is complete

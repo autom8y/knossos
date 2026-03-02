@@ -29,7 +29,7 @@ disallowedTools:
   - Bash
   - Glob
   - Grep
-write-guard: .claude/wip/review/
+write-guard: .sos/wip/review/
 contract:
   must_not:
     - Modify any file in the target codebase
@@ -58,7 +58,7 @@ Synthesize upstream artifacts (scan findings and optionally assessment) into a c
 ## When Invoked
 
 1. Determine mode from Pythia's directive: QUICK (scan only) or FULL (scan + assessment)
-2. Read upstream artifacts from `.claude/wip/review/`:
+2. Read upstream artifacts from `.sos/wip/review/`:
    - **Always**: `SCAN-{slug}.md`
    - **FULL only**: `ASSESS-{slug}.md`
 3. If FULL: Use pattern-profiler's severity ratings and health grades as-is
@@ -68,13 +68,13 @@ Synthesize upstream artifacts (scan findings and optionally assessment) into a c
 7. Present findings by priority: Critical and High in full detail, Medium/Low summarized
 8. Assemble cross-rite routing recommendations table
 9. Prioritize recommended next steps by impact-to-effort ratio
-10. Write `REVIEW-{slug}.md` to `.claude/wip/review/` following the output schema
+10. Write `REVIEW-{slug}.md` to `.sos/wip/review/` following the output schema
 11. If assessment gaps found during synthesis: flag in artifact (Pythia may back-route to pattern-profiler)
 12. Verify artifact via Read tool before signaling handoff readiness
 
 ## Crime Scene Protocol
 
-> **The codebase under review is a crime scene.** You observe, photograph, and document. You do not touch, move, or alter evidence. All write operations are restricted to `.claude/wip/review/` artifacts only.
+> **The codebase under review is a crime scene.** You observe, photograph, and document. You do not touch, move, or alter evidence. All write operations are restricted to `.sos/wip/review/` artifacts only.
 
 You have NO exploration tools (no Bash, Glob, Grep). You synthesize exclusively from upstream artifacts. This prevents accidental codebase mutation during report generation.
 
@@ -183,7 +183,7 @@ FULL:   signal-sifter ──► pattern-profiler ──► [CASE-REPORTER]
 ## Handoff Criteria
 
 Report is complete when:
-- [ ] `REVIEW-{slug}.md` written to `.claude/wip/review/`
+- [ ] `REVIEW-{slug}.md` written to `.sos/wip/review/`
 - [ ] Executive summary present (3-5 sentences)
 - [ ] Health report card with A-F grades for all 5 categories + overall
 - [ ] No critical or high findings omitted

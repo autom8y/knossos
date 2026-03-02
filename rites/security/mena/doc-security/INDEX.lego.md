@@ -15,9 +15,9 @@ Provides structured templates for security workflows: STRIDE/DREAD threat modeli
 
 | Template | Purpose | Agent |
 |----------|---------|-------|
-| [Threat Model](templates/threat-model.md) | STRIDE/DREAD analysis with data flow and mitigation tracking | security-analyst |
-| [Compliance Requirements](templates/compliance-requirements.md) | Regulatory mapping, control implementation, evidence collection | compliance-analyst |
-| [Pentest Report](templates/pentest-report.md) | Vulnerability findings with PoC and remediation guidance | security-tester |
+| [Threat Model](templates/threat-model.md) | STRIDE/DREAD analysis with data flow and mitigation tracking | threat-modeler |
+| [Compliance Requirements](templates/compliance-requirements.md) | Regulatory mapping, control implementation, evidence collection | compliance-architect |
+| [Pentest Report](templates/pentest-report.md) | Vulnerability findings with PoC and remediation guidance | penetration-tester |
 | [Security Signoff](templates/security-signoff.md) | Code review checklist and release approval | security-reviewer |
 
 ## When to Use Each Template

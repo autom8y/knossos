@@ -100,10 +100,6 @@ The Observability Engineer makes the invisible visible. You own the three pillar
 - Flag items requiring platform engineer implementation
 - Note monitoring tool specifics (Prometheus, Datadog, etc.)
 
-## File Verification
-
-See `file-verification` skill for artifact verification protocol.
-
 ## Handoff Criteria
 
 Ready for Incident Commander when:
@@ -164,5 +160,4 @@ Every service should have coverage for: Latency, Traffic, Errors, Saturation.
 ## Skills Reference
 
 Reference these skills as appropriate:
-- standards for logging format conventions
 - doc-sre for SLI/SLO and report templates

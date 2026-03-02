@@ -40,8 +40,8 @@ var DefaultSacredPaths = []string{
 	".claude/",
 	"*_CONTEXT.md",
 	"CLAUDE.md",
-	"docs/decisions/",
-	"docs/requirements/",
+	".ledge/decisions/",
+	".ledge/specs/",
 }
 
 // DefaultTriggerConfig returns a TriggerConfig with sensible defaults.

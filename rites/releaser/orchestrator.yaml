@@ -25,30 +25,30 @@ workflow_position:
 
 handoff_criteria:
   reconnaissance:
-    - "platform-state-map.yaml exists at .claude/wip/release/"
+    - "platform-state-map.yaml exists at .sos/wip/release/"
     - "All repos matching glob pattern scanned"
     - "Ecosystem identified for each repo (python_uv, node_npm, go_mod, rust_cargo)"
     - "Dirty repos flagged and excluded from release_candidate"
     - "has_dependents flag set for each release-candidate repo"
   dependency-analysis:
-    - "dependency-graph.yaml exists at .claude/wip/release/"
+    - "dependency-graph.yaml exists at .sos/wip/release/"
     - "Publish order annotated (topological sort phases)"
     - "Blast radius calculated for each repo"
     - "Version mismatches identified with severity"
     - "No unresolved circular dependencies"
   release-planning:
-    - "release-plan.yaml exists at .claude/wip/release/"
+    - "release-plan.yaml exists at .sos/wip/release/"
     - "All phases defined with parallel groups"
     - "Rollback boundaries set for each phase"
     - "Merge strategies assigned per repo"
     - "No unresolvable conflicts flagged"
   execution:
-    - "execution-ledger.yaml exists at .claude/wip/release/"
+    - "execution-ledger.yaml exists at .sos/wip/release/"
     - "At least one repo successfully pushed or published"
     - "All actions logged with timestamps and status"
     - "Halted DAG branches documented with reason"
   verification:
-    - "verification-report.yaml exists at .claude/wip/release/"
+    - "verification-report.yaml exists at .sos/wip/release/"
     - "All pushed repos have terminal CI status (green/red/timeout)"
     - "All discovered pipeline chains resolved or timed out"
     - "Failure classifications provided for red repos"

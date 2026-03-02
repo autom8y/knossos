@@ -156,10 +156,6 @@ If uncertain: Flag it. Visible uncertainty ("Note: Could not verify against prod
 - **Missing evidence**: Flagging issues without code references proving the problem
 - **Scope creep**: Rewriting docs instead of documenting issues for Tech Writer
 
-## File Verification
-
-See `file-verification` skill for artifact verification protocol.
-
 ## Skills Reference
 
 - doc-reviews for review report template

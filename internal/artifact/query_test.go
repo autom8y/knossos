@@ -12,7 +12,7 @@ func setupTestData(t *testing.T, registry *Registry, aggregator *Aggregator) {
 		{
 			ArtifactID:   "PRD-feature-a",
 			ArtifactType: TypePRD,
-			Path:         "docs/requirements/PRD-feature-a.md",
+			Path:         ".ledge/specs/PRD-feature-a.md",
 			Phase:        PhaseRequirements,
 			Specialist:   "product-owner",
 			SessionID:    session1,
@@ -22,7 +22,7 @@ func setupTestData(t *testing.T, registry *Registry, aggregator *Aggregator) {
 		{
 			ArtifactID:   "TDD-feature-a",
 			ArtifactType: TypeTDD,
-			Path:         "docs/design/TDD-feature-a.md",
+			Path:         ".ledge/specs/TDD-feature-a.md",
 			Phase:        PhaseDesign,
 			Specialist:   "context-architect",
 			SessionID:    session1,
@@ -45,7 +45,7 @@ func setupTestData(t *testing.T, registry *Registry, aggregator *Aggregator) {
 		{
 			ArtifactID:   "ADR-0001-choice",
 			ArtifactType: TypeADR,
-			Path:         "docs/decisions/ADR-0001-choice.md",
+			Path:         ".ledge/decisions/ADR-0001-choice.md",
 			Phase:        PhaseDesign,
 			Specialist:   "context-architect",
 			SessionID:    session2,

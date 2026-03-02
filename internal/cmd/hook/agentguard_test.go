@@ -51,23 +51,23 @@ func TestAgentGuard_DenyOutsideAllowedPaths(t *testing.T) {
 		Event:     "PreToolUse",
 		ToolName:  "Write",
 		ToolInput: `{"file_path":"src/main.go","content":"package main"}`,
-	}, "ecosystem-analyst", []string{".wip/"})
+	}, "ecosystem-analyst", []string{".sos/wip/"})
 
 	if result.HookSpecificOutput.PermissionDecision != "deny" {
 		t.Errorf("PermissionDecision = %q, want deny (path outside allowed prefix)", result.HookSpecificOutput.PermissionDecision)
 	}
 }
 
-// AG-2: Write to .wip/ relative path -- expect ALLOW.
+// AG-2: Write to .sos/wip/ relative path -- expect ALLOW.
 func TestAgentGuard_AllowWipPath(t *testing.T) {
 	result := runAgentGuardTest(t, &testutil.HookEnv{
 		Event:     "PreToolUse",
 		ToolName:  "Write",
-		ToolInput: `{"file_path":".wip/gap.md","content":"# Gap Analysis"}`,
-	}, "ecosystem-analyst", []string{".wip/"})
+		ToolInput: `{"file_path":".sos/wip/gap.md","content":"# Gap Analysis"}`,
+	}, "ecosystem-analyst", []string{".sos/wip/"})
 
 	if result.HookSpecificOutput.PermissionDecision != "allow" {
-		t.Errorf("PermissionDecision = %q, want allow (.wip/ prefix matches)", result.HookSpecificOutput.PermissionDecision)
+		t.Errorf("PermissionDecision = %q, want allow (.sos/wip/ prefix matches)", result.HookSpecificOutput.PermissionDecision)
 	}
 }
 
@@ -77,7 +77,7 @@ func TestAgentGuard_AllowDocsEcosystem(t *testing.T) {
 		Event:     "PreToolUse",
 		ToolName:  "Write",
 		ToolInput: `{"file_path":"docs/ecosystem/GAP-x.md","content":"# Doc"}`,
-	}, "ecosystem-analyst", []string{".wip/", "docs/ecosystem/"})
+	}, "ecosystem-analyst", []string{".sos/wip/", "docs/ecosystem/"})
 
 	if result.HookSpecificOutput.PermissionDecision != "allow" {
 		t.Errorf("PermissionDecision = %q, want allow (docs/ecosystem/ prefix matches)", result.HookSpecificOutput.PermissionDecision)
@@ -90,7 +90,7 @@ func TestAgentGuard_DenyInternalPath(t *testing.T) {
 		Event:     "PreToolUse",
 		ToolName:  "Write",
 		ToolInput: `{"file_path":"internal/agent/f.go","content":"package agent"}`,
-	}, "ecosystem-analyst", []string{".wip/", "docs/ecosystem/"})
+	}, "ecosystem-analyst", []string{".sos/wip/", "docs/ecosystem/"})
 
 	if result.HookSpecificOutput.PermissionDecision != "deny" {
 		t.Errorf("PermissionDecision = %q, want deny (internal/ not in allowed paths)", result.HookSpecificOutput.PermissionDecision)
@@ -103,7 +103,7 @@ func TestAgentGuard_AllowNonWriteEvent(t *testing.T) {
 		Event:     "PostToolUse",
 		ToolName:  "Read",
 		ToolInput: `{"file_path":"anything"}`,
-	}, "ecosystem-analyst", []string{".wip/"})
+	}, "ecosystem-analyst", []string{".sos/wip/"})
 
 	if result.HookSpecificOutput.PermissionDecision != "allow" {
 		t.Errorf("PermissionDecision = %q, want allow (PostToolUse passes through)", result.HookSpecificOutput.PermissionDecision)
@@ -116,7 +116,7 @@ func TestAgentGuard_DenyMissingFilePath(t *testing.T) {
 		Event:     "PreToolUse",
 		ToolName:  "Write",
 		ToolInput: `{"content":"some content"}`,
-	}, "ecosystem-analyst", []string{".wip/"})
+	}, "ecosystem-analyst", []string{".sos/wip/"})
 
 	if result.HookSpecificOutput.PermissionDecision != "deny" {
 		t.Errorf("PermissionDecision = %q, want deny (well-formed JSON with no file_path must fail closed)", result.HookSpecificOutput.PermissionDecision)
@@ -132,7 +132,7 @@ func TestAgentGuard_AllowBadJSON(t *testing.T) {
 		Event:     "PreToolUse",
 		ToolName:  "Write",
 		ToolInput: `not valid json {{{`,
-	}, "ecosystem-analyst", []string{".wip/"})
+	}, "ecosystem-analyst", []string{".sos/wip/"})
 
 	if result.HookSpecificOutput.PermissionDecision != "allow" {
 		t.Errorf("PermissionDecision = %q, want allow (corrupt JSON must degrade gracefully)", result.HookSpecificOutput.PermissionDecision)
@@ -152,16 +152,16 @@ func TestAgentGuard_DenyNoAllowPaths(t *testing.T) {
 	}
 }
 
-// AG-9: Absolute path containing /.wip/ -- expect ALLOW (contains condition).
+// AG-9: Absolute path containing /.sos/wip/ -- expect ALLOW (contains condition).
 func TestAgentGuard_AllowAbsoluteWipPath(t *testing.T) {
 	result := runAgentGuardTest(t, &testutil.HookEnv{
 		Event:     "PreToolUse",
 		ToolName:  "Write",
-		ToolInput: `{"file_path":"/Users/tom/project/.wip/file.md","content":"# Notes"}`,
-	}, "ecosystem-analyst", []string{".wip/"})
+		ToolInput: `{"file_path":"/Users/tom/project/.sos/wip/file.md","content":"# Notes"}`,
+	}, "ecosystem-analyst", []string{".sos/wip/"})
 
 	if result.HookSpecificOutput.PermissionDecision != "allow" {
-		t.Errorf("PermissionDecision = %q, want allow (absolute path /.wip/ matches)", result.HookSpecificOutput.PermissionDecision)
+		t.Errorf("PermissionDecision = %q, want allow (absolute path /.sos/wip/ matches)", result.HookSpecificOutput.PermissionDecision)
 	}
 }
 
@@ -171,7 +171,7 @@ func TestAgentGuard_DenyReasonIncludesAgentName(t *testing.T) {
 		Event:     "PreToolUse",
 		ToolName:  "Write",
 		ToolInput: `{"file_path":"src/main.go","content":"package main"}`,
-	}, "ecosystem-analyst", []string{".wip/"})
+	}, "ecosystem-analyst", []string{".sos/wip/"})
 
 	if result.HookSpecificOutput.PermissionDecision != "deny" {
 		t.Errorf("PermissionDecision = %q, want deny", result.HookSpecificOutput.PermissionDecision)
@@ -187,7 +187,7 @@ func TestAgentGuard_DefaultAgentName(t *testing.T) {
 		Event:     "PreToolUse",
 		ToolName:  "Write",
 		ToolInput: `{"file_path":"src/main.go","content":"package main"}`,
-	}, "this agent", []string{".wip/"})
+	}, "this agent", []string{".sos/wip/"})
 
 	if result.HookSpecificOutput.PermissionDecision != "deny" {
 		t.Errorf("PermissionDecision = %q, want deny", result.HookSpecificOutput.PermissionDecision)
@@ -201,7 +201,7 @@ func TestAgentGuard_DefaultAgentName(t *testing.T) {
 func TestAgentGuard_NonPreToolUseEvent(t *testing.T) {
 	result := runAgentGuardTest(t, &testutil.HookEnv{
 		Event: "SessionStart",
-	}, "ecosystem-analyst", []string{".wip/"})
+	}, "ecosystem-analyst", []string{".sos/wip/"})
 
 	if result.HookSpecificOutput.PermissionDecision != "allow" {
 		t.Errorf("PermissionDecision = %q, want allow (SessionStart passes through)", result.HookSpecificOutput.PermissionDecision)
@@ -218,39 +218,39 @@ func TestIsAllowedPath(t *testing.T) {
 		want       bool
 	}{
 		{
-			name:       "relative .wip/ prefix match",
-			filePath:   ".wip/gap.md",
-			allowPaths: []string{".wip/"},
+			name:       "relative .sos/wip/ prefix match",
+			filePath:   ".sos/wip/gap.md",
+			allowPaths: []string{".sos/wip/"},
 			want:       true,
 		},
 		{
-			name:       "absolute path /.wip/ contains match",
-			filePath:   "/Users/tom/project/.wip/SPIKE-x.md",
-			allowPaths: []string{".wip/"},
+			name:       "absolute path /.sos/wip/ contains match",
+			filePath:   "/Users/tom/project/.sos/wip/SPIKE-x.md",
+			allowPaths: []string{".sos/wip/"},
 			want:       true,
 		},
 		{
 			name:       "docs/ecosystem/ prefix match",
 			filePath:   "docs/ecosystem/GAP-x.md",
-			allowPaths: []string{".wip/", "docs/ecosystem/"},
+			allowPaths: []string{".sos/wip/", "docs/ecosystem/"},
 			want:       true,
 		},
 		{
-			name:       "internal/ does not match .wip/ or docs/ecosystem/",
+			name:       "internal/ does not match .sos/wip/ or docs/ecosystem/",
 			filePath:   "internal/agent/f.go",
-			allowPaths: []string{".wip/", "docs/ecosystem/"},
+			allowPaths: []string{".sos/wip/", "docs/ecosystem/"},
 			want:       false,
 		},
 		{
 			name:       "empty allow paths",
-			filePath:   ".wip/gap.md",
+			filePath:   ".sos/wip/gap.md",
 			allowPaths: nil,
 			want:       false,
 		},
 		{
 			name:       "trailing slash prevents sibling match",
 			filePath:   ".wip-private/secret.md",
-			allowPaths: []string{".wip/"},
+			allowPaths: []string{".sos/wip/"},
 			want:       false,
 		},
 		{
@@ -260,15 +260,15 @@ func TestIsAllowedPath(t *testing.T) {
 			want:       false,
 		},
 		{
-			name:       "relative .claude/wip/ matches wip/ prefix via contains",
-			filePath:   ".claude/wip/report.md",
-			allowPaths: []string{".wip/", "wip/"},
+			name:       "relative .sos/wip/ matches prefix",
+			filePath:   ".sos/wip/report.md",
+			allowPaths: []string{".sos/wip/"},
 			want:       true,
 		},
 		{
-			name:       "absolute .claude/wip/ matches wip/ prefix via contains",
-			filePath:   "/Users/tom/project/.claude/wip/report.md",
-			allowPaths: []string{".wip/", "wip/"},
+			name:       "absolute .sos/wip/ matches via contains",
+			filePath:   "/Users/tom/project/.sos/wip/report.md",
+			allowPaths: []string{".sos/wip/"},
 			want:       true,
 		},
 		{
@@ -278,9 +278,9 @@ func TestIsAllowedPath(t *testing.T) {
 			want:       true,
 		},
 		{
-			name:       ".claude/wip/ does not match .wip/ alone",
-			filePath:   ".claude/wip/report.md",
-			allowPaths: []string{".wip/"},
+			name:       ".ledge/ does not match .sos/wip/",
+			filePath:   ".ledge/specs/PRD-auth.md",
+			allowPaths: []string{".sos/wip/"},
 			want:       false,
 		},
 	}
@@ -370,7 +370,7 @@ func TestAgentGuard_StdinIntegration_DenyOutsidePaths(t *testing.T) {
 	var stdout, stderr bytes.Buffer
 	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
 
-	err := runAgentGuardCore(makeAgentGuardCtx(), printer, "ecosystem-analyst", []string{".wip/", "docs/ecosystem/"})
+	err := runAgentGuardCore(makeAgentGuardCtx(), printer, "ecosystem-analyst", []string{".sos/wip/", "docs/ecosystem/"})
 	if err != nil {
 		t.Fatalf("runAgentGuardCore() error = %v", err)
 	}
@@ -389,13 +389,13 @@ func TestAgentGuard_StdinIntegration_DenyOutsidePaths(t *testing.T) {
 }
 
 // TestAgentGuard_StdinIntegration_AllowWipPath verifies the full production
-// path allows writes to .wip/ when CC sends JSON via stdin.
+// path allows writes to .sos/wip/ when CC sends JSON via stdin.
 func TestAgentGuard_StdinIntegration_AllowWipPath(t *testing.T) {
 	oldStdin := os.Stdin
 	defer func() { os.Stdin = oldStdin }()
 
 	r, w, _ := os.Pipe()
-	payload := `{"hook_event_name":"PreToolUse","tool_name":"Write","tool_input":{"file_path":".wip/gap.md","content":"# Gap"},"session_id":"test-session"}`
+	payload := `{"hook_event_name":"PreToolUse","tool_name":"Write","tool_input":{"file_path":".sos/wip/gap.md","content":"# Gap"},"session_id":"test-session"}`
 	go func() {
 		w.Write([]byte(payload))
 		w.Close()
@@ -405,7 +405,7 @@ func TestAgentGuard_StdinIntegration_AllowWipPath(t *testing.T) {
 	var stdout, stderr bytes.Buffer
 	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
 
-	err := runAgentGuardCore(makeAgentGuardCtx(), printer, "ecosystem-analyst", []string{".wip/", "docs/ecosystem/"})
+	err := runAgentGuardCore(makeAgentGuardCtx(), printer, "ecosystem-analyst", []string{".sos/wip/", "docs/ecosystem/"})
 	if err != nil {
 		t.Fatalf("runAgentGuardCore() error = %v", err)
 	}
@@ -416,7 +416,7 @@ func TestAgentGuard_StdinIntegration_AllowWipPath(t *testing.T) {
 	}
 
 	if result.HookSpecificOutput.PermissionDecision != "allow" {
-		t.Errorf("PermissionDecision = %q, want allow (stdin: .wip/ prefix matches)", result.HookSpecificOutput.PermissionDecision)
+		t.Errorf("PermissionDecision = %q, want allow (stdin: .sos/wip/ prefix matches)", result.HookSpecificOutput.PermissionDecision)
 	}
 }
 
@@ -424,7 +424,7 @@ func TestAgentGuard_StdinIntegration_AllowWipPath(t *testing.T) {
 func BenchmarkAgentGuard_Passthrough(b *testing.B) {
 	os.Setenv("CLAUDE_HOOK_EVENT", "PreToolUse")
 	os.Setenv("CLAUDE_TOOL_NAME", "Write")
-	os.Setenv("CLAUDE_TOOL_INPUT", `{"file_path":".wip/gap.md","content":"x"}`)
+	os.Setenv("CLAUDE_TOOL_INPUT", `{"file_path":".sos/wip/gap.md","content":"x"}`)
 	defer func() {
 		os.Unsetenv("CLAUDE_HOOK_EVENT")
 		os.Unsetenv("CLAUDE_TOOL_NAME")
@@ -434,7 +434,7 @@ func BenchmarkAgentGuard_Passthrough(b *testing.B) {
 	ctx := makeAgentGuardCtx()
 	var stdout, stderr bytes.Buffer
 	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
-	allowPaths := []string{".wip/", "docs/ecosystem/"}
+	allowPaths := []string{".sos/wip/", "docs/ecosystem/"}
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {

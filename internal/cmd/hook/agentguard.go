@@ -129,13 +129,13 @@ func parseFilePathStrict(printer *output.Printer, toolInput string) (filePath st
 
 // isAllowedPath reports whether filePath matches any of the given path prefixes.
 // Two match conditions per prefix:
-//  1. strings.HasPrefix: handles relative paths (e.g. ".wip/gap.md" vs ".wip/")
+//  1. strings.HasPrefix: handles relative paths (e.g. ".sos/wip/gap.md" vs ".sos/wip/")
 //  2. strings.Contains with "/"+prefix: handles absolute paths
-//     (e.g. "/Users/tom/project/.wip/gap.md" contains "/.wip/")
+//     (e.g. "/Users/tom/project/.sos/wip/gap.md" contains "/.sos/wip/")
 //
 // No path normalization is applied -- callers control exact prefix strings.
 // A trailing slash in the prefix prevents sibling-directory false positives
-// (e.g. ".wip/" does not match ".wip-private/file.md").
+// (e.g. ".sos/wip/" does not match ".sos/wip-private/file.md").
 func isAllowedPath(filePath string, allowPaths []string) bool {
 	for _, prefix := range allowPaths {
 		if strings.HasPrefix(filePath, prefix) || strings.Contains(filePath, "/"+prefix) {

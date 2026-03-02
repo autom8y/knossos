@@ -361,3 +361,119 @@ Analyst responsibilities.
 		t.Fatal("behavioral-constraints section not found (should be from specialist archetype)")
 	}
 }
+
+func TestGenerateSkillsReference_WithSkills(t *testing.T) {
+	skills := []string{"ecosystem-ref", "orchestrator-templates"}
+	result := generateSkillsReference(skills)
+
+	if !strings.Contains(result, "ecosystem-ref") {
+		t.Errorf("output missing skill %q: %q", "ecosystem-ref", result)
+	}
+	if !strings.Contains(result, "orchestrator-templates") {
+		t.Errorf("output missing skill %q: %q", "orchestrator-templates", result)
+	}
+	if strings.Contains(result, "@") {
+		t.Errorf("output must not contain @ prefix (SCAR-017 anti-pattern): %q", result)
+	}
+	if strings.Contains(result, "Load skills on demand") {
+		t.Errorf("output should list skills, not generic message: %q", result)
+	}
+}
+
+func TestGenerateSkillsReference_EmptySkills(t *testing.T) {
+	result := generateSkillsReference(nil)
+
+	if !strings.Contains(result, "Load skills on demand") {
+		t.Errorf("empty skills should produce generic message, got: %q", result)
+	}
+	if strings.Contains(result, "@") {
+		t.Errorf("output must not contain @ prefix: %q", result)
+	}
+
+	// Also test empty slice (not nil)
+	result = generateSkillsReference([]string{})
+	if !strings.Contains(result, "Load skills on demand") {
+		t.Errorf("empty skills slice should produce generic message, got: %q", result)
+	}
+}
+
+func TestGenerateSkillsReference_NoAtPrefix(t *testing.T) {
+	// Verify that no skills list can produce @ in output (guards against regression).
+	testCases := [][]string{
+		{"standards"},
+		{"file-verification"},
+		{"standards", "file-verification"},
+		{"@should-be-stripped"},
+	}
+	for _, skills := range testCases {
+		result := generateSkillsReference(skills)
+		// The output should not inject @ characters beyond what is in the skill name itself.
+		// Since skill names should not have @ (that is the anti-pattern), verify the function
+		// does not add @ prefixes.
+		for _, skill := range skills {
+			expectedEntry := "- " + skill
+			if strings.Contains(result, "@"+skill) {
+				t.Errorf("output must not add @ prefix to skill %q: %q", skill, result)
+			}
+			if !strings.Contains(result, "@") || strings.Contains(skill, "@") {
+				// Only flag if the @ appeared and was not originally in the skill name.
+				_ = expectedEntry
+			}
+		}
+	}
+}
+
+func TestGenerateSkillsReference_IntegrationWithDerivedSection(t *testing.T) {
+	// Verify that the derived skills-reference section is generated from frontmatter skills.
+	content := `---
+name: test-orchestrator
+description: Test orchestrator with skills
+type: orchestrator
+tools: Read
+model: opus
+color: purple
+skills:
+  - ecosystem-ref
+  - forge-ref
+---
+
+# Test Orchestrator
+
+## Skills Reference
+
+OLD CONTENT - should be replaced with frontmatter skills.
+`
+
+	parsed, err := ParseAgentSections([]byte(content))
+	if err != nil {
+		t.Fatalf("ParseAgentSections() error = %v", err)
+	}
+
+	archetype, err := GetArchetype("orchestrator")
+	if err != nil {
+		t.Fatalf("GetArchetype() error = %v", err)
+	}
+
+	updated, err := RegeneratePlatformSections(parsed, archetype)
+	if err != nil {
+		t.Fatalf("RegeneratePlatformSections() error = %v", err)
+	}
+
+	skillsRef := updated.FindSection("skills-reference")
+	if skillsRef == nil {
+		t.Fatal("skills-reference section not found")
+	}
+
+	if strings.Contains(skillsRef.Content, "OLD CONTENT") {
+		t.Error("derived skills-reference still contains old content")
+	}
+	if !strings.Contains(skillsRef.Content, "ecosystem-ref") {
+		t.Errorf("skills-reference missing frontmatter skill %q: %q", "ecosystem-ref", skillsRef.Content)
+	}
+	if !strings.Contains(skillsRef.Content, "forge-ref") {
+		t.Errorf("skills-reference missing frontmatter skill %q: %q", "forge-ref", skillsRef.Content)
+	}
+	if strings.Contains(skillsRef.Content, "@") {
+		t.Errorf("skills-reference must not contain @ prefix (SCAR-017): %q", skillsRef.Content)
+	}
+}

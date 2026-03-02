@@ -19,10 +19,12 @@ description: "Innovation Lab (R&D) rite reference. Use when: activating the rnd 
 
 | Agent | Model | Role | Produces |
 |-------|-------|------|----------|
-| **technology-scout** | sonnet | Watches the technology horizon | tech-assessment |
-| **integration-researcher** | sonnet | Maps integration paths | integration-map |
+| **pythia** | opus | Orchestrates R&D workflows | — |
+| **technology-scout** | opus | Watches the technology horizon | tech-assessment |
+| **integration-researcher** | opus | Maps integration paths | integration-map |
 | **prototype-engineer** | sonnet | Builds decision-ready demos | prototype |
 | **moonshot-architect** | opus | Designs future systems | moonshot-plan |
+| **tech-transfer** | opus | Packages R&D findings for production handoff | transfer-artifact |
 
 ## Workflow
 

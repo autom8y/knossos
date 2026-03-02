@@ -33,7 +33,7 @@ ari session list --output json 2>/dev/null
 cat .claude/ACTIVE_RITE 2>/dev/null || echo "none"
 
 # 4. WIP artifacts
-ls .wip/ 2>/dev/null
+ls .sos/wip/ 2>/dev/null
 ```
 
 Also read the session context table injected by the SessionStart hook (already in your context above).
@@ -100,7 +100,7 @@ Sessions: {active_count} active, {parked_count} parked
 next: /consult
 ```
 
-If `.wip/` artifacts exist without a session, append: `Note: {n} artifacts in .wip/ with no active session.`
+If `.sos/wip/` artifacts exist without a session, append: `Note: {n} artifacts in .wip/ with no active session.`
 
 ---
 
@@ -176,11 +176,11 @@ Options:
   /rite --list   — See available rites
 ```
 
-If `.wip/` artifacts exist without a session, mention them:
+If `.sos/wip/` artifacts exist without a session, mention them:
 
 ```
 Note: Found {n} artifacts in .wip/ with no active session.
-Review with: ls .wip/
+Review with: ls .sos/wip/
 ```
 
 ## Behavioral Rules

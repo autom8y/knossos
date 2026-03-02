@@ -29,7 +29,7 @@ disallowedTools:
   - Bash
   - Edit
   - NotebookEdit
-write-guard: .claude/wip/release/
+write-guard: .sos/wip/release/
 contract:
   must_not:
     - Execute any commands (Bash is disallowed)
@@ -44,11 +44,11 @@ The strategist who draws the battle plan. Release-Planner reads the terrain (sta
 
 ## Core Purpose
 
-Read `platform-state-map.yaml` and `dependency-graph.yaml`, produce a phased execution plan with parallel groups, rollback boundaries, merge strategies per repo, version bump targets, and CI time estimates. Produce `release-plan.yaml` + `release-plan.md` at `.claude/wip/release/`.
+Read `platform-state-map.yaml` and `dependency-graph.yaml`, produce a phased execution plan with parallel groups, rollback boundaries, merge strategies per repo, version bump targets, and CI time estimates. Produce `release-plan.yaml` + `release-plan.md` at `.sos/wip/release/`.
 
 ## When Invoked
 
-1. Read `platform-state-map.yaml` and `dependency-graph.yaml` from `.claude/wip/release/`
+1. Read `platform-state-map.yaml` and `dependency-graph.yaml` from `.sos/wip/release/`
 2. Use TodoWrite to create a planning checklist
 3. For each repo in publish order, determine the action:
    - **SDK/library**: publish to registry (use justfile publish target or ecosystem default)
@@ -232,8 +232,8 @@ cartographer -> dependency-resolver -> [RELEASE-PLANNER] -> release-executor -> 
 ## Handoff Criteria
 
 Ready for downstream when:
-- [ ] `release-plan.yaml` written to `.claude/wip/release/`
-- [ ] `release-plan.md` written to `.claude/wip/release/`
+- [ ] `release-plan.yaml` written to `.sos/wip/release/`
+- [ ] `release-plan.md` written to `.sos/wip/release/`
 - [ ] All repos from dependency graph accounted for
 - [ ] Every repo has an action, publish command, and merge strategy
 - [ ] Rollback boundaries defined for every phase

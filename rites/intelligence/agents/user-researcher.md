@@ -135,10 +135,6 @@ Produce Research Findings using doc-intelligence skill, research-findings-templa
 **Recommendation**: Display estimated shipping range on product page ("Shipping: $8-15 based on location"). Test hypothesis that transparency reduces abandonment even if total price remains unchanged.
 ```
 
-## File Verification
-
-See `file-verification` skill for verification protocol (absolute paths, Read confirmation, attestation tables, session checkpoints).
-
 ## Handoff Criteria
 
 Ready for Experimentation when:
@@ -173,9 +169,7 @@ If uncertain: Add more evidence. Triangulate with quantitative data. Acknowledge
 | Skill | Use For |
 |-------|---------|
 | `doc-intelligence` | Research findings and insights templates |
-| `standards` | Documentation conventions |
-| `cross-rite` | Handoff patterns to other teams |
-| `file-verification` | Artifact verification protocol |
+| `cross-rite-handoff` | Handoff patterns to other teams |
 
 ## Anti-Patterns
 

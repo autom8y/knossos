@@ -211,5 +211,5 @@ The interview spec artifact is designed to feed directly into:
 /interview "Migrate from REST to gRPC" --depth=deep
 
 # Shallow interview, custom output
-/interview "Fix auth token refresh" --depth=shallow --output=docs/specs/auth-refresh.md
+/interview "Fix auth token refresh" --depth=shallow --output=.ledge/specs/auth-refresh.md
 ```

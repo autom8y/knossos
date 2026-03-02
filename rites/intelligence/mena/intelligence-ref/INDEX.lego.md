@@ -19,7 +19,7 @@ description: "Product Intelligence rite reference with insights artifacts. Use w
 
 | Agent | Model | Role | Produces |
 |-------|-------|------|----------|
-| **analytics-engineer** | sonnet | Builds data foundation and tracking | tracking-plan |
+| **analytics-engineer** | opus | Builds data foundation and tracking | tracking-plan |
 | **user-researcher** | opus | Captures qualitative insights | research-findings |
 | **experimentation-lead** | opus | Designs A/B tests and experiments | experiment-design |
 | **insights-analyst** | opus | Synthesizes data into decisions | insights-report |

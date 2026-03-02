@@ -227,7 +227,7 @@ func emitSupplementalEvents(sessionDir, toolName string, toolInput *hook.ToolInp
 			writer.Write(artifactEvent)
 		}
 
-		// Emit artifact_created for .wip/ writes (path-based detection, not prefix-based).
+		// Emit artifact_created for .sos/wip/ writes (path-based detection, not prefix-based).
 		// Fires even when frontmatter is missing so observability is complete.
 		if artType, wipType := matchWipArtifact(path, toolInput); artType != "" {
 			artifactEvent := clewcontract.NewArtifactCreatedEvent(artType, path, wipType, "")
@@ -273,11 +273,11 @@ func artifactTypeToPhase(artType clewcontract.ArtifactType) string {
 	}
 }
 
-// matchWipArtifact detects whether path is a .wip/ write and extracts the frontmatter type.
-// Returns (ArtifactTypeEphemeral, typeValue) when path is a .wip/ target.
-// Returns (ArtifactTypeEphemeral, "unknown") when path is .wip/ but frontmatter is invalid
+// matchWipArtifact detects whether path is a .sos/wip/ write and extracts the frontmatter type.
+// Returns (ArtifactTypeEphemeral, typeValue) when path is a .sos/wip/ target.
+// Returns (ArtifactTypeEphemeral, "unknown") when path is .sos/wip/ but frontmatter is invalid
 // or absent — we still emit the event so the write is visible in the event stream.
-// Returns ("", "") when path is not a .wip/ path.
+// Returns ("", "") when path is not a .sos/wip/ path.
 //
 // isWipPath is defined in writeguard.go (same package). toolInput.Content is the
 // file content being written — we read from memory, not from disk, to avoid I/O
@@ -311,10 +311,10 @@ func matchWipArtifact(path string, toolInput *hook.ToolInput) (clewcontract.Arti
 	return clewcontract.ArtifactTypeEphemeral, typeStr
 }
 
-// wipSlug derives a slug from a .wip/ file path by taking the base name and
+// wipSlug derives a slug from a .sos/wip/ file path by taking the base name and
 // stripping only the final file extension.
-// Example: ".wip/DESIGN-ephemeral-artifacts.md" -> "DESIGN-ephemeral-artifacts"
-// Example: ".wip/SPIKE-complex-name.analysis.md" -> "SPIKE-complex-name.analysis"
+// Example: ".sos/wip/DESIGN-ephemeral-artifacts.md" -> "DESIGN-ephemeral-artifacts"
+// Example: ".sos/wip/SPIKE-complex-name.analysis.md" -> "SPIKE-complex-name.analysis"
 func wipSlug(path string) string {
 	base := filepath.Base(path)
 	ext := filepath.Ext(base)

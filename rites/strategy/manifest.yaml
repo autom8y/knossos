@@ -5,6 +5,8 @@ name: strategy
 version: "1.0.0"
 description: Business strategy lifecycle for market research, competitive analysis, business modeling, and strategic planning
 
+# entry_agent: The agent CC invokes first via Task tool (orchestrator routing).
+# This is distinct from workflow.yaml entry_point.agent (domain workflow entry).
 entry_agent: pythia
 
 phases:
@@ -66,4 +68,4 @@ complexity_levels:
 
 metadata:
   domain: business strategy
-  color: gold
+  color: yellow

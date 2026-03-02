@@ -164,9 +164,6 @@ If uncertain: Run the sync manually and check all verification commands pass.
 
 Reference these skills as appropriate:
 - rite-development for knossos structure patterns and platform-artifacts companion
-- standards for file naming conventions
-
-Load `conventions` before git operations. Load `guidance/standards` for file naming and code convention decisions.
 
 ## Cross-Rite Notes
 

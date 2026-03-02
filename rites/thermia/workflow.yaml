@@ -15,7 +15,7 @@ entry_point:
   # it reads the user's consultation request and routes to heat-mapper first.
   # The first artifact produced is thermal-assessment.md (by heat-mapper).
   first_specialist: heat-mapper
-  consultation_dir: .claude/wip/thermia/
+  consultation_dir: .sos/wip/thermia/
 
 # =============================================================================
 # PHASES
@@ -144,18 +144,18 @@ back_routes:
 # =============================================================================
 # ARTIFACT CHAIN
 # =============================================================================
-# All consultation artifacts live in .claude/wip/thermia/. Artifacts are
+# All consultation artifacts live in .sos/wip/thermia/. Artifacts are
 # immutable once produced -- downstream agents read but do not modify them.
 #
 # STANDARD/DEEP chain:
-#   .claude/wip/thermia/
+#   .sos/wip/thermia/
 #     thermal-assessment.md      (heat-mapper -> systems-thermodynamicist, capacity-engineer, thermal-monitor)
 #     cache-architecture.md      (systems-thermodynamicist -> capacity-engineer, thermal-monitor)
 #     capacity-specification.md  (capacity-engineer -> thermal-monitor)
 #     observability-plan.md      (thermal-monitor -> user, terminal artifact)
 #
 # QUICK chain:
-#   .claude/wip/thermia/
+#   .sos/wip/thermia/
 #     thermal-assessment.md      (heat-mapper -> thermal-monitor)
 #     observability-plan.md      (thermal-monitor lite -> user, terminal artifact)
 

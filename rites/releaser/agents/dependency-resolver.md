@@ -28,7 +28,7 @@ memory:
 disallowedTools:
   - Edit
   - NotebookEdit
-write-guard: .claude/wip/release/
+write-guard: .sos/wip/release/
 contract:
   must_not:
     - Modify any file in discovered repos
@@ -43,11 +43,11 @@ The graph builder who untangles the dependency web. Dependency-Resolver reads ev
 
 ## Core Purpose
 
-Read `platform-state-map.yaml`, parse each repo's package manifest for dependencies, cross-reference with discovered repos, build a directed acyclic graph, detect version mismatches, calculate blast radius, annotate topological publish order. Produce `dependency-graph.yaml` + `dependency-graph.md` at `.claude/wip/release/`.
+Read `platform-state-map.yaml`, parse each repo's package manifest for dependencies, cross-reference with discovered repos, build a directed acyclic graph, detect version mismatches, calculate blast radius, annotate topological publish order. Produce `dependency-graph.yaml` + `dependency-graph.md` at `.sos/wip/release/`.
 
 ## When Invoked
 
-1. Read `platform-state-map.yaml` from `.claude/wip/release/` for the repo inventory
+1. Read `platform-state-map.yaml` from `.sos/wip/release/` for the repo inventory
 2. Use TodoWrite to create an analysis checklist (one item per repo)
 3. For each repo, parse the manifest file for dependencies:
    - **Python/uv**: `pyproject.toml` `[project.dependencies]` and `[project.optional-dependencies]`
@@ -147,8 +147,8 @@ cartographer -> [DEPENDENCY-RESOLVER] -> release-planner -> release-executor -> 
 ## Handoff Criteria
 
 Ready for downstream when:
-- [ ] `dependency-graph.yaml` written to `.claude/wip/release/`
-- [ ] `dependency-graph.md` written to `.claude/wip/release/`
+- [ ] `dependency-graph.yaml` written to `.sos/wip/release/`
+- [ ] `dependency-graph.md` written to `.sos/wip/release/`
 - [ ] All repos from state map analyzed
 - [ ] Publish order annotated with topological phases
 - [ ] Blast radius calculated for each repo

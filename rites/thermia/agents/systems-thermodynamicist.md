@@ -31,7 +31,7 @@ disallowedTools:
   - NotebookEdit
 write_guard:
   allow_paths:
-    - ".claude/wip/thermia/cache-architecture.md"
+    - ".sos/wip/thermia/cache-architecture.md"
 contract:
   must_not:
     - Design architecture for layers the heat-mapper rejected
@@ -137,7 +137,7 @@ Write `cache-architecture.md` with ADRs for significant decisions.
 
 | Artifact | Path | Description |
 |----------|------|-------------|
-| **cache-architecture.md** | `.claude/wip/thermia/cache-architecture.md` | Full architecture with patterns, consistency, failure modes, hierarchy, invalidation |
+| **cache-architecture.md** | `.sos/wip/thermia/cache-architecture.md` | Full architecture with patterns, consistency, failure modes, hierarchy, invalidation |
 
 ### cache-architecture.md Structure
 
@@ -196,7 +196,7 @@ Write `cache-architecture.md` with ADRs for significant decisions.
 ## Handoff Criteria
 
 Ready for capacity-engineer when:
-- [ ] `cache-architecture.md` produced at `.claude/wip/thermia/`
+- [ ] `cache-architecture.md` produced at `.sos/wip/thermia/`
 - [ ] Every CACHE layer has: pattern selected with rationale, consistency model justified, failure mode designed for all three scenarios
 - [ ] Invalidation strategy specified per layer and cross-layer (if multi-level)
 - [ ] Multi-level hierarchy designed with inclusion policy and consistency propagation (if applicable)
@@ -219,4 +219,4 @@ If uncertain: The failure mode design is incomplete. An architecture without fai
 
 ## Skills Reference
 
-- `thermia-ref` for pattern selection matrix, consistency model spectrum, cross-rite routing
+Use Skill tool to load skills on demand as needed.

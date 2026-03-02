@@ -31,7 +31,7 @@ disallowedTools:
   - NotebookEdit
 write_guard:
   allow_paths:
-    - ".claude/wip/thermia/thermal-assessment.md"
+    - ".sos/wip/thermia/thermal-assessment.md"
 contract:
   must_not:
     - Recommend caching without evaluating alternatives first
@@ -149,7 +149,7 @@ If existing caching is present, audit for:
 
 | Artifact | Path | Description |
 |----------|------|-------------|
-| **thermal-assessment.md** | `.claude/wip/thermia/thermal-assessment.md` | Full assessment with access patterns, alternatives, 6-gate results, verdicts |
+| **thermal-assessment.md** | `.sos/wip/thermia/thermal-assessment.md` | Full assessment with access patterns, alternatives, 6-gate results, verdicts |
 
 ### thermal-assessment.md Structure
 
@@ -206,7 +206,7 @@ If existing caching is present, audit for:
 ## Handoff Criteria
 
 Ready for systems-thermodynamicist (or thermal-monitor in QUICK mode) when:
-- [ ] `thermal-assessment.md` produced at `.claude/wip/thermia/`
+- [ ] `thermal-assessment.md` produced at `.sos/wip/thermia/`
 - [ ] Every hot path has alternatives assessment documented
 - [ ] 6-gate framework applied to every cache candidate with per-gate reasoning
 - [ ] Each candidate has a verdict: CACHE, OPTIMIZE-INSTEAD, or DEFER
@@ -230,4 +230,4 @@ If uncertain: Re-examine the alternatives. A cache layer you cannot justify with
 
 ## Skills Reference
 
-- `thermia-ref` for 6-gate quick reference, anti-pattern catalog, cross-rite routing
+Use Skill tool to load skills on demand as needed.

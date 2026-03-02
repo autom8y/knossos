@@ -36,7 +36,7 @@ func NewValidateCmd(outputFlag *string, verboseFlag *bool, projectDir *string) *
 and handoff criteria.
 
 Examples:
-  ari validate artifact --type=prd docs/requirements/PRD-user-auth.md
+  ari validate artifact --type=prd .ledge/specs/PRD-user-auth.md
   ari validate handoff --phase=requirements --artifact=PRD-user-auth
   ari validate schema --file=SESSION_CONTEXT.md`,
 	}
@@ -111,10 +111,10 @@ The artifact type can be auto-detected from:
   3. The --type flag (explicit override)
 
 Examples:
-  ari validate artifact docs/requirements/PRD-user-auth.md
-  ari validate artifact --type=prd docs/requirements/PRD-user-auth.md
-  ari validate artifact --type=tdd docs/design/TDD-user-auth.md
-  ari validate artifact docs/decisions/ADR-0001.md`,
+  ari validate artifact .ledge/specs/PRD-user-auth.md
+  ari validate artifact --type=prd .ledge/specs/PRD-user-auth.md
+  ari validate artifact --type=tdd .ledge/specs/TDD-user-auth.md
+  ari validate artifact .ledge/decisions/ADR-0001.md`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			printer := ctx.getPrinter()
@@ -314,7 +314,7 @@ and include blocking and non-blocking checks for each artifact type.
 Phases: requirements, design, implementation, validation
 
 Examples:
-  ari validate handoff --phase=requirements --artifact=docs/requirements/PRD-user-auth.md
+  ari validate handoff --phase=requirements --artifact=.ledge/specs/PRD-user-auth.md
   ari validate handoff --list-phases
   ari validate handoff --phase=requirements --type=prd --show-criteria`,
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -507,9 +507,9 @@ Available schemas:
   test-plan   - Test Plan
 
 Examples:
-  ari validate schema prd docs/requirements/PRD-user-auth.md
-  ari validate schema tdd docs/design/TDD-user-auth.md
-  ari validate schema adr docs/decisions/ADR-0001.md`,
+  ari validate schema prd .ledge/specs/PRD-user-auth.md
+  ari validate schema tdd .ledge/specs/TDD-user-auth.md
+  ari validate schema adr .ledge/decisions/ADR-0001.md`,
 		Args: cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			printer := ctx.getPrinter()

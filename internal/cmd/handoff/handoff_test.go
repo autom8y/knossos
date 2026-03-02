@@ -397,7 +397,7 @@ current_phase: design
 	eventsPath := filepath.Join(sessionDir, "events.jsonl")
 	events := []string{
 		`{"ts":"2026-01-05T14:00:00.000Z","type":"agent.task_start","summary":"Task delegated to architect","meta":{"agent":"architect","description":"Design TDD","parent_session":"` + sessionID + `"}}`,
-		`{"ts":"2026-01-05T14:30:00.000Z","type":"agent.task_end","summary":"Task completed by architect: success","meta":{"agent":"architect","status":"success","throughline":"TDD completed","artifacts":["docs/design/TDD-test.md"],"duration_ms":1800000}}`,
+		`{"ts":"2026-01-05T14:30:00.000Z","type":"agent.task_end","summary":"Task completed by architect: success","meta":{"agent":"architect","status":"success","throughline":"TDD completed","artifacts":[".ledge/specs/TDD-test.md"],"duration_ms":1800000}}`,
 		`{"timestamp":"2026-01-05T14:30:01.000Z","event":"HANDOFF_EXECUTED","to":"principal-engineer","metadata":{"artifact_id":"TDD-test","from_phase":"design","target_phase":"implementation"}}`,
 	}
 	if err := os.WriteFile(eventsPath, []byte(strings.Join(events, "\n")+"\n"), 0644); err != nil {

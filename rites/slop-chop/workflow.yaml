@@ -2,11 +2,13 @@ name: slop-chop
 workflow_type: sequential
 description: AI code quality gate lifecycle (Detect -> Analyze -> Decay -> Remediate -> Verdict)
 
+# entry_point: The first specialist in the domain workflow (not the CC routing agent).
+# The CC routing agent is manifest.yaml:entry_agent (always pythia for orchestrated rites).
 entry_point:
   agent: hallucination-hunter
   artifact:
     type: detection-report
-    path_template: .claude/wip/slop-chop/DETECTION-{slug}.md
+    path_template: .sos/wip/slop-chop/DETECTION-{slug}.md
 
 phases:
   - name: detection

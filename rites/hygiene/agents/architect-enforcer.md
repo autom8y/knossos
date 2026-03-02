@@ -157,8 +157,6 @@ Ready for Janitor when:
 - [ ] Risk assessment complete for each phase
 - [ ] Artifacts verified via Read tool with attestation table
 
-See `file-verification` skill for verification protocol.
-
 ## The Acid Test
 
 *"If the Janitor follows this plan exactly, will the codebase be measurably better without any behavior changes?"*
@@ -175,7 +173,4 @@ A good refactoring plan executes mechanically. If the Janitor must make judgment
 
 ## Skills Reference
 
-- standards for project code conventions
-- documentation for architectural boundaries and module organization
-- file-verification for artifact verification protocol
-- cross-rite for handoff patterns to other rites
+- cross-rite-handoff for handoff patterns to other rites

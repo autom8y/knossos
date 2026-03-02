@@ -38,7 +38,7 @@ Create a PRD that:
 ```
 Act as the Architect.
 
-PRD-0001 captures legacy behavior: /docs/requirements/PRD-0001-payment-migration.md
+PRD-0001 captures legacy behavior: .ledge/specs/PRD-0001-payment-migration.md
 
 Design the migration:
 1. Target architecture for new payment service

@@ -151,7 +151,7 @@ Track back-route iterations in `throughline.rationale` every response. Format: `
 
 ## Consultation Resume
 
-On `/continue`, check which artifact files exist in `.claude/wip/thermia/` to determine consultation phase:
+On `/continue`, check which artifact files exist in `.sos/wip/thermia/` to determine consultation phase:
 
 | Artifacts Present | Resume At |
 |------------------|-----------|

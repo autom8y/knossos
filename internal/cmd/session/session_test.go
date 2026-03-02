@@ -947,8 +947,8 @@ func TestTransition_RequirementsToDesign(t *testing.T) {
 		t.Fatalf("Failed to create audit dir: %v", err)
 	}
 
-	// Create required artifact (PRD)
-	prdDir := filepath.Join(projectDir, "docs", "requirements")
+	// Create required artifact (PRD) in canonical .ledge/specs/
+	prdDir := filepath.Join(projectDir, ".ledge", "specs")
 	if err := os.MkdirAll(prdDir, 0755); err != nil {
 		t.Fatalf("Failed to create PRD dir: %v", err)
 	}

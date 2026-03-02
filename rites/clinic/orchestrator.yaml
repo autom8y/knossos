@@ -31,7 +31,7 @@ workflow_position:
 
 handoff_criteria:
   intake:
-    - "intake-report.md exists in .claude/wip/ERRORS/{slug}/"
+    - "intake-report.md exists in .sos/wip/ERRORS/{slug}/"
     - "At least one system flagged for investigation"
     - "Evidence collection plan specifies what to look for in each system"
     - "index.yaml initialized with symptoms and systems entries"

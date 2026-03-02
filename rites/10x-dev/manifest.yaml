@@ -5,6 +5,8 @@ name: 10x-dev
 version: "1.0.0"
 description: Full development lifecycle from requirements through validation (PRD -> TDD -> Code -> QA)
 
+# entry_agent: The agent CC invokes first via Task tool (orchestrator routing).
+# This is distinct from workflow.yaml entry_point.agent (domain workflow entry).
 entry_agent: pythia
 
 phases:

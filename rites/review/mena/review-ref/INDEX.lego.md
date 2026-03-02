@@ -12,7 +12,7 @@ QUICK:  signal-sifter -> SCAN-{slug}.md -> case-reporter -> REVIEW-{slug}.md
 FULL:   signal-sifter -> SCAN-{slug}.md -> pattern-profiler -> ASSESS-{slug}.md -> case-reporter -> REVIEW-{slug}.md
 ```
 
-All artifacts written to `.claude/wip/review/`. Back-routes produce addenda, not full re-runs.
+All artifacts written to `.sos/wip/review/`. Back-routes produce addenda, not full re-runs.
 
 ## Complexity Gating
 
@@ -97,7 +97,7 @@ Review agents observe and report. They NEVER:
 - Install or modify dependencies
 - Execute test suites (read test files, don't run them)
 
-Write access is limited to `.claude/wip/review/` artifacts only.
+Write access is limited to `.sos/wip/review/` artifacts only.
 Enforced at four layers: prompt instructions, contract field, disallowedTools, agent-guard hook.
 
 ## Anti-Patterns

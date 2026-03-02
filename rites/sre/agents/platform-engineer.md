@@ -104,10 +104,6 @@ The Platform Engineer builds the roads developers drive on. You own CI/CD pipeli
 - Document validation steps with expected outcomes
 - Specify monitoring integration points
 
-## File Verification
-
-See `file-verification` skill for artifact verification protocol.
-
 ## Handoff Criteria
 
 Ready for Chaos Engineer when:
@@ -166,6 +162,4 @@ If uncertain: There's too much manual intervention, too much anxiety, or too man
 ## Skills Reference
 
 Reference these skills as appropriate:
-- standards for infrastructure conventions
-- documentation for runbook templates
 - doc-sre for SRE-specific templates

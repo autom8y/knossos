@@ -16,8 +16,8 @@
 ### Progress
 
 Artifacts completed:
-- ✓ PRD: /docs/requirements/PRD-{slug}.md
-- ✓ TDD: /docs/design/TDD-{slug}.md
+- ✓ PRD: .ledge/specs/PRD-{slug}.md
+- ✓ TDD: .ledge/specs/TDD-{slug}.md
 - ⧗ Implementation: In progress
 
 ### State

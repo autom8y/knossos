@@ -51,8 +51,8 @@ docs/{category}/{PREFIX}-{slug}.md
 
 | Rite | Path Template | Example |
 |------|--------------|---------|
-| 10x-dev | `docs/requirements/PRD-{slug}.md` | `docs/requirements/PRD-user-auth.md` |
-| 10x-dev | `docs/design/TDD-{slug}.md` | `docs/design/TDD-payment-api.md` |
+| 10x-dev | `.ledge/specs/PRD-{slug}.md` | `.ledge/specs/PRD-user-auth.md` |
+| 10x-dev | `.ledge/specs/TDD-{slug}.md` | `.ledge/specs/TDD-payment-api.md` |
 | doc-rite | `docs/audits/AUDIT-{slug}.md` | `docs/audits/AUDIT-api-docs.md` |
 | hygiene | `docs/hygiene/SMELL-{slug}.md` | `docs/hygiene/SMELL-legacy-utils.md` |
 | debt | `docs/debt/LEDGER-{slug}.md` | `docs/debt/LEDGER-2024-q4.md` |

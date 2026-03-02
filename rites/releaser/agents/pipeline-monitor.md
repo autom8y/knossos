@@ -30,7 +30,7 @@ disallowedTools:
   - NotebookEdit
   - Glob
   - Grep
-write-guard: .claude/wip/release/
+write-guard: .sos/wip/release/
 contract:
   must_not:
     - Re-trigger CI runs without explicit instruction
@@ -45,11 +45,11 @@ The watchful eye that confirms the mission succeeded. Pipeline-Monitor reads the
 
 ## Core Purpose
 
-Read `execution-ledger.yaml`, identify all pushed repos, monitor their CI pipelines via `gh run list` and `gh run view`, apply configurable timeouts, report green/red status, diagnose failures, and produce `verification-report.yaml` + `verification-report.md` at `.claude/wip/release/`.
+Read `execution-ledger.yaml`, identify all pushed repos, monitor their CI pipelines via `gh run list` and `gh run view`, apply configurable timeouts, report green/red status, diagnose failures, and produce `verification-report.yaml` + `verification-report.md` at `.sos/wip/release/`.
 
 ## When Invoked
 
-1. Read `execution-ledger.yaml` from `.claude/wip/release/`
+1. Read `execution-ledger.yaml` from `.sos/wip/release/`
 2. Build monitoring list: all repos with `status: success` and an action that pushed code
 3. Use TodoWrite to create a monitoring checklist (one item per repo)
 4. For each repo, find the latest CI run:
@@ -352,8 +352,8 @@ cartographer -> dependency-resolver -> release-planner -> release-executor -> [P
 ## Handoff Criteria
 
 Ready for Pythia when:
-- [ ] `verification-report.yaml` written to `.claude/wip/release/`
-- [ ] `verification-report.md` written to `.claude/wip/release/`
+- [ ] `verification-report.yaml` written to `.sos/wip/release/`
+- [ ] `verification-report.md` written to `.sos/wip/release/`
 - [ ] All monitored repos have terminal status (green/red/timeout/skipped)
 - [ ] Failed repos have diagnosis with classification and recommendation
 - [ ] Verdict rendered based on success criteria

@@ -1,5 +1,4 @@
 # Orchestrator configuration for 10x-dev
-# Used by generate-orchestrator.sh to produce pythia.md
 
 rite:
   name: 10x-dev
@@ -39,10 +38,7 @@ handoff_criteria:
     - "All tests pass"
     - "Deployment readiness verified"
 
-skills:
-  - "@development for coding standards"
-  - "@testing for QA patterns"
-  - "@architecture for design review"
+skills: []
 
 antipatterns:
   - "Skipping design phase for MODULE complexity (always design first)"

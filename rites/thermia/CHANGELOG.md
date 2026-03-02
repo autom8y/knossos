@@ -11,7 +11,7 @@
 - Two back-routes: assessment_gap (architecture -> assessment, max 1), design_inconsistency (validation -> specification, max 1)
 - 6-gate decision framework in heat-mapper for structured caching necessity evaluation
 - Theoretical grounding: CAP theorem, Facebook TAO/Memcache NSDI papers, Lamport consistency hierarchy (thermodynamicist); working set theory, ARC, TinyLFU, XFetch, LIRS (capacity-engineer)
-- Artifact chain: thermal-assessment -> cache-architecture -> capacity-specification -> observability-plan at `.claude/wip/thermia/`
+- Artifact chain: thermal-assessment -> cache-architecture -> capacity-specification -> observability-plan at `.sos/wip/thermia/`
 - Cross-rite outbound routing from thermal-monitor: 10x-dev (primary), clinic, sre, arch, hygiene, debt-triage (secondary)
 - `/thermia` quick-switch command (thermia-switch dromena)
 - Consultative protocol: exhaust alternatives first, probe assumptions, challenge shallow answers, derive every number

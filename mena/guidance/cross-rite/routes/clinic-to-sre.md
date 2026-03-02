@@ -16,7 +16,7 @@ The attending produces `handoff-sre.md` when the investigation reveals that moni
 
 ## Inbound Artifact
 
-The clinic produces `handoff-sre.md` in `.claude/wip/ERRORS/{investigation-slug}/`. This file contains:
+The clinic produces `handoff-sre.md` in `.sos/wip/ERRORS/{investigation-slug}/`. This file contains:
 
 | Field | Required | Description |
 |-------|----------|-------------|
@@ -49,7 +49,7 @@ Signals absent: {list of missing signals}
 Observability improvements specified. Suggest next step:
   /sre && /task "Improve monitoring for {failure-class}" --complexity={TASK|PROJECT}
 
-Handoff artifact: .claude/wip/ERRORS/{slug}/handoff-sre.md
+Handoff artifact: .sos/wip/ERRORS/{slug}/handoff-sre.md
 ```
 
 ## SRE Intake

@@ -64,8 +64,8 @@ Read Has Session, Session State from the context table — do not call `ari sess
    Duration: {total time}
 
    Artifacts:
-   - PRD: /docs/requirements/PRD-{slug}.md
-   - TDD: /docs/design/TDD-{slug}.md
+   - PRD: .ledge/specs/PRD-{slug}.md
+   - TDD: .ledge/specs/TDD-{slug}.md
    - Code: /src/...
 
    Quality: All gates passed

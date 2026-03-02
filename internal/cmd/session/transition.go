@@ -11,6 +11,7 @@ import (
 	"github.com/autom8y/knossos/internal/hook/clewcontract"
 	"github.com/autom8y/knossos/internal/lock"
 	"github.com/autom8y/knossos/internal/output"
+	"github.com/autom8y/knossos/internal/paths"
 	sess "github.com/autom8y/knossos/internal/session"
 )
 
@@ -178,25 +179,23 @@ func runTransition(ctx *cmdContext, targetPhase string, opts transitionOptions) 
 }
 
 // validateArtifacts checks for required artifacts for the target phase.
+// All artifacts live in .ledge/specs/ (PRD, TDD, TP) or .ledge/decisions/ (ADR).
 func validateArtifacts(projectRoot string, targetPhase sess.Phase) []string {
 	var missing []string
-	docsDir := filepath.Join(projectRoot, "docs")
+	resolver := paths.NewResolver(projectRoot)
 
 	switch targetPhase {
 	case sess.PhaseDesign:
-		// Requires PRD
-		if !hasArtifacts(filepath.Join(docsDir, "requirements"), "PRD-*.md") {
-			missing = append(missing, "PRD: No PRD found in docs/requirements/")
+		if !hasArtifacts(resolver.LedgeSpecsDir(), "PRD-*.md") {
+			missing = append(missing, "PRD: No PRD found in .ledge/specs/")
 		}
 	case sess.PhaseImplementation:
-		// Requires TDD
-		if !hasArtifacts(filepath.Join(docsDir, "design"), "TDD-*.md") {
-			missing = append(missing, "TDD: No TDD found in docs/design/")
+		if !hasArtifacts(resolver.LedgeSpecsDir(), "TDD-*.md") {
+			missing = append(missing, "TDD: No TDD found in .ledge/specs/")
 		}
 	case sess.PhaseComplete:
-		// Requires test plan
-		if !hasArtifacts(filepath.Join(docsDir, "testing"), "TP-*.md") {
-			missing = append(missing, "Test Plan: No test plan found in docs/testing/")
+		if !hasArtifacts(resolver.LedgeSpecsDir(), "TP-*.md") {
+			missing = append(missing, "Test Plan: No test plan found in .ledge/specs/")
 		}
 	}
 

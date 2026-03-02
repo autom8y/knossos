@@ -8,7 +8,7 @@
 - Five agents: pythia (orchestrator), triage-nurse, pathologist, diagnostician, attending
 - Four-phase sequential workflow: intake -> examination -> diagnosis -> treatment
 - Three back-routes: evidence_gap (max 3), diagnosis_insufficient (max 2), scope_expansion (max 1, user-confirmed)
-- Evidence architecture: `.claude/wip/ERRORS/{investigation-slug}/` with index.yaml as shared coordination artifact
+- Evidence architecture: `.sos/wip/ERRORS/{investigation-slug}/` with index.yaml as shared coordination artifact
 - Single complexity level: INVESTIGATION (emergent depth, no pre-classification)
 - Cross-rite handoff artifacts: handoff-10x-dev.md, handoff-sre.md, handoff-debt-triage.md
 - SRE escalation inbound protocol (incident-commander -> triage-nurse)

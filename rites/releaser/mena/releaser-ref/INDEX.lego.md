@@ -21,7 +21,7 @@ RELEASE:  cartographer -> platform-state-map.{yaml,md}
 PLATFORM: Same as RELEASE, full-scope (all matching repos, extended CI timeout)
 ```
 
-All artifacts written to `.claude/wip/release/`. YAML consumed by downstream agents; MD for human review.
+All artifacts written to `.sos/wip/release/`. YAML consumed by downstream agents; MD for human review.
 Downstream agents consume YAML only. Never parse the MD summaries programmatically.
 
 ## Complexity Levels

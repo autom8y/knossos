@@ -2,11 +2,13 @@ name: review
 workflow_type: sequential
 description: Language-agnostic code review lifecycle (Scan -> Assess -> Report)
 
+# entry_point: The first specialist in the domain workflow (not the CC routing agent).
+# The CC routing agent is manifest.yaml:entry_agent (always pythia for orchestrated rites).
 entry_point:
   agent: signal-sifter
   artifact:
     type: scan-findings
-    path_template: .claude/wip/review/SCAN-{slug}.md
+    path_template: .sos/wip/review/SCAN-{slug}.md
 
 phases:
   - name: scan

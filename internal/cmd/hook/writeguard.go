@@ -68,7 +68,7 @@ var protectedPatterns = []string{
 	"settings.local.json",
 }
 
-// validWipTypes is the closed taxonomy of valid .wip/ artifact type values.
+// validWipTypes is the closed taxonomy of valid .sos/wip/ artifact type values.
 // Values are case-sensitive lowercase. The set is intentionally small to keep
 // the classification meaningful.
 var validWipTypes = map[string]bool{
@@ -138,8 +138,8 @@ func runWriteguardCore(ctx *cmdContext, printer *output.Printer) error {
 		return outputAllow(printer)
 	}
 
-	// .wip/ validation: only applies to Write tool (not Edit — edits to existing files
-	// skip frontmatter re-validation per design). .wip/ paths are never protected, so
+	// .sos/wip/ validation: only applies to Write tool (not Edit — edits to existing files
+	// skip frontmatter re-validation per design). .sos/wip/ paths are never protected, so
 	// we return early here and skip the protected-file check entirely.
 	if toolName == "Write" && isWipPath(filePath) {
 		content := parseContentField(printer, hookEnv.ToolInput)
@@ -416,12 +416,10 @@ func outputAllow(printer *output.Printer) error {
 	return printer.Print(result)
 }
 
-// isWipPath returns true if filePath targets a .wip/ directory.
-// Matches both relative paths starting with ".wip/" and absolute paths containing
-// "/.wip/" as a path segment. The matching is intentionally broad: a false positive
-// (validating a non-root .wip/ write) is harmless — it just advises on frontmatter.
+// isWipPath returns true if filePath targets the .sos/wip/ directory.
+// Matches both relative (.sos/wip/...) and absolute (/path/to/.sos/wip/...) paths.
 func isWipPath(filePath string) bool {
-	return strings.HasPrefix(filePath, ".wip/") || strings.Contains(filePath, "/.wip/")
+	return strings.HasPrefix(filePath, ".sos/wip/") || strings.Contains(filePath, "/.sos/wip/")
 }
 
 // parseContentField extracts the "content" field from a JSON tool_input string.
@@ -451,26 +449,26 @@ func parseContentField(printer *output.Printer, toolInput string) string {
 func validateWipFrontmatter(content string) (bool, string, string) {
 	yamlBytes, _, err := frontmatter.Parse([]byte(content))
 	if err != nil {
-		return false, "", ".wip/ files require YAML frontmatter. Add to the top of your file:\n---\ntype: <spike|spec|audit|design|triage|qa|scratch>\n---"
+		return false, "", ".sos/wip/ files require YAML frontmatter. Add to the top of your file:\n---\ntype: <spike|spec|audit|design|triage|qa|scratch>\n---"
 	}
 
 	var fields map[string]any
 	if err := yaml.Unmarshal(yamlBytes, &fields); err != nil {
-		return false, "", ".wip/ files require YAML frontmatter. Add to the top of your file:\n---\ntype: <spike|spec|audit|design|triage|qa|scratch>\n---"
+		return false, "", ".sos/wip/ files require YAML frontmatter. Add to the top of your file:\n---\ntype: <spike|spec|audit|design|triage|qa|scratch>\n---"
 	}
 
 	typeVal, ok := fields["type"]
 	if !ok {
-		return false, "", ".wip/ frontmatter must include a type field. Valid types: spike, spec, audit, design, triage, qa, scratch"
+		return false, "", ".sos/wip/ frontmatter must include a type field. Valid types: spike, spec, audit, design, triage, qa, scratch"
 	}
 
 	typeStr, ok := typeVal.(string)
 	if !ok || typeStr == "" {
-		return false, "", ".wip/ frontmatter must include a type field. Valid types: spike, spec, audit, design, triage, qa, scratch"
+		return false, "", ".sos/wip/ frontmatter must include a type field. Valid types: spike, spec, audit, design, triage, qa, scratch"
 	}
 
 	if !validWipTypes[typeStr] {
-		return false, "", fmt.Sprintf(".wip/ frontmatter type %q is not valid. Valid types: spike, spec, audit, design, triage, qa, scratch", typeStr)
+		return false, "", fmt.Sprintf(".sos/wip/ frontmatter type %q is not valid. Valid types: spike, spec, audit, design, triage, qa, scratch", typeStr)
 	}
 
 	return true, typeStr, ""

@@ -160,7 +160,7 @@ conflicts:
         authority: primary
         last_modified: "2024-12-01"
 
-      - path: "docs/design/TDD-0042-settings.md"
+      - path: ".ledge/specs/TDD-0042-settings.md"
         position: "Arrays replace by default"
         evidence: "Line 85: 'replace (default)'"
         authority: secondary
@@ -201,7 +201,7 @@ conflicts:
 
 ```yaml
 preservation_audit:
-  source: "docs/design/TDD-0042-settings.md"
+  source: ".ledge/specs/TDD-0042-settings.md"
   sections:
     - heading: "Merge Algorithm"
       status: preserved

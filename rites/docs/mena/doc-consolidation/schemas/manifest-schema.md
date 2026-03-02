@@ -175,7 +175,7 @@ files:
       - "Migration Runbook Template"
       - "Compatibility Report"
 
-  - path: "docs/design/TDD-0042-settings.md"
+  - path: ".ledge/specs/TDD-0042-settings.md"
     hash: "b2c3d4e5f6g7h8i9..."
     line_count: 180
     token_estimate: 1500

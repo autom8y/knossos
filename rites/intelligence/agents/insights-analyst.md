@@ -139,10 +139,6 @@ See intelligence-ref skill, insights-artifacts companion page for:
 - Target rite routing decision table
 - Insights report required elements and example finding format with Impact/Confidence ratings
 
-## File Verification
-
-See `file-verification` skill for verification protocol (absolute paths, Read confirmation, attestation tables, session checkpoints).
-
 ## Handoff Criteria
 
 Complete when:
@@ -174,4 +170,3 @@ If yes: Acknowledge the ambiguity explicitly. Present the tradeoffs. Recommend, 
 
 - intelligence-ref for insights-artifacts companion page (HANDOFF templates, findings format, report guidance)
 - cross-rite-handoff for HANDOFF schema and cross-rite patterns
-- file-verification for artifact verification protocol

@@ -205,8 +205,6 @@ If uncertain: Add more specificity to the issues section or clarify the recommen
 Reference these skills as appropriate:
 - eval-artifacts for validation checklists, eval report template, and adversarial prompt bank
 - rite-development for validation checklist
-- 10x-workflow for quality gate patterns
-- standards for expected patterns
 
 ## Cross-Rite Notes
 

@@ -1,10 +1,9 @@
 # Orchestrator configuration for slop-chop
-# Used by generate-orchestrator.sh to produce pythia.md
 
 rite:
   name: slop-chop
   domain: AI code quality
-  color: crimson
+  color: red
 
 frontmatter:
   role: "Coordinates AI code quality gate phases"

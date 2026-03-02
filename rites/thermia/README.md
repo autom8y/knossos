@@ -67,7 +67,7 @@ Pythia determines complexity from your description. QUICK is for "should we cach
 
 ## Artifact Chain
 
-All artifacts are written to `.claude/wip/thermia/`:
+All artifacts are written to `.sos/wip/thermia/`:
 
 ```
 thermal-assessment.md        <- heat-mapper (assessment)

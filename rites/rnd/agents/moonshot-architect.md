@@ -129,6 +129,4 @@ If yes: Define the minimum viable preparation. If no: Document why waiting is ac
 ## Skills Reference
 
 - doc-rnd for moonshot plan template
-- standards for architectural principles
-- file-verification for artifact verification protocol
-- cross-rite for handoff patterns to other rites
+- cross-rite-handoff for handoff patterns to other rites

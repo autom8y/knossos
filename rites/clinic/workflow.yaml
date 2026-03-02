@@ -9,11 +9,13 @@ description: Investigation lifecycle for production errors (Intake -> Examinatio
 # Both route to triage-nurse as the first agent. The difference is artifact
 # format, not workflow structure.
 
+# entry_point: The first specialist in the domain workflow (not the CC routing agent).
+# The CC routing agent is manifest.yaml:entry_agent (always pythia for orchestrated rites).
 entry_point:
   agent: triage-nurse
   artifact:
     type: intake-report
-    path_template: .claude/wip/ERRORS/{investigation-slug}/intake-report.md
+    path_template: .sos/wip/ERRORS/{investigation-slug}/intake-report.md
 
   # Entry selection by source
   by_source:
@@ -176,7 +178,7 @@ back_routes:
 # state artifact that all agents reference.
 
 evidence_architecture:
-  base_path: ".claude/wip/ERRORS/{investigation-slug}/"
+  base_path: ".sos/wip/ERRORS/{investigation-slug}/"
   artifacts:
     intake_report:
       file: "intake-report.md"
@@ -211,7 +213,7 @@ evidence_architecture:
 # the investigation left off, then dispatches to the appropriate agent.
 #
 # Resume logic:
-#   1. Pythia reads .claude/wip/ERRORS/{slug}/index.yaml
+#   1. Pythia reads .sos/wip/ERRORS/{slug}/index.yaml
 #   2. Check the `status` field:
 #      - status: intake      -> dispatch to triage-nurse
 #      - status: examination  -> dispatch to pathologist
@@ -231,11 +233,11 @@ evidence_architecture:
 # Pythia resumes at that phase.
 #
 # Multiple investigations: If multiple investigation directories exist under
-# .claude/wip/ERRORS/, Pythia presents the list to the user and asks which
+# .sos/wip/ERRORS/, Pythia presents the list to the user and asks which
 # to resume. It does not auto-select.
 
 session_resume:
-  state_source: ".claude/wip/ERRORS/{investigation-slug}/index.yaml"
+  state_source: ".sos/wip/ERRORS/{investigation-slug}/index.yaml"
   state_field: "status"
   phase_mapping:
     intake: triage-nurse
@@ -263,7 +265,7 @@ cross_rite_handoffs:
   - target_rite: 10x-dev
     artifact:
       file: "handoff-10x-dev.md"
-      path: ".claude/wip/ERRORS/{investigation-slug}/handoff-10x-dev.md"
+      path: ".sos/wip/ERRORS/{investigation-slug}/handoff-10x-dev.md"
     format:
       required_fields:
         - root_cause_summary      # From diagnosis, not re-derived
@@ -281,7 +283,7 @@ cross_rite_handoffs:
   - target_rite: sre
     artifact:
       file: "handoff-sre.md"
-      path: ".claude/wip/ERRORS/{investigation-slug}/handoff-sre.md"
+      path: ".sos/wip/ERRORS/{investigation-slug}/handoff-sre.md"
     format:
       required_fields:
         - signals_missing          # What monitoring/observability was absent
@@ -297,7 +299,7 @@ cross_rite_handoffs:
   - target_rite: debt-triage
     artifact:
       file: "handoff-debt-triage.md"
-      path: ".claude/wip/ERRORS/{investigation-slug}/handoff-debt-triage.md"
+      path: ".sos/wip/ERRORS/{investigation-slug}/handoff-debt-triage.md"
     format:
       required_fields:
         - pattern_analysis         # How this issue manifests across the codebase
@@ -325,7 +327,7 @@ cross_rite_handoffs:
 # =============================================================================
 # ARTIFACT CHAIN SUMMARY
 # =============================================================================
-# .claude/wip/ERRORS/{investigation-slug}/
+# .sos/wip/ERRORS/{investigation-slug}/
 #   intake-report.md        (triage-nurse -> pathologist, diagnostician, attending)
 #   index.yaml              (shared coordination artifact, all agents read/write)
 #   E001.txt                (pathologist -> diagnostician)

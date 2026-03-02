@@ -49,7 +49,7 @@ Conduct time-boxed research to answer a technical question. $ARGUMENTS
 
 ## Output
 
-Spike report at `/docs/spikes/SPIKE-{slug}.md`:
+Spike report at `.sos/wip/SPIKE-{slug}.md`:
 - Question and context
 - Approach taken
 - Findings

@@ -132,8 +132,8 @@ Write `diagnosis.md` and update `index.yaml` with hypothesis and diagnosis entri
 
 | Artifact | Path | Description |
 |----------|------|-------------|
-| **diagnosis.md** | `.claude/wip/ERRORS/{slug}/diagnosis.md` | Full diagnosis with hypotheses, root cause, confidence, methodology |
-| **Updated index.yaml** | `.claude/wip/ERRORS/{slug}/index.yaml` | Hypothesis entries, diagnosis section, status updated |
+| **diagnosis.md** | `.sos/wip/ERRORS/{slug}/diagnosis.md` | Full diagnosis with hypotheses, root cause, confidence, methodology |
+| **Updated index.yaml** | `.sos/wip/ERRORS/{slug}/index.yaml` | Hypothesis entries, diagnosis section, status updated |
 | **Evidence request** (back-route) | Inline in output | Targeted request specifying system, data, and why -- triggers evidence_gap back-route |
 
 ### diagnosis.md Structure
@@ -199,7 +199,6 @@ If uncertain: You have converged too early. Re-examine the symptoms-to-evidence 
 ## Skills Reference
 
 - `clinic-ref` for evidence architecture, index.yaml schema, hypothesis entry format
-- `circuit-breaker-patterns` for circuit breaker state machines and cascade failure signatures (load when evidence suggests circuit breaker involvement)
 
 ## Anti-Patterns
 

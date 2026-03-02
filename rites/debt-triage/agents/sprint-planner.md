@@ -245,8 +245,4 @@ When work completes, capture:
 
 ## Skills Reference
 
-- documentation for sprint package templates
-- standards for estimation frameworks and capacity planning
-- file-verification for artifact verification protocol
-- cross-rite for handoff patterns to other rites
 - cross-rite-handoff for HANDOFF artifact schema and examples

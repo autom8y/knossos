@@ -122,7 +122,6 @@ Ready for remedy-smith when:
 ## Skills Reference
 
 - `slop-chop-ref` for severity model (TEMPORAL is always advisory), two-mode system, read-only enforcement
-- `rite-development` for artifact templates
 
 ## Anti-Patterns
 

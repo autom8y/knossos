@@ -15,15 +15,15 @@ Provides structured templates for SRE workflows: monitoring audits, reliability 
 
 | Template | Purpose | Agent |
 |----------|---------|-------|
-| [Observability Report](templates/observability-report.md) | Audit metrics, logging, tracing, alerting coverage | sre-analyst |
-| [Reliability Plan](templates/reliability-plan.md) | Sprint/quarterly reliability priorities from incident patterns | sre-analyst |
-| [Postmortem](templates/postmortem.md) | Blameless incident analysis with action items | incident-lead |
-| [Incident Communication](templates/incident-communication.md) | Stakeholder notifications and status updates | incident-lead |
+| [Observability Report](templates/observability-report.md) | Audit metrics, logging, tracing, alerting coverage | observability-engineer |
+| [Reliability Plan](templates/reliability-plan.md) | Sprint/quarterly reliability priorities from incident patterns | observability-engineer |
+| [Postmortem](templates/postmortem.md) | Blameless incident analysis with action items | incident-commander |
+| [Incident Communication](templates/incident-communication.md) | Stakeholder notifications and status updates | incident-commander |
 | [Chaos Experiment](templates/chaos-experiment.md) | Pre-registered failure injection test | chaos-engineer |
 | [Resilience Report](templates/resilience-report.md) | Aggregate resilience assessment across experiments | chaos-engineer |
-| [Tracking Plan](templates/tracking-plan.md) | Analytics event specification and validation | data-analyst |
-| [Infrastructure Change](templates/infrastructure-change.md) | Change management with rollback and risk assessment | sre-engineer |
-| [Pipeline Design](templates/pipeline-design.md) | CI/CD pipeline specification with DR planning | sre-engineer |
+| [Tracking Plan](templates/tracking-plan.md) | Analytics event specification and validation | observability-engineer |
+| [Infrastructure Change](templates/infrastructure-change.md) | Change management with rollback and risk assessment | platform-engineer |
+| [Pipeline Design](templates/pipeline-design.md) | CI/CD pipeline specification with DR planning | platform-engineer |
 
 ## When to Use Each Template
 

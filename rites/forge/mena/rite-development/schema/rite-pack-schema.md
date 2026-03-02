@@ -56,7 +56,7 @@ entry_point:
   agent: requirements-analyst
   artifact:
     type: prd
-    path_template: docs/requirements/PRD-{slug}.md
+    path_template: .ledge/specs/PRD-{slug}.md
 ```
 
 ---

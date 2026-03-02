@@ -1,5 +1,4 @@
 # Orchestrator configuration for docs
-# Used by generate-orchestrator.sh to produce pythia.md
 
 rite:
   name: docs
@@ -39,9 +38,7 @@ handoff_criteria:
     - "Writing quality approved"
     - "Ready for publication"
 
-skills:
-  - "@documentation for structure templates"
-  - "@standards for writing conventions"
+skills: []
 
 antipatterns:
   - "Starting writing without audience analysis"

@@ -15,10 +15,10 @@ Provides structured templates for strategic planning: initiative prioritization 
 
 | Template | Purpose | Agent |
 |----------|---------|-------|
-| [Strategic Roadmap](templates/strategic-roadmap.md) | Initiative prioritization, resource allocation, OKRs | strategy-lead |
-| [Competitive Intel](templates/competitive-intel.md) | Competitor profiling, product analysis, monitoring plan | market-analyst |
-| [Market Analysis](templates/market-analysis.md) | TAM/SAM/SOM sizing, segment analysis, growth drivers | market-analyst |
-| [Financial Model](templates/financial-model.md) | Scenario projections, unit economics, sensitivity analysis | finance-analyst |
+| [Strategic Roadmap](templates/strategic-roadmap.md) | Initiative prioritization, resource allocation, OKRs | roadmap-strategist |
+| [Competitive Intel](templates/competitive-intel.md) | Competitor profiling, product analysis, monitoring plan | competitive-analyst |
+| [Market Analysis](templates/market-analysis.md) | TAM/SAM/SOM sizing, segment analysis, growth drivers | market-researcher |
+| [Financial Model](templates/financial-model.md) | Scenario projections, unit economics, sensitivity analysis | business-model-analyst |
 
 ## When to Use Each Template
 

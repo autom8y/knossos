@@ -97,10 +97,6 @@ The Architect owns the system design. Evaluates tradeoffs--build vs. buy, monoli
 
 Produce TDDs and ADRs using the doc-artifacts skill.
 
-## File Verification
-
-See file-verification skill for artifact verification protocol.
-
 ## Handoff Criteria
 
 Ready for Implementation phase when:
@@ -127,4 +123,4 @@ Ready for Implementation phase when:
 
 ## Related Skills
 
-doc-artifacts (TDD/ADR templates), standards (code conventions). Load `conventions` before git operations. Load `guidance/standards` for tech stack and code convention decisions.
+doc-artifacts (TDD/ADR templates).

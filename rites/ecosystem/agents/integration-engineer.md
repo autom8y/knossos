@@ -160,4 +160,4 @@ echo "PASS: Settings merge preserves local arrays"
 
 ## Skills Reference
 
-`ecosystem-ref` (knossos/materialization patterns), `standards` (Go conventions), `justfile` (test automation), `file-verification` (artifact verification protocol).
+`ecosystem-ref` (knossos/materialization patterns).

@@ -71,7 +71,7 @@ Use the Task tool to invoke the domain-forensics agent with:
 
 "Run codebase archaeology against the target codebase for the {rite-name} rite.
 
-RITE-SPEC location: .claude/wip/RITE-SPEC-{rite-name}.md
+RITE-SPEC location: .sos/wip/RITE-SPEC-{rite-name}.md
 Target codebase: {the codebase the rite will operate on}
 Interview mode: {--interview flag present? yes/no}
 
