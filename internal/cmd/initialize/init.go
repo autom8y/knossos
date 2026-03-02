@@ -256,18 +256,44 @@ func runInit(ctx *cmdContext, riteName, source string, force bool, cmd *cobra.Co
 	return printer.Print(out)
 }
 
+// xdgVersionSentinel is the filename written inside the XDG mena directory to
+// record which binary version performed the last extraction. Re-extraction is
+// triggered when the sentinel is absent or its content differs from the running
+// binary version.
+const xdgVersionSentinel = ".ari-version"
+
 // extractEmbeddedMenaToXDG extracts platform mena from the embedded FS to the
 // XDG data directory. This is the hybrid distribution model: binary embeds mena,
 // first init extracts to XDG cache so subsequent syncs read from filesystem.
-// Idempotent: skips extraction if XDG mena dir already exists.
+//
+// Version-aware: writes a .ari-version sentinel after extraction. On subsequent
+// calls it reads the sentinel and skips extraction only if the recorded version
+// matches the current binary version. If versions differ (or sentinel is absent
+// but the directory already exists), the XDG mena directory is wiped and
+// re-extracted from the embedded FS so the installed-user copy stays current
+// across binary upgrades.
 func extractEmbeddedMenaToXDG(embMena fs.FS) {
+	currentVersion := common.BuildVersion()
 	xdgMena := filepath.Join(config.XDGDataDir(), "mena")
+	sentinelPath := filepath.Join(xdgMena, xdgVersionSentinel)
+
 	if _, err := os.Stat(xdgMena); err == nil {
-		return // Already extracted
+		// XDG mena dir exists -- check version sentinel.
+		if data, readErr := os.ReadFile(sentinelPath); readErr == nil {
+			if string(data) == currentVersion {
+				return // Already extracted at this version.
+			}
+		}
+		// Sentinel absent or version mismatch -- wipe and re-extract.
+		if removeErr := os.RemoveAll(xdgMena); removeErr != nil {
+			return // Best-effort
+		}
 	}
+
 	if err := os.MkdirAll(xdgMena, 0755); err != nil {
 		return // Best-effort
 	}
+
 	fs.WalkDir(embMena, "mena", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return nil // skip errors
@@ -289,6 +315,9 @@ func extractEmbeddedMenaToXDG(embMena fs.FS) {
 		os.WriteFile(dest, content, 0644)
 		return nil
 	})
+
+	// Write version sentinel so subsequent calls can detect stale extractions.
+	os.WriteFile(sentinelPath, []byte(currentVersion), 0644)
 }
 
 // scaffoldProjectDirs creates the project-level directory structure:
@@ -360,4 +389,3 @@ func writeSpikesGitignore(spikesDir string) {
 `)
 	os.WriteFile(gitignorePath, content, 0644)
 }
-

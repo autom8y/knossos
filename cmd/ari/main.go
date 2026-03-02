@@ -21,6 +21,7 @@ var (
 
 func main() {
 	root.SetVersion(version, commit, date)
+	common.SetBuildVersion(version)
 	common.SetEmbeddedAssets(knossos.EmbeddedRites, knossos.EmbeddedTemplates, knossos.EmbeddedHooksYAML)
 	common.SetEmbeddedUserAssets(knossos.EmbeddedAgents, knossos.EmbeddedMena)
 	if err := root.Execute(); err != nil {

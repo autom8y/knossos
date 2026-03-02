@@ -8,6 +8,7 @@ var (
 	embeddedHooksYAML []byte
 	embeddedAgents    fs.FS
 	embeddedMena      fs.FS
+	buildVersion      string
 )
 
 func SetEmbedded(rites, templates fs.FS, hooksYAML []byte) {
@@ -19,6 +20,19 @@ func SetEmbedded(rites, templates fs.FS, hooksYAML []byte) {
 func SetUserAssets(agents, mena fs.FS) {
 	embeddedAgents = agents
 	embeddedMena = mena
+}
+
+// SetBuildVersion stores the binary version string for use during XDG extraction.
+// Called from main before any commands execute.
+func SetBuildVersion(v string) { buildVersion = v }
+
+// BuildVersion returns the binary version string set via SetBuildVersion.
+// Returns "dev" if not set.
+func BuildVersion() string {
+	if buildVersion == "" {
+		return "dev"
+	}
+	return buildVersion
 }
 
 func Rites() fs.FS      { return embeddedRites }

@@ -33,3 +33,12 @@ func EmbeddedAgents() fs.FS { return assets.Agents() }
 
 // EmbeddedMena returns the embedded mena filesystem, or nil if not set.
 func EmbeddedMena() fs.FS { return assets.Mena() }
+
+// SetBuildVersion stores the binary version string for use during XDG extraction.
+// Called from main after root.SetVersion so the version is available when
+// extractEmbeddedMenaToXDG runs during "ari init".
+func SetBuildVersion(v string) { assets.SetBuildVersion(v) }
+
+// BuildVersion returns the binary version string set via SetBuildVersion.
+// Returns "dev" if not set (e.g. in tests).
+func BuildVersion() string { return assets.BuildVersion() }

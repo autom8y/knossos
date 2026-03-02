@@ -362,6 +362,194 @@ func TestInit_LedgeIdempotent(t *testing.T) {
 	verifyLedgeSubdirs(t, dir)
 }
 
+// makeTestMenaFS returns a minimal embedded mena FS suitable for
+// extractEmbeddedMenaToXDG tests.
+func makeTestMenaFS() fstest.MapFS {
+	return fstest.MapFS{
+		"mena/navigation/go.dro.md": &fstest.MapFile{
+			Data: []byte("# go\nNavigate."),
+		},
+		"mena/guidance/intro.lego.md": &fstest.MapFile{
+			Data: []byte("# Intro\nGuidance."),
+		},
+	}
+}
+
+// withXDGDataDir redirects config.XDGDataDir to a temp directory by setting
+// XDG_DATA_HOME, then restores the original value on cleanup.
+func withXDGDataDir(t *testing.T) string {
+	t.Helper()
+	xdgBase := t.TempDir()
+	t.Setenv("XDG_DATA_HOME", xdgBase)
+	// config.XDGDataDir() reads XDG_DATA_HOME directly (no caching), so
+	// the env var is sufficient -- no reset needed.
+	return filepath.Join(xdgBase, "knossos", "mena")
+}
+
+// TestExtractEmbeddedMenaToXDG_FreshExtraction verifies that when neither the
+// XDG mena directory nor the sentinel exist, extraction runs and the sentinel
+// is written with the current version.
+func TestExtractEmbeddedMenaToXDG_FreshExtraction(t *testing.T) {
+	xdgMena := withXDGDataDir(t)
+	common.SetBuildVersion("v1.0.0")
+	defer common.SetBuildVersion("dev")
+
+	embMena := makeTestMenaFS()
+	extractEmbeddedMenaToXDG(embMena)
+
+	// Directory must exist.
+	if _, err := os.Stat(xdgMena); os.IsNotExist(err) {
+		t.Fatal("XDG mena directory was not created")
+	}
+
+	// Sentinel must contain the version.
+	sentinel := filepath.Join(xdgMena, xdgVersionSentinel)
+	data, err := os.ReadFile(sentinel)
+	if err != nil {
+		t.Fatalf("sentinel file not written: %v", err)
+	}
+	if got := string(data); got != "v1.0.0" {
+		t.Errorf("sentinel = %q, want %q", got, "v1.0.0")
+	}
+
+	// At least one content file must be present.
+	goFile := filepath.Join(xdgMena, "navigation", "go.dro.md")
+	if _, err := os.Stat(goFile); os.IsNotExist(err) {
+		t.Error("extracted mena content file missing")
+	}
+}
+
+// TestExtractEmbeddedMenaToXDG_VersionMatch verifies that when the sentinel
+// matches the current version, extraction is skipped (idempotent).
+func TestExtractEmbeddedMenaToXDG_VersionMatch(t *testing.T) {
+	xdgMena := withXDGDataDir(t)
+	common.SetBuildVersion("v1.0.0")
+	defer common.SetBuildVersion("dev")
+
+	// Pre-create directory with sentinel matching current version.
+	if err := os.MkdirAll(xdgMena, 0755); err != nil {
+		t.Fatal(err)
+	}
+	sentinel := filepath.Join(xdgMena, xdgVersionSentinel)
+	if err := os.WriteFile(sentinel, []byte("v1.0.0"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	// Write a marker file that should NOT be overwritten.
+	markerPath := filepath.Join(xdgMena, "marker.txt")
+	if err := os.WriteFile(markerPath, []byte("keep-me"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	embMena := makeTestMenaFS()
+	extractEmbeddedMenaToXDG(embMena)
+
+	// Marker file must still exist (extraction was skipped).
+	data, err := os.ReadFile(markerPath)
+	if err != nil {
+		t.Fatalf("marker file missing after version-match skip: %v", err)
+	}
+	if string(data) != "keep-me" {
+		t.Errorf("marker file content changed: %q", string(data))
+	}
+
+	// Sentinel must remain unchanged.
+	data, err = os.ReadFile(sentinel)
+	if err != nil {
+		t.Fatalf("sentinel missing: %v", err)
+	}
+	if string(data) != "v1.0.0" {
+		t.Errorf("sentinel = %q, want %q", string(data), "v1.0.0")
+	}
+}
+
+// TestExtractEmbeddedMenaToXDG_VersionMismatch verifies that when the sentinel
+// records a different version, the XDG mena directory is wiped and re-extracted,
+// and the sentinel is updated to the current version.
+func TestExtractEmbeddedMenaToXDG_VersionMismatch(t *testing.T) {
+	xdgMena := withXDGDataDir(t)
+	common.SetBuildVersion("v2.0.0")
+	defer common.SetBuildVersion("dev")
+
+	// Pre-create directory with sentinel for old version.
+	if err := os.MkdirAll(xdgMena, 0755); err != nil {
+		t.Fatal(err)
+	}
+	sentinel := filepath.Join(xdgMena, xdgVersionSentinel)
+	if err := os.WriteFile(sentinel, []byte("v1.0.0"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	// Write a stale file that should be removed on re-extraction.
+	stalePath := filepath.Join(xdgMena, "stale.md")
+	if err := os.WriteFile(stalePath, []byte("stale"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	embMena := makeTestMenaFS()
+	extractEmbeddedMenaToXDG(embMena)
+
+	// Stale file must be gone (directory was wiped).
+	if _, err := os.Stat(stalePath); err == nil {
+		t.Error("stale file survived re-extraction -- wipe did not happen")
+	}
+
+	// Sentinel must be updated to current version.
+	data, err := os.ReadFile(sentinel)
+	if err != nil {
+		t.Fatalf("sentinel missing after re-extraction: %v", err)
+	}
+	if string(data) != "v2.0.0" {
+		t.Errorf("sentinel = %q, want %q", string(data), "v2.0.0")
+	}
+
+	// Content from embedded FS must be present.
+	goFile := filepath.Join(xdgMena, "navigation", "go.dro.md")
+	if _, err := os.Stat(goFile); os.IsNotExist(err) {
+		t.Error("re-extracted mena content file missing")
+	}
+}
+
+// TestExtractEmbeddedMenaToXDG_DirectoryExistsNoSentinel verifies that when the
+// XDG mena directory exists but has no version sentinel (legacy state), extraction
+// is treated as stale and re-runs.
+func TestExtractEmbeddedMenaToXDG_DirectoryExistsNoSentinel(t *testing.T) {
+	xdgMena := withXDGDataDir(t)
+	common.SetBuildVersion("v1.0.0")
+	defer common.SetBuildVersion("dev")
+
+	// Pre-create directory with content but NO sentinel.
+	if err := os.MkdirAll(xdgMena, 0755); err != nil {
+		t.Fatal(err)
+	}
+	stalePath := filepath.Join(xdgMena, "legacy-file.md")
+	if err := os.WriteFile(stalePath, []byte("legacy"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	embMena := makeTestMenaFS()
+	extractEmbeddedMenaToXDG(embMena)
+
+	// Legacy file must be gone (directory was wiped and re-extracted).
+	if _, err := os.Stat(stalePath); err == nil {
+		t.Error("legacy file survived re-extraction -- stale directory not wiped")
+	}
+
+	// Sentinel must now exist with current version.
+	sentinel := filepath.Join(xdgMena, xdgVersionSentinel)
+	data, err := os.ReadFile(sentinel)
+	if err != nil {
+		t.Fatalf("sentinel not written after re-extraction of sentinel-less dir: %v", err)
+	}
+	if string(data) != "v1.0.0" {
+		t.Errorf("sentinel = %q, want %q", string(data), "v1.0.0")
+	}
+
+	// Embedded content must be present.
+	goFile := filepath.Join(xdgMena, "navigation", "go.dro.md")
+	if _, err := os.Stat(goFile); os.IsNotExist(err) {
+		t.Error("re-extracted mena content file missing after sentinel-less wipe")
+	}
+}
+
 // verifyLedgeSubdirs checks that .ledge subdirectories, .gitkeep files,
 // and .gitignore policies were created correctly.
 func verifyLedgeSubdirs(t *testing.T, projectDir string) {
