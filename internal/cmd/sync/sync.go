@@ -229,6 +229,8 @@ func formatSyncResult(result *materialize.SyncResult, opts materialize.SyncOptio
 			SoftMode:        result.RiteResult.SoftMode,
 			DeferredStages:  result.RiteResult.DeferredStages,
 			ElCheapoMode:    result.RiteResult.ElCheapoMode,
+			RiteSwitched:    result.RiteResult.RiteSwitched,
+			PreviousRite:    result.RiteResult.PreviousRite,
 		}
 	}
 

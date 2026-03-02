@@ -369,3 +369,58 @@ func TestTextOutput_OrgSkipped_ShowsReason(t *testing.T) {
 		})
 	}
 }
+
+// TestTextOutput_RiteSwitchOrphans verifies that orphan output uses descriptive
+// rite-switch phrasing when RiteSwitched is true.
+func TestTextOutput_RiteSwitchOrphans(t *testing.T) {
+	tests := []struct {
+		name         string
+		riteSwitched bool
+		previousRite string
+		riteName     string
+		orphanAction string
+		wantContains string
+		wantAbsent   string
+	}{
+		{
+			name:         "rite switch shows replaced message",
+			riteSwitched: true,
+			previousRite: "releaser",
+			riteName:     "10x-dev",
+			orphanAction: "removed",
+			wantContains: "Agents: 3 replaced (rite switch: releaser -> 10x-dev)",
+			wantAbsent:   "Orphans:",
+		},
+		{
+			name:         "non-switch shows orphans message",
+			riteSwitched: false,
+			riteName:     "10x-dev",
+			orphanAction: "removed",
+			wantContains: "Orphans: 3 detected (removed)",
+			wantAbsent:   "Agents:",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			data := SyncResultOutput{
+				Status: "success",
+				Rite: &SyncRiteResult{
+					Status:          "success",
+					RiteName:        tt.riteName,
+					OrphansDetected: []string{"a.md", "b.md", "c.md"},
+					OrphanAction:    tt.orphanAction,
+					RiteSwitched:    tt.riteSwitched,
+					PreviousRite:    tt.previousRite,
+				},
+			}
+			text := data.Text()
+			if !strings.Contains(text, tt.wantContains) {
+				t.Errorf("output missing %q; got:\n%s", tt.wantContains, text)
+			}
+			if strings.Contains(text, tt.wantAbsent) {
+				t.Errorf("output should not contain %q; got:\n%s", tt.wantAbsent, text)
+			}
+		})
+	}
+}

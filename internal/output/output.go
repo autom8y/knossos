@@ -595,6 +595,8 @@ type SyncRiteResult struct {
 	SoftMode        bool     `json:"soft_mode,omitempty"`
 	DeferredStages  []string `json:"deferred_stages,omitempty"`
 	ElCheapoMode    bool     `json:"el_cheapo_mode,omitempty"`
+	RiteSwitched    bool     `json:"rite_switched,omitempty"`
+	PreviousRite    string   `json:"previous_rite,omitempty"`
 }
 
 // SyncOrgResult represents org scope sync result.
@@ -637,7 +639,12 @@ func (s SyncResultOutput) Text() string {
 			}
 		}
 		if len(s.Rite.OrphansDetected) > 0 {
-			b.WriteString(fmt.Sprintf("  Orphans: %d detected (%s)\n", len(s.Rite.OrphansDetected), s.Rite.OrphanAction))
+			if s.Rite.RiteSwitched && s.Rite.OrphanAction == "removed" {
+				b.WriteString(fmt.Sprintf("  Agents: %d replaced (rite switch: %s -> %s)\n",
+					len(s.Rite.OrphansDetected), s.Rite.PreviousRite, s.Rite.RiteName))
+			} else {
+				b.WriteString(fmt.Sprintf("  Orphans: %d detected (%s)\n", len(s.Rite.OrphansDetected), s.Rite.OrphanAction))
+			}
 		}
 		if s.Rite.SoftMode {
 			b.WriteString(fmt.Sprintf("  Soft mode: deferred %s\n", strings.Join(s.Rite.DeferredStages, ", ")))
