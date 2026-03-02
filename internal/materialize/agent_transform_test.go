@@ -384,3 +384,82 @@ func TestTransformAgentContent_InvalidFrontmatter(t *testing.T) {
 		t.Error("content without frontmatter should pass through unchanged")
 	}
 }
+
+func TestTransformAgentContent_ModelOverride(t *testing.T) {
+	// Agent has model: opus — override should force haiku
+	source := `---
+name: pythia
+description: Orchestrator
+model: opus
+tools: Bash, Read
+---
+
+# Pythia
+`
+	result, err := transformAgentContent([]byte(source), &TransformContext{
+		AgentName:     "pythia",
+		ModelOverride: "haiku",
+	})
+	if err != nil {
+		t.Fatalf("transformAgentContent() error = %v", err)
+	}
+
+	output := string(result)
+
+	if !strings.Contains(output, "model: haiku") {
+		t.Errorf("model override should force haiku:\n%s", output)
+	}
+	if strings.Contains(output, "model: opus") {
+		t.Errorf("original model should be replaced:\n%s", output)
+	}
+}
+
+func TestTransformAgentContent_ModelOverrideNoExistingModel(t *testing.T) {
+	// Agent has no model field — override should inject one
+	source := `---
+name: worker
+description: A worker agent
+tools: Bash
+---
+
+# Worker
+`
+	result, err := transformAgentContent([]byte(source), &TransformContext{
+		AgentName:     "worker",
+		ModelOverride: "haiku",
+	})
+	if err != nil {
+		t.Fatalf("transformAgentContent() error = %v", err)
+	}
+
+	output := string(result)
+
+	if !strings.Contains(output, "model: haiku") {
+		t.Errorf("model override should inject model field:\n%s", output)
+	}
+}
+
+func TestTransformAgentContent_NoModelOverride(t *testing.T) {
+	// Empty ModelOverride should leave original model unchanged
+	source := `---
+name: specialist
+description: A specialist
+model: sonnet
+---
+
+# Specialist
+`
+	result, err := transformAgentContent([]byte(source), &TransformContext{
+		AgentName:     "specialist",
+		ModelOverride: "",
+	})
+	if err != nil {
+		t.Fatalf("transformAgentContent() error = %v", err)
+	}
+
+	output := string(result)
+
+	if !strings.Contains(output, "model: sonnet") {
+		t.Errorf("original model should be preserved when no override:\n%s", output)
+	}
+}

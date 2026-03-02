@@ -35,6 +35,7 @@ type TransformContext struct {
 	WriteGuardDefaults *WriteGuardDefaults
 	AgentDefaults      map[string]interface{}
 	SkillPolicies      []SkillPolicy
+	ModelOverride      string // If set, forces model field in agent frontmatter (el-cheapo mode)
 }
 
 // transformAgentContent projects agent source into CC-consumable form.
@@ -87,6 +88,12 @@ func transformAgentContent(content []byte, ctx *TransformContext) ([]byte, error
 			generatedHooks := GenerateWriteGuardHooks(resolved)
 			mergeHooksIntoMap(fmMap, generatedHooks)
 		}
+	}
+
+	// Model override (el-cheapo mode): force model field after all other transforms.
+	// Runs AFTER MergeAgentDefaults so the override is truly blanket — no agent escapes.
+	if ctx.ModelOverride != "" {
+		fmMap["model"] = ctx.ModelOverride
 	}
 
 	return reconstructFrontmatter(fmMap, body)

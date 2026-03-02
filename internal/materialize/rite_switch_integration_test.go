@@ -259,7 +259,7 @@ func TestRiteSwitchIntegration_EmbeddedSource(t *testing.T) {
 		Agents:     []Agent{{Name: "tester", Role: "tests"}},
 		EntryAgent: "tester",
 	}
-	err = m.materializeAgents(manifest, resolved.RitePath, claudeDir, resolved, provenance.NullCollector{}, nil, nil)
+	err = m.materializeAgents(manifest, resolved.RitePath, claudeDir, resolved, provenance.NullCollector{}, nil, nil, "")
 	require.NoError(t, err)
 	got, err = os.ReadFile(filepath.Join(claudeDir, "agents", "tester.md"))
 	require.NoError(t, err)

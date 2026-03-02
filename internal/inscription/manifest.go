@@ -238,6 +238,9 @@ func DefaultSectionOrder() []string {
 		// Core behavior (determines agent mode)
 		"execution-mode",
 
+		// Model override (el-cheapo mode, shown only when active)
+		"model-override",
+
 		// Team context (who is available)
 		"quick-start",
 		"agent-routing",
@@ -261,6 +264,7 @@ func DefaultSectionOrder() []string {
 func defaultRegionDefs() map[string]*Region {
 	return map[string]*Region{
 		"execution-mode":          {Owner: OwnerKnossos},
+		"model-override":          {Owner: OwnerKnossos},
 		"agent-routing":           {Owner: OwnerKnossos},
 		"commands":                {Owner: OwnerKnossos},
 		"platform-infrastructure": {Owner: OwnerKnossos},

@@ -594,6 +594,7 @@ type SyncRiteResult struct {
 	LegacyBackup   string   `json:"legacy_backup,omitempty"`
 	SoftMode       bool     `json:"soft_mode,omitempty"`
 	DeferredStages []string `json:"deferred_stages,omitempty"`
+	ElCheapoMode   bool     `json:"el_cheapo_mode,omitempty"`
 }
 
 // SyncOrgResult represents org scope sync result.
@@ -636,6 +637,9 @@ func (s SyncResultOutput) Text() string {
 		}
 		if s.Rite.SoftMode {
 			b.WriteString(fmt.Sprintf("  Soft mode: deferred %s\n", strings.Join(s.Rite.DeferredStages, ", ")))
+		}
+		if s.Rite.ElCheapoMode {
+			b.WriteString("  El-cheapo mode: all agents using haiku\n")
 		}
 	}
 

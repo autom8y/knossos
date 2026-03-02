@@ -14,7 +14,7 @@ import (
 // Delegates to inscription.SyncCLAUDEmd for the core merge/write logic,
 // then records provenance for the written file.
 // Returns the path to legacy backup if migration occurred, or empty string if no backup.
-func (m *Materializer) materializeCLAUDEmd(manifest *RiteManifest, claudeDir string, resolved *ResolvedRite, collector provenance.Collector) (string, error) {
+func (m *Materializer) materializeCLAUDEmd(manifest *RiteManifest, claudeDir string, resolved *ResolvedRite, collector provenance.Collector, modelOverride string) (string, error) {
 	// Build render context with full agent details
 	agents := make([]inscription.AgentInfo, 0, len(manifest.Agents))
 	for _, agent := range manifest.Agents {
@@ -34,6 +34,7 @@ func (m *Materializer) materializeCLAUDEmd(manifest *RiteManifest, claudeDir str
 		KnossosVars:      make(map[string]string),
 		ProjectRoot:      projectRoot,
 		IsKnossosProject: m.templatesDir != "" && strings.HasPrefix(m.templatesDir, projectRoot),
+		ModelOverride:    modelOverride,
 	}
 
 	// Resolve template source: embedded FS or filesystem directory
@@ -105,7 +106,7 @@ func (m *Materializer) materializeMinimalCLAUDEmd(claudeDir string, collector pr
 // prevalidateCLAUDEmd validates that CLAUDE.md generation will succeed without
 // writing any files. This is called BEFORE destructive operations (agent writes,
 // orphan removal) to prevent partial state when template rendering fails.
-func (m *Materializer) prevalidateCLAUDEmd(manifest *RiteManifest, claudeDir string, resolved *ResolvedRite) error {
+func (m *Materializer) prevalidateCLAUDEmd(manifest *RiteManifest, claudeDir string, resolved *ResolvedRite, modelOverride string) error {
 	agents := make([]inscription.AgentInfo, 0, len(manifest.Agents))
 	for _, agent := range manifest.Agents {
 		agents = append(agents, inscription.AgentInfo{
@@ -123,6 +124,7 @@ func (m *Materializer) prevalidateCLAUDEmd(manifest *RiteManifest, claudeDir str
 		KnossosVars:      make(map[string]string),
 		ProjectRoot:      projectRoot,
 		IsKnossosProject: m.templatesDir != "" && strings.HasPrefix(m.templatesDir, projectRoot),
+		ModelOverride:    modelOverride,
 	}
 
 	// Resolve template source

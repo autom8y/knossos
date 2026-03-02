@@ -96,6 +96,7 @@ Performance Targets:
 	cmd.AddCommand(newGitConventionsCmd(ctx))
 	cmd.AddCommand(newWorktreeSeedCmd(ctx))
 	cmd.AddCommand(newWorktreeRemoveCmd(ctx))
+	cmd.AddCommand(newCheapoRevertCmd(ctx))
 
 	// Hook commands do NOT require project context
 	common.SetNeedsProject(cmd, false, true)

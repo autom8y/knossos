@@ -28,6 +28,7 @@ type Options struct {
 	Minimal           bool // Generate base infrastructure only (no rite/agents/skills)
 	Soft              bool // CC-safe mode: only update agents + CLAUDE.md
 	OverwriteDiverged bool // Allow overwriting user-owned mena entries on flat-name collision
+	ElCheapo          bool // Force haiku model override on all agents (ephemeral)
 }
 
 // Result contains materialization outcome details.
@@ -41,6 +42,7 @@ type Result struct {
 	LegacyBackupPath string   // Path to legacy CLAUDE.md backup if migration occurred
 	SoftMode         bool     // true if soft mode was used
 	DeferredStages   []string // stages skipped in soft mode
+	ElCheapoMode     bool     // true if el-cheapo model override was applied
 }
 
 // MCPServer represents an MCP server declaration in a rite manifest.
@@ -293,6 +295,11 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 
 	claudeDir := m.getClaudeDir()
 
+	// Remove el-cheapo marker on normal sync (revert path)
+	if !opts.ElCheapo {
+		os.Remove(filepath.Join(claudeDir, ".el-cheapo-active"))
+	}
+
 	// Note: the skip guard (skip-if-same-rite) was removed. The pipeline is safe
 	// to always run: selective write preserves user content, and fileutil.WriteIfChanged()
 	// prevents unnecessary disk writes. See ADR: "ari sync is safe to run repeatedly."
@@ -329,6 +336,12 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 		return nil, errors.Wrap(errors.CodeFileNotFound, "failed to load rite manifest", err)
 	}
 
+	// Compute model override from options (needed early for CLAUDE.md pre-validation)
+	modelOverride := ""
+	if opts.ElCheapo {
+		modelOverride = "haiku"
+	}
+
 	// Dry-run: just detect orphans and return
 	if opts.DryRun {
 		orphans, err := m.detectOrphans(manifest, claudeDir, resolved)
@@ -342,7 +355,7 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 	// Pre-validate CLAUDE.md generation before any disk writes.
 	// Template rendering is the most failure-prone step. Validating it first
 	// prevents partial state where agents are on disk but CLAUDE.md is stale.
-	if err := m.prevalidateCLAUDEmd(manifest, claudeDir, resolved); err != nil {
+	if err := m.prevalidateCLAUDEmd(manifest, claudeDir, resolved, modelOverride); err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "CLAUDE.md pre-validation failed (no files written)", err)
 	}
 
@@ -412,7 +425,7 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 	mergedSkillPolicies := MergeSkillPolicies(sharedSkillPolicies, manifest.SkillPolicies)
 
 	// 4. Generate agents/ directory from rite
-	if err := m.materializeAgents(manifest, ritePath, claudeDir, resolved, collector, mergedWriteGuardDefaults, mergedSkillPolicies); err != nil {
+	if err := m.materializeAgents(manifest, ritePath, claudeDir, resolved, collector, mergedWriteGuardDefaults, mergedSkillPolicies, modelOverride); err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize agents", err)
 	}
 
@@ -431,7 +444,7 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 	}
 
 	// 7. Generate CLAUDE.md from inscription system
-	legacyBackupPath, err := m.materializeCLAUDEmd(manifest, claudeDir, resolved, collector)
+	legacyBackupPath, err := m.materializeCLAUDEmd(manifest, claudeDir, resolved, collector, modelOverride)
 	if err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize CLAUDE.md", err)
 	}
@@ -441,6 +454,13 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 	if !opts.Soft {
 		if err := m.materializeSettingsWithManifest(claudeDir, manifest, collector); err != nil {
 			return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize settings", err)
+		}
+	}
+
+	// 8.5. El-cheapo mode: inject model override and revert hook into settings
+	if opts.ElCheapo {
+		if err := m.injectElCheapoSettings(claudeDir); err != nil {
+			return nil, errors.Wrap(errors.CodeGeneralError, "failed to inject el-cheapo settings", err)
 		}
 	}
 
@@ -460,6 +480,11 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 	if opts.Soft {
 		result.SoftMode = true
 		result.DeferredStages = []string{"mena", "rules", "settings", "workflow"}
+	}
+
+	// Populate el-cheapo mode result field
+	if opts.ElCheapo {
+		result.ElCheapoMode = true
 	}
 
 	// 10. Write ACTIVE_RITE marker
@@ -606,6 +631,7 @@ func (m *Materializer) syncRiteScope(opts SyncOptions) (*RiteScopeResult, error)
 		KeepAll:           opts.KeepOrphans,
 		Soft:              opts.Soft,
 		OverwriteDiverged: opts.OverwriteDiverged,
+		ElCheapo:          opts.ElCheapo,
 	}
 
 	legacyResult, err := m.MaterializeWithOptions(riteName, legacyOpts)
@@ -624,6 +650,7 @@ func (m *Materializer) syncRiteScope(opts SyncOptions) (*RiteScopeResult, error)
 		LegacyBackupPath: legacyResult.LegacyBackupPath,
 		SoftMode:         legacyResult.SoftMode,
 		DeferredStages:   legacyResult.DeferredStages,
+		ElCheapoMode:     legacyResult.ElCheapoMode,
 	}
 
 	// Rite-switch cleanup: remove stale throughline IDs from all sessions

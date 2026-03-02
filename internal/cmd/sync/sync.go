@@ -41,6 +41,7 @@ func NewSyncCmd(outputFlag *string, verboseFlag *bool, projectDir *string) *cobr
 		keepOrphans       bool
 		soft              bool
 		budget            bool
+		elCheapo          bool
 	)
 
 	cmd := &cobra.Command{
@@ -95,6 +96,11 @@ Examples:
 				return fmt.Errorf("invalid --resource value: %q (must be agents, mena, or hooks)", resource)
 			}
 
+			// El-cheapo only affects rite scope
+			if elCheapo && (syncScope == materialize.ScopeUser || syncScope == materialize.ScopeOrg) {
+				return fmt.Errorf("--el-cheapo only affects rite scope; use --scope=rite or default")
+			}
+
 			// Build SyncOptions
 			opts := materialize.SyncOptions{
 				Scope:             syncScope,
@@ -107,6 +113,7 @@ Examples:
 				OverwriteDiverged: overwriteDiverged,
 				KeepOrphans:       keepOrphans,
 				Soft:              soft,
+				ElCheapo:          elCheapo,
 			}
 
 			return runSync(ctx, opts, budget, cmd)
@@ -125,6 +132,7 @@ Examples:
 	cmd.Flags().BoolVar(&keepOrphans, "keep-orphans", false, "Preserve orphaned knossos files")
 	cmd.Flags().BoolVar(&soft, "soft", false, "CC-safe mode: update only agents and CLAUDE.md (skip hooks/mena/rules)")
 	cmd.Flags().BoolVar(&budget, "budget", false, "Show context token budget after sync")
+	cmd.Flags().BoolVar(&elCheapo, "el-cheapo", false, "Force all agents to haiku model (ephemeral, reverted on session exit)")
 
 	// Does NOT require project (user scope works without project)
 	common.SetNeedsProject(cmd, false, false)
@@ -220,6 +228,7 @@ func formatSyncResult(result *materialize.SyncResult, opts materialize.SyncOptio
 			LegacyBackup:    result.RiteResult.LegacyBackupPath,
 			SoftMode:        result.RiteResult.SoftMode,
 			DeferredStages:  result.RiteResult.DeferredStages,
+			ElCheapoMode:    result.RiteResult.ElCheapoMode,
 		}
 	}
 

@@ -49,6 +49,7 @@ type SyncOptions struct {
 	OverwriteDiverged bool
 	KeepOrphans       bool
 	Soft              bool // CC-safe mode: only update agents + CLAUDE.md
+	ElCheapo          bool // Force all agents to haiku model (ephemeral, reverted on session exit)
 }
 
 // SyncResult contains unified outcome.
@@ -84,6 +85,7 @@ type RiteScopeResult struct {
 	RiteSwitched          bool     `json:"rite_switched,omitempty"`          // true if rite changed from previous
 	PreviousRite          string   `json:"previous_rite,omitempty"`          // previous ACTIVE_RITE name
 	ThroughlineIDsCleaned int      `json:"throughline_ids_cleaned,omitempty"` // count of .throughline-ids.json files removed
+	ElCheapoMode          bool     `json:"el_cheapo_mode,omitempty"`          // true if el-cheapo model override active
 }
 
 // Type aliases for user-scope types from the userscope sub-package.

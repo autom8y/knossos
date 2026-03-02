@@ -19,7 +19,7 @@ import (
 // Uses selective write: only knossos-managed agents (from manifest) are replaced.
 // User-created agents not in the manifest are preserved.
 // Cross-rite agents (consultant, moirai, etc.) are user-scope owned and NOT handled here.
-func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claudeDir string, resolved *ResolvedRite, collector provenance.Collector, writeGuardDefaults *WriteGuardDefaults, skillPolicies []SkillPolicy) error {
+func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claudeDir string, resolved *ResolvedRite, collector provenance.Collector, writeGuardDefaults *WriteGuardDefaults, skillPolicies []SkillPolicy, modelOverride string) error {
 	agentsDir := filepath.Join(claudeDir, "agents")
 
 	// Ensure agents directory exists (selective — do NOT RemoveAll)
@@ -57,7 +57,7 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claud
 		// Run through the same transform pipeline as source-copied agents.
 		// Transform failure is an error, not a warning: knossos-only frontmatter fields
 		// (type, upstream, downstream, contract) must never reach CC-visible agent files.
-		transformed, tErr := transformAgentContent(content, &TransformContext{AgentName: agent.Name, WriteGuardDefaults: writeGuardDefaults, AgentDefaults: manifest.AgentDefaults, SkillPolicies: skillPolicies})
+		transformed, tErr := transformAgentContent(content, &TransformContext{AgentName: agent.Name, WriteGuardDefaults: writeGuardDefaults, AgentDefaults: manifest.AgentDefaults, SkillPolicies: skillPolicies, ModelOverride: modelOverride})
 		if tErr != nil {
 			return fmt.Errorf("agent transform failed for archetype agent %s: %w", agent.Name, tErr)
 		}

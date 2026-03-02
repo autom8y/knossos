@@ -44,6 +44,10 @@ type RenderContext struct {
 	// IsKnossosProject is true when materializing the knossos repo itself
 	// (templates are within the project). False for satellite projects.
 	IsKnossosProject bool
+
+	// ModelOverride is the active model override (e.g., "haiku" for el-cheapo mode).
+	// Empty string means no override active.
+	ModelOverride string
 }
 
 // Generator handles content generation for CLAUDE.md regions.
@@ -474,6 +478,7 @@ func (g *Generator) generateAgentConfigsContent() (string, error) {
 func (g *Generator) getDefaultSectionContent(regionName string) (string, error) {
 	defaults := map[string]string{
 		"execution-mode":          g.getDefaultExecutionModeContent(),
+		"model-override":          g.getDefaultModelOverrideContent(),
 		"agent-routing":           g.getDefaultAgentRoutingContent(),
 		"commands":                g.getDefaultCommandsContent(),
 		"platform-infrastructure": g.getDefaultPlatformInfrastructureContent(),
@@ -496,6 +501,15 @@ func (g *Generator) SetSectionTemplate(regionName, template string) {
 }
 
 // Default content generators for each section type
+
+func (g *Generator) getDefaultModelOverrideContent() string {
+	if g.Context == nil || g.Context.ModelOverride == "" {
+		return ""
+	}
+	return `## Model Override
+
+All agents forced to **` + g.Context.ModelOverride + `** (el-cheapo mode). Ephemeral -- reverts on session exit.`
+}
 
 func (g *Generator) getDefaultExecutionModeContent() string {
 	if g.Context != nil && !g.Context.IsKnossosProject {

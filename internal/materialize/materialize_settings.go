@@ -64,6 +64,56 @@ func (m *Materializer) materializeSettingsWithManifest(claudeDir string, manifes
 	return nil
 }
 
+// injectElCheapoSettings layers el-cheapo mode on top of settings.local.json.
+// Called AFTER normal settings materialization. Injects model override and a
+// Stop hook that reverts the override on session exit.
+func (m *Materializer) injectElCheapoSettings(claudeDir string) error {
+	settingsPath := filepath.Join(claudeDir, "settings.local.json")
+
+	existingSettings, err := loadExistingSettings(settingsPath)
+	if err != nil {
+		return err
+	}
+
+	// 1. Set model override
+	existingSettings["model"] = "haiku"
+
+	// 2. Inject Stop hook for revert.
+	// Command starts with "ari hook" so IsAriManagedGroup() classifies it as
+	// ari-managed — normal sync will strip it during hook merge.
+	revertHook := map[string]any{
+		"hooks": []map[string]any{
+			{
+				"type":    "command",
+				"command": "ari hook cheapo-revert --output json",
+				"timeout": 30,
+			},
+		},
+	}
+
+	// Merge into existing hooks, appending to Stop event (preserve autopark)
+	hooksMap, ok := existingSettings["hooks"].(map[string]any)
+	if !ok {
+		hooksMap = make(map[string]any)
+	}
+
+	existingStopHooks := []any{}
+	if existing, ok := hooksMap["Stop"]; ok {
+		if arr, ok := existing.([]any); ok {
+			existingStopHooks = arr
+		}
+	}
+	existingStopHooks = append(existingStopHooks, revertHook)
+	hooksMap["Stop"] = existingStopHooks
+	existingSettings["hooks"] = hooksMap
+
+	// 3. Write marker file for diagnostics and revert detection
+	markerPath := filepath.Join(claudeDir, ".el-cheapo-active")
+	_ = os.WriteFile(markerPath, []byte("haiku\n"), 0644)
+
+	return saveSettings(settingsPath, existingSettings)
+}
+
 // trackState updates .claude/sync/state.json with materialization metadata.
 func (m *Materializer) trackState(manifest *RiteManifest, activeRiteName string) error {
 	stateManager := sync.NewStateManager(m.resolver)
