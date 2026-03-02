@@ -310,17 +310,14 @@ When a mena flat-name collision occurs, knossos silently falls back to the sourc
 | Script | Location | Purpose | Coverage |
 |--------|----------|---------|---------|
 | `e2e-validate.sh` | `scripts/e2e-validate.sh` | Distribution validation (brew install + ari init + sync) | None (integration only) |
-| `context-injection.sh` | `rites/ecosystem/context-injection.sh` | Ecosystem context for rite hook (sync status, knossos ref, drift) | None |
+| `context-injection.sh` | `rites/ecosystem/context-injection.sh` | DELETED (PKG-000b) — was dead code with zero runtime callers | N/A |
 | `validation.sh` | `rites/shared/mena/cross-rite-handoff/validation.sh` | Cross-rite handoff artifact validation | None |
 
 ### Port-to-Go Plan (Priority Order)
 
-**PRIORITY 1 — `rites/ecosystem/context-injection.sh`** (Hook script, blocking, SCAR-010 risk zone)
-- **Port target**: `ari hook context --rite ecosystem` or new `ari hook eco-context` subcommand
-- **Risk if unported**: Bash arithmetic/set-e bugs (SCAR-016), stdout pollution (SCAR-015), no timeout guard (SCAR-010)
-- **Effort**: MEDIUM — reads filesystem state; no external API calls. Replaces `inject_rite_context()` with Go function called from `internal/cmd/hook/context.go`
-- **Prerequisite**: Audit callers to confirm script is actually invoked (it references `rite-context-loader.sh` which may be a dead reference)
-- **Test plan**: `internal/cmd/hook/context_test.go` with tmpdir fixture covering sync-timestamp, knossos-ref, and drift detection
+**PRIORITY 1 — `rites/ecosystem/context-injection.sh`** (REMOVED, PKG-000b)
+- **Status**: DELETED. Script had zero runtime callers. The dead call chain (`session-context.sh` -> `rite-context-loader.sh` -> `context-injection.sh`) was fully replaced by Go `ari hook context` implementation.
+- 37 documentation references remain; cleanup is a separate future task.
 
 **PRIORITY 2 — `rites/shared/mena/cross-rite-handoff/validation.sh`** (Skill dependency, testable)
 - **Port target**: `ari validate handoff [path]` subcommand (extends existing `ari handoff` package)
