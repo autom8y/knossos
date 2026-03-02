@@ -2,6 +2,7 @@
 package materialize
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/fs"
 	"log"
@@ -259,6 +260,11 @@ func (m *Materializer) MaterializeMinimal(opts Options) (*Result, error) {
 	}
 	collector := provenance.NewCollector()
 
+	// Remove stale settings.json created by the deleted writeDefaultSettings() function.
+	// Must run after prevManifest is loaded (needed for the provenance gate) and before
+	// materializeSettingsWithManifest() writes settings.local.json.
+	m.cleanupStaleBlanketSettings(claudeDir, prevManifest)
+
 	// Generate rules from templates (if available)
 	if err := m.materializeRules(claudeDir, nil, collector); err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize rules", err)
@@ -376,6 +382,13 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 	// 2.5. Clear stale invocation state from previous rite
 	if err := m.clearInvocationState(claudeDir); err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to clear invocation state", err)
+	}
+
+	// 2.6. Remove stale settings.json created by the deleted writeDefaultSettings() function.
+	// Must run after prevManifest is loaded (needed for the provenance gate) and before
+	// materializeSettingsWithManifest() writes settings.local.json.
+	if !opts.DryRun {
+		m.cleanupStaleBlanketSettings(claudeDir, prevManifest)
 	}
 
 	// 3. Handle orphans before materializing agents
@@ -1644,6 +1657,144 @@ func (m *Materializer) copyDir(src, dst string) error {
 		_, err = writeIfChanged(destPath, content, 0644)
 		return err
 	})
+}
+
+// cleanupStaleBlanketSettings removes .claude/settings.json if it matches a known
+// stale fingerprint from the deleted writeDefaultSettings() function AND has no
+// provenance entry (indicating it was not created by the current pipeline).
+//
+// Two stale fingerprints are recognized:
+//  1. Blanket-deny agent-guard hook (no --allow-path flags)
+//  2. Empty CC-default stub (permissions + empty hooks)
+//
+// Both gates must pass: no provenance entry AND structural fingerprint match.
+// Returns true if the file was removed, false otherwise.
+func (m *Materializer) cleanupStaleBlanketSettings(claudeDir string, manifest *provenance.ProvenanceManifest) bool {
+	settingsPath := filepath.Join(claudeDir, "settings.json")
+
+	// Gate 1: File must exist
+	if _, err := os.Stat(settingsPath); os.IsNotExist(err) {
+		return false
+	}
+
+	// Gate 2: No provenance entry for "settings.json".
+	// If the pipeline tracks this file, it is managed — do not touch.
+	if manifest != nil {
+		if _, tracked := manifest.Entries["settings.json"]; tracked {
+			return false
+		}
+	}
+
+	// Gate 3: Parse JSON and check structural fingerprint
+	content, err := os.ReadFile(settingsPath)
+	if err != nil {
+		return false
+	}
+
+	var parsed map[string]any
+	if err := json.Unmarshal(content, &parsed); err != nil {
+		// Not valid JSON — could be user content, leave it alone
+		return false
+	}
+
+	if !matchesStaleSettingsFingerprint(parsed) {
+		return false
+	}
+
+	// Both gates passed: safe to remove
+	if err := os.Remove(settingsPath); err != nil {
+		log.Printf("Warning: failed to remove stale settings.json from %s: %v", claudeDir, err)
+		return false
+	}
+	log.Printf("Removed stale settings.json from %s", claudeDir)
+	return true
+}
+
+// matchesStaleSettingsFingerprint returns true if the parsed settings.json content
+// matches one of the two known stale structures from the deleted writeDefaultSettings().
+//
+// Fingerprint 1: Blanket-deny agent-guard hook (no --allow-path flags)
+//
+//	{"hooks": {"PreToolUse": [{"hooks": [{"command": "ari hook agent-guard ..."}]}]}}
+//	Key signal: top-level has only "hooks", command contains "ari hook agent-guard",
+//	command does NOT contain "--allow-path".
+//
+// Fingerprint 2: Empty CC-default stub
+//
+//	{"permissions": {"allow": [], "additionalDirectories": []}, "hooks": {}}
+func matchesStaleSettingsFingerprint(parsed map[string]any) bool {
+	// Fingerprint 1: Blanket-deny agent-guard hook
+	// Top-level must have only "hooks" key.
+	if len(parsed) == 1 {
+		hooksRaw, ok := parsed["hooks"]
+		if ok {
+			hooks, ok := hooksRaw.(map[string]any)
+			if ok {
+				preToolUseRaw, ok := hooks["PreToolUse"]
+				if ok {
+					preToolUse, ok := preToolUseRaw.([]any)
+					if ok {
+						for _, entryRaw := range preToolUse {
+							entry, ok := entryRaw.(map[string]any)
+							if !ok {
+								continue
+							}
+							innerHooksRaw, ok := entry["hooks"]
+							if !ok {
+								continue
+							}
+							innerHooks, ok := innerHooksRaw.([]any)
+							if !ok {
+								continue
+							}
+							for _, hookRaw := range innerHooks {
+								hook, ok := hookRaw.(map[string]any)
+								if !ok {
+									continue
+								}
+								cmdRaw, ok := hook["command"]
+								if !ok {
+									continue
+								}
+								cmd, ok := cmdRaw.(string)
+								if !ok {
+									continue
+								}
+								if strings.Contains(cmd, "ari hook agent-guard") &&
+									!strings.Contains(cmd, "--allow-path") {
+									return true
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	// Fingerprint 2: Empty CC-default stub
+	// {"permissions": {"allow": [], "additionalDirectories": []}, "hooks": {}}
+	if len(parsed) == 2 {
+		hooksRaw, hasHooks := parsed["hooks"]
+		permissionsRaw, hasPermissions := parsed["permissions"]
+		if hasHooks && hasPermissions {
+			hooks, hooksIsMap := hooksRaw.(map[string]any)
+			permissions, permsIsMap := permissionsRaw.(map[string]any)
+			if hooksIsMap && permsIsMap && len(hooks) == 0 && len(permissions) == 2 {
+				allowRaw, hasAllow := permissions["allow"]
+				addDirsRaw, hasAddDirs := permissions["additionalDirectories"]
+				if hasAllow && hasAddDirs {
+					allow, allowIsSlice := allowRaw.([]any)
+					addDirs, addDirsIsSlice := addDirsRaw.([]any)
+					if allowIsSlice && addDirsIsSlice && len(allow) == 0 && len(addDirs) == 0 {
+						return true
+					}
+				}
+			}
+		}
+	}
+
+	return false
 }
 
 // saveProvenanceManifest merges collector entries with divergence report and previous manifest,

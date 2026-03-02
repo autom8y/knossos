@@ -122,16 +122,16 @@ ari hook budget [--output json|text] [--timeout ms]
 
 | Env Var | Type | Default | Description |
 |---------|------|---------|-------------|
-| `ARIADNE_BUDGET_DISABLE` | bool ("1") | "0" (enabled) | Disable budget tracking entirely |
-| `ARIADNE_MSG_WARN` | integer | 250 | Warning threshold (tool use count) |
-| `ARIADNE_MSG_PARK` | integer | (none) | Park suggestion threshold (disabled if unset) |
-| `ARIADNE_SESSION_KEY` | string | (none) | Explicit session key (testing override) |
+| `ARI_BUDGET_DISABLE` | bool ("1") | "0" (enabled) | Disable budget tracking entirely |
+| `ARI_MSG_WARN` | integer | 250 | Warning threshold (tool use count) |
+| `ARI_MSG_PARK` | integer | (none) | Park suggestion threshold (disabled if unset) |
+| `ARI_SESSION_KEY` | string | (none) | Explicit session key (testing override) |
 
 ### Session Key Resolution
 
 Maintain identical precedence to bash implementation for backward compatibility:
 
-1. `ARIADNE_SESSION_KEY` (explicit override for testing)
+1. `ARI_SESSION_KEY` (explicit override for testing)
 2. `CLAUDE_SESSION_ID` (Claude Code provided, most reliable)
 3. `ppid-{PPID}` fallback (parent process ID)
 
@@ -172,7 +172,7 @@ The budget hook is DEFENSIVE and does not produce output that modifies Claude be
 
 ### Early Exit Conditions (ordered, all < 1ms)
 
-1. `ARIADNE_BUDGET_DISABLE=1` -- exit immediately
+1. `ARI_BUDGET_DISABLE=1` -- exit immediately
 2. `!hook.IsEnabled()` -- hooks disabled (after GAP-5 fix, this check becomes inert but remains for defense-in-depth)
 
 ### Internal Function Decomposition
@@ -209,11 +209,11 @@ func (b BudgetOutput) Text() string {
 
 | Test | Type | Description |
 |------|------|-------------|
-| `TestBudgetCmd_EarlyExit_Disabled` | Unit | ARIADNE_BUDGET_DISABLE=1 exits with empty output |
+| `TestBudgetCmd_EarlyExit_Disabled` | Unit | ARI_BUDGET_DISABLE=1 exits with empty output |
 | `TestBudgetCmd_EarlyExit_HooksOff` | Unit | USE_ARI_HOOKS not set exits with empty output |
 | `TestBudgetConfig_Defaults` | Unit | Default warn=250, park=nil |
 | `TestBudgetConfig_Custom` | Unit | Custom env vars parsed correctly |
-| `TestResolveSessionKey_Priority` | Unit | ARIADNE_SESSION_KEY > CLAUDE_SESSION_ID > ppid |
+| `TestResolveSessionKey_Priority` | Unit | ARI_SESSION_KEY > CLAUDE_SESSION_ID > ppid |
 | `TestReadCount_NoFile` | Unit | Returns 0 when file missing |
 | `TestIncrementCount_Atomic` | Unit | Creates file, increments, returns correct count |
 | `TestIncrementCount_Concurrent` | Unit | 100 goroutines incrementing, final count >= 100 |
@@ -347,8 +347,7 @@ schema_version: "2.0"
 # Binary resolution for direct invocation
 binary: "ari"
 binary_fallback:
-  - "${ARIADNE_BIN}"
-  - "ari"                              # PATH lookup
+  - "ari"                              # PATH lookup (primary)
   - "${CLAUDE_PROJECT_DIR}/ariadne/ari" # Development
 
 hooks:

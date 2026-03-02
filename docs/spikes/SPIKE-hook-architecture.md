@@ -158,7 +158,7 @@ set -euo pipefail  # Exit on error, undefined vars, pipe failures
 [[ "${USE_ARI_HOOKS:-1}" != "1" ]] && exit 0
 
 # Binary resolution with fallback
-ARI="${ARIADNE_BIN:-$(command -v ari || echo "")}"
+ARI="$(command -v ari || echo "")"
 [[ -x "$ARI" ]] || exit 0  # Graceful degradation if binary missing
 
 # Execute ari with timeout protection (if available)
@@ -410,15 +410,13 @@ set -euo pipefail
 # [[ ! -d "$SESSION_DIR" ]] && exit 0
 
 # Binary resolution with PATH fallback (per ADR-0002 style)
-ARI="${ARIADNE_BIN:-}"
-if [[ -z "$ARI" ]]; then
-    # Priority 1: PATH lookup (for installed binary)
-    if command -v ari &>/dev/null; then
-        ARI="$(command -v ari)"
-    # Priority 2: Project-relative location (for development)
-    elif [[ -x "${CLAUDE_PROJECT_DIR:-$PWD}/ariadne/ari" ]]; then
-        ARI="${CLAUDE_PROJECT_DIR:-$PWD}/ariadne/ari"
-    fi
+ARI=""
+# Priority 1: PATH lookup (for installed binary)
+if command -v ari &>/dev/null; then
+    ARI="$(command -v ari)"
+# Priority 2: Project-relative location (for development)
+elif [[ -x "${CLAUDE_PROJECT_DIR:-$PWD}/ariadne/ari" ]]; then
+    ARI="${CLAUDE_PROJECT_DIR:-$PWD}/ariadne/ari"
 fi
 
 # Guard: binary must exist and be executable (graceful degradation)

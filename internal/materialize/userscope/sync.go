@@ -1482,7 +1482,10 @@ func removeUserOrphan(key string, manifest *provenance.ProvenanceManifest, userC
 	delete(manifest.Entries, key)
 }
 
-// cleanupOldManifests removes legacy JSON manifest files.
+// cleanupOldManifests removes legacy JSON manifest files and their v2-backup remnants.
+// The v1 JSON manifests were superseded by USER_PROVENANCE_MANIFEST.yaml.
+// The .v2-backup files were created by this function during v1-to-v2 migration
+// and serve no rollback purpose now that migration is complete.
 func cleanupOldManifests(userClaudeDir string) {
 	oldManifests := []string{
 		filepath.Join(userClaudeDir, "USER_AGENT_MANIFEST.json"),
@@ -1492,14 +1495,12 @@ func cleanupOldManifests(userClaudeDir string) {
 		filepath.Join(userClaudeDir, "USER_SKILL_MANIFEST.json"),
 	}
 	for _, path := range oldManifests {
-		// Backup before removal for safety
-		data, err := os.ReadFile(path)
-		if err != nil {
-			continue // Already gone or unreadable
-		}
-		backupPath := path + ".v2-backup"
-		os.WriteFile(backupPath, data, 0644) // Best effort
+		// Remove the original JSON manifest if still present.
+		// Skip backup creation -- migration is complete, backups serve no purpose.
 		os.Remove(path)
+
+		// Remove .v2-backup remnants from previous migration runs.
+		os.Remove(path + ".v2-backup")
 	}
 }
 

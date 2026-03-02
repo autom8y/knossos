@@ -64,9 +64,8 @@ Claude Code hooks enable customization of agent behavior at key lifecycle events
 │ └─────────────────────────────────────────────────────────┘ │
 │ ┌─────────────────────────────────────────────────────────┐ │
 │ │ Binary Resolution (<5ms)                                │ │
-│ │ 1. ARIADNE_BIN env var                                  │ │
-│ │ 2. PATH lookup (command -v ari)                         │ │
-│ │ 3. Project-relative (ariadne/ari)                       │ │
+│ │ 1. PATH lookup (command -v ari)                         │ │
+│ │ 2. Project-relative (ariadne/ari)                       │ │
 │ │ Fallback: exit 0 (graceful degradation)                │ │
 │ └─────────────────────────────────────────────────────────┘ │
 │ ┌─────────────────────────────────────────────────────────┐ │
@@ -129,13 +128,11 @@ set -euo pipefail
 [[ "${USE_ARI_HOOKS:-1}" != "1" ]] && exit 0
 
 # Binary resolution with PATH fallback
-ARI="${ARIADNE_BIN:-}"
-if [[ -z "$ARI" ]]; then
-    if command -v ari &>/dev/null; then
-        ARI="$(command -v ari)"
-    elif [[ -x "${CLAUDE_PROJECT_DIR:-$PWD}/ariadne/ari" ]]; then
-        ARI="${CLAUDE_PROJECT_DIR:-$PWD}/ariadne/ari"
-    fi
+ARI=""
+if command -v ari &>/dev/null; then
+    ARI="$(command -v ari)"
+elif [[ -x "${CLAUDE_PROJECT_DIR:-$PWD}/ariadne/ari" ]]; then
+    ARI="${CLAUDE_PROJECT_DIR:-$PWD}/ariadne/ari"
 fi
 
 # Guard: binary must exist and be executable (graceful degradation)
