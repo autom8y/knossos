@@ -704,6 +704,75 @@ func TestManagerStatus(t *testing.T) {
 	}
 }
 
+// TestRemoveCleansUpLocalDirectories tests that Remove cleans up .sos/ and .ledge/
+// in the worktree, and that symlinked directories' targets in the main root are NOT
+// affected by removal.
+func TestRemoveCleansUpLocalDirectories(t *testing.T) {
+	tmpDir := setupTestGitRepo(t)
+	defer os.RemoveAll(tmpDir)
+
+	// Create .knossos/ and .know/ in the main repo root
+	knossosDir := filepath.Join(tmpDir, ".knossos")
+	if err := os.MkdirAll(knossosDir, 0755); err != nil {
+		t.Fatalf("Failed to create .knossos/: %v", err)
+	}
+	// Put a sentinel file in .knossos/ to verify it is not deleted
+	sentinel := filepath.Join(knossosDir, "sentinel.txt")
+	if err := os.WriteFile(sentinel, []byte("do not delete"), 0644); err != nil {
+		t.Fatalf("Failed to create sentinel: %v", err)
+	}
+
+	knowDir := filepath.Join(tmpDir, ".know")
+	if err := os.MkdirAll(knowDir, 0755); err != nil {
+		t.Fatalf("Failed to create .know/: %v", err)
+	}
+	knowSentinel := filepath.Join(knowDir, "sentinel.txt")
+	if err := os.WriteFile(knowSentinel, []byte("do not delete"), 0644); err != nil {
+		t.Fatalf("Failed to create know sentinel: %v", err)
+	}
+
+	mgr, err := NewManager(tmpDir)
+	if err != nil {
+		t.Fatalf("Failed to create manager: %v", err)
+	}
+
+	wt, err := mgr.Create(CreateOptions{
+		Name: "remove-cleanup-test",
+		Rite: "test-rite",
+	})
+	if err != nil {
+		t.Fatalf("Failed to create worktree: %v", err)
+	}
+
+	// Verify the seeded directories exist before removal
+	if _, err := os.Stat(filepath.Join(wt.Path, ".sos")); os.IsNotExist(err) {
+		t.Fatal(".sos/ should exist before removal")
+	}
+	if _, err := os.Stat(filepath.Join(wt.Path, ".ledge", "decisions")); os.IsNotExist(err) {
+		t.Fatal(".ledge/decisions/ should exist before removal")
+	}
+
+	// Remove with force (worktree has untracked metadata files)
+	if err := mgr.Remove(wt.ID, true); err != nil {
+		t.Fatalf("Remove failed: %v", err)
+	}
+
+	// Verify worktree path is gone
+	if _, err := os.Stat(wt.Path); !os.IsNotExist(err) {
+		t.Error("Worktree path should not exist after removal")
+	}
+
+	// Verify main root's .knossos/ was NOT deleted (symlink target preserved)
+	if _, err := os.Stat(sentinel); os.IsNotExist(err) {
+		t.Error("Main root .knossos/sentinel.txt should still exist after worktree removal")
+	}
+
+	// Verify main root's .know/ was NOT deleted
+	if _, err := os.Stat(knowSentinel); os.IsNotExist(err) {
+		t.Error("Main root .know/sentinel.txt should still exist after worktree removal")
+	}
+}
+
 // TestMetadataJSON tests that metadata serializes correctly.
 func TestMetadataJSON(t *testing.T) {
 	wt := Worktree{

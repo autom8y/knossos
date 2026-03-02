@@ -677,4 +677,27 @@ func (m *Manager) setupWorktreeEcosystem(wtPath, riteName string) {
 
 	// Materialization now handles everything including ACTIVE_RITE file
 	// No separate switch operation needed
+
+	// Symlink .knossos/ from main root (shared framework config)
+	knossosSource := filepath.Join(m.rootDir, ".knossos")
+	if _, err := os.Stat(knossosSource); err == nil {
+		knossosDest := filepath.Join(wtPath, ".knossos")
+		os.Symlink(knossosSource, knossosDest) // best-effort
+	}
+
+	// Symlink .know/ from main root (shared codebase knowledge)
+	knowSource := filepath.Join(m.rootDir, ".know")
+	if _, err := os.Stat(knowSource); err == nil {
+		knowDest := filepath.Join(wtPath, ".know")
+		os.Symlink(knowSource, knowDest) // best-effort
+	}
+
+	// Create .ledge/ scaffold (worktree-local work product artifacts)
+	ledgeSubdirs := []string{"decisions", "specs", "reviews", "spikes"}
+	for _, sub := range ledgeSubdirs {
+		os.MkdirAll(filepath.Join(wtPath, ".ledge", sub), 0755) // best-effort
+	}
+
+	// Create .sos/ directory (worktree-local session/state)
+	os.MkdirAll(filepath.Join(wtPath, ".sos"), 0755) // best-effort
 }
