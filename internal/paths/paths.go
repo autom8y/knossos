@@ -267,31 +267,6 @@ func UserRitesDir() string {
 	return filepath.Join(DataDir(), "rites")
 }
 
-// LegacyDataDir returns the legacy ariadne data directory for migration.
-// Deprecated: Use DataDir() instead. This is only for migration support.
-func LegacyDataDir() string {
-	return filepath.Join(xdg.DataHome, "ariadne")
-}
-
-// MigrateLegacyPaths checks for legacy ariadne directories and returns paths
-// that need migration. Returns nil if no migration needed.
-func MigrateLegacyPaths() []string {
-	legacyPaths := []string{
-		filepath.Join(xdg.ConfigHome, "ariadne"),
-		filepath.Join(xdg.StateHome, "ariadne"),
-		filepath.Join(xdg.CacheHome, "ariadne"),
-		filepath.Join(xdg.DataHome, "ariadne"),
-	}
-
-	var needsMigration []string
-	for _, p := range legacyPaths {
-		if _, err := os.Stat(p); err == nil {
-			needsMigration = append(needsMigration, p)
-		}
-	}
-	return needsMigration
-}
-
 // ConfigFile returns the path to a file in the config directory.
 func ConfigFile(name string) string {
 	return filepath.Join(ConfigDir(), name)

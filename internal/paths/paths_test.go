@@ -3,7 +3,6 @@ package paths
 import (
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
 
 	"github.com/adrg/xdg"
@@ -415,15 +414,6 @@ func TestUserRitesDir(t *testing.T) {
 	}
 }
 
-// TestLegacyDataDir verifies the legacy ariadne data directory path.
-func TestLegacyDataDir(t *testing.T) {
-	got := LegacyDataDir()
-	want := filepath.Join(xdg.DataHome, "ariadne")
-	if got != want {
-		t.Errorf("LegacyDataDir() = %q, want %q", got, want)
-	}
-}
-
 // TestConfigFile verifies the config file path construction.
 func TestConfigFile(t *testing.T) {
 	got := ConfigFile("settings.yaml")
@@ -474,71 +464,6 @@ func TestEnsureStateDir(t *testing.T) {
 	if !info.IsDir() {
 		t.Errorf("%q is not a directory", StateDir())
 	}
-}
-
-// TestMigrateLegacyPaths verifies detection of legacy ariadne directories.
-func TestMigrateLegacyPaths(t *testing.T) {
-	t.Run("no_legacy_dirs", func(t *testing.T) {
-		// Save and override XDG dirs to empty temp locations
-		origConfig := xdg.ConfigHome
-		origState := xdg.StateHome
-		origCache := xdg.CacheHome
-		origData := xdg.DataHome
-		t.Cleanup(func() {
-			xdg.ConfigHome = origConfig
-			xdg.StateHome = origState
-			xdg.CacheHome = origCache
-			xdg.DataHome = origData
-		})
-
-		tmp := t.TempDir()
-		xdg.ConfigHome = filepath.Join(tmp, "config")
-		xdg.StateHome = filepath.Join(tmp, "state")
-		xdg.CacheHome = filepath.Join(tmp, "cache")
-		xdg.DataHome = filepath.Join(tmp, "data")
-
-		got := MigrateLegacyPaths()
-		if len(got) != 0 {
-			t.Errorf("MigrateLegacyPaths() = %v, want empty", got)
-		}
-	})
-
-	t.Run("some_legacy_dirs_exist", func(t *testing.T) {
-		origConfig := xdg.ConfigHome
-		origState := xdg.StateHome
-		origCache := xdg.CacheHome
-		origData := xdg.DataHome
-		t.Cleanup(func() {
-			xdg.ConfigHome = origConfig
-			xdg.StateHome = origState
-			xdg.CacheHome = origCache
-			xdg.DataHome = origData
-		})
-
-		tmp := t.TempDir()
-		xdg.ConfigHome = filepath.Join(tmp, "config")
-		xdg.StateHome = filepath.Join(tmp, "state")
-		xdg.CacheHome = filepath.Join(tmp, "cache")
-		xdg.DataHome = filepath.Join(tmp, "data")
-
-		// Create only config and data legacy dirs
-		if err := os.MkdirAll(filepath.Join(tmp, "config", "ariadne"), 0755); err != nil {
-			t.Fatalf("MkdirAll: %v", err)
-		}
-		if err := os.MkdirAll(filepath.Join(tmp, "data", "ariadne"), 0755); err != nil {
-			t.Fatalf("MkdirAll: %v", err)
-		}
-
-		got := MigrateLegacyPaths()
-		if len(got) != 2 {
-			t.Fatalf("MigrateLegacyPaths() returned %d paths, want 2: %v", len(got), got)
-		}
-		for _, p := range got {
-			if !strings.HasSuffix(p, "ariadne") {
-				t.Errorf("unexpected path %q -- expected to end with 'ariadne'", p)
-			}
-		}
-	})
 }
 
 // TestUserLevelPaths verifies user-level resource path functions.
