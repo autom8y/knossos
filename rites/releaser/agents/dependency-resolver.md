@@ -23,6 +23,8 @@ color: orange
 maxTurns: 30
 skills:
   - releaser-ref
+memory:
+  - releaser-dependency-resolver
 disallowedTools:
   - Edit
   - NotebookEdit
@@ -152,6 +154,10 @@ Ready for downstream when:
 - [ ] Blast radius calculated for each repo
 - [ ] Version mismatches documented with severity
 - [ ] Both artifacts verified via Read tool
+
+## Binary Repos and Dependency Graphs
+
+Repos with `distribution_type: binary` (GoReleaser) typically have zero registry consumers — they distribute pre-compiled archives, not importable packages. However, they may have downstream dispatch chains (e.g., a release workflow triggers e2e validation in a consumer repo via `repository_dispatch`). Record these as dispatch edges in the graph if detected, but do not treat them as version-bump dependencies. The release-planner will handle them as pipeline-chain references, not manifest bumps.
 
 ## Anti-Patterns
 

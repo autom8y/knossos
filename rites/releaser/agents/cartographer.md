@@ -23,6 +23,8 @@ color: orange
 maxTurns: 50
 skills:
   - releaser-ref
+memory:
+  - releaser-cartographer
 disallowedTools:
   - Edit
   - NotebookEdit
@@ -52,8 +54,10 @@ Discover all repos matching a glob pattern, map their git state and package ecos
 5. For each repo:
    - Git state: `git status`, `git branch`, `git log -1`, `git rev-list --left-right`
    - Ecosystem detection: check for `pyproject.toml`, `package.json`, `go.mod`, `Cargo.toml`
+   - Distribution type: check for `.goreleaser.yaml` / `.goreleaser.yml` (binary); Dockerfile with publish target (container stub); otherwise `registry`
    - Version: parse current version from the detected manifest file
    - Justfile: check existence, parse targets and map to semantic actions
+   - Makefile: check existence alongside justfile (record `makefile_exists: true|false`)
    - Dirty state: flag and mark `release_candidate: false`
    - Dependents: check if other repos declare this repo as a dependency
 6. Assemble `platform-state-map.yaml` following the output schema
@@ -62,14 +66,71 @@ Discover all repos matching a glob pattern, map their git state and package ecos
 
 ## Ecosystem Detection
 
-| File Present | Ecosystem | Version Source |
-|-------------|-----------|----------------|
-| `pyproject.toml` | python_uv | `[project].version` |
-| `package.json` | node_npm | `version` field |
-| `go.mod` | go_mod | git tags (vX.Y.Z) |
-| `Cargo.toml` | rust_cargo | `[package].version` |
-| Multiple | Escalate -- ambiguous | -- |
-| None | unknown | -- |
+> See releaser-ref: Ecosystem Detection Matrix
+
+Additional cartographer-specific fields:
+
+| File Present | Version Source |
+|-------------|----------------|
+| `pyproject.toml` | `[project].version` |
+| `package.json` | `version` field |
+| `go.mod` | git tags (vX.Y.Z) |
+| `Cargo.toml` | `[package].version` |
+| Multiple | Escalate -- ambiguous |
+| None | unknown |
+
+## Distribution Type Detection
+
+After ecosystem detection, check for distribution type indicators:
+
+| File / Pattern | Result |
+|---------------|--------|
+| `.goreleaser.yaml` or `.goreleaser.yml` | `distribution_type: binary`, `goreleaser_config: {path}` |
+| Neither goreleaser file | `distribution_type: registry`, `goreleaser_config: null` |
+| Dockerfile + GHCR/DockerHub in workflow | `distribution_type: container` (record only — escalate; not yet supported) |
+
+When goreleaser is detected, record the config path relative to the repo root. The release-planner uses this to generate binary-appropriate publish commands.
+
+### GoReleaser Config Parsing (binary repos)
+
+When `.goreleaser.yaml` is present, read and extract the following fields for the state map:
+
+| Field | GoReleaser YAML Path | State Map Key |
+|-------|---------------------|---------------|
+| Project name | `project_name` | `goreleaser_project_name` |
+| Target OS list | `builds[].goos` | `goreleaser_goos` |
+| Target arch list | `builds[].goarch` | `goreleaser_goarch` |
+| Homebrew tap repo | `brews[].repository.{owner,name}` | `goreleaser_brew_tap` (formatted as `owner/name`) |
+| GitHub release target | `release.github.{owner,name}` | `goreleaser_release_repo` (formatted as `owner/name`) |
+| Homebrew token env var | `brews[].repository.token` | `goreleaser_brew_token_env` (extract env var name, e.g., `HOMEBREW_TAP_TOKEN`) |
+
+Expected asset names follow the pattern `{project_name}_{version}_{os}_{arch}.tar.gz`. Record these as `goreleaser_expected_assets` using the cross-product of `goos` x `goarch` (e.g., for darwin+linux x amd64+arm64: four archives plus `checksums.txt`).
+
+If any of these fields are absent, record `null` for the specific key and note the absence — do not fail detection.
+
+### Pipeline Chain: release.yml → e2e-distribution.yml
+
+When scanning a binary repo's CI workflows, detect the two-workflow release chain:
+
+1. **Release trigger workflow** (`release.yml` or similar): triggered by `push: tags: ["v*"]`, runs GoReleaser action (`goreleaser/goreleaser-action`). This is stage 1.
+2. **E2E validation workflow** (`e2e-distribution.yml` or similar): triggered by `release: types: [published]` (NOT workflow_run — triggered by the GitHub Release creation event that GoReleaser produces). This is stage 2.
+
+Record this as a `trigger_chain` in `pipeline_chains` with depth 2:
+- Stage 1: release.yml, trigger: `push` (tag pattern), classification: `build`
+- Stage 2: e2e-distribution.yml, trigger: `release.published`, classification: `deploy`
+
+The e2e workflow may also support `workflow_dispatch` for manual re-runs — this is auxiliary and does not affect chain classification.
+
+### Makefile e2e Target Detection
+
+When `makefile_exists: true`, read the Makefile and scan for e2e-related targets alongside build targets:
+
+| Target Pattern | Semantic |
+|---------------|----------|
+| `e2e-linux`, `e2e-local`, `e2e-*` | e2e_validation |
+| `build`, `compile` | build |
+
+Record e2e targets in `makefile_e2e_targets: [{name: "e2e-linux", semantic: "e2e_validation"}, ...]`. A Makefile with e2e targets is a strong signal that an e2e validation workflow exists — cross-reference with `.github/workflows/` to confirm.
 
 ## Justfile Target Mapping
 
@@ -162,6 +223,16 @@ repos:
   - name: {repo-name}
     path: {absolute-path}
     ecosystem: python_uv|node_npm|go_mod|rust_cargo|unknown
+    distribution_type: registry|binary|container
+    goreleaser_config: {relative-path}|null
+    goreleaser_project_name: {string}|null        # populated for binary repos only
+    goreleaser_goos: [{darwin, linux}]|null        # populated for binary repos only
+    goreleaser_goarch: [{amd64, arm64}]|null       # populated for binary repos only
+    goreleaser_brew_tap: {owner/name}|null         # null when brews[] not configured
+    goreleaser_brew_token_env: {env-var-name}|null # e.g. HOMEBREW_TAP_TOKEN; null when brews[] absent
+    goreleaser_release_repo: {owner/name}|null     # from release.github; null when absent
+    goreleaser_expected_assets: [{string}]|null    # cross-product of goos x goarch archives + checksums.txt
+    makefile_e2e_targets: [{name: string, semantic: e2e_validation}]|null
     version: {current-version}
     manifest_file: {pyproject.toml|package.json|go.mod|Cargo.toml}
     git:
@@ -174,6 +245,7 @@ repos:
     justfile:
       exists: true|false
       targets: [{name: "build", semantic: "build"}, ...]
+    makefile_exists: true|false
     release_candidate: true|false
     has_dependents: true|false
     pipeline_chains:
@@ -247,6 +319,11 @@ Ready for downstream when:
 - [ ] `platform-state-map.md` written to `.claude/wip/release/`
 - [ ] All repos from glob pattern scanned
 - [ ] Every repo has ecosystem identified or marked unknown
+- [ ] Every repo has `distribution_type` detected and `goreleaser_config` populated (null if absent)
+- [ ] Binary repos have goreleaser config parsed: `goreleaser_project_name`, `goreleaser_goos`, `goreleaser_goarch`, `goreleaser_brew_tap`, `goreleaser_release_repo`, `goreleaser_expected_assets` populated (null fields noted)
+- [ ] Binary repos have Makefile e2e targets recorded in `makefile_e2e_targets` (null if no Makefile or no e2e targets)
+- [ ] Binary repos have release→e2e pipeline chain recorded in `pipeline_chains` (trigger_chain, depth 2)
+- [ ] Repos with `container` distribution type flagged for escalation
 - [ ] Dirty repos flagged with `release_candidate: false`
 - [ ] `has_dependents` field populated for each repo
 - [ ] Chain discovery attempted for all release-candidate repos
@@ -255,7 +332,6 @@ Ready for downstream when:
 
 ## Anti-Patterns
 
-- **Assuming uniform package managers**: Always detect ecosystem per-repo from manifest files
 - **Running build/publish commands**: Reconnaissance is read-only; never execute builds
 - **Skipping dirty state checks**: Every repo must have git dirty state verified
 - **Hardcoding ecosystem detection**: Use manifest file presence, not directory naming conventions

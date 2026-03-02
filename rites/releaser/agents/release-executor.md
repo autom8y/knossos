@@ -26,6 +26,8 @@ skills:
   - releaser-ref
   - conventions
   - commit-conventions
+memory:
+  - releaser-release-executor
 disallowedTools:
   - NotebookEdit
 contract:
@@ -70,6 +72,60 @@ Execute `release-plan.yaml` phase by phase. Publish packages, bump versions in m
 
 ## Execution Rules
 
+### Distribution-Type Branching
+
+Read `distribution_type` from the plan entry for each repo before executing:
+
+| Distribution Type | Execution Model |
+|------------------|----------------|
+| `registry` | Existing model unchanged — run `publish_command` from the plan |
+| `binary` | Tag-and-trigger model (see Binary Release Execution below) |
+| `container` | Raise "container distribution not yet supported — escalate to user"; set status: escalated |
+
+### Binary Release Execution
+
+For repos with `distribution_type: binary`, the execution model is tag-push-and-monitor. The executor takes exactly two actions; everything else is CI.
+
+**CRITICAL: The executor NEVER runs `goreleaser` directly.** GoReleaser runs inside CI (GitHub Actions). Running goreleaser locally would bypass version injection (`-X main.version={{.Version}}`), bypass the Homebrew tap token (available only as a CI secret `HOMEBREW_TAP_TOKEN`), and produce non-reproducible artifacts. The tag push IS the release trigger.
+
+#### Step 1 — Create Annotated Tag
+
+```bash
+git -C {repo-path} tag -a v{version} -m "Release v{version}"
+```
+
+Annotated tags (not lightweight) are required for GoReleaser changelog generation. Verify exit 0. If the tag already exists, log as `failed` with reason "tag already exists" and halt — do not force-overwrite tags.
+
+#### Step 2 — Push Tag to Origin
+
+```bash
+git -C {repo-path} push origin v{version}
+```
+
+This push event triggers `release.yml` in CI via `push: tags: ["v*"]`. The CI workflow then runs `goreleaser release --clean` with `GITHUB_TOKEN` and `HOMEBREW_TAP_TOKEN` available as secrets. Verify exit 0 and confirm push output references the new tag (e.g., `* [new tag]`). Log the full push output in the ledger.
+
+#### Step 3 — Record in Ledger, Hand Off to Pipeline-Monitor
+
+After tag push succeeds, record the following in the ledger action entry and stop:
+
+```yaml
+tag: "v{version}"
+tag_sha: "{output of: git -C {repo-path} rev-parse v{version}}"
+release_url: null          # pipeline-monitor populates after GitHub Release is created
+asset_count: null          # pipeline-monitor populates after GoReleaser completes
+checksum_url: null         # pipeline-monitor populates after GoReleaser completes
+```
+
+Pipeline-monitor handles all downstream verification: GitHub Release creation, expected asset count, `checksums.txt` presence, Homebrew tap formula update, and E2E validation workflow.
+
+#### Token Awareness
+
+The Homebrew tap formula update (`brews[]` in goreleaser config) requires `HOMEBREW_TAP_TOKEN` to be set as a CI secret in the source repo. If `release.yml` fails with a permission error on the tap repo (e.g., `autom8y/homebrew-tap`), record in the ledger: `"Known failure mode: HOMEBREW_TAP_TOKEN secret missing or expired in repo CI settings — check repo Settings > Secrets"`. The executor cannot verify secret availability before pushing.
+
+#### Binary Release Has No Consumer Bumps
+
+Binary repos (CLI tools distributed via Homebrew/direct download) do NOT have downstream consumers requiring manifest version bumps. After tag push, move immediately to the next plan phase. There are no `bump_and_push` actions downstream of a binary release.
+
 ### Publish Before Consume
 NEVER bump a consumer's dependency version until the SDK has been confirmed published. Confirmation means the publish command exited successfully and the version is available.
 
@@ -94,15 +150,9 @@ Match the consumer's constraint style: `exact` (1.2.3 -> 1.3.0), `range` (>=1.2.
 - NEVER publish without the plan specifying the action
 - ALWAYS verify publish success before proceeding to consumers
 
-## DAG-Branch Failure Halting
+> See releaser-ref: Failure Halting Protocol
 
-When an action fails:
-1. Record the failure in the ledger with full error details
-2. Look up the failed repo in `dependency-graph.yaml`
-3. Find all repos that depend on it (direct + transitive from `blast_radius`)
-4. Mark each dependent repo as `skipped` with reason: "dependency {name} failed"
-5. Continue executing repos that have NO dependency on the failed repo
-6. Report halted branches in the ledger's `halted_branches` section
+Additional executor-specific fields: mark each dependent repo as `skipped` with reason: "dependency {name} failed", and report halted branches in the ledger's `halted_branches` section.
 
 ## Output Schema
 
@@ -132,6 +182,12 @@ phases:
         pr_url: "{if PR created}"
         published_version: "{if published}"
         commit_sha: "{if pushed}"
+        # Binary-specific fields (populated when distribution_type: binary)
+        tag: "{vX.Y.Z if binary release}"
+        tag_sha: "{tag object SHA if binary release}"
+        release_url: "{GitHub Release URL — populated by pipeline-monitor after CI}"
+        asset_count: "{n — populated by pipeline-monitor}"
+        checksum_url: "{checksums.txt URL — populated by pipeline-monitor}"
 
 halted_branches:
   - trigger_repo: {name}
@@ -214,12 +270,12 @@ Ready for downstream when:
 
 ## Anti-Patterns
 
-- **Publishing consumer before SDK**: NEVER bump a consumer until its dependency is confirmed published
-- **Force-pushing**: NEVER use `--force` or `-f` on any push
 - **Bumping without publishing**: Version bumps and publishes are coupled -- do not bump then skip publish
 - **Ignoring failures**: Every failure must be logged and must trigger DAG-branch halting
 - **Executing off-plan**: Only run commands specified in `release-plan.yaml`
 - **Losing track of repos**: Every repo from the plan must appear in the ledger with a terminal status
+- **Running goreleaser locally**: For binary repos, NEVER run `goreleaser release` or any goreleaser command. Always push the annotated tag and let CI handle it. Local goreleaser runs bypass CI secrets and produce non-reproducible builds.
+- **Force-overwriting existing tags**: If a tag for the target version already exists, halt and escalate. Never use `git tag -f` or `git push --force` on tags.
 
 ## Skills Reference
 

@@ -1,6 +1,6 @@
 ---
 name: releaser-ref
-description: "Releaser rite methodology reference. Use when: implementing release agents, orchestrating multi-repo releases, understanding artifact chain, checking complexity levels, detecting package ecosystems, applying DAG-branch failure halting, routing CI failures to peer rites. Triggers: release orchestration, artifact chain, ecosystem detection, publish order, dependency graph, DAG-branch halting, PATCH escalation, release complexity, cross-rite routing, release anti-patterns."
+description: "Releaser rite methodology reference. Use when: implementing release agents, orchestrating multi-repo releases, understanding artifact chain, checking complexity levels, detecting package ecosystems, applying DAG-branch failure halting, routing CI failures to peer rites. Triggers: release orchestration, artifact chain, ecosystem detection, publish order, dependency graph, DAG-branch halting, PATCH escalation, release complexity, cross-rite routing, release anti-patterns. Companion files available for pipeline chains, ecosystem detection, failure halting, and cross-rite routing detail."
 ---
 
 # Releaser Methodology Reference
@@ -24,81 +24,6 @@ PLATFORM: Same as RELEASE, full-scope (all matching repos, extended CI timeout)
 All artifacts written to `.claude/wip/release/`. YAML consumed by downstream agents; MD for human review.
 Downstream agents consume YAML only. Never parse the MD summaries programmatically.
 
-## Pipeline Chain Model
-
-A **pipeline chain** is a sequence of automated workflows triggered by a code push, where each stage's completion triggers the next. Releases are not verified until the terminal stage resolves.
-
-### Chain Type Taxonomy
-
-| Chain Type | Scope | Example |
-|------------|-------|---------|
-| trigger_chain | Within a single repo, one workflow triggers another | Test suite triggers packaging workflow |
-| dispatch_chain | Across repos, one repo dispatches work to another | Source repo dispatches to infrastructure repo |
-| deployment_chain | Any chain whose terminal stage performs deployment | Build + deploy + health check sequence |
-
-A single release may involve multiple chain types composed together (e.g., trigger_chain feeding into dispatch_chain feeding into deployment_chain).
-
-### Terminal States
-
-A chain is **resolved** when its terminal stage reaches a conclusive outcome:
-
-| Terminal State | Meaning |
-|----------------|---------|
-| succeeded | All stages completed successfully, including health checks |
-| failed | Any stage failed; chain cannot proceed |
-| timed_out | Terminal stage did not resolve within the configured timeout |
-| dispatch_not_received | Cross-repo dispatch was expected but never arrived (after retry exhaustion) |
-
-A chain is **unresolved** while any non-terminal stage is still in progress or pending.
-
-### Chain-Aware Verdict Rules
-
-| Condition | Verdict |
-|-----------|---------|
-| All CI green AND all chains resolved as succeeded AND all deployments healthy | PASS |
-| All CI green AND no chains discovered (flat pipeline) | PASS |
-| Any CI red | FAIL |
-| All CI green AND any chain failed | FAIL |
-| All CI green AND any chain timed out or dispatch not received | PARTIAL |
-| Monitoring still in progress | IN_PROGRESS |
-
-Key rule: green CI with a failed deployment chain is a FAIL, not a PASS. The chain extends the definition of "pipeline success" beyond the initial CI run.
-
-## Ecosystem Detection Matrix
-
-| Manifest File | Ecosystem | Package Manager | Publish Command (typical) |
-|---------------|-----------|-----------------|--------------------------|
-| `pyproject.toml` | Python | uv | `uv publish` or justfile target |
-| `package.json` | Node | npm | `npm publish` or justfile target |
-| `go.mod` | Go | go | `git tag v{version}` + `go list -m` |
-| `Cargo.toml` | Rust | cargo | `cargo publish` or justfile target |
-
-Multiple manifest files in one repo = ambiguous ecosystem; escalate to Pythia.
-Always detect ecosystem per-repo from manifest files. Never assume uniformity.
-
-## Publish Order Protocol
-
-Topological sort rules:
-1. Foundations (no cross-repo dependencies) publish first, in parallel
-2. Each subsequent phase depends on all repos in prior phases being published
-3. Within a phase, repos with no dependency relationship may publish in parallel
-4. Consumer version bumps happen AFTER the dependency's publish is confirmed — never before
-
-Parallel group constraints:
-- Two repos may share a phase only if neither depends on the other (directly or transitively)
-- If uncertain, be conservative: sequential is safe, incorrect parallel causes failures
-
-## Failure Halting Protocol (DAG-Branch Semantics)
-
-When release-executor reports a failure on repo X:
-1. Identify X in the dependency graph
-2. Find all repos that depend on X (direct + transitive consumers)
-3. Mark all downstream repos as `skipped` in the execution ledger
-4. Continue executing repos in branches with no dependency on X
-5. Pipeline-monitor only monitors repos that were actually pushed (not skipped)
-
-Goal: maximize successful releases while preventing cascading failures from unpublished dependencies.
-
 ## Complexity Levels
 
 | Level | Phases | Use For |
@@ -119,20 +44,6 @@ Pythia response:
 2. If true: escalate to RELEASE, notify user ("Target repo has N downstream consumers. Escalating to RELEASE.")
 3. Continue from dependency-analysis phase — do NOT re-run cartographer
 
-## Cross-Rite Routing Table
-
-| Trigger Signal | Target Rite | When |
-|----------------|-------------|------|
-| Architectural boundary violations | arch | Repo structure suggests coupling issues |
-| Deployment, scaling, infrastructure | sre | CI reveals deployment or reliability issues |
-| Code quality blocking publish | hygiene | CI failures from lint/format gates |
-| Systematic test failures | review | Failures suggest deeper code issues |
-| Security vulnerabilities in CI | security | CI security scan failures |
-| Version drift, dependency rot | debt-triage | Accumulated technical debt blocking release |
-
-Route by reference only. Pipeline-monitor names the target rite in recommendations. User decides.
-No transitive routing — releaser routes directly to peer rites, never chains.
-
 ## Anti-Patterns
 
 | Anti-Pattern | Prevention |
@@ -148,3 +59,14 @@ No transitive routing — releaser routes directly to peer rites, never chains.
 
 Cartographer runs `gh auth status` during reconnaissance. If gh CLI is not authenticated,
 fail fast and escalate rather than discovering auth issues 3 phases later during execution.
+
+## Companion Files
+
+For detailed reference, agents should Read the relevant companion:
+
+| Topic | Path |
+|-------|------|
+| Pipeline Chain Model | `rites/releaser/mena/releaser-ref/pipeline-chains.md` |
+| Ecosystem Detection | `rites/releaser/mena/releaser-ref/ecosystem-detection.md` |
+| Failure Halting Protocol | `rites/releaser/mena/releaser-ref/failure-halting.md` |
+| Cross-Rite Routing | `rites/releaser/mena/releaser-ref/cross-rite-routing.md` |

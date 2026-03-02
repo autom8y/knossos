@@ -60,14 +60,6 @@ complexity_levels:
 # continues from the dependency-analysis phase. This is Pythia's responsibility
 # — the workflow engine treats it as a complexity upgrade mid-flight.
 
-# DAG-branch failure halting:
-# When release-executor encounters a failure on any repo, it halts that repo's
-# entire dependency branch (all transitive consumers) and marks them as skipped
-# in the execution ledger. Independent branches (repos with no dependency on the
-# failed repo) continue executing. Pipeline-monitor only monitors repos that
-# were actually pushed. Pythia coordinates halt decisions using the dependency
-# graph and execution ledger.
-
 # Artifact chain:
 # .claude/wip/release/
 #   platform-state-map.yaml   (cartographer -> dependency-resolver, release-planner, release-executor)

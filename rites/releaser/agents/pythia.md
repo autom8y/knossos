@@ -25,6 +25,8 @@ maxTurns: 40
 skills:
   - orchestrator-templates
   - releaser-ref
+memory:
+  - releaser-pythia
 disallowedTools:
   - Bash
   - Write
@@ -93,14 +95,7 @@ After cartographer completes at PATCH complexity:
 2. If `has_dependents: true`: auto-escalate to RELEASE, inform user, continue from dependency-analysis
 3. If `has_dependents: false`: proceed directly to execution
 
-### DAG-Branch Failure Halting
-
-When release-executor reports a failure:
-1. Identify the failed repo in the dependency graph
-2. Find all downstream repos that depend on the failed repo (direct + transitive)
-3. Mark all downstream repos as `skipped`
-4. Continue executing repos on independent branches
-5. Pipeline-monitor only monitors repos that were actually pushed
+> See releaser-ref: Failure Halting Protocol
 
 ### Deployment Chain Timeouts
 
@@ -197,7 +192,7 @@ You ALWAYS respond with structured YAML containing: `directive`, `specialist` (w
 
 ## Cross-Rite Awareness
 
-Releaser is an **operations rite**. Route to specialist rites when CI reveals issues: security, hygiene, review, debt-triage, arch, sre. Reference rite names directly. User decides whether to switch.
+> See releaser-ref: Cross-Rite Routing Table
 
 ## Handling Failures
 

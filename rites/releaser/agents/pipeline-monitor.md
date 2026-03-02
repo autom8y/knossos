@@ -23,6 +23,8 @@ color: orange
 maxTurns: 80
 skills:
   - releaser-ref
+memory:
+  - releaser-pipeline-monitor
 disallowedTools:
   - Edit
   - NotebookEdit
@@ -150,6 +152,89 @@ When any stage in a chain fails:
 - Record the failing stage and its error details
 - The chain failure contributes to the overall verdict via `all_chains_resolved`
 
+## Binary Release Verification
+
+For repos with `distribution_type: binary` in the execution ledger, verification covers two stages: GoReleaser CI completion and the downstream E2E validation chain. Both must pass for the repo to be marked `green`.
+
+### Stage 1: GoReleaser CI Completion
+
+Monitor `release.yml` (or the detected release workflow) triggered by the tag push. Standard CI polling applies (30-60 second intervals, 15-minute timeout for this stage). On green, immediately proceed to Stage 2 verification.
+
+Once `release.yml` is green, verify the GitHub Release artifact:
+
+```bash
+# Confirm release object exists and list assets
+gh release view v{version} --repo {goreleaser_release_repo}
+gh release view v{version} --repo {goreleaser_release_repo} --json assets --jq '.assets[].name'
+gh release view v{version} --repo {goreleaser_release_repo} --json isDraft --jq '.isDraft'
+```
+
+Required artifact checks (use `goreleaser_expected_assets` from the state map as the authoritative asset list):
+
+| Check | Criterion |
+|-------|-----------|
+| Release object exists | `gh release view` exits 0 |
+| Platform archives | All entries in `goreleaser_expected_assets` appear in the asset list (e.g., `ari_{version}_darwin_amd64.tar.gz`, `ari_{version}_darwin_arm64.tar.gz`, `ari_{version}_linux_amd64.tar.gz`, `ari_{version}_linux_arm64.tar.gz`) |
+| Checksums file | `checksums.txt` in asset list |
+| Not a draft | `isDraft` is `false` |
+
+**Homebrew tap update** (if `goreleaser_brew_tap` non-null in the state map):
+```bash
+# Check for GoReleaser formula commit in tap repo after the tag push timestamp
+gh api repos/{goreleaser_brew_tap}/commits --jq '.[0] | {sha: .sha, message: .commit.message, date: .commit.author.date}'
+```
+The most recent commit message should match `Brew formula update for {goreleaser_project_name} version v{version}`. If the commit predates the tag push, apply one retry cycle (wait 60 seconds, check again) before marking `homebrew_tap_updated: false`. GoReleaser pushes the tap commit as the final step of CI — it may trail the Release creation by 30-90 seconds.
+
+Record Stage 1 results in the `binary_release` sub-object:
+```yaml
+binary_release:
+  github_release_exists: true|false
+  assets_present: true|false        # true only if ALL goreleaser_expected_assets are found
+  checksums_present: true|false
+  release_is_draft: false           # false = correct; true = GoReleaser misconfiguration
+  homebrew_tap_updated: true|false|null  # null when goreleaser_brew_tap is null
+```
+
+### Stage 2: E2E Validation Chain (release.published Trigger)
+
+The GitHub Release creation event (`release: types: [published]`) automatically triggers `e2e-distribution.yml`. This is NOT a `workflow_run` trigger — it fires when GoReleaser creates (publishes) the GitHub Release object. The E2E workflow runs TWO parallel jobs:
+
+- **macOS E2E** (`macos-e2e`): Apple Silicon runner — validates Homebrew install path
+- **Linux E2E** (`linux-e2e`): Ubuntu runner with Docker + Linuxbrew — validates Linux distribution
+
+Discover the E2E workflow run:
+```bash
+gh run list --repo {goreleaser_release_repo} --workflow e2e-distribution.yml --limit 5 \
+  --json status,conclusion,databaseId,name,updatedAt,event,createdAt
+```
+
+Filter for runs with `event: release` started after the GoReleaser CI completion time. Apply the standard retry backoff for discovery (30s, 60s, 120s intervals) — the `release: published` event may lag the Release creation by 30-120 seconds.
+
+**E2E timeout**: 30 minutes (extended timeout — chain with deployment stage).
+
+**E2E assertions** (derived from `scripts/e2e-validate.sh`):
+
+| Assertion | What passes |
+|-----------|-------------|
+| `brew tap autom8y/tap` | Tap is reachable; formula exists in `autom8y/homebrew-tap` |
+| `brew install autom8y/tap/ari` (or `brew install ari`) | Formula installs without error on macOS arm64 and Linuxbrew |
+| `ari version` | Binary output matches the release tag version |
+| `ari init` | Exits 0 in a fresh temporary directory |
+| `ari sync --rite 10x-dev` | Core sync pipeline completes without error |
+| `.claude/` directory structure | Expected dirs/files created by init + sync |
+
+Monitor both macOS and Linux E2E jobs. Both must be green. If either fails, classify with the standard failure table (flaky_test / regression / infra_issue / timeout). E2E macOS failure on brew operations is often `infra_issue` (slow CI, brew rate limits); E2E Linux failure on Docker image build is often `infra_issue`.
+
+**Full binary release PASS verdict** requires all of:
+1. `release.yml` CI: green
+2. GitHub Release: exists, not draft, all expected assets present, `checksums.txt` present
+3. Homebrew tap: updated (or null when not configured)
+4. `e2e-distribution.yml`: both macOS and Linux jobs green
+
+Do not declare a binary release `green` until Stage 2 is terminal. Record Stage 2 in `chain_results` using the standard chain schema (chain_type: `trigger_chain`, depth 2, stage 1 = release.yml, stage 2 = e2e-distribution.yml).
+
+When `distribution_type: binary` is absent from the ledger entry (registry repos), skip binary verification entirely — no behavioral change.
+
 ### Failure Diagnosis
 
 Pull failed logs via `gh run view {id} --repo {repo} --log-failed`, then classify:
@@ -161,15 +246,7 @@ Pull failed logs via `gh run view {id} --repo {repo} --log-failed`, then classif
 | infra_issue | Docker pull failure, network timeout, runner unavailable | retry |
 | timeout | Run exceeded time limit | escalate |
 
-### Cross-Rite Routing Signals
-
-When diagnosing failures, note signals for other rites:
-- Security scanning failures -> reference **security** rite
-- Lint/format failures -> reference **hygiene** rite
-- Systematic test failures -> reference **review** rite
-- Dependency audit failures -> reference **debt-triage** rite
-
-Include these as recommendations in the report. User decides whether to switch rites.
+> See releaser-ref: Cross-Rite Routing Table
 
 ## Output Schema
 
@@ -196,6 +273,12 @@ repos:
       log_snippet: "{relevant log lines}"
       classification: flaky_test|regression|infra_issue|timeout
       recommendation: retry|fix_and_retry|escalate
+    binary_release:  # populated only when distribution_type: binary
+      github_release_exists: true|false
+      assets_present: true|false      # true only when ALL goreleaser_expected_assets are found
+      checksums_present: true|false
+      release_is_draft: true|false    # false = correct; true = GoReleaser misconfiguration
+      homebrew_tap_updated: true|false|null  # null when goreleaser_brew_tap not configured
     chain_results:
       - chain_id: "{chain_id}"
         chain_type: trigger_chain|dispatch_chain|deployment_chain
@@ -289,6 +372,9 @@ Ready for Pythia when:
 - **Premature chain satisfaction**: Never declare a chain resolved until its terminal stage has a conclusive status. Green CI is necessary but not sufficient when chains exist.
 - **Ignoring dispatch delays**: Cross-repo dispatches have propagation delay. Always apply the retry backoff protocol before classifying as `dispatch_not_received`.
 - **Flat monitoring of chained repos**: When `pipeline_expectations` contains chains for a repo, the monitoring protocol MUST extend beyond the initial CI run. Falling back to flat monitoring for a repo with known chains is a critical error.
+- **Binary green without E2E**: For `distribution_type: binary` repos, declaring `green` after `release.yml` CI passes is premature. The E2E chain (triggered by `release: published`) is a required verification stage — wait for both macOS and Linux E2E jobs to complete.
+- **Skipping asset count check**: GitHub Release existence alone is not sufficient. Verify all entries in `goreleaser_expected_assets` are present. A partial upload (GoReleaser interrupted) produces a Release with fewer than expected assets.
+- **Missing tap update retry**: The Homebrew tap commit may lag the Release creation by up to 90 seconds. Always retry once before marking `homebrew_tap_updated: false`.
 
 ## Skills Reference
 
