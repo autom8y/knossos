@@ -97,8 +97,11 @@ func SyncMena(sources []MenaSource, opts MenaProjectionOptions) (*MenaProjection
 		}
 
 		// In destructive mode, remove only stale files that are no longer in source.
+		// Guard: destDir may not exist for INDEX-only dromena (no companions).
 		if opts.Mode == MenaProjectionDestructive && sourceFileNames != nil {
-			removeStaleFiles(destDir, sourceFileNames)
+			if info, statErr := os.Stat(destDir); statErr == nil && info.IsDir() {
+				removeStaleFiles(destDir, sourceFileNames)
+			}
 		}
 
 		// Record what was projected
@@ -278,6 +281,9 @@ func cleanStaleMenaEntries(opts MenaProjectionOptions, result *MenaProjectionRes
 // are acceptable on shared/read-only directories and are silently ignored).
 // Callers should surface these errors as warnings, not abort the pipeline.
 func CleanEmptyDirs(root string) []error {
+	if _, err := os.Stat(root); err != nil {
+		return nil // Directory doesn't exist, nothing to clean
+	}
 	return cleanEmptyDirsRecursive(root)
 }
 
