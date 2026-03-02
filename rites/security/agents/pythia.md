@@ -11,6 +11,7 @@ skills:
   - orchestrator-templates
   - security-ref
   - cross-rite-handoff
+  - doc-security
 disallowedTools:
   - Bash
   - Write

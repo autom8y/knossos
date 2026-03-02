@@ -11,6 +11,7 @@ skills:
   - orchestrator-templates
   - intelligence-ref
   - cross-rite-handoff
+  - doc-intelligence
 disallowedTools:
   - Bash
   - Write

@@ -11,6 +11,7 @@ skills:
   - orchestrator-templates
   - strategy-ref
   - cross-rite-handoff
+  - doc-strategy
 disallowedTools:
   - Bash
   - Write

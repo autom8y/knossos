@@ -69,5 +69,4 @@ Staleness detection uses SHA-256 hashes. When a source hash doesn't match: mark 
 ## Related Skills
 
 - `doc-ecosystem` skill — Ecosystem templates (Gap Analysis, Context Design)
-- `documentation` skill — Core artifact templates (PRD, TDD, ADR)
 - `10x-workflow` skill — Agent coordination patterns

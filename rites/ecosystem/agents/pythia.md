@@ -10,6 +10,7 @@ maxTurns: 40
 skills:
   - orchestrator-templates
   - ecosystem-ref
+  - doc-ecosystem
 disallowedTools:
   - Bash
   - Write

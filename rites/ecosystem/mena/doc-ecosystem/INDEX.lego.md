@@ -76,5 +76,3 @@ This skill provides templates for ecosystem-level documentation: knossos/satelli
 ## Related Skills
 
 - [ecosystem-ref](../ecosystem-ref/INDEX.lego.md) - Sync pipeline quick reference
-- `documentation` skill — Core artifact templates (PRD, TDD, ADR)
-- `standards` skill — Code conventions and repository structure

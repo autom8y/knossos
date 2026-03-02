@@ -11,6 +11,7 @@ skills:
   - orchestrator-templates
   - rnd-ref
   - cross-rite-handoff
+  - doc-rnd
 disallowedTools:
   - Bash
   - Write

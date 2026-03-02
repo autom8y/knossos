@@ -10,6 +10,7 @@ maxTurns: 40
 skills:
   - orchestrator-templates
   - sre-catalog
+  - doc-sre
 disallowedTools:
   - Bash
   - Write
