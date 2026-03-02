@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/autom8y/knossos/internal/errors"
+	"github.com/autom8y/knossos/internal/fileutil"
 )
 
 const (
@@ -75,7 +76,7 @@ func (m *MetadataManager) Save(meta *WorktreeMetadata) error {
 	// Create .gitignore if not exists
 	gitignorePath := filepath.Join(m.worktreesDir, ".gitignore")
 	if _, err := os.Stat(gitignorePath); os.IsNotExist(err) {
-		if err := os.WriteFile(gitignorePath, []byte("*\n"), 0644); err != nil {
+		if err := fileutil.AtomicWriteFile(gitignorePath, []byte("*\n"), 0644); err != nil {
 			// Non-fatal, but log
 		}
 	}
@@ -87,7 +88,7 @@ func (m *MetadataManager) Save(meta *WorktreeMetadata) error {
 	}
 
 	path := m.metadataPath()
-	if err := os.WriteFile(path, data, 0644); err != nil {
+	if err := fileutil.AtomicWriteFile(path, data, 0644); err != nil {
 		return errors.Wrap(errors.CodeGeneralError, "failed to write metadata", err)
 	}
 
@@ -253,7 +254,7 @@ func SavePerWorktreeMeta(worktreePath string, wt Worktree, parentProject string)
 	}
 
 	path := filepath.Join(claudeDir, WorktreeMetaFileName)
-	if err := os.WriteFile(path, data, 0644); err != nil {
+	if err := fileutil.AtomicWriteFile(path, data, 0644); err != nil {
 		return errors.Wrap(errors.CodeGeneralError, "failed to write per-worktree metadata", err)
 	}
 

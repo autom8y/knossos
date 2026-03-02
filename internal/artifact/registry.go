@@ -10,6 +10,7 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"github.com/autom8y/knossos/internal/errors"
+	"github.com/autom8y/knossos/internal/fileutil"
 	"github.com/autom8y/knossos/internal/paths"
 )
 
@@ -170,7 +171,7 @@ func (r *Registry) SaveSessionRegistry(registry *SessionRegistry) error {
 		return errors.Wrap(errors.CodeGeneralError, "failed to marshal session registry", err)
 	}
 
-	return os.WriteFile(path, data, 0644)
+	return fileutil.AtomicWriteFile(path, data, 0644)
 }
 
 // Register adds an artifact to the session registry.
@@ -244,7 +245,7 @@ func (r *Registry) SaveProjectRegistry(registry *ProjectRegistry) error {
 		return errors.Wrap(errors.CodeGeneralError, "failed to marshal project registry", err)
 	}
 
-	return os.WriteFile(path, data, 0644)
+	return fileutil.AtomicWriteFile(path, data, 0644)
 }
 
 // GraduatedPath returns the .ledge/{category}/{filename} path for an artifact.

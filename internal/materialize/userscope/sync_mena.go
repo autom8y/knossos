@@ -2,6 +2,7 @@ package userscope
 
 import (
 	"io/fs"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -379,8 +380,11 @@ func syncUserMenaFile(
 		// Check if target exists (untracked)
 		if _, statErr := os.Stat(targetPath); statErr == nil {
 			if opts.Recover {
-				targetChecksum, _ := checksum.File(targetPath)
-				if targetChecksum == sourceChecksum {
+				targetChecksum, checksumErr := checksum.File(targetPath)
+				if checksumErr != nil {
+					log.Printf("Warning: checksum failed for %s: %v (treating as changed)", targetPath, checksumErr)
+				}
+				if checksumErr == nil && targetChecksum == sourceChecksum {
 					if !opts.DryRun {
 						manifest.Entries[manifestKey] = provenance.NewKnossosEntry(
 							provenance.ScopeUser, sourceRelPath, "user-sync", sourceChecksum,
@@ -402,7 +406,10 @@ func syncUserMenaFile(
 			}
 			// Not recovering - mark as user-created
 			if !opts.DryRun {
-				targetChecksum, _ := checksum.File(targetPath)
+				targetChecksum, checksumErr := checksum.File(targetPath)
+				if checksumErr != nil {
+					log.Printf("Warning: checksum failed for %s: %v (treating as changed)", targetPath, checksumErr)
+				}
 				manifest.Entries[manifestKey] = provenance.NewUserEntry(
 					provenance.ScopeUser, targetChecksum,
 				)
@@ -473,7 +480,10 @@ func syncUserMenaFile(
 		} else if entry.Checksum == sourceChecksum {
 			result.Changes.Unchanged = append(result.Changes.Unchanged, manifestKey)
 		} else {
-			targetChecksum, _ := checksum.File(targetPath)
+			targetChecksum, checksumErr := checksum.File(targetPath)
+			if checksumErr != nil {
+				log.Printf("Warning: checksum failed for %s: %v (treating as changed)", targetPath, checksumErr)
+			}
 			if targetChecksum == entry.Checksum {
 				// Target unchanged, update from source
 				if !opts.DryRun {

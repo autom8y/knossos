@@ -1,6 +1,7 @@
 package userscope
 
 import (
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -178,7 +179,10 @@ func recoverUserResource(
 			if sourcePath == "" {
 				// Not in knossos source - mark as user
 				if !opts.DryRun {
-					targetChecksum, _ := checksum.File(path)
+					targetChecksum, checksumErr := checksum.File(path)
+					if checksumErr != nil {
+						log.Printf("Warning: checksum failed for %s: %v (treating as changed)", path, checksumErr)
+					}
 					manifest.Entries[manifestKey] = provenance.NewUserEntry(
 						provenance.ScopeUser, targetChecksum,
 					)
@@ -190,7 +194,10 @@ func recoverUserResource(
 			if _, err := os.Stat(sourcePath); os.IsNotExist(err) {
 				// Not in knossos - mark as user
 				if !opts.DryRun {
-					targetChecksum, _ := checksum.File(path)
+					targetChecksum, checksumErr := checksum.File(path)
+					if checksumErr != nil {
+						log.Printf("Warning: checksum failed for %s: %v (treating as changed)", path, checksumErr)
+					}
 					manifest.Entries[manifestKey] = provenance.NewUserEntry(
 						provenance.ScopeUser, targetChecksum,
 					)
@@ -200,12 +207,18 @@ func recoverUserResource(
 		}
 
 		// Compare checksums
-		sourceChecksum, _ := checksum.File(sourcePath)
-		targetChecksum, _ := checksum.File(path)
+		sourceChecksum, srcErr := checksum.File(sourcePath)
+		if srcErr != nil {
+			log.Printf("Warning: checksum failed for %s: %v (treating as changed)", sourcePath, srcErr)
+		}
+		targetChecksum, tgtErr := checksum.File(path)
+		if tgtErr != nil {
+			log.Printf("Warning: checksum failed for %s: %v (treating as changed)", path, tgtErr)
+		}
 		sourceRelPath, _ := filepath.Rel(config.KnossosHome(), sourcePath)
 
 		if !opts.DryRun {
-			if sourceChecksum == targetChecksum {
+			if srcErr == nil && tgtErr == nil && sourceChecksum == targetChecksum {
 				manifest.Entries[manifestKey] = provenance.NewKnossosEntry(
 					provenance.ScopeUser, sourceRelPath, "user-sync", sourceChecksum,
 				)

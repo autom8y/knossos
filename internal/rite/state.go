@@ -9,6 +9,7 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"github.com/autom8y/knossos/internal/errors"
+	"github.com/autom8y/knossos/internal/fileutil"
 	"github.com/autom8y/knossos/internal/paths"
 )
 
@@ -90,7 +91,7 @@ func (m *StateManager) Save(state *InvocationState) error {
 		return errors.Wrap(errors.CodeGeneralError, "failed to marshal invocation state", err)
 	}
 
-	if err := os.WriteFile(path, data, 0644); err != nil {
+	if err := fileutil.AtomicWriteFile(path, data, 0644); err != nil {
 		return errors.Wrap(errors.CodePermissionDenied, "failed to write invocation state", err)
 	}
 

@@ -306,8 +306,11 @@ func (s *syncer) syncUserResource(
 			// Check if target exists (untracked)
 			if _, statErr := os.Stat(targetPath); statErr == nil {
 				if opts.Recover {
-					targetChecksum, _ := checksum.File(targetPath)
-					if targetChecksum == sourceChecksum {
+					targetChecksum, checksumErr := checksum.File(targetPath)
+					if checksumErr != nil {
+						log.Printf("Warning: checksum failed for %s: %v (treating as changed)", targetPath, checksumErr)
+					}
+					if checksumErr == nil && targetChecksum == sourceChecksum {
 						// Adopt as knossos-owned
 						if !opts.DryRun {
 							manifest.Entries[manifestKey] = provenance.NewKnossosEntry(
@@ -331,7 +334,10 @@ func (s *syncer) syncUserResource(
 				}
 				// Not recovering - mark as user-created
 				if !opts.DryRun {
-					targetChecksum, _ := checksum.File(targetPath)
+					targetChecksum, checksumErr := checksum.File(targetPath)
+					if checksumErr != nil {
+						log.Printf("Warning: checksum failed for %s: %v (treating as changed)", targetPath, checksumErr)
+					}
 					manifest.Entries[manifestKey] = provenance.NewUserEntry(
 						provenance.ScopeUser, targetChecksum,
 					)
@@ -397,7 +403,10 @@ func (s *syncer) syncUserResource(
 				result.Changes.Unchanged = append(result.Changes.Unchanged, manifestKey)
 			} else {
 				// Source changed - check if target diverged
-				targetChecksum, _ := checksum.File(targetPath)
+				targetChecksum, checksumErr := checksum.File(targetPath)
+				if checksumErr != nil {
+					log.Printf("Warning: checksum failed for %s: %v (treating as changed)", targetPath, checksumErr)
+				}
 				if targetChecksum == entry.Checksum {
 					// Target unchanged, update from source
 					if !opts.DryRun {

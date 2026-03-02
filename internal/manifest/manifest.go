@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/autom8y/knossos/internal/errors"
+	"github.com/autom8y/knossos/internal/fileutil"
 	"gopkg.in/yaml.v3"
 )
 
@@ -188,7 +189,7 @@ func (m *Manifest) Save(path string) error {
 		return errors.Wrap(errors.CodeGeneralError, "failed to encode manifest", err)
 	}
 
-	return os.WriteFile(path, data, 0644)
+	return fileutil.AtomicWriteFile(path, data, 0644)
 }
 
 // ToJSON converts manifest content to JSON bytes.
