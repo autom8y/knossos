@@ -60,7 +60,7 @@ agent_defaults:
 dromena:
   - thermia-switch
 
-legomena: []
+legomena: [thermia-ref]
 
 hooks:
   - agent-guard
