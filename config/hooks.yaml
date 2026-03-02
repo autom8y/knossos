@@ -88,6 +88,24 @@ hooks:
     description: "Tracks tool use count for cognitive budget warnings"
 
   # ===========================================================================
+  # WorktreeCreate Hooks (delegation hook: must create worktree and print path)
+  # ===========================================================================
+  - event: WorktreeCreate
+    command: "ari hook worktree-seed --output json"
+    timeout: 30
+    priority: 5
+    description: "Creates and seeds git worktrees with rite configuration on CC WorktreeCreate"
+
+  # ===========================================================================
+  # WorktreeRemove Hooks
+  # ===========================================================================
+  - event: WorktreeRemove
+    command: "ari hook worktree-remove --output json"
+    timeout: 10
+    priority: 5
+    description: "Removes git worktrees on CC WorktreeRemove"
+
+  # ===========================================================================
   # SubagentStart Hooks
   # ===========================================================================
   - event: SubagentStart
