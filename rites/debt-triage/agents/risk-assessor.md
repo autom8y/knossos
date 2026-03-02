@@ -24,8 +24,7 @@ maxTurns: 150
 skills:
   - debt-catalog
   - guidance/standards
-disallowedTools:
-  - Edit
+disallowedTools: []
 write-guard: true
 ---
 
@@ -151,7 +150,4 @@ If uncertain about blast radius or likelihood: assume worse case. Underestimatin
 
 ## Skills Reference
 
-- standards for risk scoring frameworks and prioritization matrices
-- documentation for executive summary templates
-- file-verification for artifact verification protocol
-- cross-rite for handoff patterns to other rites
+- cross-rite-handoff for handoff patterns to other rites

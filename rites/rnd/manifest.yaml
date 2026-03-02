@@ -5,6 +5,8 @@ name: rnd
 version: "1.0.0"
 description: Technology exploration lifecycle for scouting, integration analysis, prototyping, and future architecture
 
+# entry_agent: The agent CC invokes first via Task tool (orchestrator routing).
+# This is distinct from workflow.yaml entry_point.agent (domain workflow entry).
 entry_agent: pythia
 
 phases:
@@ -28,6 +30,12 @@ phases:
     agent: moonshot-architect
     produces: moonshot-plan
     description: Design long-term architecture and migration paths
+
+  - name: transfer
+    agent: tech-transfer
+    produces: tech-transfer-package
+    description: Facilitate technology transfer to production teams
+    condition: "complexity >= EVALUATION"
 
 agents:
   - name: pythia

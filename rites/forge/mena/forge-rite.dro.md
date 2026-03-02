@@ -22,8 +22,8 @@ Create a new rite with domain expertise extraction: $ARGUMENTS
 - `--complexity`: Optional. Default is MODULE.
   - MODULE: New rite with 3-5 agents (all phases including archaeology)
   - SYSTEM: Major rite redesign or cross-rite refactor (all phases)
-  - PATCH is not available for `/forge-rite` — archaeology requires MODULE or higher. If the user passes `--complexity=PATCH`, respond with:
-    > PATCH complexity is for single-agent modifications. Use `/new-rite <name> --complexity=PATCH` instead.
+  - AGENT is not available for `/forge-rite` — archaeology requires MODULE or higher. If the user passes `--complexity=AGENT`, respond with:
+    > AGENT complexity is for single-agent modifications. Use `/new-rite <name> --complexity=AGENT` instead.
 - `--interview`: Optional. Adds Pass 5 (tribal knowledge interview) where the domain-forensics agent conducts a structured interview with the user to extract jurisdiction boundaries, priorities, and unwritten rules.
 
 ### 2. Check Codebase Knowledge Freshness

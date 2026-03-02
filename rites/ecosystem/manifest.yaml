@@ -5,6 +5,8 @@ name: ecosystem
 version: "1.0.0"
 description: Ecosystem infrastructure lifecycle for sync pipeline/knossos changes (Analysis -> Design -> Implementation -> Documentation -> Validation)
 
+# entry_agent: The agent CC invokes first via Task tool (orchestrator routing).
+# This is distinct from workflow.yaml entry_point.agent (domain workflow entry).
 entry_agent: pythia
 
 phases:
@@ -54,7 +56,8 @@ agents:
   - name: compatibility-tester
     role: Validates ecosystem changes across satellite configurations
 
-dromena: []
+dromena:
+  - sync-debug
 
 legomena:
   - claude-md-architecture
@@ -82,7 +85,7 @@ complexity_levels:
 
 metadata:
   domain: ecosystem infrastructure
-  color: "#8B00FF"
+  color: purple
 
 mcp_servers:
   - name: go-semantic

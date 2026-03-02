@@ -1,10 +1,9 @@
 # Orchestrator configuration for hygiene
-# Used by generate-orchestrator.sh to produce pythia.md
 
 rite:
   name: hygiene
   domain: code quality
-  color: lime
+  color: green
 
 frontmatter:
   role: "Coordinates code hygiene initiatives"
@@ -39,10 +38,7 @@ handoff_criteria:
     - "Quality metrics improved"
     - "Hygiene signoff obtained"
 
-skills:
-  - "@code-quality for smell detection"
-  - "@refactoring for cleanup patterns"
-  - "@testing for regression prevention"
+skills: []
 
 antipatterns:
   - "Refactoring without tests (risk of regression)"

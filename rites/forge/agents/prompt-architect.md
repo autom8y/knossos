@@ -21,7 +21,7 @@ description: |
   </example>
 tools: Bash, Glob, Grep, Read, Write, Edit, TodoWrite, Skill
 model: opus
-color: cyan
+color: blue
 maxTurns: 150
 memory: "project"
 skills:
@@ -103,7 +103,7 @@ When a `HANDOFF-PROMPT-FUEL.md` exists (produced by domain-forensics during arch
 
 ### Detection
 
-Check `.claude/wip/ARCHAEOLOGY/HANDOFF-PROMPT-FUEL.md` at the start of Phase 1. If present, load the `prompt-fuel-reference` skill for detailed consumption guidance.
+Check `.sos/wip/ARCHAEOLOGY/HANDOFF-PROMPT-FUEL.md` at the start of Phase 1. If present, load the `prompt-fuel-reference` skill for detailed consumption guidance.
 
 ### Processing Workflow (per agent)
 

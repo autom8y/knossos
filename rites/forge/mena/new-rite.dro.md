@@ -1,7 +1,7 @@
 ---
 name: new-rite
 description: Create a new rite through The Forge workflow (direct creation)
-argument-hint: "<rite-name> [--complexity=PATCH|RITE|ECOSYSTEM]"
+argument-hint: "<rite-name> [--complexity=AGENT|MODULE|SYSTEM]"
 allowed-tools: Bash, Glob, Grep, Read, Write, Edit, Task, TodoWrite
 model: opus
 ---
@@ -19,10 +19,10 @@ Create a new rite: $ARGUMENTS
 ### 1. Parse Arguments
 
 - `rite-name`: Required. Name for the new rite
-- `--complexity`: Optional. Default is RITE.
-  - PATCH: Single agent modification (phases: design, prompting, validation)
-  - RITE: Full rite with 3-5 agents (all phases)
-  - ECOSYSTEM: Multi-rite initiative (all phases)
+- `--complexity`: Optional. Default is MODULE.
+  - AGENT: Single agent modification (phases: design, prompts, validation)
+  - MODULE: Full rite with 3-5 agents (all phases)
+  - SYSTEM: Multi-rite initiative (all phases)
 
 If the user passes `--deep` or `--interview`, respond with:
 > For archaeology-first rite creation with domain expertise extraction, use `/forge-rite <name>` instead.
@@ -72,10 +72,10 @@ When Agent Curator finishes, the rite is:
 /new-rite api-dev
 
 # Create a minimal agent modification
-/new-rite security-auditor --complexity=PATCH
+/new-rite security-auditor --complexity=AGENT
 
 # Create a multi-rite ecosystem initiative
-/new-rite observability-platform --complexity=ECOSYSTEM
+/new-rite observability-platform --complexity=SYSTEM
 ```
 
 ## See Also

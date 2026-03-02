@@ -1,12 +1,10 @@
 # Orchestrator configuration for ecosystem
-# Used by generate-orchestrator.sh to produce pythia.md
-# References workflow.yaml for phase/specialist data
 
 # Rite metadata
 rite:
   name: ecosystem
   domain: ecosystem infrastructure
-  color: "#8B00FF"
+  color: purple
 
 # Frontmatter customization
 frontmatter:
@@ -53,11 +51,7 @@ handoff_criteria:
     - "Sign-off criteria met"
 
 # Skills references for this rite
-skills:
-  - "@ecosystem-ref for sync pipeline/knossos patterns"
-  - "@documentation for schema conventions"
-  - "@10x-workflow for complexity assessment"
-  - "@standards for naming conventions"
+skills: []
 
 # Rite-specific anti-patterns
 antipatterns:

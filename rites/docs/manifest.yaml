@@ -5,6 +5,8 @@ name: docs
 version: "1.0.0"
 description: Documentation lifecycle from audit through review (Audit -> Structure -> Write -> Review)
 
+# entry_agent: The agent CC invokes first via Task tool (orchestrator routing).
+# This is distinct from workflow.yaml entry_point.agent (domain workflow entry).
 entry_agent: pythia
 
 phases:
@@ -47,6 +49,7 @@ agents:
 
 dromena:
   - docs-ref
+  - consolidate
 
 legomena:
   - doc-consolidation

@@ -27,7 +27,6 @@ skills:
   - doc-reviews
 disallowedTools:
   - Task
-  - Edit
 write-guard: true
 contract:
   must_not:
@@ -151,4 +150,3 @@ See `file-verification` skill for artifact verification protocol.
 ## Skills Reference
 
 - doc-reviews for audit report template and staleness-detection companion
-- standards for documentation conventions

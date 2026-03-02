@@ -1,10 +1,9 @@
 # Orchestrator configuration for forge
-# Used by generate-orchestrator.sh to produce pythia.md
 
 rite:
   name: forge
   domain: agent pantheon creation
-  color: silver
+  color: white
 
 frontmatter:
   role: "Coordinates agent pantheon creation"
@@ -49,10 +48,7 @@ handoff_criteria:
     - "Rite readiness confirmed"
     - "Production deployment approved"
 
-skills:
-  - "@agent-design for prompt engineering"
-  - "@workflow-design for orchestration"
-  - "@platform-integration for knossos patterns"
+skills: []
 
 antipatterns:
   - "Creating agents without workflow context (agents must fit rite lifecycle)"

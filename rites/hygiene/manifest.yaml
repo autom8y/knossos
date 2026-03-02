@@ -5,6 +5,8 @@ name: hygiene
 version: "1.0.0"
 description: Code quality lifecycle for smell detection, planning, and cleanup (Smell -> Plan -> Clean -> Audit)
 
+# entry_agent: The agent CC invokes first via Task tool (orchestrator routing).
+# This is distinct from workflow.yaml entry_point.agent (domain workflow entry).
 entry_agent: pythia
 
 phases:
@@ -65,4 +67,4 @@ complexity_levels:
 
 metadata:
   domain: code quality
-  color: lime
+  color: green
