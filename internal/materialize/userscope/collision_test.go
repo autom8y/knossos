@@ -1,6 +1,11 @@
 package userscope
 
-import "testing"
+import (
+	"testing"
+	"time"
+
+	"github.com/autom8y/knossos/internal/provenance"
+)
 
 func TestCollisionChecker_ExactMatch(t *testing.T) {
 	c := &CollisionChecker{
@@ -107,5 +112,54 @@ func TestCollisionChecker_EmptyEntries(t *testing.T) {
 	collision, _ := c.CheckCollision("agents/anything.md")
 	if collision {
 		t.Error("Expected no collision with empty rite entries")
+	}
+}
+
+// TestCollisionChecker_MissingManifest_ReportsIneffective verifies that when
+// no PROVENANCE_MANIFEST.yaml exists (e.g. a fresh worktree), IsEffective()
+// returns false so callers can fail-closed and skip user-scope writes.
+func TestCollisionChecker_MissingManifest_ReportsIneffective(t *testing.T) {
+	tmpDir := t.TempDir()
+	// No manifest file written — .claude/ is empty.
+	c := NewCollisionChecker(tmpDir)
+
+	if c.IsEffective() {
+		t.Error("IsEffective() should return false when no provenance manifest exists")
+	}
+	// CheckCollision should return false (no collision) because riteEntries is empty,
+	// but the caller should not rely on this path when checker is ineffective.
+	collision, _ := c.CheckCollision("agents/anything.md")
+	if collision {
+		t.Error("CheckCollision should return false when manifest is missing (empty entries)")
+	}
+}
+
+// TestCollisionChecker_EmptyEntries_ReportsIneffective verifies that an empty
+// manifest (no rite-scope entries) still reports IsEffective()=true — the
+// manifest loaded successfully, there are simply no rite-owned resources.
+// This is distinct from a missing manifest.
+func TestCollisionChecker_EmptyEntries_ReportsIneffective(t *testing.T) {
+	// Write a valid PROVENANCE_MANIFEST.yaml with no entries using provenance.Save().
+	tmpDir := t.TempDir()
+	manifest := &provenance.ProvenanceManifest{
+		SchemaVersion: provenance.CurrentSchemaVersion,
+		LastSync:      time.Now().UTC(),
+		Entries:       make(map[string]*provenance.ProvenanceEntry),
+	}
+	manifestPath := provenance.ManifestPath(tmpDir)
+	if err := provenance.Save(manifestPath, manifest); err != nil {
+		t.Fatalf("Failed to write manifest: %v", err)
+	}
+
+	c := NewCollisionChecker(tmpDir)
+
+	// Manifest loaded successfully (even if empty), so checker IS effective.
+	if !c.IsEffective() {
+		t.Error("IsEffective() should return true when a valid (but empty) manifest exists")
+	}
+	// No rite entries means no collisions.
+	collision, _ := c.CheckCollision("agents/anything.md")
+	if collision {
+		t.Error("Expected no collision when manifest has no rite-scope entries")
 	}
 }

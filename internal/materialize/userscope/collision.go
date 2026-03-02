@@ -24,18 +24,27 @@ func NewCollisionChecker(claudeDir string) *CollisionChecker {
 }
 
 func (c *CollisionChecker) loadRiteManifest(claudeDir string) {
-	c.manifestLoaded = true
 	c.riteEntries = make(map[string]bool)
 	manifestPath := provenance.ManifestPath(claudeDir)
 	manifest, err := provenance.Load(manifestPath)
 	if err != nil {
+		// manifestLoaded stays false: no manifest file means checker is not effective.
 		return
 	}
+	c.manifestLoaded = true
 	for key, entry := range manifest.Entries {
 		if entry.Scope == provenance.ScopeRite && entry.Owner == provenance.OwnerKnossos {
 			c.riteEntries[key] = true
 		}
 	}
+}
+
+// IsEffective reports whether the collision checker successfully loaded a
+// provenance manifest. When false, the manifest file was absent or unreadable,
+// so collision results are unreliable. Callers should treat an ineffective
+// checker as fail-closed: assume all resources would collide (skip writes).
+func (c *CollisionChecker) IsEffective() bool {
+	return c.manifestLoaded
 }
 
 // CheckCollision checks if a manifest key collides with a rite entry.

@@ -2,6 +2,7 @@ package userscope
 
 import (
 	"io/fs"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -69,9 +70,17 @@ func (s *syncer) syncUserScope(opts SyncOptions) (*UserScopeResult, error) {
 		wipeKnossosOwnedMenaEntries(knossosHome, userClaudeDir, manifest, opts.DryRun)
 	}
 
-	// Initialize collision checker with project .claude/ directory
+	// Initialize collision checker with project .claude/ directory.
+	// When the checker is not effective (missing provenance manifest — e.g. a fresh
+	// worktree), we use a sentinel that reports every resource as a collision.
+	// This is the fail-closed posture: no user-scope writes when we cannot determine
+	// what the rite owns, preventing cross-project contamination.
 	projectClaudeDir := s.resolver.ClaudeDir()
 	collisionChecker := NewCollisionChecker(projectClaudeDir)
+	if !collisionChecker.IsEffective() {
+		log.Printf("userscope: collision checker not effective (no provenance manifest at %s); skipping user-scope writes", projectClaudeDir)
+		return result, nil
+	}
 
 	// Determine which resource types to sync
 	resourcesToSync := []SyncResource{}
