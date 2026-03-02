@@ -25,7 +25,7 @@ func (m *Materializer) materializeMena(manifest *RiteManifest, claudeDir string,
 	var sources []MenaSource
 
 	// 1. Platform-level mena (lowest priority, can be overridden by rite-specific)
-	// Resolution order: project-level mena/ → XDG data dir → KnossosHome → embedded fallback.
+	// Resolution order: project-level mena/ → KnossosHome → XDG data dir → embedded fallback.
 	// Platform mena IS the product — operations, guidance, session skills ship to all users.
 	if menaDir := m.getMenaDir(); menaDir != "" {
 		sources = append(sources, MenaSource{Path: menaDir})
@@ -116,7 +116,7 @@ func (m *Materializer) materializeMena(manifest *RiteManifest, claudeDir string,
 }
 
 // getMenaDir returns the mena directory path.
-// Resolution order: project-level → XDG data dir → KnossosHome.
+// Resolution order: project-level → KnossosHome → XDG data dir.
 // Returns "" if none found (caller should try embedded fallback).
 func (m *Materializer) getMenaDir() string {
 	// 1. Check for project-level mena first (.knossos/mena/ satellite overrides)
@@ -125,18 +125,18 @@ func (m *Materializer) getMenaDir() string {
 		return projectMena
 	}
 
-	// 2. Check XDG data dir (installed user case)
-	if xdgMena := xdgMenaPath(); xdgMena != "" {
-		if _, err := os.Stat(xdgMena); err == nil {
-			return xdgMena
-		}
-	}
-
-	// 3. Fall back to Knossos platform mena (developer case)
+	// 2. Fall back to Knossos platform mena (developer case)
 	if m.sourceResolver.KnossosHome() != "" {
 		knossosMena := filepath.Join(m.sourceResolver.KnossosHome(), "mena")
 		if _, err := os.Stat(knossosMena); err == nil {
 			return knossosMena
+		}
+	}
+
+	// 3. Check XDG data dir (installed user case)
+	if xdgMena := xdgMenaPath(); xdgMena != "" {
+		if _, err := os.Stat(xdgMena); err == nil {
+			return xdgMena
 		}
 	}
 
