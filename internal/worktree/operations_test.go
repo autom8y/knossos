@@ -931,16 +931,21 @@ func TestSetupWorktreeEcosystemSkipsSymlinksWhenSourceMissing(t *testing.T) {
 		t.Fatalf("Failed to create worktree: %v", err)
 	}
 
-	// Verify .knossos/ symlink was NOT created
-	knossosLink := filepath.Join(wt.Path, ".knossos")
-	if _, err := os.Lstat(knossosLink); !os.IsNotExist(err) {
-		t.Error(".knossos/ should not exist when source is missing")
+	// Verify .knossos/ is NOT a symlink (ensureProjectDirs creates it as a real
+	// directory, but the symlink to main should not be created when source is missing)
+	knossosPath := filepath.Join(wt.Path, ".knossos")
+	if fi, err := os.Lstat(knossosPath); err == nil {
+		if fi.Mode()&os.ModeSymlink != 0 {
+			t.Error(".knossos/ should not be a symlink when source is missing")
+		}
 	}
 
 	// Verify .know/ symlink was NOT created
 	knowLink := filepath.Join(wt.Path, ".know")
-	if _, err := os.Lstat(knowLink); !os.IsNotExist(err) {
-		t.Error(".know/ should not exist when source is missing")
+	if fi, err := os.Lstat(knowLink); err == nil {
+		if fi.Mode()&os.ModeSymlink != 0 {
+			t.Error(".know/ should not be a symlink when source is missing")
+		}
 	}
 
 	// Verify .ledge/ subdirectories still exist

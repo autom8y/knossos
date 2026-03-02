@@ -678,10 +678,13 @@ func (m *Manager) setupWorktreeEcosystem(wtPath, riteName string) {
 	// Materialization now handles everything including ACTIVE_RITE file
 	// No separate switch operation needed
 
-	// Symlink .knossos/ from main root (shared framework config)
+	// Symlink .knossos/ from main root (shared framework config).
+	// ensureProjectDirs() in mat.Sync() may have created .knossos/ as an empty
+	// directory — remove it first so the symlink to the main root succeeds.
 	knossosSource := filepath.Join(m.rootDir, ".knossos")
 	if _, err := os.Stat(knossosSource); err == nil {
 		knossosDest := filepath.Join(wtPath, ".knossos")
+		os.RemoveAll(knossosDest) // remove empty dir from ensureProjectDirs
 		os.Symlink(knossosSource, knossosDest) // best-effort
 	}
 
@@ -689,6 +692,7 @@ func (m *Manager) setupWorktreeEcosystem(wtPath, riteName string) {
 	knowSource := filepath.Join(m.rootDir, ".know")
 	if _, err := os.Stat(knowSource); err == nil {
 		knowDest := filepath.Join(wtPath, ".know")
+		os.RemoveAll(knowDest) // remove if exists
 		os.Symlink(knowSource, knowDest) // best-effort
 	}
 
