@@ -244,15 +244,15 @@ func (m *Materializer) MaterializeMinimal(opts Options) (*Result, error) {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to create .claude directory", err)
 	}
 
-	// Provenance: load previous manifest and detect divergence
+	// Provenance: load previous manifest and detect divergence.
+	// LoadOrBootstrap returns an empty manifest only on file-not-found; all other errors
+	// (parse failure, schema validation) propagate and abort the pipeline. A corrupted
+	// provenance manifest must be fixed or removed manually -- silent bootstrapping would
+	// mask data corruption and defeat the purpose of the manifest.
 	manifestPath := provenance.ManifestPath(claudeDir)
 	prevManifest, err := provenance.LoadOrBootstrap(manifestPath)
 	if err != nil {
-		log.Printf("Warning: failed to load provenance manifest, starting fresh: %v", err)
-		prevManifest = &provenance.ProvenanceManifest{
-			SchemaVersion: provenance.CurrentSchemaVersion,
-			Entries:       make(map[string]*provenance.ProvenanceEntry),
-		}
+		return nil, errors.Wrap(errors.CodeGeneralError, "failed to load provenance manifest", err)
 	}
 	divergenceReport, err := provenance.DetectDivergence(prevManifest, nil, claudeDir)
 	if err != nil {
@@ -363,15 +363,15 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to create .claude directory", err)
 	}
 
-	// Provenance: load previous manifest and detect divergence
+	// Provenance: load previous manifest and detect divergence.
+	// LoadOrBootstrap returns an empty manifest only on file-not-found; all other errors
+	// (parse failure, schema validation) propagate and abort the pipeline. A corrupted
+	// provenance manifest must be fixed or removed manually -- silent bootstrapping would
+	// mask data corruption and defeat the purpose of the manifest.
 	manifestPath := provenance.ManifestPath(claudeDir)
 	prevManifest, err := provenance.LoadOrBootstrap(manifestPath)
 	if err != nil {
-		log.Printf("Warning: failed to load provenance manifest, starting fresh: %v", err)
-		prevManifest = &provenance.ProvenanceManifest{
-			SchemaVersion: provenance.CurrentSchemaVersion,
-			Entries:       make(map[string]*provenance.ProvenanceEntry),
-		}
+		return nil, errors.Wrap(errors.CodeGeneralError, "failed to load provenance manifest", err)
 	}
 	divergenceReport, err := provenance.DetectDivergence(prevManifest, nil, claudeDir)
 	if err != nil {
@@ -537,6 +537,23 @@ func (m *Materializer) Sync(opts SyncOptions) (*SyncResult, error) {
 			}
 		} else {
 			result.RiteResult = riteResult
+		}
+	}
+
+	// Phase 1.5: Org scope
+	if opts.Scope == ScopeAll || opts.Scope == ScopeOrg {
+		orgResult, err := m.syncOrgScope(opts)
+		if err != nil {
+			if opts.Scope == ScopeOrg {
+				return nil, err
+			}
+			// scope=all: log and skip, don't block other results
+			result.OrgResult = &OrgScopeResult{
+				Status: "error",
+				Error:  err.Error(),
+			}
+		} else {
+			result.OrgResult = orgResult
 		}
 	}
 
@@ -889,12 +906,14 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claud
 			return fmt.Errorf("archetype render failed for %s: %w", agent.Name, err)
 		}
 
-		// Run through the same transform pipeline as source-copied agents
-		if transformed, tErr := transformAgentContent(content, &TransformContext{AgentName: agent.Name, WriteGuardDefaults: writeGuardDefaults, AgentDefaults: manifest.AgentDefaults, SkillPolicies: skillPolicies}); tErr == nil {
-			content = transformed
-		} else {
-			log.Printf("Warning: agent transform failed for archetype agent %s: %v", agent.Name, tErr)
+		// Run through the same transform pipeline as source-copied agents.
+		// Transform failure is an error, not a warning: knossos-only frontmatter fields
+		// (type, upstream, downstream, contract) must never reach CC-visible agent files.
+		transformed, tErr := transformAgentContent(content, &TransformContext{AgentName: agent.Name, WriteGuardDefaults: writeGuardDefaults, AgentDefaults: manifest.AgentDefaults, SkillPolicies: skillPolicies})
+		if tErr != nil {
+			return fmt.Errorf("agent transform failed for archetype agent %s: %w", agent.Name, tErr)
 		}
+		content = transformed
 
 		destPath := filepath.Join(agentsDir, agent.Name+".md")
 		written, err := writeIfChanged(destPath, content, 0644)
@@ -939,13 +958,15 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claud
 			if err != nil {
 				return err
 			}
-			// Project agent source into CC-consumable form (merge defaults, strip knossos metadata, inject name, resolve hooks)
+			// Project agent source into CC-consumable form (merge defaults, strip knossos metadata, inject name, resolve hooks).
+			// Transform failure is an error, not a warning: knossos-only frontmatter fields
+			// (type, upstream, downstream, contract) must never reach CC-visible agent files.
 			agentName := strings.TrimSuffix(filepath.Base(path), ".md")
-			if transformed, tErr := transformAgentContent(content, &TransformContext{AgentName: agentName, WriteGuardDefaults: writeGuardDefaults, AgentDefaults: manifest.AgentDefaults, SkillPolicies: skillPolicies}); tErr == nil {
-				content = transformed
-			} else {
-				log.Printf("Warning: agent transform failed for %s: %v", agentName, tErr)
+			transformed, tErr := transformAgentContent(content, &TransformContext{AgentName: agentName, WriteGuardDefaults: writeGuardDefaults, AgentDefaults: manifest.AgentDefaults, SkillPolicies: skillPolicies})
+			if tErr != nil {
+				return fmt.Errorf("agent transform failed for %s: %w", agentName, tErr)
 			}
+			content = transformed
 			destPath := filepath.Join(agentsDir, path)
 			if err := os.MkdirAll(filepath.Dir(destPath), 0755); err != nil {
 				return err
@@ -991,13 +1012,15 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claud
 				return err
 			}
 
-			// Project agent source into CC-consumable form (merge defaults, strip knossos metadata, inject name, resolve hooks)
+			// Project agent source into CC-consumable form (merge defaults, strip knossos metadata, inject name, resolve hooks).
+			// Transform failure is an error, not a warning: knossos-only frontmatter fields
+			// (type, upstream, downstream, contract) must never reach CC-visible agent files.
 			agentName := strings.TrimSuffix(filepath.Base(path), ".md")
-			if transformed, tErr := transformAgentContent(content, &TransformContext{AgentName: agentName, WriteGuardDefaults: writeGuardDefaults, AgentDefaults: manifest.AgentDefaults, SkillPolicies: skillPolicies}); tErr == nil {
-				content = transformed
-			} else {
-				log.Printf("Warning: agent transform failed for %s: %v", agentName, tErr)
+			transformed, tErr := transformAgentContent(content, &TransformContext{AgentName: agentName, WriteGuardDefaults: writeGuardDefaults, AgentDefaults: manifest.AgentDefaults, SkillPolicies: skillPolicies})
+			if tErr != nil {
+				return fmt.Errorf("agent transform failed for %s: %w", agentName, tErr)
 			}
+			content = transformed
 
 			// Compute relative path
 			relPath, err := filepath.Rel(sourceAgentsDir, path)

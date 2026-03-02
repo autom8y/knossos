@@ -13,6 +13,8 @@ const (
 	SourceUser SourceType = "user"
 	// SourceKnossos represents rites from the Knossos platform ($KNOSSOS_HOME/rites).
 	SourceKnossos SourceType = "knossos"
+	// SourceOrg represents rites from an organization-level directory.
+	SourceOrg SourceType = "org"
 	// SourceExplicit represents an explicitly specified path via --source flag.
 	SourceExplicit SourceType = "explicit"
 	// SourceEmbedded represents rites compiled into the binary via //go:embed.

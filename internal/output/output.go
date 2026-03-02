@@ -577,6 +577,7 @@ type SyncResultOutput struct {
 	Status string          `json:"status"`
 	DryRun bool            `json:"dry_run,omitempty"`
 	Rite   *SyncRiteResult `json:"rite,omitempty"`
+	Org    *SyncOrgResult  `json:"org,omitempty"`
 	User   *SyncUserResult `json:"user,omitempty"`
 	Budget interface{}     `json:"budget,omitempty"`
 }
@@ -593,6 +594,16 @@ type SyncRiteResult struct {
 	LegacyBackup   string   `json:"legacy_backup,omitempty"`
 	SoftMode       bool     `json:"soft_mode,omitempty"`
 	DeferredStages []string `json:"deferred_stages,omitempty"`
+}
+
+// SyncOrgResult represents org scope sync result.
+type SyncOrgResult struct {
+	Status  string `json:"status"`
+	Error   string `json:"error,omitempty"`
+	OrgName string `json:"org,omitempty"`
+	Source  string `json:"source,omitempty"`
+	Agents  int    `json:"agents,omitempty"`
+	Mena    int    `json:"mena,omitempty"`
 }
 
 // SyncUserResult represents user scope sync result.
@@ -625,6 +636,20 @@ func (s SyncResultOutput) Text() string {
 		}
 		if s.Rite.SoftMode {
 			b.WriteString(fmt.Sprintf("  Soft mode: deferred %s\n", strings.Join(s.Rite.DeferredStages, ", ")))
+		}
+	}
+
+	if s.Org != nil {
+		b.WriteString(fmt.Sprintf("  Org: %s", s.Org.Status))
+		if s.Org.OrgName != "" {
+			b.WriteString(fmt.Sprintf(" (%s)", s.Org.OrgName))
+		}
+		if s.Org.Agents > 0 || s.Org.Mena > 0 {
+			b.WriteString(fmt.Sprintf(" [agents:%d, mena:%d]", s.Org.Agents, s.Org.Mena))
+		}
+		b.WriteString("\n")
+		if s.Org.Error != "" {
+			b.WriteString(fmt.Sprintf("  Error: %s\n", s.Org.Error))
 		}
 	}
 

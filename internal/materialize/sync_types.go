@@ -11,13 +11,14 @@ type SyncScope string
 const (
 	ScopeAll  SyncScope = "all"
 	ScopeRite SyncScope = "rite"
+	ScopeOrg  SyncScope = "org"
 	ScopeUser SyncScope = "user"
 )
 
 // IsValid returns true if the scope is a recognized value.
 func (s SyncScope) IsValid() bool {
 	switch s {
-	case ScopeAll, ScopeRite, ScopeUser:
+	case ScopeAll, ScopeRite, ScopeOrg, ScopeUser:
 		return true
 	default:
 		return false
@@ -42,6 +43,7 @@ type SyncOptions struct {
 	RiteName          string
 	Source            string
 	Resource          SyncResource
+	OrgName           string // Org name for org-scope sync (empty = use config.ActiveOrg())
 	DryRun            bool
 	Recover           bool
 	OverwriteDiverged bool
@@ -52,7 +54,18 @@ type SyncOptions struct {
 // SyncResult contains unified outcome.
 type SyncResult struct {
 	RiteResult *RiteScopeResult `json:"rite,omitempty"`
+	OrgResult  *OrgScopeResult  `json:"org,omitempty"`
 	UserResult *UserScopeResult `json:"user,omitempty"`
+}
+
+// OrgScopeResult wraps org scope sync outcome.
+type OrgScopeResult struct {
+	Status  string `json:"status"`
+	Error   string `json:"error,omitempty"`
+	OrgName string `json:"org_name,omitempty"`
+	Source  string `json:"source,omitempty"`
+	Agents  int    `json:"agents,omitempty"`
+	Mena    int    `json:"mena,omitempty"`
 }
 
 // RiteScopeResult wraps rite scope outcome.

@@ -34,6 +34,7 @@ func NewSyncCmd(outputFlag *string, verboseFlag *bool, projectDir *string) *cobr
 		riteName          string
 		source            string
 		resource          string
+		orgName           string
 		dryRun            bool
 		recover_          bool
 		overwriteDiverged bool
@@ -47,13 +48,17 @@ func NewSyncCmd(outputFlag *string, verboseFlag *bool, projectDir *string) *cobr
 		Short: "Synchronize rite and user resources",
 		Long: `Sync generates and updates Claude Code configuration.
 
-By default, syncs both rite scope (project .claude/) and user scope (~/.claude/).
+By default, syncs rite scope (project .claude/), org scope, and user scope (~/.claude/).
 Use --scope to limit to a specific scope.
 
 Rite Scope:
   Generates .claude/ from the active rite (agents, mena, hooks, rules, CLAUDE.md).
   Requires a project context with ACTIVE_RITE (or --rite flag).
-  Source resolution: project > user > knossos > embedded.
+  Source resolution: project > user > org > knossos > embedded.
+
+Org Scope:
+  Syncs org-level agents and mena to ~/.claude/.
+  Requires an active org (KNOSSOS_ORG env var, ari org set, or --org flag).
 
 User Scope:
   Syncs user-level resources from $KNOSSOS_HOME to ~/.claude/.
@@ -64,6 +69,8 @@ Examples:
   ari sync                              # Sync everything (default)
   ari sync --scope=rite                 # Rite only
   ari sync --scope=user                 # User only (works outside projects)
+  ari sync --scope=org                  # Org only
+  ari sync --org=autom8y                # Sync with specific org
   ari sync --rite=ecosystem             # Specific rite
   ari sync --resource=agents            # Filter to just agents
   ari sync --dry-run                    # Preview
@@ -79,7 +86,7 @@ Examples:
 				syncScope = materialize.ScopeAll
 			}
 			if !syncScope.IsValid() {
-				return fmt.Errorf("invalid --scope value: %q (must be rite, user, or all)", scope)
+				return fmt.Errorf("invalid --scope value: %q (must be rite, org, user, or all)", scope)
 			}
 
 			// Validate resource
@@ -94,6 +101,7 @@ Examples:
 				RiteName:          riteName,
 				Source:            source,
 				Resource:          syncResource,
+				OrgName:           orgName,
 				DryRun:            dryRun,
 				Recover:           recover_,
 				OverwriteDiverged: overwriteDiverged,
@@ -106,9 +114,10 @@ Examples:
 	}
 
 	// Flags per D14
-	cmd.Flags().StringVar(&scope, "scope", "", "Sync scope: rite, user, or all (default: all)")
+	cmd.Flags().StringVar(&scope, "scope", "", "Sync scope: rite, org, user, or all (default: all)")
 	cmd.Flags().StringVar(&riteName, "rite", "", "Rite name (defaults to ACTIVE_RITE)")
 	cmd.Flags().StringVar(&source, "source", "", "Rite source: path or 'knossos' alias")
+	cmd.Flags().StringVar(&orgName, "org", "", "Organization name (defaults to active org)")
 	cmd.Flags().StringVar(&resource, "resource", "", "Filter to resource type: agents, mena, or hooks")
 	cmd.Flags().BoolVar(&dryRun, "dry-run", false, "Preview changes without applying")
 	cmd.Flags().BoolVar(&recover_, "recover", false, "Adopt existing untracked files into manifest")
@@ -211,6 +220,17 @@ func formatSyncResult(result *materialize.SyncResult, opts materialize.SyncOptio
 			LegacyBackup:    result.RiteResult.LegacyBackupPath,
 			SoftMode:        result.RiteResult.SoftMode,
 			DeferredStages:  result.RiteResult.DeferredStages,
+		}
+	}
+
+	if result.OrgResult != nil {
+		out.Org = &output.SyncOrgResult{
+			Status:  result.OrgResult.Status,
+			Error:   result.OrgResult.Error,
+			OrgName: result.OrgResult.OrgName,
+			Source:  result.OrgResult.Source,
+			Agents:  result.OrgResult.Agents,
+			Mena:    result.OrgResult.Mena,
 		}
 	}
 

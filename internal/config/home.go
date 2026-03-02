@@ -4,6 +4,7 @@ package config
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 )
 
@@ -46,6 +47,30 @@ func XDGDataDir() string {
 	}
 	// Linux/default
 	return filepath.Join(homeDir, ".local", "share", "knossos")
+}
+
+// ActiveOrg returns the currently active organization name.
+// Resolution: $KNOSSOS_ORG env var, then $XDG_CONFIG_HOME/knossos/active-org file.
+// Returns empty string if no org is configured.
+func ActiveOrg() string {
+	if org := os.Getenv("KNOSSOS_ORG"); org != "" {
+		return org
+	}
+
+	// Inline XDG config path resolution to avoid circular import with paths package.
+	var configDir string
+	if xdg := os.Getenv("XDG_CONFIG_HOME"); xdg != "" {
+		configDir = filepath.Join(xdg, "knossos")
+	} else {
+		homeDir, _ := os.UserHomeDir()
+		configDir = filepath.Join(homeDir, ".config", "knossos")
+	}
+
+	data, err := os.ReadFile(filepath.Join(configDir, "active-org"))
+	if err != nil {
+		return ""
+	}
+	return strings.TrimSpace(string(data))
 }
 
 // ResetKnossosHome resets the cached home directory (for testing only).

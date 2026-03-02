@@ -5,6 +5,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 
 	"github.com/autom8y/knossos/internal/config"
@@ -17,6 +18,7 @@ type SourceResolver struct {
 	projectRoot     string
 	projectRitesDir string
 	userRitesDir    string
+	orgRitesDir     string // Org-level rites directory (between user and knossos)
 	knossosHome     string
 	EmbeddedFS      fs.FS // Embedded rites filesystem (compiled-in fallback)
 
@@ -31,6 +33,7 @@ func NewSourceResolver(projectRoot string) *SourceResolver {
 		projectRoot:     projectRoot,
 		projectRitesDir: filepath.Join(projectRoot, ".knossos", "rites"),
 		userRitesDir:    paths.UserRitesDir(),
+		orgRitesDir:     paths.OrgRitesDir(config.ActiveOrg()),
 		knossosHome:     config.KnossosHome(),
 		resolved:        make(map[string]*ResolvedRite),
 	}
@@ -54,15 +57,18 @@ func (r *SourceResolver) WithEmbeddedFS(fsys fs.FS) *SourceResolver {
 //  1. ExplicitSource (if --source flag provided)
 //  2. Project satellite rites (.knossos/rites/{rite}/)
 //  3. User rites (~/.local/share/knossos/rites/{rite}/)
-//  4. Knossos platform ($KNOSSOS_HOME/rites/{rite}/)
-//  5. Embedded rites (compiled into binary)
+//  4. Org rites ($XDG_DATA_HOME/knossos/orgs/{org}/rites/{rite}/)
+//  5. Knossos platform ($KNOSSOS_HOME/rites/{rite}/)
+//  6. Embedded rites (compiled into binary)
 //
 // Returns error if rite is not found in any source.
 func (r *SourceResolver) ResolveRite(riteName string, explicitSource string) (*ResolvedRite, error) {
-	// Check cache first (unless explicit source overrides)
+	// Check cache first (unless explicit source overrides).
+	// Cache key includes orgRitesDir so org switches invalidate stale entries.
+	cacheKey := riteName + "\x00" + r.orgRitesDir
 	if explicitSource == "" {
 		r.mu.RLock()
-		if cached, ok := r.resolved[riteName]; ok {
+		if cached, ok := r.resolved[cacheKey]; ok {
 			r.mu.RUnlock()
 			return cached, nil
 		}
@@ -118,7 +124,21 @@ func (r *SourceResolver) ResolveRite(riteName string, explicitSource string) (*R
 		}
 	}
 
-	// 4. Knossos platform
+	// 4. Org rites
+	if result == nil && r.orgRitesDir != "" {
+		source := RiteSource{
+			Type:        SourceOrg,
+			Path:        r.orgRitesDir,
+			Description: "org-level rites",
+		}
+		if res, err := r.checkSource(riteName, source); err == nil {
+			result = res
+		} else {
+			checkedPaths = append(checkedPaths, source.Path)
+		}
+	}
+
+	// 5. Knossos platform
 	if result == nil && r.knossosHome != "" {
 		source := RiteSource{
 			Type:        SourceKnossos,
@@ -132,7 +152,7 @@ func (r *SourceResolver) ResolveRite(riteName string, explicitSource string) (*R
 		}
 	}
 
-	// 5. Embedded rites (compiled-in fallback)
+	// 6. Embedded rites (compiled-in fallback)
 	if result == nil && r.EmbeddedFS != nil {
 		if res, err := r.checkEmbeddedSource(riteName); err == nil {
 			result = res
@@ -153,7 +173,7 @@ func (r *SourceResolver) ResolveRite(riteName string, explicitSource string) (*R
 
 	// Cache result
 	r.mu.Lock()
-	r.resolved[riteName] = result
+	r.resolved[cacheKey] = result
 	r.mu.Unlock()
 
 	return result, nil
@@ -163,6 +183,8 @@ func (r *SourceResolver) ResolveRite(riteName string, explicitSource string) (*R
 //
 // Supports:
 //   - "knossos" or "knossos:" -> KNOSSOS_HOME
+//   - "org" -> active org's rites directory
+//   - "org:{name}" -> named org's rites directory
 //   - "/absolute/path" -> explicit path
 //   - "~/relative/path" -> expanded relative path
 func (r *SourceResolver) parseExplicitSource(source string) (RiteSource, error) {
@@ -177,6 +199,24 @@ func (r *SourceResolver) parseExplicitSource(source string) (RiteSource, error) 
 			Type:        SourceKnossos,
 			Path:        filepath.Join(home, "rites"),
 			Description: fmt.Sprintf("Knossos platform at %s", home),
+		}, nil
+	}
+
+	// Handle "org" and "org:{name}" aliases
+	if source == "org" || strings.HasPrefix(source, "org:") {
+		orgName := config.ActiveOrg()
+		if strings.HasPrefix(source, "org:") {
+			orgName = source[4:]
+		}
+		if orgName == "" {
+			return RiteSource{}, errors.New(errors.CodeGeneralError,
+				"No active org. Set KNOSSOS_ORG environment variable, run ari org set, or specify org:name.")
+		}
+		orgDir := paths.OrgRitesDir(orgName)
+		return RiteSource{
+			Type:        SourceOrg,
+			Path:        orgDir,
+			Description: fmt.Sprintf("org '%s' rites", orgName),
 		}, nil
 	}
 
@@ -246,6 +286,8 @@ func (r *SourceResolver) checkSource(riteName string, source RiteSource) (*Resol
 		}
 	case SourceUser:
 		templatesDir = "" // User rites don't have templates
+	case SourceOrg:
+		templatesDir = "" // Org rites don't carry templates (use embedded)
 	}
 
 	return &ResolvedRite{
@@ -258,7 +300,7 @@ func (r *SourceResolver) checkSource(riteName string, source RiteSource) (*Resol
 }
 
 // ListAvailableRites returns all rites available from all configured sources.
-// Higher-priority sources shadow lower-priority ones (project > user > knossos).
+// Higher-priority sources shadow lower-priority ones (project > user > org > knossos).
 func (r *SourceResolver) ListAvailableRites() ([]ResolvedRite, error) {
 	var result []ResolvedRite
 	seen := make(map[string]bool)
@@ -267,6 +309,7 @@ func (r *SourceResolver) ListAvailableRites() ([]ResolvedRite, error) {
 	sources := []RiteSource{
 		{Type: SourceProject, Path: r.projectRitesDir},
 		{Type: SourceUser, Path: r.userRitesDir},
+		{Type: SourceOrg, Path: r.orgRitesDir},
 		{Type: SourceKnossos, Path: filepath.Join(r.knossosHome, "rites")},
 	}
 
@@ -297,7 +340,7 @@ func (r *SourceResolver) ListAvailableRites() ([]ResolvedRite, error) {
 		}
 	}
 
-	// 5. Embedded rites (lowest priority)
+	// 6. Embedded rites (lowest priority)
 	if r.EmbeddedFS != nil {
 		entries, err := fs.ReadDir(r.EmbeddedFS, "rites")
 		if err == nil {

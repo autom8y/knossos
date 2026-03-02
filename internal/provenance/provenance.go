@@ -15,6 +15,9 @@ const ManifestFileName = "PROVENANCE_MANIFEST.yaml"
 // UserManifestFileName is the user-level provenance manifest filename.
 const UserManifestFileName = "USER_PROVENANCE_MANIFEST.yaml"
 
+// OrgManifestFileName is the org-level provenance manifest filename.
+const OrgManifestFileName = "ORG_PROVENANCE_MANIFEST.yaml"
+
 // CurrentSchemaVersion is the current manifest schema version.
 // Starts at "2.0" for the provenance manifest (independent of inscription's "1.0").
 const CurrentSchemaVersion = "2.0"
@@ -106,6 +109,9 @@ const (
 	// ScopeRite indicates entries tracked in project-level PROVENANCE_MANIFEST.yaml.
 	ScopeRite ScopeType = "rite"
 
+	// ScopeOrg indicates entries tracked in org-level ORG_PROVENANCE_MANIFEST.yaml.
+	ScopeOrg ScopeType = "org"
+
 	// ScopeUser indicates entries tracked in user-level USER_PROVENANCE_MANIFEST.yaml.
 	ScopeUser ScopeType = "user"
 )
@@ -113,7 +119,7 @@ const (
 // IsValid returns true if the scope type is a recognized value.
 func (s ScopeType) IsValid() bool {
 	switch s {
-	case ScopeRite, ScopeUser:
+	case ScopeRite, ScopeOrg, ScopeUser:
 		return true
 	default:
 		return false
@@ -128,6 +134,11 @@ func (s ScopeType) String() string {
 // UserManifestPath returns the full path to USER_PROVENANCE_MANIFEST.yaml within the user .claude directory.
 func UserManifestPath(userClaudeDir string) string {
 	return filepath.Join(userClaudeDir, UserManifestFileName)
+}
+
+// OrgManifestPath returns the full path to ORG_PROVENANCE_MANIFEST.yaml within the user .claude directory.
+func OrgManifestPath(userClaudeDir string) string {
+	return filepath.Join(userClaudeDir, OrgManifestFileName)
 }
 
 // NewKnossosEntry constructs a ProvenanceEntry for a knossos-managed file.

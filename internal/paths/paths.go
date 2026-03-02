@@ -267,6 +267,33 @@ func UserRitesDir() string {
 	return filepath.Join(DataDir(), "rites")
 }
 
+// --- Org-Level Resource Paths ---
+
+// OrgDataDir returns the data directory for a named organization.
+// Location: $XDG_DATA_HOME/knossos/orgs/{orgName}/
+func OrgDataDir(orgName string) string {
+	return filepath.Join(DataDir(), "orgs", orgName)
+}
+
+// OrgRitesDir returns the org-level rites directory.
+// Returns empty string if orgName is empty.
+func OrgRitesDir(orgName string) string {
+	if orgName == "" {
+		return ""
+	}
+	return filepath.Join(OrgDataDir(orgName), "rites")
+}
+
+// OrgAgentsDir returns the org-level agents directory.
+func OrgAgentsDir(orgName string) string {
+	return filepath.Join(OrgDataDir(orgName), "agents")
+}
+
+// OrgMenaDir returns the org-level mena directory.
+func OrgMenaDir(orgName string) string {
+	return filepath.Join(OrgDataDir(orgName), "mena")
+}
+
 // ConfigFile returns the path to a file in the config directory.
 func ConfigFile(name string) string {
 	return filepath.Join(ConfigDir(), name)
@@ -313,6 +340,11 @@ func UserHooksDir() string {
 // UserProvenanceManifest returns the path to the user-level provenance manifest.
 func UserProvenanceManifest() string {
 	return filepath.Join(UserClaudeDir(), "USER_PROVENANCE_MANIFEST.yaml")
+}
+
+// OrgProvenanceManifest returns the path to the org-level provenance manifest.
+func OrgProvenanceManifest() string {
+	return filepath.Join(UserClaudeDir(), "ORG_PROVENANCE_MANIFEST.yaml")
 }
 
 // --- Session ID Helpers ---

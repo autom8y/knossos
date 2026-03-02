@@ -233,3 +233,377 @@ func createTestRite(t *testing.T, baseDir, riteName string) {
 		t.Fatalf("Failed to write manifest: %v", err)
 	}
 }
+
+// createOrgRite creates a minimal rite in an org directory structure for testing.
+func createOrgRite(t *testing.T, orgDir, riteName string) {
+	t.Helper()
+	riteDir := filepath.Join(orgDir, "rites", riteName)
+	if err := os.MkdirAll(riteDir, 0755); err != nil {
+		t.Fatalf("Failed to create org rite dir: %v", err)
+	}
+	manifest := "name: " + riteName + "\nversion: 1.0\n"
+	if err := os.WriteFile(filepath.Join(riteDir, "manifest.yaml"), []byte(manifest), 0644); err != nil {
+		t.Fatalf("Failed to write org manifest: %v", err)
+	}
+}
+
+// createUserRite creates a minimal rite in a user-level directory for testing.
+func createUserRite(t *testing.T, userRitesDir, riteName string) {
+	t.Helper()
+	riteDir := filepath.Join(userRitesDir, riteName)
+	if err := os.MkdirAll(riteDir, 0755); err != nil {
+		t.Fatalf("Failed to create user rite dir: %v", err)
+	}
+	manifest := "name: " + riteName + "\nversion: 1.0\n"
+	if err := os.WriteFile(filepath.Join(riteDir, "manifest.yaml"), []byte(manifest), 0644); err != nil {
+		t.Fatalf("Failed to write user manifest: %v", err)
+	}
+}
+
+// --- Org Tier Tests (6-Tier Resolution) ---
+
+func TestSourceResolver_OrgTierResolvesRite(t *testing.T) {
+	tmpDir := t.TempDir()
+	orgDir := filepath.Join(tmpDir, "org")
+	createOrgRite(t, orgDir, "org-rite")
+
+	config.ResetKnossosHome()
+	t.Setenv("KNOSSOS_HOME", "/nonexistent-knossos-home")
+	t.Setenv("KNOSSOS_ORG", "")
+	t.Cleanup(config.ResetKnossosHome)
+
+	resolver := &SourceResolver{
+		projectRoot:     "/nonexistent-project",
+		projectRitesDir: "/nonexistent-project/.knossos/rites",
+		userRitesDir:    "/nonexistent-user-rites",
+		orgRitesDir:     filepath.Join(orgDir, "rites"),
+		knossosHome:     "/nonexistent-knossos-home",
+		resolved:        make(map[string]*ResolvedRite),
+	}
+
+	resolved, err := resolver.ResolveRite("org-rite", "")
+	if err != nil {
+		t.Fatalf("ResolveRite failed: %v", err)
+	}
+	if resolved.Source.Type != SourceOrg {
+		t.Errorf("Expected source type %q, got %q", SourceOrg, resolved.Source.Type)
+	}
+	if resolved.Name != "org-rite" {
+		t.Errorf("Expected rite name %q, got %q", "org-rite", resolved.Name)
+	}
+}
+
+func TestSourceResolver_UserShadowsOrg(t *testing.T) {
+	tmpDir := t.TempDir()
+	orgDir := filepath.Join(tmpDir, "org")
+	userDir := filepath.Join(tmpDir, "user-rites")
+
+	// Same rite name in both org and user
+	createOrgRite(t, orgDir, "shared-rite")
+	createUserRite(t, userDir, "shared-rite")
+
+	resolver := &SourceResolver{
+		projectRoot:     "/nonexistent-project",
+		projectRitesDir: "/nonexistent-project/.knossos/rites",
+		userRitesDir:    userDir,
+		orgRitesDir:     filepath.Join(orgDir, "rites"),
+		knossosHome:     "/nonexistent-knossos-home",
+		resolved:        make(map[string]*ResolvedRite),
+	}
+
+	resolved, err := resolver.ResolveRite("shared-rite", "")
+	if err != nil {
+		t.Fatalf("ResolveRite failed: %v", err)
+	}
+	// User (tier 3) should shadow org (tier 4)
+	if resolved.Source.Type != SourceUser {
+		t.Errorf("Expected user to shadow org, got source type %q", resolved.Source.Type)
+	}
+}
+
+func TestSourceResolver_OrgShadowsKnossos(t *testing.T) {
+	tmpDir := t.TempDir()
+	orgDir := filepath.Join(tmpDir, "org")
+	knossosDir := filepath.Join(tmpDir, "knossos")
+
+	createOrgRite(t, orgDir, "shared-rite")
+
+	// Create knossos rite
+	riteDir := filepath.Join(knossosDir, "rites", "shared-rite")
+	if err := os.MkdirAll(riteDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(riteDir, "manifest.yaml"), []byte("name: shared-rite\nversion: 1.0\n"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	resolver := &SourceResolver{
+		projectRoot:     "/nonexistent-project",
+		projectRitesDir: "/nonexistent-project/.knossos/rites",
+		userRitesDir:    "/nonexistent-user-rites",
+		orgRitesDir:     filepath.Join(orgDir, "rites"),
+		knossosHome:     knossosDir,
+		resolved:        make(map[string]*ResolvedRite),
+	}
+
+	resolved, err := resolver.ResolveRite("shared-rite", "")
+	if err != nil {
+		t.Fatalf("ResolveRite failed: %v", err)
+	}
+	// Org (tier 4) should shadow knossos (tier 5)
+	if resolved.Source.Type != SourceOrg {
+		t.Errorf("Expected org to shadow knossos, got source type %q", resolved.Source.Type)
+	}
+}
+
+func TestSourceResolver_ProjectShadowsAll(t *testing.T) {
+	tmpDir := t.TempDir()
+	orgDir := filepath.Join(tmpDir, "org")
+	userDir := filepath.Join(tmpDir, "user-rites")
+
+	// Same rite in project, user, and org
+	createTestRite(t, tmpDir, "shared-rite")
+	createUserRite(t, userDir, "shared-rite")
+	createOrgRite(t, orgDir, "shared-rite")
+
+	resolver := &SourceResolver{
+		projectRoot:     tmpDir,
+		projectRitesDir: filepath.Join(tmpDir, ".knossos", "rites"),
+		userRitesDir:    userDir,
+		orgRitesDir:     filepath.Join(orgDir, "rites"),
+		knossosHome:     "/nonexistent-knossos-home",
+		resolved:        make(map[string]*ResolvedRite),
+	}
+
+	resolved, err := resolver.ResolveRite("shared-rite", "")
+	if err != nil {
+		t.Fatalf("ResolveRite failed: %v", err)
+	}
+	// Project (tier 2) should shadow all
+	if resolved.Source.Type != SourceProject {
+		t.Errorf("Expected project to shadow all, got source type %q", resolved.Source.Type)
+	}
+}
+
+func TestSourceResolver_ListIncludesOrg(t *testing.T) {
+	tmpDir := t.TempDir()
+	orgDir := filepath.Join(tmpDir, "org")
+
+	// Create org-only rite
+	createOrgRite(t, orgDir, "org-only-rite")
+
+	// Create embedded rite
+	fsys := fstest.MapFS{
+		"rites/embedded-rite/manifest.yaml": &fstest.MapFile{
+			Data: []byte("name: embedded-rite\nversion: 1.0\n"),
+		},
+	}
+
+	resolver := &SourceResolver{
+		projectRoot:     "/nonexistent-project",
+		projectRitesDir: "/nonexistent-project/.knossos/rites",
+		userRitesDir:    "/nonexistent-user-rites",
+		orgRitesDir:     filepath.Join(orgDir, "rites"),
+		knossosHome:     "/nonexistent-knossos-home",
+		EmbeddedFS:      fsys,
+		resolved:        make(map[string]*ResolvedRite),
+	}
+
+	rites, err := resolver.ListAvailableRites()
+	if err != nil {
+		t.Fatalf("ListAvailableRites failed: %v", err)
+	}
+
+	if len(rites) != 2 {
+		t.Fatalf("Expected 2 rites (org + embedded), got %d", len(rites))
+	}
+
+	found := map[string]SourceType{}
+	for _, r := range rites {
+		found[r.Name] = r.Source.Type
+	}
+	if found["org-only-rite"] != SourceOrg {
+		t.Errorf("Expected org-only-rite to have source type %q, got %q", SourceOrg, found["org-only-rite"])
+	}
+	if found["embedded-rite"] != SourceEmbedded {
+		t.Errorf("Expected embedded-rite to have source type %q, got %q", SourceEmbedded, found["embedded-rite"])
+	}
+}
+
+func TestSourceResolver_ListOrgShadowedByUser(t *testing.T) {
+	tmpDir := t.TempDir()
+	orgDir := filepath.Join(tmpDir, "org")
+	userDir := filepath.Join(tmpDir, "user-rites")
+
+	// Same rite in org and user
+	createOrgRite(t, orgDir, "overlap-rite")
+	createUserRite(t, userDir, "overlap-rite")
+
+	// Org-only rite
+	createOrgRite(t, orgDir, "org-exclusive")
+
+	resolver := &SourceResolver{
+		projectRoot:     "/nonexistent-project",
+		projectRitesDir: "/nonexistent-project/.knossos/rites",
+		userRitesDir:    userDir,
+		orgRitesDir:     filepath.Join(orgDir, "rites"),
+		knossosHome:     "/nonexistent-knossos-home",
+		resolved:        make(map[string]*ResolvedRite),
+	}
+
+	rites, err := resolver.ListAvailableRites()
+	if err != nil {
+		t.Fatalf("ListAvailableRites failed: %v", err)
+	}
+
+	if len(rites) != 2 {
+		t.Fatalf("Expected 2 rites (overlap from user + org-exclusive from org), got %d", len(rites))
+	}
+
+	found := map[string]SourceType{}
+	for _, r := range rites {
+		found[r.Name] = r.Source.Type
+	}
+	// overlap-rite should come from user (higher priority)
+	if found["overlap-rite"] != SourceUser {
+		t.Errorf("Expected overlap-rite from user, got %q", found["overlap-rite"])
+	}
+	if found["org-exclusive"] != SourceOrg {
+		t.Errorf("Expected org-exclusive from org, got %q", found["org-exclusive"])
+	}
+}
+
+func TestSourceResolver_CacheOrgAware(t *testing.T) {
+	tmpDir := t.TempDir()
+	orgDir1 := filepath.Join(tmpDir, "org1")
+	orgDir2 := filepath.Join(tmpDir, "org2")
+
+	createOrgRite(t, orgDir1, "my-rite")
+	createOrgRite(t, orgDir2, "my-rite")
+
+	// Resolve with org1
+	resolver1 := &SourceResolver{
+		projectRoot:     "/nonexistent-project",
+		projectRitesDir: "/nonexistent-project/.knossos/rites",
+		userRitesDir:    "/nonexistent-user-rites",
+		orgRitesDir:     filepath.Join(orgDir1, "rites"),
+		knossosHome:     "/nonexistent-knossos-home",
+		resolved:        make(map[string]*ResolvedRite),
+	}
+
+	res1, err := resolver1.ResolveRite("my-rite", "")
+	if err != nil {
+		t.Fatalf("Resolve with org1 failed: %v", err)
+	}
+
+	// Simulate org switch by creating resolver with different orgRitesDir
+	resolver2 := &SourceResolver{
+		projectRoot:     "/nonexistent-project",
+		projectRitesDir: "/nonexistent-project/.knossos/rites",
+		userRitesDir:    "/nonexistent-user-rites",
+		orgRitesDir:     filepath.Join(orgDir2, "rites"),
+		knossosHome:     "/nonexistent-knossos-home",
+		resolved:        resolver1.resolved, // Share cache to prove keys differ
+	}
+
+	res2, err := resolver2.ResolveRite("my-rite", "")
+	if err != nil {
+		t.Fatalf("Resolve with org2 failed: %v", err)
+	}
+
+	// Different org dirs should produce different cache entries (not stale)
+	if res1.Source.Path == res2.Source.Path {
+		t.Error("Expected different source paths for different orgs, got same")
+	}
+}
+
+func TestSourceResolver_EmptyOrgSkipped(t *testing.T) {
+	// When no org is configured, orgRitesDir is empty — should be skipped
+	config.ResetKnossosHome()
+	t.Setenv("KNOSSOS_HOME", "/nonexistent-knossos-home")
+	t.Setenv("KNOSSOS_ORG", "")
+	t.Cleanup(config.ResetKnossosHome)
+
+	fsys := fstest.MapFS{
+		"rites/fallback-rite/manifest.yaml": &fstest.MapFile{
+			Data: []byte("name: fallback-rite\nversion: 1.0\n"),
+		},
+	}
+
+	resolver := NewSourceResolver("/nonexistent-project")
+	resolver.WithEmbeddedFS(fsys)
+
+	resolved, err := resolver.ResolveRite("fallback-rite", "")
+	if err != nil {
+		t.Fatalf("ResolveRite failed: %v", err)
+	}
+	// Should fall through to embedded since no org is configured
+	if resolved.Source.Type != SourceEmbedded {
+		t.Errorf("Expected embedded fallback when no org configured, got %q", resolved.Source.Type)
+	}
+}
+
+func TestSourceResolver_OrgNoTemplates(t *testing.T) {
+	tmpDir := t.TempDir()
+	orgDir := filepath.Join(tmpDir, "org")
+	createOrgRite(t, orgDir, "org-rite")
+
+	resolver := &SourceResolver{
+		projectRoot:     "/nonexistent-project",
+		projectRitesDir: "/nonexistent-project/.knossos/rites",
+		userRitesDir:    "/nonexistent-user-rites",
+		orgRitesDir:     filepath.Join(orgDir, "rites"),
+		knossosHome:     "/nonexistent-knossos-home",
+		resolved:        make(map[string]*ResolvedRite),
+	}
+
+	resolved, err := resolver.ResolveRite("org-rite", "")
+	if err != nil {
+		t.Fatalf("ResolveRite failed: %v", err)
+	}
+	// Org rites should not carry templates
+	if resolved.TemplatesDir != "" {
+		t.Errorf("Expected empty templates dir for org rite, got %q", resolved.TemplatesDir)
+	}
+}
+
+func TestSourceResolver_ExplicitOrgAlias(t *testing.T) {
+	tmpDir := t.TempDir()
+	orgDir := filepath.Join(tmpDir, "orgs", "test-org")
+	createOrgRite(t, orgDir, "aliased-rite")
+
+	// Set up XDG paths to point to our temp dir
+	t.Setenv("XDG_DATA_HOME", tmpDir)
+
+	resolver := &SourceResolver{
+		projectRoot:     "/nonexistent-project",
+		projectRitesDir: "/nonexistent-project/.knossos/rites",
+		userRitesDir:    "/nonexistent-user-rites",
+		orgRitesDir:     filepath.Join(orgDir, "rites"),
+		knossosHome:     "/nonexistent-knossos-home",
+		resolved:        make(map[string]*ResolvedRite),
+	}
+
+	// "org:test-org" should resolve to the named org's rites dir
+	source, err := resolver.parseExplicitSource("org:test-org")
+	if err != nil {
+		t.Fatalf("parseExplicitSource(org:test-org) failed: %v", err)
+	}
+	if source.Type != SourceOrg {
+		t.Errorf("Expected source type %q, got %q", SourceOrg, source.Type)
+	}
+}
+
+func TestSourceResolver_ExplicitOrgNoOrg(t *testing.T) {
+	t.Setenv("KNOSSOS_ORG", "")
+
+	resolver := &SourceResolver{
+		resolved: make(map[string]*ResolvedRite),
+	}
+
+	// "org" without active org should error
+	_, err := resolver.parseExplicitSource("org")
+	if err == nil {
+		t.Fatal("Expected error when using 'org' alias with no active org")
+	}
+}
