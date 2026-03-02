@@ -12,16 +12,17 @@ import (
 //
 // Steps:
 //
-//	0. Carry forward knossos entries from prev that still exist on disk (idempotency)
-//	1. Layer promoted + carried-forward entries from divergence detection (skip empty checksums)
-//	2. Layer collector entries (pipeline-written), EXCEPT where divergence promoted to user
-//	3. Promote prev untracked entries not written this sync → user
+//  0. Carry forward knossos entries from prev that still exist on disk (idempotency)
+//  1. Layer promoted + carried-forward entries from divergence detection (skip empty checksums)
+//  2. Layer collector entries (pipeline-written), EXCEPT where divergence promoted to user
+//  3. Promote prev untracked entries not written this sync → user
 func Merge(
 	claudeDir string,
 	activeRite string,
 	collector Collector,
 	divergenceReport *DivergenceReport,
 	prevManifest *ProvenanceManifest,
+	overwriteDiverged bool,
 ) *ProvenanceManifest {
 	finalEntries := make(map[string]*ProvenanceEntry)
 
@@ -60,10 +61,12 @@ func Merge(
 	}
 
 	// Step 2: Layer current sync entries on top
-	// Pipeline-written files take precedence unless path was promoted to user-owned in Step 1
+	// Pipeline-written files take precedence unless path was promoted to user-owned in Step 1.
+	// When overwriteDiverged is true, collector entries reclaim user-promoted entries —
+	// this matches the --overwrite-diverged flag which overwrites files on disk.
 	for path, entry := range collector.Entries() {
 		if existing, ok := finalEntries[path]; ok {
-			if existing.Owner == OwnerUser {
+			if existing.Owner == OwnerUser && !overwriteDiverged {
 				// User promoted this file via divergence detection.
 				// Do NOT overwrite with the pipeline entry.
 				continue

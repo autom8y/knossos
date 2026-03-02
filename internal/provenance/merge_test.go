@@ -49,7 +49,7 @@ func TestMerge_EmptyInputs(t *testing.T) {
 	entry := validKnossosEntry("rites/eco/agents/foo.md")
 	collector.Record("agents/foo.md", entry)
 
-	result := Merge(claudeDir, "eco", collector, nil, nil)
+	result := Merge(claudeDir, "eco", collector, nil, nil, false)
 
 	if result == nil {
 		t.Fatal("expected non-nil manifest")
@@ -103,7 +103,7 @@ func TestMerge_Step0_CarryForwardKnossos(t *testing.T) {
 	// Empty collector — nothing written this sync
 	collector := NewCollector()
 
-	result := Merge(claudeDir, "eco", collector, nil, prevManifest)
+	result := Merge(claudeDir, "eco", collector, nil, prevManifest, false)
 
 	// Only the on-disk entry should carry forward
 	if len(result.Entries) != 1 {
@@ -142,7 +142,7 @@ func TestMerge_Step0_CarryForwardKnossosDirEntry(t *testing.T) {
 	}
 
 	collector := NewCollector()
-	result := Merge(claudeDir, "eco", collector, nil, prevManifest)
+	result := Merge(claudeDir, "eco", collector, nil, prevManifest, false)
 
 	if _, ok := result.Entries["commands/commit/"]; !ok {
 		t.Error("expected commands/commit/ directory entry to be carried forward")
@@ -182,7 +182,7 @@ func TestMerge_Step1_DivergencePromoted(t *testing.T) {
 	}
 
 	collector := NewCollector()
-	result := Merge(claudeDir, "eco", collector, divergenceReport, nil)
+	result := Merge(claudeDir, "eco", collector, divergenceReport, nil, false)
 
 	// promoted with checksum should be included
 	if _, ok := result.Entries["agents/modified.md"]; !ok {
@@ -265,7 +265,7 @@ func TestMerge_Step2_CollectorLayering(t *testing.T) {
 	collector.Record("agents/overwritable.md", newCollectorEntry)
 	collector.Record("agents/user-protected.md", collectorProtectedEntry)
 
-	result := Merge(claudeDir, "eco", collector, divergenceReport, prevManifest)
+	result := Merge(claudeDir, "eco", collector, divergenceReport, prevManifest, false)
 
 	// "agents/overwritable.md": collector should overwrite Step 0 entry
 	overwritable, ok := result.Entries["agents/overwritable.md"]
@@ -306,8 +306,8 @@ func TestMerge_Step3_UntrackedPromotion(t *testing.T) {
 		SchemaVersion: CurrentSchemaVersion,
 		LastSync:      now,
 		Entries: map[string]*ProvenanceEntry{
-			"legacy-file.md":     untrackedEntry,
-			"pipeline-owned.md":  validKnossosEntry("rites/eco/pipeline-owned.md"),
+			"legacy-file.md":    untrackedEntry,
+			"pipeline-owned.md": validKnossosEntry("rites/eco/pipeline-owned.md"),
 		},
 	}
 
@@ -323,7 +323,7 @@ func TestMerge_Step3_UntrackedPromotion(t *testing.T) {
 	}
 	collector.Record("pipeline-owned.md", collectorEntry)
 
-	result := Merge(claudeDir, "eco", collector, nil, prevManifest)
+	result := Merge(claudeDir, "eco", collector, nil, prevManifest, false)
 
 	// "legacy-file.md" was untracked and NOT written this sync → must be promoted to user
 	legacy, ok := result.Entries["legacy-file.md"]
@@ -386,7 +386,7 @@ func TestMerge_Step3_UntrackedAlreadyInFinal(t *testing.T) {
 
 	collector := NewCollector() // nothing written this sync
 
-	result := Merge(claudeDir, "eco", collector, divergenceReport, prevManifest)
+	result := Merge(claudeDir, "eco", collector, divergenceReport, prevManifest, false)
 
 	legacy, ok := result.Entries["legacy-file.md"]
 	if !ok {
@@ -396,5 +396,66 @@ func TestMerge_Step3_UntrackedAlreadyInFinal(t *testing.T) {
 	if legacy.Checksum != divergenceCarriedForwardChecksum {
 		t.Errorf("Step 3 must not overwrite existing final entry: expected %s, got %s",
 			divergenceCarriedForwardChecksum, legacy.Checksum)
+	}
+}
+
+// TestMerge_Step2_OverwriteDivergedReclaims verifies that when overwriteDiverged is true,
+// collector entries reclaim user-promoted entries instead of skipping them.
+func TestMerge_Step2_OverwriteDivergedReclaims(t *testing.T) {
+	tmpDir := t.TempDir()
+	claudeDir := filepath.Join(tmpDir, ".claude")
+
+	now := time.Now().UTC()
+	userChecksum := "sha256:fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210"
+
+	// Divergence report promotes entry to user-owned
+	divergenceReport := &DivergenceReport{
+		Promoted: map[string]*ProvenanceEntry{
+			"commands/commit/": {
+				Owner:      OwnerUser,
+				Scope:      ScopeRite,
+				SourcePath: "mena/operations/commit",
+				SourceType: "project",
+				Checksum:   userChecksum,
+				LastSynced: now,
+			},
+		},
+		CarriedForward: map[string]*ProvenanceEntry{},
+		Removed:        []string{},
+	}
+
+	// Collector writes a knossos entry for the same path
+	knossosChecksum := "sha256:1111111111111111111111111111111111111111111111111111111111111111"
+	collector := NewCollector()
+	collector.Record("commands/commit/", &ProvenanceEntry{
+		Owner:      OwnerKnossos,
+		Scope:      ScopeRite,
+		SourcePath: "mena/operations/commit",
+		SourceType: "project",
+		Checksum:   knossosChecksum,
+		LastSynced: now,
+	})
+
+	// Without overwriteDiverged: user entry wins
+	resultDefault := Merge(claudeDir, "eco", collector, divergenceReport, nil, false)
+	entry := resultDefault.Entries["commands/commit/"]
+	if entry == nil {
+		t.Fatal("expected commands/commit/ in default merge result")
+	}
+	if entry.Owner != OwnerUser {
+		t.Errorf("default merge: expected Owner=user, got %s", entry.Owner)
+	}
+
+	// With overwriteDiverged: collector reclaims ownership
+	resultOverwrite := Merge(claudeDir, "eco", collector, divergenceReport, nil, true)
+	entry = resultOverwrite.Entries["commands/commit/"]
+	if entry == nil {
+		t.Fatal("expected commands/commit/ in overwrite merge result")
+	}
+	if entry.Owner != OwnerKnossos {
+		t.Errorf("overwrite merge: expected Owner=knossos (reclaimed), got %s", entry.Owner)
+	}
+	if entry.Checksum != knossosChecksum {
+		t.Errorf("overwrite merge: expected collector checksum %s, got %s", knossosChecksum, entry.Checksum)
 	}
 }

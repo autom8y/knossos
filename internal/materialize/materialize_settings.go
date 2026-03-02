@@ -381,8 +381,9 @@ func (m *Materializer) saveProvenanceManifest(
 	collector provenance.Collector,
 	divergenceReport *provenance.DivergenceReport,
 	prevManifest *provenance.ProvenanceManifest,
+	overwriteDiverged bool,
 ) error {
 	claudeDir := filepath.Dir(manifestPath)
-	finalManifest := provenance.Merge(claudeDir, activeRite, collector, divergenceReport, prevManifest)
+	finalManifest := provenance.Merge(claudeDir, activeRite, collector, divergenceReport, prevManifest, overwriteDiverged)
 	return provenance.Save(manifestPath, finalManifest)
 }

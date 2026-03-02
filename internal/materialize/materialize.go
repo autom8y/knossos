@@ -188,7 +188,6 @@ func (m *Materializer) templatesFS(resolved *ResolvedRite) fs.FS {
 	return os.DirFS(m.templatesDir)
 }
 
-
 // copyDirFromFS copies all files from an fs.FS to a destination directory on disk.
 func copyDirFromFS(fsys fs.FS, dst string) error {
 	return fs.WalkDir(fsys, ".", func(path string, d fs.DirEntry, err error) error {
@@ -278,7 +277,7 @@ func (m *Materializer) MaterializeMinimal(opts Options) (*Result, error) {
 	os.Remove(filepath.Join(claudeDir, "INVOCATION_STATE.yaml"))
 
 	// Provenance: merge and save manifest
-	if err := m.saveProvenanceManifest(manifestPath, "", collector, divergenceReport, prevManifest); err != nil {
+	if err := m.saveProvenanceManifest(manifestPath, "", collector, divergenceReport, prevManifest, opts.OverwriteDiverged); err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to save provenance manifest", err)
 	}
 
@@ -493,7 +492,7 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 	}
 
 	// Provenance: merge and save manifest
-	if err := m.saveProvenanceManifest(manifestPath, activeRiteName, collector, divergenceReport, prevManifest); err != nil {
+	if err := m.saveProvenanceManifest(manifestPath, activeRiteName, collector, divergenceReport, prevManifest, opts.OverwriteDiverged); err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to save provenance manifest", err)
 	}
 
@@ -507,7 +506,7 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 // cannot be created, the subsequent sync steps will fail with actionable errors.
 func (m *Materializer) ensureProjectDirs() {
 	dirs := []string{
-		m.resolver.ClaudeDir(),    // .claude/
+		m.resolver.ClaudeDir(),   // .claude/
 		m.resolver.SessionsDir(), // .sos/sessions/ (implies .sos/)
 		m.resolver.KnossosDir(),  // .knossos/
 	}
