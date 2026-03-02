@@ -125,19 +125,10 @@ func TestUnifiedSync_RiteOnly(t *testing.T) {
 
 // TestUnifiedSync_UserOnly tests scope=user without project context
 func TestUnifiedSync_UserOnly(t *testing.T) {
-	// Save and restore original KNOSSOS_HOME
-	oldKnossosHome := os.Getenv("KNOSSOS_HOME")
-	defer func() {
-		if oldKnossosHome != "" {
-			os.Setenv("KNOSSOS_HOME", oldKnossosHome)
-		} else {
-			os.Unsetenv("KNOSSOS_HOME")
-		}
-	}()
-
 	knossosHome := t.TempDir()
-	os.Setenv("KNOSSOS_HOME", knossosHome)
-	config.ResetKnossosHome() // Force config reload
+	t.Setenv("KNOSSOS_HOME", knossosHome)
+	config.ResetKnossosHome()
+	t.Cleanup(config.ResetKnossosHome)
 
 	userClaudeDir := filepath.Join(t.TempDir(), ".claude")
 	projectDir := t.TempDir() // Empty project (no rite)
@@ -145,9 +136,7 @@ func TestUnifiedSync_UserOnly(t *testing.T) {
 	setupKnossosHome(t, knossosHome)
 
 	// Override paths.UserClaudeDir for this test
-	oldHome := os.Getenv("HOME")
-	defer os.Setenv("HOME", oldHome)
-	os.Setenv("HOME", filepath.Dir(userClaudeDir))
+	t.Setenv("HOME", filepath.Dir(userClaudeDir))
 
 	resolver := paths.NewResolver(projectDir)
 	m := NewMaterializer(resolver)
@@ -171,27 +160,17 @@ func TestUnifiedSync_UserOnly(t *testing.T) {
 
 // TestUnifiedSync_ScopeAll tests default scope (rite + user)
 func TestUnifiedSync_ScopeAll(t *testing.T) {
-	oldKnossosHome := os.Getenv("KNOSSOS_HOME")
-	defer func() {
-		if oldKnossosHome != "" {
-			os.Setenv("KNOSSOS_HOME", oldKnossosHome)
-		} else {
-			os.Unsetenv("KNOSSOS_HOME")
-		}
-	}()
-
 	projectDir := t.TempDir()
 	claudeDir := filepath.Join(projectDir, ".claude")
 	riteDir := filepath.Join(projectDir, ".knossos", "rites", "test-rite")
 
 	knossosHome := t.TempDir()
-	os.Setenv("KNOSSOS_HOME", knossosHome)
+	t.Setenv("KNOSSOS_HOME", knossosHome)
 	config.ResetKnossosHome()
+	t.Cleanup(config.ResetKnossosHome)
 
 	userClaudeDir := filepath.Join(t.TempDir(), ".claude")
-	oldHome := os.Getenv("HOME")
-	defer os.Setenv("HOME", oldHome)
-	os.Setenv("HOME", filepath.Dir(userClaudeDir))
+	t.Setenv("HOME", filepath.Dir(userClaudeDir))
 
 	setupTestRite(t, riteDir)
 	setupKnossosHome(t, knossosHome)
@@ -218,24 +197,14 @@ func TestUnifiedSync_ScopeAll(t *testing.T) {
 
 // TestUnifiedSync_NoActiveRite_ScopeAll tests graceful degradation
 func TestUnifiedSync_NoActiveRite_ScopeAll(t *testing.T) {
-	oldKnossosHome := os.Getenv("KNOSSOS_HOME")
-	defer func() {
-		if oldKnossosHome != "" {
-			os.Setenv("KNOSSOS_HOME", oldKnossosHome)
-		} else {
-			os.Unsetenv("KNOSSOS_HOME")
-		}
-	}()
-
 	projectDir := t.TempDir()
 	knossosHome := t.TempDir()
-	os.Setenv("KNOSSOS_HOME", knossosHome)
+	t.Setenv("KNOSSOS_HOME", knossosHome)
 	config.ResetKnossosHome()
+	t.Cleanup(config.ResetKnossosHome)
 
 	userClaudeDir := filepath.Join(t.TempDir(), ".claude")
-	oldHome := os.Getenv("HOME")
-	defer os.Setenv("HOME", oldHome)
-	os.Setenv("HOME", filepath.Dir(userClaudeDir))
+	t.Setenv("HOME", filepath.Dir(userClaudeDir))
 
 	setupKnossosHome(t, knossosHome)
 
@@ -277,27 +246,17 @@ func TestUnifiedSync_NoActiveRite_ScopeRite(t *testing.T) {
 
 // TestUnifiedSync_CollisionDetection tests user file shadowing rite
 func TestUnifiedSync_CollisionDetection(t *testing.T) {
-	oldKnossosHome := os.Getenv("KNOSSOS_HOME")
-	defer func() {
-		if oldKnossosHome != "" {
-			os.Setenv("KNOSSOS_HOME", oldKnossosHome)
-		} else {
-			os.Unsetenv("KNOSSOS_HOME")
-		}
-	}()
-
 	projectDir := t.TempDir()
 	claudeDir := filepath.Join(projectDir, ".claude")
 	riteDir := filepath.Join(projectDir, ".knossos", "rites", "test-rite")
 
 	knossosHome := t.TempDir()
-	os.Setenv("KNOSSOS_HOME", knossosHome)
+	t.Setenv("KNOSSOS_HOME", knossosHome)
 	config.ResetKnossosHome()
+	t.Cleanup(config.ResetKnossosHome)
 
 	userClaudeDir := filepath.Join(t.TempDir(), ".claude")
-	oldHome := os.Getenv("HOME")
-	defer os.Setenv("HOME", oldHome)
-	os.Setenv("HOME", filepath.Dir(userClaudeDir))
+	t.Setenv("HOME", filepath.Dir(userClaudeDir))
 
 	// Setup rite with test-agent
 	setupTestRite(t, riteDir)
@@ -344,23 +303,13 @@ func TestUnifiedSync_CollisionDetection(t *testing.T) {
 
 // TestUnifiedSync_RecoveryMode tests --recover
 func TestUnifiedSync_RecoveryMode(t *testing.T) {
-	oldKnossosHome := os.Getenv("KNOSSOS_HOME")
-	defer func() {
-		if oldKnossosHome != "" {
-			os.Setenv("KNOSSOS_HOME", oldKnossosHome)
-		} else {
-			os.Unsetenv("KNOSSOS_HOME")
-		}
-	}()
-
 	knossosHome := t.TempDir()
-	os.Setenv("KNOSSOS_HOME", knossosHome)
+	t.Setenv("KNOSSOS_HOME", knossosHome)
 	config.ResetKnossosHome()
+	t.Cleanup(config.ResetKnossosHome)
 
 	userClaudeDir := filepath.Join(t.TempDir(), ".claude")
-	oldHome := os.Getenv("HOME")
-	defer os.Setenv("HOME", oldHome)
-	os.Setenv("HOME", filepath.Dir(userClaudeDir))
+	t.Setenv("HOME", filepath.Dir(userClaudeDir))
 
 	setupKnossosHome(t, knossosHome)
 
@@ -402,23 +351,13 @@ func TestUnifiedSync_RecoveryMode(t *testing.T) {
 
 // TestUnifiedSync_OverwriteDiverged tests --overwrite-diverged
 func TestUnifiedSync_OverwriteDiverged(t *testing.T) {
-	oldKnossosHome := os.Getenv("KNOSSOS_HOME")
-	defer func() {
-		if oldKnossosHome != "" {
-			os.Setenv("KNOSSOS_HOME", oldKnossosHome)
-		} else {
-			os.Unsetenv("KNOSSOS_HOME")
-		}
-	}()
-
 	knossosHome := t.TempDir()
-	os.Setenv("KNOSSOS_HOME", knossosHome)
+	t.Setenv("KNOSSOS_HOME", knossosHome)
 	config.ResetKnossosHome()
+	t.Cleanup(config.ResetKnossosHome)
 
 	userClaudeDir := filepath.Join(t.TempDir(), ".claude")
-	oldHome := os.Getenv("HOME")
-	defer os.Setenv("HOME", oldHome)
-	os.Setenv("HOME", filepath.Dir(userClaudeDir))
+	t.Setenv("HOME", filepath.Dir(userClaudeDir))
 
 	setupKnossosHome(t, knossosHome)
 
@@ -472,23 +411,13 @@ func TestUnifiedSync_OverwriteDiverged(t *testing.T) {
 
 // TestUnifiedSync_KeepOrphans tests --keep-orphans
 func TestUnifiedSync_KeepOrphans(t *testing.T) {
-	oldKnossosHome := os.Getenv("KNOSSOS_HOME")
-	defer func() {
-		if oldKnossosHome != "" {
-			os.Setenv("KNOSSOS_HOME", oldKnossosHome)
-		} else {
-			os.Unsetenv("KNOSSOS_HOME")
-		}
-	}()
-
 	knossosHome := t.TempDir()
-	os.Setenv("KNOSSOS_HOME", knossosHome)
+	t.Setenv("KNOSSOS_HOME", knossosHome)
 	config.ResetKnossosHome()
+	t.Cleanup(config.ResetKnossosHome)
 
 	userClaudeDir := filepath.Join(t.TempDir(), ".claude")
-	oldHome := os.Getenv("HOME")
-	defer os.Setenv("HOME", oldHome)
-	os.Setenv("HOME", filepath.Dir(userClaudeDir))
+	t.Setenv("HOME", filepath.Dir(userClaudeDir))
 
 	setupKnossosHome(t, knossosHome)
 
@@ -532,23 +461,13 @@ func TestUnifiedSync_KeepOrphans(t *testing.T) {
 
 // TestUnifiedSync_ResourceFilter tests --resource flag
 func TestUnifiedSync_ResourceFilter(t *testing.T) {
-	oldKnossosHome := os.Getenv("KNOSSOS_HOME")
-	defer func() {
-		if oldKnossosHome != "" {
-			os.Setenv("KNOSSOS_HOME", oldKnossosHome)
-		} else {
-			os.Unsetenv("KNOSSOS_HOME")
-		}
-	}()
-
 	knossosHome := t.TempDir()
-	os.Setenv("KNOSSOS_HOME", knossosHome)
+	t.Setenv("KNOSSOS_HOME", knossosHome)
 	config.ResetKnossosHome()
+	t.Cleanup(config.ResetKnossosHome)
 
 	userClaudeDir := filepath.Join(t.TempDir(), ".claude")
-	oldHome := os.Getenv("HOME")
-	defer os.Setenv("HOME", oldHome)
-	os.Setenv("HOME", filepath.Dir(userClaudeDir))
+	t.Setenv("HOME", filepath.Dir(userClaudeDir))
 
 	setupKnossosHome(t, knossosHome)
 
@@ -579,27 +498,17 @@ func TestUnifiedSync_ResourceFilter(t *testing.T) {
 
 // TestUnifiedSync_DryRun tests --dry-run for both scopes
 func TestUnifiedSync_DryRun(t *testing.T) {
-	oldKnossosHome := os.Getenv("KNOSSOS_HOME")
-	defer func() {
-		if oldKnossosHome != "" {
-			os.Setenv("KNOSSOS_HOME", oldKnossosHome)
-		} else {
-			os.Unsetenv("KNOSSOS_HOME")
-		}
-	}()
-
 	projectDir := t.TempDir()
 	claudeDir := filepath.Join(projectDir, ".claude")
 	riteDir := filepath.Join(projectDir, ".knossos", "rites", "test-rite")
 
 	knossosHome := t.TempDir()
-	os.Setenv("KNOSSOS_HOME", knossosHome)
+	t.Setenv("KNOSSOS_HOME", knossosHome)
 	config.ResetKnossosHome()
+	t.Cleanup(config.ResetKnossosHome)
 
 	userClaudeDir := filepath.Join(t.TempDir(), ".claude")
-	oldHome := os.Getenv("HOME")
-	defer os.Setenv("HOME", oldHome)
-	os.Setenv("HOME", filepath.Dir(userClaudeDir))
+	t.Setenv("HOME", filepath.Dir(userClaudeDir))
 
 	setupTestRite(t, riteDir)
 	setupKnossosHome(t, knossosHome)

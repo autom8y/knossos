@@ -85,14 +85,18 @@ func SyncMena(sources []MenaSource, opts MenaProjectionOptions) (*MenaProjection
 		if hideCompanions {
 			oldIndex := filepath.Join(destDir, "INDEX.md")
 			if _, statErr := os.Stat(oldIndex); statErr == nil {
-				os.Remove(oldIndex)
+				if rmErr := os.Remove(oldIndex); rmErr != nil {
+					result.Warnings = append(result.Warnings, fmt.Sprintf("failed to remove old INDEX.md in %s: %v", destDir, rmErr))
+				}
 			}
 			for _, cleanErr := range CleanEmptyDirs(destDir) {
 				result.Warnings = append(result.Warnings, cleanErr.Error())
 			}
 			// Remove destDir itself if now empty (only had INDEX.md)
 			if entries, readErr := os.ReadDir(destDir); readErr == nil && len(entries) == 0 {
-				os.Remove(destDir)
+				if rmErr := os.Remove(destDir); rmErr != nil {
+					result.Warnings = append(result.Warnings, fmt.Sprintf("failed to remove empty directory %s: %v", destDir, rmErr))
+				}
 			}
 		}
 
@@ -260,16 +264,26 @@ func cleanStaleMenaEntries(opts MenaProjectionOptions, result *MenaProjectionRes
 		absPath = strings.TrimRight(absPath, "/")
 		if info, err := os.Stat(absPath); err == nil {
 			if info.IsDir() {
-				os.RemoveAll(absPath)
+				if rmErr := os.RemoveAll(absPath); rmErr != nil {
+					result.Warnings = append(result.Warnings, fmt.Sprintf("failed to remove stale mena directory %s: %v", key, rmErr))
+				} else {
+					log.Printf("Removed stale mena entry: %s", key)
+				}
 			} else {
-				os.Remove(absPath)
+				if rmErr := os.Remove(absPath); rmErr != nil {
+					result.Warnings = append(result.Warnings, fmt.Sprintf("failed to remove stale mena file %s: %v", key, rmErr))
+				} else {
+					log.Printf("Removed stale mena entry: %s", key)
+				}
 			}
-			log.Printf("Removed stale mena entry: %s", key)
 		}
 		promotedFile := absPath + ".md"
 		if _, statErr := os.Stat(promotedFile); statErr == nil {
-			os.Remove(promotedFile)
-			log.Printf("Removed stale promoted file: %s.md", key)
+			if rmErr := os.Remove(promotedFile); rmErr != nil {
+				result.Warnings = append(result.Warnings, fmt.Sprintf("failed to remove stale promoted file %s.md: %v", key, rmErr))
+			} else {
+				log.Printf("Removed stale promoted file: %s.md", key)
+			}
 		}
 	}
 
@@ -342,6 +356,7 @@ func cleanEmptyDirsRecursive(root string) []error {
 }
 
 // removeStaleFiles removes files in destDir that are NOT in the sourceFileNames set.
+// Removal errors are logged as warnings (non-fatal).
 func removeStaleFiles(destDir string, sourceFileNames map[string]bool) {
 	filepath.WalkDir(destDir, func(path string, d fs.DirEntry, walkErr error) error {
 		if walkErr != nil || d.IsDir() {
@@ -352,7 +367,9 @@ func removeStaleFiles(destDir string, sourceFileNames map[string]bool) {
 			return nil
 		}
 		if !sourceFileNames[relPath] {
-			os.Remove(path)
+			if rmErr := os.Remove(path); rmErr != nil {
+				log.Printf("Warning: failed to remove stale file %s: %v", path, rmErr)
+			}
 		}
 		return nil
 	})
