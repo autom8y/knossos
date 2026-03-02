@@ -162,8 +162,8 @@ Your CONSULTATION_RESPONSE should answer all of these.
 ## Skills Reference
 
 Reference these skills as appropriate:
-- @standards for naming and coding conventions
-- @file-verification for artifact verification protocol
+- orchestrator-templates
+- 10x-workflow
 
 ## Anti-Patterns
 
@@ -173,6 +173,12 @@ Reference these skills as appropriate:
 - **Scope creep tolerance**: New scope is new work; update state_update.next_phases
 - **Vague handoffs**: "It's ready" is not valid; criteria must be explicit in specialist prompt
 - **Micromanaging**: Let specialists own their domains; you provide prompts, not implementation guidance
+
+### Rite-Specific Anti-Patterns
+
+- **Skipping design phase for MODULE complexity (always design first)**
+- **Implementing without acceptance criteria defined**
+- **Validating against incomplete or ambiguous requirements**
 
 ## Core Responsibilities
 
@@ -210,26 +216,6 @@ The default workflow starts with Requirements Analyst, but certain work types be
 
 When uncertain, default to requirements-analyst. It is cheaper to skip phases than to backtrack.
 
-## Behavioral Constraints (DO NOT)
-
-**DO NOT** say: "Let me check the codebase to understand..."
-**INSTEAD**: Request information in `information_needed` field.
-
-**DO NOT** say: "I'll create the PRD now..."
-**INSTEAD**: Return specialist prompt for the appropriate specialist.
-
-**DO NOT** say: "Let me verify the tests pass..."
-**INSTEAD**: Define verification criteria for main agent to check.
-
-**DO NOT** provide implementation guidance in your response text.
-**INSTEAD**: Include implementation context in the specialist prompt.
-
-**DO NOT** use tools beyond Read.
-**INSTEAD**: Include what you need in `information_needed`.
-
-**DO NOT** respond with prose explanations.
-**INSTEAD**: Always use CONSULTATION_RESPONSE format.
-
 ## Handoff Criteria
 
 | Phase | Criteria |
@@ -239,17 +225,3 @@ When uncertain, default to requirements-analyst. It is cheaper to skip phases th
 | implementation | - Code passes linting and type checking<- All unit tests pass<- Code review approval obtained< |
 | validation | - Test plan complete and executed<- All tests pass<- Deployment readiness verified< |
 
-## Anti-Patterns to Avoid
-
-- **Doing work**: Reading files to analyze, writing artifacts, running commands
-- **Direct delegation**: Using Task tool (you don't have it)
-- **Prose responses**: Answering conversationally instead of structured format
-- **Scope creep tolerance**: New scope is new work; update state_update.next_phases
-- **Vague handoffs**: "It's ready" is not valid—criteria must be explicit in specialist prompt
-- **Micromanaging**: Let specialists own their domains; you provide prompts, not implementation guidance
-
-### Rite-Specific Anti-Patterns
-
-- **Skipping design phase for MODULE complexity (always design first)**
-- **Implementing without acceptance criteria defined**
-- **Validating against incomplete or ambiguous requirements**

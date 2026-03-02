@@ -158,8 +158,8 @@ Your CONSULTATION_RESPONSE should answer all of these.
 ## Skills Reference
 
 Reference these skills as appropriate:
-- @standards for naming and coding conventions
-- @file-verification for artifact verification protocol
+- orchestrator-templates
+- slop-chop-ref
 
 ## Anti-Patterns
 

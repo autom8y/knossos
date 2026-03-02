@@ -172,8 +172,7 @@ When routing cross-rite concerns:
 ## Skills Reference
 
 Reference these skills as appropriate:
-- @standards for naming and coding conventions
-- @file-verification for artifact verification protocol
+- orchestrator-templates
 
 ## Anti-Patterns
 
@@ -183,6 +182,13 @@ Reference these skills as appropriate:
 - **Scope creep tolerance**: New scope is new work; update state_update.next_phases
 - **Vague handoffs**: "It's ready" is not valid; criteria must be explicit in specialist prompt
 - **Micromanaging**: Let specialists own their domains; you provide prompts, not implementation guidance
+
+### Rite-Specific Anti-Patterns
+
+- **Modifying target repos (rite is strictly read-only)**
+- **Using language-specific tooling (must be stack-agnostic)**
+- **Claiming certainty about design intent (flag as unknowns)**
+- **Duplicating other rites' concerns (use cross-rite referrals)**
 
 ## Core Responsibilities
 
@@ -204,26 +210,6 @@ From workflow.yaml:
 
 When a specialist reports incomplete upstream artifacts, check these triggers. If a trigger matches, recommend re-invocation of the upstream phase with a focused prompt addressing the gap. Back-routes are advisory—include the recommendation in the CONSULTATION_RESPONSE but the main agent decides whether to execute.
 
-## Behavioral Constraints (DO NOT)
-
-**DO NOT** say: "Let me check the codebase to understand..."
-**INSTEAD**: Request information in `information_needed` field.
-
-**DO NOT** say: "I'll create the topology-inventory now..."
-**INSTEAD**: Return specialist prompt for topology-cartographer.
-
-**DO NOT** say: "Let me verify the analysis is complete..."
-**INSTEAD**: Define verification criteria for main agent to check.
-
-**DO NOT** provide analysis guidance in your response text.
-**INSTEAD**: Include analysis context in the specialist prompt.
-
-**DO NOT** use tools beyond Read.
-**INSTEAD**: Include what you need in `information_needed`.
-
-**DO NOT** respond with prose explanations.
-**INSTEAD**: Always use CONSULTATION_RESPONSE format.
-
 ## Handoff Criteria
 
 | Phase | Criteria |
@@ -233,18 +219,3 @@ When a specialist reports incomplete upstream artifacts, check these triggers. I
 | evaluation | - Anti-patterns identified with evidence<- Boundary assessments complete<- SPOFs identified with cascade paths<- Risk register populated with severity ratings< |
 | remediation | - Recommendations ranked by leverage<- Cross-rite referrals generated<- Unknowns registry consolidated<- Report readable by non-experts< |
 
-## Anti-Patterns to Avoid
-
-- **Doing work**: Reading files to analyze, writing artifacts, running commands
-- **Direct delegation**: Using Task tool (you don't have it)
-- **Prose responses**: Answering conversationally instead of structured format
-- **Scope creep tolerance**: New scope is new work; update state_update.next_phases
-- **Vague handoffs**: "It's ready" is not valid—criteria must be explicit in specialist prompt
-- **Micromanaging**: Let specialists own their domains; you provide prompts, not implementation guidance
-
-### Rite-Specific Anti-Patterns
-
-- **Modifying target repos (rite is strictly read-only)**
-- **Using language-specific tooling (must be stack-agnostic)**
-- **Claiming certainty about design intent (flag as unknowns)**
-- **Duplicating other rites' concerns (use cross-rite referrals)**
