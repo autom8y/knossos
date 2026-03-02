@@ -584,17 +584,17 @@ type SyncResultOutput struct {
 
 // SyncRiteResult represents rite scope sync result.
 type SyncRiteResult struct {
-	Status         string   `json:"status"`
-	Error          string   `json:"error,omitempty"`
-	RiteName       string   `json:"rite,omitempty"`
-	Source         string   `json:"source,omitempty"`
-	SourcePath     string   `json:"source_path,omitempty"`
+	Status          string   `json:"status"`
+	Error           string   `json:"error,omitempty"`
+	RiteName        string   `json:"rite,omitempty"`
+	Source          string   `json:"source,omitempty"`
+	SourcePath      string   `json:"source_path,omitempty"`
 	OrphansDetected []string `json:"orphans_detected,omitempty"`
-	OrphanAction   string   `json:"orphan_action,omitempty"`
-	LegacyBackup   string   `json:"legacy_backup,omitempty"`
-	SoftMode       bool     `json:"soft_mode,omitempty"`
-	DeferredStages []string `json:"deferred_stages,omitempty"`
-	ElCheapoMode   bool     `json:"el_cheapo_mode,omitempty"`
+	OrphanAction    string   `json:"orphan_action,omitempty"`
+	LegacyBackup    string   `json:"legacy_backup,omitempty"`
+	SoftMode        bool     `json:"soft_mode,omitempty"`
+	DeferredStages  []string `json:"deferred_stages,omitempty"`
+	ElCheapoMode    bool     `json:"el_cheapo_mode,omitempty"`
 }
 
 // SyncOrgResult represents org scope sync result.
@@ -772,4 +772,3 @@ type SnapshotOutput struct {
 func (s SnapshotOutput) Text() string {
 	return s.Markdown
 }
-

@@ -57,12 +57,12 @@ func TestJSON_CreateOutput_ValidJSON(t *testing.T) {
 	p, buf, _ := newTestPrinter(FormatJSON)
 
 	data := CreateOutput{
-		SessionID: "session-20260101-120000-abcd1234",
-		Status:    "ACTIVE",
+		SessionID:  "session-20260101-120000-abcd1234",
+		Status:     "ACTIVE",
 		Initiative: "build feature X",
 		Complexity: "SYSTEM",
-		Rite:      "ecosystem",
-		CreatedAt: "2026-01-01T12:00:00Z",
+		Rite:       "ecosystem",
+		CreatedAt:  "2026-01-01T12:00:00Z",
 	}
 
 	if err := p.Print(data); err != nil {
