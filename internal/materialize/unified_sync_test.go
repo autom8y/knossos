@@ -687,3 +687,123 @@ func TestUnifiedSync_Idempotency(t *testing.T) {
 	// Verify agent entry checksum unchanged (file not rewritten)
 	assert.Equal(t, agentEntry1.Checksum, agentEntry2.Checksum, "Agent checksum should be unchanged")
 }
+
+// TestSync_ScopeAll_RiteError_SurfacesError verifies that rite scope errors
+// are surfaced in scope=all mode instead of being silently swallowed.
+// Regression test for R1: error surfacing in Sync().
+func TestSync_ScopeAll_RiteError_SurfacesError(t *testing.T) {
+	projectDir := t.TempDir()
+	claudeDir := filepath.Join(projectDir, ".claude")
+
+	// Write ACTIVE_RITE pointing to a non-existent rite
+	writeActiveRite(t, claudeDir, "nonexistent-rite")
+
+	resolver := paths.NewResolver(projectDir)
+	m := NewMaterializer(resolver)
+
+	opts := SyncOptions{
+		Scope: ScopeAll,
+	}
+
+	result, err := m.Sync(opts)
+
+	// scope=all should NOT return a top-level error (continues to user scope)
+	require.NoError(t, err)
+	require.NotNil(t, result.RiteResult)
+
+	// The rite result should report "error" status with the actual error message
+	assert.Equal(t, "error", result.RiteResult.Status, "rite result should show 'error' not 'skipped'")
+	assert.NotEmpty(t, result.RiteResult.Error, "rite result should contain the error message")
+}
+
+// TestSync_ScopeRite_Error_StillFails verifies that scope=rite errors
+// are still returned as top-level errors (unchanged behavior).
+func TestSync_ScopeRite_Error_StillFails(t *testing.T) {
+	projectDir := t.TempDir()
+	claudeDir := filepath.Join(projectDir, ".claude")
+
+	// Write ACTIVE_RITE pointing to a non-existent rite
+	writeActiveRite(t, claudeDir, "nonexistent-rite")
+
+	resolver := paths.NewResolver(projectDir)
+	m := NewMaterializer(resolver)
+
+	opts := SyncOptions{
+		Scope: ScopeRite,
+	}
+
+	result, err := m.Sync(opts)
+	assert.Error(t, err, "scope=rite should return top-level error")
+	assert.Nil(t, result)
+}
+
+// TestMaterializeWithOptions_PrevalidateBlocksPartialState verifies that
+// CLAUDE.md pre-validation prevents partial state when template rendering fails.
+// Regression test for R2: pre-validation gate.
+func TestMaterializeWithOptions_PrevalidateBlocksPartialState(t *testing.T) {
+	projectDir := t.TempDir()
+	claudeDir := filepath.Join(projectDir, ".claude")
+	riteDir := filepath.Join(projectDir, ".knossos", "rites", "bad-rite")
+
+	// Set up a rite with an agent but a broken template
+	require.NoError(t, os.MkdirAll(riteDir, 0755))
+	manifest := &RiteManifest{
+		Name:        "bad-rite",
+		Version:     "1.0.0",
+		Description: "Rite with bad template",
+		EntryAgent:  "test-agent",
+		Agents: []Agent{
+			{Name: "test-agent", Role: "Testing agent"},
+		},
+	}
+	data, err := yaml.Marshal(manifest)
+	require.NoError(t, err)
+	require.NoError(t, os.WriteFile(filepath.Join(riteDir, "manifest.yaml"), data, 0644))
+
+	// Create agent source
+	agentsDir := filepath.Join(riteDir, "agents")
+	require.NoError(t, os.MkdirAll(agentsDir, 0755))
+	require.NoError(t, os.WriteFile(
+		filepath.Join(agentsDir, "test-agent.md"),
+		[]byte("# Test Agent\n\nA test agent.\n"),
+		0644,
+	))
+
+	// Create a templates directory with a broken template
+	templatesDir := filepath.Join(projectDir, "templates", "sections")
+	require.NoError(t, os.MkdirAll(templatesDir, 0755))
+	require.NoError(t, os.WriteFile(
+		filepath.Join(templatesDir, "execution-mode.md.tpl"),
+		[]byte("## Execution Mode\n\n{{ .BogusField.Nested }}"), // Will fail during template execution
+		0644,
+	))
+
+	// Pre-create .claude/ with an existing agent that should NOT be overwritten
+	require.NoError(t, os.MkdirAll(filepath.Join(claudeDir, "agents"), 0755))
+	require.NoError(t, os.WriteFile(
+		filepath.Join(claudeDir, "agents", "existing-agent.md"),
+		[]byte("# Existing Agent\n\nShould not be touched.\n"),
+		0644,
+	))
+
+	resolver := paths.NewResolver(projectDir)
+	m := NewMaterializer(resolver)
+	m.templatesDir = filepath.Join(projectDir, "templates")
+
+	result, err := m.MaterializeWithOptions("bad-rite", Options{})
+
+	// Should fail with pre-validation error
+	assert.Error(t, err, "should fail due to broken template")
+	assert.Nil(t, result)
+	assert.Contains(t, err.Error(), "pre-validation failed", "error should indicate pre-validation")
+
+	// Verify no partial state: existing agent should be untouched,
+	// new agent should NOT have been written
+	existingContent, readErr := os.ReadFile(filepath.Join(claudeDir, "agents", "existing-agent.md"))
+	require.NoError(t, readErr)
+	assert.Contains(t, string(existingContent), "Should not be touched", "existing agent should be preserved")
+
+	// The new rite's agent should NOT be on disk
+	_, statErr := os.Stat(filepath.Join(claudeDir, "agents", "test-agent.md"))
+	assert.True(t, os.IsNotExist(statErr), "new agent should NOT be written when pre-validation fails")
+}

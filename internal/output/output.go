@@ -583,6 +583,7 @@ type SyncResultOutput struct {
 // SyncRiteResult represents rite scope sync result.
 type SyncRiteResult struct {
 	Status         string   `json:"status"`
+	Error          string   `json:"error,omitempty"`
 	RiteName       string   `json:"rite,omitempty"`
 	Source         string   `json:"source,omitempty"`
 	SourcePath     string   `json:"source_path,omitempty"`
@@ -615,6 +616,9 @@ func (s SyncResultOutput) Text() string {
 			b.WriteString(fmt.Sprintf(" (%s)", s.Rite.RiteName))
 		}
 		b.WriteString("\n")
+		if s.Rite.Error != "" {
+			b.WriteString(fmt.Sprintf("  Error: %s\n", s.Rite.Error))
+		}
 		if len(s.Rite.OrphansDetected) > 0 {
 			b.WriteString(fmt.Sprintf("  Orphans: %d detected (%s)\n", len(s.Rite.OrphansDetected), s.Rite.OrphanAction))
 		}

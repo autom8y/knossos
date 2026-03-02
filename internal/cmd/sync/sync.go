@@ -202,6 +202,7 @@ func formatSyncResult(result *materialize.SyncResult, opts materialize.SyncOptio
 	if result.RiteResult != nil {
 		out.Rite = &output.SyncRiteResult{
 			Status:          result.RiteResult.Status,
+			Error:           result.RiteResult.Error,
 			RiteName:        result.RiteResult.RiteName,
 			Source:          result.RiteResult.Source,
 			SourcePath:      result.RiteResult.SourcePath,

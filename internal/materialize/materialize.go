@@ -345,6 +345,13 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 		return result, nil
 	}
 
+	// Pre-validate CLAUDE.md generation before any disk writes.
+	// Template rendering is the most failure-prone step. Validating it first
+	// prevents partial state where agents are on disk but CLAUDE.md is stale.
+	if err := m.prevalidateCLAUDEmd(manifest, claudeDir, resolved); err != nil {
+		return nil, errors.Wrap(errors.CodeGeneralError, "CLAUDE.md pre-validation failed (no files written)", err)
+	}
+
 	// 2. Ensure .claude/ directory exists
 	if err := paths.EnsureDir(claudeDir); err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to create .claude directory", err)
@@ -510,8 +517,11 @@ func (m *Materializer) Sync(opts SyncOptions) (*SyncResult, error) {
 			if opts.Scope == ScopeRite {
 				return nil, err
 			}
-			// scope=all: skip rite, continue to user
-			result.RiteResult = &RiteScopeResult{Status: "skipped"}
+			// scope=all: surface error but continue to user scope
+			result.RiteResult = &RiteScopeResult{
+				Status: "error",
+				Error:  err.Error(),
+			}
 		} else {
 			result.RiteResult = riteResult
 		}
@@ -1384,6 +1394,57 @@ func (m *Materializer) materializeMinimalCLAUDEmd(claudeDir string, collector pr
 	}
 
 	return result.LegacyBackupPath, nil
+}
+
+// prevalidateCLAUDEmd validates that CLAUDE.md generation will succeed without
+// writing any files. This is called BEFORE destructive operations (agent writes,
+// orphan removal) to prevent partial state when template rendering fails.
+func (m *Materializer) prevalidateCLAUDEmd(manifest *RiteManifest, claudeDir string, resolved *ResolvedRite) error {
+	agents := make([]inscription.AgentInfo, 0, len(manifest.Agents))
+	for _, agent := range manifest.Agents {
+		agents = append(agents, inscription.AgentInfo{
+			Name: agent.Name,
+			File: agent.Name + ".md",
+			Role: agent.Role,
+		})
+	}
+
+	projectRoot := m.resolver.ProjectRoot()
+	renderCtx := &inscription.RenderContext{
+		ActiveRite:       manifest.Name,
+		AgentCount:       len(manifest.Agents),
+		Agents:           agents,
+		KnossosVars:      make(map[string]string),
+		ProjectRoot:      projectRoot,
+		IsKnossosProject: m.templatesDir != "" && strings.HasPrefix(m.templatesDir, projectRoot),
+	}
+
+	// Resolve template source
+	var templateFS fs.FS
+	if resolved != nil && resolved.Source.Type == SourceEmbedded && m.embeddedTemplates != nil {
+		templateFS = m.templatesFS(resolved)
+	}
+
+	// Load or create manifest (read-only validation)
+	knossosManifestPath := filepath.Join(claudeDir, "KNOSSOS_MANIFEST.yaml")
+	loader := inscription.NewManifestLoader(filepath.Dir(claudeDir))
+	loader.ManifestPath = knossosManifestPath
+	insManifest, err := loader.LoadOrCreate()
+	if err != nil {
+		return err
+	}
+	insManifest.AdoptNewDefaults()
+
+	// Create generator and validate all sections render without error
+	var generator *inscription.Generator
+	if templateFS != nil {
+		generator = inscription.NewGeneratorWithFS(templateFS, insManifest, renderCtx)
+	} else {
+		generator = inscription.NewGenerator(m.templatesDir, insManifest, renderCtx)
+	}
+
+	_, err = generator.GenerateAll()
+	return err
 }
 
 // materializeSettingsWithManifest generates or updates settings.local.json.

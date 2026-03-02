@@ -58,6 +58,7 @@ type SyncResult struct {
 // RiteScopeResult wraps rite scope outcome.
 type RiteScopeResult struct {
 	Status                string   `json:"status"`
+	Error                 string   `json:"error,omitempty"`
 	RiteName              string   `json:"rite_name,omitempty"`
 	Source                string   `json:"source,omitempty"`
 	SourcePath            string   `json:"source_path,omitempty"`
