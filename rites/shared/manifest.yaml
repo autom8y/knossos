@@ -35,7 +35,7 @@ hooks: []
 
 hook_defaults:
   write_guard:
-    allow_paths: [".wip/", "wip/"]
+    allow_paths: [".ledge/", ".know/"]
     timeout: 3
 
 dependencies: []

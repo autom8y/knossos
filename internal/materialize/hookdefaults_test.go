@@ -16,7 +16,7 @@ func TestResolveHookDefaults(t *testing.T) {
 			name: "3-tier cascade: shared base + rite extras merge",
 			shared: &HookDefaults{
 				WriteGuard: &WriteGuardDefaults{
-					AllowPaths: []string{".wip/", "wip/"},
+					AllowPaths: []string{".ledge/", ".know/"},
 					Timeout:    3,
 				},
 			},
@@ -26,7 +26,7 @@ func TestResolveHookDefaults(t *testing.T) {
 				},
 			},
 			want: &WriteGuardDefaults{
-				AllowPaths: []string{".wip/", "wip/", "docs/ecosystem/"},
+				AllowPaths: []string{".ledge/", ".know/", "docs/ecosystem/"},
 				Timeout:    3,
 			},
 		},
@@ -34,13 +34,13 @@ func TestResolveHookDefaults(t *testing.T) {
 			name: "shared-only: no rite overrides",
 			shared: &HookDefaults{
 				WriteGuard: &WriteGuardDefaults{
-					AllowPaths: []string{".wip/", "wip/"},
+					AllowPaths: []string{".ledge/", ".know/"},
 					Timeout:    3,
 				},
 			},
 			rite: nil,
 			want: &WriteGuardDefaults{
-				AllowPaths: []string{".wip/", "wip/"},
+				AllowPaths: []string{".ledge/", ".know/"},
 				Timeout:    3,
 			},
 		},
@@ -68,17 +68,17 @@ func TestResolveHookDefaults(t *testing.T) {
 			name: "deduplication: same path in shared and rite",
 			shared: &HookDefaults{
 				WriteGuard: &WriteGuardDefaults{
-					AllowPaths: []string{".wip/", "wip/"},
+					AllowPaths: []string{".ledge/", ".know/"},
 					Timeout:    3,
 				},
 			},
 			rite: &HookDefaults{
 				WriteGuard: &WriteGuardDefaults{
-					ExtraPaths: []string{".wip/"}, // duplicate
+					ExtraPaths: []string{".ledge/"}, // duplicate
 				},
 			},
 			want: &WriteGuardDefaults{
-				AllowPaths: []string{".wip/", "wip/"},
+				AllowPaths: []string{".ledge/", ".know/"},
 				Timeout:    3,
 			},
 		},
@@ -86,7 +86,7 @@ func TestResolveHookDefaults(t *testing.T) {
 			name: "rite timeout overrides shared",
 			shared: &HookDefaults{
 				WriteGuard: &WriteGuardDefaults{
-					AllowPaths: []string{".wip/"},
+					AllowPaths: []string{".ledge/"},
 					Timeout:    3,
 				},
 			},
@@ -96,7 +96,7 @@ func TestResolveHookDefaults(t *testing.T) {
 				},
 			},
 			want: &WriteGuardDefaults{
-				AllowPaths: []string{".wip/"},
+				AllowPaths: []string{".ledge/"},
 				Timeout:    5,
 			},
 		},
@@ -104,12 +104,12 @@ func TestResolveHookDefaults(t *testing.T) {
 			name: "default timeout applied when zero",
 			shared: &HookDefaults{
 				WriteGuard: &WriteGuardDefaults{
-					AllowPaths: []string{".wip/"},
+					AllowPaths: []string{".ledge/"},
 				},
 			},
 			rite: nil,
 			want: &WriteGuardDefaults{
-				AllowPaths: []string{".wip/"},
+				AllowPaths: []string{".ledge/"},
 				Timeout:    defaultWriteGuardTimeout,
 			},
 		},
@@ -139,7 +139,7 @@ func TestResolveHookDefaults(t *testing.T) {
 
 func TestResolveWriteGuard(t *testing.T) {
 	defaults := &WriteGuardDefaults{
-		AllowPaths: []string{".wip/", "wip/"},
+		AllowPaths: []string{".ledge/", ".know/"},
 		Timeout:    3,
 	}
 
@@ -156,7 +156,7 @@ func TestResolveWriteGuard(t *testing.T) {
 			agentName: "cruft-cutter",
 			agentWG:   true,
 			want: &ResolvedWriteGuard{
-				AllowPaths: []string{".wip/", "wip/"},
+				AllowPaths: []string{".ledge/", ".know/"},
 				Timeout:    3,
 				AgentName:  "cruft-cutter",
 			},
@@ -190,7 +190,7 @@ func TestResolveWriteGuard(t *testing.T) {
 				"extra-paths": []interface{}{"docs/"},
 			},
 			want: &ResolvedWriteGuard{
-				AllowPaths: []string{".wip/", "wip/", "docs/"},
+				AllowPaths: []string{".ledge/", ".know/", "docs/"},
 				Timeout:    3,
 				AgentName:  "risk-assessor",
 			},
@@ -200,10 +200,10 @@ func TestResolveWriteGuard(t *testing.T) {
 			defaults:  defaults,
 			agentName: "risk-assessor",
 			agentWG: map[string]interface{}{
-				"extra-paths": []interface{}{".wip/"}, // already in defaults
+				"extra-paths": []interface{}{".ledge/"}, // already in defaults
 			},
 			want: &ResolvedWriteGuard{
-				AllowPaths: []string{".wip/", "wip/"},
+				AllowPaths: []string{".ledge/", ".know/"},
 				Timeout:    3,
 				AgentName:  "risk-assessor",
 			},
@@ -245,7 +245,7 @@ func TestGenerateWriteGuardHooks(t *testing.T) {
 
 	t.Run("generates correct CC-compatible structure", func(t *testing.T) {
 		resolved := &ResolvedWriteGuard{
-			AllowPaths: []string{".wip/", "wip/", "docs/ecosystem/"},
+			AllowPaths: []string{".ledge/", ".know/", "docs/ecosystem/"},
 			Timeout:    3,
 			AgentName:  "ecosystem-analyst",
 		}
@@ -291,7 +291,7 @@ func TestGenerateWriteGuardHooks(t *testing.T) {
 		}
 
 		// Verify command string
-		wantCmd := "ari hook agent-guard --agent ecosystem-analyst --allow-path .wip/ --allow-path wip/ --allow-path docs/ecosystem/ --output json"
+		wantCmd := "ari hook agent-guard --agent ecosystem-analyst --allow-path .ledge/ --allow-path .know/ --allow-path docs/ecosystem/ --output json"
 		if hook["command"] != wantCmd {
 			t.Errorf("command = %q, want %q", hook["command"], wantCmd)
 		}

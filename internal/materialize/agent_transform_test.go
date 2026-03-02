@@ -6,7 +6,7 @@ import (
 )
 
 var testDefaults = &WriteGuardDefaults{
-	AllowPaths: []string{".wip/", "wip/"},
+	AllowPaths: []string{".ledge/", ".know/"},
 	Timeout:    3,
 }
 
@@ -37,7 +37,7 @@ Body content here.
 	}
 
 	// hooks block must be present with correct command
-	if !strings.Contains(output, "ari hook agent-guard --agent cruft-cutter --allow-path .wip/ --allow-path wip/ --output json") {
+	if !strings.Contains(output, "ari hook agent-guard --agent cruft-cutter --allow-path .ledge/ --allow-path .know/ --output json") {
 		t.Errorf("output missing generated write-guard command:\n%s", output)
 	}
 
@@ -69,11 +69,11 @@ write-guard:
 	output := string(result)
 
 	// Must contain all three paths
-	if !strings.Contains(output, "--allow-path .wip/") {
-		t.Error("output missing .wip/ path")
+	if !strings.Contains(output, "--allow-path .ledge/") {
+		t.Error("output missing .ledge/ path")
 	}
-	if !strings.Contains(output, "--allow-path wip/") {
-		t.Error("output missing wip/ path")
+	if !strings.Contains(output, "--allow-path .know/") {
+		t.Error("output missing .know/ path")
 	}
 	if !strings.Contains(output, "--allow-path docs/") {
 		t.Error("output missing docs/ path")

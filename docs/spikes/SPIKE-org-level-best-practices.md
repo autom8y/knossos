@@ -319,19 +319,15 @@ Deploy via MDM or file-based managed settings:
 {
   "permissions": {
     "deny": ["Bash(rm -rf *)", "Read(.env)", "Read(.env.*)"]
-  },
-  "allowManagedHooksOnly": true,
-  "hooks": {
-    "PreToolUse": [{
-      "matcher": "Edit|Write|MultiEdit",
-      "hooks": [{
-        "type": "command",
-        "command": "ari hook agent-guard --output json"
-      }]
-    }]
   }
 }
 ```
+
+> **Note**: Do NOT add a blanket `agent-guard` hook in managed settings without
+> `--allow-path` flags. A pathless `ari hook agent-guard` unconditionally denies
+> ALL write operations. Agent-guard enforcement is handled correctly by the
+> per-agent materialization pipeline via manifest `hook_defaults` and agent
+> `write-guard:` frontmatter. See `SPIKE-agent-guard-ledge-path-blockage.md`.
 
 ### 8.3 Shared Rules via Git
 
