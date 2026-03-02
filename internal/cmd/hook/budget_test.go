@@ -59,7 +59,7 @@ func TestRunBudget_Disabled(t *testing.T) {
 	t.Setenv(envSessionKey, "disabled-test")
 
 	// Clean up any state file from previous runs
-	expectedPath := filepath.Join(os.TempDir(), "ariadne-msg-count-disabled-test")
+	expectedPath := filepath.Join(os.TempDir(), "ari-msg-count-disabled-test")
 	os.Remove(expectedPath)
 
 	ctx := newTestContext(t)
@@ -134,12 +134,12 @@ func TestResolveStateFile(t *testing.T) {
 		},
 	}
 
-	t.Run("uses ARIADNE_SESSION_KEY", func(t *testing.T) {
+	t.Run("uses ARI_SESSION_KEY", func(t *testing.T) {
 		t.Setenv(envSessionKey, "my-test-key")
 		t.Setenv("CLAUDE_SESSION_ID", "should-not-use")
 
 		result := resolveStateFile(ctx)
-		expected := filepath.Join(os.TempDir(), "ariadne-msg-count-my-test-key")
+		expected := filepath.Join(os.TempDir(), "ari-msg-count-my-test-key")
 		if result != expected {
 			t.Errorf("resolveStateFile() = %q, want %q", result, expected)
 		}
@@ -152,7 +152,7 @@ func TestResolveStateFile(t *testing.T) {
 		t.Setenv("CLAUDE_SESSION_ID", "sess-abc-123")
 
 		result := resolveStateFile(ctx)
-		expected := filepath.Join(os.TempDir(), "ariadne-msg-count-sess-abc-123")
+		expected := filepath.Join(os.TempDir(), "ari-msg-count-sess-abc-123")
 		if result != expected {
 			t.Errorf("resolveStateFile() = %q, want %q", result, expected)
 		}
@@ -162,7 +162,7 @@ func TestResolveStateFile(t *testing.T) {
 		t.Setenv(envSessionKey, "test/key with spaces!@#")
 
 		result := resolveStateFile(ctx)
-		expected := filepath.Join(os.TempDir(), "ariadne-msg-count-test_key_with_spaces___")
+		expected := filepath.Join(os.TempDir(), "ari-msg-count-test_key_with_spaces___")
 		if result != expected {
 			t.Errorf("resolveStateFile() = %q, want %q", result, expected)
 		}
@@ -171,7 +171,7 @@ func TestResolveStateFile(t *testing.T) {
 
 func TestRunBudget_WarnThreshold(t *testing.T) {
 	tmpDir := t.TempDir()
-	stateFile := filepath.Join(tmpDir, "ariadne-msg-count-warn-test")
+	stateFile := filepath.Join(tmpDir, "ari-msg-count-warn-test")
 
 	testutil.SetupEnv(t, &testutil.HookEnv{
 		Event:       "PostToolUse",
@@ -190,9 +190,9 @@ func TestRunBudget_WarnThreshold(t *testing.T) {
 	}
 
 	// We need the state file to be at the resolved path
-	// Since resolveStateFile uses os.TempDir(), we set ARIADNE_SESSION_KEY
+	// Since resolveStateFile uses os.TempDir(), we set ARI_SESSION_KEY
 	// and pre-seed the file at that path
-	expectedPath := filepath.Join(os.TempDir(), "ariadne-msg-count-warn-test")
+	expectedPath := filepath.Join(os.TempDir(), "ari-msg-count-warn-test")
 	if err := os.WriteFile(expectedPath, []byte("2"), 0644); err != nil {
 		t.Fatalf("Failed to seed counter at temp: %v", err)
 	}
@@ -223,7 +223,7 @@ func TestRunBudget_ParkThreshold(t *testing.T) {
 	t.Setenv(envMsgWarn, "1000") // high warn so we only test park
 	t.Setenv(envMsgPark, "5")
 
-	expectedPath := filepath.Join(os.TempDir(), "ariadne-msg-count-park-test")
+	expectedPath := filepath.Join(os.TempDir(), "ari-msg-count-park-test")
 	if err := os.WriteFile(expectedPath, []byte("4"), 0644); err != nil {
 		t.Fatalf("Failed to seed counter: %v", err)
 	}
@@ -253,7 +253,7 @@ func TestRunBudget_OneShot(t *testing.T) {
 	t.Setenv(envSessionKey, "oneshot-test")
 	t.Setenv(envMsgWarn, "1")
 
-	expectedPath := filepath.Join(os.TempDir(), "ariadne-msg-count-oneshot-test")
+	expectedPath := filepath.Join(os.TempDir(), "ari-msg-count-oneshot-test")
 	// Start clean
 	os.Remove(expectedPath)
 	os.Remove(expectedPath + ".warned")
@@ -300,7 +300,7 @@ func TestRunBudget_CustomThresholds(t *testing.T) {
 	t.Setenv(envMsgWarn, "100")
 	t.Setenv(envMsgPark, "200")
 
-	expectedPath := filepath.Join(os.TempDir(), "ariadne-msg-count-custom-thresh")
+	expectedPath := filepath.Join(os.TempDir(), "ari-msg-count-custom-thresh")
 	os.Remove(expectedPath)
 	t.Cleanup(func() {
 		os.Remove(expectedPath)
@@ -334,7 +334,7 @@ func TestRunBudget_InvalidThresholds(t *testing.T) {
 	t.Setenv(envMsgWarn, "not-a-number")
 	t.Setenv(envMsgPark, "-5")
 
-	expectedPath := filepath.Join(os.TempDir(), "ariadne-msg-count-invalid-thresh")
+	expectedPath := filepath.Join(os.TempDir(), "ari-msg-count-invalid-thresh")
 	os.Remove(expectedPath)
 	t.Cleanup(func() {
 		os.Remove(expectedPath)

@@ -29,7 +29,7 @@ func newListCmd(ctx *cmdContext) *cobra.Command {
 		Short: "List sessions with status filtering",
 		Long: `List sessions with optional filtering by status.
 
-Parked sessions older than ARIADNE_STALE_SESSION_DAYS (default: 2 days)
+Parked sessions older than ARI_STALE_SESSION_DAYS (default: 2 days)
 are annotated as stale with a suggestion to wrap them. Use --all to
 include archived sessions from the archive directory.
 
@@ -180,10 +180,10 @@ func loadSessionSummaryFromPath(ctxPath, sessionID, currentID string) (output.Se
 }
 
 // staleSessionThreshold returns the duration after which a parked session
-// is considered stale. Configurable via ARIADNE_STALE_SESSION_DAYS (default: 2).
+// is considered stale. Configurable via ARI_STALE_SESSION_DAYS (default: 2).
 func staleSessionThreshold() time.Duration {
 	days := 2
-	if env := os.Getenv("ARIADNE_STALE_SESSION_DAYS"); env != "" {
+	if env := os.Getenv("ARI_STALE_SESSION_DAYS"); env != "" {
 		if d, err := strconv.Atoi(env); err == nil && d > 0 {
 			days = d
 		}

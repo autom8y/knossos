@@ -32,10 +32,10 @@ func (b BudgetOutput) Text() string {
 
 // Budget configuration from environment.
 const (
-	envBudgetDisable = "ARIADNE_BUDGET_DISABLE"
-	envMsgWarn       = "ARIADNE_MSG_WARN"
-	envMsgPark       = "ARIADNE_MSG_PARK"
-	envSessionKey    = "ARIADNE_SESSION_KEY"
+	envBudgetDisable = "ARI_BUDGET_DISABLE"
+	envMsgWarn       = "ARI_MSG_WARN"
+	envMsgPark       = "ARI_MSG_PARK"
+	envSessionKey    = "ARI_SESSION_KEY"
 	defaultWarn      = 250
 )
 
@@ -52,10 +52,10 @@ This hook is triggered on PostToolUse events (all tools). It:
 - Alerts (once) when park threshold is crossed
 
 Environment Variables:
-  ARIADNE_MSG_WARN       Warning threshold (default: 250)
-  ARIADNE_MSG_PARK       Park suggestion threshold (default: disabled)
-  ARIADNE_BUDGET_DISABLE Set to 1 to disable budget tracking
-  ARIADNE_SESSION_KEY    Explicit session key (for testing)
+  ARI_MSG_WARN       Warning threshold (default: 250)
+  ARI_MSG_PARK       Park suggestion threshold (default: disabled)
+  ARI_BUDGET_DISABLE Set to 1 to disable budget tracking
+  ARI_SESSION_KEY    Explicit session key (for testing)
 
 Performance: <5ms target execution time (file I/O only).`,
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -141,7 +141,7 @@ func runBudget(ctx *cmdContext) error {
 }
 
 // resolveStateFile determines the temp file path for counter state.
-// Key resolution: ARIADNE_SESSION_KEY > CLAUDE_SESSION_ID > ppid-{PPID}
+// Key resolution: ARI_SESSION_KEY > CLAUDE_SESSION_ID > ppid-{PPID}
 func resolveStateFile(ctx *cmdContext) string {
 	var key string
 
@@ -164,7 +164,7 @@ func resolveStateFile(ctx *cmdContext) string {
 		return '_'
 	}, key)
 
-	return filepath.Join(os.TempDir(), "ariadne-msg-count-"+key)
+	return filepath.Join(os.TempDir(), "ari-msg-count-"+key)
 }
 
 // incrementCounter atomically reads, increments, and writes the counter.
@@ -182,7 +182,7 @@ func incrementCounter(stateFile string) (int, error) {
 
 	// Atomic write: temp file + rename
 	dir := filepath.Dir(stateFile)
-	tmpFile, err := os.CreateTemp(dir, "ariadne-budget-*")
+	tmpFile, err := os.CreateTemp(dir, "ari-budget-*")
 	if err != nil {
 		// Fallback: direct write
 		return count, os.WriteFile(stateFile, []byte(strconv.Itoa(count)), 0644)

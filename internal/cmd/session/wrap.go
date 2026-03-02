@@ -332,7 +332,7 @@ func runWrap(ctx *cmdContext, opts wrapOptions) error {
 // collectCognitiveBudget attempts to collect cognitive budget metadata from the session.
 // Returns nil if CLEW_RECORD.ndjson doesn't exist or cannot be read.
 // Falls back to THREAD_RECORD.ndjson for legacy sessions.
-// Future: Integrate with ARIADNE_MSG_WARN/ARIADNE_MSG_PARK thresholds.
+// Future: Integrate with ARI_MSG_WARN/ARI_MSG_PARK thresholds.
 func collectCognitiveBudget(sessionDir string) map[string]any {
 	// Try new path first, fall back to legacy path
 	clewRecordPath := sessionDir + "/CLEW_RECORD.ndjson"
@@ -376,7 +376,7 @@ func collectCognitiveBudget(sessionDir string) map[string]any {
 	// Return basic budget data
 	// Future enhancements:
 	// - Parse individual events to categorize by tool type
-	// - Track message count vs thresholds (ARIADNE_MSG_WARN)
+	// - Track message count vs thresholds (ARI_MSG_WARN)
 	// - Include park suggestions if threshold exceeded
 	return map[string]any{
 		"total_tool_calls": totalEvents,

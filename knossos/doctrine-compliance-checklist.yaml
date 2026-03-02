@@ -36,8 +36,8 @@ categories:
           - ariadne/internal/hook/threadcontract/event.go
           - .claude/hooks/ari/cognitive-budget.sh
           - .claude/hooks/ari/autopark.sh
-        validation_criteria: "ARIADNE_MSG_WARN threshold triggers warning; ari hook autopark fires on Stop event"
-        notes: "Environment variables ARIADNE_MSG_WARN, ARIADNE_MSG_PARK, ARIADNE_BUDGET_DISABLE implemented"
+        validation_criteria: "ARI_MSG_WARN threshold triggers warning; ari hook autopark fires on Stop event"
+        notes: "Environment variables ARI_MSG_WARN, ARI_MSG_PARK, ARI_BUDGET_DISABLE implemented"
 
       - id: WE-002
         name: "Budget-aware session parking"

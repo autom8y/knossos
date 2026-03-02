@@ -171,7 +171,7 @@ func cleanupBudgetFiles(sessionKey string) {
 		return '_'
 	}, sessionKey)
 
-	base := filepath.Join(os.TempDir(), "ariadne-msg-count-"+key)
+	base := filepath.Join(os.TempDir(), "ari-msg-count-"+key)
 	// Remove counter file and marker files
 	for _, suffix := range []string{"", ".warned", ".park-warned"} {
 		os.Remove(base + suffix)

@@ -27,7 +27,7 @@ func newGcCmd(ctx *cmdContext) *cobra.Command {
 		Short: "Archive stale parked sessions",
 		Long: `Scan for PARKED sessions older than the stale threshold and archive them.
 
-The default stale threshold is set by ARIADNE_STALE_SESSION_DAYS (default: 2 days).
+The default stale threshold is set by ARI_STALE_SESSION_DAYS (default: 2 days).
 Override with --stale-after for a one-off run.
 
 Without --force, prompt for confirmation before wrapping each session.
@@ -49,7 +49,7 @@ Context:
 		},
 	}
 
-	cmd.Flags().IntVar(&opts.staleDays, "stale-after", 0, "Days parked before considered stale (default: ARIADNE_STALE_SESSION_DAYS or 2)")
+	cmd.Flags().IntVar(&opts.staleDays, "stale-after", 0, "Days parked before considered stale (default: ARI_STALE_SESSION_DAYS or 2)")
 	cmd.Flags().BoolVar(&opts.force, "force", false, "Archive all stale sessions without prompting")
 	cmd.Flags().BoolVar(&opts.dryRun, "dry-run", false, "List stale sessions without archiving")
 
