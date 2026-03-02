@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/autom8y/knossos/internal/checksum"
+	"github.com/autom8y/knossos/internal/fileutil"
 	"github.com/autom8y/knossos/internal/paths"
 	"github.com/autom8y/knossos/internal/provenance"
 )
@@ -34,7 +35,7 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claud
 	}
 
 	// NOTE: We intentionally do NOT pre-delete managed agents before rewriting.
-	// writeIfChanged() handles overwrite-if-different atomically. Pre-deletion
+	// fileutil.WriteIfChanged() handles overwrite-if-different atomically. Pre-deletion
 	// causes CC's file watcher to see DELETE events for files that are immediately
 	// recreated, which crashes/disrupts active Claude Code sessions.
 
@@ -63,7 +64,7 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claud
 		content = transformed
 
 		destPath := filepath.Join(agentsDir, agent.Name+".md")
-		written, err := writeIfChanged(destPath, content, 0644)
+		written, err := fileutil.WriteIfChanged(destPath, content, 0644)
 		if err != nil {
 			return err
 		}
@@ -118,7 +119,7 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claud
 			if err := os.MkdirAll(filepath.Dir(destPath), 0755); err != nil {
 				return err
 			}
-			written, err := writeIfChanged(destPath, content, 0644)
+			written, err := fileutil.WriteIfChanged(destPath, content, 0644)
 			if err != nil {
 				return err
 			}
@@ -181,7 +182,7 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claud
 				return err
 			}
 
-			written, err := writeIfChanged(destPath, content, 0644)
+			written, err := fileutil.WriteIfChanged(destPath, content, 0644)
 			if err != nil {
 				return err
 			}

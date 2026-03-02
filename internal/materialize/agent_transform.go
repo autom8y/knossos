@@ -133,9 +133,16 @@ func reconstructFrontmatter(fmMap map[string]interface{}, body []byte) ([]byte, 
 	return result, nil
 }
 
-// loadSharedHookDefaults loads hook_defaults from the shared rite manifest.
-// Returns nil if the shared manifest doesn't exist or has no hook_defaults.
-func (m *Materializer) loadSharedHookDefaults(resolved *ResolvedRite) *HookDefaults {
+// loadSharedManifest loads and parses the shared rite manifest (rites/shared/manifest.yaml).
+// Returns nil and a nil error if the manifest doesn't exist (graceful degradation).
+// Returns nil and a non-nil error only on parse failure (caller should log and degrade).
+//
+// Load-path order:
+//  1. Embedded FS (SourceEmbedded): reads from the embedded rites filesystem
+//  2. $KNOSSOS_HOME/rites/shared/manifest.yaml (satellite-safe: shared rites are never
+//     inside the satellite project directory)
+//  3. Project root fallback (knossos-on-knossos: project IS knossos)
+func (m *Materializer) loadSharedManifest(resolved *ResolvedRite) (*RiteManifest, error) {
 	var data []byte
 	var err error
 
@@ -157,14 +164,27 @@ func (m *Materializer) loadSharedHookDefaults(resolved *ResolvedRite) *HookDefau
 		data, err = os.ReadFile(sharedPath)
 	}
 	if err != nil {
-		return nil // Shared manifest not found — graceful degradation
+		return nil, nil // Shared manifest not found — graceful degradation
 	}
 
 	var manifest RiteManifest
 	if err := yaml.Unmarshal(data, &manifest); err != nil {
+		return nil, err
+	}
+
+	return &manifest, nil
+}
+
+// loadSharedHookDefaults loads hook_defaults from the shared rite manifest.
+// Returns nil if the shared manifest doesn't exist or has no hook_defaults.
+func (m *Materializer) loadSharedHookDefaults(resolved *ResolvedRite) *HookDefaults {
+	manifest, err := m.loadSharedManifest(resolved)
+	if err != nil {
 		log.Printf("Warning: failed to parse shared manifest for hook_defaults: %v", err)
 		return nil
 	}
-
+	if manifest == nil {
+		return nil
+	}
 	return manifest.HookDefaults
 }

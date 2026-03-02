@@ -45,6 +45,8 @@ func SyncMena(sources []MenaSource, opts MenaProjectionOptions) (*MenaProjection
 	if err != nil {
 		return nil, err
 	}
+	// Propagate namespace collision warnings from resolution to result
+	result.Warnings = append(result.Warnings, resolution.Warnings...)
 
 	// Pass 3: Write directory entries to target directories.
 	for _, entry := range resolution.Entries {
@@ -58,25 +60,23 @@ func SyncMena(sources []MenaSource, opts MenaProjectionOptions) (*MenaProjection
 		// Hide companions for dromena only
 		hideCompanions := entry.MenaType == "dro"
 
+		// Open a unified fs.FS view of this source (handles both embedded and
+		// filesystem sources) so the copy and stale-file-collection paths share
+		// one implementation.
+		srcFS, srcRoot, err := openMenaFS(entry.Source)
+		if err != nil {
+			return nil, err
+		}
+
 		// Collect source filenames (with extension stripping) BEFORE writing,
 		// so we can remove only stale files afterwards instead of nuking the whole dir.
 		var sourceFileNames map[string]bool
 		if opts.Mode == MenaProjectionDestructive {
-			sourceFileNames = collectSourceFileNames(entry.Source, hideCompanions)
+			sourceFileNames = collectFSFileNames(srcFS, hideCompanions)
 		}
 
-		if entry.Source.IsEmbedded {
-			sub, err := fs.Sub(entry.Source.Fsys, entry.Source.FsysPath)
-			if err != nil {
-				return nil, err
-			}
-			if err := copyDirFromFSWithStripping(sub, destDir, hideCompanions); err != nil {
-				return nil, err
-			}
-		} else {
-			if err := copyDirWithStripping(entry.Source.Path, destDir, hideCompanions); err != nil {
-				return nil, err
-			}
+		if err := copyDirFS(srcFS, srcRoot, destDir, hideCompanions); err != nil {
+			return nil, err
 		}
 
 		// For dromena: INDEX.md was promoted to destDir.md at parent level.
@@ -87,7 +87,9 @@ func SyncMena(sources []MenaSource, opts MenaProjectionOptions) (*MenaProjection
 			if _, statErr := os.Stat(oldIndex); statErr == nil {
 				os.Remove(oldIndex)
 			}
-			CleanEmptyDirs(destDir)
+			for _, cleanErr := range CleanEmptyDirs(destDir) {
+				result.Warnings = append(result.Warnings, cleanErr.Error())
+			}
 			// Remove destDir itself if now empty (only had INDEX.md)
 			if entries, readErr := os.ReadDir(destDir); readErr == nil && len(entries) == 0 {
 				os.Remove(destDir)
@@ -261,17 +263,33 @@ func cleanStaleMenaEntries(opts MenaProjectionOptions, result *MenaProjectionRes
 		}
 	}
 
-	// Also clean empty parent directories left behind by removal
+	// Also clean empty parent directories left behind by removal.
+	// Surface non-permission errors as warnings -- permission errors on shared
+	// or read-only directories are acceptable and silently ignored.
 	for _, dir := range []string{opts.TargetCommandsDir, opts.TargetSkillsDir} {
-		CleanEmptyDirs(dir)
+		for _, cleanErr := range CleanEmptyDirs(dir) {
+			result.Warnings = append(result.Warnings, cleanErr.Error())
+		}
 	}
 }
 
 // CleanEmptyDirs removes empty subdirectories within a directory.
-func CleanEmptyDirs(root string) {
+// Returns non-permission errors encountered during cleanup (permission errors
+// are acceptable on shared/read-only directories and are silently ignored).
+// Callers should surface these errors as warnings, not abort the pipeline.
+func CleanEmptyDirs(root string) []error {
+	return cleanEmptyDirsRecursive(root)
+}
+
+// cleanEmptyDirsRecursive is the internal recursive implementation of CleanEmptyDirs.
+func cleanEmptyDirsRecursive(root string) []error {
+	var errs []error
 	entries, err := os.ReadDir(root)
 	if err != nil {
-		return
+		if !os.IsPermission(err) {
+			errs = append(errs, fmt.Errorf("CleanEmptyDirs: failed to read directory %s: %w", root, err))
+		}
+		return errs
 	}
 	for _, entry := range entries {
 		if !entry.IsDir() {
@@ -280,165 +298,27 @@ func CleanEmptyDirs(root string) {
 		subdir := filepath.Join(root, entry.Name())
 		subEntries, err := os.ReadDir(subdir)
 		if err != nil {
+			if !os.IsPermission(err) {
+				errs = append(errs, fmt.Errorf("CleanEmptyDirs: failed to read subdirectory %s: %w", subdir, err))
+			}
 			continue
 		}
 		if len(subEntries) == 0 {
-			os.Remove(subdir)
+			if rmErr := os.Remove(subdir); rmErr != nil && !os.IsPermission(rmErr) {
+				errs = append(errs, fmt.Errorf("CleanEmptyDirs: failed to remove empty directory %s: %w", subdir, rmErr))
+			}
 		} else {
-			CleanEmptyDirs(subdir)
+			errs = append(errs, cleanEmptyDirsRecursive(subdir)...)
+			// Re-read after recursive cleanup to check if now empty
 			subEntries, _ = os.ReadDir(subdir)
 			if len(subEntries) == 0 {
-				os.Remove(subdir)
+				if rmErr := os.Remove(subdir); rmErr != nil && !os.IsPermission(rmErr) {
+					errs = append(errs, fmt.Errorf("CleanEmptyDirs: failed to remove empty directory %s: %w", subdir, rmErr))
+				}
 			}
 		}
 	}
-}
-
-// copyDirWithStripping copies all files from src to dst, applying
-// StripMenaExtension to filenames during copy.
-func copyDirWithStripping(src, dst string, hideCompanions bool) error {
-	return filepath.WalkDir(src, func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-
-		relPath, err := filepath.Rel(src, path)
-		if err != nil {
-			return err
-		}
-
-		dir := filepath.Dir(relPath)
-		base := StripMenaExtension(filepath.Base(relPath))
-		strippedRel := filepath.Join(dir, base)
-		destPath := filepath.Join(dst, strippedRel)
-
-		if d.IsDir() {
-			return os.MkdirAll(destPath, 0755)
-		}
-
-		content, err := os.ReadFile(path)
-		if err != nil {
-			return err
-		}
-
-		// For dromena: promote top-level INDEX.md to parent level (dst.md)
-		if hideCompanions && base == "INDEX.md" && dir == "." {
-			destPath = dst + ".md"
-		}
-
-		// For legomena: rename top-level INDEX.md → SKILL.md (CC entrypoint convention).
-		// CC reads SKILL.md as the skill entrypoint; INDEX.md is not recognized.
-		if !hideCompanions && base == "INDEX.md" && dir == "." {
-			base = "SKILL.md"
-			destPath = filepath.Join(dst, "SKILL.md")
-		}
-
-		// Apply companion hiding for dromena non-INDEX markdown files
-		if hideCompanions && base != "INDEX.md" && strings.HasSuffix(base, ".md") {
-			content = InjectCompanionHideFrontmatter(content)
-		}
-
-		if err := os.MkdirAll(filepath.Dir(destPath), 0755); err != nil {
-			return err
-		}
-		_, err = fileutil.WriteIfChanged(destPath, content, 0644)
-		return err
-	})
-}
-
-// copyDirFromFSWithStripping copies all files from an fs.FS to a destination
-// directory on disk, applying StripMenaExtension to filenames during copy.
-func copyDirFromFSWithStripping(fsys fs.FS, dst string, hideCompanions bool) error {
-	return fs.WalkDir(fsys, ".", func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-
-		dir := filepath.Dir(path)
-		base := StripMenaExtension(filepath.Base(path))
-		strippedPath := filepath.Join(dir, base)
-		destPath := filepath.Join(dst, strippedPath)
-
-		if d.IsDir() {
-			return os.MkdirAll(destPath, 0755)
-		}
-
-		content, err := fs.ReadFile(fsys, path)
-		if err != nil {
-			return err
-		}
-
-		// For dromena: promote top-level INDEX.md to parent level (dst.md)
-		if hideCompanions && base == "INDEX.md" && dir == "." {
-			destPath = dst + ".md"
-		}
-
-		// For legomena: rename top-level INDEX.md → SKILL.md (CC entrypoint convention).
-		// CC reads SKILL.md as the skill entrypoint; INDEX.md is not recognized.
-		if !hideCompanions && base == "INDEX.md" && dir == "." {
-			base = "SKILL.md"
-			destPath = filepath.Join(dst, "SKILL.md")
-		}
-
-		// Apply companion hiding for dromena non-INDEX markdown files
-		if hideCompanions && base != "INDEX.md" && strings.HasSuffix(base, ".md") {
-			content = InjectCompanionHideFrontmatter(content)
-		}
-
-		if err := os.MkdirAll(filepath.Dir(destPath), 0755); err != nil {
-			return err
-		}
-		_, err = fileutil.WriteIfChanged(destPath, content, 0644)
-		return err
-	})
-}
-
-// collectSourceFileNames builds the set of destination-relative file paths
-// that a mena source will produce (after extension stripping and promotion).
-// hideCompanions must match the value passed to copyDirWithStripping/copyDirFromFSWithStripping
-// so that the legomena INDEX.md → SKILL.md rename is reflected in the expected filenames.
-func collectSourceFileNames(src MenaSource, hideCompanions bool) map[string]bool {
-	names := make(map[string]bool)
-
-	if src.IsEmbedded {
-		sub, err := fs.Sub(src.Fsys, src.FsysPath)
-		if err != nil {
-			return names
-		}
-		fs.WalkDir(sub, ".", func(path string, d fs.DirEntry, walkErr error) error {
-			if walkErr != nil || d.IsDir() {
-				return walkErr
-			}
-			dir := filepath.Dir(path)
-			base := StripMenaExtension(filepath.Base(path))
-			// Mirror legomena promotion: INDEX.md → SKILL.md at root level
-			if !hideCompanions && base == "INDEX.md" && dir == "." {
-				base = "SKILL.md"
-			}
-			names[filepath.Join(dir, base)] = true
-			return nil
-		})
-	} else if src.Path != "" {
-		filepath.WalkDir(src.Path, func(path string, d fs.DirEntry, walkErr error) error {
-			if walkErr != nil || d.IsDir() {
-				return walkErr
-			}
-			relPath, relErr := filepath.Rel(src.Path, path)
-			if relErr != nil {
-				return nil
-			}
-			dir := filepath.Dir(relPath)
-			base := StripMenaExtension(filepath.Base(relPath))
-			// Mirror legomena promotion: INDEX.md → SKILL.md at root level
-			if !hideCompanions && base == "INDEX.md" && dir == "." {
-				base = "SKILL.md"
-			}
-			names[filepath.Join(dir, base)] = true
-			return nil
-		})
-	}
-
-	return names
+	return errs
 }
 
 // removeStaleFiles removes files in destDir that are NOT in the sourceFileNames set.
@@ -456,5 +336,9 @@ func removeStaleFiles(destDir string, sourceFileNames map[string]bool) {
 		}
 		return nil
 	})
-	CleanEmptyDirs(destDir)
+	// Log non-permission errors from CleanEmptyDirs. Permission errors are
+	// acceptable on shared/read-only directories and are silently ignored.
+	for _, cleanErr := range CleanEmptyDirs(destDir) {
+		log.Printf("Warning: %s", cleanErr)
+	}
 }

@@ -47,8 +47,6 @@ Core workflow execution patterns for development and operations.
 | Skill | 10x-dev | ecosystem | doc-team | debt | sre | security | strategy | hygiene | intelligence | rnd | slop-chop |
 |-------|:-------:|:---------:|:--------:|:----:|:---:|:--------:|:--------:|:-------:|:------------:|:---:|:---------:|
 | 10x-workflow | **P** | S | S | S | S | S | S | S | S | S | S |
-| architect-ref | **P** | S | | | S | S | | S | | S | |
-| build-ref | **P** | S | | | S | S | | S | | S | |
 | hotfix-ref | **P** | | | | **P** | S | | S | | | |
 | orchestration | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** |
 | pr-ref | **P** | **P** | S | | S | S | | S | | S | **P** |
@@ -57,6 +55,17 @@ Core workflow execution patterns for development and operations.
 | spike-ref | **P** | S | | | S | S | | | S | **P** | |
 | sprint-ref | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** |
 | task-ref | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** | **P** |
+
+---
+
+## Workflow Commands (Dromena)
+
+These are slash commands (.dro.md) that execute as transient actions. They are NOT skills and cannot be preloaded.
+
+| Command | 10x-dev | ecosystem | doc-team | debt | sre | security | strategy | hygiene | intelligence | rnd | slop-chop |
+|---------|:-------:|:---------:|:--------:|:----:|:---:|:--------:|:--------:|:-------:|:------------:|:---:|:---------:|
+| /architect (architect-ref) | **P** | S | | | S | S | | S | | S | |
+| /build (build-ref) | **P** | S | | | S | S | | S | | S | |
 
 ---
 
@@ -77,11 +86,11 @@ Session lifecycle control for all teams.
 
 ## Team Switch Skills
 
-Quick team context switching.
+Quick team context switching. These are dromena (slash commands), not skills. They materialize to `.claude/commands/`.
 
-| Skill | 10x-dev | ecosystem | doc-team | debt | sre | security | strategy | hygiene | intelligence | rnd | slop-chop |
-|-------|:-------:|:---------:|:--------:|:----:|:---:|:--------:|:--------:|:-------:|:------------:|:---:|:---------:|
-| 10x-ref | **P** | S | S | S | S | S | S | S | S | S | |
+| Command | 10x-dev | ecosystem | doc-team | debt | sre | security | strategy | hygiene | intelligence | rnd | slop-chop |
+|---------|:-------:|:---------:|:--------:|:----:|:---:|:--------:|:--------:|:-------:|:------------:|:---:|:---------:|
+| /10x (10x-ref) | **P** | S | S | S | S | S | S | S | S | S | |
 | debt-ref | S | S | S | **P** | S | | | S | | | |
 | docs-ref | S | S | **P** | S | S | S | S | S | S | S | |
 | hygiene-ref | S | **P** | S | S | S | | | **P** | | | |
@@ -154,7 +163,9 @@ External tool integrations and automation.
 
 ### 10x-dev (Full Development Lifecycle)
 
-**Primary Skills (12)**: doc-artifacts, 10x-workflow, architect-ref, build-ref, hotfix-ref, orchestration, pr-ref, qa-ref, review, spike-ref, sprint-ref, task-ref, start-ref, park-ref, resume, wrap-ref, handoff-ref, initiative-scoping, 10x-ref, team-ref, consult-ref, prompting, standards, justfile, worktree-ref
+**Primary Skills**: doc-artifacts, 10x-workflow, hotfix-ref, orchestration, pr-ref, qa-ref, review, spike-ref, sprint-ref, task-ref, start-ref, park-ref, resume, wrap-ref, handoff-ref, initiative-scoping, team-ref, consult-ref, prompting, standards, justfile, worktree-ref
+
+**Primary Commands (dromena)**: /10x (10x-ref), /architect (architect-ref), /build (build-ref)
 
 **Focus**: PRD to TDD to Code to QA pipeline. All core workflow and session skills are primary.
 

@@ -186,12 +186,6 @@ func (m *Materializer) templatesFS(resolved *ResolvedRite) fs.FS {
 	return os.DirFS(m.templatesDir)
 }
 
-// writeIfChanged writes content to path only if it differs from existing content.
-// Uses atomic writes (write to temp file, then rename) to prevent Claude Code's
-// file watcher from seeing partially-written files.
-func writeIfChanged(path string, content []byte, perm os.FileMode) (bool, error) {
-	return fileutil.WriteIfChanged(path, content, perm)
-}
 
 // copyDirFromFS copies all files from an fs.FS to a destination directory on disk.
 func copyDirFromFS(fsys fs.FS, dst string) error {
@@ -210,7 +204,7 @@ func copyDirFromFS(fsys fs.FS, dst string) error {
 		if err := os.MkdirAll(filepath.Dir(destPath), 0755); err != nil {
 			return err
 		}
-		_, err = writeIfChanged(destPath, content, 0644)
+		_, err = fileutil.WriteIfChanged(destPath, content, 0644)
 		return err
 	})
 }
@@ -300,7 +294,7 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 	claudeDir := m.getClaudeDir()
 
 	// Note: the skip guard (skip-if-same-rite) was removed. The pipeline is safe
-	// to always run: selective write preserves user content, and writeIfChanged()
+	// to always run: selective write preserves user content, and fileutil.WriteIfChanged()
 	// prevents unnecessary disk writes. See ADR: "ari sync is safe to run repeatedly."
 
 	// 1. Resolve rite source using 4-tier resolution
@@ -706,7 +700,7 @@ func (m *Materializer) copyDir(src, dst string) error {
 			return err
 		}
 
-		_, err = writeIfChanged(destPath, content, 0644)
+		_, err = fileutil.WriteIfChanged(destPath, content, 0644)
 		return err
 	})
 }

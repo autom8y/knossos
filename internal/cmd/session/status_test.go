@@ -1,6 +1,8 @@
 package session
 
 import (
+	"encoding/json"
+	"io"
 	"os"
 	"path/filepath"
 	"testing"
@@ -8,6 +10,21 @@ import (
 
 	"github.com/autom8y/knossos/internal/cmd/common"
 )
+
+// captureStatusOutput runs f and returns everything written to stdout.
+func captureStatusOutput(f func()) string {
+	old := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
+
+	f()
+
+	w.Close()
+	os.Stdout = old
+
+	out, _ := io.ReadAll(r)
+	return string(out)
+}
 
 // TestStatus_WithSailsColor verifies that sails color is included in status output.
 func TestStatus_WithSailsColor(t *testing.T) {
@@ -85,13 +102,26 @@ type: standard
 		},
 	}
 
-	err := runStatus(ctx)
-	if err != nil {
-		t.Fatalf("runStatus failed: %v", err)
+	var out string
+	var runErr error
+	out = captureStatusOutput(func() {
+		runErr = runStatus(ctx)
+	})
+	if runErr != nil {
+		t.Fatalf("runStatus failed: %v", runErr)
 	}
 
-	// TODO: Capture and verify JSON output contains sails_color: WHITE
-	// For now, we verify no error occurred
+	// Verify JSON output contains sails_color: WHITE
+	var result map[string]any
+	if err := json.Unmarshal([]byte(out), &result); err != nil {
+		t.Fatalf("failed to parse JSON output: %v\noutput: %q", err, out)
+	}
+	sailsColor, ok := result["sails_color"]
+	if !ok {
+		t.Errorf("JSON output missing sails_color field; got: %s", out)
+	} else if sailsColor != "WHITE" {
+		t.Errorf("expected sails_color=WHITE, got %q", sailsColor)
+	}
 }
 
 // TestStatus_WithGraySails verifies gray sails display with base color.

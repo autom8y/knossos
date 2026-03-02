@@ -62,6 +62,7 @@ type MenaProjectionOptions struct {
 type MenaProjectionResult struct {
 	CommandsProjected []string // Relative paths of files written to commands/
 	SkillsProjected   []string // Relative paths of files written to skills/
+	Warnings          []string // Non-fatal diagnostic messages (e.g., namespace collisions)
 }
 
 // menaCollectedEntry represents a leaf mena directory collected for routing.
@@ -84,6 +85,7 @@ type menaStandaloneFile struct {
 type MenaResolution struct {
 	Entries     map[string]MenaResolvedEntry      // source key -> directory entry
 	Standalones map[string]MenaResolvedStandalone // source key -> standalone file
+	Warnings    []string                          // Non-fatal diagnostics from namespace resolution (e.g., collisions)
 }
 
 // MenaResolvedEntry represents a resolved leaf mena directory with flat name and type.

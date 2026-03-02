@@ -2,6 +2,7 @@ package mena
 
 import (
 	"bytes"
+	"fmt"
 	"io/fs"
 	"log"
 	"os"
@@ -13,12 +14,15 @@ import (
 )
 
 // resolveNamespace computes flat command names for dromena entries by reading
-// frontmatter name fields. Returns a map from source key to flat name.
+// frontmatter name fields. Returns a map from source key to flat name and a
+// slice of diagnostic warnings for namespace collisions.
 // On name collision between dromena from different sources, the highest-priority
 // source wins (later in sources array = higher priority: user < shared < dep < rite).
-// On collision with user-owned commands in target dir, knossos entry falls back.
-func resolveNamespace(collected map[string]menaCollectedEntry, standalones map[string]menaStandaloneFile, opts MenaProjectionOptions) map[string]string {
+// On collision with user-owned commands in target dir, knossos entry falls back
+// and a warning is emitted so the user knows why the flat name was not applied.
+func resolveNamespace(collected map[string]menaCollectedEntry, standalones map[string]menaStandaloneFile, opts MenaProjectionOptions) (map[string]string, []string) {
 	flatNames := make(map[string]string)
+	var warnings []string
 
 	type nameCandidate struct {
 		sourceKey   string
@@ -174,8 +178,14 @@ func resolveNamespace(collected map[string]menaCollectedEntry, standalones map[s
 					continue
 				}
 
-				// User-owned or untracked entry -- knossos yields
+				// User-owned or untracked entry -- knossos yields.
+				// Surface a warning so the user knows why the flat name was not applied
+				// and can resolve the conflict manually (rename or remove the user entry).
 				for _, sourceKey := range sourceKeys {
+					warnings = append(warnings, fmt.Sprintf(
+						"namespace collision: flat name %q conflicts with existing user-owned entry %q; knossos falling back to source-path routing for %q",
+						entryName, entryName, sourceKey,
+					))
 					log.Printf("Warning: flat name '%s' collides with existing user entry, falling back to source path for source '%s'", entryName, sourceKey)
 					delete(flatNames, sourceKey)
 				}
@@ -183,7 +193,7 @@ func resolveNamespace(collected map[string]menaCollectedEntry, standalones map[s
 		}
 	}
 
-	return flatNames
+	return flatNames, warnings
 }
 
 // InjectCompanionHideFrontmatter adds user-invocable: false to companion file content.

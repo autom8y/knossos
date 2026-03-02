@@ -57,8 +57,14 @@ type ProvenanceEntry struct {
 	SourcePath string `yaml:"source_path,omitempty"`
 
 	// SourceType records which tier of the source resolution chain provided the file.
-	// Values match materialize.SourceType: "project", "user", "knossos", "explicit", "embedded".
+	// Values are string constants matching materialize/source.SourceType:
+	//   "project", "user", "knossos", "org", "explicit", "embedded".
 	// Additional values for mena provenance: "template", "shared", "dependency".
+	//
+	// NOTE: Provenance is a leaf package (no internal imports per ADR-0026).
+	// It intentionally uses plain strings rather than importing source.SourceType.
+	// String values must stay in sync with internal/materialize/source/types.go.
+	// See TENSION-007 in .know/design-constraints.md for context.
 	SourceType string `yaml:"source_type,omitempty"`
 
 	// Checksum is the SHA256 hash of the file (or directory for mena) at write time.
@@ -70,6 +76,10 @@ type ProvenanceEntry struct {
 }
 
 // OwnerType represents who owns a file in .claude/.
+//
+// NOTE: inscription.OwnerType is a distinct type with different semantics (region
+// ownership for CLAUDE.md: knossos/satellite/regenerate). This type covers file
+// ownership (knossos/user/untracked). See TENSION-001 in .know/design-constraints.md.
 type OwnerType string
 
 const (

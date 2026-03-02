@@ -1,13 +1,8 @@
 package materialize
 
 import (
-	"io/fs"
 	"log"
-	"os"
-	"path/filepath"
 	"strings"
-
-	"gopkg.in/yaml.v3"
 )
 
 // SkillPolicy defines a single capability-driven skill wiring rule.
@@ -266,37 +261,15 @@ func parseToolsSet(fmMap map[string]interface{}, fieldName string) map[string]bo
 
 // loadSharedSkillPolicies loads skill_policies from the shared rite manifest.
 // Returns nil if the shared manifest doesn't exist or has no skill_policies.
-// Follows the same pattern as loadSharedHookDefaults in agent_transform.go.
+// Delegates to loadSharedManifest (see agent_transform.go) for the shared load path.
 func (m *Materializer) loadSharedSkillPolicies(resolved *ResolvedRite) []SkillPolicy {
-	var data []byte
-	var err error
-
-	if resolved != nil && resolved.Source.Type == SourceEmbedded && m.sourceResolver.EmbeddedFS != nil {
-		// Embedded FS: look for shared manifest relative to rite
-		data, err = fs.ReadFile(m.sourceResolver.EmbeddedFS, "rites/shared/manifest.yaml")
-	} else {
-		// Filesystem: resolve shared manifest from knossos-core ($KNOSSOS_HOME/rites/),
-		// not from the project root. For satellite-local rites the project root is the
-		// satellite directory, which has no rites/shared/. Shared rites always live in
-		// $KNOSSOS_HOME/rites/ regardless of which project is being synced.
-		sharedBase := m.sourceResolver.KnossosHome()
-		if sharedBase == "" {
-			// No KNOSSOS_HOME configured; fall back to project root (knossos-on-knossos
-			// case where the project itself is knossos).
-			sharedBase = m.resolver.ProjectRoot()
-		}
-		sharedPath := filepath.Join(sharedBase, "rites", "shared", "manifest.yaml")
-		data, err = os.ReadFile(sharedPath)
-	}
+	manifest, err := m.loadSharedManifest(resolved)
 	if err != nil {
-		return nil // Shared manifest not found — graceful degradation
-	}
-
-	var manifest RiteManifest
-	if err := yaml.Unmarshal(data, &manifest); err != nil {
 		log.Printf("Warning: failed to parse shared manifest for skill_policies: %v", err)
 		return nil
 	}
-
+	if manifest == nil {
+		return nil
+	}
 	return manifest.SkillPolicies
 }

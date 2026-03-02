@@ -11,7 +11,11 @@ import (
 	"time"
 )
 
-// OwnerType represents the ownership category for a region.
+// OwnerType represents the ownership category for a CLAUDE.md region.
+//
+// NOTE: provenance.OwnerType is a distinct type with different semantics (file
+// ownership: knossos/user/untracked). This type covers CLAUDE.md region ownership
+// (knossos/satellite/regenerate). See TENSION-001 in .know/design-constraints.md.
 type OwnerType string
 
 const (

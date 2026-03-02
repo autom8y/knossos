@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/autom8y/knossos/internal/checksum"
+	"github.com/autom8y/knossos/internal/fileutil"
 	"github.com/autom8y/knossos/internal/paths"
 	"github.com/autom8y/knossos/internal/provenance"
 )
@@ -104,7 +105,7 @@ func (m *Materializer) materializeRules(claudeDir string, resolved *ResolvedRite
 
 	// Remove only STALE knossos-managed rules: files that match a known template name
 	// but are NOT in the current rite's template set. Do NOT pre-delete rules that will
-	// be rewritten — writeIfChanged() handles atomic overwrite. Pre-deletion causes
+	// be rewritten — fileutil.WriteIfChanged() handles atomic overwrite. Pre-deletion causes
 	// CC's file watcher to see DELETE events that crash active sessions.
 	if existingRules, err := os.ReadDir(rulesDir); err == nil {
 		for _, entry := range existingRules {
@@ -120,7 +121,7 @@ func (m *Materializer) materializeRules(claudeDir string, resolved *ResolvedRite
 	// Write current template rules and record provenance
 	for name, content := range templateRules {
 		dstPath := filepath.Join(rulesDir, name)
-		written, err := writeIfChanged(dstPath, content, 0644)
+		written, err := fileutil.WriteIfChanged(dstPath, content, 0644)
 		if err != nil {
 			return err
 		}

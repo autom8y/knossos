@@ -43,7 +43,10 @@ func CollectMena(sources []MenaSource, opts MenaProjectionOptions) (*MenaResolut
 	}
 
 	// Pass 1.5: Resolve flat namespace for dromena.
-	flatNames := resolveNamespace(collected, standalones, opts)
+	// resolveNamespace returns warnings for user-owned collisions so callers can
+	// surface them as diagnostic output rather than silently falling back.
+	flatNames, nsWarnings := resolveNamespace(collected, standalones, opts)
+	resolution.Warnings = append(resolution.Warnings, nsWarnings...)
 
 	// Pass 2: Apply flat names for each directory entry using the cached mena type.
 	for name, ce := range collected {

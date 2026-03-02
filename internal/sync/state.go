@@ -16,12 +16,12 @@ import (
 // State represents the sync state stored in .claude/sync/state.json.
 type State struct {
 	SchemaVersion string    `json:"schema_version"`
-	ActiveRite    string    `json:"active_rite,omitempty"`
 	LastSync      time.Time `json:"last_sync"`
 }
 
 // CurrentSchemaVersion is the current state schema version.
-const CurrentSchemaVersion = "1.0"
+// Bumped to 1.1 when active_rite was removed (PKG-008: confirmed zero runtime consumers).
+const CurrentSchemaVersion = "1.1"
 
 // StateManager handles sync state operations.
 type StateManager struct {

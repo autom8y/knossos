@@ -74,3 +74,47 @@ func TestKnossosHome_Caching(t *testing.T) {
 		t.Errorf("KnossosHome() = %q, want /first", home1)
 	}
 }
+
+// TestKnossosHome_ResetCleanupPattern verifies the canonical test-safety pattern
+// documented in ResetKnossosHome.
+//
+// This is the required pattern for any test that needs a custom KNOSSOS_HOME:
+//
+//	config.ResetKnossosHome()
+//	t.Setenv("KNOSSOS_HOME", customDir)
+//	t.Cleanup(config.ResetKnossosHome)
+func TestKnossosHome_ResetCleanupPattern(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	// Step 1: Reset before setting so no stale cache from prior tests.
+	ResetKnossosHome()
+	// Step 2: Use t.Setenv so the env var is restored after the test.
+	t.Setenv("KNOSSOS_HOME", tmpDir)
+	// Step 3: Register cleanup so subsequent tests see a fresh cache.
+	t.Cleanup(ResetKnossosHome)
+
+	got := KnossosHome()
+	if got != tmpDir {
+		t.Errorf("KnossosHome() = %q, want %q", got, tmpDir)
+	}
+}
+
+// TestKnossosHome_CachePoisonRegression ensures that a reset before calling
+// KnossosHome prevents using a stale default path when KNOSSOS_HOME is set.
+func TestKnossosHome_CachePoisonRegression(t *testing.T) {
+	// Simulate a prior test having called KnossosHome without cleanup.
+	// First call caches the default value.
+	ResetKnossosHome()
+	_ = KnossosHome() // primes the cache with whatever is currently set
+
+	// Now apply the correct reset-before-set sequence.
+	tmpDir := t.TempDir()
+	ResetKnossosHome()
+	t.Setenv("KNOSSOS_HOME", tmpDir)
+	t.Cleanup(ResetKnossosHome)
+
+	got := KnossosHome()
+	if got != tmpDir {
+		t.Errorf("cache poison: KnossosHome() = %q, want %q (reset did not work)", got, tmpDir)
+	}
+}

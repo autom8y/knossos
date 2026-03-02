@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/autom8y/knossos/internal/checksum"
+	"github.com/autom8y/knossos/internal/fileutil"
 	"github.com/autom8y/knossos/internal/paths"
 	"github.com/autom8y/knossos/internal/provenance"
 	"github.com/autom8y/knossos/internal/sync"
@@ -151,7 +152,7 @@ func (m *Materializer) materializeWorkflow(claudeDir string, resolved *ResolvedR
 		}
 		return nil
 	}
-	written, err := writeIfChanged(dstPath, content, 0644)
+	written, err := fileutil.WriteIfChanged(dstPath, content, 0644)
 	if err != nil {
 		return err
 	}
@@ -176,7 +177,7 @@ func (m *Materializer) materializeWorkflow(claudeDir string, resolved *ResolvedR
 func (m *Materializer) writeActiveRite(riteName, claudeDir string) error {
 	activeRitePath := filepath.Join(claudeDir, "ACTIVE_RITE")
 	content := []byte(riteName + "\n")
-	_, err := writeIfChanged(activeRitePath, content, 0644)
+	_, err := fileutil.WriteIfChanged(activeRitePath, content, 0644)
 	if err != nil {
 		return err
 	}

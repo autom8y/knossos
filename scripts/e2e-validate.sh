@@ -12,16 +12,22 @@
 # DELIBERATE SHORTCUTS (prototype -- not production):
 #   - No test framework; plain bash with pass/fail output
 #   - Exit 1 on first failure (no "run all, report all" mode)
-#   - No timeout handling on brew operations (can stall in slow CI)
 #   - Version auto-detection falls back to "any non-dev version" if gh CLI unavailable
 #   - --skip-install skips tap+install entirely; assumes ari is already on PATH
 #   - Linuxbrew path handling is best-effort (checked /home/linuxbrew/.linuxbrew/bin)
+#
+# Timeout Handling:
+#   --brew-timeout SECS   Timeout for brew tap + install (default: 300s / 5 min)
+#   --ari-timeout SECS    Timeout for ari init + sync (default: 60s / 1 min)
+#   Requires GNU coreutils `timeout` on macOS (brew install coreutils) or Linux timeout.
+#   If `timeout` is not available, brew operations run without time limit.
 #
 # Usage:
 #   ./scripts/e2e-validate.sh
 #   ./scripts/e2e-validate.sh --version v0.3.0
 #   ./scripts/e2e-validate.sh --skip-install
 #   ./scripts/e2e-validate.sh --version v0.3.0 --skip-install
+#   ./scripts/e2e-validate.sh --brew-timeout 600 --ari-timeout 120
 
 set -euo pipefail
 
@@ -33,6 +39,8 @@ SKIP_INSTALL=false
 REPO="autom8y/knossos"
 TAP="autom8y/tap"
 FORMULA="autom8y/tap/ari"
+BREW_TIMEOUT=300   # seconds for brew tap + install (can stall in CI)
+ARI_TIMEOUT=60     # seconds for ari init + sync
 
 # ---------------------------------------------------------------------------
 # Argument parsing
@@ -46,6 +54,14 @@ while [[ $# -gt 0 ]]; do
         --skip-install)
             SKIP_INSTALL=true
             shift
+            ;;
+        --brew-timeout)
+            BREW_TIMEOUT="${2:?--brew-timeout requires a value}"
+            shift 2
+            ;;
+        --ari-timeout)
+            ARI_TIMEOUT="${2:?--ari-timeout requires a value}"
+            shift 2
             ;;
         -h|--help)
             sed -n '/^# e2e-validate/,/^$/p' "$0"
@@ -87,6 +103,35 @@ assert_exit0() {
         echo "  CMD:  $*" >&2
         echo "  OUT:  $output" >&2
         fail "$label -- command exited non-zero"
+    fi
+}
+
+# run_with_timeout SECS LABEL cmd [args...]
+# Runs cmd with a hard wall-clock timeout. If the timeout binary is not available,
+# runs without time limit and prints a warning.
+# Exits 1 (via fail) if cmd times out or returns non-zero.
+run_with_timeout() {
+    local secs="$1"
+    local label="$2"
+    shift 2
+
+    if [[ -n "$TIMEOUT_BIN" ]]; then
+        local output exit_code
+        output=$("$TIMEOUT_BIN" "$secs" "$@" 2>&1)
+        exit_code=$?
+        if [[ $exit_code -eq 124 ]]; then
+            echo "  CMD:     $*" >&2
+            echo "  TIMEOUT: exceeded ${secs}s" >&2
+            fail "$label -- timed out after ${secs}s (increase --brew-timeout or --ari-timeout)"
+        elif [[ $exit_code -ne 0 ]]; then
+            echo "  CMD:  $*" >&2
+            echo "  OUT:  $output" >&2
+            fail "$label -- command exited non-zero (exit $exit_code)"
+        fi
+        pass "$label"
+    else
+        # Fallback: no timeout binary; run without time limit
+        assert_exit0 "$label (no timeout binary -- running without limit)" "$@"
     fi
 }
 
@@ -136,6 +181,19 @@ echo ""
 echo "Platform:  $(uname -s)/$(uname -m)"
 echo "Date:      $(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
+# Detect timeout binary (gtimeout on macOS via coreutils, timeout on Linux).
+TIMEOUT_BIN=""
+if command -v gtimeout &>/dev/null; then
+    TIMEOUT_BIN="gtimeout"
+elif command -v timeout &>/dev/null; then
+    TIMEOUT_BIN="timeout"
+fi
+if [[ -n "$TIMEOUT_BIN" ]]; then
+    echo "Timeout:   $TIMEOUT_BIN (brew=${BREW_TIMEOUT}s, ari=${ARI_TIMEOUT}s)"
+else
+    echo "Timeout:   NONE (install coreutils for timeout enforcement: brew install coreutils)"
+fi
+
 # Detect brew binary (Linuxbrew installs to /home/linuxbrew/.linuxbrew/bin)
 BREW_BIN="brew"
 if ! command -v brew &>/dev/null; then
@@ -178,7 +236,8 @@ echo "--- Assertion 1: brew tap $TAP ---"
 if [[ "$SKIP_INSTALL" == "true" ]]; then
     echo "  SKIP: --skip-install set"
 else
-    assert_exit0 "brew tap $TAP exits 0" "$BREW_BIN" tap "$TAP"
+    run_with_timeout "$BREW_TIMEOUT" "brew tap $TAP exits 0 within ${BREW_TIMEOUT}s" \
+        "$BREW_BIN" tap "$TAP"
 fi
 
 # ---------------------------------------------------------------------------
@@ -188,7 +247,8 @@ echo "--- Assertion 2: brew install $FORMULA ---"
 if [[ "$SKIP_INSTALL" == "true" ]]; then
     echo "  SKIP: --skip-install set"
 else
-    assert_exit0 "brew install $FORMULA exits 0" "$BREW_BIN" install "$FORMULA"
+    run_with_timeout "$BREW_TIMEOUT" "brew install $FORMULA exits 0 within ${BREW_TIMEOUT}s" \
+        "$BREW_BIN" install "$FORMULA"
 fi
 
 # Ensure ari is on PATH after install
@@ -225,7 +285,7 @@ E2E_TMPDIR=$(mktemp -d)
 trap 'rm -rf "$E2E_TMPDIR"' EXIT
 
 pushd "$E2E_TMPDIR" > /dev/null
-assert_exit0 "ari init exits 0" ari init
+run_with_timeout "$ARI_TIMEOUT" "ari init exits 0 within ${ARI_TIMEOUT}s" ari init
 popd > /dev/null
 
 # ---------------------------------------------------------------------------
@@ -233,7 +293,8 @@ popd > /dev/null
 # ---------------------------------------------------------------------------
 echo "--- Assertion 5: ari sync --rite 10x-dev ---"
 pushd "$E2E_TMPDIR" > /dev/null
-assert_exit0 "ari sync --rite 10x-dev exits 0" ari sync --rite 10x-dev
+run_with_timeout "$ARI_TIMEOUT" "ari sync --rite 10x-dev exits 0 within ${ARI_TIMEOUT}s" \
+    ari sync --rite 10x-dev
 popd > /dev/null
 
 # ---------------------------------------------------------------------------

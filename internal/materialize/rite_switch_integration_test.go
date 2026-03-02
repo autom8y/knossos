@@ -81,12 +81,12 @@ func TestRiteSwitchIntegration_StateConsistency(t *testing.T) {
 	require.NoError(t, err)
 	assert.Contains(t, string(workflow), "rite-a-workflow")
 
-	// Verify sync/state.json has ActiveRite
+	// Verify sync/state.json is valid (active_rite removed in PKG-008; ACTIVE_RITE file is authoritative)
 	stateManager := sync.NewStateManager(resolver)
 	state, err := stateManager.Load()
 	require.NoError(t, err)
 	require.NotNil(t, state)
-	assert.Equal(t, "rite-a", state.ActiveRite)
+	assert.NotEmpty(t, state.LastSync)
 
 	// Verify template rule was written
 	ruleContent, err := os.ReadFile(filepath.Join(claudeDir, "rules", "internal-session.md"))
@@ -119,11 +119,11 @@ func TestRiteSwitchIntegration_StateConsistency(t *testing.T) {
 	require.NoError(t, err)
 	assert.Contains(t, string(workflow), "rite-b-workflow")
 
-	// Verify sync/state.json has ActiveRite = rite-b
+	// Verify sync/state.json is still valid after rite switch
 	state, err = stateManager.Load()
 	require.NoError(t, err)
 	require.NotNil(t, state)
-	assert.Equal(t, "rite-b", state.ActiveRite)
+	assert.NotEmpty(t, state.LastSync)
 
 	// Verify INVOCATION_STATE.yaml is gone
 	_, err = os.Stat(filepath.Join(claudeDir, "INVOCATION_STATE.yaml"))
@@ -284,12 +284,13 @@ func TestRiteSwitchIntegration_SyncStateJSON(t *testing.T) {
 	_, err := m.MaterializeWithOptions("state-test", Options{Force: true})
 	require.NoError(t, err)
 
-	// Read state.json and verify it's valid JSON with ActiveRite
+	// Read state.json and verify it's valid JSON with last_sync.
+	// active_rite was removed from state.json (PKG-008): ACTIVE_RITE file is the authoritative store.
 	stateData, err := os.ReadFile(filepath.Join(projectDir, ".claude", "sync", "state.json"))
 	require.NoError(t, err)
 
 	var rawState map[string]any
 	require.NoError(t, json.Unmarshal(stateData, &rawState))
-	assert.Equal(t, "state-test", rawState["active_rite"])
 	assert.NotEmpty(t, rawState["last_sync"])
+	assert.NotContains(t, rawState, "active_rite", "active_rite must not be written to state.json")
 }

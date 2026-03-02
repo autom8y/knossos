@@ -74,6 +74,18 @@ func ActiveOrg() string {
 }
 
 // ResetKnossosHome resets the cached home directory (for testing only).
+//
+// Tests that need a custom KNOSSOS_HOME must follow this pattern to avoid
+// cache poisoning across test cases:
+//
+//	config.ResetKnossosHome()
+//	t.Setenv("KNOSSOS_HOME", tmpDir)
+//	t.Cleanup(config.ResetKnossosHome)
+//
+// RISK-003: KnossosHome is cached via sync.Once. A test that calls KnossosHome
+// (directly or transitively) before setting KNOSSOS_HOME will silently poison
+// the cache for all subsequent tests in the same process. Always reset before
+// and after any test that requires a custom home directory.
 func ResetKnossosHome() {
 	knossosHomeOnce = sync.Once{}
 	knossosHome = ""
