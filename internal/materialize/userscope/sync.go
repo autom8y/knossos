@@ -72,20 +72,35 @@ func (s *syncer) syncUserScope(opts SyncOptions) (*UserScopeResult, error) {
 
 	// Initialize collision checker with project .claude/ directory.
 	// The checker requires a rite PROVENANCE_MANIFEST.yaml to detect collisions.
-	// When the manifest is missing AND a rite has been synced (ACTIVE_RITE exists),
-	// this is a degraded state (e.g. a fresh worktree where rite scope fell to
-	// minimal mode). In that case, fail-closed: skip all user-scope writes to
-	// prevent cross-project contamination via USER_PROVENANCE_MANIFEST.yaml.
+	// When the manifest is missing, try to fall back to the main worktree's
+	// provenance (for linked git worktrees). If that also fails and an ACTIVE_RITE
+	// is present, fail-closed: skip all user-scope writes to prevent cross-project
+	// contamination via USER_PROVENANCE_MANIFEST.yaml.
 	// When no ACTIVE_RITE exists, there is no rite to protect against; proceed.
 	projectClaudeDir := s.resolver.ClaudeDir()
 	collisionChecker := NewCollisionChecker(projectClaudeDir)
 	if !collisionChecker.IsEffective() {
-		activeRite := s.resolver.ReadActiveRite()
-		if activeRite != "" {
-			log.Printf("userscope: collision checker not effective (no provenance manifest at %s) but ACTIVE_RITE=%q; skipping user-scope writes to prevent contamination", projectClaudeDir, activeRite)
-			return result, nil
+		// Attempt to use the main worktree's provenance manifest when we are
+		// running inside a linked git worktree. This avoids the blanket "skip all"
+		// behaviour when the main worktree has a valid rite provenance.
+		if mainDir, err := worktreeMainDir(s.resolver.ProjectRoot()); err == nil {
+			mainClaudeDir := filepath.Join(mainDir, ".claude")
+			mainChecker := NewCollisionChecker(mainClaudeDir)
+			if mainChecker.IsEffective() {
+				log.Printf("userscope: collision checker fell back to main worktree provenance at %s", mainClaudeDir)
+				collisionChecker = mainChecker
+			}
 		}
-		// No ACTIVE_RITE: no rite to protect. Proceed without collision checking.
+
+		// If still not effective, apply the fail-closed guard.
+		if !collisionChecker.IsEffective() {
+			activeRite := s.resolver.ReadActiveRite()
+			if activeRite != "" {
+				log.Printf("userscope: collision checker not effective (no provenance manifest at %s) but ACTIVE_RITE=%q; skipping user-scope writes to prevent contamination", projectClaudeDir, activeRite)
+				return result, nil
+			}
+			// No ACTIVE_RITE: no rite to protect. Proceed without collision checking.
+		}
 	}
 
 	// Determine which resource types to sync
