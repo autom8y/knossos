@@ -23,6 +23,7 @@ color: orange
 maxTurns: 200
 skills:
   - debt-catalog
+  - smell-detection
 memory: "project"
 contract:
   must_not:

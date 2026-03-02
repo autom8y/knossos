@@ -26,6 +26,7 @@ color: orange
 maxTurns: 150
 skills:
   - hygiene-catalog
+  - smell-detection
 memory: "project"
 disallowedTools:
   - Edit

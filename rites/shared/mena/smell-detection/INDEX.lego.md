@@ -82,4 +82,3 @@ Provides canonical smell taxonomy, detection heuristics, and severity classifica
 ## Related Skills
 
 - `doc-ecosystem` skill — Smell report template
-- `standards` skill — Code conventions

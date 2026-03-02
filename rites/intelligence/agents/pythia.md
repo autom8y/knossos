@@ -10,6 +10,7 @@ maxTurns: 40
 skills:
   - orchestrator-templates
   - intelligence-ref
+  - cross-rite-handoff
 disallowedTools:
   - Bash
   - Write
