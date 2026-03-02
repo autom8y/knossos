@@ -304,3 +304,68 @@ func TestVerboseLog_OnlyWritesWhenVerbose(t *testing.T) {
 		t.Errorf("VerboseLog output missing message: %s", errBuf.String())
 	}
 }
+
+// --- SyncResultOutput Text tests ---
+
+func TestTextOutput_OrgSkipped_ShowsReason(t *testing.T) {
+	tests := []struct {
+		name       string
+		status     string
+		errMsg     string
+		wantLabel  string
+		wantAbsent string
+	}{
+		{
+			name:       "org skipped shows Reason",
+			status:     "skipped",
+			errMsg:     "no active org configured",
+			wantLabel:  "Reason:",
+			wantAbsent: "Error:",
+		},
+		{
+			name:       "org error shows Error",
+			status:     "error",
+			errMsg:     "permission denied",
+			wantLabel:  "Error:",
+			wantAbsent: "Reason:",
+		},
+		{
+			name:       "rite skipped shows Reason",
+			status:     "skipped",
+			errMsg:     "no rite configured",
+			wantLabel:  "Reason:",
+			wantAbsent: "Error:",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var data SyncResultOutput
+			if strings.HasPrefix(tt.name, "rite") {
+				data = SyncResultOutput{
+					Status: "ok",
+					Rite: &SyncRiteResult{
+						Status: tt.status,
+						Error:  tt.errMsg,
+					},
+				}
+			} else {
+				data = SyncResultOutput{
+					Status: "ok",
+					Org: &SyncOrgResult{
+						Status: tt.status,
+						Error:  tt.errMsg,
+					},
+				}
+			}
+
+			text := data.Text()
+			if !strings.Contains(text, tt.wantLabel) {
+				t.Errorf("output missing %q; got:\n%s", tt.wantLabel, text)
+			}
+			if strings.Contains(text, tt.wantAbsent) {
+				t.Errorf("output should not contain %q; got:\n%s", tt.wantAbsent, text)
+			}
+		})
+	}
+}

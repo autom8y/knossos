@@ -630,7 +630,11 @@ func (s SyncResultOutput) Text() string {
 		}
 		b.WriteString("\n")
 		if s.Rite.Error != "" {
-			b.WriteString(fmt.Sprintf("  Error: %s\n", s.Rite.Error))
+			if s.Rite.Status == "skipped" {
+				b.WriteString(fmt.Sprintf("    Reason: %s\n", s.Rite.Error))
+			} else {
+				b.WriteString(fmt.Sprintf("  Error: %s\n", s.Rite.Error))
+			}
 		}
 		if len(s.Rite.OrphansDetected) > 0 {
 			b.WriteString(fmt.Sprintf("  Orphans: %d detected (%s)\n", len(s.Rite.OrphansDetected), s.Rite.OrphanAction))
@@ -653,7 +657,11 @@ func (s SyncResultOutput) Text() string {
 		}
 		b.WriteString("\n")
 		if s.Org.Error != "" {
-			b.WriteString(fmt.Sprintf("  Error: %s\n", s.Org.Error))
+			if s.Org.Status == "skipped" {
+				b.WriteString(fmt.Sprintf("    Reason: %s\n", s.Org.Error))
+			} else {
+				b.WriteString(fmt.Sprintf("  Error: %s\n", s.Org.Error))
+			}
 		}
 	}
 
