@@ -1,6 +1,8 @@
 package lint
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 )
 
@@ -194,4 +196,79 @@ func TestCheckSourcePathLeaks(t *testing.T) {
 			t.Errorf("expected 0 findings for materialization docs, got %d", len(findings))
 		}
 	})
+}
+
+func TestLintSessionArtifactsInSharedMena(t *testing.T) {
+	tests := []struct {
+		name      string
+		content   string
+		wantFound bool
+	}{
+		{
+			name: "session_id triggers finding",
+			content: "---\nname: bad-artifact\ndescription: test\nsession_id: session-20260302-123456-abcdef01\n---\n# Bad\n",
+			wantFound: true,
+		},
+		{
+			name: "throughline triggers finding",
+			content: "---\nname: throughline-doc\ndescription: test\nthroughline: some-initiative-ref\n---\n# Bad\n",
+			wantFound: true,
+		},
+		{
+			name: "session-ref triggers finding",
+			content: "---\nname: session-doc\ndescription: test\nsession-ref: session-20260301\n---\n# Bad\n",
+			wantFound: true,
+		},
+		{
+			name: "clean legomena passes",
+			content: "---\nname: good-skill\ndescription: Permanent platform knowledge. Triggers: domain reference.\n---\n# Good\n",
+			wantFound: false,
+		},
+		{
+			name: "no frontmatter passes",
+			content: "# Just a plain markdown file\nNo frontmatter here.\n",
+			wantFound: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			projectRoot := t.TempDir()
+			sharedMenaDir := filepath.Join(projectRoot, "rites", "shared", "mena", "test-entry")
+			if err := os.MkdirAll(sharedMenaDir, 0755); err != nil {
+				t.Fatalf("MkdirAll: %v", err)
+			}
+			if err := os.WriteFile(filepath.Join(sharedMenaDir, "INDEX.lego.md"), []byte(tt.content), 0644); err != nil {
+				t.Fatalf("WriteFile: %v", err)
+			}
+
+			report := &LintReport{}
+			lintSessionArtifactsInSharedMena(projectRoot, report)
+
+			found := false
+			for _, f := range report.Legomena {
+				if f.Rule == "session-artifact-in-shared-mena" {
+					found = true
+				}
+			}
+			if found != tt.wantFound {
+				t.Errorf("session-artifact-in-shared-mena finding: got %v, want %v", found, tt.wantFound)
+				if len(report.Legomena) > 0 {
+					t.Logf("findings: %+v", report.Legomena)
+				}
+			}
+		})
+	}
+}
+
+func TestLintSessionArtifactsInSharedMena_NoSharedDir(t *testing.T) {
+	projectRoot := t.TempDir()
+	// No rites/shared/mena/ directory exists
+
+	report := &LintReport{}
+	lintSessionArtifactsInSharedMena(projectRoot, report)
+
+	if len(report.Legomena) != 0 {
+		t.Errorf("expected 0 findings when shared mena dir absent, got %d", len(report.Legomena))
+	}
 }

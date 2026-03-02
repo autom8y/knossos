@@ -202,6 +202,10 @@ func runLint(ctx *cmdContext, scope string) error {
 	if scope == "" || scope == "legomena" {
 		lintLegomena(projectRoot, sources, report)
 	}
+	// Session artifact boundary check runs for all scopes (it checks shared mena dirs)
+	if scope == "" {
+		lintSessionArtifactsInSharedMena(projectRoot, report)
+	}
 
 	// Compute summary
 	all := append(append(report.Agents, report.Dromena...), report.Legomena...)
@@ -602,6 +606,69 @@ func lintLegomenFile(_, relPath string, data []byte, report *LintReport) {
 
 	// Source path leak check
 	checkSourcePathLeaks(string(body), relPath, &report.Legomena)
+}
+
+// --- Session artifact boundary check ---
+
+// sessionArtifactPatterns detect session-specific content that should NOT
+// appear in shared mena directories. Shared mena is permanent platform
+// knowledge; session artifacts belong in .sos/wip/ (ephemeral).
+var sessionArtifactPatterns = []*regexp.Regexp{
+	regexp.MustCompile(`(?i)^session[_-]?id\s*:`),
+	regexp.MustCompile(`(?i)^throughline\s*:`),
+	regexp.MustCompile(`(?i)^session[_-]?ref\s*:`),
+	regexp.MustCompile(`(?i)^sprint[_-]?session\s*:`),
+}
+
+// lintSessionArtifactsInSharedMena walks rites/shared/mena/ and flags any
+// files with session-specific frontmatter. This enforces SCAR-boundary:
+// shared mena is permanent platform knowledge, not a dumping ground for
+// session-scoped artifacts.
+func lintSessionArtifactsInSharedMena(projectRoot string, report *LintReport) {
+	sharedMenaDir := filepath.Join(projectRoot, "rites", "shared", "mena")
+	if _, err := os.Stat(sharedMenaDir); err != nil {
+		return // No shared mena directory
+	}
+
+	filepath.WalkDir(sharedMenaDir, func(path string, d os.DirEntry, walkErr error) error {
+		if walkErr != nil || d.IsDir() {
+			return walkErr
+		}
+		if !strings.HasSuffix(path, ".md") {
+			return nil
+		}
+		report.Summary.Files++
+		relPath := mustRel(projectRoot, path)
+
+		data, err := os.ReadFile(path)
+		if err != nil {
+			return nil
+		}
+
+		yamlBytes, _, parseErr := frontmatter.Parse(data)
+		if parseErr != nil {
+			return nil // No frontmatter -- not a session artifact
+		}
+
+		// Check frontmatter lines for session-specific fields
+		fmLines := strings.Split(string(yamlBytes), "\n")
+		for _, line := range fmLines {
+			trimmed := strings.TrimSpace(line)
+			for _, pat := range sessionArtifactPatterns {
+				if pat.MatchString(trimmed) {
+					report.Legomena = append(report.Legomena, Finding{
+						File:     relPath,
+						Severity: SevHigh,
+						Rule:     "session-artifact-in-shared-mena",
+						Message:  fmt.Sprintf("shared mena file contains session-specific field %q — session artifacts belong in .sos/wip/, not rites/shared/mena/", trimmed),
+					})
+					return nil // One finding per file is sufficient
+				}
+			}
+		}
+
+		return nil
+	})
 }
 
 // --- @skill-name check ---
