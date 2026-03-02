@@ -269,6 +269,13 @@ func (m *Manager) Remove(idOrName string, force bool) error {
 		}
 	}
 
+	// Clean up worktree-local directories before git worktree removal.
+	// These are best-effort; don't fail the Remove operation on cleanup errors.
+	// Symlinked dirs (.knossos/, .know/) are just symlinks and get removed
+	// with the worktree directory -- do NOT follow/delete symlink targets.
+	os.RemoveAll(filepath.Join(wt.Path, ".sos"))
+	os.RemoveAll(filepath.Join(wt.Path, ".ledge"))
+
 	// Remove git worktree
 	if err := m.git.WorktreeRemove(wt.Path, force); err != nil {
 		// Try manual removal if git worktree remove fails

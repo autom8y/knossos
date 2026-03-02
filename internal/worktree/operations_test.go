@@ -823,6 +823,148 @@ func TestQuoteIfNeeded(t *testing.T) {
 	}
 }
 
+// TestSetupWorktreeEcosystemSeedsDirectories tests that Create produces a worktree
+// with .knossos/ and .know/ as symlinks pointing to main root, and .ledge/ and .sos/
+// as scaffolded directories.
+func TestSetupWorktreeEcosystemSeedsDirectories(t *testing.T) {
+	tmpDir := setupTestGitRepo(t)
+	defer os.RemoveAll(tmpDir)
+
+	// Create .knossos/ and .know/ in the main repo root so symlinks have targets
+	knossosDir := filepath.Join(tmpDir, ".knossos")
+	if err := os.MkdirAll(knossosDir, 0755); err != nil {
+		t.Fatalf("Failed to create .knossos/: %v", err)
+	}
+	knowDir := filepath.Join(tmpDir, ".know")
+	if err := os.MkdirAll(knowDir, 0755); err != nil {
+		t.Fatalf("Failed to create .know/: %v", err)
+	}
+
+	mgr, err := NewManager(tmpDir)
+	if err != nil {
+		t.Fatalf("Failed to create manager: %v", err)
+	}
+
+	wt, err := mgr.Create(CreateOptions{
+		Name: "seed-test",
+		Rite: "test-rite",
+	})
+	if err != nil {
+		t.Fatalf("Failed to create worktree: %v", err)
+	}
+
+	// Verify .knossos/ is a symlink pointing to main root
+	knossosLink := filepath.Join(wt.Path, ".knossos")
+	fi, err := os.Lstat(knossosLink)
+	if err != nil {
+		t.Fatalf(".knossos/ does not exist in worktree: %v", err)
+	}
+	if fi.Mode()&os.ModeSymlink == 0 {
+		t.Error(".knossos/ should be a symlink")
+	}
+	target, err := os.Readlink(knossosLink)
+	if err != nil {
+		t.Fatalf("Failed to readlink .knossos/: %v", err)
+	}
+	if target != knossosDir {
+		t.Errorf(".knossos/ symlink target = %s, want %s", target, knossosDir)
+	}
+
+	// Verify .know/ is a symlink pointing to main root
+	knowLink := filepath.Join(wt.Path, ".know")
+	fi, err = os.Lstat(knowLink)
+	if err != nil {
+		t.Fatalf(".know/ does not exist in worktree: %v", err)
+	}
+	if fi.Mode()&os.ModeSymlink == 0 {
+		t.Error(".know/ should be a symlink")
+	}
+	target, err = os.Readlink(knowLink)
+	if err != nil {
+		t.Fatalf("Failed to readlink .know/: %v", err)
+	}
+	if target != knowDir {
+		t.Errorf(".know/ symlink target = %s, want %s", target, knowDir)
+	}
+
+	// Verify .ledge/ subdirectories exist
+	for _, sub := range []string{"decisions", "specs", "reviews", "spikes"} {
+		subPath := filepath.Join(wt.Path, ".ledge", sub)
+		fi, err := os.Stat(subPath)
+		if err != nil {
+			t.Errorf(".ledge/%s does not exist: %v", sub, err)
+		} else if !fi.IsDir() {
+			t.Errorf(".ledge/%s is not a directory", sub)
+		}
+	}
+
+	// Verify .sos/ exists
+	sosPath := filepath.Join(wt.Path, ".sos")
+	fi, err = os.Stat(sosPath)
+	if err != nil {
+		t.Fatalf(".sos/ does not exist in worktree: %v", err)
+	}
+	if !fi.IsDir() {
+		t.Error(".sos/ should be a directory")
+	}
+}
+
+// TestSetupWorktreeEcosystemSkipsSymlinksWhenSourceMissing tests that when .knossos/
+// and .know/ don't exist in root, Create still succeeds and those symlinks are not
+// created, but .ledge/ and .sos/ are still scaffolded.
+func TestSetupWorktreeEcosystemSkipsSymlinksWhenSourceMissing(t *testing.T) {
+	tmpDir := setupTestGitRepo(t)
+	defer os.RemoveAll(tmpDir)
+
+	// Do NOT create .knossos/ or .know/ in the main repo root
+
+	mgr, err := NewManager(tmpDir)
+	if err != nil {
+		t.Fatalf("Failed to create manager: %v", err)
+	}
+
+	wt, err := mgr.Create(CreateOptions{
+		Name: "no-source-test",
+		Rite: "test-rite",
+	})
+	if err != nil {
+		t.Fatalf("Failed to create worktree: %v", err)
+	}
+
+	// Verify .knossos/ symlink was NOT created
+	knossosLink := filepath.Join(wt.Path, ".knossos")
+	if _, err := os.Lstat(knossosLink); !os.IsNotExist(err) {
+		t.Error(".knossos/ should not exist when source is missing")
+	}
+
+	// Verify .know/ symlink was NOT created
+	knowLink := filepath.Join(wt.Path, ".know")
+	if _, err := os.Lstat(knowLink); !os.IsNotExist(err) {
+		t.Error(".know/ should not exist when source is missing")
+	}
+
+	// Verify .ledge/ subdirectories still exist
+	for _, sub := range []string{"decisions", "specs", "reviews", "spikes"} {
+		subPath := filepath.Join(wt.Path, ".ledge", sub)
+		fi, err := os.Stat(subPath)
+		if err != nil {
+			t.Errorf(".ledge/%s does not exist: %v", sub, err)
+		} else if !fi.IsDir() {
+			t.Errorf(".ledge/%s is not a directory", sub)
+		}
+	}
+
+	// Verify .sos/ still exists
+	sosPath := filepath.Join(wt.Path, ".sos")
+	fi, err := os.Stat(sosPath)
+	if err != nil {
+		t.Fatalf(".sos/ does not exist in worktree: %v", err)
+	}
+	if !fi.IsDir() {
+		t.Error(".sos/ should be a directory")
+	}
+}
+
 // TestParseSessionContextFile tests session context parsing.
 func TestParseSessionContextFile(t *testing.T) {
 	tmpDir, err := os.MkdirTemp("", "parse-test-*")
