@@ -5,7 +5,9 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
+	"github.com/autom8y/knossos/internal/artifact"
 	"github.com/autom8y/knossos/internal/output"
 	"github.com/autom8y/knossos/internal/session"
 
@@ -1285,5 +1287,177 @@ created_at: 2025-01-05T12:00:00Z
 	otherCCMapPath := filepath.Join(ccMapDir, "cc-other-session-456")
 	if _, statErr := os.Stat(otherCCMapPath); os.IsNotExist(statErr) {
 		t.Error("CC map entry for unrelated session should NOT have been removed")
+	}
+}
+
+// TestWrapGraduatesArtifacts verifies that wrap graduates registered artifacts to .ledge/.
+func TestWrapGraduatesArtifacts(t *testing.T) {
+	tmpDir := t.TempDir()
+	projectDir := tmpDir
+
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
+	sessionID := "session-20250105-120030-grad1234"
+	sessionDir := filepath.Join(sessionsDir, sessionID)
+	locksDir := filepath.Join(sessionsDir, ".locks")
+	auditDir := filepath.Join(sessionsDir, ".audit")
+
+	for _, dir := range []string{sessionDir, locksDir, auditDir} {
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			t.Fatalf("Failed to create dir: %v", err)
+		}
+	}
+
+	// Create SESSION_CONTEXT.md
+	contextContent := `---
+schema_version: "1.0"
+session_id: ` + sessionID + `
+status: ACTIVE
+initiative: Graduation Test
+complexity: MODULE
+created_at: 2025-01-05T12:00:00Z
+---
+
+# Session Context
+`
+	if err := os.WriteFile(filepath.Join(sessionDir, "SESSION_CONTEXT.md"), []byte(contextContent), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(sessionsDir, ".current-session"), []byte(sessionID), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	// Create an ADR source artifact in the session directory
+	adrContent := "# ADR-042: Use Event Sourcing\n\nWe decided to use event sourcing."
+	adrRelPath := filepath.Join(".sos", "sessions", sessionID, "ADR-042.md")
+	if err := os.WriteFile(filepath.Join(projectDir, adrRelPath), []byte(adrContent), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	// Register the artifact
+	registry := artifact.NewRegistry(projectDir)
+	if err := registry.Register(sessionID, artifact.Entry{
+		ArtifactID:   "ADR-042",
+		ArtifactType: artifact.TypeADR,
+		Path:         adrRelPath,
+		Phase:        artifact.PhaseDesign,
+		Specialist:   "context-architect",
+		SessionID:    sessionID,
+		RegisteredAt: time.Now().UTC(),
+		Validated:    true,
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	// Run wrap
+	outputFormat := "json"
+	verbose := true
+	ctx := &cmdContext{
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
+	}
+
+	opts := wrapOptions{noArchive: true}
+	err := runWrap(ctx, opts)
+	if err != nil {
+		t.Fatalf("runWrap failed: %v", err)
+	}
+
+	// Verify graduated artifact exists at .ledge/decisions/ADR-042.md
+	graduatedPath := filepath.Join(projectDir, ".ledge", "decisions", "ADR-042.md")
+	content, err := os.ReadFile(graduatedPath)
+	if err != nil {
+		t.Fatalf("Graduated artifact not found: %v", err)
+	}
+
+	contentStr := string(content)
+	if !strings.Contains(contentStr, "session_id: "+sessionID) {
+		t.Error("Missing session_id provenance")
+	}
+	if !strings.Contains(contentStr, "# ADR-042: Use Event Sourcing") {
+		t.Error("Original content not preserved")
+	}
+}
+
+// TestWrapNoGraduateFlag verifies that --no-graduate skips graduation.
+func TestWrapNoGraduateFlag(t *testing.T) {
+	tmpDir := t.TempDir()
+	projectDir := tmpDir
+
+	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
+	sessionID := "session-20250105-120031-nograd12"
+	sessionDir := filepath.Join(sessionsDir, sessionID)
+	locksDir := filepath.Join(sessionsDir, ".locks")
+	auditDir := filepath.Join(sessionsDir, ".audit")
+
+	for _, dir := range []string{sessionDir, locksDir, auditDir} {
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			t.Fatalf("Failed to create dir: %v", err)
+		}
+	}
+
+	contextContent := `---
+schema_version: "1.0"
+session_id: ` + sessionID + `
+status: ACTIVE
+initiative: No Graduate Test
+complexity: MODULE
+created_at: 2025-01-05T12:00:00Z
+---
+
+# Session Context
+`
+	if err := os.WriteFile(filepath.Join(sessionDir, "SESSION_CONTEXT.md"), []byte(contextContent), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(sessionsDir, ".current-session"), []byte(sessionID), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	// Create and register an artifact
+	spikeContent := "# Spike: Redis Caching"
+	spikeRelPath := filepath.Join(".sos", "sessions", sessionID, "SPIKE-redis.md")
+	if err := os.WriteFile(filepath.Join(projectDir, spikeRelPath), []byte(spikeContent), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	registry := artifact.NewRegistry(projectDir)
+	if err := registry.Register(sessionID, artifact.Entry{
+		ArtifactID:   "SPIKE-redis",
+		ArtifactType: artifact.TypeSpike,
+		Path:         spikeRelPath,
+		SessionID:    sessionID,
+		RegisteredAt: time.Now().UTC(),
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	// Run wrap with --no-graduate
+	outputFormat := "json"
+	verbose := true
+	ctx := &cmdContext{
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectDir,
+			},
+		},
+	}
+
+	opts := wrapOptions{noArchive: true, noGraduate: true}
+	err := runWrap(ctx, opts)
+	if err != nil {
+		t.Fatalf("runWrap failed: %v", err)
+	}
+
+	// Verify artifact was NOT graduated
+	graduatedPath := filepath.Join(projectDir, ".ledge", "spikes", "SPIKE-redis.md")
+	if _, statErr := os.Stat(graduatedPath); !os.IsNotExist(statErr) {
+		t.Error("Artifact should NOT have been graduated with --no-graduate flag")
 	}
 }

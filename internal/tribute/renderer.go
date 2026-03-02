@@ -41,6 +41,11 @@ func (r *Renderer) Render(result *GenerateResult) ([]byte, error) {
 	// 5. Artifacts Produced (always included, even if empty)
 	r.renderArtifacts(&b, result)
 
+	// 5b. Graduated Artifacts (conditional)
+	if len(result.GraduatedArtifacts) > 0 {
+		r.renderGraduatedArtifacts(&b, result)
+	}
+
 	// 6. Decisions Made (conditional)
 	if len(result.Decisions) > 0 {
 		r.renderDecisions(&b, result)
@@ -158,6 +163,21 @@ func (r *Renderer) renderArtifacts(b *strings.Builder, result *GenerateResult) {
 	for _, artifact := range result.Artifacts {
 		b.WriteString(fmt.Sprintf("| %s | `%s` | %s |\n",
 			artifact.Type, artifact.Path, artifact.Status))
+	}
+
+	b.WriteString("\n")
+}
+
+// renderGraduatedArtifacts writes the Graduated Artifacts section.
+func (r *Renderer) renderGraduatedArtifacts(b *strings.Builder, result *GenerateResult) {
+	b.WriteString("## Graduated Artifacts\n\n")
+
+	b.WriteString("| Type | Original Path | Graduated Path | Category |\n")
+	b.WriteString("|------|---------------|----------------|----------|\n")
+
+	for _, ga := range result.GraduatedArtifacts {
+		b.WriteString(fmt.Sprintf("| %s | `%s` | `%s` | %s |\n",
+			ga.Type, ga.OriginalPath, ga.GraduatedPath, ga.Category))
 	}
 
 	b.WriteString("\n")

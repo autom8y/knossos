@@ -15,6 +15,9 @@ type Generator struct {
 	// SessionPath is the path to the session directory.
 	SessionPath string
 
+	// ProjectRoot is the project root directory (optional, enables graduated artifacts).
+	ProjectRoot string
+
 	// Now is a function that returns the current time (for testing).
 	Now func() time.Time
 }
@@ -70,6 +73,12 @@ func (g *Generator) Generate() (*GenerateResult, error) {
 	handoffs := extractor.ExtractHandoffs(events)
 	metrics := extractor.ExtractMetrics(events)
 
+	// Step 3b: Extract graduated artifacts from registry (graceful degradation)
+	var graduatedArtifacts []GraduatedArtifact
+	if g.ProjectRoot != "" && ctx.SessionID != "" {
+		graduatedArtifacts = extractor.ExtractGraduatedArtifacts(ctx.SessionID, g.ProjectRoot)
+	}
+
 	// Step 4: Load WHITE_SAILS.yaml (graceful degradation if missing)
 	sailsData, _ := extractor.ExtractWhiteSails() // Ignore error - optional
 
@@ -100,7 +109,8 @@ func (g *Generator) Generate() (*GenerateResult, error) {
 		Decisions:   decisions,
 		Phases:      phases,
 		Handoffs:    handoffs,
-		Commits:     []Commit{}, // Phase 2 - empty for now
+		GraduatedArtifacts: graduatedArtifacts,
+		Commits:            []Commit{}, // Phase 2 - empty for now
 		Metrics:     metrics,
 		Notes:       notes,
 		GeneratedAt: now,
@@ -145,7 +155,9 @@ func GenerateFromProject(projectRoot string, sessionID string) (*Generator, erro
 		return nil, errors.New(errors.CodeSessionNotFound, "session directory not found: "+sessionID)
 	}
 
-	return NewGenerator(sessionDir), nil
+	gen := NewGenerator(sessionDir)
+	gen.ProjectRoot = projectRoot
+	return gen, nil
 }
 
 // GenerateFromSessionID creates a Generator for a specific session ID.
@@ -155,13 +167,17 @@ func GenerateFromSessionID(projectRoot, sessionID string) (*Generator, error) {
 	// Check sessions directory first
 	sessionPath := resolver.SessionDir(sessionID)
 	if _, err := os.Stat(filepath.Join(sessionPath, "SESSION_CONTEXT.md")); err == nil {
-		return NewGenerator(sessionPath), nil
+		gen := NewGenerator(sessionPath)
+		gen.ProjectRoot = projectRoot
+		return gen, nil
 	}
 
 	// Check archive directory
 	archivePath := filepath.Join(resolver.ArchiveDir(), sessionID)
 	if _, err := os.Stat(filepath.Join(archivePath, "SESSION_CONTEXT.md")); err == nil {
-		return NewGenerator(archivePath), nil
+		gen := NewGenerator(archivePath)
+		gen.ProjectRoot = projectRoot
+		return gen, nil
 	}
 
 	return nil, errors.ErrSessionNotFound(sessionID)

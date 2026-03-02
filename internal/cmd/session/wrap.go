@@ -7,6 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/autom8y/knossos/internal/artifact"
 	"github.com/autom8y/knossos/internal/errors"
 	"github.com/autom8y/knossos/internal/hook/clewcontract"
 	"github.com/autom8y/knossos/internal/lock"
@@ -18,8 +19,9 @@ import (
 )
 
 type wrapOptions struct {
-	noArchive bool
-	force     bool
+	noArchive  bool
+	noGraduate bool
+	force      bool
 }
 
 func newWrapCmd(ctx *cmdContext) *cobra.Command {
@@ -55,6 +57,7 @@ Context:
 	}
 
 	cmd.Flags().BoolVar(&opts.noArchive, "no-archive", false, "Don't move to archive directory")
+	cmd.Flags().BoolVar(&opts.noGraduate, "no-graduate", false, "Skip artifact graduation to .ledge/")
 	cmd.Flags().BoolVar(&opts.force, "force", false, "Force wrap even with BLACK sails")
 
 	return cmd
@@ -226,6 +229,20 @@ func runWrap(ctx *cmdContext, opts wrapOptions) error {
 		}
 	}
 
+	// Graduate artifacts to .ledge/ (non-fatal)
+	var graduatedCount int
+	if !opts.noGraduate {
+		gradResult, gradErr := artifact.GraduateSession(resolver, sessionID)
+		if gradErr != nil {
+			printer.VerboseLog("warn", "artifact graduation failed", map[string]any{"error": gradErr.Error()})
+		} else {
+			graduatedCount = len(gradResult.Graduated)
+			for _, w := range gradResult.Warnings {
+				printer.VerboseLog("warn", "artifact graduation warning", map[string]any{"warning": w})
+			}
+		}
+	}
+
 	// If this was a frayed session, emit strand_resolved on parent
 	if sessCtx.FrayedFrom != "" {
 		parentDir := resolver.SessionDir(sessCtx.FrayedFrom)
@@ -301,6 +318,8 @@ func runWrap(ctx *cmdContext, opts wrapOptions) error {
 		Archived:       archived,
 		ArchivePath:    archivePath,
 	}
+
+	result.GraduatedCount = graduatedCount
 
 	// Add sails information to output if generation succeeded
 	if sailsResult != nil {
