@@ -141,12 +141,20 @@ func resolveNamespace(collected map[string]menaCollectedEntry, standalones map[s
 				flatToSource[flatName] = append(flatToSource[flatName], sourceKey)
 			}
 
+			seen := make(map[string]bool)
 			for _, entry := range entries {
 				entryName := entry.Name()
 				// Strip .md extension for file entries to match flat name
 				if !entry.IsDir() && strings.HasSuffix(entryName, ".md") {
 					entryName = strings.TrimSuffix(entryName, ".md")
 				}
+
+				// A command with companions exists as both dir and promoted .md file.
+				// Skip the second occurrence to avoid duplicate warnings/log lines.
+				if seen[entryName] {
+					continue
+				}
+				seen[entryName] = true
 
 				sourceKeys, isFlat := flatToSource[entryName]
 				if !isFlat {
