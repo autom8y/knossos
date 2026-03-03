@@ -88,7 +88,7 @@ SCOUT-{slug}  INTEGRATE-{slug}    PROTO-{slug}   MOONSHOT-{slug}
 - Opportunity identification
 - Risk assessment
 
-**Produces**: `docs/rnd/SCOUT-{slug}.md`
+**Produces**: `.ledge/spikes/SCOUT-{slug}.md`
 
 ---
 
@@ -102,7 +102,7 @@ SCOUT-{slug}  INTEGRATE-{slug}    PROTO-{slug}   MOONSHOT-{slug}
 - Effort estimation
 - Migration planning
 
-**Produces**: `docs/rnd/INTEGRATE-{slug}.md`
+**Produces**: `.ledge/spikes/INTEGRATE-{slug}.md`
 
 ---
 
@@ -116,7 +116,7 @@ SCOUT-{slug}  INTEGRATE-{slug}    PROTO-{slug}   MOONSHOT-{slug}
 - Constraint discovery
 - Knowledge transfer
 
-**Produces**: `docs/rnd/PROTO-{slug}.md`
+**Produces**: `.ledge/spikes/PROTO-{slug}.md`
 
 ---
 
@@ -130,7 +130,7 @@ SCOUT-{slug}  INTEGRATE-{slug}    PROTO-{slug}   MOONSHOT-{slug}
 - Assumption stress-testing
 - Migration path design
 
-**Produces**: `docs/rnd/MOONSHOT-{slug}.md`
+**Produces**: `.ledge/spikes/MOONSHOT-{slug}.md`
 
 ## Cross-References
 

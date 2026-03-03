@@ -86,7 +86,7 @@ threat-modeling → compliance-design → penetration-testing → security-revie
 - Attack surface enumeration
 - Risk prioritization
 
-**Produces**: `docs/security/THREAT-{slug}.md`
+**Produces**: `.ledge/reviews/THREAT-{slug}.md`
 
 ---
 
@@ -100,7 +100,7 @@ threat-modeling → compliance-design → penetration-testing → security-revie
 - Evidence architecture
 - Audit preparation
 
-**Produces**: `docs/security/COMPLY-{slug}.md`
+**Produces**: `.ledge/reviews/COMPLY-{slug}.md`
 
 ---
 
@@ -114,7 +114,7 @@ threat-modeling → compliance-design → penetration-testing → security-revie
 - Attack path documentation
 - Remediation guidance
 
-**Produces**: `docs/security/PENTEST-{slug}.md`
+**Produces**: `.ledge/reviews/PENTEST-{slug}.md`
 
 ---
 
@@ -128,7 +128,7 @@ threat-modeling → compliance-design → penetration-testing → security-revie
 - Release approval
 - Pattern recognition
 
-**Produces**: `docs/security/SEC-{slug}.md`
+**Produces**: `.ledge/reviews/SEC-{slug}.md`
 
 ## Cross-References
 

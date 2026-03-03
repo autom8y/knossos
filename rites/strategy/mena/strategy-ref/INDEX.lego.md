@@ -86,7 +86,7 @@ market-research → competitive-analysis → business-modeling → strategic-pla
 - Trend identification
 - Buyer research
 
-**Produces**: `docs/strategy/MARKET-{slug}.md`
+**Produces**: `.ledge/spikes/MARKET-{slug}.md`
 
 ---
 
@@ -100,7 +100,7 @@ market-research → competitive-analysis → business-modeling → strategic-pla
 - Market positioning
 - Predictive analysis
 
-**Produces**: `docs/strategy/COMPETE-{slug}.md`
+**Produces**: `.ledge/spikes/COMPETE-{slug}.md`
 
 ---
 
@@ -114,7 +114,7 @@ market-research → competitive-analysis → business-modeling → strategic-pla
 - Margin analysis
 - Scenario modeling
 
-**Produces**: `docs/strategy/FINANCE-{slug}.md`
+**Produces**: `.ledge/spikes/FINANCE-{slug}.md`
 
 ---
 
@@ -128,7 +128,7 @@ market-research → competitive-analysis → business-modeling → strategic-pla
 - OKR design
 - Roadmap construction
 
-**Produces**: `docs/strategy/STRATEGY-{slug}.md`
+**Produces**: `.ledge/spikes/STRATEGY-{slug}.md`
 
 ## Progressive Disclosure
 

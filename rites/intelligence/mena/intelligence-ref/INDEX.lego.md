@@ -86,7 +86,7 @@ instrumentation → research → experimentation → synthesis
 - Data quality assurance
 - Pipeline architecture
 
-**Produces**: `docs/intelligence/TRACK-{slug}.md`
+**Produces**: `.ledge/spikes/TRACK-{slug}.md`
 
 ---
 
@@ -100,7 +100,7 @@ instrumentation → research → experimentation → synthesis
 - Usability testing
 - Synthesis
 
-**Produces**: `docs/intelligence/RESEARCH-{slug}.md`
+**Produces**: `.ledge/spikes/RESEARCH-{slug}.md`
 
 ---
 
@@ -114,7 +114,7 @@ instrumentation → research → experimentation → synthesis
 - Sample size calculation
 - Statistical rigor
 
-**Produces**: `docs/intelligence/EXPERIMENT-{slug}.md`
+**Produces**: `.ledge/spikes/EXPERIMENT-{slug}.md`
 
 ---
 
@@ -128,7 +128,7 @@ instrumentation → research → experimentation → synthesis
 - Recommendation synthesis
 - Stakeholder communication
 
-**Produces**: `docs/intelligence/INSIGHT-{slug}.md`
+**Produces**: `.ledge/spikes/INSIGHT-{slug}.md`
 
 ## Supporting Files
 
