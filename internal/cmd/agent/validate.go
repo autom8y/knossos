@@ -123,16 +123,11 @@ func runValidate(ctx *cmdContext, opts validateOptions, paths []string) error {
 		warningCount += len(result.Warnings)
 	}
 
-	// Print results
-	printValidationResults(printer, results, resolver)
+	// Build structured output
+	out := buildValidationOutput(results, resolver, len(agentPaths), validCount, errorCount, warningCount)
 
-	// Print summary
-	fmt.Fprintf(os.Stdout, "\n")
-	fmt.Fprintf(os.Stdout, "Summary: %d agents validated\n", len(agentPaths))
-	fmt.Fprintf(os.Stdout, "  Valid: %d\n", validCount)
-	fmt.Fprintf(os.Stdout, "  Errors: %d\n", errorCount)
-	if warningCount > 0 {
-		fmt.Fprintf(os.Stdout, "  Warnings: %d\n", warningCount)
+	if err := printer.Print(out); err != nil {
+		return err
 	}
 
 	// Return error exit code if any validation failed
@@ -196,42 +191,93 @@ func collectAllAgents(resolver *paths.Resolver) ([]string, error) {
 	return allPaths, nil
 }
 
-func printValidationResults(printer *output.Printer, results map[string]*agentpkg.AgentValidationResult, resolver *paths.Resolver) {
+// agentValidateOutput is the structured output for ari agent validate.
+type agentValidateOutput struct {
+	Agents       []agentValidateEntry `json:"agents"`
+	TotalScanned int                  `json:"total_scanned"`
+	Valid        int                  `json:"valid"`
+	Errors       int                  `json:"errors"`
+	Warnings     int                  `json:"warnings"`
+}
+
+type agentValidateEntry struct {
+	Path     string                    `json:"path"`
+	Status   string                    `json:"status"` // "pass", "warn", "fail"
+	Issues   []agentpkg.ValidationIssue `json:"issues,omitempty"`
+	Warnings []string                  `json:"warnings,omitempty"`
+}
+
+// Text implements output.Textable.
+func (v agentValidateOutput) Text() string {
+	var b strings.Builder
+
+	for _, entry := range v.Agents {
+		switch entry.Status {
+		case "pass":
+			b.WriteString(fmt.Sprintf("PASS  %s\n", entry.Path))
+		case "warn":
+			b.WriteString(fmt.Sprintf("WARN  %s\n", entry.Path))
+		case "fail":
+			b.WriteString(fmt.Sprintf("FAIL  %s\n", entry.Path))
+		}
+
+		for _, issue := range entry.Issues {
+			if issue.Field != "" {
+				b.WriteString(fmt.Sprintf("  ERROR: %s: %s\n", issue.Field, issue.Message))
+			} else {
+				b.WriteString(fmt.Sprintf("  ERROR: %s\n", issue.Message))
+			}
+			if issue.Value != nil {
+				b.WriteString(fmt.Sprintf("         value: %v\n", issue.Value))
+			}
+		}
+
+		for _, warning := range entry.Warnings {
+			b.WriteString(fmt.Sprintf("  WARN: %s\n", warning))
+		}
+	}
+
+	b.WriteString("\n")
+	b.WriteString(fmt.Sprintf("Summary: %d agents validated\n", v.TotalScanned))
+	b.WriteString(fmt.Sprintf("  Valid: %d\n", v.Valid))
+	b.WriteString(fmt.Sprintf("  Errors: %d\n", v.Errors))
+	if v.Warnings > 0 {
+		b.WriteString(fmt.Sprintf("  Warnings: %d\n", v.Warnings))
+	}
+
+	return b.String()
+}
+
+func buildValidationOutput(results map[string]*agentpkg.AgentValidationResult, resolver *paths.Resolver, totalScanned, validCount, errorCount, warningCount int) agentValidateOutput {
 	projectRoot := resolver.ProjectRoot()
 
+	var entries []agentValidateEntry
 	for path, result := range results {
-		// Make path relative to project root for display
 		relPath, err := filepath.Rel(projectRoot, path)
 		if err != nil {
 			relPath = path
 		}
 
-		// Print status indicator
-		if result.Valid {
-			if len(result.Warnings) > 0 {
-				fmt.Fprintf(os.Stdout, "WARN  %s\n", relPath)
-			} else {
-				fmt.Fprintf(os.Stdout, "PASS  %s\n", relPath)
-			}
-		} else {
-			fmt.Fprintf(os.Stdout, "FAIL  %s\n", relPath)
+		status := "pass"
+		if !result.Valid {
+			status = "fail"
+		} else if len(result.Warnings) > 0 {
+			status = "warn"
 		}
 
-		// Print errors
-		for _, issue := range result.Issues {
-			if issue.Field != "" {
-				fmt.Fprintf(os.Stdout, "  ERROR: %s: %s\n", issue.Field, issue.Message)
-			} else {
-				fmt.Fprintf(os.Stdout, "  ERROR: %s\n", issue.Message)
-			}
-			if issue.Value != nil {
-				fmt.Fprintf(os.Stdout, "         value: %v\n", issue.Value)
-			}
-		}
+		entries = append(entries, agentValidateEntry{
+			Path:     relPath,
+			Status:   status,
+			Issues:   result.Issues,
+			Warnings: result.Warnings,
+		})
+	}
 
-		// Print warnings
-		for _, warning := range result.Warnings {
-			fmt.Fprintf(os.Stdout, "  WARN: %s\n", warning)
-		}
+	return agentValidateOutput{
+		Agents:       entries,
+		TotalScanned: totalScanned,
+		Valid:        validCount,
+		Errors:       errorCount,
+		Warnings:     warningCount,
 	}
 }

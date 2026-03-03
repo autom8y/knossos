@@ -11,6 +11,7 @@ import (
 
 	"github.com/autom8y/knossos/internal/cmd/common"
 	"github.com/autom8y/knossos/internal/naxos"
+	"github.com/autom8y/knossos/internal/output"
 )
 
 type gcOptions struct {
@@ -56,7 +57,53 @@ Context:
 	return cmd
 }
 
+// gcOutput is the structured output for ari session gc.
+type gcOutput struct {
+	StaleCount int             `json:"stale_count"`
+	Threshold  string          `json:"threshold"`
+	Sessions   []gcSessionInfo `json:"sessions"`
+	Archived   int             `json:"archived"`
+	Total      int             `json:"total"`
+	DryRun     bool            `json:"dry_run,omitempty"`
+	Aborted    bool            `json:"aborted,omitempty"`
+}
+
+type gcSessionInfo struct {
+	ID       string `json:"id"`
+	ParkedAge string `json:"parked_age"`
+}
+
+// Text implements output.Textable.
+func (g gcOutput) Text() string {
+	var b strings.Builder
+
+	if g.StaleCount == 0 {
+		b.WriteString("No stale sessions found.\n")
+		return b.String()
+	}
+
+	b.WriteString(fmt.Sprintf("Found %d stale parked session(s) (parked > %s):\n\n", g.StaleCount, g.Threshold))
+	for i, s := range g.Sessions {
+		b.WriteString(fmt.Sprintf("  %d. %s  (parked %s ago)\n", i+1, s.ID, s.ParkedAge))
+	}
+	b.WriteString("\n")
+
+	if g.DryRun {
+		b.WriteString("Dry-run: no sessions archived. Use --force or confirm interactively.\n")
+		return b.String()
+	}
+
+	if g.Aborted {
+		b.WriteString("Aborted.\n")
+		return b.String()
+	}
+
+	b.WriteString(fmt.Sprintf("\nArchived %d/%d session(s).\n", g.Archived, g.Total))
+	return b.String()
+}
+
 func runGc(ctx *cmdContext, opts gcOptions) error {
+	printer := ctx.GetPrinter(output.FormatText)
 	resolver := ctx.GetResolver()
 
 	// Determine stale threshold: --stale-after flag > env var > default (2 days)
@@ -70,34 +117,52 @@ func runGc(ctx *cmdContext, opts gcOptions) error {
 	// Discover stale PARKED sessions
 	staleSessions := naxos.ScanStaleSessions(resolver.SessionsDir(), threshold, "")
 	if len(staleSessions) == 0 {
-		fmt.Fprintln(os.Stdout, "No stale sessions found.")
-		return nil
+		return printer.Print(gcOutput{StaleCount: 0})
 	}
 
-	// Print what was found
-	fmt.Fprintf(os.Stdout, "Found %d stale parked session(s) (parked > %s):\n\n", len(staleSessions), formatThreshold(threshold))
+	// Build session info
+	sessions := make([]gcSessionInfo, len(staleSessions))
 	for i, s := range staleSessions {
-		fmt.Fprintf(os.Stdout, "  %d. %s  (parked %s ago)\n", i+1, s.ID, naxos.FormatDuration(s.Age))
+		sessions[i] = gcSessionInfo{ID: s.ID, ParkedAge: naxos.FormatDuration(s.Age)}
 	}
-	fmt.Fprintln(os.Stdout)
+
+	thresholdStr := formatThreshold(threshold)
 
 	if opts.dryRun {
-		fmt.Fprintln(os.Stdout, "Dry-run: no sessions archived. Use --force or confirm interactively.")
-		return nil
+		return printer.Print(gcOutput{
+			StaleCount: len(staleSessions),
+			Threshold:  thresholdStr,
+			Sessions:   sessions,
+			DryRun:     true,
+		})
+	}
+
+	// Print what was found (use text for interactive prompt)
+	printer.PrintLine(fmt.Sprintf("Found %d stale parked session(s) (parked > %s):\n", len(staleSessions), thresholdStr))
+	for i, s := range staleSessions {
+		printer.PrintLine(fmt.Sprintf("  %d. %s  (parked %s ago)", i+1, s.ID, naxos.FormatDuration(s.Age)))
 	}
 
 	// Confirm unless --force
 	if !opts.force {
-		fmt.Fprintf(os.Stdout, "Archive %d session(s)? [y/N] ", len(staleSessions))
+		fmt.Fprintf(os.Stdout, "\nArchive %d session(s)? [y/N] ", len(staleSessions))
 		scanner := bufio.NewScanner(os.Stdin)
 		if !scanner.Scan() {
-			fmt.Fprintln(os.Stdout, "Aborted.")
-			return nil
+			return printer.Print(gcOutput{
+				StaleCount: len(staleSessions),
+				Threshold:  thresholdStr,
+				Sessions:   sessions,
+				Aborted:    true,
+			})
 		}
 		answer := strings.TrimSpace(strings.ToLower(scanner.Text()))
 		if answer != "y" && answer != "yes" {
-			fmt.Fprintln(os.Stdout, "Aborted.")
-			return nil
+			return printer.Print(gcOutput{
+				StaleCount: len(staleSessions),
+				Threshold:  thresholdStr,
+				Sessions:   sessions,
+				Aborted:    true,
+			})
 		}
 	}
 
@@ -106,14 +171,20 @@ func runGc(ctx *cmdContext, opts gcOptions) error {
 	for _, s := range staleSessions {
 		wrapCtx := newGcWrapContext(ctx, s.ID)
 		if err := runWrap(wrapCtx, wrapOptions{noArchive: false, force: true}); err != nil {
+			printer.VerboseLog("warn", fmt.Sprintf("failed to archive %s", s.ID), map[string]interface{}{"error": err.Error()})
 			fmt.Fprintf(os.Stderr, "  warn: failed to archive %s: %v\n", s.ID, err)
 			continue
 		}
 		archived++
 	}
 
-	fmt.Fprintf(os.Stdout, "\nArchived %d/%d session(s).\n", archived, len(staleSessions))
-	return nil
+	return printer.Print(gcOutput{
+		StaleCount: len(staleSessions),
+		Threshold:  thresholdStr,
+		Sessions:   sessions,
+		Archived:   archived,
+		Total:      len(staleSessions),
+	})
 }
 
 // newGcWrapContext creates a cmdContext scoped to a specific session ID

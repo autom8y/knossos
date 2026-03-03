@@ -1,7 +1,6 @@
 package agent
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -12,6 +11,34 @@ import (
 	"github.com/autom8y/knossos/internal/output"
 	"github.com/autom8y/knossos/internal/paths"
 )
+
+// agentListOutput is the structured output for ari agent list.
+type agentListOutput struct {
+	Agents []agentListEntry `json:"agents"`
+	Total  int              `json:"total"`
+}
+
+type agentListEntry struct {
+	Name        string `json:"name"`
+	Type        string `json:"type"`
+	Model       string `json:"model"`
+	Source      string `json:"source"`
+	Description string `json:"description"`
+}
+
+// Headers implements output.Tabular.
+func (l agentListOutput) Headers() []string {
+	return []string{"AGENT", "TYPE", "MODEL", "SOURCE", "DESCRIPTION"}
+}
+
+// Rows implements output.Tabular.
+func (l agentListOutput) Rows() [][]string {
+	rows := make([][]string, len(l.Agents))
+	for i, a := range l.Agents {
+		rows[i] = []string{a.Name, a.Type, a.Model, a.Source, a.Description}
+	}
+	return rows
+}
 
 type listOptions struct {
 	riteName string
@@ -103,10 +130,48 @@ func runList(ctx *cmdContext, opts listOptions) error {
 		agents = append(agents, info)
 	}
 
-	// Print agents
-	printAgentList(agents, resolver)
+	// Build structured output
+	entries := make([]agentListEntry, len(agents))
+	for i, a := range agents {
+		name := a.Name
+		if name == "" {
+			relPath, err := filepath.Rel(resolver.ProjectRoot(), a.Path)
+			if err != nil {
+				relPath = filepath.Base(a.Path)
+			} else {
+				relPath = filepath.Base(relPath)
+			}
+			name = strings.TrimSuffix(relPath, ".md")
+		}
 
-	return nil
+		agentType := a.Type
+		if agentType == "" {
+			agentType = "-"
+		}
+
+		model := a.Model
+		if model == "" {
+			model = "-"
+		}
+
+		description := a.Description
+		if len(description) > 40 {
+			description = description[:37] + "..."
+		}
+
+		entries[i] = agentListEntry{
+			Name:        name,
+			Type:        agentType,
+			Model:       model,
+			Source:      a.Source,
+			Description: description,
+		}
+	}
+
+	return printer.Print(agentListOutput{
+		Agents: entries,
+		Total:  len(entries),
+	})
 }
 
 func determineSource(agentPath string, resolver *paths.Resolver) string {
@@ -131,41 +196,5 @@ func determineSource(agentPath string, resolver *paths.Resolver) string {
 	return "unknown"
 }
 
-func printAgentList(agents []agentInfo, resolver *paths.Resolver) {
-	projectRoot := resolver.ProjectRoot()
-
-	fmt.Fprintf(os.Stdout, "%-30s %-15s %-10s %-15s %s\n", "AGENT", "TYPE", "MODEL", "SOURCE", "DESCRIPTION")
-	fmt.Fprintf(os.Stdout, "%s\n", strings.Repeat("-", 100))
-
-	for _, agent := range agents {
-		relPath, err := filepath.Rel(projectRoot, agent.Path)
-		if err != nil {
-			relPath = filepath.Base(agent.Path)
-		} else {
-			relPath = filepath.Base(relPath)
-		}
-
-		name := agent.Name
-		if name == "" {
-			name = strings.TrimSuffix(relPath, ".md")
-		}
-
-		agentType := agent.Type
-		if agentType == "" {
-			agentType = "-"
-		}
-
-		model := agent.Model
-		if model == "" {
-			model = "-"
-		}
-
-		description := agent.Description
-		if len(description) > 40 {
-			description = description[:37] + "..."
-		}
-
-		fmt.Fprintf(os.Stdout, "%-30s %-15s %-10s %-15s %s\n",
-			name, agentType, model, agent.Source, description)
-	}
-}
+// printAgentList is retained for backward compatibility but unused.
+// Output is now routed through the Printer infrastructure.

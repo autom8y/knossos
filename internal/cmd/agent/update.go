@@ -13,6 +13,44 @@ import (
 	"github.com/autom8y/knossos/internal/output"
 )
 
+// agentUpdateOutput is the structured output for ari agent update.
+type agentUpdateOutput struct {
+	Entries []agentUpdateEntry `json:"entries"`
+	Updated int                `json:"updated"`
+	Skipped int                `json:"skipped"`
+	Errors  int                `json:"errors"`
+}
+
+type agentUpdateEntry struct {
+	Path     string `json:"path"`
+	Status   string `json:"status"` // "updated", "skipped", "would_update", "error"
+	Sections int    `json:"sections,omitempty"`
+	Reason   string `json:"reason,omitempty"`
+	Error    string `json:"error,omitempty"`
+}
+
+// Text implements output.Textable.
+func (u agentUpdateOutput) Text() string {
+	var b strings.Builder
+
+	for _, entry := range u.Entries {
+		switch entry.Status {
+		case "updated":
+			b.WriteString(fmt.Sprintf("UPDATED  %s (%d sections regenerated)\n", entry.Path, entry.Sections))
+		case "would_update":
+			b.WriteString(fmt.Sprintf("WOULD UPDATE %s (%d sections would change)\n", entry.Path, entry.Sections))
+		case "skipped":
+			b.WriteString(fmt.Sprintf("SKIPPED  %s (%s)\n", entry.Path, entry.Reason))
+		case "error":
+			b.WriteString(fmt.Sprintf("ERROR    %s: %s\n", entry.Path, entry.Error))
+		}
+	}
+
+	b.WriteString(fmt.Sprintf("\nSummary: %d updated, %d skipped, %d errors\n",
+		u.Updated, u.Skipped, u.Errors))
+	return b.String()
+}
+
 type updateOptions struct {
 	rite   string
 	all    bool
@@ -83,7 +121,7 @@ func runUpdate(ctx *cmdContext, opts updateOptions) error {
 	}
 
 	if len(agentPaths) == 0 {
-		fmt.Fprintf(os.Stdout, "No agent files found\n")
+		printer.PrintLine("No agent files found")
 		return nil
 	}
 
@@ -92,14 +130,25 @@ func runUpdate(ctx *cmdContext, opts updateOptions) error {
 	for _, path := range agentPaths {
 		if err := updateAgentFile(resolver, path, opts.dryRun, stats); err != nil {
 			relPath, _ := filepath.Rel(resolver.ProjectRoot(), path)
-			fmt.Fprintf(os.Stderr, "ERROR    %s: %v\n", relPath, err)
+			stats.entries = append(stats.entries, agentUpdateEntry{
+				Path:   relPath,
+				Status: "error",
+				Error:  err.Error(),
+			})
 			stats.errors++
 		}
 	}
 
-	// Print summary
-	fmt.Fprintf(os.Stdout, "\nSummary: %d updated, %d skipped, %d errors\n",
-		stats.updated, stats.skipped, stats.errors)
+	out := agentUpdateOutput{
+		Entries: stats.entries,
+		Updated: stats.updated,
+		Skipped: stats.skipped,
+		Errors:  stats.errors,
+	}
+
+	if err := printer.Print(out); err != nil {
+		return err
+	}
 
 	if stats.errors > 0 {
 		return errors.New(errors.CodeGeneralError, "some agent files failed to update")
@@ -112,6 +161,7 @@ type updateStats struct {
 	updated int
 	skipped int
 	errors  int
+	entries []agentUpdateEntry
 }
 
 // updateAgentFile updates a single agent file.
@@ -132,7 +182,7 @@ func updateAgentFile(resolver interface{ ProjectRoot() string }, path string, dr
 	archetypeName := parsed.Frontmatter.Type
 	if archetypeName == "" {
 		relPath, _ := filepath.Rel(resolver.ProjectRoot(), path)
-		fmt.Fprintf(os.Stdout, "SKIPPED  %s (no type field)\n", relPath)
+		stats.entries = append(stats.entries, agentUpdateEntry{Path: relPath, Status: "skipped", Reason: "no type field"})
 		stats.skipped++
 		return nil
 	}
@@ -145,7 +195,7 @@ func updateAgentFile(resolver interface{ ProjectRoot() string }, path string, dr
 	archetype, err := agentpkg.GetArchetype(archetypeName)
 	if err != nil {
 		relPath, _ := filepath.Rel(resolver.ProjectRoot(), path)
-		fmt.Fprintf(os.Stdout, "SKIPPED  %s (unknown archetype %q)\n", relPath, archetypeName)
+		stats.entries = append(stats.entries, agentUpdateEntry{Path: relPath, Status: "skipped", Reason: fmt.Sprintf("unknown archetype %q", archetypeName)})
 		stats.skipped++
 		return nil
 	}
@@ -153,7 +203,7 @@ func updateAgentFile(resolver interface{ ProjectRoot() string }, path string, dr
 	// Check if there are any platform or derived sections to update
 	if !hasSectionsToUpdate(archetype) {
 		relPath, _ := filepath.Rel(resolver.ProjectRoot(), path)
-		fmt.Fprintf(os.Stdout, "SKIPPED  %s (no platform sections to update)\n", relPath)
+		stats.entries = append(stats.entries, agentUpdateEntry{Path: relPath, Status: "skipped", Reason: "no platform sections to update"})
 		stats.skipped++
 		return nil
 	}
@@ -172,7 +222,7 @@ func updateAgentFile(resolver interface{ ProjectRoot() string }, path string, dr
 
 	if changedCount == 0 {
 		relPath, _ := filepath.Rel(resolver.ProjectRoot(), path)
-		fmt.Fprintf(os.Stdout, "SKIPPED  %s (no changes)\n", relPath)
+		stats.entries = append(stats.entries, agentUpdateEntry{Path: relPath, Status: "skipped", Reason: "no changes"})
 		stats.skipped++
 		return nil
 	}
@@ -180,7 +230,7 @@ func updateAgentFile(resolver interface{ ProjectRoot() string }, path string, dr
 	relPath, _ := filepath.Rel(resolver.ProjectRoot(), path)
 
 	if dryRun {
-		fmt.Fprintf(os.Stdout, "WOULD UPDATE %s (%d sections would change)\n", relPath, changedCount)
+		stats.entries = append(stats.entries, agentUpdateEntry{Path: relPath, Status: "would_update", Sections: changedCount})
 		stats.updated++
 		return nil
 	}
@@ -190,7 +240,7 @@ func updateAgentFile(resolver interface{ ProjectRoot() string }, path string, dr
 		return errors.Wrap(errors.CodePermissionDenied, "failed to write agent file", err)
 	}
 
-	fmt.Fprintf(os.Stdout, "UPDATED  %s (%d sections regenerated)\n", relPath, changedCount)
+	stats.entries = append(stats.entries, agentUpdateEntry{Path: relPath, Status: "updated", Sections: changedCount})
 	stats.updated++
 	return nil
 }

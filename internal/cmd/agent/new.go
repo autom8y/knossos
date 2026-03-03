@@ -115,7 +115,7 @@ func runNew(ctx *cmdContext, opts newOptions) error {
 	if relErr != nil {
 		relPath = targetPath
 	}
-	fmt.Fprintf(os.Stdout, "Created %s -- fill in author sections marked with TODO\n", relPath)
+	printer.PrintLine(fmt.Sprintf("Created %s -- fill in author sections marked with TODO", relPath))
 
 	return nil
 }
