@@ -9,6 +9,7 @@ import (
 )
 
 func TestParseArtifactType(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		input string
 		want  ArtifactType
@@ -32,6 +33,7 @@ func TestParseArtifactType(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.input, func(t *testing.T) {
+			t.Parallel()
 			if got := ParseArtifactType(tt.input); got != tt.want {
 				t.Errorf("ParseArtifactType(%q) = %v, want %v", tt.input, got, tt.want)
 			}
@@ -40,6 +42,7 @@ func TestParseArtifactType(t *testing.T) {
 }
 
 func TestDetectArtifactType_Filename(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		filename string
 		want     ArtifactType
@@ -61,6 +64,7 @@ func TestDetectArtifactType_Filename(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.filename, func(t *testing.T) {
+			t.Parallel()
 			got := DetectArtifactType(tt.filename, nil)
 			if got != tt.want {
 				t.Errorf("DetectArtifactType(%q, nil) = %v, want %v", tt.filename, got, tt.want)
@@ -70,6 +74,7 @@ func TestDetectArtifactType_Filename(t *testing.T) {
 }
 
 func TestDetectArtifactType_Frontmatter(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name        string
 		filename    string
@@ -104,6 +109,7 @@ func TestDetectArtifactType_Frontmatter(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			got := DetectArtifactType(tt.filename, tt.frontmatter)
 			if got != tt.want {
 				t.Errorf("DetectArtifactType() = %v, want %v", got, tt.want)
@@ -113,6 +119,7 @@ func TestDetectArtifactType_Frontmatter(t *testing.T) {
 }
 
 func TestArtifactType_SchemaName(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		aType ArtifactType
 		want  string
@@ -126,6 +133,7 @@ func TestArtifactType_SchemaName(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(string(tt.aType), func(t *testing.T) {
+			t.Parallel()
 			if got := tt.aType.SchemaName(); got != tt.want {
 				t.Errorf("SchemaName() = %q, want %q", got, tt.want)
 			}
@@ -134,6 +142,7 @@ func TestArtifactType_SchemaName(t *testing.T) {
 }
 
 func TestArtifactValidator_Validate_ValidPRD(t *testing.T) {
+	t.Parallel()
 	content := []byte(`---
 artifact_id: PRD-test-feature
 title: Test Feature PRD
@@ -173,6 +182,7 @@ This is the content.
 }
 
 func TestArtifactValidator_Validate_ValidTDD(t *testing.T) {
+	t.Parallel()
 	content := []byte(`---
 artifact_id: TDD-feature-design
 title: Feature Design
@@ -203,6 +213,7 @@ Technical design here.
 }
 
 func TestArtifactValidator_Validate_ValidADR(t *testing.T) {
+	t.Parallel()
 	// Note: YAML parses bare dates as timestamps, so we quote it to keep as string
 	content := []byte(`---
 artifact_id: ADR-0001
@@ -234,6 +245,7 @@ Decision content.
 }
 
 func TestArtifactValidator_Validate_ValidTestPlan(t *testing.T) {
+	t.Parallel()
 	content := []byte(`---
 artifact_id: TEST-feature-validation
 title: Feature Validation Test Plan
@@ -263,6 +275,7 @@ Test cases here.
 }
 
 func TestArtifactValidator_Validate_MissingRequiredFields(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name         string
 		content      string
@@ -305,13 +318,14 @@ Content`,
 		},
 	}
 
-	validator, err := NewArtifactValidator()
-	if err != nil {
-		t.Fatalf("NewArtifactValidator() error = %v", err)
-	}
-
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			validator, err := NewArtifactValidator()
+			if err != nil {
+				t.Fatalf("NewArtifactValidator() error = %v", err)
+			}
+
 			result, err := validator.Validate([]byte(tt.content), "test.md", tt.artifactType)
 			if err != nil {
 				t.Fatalf("Validate() error = %v", err)
@@ -339,6 +353,7 @@ Content`,
 }
 
 func TestArtifactValidator_Validate_InvalidFieldValues(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name    string
 		content string
@@ -377,13 +392,14 @@ Content`,
 		},
 	}
 
-	validator, err := NewArtifactValidator()
-	if err != nil {
-		t.Fatalf("NewArtifactValidator() error = %v", err)
-	}
-
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			validator, err := NewArtifactValidator()
+			if err != nil {
+				t.Fatalf("NewArtifactValidator() error = %v", err)
+			}
+
 			result, err := validator.Validate([]byte(tt.content), "test.md", ArtifactTypePRD)
 			if err != nil {
 				t.Fatalf("Validate() error = %v", err)
@@ -397,6 +413,7 @@ Content`,
 }
 
 func TestArtifactValidator_Validate_NoFrontmatter(t *testing.T) {
+	t.Parallel()
 	content := []byte(`# Document Title
 
 This document has no frontmatter.
@@ -422,6 +439,7 @@ This document has no frontmatter.
 }
 
 func TestArtifactValidator_Validate_UnknownType(t *testing.T) {
+	t.Parallel()
 	content := []byte(`---
 title: Some Document
 ---
@@ -448,6 +466,7 @@ Content`)
 }
 
 func TestArtifactValidator_ValidateFile(t *testing.T) {
+	t.Parallel()
 	// Create a temp file with valid PRD content
 	tmpDir := t.TempDir()
 	prdFile := filepath.Join(tmpDir, "PRD-test.md")
@@ -491,6 +510,7 @@ Content here.
 }
 
 func TestArtifactValidator_ValidateFile_NotFound(t *testing.T) {
+	t.Parallel()
 	validator, err := NewArtifactValidator()
 	if err != nil {
 		t.Fatalf("NewArtifactValidator() error = %v", err)
@@ -503,6 +523,7 @@ func TestArtifactValidator_ValidateFile_NotFound(t *testing.T) {
 }
 
 func TestValidArtifactTypes(t *testing.T) {
+	t.Parallel()
 	types := ValidArtifactTypes()
 
 	expected := []string{"prd", "tdd", "adr", "test-plan"}
@@ -525,6 +546,7 @@ func TestValidArtifactTypes(t *testing.T) {
 }
 
 func TestArtifactValidator_ExplicitType(t *testing.T) {
+	t.Parallel()
 	// Content matches TDD pattern in filename but we force PRD validation
 	content := []byte(`---
 artifact_id: PRD-forced-type
@@ -553,6 +575,7 @@ Content`)
 }
 
 func TestArtifactType_String(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		aType ArtifactType
 		want  string
@@ -566,6 +589,7 @@ func TestArtifactType_String(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(string(tt.aType), func(t *testing.T) {
+			t.Parallel()
 			if got := tt.aType.String(); got != tt.want {
 				t.Errorf("String() = %q, want %q", got, tt.want)
 			}
@@ -574,6 +598,7 @@ func TestArtifactType_String(t *testing.T) {
 }
 
 func TestNewArtifactValidator(t *testing.T) {
+	t.Parallel()
 	validator, err := NewArtifactValidator()
 	if err != nil {
 		t.Fatalf("NewArtifactValidator() error = %v", err)
@@ -589,12 +614,8 @@ func TestNewArtifactValidator(t *testing.T) {
 }
 
 func TestArtifactValidator_Validate_AllSchemas(t *testing.T) {
+	t.Parallel()
 	// Test that all schema types can be compiled and used
-	validator, err := NewArtifactValidator()
-	if err != nil {
-		t.Fatalf("NewArtifactValidator() error = %v", err)
-	}
-
 	schemaTypes := []ArtifactType{
 		ArtifactTypePRD,
 		ArtifactTypeTDD,
@@ -604,8 +625,14 @@ func TestArtifactValidator_Validate_AllSchemas(t *testing.T) {
 
 	for _, schemaType := range schemaTypes {
 		t.Run(string(schemaType), func(t *testing.T) {
+			t.Parallel()
+			validator, err := NewArtifactValidator()
+			if err != nil {
+				t.Fatalf("NewArtifactValidator() error = %v", err)
+			}
+
 			// Validate with empty data to verify schema is loadable
-			_, err := validator.validateAgainstSchema(map[string]interface{}{}, schemaType)
+			_, err = validator.validateAgainstSchema(map[string]interface{}{}, schemaType)
 			// We expect this to fail (missing required fields) but NOT with a schema loading error
 			if err != nil {
 				t.Errorf("validateAgainstSchema(%s) schema error: %v", schemaType, err)
@@ -615,6 +642,7 @@ func TestArtifactValidator_Validate_AllSchemas(t *testing.T) {
 }
 
 func TestValidationIssue(t *testing.T) {
+	t.Parallel()
 	issue := ValidationIssue{
 		Field:   "artifact_id",
 		Message: "missing required field",
@@ -630,6 +658,7 @@ func TestValidationIssue(t *testing.T) {
 }
 
 func TestDetectArtifactType_PathVariations(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		path string
 		want ArtifactType
@@ -643,6 +672,7 @@ func TestDetectArtifactType_PathVariations(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.path, func(t *testing.T) {
+			t.Parallel()
 			got := DetectArtifactType(tt.path, nil)
 			if got != tt.want {
 				t.Errorf("DetectArtifactType(%q, nil) = %v, want %v", tt.path, got, tt.want)
@@ -652,6 +682,7 @@ func TestDetectArtifactType_PathVariations(t *testing.T) {
 }
 
 func TestArtifactValidator_Validate_FrontmatterContainedInResult(t *testing.T) {
+	t.Parallel()
 	content := []byte(`---
 artifact_id: PRD-test
 title: Test Feature

@@ -7,6 +7,7 @@ import (
 )
 
 func TestDiff(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name      string
 		a         map[string]interface{}
@@ -62,6 +63,7 @@ func TestDiff(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			mA := &manifest.Manifest{Content: tt.a}
 			mB := &manifest.Manifest{Content: tt.b}
 
@@ -87,6 +89,7 @@ func TestDiff(t *testing.T) {
 }
 
 func TestDiffFormatUnified(t *testing.T) {
+	t.Parallel()
 	mA := &manifest.Manifest{
 		Content: map[string]interface{}{
 			"version": "1.0",

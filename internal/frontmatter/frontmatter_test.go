@@ -7,6 +7,7 @@ import (
 )
 
 func TestParse_ValidFrontmatter(t *testing.T) {
+	t.Parallel()
 	content := []byte("---\nname: test\ndescription: hello\n---\n\n# Body\n")
 
 	yamlBytes, body, err := Parse(content)
@@ -23,6 +24,7 @@ func TestParse_ValidFrontmatter(t *testing.T) {
 }
 
 func TestParse_CRLFDelimiters(t *testing.T) {
+	t.Parallel()
 	content := []byte("---\r\nname: test\r\n---\r\n\r\n# Body\r\n")
 
 	yamlBytes, _, err := Parse(content)
@@ -38,6 +40,7 @@ func TestParse_CRLFDelimiters(t *testing.T) {
 }
 
 func TestParse_MixedLineEndings(t *testing.T) {
+	t.Parallel()
 	// Open with \r\n, close with \n --- YAML bytes preserve raw content
 	content := []byte("---\r\nname: test\n---\n\n# Body\n")
 
@@ -52,6 +55,7 @@ func TestParse_MixedLineEndings(t *testing.T) {
 }
 
 func TestParse_MissingOpenDelimiter(t *testing.T) {
+	t.Parallel()
 	content := []byte("name: test\n---\n")
 
 	_, _, err := Parse(content)
@@ -61,6 +65,7 @@ func TestParse_MissingOpenDelimiter(t *testing.T) {
 }
 
 func TestParse_MissingCloseDelimiter(t *testing.T) {
+	t.Parallel()
 	content := []byte("---\nname: test\nno closing\n")
 
 	_, _, err := Parse(content)
@@ -70,6 +75,7 @@ func TestParse_MissingCloseDelimiter(t *testing.T) {
 }
 
 func TestParse_EmptyContent(t *testing.T) {
+	t.Parallel()
 	_, _, err := Parse([]byte(""))
 	if err != ErrMissingOpenDelimiter {
 		t.Errorf("err = %v, want ErrMissingOpenDelimiter", err)
@@ -77,6 +83,7 @@ func TestParse_EmptyContent(t *testing.T) {
 }
 
 func TestParse_EmptyFrontmatter(t *testing.T) {
+	t.Parallel()
 	content := []byte("---\n\n---\n\n# Body\n")
 
 	yamlBytes, body, err := Parse(content)
@@ -93,6 +100,7 @@ func TestParse_EmptyFrontmatter(t *testing.T) {
 }
 
 func TestParse_NoBody(t *testing.T) {
+	t.Parallel()
 	content := []byte("---\nname: test\n---\n")
 
 	yamlBytes, body, err := Parse(content)
@@ -109,6 +117,7 @@ func TestParse_NoBody(t *testing.T) {
 }
 
 func TestFlexibleStringSlice_CommaSeparated(t *testing.T) {
+	t.Parallel()
 	input := "Bash, Read, Glob, Grep"
 
 	node := &yaml.Node{
@@ -133,6 +142,7 @@ func TestFlexibleStringSlice_CommaSeparated(t *testing.T) {
 }
 
 func TestFlexibleStringSlice_YAMLSequence(t *testing.T) {
+	t.Parallel()
 	yamlInput := "- Bash\n- Read\n- Glob\n"
 	var fs FlexibleStringSlice
 	if err := yaml.Unmarshal([]byte(yamlInput), &fs); err != nil {
@@ -151,6 +161,7 @@ func TestFlexibleStringSlice_YAMLSequence(t *testing.T) {
 }
 
 func TestFlexibleStringSlice_EmptyString(t *testing.T) {
+	t.Parallel()
 	node := &yaml.Node{
 		Kind:  yaml.ScalarNode,
 		Value: "",
@@ -167,6 +178,7 @@ func TestFlexibleStringSlice_EmptyString(t *testing.T) {
 }
 
 func TestFlexibleStringSlice_SingleValue(t *testing.T) {
+	t.Parallel()
 	node := &yaml.Node{
 		Kind:  yaml.ScalarNode,
 		Value: "Read",
@@ -183,6 +195,7 @@ func TestFlexibleStringSlice_SingleValue(t *testing.T) {
 }
 
 func TestFlexibleStringSlice_TrailingComma(t *testing.T) {
+	t.Parallel()
 	node := &yaml.Node{
 		Kind:  yaml.ScalarNode,
 		Value: "Bash, Read,",
@@ -206,6 +219,7 @@ func TestFlexibleStringSlice_TrailingComma(t *testing.T) {
 }
 
 func TestFlexibleStringSlice_RoundTrip(t *testing.T) {
+	t.Parallel()
 	// Parse frontmatter containing FlexibleStringSlice field, verify it works
 	// end-to-end with Parse() + yaml.Unmarshal
 	content := []byte("---\ntools: Bash, Read, Glob\nname: test\n---\n\n# Body\n")

@@ -8,6 +8,7 @@ import (
 )
 
 func TestContent(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name    string
 		content string
@@ -32,6 +33,7 @@ func TestContent(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			got := Content(tt.content)
 			if got != tt.want {
 				t.Errorf("Content(%q) = %q, want %q", tt.content, got, tt.want)
@@ -41,6 +43,7 @@ func TestContent(t *testing.T) {
 }
 
 func TestBytes(t *testing.T) {
+	t.Parallel()
 	got := Bytes([]byte("hello world"))
 	want := "sha256:b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9"
 	if got != want {
@@ -49,6 +52,7 @@ func TestBytes(t *testing.T) {
 }
 
 func TestContent_HasPrefix(t *testing.T) {
+	t.Parallel()
 	got := Content("test")
 	if !strings.HasPrefix(got, Prefix) {
 		t.Errorf("Content() = %q, missing prefix %q", got, Prefix)
@@ -56,6 +60,7 @@ func TestContent_HasPrefix(t *testing.T) {
 }
 
 func TestBytes_HasPrefix(t *testing.T) {
+	t.Parallel()
 	got := Bytes([]byte("test"))
 	if !strings.HasPrefix(got, Prefix) {
 		t.Errorf("Bytes() = %q, missing prefix %q", got, Prefix)
@@ -63,6 +68,7 @@ func TestBytes_HasPrefix(t *testing.T) {
 }
 
 func TestContent_MatchesBytes(t *testing.T) {
+	t.Parallel()
 	input := "test content"
 	fromContent := Content(input)
 	fromBytes := Bytes([]byte(input))
@@ -72,6 +78,7 @@ func TestContent_MatchesBytes(t *testing.T) {
 }
 
 func TestFile(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 	testFile := filepath.Join(tmpDir, "test.txt")
 
@@ -91,6 +98,7 @@ func TestFile(t *testing.T) {
 }
 
 func TestFile_NonExistent(t *testing.T) {
+	t.Parallel()
 	got, err := File("/nonexistent/path/file.txt")
 	if err != nil {
 		t.Fatalf("File() error = %v, want nil for nonexistent", err)
@@ -101,6 +109,7 @@ func TestFile_NonExistent(t *testing.T) {
 }
 
 func TestFile_MatchesContent(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 	testFile := filepath.Join(tmpDir, "test.txt")
 	content := "consistent hash test"
@@ -121,6 +130,7 @@ func TestFile_MatchesContent(t *testing.T) {
 }
 
 func TestDir(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 
 	// Create directory structure

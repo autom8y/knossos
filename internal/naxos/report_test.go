@@ -7,6 +7,7 @@ import (
 )
 
 func TestScanOutput_Headers(t *testing.T) {
+	t.Parallel()
 	output := ScanOutput{}
 	headers := output.Headers()
 
@@ -22,6 +23,7 @@ func TestScanOutput_Headers(t *testing.T) {
 }
 
 func TestScanOutput_Rows(t *testing.T) {
+	t.Parallel()
 	output := ScanOutput{
 		OrphanedSessions: []OrphanedSession{
 			{
@@ -71,6 +73,7 @@ func TestScanOutput_Rows(t *testing.T) {
 }
 
 func TestScanOutput_Rows_TruncatesLongSessionID(t *testing.T) {
+	t.Parallel()
 	output := ScanOutput{
 		OrphanedSessions: []OrphanedSession{
 			{
@@ -93,6 +96,7 @@ func TestScanOutput_Rows_TruncatesLongSessionID(t *testing.T) {
 }
 
 func TestScanOutput_Text_NoOrphans(t *testing.T) {
+	t.Parallel()
 	output := ScanOutput{
 		TotalScanned:     5,
 		TotalOrphaned:    0,
@@ -115,6 +119,7 @@ func TestScanOutput_Text_NoOrphans(t *testing.T) {
 }
 
 func TestScanOutput_Text_WithOrphans(t *testing.T) {
+	t.Parallel()
 	output := ScanOutput{
 		TotalScanned:  10,
 		TotalOrphaned: 2,
@@ -190,6 +195,7 @@ func TestScanOutput_Text_WithOrphans(t *testing.T) {
 }
 
 func TestScanOutput_Text_IncompleteWrapReason(t *testing.T) {
+	t.Parallel()
 	output := ScanOutput{
 		TotalScanned:  1,
 		TotalOrphaned: 1,
@@ -225,6 +231,7 @@ func TestScanOutput_Text_IncompleteWrapReason(t *testing.T) {
 }
 
 func TestFromScanResult(t *testing.T) {
+	t.Parallel()
 	now := time.Now().UTC()
 	config := ScanConfig{
 		InactiveThreshold:   24 * time.Hour,
@@ -266,6 +273,7 @@ func TestFromScanResult(t *testing.T) {
 }
 
 func TestReasonSymbol(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		reason OrphanReason
 		want   string
@@ -285,6 +293,7 @@ func TestReasonSymbol(t *testing.T) {
 }
 
 func TestTruncate(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		s      string
 		maxLen int
@@ -307,6 +316,7 @@ func TestTruncate(t *testing.T) {
 }
 
 func TestByReasonSummary(t *testing.T) {
+	t.Parallel()
 	summary := ByReasonSummary{
 		Inactive:       3,
 		StaleSails:     2,
@@ -325,6 +335,7 @@ func TestByReasonSummary(t *testing.T) {
 }
 
 func TestConfigSummary(t *testing.T) {
+	t.Parallel()
 	summary := ConfigSummary{
 		InactiveThreshold:   "24 hours",
 		StaleSailsThreshold: "7 days",

@@ -10,6 +10,7 @@ import (
 // --- Error struct construction and interface ---
 
 func TestNew_SetsCodeMessageAndExitCode(t *testing.T) {
+	t.Parallel()
 	err := New(CodeFileNotFound, "file not found")
 	if err.Code != CodeFileNotFound {
 		t.Errorf("Code = %q, want %q", err.Code, CodeFileNotFound)
@@ -26,6 +27,7 @@ func TestNew_SetsCodeMessageAndExitCode(t *testing.T) {
 }
 
 func TestNewWithDetails_SetsAllFields(t *testing.T) {
+	t.Parallel()
 	details := map[string]any{"path": "/some/path"}
 	err := NewWithDetails(CodeParseError, "parse failed", details)
 	if err.Code != CodeParseError {
@@ -43,6 +45,7 @@ func TestNewWithDetails_SetsAllFields(t *testing.T) {
 }
 
 func TestWrap_StoresCauseInDetailsAsString(t *testing.T) {
+	t.Parallel()
 	cause := fmt.Errorf("underlying io error")
 	err := Wrap(CodeGeneralError, "operation failed", cause)
 	if err.Code != CodeGeneralError {
@@ -61,6 +64,7 @@ func TestWrap_StoresCauseInDetailsAsString(t *testing.T) {
 }
 
 func TestWrap_NilCause_EmptyDetails(t *testing.T) {
+	t.Parallel()
 	err := Wrap(CodeGeneralError, "no cause", nil)
 	if _, ok := err.Details["cause"]; ok {
 		t.Errorf("Details[cause] set for nil cause, want absent")
@@ -71,22 +75,59 @@ func TestWrap_NilCause_EmptyDetails(t *testing.T) {
 	}
 }
 
-// Wrap does NOT use %w, so stdlib errors.Is/errors.As cannot traverse the cause chain.
-func TestWrap_DoesNotUnwrapForStdlibErrors(t *testing.T) {
+// Wrap preserves the cause for Go error chain traversal via Unwrap().
+func TestWrap_UnwrapsFindsSentinelThroughChain(t *testing.T) {
+	t.Parallel()
 	sentinel := fmt.Errorf("sentinel error")
 	wrapped := Wrap(CodeGeneralError, "wrapping", sentinel)
-	// The custom Error type does not implement Unwrap(), so errors.Is won't find sentinel.
-	if fmt.Errorf("%w", wrapped) == nil {
-		// Just verifying no panic; stdlib wrapping the *Error itself is fine
-	}
-	// errors.Is cannot find sentinel through our *Error wrapper.
-	if isMatch := isStdlibIs(wrapped, sentinel); isMatch {
-		t.Errorf("stdlib errors.Is found sentinel through *Error wrapper — expected not to")
+	// Unwrap returns the cause, so isStdlibIs can find the sentinel
+	if !isStdlibIs(wrapped, sentinel) {
+		t.Errorf("stdlib errors.Is should find sentinel through *Error Unwrap chain")
 	}
 }
 
-// isStdlibIs calls the stdlib errors.Is using fmt.Errorf wrapping to test unwrapping.
-// We avoid importing "errors" from stdlib to not shadow package name, so use direct type assertion.
+// When *Error itself is wrapped by fmt.Errorf("%w"), errors.As can find it.
+func TestErrorsAs_FindsErrorThroughFmtWrapping(t *testing.T) {
+	t.Parallel()
+	inner := New(CodeFileNotFound, "not found")
+	wrapped := fmt.Errorf("context: %w", inner)
+	var target *Error
+	if !isErrorsAs(wrapped, &target) {
+		t.Fatal("errors.As should find *Error through fmt.Errorf wrapping")
+	}
+	if target.Code != CodeFileNotFound {
+		t.Errorf("Code = %q, want %q", target.Code, CodeFileNotFound)
+	}
+}
+
+// IsNotFound works through fmt.Errorf("%w") wrapping.
+func TestIsNotFound_ThroughFmtWrapping(t *testing.T) {
+	t.Parallel()
+	inner := New(CodeFileNotFound, "not found")
+	wrapped := fmt.Errorf("loading config: %w", inner)
+	if !IsNotFound(wrapped) {
+		t.Errorf("IsNotFound should detect *Error through fmt.Errorf wrapping")
+	}
+}
+
+// isErrorsAs performs stdlib errors.As without importing "errors" (which would shadow the package).
+func isErrorsAs(err error, target **Error) bool {
+	type unwrapper interface{ Unwrap() error }
+	for e := err; e != nil; {
+		if ce, ok := e.(*Error); ok {
+			*target = ce
+			return true
+		}
+		u, ok := e.(unwrapper)
+		if !ok {
+			return false
+		}
+		e = u.Unwrap()
+	}
+	return false
+}
+
+// isStdlibIs walks the error chain to check identity, avoiding importing "errors".
 func isStdlibIs(err error, target error) bool {
 	// Walk the error chain manually using Unwrap (stdlib pattern)
 	for e := err; e != nil; {
@@ -106,6 +147,7 @@ func isStdlibIs(err error, target error) bool {
 // --- Error() string output ---
 
 func TestError_ReturnsMessage(t *testing.T) {
+	t.Parallel()
 	err := New(CodeUsageError, "invalid argument")
 	if err.Error() != "invalid argument" {
 		t.Errorf("Error() = %q, want %q", err.Error(), "invalid argument")
@@ -115,6 +157,7 @@ func TestError_ReturnsMessage(t *testing.T) {
 // --- JSON() output format ---
 
 func TestJSON_ProducesWrappedEnvelope(t *testing.T) {
+	t.Parallel()
 	err := NewWithDetails(CodeFileNotFound, "not found", map[string]any{"path": "/x"})
 	raw := err.JSON()
 
@@ -140,6 +183,7 @@ func TestJSON_ProducesWrappedEnvelope(t *testing.T) {
 }
 
 func TestJSON_ExitCodeOmitted(t *testing.T) {
+	t.Parallel()
 	err := New(CodeUsageError, "bad flag")
 	raw := err.JSON()
 	if strings.Contains(raw, "exit_code") || strings.Contains(raw, "ExitCode") {
@@ -148,6 +192,7 @@ func TestJSON_ExitCodeOmitted(t *testing.T) {
 }
 
 func TestJSON_NilDetails_OmitsDetailsKey(t *testing.T) {
+	t.Parallel()
 	err := New(CodeGeneralError, "bare error")
 	raw := err.JSON()
 	if strings.Contains(raw, `"details"`) {
@@ -158,6 +203,7 @@ func TestJSON_NilDetails_OmitsDetailsKey(t *testing.T) {
 // --- exitCodeForCode mapping table ---
 
 func TestExitCodeMapping(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		code     string
 		wantExit int
@@ -196,6 +242,7 @@ func TestExitCodeMapping(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.code, func(t *testing.T) {
+			t.Parallel()
 			err := New(tt.code, "msg")
 			if err.ExitCode != tt.wantExit {
 				t.Errorf("New(%q).ExitCode = %d, want %d", tt.code, err.ExitCode, tt.wantExit)
@@ -207,12 +254,14 @@ func TestExitCodeMapping(t *testing.T) {
 // --- GetExitCode ---
 
 func TestGetExitCode_NilError_ReturnsSuccess(t *testing.T) {
+	t.Parallel()
 	if got := GetExitCode(nil); got != ExitSuccess {
 		t.Errorf("GetExitCode(nil) = %d, want %d", got, ExitSuccess)
 	}
 }
 
 func TestGetExitCode_CustomError_ReturnsCorrectCode(t *testing.T) {
+	t.Parallel()
 	err := New(CodeValidationFailed, "failed")
 	if got := GetExitCode(err); got != ExitValidationFailed {
 		t.Errorf("GetExitCode = %d, want %d", got, ExitValidationFailed)
@@ -220,25 +269,27 @@ func TestGetExitCode_CustomError_ReturnsCorrectCode(t *testing.T) {
 }
 
 func TestGetExitCode_StdlibError_ReturnsGeneralError(t *testing.T) {
+	t.Parallel()
 	err := fmt.Errorf("plain error")
 	if got := GetExitCode(err); got != ExitGeneralError {
 		t.Errorf("GetExitCode(stdlib err) = %d, want %d", got, ExitGeneralError)
 	}
 }
 
-func TestGetExitCode_FmtWrappedCustomError_ReturnsGeneralError(t *testing.T) {
-	// %w wrapping around *Error loses the type assertion in GetExitCode
+func TestGetExitCode_FmtWrappedCustomError_TraversesChain(t *testing.T) {
+	t.Parallel()
+	// errors.As traverses through fmt.Errorf("%w") to find the inner *Error
 	inner := New(CodeFileNotFound, "not found")
 	wrapped := fmt.Errorf("outer: %w", inner)
-	if got := GetExitCode(wrapped); got != ExitGeneralError {
-		// GetExitCode only does a direct type assertion, not chain traversal
-		t.Errorf("GetExitCode(fmt.Errorf wrapping) = %d, want %d (direct assertion fails)", got, ExitGeneralError)
+	if got := GetExitCode(wrapped); got != ExitFileNotFound {
+		t.Errorf("GetExitCode(fmt.Errorf wrapping) = %d, want %d (chain traversal)", got, ExitFileNotFound)
 	}
 }
 
 // --- Domain-specific error constructors ---
 
 func TestErrProjectNotFound(t *testing.T) {
+	t.Parallel()
 	err := ErrProjectNotFound()
 	if err.Code != CodeProjectNotFound {
 		t.Errorf("Code = %q, want %q", err.Code, CodeProjectNotFound)
@@ -252,6 +303,7 @@ func TestErrProjectNotFound(t *testing.T) {
 }
 
 func TestErrSessionNotFound(t *testing.T) {
+	t.Parallel()
 	err := ErrSessionNotFound("sess-abc-123")
 	if err.Code != CodeSessionNotFound {
 		t.Errorf("Code = %q, want %q", err.Code, CodeSessionNotFound)
@@ -268,6 +320,7 @@ func TestErrSessionNotFound(t *testing.T) {
 }
 
 func TestErrSessionExists(t *testing.T) {
+	t.Parallel()
 	err := ErrSessionExists("existing-id", "ACTIVE")
 	if err.Code != CodeSessionExists {
 		t.Errorf("Code = %q, want %q", err.Code, CodeSessionExists)
@@ -284,6 +337,7 @@ func TestErrSessionExists(t *testing.T) {
 }
 
 func TestErrLifecycleViolation(t *testing.T) {
+	t.Parallel()
 	err := ErrLifecycleViolation("ACTIVE", "ARCHIVED", "cannot archive from active")
 	if err.Code != CodeLifecycleViolation {
 		t.Errorf("Code = %q, want %q", err.Code, CodeLifecycleViolation)
@@ -304,6 +358,7 @@ func TestErrLifecycleViolation(t *testing.T) {
 }
 
 func TestErrLockTimeout_WithMeta(t *testing.T) {
+	t.Parallel()
 	meta := map[string]string{"pid": "1234"}
 	err := ErrLockTimeout("/var/lock/ari.lock", meta)
 	if err.Code != CodeLockTimeout {
@@ -321,6 +376,7 @@ func TestErrLockTimeout_WithMeta(t *testing.T) {
 }
 
 func TestErrLockTimeout_NilMeta_NoLockHolder(t *testing.T) {
+	t.Parallel()
 	err := ErrLockTimeout("/var/lock/ari.lock", nil)
 	if _, ok := err.Details["lock_holder"]; ok {
 		t.Errorf("Details[lock_holder] should be absent when meta is nil")
@@ -328,6 +384,7 @@ func TestErrLockTimeout_NilMeta_NoLockHolder(t *testing.T) {
 }
 
 func TestErrSchemaInvalid(t *testing.T) {
+	t.Parallel()
 	issues := []string{"field 'x' required", "field 'y' invalid"}
 	err := ErrSchemaInvalid("/schema/path.json", issues)
 	if err.Code != CodeSchemaInvalid {
@@ -342,6 +399,7 @@ func TestErrSchemaInvalid(t *testing.T) {
 }
 
 func TestErrMigrationFailed(t *testing.T) {
+	t.Parallel()
 	err := ErrMigrationFailed("sess-xyz", "schema version mismatch")
 	if err.Code != CodeMigrationFailed {
 		t.Errorf("Code = %q, want %q", err.Code, CodeMigrationFailed)
@@ -358,6 +416,7 @@ func TestErrMigrationFailed(t *testing.T) {
 }
 
 func TestErrOrphanConflict(t *testing.T) {
+	t.Parallel()
 	orphans := []string{"agent-a.md", "agent-b.md"}
 	err := ErrOrphanConflict(orphans, "rite-old", "rite-new")
 	if err.Code != CodeOrphanConflict {
@@ -375,6 +434,7 @@ func TestErrOrphanConflict(t *testing.T) {
 }
 
 func TestErrValidationFailed(t *testing.T) {
+	t.Parallel()
 	issues := []string{"missing field x", "invalid value for y"}
 	err := ErrValidationFailed("ecosystem", 2, issues)
 	if err.Code != CodeValidationFailed {
@@ -392,6 +452,7 @@ func TestErrValidationFailed(t *testing.T) {
 }
 
 func TestErrSwitchAborted(t *testing.T) {
+	t.Parallel()
 	err := ErrSwitchAborted("my-rite", "validation failed")
 	if err.Code != CodeSwitchAborted {
 		t.Errorf("Code = %q, want %q", err.Code, CodeSwitchAborted)
@@ -405,6 +466,7 @@ func TestErrSwitchAborted(t *testing.T) {
 }
 
 func TestErrMergeConflict(t *testing.T) {
+	t.Parallel()
 	conflicts := []string{"file1.md", "file2.md"}
 	err := ErrMergeConflict(conflicts, "/output/path.md")
 	if err.Code != CodeMergeConflict {
@@ -422,6 +484,7 @@ func TestErrMergeConflict(t *testing.T) {
 }
 
 func TestErrSchemaNotFound(t *testing.T) {
+	t.Parallel()
 	err := ErrSchemaNotFound("session-v2")
 	if err.Code != CodeSchemaNotFound {
 		t.Errorf("Code = %q, want %q", err.Code, CodeSchemaNotFound)
@@ -438,6 +501,7 @@ func TestErrSchemaNotFound(t *testing.T) {
 }
 
 func TestErrParseError_WithCause(t *testing.T) {
+	t.Parallel()
 	cause := fmt.Errorf("unexpected EOF")
 	err := ErrParseError("/path/to/file.yaml", "YAML", cause)
 	if err.Code != CodeParseError {
@@ -458,6 +522,7 @@ func TestErrParseError_WithCause(t *testing.T) {
 }
 
 func TestErrParseError_NilCause(t *testing.T) {
+	t.Parallel()
 	err := ErrParseError("/path/to/file.json", "JSON", nil)
 	if _, ok := err.Details["cause"]; ok {
 		t.Errorf("Details[cause] should be absent when cause is nil")
@@ -465,6 +530,7 @@ func TestErrParseError_NilCause(t *testing.T) {
 }
 
 func TestErrRemoteNotFound(t *testing.T) {
+	t.Parallel()
 	err := ErrRemoteNotFound("origin")
 	if err.Code != CodeRemoteNotFound {
 		t.Errorf("Code = %q, want %q", err.Code, CodeRemoteNotFound)
@@ -479,6 +545,7 @@ func TestErrRemoteNotFound(t *testing.T) {
 }
 
 func TestErrSyncConflict(t *testing.T) {
+	t.Parallel()
 	conflicts := []string{"agents/x.md"}
 	err := ErrSyncConflict(conflicts)
 	// ErrSyncConflict uses CodeMergeConflict internally
@@ -494,6 +561,7 @@ func TestErrSyncConflict(t *testing.T) {
 }
 
 func TestErrSyncStateCorrupt(t *testing.T) {
+	t.Parallel()
 	err := ErrSyncStateCorrupt("/path/state.json", "unexpected null")
 	if err.Code != CodeSyncStateCorrupt {
 		t.Errorf("Code = %q, want %q", err.Code, CodeSyncStateCorrupt)
@@ -507,6 +575,7 @@ func TestErrSyncStateCorrupt(t *testing.T) {
 }
 
 func TestErrNetworkError_WithCause(t *testing.T) {
+	t.Parallel()
 	cause := fmt.Errorf("connection refused")
 	err := ErrNetworkError("https://example.com/api", cause)
 	if err.Code != CodeNetworkError {
@@ -524,6 +593,7 @@ func TestErrNetworkError_WithCause(t *testing.T) {
 }
 
 func TestErrNetworkError_NilCause(t *testing.T) {
+	t.Parallel()
 	err := ErrNetworkError("https://example.com", nil)
 	if _, ok := err.Details["cause"]; ok {
 		t.Errorf("Details[cause] should be absent for nil cause")
@@ -531,6 +601,7 @@ func TestErrNetworkError_NilCause(t *testing.T) {
 }
 
 func TestErrRemoteRejected(t *testing.T) {
+	t.Parallel()
 	err := ErrRemoteRejected("origin", "non-fast-forward")
 	if err.Code != CodeRemoteRejected {
 		t.Errorf("Code = %q, want %q", err.Code, CodeRemoteRejected)
@@ -544,6 +615,7 @@ func TestErrRemoteRejected(t *testing.T) {
 }
 
 func TestErrRiteNotFound(t *testing.T) {
+	t.Parallel()
 	err := ErrRiteNotFound("my-rite")
 	if err.Code != CodeRiteNotFound {
 		t.Errorf("Code = %q, want %q", err.Code, CodeRiteNotFound)
@@ -560,6 +632,7 @@ func TestErrRiteNotFound(t *testing.T) {
 }
 
 func TestErrBorrowConflict(t *testing.T) {
+	t.Parallel()
 	conflicts := []string{"invocation-1", "invocation-2"}
 	err := ErrBorrowConflict(conflicts)
 	if err.Code != CodeBorrowConflict {
@@ -571,6 +644,7 @@ func TestErrBorrowConflict(t *testing.T) {
 }
 
 func TestErrBudgetExceeded(t *testing.T) {
+	t.Parallel()
 	err := ErrBudgetExceeded(80000, 30000, 100000)
 	if err.Code != CodeBudgetExceeded {
 		t.Errorf("Code = %q, want %q", err.Code, CodeBudgetExceeded)
@@ -593,6 +667,7 @@ func TestErrBudgetExceeded(t *testing.T) {
 }
 
 func TestErrInvalidRiteForm(t *testing.T) {
+	t.Parallel()
 	err := ErrInvalidRiteForm("solo", "agents")
 	if err.Code != CodeInvalidRiteForm {
 		t.Errorf("Code = %q, want %q", err.Code, CodeInvalidRiteForm)
@@ -609,6 +684,7 @@ func TestErrInvalidRiteForm(t *testing.T) {
 }
 
 func TestErrInvocationNotFound(t *testing.T) {
+	t.Parallel()
 	err := ErrInvocationNotFound("inv-abc-123")
 	if err.Code != CodeInvocationNotFound {
 		t.Errorf("Code = %q, want %q", err.Code, CodeInvocationNotFound)
@@ -624,6 +700,7 @@ func TestErrInvocationNotFound(t *testing.T) {
 // --- Predicate helpers: IsNotFound ---
 
 func TestIsNotFound(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name string
 		err  error
@@ -640,6 +717,7 @@ func TestIsNotFound(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			if got := IsNotFound(tt.err); got != tt.want {
 				t.Errorf("IsNotFound(%v) = %v, want %v", tt.err, got, tt.want)
 			}
@@ -650,6 +728,7 @@ func TestIsNotFound(t *testing.T) {
 // --- Predicate helpers: IsLifecycleError ---
 
 func TestIsLifecycleError(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name string
 		err  error
@@ -663,6 +742,7 @@ func TestIsLifecycleError(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			if got := IsLifecycleError(tt.err); got != tt.want {
 				t.Errorf("IsLifecycleError(%v) = %v, want %v", tt.err, got, tt.want)
 			}
@@ -673,6 +753,7 @@ func TestIsLifecycleError(t *testing.T) {
 // --- Predicate helpers: IsOrphanConflict ---
 
 func TestIsOrphanConflict(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name string
 		err  error
@@ -685,6 +766,7 @@ func TestIsOrphanConflict(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			if got := IsOrphanConflict(tt.err); got != tt.want {
 				t.Errorf("IsOrphanConflict(%v) = %v, want %v", tt.err, got, tt.want)
 			}
@@ -695,6 +777,7 @@ func TestIsOrphanConflict(t *testing.T) {
 // --- Predicate helpers: IsMergeConflict ---
 
 func TestIsMergeConflict(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name string
 		err  error
@@ -708,6 +791,7 @@ func TestIsMergeConflict(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			if got := IsMergeConflict(tt.err); got != tt.want {
 				t.Errorf("IsMergeConflict(%v) = %v, want %v", tt.err, got, tt.want)
 			}
@@ -718,6 +802,7 @@ func TestIsMergeConflict(t *testing.T) {
 // --- Predicate helpers: IsSchemaNotFound ---
 
 func TestIsSchemaNotFound(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name string
 		err  error
@@ -730,6 +815,7 @@ func TestIsSchemaNotFound(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			if got := IsSchemaNotFound(tt.err); got != tt.want {
 				t.Errorf("IsSchemaNotFound(%v) = %v, want %v", tt.err, got, tt.want)
 			}
@@ -740,6 +826,7 @@ func TestIsSchemaNotFound(t *testing.T) {
 // --- Predicate helpers: IsParseError ---
 
 func TestIsParseError(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name string
 		err  error
@@ -752,6 +839,7 @@ func TestIsParseError(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			if got := IsParseError(tt.err); got != tt.want {
 				t.Errorf("IsParseError(%v) = %v, want %v", tt.err, got, tt.want)
 			}
@@ -762,6 +850,7 @@ func TestIsParseError(t *testing.T) {
 // --- Predicate helpers: IsSyncStateCorrupt ---
 
 func TestIsSyncStateCorrupt(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name string
 		err  error
@@ -774,6 +863,7 @@ func TestIsSyncStateCorrupt(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			if got := IsSyncStateCorrupt(tt.err); got != tt.want {
 				t.Errorf("IsSyncStateCorrupt(%v) = %v, want %v", tt.err, got, tt.want)
 			}
@@ -784,6 +874,7 @@ func TestIsSyncStateCorrupt(t *testing.T) {
 // --- Predicate helpers: IsNetworkError ---
 
 func TestIsNetworkError(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name string
 		err  error
@@ -796,6 +887,7 @@ func TestIsNetworkError(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			if got := IsNetworkError(tt.err); got != tt.want {
 				t.Errorf("IsNetworkError(%v) = %v, want %v", tt.err, got, tt.want)
 			}
@@ -806,6 +898,7 @@ func TestIsNetworkError(t *testing.T) {
 // --- Predicate helpers: IsRemoteRejected ---
 
 func TestIsRemoteRejected(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name string
 		err  error
@@ -818,6 +911,7 @@ func TestIsRemoteRejected(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			if got := IsRemoteRejected(tt.err); got != tt.want {
 				t.Errorf("IsRemoteRejected(%v) = %v, want %v", tt.err, got, tt.want)
 			}
@@ -828,6 +922,7 @@ func TestIsRemoteRejected(t *testing.T) {
 // --- Predicate helpers: IsRemoteNotFound ---
 
 func TestIsRemoteNotFound(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name string
 		err  error
@@ -840,6 +935,7 @@ func TestIsRemoteNotFound(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			if got := IsRemoteNotFound(tt.err); got != tt.want {
 				t.Errorf("IsRemoteNotFound(%v) = %v, want %v", tt.err, got, tt.want)
 			}
@@ -850,6 +946,7 @@ func TestIsRemoteNotFound(t *testing.T) {
 // --- Predicate helpers: IsSyncNotConfigured ---
 
 func TestIsSyncNotConfigured(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name string
 		err  error
@@ -862,6 +959,7 @@ func TestIsSyncNotConfigured(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			if got := IsSyncNotConfigured(tt.err); got != tt.want {
 				t.Errorf("IsSyncNotConfigured(%v) = %v, want %v", tt.err, got, tt.want)
 			}
@@ -872,6 +970,7 @@ func TestIsSyncNotConfigured(t *testing.T) {
 // --- Predicate helpers: IsRiteNotFound ---
 
 func TestIsRiteNotFound(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name string
 		err  error
@@ -884,6 +983,7 @@ func TestIsRiteNotFound(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			if got := IsRiteNotFound(tt.err); got != tt.want {
 				t.Errorf("IsRiteNotFound(%v) = %v, want %v", tt.err, got, tt.want)
 			}
@@ -894,6 +994,7 @@ func TestIsRiteNotFound(t *testing.T) {
 // --- Predicate helpers: IsBorrowConflict ---
 
 func TestIsBorrowConflict(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name string
 		err  error
@@ -906,6 +1007,7 @@ func TestIsBorrowConflict(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			if got := IsBorrowConflict(tt.err); got != tt.want {
 				t.Errorf("IsBorrowConflict(%v) = %v, want %v", tt.err, got, tt.want)
 			}
@@ -916,6 +1018,7 @@ func TestIsBorrowConflict(t *testing.T) {
 // --- Predicate helpers: IsBudgetExceeded ---
 
 func TestIsBudgetExceeded(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name string
 		err  error
@@ -928,6 +1031,7 @@ func TestIsBudgetExceeded(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			if got := IsBudgetExceeded(tt.err); got != tt.want {
 				t.Errorf("IsBudgetExceeded(%v) = %v, want %v", tt.err, got, tt.want)
 			}
@@ -938,6 +1042,7 @@ func TestIsBudgetExceeded(t *testing.T) {
 // --- Predicate helpers: IsInvocationNotFound ---
 
 func TestIsInvocationNotFound(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name string
 		err  error
@@ -950,6 +1055,7 @@ func TestIsInvocationNotFound(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			if got := IsInvocationNotFound(tt.err); got != tt.want {
 				t.Errorf("IsInvocationNotFound(%v) = %v, want %v", tt.err, got, tt.want)
 			}
@@ -957,11 +1063,11 @@ func TestIsInvocationNotFound(t *testing.T) {
 	}
 }
 
-// --- Error chain traversal (Wrap stores cause as string, not unwrappable) ---
+// --- Error chain traversal ---
 
-func TestWrap_CauseStoredAsString_NotTraversable(t *testing.T) {
-	// Demonstrate the intended behavior: Wrap stores cause in details, not as Unwrap chain.
-	// Predicates on the wrapped error still work on the outer code.
+func TestWrap_CauseStoredAsStringAndTraversable(t *testing.T) {
+	t.Parallel()
+	// Wrap stores cause both as string in Details (for JSON) and via Unwrap (for Go chain).
 	inner := fmt.Errorf("inner io error")
 	outer := Wrap(CodeFileNotFound, "outer message", inner)
 
@@ -975,13 +1081,14 @@ func TestWrap_CauseStoredAsString_NotTraversable(t *testing.T) {
 		t.Errorf("cause detail = %v, want %q", outer.Details["cause"], "inner io error")
 	}
 
-	// But the inner error is NOT traversable via stdlib errors.Is
-	if isStdlibIs(outer, inner) {
-		t.Errorf("inner error should NOT be findable via stdlib errors chain traversal")
+	// The inner error IS traversable via Unwrap chain
+	if !isStdlibIs(outer, inner) {
+		t.Errorf("inner error should be findable via stdlib errors chain traversal")
 	}
 }
 
 func TestWrap_DoubleWrapped_InnerCauseIsSecondWrapMessage(t *testing.T) {
+	t.Parallel()
 	// When wrapping a *Error with Wrap, the cause is the wrapped error's message string.
 	inner := New(CodeFileNotFound, "inner not found")
 	outer := Wrap(CodeGeneralError, "outer context", inner)
@@ -1000,6 +1107,7 @@ func TestWrap_DoubleWrapped_InnerCauseIsSecondWrapMessage(t *testing.T) {
 // --- Error satisfies standard error interface ---
 
 func TestError_ImplementsErrorInterface(t *testing.T) {
+	t.Parallel()
 	var err error = New(CodeGeneralError, "test")
 	if err.Error() != "test" {
 		t.Errorf("error.Error() = %q, want %q", err.Error(), "test")
@@ -1009,6 +1117,7 @@ func TestError_ImplementsErrorInterface(t *testing.T) {
 // --- Structured field access ---
 
 func TestError_FieldsDirectlyAccessible(t *testing.T) {
+	t.Parallel()
 	details := map[string]any{"key": "value"}
 	err := NewWithDetails(CodeUsageError, "bad flag --foo", details)
 
@@ -1029,6 +1138,7 @@ func TestError_FieldsDirectlyAccessible(t *testing.T) {
 // --- Exit code constants have expected values ---
 
 func TestExitCodeConstants(t *testing.T) {
+	t.Parallel()
 	// Verify the constants match their documented values from TDD Section 4.1
 	tests := []struct {
 		name string
@@ -1060,6 +1170,7 @@ func TestExitCodeConstants(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			if tt.got != tt.want {
 				t.Errorf("%s = %d, want %d", tt.name, tt.got, tt.want)
 			}
@@ -1070,6 +1181,7 @@ func TestExitCodeConstants(t *testing.T) {
 // --- Error code string constants equal their own names (SCREAMING_SNAKE_CASE) ---
 
 func TestErrorCodeStrings_SelfNamed(t *testing.T) {
+	t.Parallel()
 	// Error codes are self-naming: the constant value equals the constant name.
 	tests := []struct {
 		name string
@@ -1107,6 +1219,7 @@ func TestErrorCodeStrings_SelfNamed(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			// Verify the value is non-empty and all uppercase/underscore (SCREAMING_SNAKE_CASE)
 			if tt.code == "" {
 				t.Errorf("%s constant is empty string", tt.name)

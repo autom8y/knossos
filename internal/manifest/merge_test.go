@@ -7,6 +7,7 @@ import (
 )
 
 func TestMerge(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name         string
 		base         map[string]interface{}
@@ -94,6 +95,7 @@ func TestMerge(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			base := &manifest.Manifest{Content: tt.base}
 			ours := &manifest.Manifest{Content: tt.ours}
 			theirs := &manifest.Manifest{Content: tt.theirs}
@@ -117,6 +119,7 @@ func TestMerge(t *testing.T) {
 }
 
 func TestMergeConflictMarkers(t *testing.T) {
+	t.Parallel()
 	base := &manifest.Manifest{Content: map[string]interface{}{"version": "1.0"}}
 	ours := &manifest.Manifest{Content: map[string]interface{}{"version": "2.0"}}
 	theirs := &manifest.Manifest{Content: map[string]interface{}{"version": "3.0"}}

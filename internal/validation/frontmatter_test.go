@@ -5,6 +5,7 @@ import (
 )
 
 func TestExtractFrontmatter_Valid(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name     string
 		content  string
@@ -63,6 +64,7 @@ coverage:
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			result, err := ExtractFrontmatter([]byte(tt.content))
 
 			if (err != nil) != tt.wantErr {
@@ -90,6 +92,7 @@ coverage:
 }
 
 func TestExtractFrontmatter_Invalid(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name        string
 		content     string
@@ -124,6 +127,7 @@ func TestExtractFrontmatter_Invalid(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			_, err := ExtractFrontmatter([]byte(tt.content))
 
 			if err == nil {
@@ -139,6 +143,7 @@ func TestExtractFrontmatter_Invalid(t *testing.T) {
 }
 
 func TestExtractFrontmatter_EmptyFrontmatter(t *testing.T) {
+	t.Parallel()
 	// Empty frontmatter between delimiters returns an error
 	// because there's no meaningful YAML content
 	content := "---\n---\n# Content"
@@ -154,6 +159,7 @@ func TestExtractFrontmatter_EmptyFrontmatter(t *testing.T) {
 }
 
 func TestHasFrontmatter(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name    string
 		content string
@@ -193,6 +199,7 @@ func TestHasFrontmatter(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			if got := HasFrontmatter([]byte(tt.content)); got != tt.want {
 				t.Errorf("HasFrontmatter() = %v, want %v", got, tt.want)
 			}
@@ -201,6 +208,7 @@ func TestHasFrontmatter(t *testing.T) {
 }
 
 func TestBuildFrontmatter(t *testing.T) {
+	t.Parallel()
 	data := map[string]interface{}{
 		"title":  "Test Document",
 		"status": "draft",
@@ -231,6 +239,7 @@ func TestBuildFrontmatter(t *testing.T) {
 }
 
 func TestExtractFrontmatter_RawYAML(t *testing.T) {
+	t.Parallel()
 	content := `---
 title: Test
 author: Alice
@@ -255,6 +264,7 @@ author: Alice
 }
 
 func TestExtractFrontmatter_LineNumbers(t *testing.T) {
+	t.Parallel()
 	content := `---
 title: Test
 author: Alice

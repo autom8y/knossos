@@ -7,6 +7,7 @@ import (
 )
 
 func TestParsePhase(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		input string
 		want  Phase
@@ -24,6 +25,7 @@ func TestParsePhase(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.input, func(t *testing.T) {
+			t.Parallel()
 			if got := ParsePhase(tt.input); got != tt.want {
 				t.Errorf("ParsePhase(%q) = %v, want %v", tt.input, got, tt.want)
 			}
@@ -32,6 +34,7 @@ func TestParsePhase(t *testing.T) {
 }
 
 func TestValidPhases(t *testing.T) {
+	t.Parallel()
 	phases := ValidPhases()
 	expected := []string{"requirements", "design", "implementation", "validation"}
 
@@ -54,6 +57,7 @@ func TestValidPhases(t *testing.T) {
 }
 
 func TestNewHandoffValidator(t *testing.T) {
+	t.Parallel()
 	hv, err := NewHandoffValidator()
 	if err != nil {
 		t.Fatalf("NewHandoffValidator() error = %v", err)
@@ -69,6 +73,7 @@ func TestNewHandoffValidator(t *testing.T) {
 }
 
 func TestHandoffValidator_GetCriteria(t *testing.T) {
+	t.Parallel()
 	hv, err := NewHandoffValidator()
 	if err != nil {
 		t.Fatalf("NewHandoffValidator() error = %v", err)
@@ -126,6 +131,7 @@ func TestHandoffValidator_GetCriteria(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			criteria, err := hv.GetCriteria(tt.phase, tt.artifactType)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetCriteria() error = %v, wantErr %v", err, tt.wantErr)
@@ -143,6 +149,7 @@ func TestHandoffValidator_GetCriteria(t *testing.T) {
 }
 
 func TestHandoffValidator_ListPhases(t *testing.T) {
+	t.Parallel()
 	hv, err := NewHandoffValidator()
 	if err != nil {
 		t.Fatalf("NewHandoffValidator() error = %v", err)
@@ -174,6 +181,7 @@ func TestHandoffValidator_ListPhases(t *testing.T) {
 }
 
 func TestHandoffValidator_ListArtifactTypes(t *testing.T) {
+	t.Parallel()
 	hv, err := NewHandoffValidator()
 	if err != nil {
 		t.Fatalf("NewHandoffValidator() error = %v", err)
@@ -199,6 +207,7 @@ func TestHandoffValidator_ListArtifactTypes(t *testing.T) {
 }
 
 func TestHandoffValidator_ValidateHandoff_PassingPRD(t *testing.T) {
+	t.Parallel()
 	hv, err := NewHandoffValidator()
 	if err != nil {
 		t.Fatalf("NewHandoffValidator() error = %v", err)
@@ -231,6 +240,7 @@ func TestHandoffValidator_ValidateHandoff_PassingPRD(t *testing.T) {
 }
 
 func TestHandoffValidator_ValidateHandoff_FailingPRD_MissingRequired(t *testing.T) {
+	t.Parallel()
 	hv, err := NewHandoffValidator()
 	if err != nil {
 		t.Fatalf("NewHandoffValidator() error = %v", err)
@@ -267,6 +277,7 @@ func TestHandoffValidator_ValidateHandoff_FailingPRD_MissingRequired(t *testing.
 }
 
 func TestHandoffValidator_ValidateHandoff_NonBlockingWarnings(t *testing.T) {
+	t.Parallel()
 	hv, err := NewHandoffValidator()
 	if err != nil {
 		t.Fatalf("NewHandoffValidator() error = %v", err)
@@ -299,6 +310,7 @@ func TestHandoffValidator_ValidateHandoff_NonBlockingWarnings(t *testing.T) {
 }
 
 func TestHandoffValidator_ValidateHandoff_EmptyField(t *testing.T) {
+	t.Parallel()
 	hv, err := NewHandoffValidator()
 	if err != nil {
 		t.Fatalf("NewHandoffValidator() error = %v", err)
@@ -323,6 +335,7 @@ func TestHandoffValidator_ValidateHandoff_EmptyField(t *testing.T) {
 }
 
 func TestHandoffValidator_ValidateHandoff_MinItems(t *testing.T) {
+	t.Parallel()
 	hv, err := NewHandoffValidator()
 	if err != nil {
 		t.Fatalf("NewHandoffValidator() error = %v", err)
@@ -347,6 +360,7 @@ func TestHandoffValidator_ValidateHandoff_MinItems(t *testing.T) {
 }
 
 func TestHandoffValidator_ValidateHandoff_DesignTDD(t *testing.T) {
+	t.Parallel()
 	hv, err := NewHandoffValidator()
 	if err != nil {
 		t.Fatalf("NewHandoffValidator() error = %v", err)
@@ -374,6 +388,7 @@ func TestHandoffValidator_ValidateHandoff_DesignTDD(t *testing.T) {
 }
 
 func TestHandoffValidator_ValidateHandoff_DesignADR(t *testing.T) {
+	t.Parallel()
 	hv, err := NewHandoffValidator()
 	if err != nil {
 		t.Fatalf("NewHandoffValidator() error = %v", err)
@@ -400,6 +415,7 @@ func TestHandoffValidator_ValidateHandoff_DesignADR(t *testing.T) {
 }
 
 func TestHandoffValidator_ValidateHandoff_ValidationTestPlan(t *testing.T) {
+	t.Parallel()
 	hv, err := NewHandoffValidator()
 	if err != nil {
 		t.Fatalf("NewHandoffValidator() error = %v", err)
@@ -425,6 +441,7 @@ func TestHandoffValidator_ValidateHandoff_ValidationTestPlan(t *testing.T) {
 }
 
 func TestHandoffValidator_ValidateHandoffFile(t *testing.T) {
+	t.Parallel()
 	hv, err := NewHandoffValidator()
 	if err != nil {
 		t.Fatalf("NewHandoffValidator() error = %v", err)
@@ -471,6 +488,7 @@ Content here.
 }
 
 func TestHandoffValidator_ValidateHandoffFile_FailingFile(t *testing.T) {
+	t.Parallel()
 	hv, err := NewHandoffValidator()
 	if err != nil {
 		t.Fatalf("NewHandoffValidator() error = %v", err)
@@ -507,6 +525,7 @@ Missing success_criteria.
 }
 
 func TestHandoffValidator_ValidateHandoffFile_NoFrontmatter(t *testing.T) {
+	t.Parallel()
 	hv, err := NewHandoffValidator()
 	if err != nil {
 		t.Fatalf("NewHandoffValidator() error = %v", err)
@@ -536,6 +555,7 @@ This document has no frontmatter.
 }
 
 func TestHandoffResult_FailedBlocking(t *testing.T) {
+	t.Parallel()
 	result := &HandoffResult{
 		BlockingResults: []CriterionResult{
 			{Criterion: Criterion{Field: "field1"}, Passed: true},
@@ -551,6 +571,7 @@ func TestHandoffResult_FailedBlocking(t *testing.T) {
 }
 
 func TestHandoffResult_Warnings(t *testing.T) {
+	t.Parallel()
 	result := &HandoffResult{
 		WarningResults: []CriterionResult{
 			{Criterion: Criterion{Field: "warn1"}, Passed: false, Message: "warning 1"},
@@ -565,6 +586,7 @@ func TestHandoffResult_Warnings(t *testing.T) {
 }
 
 func TestIsEmpty(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name  string
 		value interface{}
@@ -586,6 +608,7 @@ func TestIsEmpty(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			if got := isEmpty(tt.value); got != tt.want {
 				t.Errorf("isEmpty(%v) = %v, want %v", tt.value, got, tt.want)
 			}
@@ -594,6 +617,7 @@ func TestIsEmpty(t *testing.T) {
 }
 
 func TestGetItemCount(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name  string
 		value interface{}
@@ -608,6 +632,7 @@ func TestGetItemCount(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			if got := getItemCount(tt.value); got != tt.want {
 				t.Errorf("getItemCount(%v) = %d, want %d", tt.value, got, tt.want)
 			}
@@ -616,6 +641,7 @@ func TestGetItemCount(t *testing.T) {
 }
 
 func TestPhase_String(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		phase Phase
 		want  string
@@ -628,6 +654,7 @@ func TestPhase_String(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(string(tt.phase), func(t *testing.T) {
+			t.Parallel()
 			if got := tt.phase.String(); got != tt.want {
 				t.Errorf("String() = %q, want %q", got, tt.want)
 			}

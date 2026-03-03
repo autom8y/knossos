@@ -5,6 +5,7 @@ import (
 )
 
 func TestParseAgentFrontmatter_Minimal(t *testing.T) {
+	t.Parallel()
 	content := []byte(`---
 name: ecosystem-analyst
 description: "Traces ecosystem issues to root causes"
@@ -39,6 +40,7 @@ color: orange
 }
 
 func TestParseAgentFrontmatter_Enhanced(t *testing.T) {
+	t.Parallel()
 	content := []byte(`---
 name: context-architect
 description: "Infrastructure designer who architects context solutions"
@@ -136,6 +138,7 @@ schema_version: "1.0"
 }
 
 func TestParseAgentFrontmatter_WithAliases(t *testing.T) {
+	t.Parallel()
 	content := []byte(`---
 name: moirai
 description: "Session lifecycle agent"
@@ -164,6 +167,7 @@ aliases:
 }
 
 func TestFlexibleStringSlice_CommaSeparated(t *testing.T) {
+	t.Parallel()
 	content := []byte(`---
 name: test-agent
 description: "Test agent"
@@ -190,6 +194,7 @@ tools: Bash, Glob, Grep, Read
 }
 
 func TestFlexibleStringSlice_Array(t *testing.T) {
+	t.Parallel()
 	content := []byte(`---
 name: test-agent
 description: "Test agent"
@@ -220,6 +225,7 @@ tools:
 }
 
 func TestMCPToolReferences(t *testing.T) {
+	t.Parallel()
 	content := []byte(`---
 name: mcp-agent
 description: "Agent with MCP tools"
@@ -249,6 +255,7 @@ tools:
 }
 
 func TestMCPServers(t *testing.T) {
+	t.Parallel()
 	fm := &AgentFrontmatter{
 		Tools: FlexibleStringSlice{"Read", "mcp:github", "mcp:github/create_issue", "mcp:slack", "Bash"},
 	}
@@ -272,6 +279,7 @@ func TestMCPServers(t *testing.T) {
 }
 
 func TestMCPServers_NoMCP(t *testing.T) {
+	t.Parallel()
 	fm := &AgentFrontmatter{
 		Tools: FlexibleStringSlice{"Read", "Bash", "Glob"},
 	}
@@ -283,6 +291,7 @@ func TestMCPServers_NoMCP(t *testing.T) {
 }
 
 func TestValidate_RequiredFields(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name    string
 		fm      AgentFrontmatter
@@ -313,6 +322,7 @@ func TestValidate_RequiredFields(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			err := tt.fm.Validate()
 			if tt.wantErr {
 				if err == nil {
@@ -336,6 +346,7 @@ func TestValidate_RequiredFields(t *testing.T) {
 }
 
 func TestValidate_InvalidType(t *testing.T) {
+	t.Parallel()
 	fm := AgentFrontmatter{
 		Name:        "test-agent",
 		Description: "A test agent",
@@ -352,6 +363,7 @@ func TestValidate_InvalidType(t *testing.T) {
 }
 
 func TestValidate_InvalidModel(t *testing.T) {
+	t.Parallel()
 	fm := AgentFrontmatter{
 		Name:        "test-agent",
 		Description: "A test agent",
@@ -368,6 +380,7 @@ func TestValidate_InvalidModel(t *testing.T) {
 }
 
 func TestValidate_InvalidToolReference(t *testing.T) {
+	t.Parallel()
 	fm := AgentFrontmatter{
 		Name:        "test-agent",
 		Description: "A test agent",
@@ -384,6 +397,7 @@ func TestValidate_InvalidToolReference(t *testing.T) {
 }
 
 func TestValidateToolReference(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		tool    string
 		wantErr bool
@@ -413,6 +427,7 @@ func TestValidateToolReference(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.tool, func(t *testing.T) {
+			t.Parallel()
 			err := validateToolReference(tt.tool)
 			if tt.wantErr && err == nil {
 				t.Errorf("expected error for tool %q", tt.tool)
@@ -425,6 +440,7 @@ func TestValidateToolReference(t *testing.T) {
 }
 
 func TestParseAgentFrontmatter_MissingDelimiter(t *testing.T) {
+	t.Parallel()
 	content := []byte(`name: test
 description: "no delimiters"
 `)
@@ -436,6 +452,7 @@ description: "no delimiters"
 }
 
 func TestParseAgentFrontmatter_MissingClosingDelimiter(t *testing.T) {
+	t.Parallel()
 	content := []byte(`---
 name: test
 description: "no closing"
@@ -448,6 +465,7 @@ description: "no closing"
 }
 
 func TestParseAgentFrontmatter_MultilineDescription(t *testing.T) {
+	t.Parallel()
 	content := []byte(`---
 name: agent-designer
 role: "Designs agent roles and contracts"
@@ -479,6 +497,7 @@ color: purple
 }
 
 func TestParseAgentFrontmatter_NoToolsField(t *testing.T) {
+	t.Parallel()
 	// Some agents like context-engineer lack a tools field
 	content := []byte(`---
 name: context-engineer
@@ -504,6 +523,7 @@ color: orange
 }
 
 func TestParseAgentFrontmatter_WithCCNativeFields(t *testing.T) {
+	t.Parallel()
 	content := []byte(`---
 name: orchestrator
 description: "Coordinates ecosystem phases"
@@ -552,6 +572,7 @@ disallowedTools: Bash, Write, Edit, Glob, Grep, Task
 }
 
 func TestParseAgentFrontmatter_MaxTurnsOnly(t *testing.T) {
+	t.Parallel()
 	content := []byte(`---
 name: specialist
 description: "Domain expert"
@@ -579,6 +600,7 @@ maxTurns: 25
 }
 
 func TestValidate_MaxTurnsNegative(t *testing.T) {
+	t.Parallel()
 	fm := AgentFrontmatter{
 		Name:        "test-agent",
 		Description: "A test agent",
@@ -595,6 +617,7 @@ func TestValidate_MaxTurnsNegative(t *testing.T) {
 }
 
 func TestValidate_MaxTurnsZero(t *testing.T) {
+	t.Parallel()
 	fm := AgentFrontmatter{
 		Name:        "test-agent",
 		Description: "A test agent",
@@ -608,6 +631,7 @@ func TestValidate_MaxTurnsZero(t *testing.T) {
 }
 
 func TestValidate_MaxTurnsPositive(t *testing.T) {
+	t.Parallel()
 	fm := AgentFrontmatter{
 		Name:        "test-agent",
 		Description: "A test agent",
@@ -621,6 +645,7 @@ func TestValidate_MaxTurnsPositive(t *testing.T) {
 }
 
 func TestValidate_DisallowedToolsValid(t *testing.T) {
+	t.Parallel()
 	fm := AgentFrontmatter{
 		Name:            "test-agent",
 		Description:     "A test agent",
@@ -634,6 +659,7 @@ func TestValidate_DisallowedToolsValid(t *testing.T) {
 }
 
 func TestValidate_DisallowedToolsInvalid(t *testing.T) {
+	t.Parallel()
 	fm := AgentFrontmatter{
 		Name:            "test-agent",
 		Description:     "A test agent",
@@ -650,6 +676,7 @@ func TestValidate_DisallowedToolsInvalid(t *testing.T) {
 }
 
 func TestValidate_ModelInherit(t *testing.T) {
+	t.Parallel()
 	fm := AgentFrontmatter{
 		Name:        "test-agent",
 		Description: "A test agent",
@@ -663,6 +690,7 @@ func TestValidate_ModelInherit(t *testing.T) {
 }
 
 func TestParseAgentFrontmatter_ModelInherit(t *testing.T) {
+	t.Parallel()
 	content := []byte(`---
 name: inherit-agent
 description: "Agent that inherits parent model"
@@ -688,6 +716,7 @@ model: inherit
 }
 
 func TestParseAgentFrontmatter_WithMemoryField(t *testing.T) {
+	t.Parallel()
 	content := []byte(`---
 name: memory-agent
 description: "Agent with memory enabled"
@@ -712,6 +741,7 @@ memory: true
 }
 
 func TestParseAgentFrontmatter_WithPermissionMode(t *testing.T) {
+	t.Parallel()
 	content := []byte(`---
 name: bypass-agent
 description: "Agent with bypassPermissions"
@@ -733,9 +763,11 @@ permissionMode: bypassPermissions
 }
 
 func TestValidate_PermissionMode_Valid(t *testing.T) {
+	t.Parallel()
 	modes := []string{"default", "plan", "bypassPermissions"}
 	for _, mode := range modes {
 		t.Run(mode, func(t *testing.T) {
+			t.Parallel()
 			fm := AgentFrontmatter{
 				Name:           "test-agent",
 				Description:    "A test agent",
@@ -749,6 +781,7 @@ func TestValidate_PermissionMode_Valid(t *testing.T) {
 }
 
 func TestValidate_PermissionMode_Invalid(t *testing.T) {
+	t.Parallel()
 	fm := AgentFrontmatter{
 		Name:           "test-agent",
 		Description:    "A test agent",
@@ -765,6 +798,7 @@ func TestValidate_PermissionMode_Invalid(t *testing.T) {
 }
 
 func TestParseAgentFrontmatter_WithMcpServers(t *testing.T) {
+	t.Parallel()
 	content := []byte(`---
 name: mcp-config-agent
 description: "Agent with MCP server configs"
@@ -799,6 +833,7 @@ mcpServers:
 }
 
 func TestParseAgentFrontmatter_WithHooks(t *testing.T) {
+	t.Parallel()
 	content := []byte(`---
 name: hooks-agent
 description: "Agent with hooks configuration"
@@ -826,6 +861,7 @@ hooks:
 }
 
 func TestParseAgentFrontmatter_AllNewCCFields(t *testing.T) {
+	t.Parallel()
 	content := []byte(`---
 name: full-cc-agent
 description: "Agent with all CC-native fields"
@@ -877,6 +913,7 @@ hooks:
 }
 
 func TestParseAgentFrontmatter_MemoryFalse(t *testing.T) {
+	t.Parallel()
 	content := []byte(`---
 name: no-memory-agent
 description: "Agent with memory explicitly disabled"
@@ -901,6 +938,7 @@ memory: false
 }
 
 func TestParseAgentFrontmatter_MemoryStringProject(t *testing.T) {
+	t.Parallel()
 	content := []byte(`---
 name: project-memory-agent
 description: "Agent with explicit project memory scope"
@@ -925,6 +963,7 @@ memory: "project"
 }
 
 func TestParseAgentFrontmatter_MemoryStringUser(t *testing.T) {
+	t.Parallel()
 	content := []byte(`---
 name: user-memory-agent
 description: "Agent with user memory scope"
@@ -949,6 +988,7 @@ memory: "user"
 }
 
 func TestParseAgentFrontmatter_MemoryStringLocal(t *testing.T) {
+	t.Parallel()
 	content := []byte(`---
 name: local-memory-agent
 description: "Agent with local memory scope"
@@ -973,6 +1013,7 @@ memory: "local"
 }
 
 func TestValidate_MemoryScope_Invalid(t *testing.T) {
+	t.Parallel()
 	fm := AgentFrontmatter{
 		Name:        "test-agent",
 		Description: "A test agent",
@@ -989,6 +1030,7 @@ func TestValidate_MemoryScope_Invalid(t *testing.T) {
 }
 
 func TestParseAgentFrontmatter_MemoryAbsent(t *testing.T) {
+	t.Parallel()
 	content := []byte(`---
 name: no-memory-field-agent
 description: "Agent without a memory field"
@@ -1012,9 +1054,11 @@ tools: Read
 }
 
 func TestValidate_MemoryScope_Valid(t *testing.T) {
+	t.Parallel()
 	scopes := []string{"user", "project", "local"}
 	for _, scope := range scopes {
 		t.Run(scope, func(t *testing.T) {
+			t.Parallel()
 			fm := AgentFrontmatter{
 				Name:        "test-agent",
 				Description: "A test agent",

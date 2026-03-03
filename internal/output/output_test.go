@@ -17,6 +17,7 @@ func newTestPrinter(format Format) (*Printer, *bytes.Buffer, *bytes.Buffer) {
 // --- JSON output contract tests ---
 
 func TestJSON_StatusOutput_ValidJSON(t *testing.T) {
+	t.Parallel()
 	p, buf, _ := newTestPrinter(FormatJSON)
 
 	data := StatusOutput{
@@ -54,6 +55,7 @@ func TestJSON_StatusOutput_ValidJSON(t *testing.T) {
 }
 
 func TestJSON_CreateOutput_ValidJSON(t *testing.T) {
+	t.Parallel()
 	p, buf, _ := newTestPrinter(FormatJSON)
 
 	data := CreateOutput{
@@ -87,6 +89,7 @@ func TestJSON_CreateOutput_ValidJSON(t *testing.T) {
 }
 
 func TestJSON_SyncResultOutput_ValidJSON(t *testing.T) {
+	t.Parallel()
 	p, buf, _ := newTestPrinter(FormatJSON)
 
 	data := SyncResultOutput{
@@ -124,6 +127,7 @@ func TestJSON_SyncResultOutput_ValidJSON(t *testing.T) {
 }
 
 func TestJSON_ErrorOutput_ValidJSON(t *testing.T) {
+	t.Parallel()
 	p, _, errBuf := newTestPrinter(FormatJSON)
 
 	// The printer wraps non-errors.Error in {"error": {"code": ..., "message": ...}}.
@@ -165,6 +169,7 @@ func (e *plainErrorImpl) Error() string { return e.msg }
 // --- Format dispatch tests ---
 
 func TestFormatDispatch_TextProducesNoJSON(t *testing.T) {
+	t.Parallel()
 	p, buf, _ := newTestPrinter(FormatText)
 
 	data := StatusOutput{HasSession: false}
@@ -179,6 +184,7 @@ func TestFormatDispatch_TextProducesNoJSON(t *testing.T) {
 }
 
 func TestFormatDispatch_JSONProducesValidJSON(t *testing.T) {
+	t.Parallel()
 	p, buf, _ := newTestPrinter(FormatJSON)
 
 	data := StatusOutput{HasSession: false, Status: "none"}
@@ -194,6 +200,7 @@ func TestFormatDispatch_JSONProducesValidJSON(t *testing.T) {
 // --- ParseFormat and ValidateFormat ---
 
 func TestParseFormat(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		input string
 		want  Format
@@ -216,6 +223,7 @@ func TestParseFormat(t *testing.T) {
 }
 
 func TestValidateFormat(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		input   string
 		wantErr bool
@@ -239,6 +247,7 @@ func TestValidateFormat(t *testing.T) {
 // --- SessionListOutput contract ---
 
 func TestJSON_SessionListOutput_ValidJSON(t *testing.T) {
+	t.Parallel()
 	p, buf, _ := newTestPrinter(FormatJSON)
 
 	data := SessionListOutput{
@@ -283,6 +292,7 @@ func TestJSON_SessionListOutput_ValidJSON(t *testing.T) {
 // --- VerboseLog ---
 
 func TestVerboseLog_OnlyWritesWhenVerbose(t *testing.T) {
+	t.Parallel()
 	outBuf := &bytes.Buffer{}
 	errBuf := &bytes.Buffer{}
 
@@ -308,6 +318,7 @@ func TestVerboseLog_OnlyWritesWhenVerbose(t *testing.T) {
 // --- SyncResultOutput Text tests ---
 
 func TestTextOutput_OrgSkipped_ShowsReason(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name       string
 		status     string
@@ -340,6 +351,7 @@ func TestTextOutput_OrgSkipped_ShowsReason(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			var data SyncResultOutput
 			if strings.HasPrefix(tt.name, "rite") {
 				data = SyncResultOutput{
@@ -373,6 +385,7 @@ func TestTextOutput_OrgSkipped_ShowsReason(t *testing.T) {
 // --- RiteListOutput JSON contract ---
 
 func TestJSON_RiteListOutput_ValidJSON(t *testing.T) {
+	t.Parallel()
 	p, buf, _ := newTestPrinter(FormatJSON)
 
 	data := RiteListOutput{
@@ -433,6 +446,7 @@ func TestJSON_RiteListOutput_ValidJSON(t *testing.T) {
 // --- AuditOutput JSON contract ---
 
 func TestJSON_AuditOutput_ValidJSON(t *testing.T) {
+	t.Parallel()
 	p, buf, _ := newTestPrinter(FormatJSON)
 
 	data := AuditOutput{
@@ -493,6 +507,7 @@ func TestJSON_AuditOutput_ValidJSON(t *testing.T) {
 // --- ManifestShowOutput JSON contract ---
 
 func TestJSON_ManifestShowOutput_ValidJSON(t *testing.T) {
+	t.Parallel()
 	p, buf, _ := newTestPrinter(FormatJSON)
 
 	data := ManifestShowOutput{
@@ -542,6 +557,7 @@ func TestJSON_ManifestShowOutput_ValidJSON(t *testing.T) {
 // --- ManifestValidateOutput JSON contract ---
 
 func TestJSON_ManifestValidateOutput_ValidJSON(t *testing.T) {
+	t.Parallel()
 	p, buf, _ := newTestPrinter(FormatJSON)
 
 	data := ManifestValidateOutput{
@@ -583,6 +599,7 @@ func TestJSON_ManifestValidateOutput_ValidJSON(t *testing.T) {
 // --- RiteInfoOutput JSON contract ---
 
 func TestJSON_RiteInfoOutput_ValidJSON(t *testing.T) {
+	t.Parallel()
 	p, buf, _ := newTestPrinter(FormatJSON)
 
 	data := RiteInfoOutput{
@@ -644,6 +661,7 @@ func TestJSON_RiteInfoOutput_ValidJSON(t *testing.T) {
 // --- TransitionOutput JSON contract ---
 
 func TestJSON_TransitionOutput_ValidJSON(t *testing.T) {
+	t.Parallel()
 	p, buf, _ := newTestPrinter(FormatJSON)
 
 	data := TransitionOutput{
@@ -680,6 +698,7 @@ func TestJSON_TransitionOutput_ValidJSON(t *testing.T) {
 // --- Text() smoke tests ---
 
 func TestText_Smoke_NoPanic(t *testing.T) {
+	t.Parallel()
 	// Verify that Text() methods do not panic and produce non-empty output
 	// for representative inputs. Table-driven to cover maximum output types.
 	tests := []struct {
@@ -841,6 +860,7 @@ func TestText_Smoke_NoPanic(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			got := tt.textable.Text()
 			if tt.wantNon && got == "" {
 				t.Errorf("Text() returned empty string, want non-empty")
@@ -852,6 +872,7 @@ func TestText_Smoke_NoPanic(t *testing.T) {
 // --- Tabular interface tests ---
 
 func TestTabular_Headers_NonEmpty(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name    string
 		tabular Tabular
@@ -868,6 +889,7 @@ func TestTabular_Headers_NonEmpty(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			headers := tt.tabular.Headers()
 			if len(headers) == 0 {
 				t.Error("Headers() returned empty slice")
@@ -877,6 +899,7 @@ func TestTabular_Headers_NonEmpty(t *testing.T) {
 }
 
 func TestTabular_Rows_MatchHeaders(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name    string
 		tabular Tabular
@@ -917,6 +940,7 @@ func TestTabular_Rows_MatchHeaders(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			headers := tt.tabular.Headers()
 			rows := tt.tabular.Rows()
 			if len(rows) == 0 {
@@ -934,6 +958,7 @@ func TestTabular_Rows_MatchHeaders(t *testing.T) {
 // --- PrintSuccess tests ---
 
 func TestPrintSuccess_JSONProducesOutput(t *testing.T) {
+	t.Parallel()
 	p, buf, _ := newTestPrinter(FormatJSON)
 	data := StatusOutput{HasSession: true, Status: "ACTIVE"}
 	if err := p.PrintSuccess(data); err != nil {
@@ -948,6 +973,7 @@ func TestPrintSuccess_JSONProducesOutput(t *testing.T) {
 }
 
 func TestPrintSuccess_TextIsSilent(t *testing.T) {
+	t.Parallel()
 	p, buf, _ := newTestPrinter(FormatText)
 	data := StatusOutput{HasSession: true, Status: "ACTIVE"}
 	if err := p.PrintSuccess(data); err != nil {
@@ -961,6 +987,7 @@ func TestPrintSuccess_TextIsSilent(t *testing.T) {
 // --- PrintError text mode test ---
 
 func TestPrintError_TextMode(t *testing.T) {
+	t.Parallel()
 	p, _, errBuf := newTestPrinter(FormatText)
 	err := &plainErrorImpl{msg: "test error"}
 	if pErr := p.PrintError(err); pErr != nil {
@@ -977,6 +1004,7 @@ func TestPrintError_TextMode(t *testing.T) {
 // --- PrintText and PrintLine ---
 
 func TestPrintText_WritesRaw(t *testing.T) {
+	t.Parallel()
 	p, buf, _ := newTestPrinter(FormatJSON) // format should not matter for PrintText
 	p.PrintText("raw output")
 	if buf.String() != "raw output" {
@@ -985,6 +1013,7 @@ func TestPrintText_WritesRaw(t *testing.T) {
 }
 
 func TestPrintLine_WritesWithNewline(t *testing.T) {
+	t.Parallel()
 	p, buf, _ := newTestPrinter(FormatJSON) // format should not matter for PrintLine
 	p.PrintLine("a line")
 	if buf.String() != "a line\n" {
@@ -995,6 +1024,7 @@ func TestPrintLine_WritesWithNewline(t *testing.T) {
 // --- truncateDescription ---
 
 func TestTruncateDescription(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		input string
 		want  string
@@ -1017,6 +1047,7 @@ func TestTruncateDescription(t *testing.T) {
 // --- printTable via Printer ---
 
 func TestPrintTable_RendersTabularData(t *testing.T) {
+	t.Parallel()
 	p, buf, _ := newTestPrinter(FormatText)
 
 	data := RiteListOutput{
@@ -1043,6 +1074,7 @@ func TestPrintTable_RendersTabularData(t *testing.T) {
 // TestTextOutput_RiteSwitchOrphans verifies that orphan output uses descriptive
 // rite-switch phrasing when RiteSwitched is true.
 func TestTextOutput_RiteSwitchOrphans(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name         string
 		riteSwitched bool
@@ -1073,6 +1105,7 @@ func TestTextOutput_RiteSwitchOrphans(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			data := SyncResultOutput{
 				Status: "success",
 				Rite: &SyncRiteResult{
