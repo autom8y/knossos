@@ -8,7 +8,7 @@ entry_point:
   agent: technology-scout
   artifact:
     type: tech-assessment
-    path_template: docs/rnd/SCOUT-{slug}.md
+    path_template: .ledge/spikes/SCOUT-{slug}.md
 
 phases:
   - name: scouting

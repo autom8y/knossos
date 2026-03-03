@@ -8,7 +8,7 @@ entry_point:
   agent: doc-auditor
   artifact:
     type: audit-report
-    path_template: docs/audits/AUDIT-{slug}.md
+    path_template: .ledge/reviews/AUDIT-{slug}.md
 
 phases:
   - name: audit

@@ -16,7 +16,7 @@ entry_point:
   agent: topology-cartographer
   artifact:
     type: topology-inventory
-    path_template: docs/architecture/TOPOLOGY-{slug}.md
+    path_template: .ledge/decisions/TOPOLOGY-{slug}.md
 
 phases:
   - name: discovery

@@ -8,7 +8,7 @@ entry_point:
   agent: analytics-engineer
   artifact:
     type: tracking-plan
-    path_template: docs/intelligence/TRACK-{slug}.md
+    path_template: .ledge/spikes/TRACK-{slug}.md
 
 phases:
   - name: instrumentation

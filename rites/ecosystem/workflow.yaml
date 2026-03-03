@@ -9,7 +9,7 @@ entry_point:
   agent: ecosystem-analyst
   artifact:
     type: gap-analysis
-    path_template: docs/ecosystem/GAP-{slug}.md
+    path_template: .ledge/reviews/GAP-{slug}.md
 
 phases:
   - name: analysis

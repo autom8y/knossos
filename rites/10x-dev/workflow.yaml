@@ -23,10 +23,10 @@ entry_point:
   artifact_templates:
     requirements-analyst:
       type: prd
-      path_template: docs/requirements/PRD-{slug}.md
+      path_template: .ledge/specs/PRD-{slug}.md
     architect:
       type: tdd
-      path_template: docs/design/TDD-{slug}.md
+      path_template: .ledge/specs/TDD-{slug}.md
     principal-engineer:
       type: code
       path_template: null  # Implementation path determined by scope

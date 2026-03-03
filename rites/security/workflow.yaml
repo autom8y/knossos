@@ -10,7 +10,7 @@ entry_point:
     agent: threat-modeler
     artifact:
       type: threat-model
-      path_template: docs/security/THREAT-{slug}.md
+      path_template: .ledge/reviews/THREAT-{slug}.md
 
   # Consultation entry for cross-rite invocation (e.g., from 10x-dev)
   consultation:
@@ -18,7 +18,7 @@ entry_point:
     mode: advisory
     artifact:
       type: security-review
-      path_template: docs/security/REVIEW-{slug}.md
+      path_template: .ledge/reviews/REVIEW-{slug}.md
 
 # External consultation support
 # Allows other rites (primarily 10x-dev) to invoke threat-modeler
@@ -45,7 +45,7 @@ external_consultation:
       - compliance_flags: "Relevant compliance requirements"
     artifact:
       type: security-advisory
-      path_template: docs/security/ADVISORY-{slug}.md
+      path_template: .ledge/reviews/ADVISORY-{slug}.md
 
   # Consultation flow (does not continue to full security phases)
   consultation_phases:

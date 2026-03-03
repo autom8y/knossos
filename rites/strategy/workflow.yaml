@@ -8,7 +8,7 @@ entry_point:
   agent: market-researcher
   artifact:
     type: market-analysis
-    path_template: docs/strategy/MARKET-{slug}.md
+    path_template: .ledge/spikes/MARKET-{slug}.md
 
 phases:
   - name: market-research

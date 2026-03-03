@@ -8,7 +8,7 @@ entry_point:
   agent: observability-engineer
   artifact:
     type: observability-report
-    path_template: docs/reliability/OBS-{slug}.md
+    path_template: .ledge/reviews/OBS-{slug}.md
 
 phases:
   - name: observation

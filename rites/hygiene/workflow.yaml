@@ -8,7 +8,7 @@ entry_point:
   agent: code-smeller
   artifact:
     type: smell-report
-    path_template: docs/hygiene/SMELL-{slug}.md
+    path_template: .ledge/reviews/SMELL-{slug}.md
 
 phases:
   - name: assessment

@@ -9,7 +9,7 @@ entry_point:
   agent: agent-designer
   artifact:
     type: rite-spec
-    path_template: docs/forge/RITE-SPEC-{slug}.md
+    path_template: .ledge/specs/RITE-SPEC-{slug}.md
 
 phases:
   - name: design
