@@ -34,7 +34,9 @@ Input (stdin JSON from CC):
 
 All output goes to STDERR. Exit 0 = success.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runWorktreeRemove(ctx)
+			return ctx.withTimeout(func() error {
+				return runWorktreeRemove(ctx)
+			})
 		},
 	}
 
@@ -61,14 +63,20 @@ func runWorktreeRemove(ctx *cmdContext) error {
 		}
 	}
 
-	// Step 2: Validate worktree_path.
+	// Step 2: Event guard — only process WorktreeRemove events (or empty for direct CLI).
+	if payload.HookEventName != "" && payload.HookEventName != "WorktreeRemove" {
+		fmt.Fprintf(stderr, "worktree-remove: skipping non-WorktreeRemove event %q\n", payload.HookEventName)
+		return nil
+	}
+
+	// Step 3: Validate worktree_path.
 	worktreePath := strings.TrimSpace(payload.WorktreePath)
 	if worktreePath == "" {
 		fmt.Fprintf(stderr, "worktree-remove: stdin JSON missing 'worktree_path' field\n")
 		return fmt.Errorf("worktree-remove: missing worktree_path")
 	}
 
-	// Step 3: Remove the git worktree.
+	// Step 4: Remove the git worktree.
 	fmt.Fprintf(stderr, "worktree-remove: removing git worktree at %s\n", worktreePath)
 	gitCmd := exec.Command("git", "worktree", "remove", worktreePath)
 	gitCmd.Stderr = stderr

@@ -12,7 +12,6 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/autom8y/knossos/internal/cmd/common"
 	"github.com/autom8y/knossos/internal/materialize"
 	"github.com/autom8y/knossos/internal/paths"
 )
@@ -153,15 +152,7 @@ func runWorktreeSeed(ctx *cmdContext) error {
 // .claude/ directory with the specified rite.
 func seedWorktreeRite(worktreePath, riteName string, ctx *cmdContext) error {
 	resolver := paths.NewResolver(worktreePath)
-	m := materialize.NewMaterializer(resolver)
-
-	// Wire embedded assets from the common package.
-	if embRites := common.EmbeddedRites(); embRites != nil {
-		m.WithEmbeddedFS(embRites)
-	}
-	if embTemplates := common.EmbeddedTemplates(); embTemplates != nil {
-		m.WithEmbeddedTemplates(embTemplates)
-	}
+	m := NewWiredMaterializer(resolver)
 
 	opts := materialize.SyncOptions{
 		Scope:    materialize.ScopeRite,
