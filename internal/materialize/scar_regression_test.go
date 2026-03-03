@@ -155,7 +155,7 @@ func TestSCAR008_BudgetHook_MustNotBeAsync(t *testing.T) {
 	require.NoError(t, err, "config/hooks.yaml must be readable from repo root")
 
 	// Parse via the hooks package (same parser the pipeline uses).
-	cfg, parseErr := parseHooksYAMLForSCAR008(data)
+	cfg, parseErr := parseHooksYAMLForSCAR008(t, data)
 	require.NoError(t, parseErr, "config/hooks.yaml must be valid YAML")
 
 	// Scan all entries: budget hook must not be async.
@@ -170,12 +170,11 @@ func TestSCAR008_BudgetHook_MustNotBeAsync(t *testing.T) {
 	}
 }
 
-// parseHooksYAMLForSCAR008 parses hooks.yaml content without importing the hooks package
-// to avoid a direct dependency on the test needing special test setup.
-// It uses the hooks package directly (same package as the production code).
-func parseHooksYAMLForSCAR008(data []byte) ([]hooks.HookEntry, error) {
-	tmpDir := t_tempDirForSCAR008()
-	defer os.RemoveAll(tmpDir)
+// parseHooksYAMLForSCAR008 parses hooks.yaml content using the hooks package
+// (same parser as the production code).
+func parseHooksYAMLForSCAR008(t *testing.T, data []byte) ([]hooks.HookEntry, error) {
+	t.Helper()
+	tmpDir := t.TempDir()
 
 	configDir := filepath.Join(tmpDir, "config")
 	if err := os.MkdirAll(configDir, 0755); err != nil {
@@ -190,13 +189,6 @@ func parseHooksYAMLForSCAR008(data []byte) ([]hooks.HookEntry, error) {
 		return nil, nil
 	}
 	return cfg.Hooks, nil
-}
-
-// t_tempDirForSCAR008 creates a temporary directory without t.TempDir() since
-// this helper is called outside a test function context.
-func t_tempDirForSCAR008() string {
-	dir, _ := os.MkdirTemp("", "scar008-*")
-	return dir
 }
 
 // TestSCAR021_CrossRiteAgents_ProjectScopeExclusion is a labeled regression test for SCAR-021.

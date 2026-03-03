@@ -11,11 +11,7 @@ import (
 )
 
 func TestManager_AcquireRelease(t *testing.T) {
-	tmpDir, err := os.MkdirTemp("", "lock-test-*")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer os.RemoveAll(tmpDir)
+	tmpDir := t.TempDir()
 
 	mgr := NewManager(tmpDir)
 	sessionID := "test-session"
@@ -37,11 +33,7 @@ func TestManager_AcquireRelease(t *testing.T) {
 }
 
 func TestManager_ExclusiveLock(t *testing.T) {
-	tmpDir, err := os.MkdirTemp("", "lock-test-*")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer os.RemoveAll(tmpDir)
+	tmpDir := t.TempDir()
 
 	mgr := NewManager(tmpDir)
 	sessionID := "exclusive-test"
@@ -60,11 +52,7 @@ func TestManager_ExclusiveLock(t *testing.T) {
 }
 
 func TestManager_SharedLock(t *testing.T) {
-	tmpDir, err := os.MkdirTemp("", "lock-test-*")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer os.RemoveAll(tmpDir)
+	tmpDir := t.TempDir()
 
 	mgr := NewManager(tmpDir)
 	sessionID := "shared-test"
@@ -84,11 +72,7 @@ func TestManager_SharedLock(t *testing.T) {
 }
 
 func TestManager_IsLocked(t *testing.T) {
-	tmpDir, err := os.MkdirTemp("", "lock-test-*")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer os.RemoveAll(tmpDir)
+	tmpDir := t.TempDir()
 
 	mgr := NewManager(tmpDir)
 	sessionID := "islock-test"
@@ -106,11 +90,7 @@ func TestManager_IsLocked(t *testing.T) {
 }
 
 func TestManager_ConcurrentPark(t *testing.T) {
-	tmpDir, err := os.MkdirTemp("", "lock-test-*")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer os.RemoveAll(tmpDir)
+	tmpDir := t.TempDir()
 
 	mgr := NewManager(tmpDir)
 	sessionID := "concurrent-park"
@@ -154,11 +134,7 @@ func TestManager_ConcurrentPark(t *testing.T) {
 }
 
 func TestManager_RaceCondition(t *testing.T) {
-	tmpDir, err := os.MkdirTemp("", "lock-test-*")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer os.RemoveAll(tmpDir)
+	tmpDir := t.TempDir()
 
 	mgr := NewManager(tmpDir)
 	sessionID := "race-test"
@@ -211,11 +187,7 @@ func TestManager_RaceCondition(t *testing.T) {
 }
 
 func TestLock_Metadata(t *testing.T) {
-	tmpDir, err := os.MkdirTemp("", "lock-test-*")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer os.RemoveAll(tmpDir)
+	tmpDir := t.TempDir()
 
 	mgr := NewManager(tmpDir)
 	sessionID := "props-test"
@@ -250,11 +222,7 @@ func TestLock_Metadata(t *testing.T) {
 }
 
 func TestManager_ForceRelease(t *testing.T) {
-	tmpDir, err := os.MkdirTemp("", "lock-test-*")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer os.RemoveAll(tmpDir)
+	tmpDir := t.TempDir()
 
 	mgr := NewManager(tmpDir)
 	sessionID := "force-release"
@@ -279,11 +247,7 @@ func TestManager_ForceRelease(t *testing.T) {
 // --- TDD: JSON Lock Format Tests ---
 
 func TestLockFileFormat_JSON(t *testing.T) {
-	tmpDir, err := os.MkdirTemp("", "lock-test-*")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer os.RemoveAll(tmpDir)
+	tmpDir := t.TempDir()
 
 	mgr := NewManager(tmpDir)
 	sessionID := "json-format-test"
@@ -327,11 +291,7 @@ func TestLockFileFormat_JSON(t *testing.T) {
 }
 
 func TestLockFileFormat_ParseLegacy(t *testing.T) {
-	tmpDir, err := os.MkdirTemp("", "lock-test-*")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer os.RemoveAll(tmpDir)
+	tmpDir := t.TempDir()
 
 	mgr := NewManager(tmpDir)
 	sessionID := "legacy-test"
@@ -357,11 +317,7 @@ func TestLockFileFormat_ParseLegacy(t *testing.T) {
 }
 
 func TestLockFileFormat_BackwardCompat(t *testing.T) {
-	tmpDir, err := os.MkdirTemp("", "lock-test-*")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer os.RemoveAll(tmpDir)
+	tmpDir := t.TempDir()
 
 	mgr := NewManager(tmpDir)
 	sessionID := "compat-test"
@@ -380,11 +336,7 @@ func TestLockFileFormat_BackwardCompat(t *testing.T) {
 }
 
 func TestLockStale_AgeBased(t *testing.T) {
-	tmpDir, err := os.MkdirTemp("", "lock-test-*")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer os.RemoveAll(tmpDir)
+	tmpDir := t.TempDir()
 
 	mgr := NewManager(tmpDir)
 	sessionID := "stale-age-test"
@@ -419,11 +371,7 @@ func TestLockStale_AgeBased(t *testing.T) {
 }
 
 func TestLockStale_Unparseable(t *testing.T) {
-	tmpDir, err := os.MkdirTemp("", "lock-test-*")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer os.RemoveAll(tmpDir)
+	tmpDir := t.TempDir()
 
 	mgr := NewManager(tmpDir)
 	lockPath := filepath.Join(tmpDir, "corrupt.lock")
@@ -439,11 +387,7 @@ func TestLockStale_Unparseable(t *testing.T) {
 }
 
 func TestGetLockInfo_JSONFormat(t *testing.T) {
-	tmpDir, err := os.MkdirTemp("", "lock-test-*")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer os.RemoveAll(tmpDir)
+	tmpDir := t.TempDir()
 
 	mgr := NewManager(tmpDir)
 	sessionID := "info-test"
@@ -478,11 +422,7 @@ func TestGetLockInfo_JSONFormat(t *testing.T) {
 }
 
 func TestManager_StaleLockReclamation(t *testing.T) {
-	tmpDir, err := os.MkdirTemp("", "lock-test-*")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer os.RemoveAll(tmpDir)
+	tmpDir := t.TempDir()
 
 	mgr := NewManager(tmpDir)
 	sessionID := "stale-reclaim-test"
@@ -536,11 +476,7 @@ func TestManager_StaleLockReclamation(t *testing.T) {
 }
 
 func TestManager_StaleLockReclamation_Concurrent(t *testing.T) {
-	tmpDir, err := os.MkdirTemp("", "lock-test-*")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer os.RemoveAll(tmpDir)
+	tmpDir := t.TempDir()
 
 	mgr := NewManager(tmpDir)
 	sessionID := "stale-concurrent-test"
@@ -598,15 +534,11 @@ func TestManager_StaleLockReclamation_Concurrent(t *testing.T) {
 }
 
 func TestGetLockInfo_NoLock(t *testing.T) {
-	tmpDir, err := os.MkdirTemp("", "lock-test-*")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer os.RemoveAll(tmpDir)
+	tmpDir := t.TempDir()
 
 	mgr := NewManager(tmpDir)
 
-	_, err = mgr.GetLockInfo("nonexistent")
+	_, err := mgr.GetLockInfo("nonexistent")
 	if err == nil {
 		t.Error("GetLockInfo() should return error for nonexistent lock")
 	}

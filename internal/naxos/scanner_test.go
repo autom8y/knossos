@@ -19,10 +19,7 @@ type testSetup struct {
 
 func newTestSetup(t *testing.T) *testSetup {
 	t.Helper()
-	tempDir, err := os.MkdirTemp("", "naxos-test-*")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
+	tempDir := t.TempDir()
 
 	projectRoot := tempDir
 	sessionsDir := filepath.Join(projectRoot, ".sos", "sessions")
@@ -36,10 +33,6 @@ func newTestSetup(t *testing.T) *testSetup {
 		sessionsDir: sessionsDir,
 		t:           t,
 	}
-}
-
-func (ts *testSetup) cleanup() {
-	os.RemoveAll(ts.tempDir)
 }
 
 func (ts *testSetup) resolver() *paths.Resolver {
@@ -149,7 +142,7 @@ Test body.
 
 func TestScanner_Scan_NoSessions(t *testing.T) {
 	ts := newTestSetup(t)
-	defer ts.cleanup()
+
 
 	scanner := NewScanner(ts.resolver(), DefaultConfig())
 	result, err := scanner.Scan()
@@ -167,7 +160,7 @@ func TestScanner_Scan_NoSessions(t *testing.T) {
 
 func TestScanner_Scan_HealthyActiveSession(t *testing.T) {
 	ts := newTestSetup(t)
-	defer ts.cleanup()
+
 
 	// Create a recent active session (should not be flagged)
 	now := time.Now().UTC()
@@ -189,7 +182,7 @@ func TestScanner_Scan_HealthyActiveSession(t *testing.T) {
 
 func TestScanner_Scan_InactiveSession(t *testing.T) {
 	ts := newTestSetup(t)
-	defer ts.cleanup()
+
 
 	// Create an old active session (should be flagged as inactive)
 	now := time.Now().UTC()
@@ -228,7 +221,7 @@ func TestScanner_Scan_InactiveSession(t *testing.T) {
 
 func TestScanner_Scan_StaleSailsSession(t *testing.T) {
 	ts := newTestSetup(t)
-	defer ts.cleanup()
+
 
 	// Create a parked session with gray sails that's old
 	now := time.Now().UTC()
@@ -266,7 +259,7 @@ func TestScanner_Scan_StaleSailsSession(t *testing.T) {
 
 func TestScanner_Scan_ParkedWithWhiteSails_NotFlagged(t *testing.T) {
 	ts := newTestSetup(t)
-	defer ts.cleanup()
+
 
 	// Create a parked session with WHITE sails (should not be flagged)
 	now := time.Now().UTC()
@@ -291,7 +284,7 @@ func TestScanner_Scan_ParkedWithWhiteSails_NotFlagged(t *testing.T) {
 
 func TestScanner_Scan_IncompleteWrap(t *testing.T) {
 	ts := newTestSetup(t)
-	defer ts.cleanup()
+
 
 	// Create a session with wrap phase but still ACTIVE
 	now := time.Now().UTC()
@@ -324,7 +317,7 @@ func TestScanner_Scan_IncompleteWrap(t *testing.T) {
 
 func TestScanner_Scan_ArchivedNotIncluded(t *testing.T) {
 	ts := newTestSetup(t)
-	defer ts.cleanup()
+
 
 	// Create an archived session
 	now := time.Now().UTC()
@@ -350,7 +343,7 @@ func TestScanner_Scan_ArchivedNotIncluded(t *testing.T) {
 
 func TestScanner_Scan_MultipleOrphans(t *testing.T) {
 	ts := newTestSetup(t)
-	defer ts.cleanup()
+
 
 	now := time.Now().UTC()
 
@@ -397,7 +390,7 @@ func TestScanner_Scan_MultipleOrphans(t *testing.T) {
 
 func TestScanner_Scan_CustomThresholds(t *testing.T) {
 	ts := newTestSetup(t)
-	defer ts.cleanup()
+
 
 	now := time.Now().UTC()
 
@@ -433,7 +426,7 @@ func TestScanner_Scan_CustomThresholds(t *testing.T) {
 
 func TestScanner_Scan_NonSessionDirsIgnored(t *testing.T) {
 	ts := newTestSetup(t)
-	defer ts.cleanup()
+
 
 	// Create non-session directories that should be ignored
 	os.MkdirAll(filepath.Join(ts.sessionsDir, ".locks"), 0755)
@@ -454,7 +447,7 @@ func TestScanner_Scan_NonSessionDirsIgnored(t *testing.T) {
 
 func TestScanner_SuggestedAction_VeryOldInactive(t *testing.T) {
 	ts := newTestSetup(t)
-	defer ts.cleanup()
+
 
 	now := time.Now().UTC()
 
@@ -481,7 +474,7 @@ func TestScanner_SuggestedAction_VeryOldInactive(t *testing.T) {
 
 func TestScanner_SuggestedAction_RecentInactive(t *testing.T) {
 	ts := newTestSetup(t)
-	defer ts.cleanup()
+
 
 	now := time.Now().UTC()
 
@@ -508,7 +501,7 @@ func TestScanner_SuggestedAction_RecentInactive(t *testing.T) {
 
 func TestScanner_SuggestedAction_StaleSailsWithReason(t *testing.T) {
 	ts := newTestSetup(t)
-	defer ts.cleanup()
+
 
 	now := time.Now().UTC()
 	parkedAt := now.Add(-10 * 24 * time.Hour)

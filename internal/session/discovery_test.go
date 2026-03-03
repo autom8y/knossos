@@ -35,11 +35,7 @@ current_phase: requirements
 }
 
 func TestFindActiveSession_NoSessions(t *testing.T) {
-	tmpDir, err := os.MkdirTemp("", "discovery-test-*")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer os.RemoveAll(tmpDir)
+	tmpDir := t.TempDir()
 
 	sessionsDir := filepath.Join(tmpDir, "sessions")
 	if err := os.MkdirAll(sessionsDir, 0755); err != nil {
@@ -56,11 +52,7 @@ func TestFindActiveSession_NoSessions(t *testing.T) {
 }
 
 func TestFindActiveSession_OneActive(t *testing.T) {
-	tmpDir, err := os.MkdirTemp("", "discovery-test-*")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer os.RemoveAll(tmpDir)
+	tmpDir := t.TempDir()
 
 	sessionsDir := filepath.Join(tmpDir, "sessions")
 	sessionID := "session-20260205-160414-abc12345"
@@ -76,11 +68,7 @@ func TestFindActiveSession_OneActive(t *testing.T) {
 }
 
 func TestFindActiveSession_OneParked(t *testing.T) {
-	tmpDir, err := os.MkdirTemp("", "discovery-test-*")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer os.RemoveAll(tmpDir)
+	tmpDir := t.TempDir()
 
 	sessionsDir := filepath.Join(tmpDir, "sessions")
 	writeSessionContext(t, sessionsDir, "session-20260205-160414-abc12345", "PARKED")
@@ -95,11 +83,7 @@ func TestFindActiveSession_OneParked(t *testing.T) {
 }
 
 func TestFindActiveSession_MultipleParked_OneActive(t *testing.T) {
-	tmpDir, err := os.MkdirTemp("", "discovery-test-*")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer os.RemoveAll(tmpDir)
+	tmpDir := t.TempDir()
 
 	sessionsDir := filepath.Join(tmpDir, "sessions")
 	writeSessionContext(t, sessionsDir, "session-20260201-100000-parked01", "PARKED")
@@ -127,11 +111,7 @@ func TestFindActiveSession_NoActiveDir(t *testing.T) {
 }
 
 func TestFindActiveSession_CorruptContext(t *testing.T) {
-	tmpDir, err := os.MkdirTemp("", "discovery-test-*")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer os.RemoveAll(tmpDir)
+	tmpDir := t.TempDir()
 
 	sessionsDir := filepath.Join(tmpDir, "sessions")
 
@@ -157,11 +137,7 @@ func TestFindActiveSession_CorruptContext(t *testing.T) {
 }
 
 func TestFindActiveSession_SkipsNonSessionDirs(t *testing.T) {
-	tmpDir, err := os.MkdirTemp("", "discovery-test-*")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer os.RemoveAll(tmpDir)
+	tmpDir := t.TempDir()
 
 	sessionsDir := filepath.Join(tmpDir, "sessions")
 	if err := os.MkdirAll(sessionsDir, 0755); err != nil {
@@ -186,11 +162,7 @@ func TestFindActiveSession_SkipsNonSessionDirs(t *testing.T) {
 func TestFindActiveSession_PhantomStatusNotActive(t *testing.T) {
 	// A session with phantom status "COMPLETED" should NOT appear as active.
 	// After normalization, COMPLETED → ARCHIVED, which != ACTIVE.
-	tmpDir, err := os.MkdirTemp("", "discovery-phantom-test-*")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer os.RemoveAll(tmpDir)
+	tmpDir := t.TempDir()
 
 	sessionsDir := filepath.Join(tmpDir, "sessions")
 	writeSessionContext(t, sessionsDir, "session-20260201-100000-complet1", "COMPLETED")
@@ -213,11 +185,7 @@ func TestFindActiveSession_PhantomStatusNotActive(t *testing.T) {
 // from race conditions.
 
 func TestFindActiveSession_DualActive(t *testing.T) {
-	tmpDir, err := os.MkdirTemp("", "discovery-dual-test-*")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer os.RemoveAll(tmpDir)
+	tmpDir := t.TempDir()
 
 	sessionsDir := filepath.Join(tmpDir, "sessions")
 
@@ -259,11 +227,7 @@ func TestFindActiveSession_DualActive(t *testing.T) {
 // sessions. This is a sanity check, not a benchmark.
 
 func TestFindActiveSession_Performance(t *testing.T) {
-	tmpDir, err := os.MkdirTemp("", "discovery-perf-test-*")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer os.RemoveAll(tmpDir)
+	tmpDir := t.TempDir()
 
 	sessionsDir := filepath.Join(tmpDir, "sessions")
 

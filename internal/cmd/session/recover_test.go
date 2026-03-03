@@ -12,11 +12,7 @@ import (
 )
 
 func TestIsLockStale_EmptyFile(t *testing.T) {
-	tmpDir, err := os.MkdirTemp("", "recover-test-*")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer os.RemoveAll(tmpDir)
+	tmpDir := t.TempDir()
 
 	lockPath := filepath.Join(tmpDir, "test.lock")
 	if err := os.WriteFile(lockPath, []byte(""), 0644); err != nil {
@@ -29,11 +25,7 @@ func TestIsLockStale_EmptyFile(t *testing.T) {
 }
 
 func TestIsLockStale_FreshJSON(t *testing.T) {
-	tmpDir, err := os.MkdirTemp("", "recover-test-*")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer os.RemoveAll(tmpDir)
+	tmpDir := t.TempDir()
 
 	meta := lock.LockMetadata{
 		Session:  "session-20260205-160414-abc12345",
@@ -54,11 +46,7 @@ func TestIsLockStale_FreshJSON(t *testing.T) {
 }
 
 func TestIsLockStale_OldJSON(t *testing.T) {
-	tmpDir, err := os.MkdirTemp("", "recover-test-*")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer os.RemoveAll(tmpDir)
+	tmpDir := t.TempDir()
 
 	meta := lock.LockMetadata{
 		Session:  "session-20260205-160414-abc12345",
@@ -79,11 +67,7 @@ func TestIsLockStale_OldJSON(t *testing.T) {
 }
 
 func TestIsLockStale_LegacyPID(t *testing.T) {
-	tmpDir, err := os.MkdirTemp("", "recover-test-*")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer os.RemoveAll(tmpDir)
+	tmpDir := t.TempDir()
 
 	lockPath := filepath.Join(tmpDir, "test.lock")
 	if err := os.WriteFile(lockPath, []byte("12345\n"), 0644); err != nil {
@@ -96,11 +80,7 @@ func TestIsLockStale_LegacyPID(t *testing.T) {
 }
 
 func TestIsLockStale_Unparseable(t *testing.T) {
-	tmpDir, err := os.MkdirTemp("", "recover-test-*")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer os.RemoveAll(tmpDir)
+	tmpDir := t.TempDir()
 
 	lockPath := filepath.Join(tmpDir, "test.lock")
 	if err := os.WriteFile(lockPath, []byte("garbage data here"), 0644); err != nil {
@@ -153,11 +133,7 @@ func TestStaleDivergence_LegacyPIDAlive(t *testing.T) {
 	//
 	// We use the current process PID (os.Getpid()) as a guaranteed-alive PID.
 
-	tmpDir, err := os.MkdirTemp("", "divergence-test-*")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer os.RemoveAll(tmpDir)
+	tmpDir := t.TempDir()
 
 	// Write a legacy PID lock file using the current process PID (guaranteed alive)
 	alivePID := os.Getpid()
@@ -190,11 +166,7 @@ func TestStaleDivergence_LegacyPIDAlive(t *testing.T) {
 func TestStaleDivergence_EmptyFile(t *testing.T) {
 	// Empty lock files are stale in all contexts (stakeholder decision).
 
-	tmpDir, err := os.MkdirTemp("", "divergence-empty-test-*")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer os.RemoveAll(tmpDir)
+	tmpDir := t.TempDir()
 
 	lockPath := filepath.Join(tmpDir, "empty.lock")
 	if err := os.WriteFile(lockPath, []byte(""), 0644); err != nil {
@@ -219,11 +191,7 @@ func TestStaleDivergence_AgreementCases(t *testing.T) {
 	// Documents the cases where both functions AGREE.
 	// This ensures the divergence is scoped and not accidental.
 
-	tmpDir, err := os.MkdirTemp("", "divergence-agree-test-*")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer os.RemoveAll(tmpDir)
+	tmpDir := t.TempDir()
 
 	lockMgr := lock.NewManager(tmpDir)
 

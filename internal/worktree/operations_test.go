@@ -15,7 +15,7 @@ import (
 // TestSwitchWorktree tests the Switch operation.
 func TestSwitchWorktree(t *testing.T) {
 	tmpDir := setupTestGitRepo(t)
-	defer os.RemoveAll(tmpDir)
+
 
 	mgr, err := NewManager(tmpDir)
 	if err != nil {
@@ -48,7 +48,7 @@ func TestSwitchWorktree(t *testing.T) {
 // TestSwitchByName tests switching by name instead of ID.
 func TestSwitchByName(t *testing.T) {
 	tmpDir := setupTestGitRepo(t)
-	defer os.RemoveAll(tmpDir)
+
 
 	mgr, err := NewManager(tmpDir)
 	if err != nil {
@@ -75,7 +75,7 @@ func TestSwitchByName(t *testing.T) {
 // TestSwitchNonexistent tests switching to a nonexistent worktree.
 func TestSwitchNonexistent(t *testing.T) {
 	tmpDir := setupTestGitRepo(t)
-	defer os.RemoveAll(tmpDir)
+
 
 	mgr, err := NewManager(tmpDir)
 	if err != nil {
@@ -91,7 +91,7 @@ func TestSwitchNonexistent(t *testing.T) {
 // TestSwitchWithRiteUpdate tests that UpdateRite option works.
 func TestSwitchWithRiteUpdate(t *testing.T) {
 	tmpDir := setupTestGitRepo(t)
-	defer os.RemoveAll(tmpDir)
+
 
 	mgr, err := NewManager(tmpDir)
 	if err != nil {
@@ -128,7 +128,7 @@ func TestSwitchWithRiteUpdate(t *testing.T) {
 // TestCloneWorktree tests the Clone operation.
 func TestCloneWorktree(t *testing.T) {
 	tmpDir := setupTestGitRepo(t)
-	defer os.RemoveAll(tmpDir)
+
 
 	mgr, err := NewManager(tmpDir)
 	if err != nil {
@@ -180,7 +180,7 @@ func TestCloneWorktree(t *testing.T) {
 // TestCloneWithRiteOverride tests clone with rite override.
 func TestCloneWithRiteOverride(t *testing.T) {
 	tmpDir := setupTestGitRepo(t)
-	defer os.RemoveAll(tmpDir)
+
 
 	mgr, err := NewManager(tmpDir)
 	if err != nil {
@@ -212,7 +212,7 @@ func TestCloneWithRiteOverride(t *testing.T) {
 // TestCloneByName tests cloning by worktree name.
 func TestCloneByName(t *testing.T) {
 	tmpDir := setupTestGitRepo(t)
-	defer os.RemoveAll(tmpDir)
+
 
 	mgr, err := NewManager(tmpDir)
 	if err != nil {
@@ -239,7 +239,7 @@ func TestCloneByName(t *testing.T) {
 // TestCloneNonexistent tests cloning a nonexistent worktree.
 func TestCloneNonexistent(t *testing.T) {
 	tmpDir := setupTestGitRepo(t)
-	defer os.RemoveAll(tmpDir)
+
 
 	mgr, err := NewManager(tmpDir)
 	if err != nil {
@@ -255,7 +255,7 @@ func TestCloneNonexistent(t *testing.T) {
 // TestSyncWorktree tests the Sync operation.
 func TestSyncWorktree(t *testing.T) {
 	tmpDir := setupTestGitRepo(t)
-	defer os.RemoveAll(tmpDir)
+
 
 	mgr, err := NewManager(tmpDir)
 	if err != nil {
@@ -289,7 +289,7 @@ func TestSyncWorktree(t *testing.T) {
 // TestSyncByName tests syncing by worktree name.
 func TestSyncByName(t *testing.T) {
 	tmpDir := setupTestGitRepo(t)
-	defer os.RemoveAll(tmpDir)
+
 
 	mgr, err := NewManager(tmpDir)
 	if err != nil {
@@ -314,7 +314,7 @@ func TestSyncByName(t *testing.T) {
 // TestSyncNonexistent tests syncing a nonexistent worktree.
 func TestSyncNonexistent(t *testing.T) {
 	tmpDir := setupTestGitRepo(t)
-	defer os.RemoveAll(tmpDir)
+
 
 	mgr, err := NewManager(tmpDir)
 	if err != nil {
@@ -330,7 +330,7 @@ func TestSyncNonexistent(t *testing.T) {
 // TestExportImportRoundtrip tests export and import.
 func TestExportImportRoundtrip(t *testing.T) {
 	tmpDir := setupTestGitRepo(t)
-	defer os.RemoveAll(tmpDir)
+
 
 	mgr, err := NewManager(tmpDir)
 	if err != nil {
@@ -413,7 +413,7 @@ func TestExportImportRoundtrip(t *testing.T) {
 // TestExportByName tests export by worktree name.
 func TestExportByName(t *testing.T) {
 	tmpDir := setupTestGitRepo(t)
-	defer os.RemoveAll(tmpDir)
+
 
 	mgr, err := NewManager(tmpDir)
 	if err != nil {
@@ -438,7 +438,7 @@ func TestExportByName(t *testing.T) {
 // TestExportNonexistent tests exporting a nonexistent worktree.
 func TestExportNonexistent(t *testing.T) {
 	tmpDir := setupTestGitRepo(t)
-	defer os.RemoveAll(tmpDir)
+
 
 	mgr, err := NewManager(tmpDir)
 	if err != nil {
@@ -455,7 +455,7 @@ func TestExportNonexistent(t *testing.T) {
 // TestImportInvalidArchive tests importing an invalid archive.
 func TestImportInvalidArchive(t *testing.T) {
 	tmpDir := setupTestGitRepo(t)
-	defer os.RemoveAll(tmpDir)
+
 
 	mgr, err := NewManager(tmpDir)
 	if err != nil {
@@ -477,7 +477,7 @@ func TestImportInvalidArchive(t *testing.T) {
 // TestImportMissingMetadata tests importing archive without metadata.
 func TestImportMissingMetadata(t *testing.T) {
 	tmpDir := setupTestGitRepo(t)
-	defer os.RemoveAll(tmpDir)
+
 
 	mgr, err := NewManager(tmpDir)
 	if err != nil {
@@ -586,11 +586,7 @@ func createEmptyArchive(t *testing.T, path string) {
 
 // TestSessionIntegrationUpdateWorktree tests updating worktree_id in session.
 func TestSessionIntegrationUpdateWorktree(t *testing.T) {
-	tmpDir, err := os.MkdirTemp("", "session-test-*")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer os.RemoveAll(tmpDir)
+	tmpDir := t.TempDir()
 
 	// Create a session context file
 	sessionDir := filepath.Join(tmpDir, ".sos", "sessions", "session-test")
@@ -630,11 +626,7 @@ status: "ACTIVE"
 
 // TestSessionIntegrationGetActiveWorktree tests retrieving worktree_id.
 func TestSessionIntegrationGetActiveWorktree(t *testing.T) {
-	tmpDir, err := os.MkdirTemp("", "session-test-*")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer os.RemoveAll(tmpDir)
+	tmpDir := t.TempDir()
 
 	// Create a session context with worktree_id
 	sessionDir := filepath.Join(tmpDir, ".sos", "sessions", "session-test")
@@ -669,11 +661,7 @@ worktree_id: "wt-existing-id"
 
 // TestSessionIntegrationMissingWorktree tests getting nonexistent worktree_id.
 func TestSessionIntegrationMissingWorktree(t *testing.T) {
-	tmpDir, err := os.MkdirTemp("", "session-test-*")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer os.RemoveAll(tmpDir)
+	tmpDir := t.TempDir()
 
 	sessionDir := filepath.Join(tmpDir, ".sos", "sessions", "session-test")
 	if err := os.MkdirAll(sessionDir, 0755); err != nil {
@@ -828,7 +816,7 @@ func TestQuoteIfNeeded(t *testing.T) {
 // as scaffolded directories.
 func TestSetupWorktreeEcosystemSeedsDirectories(t *testing.T) {
 	tmpDir := setupTestGitRepo(t)
-	defer os.RemoveAll(tmpDir)
+
 
 	// Create .knossos/ and .know/ in the main repo root so symlinks have targets
 	knossosDir := filepath.Join(tmpDir, ".knossos")
@@ -914,7 +902,7 @@ func TestSetupWorktreeEcosystemSeedsDirectories(t *testing.T) {
 // created, but .ledge/ and .sos/ are still scaffolded.
 func TestSetupWorktreeEcosystemSkipsSymlinksWhenSourceMissing(t *testing.T) {
 	tmpDir := setupTestGitRepo(t)
-	defer os.RemoveAll(tmpDir)
+
 
 	// Do NOT create .knossos/ or .know/ in the main repo root
 
@@ -972,11 +960,7 @@ func TestSetupWorktreeEcosystemSkipsSymlinksWhenSourceMissing(t *testing.T) {
 
 // TestParseSessionContextFile tests session context parsing.
 func TestParseSessionContextFile(t *testing.T) {
-	tmpDir, err := os.MkdirTemp("", "parse-test-*")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer os.RemoveAll(tmpDir)
+	tmpDir := t.TempDir()
 
 	contextPath := filepath.Join(tmpDir, "SESSION_CONTEXT.md")
 	content := `---

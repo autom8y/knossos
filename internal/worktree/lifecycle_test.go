@@ -113,11 +113,7 @@ func TestFormatAge(t *testing.T) {
 // TestMetadataManager tests metadata persistence.
 func TestMetadataManager(t *testing.T) {
 	// Create temp directory
-	tmpDir, err := os.MkdirTemp("", "worktree-test-*")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer os.RemoveAll(tmpDir)
+	tmpDir := t.TempDir()
 
 	mgr := NewMetadataManager(tmpDir)
 
@@ -205,11 +201,7 @@ func TestMetadataManager(t *testing.T) {
 
 // TestMetadataGetOlderThan tests filtering worktrees by age.
 func TestMetadataGetOlderThan(t *testing.T) {
-	tmpDir, err := os.MkdirTemp("", "worktree-test-*")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer os.RemoveAll(tmpDir)
+	tmpDir := t.TempDir()
 
 	mgr := NewMetadataManager(tmpDir)
 
@@ -251,11 +243,7 @@ func TestMetadataGetOlderThan(t *testing.T) {
 
 // TestPerWorktreeMeta tests per-worktree metadata storage.
 func TestPerWorktreeMeta(t *testing.T) {
-	tmpDir, err := os.MkdirTemp("", "worktree-test-*")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer os.RemoveAll(tmpDir)
+	tmpDir := t.TempDir()
 
 	wt := Worktree{
 		ID:         "wt-20260104-143052-a1b2",
@@ -267,7 +255,7 @@ func TestPerWorktreeMeta(t *testing.T) {
 	}
 
 	// Save
-	err = SavePerWorktreeMeta(tmpDir, wt, "/parent/project")
+	err := SavePerWorktreeMeta(tmpDir, wt, "/parent/project")
 	if err != nil {
 		t.Fatalf("Failed to save per-worktree meta: %v", err)
 	}
@@ -305,15 +293,11 @@ func TestPerWorktreeMeta(t *testing.T) {
 func setupTestGitRepo(t *testing.T) string {
 	t.Helper()
 
-	tmpDir, err := os.MkdirTemp("", "worktree-git-test-*")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
+	tmpDir := t.TempDir()
 
 	// Resolve symlinks for macOS /var -> /private/var
-	tmpDir, err = filepath.EvalSymlinks(tmpDir)
+	tmpDir, err := filepath.EvalSymlinks(tmpDir)
 	if err != nil {
-		os.RemoveAll(tmpDir)
 		t.Fatalf("Failed to resolve symlinks: %v", err)
 	}
 
@@ -321,7 +305,6 @@ func setupTestGitRepo(t *testing.T) string {
 	cmd := exec.Command("git", "init")
 	cmd.Dir = tmpDir
 	if err := cmd.Run(); err != nil {
-		os.RemoveAll(tmpDir)
 		t.Fatalf("Failed to init git repo: %v", err)
 	}
 
@@ -345,7 +328,6 @@ func setupTestGitRepo(t *testing.T) string {
 	cmd = exec.Command("git", "commit", "-m", "Initial commit")
 	cmd.Dir = tmpDir
 	if err := cmd.Run(); err != nil {
-		os.RemoveAll(tmpDir)
 		t.Fatalf("Failed to create initial commit: %v", err)
 	}
 
@@ -359,7 +341,7 @@ func setupTestGitRepo(t *testing.T) string {
 // TestGitOperations tests git operations.
 func TestGitOperations(t *testing.T) {
 	tmpDir := setupTestGitRepo(t)
-	defer os.RemoveAll(tmpDir)
+
 
 	git := NewGitOperations(tmpDir)
 
@@ -407,7 +389,7 @@ func TestGitOperations(t *testing.T) {
 // TestManagerCreate tests worktree creation.
 func TestManagerCreate(t *testing.T) {
 	tmpDir := setupTestGitRepo(t)
-	defer os.RemoveAll(tmpDir)
+
 
 	mgr, err := NewManager(tmpDir)
 	if err != nil {
@@ -464,7 +446,7 @@ func TestManagerCreate(t *testing.T) {
 // TestManagerList tests worktree listing.
 func TestManagerList(t *testing.T) {
 	tmpDir := setupTestGitRepo(t)
-	defer os.RemoveAll(tmpDir)
+
 
 	mgr, err := NewManager(tmpDir)
 	if err != nil {
@@ -501,7 +483,7 @@ func TestManagerList(t *testing.T) {
 // TestManagerRemove tests worktree removal.
 func TestManagerRemove(t *testing.T) {
 	tmpDir := setupTestGitRepo(t)
-	defer os.RemoveAll(tmpDir)
+
 
 	mgr, err := NewManager(tmpDir)
 	if err != nil {
@@ -535,7 +517,7 @@ func TestManagerRemove(t *testing.T) {
 // TestManagerRemoveByName tests worktree removal by name.
 func TestManagerRemoveByName(t *testing.T) {
 	tmpDir := setupTestGitRepo(t)
-	defer os.RemoveAll(tmpDir)
+
 
 	mgr, err := NewManager(tmpDir)
 	if err != nil {
@@ -563,7 +545,7 @@ func TestManagerRemoveByName(t *testing.T) {
 // TestManagerRemoveDirtyRequiresForce tests that removing dirty worktree requires force.
 func TestManagerRemoveDirtyRequiresForce(t *testing.T) {
 	tmpDir := setupTestGitRepo(t)
-	defer os.RemoveAll(tmpDir)
+
 
 	mgr, err := NewManager(tmpDir)
 	if err != nil {
@@ -596,7 +578,7 @@ func TestManagerRemoveDirtyRequiresForce(t *testing.T) {
 // TestManagerCleanup tests cleanup of stale worktrees.
 func TestManagerCleanup(t *testing.T) {
 	tmpDir := setupTestGitRepo(t)
-	defer os.RemoveAll(tmpDir)
+
 
 	mgr, err := NewManager(tmpDir)
 	if err != nil {
@@ -659,7 +641,7 @@ func TestManagerCleanup(t *testing.T) {
 // TestManagerStatus tests worktree status.
 func TestManagerStatus(t *testing.T) {
 	tmpDir := setupTestGitRepo(t)
-	defer os.RemoveAll(tmpDir)
+
 
 	mgr, err := NewManager(tmpDir)
 	if err != nil {
@@ -709,7 +691,7 @@ func TestManagerStatus(t *testing.T) {
 // affected by removal.
 func TestRemoveCleansUpLocalDirectories(t *testing.T) {
 	tmpDir := setupTestGitRepo(t)
-	defer os.RemoveAll(tmpDir)
+
 
 	// Create .knossos/ and .know/ in the main repo root
 	knossosDir := filepath.Join(tmpDir, ".knossos")
