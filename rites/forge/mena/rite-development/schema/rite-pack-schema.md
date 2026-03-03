@@ -222,7 +222,7 @@ entry_point:
   agent: first-agent
   artifact:
     type: first-artifact
-    path_template: docs/{slug}.md
+    path_template: .ledge/{category}/{slug}.md
 
 phases:
   - name: first-phase
@@ -248,7 +248,7 @@ entry_point:
   agent: analyst
   artifact:
     type: analysis-report
-    path_template: docs/analysis/REPORT-{slug}.md
+    path_template: .ledge/reviews/REPORT-{slug}.md
 
 phases:
   - name: analysis

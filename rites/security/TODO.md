@@ -107,8 +107,8 @@ SYSTEM complexity:
     initiative: "User Authentication Redesign"
     complexity: SYSTEM
     source_artifacts:
-      - docs/design/TDD-auth-redesign.md
-      - docs/requirements/PRD-auth-redesign.md
+      - .ledge/specs/TDD-auth-redesign.md
+      - .ledge/specs/PRD-auth-redesign.md
   items:
     - id: SEC-001
       summary: "Full security assessment of auth redesign"

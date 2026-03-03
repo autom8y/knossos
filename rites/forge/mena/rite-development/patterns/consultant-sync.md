@@ -35,7 +35,7 @@ Consultant knowledge is maintained in rite mena directories and shared skills:
 | **Workflow change** | rite-profile, agent-reference (if phases change) |
 | **Rename rite** | All files referencing old name |
 | **Remove rite** | Remove from all files, delete rite-profile |
-| **New playbook** | Create in `docs/playbooks/` |
+| **New playbook** | Create in `.ledge/spikes/` |
 
 ---
 

@@ -77,7 +77,7 @@ VALIDATION_AGENT=$(grep -B1 "next: null" .claude/ACTIVE_WORKFLOW.yaml | grep "ag
 
 ```
 /qa "user-authentication"
-/qa "API documentation" --requirements=docs/audits/AUDIT-api.md
+/qa "API documentation" --requirements=.ledge/reviews/AUDIT-api.md
 ```
 
 ## Reference

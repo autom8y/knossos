@@ -18,7 +18,7 @@ entry_point:
   agent: {first-agent-name}
   artifact:
     type: {artifact-type}
-    path_template: docs/{category}/{PREFIX}-{slug}.md
+    path_template: .ledge/{category}/{PREFIX}-{slug}.md
 
 phases:
   - name: {phase-1}

@@ -45,8 +45,8 @@ priority: high
 User research and A/B testing confirm that address autocomplete reduces checkout abandonment by 60%. Ready for production implementation.
 
 ## Source Artifacts
-- docs/research/INSIGHTS-checkout-friction-Q1.md
-- docs/research/AB-RESULTS-address-autocomplete.md
+- .ledge/spikes/INSIGHTS-checkout-friction-Q1.md
+- .ledge/spikes/AB-RESULTS-address-autocomplete.md
 
 ## Items
 
@@ -82,7 +82,7 @@ priority: medium
 Cross-platform analysis reveals significant mobile conversion gap despite higher engagement.
 
 ## Source Artifacts
-- docs/research/INSIGHTS-platform-behavior-Q1.md
+- .ledge/spikes/INSIGHTS-platform-behavior-Q1.md
 
 ## Items
 

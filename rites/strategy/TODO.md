@@ -105,7 +105,7 @@ The strategy rite is a **well-designed, methodologically rigorous rite** with cl
   context:
     initiative: "Event-Driven Architecture Migration"
     source_artifacts:
-      - docs/rnd/MOONSHOT-event-driven.md
+      - .ledge/spikes/MOONSHOT-event-driven.md
   items:
     - id: STRAT-EVAL-001
       summary: "Evaluate business case for architecture migration"
@@ -181,8 +181,8 @@ The strategy rite is a **well-designed, methodologically rigorous rite** with cl
   context:
     initiative: "Mobile-First Checkout Redesign"
     source_artifacts:
-      - docs/strategy/STRATEGY-mobile-checkout.md
-      - docs/strategy/MARKET-checkout-opportunity.md
+      - .ledge/spikes/STRATEGY-mobile-checkout.md
+      - .ledge/spikes/MARKET-checkout-opportunity.md
   items:
     - id: IMPL-001
       summary: "Implement mobile-first checkout flow"

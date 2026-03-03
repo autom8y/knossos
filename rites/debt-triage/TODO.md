@@ -71,9 +71,9 @@ skills/smell-detection/
   context:
     initiative: "Q1 Technical Debt Remediation"
     source_artifacts:
-      - docs/debt/LEDGER-q1-2026.md
-      - docs/debt/RISK-MATRIX-q1-2026.md
-      - docs/debt/SPRINT-PLAN-q1-2026.md
+      - .ledge/reviews/LEDGER-q1-2026.md
+      - .ledge/reviews/RISK-MATRIX-q1-2026.md
+      - .ledge/reviews/SPRINT-PLAN-q1-2026.md
   items:
     - id: PKG-001
       summary: "Extract shared email validator"

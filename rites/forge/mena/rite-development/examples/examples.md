@@ -34,7 +34,7 @@ entry_point:
   agent: debt-collector
   artifact:
     type: debt-ledger
-    path_template: docs/debt/LEDGER-{slug}.md
+    path_template: .ledge/reviews/LEDGER-{slug}.md
 
 phases:
   - name: collection

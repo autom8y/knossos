@@ -85,9 +85,9 @@ RND exploration complete → tech-transfer produces TRANSFER doc → 10x-dev pic
   context:
     initiative: "ML-Powered Search"
     source_artifacts:
-      - docs/rnd/EXPLORATION-ml-search.md
-      - docs/rnd/PROTOTYPE-ml-search.md
-      - docs/rnd/EVALUATION-ml-search.md
+      - .ledge/spikes/EXPLORATION-ml-search.md
+      - .ledge/spikes/PROTOTYPE-ml-search.md
+      - .ledge/spikes/EVALUATION-ml-search.md
   items:
     - id: PROD-001
       summary: "Productionize ML search prototype"
@@ -107,7 +107,7 @@ RND exploration complete → tech-transfer produces TRANSFER doc → 10x-dev pic
   context:
     initiative: "Technology Radar Update"
     source_artifacts:
-      - docs/rnd/EVALUATION-emerging-tech-q1.md
+      - .ledge/spikes/EVALUATION-emerging-tech-q1.md
   items:
     - id: STRAT-001
       summary: "WebAssembly ready for production use"

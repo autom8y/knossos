@@ -19,9 +19,9 @@ priority: high
 Q1 strategic roadmap prioritized enterprise tier as highest-value initiative. Resource allocation confirmed (3 engineers, Jan-Feb). OKRs established with measurable key results.
 
 ## Source Artifacts
-- docs/strategy/ROADMAP-Q1-2026.md
-- docs/strategy/PRIORITIZATION-enterprise-analysis.md
-- docs/strategy/OKR-Q1-2026.md
+- .ledge/spikes/ROADMAP-Q1-2026.md
+- .ledge/spikes/PRIORITIZATION-enterprise-analysis.md
+- .ledge/spikes/OKR-Q1-2026.md
 
 ## Items
 

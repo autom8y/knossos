@@ -133,8 +133,8 @@ The intelligence rite is a **well-structured analytics and research rite** with 
   context:
     initiative: "Checkout Flow Optimization"
     source_artifacts:
-      - docs/intelligence/EXPERIMENT-checkout-shipping.md
-      - docs/intelligence/INSIGHT-checkout-shipping.md
+      - .ledge/spikes/EXPERIMENT-checkout-shipping.md
+      - .ledge/spikes/INSIGHT-checkout-shipping.md
   items:
     - id: IMPL-001
       summary: "Implement shipping estimate on product page"
@@ -150,7 +150,7 @@ The intelligence rite is a **well-structured analytics and research rite** with 
   context:
     initiative: "Q2 Roadmap Planning"
     source_artifacts:
-      - docs/intelligence/INSIGHT-user-behavior-q1.md
+      - .ledge/spikes/INSIGHT-user-behavior-q1.md
   items:
     - id: STRAT-001
       summary: "Mobile checkout friction identified as top opportunity"

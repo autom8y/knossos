@@ -77,7 +77,7 @@ The sre rite is a **production-ready, well-optimized rite** (44% token reduction
   context:
     initiative: "OAuth2 Implementation"
     source_artifacts:
-      - docs/design/TDD-oauth2.md
+      - .ledge/specs/TDD-oauth2.md
       - src/auth/oauth2/
   items:
     - id: VAL-001

@@ -91,9 +91,9 @@ priority: high
 Two-week R&D spike validated ML search approach. Prototype achieved 85% relevance improvement with acceptable latency. Production gaps identified and documented. Ready for implementation.
 
 ## Source Artifacts
-- docs/rnd/PROTOTYPE-ml-search.md
-- docs/rnd/EVALUATION-ml-search.md
-- docs/rnd/TRANSFER-ml-search.md
+- .ledge/spikes/PROTOTYPE-ml-search.md
+- .ledge/spikes/EVALUATION-ml-search.md
+- .ledge/spikes/TRANSFER-ml-search.md
 
 ## Items
 
@@ -136,8 +136,8 @@ priority: medium
 Evaluated WebAssembly for compute-intensive operations. Technically viable with 3x performance improvement, but ecosystem maturity suggests waiting.
 
 ## Source Artifacts
-- docs/rnd/EXPLORATION-wasm-evaluation.md
-- docs/rnd/PROTOTYPE-wasm-image-processing.md
+- .ledge/spikes/EXPLORATION-wasm-evaluation.md
+- .ledge/spikes/PROTOTYPE-wasm-image-processing.md
 
 ## Items
 
