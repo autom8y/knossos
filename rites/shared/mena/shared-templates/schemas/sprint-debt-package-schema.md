@@ -2,7 +2,7 @@
 
 **Version:** 1.0
 **Type:** sprint-debt-package
-**File Pattern:** `docs/sprints/SDP-{slug}.md`
+**File Pattern:** `.ledge/reviews/SDP-{slug}.md`
 
 ## Purpose
 

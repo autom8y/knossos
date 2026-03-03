@@ -2,7 +2,7 @@
 
 **Version:** 1.0
 **Type:** risk-matrix
-**File Pattern:** `docs/debt/RM-{slug}.md`
+**File Pattern:** `.ledge/reviews/RM-{slug}.md`
 
 ## Purpose
 

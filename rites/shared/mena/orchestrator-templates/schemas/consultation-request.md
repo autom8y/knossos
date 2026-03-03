@@ -80,7 +80,7 @@ consultation:
     last_specialist: "code-smeller"
     last_outcome: "success"
     artifacts_ready:
-      - "smell-report: docs/hygiene/SMELL_REPORT.md"
+      - "smell-report: .ledge/reviews/SMELL_REPORT.md"
 
   context_summary: |
     Code Smeller identified 23 unused imports across 8 files in internal/hook.

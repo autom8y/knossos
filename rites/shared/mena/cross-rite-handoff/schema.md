@@ -202,7 +202,7 @@ Cross-rite handoff is **not required** when:
 | Context | Location | Pattern |
 |---------|----------|---------|
 | Active session | `.sos/sessions/{session-id}/` | `HANDOFF-{source}-to-{target}-{date}.md` |
-| Initiative docs | `docs/handoffs/` | `HANDOFF-{source}-to-{target}-{date}.md` |
+| Initiative docs | `.ledge/reviews/` | `HANDOFF-{source}-to-{target}-{date}.md` |
 | Sprint context | `.sos/sessions/{sprint-id}/` | `HANDOFF-{source}-to-{target}-{date}.md` |
 
 ### Naming Convention

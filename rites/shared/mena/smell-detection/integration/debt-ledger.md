@@ -164,7 +164,7 @@ evidence: "getUserData() modifies cache (smell-detection NM-MISLEAD heuristic, m
 - Detection heuristics: How to detect them
 - Severity classification: How severe each smell is
 
-**Output**: `docs/quality/SMELL_REPORT.md` with smell entries
+**Output**: `.ledge/reviews/SMELL_REPORT.md` with smell entries
 
 ### debt-collector (debt-triage)
 

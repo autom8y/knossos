@@ -343,7 +343,7 @@ Validation runs at:
 ### Error Reporting Format
 
 ```
-VALIDATION FAILED: docs/debt/DL-api-cleanup.md
+VALIDATION FAILED: .ledge/reviews/DL-api-cleanup.md
 
 Errors (3):
   DL-V004: Statistics mismatch: total_items (42) != sum of categories (41)

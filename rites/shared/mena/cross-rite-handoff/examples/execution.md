@@ -10,8 +10,8 @@ initiative: "Q1 2026 Debt Remediation"
 created_at: "2026-01-03T14:00:00Z"
 status: pending
 source_artifacts:
-  - docs/debt/SPRINT-PLAN-q1-2026.md
-  - docs/debt/RISK-ASSESSMENT-email-validators.md
+  - .ledge/reviews/SPRINT-PLAN-q1-2026.md
+  - .ledge/reviews/RISK-ASSESSMENT-email-validators.md
 sprint_id: sprint-debt-q1-2026
 items:
   - id: PKG-001

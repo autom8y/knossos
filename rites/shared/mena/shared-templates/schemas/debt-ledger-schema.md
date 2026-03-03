@@ -2,7 +2,7 @@
 
 **Version:** 1.0
 **Type:** debt-ledger
-**File Pattern:** `docs/debt/DL-{slug}.md`
+**File Pattern:** `.ledge/reviews/DL-{slug}.md`
 
 ## Purpose
 

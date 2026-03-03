@@ -90,7 +90,7 @@ directive:
 specialist:
   agent: "architect-enforcer"
   prompt: |
-    Review the smell report at docs/hygiene/SMELL_REPORT.md and create a phased refactoring plan.
+    Review the smell report at .ledge/reviews/SMELL_REPORT.md and create a phased refactoring plan.
 
     Context: 23 unused imports across 8 files in internal/hook package, plus 3 duplicate
     utility functions between hook.go and env.go. All tests passing. No architectural concerns.
