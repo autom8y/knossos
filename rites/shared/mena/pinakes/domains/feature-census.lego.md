@@ -13,10 +13,12 @@ description: "Criteria for feature enumeration census. Use when: theoros is scan
 - `rites/*/manifest.yaml` -- rite descriptions reveal major capability domains
 - `internal/*/` -- package directory names map to implementation boundaries
 - `docs/decisions/ADR-*.md` -- titles and first paragraphs reveal feature decisions
-- `.claude/commands/*.md` -- user-facing command surface
-- `.claude/agents/*.md` -- agent descriptions reveal feature behaviors
+- `rites/*/mena/**/*.dro.md` -- dromena (commands) define user-facing feature surface
+- `rites/*/agents/*.md` -- agent definitions describe feature behaviors and responsibilities
 - `INTERVIEW_SYNTHESIS.md` -- high-level feature overview and golden rules
 - `.know/*.md` frontmatter -- existing knowledge domains as feature signals
+
+**NOTE**: Scan rite SOURCE artifacts (`rites/`), NOT materialized outputs (`.claude/`). Knossos materializes `rites/` → `.claude/` via `ari sync`. The `.claude/` directory is a projection, not a source of truth.
 
 **Observation focus**: Enumerate every identifiable feature in the project. For each feature, produce a structured entry with slug, name, category, source evidence, complexity rating, GENERATE/SKIP recommendation, and confidence score.
 
@@ -43,7 +45,7 @@ The theoros uses these rules to produce GENERATE vs SKIP recommendations:
 **GENERATE** if any of:
 - 1+ ADRs reference the feature
 - 10+ implementation files in relevant packages
-- User-facing commands exist for the feature
+- User-facing dromena (commands) exist for the feature
 - Multiple rites depend on the feature
 
 **SKIP** if all of:

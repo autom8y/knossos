@@ -12,9 +12,12 @@ description: "Criteria for per-feature knowledge capture via theoros observation
 **Target sources** (theoros checks all applicable to the feature being documented):
 - Go source in relevant packages (`internal/{feature-related}/`)
 - ADRs in `docs/decisions/` that reference the feature
-- Agent and command definitions (`.claude/agents/*.md`, `.claude/commands/*.md`) that describe feature behavior
+- Agent definitions in `rites/*/agents/*.md` that describe feature behaviors and responsibilities
+- Dromena (commands) in `rites/*/mena/**/*.dro.md` that define user-facing feature surface
 - Existing `.know/` files (`architecture.md`, `scar-tissue.md`, `conventions.md`) for structural context
 - Rite manifests (`rites/*/manifest.yaml`) if the feature maps to a rite capability
+
+**NOTE**: Scan rite SOURCE artifacts (`rites/`), NOT materialized outputs (`.claude/`). Knossos materializes `rites/` → `.claude/` via `ari sync`. The `.claude/` directory is a projection, not a source of truth.
 
 **Observation focus**: Produce a comprehensive knowledge reference for a single feature. The reference must answer four questions: Why does this feature exist? How should agents think about it? Where is it implemented? What are its boundaries and failure modes?
 
