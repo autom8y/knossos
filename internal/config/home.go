@@ -58,12 +58,17 @@ func ActiveOrg() string {
 	}
 
 	// Inline XDG config path resolution to avoid circular import with paths package.
+	// Must match paths.ConfigDir() logic: macOS uses ~/Library/Application Support.
 	var configDir string
 	if xdg := os.Getenv("XDG_CONFIG_HOME"); xdg != "" {
 		configDir = filepath.Join(xdg, "knossos")
 	} else {
 		homeDir, _ := os.UserHomeDir()
-		configDir = filepath.Join(homeDir, ".config", "knossos")
+		if _, err := os.Stat(filepath.Join(homeDir, "Library")); err == nil {
+			configDir = filepath.Join(homeDir, "Library", "Application Support", "knossos")
+		} else {
+			configDir = filepath.Join(homeDir, ".config", "knossos")
+		}
 	}
 
 	data, err := os.ReadFile(filepath.Join(configDir, "active-org"))

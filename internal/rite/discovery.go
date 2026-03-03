@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"sort"
 
+	"github.com/autom8y/knossos/internal/config"
 	"github.com/autom8y/knossos/internal/errors"
 	"github.com/autom8y/knossos/internal/paths"
 )
@@ -31,6 +32,7 @@ type Rite struct {
 type Discovery struct {
 	projectRitesDir string
 	userRitesDir    string
+	orgRitesDir     string
 	activeRite      string
 }
 
@@ -39,6 +41,7 @@ func NewDiscovery(resolver *paths.Resolver) *Discovery {
 	return &Discovery{
 		projectRitesDir: resolver.RitesDir(),
 		userRitesDir:    paths.UserRitesDir(),
+		orgRitesDir:     paths.OrgRitesDir(config.ActiveOrg()),
 		activeRite:      resolver.ReadActiveRite(),
 	}
 }
@@ -61,10 +64,28 @@ func (d *Discovery) List() ([]Rite, error) {
 		rites = append(rites, projectRites...)
 	}
 
-	// Scan user rites if present
+	// Scan org rites if present (org < user < project in precedence)
+	if d.orgRitesDir != "" {
+		if orgRites, err := d.scanDir(d.orgRitesDir, "org"); err == nil {
+			riteMap := make(map[string]Rite)
+			for _, r := range rites {
+				riteMap[r.Name] = r
+			}
+			for _, r := range orgRites {
+				if _, exists := riteMap[r.Name]; !exists {
+					riteMap[r.Name] = r
+				}
+			}
+			rites = make([]Rite, 0, len(riteMap))
+			for _, r := range riteMap {
+				rites = append(rites, r)
+			}
+		}
+	}
+
+	// Scan user rites if present (user > org, user < project)
 	if d.userRitesDir != "" {
 		if userRites, err := d.scanDir(d.userRitesDir, "user"); err == nil {
-			// User rites override project rites with same name
 			riteMap := make(map[string]Rite)
 			for _, r := range rites {
 				riteMap[r.Name] = r
@@ -299,6 +320,14 @@ func (d *Discovery) GetRitePath(name string) (string, error) {
 		userPath := filepath.Join(d.userRitesDir, name)
 		if _, err := os.Stat(filepath.Join(userPath, "manifest.yaml")); err == nil {
 			return userPath, nil
+		}
+	}
+
+	// Check org rites
+	if d.orgRitesDir != "" {
+		orgPath := filepath.Join(d.orgRitesDir, name)
+		if _, err := os.Stat(filepath.Join(orgPath, "manifest.yaml")); err == nil {
+			return orgPath, nil
 		}
 	}
 
