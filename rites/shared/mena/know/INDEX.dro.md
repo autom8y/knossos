@@ -40,15 +40,18 @@ This command runs in the main thread (requires Task tool for theoros dispatch). 
    - If not found: ERROR "Domain '{domain}' not registered in pinakes or not codebase-scoped. Available codebase domains: {list}"
    - **Scan for satellite-authored criteria**: Check if `.know/criteria/` exists and contains any `*.md` files. If it does, read each file and merge its domain entry into the registry alongside the pinakes domains. Each criteria file follows the same format as pinakes domain files. If `.know/criteria/` does not exist or is empty, continue normally with only pinakes domains.
 
-3. **Build generation queue**:
+3. **Build generation queue** (uses `ari knows --delta` for change analysis):
    - For each domain (single or all):
-     - If `.know/{domain}.md` exists AND `--force` not set:
-       - Read its YAML frontmatter, parse `generated_at` and `expires_after`
-       - Check git-diff staleness: compare `source_hash` to current HEAD
-       - If time-fresh AND code-fresh: report "Knowledge for '{domain}' is current" and SKIP this domain
-     - If expired, code-stale, or file does not exist: ADD to generation queue
-   - If generation queue is empty: report "All domains are current. Use --force to regenerate." and STOP.
-   - Report: "Generating {N} domain(s): {list}"
+     - If `.know/{domain}.md` does not exist: ADD to **full** queue
+     - If `--force` is set: ADD to **full** queue
+     - Otherwise, run: `Bash("ari knows --delta {domain} -o json")` and parse the JSON result:
+       - If `mode == "skip"`: report "Knowledge for '{domain}' is current" and SKIP
+       - If `mode == "time-only"`: ADD to **time-only** queue (no code changes, just time-expired)
+       - If `mode == "incremental"` AND `force_full == false`: ADD to **incremental** queue
+       - If `mode == "full"` OR `force_full == true`: ADD to **full** queue
+   - If all queues are empty: report "All domains are current. Use --force to regenerate." and STOP.
+   - Report queues: "Time-only refresh: {N}, Incremental update: {N}, Full regeneration: {N}, Skipped: {N}"
+   - Store the delta JSON for each incremental domain (used in Phase 2a for change context).
 
 4. **Compute source_hash**:
    - Run: `git rev-parse --short HEAD`
@@ -56,6 +59,35 @@ This command runs in the main thread (requires Task tool for theoros dispatch). 
 
 5. **Ensure .know/ directory exists**:
    - Run: `mkdir -p .know`
+
+## Phase 0: Time-Only Refresh
+
+Process the **time-only** queue first. These domains have no code changes since the last analysis — only the time expiry triggered. Zero theoros cost, zero quality risk.
+
+For EACH domain in the time-only queue:
+
+1. **Read the existing file**:
+   ```
+   Read(".know/{domain}.md")
+   ```
+
+2. **Update frontmatter only**:
+   - Set `generated_at` to current ISO 8601 UTC timestamp
+   - Set `source_hash` to the git short SHA from pre-flight step 4
+   - Set `update_mode: "time-only"`
+   - Reset `incremental_cycle` to `0` (time-only is not an incremental update)
+   - Preserve ALL other frontmatter fields and the ENTIRE body unchanged
+
+3. **Write the file**:
+   ```
+   Write(".know/{domain}.md", updated_frontmatter + original_body)
+   ```
+
+4. **Report**: "Refreshed '{domain}' (time-only, no code changes)"
+
+After processing all time-only domains, continue to Phase 1 for incremental and full queues.
+
+If ONLY time-only domains were queued (incremental and full queues are empty), skip directly to Phase 4: Report.
 
 ## Phase 1: Criteria Loading
 
@@ -70,7 +102,108 @@ For EACH domain in the generation queue:
 
 Store all loaded criteria keyed by domain name.
 
-## Phase 2: Theoros Dispatch — Argus Pattern
+## Phase 2a: Incremental Theoros Dispatch
+
+Process the **incremental** queue. These domains have code changes within scope, but the delta is small enough that theoros can update the existing knowledge rather than re-reading the entire codebase.
+
+**YOU MUST USE THE TASK TOOL.** Do NOT update knowledge yourself.
+
+**If multiple incremental domains**: Launch ALL theoros agents in a SINGLE response block (Argus Pattern).
+
+For each domain in the incremental queue:
+
+1. **Gather change context**:
+   - Read the existing `.know/{domain}.md` (this is the current knowledge to update)
+   - The delta JSON from Pre-flight Step 3 contains the ChangeManifest (files changed, commit log, delta stats)
+   - Run `Bash("git diff {from_hash}..{to_hash} -- {space-separated in-scope modified files}")` to get per-file diffs
+   - If total diff exceeds 100K characters, truncate to the first 100K with a note "(truncated)"
+
+2. **Dispatch incremental theoros**:
+
+```
+Task(subagent_type="theoros", prompt="
+## Incremental Knowledge Update: {domain}
+
+You are UPDATING an existing knowledge reference document, not creating one from scratch. Your goal is to merge new changes into the existing knowledge while preserving its quality and completeness.
+
+### Current Knowledge State
+
+The existing .know/{domain}.md content (this is what you are updating):
+
+{existing_know_file_content}
+
+### Changes Since Last Analysis ({from_hash} -> {to_hash})
+
+#### Commit Summary
+{commit_log from ChangeManifest}
+
+#### Files Changed
+- New: {new_files list}
+- Modified: {modified_files list}
+- Deleted: {deleted_files list}
+- Renamed: {renamed_files list}
+- Delta: {delta_lines} lines changed (ratio {delta_ratio})
+
+#### Detailed Diffs
+{per-file unified diffs from git diff}
+
+### Domain Criteria
+
+{full_criteria_file_content}
+
+### Your Task
+
+1. READ the existing knowledge document thoroughly
+2. READ the change diffs to understand what changed
+3. For each section in the knowledge document, determine:
+   - Does this section need updating based on the changes? If no changes affect it, leave it UNCHANGED.
+   - If changes affect it, READ the affected source files for full context (do not rely solely on diff text)
+   - Produce the UPDATED section
+4. Check for entirely NEW topics introduced by the changes that are not covered by existing sections
+5. Check for sections that reference DELETED files/functions/types and correct them
+6. Verify all file paths still exist using Glob/Read
+
+### Output Format
+
+Produce your output in TWO parts:
+
+**Part 1: Knowledge Reference Body**
+
+The COMPLETE updated knowledge document (same format as the original). Preserve all existing sections. Update only what changed. Add new sections where needed.
+
+Start with the same top-level heading as the original document.
+
+**IMPORTANT**: Always use FULL file paths from the project root. Abbreviated paths break automated validation.
+
+**Part 2: Assessment Metadata**
+
+After the knowledge body, on its own line produce a fenced metadata block:
+
+```metadata
+overall_grade: {A-F}
+overall_percentage: {N.N}%
+confidence: {0.0-1.0}
+criteria_grades:
+  {criterion_1_snake_case}: {grade}
+  ...one entry per criterion from the criteria file...
+sections_unchanged: [{list of unchanged section names}]
+sections_updated: [{list of updated section names with brief reason}]
+sections_added: [{list of new section names with brief reason}]
+sections_corrected: [{list of sections with fixed broken refs}]
+```
+
+### Critical Rules
+- DO NOT reduce knowledge quality. The updated document must be at least as comprehensive as the original.
+- DO NOT hallucinate. If unsure whether a change affects a section, READ the source file.
+- DO reference changes by examining the actual current source, not just the diff text.
+- Preserve evidence quality: specific file paths, line numbers, function names.
+- Your confidence should reflect how thoroughly you verified the updates against source.
+")
+```
+
+## Phase 2b: Full Theoros Dispatch — Argus Pattern
+
+Process the **full** queue. These domains either don't exist yet, have large deltas, hit their incremental cycle limit, or were force-regenerated.
 
 > "One body, a hundred eyes, nothing unseen." — The Argus Pattern dispatches one theoros per domain in parallel.
 
@@ -82,7 +215,9 @@ Store all loaded criteria keyed by domain name.
 
 **CRITICAL**: When dispatching multiple domains, ALL Task calls MUST appear in the same response block to enable CC's parallel execution. Do NOT dispatch sequentially.
 
-For each domain in the generation queue, construct:
+**CRITICAL**: Launch ALL theoros agents (both incremental Phase 2a and full Phase 2b) in the SAME response block. Do NOT dispatch Phase 2a first and wait, then dispatch Phase 2b. Combine them into a single parallel dispatch.
+
+For each domain in the full generation queue, construct:
 
 ```
 Task(subagent_type="theoros", prompt="
@@ -154,7 +289,7 @@ Read the **Scope** section in the domain criteria file above. It defines the tar
 
 After ALL theoros agents return (wait for all parallel dispatches to complete):
 
-For EACH domain's theoros output, perform the following assembly:
+For EACH domain's theoros output (both incremental and full), perform the following assembly:
 
 1. **Parse theoros output**:
    - Extract the knowledge reference body (everything before the ` ```metadata` fence)
@@ -168,6 +303,12 @@ For EACH domain's theoros output, perform the following assembly:
    - Else if `package.json` exists: set `source_scope` to `["./src/**/*.ts", "./lib/**/*.ts", "./package.json"]`
    - Else if `pyproject.toml` exists: set `source_scope` to `["./src/**/*.py", "./app/**/*.py", "./pyproject.toml"]`
    - Else (no recognized manifest): set `source_scope` to `["./src/**/*"]`
+
+   **Determine update tracking fields** based on which queue the domain came from:
+
+   - **Full queue**: `update_mode: "full"`, `incremental_cycle: 0`, `max_incremental_cycles: 3`
+   - **Incremental queue**: `update_mode: "incremental"`, `incremental_cycle: {previous_cycle + 1}`, `max_incremental_cycles: 3`
+     - Read the previous `incremental_cycle` from the existing .know/ file's frontmatter (default 0 if absent)
 
    Build YAML frontmatter:
    ```yaml
@@ -183,6 +324,9 @@ For EACH domain's theoros output, perform the following assembly:
    source_hash: "{git short SHA from pre-flight}"
    confidence: {confidence from theoros metadata}
    format_version: "1.0"
+   update_mode: "{full or incremental}"
+   incremental_cycle: {0 for full, previous+1 for incremental}
+   max_incremental_cycles: 3
    ---
    ```
    Combine frontmatter + theoros knowledge body (Part 1 only, not the metadata fence).
@@ -208,10 +352,12 @@ For EACH domain's theoros output, perform the following assembly:
 | Field | Value |
 |-------|-------|
 | Domain | {domain} |
+| Mode | {update_mode: full/incremental/time-only} |
 | Source hash | {source_hash} |
 | Confidence | {confidence} |
 | Completeness | {grade} ({percentage}%) |
 | Expires | {expiry_date} |
+| Incremental cycle | {incremental_cycle} / {max_incremental_cycles} |
 
 ### Criteria Completeness
 | Criterion | Grade |
@@ -227,19 +373,20 @@ Regenerate with: `/know {domain} --force`
 **For `--all` (Argus Pattern)**, display a combined report:
 
 ```
-## Argus Pattern: {N} Domains Generated
+## Argus Pattern: {N} Domains Processed
 
-| Domain | Grade | Confidence | Lines | Status |
-|--------|-------|------------|-------|--------|
-| {domain_1} | {grade} ({pct}%) | {confidence} | {line_count} | Generated |
-| {domain_2} | {grade} ({pct}%) | {confidence} | {line_count} | Generated |
-| ... | ... | ... | ... | ... |
-| {skipped_domain} | - | - | - | Skipped (fresh) |
+| Domain | Mode | Grade | Confidence | Lines | Status |
+|--------|------|-------|------------|-------|--------|
+| {domain_1} | full | {grade} ({pct}%) | {confidence} | {line_count} | Generated |
+| {domain_2} | incremental | {grade} ({pct}%) | {confidence} | {line_count} | Updated |
+| {domain_3} | time-only | - | - | - | Refreshed |
+| {skipped_domain} | - | - | - | - | Skipped (fresh) |
 
 Source hash: {source_hash} | Expires: {expiry_date}
 
 All files consumable via `Read(".know/{domain}.md")`.
 Check freshness: `ari knows`
+Check deltas: `ari knows --delta`
 Regenerate all: `/know --all --force`
 ```
 

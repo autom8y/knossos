@@ -43,6 +43,10 @@ type Meta struct {
 	SourceHash    string   `yaml:"source_hash"`
 	Confidence    float64  `yaml:"confidence"`
 	FormatVersion string   `yaml:"format_version"`
+	// Incremental update tracking
+	UpdateMode           string `yaml:"update_mode,omitempty"`
+	IncrementalCycle     int    `yaml:"incremental_cycle,omitempty"`
+	MaxIncrementalCycles int    `yaml:"max_incremental_cycles,omitempty"`
 }
 
 // DomainStatus reports freshness for a single .know/ domain.
@@ -56,6 +60,7 @@ type DomainStatus struct {
 	CurrentHash string  `json:"current_hash"`
 	CodeChanged bool    `json:"code_changed"`
 	Confidence  float64 `json:"confidence"`
+	ForceFull   bool    `json:"force_full"`
 }
 
 // ReadMeta reads and parses all .know/*.md files in knowDir, and also scans
@@ -120,16 +125,60 @@ func ReadMeta(knowDir string) ([]DomainStatus, error) {
 		if !os.IsNotExist(err) {
 			return nil, fmt.Errorf("read .know/feat/ directory: %w", err)
 		}
-		// feat/ doesn't exist: not an error, just no feature domains.
+		// feat/ doesn't exist: not an error, just no feature domains. Continue to release/.
+	} else {
+		for _, entry := range featEntries {
+			if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".md") {
+				continue
+			}
+
+			path := filepath.Join(featDir, entry.Name())
+			data, err := os.ReadFile(path)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "warn: cannot read %s: %v\n", path, err)
+				continue
+			}
+
+			yamlBytes, _, err := frontmatter.Parse(data)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "warn: no frontmatter in %s: %v\n", path, err)
+				continue
+			}
+
+			var meta Meta
+			if err := yaml.Unmarshal(yamlBytes, &meta); err != nil {
+				fmt.Fprintf(os.Stderr, "warn: malformed frontmatter in %s: %v\n", path, err)
+				continue
+			}
+
+			// Always use "feat/{slug}" as the domain name regardless of frontmatter domain field.
+			// This ensures consistent namespacing and prevents collisions with top-level domains.
+			slug := strings.TrimSuffix(entry.Name(), ".md")
+			meta.Domain = "feat/" + slug
+
+			status := buildDomainStatus(meta, now, currentHash)
+			results = append(results, status)
+		}
+	}
+
+	// Scan .know/release/*.md (one level deep only).
+	// Domain names are prefixed as "release/{slug}" (e.g., "release/platform-profile").
+	releaseDir := filepath.Join(knowDir, "release")
+	releaseEntries, err := os.ReadDir(releaseDir)
+	if err != nil {
+		if !os.IsNotExist(err) {
+			return nil, fmt.Errorf("read .know/release/ directory: %w", err)
+		}
+		// release/ doesn't exist: not an error.
 		return results, nil
 	}
 
-	for _, entry := range featEntries {
+	for _, entry := range releaseEntries {
 		if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".md") {
 			continue
 		}
 
-		path := filepath.Join(featDir, entry.Name())
+		path := filepath.Join(releaseDir, entry.Name())
 		data, err := os.ReadFile(path)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "warn: cannot read %s: %v\n", path, err)
@@ -148,10 +197,8 @@ func ReadMeta(knowDir string) ([]DomainStatus, error) {
 			continue
 		}
 
-		// Always use "feat/{slug}" as the domain name regardless of frontmatter domain field.
-		// This ensures consistent namespacing and prevents collisions with top-level domains.
 		slug := strings.TrimSuffix(entry.Name(), ".md")
-		meta.Domain = "feat/" + slug
+		meta.Domain = "release/" + slug
 
 		status := buildDomainStatus(meta, now, currentHash)
 		results = append(results, status)
@@ -312,7 +359,37 @@ func buildDomainStatus(meta Meta, now time.Time, currentHash string) DomainStatu
 	status.CodeChanged = codeChanged
 	status.Fresh = !timeExpired && !codeChanged
 
+	// If we've hit the maximum incremental cycles, force a full regeneration
+	// on the next update regardless of delta size.
+	// MaxIncrementalCycles == 0 means "no limit" (backward compat with existing files).
+	if meta.MaxIncrementalCycles > 0 && meta.IncrementalCycle >= meta.MaxIncrementalCycles {
+		status.ForceFull = true
+	}
+
 	return status
+}
+
+// ReadSingleMeta reads and parses the frontmatter of a single .know/ domain file.
+// domain may be a plain name ("architecture") or a feat namespace ("feat/materialization").
+// Returns the parsed Meta or an error if the file doesn't exist or is unparseable.
+func ReadSingleMeta(knowDir, domain string) (*Meta, error) {
+	path := DomainFilePath(knowDir, domain)
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, fmt.Errorf("read domain %q: %w", domain, err)
+	}
+	yamlBytes, _, err := frontmatter.Parse(data)
+	if err != nil {
+		return nil, fmt.Errorf("parse frontmatter for %q: %w", domain, err)
+	}
+	var meta Meta
+	if err := yaml.Unmarshal(yamlBytes, &meta); err != nil {
+		return nil, fmt.Errorf("unmarshal frontmatter for %q: %w", domain, err)
+	}
+	if meta.Domain == "" {
+		meta.Domain = domain
+	}
+	return &meta, nil
 }
 
 // ParseDuration parses a duration string supporting "d" for days in addition to

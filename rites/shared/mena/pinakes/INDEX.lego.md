@@ -43,6 +43,8 @@ This table IS the registry. A domain exists when it has a row here and a criteri
 | **socratic-design-constraints** | `domains/socratic-design-constraints.lego.md` | socratic | Surfaces constraints present in the code but missing from .know/design-constraints.md |
 | **feature-census** | `domains/feature-census.lego.md` | feature | Feature enumeration: scans project sources to produce feature taxonomy with GENERATE/SKIP recommendations |
 | **feature-knowledge** | `domains/feature-knowledge.lego.md` | feature | Per-feature knowledge capture: purpose, conceptual model, implementation map, boundaries |
+| **release-platform-profile** | `domains/release-platform-profile.lego.md` | release | Cached stable platform state: repo ecosystems, pipeline chains, dependency topology, build configs |
+| **release-history** | `domains/release-history.lego.md` | release | Release outcome log: versions released, CI pass/fail patterns, failure classifications, trend analysis |
 
 ### Scope Values
 
@@ -56,6 +58,7 @@ This table IS the registry. A domain exists when it has a row here and a criteri
 | `adversarial` | Advocatus diaboli mode: actively searches for evidence that contradicts .know/ claims |
 | `socratic` | Socratic mode: surfaces unstated assumptions and undocumented constraints in .know/ files |
 | `feature` | Product/feature knowledge: what the project does, why features work the way they do, conceptual models |
+| `release` | Release engineering knowledge: platform profiles, dependency topologies, release history, CI patterns |
 
 ### Grading Scale
 
@@ -118,6 +121,10 @@ No +/- modifiers. Simplicity prevents grade inflation and gaming.
 ### Domain Criteria — Feature
 - [feature-census.lego.md](domains/feature-census.lego.md) - Feature enumeration census with GENERATE/SKIP recommendations
 - [feature-knowledge.lego.md](domains/feature-knowledge.lego.md) - Per-feature knowledge capture (purpose, model, implementation, boundaries)
+
+### Domain Criteria — Release
+- [release-platform-profile.lego.md](domains/release-platform-profile.lego.md) - Cached platform state (ecosystems, pipelines, topology, configs)
+- [release-history.lego.md](domains/release-history.lego.md) - Release outcome history (log, failures, CI patterns, trends)
 
 ### Schemas
 - [registry-format.lego.md](registry-format.lego.md) - How to add new domains

@@ -379,3 +379,80 @@ func TestDomainFilePath(t *testing.T) {
 		}
 	}
 }
+
+// --- release/ subdirectory validation tests ---
+
+// TestDomainFilePath_Release verifies that "release/platform-profile" resolves to the correct path.
+func TestDomainFilePath_Release(t *testing.T) {
+	tests := []struct {
+		knowDir string
+		domain  string
+		want    string
+	}{
+		{"/project/.know", "release/platform-profile", "/project/.know/release/platform-profile.md"},
+		{"/project/.know", "release/migration-guide", "/project/.know/release/migration-guide.md"},
+	}
+
+	for _, tt := range tests {
+		got := DomainFilePath(tt.knowDir, tt.domain)
+		if got != tt.want {
+			t.Errorf("DomainFilePath(%q, %q) = %q, want %q", tt.knowDir, tt.domain, got, tt.want)
+		}
+	}
+}
+
+// TestValidateAll_IncludesReleaseFiles verifies that ValidateAll discovers .know/release/*.md files.
+func TestValidateAll_IncludesReleaseFiles(t *testing.T) {
+	rootDir := t.TempDir()
+	knowDir := filepath.Join(rootDir, ".know")
+	releaseDir := filepath.Join(knowDir, "release")
+	if err := os.MkdirAll(releaseDir, 0755); err != nil {
+		t.Fatalf("mkdir .know/release: %v", err)
+	}
+
+	// Top-level domain.
+	writeKnowFile(t, knowDir, "architecture.md",
+		"---\ndomain: architecture\ngenerated_at: \"2026-01-01T00:00:00Z\"\nexpires_after: \"7d\"\n---\n\nNo references here.\n")
+	// Release domain.
+	writeKnowFile(t, releaseDir, "platform-profile.md",
+		"---\ndomain: platform-profile\ngenerated_at: \"2026-01-01T00:00:00Z\"\nexpires_after: \"7d\"\n---\n\nNo references here either.\n")
+
+	reports, err := ValidateAll(rootDir)
+	if err != nil {
+		t.Fatalf("ValidateAll error: %v", err)
+	}
+	if len(reports) != 2 {
+		t.Errorf("expected 2 reports (1 top-level + 1 release), got %d", len(reports))
+	}
+
+	byDomain := make(map[string]ValidationReport)
+	for _, r := range reports {
+		byDomain[r.Domain] = r
+	}
+	if _, ok := byDomain["architecture"]; !ok {
+		t.Error("missing top-level domain \"architecture\" in reports")
+	}
+	if _, ok := byDomain["release/platform-profile"]; !ok {
+		t.Error("missing release domain \"release/platform-profile\" in reports")
+	}
+}
+
+// TestValidateAll_ReleaseMissingDirectory verifies ValidateAll succeeds when release/ doesn't exist.
+func TestValidateAll_ReleaseMissingDirectory(t *testing.T) {
+	rootDir := t.TempDir()
+	knowDir := filepath.Join(rootDir, ".know")
+	if err := os.MkdirAll(knowDir, 0755); err != nil {
+		t.Fatalf("mkdir .know: %v", err)
+	}
+
+	writeKnowFile(t, knowDir, "architecture.md",
+		"---\ndomain: architecture\ngenerated_at: \"2026-01-01T00:00:00Z\"\nexpires_after: \"7d\"\n---\n\nNo references.\n")
+
+	reports, err := ValidateAll(rootDir)
+	if err != nil {
+		t.Fatalf("ValidateAll with missing release/: want nil error, got %v", err)
+	}
+	if len(reports) != 1 {
+		t.Errorf("expected 1 report (no release/ dir), got %d", len(reports))
+	}
+}

@@ -704,3 +704,384 @@ func domainKeys(m map[string]DomainStatus) []string {
 	}
 	return keys
 }
+
+// --- release/ subdirectory tests ---
+
+// writeReleaseFrontmatter creates a .know/release/*.md file with the given YAML frontmatter.
+func writeReleaseFrontmatter(t *testing.T, releaseDir, filename, fm string) {
+	t.Helper()
+	content := fmt.Sprintf("---\n%s---\n\n# Body content\n", fm)
+	path := filepath.Join(releaseDir, filename)
+	if err := os.WriteFile(path, []byte(content), 0644); err != nil {
+		t.Fatalf("write release test file: %v", err)
+	}
+}
+
+// TestReadMeta_ReleaseSubdirectory verifies that ReadMeta discovers .know/release/*.md files.
+func TestReadMeta_ReleaseSubdirectory(t *testing.T) {
+	dir := t.TempDir()
+	releaseDir := filepath.Join(dir, "release")
+	if err := os.MkdirAll(releaseDir, 0755); err != nil {
+		t.Fatalf("mkdir release: %v", err)
+	}
+
+	recentAt := time.Now().UTC().Add(-1 * time.Hour).Format(time.RFC3339)
+	writeReleaseFrontmatter(t, releaseDir, "platform-profile.md", fmt.Sprintf(`domain: platform-profile
+generated_at: "%s"
+expires_after: "7d"
+source_hash: "abc1234"
+confidence: 0.85
+format_version: "1.0"
+`, recentAt))
+
+	results, err := ReadMeta(dir)
+	if err != nil {
+		t.Fatalf("ReadMeta: %v", err)
+	}
+	if len(results) != 1 {
+		t.Fatalf("want 1 result, got %d", len(results))
+	}
+
+	got := results[0]
+	if got.Domain != "release/platform-profile" {
+		t.Errorf("domain = %q, want %q", got.Domain, "release/platform-profile")
+	}
+}
+
+// TestReadMeta_ReleaseDomainPrefix verifies that release/ domain names are correctly prefixed.
+func TestReadMeta_ReleaseDomainPrefix(t *testing.T) {
+	dir := t.TempDir()
+	releaseDir := filepath.Join(dir, "release")
+	if err := os.MkdirAll(releaseDir, 0755); err != nil {
+		t.Fatalf("mkdir release: %v", err)
+	}
+
+	recentAt := time.Now().UTC().Add(-1 * time.Hour).Format(time.RFC3339)
+	writeReleaseFrontmatter(t, releaseDir, "platform-profile.md", fmt.Sprintf(`domain: platform-profile
+generated_at: "%s"
+expires_after: "7d"
+source_hash: "abc1"
+confidence: 0.80
+format_version: "1.0"
+`, recentAt))
+	writeReleaseFrontmatter(t, releaseDir, "migration-guide.md", fmt.Sprintf(`domain: migration-guide
+generated_at: "%s"
+expires_after: "7d"
+source_hash: "abc2"
+confidence: 0.75
+format_version: "1.0"
+`, recentAt))
+
+	results, err := ReadMeta(dir)
+	if err != nil {
+		t.Fatalf("ReadMeta: %v", err)
+	}
+	if len(results) != 2 {
+		t.Fatalf("want 2 results, got %d", len(results))
+	}
+
+	byDomain := make(map[string]DomainStatus)
+	for _, r := range results {
+		byDomain[r.Domain] = r
+	}
+
+	if _, ok := byDomain["release/platform-profile"]; !ok {
+		t.Errorf("expected domain %q, got keys: %v", "release/platform-profile", domainKeys(byDomain))
+	}
+	if _, ok := byDomain["release/migration-guide"]; !ok {
+		t.Errorf("expected domain %q, got keys: %v", "release/migration-guide", domainKeys(byDomain))
+	}
+	// Ensure no unprefixed release domain leaked through.
+	if _, ok := byDomain["platform-profile"]; ok {
+		t.Error("unexpected unprefixed domain \"platform-profile\"; should be \"release/platform-profile\"")
+	}
+}
+
+// TestReadMeta_ReleaseMissingDirectory verifies ReadMeta succeeds when .know/release/ doesn't exist.
+func TestReadMeta_ReleaseMissingDirectory(t *testing.T) {
+	dir := t.TempDir()
+	// No release/ subdirectory created.
+
+	recentAt := time.Now().UTC().Add(-1 * time.Hour).Format(time.RFC3339)
+	writeFrontmatter(t, dir, "architecture.md", fmt.Sprintf(`domain: architecture
+generated_at: "%s"
+expires_after: "7d"
+source_hash: "abc1234"
+confidence: 0.90
+format_version: "1.0"
+`, recentAt))
+
+	results, err := ReadMeta(dir)
+	if err != nil {
+		t.Errorf("ReadMeta with missing release/: want nil error, got %v", err)
+	}
+	// Only top-level domain should appear.
+	if len(results) != 1 {
+		t.Errorf("want 1 result (no release/ dir), got %d", len(results))
+	}
+	if results[0].Domain != "architecture" {
+		t.Errorf("domain = %q, want %q", results[0].Domain, "architecture")
+	}
+}
+
+// TestReadMeta_ReleaseIgnoresNonMdFiles verifies that non-.md files in release/ are ignored.
+func TestReadMeta_ReleaseIgnoresNonMdFiles(t *testing.T) {
+	dir := t.TempDir()
+	releaseDir := filepath.Join(dir, "release")
+	if err := os.MkdirAll(releaseDir, 0755); err != nil {
+		t.Fatalf("mkdir release: %v", err)
+	}
+
+	// Write a non-.md file that should be ignored.
+	if err := os.WriteFile(filepath.Join(releaseDir, "README.txt"), []byte("ignore me"), 0644); err != nil {
+		t.Fatalf("write txt: %v", err)
+	}
+
+	recentAt := time.Now().UTC().Add(-1 * time.Hour).Format(time.RFC3339)
+	writeReleaseFrontmatter(t, releaseDir, "platform-profile.md", fmt.Sprintf(`domain: platform-profile
+generated_at: "%s"
+expires_after: "7d"
+source_hash: "abc1234"
+confidence: 0.85
+format_version: "1.0"
+`, recentAt))
+
+	results, err := ReadMeta(dir)
+	if err != nil {
+		t.Fatalf("ReadMeta: %v", err)
+	}
+	// Only .md file should be in results.
+	if len(results) != 1 {
+		t.Fatalf("want 1 result (txt ignored), got %d", len(results))
+	}
+	if results[0].Domain != "release/platform-profile" {
+		t.Errorf("domain = %q, want %q", results[0].Domain, "release/platform-profile")
+	}
+}
+
+// TestReadMeta_ReleaseMixedWithTopLevel verifies release/ and top-level domains coexist.
+func TestReadMeta_ReleaseMixedWithTopLevel(t *testing.T) {
+	dir := t.TempDir()
+	releaseDir := filepath.Join(dir, "release")
+	if err := os.MkdirAll(releaseDir, 0755); err != nil {
+		t.Fatalf("mkdir release: %v", err)
+	}
+
+	recentAt := time.Now().UTC().Add(-1 * time.Hour).Format(time.RFC3339)
+	writeFrontmatter(t, dir, "architecture.md", fmt.Sprintf(`domain: architecture
+generated_at: "%s"
+expires_after: "7d"
+source_hash: "top1"
+confidence: 0.90
+format_version: "1.0"
+`, recentAt))
+	writeReleaseFrontmatter(t, releaseDir, "platform-profile.md", fmt.Sprintf(`domain: platform-profile
+generated_at: "%s"
+expires_after: "7d"
+source_hash: "rel1"
+confidence: 0.80
+format_version: "1.0"
+`, recentAt))
+
+	results, err := ReadMeta(dir)
+	if err != nil {
+		t.Fatalf("ReadMeta: %v", err)
+	}
+	if len(results) != 2 {
+		t.Fatalf("want 2 results, got %d", len(results))
+	}
+
+	byDomain := make(map[string]DomainStatus)
+	for _, r := range results {
+		byDomain[r.Domain] = r
+	}
+
+	if _, ok := byDomain["architecture"]; !ok {
+		t.Error("missing top-level domain \"architecture\"")
+	}
+	if _, ok := byDomain["release/platform-profile"]; !ok {
+		t.Error("missing release domain \"release/platform-profile\"")
+	}
+}
+
+// TestReadMeta_AllThreeSubdirectories verifies top-level + feat/ + release/ all scanned together.
+func TestReadMeta_AllThreeSubdirectories(t *testing.T) {
+	dir := t.TempDir()
+	featDir := filepath.Join(dir, "feat")
+	releaseDir := filepath.Join(dir, "release")
+	if err := os.MkdirAll(featDir, 0755); err != nil {
+		t.Fatalf("mkdir feat: %v", err)
+	}
+	if err := os.MkdirAll(releaseDir, 0755); err != nil {
+		t.Fatalf("mkdir release: %v", err)
+	}
+
+	recentAt := time.Now().UTC().Add(-1 * time.Hour).Format(time.RFC3339)
+	writeFrontmatter(t, dir, "architecture.md", fmt.Sprintf(`domain: architecture
+generated_at: "%s"
+expires_after: "7d"
+source_hash: "top1"
+confidence: 0.90
+format_version: "1.0"
+`, recentAt))
+	writeFeatFrontmatter(t, featDir, "materialization.md", fmt.Sprintf(`domain: materialization
+generated_at: "%s"
+expires_after: "7d"
+source_hash: "feat1"
+confidence: 0.80
+format_version: "1.0"
+`, recentAt))
+	writeReleaseFrontmatter(t, releaseDir, "platform-profile.md", fmt.Sprintf(`domain: platform-profile
+generated_at: "%s"
+expires_after: "7d"
+source_hash: "rel1"
+confidence: 0.75
+format_version: "1.0"
+`, recentAt))
+
+	results, err := ReadMeta(dir)
+	if err != nil {
+		t.Fatalf("ReadMeta: %v", err)
+	}
+	if len(results) != 3 {
+		t.Fatalf("want 3 results (top-level + feat + release), got %d", len(results))
+	}
+
+	byDomain := make(map[string]DomainStatus)
+	for _, r := range results {
+		byDomain[r.Domain] = r
+	}
+
+	if _, ok := byDomain["architecture"]; !ok {
+		t.Error("missing top-level domain \"architecture\"")
+	}
+	if _, ok := byDomain["feat/materialization"]; !ok {
+		t.Error("missing feat domain \"feat/materialization\"")
+	}
+	if _, ok := byDomain["release/platform-profile"]; !ok {
+		t.Error("missing release domain \"release/platform-profile\"")
+	}
+}
+
+// --- Incremental update tracking tests ---
+
+// TestMeta_IncrementalFields verifies that update_mode, incremental_cycle, and
+// max_incremental_cycles parse correctly from frontmatter.
+func TestMeta_IncrementalFields(t *testing.T) {
+	dir := t.TempDir()
+	recentAt := time.Now().UTC().Add(-1 * time.Hour).Format(time.RFC3339)
+	writeFrontmatter(t, dir, "architecture.md", fmt.Sprintf(`domain: architecture
+generated_at: "%s"
+expires_after: "7d"
+source_hash: "abc1234"
+confidence: 0.88
+format_version: "1.0"
+update_mode: incremental
+incremental_cycle: 2
+max_incremental_cycles: 5
+`, recentAt))
+
+	results, err := ReadMeta(dir)
+	if err != nil {
+		t.Fatalf("ReadMeta: %v", err)
+	}
+	if len(results) != 1 {
+		t.Fatalf("want 1 result, got %d", len(results))
+	}
+
+	got := results[0]
+	if got.Domain != "architecture" {
+		t.Errorf("domain = %q, want %q", got.Domain, "architecture")
+	}
+	// ForceFull should be false: cycle 2 < max 5
+	if got.ForceFull {
+		t.Errorf("ForceFull = true, want false: cycle 2 < max 5")
+	}
+}
+
+// TestMeta_IncrementalFields_ZeroValues verifies that existing frontmatter without
+// incremental fields parses correctly with zero values and ForceFull=false.
+func TestMeta_IncrementalFields_ZeroValues(t *testing.T) {
+	dir := t.TempDir()
+	recentAt := time.Now().UTC().Add(-1 * time.Hour).Format(time.RFC3339)
+	writeFrontmatter(t, dir, "conventions.md", fmt.Sprintf(`domain: conventions
+generated_at: "%s"
+expires_after: "7d"
+source_hash: "abc1234"
+confidence: 0.80
+format_version: "1.0"
+`, recentAt))
+
+	results, err := ReadMeta(dir)
+	if err != nil {
+		t.Fatalf("ReadMeta: %v", err)
+	}
+	if len(results) != 1 {
+		t.Fatalf("want 1 result, got %d", len(results))
+	}
+
+	got := results[0]
+	if got.ForceFull {
+		t.Errorf("ForceFull = true, want false: MaxIncrementalCycles=0 means no limit")
+	}
+}
+
+// TestBuildDomainStatus_ForceFull_AtThreshold verifies ForceFull=true when
+// IncrementalCycle equals MaxIncrementalCycles.
+func TestBuildDomainStatus_ForceFull_AtThreshold(t *testing.T) {
+	now := time.Now().UTC()
+	generatedAt := now.Add(-1 * time.Hour).Format(time.RFC3339)
+	meta := Meta{
+		Domain:               "architecture",
+		GeneratedAt:          generatedAt,
+		ExpiresAfter:         "7d",
+		SourceHash:           "abc1234",
+		UpdateMode:           "incremental",
+		IncrementalCycle:     3,
+		MaxIncrementalCycles: 3,
+	}
+	status := buildDomainStatus(meta, now, "abc1234")
+	if !status.ForceFull {
+		t.Errorf("ForceFull = false, want true: cycle %d >= max %d", meta.IncrementalCycle, meta.MaxIncrementalCycles)
+	}
+}
+
+// TestBuildDomainStatus_ForceFull_BelowThreshold verifies ForceFull=false when
+// IncrementalCycle is below MaxIncrementalCycles.
+func TestBuildDomainStatus_ForceFull_BelowThreshold(t *testing.T) {
+	now := time.Now().UTC()
+	generatedAt := now.Add(-1 * time.Hour).Format(time.RFC3339)
+	meta := Meta{
+		Domain:               "architecture",
+		GeneratedAt:          generatedAt,
+		ExpiresAfter:         "7d",
+		SourceHash:           "abc1234",
+		UpdateMode:           "incremental",
+		IncrementalCycle:     1,
+		MaxIncrementalCycles: 3,
+	}
+	status := buildDomainStatus(meta, now, "abc1234")
+	if status.ForceFull {
+		t.Errorf("ForceFull = true, want false: cycle %d < max %d", meta.IncrementalCycle, meta.MaxIncrementalCycles)
+	}
+}
+
+// TestBuildDomainStatus_ForceFull_ZeroMax verifies ForceFull=false when
+// MaxIncrementalCycles=0 (no limit), even with a high cycle count.
+func TestBuildDomainStatus_ForceFull_ZeroMax(t *testing.T) {
+	now := time.Now().UTC()
+	generatedAt := now.Add(-1 * time.Hour).Format(time.RFC3339)
+	meta := Meta{
+		Domain:               "architecture",
+		GeneratedAt:          generatedAt,
+		ExpiresAfter:         "7d",
+		SourceHash:           "abc1234",
+		UpdateMode:           "incremental",
+		IncrementalCycle:     100,
+		MaxIncrementalCycles: 0,
+	}
+	status := buildDomainStatus(meta, now, "abc1234")
+	if status.ForceFull {
+		t.Errorf("ForceFull = true, want false: MaxIncrementalCycles=0 means no limit")
+	}
+}

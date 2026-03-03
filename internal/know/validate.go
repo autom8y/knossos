@@ -66,9 +66,15 @@ type extractedRef struct {
 }
 
 // DomainFilePath resolves a domain name to its absolute .know/ file path.
-// Handles the "feat/{slug}" namespace: "feat/materialization" -> ".know/feat/materialization.md".
+// Handles subdirectory namespaces:
+//   - "release/{slug}" -> ".know/release/{slug}.md"
+//   - "feat/{slug}"    -> ".know/feat/{slug}.md"
+//
 // Plain domain names resolve to ".know/{domain}.md".
 func DomainFilePath(knowDir, domain string) string {
+	if slug, ok := strings.CutPrefix(domain, "release/"); ok {
+		return filepath.Join(knowDir, "release", slug+".md")
+	}
 	if slug, ok := strings.CutPrefix(domain, "feat/"); ok {
 		return filepath.Join(knowDir, "feat", slug+".md")
 	}
@@ -100,6 +106,9 @@ func ValidateDomain(rootDir, domain string) (*ValidationReport, error) {
 				// Preserve the feat/ namespace to ensure consistent domain naming.
 				// The frontmatter domain field typically holds just the slug.
 				domainName = "feat/" + strings.TrimPrefix(meta.Domain, "feat/")
+			} else if strings.HasPrefix(domain, "release/") {
+				// Preserve the release/ namespace to ensure consistent domain naming.
+				domainName = "release/" + strings.TrimPrefix(meta.Domain, "release/")
 			} else {
 				domainName = meta.Domain
 			}
@@ -169,16 +178,39 @@ func ValidateAll(rootDir string) ([]ValidationReport, error) {
 		if !os.IsNotExist(err) {
 			return nil, fmt.Errorf("read .know/feat/ directory: %w", err)
 		}
-		// feat/ doesn't exist: not an error, just no feature domains to validate.
+		// feat/ doesn't exist: not an error, just no feature domains to validate. Continue to release/.
+	} else {
+		for _, entry := range featEntries {
+			if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".md") {
+				continue
+			}
+			slug := strings.TrimSuffix(entry.Name(), ".md")
+			domain := "feat/" + slug
+			report, err := ValidateDomain(rootDir, domain)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "warn: cannot validate %s: %v\n", entry.Name(), err)
+				continue
+			}
+			reports = append(reports, *report)
+		}
+	}
+
+	// Also validate .know/release/*.md files (one level deep only).
+	releaseDir := filepath.Join(knowDir, "release")
+	releaseEntries, err := os.ReadDir(releaseDir)
+	if err != nil {
+		if !os.IsNotExist(err) {
+			return nil, fmt.Errorf("read .know/release/ directory: %w", err)
+		}
 		return reports, nil
 	}
 
-	for _, entry := range featEntries {
+	for _, entry := range releaseEntries {
 		if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".md") {
 			continue
 		}
 		slug := strings.TrimSuffix(entry.Name(), ".md")
-		domain := "feat/" + slug
+		domain := "release/" + slug
 		report, err := ValidateDomain(rootDir, domain)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "warn: cannot validate %s: %v\n", entry.Name(), err)
