@@ -83,14 +83,14 @@ This command orchestrates the ecosystem workflow for documentation consolidation
 ## Examples
 
 ```bash
-# Consolidate documentation skill (full execution)
-/consolidate .claude/skills/documentation
+# Consolidate documentation in a directory (full execution)
+/consolidate docs/design
 
 # Preview consolidation plan only
 /consolidate docs/design --dry-run
 
-# Consolidate knowledge base
-/consolidate .claude/knowledge/consultant
+# Consolidate rite mena documentation
+/consolidate rites/shared/mena/smell-detection
 ```
 
 ## Phase Transitions

@@ -73,5 +73,5 @@ After Gap Analysis is complete:
 
 ## Reference
 
-Full workflow: `.claude/skills/ecosystem-ref/INDEX.md`
+Full workflow: `Skill("ecosystem-ref")`
 Sync source: `internal/materialize/` (Go implementation)

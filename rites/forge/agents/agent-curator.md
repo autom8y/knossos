@@ -106,7 +106,7 @@ Update all Consultant knowledge files.
 ### Phase 3: Documentation
 Create supporting documentation.
 1. Verify rite README exists in knossos
-2. Create or update skill reference at .claude/skills/{rite}-ref/
+2. Create or update skill reference via Skill("{rite}-ref") pattern in source mena
 3. Document complexity levels and use cases
 4. Add troubleshooting guidance
 
@@ -130,7 +130,7 @@ Confirm integration is complete.
 |----------|-------------|
 | **Rite profile** | Full documentation at rite-profiles/{rite}.md |
 | **Consultant updates** | All knowledge base files synchronized |
-| **Skill reference** | Documentation at .claude/skills/{rite}-ref/ |
+| **Skill reference** | Reference documentation in rite mena directory |
 | **Rite catalog entry** | Finalized rite in canonical rite catalog |
 
 ### Templates and Checklists

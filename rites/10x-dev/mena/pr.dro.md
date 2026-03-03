@@ -61,4 +61,4 @@ Create a GitHub pull request with auto-generated description. $ARGUMENTS
 
 ## Reference
 
-Full documentation: `.claude/commands/operations/pr/INDEX.md`
+Full documentation: `rites/10x-dev/mena/pr.dro.md` (self-contained)

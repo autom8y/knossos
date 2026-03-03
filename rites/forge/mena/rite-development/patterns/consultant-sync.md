@@ -16,20 +16,12 @@ The Consultant agent (`/consult`) is the ecosystem's meta-navigator. Users rely 
 
 ## Knowledge Base Structure
 
-```
-.claude/knowledge/consultant/
-├── ecosystem-map.md          # Complete ecosystem overview
-├── command-reference.md      # All commands
-├── agent-reference.md        # All agents
-├── routing/
-│   ├── intent-patterns.md    # Natural language → rite/command
-│   ├── decision-trees.md     # Structured routing logic
-│   └── complexity-matrix.md  # Scope-based selection
-├── rite-profiles/
-│   └── {rite}.md             # One per rite
-└── playbooks/curated/
-    └── {scenario}.md         # Common workflow playbooks
-```
+Consultant knowledge is maintained in rite mena directories and shared skills:
+
+- `mena/navigation/consult/` -- Consultant dromena and reference
+- `prompting` skill -- Invocation patterns
+- `10x-workflow` skill -- Phase transitions and quality gates
+- Rite manifests at `$KNOSSOS_HOME/rites/*/orchestrator.yaml`
 
 ---
 
@@ -43,7 +35,7 @@ The Consultant agent (`/consult`) is the ecosystem's meta-navigator. Users rely 
 | **Workflow change** | rite-profile, agent-reference (if phases change) |
 | **Rename rite** | All files referencing old name |
 | **Remove rite** | Remove from all files, delete rite-profile |
-| **New playbook** | Create in playbooks/curated/ |
+| **New playbook** | Create in `docs/playbooks/` |
 
 ---
 
@@ -61,77 +53,17 @@ Update counts:
 **Total Agents**: {new count} across all rites
 ```
 
-### 2. Update agent-reference.md
+### 2. Update rite manifest
 
-Add new section:
-```markdown
-## {rite} ({N} agents)
+Ensure `rites/{rite}/orchestrator.yaml` contains accurate agent/workflow/complexity data. This is the source of truth for rite routing and capability declaration.
 
-| Agent | Model | Phase | Produces |
-|-------|-------|-------|----------|
-| **{agent-1}** | {model} | {phase} | {artifact} |
-| **{agent-2}** | {model} | {phase} | {artifact} |
-...
+### 3. Verify quick-switch command
 
-**Workflow**: {phase-1} → {phase-2} → {phase-3} → {phase-4}
-```
+Ensure `mena/navigation/{rite}.dro.md` or equivalent quick-switch dromenon exists and routes correctly.
 
-### 3. Create rite-profiles/{rite}.md
+### 4. Verify rite integration
 
-Use template from INDEX.lego.md. Include:
-- Overview
-- Switch Command
-- Agents table
-- Workflow diagram
-- Complexity Levels
-- Best For / Not For
-- Quick Start
-- Related Commands
-
-### 4. Update routing/intent-patterns.md
-
-Add intent patterns for new rite domain:
-```markdown
-## {Domain} Intents
-
-| User Says | Likely Need | Recommended |
-|-----------|-------------|-------------|
-| "{keyword 1}" | {description} | `/{rite}` → `/task` |
-| "{keyword 2}" | {description} | `/{rite}` → `/task` |
-```
-
-### 5. Update routing/decision-trees.md
-
-Add to Primary Router:
-```markdown
-├─ {DOMAIN} something?
-│   └─ → {rite} (/{rite})
-```
-
-Add to Rite Selection Tree:
-```markdown
-├─ {Domain}
-│   └─ → {rite} (/{rite})
-```
-
-### 6. Update routing/complexity-matrix.md
-
-Add rite's complexity levels:
-```markdown
-## {rite} Complexity
-
-| Level | When to Use | Scope |
-|-------|-------------|-------|
-| **{LEVEL1}** | {description} | {scope} |
-| **{LEVEL2}** | {description} | {scope} |
-```
-
-### 7. Update command-reference.md
-
-Add to Rite Management section:
-```markdown
-| `/{rite}` | {rite} |
-```
+Run `ari rite list` to confirm the new rite appears in the catalog with correct metadata.
 
 ---
 
@@ -175,7 +107,7 @@ Common playbooks cover:
 
 ### 2. Create playbook file
 
-Location: `.claude/knowledge/consultant/playbooks/curated/{scenario}.md`
+Location: playbook files are maintained in rite mena directories or shared skills.
 
 Use format:
 ```markdown
@@ -212,7 +144,7 @@ Use format:
 
 ### 3. Update consult-ref skill
 
-Add playbook to the list in `.claude/commands/navigation/consult/INDEX.md`:
+Add playbook to the list in `mena/navigation/consult/reference.md`:
 ```markdown
 **Curated Playbooks**: Pre-authored sequences for common scenarios
 - `{playbook}.md`
@@ -225,20 +157,17 @@ Add playbook to the list in `.claude/commands/navigation/consult/INDEX.md`:
 After any sync:
 
 ```bash
-# Verify ecosystem-map has correct rite count
-grep "rites" .claude/knowledge/consultant/ecosystem-map.md
+# Verify rite appears in catalog
+ari rite list
 
-# Verify agent-reference has all rites
-grep "## .*" .claude/knowledge/consultant/agent-reference.md
+# Verify rite manifest exists
+cat $KNOSSOS_HOME/rites/{rite-name}/orchestrator.yaml
 
-# Verify all rite profiles exist
-ls .claude/knowledge/consultant/rite-profiles/
+# Verify quick-switch command exists
+ls $KNOSSOS_HOME/mena/navigation/{rite-name}.dro.md 2>/dev/null || echo "No quick-switch"
 
-# Verify routing includes rite
-grep "{rite-name}" .claude/knowledge/consultant/routing/intent-patterns.md
-
-# Verify command reference
-grep "/{rite}" .claude/knowledge/consultant/command-reference.md
+# Verify rite loads
+ari sync --rite {rite-name} --dry-run
 ```
 
 ---

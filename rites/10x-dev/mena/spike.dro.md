@@ -62,4 +62,4 @@ Spike report at `.sos/wip/SPIKE-{slug}.md`:
 
 ## Reference
 
-Full documentation: `.claude/commands/operations/spike/INDEX.md`
+Full documentation: `rites/10x-dev/mena/spike.dro.md` (self-contained)

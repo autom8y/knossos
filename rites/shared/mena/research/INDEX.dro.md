@@ -31,7 +31,7 @@ This command operates in forked context (transient session). It generates `.know
    ```
    Skill("literature-review")
    ```
-   This loads the evidence grading scale, source taxonomy, review protocol, and schemas into context.
+   This loads the evidence grading scale, source taxonomy, review protocol, and schemas into context. Source: `rites/shared/mena/literature-review/`.
 
 4. **Check for existing output**:
    - If `.know/literature-{domain}.md` exists:
@@ -88,7 +88,7 @@ If source targets are not met after all search queries, note this in the output 
 
 For each source in the catalog:
 
-1. **Read companion reference**: Read the evidence grading framework from the literature-review skill for tier definitions: `Read(".claude/skills/literature-review/evidence-grading.md")`.
+1. **Read companion reference**: Load the evidence grading framework via `Skill("literature-review")` for tier definitions.
 
 2. **Extract key claims**: Identify the 2-5 most relevant claims from the source for the domain question.
 
@@ -104,7 +104,7 @@ For each source in the catalog:
 
 Skip this phase for SURVEY depth.
 
-1. **Read synthesis schema**: `Read(".claude/skills/literature-review/schemas/synthesis.md")`.
+1. **Read synthesis schema**: Access synthesis schema via `Skill("literature-review")` companion files.
 
 2. **Identify themes**: Group claims across sources into thematic clusters. Minimum 3 themes for REVIEW depth.
 

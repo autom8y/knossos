@@ -171,4 +171,4 @@ If the latter, revise to describe when each pattern applies rather than prescrib
 
 - [INDEX.lego.md](INDEX.lego.md) - Parent skill with content architecture principles
 - [anti-patterns.md](anti-patterns.md) - Content that should not appear
-- [execution-mode.md](~/.claude/skills/orchestration/execution-mode.md) - Where enforcement rules live
+- Execution mode enforcement rules are maintained in orchestrator agent prompts and session hooks

@@ -43,10 +43,7 @@ Parse `$ARGUMENTS` to determine audit scope:
    Skill("pinakes")
    ```
 
-2. Read the domain registry table from pinakes INDEX:
-   ```
-   Read(".claude/skills/pinakes/INDEX.md")
-   ```
+2. The domain registry table is loaded via the `Skill("pinakes")` call above.
 
 3. Parse the Domain Registry table to extract:
    - Domain name
