@@ -275,9 +275,13 @@ This flow produces per-feature knowledge files in `.know/feat/`. It operates in 
 3. **Ensure directories exist**:
    - Run: `mkdir -p .know/feat`
 
-4. **Load criteria files**:
-   - Read census criteria: `Read(".claude/skills/pinakes/domains/feature-census.lego.md")`
-   - Read feature knowledge criteria: `Read(".claude/skills/pinakes/domains/feature-knowledge.lego.md")`
+4. **Load domain registry and criteria**:
+   - Load pinakes skill: `Skill("pinakes")`
+   - Read pinakes INDEX to find the Domain Registry table
+   - Verify `feature-census` and `feature-knowledge` domains are registered with scope `feature`
+   - If not found: ERROR "Feature domains not registered in pinakes. Run `ari sync` to materialize."
+   - Read census criteria: `Read(".claude/skills/pinakes/domains/feature-census.md")`
+   - Read feature knowledge criteria: `Read(".claude/skills/pinakes/domains/feature-knowledge.md")`
    - Store both for injection into theoros dispatch prompts.
 
 5. **Route by argument**:
