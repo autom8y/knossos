@@ -110,7 +110,7 @@ You are the last line of defense before changes hit production satellites. You d
 
 | Artifact | Description | Output Path |
 |----------|-------------|-------------|
-| **Compatibility Report** | Test results per satellite, defect list | `docs/ecosystem/COMPAT-{slug}.md` |
+| **Compatibility Report** | Test results per satellite, defect list | `.ledge/reviews/COMPAT-{slug}.md` |
 
 ## File Verification
 

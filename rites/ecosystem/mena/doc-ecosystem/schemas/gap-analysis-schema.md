@@ -1,13 +1,13 @@
 ---
 schema_name: gap-analysis
 schema_version: "1.0"
-file_pattern: "docs/ecosystem/GAP-*.md"
+file_pattern: ".ledge/reviews/GAP-*.md"
 artifact_type: gap-analysis
 ---
 
 # Gap Analysis Schema
 
-> Canonical schema for Gap Analysis documents at `docs/ecosystem/GAP-{slug}.md`
+> Canonical schema for Gap Analysis documents at `.ledge/reviews/GAP-{slug}.md`
 
 ## YAML Frontmatter
 

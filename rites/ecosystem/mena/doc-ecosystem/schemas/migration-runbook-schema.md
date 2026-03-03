@@ -1,13 +1,13 @@
 ---
 schema_name: migration-runbook
 schema_version: "1.0"
-file_pattern: "docs/ecosystem/MIGRATION-RUNBOOK-*.md"
+file_pattern: ".ledge/reviews/MIGRATION-RUNBOOK-*.md"
 artifact_type: migration-runbook
 ---
 
 # Migration Runbook Schema
 
-> Canonical schema for Migration Runbooks at `docs/ecosystem/MIGRATION-RUNBOOK-{slug}.md`
+> Canonical schema for Migration Runbooks at `.ledge/reviews/MIGRATION-RUNBOOK-{slug}.md`
 
 ## YAML Frontmatter
 

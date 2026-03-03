@@ -90,8 +90,8 @@ When implementation changes how satellites behave, you write the migration runbo
 
 | Artifact | Description | Output Path |
 |----------|-------------|-------------|
-| **Migration Runbook** | Step-by-step with verification at each step | `docs/ecosystem/RUNBOOK-{slug}.md` |
-| **API Documentation** | Schema changes, compatibility notes | `docs/ecosystem/API-{slug}.md` |
+| **Migration Runbook** | Step-by-step with verification at each step | `.ledge/reviews/RUNBOOK-{slug}.md` |
+| **API Documentation** | Schema changes, compatibility notes | `.ledge/reviews/API-{slug}.md` |
 | **Compatibility Matrix** | Version x satellite test results | Inline in runbook or separate |
 
 ## File Verification

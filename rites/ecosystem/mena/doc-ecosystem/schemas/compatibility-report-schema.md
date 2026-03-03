@@ -1,13 +1,13 @@
 ---
 schema_name: compatibility-report
 schema_version: "1.0"
-file_pattern: "docs/ecosystem/COMPATIBILITY-REPORT-*.md"
+file_pattern: ".ledge/reviews/COMPATIBILITY-REPORT-*.md"
 artifact_type: compatibility-report
 ---
 
 # Compatibility Report Schema
 
-> Canonical schema for Compatibility Reports at `docs/ecosystem/COMPATIBILITY-REPORT-{slug}.md`
+> Canonical schema for Compatibility Reports at `.ledge/reviews/COMPATIBILITY-REPORT-{slug}.md`
 
 ## YAML Frontmatter
 

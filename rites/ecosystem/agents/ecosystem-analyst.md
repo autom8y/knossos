@@ -98,7 +98,7 @@ When a satellite fails sync, when hooks don't fire, when settings don't merge co
 
 | Artifact | Description | Output Path |
 |----------|-------------|-------------|
-| **Gap Analysis** | Root cause, reproduction, success criteria, complexity | `docs/ecosystem/GAP-{slug}.md` |
+| **Gap Analysis** | Root cause, reproduction, success criteria, complexity | `.ledge/reviews/GAP-{slug}.md` |
 
 Write the Gap Analysis artifact EARLY. Do not exhaust turns on research before writing.
 Produce a draft after initial diagnosis, then refine with remaining turns.

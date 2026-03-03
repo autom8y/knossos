@@ -54,7 +54,7 @@ The Ecosystem Analyst will examine:
 
 ## Expected Output
 
-**Gap Analysis** document at: `docs/ecosystem/GAP-{issue-slug}.md`
+**Gap Analysis** document at: `.ledge/reviews/GAP-{issue-slug}.md`
 
 Contains:
 - **Problem**: User-reported issue description

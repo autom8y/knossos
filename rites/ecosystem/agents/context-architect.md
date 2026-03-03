@@ -96,7 +96,7 @@ When Ecosystem Analyst identifies a root cause, you design the solution architec
 
 | Artifact | Description | Output Path |
 |----------|-------------|-------------|
-| **Context Design** | Architecture, schemas, migration paths, rationale | `docs/ecosystem/DESIGN-{slug}.md` |
+| **Context Design** | Architecture, schemas, migration paths, rationale | `.ledge/reviews/DESIGN-{slug}.md` |
 
 ## File Verification
 
@@ -115,7 +115,7 @@ See `file-verification` skill for the full protocol. Summary:
 - [ ] Integration test matrix with expected outcomes per satellite
 - [ ] Knossos/materialization file changes specified at file/function level
 - [ ] No unresolved design decisions
-- [ ] Context Design committed to `docs/ecosystem/DESIGN-{slug}.md`
+- [ ] Context Design committed to `.ledge/reviews/DESIGN-{slug}.md`
 - [ ] All artifacts verified via Read tool
 - [ ] Attestation table included with absolute paths
 

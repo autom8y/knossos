@@ -1,13 +1,13 @@
 ---
 schema_name: context-design
 schema_version: "1.0"
-file_pattern: "docs/ecosystem/CONTEXT-DESIGN-*.md"
+file_pattern: ".ledge/reviews/CONTEXT-DESIGN-*.md"
 artifact_type: context-design
 ---
 
 # Context Design Schema
 
-> Canonical schema for Context Design documents at `docs/ecosystem/CONTEXT-DESIGN-{slug}.md`
+> Canonical schema for Context Design documents at `.ledge/reviews/CONTEXT-DESIGN-{slug}.md`
 
 ## YAML Frontmatter
 
