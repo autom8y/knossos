@@ -370,6 +370,676 @@ func TestTextOutput_OrgSkipped_ShowsReason(t *testing.T) {
 	}
 }
 
+// --- RiteListOutput JSON contract ---
+
+func TestJSON_RiteListOutput_ValidJSON(t *testing.T) {
+	p, buf, _ := newTestPrinter(FormatJSON)
+
+	data := RiteListOutput{
+		Rites: []RiteSummary{
+			{
+				Name:       "ecosystem",
+				Form:       "full",
+				AgentCount: 5,
+				SkillCount: 3,
+				Path:       "rites/ecosystem",
+				Source:     "project",
+				Active:     true,
+			},
+			{
+				Name:       "releaser",
+				Form:       "lite",
+				AgentCount: 2,
+				SkillCount: 1,
+				Path:       "rites/releaser",
+				Source:     "project",
+				Active:     false,
+			},
+		},
+		Total:      2,
+		ActiveRite: "ecosystem",
+	}
+
+	if err := p.Print(data); err != nil {
+		t.Fatalf("Print() error = %v", err)
+	}
+
+	if !json.Valid(buf.Bytes()) {
+		t.Errorf("JSON output is not valid JSON: %s", buf.String())
+	}
+
+	var decoded RiteListOutput
+	if err := json.Unmarshal(buf.Bytes(), &decoded); err != nil {
+		t.Fatalf("failed to unmarshal: %v", err)
+	}
+
+	if decoded.Total != 2 {
+		t.Errorf("total = %d, want 2", decoded.Total)
+	}
+	if decoded.ActiveRite != "ecosystem" {
+		t.Errorf("active_rite = %q, want %q", decoded.ActiveRite, "ecosystem")
+	}
+	if len(decoded.Rites) != 2 {
+		t.Fatalf("rites length = %d, want 2", len(decoded.Rites))
+	}
+	if !decoded.Rites[0].Active {
+		t.Errorf("rites[0].active = false, want true")
+	}
+	if decoded.Rites[1].Active {
+		t.Errorf("rites[1].active = true, want false")
+	}
+}
+
+// --- AuditOutput JSON contract ---
+
+func TestJSON_AuditOutput_ValidJSON(t *testing.T) {
+	p, buf, _ := newTestPrinter(FormatJSON)
+
+	data := AuditOutput{
+		SessionID: "session-20260101-120000-abcd1234",
+		Events: []AuditEvent{
+			{
+				Timestamp: "2026-01-01T12:00:00Z",
+				Event:     "state_transition",
+				From:      "NONE",
+				To:        "ACTIVE",
+			},
+			{
+				Timestamp: "2026-01-01T13:00:00Z",
+				Event:     "phase_transition",
+				FromPhase: "planning",
+				ToPhase:   "implementation",
+				Metadata:  map[string]interface{}{"reason": "design complete"},
+			},
+		},
+		Total: 2,
+		FiltersApplied: AuditFilters{
+			Limit:     50,
+			EventType: "",
+			Since:     "",
+		},
+	}
+
+	if err := p.Print(data); err != nil {
+		t.Fatalf("Print() error = %v", err)
+	}
+
+	if !json.Valid(buf.Bytes()) {
+		t.Errorf("JSON output is not valid JSON: %s", buf.String())
+	}
+
+	var decoded AuditOutput
+	if err := json.Unmarshal(buf.Bytes(), &decoded); err != nil {
+		t.Fatalf("failed to unmarshal: %v", err)
+	}
+
+	if decoded.SessionID != data.SessionID {
+		t.Errorf("session_id = %q, want %q", decoded.SessionID, data.SessionID)
+	}
+	if decoded.Total != 2 {
+		t.Errorf("total = %d, want 2", decoded.Total)
+	}
+	if len(decoded.Events) != 2 {
+		t.Fatalf("events length = %d, want 2", len(decoded.Events))
+	}
+	if decoded.Events[0].To != "ACTIVE" {
+		t.Errorf("events[0].to = %q, want %q", decoded.Events[0].To, "ACTIVE")
+	}
+	if decoded.Events[1].ToPhase != "implementation" {
+		t.Errorf("events[1].to_phase = %q, want %q", decoded.Events[1].ToPhase, "implementation")
+	}
+}
+
+// --- ManifestShowOutput JSON contract ---
+
+func TestJSON_ManifestShowOutput_ValidJSON(t *testing.T) {
+	p, buf, _ := newTestPrinter(FormatJSON)
+
+	data := ManifestShowOutput{
+		Path:   "knossos.yaml",
+		Exists: true,
+		Format: "yaml",
+		Schema: &ManifestSchemaInfo{
+			Type:    "rite-manifest",
+			Version: "1.0",
+			Valid:   true,
+		},
+		Content: map[string]interface{}{
+			"project": map[string]interface{}{
+				"name":        "knossos",
+				"description": "test project",
+			},
+		},
+	}
+
+	if err := p.Print(data); err != nil {
+		t.Fatalf("Print() error = %v", err)
+	}
+
+	if !json.Valid(buf.Bytes()) {
+		t.Errorf("JSON output is not valid JSON: %s", buf.String())
+	}
+
+	var decoded ManifestShowOutput
+	if err := json.Unmarshal(buf.Bytes(), &decoded); err != nil {
+		t.Fatalf("failed to unmarshal: %v", err)
+	}
+
+	if decoded.Path != "knossos.yaml" {
+		t.Errorf("path = %q, want %q", decoded.Path, "knossos.yaml")
+	}
+	if !decoded.Exists {
+		t.Errorf("exists = false, want true")
+	}
+	if decoded.Schema == nil {
+		t.Fatal("schema is nil")
+	}
+	if !decoded.Schema.Valid {
+		t.Errorf("schema.valid = false, want true")
+	}
+}
+
+// --- ManifestValidateOutput JSON contract ---
+
+func TestJSON_ManifestValidateOutput_ValidJSON(t *testing.T) {
+	p, buf, _ := newTestPrinter(FormatJSON)
+
+	data := ManifestValidateOutput{
+		Path:   "knossos.yaml",
+		Schema: "rite-manifest-v1",
+		Valid:  false,
+		Issues: []ManifestValidationIssue{
+			{Path: "project.name", Message: "required field missing", Severity: "error"},
+		},
+		Warnings: []ManifestValidationIssue{
+			{Path: "teams.available", Message: "empty list", Severity: "warning"},
+		},
+	}
+
+	if err := p.Print(data); err != nil {
+		t.Fatalf("Print() error = %v", err)
+	}
+
+	if !json.Valid(buf.Bytes()) {
+		t.Errorf("JSON output is not valid JSON: %s", buf.String())
+	}
+
+	var decoded ManifestValidateOutput
+	if err := json.Unmarshal(buf.Bytes(), &decoded); err != nil {
+		t.Fatalf("failed to unmarshal: %v", err)
+	}
+
+	if decoded.Valid {
+		t.Errorf("valid = true, want false")
+	}
+	if len(decoded.Issues) != 1 {
+		t.Fatalf("issues length = %d, want 1", len(decoded.Issues))
+	}
+	if len(decoded.Warnings) != 1 {
+		t.Fatalf("warnings length = %d, want 1", len(decoded.Warnings))
+	}
+}
+
+// --- RiteInfoOutput JSON contract ---
+
+func TestJSON_RiteInfoOutput_ValidJSON(t *testing.T) {
+	p, buf, _ := newTestPrinter(FormatJSON)
+
+	data := RiteInfoOutput{
+		Name:   "ecosystem",
+		Form:   "full",
+		Path:   "rites/ecosystem",
+		Source: "project",
+		Active: true,
+		Agents: []RiteAgentInfo{
+			{Name: "pythia", File: "pythia.md", Role: "orchestrator"},
+		},
+		Skills: []RiteSkillInfo{
+			{Ref: "conventions", Path: ".claude/skills/conventions", External: false},
+		},
+		Workflow: &RiteWorkflowInfo{
+			Type:       "orchestrated",
+			EntryPoint: "pythia",
+			Phases:     []string{"planning", "implementation", "review"},
+		},
+		Budget: &RiteBudgetInfo{
+			EstimatedTokens: 15000,
+			AgentsCost:      10000,
+			SkillsCost:      3000,
+			WorkflowCost:    2000,
+		},
+		SchemaVersion: "1.0",
+	}
+
+	if err := p.Print(data); err != nil {
+		t.Fatalf("Print() error = %v", err)
+	}
+
+	if !json.Valid(buf.Bytes()) {
+		t.Errorf("JSON output is not valid JSON: %s", buf.String())
+	}
+
+	var decoded RiteInfoOutput
+	if err := json.Unmarshal(buf.Bytes(), &decoded); err != nil {
+		t.Fatalf("failed to unmarshal: %v", err)
+	}
+
+	if decoded.Name != "ecosystem" {
+		t.Errorf("name = %q, want %q", decoded.Name, "ecosystem")
+	}
+	if !decoded.Active {
+		t.Errorf("active = false, want true")
+	}
+	if len(decoded.Agents) != 1 {
+		t.Fatalf("agents length = %d, want 1", len(decoded.Agents))
+	}
+	if decoded.Workflow == nil {
+		t.Fatal("workflow is nil")
+	}
+	if decoded.Budget == nil {
+		t.Fatal("budget is nil")
+	}
+}
+
+// --- TransitionOutput JSON contract ---
+
+func TestJSON_TransitionOutput_ValidJSON(t *testing.T) {
+	p, buf, _ := newTestPrinter(FormatJSON)
+
+	data := TransitionOutput{
+		SessionID:      "session-20260101-120000-abcd1234",
+		Status:         "ARCHIVED",
+		PreviousStatus: "ACTIVE",
+		SailsColor:     "WHITE",
+		SailsBase:      "WHITE",
+		Archived:       true,
+		ArchivePath:    "/archive/session.tar.gz",
+	}
+
+	if err := p.Print(data); err != nil {
+		t.Fatalf("Print() error = %v", err)
+	}
+
+	if !json.Valid(buf.Bytes()) {
+		t.Errorf("JSON output is not valid JSON: %s", buf.String())
+	}
+
+	var decoded TransitionOutput
+	if err := json.Unmarshal(buf.Bytes(), &decoded); err != nil {
+		t.Fatalf("failed to unmarshal: %v", err)
+	}
+
+	if decoded.Status != "ARCHIVED" {
+		t.Errorf("status = %q, want %q", decoded.Status, "ARCHIVED")
+	}
+	if decoded.SailsColor != "WHITE" {
+		t.Errorf("sails_color = %q, want %q", decoded.SailsColor, "WHITE")
+	}
+}
+
+// --- Text() smoke tests ---
+
+func TestText_Smoke_NoPanic(t *testing.T) {
+	// Verify that Text() methods do not panic and produce non-empty output
+	// for representative inputs. Table-driven to cover maximum output types.
+	tests := []struct {
+		name     string
+		textable Textable
+		wantNon  bool // if true, expect non-empty output
+	}{
+		{
+			name:     "StatusOutput/active",
+			textable: StatusOutput{HasSession: true, SessionID: "s1", Status: "ACTIVE", Initiative: "test", CurrentPhase: "impl", ActiveRite: "eco"},
+			wantNon:  true,
+		},
+		{
+			name:     "StatusOutput/no-session",
+			textable: StatusOutput{HasSession: false},
+			wantNon:  true,
+		},
+		{
+			name:     "CreateOutput",
+			textable: CreateOutput{SessionID: "s1", Initiative: "x", Complexity: "M", Rite: "eco"},
+			wantNon:  true,
+		},
+		{
+			name:     "SyncResultOutput/full",
+			textable: SyncResultOutput{Status: "ok", Rite: &SyncRiteResult{Status: "ok", RiteName: "eco"}, Org: &SyncOrgResult{Status: "ok", OrgName: "team"}, User: &SyncUserResult{Status: "ok"}},
+			wantNon:  true,
+		},
+		{
+			name:     "SyncResultOutput/dry-run",
+			textable: SyncResultOutput{Status: "ok", DryRun: true},
+			wantNon:  true,
+		},
+		{
+			name:     "RiteListOutput/empty",
+			textable: RiteListOutput{},
+			wantNon:  true,
+		},
+		{
+			name:     "RiteListOutput/populated",
+			textable: RiteListOutput{Rites: []RiteSummary{{Name: "eco", Active: true}}, Total: 1},
+			wantNon:  true,
+		},
+		{
+			name:     "RiteInfoOutput",
+			textable: RiteInfoOutput{Name: "eco", Form: "full", Path: "p", Source: "project", Active: true, Agents: []RiteAgentInfo{{Name: "a", Role: "r"}}},
+			wantNon:  true,
+		},
+		{
+			name:     "RiteCurrentOutput/no-rite",
+			textable: RiteCurrentOutput{},
+			wantNon:  true,
+		},
+		{
+			name:     "RiteCurrentOutput/active",
+			textable: RiteCurrentOutput{ActiveRite: "eco", NativeAgents: []string{"a"}, Budget: CurrentBudgetOutput{TotalTokens: 1000, BudgetLimit: 50000}},
+			wantNon:  true,
+		},
+		{
+			name:     "RiteStatusOutput",
+			textable: RiteStatusOutput{Rite: "eco", IsActive: true, Path: "p", Description: "d", WorkflowType: "orchestrated", EntryPoint: "pythia", ManifestValid: true, ClaudeMDSynced: true},
+			wantNon:  true,
+		},
+		{
+			name:     "RiteValidateOutput",
+			textable: RiteValidateOutput{Rite: "eco", Valid: true, Checks: []ValidationCheckOut{{Check: "schema", Status: "pass", Message: "ok"}}},
+			wantNon:  true,
+		},
+		{
+			name:     "PantheonOutput",
+			textable: PantheonOutput{Rite: "eco", Agents: []PantheonAgent{{Name: "a"}}, Count: 1},
+			wantNon:  true,
+		},
+		{
+			name:     "ManifestShowOutput/exists",
+			textable: ManifestShowOutput{Path: "k.yaml", Exists: true, Format: "yaml"},
+			wantNon:  true,
+		},
+		{
+			name:     "ManifestShowOutput/missing",
+			textable: ManifestShowOutput{Path: "k.yaml", Exists: false},
+			wantNon:  true,
+		},
+		{
+			name:     "ManifestValidateOutput",
+			textable: ManifestValidateOutput{Path: "k.yaml", Schema: "v1", Valid: true},
+			wantNon:  true,
+		},
+		{
+			name:     "ManifestDiffOutput/no-changes",
+			textable: ManifestDiffOutput{HasChanges: false},
+			wantNon:  true,
+		},
+		{
+			name:     "ManifestDiffOutput/with-changes",
+			textable: ManifestDiffOutput{HasChanges: true, Base: "a", Compare: "b", Changes: []ManifestDiffChange{{Path: "p", Type: "added", NewValue: "v"}}},
+			wantNon:  true,
+		},
+		{
+			name:     "ManifestMergeOutput",
+			textable: ManifestMergeOutput{Base: "a", Ours: "b", Theirs: "c", Strategy: "ours"},
+			wantNon:  true,
+		},
+		{
+			name:     "TimelineOutput/empty",
+			textable: TimelineOutput{SessionID: "s1"},
+			wantNon:  true,
+		},
+		{
+			name:     "TimelineOutput/populated",
+			textable: TimelineOutput{SessionID: "s1", Entries: []TimelineEntryOutput{{Time: "12:00", Category: "state", Summary: "created"}}},
+			wantNon:  true,
+		},
+		{
+			name:     "FrayOutput",
+			textable: FrayOutput{ParentID: "p1", ChildID: "c1", FrayPoint: "fp", Status: "ok"},
+			wantNon:  true,
+		},
+		{
+			name:     "LogOutput",
+			textable: LogOutput{SessionID: "s1", Type: "note", Entry: "logged"},
+			wantNon:  true,
+		},
+		{
+			name:     "FieldOutput",
+			textable: FieldOutput{Key: "status", Value: "ACTIVE"},
+			wantNon:  true,
+		},
+		{
+			name:     "FieldAllOutput",
+			textable: FieldAllOutput{SessionID: "s1", Status: "ACTIVE"},
+			wantNon:  true,
+		},
+		{
+			name:     "TransitionOutput/archived",
+			textable: TransitionOutput{SessionID: "s1", Status: "ARCHIVED", SailsColor: "WHITE"},
+			wantNon:  true,
+		},
+		{
+			name:     "TransitionOutput/black-sails",
+			textable: TransitionOutput{SessionID: "s1", Status: "ARCHIVED", SailsColor: "BLACK", SailsReasons: []string{"tests failed"}},
+			wantNon:  true,
+		},
+		{
+			name:     "TransitionOutput/gray-sails",
+			textable: TransitionOutput{SessionID: "s1", Status: "ARCHIVED", SailsColor: "GRAY"},
+			wantNon:  true,
+		},
+		{
+			name:     "SeedCreateOutput",
+			textable: SeedCreateOutput{SessionID: "s1", Status: "PARKED", Seeded: true, SeededTo: "/tmp/seed"},
+			wantNon:  true,
+		},
+		{
+			name:     "SnapshotOutput",
+			textable: SnapshotOutput{Markdown: "# Snapshot\nContent here"},
+			wantNon:  true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.textable.Text()
+			if tt.wantNon && got == "" {
+				t.Errorf("Text() returned empty string, want non-empty")
+			}
+		})
+	}
+}
+
+// --- Tabular interface tests ---
+
+func TestTabular_Headers_NonEmpty(t *testing.T) {
+	tests := []struct {
+		name    string
+		tabular Tabular
+	}{
+		{"SessionListOutput", SessionListOutput{Sessions: []SessionSummary{{SessionID: "s1"}}, Total: 1}},
+		{"AuditOutput", AuditOutput{Events: []AuditEvent{{Event: "e1"}}}},
+		{"RiteListOutput", RiteListOutput{Rites: []RiteSummary{{Name: "eco"}}}},
+		{"RiteStatusOutput", RiteStatusOutput{Rite: "eco"}},
+		{"RiteSwitchOutput", RiteSwitchOutput{Rite: "eco"}},
+		{"RiteSwitchDryRunOutput", RiteSwitchDryRunOutput{WouldSwitchTo: "eco"}},
+		{"RiteValidateOutput", RiteValidateOutput{Rite: "eco"}},
+		{"PantheonOutput", PantheonOutput{Rite: "eco"}},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			headers := tt.tabular.Headers()
+			if len(headers) == 0 {
+				t.Error("Headers() returned empty slice")
+			}
+		})
+	}
+}
+
+func TestTabular_Rows_MatchHeaders(t *testing.T) {
+	tests := []struct {
+		name    string
+		tabular Tabular
+	}{
+		{
+			"SessionListOutput",
+			SessionListOutput{
+				Sessions: []SessionSummary{
+					{SessionID: "s1", Status: "ACTIVE", Initiative: "test", CreatedAt: "2026-01-01T12:00:00Z", Current: true},
+				},
+				Total: 1,
+			},
+		},
+		{
+			"AuditOutput",
+			AuditOutput{
+				Events: []AuditEvent{
+					{Timestamp: "2026-01-01T12:00:00Z", Event: "state_transition", From: "NONE", To: "ACTIVE"},
+				},
+			},
+		},
+		{
+			"RiteListOutput",
+			RiteListOutput{
+				Rites: []RiteSummary{
+					{Name: "eco", Form: "full", AgentCount: 5, SkillCount: 3, Source: "project", Active: true},
+				},
+			},
+		},
+		{
+			"PantheonOutput",
+			PantheonOutput{
+				Rite:   "eco",
+				Agents: []PantheonAgent{{Name: "pythia", Model: "opus", Description: "orchestrator"}},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			headers := tt.tabular.Headers()
+			rows := tt.tabular.Rows()
+			if len(rows) == 0 {
+				t.Fatal("Rows() returned empty slice")
+			}
+			for i, row := range rows {
+				if len(row) != len(headers) {
+					t.Errorf("row[%d] has %d columns, want %d (matching headers)", i, len(row), len(headers))
+				}
+			}
+		})
+	}
+}
+
+// --- PrintSuccess tests ---
+
+func TestPrintSuccess_JSONProducesOutput(t *testing.T) {
+	p, buf, _ := newTestPrinter(FormatJSON)
+	data := StatusOutput{HasSession: true, Status: "ACTIVE"}
+	if err := p.PrintSuccess(data); err != nil {
+		t.Fatalf("PrintSuccess() error = %v", err)
+	}
+	if buf.Len() == 0 {
+		t.Error("PrintSuccess() produced no output in JSON mode")
+	}
+	if !json.Valid(buf.Bytes()) {
+		t.Errorf("PrintSuccess() JSON output is not valid: %s", buf.String())
+	}
+}
+
+func TestPrintSuccess_TextIsSilent(t *testing.T) {
+	p, buf, _ := newTestPrinter(FormatText)
+	data := StatusOutput{HasSession: true, Status: "ACTIVE"}
+	if err := p.PrintSuccess(data); err != nil {
+		t.Fatalf("PrintSuccess() error = %v", err)
+	}
+	if buf.Len() != 0 {
+		t.Errorf("PrintSuccess() wrote output in text mode, expected silent: %s", buf.String())
+	}
+}
+
+// --- PrintError text mode test ---
+
+func TestPrintError_TextMode(t *testing.T) {
+	p, _, errBuf := newTestPrinter(FormatText)
+	err := &plainErrorImpl{msg: "test error"}
+	if pErr := p.PrintError(err); pErr != nil {
+		t.Fatalf("PrintError() error = %v", pErr)
+	}
+	if !strings.Contains(errBuf.String(), "test error") {
+		t.Errorf("PrintError() text output missing error message: %s", errBuf.String())
+	}
+	if !strings.Contains(errBuf.String(), "Error:") {
+		t.Errorf("PrintError() text output missing 'Error:' prefix: %s", errBuf.String())
+	}
+}
+
+// --- PrintText and PrintLine ---
+
+func TestPrintText_WritesRaw(t *testing.T) {
+	p, buf, _ := newTestPrinter(FormatJSON) // format should not matter for PrintText
+	p.PrintText("raw output")
+	if buf.String() != "raw output" {
+		t.Errorf("PrintText() = %q, want %q", buf.String(), "raw output")
+	}
+}
+
+func TestPrintLine_WritesWithNewline(t *testing.T) {
+	p, buf, _ := newTestPrinter(FormatJSON) // format should not matter for PrintLine
+	p.PrintLine("a line")
+	if buf.String() != "a line\n" {
+		t.Errorf("PrintLine() = %q, want %q", buf.String(), "a line\n")
+	}
+}
+
+// --- truncateDescription ---
+
+func TestTruncateDescription(t *testing.T) {
+	tests := []struct {
+		input string
+		want  string
+	}{
+		{"", ""},
+		{"Short description.", "Short description."},
+		{"First sentence. Second sentence.", "First sentence."},
+		{strings.Repeat("a", 100), strings.Repeat("a", 77) + "..."},
+		{"Line one\nLine two\nLine three", "Line one Line two"},
+	}
+
+	for _, tt := range tests {
+		got := truncateDescription(tt.input)
+		if got != tt.want {
+			t.Errorf("truncateDescription(%q) = %q, want %q", tt.input, got, tt.want)
+		}
+	}
+}
+
+// --- printTable via Printer ---
+
+func TestPrintTable_RendersTabularData(t *testing.T) {
+	p, buf, _ := newTestPrinter(FormatText)
+
+	data := RiteListOutput{
+		Rites: []RiteSummary{
+			{Name: "ecosystem", Form: "full", AgentCount: 5, SkillCount: 3, Source: "project", Active: true},
+		},
+		Total: 1,
+	}
+
+	// Text print should go through printTable because RiteListOutput implements Tabular
+	if err := p.Print(data); err != nil {
+		t.Fatalf("Print() error = %v", err)
+	}
+
+	output := buf.String()
+	if !strings.Contains(output, "ecosystem") {
+		t.Errorf("table output missing rite name: %s", output)
+	}
+	if !strings.Contains(output, "RITE") {
+		t.Errorf("table output missing header: %s", output)
+	}
+}
+
 // TestTextOutput_RiteSwitchOrphans verifies that orphan output uses descriptive
 // rite-switch phrasing when RiteSwitched is true.
 func TestTextOutput_RiteSwitchOrphans(t *testing.T) {
