@@ -278,7 +278,7 @@ Validates workflow YAML files against schema requirements including required fie
 
 **Function**: `validate_workflow_yaml()`
 
-**Implementation**: Hook-based validation logic (implementation location TBD - likely `.claude/hooks/lib/workflow-validator.sh` or similar)
+**Implementation**: Hook-based validation logic (implementation location TBD - likely `internal/hook/workflow_validate.go` projected via `ari sync`)
 
 **Exit Codes**:
 - 0 = valid

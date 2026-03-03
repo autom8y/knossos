@@ -244,7 +244,7 @@ pending_handoffs:
 
 ```
 1. Source rite creates HANDOFF artifact
-2. Source rite updates SESSION_CONTEXT.pending_handoffs (if session active)
+2. Source rite requests Moirai to update pending_handoffs (if session active) via Task tool
 3. User routes HANDOFF to target rite
 4. Target rite accepts, rejects, or requests clarification
 5. If accepted: Target rite produces response artifact

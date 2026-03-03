@@ -33,7 +33,7 @@ Manage rites. $ARGUMENTS
    - **Interactive (TTY)**: Prompt user for each orphan agent
    - **Non-interactive**: Require `--keep-orphans` flag
 3. Show confirmation with agent count
-4. If SESSION_CONTEXT exists, update `active_rite` field
+4. Confirm `ari sync` output shows the correct active rite
 
 **Note**: The `ari sync` command is the standard approach as of v0.2.0.
 

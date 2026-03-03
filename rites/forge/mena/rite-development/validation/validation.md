@@ -95,7 +95,7 @@ ari rite list
 
 | Symptom | Cause | Fix |
 |---------|-------|-----|
-| `/{rite-name}` not recognized | Command file missing | Create `.claude/commands/{rite-name}.md` |
+| `/{rite-name}` not recognized | Command file missing | Create dromena source at `mena/rite-switching/{rite-name}.dro.md` and run `ari sync` |
 | `@{rite-name}-ref` not found | Skill missing | Create `rites/{rite-name}/mena/{rite-name}-ref/INDEX.lego.md` (use skill-ref template) |
 | SESSION_CONTEXT stale | Swap script issue | Verify quick-switch updates active_team |
 

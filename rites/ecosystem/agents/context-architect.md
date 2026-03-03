@@ -152,7 +152,7 @@ hook:
 
 ### Components Affected
 - `internal/materialize/materialize.go`: mergeSettings() function
-- `.claude/settings.schema.json`: Add merge_strategy field
+- `knossos/schemas/settings.schema.json` (source): Add merge_strategy field
 
 ### Schema Changes
 [Include schema definition with validation]

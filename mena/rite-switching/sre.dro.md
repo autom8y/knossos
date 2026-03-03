@@ -19,7 +19,7 @@ Switch to the SRE rite and display the pantheon. $ARGUMENTS
 
 1. Execute: `ari sync --rite sre $ARGUMENTS`
 2. Display the pantheon output from ari (agents and their roles)
-3. If SESSION_CONTEXT exists, update `active_rite` to `sre`
+3. Confirm `ari sync` output shows the correct active rite
 
 ## Flags
 

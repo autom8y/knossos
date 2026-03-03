@@ -31,7 +31,7 @@ After successful switch, show the agent table:
 
 ### 3. Update Session
 
-If a session is active, update `active_rite` to `sre`.
+Confirm `ari sync` output shows the correct active rite.
 
 ## When to Use
 

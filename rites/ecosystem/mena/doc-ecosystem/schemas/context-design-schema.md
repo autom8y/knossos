@@ -149,12 +149,12 @@ work_packages:
     name: "Hook Refactoring"
     description: "Update all hooks to use centralized validation"
     files:
-      - path: ".claude/hooks/session-context.sh"
+      - path: "internal/hook/context.go"
         action: modify
-        description: "Replace inline validation with function call"
-      - path: ".claude/hooks/start-preflight.sh"
+        description: "Hook source (projects via ari sync)"
+      - path: "internal/hook/preflight.go"
         action: modify
-        description: "Replace inline validation with function call"
+        description: "Hook source (projects via ari sync)"
     dependencies: [WP1]
     estimated_effort: "1 hour"
 schema_version: "1.0"

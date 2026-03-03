@@ -19,7 +19,7 @@ Switch to the Innovation Lab (R&D) rite and display the pantheon. $ARGUMENTS
 
 1. Execute: `ari sync --rite rnd $ARGUMENTS`
 2. Display the pantheon output from ari (agents and their roles)
-3. If SESSION_CONTEXT exists, update `active_rite` to `rnd`
+3. Confirm `ari sync` output shows the correct active rite
 
 ## Flags
 
