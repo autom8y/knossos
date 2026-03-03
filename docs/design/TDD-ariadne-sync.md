@@ -34,8 +34,8 @@ This Technical Design Document specifies the implementation of the **sync domain
 - 7 sync commands: status, pull, push, diff, resolve, history, reset
 - Internal packages: `cmd/sync/`, `sync/`
 - Error handling with exit codes per PRD Section 5.1
-- Tracking state in `.claude/sync/state.json`
-- Audit trail in `.claude/sync/history.json`
+- Tracking state in `.knossos/sync/state.json`
+- Audit trail in `.knossos/sync/history.json`
 - Three-way merge for conflict resolution (reuse manifest/merge.go)
 - Remote source resolution (GitHub raw URLs, local paths, git refs)
 
@@ -115,7 +115,7 @@ ariadne/
          │
          v
 ┌─────────────────────────────────────────────────────────────────┐
-│  Filesystem: .claude/sync/state.json, .claude/sync/history.json,│
+│  Filesystem: .knossos/sync/state.json, .knossos/sync/history.json,│
 │  rites/, ~/.claude/skills/, .claude/hooks/                       │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -135,7 +135,7 @@ Resources that can be synced:
 #### Remote Sources
 
 ```yaml
-# .claude/sync/config.yaml (optional per-project config)
+# .knossos/sync/config.yaml (optional per-project config)
 remotes:
   roster:
     url: "https://github.com/autom8y/roster"
@@ -154,7 +154,7 @@ remotes:
 #### Tracking State
 
 ```
-.claude/sync/
+.knossos/sync/
 ├── state.json                 # Current sync state (checksums, timestamps)
 ├── history.json               # Audit log of sync operations
 └── conflicts/                 # Pending conflict files for resolution
@@ -275,7 +275,7 @@ No conflicts.
 | 9 | No .claude/ directory found |
 
 **Implementation Notes**:
-- Reads from `.claude/sync/state.json`
+- Reads from `.knossos/sync/state.json`
 - Computes checksums of local files for comparison
 - Does not fetch from remote (use `--fetch` for that behavior)
 - Groups resources by type (teams, skills, hooks)
@@ -356,7 +356,7 @@ ari sync pull [--resource=TYPE] [--remote=NAME] [--dry-run] [--force]
         "resource": "teams",
         "name": "10x-dev",
         "path": "rites/10x-dev/workflow.yaml",
-        "conflict_file": ".claude/sync/conflicts/workflow.yaml-20260104-190000.conflict",
+        "conflict_file": ".knossos/sync/conflicts/workflow.yaml-20260104-190000.conflict",
         "base_checksum": "sha256:base123...",
         "local_checksum": "sha256:local456...",
         "remote_checksum": "sha256:remote789..."
@@ -397,7 +397,7 @@ Pulling from roster...
 Conflicts:
   [teams] 10x-dev/workflow.yaml
     Local and remote both modified since last sync.
-    Conflict file: .claude/sync/conflicts/workflow.yaml-20260104-190000.conflict
+    Conflict file: .knossos/sync/conflicts/workflow.yaml-20260104-190000.conflict
 
 Summary: 0 updated, 0 added, 0 deleted, 1 conflict
 
@@ -418,9 +418,9 @@ Run 'ari sync resolve' to resolve conflicts before continuing.
 - Fetches checksums from remote first
 - Compares local, remote, and base (last synced) checksums
 - Uses three-way merge from manifest domain for conflict detection
-- Creates conflict files in `.claude/sync/conflicts/`
-- Updates `.claude/sync/state.json` after successful pull
-- Logs operation to `.claude/sync/history.json`
+- Creates conflict files in `.knossos/sync/conflicts/`
+- Updates `.knossos/sync/state.json` after successful pull
+- Logs operation to `.knossos/sync/history.json`
 - `--force` skips conflict detection and overwrites local
 
 ### 3.4 Command: `ari sync push`
@@ -637,7 +637,7 @@ Sync state updated.
 | 9 | No .claude/ directory found |
 
 **Implementation Notes**:
-- Reads conflict files from `.claude/sync/conflicts/`
+- Reads conflict files from `.knossos/sync/conflicts/`
 - Uses manifest domain's merge logic for `merge` strategy
 - Removes conflict files after resolution
 - Updates state and history after resolution
@@ -719,7 +719,7 @@ Total: 3 entries
 | 9 | No .claude/ directory found |
 
 **Implementation Notes**:
-- Reads from `.claude/sync/history.json`
+- Reads from `.knossos/sync/history.json`
 - JSONL format for efficient append-only writes
 - Supports filtering by resource and timestamp
 
@@ -961,7 +961,7 @@ JSONL format for append-only audit trail:
 
 ### 5.3 Conflict File Format
 
-Conflict files stored in `.claude/sync/conflicts/`:
+Conflict files stored in `.knossos/sync/conflicts/`:
 
 ```json
 {
@@ -1590,7 +1590,7 @@ func (r *Resolver) ResolveConflict(conflict ConflictEntry, strategy string) (*Re
 ### 7.3 Conflict File Lifecycle
 
 1. **Created**: During `ari sync pull` when conflict detected
-2. **Stored**: In `.claude/sync/conflicts/{file}-{timestamp}.conflict`
+2. **Stored**: In `.knossos/sync/conflicts/{file}-{timestamp}.conflict`
 3. **Resolved**: Via `ari sync resolve`
 4. **Removed**: After successful resolution
 

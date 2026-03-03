@@ -166,7 +166,7 @@ The core module provides all FSM operations:
 
 | Variable            | Default            | Description                    |
 |---------------------|--------------------|--------------------------------|
-| FSM_SESSIONS_DIR    | .claude/sessions   | Session storage directory      |
+| FSM_SESSIONS_DIR    | .sos/sessions      | Session storage directory      |
 | FSM_LOCK_TIMEOUT    | 10                 | Lock timeout in seconds        |
 | FSM_VALIDATE_SCHEMA | true               | Enable schema validation       |
 | FSM_EMIT_EVENTS     | true               | Enable event emission          |

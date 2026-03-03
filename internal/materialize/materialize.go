@@ -464,7 +464,7 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 		}
 	}
 
-	// 9. Track state in .claude/sync/state.json
+	// 9. Track state in .knossos/sync/state.json
 	if err := m.trackState(manifest, activeRiteName); err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to track state", err)
 	}

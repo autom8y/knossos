@@ -81,7 +81,7 @@ Read Has Session, Session State from the context table — do not call `ari sess
    GIT_DIR=$(git rev-parse --git-dir 2>/dev/null)
    if [[ -f "$GIT_DIR" ]] && grep -q "^gitdir:" "$GIT_DIR" 2>/dev/null; then
      IS_WORKTREE=true
-     WT_META=".claude/.worktree-meta.json"
+     WT_META=".knossos/.worktree-meta.json"
      WT_ID=$(jq -r '.worktree_id' "$WT_META" 2>/dev/null)
    fi
    ```

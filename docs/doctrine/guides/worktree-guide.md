@@ -436,7 +436,7 @@ project/
 
 ### Worktree Metadata
 
-Each worktree has `.claude/.worktree-meta.json`:
+Each worktree has `.knossos/.worktree-meta.json`:
 
 ```json
 {

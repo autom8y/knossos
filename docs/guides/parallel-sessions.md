@@ -216,8 +216,8 @@ ls -la .sos/sessions/
 # Fix permissions if needed
 chmod 755 .sos/sessions/
 
-# Ensure .claude exists
-mkdir -p .claude/sessions
+# Ensure .sos exists
+mkdir -p .sos/sessions
 ```
 
 ## Integration with state-mate

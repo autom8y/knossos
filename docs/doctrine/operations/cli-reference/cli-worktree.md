@@ -58,7 +58,7 @@ ari worktree create migration --complexity=MIGRATION
 2. `.claude/` directory materialized from roster
 3. Rite activated via sync materialize
 4. Initial session created (optional)
-5. Worktree metadata saved to `.claude/.worktree-meta.json`
+5. Worktree metadata saved to `.knossos/.worktree-meta.json`
 
 **Related Commands**:
 - [`ari worktree list`](#ari-worktree-list) — List worktrees

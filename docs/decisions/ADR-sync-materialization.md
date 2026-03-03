@@ -153,7 +153,7 @@ func templateFuncs() template.FuncMap {
 
 ### State Tracking
 
-`.claude/sync/state.json`:
+`.knossos/sync/state.json`:
 
 ```json
 {
@@ -207,7 +207,7 @@ ari rite switch rnd  # Backs up customizations, switches agents/skills
 
 ### Negative
 
-- **State File Dependency**: `.claude/sync/state.json` must be maintained
+- **State File Dependency**: `.knossos/sync/state.json` must be maintained
 - **Complexity**: Three-way merge is more complex than simple overwrite
 - **Merge Conflicts**: Users must resolve conflicts manually when both sides change
 - **Learning Curve**: Understanding materialization model takes time
@@ -290,7 +290,7 @@ Update `ariadne/internal/cmd/sync/`:
 
 If materialization model fails:
 1. Restore `.claude/` from git (if previously tracked)
-2. Remove `.claude/sync/state.json` to reset state
+2. Remove `.knossos/sync/state.json` to reset state
 3. Re-run `ari sync --force` to regenerate
 
 ## Related

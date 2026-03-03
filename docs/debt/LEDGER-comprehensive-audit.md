@@ -380,8 +380,8 @@ Three stale items in `.know/test-coverage.md` require correction: `internal/erro
 - **Category**: Code > Dead infrastructure
 - **Severity**: low
 - **Title**: `state.json` may be entirely eliminable
-- **Location**: `internal/sync/state.go`, `.claude/sync/state.json`
-- **Impact**: After removing `active_rite` (PKG-008) and potentially `last_sync` (DEBT-125), `state.json` would contain only `schema_version`. The question is whether the file serves any purpose beyond versioning itself. `StateManager.IsInitialized()` checks for file existence -- this could be replaced by checking for `.claude/` existence.
+- **Location**: `internal/sync/state.go`, `.knossos/sync/state.json`
+- **Impact**: After removing `active_rite` (PKG-008) and potentially `last_sync` (DEBT-125), `state.json` would contain only `schema_version`. The question is whether the file serves any purpose beyond versioning itself. `StateManager.IsInitialized()` checks for file existence -- this could be replaced by checking for `.knossos/` existence.
 - **Effort estimate**: 2-3 hours (audit all StateManager callers, replace with simpler check)
 - **Staleness**: **VALID** -- follow-up to PKG-008/DEBT-039.
 - **Cross-reference**: DEBT-125, `.know/design-constraints.md` Knowledge Gap 1

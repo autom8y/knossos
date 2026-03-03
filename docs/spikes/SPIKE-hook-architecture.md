@@ -353,7 +353,7 @@ set -euo pipefail
 
 # Early exit checks (shell)
 [[ "${USE_ARI_HOOKS:-1}" != "1" ]] && exit 0
-[[ ! -d ".claude/sessions" ]] && exit 0
+[[ ! -d ".sos/sessions" ]] && exit 0
 
 # Source shared libraries (shell)
 source .claude/hooks/lib/session-utils.sh
@@ -406,7 +406,7 @@ set -euo pipefail
 # case "$CLAUDE_HOOK_TOOL_NAME" in Edit|Write|Bash) ;; *) exit 0 ;; esac
 
 # Check 3: Session exists (if needed)
-# SESSION_DIR="${CLAUDE_SESSION_DIR:-.claude/sessions}"
+# SESSION_DIR="${CLAUDE_SESSION_DIR:-.sos/sessions}"
 # [[ ! -d "$SESSION_DIR" ]] && exit 0
 
 # Binary resolution with PATH fallback (per ADR-0002 style)

@@ -17,7 +17,7 @@ func newBackupsCmd(ctx *cmdContext) *cobra.Command {
 Backups are created automatically before each sync operation.
 By default, the 5 most recent backups are retained.
 
-Backup files are stored in .claude/backups/ with timestamp naming:
+Backup files are stored in .knossos/backups/ with timestamp naming:
   CLAUDE.md.YYYY-MM-DDTHH-MM-SSZ
 
 Examples:

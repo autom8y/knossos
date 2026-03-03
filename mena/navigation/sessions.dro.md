@@ -73,8 +73,8 @@ echo "=== Worktrees ==="
 for wt in "$PROJECT_ROOT/worktrees"/wt-*; do
   [ -d "$wt" ] || continue
   WT_ID=$(basename "$wt")
-  WT_NAME=$(jq -r '.name // "unnamed"' "$wt/.claude/.worktree-meta.json" 2>/dev/null)
-  WT_RITE=$(jq -r '.rite // "none"' "$wt/.claude/.worktree-meta.json" 2>/dev/null)
+  WT_NAME=$(jq -r '.name // "unnamed"' "$wt/.knossos/.worktree-meta.json" 2>/dev/null)
+  WT_RITE=$(jq -r '.rite // "none"' "$wt/.knossos/.worktree-meta.json" 2>/dev/null)
 
   echo ""
   echo "[$WT_ID] $WT_NAME (rite: $WT_RITE)"

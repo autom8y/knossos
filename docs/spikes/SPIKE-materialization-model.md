@@ -208,7 +208,7 @@ func (g *Generator) templateFuncs() template.FuncMap {
 ```
 
 **Implementation**:
-- Store checksums of generated files in `.claude/sync/state.json`
+- Store checksums of generated files in `.knossos/sync/state.json`
 - On sync: Compare LOCAL vs BASE and REMOTE vs BASE
 - No changes to LOCAL: Accept REMOTE (simple update)
 - Changes to LOCAL, no changes to REMOTE: Keep LOCAL (user customization)
@@ -323,7 +323,7 @@ func (g *Generator) templateFuncs() template.FuncMap {
 │    3. Materialize agents from rites/{selected}/agents/                      │
 │    4. Materialize skills from rites/{selected}/skills/ + rites/shared/      │
 │    5. Generate CLAUDE.md from templates/CLAUDE.md.tpl                       │
-│    6. Write .claude/sync/state.json with checksums                          │
+│    6. Write .knossos/sync/state.json with checksums                          │
 │    7. Write .claude/ACTIVE_RITE file                                        │
 │                                                                             │
 │  Output:                                                                    │
@@ -452,7 +452,7 @@ func (g *Generator) templateFuncs() template.FuncMap {
 │    6. Sync shared skills from rites/shared/skills/                          │
 │    7. Regenerate CLAUDE.md with new rite context                            │
 │    8. Update .claude/ACTIVE_RITE                                            │
-│    9. Update .claude/sync/state.json                                        │
+│    9. Update .knossos/sync/state.json                                        │
 │                                                                             │
 │  Output:                                                                    │
 │    "Switched to 'rnd' rite"                                                 │
@@ -493,7 +493,7 @@ func (g *Generator) templateFuncs() template.FuncMap {
 When conflicts occur, store marker file:
 
 ```
-.claude/sync/conflicts/
+.knossos/sync/conflicts/
   session-manager.sh.conflict.json
 ```
 
@@ -504,9 +504,9 @@ When conflicts occur, store marker file:
   "base_checksum": "sha256:abc123...",
   "local_checksum": "sha256:def456...",
   "remote_checksum": "sha256:ghi789...",
-  "local_path": ".claude/sync/conflicts/session-manager.sh.local",
-  "remote_path": ".claude/sync/conflicts/session-manager.sh.remote",
-  "base_path": ".claude/sync/conflicts/session-manager.sh.base"
+  "local_path": ".knossos/sync/conflicts/session-manager.sh.local",
+  "remote_path": ".knossos/sync/conflicts/session-manager.sh.remote",
+  "base_path": ".knossos/sync/conflicts/session-manager.sh.base"
 }
 ```
 
@@ -525,7 +525,7 @@ When conflicts occur, store marker file:
 
 ### 4.1 State File Schema
 
-`.claude/sync/state.json`:
+`.knossos/sync/state.json`:
 
 ```json
 {

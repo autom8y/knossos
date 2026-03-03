@@ -332,11 +332,11 @@ SESSION_CONTEXT.md observed sizes: up to 355 lines / 15.9KB — unbounded growth
 | `.claude/hooks/**` | materializeHooks | writeIfChanged (selective) |
 | `.claude/rules/*.md` | materializeRules | writeIfChanged (selective) |
 | `.claude/CLAUDE.md` | materializeCLAUDEmd (inscription) | AtomicWriteFile |
-| `.claude/KNOSSOS_MANIFEST.yaml` | inscription Save | AtomicWriteFile |
+| `.knossos/KNOSSOS_MANIFEST.yaml` | inscription Save | AtomicWriteFile |
 | `.claude/settings.local.json` | materializeSettingsWithManifest | writeIfChanged |
 | `.claude/ACTIVE_RITE` | writeActiveRite | writeIfChanged |
 | `.claude/ACTIVE_WORKFLOW.yaml` | materializeWorkflow | writeIfChanged |
-| `.claude/sync/state.json` | trackState | writeIfChanged |
+| `.knossos/sync/state.json` | trackState | writeIfChanged |
 | `.sos/sessions/*/SESSION_CONTEXT.md` | session commands | os.WriteFile (via Moirai) |
 | `.sos/sessions/*/.moirai-lock` | lock command | os.WriteFile |
 | `.sos/sessions/*/events.jsonl` | EventEmitter | append |

@@ -111,7 +111,7 @@ ari sync --rite <rite-name>
 git worktree list
 
 # Check worktree metadata
-cat worktrees/wt-{id}/.claude/.worktree-meta.json
+cat worktrees/wt-{id}/.knossos/.worktree-meta.json
 
 # Verify sync state
 cd worktrees/wt-{id} && ari sync --dry-run

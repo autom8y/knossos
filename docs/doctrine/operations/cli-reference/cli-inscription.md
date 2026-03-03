@@ -116,7 +116,7 @@ ari inscription backups [flags]
 ```
 
 **Description**:
-Lists backups created before inscription sync operations. Backups are stored in `.claude/backups/`.
+Lists backups created before inscription sync operations. Backups are stored in `.knossos/backups/`.
 
 **Examples**:
 ```bash

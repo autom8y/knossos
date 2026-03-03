@@ -166,7 +166,7 @@ set -euo pipefail
 case "$CLAUDE_HOOK_TOOL_NAME" in Edit|Write|Bash) ;; *) exit 0 ;; esac
 
 # Check for active session
-SESSION_DIR="${CLAUDE_SESSION_DIR:-.claude/sessions}"
+SESSION_DIR="${CLAUDE_SESSION_DIR:-.sos/sessions}"
 [[ ! -d "$SESSION_DIR" ]] && exit 0
 
 # DISPATCH: Call ari directly (<100ms total)

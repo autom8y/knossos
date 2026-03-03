@@ -62,7 +62,7 @@ When a user runs `ari init --rite 10x-dev` on a fresh machine:
    - `.claude/skills/` -- Legomena (reference knowledge) from rite + shared mena
    - `.claude/CLAUDE.md` -- Rendered from embedded section templates
    - `.claude/settings.json` -- Agent-guard hook configuration
-   - `.claude/KNOSSOS_MANIFEST.yaml` -- Project state tracking
+   - `.knossos/KNOSSOS_MANIFEST.yaml` -- Project state tracking
    - `config/hooks.yaml` -- Bootstrapped from embedded hooks config
 
 3. **XDG mena extraction** (`extractEmbeddedMenaToXDG`): On first `ari init`, platform-level mena are extracted from the embedded FS to the XDG data directory (`~/Library/Application Support/knossos/mena/` on macOS, `~/.local/share/knossos/mena/` on Linux). This provides `/go`, `/start`, `/commit`, guidance skills, etc. to all projects without needing `KNOSSOS_HOME`.

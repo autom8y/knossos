@@ -712,7 +712,7 @@ migrate_session() {
 
 # Batch migration for all sessions
 migrate_all_sessions() {
-    local sessions_dir=".claude/sessions"
+    local sessions_dir=".sos/sessions"
     local success=0
     local failed=0
 
@@ -760,7 +760,7 @@ rollback_session() {
 }
 
 rollback_all_sessions() {
-    local sessions_dir=".claude/sessions"
+    local sessions_dir=".sos/sessions"
 
     for session_dir in "$sessions_dir"/session-*; do
         [[ -d "$session_dir" ]] || continue
@@ -1069,7 +1069,7 @@ Location: `tests/integration/session-concurrency.bats`
 
 ```bash
 # For testing, these can be overridden:
-FSM_SESSIONS_DIR="${FSM_SESSIONS_DIR:-.claude/sessions}"
+FSM_SESSIONS_DIR="${FSM_SESSIONS_DIR:-.sos/sessions}"
 FSM_LOCK_TIMEOUT="${FSM_LOCK_TIMEOUT:-10}"
 FSM_VALIDATE_SCHEMA="${FSM_VALIDATE_SCHEMA:-true}"
 FSM_EMIT_EVENTS="${FSM_EMIT_EVENTS:-true}"

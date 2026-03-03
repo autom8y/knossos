@@ -446,7 +446,7 @@ This is the standard extensibility pattern for project-specific content in knoss
 
 ### Source-Repo Manifest Addition
 
-Add to `.claude/KNOSSOS_MANIFEST.yaml`:
+Add to `.knossos/KNOSSOS_MANIFEST.yaml`:
 
 ```yaml
 knossos_vars:
@@ -492,7 +492,7 @@ This works because `index .KnossosVars "build_command"` returns empty string for
 | `knossos/templates/sections/slash-commands.md.tpl` | NONE | Already optimal |
 | `knossos/templates/sections/user-content.md.tpl` | EDIT | Compress placeholder comments |
 | `knossos/templates/CLAUDE.md.tpl` | NONE | Master template correct from Sprint 1 |
-| `.claude/KNOSSOS_MANIFEST.yaml` | EDIT | Add `knossos_vars` block |
+| `.knossos/KNOSSOS_MANIFEST.yaml` | EDIT | Add `knossos_vars` block |
 | `.claude/CLAUDE.md` | REGENERATE + MANUAL | Regenerate via sync, then manually trim `user-content` |
 | `internal/inscription/manifest.go` | NONE | Already correct from Sprint 1 |
 

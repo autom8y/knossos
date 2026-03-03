@@ -136,7 +136,7 @@
 | ACTIVE_RITE written | PASS | Contains `10x-dev` |
 | Agents materialized | PASS | 5 agents in `.claude/agents/` |
 | Skills materialized | PASS | 8 skills in `.claude/skills/` (rite + shared) |
-| State tracking | PASS | `.claude/sync/state.json` exists with schema_version, last_sync |
+| State tracking | PASS | `.knossos/sync/state.json` exists with schema_version, last_sync |
 | Idempotency | PASS | Running multiple times produces same result |
 
 ### 4.2 Issues Found

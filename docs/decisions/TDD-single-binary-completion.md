@@ -477,7 +477,7 @@ When no `--rite`:
 
 ### 4.3 Idempotency
 
-On an existing Knossos project (`.claude/KNOSSOS_MANIFEST.yaml` exists):
+On an existing Knossos project (`.knossos/KNOSSOS_MANIFEST.yaml` exists):
 - Without `--force`: Print "already initialized" and exit 0 (not an error)
 - With `--force`: Re-run full scaffolding, preserving satellite regions in CLAUDE.md
 
@@ -717,7 +717,7 @@ Global Flags:
   "source": "embedded",
   "artifacts": [
     ".claude/CLAUDE.md",
-    ".claude/KNOSSOS_MANIFEST.yaml",
+    ".knossos/KNOSSOS_MANIFEST.yaml",
     ".claude/settings.local.json"
   ]
 }
@@ -860,7 +860,7 @@ func TestEmbeddedRites_ContainsKnownRites(t *testing.T) {
 func TestInit_FreshDirectory(t *testing.T) {
     dir := t.TempDir()
     // Run init command targeting dir
-    // Verify .claude/KNOSSOS_MANIFEST.yaml exists
+    // Verify .knossos/KNOSSOS_MANIFEST.yaml exists
     // Verify .claude/CLAUDE.md exists
     // Verify .claude/settings.local.json exists
 }

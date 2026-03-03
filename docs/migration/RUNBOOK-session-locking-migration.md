@@ -71,8 +71,8 @@ pwd
 
 ```bash
 # Create timestamped backup of all sessions
-BACKUP_DIR=".claude/sessions.backup.$(date +%Y%m%d-%H%M%S)"
-cp -r .claude/sessions "$BACKUP_DIR" 2>/dev/null && echo "Backup created: $BACKUP_DIR" || echo "No sessions to backup"
+BACKUP_DIR=".sos/sessions.backup.$(date +%Y%m%d-%H%M%S)"
+cp -r .sos/sessions "$BACKUP_DIR" 2>/dev/null && echo "Backup created: $BACKUP_DIR" || echo "No sessions to backup"
 ```
 **Verify**: Backup directory created OR "No sessions to backup" message
 
@@ -152,8 +152,8 @@ ls -la .sos/sessions/.create.lock 2>/dev/null || echo "No create lock (expected)
 
 ```bash
 # Verify no corrupted lock files
-find .claude/sessions -name "*.lock" -type f 2>/dev/null
-find .claude/sessions -name "*.lock.d" -type d 2>/dev/null
+find .sos/sessions -name "*.lock" -type f 2>/dev/null
+find .sos/sessions -name "*.lock.d" -type d 2>/dev/null
 ```
 **Verify**: No output (no stale locks)
 
@@ -333,11 +333,11 @@ git revert <commit-sha>
 **Option B: Restore from backup**
 ```bash
 # Find your backup
-ls -la .claude/*.backup.* 2>/dev/null
+ls -la .sos/*.backup.* 2>/dev/null
 
 # Restore sessions
-rm -rf .claude/sessions
-cp -r .claude/sessions.backup.<timestamp> .claude/sessions
+rm -rf .sos/sessions
+cp -r .sos/sessions.backup.<timestamp> .sos/sessions
 echo "Sessions restored from backup"
 ```
 
@@ -379,8 +379,8 @@ ls -la .sos/sessions/<session_id>/SESSION_CONTEXT.md.v1.backup
 
 **Detection**:
 ```bash
-find .claude/sessions -name "*.lock" -mmin +10
-find .claude/sessions -name "*.lock.d" -mmin +10
+find .sos/sessions -name "*.lock" -mmin +10
+find .sos/sessions -name "*.lock.d" -mmin +10
 ```
 
 **Resolution**:

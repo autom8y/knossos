@@ -18,7 +18,7 @@ Also triggers when deleting `.claude/CLAUDE.md` directly:
 - `.claude/CLAUDE.md` — Claude Code's project instructions (loaded into system prompt)
 - `.claude/commands/` — Skill registry (slash commands)
 - `.claude/skills/` — Skill registry (reference skills)
-- `.claude/KNOSSOS_MANIFEST.yaml` — Inscription state
+- `.knossos/KNOSSOS_MANIFEST.yaml` — Inscription state
 
 When Claude Code detects changes to these files (via filesystem watching or post-tool-use reload), the mid-session mutation causes a crash or hang. The same issue occurs when `.claude/CLAUDE.md` is deleted — Claude Code attempts to reload and fails.
 

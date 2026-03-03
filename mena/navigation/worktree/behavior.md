@@ -110,7 +110,7 @@ Garbage collect orphaned worktree refs.
 
 ## Worktree Metadata
 
-Each worktree stores metadata in `.claude/.worktree-meta.json`:
+Each worktree stores metadata in `.knossos/.worktree-meta.json`:
 
 ```json
 {
@@ -139,4 +139,4 @@ Worktree management via the `ari worktree` subcommands.
 
 ### Worktree Detection
 
-Worktree context is detected via `.claude/.worktree-meta.json` presence. Use `ari worktree status` for metadata.
+Worktree context is detected via `.knossos/.worktree-meta.json` presence. Use `ari worktree status` for metadata.

@@ -542,7 +542,7 @@ See `.claude/skills/` and `~/.claude/skills/` for full list.
 
 ### 5.1 Invocation State File
 
-State is tracked in `.claude/INVOCATION_STATE.yaml`:
+State is tracked in `.knossos/INVOCATION_STATE.yaml`:
 
 ```yaml
 # INVOCATION_STATE.yaml

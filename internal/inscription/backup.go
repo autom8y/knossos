@@ -13,7 +13,7 @@ import (
 // BackupManager handles backup and rollback operations for CLAUDE.md.
 type BackupManager struct {
 	// BackupDir is the directory where backups are stored.
-	// Default: .claude/backups
+	// Default: .knossos/backups
 	BackupDir string
 
 	// TargetPath is the path to the file being backed up.

@@ -96,7 +96,7 @@ For each materialization:
 - [ ] .claude/agents/ contains expected agents
 - [ ] .claude/skills/ contains expected skills (rite + shared)
 - [ ] .claude/CLAUDE.md updated with quick-start section
-- [ ] .claude/sync/state.json updated with timestamp
+- [ ] .knossos/sync/state.json updated with timestamp
 
 ---
 

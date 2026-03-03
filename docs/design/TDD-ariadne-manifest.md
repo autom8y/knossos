@@ -193,7 +193,7 @@ ari manifest show [--path=PATH] [--schema] [--resolved]
       "available": ["10x-dev", "rnd", "security"]
     },
     "paths": {
-      "sessions": ".claude/sessions",
+      "sessions": ".sos/sessions",
       "agents": ".claude/agents",
       "skills": ".claude/skills"
     }
@@ -215,7 +215,7 @@ Teams:
   Available: 10x-dev, rnd, security
 
 Paths:
-  Sessions: .claude/sessions
+  Sessions: .sos/sessions
   Agents: .claude/agents
   Skills: .claude/skills
 ```
@@ -321,7 +321,7 @@ Paths can reference git objects:
 
 @@ paths @@
   "paths": {
-    "sessions": ".claude/sessions",
+    "sessions": ".sos/sessions",
     "agents": ".claude/agents",
 -   "hooks": ".claude/hooks"
   }
@@ -717,7 +717,7 @@ The Claude Extension Manifest (`.claude/manifest.json`):
     "discovery": ["rites/", "~/.config/ariadne/rites/"]
   },
   "paths": {
-    "sessions": ".claude/sessions",
+    "sessions": ".sos/sessions",
     "agents": ".claude/agents",
     "skills": ".claude/skills",
     "hooks": ".claude/hooks"

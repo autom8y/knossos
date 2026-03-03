@@ -430,7 +430,7 @@ set_current_session() {
     fi
 
     local project_dir="${CLAUDE_PROJECT_DIR:-.}"
-    local sessions_dir="$project_dir/.claude/sessions"
+    local sessions_dir="$project_dir/.sos/sessions"
     local current_file="$sessions_dir/.current-session"
 
     mkdir -p "$sessions_dir" 2>/dev/null || {

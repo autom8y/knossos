@@ -106,7 +106,7 @@
       "properties": {
         "when": {
           "type": "string",
-          "description": "Condition expression (e.g., file_exists('.claude/sessions'), env_set(VAR), always, never)"
+          "description": "Condition expression (e.g., file_exists('.sos/sessions'), env_set(VAR), always, never)"
         },
         "include": {
           "type": "array",

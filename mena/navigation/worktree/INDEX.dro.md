@@ -10,7 +10,7 @@ context: fork
 
 ## Context
 
-Git worktrees provide true filesystem isolation for parallel Claude sessions. Each worktree has its own `.claude/` directory with independent agents, sessions, sprints, and rite configuration.
+Git worktrees provide true filesystem isolation for parallel Claude sessions. Each worktree has its own `.claude/` directory (CC primitives), `.knossos/` (framework state), and `.sos/` (session state).
 
 ## Pre-flight
 

@@ -80,7 +80,7 @@ The materialize command:
    - Into `.claude/skills/`
 4. **Preserves** hooks in `.claude/hooks/` (until templates/hooks exists)
 5. **Generates** CLAUDE.md using the inscription system
-6. **Tracks** state in `.claude/sync/state.json`
+6. **Tracks** state in `.knossos/sync/state.json`
 7. **Writes** ACTIVE_RITE marker
 
 ### Idempotency
@@ -154,7 +154,7 @@ hooks: []
 
 ## State Tracking
 
-Materialization tracks state in `.claude/sync/state.json`:
+Materialization tracks state in `.knossos/sync/state.json`:
 
 ```json
 {
@@ -199,7 +199,7 @@ ari sync materialize --rite ecosystem
 
 **Cause**: KNOSSOS_MANIFEST.yaml may be missing or incomplete.
 
-**Solution**: Ensure `.claude/KNOSSOS_MANIFEST.yaml` exists with region definitions.
+**Solution**: Ensure `.knossos/KNOSSOS_MANIFEST.yaml` exists with region definitions.
 
 ### Issue: "failed to load rite manifest"
 

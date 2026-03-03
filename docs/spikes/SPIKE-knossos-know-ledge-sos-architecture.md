@@ -131,7 +131,7 @@ rite work        →  .ledge/    (graduated artifacts)
 
 | File | Method | Current | Proposed |
 |------|--------|---------|----------|
-| `internal/paths/paths.go` | `SessionsDir()` | `.claude/sessions` | `.sos/sessions` |
+| `internal/paths/paths.go` | `SessionsDir()` | `.sos/sessions` | `.sos/sessions` |
 | `internal/paths/paths.go` | `LocksDir()` | `.sos/sessions/.locks` | `.sos/sessions/.locks` |
 | `internal/paths/paths.go` | `CCMapDir()` | `.sos/sessions/.cc-map` | `.sos/sessions/.cc-map` |
 | `internal/paths/paths.go` | `ArchiveDir()` | `.claude/.archive/sessions` | `.sos/archive` |

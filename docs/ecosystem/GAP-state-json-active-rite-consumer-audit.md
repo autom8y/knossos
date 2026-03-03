@@ -44,7 +44,7 @@ This is the **primary authoritative store**. All runtime rite resolution flows t
 
 **Consumer count: 18** (13 READ, 2 WRITE, 1 DELETE, 2 indirect READ)
 
-### 2. state.json active_rite Consumers (.claude/sync/state.json)
+### 2. state.json active_rite Consumers (.knossos/sync/state.json)
 
 | # | Consumer | File:Line | Access | Purpose |
 |---|----------|-----------|--------|---------|
@@ -94,9 +94,9 @@ This is the **primary authoritative store**. All runtime rite resolution flows t
 | Store | Path | Written by | Read by (runtime) | Unique data |
 |-------|------|-----------|-------------------|-------------|
 | **ACTIVE_RITE** (file) | `.claude/ACTIVE_RITE` | `materialize.writeActiveRite()` (step 10) | 18 consumers (see A1-A18) | None -- this is the primary |
-| **state.json** | `.claude/sync/state.json` | `materialize.trackState()` (step 9) | **ZERO runtime readers** | `last_sync` timestamp |
+| **state.json** | `.knossos/sync/state.json` | `materialize.trackState()` (step 9) | **ZERO runtime readers** | `last_sync` timestamp |
 | **PROVENANCE_MANIFEST.yaml** | `.claude/PROVENANCE_MANIFEST.yaml` | `materialize.saveProvenanceManifest()` (step 11) | 0 for rite selection | Audit trail; file-level provenance entries |
-| **KNOSSOS_MANIFEST.yaml** | `.claude/KNOSSOS_MANIFEST.yaml` | `inscription.SyncCLAUDEmd()` | 2 (K3 template rendering, K6 validation) | Region ownership, inscription version |
+| **KNOSSOS_MANIFEST.yaml** | `.knossos/KNOSSOS_MANIFEST.yaml` | `inscription.SyncCLAUDEmd()` | 2 (K3 template rendering, K6 validation) | Region ownership, inscription version |
 
 ### Write Order Within One Sync Pipeline Run
 

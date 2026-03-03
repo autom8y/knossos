@@ -241,7 +241,7 @@ Per C1 Part 5: Add `build_command` and `test_command` to KnossosVars. Render con
 
 Files to modify:
 - `knossos/templates/sections/platform-infrastructure.md.tpl` (conditional rendering)
-- `.claude/KNOSSOS_MANIFEST.yaml` (add `knossos_vars` block if not present)
+- `.knossos/KNOSSOS_MANIFEST.yaml` (add `knossos_vars` block if not present)
 
 ---
 

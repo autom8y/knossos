@@ -164,7 +164,7 @@ Existing markers are supported during migration:
 ### 4.1 File Location
 
 ```
-.claude/KNOSSOS_MANIFEST.yaml
+.knossos/KNOSSOS_MANIFEST.yaml
 ```
 
 ### 4.2 Schema Definition
@@ -578,13 +578,13 @@ FOR each section NOT in section_order:
   region: "agent-routing"
   type: "knossos_overwrite"
   message: "User edits overwritten in knossos-owned region"
-  backup: ".claude/backups/CLAUDE.md.2026-01-06T10-35-00Z"
+  backup: ".knossos/backups/CLAUDE.md.2026-01-06T10-35-00Z"
 ```
 
 #### Stage 6: Write Output
 
 **Write Protocol**:
-1. Create backup: `.claude/backups/CLAUDE.md.{timestamp}`
+1. Create backup: `.knossos/backups/CLAUDE.md.{timestamp}`
 2. Write to temp file: `.claude/CLAUDE.md.tmp`
 3. Validate output (markers balanced, sections present)
 4. Atomic rename: `mv .claude/CLAUDE.md.tmp .claude/CLAUDE.md`
@@ -601,10 +601,10 @@ FOR each section NOT in section_order:
 **Rollback Process**:
 ```bash
 # Keep last 5 backups
-ls -t .claude/backups/CLAUDE.md.* | tail -n +6 | xargs rm -f
+ls -t .knossos/backups/CLAUDE.md.* | tail -n +6 | xargs rm -f
 
 # Rollback to most recent
-cp .claude/backups/CLAUDE.md.{latest} .claude/CLAUDE.md
+cp .knossos/backups/CLAUDE.md.{latest} .claude/CLAUDE.md
 ```
 
 ### 5.3 Sequence Diagram
@@ -761,7 +761,7 @@ Initial implementation uses simple presence/absence:
 conditionals:
   # Include state-management only if sessions are used
   state-management:
-    when: "file_exists('.claude/sessions')"
+    when: "file_exists('.sos/sessions')"
     include: [state-management]
     exclude: []
 

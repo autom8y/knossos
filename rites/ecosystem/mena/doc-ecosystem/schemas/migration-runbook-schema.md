@@ -181,7 +181,7 @@ steps:
   - number: 3
     action: "Migrate existing SESSION_CONTEXT.md files"
     verification: "All sessions have schema_version: 2.0"
-    command: "find .claude/sessions -name 'SESSION_CONTEXT.md' -exec head -20 {} \\;"
+    command: "find .sos/sessions -name 'SESSION_CONTEXT.md' -exec head -20 {} \\;"
     warning: "This modifies existing session files"
   - number: 4
     action: "Validate migrated sessions"

@@ -52,8 +52,8 @@ When step 7 (`materializeCLAUDEmd`) fails, the following files are in an **incon
 
 **Never updated (stale OLD rite content):**
 - `.claude/CLAUDE.md` -- still references the OLD rite
-- `.claude/KNOSSOS_MANIFEST.yaml` -- still says the OLD rite is active
-- `.claude/sync/state.json` -- still records the OLD rite
+- `.knossos/KNOSSOS_MANIFEST.yaml` -- still says the OLD rite is active
+- `.knossos/sync/state.json` -- still records the OLD rite
 - `.claude/ACTIVE_WORKFLOW.yaml` -- still has the OLD rite's workflow
 - `.claude/ACTIVE_RITE` -- still says the OLD rite (or does not exist)
 - `.claude/PROVENANCE_MANIFEST.yaml` -- never updated
@@ -321,9 +321,9 @@ Complete list of files that must be mutually consistent after a successful sync:
 | `.claude/skills/*` | 5 | Mena sources (platform + shared + deps + rite) |
 | `.claude/rules/*.md` | 6 | Template rules (knossos-internal or none) |
 | `.claude/CLAUDE.md` | 7 | Template rendering with IsKnossosProject + agent data |
-| `.claude/KNOSSOS_MANIFEST.yaml` | 7 (via SyncCLAUDEmd) | Active rite, section hashes, inscription version |
+| `.knossos/KNOSSOS_MANIFEST.yaml` | 7 (via SyncCLAUDEmd) | Active rite, section hashes, inscription version |
 | `.claude/settings.local.json` | 8 | MCP servers from manifest + hooks.yaml |
-| `.claude/sync/state.json` | 9 | Active rite name + last sync timestamp |
+| `.knossos/sync/state.json` | 9 | Active rite name + last sync timestamp |
 | `.claude/ACTIVE_WORKFLOW.yaml` | 9.5 | Workflow definition from rite |
 | `.claude/ACTIVE_RITE` | 10 | Rite name marker |
 | `.claude/PROVENANCE_MANIFEST.yaml` | last | All file checksums + ownership + source info |
