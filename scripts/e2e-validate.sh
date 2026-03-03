@@ -314,7 +314,7 @@ echo "--- Assertion 7: .claude/ directory structure ---"
 assert_dir_exists ".claude/agents/ exists" "$E2E_TMPDIR/.claude/agents"
 assert_dir_exists ".claude/commands/ exists" "$E2E_TMPDIR/.claude/commands"
 assert_dir_exists ".claude/skills/ exists" "$E2E_TMPDIR/.claude/skills"
-assert_file_exists_nonempty ".claude/settings.json exists and non-empty" "$E2E_TMPDIR/.claude/settings.json"
+assert_file_exists_nonempty ".claude/settings.local.json exists and non-empty" "$E2E_TMPDIR/.claude/settings.local.json"
 
 # Verify at least one agent file exists (ensures rite content actually materialized)
 AGENT_COUNT=$(find "$E2E_TMPDIR/.claude/agents" -name "*.md" 2>/dev/null | wc -l | tr -d ' ')
