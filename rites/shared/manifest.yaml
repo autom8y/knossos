@@ -37,7 +37,7 @@ hooks: []
 
 hook_defaults:
   write_guard:
-    allow_paths: [".ledge/", ".know/"]
+    allow_paths: [".ledge/", ".know/", ".claude/agent-memory/", ".claude/agent-memory-local/"]
     timeout: 3
 
 dependencies: []
