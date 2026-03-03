@@ -617,8 +617,8 @@ func (m *Manager) detectConflicts(path string) []string {
 
 // copySessionContext copies session context from source to target worktree.
 func copySessionContext(sourcePath, targetPath string) error {
-	sourceSessionsDir := filepath.Join(sourcePath, ".claude", "sessions")
-	targetSessionsDir := filepath.Join(targetPath, ".claude", "sessions")
+	sourceSessionsDir := filepath.Join(sourcePath, ".sos", "sessions")
+	targetSessionsDir := filepath.Join(targetPath, ".sos", "sessions")
 
 	entries, err := os.ReadDir(sourceSessionsDir)
 	if err != nil {

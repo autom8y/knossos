@@ -296,7 +296,8 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 
 	// Remove el-cheapo marker on normal sync (revert path)
 	if !opts.ElCheapo {
-		os.Remove(filepath.Join(claudeDir, ".el-cheapo-active"))
+		knossosDir := filepath.Join(filepath.Dir(claudeDir), ".knossos")
+		os.Remove(filepath.Join(knossosDir, ".el-cheapo-active"))
 	}
 
 	// Note: the skip guard (skip-if-same-rite) was removed. The pipeline is safe

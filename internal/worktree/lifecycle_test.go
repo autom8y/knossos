@@ -273,7 +273,7 @@ func TestPerWorktreeMeta(t *testing.T) {
 	}
 
 	// Verify file exists
-	metaPath := filepath.Join(tmpDir, ".claude", WorktreeMetaFileName)
+	metaPath := filepath.Join(tmpDir, ".knossos", WorktreeMetaFileName)
 	if _, err := os.Stat(metaPath); os.IsNotExist(err) {
 		t.Error("Metadata file was not created")
 	}

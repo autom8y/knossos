@@ -21,9 +21,9 @@ func NewResolver(projectRoot string) *Resolver {
 	return &Resolver{projectRoot: projectRoot}
 }
 
-// FindProjectRoot walks up from the given directory looking for .claude/.
+// FindProjectRoot walks up from the given directory looking for .claude/ or .knossos/.
 // If startDir is empty, uses the current working directory.
-// Returns an error if no .claude/ directory is found.
+// Returns an error if neither directory is found.
 func FindProjectRoot(startDir string) (string, error) {
 	if startDir == "" {
 		var err error
@@ -35,9 +35,14 @@ func FindProjectRoot(startDir string) (string, error) {
 
 	dir := startDir
 	for {
+		// Check .claude/ first (CC projects)
 		claudeDir := filepath.Join(dir, ".claude")
-		info, err := os.Stat(claudeDir)
-		if err == nil && info.IsDir() {
+		if info, err := os.Stat(claudeDir); err == nil && info.IsDir() {
+			return dir, nil
+		}
+		// Fallback: .knossos/ (knossos-managed projects)
+		knossosDir := filepath.Join(dir, ".knossos")
+		if info, err := os.Stat(knossosDir); err == nil && info.IsDir() {
 			return dir, nil
 		}
 
@@ -137,7 +142,7 @@ func (r *Resolver) ActiveWorkflowFile() string {
 
 // KnossosManifestFile returns the path to the KNOSSOS_MANIFEST.yaml file.
 func (r *Resolver) KnossosManifestFile() string {
-	return filepath.Join(r.ClaudeDir(), "KNOSSOS_MANIFEST.yaml")
+	return filepath.Join(r.KnossosDir(), "KNOSSOS_MANIFEST.yaml")
 }
 
 // AgentsDir returns the path to the .claude/agents/ directory.
@@ -195,7 +200,32 @@ func (r *Resolver) LedgeSpikesDir() string {
 
 // InvocationStateFile returns the path to the INVOCATION_STATE.yaml file.
 func (r *Resolver) InvocationStateFile() string {
-	return filepath.Join(r.ClaudeDir(), "INVOCATION_STATE.yaml")
+	return filepath.Join(r.KnossosDir(), "INVOCATION_STATE.yaml")
+}
+
+// KnossosSyncDir returns the path to the .knossos/sync/ directory.
+func (r *Resolver) KnossosSyncDir() string {
+	return filepath.Join(r.KnossosDir(), "sync")
+}
+
+// KnossosBackupsDir returns the path to the .knossos/backups/ directory.
+func (r *Resolver) KnossosBackupsDir() string {
+	return filepath.Join(r.KnossosDir(), "backups")
+}
+
+// ElCheapoMarkerFile returns the path to the .knossos/.el-cheapo-active marker.
+func (r *Resolver) ElCheapoMarkerFile() string {
+	return filepath.Join(r.KnossosDir(), ".el-cheapo-active")
+}
+
+// WorktreeMetaFile returns the path to per-worktree metadata in .knossos/.
+func (r *Resolver) WorktreeMetaFile() string {
+	return filepath.Join(r.KnossosDir(), ".worktree-meta.json")
+}
+
+// WorktreesDir returns the path to the .knossos/worktrees/ directory.
+func (r *Resolver) WorktreesDir() string {
+	return filepath.Join(r.KnossosDir(), "worktrees")
 }
 
 // RiteDir returns the path to a rite directory.

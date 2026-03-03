@@ -231,11 +231,11 @@ type PerWorktreeMeta struct {
 	ParentProject string `json:"parent_project"`
 }
 
-// SavePerWorktreeMeta saves metadata to the worktree's .claude directory.
+// SavePerWorktreeMeta saves metadata to the worktree's .knossos directory.
 func SavePerWorktreeMeta(worktreePath string, wt Worktree, parentProject string) error {
-	claudeDir := filepath.Join(worktreePath, ".claude")
-	if err := os.MkdirAll(claudeDir, 0755); err != nil {
-		return errors.Wrap(errors.CodeGeneralError, "failed to create .claude directory", err)
+	knossosDir := filepath.Join(worktreePath, ".knossos")
+	if err := os.MkdirAll(knossosDir, 0755); err != nil {
+		return errors.Wrap(errors.CodeGeneralError, "failed to create .knossos directory", err)
 	}
 
 	meta := PerWorktreeMeta{
@@ -253,7 +253,7 @@ func SavePerWorktreeMeta(worktreePath string, wt Worktree, parentProject string)
 		return errors.Wrap(errors.CodeGeneralError, "failed to marshal per-worktree metadata", err)
 	}
 
-	path := filepath.Join(claudeDir, WorktreeMetaFileName)
+	path := filepath.Join(knossosDir, WorktreeMetaFileName)
 	if err := fileutil.AtomicWriteFile(path, data, 0644); err != nil {
 		return errors.Wrap(errors.CodeGeneralError, "failed to write per-worktree metadata", err)
 	}
@@ -261,9 +261,9 @@ func SavePerWorktreeMeta(worktreePath string, wt Worktree, parentProject string)
 	return nil
 }
 
-// LoadPerWorktreeMeta loads metadata from a worktree's .claude directory.
+// LoadPerWorktreeMeta loads metadata from a worktree's .knossos directory.
 func LoadPerWorktreeMeta(worktreePath string) (*PerWorktreeMeta, error) {
-	path := filepath.Join(worktreePath, ".claude", WorktreeMetaFileName)
+	path := filepath.Join(worktreePath, ".knossos", WorktreeMetaFileName)
 	data, err := os.ReadFile(path)
 	if err != nil {
 		if os.IsNotExist(err) {

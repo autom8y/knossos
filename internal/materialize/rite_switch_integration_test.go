@@ -94,9 +94,11 @@ func TestRiteSwitchIntegration_StateConsistency(t *testing.T) {
 	assert.Equal(t, "session rule v1", string(ruleContent))
 
 	// Simulate actions between rite switches:
-	// 1. Create INVOCATION_STATE.yaml (simulating `ari rite invoke`)
+	// 1. Create INVOCATION_STATE.yaml in .knossos/ (simulating `ari rite invoke`)
+	knossosDir := filepath.Join(projectDir, ".knossos")
+	require.NoError(t, os.MkdirAll(knossosDir, 0755))
 	require.NoError(t, os.WriteFile(
-		filepath.Join(claudeDir, "INVOCATION_STATE.yaml"),
+		filepath.Join(knossosDir, "INVOCATION_STATE.yaml"),
 		[]byte("current_rite: rite-a\n"), 0644))
 	// 2. Create a user rule
 	require.NoError(t, os.WriteFile(
@@ -125,8 +127,8 @@ func TestRiteSwitchIntegration_StateConsistency(t *testing.T) {
 	require.NotNil(t, state)
 	assert.NotEmpty(t, state.LastSync)
 
-	// Verify INVOCATION_STATE.yaml is gone
-	_, err = os.Stat(filepath.Join(claudeDir, "INVOCATION_STATE.yaml"))
+	// Verify INVOCATION_STATE.yaml is gone from .knossos/
+	_, err = os.Stat(filepath.Join(knossosDir, "INVOCATION_STATE.yaml"))
 	assert.True(t, os.IsNotExist(err), "INVOCATION_STATE.yaml should be removed on rite switch")
 
 	// Verify user rule survived
@@ -286,7 +288,7 @@ func TestRiteSwitchIntegration_SyncStateJSON(t *testing.T) {
 
 	// Read state.json and verify it's valid JSON with last_sync.
 	// active_rite was removed from state.json (PKG-008): ACTIVE_RITE file is the authoritative store.
-	stateData, err := os.ReadFile(filepath.Join(projectDir, ".claude", "sync", "state.json"))
+	stateData, err := os.ReadFile(filepath.Join(projectDir, ".knossos", "sync", "state.json"))
 	require.NoError(t, err)
 
 	var rawState map[string]any

@@ -41,7 +41,7 @@ func TestResolver_PathMethods(t *testing.T) {
 		{"CurrentSessionFile", r.CurrentSessionFile(), "/tmp/testroot/.sos/sessions/.current-session"},
 		{"ActiveRiteFile", r.ActiveRiteFile(), "/tmp/testroot/.claude/ACTIVE_RITE"},
 		{"ActiveWorkflowFile", r.ActiveWorkflowFile(), "/tmp/testroot/.claude/ACTIVE_WORKFLOW.yaml"},
-		{"KnossosManifestFile", r.KnossosManifestFile(), "/tmp/testroot/.claude/KNOSSOS_MANIFEST.yaml"},
+		{"KnossosManifestFile", r.KnossosManifestFile(), "/tmp/testroot/.knossos/KNOSSOS_MANIFEST.yaml"},
 		{"AgentsDir", r.AgentsDir(), "/tmp/testroot/.claude/agents"},
 		{"AgentFile", r.AgentFile("pythia.md"), "/tmp/testroot/.claude/agents/pythia.md"},
 		{"ClaudeMDFile", r.ClaudeMDFile(), "/tmp/testroot/.claude/CLAUDE.md"},
@@ -53,7 +53,12 @@ func TestResolver_PathMethods(t *testing.T) {
 		{"LedgeReviewsDir", r.LedgeReviewsDir(), "/tmp/testroot/.ledge/reviews"},
 		{"LedgeSpikesDir", r.LedgeSpikesDir(), "/tmp/testroot/.ledge/spikes"},
 		{"WipDir", r.WipDir(), "/tmp/testroot/.sos/wip"},
-		{"InvocationStateFile", r.InvocationStateFile(), "/tmp/testroot/.claude/INVOCATION_STATE.yaml"},
+		{"InvocationStateFile", r.InvocationStateFile(), "/tmp/testroot/.knossos/INVOCATION_STATE.yaml"},
+		{"KnossosSyncDir", r.KnossosSyncDir(), "/tmp/testroot/.knossos/sync"},
+		{"KnossosBackupsDir", r.KnossosBackupsDir(), "/tmp/testroot/.knossos/backups"},
+		{"ElCheapoMarkerFile", r.ElCheapoMarkerFile(), "/tmp/testroot/.knossos/.el-cheapo-active"},
+		{"WorktreeMetaFile", r.WorktreeMetaFile(), "/tmp/testroot/.knossos/.worktree-meta.json"},
+		{"WorktreesDir", r.WorktreesDir(), "/tmp/testroot/.knossos/worktrees"},
 	}
 
 	for _, tt := range tests {
@@ -223,12 +228,48 @@ func TestFindProjectRoot(t *testing.T) {
 		}
 	})
 
-	t.Run("error_no_claude_dir", func(t *testing.T) {
-		// Temp dir with no .claude/ anywhere in its ancestry
+	t.Run("finds_knossos_dir", func(t *testing.T) {
+		// Create a temp tree with only .knossos/ (no .claude/)
+		root := t.TempDir()
+		knossosDir := filepath.Join(root, ".knossos")
+		if err := os.MkdirAll(knossosDir, 0755); err != nil {
+			t.Fatalf("MkdirAll: %v", err)
+		}
+		nested := filepath.Join(root, "a", "b")
+		if err := os.MkdirAll(nested, 0755); err != nil {
+			t.Fatalf("MkdirAll: %v", err)
+		}
+
+		got, err := FindProjectRoot(nested)
+		if err != nil {
+			t.Fatalf("FindProjectRoot(%q) returned error: %v", nested, err)
+		}
+		if got != root {
+			t.Errorf("FindProjectRoot(%q) = %q, want %q", nested, got, root)
+		}
+	})
+
+	t.Run("prefers_claude_over_knossos", func(t *testing.T) {
+		// Both .claude/ and .knossos/ exist — .claude/ should win
+		root := t.TempDir()
+		os.MkdirAll(filepath.Join(root, ".claude"), 0755)
+		os.MkdirAll(filepath.Join(root, ".knossos"), 0755)
+
+		got, err := FindProjectRoot(root)
+		if err != nil {
+			t.Fatalf("FindProjectRoot(%q) returned error: %v", root, err)
+		}
+		if got != root {
+			t.Errorf("FindProjectRoot(%q) = %q, want %q", root, got, root)
+		}
+	})
+
+	t.Run("error_no_claude_or_knossos_dir", func(t *testing.T) {
+		// Temp dir with neither .claude/ nor .knossos/ anywhere in its ancestry
 		isolated := t.TempDir()
 		_, err := FindProjectRoot(isolated)
 		if err == nil {
-			t.Error("FindProjectRoot() should return error when no .claude/ exists")
+			t.Error("FindProjectRoot() should return error when no .claude/ or .knossos/ exists")
 		}
 	})
 

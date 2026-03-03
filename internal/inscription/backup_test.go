@@ -11,7 +11,7 @@ import (
 func TestNewBackupManager(t *testing.T) {
 	bm := NewBackupManager("/project")
 
-	if bm.BackupDir != "/project/.claude/backups" {
+	if bm.BackupDir != "/project/.knossos/backups" {
 		t.Errorf("NewBackupManager() BackupDir = %q", bm.BackupDir)
 	}
 	if bm.TargetPath != "/project/.claude/CLAUDE.md" {

@@ -13,14 +13,14 @@ func TestNewPipeline(t *testing.T) {
 	if pipeline.ClaudeMDPath != "/project/.claude/CLAUDE.md" {
 		t.Errorf("NewPipeline() ClaudeMDPath = %q, want '/project/.claude/CLAUDE.md'", pipeline.ClaudeMDPath)
 	}
-	if pipeline.ManifestPath != "/project/.claude/KNOSSOS_MANIFEST.yaml" {
-		t.Errorf("NewPipeline() ManifestPath = %q, want '/project/.claude/KNOSSOS_MANIFEST.yaml'", pipeline.ManifestPath)
+	if pipeline.ManifestPath != "/project/.knossos/KNOSSOS_MANIFEST.yaml" {
+		t.Errorf("NewPipeline() ManifestPath = %q, want '/project/.knossos/KNOSSOS_MANIFEST.yaml'", pipeline.ManifestPath)
 	}
 	if pipeline.TemplateDir != "/project/knossos/templates" {
 		t.Errorf("NewPipeline() TemplateDir = %q, want '/project/knossos/templates'", pipeline.TemplateDir)
 	}
-	if pipeline.BackupDir != "/project/.claude/backups" {
-		t.Errorf("NewPipeline() BackupDir = %q, want '/project/.claude/backups'", pipeline.BackupDir)
+	if pipeline.BackupDir != "/project/.knossos/backups" {
+		t.Errorf("NewPipeline() BackupDir = %q, want '/project/.knossos/backups'", pipeline.BackupDir)
 	}
 	if pipeline.ProjectRoot != "/project" {
 		t.Errorf("NewPipeline() ProjectRoot = %q, want '/project'", pipeline.ProjectRoot)
@@ -94,7 +94,8 @@ regions:
     owner: regenerate
     source: ACTIVE_RITE
 `
-	os.WriteFile(filepath.Join(claudeDir, "KNOSSOS_MANIFEST.yaml"), []byte(manifestContent), 0644)
+	os.MkdirAll(filepath.Join(tmpDir, ".knossos"), 0755)
+	os.WriteFile(filepath.Join(tmpDir, ".knossos", "KNOSSOS_MANIFEST.yaml"), []byte(manifestContent), 0644)
 
 	pipeline := NewPipeline(tmpDir)
 
@@ -122,7 +123,8 @@ func TestPipeline_Validate_InvalidManifest(t *testing.T) {
   test:
     owner: invalid-owner
 `
-	os.WriteFile(filepath.Join(claudeDir, "KNOSSOS_MANIFEST.yaml"), []byte(manifestContent), 0644)
+	os.MkdirAll(filepath.Join(tmpDir, ".knossos"), 0755)
+	os.WriteFile(filepath.Join(tmpDir, ".knossos", "KNOSSOS_MANIFEST.yaml"), []byte(manifestContent), 0644)
 
 	pipeline := NewPipeline(tmpDir)
 
@@ -153,7 +155,8 @@ section_order:
   - execution-mode
   - project-custom
 `
-	os.WriteFile(filepath.Join(claudeDir, "KNOSSOS_MANIFEST.yaml"), []byte(manifestContent), 0644)
+	os.MkdirAll(filepath.Join(tmpDir, ".knossos"), 0755)
+	os.WriteFile(filepath.Join(tmpDir, ".knossos", "KNOSSOS_MANIFEST.yaml"), []byte(manifestContent), 0644)
 
 	pipeline := NewPipeline(tmpDir)
 
@@ -184,7 +187,7 @@ section_order:
 func TestPipeline_Sync_CreatesBackup(t *testing.T) {
 	tmpDir := t.TempDir()
 	claudeDir := filepath.Join(tmpDir, ".claude")
-	backupsDir := filepath.Join(claudeDir, "backups")
+	backupsDir := filepath.Join(tmpDir, ".knossos", "backups")
 	os.MkdirAll(claudeDir, 0755)
 
 	// Create existing CLAUDE.md
@@ -200,7 +203,8 @@ regions:
 section_order:
   - execution-mode
 `
-	os.WriteFile(filepath.Join(claudeDir, "KNOSSOS_MANIFEST.yaml"), []byte(manifestContent), 0644)
+	os.MkdirAll(filepath.Join(tmpDir, ".knossos"), 0755)
+	os.WriteFile(filepath.Join(tmpDir, ".knossos", "KNOSSOS_MANIFEST.yaml"), []byte(manifestContent), 0644)
 
 	pipeline := NewPipeline(tmpDir)
 
@@ -223,7 +227,7 @@ section_order:
 func TestPipeline_Sync_NoBackupOption(t *testing.T) {
 	tmpDir := t.TempDir()
 	claudeDir := filepath.Join(tmpDir, ".claude")
-	backupsDir := filepath.Join(claudeDir, "backups")
+	backupsDir := filepath.Join(tmpDir, ".knossos", "backups")
 	os.MkdirAll(claudeDir, 0755)
 
 	// Create existing CLAUDE.md
@@ -239,7 +243,8 @@ regions:
 section_order:
   - execution-mode
 `
-	os.WriteFile(filepath.Join(claudeDir, "KNOSSOS_MANIFEST.yaml"), []byte(manifestContent), 0644)
+	os.MkdirAll(filepath.Join(tmpDir, ".knossos"), 0755)
+	os.WriteFile(filepath.Join(tmpDir, ".knossos", "KNOSSOS_MANIFEST.yaml"), []byte(manifestContent), 0644)
 
 	pipeline := NewPipeline(tmpDir)
 
@@ -277,7 +282,8 @@ regions:
 section_order:
   - execution-mode
 `
-	os.WriteFile(filepath.Join(claudeDir, "KNOSSOS_MANIFEST.yaml"), []byte(manifestContent), 0644)
+	os.MkdirAll(filepath.Join(tmpDir, ".knossos"), 0755)
+	os.WriteFile(filepath.Join(tmpDir, ".knossos", "KNOSSOS_MANIFEST.yaml"), []byte(manifestContent), 0644)
 
 	pipeline := NewPipeline(tmpDir)
 
@@ -311,7 +317,8 @@ regions:
 section_order:
   - execution-mode
 `
-	manifestPath := filepath.Join(claudeDir, "KNOSSOS_MANIFEST.yaml")
+	os.MkdirAll(filepath.Join(tmpDir, ".knossos"), 0755)
+	manifestPath := filepath.Join(tmpDir, ".knossos", "KNOSSOS_MANIFEST.yaml")
 	os.WriteFile(manifestPath, []byte(manifestContent), 0644)
 
 	pipeline := NewPipeline(tmpDir)
@@ -328,8 +335,7 @@ section_order:
 
 func TestPipeline_ListBackups(t *testing.T) {
 	tmpDir := t.TempDir()
-	claudeDir := filepath.Join(tmpDir, ".claude")
-	backupsDir := filepath.Join(claudeDir, "backups")
+	backupsDir := filepath.Join(tmpDir, ".knossos", "backups")
 	os.MkdirAll(backupsDir, 0755)
 
 	// Create some backup files
@@ -373,7 +379,8 @@ regions:
 section_order:
   - execution-mode
 `
-	os.WriteFile(filepath.Join(claudeDir, "KNOSSOS_MANIFEST.yaml"), []byte(manifestContent), 0644)
+	os.MkdirAll(filepath.Join(tmpDir, ".knossos"), 0755)
+	os.WriteFile(filepath.Join(tmpDir, ".knossos", "KNOSSOS_MANIFEST.yaml"), []byte(manifestContent), 0644)
 
 	pipeline := NewPipeline(tmpDir)
 

@@ -61,9 +61,9 @@ type CLAUDEmdSyncResult struct {
 //  6. Writes only if content changed (avoids CC file watcher triggers)
 //  7. Optionally updates manifest hashes and version
 func SyncCLAUDEmd(opts CLAUDEmdSyncOptions) (*CLAUDEmdSyncResult, error) {
-	// 1. Load or create KNOSSOS_MANIFEST.yaml
-	knossosManifestPath := filepath.Join(opts.ClaudeDir, "KNOSSOS_MANIFEST.yaml")
+	// 1. Load or create KNOSSOS_MANIFEST.yaml in .knossos/
 	projectRoot := filepath.Dir(opts.ClaudeDir)
+	knossosManifestPath := filepath.Join(projectRoot, ".knossos", "KNOSSOS_MANIFEST.yaml")
 
 	loader := NewManifestLoader(projectRoot)
 	loader.ManifestPath = knossosManifestPath

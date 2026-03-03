@@ -74,7 +74,7 @@ Produces: Test reports
 	}
 
 	// Verify manifest was created
-	manifestPath := filepath.Join(claudeDir, "KNOSSOS_MANIFEST.yaml")
+	manifestPath := filepath.Join(tmpDir, ".knossos", "KNOSSOS_MANIFEST.yaml")
 	if _, err := os.Stat(manifestPath); os.IsNotExist(err) {
 		t.Fatal("Sync() should create manifest on clean project")
 	}
@@ -130,7 +130,8 @@ section_order:
   - execution-mode
   - project-custom
 `
-	manifestPath := filepath.Join(claudeDir, "KNOSSOS_MANIFEST.yaml")
+	os.MkdirAll(filepath.Join(tmpDir, ".knossos"), 0755)
+	manifestPath := filepath.Join(tmpDir, ".knossos", "KNOSSOS_MANIFEST.yaml")
 	if err := os.WriteFile(manifestPath, []byte(manifestContent), 0644); err != nil {
 		t.Fatalf("Failed to create manifest: %v", err)
 	}
@@ -207,7 +208,8 @@ regions:
 section_order:
   - execution-mode
 `
-	manifestPath := filepath.Join(claudeDir, "KNOSSOS_MANIFEST.yaml")
+	os.MkdirAll(filepath.Join(tmpDir, ".knossos"), 0755)
+	manifestPath := filepath.Join(tmpDir, ".knossos", "KNOSSOS_MANIFEST.yaml")
 	if err := os.WriteFile(manifestPath, []byte(manifestContent), 0644); err != nil {
 		t.Fatalf("Failed to create manifest: %v", err)
 	}
@@ -297,7 +299,8 @@ regions:
 section_order:
   - quick-start
 `
-	manifestPath := filepath.Join(claudeDir, "KNOSSOS_MANIFEST.yaml")
+	os.MkdirAll(filepath.Join(tmpDir, ".knossos"), 0755)
+	manifestPath := filepath.Join(tmpDir, ".knossos", "KNOSSOS_MANIFEST.yaml")
 	if err := os.WriteFile(manifestPath, []byte(manifestContent), 0644); err != nil {
 		t.Fatalf("Failed to create manifest: %v", err)
 	}
@@ -375,7 +378,8 @@ regions:
 section_order:
   - execution-mode
 `
-	manifestPath := filepath.Join(claudeDir, "KNOSSOS_MANIFEST.yaml")
+	os.MkdirAll(filepath.Join(tmpDir, ".knossos"), 0755)
+	manifestPath := filepath.Join(tmpDir, ".knossos", "KNOSSOS_MANIFEST.yaml")
 	if err := os.WriteFile(manifestPath, []byte(manifestContent), 0644); err != nil {
 		t.Fatalf("Failed to create manifest: %v", err)
 	}
@@ -428,7 +432,7 @@ func TestInscription_DryRunNoChanges(t *testing.T) {
 	// Setup: Create project with existing CLAUDE.md
 	tmpDir := t.TempDir()
 	claudeDir := filepath.Join(tmpDir, ".claude")
-	backupsDir := filepath.Join(claudeDir, "backups")
+	backupsDir := filepath.Join(tmpDir, ".knossos", "backups")
 	if err := os.MkdirAll(claudeDir, 0755); err != nil {
 		t.Fatalf("Failed to create .claude directory: %v", err)
 	}
@@ -458,7 +462,8 @@ regions:
 section_order:
   - execution-mode
 `
-	manifestPath := filepath.Join(claudeDir, "KNOSSOS_MANIFEST.yaml")
+	os.MkdirAll(filepath.Join(tmpDir, ".knossos"), 0755)
+	manifestPath := filepath.Join(tmpDir, ".knossos", "KNOSSOS_MANIFEST.yaml")
 	if err := os.WriteFile(manifestPath, []byte(manifestContent), 0644); err != nil {
 		t.Fatalf("Failed to create manifest: %v", err)
 	}
@@ -655,7 +660,8 @@ regions:
 section_order:
   - quick-start
 `
-	manifestPath := filepath.Join(claudeDir, "KNOSSOS_MANIFEST.yaml")
+	os.MkdirAll(filepath.Join(tmpDir, ".knossos"), 0755)
+	manifestPath := filepath.Join(tmpDir, ".knossos", "KNOSSOS_MANIFEST.yaml")
 	if err := os.WriteFile(manifestPath, []byte(manifestContent), 0644); err != nil {
 		t.Fatalf("Failed to create manifest: %v", err)
 	}
@@ -749,7 +755,8 @@ regions:
 section_order:
   - execution-mode
 `
-	if err := os.WriteFile(filepath.Join(claudeDir, "KNOSSOS_MANIFEST.yaml"), []byte(manifestContent), 0644); err != nil {
+	os.MkdirAll(filepath.Join(tmpDir, ".knossos"), 0755)
+	if err := os.WriteFile(filepath.Join(tmpDir, ".knossos", "KNOSSOS_MANIFEST.yaml"), []byte(manifestContent), 0644); err != nil {
 		t.Fatalf("Failed to create manifest: %v", err)
 	}
 
@@ -808,7 +815,8 @@ regions:
 section_order:
   - execution-mode
 `
-	if err := os.WriteFile(filepath.Join(claudeDir, "KNOSSOS_MANIFEST.yaml"), []byte(manifestContent), 0644); err != nil {
+	os.MkdirAll(filepath.Join(tmpDir, ".knossos"), 0755)
+	if err := os.WriteFile(filepath.Join(tmpDir, ".knossos", "KNOSSOS_MANIFEST.yaml"), []byte(manifestContent), 0644); err != nil {
 		t.Fatalf("Failed to create manifest: %v", err)
 	}
 
@@ -836,7 +844,7 @@ section_order:
 func TestInscription_ConcurrentBackups(t *testing.T) {
 	tmpDir := t.TempDir()
 	claudeDir := filepath.Join(tmpDir, ".claude")
-	backupsDir := filepath.Join(claudeDir, "backups")
+	backupsDir := filepath.Join(tmpDir, ".knossos", "backups")
 	if err := os.MkdirAll(claudeDir, 0755); err != nil {
 		t.Fatalf("Failed to create .claude directory: %v", err)
 	}
@@ -863,7 +871,8 @@ regions:
 section_order:
   - execution-mode
 `
-	if err := os.WriteFile(filepath.Join(claudeDir, "KNOSSOS_MANIFEST.yaml"), []byte(manifestContent), 0644); err != nil {
+	os.MkdirAll(filepath.Join(tmpDir, ".knossos"), 0755)
+	if err := os.WriteFile(filepath.Join(tmpDir, ".knossos", "KNOSSOS_MANIFEST.yaml"), []byte(manifestContent), 0644); err != nil {
 		t.Fatalf("Failed to create manifest: %v", err)
 	}
 

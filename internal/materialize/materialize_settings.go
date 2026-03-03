@@ -108,19 +108,23 @@ func (m *Materializer) injectElCheapoSettings(claudeDir string) error {
 	existingSettings["hooks"] = hooksMap
 
 	// 3. Write marker file for diagnostics and revert detection
-	markerPath := filepath.Join(claudeDir, ".el-cheapo-active")
+	knossosDir := filepath.Join(filepath.Dir(claudeDir), ".knossos")
+	_ = os.MkdirAll(knossosDir, 0755)
+	markerPath := filepath.Join(knossosDir, ".el-cheapo-active")
 	_ = os.WriteFile(markerPath, []byte("haiku\n"), 0644)
 
 	return saveSettings(settingsPath, existingSettings)
 }
 
-// trackState updates .claude/sync/state.json with materialization metadata.
+// trackState updates .knossos/sync/state.json with materialization metadata.
 func (m *Materializer) trackState(manifest *RiteManifest, activeRiteName string) error {
 	stateManager := sync.NewStateManager(m.resolver)
 
 	// During staged materialization, override the sync dir to target the staging directory.
 	if m.claudeDirOverride != "" {
-		stateManager.SetSyncDir(filepath.Join(m.claudeDirOverride, "sync"))
+		// During staged materialization, sync state goes alongside the staging directory.
+		stagingParent := filepath.Dir(m.claudeDirOverride)
+		stateManager.SetSyncDir(filepath.Join(stagingParent, ".knossos", "sync"))
 	}
 
 	// Load or initialize state
@@ -151,7 +155,8 @@ func (m *Materializer) trackState(manifest *RiteManifest, activeRiteName string)
 // clearInvocationState removes INVOCATION_STATE.yaml which becomes stale on rite switch.
 // The file tracks borrowed components from the previous rite's invocations.
 func (m *Materializer) clearInvocationState(claudeDir string) error {
-	err := os.Remove(filepath.Join(claudeDir, "INVOCATION_STATE.yaml"))
+	knossosDir := filepath.Join(filepath.Dir(claudeDir), ".knossos")
+	err := os.Remove(filepath.Join(knossosDir, "INVOCATION_STATE.yaml"))
 	if err != nil && !os.IsNotExist(err) {
 		return err
 	}

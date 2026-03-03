@@ -42,7 +42,7 @@ type BackupInfo struct {
 // NewBackupManager creates a new backup manager.
 func NewBackupManager(projectRoot string) *BackupManager {
 	return &BackupManager{
-		BackupDir:  filepath.Join(projectRoot, ".claude", "backups"),
+		BackupDir:  filepath.Join(projectRoot, ".knossos", "backups"),
 		TargetPath: filepath.Join(projectRoot, ".claude", "CLAUDE.md"),
 		MaxBackups: 5,
 	}

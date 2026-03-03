@@ -24,7 +24,7 @@ func TestManifestLoader_Load_NotFound(t *testing.T) {
 
 func TestManifestLoader_Load_Valid(t *testing.T) {
 	tmpDir := t.TempDir()
-	manifestDir := filepath.Join(tmpDir, ".claude")
+	manifestDir := filepath.Join(tmpDir, ".knossos")
 	os.MkdirAll(manifestDir, 0755)
 
 	manifestPath := filepath.Join(manifestDir, ManifestFileName)
@@ -87,7 +87,7 @@ section_order:
 
 func TestManifestLoader_Load_InvalidYAML(t *testing.T) {
 	tmpDir := t.TempDir()
-	manifestDir := filepath.Join(tmpDir, ".claude")
+	manifestDir := filepath.Join(tmpDir, ".knossos")
 	os.MkdirAll(manifestDir, 0755)
 
 	manifestPath := filepath.Join(manifestDir, ManifestFileName)
@@ -106,7 +106,7 @@ func TestManifestLoader_Load_InvalidYAML(t *testing.T) {
 
 func TestManifestLoader_Load_MissingRequiredFields(t *testing.T) {
 	tmpDir := t.TempDir()
-	manifestDir := filepath.Join(tmpDir, ".claude")
+	manifestDir := filepath.Join(tmpDir, ".knossos")
 	os.MkdirAll(manifestDir, 0755)
 
 	manifestPath := filepath.Join(manifestDir, ManifestFileName)
@@ -129,7 +129,7 @@ func TestManifestLoader_Load_MissingRequiredFields(t *testing.T) {
 
 func TestManifestLoader_Load_InvalidRegenerateWithoutSource(t *testing.T) {
 	tmpDir := t.TempDir()
-	manifestDir := filepath.Join(tmpDir, ".claude")
+	manifestDir := filepath.Join(tmpDir, ".knossos")
 	os.MkdirAll(manifestDir, 0755)
 
 	manifestPath := filepath.Join(manifestDir, ManifestFileName)
@@ -225,7 +225,7 @@ func TestManifestLoader_LoadOrCreate_Create(t *testing.T) {
 
 func TestManifestLoader_LoadOrCreate_Load(t *testing.T) {
 	tmpDir := t.TempDir()
-	manifestDir := filepath.Join(tmpDir, ".claude")
+	manifestDir := filepath.Join(tmpDir, ".knossos")
 	os.MkdirAll(manifestDir, 0755)
 
 	manifestPath := filepath.Join(manifestDir, ManifestFileName)

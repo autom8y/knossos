@@ -593,7 +593,7 @@ func TestSessionIntegrationUpdateWorktree(t *testing.T) {
 	defer os.RemoveAll(tmpDir)
 
 	// Create a session context file
-	sessionDir := filepath.Join(tmpDir, ".claude", "sessions", "session-test")
+	sessionDir := filepath.Join(tmpDir, ".sos", "sessions", "session-test")
 	if err := os.MkdirAll(sessionDir, 0755); err != nil {
 		t.Fatalf("Failed to create session dir: %v", err)
 	}
@@ -637,7 +637,7 @@ func TestSessionIntegrationGetActiveWorktree(t *testing.T) {
 	defer os.RemoveAll(tmpDir)
 
 	// Create a session context with worktree_id
-	sessionDir := filepath.Join(tmpDir, ".claude", "sessions", "session-test")
+	sessionDir := filepath.Join(tmpDir, ".sos", "sessions", "session-test")
 	if err := os.MkdirAll(sessionDir, 0755); err != nil {
 		t.Fatalf("Failed to create session dir: %v", err)
 	}
@@ -675,7 +675,7 @@ func TestSessionIntegrationMissingWorktree(t *testing.T) {
 	}
 	defer os.RemoveAll(tmpDir)
 
-	sessionDir := filepath.Join(tmpDir, ".claude", "sessions", "session-test")
+	sessionDir := filepath.Join(tmpDir, ".sos", "sessions", "session-test")
 	if err := os.MkdirAll(sessionDir, 0755); err != nil {
 		t.Fatalf("Failed to create session dir: %v", err)
 	}

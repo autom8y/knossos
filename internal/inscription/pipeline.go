@@ -155,7 +155,7 @@ func NewPipeline(projectRoot string) *Pipeline {
 		ClaudeMDPath: filepath.Join(projectRoot, ".claude", "CLAUDE.md"),
 		ManifestPath: DefaultManifestPath(projectRoot),
 		TemplateDir:  filepath.Join(projectRoot, "knossos", "templates"),
-		BackupDir:    filepath.Join(projectRoot, ".claude", "backups"),
+		BackupDir:    filepath.Join(projectRoot, ".knossos", "backups"),
 		ProjectRoot:  projectRoot,
 	}
 }

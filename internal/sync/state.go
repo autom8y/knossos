@@ -13,7 +13,7 @@ import (
 	"github.com/autom8y/knossos/internal/paths"
 )
 
-// State represents the sync state stored in .claude/sync/state.json.
+// State represents the sync state stored in .knossos/sync/state.json.
 type State struct {
 	SchemaVersion string    `json:"schema_version"`
 	LastSync      time.Time `json:"last_sync"`
@@ -39,12 +39,12 @@ func (m *StateManager) SetSyncDir(dir string) {
 	m.syncDirPath = dir
 }
 
-// SyncDir returns the path to the .claude/sync directory.
+// SyncDir returns the path to the .knossos/sync directory.
 func (m *StateManager) SyncDir() string {
 	if m.syncDirPath != "" {
 		return m.syncDirPath
 	}
-	return filepath.Join(m.resolver.ClaudeDir(), "sync")
+	return m.resolver.KnossosSyncDir()
 }
 
 // StatePath returns the path to state.json.

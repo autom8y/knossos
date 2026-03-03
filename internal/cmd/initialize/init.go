@@ -139,8 +139,8 @@ func runInit(ctx *cmdContext, riteName, source string, force bool, cmd *cobra.Co
 		}
 	}
 
-	claudeDir := filepath.Join(projectDir, ".claude")
-	manifestPath := filepath.Join(claudeDir, "KNOSSOS_MANIFEST.yaml")
+	knossosDir := filepath.Join(projectDir, ".knossos")
+	manifestPath := filepath.Join(knossosDir, "KNOSSOS_MANIFEST.yaml")
 
 	// Check existing state for idempotency.
 	if _, err := os.Stat(manifestPath); err == nil && !force {
@@ -154,8 +154,9 @@ func runInit(ctx *cmdContext, riteName, source string, force bool, cmd *cobra.Co
 		return printer.Print(result)
 	}
 
+	claudeDir := filepath.Join(projectDir, ".claude")
 	if _, err := os.Stat(claudeDir); err == nil && !force {
-		// .claude/ exists but no KNOSSOS_MANIFEST.yaml -- not Knossos-managed.
+		// .claude/ exists but no KNOSSOS_MANIFEST.yaml in .knossos/ -- not Knossos-managed.
 		errMsg := fmt.Errorf(".claude/ exists but is not Knossos-managed. Use --force to initialize.")
 		printer.PrintError(errMsg)
 		return errMsg

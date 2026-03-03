@@ -102,8 +102,8 @@ func runWorktreeSeed(ctx *cmdContext) error {
 		return fmt.Errorf("worktree-seed: missing worktree name")
 	}
 
-	// Step 4: Determine worktree path: projectRoot/.claude/worktrees/{slug}
-	worktreesDir := filepath.Join(projectRoot, ".claude", "worktrees")
+	// Step 4: Determine worktree path: projectRoot/.knossos/worktrees/{slug}
+	worktreesDir := filepath.Join(projectRoot, ".knossos", "worktrees")
 	if err := os.MkdirAll(worktreesDir, 0755); err != nil {
 		fmt.Fprintf(stderr, "worktree-seed: failed to create worktrees dir %s: %v\n", worktreesDir, err)
 		return err

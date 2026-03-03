@@ -325,7 +325,7 @@ const DefaultSchemaVersion = "1.0"
 const ManifestFileName = "KNOSSOS_MANIFEST.yaml"
 
 // DefaultManifestPath returns the default path to the manifest file.
-// Path: .claude/KNOSSOS_MANIFEST.yaml
+// Path: .knossos/KNOSSOS_MANIFEST.yaml
 func DefaultManifestPath(projectRoot string) string {
-	return projectRoot + "/.claude/" + ManifestFileName
+	return projectRoot + "/.knossos/" + ManifestFileName
 }

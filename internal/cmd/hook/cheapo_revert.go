@@ -64,7 +64,7 @@ func runCheapoRevert(ctx *cmdContext) error {
 	}
 
 	// Check for el-cheapo marker
-	markerPath := filepath.Join(projectDir, ".claude", ".el-cheapo-active")
+	markerPath := filepath.Join(projectDir, ".knossos", ".el-cheapo-active")
 	if _, err := os.Stat(markerPath); os.IsNotExist(err) {
 		return printer.Print(CheapoRevertOutput{
 			Status:  "skipped",

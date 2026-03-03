@@ -67,7 +67,7 @@ func (s *SessionIntegration) GetActiveWorktree(sessionPath string) (string, erro
 // FindActiveSession looks for an active session in the given directory.
 // Returns the session path and session ID if found.
 func (s *SessionIntegration) FindActiveSession(searchPath string) (sessionPath, sessionID string, err error) {
-	sessionsDir := filepath.Join(searchPath, ".claude", "sessions")
+	sessionsDir := filepath.Join(searchPath, ".sos", "sessions")
 
 	entries, err := os.ReadDir(sessionsDir)
 	if err != nil {
@@ -106,7 +106,7 @@ func (s *SessionIntegration) FindActiveSession(searchPath string) (sessionPath, 
 
 // GetSessionsForWorktree finds all sessions associated with a worktree.
 func (s *SessionIntegration) GetSessionsForWorktree(searchPath, worktreeID string) ([]string, error) {
-	sessionsDir := filepath.Join(searchPath, ".claude", "sessions")
+	sessionsDir := filepath.Join(searchPath, ".sos", "sessions")
 
 	entries, err := os.ReadDir(sessionsDir)
 	if err != nil {

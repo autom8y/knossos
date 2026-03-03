@@ -210,7 +210,7 @@ func (m *Manager) getStatus(wt Worktree) (*WorktreeStatus, error) {
 	}
 
 	// Get session status
-	sessionsDir := filepath.Join(wt.Path, ".claude", "sessions")
+	sessionsDir := filepath.Join(wt.Path, ".sos", "sessions")
 	entries, err := os.ReadDir(sessionsDir)
 	if err == nil {
 		for _, entry := range entries {

@@ -47,10 +47,10 @@ func TestInit_FreshDirectory(t *testing.T) {
 		t.Error(".claude/ directory was not created")
 	}
 
-	// Verify KNOSSOS_MANIFEST.yaml was created.
-	manifestPath := filepath.Join(claudeDir, "KNOSSOS_MANIFEST.yaml")
+	// Verify KNOSSOS_MANIFEST.yaml was created in .knossos/.
+	manifestPath := filepath.Join(dir, ".knossos", "KNOSSOS_MANIFEST.yaml")
 	if _, err := os.Stat(manifestPath); os.IsNotExist(err) {
-		t.Error("KNOSSOS_MANIFEST.yaml was not created")
+		t.Error("KNOSSOS_MANIFEST.yaml was not created in .knossos/")
 	}
 
 	// Verify CLAUDE.md was created.
@@ -163,10 +163,10 @@ dependencies:
 		t.Errorf("ACTIVE_RITE = %q, want %q", got, "test-rite\n")
 	}
 
-	// Verify KNOSSOS_MANIFEST.yaml was created.
-	manifestPath := filepath.Join(claudeDir, "KNOSSOS_MANIFEST.yaml")
+	// Verify KNOSSOS_MANIFEST.yaml was created in .knossos/.
+	manifestPath := filepath.Join(dir, ".knossos", "KNOSSOS_MANIFEST.yaml")
 	if _, err := os.Stat(manifestPath); os.IsNotExist(err) {
-		t.Error("KNOSSOS_MANIFEST.yaml was not created")
+		t.Error("KNOSSOS_MANIFEST.yaml was not created in .knossos/")
 	}
 
 	// Verify project-level directories were scaffolded.
@@ -184,12 +184,12 @@ dependencies:
 func TestInit_AlreadyInitialized(t *testing.T) {
 	dir := t.TempDir()
 
-	// Pre-create the .claude/ with a valid KNOSSOS_MANIFEST.yaml to simulate existing init.
-	claudeDir := filepath.Join(dir, ".claude")
-	if err := os.MkdirAll(claudeDir, 0755); err != nil {
+	// Pre-create .knossos/ with a valid KNOSSOS_MANIFEST.yaml to simulate existing init.
+	knossosDir := filepath.Join(dir, ".knossos")
+	if err := os.MkdirAll(knossosDir, 0755); err != nil {
 		t.Fatal(err)
 	}
-	manifestPath := filepath.Join(claudeDir, "KNOSSOS_MANIFEST.yaml")
+	manifestPath := filepath.Join(knossosDir, "KNOSSOS_MANIFEST.yaml")
 	validManifest := `schema_version: "1.0"
 inscription_version: "1"
 regions:
@@ -240,12 +240,16 @@ section_order:
 func TestInit_Force(t *testing.T) {
 	dir := t.TempDir()
 
-	// Pre-create the .claude/ with a valid KNOSSOS_MANIFEST.yaml.
+	// Pre-create .knossos/ with a valid KNOSSOS_MANIFEST.yaml.
+	knossosDir := filepath.Join(dir, ".knossos")
 	claudeDir := filepath.Join(dir, ".claude")
+	if err := os.MkdirAll(knossosDir, 0755); err != nil {
+		t.Fatal(err)
+	}
 	if err := os.MkdirAll(claudeDir, 0755); err != nil {
 		t.Fatal(err)
 	}
-	manifestPath := filepath.Join(claudeDir, "KNOSSOS_MANIFEST.yaml")
+	manifestPath := filepath.Join(knossosDir, "KNOSSOS_MANIFEST.yaml")
 	validManifest := `schema_version: "1.0"
 inscription_version: "1"
 regions:
