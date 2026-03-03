@@ -267,6 +267,62 @@ func ComputeChangeManifest(fromHash, toHash string, sourceScope []string) (*Chan
 	return manifest, nil
 }
 
+// FilterChangeManifest returns a copy of the manifest with file lists filtered
+// by sourceScope. If sourceScope is empty, returns the original manifest unchanged.
+// DeltaRatio is recalculated based on filtered file counts. DeltaLines and CommitLog
+// are preserved as-is (they are global signals, not scope-filtered).
+func FilterChangeManifest(m *ChangeManifest, sourceScope []string) *ChangeManifest {
+	if len(sourceScope) == 0 || m == nil {
+		return m
+	}
+
+	inScope := func(path string) bool {
+		for _, pattern := range sourceScope {
+			if matchScope(pattern, path) {
+				return true
+			}
+		}
+		return false
+	}
+
+	filterFiles := func(files []string) []string {
+		var result []string
+		for _, f := range files {
+			if f != "" && inScope(f) {
+				result = append(result, f)
+			}
+		}
+		return result
+	}
+
+	filtered := &ChangeManifest{
+		FromHash:      m.FromHash,
+		ToHash:        m.ToHash,
+		NewFiles:      filterFiles(m.NewFiles),
+		ModifiedFiles: filterFiles(m.ModifiedFiles),
+		DeletedFiles:  filterFiles(m.DeletedFiles),
+		CommitLog:     m.CommitLog,
+		DeltaLines:    m.DeltaLines,
+		TotalFiles:    m.TotalFiles,
+	}
+
+	for _, r := range m.RenamedFiles {
+		if inScope(r.NewPath) {
+			filtered.RenamedFiles = append(filtered.RenamedFiles, r)
+		}
+	}
+
+	changedCount := len(filtered.NewFiles) + len(filtered.ModifiedFiles) +
+		len(filtered.DeletedFiles) + len(filtered.RenamedFiles)
+	if filtered.TotalFiles == 0 {
+		filtered.DeltaRatio = 1.0
+	} else {
+		filtered.DeltaRatio = float64(changedCount) / float64(filtered.TotalFiles)
+	}
+
+	return filtered
+}
+
 // RecommendedMode returns the recommended update mode based on the change manifest
 // and domain metadata.
 //

@@ -516,3 +516,70 @@ func TestComputeChangeManifest_ScopeFilterRenames(t *testing.T) {
 		t.Errorf("expected in-scope rename, got: %+v", manifest.RenamedFiles[0])
 	}
 }
+
+// --- FilterChangeManifest tests ---
+
+func TestFilterChangeManifest_NilManifest(t *testing.T) {
+	got := FilterChangeManifest(nil, []string{"internal/"})
+	if got != nil {
+		t.Errorf("expected nil, got %+v", got)
+	}
+}
+
+func TestFilterChangeManifest_EmptyScope(t *testing.T) {
+	m := &ChangeManifest{
+		NewFiles:      []string{"a.go", "b.go"},
+		ModifiedFiles: []string{"c.go"},
+	}
+	got := FilterChangeManifest(m, nil)
+	if got != m {
+		t.Error("empty scope should return original manifest pointer")
+	}
+}
+
+func TestFilterChangeManifest_FiltersCorrectly(t *testing.T) {
+	m := &ChangeManifest{
+		FromHash:      "abc",
+		ToHash:        "def",
+		NewFiles:      []string{"internal/know/foo.go", "external/bar.go", "internal/cmd/baz.go"},
+		ModifiedFiles: []string{"internal/know/manifest.go", "docs/README.md"},
+		DeletedFiles:  []string{"internal/old.go", "vendor/dep.go"},
+		RenamedFiles: []RenamedFile{
+			{OldPath: "internal/a.go", NewPath: "internal/b.go"},
+			{OldPath: "external/x.go", NewPath: "external/y.go"},
+		},
+		CommitLog:  "abc123 some commit",
+		DeltaLines: 500,
+		TotalFiles: 100,
+	}
+
+	filtered := FilterChangeManifest(m, []string{"internal/**"})
+
+	if len(filtered.NewFiles) != 2 {
+		t.Errorf("NewFiles = %d, want 2; got %v", len(filtered.NewFiles), filtered.NewFiles)
+	}
+	if len(filtered.ModifiedFiles) != 1 {
+		t.Errorf("ModifiedFiles = %d, want 1; got %v", len(filtered.ModifiedFiles), filtered.ModifiedFiles)
+	}
+	if len(filtered.DeletedFiles) != 1 {
+		t.Errorf("DeletedFiles = %d, want 1; got %v", len(filtered.DeletedFiles), filtered.DeletedFiles)
+	}
+	if len(filtered.RenamedFiles) != 1 {
+		t.Errorf("RenamedFiles = %d, want 1; got %v", len(filtered.RenamedFiles), filtered.RenamedFiles)
+	}
+	// DeltaLines and CommitLog preserved as-is.
+	if filtered.DeltaLines != 500 {
+		t.Errorf("DeltaLines = %d, want 500", filtered.DeltaLines)
+	}
+	if filtered.CommitLog != "abc123 some commit" {
+		t.Errorf("CommitLog mutated")
+	}
+	// DeltaRatio recalculated: 5 changed files / 100 total = 0.05.
+	if filtered.DeltaRatio != 0.05 {
+		t.Errorf("DeltaRatio = %f, want 0.05", filtered.DeltaRatio)
+	}
+	// Original manifest not mutated.
+	if len(m.NewFiles) != 3 {
+		t.Error("original manifest was mutated")
+	}
+}

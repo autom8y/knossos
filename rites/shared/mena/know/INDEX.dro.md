@@ -41,14 +41,16 @@ This command runs in the main thread (requires Task tool for theoros dispatch). 
    - **Scan for satellite-authored criteria**: Check if `.know/criteria/` exists and contains any `*.md` files. If it does, read each file and merge its domain entry into the registry alongside the pinakes domains. Each criteria file follows the same format as pinakes domain files. If `.know/criteria/` does not exist or is empty, continue normally with only pinakes domains.
 
 3. **Build generation queue** (uses `ari knows --delta` for change analysis):
-   - For each domain (single or all):
-     - If `.know/{domain}.md` does not exist: ADD to **full** queue
-     - If `--force` is set: ADD to **full** queue
-     - Otherwise, run: `Bash("ari knows --delta {domain} -o json")` and parse the JSON result:
-       - If `mode == "skip"`: report "Knowledge for '{domain}' is current" and SKIP
-       - If `mode == "time-only"`: ADD to **time-only** queue (no code changes, just time-expired)
-       - If `mode == "incremental"` AND `force_full == false`: ADD to **incremental** queue
-       - If `mode == "full"` OR `force_full == true`: ADD to **full** queue
+   - First, check each domain for non-delta conditions:
+     - If `.know/{domain}.md` does not exist: ADD to **full** queue (skip delta for this domain)
+     - If `--force` is set: ADD to **full** queue (skip delta for this domain)
+   - Then, for ALL remaining domains in a **single batch call**:
+     - Run: `Bash("ari knows --delta -o json")` — this returns a JSON object with a `domains` array containing ALL domain deltas. One call, not N calls. The CLI caches git operations internally so overlapping source scopes don't cause redundant git subprocess invocations.
+     - Parse the batch result and route each domain entry by its `mode` field:
+       - `mode == "skip"`: report "Knowledge for '{domain}' is current" and SKIP
+       - `mode == "time-only"`: ADD to **time-only** queue
+       - `mode == "incremental"` AND `force_full == false`: ADD to **incremental** queue
+       - `mode == "full"` OR `force_full == true`: ADD to **full** queue
    - If all queues are empty: report "All domains are current. Use --force to regenerate." and STOP.
    - Report queues: "Time-only refresh: {N}, Incremental update: {N}, Full regeneration: {N}, Skipped: {N}"
    - Store the delta JSON for each incremental domain (used in Phase 2a for change context).

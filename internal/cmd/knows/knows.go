@@ -442,6 +442,10 @@ func runDelta(printer interface {
 
 	var results []DeltaOutput
 
+	// Cache unscoped manifests by (fromHash, toHash) to avoid redundant git
+	// operations when multiple domains share the same hash pair.
+	manifestCache := make(map[string]*know.ChangeManifest)
+
 	for _, status := range statuses {
 		out := DeltaOutput{
 			Domain:    status.Domain,
@@ -477,14 +481,23 @@ func runDelta(printer interface {
 			continue
 		}
 
-		manifest, err := know.ComputeChangeManifest(status.SourceHash, status.CurrentHash, meta.SourceScope)
-		if err != nil {
-			// Graceful degradation: git may be unavailable.
-			fmt.Fprintf(os.Stderr, "warn: cannot compute manifest for %q: %v\n", status.Domain, err)
-			out.Mode = "full"
-			results = append(results, out)
-			continue
+		// Get or compute the unscoped manifest for this hash pair.
+		cacheKey := status.SourceHash + ":" + status.CurrentHash
+		raw, ok := manifestCache[cacheKey]
+		if !ok {
+			raw, err = know.ComputeChangeManifest(status.SourceHash, status.CurrentHash, nil)
+			if err != nil {
+				// Graceful degradation: git may be unavailable.
+				fmt.Fprintf(os.Stderr, "warn: cannot compute manifest for %q: %v\n", status.Domain, err)
+				out.Mode = "full"
+				results = append(results, out)
+				continue
+			}
+			manifestCache[cacheKey] = raw
 		}
+
+		// Filter the cached manifest by this domain's source scope.
+		manifest := know.FilterChangeManifest(raw, meta.SourceScope)
 
 		out.Manifest = manifest
 		out.Mode = know.RecommendedMode(manifest, meta)
@@ -546,6 +559,10 @@ func runSemanticDiff(printer interface {
 		statuses = found
 	}
 
+	// Cache unscoped manifests by (fromHash, toHash) to avoid redundant git
+	// operations when multiple domains share the same hash pair.
+	manifestCache := make(map[string]*know.ChangeManifest)
+
 	for _, status := range statuses {
 		if status.SourceHash == "" || status.CurrentHash == "" {
 			continue
@@ -560,11 +577,18 @@ func runSemanticDiff(printer interface {
 			continue
 		}
 
-		manifest, err := know.ComputeChangeManifest(status.SourceHash, status.CurrentHash, meta.SourceScope)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "warn: cannot compute manifest for %q: %v\n", status.Domain, err)
-			continue
+		cacheKey := status.SourceHash + ":" + status.CurrentHash
+		raw, ok := manifestCache[cacheKey]
+		if !ok {
+			raw, err = know.ComputeChangeManifest(status.SourceHash, status.CurrentHash, nil)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "warn: cannot compute manifest for %q: %v\n", status.Domain, err)
+				continue
+			}
+			manifestCache[cacheKey] = raw
 		}
+
+		manifest := know.FilterChangeManifest(raw, meta.SourceScope)
 
 		sd := &know.SemanticDiff{
 			FromHash: status.SourceHash,
