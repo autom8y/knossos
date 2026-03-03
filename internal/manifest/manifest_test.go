@@ -127,6 +127,139 @@ func TestManifestToJSON(t *testing.T) {
 	}
 }
 
+// --- DEBT-178: Rite Manifest Validation Tests ---
+
+func TestValidateRiteManifest_Valid(t *testing.T) {
+	m := &manifest.Manifest{
+		Path: "/test/rites/test-rite/manifest.yaml",
+		Content: map[string]interface{}{
+			"name":        "test-rite",
+			"entry_agent": "pythia",
+			"agents": []interface{}{
+				map[string]interface{}{"name": "pythia", "role": "orchestrator"},
+				map[string]interface{}{"name": "builder", "role": "builds things"},
+			},
+		},
+	}
+	warnings := manifest.ValidateRiteManifest(m)
+	if len(warnings) != 0 {
+		t.Errorf("ValidateRiteManifest() returned %d warnings for valid manifest, want 0: %v", len(warnings), warnings)
+	}
+}
+
+func TestValidateRiteManifest_MissingRequiredFields(t *testing.T) {
+	tests := []struct {
+		name         string
+		content      map[string]interface{}
+		wantWarnings int
+		wantPaths    []string
+	}{
+		{
+			name: "missing name",
+			content: map[string]interface{}{
+				"entry_agent": "pythia",
+				"agents":      []interface{}{map[string]interface{}{"name": "pythia"}},
+			},
+			wantWarnings: 1,
+			wantPaths:    []string{"$.name"},
+		},
+		{
+			name: "missing entry_agent",
+			content: map[string]interface{}{
+				"name":   "test-rite",
+				"agents": []interface{}{map[string]interface{}{"name": "builder"}},
+			},
+			wantWarnings: 1,
+			wantPaths:    []string{"$.entry_agent"},
+		},
+		{
+			name: "empty name and entry_agent",
+			content: map[string]interface{}{
+				"name":        "",
+				"entry_agent": "",
+				"agents":      []interface{}{map[string]interface{}{"name": "builder"}},
+			},
+			wantWarnings: 2,
+			wantPaths:    []string{"$.name", "$.entry_agent"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			m := &manifest.Manifest{Path: "/test", Content: tt.content}
+			warnings := manifest.ValidateRiteManifest(m)
+			if len(warnings) != tt.wantWarnings {
+				t.Errorf("got %d warnings, want %d: %v", len(warnings), tt.wantWarnings, warnings)
+			}
+			for i, wantPath := range tt.wantPaths {
+				if i < len(warnings) && warnings[i].Path != wantPath {
+					t.Errorf("warning[%d].Path = %q, want %q", i, warnings[i].Path, wantPath)
+				}
+			}
+			// All warnings must have severity "warning" (not "error") per TD-3
+			for _, w := range warnings {
+				if w.Severity != "warning" {
+					t.Errorf("severity = %q, want %q (TD-3: warnings only)", w.Severity, "warning")
+				}
+			}
+		})
+	}
+}
+
+func TestValidateRiteManifest_EntryAgentNotInList(t *testing.T) {
+	m := &manifest.Manifest{
+		Path: "/test",
+		Content: map[string]interface{}{
+			"name":        "test-rite",
+			"entry_agent": "nonexistent-agent",
+			"agents": []interface{}{
+				map[string]interface{}{"name": "builder", "role": "builds things"},
+			},
+		},
+	}
+	warnings := manifest.ValidateRiteManifest(m)
+	found := false
+	for _, w := range warnings {
+		if w.Path == "$.entry_agent" && w.Severity == "warning" {
+			found = true
+		}
+	}
+	if !found {
+		t.Error("expected warning for entry_agent not found in agents list")
+	}
+}
+
+func TestValidateRiteManifest_AgentMissingName(t *testing.T) {
+	m := &manifest.Manifest{
+		Path: "/test",
+		Content: map[string]interface{}{
+			"name":        "test-rite",
+			"entry_agent": "builder",
+			"agents": []interface{}{
+				map[string]interface{}{"name": "builder", "role": "builds things"},
+				map[string]interface{}{"role": "unnamed agent"},
+			},
+		},
+	}
+	warnings := manifest.ValidateRiteManifest(m)
+	found := false
+	for _, w := range warnings {
+		if w.Path == "$.agents[1].name" {
+			found = true
+		}
+	}
+	if !found {
+		t.Error("expected warning for agent[1] missing name field")
+	}
+}
+
+func TestValidateRiteManifest_NilManifest(t *testing.T) {
+	warnings := manifest.ValidateRiteManifest(nil)
+	if warnings != nil {
+		t.Errorf("expected nil for nil manifest, got %v", warnings)
+	}
+}
+
 func TestLoadFormat(t *testing.T) {
 	tests := []struct {
 		name    string

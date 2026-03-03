@@ -4,6 +4,8 @@ package manifest
 
 import (
 	"encoding/json"
+	"fmt"
+	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -62,12 +64,25 @@ func Load(path string) (*Manifest, error) {
 			})
 	}
 
-	return &Manifest{
+	m := &Manifest{
 		Path:    path,
 		Format:  format,
 		Content: content,
 		Raw:     data,
-	}, nil
+	}
+
+	// Post-parse validation: if the content looks like a rite manifest
+	// (has "name" and "agents" keys), run structural validation and log warnings.
+	// Per TD-3: warnings only, never block Load().
+	if looksLikeRiteManifest(content) {
+		if warnings := ValidateRiteManifest(m); len(warnings) > 0 {
+			for _, w := range warnings {
+				log.Printf("Warning: manifest %s: %s at %s", path, w.Message, w.Path)
+			}
+		}
+	}
+
+	return m, nil
 }
 
 // LoadFromGitRef loads a manifest from a git reference.
@@ -269,4 +284,120 @@ func (m *Manifest) GetStringSlice(path string) []string {
 // Exists checks if the manifest was loaded from an existing file.
 func (m *Manifest) Exists() bool {
 	return m != nil && len(m.Raw) > 0
+}
+
+// looksLikeRiteManifest returns true if the content has keys typical of a rite manifest.
+// Used to decide whether to run rite-specific validation from Load().
+func looksLikeRiteManifest(content map[string]interface{}) bool {
+	_, hasName := content["name"]
+	_, hasAgents := content["agents"]
+	return hasName && hasAgents
+}
+
+// ValidateRiteManifest performs structural validation on a manifest that represents
+// a rite manifest. It checks required fields and agent reference format.
+//
+// Per TD-3: returns warnings (not errors) so that existing manifests with minor
+// schema drift do not break ari sync. Callers should log warnings, not abort.
+func ValidateRiteManifest(m *Manifest) []ValidationIssue {
+	if m == nil || m.Content == nil {
+		return nil
+	}
+	var warnings []ValidationIssue
+
+	// Required field: name
+	name, hasName := m.Content["name"]
+	if !hasName {
+		warnings = append(warnings, ValidationIssue{
+			Path:     "$.name",
+			Message:  "missing required field 'name'",
+			Severity: "warning",
+		})
+	} else if nameStr, ok := name.(string); ok && nameStr == "" {
+		warnings = append(warnings, ValidationIssue{
+			Path:     "$.name",
+			Message:  "field 'name' must not be empty",
+			Severity: "warning",
+		})
+	}
+
+	// Required field: entry_agent
+	entryAgent, hasEntryAgent := m.Content["entry_agent"]
+	if !hasEntryAgent {
+		warnings = append(warnings, ValidationIssue{
+			Path:     "$.entry_agent",
+			Message:  "missing required field 'entry_agent'",
+			Severity: "warning",
+		})
+	} else if ea, ok := entryAgent.(string); ok && ea == "" {
+		warnings = append(warnings, ValidationIssue{
+			Path:     "$.entry_agent",
+			Message:  "field 'entry_agent' must not be empty",
+			Severity: "warning",
+		})
+	}
+
+	// Validate agent references: each agent must have a non-empty name
+	if agents, ok := m.Content["agents"]; ok {
+		if agentList, ok := agents.([]interface{}); ok {
+			for i, agent := range agentList {
+				if agentMap, ok := agent.(map[string]interface{}); ok {
+					agentName, hasAgentName := agentMap["name"]
+					if !hasAgentName {
+						warnings = append(warnings, ValidationIssue{
+							Path:     formatAgentPath(i, "name"),
+							Message:  "agent entry missing required field 'name'",
+							Severity: "warning",
+						})
+					} else if n, ok := agentName.(string); ok && n == "" {
+						warnings = append(warnings, ValidationIssue{
+							Path:     formatAgentPath(i, "name"),
+							Message:  "agent 'name' must not be empty",
+							Severity: "warning",
+						})
+					}
+				}
+			}
+		}
+	}
+
+	// Validate entry_agent references an agent in the agents list
+	if hasEntryAgent && hasName {
+		if ea, ok := entryAgent.(string); ok && ea != "" {
+			if !agentExistsInList(m.Content, ea) {
+				warnings = append(warnings, ValidationIssue{
+					Path:     "$.entry_agent",
+					Message:  "entry_agent '" + ea + "' not found in agents list",
+					Severity: "warning",
+				})
+			}
+		}
+	}
+
+	return warnings
+}
+
+// formatAgentPath returns a JSON path for an agent list entry.
+func formatAgentPath(index int, field string) string {
+	return fmt.Sprintf("$.agents[%d].%s", index, field)
+}
+
+// agentExistsInList checks if an agent name appears in the manifest's agents list.
+func agentExistsInList(content map[string]interface{}, name string) bool {
+	agents, ok := content["agents"]
+	if !ok {
+		return false
+	}
+	agentList, ok := agents.([]interface{})
+	if !ok {
+		return false
+	}
+	for _, agent := range agentList {
+		if agentMap, ok := agent.(map[string]interface{}); ok {
+			if n, ok := agentMap["name"].(string); ok && n == name {
+				return true
+			}
+		}
+	}
+	return false
 }

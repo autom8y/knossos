@@ -607,3 +607,94 @@ func TestSourceResolver_ExplicitOrgNoOrg(t *testing.T) {
 		t.Fatal("Expected error when using 'org' alias with no active org")
 	}
 }
+
+// --- SCAR Regression Tests ---
+
+// TestSCAR023_TemplatePathResolution_SelfHosting is a regression test for SCAR-023.
+//
+// Background: SourceProject template resolution looked only at $PROJECT/templates/.
+// In the knossos self-hosting case (where knossos is the project), templates live at
+// $PROJECT/knossos/templates/. The fix added a fallback: when templates/sections/
+// does not exist, check knossos/templates/sections/ as an alternative.
+//
+// This test creates a project structure that mimics the knossos self-hosting layout
+// (knossos/templates/sections/ exists but templates/sections/ does not) and verifies
+// that the resolver correctly falls back to the knossos/templates/ path.
+func TestSCAR023_TemplatePathResolution_SelfHosting(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	// Create the knossos self-hosting template layout:
+	// knossos/templates/sections/ exists, but templates/sections/ does NOT.
+	knossosTemplatesDir := filepath.Join(tmpDir, "knossos", "templates")
+	if err := os.MkdirAll(filepath.Join(knossosTemplatesDir, "sections"), 0755); err != nil {
+		t.Fatal(err)
+	}
+
+	// Create a project-level rite (satellite local)
+	createTestRite(t, tmpDir, "self-hosted-rite")
+
+	resolver := &SourceResolver{
+		projectRoot:     tmpDir,
+		projectRitesDir: filepath.Join(tmpDir, ".knossos", "rites"),
+		userRitesDir:    "/nonexistent-user-rites",
+		orgRitesDir:     "",
+		knossosHome:     "/nonexistent-knossos-home",
+		resolved:        make(map[string]*ResolvedRite),
+	}
+
+	resolved, err := resolver.ResolveRite("self-hosted-rite", "")
+	if err != nil {
+		t.Fatalf("ResolveRite failed: %v", err)
+	}
+
+	if resolved.Source.Type != SourceProject {
+		t.Errorf("Expected source type %q, got %q", SourceProject, resolved.Source.Type)
+	}
+
+	// The critical assertion: templates dir must resolve to knossos/templates/
+	// because templates/sections/ does not exist (self-hosting fallback).
+	if resolved.TemplatesDir != knossosTemplatesDir {
+		t.Errorf("SCAR-023 regression: TemplatesDir = %q, want %q. "+
+			"When templates/sections/ does not exist but knossos/templates/sections/ does, "+
+			"the resolver must fall back to knossos/templates/. "+
+			"See commit bff1293.", resolved.TemplatesDir, knossosTemplatesDir)
+	}
+}
+
+// TestSCAR023_TemplatePathResolution_StandardProject is the complementary test:
+// when templates/sections/ exists at the standard location, the resolver must
+// use it directly without fallback.
+func TestSCAR023_TemplatePathResolution_StandardProject(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	// Create both template locations (standard takes priority)
+	standardTemplatesDir := filepath.Join(tmpDir, "templates")
+	if err := os.MkdirAll(filepath.Join(standardTemplatesDir, "sections"), 0755); err != nil {
+		t.Fatal(err)
+	}
+	// Also create knossos/templates/ to verify it is NOT used when standard exists
+	if err := os.MkdirAll(filepath.Join(tmpDir, "knossos", "templates", "sections"), 0755); err != nil {
+		t.Fatal(err)
+	}
+
+	createTestRite(t, tmpDir, "standard-rite")
+
+	resolver := &SourceResolver{
+		projectRoot:     tmpDir,
+		projectRitesDir: filepath.Join(tmpDir, ".knossos", "rites"),
+		userRitesDir:    "/nonexistent-user-rites",
+		orgRitesDir:     "",
+		knossosHome:     "/nonexistent-knossos-home",
+		resolved:        make(map[string]*ResolvedRite),
+	}
+
+	resolved, err := resolver.ResolveRite("standard-rite", "")
+	if err != nil {
+		t.Fatalf("ResolveRite failed: %v", err)
+	}
+
+	// Standard templates/ must be used when it exists (no fallback needed)
+	if resolved.TemplatesDir != standardTemplatesDir {
+		t.Errorf("TemplatesDir = %q, want %q (standard path should take priority)", resolved.TemplatesDir, standardTemplatesDir)
+	}
+}
