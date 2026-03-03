@@ -3,7 +3,7 @@ package mena
 import (
 	"fmt"
 	"io/fs"
-	"log"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -267,13 +267,13 @@ func cleanStaleMenaEntries(opts MenaProjectionOptions, result *MenaProjectionRes
 				if rmErr := os.RemoveAll(absPath); rmErr != nil {
 					result.Warnings = append(result.Warnings, fmt.Sprintf("failed to remove stale mena directory %s: %v", key, rmErr))
 				} else {
-					log.Printf("Removed stale mena entry: %s", key)
+					slog.Info("removed stale mena entry", "key", key)
 				}
 			} else {
 				if rmErr := os.Remove(absPath); rmErr != nil {
 					result.Warnings = append(result.Warnings, fmt.Sprintf("failed to remove stale mena file %s: %v", key, rmErr))
 				} else {
-					log.Printf("Removed stale mena entry: %s", key)
+					slog.Info("removed stale mena entry", "key", key)
 				}
 			}
 		}
@@ -282,7 +282,7 @@ func cleanStaleMenaEntries(opts MenaProjectionOptions, result *MenaProjectionRes
 			if rmErr := os.Remove(promotedFile); rmErr != nil {
 				result.Warnings = append(result.Warnings, fmt.Sprintf("failed to remove stale promoted file %s.md: %v", key, rmErr))
 			} else {
-				log.Printf("Removed stale promoted file: %s.md", key)
+				slog.Info("removed stale promoted file", "key", key+".md")
 			}
 		}
 	}
@@ -368,7 +368,7 @@ func removeStaleFiles(destDir string, sourceFileNames map[string]bool) {
 		}
 		if !sourceFileNames[relPath] {
 			if rmErr := os.Remove(path); rmErr != nil {
-				log.Printf("Warning: failed to remove stale file %s: %v", path, rmErr)
+				slog.Warn("failed to remove stale file", "path", path, "error", rmErr)
 			}
 		}
 		return nil
@@ -376,6 +376,6 @@ func removeStaleFiles(destDir string, sourceFileNames map[string]bool) {
 	// Log non-permission errors from CleanEmptyDirs. Permission errors are
 	// acceptable on shared/read-only directories and are silently ignored.
 	for _, cleanErr := range CleanEmptyDirs(destDir) {
-		log.Printf("Warning: %s", cleanErr)
+		slog.Warn("clean empty dirs issue", "error", cleanErr)
 	}
 }

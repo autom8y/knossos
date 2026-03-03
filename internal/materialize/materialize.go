@@ -4,7 +4,7 @@ package materialize
 import (
 	"fmt"
 	"io/fs"
-	"log"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -245,7 +245,7 @@ func (m *Materializer) MaterializeMinimal(opts Options) (*Result, error) {
 	}
 	divergenceReport, err := provenance.DetectDivergence(prevManifest, nil, claudeDir)
 	if err != nil {
-		log.Printf("Warning: failed to detect provenance divergence: %v", err)
+		slog.Warn("failed to detect provenance divergence", "error", err)
 	}
 	collector := provenance.NewCollector()
 
@@ -321,7 +321,7 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 	platformMenaDir := m.getMenaDir()
 	if warnings, err := registry.ValidateRiteReferences(ritePath, ritesBase, platformMenaDir); err == nil {
 		for _, w := range warnings {
-			log.Printf("Warning: %s: %s (%s)", w.File, w.Message, w.RefName)
+			slog.Warn("stale rite reference", "file", w.File, "message", w.Message, "ref", w.RefName)
 		}
 	}
 
@@ -376,7 +376,7 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 	}
 	divergenceReport, err := provenance.DetectDivergence(prevManifest, nil, claudeDir)
 	if err != nil {
-		log.Printf("Warning: failed to detect provenance divergence: %v", err)
+		slog.Warn("failed to detect provenance divergence", "error", err)
 	}
 	collector := provenance.NewCollector()
 

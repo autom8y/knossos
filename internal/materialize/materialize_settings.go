@@ -3,7 +3,7 @@ package materialize
 import (
 	"encoding/json"
 	"io/fs"
-	"log"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -187,7 +187,7 @@ func (m *Materializer) cleanupThroughlineIDs() int {
 		if err := os.Remove(idFile); err == nil {
 			cleaned++
 		} else if !os.IsNotExist(err) {
-			log.Printf("Warning: failed to remove %s: %v", idFile, err)
+			slog.Warn("failed to remove throughline IDs", "path", idFile, "error", err)
 		}
 	}
 	return cleaned
@@ -284,10 +284,10 @@ func (m *Materializer) cleanupStaleBlanketSettings(claudeDir string, manifest *p
 
 	// Both gates passed: safe to remove
 	if err := os.Remove(settingsPath); err != nil {
-		log.Printf("Warning: failed to remove stale settings.json from %s: %v", claudeDir, err)
+		slog.Warn("failed to remove stale settings.json", "path", claudeDir, "error", err)
 		return false
 	}
-	log.Printf("Removed stale settings.json from %s", claudeDir)
+	slog.Info("removed stale settings.json", "path", claudeDir)
 	return true
 }
 

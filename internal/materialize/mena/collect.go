@@ -2,7 +2,7 @@ package mena
 
 import (
 	"io/fs"
-	"log"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -33,7 +33,7 @@ func CollectMena(sources []MenaSource, opts MenaProjectionOptions) (*MenaResolut
 				// Log at verbose level so callers can diagnose missing mena sources
 				// (e.g., shared mena pointing to wrong base directory for satellite rites).
 				// Graceful skip is intentional — not all sources are required to exist.
-				log.Printf("mena: source path does not exist, skipping: %s", src.Path)
+				slog.Info("mena source path does not exist, skipping", "path", src.Path)
 				continue
 			}
 			if err := collectMenaEntriesDir(src.Path, "", collected, standalones, srcIdx); err != nil {

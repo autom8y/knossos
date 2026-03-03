@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io/fs"
-	"log"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -130,7 +130,7 @@ func resolveNamespace(collected map[string]menaCollectedEntry, standalones map[s
 		manifestPath := filepath.Join(claudeDir, provenance.ManifestFileName)
 		oldManifest, loadErr := provenance.Load(manifestPath)
 		if loadErr != nil && !errors.IsNotFound(loadErr) {
-			log.Printf("Warning: failed to load provenance manifest for collision check: %v", loadErr)
+			slog.Warn("failed to load provenance manifest for collision check", "error", loadErr)
 		}
 
 		entries, err := os.ReadDir(opts.TargetCommandsDir)
@@ -182,7 +182,7 @@ func resolveNamespace(collected map[string]menaCollectedEntry, standalones map[s
 				}
 
 				if opts.OverwriteDiverged {
-					log.Printf("Info: flat name '%s' overwriting user entry (--overwrite-diverged)", entryName)
+					slog.Info("flat name overwriting user entry", "name", entryName, "reason", "--overwrite-diverged")
 					continue
 				}
 
@@ -194,7 +194,7 @@ func resolveNamespace(collected map[string]menaCollectedEntry, standalones map[s
 						"namespace collision: flat name %q conflicts with existing user-owned entry %q; knossos falling back to source-path routing for %q",
 						entryName, entryName, sourceKey,
 					))
-					log.Printf("Warning: flat name '%s' collides with existing user entry, falling back to source path for source '%s'", entryName, sourceKey)
+					slog.Warn("flat name collides with existing user entry, falling back to source path", "name", entryName, "source", sourceKey)
 					delete(flatNames, sourceKey)
 				}
 			}

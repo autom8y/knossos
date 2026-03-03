@@ -2,7 +2,7 @@ package userscope
 
 import (
 	"io/fs"
-	"log"
+	"log/slog"
 	"os"
 	"path/filepath"
 
@@ -82,7 +82,7 @@ func (s *syncer) syncUserResourceFromEmbedded(
 				if !opts.DryRun {
 					targetChecksum, checksumErr := checksum.File(targetPath)
 					if checksumErr != nil {
-						log.Printf("Warning: checksum failed for %s: %v (treating as changed)", targetPath, checksumErr)
+						slog.Warn("checksum failed, treating as changed", "path", targetPath, "error", checksumErr)
 					}
 					manifest.Entries[manifestKey] = provenance.NewUserEntry(
 						provenance.ScopeUser, targetChecksum,
@@ -156,7 +156,7 @@ func (s *syncer) syncUserResourceFromEmbedded(
 			} else {
 				targetChecksum, checksumErr := checksum.File(targetPath)
 				if checksumErr != nil {
-					log.Printf("Warning: checksum failed for %s: %v (treating as changed)", targetPath, checksumErr)
+					slog.Warn("checksum failed, treating as changed", "path", targetPath, "error", checksumErr)
 				}
 				if targetChecksum == entry.Checksum {
 					// Target unchanged, update from embedded source

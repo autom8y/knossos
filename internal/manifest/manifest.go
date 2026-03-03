@@ -5,7 +5,7 @@ package manifest
 import (
 	"encoding/json"
 	"fmt"
-	"log"
+	"log/slog"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -77,7 +77,7 @@ func Load(path string) (*Manifest, error) {
 	if looksLikeRiteManifest(content) {
 		if warnings := ValidateRiteManifest(m); len(warnings) > 0 {
 			for _, w := range warnings {
-				log.Printf("Warning: manifest %s: %s at %s", path, w.Message, w.Path)
+				slog.Warn("manifest validation issue", "path", path, "message", w.Message, "location", w.Path)
 			}
 		}
 	}

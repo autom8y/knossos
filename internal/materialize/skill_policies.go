@@ -1,7 +1,7 @@
 package materialize
 
 import (
-	"log"
+	"log/slog"
 	"strings"
 )
 
@@ -265,7 +265,7 @@ func parseToolsSet(fmMap map[string]interface{}, fieldName string) map[string]bo
 func (m *Materializer) loadSharedSkillPolicies(resolved *ResolvedRite) []SkillPolicy {
 	manifest, err := m.loadSharedManifest(resolved)
 	if err != nil {
-		log.Printf("Warning: failed to parse shared manifest for skill_policies: %v", err)
+		slog.Warn("failed to parse shared manifest for skill_policies", "error", err)
 		return nil
 	}
 	if manifest == nil {

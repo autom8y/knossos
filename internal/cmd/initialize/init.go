@@ -6,7 +6,7 @@ package initialize
 import (
 	"fmt"
 	"io/fs"
-	"log"
+	"log/slog"
 	"os"
 	"path/filepath"
 
@@ -288,19 +288,19 @@ func extractEmbeddedMenaToXDG(embMena fs.FS) {
 		}
 		// Sentinel absent or version mismatch -- wipe and re-extract.
 		if removeErr := os.RemoveAll(xdgMena); removeErr != nil {
-			log.Printf("Warning: extractEmbeddedMena: RemoveAll %s failed: %v", xdgMena, removeErr)
+			slog.Warn("extractEmbeddedMena: RemoveAll failed", "path", xdgMena, "error", removeErr)
 			return // Best-effort
 		}
 	}
 
 	if err := os.MkdirAll(xdgMena, 0755); err != nil {
-		log.Printf("Warning: extractEmbeddedMena: MkdirAll %s failed: %v", xdgMena, err)
+		slog.Warn("extractEmbeddedMena: MkdirAll failed", "path", xdgMena, "error", err)
 		return // Best-effort
 	}
 
 	fs.WalkDir(embMena, "mena", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
-			log.Printf("Warning: extractEmbeddedMena: WalkDir skip %s: %v", path, err)
+			slog.Warn("extractEmbeddedMena: WalkDir skip", "path", path, "error", err)
 			return nil // skip errors
 		}
 		rel, relErr := filepath.Rel("mena", path)
@@ -314,19 +314,19 @@ func extractEmbeddedMenaToXDG(embMena fs.FS) {
 		}
 		content, readErr := fs.ReadFile(embMena, path)
 		if readErr != nil {
-			log.Printf("Warning: extractEmbeddedMena: ReadFile %s failed: %v", path, readErr)
+			slog.Warn("extractEmbeddedMena: ReadFile failed", "path", path, "error", readErr)
 			return nil
 		}
 		os.MkdirAll(filepath.Dir(dest), 0755)
 		if writeErr := os.WriteFile(dest, content, 0644); writeErr != nil {
-			log.Printf("Warning: extractEmbeddedMena: WriteFile %s failed: %v", dest, writeErr)
+			slog.Warn("extractEmbeddedMena: WriteFile failed", "path", dest, "error", writeErr)
 		}
 		return nil
 	})
 
 	// Write version sentinel so subsequent calls can detect stale extractions.
 	if writeErr := os.WriteFile(sentinelPath, []byte(currentVersion), 0644); writeErr != nil {
-		log.Printf("Warning: extractEmbeddedMena: sentinel write %s failed: %v", sentinelPath, writeErr)
+		slog.Warn("extractEmbeddedMena: sentinel write failed", "path", sentinelPath, "error", writeErr)
 	}
 }
 

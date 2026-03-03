@@ -3,7 +3,7 @@ package materialize
 import (
 	"fmt"
 	"io/fs"
-	"log"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -206,7 +206,7 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claud
 	for _, agent := range manifest.Agents {
 		agentPath := filepath.Join(agentsDir, agent.Name+".md")
 		if _, err := os.Stat(agentPath); os.IsNotExist(err) {
-			log.Printf("Warning: agent '%s' declared in rite manifest but no .md file found at %s", agent.Name, agentPath)
+			slog.Warn("agent declared in rite manifest but no .md file found", "agent", agent.Name, "path", agentPath)
 		}
 	}
 

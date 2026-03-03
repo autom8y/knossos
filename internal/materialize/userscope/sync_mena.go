@@ -2,7 +2,7 @@ package userscope
 
 import (
 	"io/fs"
-	"log"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -382,7 +382,7 @@ func syncUserMenaFile(
 			if opts.Recover {
 				targetChecksum, checksumErr := checksum.File(targetPath)
 				if checksumErr != nil {
-					log.Printf("Warning: checksum failed for %s: %v (treating as changed)", targetPath, checksumErr)
+					slog.Warn("checksum failed, treating as changed", "path", targetPath, "error", checksumErr)
 				}
 				if checksumErr == nil && targetChecksum == sourceChecksum {
 					if !opts.DryRun {
@@ -408,7 +408,7 @@ func syncUserMenaFile(
 			if !opts.DryRun {
 				targetChecksum, checksumErr := checksum.File(targetPath)
 				if checksumErr != nil {
-					log.Printf("Warning: checksum failed for %s: %v (treating as changed)", targetPath, checksumErr)
+					slog.Warn("checksum failed, treating as changed", "path", targetPath, "error", checksumErr)
 				}
 				manifest.Entries[manifestKey] = provenance.NewUserEntry(
 					provenance.ScopeUser, targetChecksum,
@@ -482,7 +482,7 @@ func syncUserMenaFile(
 		} else {
 			targetChecksum, checksumErr := checksum.File(targetPath)
 			if checksumErr != nil {
-				log.Printf("Warning: checksum failed for %s: %v (treating as changed)", targetPath, checksumErr)
+				slog.Warn("checksum failed, treating as changed", "path", targetPath, "error", checksumErr)
 			}
 			if targetChecksum == entry.Checksum {
 				// Target unchanged, update from source

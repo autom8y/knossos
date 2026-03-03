@@ -3,7 +3,7 @@
 package orgscope
 
 import (
-	"log"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"time"
@@ -81,7 +81,7 @@ func SyncOrgScope(params SyncOrgScopeParams) (*OrgScopeResult, error) {
 	if _, err := os.Stat(agentsDir); err == nil {
 		count, err := syncOrgResource(agentsDir, filepath.Join(userClaudeDir, "agents"), manifest, params.DryRun)
 		if err != nil {
-			log.Printf("orgscope: error syncing agents: %v", err)
+			slog.Warn("orgscope: error syncing agents", "error", err)
 		}
 		result.Agents = count
 	}
@@ -91,7 +91,7 @@ func SyncOrgScope(params SyncOrgScopeParams) (*OrgScopeResult, error) {
 	if _, err := os.Stat(menaDir); err == nil {
 		count, err := syncOrgResource(menaDir, filepath.Join(userClaudeDir, "skills"), manifest, params.DryRun)
 		if err != nil {
-			log.Printf("orgscope: error syncing mena: %v", err)
+			slog.Warn("orgscope: error syncing mena", "error", err)
 		}
 		result.Mena = count
 	}
@@ -132,7 +132,7 @@ func syncOrgResource(sourceDir, targetDir string, manifest *provenance.Provenanc
 
 		sourceData, err := os.ReadFile(sourcePath)
 		if err != nil {
-			log.Printf("orgscope: failed to read %s: %v", sourcePath, err)
+			slog.Warn("orgscope: failed to read source", "path", sourcePath, "error", err)
 			continue
 		}
 
@@ -152,7 +152,7 @@ func syncOrgResource(sourceDir, targetDir string, manifest *provenance.Provenanc
 		}
 
 		if err := os.WriteFile(targetPath, sourceData, 0644); err != nil {
-			log.Printf("orgscope: failed to write %s: %v", targetPath, err)
+			slog.Warn("orgscope: failed to write target", "path", targetPath, "error", err)
 			continue
 		}
 

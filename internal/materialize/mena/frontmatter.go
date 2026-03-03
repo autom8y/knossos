@@ -2,7 +2,7 @@ package mena
 
 import (
 	"bytes"
-	"log"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -108,7 +108,7 @@ func ParseMenaFrontmatterBytes(data []byte) MenaFrontmatter {
 
 	var fm MenaFrontmatter
 	if err := yaml.Unmarshal(data[searchStart:searchStart+endIndex], &fm); err != nil {
-		log.Printf("Warning: malformed YAML frontmatter, treating as unscoped: %v", err)
+		slog.Warn("malformed YAML frontmatter, treating as unscoped", "error", err)
 		return MenaFrontmatter{}
 	}
 	return fm

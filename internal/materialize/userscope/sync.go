@@ -2,7 +2,7 @@ package userscope
 
 import (
 	"io/fs"
-	"log"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -86,7 +86,7 @@ func (s *syncer) syncUserScope(opts SyncOptions) (*UserScopeResult, error) {
 			mainClaudeDir := filepath.Join(mainDir, ".claude")
 			mainChecker := NewCollisionChecker(mainClaudeDir)
 			if mainChecker.IsEffective() {
-				log.Printf("userscope: collision checker fell back to main worktree provenance at %s", mainClaudeDir)
+				slog.Info("userscope: collision checker fell back to main worktree provenance", "path", mainClaudeDir)
 				collisionChecker = mainChecker
 			}
 		}
@@ -95,7 +95,7 @@ func (s *syncer) syncUserScope(opts SyncOptions) (*UserScopeResult, error) {
 		if !collisionChecker.IsEffective() {
 			activeRite := s.resolver.ReadActiveRite()
 			if activeRite != "" {
-				log.Printf("userscope: collision checker not effective (no provenance manifest at %s) but ACTIVE_RITE=%q; skipping user-scope writes to prevent contamination", projectClaudeDir, activeRite)
+				slog.Warn("userscope: collision checker not effective, skipping user-scope writes to prevent contamination", "path", projectClaudeDir, "active_rite", activeRite)
 				return result, nil
 			}
 			// No ACTIVE_RITE: no rite to protect. Proceed without collision checking.
@@ -308,7 +308,7 @@ func (s *syncer) syncUserResource(
 				if opts.Recover {
 					targetChecksum, checksumErr := checksum.File(targetPath)
 					if checksumErr != nil {
-						log.Printf("Warning: checksum failed for %s: %v (treating as changed)", targetPath, checksumErr)
+						slog.Warn("checksum failed, treating as changed", "path", targetPath, "error", checksumErr)
 					}
 					if checksumErr == nil && targetChecksum == sourceChecksum {
 						// Adopt as knossos-owned
@@ -336,7 +336,7 @@ func (s *syncer) syncUserResource(
 				if !opts.DryRun {
 					targetChecksum, checksumErr := checksum.File(targetPath)
 					if checksumErr != nil {
-						log.Printf("Warning: checksum failed for %s: %v (treating as changed)", targetPath, checksumErr)
+						slog.Warn("checksum failed, treating as changed", "path", targetPath, "error", checksumErr)
 					}
 					manifest.Entries[manifestKey] = provenance.NewUserEntry(
 						provenance.ScopeUser, targetChecksum,
@@ -405,7 +405,7 @@ func (s *syncer) syncUserResource(
 				// Source changed - check if target diverged
 				targetChecksum, checksumErr := checksum.File(targetPath)
 				if checksumErr != nil {
-					log.Printf("Warning: checksum failed for %s: %v (treating as changed)", targetPath, checksumErr)
+					slog.Warn("checksum failed, treating as changed", "path", targetPath, "error", checksumErr)
 				}
 				if targetChecksum == entry.Checksum {
 					// Target unchanged, update from source

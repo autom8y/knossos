@@ -3,7 +3,7 @@ package materialize
 import (
 	"fmt"
 	"io/fs"
-	"log"
+	"log/slog"
 	"os"
 	"path/filepath"
 
@@ -187,7 +187,7 @@ func (m *Materializer) loadSharedManifest(resolved *ResolvedRite) (*RiteManifest
 func (m *Materializer) loadSharedHookDefaults(resolved *ResolvedRite) *HookDefaults {
 	manifest, err := m.loadSharedManifest(resolved)
 	if err != nil {
-		log.Printf("Warning: failed to parse shared manifest for hook_defaults: %v", err)
+		slog.Warn("failed to parse shared manifest for hook_defaults", "error", err)
 		return nil
 	}
 	if manifest == nil {
