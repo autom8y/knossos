@@ -260,7 +260,7 @@ The Knossos repository—canonical, versioned platform code that generates PROJE
 ### Sprint
 Multi-task coordinated workflow tracked in `SPRINT_CONTEXT.md`.
 - **Related**: Tasks, Coordination, Planning
-- **Source**: `.claude/sprints/[sprint-id]/SPRINT_CONTEXT.md`
+- **Source**: `.sos/sessions/[sprint-id]/SPRINT_CONTEXT.md`
 
 ### TLA+
 Formal specification language used to verify session state machine correctness.

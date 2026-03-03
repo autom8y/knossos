@@ -30,7 +30,8 @@ This command runs in the main thread. Main-thread execution is required because 
    - This is a side effect -- execute it before the Task dispatch.
 
 4. **Read session context** (if available):
-   - Check for `.claude/SESSION_CONTEXT.md` (injected by hooks when a session is active).
+   - Session context is injected via hooks at session start, not stored at a fixed file path.
+   - Check for an active session by looking at `.sos/sessions/` for the most recent active session's `SESSION_CONTEXT.md`.
    - If it exists, read it and extract: active rite, sprint name/number, current phase, recent decisions.
    - If it does not exist: note "no active session" -- framing proceeds without session context.
    - Do NOT call `ari` commands or run shell introspection to discover session state.

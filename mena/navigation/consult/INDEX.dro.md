@@ -52,7 +52,7 @@ Provide ecosystem guidance and recommendations. $ARGUMENTS
 7. Offer alternatives if multiple valid approaches exist
 
 ### `--playbook=NAME` flag
-1. Load playbook from `~/.claude/knowledge/consultant/playbooks/curated/{NAME}.md`
+1. Search for playbook by name in rite mena directories and shared skills
 2. Present complete workflow with current context
 3. If not found, list available playbooks
 
@@ -153,7 +153,7 @@ When recommending rites, retrieve current rite inventory from:
 
 ## Reference
 
-Full documentation: `.claude/commands/navigation/consult/INDEX.md`
+Full documentation: `mena/navigation/consult/reference.md`
 
 ## Sigil
 

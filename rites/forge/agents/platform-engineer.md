@@ -116,7 +116,7 @@ Verify ari sync --rite can load the rite.
 
 ### Phase 5: Rollback Preparation
 Document recovery path.
-1. Note backup location (.claude/agents.backup/)
+1. Note that previous rite can be restored via `ari sync --rite {previous-rite}`
 2. Document how to restore previous rite
 3. Verify rollback mechanism works
 

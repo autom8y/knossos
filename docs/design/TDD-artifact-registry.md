@@ -114,7 +114,7 @@ artifacts:
 ### 2.3 Project-Level Registry Schema
 
 ```yaml
-# .claude/artifacts/registry.yaml
+# .ledge/registry.yaml
 schema_version: "1.0"
 project_root: "/Users/tomtenuta/Code/roster/ariadne"
 created_at: "2026-01-01T00:00:00Z"
@@ -276,7 +276,7 @@ func (r *Registry) SessionRegistryPath(sessionID string) string {
 
 // ProjectRegistryPath returns the path to the project registry.
 func (r *Registry) ProjectRegistryPath() string {
-    return filepath.Join(r.paths.ClaudeDir(), "artifacts", "registry.yaml")
+    return filepath.Join(r.projectRoot, ".ledge", "registry.yaml")
 }
 
 // LoadSessionRegistry loads the artifact registry for a session.
@@ -1007,7 +1007,7 @@ For existing sessions without artifact registries:
 ### 10.2 Project-Level
 
 ```
-.claude/artifacts/registry.yaml
+.ledge/registry.yaml
 ```
 
 ### 10.3 Implementation Files

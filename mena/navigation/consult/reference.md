@@ -168,7 +168,7 @@ When given a natural language query, `/consult` acts as intelligent router:
    - Recognize domain keywords (auth, performance, tests, docs)
 
 2. **Match to Rite + Workflow**
-   - Consult `~/.claude/knowledge/consultant/routing/intent-patterns.md`
+   - Match intent keywords to rite profiles in rite mena directories
    - Determine appropriate rite
    - Select workflow type (task, sprint, hotfix, spike)
    - Estimate complexity level
@@ -273,7 +273,7 @@ Next step: Run `/10x` to switch rites
 Curated playbooks provide pre-built workflows for common scenarios:
 
 1. **Check Playbook Exists**
-   - Look in `~/.claude/knowledge/consultant/playbooks/curated/{NAME}.md`
+   - Search for playbook by name in rite mena directories and shared skills
    - If not found, list available playbooks
 
 2. **Load and Present Playbook**
@@ -449,7 +449,7 @@ The Consultant draws from structured knowledge base:
 | `rite-profiles/*.md` | Deep knowledge of each rite's strengths |
 | `playbooks/curated/*.md` | Pre-built workflows for common scenarios |
 
-These sources are maintained in `~/.claude/knowledge/consultant/` and kept in sync with the ecosystem.
+These sources are maintained in the rite mena directories and shared skills, materialized via `ari sync`.
 
 ---
 
@@ -659,7 +659,7 @@ A good `/consult` response:
 
 ### Consultant Agent
 
-The `/consult` command is powered by the **Consultant** agent, a global singleton at `~/.claude/agents/consultant.md`. This agent:
+The `/consult` command is powered by the **Consultant** agent. This agent:
 - Persists across rite swaps
 - Has deep knowledge of all rites and workflows
 - Uses Claude Opus 4.5 for complex reasoning
@@ -705,5 +705,5 @@ This skill is kept in sync with:
 
 When ecosystem changes, update:
 1. This skill reference (INDEX.lego.md)
-2. Consultant knowledge base (`~/.claude/knowledge/consultant/`)
-3. Consultant agent prompt (`~/.claude/agents/consultant.md`)
+2. Rite mena directories and shared skills (source of truth)
+3. Consultant agent prompt (in agents directory)

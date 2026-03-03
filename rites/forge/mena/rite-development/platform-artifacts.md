@@ -51,7 +51,6 @@ Key behaviors to understand:
 - Warns if workflow.yaml missing
 
 ### Sync Phase
-- Backs up current agents to .claude/agents.backup/
 - Clears .claude/agents/
 - Copies new agents from knossos
 - Copies workflow.yaml to .claude/ACTIVE_WORKFLOW.yaml

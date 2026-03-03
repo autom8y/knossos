@@ -80,4 +80,4 @@ Adversarial: {✓|✗} Edge cases handled
 ## Reference
 
 Full documentation: `.claude/skills/forge-ref/INDEX.md`
-Validation checklist: `~/.claude/knowledge/forge/evals/`
+Validation checklist: see `rite-development` skill validation section

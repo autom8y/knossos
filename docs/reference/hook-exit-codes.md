@@ -473,17 +473,15 @@ All roster hooks use the `logging.sh` library. Enable debug logging:
 
 ```bash
 # In hook script
-HOOKS_LIB="${CLAUDE_PROJECT_DIR:-.}/.claude/hooks/lib"
-source "$HOOKS_LIB/logging.sh" 2>/dev/null && log_init "hook-name" || true
+Hooks are Go binaries invoked via `ari hook <name>`. Debug logging is controlled
+via the `KNOSSOS_SYNC_DEBUG` environment variable.
 
-# Logs written to: .claude/hooks/.logs/<hook-name>.log
+# Hook commands are Go subcommands of ari:
+# ari hook writeguard, ari hook context, ari hook thread, etc.
 ```
 
 **View logs**:
-```bash
-tail -f .claude/hooks/.logs/session-write-guard.log
-tail -f .claude/hooks/.logs/command-validator.log
-```
+Hook output is visible in CC's hook execution trace when debug mode is enabled.
 
 ### Test Hooks in Isolation
 
@@ -623,7 +621,7 @@ exit 0
 
 - **ADR-0002**: Hook Library Resolution Architecture
 - **docs/ORCHESTRATOR-CI-IMPLEMENTATION.md**: CI/CD validation and git pre-commit hooks
-- **user-hooks/*/**: Reference implementations for all hook types
+- **internal/cmd/hook/**: Go hook implementations
 - **Claude Code Hooks Documentation**: https://code.claude.com/docs/en/hooks
 
 ---
@@ -672,4 +670,4 @@ timeout 5s validate || { echo "WARN: Allowing"; exit 0; }
 
 ---
 
-**File Path**: `/Users/tomtenuta/Code/roster/docs/reference/hook-exit-codes.md`
+**File Path**: `/Users/tomtenuta/Code/knossos/docs/reference/hook-exit-codes.md`

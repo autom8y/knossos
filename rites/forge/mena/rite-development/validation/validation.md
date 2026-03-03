@@ -51,8 +51,8 @@ ls .claude/agents/
 # Verify terminal phase
 grep -B1 "next: null" $KNOSSOS_HOME/rites/{rite-name}/workflow.yaml
 
-# Check Consultant knowledge
-grep "{rite-name}" .claude/knowledge/consultant/ecosystem-map.md
+# Check rite appears in catalog
+ari rite list
 ```
 
 ---

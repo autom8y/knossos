@@ -55,7 +55,7 @@ Via `rites/shared/manifest.yaml`, all satellites receive:
 |-------|---------|
 | `cross-rite-handoff` | Completely inapplicable (assumes multiple rites) |
 | `orchestrator-templates` | Assumes Pythia orchestration model |
-| `ephemeral-artifacts` | `.claude/wip/` pattern (knossos-specific) |
+| `ephemeral-artifacts` | `.sos/wip/` pattern (knossos-specific) |
 | `pinakes` | Domain registry assumes framework domains (dromena, legomena, agents, hooks, mena-structure) |
 | `codebase-archaeology` | Teaches "Prompt Fuel" compression, rite creation as endpoint |
 

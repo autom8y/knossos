@@ -97,7 +97,7 @@ rite work        →  .ledge/    (graduated artifacts)
 ### 3. `.ledge/` — Work Product Artifacts (NEW DIRECTORY)
 
 **Current problem**: Artifacts scatter across:
-- `.claude/wip/` (gitignored — good artifacts disappear)
+- `.sos/wip/` (gitignored — good artifacts disappear)
 - `docs/` (10x-dev dumps here with no structure)
 - `SESSION_CONTEXT.md` body (decisions buried in conversation history)
 

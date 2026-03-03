@@ -183,6 +183,6 @@ When designing workflows reveals:
 - **Orphan Phases**: Phases not reachable from entry point. Every phase must be in the chain.
 - **Missing Terminal**: Forgetting `next: null` on final phase. Exactly one terminal required.
 - **Over-Gating**: Too many complexity conditions making workflow confusing. Keep it simple.
-- **Command Collision**: Using reserved command names. Check CC built-in list at `.claude/COMMAND_REGISTRY.md` or run `ari rite --list` to see active commands.
+- **Command Collision**: Using reserved command names. Run `ari rite --list` to see active commands.
 - **Agent Mismatch**: Referencing agent names that don't match .md filenames. Exact match required.
 

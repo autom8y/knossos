@@ -102,4 +102,4 @@ Overall: {PASS | FAIL}
 ## Reference
 
 Full documentation: `.claude/skills/forge-ref/INDEX.md`
-Agent completeness checklist: `~/.claude/knowledge/forge/evals/agent-completeness.md`
+Agent completeness checklist: see `agent-prompt-engineering` skill validation checklist

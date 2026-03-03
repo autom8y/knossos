@@ -348,7 +348,7 @@ HANDOFF-[source]-to-[target]-[date].md
 |---------|----------|
 | Active session | `.sos/sessions/{session-id}/` |
 | Initiative docs | `docs/handoffs/` |
-| Sprint context | `.claude/sprints/{sprint-id}/` |
+| Sprint context | `.sos/sessions/{sprint-id}/` |
 
 ### Discovery
 

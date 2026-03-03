@@ -1,6 +1,6 @@
 ## Gap Analysis: /know Dromenon Satellite-Readiness Gaps
 
-Confirmation of two gaps identified in `.claude/wip/KNOW-10X-STRATEGY.md` (sections 2.6 and 2.9.1).
+Confirmation of two gaps identified in `.sos/wip/KNOW-10X-STRATEGY.md` (sections 2.6 and 2.9.1).
 
 ### Gap A: Hardcoded Go source_scope
 

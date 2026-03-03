@@ -167,7 +167,7 @@ Replace the current `user-content` section with:
 
 ### Golden Rules
 - **NEVER edit `.claude/` directly** -- edit source (rites/, mena/, knossos/templates/, user-*/) and rematerialize
-- **NEVER add session artifacts to mena** -- legomena are permanent platform knowledge; ephemeral content goes in `.claude/wip/`
+- **NEVER add session artifacts to mena** -- legomena are permanent platform knowledge; ephemeral content goes in `.sos/wip/`
 - **`.claude/` is NOT a pure cache** -- it contains user state (satellite regions). "Delete and regen" destroys user content
 
 ### Anti-Patterns

@@ -34,7 +34,7 @@ Ready for Architect when:
 - [ ] No TODO or TBD markers remain in document
 - [ ] User-facing text reviewed (no placeholder copy)
 - [ ] PRD validated against PRD template (all sections present)
-- [ ] File written to `.claude/artifacts/PRD-{id}.md` and verified via Read tool
+- [ ] File written to `.ledge/specs/PRD-{id}.md` and verified via Read tool
 ```
 
 ## Key Improvements
