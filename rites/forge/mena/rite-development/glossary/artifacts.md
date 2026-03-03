@@ -35,15 +35,15 @@ resilience-report # Chaos engineering results
 
 ### Pattern
 ```
-docs/{category}/{PREFIX}-{slug}.md
+.ledge/{category}/{PREFIX}-{slug}.md
 ```
 
 ### Components
 
 | Component | Description | Examples |
 |-----------|-------------|----------|
-| `docs/` | Standard documentation root | Always `docs/` |
-| `{category}` | Domain-specific subdirectory | requirements, design, hygiene, reliability |
+| `.ledge/` | Knossos work artifact root | Always `.ledge/` |
+| `{category}` | Domain-specific subdirectory | specs, decisions, reviews, spikes |
 | `{PREFIX}` | Artifact type abbreviation (uppercase) | PRD, TDD, ADR, OBS |
 | `{slug}` | Dynamic name placeholder | user-auth, api-gateway |
 
@@ -53,10 +53,10 @@ docs/{category}/{PREFIX}-{slug}.md
 |------|--------------|---------|
 | 10x-dev | `.ledge/specs/PRD-{slug}.md` | `.ledge/specs/PRD-user-auth.md` |
 | 10x-dev | `.ledge/specs/TDD-{slug}.md` | `.ledge/specs/TDD-payment-api.md` |
-| doc-rite | `docs/audits/AUDIT-{slug}.md` | `docs/audits/AUDIT-api-docs.md` |
-| hygiene | `docs/hygiene/SMELL-{slug}.md` | `docs/hygiene/SMELL-legacy-utils.md` |
-| debt | `docs/debt/LEDGER-{slug}.md` | `docs/debt/LEDGER-2024-q4.md` |
-| sre | `docs/reliability/OBS-{slug}.md` | `docs/reliability/OBS-payment-svc.md` |
+| doc-rite | `.ledge/reviews/AUDIT-{slug}.md` | `.ledge/reviews/AUDIT-api-docs.md` |
+| hygiene | `.ledge/reviews/SMELL-{slug}.md` | `.ledge/reviews/SMELL-legacy-utils.md` |
+| debt | `.ledge/reviews/LEDGER-{slug}.md` | `.ledge/reviews/LEDGER-2024-q4.md` |
+| sre | `.ledge/reviews/OBS-{slug}.md` | `.ledge/reviews/OBS-payment-svc.md` |
 
 ---
 
@@ -91,19 +91,15 @@ docs/{category}/{PREFIX}-{slug}.md
 
 | Category | Purpose | Rites |
 |----------|---------|-------|
-| `requirements/` | PRDs and requirements | 10x-dev |
-| `design/` | TDDs and architecture | 10x-dev |
-| `decisions/` | ADRs | 10x-dev |
-| `audits/` | Audit reports | doc-rite |
-| `hygiene/` | Code quality reports | hygiene |
-| `debt/` | Debt tracking | debt-triage |
-| `reliability/` | SRE artifacts | sre |
-| `tests/` | Test plans and results | all |
+| `specs/` | PRDs, TDDs, and test plans | 10x-dev |
+| `decisions/` | ADRs and design decisions | 10x-dev |
+| `reviews/` | Audit reports, smell reports, debt ledgers | doc-rite, hygiene, debt-triage, sre |
+| `spikes/` | Exploration and research artifacts | rnd, intelligence |
 
 ### Creating New Categories
 - Lowercase, singular or plural (be consistent)
 - Describes the artifact type, not the rite
-- Create at project root under `docs/`
+- Create under `.ledge/`
 
 ---
 
