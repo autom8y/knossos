@@ -55,7 +55,7 @@ canonical_sections:
     authority_source: ".claude/skills/doc-ecosystem/INDEX.lego.md"
     content_summary: "Settings are organized into four tiers that merge during sync. Each tier serves a specific scope, from global defaults (skeleton) to personal preferences (user)."
     key_points:
-      - "Four tiers in precedence order: skeleton < project < team < user"
+      - "Three tiers in precedence order: project < rite < user"
       - "Higher tiers override lower tiers for scalar values"
       - "Each tier has a specific purpose and scope"
       - "Tiers are loaded from well-known file locations"
@@ -63,9 +63,8 @@ canonical_sections:
       - language: text
         snippet: |
           Tier Locations:
-          skeleton:  .claude/settings.skeleton.json
           project:   .claude/settings.local.json
-          team:      .claude/settings.rite.json (shared)
+          rite:      .claude/settings.rite.json (shared)
           user:      ~/.config/claude/settings.json
         source: ".claude/skills/doc-ecosystem/INDEX.lego.md:156"
     cross_references:

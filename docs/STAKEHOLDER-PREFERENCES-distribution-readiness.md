@@ -245,19 +245,17 @@ This means the work order is:
 - `agents/consultant.md` -- Meta-level navigator, opus model, maxTurns: 20
 - `mena/navigation/consult/INDEX.dro.md` -- Dromena (slash command)
 - `mena/navigation/consult/reference.md` -- Skill reference (legomena)
-- `.claude/knowledge/consultant/capability-index.yaml` -- Rite capability metadata
-- `.claude/knowledge/consultant/rites/*.md` -- Rite-specific agent knowledge (ecosystem only)
+- Rite capability metadata is derived from rite manifests via `rite-discovery` skill
 
 **Missing**:
 - `rite-discovery` skill source exists in `mena/` but is not materialized to `.claude/skills/` -- the consult dromena references it 6+ times expecting it to be loadable
-- Playbook files (`~/.claude/knowledge/consultant/playbooks/curated/*.md`)
+- Playbook files (no curated playbooks exist in source mena yet)
 - Knowledge base coverage for non-ecosystem rites
 - capability-index.yaml has stale command names (/10x-dev → /10x, /doc-team → /docs, /debt-triage → /debt)
 - Consultant reference file references "Claude Opus 4.5" specifically -- should reference model generically
 
 **Required for world-class**:
 - Create rite-discovery skill (dynamic rite inventory)
-- Fix/populate capability-index.yaml with current data
 - Create or remove playbook references
 - Full dynamic exploration via Glob/Grep/Read (not Task delegation)
 - Ensure all 5 modes produce correct output
@@ -298,7 +296,7 @@ These were identified during the interview but deferred:
 2. **Distribution mechanism**: Clone repo? Package? Homebrew? Deferred until product is ready.
 3. **Hook shell→binary migration completeness**: Needs verification. Stakeholder says "not sure" but migration being complete is a prerequisite.
 4. **Companion file autocomplete fix**: Is this a CC behavior we can control, or a naming convention we need to change? Needs investigation.
-5. **Consultant knowledge base location**: Currently at `.claude/knowledge/consultant/` (projection). Should this be source-controlled? Materialized from source?
+5. **Consultant knowledge base location**: Previously at `.claude/knowledge/consultant/` (phantom -- never existed in pipeline). Consultant now uses rite mena directories and shared skills as source of truth.
 6. **MOIRAI_BYPASS mechanism**: Fundamentally can't work through CC Bash. Alternative approach needed for Moirai's write guard bypass.
 
 **Standing directive**: When questions arise about White Sails, Naxos, Fates, or other doctrinal topics, the doctrine files are the canonical source of truth -- not interview summaries or paraphrases. Stakeholder explicitly directed: "Read the doctrine."

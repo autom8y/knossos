@@ -34,8 +34,8 @@ categories:
         status: IMPLEMENTED
         files:
           - ariadne/internal/hook/threadcontract/event.go
-          - .claude/hooks/ari/cognitive-budget.sh
-          - .claude/hooks/ari/autopark.sh
+          - internal/cmd/hook/cognitivebudget.go
+          - internal/cmd/hook/autopark.go
         validation_criteria: "ARI_MSG_WARN threshold triggers warning; ari hook autopark fires on Stop event"
         notes: "Environment variables ARI_MSG_WARN, ARI_MSG_PARK, ARI_BUDGET_DISABLE implemented"
 
@@ -100,7 +100,7 @@ categories:
         status: IMPLEMENTED
         files:
           - ariadne/internal/hook/threadcontract/event.go
-          - .claude/hooks/ari/thread.sh
+          - internal/cmd/hook/thread.go
         validation_criteria: "PostToolUse hook records tool_call for Edit, Write, Bash tools"
 
       - id: TC-006
@@ -168,8 +168,7 @@ categories:
         severity: BLOCKER
         status: PARTIAL
         files:
-          - .claude/hooks/ari/thread.sh
-          - ariadne/internal/cmd/hook/thread.go
+          - internal/cmd/hook/thread.go
         validation_criteria: "PostToolUse hook records tool_call, file_change, command events to events.jsonl"
         notes: "Hook fires for Edit/Write/Bash but not all event types auto-recorded; some require explicit agent invocation"
 
@@ -257,8 +256,7 @@ categories:
         severity: BLOCKER
         status: IMPLEMENTED
         files:
-          - .claude/hooks/ari/writeguard.sh
-          - ariadne/internal/cmd/hook/writeguard.go
+          - internal/cmd/hook/writeguard.go
         validation_criteria: "PreToolUse hook intercepts Write/Edit to *_CONTEXT.md files; instructs use of Task(moirai, ...)"
 
       - id: MO-010
@@ -599,10 +597,9 @@ categories:
         severity: ENHANsync pipelineENT
         status: PARTIAL
         files:
-          - user-hooks/lib/team-context-loader.sh
-          - .claude/hooks/lib/team-context-loader.sh
-        validation_criteria: "Rename team-context-loader.sh to rite-context-loader.sh"
-        notes: "Low priority; functionality correct"
+          - internal/cmd/hook/context.go
+        validation_criteria: "Hooks are Go binaries; shell scripts eliminated"
+        notes: "Low priority; hooks migrated to Go binaries via ari hook commands"
 
       - id: TM-008
         name: "Skill references"
@@ -639,8 +636,8 @@ cross_cutting:
         - thread_contract
       files:
         - ariadne/internal/hook/threadcontract/*.go
-        - .claude/hooks/ari/thread.sh
-      validation_criteria: "Package name threadcontract; hook named thread.sh - low priority rename"
+        - internal/cmd/hook/thread.go
+      validation_criteria: "Package name threadcontract; Go hook binary - low priority rename"
       notes: "Doctrine acknowledges drift; marked LOW priority in Section XIV"
 
     - id: CC-003
@@ -727,10 +724,10 @@ dependencies:
     - id: DEP-002
       from: "Hooks"
       to: "Ariadne CLI"
-      relationship: "Shell hooks dispatch to ari binary"
+      relationship: "Go hooks dispatch via ari binary"
       status: IMPLEMENTED
       files:
-        - .claude/hooks/ari/*.sh
+        - internal/cmd/hook/*.go
 
     - id: DEP-003
       from: "Session Manager"

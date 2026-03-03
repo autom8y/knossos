@@ -111,13 +111,7 @@ These `.claude/hooks/lib/` files use `ROSTER_HOME` as a live env var (not just a
 Also, `.claude/hooks/lib/fail-open.sh` contains a hardcoded absolute path:
 - Lines 104, 111: `/Users/tomtenuta/Code/roster/ariadne/ari` -> `/Users/tomtenuta/Code/knossos/ariadne/ari`
 
-Also, `.claude/knowledge/consultant/build-capability-index.sh`:
-
-| Old Name | New Name | File | Lines |
-|----------|----------|------|-------|
-| `ROSTER_HOME` | `KNOSSOS_HOME` | `.claude/knowledge/consultant/build-capability-index.sh` | 7, 8, 9 |
-
-Note: Line 7 also contains hardcoded path `/Users/tomtenuta/Code/roster` which becomes `/Users/tomtenuta/Code/knossos`.
+Note: `.claude/knowledge/consultant/build-capability-index.sh` has been removed (phantom path from legacy knowledge base structure).
 
 ### 1.9 ROSTER_HOME in Test Files (used as variable, not deprecated shim)
 
@@ -691,7 +685,7 @@ These are projected copies that also contain "roster" references. They must be u
 13b. `.claude/hooks/lib/handoff-validator.sh` -- `ROSTER_HOME` env var (lines 13-15)
 13c. `.claude/hooks/lib/artifact-validation.sh` -- `ROSTER_HOME` env var (line 8)
 13d. `.claude/hooks/lib/fail-open.sh` -- hardcoded path `/Users/tomtenuta/Code/roster/ariadne/ari` (lines 104, 111)
-13e. `.claude/knowledge/consultant/build-capability-index.sh` -- `ROSTER_HOME` env var + hardcoded path (lines 7-9)
+13e. (removed -- `.claude/knowledge/consultant/` was a phantom path)
 
 ### Phase 3: Hook Scripts
 
