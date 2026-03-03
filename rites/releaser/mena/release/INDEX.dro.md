@@ -14,7 +14,7 @@ One command from code to verified deployment. `/release` captures your intent, c
 
 | Argument | Description | Example |
 |----------|-------------|---------|
-| positional | Glob pattern or comma-separated repo names | `~/code/autom8y*`, `autom8y-data,autom8y-ads` |
+| positional | Glob pattern or comma-separated repo names | `~/code/acme-*`, `acme-data,acme-ads` |
 | `--complexity` | Override auto-detection (PATCH, RELEASE, PLATFORM) | `--complexity=RELEASE` |
 | `--dry-run` | Run reconnaissance only, produce state map, stop before execution | |
 

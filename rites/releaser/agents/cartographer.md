@@ -10,8 +10,8 @@ description: |
   - Identifying package ecosystems and build tooling
 
   <example>
-  Context: User wants to release across their autom8y platform.
-  user: "Scan ~/code/autom8y* and map what's there."
+  Context: User wants to release across their platform.
+  user: "Scan ~/code/acme-* and map what's there."
   assistant: "Invoking Cartographer: Discover repos matching glob, map git state, identify ecosystems, produce platform-state-map.yaml."
   </example>
 

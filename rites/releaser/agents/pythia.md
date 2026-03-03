@@ -12,7 +12,7 @@ description: |
 
   <example>
   Context: User wants to publish an SDK and bump all consumers.
-  user: "Release autom8y-core and update all consumers."
+  user: "Release acme-core and update all consumers."
   assistant: "Invoking Pythia: Determine RELEASE complexity, route to cartographer for recon, then dependency-resolver, release-planner, release-executor, and pipeline-monitor."
   </example>
 

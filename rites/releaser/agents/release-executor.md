@@ -125,7 +125,7 @@ Pipeline-monitor handles all downstream verification: GitHub Release creation, e
 
 #### Token Awareness
 
-The Homebrew tap formula update (`brews[]` in goreleaser config) requires `HOMEBREW_TAP_TOKEN` to be set as a CI secret in the source repo. If `release.yml` fails with a permission error on the tap repo (e.g., `autom8y/homebrew-tap`), record in the ledger: `"Known failure mode: HOMEBREW_TAP_TOKEN secret missing or expired in repo CI settings — check repo Settings > Secrets"`. The executor cannot verify secret availability before pushing.
+The Homebrew tap formula update (`brews[]` in goreleaser config) requires `HOMEBREW_TAP_TOKEN` to be set as a CI secret in the source repo. If `release.yml` fails with a permission error on the tap repo (e.g., `your-org/homebrew-tap`), record in the ledger: `"Known failure mode: HOMEBREW_TAP_TOKEN secret missing or expired in repo CI settings — check repo Settings > Secrets"`. The executor cannot verify secret availability before pushing.
 
 
 ### Publish Before Consume

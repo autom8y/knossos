@@ -159,9 +159,9 @@ The intelligence rite is a **well-structured analytics and research rite** with 
 
 ---
 
-### P5: Plan MCP Integration with autom8_data
+### P5: Plan MCP Integration with Data Service
 
-**Decision:** Future work to give agents actual data access via MCP integration with autom8_data service.
+**Decision:** Future work to give agents actual data access via MCP integration with data service.
 
 **Changes required:**
 - [ ] Document planned MCP integration in intelligence README
@@ -170,10 +170,10 @@ The intelligence rite is a **well-structured analytics and research rite** with 
   - insights-analyst: Run analytical queries, verify statistical claims
   - user-researcher: Access session recordings, behavioral data
   - experimentation-lead: Query experiment results
-- [ ] Coordinate with autom8_data satellite MCP implementation
+- [ ] Coordinate with data-service satellite MCP implementation
 - [ ] Add MCP tools to agent tool lists when ready
 
-**Note:** MCP groundwork already laid in autom8_data satellite. This is a future enhancement, not blocking current workflow.
+**Note:** MCP groundwork already laid in data-service satellite. This is a future enhancement, not blocking current workflow.
 
 ---
 
@@ -196,7 +196,7 @@ The intelligence rite is a **well-structured analytics and research rite** with 
 |------|------------|
 | P3 (boundary clarification) | Requires update to strategy README (coordinate with strategy audit) |
 | P4 (handoff pattern) | Generalized handoff pattern from debt-triage TODO |
-| P5 (MCP integration) | autom8_data satellite MCP implementation |
+| P5 (MCP integration) | data-service satellite MCP implementation |
 
 ---
 
@@ -206,7 +206,7 @@ The intelligence rite is a **well-structured analytics and research rite** with 
 
 **For ecosystem:** P4 adds intelligence→10x and intelligence→strategy to generalized handoff pattern.
 
-**For autom8_data satellite:** P5 depends on MCP server implementation in that service.
+**For data-service satellite:** P5 depends on MCP server implementation in that service.
 
 ---
 

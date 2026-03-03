@@ -11,7 +11,7 @@ Extends platform `conventions` skill with release-specific commit formats.
 
 | Action | Format | Example |
 |--------|--------|---------|
-| Dependency bump | `chore(deps): bump {dependency} to {version}` | `chore(deps): bump @autom8y/sdk to 2.1.0` |
+| Dependency bump | `chore(deps): bump {dependency} to {version}` | `chore(deps): bump @acme/sdk to 2.1.0` |
 | Package publish | `chore(release): publish {package} v{version}` | `chore(release): publish core-sdk v1.3.0` |
 
 ## Constraint Style Matching
