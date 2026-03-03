@@ -27,11 +27,5 @@ ari
 .claude/agent-memory/
 .claude/agent-memory-local/
 
-# Knossos internal state within .knossos/ (ephemeral, not tracked)
-.knossos/sync/
-.knossos/backups/
-.knossos/worktrees/
-.knossos/.el-cheapo-active
-.knossos/.worktree-meta.json
-.knossos/KNOSSOS_MANIFEST.yaml
-.knossos/INVOCATION_STATE.yaml
+# Knossos internal state (ephemeral, not tracked — any depth)
+**/.knossos/
