@@ -1,18 +1,28 @@
 ---
 name: know
-description: "Generate persistent codebase knowledge via theoros observation. Produces .know/{domain}.md with schema-validated frontmatter and structured knowledge sections."
-argument-hint: "[domain|--all] [--force] [--expires=DURATION]"
+description: "Generate persistent codebase knowledge via theoros observation. Produces .know/{domain}.md and .know/feat/{slug}.md with schema-validated frontmatter and structured knowledge sections."
+argument-hint: "[domain|--all|--scope=feature] [--force] [--expires=DURATION] [--census] [--feature=SLUG]"
 allowed-tools: Bash, Read, Write, Glob, Grep, Task, Skill
 model: opus
 ---
 
 # /know -- Codebase Knowledge Generator
 
-Dispatches theoros to observe and document codebase architecture, producing persistent `.know/` reference files that any CC agent can consume for codebase context.
+Dispatches theoros to observe and document codebase architecture, producing persistent `.know/` reference files that any CC agent can consume for codebase context. Supports two modes: **codebase domains** (default) and **feature knowledge** (`--scope=feature`).
 
 ## Context
 
 This command runs in the main thread (requires Task tool for theoros dispatch). It generates `.know/` files at the project root. The Argus Pattern requires main-thread execution because agents cannot spawn agents — only the main thread has Task tool access.
+
+## Scope Routing
+
+**If `--scope=feature` is present**: Skip to [Feature Knowledge Flow](#feature-knowledge-flow---scope-feature). The entire codebase domain pipeline below does NOT apply.
+
+**Otherwise**: Continue with the codebase domain pipeline below (default behavior).
+
+---
+
+## Codebase Domain Pipeline (Default)
 
 ## Pre-flight
 
@@ -233,6 +243,453 @@ Check freshness: `ari knows`
 Regenerate all: `/know --all --force`
 ```
 
+---
+
+## Feature Knowledge Flow (`--scope=feature`)
+
+This flow produces per-feature knowledge files in `.know/feat/`. It operates in two phases separated by a mandatory human review gate.
+
+### Argument Variants
+
+| Invocation | Behavior |
+|------------|----------|
+| `/know --scope=feature` | Full flow: census if needed, then generate all stale GENERATE features |
+| `/know --scope=feature --census` | Census only: enumerate features and produce INDEX.md, then STOP |
+| `/know --scope=feature --feature={slug}` | Single feature: skip census, generate one feature file directly |
+| `/know --scope=feature --force` | Force regeneration: ignore freshness checks on all files |
+| `/know --scope=feature --expires=DURATION` | Override default expiry (census: 30d, per-feature: 14d) |
+
+### Feature Pre-flight
+
+1. **Parse feature arguments**:
+   - `--scope=feature`: Required. Activates the feature knowledge flow.
+   - `--census`: Optional. If set, run census only and STOP after INDEX.md is produced.
+   - `--feature={slug}`: Optional. If set, skip census entirely and generate a single feature.
+   - `--force`: Optional. Skip freshness checks on census and feature files.
+   - `--expires=DURATION`: Optional. Override default expiry per file type.
+
+2. **Compute source_hash**:
+   - Run: `git rev-parse --short HEAD`
+   - Store result for frontmatter injection.
+
+3. **Ensure directories exist**:
+   - Run: `mkdir -p .know/feat`
+
+4. **Load criteria files**:
+   - Read census criteria: `Read(".claude/skills/pinakes/domains/feature-census.lego.md")`
+   - Read feature knowledge criteria: `Read(".claude/skills/pinakes/domains/feature-knowledge.lego.md")`
+   - Store both for injection into theoros dispatch prompts.
+
+5. **Route by argument**:
+   - If `--feature={slug}`: Jump directly to [Feature Phase 2: Per-Feature Generation](#feature-phase-2-per-feature-generation) for the single slug.
+   - If `--census`: Continue to Feature Phase 1 and STOP after it completes.
+   - Otherwise: Continue to Feature Phase 1, then gate, then Feature Phase 2.
+
+### Feature Phase 1: Census
+
+**Purpose**: Enumerate all identifiable features in the project and produce `.know/feat/INDEX.md` with GENERATE/SKIP recommendations.
+
+#### 1.1 Census Freshness Check
+
+If `.know/feat/INDEX.md` exists AND `--force` is NOT set AND `--census` is NOT set:
+- Read its YAML frontmatter, parse `generated_at` and `expires_after`
+- Check git-diff staleness: compare `source_hash` to current HEAD
+- If time-fresh AND code-fresh: report "Feature census is current (generated {date}, hash {hash}). Proceeding to feature generation." and skip to [Feature Human Gate](#feature-human-gate).
+
+If `--census` IS set: always regenerate the census regardless of freshness (the user explicitly asked for a census re-run).
+
+#### 1.2 Census Theoros Dispatch
+
+**YOU MUST USE THE TASK TOOL.** Do NOT enumerate features yourself.
+
+Dispatch a single theoros subagent with the census criteria:
+
+```
+Task(subagent_type="theoros", prompt="
+## Feature Census Observation
+
+You are producing a FEATURE CENSUS, not an audit report.
+
+Your criteria define HOW to scan the project and enumerate its features. Instead of grading compliance, assess the COMPLETENESS of your enumeration. The grading rubric measures how many identifiable features you captured, not whether those features are well-implemented.
+
+### Reframing Your Audit Protocol
+
+Your audit protocol still applies, but reframed:
+- 'What to evaluate' -> 'What features to discover and enumerate'
+- 'Evidence collection' -> 'Which project sources to scan for feature signals'
+- 'Assign letter grades' -> 'Assess completeness of feature enumeration'
+- Grade A = every identifiable feature cataloged with evidence
+- Grade F = fewer than half of identifiable features documented
+
+### Census Criteria
+
+{full_feature_census_criteria_content}
+
+### Output Format
+
+Produce your output in TWO parts:
+
+**Part 1: Feature Census Body**
+
+Start with:
+# Feature Census
+
+Then produce a summary line:
+> {N} features identified across {M} categories. {G} recommended for GENERATE, {S} recommended for SKIP.
+
+Then produce ONE section per feature, ordered by category. Each feature section uses this EXACT format:
+
+## {slug}
+
+| Field | Value |
+|-------|-------|
+| Name | {human-readable name} |
+| Category | {category} |
+| Complexity | {HIGH / MEDIUM / LOW} |
+| Recommendation | **{GENERATE / SKIP}** |
+| Confidence | {0.0-1.0} |
+
+**Source Evidence**:
+- {source_file_1}: {what it reveals about this feature}
+- {source_file_2}: {what it reveals about this feature}
+
+**Rationale**: {one-paragraph justification for GENERATE or SKIP, citing triage heuristics}
+
+---
+
+End with:
+## Census Gaps
+(List any areas of the project that were difficult to classify or where feature boundaries were ambiguous.)
+
+**IMPORTANT**: Use kebab-case slugs. Every feature must have all 7 fields. Use the triage heuristics from the criteria to justify GENERATE vs SKIP.
+
+**Part 2: Assessment Metadata**
+
+After the census body, on its own line produce a fenced metadata block:
+
+```metadata
+overall_grade: {A-F}
+overall_percentage: {N.N}%
+confidence: {0.0-1.0}
+criteria_grades:
+  source_coverage: {grade}
+  feature_enumeration: {grade}
+  classification_quality: {grade}
+  output_format_compliance: {grade}
+```
+
+### Scope Reminder
+
+Read the **Scope** section in the census criteria above. It defines the target sources to scan. Scan ALL of them.
+")
+```
+
+#### 1.3 Census Output Assembly
+
+After the census theoros returns:
+
+1. **Parse theoros output**:
+   - Extract the census body (everything before the ` ```metadata` fence)
+   - Extract the metadata block content
+   - Parse confidence and grades from the metadata
+   - If metadata block is missing or unparseable: use defaults (confidence: 0.5, grade: C)
+
+2. **Construct `.know/feat/INDEX.md`**:
+   ```yaml
+   ---
+   domain: feat/index
+   generated_at: "{current ISO 8601 UTC timestamp}"
+   expires_after: "{expires_duration, default 30d}"
+   source_scope:
+     - "./rites/*/manifest.yaml"
+     - "./internal/*/"
+     - "./docs/decisions/ADR-*.md"
+     - "./.claude/commands/*.md"
+     - "./.claude/agents/*.md"
+     - "./INTERVIEW_SYNTHESIS.md"
+     - "./.know/*.md"
+   generator: theoros
+   source_hash: "{git short SHA}"
+   confidence: {confidence from metadata}
+   format_version: "1.0"
+   ---
+   ```
+   Combine frontmatter + census body (Part 1 only).
+
+3. **Write the file**:
+   ```
+   Write(".know/feat/INDEX.md", frontmatter + body)
+   ```
+
+4. **Verify the file**:
+   ```
+   Read(".know/feat/INDEX.md", limit=30)
+   ```
+   Confirm frontmatter is valid. Confirm feature sections exist with structured entries.
+
+5. **Report census result**:
+   ```
+   ## Feature Census Complete: .know/feat/INDEX.md
+
+   | Field | Value |
+   |-------|-------|
+   | Features found | {total_count} |
+   | GENERATE | {generate_count} |
+   | SKIP | {skip_count} |
+   | Source hash | {source_hash} |
+   | Confidence | {confidence} |
+   | Completeness | {grade} ({percentage}%) |
+   | Expires | {expiry_date} |
+   ```
+
+6. **If `--census` flag was set**: STOP here. Report is complete.
+
+### Feature Human Gate
+
+**THIS GATE IS MANDATORY.** Do NOT proceed to Phase 2 automatically.
+
+Present the census results to the user and ask for explicit approval:
+
+```
+The feature census has been written to `.know/feat/INDEX.md`.
+
+**Action required**: Review the census before feature generation begins.
+
+Read the file with: `Read(".know/feat/INDEX.md")`
+
+Check:
+1. Are the feature boundaries correct? (Are separate features incorrectly merged, or one feature incorrectly split?)
+2. Are the GENERATE/SKIP recommendations appropriate? (Should any SKIP become GENERATE, or vice versa?)
+3. Are there missing features not captured by the census?
+
+You may edit `.know/feat/INDEX.md` directly to adjust recommendations before proceeding.
+
+**When ready**: Reply with "proceed" (or "proceed with changes") to begin per-feature knowledge generation for all GENERATE features.
+```
+
+**Wait for user response.** Do NOT continue until the user explicitly confirms. If the user edits the INDEX and says "proceed with changes", re-read INDEX.md before continuing.
+
+### Feature Phase 2: Per-Feature Generation
+
+**Purpose**: Generate `.know/feat/{slug}.md` for each GENERATE feature in the census.
+
+#### 2.1 Build Feature Generation Queue
+
+**If invoked via `--feature={slug}`** (single feature mode):
+- The slug is the only item in the queue.
+- Read `.know/feat/INDEX.md` to extract the census entry for this slug.
+- If INDEX.md does not exist: ERROR "Feature census not found. Run `/know --scope=feature --census` first to enumerate features."
+- If slug not found in INDEX.md: ERROR "Feature '{slug}' not found in census. Available features: {list of slugs from INDEX.md}"
+
+**If invoked via full flow** (after human gate):
+- Re-read `.know/feat/INDEX.md` (user may have edited it).
+- Parse every feature section. Extract slug and recommendation for each.
+- For each feature with recommendation **GENERATE**:
+  - If `.know/feat/{slug}.md` exists AND `--force` not set:
+    - Read its YAML frontmatter, parse `generated_at` and `expires_after`
+    - Check git-diff staleness: compare `source_hash` to current HEAD
+    - If time-fresh AND code-fresh: SKIP (report "Feature '{slug}' is current")
+  - Otherwise: ADD to generation queue
+- If generation queue is empty: report "All GENERATE features are current. Use --force to regenerate." and STOP.
+- Report: "Generating {N} feature(s): {slug_list}"
+
+#### 2.2 Extract Census Context per Feature
+
+For each slug in the generation queue, extract from `.know/feat/INDEX.md`:
+- The full feature section (slug, name, category, source_evidence, complexity, recommendation rationale)
+- Store as `census_context` for injection into the per-feature theoros prompt.
+
+#### 2.3 Per-Feature Theoros Dispatch -- Argus Pattern
+
+**YOU MUST USE THE TASK TOOL.** Do NOT write feature knowledge yourself.
+
+**If multiple features**: Launch ALL theoros agents in a SINGLE response block. This is the Argus Pattern — parallel dispatch, concurrent observation.
+
+**If single feature** (via `--feature={slug}`): Launch one theoros agent.
+
+**CRITICAL**: When dispatching multiple features, ALL Task calls MUST appear in the same response block to enable CC's parallel execution. Do NOT dispatch sequentially.
+
+For each feature slug in the generation queue, construct:
+
+```
+Task(subagent_type="theoros", prompt="
+## Feature Knowledge Observation: {slug}
+
+You are producing a FEATURE KNOWLEDGE REFERENCE for the feature '{name}', not an audit report.
+
+Your criteria define the four dimensions of feature knowledge to capture. Instead of grading compliance, assess the COMPLETENESS of your knowledge documentation. The grading rubric measures how thoroughly you documented the feature, not whether the feature is well-implemented.
+
+### Reframing Your Audit Protocol
+
+Your audit protocol still applies, but reframed:
+- 'What to evaluate' -> 'What to observe and document about this feature'
+- 'Evidence collection' -> 'Where to look and what to record'
+- 'Assign letter grades' -> 'Assess completeness of feature knowledge capture'
+- Grade A = an agent reading only this file could modify the feature safely
+- Grade F = the document is too incomplete for safe modification
+
+### Census Context for This Feature
+
+The project-wide feature census identified this feature with the following classification:
+
+{census_context_for_this_slug}
+
+Use the source evidence listed above as your STARTING POINT for investigation. Expand beyond these sources as needed to build complete knowledge.
+
+### Feature Knowledge Criteria
+
+{full_feature_knowledge_criteria_content}
+
+### Output Format
+
+Produce your output in TWO parts:
+
+**Part 1: Feature Knowledge Body**
+
+Start with:
+# {feature_name}
+
+Then produce the four knowledge dimensions as H2 sections, in this exact order:
+
+## Purpose and Design Rationale
+(Why this feature exists, what problem it solves, ADRs, rejected alternatives, tradeoffs)
+
+## Conceptual Model
+(Key abstractions, terminology, state machines/lifecycles, inter-feature relationships)
+
+## Implementation Map
+(Packages, key types, entry points, data flow, public API surface, test locations)
+
+## Boundaries and Failure Modes
+(Scope limitations, edge cases, error paths, interaction points, configuration boundaries)
+
+End with:
+## Knowledge Gaps
+(List anything you could not fully document and why.)
+
+Be thorough. Include file paths, type names, function signatures, and import relationships. This document will be the primary reference for CC agents working on this feature.
+
+**IMPORTANT**: Always use FULL file paths from the project root (e.g., `internal/cmd/hook/budget.go`, NOT `cmd/hook/budget.go`). Abbreviated or package-relative paths break automated validation.
+
+**Part 2: Assessment Metadata**
+
+After the knowledge body, on its own line produce a fenced metadata block:
+
+```metadata
+overall_grade: {A-F}
+overall_percentage: {N.N}%
+confidence: {0.0-1.0}
+criteria_grades:
+  purpose_and_design_rationale: {grade}
+  conceptual_model: {grade}
+  implementation_map: {grade}
+  boundaries_and_failure_modes: {grade}
+```
+
+### Scope Reminder
+
+Focus on the packages and files relevant to '{slug}'. Use the source_evidence from the census context as your starting point. Consult existing `.know/architecture.md` and `.know/scar-tissue.md` for structural context and failure history.
+")
+```
+
+#### 2.4 Per-Feature Output Assembly
+
+After ALL per-feature theoros agents return (wait for all parallel dispatches to complete):
+
+For EACH feature's theoros output, perform the following assembly:
+
+1. **Parse theoros output**:
+   - Extract the feature knowledge body (everything before the ` ```metadata` fence)
+   - Extract the metadata block content
+   - Parse confidence and grades from the metadata
+   - If metadata block is missing or unparseable: use defaults (confidence: 0.5, grade: C)
+
+2. **Determine source_scope for this feature**:
+   From the census context for this slug, extract the `source_evidence` entries. Convert them to glob patterns for the frontmatter. For example:
+   - If source_evidence mentions `internal/materialize/`: use `"./internal/materialize/**/*.go"`
+   - If source_evidence mentions `docs/decisions/ADR-0026`: use `"./docs/decisions/ADR-0026*.md"`
+   - If source_evidence mentions `.claude/agents/`: use `"./.claude/agents/*.md"`
+   - Always include `"./.know/architecture.md"` (structural context baseline)
+
+3. **Construct `.know/feat/{slug}.md`**:
+   ```yaml
+   ---
+   domain: feat/{slug}
+   generated_at: "{current ISO 8601 UTC timestamp}"
+   expires_after: "{expires_duration, default 14d}"
+   source_scope:
+     - "{derived from census source_evidence}"
+     - "./.know/architecture.md"
+   generator: theoros
+   source_hash: "{git short SHA from pre-flight}"
+   confidence: {confidence from metadata}
+   format_version: "1.0"
+   ---
+   ```
+   Combine frontmatter + feature knowledge body (Part 1 only).
+
+4. **Write the file**:
+   ```
+   Write(".know/feat/{slug}.md", frontmatter + body)
+   ```
+
+5. **Verify the file**:
+   ```
+   Read(".know/feat/{slug}.md", limit=20)
+   ```
+   Confirm frontmatter fields are present and valid. Confirm all four knowledge dimension sections exist.
+
+### Feature Phase 3: Report
+
+**For single feature** (via `--feature={slug}`), display:
+
+```
+## Feature Knowledge Generated: .know/feat/{slug}.md
+
+| Field | Value |
+|-------|-------|
+| Feature | {name} ({slug}) |
+| Category | {category} |
+| Source hash | {source_hash} |
+| Confidence | {confidence} |
+| Completeness | {grade} ({percentage}%) |
+| Expires | {expiry_date} |
+
+### Knowledge Dimensions
+| Dimension | Grade |
+|-----------|-------|
+| Purpose and Design Rationale | {grade} |
+| Conceptual Model | {grade} |
+| Implementation Map | {grade} |
+| Boundaries and Failure Modes | {grade} |
+
+This file is consumable by any CC agent via `Read(".know/feat/{slug}.md")`.
+Regenerate with: `/know --scope=feature --feature={slug} --force`
+```
+
+**For full flow or multi-feature** (Argus Pattern), display a combined report:
+
+```
+## Feature Knowledge: {N} Features Generated
+
+| Feature | Category | Grade | Confidence | Lines | Status |
+|---------|----------|-------|------------|-------|--------|
+| {slug_1} | {category} | {grade} ({pct}%) | {confidence} | {line_count} | Generated |
+| {slug_2} | {category} | {grade} ({pct}%) | {confidence} | {line_count} | Generated |
+| ... | ... | ... | ... | ... | ... |
+| {skipped_slug} | {category} | - | - | - | Skipped (fresh) |
+| {skip_slug} | {category} | - | - | - | Skipped (SKIP in census) |
+
+Source hash: {source_hash}
+
+All files consumable via `Read(".know/feat/{slug}.md")`.
+Census: `Read(".know/feat/INDEX.md")`
+Re-census: `/know --scope=feature --census`
+Regenerate all: `/know --scope=feature --force`
+```
+
+---
+
 ## Error Handling
 
 | Scenario | Action |
@@ -242,6 +699,11 @@ Regenerate all: `/know --all --force`
 | Theoros output unparseable | Write body as-is with default metadata, WARN about metadata parsing failure |
 | .know/ directory not writable | ERROR with permission details |
 | Git not available (no source_hash) | Use "unknown" as source_hash, WARN |
+| `--scope=feature --feature={slug}` but no INDEX.md | ERROR "Feature census not found. Run `/know --scope=feature --census` first." |
+| `--scope=feature --feature={slug}` but slug not in INDEX | ERROR "Feature '{slug}' not in census. Available: {list}" |
+| Census theoros returns unparseable feature entries | WARN about format issues, write census as-is, let human gate catch errors |
+| `--scope=feature` with `--all` | ERROR "Cannot combine --scope=feature with --all. Use --scope=feature alone for full feature flow." |
+| `--scope=feature` with positional domain arg | ERROR "Cannot combine --scope=feature with a domain argument. Feature scope generates feature knowledge, not domain knowledge." |
 
 ## Anti-Patterns
 
@@ -250,3 +712,6 @@ Regenerate all: `/know --all --force`
 - **Skipping verification**: Always Read the .know/ file after writing to confirm correctness.
 - **Ignoring expiry**: Respect the expiry mechanism. Regenerating current knowledge wastes theoros capacity.
 - **Hardcoding architecture-only**: This dromenon accepts any codebase-scoped domain. Architecture is the default, but the mechanism is generic.
+- **Skipping the human gate in feature flow**: The census-to-generation gate is MANDATORY. Do NOT proceed to per-feature generation without explicit user confirmation. The census may contain incorrect feature boundaries that the user must review.
+- **Generating features marked SKIP**: Only features with GENERATE recommendation enter the generation queue. SKIP features are excluded unless the user edits INDEX.md to change the recommendation before confirming.
+- **Sequential feature dispatch**: When generating multiple features, ALL Task calls MUST be in one response block (Argus Pattern). Sequential dispatch wastes wall-clock time.

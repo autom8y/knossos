@@ -275,8 +275,10 @@ func runValidate(printer interface {
 }
 
 // readSingleDomain reads and prints a single domain file to stdout.
+// domain may be a plain name ("architecture") or a feat namespace ("feat/materialization").
+// The feat namespace resolves to .know/feat/{slug}.md.
 func readSingleDomain(knowDir, domain string) error {
-	path := filepath.Join(knowDir, domain+".md")
+	path := know.DomainFilePath(knowDir, domain)
 	data, err := os.ReadFile(path)
 	if err != nil {
 		if os.IsNotExist(err) {

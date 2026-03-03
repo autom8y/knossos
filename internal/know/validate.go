@@ -65,12 +65,23 @@ type extractedRef struct {
 	context string
 }
 
+// DomainFilePath resolves a domain name to its absolute .know/ file path.
+// Handles the "feat/{slug}" namespace: "feat/materialization" -> ".know/feat/materialization.md".
+// Plain domain names resolve to ".know/{domain}.md".
+func DomainFilePath(knowDir, domain string) string {
+	if slug, ok := strings.CutPrefix(domain, "feat/"); ok {
+		return filepath.Join(knowDir, "feat", slug+".md")
+	}
+	return filepath.Join(knowDir, domain+".md")
+}
+
 // ValidateDomain reads .know/{domain}.md, extracts references, and verifies each.
+// domain may be a plain name ("architecture") or a feat namespace ("feat/materialization").
 // rootDir is the project root (for file path resolution and git operations).
 // Returns a report; returns error only for I/O failures (missing file, unreadable).
 func ValidateDomain(rootDir, domain string) (*ValidationReport, error) {
 	knowDir := filepath.Join(rootDir, ".know")
-	path := filepath.Join(knowDir, domain+".md")
+	path := DomainFilePath(knowDir, domain)
 
 	data, err := os.ReadFile(path)
 	if err != nil {
@@ -78,12 +89,20 @@ func ValidateDomain(rootDir, domain string) (*ValidationReport, error) {
 	}
 
 	// Parse frontmatter to get domain name; fall back to filename stem.
+	// For feat/ namespace domains, always preserve the "feat/" prefix regardless
+	// of what the frontmatter domain field says (it may omit the prefix).
 	domainName := domain
 	yamlBytes, body, err := frontmatter.Parse(data)
 	if err == nil {
 		var meta Meta
 		if yaml.Unmarshal(yamlBytes, &meta) == nil && meta.Domain != "" {
-			domainName = meta.Domain
+			if strings.HasPrefix(domain, "feat/") {
+				// Preserve the feat/ namespace to ensure consistent domain naming.
+				// The frontmatter domain field typically holds just the slug.
+				domainName = "feat/" + strings.TrimPrefix(meta.Domain, "feat/")
+			} else {
+				domainName = meta.Domain
+			}
 		}
 	} else {
 		// No frontmatter: body is the full file content.
@@ -116,7 +135,7 @@ func ValidateDomain(rootDir, domain string) (*ValidationReport, error) {
 	return report, nil
 }
 
-// ValidateAll globs .know/*.md and validates each domain.
+// ValidateAll globs .know/*.md and .know/feat/*.md and validates each domain.
 // Returns one report per domain. Returns error only for I/O failures on the directory.
 func ValidateAll(rootDir string) ([]ValidationReport, error) {
 	knowDir := filepath.Join(rootDir, ".know")
@@ -137,6 +156,31 @@ func ValidateAll(rootDir string) ([]ValidationReport, error) {
 		report, err := ValidateDomain(rootDir, domain)
 		if err != nil {
 			// Log to stderr and continue; don't abort the whole run for one bad file.
+			fmt.Fprintf(os.Stderr, "warn: cannot validate %s: %v\n", entry.Name(), err)
+			continue
+		}
+		reports = append(reports, *report)
+	}
+
+	// Also validate .know/feat/*.md files (one level deep only).
+	featDir := filepath.Join(knowDir, "feat")
+	featEntries, err := os.ReadDir(featDir)
+	if err != nil {
+		if !os.IsNotExist(err) {
+			return nil, fmt.Errorf("read .know/feat/ directory: %w", err)
+		}
+		// feat/ doesn't exist: not an error, just no feature domains to validate.
+		return reports, nil
+	}
+
+	for _, entry := range featEntries {
+		if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".md") {
+			continue
+		}
+		slug := strings.TrimSuffix(entry.Name(), ".md")
+		domain := "feat/" + slug
+		report, err := ValidateDomain(rootDir, domain)
+		if err != nil {
 			fmt.Fprintf(os.Stderr, "warn: cannot validate %s: %v\n", entry.Name(), err)
 			continue
 		}

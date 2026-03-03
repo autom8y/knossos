@@ -264,3 +264,118 @@ func findProjectRoot(t *testing.T) string {
 		dir = parent
 	}
 }
+
+// --- feat/ subdirectory validation tests ---
+
+// TestValidateAll_IncludesFeatFiles verifies that ValidateAll includes .know/feat/*.md.
+func TestValidateAll_IncludesFeatFiles(t *testing.T) {
+	rootDir := t.TempDir()
+	knowDir := filepath.Join(rootDir, ".know")
+	featDir := filepath.Join(knowDir, "feat")
+	if err := os.MkdirAll(featDir, 0755); err != nil {
+		t.Fatalf("mkdir .know/feat: %v", err)
+	}
+
+	// Top-level domain.
+	writeKnowFile(t, knowDir, "architecture.md",
+		"---\ndomain: architecture\ngenerated_at: \"2026-01-01T00:00:00Z\"\nexpires_after: \"7d\"\n---\n\nNo references here.\n")
+	// Feature domain.
+	writeKnowFile(t, featDir, "materialization.md",
+		"---\ndomain: materialization\ngenerated_at: \"2026-01-01T00:00:00Z\"\nexpires_after: \"7d\"\n---\n\nNo references here either.\n")
+
+	reports, err := ValidateAll(rootDir)
+	if err != nil {
+		t.Fatalf("ValidateAll error: %v", err)
+	}
+	if len(reports) != 2 {
+		t.Errorf("expected 2 reports (1 top-level + 1 feat), got %d", len(reports))
+	}
+
+	// Verify domain names present.
+	byDomain := make(map[string]ValidationReport)
+	for _, r := range reports {
+		byDomain[r.Domain] = r
+	}
+	if _, ok := byDomain["architecture"]; !ok {
+		t.Error("missing top-level domain \"architecture\" in reports")
+	}
+	if _, ok := byDomain["feat/materialization"]; !ok {
+		t.Error("missing feat domain \"feat/materialization\" in reports")
+	}
+}
+
+// TestValidateAll_FeatMissingDirectory verifies ValidateAll succeeds when feat/ doesn't exist.
+func TestValidateAll_FeatMissingDirectory(t *testing.T) {
+	rootDir := t.TempDir()
+	knowDir := filepath.Join(rootDir, ".know")
+	if err := os.MkdirAll(knowDir, 0755); err != nil {
+		t.Fatalf("mkdir .know: %v", err)
+	}
+
+	writeKnowFile(t, knowDir, "architecture.md",
+		"---\ndomain: architecture\ngenerated_at: \"2026-01-01T00:00:00Z\"\nexpires_after: \"7d\"\n---\n\nNo references.\n")
+
+	reports, err := ValidateAll(rootDir)
+	if err != nil {
+		t.Fatalf("ValidateAll with missing feat/: want nil error, got %v", err)
+	}
+	if len(reports) != 1 {
+		t.Errorf("expected 1 report (no feat/ dir), got %d", len(reports))
+	}
+}
+
+// TestValidateDomain_FeatNamespace verifies that ValidateDomain resolves "feat/materialization"
+// to .know/feat/materialization.md.
+func TestValidateDomain_FeatNamespace(t *testing.T) {
+	rootDir := t.TempDir()
+	knowDir := filepath.Join(rootDir, ".know")
+	featDir := filepath.Join(knowDir, "feat")
+	if err := os.MkdirAll(featDir, 0755); err != nil {
+		t.Fatalf("mkdir .know/feat: %v", err)
+	}
+
+	writeKnowFile(t, featDir, "materialization.md",
+		"---\ndomain: materialization\ngenerated_at: \"2026-01-01T00:00:00Z\"\nexpires_after: \"7d\"\n---\n\nNo references.\n")
+
+	report, err := ValidateDomain(rootDir, "feat/materialization")
+	if err != nil {
+		t.Fatalf("ValidateDomain(\"feat/materialization\"): %v", err)
+	}
+	if report == nil {
+		t.Fatal("expected non-nil report")
+	}
+	// Domain name in report should reflect the feat/ namespace.
+	if report.Domain != "feat/materialization" {
+		t.Errorf("report.Domain = %q, want %q", report.Domain, "feat/materialization")
+	}
+}
+
+// TestValidateDomain_FeatMissingFile verifies error for missing feat domain.
+func TestValidateDomain_FeatMissingFile(t *testing.T) {
+	rootDir := t.TempDir()
+	_, err := ValidateDomain(rootDir, "feat/nonexistent")
+	if err == nil {
+		t.Error("ValidateDomain on missing feat domain: want error, got nil")
+	}
+}
+
+// TestDomainFilePath verifies path resolution for both plain and feat namespaces.
+func TestDomainFilePath(t *testing.T) {
+	tests := []struct {
+		knowDir string
+		domain  string
+		want    string
+	}{
+		{"/project/.know", "architecture", "/project/.know/architecture.md"},
+		{"/project/.know", "conventions", "/project/.know/conventions.md"},
+		{"/project/.know", "feat/materialization", "/project/.know/feat/materialization.md"},
+		{"/project/.know", "feat/session-hardening", "/project/.know/feat/session-hardening.md"},
+	}
+
+	for _, tt := range tests {
+		got := DomainFilePath(tt.knowDir, tt.domain)
+		if got != tt.want {
+			t.Errorf("DomainFilePath(%q, %q) = %q, want %q", tt.knowDir, tt.domain, got, tt.want)
+		}
+	}
+}

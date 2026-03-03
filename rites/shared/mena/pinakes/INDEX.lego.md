@@ -41,6 +41,8 @@ This table IS the registry. A domain exists when it has a row here and a criteri
 | **advocatus-scar-tissue** | `domains/advocatus-scar-tissue.lego.md` | adversarial | Finds undocumented scars or scars whose fixes have regressed |
 | **socratic-architecture** | `domains/socratic-architecture.lego.md` | socratic | Surfaces unstated assumptions in .know/architecture.md |
 | **socratic-design-constraints** | `domains/socratic-design-constraints.lego.md` | socratic | Surfaces constraints present in the code but missing from .know/design-constraints.md |
+| **feature-census** | `domains/feature-census.lego.md` | feature | Feature enumeration: scans project sources to produce feature taxonomy with GENERATE/SKIP recommendations |
+| **feature-knowledge** | `domains/feature-knowledge.lego.md` | feature | Per-feature knowledge capture: purpose, conceptual model, implementation map, boundaries |
 
 ### Scope Values
 
@@ -53,6 +55,7 @@ This table IS the registry. A domain exists when it has a row here and a criteri
 | `radar` | Cross-reference signals: reads .know/ files and detects gaps, drift, decay, and violations |
 | `adversarial` | Advocatus diaboli mode: actively searches for evidence that contradicts .know/ claims |
 | `socratic` | Socratic mode: surfaces unstated assumptions and undocumented constraints in .know/ files |
+| `feature` | Product/feature knowledge: what the project does, why features work the way they do, conceptual models |
 
 ### Grading Scale
 
@@ -111,6 +114,10 @@ No +/- modifiers. Simplicity prevents grade inflation and gaming.
 ### Domain Criteria — Socratic
 - [socratic-architecture.lego.md](domains/socratic-architecture.lego.md) - Surface unstated assumptions in architecture documentation
 - [socratic-design-constraints.lego.md](domains/socratic-design-constraints.lego.md) - Surface undocumented constraints present in code
+
+### Domain Criteria — Feature
+- [feature-census.lego.md](domains/feature-census.lego.md) - Feature enumeration census with GENERATE/SKIP recommendations
+- [feature-knowledge.lego.md](domains/feature-knowledge.lego.md) - Per-feature knowledge capture (purpose, model, implementation, boundaries)
 
 ### Schemas
 - [registry-format.lego.md](registry-format.lego.md) - How to add new domains

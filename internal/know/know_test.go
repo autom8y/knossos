@@ -495,3 +495,212 @@ func TestScopedStaleness_EmptyHashes(t *testing.T) {
 		t.Error("scopedStaleness with empty toHash: want false, got true")
 	}
 }
+
+// --- feat/ subdirectory tests ---
+
+// writeFeatFrontmatter creates a .know/feat/*.md file with the given YAML frontmatter.
+func writeFeatFrontmatter(t *testing.T, featDir, filename, fm string) {
+	t.Helper()
+	content := fmt.Sprintf("---\n%s---\n\n# Body content\n", fm)
+	path := filepath.Join(featDir, filename)
+	if err := os.WriteFile(path, []byte(content), 0644); err != nil {
+		t.Fatalf("write feat test file: %v", err)
+	}
+}
+
+// TestReadMeta_FeatSubdirectory verifies that ReadMeta discovers .know/feat/*.md files.
+func TestReadMeta_FeatSubdirectory(t *testing.T) {
+	dir := t.TempDir()
+	featDir := filepath.Join(dir, "feat")
+	if err := os.MkdirAll(featDir, 0755); err != nil {
+		t.Fatalf("mkdir feat: %v", err)
+	}
+
+	recentAt := time.Now().UTC().Add(-1 * time.Hour).Format(time.RFC3339)
+	writeFeatFrontmatter(t, featDir, "materialization.md", fmt.Sprintf(`domain: materialization
+generated_at: "%s"
+expires_after: "7d"
+source_hash: "abc1234"
+confidence: 0.85
+format_version: "1.0"
+`, recentAt))
+
+	results, err := ReadMeta(dir)
+	if err != nil {
+		t.Fatalf("ReadMeta: %v", err)
+	}
+	if len(results) != 1 {
+		t.Fatalf("want 1 result, got %d", len(results))
+	}
+
+	got := results[0]
+	if got.Domain != "feat/materialization" {
+		t.Errorf("domain = %q, want %q", got.Domain, "feat/materialization")
+	}
+}
+
+// TestReadMeta_FeatDomainPrefix verifies that feat/ domain names are correctly prefixed.
+func TestReadMeta_FeatDomainPrefix(t *testing.T) {
+	dir := t.TempDir()
+	featDir := filepath.Join(dir, "feat")
+	if err := os.MkdirAll(featDir, 0755); err != nil {
+		t.Fatalf("mkdir feat: %v", err)
+	}
+
+	recentAt := time.Now().UTC().Add(-1 * time.Hour).Format(time.RFC3339)
+	// Write two feat files.
+	writeFeatFrontmatter(t, featDir, "materialization.md", fmt.Sprintf(`domain: materialization
+generated_at: "%s"
+expires_after: "7d"
+source_hash: "abc1"
+confidence: 0.80
+format_version: "1.0"
+`, recentAt))
+	writeFeatFrontmatter(t, featDir, "session-hardening.md", fmt.Sprintf(`domain: session-hardening
+generated_at: "%s"
+expires_after: "7d"
+source_hash: "abc2"
+confidence: 0.75
+format_version: "1.0"
+`, recentAt))
+
+	results, err := ReadMeta(dir)
+	if err != nil {
+		t.Fatalf("ReadMeta: %v", err)
+	}
+	if len(results) != 2 {
+		t.Fatalf("want 2 results, got %d", len(results))
+	}
+
+	byDomain := make(map[string]DomainStatus)
+	for _, r := range results {
+		byDomain[r.Domain] = r
+	}
+
+	if _, ok := byDomain["feat/materialization"]; !ok {
+		t.Errorf("expected domain %q, got keys: %v", "feat/materialization", domainKeys(byDomain))
+	}
+	if _, ok := byDomain["feat/session-hardening"]; !ok {
+		t.Errorf("expected domain %q, got keys: %v", "feat/session-hardening", domainKeys(byDomain))
+	}
+	// Ensure no unprefixed feat domain leaked through.
+	if _, ok := byDomain["materialization"]; ok {
+		t.Error("unexpected unprefixed domain \"materialization\"; should be \"feat/materialization\"")
+	}
+}
+
+// TestReadMeta_FeatMissingDirectory verifies ReadMeta succeeds when .know/feat/ doesn't exist.
+func TestReadMeta_FeatMissingDirectory(t *testing.T) {
+	dir := t.TempDir()
+	// No feat/ subdirectory created.
+
+	recentAt := time.Now().UTC().Add(-1 * time.Hour).Format(time.RFC3339)
+	writeFrontmatter(t, dir, "architecture.md", fmt.Sprintf(`domain: architecture
+generated_at: "%s"
+expires_after: "7d"
+source_hash: "abc1234"
+confidence: 0.90
+format_version: "1.0"
+`, recentAt))
+
+	results, err := ReadMeta(dir)
+	if err != nil {
+		t.Errorf("ReadMeta with missing feat/: want nil error, got %v", err)
+	}
+	// Only top-level domain should appear.
+	if len(results) != 1 {
+		t.Errorf("want 1 result (no feat/ dir), got %d", len(results))
+	}
+	if results[0].Domain != "architecture" {
+		t.Errorf("domain = %q, want %q", results[0].Domain, "architecture")
+	}
+}
+
+// TestReadMeta_FeatIgnoresNonMdFiles verifies that non-.md files in feat/ are ignored.
+func TestReadMeta_FeatIgnoresNonMdFiles(t *testing.T) {
+	dir := t.TempDir()
+	featDir := filepath.Join(dir, "feat")
+	if err := os.MkdirAll(featDir, 0755); err != nil {
+		t.Fatalf("mkdir feat: %v", err)
+	}
+
+	// Write a non-.md file that should be ignored.
+	if err := os.WriteFile(filepath.Join(featDir, "README.txt"), []byte("ignore me"), 0644); err != nil {
+		t.Fatalf("write txt: %v", err)
+	}
+
+	recentAt := time.Now().UTC().Add(-1 * time.Hour).Format(time.RFC3339)
+	writeFeatFrontmatter(t, featDir, "materialization.md", fmt.Sprintf(`domain: materialization
+generated_at: "%s"
+expires_after: "7d"
+source_hash: "abc1234"
+confidence: 0.85
+format_version: "1.0"
+`, recentAt))
+
+	results, err := ReadMeta(dir)
+	if err != nil {
+		t.Fatalf("ReadMeta: %v", err)
+	}
+	// Only .md file should be in results.
+	if len(results) != 1 {
+		t.Fatalf("want 1 result (txt ignored), got %d", len(results))
+	}
+	if results[0].Domain != "feat/materialization" {
+		t.Errorf("domain = %q, want %q", results[0].Domain, "feat/materialization")
+	}
+}
+
+// TestReadMeta_FeatMixedWithTopLevel verifies feat/ and top-level domains coexist.
+func TestReadMeta_FeatMixedWithTopLevel(t *testing.T) {
+	dir := t.TempDir()
+	featDir := filepath.Join(dir, "feat")
+	if err := os.MkdirAll(featDir, 0755); err != nil {
+		t.Fatalf("mkdir feat: %v", err)
+	}
+
+	recentAt := time.Now().UTC().Add(-1 * time.Hour).Format(time.RFC3339)
+	writeFrontmatter(t, dir, "architecture.md", fmt.Sprintf(`domain: architecture
+generated_at: "%s"
+expires_after: "7d"
+source_hash: "top1"
+confidence: 0.90
+format_version: "1.0"
+`, recentAt))
+	writeFeatFrontmatter(t, featDir, "materialization.md", fmt.Sprintf(`domain: materialization
+generated_at: "%s"
+expires_after: "7d"
+source_hash: "feat1"
+confidence: 0.80
+format_version: "1.0"
+`, recentAt))
+
+	results, err := ReadMeta(dir)
+	if err != nil {
+		t.Fatalf("ReadMeta: %v", err)
+	}
+	if len(results) != 2 {
+		t.Fatalf("want 2 results, got %d", len(results))
+	}
+
+	byDomain := make(map[string]DomainStatus)
+	for _, r := range results {
+		byDomain[r.Domain] = r
+	}
+
+	if _, ok := byDomain["architecture"]; !ok {
+		t.Error("missing top-level domain \"architecture\"")
+	}
+	if _, ok := byDomain["feat/materialization"]; !ok {
+		t.Error("missing feat domain \"feat/materialization\"")
+	}
+}
+
+// domainKeys returns the keys of a DomainStatus map for error messages.
+func domainKeys(m map[string]DomainStatus) []string {
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	return keys
+}

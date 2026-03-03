@@ -58,9 +58,10 @@ type DomainStatus struct {
 	Confidence  float64 `json:"confidence"`
 }
 
-// ReadMeta reads and parses all .know/*.md files in knowDir.
-// Missing directory returns an empty slice (not an error).
-// Files with unparseable frontmatter are skipped with a warning logged to stderr.
+// ReadMeta reads and parses all .know/*.md files in knowDir, and also scans
+// .know/feat/*.md (one level deep). Missing directory returns an empty slice
+// (not an error). Files with unparseable frontmatter are skipped with a warning
+// logged to stderr.
 func ReadMeta(knowDir string) ([]DomainStatus, error) {
 	entries, err := os.ReadDir(knowDir)
 	if err != nil {
@@ -106,6 +107,51 @@ func ReadMeta(knowDir string) ([]DomainStatus, error) {
 			// Use filename stem as fallback domain name
 			meta.Domain = strings.TrimSuffix(entry.Name(), ".md")
 		}
+
+		status := buildDomainStatus(meta, now, currentHash)
+		results = append(results, status)
+	}
+
+	// Scan .know/feat/*.md (one level deep only).
+	// Domain names are prefixed as "feat/{slug}" (e.g., "feat/materialization").
+	featDir := filepath.Join(knowDir, "feat")
+	featEntries, err := os.ReadDir(featDir)
+	if err != nil {
+		if !os.IsNotExist(err) {
+			return nil, fmt.Errorf("read .know/feat/ directory: %w", err)
+		}
+		// feat/ doesn't exist: not an error, just no feature domains.
+		return results, nil
+	}
+
+	for _, entry := range featEntries {
+		if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".md") {
+			continue
+		}
+
+		path := filepath.Join(featDir, entry.Name())
+		data, err := os.ReadFile(path)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "warn: cannot read %s: %v\n", path, err)
+			continue
+		}
+
+		yamlBytes, _, err := frontmatter.Parse(data)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "warn: no frontmatter in %s: %v\n", path, err)
+			continue
+		}
+
+		var meta Meta
+		if err := yaml.Unmarshal(yamlBytes, &meta); err != nil {
+			fmt.Fprintf(os.Stderr, "warn: malformed frontmatter in %s: %v\n", path, err)
+			continue
+		}
+
+		// Always use "feat/{slug}" as the domain name regardless of frontmatter domain field.
+		// This ensures consistent namespacing and prevents collisions with top-level domains.
+		slug := strings.TrimSuffix(entry.Name(), ".md")
+		meta.Domain = "feat/" + slug
 
 		status := buildDomainStatus(meta, now, currentHash)
 		results = append(results, status)
