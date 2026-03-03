@@ -275,7 +275,32 @@ This flow produces per-feature knowledge files in `.know/feat/`. It operates in 
 3. **Ensure directories exist**:
    - Run: `mkdir -p .know/feat`
 
-4. **Load domain registry and criteria**:
+4. **Seed freshness gate** (feature scope requires fresh codebase knowledge):
+   - The 5 codebase `.know/` domains are formal prerequisites for feature analysis.
+     They provide the structural map that feature criteria depend on.
+   - Check if ALL 5 seed files exist: `.know/architecture.md`, `.know/scar-tissue.md`,
+     `.know/conventions.md`, `.know/design-constraints.md`, `.know/test-coverage.md`
+   - If ANY seed is missing: ERROR "Codebase knowledge seeds not found. Run `/know --all` first to generate base knowledge, then re-run `/know --scope=feature`."
+   - If `--force` is set: skip freshness check, proceed with existing seeds.
+   - Otherwise, read frontmatter of each seed (limit=20 lines per file) and check freshness:
+     - Parse `generated_at` + `expires_after` for time-based staleness
+     - Compare `source_hash` to current HEAD for code-based staleness
+   - If ANY seed is stale, present the staleness report:
+     ```
+     ## Seed Freshness Check
+
+     Feature analysis requires fresh codebase knowledge as context seeds.
+
+     | Domain | Status | Reason |
+     |--------|--------|--------|
+     | {domain} | {FRESH/STALE} | {reason: time expired / code changed / fresh} |
+     ...
+
+     **Action required**: Run `/know --all` to refresh codebase domains, then re-run `/know --scope=feature`.
+     ```
+   - STOP. Do NOT proceed with stale seeds. The user must refresh and re-invoke.
+
+5. **Load domain registry and criteria**:
    - Load pinakes skill: `Skill("pinakes")`
    - Read pinakes INDEX to find the Domain Registry table
    - Verify `feature-census` and `feature-knowledge` domains are registered with scope `feature`
@@ -283,8 +308,10 @@ This flow produces per-feature knowledge files in `.know/feat/`. It operates in 
    - Read census criteria: `Read(".claude/skills/pinakes/domains/feature-census.md")`
    - Read feature knowledge criteria: `Read(".claude/skills/pinakes/domains/feature-knowledge.md")`
    - Store both for injection into theoros dispatch prompts.
+   - Pre-load architecture seed for theoros injection: `Read(".know/architecture.md")`
+   - Store architecture content for injection into theoros dispatch prompts.
 
-5. **Route by argument**:
+6. **Route by argument**:
    - If `--feature={slug}`: Jump directly to [Feature Phase 2: Per-Feature Generation](#feature-phase-2-per-feature-generation) for the single slug.
    - If `--census`: Continue to Feature Phase 1 and STOP after it completes.
    - Otherwise: Continue to Feature Phase 1, then gate, then Feature Phase 2.
@@ -328,6 +355,20 @@ Your audit protocol still applies, but reframed:
 ### Census Criteria
 
 {full_feature_census_criteria_content}
+
+### Pre-loaded Context: Architecture Seed
+
+The following is the project's architecture knowledge (.know/architecture.md). Use it as your
+structural map to discover where features are implemented. Do NOT re-discover what this file
+already documents -- use it to guide your source scanning.
+
+{architecture_md_content}
+
+Additional .know/ files available on demand via Read():
+- .know/scar-tissue.md (past bugs, defensive patterns, failure catalog)
+- .know/conventions.md (error handling, naming, file organization)
+- .know/design-constraints.md (tensions, frozen areas, risk zones)
+- .know/test-coverage.md (test gaps, coverage patterns)
 
 ### Output Format
 
@@ -544,6 +585,20 @@ Use the source evidence listed above as your STARTING POINT for investigation. E
 
 {full_feature_knowledge_criteria_content}
 
+### Pre-loaded Context: Architecture Seed
+
+The following is the project's architecture knowledge (.know/architecture.md). Use it as your
+structural map to locate this feature's implementation. Do NOT re-discover what this file
+already documents.
+
+{architecture_md_content}
+
+Additional .know/ files available on demand via Read():
+- .know/scar-tissue.md (past bugs, defensive patterns -- valuable for Boundaries section)
+- .know/conventions.md (error handling, naming -- valuable for understanding code patterns)
+- .know/design-constraints.md (tensions, frozen areas -- valuable for Boundaries section)
+- .know/test-coverage.md (test gaps -- valuable for Implementation Map section)
+
 ### Output Format
 
 Produce your output in TWO parts:
@@ -609,10 +664,10 @@ For EACH feature's theoros output, perform the following assembly:
    - If metadata block is missing or unparseable: use defaults (confidence: 0.5, grade: C)
 
 2. **Determine source_scope for this feature**:
-   From the census context for this slug, extract the `source_evidence` entries. Convert them to glob patterns for the frontmatter. For example:
-   - If source_evidence mentions `internal/materialize/`: use `"./internal/materialize/**/*.go"`
-   - If source_evidence mentions `docs/decisions/ADR-0026`: use `"./docs/decisions/ADR-0026*.md"`
-   - If source_evidence mentions `.claude/agents/`: use `"./.claude/agents/*.md"`
+   From the census context for this slug, extract the `source_evidence` entries. Convert them to glob patterns for the frontmatter. Adapt to the detected project language:
+   - Source directories: use language-appropriate glob (e.g., `"./internal/materialize/**/*.go"` for Go, `"./src/auth/**/*.ts"` for TypeScript)
+   - Decision records: use the path as-is (e.g., `"./docs/decisions/ADR-0026*.md"`)
+   - Documentation: use the path as-is (e.g., `"./docs/feature-name.md"`)
    - Always include `"./.know/architecture.md"` (structural context baseline)
 
 3. **Construct `.know/feat/{slug}.md`**:

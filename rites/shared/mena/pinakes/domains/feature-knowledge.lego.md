@@ -7,17 +7,24 @@ description: "Criteria for per-feature knowledge capture via theoros observation
 
 > The theoros observes and documents a single feature -- producing a knowledge reference that enables any CC agent to understand the feature well enough to modify it safely. This is a template: the `/know` dispatch parameterizes it with a specific feature slug and census context.
 
+## Language Detection
+
+Before beginning observation, identify the primary language(s) in the project:
+- Check for: `go.mod` (Go), `package.json` (JS/TS), `pyproject.toml`/`setup.py` (Python),
+  `Cargo.toml` (Rust), `pom.xml`/`build.gradle` (Java/Kotlin)
+- Adapt source directories, evidence collection, and tooling references accordingly
+
 ## Scope
 
-**Target sources** (theoros checks all applicable to the feature being documented):
-- Go source in relevant packages (`internal/{feature-related}/`)
-- ADRs in `docs/decisions/` that reference the feature
-- Agent definitions in `rites/*/agents/*.md` that describe feature behaviors and responsibilities
-- Dromena (commands) in `rites/*/mena/**/*.dro.md` that define user-facing feature surface
-- Existing `.know/` files (`architecture.md`, `scar-tissue.md`, `conventions.md`) for structural context
-- Rite manifests (`rites/*/manifest.yaml`) if the feature maps to a rite capability
+**Prerequisite**: The `/know` dromenon injects `.know/architecture.md` as pre-loaded context. Use it as your structural map to locate feature implementation. Do NOT re-discover what the architecture seed already documents.
 
-**NOTE**: Scan rite SOURCE artifacts (`rites/`), NOT materialized outputs (`.claude/`). Knossos materializes `rites/` → `.claude/` via `ari sync`. The `.claude/` directory is a projection, not a source of truth.
+**Target sources** (theoros checks all applicable to the feature being documented):
+- Source code in relevant packages/modules (identified from census `source_evidence` field and the pre-loaded architecture seed)
+- Decision records (ADRs, RFCs, design docs) that reference the feature -- check `docs/decisions/`, `docs/adrs/`, `docs/rfcs/`
+- User-facing interface definitions related to the feature (commands, routes, endpoints, UI components)
+- Existing `.know/` files for structural context and failure history (read on demand: `.know/scar-tissue.md`, `.know/conventions.md`, `.know/design-constraints.md`, `.know/test-coverage.md`)
+- Project documentation that describes the feature (`README.md`, `docs/`)
+- Test files covering the feature's implementation
 
 **Observation focus**: Produce a comprehensive knowledge reference for a single feature. The reference must answer four questions: Why does this feature exist? How should agents think about it? Where is it implemented? What are its boundaries and failure modes?
 
@@ -30,17 +37,17 @@ description: "Criteria for per-feature knowledge capture via theoros observation
 **What to observe**: Why this feature exists, what problem it solves, what design decisions shaped it, what alternatives were rejected, and what tradeoffs were accepted. The knowledge reference must give an agent the "why" before the "how."
 
 **Evidence to collect**:
-- ADRs in `docs/decisions/` that reference this feature (titles, decision records, rejected alternatives)
-- Spike artifacts in `.ledge/spikes/` if they exist for this feature
+- Decision records (ADRs, RFCs) that reference this feature
+- Spike or exploration artifacts if they exist for this feature
 - Commit history for initial feature introduction (the "why" commit messages)
-- Any INTERVIEW_SYNTHESIS.md sections describing the feature's purpose
+- Project documentation sections describing the feature's purpose
 - Existing `.know/` entries that mention the feature
 
 | Grade | Threshold | Evidence Required |
 |-------|-----------|-------------------|
-| A | 90-100% completeness | Problem statement clearly articulated. Design decisions documented with rationale and evidence (ADR references, commit hashes). Rejected alternatives listed with rejection reasons. Tradeoffs explicitly identified with impact assessment. Cross-references to ADRs provided. |
+| A | 90-100% completeness | Problem statement clearly articulated. Design decisions documented with rationale and evidence (decision record references, commit hashes). Rejected alternatives listed with rejection reasons. Tradeoffs explicitly identified with impact assessment. |
 | B | 80-89% completeness | Purpose clearly stated with problem context. Most design decisions documented. Rejected alternatives mentioned but not all with rationale. Tradeoffs identified but impact assessment incomplete. |
-| C | 70-79% completeness | Purpose stated but problem context thin. Some design decisions documented. Alternatives and tradeoffs partially covered. ADR references incomplete. |
+| C | 70-79% completeness | Purpose stated but problem context thin. Some design decisions documented. Alternatives and tradeoffs partially covered. |
 | D | 60-69% completeness | Purpose mentioned but vague. Design decisions listed without rationale. No alternatives documented. Tradeoffs not identified. |
 | F | < 60% completeness | Purpose unclear or missing. Design rationale undocumented. An agent cannot understand why this feature exists. |
 
@@ -51,11 +58,11 @@ description: "Criteria for per-feature knowledge capture via theoros observation
 **What to observe**: How users and agents think about this feature. Key abstractions, terminology, mental model, state machines or lifecycles if applicable, and relationship to other features. The knowledge reference must give an agent the vocabulary and mental framework for reasoning about the feature.
 
 **Evidence to collect**:
-- Core terminology used in source code (type names, function prefixes, package names)
-- State transitions or lifecycle stages if the feature has them (e.g., session states, materialization phases)
+- Core terminology used in source code (type names, function prefixes, module names)
+- State transitions or lifecycle stages if the feature has them
 - Diagrams or descriptions of workflows the feature participates in
 - Inter-feature dependencies (what this feature consumes from others, what it provides to others)
-- User-facing concepts from commands and agent descriptions
+- User-facing concepts from interface definitions and documentation
 
 | Grade | Threshold | Evidence Required |
 |-------|-----------|-------------------|
@@ -69,11 +76,11 @@ description: "Criteria for per-feature knowledge capture via theoros observation
 
 ### Criterion 3: Implementation Map (weight: 25%)
 
-**What to observe**: Which packages and files implement this feature, key types and entry points, data flow through the feature, public API surface, and test coverage. The knowledge reference must tell an agent exactly where to look and what to expect.
+**What to observe**: Which packages/modules and files implement this feature, key types and entry points, data flow through the feature, public API surface, and test coverage. The knowledge reference must tell an agent exactly where to look and what to expect.
 
 **Evidence to collect**:
-- List all packages under `internal/` (and `cmd/` if applicable) that implement this feature
-- For each package: primary purpose relative to the feature, key exported types, entry point functions
+- List all packages/modules that implement this feature (cross-reference with architecture seed)
+- For each: primary purpose relative to the feature, key exported types, entry point functions
 - Data flow: input sources -> processing stages -> output destinations for the feature's primary path
 - Public API surface: exported functions/types that other packages depend on
 - Test file locations and what aspects of the feature they cover
@@ -93,8 +100,8 @@ description: "Criteria for per-feature knowledge capture via theoros observation
 **What to observe**: What this feature does NOT do (explicit scope boundaries), known edge cases and limitations, error paths and recovery mechanisms, and interaction points with other features where boundaries blur. The knowledge reference must protect an agent from making changes that violate implicit assumptions.
 
 **Evidence to collect**:
-- Explicit scope limitations documented in source comments, ADRs, or commit messages
-- Known edge cases from scar tissue (`.know/scar-tissue.md` entries referencing this feature)
+- Explicit scope limitations documented in source comments, decision records, or commit messages
+- Known edge cases from scar tissue (`.know/scar-tissue.md` entries referencing this feature, if available)
 - Error return paths in key functions (what errors are returned, how callers handle them)
 - Panic or fatal conditions if any
 - Interaction points: where this feature's code calls into other features' packages or vice versa
@@ -123,6 +130,6 @@ Final grade is weighted average of all criteria midpoint scores (see `schemas/gr
 
 - [Pinakes INDEX](../INDEX.lego.md) -- Full audit system documentation
 - [feature-census-criteria](feature-census.lego.md) -- Feature enumeration census (upstream producer of feature slugs)
-- [architecture-criteria](architecture.lego.md) -- Codebase architecture knowledge capture (complementary domain)
+- [architecture-criteria](architecture.lego.md) -- Codebase architecture knowledge capture (complementary domain, same Language Detection pattern)
 - [scar-tissue-criteria](scar-tissue.lego.md) -- Scar tissue knowledge capture (failure mode evidence source)
 - [design-constraints-criteria](design-constraints.lego.md) -- Design constraint capture (boundary and tension evidence source)
