@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/autom8y/knossos/internal/cmd/common"
+	"github.com/autom8y/knossos/internal/errors"
 	"github.com/autom8y/knossos/internal/materialize"
 	"github.com/autom8y/knossos/internal/output"
 	"github.com/autom8y/knossos/internal/paths"
@@ -87,18 +88,18 @@ Examples:
 				syncScope = materialize.ScopeAll
 			}
 			if !syncScope.IsValid() {
-				return fmt.Errorf("invalid --scope value: %q (must be rite, org, user, or all)", scope)
+				return errors.New(errors.CodeUsageError, fmt.Sprintf("invalid --scope value: %q (must be rite, org, user, or all)", scope))
 			}
 
 			// Validate resource
 			syncResource := materialize.SyncResource(resource)
 			if !syncResource.IsValid() {
-				return fmt.Errorf("invalid --resource value: %q (must be agents, mena, or hooks)", resource)
+				return errors.New(errors.CodeUsageError, fmt.Sprintf("invalid --resource value: %q (must be agents, mena, or hooks)", resource))
 			}
 
 			// El-cheapo only affects rite scope
 			if elCheapo && (syncScope == materialize.ScopeUser || syncScope == materialize.ScopeOrg) {
-				return fmt.Errorf("--el-cheapo only affects rite scope; use --scope=rite or default")
+				return errors.New(errors.CodeUsageError, "--el-cheapo only affects rite scope; use --scope=rite or default")
 			}
 
 			// Build SyncOptions

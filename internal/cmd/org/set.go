@@ -7,6 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/autom8y/knossos/internal/errors"
 	"github.com/autom8y/knossos/internal/paths"
 )
 
@@ -36,18 +37,18 @@ func runSet(ctx *cmdContext, orgName string) error {
 	// Validate org exists
 	orgDir := paths.OrgDataDir(orgName)
 	if _, err := os.Stat(orgDir); os.IsNotExist(err) {
-		return fmt.Errorf("org %q does not exist (run 'ari org init %s' first)", orgName, orgName)
+		return errors.New(errors.CodeFileNotFound, fmt.Sprintf("org %q does not exist (run 'ari org init %s' first)", orgName, orgName))
 	}
 
 	// Write active-org file
 	configDir := paths.ConfigDir()
 	if err := os.MkdirAll(configDir, 0755); err != nil {
-		return fmt.Errorf("failed to create config directory: %w", err)
+		return errors.Wrap(errors.CodePermissionDenied, "failed to create config directory", err)
 	}
 
 	activeOrgPath := filepath.Join(configDir, "active-org")
 	if err := os.WriteFile(activeOrgPath, []byte(orgName+"\n"), 0644); err != nil {
-		return fmt.Errorf("failed to write active-org: %w", err)
+		return errors.Wrap(errors.CodePermissionDenied, "failed to write active-org", err)
 	}
 
 	printer.Print(map[string]interface{}{

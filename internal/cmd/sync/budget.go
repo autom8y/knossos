@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/autom8y/knossos/internal/errors"
 	"github.com/autom8y/knossos/internal/tokenizer"
 )
 
@@ -12,12 +13,12 @@ import (
 func formatBudgetReport(claudeDir string, out map[string]any) error {
 	counter, err := tokenizer.New()
 	if err != nil {
-		return fmt.Errorf("initializing tokenizer: %w", err)
+		return errors.Wrap(errors.CodeGeneralError, "initializing tokenizer", err)
 	}
 
 	report, err := counter.CalculateBudget(claudeDir)
 	if err != nil {
-		return fmt.Errorf("calculating budget: %w", err)
+		return errors.Wrap(errors.CodeGeneralError, "calculating budget", err)
 	}
 
 	// Add structured budget data to output map

@@ -12,6 +12,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/autom8y/knossos/internal/cmd/common"
+	"github.com/autom8y/knossos/internal/errors"
 	"github.com/autom8y/knossos/internal/know"
 	"github.com/autom8y/knossos/internal/output"
 	"github.com/autom8y/knossos/internal/paths"
@@ -200,7 +201,7 @@ Examples:
 			if !dashboard.Healthy {
 				// Return a non-nil error to trigger exit code 1.
 				// The dashboard has already been printed, so use SilenceErrors.
-				return fmt.Errorf("project unhealthy: %s", strings.Join(dashboard.Errors, "; "))
+				return errors.New(errors.CodeValidationFailed, fmt.Sprintf("project unhealthy: %s", strings.Join(dashboard.Errors, "; ")))
 			}
 			return nil
 		},

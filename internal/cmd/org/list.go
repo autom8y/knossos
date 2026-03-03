@@ -1,13 +1,13 @@
 package org
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 
 	"github.com/spf13/cobra"
 
 	"github.com/autom8y/knossos/internal/config"
+	"github.com/autom8y/knossos/internal/errors"
 	"github.com/autom8y/knossos/internal/paths"
 )
 
@@ -43,7 +43,7 @@ func runList(ctx *cmdContext) error {
 			})
 			return nil
 		}
-		return fmt.Errorf("failed to read orgs directory: %w", err)
+		return errors.Wrap(errors.CodeFileNotFound, "failed to read orgs directory", err)
 	}
 
 	activeOrg := config.ActiveOrg()

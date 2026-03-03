@@ -10,6 +10,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/autom8y/knossos/internal/cmd/common"
+	"github.com/autom8y/knossos/internal/errors"
 	"github.com/autom8y/knossos/internal/know"
 	"github.com/autom8y/knossos/internal/output"
 )
@@ -188,7 +189,7 @@ func runKnows(ctx *cmdContext, args []string, checkFlag, validateFlag bool) erro
 	// Read all domain metadata
 	domains, err := know.ReadMeta(knowDir)
 	if err != nil {
-		return fmt.Errorf("reading .know/ metadata: %w", err)
+		return errors.Wrap(errors.CodeFileNotFound, "reading .know/ metadata", err)
 	}
 
 	if len(domains) == 0 {
@@ -241,7 +242,7 @@ func runValidate(printer interface {
 		// Single domain validation.
 		report, err := know.ValidateDomain(projectDir, args[0])
 		if err != nil {
-			return fmt.Errorf("validating domain %q: %w", args[0], err)
+			return errors.Wrap(errors.CodeValidationFailed, fmt.Sprintf("validating domain %q", args[0]), err)
 		}
 		validateOut.Reports = []know.ValidationReport{*report}
 		validateOut.TotalRefs = report.TotalRefs
@@ -251,7 +252,7 @@ func runValidate(printer interface {
 		// All domains validation.
 		reports, err := know.ValidateAll(projectDir)
 		if err != nil {
-			return fmt.Errorf("validating .know/: %w", err)
+			return errors.Wrap(errors.CodeValidationFailed, "validating .know/", err)
 		}
 		validateOut.Reports = reports
 		for _, r := range reports {
@@ -279,9 +280,9 @@ func readSingleDomain(knowDir, domain string) error {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return fmt.Errorf("domain %q not found in .know/ (expected %s)", domain, path)
+			return errors.New(errors.CodeFileNotFound, fmt.Sprintf("domain %q not found in .know/ (expected %s)", domain, path))
 		}
-		return fmt.Errorf("reading .know/%s.md: %w", domain, err)
+		return errors.Wrap(errors.CodeFileNotFound, fmt.Sprintf("reading .know/%s.md", domain), err)
 	}
 	_, err = os.Stdout.Write(data)
 	return err

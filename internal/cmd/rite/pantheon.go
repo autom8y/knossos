@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 
+	"github.com/autom8y/knossos/internal/errors"
 	"github.com/autom8y/knossos/internal/output"
 )
 
@@ -45,14 +46,14 @@ func runPantheon(ctx *cmdContext) error {
 	// Get active rite
 	activeRite := ctx.getActiveRite()
 	if activeRite == "" {
-		return fmt.Errorf("no active rite (use 'ari sync --rite=<name>' to activate)")
+		return errors.New(errors.CodeFileNotFound, "no active rite (use 'ari sync --rite=<name>' to activate)")
 	}
 
 	// Read agents from .claude/agents/
 	agentsDir := filepath.Join(resolver.ClaudeDir(), "agents")
 	entries, err := os.ReadDir(agentsDir)
 	if err != nil {
-		return fmt.Errorf("failed to read agents directory: %w", err)
+		return errors.Wrap(errors.CodeFileNotFound, fmt.Sprintf("failed to read agents directory: %s", agentsDir), err)
 	}
 
 	var agents []output.PantheonAgent

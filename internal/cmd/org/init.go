@@ -8,6 +8,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/autom8y/knossos/internal/errors"
 	"github.com/autom8y/knossos/internal/paths"
 )
 
@@ -46,21 +47,22 @@ func runInit(ctx *cmdContext, orgName string) error {
 
 	// Validate org name
 	if len(orgName) < 2 {
-		return fmt.Errorf("org name must be at least 2 characters: %q", orgName)
+		return errors.New(errors.CodeUsageError, fmt.Sprintf("org name must be at least 2 characters: %q", orgName))
 	}
 	if !validOrgName.MatchString(orgName) {
-		return fmt.Errorf("invalid org name %q: must be kebab-case (lowercase letters, digits, hyphens)", orgName)
+		return errors.New(errors.CodeUsageError, fmt.Sprintf("invalid org name %q: must be kebab-case (lowercase letters, digits, hyphens)", orgName))
 	}
 	// Prevent path traversal
 	if filepath.Base(orgName) != orgName {
-		return fmt.Errorf("invalid org name %q: must not contain path separators", orgName)
+		return errors.New(errors.CodeUsageError, fmt.Sprintf("invalid org name %q: must not contain path separators", orgName))
 	}
 
 	orgDir := paths.OrgDataDir(orgName)
 
 	// Check if already exists
 	if _, err := os.Stat(orgDir); err == nil {
-		return fmt.Errorf("org %q already exists at %s", orgName, orgDir)
+		return errors.NewWithDetails(errors.CodeLifecycleViolation, fmt.Sprintf("org %q already exists at %s", orgName, orgDir),
+			map[string]interface{}{"org": orgName, "path": orgDir})
 	}
 
 	// Create directory structure
@@ -72,7 +74,7 @@ func runInit(ctx *cmdContext, orgName string) error {
 	}
 	for _, dir := range dirs {
 		if err := os.MkdirAll(dir, 0755); err != nil {
-			return fmt.Errorf("failed to create directory %s: %w", dir, err)
+			return errors.Wrap(errors.CodePermissionDenied, fmt.Sprintf("failed to create directory %s", dir), err)
 		}
 	}
 
@@ -80,7 +82,7 @@ func runInit(ctx *cmdContext, orgName string) error {
 	orgYAML := fmt.Sprintf("name: %s\n", orgName)
 	orgYAMLPath := filepath.Join(orgDir, "org.yaml")
 	if err := os.WriteFile(orgYAMLPath, []byte(orgYAML), 0644); err != nil {
-		return fmt.Errorf("failed to write org.yaml: %w", err)
+		return errors.Wrap(errors.CodePermissionDenied, "failed to write org.yaml", err)
 	}
 
 	printer.Print(map[string]interface{}{
