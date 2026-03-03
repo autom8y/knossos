@@ -116,6 +116,20 @@ func (da DeltaAllOutput) Text() string {
 	return b.String()
 }
 
+// SemanticDiffOutput is the structured output for the --semantic-diff flag.
+type SemanticDiffOutput struct {
+	Domain string             `json:"domain"`
+	Diff   *know.SemanticDiff `json:"diff"`
+}
+
+// Text implements output.Textable for human-readable semantic diff output.
+func (s SemanticDiffOutput) Text() string {
+	if s.Diff == nil {
+		return fmt.Sprintf("Domain: %s\nNo changes detected.\n", s.Domain)
+	}
+	return fmt.Sprintf("Domain: %s\n\n%s", s.Domain, know.FormatSemanticDiff(s.Diff))
+}
+
 // ValidateOutput is the structured output for the --validate flag.
 type ValidateOutput struct {
 	Reports    []know.ValidationReport `json:"reports"`
@@ -242,6 +256,7 @@ func NewKnowsCmd(outputFlag *string, verboseFlag *bool, projectDir *string) *cob
 	var checkFlag bool
 	var validateFlag bool
 	var deltaFlag bool
+	var semanticDiffFlag bool
 
 	cmd := &cobra.Command{
 		Use:   "knows [domain]",
@@ -259,23 +274,25 @@ Examples:
   ari knows --validate arch      # Validate references in a single domain
   ari knows --delta              # Show change manifests for all domains
   ari knows --delta architecture # Show change manifest for one domain
+  ari knows --semantic-diff arch # AST-based semantic diff for Go files
   ari knows -o json              # JSON output for scripting`,
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runKnows(ctx, args, checkFlag, validateFlag, deltaFlag)
+			return runKnows(ctx, args, checkFlag, validateFlag, deltaFlag, semanticDiffFlag)
 		},
 	}
 
 	cmd.Flags().BoolVar(&checkFlag, "check", false, "Exit 1 if any domain is stale (for CI/hooks)")
 	cmd.Flags().BoolVar(&validateFlag, "validate", false, "Validate references in .know/ files against codebase")
 	cmd.Flags().BoolVar(&deltaFlag, "delta", false, "Show change manifest and recommended update mode")
+	cmd.Flags().BoolVar(&semanticDiffFlag, "semantic-diff", false, "Show AST-based semantic diff for Go files (compressed change context)")
 
 	common.SetNeedsProject(cmd, true, true)
 
 	return cmd
 }
 
-func runKnows(ctx *cmdContext, args []string, checkFlag, validateFlag, deltaFlag bool) error {
+func runKnows(ctx *cmdContext, args []string, checkFlag, validateFlag, deltaFlag, semanticDiffFlag bool) error {
 	printer := ctx.GetPrinter(output.FormatText)
 	resolver := ctx.GetResolver()
 	projectDir := resolver.ProjectRoot()
@@ -284,6 +301,11 @@ func runKnows(ctx *cmdContext, args []string, checkFlag, validateFlag, deltaFlag
 	// --validate mode: check references in .know/ files against the codebase.
 	if validateFlag {
 		return runValidate(printer, projectDir, args)
+	}
+
+	// --semantic-diff mode: AST-based semantic diff for Go files.
+	if semanticDiffFlag {
+		return runSemanticDiff(printer, knowDir, args)
 	}
 
 	// --delta mode: show change manifests and recommended update modes.
@@ -492,4 +514,131 @@ func readSingleDomain(knowDir, domain string) error {
 	}
 	_, err = os.Stdout.Write(data)
 	return err
+}
+
+// runSemanticDiff computes AST-based semantic diffs for a domain's changed Go files.
+func runSemanticDiff(printer interface {
+	Print(data any) error
+	PrintLine(text string)
+}, knowDir string, args []string) error {
+	allStatuses, err := know.ReadMeta(knowDir)
+	if err != nil {
+		return errors.Wrap(errors.CodeFileNotFound, "reading .know/ metadata", err)
+	}
+
+	if len(allStatuses) == 0 {
+		printer.PrintLine("No codebase knowledge available. Run /know to generate.")
+		return nil
+	}
+
+	statuses := allStatuses
+	if len(args) == 1 {
+		var found []know.DomainStatus
+		for _, s := range allStatuses {
+			if s.Domain == args[0] {
+				found = append(found, s)
+				break
+			}
+		}
+		if len(found) == 0 {
+			return errors.New(errors.CodeFileNotFound, fmt.Sprintf("domain %q not found in .know/", args[0]))
+		}
+		statuses = found
+	}
+
+	for _, status := range statuses {
+		if status.SourceHash == "" || status.CurrentHash == "" {
+			continue
+		}
+		if status.SourceHash == status.CurrentHash {
+			continue
+		}
+
+		meta, err := know.ReadSingleMeta(knowDir, status.Domain)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "warn: cannot read meta for %q: %v\n", status.Domain, err)
+			continue
+		}
+
+		manifest, err := know.ComputeChangeManifest(status.SourceHash, status.CurrentHash, meta.SourceScope)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "warn: cannot compute manifest for %q: %v\n", status.Domain, err)
+			continue
+		}
+
+		sd := &know.SemanticDiff{
+			FromHash: status.SourceHash,
+			ToHash:   status.CurrentHash,
+		}
+
+		for _, f := range manifest.ModifiedFiles {
+			if !strings.HasSuffix(f, ".go") {
+				sd.NonGoFiles = append(sd.NonGoFiles, f)
+				continue
+			}
+
+			oldSource, err := know.GitShowFileFunc()(status.SourceHash, f)
+			if err != nil {
+				sd.SkippedFiles = append(sd.SkippedFiles, f)
+				continue
+			}
+
+			newSource, err := os.ReadFile(f)
+			if err != nil {
+				sd.SkippedFiles = append(sd.SkippedFiles, f)
+				continue
+			}
+
+			fileDiff, err := know.ComputeFileDiff(oldSource, newSource, f)
+			if err != nil {
+				sd.SkippedFiles = append(sd.SkippedFiles, f)
+				continue
+			}
+
+			if fileDiff != nil {
+				sd.Files = append(sd.Files, *fileDiff)
+			}
+		}
+
+		for _, f := range manifest.NewFiles {
+			if !strings.HasSuffix(f, ".go") {
+				sd.NonGoFiles = append(sd.NonGoFiles, f)
+			}
+		}
+
+		for _, f := range manifest.DeletedFiles {
+			if strings.HasSuffix(f, ".go") {
+				oldSource, err := know.GitShowFileFunc()(status.SourceHash, f)
+				if err != nil {
+					sd.SkippedFiles = append(sd.SkippedFiles, f)
+					continue
+				}
+				fileDiff, err := know.ComputeFileDiff(oldSource, nil, f)
+				if err != nil {
+					sd.SkippedFiles = append(sd.SkippedFiles, f)
+					continue
+				}
+				if fileDiff != nil {
+					sd.Files = append(sd.Files, *fileDiff)
+				}
+			} else {
+				sd.NonGoFiles = append(sd.NonGoFiles, f)
+			}
+		}
+
+		out := SemanticDiffOutput{
+			Domain: status.Domain,
+			Diff:   sd,
+		}
+
+		if len(sd.Files) == 0 && len(sd.NonGoFiles) == 0 && len(sd.SkippedFiles) == 0 {
+			out.Diff = nil
+		}
+
+		if err := printer.Print(out); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
