@@ -1,0 +1,20 @@
+#!/bin/sh
+# Pre-commit hook: run golangci-lint on changed Go files.
+# Only lints code changed since HEAD, so it's fast.
+#
+# Install: git config core.hooksPath .githooks
+# Bypass:  git commit --no-verify
+
+# Check if golangci-lint is installed
+if ! command -v golangci-lint >/dev/null 2>&1; then
+    echo "WARN: golangci-lint not found, skipping lint check"
+    exit 0
+fi
+
+# Check if any Go files are staged
+if ! git diff --cached --name-only --diff-filter=ACMR | grep -q '\.go$'; then
+    exit 0
+fi
+
+# Run golangci-lint on changes since HEAD
+golangci-lint run --new-from-rev=HEAD ./...
