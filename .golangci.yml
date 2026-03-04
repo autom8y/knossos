@@ -4,7 +4,14 @@ linters:
   default: standard
   enable:
     - modernize
+    - errorlint
+    - gocritic
   settings:
+    errorlint:
+      errorf: true
+      asserts: true
+      comparison: true
+    gocritic: {}
     errcheck:
       exclude-functions:
         - (io.Closer).Close

@@ -1,6 +1,7 @@
 package frontmatter
 
 import (
+	"errors"
 	"testing"
 
 	"gopkg.in/yaml.v3"
@@ -59,7 +60,7 @@ func TestParse_MissingOpenDelimiter(t *testing.T) {
 	content := []byte("name: test\n---\n")
 
 	_, _, err := Parse(content)
-	if err != ErrMissingOpenDelimiter {
+	if !errors.Is(err, ErrMissingOpenDelimiter) {
 		t.Errorf("err = %v, want ErrMissingOpenDelimiter", err)
 	}
 }
@@ -69,7 +70,7 @@ func TestParse_MissingCloseDelimiter(t *testing.T) {
 	content := []byte("---\nname: test\nno closing\n")
 
 	_, _, err := Parse(content)
-	if err != ErrMissingCloseDelimiter {
+	if !errors.Is(err, ErrMissingCloseDelimiter) {
 		t.Errorf("err = %v, want ErrMissingCloseDelimiter", err)
 	}
 }
@@ -77,7 +78,7 @@ func TestParse_MissingCloseDelimiter(t *testing.T) {
 func TestParse_EmptyContent(t *testing.T) {
 	t.Parallel()
 	_, _, err := Parse([]byte(""))
-	if err != ErrMissingOpenDelimiter {
+	if !errors.Is(err, ErrMissingOpenDelimiter) {
 		t.Errorf("err = %v, want ErrMissingOpenDelimiter", err)
 	}
 }

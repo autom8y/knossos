@@ -93,7 +93,8 @@ func TestErrorConstructors(t *testing.T) {
 		if err.Error() == "" {
 			t.Error("expected non-empty error message")
 		}
-		if _, ok := err.(*UserSyncError); !ok {
+		userSyncError := &UserSyncError{}
+		if errors.As(err, &userSyncError) {
 			t.Errorf("expected *UserSyncError, got %T", err)
 		}
 	})

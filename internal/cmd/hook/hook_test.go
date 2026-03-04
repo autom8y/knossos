@@ -76,7 +76,7 @@ func TestWithTimeout_ReturnsError(t *testing.T) {
 		return expectedErr
 	})
 
-	if err != expectedErr {
+	if !errors.Is(err, expectedErr) {
 		t.Errorf("withTimeout() error = %v, want %v", err, expectedErr)
 	}
 }
@@ -282,10 +282,10 @@ func TestGetSessionID_NoActiveSession(t *testing.T) {
 
 func TestGetHookEnv(t *testing.T) {
 	testutil.SetupEnv(t, &testutil.HookEnv{
-		Event:       "PreToolUse",
-		ToolName:    "Bash",
-		ToolInput:   `{"command":"ls"}`,
-		ProjectDir:  "/test/project",
+		Event:      "PreToolUse",
+		ToolName:   "Bash",
+		ToolInput:  `{"command":"ls"}`,
+		ProjectDir: "/test/project",
 	})
 
 	ctx := &cmdContext{}
@@ -363,8 +363,8 @@ func TestIntegration_ContextHook_NoSession(t *testing.T) {
 	}
 
 	testutil.SetupEnv(t, &testutil.HookEnv{
-		Event:       "SessionStart",
-		ProjectDir:  tmpDir,
+		Event:      "SessionStart",
+		ProjectDir: tmpDir,
 	})
 
 	var stdout, stderr bytes.Buffer
@@ -415,10 +415,10 @@ func TestIntegration_ValidateHook_Chain(t *testing.T) {
 	for _, tc := range commands {
 		t.Run(tc.command, func(t *testing.T) {
 			testutil.SetupEnv(t, &testutil.HookEnv{
-				Event:       "PreToolUse",
-				ToolName:    "Bash",
-				ToolInput:   tc.command,
-					})
+				Event:     "PreToolUse",
+				ToolName:  "Bash",
+				ToolInput: tc.command,
+			})
 
 			var stdout, stderr bytes.Buffer
 			printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
@@ -470,10 +470,10 @@ func TestIntegration_WriteguardHook_Chain(t *testing.T) {
 	for _, tc := range files {
 		t.Run(tc.path, func(t *testing.T) {
 			testutil.SetupEnv(t, &testutil.HookEnv{
-				Event:       "PreToolUse",
-				ToolName:    "Write",
-				ToolInput:   `{"file_path": "` + tc.path + `", "content": "test"}`,
-					})
+				Event:     "PreToolUse",
+				ToolName:  "Write",
+				ToolInput: `{"file_path": "` + tc.path + `", "content": "test"}`,
+			})
 
 			var stdout, stderr bytes.Buffer
 			printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)

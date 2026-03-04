@@ -2,6 +2,7 @@
 package know
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -344,7 +345,8 @@ func verifyFuncRef(rootDir string, r extractedRef) *BrokenRef {
 // isGitGrepNoMatch returns true when the error is git grep's "no matches" exit code (1).
 // Exit code 2+ indicates a real git error (unavailable, bad syntax, etc.).
 func isGitGrepNoMatch(err error) bool {
-	if exitErr, ok := err.(*exec.ExitError); ok {
+	exitErr := &exec.ExitError{}
+	if errors.As(err, &exitErr) {
 		return exitErr.ExitCode() == 1
 	}
 	return false
@@ -357,7 +359,8 @@ func verifyCommitRef(rootDir string, r extractedRef) *BrokenRef {
 	cmd.Dir = rootDir
 	err := cmd.Run()
 	if err != nil {
-		if exitErr, ok := err.(*exec.ExitError); ok && exitErr.ExitCode() == 128 {
+		exitErr := &exec.ExitError{}
+		if errors.As(err, &exitErr) {
 			// Exit 128 = git object not found.
 			return &BrokenRef{
 				Type:    "commit",
