@@ -80,14 +80,14 @@ func TestCollectMena_CompanionHiding(t *testing.T) {
 		t.Errorf("Expected companion to have 'user-invocable: false', got:\n%s", string(content))
 	}
 
-	// INDEX should NOT have user-invocable: false
-	indexPath := filepath.Join(commandsDir, "my-cmd", "INDEX.md")
-	indexContent, err := os.ReadFile(indexPath)
+	// Promoted INDEX (now at parent level as my-cmd.md) should NOT have user-invocable: false
+	promotedPath := filepath.Join(commandsDir, "my-cmd.md")
+	promotedContent, err := os.ReadFile(promotedPath)
 	if err != nil {
-		t.Fatalf("Failed to read INDEX file: %v", err)
+		t.Fatalf("Failed to read promoted INDEX file at %s: %v", promotedPath, err)
 	}
-	if containsBytes(indexContent, "user-invocable: false") {
-		t.Errorf("INDEX should NOT have 'user-invocable: false'")
+	if containsBytes(promotedContent, "user-invocable: false") {
+		t.Errorf("Promoted INDEX should NOT have 'user-invocable: false'")
 	}
 
 	if result.Summary.Added != 2 {
@@ -170,10 +170,11 @@ func TestSyncUserMena_CollisionSkipsRiteContent(t *testing.T) {
 	os.MkdirAll(filepath.Join(userClaudeDir, "commands"), 0755)
 	os.MkdirAll(filepath.Join(userClaudeDir, "skills"), 0755)
 
-	// Create collision checker that reports collision for commands/my-cmd/
+	// Create collision checker that reports collision for commands/my-cmd.md
+	// (promoted dromena INDEX.md form — rite scope also promotes)
 	checker := &CollisionChecker{
 		manifestLoaded: true,
-		riteEntries:    map[string]bool{"commands/my-cmd/": true},
+		riteEntries:    map[string]bool{"commands/my-cmd.md": true},
 	}
 
 	manifest := &provenance.ProvenanceManifest{
@@ -205,14 +206,15 @@ func TestSyncUserMena_PreservesUserOwned(t *testing.T) {
 	os.WriteFile(filepath.Join(droDir, "INDEX.dro.md"), []byte("---\nname: my-cmd\n---\n# New Content\n"), 0644)
 
 	userClaudeDir := filepath.Join(tmpDir, "user-claude")
-	targetDir := filepath.Join(userClaudeDir, "commands", "my-cmd")
-	os.MkdirAll(targetDir, 0755)
+	os.MkdirAll(filepath.Join(userClaudeDir, "commands"), 0755)
 	os.MkdirAll(filepath.Join(userClaudeDir, "skills"), 0755)
-	os.WriteFile(filepath.Join(targetDir, "INDEX.md"), []byte("# User Modified\n"), 0644)
+	// Promoted dro INDEX.md lives at commands/my-cmd.md (parent level)
+	promotedFile := filepath.Join(userClaudeDir, "commands", "my-cmd.md")
+	os.WriteFile(promotedFile, []byte("# User Modified\n"), 0644)
 
 	manifest := &provenance.ProvenanceManifest{
 		Entries: map[string]*provenance.ProvenanceEntry{
-			"commands/my-cmd/INDEX.md": {
+			"commands/my-cmd.md": {
 				Owner: provenance.OwnerUser,
 				Scope: provenance.ScopeUser,
 			},
@@ -227,7 +229,7 @@ func TestSyncUserMena_PreservesUserOwned(t *testing.T) {
 	}
 
 	// User content should be preserved
-	content, _ := os.ReadFile(filepath.Join(targetDir, "INDEX.md"))
+	content, _ := os.ReadFile(promotedFile)
 	if string(content) != "# User Modified\n" {
 		t.Errorf("Expected user content preserved, got %q", string(content))
 	}
@@ -527,21 +529,22 @@ func TestSyncUserMena_IncludesSharedRiteMena(t *testing.T) {
 		t.Fatalf("syncUserMena failed: %v", err)
 	}
 
-	// Platform mena should be projected (user-scope keeps directory structure)
-	navCmd := filepath.Join(userClaudeDir, "commands", "nav-cmd", "INDEX.md")
+	// Platform dro mena should be promoted to parent level (commands/nav-cmd.md)
+	navCmd := filepath.Join(userClaudeDir, "commands", "nav-cmd.md")
 	if _, err := os.Stat(navCmd); os.IsNotExist(err) {
-		t.Errorf("Expected platform dromenon at %s", navCmd)
+		t.Errorf("Expected promoted platform dromenon at %s", navCmd)
 	}
 
-	// Shared rite mena should ALSO be projected
-	knowCmd := filepath.Join(userClaudeDir, "commands", "know", "INDEX.md")
+	// Shared rite dro mena should ALSO be promoted
+	knowCmd := filepath.Join(userClaudeDir, "commands", "know.md")
 	if _, err := os.Stat(knowCmd); os.IsNotExist(err) {
-		t.Errorf("Expected shared dromenon /know at %s", knowCmd)
+		t.Errorf("Expected promoted shared dromenon /know at %s", knowCmd)
 	}
 
-	sharedSkill := filepath.Join(userClaudeDir, "skills", "shared-ref", "INDEX.md")
+	// Shared lego mena should have INDEX.md renamed to SKILL.md
+	sharedSkill := filepath.Join(userClaudeDir, "skills", "shared-ref", "SKILL.md")
 	if _, err := os.Stat(sharedSkill); os.IsNotExist(err) {
-		t.Errorf("Expected shared legomenon at %s", sharedSkill)
+		t.Errorf("Expected shared legomenon SKILL.md at %s", sharedSkill)
 	}
 
 	// Verify added count includes shared mena entries

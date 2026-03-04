@@ -121,9 +121,25 @@ func (s *syncer) syncUserMena(
 			fileDir := filepath.Dir(relPath)
 			strippedRel := filepath.Join(fileDir, strippedName)
 
+			// Preserve original stripped path for provenance source tracking
+			sourceStrippedRel := strippedRel
+
 			// Manifest key uses flat name
 			manifestKey := manifestPrefix + filepath.Join(entry.FlatName, strippedRel)
 			targetPath := filepath.Join(targetBaseDir, entry.FlatName, strippedRel)
+
+			// Dromena INDEX.md promotion: top-level INDEX.md → parent-level {flatName}.md
+			if entry.MenaType == "dro" && strippedName == "INDEX.md" && fileDir == "." {
+				manifestKey = manifestPrefix + entry.FlatName + ".md"
+				targetPath = filepath.Join(targetBaseDir, entry.FlatName+".md")
+			}
+
+			// Legomena INDEX.md → SKILL.md rename (CC entrypoint convention)
+			if entry.MenaType == "lego" && strippedName == "INDEX.md" && fileDir == "." {
+				strippedName = "SKILL.md"
+				manifestKey = manifestPrefix + filepath.Join(entry.FlatName, "SKILL.md")
+				targetPath = filepath.Join(targetBaseDir, entry.FlatName, "SKILL.md")
+			}
 
 			// Read source content
 			content, err := os.ReadFile(path)
@@ -141,7 +157,7 @@ func (s *syncer) syncUserMena(
 
 			return syncUserMenaFile(
 				manifestKey, targetPath, content, sourceChecksum,
-				filepath.Join("mena", entry.FlatName, strippedRel),
+				filepath.Join("mena", entry.FlatName, sourceStrippedRel),
 				manifest, collisionChecker, snapshot, result, opts,
 			)
 		})
@@ -280,9 +296,25 @@ func (s *syncer) syncUserMenaFromEmbedded(
 			fileDir := filepath.Dir(relPath)
 			strippedRel := filepath.Join(fileDir, strippedName)
 
+			// Preserve original stripped path for provenance source tracking
+			sourceStrippedRel := strippedRel
+
 			// Manifest key uses flat name
 			manifestKey := manifestPrefix + filepath.Join(entry.FlatName, strippedRel)
 			targetPath := filepath.Join(targetBaseDir, entry.FlatName, strippedRel)
+
+			// Dromena INDEX.md promotion: top-level INDEX.md → parent-level {flatName}.md
+			if entry.MenaType == "dro" && strippedName == "INDEX.md" && fileDir == "." {
+				manifestKey = manifestPrefix + entry.FlatName + ".md"
+				targetPath = filepath.Join(targetBaseDir, entry.FlatName+".md")
+			}
+
+			// Legomena INDEX.md → SKILL.md rename (CC entrypoint convention)
+			if entry.MenaType == "lego" && strippedName == "INDEX.md" && fileDir == "." {
+				strippedName = "SKILL.md"
+				manifestKey = manifestPrefix + filepath.Join(entry.FlatName, "SKILL.md")
+				targetPath = filepath.Join(targetBaseDir, entry.FlatName, "SKILL.md")
+			}
 
 			// Read embedded content
 			content, err := fs.ReadFile(entry.Source.Fsys, path)
@@ -299,7 +331,7 @@ func (s *syncer) syncUserMenaFromEmbedded(
 
 			return syncUserMenaFile(
 				manifestKey, targetPath, content, sourceChecksum,
-				"embedded:mena/"+filepath.Join(entry.FlatName, strippedRel),
+				"embedded:mena/"+filepath.Join(entry.FlatName, sourceStrippedRel),
 				manifest, collisionChecker, nil, result, opts,
 			)
 		})

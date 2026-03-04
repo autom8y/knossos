@@ -153,8 +153,8 @@ func TestUnifiedSync_UserOnly(t *testing.T) {
 
 	// Verify ~/.claude/ populated
 	assert.FileExists(t, filepath.Join(userClaudeDir, "agents", "user-agent.md"))
-	assert.FileExists(t, filepath.Join(userClaudeDir, "commands", "test-command", "INDEX.md"))
-	assert.FileExists(t, filepath.Join(userClaudeDir, "skills", "test-skill", "INDEX.md"))
+	assert.FileExists(t, filepath.Join(userClaudeDir, "commands", "test-command.md"))
+	assert.FileExists(t, filepath.Join(userClaudeDir, "skills", "test-skill", "SKILL.md"))
 	assert.FileExists(t, filepath.Join(userClaudeDir, "hooks", "test-hook.sh"))
 }
 
