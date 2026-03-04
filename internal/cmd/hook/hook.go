@@ -73,7 +73,7 @@ Performance Targets:
 		},
 		Run: func(cmd *cobra.Command, args []string) {
 			// Show help when no subcommand specified
-			cmd.Help()
+			_ = cmd.Help()
 		},
 	}
 

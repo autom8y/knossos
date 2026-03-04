@@ -48,7 +48,7 @@ Context:
 	}
 
 	cmd.Flags().StringVarP(&opts.agent, "agent", "a", "", "Agent name (must be 'moirai')")
-	cmd.MarkFlagRequired("agent")
+	_ = cmd.MarkFlagRequired("agent")
 
 	return cmd
 }
@@ -77,7 +77,7 @@ Context:
 	}
 
 	cmd.Flags().StringVarP(&opts.agent, "agent", "a", "", "Agent name (must match lock holder)")
-	cmd.MarkFlagRequired("agent")
+	_ = cmd.MarkFlagRequired("agent")
 
 	return cmd
 }

@@ -73,7 +73,7 @@ func runPark(ctx *cmdContext, opts parkOptions) error {
 		printer.PrintError(err)
 		return err
 	}
-	defer sessionLock.Release()
+	defer func() { _ = sessionLock.Release() }()
 	emitLockEvent(resolver, sessionID, "ari-session-park")
 
 	// Load session context
@@ -120,7 +120,7 @@ func runPark(ctx *cmdContext, opts parkOptions) error {
 
 	// Emit Clew Contract events
 	parkWriter := clewcontract.NewBufferedEventWriter(sessionDir, clewcontract.DefaultFlushInterval)
-	defer parkWriter.Close()
+	defer func() { _ = parkWriter.Close() }()
 	{
 		// Lifecycle event
 		parkWriter.Write(clewcontract.NewSessionParkedEvent(sessionID, opts.reason))

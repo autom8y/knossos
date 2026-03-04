@@ -85,7 +85,7 @@ func runTransition(ctx *cmdContext, targetPhase string, opts transitionOptions) 
 		printer.PrintError(err)
 		return err
 	}
-	defer sessionLock.Release()
+	defer func() { _ = sessionLock.Release() }()
 	emitLockEvent(resolver, sessionID, "ari-session-transition")
 
 	// Load session context
@@ -161,7 +161,7 @@ func runTransition(ctx *cmdContext, targetPhase string, opts transitionOptions) 
 
 	// Emit lifecycle event
 	writer := clewcontract.NewBufferedEventWriter(sessionDir, clewcontract.DefaultFlushInterval)
-	defer writer.Close()
+	defer func() { _ = writer.Close() }()
 	writer.Write(clewcontract.NewPhaseTransitionedEvent(sessionID, fromPhase, targetPhase))
 	if err := writer.Flush(); err != nil {
 		printer.VerboseLog("warn", "failed to write event", map[string]any{"error": err.Error()})

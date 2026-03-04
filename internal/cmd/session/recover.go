@@ -86,8 +86,8 @@ func runRecover(ctx *cmdContext, opts recoverOptions) error {
 								"action":     "stale_lock_removed",
 								"session_id": sessionID,
 							}))
-							w.Flush()
-							w.Close()
+							_ = w.Flush()
+							_ = w.Close()
 						}
 					}
 				}

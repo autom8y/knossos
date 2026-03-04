@@ -358,7 +358,7 @@ func equal(a, b interface{}) bool {
 func deepCopy(m map[string]interface{}) map[string]interface{} {
 	data, _ := json.Marshal(m)
 	var result map[string]interface{}
-	json.Unmarshal(data, &result)
+	_ = json.Unmarshal(data, &result)
 	return result
 }
 
@@ -369,7 +369,7 @@ func deepCopyValue(v interface{}) interface{} {
 	}
 	data, _ := json.Marshal(v)
 	var result interface{}
-	json.Unmarshal(data, &result)
+	_ = json.Unmarshal(data, &result)
 	return result
 }
 

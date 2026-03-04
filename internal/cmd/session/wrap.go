@@ -101,7 +101,7 @@ func runWrap(ctx *cmdContext, opts wrapOptions) error {
 		printer.PrintError(err)
 		return err
 	}
-	defer sessionLock.Release()
+	defer func() { _ = sessionLock.Release() }()
 	emitLockEvent(resolver, sessionID, "ari-session-wrap")
 
 	// Load session context
@@ -151,7 +151,7 @@ func runWrap(ctx *cmdContext, opts wrapOptions) error {
 
 		// Emit SAILS_GENERATED event to Clew Contract
 		sailsWriter := clewcontract.NewBufferedEventWriter(sessionDir, clewcontract.DefaultFlushInterval)
-		defer sailsWriter.Close()
+		defer func() { _ = sailsWriter.Close() }()
 
 		// Build evidence paths from collected proofs
 		var evidencePaths *clewcontract.EvidencePaths
@@ -207,7 +207,7 @@ func runWrap(ctx *cmdContext, opts wrapOptions) error {
 
 	// Emit Clew Contract events
 	endWriter := clewcontract.NewBufferedEventWriter(sessionDir, clewcontract.DefaultFlushInterval)
-	defer endWriter.Close()
+	defer func() { _ = endWriter.Close() }()
 	{
 		// Lifecycle event
 		endWriter.Write(clewcontract.NewSessionArchivedEvent(sessionID, string(previousStatus)))
@@ -247,7 +247,7 @@ func runWrap(ctx *cmdContext, opts wrapOptions) error {
 	if sessCtx.FrayedFrom != "" {
 		parentDir := resolver.SessionDir(sessCtx.FrayedFrom)
 		strandWriter := clewcontract.NewBufferedEventWriter(parentDir, clewcontract.DefaultFlushInterval)
-		defer strandWriter.Close()
+		defer func() { _ = strandWriter.Close() }()
 		event := clewcontract.NewStrandResolvedEvent(sessCtx.FrayedFrom, sessionID, "wrapped")
 		strandWriter.Write(event)
 		if flushErr := strandWriter.Flush(); flushErr != nil {
@@ -260,7 +260,7 @@ func runWrap(ctx *cmdContext, opts wrapOptions) error {
 	// block the wrap, since the session context is already ARCHIVED.
 
 	// 1. Advisory session lock (.locks/{id}.lock)
-	lockMgr.ForceRelease(sessionID)
+	_ = lockMgr.ForceRelease(sessionID)
 
 	// 2. Moirai lock (.moirai-lock in session dir)
 	// Must be removed before the archive move so it doesn't persist in the archive.
@@ -371,7 +371,7 @@ func collectCognitiveBudget(sessionDir string) map[string]any {
 	if err != nil {
 		return nil
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 
 	toolCounts := make(map[string]int)
 	totalEvents := 0

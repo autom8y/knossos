@@ -118,7 +118,7 @@ func runBudget(ctx *cmdContext) error {
 				"Tool use count (%d) reached warning threshold (%d). Consider using %s to preserve session state.",
 				count, warnThreshold, registry.Ref(registry.DromenaPark))
 			// Write marker (best-effort)
-			os.WriteFile(warnMarker, []byte("1"), 0644)
+			_ = os.WriteFile(warnMarker, []byte("1"), 0644)
 			fmt.Fprintf(os.Stderr, "[cognitive-budget] Warning: %s\n", out.Message)
 		}
 	}
@@ -132,7 +132,7 @@ func runBudget(ctx *cmdContext) error {
 				"Tool use count (%d) reached park threshold (%d). Recommend %s now to preserve session state and avoid context degradation.",
 				count, parkThreshold, registry.Ref(registry.DromenaPark))
 			// Write marker (best-effort)
-			os.WriteFile(parkMarker, []byte("1"), 0644)
+			_ = os.WriteFile(parkMarker, []byte("1"), 0644)
 			fmt.Fprintf(os.Stderr, "[cognitive-budget] Alert: %s\n", out.Message)
 		}
 	}
@@ -189,14 +189,14 @@ func incrementCounter(stateFile string) (int, error) {
 	}
 
 	if _, err := fmt.Fprintf(tmpFile, "%d", count); err != nil {
-		tmpFile.Close()
-		os.Remove(tmpFile.Name())
+		_ = tmpFile.Close()
+		_ = os.Remove(tmpFile.Name())
 		return count, os.WriteFile(stateFile, []byte(strconv.Itoa(count)), 0644)
 	}
-	tmpFile.Close()
+	_ = tmpFile.Close()
 
 	if err := os.Rename(tmpFile.Name(), stateFile); err != nil {
-		os.Remove(tmpFile.Name())
+		_ = os.Remove(tmpFile.Name())
 		return count, os.WriteFile(stateFile, []byte(strconv.Itoa(count)), 0644)
 	}
 

@@ -108,7 +108,7 @@ func runCreate(ctx *cmdContext, initiative string, opts createOptions) error {
 		printer.PrintError(err)
 		return err
 	}
-	defer createLock.Release()
+	defer func() { _ = createLock.Release() }()
 
 	// Check for existing session
 	currentID, err := session.FindActiveSession(resolver.SessionsDir())
@@ -154,14 +154,14 @@ func runCreate(ctx *cmdContext, initiative string, opts createOptions) error {
 	ctxPath := resolver.SessionContextFile(newCtx.SessionID)
 	if err := newCtx.Save(ctxPath); err != nil {
 		// Cleanup on failure
-		os.RemoveAll(sessionDir)
+		_ = os.RemoveAll(sessionDir)
 		printer.PrintError(err)
 		return err
 	}
 
 	// Emit lifecycle event
 	writer := clewcontract.NewBufferedEventWriter(sessionDir, clewcontract.DefaultFlushInterval)
-	defer writer.Close()
+	defer func() { _ = writer.Close() }()
 	writer.Write(clewcontract.NewSessionCreatedEvent(newCtx.SessionID, initiative, opts.complexity, rite))
 	if err := writer.Flush(); err != nil {
 		printer.VerboseLog("warn", "failed to write event", map[string]any{"error": err.Error()})
@@ -223,7 +223,7 @@ func runCreateSeeded(ctx *cmdContext, initiative string, opts createOptions) err
 			return
 		}
 		printer.VerboseLog("info", "removing ephemeral worktree", map[string]any{"path": worktreePath})
-		removeWorktree(worktreePath)
+		_ = removeWorktree(worktreePath)
 	}
 
 	// Create a resolver for the worktree
@@ -266,7 +266,7 @@ func runCreateSeeded(ctx *cmdContext, initiative string, opts createOptions) err
 	// Save context in worktree
 	worktreeCtxPath := worktreeResolver.SessionContextFile(newCtx.SessionID)
 	if err := newCtx.Save(worktreeCtxPath); err != nil {
-		os.RemoveAll(worktreeSessionDir)
+		_ = os.RemoveAll(worktreeSessionDir)
 		cleanupWorktree()
 		printer.PrintError(err)
 		return err
@@ -274,7 +274,7 @@ func runCreateSeeded(ctx *cmdContext, initiative string, opts createOptions) err
 
 	// Emit lifecycle events in worktree before copying
 	writer := clewcontract.NewBufferedEventWriter(worktreeSessionDir, clewcontract.DefaultFlushInterval)
-	defer writer.Close()
+	defer func() { _ = writer.Close() }()
 	writer.Write(clewcontract.NewSessionCreatedEvent(newCtx.SessionID, initiative, opts.complexity, rite))
 	writer.Write(clewcontract.NewSessionParkedEvent(newCtx.SessionID, "seeded creation"))
 	if err := writer.Flush(); err != nil {

@@ -167,7 +167,7 @@ func runFieldSet(ctx *cmdContext, key, value string) error {
 		printer.PrintError(err)
 		return err
 	}
-	defer sessionLock.Release()
+	defer func() { _ = sessionLock.Release() }()
 	emitLockEvent(resolver, sessionID, "ari-session-field-set")
 
 	// Load session context
@@ -196,7 +196,7 @@ func runFieldSet(ctx *cmdContext, key, value string) error {
 	// Emit field.updated event to session log (backplane-only)
 	sessionDir := resolver.SessionDir(sessionID)
 	writer := clewcontract.NewBufferedEventWriter(sessionDir, clewcontract.DefaultFlushInterval)
-	defer writer.Close()
+	defer func() { _ = writer.Close() }()
 	writer.Write(clewcontract.Event{
 		Timestamp: time.Now().UTC().Format("2006-01-02T15:04:05.000Z"),
 		Type:      "field.updated",
@@ -252,7 +252,7 @@ func runFieldGet(ctx *cmdContext, key string, opts fieldGetOptions) error {
 		// Non-fatal — proceed without lock (same pattern as status.go)
 		printer.VerboseLog("warn", "failed to acquire lock", map[string]any{"error": err.Error()})
 	} else {
-		defer sessionLock.Release()
+		defer func() { _ = sessionLock.Release() }()
 	}
 
 	// Load session context

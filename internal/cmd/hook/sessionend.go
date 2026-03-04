@@ -126,7 +126,7 @@ func runSessionEndCore(ctx *cmdContext, printer *output.Printer) error {
 	writer, err := clewcontract.NewEventWriter(sessionDir)
 	if err == nil {
 		_ = writer.Write(event)
-		writer.Close()
+		_ = writer.Close()
 	}
 
 	// Clean up budget temp counter files (best-effort)
@@ -174,7 +174,7 @@ func cleanupBudgetFiles(sessionKey string) {
 	base := filepath.Join(os.TempDir(), "ari-msg-count-"+key)
 	// Remove counter file and marker files
 	for _, suffix := range []string{"", ".warned", ".park-warned"} {
-		os.Remove(base + suffix)
+		_ = os.Remove(base + suffix)
 	}
 }
 

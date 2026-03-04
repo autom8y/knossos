@@ -63,7 +63,7 @@ func runResume(ctx *cmdContext) error {
 		printer.PrintError(err)
 		return err
 	}
-	defer sessionLock.Release()
+	defer func() { _ = sessionLock.Release() }()
 	emitLockEvent(resolver, sessionID, "ari-session-resume")
 
 	// Load session context
@@ -100,7 +100,7 @@ func runResume(ctx *cmdContext) error {
 	// Emit lifecycle event
 	sessionDir := resolver.SessionDir(sessionID)
 	writer := clewcontract.NewBufferedEventWriter(sessionDir, clewcontract.DefaultFlushInterval)
-	defer writer.Close()
+	defer func() { _ = writer.Close() }()
 	writer.Write(clewcontract.NewSessionResumedEvent(sessionID))
 	if err := writer.Flush(); err != nil {
 		printer.VerboseLog("warn", "failed to write event", map[string]any{"error": err.Error()})

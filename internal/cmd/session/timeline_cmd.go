@@ -277,7 +277,7 @@ func readTypedEventsFromPath(path string) ([]clewcontract.TypedEvent, error) {
 		}
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to open events file", err)
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	// typedEventDetector checks for the "data" field to identify v3 TypedEvents.
 	type typedEventDetector struct {

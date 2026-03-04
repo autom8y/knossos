@@ -85,7 +85,7 @@ func runInit(ctx *cmdContext, orgName string) error {
 		return errors.Wrap(errors.CodePermissionDenied, "failed to write org.yaml", err)
 	}
 
-	printer.Print(map[string]interface{}{
+	_ = printer.Print(map[string]interface{}{
 		"status":  "created",
 		"org":     orgName,
 		"path":    orgDir,

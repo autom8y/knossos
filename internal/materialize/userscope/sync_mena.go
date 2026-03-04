@@ -582,7 +582,7 @@ func wipeKnossosOwnedMenaEntries(knossosHome, userClaudeDir string, manifest *pr
 		}
 		if !dryRun {
 			targetPath := filepath.Join(userClaudeDir, key)
-			os.Remove(targetPath)
+			_ = os.Remove(targetPath)
 			delete(manifest.Entries, key)
 		}
 	}
@@ -593,7 +593,7 @@ func wipeKnossosOwnedMenaEntries(knossosHome, userClaudeDir string, manifest *pr
 	if !dryRun {
 		for _, dir := range []string{"commands", "skills"} {
 			targetDir := filepath.Join(userClaudeDir, dir)
-			filepath.WalkDir(targetDir, func(path string, d os.DirEntry, wErr error) error {
+			_ = filepath.WalkDir(targetDir, func(path string, d os.DirEntry, wErr error) error {
 				if wErr != nil || d.IsDir() {
 					return nil
 				}
@@ -606,7 +606,7 @@ func wipeKnossosOwnedMenaEntries(knossosHome, userClaudeDir string, manifest *pr
 					return nil
 				}
 				if matchesKnossosKey(relPath, knossosKeys) {
-					os.Remove(path)
+					_ = os.Remove(path)
 				}
 				return nil
 			})

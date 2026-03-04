@@ -86,7 +86,7 @@ func runStatus(ctx *cmdContext) error {
 		// Non-fatal - continue without lock
 		printer.VerboseLog("warn", "failed to acquire lock", map[string]any{"error": err.Error()})
 	} else {
-		defer sessionLock.Release()
+		defer func() { _ = sessionLock.Release() }()
 	}
 
 	// Load session context

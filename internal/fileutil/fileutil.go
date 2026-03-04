@@ -29,8 +29,8 @@ func AtomicWriteFile(path string, content []byte, perm os.FileMode) error {
 	// Clean up temp file on error
 	defer func() {
 		if tmpFile != nil {
-			tmpFile.Close()
-			os.Remove(tmpPath)
+			_ = tmpFile.Close()
+			_ = os.Remove(tmpPath)
 		}
 	}()
 
@@ -52,7 +52,7 @@ func AtomicWriteFile(path string, content []byte, perm os.FileMode) error {
 
 	// Set permissions
 	if err := os.Chmod(tmpPath, perm); err != nil {
-		os.Remove(tmpPath) // best-effort cleanup
+		_ = os.Remove(tmpPath) // best-effort cleanup
 		return err
 	}
 

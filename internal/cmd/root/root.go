@@ -162,7 +162,7 @@ Examples:
 		printer := output.NewPrinter(format, os.Stdout, os.Stderr, globalOpts.Verbose)
 
 		if format == output.FormatJSON {
-			printer.Print(map[string]string{
+			_ = printer.Print(map[string]string{
 				"version": version,
 				"commit":  commit,
 				"date":    date,

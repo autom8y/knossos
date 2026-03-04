@@ -208,7 +208,7 @@ func emitSupplementalEvents(sessionDir, toolName string, toolInput *hook.ToolInp
 	}
 
 	writer := clewcontract.NewBufferedEventWriter(sessionDir, clewcontract.DefaultFlushInterval)
-	defer writer.Close()
+	defer func() { _ = writer.Close() }()
 
 	// Emit file_change event for Edit/Write tools
 	linesChanged := 0
@@ -330,7 +330,7 @@ func emitErrorEvent(sessionDir, errorCode, message string, recoverable bool, pri
 	}
 
 	writer := clewcontract.NewBufferedEventWriter(sessionDir, clewcontract.DefaultFlushInterval)
-	defer writer.Close()
+	defer func() { _ = writer.Close() }()
 
 	errorEvent := clewcontract.NewErrorEvent(errorCode, message, "clew hook", recoverable, "check hook logs")
 	writer.Write(errorEvent)

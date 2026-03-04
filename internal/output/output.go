@@ -98,13 +98,15 @@ func (p *Printer) PrintSuccess(data interface{}) error {
 	}
 }
 
-// PrintError outputs an error.
-func (p *Printer) PrintError(err error) error {
+// PrintError outputs an error to stderr. The output error (if any) is
+// silently discarded since callers are already in an error-handling path
+// and cannot meaningfully react to a stderr write failure.
+func (p *Printer) PrintError(err error) {
 	if p.format == FormatJSON {
 		// Check if error has JSON method
 		if jsonErr, ok := err.(interface{ JSON() string }); ok {
 			fmt.Fprintln(p.errOut, jsonErr.JSON())
-			return nil
+			return
 		}
 		// Wrap in standard error format
 		wrapper := map[string]interface{}{
@@ -115,10 +117,10 @@ func (p *Printer) PrintError(err error) error {
 		}
 		enc := json.NewEncoder(p.errOut)
 		enc.SetIndent("", "  ")
-		return enc.Encode(wrapper)
+		_ = enc.Encode(wrapper)
+		return
 	}
 	fmt.Fprintf(p.errOut, "Error: %s\n", err.Error())
-	return nil
 }
 
 // PrintText outputs raw text (bypasses format switching).
@@ -157,7 +159,7 @@ func (p *Printer) printJSON(data interface{}) error {
 func (p *Printer) printYAML(data interface{}) error {
 	enc := yaml.NewEncoder(p.out)
 	enc.SetIndent(2)
-	defer enc.Close()
+	defer func() { _ = enc.Close() }()
 	return enc.Encode(data)
 }
 
@@ -192,7 +194,7 @@ type Textable interface {
 
 func (p *Printer) printTable(t Tabular) error {
 	w := tabwriter.NewWriter(p.out, 0, 0, 2, ' ', 0)
-	defer w.Flush()
+	defer func() { _ = w.Flush() }()
 
 	// Headers
 	headers := t.Headers()

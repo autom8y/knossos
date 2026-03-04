@@ -132,7 +132,7 @@ func runSubagentStartCore(ctx *cmdContext, printer *output.Printer) error {
 	}
 
 	writer := clewcontract.NewBufferedEventWriter(sessionDir, clewcontract.DefaultFlushInterval)
-	defer writer.Close()
+	defer func() { _ = writer.Close() }()
 
 	writer.Write(event)
 	if flushErr := writer.Flush(); flushErr != nil {
@@ -193,7 +193,7 @@ func runSubagentStopCore(ctx *cmdContext, printer *output.Printer) error {
 	}
 
 	stopWriter := clewcontract.NewBufferedEventWriter(sessionDir, clewcontract.DefaultFlushInterval)
-	defer stopWriter.Close()
+	defer func() { _ = stopWriter.Close() }()
 
 	stopWriter.Write(event)
 	if flushErr := stopWriter.Flush(); flushErr != nil {

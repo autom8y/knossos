@@ -358,7 +358,7 @@ func cleanEmptyDirsRecursive(root string) []error {
 // removeStaleFiles removes files in destDir that are NOT in the sourceFileNames set.
 // Removal errors are logged as warnings (non-fatal).
 func removeStaleFiles(destDir string, sourceFileNames map[string]bool) {
-	filepath.WalkDir(destDir, func(path string, d fs.DirEntry, walkErr error) error {
+	_ = filepath.WalkDir(destDir, func(path string, d fs.DirEntry, walkErr error) error {
 		if walkErr != nil || d.IsDir() {
 			return walkErr
 		}

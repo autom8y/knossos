@@ -187,7 +187,7 @@ func runPrepare(ctx *cmdContext, opts prepareOptions) error {
 	// Emit Clew Contract events
 	sessionDir := resolver.SessionDir(sessionID)
 	prepWriter := clewcontract.NewBufferedEventWriter(sessionDir, clewcontract.DefaultFlushInterval)
-	defer prepWriter.Close()
+	defer func() { _ = prepWriter.Close() }()
 	{
 		// Build artifacts list (currently empty, could be populated from artifact registry)
 		artifacts := []string{}

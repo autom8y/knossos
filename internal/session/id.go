@@ -14,7 +14,7 @@ var sessionIDPattern = regexp.MustCompile(`^session-[0-9]{8}-[0-9]{6}-[a-f0-9]{8
 func GenerateSessionID() string {
 	now := time.Now()
 	hex := make([]byte, 4)
-	rand.Read(hex)
+	_, _ = rand.Read(hex)
 	return fmt.Sprintf("session-%s-%x",
 		now.Format("20060102-150405"),
 		hex,

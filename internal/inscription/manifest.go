@@ -177,7 +177,7 @@ func (m *ManifestLoader) Save(manifest *Manifest) error {
 	}
 
 	if err := os.Rename(tmpPath, m.ManifestPath); err != nil {
-		os.Remove(tmpPath) // Clean up
+		_ = os.Remove(tmpPath) // Clean up
 		return errors.Wrap(errors.CodeGeneralError, "failed to rename manifest file", err)
 	}
 

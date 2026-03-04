@@ -102,7 +102,7 @@ func fraySession(projectDir, parentID string, opts frayOptions) (*output.FrayOut
 	if err != nil {
 		return nil, err
 	}
-	defer parentLock.Release()
+	defer func() { _ = parentLock.Release() }()
 	emitLockEvent(resolver, parentID, "ari-session-fray")
 
 	// Load parent context
@@ -146,7 +146,7 @@ func fraySession(projectDir, parentID string, opts frayOptions) (*output.FrayOut
 	// Save child context
 	childCtxPath := resolver.SessionContextFile(childCtx.SessionID)
 	if err := childCtx.Save(childCtxPath); err != nil {
-		os.RemoveAll(childDir)
+		_ = os.RemoveAll(childDir)
 		return nil, err
 	}
 
@@ -158,7 +158,7 @@ func fraySession(projectDir, parentID string, opts frayOptions) (*output.FrayOut
 	parentCtx.Strands = append(parentCtx.Strands, childCtx.SessionID)
 
 	if err := parentCtx.Save(parentCtxPath); err != nil {
-		os.RemoveAll(childDir)
+		_ = os.RemoveAll(childDir)
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to update parent context", err)
 	}
 
@@ -196,14 +196,14 @@ func emitFrayEvents(resolver *paths.Resolver, parentID, childID, frayPoint strin
 	// Emit clew session_frayed event on parent
 	parentDir := resolver.SessionDir(parentID)
 	frayWriter := clewcontract.NewBufferedEventWriter(parentDir, clewcontract.DefaultFlushInterval)
-	defer frayWriter.Close()
+	defer func() { _ = frayWriter.Close() }()
 	frayWriter.Write(clewcontract.NewSessionFrayedEvent(parentID, childID, frayPoint))
-	frayWriter.Flush() // Best-effort flush for fray events
+	_ = frayWriter.Flush() // Best-effort flush for fray events
 
 	// Emit session_created lifecycle event on child
 	childDir := resolver.SessionDir(childID)
 	childWriter := clewcontract.NewBufferedEventWriter(childDir, clewcontract.DefaultFlushInterval)
-	defer childWriter.Close()
+	defer func() { _ = childWriter.Close() }()
 	childWriter.Write(clewcontract.NewSessionCreatedEvent(childID, "", "", ""))
-	childWriter.Flush()
+	_ = childWriter.Flush()
 }

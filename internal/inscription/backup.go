@@ -270,7 +270,7 @@ func (b *BackupManager) atomicWrite(path string, content []byte) error {
 
 	// Atomic rename
 	if err := os.Rename(tmpPath, path); err != nil {
-		os.Remove(tmpPath) // Clean up on failure
+		_ = os.Remove(tmpPath) // Clean up on failure
 		return errors.Wrap(errors.CodeGeneralError, "failed to rename temp file", err)
 	}
 

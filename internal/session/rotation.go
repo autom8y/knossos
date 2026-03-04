@@ -161,7 +161,7 @@ func appendToArchive(archivePath string, content string) error {
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	timestamp := time.Now().UTC().Format(time.RFC3339)
 	header := fmt.Sprintf("\n<!-- Archived at %s -->\n\n", timestamp)

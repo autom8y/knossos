@@ -38,8 +38,7 @@ into the project-level registry. Use this for recovery or initial index build.`,
 					"rebuild_time_ms":   0,
 					"dry_run":           true,
 				}
-				printer.Print(result)
-				return nil
+				return printer.Print(result)
 			}
 
 			// Perform rebuild
@@ -63,7 +62,9 @@ into the project-level registry. Use this for recovery or initial index build.`,
 				"rebuild_time_ms":   elapsed.Milliseconds(),
 				"dry_run":           false,
 			}
-			printer.Print(result)
+			if err := printer.Print(result); err != nil {
+				return err
+			}
 
 			// Print summary in text mode
 			if *ctx.Output == "text" {

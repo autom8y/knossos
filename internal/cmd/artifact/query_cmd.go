@@ -58,13 +58,13 @@ Multiple filters are ANDed together. Results can be output in JSON, YAML, or tab
 				printTable(entries, result.Count)
 			} else {
 				// JSON or YAML
-				output := map[string]interface{}{
+				out := map[string]interface{}{
 					"entries": entries,
 					"count":   len(entries),
 					"total":   result.Count,
 					"filter":  filter,
 				}
-				printer.Print(output)
+				return printer.Print(out)
 			}
 
 			return nil

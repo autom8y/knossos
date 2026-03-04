@@ -630,7 +630,7 @@ func lintSessionArtifactsInSharedMena(projectRoot string, report *LintReport) {
 		return // No shared mena directory
 	}
 
-	filepath.WalkDir(sharedMenaDir, func(path string, d os.DirEntry, walkErr error) error {
+	_ = filepath.WalkDir(sharedMenaDir, func(path string, d os.DirEntry, walkErr error) error {
 		if walkErr != nil || d.IsDir() {
 			return walkErr
 		}

@@ -333,7 +333,7 @@ func emitSessionStartEvent(sessionDir, sessionID, initiative, complexity, rite s
 	}
 
 	writer := clewcontract.NewBufferedEventWriter(sessionDir, clewcontract.DefaultFlushInterval)
-	defer writer.Close()
+	defer func() { _ = writer.Close() }()
 
 	event := clewcontract.NewSessionStartEvent(sessionID, initiative, complexity, rite)
 	writer.Write(event)

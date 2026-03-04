@@ -52,9 +52,13 @@ func SetupEnv(t *testing.T, env *HookEnv) *EnvSetup {
 	for key, value := range vars {
 		setup.original[key] = os.Getenv(key)
 		if value != "" {
-			os.Setenv(key, value)
+			if err := os.Setenv(key, value); err != nil {
+				t.Fatalf("SetupEnv: os.Setenv(%q): %v", key, err)
+			}
 		} else {
-			os.Unsetenv(key)
+			if err := os.Unsetenv(key); err != nil {
+				t.Fatalf("SetupEnv: os.Unsetenv(%q): %v", key, err)
+			}
 		}
 	}
 
@@ -70,9 +74,13 @@ func SetupEnv(t *testing.T, env *HookEnv) *EnvSetup {
 func (s *EnvSetup) Restore() {
 	for key, value := range s.original {
 		if value == "" {
-			os.Unsetenv(key)
+			if err := os.Unsetenv(key); err != nil {
+				s.t.Logf("Restore: os.Unsetenv(%q): %v", key, err)
+			}
 		} else {
-			os.Setenv(key, value)
+			if err := os.Setenv(key, value); err != nil {
+				s.t.Logf("Restore: os.Setenv(%q): %v", key, err)
+			}
 		}
 	}
 }
@@ -82,7 +90,9 @@ func (s *EnvSetup) SetVar(key, value string) {
 	if _, exists := s.original[key]; !exists {
 		s.original[key] = os.Getenv(key)
 	}
-	os.Setenv(key, value)
+	if err := os.Setenv(key, value); err != nil {
+		s.t.Fatalf("SetVar: os.Setenv(%q): %v", key, err)
+	}
 }
 
 // UnsetVar unsets an environment variable (captured for restoration).
@@ -90,7 +100,9 @@ func (s *EnvSetup) UnsetVar(key string) {
 	if _, exists := s.original[key]; !exists {
 		s.original[key] = os.Getenv(key)
 	}
-	os.Unsetenv(key)
+	if err := os.Unsetenv(key); err != nil {
+		s.t.Fatalf("UnsetVar: os.Unsetenv(%q): %v", key, err)
+	}
 }
 
 // PresetEnvs provides common hook environment configurations for testing.

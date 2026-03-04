@@ -90,7 +90,7 @@ func runCheck(ctx *cmdContext, flags *checkFlags, args []string) error {
 
 	if err != nil {
 		if !flags.quiet {
-			_ = printer.PrintError(err)
+			printer.PrintError(err)
 		}
 		// Get exit code from error
 		if e, ok := err.(*errors.Error); ok {

@@ -18,7 +18,7 @@ import (
 // writes an appropriate event to the session's events.jsonl file.
 func RecordToolEvent(sessionDir string, env *hook.Env, toolInput *hook.ToolInput) error {
 	writer := NewBufferedEventWriter(sessionDir, DefaultFlushInterval)
-	defer writer.Close()
+	defer func() { _ = writer.Close() }()
 
 	// Build event based on tool type
 	event := BuildEventFromToolInput(env, toolInput)
@@ -134,7 +134,7 @@ func GetEventsPath(sessionDir string) string {
 // to the session's events.jsonl file.
 func RecordStamp(sessionDir, decision, rationale string, rejected []string) error {
 	writer := NewBufferedEventWriter(sessionDir, DefaultFlushInterval)
-	defer writer.Close()
+	defer func() { _ = writer.Close() }()
 
 	stamp := NewStamp(decision, rationale, rejected, nil)
 	event := stamp.ToEvent()

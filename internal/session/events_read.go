@@ -73,7 +73,7 @@ func ReadEvents(path string) ([]Event, error) {
 		}
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to open events file", err)
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	var events []Event
 	scanner := bufio.NewScanner(f)

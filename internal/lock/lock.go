@@ -99,11 +99,11 @@ func (m *Manager) Acquire(sessionID string, lockType LockType, timeout time.Dura
 			}
 			if lockType == Exclusive {
 				// Write JSON metadata
-				file.Truncate(0)
-				file.Seek(0, 0)
+				_ = file.Truncate(0)
+				_, _ = file.Seek(0, 0)
 				data, _ := json.Marshal(meta)
-				file.Write(data)
-				file.Write([]byte("\n"))
+				_, _ = file.Write(data)
+				_, _ = file.Write([]byte("\n"))
 			}
 			return &Lock{
 				sessionID: sessionID,
@@ -126,11 +126,11 @@ func (m *Manager) Acquire(sessionID string, lockType LockType, timeout time.Dura
 					Holder:   holder,
 					Version:  "2",
 				}
-				file.Truncate(0)
-				file.Seek(0, 0)
+				_ = file.Truncate(0)
+				_, _ = file.Seek(0, 0)
 				data, _ := json.Marshal(meta)
-				file.Write(data)
-				file.Write([]byte("\n"))
+				_, _ = file.Write(data)
+				_, _ = file.Write([]byte("\n"))
 				return &Lock{
 					sessionID: sessionID,
 					file:      file,
@@ -147,7 +147,7 @@ func (m *Manager) Acquire(sessionID string, lockType LockType, timeout time.Dura
 	}
 
 	// Timeout - get holder info for error message
-	file.Close()
+	_ = file.Close()
 	meta, _ := m.GetLockInfo(sessionID)
 	return nil, errors.ErrLockTimeout(lockPath, meta)
 }
@@ -159,8 +159,8 @@ func (l *Lock) Release() error {
 	}
 
 	// Release flock
-	syscall.Flock(int(l.file.Fd()), syscall.LOCK_UN)
-	l.file.Close()
+	_ = syscall.Flock(int(l.file.Fd()), syscall.LOCK_UN)
+	_ = l.file.Close()
 	l.file = nil
 
 	return nil
@@ -267,7 +267,7 @@ func (m *Manager) IsLocked(sessionID string) bool {
 	if err != nil {
 		return false
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 
 	err = syscall.Flock(int(file.Fd()), syscall.LOCK_EX|syscall.LOCK_NB)
 	if err != nil {
@@ -276,7 +276,7 @@ func (m *Manager) IsLocked(sessionID string) bool {
 	}
 
 	// Release immediately
-	syscall.Flock(int(file.Fd()), syscall.LOCK_UN)
+	_ = syscall.Flock(int(file.Fd()), syscall.LOCK_UN)
 	return false
 }
 

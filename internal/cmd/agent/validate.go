@@ -94,7 +94,7 @@ func runValidate(ctx *cmdContext, opts validateOptions, paths []string) error {
 	}
 
 	if len(agentPaths) == 0 {
-		printer.Print("No agent files found to validate")
+		_ = printer.Print("No agent files found to validate")
 		return nil
 	}
 

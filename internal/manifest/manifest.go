@@ -217,7 +217,7 @@ func (m *Manifest) Clone() *Manifest {
 	// Use JSON round-trip for deep copy
 	data, _ := json.Marshal(m.Content)
 	var content map[string]interface{}
-	json.Unmarshal(data, &content)
+	_ = json.Unmarshal(data, &content)
 
 	rawCopy := make([]byte, len(m.Raw))
 	copy(rawCopy, m.Raw)

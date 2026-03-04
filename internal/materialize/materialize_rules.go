@@ -51,7 +51,7 @@ func (m *Materializer) materializeRules(claudeDir string, resolved *ResolvedRite
 					continue
 				}
 				if knownTemplateNames[entry.Name()] {
-					os.Remove(filepath.Join(rulesDir, entry.Name()))
+					_ = os.Remove(filepath.Join(rulesDir, entry.Name()))
 				}
 			}
 		}
@@ -65,7 +65,7 @@ func (m *Materializer) materializeRules(claudeDir string, resolved *ResolvedRite
 					continue
 				}
 				if knownTemplateNames[entry.Name()] {
-					os.Remove(filepath.Join(rulesDir, entry.Name()))
+					_ = os.Remove(filepath.Join(rulesDir, entry.Name()))
 				}
 			}
 		}
@@ -113,7 +113,7 @@ func (m *Materializer) materializeRules(claudeDir string, resolved *ResolvedRite
 				continue
 			}
 			if allTemplateNames[entry.Name()] && templateRules[entry.Name()] == nil {
-				os.Remove(filepath.Join(rulesDir, entry.Name()))
+				_ = os.Remove(filepath.Join(rulesDir, entry.Name()))
 			}
 		}
 	}

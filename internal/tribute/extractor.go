@@ -42,7 +42,7 @@ func (e *Extractor) ExtractEvents() ([]EventData, error) {
 		}
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to open events file", err)
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	var events []EventData
 	scanner := bufio.NewScanner(f)

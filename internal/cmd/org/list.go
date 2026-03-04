@@ -37,7 +37,7 @@ func runList(ctx *cmdContext) error {
 	entries, err := os.ReadDir(orgsDir)
 	if err != nil {
 		if os.IsNotExist(err) {
-			printer.Print(map[string]interface{}{
+			_ = printer.Print(map[string]interface{}{
 				"status": "empty",
 				"orgs":   []string{},
 			})
@@ -61,7 +61,7 @@ func runList(ctx *cmdContext) error {
 		orgs = append(orgs, org)
 	}
 
-	printer.Print(map[string]interface{}{
+	_ = printer.Print(map[string]interface{}{
 		"status": "ok",
 		"orgs":   orgs,
 		"count":  len(orgs),

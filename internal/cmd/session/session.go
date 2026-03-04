@@ -91,8 +91,8 @@ func emitLockEvent(resolver *paths.Resolver, sessionID, holder string) {
 	sessionDir := resolver.SessionDir(sessionID)
 	w := clewcontract.NewBufferedEventWriter(sessionDir, clewcontract.DefaultFlushInterval)
 	w.Write(clewcontract.NewLockAcquiredEvent(sessionID, holder))
-	w.Flush()
-	w.Close()
+	_ = w.Flush()
+	_ = w.Close()
 }
 
 // getActiveRite reads the active rite from ACTIVE_RITE file.

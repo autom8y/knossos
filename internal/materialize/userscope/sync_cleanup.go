@@ -93,9 +93,9 @@ func removeUserOrphan(key string, manifest *provenance.ProvenanceManifest, userC
 
 	// Remove file or directory
 	if strings.HasSuffix(key, "/") {
-		os.RemoveAll(targetPath)
+		_ = os.RemoveAll(targetPath)
 	} else {
-		os.Remove(targetPath)
+		_ = os.Remove(targetPath)
 	}
 
 	// Remove from manifest
@@ -117,10 +117,10 @@ func cleanupOldManifests(userClaudeDir string) {
 	for _, path := range oldManifests {
 		// Remove the original JSON manifest if still present.
 		// Skip backup creation -- migration is complete, backups serve no purpose.
-		os.Remove(path)
+		_ = os.Remove(path)
 
 		// Remove .v2-backup remnants from previous migration runs.
-		os.Remove(path + ".v2-backup")
+		_ = os.Remove(path + ".v2-backup")
 	}
 }
 

@@ -250,7 +250,7 @@ func readSnapshotEvents(eventsPath string) ([]clewcontract.TypedEvent, error) {
 		}
 		return nil, err
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	type detector struct {
 		Data json.RawMessage `json:"data"`

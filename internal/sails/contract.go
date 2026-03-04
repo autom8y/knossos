@@ -72,7 +72,7 @@ func parseEventsFile(path string) ([]clewcontract.Event, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to open events.jsonl: %w", err)
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 
 	var events []clewcontract.Event
 	scanner := bufio.NewScanner(file)

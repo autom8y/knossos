@@ -254,7 +254,7 @@ func (s *InvocationState) BudgetUsagePercent() float64 {
 // GenerateInvocationID creates a unique invocation ID.
 func GenerateInvocationID() string {
 	b := make([]byte, 6)
-	rand.Read(b)
+	_, _ = rand.Read(b)
 	timestamp := time.Now().Format("20060102")
 	return "inv-" + timestamp + "-" + hex.EncodeToString(b)
 }

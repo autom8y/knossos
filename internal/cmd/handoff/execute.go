@@ -124,7 +124,7 @@ func runExecute(ctx *cmdContext, opts executeOptions) error {
 	// Emit Clew Contract events
 	sessionDir := resolver.SessionDir(sessionID)
 	execWriter := clewcontract.NewBufferedEventWriter(sessionDir, clewcontract.DefaultFlushInterval)
-	defer execWriter.Close()
+	defer func() { _ = execWriter.Close() }()
 	{
 		// Build task ID from session and agent
 		taskID := fmt.Sprintf("%s-%s", sessionID, opts.toAgent)

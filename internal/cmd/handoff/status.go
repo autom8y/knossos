@@ -105,7 +105,7 @@ func readAllEvents(path string) ([]GenericEvent, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 
 	var events []GenericEvent
 	scanner := bufio.NewScanner(file)

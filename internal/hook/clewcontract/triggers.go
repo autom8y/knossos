@@ -319,7 +319,7 @@ func readEventsFromFile(eventsPath string) ([]Event, error) {
 		}
 		return nil, err
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 
 	var events []Event
 	scanner := bufio.NewScanner(file)

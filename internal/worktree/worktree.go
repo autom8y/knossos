@@ -64,7 +64,7 @@ var worktreeIDPattern = regexp.MustCompile(`^wt-[0-9]{8}-[0-9]{6}-[a-f0-9]{4,}$`
 func GenerateWorktreeID() string {
 	now := time.Now()
 	hex := make([]byte, 2)
-	rand.Read(hex)
+	_, _ = rand.Read(hex)
 	return fmt.Sprintf("wt-%s-%x",
 		now.Format("20060102-150405"),
 		hex,

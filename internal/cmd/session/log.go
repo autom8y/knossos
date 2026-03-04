@@ -98,7 +98,7 @@ func runLog(ctx *cmdContext, message string, opts logOptions) error {
 			"error": flushErr.Error(),
 		})
 	}
-	writer.Close()
+	_ = writer.Close()
 
 	// Format the timeline entry and append to SESSION_CONTEXT.md.
 	entry := sess.FormatTimelineEntry(event)

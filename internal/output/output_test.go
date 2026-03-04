@@ -140,9 +140,7 @@ func TestJSON_ErrorOutput_ValidJSON(t *testing.T) {
 
 	// Use a plain error (not *errors.Error) to exercise the generic fallback path.
 	plainError := &plainErrorImpl{msg: "something went wrong"}
-	if pErr := p.PrintError(plainError); pErr != nil {
-		t.Fatalf("PrintError() error = %v", pErr)
-	}
+	p.PrintError(plainError)
 
 	if !json.Valid(errBuf.Bytes()) {
 		t.Errorf("error JSON output is not valid JSON: %s", errBuf.String())
@@ -990,9 +988,7 @@ func TestPrintError_TextMode(t *testing.T) {
 	t.Parallel()
 	p, _, errBuf := newTestPrinter(FormatText)
 	err := &plainErrorImpl{msg: "test error"}
-	if pErr := p.PrintError(err); pErr != nil {
-		t.Fatalf("PrintError() error = %v", pErr)
-	}
+	p.PrintError(err)
 	if !strings.Contains(errBuf.String(), "test error") {
 		t.Errorf("PrintError() text output missing error message: %s", errBuf.String())
 	}

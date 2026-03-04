@@ -89,12 +89,12 @@ Dimensions:
 			if format == output.FormatText {
 				printCountsTable(by, counts, total)
 			} else {
-				output := map[string]interface{}{
+				out := map[string]interface{}{
 					"dimension": by,
 					"counts":    counts,
 					"total":     total,
 				}
-				printer.Print(output)
+				return printer.Print(out)
 			}
 
 			return nil

@@ -351,7 +351,7 @@ func ParseSessionContextFile(path string) (*SessionContext, error) {
 	if err != nil {
 		return nil, errors.Wrap(errors.CodeFileNotFound, "failed to open session context", err)
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 
 	ctx := &SessionContext{}
 	scanner := bufio.NewScanner(file)

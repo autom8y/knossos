@@ -129,7 +129,7 @@ Phase and specialist can be specified explicitly or inferred from context.`,
 				"validated":     entry.Validated,
 				"aggregated":    aggregated,
 			}
-			printer.Print(result)
+			_ = printer.Print(result)
 			return nil
 		},
 	}
@@ -142,7 +142,7 @@ Phase and specialist can be specified explicitly or inferred from context.`,
 	cmd.Flags().BoolVar(&skipValidation, "skip-validation", false, "Skip schema validation")
 	cmd.Flags().BoolVar(&skipAggregate, "skip-aggregate", false, "Don't trigger project aggregation")
 
-	cmd.MarkFlagRequired("path")
+	_ = cmd.MarkFlagRequired("path")
 
 	return cmd
 }
