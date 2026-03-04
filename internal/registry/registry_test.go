@@ -10,6 +10,7 @@ func TestRegistryCompleteness(t *testing.T) {
 	allKeys := []RefKey{
 		SkillConventions,
 		SkillCommitBehavior,
+		SkillAttributionGuard,
 		AgentPythia,
 		AgentMoirai,
 		AgentConsultant,
@@ -91,8 +92,8 @@ func TestEntriesByCategory_Agents(t *testing.T) {
 // TestEntriesByCategory_Skills verifies that exactly 2 skill entries exist.
 func TestEntriesByCategory_Skills(t *testing.T) {
 	skills := EntriesByCategory(CategorySkill)
-	if len(skills) != 2 {
-		t.Errorf("expected 2 skill entries, got %d", len(skills))
+	if len(skills) != 3 {
+		t.Errorf("expected 3 skill entries, got %d", len(skills))
 	}
 }
 

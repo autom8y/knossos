@@ -30,8 +30,9 @@ type RefKey string
 // Registry keys for platform references.
 const (
 	// Skills
-	SkillConventions    RefKey = "skill.conventions"
-	SkillCommitBehavior RefKey = "skill.commit-behavior"
+	SkillConventions      RefKey = "skill.conventions"
+	SkillCommitBehavior   RefKey = "skill.commit-behavior"
+	SkillAttributionGuard RefKey = "skill.attribution-guard"
 
 	// Agents
 	AgentPythia          RefKey = "agent.pythia"
@@ -71,6 +72,11 @@ var entries = map[RefKey]RefEntry{
 		Category: CategorySkill,
 		Value:    "commit:behavior",
 		Recovery: "Load skill commit:behavior for full specification.",
+	},
+	SkillAttributionGuard: {
+		Category: CategorySkill,
+		Value:    "conventions",
+		Recovery: "Commits use user-only attribution. Load skill conventions for policy details.",
 	},
 	AgentPythia: {
 		Category: CategoryAgent,

@@ -94,6 +94,7 @@ Performance Targets:
 	cmd.AddCommand(newWorktreeSeedCmd(ctx))
 	cmd.AddCommand(newWorktreeRemoveCmd(ctx))
 	cmd.AddCommand(newCheapoRevertCmd(ctx))
+	cmd.AddCommand(newAttributionGuardCmd(ctx))
 
 	// Hook commands do NOT require project context
 	common.SetNeedsProject(cmd, false, true)
