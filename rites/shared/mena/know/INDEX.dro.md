@@ -1,7 +1,7 @@
 ---
 name: know
 description: "Generate persistent codebase knowledge via theoros observation. Produces .know/{domain}.md and .know/feat/{slug}.md with schema-validated frontmatter and structured knowledge sections."
-argument-hint: "[domain|--all|--scope=feature] [--force] [--expires=DURATION] [--census] [--feature=SLUG]"
+argument-hint: "[domain|--all|--scope=feature] [--force] [--expires=DURATION] [--census] [--feature=SLUG] [--root=PATH]"
 allowed-tools: Bash, Read, Write, Glob, Grep, Task, Skill
 model: opus
 ---
@@ -31,6 +31,14 @@ This command runs in the main thread (requires Task tool for theoros dispatch). 
    - `--all`: Generate ALL codebase-scoped domains. Overrides `domain` argument. Uses **Argus Pattern** (parallel theoros dispatch).
    - `--force`: Skip expiry check, regenerate even if current.
    - `--expires=DURATION`: Override default expiry (e.g., `--expires=14d`). Default: `"7d"`.
+   - `--root=PATH`: Scoped generation target directory (monorepo support). When set:
+     - Validate: path exists and is under project root. ERROR if not: "Root path '{path}' does not exist" or "Root path '{path}' is not under project root".
+     - Output directory becomes `{root}/.know/` instead of project root `.know/`
+     - Theoros observation scope is constrained to `{root}/` and its subtree
+     - `source_scope` globs resolve relative to `{root}/` (e.g., `./internal/**/*.go` scopes to `{root}/internal/`)
+     - The `ari knows --delta` call becomes `ari knows --scope-dir={root} --delta -o json`
+     - Criteria inheritance: check `{root}/.know/criteria/` first (local override); fall back to project root `.know/criteria/`
+     - Pinakes registry is always loaded from global (framework-level, not service-level)
 
 2. **Load domain registry**:
    - Load pinakes skill: `Skill("pinakes")`
@@ -38,14 +46,16 @@ This command runs in the main thread (requires Task tool for theoros dispatch). 
    - If `--all`: collect ALL domains with scope `codebase` from the registry
    - If single domain: verify requested domain appears in the table with scope `codebase`
    - If not found: ERROR "Domain '{domain}' not registered in pinakes or not codebase-scoped. Available codebase domains: {list}"
-   - **Scan for satellite-authored criteria**: Check if `.know/criteria/` exists and contains any `*.md` files. If it does, read each file and merge its domain entry into the registry alongside the pinakes domains. Each criteria file follows the same format as pinakes domain files. If `.know/criteria/` does not exist or is empty, continue normally with only pinakes domains.
+   - **Scan for satellite-authored criteria**: Check if `{knowDir}/criteria/` exists and contains any `*.md` files (where `{knowDir}` is `{root}/.know/` when `--root` is set, otherwise `.know/`). If it does, read each file and merge its domain entry into the registry alongside the pinakes domains. Each criteria file follows the same format as pinakes domain files. If `{knowDir}/criteria/` does not exist, fall back to `.know/criteria/` (project root) when `--root` is set. If neither exists or both are empty, continue normally with only pinakes domains.
 
 3. **Build generation queue** (uses `ari knows --delta` for change analysis):
    - First, check each domain for non-delta conditions:
-     - If `.know/{domain}.md` does not exist: ADD to **full** queue (skip delta for this domain)
+     - If `{knowDir}/{domain}.md` does not exist: ADD to **full** queue (skip delta for this domain)
      - If `--force` is set: ADD to **full** queue (skip delta for this domain)
    - Then, for ALL remaining domains in a **single batch call**:
-     - Run: `Bash("ari knows --delta -o json")` — this returns a JSON object with a `domains` array containing ALL domain deltas. One call, not N calls. The CLI caches git operations internally so overlapping source scopes don't cause redundant git subprocess invocations.
+     - If `--root` is set: Run: `Bash("ari knows --scope-dir={root} --delta -o json")`
+     - Otherwise: Run: `Bash("ari knows --delta -o json")`
+     - This returns a JSON object with a `domains` array containing ALL domain deltas. One call, not N calls. The CLI caches git operations internally so overlapping source scopes don't cause redundant git subprocess invocations.
      - Parse the batch result and route each domain entry by its `mode` field:
        - `mode == "skip"`: report "Knowledge for '{domain}' is current" and SKIP
        - `mode == "time-only"`: ADD to **time-only** queue
@@ -60,7 +70,8 @@ This command runs in the main thread (requires Task tool for theoros dispatch). 
    - Store result for frontmatter injection.
 
 5. **Ensure .know/ directory exists**:
-   - Run: `mkdir -p .know`
+   - If `--root` is set: Run: `mkdir -p {root}/.know`
+   - Otherwise: Run: `mkdir -p .know`
 
 ## Phase 0: Time-Only Refresh
 
@@ -221,6 +232,14 @@ Process the **full** queue. These domains either don't exist yet, have large del
 
 For each domain in the full generation queue, construct:
 
+**If `--root` is set**: Add the following observation scope constraint to the theoros prompt (immediately after the domain criteria section):
+```
+### Observation Scope
+Your observation is scoped to `{root}/` and its subtree. Only read files under this directory.
+When you encounter references to code outside this scope, note them as external dependencies
+rather than observing them directly.
+```
+
 ```
 Task(subagent_type="theoros", prompt="
 ## Knowledge Observation: {domain}
@@ -300,11 +319,12 @@ For EACH domain's theoros output (both incremental and full), perform the follow
    - If metadata block is missing or unparseable: use defaults (confidence: 0.5, grade: C)
 
 2. **Construct the .know/ file**:
-   Before assembling frontmatter, detect the project language by checking for manifest files in the project root:
-   - If `go.mod` exists: set `source_scope` to `["./cmd/**/*.go", "./internal/**/*.go", "./go.mod"]`
-   - Else if `package.json` exists: set `source_scope` to `["./src/**/*.ts", "./lib/**/*.ts", "./package.json"]`
-   - Else if `pyproject.toml` exists: set `source_scope` to `["./src/**/*.py", "./app/**/*.py", "./pyproject.toml"]`
+   Before assembling frontmatter, detect the project language by checking for manifest files in the scope root (`{root}/` when `--root` is set, otherwise project root):
+   - If `go.mod` exists in scope root: set `source_scope` to `["./cmd/**/*.go", "./internal/**/*.go", "./go.mod"]`
+   - Else if `package.json` exists in scope root: set `source_scope` to `["./src/**/*.ts", "./lib/**/*.ts", "./package.json"]`
+   - Else if `pyproject.toml` exists in scope root: set `source_scope` to `["./src/**/*.py", "./app/**/*.py", "./pyproject.toml"]`
    - Else (no recognized manifest): set `source_scope` to `["./src/**/*"]`
+   Note: `source_scope` globs are always written as relative to the `.know/` parent directory (using `./` prefix). The `ari knows` CLI normalizes them to repo-root-relative when computing staleness.
 
    **Determine update tracking fields** based on which queue the domain came from:
 
@@ -334,14 +354,20 @@ For EACH domain's theoros output (both incremental and full), perform the follow
    Combine frontmatter + theoros knowledge body (Part 1 only, not the metadata fence).
 
 3. **Write the file**:
+   If `--root` is set:
+   ```
+   Write("{root}/.know/{domain}.md", frontmatter + body)
+   ```
+   Otherwise:
    ```
    Write(".know/{domain}.md", frontmatter + body)
    ```
 
 4. **Verify the file**:
    ```
-   Read(".know/{domain}.md", limit=20)
+   Read("{knowDir}/{domain}.md", limit=20)
    ```
+   Where `{knowDir}` is `{root}/.know` when `--root` is set, otherwise `.know`.
    Confirm frontmatter fields are present and valid. Confirm body sections exist.
 
 ## Phase 4: Report
