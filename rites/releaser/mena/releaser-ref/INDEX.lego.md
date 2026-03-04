@@ -40,7 +40,7 @@ For detailed reference, agents should Read the relevant companion:
 
 | Topic | Path |
 |-------|------|
-| Pipeline Chain Model | `rites/releaser/mena/releaser-ref/pipeline-chains.md` |
-| Ecosystem Detection | `rites/releaser/mena/releaser-ref/ecosystem-detection.md` |
-| Failure Halting Protocol | `rites/releaser/mena/releaser-ref/failure-halting.md` |
-| Cross-Rite Routing | `rites/releaser/mena/releaser-ref/cross-rite-routing.md` |
+| Pipeline Chain Model | `pipeline-chains.md` |
+| Ecosystem Detection | `ecosystem-detection.md` |
+| Failure Halting Protocol | `failure-halting.md` |
+| Cross-Rite Routing | `cross-rite-routing.md` |
