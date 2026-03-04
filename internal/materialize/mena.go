@@ -28,13 +28,11 @@ const (
 
 // Re-export functions.
 var (
-	CollectMena                    = mena.CollectMena
-	SyncMena                       = mena.SyncMena
-	StripMenaExtension             = mena.StripMenaExtension
-	RouteMenaFile                  = mena.RouteMenaFile
-	DetectMenaType                 = mena.DetectMenaType
-	ReadMenaFrontmatterFromDir     = mena.ReadMenaFrontmatterFromDir
-	ReadMenaFrontmatterFromFile    = mena.ReadMenaFrontmatterFromFile
-	injectCompanionHideFrontmatter = mena.InjectCompanionHideFrontmatter
-	cleanEmptyDirs                 = mena.CleanEmptyDirs
+	CollectMena                 = mena.CollectMena
+	SyncMena                    = mena.SyncMena
+	StripMenaExtension          = mena.StripMenaExtension
+	RouteMenaFile               = mena.RouteMenaFile
+	DetectMenaType              = mena.DetectMenaType
+	ReadMenaFrontmatterFromDir  = mena.ReadMenaFrontmatterFromDir
+	ReadMenaFrontmatterFromFile = mena.ReadMenaFrontmatterFromFile
 )

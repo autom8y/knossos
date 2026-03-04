@@ -272,9 +272,9 @@ func (m *Materializer) MaterializeMinimal(opts Options) (*Result, error) {
 	}
 
 	// Remove rite-specific state files (cross-cutting mode has no rite)
-	os.Remove(filepath.Join(claudeDir, "ACTIVE_RITE"))
-	os.Remove(filepath.Join(claudeDir, "ACTIVE_WORKFLOW.yaml"))
-	os.Remove(filepath.Join(claudeDir, "INVOCATION_STATE.yaml"))
+	_ = os.Remove(filepath.Join(claudeDir, "ACTIVE_RITE"))
+	_ = os.Remove(filepath.Join(claudeDir, "ACTIVE_WORKFLOW.yaml"))
+	_ = os.Remove(filepath.Join(claudeDir, "INVOCATION_STATE.yaml"))
 
 	// Provenance: merge and save manifest
 	if err := m.saveProvenanceManifest(manifestPath, "", collector, divergenceReport, prevManifest, opts.OverwriteDiverged); err != nil {
@@ -297,7 +297,7 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 	// Remove el-cheapo marker on normal sync (revert path)
 	if !opts.ElCheapo {
 		knossosDir := filepath.Join(filepath.Dir(claudeDir), ".knossos")
-		os.Remove(filepath.Join(knossosDir, ".el-cheapo-active"))
+		_ = os.Remove(filepath.Join(knossosDir, ".el-cheapo-active"))
 	}
 
 	// Note: the skip guard (skip-if-same-rite) was removed. The pipeline is safe
@@ -702,32 +702,3 @@ func (m *Materializer) loadRiteManifest(ritePath string, resolved *ResolvedRite)
 	return &manifest, nil
 }
 
-// copyDir recursively copies a directory.
-func (m *Materializer) copyDir(src, dst string) error {
-	return filepath.WalkDir(src, func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-
-		// Compute relative path
-		relPath, err := filepath.Rel(src, path)
-		if err != nil {
-			return err
-		}
-
-		destPath := filepath.Join(dst, relPath)
-
-		if d.IsDir() {
-			return os.MkdirAll(destPath, 0755)
-		}
-
-		// Read and write file (only if changed)
-		content, err := os.ReadFile(path)
-		if err != nil {
-			return err
-		}
-
-		_, err = fileutil.WriteIfChanged(destPath, content, 0644)
-		return err
-	})
-}

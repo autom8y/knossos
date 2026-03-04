@@ -710,14 +710,6 @@ func min(a, b int) int {
 	return b
 }
 
-// Helper function for max of two integers
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}
-
 // Additional integration tests for edge cases
 
 // TestInscription_MalformedMarkersHandled tests graceful handling of malformed markers.

@@ -65,9 +65,6 @@ type Generator struct {
 	// Context is the render context for template execution.
 	Context *RenderContext
 
-	// templates is the parsed template cache.
-	templates *template.Template
-
 	// sectionTemplates maps region names to template content.
 	sectionTemplates map[string]string
 }

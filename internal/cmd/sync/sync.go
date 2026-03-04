@@ -267,7 +267,3 @@ func formatSyncResult(result *materialize.SyncResult, opts materialize.SyncOptio
 	return out
 }
 
-// getPrinter creates an output printer from the context.
-func (c *cmdContext) getPrinter() *output.Printer {
-	return c.GetPrinter(output.FormatText)
-}

@@ -166,35 +166,6 @@ func countEventsOfType(t *testing.T, projectDir, sessionID, eventType string) in
 	return strings.Count(string(content), eventType)
 }
 
-// readEventsJSONL reads events.jsonl and returns parsed JSON objects.
-func readEventsJSONL(t *testing.T, projectDir, sessionID string) []map[string]any {
-	t.Helper()
-	eventsPath := filepath.Join(projectDir, ".sos", "sessions", sessionID, "events.jsonl")
-	file, err := os.Open(eventsPath)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return nil
-		}
-		t.Fatalf("Failed to open events.jsonl: %v", err)
-	}
-	defer file.Close()
-
-	var events []map[string]any
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		line := scanner.Text()
-		if strings.TrimSpace(line) == "" {
-			continue
-		}
-		var event map[string]any
-		if err := json.Unmarshal([]byte(line), &event); err != nil {
-			// Skip unparseable lines (legacy format)
-			continue
-		}
-		events = append(events, event)
-	}
-	return events
-}
 
 // =============================================================================
 // Test Scenario 1: State Mutation via Session Commands

@@ -104,17 +104,6 @@ func TestMergeSkillPolicies_OrderPreserved(t *testing.T) {
 
 // --- applySkillPolicies tests ---
 
-func fmWithTools(tools []interface{}, skills []interface{}) map[string]interface{} {
-	fm := map[string]interface{}{}
-	if tools != nil {
-		fm["tools"] = tools
-	}
-	if skills != nil {
-		fm["skills"] = skills
-	}
-	return fm
-}
-
 func TestApplySkillPolicies_InjectMatchesAll(t *testing.T) {
 	// Policy with no requires_tools matches any agent
 	fm := map[string]interface{}{

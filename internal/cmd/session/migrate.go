@@ -4,7 +4,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 
 	"github.com/spf13/cobra"
 
@@ -197,7 +196,7 @@ func migrateSession(ctx *cmdContext, resolver *paths.Resolver, lockMgr *lock.Man
 			Error:     "Failed to acquire lock: " + err.Error(),
 		}
 	}
-	defer sessionLock.Release()
+	defer func() { _ = sessionLock.Release() }()
 	emitLockEvent(resolver, sessionID, "ari-session-migrate")
 
 	// Create backup
@@ -216,7 +215,7 @@ func migrateSession(ctx *cmdContext, resolver *paths.Resolver, lockMgr *lock.Man
 	// Save migrated context
 	if err := sessCtx.Save(ctxPath); err != nil {
 		// Restore backup
-		os.Rename(backupPath, ctxPath)
+		_ = os.Rename(backupPath, ctxPath)
 		return nil, nil, &output.FailResult{
 			SessionID: sessionID,
 			Error:     "Failed to save migrated context: " + err.Error(),
@@ -227,8 +226,8 @@ func migrateSession(ctx *cmdContext, resolver *paths.Resolver, lockMgr *lock.Man
 	sessionDir := resolver.SessionDir(sessionID)
 	writer := clewcontract.NewBufferedEventWriter(sessionDir, clewcontract.DefaultFlushInterval)
 	writer.Write(clewcontract.NewSchemaMigratedEvent(sessionID, "1.0", "2.1"))
-	writer.Flush()
-	writer.Close()
+	_ = writer.Flush()
+	_ = writer.Close()
 
 	return &output.MigrationResult{
 		SessionID:     sessionID,
@@ -261,7 +260,3 @@ func deriveV1Status(content []byte) string {
 	return "ACTIVE"
 }
 
-// Helper to generate timestamps for migration events
-func now() time.Time {
-	return time.Now().UTC()
-}

@@ -2,11 +2,8 @@
 package manifest
 
 import (
-	"bytes"
-	"embed"
 	"encoding/json"
 	"fmt"
-	"io"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -21,9 +18,6 @@ const (
 	CodeParseError     = errors.CodeParseError
 	CodeSchemaNotFound = errors.CodeSchemaNotFound
 )
-
-//go:embed schemas/*.json
-var schemaFS embed.FS
 
 // Schema names for different manifest types
 const (
@@ -307,19 +301,6 @@ func jsonPointerToPath(location string) string {
 	return "$." + path
 }
 
-// jsonPathToJQuery converts JSON pointer to jQuery-style path ($.foo.bar).
-func jsonPathToJQuery(location string) string {
-	if location == "" {
-		return "$"
-	}
-	// Replace "/" with "." and prepend "$"
-	path := strings.ReplaceAll(location, "/", ".")
-	if strings.HasPrefix(path, ".") {
-		return "$" + path
-	}
-	return "$." + path
-}
-
 // checkAdditionalProperties checks for properties not in the schema.
 func checkAdditionalProperties(content map[string]interface{}, schemaName string) []ValidationIssue {
 	// This is a simplified check - a full implementation would
@@ -429,14 +410,3 @@ type SchemaInfo struct {
 	Valid   bool   `json:"valid,omitempty"`
 }
 
-// embedLoader implements jsonschema.URLLoader for embedded files.
-type embedLoader struct{}
-
-func (l *embedLoader) Load(url string) (io.ReadCloser, error) {
-	path := strings.TrimPrefix(url, "embed:///")
-	data, err := schemaFS.ReadFile(path)
-	if err != nil {
-		return nil, fmt.Errorf("schema not found: %s", path)
-	}
-	return io.NopCloser(bytes.NewReader(data)), nil
-}

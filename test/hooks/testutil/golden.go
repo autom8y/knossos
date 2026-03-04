@@ -11,10 +11,9 @@ import (
 
 // GoldenFile manages golden file comparison for hook output testing.
 type GoldenFile struct {
-	t       *testing.T
-	dir     string
-	name    string
-	content []byte
+	t    *testing.T
+	dir  string
+	name string
 }
 
 // Golden creates a new golden file handler.

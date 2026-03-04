@@ -3,7 +3,6 @@
 package sails
 
 import (
-	"bytes"
 	"os"
 	"path/filepath"
 	"strings"
@@ -1110,26 +1109,3 @@ func TestValidateColorInput(t *testing.T) {
 	}
 }
 
-// Helper to capture stdout/stderr for testing (not used but available)
-func captureOutput(f func()) (string, string) {
-	var stdout, stderr bytes.Buffer
-	oldStdout := os.Stdout
-	oldStderr := os.Stderr
-
-	rOut, wOut, _ := os.Pipe()
-	rErr, wErr, _ := os.Pipe()
-	os.Stdout = wOut
-	os.Stderr = wErr
-
-	f()
-
-	wOut.Close()
-	wErr.Close()
-	os.Stdout = oldStdout
-	os.Stderr = oldStderr
-
-	stdout.ReadFrom(rOut)
-	stderr.ReadFrom(rErr)
-
-	return stdout.String(), stderr.String()
-}

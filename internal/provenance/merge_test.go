@@ -29,16 +29,6 @@ func validUserEntry() *ProvenanceEntry {
 	}
 }
 
-// validUntrackedEntry returns an untracked entry with a valid checksum for testing.
-func validUntrackedEntry() *ProvenanceEntry {
-	return &ProvenanceEntry{
-		Owner:      OwnerUntracked,
-		Scope:      ScopeRite,
-		Checksum:   "sha256:fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210",
-		LastSynced: time.Now().UTC(),
-	}
-}
-
 // TestMerge_EmptyInputs verifies Merge with nil prev, nil divergence, and empty collector
 // produces a valid manifest containing only the collector's entries.
 func TestMerge_EmptyInputs(t *testing.T) {

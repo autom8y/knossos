@@ -24,7 +24,6 @@ const EventsFileName = "events.jsonl"
 type EventWriter struct {
 	mu       sync.Mutex
 	filePath string
-	file     *os.File
 }
 
 // NewEventWriter creates a new EventWriter for the given session directory.
@@ -73,7 +72,7 @@ func (w *EventWriter) Write(event Event) error {
 	if err != nil {
 		return errors.Wrap(errors.CodePermissionDenied, "failed to open events file", err)
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	// Write JSON line
 	if _, err := f.Write(append(data, '\n')); err != nil {
@@ -100,7 +99,7 @@ func (w *EventWriter) WriteTyped(event TypedEvent) error {
 	if err != nil {
 		return errors.Wrap(errors.CodePermissionDenied, "failed to open events file", err)
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	if _, err := f.Write(append(data, '\n')); err != nil {
 		return errors.Wrap(errors.CodeGeneralError, "failed to write typed event", err)
@@ -124,7 +123,7 @@ func (w *EventWriter) WriteMultiple(events []Event) error {
 	if err != nil {
 		return errors.Wrap(errors.CodePermissionDenied, "failed to open events file", err)
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	// Write all events
 	for _, event := range events {
@@ -271,7 +270,7 @@ func (w *BufferedEventWriter) Flush() error {
 		w.mu.Unlock()
 		return err
 	}
-	defer syncWriter.Close()
+	defer func() { _ = syncWriter.Close() }()
 
 	// Write v2 flat events first (preserves relative order within this flush cycle)
 	if err = syncWriter.WriteMultiple(toFlush); err != nil {

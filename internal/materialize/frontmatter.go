@@ -11,5 +11,3 @@ type (
 	FlexibleStringSlice = mena.FlexibleStringSlice
 )
 
-// Re-export the frontmatter parser (used by core tests).
-var parseMenaFrontmatterBytes = mena.ParseMenaFrontmatterBytes

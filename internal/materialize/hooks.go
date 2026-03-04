@@ -13,9 +13,7 @@ type (
 
 // Re-export functions (used by core tests and other core code).
 var (
-	buildHooksSettings   = hooks.BuildHooksSettings
 	mergeHooksSettings   = hooks.MergeHooksSettings
-	isAriManagedGroup    = hooks.IsAriManagedGroup
 	loadExistingSettings = hooks.LoadExistingSettings
 	saveSettings         = hooks.SaveSettings
 )
