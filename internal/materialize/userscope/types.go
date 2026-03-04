@@ -14,7 +14,8 @@ import (
 type SyncUserScopeParams struct {
 	Resolver       *paths.Resolver // for ClaudeDir() (collision checker)
 	EmbeddedAgents fs.FS           // fallback agent source
-	EmbeddedMena   fs.FS           // fallback mena source
+	EmbeddedMena   fs.FS           // fallback mena source (platform mena/)
+	EmbeddedRites  fs.FS           // fallback rites source (for rites/shared/mena/)
 	Opts           SyncOptions     // sync configuration
 }
 

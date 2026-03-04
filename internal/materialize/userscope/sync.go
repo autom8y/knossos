@@ -20,6 +20,7 @@ type syncer struct {
 	resolver       *paths.Resolver
 	embeddedAgents fs.FS
 	embeddedMena   fs.FS
+	embeddedRites  fs.FS
 }
 
 // SyncUserScope is the primary entry point for user-scope sync.
@@ -29,6 +30,7 @@ func SyncUserScope(params SyncUserScopeParams) (*UserScopeResult, error) {
 		resolver:       params.Resolver,
 		embeddedAgents: params.EmbeddedAgents,
 		embeddedMena:   params.EmbeddedMena,
+		embeddedRites:  params.EmbeddedRites,
 	}
 	return s.syncUserScope(params.Opts)
 }

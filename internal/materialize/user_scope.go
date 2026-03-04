@@ -11,6 +11,7 @@ func (m *Materializer) syncUserScope(opts SyncOptions) (*UserScopeResult, error)
 		Resolver:       m.resolver,
 		EmbeddedAgents: m.embeddedAgents,
 		EmbeddedMena:   m.embeddedMena,
+		EmbeddedRites:  m.sourceResolver.EmbeddedFS,
 		Opts: userscope.SyncOptions{
 			Resource:          opts.Resource,
 			DryRun:            opts.DryRun,

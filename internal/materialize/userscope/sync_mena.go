@@ -167,7 +167,12 @@ func (s *syncer) syncUserMenaFromEmbedded(
 
 	// Use embedded FS as a MenaSource via the CollectMena pipeline.
 	// CollectMena supports fs.FS sources via MenaSource.Fsys field.
+	// Include both platform mena and shared rite mena (for cross-rite overlay
+	// entries like interview, smell-detection, etc. that remain in rites/shared/).
 	sources := []mena.MenaSource{{Fsys: s.embeddedMena, FsysPath: "mena", IsEmbedded: true}}
+	if s.embeddedRites != nil {
+		sources = append(sources, mena.MenaSource{Fsys: s.embeddedRites, FsysPath: "rites/shared/mena", IsEmbedded: true})
+	}
 	collectOpts := mena.MenaProjectionOptions{
 		Filter: mena.ProjectAll,
 	}
@@ -541,6 +546,11 @@ func wipeKnossosOwnedMenaEntries(knossosHome, userClaudeDir string, manifest *pr
 	// Any existing manifest entry matching either pattern is knossos-produced, not user-created.
 	menaSourceDir := filepath.Join(knossosHome, "mena")
 	sources := []mena.MenaSource{{Path: menaSourceDir}}
+	// Include shared rite mena so old-pipeline orphans from shared entries are also cleaned up.
+	sharedMenaDir := filepath.Join(knossosHome, "rites", "shared", "mena")
+	if _, err := os.Stat(sharedMenaDir); err == nil {
+		sources = append(sources, mena.MenaSource{Path: sharedMenaDir})
+	}
 	resolution, err := mena.CollectMena(sources, mena.MenaProjectionOptions{Filter: mena.ProjectAll})
 	if err != nil {
 		return // Best effort: if CollectMena fails, skip wipe

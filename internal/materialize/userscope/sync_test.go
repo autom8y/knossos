@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"testing/fstest"
 
 	"github.com/autom8y/knossos/internal/materialize/mena"
 	"github.com/autom8y/knossos/internal/provenance"
@@ -550,6 +551,53 @@ func TestSyncUserMena_IncludesSharedRiteMena(t *testing.T) {
 	// Verify added count includes shared mena entries
 	if result.Summary.Added < 3 {
 		t.Errorf("Expected at least 3 added entries (platform + shared dro + shared lego), got %d", result.Summary.Added)
+	}
+}
+
+// TestSyncUserMena_EmbeddedIncludesSharedRiteMena verifies that the embedded
+// fallback path includes rites/shared/mena/ entries alongside platform mena.
+func TestSyncUserMena_EmbeddedIncludesSharedRiteMena(t *testing.T) {
+	userClaudeDir := t.TempDir()
+
+	// Build an embedded FS with platform mena + shared rite mena
+	embeddedMena := fstest.MapFS{
+		"mena/operations/commit/INDEX.dro.md": &fstest.MapFile{
+			Data: []byte("---\nname: commit\ndescription: Commit\n---\n# commit\n"),
+		},
+	}
+	embeddedRites := fstest.MapFS{
+		"rites/shared/mena/smell-detection/INDEX.lego.md": &fstest.MapFile{
+			Data: []byte("---\nname: smell-detection\ndescription: Smell detection\n---\n# smell-detection\n"),
+		},
+	}
+
+	s := &syncer{
+		embeddedMena:  embeddedMena,
+		embeddedRites: embeddedRites,
+	}
+	manifest, _ := provenance.LoadOrBootstrap(filepath.Join(t.TempDir(), "manifest.yaml"))
+	collisionChecker := NewCollisionChecker(t.TempDir())
+
+	result, err := s.syncUserMenaFromEmbedded(userClaudeDir, manifest, collisionChecker, SyncOptions{})
+	if err != nil {
+		t.Fatalf("syncUserMenaFromEmbedded failed: %v", err)
+	}
+
+	// Platform dro should be promoted
+	commitCmd := filepath.Join(userClaudeDir, "commands", "commit.md")
+	if _, statErr := os.Stat(commitCmd); os.IsNotExist(statErr) {
+		t.Errorf("Expected platform dromenon /commit at %s", commitCmd)
+	}
+
+	// Shared lego should be projected with SKILL.md rename
+	smellSkill := filepath.Join(userClaudeDir, "skills", "smell-detection", "SKILL.md")
+	if _, statErr := os.Stat(smellSkill); os.IsNotExist(statErr) {
+		t.Errorf("Expected shared legomenon smell-detection at %s", smellSkill)
+	}
+
+	// Both entries should be added
+	if result.Summary.Added < 2 {
+		t.Errorf("Expected at least 2 added entries (platform dro + shared lego), got %d", result.Summary.Added)
 	}
 }
 
