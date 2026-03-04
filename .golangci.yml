@@ -2,6 +2,8 @@ version: "2"
 
 linters:
   default: standard
+  enable:
+    - modernize
   settings:
     errcheck:
       exclude-functions:
@@ -18,6 +20,8 @@ linters:
       - path: _test\.go
         linters:
           - errcheck
+      - path: _test\.go
+        text: "SA5011"
 
 issues:
   max-issues-per-linter: 0
