@@ -195,6 +195,9 @@ func stalenessLabel(d know.DomainStatus) string {
 	if d.Fresh {
 		return "fresh"
 	}
+	if d.DependencyStale {
+		return fmt.Sprintf("stale (dependency: %s)", strings.Join(d.StaleDeps, ", "))
+	}
 	switch {
 	case d.TimeExpired && d.CodeChanged:
 		return "stale (expired + code changed)"

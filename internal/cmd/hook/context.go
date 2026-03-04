@@ -369,7 +369,11 @@ func knowStatus(projectDir, cwd string) string {
 	for _, d := range domains {
 		status := "fresh"
 		if !d.Fresh {
-			status = "STALE"
+			if d.DependencyStale {
+				status = "STALE (dep)"
+			} else {
+				status = "STALE"
+			}
 			hasStale = true
 		}
 		parts = append(parts, fmt.Sprintf("%s: %s, expires %s", d.Domain, status, d.Expires))

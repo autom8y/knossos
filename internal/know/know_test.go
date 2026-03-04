@@ -1118,6 +1118,116 @@ func TestNormalizeSourceScope_DotSlashStripping(t *testing.T) {
 	}
 }
 
+// --- Dependency staleness tests ---
+
+func TestCheckDependencyStaleness_FreshDep(t *testing.T) {
+	statuses := []DomainStatus{
+		{Domain: "architecture", Fresh: true},
+		{Domain: "conventions", Fresh: true},
+	}
+	metaByDomain := map[string]*Meta{
+		"architecture": {DependsOn: []string{"conventions"}},
+		"conventions":  {},
+	}
+	checkDependencyStaleness(statuses, metaByDomain)
+	if !statuses[0].Fresh {
+		t.Error("architecture should remain fresh when all deps are fresh")
+	}
+	if statuses[0].DependencyStale {
+		t.Error("DependencyStale should be false when all deps are fresh")
+	}
+}
+
+func TestCheckDependencyStaleness_StaleDep(t *testing.T) {
+	statuses := []DomainStatus{
+		{Domain: "architecture", Fresh: true},
+		{Domain: "conventions", Fresh: false},
+	}
+	metaByDomain := map[string]*Meta{
+		"architecture": {DependsOn: []string{"conventions"}},
+		"conventions":  {},
+	}
+	checkDependencyStaleness(statuses, metaByDomain)
+	if statuses[0].Fresh {
+		t.Error("architecture should be stale when a dep is stale")
+	}
+	if !statuses[0].DependencyStale {
+		t.Error("DependencyStale should be true")
+	}
+	if len(statuses[0].StaleDeps) != 1 || statuses[0].StaleDeps[0] != "conventions" {
+		t.Errorf("StaleDeps = %v, want [conventions]", statuses[0].StaleDeps)
+	}
+}
+
+func TestCheckDependencyStaleness_Transitive(t *testing.T) {
+	statuses := []DomainStatus{
+		{Domain: "A", Fresh: true},
+		{Domain: "B", Fresh: true},
+		{Domain: "C", Fresh: false},
+	}
+	metaByDomain := map[string]*Meta{
+		"A": {DependsOn: []string{"B"}},
+		"B": {DependsOn: []string{"C"}},
+		"C": {},
+	}
+	checkDependencyStaleness(statuses, metaByDomain)
+	if statuses[0].Fresh {
+		t.Error("A should be stale via transitive dep A→B→C(stale)")
+	}
+	if !statuses[0].DependencyStale {
+		t.Error("A.DependencyStale should be true")
+	}
+}
+
+func TestCheckDependencyStaleness_CycleDetection(t *testing.T) {
+	statuses := []DomainStatus{
+		{Domain: "A", Fresh: true},
+		{Domain: "B", Fresh: true},
+	}
+	metaByDomain := map[string]*Meta{
+		"A": {DependsOn: []string{"B"}},
+		"B": {DependsOn: []string{"A"}},
+	}
+	// Should not infinite loop
+	checkDependencyStaleness(statuses, metaByDomain)
+	// Both are fresh with no stale deps — cycle should be harmless
+	if !statuses[0].Fresh || !statuses[1].Fresh {
+		t.Error("both should remain fresh (cycle with no stale nodes)")
+	}
+}
+
+func TestCheckDependencyStaleness_MissingDep(t *testing.T) {
+	statuses := []DomainStatus{
+		{Domain: "architecture", Fresh: true},
+	}
+	metaByDomain := map[string]*Meta{
+		"architecture": {DependsOn: []string{"nonexistent"}},
+	}
+	checkDependencyStaleness(statuses, metaByDomain)
+	if statuses[0].Fresh {
+		t.Error("should be stale when dep is not found")
+	}
+	if len(statuses[0].StaleDeps) != 1 {
+		t.Fatalf("want 1 stale dep, got %d", len(statuses[0].StaleDeps))
+	}
+	if statuses[0].StaleDeps[0] != "nonexistent (not found)" {
+		t.Errorf("StaleDeps[0] = %q, want %q", statuses[0].StaleDeps[0], "nonexistent (not found)")
+	}
+}
+
+func TestCheckDependencyStaleness_NoDeps(t *testing.T) {
+	statuses := []DomainStatus{
+		{Domain: "architecture", Fresh: true},
+	}
+	metaByDomain := map[string]*Meta{
+		"architecture": {},
+	}
+	checkDependencyStaleness(statuses, metaByDomain)
+	if !statuses[0].Fresh {
+		t.Error("should remain fresh with no deps")
+	}
+}
+
 // --- FindKnowDirs and ReadMeta tests ---
 
 // TestFindKnowDirs_SingleLevel verifies discovery of a single .know/ at repo root.

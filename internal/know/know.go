@@ -47,20 +47,31 @@ type Meta struct {
 	UpdateMode           string `yaml:"update_mode,omitempty"`
 	IncrementalCycle     int    `yaml:"incremental_cycle,omitempty"`
 	MaxIncrementalCycles int    `yaml:"max_incremental_cycles,omitempty"`
+	// Knowledge graph edges: qualified domain names of dependencies.
+	// When any dependency is stale, this domain is transitively stale.
+	DependsOn []string `yaml:"depends_on,omitempty"`
 }
 
 // DomainStatus reports freshness for a single .know/ domain.
 type DomainStatus struct {
-	Domain      string  `json:"domain"`
-	Generated   string  `json:"generated_at"`
-	Expires     string  `json:"expires_at"`
-	Fresh       bool    `json:"fresh"`
-	TimeExpired bool    `json:"time_expired"`
-	SourceHash  string  `json:"source_hash"`
-	CurrentHash string  `json:"current_hash"`
-	CodeChanged bool    `json:"code_changed"`
-	Confidence  float64 `json:"confidence"`
-	ForceFull   bool    `json:"force_full"`
+	Domain          string   `json:"domain"`
+	Generated       string   `json:"generated_at"`
+	Expires         string   `json:"expires_at"`
+	Fresh           bool     `json:"fresh"`
+	TimeExpired     bool     `json:"time_expired"`
+	SourceHash      string   `json:"source_hash"`
+	CurrentHash     string   `json:"current_hash"`
+	CodeChanged     bool     `json:"code_changed"`
+	Confidence      float64  `json:"confidence"`
+	ForceFull       bool     `json:"force_full"`
+	DependencyStale bool     `json:"dependency_stale"`          // true if any depends_on domain is stale
+	StaleDeps       []string `json:"stale_deps,omitempty"`      // which dependencies are stale
+}
+
+// domainResult pairs a DomainStatus with its parsed Meta for dependency resolution.
+type domainResult struct {
+	Status DomainStatus
+	Meta   Meta
 }
 
 // readMetaFromDir reads and parses all .know/*.md files in knowDir, and also scans
@@ -68,7 +79,9 @@ type DomainStatus struct {
 // an empty slice (not an error). Files with unparseable frontmatter are skipped with
 // a warning logged to stderr. The repoRoot parameter enables source_scope normalization
 // for nested .know/ directories.
-func readMetaFromDir(knowDir, repoRoot string) ([]DomainStatus, error) {
+// readMetaFromDirFull is the internal implementation that returns both status and meta.
+// Used by ReadMeta for dependency resolution. External callers should use readMetaFromDir.
+func readMetaFromDirFull(knowDir, repoRoot string) ([]domainResult, error) {
 	entries, err := os.ReadDir(knowDir)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -87,7 +100,7 @@ func readMetaFromDir(knowDir, repoRoot string) ([]DomainStatus, error) {
 	// For root .know/, baseDir == repoRoot and scopes pass through unchanged.
 	baseDir := filepath.Dir(knowDir)
 
-	var results []DomainStatus
+	var results []domainResult
 
 	for _, entry := range entries {
 		if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".md") {
@@ -123,7 +136,7 @@ func readMetaFromDir(knowDir, repoRoot string) ([]DomainStatus, error) {
 		meta.SourceScope = NormalizeSourceScope(baseDir, repoRoot, meta.SourceScope)
 
 		status := buildDomainStatus(meta, now, currentHash)
-		results = append(results, status)
+		results = append(results, domainResult{Status: status, Meta: meta})
 	}
 
 	// Scan .know/feat/*.md (one level deep only).
@@ -167,7 +180,7 @@ func readMetaFromDir(knowDir, repoRoot string) ([]DomainStatus, error) {
 			meta.SourceScope = NormalizeSourceScope(baseDir, repoRoot, meta.SourceScope)
 
 			status := buildDomainStatus(meta, now, currentHash)
-			results = append(results, status)
+			results = append(results, domainResult{Status: status, Meta: meta})
 		}
 	}
 
@@ -212,10 +225,27 @@ func readMetaFromDir(knowDir, repoRoot string) ([]DomainStatus, error) {
 		meta.SourceScope = NormalizeSourceScope(baseDir, repoRoot, meta.SourceScope)
 
 		status := buildDomainStatus(meta, now, currentHash)
-		results = append(results, status)
+		results = append(results, domainResult{Status: status, Meta: meta})
 	}
 
 	return results, nil
+}
+
+// readMetaFromDir reads all domains from a single .know/ directory and returns
+// their statuses. Wraps readMetaFromDirFull to extract only DomainStatus values.
+func readMetaFromDir(knowDir, repoRoot string) ([]DomainStatus, error) {
+	results, err := readMetaFromDirFull(knowDir, repoRoot)
+	if err != nil {
+		return nil, err
+	}
+	if results == nil {
+		return nil, nil
+	}
+	statuses := make([]DomainStatus, len(results))
+	for i, r := range results {
+		statuses[i] = r.Status
+	}
+	return statuses, nil
 }
 
 // resolveGitHead returns the short git SHA of HEAD in the current working directory.
@@ -354,6 +384,70 @@ func NormalizeSourceScope(baseDir, repoRoot string, scopes []string) []string {
 	return normalized
 }
 
+// checkDependencyStaleness resolves depends_on references across the merged domain
+// set and marks domains whose dependencies are stale. Uses DAG traversal with
+// cycle detection and a max depth of 10.
+func checkDependencyStaleness(statuses []DomainStatus, metaByDomain map[string]*Meta) {
+	if len(statuses) == 0 {
+		return
+	}
+
+	// Build freshness index from current statuses
+	freshMap := make(map[string]bool, len(statuses))
+	for _, s := range statuses {
+		freshMap[s.Domain] = s.Fresh
+	}
+
+	// Check each domain for dependency staleness
+	for i := range statuses {
+		meta, ok := metaByDomain[statuses[i].Domain]
+		if !ok || len(meta.DependsOn) == 0 {
+			continue
+		}
+
+		visited := make(map[string]bool)
+		staleDeps := findStaleDeps(meta.DependsOn, freshMap, metaByDomain, visited, 0)
+		if len(staleDeps) > 0 {
+			statuses[i].DependencyStale = true
+			statuses[i].StaleDeps = staleDeps
+			statuses[i].Fresh = false
+		}
+	}
+}
+
+// findStaleDeps traverses the dependency graph and returns stale dependency names.
+// Uses visited-set for cycle detection and max depth of 10 as a safety valve.
+func findStaleDeps(deps []string, freshMap map[string]bool, metaByDomain map[string]*Meta, visited map[string]bool, depth int) []string {
+	const maxDepth = 10
+	if depth >= maxDepth {
+		return nil
+	}
+
+	var stale []string
+	for _, dep := range deps {
+		if visited[dep] {
+			continue
+		}
+		visited[dep] = true
+
+		fresh, exists := freshMap[dep]
+		if !exists {
+			stale = append(stale, dep+" (not found)")
+			continue
+		}
+		if !fresh {
+			stale = append(stale, dep)
+		}
+
+		// Check transitive deps
+		if meta, ok := metaByDomain[dep]; ok && len(meta.DependsOn) > 0 {
+			transitive := findStaleDeps(meta.DependsOn, freshMap, metaByDomain, visited, depth+1)
+			stale = append(stale, transitive...)
+		}
+	}
+	return stale
+}
+
 // buildDomainStatus computes freshness for a single domain.
 // currentHash is the current git HEAD short SHA; empty means unavailable.
 func buildDomainStatus(meta Meta, now time.Time, currentHash string) DomainStatus {
@@ -483,6 +577,7 @@ func ReadMeta(startDir, repoRoot string) ([]DomainStatus, error) {
 	// Track seen domain names — nearest wins.
 	seen := make(map[string]bool)
 	var merged []DomainStatus
+	metaByDomain := make(map[string]*Meta)
 
 	rootAbs, err := filepath.Abs(repoRoot)
 	if err != nil {
@@ -491,7 +586,7 @@ func ReadMeta(startDir, repoRoot string) ([]DomainStatus, error) {
 	rootKnowDir := filepath.Join(rootAbs, ".know")
 
 	for _, knowDir := range knowDirs {
-		statuses, err := readMetaFromDir(knowDir, rootAbs)
+		results, err := readMetaFromDirFull(knowDir, rootAbs)
 		if err != nil {
 			return nil, fmt.Errorf("read %s: %w", knowDir, err)
 		}
@@ -506,23 +601,30 @@ func ReadMeta(startDir, repoRoot string) ([]DomainStatus, error) {
 			}
 		}
 
-		for _, s := range statuses {
+		for _, r := range results {
 			// Build the qualified domain name.
-			qualifiedDomain := s.Domain
+			qualifiedDomain := r.Status.Domain
 			if prefix != "" {
-				qualifiedDomain = prefix + "::" + s.Domain
+				qualifiedDomain = prefix + "::" + r.Status.Domain
 			}
 
-			if seen[s.Domain] {
+			if seen[r.Status.Domain] {
 				// A nearer .know/ already provided this domain. Skip.
 				continue
 			}
-			seen[s.Domain] = true
+			seen[r.Status.Domain] = true
 
-			s.Domain = qualifiedDomain
-			merged = append(merged, s)
+			r.Status.Domain = qualifiedDomain
+			merged = append(merged, r.Status)
+
+			// Collect meta for dependency resolution
+			m := r.Meta
+			metaByDomain[qualifiedDomain] = &m
 		}
 	}
+
+	// Resolve dependency staleness across the merged domain set.
+	checkDependencyStaleness(merged, metaByDomain)
 
 	return merged, nil
 }
