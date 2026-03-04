@@ -130,6 +130,32 @@ func TestRewriteMenaContentPaths(t *testing.T) {
 			input: "[ref](../INDEX.dro.md)",
 			want:  "[ref](../INDEX.md)",
 		},
+		{
+			// unclosed_fence: content after the opening ``` but no closing ```.
+			// The rewriter treats everything after the opener as fenced and should
+			// not rewrite it. The content before the fence is rewritten normally.
+			name:  "unclosed_fence",
+			input: "before [ref](foo.lego.md)\n```\nfenced `INDEX.lego.md`\nno closing",
+			want:  "before [ref](foo.md)\n```\nfenced `INDEX.lego.md`\nno closing",
+		},
+		{
+			// crlf_line_endings: same as fenced_block_preserved but with \r\n.
+			name:  "crlf_line_endings",
+			input: "```\r\n`INDEX.lego.md`\r\n```\r\n[ref](foo.lego.md)",
+			want:  "```\r\n`INDEX.lego.md`\r\n```\r\n[ref](foo.md)",
+		},
+		{
+			// fence_at_start: content starting with ``` on line 1.
+			name:  "fence_at_start",
+			input: "```\nfenced `INDEX.lego.md`\n```\n[ref](foo.lego.md)",
+			want:  "```\nfenced `INDEX.lego.md`\n```\n[ref](foo.md)",
+		},
+		{
+			// multiple_fenced_blocks: alternating fenced and non-fenced content.
+			name:  "multiple_fenced_blocks",
+			input: "[a](a.lego.md)\n```\nfenced\n```\n[b](b.lego.md)\n```\nfenced2\n```\n[c](c.lego.md)",
+			want:  "[a](a.md)\n```\nfenced\n```\n[b](b.md)\n```\nfenced2\n```\n[c](c.md)",
+		},
 	}
 
 	for _, tt := range tests {
@@ -247,5 +273,27 @@ More links after fenced content: [back](../schemas/report.lego.md)
 	}
 	if !strings.Contains(output, `const ext = ".lego.md"`) {
 		t.Error("fenced Go code block was incorrectly modified: expected .lego.md preserved inside fence")
+	}
+}
+
+// TestSCAR_ContentRewriteNotBypassed is a regression guard for the
+// RewriteMenaContentPaths call in the materialization pipeline.
+//
+// SCAR guard: if someone removes the RewriteMenaContentPaths call or
+// deletes the function entirely, this test will fail at compile time
+// (the function reference below will be unresolved) or at runtime
+// (the assertion will detect stale .lego.md refs in the output).
+// This protects against the class of bypass bugs identified in GO-001,
+// GO-002, and GO-003 where the rewriter was omitted from code paths.
+func TestSCAR_ContentRewriteNotBypassed(t *testing.T) {
+	input := "See [the skill](foo.lego.md) for details."
+
+	output := string(RewriteMenaContentPaths([]byte(input)))
+
+	if strings.Contains(output, "](foo.lego.md)") {
+		t.Errorf("SCAR regression: RewriteMenaContentPaths did not rewrite .lego.md link target\n  input:  %q\n  output: %q", input, output)
+	}
+	if !strings.Contains(output, "](foo.md)") {
+		t.Errorf("SCAR regression: expected ](foo.md) in output\n  input:  %q\n  output: %q", input, output)
 	}
 }
