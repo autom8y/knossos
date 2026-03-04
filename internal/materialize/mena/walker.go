@@ -78,7 +78,10 @@ func copyDirFS(fsys fs.FS, root, dst string, hideCompanions bool) error {
 		}
 
 		// Rewrite stale .lego.md/.dro.md content references to materialized forms.
-		content = rewriteMenaContentPaths(content)
+		// Only markdown files contain link targets and backtick spans that need rewriting.
+		if strings.HasSuffix(base, ".md") {
+			content = RewriteMenaContentPaths(content)
+		}
 
 		if err := os.MkdirAll(filepath.Dir(destPath), 0755); err != nil {
 			return err

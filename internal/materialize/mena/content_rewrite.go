@@ -33,7 +33,7 @@ var reBacktickLego = regexp.MustCompile("`([^`]*?)\\.lego\\.md([^`]*?)`")
 // Example: `path/name.dro.md`
 var reBacktickDro = regexp.MustCompile("`([^`]*?)\\.dro\\.md([^`]*?)`")
 
-// rewriteMenaContentPaths rewrites stale .lego.md/.dro.md content references
+// RewriteMenaContentPaths rewrites stale .lego.md/.dro.md content references
 // to their materialized forms. It applies the same extension-stripping logic
 // that the materializer applies to filenames, but at the content level.
 //
@@ -47,7 +47,7 @@ var reBacktickDro = regexp.MustCompile("`([^`]*?)\\.dro\\.md([^`]*?)`")
 // link targets or backtick code spans with mena extensions.
 //
 // This is a pure function: no side effects, no file I/O.
-func rewriteMenaContentPaths(content []byte) []byte {
+func RewriteMenaContentPaths(content []byte) []byte {
 	if len(content) == 0 {
 		return content
 	}

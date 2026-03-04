@@ -140,6 +140,9 @@ func SyncMena(sources []MenaSource, opts MenaProjectionOptions) (*MenaProjection
 		if err != nil {
 			return nil, err
 		}
+		if strings.HasSuffix(destPath, ".md") {
+			data = RewriteMenaContentPaths(data)
+		}
 		if _, err := fileutil.WriteIfChanged(destPath, data, 0644); err != nil {
 			return nil, err
 		}

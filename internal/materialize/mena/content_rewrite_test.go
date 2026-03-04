@@ -134,7 +134,7 @@ func TestRewriteMenaContentPaths(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := string(rewriteMenaContentPaths([]byte(tt.input)))
+			got := string(RewriteMenaContentPaths([]byte(tt.input)))
 			if got != tt.want {
 				t.Errorf("rewriteMenaContentPaths(%q)\n  got:  %q\n  want: %q", tt.input, got, tt.want)
 			}
@@ -211,7 +211,7 @@ const ext = ".lego.md"
 More links after fenced content: [back](../schemas/report.lego.md)
 `
 
-	output := string(rewriteMenaContentPaths([]byte(corpus)))
+	output := string(RewriteMenaContentPaths([]byte(corpus)))
 
 	// Split the output on fence boundaries (same logic as the rewriter).
 	// Odd-indexed segments are inside fences and are exempt from the check.
