@@ -76,6 +76,7 @@ type Env struct {
 	// Session context
 	SessionID      string
 	ProjectDir     string
+	CWD            string // Working directory from CC stdin payload (distinct from ProjectDir)
 	ConversationID string
 
 	// Message context
@@ -122,6 +123,7 @@ func ParseEnv() *Env {
 	conversationID := os.Getenv(EnvConversation)
 
 	// Override with stdin values if available (CC's actual data)
+	var cwd string
 	if stdin != nil {
 		if stdin.HookEventName != "" {
 			event = HookEvent(stdin.HookEventName)
@@ -138,8 +140,12 @@ func ParseEnv() *Env {
 		if stdin.SessionID != "" {
 			sessionID = stdin.SessionID
 		}
-		if stdin.CWD != "" && projectDir == "" {
-			projectDir = stdin.CWD
+		// Always capture CWD separately for spatial-aware consumers (e.g., .know/ hierarchy)
+		if stdin.CWD != "" {
+			cwd = stdin.CWD
+			if projectDir == "" {
+				projectDir = stdin.CWD
+			}
 		}
 		if stdin.Prompt != "" {
 			userMessage = stdin.Prompt
@@ -160,6 +166,7 @@ func ParseEnv() *Env {
 		ToolResult:     toolResult,
 		SessionID:      sessionID,
 		ProjectDir:     projectDir,
+		CWD:            cwd,
 		ConversationID: conversationID,
 		UserMessage:    userMessage,
 		AssistantText:  assistantText,

@@ -257,6 +257,7 @@ func NewKnowsCmd(outputFlag *string, verboseFlag *bool, projectDir *string) *cob
 	var validateFlag bool
 	var deltaFlag bool
 	var semanticDiffFlag bool
+	var scopeDir string
 
 	cmd := &cobra.Command{
 		Use:   "knows [domain]",
@@ -267,18 +268,19 @@ Without arguments, lists all domains with freshness status.
 With a domain name, prints the full content of that domain file to stdout.
 
 Examples:
-  ari knows                      # List all domains with freshness
-  ari knows architecture         # Print full .know/architecture.md content
-  ari knows --check              # Exit 0 if all fresh, exit 1 if any stale
-  ari knows --validate           # Validate references in all .know/ files
-  ari knows --validate arch      # Validate references in a single domain
-  ari knows --delta              # Show change manifests for all domains
-  ari knows --delta architecture # Show change manifest for one domain
-  ari knows --semantic-diff arch # AST-based semantic diff for Go files
-  ari knows -o json              # JSON output for scripting`,
+  ari knows                                   # List all domains with freshness
+  ari knows architecture                      # Print full .know/architecture.md content
+  ari knows --check                           # Exit 0 if all fresh, exit 1 if any stale
+  ari knows --validate                        # Validate references in all .know/ files
+  ari knows --validate arch                   # Validate references in a single domain
+  ari knows --delta                           # Show change manifests for all domains
+  ari knows --delta architecture              # Show change manifest for one domain
+  ari knows --semantic-diff arch              # AST-based semantic diff for Go files
+  ari knows --scope-dir services/payments/    # Hierarchical view from service dir
+  ari knows -o json                           # JSON output for scripting`,
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runKnows(ctx, args, checkFlag, validateFlag, deltaFlag, semanticDiffFlag)
+			return runKnows(ctx, args, scopeDir, checkFlag, validateFlag, deltaFlag, semanticDiffFlag)
 		},
 	}
 
@@ -286,17 +288,24 @@ Examples:
 	cmd.Flags().BoolVar(&validateFlag, "validate", false, "Validate references in .know/ files against codebase")
 	cmd.Flags().BoolVar(&deltaFlag, "delta", false, "Show change manifest and recommended update mode")
 	cmd.Flags().BoolVar(&semanticDiffFlag, "semantic-diff", false, "Show AST-based semantic diff for Go files (compressed change context)")
+	cmd.Flags().StringVar(&scopeDir, "scope-dir", "", "Starting directory for hierarchical .know/ discovery (defaults to project root)")
 
 	common.SetNeedsProject(cmd, true, true)
 
 	return cmd
 }
 
-func runKnows(ctx *cmdContext, args []string, checkFlag, validateFlag, deltaFlag, semanticDiffFlag bool) error {
+func runKnows(ctx *cmdContext, args []string, scopeDir string, checkFlag, validateFlag, deltaFlag, semanticDiffFlag bool) error {
 	printer := ctx.GetPrinter(output.FormatText)
 	resolver := ctx.GetResolver()
 	projectDir := resolver.ProjectRoot()
-	knowDir := filepath.Join(projectDir, ".know")
+
+	// Resolve scope directory for hierarchical discovery
+	startDir := projectDir
+	if scopeDir != "" {
+		startDir = scopeDir
+	}
+	knowDir := filepath.Join(startDir, ".know")
 
 	// --validate mode: check references in .know/ files against the codebase.
 	if validateFlag {
@@ -305,12 +314,12 @@ func runKnows(ctx *cmdContext, args []string, checkFlag, validateFlag, deltaFlag
 
 	// --semantic-diff mode: AST-based semantic diff for Go files.
 	if semanticDiffFlag {
-		return runSemanticDiff(printer, knowDir, args)
+		return runSemanticDiff(printer, startDir, projectDir, args)
 	}
 
 	// --delta mode: show change manifests and recommended update modes.
 	if deltaFlag {
-		return runDelta(printer, knowDir, args)
+		return runDelta(printer, startDir, projectDir, args)
 	}
 
 	// Single domain read: just cat the file to stdout
@@ -319,7 +328,7 @@ func runKnows(ctx *cmdContext, args []string, checkFlag, validateFlag, deltaFlag
 	}
 
 	// Read all domain metadata
-	domains, err := know.ReadMeta(knowDir)
+	domains, err := know.ReadMeta(startDir, projectDir)
 	if err != nil {
 		return errors.Wrap(errors.CodeFileNotFound, "reading .know/ metadata", err)
 	}
@@ -412,9 +421,10 @@ func runValidate(printer interface {
 func runDelta(printer interface {
 	Print(data any) error
 	PrintLine(text string)
-}, knowDir string, args []string) error {
+}, startDir, projectDir string, args []string) error {
+	knowDir := filepath.Join(startDir, ".know")
 	// Read all domain statuses first to get the list of known domains.
-	allStatuses, err := know.ReadMeta(knowDir)
+	allStatuses, err := know.ReadMeta(startDir, projectDir)
 	if err != nil {
 		return errors.Wrap(errors.CodeFileNotFound, "reading .know/ metadata", err)
 	}
@@ -533,8 +543,9 @@ func readSingleDomain(knowDir, domain string) error {
 func runSemanticDiff(printer interface {
 	Print(data any) error
 	PrintLine(text string)
-}, knowDir string, args []string) error {
-	allStatuses, err := know.ReadMeta(knowDir)
+}, startDir, projectDir string, args []string) error {
+	knowDir := filepath.Join(startDir, ".know")
+	allStatuses, err := know.ReadMeta(startDir, projectDir)
 	if err != nil {
 		return errors.Wrap(errors.CodeFileNotFound, "reading .know/ metadata", err)
 	}

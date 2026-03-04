@@ -198,7 +198,11 @@ func TestReadSingleDomain_Exists(t *testing.T) {
 }
 
 func TestFreshDomainDetection(t *testing.T) {
-	dir := t.TempDir()
+	root := t.TempDir()
+	dir := filepath.Join(root, ".know")
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		t.Fatalf("create .know dir: %v", err)
+	}
 	// Generated 1 day ago, expires in 7 days = fresh
 	generatedAt := time.Now().UTC().Add(-24 * time.Hour).Format(time.RFC3339)
 	writeFrontmatter(t, dir, "architecture.md", fmt.Sprintf(`domain: architecture
@@ -209,7 +213,7 @@ confidence: 0.88
 format_version: "1.0"
 `, generatedAt))
 
-	domains, err := know.ReadMeta(dir)
+	domains, err := know.ReadMeta(root, root)
 	if err != nil {
 		t.Fatalf("ReadMeta: %v", err)
 	}
@@ -224,7 +228,11 @@ format_version: "1.0"
 }
 
 func TestStaleDomainDetection(t *testing.T) {
-	dir := t.TempDir()
+	root := t.TempDir()
+	dir := filepath.Join(root, ".know")
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		t.Fatalf("create .know dir: %v", err)
+	}
 	// Generated 10 days ago, expires in 7 days = stale
 	generatedAt := time.Now().UTC().Add(-10 * 24 * time.Hour).Format(time.RFC3339)
 	writeFrontmatter(t, dir, "architecture.md", fmt.Sprintf(`domain: architecture
@@ -235,7 +243,7 @@ confidence: 0.88
 format_version: "1.0"
 `, generatedAt))
 
-	domains, err := know.ReadMeta(dir)
+	domains, err := know.ReadMeta(root, root)
 	if err != nil {
 		t.Fatalf("ReadMeta: %v", err)
 	}
@@ -252,10 +260,9 @@ format_version: "1.0"
 
 func TestMissingKnowDirectory(t *testing.T) {
 	dir := t.TempDir()
-	knowDir := filepath.Join(dir, ".know")
-	// Don't create the directory
+	// Don't create .know/ directory
 
-	domains, err := know.ReadMeta(knowDir)
+	domains, err := know.ReadMeta(dir, dir)
 	if err != nil {
 		t.Errorf("ReadMeta on missing directory: want nil error, got %v", err)
 	}
@@ -265,13 +272,17 @@ func TestMissingKnowDirectory(t *testing.T) {
 }
 
 func TestMalformedFrontmatter(t *testing.T) {
-	dir := t.TempDir()
+	root := t.TempDir()
+	dir := filepath.Join(root, ".know")
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		t.Fatalf("create .know dir: %v", err)
+	}
 	// Write a file with no frontmatter
 	if err := os.WriteFile(filepath.Join(dir, "broken.md"), []byte("# No frontmatter\n"), 0644); err != nil {
 		t.Fatalf("write broken file: %v", err)
 	}
 
-	domains, err := know.ReadMeta(dir)
+	domains, err := know.ReadMeta(root, root)
 	if err != nil {
 		t.Errorf("ReadMeta with broken file: want nil error, got %v", err)
 	}

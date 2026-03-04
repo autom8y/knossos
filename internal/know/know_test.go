@@ -60,7 +60,7 @@ func TestParseDuration(t *testing.T) {
 }
 
 func TestReadMeta_MissingDirectory(t *testing.T) {
-	results, err := ReadMeta("/nonexistent/path/.know")
+	results, err := readMetaFromDir("/nonexistent/path/.know", "/nonexistent/path")
 	if err != nil {
 		t.Errorf("ReadMeta missing dir: want nil error, got %v", err)
 	}
@@ -71,7 +71,7 @@ func TestReadMeta_MissingDirectory(t *testing.T) {
 
 func TestReadMeta_EmptyDirectory(t *testing.T) {
 	dir := t.TempDir()
-	results, err := ReadMeta(dir)
+	results, err := readMetaFromDir(dir, dir)
 	if err != nil {
 		t.Errorf("ReadMeta empty dir: want nil error, got %v", err)
 	}
@@ -92,7 +92,7 @@ confidence: 0.88
 format_version: "1.0"
 `, generatedAt))
 
-	results, err := ReadMeta(dir)
+	results, err := readMetaFromDir(dir, dir)
 	if err != nil {
 		t.Fatalf("ReadMeta: %v", err)
 	}
@@ -124,7 +124,7 @@ confidence: 0.70
 format_version: "1.0"
 `, generatedAt))
 
-	results, err := ReadMeta(dir)
+	results, err := readMetaFromDir(dir, dir)
 	if err != nil {
 		t.Fatalf("ReadMeta: %v", err)
 	}
@@ -149,7 +149,7 @@ func TestReadMeta_MalformedFrontmatter(t *testing.T) {
 		t.Fatalf("write broken file: %v", err)
 	}
 
-	results, err := ReadMeta(dir)
+	results, err := readMetaFromDir(dir, dir)
 	if err != nil {
 		t.Errorf("ReadMeta with malformed file: want nil error, got %v", err)
 	}
@@ -180,7 +180,7 @@ confidence: 0.75
 format_version: "1.0"
 `, oldAt))
 
-	results, err := ReadMeta(dir)
+	results, err := readMetaFromDir(dir, dir)
 	if err != nil {
 		t.Fatalf("ReadMeta: %v", err)
 	}
@@ -223,7 +223,7 @@ confidence: 0.80
 format_version: "1.0"
 `, recentAt))
 
-	results, err := ReadMeta(dir)
+	results, err := readMetaFromDir(dir, dir)
 	if err != nil {
 		t.Fatalf("ReadMeta: %v", err)
 	}
@@ -525,7 +525,7 @@ confidence: 0.85
 format_version: "1.0"
 `, recentAt))
 
-	results, err := ReadMeta(dir)
+	results, err := readMetaFromDir(dir, dir)
 	if err != nil {
 		t.Fatalf("ReadMeta: %v", err)
 	}
@@ -564,7 +564,7 @@ confidence: 0.75
 format_version: "1.0"
 `, recentAt))
 
-	results, err := ReadMeta(dir)
+	results, err := readMetaFromDir(dir, dir)
 	if err != nil {
 		t.Fatalf("ReadMeta: %v", err)
 	}
@@ -603,7 +603,7 @@ confidence: 0.90
 format_version: "1.0"
 `, recentAt))
 
-	results, err := ReadMeta(dir)
+	results, err := readMetaFromDir(dir, dir)
 	if err != nil {
 		t.Errorf("ReadMeta with missing feat/: want nil error, got %v", err)
 	}
@@ -638,7 +638,7 @@ confidence: 0.85
 format_version: "1.0"
 `, recentAt))
 
-	results, err := ReadMeta(dir)
+	results, err := readMetaFromDir(dir, dir)
 	if err != nil {
 		t.Fatalf("ReadMeta: %v", err)
 	}
@@ -675,7 +675,7 @@ confidence: 0.80
 format_version: "1.0"
 `, recentAt))
 
-	results, err := ReadMeta(dir)
+	results, err := readMetaFromDir(dir, dir)
 	if err != nil {
 		t.Fatalf("ReadMeta: %v", err)
 	}
@@ -734,7 +734,7 @@ confidence: 0.85
 format_version: "1.0"
 `, recentAt))
 
-	results, err := ReadMeta(dir)
+	results, err := readMetaFromDir(dir, dir)
 	if err != nil {
 		t.Fatalf("ReadMeta: %v", err)
 	}
@@ -772,7 +772,7 @@ confidence: 0.75
 format_version: "1.0"
 `, recentAt))
 
-	results, err := ReadMeta(dir)
+	results, err := readMetaFromDir(dir, dir)
 	if err != nil {
 		t.Fatalf("ReadMeta: %v", err)
 	}
@@ -811,7 +811,7 @@ confidence: 0.90
 format_version: "1.0"
 `, recentAt))
 
-	results, err := ReadMeta(dir)
+	results, err := readMetaFromDir(dir, dir)
 	if err != nil {
 		t.Errorf("ReadMeta with missing release/: want nil error, got %v", err)
 	}
@@ -846,7 +846,7 @@ confidence: 0.85
 format_version: "1.0"
 `, recentAt))
 
-	results, err := ReadMeta(dir)
+	results, err := readMetaFromDir(dir, dir)
 	if err != nil {
 		t.Fatalf("ReadMeta: %v", err)
 	}
@@ -883,7 +883,7 @@ confidence: 0.80
 format_version: "1.0"
 `, recentAt))
 
-	results, err := ReadMeta(dir)
+	results, err := readMetaFromDir(dir, dir)
 	if err != nil {
 		t.Fatalf("ReadMeta: %v", err)
 	}
@@ -939,7 +939,7 @@ confidence: 0.75
 format_version: "1.0"
 `, recentAt))
 
-	results, err := ReadMeta(dir)
+	results, err := readMetaFromDir(dir, dir)
 	if err != nil {
 		t.Fatalf("ReadMeta: %v", err)
 	}
@@ -981,7 +981,7 @@ incremental_cycle: 2
 max_incremental_cycles: 5
 `, recentAt))
 
-	results, err := ReadMeta(dir)
+	results, err := readMetaFromDir(dir, dir)
 	if err != nil {
 		t.Fatalf("ReadMeta: %v", err)
 	}
@@ -1012,7 +1012,7 @@ confidence: 0.80
 format_version: "1.0"
 `, recentAt))
 
-	results, err := ReadMeta(dir)
+	results, err := readMetaFromDir(dir, dir)
 	if err != nil {
 		t.Fatalf("ReadMeta: %v", err)
 	}
@@ -1066,7 +1066,7 @@ func TestBuildDomainStatus_ForceFull_BelowThreshold(t *testing.T) {
 	}
 }
 
-// --- FindKnowDirs and ReadMetaHierarchical tests ---
+// --- FindKnowDirs and ReadMeta tests ---
 
 // TestFindKnowDirs_SingleLevel verifies discovery of a single .know/ at repo root.
 func TestFindKnowDirs_SingleLevel(t *testing.T) {
@@ -1147,9 +1147,9 @@ func TestFindKnowDirs_SkipsIntermediateWithout(t *testing.T) {
 	}
 }
 
-// TestReadMetaHierarchical_NearestWins verifies that the closest .know/ domain
+// TestReadMeta_NearestWins verifies that the closest .know/ domain
 // overrides the same domain from a parent .know/.
-func TestReadMetaHierarchical_NearestWins(t *testing.T) {
+func TestReadMeta_NearestWins(t *testing.T) {
 	root := t.TempDir()
 	rootKnow := filepath.Join(root, ".know")
 	serviceDir := filepath.Join(root, "services", "payments")
@@ -1182,9 +1182,9 @@ confidence: 0.95
 format_version: "1.0"
 `, recentAt))
 
-	results, err := ReadMetaHierarchical(serviceDir, root)
+	results, err := ReadMeta(serviceDir, root)
 	if err != nil {
-		t.Fatalf("ReadMetaHierarchical: %v", err)
+		t.Fatalf("ReadMeta: %v", err)
 	}
 
 	// Should have exactly 1 architecture domain (nearest wins, root skipped).
@@ -1202,9 +1202,9 @@ format_version: "1.0"
 	}
 }
 
-// TestReadMetaHierarchical_MergesDistinctDomains verifies that distinct domains
+// TestReadMeta_MergesDistinctDomains verifies that distinct domains
 // from different levels are all included.
-func TestReadMetaHierarchical_MergesDistinctDomains(t *testing.T) {
+func TestReadMeta_MergesDistinctDomains(t *testing.T) {
 	root := t.TempDir()
 	rootKnow := filepath.Join(root, ".know")
 	serviceDir := filepath.Join(root, "services", "payments")
@@ -1237,9 +1237,9 @@ confidence: 0.90
 format_version: "1.0"
 `, recentAt))
 
-	results, err := ReadMetaHierarchical(serviceDir, root)
+	results, err := ReadMeta(serviceDir, root)
 	if err != nil {
-		t.Fatalf("ReadMetaHierarchical: %v", err)
+		t.Fatalf("ReadMeta: %v", err)
 	}
 
 	if len(results) != 2 {
@@ -1259,25 +1259,25 @@ format_version: "1.0"
 	}
 }
 
-// TestReadMetaHierarchical_NoKnowDirs verifies nil result when no .know/ exists.
-func TestReadMetaHierarchical_NoKnowDirs(t *testing.T) {
+// TestReadMeta_NoKnowDirs verifies nil result when no .know/ exists.
+func TestReadMeta_NoKnowDirs(t *testing.T) {
 	root := t.TempDir()
 	subdir := filepath.Join(root, "services", "payments")
 	if err := os.MkdirAll(subdir, 0755); err != nil {
 		t.Fatalf("mkdir: %v", err)
 	}
 
-	results, err := ReadMetaHierarchical(subdir, root)
+	results, err := ReadMeta(subdir, root)
 	if err != nil {
-		t.Fatalf("ReadMetaHierarchical: %v", err)
+		t.Fatalf("ReadMeta: %v", err)
 	}
 	if results != nil {
 		t.Errorf("want nil, got %v", results)
 	}
 }
 
-// TestReadMetaHierarchical_RootOnly verifies backward compat when only root .know/ exists.
-func TestReadMetaHierarchical_RootOnly(t *testing.T) {
+// TestReadMeta_RootOnly verifies backward compat when only root .know/ exists.
+func TestReadMeta_RootOnly(t *testing.T) {
 	root := t.TempDir()
 	rootKnow := filepath.Join(root, ".know")
 	serviceDir := filepath.Join(root, "services", "payments")
@@ -1298,9 +1298,9 @@ confidence: 0.90
 format_version: "1.0"
 `, recentAt))
 
-	results, err := ReadMetaHierarchical(serviceDir, root)
+	results, err := ReadMeta(serviceDir, root)
 	if err != nil {
-		t.Fatalf("ReadMetaHierarchical: %v", err)
+		t.Fatalf("ReadMeta: %v", err)
 	}
 	if len(results) != 1 {
 		t.Fatalf("want 1 result, got %d", len(results))

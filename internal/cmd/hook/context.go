@@ -216,7 +216,7 @@ func runContextCore(ctx *cmdContext, printer *output.Printer) error {
 	}
 
 	// Check .know/ status (best-effort, <100ms — just readdir + parse frontmatter)
-	if knowLine := knowStatus(projectDir); knowLine != "" {
+	if knowLine := knowStatus(projectDir, hookEnv.CWD); knowLine != "" {
 		result.KnowStatus = knowLine
 	}
 
@@ -347,12 +347,17 @@ func emitSessionStartEvent(sessionDir, sessionID, initiative, complexity, rite s
 // knowStatus checks .know/ domain freshness and returns a one-line summary string.
 // Returns "" if .know/ doesn't exist or is empty. This runs in <100ms:
 // it only reads directory entries and parses frontmatter (no full file reads beyond header).
-func knowStatus(projectDir string) string {
+// When cwd is set and differs from projectDir, hierarchical discovery walks from cwd
+// up to projectDir, merging service-level and root-level .know/ domains.
+func knowStatus(projectDir, cwd string) string {
 	if projectDir == "" {
 		return ""
 	}
-	knowDir := filepath.Join(projectDir, ".know")
-	domains, err := know.ReadMeta(knowDir)
+	startDir := cwd
+	if startDir == "" {
+		startDir = projectDir
+	}
+	domains, err := know.ReadMeta(startDir, projectDir)
 	if err != nil || len(domains) == 0 {
 		return ""
 	}

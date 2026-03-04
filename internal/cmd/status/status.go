@@ -310,7 +310,7 @@ func collectKnow(projectDir string) KnowHealth {
 
 	health := KnowHealth{Exists: true}
 
-	domains, err := know.ReadMeta(knowDir)
+	domains, err := know.ReadMeta(projectDir, projectDir)
 	if err != nil {
 		return health
 	}

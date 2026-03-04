@@ -63,11 +63,12 @@ type DomainStatus struct {
 	ForceFull   bool    `json:"force_full"`
 }
 
-// ReadMeta reads and parses all .know/*.md files in knowDir, and also scans
-// .know/feat/*.md (one level deep). Missing directory returns an empty slice
-// (not an error). Files with unparseable frontmatter are skipped with a warning
-// logged to stderr.
-func ReadMeta(knowDir string) ([]DomainStatus, error) {
+// readMetaFromDir reads and parses all .know/*.md files in knowDir, and also scans
+// .know/feat/*.md and .know/release/*.md (one level deep). Missing directory returns
+// an empty slice (not an error). Files with unparseable frontmatter are skipped with
+// a warning logged to stderr. The repoRoot parameter enables source_scope normalization
+// for nested .know/ directories.
+func readMetaFromDir(knowDir, repoRoot string) ([]DomainStatus, error) {
 	entries, err := os.ReadDir(knowDir)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -414,16 +415,14 @@ func FindKnowDirs(startDir, repoRoot string) []string {
 	return dirs
 }
 
-// ReadMetaHierarchical discovers .know/ directories from startDir up to repoRoot
-// and merges their domain statuses. When the same domain name appears at multiple
-// levels, the nearest (most specific) .know/ directory wins. This enables monorepo
-// layouts where a service-level .know/architecture.md overrides the repo-wide one.
+// ReadMeta discovers .know/ directories from startDir up to repoRoot and merges
+// their domain statuses with nearest-wins semantics. When startDir == repoRoot,
+// this behaves identically to a single-directory scan. For monorepo layouts,
+// service-level .know/ domains override repo-wide ones.
 //
-// Domain names from non-root .know/ dirs are prefixed with their relative path to
-// distinguish them in status output. For example, a domain "architecture" found in
-// /repo/services/payments/.know/ is reported as "services/payments::architecture".
-// The root .know/ domains are reported unprefixed (backward compatible).
-func ReadMetaHierarchical(startDir, repoRoot string) ([]DomainStatus, error) {
+// Domain names from non-root .know/ dirs are prefixed with their relative path
+// (e.g., "services/payments::architecture"). Root .know/ domains are unprefixed.
+func ReadMeta(startDir, repoRoot string) ([]DomainStatus, error) {
 	knowDirs := FindKnowDirs(startDir, repoRoot)
 	if len(knowDirs) == 0 {
 		return nil, nil
@@ -440,7 +439,7 @@ func ReadMetaHierarchical(startDir, repoRoot string) ([]DomainStatus, error) {
 	rootKnowDir := filepath.Join(rootAbs, ".know")
 
 	for _, knowDir := range knowDirs {
-		statuses, err := ReadMeta(knowDir)
+		statuses, err := readMetaFromDir(knowDir, rootAbs)
 		if err != nil {
 			return nil, fmt.Errorf("read %s: %w", knowDir, err)
 		}
