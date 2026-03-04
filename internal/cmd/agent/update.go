@@ -104,13 +104,14 @@ func runUpdate(ctx *cmdContext, opts updateOptions) error {
 	var agentPaths []string
 	var err error
 
-	if opts.all {
+	switch {
+	case opts.all:
 		agentPaths, err = findAllAgentFiles(resolver)
-	} else if opts.rite != "" {
+	case opts.rite != "":
 		agentPaths, err = findAgentFilesInRite(resolver, opts.rite)
-	} else if len(opts.paths) > 0 {
+	case len(opts.paths) > 0:
 		agentPaths = opts.paths
-	} else {
+	default:
 		return errors.New(errors.CodeUsageError,
 			"must specify agent paths, --rite, or --all")
 	}

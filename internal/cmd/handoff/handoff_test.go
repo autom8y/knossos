@@ -780,10 +780,8 @@ current_phase: design
 				if err != nil && !strings.Contains(err.Error(), tc.errorMsg) {
 					t.Errorf("Expected error containing %q, got: %v", tc.errorMsg, err)
 				}
-			} else {
-				if err != nil {
-					t.Errorf("runPrepare should succeed for valid rite agents: %v", err)
-				}
+			} else if err != nil {
+				t.Errorf("runPrepare should succeed for valid rite agents: %v", err)
 			}
 		})
 	}

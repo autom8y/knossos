@@ -119,11 +119,12 @@ func (h HealthDashboard) Text() string {
 
 	// .know/
 	b.WriteString("\n.know/\n")
-	if !h.Know.Exists {
+	switch {
+	case !h.Know.Exists:
 		b.WriteString("  (not found)\n")
-	} else if h.Know.DomainCount == 0 {
+	case h.Know.DomainCount == 0:
 		b.WriteString("  Domains: 0\n")
-	} else {
+	default:
 		b.WriteString(fmt.Sprintf("  Domains: %d (%d fresh, %d stale)\n",
 			h.Know.DomainCount, h.Know.FreshCount, h.Know.StaleCount))
 		for _, d := range h.Know.Domains {

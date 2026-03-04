@@ -296,11 +296,12 @@ func classifyEditSection(toolInput string) SectionClass {
 			// Blank lines are neutral — skip.
 			continue
 		}
-		if isTimelineIndicator(trimmed) {
+		switch {
+		case isTimelineIndicator(trimmed):
 			hasTimeline = true
-		} else if isFrontmatterIndicator(trimmed) {
+		case isFrontmatterIndicator(trimmed):
 			hasFrontmatter = true
-		} else if isOtherSectionIndicator(trimmed) {
+		case isOtherSectionIndicator(trimmed):
 			hasOther = true
 		}
 		// Lines matching no indicator are context lines — they do not influence
@@ -565,13 +566,14 @@ func outputBlockUnknown(printer *output.Printer) error {
 func outputBlock(printer *output.Printer, filePath string) error {
 	var contextType string
 	var moiraiOp string
-	if strings.HasSuffix(filePath, "SESSION_CONTEXT.md") {
+	switch {
+	case strings.HasSuffix(filePath, "SESSION_CONTEXT.md"):
 		contextType = "SESSION_CONTEXT"
 		moiraiOp = registry.TaskDelegation(registry.AgentMoirai, "transition_phase", "update_field", "park_session", "resume_session", "handoff", "record_decision")
-	} else if strings.HasSuffix(filePath, "SPRINT_CONTEXT.md") {
+	case strings.HasSuffix(filePath, "SPRINT_CONTEXT.md"):
 		contextType = "SPRINT_CONTEXT"
 		moiraiOp = registry.TaskDelegation(registry.AgentMoirai, "create_sprint", "mark_complete", "update_field")
-	} else {
+	default:
 		contextType = "context file"
 		moiraiOp = registry.TaskDelegation(registry.AgentMoirai)
 	}

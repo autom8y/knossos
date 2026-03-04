@@ -154,11 +154,12 @@ func runRecover(ctx *cmdContext, opts recoverOptions) error {
 		DryRun:                opts.dryRun,
 	}
 
-	if len(staleLocks) == 0 && len(ccMapOrphans) == 0 && !currentSessionCleaned {
+	switch {
+	case len(staleLocks) == 0 && len(ccMapOrphans) == 0 && !currentSessionCleaned:
 		result.Summary = "All healthy. No stale locks, CC map orphans, or legacy cache files found."
-	} else if opts.dryRun {
+	case opts.dryRun:
 		result.Summary = "Issues found. Run without --dry-run to fix."
-	} else {
+	default:
 		result.Summary = "Recovery complete."
 	}
 

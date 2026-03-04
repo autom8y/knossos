@@ -138,21 +138,22 @@ func (v *Validator) checkWorkflowYAML(result *ValidationResult, rite *Rite) {
 	}
 
 	// Check required fields
-	if workflow.Name == "" {
+	switch {
+	case workflow.Name == "":
 		result.Checks = append(result.Checks, ValidationCheck{
 			Check:   "WORKFLOW_YAML",
 			Status:  CheckWarn,
 			Message: "workflow.yaml missing 'name' field",
 		})
 		result.Warnings++
-	} else if workflow.EntryPoint.Agent == "" {
+	case workflow.EntryPoint.Agent == "":
 		result.Checks = append(result.Checks, ValidationCheck{
 			Check:   "WORKFLOW_YAML",
 			Status:  CheckWarn,
 			Message: "workflow.yaml missing 'entry_point.agent' field",
 		})
 		result.Warnings++
-	} else {
+	default:
 		result.Checks = append(result.Checks, ValidationCheck{
 			Check:   "WORKFLOW_YAML",
 			Status:  CheckPass,
@@ -282,8 +283,7 @@ func (v *Validator) Fix(riteName string) error {
 	}
 
 	for _, fixable := range result.Fixable {
-		switch fixable {
-		case "CLAUDE_MD_SYNC":
+		if fixable == "CLAUDE_MD_SYNC" {
 			rite, err := v.discovery.Get(riteName)
 			if err != nil {
 				continue

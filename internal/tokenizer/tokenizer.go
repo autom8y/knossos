@@ -176,7 +176,8 @@ func (c *Counter) parseSections(claudeMdPath string) []SectionTokenCount {
 	var sectionLines []string
 
 	for _, line := range lines {
-		if strings.Contains(line, "<!-- KNOSSOS:START") {
+		switch {
+		case strings.Contains(line, "<!-- KNOSSOS:START"):
 			// Extract section name
 			start := strings.Index(line, "KNOSSOS:START") + len("KNOSSOS:START")
 			rest := strings.TrimSpace(line[start:])
@@ -186,7 +187,7 @@ func (c *Counter) parseSections(claudeMdPath string) []SectionTokenCount {
 				currentSection = parts[0]
 				sectionLines = nil
 			}
-		} else if strings.Contains(line, "<!-- KNOSSOS:END") {
+		case strings.Contains(line, "<!-- KNOSSOS:END"):
 			if currentSection != "" && len(sectionLines) > 0 {
 				text := strings.Join(sectionLines, "\n")
 				tokens := c.Count(text)
@@ -197,8 +198,10 @@ func (c *Counter) parseSections(claudeMdPath string) []SectionTokenCount {
 			}
 			currentSection = ""
 			sectionLines = nil
-		} else if currentSection != "" {
-			sectionLines = append(sectionLines, line)
+		default:
+			if currentSection != "" {
+				sectionLines = append(sectionLines, line)
+			}
 		}
 	}
 

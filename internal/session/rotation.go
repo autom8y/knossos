@@ -89,7 +89,7 @@ func RotateSessionContext(sessionDir string, maxLines int, keepLines int) (*Rota
 	}
 	newBody := strings.Join(keptBodyLines, "\n")
 	if newBody != "" {
-		newBody = newBody + "\n"
+		newBody += "\n"
 	}
 
 	// Reconstruct the full content

@@ -48,13 +48,14 @@ func runList(ctx *cmdContext, opts listOptions) error {
 	var err error
 
 	// Get rites based on filters
-	if opts.form != "" {
+	switch {
+	case opts.form != "":
 		rites, err = discovery.ListByForm(rite.RiteForm(opts.form))
-	} else if opts.project {
+	case opts.project:
 		rites, err = discovery.ListBySource("project")
-	} else if opts.user {
+	case opts.user:
 		rites, err = discovery.ListBySource("user")
-	} else {
+	default:
 		rites, err = discovery.List()
 	}
 

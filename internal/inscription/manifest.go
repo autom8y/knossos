@@ -375,15 +375,16 @@ func isValidSchemaVersion(version string) bool {
 	parts := 0
 	hasDigit := false
 	for _, c := range version {
-		if c == '.' {
+		switch {
+		case c == '.':
 			if !hasDigit {
 				return false
 			}
 			parts++
 			hasDigit = false
-		} else if c >= '0' && c <= '9' {
+		case c >= '0' && c <= '9':
 			hasDigit = true
-		} else {
+		default:
 			return false
 		}
 	}

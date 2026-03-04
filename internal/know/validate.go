@@ -103,14 +103,15 @@ func ValidateDomain(rootDir, domain string) (*ValidationReport, error) {
 	if err == nil {
 		var meta Meta
 		if yaml.Unmarshal(yamlBytes, &meta) == nil && meta.Domain != "" {
-			if strings.HasPrefix(domain, "feat/") {
+			switch {
+			case strings.HasPrefix(domain, "feat/"):
 				// Preserve the feat/ namespace to ensure consistent domain naming.
 				// The frontmatter domain field typically holds just the slug.
 				domainName = "feat/" + strings.TrimPrefix(meta.Domain, "feat/")
-			} else if strings.HasPrefix(domain, "release/") {
+			case strings.HasPrefix(domain, "release/"):
 				// Preserve the release/ namespace to ensure consistent domain naming.
 				domainName = "release/" + strings.TrimPrefix(meta.Domain, "release/")
-			} else {
+			default:
 				domainName = meta.Domain
 			}
 		}

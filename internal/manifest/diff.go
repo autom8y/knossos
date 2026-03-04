@@ -158,19 +158,20 @@ func compareMaps(path string, base, compare map[string]any, changes *[]Change, o
 		baseVal, baseOk := base[key]
 		compareVal, compareOk := compare[key]
 
-		if !baseOk {
+		switch {
+		case !baseOk:
 			*changes = append(*changes, Change{
 				Path:     keyPath,
 				Type:     ChangeAdded,
 				NewValue: compareVal,
 			})
-		} else if !compareOk {
+		case !compareOk:
 			*changes = append(*changes, Change{
 				Path:     keyPath,
 				Type:     ChangeRemoved,
 				OldValue: baseVal,
 			})
-		} else {
+		default:
 			walkAndCompare(keyPath, baseVal, compareVal, changes, opts)
 		}
 	}
@@ -183,19 +184,20 @@ func compareArrays(path string, base, compare []any, changes *[]Change, opts Man
 	for i := range maxLen {
 		indexPath := path + "[" + strconv.Itoa(i) + "]"
 
-		if i >= len(base) {
+		switch {
+		case i >= len(base):
 			*changes = append(*changes, Change{
 				Path:     indexPath,
 				Type:     ChangeAdded,
 				NewValue: compare[i],
 			})
-		} else if i >= len(compare) {
+		case i >= len(compare):
 			*changes = append(*changes, Change{
 				Path:     indexPath,
 				Type:     ChangeRemoved,
 				OldValue: base[i],
 			})
-		} else {
+		default:
 			walkAndCompare(indexPath, base[i], compare[i], changes, opts)
 		}
 	}

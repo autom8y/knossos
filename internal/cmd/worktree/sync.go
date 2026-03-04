@@ -35,15 +35,16 @@ func (s SyncOutput) Text() string {
 	b.WriteString(fmt.Sprintf("Worktree: %s (%s)\n", s.Name, s.WorktreeID))
 	b.WriteString(fmt.Sprintf("Base branch: %s\n\n", s.BaseBranch))
 
-	if s.UpToDate {
+	switch {
+	case s.UpToDate:
 		b.WriteString("Status: Up to date\n")
-	} else if s.Diverged {
+	case s.Diverged:
 		b.WriteString(fmt.Sprintf("Status: Diverged (+%d/-%d)\n", s.Ahead, s.Behind))
 		b.WriteString("  Your branch and upstream have diverged.\n")
 		b.WriteString("  Consider rebasing or merging upstream changes.\n")
-	} else if s.Ahead > 0 {
+	case s.Ahead > 0:
 		b.WriteString(fmt.Sprintf("Status: Ahead by %d commit(s)\n", s.Ahead))
-	} else if s.Behind > 0 {
+	case s.Behind > 0:
 		b.WriteString(fmt.Sprintf("Status: Behind by %d commit(s)\n", s.Behind))
 	}
 
@@ -125,13 +126,14 @@ func runSync(ctx *cmdContext, idOrName string, opts syncOptions) error {
 
 	// Determine message
 	message := "up to date"
-	if result.Diverged {
+	switch {
+	case result.Diverged:
 		message = "diverged from upstream"
-	} else if result.Ahead > 0 && result.Behind > 0 {
+	case result.Ahead > 0 && result.Behind > 0:
 		message = fmt.Sprintf("%d ahead, %d behind", result.Ahead, result.Behind)
-	} else if result.Ahead > 0 {
+	case result.Ahead > 0:
 		message = fmt.Sprintf("%d ahead", result.Ahead)
-	} else if result.Behind > 0 {
+	case result.Behind > 0:
 		message = fmt.Sprintf("%d behind", result.Behind)
 	}
 

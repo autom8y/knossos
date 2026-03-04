@@ -336,10 +336,8 @@ func TestValidate_RequiredFields(t *testing.T) {
 						}
 					}
 				}
-			} else {
-				if err != nil {
-					t.Fatalf("unexpected error: %v", err)
-				}
+			} else if err != nil {
+				t.Fatalf("unexpected error: %v", err)
 			}
 		})
 	}

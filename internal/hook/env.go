@@ -9,6 +9,7 @@ import (
 )
 
 // Claude Code hook environment variable names.
+//
 // Deprecated: CC sends these via stdin JSON, not env vars.
 // Kept for backwards compatibility with direct CLI invocation.
 const (

@@ -1139,13 +1139,14 @@ func TestAdversarial_LargeFileDiffPerformance(t *testing.T) {
 	const numFuncs = 500
 	for i := range numFuncs {
 		oldB.WriteString(fmt.Sprintf("func Func%d() { _ = %d }\n\n", i, i))
-		if i%3 == 0 {
+		switch {
+		case i%3 == 0:
 			// Modify every 3rd function
 			newB.WriteString(fmt.Sprintf("func Func%d() { _ = %d + 1 }\n\n", i, i))
-		} else if i%5 == 0 {
+		case i%5 == 0:
 			// Delete every 5th function (by not including it)
 			continue
-		} else {
+		default:
 			newB.WriteString(fmt.Sprintf("func Func%d() { _ = %d }\n\n", i, i))
 		}
 	}

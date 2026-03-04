@@ -77,13 +77,11 @@ func removeUserOrphan(key string, manifest *provenance.ProvenanceManifest, userC
 
 	// Determine target path from key
 	var targetPath string
-	if strings.HasPrefix(key, "commands/") {
-		targetPath = filepath.Join(userClaudeDir, key)
-	} else if strings.HasPrefix(key, "skills/") {
-		targetPath = filepath.Join(userClaudeDir, key)
-	} else if strings.HasPrefix(key, "agents/") {
-		targetPath = filepath.Join(userClaudeDir, key)
-	} else if strings.HasPrefix(key, "hooks/") {
+	switch {
+	case strings.HasPrefix(key, "commands/"),
+		strings.HasPrefix(key, "skills/"),
+		strings.HasPrefix(key, "agents/"),
+		strings.HasPrefix(key, "hooks/"):
 		targetPath = filepath.Join(userClaudeDir, key)
 	}
 

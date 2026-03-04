@@ -199,8 +199,7 @@ func LoadManifest(path string) (*RiteManifest, error) {
 
 	// Parse skills - can be []string or []SkillRef
 	if raw.Skills != nil {
-		switch skills := raw.Skills.(type) {
-		case []any:
+		if skills, ok := raw.Skills.([]any); ok {
 			for _, s := range skills {
 				switch skill := s.(type) {
 				case string:

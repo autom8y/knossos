@@ -70,10 +70,11 @@ func runValidate(ctx *cmdContext, opts validateOptions, paths []string) error {
 	// Collect agent paths to validate
 	var agentPaths []string
 
-	if len(paths) > 0 {
+	switch {
+	case len(paths) > 0:
 		// Validate specific paths provided by user
 		agentPaths = paths
-	} else if opts.riteName != "" {
+	case opts.riteName != "":
 		// Validate all agents in specific rite
 		ritePath := resolver.RiteDir(opts.riteName)
 		agentsDir := filepath.Join(ritePath, "agents")
@@ -83,7 +84,7 @@ func runValidate(ctx *cmdContext, opts validateOptions, paths []string) error {
 			return err
 		}
 		agentPaths = ritePaths
-	} else if opts.all || (len(paths) == 0 && opts.riteName == "") {
+	default:
 		// Validate all agents (default behavior)
 		allPaths, err := collectAllAgents(resolver)
 		if err != nil {

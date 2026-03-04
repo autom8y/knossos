@@ -72,7 +72,7 @@ func runExport(ctx *cmdContext, idOrName, targetPath string) error {
 
 	// Ensure .tar.gz extension
 	if !strings.HasSuffix(targetPath, ".tar.gz") && !strings.HasSuffix(targetPath, ".tgz") {
-		targetPath = targetPath + ".tar.gz"
+		targetPath += ".tar.gz"
 	}
 
 	// Convert to absolute path

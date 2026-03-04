@@ -99,11 +99,12 @@ func ExtractSummary(event clewcontract.TypedEvent) string {
 		if err := json.Unmarshal(event.Data, &d); err != nil {
 			summary = "created: (unknown)"
 		} else {
-			if d.Complexity != "" {
+			switch {
+			case d.Complexity != "":
 				summary = fmt.Sprintf("created: %s (%s)", d.Initiative, d.Complexity)
-			} else if d.Initiative != "" {
+			case d.Initiative != "":
 				summary = fmt.Sprintf("created: %s", d.Initiative)
-			} else {
+			default:
 				summary = "created: (unknown)"
 			}
 		}

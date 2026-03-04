@@ -116,11 +116,12 @@ func ParseAgentSections(content []byte) (*ParsedAgent, error) {
 		}
 
 		// Accumulate content
-		if inPreamble {
+		switch {
+		case inPreamble:
 			preambleLines = append(preambleLines, lineStr)
-		} else if currentSection != nil {
+		case currentSection != nil:
 			sectionLines = append(sectionLines, lineStr)
-		} else if i > 0 && agent.Title == "" {
+		case i > 0 && agent.Title == "":
 			// Content before title - skip (shouldn't happen in valid files)
 			continue
 		}

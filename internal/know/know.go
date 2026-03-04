@@ -346,11 +346,12 @@ func buildDomainStatus(meta Meta, now time.Time, currentHash string) DomainStatu
 	// from commits that only touched docs or other out-of-scope files.
 	var codeChanged bool
 	if currentHash != "" && meta.SourceHash != "" {
-		if currentHash == meta.SourceHash {
+		switch {
+		case currentHash == meta.SourceHash:
 			codeChanged = false // identical hash, definitely fresh
-		} else if len(meta.SourceScope) > 0 {
+		case len(meta.SourceScope) > 0:
 			codeChanged = scopedStaleness(meta.SourceHash, currentHash, meta.SourceScope)
-		} else {
+		default:
 			codeChanged = true // no scope defined, fall back to hash inequality
 		}
 	}

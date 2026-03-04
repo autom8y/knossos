@@ -32,11 +32,9 @@ func (m *Materializer) materializeSettingsWithManifest(claudeDir string, manifes
 	// Load hooks.yaml and merge hook registrations
 	if hooksConfig := m.loadHooksConfig(); hooksConfig != nil {
 		existingSettings = mergeHooksSettings(existingSettings, hooksConfig)
-	} else {
+	} else if existingSettings["hooks"] == nil {
 		// No hooks.yaml found — ensure hooks key exists (empty)
-		if existingSettings["hooks"] == nil {
-			existingSettings["hooks"] = make(map[string]any)
-		}
+		existingSettings["hooks"] = make(map[string]any)
 	}
 
 	// If manifest has MCP servers, merge them

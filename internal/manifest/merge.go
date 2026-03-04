@@ -283,15 +283,16 @@ func mergeFieldsUnion(path string, base, ours, theirs map[string]any,
 			merged[key] = deepCopyValue(oursVal)
 			changes.FromOurs = append(changes.FromOurs, fieldPath)
 		case baseOk && oursOk && theirsOk:
-			if equal(oursVal, theirsVal) {
+			switch {
+			case equal(oursVal, theirsVal):
 				merged[key] = deepCopyValue(oursVal)
-			} else if equal(baseVal, oursVal) {
+			case equal(baseVal, oursVal):
 				merged[key] = deepCopyValue(theirsVal)
 				changes.FromTheirs = append(changes.FromTheirs, fieldPath)
-			} else if equal(baseVal, theirsVal) {
+			case equal(baseVal, theirsVal):
 				merged[key] = deepCopyValue(oursVal)
 				changes.FromOurs = append(changes.FromOurs, fieldPath)
-			} else {
+			default:
 				*conflicts = append(*conflicts, Conflict{
 					Path:        fieldPath,
 					BaseValue:   baseVal,

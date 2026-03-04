@@ -676,21 +676,22 @@ func simpleDiff(regionName, oldContent, newContent string) string {
 	sb.WriteString(regionName)
 	sb.WriteString(" (generated)\n")
 
-	if oldContent == "" && newContent != "" {
+	switch {
+	case oldContent == "" && newContent != "":
 		sb.WriteString("+ (new region)\n")
 		for _, line := range strings.Split(newContent, "\n") {
 			sb.WriteString("+ ")
 			sb.WriteString(line)
 			sb.WriteString("\n")
 		}
-	} else if oldContent != "" && newContent == "" {
+	case oldContent != "" && newContent == "":
 		sb.WriteString("- (region removed)\n")
 		for _, line := range strings.Split(oldContent, "\n") {
 			sb.WriteString("- ")
 			sb.WriteString(line)
 			sb.WriteString("\n")
 		}
-	} else if oldContent != newContent {
+	case oldContent != newContent:
 		sb.WriteString("@@ region changed @@\n")
 		// Simple line-by-line comparison
 		oldLines := strings.Split(oldContent, "\n")

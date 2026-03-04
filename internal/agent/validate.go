@@ -212,8 +212,7 @@ func (av *AgentValidator) validateArchetypeRules(fm *AgentFrontmatter, mode Vali
 		return issues
 	}
 
-	switch fm.Type {
-	case "reviewer":
+	if fm.Type == "reviewer" {
 		// Reviewers should have contract.must_not in strict mode
 		if mode == ValidationModeStrict {
 			if fm.Contract == nil || len(fm.Contract.MustNot) == 0 {
