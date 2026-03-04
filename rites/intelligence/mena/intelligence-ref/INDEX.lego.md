@@ -11,8 +11,8 @@ description: "Product Intelligence rite reference with insights artifacts. Use w
 
 | Component | Location | Purpose |
 |-----------|----------|---------|
-| Agents | `$KNOSSOS_HOME/rites/intelligence/agents/` | Agent prompts |
-| Workflow | `$KNOSSOS_HOME/rites/intelligence/workflow.yaml` | Phase configuration |
+| Agents | `.claude/agents/` | Agent prompts |
+| Workflow | `.claude/ACTIVE_RITE` | Phase configuration |
 | Switch | `/intelligence` | Activate this rite |
 
 ## Pantheon

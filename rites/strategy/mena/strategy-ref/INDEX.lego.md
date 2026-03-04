@@ -11,8 +11,8 @@ description: "Strategy rite reference. Use when: activating the strategy rite, i
 
 | Component | Location | Purpose |
 |-----------|----------|---------|
-| Agents | `$KNOSSOS_HOME/rites/strategy/agents/` | Agent prompts |
-| Workflow | `$KNOSSOS_HOME/rites/strategy/workflow.yaml` | Phase configuration |
+| Agents | `.claude/agents/` | Agent prompts |
+| Workflow | `.claude/ACTIVE_RITE` | Phase configuration |
 | Switch | `/strategy` | Activate this rite |
 
 ## Pantheon

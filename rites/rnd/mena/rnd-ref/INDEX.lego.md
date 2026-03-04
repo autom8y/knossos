@@ -11,8 +11,8 @@ description: "Innovation Lab (R&D) rite reference. Use when: activating the rnd 
 
 | Component | Location | Purpose |
 |-----------|----------|---------|
-| Agents | `$KNOSSOS_HOME/rites/rnd/agents/` | Agent prompts |
-| Workflow | `$KNOSSOS_HOME/rites/rnd/workflow.yaml` | Phase configuration |
+| Agents | `.claude/agents/` | Agent prompts |
+| Workflow | `.claude/ACTIVE_RITE` | Phase configuration |
 | Switch | `/rnd` | Activate this rite |
 
 ## Pantheon
