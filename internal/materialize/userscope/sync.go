@@ -103,7 +103,7 @@ func (s *syncer) syncUserScope(opts SyncOptions) (*UserScopeResult, error) {
 	}
 
 	// Determine which resource types to sync
-	resourcesToSync := []SyncResource{}
+	var resourcesToSync []SyncResource
 	if opts.Resource == ResourceAll || opts.Resource == "" {
 		resourcesToSync = []SyncResource{ResourceAgents, ResourceMena, ResourceHooks}
 	} else {

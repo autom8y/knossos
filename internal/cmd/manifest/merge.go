@@ -69,7 +69,7 @@ func runMerge(ctx *cmdContext, basePath, oursPath, theirsPath string, opts merge
 	}
 
 	// Parse strategy
-	strategy := manifest.StrategySmart
+	var strategy manifest.MergeStrategy
 	switch opts.strategy {
 	case "ours":
 		strategy = manifest.StrategyOurs
@@ -141,9 +141,6 @@ func runMerge(ctx *cmdContext, basePath, oursPath, theirsPath string, opts merge
 			printer.PrintError(err)
 			return err
 		}
-	} else if !opts.dryRun && opts.outputPath == "" {
-		// If no output path, print merged content to stdout
-		// (JSON output will include it, text output shows summary)
 	}
 
 	if err := printer.Print(out); err != nil {
