@@ -83,6 +83,10 @@ func readMetaFromDir(knowDir, repoRoot string) ([]DomainStatus, error) {
 	// An empty string means git is unavailable; code-changed check is skipped.
 	currentHash := resolveGitHead()
 
+	// The .know/ parent dir is the base for source_scope normalization.
+	// For root .know/, baseDir == repoRoot and scopes pass through unchanged.
+	baseDir := filepath.Dir(knowDir)
+
 	var results []DomainStatus
 
 	for _, entry := range entries {
@@ -113,6 +117,10 @@ func readMetaFromDir(knowDir, repoRoot string) ([]DomainStatus, error) {
 			// Use filename stem as fallback domain name
 			meta.Domain = strings.TrimSuffix(entry.Name(), ".md")
 		}
+
+		// Normalize source_scope paths for nested .know/ directories so that
+		// scopedStaleness (which uses repo-root-relative git diff output) works correctly.
+		meta.SourceScope = NormalizeSourceScope(baseDir, repoRoot, meta.SourceScope)
 
 		status := buildDomainStatus(meta, now, currentHash)
 		results = append(results, status)
@@ -156,6 +164,7 @@ func readMetaFromDir(knowDir, repoRoot string) ([]DomainStatus, error) {
 			// This ensures consistent namespacing and prevents collisions with top-level domains.
 			slug := strings.TrimSuffix(entry.Name(), ".md")
 			meta.Domain = "feat/" + slug
+			meta.SourceScope = NormalizeSourceScope(baseDir, repoRoot, meta.SourceScope)
 
 			status := buildDomainStatus(meta, now, currentHash)
 			results = append(results, status)
@@ -200,6 +209,7 @@ func readMetaFromDir(knowDir, repoRoot string) ([]DomainStatus, error) {
 
 		slug := strings.TrimSuffix(entry.Name(), ".md")
 		meta.Domain = "release/" + slug
+		meta.SourceScope = NormalizeSourceScope(baseDir, repoRoot, meta.SourceScope)
 
 		status := buildDomainStatus(meta, now, currentHash)
 		results = append(results, status)
@@ -300,6 +310,48 @@ func matchScope(pattern, path string) bool {
 		return false
 	}
 	return matched
+}
+
+// NormalizeSourceScope resolves source_scope globs relative to a .know/ directory's
+// parent (baseDir) against the repository root. For root-level .know/ directories
+// (where baseDir == repoRoot), scopes pass through unchanged. For nested .know/
+// directories, relative paths are prefixed with the baseDir's path relative to repoRoot.
+//
+// Example: baseDir="/repo/services/payments", repoRoot="/repo"
+//
+//	"./internal/**/*.go" → "services/payments/internal/**/*.go"
+//	"go.mod"             → "services/payments/go.mod"
+func NormalizeSourceScope(baseDir, repoRoot string, scopes []string) []string {
+	if len(scopes) == 0 {
+		return scopes
+	}
+
+	baseAbs, err := filepath.Abs(baseDir)
+	if err != nil {
+		return scopes
+	}
+	rootAbs, err := filepath.Abs(repoRoot)
+	if err != nil {
+		return scopes
+	}
+
+	// Root-level: no normalization needed
+	if baseAbs == rootAbs {
+		return scopes
+	}
+
+	rel, err := filepath.Rel(rootAbs, baseAbs)
+	if err != nil || rel == "." {
+		return scopes
+	}
+
+	normalized := make([]string, len(scopes))
+	for i, scope := range scopes {
+		// Strip leading "./" before prefixing
+		s := strings.TrimPrefix(scope, "./")
+		normalized[i] = filepath.Join(rel, s)
+	}
+	return normalized
 }
 
 // buildDomainStatus computes freshness for a single domain.

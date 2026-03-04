@@ -1066,6 +1066,58 @@ func TestBuildDomainStatus_ForceFull_BelowThreshold(t *testing.T) {
 	}
 }
 
+// --- NormalizeSourceScope tests ---
+
+func TestNormalizeSourceScope_RootLevel(t *testing.T) {
+	// When baseDir == repoRoot, scopes pass through unchanged.
+	scopes := []string{"./internal/**/*.go", "./cmd/**/*.go", "go.mod"}
+	result := NormalizeSourceScope("/repo", "/repo", scopes)
+	if len(result) != len(scopes) {
+		t.Fatalf("want %d scopes, got %d", len(scopes), len(result))
+	}
+	for i := range scopes {
+		if result[i] != scopes[i] {
+			t.Errorf("scope[%d] = %q, want %q", i, result[i], scopes[i])
+		}
+	}
+}
+
+func TestNormalizeSourceScope_NestedService(t *testing.T) {
+	scopes := []string{"./internal/**/*.go", "go.mod"}
+	result := NormalizeSourceScope("/repo/services/payments", "/repo", scopes)
+	want := []string{"services/payments/internal/**/*.go", "services/payments/go.mod"}
+	if len(result) != len(want) {
+		t.Fatalf("want %d scopes, got %d", len(want), len(result))
+	}
+	for i := range want {
+		if result[i] != want[i] {
+			t.Errorf("scope[%d] = %q, want %q", i, result[i], want[i])
+		}
+	}
+}
+
+func TestNormalizeSourceScope_EmptyScopes(t *testing.T) {
+	result := NormalizeSourceScope("/repo/services/payments", "/repo", nil)
+	if result != nil {
+		t.Errorf("want nil, got %v", result)
+	}
+	result = NormalizeSourceScope("/repo/services/payments", "/repo", []string{})
+	if len(result) != 0 {
+		t.Errorf("want empty, got %v", result)
+	}
+}
+
+func TestNormalizeSourceScope_DotSlashStripping(t *testing.T) {
+	// Verify that "./internal/**/*.go" is normalized to "services/payments/internal/**/*.go"
+	// (not "services/payments/./internal/**/*.go")
+	scopes := []string{"./internal/**/*.go"}
+	result := NormalizeSourceScope("/repo/services/payments", "/repo", scopes)
+	want := "services/payments/internal/**/*.go"
+	if len(result) != 1 || result[0] != want {
+		t.Errorf("got %v, want [%q]", result, want)
+	}
+}
+
 // --- FindKnowDirs and ReadMeta tests ---
 
 // TestFindKnowDirs_SingleLevel verifies discovery of a single .know/ at repo root.
