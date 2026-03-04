@@ -194,7 +194,7 @@ func newGcWrapContext(parent *cmdContext, sessionID string) *cmdContext {
 	id := sessionID
 	return &cmdContext{
 		SessionContext: common.SessionContext{
-			BaseContext: parent.SessionContext.BaseContext,
+			BaseContext: parent.BaseContext,
 			SessionID:   &id,
 		},
 	}

@@ -66,7 +66,7 @@ func TestParseSessionTimestamp(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.id, func(t *testing.T) {
 			got := ParseSessionTimestamp(tt.id)
-			if (got == time.Time{}) != tt.wantZero {
+			if got.Equal(time.Time{}) != tt.wantZero {
 				t.Errorf("ParseSessionTimestamp(%q) = %v, wantZero = %v", tt.id, got, tt.wantZero)
 			}
 		})

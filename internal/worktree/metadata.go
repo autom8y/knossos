@@ -76,9 +76,7 @@ func (m *MetadataManager) Save(meta *WorktreeMetadata) error {
 	// Create .gitignore if not exists
 	gitignorePath := filepath.Join(m.worktreesDir, ".gitignore")
 	if _, err := os.Stat(gitignorePath); os.IsNotExist(err) {
-		if err := fileutil.AtomicWriteFile(gitignorePath, []byte("*\n"), 0644); err != nil {
-			// Non-fatal, but log
-		}
+		_ = fileutil.AtomicWriteFile(gitignorePath, []byte("*\n"), 0644) // Non-fatal
 	}
 
 	meta.UpdatedAt = time.Now().UTC()

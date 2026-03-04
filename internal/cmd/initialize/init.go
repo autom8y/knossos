@@ -157,7 +157,7 @@ func runInit(ctx *cmdContext, riteName, source string, force bool, cmd *cobra.Co
 	claudeDir := filepath.Join(projectDir, ".claude")
 	if _, err := os.Stat(claudeDir); err == nil && !force {
 		// .claude/ exists but no KNOSSOS_MANIFEST.yaml in .knossos/ -- not Knossos-managed.
-		errMsg := fmt.Errorf(".claude/ exists but is not Knossos-managed. Use --force to initialize.")
+		errMsg := fmt.Errorf(".claude/ exists but is not Knossos-managed; use --force to initialize")
 		printer.PrintError(errMsg)
 		return errMsg
 	}
@@ -195,7 +195,7 @@ func runInit(ctx *cmdContext, riteName, source string, force bool, cmd *cobra.Co
 		hooksPath := filepath.Join(projectDir, "config", "hooks.yaml")
 		if _, err := os.Stat(hooksPath); os.IsNotExist(err) {
 			if err := os.MkdirAll(filepath.Dir(hooksPath), 0755); err == nil {
-				os.WriteFile(hooksPath, hooksYAML, 0644)
+				_ = os.WriteFile(hooksPath, hooksYAML, 0644)
 			}
 		}
 	}
@@ -298,7 +298,7 @@ func extractEmbeddedMenaToXDG(embMena fs.FS) {
 		return // Best-effort
 	}
 
-	fs.WalkDir(embMena, "mena", func(path string, d fs.DirEntry, err error) error {
+	_ = fs.WalkDir(embMena, "mena", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			slog.Warn("extractEmbeddedMena: WalkDir skip", "path", path, "error", err)
 			return nil // skip errors
@@ -309,7 +309,7 @@ func extractEmbeddedMenaToXDG(embMena fs.FS) {
 		}
 		dest := filepath.Join(xdgMena, rel)
 		if d.IsDir() {
-			os.MkdirAll(dest, 0755)
+			_ = os.MkdirAll(dest, 0755)
 			return nil
 		}
 		content, readErr := fs.ReadFile(embMena, path)
@@ -317,7 +317,7 @@ func extractEmbeddedMenaToXDG(embMena fs.FS) {
 			slog.Warn("extractEmbeddedMena: ReadFile failed", "path", path, "error", readErr)
 			return nil
 		}
-		os.MkdirAll(filepath.Dir(dest), 0755)
+		_ = os.MkdirAll(filepath.Dir(dest), 0755)
 		if writeErr := os.WriteFile(dest, content, 0644); writeErr != nil {
 			slog.Warn("extractEmbeddedMena: WriteFile failed", "path", dest, "error", writeErr)
 		}
@@ -343,18 +343,18 @@ func scaffoldProjectDirs(projectDir string) {
 		filepath.Join(projectDir, ".sos"),
 	}
 	for _, d := range dirs {
-		os.MkdirAll(d, 0755) // Best-effort, non-fatal.
+		_ = os.MkdirAll(d, 0755) // Best-effort, non-fatal.
 	}
 
 	ledgeDir := filepath.Join(projectDir, ".ledge")
 	ledgeSubdirs := []string{"decisions", "specs", "reviews", "spikes"}
 	for _, sub := range ledgeSubdirs {
 		subDir := filepath.Join(ledgeDir, sub)
-		os.MkdirAll(subDir, 0755)
+		_ = os.MkdirAll(subDir, 0755)
 		// .gitkeep so empty dirs survive git.
 		gitkeep := filepath.Join(subDir, ".gitkeep")
 		if _, err := os.Stat(gitkeep); os.IsNotExist(err) {
-			os.WriteFile(gitkeep, []byte(""), 0644)
+			_ = os.WriteFile(gitkeep, []byte(""), 0644)
 		}
 	}
 
@@ -382,7 +382,7 @@ func writeLedgeGitignore(ledgeDir string) {
 # reviews/ is tracked
 # spikes/ has its own .gitignore (opt-in)
 `)
-	os.WriteFile(gitignorePath, content, 0644)
+	_ = os.WriteFile(gitignorePath, content, 0644)
 }
 
 // writeSpikesGitignore writes .ledge/spikes/.gitignore with an opt-in policy.
@@ -397,5 +397,5 @@ func writeSpikesGitignore(spikesDir string) {
 !.gitignore
 !.gitkeep
 `)
-	os.WriteFile(gitignorePath, content, 0644)
+	_ = os.WriteFile(gitignorePath, content, 0644)
 }

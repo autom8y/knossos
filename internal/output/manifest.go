@@ -5,6 +5,9 @@ package output
 import (
 	"fmt"
 	"strings"
+
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 // --- Manifest Output Structures ---
@@ -76,7 +79,7 @@ func (m ManifestShowOutput) Text() string {
 		if paths, ok := m.Content["paths"].(map[string]interface{}); ok {
 			b.WriteString("\nPaths:\n")
 			for key, val := range paths {
-				b.WriteString(fmt.Sprintf("  %s: %v\n", strings.Title(key), val))
+				b.WriteString(fmt.Sprintf("  %s: %v\n", cases.Title(language.English).String(key), val))
 			}
 		}
 	}

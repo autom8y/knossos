@@ -605,7 +605,7 @@ func TestNewArtifactValidator(t *testing.T) {
 	}
 
 	if validator == nil {
-		t.Error("NewArtifactValidator() returned nil")
+		t.Fatal("NewArtifactValidator() returned nil")
 	}
 
 	if validator.validator == nil {

@@ -81,7 +81,7 @@ func (m *Manager) Create(opts CreateOptions) (*Worktree, error) {
 	}
 	gitignorePath := filepath.Join(worktreesDir, ".gitignore")
 	if _, err := os.Stat(gitignorePath); os.IsNotExist(err) {
-		os.WriteFile(gitignorePath, []byte("*\n"), 0644)
+		_ = os.WriteFile(gitignorePath, []byte("*\n"), 0644)
 	}
 
 	// Create git worktree with detached HEAD
@@ -120,14 +120,14 @@ func (m *Manager) Create(opts CreateOptions) (*Worktree, error) {
 	// Save per-worktree metadata
 	if err := SavePerWorktreeMeta(wtPath, wt, m.rootDir); err != nil {
 		// Cleanup on failure
-		m.git.WorktreeRemove(wtPath, true)
+		_ = m.git.WorktreeRemove(wtPath, true)
 		return nil, err
 	}
 
 	// Add to registry
 	if err := m.metadata.Add(wt); err != nil {
 		// Cleanup on failure
-		m.git.WorktreeRemove(wtPath, true)
+		_ = m.git.WorktreeRemove(wtPath, true)
 		return nil, err
 	}
 
@@ -140,9 +140,7 @@ func (m *Manager) Create(opts CreateOptions) (*Worktree, error) {
 // List returns all worktrees with their status.
 func (m *Manager) List() ([]WorktreeStatus, error) {
 	// Sync metadata with filesystem first
-	if err := m.metadata.SyncMetadataFromFilesystem(); err != nil {
-		// Non-fatal, continue with what we have
-	}
+	_ = m.metadata.SyncMetadataFromFilesystem() // Non-fatal, continue with what we have
 
 	worktrees, err := m.metadata.List()
 	if err != nil {
@@ -273,14 +271,14 @@ func (m *Manager) Remove(idOrName string, force bool) error {
 	// These are best-effort; don't fail the Remove operation on cleanup errors.
 	// Symlinked dirs (.knossos/, .know/) are just symlinks and get removed
 	// with the worktree directory -- do NOT follow/delete symlink targets.
-	os.RemoveAll(filepath.Join(wt.Path, ".sos"))
-	os.RemoveAll(filepath.Join(wt.Path, ".ledge"))
+	_ = os.RemoveAll(filepath.Join(wt.Path, ".sos"))
+	_ = os.RemoveAll(filepath.Join(wt.Path, ".ledge"))
 
 	// Remove git worktree
 	if err := m.git.WorktreeRemove(wt.Path, force); err != nil {
 		// Try manual removal if git worktree remove fails
 		if force {
-			os.RemoveAll(wt.Path)
+			_ = os.RemoveAll(wt.Path)
 		} else {
 			return err
 		}
@@ -310,9 +308,7 @@ func (m *Manager) Cleanup(opts CleanupOptions) (*CleanupResult, error) {
 	}
 
 	// Sync metadata first
-	if err := m.metadata.SyncMetadataFromFilesystem(); err != nil {
-		// Non-fatal
-	}
+	_ = m.metadata.SyncMetadataFromFilesystem() // Non-fatal
 
 	oldWorktrees, err := m.metadata.GetOlderThan(opts.OlderThan)
 	if err != nil {
@@ -369,7 +365,7 @@ func (m *Manager) Cleanup(opts CleanupOptions) (*CleanupResult, error) {
 
 	// Prune orphaned refs
 	if !opts.DryRun {
-		m.git.WorktreePrune()
+		_ = m.git.WorktreePrune()
 	}
 
 	return result, nil

@@ -1225,7 +1225,7 @@ func TestErrorCodeStrings_SelfNamed(t *testing.T) {
 				t.Errorf("%s constant is empty string", tt.name)
 			}
 			for _, ch := range tt.code {
-				if !((ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9') || ch == '_') {
+				if (ch < 'A' || ch > 'Z') && (ch < '0' || ch > '9') && ch != '_' {
 					t.Errorf("%s = %q contains non-SCREAMING_SNAKE_CASE char %q", tt.name, tt.code, ch)
 				}
 			}

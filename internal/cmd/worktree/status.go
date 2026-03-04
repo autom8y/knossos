@@ -47,7 +47,7 @@ func (s StatusOutput) Text() string {
 	if s.Branch != "" {
 		b.WriteString(fmt.Sprintf("  Branch: %s\n", s.Branch))
 	} else {
-		b.WriteString(fmt.Sprintf("  Branch: (detached)\n"))
+		b.WriteString("  Branch: (detached)\n")
 	}
 
 	b.WriteString(fmt.Sprintf("  Base: %s\n", s.BaseBranch))

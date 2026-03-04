@@ -317,7 +317,7 @@ func NewSessionEndEventWithBudget(sessionID, status string, durationMs int64, bu
 	}
 
 	// Add budget metadata if provided
-	if budget != nil && len(budget) > 0 {
+	if len(budget) > 0 {
 		meta["cognitive_budget"] = budget
 	}
 

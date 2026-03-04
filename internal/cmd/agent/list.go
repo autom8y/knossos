@@ -101,7 +101,7 @@ func runList(ctx *cmdContext, opts listOptions) error {
 	}
 
 	if len(agentPaths) == 0 {
-		printer.Print("No agents found")
+		_ = printer.Print("No agents found")
 		return nil
 	}
 
@@ -179,7 +179,7 @@ func determineSource(agentPath string, resolver *paths.Resolver) string {
 	ritesDir := resolver.RitesDir()
 
 	// Check if it's a rite agent
-	if filepath.HasPrefix(agentPath, ritesDir) {
+	if strings.HasPrefix(agentPath, ritesDir) {
 		relPath, _ := filepath.Rel(ritesDir, agentPath)
 		parts := filepath.SplitList(relPath)
 		if len(parts) > 0 {
@@ -189,7 +189,7 @@ func determineSource(agentPath string, resolver *paths.Resolver) string {
 
 	// Check if it's a user agent
 	userAgentsDir := filepath.Join(projectRoot, "agents")
-	if filepath.HasPrefix(agentPath, userAgentsDir) {
+	if strings.HasPrefix(agentPath, userAgentsDir) {
 		return "user"
 	}
 

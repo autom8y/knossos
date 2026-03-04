@@ -134,7 +134,7 @@ func runList(ctx *cmdContext) error {
 	if len(summaries) == 0 {
 		printer.PrintLine("No worktrees found")
 		printer.PrintLine("")
-		printer.PrintLine(fmt.Sprintf("Create one with: ari worktree create <name>"))
+		printer.PrintLine("Create one with: ari worktree create <name>")
 		return nil
 	}
 

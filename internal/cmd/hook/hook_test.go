@@ -342,6 +342,7 @@ func TestNewHookCmd_TimeoutFlag(t *testing.T) {
 	flag := cmd.PersistentFlags().Lookup("timeout")
 	if flag == nil {
 		t.Error("--timeout flag not found")
+		return
 	}
 	if flag.DefValue != "100" {
 		t.Errorf("Default timeout = %q, want %q", flag.DefValue, "100")

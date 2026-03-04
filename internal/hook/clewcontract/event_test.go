@@ -934,7 +934,7 @@ func TestNewTaskEndEvent_NilArtifacts(t *testing.T) {
 		}
 		return
 	}
-	if artifacts != nil && len(artifacts) != 0 {
+	if len(artifacts) != 0 {
 		t.Errorf("Meta.artifacts length = %d, want 0 or nil", len(artifacts))
 	}
 }

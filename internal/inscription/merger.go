@@ -568,7 +568,7 @@ func (m *Merger) checkOverlappingRegions(parseResult *ParseResult) error {
 			// Check if regions overlap
 			if a.start < b.end && b.start < a.end {
 				// Regions overlap (but adjacent is OK)
-				if !(a.end == b.start || b.end == a.start) {
+				if a.end != b.start && b.end != a.start {
 					return errors.NewWithDetails(errors.CodeUsageError,
 						"overlapping regions detected",
 						map[string]interface{}{

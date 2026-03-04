@@ -599,14 +599,14 @@ func extractQAUpgrade(body string) *QAUpgrade {
 
 	// Extract qa_session_id
 	qaSessionIDPattern := regexp.MustCompile(`(?m)^[\s]*[-*]\s*qa_session_id:\s*(.+)$`)
-	if m := qaSessionIDPattern.FindStringSubmatch(sectionContent); m != nil && len(m) > 1 {
+	if m := qaSessionIDPattern.FindStringSubmatch(sectionContent); len(m) > 1 {
 		upgrade.QASessionID = strings.TrimSpace(m[1])
 		hasData = true
 	}
 
 	// Extract upgraded_at timestamp
 	upgradedAtPattern := regexp.MustCompile(`(?m)^[\s]*[-*]\s*upgraded_at:\s*(.+)$`)
-	if m := upgradedAtPattern.FindStringSubmatch(sectionContent); m != nil && len(m) > 1 {
+	if m := upgradedAtPattern.FindStringSubmatch(sectionContent); len(m) > 1 {
 		timestampStr := strings.TrimSpace(m[1])
 		if t, err := time.Parse(time.RFC3339, timestampStr); err == nil {
 			upgrade.UpgradedAt = &t
@@ -616,7 +616,7 @@ func extractQAUpgrade(body string) *QAUpgrade {
 
 	// Extract constraint_resolution_log
 	logPattern := regexp.MustCompile(`(?m)^[\s]*[-*]\s*constraint_resolution_log:\s*(.+)$`)
-	if m := logPattern.FindStringSubmatch(sectionContent); m != nil && len(m) > 1 {
+	if m := logPattern.FindStringSubmatch(sectionContent); len(m) > 1 {
 		upgrade.ConstraintResolutionLog = strings.TrimSpace(m[1])
 		hasData = true
 	}

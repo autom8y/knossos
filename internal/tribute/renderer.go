@@ -26,14 +26,14 @@ func (r *Renderer) Render(result *GenerateResult) ([]byte, error) {
 	}
 
 	// 2. Title
-	b.WriteString(fmt.Sprintf("# Tribute: %s\n\n", result.Initiative))
+	fmt.Fprintf(&b, "# Tribute: %s\n\n", result.Initiative)
 
 	// 3. Session quote
 	endDate := result.EndedAt
 	if endDate.IsZero() {
 		endDate = result.GeneratedAt
 	}
-	b.WriteString(fmt.Sprintf("> Session `%s` completed on %s\n\n", result.SessionID, endDate.Format("2006-01-02")))
+	fmt.Fprintf(&b, "> Session `%s` completed on %s\n\n", result.SessionID, endDate.Format("2006-01-02"))
 
 	// 4. Summary section
 	r.renderSummary(&b, result)
@@ -113,36 +113,36 @@ func (r *Renderer) renderFrontmatter(b *strings.Builder, result *GenerateResult)
 func (r *Renderer) renderSummary(b *strings.Builder, result *GenerateResult) {
 	b.WriteString("## Summary\n\n")
 
-	b.WriteString(fmt.Sprintf("**Initiative**: %s\n", result.Initiative))
+	fmt.Fprintf(b, "**Initiative**: %s\n", result.Initiative)
 
 	// Complexity with estimate
 	complexityDesc := complexityDescription(result.Complexity)
-	b.WriteString(fmt.Sprintf("**Complexity**: %s%s\n", result.Complexity, complexityDesc))
+	fmt.Fprintf(b, "**Complexity**: %s%s\n", result.Complexity, complexityDesc)
 
 	// Duration with timestamps
 	if !result.StartedAt.IsZero() && !result.EndedAt.IsZero() {
 		duration := formatDuration(result.Duration)
-		b.WriteString(fmt.Sprintf("**Duration**: %s (%s to %s)\n",
+		fmt.Fprintf(b, "**Duration**: %s (%s to %s)\n",
 			duration,
 			result.StartedAt.UTC().Format(time.RFC3339),
-			result.EndedAt.UTC().Format(time.RFC3339)))
+			result.EndedAt.UTC().Format(time.RFC3339))
 	} else if result.Duration > 0 {
-		b.WriteString(fmt.Sprintf("**Duration**: %s\n", formatDuration(result.Duration)))
+		fmt.Fprintf(b, "**Duration**: %s\n", formatDuration(result.Duration))
 	}
 
 	// Rite
 	if result.Rite != "" {
-		b.WriteString(fmt.Sprintf("**Rite**: %s\n", result.Rite))
+		fmt.Fprintf(b, "**Rite**: %s\n", result.Rite)
 	}
 
 	// Final Phase
 	if result.FinalPhase != "" {
-		b.WriteString(fmt.Sprintf("**Final Phase**: %s\n", result.FinalPhase))
+		fmt.Fprintf(b, "**Final Phase**: %s\n", result.FinalPhase)
 	}
 
 	// Confidence Signal
 	if result.SailsColor != "" {
-		b.WriteString(fmt.Sprintf("**Confidence Signal**: %s\n", result.SailsColor))
+		fmt.Fprintf(b, "**Confidence Signal**: %s\n", result.SailsColor)
 	}
 
 	b.WriteString("\n")
@@ -161,8 +161,8 @@ func (r *Renderer) renderArtifacts(b *strings.Builder, result *GenerateResult) {
 	b.WriteString("|------|------|--------|\n")
 
 	for _, artifact := range result.Artifacts {
-		b.WriteString(fmt.Sprintf("| %s | `%s` | %s |\n",
-			artifact.Type, artifact.Path, artifact.Status))
+		fmt.Fprintf(b, "| %s | `%s` | %s |\n",
+			artifact.Type, artifact.Path, artifact.Status)
 	}
 
 	b.WriteString("\n")
@@ -176,8 +176,8 @@ func (r *Renderer) renderGraduatedArtifacts(b *strings.Builder, result *Generate
 	b.WriteString("|------|---------------|----------------|----------|\n")
 
 	for _, ga := range result.GraduatedArtifacts {
-		b.WriteString(fmt.Sprintf("| %s | `%s` | `%s` | %s |\n",
-			ga.Type, ga.OriginalPath, ga.GraduatedPath, ga.Category))
+		fmt.Fprintf(b, "| %s | `%s` | `%s` | %s |\n",
+			ga.Type, ga.OriginalPath, ga.GraduatedPath, ga.Category)
 	}
 
 	b.WriteString("\n")
@@ -195,7 +195,7 @@ func (r *Renderer) renderDecisions(b *strings.Builder, result *GenerateResult) {
 		// Truncate long text for table display
 		dec := truncate(decision.Decision, 60)
 		rat := truncate(decision.Rationale, 60)
-		b.WriteString(fmt.Sprintf("| %s | %s | %s |\n", ts, dec, rat))
+		fmt.Fprintf(b, "| %s | %s | %s |\n", ts, dec, rat)
 	}
 
 	b.WriteString("\n")
@@ -210,7 +210,7 @@ func (r *Renderer) renderPhases(b *strings.Builder, result *GenerateResult) {
 	for i, phase := range result.Phases {
 		duration := formatDuration(phase.Duration)
 		if i > 0 {
-			b.WriteString(fmt.Sprintf(" -(%s)-> ", duration))
+			fmt.Fprintf(b, " -(%s)-> ", duration)
 		}
 		b.WriteString(phase.Phase)
 	}
@@ -223,8 +223,8 @@ func (r *Renderer) renderPhases(b *strings.Builder, result *GenerateResult) {
 	for _, phase := range result.Phases {
 		started := phase.StartedAt.UTC().Format(time.RFC3339)
 		duration := formatDuration(phase.Duration)
-		b.WriteString(fmt.Sprintf("| %s | %s | %s | %s |\n",
-			phase.Phase, started, duration, phase.Agent))
+		fmt.Fprintf(b, "| %s | %s | %s | %s |\n",
+			phase.Phase, started, duration, phase.Agent)
 	}
 
 	b.WriteString("\n")
@@ -240,8 +240,8 @@ func (r *Renderer) renderHandoffs(b *strings.Builder, result *GenerateResult) {
 	for _, handoff := range result.Handoffs {
 		ts := handoff.Timestamp.UTC().Format(time.RFC3339)
 		notes := truncate(handoff.Notes, 40)
-		b.WriteString(fmt.Sprintf("| %s | %s | %s | %s |\n",
-			handoff.From, handoff.To, ts, notes))
+		fmt.Fprintf(b, "| %s | %s | %s | %s |\n",
+			handoff.From, handoff.To, ts, notes)
 	}
 
 	b.WriteString("\n")
@@ -256,8 +256,8 @@ func (r *Renderer) renderCommits(b *strings.Builder, result *GenerateResult) {
 
 	for _, commit := range result.Commits {
 		msg := truncate(commit.Message, 50)
-		b.WriteString(fmt.Sprintf("| %s | %s | %d |\n",
-			commit.ShortHash, msg, commit.FilesChanged))
+		fmt.Fprintf(b, "| %s | %s | %d |\n",
+			commit.ShortHash, msg, commit.FilesChanged)
 	}
 
 	b.WriteString("\n")
@@ -267,9 +267,9 @@ func (r *Renderer) renderCommits(b *strings.Builder, result *GenerateResult) {
 func (r *Renderer) renderSails(b *strings.Builder, result *GenerateResult) {
 	b.WriteString("## White Sails Attestation\n\n")
 
-	b.WriteString(fmt.Sprintf("**Color**: %s\n", result.SailsColor))
+	fmt.Fprintf(b, "**Color**: %s\n", result.SailsColor)
 	if result.SailsBase != "" && result.SailsBase != result.SailsColor {
-		b.WriteString(fmt.Sprintf("**Computed Base**: %s\n", result.SailsBase))
+		fmt.Fprintf(b, "**Computed Base**: %s\n", result.SailsBase)
 	}
 
 	if len(result.SailsProofs) > 0 {
@@ -279,7 +279,7 @@ func (r *Renderer) renderSails(b *strings.Builder, result *GenerateResult) {
 			if proof.Summary != "" {
 				summary = fmt.Sprintf(" (%s)", proof.Summary)
 			}
-			b.WriteString(fmt.Sprintf("- %s: %s%s\n", name, proof.Status, summary))
+			fmt.Fprintf(b, "- %s: %s%s\n", name, proof.Status, summary)
 		}
 	}
 
@@ -293,11 +293,11 @@ func (r *Renderer) renderMetrics(b *strings.Builder, result *GenerateResult) {
 	b.WriteString("| Metric | Value |\n")
 	b.WriteString("|--------|-------|\n")
 
-	b.WriteString(fmt.Sprintf("| Tool Calls | %d |\n", result.Metrics.ToolCalls))
-	b.WriteString(fmt.Sprintf("| Events Recorded | %d |\n", result.Metrics.EventsRecorded))
-	b.WriteString(fmt.Sprintf("| Files Modified | %d |\n", result.Metrics.FilesModified))
-	b.WriteString(fmt.Sprintf("| Lines Added | %d |\n", result.Metrics.LinesAdded))
-	b.WriteString(fmt.Sprintf("| Lines Removed | %d |\n", result.Metrics.LinesRemoved))
+	fmt.Fprintf(b, "| Tool Calls | %d |\n", result.Metrics.ToolCalls)
+	fmt.Fprintf(b, "| Events Recorded | %d |\n", result.Metrics.EventsRecorded)
+	fmt.Fprintf(b, "| Files Modified | %d |\n", result.Metrics.FilesModified)
+	fmt.Fprintf(b, "| Lines Added | %d |\n", result.Metrics.LinesAdded)
+	fmt.Fprintf(b, "| Lines Removed | %d |\n", result.Metrics.LinesRemoved)
 
 	b.WriteString("\n")
 }

@@ -87,7 +87,7 @@ func (m *Manager) Switch(idOrName string, opts WorktreeSwitchOptions) (*Worktree
 		// Write ACTIVE_RITE file directly (always, as baseline)
 		activeRitePath := filepath.Join(wt.Path, ".claude", "ACTIVE_RITE")
 		if err := os.MkdirAll(filepath.Dir(activeRitePath), 0755); err == nil {
-			os.WriteFile(activeRitePath, []byte(wt.Rite+"\n"), 0644)
+			_ = os.WriteFile(activeRitePath, []byte(wt.Rite+"\n"), 0644)
 		}
 		// Materialization handles the full rite setup; if needed, could call materialize here
 		// but for worktree restoration, just the ACTIVE_RITE marker is sufficient
@@ -151,21 +151,19 @@ func (m *Manager) Clone(sourceIDOrName, newName string, opts CloneOptions) (*Wor
 
 	// Save per-worktree metadata
 	if err := SavePerWorktreeMeta(wtPath, wt, m.rootDir); err != nil {
-		m.git.WorktreeRemove(wtPath, true)
+		_ = m.git.WorktreeRemove(wtPath, true)
 		return nil, err
 	}
 
 	// Add to registry
 	if err := m.metadata.Add(wt); err != nil {
-		m.git.WorktreeRemove(wtPath, true)
+		_ = m.git.WorktreeRemove(wtPath, true)
 		return nil, err
 	}
 
 	// Copy session context if requested
 	if opts.CopySession {
-		if err := copySessionContext(source.Path, wtPath); err != nil {
-			// Non-fatal, just log
-		}
+		_ = copySessionContext(source.Path, wtPath) // Non-fatal
 	}
 
 	// Materialize .claude/ and set up rite for the new worktree
@@ -188,9 +186,7 @@ func (m *Manager) Sync(idOrName string, opts WorktreeSyncOptions) (*SyncResult, 
 	}
 
 	// Fetch from remote to update refs
-	if err := m.gitFetch(wt.Path); err != nil {
-		// Non-fatal, continue with local comparison
-	}
+	_ = m.gitFetch(wt.Path) // Non-fatal, continue with local comparison
 
 	// Get sync status against base branch
 	ahead, behind, err := m.git.GetCommitDiff(wt.Path, wt.BaseBranch)
@@ -264,13 +260,13 @@ func (m *Manager) Export(idOrName, targetPath string) error {
 	if err != nil {
 		return errors.Wrap(errors.CodeGeneralError, "failed to create archive", err)
 	}
-	defer archiveFile.Close()
+	defer func() { _ = archiveFile.Close() }()
 
 	gzWriter := gzip.NewWriter(archiveFile)
-	defer gzWriter.Close()
+	defer func() { _ = gzWriter.Close() }()
 
 	tarWriter := tar.NewWriter(gzWriter)
-	defer tarWriter.Close()
+	defer func() { _ = tarWriter.Close() }()
 
 	// Write metadata first
 	metaData, err := json.MarshalIndent(meta, "", "  ")
@@ -337,7 +333,7 @@ func (m *Manager) Export(idOrName, targetPath string) error {
 			if err != nil {
 				return err
 			}
-			defer file.Close()
+			defer func() { _ = file.Close() }()
 
 			if _, err := io.Copy(tarWriter, file); err != nil {
 				return err
@@ -367,13 +363,13 @@ func (m *Manager) Import(archivePath string) (*Worktree, error) {
 	if err != nil {
 		return nil, errors.Wrap(errors.CodeFileNotFound, "failed to open archive", err)
 	}
-	defer archiveFile.Close()
+	defer func() { _ = archiveFile.Close() }()
 
 	gzReader, err := gzip.NewReader(archiveFile)
 	if err != nil {
 		return nil, errors.Wrap(errors.CodeParseError, "failed to read gzip archive", err)
 	}
-	defer gzReader.Close()
+	defer func() { _ = gzReader.Close() }()
 
 	tarReader := tar.NewReader(gzReader)
 
@@ -386,7 +382,7 @@ func (m *Manager) Import(archivePath string) (*Worktree, error) {
 	if err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to create temp directory", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	// Extract archive
 	for {
@@ -429,10 +425,10 @@ func (m *Manager) Import(archivePath string) (*Worktree, error) {
 				return nil, errors.Wrap(errors.CodeGeneralError, "failed to create file", err)
 			}
 			if _, err := io.Copy(file, tarReader); err != nil {
-				file.Close()
+				_ = file.Close()
 				return nil, errors.Wrap(errors.CodeGeneralError, "failed to write file", err)
 			}
-			file.Close()
+			_ = file.Close()
 		case tar.TypeSymlink:
 			if err := os.MkdirAll(targetDir, 0755); err != nil {
 				return nil, errors.Wrap(errors.CodeGeneralError, "failed to create directory", err)
@@ -460,7 +456,7 @@ func (m *Manager) Import(archivePath string) (*Worktree, error) {
 	// Verify git ref exists
 	if !m.git.RefExists(meta.GitRef) {
 		// Try to fetch it
-		m.gitFetch(m.rootDir)
+		_ = m.gitFetch(m.rootDir)
 		if !m.git.RefExists(meta.GitRef) {
 			return nil, errors.NewWithDetails(errors.CodeGeneralError,
 				"git ref from archive not found",
@@ -513,7 +509,7 @@ func (m *Manager) Import(archivePath string) (*Worktree, error) {
 			if err != nil {
 				return err
 			}
-			defer src.Close()
+			defer func() { _ = src.Close() }()
 
 			if err := os.MkdirAll(filepath.Dir(destPath), 0755); err != nil {
 				return err
@@ -523,13 +519,13 @@ func (m *Manager) Import(archivePath string) (*Worktree, error) {
 			if err != nil {
 				return err
 			}
-			defer dst.Close()
+			defer func() { _ = dst.Close() }()
 
 			_, err = io.Copy(dst, src)
 			return err
 		})
 		if err != nil {
-			m.git.WorktreeRemove(wtPath, true)
+			_ = m.git.WorktreeRemove(wtPath, true)
 			return nil, errors.Wrap(errors.CodeGeneralError, "failed to restore files", err)
 		}
 	}
@@ -548,13 +544,13 @@ func (m *Manager) Import(archivePath string) (*Worktree, error) {
 
 	// Update per-worktree metadata with new ID
 	if err := SavePerWorktreeMeta(wtPath, wt, m.rootDir); err != nil {
-		m.git.WorktreeRemove(wtPath, true)
+		_ = m.git.WorktreeRemove(wtPath, true)
 		return nil, err
 	}
 
 	// Add to registry
 	if err := m.metadata.Add(wt); err != nil {
-		m.git.WorktreeRemove(wtPath, true)
+		_ = m.git.WorktreeRemove(wtPath, true)
 		return nil, err
 	}
 
@@ -645,7 +641,7 @@ func copySessionContext(sourcePath, targetPath string) error {
 
 		data, err := os.ReadFile(sourceContext)
 		if err == nil {
-			os.WriteFile(targetContext, data, 0644)
+			_ = os.WriteFile(targetContext, data, 0644)
 		}
 	}
 
@@ -669,7 +665,7 @@ func (m *Manager) setupWorktreeEcosystem(wtPath, riteName string) {
 	if embMena := assets.Mena(); embMena != nil {
 		mat.WithEmbeddedMena(embMena)
 	}
-	mat.Sync(materialize.SyncOptions{
+	_, _ = mat.Sync(materialize.SyncOptions{
 		Scope:       materialize.ScopeAll,
 		RiteName:    riteName,
 		KeepOrphans: true,
@@ -684,24 +680,24 @@ func (m *Manager) setupWorktreeEcosystem(wtPath, riteName string) {
 	knossosSource := filepath.Join(m.rootDir, ".knossos")
 	if _, err := os.Stat(knossosSource); err == nil {
 		knossosDest := filepath.Join(wtPath, ".knossos")
-		os.RemoveAll(knossosDest) // remove empty dir from ensureProjectDirs
-		os.Symlink(knossosSource, knossosDest) // best-effort
+		_ = os.RemoveAll(knossosDest) // remove empty dir from ensureProjectDirs
+		_ = os.Symlink(knossosSource, knossosDest) // best-effort
 	}
 
 	// Symlink .know/ from main root (shared codebase knowledge)
 	knowSource := filepath.Join(m.rootDir, ".know")
 	if _, err := os.Stat(knowSource); err == nil {
 		knowDest := filepath.Join(wtPath, ".know")
-		os.RemoveAll(knowDest) // remove if exists
-		os.Symlink(knowSource, knowDest) // best-effort
+		_ = os.RemoveAll(knowDest) // remove if exists
+		_ = os.Symlink(knowSource, knowDest) // best-effort
 	}
 
 	// Create .ledge/ scaffold (worktree-local work product artifacts)
 	ledgeSubdirs := []string{"decisions", "specs", "reviews", "spikes"}
 	for _, sub := range ledgeSubdirs {
-		os.MkdirAll(filepath.Join(wtPath, ".ledge", sub), 0755) // best-effort
+		_ = os.MkdirAll(filepath.Join(wtPath, ".ledge", sub), 0755) // best-effort
 	}
 
 	// Create .sos/ directory (worktree-local session/state)
-	os.MkdirAll(filepath.Join(wtPath, ".sos"), 0755) // best-effort
+	_ = os.MkdirAll(filepath.Join(wtPath, ".sos"), 0755) // best-effort
 }

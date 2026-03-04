@@ -436,7 +436,7 @@ func isKebabCase(s string) bool {
 	}
 	// Must be lowercase alphanumeric with hyphens
 	for _, c := range s {
-		if !((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '-') {
+		if (c < 'a' || c > 'z') && (c < '0' || c > '9') && c != '-' {
 			return false
 		}
 	}

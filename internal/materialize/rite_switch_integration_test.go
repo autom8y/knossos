@@ -108,7 +108,7 @@ func TestRiteSwitchIntegration_StateConsistency(t *testing.T) {
 	// Phase 2: Switch to rite-b
 	m2 := NewMaterializer(resolver)
 	m2.templatesDir = templatesDir
-	result, err = m2.MaterializeWithOptions("rite-b", Options{Force: true})
+	_, err = m2.MaterializeWithOptions("rite-b", Options{Force: true})
 	require.NoError(t, err)
 
 	// Verify ACTIVE_RITE = rite-b
