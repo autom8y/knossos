@@ -86,9 +86,9 @@ func TestManifestClone(t *testing.T) {
 	original := &manifest.Manifest{
 		Path:   "/test/path",
 		Format: manifest.FormatJSON,
-		Content: map[string]interface{}{
+		Content: map[string]any{
 			"version": "1.0",
-			"project": map[string]interface{}{
+			"project": map[string]any{
 				"name": "test",
 			},
 		},
@@ -110,7 +110,7 @@ func TestManifestClone(t *testing.T) {
 
 func TestManifestToJSON(t *testing.T) {
 	m := &manifest.Manifest{
-		Content: map[string]interface{}{
+		Content: map[string]any{
 			"version": "1.0",
 		},
 	}
@@ -132,12 +132,12 @@ func TestManifestToJSON(t *testing.T) {
 func TestValidateRiteManifest_Valid(t *testing.T) {
 	m := &manifest.Manifest{
 		Path: "/test/rites/test-rite/manifest.yaml",
-		Content: map[string]interface{}{
+		Content: map[string]any{
 			"name":        "test-rite",
 			"entry_agent": "pythia",
-			"agents": []interface{}{
-				map[string]interface{}{"name": "pythia", "role": "orchestrator"},
-				map[string]interface{}{"name": "builder", "role": "builds things"},
+			"agents": []any{
+				map[string]any{"name": "pythia", "role": "orchestrator"},
+				map[string]any{"name": "builder", "role": "builds things"},
 			},
 		},
 	}
@@ -150,34 +150,34 @@ func TestValidateRiteManifest_Valid(t *testing.T) {
 func TestValidateRiteManifest_MissingRequiredFields(t *testing.T) {
 	tests := []struct {
 		name         string
-		content      map[string]interface{}
+		content      map[string]any
 		wantWarnings int
 		wantPaths    []string
 	}{
 		{
 			name: "missing name",
-			content: map[string]interface{}{
+			content: map[string]any{
 				"entry_agent": "pythia",
-				"agents":      []interface{}{map[string]interface{}{"name": "pythia"}},
+				"agents":      []any{map[string]any{"name": "pythia"}},
 			},
 			wantWarnings: 1,
 			wantPaths:    []string{"$.name"},
 		},
 		{
 			name: "missing entry_agent",
-			content: map[string]interface{}{
+			content: map[string]any{
 				"name":   "test-rite",
-				"agents": []interface{}{map[string]interface{}{"name": "builder"}},
+				"agents": []any{map[string]any{"name": "builder"}},
 			},
 			wantWarnings: 1,
 			wantPaths:    []string{"$.entry_agent"},
 		},
 		{
 			name: "empty name and entry_agent",
-			content: map[string]interface{}{
+			content: map[string]any{
 				"name":        "",
 				"entry_agent": "",
-				"agents":      []interface{}{map[string]interface{}{"name": "builder"}},
+				"agents":      []any{map[string]any{"name": "builder"}},
 			},
 			wantWarnings: 2,
 			wantPaths:    []string{"$.name", "$.entry_agent"},
@@ -209,11 +209,11 @@ func TestValidateRiteManifest_MissingRequiredFields(t *testing.T) {
 func TestValidateRiteManifest_EntryAgentNotInList(t *testing.T) {
 	m := &manifest.Manifest{
 		Path: "/test",
-		Content: map[string]interface{}{
+		Content: map[string]any{
 			"name":        "test-rite",
 			"entry_agent": "nonexistent-agent",
-			"agents": []interface{}{
-				map[string]interface{}{"name": "builder", "role": "builds things"},
+			"agents": []any{
+				map[string]any{"name": "builder", "role": "builds things"},
 			},
 		},
 	}
@@ -232,12 +232,12 @@ func TestValidateRiteManifest_EntryAgentNotInList(t *testing.T) {
 func TestValidateRiteManifest_AgentMissingName(t *testing.T) {
 	m := &manifest.Manifest{
 		Path: "/test",
-		Content: map[string]interface{}{
+		Content: map[string]any{
 			"name":        "test-rite",
 			"entry_agent": "builder",
-			"agents": []interface{}{
-				map[string]interface{}{"name": "builder", "role": "builds things"},
-				map[string]interface{}{"role": "unnamed agent"},
+			"agents": []any{
+				map[string]any{"name": "builder", "role": "builds things"},
+				map[string]any{"role": "unnamed agent"},
 			},
 		},
 	}

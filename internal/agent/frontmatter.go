@@ -30,14 +30,14 @@ type AgentFrontmatter struct {
 	Aliases []string            `yaml:"aliases,omitempty" json:"aliases,omitempty"`
 
 	// CC-native fields (camelCase matches Claude Code's expected frontmatter schema)
-	MaxTurns        int                    `yaml:"maxTurns,omitempty" json:"maxTurns,omitempty"`
-	Skills          []string               `yaml:"skills,omitempty" json:"skills,omitempty"`
-	DisallowedTools FlexibleStringSlice    `yaml:"disallowedTools,omitempty" json:"disallowedTools,omitempty"`
-	Memory          MemoryField            `yaml:"memory,omitempty" json:"memory,omitempty"`
-	PermissionMode  string                 `yaml:"permissionMode,omitempty" json:"permissionMode,omitempty"`
-	McpServers      []McpServerConfig      `yaml:"mcpServers,omitempty" json:"mcpServers,omitempty"`
-	Hooks           map[string]interface{} `yaml:"hooks,omitempty" json:"hooks,omitempty"`
-	WriteGuard      interface{}            `yaml:"write-guard,omitempty" json:"write-guard,omitempty"` // Source-only: consumed during materialization
+	MaxTurns        int                 `yaml:"maxTurns,omitempty" json:"maxTurns,omitempty"`
+	Skills          []string            `yaml:"skills,omitempty" json:"skills,omitempty"`
+	DisallowedTools FlexibleStringSlice `yaml:"disallowedTools,omitempty" json:"disallowedTools,omitempty"`
+	Memory          MemoryField         `yaml:"memory,omitempty" json:"memory,omitempty"`
+	PermissionMode  string              `yaml:"permissionMode,omitempty" json:"permissionMode,omitempty"`
+	McpServers      []McpServerConfig   `yaml:"mcpServers,omitempty" json:"mcpServers,omitempty"`
+	Hooks           map[string]any      `yaml:"hooks,omitempty" json:"hooks,omitempty"`
+	WriteGuard      any                 `yaml:"write-guard,omitempty" json:"write-guard,omitempty"` // Source-only: consumed during materialization
 
 	// Workflow Position
 	Upstream   []UpstreamRef   `yaml:"upstream,omitempty" json:"upstream,omitempty"`

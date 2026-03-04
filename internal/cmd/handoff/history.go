@@ -141,7 +141,7 @@ func eventToHistoryEntry(e GenericEvent) *HandoffHistoryEntry {
 			if throughline, ok := e.Meta["throughline"].(string); ok {
 				entry.Throughline = throughline
 			}
-			if artifacts, ok := e.Meta["artifacts"].([]interface{}); ok {
+			if artifacts, ok := e.Meta["artifacts"].([]any); ok {
 				for _, a := range artifacts {
 					if s, ok := a.(string); ok {
 						entry.Artifacts = append(entry.Artifacts, s)

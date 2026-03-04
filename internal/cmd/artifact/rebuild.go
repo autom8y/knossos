@@ -32,7 +32,7 @@ into the project-level registry. Use this for recovery or initial index build.`,
 					return err
 				}
 
-				result := map[string]interface{}{
+				result := map[string]any{
 					"sessions_scanned":  projectReg.SessionsIndexed,
 					"artifacts_indexed": projectReg.ArtifactCount,
 					"rebuild_time_ms":   0,
@@ -56,7 +56,7 @@ into the project-level registry. Use this for recovery or initial index build.`,
 				return err
 			}
 
-			result := map[string]interface{}{
+			result := map[string]any{
 				"sessions_scanned":  projectReg.SessionsIndexed,
 				"artifacts_indexed": projectReg.ArtifactCount,
 				"rebuild_time_ms":   elapsed.Milliseconds(),

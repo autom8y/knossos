@@ -62,7 +62,7 @@ func runInit(ctx *cmdContext, orgName string) error {
 	// Check if already exists
 	if _, err := os.Stat(orgDir); err == nil {
 		return errors.NewWithDetails(errors.CodeLifecycleViolation, fmt.Sprintf("org %q already exists at %s", orgName, orgDir),
-			map[string]interface{}{"org": orgName, "path": orgDir})
+			map[string]any{"org": orgName, "path": orgDir})
 	}
 
 	// Create directory structure
@@ -85,7 +85,7 @@ func runInit(ctx *cmdContext, orgName string) error {
 		return errors.Wrap(errors.CodePermissionDenied, "failed to write org.yaml", err)
 	}
 
-	_ = printer.Print(map[string]interface{}{
+	_ = printer.Print(map[string]any{
 		"status":  "created",
 		"org":     orgName,
 		"path":    orgDir,

@@ -3,6 +3,7 @@ package inscription
 import (
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"time"
 
@@ -665,7 +666,6 @@ func (p *Pipeline) loadAgents(agentsDir string) ([]AgentInfo, error) {
 	return agents, nil
 }
 
-
 // simpleDiff creates a simple diff output for a region.
 func simpleDiff(regionName, oldContent, newContent string) string {
 	var sb strings.Builder
@@ -718,12 +718,7 @@ func simpleDiff(regionName, oldContent, newContent string) string {
 
 // contains checks if a slice contains a string.
 func contains(slice []string, s string) bool {
-	for _, item := range slice {
-		if item == s {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(slice, s)
 }
 
 // firstSentence extracts the first sentence from a string.

@@ -51,7 +51,7 @@ func runSet(ctx *cmdContext, orgName string) error {
 		return errors.Wrap(errors.CodePermissionDenied, "failed to write active-org", err)
 	}
 
-	_ = printer.Print(map[string]interface{}{
+	_ = printer.Print(map[string]any{
 		"status":  "set",
 		"org":     orgName,
 		"message": fmt.Sprintf("Active org set to %q", orgName),

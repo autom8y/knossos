@@ -116,7 +116,7 @@ func TestHandoffPreparedEvent_JSONMarshaling(t *testing.T) {
 	}
 
 	// Unmarshal to verify structure
-	var result map[string]interface{}
+	var result map[string]any
 	if err := json.Unmarshal(jsonData, &result); err != nil {
 		t.Fatalf("json.Unmarshal failed: %v", err)
 	}
@@ -130,7 +130,7 @@ func TestHandoffPreparedEvent_JSONMarshaling(t *testing.T) {
 		t.Errorf("summary = %v", result["summary"])
 	}
 
-	meta, ok := result["meta"].(map[string]interface{})
+	meta, ok := result["meta"].(map[string]any)
 	if !ok {
 		t.Fatalf("meta is not a map: %T", result["meta"])
 	}
@@ -161,7 +161,7 @@ func TestHandoffExecutedEvent_JSONMarshaling(t *testing.T) {
 	}
 
 	// Unmarshal to verify structure
-	var result map[string]interface{}
+	var result map[string]any
 	if err := json.Unmarshal(jsonData, &result); err != nil {
 		t.Fatalf("json.Unmarshal failed: %v", err)
 	}
@@ -171,12 +171,12 @@ func TestHandoffExecutedEvent_JSONMarshaling(t *testing.T) {
 		t.Errorf("type = %v, want %q", result["type"], "agent.handoff_executed")
 	}
 
-	meta, ok := result["meta"].(map[string]interface{})
+	meta, ok := result["meta"].(map[string]any)
 	if !ok {
 		t.Fatalf("meta is not a map: %T", result["meta"])
 	}
 
-	artifactsMeta, ok := meta["artifacts"].([]interface{})
+	artifactsMeta, ok := meta["artifacts"].([]any)
 	if !ok {
 		t.Fatalf("meta.artifacts is not an array: %T", meta["artifacts"])
 	}

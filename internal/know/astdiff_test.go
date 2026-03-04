@@ -1117,7 +1117,7 @@ func TestAdversarial_LargeFile(t *testing.T) {
 	var b strings.Builder
 	b.WriteString("package foo\n\n")
 	const numFuncs = 500
-	for i := 0; i < numFuncs; i++ {
+	for i := range numFuncs {
 		b.WriteString(fmt.Sprintf("func Func%d() { _ = %d }\n\n", i, i))
 	}
 	src := []byte(b.String())
@@ -1137,7 +1137,7 @@ func TestAdversarial_LargeFileDiffPerformance(t *testing.T) {
 	oldB.WriteString("package foo\n\n")
 	newB.WriteString("package foo\n\n")
 	const numFuncs = 500
-	for i := 0; i < numFuncs; i++ {
+	for i := range numFuncs {
 		oldB.WriteString(fmt.Sprintf("func Func%d() { _ = %d }\n\n", i, i))
 		if i%3 == 0 {
 			// Modify every 3rd function
@@ -1321,11 +1321,11 @@ func TestAdversarial_NegativeBodyDelta(t *testing.T) {
 func TestAdversarial_DeclKeySortStability(t *testing.T) {
 	old := map[string]declaration{}
 	new := map[string]declaration{
-		"B.Foo":  {kind: DeclFunc, name: "Foo", receiver: "B", signature: "func (b B) Foo()"},
-		"A.Foo":  {kind: DeclFunc, name: "Foo", receiver: "A", signature: "func (a A) Foo()"},
-		"Foo":    {kind: DeclFunc, name: "Foo", signature: "func Foo()"},
-		"A.Bar":  {kind: DeclFunc, name: "Bar", receiver: "A", signature: "func (a A) Bar()"},
-		"B.Bar":  {kind: DeclFunc, name: "Bar", receiver: "B", signature: "func (b B) Bar()"},
+		"B.Foo": {kind: DeclFunc, name: "Foo", receiver: "B", signature: "func (b B) Foo()"},
+		"A.Foo": {kind: DeclFunc, name: "Foo", receiver: "A", signature: "func (a A) Foo()"},
+		"Foo":   {kind: DeclFunc, name: "Foo", signature: "func Foo()"},
+		"A.Bar": {kind: DeclFunc, name: "Bar", receiver: "A", signature: "func (a A) Bar()"},
+		"B.Bar": {kind: DeclFunc, name: "Bar", receiver: "B", signature: "func (b B) Bar()"},
 	}
 	changes := diffDeclarations(old, new)
 	if len(changes) != 5 {

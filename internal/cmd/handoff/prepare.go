@@ -3,6 +3,7 @@ package handoff
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 	"time"
 
@@ -96,13 +97,13 @@ func runPrepare(ctx *cmdContext, opts prepareOptions) error {
 	}
 	if !isValidAgent(opts.fromAgent, validAgents) {
 		err := errors.NewWithDetails(errors.CodeUsageError, "invalid source agent",
-			map[string]interface{}{"from": opts.fromAgent, "valid_agents": validAgents})
+			map[string]any{"from": opts.fromAgent, "valid_agents": validAgents})
 		printer.PrintError(err)
 		return err
 	}
 	if !isValidAgent(opts.toAgent, validAgents) {
 		err := errors.NewWithDetails(errors.CodeUsageError, "invalid target agent",
-			map[string]interface{}{"to": opts.toAgent, "valid_agents": validAgents})
+			map[string]any{"to": opts.toAgent, "valid_agents": validAgents})
 		printer.PrintError(err)
 		return err
 	}
@@ -110,7 +111,7 @@ func runPrepare(ctx *cmdContext, opts prepareOptions) error {
 	// Prevent self-handoff (C3 edge case)
 	if opts.fromAgent == opts.toAgent {
 		err := errors.NewWithDetails(errors.CodeLifecycleViolation, "self-handoff not allowed",
-			map[string]interface{}{
+			map[string]any{
 				"agent": opts.fromAgent,
 				"hint":  "Handoff requires a different agent. Cannot handoff to self.",
 			})
@@ -124,7 +125,7 @@ func runPrepare(ctx *cmdContext, opts prepareOptions) error {
 		if riteAgents != nil {
 			if !isValidAgent(opts.fromAgent, riteAgents) {
 				err := errors.NewWithDetails(errors.CodeUsageError, "source agent not in active rite",
-					map[string]interface{}{
+					map[string]any{
 						"from":        opts.fromAgent,
 						"active_rite": sessCtx.ActiveRite,
 						"rite_agents": riteAgents,
@@ -134,7 +135,7 @@ func runPrepare(ctx *cmdContext, opts prepareOptions) error {
 			}
 			if !isValidAgent(opts.toAgent, riteAgents) {
 				err := errors.NewWithDetails(errors.CodeUsageError, "target agent not in active rite",
-					map[string]interface{}{
+					map[string]any{
 						"to":          opts.toAgent,
 						"active_rite": sessCtx.ActiveRite,
 						"rite_agents": riteAgents,
@@ -148,7 +149,7 @@ func runPrepare(ctx *cmdContext, opts prepareOptions) error {
 	// Validate handoff sequence
 	if !isValidHandoffSequence(opts.fromAgent, opts.toAgent) {
 		err := errors.NewWithDetails(errors.CodeLifecycleViolation, "invalid handoff sequence",
-			map[string]interface{}{
+			map[string]any{
 				"from": opts.fromAgent,
 				"to":   opts.toAgent,
 				"hint": "Handoffs must follow workflow: requirements-analyst -> architect -> principal-engineer -> qa-adversary",
@@ -172,7 +173,7 @@ func runPrepare(ctx *cmdContext, opts prepareOptions) error {
 			if artifactType != validation.ArtifactTypeUnknown {
 				// Note: In a real implementation, we would locate the artifact file
 				// For now, we just report readiness based on session context
-				printer.VerboseLog("info", "artifact validation would check", map[string]interface{}{
+				printer.VerboseLog("info", "artifact validation would check", map[string]any{
 					"phase":         phase,
 					"artifact_type": artifactType,
 				})
@@ -215,20 +216,20 @@ func runPrepare(ctx *cmdContext, opts prepareOptions) error {
 		prepWriter.Write(clewcontract.NewPhaseTransitionedEvent(sessionID, opts.fromAgent, opts.toAgent))
 
 		if flushErr := prepWriter.Flush(); flushErr != nil {
-			printer.VerboseLog("warn", "failed to write events", map[string]interface{}{"error": flushErr.Error()})
+			printer.VerboseLog("warn", "failed to write events", map[string]any{"error": flushErr.Error()})
 		}
 	}
 
 	// Build output
 	result := HandoffPrepareOutput{
-		SessionID:   sessionID,
-		FromAgent:   opts.fromAgent,
-		ToAgent:     opts.toAgent,
-		Status:      "ready",
-		PreparedAt:  time.Now().UTC().Format(time.RFC3339),
-		DurationMs:  durationMs,
-		Warnings:    warnings,
-		ArtifactID:  opts.artifactID,
+		SessionID:    sessionID,
+		FromAgent:    opts.fromAgent,
+		ToAgent:      opts.toAgent,
+		Status:       "ready",
+		PreparedAt:   time.Now().UTC().Format(time.RFC3339),
+		DurationMs:   durationMs,
+		Warnings:     warnings,
+		ArtifactID:   opts.artifactID,
 		CurrentPhase: sessCtx.CurrentPhase,
 	}
 
@@ -244,12 +245,7 @@ func runPrepare(ctx *cmdContext, opts prepareOptions) error {
 
 // isValidAgent checks if an agent name is in the valid list.
 func isValidAgent(agent string, valid []string) bool {
-	for _, v := range valid {
-		if agent == v {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(valid, agent)
 }
 
 // isValidHandoffSequence validates that the handoff follows the workflow.
@@ -259,7 +255,7 @@ func isValidHandoffSequence(from, to string) bool {
 		"requirements-analyst": {"architect"},
 		"architect":            {"principal-engineer"},
 		"principal-engineer":   {"qa-adversary"},
-		"qa-adversary":         {"orchestrator", "architect"}, // QA can loop back to architect or complete
+		"qa-adversary":         {"orchestrator", "architect"},                                               // QA can loop back to architect or complete
 		"orchestrator":         {"requirements-analyst", "architect", "principal-engineer", "qa-adversary"}, // orchestrator can delegate
 	}
 
@@ -268,12 +264,7 @@ func isValidHandoffSequence(from, to string) bool {
 		return false
 	}
 
-	for _, valid := range validTargets {
-		if to == valid {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(validTargets, to)
 }
 
 // agentToPhase maps an agent to the phase they complete.

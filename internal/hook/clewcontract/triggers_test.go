@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"slices"
 	"testing"
 )
 
@@ -39,13 +40,7 @@ func TestDefaultTriggerConfig(t *testing.T) {
 	// Verify default sacred paths
 	expectedPaths := []string{".claude/", "*_CONTEXT.md", "CLAUDE.md", ".ledge/decisions/", ".ledge/specs/"}
 	for _, expected := range expectedPaths {
-		found := false
-		for _, path := range config.SacredPaths {
-			if path == expected {
-				found = true
-				break
-			}
-		}
+		found := slices.Contains(config.SacredPaths, expected)
 		if !found {
 			t.Errorf("SacredPaths missing expected path: %s", expected)
 		}
@@ -65,7 +60,7 @@ func TestTriggerResult_JSON(t *testing.T) {
 		t.Fatalf("Failed to marshal TriggerResult: %v", err)
 	}
 
-	var raw map[string]interface{}
+	var raw map[string]any
 	if err := json.Unmarshal(data, &raw); err != nil {
 		t.Fatalf("Failed to unmarshal JSON: %v", err)
 	}
@@ -94,7 +89,7 @@ func TestTriggerResult_JSON_OmitEmpty(t *testing.T) {
 		t.Fatalf("Failed to marshal TriggerResult: %v", err)
 	}
 
-	var raw map[string]interface{}
+	var raw map[string]any
 	if err := json.Unmarshal(data, &raw); err != nil {
 		t.Fatalf("Failed to unmarshal JSON: %v", err)
 	}
@@ -318,7 +313,7 @@ func TestCheckTriggers_FailureRepeat(t *testing.T) {
 	firstFailure := Event{
 		Type: EventTypeToolCall,
 		Tool: "Bash",
-		Meta: map[string]interface{}{
+		Meta: map[string]any{
 			"command":   "go test ./...",
 			"exit_code": 1,
 		},
@@ -332,7 +327,7 @@ func TestCheckTriggers_FailureRepeat(t *testing.T) {
 	currentEvent := Event{
 		Type: EventTypeToolCall,
 		Tool: "Bash",
-		Meta: map[string]interface{}{
+		Meta: map[string]any{
 			"command":   "go test ./...",
 			"exit_code": 1,
 		},
@@ -366,7 +361,7 @@ func TestCheckTriggers_FailureRepeat_DifferentCommands(t *testing.T) {
 	firstFailure := Event{
 		Type: EventTypeToolCall,
 		Tool: "Bash",
-		Meta: map[string]interface{}{
+		Meta: map[string]any{
 			"command":   "go build ./...",
 			"exit_code": 1,
 		},
@@ -380,7 +375,7 @@ func TestCheckTriggers_FailureRepeat_DifferentCommands(t *testing.T) {
 	currentEvent := Event{
 		Type: EventTypeToolCall,
 		Tool: "Bash",
-		Meta: map[string]interface{}{
+		Meta: map[string]any{
 			"command":   "npm install",
 			"exit_code": 1,
 		},
@@ -492,7 +487,7 @@ func TestDetectRepeatedFailures(t *testing.T) {
 	failure := Event{
 		Type: EventTypeToolCall,
 		Tool: "Bash",
-		Meta: map[string]interface{}{
+		Meta: map[string]any{
 			"command":   "go test ./pkg/...",
 			"exit_code": 1,
 		},
@@ -506,7 +501,7 @@ func TestDetectRepeatedFailures(t *testing.T) {
 	currentEvent := Event{
 		Type: EventTypeToolCall,
 		Tool: "Bash",
-		Meta: map[string]interface{}{
+		Meta: map[string]any{
 			"command":   "go test ./internal/...",
 			"exit_code": 1,
 		},
@@ -534,7 +529,7 @@ func TestDetectRepeatedFailures_SuccessDoesNotCount(t *testing.T) {
 	success := Event{
 		Type: EventTypeToolCall,
 		Tool: "Bash",
-		Meta: map[string]interface{}{
+		Meta: map[string]any{
 			"command":   "go test ./pkg/...",
 			"exit_code": 0,
 		},
@@ -548,7 +543,7 @@ func TestDetectRepeatedFailures_SuccessDoesNotCount(t *testing.T) {
 	currentEvent := Event{
 		Type: EventTypeToolCall,
 		Tool: "Bash",
-		Meta: map[string]interface{}{
+		Meta: map[string]any{
 			"command":   "go test ./internal/...",
 			"exit_code": 1,
 		},
@@ -629,7 +624,7 @@ func TestCheckTriggers_Priority_SacredPathFirst(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for i := 0; i < 10; i++ {
+	for i := range 10 {
 		event := Event{
 			Type: EventTypeToolCall,
 			Tool: "Edit",

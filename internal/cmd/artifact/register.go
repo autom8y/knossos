@@ -61,7 +61,7 @@ Phase and specialist can be specified explicitly or inferred from context.`,
 			if _, err := os.Stat(absPath); os.IsNotExist(err) {
 				e := errors.NewWithDetails(errors.CodeFileNotFound,
 					"artifact file not found",
-					map[string]interface{}{"path": path})
+					map[string]any{"path": path})
 				printer.PrintError(e)
 				return e
 			}
@@ -110,14 +110,14 @@ Phase and specialist can be specified explicitly or inferred from context.`,
 			if !skipAggregate {
 				if err := aggregator.AggregateSession(sid); err != nil {
 					// Log warning but don't fail
-					printer.VerboseLog("warn", "aggregation failed", map[string]interface{}{"error": err.Error()})
+					printer.VerboseLog("warn", "aggregation failed", map[string]any{"error": err.Error()})
 				} else {
 					aggregated = true
 				}
 			}
 
 			// Print result
-			result := map[string]interface{}{
+			result := map[string]any{
 				"artifact_id":   entry.ArtifactID,
 				"artifact_type": entry.ArtifactType,
 				"path":          entry.Path,
@@ -159,7 +159,7 @@ func detectArtifact(filename string) (artifact.ArtifactType, string, error) {
 	if matches == nil {
 		return "", "", errors.NewWithDetails(errors.CodeUsageError,
 			"invalid artifact filename pattern (expected: TYPE-artifact-id.ext)",
-			map[string]interface{}{"filename": filename})
+			map[string]any{"filename": filename})
 	}
 
 	typePrefix := matches[1]
@@ -182,7 +182,7 @@ func detectArtifact(filename string) (artifact.ArtifactType, string, error) {
 	default:
 		return "", "", errors.NewWithDetails(errors.CodeUsageError,
 			"unknown artifact type prefix",
-			map[string]interface{}{"prefix": typePrefix, "filename": filename})
+			map[string]any{"prefix": typePrefix, "filename": filename})
 	}
 
 	return artifactType, artifactID, nil

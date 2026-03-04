@@ -42,14 +42,14 @@ func (g *Generator) Generate() (*GenerateResult, error) {
 		if os.IsNotExist(err) {
 			return nil, errors.NewWithDetails(errors.CodeSessionNotFound,
 				"session directory not found",
-				map[string]interface{}{"path": g.SessionPath})
+				map[string]any{"path": g.SessionPath})
 		}
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to access session directory", err)
 	}
 	if !info.IsDir() {
 		return nil, errors.NewWithDetails(errors.CodeUsageError,
 			"path is not a directory",
-			map[string]interface{}{"path": g.SessionPath})
+			map[string]any{"path": g.SessionPath})
 	}
 
 	extractor := NewExtractor(g.SessionPath)
@@ -96,24 +96,24 @@ func (g *Generator) Generate() (*GenerateResult, error) {
 
 	// Build result
 	result := &GenerateResult{
-		FilePath:    filepath.Join(g.SessionPath, "TRIBUTE.md"),
-		SessionID:   ctx.SessionID,
-		Initiative:  ctx.Initiative,
-		Complexity:  ctx.Complexity,
-		Duration:    duration,
-		Rite:        ctx.ActiveRite,
-		FinalPhase:  ctx.CurrentPhase,
-		StartedAt:   startedAt,
-		EndedAt:     endedAt,
-		Artifacts:   artifacts,
-		Decisions:   decisions,
-		Phases:      phases,
-		Handoffs:    handoffs,
+		FilePath:           filepath.Join(g.SessionPath, "TRIBUTE.md"),
+		SessionID:          ctx.SessionID,
+		Initiative:         ctx.Initiative,
+		Complexity:         ctx.Complexity,
+		Duration:           duration,
+		Rite:               ctx.ActiveRite,
+		FinalPhase:         ctx.CurrentPhase,
+		StartedAt:          startedAt,
+		EndedAt:            endedAt,
+		Artifacts:          artifacts,
+		Decisions:          decisions,
+		Phases:             phases,
+		Handoffs:           handoffs,
 		GraduatedArtifacts: graduatedArtifacts,
 		Commits:            []Commit{}, // Phase 2 - empty for now
-		Metrics:     metrics,
-		Notes:       notes,
-		GeneratedAt: now,
+		Metrics:            metrics,
+		Notes:              notes,
+		GeneratedAt:        now,
 	}
 
 	// Add sails data if available

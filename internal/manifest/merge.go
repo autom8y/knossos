@@ -31,10 +31,10 @@ type ManifestMergeOptions struct {
 
 // Conflict represents a merge conflict.
 type Conflict struct {
-	Path        string      `json:"path"`
-	BaseValue   interface{} `json:"base_value"`
-	OursValue   interface{} `json:"ours_value"`
-	TheirsValue interface{} `json:"theirs_value"`
+	Path        string `json:"path"`
+	BaseValue   any    `json:"base_value"`
+	OursValue   any    `json:"ours_value"`
+	TheirsValue any    `json:"theirs_value"`
 }
 
 // MergeChanges tracks which changes came from which source.
@@ -45,15 +45,15 @@ type MergeChanges struct {
 
 // MergeResult holds the result of a three-way merge.
 type MergeResult struct {
-	Base          string                 `json:"base"`
-	Ours          string                 `json:"ours"`
-	Theirs        string                 `json:"theirs"`
-	Strategy      string                 `json:"strategy"`
-	HasConflicts  bool                   `json:"has_conflicts"`
-	Conflicts     []Conflict             `json:"conflicts,omitempty"`
-	Merged        map[string]interface{} `json:"merged,omitempty"`
-	MergedMarkers string                 `json:"merged_with_markers,omitempty"`
-	Changes       *MergeChanges          `json:"changes,omitempty"`
+	Base          string         `json:"base"`
+	Ours          string         `json:"ours"`
+	Theirs        string         `json:"theirs"`
+	Strategy      string         `json:"strategy"`
+	HasConflicts  bool           `json:"has_conflicts"`
+	Conflicts     []Conflict     `json:"conflicts,omitempty"`
+	Merged        map[string]any `json:"merged,omitempty"`
+	MergedMarkers string         `json:"merged_with_markers,omitempty"`
+	Changes       *MergeChanges  `json:"changes,omitempty"`
 }
 
 // Merge performs a three-way merge of manifests.
@@ -97,7 +97,7 @@ func mergePreferTheirs(result *MergeResult, theirs *Manifest) (*MergeResult, err
 
 // mergeUnion merges arrays as sets.
 func mergeUnion(result *MergeResult, base, ours, theirs *Manifest) (*MergeResult, error) {
-	merged := make(map[string]interface{})
+	merged := make(map[string]any)
 	conflicts := []Conflict{}
 
 	mergeFieldsUnion("$", base.Content, ours.Content, theirs.Content, merged, &conflicts, result.Changes)
@@ -115,7 +115,7 @@ func mergeUnion(result *MergeResult, base, ours, theirs *Manifest) (*MergeResult
 
 // mergeSmart performs field-level three-way merge.
 func mergeSmart(result *MergeResult, base, ours, theirs *Manifest) (*MergeResult, error) {
-	merged := make(map[string]interface{})
+	merged := make(map[string]any)
 	conflicts := []Conflict{}
 
 	mergeFields("$", base.Content, ours.Content, theirs.Content, merged, &conflicts, result.Changes)
@@ -132,8 +132,8 @@ func mergeSmart(result *MergeResult, base, ours, theirs *Manifest) (*MergeResult
 }
 
 // mergeFields performs three-way merge on map fields.
-func mergeFields(path string, base, ours, theirs map[string]interface{},
-	merged map[string]interface{}, conflicts *[]Conflict, changes *MergeChanges) {
+func mergeFields(path string, base, ours, theirs map[string]any,
+	merged map[string]any, conflicts *[]Conflict, changes *MergeChanges) {
 
 	allKeys := collectKeys(base, ours, theirs)
 
@@ -214,11 +214,11 @@ func mergeFields(path string, base, ours, theirs map[string]interface{},
 					merged[key] = deepCopyValue(oursVal)
 				} else {
 					// Both changed differently - check if nested object
-					if oursMap, ok := oursVal.(map[string]interface{}); ok {
-						if theirsMap, ok := theirsVal.(map[string]interface{}); ok {
-							if baseMap, ok := baseVal.(map[string]interface{}); ok {
+					if oursMap, ok := oursVal.(map[string]any); ok {
+						if theirsMap, ok := theirsVal.(map[string]any); ok {
+							if baseMap, ok := baseVal.(map[string]any); ok {
 								// Recursively merge nested objects
-								nestedMerged := make(map[string]interface{})
+								nestedMerged := make(map[string]any)
 								mergeFields(fieldPath, baseMap, oursMap, theirsMap, nestedMerged, conflicts, changes)
 								merged[key] = nestedMerged
 								continue
@@ -255,8 +255,8 @@ func mergeFields(path string, base, ours, theirs map[string]interface{},
 }
 
 // mergeFieldsUnion merges with array union strategy.
-func mergeFieldsUnion(path string, base, ours, theirs map[string]interface{},
-	merged map[string]interface{}, conflicts *[]Conflict, changes *MergeChanges) {
+func mergeFieldsUnion(path string, base, ours, theirs map[string]any,
+	merged map[string]any, conflicts *[]Conflict, changes *MergeChanges) {
 
 	allKeys := collectKeys(base, ours, theirs)
 
@@ -267,8 +267,8 @@ func mergeFieldsUnion(path string, base, ours, theirs map[string]interface{},
 		theirsVal, theirsOk := theirs[key]
 
 		// Handle arrays with union
-		if oursArr, oursIsArr := oursVal.([]interface{}); oursIsArr {
-			if theirsArr, theirsIsArr := theirsVal.([]interface{}); theirsIsArr {
+		if oursArr, oursIsArr := oursVal.([]any); oursIsArr {
+			if theirsArr, theirsIsArr := theirsVal.([]any); theirsIsArr {
 				merged[key] = unionArrays(oursArr, theirsArr)
 				continue
 			}
@@ -309,9 +309,9 @@ func mergeFieldsUnion(path string, base, ours, theirs map[string]interface{},
 }
 
 // unionArrays merges two arrays without duplicates.
-func unionArrays(ours, theirs []interface{}) []interface{} {
+func unionArrays(ours, theirs []any) []any {
 	seen := make(map[string]bool)
-	result := []interface{}{}
+	result := []any{}
 
 	for _, v := range ours {
 		key := toJSONKey(v)
@@ -333,7 +333,7 @@ func unionArrays(ours, theirs []interface{}) []interface{} {
 }
 
 // collectKeys returns all unique keys from the maps, sorted.
-func collectKeys(maps ...map[string]interface{}) []string {
+func collectKeys(maps ...map[string]any) []string {
 	seen := make(map[string]bool)
 	for _, m := range maps {
 		for k := range m {
@@ -350,31 +350,31 @@ func collectKeys(maps ...map[string]interface{}) []string {
 }
 
 // equal checks if two values are equal.
-func equal(a, b interface{}) bool {
+func equal(a, b any) bool {
 	return reflect.DeepEqual(a, b)
 }
 
 // deepCopy creates a deep copy of a map.
-func deepCopy(m map[string]interface{}) map[string]interface{} {
+func deepCopy(m map[string]any) map[string]any {
 	data, _ := json.Marshal(m)
-	var result map[string]interface{}
+	var result map[string]any
 	_ = json.Unmarshal(data, &result)
 	return result
 }
 
 // deepCopyValue creates a deep copy of any value.
-func deepCopyValue(v interface{}) interface{} {
+func deepCopyValue(v any) any {
 	if v == nil {
 		return nil
 	}
 	data, _ := json.Marshal(v)
-	var result interface{}
+	var result any
 	_ = json.Unmarshal(data, &result)
 	return result
 }
 
 // generateConflictMarkers creates Git-style conflict markers.
-func generateConflictMarkers(merged map[string]interface{}, conflicts []Conflict) string {
+func generateConflictMarkers(merged map[string]any, conflicts []Conflict) string {
 	// Create a copy with conflict markers embedded
 	data, _ := json.MarshalIndent(merged, "", "  ")
 	result := string(data)

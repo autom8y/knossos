@@ -280,7 +280,7 @@ func (e *Extractor) ExtractWhiteSails() (*WhiteSailsData, error) {
 	}
 
 	// Parse YAML into a flexible structure
-	var raw map[string]interface{}
+	var raw map[string]any
 	if err := yaml.Unmarshal(content, &raw); err != nil {
 		return nil, errors.Wrap(errors.CodeSchemaInvalid, "failed to parse WHITE_SAILS.yaml", err)
 	}
@@ -300,9 +300,9 @@ func (e *Extractor) ExtractWhiteSails() (*WhiteSailsData, error) {
 	}
 
 	// Extract proofs
-	if proofs, ok := raw["proofs"].(map[string]interface{}); ok {
+	if proofs, ok := raw["proofs"].(map[string]any); ok {
 		for name, proofData := range proofs {
-			if proofMap, ok := proofData.(map[string]interface{}); ok {
+			if proofMap, ok := proofData.(map[string]any); ok {
 				proof := ProofStatus{}
 				if status, ok := proofMap["status"].(string); ok {
 					proof.Status = status

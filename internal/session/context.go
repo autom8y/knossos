@@ -41,21 +41,21 @@ type Context struct {
 
 // contextYAML is the YAML representation with string timestamps.
 type contextYAML struct {
-	SchemaVersion string  `yaml:"schema_version"`
-	SessionID     string  `yaml:"session_id"`
-	Status        string  `yaml:"status"`
-	CreatedAt     string  `yaml:"created_at"`
-	Initiative    string  `yaml:"initiative"`
-	Complexity    string  `yaml:"complexity"`
-	ActiveRite    string  `yaml:"active_rite"`
-	Rite          *string `yaml:"rite,omitempty"`
-	CurrentPhase  string  `yaml:"current_phase"`
-	ParkedAt      string  `yaml:"parked_at,omitempty"`
-	ParkedReason  string  `yaml:"parked_reason,omitempty"`
-	ArchivedAt    string  `yaml:"archived_at,omitempty"`
-	ResumedAt     string  `yaml:"resumed_at,omitempty"`
-	FrayedFrom    string  `yaml:"frayed_from,omitempty"`
-	FrayPoint     string  `yaml:"fray_point,omitempty"`
+	SchemaVersion string   `yaml:"schema_version"`
+	SessionID     string   `yaml:"session_id"`
+	Status        string   `yaml:"status"`
+	CreatedAt     string   `yaml:"created_at"`
+	Initiative    string   `yaml:"initiative"`
+	Complexity    string   `yaml:"complexity"`
+	ActiveRite    string   `yaml:"active_rite"`
+	Rite          *string  `yaml:"rite,omitempty"`
+	CurrentPhase  string   `yaml:"current_phase"`
+	ParkedAt      string   `yaml:"parked_at,omitempty"`
+	ParkedReason  string   `yaml:"parked_reason,omitempty"`
+	ArchivedAt    string   `yaml:"archived_at,omitempty"`
+	ResumedAt     string   `yaml:"resumed_at,omitempty"`
+	FrayedFrom    string   `yaml:"frayed_from,omitempty"`
+	FrayPoint     string   `yaml:"fray_point,omitempty"`
 	Strands       []string `yaml:"strands,omitempty"`
 }
 
@@ -218,7 +218,7 @@ func (c *Context) Save(path string) error {
 
 // Validate checks the context against schema requirements.
 func (c *Context) Validate() []string {
-	data := map[string]interface{}{
+	data := map[string]any{
 		"session_id":    c.SessionID,
 		"status":        string(c.Status),
 		"created_at":    c.CreatedAt.UTC().Format(time.RFC3339),

@@ -30,14 +30,14 @@ func runCurrent(ctx *cmdContext) error {
 
 	activeOrg := config.ActiveOrg()
 	if activeOrg == "" {
-		_ = printer.Print(map[string]interface{}{
+		_ = printer.Print(map[string]any{
 			"status":  "none",
 			"message": "No active org (set with 'ari org set <name>' or KNOSSOS_ORG env var)",
 		})
 		return nil
 	}
 
-	_ = printer.Print(map[string]interface{}{
+	_ = printer.Print(map[string]any{
 		"status": "ok",
 		"org":    activeOrg,
 	})

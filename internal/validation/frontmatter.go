@@ -14,7 +14,7 @@ import (
 // FrontmatterResult contains the extracted frontmatter and metadata.
 type FrontmatterResult struct {
 	// Data contains the parsed YAML frontmatter as a map.
-	Data map[string]interface{}
+	Data map[string]any
 
 	// RawYAML contains the raw YAML content between delimiters.
 	RawYAML string
@@ -72,14 +72,14 @@ func ExtractFrontmatterFromReader(r io.Reader) (*FrontmatterResult, error) {
 			rawYAML := strings.Join(yamlLines, "\n")
 
 			// Parse YAML
-			var data map[string]interface{}
+			var data map[string]any
 			if err := yaml.Unmarshal([]byte(rawYAML), &data); err != nil {
 				return nil, errors.Wrap(errors.CodeParseError, "invalid YAML in frontmatter", err)
 			}
 
 			// Handle nil result (empty but valid YAML like "---\n---")
 			if data == nil {
-				data = make(map[string]interface{})
+				data = make(map[string]any)
 			}
 
 			return &FrontmatterResult{
@@ -119,7 +119,7 @@ func HasFrontmatter(content []byte) bool {
 }
 
 // BuildFrontmatter creates a markdown file header with YAML frontmatter.
-func BuildFrontmatter(data map[string]interface{}) (string, error) {
+func BuildFrontmatter(data map[string]any) (string, error) {
 	yamlBytes, err := yaml.Marshal(data)
 	if err != nil {
 		return "", errors.Wrap(errors.CodeGeneralError, "failed to marshal frontmatter", err)

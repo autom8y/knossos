@@ -83,7 +83,7 @@ func (g *GoldenFile) AssertString(actual string) {
 
 // AssertJSON compares JSON output against the golden file.
 // The actual value is marshaled and pretty-printed before comparison.
-func (g *GoldenFile) AssertJSON(actual interface{}) {
+func (g *GoldenFile) AssertJSON(actual any) {
 	g.t.Helper()
 
 	data, err := json.MarshalIndent(actual, "", "  ")
@@ -104,7 +104,7 @@ func (g *GoldenFile) AssertJSON(actual interface{}) {
 func (g *GoldenFile) AssertJSONString(actual string) {
 	g.t.Helper()
 
-	var v interface{}
+	var v any
 	if err := json.Unmarshal([]byte(actual), &v); err != nil {
 		g.t.Fatalf("Failed to parse actual JSON: %v\nInput: %s", err, actual)
 	}

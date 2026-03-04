@@ -3,6 +3,7 @@ package mena
 import (
 	"os"
 	"path/filepath"
+	"slices"
 	"testing"
 	"testing/fstest"
 	"time"
@@ -559,13 +560,7 @@ func TestSyncMena_NamespaceCollision_YieldsToUserEntry(t *testing.T) {
 	}
 
 	// The dromenon should have fallen back to source path
-	found := false
-	for _, projected := range result.CommandsProjected {
-		if projected == "group/my-cmd" {
-			found = true
-			break
-		}
-	}
+	found := slices.Contains(result.CommandsProjected, "group/my-cmd")
 	if !found {
 		t.Errorf("expected dromenon to fall back to source path 'group/my-cmd', projected: %v", result.CommandsProjected)
 	}
@@ -635,13 +630,7 @@ func TestSyncMena_NamespaceCollision_OverwriteDivergedReclaims(t *testing.T) {
 	}
 
 	// The dromenon should be projected at the flat name, not the source path
-	foundFlat := false
-	for _, projected := range result.CommandsProjected {
-		if projected == "my-cmd" {
-			foundFlat = true
-			break
-		}
-	}
+	foundFlat := slices.Contains(result.CommandsProjected, "my-cmd")
 	if !foundFlat {
 		t.Errorf("expected dromenon at flat name 'my-cmd', projected: %v", result.CommandsProjected)
 	}

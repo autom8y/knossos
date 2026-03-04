@@ -301,7 +301,7 @@ func TestVerboseLog_OnlyWritesWhenVerbose(t *testing.T) {
 	}
 
 	verbosePrinter := NewPrinter(FormatText, outBuf, errBuf, true)
-	verbosePrinter.VerboseLog("info", "verbose message", map[string]interface{}{"key": "value"})
+	verbosePrinter.VerboseLog("info", "verbose message", map[string]any{"key": "value"})
 	if errBuf.Len() == 0 {
 		t.Errorf("VerboseLog wrote nothing when verbose=true")
 	}
@@ -461,7 +461,7 @@ func TestJSON_AuditOutput_ValidJSON(t *testing.T) {
 				Event:     "phase_transition",
 				FromPhase: "planning",
 				ToPhase:   "implementation",
-				Metadata:  map[string]interface{}{"reason": "design complete"},
+				Metadata:  map[string]any{"reason": "design complete"},
 			},
 		},
 		Total: 2,
@@ -517,8 +517,8 @@ func TestJSON_ManifestShowOutput_ValidJSON(t *testing.T) {
 			Version: "1.0",
 			Valid:   true,
 		},
-		Content: map[string]interface{}{
-			"project": map[string]interface{}{
+		Content: map[string]any{
+			"project": map[string]any{
 				"name":        "knossos",
 				"description": "test project",
 			},

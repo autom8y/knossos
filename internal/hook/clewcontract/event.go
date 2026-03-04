@@ -4,6 +4,7 @@ package clewcontract
 
 import (
 	"fmt"
+	"maps"
 	"time"
 )
 
@@ -12,29 +13,29 @@ type EventType string
 
 // Clew event types for tracking Claude Code activity.
 const (
-	EventTypeToolCall   EventType = "tool.call"
-	EventTypeFileChange EventType = "tool.file_change"
-	EventTypeDecision   EventType = "agent.decision"
-	EventTypeContextSwitch   EventType = "context_switch"
-	EventTypeSailsGenerated  EventType = "quality.sails_generated"
-	EventTypeTaskStart       EventType = "agent.task_start"
-	EventTypeTaskEnd         EventType = "agent.task_end"
-	EventTypeSessionStart    EventType = "session.started"
-	EventTypeSessionEnd      EventType = "session.ended"
-	EventTypeArtifactCreated EventType = "tool.artifact_created"
-	EventTypeError           EventType = "tool.error"
-	EventTypeHandoffPrepared EventType = "agent.handoff_prepared"
-	EventTypeHandoffExecuted EventType = "agent.handoff_executed"
-	EventTypeSessionFrayed   EventType = "session.frayed"
-	EventTypeStrandResolved  EventType = "session.strand_resolved"
-	EventTypeSessionCreated     EventType = "session.created"
-	EventTypeSessionParked      EventType = "session.parked"
-	EventTypeSessionResumed     EventType = "session.resumed"
-	EventTypeSessionArchived    EventType = "session.archived"
-	EventTypePhaseTransitioned  EventType = "phase.transitioned"
-	EventTypeSchemaMigrated     EventType = "session.schema_migrated"
-	EventTypeLockAcquired       EventType = "lock.acquired"
-	EventTypeLockReleased       EventType = "lock.released"
+	EventTypeToolCall          EventType = "tool.call"
+	EventTypeFileChange        EventType = "tool.file_change"
+	EventTypeDecision          EventType = "agent.decision"
+	EventTypeContextSwitch     EventType = "context_switch"
+	EventTypeSailsGenerated    EventType = "quality.sails_generated"
+	EventTypeTaskStart         EventType = "agent.task_start"
+	EventTypeTaskEnd           EventType = "agent.task_end"
+	EventTypeSessionStart      EventType = "session.started"
+	EventTypeSessionEnd        EventType = "session.ended"
+	EventTypeArtifactCreated   EventType = "tool.artifact_created"
+	EventTypeError             EventType = "tool.error"
+	EventTypeHandoffPrepared   EventType = "agent.handoff_prepared"
+	EventTypeHandoffExecuted   EventType = "agent.handoff_executed"
+	EventTypeSessionFrayed     EventType = "session.frayed"
+	EventTypeStrandResolved    EventType = "session.strand_resolved"
+	EventTypeSessionCreated    EventType = "session.created"
+	EventTypeSessionParked     EventType = "session.parked"
+	EventTypeSessionResumed    EventType = "session.resumed"
+	EventTypeSessionArchived   EventType = "session.archived"
+	EventTypePhaseTransitioned EventType = "phase.transitioned"
+	EventTypeSchemaMigrated    EventType = "session.schema_migrated"
+	EventTypeLockAcquired      EventType = "lock.acquired"
+	EventTypeLockReleased      EventType = "lock.released"
 )
 
 // ArtifactType represents the type of artifact created during a session.
@@ -68,7 +69,7 @@ type Event struct {
 	Summary string `json:"summary"`
 
 	// Additional metadata (lines_changed, exit_code, duration_ms, etc.)
-	Meta map[string]interface{} `json:"meta,omitempty"`
+	Meta map[string]any `json:"meta,omitempty"`
 }
 
 // timestamp returns the current time in RFC3339 format with milliseconds.
@@ -77,7 +78,7 @@ func timestamp() string {
 }
 
 // NewToolCallEvent creates an event for a Claude Code tool invocation.
-func NewToolCallEvent(tool, path string, meta map[string]interface{}) Event {
+func NewToolCallEvent(tool, path string, meta map[string]any) Event {
 	summary := "Tool: " + tool
 	if path != "" {
 		summary += " on " + path
@@ -94,7 +95,7 @@ func NewToolCallEvent(tool, path string, meta map[string]interface{}) Event {
 
 // NewFileChangeEvent creates an event for a file modification.
 func NewFileChangeEvent(path string, linesChanged int) Event {
-	meta := map[string]interface{}{
+	meta := map[string]any{
 		"lines_changed": linesChanged,
 	}
 	return Event{
@@ -107,7 +108,7 @@ func NewFileChangeEvent(path string, linesChanged int) Event {
 }
 
 // NewDecisionEvent creates an event for a workflow decision.
-func NewDecisionEvent(summary string, meta map[string]interface{}) Event {
+func NewDecisionEvent(summary string, meta map[string]any) Event {
 	return Event{
 		Timestamp: timestamp(),
 		Type:      EventTypeDecision,
@@ -117,7 +118,7 @@ func NewDecisionEvent(summary string, meta map[string]interface{}) Event {
 }
 
 // NewContextSwitchEvent creates an event for a context change (e.g., new file, new task).
-func NewContextSwitchEvent(summary string, path string, meta map[string]interface{}) Event {
+func NewContextSwitchEvent(summary string, path string, meta map[string]any) Event {
 	return Event{
 		Timestamp: timestamp(),
 		Type:      EventTypeContextSwitch,
@@ -177,7 +178,7 @@ type SailsGeneratedData struct {
 //   - File path to WHITE_SAILS.yaml
 //   - Evidence paths from WHITE_SAILS.yaml proofs (tests, build, lint)
 func NewSailsGeneratedEvent(sessionID string, data SailsGeneratedData) Event {
-	meta := map[string]interface{}{
+	meta := map[string]any{
 		"session_id":    sessionID,
 		"color":         data.Color,
 		"computed_base": data.ComputedBase,
@@ -235,7 +236,7 @@ func NewTaskStartEvent(taskID, agent, phase, sessionID string) Event {
 		Timestamp: timestamp(),
 		Type:      EventTypeTaskStart,
 		Summary:   fmt.Sprintf("Task started: %s by %s in %s phase", taskID, agent, phase),
-		Meta: map[string]interface{}{
+		Meta: map[string]any{
 			"task_id":    taskID,
 			"agent":      agent,
 			"phase":      phase,
@@ -259,7 +260,7 @@ func NewTaskEndEvent(taskID, agent, outcome, sessionID string, durationMs int64,
 		Timestamp: timestamp(),
 		Type:      EventTypeTaskEnd,
 		Summary:   fmt.Sprintf("Task ended: %s by %s - %s (%dms)", taskID, agent, outcome, durationMs),
-		Meta: map[string]interface{}{
+		Meta: map[string]any{
 			"task_id":     taskID,
 			"agent":       agent,
 			"outcome":     outcome,
@@ -283,7 +284,7 @@ func NewSessionStartEvent(sessionID, initiative, complexity, rite string) Event 
 		Timestamp: timestamp(),
 		Type:      EventTypeSessionStart,
 		Summary:   "Session started: " + initiative + " (" + complexity + ")",
-		Meta: map[string]interface{}{
+		Meta: map[string]any{
 			"session_id": sessionID,
 			"initiative": initiative,
 			"complexity": complexity,
@@ -309,8 +310,8 @@ func NewSessionEndEvent(sessionID, status string, durationMs int64) Event {
 //   - status: Completion status (e.g., "completed", "parked", "abandoned")
 //   - durationMs: Total session duration in milliseconds
 //   - budget: Optional cognitive budget data (tool calls, message count, etc.)
-func NewSessionEndEventWithBudget(sessionID, status string, durationMs int64, budget map[string]interface{}) Event {
-	meta := map[string]interface{}{
+func NewSessionEndEventWithBudget(sessionID, status string, durationMs int64, budget map[string]any) Event {
+	meta := map[string]any{
 		"session_id":  sessionID,
 		"status":      status,
 		"duration_ms": durationMs,
@@ -344,7 +345,7 @@ func NewArtifactCreatedEvent(artifactType ArtifactType, path, phase string, vali
 		Type:      EventTypeArtifactCreated,
 		Path:      path,
 		Summary:   fmt.Sprintf("Artifact created: %s (%s)", artifactType, phase),
-		Meta: map[string]interface{}{
+		Meta: map[string]any{
 			"artifact_type":     string(artifactType),
 			"phase":             phase,
 			"validates_against": validatesAgainst,
@@ -366,7 +367,7 @@ func NewErrorEvent(errorCode, message, context string, recoverable bool, suggest
 		Timestamp: timestamp(),
 		Type:      EventTypeError,
 		Summary:   fmt.Sprintf("Error: %s - %s", errorCode, message),
-		Meta: map[string]interface{}{
+		Meta: map[string]any{
 			"error_code":       errorCode,
 			"message":          message,
 			"context":          context,
@@ -388,7 +389,7 @@ func NewHandoffPreparedEvent(fromAgent, toAgent, sessionID string) Event {
 		Timestamp: timestamp(),
 		Type:      EventTypeHandoffPrepared,
 		Summary:   fmt.Sprintf("Handoff prepared: %s -> %s", fromAgent, toAgent),
-		Meta: map[string]interface{}{
+		Meta: map[string]any{
 			"from_agent": fromAgent,
 			"to_agent":   toAgent,
 			"session_id": sessionID,
@@ -409,7 +410,7 @@ func NewHandoffExecutedEvent(fromAgent, toAgent, sessionID string, artifacts []s
 		Timestamp: timestamp(),
 		Type:      EventTypeHandoffExecuted,
 		Summary:   fmt.Sprintf("Handoff executed: %s -> %s (%d artifacts)", fromAgent, toAgent, len(artifacts)),
-		Meta: map[string]interface{}{
+		Meta: map[string]any{
 			"from_agent": fromAgent,
 			"to_agent":   toAgent,
 			"session_id": sessionID,
@@ -451,7 +452,7 @@ func NewStamp(decision, rationale string, rejected []string, context map[string]
 // ToEvent converts a Stamp to an Event with type="decision".
 // This allows stamps to be written to events.jsonl in a consistent format.
 func (s Stamp) ToEvent() Event {
-	meta := make(map[string]interface{})
+	meta := make(map[string]any)
 
 	// Add rationale to meta
 	meta["rationale"] = s.Rationale
@@ -462,9 +463,7 @@ func (s Stamp) ToEvent() Event {
 	}
 
 	// Merge stamp context into meta
-	for k, v := range s.Context {
-		meta[k] = v
-	}
+	maps.Copy(meta, s.Context)
 
 	return Event{
 		Timestamp: s.Ts.Format("2006-01-02T15:04:05.000Z"),
@@ -480,7 +479,7 @@ func NewSessionFrayedEvent(parentID, childID, frayPoint string) Event {
 		Timestamp: timestamp(),
 		Type:      EventTypeSessionFrayed,
 		Summary:   fmt.Sprintf("Session frayed: %s -> %s at %s", parentID, childID, frayPoint),
-		Meta: map[string]interface{}{
+		Meta: map[string]any{
 			"parent_id":  parentID,
 			"child_id":   childID,
 			"fray_point": frayPoint,
@@ -494,7 +493,7 @@ func NewStrandResolvedEvent(parentID, childID, resolution string) Event {
 		Timestamp: timestamp(),
 		Type:      EventTypeStrandResolved,
 		Summary:   fmt.Sprintf("Strand resolved: %s from %s (%s)", childID, parentID, resolution),
-		Meta: map[string]interface{}{
+		Meta: map[string]any{
 			"parent_id":  parentID,
 			"child_id":   childID,
 			"resolution": resolution,
@@ -515,7 +514,7 @@ func NewSessionCreatedEvent(sessionID, initiative, complexity, rite string) Even
 		Timestamp: timestamp(),
 		Type:      EventTypeSessionCreated,
 		Summary:   "Session created: " + sessionID,
-		Meta: map[string]interface{}{
+		Meta: map[string]any{
 			"session_id": sessionID,
 			"initiative": initiative,
 			"complexity": complexity,
@@ -537,7 +536,7 @@ func NewSessionParkedEvent(sessionID, reason string) Event {
 		Timestamp: timestamp(),
 		Type:      EventTypeSessionParked,
 		Summary:   "Session parked: " + sessionID,
-		Meta: map[string]interface{}{
+		Meta: map[string]any{
 			"session_id": sessionID,
 			"reason":     reason,
 			"from":       "ACTIVE",
@@ -556,7 +555,7 @@ func NewSessionResumedEvent(sessionID string) Event {
 		Timestamp: timestamp(),
 		Type:      EventTypeSessionResumed,
 		Summary:   "Session resumed: " + sessionID,
-		Meta: map[string]interface{}{
+		Meta: map[string]any{
 			"session_id": sessionID,
 			"from":       "PARKED",
 			"to":         "ACTIVE",
@@ -575,7 +574,7 @@ func NewSessionArchivedEvent(sessionID, fromStatus string) Event {
 		Timestamp: timestamp(),
 		Type:      EventTypeSessionArchived,
 		Summary:   "Session archived: " + sessionID,
-		Meta: map[string]interface{}{
+		Meta: map[string]any{
 			"session_id": sessionID,
 			"from":       fromStatus,
 			"to":         "ARCHIVED",
@@ -595,7 +594,7 @@ func NewPhaseTransitionedEvent(sessionID, fromPhase, toPhase string) Event {
 		Timestamp: timestamp(),
 		Type:      EventTypePhaseTransitioned,
 		Summary:   fmt.Sprintf("Phase transitioned: %s -> %s", fromPhase, toPhase),
-		Meta: map[string]interface{}{
+		Meta: map[string]any{
 			"session_id": sessionID,
 			"from_phase": fromPhase,
 			"to_phase":   toPhase,
@@ -609,7 +608,7 @@ func NewSchemaMigratedEvent(sessionID, fromVersion, toVersion string) Event {
 		Timestamp: timestamp(),
 		Type:      EventTypeSchemaMigrated,
 		Summary:   fmt.Sprintf("Schema migrated from %s to %s", fromVersion, toVersion),
-		Meta: map[string]interface{}{
+		Meta: map[string]any{
 			"session_id":   sessionID,
 			"from_version": fromVersion,
 			"to_version":   toVersion,
@@ -623,7 +622,7 @@ func NewLockAcquiredEvent(sessionID, holder string) Event {
 		Timestamp: timestamp(),
 		Type:      EventTypeLockAcquired,
 		Summary:   fmt.Sprintf("Lock acquired on %s by %s", sessionID, holder),
-		Meta: map[string]interface{}{
+		Meta: map[string]any{
 			"session_id": sessionID,
 			"holder":     holder,
 		},
@@ -636,7 +635,7 @@ func NewLockReleasedEvent(sessionID, holder string) Event {
 		Timestamp: timestamp(),
 		Type:      EventTypeLockReleased,
 		Summary:   fmt.Sprintf("Lock released on %s by %s", sessionID, holder),
-		Meta: map[string]interface{}{
+		Meta: map[string]any{
 			"session_id": sessionID,
 			"holder":     holder,
 		},

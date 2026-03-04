@@ -702,14 +702,6 @@ section_order:
 	}
 }
 
-// Helper function for min of two integers
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
 // Additional integration tests for edge cases
 
 // TestInscription_MalformedMarkersHandled tests graceful handling of malformed markers.
@@ -785,7 +777,7 @@ func TestInscription_LargeFile(t *testing.T) {
 	sb.WriteString("## Execution Mode\n\n")
 
 	// Add ~50KB of content
-	for i := 0; i < 1000; i++ {
+	for i := range 1000 {
 		sb.WriteString("This is line ")
 		sb.WriteString(itoa(i))
 		sb.WriteString(" of the large documentation file with plenty of text to make it sizable.\n")
@@ -870,7 +862,7 @@ section_order:
 
 	// Run multiple syncs (more than MaxBackups default of 5)
 	pipeline := NewPipeline(tmpDir)
-	for i := 0; i < 8; i++ {
+	for i := range 8 {
 		// Small delay to ensure different timestamps
 		time.Sleep(5 * time.Millisecond)
 

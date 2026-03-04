@@ -138,7 +138,7 @@ func TestStaleDivergence_LegacyPIDAlive(t *testing.T) {
 	// Write a legacy PID lock file using the current process PID (guaranteed alive)
 	alivePID := os.Getpid()
 	lockPath := filepath.Join(tmpDir, "divergence.lock")
-	if err := os.WriteFile(lockPath, []byte(fmt.Sprintf("%d\n", alivePID)), 0644); err != nil {
+	if err := os.WriteFile(lockPath, fmt.Appendf(nil, "%d\n", alivePID), 0644); err != nil {
 		t.Fatalf("Failed to write lock file: %v", err)
 	}
 

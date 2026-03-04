@@ -265,7 +265,7 @@ func ValidateRegionName(name string) error {
 		}
 		return errors.NewWithDetails(errors.CodeUsageError,
 			"invalid character in region name",
-			map[string]interface{}{
+			map[string]any{
 				"character": string(c),
 				"position":  i,
 				"name":      name,

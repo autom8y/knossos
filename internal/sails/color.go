@@ -49,8 +49,8 @@ func (c Color) IsValid() bool {
 func ParseColorFromYAML(content []byte) Color {
 	for _, line := range strings.Split(string(content), "\n") {
 		line = strings.TrimSpace(line)
-		if strings.HasPrefix(line, "color:") {
-			value := strings.TrimSpace(strings.TrimPrefix(line, "color:"))
+		if after, ok := strings.CutPrefix(line, "color:"); ok {
+			value := strings.TrimSpace(after)
 			value = strings.Trim(value, "\"'")
 			switch strings.ToUpper(value) {
 			case "WHITE":

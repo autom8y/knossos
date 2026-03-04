@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"maps"
 	"os"
 	"strings"
 	"text/tabwriter"
@@ -73,7 +74,7 @@ func NewPrinter(format Format, out, errOut io.Writer, verbose bool) *Printer {
 }
 
 // Print outputs data in the configured format.
-func (p *Printer) Print(data interface{}) error {
+func (p *Printer) Print(data any) error {
 	switch p.format {
 	case FormatJSON:
 		return p.printJSON(data)
@@ -86,7 +87,7 @@ func (p *Printer) Print(data interface{}) error {
 
 // PrintSuccess outputs a success message.
 // For JSON format, wraps the data. For text, silent (per TDD).
-func (p *Printer) PrintSuccess(data interface{}) error {
+func (p *Printer) PrintSuccess(data any) error {
 	switch p.format {
 	case FormatJSON:
 		return p.printJSON(data)
@@ -109,8 +110,8 @@ func (p *Printer) PrintError(err error) {
 			return
 		}
 		// Wrap in standard error format
-		wrapper := map[string]interface{}{
-			"error": map[string]interface{}{
+		wrapper := map[string]any{
+			"error": map[string]any{
 				"code":    "GENERAL_ERROR",
 				"message": err.Error(),
 			},
@@ -134,36 +135,34 @@ func (p *Printer) PrintLine(text string) {
 }
 
 // VerboseLog writes a JSON line to stderr for debugging.
-func (p *Printer) VerboseLog(level, msg string, fields map[string]interface{}) {
+func (p *Printer) VerboseLog(level, msg string, fields map[string]any) {
 	if !p.verbose {
 		return
 	}
-	entry := map[string]interface{}{
+	entry := map[string]any{
 		"level": level,
 		"msg":   msg,
 		"ts":    time.Now().UTC().Format(time.RFC3339),
 	}
-	for k, v := range fields {
-		entry[k] = v
-	}
+	maps.Copy(entry, fields)
 	data, _ := json.Marshal(entry)
 	fmt.Fprintln(p.errOut, string(data))
 }
 
-func (p *Printer) printJSON(data interface{}) error {
+func (p *Printer) printJSON(data any) error {
 	enc := json.NewEncoder(p.out)
 	enc.SetIndent("", "  ")
 	return enc.Encode(data)
 }
 
-func (p *Printer) printYAML(data interface{}) error {
+func (p *Printer) printYAML(data any) error {
 	enc := yaml.NewEncoder(p.out)
 	enc.SetIndent(2)
 	defer func() { _ = enc.Close() }()
 	return enc.Encode(data)
 }
 
-func (p *Printer) printText(data interface{}) error {
+func (p *Printer) printText(data any) error {
 	// Handle Tabular interface for table output
 	if t, ok := data.(Tabular); ok {
 		return p.printTable(t)
@@ -458,13 +457,13 @@ type AuditOutput struct {
 
 // AuditEvent represents a single audit event.
 type AuditEvent struct {
-	Timestamp string                 `json:"timestamp"`
-	Event     string                 `json:"event"`
-	From      string                 `json:"from,omitempty"`
-	To        string                 `json:"to,omitempty"`
-	FromPhase string                 `json:"from_phase,omitempty"`
-	ToPhase   string                 `json:"to_phase,omitempty"`
-	Metadata  map[string]interface{} `json:"metadata,omitempty"`
+	Timestamp string         `json:"timestamp"`
+	Event     string         `json:"event"`
+	From      string         `json:"from,omitempty"`
+	To        string         `json:"to,omitempty"`
+	FromPhase string         `json:"from_phase,omitempty"`
+	ToPhase   string         `json:"to_phase,omitempty"`
+	Metadata  map[string]any `json:"metadata,omitempty"`
 }
 
 // AuditFilters shows which filters were applied.
@@ -581,7 +580,7 @@ type SyncResultOutput struct {
 	Rite   *SyncRiteResult `json:"rite,omitempty"`
 	Org    *SyncOrgResult  `json:"org,omitempty"`
 	User   *SyncUserResult `json:"user,omitempty"`
-	Budget interface{}     `json:"budget,omitempty"`
+	Budget any             `json:"budget,omitempty"`
 }
 
 // SyncRiteResult represents rite scope sync result.
@@ -613,10 +612,10 @@ type SyncOrgResult struct {
 
 // SyncUserResult represents user scope sync result.
 type SyncUserResult struct {
-	Status    string                 `json:"status"`
-	Totals    interface{}            `json:"totals"`
-	Resources map[string]interface{} `json:"resources,omitempty"`
-	Errors    interface{}            `json:"errors,omitempty"`
+	Status    string         `json:"status"`
+	Totals    any            `json:"totals"`
+	Resources map[string]any `json:"resources,omitempty"`
+	Errors    any            `json:"errors,omitempty"`
 }
 
 // Text implements Textable for SyncResultOutput.

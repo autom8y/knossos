@@ -96,7 +96,7 @@ func (v *Validator) getSchema(name string) (*jsonschema.Schema, error) {
 	s, err := v.compiler.Compile(url)
 	if err != nil {
 		return nil, errors.NewWithDetails(errors.CodeGeneralError, "failed to compile schema: "+name,
-			map[string]interface{}{"url": url, "error": err.Error()})
+			map[string]any{"url": url, "error": err.Error()})
 	}
 
 	v.schemas[name] = s
@@ -110,7 +110,7 @@ func (v *Validator) ValidateSessionContext(data []byte) error {
 		return err
 	}
 
-	var parsed interface{}
+	var parsed any
 	if err := json.Unmarshal(data, &parsed); err != nil {
 		return errors.Wrap(errors.CodeSchemaInvalid, "invalid JSON", err)
 	}
@@ -118,14 +118,14 @@ func (v *Validator) ValidateSessionContext(data []byte) error {
 	if err := schema.Validate(parsed); err != nil {
 		return errors.NewWithDetails(errors.CodeSchemaInvalid,
 			"session context validation failed",
-			map[string]interface{}{"error": err.Error()})
+			map[string]any{"error": err.Error()})
 	}
 
 	return nil
 }
 
 // ValidateSessionContextMap validates a session context map.
-func (v *Validator) ValidateSessionContextMap(data map[string]interface{}) error {
+func (v *Validator) ValidateSessionContextMap(data map[string]any) error {
 	jsonData, err := json.Marshal(data)
 	if err != nil {
 		return errors.Wrap(errors.CodeSchemaInvalid, "failed to marshal data", err)
@@ -135,7 +135,7 @@ func (v *Validator) ValidateSessionContextMap(data map[string]interface{}) error
 
 // ValidateAgentData validates pre-parsed agent data against the agent schema.
 // The data parameter should be an interface{} from JSON unmarshal (not raw bytes).
-func (v *Validator) ValidateAgentData(data interface{}) error {
+func (v *Validator) ValidateAgentData(data any) error {
 	schema, err := v.getSchema("agent")
 	if err != nil {
 		return err
@@ -144,7 +144,7 @@ func (v *Validator) ValidateAgentData(data interface{}) error {
 	if err := schema.Validate(data); err != nil {
 		return errors.NewWithDetails(errors.CodeSchemaInvalid,
 			"agent schema validation failed",
-			map[string]interface{}{"error": err.Error()})
+			map[string]any{"error": err.Error()})
 	}
 
 	return nil
@@ -154,7 +154,7 @@ func (v *Validator) ValidateAgentData(data interface{}) error {
 
 // ValidateSessionFields performs lightweight validation of required session fields.
 // This is used when the full schema validator is not available.
-func ValidateSessionFields(data map[string]interface{}) []string {
+func ValidateSessionFields(data map[string]any) []string {
 	var issues []string
 
 	// Required fields per TDD
@@ -225,7 +225,7 @@ func ValidatePhase(phase string) bool {
 
 // ParseYAMLFrontmatter extracts YAML frontmatter from a markdown file.
 // Returns the parsed YAML as a map.
-func ParseYAMLFrontmatter(content []byte) (map[string]interface{}, error) {
+func ParseYAMLFrontmatter(content []byte) (map[string]any, error) {
 	str := string(content)
 
 	// Find frontmatter delimiters
@@ -246,7 +246,7 @@ func ParseYAMLFrontmatter(content []byte) (map[string]interface{}, error) {
 	yamlContent := str[4 : endIdx+4]
 
 	// Parse YAML
-	var result map[string]interface{}
+	var result map[string]any
 	if err := yaml.Unmarshal([]byte(yamlContent), &result); err != nil {
 		return nil, errors.Wrap(errors.CodeSchemaInvalid, "invalid YAML frontmatter", err)
 	}
@@ -255,7 +255,7 @@ func ParseYAMLFrontmatter(content []byte) (map[string]interface{}, error) {
 }
 
 // BuildYAMLFrontmatter creates YAML frontmatter from a map.
-func BuildYAMLFrontmatter(data map[string]interface{}) (string, error) {
+func BuildYAMLFrontmatter(data map[string]any) (string, error) {
 	yamlBytes, err := yaml.Marshal(data)
 	if err != nil {
 		return "", errors.Wrap(errors.CodeGeneralError, "failed to marshal YAML", err)

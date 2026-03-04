@@ -204,7 +204,7 @@ func TestBackupManager_CleanupOldBackups(t *testing.T) {
 	bm.MaxBackups = 2
 
 	// Create more backups than limit
-	for i := 0; i < 5; i++ {
+	for range 5 {
 		bm.CreateBackup()
 		time.Sleep(10 * time.Millisecond) // Ensure different timestamps
 	}
@@ -229,7 +229,7 @@ func TestBackupManager_ListBackups(t *testing.T) {
 	bm.MaxBackups = 10 // Allow more for this test
 
 	// Create multiple backups with 1-second delays (timestamp resolution is 1 second)
-	for i := 0; i < 3; i++ {
+	for i := range 3 {
 		bm.CreateBackup()
 		if i < 2 {
 			time.Sleep(1100 * time.Millisecond)
@@ -433,7 +433,7 @@ func TestBackupManager_DeleteAllBackups(t *testing.T) {
 	bm.MaxBackups = 10
 
 	// Create multiple backups
-	for i := 0; i < 3; i++ {
+	for range 3 {
 		bm.CreateBackup()
 		time.Sleep(10 * time.Millisecond)
 	}
@@ -451,7 +451,6 @@ func TestBackupManager_DeleteAllBackups(t *testing.T) {
 		t.Error("DeleteAllBackups() backups still exist")
 	}
 }
-
 
 func TestBackupManager_BackupAndWrite(t *testing.T) {
 	tmpDir := t.TempDir()

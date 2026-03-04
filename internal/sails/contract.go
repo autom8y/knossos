@@ -236,7 +236,7 @@ func validateTaskLifecycle(events []clewcontract.Event) []ContractViolation {
 
 // getMetaString extracts a string value from event metadata.
 // Returns empty string if key doesn't exist or value is not a string.
-func getMetaString(meta map[string]interface{}, key string) string {
+func getMetaString(meta map[string]any, key string) string {
 	if meta == nil {
 		return ""
 	}

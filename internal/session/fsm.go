@@ -1,6 +1,8 @@
 package session
 
 import (
+	"slices"
+
 	"github.com/autom8y/knossos/internal/errors"
 )
 
@@ -13,7 +15,7 @@ type FSM struct {
 func NewFSM() *FSM {
 	return &FSM{
 		transitions: map[Status][]Status{
-			StatusNone:   {StatusActive},              // create
+			StatusNone:   {StatusActive},                 // create
 			StatusActive: {StatusParked, StatusArchived}, // park, wrap
 			StatusParked: {StatusActive, StatusArchived}, // resume, wrap
 			// StatusArchived has no valid transitions (terminal)
@@ -27,12 +29,7 @@ func (f *FSM) CanTransition(from, to Status) bool {
 	if !ok {
 		return false
 	}
-	for _, target := range validTargets {
-		if target == to {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(validTargets, to)
 }
 
 // ValidateTransition checks a transition and returns an error if invalid.

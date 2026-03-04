@@ -24,42 +24,42 @@ func TestValidate(t *testing.T) {
 
 	tests := []struct {
 		name       string
-		content    map[string]interface{}
+		content    map[string]any
 		schemaName string
 		wantValid  bool
 	}{
 		{
 			name:       "valid manifest - has version",
-			content:    map[string]interface{}{"version": "1.0"},
+			content:    map[string]any{"version": "1.0"},
 			schemaName: manifest.SchemaManifest,
 			wantValid:  true,
 		},
 		{
 			name:       "invalid manifest - missing version",
-			content:    map[string]interface{}{"project": map[string]interface{}{"name": "test"}},
+			content:    map[string]any{"project": map[string]any{"name": "test"}},
 			schemaName: manifest.SchemaManifest,
 			wantValid:  false,
 		},
 		{
 			name: "valid team manifest",
-			content: map[string]interface{}{
+			content: map[string]any{
 				"version": "1.0",
 				"name":    "test-rite",
-				"workflow": map[string]interface{}{
+				"workflow": map[string]any{
 					"type":        "sequential",
 					"entry_point": "start",
 				},
-				"agents": []interface{}{},
+				"agents": []any{},
 			},
 			schemaName: manifest.SchemaRiteManifest,
 			wantValid:  true,
 		},
 		{
 			name: "invalid rite manifest - missing workflow",
-			content: map[string]interface{}{
+			content: map[string]any{
 				"version": "1.0",
 				"name":    "test-rite",
-				"agents":  []interface{}{},
+				"agents":  []any{},
 			},
 			schemaName: manifest.SchemaRiteManifest,
 			wantValid:  false,
@@ -145,7 +145,7 @@ func TestIsValidVersion(t *testing.T) {
 			v, _ := manifest.NewSchemaValidator()
 			m := &manifest.Manifest{
 				Path:    "/test",
-				Content: map[string]interface{}{"version": tt.version},
+				Content: map[string]any{"version": tt.version},
 			}
 			result, _ := v.Validate(m, manifest.SchemaManifest, false)
 

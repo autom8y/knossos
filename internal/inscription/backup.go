@@ -65,7 +65,7 @@ func (b *BackupManager) CreateBackup() (string, error) {
 	if os.IsNotExist(err) {
 		return "", errors.NewWithDetails(errors.CodeFileNotFound,
 			"target file not found for backup",
-			map[string]interface{}{"path": b.TargetPath})
+			map[string]any{"path": b.TargetPath})
 	}
 	if err != nil {
 		return "", errors.Wrap(errors.CodeGeneralError, "failed to stat target file", err)
@@ -160,7 +160,7 @@ func (b *BackupManager) RestoreBackup(timestamp string) error {
 		if backupPath == "" {
 			return errors.NewWithDetails(errors.CodeFileNotFound,
 				"backup not found",
-				map[string]interface{}{"timestamp": timestamp})
+				map[string]any{"timestamp": timestamp})
 		}
 	}
 
@@ -317,7 +317,7 @@ func (b *BackupManager) DeleteBackup(timestamp string) error {
 	if backup == nil {
 		return errors.NewWithDetails(errors.CodeFileNotFound,
 			"backup not found",
-			map[string]interface{}{"timestamp": timestamp})
+			map[string]any{"timestamp": timestamp})
 	}
 
 	if err := os.Remove(backup.Path); err != nil {
@@ -343,7 +343,6 @@ func (b *BackupManager) DeleteAllBackups() error {
 
 	return nil
 }
-
 
 // BackupAndWrite creates a backup then writes new content atomically.
 // Returns the backup path if successful.
@@ -378,7 +377,7 @@ func (b *BackupManager) VerifyBackup(timestamp, expectedHash string) error {
 	if backup == nil {
 		return errors.NewWithDetails(errors.CodeFileNotFound,
 			"backup not found",
-			map[string]interface{}{"timestamp": timestamp})
+			map[string]any{"timestamp": timestamp})
 	}
 
 	content, err := os.ReadFile(backup.Path)
@@ -390,7 +389,7 @@ func (b *BackupManager) VerifyBackup(timestamp, expectedHash string) error {
 	if actualHash != expectedHash {
 		return errors.NewWithDetails(errors.CodeGeneralError,
 			"backup hash mismatch",
-			map[string]interface{}{
+			map[string]any{
 				"expected": expectedHash,
 				"actual":   actualHash,
 			})
@@ -405,7 +404,7 @@ func (b *BackupManager) GetBackupContent(timestamp string) (string, error) {
 	if backup == nil {
 		return "", errors.NewWithDetails(errors.CodeFileNotFound,
 			"backup not found",
-			map[string]interface{}{"timestamp": timestamp})
+			map[string]any{"timestamp": timestamp})
 	}
 
 	content, err := os.ReadFile(backup.Path)

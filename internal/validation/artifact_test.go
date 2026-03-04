@@ -3,6 +3,7 @@ package validation
 import (
 	"os"
 	"path/filepath"
+	"slices"
 	"testing"
 
 	"github.com/autom8y/knossos/internal/errors"
@@ -78,31 +79,31 @@ func TestDetectArtifactType_Frontmatter(t *testing.T) {
 	tests := []struct {
 		name        string
 		filename    string
-		frontmatter map[string]interface{}
+		frontmatter map[string]any
 		want        ArtifactType
 	}{
 		{
 			name:        "frontmatter type takes priority",
 			filename:    "some-file.md",
-			frontmatter: map[string]interface{}{"type": "prd"},
+			frontmatter: map[string]any{"type": "prd"},
 			want:        ArtifactTypePRD,
 		},
 		{
 			name:        "frontmatter overrides filename",
 			filename:    "TDD-something.md",
-			frontmatter: map[string]interface{}{"type": "prd"},
+			frontmatter: map[string]any{"type": "prd"},
 			want:        ArtifactTypePRD,
 		},
 		{
 			name:        "falls back to filename when no type field",
 			filename:    "PRD-feature.md",
-			frontmatter: map[string]interface{}{"title": "Feature"},
+			frontmatter: map[string]any{"title": "Feature"},
 			want:        ArtifactTypePRD,
 		},
 		{
 			name:        "unknown type in frontmatter falls back to filename",
 			filename:    "TDD-design.md",
-			frontmatter: map[string]interface{}{"type": "invalid"},
+			frontmatter: map[string]any{"type": "invalid"},
 			want:        ArtifactTypeTDD,
 		},
 	}
@@ -532,13 +533,7 @@ func TestValidArtifactTypes(t *testing.T) {
 	}
 
 	for _, e := range expected {
-		found := false
-		for _, t := range types {
-			if t == e {
-				found = true
-				break
-			}
-		}
+		found := slices.Contains(types, e)
 		if !found {
 			t.Errorf("ValidArtifactTypes() missing %q", e)
 		}
@@ -632,7 +627,7 @@ func TestArtifactValidator_Validate_AllSchemas(t *testing.T) {
 			}
 
 			// Validate with empty data to verify schema is loadable
-			_, err = validator.validateAgainstSchema(map[string]interface{}{}, schemaType)
+			_, err = validator.validateAgainstSchema(map[string]any{}, schemaType)
 			// We expect this to fail (missing required fields) but NOT with a schema loading error
 			if err != nil {
 				t.Errorf("validateAgainstSchema(%s) schema error: %v", schemaType, err)

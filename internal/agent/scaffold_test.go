@@ -117,10 +117,10 @@ func TestScaffoldAgent_AuthorSectionsHaveTODO(t *testing.T) {
 
 				// Extract content until the next ## heading or end of file
 				afterHeading := text[idx+len(section.Heading):]
-				nextHeading := strings.Index(afterHeading, "\n## ")
+				before, _, ok := strings.Cut(afterHeading, "\n## ")
 				var sectionContent string
-				if nextHeading >= 0 {
-					sectionContent = afterHeading[:nextHeading]
+				if ok {
+					sectionContent = before
 				} else {
 					sectionContent = afterHeading
 				}
@@ -159,10 +159,10 @@ func TestScaffoldAgent_PlatformSectionsHaveContent(t *testing.T) {
 				}
 
 				afterHeading := text[idx+len(section.Heading):]
-				nextHeading := strings.Index(afterHeading, "\n## ")
+				before, _, ok := strings.Cut(afterHeading, "\n## ")
 				var sectionContent string
-				if nextHeading >= 0 {
-					sectionContent = afterHeading[:nextHeading]
+				if ok {
+					sectionContent = before
 				} else {
 					sectionContent = afterHeading
 				}

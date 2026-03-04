@@ -105,7 +105,7 @@ func (v *SchemaValidator) Validate(m *Manifest, schemaName string, strict bool) 
 }
 
 // validateManifestStructure checks required fields for project manifest.
-func validateManifestStructure(content map[string]interface{}, result *ValidationResult) {
+func validateManifestStructure(content map[string]any, result *ValidationResult) {
 	// Required: version
 	if _, ok := content["version"]; !ok {
 		result.Issues = append(result.Issues, ValidationIssue{
@@ -126,7 +126,7 @@ func validateManifestStructure(content map[string]interface{}, result *Validatio
 }
 
 // validateRiteManifestStructure checks required fields for rite manifest.
-func validateRiteManifestStructure(content map[string]interface{}, result *ValidationResult) {
+func validateRiteManifestStructure(content map[string]any, result *ValidationResult) {
 	required := []string{"version", "name", "workflow", "agents"}
 	for _, field := range required {
 		if _, ok := content[field]; !ok {
@@ -139,7 +139,7 @@ func validateRiteManifestStructure(content map[string]interface{}, result *Valid
 	}
 
 	// Check workflow structure
-	if workflow, ok := content["workflow"].(map[string]interface{}); ok {
+	if workflow, ok := content["workflow"].(map[string]any); ok {
 		if _, ok := workflow["type"]; !ok {
 			result.Issues = append(result.Issues, ValidationIssue{
 				Path:     "$.workflow.type",
@@ -156,7 +156,6 @@ func validateRiteManifestStructure(content map[string]interface{}, result *Valid
 		}
 	}
 }
-
 
 // isValidVersion checks if a version string matches X.Y format.
 func isValidVersion(v string) bool {
@@ -195,7 +194,7 @@ func (v *SchemaValidator) ValidateBytes(data []byte, format Format, schemaName s
 	// Convert to JSON if YAML
 	var jsonData []byte
 	if format == FormatYAML {
-		var content interface{}
+		var content any
 		if err := yaml.Unmarshal(data, &content); err != nil {
 			result.Valid = false
 			result.Issues = append(result.Issues, ValidationIssue{
@@ -210,7 +209,7 @@ func (v *SchemaValidator) ValidateBytes(data []byte, format Format, schemaName s
 		jsonData = data
 	}
 
-	var parsed interface{}
+	var parsed any
 	if err := json.Unmarshal(jsonData, &parsed); err != nil {
 		result.Valid = false
 		result.Issues = append(result.Issues, ValidationIssue{
@@ -302,7 +301,7 @@ func jsonPointerToPath(location string) string {
 }
 
 // checkAdditionalProperties checks for properties not in the schema.
-func checkAdditionalProperties(content map[string]interface{}, schemaName string) []ValidationIssue {
+func checkAdditionalProperties(content map[string]any, schemaName string) []ValidationIssue {
 	// This is a simplified check - a full implementation would
 	// load the schema and walk the content tree
 	var warnings []ValidationIssue
@@ -373,7 +372,7 @@ func DetectSchemaFromPath(path string) (string, error) {
 
 	return "", errors.NewWithDetails(errors.CodeSchemaNotFound,
 		fmt.Sprintf("no schema detected for path: %s", path),
-		map[string]interface{}{"path": path})
+		map[string]any{"path": path})
 }
 
 // GetSchemaInfo returns information about the manifest schema.
@@ -409,4 +408,3 @@ type SchemaInfo struct {
 	Version string `json:"version"`
 	Valid   bool   `json:"valid,omitempty"`
 }
-

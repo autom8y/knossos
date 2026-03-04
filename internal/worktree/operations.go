@@ -25,7 +25,7 @@ type SyncResult struct {
 	Diverged  bool     `json:"diverged"`   // Both ahead and behind
 	UpToDate  bool     `json:"up_to_date"` // Exactly at upstream
 	Conflicts []string `json:"conflicts,omitempty"`
-	Pulled    bool     `json:"pulled"`    // If pull was performed
+	Pulled    bool     `json:"pulled"` // If pull was performed
 	PullError string   `json:"pull_error,omitempty"`
 }
 
@@ -76,7 +76,7 @@ func (m *Manager) Switch(idOrName string, opts WorktreeSwitchOptions) (*Worktree
 	if _, err := os.Stat(wt.Path); os.IsNotExist(err) {
 		return nil, errors.NewWithDetails(errors.CodeFileNotFound,
 			"worktree path no longer exists",
-			map[string]interface{}{
+			map[string]any{
 				"worktree_id": wt.ID,
 				"path":        wt.Path,
 			})
@@ -109,7 +109,7 @@ func (m *Manager) Clone(sourceIDOrName, newName string, opts CloneOptions) (*Wor
 	if err != nil {
 		return nil, errors.NewWithDetails(errors.CodeFileNotFound,
 			"source worktree not found",
-			map[string]interface{}{"source": sourceIDOrName})
+			map[string]any{"source": sourceIDOrName})
 	}
 
 	// Get current HEAD of source worktree
@@ -447,7 +447,7 @@ func (m *Manager) Import(archivePath string) (*Worktree, error) {
 	if meta.Version != archiveVersion {
 		return nil, errors.NewWithDetails(errors.CodeParseError,
 			"unsupported archive version",
-			map[string]interface{}{
+			map[string]any{
 				"expected": archiveVersion,
 				"actual":   meta.Version,
 			})
@@ -460,7 +460,7 @@ func (m *Manager) Import(archivePath string) (*Worktree, error) {
 		if !m.git.RefExists(meta.GitRef) {
 			return nil, errors.NewWithDetails(errors.CodeGeneralError,
 				"git ref from archive not found",
-				map[string]interface{}{"ref": meta.GitRef})
+				map[string]any{"ref": meta.GitRef})
 		}
 	}
 
@@ -680,7 +680,7 @@ func (m *Manager) setupWorktreeEcosystem(wtPath, riteName string) {
 	knossosSource := filepath.Join(m.rootDir, ".knossos")
 	if _, err := os.Stat(knossosSource); err == nil {
 		knossosDest := filepath.Join(wtPath, ".knossos")
-		_ = os.RemoveAll(knossosDest) // remove empty dir from ensureProjectDirs
+		_ = os.RemoveAll(knossosDest)              // remove empty dir from ensureProjectDirs
 		_ = os.Symlink(knossosSource, knossosDest) // best-effort
 	}
 
@@ -688,7 +688,7 @@ func (m *Manager) setupWorktreeEcosystem(wtPath, riteName string) {
 	knowSource := filepath.Join(m.rootDir, ".know")
 	if _, err := os.Stat(knowSource); err == nil {
 		knowDest := filepath.Join(wtPath, ".know")
-		_ = os.RemoveAll(knowDest) // remove if exists
+		_ = os.RemoveAll(knowDest)           // remove if exists
 		_ = os.Symlink(knowSource, knowDest) // best-effort
 	}
 

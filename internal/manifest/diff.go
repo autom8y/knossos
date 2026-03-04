@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"sort"
 	"strconv"
+	"strings"
 )
 
 // ChangeType represents the type of change.
@@ -22,10 +23,10 @@ const (
 
 // Change represents a single change between manifests.
 type Change struct {
-	Path     string      `json:"path"`
-	Type     ChangeType  `json:"type"`
-	OldValue interface{} `json:"old_value,omitempty"`
-	NewValue interface{} `json:"new_value,omitempty"`
+	Path     string     `json:"path"`
+	Type     ChangeType `json:"type"`
+	OldValue any        `json:"old_value,omitempty"`
+	NewValue any        `json:"new_value,omitempty"`
 }
 
 // DiffResult holds the result of comparing two manifests.
@@ -73,7 +74,7 @@ func Diff(base, compare *Manifest, opts ManifestDiffOptions) (*DiffResult, error
 }
 
 // walkAndCompare recursively compares two values and collects changes.
-func walkAndCompare(path string, base, compare interface{}, changes *[]Change, opts ManifestDiffOptions) {
+func walkAndCompare(path string, base, compare any, changes *[]Change, opts ManifestDiffOptions) {
 	// Handle nil cases
 	if base == nil && compare == nil {
 		return
@@ -109,12 +110,12 @@ func walkAndCompare(path string, base, compare interface{}, changes *[]Change, o
 	}
 
 	switch baseVal := base.(type) {
-	case map[string]interface{}:
-		compareVal := compare.(map[string]interface{})
+	case map[string]any:
+		compareVal := compare.(map[string]any)
 		compareMaps(path, baseVal, compareVal, changes, opts)
 
-	case []interface{}:
-		compareVal := compare.([]interface{})
+	case []any:
+		compareVal := compare.([]any)
 		if opts.IgnoreOrder {
 			compareArraysAsSet(path, baseVal, compareVal, changes)
 		} else {
@@ -135,7 +136,7 @@ func walkAndCompare(path string, base, compare interface{}, changes *[]Change, o
 }
 
 // compareMaps compares two map values.
-func compareMaps(path string, base, compare map[string]interface{}, changes *[]Change, opts ManifestDiffOptions) {
+func compareMaps(path string, base, compare map[string]any, changes *[]Change, opts ManifestDiffOptions) {
 	// Get all keys from both maps
 	allKeys := make(map[string]bool)
 	for k := range base {
@@ -176,13 +177,10 @@ func compareMaps(path string, base, compare map[string]interface{}, changes *[]C
 }
 
 // compareArrays compares two arrays maintaining order.
-func compareArrays(path string, base, compare []interface{}, changes *[]Change, opts ManifestDiffOptions) {
-	maxLen := len(base)
-	if len(compare) > maxLen {
-		maxLen = len(compare)
-	}
+func compareArrays(path string, base, compare []any, changes *[]Change, opts ManifestDiffOptions) {
+	maxLen := max(len(compare), len(base))
 
-	for i := 0; i < maxLen; i++ {
+	for i := range maxLen {
 		indexPath := path + "[" + strconv.Itoa(i) + "]"
 
 		if i >= len(base) {
@@ -204,9 +202,9 @@ func compareArrays(path string, base, compare []interface{}, changes *[]Change, 
 }
 
 // compareArraysAsSet compares arrays treating them as sets (ignoring order).
-func compareArraysAsSet(path string, base, compare []interface{}, changes *[]Change) {
-	baseSet := make(map[string]interface{})
-	compareSet := make(map[string]interface{})
+func compareArraysAsSet(path string, base, compare []any, changes *[]Change) {
+	baseSet := make(map[string]any)
+	compareSet := make(map[string]any)
 
 	// Convert to sets using JSON as key
 	for _, v := range base {
@@ -242,7 +240,7 @@ func compareArraysAsSet(path string, base, compare []interface{}, changes *[]Cha
 }
 
 // toJSONKey converts a value to a JSON string for use as a map key.
-func toJSONKey(v interface{}) string {
+func toJSONKey(v any) string {
 	data, _ := json.Marshal(v)
 	return string(data)
 }
@@ -253,30 +251,30 @@ func (d *DiffResult) FormatUnified() string {
 		return ""
 	}
 
-	var result string
-	result += "--- " + d.Base + "\n"
-	result += "+++ " + d.Compare + "\n"
-	result += "\n"
+	var result strings.Builder
+	result.WriteString("--- " + d.Base + "\n")
+	result.WriteString("+++ " + d.Compare + "\n")
+	result.WriteString("\n")
 
 	// Group changes by top-level path
 	groups := groupChangesBySection(d.Changes)
 	for section, sectionChanges := range groups {
-		result += "@@ " + section + " @@\n"
+		result.WriteString("@@ " + section + " @@\n")
 		for _, c := range sectionChanges {
 			switch c.Type {
 			case ChangeRemoved:
-				result += formatValue("-", c.OldValue)
+				result.WriteString(formatValue("-", c.OldValue))
 			case ChangeAdded:
-				result += formatValue("+", c.NewValue)
+				result.WriteString(formatValue("+", c.NewValue))
 			case ChangeModified:
-				result += formatValue("-", c.OldValue)
-				result += formatValue("+", c.NewValue)
+				result.WriteString(formatValue("-", c.OldValue))
+				result.WriteString(formatValue("+", c.NewValue))
 			}
 		}
-		result += "\n"
+		result.WriteString("\n")
 	}
 
-	return result
+	return result.String()
 }
 
 // groupChangesBySection groups changes by their top-level key.
@@ -306,14 +304,14 @@ func extractSection(path string) string {
 }
 
 // formatValue formats a value for unified diff output.
-func formatValue(prefix string, val interface{}) string {
+func formatValue(prefix string, val any) string {
 	data, _ := json.MarshalIndent(val, "", "  ")
 	lines := splitLines(string(data))
-	var result string
+	var result strings.Builder
 	for _, line := range lines {
-		result += prefix + "  " + line + "\n"
+		result.WriteString(prefix + "  " + line + "\n")
 	}
-	return result
+	return result.String()
 }
 
 // splitLines splits a string into lines.

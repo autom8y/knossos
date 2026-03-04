@@ -3,6 +3,7 @@ package agent
 import (
 	"fmt"
 	"sort"
+	"strings"
 
 	"github.com/autom8y/knossos/internal/errors"
 )
@@ -187,7 +188,7 @@ func GetArchetype(name string) (*Archetype, error) {
 	if !ok {
 		return nil, errors.NewWithDetails(errors.CodeUsageError,
 			fmt.Sprintf("unknown archetype %q, must be one of: %s", name, listArchetypeNames()),
-			map[string]interface{}{"archetype": name, "available": ListArchetypes()})
+			map[string]any{"archetype": name, "available": ListArchetypes()})
 	}
 	return a, nil
 }
@@ -205,14 +206,14 @@ func ListArchetypes() []string {
 // listArchetypeNames returns a comma-separated string of archetype names for error messages.
 func listArchetypeNames() string {
 	names := ListArchetypes()
-	result := ""
+	var result strings.Builder
 	for i, name := range names {
 		if i > 0 {
-			result += ", "
+			result.WriteString(", ")
 		}
-		result += name
+		result.WriteString(name)
 	}
-	return result
+	return result.String()
 }
 
 // AuthorSections returns only the author-owned sections for this archetype.

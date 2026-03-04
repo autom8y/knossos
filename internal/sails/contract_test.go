@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"slices"
 	"testing"
 
 	"github.com/autom8y/knossos/internal/hook/clewcontract"
@@ -101,7 +102,7 @@ func TestValidateClewContract_HandoffViolations(t *testing.T) {
 				{
 					Type:    clewcontract.EventTypeHandoffExecuted,
 					Summary: "Handoff executed",
-					Meta:    map[string]interface{}{},
+					Meta:    map[string]any{},
 				},
 			},
 			expectedViolation: "handoff_missing_metadata",
@@ -169,7 +170,7 @@ func TestValidateClewContract_TaskViolations(t *testing.T) {
 				{
 					Type:    clewcontract.EventTypeTaskStart,
 					Summary: "Task started",
-					Meta:    map[string]interface{}{},
+					Meta:    map[string]any{},
 				},
 			},
 			expectedViolation: "task_missing_id",
@@ -180,7 +181,7 @@ func TestValidateClewContract_TaskViolations(t *testing.T) {
 				{
 					Type:    clewcontract.EventTypeTaskEnd,
 					Summary: "Task ended",
-					Meta:    map[string]interface{}{},
+					Meta:    map[string]any{},
 				},
 			},
 			expectedViolation: "task_missing_id",
@@ -319,13 +320,7 @@ proofs:
 	}
 
 	// Verify that reasons mention the downgrade
-	foundDowngradeReason := false
-	for _, reason := range result.Reasons {
-		if reason == "clew contract violations present: downgraded to GRAY" {
-			foundDowngradeReason = true
-			break
-		}
-	}
+	foundDowngradeReason := slices.Contains(result.Reasons, "clew contract violations present: downgraded to GRAY")
 	if !foundDowngradeReason {
 		t.Errorf("CheckGate() expected downgrade reason in reasons, got: %+v", result.Reasons)
 	}

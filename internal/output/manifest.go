@@ -14,12 +14,12 @@ import (
 
 // ManifestShowOutput represents the manifest show command output.
 type ManifestShowOutput struct {
-	Path    string                 `json:"path"`
-	Exists  bool                   `json:"exists"`
-	Format  string                 `json:"format,omitempty"`
-	Schema  *ManifestSchemaInfo    `json:"schema,omitempty"`
-	Content map[string]interface{} `json:"content,omitempty"`
-	Error   string                 `json:"error,omitempty"`
+	Path    string              `json:"path"`
+	Exists  bool                `json:"exists"`
+	Format  string              `json:"format,omitempty"`
+	Schema  *ManifestSchemaInfo `json:"schema,omitempty"`
+	Content map[string]any      `json:"content,omitempty"`
+	Error   string              `json:"error,omitempty"`
 }
 
 // ManifestSchemaInfo holds schema metadata.
@@ -51,7 +51,7 @@ func (m ManifestShowOutput) Text() string {
 
 	// Format content sections
 	if m.Content != nil {
-		if project, ok := m.Content["project"].(map[string]interface{}); ok {
+		if project, ok := m.Content["project"].(map[string]any); ok {
 			if name, ok := project["name"].(string); ok {
 				b.WriteString(fmt.Sprintf("Project: %s\n", name))
 			}
@@ -62,12 +62,12 @@ func (m ManifestShowOutput) Text() string {
 
 		b.WriteString("\n")
 
-		if teams, ok := m.Content["teams"].(map[string]interface{}); ok {
+		if teams, ok := m.Content["teams"].(map[string]any); ok {
 			b.WriteString("Rites:\n")
 			if def, ok := teams["default"].(string); ok {
 				b.WriteString(fmt.Sprintf("  Default: %s\n", def))
 			}
-			if avail, ok := teams["available"].([]interface{}); ok {
+			if avail, ok := teams["available"].([]any); ok {
 				names := make([]string, len(avail))
 				for i, v := range avail {
 					names[i] = fmt.Sprintf("%v", v)
@@ -76,7 +76,7 @@ func (m ManifestShowOutput) Text() string {
 			}
 		}
 
-		if paths, ok := m.Content["paths"].(map[string]interface{}); ok {
+		if paths, ok := m.Content["paths"].(map[string]any); ok {
 			b.WriteString("\nPaths:\n")
 			for key, val := range paths {
 				b.WriteString(fmt.Sprintf("  %s: %v\n", cases.Title(language.English).String(key), val))
@@ -89,11 +89,11 @@ func (m ManifestShowOutput) Text() string {
 
 // ManifestValidateOutput represents the manifest validate command output.
 type ManifestValidateOutput struct {
-	Path     string                     `json:"path"`
-	Schema   string                     `json:"schema"`
-	Valid    bool                       `json:"valid"`
-	Issues   []ManifestValidationIssue  `json:"issues"`
-	Warnings []ManifestValidationIssue  `json:"warnings"`
+	Path     string                    `json:"path"`
+	Schema   string                    `json:"schema"`
+	Valid    bool                      `json:"valid"`
+	Issues   []ManifestValidationIssue `json:"issues"`
+	Warnings []ManifestValidationIssue `json:"warnings"`
 }
 
 // ManifestValidationIssue represents a validation issue.
@@ -128,22 +128,22 @@ func (v ManifestValidateOutput) Text() string {
 
 // ManifestDiffOutput represents the manifest diff command output.
 type ManifestDiffOutput struct {
-	Base          string                `json:"base"`
-	Compare       string                `json:"compare"`
-	HasChanges    bool                  `json:"has_changes"`
-	Changes       []ManifestDiffChange  `json:"changes"`
-	Additions     int                   `json:"additions"`
-	Modifications int                   `json:"modifications"`
-	Deletions     int                   `json:"deletions"`
-	UnifiedDiff   string                `json:"-"` // For text output
+	Base          string               `json:"base"`
+	Compare       string               `json:"compare"`
+	HasChanges    bool                 `json:"has_changes"`
+	Changes       []ManifestDiffChange `json:"changes"`
+	Additions     int                  `json:"additions"`
+	Modifications int                  `json:"modifications"`
+	Deletions     int                  `json:"deletions"`
+	UnifiedDiff   string               `json:"-"` // For text output
 }
 
 // ManifestDiffChange represents a single change.
 type ManifestDiffChange struct {
-	Path     string      `json:"path"`
-	Type     string      `json:"type"`
-	OldValue interface{} `json:"old_value,omitempty"`
-	NewValue interface{} `json:"new_value,omitempty"`
+	Path     string `json:"path"`
+	Type     string `json:"type"`
+	OldValue any    `json:"old_value,omitempty"`
+	NewValue any    `json:"new_value,omitempty"`
 }
 
 // Text implements Textable for ManifestDiffOutput.
@@ -178,24 +178,24 @@ func (d ManifestDiffOutput) Text() string {
 
 // ManifestMergeOutput represents the manifest merge command output.
 type ManifestMergeOutput struct {
-	Base          string                   `json:"base"`
-	Ours          string                   `json:"ours"`
-	Theirs        string                   `json:"theirs"`
-	Strategy      string                   `json:"strategy"`
-	HasConflicts  bool                     `json:"has_conflicts"`
-	Conflicts     []ManifestMergeConflict  `json:"conflicts,omitempty"`
-	Merged        map[string]interface{}   `json:"merged,omitempty"`
-	MergedMarkers string                   `json:"merged_with_markers,omitempty"`
-	Changes       *ManifestMergeChanges    `json:"changes,omitempty"`
-	OutputPath    string                   `json:"output_path,omitempty"`
+	Base          string                  `json:"base"`
+	Ours          string                  `json:"ours"`
+	Theirs        string                  `json:"theirs"`
+	Strategy      string                  `json:"strategy"`
+	HasConflicts  bool                    `json:"has_conflicts"`
+	Conflicts     []ManifestMergeConflict `json:"conflicts,omitempty"`
+	Merged        map[string]any          `json:"merged,omitempty"`
+	MergedMarkers string                  `json:"merged_with_markers,omitempty"`
+	Changes       *ManifestMergeChanges   `json:"changes,omitempty"`
+	OutputPath    string                  `json:"output_path,omitempty"`
 }
 
 // ManifestMergeConflict represents a merge conflict.
 type ManifestMergeConflict struct {
-	Path        string      `json:"path"`
-	BaseValue   interface{} `json:"base_value"`
-	OursValue   interface{} `json:"ours_value"`
-	TheirsValue interface{} `json:"theirs_value"`
+	Path        string `json:"path"`
+	BaseValue   any    `json:"base_value"`
+	OursValue   any    `json:"ours_value"`
+	TheirsValue any    `json:"theirs_value"`
 }
 
 // ManifestMergeChanges tracks change sources.

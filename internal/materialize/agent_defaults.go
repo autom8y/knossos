@@ -1,5 +1,7 @@
 package materialize
 
+import "maps"
+
 // appendListFields are list fields where agent values are APPENDED to defaults.
 // Deduplication preserves first-occurrence order (defaults before agent).
 // skills was removed: skill injection is now handled exclusively by skill_policies.
@@ -25,20 +27,18 @@ var replaceListFields = map[string]bool{
 //   - Missing agent value: use default
 //   - Missing default: use agent value as-is
 //   - Nil/empty defaults: no-op, return agent frontmatter unchanged
-func MergeAgentDefaults(defaults map[string]interface{}, agentFM map[string]interface{}) map[string]interface{} {
+func MergeAgentDefaults(defaults map[string]any, agentFM map[string]any) map[string]any {
 	if len(defaults) == 0 {
 		return agentFM
 	}
 	if agentFM == nil {
-		agentFM = make(map[string]interface{})
+		agentFM = make(map[string]any)
 	}
 
-	result := make(map[string]interface{}, len(agentFM)+len(defaults))
+	result := make(map[string]any, len(agentFM)+len(defaults))
 
 	// Start with all agent values
-	for k, v := range agentFM {
-		result[k] = v
-	}
+	maps.Copy(result, agentFM)
 
 	// Merge defaults for keys not in agent, or apply field-specific merge
 	for key, defaultVal := range defaults {
@@ -77,7 +77,7 @@ func MergeAgentDefaults(defaults map[string]interface{}, agentFM map[string]inte
 
 // mergeAppendLists appends agent list items to default list items, deduplicating.
 // Returns the merged list preserving first-occurrence order (defaults first, then agent).
-func mergeAppendLists(defaultVal, agentVal interface{}) interface{} {
+func mergeAppendLists(defaultVal, agentVal any) any {
 	defaultItems := toStringSlice(defaultVal)
 	agentItems := toStringSlice(agentVal)
 
@@ -89,12 +89,10 @@ func mergeAppendLists(defaultVal, agentVal interface{}) interface{} {
 }
 
 // deepMergeMaps merges two string-keyed maps. Agent keys win on conflict.
-func deepMergeMaps(base, override map[string]interface{}) map[string]interface{} {
-	result := make(map[string]interface{}, len(base)+len(override))
+func deepMergeMaps(base, override map[string]any) map[string]any {
+	result := make(map[string]any, len(base)+len(override))
 
-	for k, v := range base {
-		result[k] = v
-	}
+	maps.Copy(result, base)
 
 	for k, v := range override {
 		if baseVal, exists := result[k]; exists {
@@ -113,13 +111,13 @@ func deepMergeMaps(base, override map[string]interface{}) map[string]interface{}
 
 // toStringMap attempts to convert an interface{} to map[string]interface{}.
 // Handles both Go-native maps and YAML-unmarshaled maps.
-func toStringMap(v interface{}) (map[string]interface{}, bool) {
+func toStringMap(v any) (map[string]any, bool) {
 	switch m := v.(type) {
-	case map[string]interface{}:
+	case map[string]any:
 		return m, true
-	case map[interface{}]interface{}:
+	case map[any]any:
 		// YAML sometimes produces this type
-		result := make(map[string]interface{}, len(m))
+		result := make(map[string]any, len(m))
 		for k, val := range m {
 			if ks, ok := k.(string); ok {
 				result[ks] = val
@@ -132,9 +130,9 @@ func toStringMap(v interface{}) (map[string]interface{}, bool) {
 
 // toStringSlice converts an interface{} that may be a []interface{} or []string
 // into a []string. Returns nil if the value is not a recognized list type.
-func toStringSlice(v interface{}) []string {
+func toStringSlice(v any) []string {
 	switch s := v.(type) {
-	case []interface{}:
+	case []any:
 		result := make([]string, 0, len(s))
 		for _, item := range s {
 			if str, ok := item.(string); ok {
@@ -149,8 +147,8 @@ func toStringSlice(v interface{}) []string {
 }
 
 // toInterfaceSlice converts []string to []interface{} for YAML map compatibility.
-func toInterfaceSlice(items []string) []interface{} {
-	result := make([]interface{}, len(items))
+func toInterfaceSlice(items []string) []any {
+	result := make([]any, len(items))
 	for i, item := range items {
 		result[i] = item
 	}

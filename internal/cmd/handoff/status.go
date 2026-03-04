@@ -65,7 +65,7 @@ func runStatus(ctx *cmdContext) error {
 	eventsPath := resolver.SessionEventsFile(sessionID)
 	events, err := readAllEvents(eventsPath)
 	if err != nil && !os.IsNotExist(err) {
-		printer.VerboseLog("warn", "failed to read events", map[string]interface{}{"error": err.Error()})
+		printer.VerboseLog("warn", "failed to read events", map[string]any{"error": err.Error()})
 	}
 
 	// Filter events by sessionID to avoid cross-session contamination (C3 edge case)
@@ -152,21 +152,21 @@ func filterEventsBySession(events []GenericEvent, sessionID string) []GenericEve
 // GenericEvent represents either a session event or a clew contract event.
 type GenericEvent struct {
 	// Session event fields
-	Timestamp string                 `json:"timestamp,omitempty"`
-	Event     string                 `json:"event,omitempty"`
-	From      string                 `json:"from,omitempty"`
-	To        string                 `json:"to,omitempty"`
-	FromPhase string                 `json:"from_phase,omitempty"`
-	ToPhase   string                 `json:"to_phase,omitempty"`
-	Metadata  map[string]interface{} `json:"metadata,omitempty"`
+	Timestamp string         `json:"timestamp,omitempty"`
+	Event     string         `json:"event,omitempty"`
+	From      string         `json:"from,omitempty"`
+	To        string         `json:"to,omitempty"`
+	FromPhase string         `json:"from_phase,omitempty"`
+	ToPhase   string         `json:"to_phase,omitempty"`
+	Metadata  map[string]any `json:"metadata,omitempty"`
 
 	// Clew contract event fields
-	Ts      string                 `json:"ts,omitempty"`
-	Type    string                 `json:"type,omitempty"`
-	Tool    string                 `json:"tool,omitempty"`
-	Path    string                 `json:"path,omitempty"`
-	Summary string                 `json:"summary,omitempty"`
-	Meta    map[string]interface{} `json:"meta,omitempty"`
+	Ts      string         `json:"ts,omitempty"`
+	Type    string         `json:"type,omitempty"`
+	Tool    string         `json:"tool,omitempty"`
+	Path    string         `json:"path,omitempty"`
+	Summary string         `json:"summary,omitempty"`
+	Meta    map[string]any `json:"meta,omitempty"`
 }
 
 // GetTimestamp returns the timestamp from either field.

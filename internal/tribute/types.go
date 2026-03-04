@@ -221,18 +221,18 @@ type WhiteSailsData struct {
 // Events can have different schemas, so we use interface{} for flexible parsing.
 type EventData struct {
 	// Common fields across event types
-	Timestamp string                 `json:"timestamp,omitempty"` // Standard events
-	Ts        string                 `json:"ts,omitempty"`        // Hook-generated events
-	Event     string                 `json:"event,omitempty"`     // Standard event type
-	Type      string                 `json:"type,omitempty"`      // Hook event type
-	From      string                 `json:"from,omitempty"`
-	To        string                 `json:"to,omitempty"`
-	FromPhase string                 `json:"from_phase,omitempty"`
-	ToPhase   string                 `json:"to_phase,omitempty"`
-	Path      string                 `json:"path,omitempty"`
-	Summary   string                 `json:"summary,omitempty"`
-	Metadata  map[string]interface{} `json:"metadata,omitempty"`
-	Meta      map[string]interface{} `json:"meta,omitempty"` // Hook events use "meta"
+	Timestamp string         `json:"timestamp,omitempty"` // Standard events
+	Ts        string         `json:"ts,omitempty"`        // Hook-generated events
+	Event     string         `json:"event,omitempty"`     // Standard event type
+	Type      string         `json:"type,omitempty"`      // Hook event type
+	From      string         `json:"from,omitempty"`
+	To        string         `json:"to,omitempty"`
+	FromPhase string         `json:"from_phase,omitempty"`
+	ToPhase   string         `json:"to_phase,omitempty"`
+	Path      string         `json:"path,omitempty"`
+	Summary   string         `json:"summary,omitempty"`
+	Metadata  map[string]any `json:"metadata,omitempty"`
+	Meta      map[string]any `json:"meta,omitempty"` // Hook events use "meta"
 
 	// Decision-specific fields
 	Decision  string   `json:"decision,omitempty"`
@@ -264,7 +264,7 @@ func (e *EventData) GetEventType() string {
 }
 
 // GetMetadata returns metadata from either format.
-func (e *EventData) GetMetadata() map[string]interface{} {
+func (e *EventData) GetMetadata() map[string]any {
 	if e.Metadata != nil {
 		return e.Metadata
 	}

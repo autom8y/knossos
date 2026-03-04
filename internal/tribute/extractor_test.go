@@ -123,14 +123,14 @@ func TestExtractor_ExtractPhases(t *testing.T) {
 			Event:     "PHASE_TRANSITIONED",
 			FromPhase: "",
 			ToPhase:   "requirements",
-			Metadata:  map[string]interface{}{"agent": "requirements-analyst"},
+			Metadata:  map[string]any{"agent": "requirements-analyst"},
 		},
 		{
 			Timestamp: "2026-01-06T12:00:00Z",
 			Event:     "PHASE_TRANSITIONED",
 			FromPhase: "requirements",
 			ToPhase:   "design",
-			Metadata:  map[string]interface{}{"agent": "architect"},
+			Metadata:  map[string]any{"agent": "architect"},
 		},
 	}
 
@@ -167,14 +167,14 @@ func TestExtractor_ExtractMetrics(t *testing.T) {
 		{Type: "tool.call"},
 		{
 			Type: "tool.file_change",
-			Meta: map[string]interface{}{
+			Meta: map[string]any{
 				"lines_added":   float64(100),
 				"lines_removed": float64(20),
 			},
 		},
 		{
 			Type: "tool.file_change",
-			Meta: map[string]interface{}{
+			Meta: map[string]any{
 				"lines_added":   float64(50),
 				"lines_removed": float64(10),
 			},

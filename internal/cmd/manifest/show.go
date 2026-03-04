@@ -101,12 +101,12 @@ func runShow(ctx *cmdContext, opts showOptions) error {
 }
 
 // applyDefaults applies default values to manifest content.
-func applyDefaults(content map[string]interface{}) {
+func applyDefaults(content map[string]any) {
 	// Apply default paths if not set
 	if _, ok := content["paths"]; !ok {
-		content["paths"] = map[string]interface{}{}
+		content["paths"] = map[string]any{}
 	}
-	paths, _ := content["paths"].(map[string]interface{})
+	paths, _ := content["paths"].(map[string]any)
 
 	defaults := map[string]string{
 		"sessions": ".sos/sessions",
@@ -122,11 +122,11 @@ func applyDefaults(content map[string]interface{}) {
 
 	// Apply default settings if not set
 	if _, ok := content["settings"]; !ok {
-		content["settings"] = map[string]interface{}{}
+		content["settings"] = map[string]any{}
 	}
-	settings, _ := content["settings"].(map[string]interface{})
+	settings, _ := content["settings"].(map[string]any)
 
-	settingDefaults := map[string]interface{}{
+	settingDefaults := map[string]any{
 		"auto_park_on_stop": true,
 		"require_session":   false,
 	}

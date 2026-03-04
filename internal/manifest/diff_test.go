@@ -10,8 +10,8 @@ func TestDiff(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
 		name      string
-		a         map[string]interface{}
-		b         map[string]interface{}
+		a         map[string]any
+		b         map[string]any
 		wantDiff  bool
 		additions int
 		mods      int
@@ -19,40 +19,40 @@ func TestDiff(t *testing.T) {
 	}{
 		{
 			name:     "identical manifests",
-			a:        map[string]interface{}{"version": "1.0"},
-			b:        map[string]interface{}{"version": "1.0"},
+			a:        map[string]any{"version": "1.0"},
+			b:        map[string]any{"version": "1.0"},
 			wantDiff: false,
 		},
 		{
 			name:      "added field",
-			a:         map[string]interface{}{"version": "1.0"},
-			b:         map[string]interface{}{"version": "1.0", "name": "test"},
+			a:         map[string]any{"version": "1.0"},
+			b:         map[string]any{"version": "1.0", "name": "test"},
 			wantDiff:  true,
 			additions: 1,
 		},
 		{
 			name:     "modified field",
-			a:        map[string]interface{}{"version": "1.0"},
-			b:        map[string]interface{}{"version": "2.0"},
+			a:        map[string]any{"version": "1.0"},
+			b:        map[string]any{"version": "2.0"},
 			wantDiff: true,
 			mods:     1,
 		},
 		{
 			name:     "removed field",
-			a:        map[string]interface{}{"version": "1.0", "name": "test"},
-			b:        map[string]interface{}{"version": "1.0"},
+			a:        map[string]any{"version": "1.0", "name": "test"},
+			b:        map[string]any{"version": "1.0"},
 			wantDiff: true,
 			removals: 1,
 		},
 		{
 			name: "nested modification",
-			a: map[string]interface{}{
-				"project": map[string]interface{}{
+			a: map[string]any{
+				"project": map[string]any{
 					"name": "old",
 				},
 			},
-			b: map[string]interface{}{
-				"project": map[string]interface{}{
+			b: map[string]any{
+				"project": map[string]any{
 					"name": "new",
 				},
 			},
@@ -91,13 +91,13 @@ func TestDiff(t *testing.T) {
 func TestDiffFormatUnified(t *testing.T) {
 	t.Parallel()
 	mA := &manifest.Manifest{
-		Content: map[string]interface{}{
+		Content: map[string]any{
 			"version": "1.0",
 			"old":     "value",
 		},
 	}
 	mB := &manifest.Manifest{
-		Content: map[string]interface{}{
+		Content: map[string]any{
 			"version": "2.0",
 			"new":     "value",
 		},

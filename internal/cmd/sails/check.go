@@ -115,7 +115,7 @@ func runCheck(ctx *cmdContext, flags *checkFlags, args []string) error {
 }
 
 // formatGateResult formats the gate result for output.
-func formatGateResult(result *sails.GateResult) interface{} {
+func formatGateResult(result *sails.GateResult) any {
 	// For JSON/YAML output, return the struct directly
 	// For text output, this will be formatted by the printer
 
@@ -134,15 +134,15 @@ func formatGateResult(result *sails.GateResult) interface{} {
 
 // gateOutput is the structured output for the check command.
 type gateOutput struct {
-	Pass               bool                       `json:"pass" yaml:"pass"`
-	Color              string                     `json:"color" yaml:"color"`
-	SessionID          string                     `json:"session_id" yaml:"session_id"`
-	Reasons            []string                   `json:"reasons" yaml:"reasons"`
-	FilePath           string                     `json:"file_path" yaml:"file_path"`
-	ComputedBase       string                     `json:"computed_base,omitempty" yaml:"computed_base,omitempty"`
-	OpenQuestions      []string                   `json:"open_questions,omitempty" yaml:"open_questions,omitempty"`
-	ContractViolations []sails.ContractViolation  `json:"contract_violations,omitempty" yaml:"contract_violations,omitempty"`
-	Summary            string                     `json:"summary" yaml:"summary"`
+	Pass               bool                      `json:"pass" yaml:"pass"`
+	Color              string                    `json:"color" yaml:"color"`
+	SessionID          string                    `json:"session_id" yaml:"session_id"`
+	Reasons            []string                  `json:"reasons" yaml:"reasons"`
+	FilePath           string                    `json:"file_path" yaml:"file_path"`
+	ComputedBase       string                    `json:"computed_base,omitempty" yaml:"computed_base,omitempty"`
+	OpenQuestions      []string                  `json:"open_questions,omitempty" yaml:"open_questions,omitempty"`
+	ContractViolations []sails.ContractViolation `json:"contract_violations,omitempty" yaml:"contract_violations,omitempty"`
+	Summary            string                    `json:"summary" yaml:"summary"`
 }
 
 // String returns the text representation of the gate output.

@@ -79,7 +79,7 @@ Dimensions:
 			default:
 				e := errors.NewWithDetails(errors.CodeUsageError,
 					"invalid dimension",
-					map[string]interface{}{"by": by, "valid": "phase, type, specialist, session"})
+					map[string]any{"by": by, "valid": "phase, type, specialist, session"})
 				printer.PrintError(e)
 				return e
 			}
@@ -89,7 +89,7 @@ Dimensions:
 			if format == output.FormatText {
 				printCountsTable(by, counts, total)
 			} else {
-				out := map[string]interface{}{
+				out := map[string]any{
 					"dimension": by,
 					"counts":    counts,
 					"total":     total,

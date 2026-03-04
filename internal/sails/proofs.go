@@ -96,14 +96,14 @@ func CollectProofs(sessionDir string) (*ProofSet, error) {
 		if os.IsNotExist(err) {
 			return nil, errors.NewWithDetails(errors.CodeSessionNotFound,
 				"session directory not found",
-				map[string]interface{}{"path": sessionDir})
+				map[string]any{"path": sessionDir})
 		}
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to access session directory", err)
 	}
 	if !info.IsDir() {
 		return nil, errors.NewWithDetails(errors.CodeUsageError,
 			"path is not a directory",
-			map[string]interface{}{"path": sessionDir})
+			map[string]any{"path": sessionDir})
 	}
 
 	proofSet := &ProofSet{}

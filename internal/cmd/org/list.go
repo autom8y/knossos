@@ -37,7 +37,7 @@ func runList(ctx *cmdContext) error {
 	entries, err := os.ReadDir(orgsDir)
 	if err != nil {
 		if os.IsNotExist(err) {
-			_ = printer.Print(map[string]interface{}{
+			_ = printer.Print(map[string]any{
 				"status": "empty",
 				"orgs":   []string{},
 			})
@@ -47,12 +47,12 @@ func runList(ctx *cmdContext) error {
 	}
 
 	activeOrg := config.ActiveOrg()
-	var orgs []map[string]interface{}
+	var orgs []map[string]any
 	for _, entry := range entries {
 		if !entry.IsDir() {
 			continue
 		}
-		org := map[string]interface{}{
+		org := map[string]any{
 			"name": entry.Name(),
 		}
 		if entry.Name() == activeOrg {
@@ -61,7 +61,7 @@ func runList(ctx *cmdContext) error {
 		orgs = append(orgs, org)
 	}
 
-	_ = printer.Print(map[string]interface{}{
+	_ = printer.Print(map[string]any{
 		"status": "ok",
 		"orgs":   orgs,
 		"count":  len(orgs),

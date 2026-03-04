@@ -47,7 +47,7 @@ type ValidationIssue struct {
 	Message string `json:"message"`
 
 	// Value is the actual value that failed validation (if applicable).
-	Value interface{} `json:"value,omitempty"`
+	Value any `json:"value,omitempty"`
 }
 
 // AgentValidator validates agent files against the schema and semantic rules.
@@ -71,7 +71,7 @@ func (av *AgentValidator) ValidateAgentFile(path string, mode ValidationMode) (*
 		if os.IsNotExist(err) {
 			return nil, errors.NewWithDetails(errors.CodeFileNotFound,
 				"agent file not found",
-				map[string]interface{}{"path": path})
+				map[string]any{"path": path})
 		}
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to read agent file", err)
 	}
@@ -122,7 +122,7 @@ func (av *AgentValidator) validateSchema(fm *AgentFrontmatter) ([]ValidationIssu
 		return issues, warnings
 	}
 
-	var data interface{}
+	var data any
 	if err := json.Unmarshal(jsonBytes, &data); err != nil {
 		issues = append(issues, ValidationIssue{
 			Message: fmt.Sprintf("failed to prepare data for schema validation: %s", err.Error()),

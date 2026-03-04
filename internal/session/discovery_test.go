@@ -232,7 +232,7 @@ func TestFindActiveSession_Performance(t *testing.T) {
 	sessionsDir := filepath.Join(tmpDir, "sessions")
 
 	// Create 9 PARKED sessions and 1 ACTIVE session (last alphabetically)
-	for i := 0; i < 9; i++ {
+	for i := range 9 {
 		sessionID := fmt.Sprintf("session-20260201-10%02d00-parked%02d", i, i)
 		writeSessionContext(t, sessionsDir, sessionID, "PARKED")
 	}

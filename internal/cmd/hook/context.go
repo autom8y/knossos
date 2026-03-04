@@ -134,14 +134,14 @@ func runContextCore(ctx *cmdContext, printer *output.Printer) error {
 	// Verify this is a SessionStart event (or allow for testing without event)
 	if hookEnv.Event != "" && hookEnv.Event != hook.EventSessionStart {
 		printer.VerboseLog("debug", "skipping context hook for non-SessionStart event",
-			map[string]interface{}{"event": string(hookEnv.Event)})
+			map[string]any{"event": string(hookEnv.Event)})
 		return outputNoSession(printer)
 	}
 
 	// Resolve session context
 	resolver, sessionID, err := ctx.resolveSession(hookEnv)
 	if err != nil {
-		printer.VerboseLog("warn", "failed to read current session", map[string]interface{}{"error": err.Error()})
+		printer.VerboseLog("warn", "failed to read current session", map[string]any{"error": err.Error()})
 		return outputNoSession(printer)
 	}
 
@@ -154,7 +154,7 @@ func runContextCore(ctx *cmdContext, printer *output.Printer) error {
 	sessCtx, err := session.LoadContext(ctxPath)
 	if err != nil {
 		printer.VerboseLog("warn", "failed to load session context",
-			map[string]interface{}{"session_id": sessionID, "error": err.Error()})
+			map[string]any{"session_id": sessionID, "error": err.Error()})
 		return outputNoSession(printer)
 	}
 
@@ -246,7 +246,7 @@ func consumeCompactCheckpoint(sessionDir string, printer *output.Printer) string
 	consumedPath := filepath.Join(sessionDir, CompactCheckpointConsumed)
 	if renameErr := os.Rename(checkpointPath, consumedPath); renameErr != nil {
 		printer.VerboseLog("warn", "failed to rename compact checkpoint",
-			map[string]interface{}{"error": renameErr.Error()})
+			map[string]any{"error": renameErr.Error()})
 		// Still return the data — consumption is best-effort
 	}
 
@@ -318,8 +318,8 @@ func listAvailableAgents(agentsDir string) []string {
 			continue
 		}
 		name := e.Name()
-		if strings.HasSuffix(name, ".md") {
-			agents = append(agents, strings.TrimSuffix(name, ".md"))
+		if before, ok := strings.CutSuffix(name, ".md"); ok {
+			agents = append(agents, before)
 		}
 	}
 	return agents
@@ -340,7 +340,7 @@ func emitSessionStartEvent(sessionDir, sessionID, initiative, complexity, rite s
 
 	if flushErr := writer.Flush(); flushErr != nil {
 		printer.VerboseLog("warn", "failed to emit session_start event",
-			map[string]interface{}{"error": flushErr.Error()})
+			map[string]any{"error": flushErr.Error()})
 	}
 }
 

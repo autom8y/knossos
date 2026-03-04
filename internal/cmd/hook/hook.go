@@ -65,10 +65,7 @@ Performance Targets:
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			// Convert timeout flag to duration
 			if timeoutMs > 0 {
-				ctx.timeout = time.Duration(timeoutMs) * time.Millisecond
-				if ctx.timeout > MaxTimeout {
-					ctx.timeout = MaxTimeout
-				}
+				ctx.timeout = min(time.Duration(timeoutMs)*time.Millisecond, MaxTimeout)
 			}
 		},
 		Run: func(cmd *cobra.Command, args []string) {

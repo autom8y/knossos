@@ -106,14 +106,14 @@ func checkSacredPath(event Event, sacredPaths []string) TriggerResult {
 // matchSacredPattern checks if a path matches a sacred path pattern.
 func matchSacredPattern(path, pattern string) bool {
 	// Handle directory patterns (ending with /)
-	if strings.HasSuffix(pattern, "/") {
+	if before, ok := strings.CutSuffix(pattern, "/"); ok {
 		// Check if path contains this directory
-		return strings.Contains(path, pattern) || strings.Contains(path, strings.TrimSuffix(pattern, "/"))
+		return strings.Contains(path, pattern) || strings.Contains(path, before)
 	}
 
 	// Handle wildcard prefix patterns (*_CONTEXT.md)
-	if strings.HasPrefix(pattern, "*") {
-		suffix := strings.TrimPrefix(pattern, "*")
+	if after, ok := strings.CutPrefix(pattern, "*"); ok {
+		suffix := after
 		return strings.HasSuffix(path, suffix)
 	}
 

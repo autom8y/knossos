@@ -3,6 +3,7 @@ package session
 import (
 	"os"
 	"path/filepath"
+	"slices"
 	"testing"
 	"time"
 )
@@ -505,7 +506,7 @@ func TestEdgeCases_ConcurrentAccess(t *testing.T) {
 
 	// Multiple goroutines reading is safe
 	done := make(chan bool, 5)
-	for i := 0; i < 5; i++ {
+	for range 5 {
 		go func() {
 			if _, err := LoadContext(ctxPath); err != nil {
 				t.Errorf("Concurrent read failed: %v", err)
@@ -515,7 +516,7 @@ func TestEdgeCases_ConcurrentAccess(t *testing.T) {
 	}
 
 	// Wait for all reads
-	for i := 0; i < 5; i++ {
+	for range 5 {
 		<-done
 	}
 }
@@ -579,13 +580,7 @@ func TestValidTransitions(t *testing.T) {
 
 			// Check each expected transition is present
 			for _, wantStatus := range tt.want {
-				found := false
-				for _, gotStatus := range got {
-					if gotStatus == wantStatus {
-						found = true
-						break
-					}
-				}
+				found := slices.Contains(got, wantStatus)
 				if !found {
 					t.Errorf("ValidTransitions(%s) missing %s", tt.status, wantStatus)
 				}

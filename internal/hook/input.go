@@ -24,7 +24,7 @@ type ToolInput struct {
 	Description string `json:"description,omitempty"`
 
 	// For nested or tool-specific data
-	data map[string]interface{}
+	data map[string]any
 }
 
 // ParseToolInput parses JSON tool input from a string.
@@ -39,7 +39,7 @@ func ParseToolInput(jsonStr string) (*ToolInput, error) {
 func ParseToolInputBytes(data []byte) (*ToolInput, error) {
 	input := &ToolInput{
 		Raw:  data,
-		data: make(map[string]interface{}),
+		data: make(map[string]any),
 	}
 
 	// Parse into structured fields
@@ -50,7 +50,7 @@ func ParseToolInputBytes(data []byte) (*ToolInput, error) {
 	// Also parse into generic map for arbitrary field access
 	if err := json.Unmarshal(data, &input.data); err != nil {
 		// Non-fatal: structured fields were parsed successfully
-		input.data = make(map[string]interface{})
+		input.data = make(map[string]any)
 	}
 
 	return input, nil
@@ -65,9 +65,8 @@ func ParseToolInputFromReader(r io.Reader) (*ToolInput, error) {
 	return ParseToolInputBytes(data)
 }
 
-
 // Get returns a field value by key from the parsed data.
-func (t *ToolInput) Get(key string) interface{} {
+func (t *ToolInput) Get(key string) any {
 	if t.data == nil {
 		return nil
 	}
@@ -107,14 +106,13 @@ func (t *ToolInput) GetInt(key string) int {
 }
 
 // GetMap returns a map field value by key.
-func (t *ToolInput) GetMap(key string) map[string]interface{} {
+func (t *ToolInput) GetMap(key string) map[string]any {
 	val := t.Get(key)
-	if m, ok := val.(map[string]interface{}); ok {
+	if m, ok := val.(map[string]any); ok {
 		return m
 	}
 	return nil
 }
-
 
 // GetEffectivePath returns the most likely path field from tool input.
 // Different tools use different field names for paths.

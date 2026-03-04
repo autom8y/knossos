@@ -82,7 +82,7 @@ func ResolveHookDefaults(shared, rite *HookDefaults) *WriteGuardDefaults {
 //   - defaults is nil (no hook defaults at manifest level)
 //   - agent opted out (write-guard: false)
 //   - agent has no write-guard key (no opt-in)
-func ResolveWriteGuard(defaults *WriteGuardDefaults, agentName string, agentWG interface{}) *ResolvedWriteGuard {
+func ResolveWriteGuard(defaults *WriteGuardDefaults, agentName string, agentWG any) *ResolvedWriteGuard {
 	if defaults == nil {
 		return nil
 	}
@@ -105,10 +105,10 @@ func ResolveWriteGuard(defaults *WriteGuardDefaults, agentName string, agentWG i
 
 	// Handle struct form: write-guard: {extra-paths: [...]}
 	var agentConfig WriteGuardAgent
-	if m, ok := agentWG.(map[string]interface{}); ok {
+	if m, ok := agentWG.(map[string]any); ok {
 		if eps, ok := m["extra-paths"]; ok {
 			switch v := eps.(type) {
-			case []interface{}:
+			case []any:
 				for _, item := range v {
 					if s, ok := item.(string); ok {
 						agentConfig.ExtraPaths = append(agentConfig.ExtraPaths, s)
@@ -141,7 +141,7 @@ func ResolveWriteGuard(defaults *WriteGuardDefaults, agentName string, agentWG i
 //	        - type: command
 //	          command: "ari hook agent-guard --agent {name} --allow-path ... --output json"
 //	          timeout: 3
-func GenerateWriteGuardHooks(resolved *ResolvedWriteGuard) map[string]interface{} {
+func GenerateWriteGuardHooks(resolved *ResolvedWriteGuard) map[string]any {
 	if resolved == nil {
 		return nil
 	}
@@ -156,19 +156,19 @@ func GenerateWriteGuardHooks(resolved *ResolvedWriteGuard) map[string]interface{
 	parts = append(parts, "--output json")
 	command := strings.Join(parts, " ")
 
-	hookEntry := map[string]interface{}{
+	hookEntry := map[string]any{
 		"type":    "command",
 		"command": command,
 		"timeout": resolved.Timeout,
 	}
 
-	matcherGroup := map[string]interface{}{
+	matcherGroup := map[string]any{
 		"matcher": "Write",
-		"hooks":   []interface{}{hookEntry},
+		"hooks":   []any{hookEntry},
 	}
 
-	return map[string]interface{}{
-		"PreToolUse": []interface{}{matcherGroup},
+	return map[string]any{
+		"PreToolUse": []any{matcherGroup},
 	}
 }
 

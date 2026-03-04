@@ -37,7 +37,7 @@ func RecordToolEvent(sessionDir string, env *hook.Env, toolInput *hook.ToolInput
 func BuildEventFromToolInput(env *hook.Env, toolInput *hook.ToolInput) Event {
 	tool := env.ToolName
 	path := toolInput.GetEffectivePath()
-	meta := make(map[string]interface{})
+	meta := make(map[string]any)
 
 	// Add tool-specific metadata
 	switch tool {

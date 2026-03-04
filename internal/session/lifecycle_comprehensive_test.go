@@ -352,7 +352,7 @@ func TestNewContext_UniqueIDs(t *testing.T) {
 	ids := make(map[string]bool)
 	const n = 100
 
-	for i := 0; i < n; i++ {
+	for i := range n {
 		ctx := NewContext("Test", "MODULE", "test")
 		if ids[ctx.SessionID] {
 			t.Fatalf("Duplicate SessionID after %d generations: %s", i, ctx.SessionID)
@@ -954,7 +954,7 @@ func TestLifecycle_MultipleParkResumeCycles(t *testing.T) {
 	}
 
 	const cycles = 5
-	for i := 0; i < cycles; i++ {
+	for i := range cycles {
 		loaded, err := LoadContext(ctxPath)
 		if err != nil {
 			t.Fatalf("Cycle %d: Load for park failed: %v", i, err)
@@ -1127,7 +1127,7 @@ func TestEdgeCases_ConcurrentReads(t *testing.T) {
 	var wg sync.WaitGroup
 	errs := make(chan error, goroutines)
 
-	for i := 0; i < goroutines; i++ {
+	for range goroutines {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
@@ -1208,7 +1208,6 @@ func TestEdgeCases_SpecialCharactersInInitiative(t *testing.T) {
 	}
 }
 
-
 // =============================================================================
 // Phase Transition Tests
 // =============================================================================
@@ -1224,7 +1223,7 @@ func TestPhaseTransitions_ValidForward(t *testing.T) {
 	}
 
 	// All forward transitions should be valid
-	for i := 0; i < len(phases); i++ {
+	for i := range phases {
 		for j := i + 1; j < len(phases); j++ {
 			t.Run(string(phases[i])+"->"+string(phases[j]), func(t *testing.T) {
 				if !CanTransitionPhase(phases[i], phases[j]) {
@@ -1357,13 +1356,13 @@ func TestStatus_IsValid_EdgeCases(t *testing.T) {
 		{"ACTIVE", true},
 		{"PARKED", true},
 		{"ARCHIVED", true},
-		{"none", false},     // wrong case
-		{"active", false},   // wrong case
-		{"Active", false},   // mixed case
-		{"", false},         // empty
-		{" ACTIVE", false},  // leading space
-		{"ACTIVE ", false},  // trailing space
-		{"INVALID", false},  // unknown
+		{"none", false},    // wrong case
+		{"active", false},  // wrong case
+		{"Active", false},  // mixed case
+		{"", false},        // empty
+		{" ACTIVE", false}, // leading space
+		{"ACTIVE ", false}, // trailing space
+		{"INVALID", false}, // unknown
 	}
 
 	for _, tt := range tests {
@@ -1486,7 +1485,7 @@ func TestContext_Validate_AllComplexities(t *testing.T) {
 
 // TestSessionID_Format verifies the generated ID matches the documented format.
 func TestSessionID_Format(t *testing.T) {
-	for i := 0; i < 10; i++ {
+	for range 10 {
 		id := GenerateSessionID()
 		if !strings.HasPrefix(id, "session-") {
 			t.Errorf("ID %q should start with 'session-'", id)

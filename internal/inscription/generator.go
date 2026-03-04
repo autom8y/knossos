@@ -99,7 +99,7 @@ func (g *Generator) GenerateSection(regionName string) (string, error) {
 	if region == nil {
 		return "", errors.NewWithDetails(errors.CodeFileNotFound,
 			"region not found in manifest",
-			map[string]interface{}{"region": regionName})
+			map[string]any{"region": regionName})
 	}
 
 	switch region.Owner {
@@ -113,7 +113,7 @@ func (g *Generator) GenerateSection(regionName string) (string, error) {
 	default:
 		return "", errors.NewWithDetails(errors.CodeUsageError,
 			"unknown owner type",
-			map[string]interface{}{"region": regionName, "owner": string(region.Owner)})
+			map[string]any{"region": regionName, "owner": string(region.Owner)})
 	}
 }
 
@@ -242,14 +242,14 @@ func (g *Generator) renderTemplateString(name string, tmplStr string) (string, e
 	if err != nil {
 		return "", errors.NewWithDetails(errors.CodeParseError,
 			"failed to parse template",
-			map[string]interface{}{"name": name, "cause": err.Error()})
+			map[string]any{"name": name, "cause": err.Error()})
 	}
 
 	var buf bytes.Buffer
 	if err := tmpl.Execute(&buf, g.Context); err != nil {
 		return "", errors.NewWithDetails(errors.CodeGeneralError,
 			"failed to execute template",
-			map[string]interface{}{"name": name, "cause": err.Error()})
+			map[string]any{"name": name, "cause": err.Error()})
 	}
 
 	return strings.TrimSpace(buf.String()), nil
@@ -319,16 +319,16 @@ func (g *Generator) loadAgentTable() string {
 func (g *Generator) lookupTerminology(term string) string {
 	// Default terminology definitions
 	terminology := map[string]string{
-		"knossos":     "The platform (the labyrinth itself)",
-		"ariadne":     "CLI binary (`ari`) - the clew ensuring return",
-		"theseus":     "Claude Code agent - the navigator with amnesia",
-		"moirai":      "Session lifecycle agent - the Fates who spin, measure, and cut",
-		"white-sails": "Confidence signal - honest return indicator",
-		"rites":       "Practice bundles - invokable ceremonies",
-		"pantheon":    "Agent collection within a rite",
-		"dromena":     "Slash commands - user-invoked, transient",
-		"legomena":    "Skills - model-invoked, persistent",
-		"mena":        "Source directory for dromena + legomena",
+		"knossos":         "The platform (the labyrinth itself)",
+		"ariadne":         "CLI binary (`ari`) - the clew ensuring return",
+		"theseus":         "Claude Code agent - the navigator with amnesia",
+		"moirai":          "Session lifecycle agent - the Fates who spin, measure, and cut",
+		"white-sails":     "Confidence signal - honest return indicator",
+		"rites":           "Practice bundles - invokable ceremonies",
+		"pantheon":        "Agent collection within a rite",
+		"dromena":         "Slash commands - user-invoked, transient",
+		"legomena":        "Skills - model-invoked, persistent",
+		"mena":            "Source directory for dromena + legomena",
 		"inscription":     "CLAUDE.md generation from templates",
 		"materialization": "Source to .claude/ projection",
 	}
@@ -357,7 +357,7 @@ func (g *Generator) regenerateFromSource(regionName string, source string) (stri
 	default:
 		return "", errors.NewWithDetails(errors.CodeUsageError,
 			"unknown regenerate source",
-			map[string]interface{}{"region": regionName, "source": source})
+			map[string]any{"region": regionName, "source": source})
 	}
 }
 
@@ -489,7 +489,7 @@ func (g *Generator) getDefaultSectionContent(regionName string) (string, error) 
 
 	return "", errors.NewWithDetails(errors.CodeFileNotFound,
 		"no template found for region",
-		map[string]interface{}{"region": regionName})
+		map[string]any{"region": regionName})
 }
 
 // SetSectionTemplate sets an inline template for a section.

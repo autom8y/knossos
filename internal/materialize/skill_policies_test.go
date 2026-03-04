@@ -106,8 +106,8 @@ func TestMergeSkillPolicies_OrderPreserved(t *testing.T) {
 
 func TestApplySkillPolicies_InjectMatchesAll(t *testing.T) {
 	// Policy with no requires_tools matches any agent
-	fm := map[string]interface{}{
-		"skills": []interface{}{"existing-skill"},
+	fm := map[string]any{
+		"skills": []any{"existing-skill"},
 	}
 	policies := []SkillPolicy{
 		{Skill: "new-skill", Mode: "inject"},
@@ -122,8 +122,8 @@ func TestApplySkillPolicies_InjectMatchesAll(t *testing.T) {
 
 func TestApplySkillPolicies_InjectRequiresTool_Missing(t *testing.T) {
 	// Agent lacks the required tool — skill should NOT be added
-	fm := map[string]interface{}{
-		"tools": []interface{}{"Read", "Write"},
+	fm := map[string]any{
+		"tools": []any{"Read", "Write"},
 	}
 	policies := []SkillPolicy{
 		{Skill: "bash-skill", Mode: "inject", RequiresTools: []string{"Bash"}},
@@ -137,8 +137,8 @@ func TestApplySkillPolicies_InjectRequiresTool_Missing(t *testing.T) {
 
 func TestApplySkillPolicies_InjectRequiresTool_Present(t *testing.T) {
 	// Agent has the required tool — skill should be added
-	fm := map[string]interface{}{
-		"tools": []interface{}{"Bash", "Read"},
+	fm := map[string]any{
+		"tools": []any{"Bash", "Read"},
 	}
 	policies := []SkillPolicy{
 		{Skill: "bash-skill", Mode: "inject", RequiresTools: []string{"Bash"}},
@@ -152,8 +152,8 @@ func TestApplySkillPolicies_InjectRequiresTool_Present(t *testing.T) {
 
 func TestApplySkillPolicies_RequiresNone_Blocked(t *testing.T) {
 	// Agent has the blocked tool in disallowedTools — policy should NOT apply
-	fm := map[string]interface{}{
-		"disallowedTools": []interface{}{"Bash"},
+	fm := map[string]any{
+		"disallowedTools": []any{"Bash"},
 	}
 	policies := []SkillPolicy{
 		{Skill: "non-bash-skill", Mode: "inject", RequiresNone: []string{"Bash"}},
@@ -167,8 +167,8 @@ func TestApplySkillPolicies_RequiresNone_Blocked(t *testing.T) {
 
 func TestApplySkillPolicies_RequiresNone_NotBlocked(t *testing.T) {
 	// Agent does NOT have the blocked tool — policy should apply
-	fm := map[string]interface{}{
-		"disallowedTools": []interface{}{"Write"},
+	fm := map[string]any{
+		"disallowedTools": []any{"Write"},
 	}
 	policies := []SkillPolicy{
 		{Skill: "non-bash-skill", Mode: "inject", RequiresNone: []string{"Bash"}},
@@ -181,8 +181,8 @@ func TestApplySkillPolicies_RequiresNone_NotBlocked(t *testing.T) {
 }
 
 func TestApplySkillPolicies_ExcludeSpecific(t *testing.T) {
-	fm := map[string]interface{}{
-		"skill_policy_exclude": []interface{}{"excluded-skill"},
+	fm := map[string]any{
+		"skill_policy_exclude": []any{"excluded-skill"},
 	}
 	policies := []SkillPolicy{
 		{Skill: "excluded-skill", Mode: "inject"},
@@ -196,9 +196,9 @@ func TestApplySkillPolicies_ExcludeSpecific(t *testing.T) {
 }
 
 func TestApplySkillPolicies_ExcludeAll(t *testing.T) {
-	fm := map[string]interface{}{
+	fm := map[string]any{
 		"skill_policy_exclude": "all",
-		"skills":               []interface{}{"agent-skill"},
+		"skills":               []any{"agent-skill"},
 	}
 	policies := []SkillPolicy{
 		{Skill: "injected-skill", Mode: "inject"},
@@ -213,7 +213,7 @@ func TestApplySkillPolicies_ExcludeAll(t *testing.T) {
 
 func TestApplySkillPolicies_EmptyRequiresTools_MatchesAll(t *testing.T) {
 	// No requires_tools means policy matches regardless of agent tools
-	fm := map[string]interface{}{}
+	fm := map[string]any{}
 	policies := []SkillPolicy{
 		{Skill: "universal-skill", Mode: "inject"},
 	}
@@ -226,8 +226,8 @@ func TestApplySkillPolicies_EmptyRequiresTools_MatchesAll(t *testing.T) {
 
 func TestApplySkillPolicies_Dedup_NoDouble(t *testing.T) {
 	// Agent already has the skill — no duplicate should be created
-	fm := map[string]interface{}{
-		"skills": []interface{}{"ecosystem-ref"},
+	fm := map[string]any{
+		"skills": []any{"ecosystem-ref"},
 	}
 	policies := []SkillPolicy{
 		{Skill: "ecosystem-ref", Mode: "inject"},
@@ -241,8 +241,8 @@ func TestApplySkillPolicies_Dedup_NoDouble(t *testing.T) {
 
 func TestApplySkillPolicies_MultipleOrdering(t *testing.T) {
 	// Multiple policies — first policy's skill comes first
-	fm := map[string]interface{}{
-		"skills": []interface{}{"agent-skill"},
+	fm := map[string]any{
+		"skills": []any{"agent-skill"},
 	}
 	policies := []SkillPolicy{
 		{Skill: "first-injected", Mode: "inject"},
@@ -259,7 +259,7 @@ func TestApplySkillPolicies_MultipleOrdering(t *testing.T) {
 
 func TestApplySkillPolicies_ReferenceMode_AddsComment(t *testing.T) {
 	// Reference mode prepends an HTML comment to the body
-	fm := map[string]interface{}{}
+	fm := map[string]any{}
 	body := []byte("# Agent Body\n")
 	policies := []SkillPolicy{
 		{Skill: "conventions", Mode: "reference"},
@@ -274,7 +274,7 @@ func TestApplySkillPolicies_ReferenceMode_AddsComment(t *testing.T) {
 
 func TestApplySkillPolicies_ReferenceMode_ExactFormat(t *testing.T) {
 	// Verify the exact comment format produced by reference mode
-	fm := map[string]interface{}{}
+	fm := map[string]any{}
 	policies := []SkillPolicy{
 		{Skill: "ecosystem-ref", Mode: "reference"},
 	}
@@ -288,8 +288,8 @@ func TestApplySkillPolicies_ReferenceMode_ExactFormat(t *testing.T) {
 
 func TestApplySkillPolicies_DeadReferenceGuard_SkillToolDisallowed(t *testing.T) {
 	// Agent has Skill in disallowedTools — reference comment must NOT be added
-	fm := map[string]interface{}{
-		"disallowedTools": []interface{}{"Skill"},
+	fm := map[string]any{
+		"disallowedTools": []any{"Skill"},
 	}
 	body := []byte("# Agent Body\n")
 	policies := []SkillPolicy{
@@ -303,8 +303,8 @@ func TestApplySkillPolicies_DeadReferenceGuard_SkillToolDisallowed(t *testing.T)
 
 func TestApplySkillPolicies_DeadReferenceGuard_InjectNotAffected(t *testing.T) {
 	// Agent has Skill in disallowedTools — inject mode is NOT affected by dead reference guard
-	fm := map[string]interface{}{
-		"disallowedTools": []interface{}{"Skill"},
+	fm := map[string]any{
+		"disallowedTools": []any{"Skill"},
 	}
 	policies := []SkillPolicy{
 		{Skill: "conventions", Mode: "inject"},
@@ -317,8 +317,8 @@ func TestApplySkillPolicies_DeadReferenceGuard_InjectNotAffected(t *testing.T) {
 }
 
 func TestApplySkillPolicies_NoopWhenEmpty(t *testing.T) {
-	fm := map[string]interface{}{
-		"skills": []interface{}{"existing"},
+	fm := map[string]any{
+		"skills": []any{"existing"},
 	}
 	result, _ := applySkillPolicies(fm, nil, nil)
 	skills := toStringSlice(result["skills"])
@@ -329,7 +329,7 @@ func TestApplySkillPolicies_NoopWhenEmpty(t *testing.T) {
 
 func TestApplySkillPolicies_CommaSeperatedTools(t *testing.T) {
 	// tools field as comma-separated string
-	fm := map[string]interface{}{
+	fm := map[string]any{
 		"tools": "Bash, Read, Write",
 	}
 	policies := []SkillPolicy{
@@ -343,8 +343,8 @@ func TestApplySkillPolicies_CommaSeperatedTools(t *testing.T) {
 }
 
 func TestParseToolsSet_YAMLList(t *testing.T) {
-	fm := map[string]interface{}{
-		"tools": []interface{}{"Bash", "Read"},
+	fm := map[string]any{
+		"tools": []any{"Bash", "Read"},
 	}
 	set := parseToolsSet(fm, "tools")
 	if !set["Bash"] || !set["Read"] {
@@ -356,7 +356,7 @@ func TestParseToolsSet_YAMLList(t *testing.T) {
 }
 
 func TestParseToolsSet_CommaSeparated(t *testing.T) {
-	fm := map[string]interface{}{
+	fm := map[string]any{
 		"tools": "Bash, Read, Write",
 	}
 	set := parseToolsSet(fm, "tools")
@@ -366,7 +366,7 @@ func TestParseToolsSet_CommaSeparated(t *testing.T) {
 }
 
 func TestParseToolsSet_Missing(t *testing.T) {
-	fm := map[string]interface{}{}
+	fm := map[string]any{}
 	set := parseToolsSet(fm, "tools")
 	if set != nil {
 		t.Errorf("expected nil for missing field, got %v", set)
@@ -377,9 +377,9 @@ func TestParseToolsSet_Missing(t *testing.T) {
 
 func TestApplySkillPolicies_Override_ReferenceToInject(t *testing.T) {
 	// Policy is reference, agent override says inject → skill added to skills:, no comment
-	fm := map[string]interface{}{
-		"skill_policy_override": []interface{}{
-			map[string]interface{}{"skill": "conventions", "mode": "inject"},
+	fm := map[string]any{
+		"skill_policy_override": []any{
+			map[string]any{"skill": "conventions", "mode": "inject"},
 		},
 	}
 	body := []byte("# Body\n")
@@ -399,9 +399,9 @@ func TestApplySkillPolicies_Override_ReferenceToInject(t *testing.T) {
 
 func TestApplySkillPolicies_Override_InjectToReference(t *testing.T) {
 	// Policy is inject, agent override says reference → comment added, not in skills:
-	fm := map[string]interface{}{
-		"skill_policy_override": []interface{}{
-			map[string]interface{}{"skill": "conventions", "mode": "reference"},
+	fm := map[string]any{
+		"skill_policy_override": []any{
+			map[string]any{"skill": "conventions", "mode": "reference"},
 		},
 	}
 	body := []byte("# Body\n")
@@ -421,10 +421,10 @@ func TestApplySkillPolicies_Override_InjectToReference(t *testing.T) {
 
 func TestApplySkillPolicies_ExcludeWinsOverOverride(t *testing.T) {
 	// Agent both excludes and overrides same skill — exclude wins, skill skipped entirely
-	fm := map[string]interface{}{
-		"skill_policy_exclude": []interface{}{"conventions"},
-		"skill_policy_override": []interface{}{
-			map[string]interface{}{"skill": "conventions", "mode": "inject"},
+	fm := map[string]any{
+		"skill_policy_exclude": []any{"conventions"},
+		"skill_policy_override": []any{
+			map[string]any{"skill": "conventions", "mode": "inject"},
 		},
 	}
 	body := []byte("# Body\n")
@@ -443,7 +443,7 @@ func TestApplySkillPolicies_ExcludeWinsOverOverride(t *testing.T) {
 
 func TestApplySkillPolicies_MixedModes(t *testing.T) {
 	// Some policies inject, some reference → correct outputs for each
-	fm := map[string]interface{}{}
+	fm := map[string]any{}
 	body := []byte("# Body\n")
 	policies := []SkillPolicy{
 		{Skill: "inject-skill", Mode: "inject"},
@@ -469,7 +469,7 @@ func TestApplySkillPolicies_MixedModes(t *testing.T) {
 
 func TestApplySkillPolicies_MultipleReferenceComments_Order(t *testing.T) {
 	// Multiple reference policies — all comments prepended in policy order
-	fm := map[string]interface{}{}
+	fm := map[string]any{}
 	body := []byte("# Body\n")
 	policies := []SkillPolicy{
 		{Skill: "first-ref", Mode: "reference"},

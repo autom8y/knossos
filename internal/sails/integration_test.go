@@ -5,6 +5,7 @@ package sails
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -57,7 +58,8 @@ func writeSessionContext(t *testing.T, sessionDir string, ctx SessionContextInpu
 	}
 
 	// Build frontmatter
-	content := `---
+	var content strings.Builder
+	content.WriteString(`---
 schema_version: "2.1"
 session_id: "` + ctx.SessionID + `"
 status: ACTIVE
@@ -70,50 +72,50 @@ current_phase: implementation
 
 # Session: Test Initiative
 
-`
+`)
 
 	// Add session type section if not standard
 	if ctx.Type != "standard" {
-		content += `## Session Type
+		content.WriteString(`## Session Type
 ` + ctx.Type + `
 
-`
+`)
 	}
 
 	// Add open questions section
-	content += `## Open Questions
-`
+	content.WriteString(`## Open Questions
+`)
 	if len(ctx.OpenQuestions) == 0 {
-		content += "None.\n\n"
+		content.WriteString("None.\n\n")
 	} else {
 		for _, q := range ctx.OpenQuestions {
-			content += "- " + q + "\n"
+			content.WriteString("- " + q + "\n")
 		}
-		content += "\n"
+		content.WriteString("\n")
 	}
 
 	// Add modifiers section
-	content += `## Modifiers
-`
+	content.WriteString(`## Modifiers
+`)
 	if len(ctx.Modifiers) == 0 {
-		content += "None.\n\n"
+		content.WriteString("None.\n\n")
 	} else {
 		for _, m := range ctx.Modifiers {
-			content += "- " + m.Type + ": " + m.Justification
+			content.WriteString("- " + m.Type + ": " + m.Justification)
 			if m.AppliedBy != "" {
-				content += " (applied_by: " + m.AppliedBy + ")"
+				content.WriteString(" (applied_by: " + m.AppliedBy + ")")
 			}
-			content += "\n"
+			content.WriteString("\n")
 		}
-		content += "\n"
+		content.WriteString("\n")
 	}
 
-	content += `## Blockers
+	content.WriteString(`## Blockers
 None.
-`
+`)
 
 	path := filepath.Join(sessionDir, "SESSION_CONTEXT.md")
-	err := os.WriteFile(path, []byte(content), 0644)
+	err := os.WriteFile(path, []byte(content.String()), 0644)
 	require.NoError(t, err, "failed to write SESSION_CONTEXT.md")
 }
 

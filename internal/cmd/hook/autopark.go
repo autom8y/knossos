@@ -69,14 +69,14 @@ func runAutoparkCore(ctx *cmdContext, printer *output.Printer) error {
 	// Verify this is a Stop event (or allow for testing without event)
 	if hookEnv.Event != "" && hookEnv.Event != hook.EventStop {
 		printer.VerboseLog("debug", "skipping autopark hook for non-Stop event",
-			map[string]interface{}{"event": string(hookEnv.Event)})
+			map[string]any{"event": string(hookEnv.Event)})
 		return outputNoPark(printer, "not a Stop event")
 	}
 
 	// Resolve session context
 	resolver, sessionID, err := ctx.resolveSession(hookEnv)
 	if err != nil {
-		printer.VerboseLog("warn", "failed to read current session", map[string]interface{}{"error": err.Error()})
+		printer.VerboseLog("warn", "failed to read current session", map[string]any{"error": err.Error()})
 		return outputNoPark(printer, "no active session")
 	}
 
@@ -89,7 +89,7 @@ func runAutoparkCore(ctx *cmdContext, printer *output.Printer) error {
 	sessCtx, err := session.LoadContext(ctxPath)
 	if err != nil {
 		printer.VerboseLog("warn", "failed to load session context",
-			map[string]interface{}{"session_id": sessionID, "error": err.Error()})
+			map[string]any{"session_id": sessionID, "error": err.Error()})
 		return outputNoPark(printer, "could not load session")
 	}
 
@@ -116,13 +116,13 @@ func runAutoparkCore(ctx *cmdContext, printer *output.Printer) error {
 	// Save session context
 	if err := sessCtx.Save(ctxPath); err != nil {
 		printer.VerboseLog("error", "failed to save session context",
-			map[string]interface{}{"session_id": sessionID, "error": err.Error()})
+			map[string]any{"session_id": sessionID, "error": err.Error()})
 		return outputNoPark(printer, "failed to save session")
 	}
 
 	// Log git status for audit purposes
 	gitStatus := getGitStatusQuick()
-	printer.VerboseLog("info", "session auto-parked", map[string]interface{}{
+	printer.VerboseLog("info", "session auto-parked", map[string]any{
 		"session_id": sessionID,
 		"git_status": gitStatus,
 	})

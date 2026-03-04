@@ -64,7 +64,7 @@ func (m *Manager) Create(opts CreateOptions) (*Worktree, error) {
 	if !m.git.RefExists(opts.FromRef) {
 		return nil, errors.NewWithDetails(errors.CodeGeneralError,
 			"invalid git ref",
-			map[string]interface{}{"ref": opts.FromRef})
+			map[string]any{"ref": opts.FromRef})
 	}
 
 	// Generate worktree ID
@@ -259,7 +259,7 @@ func (m *Manager) Remove(idOrName string, force bool) error {
 		if err == nil && (gitStatus.IsDirty || gitStatus.HasUntracked) {
 			return errors.NewWithDetails(errors.CodeGeneralError,
 				"worktree has uncommitted changes, use --force to override",
-				map[string]interface{}{
+				map[string]any{
 					"worktree_id":     wt.ID,
 					"changed_files":   gitStatus.ChangedFiles,
 					"untracked_files": gitStatus.UntrackedCount,
@@ -294,10 +294,10 @@ func (m *Manager) Remove(idOrName string, force bool) error {
 
 // CleanupResult represents the result of a cleanup operation.
 type CleanupResult struct {
-	Removed     []string `json:"removed"`
-	Skipped     []string `json:"skipped"`
+	Removed     []string          `json:"removed"`
+	Skipped     []string          `json:"skipped"`
 	SkipReasons map[string]string `json:"skip_reasons,omitempty"`
-	DryRun      bool     `json:"dry_run"`
+	DryRun      bool              `json:"dry_run"`
 }
 
 // Cleanup removes stale worktrees.

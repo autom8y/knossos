@@ -76,14 +76,14 @@ func runSessionEndCore(ctx *cmdContext, printer *output.Printer) error {
 	// Verify this is a SessionEnd event (or allow for testing without event)
 	if hookEnv.Event != "" && hookEnv.Event != hook.EventSessionEnd {
 		printer.VerboseLog("debug", "skipping sessionend hook for non-SessionEnd event",
-			map[string]interface{}{"event": string(hookEnv.Event)})
+			map[string]any{"event": string(hookEnv.Event)})
 		return outputNoEnd(printer, "not a SessionEnd event")
 	}
 
 	// Resolve session context
 	resolver, sessionID, err := ctx.resolveSession(hookEnv)
 	if err != nil {
-		printer.VerboseLog("warn", "failed to read current session", map[string]interface{}{"error": err.Error()})
+		printer.VerboseLog("warn", "failed to read current session", map[string]any{"error": err.Error()})
 		return outputNoEnd(printer, "no active session")
 	}
 
@@ -96,7 +96,7 @@ func runSessionEndCore(ctx *cmdContext, printer *output.Printer) error {
 	sessCtx, err := session.LoadContext(ctxPath)
 	if err != nil {
 		printer.VerboseLog("warn", "failed to load session context",
-			map[string]interface{}{"session_id": sessionID, "error": err.Error()})
+			map[string]any{"session_id": sessionID, "error": err.Error()})
 		return outputNoEnd(printer, "could not load session")
 	}
 
@@ -113,7 +113,7 @@ func runSessionEndCore(ctx *cmdContext, printer *output.Printer) error {
 
 			if err := sessCtx.Save(ctxPath); err != nil {
 				printer.VerboseLog("error", "failed to save session context",
-					map[string]interface{}{"session_id": sessionID, "error": err.Error()})
+					map[string]any{"session_id": sessionID, "error": err.Error()})
 				return outputNoEnd(printer, "failed to save session")
 			}
 			wasParked = true
@@ -132,7 +132,7 @@ func runSessionEndCore(ctx *cmdContext, printer *output.Printer) error {
 	// Clean up budget temp counter files (best-effort)
 	cleanupBudgetFiles(hookEnv.SessionID)
 
-	printer.VerboseLog("info", "session ended", map[string]interface{}{
+	printer.VerboseLog("info", "session ended", map[string]any{
 		"session_id": sessionID,
 		"was_parked": wasParked,
 	})
@@ -177,4 +177,3 @@ func cleanupBudgetFiles(sessionKey string) {
 		_ = os.Remove(base + suffix)
 	}
 }
-

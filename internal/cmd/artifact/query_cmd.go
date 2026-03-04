@@ -58,7 +58,7 @@ Multiple filters are ANDed together. Results can be output in JSON, YAML, or tab
 				printTable(entries, result.Count)
 			} else {
 				// JSON or YAML
-				out := map[string]interface{}{
+				out := map[string]any{
 					"entries": entries,
 					"count":   len(entries),
 					"total":   result.Count,

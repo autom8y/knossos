@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"testing/fstest"
 
@@ -21,11 +22,12 @@ func setupRite(t *testing.T, ritesDir, riteName, workflowContent string, agents 
 	require.NoError(t, os.MkdirAll(filepath.Join(riteDir, "agents"), 0755))
 
 	// Build manifest YAML
-	manifest := "name: " + riteName + "\nversion: \"1.0\"\ndescription: test rite\nentry_agent: " + agents[0].Name + "\nagents:\n"
+	var manifest strings.Builder
+	manifest.WriteString("name: " + riteName + "\nversion: \"1.0\"\ndescription: test rite\nentry_agent: " + agents[0].Name + "\nagents:\n")
 	for _, a := range agents {
-		manifest += "  - name: " + a.Name + "\n    role: " + a.Role + "\n"
+		manifest.WriteString("  - name: " + a.Name + "\n    role: " + a.Role + "\n")
 	}
-	require.NoError(t, os.WriteFile(filepath.Join(riteDir, "manifest.yaml"), []byte(manifest), 0644))
+	require.NoError(t, os.WriteFile(filepath.Join(riteDir, "manifest.yaml"), []byte(manifest.String()), 0644))
 
 	if workflowContent != "" {
 		require.NoError(t, os.WriteFile(filepath.Join(riteDir, "workflow.yaml"), []byte(workflowContent), 0644))

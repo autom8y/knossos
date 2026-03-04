@@ -147,7 +147,7 @@ func TestResolveWriteGuard(t *testing.T) {
 		name      string
 		defaults  *WriteGuardDefaults
 		agentName string
-		agentWG   interface{}
+		agentWG   any
 		want      *ResolvedWriteGuard
 	}{
 		{
@@ -186,8 +186,8 @@ func TestResolveWriteGuard(t *testing.T) {
 			name:      "extra-paths additive merge",
 			defaults:  defaults,
 			agentName: "risk-assessor",
-			agentWG: map[string]interface{}{
-				"extra-paths": []interface{}{"docs/"},
+			agentWG: map[string]any{
+				"extra-paths": []any{"docs/"},
 			},
 			want: &ResolvedWriteGuard{
 				AllowPaths: []string{".ledge/", ".know/", "docs/"},
@@ -199,8 +199,8 @@ func TestResolveWriteGuard(t *testing.T) {
 			name:      "extra-paths dedup",
 			defaults:  defaults,
 			agentName: "risk-assessor",
-			agentWG: map[string]interface{}{
-				"extra-paths": []interface{}{".ledge/"}, // already in defaults
+			agentWG: map[string]any{
+				"extra-paths": []any{".ledge/"}, // already in defaults
 			},
 			want: &ResolvedWriteGuard{
 				AllowPaths: []string{".ledge/", ".know/"},
@@ -258,12 +258,12 @@ func TestGenerateWriteGuardHooks(t *testing.T) {
 		}
 
 		// Verify matcher group
-		groups, ok := preToolUse.([]interface{})
+		groups, ok := preToolUse.([]any)
 		if !ok || len(groups) != 1 {
 			t.Fatalf("PreToolUse should have 1 matcher group, got %v", preToolUse)
 		}
 
-		group, ok := groups[0].(map[string]interface{})
+		group, ok := groups[0].(map[string]any)
 		if !ok {
 			t.Fatal("matcher group should be a map")
 		}
@@ -273,12 +273,12 @@ func TestGenerateWriteGuardHooks(t *testing.T) {
 		}
 
 		// Verify hook entry
-		hooks, ok := group["hooks"].([]interface{})
+		hooks, ok := group["hooks"].([]any)
 		if !ok || len(hooks) != 1 {
 			t.Fatalf("hooks should have 1 entry, got %v", group["hooks"])
 		}
 
-		hook, ok := hooks[0].(map[string]interface{})
+		hook, ok := hooks[0].(map[string]any)
 		if !ok {
 			t.Fatal("hook entry should be a map")
 		}

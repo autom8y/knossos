@@ -3,6 +3,7 @@ package sails
 import (
 	"os"
 	"path/filepath"
+	"slices"
 	"testing"
 )
 
@@ -205,13 +206,7 @@ modifiers: []
 	}
 
 	// Check that spike is mentioned in reasons
-	hasSpkeReason := false
-	for _, reason := range result.Reasons {
-		if reason == "session type is spike (gray ceiling)" {
-			hasSpkeReason = true
-			break
-		}
-	}
+	hasSpkeReason := slices.Contains(result.Reasons, "session type is spike (gray ceiling)")
 	if !hasSpkeReason {
 		t.Errorf("Expected spike reason in reasons, got: %v", result.Reasons)
 	}
@@ -259,13 +254,7 @@ modifiers: []
 	}
 
 	// Check that hotfix is mentioned in reasons
-	hasHotfixReason := false
-	for _, reason := range result.Reasons {
-		if reason == "session type is hotfix (expedited gray)" {
-			hasHotfixReason = true
-			break
-		}
-	}
+	hasHotfixReason := slices.Contains(result.Reasons, "session type is hotfix (expedited gray)")
 	if !hasHotfixReason {
 		t.Errorf("Expected hotfix reason in reasons, got: %v", result.Reasons)
 	}

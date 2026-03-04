@@ -311,10 +311,7 @@ func buildSpecialistTimeline(events []clewcontract.TypedEvent, agentName string)
 	}
 
 	// Pass 2: last 5 chronological entries.
-	recentStart := len(curated) - 5
-	if recentStart < 0 {
-		recentStart = 0
-	}
+	recentStart := max(len(curated)-5, 0)
 	recent := curated[recentStart:]
 
 	// Build a set of recent indices for deduplication.

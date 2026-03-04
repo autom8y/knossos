@@ -571,7 +571,7 @@ func (m *Merger) checkOverlappingRegions(parseResult *ParseResult) error {
 				if a.end != b.start && b.end != a.start {
 					return errors.NewWithDetails(errors.CodeUsageError,
 						"overlapping regions detected",
-						map[string]interface{}{
+						map[string]any{
 							"region_a": a.name,
 							"region_b": b.name,
 						})
@@ -595,7 +595,7 @@ func (m *Merger) ValidateMerge(existingContent string, generatedContent map[stri
 			if strings.Contains(err.Message, "without matching") {
 				return errors.NewWithDetails(errors.CodeParseError,
 					"malformed markers prevent merge",
-					map[string]interface{}{
+					map[string]any{
 						"error": err.Message,
 						"line":  err.Line,
 					})
@@ -613,7 +613,7 @@ func (m *Merger) ValidateMerge(existingContent string, generatedContent map[stri
 		if !m.Manifest.HasRegion(regionName) {
 			return errors.NewWithDetails(errors.CodeUsageError,
 				"generated content for unknown region",
-				map[string]interface{}{"region": regionName})
+				map[string]any{"region": regionName})
 		}
 	}
 

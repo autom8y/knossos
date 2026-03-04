@@ -112,10 +112,10 @@ func parseFilePathStrict(printer *output.Printer, toolInput string) (filePath st
 		return "", true
 	}
 
-	var input map[string]interface{}
+	var input map[string]any
 	if err := json.Unmarshal([]byte(toolInput), &input); err != nil {
 		printer.VerboseLog("warn", "agent-guard: failed to parse tool input JSON",
-			map[string]interface{}{"error": err.Error(), "input": toolInput})
+			map[string]any{"error": err.Error(), "input": toolInput})
 		return "", true
 	}
 

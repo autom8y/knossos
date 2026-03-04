@@ -77,9 +77,9 @@ func Parse(content []byte) (yamlBytes []byte, body []byte, err error) {
 	}
 
 	for _, pat := range closePatterns {
-		if idx := bytes.Index(rest, pat); idx != -1 {
-			yamlBytes = rest[:idx]
-			body = rest[idx+len(pat):]
+		if before, after, ok := bytes.Cut(rest, pat); ok {
+			yamlBytes = before
+			body = after
 			return yamlBytes, body, nil
 		}
 	}

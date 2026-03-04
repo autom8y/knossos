@@ -109,7 +109,7 @@ func runClewCore(ctx *cmdContext, printer *output.Printer) error {
 	// Verify this is a PostToolUse event (or allow for testing without event)
 	if hookEnv.Event != "" && hookEnv.Event != hook.EventPostToolUse {
 		printer.VerboseLog("debug", "skipping clew hook for non-PostToolUse event",
-			map[string]interface{}{"event": string(hookEnv.Event)})
+			map[string]any{"event": string(hookEnv.Event)})
 		return outputNotRecorded(printer, "not a PostToolUse event")
 	}
 
@@ -124,7 +124,7 @@ func runClewCore(ctx *cmdContext, printer *output.Printer) error {
 	toolInput, err := hook.ParseToolInput(toolInputJSON)
 	if err != nil {
 		printer.VerboseLog("warn", "failed to parse tool input",
-			map[string]interface{}{"error": err.Error()})
+			map[string]any{"error": err.Error()})
 		// Emit error event for parse failure (graceful degradation)
 		emitErrorEvent(sessionDir, "TOOL_INPUT_PARSE", "failed to parse tool input: "+err.Error(), true, printer)
 		return outputNotRecorded(printer, "invalid tool input: "+err.Error())
@@ -136,7 +136,7 @@ func runClewCore(ctx *cmdContext, printer *output.Printer) error {
 	// Record the tool event
 	if err := clewcontract.RecordToolEvent(sessionDir, hookEnv, toolInput); err != nil {
 		printer.VerboseLog("error", "failed to record tool event",
-			map[string]interface{}{"error": err.Error()})
+			map[string]any{"error": err.Error()})
 		// Emit error event for write failure (graceful degradation)
 		emitErrorEvent(sessionDir, "CLEW_WRITE", "failed to record tool event: "+err.Error(), true, printer)
 		return outputNotRecorded(printer, "write failed: "+err.Error())
@@ -151,11 +151,11 @@ func runClewCore(ctx *cmdContext, printer *output.Printer) error {
 			// Record decision stamp (fail silently - don't break hook if stamp fails)
 			if err := clewcontract.RecordStamp(sessionDir, throughline.Decision, throughline.Rationale, nil); err != nil {
 				printer.VerboseLog("warn", "failed to record orchestrator stamp",
-					map[string]interface{}{"error": err.Error()})
+					map[string]any{"error": err.Error()})
 				// Continue - stamp failure is not critical
 			} else {
 				printer.VerboseLog("debug", "recorded orchestrator decision stamp",
-					map[string]interface{}{"decision": throughline.Decision})
+					map[string]any{"decision": throughline.Decision})
 			}
 		}
 	}
@@ -239,7 +239,7 @@ func emitSupplementalEvents(sessionDir, toolName string, toolInput *hook.ToolInp
 
 	if flushErr := writer.Flush(); flushErr != nil {
 		printer.VerboseLog("warn", "failed to emit supplemental events",
-			map[string]interface{}{"error": flushErr.Error()})
+			map[string]any{"error": flushErr.Error()})
 	}
 }
 
@@ -293,7 +293,7 @@ func matchWipArtifact(path string, toolInput *hook.ToolInput) (clewcontract.Arti
 		return clewcontract.ArtifactTypeEphemeral, "unknown"
 	}
 
-	var fields map[string]interface{}
+	var fields map[string]any
 	if err := yaml.Unmarshal(yamlBytes, &fields); err != nil {
 		return clewcontract.ArtifactTypeEphemeral, "unknown"
 	}
@@ -337,6 +337,6 @@ func emitErrorEvent(sessionDir, errorCode, message string, recoverable bool, pri
 
 	if flushErr := writer.Flush(); flushErr != nil {
 		printer.VerboseLog("warn", "failed to emit error event",
-			map[string]interface{}{"error": flushErr.Error()})
+			map[string]any{"error": flushErr.Error()})
 	}
 }

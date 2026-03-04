@@ -1,6 +1,7 @@
 package sails
 
 import (
+	"slices"
 	"testing"
 	"time"
 )
@@ -223,13 +224,7 @@ func TestComputeColor_sails_002_GrayWithOpenQuestions(t *testing.T) {
 	}
 
 	// Should mention open questions in reasons
-	found := false
-	for _, reason := range result.Reasons {
-		if reason == "open questions present: gray ceiling applied" {
-			found = true
-			break
-		}
-	}
+	found := slices.Contains(result.Reasons, "open questions present: gray ceiling applied")
 	if !found {
 		t.Errorf("sails_002: Reasons should mention open questions, got: %v", result.Reasons)
 	}
@@ -258,13 +253,7 @@ func TestComputeColor_sails_003_GrayWithMissingProofs(t *testing.T) {
 	}
 
 	// Should mention missing proof in reasons
-	found := false
-	for _, reason := range result.Reasons {
-		if reason == "required proof 'lint' is missing" {
-			found = true
-			break
-		}
-	}
+	found := slices.Contains(result.Reasons, "required proof 'lint' is missing")
 	if !found {
 		t.Errorf("sails_003: Reasons should mention missing lint proof, got: %v", result.Reasons)
 	}
@@ -313,13 +302,7 @@ func TestComputeColor_sails_004_BlackWithFailingTests(t *testing.T) {
 	}
 
 	// Should mention failing proof in reasons
-	found := false
-	for _, reason := range result.Reasons {
-		if reason == "proof 'tests' has status FAIL" {
-			found = true
-			break
-		}
-	}
+	found := slices.Contains(result.Reasons, "proof 'tests' has status FAIL")
 	if !found {
 		t.Errorf("sails_004: Reasons should mention failing tests, got: %v", result.Reasons)
 	}
@@ -369,13 +352,7 @@ func TestComputeColor_BlackWithBlockers(t *testing.T) {
 	}
 
 	// Should mention blockers in reasons
-	foundBlockers := false
-	for _, reason := range result.Reasons {
-		if reason == "explicit blockers present: black sails (do not ship)" {
-			foundBlockers = true
-			break
-		}
-	}
+	foundBlockers := slices.Contains(result.Reasons, "explicit blockers present: black sails (do not ship)")
 	if !foundBlockers {
 		t.Errorf("Reasons should mention explicit blockers, got: %v", result.Reasons)
 	}
@@ -384,11 +361,8 @@ func TestComputeColor_BlackWithBlockers(t *testing.T) {
 	for _, blocker := range input.Blockers {
 		found := false
 		expectedReason := "  - " + blocker
-		for _, reason := range result.Reasons {
-			if reason == expectedReason {
-				found = true
-				break
-			}
+		if slices.Contains(result.Reasons, expectedReason) {
+			found = true
 		}
 		if !found {
 			t.Errorf("Reasons should list blocker %q, got: %v", blocker, result.Reasons)
@@ -448,13 +422,7 @@ func TestComputeColor_sails_005_SpikeAlwaysGray(t *testing.T) {
 	}
 
 	// Should mention spike ceiling in reasons
-	found := false
-	for _, reason := range result.Reasons {
-		if reason == "session type 'spike' has gray ceiling (spikes never white)" {
-			found = true
-			break
-		}
-	}
+	found := slices.Contains(result.Reasons, "session type 'spike' has gray ceiling (spikes never white)")
 	if !found {
 		t.Errorf("sails_005: Reasons should mention spike ceiling, got: %v", result.Reasons)
 	}
@@ -506,13 +474,7 @@ func TestComputeColor_sails_006_HotfixAlwaysGray(t *testing.T) {
 	}
 
 	// Should mention hotfix ceiling in reasons
-	found := false
-	for _, reason := range result.Reasons {
-		if reason == "session type 'hotfix' has gray ceiling (expedited gray)" {
-			found = true
-			break
-		}
-	}
+	found := slices.Contains(result.Reasons, "session type 'hotfix' has gray ceiling (expedited gray)")
 	if !found {
 		t.Errorf("sails_006: Reasons should mention hotfix ceiling, got: %v", result.Reasons)
 	}
@@ -639,13 +601,7 @@ func TestComputeColor_sails_008_QAUpgradeGrayToWhite(t *testing.T) {
 	}
 
 	// Should mention QA upgrade in reasons
-	found := false
-	for _, reason := range result.Reasons {
-		if reason == "QA upgrade applied: gray -> white via QA session session-20260106-100000-qa123456" {
-			found = true
-			break
-		}
-	}
+	found := slices.Contains(result.Reasons, "QA upgrade applied: gray -> white via QA session session-20260106-100000-qa123456")
 	if !found {
 		t.Errorf("sails_008: Reasons should mention QA upgrade, got: %v", result.Reasons)
 	}

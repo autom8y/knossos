@@ -70,7 +70,7 @@ func runNew(ctx *cmdContext, opts newOptions) error {
 	if _, statErr := os.Stat(riteDir); os.IsNotExist(statErr) {
 		err := errors.NewWithDetails(errors.CodeRiteNotFound,
 			fmt.Sprintf("rite %q not found at %s", opts.riteName, riteDir),
-			map[string]interface{}{"rite": opts.riteName, "path": riteDir})
+			map[string]any{"rite": opts.riteName, "path": riteDir})
 		printer.PrintError(err)
 		return err
 	}
@@ -90,7 +90,7 @@ func runNew(ctx *cmdContext, opts newOptions) error {
 		relPath, _ := filepath.Rel(resolver.ProjectRoot(), targetPath)
 		err := errors.NewWithDetails(errors.CodeSessionExists,
 			fmt.Sprintf("agent file already exists: %s", relPath),
-			map[string]interface{}{"path": targetPath})
+			map[string]any{"path": targetPath})
 		printer.PrintError(err)
 		return err
 	}

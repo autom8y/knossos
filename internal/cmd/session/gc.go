@@ -69,7 +69,7 @@ type gcOutput struct {
 }
 
 type gcSessionInfo struct {
-	ID       string `json:"id"`
+	ID        string `json:"id"`
 	ParkedAge string `json:"parked_age"`
 }
 
@@ -171,7 +171,7 @@ func runGc(ctx *cmdContext, opts gcOptions) error {
 	for _, s := range staleSessions {
 		wrapCtx := newGcWrapContext(ctx, s.ID)
 		if err := runWrap(wrapCtx, wrapOptions{noArchive: false, force: true}); err != nil {
-			printer.VerboseLog("warn", fmt.Sprintf("failed to archive %s", s.ID), map[string]interface{}{"error": err.Error()})
+			printer.VerboseLog("warn", fmt.Sprintf("failed to archive %s", s.ID), map[string]any{"error": err.Error()})
 			fmt.Fprintf(os.Stderr, "  warn: failed to archive %s: %v\n", s.ID, err)
 			continue
 		}

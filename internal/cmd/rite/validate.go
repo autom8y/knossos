@@ -64,7 +64,7 @@ func runValidate(ctx *cmdContext, opts validateOptions) error {
 	// Apply fixes if requested
 	if opts.fix && len(result.Fixable) > 0 {
 		if err := validator.Fix(riteName); err != nil {
-			printer.VerboseLog("warn", "Fix failed", map[string]interface{}{"error": err.Error()})
+			printer.VerboseLog("warn", "Fix failed", map[string]any{"error": err.Error()})
 		}
 		// Re-validate after fix
 		result, _ = validator.Validate(riteName)

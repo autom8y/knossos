@@ -28,24 +28,24 @@ import (
 
 // Event represents a session event in the pre-ADR-0027 EventEmitter format.
 type Event struct {
-	Timestamp string                 `json:"timestamp"`
-	Event     string                 `json:"event"`
-	From      string                 `json:"from,omitempty"`
-	To        string                 `json:"to,omitempty"`
-	FromPhase string                 `json:"from_phase,omitempty"`
-	ToPhase   string                 `json:"to_phase,omitempty"`
-	Metadata  map[string]interface{} `json:"metadata,omitempty"`
+	Timestamp string         `json:"timestamp"`
+	Event     string         `json:"event"`
+	From      string         `json:"from,omitempty"`
+	To        string         `json:"to,omitempty"`
+	FromPhase string         `json:"from_phase,omitempty"`
+	ToPhase   string         `json:"to_phase,omitempty"`
+	Metadata  map[string]any `json:"metadata,omitempty"`
 }
 
 // ClewEvent represents a Clew Contract v2 event (new format).
 // This is a minimal struct for reading Clew events.jsonl entries.
 type ClewEvent struct {
-	Timestamp string                 `json:"ts"`
-	Type      string                 `json:"type"`
-	Tool      string                 `json:"tool,omitempty"`
-	Path      string                 `json:"path,omitempty"`
-	Summary   string                 `json:"summary"`
-	Meta      map[string]interface{} `json:"meta,omitempty"`
+	Timestamp string         `json:"ts"`
+	Type      string         `json:"type"`
+	Tool      string         `json:"tool,omitempty"`
+	Path      string         `json:"path,omitempty"`
+	Summary   string         `json:"summary"`
+	Meta      map[string]any `json:"meta,omitempty"`
 }
 
 // typedClewEventDetector is a minimal struct used to detect v3 TypedEvent lines.
@@ -106,7 +106,7 @@ func ReadEvents(path string) ([]Event, error) {
 			events = append(events, Event{
 				Timestamp: clewEvent.Timestamp,
 				Event:     clewEvent.Type,
-				Metadata: map[string]interface{}{
+				Metadata: map[string]any{
 					"tool":    clewEvent.Tool,
 					"path":    clewEvent.Path,
 					"summary": clewEvent.Summary,
@@ -135,7 +135,7 @@ func ReadEvents(path string) ([]Event, error) {
 //   - data: stored in Metadata["data"] as the parsed JSON object
 func typedEventToLegacy(te clewcontract.TypedEvent) Event {
 	// Parse the Data field to include in Metadata.
-	var dataMap map[string]interface{}
+	var dataMap map[string]any
 	_ = json.Unmarshal(te.Data, &dataMap)
 
 	// Apply rename: v3 type strings are already canonical; this is a no-op for v3 events
@@ -145,7 +145,7 @@ func typedEventToLegacy(te clewcontract.TypedEvent) Event {
 	return Event{
 		Timestamp: te.Ts,
 		Event:     normalizedType,
-		Metadata: map[string]interface{}{
+		Metadata: map[string]any{
 			"source": string(te.Source),
 			"data":   dataMap,
 		},

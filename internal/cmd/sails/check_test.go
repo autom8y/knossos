@@ -37,7 +37,6 @@ func createTestSession(t *testing.T, projectDir, sessionID string) string {
 	return sessionDir
 }
 
-
 // writeWhiteSails writes a WHITE_SAILS.yaml file to the session directory.
 func writeWhiteSails(t *testing.T, sessionDir string, content string) {
 	t.Helper()
@@ -423,26 +422,26 @@ func TestConfidenceLevel_GRAY_HotfixCeiling(t *testing.T) {
 // TestConfidenceLevel_ModifierDowngrade verifies modifiers can downgrade color.
 func TestConfidenceLevel_ModifierDowngrade(t *testing.T) {
 	tests := []struct {
-		name         string
-		modifier     sails.ModifierType
+		name          string
+		modifier      sails.ModifierType
 		expectedFinal sails.Color
 		expectedBase  sails.Color
 	}{
 		{
-			name:         "DOWNGRADE_TO_GRAY",
-			modifier:     sails.ModifierDowngradeToGray,
+			name:          "DOWNGRADE_TO_GRAY",
+			modifier:      sails.ModifierDowngradeToGray,
 			expectedFinal: sails.ColorGray,
 			expectedBase:  sails.ColorWhite,
 		},
 		{
-			name:         "DOWNGRADE_TO_BLACK",
-			modifier:     sails.ModifierDowngradeToBlack,
+			name:          "DOWNGRADE_TO_BLACK",
+			modifier:      sails.ModifierDowngradeToBlack,
 			expectedFinal: sails.ColorBlack,
 			expectedBase:  sails.ColorWhite,
 		},
 		{
-			name:         "HUMAN_OVERRIDE_GRAY",
-			modifier:     sails.ModifierHumanOverrideGray,
+			name:          "HUMAN_OVERRIDE_GRAY",
+			modifier:      sails.ModifierHumanOverrideGray,
 			expectedFinal: sails.ColorGray,
 			expectedBase:  sails.ColorWhite,
 		},
@@ -504,9 +503,9 @@ func TestConfidenceLevel_QAUpgrade(t *testing.T) {
 // TestConfidenceLevel_QAUpgradeRequirements verifies QA upgrade conditions.
 func TestConfidenceLevel_QAUpgradeRequirements(t *testing.T) {
 	tests := []struct {
-		name          string
-		qaUpgrade     *sails.QAUpgrade
-		expectedColor sails.Color
+		name           string
+		qaUpgrade      *sails.QAUpgrade
+		expectedColor  sails.Color
 		expectedReason string
 	}{
 		{
@@ -568,8 +567,8 @@ func TestConfidenceLevel_QAUpgradeRequirements(t *testing.T) {
 // TestComplexityThresholds_RequiredProofs verifies proof requirements by complexity.
 func TestComplexityThresholds_RequiredProofs(t *testing.T) {
 	tests := []struct {
-		complexity string
-		required   []string
+		complexity  string
+		required    []string
 		notRequired []string
 	}{
 		{
@@ -1030,7 +1029,7 @@ func TestCmdContext_ConcurrentPrinterAccess(t *testing.T) {
 
 	// Create multiple printers concurrently
 	done := make(chan bool, 10)
-	for i := 0; i < 10; i++ {
+	for range 10 {
 		go func() {
 			printer := ctx.getPrinter()
 			assert.NotNil(t, printer)
@@ -1039,7 +1038,7 @@ func TestCmdContext_ConcurrentPrinterAccess(t *testing.T) {
 	}
 
 	// Wait for all goroutines
-	for i := 0; i < 10; i++ {
+	for range 10 {
 		<-done
 	}
 }
@@ -1051,9 +1050,9 @@ func TestCmdContext_ConcurrentPrinterAccess(t *testing.T) {
 // TestValidateColorInput verifies color input validation.
 func TestValidateColorInput(t *testing.T) {
 	tests := []struct {
-		name       string
-		input      sails.ColorInput
-		hasErrors  bool
+		name      string
+		input     sails.ColorInput
+		hasErrors bool
 	}{
 		{
 			name: "valid input",
@@ -1108,4 +1107,3 @@ func TestValidateColorInput(t *testing.T) {
 		})
 	}
 }
-

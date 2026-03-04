@@ -228,11 +228,11 @@ func TestEventWriter_ThreadSafety(t *testing.T) {
 	var wg sync.WaitGroup
 	wg.Add(numWriters)
 
-	for i := 0; i < numWriters; i++ {
+	for i := range numWriters {
 		go func(writerID int) {
 			defer wg.Done()
-			for j := 0; j < eventsPerWriter; j++ {
-				event := NewToolCallEvent("Bash", "", map[string]interface{}{
+			for j := range eventsPerWriter {
+				event := NewToolCallEvent("Bash", "", map[string]any{
 					"writer_id": writerID,
 					"event_num": j,
 				})
@@ -514,11 +514,11 @@ func TestBufferedEventWriter_ThreadSafety(t *testing.T) {
 	var wg sync.WaitGroup
 	wg.Add(numWriters)
 
-	for i := 0; i < numWriters; i++ {
+	for i := range numWriters {
 		go func(writerID int) {
 			defer wg.Done()
-			for j := 0; j < eventsPerWriter; j++ {
-				event := NewToolCallEvent("Bash", "", map[string]interface{}{
+			for j := range eventsPerWriter {
+				event := NewToolCallEvent("Bash", "", map[string]any{
 					"writer_id": writerID,
 					"event_num": j,
 				})
@@ -565,9 +565,9 @@ func TestBufferedEventWriter_MultipleFlushes(t *testing.T) {
 	defer writer.Close()
 
 	// Write and flush multiple batches
-	for batch := 0; batch < 3; batch++ {
-		for i := 0; i < 10; i++ {
-			event := NewToolCallEvent("Bash", "", map[string]interface{}{
+	for batch := range 3 {
+		for i := range 10 {
+			event := NewToolCallEvent("Bash", "", map[string]any{
 				"batch": batch,
 				"index": i,
 			})

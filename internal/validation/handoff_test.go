@@ -3,6 +3,7 @@ package validation
 import (
 	"os"
 	"path/filepath"
+	"slices"
 	"testing"
 )
 
@@ -43,13 +44,7 @@ func TestValidPhases(t *testing.T) {
 	}
 
 	for _, e := range expected {
-		found := false
-		for _, p := range phases {
-			if p == e {
-				found = true
-				break
-			}
-		}
+		found := slices.Contains(phases, e)
 		if !found {
 			t.Errorf("ValidPhases() missing %q", e)
 		}
@@ -193,13 +188,7 @@ func TestHandoffValidator_ListArtifactTypes(t *testing.T) {
 	}
 
 	// Should have PRD for requirements phase
-	foundPRD := false
-	for _, at := range types {
-		if at == ArtifactTypePRD {
-			foundPRD = true
-			break
-		}
-	}
+	foundPRD := slices.Contains(types, ArtifactTypePRD)
 
 	if !foundPRD {
 		t.Error("ListArtifactTypes(requirements) missing PRD")
@@ -213,7 +202,7 @@ func TestHandoffValidator_ValidateHandoff_PassingPRD(t *testing.T) {
 		t.Fatalf("NewHandoffValidator() error = %v", err)
 	}
 
-	frontmatter := map[string]interface{}{
+	frontmatter := map[string]any{
 		"artifact_id":      "PRD-test-feature",
 		"title":            "Test Feature",
 		"status":           "approved",
@@ -247,7 +236,7 @@ func TestHandoffValidator_ValidateHandoff_FailingPRD_MissingRequired(t *testing.
 	}
 
 	// Missing success_criteria
-	frontmatter := map[string]interface{}{
+	frontmatter := map[string]any{
 		"artifact_id": "PRD-test-feature",
 		"title":       "Test Feature",
 		"status":      "approved",
@@ -284,7 +273,7 @@ func TestHandoffValidator_ValidateHandoff_NonBlockingWarnings(t *testing.T) {
 	}
 
 	// Has blocking fields but missing non-blocking
-	frontmatter := map[string]interface{}{
+	frontmatter := map[string]any{
 		"artifact_id":      "PRD-test-feature",
 		"title":            "Test Feature",
 		"status":           "approved",
@@ -317,7 +306,7 @@ func TestHandoffValidator_ValidateHandoff_EmptyField(t *testing.T) {
 	}
 
 	// artifact_id is present but empty
-	frontmatter := map[string]interface{}{
+	frontmatter := map[string]any{
 		"artifact_id":      "",
 		"title":            "Test Feature",
 		"status":           "approved",
@@ -342,7 +331,7 @@ func TestHandoffValidator_ValidateHandoff_MinItems(t *testing.T) {
 	}
 
 	// success_criteria is present but empty array
-	frontmatter := map[string]interface{}{
+	frontmatter := map[string]any{
 		"artifact_id":      "PRD-test-feature",
 		"title":            "Test Feature",
 		"status":           "approved",
@@ -366,7 +355,7 @@ func TestHandoffValidator_ValidateHandoff_DesignTDD(t *testing.T) {
 		t.Fatalf("NewHandoffValidator() error = %v", err)
 	}
 
-	frontmatter := map[string]interface{}{
+	frontmatter := map[string]any{
 		"artifact_id":         "TDD-feature-design",
 		"title":               "Feature Design",
 		"status":              "approved",
@@ -394,7 +383,7 @@ func TestHandoffValidator_ValidateHandoff_DesignADR(t *testing.T) {
 		t.Fatalf("NewHandoffValidator() error = %v", err)
 	}
 
-	frontmatter := map[string]interface{}{
+	frontmatter := map[string]any{
 		"artifact_id": "ADR-0001",
 		"title":       "Use JSON Schema for Validation",
 		"status":      "accepted",
@@ -421,7 +410,7 @@ func TestHandoffValidator_ValidateHandoff_ValidationTestPlan(t *testing.T) {
 		t.Fatalf("NewHandoffValidator() error = %v", err)
 	}
 
-	frontmatter := map[string]interface{}{
+	frontmatter := map[string]any{
 		"artifact_id": "TEST-feature-validation",
 		"title":       "Feature Validation Test Plan",
 		"status":      "approved",
@@ -589,7 +578,7 @@ func TestIsEmpty(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
 		name  string
-		value interface{}
+		value any
 		want  bool
 	}{
 		{"nil", nil, true},
@@ -620,7 +609,7 @@ func TestGetItemCount(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
 		name  string
-		value interface{}
+		value any
 		want  int
 	}{
 		{"nil", nil, 0},

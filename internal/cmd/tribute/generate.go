@@ -13,19 +13,19 @@ import (
 
 // GenerateOutput represents the output of tribute generation.
 type GenerateOutput struct {
-	SessionID   string  `json:"session_id"`
-	FilePath    string  `json:"file_path"`
-	Initiative  string  `json:"initiative"`
-	Complexity  string  `json:"complexity"`
-	Duration    string  `json:"duration"`
-	Rite        string  `json:"rite"`
-	FinalPhase  string  `json:"final_phase"`
-	SailsColor  string  `json:"sails_color,omitempty"`
-	Artifacts   int     `json:"artifacts_count"`
-	Decisions   int     `json:"decisions_count"`
-	Phases      int     `json:"phases_count"`
-	Handoffs    int     `json:"handoffs_count"`
-	GeneratedAt string  `json:"generated_at"`
+	SessionID   string `json:"session_id"`
+	FilePath    string `json:"file_path"`
+	Initiative  string `json:"initiative"`
+	Complexity  string `json:"complexity"`
+	Duration    string `json:"duration"`
+	Rite        string `json:"rite"`
+	FinalPhase  string `json:"final_phase"`
+	SailsColor  string `json:"sails_color,omitempty"`
+	Artifacts   int    `json:"artifacts_count"`
+	Decisions   int    `json:"decisions_count"`
+	Phases      int    `json:"phases_count"`
+	Handoffs    int    `json:"handoffs_count"`
+	GeneratedAt string `json:"generated_at"`
 }
 
 // Text implements output.Textable for GenerateOutput.
@@ -113,7 +113,7 @@ func runGenerate(ctx *cmdContext, sessionDir string) error {
 		}
 	}
 
-	printer.VerboseLog("info", "generating tribute", map[string]interface{}{
+	printer.VerboseLog("info", "generating tribute", map[string]any{
 		"session_path": generator.SessionPath,
 	})
 
@@ -139,7 +139,7 @@ func runGenerate(ctx *cmdContext, sessionDir string) error {
 		GeneratedAt: result.GeneratedAt.Format("2006-01-02T15:04:05Z"),
 	}
 
-	printer.VerboseLog("info", "tribute generated", map[string]interface{}{
+	printer.VerboseLog("info", "tribute generated", map[string]any{
 		"file_path":  result.FilePath,
 		"session_id": result.SessionID,
 	})
@@ -148,7 +148,7 @@ func runGenerate(ctx *cmdContext, sessionDir string) error {
 }
 
 // formatDuration formats duration as human-readable string.
-func formatDuration(d interface{}) string {
+func formatDuration(d any) string {
 	switch v := d.(type) {
 	case interface{ Hours() float64 }:
 		hours := v.Hours()

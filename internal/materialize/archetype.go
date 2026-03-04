@@ -96,7 +96,7 @@ func buildOrchestratorData(agent Agent, manifest *RiteManifest) *OrchestratorDat
 			return nil
 		}
 		switch typed := v.(type) {
-		case []interface{}:
+		case []any:
 			result := make([]string, 0, len(typed))
 			for _, item := range typed {
 				if s, ok := item.(string); ok {
@@ -141,7 +141,7 @@ func buildOrchestratorData(agent Agent, manifest *RiteManifest) *OrchestratorDat
 
 // RenderArchetype loads a template from knossos/archetypes/ and renders it.
 // Resolution order: projectRoot → KnossosHome → embedded FS.
-func RenderArchetype(projectRoot, templateName string, data interface{}) ([]byte, error) {
+func RenderArchetype(projectRoot, templateName string, data any) ([]byte, error) {
 	relPath := filepath.Join("knossos", "archetypes", templateName)
 
 	// 1. Try project root (knossos-on-knossos case)
@@ -169,7 +169,7 @@ func RenderArchetype(projectRoot, templateName string, data interface{}) ([]byte
 
 // RenderArchetypeFromString parses and renders a template from a raw string.
 // Useful for testing without filesystem dependency.
-func RenderArchetypeFromString(tplContent, templateName string, data interface{}) ([]byte, error) {
+func RenderArchetypeFromString(tplContent, templateName string, data any) ([]byte, error) {
 	tmpl, err := template.New(templateName).Parse(tplContent)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse archetype template %s: %w", templateName, err)

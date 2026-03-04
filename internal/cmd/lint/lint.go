@@ -229,13 +229,13 @@ func runLint(ctx *cmdContext, scope string) error {
 // --- Agent linting ---
 
 type agentFrontmatter struct {
-	Name        string                       `yaml:"name"`
-	Description string                       `yaml:"description"`
-	Type        string                       `yaml:"type"`
+	Name        string                          `yaml:"name"`
+	Description string                          `yaml:"description"`
+	Type        string                          `yaml:"type"`
 	Tools       frontmatter.FlexibleStringSlice `yaml:"tools"`
-	Model       string                       `yaml:"model"`
-	Color       string                       `yaml:"color"`
-	MaxTurns    int                          `yaml:"maxTurns"`
+	Model       string                          `yaml:"model"`
+	Color       string                          `yaml:"color"`
+	MaxTurns    int                             `yaml:"maxTurns"`
 }
 
 var archetypeMaxTurns = map[string]int{
@@ -351,10 +351,7 @@ func lintAgentFile(path, relPath string, report *LintReport) {
 				deviation = -deviation
 			}
 			// Threshold: 50% of archetype default or 50, whichever is larger
-			threshold := expected / 2
-			if threshold < 50 {
-				threshold = 50
-			}
+			threshold := max(expected/2, 50)
 			if deviation > threshold {
 				report.Agents = append(report.Agents, Finding{
 					File: relPath, Severity: SevMedium, Rule: "maxTurns-deviation",
@@ -796,14 +793,14 @@ func buildAllMenaSources(projectRoot string) []mena.MenaSource {
 // parseFrontmatterLenient tries strict YAML first, then falls back to line-by-line
 // key extraction. This handles argument-hint values with brackets like
 // "[--scope=rite|user|all]" which are invalid YAML.
-func parseFrontmatterLenient(yamlBytes []byte) map[string]interface{} {
-	var fm map[string]interface{}
+func parseFrontmatterLenient(yamlBytes []byte) map[string]any {
+	var fm map[string]any
 	if err := yaml.Unmarshal(yamlBytes, &fm); err == nil {
 		return fm
 	}
 
 	// Fallback: line-by-line extraction of simple key: value pairs
-	fm = make(map[string]interface{})
+	fm = make(map[string]any)
 	for _, line := range strings.Split(string(yamlBytes), "\n") {
 		line = strings.TrimSpace(line)
 		if line == "" || strings.HasPrefix(line, "#") {
@@ -838,7 +835,7 @@ func mustRel(base, path string) string {
 	return rel
 }
 
-func strVal(m map[string]interface{}, key string) string {
+func strVal(m map[string]any, key string) string {
 	v, ok := m[key]
 	if !ok {
 		return ""

@@ -97,11 +97,8 @@ func budgetText(claudeDir string) (string, error) {
 
 	// Top files
 	b.WriteString("\nTop files:\n")
-	limit := 10
-	if len(report.Files) < limit {
-		limit = len(report.Files)
-	}
-	for i := 0; i < limit; i++ {
+	limit := min(len(report.Files), 10)
+	for i := range limit {
 		f := report.Files[i]
 		b.WriteString(fmt.Sprintf("  %-40s %6s tokens\n", f.Path, formatNum(f.Tokens)))
 	}

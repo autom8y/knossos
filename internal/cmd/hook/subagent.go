@@ -114,7 +114,7 @@ func runSubagentStartCore(ctx *cmdContext, printer *output.Printer) error {
 	agentInfo := parseSubagentInfo(hookEnv.ToolInput)
 
 	// Log to clew using a task_start event
-	meta := map[string]interface{}{
+	meta := map[string]any{
 		"agent_name": agentInfo.AgentName,
 		"agent_type": agentInfo.AgentType,
 		"task_id":    agentInfo.TaskID,
@@ -137,7 +137,7 @@ func runSubagentStartCore(ctx *cmdContext, printer *output.Printer) error {
 	writer.Write(event)
 	if flushErr := writer.Flush(); flushErr != nil {
 		printer.VerboseLog("warn", "failed to write subagent start event",
-			map[string]interface{}{"error": flushErr.Error()})
+			map[string]any{"error": flushErr.Error()})
 		return outputSubagentResult(printer, false, "clew write failed")
 	}
 
@@ -146,7 +146,7 @@ func runSubagentStartCore(ctx *cmdContext, printer *output.Printer) error {
 	if agentInfo.AgentID != "" && throughlineAgentNames[agentInfo.AgentName] {
 		if err := upsertThroughlineID(sessionDir, agentInfo.AgentName, agentInfo.AgentID); err != nil {
 			printer.VerboseLog("warn", "failed to persist throughline agent ID",
-				map[string]interface{}{
+				map[string]any{
 					"agent_name": agentInfo.AgentName,
 					"error":      err.Error(),
 				})
@@ -175,7 +175,7 @@ func runSubagentStopCore(ctx *cmdContext, printer *output.Printer) error {
 	agentInfo := parseSubagentInfo(hookEnv.ToolInput)
 
 	// Log to clew using a task_end event
-	stopMeta := map[string]interface{}{
+	stopMeta := map[string]any{
 		"agent_name": agentInfo.AgentName,
 		"agent_type": agentInfo.AgentType,
 		"task_id":    agentInfo.TaskID,
@@ -198,7 +198,7 @@ func runSubagentStopCore(ctx *cmdContext, printer *output.Printer) error {
 	stopWriter.Write(event)
 	if flushErr := stopWriter.Flush(); flushErr != nil {
 		printer.VerboseLog("warn", "failed to write subagent stop event",
-			map[string]interface{}{"error": flushErr.Error()})
+			map[string]any{"error": flushErr.Error()})
 		return outputSubagentResult(printer, false, "clew write failed")
 	}
 
@@ -220,7 +220,7 @@ func parseSubagentInfo(toolInputJSON string) subagentPayload {
 	}
 
 	// Try to parse as JSON object
-	var raw map[string]interface{}
+	var raw map[string]any
 	if err := json.Unmarshal([]byte(toolInputJSON), &raw); err != nil {
 		info.AgentName = "unknown"
 		return info

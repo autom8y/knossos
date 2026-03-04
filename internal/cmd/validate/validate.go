@@ -61,11 +61,11 @@ func (c *cmdContext) getPrinter() *output.Printer {
 
 // ArtifactOutput represents the JSON output for artifact validation.
 type ArtifactOutput struct {
-	Valid        bool                     `json:"valid"`
-	ArtifactType string                   `json:"artifact_type,omitempty"`
-	FilePath     string                   `json:"file_path"`
+	Valid        bool                         `json:"valid"`
+	ArtifactType string                       `json:"artifact_type,omitempty"`
+	FilePath     string                       `json:"file_path"`
 	Issues       []validation.ValidationIssue `json:"issues,omitempty"`
-	Frontmatter  map[string]interface{}   `json:"frontmatter,omitempty"`
+	Frontmatter  map[string]any               `json:"frontmatter,omitempty"`
 }
 
 // Text implements output.Textable for ArtifactOutput.
@@ -140,7 +140,7 @@ Examples:
 				if aType == validation.ArtifactTypeUnknown {
 					err := errors.NewWithDetails(errors.CodeUsageError,
 						"invalid artifact type",
-						map[string]interface{}{
+						map[string]any{
 							"type":  artifactType,
 							"valid": validation.ValidArtifactTypes(),
 						})
@@ -198,12 +198,12 @@ func issueMessages(issues []validation.ValidationIssue) []string {
 
 // HandoffOutput represents the JSON output for handoff validation.
 type HandoffOutput struct {
-	Passed          bool                           `json:"passed"`
-	Phase           string                         `json:"phase"`
-	ArtifactType    string                         `json:"artifact_type,omitempty"`
-	FilePath        string                         `json:"file_path,omitempty"`
-	BlockingFailed  []validation.CriterionResult   `json:"blocking_failed,omitempty"`
-	Warnings        []validation.CriterionResult   `json:"warnings,omitempty"`
+	Passed         bool                         `json:"passed"`
+	Phase          string                       `json:"phase"`
+	ArtifactType   string                       `json:"artifact_type,omitempty"`
+	FilePath       string                       `json:"file_path,omitempty"`
+	BlockingFailed []validation.CriterionResult `json:"blocking_failed,omitempty"`
+	Warnings       []validation.CriterionResult `json:"warnings,omitempty"`
 }
 
 // Text implements output.Textable for HandoffOutput.
@@ -362,7 +362,7 @@ Examples:
 				if p == "" {
 					err := errors.NewWithDetails(errors.CodeUsageError,
 						"invalid phase",
-						map[string]interface{}{"phase": phase, "valid": validation.ValidPhases()})
+						map[string]any{"phase": phase, "valid": validation.ValidPhases()})
 					printer.PrintError(err)
 					return err
 				}
@@ -371,7 +371,7 @@ Examples:
 				if at == validation.ArtifactTypeUnknown {
 					err := errors.NewWithDetails(errors.CodeUsageError,
 						"invalid artifact type",
-						map[string]interface{}{"type": artifactType, "valid": validation.ValidArtifactTypes()})
+						map[string]any{"type": artifactType, "valid": validation.ValidArtifactTypes()})
 					printer.PrintError(err)
 					return err
 				}
@@ -407,7 +407,7 @@ Examples:
 			if p == "" {
 				err := errors.NewWithDetails(errors.CodeUsageError,
 					"invalid phase",
-					map[string]interface{}{"phase": phase, "valid": validation.ValidPhases()})
+					map[string]any{"phase": phase, "valid": validation.ValidPhases()})
 				printer.PrintError(err)
 				return err
 			}
@@ -464,9 +464,9 @@ Examples:
 
 // SchemaOutput represents the JSON output for schema validation.
 type SchemaOutput struct {
-	Valid      bool                     `json:"valid"`
-	SchemaName string                   `json:"schema_name"`
-	FilePath   string                   `json:"file_path"`
+	Valid      bool                         `json:"valid"`
+	SchemaName string                       `json:"schema_name"`
+	FilePath   string                       `json:"file_path"`
 	Issues     []validation.ValidationIssue `json:"issues,omitempty"`
 }
 
@@ -527,7 +527,7 @@ Examples:
 			if aType == validation.ArtifactTypeUnknown {
 				err := errors.NewWithDetails(errors.CodeSchemaNotFound,
 					"unknown schema",
-					map[string]interface{}{
+					map[string]any{
 						"schema": schemaName,
 						"valid":  validation.ValidArtifactTypes(),
 					})

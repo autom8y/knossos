@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"gopkg.in/yaml.v3"
@@ -32,12 +33,7 @@ var ValidForms = []RiteForm{FormSimple, FormPractitioner, FormProcedural, FormFu
 
 // IsValidForm returns true if the form is valid.
 func IsValidForm(f RiteForm) bool {
-	for _, valid := range ValidForms {
-		if f == valid {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(ValidForms, f)
 }
 
 // RiteManifest represents a parsed manifest.yaml file.
@@ -65,7 +61,7 @@ type RiteManifest struct {
 	ComplexityLevels []ComplexityLevel `yaml:"complexity_levels,omitempty" json:"complexity_levels,omitempty"`
 
 	// Metadata
-	Metadata map[string]interface{} `yaml:"metadata,omitempty" json:"metadata,omitempty"`
+	Metadata map[string]any `yaml:"metadata,omitempty" json:"metadata,omitempty"`
 
 	// Legacy/planned fields for backward compatibility
 	SchemaVersion string   `yaml:"schema_version,omitempty" json:"schema_version,omitempty"`
@@ -76,7 +72,7 @@ type RiteManifest struct {
 	Workflow *WorkflowConfig `yaml:"workflow,omitempty" json:"workflow,omitempty"`
 
 	// Optional lifecycle hooks
-	Hooks interface{} `yaml:"hooks,omitempty" json:"hooks,omitempty"`
+	Hooks any `yaml:"hooks,omitempty" json:"hooks,omitempty"`
 
 	// Context budget metadata
 	Budget *BudgetInfo `yaml:"budget,omitempty" json:"budget,omitempty"`
@@ -150,25 +146,24 @@ type BudgetInfo struct {
 	WorkflowCost    int `yaml:"workflow_cost,omitempty" json:"workflow_cost,omitempty"`
 }
 
-
 // rawManifest is an intermediate struct for parsing manifests with flexible skills field.
 type rawManifest struct {
-	Name             string                 `yaml:"name"`
-	Version          string                 `yaml:"version,omitempty"`
-	Description      string                 `yaml:"description,omitempty"`
-	EntryAgent       string                 `yaml:"entry_agent,omitempty"`
-	Phases           []ManifestPhase        `yaml:"phases,omitempty"`
-	Agents           []AgentRef             `yaml:"agents,omitempty"`
-	Skills           interface{}            `yaml:"skills,omitempty"` // Can be []string or []SkillRef
-	Dependencies     []string               `yaml:"dependencies,omitempty"`
-	ComplexityLevels []ComplexityLevel      `yaml:"complexity_levels,omitempty"`
-	Metadata         map[string]interface{} `yaml:"metadata,omitempty"`
-	SchemaVersion    string                 `yaml:"schema_version,omitempty"`
-	DisplayName      string                 `yaml:"display_name,omitempty"`
-	Form             RiteForm               `yaml:"form,omitempty"`
-	Workflow         *WorkflowConfig        `yaml:"workflow,omitempty"`
-	Hooks            interface{}            `yaml:"hooks,omitempty"`
-	Budget           *BudgetInfo            `yaml:"budget,omitempty"`
+	Name             string            `yaml:"name"`
+	Version          string            `yaml:"version,omitempty"`
+	Description      string            `yaml:"description,omitempty"`
+	EntryAgent       string            `yaml:"entry_agent,omitempty"`
+	Phases           []ManifestPhase   `yaml:"phases,omitempty"`
+	Agents           []AgentRef        `yaml:"agents,omitempty"`
+	Skills           any               `yaml:"skills,omitempty"` // Can be []string or []SkillRef
+	Dependencies     []string          `yaml:"dependencies,omitempty"`
+	ComplexityLevels []ComplexityLevel `yaml:"complexity_levels,omitempty"`
+	Metadata         map[string]any    `yaml:"metadata,omitempty"`
+	SchemaVersion    string            `yaml:"schema_version,omitempty"`
+	DisplayName      string            `yaml:"display_name,omitempty"`
+	Form             RiteForm          `yaml:"form,omitempty"`
+	Workflow         *WorkflowConfig   `yaml:"workflow,omitempty"`
+	Hooks            any               `yaml:"hooks,omitempty"`
+	Budget           *BudgetInfo       `yaml:"budget,omitempty"`
 }
 
 // LoadManifest reads and parses a manifest.yaml file.
@@ -205,12 +200,12 @@ func LoadManifest(path string) (*RiteManifest, error) {
 	// Parse skills - can be []string or []SkillRef
 	if raw.Skills != nil {
 		switch skills := raw.Skills.(type) {
-		case []interface{}:
+		case []any:
 			for _, s := range skills {
 				switch skill := s.(type) {
 				case string:
 					manifest.SkillNames = append(manifest.SkillNames, skill)
-				case map[string]interface{}:
+				case map[string]any:
 					ref := SkillRef{}
 					if v, ok := skill["ref"].(string); ok {
 						ref.Ref = v

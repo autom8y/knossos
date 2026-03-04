@@ -2,6 +2,7 @@ package inscription
 
 import (
 	"encoding/json"
+	"maps"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -37,7 +38,7 @@ func (m *ManifestLoader) Load() (*Manifest, error) {
 		if os.IsNotExist(err) {
 			return nil, errors.NewWithDetails(errors.CodeFileNotFound,
 				"manifest file not found",
-				map[string]interface{}{"path": m.ManifestPath})
+				map[string]any{"path": m.ManifestPath})
 		}
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to read manifest", err)
 	}
@@ -63,7 +64,7 @@ func (m *ManifestLoader) ParseManifest(data []byte) (*Manifest, error) {
 	if err := yaml.Unmarshal(data, &manifest); err != nil {
 		return nil, errors.NewWithDetails(errors.CodeParseError,
 			"failed to parse manifest YAML",
-			map[string]interface{}{
+			map[string]any{
 				"path":  m.ManifestPath,
 				"cause": err.Error(),
 			})
@@ -306,7 +307,7 @@ func (manifest *Manifest) AdoptNewDefaults() {
 func DeprecatedRegions() []string {
 	return []string{
 		"slash-commands", // Removed in v18, absorbed into commands Rosetta Stone
-		"navigation",    // Removed in v20, zero unique value (all content duplicated or tautological)
+		"navigation",     // Removed in v20, zero unique value (all content duplicated or tautological)
 	}
 }
 
@@ -357,13 +358,13 @@ func (manifest *Manifest) Clone() (*Manifest, error) {
 	if err != nil {
 		return nil, errors.NewWithDetails(errors.CodeGeneralError,
 			"clone: failed to marshal manifest",
-			map[string]interface{}{"error": err.Error()})
+			map[string]any{"error": err.Error()})
 	}
 	var clone Manifest
 	if err := json.Unmarshal(data, &clone); err != nil {
 		return nil, errors.NewWithDetails(errors.CodeGeneralError,
 			"clone: failed to unmarshal manifest",
-			map[string]interface{}{"error": err.Error()})
+			map[string]any{"error": err.Error()})
 	}
 	return &clone, nil
 }
@@ -426,9 +427,7 @@ func MergeManifests(base, overlay *Manifest) (*Manifest, error) {
 		if result.Regions == nil {
 			result.Regions = make(map[string]*Region)
 		}
-		for name, region := range overlay.Regions {
-			result.Regions[name] = region
-		}
+		maps.Copy(result.Regions, overlay.Regions)
 	}
 
 	// Overlay section_order if provided
@@ -441,9 +440,7 @@ func MergeManifests(base, overlay *Manifest) (*Manifest, error) {
 		if result.Conditionals == nil {
 			result.Conditionals = make(map[string]*Conditional)
 		}
-		for name, cond := range overlay.Conditionals {
-			result.Conditionals[name] = cond
-		}
+		maps.Copy(result.Conditionals, overlay.Conditionals)
 	}
 
 	return result, nil
@@ -492,7 +489,7 @@ func (manifest *Manifest) AddRegion(name string, region *Region) error {
 	if manifest.HasRegion(name) {
 		return errors.NewWithDetails(errors.CodeUsageError,
 			"region already exists",
-			map[string]interface{}{"region": name})
+			map[string]any{"region": name})
 	}
 
 	manifest.SetRegion(name, region)

@@ -1,6 +1,7 @@
 package worktree
 
 import (
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -1084,13 +1085,7 @@ func TestListOutput_Headers_SixColumns(t *testing.T) {
 func TestListOutput_Headers_ContainsID(t *testing.T) {
 	out := ListOutput{}
 	headers := out.Headers()
-	found := false
-	for _, h := range headers {
-		if h == "ID" {
-			found = true
-			break
-		}
-	}
+	found := slices.Contains(headers, "ID")
 	if !found {
 		t.Errorf("ListOutput.Headers() should contain 'ID', got: %v", headers)
 	}

@@ -106,7 +106,7 @@ func runCleanup(ctx *cmdContext, opts cleanupOptions) error {
 	// Parse duration
 	duration, err := parseDuration(opts.olderThan)
 	if err != nil {
-		err := errors.NewWithDetails(errors.CodeUsageError, "invalid duration format", map[string]interface{}{
+		err := errors.NewWithDetails(errors.CodeUsageError, "invalid duration format", map[string]any{
 			"value":   opts.olderThan,
 			"example": "7d, 24h, 1h",
 		})

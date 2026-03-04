@@ -278,7 +278,7 @@ func TestRecordStamp(t *testing.T) {
 	}
 
 	// Check rejected is present
-	rejectedMeta, ok := event.Meta["rejected"].([]interface{})
+	rejectedMeta, ok := event.Meta["rejected"].([]any)
 	if !ok {
 		t.Fatal("Meta.rejected is not a slice")
 	}

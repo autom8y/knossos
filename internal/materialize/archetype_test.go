@@ -440,10 +440,7 @@ func TestRenderArchetype_SkillsYAMLList(t *testing.T) {
 	if !strings.Contains(output, "skills:\n  - orchestrator-templates\n  - 10x-workflow\n") {
 		// Extract the skills section for debugging
 		start := strings.Index(output, "skills:")
-		end := start + 100
-		if end > len(output) {
-			end = len(output)
-		}
+		end := min(start+100, len(output))
 		t.Errorf("skills not rendered as expected YAML list.\nGot:\n%s", output[start:end])
 	}
 }
@@ -502,11 +499,11 @@ func TestMaterializeAgents_ArchetypeRendersFromTemplate(t *testing.T) {
 			{Name: "pythia", Role: "Coordinates workflow", Archetype: "orchestrator"},
 			{Name: "engineer", Role: "Implements code"},
 		},
-		ArchetypeData: map[string]map[string]interface{}{
+		ArchetypeData: map[string]map[string]any{
 			"orchestrator": {
 				"description":         "Coordinates test phases",
 				"color":               "green",
-				"skills":              []interface{}{"orchestrator-templates"},
+				"skills":              []any{"orchestrator-templates"},
 				"phase_routing":       "| engineer | Implementation needed |\n",
 				"handoff_criteria":    "| impl | - Code complete |\n",
 				"rite_anti_patterns":  "- **Test anti-pattern**",
@@ -574,11 +571,11 @@ func TestMaterializeAgents_NonArchetypeAgentCopiedFromSource(t *testing.T) {
 			{Name: "pythia", Role: "Coordinates", Archetype: "orchestrator"},
 			{Name: "engineer", Role: "Implements code"},
 		},
-		ArchetypeData: map[string]map[string]interface{}{
+		ArchetypeData: map[string]map[string]any{
 			"orchestrator": {
 				"description":         "Coordinates test phases",
 				"color":               "green",
-				"skills":              []interface{}{"orchestrator-templates"},
+				"skills":              []any{"orchestrator-templates"},
 				"phase_routing":       "| engineer | Impl needed |\n",
 				"handoff_criteria":    "| impl | - Done |\n",
 				"rite_anti_patterns":  "- None",
@@ -630,11 +627,11 @@ func TestMaterializeAgents_ArchetypeGoesThruTransformPipeline(t *testing.T) {
 		Agents: []Agent{
 			{Name: "pythia", Role: "Coordinates", Archetype: "orchestrator"},
 		},
-		ArchetypeData: map[string]map[string]interface{}{
+		ArchetypeData: map[string]map[string]any{
 			"orchestrator": {
 				"description":         "Coordinates phases",
 				"color":               "purple",
-				"skills":              []interface{}{"orchestrator-templates"},
+				"skills":              []any{"orchestrator-templates"},
 				"phase_routing":       "| eng | Impl |\n",
 				"handoff_criteria":    "| impl | - Done |\n",
 				"rite_anti_patterns":  "- None",
@@ -771,11 +768,11 @@ func TestMaterializeAgents_ArchetypeProvenanceRecorded(t *testing.T) {
 			{Name: "pythia", Role: "Coordinates", Archetype: "orchestrator"},
 			{Name: "engineer", Role: "Implements"},
 		},
-		ArchetypeData: map[string]map[string]interface{}{
+		ArchetypeData: map[string]map[string]any{
 			"orchestrator": {
 				"description":         "Coordinates",
 				"color":               "blue",
-				"skills":              []interface{}{"orchestrator-templates"},
+				"skills":              []any{"orchestrator-templates"},
 				"phase_routing":       "| eng | Impl |\n",
 				"handoff_criteria":    "| impl | - Done |\n",
 				"rite_anti_patterns":  "- None",
@@ -829,12 +826,12 @@ func TestBuildOrchestratorData_ExtractsAllFields(t *testing.T) {
 	manifest := &RiteManifest{
 		Name:        "test-rite",
 		Description: "Test description",
-		ArchetypeData: map[string]map[string]interface{}{
+		ArchetypeData: map[string]map[string]any{
 			"orchestrator": {
 				"description":                  "Custom orchestrator desc",
 				"color":                        "red",
-				"skills":                       []interface{}{"skill-a", "skill-b"},
-				"contract_must_not":            []interface{}{"Don't do X", "Don't do Y"},
+				"skills":                       []any{"skill-a", "skill-b"},
+				"contract_must_not":            []any{"Don't do X", "Don't do Y"},
 				"phase_routing":                "| agent | route |\n",
 				"handoff_criteria":             "| phase | criteria |\n",
 				"rite_anti_patterns":           "- Pattern A",

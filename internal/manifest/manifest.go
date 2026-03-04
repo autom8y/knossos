@@ -28,10 +28,10 @@ const (
 
 // Manifest represents a parsed manifest file.
 type Manifest struct {
-	Path    string                 `json:"path"`
-	Format  Format                 `json:"format"`
-	Content map[string]interface{} `json:"content"`
-	Raw     []byte                 `json:"-"`
+	Path    string         `json:"path"`
+	Format  Format         `json:"format"`
+	Content map[string]any `json:"content"`
+	Raw     []byte         `json:"-"`
 }
 
 // Load reads and parses a manifest from the given path.
@@ -47,7 +47,7 @@ func Load(path string) (*Manifest, error) {
 		if os.IsNotExist(err) {
 			return nil, errors.NewWithDetails(errors.CodeFileNotFound,
 				"manifest file not found",
-				map[string]interface{}{"path": path})
+				map[string]any{"path": path})
 		}
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to read manifest", err)
 	}
@@ -57,7 +57,7 @@ func Load(path string) (*Manifest, error) {
 	if err != nil {
 		return nil, errors.NewWithDetails(CodeParseError,
 			"failed to parse manifest",
-			map[string]interface{}{
+			map[string]any{
 				"path":   path,
 				"format": string(format),
 				"cause":  err.Error(),
@@ -92,7 +92,7 @@ func LoadFromGitRef(ref string) (*Manifest, error) {
 	if len(parts) != 2 {
 		return nil, errors.NewWithDetails(errors.CodeUsageError,
 			"invalid git ref format",
-			map[string]interface{}{"ref": ref, "expected": "commit:path"})
+			map[string]any{"ref": ref, "expected": "commit:path"})
 	}
 
 	commit, path := parts[0], parts[1]
@@ -104,7 +104,7 @@ func LoadFromGitRef(ref string) (*Manifest, error) {
 		if exitErr, ok := err.(*exec.ExitError); ok {
 			return nil, errors.NewWithDetails(errors.CodeFileNotFound,
 				"git ref not found",
-				map[string]interface{}{
+				map[string]any{
 					"ref":    ref,
 					"stderr": string(exitErr.Stderr),
 				})
@@ -117,7 +117,7 @@ func LoadFromGitRef(ref string) (*Manifest, error) {
 	if err != nil {
 		return nil, errors.NewWithDetails(CodeParseError,
 			"failed to parse manifest from git",
-			map[string]interface{}{
+			map[string]any{
 				"ref":    ref,
 				"format": string(format),
 				"cause":  err.Error(),
@@ -166,8 +166,8 @@ func detectFormat(path string) Format {
 }
 
 // parse decodes the manifest content.
-func parse(data []byte, format Format) (map[string]interface{}, error) {
-	var content map[string]interface{}
+func parse(data []byte, format Format) (map[string]any, error) {
+	var content map[string]any
 
 	switch format {
 	case FormatYAML:
@@ -216,7 +216,7 @@ func (m *Manifest) ToJSON() ([]byte, error) {
 func (m *Manifest) Clone() *Manifest {
 	// Use JSON round-trip for deep copy
 	data, _ := json.Marshal(m.Content)
-	var content map[string]interface{}
+	var content map[string]any
 	_ = json.Unmarshal(data, &content)
 
 	rawCopy := make([]byte, len(m.Raw))
@@ -231,13 +231,13 @@ func (m *Manifest) Clone() *Manifest {
 }
 
 // Get retrieves a value from the manifest using dot notation (e.g., "teams.default").
-func (m *Manifest) Get(path string) (interface{}, bool) {
+func (m *Manifest) Get(path string) (any, bool) {
 	parts := strings.Split(path, ".")
-	var current interface{} = m.Content
+	var current any = m.Content
 
 	for _, part := range parts {
 		switch v := current.(type) {
-		case map[string]interface{}:
+		case map[string]any:
 			val, ok := v[part]
 			if !ok {
 				return nil, false
@@ -269,7 +269,7 @@ func (m *Manifest) GetStringSlice(path string) []string {
 	if !ok {
 		return nil
 	}
-	if arr, ok := val.([]interface{}); ok {
+	if arr, ok := val.([]any); ok {
 		result := make([]string, 0, len(arr))
 		for _, item := range arr {
 			if s, ok := item.(string); ok {
@@ -288,7 +288,7 @@ func (m *Manifest) Exists() bool {
 
 // looksLikeRiteManifest returns true if the content has keys typical of a rite manifest.
 // Used to decide whether to run rite-specific validation from Load().
-func looksLikeRiteManifest(content map[string]interface{}) bool {
+func looksLikeRiteManifest(content map[string]any) bool {
 	_, hasName := content["name"]
 	_, hasAgents := content["agents"]
 	return hasName && hasAgents
@@ -339,9 +339,9 @@ func ValidateRiteManifest(m *Manifest) []ValidationIssue {
 
 	// Validate agent references: each agent must have a non-empty name
 	if agents, ok := m.Content["agents"]; ok {
-		if agentList, ok := agents.([]interface{}); ok {
+		if agentList, ok := agents.([]any); ok {
 			for i, agent := range agentList {
-				if agentMap, ok := agent.(map[string]interface{}); ok {
+				if agentMap, ok := agent.(map[string]any); ok {
 					agentName, hasAgentName := agentMap["name"]
 					if !hasAgentName {
 						warnings = append(warnings, ValidationIssue{
@@ -383,17 +383,17 @@ func formatAgentPath(index int, field string) string {
 }
 
 // agentExistsInList checks if an agent name appears in the manifest's agents list.
-func agentExistsInList(content map[string]interface{}, name string) bool {
+func agentExistsInList(content map[string]any, name string) bool {
 	agents, ok := content["agents"]
 	if !ok {
 		return false
 	}
-	agentList, ok := agents.([]interface{})
+	agentList, ok := agents.([]any)
 	if !ok {
 		return false
 	}
 	for _, agent := range agentList {
-		if agentMap, ok := agent.(map[string]interface{}); ok {
+		if agentMap, ok := agent.(map[string]any); ok {
 			if n, ok := agentMap["name"].(string); ok && n == name {
 				return true
 			}

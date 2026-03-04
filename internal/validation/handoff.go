@@ -108,7 +108,7 @@ type HandoffResult struct {
 	WarningResults []CriterionResult `json:"warning_results,omitempty"`
 
 	// Frontmatter contains the parsed frontmatter data.
-	Frontmatter map[string]interface{} `json:"frontmatter,omitempty"`
+	Frontmatter map[string]any `json:"frontmatter,omitempty"`
 }
 
 // FailedBlocking returns the blocking criteria that failed.
@@ -172,7 +172,7 @@ func parseCriteria(data []byte) (HandoffCriteria, error) {
 		if phase == "" {
 			return nil, errors.NewWithDetails(errors.CodeSchemaInvalid,
 				"invalid phase in handoff criteria",
-				map[string]interface{}{"phase": phaseStr, "valid": ValidPhases()})
+				map[string]any{"phase": phaseStr, "valid": ValidPhases()})
 		}
 
 		criteria[phase] = make(map[ArtifactType]ArtifactCriteria)
@@ -181,7 +181,7 @@ func parseCriteria(data []byte) (HandoffCriteria, error) {
 			if artifactType == ArtifactTypeUnknown {
 				return nil, errors.NewWithDetails(errors.CodeSchemaInvalid,
 					"invalid artifact type in handoff criteria",
-					map[string]interface{}{"artifact_type": artifactStr, "valid": ValidArtifactTypes()})
+					map[string]any{"artifact_type": artifactStr, "valid": ValidArtifactTypes()})
 			}
 			criteria[phase][artifactType] = ArtifactCriteria{
 				Blocking:    ac.Blocking,
@@ -199,7 +199,7 @@ func (hv *HandoffValidator) GetCriteria(phase Phase, artifactType ArtifactType) 
 	if !ok {
 		return nil, errors.NewWithDetails(errors.CodeSchemaNotFound,
 			"no criteria defined for phase",
-			map[string]interface{}{"phase": string(phase), "valid": ValidPhases()})
+			map[string]any{"phase": string(phase), "valid": ValidPhases()})
 	}
 
 	criteria, ok := phaseMap[artifactType]
@@ -235,7 +235,7 @@ func (hv *HandoffValidator) ListArtifactTypes(phase Phase) []ArtifactType {
 }
 
 // ValidateHandoff validates an artifact's frontmatter against handoff criteria.
-func (hv *HandoffValidator) ValidateHandoff(phase Phase, artifactType ArtifactType, frontmatter map[string]interface{}) (*HandoffResult, error) {
+func (hv *HandoffValidator) ValidateHandoff(phase Phase, artifactType ArtifactType, frontmatter map[string]any) (*HandoffResult, error) {
 	result := &HandoffResult{
 		Phase:        phase,
 		ArtifactType: artifactType,
@@ -310,7 +310,7 @@ func (hv *HandoffValidator) ValidateHandoffFile(phase Phase, filePath string) (*
 }
 
 // evaluateCriterion evaluates a single criterion against frontmatter.
-func evaluateCriterion(criterion Criterion, frontmatter map[string]interface{}) CriterionResult {
+func evaluateCriterion(criterion Criterion, frontmatter map[string]any) CriterionResult {
 	result := CriterionResult{
 		Criterion: criterion,
 		Passed:    true,
@@ -347,7 +347,7 @@ func evaluateCriterion(criterion Criterion, frontmatter map[string]interface{}) 
 }
 
 // isEmpty checks if a value is empty.
-func isEmpty(value interface{}) bool {
+func isEmpty(value any) bool {
 	if value == nil {
 		return true
 	}
@@ -366,7 +366,7 @@ func isEmpty(value interface{}) bool {
 }
 
 // getItemCount returns the count of items for array/slice values.
-func getItemCount(value interface{}) int {
+func getItemCount(value any) int {
 	if value == nil {
 		return 0
 	}

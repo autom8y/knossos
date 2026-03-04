@@ -1,6 +1,7 @@
 package materialize
 
 import (
+	"maps"
 	"os"
 	"path/filepath"
 	"testing"
@@ -19,9 +20,7 @@ func buildTestManifest(entries map[string]*provenance.ProvenanceEntry) *provenan
 		LastSync:      time.Now().UTC(),
 		Entries:       make(map[string]*provenance.ProvenanceEntry),
 	}
-	for k, v := range entries {
-		m.Entries[k] = v
-	}
+	maps.Copy(m.Entries, entries)
 	return m
 }
 
@@ -279,7 +278,7 @@ func TestMatchesStaleSettingsFingerprint_AgentGuardWithAllowPath(t *testing.T) {
 func TestMatchesStaleSettingsFingerprint_EmptyStub(t *testing.T) {
 	parsed := map[string]any{
 		"permissions": map[string]any{
-			"allow":                []any{},
+			"allow":                 []any{},
 			"additionalDirectories": []any{},
 		},
 		"hooks": map[string]any{},
@@ -291,9 +290,9 @@ func TestMatchesStaleSettingsFingerprint_EmptyStubWithExtraPermissions(t *testin
 	// permissions has extra fields beyond allow + additionalDirectories
 	parsed := map[string]any{
 		"permissions": map[string]any{
-			"allow":                []any{},
+			"allow":                 []any{},
 			"additionalDirectories": []any{},
-			"deny":                 []any{"Bash(rm:*)"},
+			"deny":                  []any{"Bash(rm:*)"},
 		},
 		"hooks": map[string]any{},
 	}
@@ -303,7 +302,7 @@ func TestMatchesStaleSettingsFingerprint_EmptyStubWithExtraPermissions(t *testin
 func TestMatchesStaleSettingsFingerprint_EmptyStubNonEmptyAllow(t *testing.T) {
 	parsed := map[string]any{
 		"permissions": map[string]any{
-			"allow":                []any{"Bash(git:*)"},
+			"allow":                 []any{"Bash(git:*)"},
 			"additionalDirectories": []any{},
 		},
 		"hooks": map[string]any{},
@@ -315,7 +314,7 @@ func TestMatchesStaleSettingsFingerprint_EmptyStubWithNonEmptyHooks(t *testing.T
 	// hooks is not empty — user added something
 	parsed := map[string]any{
 		"permissions": map[string]any{
-			"allow":                []any{},
+			"allow":                 []any{},
 			"additionalDirectories": []any{},
 		},
 		"hooks": map[string]any{

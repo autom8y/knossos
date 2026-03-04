@@ -66,17 +66,17 @@ type GenerateResult struct {
 
 // WhiteSailsYAML represents the WHITE_SAILS.yaml file structure.
 type WhiteSailsYAML struct {
-	SchemaVersion string                  `yaml:"schema_version"`
-	SessionID     string                  `yaml:"session_id"`
-	GeneratedAt   string                  `yaml:"generated_at"`
-	Color         string                  `yaml:"color"`
-	ComputedBase  string                  `yaml:"computed_base"`
-	Proofs        map[string]YAMLProof    `yaml:"proofs"`
-	OpenQuestions []string                `yaml:"open_questions"`
-	Modifiers     []YAMLModifier          `yaml:"modifiers,omitempty"`
-	Complexity    string                  `yaml:"complexity,omitempty"`
-	Type          string                  `yaml:"type,omitempty"`
-	QAUpgrade     *YAMLQAUpgrade          `yaml:"qa_upgrade,omitempty"`
+	SchemaVersion string               `yaml:"schema_version"`
+	SessionID     string               `yaml:"session_id"`
+	GeneratedAt   string               `yaml:"generated_at"`
+	Color         string               `yaml:"color"`
+	ComputedBase  string               `yaml:"computed_base"`
+	Proofs        map[string]YAMLProof `yaml:"proofs"`
+	OpenQuestions []string             `yaml:"open_questions"`
+	Modifiers     []YAMLModifier       `yaml:"modifiers,omitempty"`
+	Complexity    string               `yaml:"complexity,omitempty"`
+	Type          string               `yaml:"type,omitempty"`
+	QAUpgrade     *YAMLQAUpgrade       `yaml:"qa_upgrade,omitempty"`
 }
 
 // YAMLProof represents a proof item in YAML format.
@@ -133,14 +133,14 @@ func (g *Generator) Generate() (*GenerateResult, error) {
 		if os.IsNotExist(err) {
 			return nil, errors.NewWithDetails(errors.CodeSessionNotFound,
 				"session directory not found",
-				map[string]interface{}{"path": g.SessionPath})
+				map[string]any{"path": g.SessionPath})
 		}
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to access session directory", err)
 	}
 	if !info.IsDir() {
 		return nil, errors.NewWithDetails(errors.CodeUsageError,
 			"path is not a directory",
-			map[string]interface{}{"path": g.SessionPath})
+			map[string]any{"path": g.SessionPath})
 	}
 
 	// Step 1: Collect proofs from session directory
@@ -215,7 +215,7 @@ func (g *Generator) Generate() (*GenerateResult, error) {
 			}
 			return nil, errors.NewWithDetails(errors.CodeSchemaInvalid,
 				"generated WHITE_SAILS.yaml failed schema validation",
-				map[string]interface{}{"issues": issues})
+				map[string]any{"issues": issues})
 		}
 	}
 

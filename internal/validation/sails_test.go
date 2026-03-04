@@ -286,18 +286,18 @@ func TestValidateWhiteSailsMap(t *testing.T) {
 		t.Fatalf("NewValidator() error = %v", err)
 	}
 
-	data := map[string]interface{}{
+	data := map[string]any{
 		"schema_version": "1.0",
 		"session_id":     "session-20260105-143000-abc12345",
 		"generated_at":   "2026-01-05T14:30:00Z",
 		"color":          "WHITE",
 		"computed_base":  "WHITE",
-		"proofs": map[string]interface{}{
-			"tests": map[string]interface{}{"status": "PASS"},
-			"build": map[string]interface{}{"status": "PASS"},
-			"lint":  map[string]interface{}{"status": "PASS"},
+		"proofs": map[string]any{
+			"tests": map[string]any{"status": "PASS"},
+			"build": map[string]any{"status": "PASS"},
+			"lint":  map[string]any{"status": "PASS"},
 		},
-		"open_questions": []interface{}{},
+		"open_questions": []any{},
 	}
 
 	result, err := v.ValidateWhiteSailsMap(data)
@@ -313,29 +313,29 @@ func TestValidateWhiteSailsMap(t *testing.T) {
 func TestValidateSailsFields(t *testing.T) {
 	tests := []struct {
 		name       string
-		data       map[string]interface{}
+		data       map[string]any
 		wantIssues bool
 	}{
 		{
 			name: "valid data",
-			data: map[string]interface{}{
+			data: map[string]any{
 				"schema_version": "1.0",
 				"session_id":     "session-20260105-143000-abc12345",
 				"generated_at":   "2026-01-05T14:30:00Z",
 				"color":          "WHITE",
 				"computed_base":  "WHITE",
-				"proofs": map[string]interface{}{
-					"tests": map[string]interface{}{"status": "PASS"},
-					"build": map[string]interface{}{"status": "PASS"},
-					"lint":  map[string]interface{}{"status": "PASS"},
+				"proofs": map[string]any{
+					"tests": map[string]any{"status": "PASS"},
+					"build": map[string]any{"status": "PASS"},
+					"lint":  map[string]any{"status": "PASS"},
 				},
-				"open_questions": []interface{}{},
+				"open_questions": []any{},
 			},
 			wantIssues: false,
 		},
 		{
 			name: "missing required field",
-			data: map[string]interface{}{
+			data: map[string]any{
 				"schema_version": "1.0",
 				"session_id":     "session-20260105-143000-abc12345",
 			},
@@ -343,51 +343,51 @@ func TestValidateSailsFields(t *testing.T) {
 		},
 		{
 			name: "invalid color",
-			data: map[string]interface{}{
+			data: map[string]any{
 				"schema_version": "1.0",
 				"session_id":     "session-20260105-143000-abc12345",
 				"generated_at":   "2026-01-05T14:30:00Z",
 				"color":          "GREEN",
 				"computed_base":  "WHITE",
-				"proofs": map[string]interface{}{
-					"tests": map[string]interface{}{"status": "PASS"},
-					"build": map[string]interface{}{"status": "PASS"},
-					"lint":  map[string]interface{}{"status": "PASS"},
+				"proofs": map[string]any{
+					"tests": map[string]any{"status": "PASS"},
+					"build": map[string]any{"status": "PASS"},
+					"lint":  map[string]any{"status": "PASS"},
 				},
-				"open_questions": []interface{}{},
+				"open_questions": []any{},
 			},
 			wantIssues: true,
 		},
 		{
 			name: "invalid session_id format",
-			data: map[string]interface{}{
+			data: map[string]any{
 				"schema_version": "1.0",
 				"session_id":     "bad-session-id",
 				"generated_at":   "2026-01-05T14:30:00Z",
 				"color":          "WHITE",
 				"computed_base":  "WHITE",
-				"proofs": map[string]interface{}{
-					"tests": map[string]interface{}{"status": "PASS"},
-					"build": map[string]interface{}{"status": "PASS"},
-					"lint":  map[string]interface{}{"status": "PASS"},
+				"proofs": map[string]any{
+					"tests": map[string]any{"status": "PASS"},
+					"build": map[string]any{"status": "PASS"},
+					"lint":  map[string]any{"status": "PASS"},
 				},
-				"open_questions": []interface{}{},
+				"open_questions": []any{},
 			},
 			wantIssues: true,
 		},
 		{
 			name: "missing required proof",
-			data: map[string]interface{}{
+			data: map[string]any{
 				"schema_version": "1.0",
 				"session_id":     "session-20260105-143000-abc12345",
 				"generated_at":   "2026-01-05T14:30:00Z",
 				"color":          "WHITE",
 				"computed_base":  "WHITE",
-				"proofs": map[string]interface{}{
-					"tests": map[string]interface{}{"status": "PASS"},
+				"proofs": map[string]any{
+					"tests": map[string]any{"status": "PASS"},
 					// missing build and lint
 				},
-				"open_questions": []interface{}{},
+				"open_questions": []any{},
 			},
 			wantIssues: true,
 		},

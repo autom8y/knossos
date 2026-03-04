@@ -55,8 +55,8 @@ coverage:
 			wantErr:  false,
 		},
 		{
-			name: "frontmatter with CRLF line endings",
-			content: "---\r\ntitle: Test\r\n---\r\n# Content",
+			name:     "frontmatter with CRLF line endings",
+			content:  "---\r\ntitle: Test\r\n---\r\n# Content",
 			wantKeys: []string{"title"},
 			wantErr:  false,
 		},
@@ -209,7 +209,7 @@ func TestHasFrontmatter(t *testing.T) {
 
 func TestBuildFrontmatter(t *testing.T) {
 	t.Parallel()
-	data := map[string]interface{}{
+	data := map[string]any{
 		"title":  "Test Document",
 		"status": "draft",
 	}

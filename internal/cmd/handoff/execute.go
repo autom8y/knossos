@@ -96,7 +96,7 @@ func runExecute(ctx *cmdContext, opts executeOptions) error {
 	}
 	if !isValidAgent(opts.toAgent, validAgents) {
 		err := errors.NewWithDetails(errors.CodeUsageError, "invalid target agent",
-			map[string]interface{}{"to": opts.toAgent, "valid_agents": validAgents})
+			map[string]any{"to": opts.toAgent, "valid_agents": validAgents})
 		printer.PrintError(err)
 		return err
 	}
@@ -143,7 +143,7 @@ func runExecute(ctx *cmdContext, opts executeOptions) error {
 		execWriter.Write(clewcontract.NewHandoffExecutedEvent(fromAgent, opts.toAgent, sessionID, artifacts))
 
 		if flushErr := execWriter.Flush(); flushErr != nil {
-			printer.VerboseLog("warn", "failed to write events", map[string]interface{}{"error": flushErr.Error()})
+			printer.VerboseLog("warn", "failed to write events", map[string]any{"error": flushErr.Error()})
 		}
 	}
 

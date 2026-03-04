@@ -63,7 +63,7 @@ func CheckGate(sessionPath string) (*GateResult, error) {
 		if os.IsNotExist(err) {
 			return nil, errors.NewWithDetails(errors.CodeFileNotFound,
 				"path not found",
-				map[string]interface{}{"path": sessionPath})
+				map[string]any{"path": sessionPath})
 		}
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to access path", err)
 	}
@@ -75,7 +75,7 @@ func CheckGate(sessionPath string) (*GateResult, error) {
 			if os.IsNotExist(err) {
 				return nil, errors.NewWithDetails(errors.CodeFileNotFound,
 					"WHITE_SAILS.yaml not found in session directory",
-					map[string]interface{}{"session_path": sessionPath})
+					map[string]any{"session_path": sessionPath})
 			}
 			return nil, errors.Wrap(errors.CodeGeneralError, "failed to access WHITE_SAILS.yaml", err)
 		}

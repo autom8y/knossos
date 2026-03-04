@@ -29,7 +29,7 @@ import (
 // presence rather than a compile-time guard, so that a re-introduction is caught at
 // test time with a clear failure message rather than silently compiling.
 func TestSCAR002_StagedMaterializeAbsent(t *testing.T) {
-	materializerType := reflect.TypeOf((*Materializer)(nil))
+	materializerType := reflect.TypeFor[*Materializer]()
 
 	_, exists := materializerType.MethodByName("StagedMaterialize")
 	assert.False(t, exists,
@@ -464,8 +464,8 @@ func TestSCAR018_KnowDromenon_NoContextFork(t *testing.T) {
 
 	for _, line := range strings.Split(frontmatter, "\n") {
 		trimmed := strings.TrimSpace(line)
-		if strings.HasPrefix(trimmed, "context:") {
-			value := strings.TrimSpace(strings.TrimPrefix(trimmed, "context:"))
+		if after, ok := strings.CutPrefix(trimmed, "context:"); ok {
+			value := strings.TrimSpace(after)
 			assert.NotEqual(t, "fork", value,
 				"SCAR-018 regression: /know dromenon must NOT have context: fork. "+
 					"Forked slash commands cannot use Task tool, which /know requires for "+
@@ -500,8 +500,8 @@ func TestSCAR018_KnowDromenon_NoContextFork(t *testing.T) {
 			if strings.HasPrefix(trimmedLine, "allowed-tools:") && strings.Contains(trimmedLine, "Task") {
 				hasTask = true
 			}
-			if strings.HasPrefix(trimmedLine, "context:") {
-				val := strings.TrimSpace(strings.TrimPrefix(trimmedLine, "context:"))
+			if after, ok := strings.CutPrefix(trimmedLine, "context:"); ok {
+				val := strings.TrimSpace(after)
 				if val == "fork" {
 					hasContextFork = true
 				}
@@ -663,4 +663,3 @@ func TestSCAR027_SharedMena_NoSessionArtifacts(t *testing.T) {
 			"Shared mena is permanent platform knowledge. Session artifacts belong in .sos/wip/. "+
 			"See MEMORY.md Golden Rule and commit f0971e4.")
 }
-

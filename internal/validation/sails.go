@@ -107,7 +107,7 @@ func (v *Validator) ValidateWhiteSails(data []byte) (*SailsValidationResult, err
 	}
 
 	// Try parsing as JSON first, then YAML
-	var parsed interface{}
+	var parsed any
 	var parseErr error
 
 	if err := json.Unmarshal(data, &parsed); err != nil {
@@ -140,7 +140,7 @@ func (v *Validator) ValidateWhiteSails(data []byte) (*SailsValidationResult, err
 	}
 
 	// Extract key fields for convenience
-	if m, ok := parsed.(map[string]interface{}); ok {
+	if m, ok := parsed.(map[string]any); ok {
 		if color, ok := m["color"].(string); ok {
 			result.Color = ParseSailsColor(color)
 		}
@@ -157,7 +157,7 @@ func (v *Validator) ValidateWhiteSails(data []byte) (*SailsValidationResult, err
 }
 
 // ValidateWhiteSailsMap validates a WHITE_SAILS map against the schema.
-func (v *Validator) ValidateWhiteSailsMap(data map[string]interface{}) (*SailsValidationResult, error) {
+func (v *Validator) ValidateWhiteSailsMap(data map[string]any) (*SailsValidationResult, error) {
 	jsonData, err := json.Marshal(data)
 	if err != nil {
 		return nil, errors.Wrap(errors.CodeSchemaInvalid, "failed to marshal WHITE_SAILS data", err)
@@ -167,8 +167,8 @@ func (v *Validator) ValidateWhiteSailsMap(data map[string]interface{}) (*SailsVa
 
 // parseYAMLToInterface parses YAML bytes to a generic interface.
 // This is used for YAML input that needs JSON schema validation.
-func parseYAMLToInterface(data []byte) (interface{}, error) {
-	var result interface{}
+func parseYAMLToInterface(data []byte) (any, error) {
+	var result any
 	if err := yaml.Unmarshal(data, &result); err != nil {
 		return nil, err
 	}
@@ -177,22 +177,22 @@ func parseYAMLToInterface(data []byte) (interface{}, error) {
 }
 
 // convertYAMLToJSON recursively converts YAML structures to JSON-compatible structures.
-func convertYAMLToJSON(v interface{}) interface{} {
+func convertYAMLToJSON(v any) any {
 	switch val := v.(type) {
-	case map[interface{}]interface{}:
-		result := make(map[string]interface{})
+	case map[any]any:
+		result := make(map[string]any)
 		for k, v := range val {
 			result[fmt.Sprintf("%v", k)] = convertYAMLToJSON(v)
 		}
 		return result
-	case map[string]interface{}:
-		result := make(map[string]interface{})
+	case map[string]any:
+		result := make(map[string]any)
 		for k, v := range val {
 			result[k] = convertYAMLToJSON(v)
 		}
 		return result
-	case []interface{}:
-		result := make([]interface{}, len(val))
+	case []any:
+		result := make([]any, len(val))
 		for i, v := range val {
 			result[i] = convertYAMLToJSON(v)
 		}
@@ -206,7 +206,7 @@ func convertYAMLToJSON(v interface{}) interface{} {
 
 // ValidateSailsFields performs lightweight validation of required WHITE_SAILS fields.
 // This is used when the full schema validator is not available.
-func ValidateSailsFields(data map[string]interface{}) []string {
+func ValidateSailsFields(data map[string]any) []string {
 	var issues []string
 
 	// Required fields per schema
@@ -245,7 +245,7 @@ func ValidateSailsFields(data map[string]interface{}) []string {
 	}
 
 	// Validate proofs structure
-	if proofs, ok := data["proofs"].(map[string]interface{}); ok {
+	if proofs, ok := data["proofs"].(map[string]any); ok {
 		requiredProofs := []string{"tests", "build", "lint"}
 		for _, proofType := range requiredProofs {
 			if _, ok := proofs[proofType]; !ok {

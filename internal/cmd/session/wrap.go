@@ -385,7 +385,7 @@ func collectCognitiveBudget(sessionDir string) map[string]any {
 		if err != nil {
 			break
 		}
-		for i := 0; i < n; i++ {
+		for i := range n {
 			if buffer[i] == '\n' {
 				totalEvents++
 			}

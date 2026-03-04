@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"slices"
 	"testing"
 
 	"github.com/autom8y/knossos/internal/cmd/common"
@@ -117,13 +118,7 @@ current_phase: "implementation"
 		t.Error("AvailableRites should be non-empty in worktree: SourceResolver must discover rites from KNOSSOS_HOME even when .knossos/rites/ is absent")
 	}
 
-	found := false
-	for _, r := range result.AvailableRites {
-		if r == "platform-rite" {
-			found = true
-			break
-		}
-	}
+	found := slices.Contains(result.AvailableRites, "platform-rite")
 	if !found {
 		t.Errorf("AvailableRites should contain 'platform-rite' from KNOSSOS_HOME: got %v", result.AvailableRites)
 	}

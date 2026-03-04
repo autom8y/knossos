@@ -9,7 +9,7 @@ import (
 // Declared at manifest level (shared or rite), evaluated per-agent during sync.
 type SkillPolicy struct {
 	Skill         string   `yaml:"skill"`
-	Mode          string   `yaml:"mode"`                    // "inject" or "reference"
+	Mode          string   `yaml:"mode"` // "inject" or "reference"
 	RequiresTools []string `yaml:"requires_tools,omitempty"`
 	RequiresNone  []string `yaml:"requires_none,omitempty"`
 }
@@ -58,7 +58,7 @@ func MergeSkillPolicies(shared, rite []SkillPolicy) []SkillPolicy {
 // Exclude always wins over override (excluded skills are never applied).
 //
 // Returns the modified fmMap AND the modified body.
-func applySkillPolicies(fmMap map[string]interface{}, body []byte, policies []SkillPolicy) (map[string]interface{}, []byte) {
+func applySkillPolicies(fmMap map[string]any, body []byte, policies []SkillPolicy) (map[string]any, []byte) {
 	if len(policies) == 0 {
 		return fmMap, body
 	}
@@ -160,21 +160,21 @@ func applySkillPolicies(fmMap map[string]interface{}, body []byte, policies []Sk
 // parseSkillPolicyOverride reads the skill_policy_override field from the frontmatter map.
 // Returns a map of skill-name → override-mode for O(1) lookup during policy evaluation.
 // The field is expected to be a list of {skill: name, mode: mode} objects.
-func parseSkillPolicyOverride(fmMap map[string]interface{}) map[string]string {
+func parseSkillPolicyOverride(fmMap map[string]any) map[string]string {
 	val, ok := fmMap["skill_policy_override"]
 	if !ok {
 		return nil
 	}
 
 	// Expected YAML structure: list of maps with "skill" and "mode" keys
-	items, ok := val.([]interface{})
+	items, ok := val.([]any)
 	if !ok {
 		return nil
 	}
 
 	overrides := make(map[string]string, len(items))
 	for _, item := range items {
-		entry, ok := item.(map[string]interface{})
+		entry, ok := item.(map[string]any)
 		if !ok {
 			continue
 		}
@@ -198,7 +198,7 @@ func parseSkillPolicyOverride(fmMap map[string]interface{}) map[string]string {
 
 // parseSkillPolicyExclude reads the skill_policy_exclude field from the frontmatter map.
 // Returns (true, nil) if "all" exclusion, or (false, set) for a specific exclusion list.
-func parseSkillPolicyExclude(fmMap map[string]interface{}) (excludeAll bool, excludeSet map[string]bool) {
+func parseSkillPolicyExclude(fmMap map[string]any) (excludeAll bool, excludeSet map[string]bool) {
 	val, ok := fmMap["skill_policy_exclude"]
 	if !ok {
 		return false, nil
@@ -227,7 +227,7 @@ func parseSkillPolicyExclude(fmMap map[string]interface{}) (excludeAll bool, exc
 
 // parseToolsSet parses a tools-like field from fmMap into a set for O(1) lookup.
 // The field can be a YAML list ["Bash", "Read"] or a comma-separated string "Bash, Read".
-func parseToolsSet(fmMap map[string]interface{}, fieldName string) map[string]bool {
+func parseToolsSet(fmMap map[string]any, fieldName string) map[string]bool {
 	val, ok := fmMap[fieldName]
 	if !ok {
 		return nil

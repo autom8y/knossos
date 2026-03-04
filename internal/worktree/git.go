@@ -62,8 +62,8 @@ func (g *GitOperations) GetMainWorktree() (string, error) {
 
 	// First worktree in list is the main worktree
 	for _, line := range strings.Split(string(out), "\n") {
-		if strings.HasPrefix(line, "worktree ") {
-			return strings.TrimPrefix(line, "worktree "), nil
+		if after, ok := strings.CutPrefix(line, "worktree "); ok {
+			return after, nil
 		}
 	}
 	return "", errors.New(errors.CodeGeneralError, "could not determine main worktree")
@@ -115,7 +115,7 @@ func (g *GitOperations) WorktreeAdd(path, ref string, detach bool) error {
 	if err := cmd.Run(); err != nil {
 		return errors.NewWithDetails(errors.CodeGeneralError,
 			"failed to create git worktree",
-			map[string]interface{}{
+			map[string]any{
 				"path":   path,
 				"ref":    ref,
 				"stderr": stderr.String(),
@@ -140,7 +140,7 @@ func (g *GitOperations) WorktreeRemove(path string, force bool) error {
 	if err := cmd.Run(); err != nil {
 		return errors.NewWithDetails(errors.CodeGeneralError,
 			"failed to remove git worktree",
-			map[string]interface{}{
+			map[string]any{
 				"path":   path,
 				"stderr": stderr.String(),
 			})

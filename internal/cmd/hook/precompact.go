@@ -21,7 +21,6 @@ type precompactResult struct {
 	Reason string `json:"reason,omitempty"`
 }
 
-
 // newPrecompactCmd creates the precompact hook subcommand.
 func newPrecompactCmd(ctx *cmdContext) *cobra.Command {
 	cmd := &cobra.Command{
@@ -69,7 +68,7 @@ func runPrecompactCore(ctx *cmdContext, printer *output.Printer) error {
 	// Resolve session from hook context
 	resolver, sessionID, err := ctx.resolveSession(hookEnv)
 	if err != nil {
-		printer.VerboseLog("warn", "failed to resolve session", map[string]interface{}{"error": err.Error()})
+		printer.VerboseLog("warn", "failed to resolve session", map[string]any{"error": err.Error()})
 		return outputAllowPrecompact(printer, "")
 	}
 
@@ -91,7 +90,7 @@ func runPrecompactCore(ctx *cmdContext, printer *output.Printer) error {
 	// Attempt rotation
 	result, err := session.RotateSessionContext(sessionDir, session.DefaultMaxLines, session.DefaultKeepLines)
 	if err != nil {
-		printer.VerboseLog("error", "failed to rotate SESSION_CONTEXT", map[string]interface{}{
+		printer.VerboseLog("error", "failed to rotate SESSION_CONTEXT", map[string]any{
 			"error":      err.Error(),
 			"sessionDir": sessionDir,
 		})
@@ -101,7 +100,7 @@ func runPrecompactCore(ctx *cmdContext, printer *output.Printer) error {
 
 	// Write compact checkpoint for SessionStart rehydration
 	if err := writeCompactCheckpoint(sessionDir); err != nil {
-		printer.VerboseLog("warn", "failed to write compact checkpoint", map[string]interface{}{
+		printer.VerboseLog("warn", "failed to write compact checkpoint", map[string]any{
 			"error":      err.Error(),
 			"sessionDir": sessionDir,
 		})

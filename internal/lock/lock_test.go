@@ -98,7 +98,7 @@ func TestManager_ConcurrentPark(t *testing.T) {
 	var wg sync.WaitGroup
 	results := make(chan error, 2)
 
-	for i := 0; i < 2; i++ {
+	for i := range 2 {
 		wg.Add(1)
 		go func(n int) {
 			defer wg.Done()
@@ -144,7 +144,7 @@ func TestManager_RaceCondition(t *testing.T) {
 	counter := 0
 	overlaps := 0
 
-	for i := 0; i < 10; i++ {
+	for range 10 {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
@@ -499,7 +499,7 @@ func TestManager_StaleLockReclamation_Concurrent(t *testing.T) {
 	results := make(chan *Lock, 2)
 	errors := make(chan error, 2)
 
-	for i := 0; i < 2; i++ {
+	for i := range 2 {
 		wg.Add(1)
 		go func(n int) {
 			defer wg.Done()

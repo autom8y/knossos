@@ -342,7 +342,6 @@ func setupTestGitRepo(t *testing.T) string {
 func TestGitOperations(t *testing.T) {
 	tmpDir := setupTestGitRepo(t)
 
-
 	git := NewGitOperations(tmpDir)
 
 	// Test IsGitRepo
@@ -389,7 +388,6 @@ func TestGitOperations(t *testing.T) {
 // TestManagerCreate tests worktree creation.
 func TestManagerCreate(t *testing.T) {
 	tmpDir := setupTestGitRepo(t)
-
 
 	mgr, err := NewManager(tmpDir)
 	if err != nil {
@@ -447,7 +445,6 @@ func TestManagerCreate(t *testing.T) {
 func TestManagerList(t *testing.T) {
 	tmpDir := setupTestGitRepo(t)
 
-
 	mgr, err := NewManager(tmpDir)
 	if err != nil {
 		t.Fatalf("Failed to create manager: %v", err)
@@ -463,7 +460,7 @@ func TestManagerList(t *testing.T) {
 	}
 
 	// Create some worktrees
-	for i := 0; i < 3; i++ {
+	for i := range 3 {
 		_, err := mgr.Create(CreateOptions{Name: "test-" + string(rune('a'+i))})
 		if err != nil {
 			t.Fatalf("Failed to create worktree %d: %v", i, err)
@@ -483,7 +480,6 @@ func TestManagerList(t *testing.T) {
 // TestManagerRemove tests worktree removal.
 func TestManagerRemove(t *testing.T) {
 	tmpDir := setupTestGitRepo(t)
-
 
 	mgr, err := NewManager(tmpDir)
 	if err != nil {
@@ -518,7 +514,6 @@ func TestManagerRemove(t *testing.T) {
 func TestManagerRemoveByName(t *testing.T) {
 	tmpDir := setupTestGitRepo(t)
 
-
 	mgr, err := NewManager(tmpDir)
 	if err != nil {
 		t.Fatalf("Failed to create manager: %v", err)
@@ -545,7 +540,6 @@ func TestManagerRemoveByName(t *testing.T) {
 // TestManagerRemoveDirtyRequiresForce tests that removing dirty worktree requires force.
 func TestManagerRemoveDirtyRequiresForce(t *testing.T) {
 	tmpDir := setupTestGitRepo(t)
-
 
 	mgr, err := NewManager(tmpDir)
 	if err != nil {
@@ -578,7 +572,6 @@ func TestManagerRemoveDirtyRequiresForce(t *testing.T) {
 // TestManagerCleanup tests cleanup of stale worktrees.
 func TestManagerCleanup(t *testing.T) {
 	tmpDir := setupTestGitRepo(t)
-
 
 	mgr, err := NewManager(tmpDir)
 	if err != nil {
@@ -642,7 +635,6 @@ func TestManagerCleanup(t *testing.T) {
 func TestManagerStatus(t *testing.T) {
 	tmpDir := setupTestGitRepo(t)
 
-
 	mgr, err := NewManager(tmpDir)
 	if err != nil {
 		t.Fatalf("Failed to create manager: %v", err)
@@ -691,7 +683,6 @@ func TestManagerStatus(t *testing.T) {
 // affected by removal.
 func TestRemoveCleansUpLocalDirectories(t *testing.T) {
 	tmpDir := setupTestGitRepo(t)
-
 
 	// Create .knossos/ and .know/ in the main repo root
 	knossosDir := filepath.Join(tmpDir, ".knossos")

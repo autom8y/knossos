@@ -82,7 +82,7 @@ var (
 //  1. Frontmatter "type" field (if present)
 //  2. Filename pattern (PRD-*.md, TDD-*.md, etc.)
 //  3. Returns ArtifactTypeUnknown if neither works
-func DetectArtifactType(filename string, frontmatter map[string]interface{}) ArtifactType {
+func DetectArtifactType(filename string, frontmatter map[string]any) ArtifactType {
 	// Priority 1: Check frontmatter "type" field
 	if frontmatter != nil {
 		if typeField, ok := frontmatter["type"].(string); ok {
@@ -120,7 +120,7 @@ type ValidationIssue struct {
 	Message string `json:"message"`
 
 	// Value is the actual value that failed validation (if applicable).
-	Value interface{} `json:"value,omitempty"`
+	Value any `json:"value,omitempty"`
 }
 
 // ArtifactValidationResult contains the result of artifact validation.
@@ -138,7 +138,7 @@ type ArtifactValidationResult struct {
 	Issues []ValidationIssue `json:"issues,omitempty"`
 
 	// Frontmatter contains the parsed frontmatter data.
-	Frontmatter map[string]interface{} `json:"frontmatter,omitempty"`
+	Frontmatter map[string]any `json:"frontmatter,omitempty"`
 }
 
 // ArtifactValidator validates workflow artifacts against their schemas.
@@ -164,7 +164,7 @@ func (av *ArtifactValidator) ValidateFile(filePath string, artifactType Artifact
 		if os.IsNotExist(err) {
 			return nil, errors.NewWithDetails(errors.CodeFileNotFound,
 				"artifact file not found",
-				map[string]interface{}{"path": filePath})
+				map[string]any{"path": filePath})
 		}
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to read artifact file", err)
 	}
@@ -224,12 +224,12 @@ func (av *ArtifactValidator) Validate(content []byte, filePath string, artifactT
 }
 
 // validateAgainstSchema validates frontmatter data against an artifact schema.
-func (av *ArtifactValidator) validateAgainstSchema(data map[string]interface{}, artifactType ArtifactType) ([]ValidationIssue, error) {
+func (av *ArtifactValidator) validateAgainstSchema(data map[string]any, artifactType ArtifactType) ([]ValidationIssue, error) {
 	schemaName := artifactType.SchemaName()
 	if schemaName == "" {
 		return nil, errors.NewWithDetails(errors.CodeSchemaNotFound,
 			"no schema for artifact type",
-			map[string]interface{}{"type": string(artifactType)})
+			map[string]any{"type": string(artifactType)})
 	}
 
 	// Get compiled schema
@@ -238,7 +238,7 @@ func (av *ArtifactValidator) validateAgainstSchema(data map[string]interface{}, 
 		// Wrap with more context for debugging
 		return nil, errors.NewWithDetails(errors.CodeGeneralError,
 			"failed to compile schema: "+schemaName,
-			map[string]interface{}{"cause": err.Error()})
+			map[string]any{"cause": err.Error()})
 	}
 
 	// Convert data to JSON for validation
@@ -247,7 +247,7 @@ func (av *ArtifactValidator) validateAgainstSchema(data map[string]interface{}, 
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to marshal frontmatter", err)
 	}
 
-	var parsed interface{}
+	var parsed any
 	if err := json.Unmarshal(jsonData, &parsed); err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to parse frontmatter JSON", err)
 	}

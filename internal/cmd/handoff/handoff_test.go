@@ -270,7 +270,7 @@ current_phase: design
 			}
 
 			// Verify artifacts
-			artifacts, ok := event.Meta["artifacts"].([]interface{})
+			artifacts, ok := event.Meta["artifacts"].([]any)
 			if !ok {
 				t.Error("handoff_executed event missing artifacts")
 			} else if len(artifacts) != 1 || artifacts[0].(string) != "TDD-test-feature" {
@@ -553,15 +553,15 @@ current_phase: design
 			outputFormat := "json"
 			verbose := false
 			ctx := &cmdContext{
-		SessionContext: common.SessionContext{
-			BaseContext: common.BaseContext{
-				Output:     &outputFormat,
-				Verbose:    &verbose,
-				ProjectDir: &projectDir,
-			},
-			SessionID: &sessionID,
-		},
-	}
+				SessionContext: common.SessionContext{
+					BaseContext: common.BaseContext{
+						Output:     &outputFormat,
+						Verbose:    &verbose,
+						ProjectDir: &projectDir,
+					},
+					SessionID: &sessionID,
+				},
+			}
 
 			opts := prepareOptions{
 				fromAgent: agent,
@@ -648,15 +648,15 @@ current_phase: design
 			outputFormat := "json"
 			verbose := false
 			ctx := &cmdContext{
-		SessionContext: common.SessionContext{
-			BaseContext: common.BaseContext{
-				Output:     &outputFormat,
-				Verbose:    &verbose,
-				ProjectDir: &projectDir,
-			},
-			SessionID: &sessionID,
-		},
-	}
+				SessionContext: common.SessionContext{
+					BaseContext: common.BaseContext{
+						Output:     &outputFormat,
+						Verbose:    &verbose,
+						ProjectDir: &projectDir,
+					},
+					SessionID: &sessionID,
+				},
+			}
 
 			opts := prepareOptions{
 				fromAgent: tc.from,
@@ -757,15 +757,15 @@ current_phase: design
 			outputFormat := "json"
 			verbose := false
 			ctx := &cmdContext{
-		SessionContext: common.SessionContext{
-			BaseContext: common.BaseContext{
-				Output:     &outputFormat,
-				Verbose:    &verbose,
-				ProjectDir: &projectDir,
-			},
-			SessionID: &sessionID,
-		},
-	}
+				SessionContext: common.SessionContext{
+					BaseContext: common.BaseContext{
+						Output:     &outputFormat,
+						Verbose:    &verbose,
+						ProjectDir: &projectDir,
+					},
+					SessionID: &sessionID,
+				},
+			}
 
 			opts := prepareOptions{
 				fromAgent: tc.fromAgent,
@@ -1148,15 +1148,15 @@ current_phase: design
 			outputFormat := "json"
 			verbose := false
 			ctx := &cmdContext{
-		SessionContext: common.SessionContext{
-			BaseContext: common.BaseContext{
-				Output:     &outputFormat,
-				Verbose:    &verbose,
-				ProjectDir: &projectDir,
-			},
-			SessionID: &sessionID,
-		},
-	}
+				SessionContext: common.SessionContext{
+					BaseContext: common.BaseContext{
+						Output:     &outputFormat,
+						Verbose:    &verbose,
+						ProjectDir: &projectDir,
+					},
+					SessionID: &sessionID,
+				},
+			}
 
 			opts := prepareOptions{
 				fromAgent: tc.from,
@@ -1339,15 +1339,15 @@ current_phase: design
 			outputFormat := "json"
 			verbose := false
 			ctx := &cmdContext{
-		SessionContext: common.SessionContext{
-			BaseContext: common.BaseContext{
-				Output:     &outputFormat,
-				Verbose:    &verbose,
-				ProjectDir: &projectDir,
-			},
-			SessionID: &sessionID,
-		},
-	}
+				SessionContext: common.SessionContext{
+					BaseContext: common.BaseContext{
+						Output:     &outputFormat,
+						Verbose:    &verbose,
+						ProjectDir: &projectDir,
+					},
+					SessionID: &sessionID,
+				},
+			}
 
 			opts := prepareOptions{
 				fromAgent: tc.fromAgent,
@@ -1437,7 +1437,7 @@ current_phase: design
 
 	for _, event := range events {
 		if event.Type == clewcontract.EventTypeTaskEnd {
-			artifacts, ok := event.Meta["artifacts"].([]interface{})
+			artifacts, ok := event.Meta["artifacts"].([]any)
 			if !ok {
 				t.Error("task_end event missing artifacts in meta")
 				continue
@@ -1610,15 +1610,15 @@ current_phase: design
 			outputFormat := "json"
 			verbose := false
 			ctx := &cmdContext{
-		SessionContext: common.SessionContext{
-			BaseContext: common.BaseContext{
-				Output:     &outputFormat,
-				Verbose:    &verbose,
-				ProjectDir: &projectDir,
-			},
-			SessionID: &sessionID,
-		},
-	}
+				SessionContext: common.SessionContext{
+					BaseContext: common.BaseContext{
+						Output:     &outputFormat,
+						Verbose:    &verbose,
+						ProjectDir: &projectDir,
+					},
+					SessionID: &sessionID,
+				},
+			}
 
 			opts := executeOptions{
 				artifactID: "TDD-test-" + tc.agent,
@@ -1869,15 +1869,15 @@ current_phase: ` + tc.phase + `
 			outputFormat := "json"
 			verbose := false
 			ctx := &cmdContext{
-		SessionContext: common.SessionContext{
-			BaseContext: common.BaseContext{
-				Output:     &outputFormat,
-				Verbose:    &verbose,
-				ProjectDir: &projectDir,
-			},
-			SessionID: &sessionID,
-		},
-	}
+				SessionContext: common.SessionContext{
+					BaseContext: common.BaseContext{
+						Output:     &outputFormat,
+						Verbose:    &verbose,
+						ProjectDir: &projectDir,
+					},
+					SessionID: &sessionID,
+				},
+			}
 
 			err := runStatus(ctx)
 			if err != nil {

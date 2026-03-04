@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/fs"
 	"log/slog"
+	"maps"
 	"os"
 	"path/filepath"
 
@@ -15,15 +16,15 @@ import (
 // CC does not consume these. Unknown fields pass through for forward compatibility.
 // NOTE: `color` is NOT stripped — CC uses it for subagent UI identification.
 var knossosOnlyFields = map[string]bool{
-	"type":                 true,
-	"role":                 true,
-	"upstream":             true,
-	"downstream":           true,
-	"produces":             true,
-	"contract":             true,
-	"schema_version":       true,
-	"write-guard":          true,
-	"aliases":              true,
+	"type":                  true,
+	"role":                  true,
+	"upstream":              true,
+	"downstream":            true,
+	"produces":              true,
+	"contract":              true,
+	"schema_version":        true,
+	"write-guard":           true,
+	"aliases":               true,
 	"skill_policy_exclude":  true,
 	"skill_policy_override": true,
 }
@@ -33,7 +34,7 @@ var knossosOnlyFields = map[string]bool{
 type TransformContext struct {
 	AgentName          string
 	WriteGuardDefaults *WriteGuardDefaults
-	AgentDefaults      map[string]interface{}
+	AgentDefaults      map[string]any
 	SkillPolicies      []SkillPolicy
 	ModelOverride      string // If set, forces model field in agent frontmatter (el-cheapo mode)
 }
@@ -55,7 +56,7 @@ func transformAgentContent(content []byte, ctx *TransformContext) ([]byte, error
 	}
 
 	// Unmarshal into a map to preserve all fields and unknown keys
-	var fmMap map[string]interface{}
+	var fmMap map[string]any
 	if err := yaml.Unmarshal(yamlBytes, &fmMap); err != nil {
 		return content, nil // Invalid YAML — pass through unchanged
 	}
@@ -101,7 +102,7 @@ func transformAgentContent(content []byte, ctx *TransformContext) ([]byte, error
 
 // mergeHooksIntoMap merges generated hook entries into the frontmatter map's hooks field.
 // Existing non-write-guard hooks are preserved.
-func mergeHooksIntoMap(fmMap map[string]interface{}, generatedHooks map[string]interface{}) {
+func mergeHooksIntoMap(fmMap map[string]any, generatedHooks map[string]any) {
 	if generatedHooks == nil {
 		return
 	}
@@ -113,20 +114,18 @@ func mergeHooksIntoMap(fmMap map[string]interface{}, generatedHooks map[string]i
 	}
 
 	// Merge: replace PreToolUse write-guard entries, preserve others
-	existingMap, ok := existing.(map[string]interface{})
+	existingMap, ok := existing.(map[string]any)
 	if !ok {
 		fmMap["hooks"] = generatedHooks
 		return
 	}
 
-	for event, entries := range generatedHooks {
-		existingMap[event] = entries
-	}
+	maps.Copy(existingMap, generatedHooks)
 	fmMap["hooks"] = existingMap
 }
 
 // reconstructFrontmatter serializes a frontmatter map and body back into markdown content.
-func reconstructFrontmatter(fmMap map[string]interface{}, body []byte) ([]byte, error) {
+func reconstructFrontmatter(fmMap map[string]any, body []byte) ([]byte, error) {
 	yamlOut, err := yaml.Marshal(fmMap)
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal transformed frontmatter: %w", err)

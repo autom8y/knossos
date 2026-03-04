@@ -10,84 +10,84 @@ func TestMerge(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
 		name         string
-		base         map[string]interface{}
-		ours         map[string]interface{}
-		theirs       map[string]interface{}
+		base         map[string]any
+		ours         map[string]any
+		theirs       map[string]any
 		strategy     manifest.MergeStrategy
 		wantConflict bool
-		checkResult  func(map[string]interface{}) bool
+		checkResult  func(map[string]any) bool
 	}{
 		{
 			name:         "no changes",
-			base:         map[string]interface{}{"version": "1.0"},
-			ours:         map[string]interface{}{"version": "1.0"},
-			theirs:       map[string]interface{}{"version": "1.0"},
+			base:         map[string]any{"version": "1.0"},
+			ours:         map[string]any{"version": "1.0"},
+			theirs:       map[string]any{"version": "1.0"},
 			strategy:     manifest.StrategySmart,
 			wantConflict: false,
-			checkResult: func(m map[string]interface{}) bool {
+			checkResult: func(m map[string]any) bool {
 				return m["version"] == "1.0"
 			},
 		},
 		{
 			name:         "ours only change",
-			base:         map[string]interface{}{"version": "1.0"},
-			ours:         map[string]interface{}{"version": "1.0", "name": "ours"},
-			theirs:       map[string]interface{}{"version": "1.0"},
+			base:         map[string]any{"version": "1.0"},
+			ours:         map[string]any{"version": "1.0", "name": "ours"},
+			theirs:       map[string]any{"version": "1.0"},
 			strategy:     manifest.StrategySmart,
 			wantConflict: false,
-			checkResult: func(m map[string]interface{}) bool {
+			checkResult: func(m map[string]any) bool {
 				return m["name"] == "ours"
 			},
 		},
 		{
 			name:         "theirs only change",
-			base:         map[string]interface{}{"version": "1.0"},
-			ours:         map[string]interface{}{"version": "1.0"},
-			theirs:       map[string]interface{}{"version": "1.0", "name": "theirs"},
+			base:         map[string]any{"version": "1.0"},
+			ours:         map[string]any{"version": "1.0"},
+			theirs:       map[string]any{"version": "1.0", "name": "theirs"},
 			strategy:     manifest.StrategySmart,
 			wantConflict: false,
-			checkResult: func(m map[string]interface{}) bool {
+			checkResult: func(m map[string]any) bool {
 				return m["name"] == "theirs"
 			},
 		},
 		{
 			name:         "both change same field - conflict",
-			base:         map[string]interface{}{"version": "1.0"},
-			ours:         map[string]interface{}{"version": "2.0"},
-			theirs:       map[string]interface{}{"version": "3.0"},
+			base:         map[string]any{"version": "1.0"},
+			ours:         map[string]any{"version": "2.0"},
+			theirs:       map[string]any{"version": "3.0"},
 			strategy:     manifest.StrategySmart,
 			wantConflict: true,
 		},
 		{
 			name:         "both change same field - ours strategy",
-			base:         map[string]interface{}{"version": "1.0"},
-			ours:         map[string]interface{}{"version": "2.0"},
-			theirs:       map[string]interface{}{"version": "3.0"},
+			base:         map[string]any{"version": "1.0"},
+			ours:         map[string]any{"version": "2.0"},
+			theirs:       map[string]any{"version": "3.0"},
 			strategy:     manifest.StrategyOurs,
 			wantConflict: false,
-			checkResult: func(m map[string]interface{}) bool {
+			checkResult: func(m map[string]any) bool {
 				return m["version"] == "2.0"
 			},
 		},
 		{
 			name:         "both change same field - theirs strategy",
-			base:         map[string]interface{}{"version": "1.0"},
-			ours:         map[string]interface{}{"version": "2.0"},
-			theirs:       map[string]interface{}{"version": "3.0"},
+			base:         map[string]any{"version": "1.0"},
+			ours:         map[string]any{"version": "2.0"},
+			theirs:       map[string]any{"version": "3.0"},
 			strategy:     manifest.StrategyTheirs,
 			wantConflict: false,
-			checkResult: func(m map[string]interface{}) bool {
+			checkResult: func(m map[string]any) bool {
 				return m["version"] == "3.0"
 			},
 		},
 		{
-			name: "both add different fields - no conflict",
-			base: map[string]interface{}{"version": "1.0"},
-			ours: map[string]interface{}{"version": "1.0", "ours_field": "a"},
-			theirs: map[string]interface{}{"version": "1.0", "theirs_field": "b"},
+			name:         "both add different fields - no conflict",
+			base:         map[string]any{"version": "1.0"},
+			ours:         map[string]any{"version": "1.0", "ours_field": "a"},
+			theirs:       map[string]any{"version": "1.0", "theirs_field": "b"},
 			strategy:     manifest.StrategySmart,
 			wantConflict: false,
-			checkResult: func(m map[string]interface{}) bool {
+			checkResult: func(m map[string]any) bool {
 				return m["ours_field"] == "a" && m["theirs_field"] == "b"
 			},
 		},
@@ -120,9 +120,9 @@ func TestMerge(t *testing.T) {
 
 func TestMergeConflictMarkers(t *testing.T) {
 	t.Parallel()
-	base := &manifest.Manifest{Content: map[string]interface{}{"version": "1.0"}}
-	ours := &manifest.Manifest{Content: map[string]interface{}{"version": "2.0"}}
-	theirs := &manifest.Manifest{Content: map[string]interface{}{"version": "3.0"}}
+	base := &manifest.Manifest{Content: map[string]any{"version": "1.0"}}
+	ours := &manifest.Manifest{Content: map[string]any{"version": "2.0"}}
+	theirs := &manifest.Manifest{Content: map[string]any{"version": "3.0"}}
 
 	result, err := manifest.Merge(base, ours, theirs, manifest.ManifestMergeOptions{Strategy: manifest.StrategySmart})
 	if err != nil {

@@ -33,7 +33,7 @@ func TestEvent_JSONMarshaling(t *testing.T) {
 		Tool:      "Edit",
 		Path:      "/abs/path/file.go",
 		Summary:   "Tool: Edit on /abs/path/file.go",
-		Meta: map[string]interface{}{
+		Meta: map[string]any{
 			"lines_changed": 42,
 		},
 	}
@@ -44,7 +44,7 @@ func TestEvent_JSONMarshaling(t *testing.T) {
 	}
 
 	// Verify JSON structure
-	var raw map[string]interface{}
+	var raw map[string]any
 	if err := json.Unmarshal(data, &raw); err != nil {
 		t.Fatalf("Failed to unmarshal JSON: %v", err)
 	}
@@ -67,7 +67,7 @@ func TestEvent_JSONMarshaling(t *testing.T) {
 	}
 
 	// Check meta
-	meta, ok := raw["meta"].(map[string]interface{})
+	meta, ok := raw["meta"].(map[string]any)
 	if !ok {
 		t.Fatal("meta is not a map")
 	}
@@ -120,7 +120,7 @@ func TestEvent_OmitEmpty(t *testing.T) {
 		t.Fatalf("Failed to marshal: %v", err)
 	}
 
-	var raw map[string]interface{}
+	var raw map[string]any
 	if err := json.Unmarshal(data, &raw); err != nil {
 		t.Fatalf("Failed to unmarshal: %v", err)
 	}
@@ -138,7 +138,7 @@ func TestEvent_OmitEmpty(t *testing.T) {
 }
 
 func TestNewToolCallEvent(t *testing.T) {
-	meta := map[string]interface{}{"command": "ls -la"}
+	meta := map[string]any{"command": "ls -la"}
 	event := NewToolCallEvent("Bash", "/some/path", meta)
 
 	if event.Type != EventTypeToolCall {
@@ -190,7 +190,7 @@ func TestNewFileChangeEvent(t *testing.T) {
 }
 
 func TestNewDecisionEvent(t *testing.T) {
-	meta := map[string]interface{}{"reason": "performance"}
+	meta := map[string]any{"reason": "performance"}
 	event := NewDecisionEvent("Selected approach A over B", meta)
 
 	if event.Type != EventTypeDecision {
@@ -205,7 +205,7 @@ func TestNewDecisionEvent(t *testing.T) {
 }
 
 func TestNewContextSwitchEvent(t *testing.T) {
-	meta := map[string]interface{}{"from_file": "old.go"}
+	meta := map[string]any{"from_file": "old.go"}
 	event := NewContextSwitchEvent("Switched to new file", "/new/file.go", meta)
 
 	if event.Type != EventTypeContextSwitch {
@@ -244,7 +244,7 @@ func TestStamp_JSONMarshaling(t *testing.T) {
 		Rationale: "Better ACID compliance for financial data",
 		Rejected:  []string{"MongoDB", "CockroachDB"},
 		Context: map[string]any{
-			"team": "backend",
+			"team":     "backend",
 			"priority": "high",
 		},
 	}
@@ -255,7 +255,7 @@ func TestStamp_JSONMarshaling(t *testing.T) {
 	}
 
 	// Verify JSON structure
-	var raw map[string]interface{}
+	var raw map[string]any
 	if err := json.Unmarshal(data, &raw); err != nil {
 		t.Fatalf("Failed to unmarshal JSON: %v", err)
 	}
@@ -268,7 +268,7 @@ func TestStamp_JSONMarshaling(t *testing.T) {
 	}
 
 	// Check rejected array
-	rejected, ok := raw["rejected"].([]interface{})
+	rejected, ok := raw["rejected"].([]any)
 	if !ok {
 		t.Fatal("rejected is not a slice")
 	}
@@ -277,7 +277,7 @@ func TestStamp_JSONMarshaling(t *testing.T) {
 	}
 
 	// Check context
-	ctx, ok := raw["context"].(map[string]interface{})
+	ctx, ok := raw["context"].(map[string]any)
 	if !ok {
 		t.Fatal("context is not a map")
 	}
@@ -299,7 +299,7 @@ func TestStamp_OmitEmpty(t *testing.T) {
 		t.Fatalf("Failed to marshal: %v", err)
 	}
 
-	var raw map[string]interface{}
+	var raw map[string]any
 	if err := json.Unmarshal(data, &raw); err != nil {
 		t.Fatalf("Failed to unmarshal: %v", err)
 	}
@@ -571,7 +571,7 @@ func TestNewSailsGeneratedEvent_JSONMarshaling(t *testing.T) {
 	}
 
 	// Unmarshal to verify structure
-	var raw map[string]interface{}
+	var raw map[string]any
 	if err := json.Unmarshal(jsonData, &raw); err != nil {
 		t.Fatalf("Failed to unmarshal JSON: %v", err)
 	}
@@ -582,7 +582,7 @@ func TestNewSailsGeneratedEvent_JSONMarshaling(t *testing.T) {
 	}
 
 	// Check meta is present
-	meta, ok := raw["meta"].(map[string]interface{})
+	meta, ok := raw["meta"].(map[string]any)
 	if !ok {
 		t.Fatal("meta is not a map")
 	}
@@ -594,7 +594,7 @@ func TestNewSailsGeneratedEvent_JSONMarshaling(t *testing.T) {
 	}
 
 	// Check reasons array in JSON
-	reasons, ok := meta["reasons"].([]interface{})
+	reasons, ok := meta["reasons"].([]any)
 	if !ok {
 		t.Fatal("meta.reasons is not a slice")
 	}
@@ -947,7 +947,7 @@ func TestTaskEvents_JSONMarshaling(t *testing.T) {
 		t.Fatalf("Failed to marshal task_start event: %v", err)
 	}
 
-	var startRaw map[string]interface{}
+	var startRaw map[string]any
 	if err := json.Unmarshal(startData, &startRaw); err != nil {
 		t.Fatalf("Failed to unmarshal task_start JSON: %v", err)
 	}
@@ -958,7 +958,7 @@ func TestTaskEvents_JSONMarshaling(t *testing.T) {
 	}
 
 	// Check meta is present
-	startMeta, ok := startRaw["meta"].(map[string]interface{})
+	startMeta, ok := startRaw["meta"].(map[string]any)
 	if !ok {
 		t.Fatal("meta is not a map")
 	}
@@ -973,7 +973,7 @@ func TestTaskEvents_JSONMarshaling(t *testing.T) {
 		t.Fatalf("Failed to marshal task_end event: %v", err)
 	}
 
-	var endRaw map[string]interface{}
+	var endRaw map[string]any
 	if err := json.Unmarshal(endData, &endRaw); err != nil {
 		t.Fatalf("Failed to unmarshal task_end JSON: %v", err)
 	}
@@ -984,7 +984,7 @@ func TestTaskEvents_JSONMarshaling(t *testing.T) {
 	}
 
 	// Check meta is present
-	endMeta, ok := endRaw["meta"].(map[string]interface{})
+	endMeta, ok := endRaw["meta"].(map[string]any)
 	if !ok {
 		t.Fatal("meta is not a map")
 	}

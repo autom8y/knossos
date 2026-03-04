@@ -106,7 +106,7 @@ func runValidate(ctx *cmdContext, opts validateOptions, paths []string) error {
 		result, err := validator.ValidateAgentFile(agentPath, mode)
 		if err != nil {
 			// File not found or read error
-			printer.VerboseLog("error", "validation failed", map[string]interface{}{
+			printer.VerboseLog("error", "validation failed", map[string]any{
 				"path":  agentPath,
 				"error": err.Error(),
 			})
@@ -201,10 +201,10 @@ type agentValidateOutput struct {
 }
 
 type agentValidateEntry struct {
-	Path     string                    `json:"path"`
-	Status   string                    `json:"status"` // "pass", "warn", "fail"
+	Path     string                     `json:"path"`
+	Status   string                     `json:"status"` // "pass", "warn", "fail"
 	Issues   []agentpkg.ValidationIssue `json:"issues,omitempty"`
-	Warnings []string                  `json:"warnings,omitempty"`
+	Warnings []string                   `json:"warnings,omitempty"`
 }
 
 // Text implements output.Textable.

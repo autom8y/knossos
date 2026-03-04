@@ -3,6 +3,7 @@ package inscription
 import (
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -749,13 +750,13 @@ func TestAdoptNewDefaults_AddsMissingRegion(t *testing.T) {
 		SchemaVersion:      "1.0",
 		InscriptionVersion: "42",
 		Regions: map[string]*Region{
-			"execution-mode":       {Owner: OwnerKnossos},
-			"agent-routing":        {Owner: OwnerKnossos},
-			"commands":             {Owner: OwnerKnossos},
+			"execution-mode":          {Owner: OwnerKnossos},
+			"agent-routing":           {Owner: OwnerKnossos},
+			"commands":                {Owner: OwnerKnossos},
 			"platform-infrastructure": {Owner: OwnerKnossos},
-			"quick-start":          {Owner: OwnerRegenerate, Source: "ACTIVE_RITE+agents"},
-			"agent-configurations": {Owner: OwnerRegenerate, Source: "agents/*.md"},
-			"user-content":         {Owner: OwnerSatellite},
+			"quick-start":             {Owner: OwnerRegenerate, Source: "ACTIVE_RITE+agents"},
+			"agent-configurations":    {Owner: OwnerRegenerate, Source: "agents/*.md"},
+			"user-content":            {Owner: OwnerSatellite},
 		},
 		SectionOrder: []string{
 			"execution-mode", "quick-start", "agent-routing",
@@ -775,13 +776,7 @@ func TestAdoptNewDefaults_AddsMissingRegion(t *testing.T) {
 	}
 
 	// Section order should include "know"
-	found := false
-	for _, s := range manifest.SectionOrder {
-		if s == "know" {
-			found = true
-			break
-		}
-	}
+	found := slices.Contains(manifest.SectionOrder, "know")
 	if !found {
 		t.Error("AdoptNewDefaults() did not add 'know' to SectionOrder")
 	}

@@ -58,22 +58,22 @@ type MCPServer struct {
 
 // RiteManifest represents a rite manifest.yaml file.
 type RiteManifest struct {
-	Name          string                            `yaml:"name"`
-	Version       string                            `yaml:"version"`
-	Description   string                            `yaml:"description"`
-	EntryAgent    string                            `yaml:"entry_agent"`
-	Agents        []Agent                           `yaml:"agents"`
-	Dromena       []string                          `yaml:"dromena"`  // Invokable commands (project to .claude/commands/)
-	Legomena      []string                          `yaml:"legomena"` // Reference knowledge (project to .claude/skills/)
-	Commands      []string                          `yaml:"commands"` // Backward compat: populates from dromena+legomena if empty
-	Skills        []string                          `yaml:"skills"`   // Deprecated: use Legomena instead
-	Hooks         []string                          `yaml:"hooks"`
-	Dependencies  []string                          `yaml:"dependencies"`
-	MCPServers    []MCPServer                       `yaml:"mcp_servers,omitempty"` // MCP server declarations
-	HookDefaults  *HookDefaults                     `yaml:"hook_defaults,omitempty"`
-	AgentDefaults map[string]interface{}            `yaml:"agent_defaults,omitempty"` // Manifest-level defaults merged into agent frontmatter during sync
-	SkillPolicies []SkillPolicy                     `yaml:"skill_policies,omitempty"` // Capability-driven skill wiring rules evaluated per-agent during sync
-	ArchetypeData map[string]map[string]interface{} `yaml:"archetype_data,omitempty"` // Per-archetype template data keyed by archetype name
+	Name          string                    `yaml:"name"`
+	Version       string                    `yaml:"version"`
+	Description   string                    `yaml:"description"`
+	EntryAgent    string                    `yaml:"entry_agent"`
+	Agents        []Agent                   `yaml:"agents"`
+	Dromena       []string                  `yaml:"dromena"`  // Invokable commands (project to .claude/commands/)
+	Legomena      []string                  `yaml:"legomena"` // Reference knowledge (project to .claude/skills/)
+	Commands      []string                  `yaml:"commands"` // Backward compat: populates from dromena+legomena if empty
+	Skills        []string                  `yaml:"skills"`   // Deprecated: use Legomena instead
+	Hooks         []string                  `yaml:"hooks"`
+	Dependencies  []string                  `yaml:"dependencies"`
+	MCPServers    []MCPServer               `yaml:"mcp_servers,omitempty"` // MCP server declarations
+	HookDefaults  *HookDefaults             `yaml:"hook_defaults,omitempty"`
+	AgentDefaults map[string]any            `yaml:"agent_defaults,omitempty"` // Manifest-level defaults merged into agent frontmatter during sync
+	SkillPolicies []SkillPolicy             `yaml:"skill_policies,omitempty"` // Capability-driven skill wiring rules evaluated per-agent during sync
+	ArchetypeData map[string]map[string]any `yaml:"archetype_data,omitempty"` // Per-archetype template data keyed by archetype name
 }
 
 // MCPServerNames returns the list of MCP server names declared in the manifest.
@@ -701,4 +701,3 @@ func (m *Materializer) loadRiteManifest(ritePath string, resolved *ResolvedRite)
 
 	return &manifest, nil
 }
-
