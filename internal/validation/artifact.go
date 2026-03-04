@@ -3,6 +3,7 @@ package validation
 
 import (
 	"encoding/json"
+	stderrors "errors"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -183,7 +184,8 @@ func (av *ArtifactValidator) Validate(content []byte, filePath string, artifactT
 	fm, err := ExtractFrontmatter(content)
 	if err != nil {
 		// Return validation result with error as an issue
-		if e, ok := err.(*errors.Error); ok {
+		var e *errors.Error
+		if stderrors.As(err, &e) {
 			result.Issues = []ValidationIssue{
 				{Message: e.Message},
 			}
@@ -265,10 +267,10 @@ func extractValidationIssues(err error) []ValidationIssue {
 	var issues []ValidationIssue
 
 	// Handle different error types from jsonschema library
-	switch e := err.(type) {
-	case *jsonschema.ValidationError:
-		issues = append(issues, extractFromValidationError(e)...)
-	default:
+	var ve *jsonschema.ValidationError
+	if stderrors.As(err, &ve) {
+		issues = append(issues, extractFromValidationError(ve)...)
+	} else {
 		// Generic error
 		issues = append(issues, ValidationIssue{
 			Message: err.Error(),

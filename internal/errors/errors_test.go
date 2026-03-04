@@ -114,7 +114,7 @@ func TestIsNotFound_ThroughFmtWrapping(t *testing.T) {
 func isErrorsAs(err error, target **Error) bool {
 	type unwrapper interface{ Unwrap() error }
 	for e := err; e != nil; {
-		if ce, ok := e.(*Error); ok {
+		if ce, ok := e.(*Error); ok { //nolint:errorlint // intentionally tests direct type assertion in errors package
 			*target = ce
 			return true
 		}
@@ -131,7 +131,7 @@ func isErrorsAs(err error, target **Error) bool {
 func isStdlibIs(err error, target error) bool {
 	// Walk the error chain manually using Unwrap (stdlib pattern)
 	for e := err; e != nil; {
-		if e == target {
+		if e == target { //nolint:errorlint // intentionally tests direct comparison in errors package
 			return true
 		}
 		type unwrapper interface{ Unwrap() error }

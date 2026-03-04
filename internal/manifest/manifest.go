@@ -4,6 +4,7 @@ package manifest
 
 import (
 	"encoding/json"
+	stderrors "errors"
 	"fmt"
 	"log/slog"
 	"os"
@@ -101,7 +102,8 @@ func LoadFromGitRef(ref string) (*Manifest, error) {
 	cmd := exec.Command("git", "show", commit+":"+path)
 	data, err := cmd.Output()
 	if err != nil {
-		if exitErr, ok := err.(*exec.ExitError); ok {
+		var exitErr *exec.ExitError
+		if stderrors.As(err, &exitErr) {
 			return nil, errors.NewWithDetails(errors.CodeFileNotFound,
 				"git ref not found",
 				map[string]any{

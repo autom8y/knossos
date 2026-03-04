@@ -1,6 +1,7 @@
 package validation
 
 import (
+	stderrors "errors"
 	"os"
 	"path/filepath"
 	"slices"
@@ -164,7 +165,8 @@ This is the content.
 	result, err := validator.Validate(content, "PRD-test-feature.md", ArtifactTypeUnknown)
 	if err != nil {
 		// Print details if available
-		if e, ok := err.(*errors.Error); ok && e.Details != nil {
+		var e *errors.Error
+		if stderrors.As(err, &e) && e.Details != nil {
 			t.Logf("Error details: %v", e.Details)
 		}
 		t.Fatalf("Validate() error = %v", err)

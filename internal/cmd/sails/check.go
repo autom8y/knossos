@@ -2,6 +2,7 @@
 package sails
 
 import (
+	stderrors "errors"
 	"fmt"
 	"os"
 	"strings"
@@ -93,7 +94,8 @@ func runCheck(ctx *cmdContext, flags *checkFlags, args []string) error {
 			printer.PrintError(err)
 		}
 		// Get exit code from error
-		if e, ok := err.(*errors.Error); ok {
+		var e *errors.Error
+		if stderrors.As(err, &e) {
 			os.Exit(e.ExitCode)
 		}
 		os.Exit(errors.ExitGeneralError)

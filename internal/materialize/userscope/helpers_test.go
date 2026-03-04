@@ -1,6 +1,7 @@
 package userscope
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"testing"
@@ -94,7 +95,7 @@ func TestErrorConstructors(t *testing.T) {
 			t.Error("expected non-empty error message")
 		}
 		userSyncError := &UserSyncError{}
-		if errors.As(err, &userSyncError) {
+		if !errors.As(err, &userSyncError) {
 			t.Errorf("expected *UserSyncError, got %T", err)
 		}
 	})

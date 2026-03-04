@@ -1,6 +1,7 @@
 package session
 
 import (
+	stderrors "errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -203,7 +204,8 @@ func TestTransitionErrors_AreLifecycleViolations(t *testing.T) {
 			}
 
 			// Verify structured error has details
-			if e, ok := err.(*errors.Error); ok {
+			var e *errors.Error
+			if stderrors.As(err, &e) {
 				if e.Details == nil {
 					t.Error("Structured error should have details")
 				}

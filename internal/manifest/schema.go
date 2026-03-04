@@ -3,6 +3,7 @@ package manifest
 
 import (
 	"encoding/json"
+	stderrors "errors"
 	"fmt"
 	"path/filepath"
 	"regexp"
@@ -233,7 +234,8 @@ func (v *SchemaValidator) ValidateBytes(data []byte, format Format, schemaName s
 func parseValidationErrors(err error) []ValidationIssue {
 	var issues []ValidationIssue
 
-	if ve, ok := err.(*jsonschema.ValidationError); ok {
+	var ve *jsonschema.ValidationError
+	if stderrors.As(err, &ve) {
 		// Use detailed output for better error messages
 		output := ve.DetailedOutput()
 		collectOutputErrors(output, &issues)

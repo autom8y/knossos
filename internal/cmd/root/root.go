@@ -2,6 +2,7 @@
 package root
 
 import (
+	stderrors "errors"
 	"fmt"
 	"os"
 	"runtime"
@@ -190,7 +191,8 @@ func initConfig() error {
 
 	// Read config file if it exists (not an error if missing)
 	if err := viper.ReadInConfig(); err != nil {
-		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
+		var configFileNotFoundError viper.ConfigFileNotFoundError
+		if !stderrors.As(err, &configFileNotFoundError) {
 			return err
 		}
 	}
