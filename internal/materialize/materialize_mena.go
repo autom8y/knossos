@@ -115,6 +115,49 @@ func (m *Materializer) materializeMena(manifest *RiteManifest, claudeDir string,
 	return err
 }
 
+// materializeMinimalMena projects platform mena and shared rite mena into
+// .claude/commands/ and .claude/skills/ without requiring an active rite.
+// Called from MaterializeMinimal so that cross-cutting mode still gets core
+// features like /know, /radar, /research.
+func (m *Materializer) materializeMinimalMena(claudeDir string, collector provenance.Collector, overwriteDiverged bool) error {
+	commandsDir := filepath.Join(claudeDir, "commands")
+	skillsDir := filepath.Join(claudeDir, "skills")
+
+	var sources []MenaSource
+
+	// 1. Platform-level mena (lowest priority)
+	if menaDir := m.getMenaDir(); menaDir != "" {
+		sources = append(sources, MenaSource{Path: menaDir})
+	} else if m.embeddedMena != nil {
+		sources = append(sources, MenaSource{Fsys: m.embeddedMena, FsysPath: "mena", IsEmbedded: true})
+	}
+
+	// 2. Shared rite mena — core cross-rite features (/know, /radar, etc.)
+	if m.sourceResolver.EmbeddedFS != nil {
+		sources = append(sources, MenaSource{Fsys: m.sourceResolver.EmbeddedFS, FsysPath: "rites/shared/mena", IsEmbedded: true})
+	} else if knossosHome := m.sourceResolver.KnossosHome(); knossosHome != "" {
+		sharedMenaDir := filepath.Join(knossosHome, "rites", "shared", "mena")
+		sources = append(sources, MenaSource{Path: sharedMenaDir})
+	}
+
+	if len(sources) == 0 {
+		return nil // No mena sources available
+	}
+
+	opts := MenaProjectionOptions{
+		Mode:              MenaProjectionDestructive,
+		Filter:            ProjectAll,
+		TargetCommandsDir: commandsDir,
+		TargetSkillsDir:   skillsDir,
+		Collector:         collector,
+		ProjectRoot:       m.resolver.ProjectRoot(),
+		OverwriteDiverged: overwriteDiverged,
+	}
+
+	_, err := SyncMena(sources, opts)
+	return err
+}
+
 // getMenaDir returns the mena directory path.
 // Resolution order: project-level → KnossosHome → XDG data dir.
 // Returns "" if none found (caller should try embedded fallback).

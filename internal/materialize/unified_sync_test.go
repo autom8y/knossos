@@ -716,3 +716,66 @@ func TestMaterializeWithOptions_PrevalidateBlocksPartialState(t *testing.T) {
 	_, statErr := os.Stat(filepath.Join(claudeDir, "agents", "test-agent.md"))
 	assert.True(t, os.IsNotExist(statErr), "new agent should NOT be written when pre-validation fails")
 }
+
+// TestMinimalMode_ProjectsSharedMena verifies that MaterializeMinimal projects
+// shared rite mena (e.g., /know, /radar) to .claude/commands/ and .claude/skills/
+// so cross-cutting mode still has core features available.
+// Regression test for: shared mena missing in no-rite sync.
+func TestMinimalMode_ProjectsSharedMena(t *testing.T) {
+	knossosHome := t.TempDir()
+	t.Setenv("KNOSSOS_HOME", knossosHome)
+	config.ResetKnossosHome()
+	t.Cleanup(config.ResetKnossosHome)
+
+	projectDir := t.TempDir()
+	claudeDir := filepath.Join(projectDir, ".claude")
+
+	// Set up platform mena (root level) — getMenaDir() needs this to resolve
+	platformMenaDir := filepath.Join(knossosHome, "mena", "nav-cmd")
+	require.NoError(t, os.MkdirAll(platformMenaDir, 0755))
+	require.NoError(t, os.WriteFile(
+		filepath.Join(platformMenaDir, "INDEX.dro.md"),
+		[]byte("---\nname: nav-cmd\ndescription: Navigation command\n---\n# Nav\n"),
+		0644,
+	))
+
+	// Set up shared rite mena (the missing piece before this fix)
+	sharedMenaDir := filepath.Join(knossosHome, "rites", "shared", "mena")
+
+	// Dromenon: simulates /know (INDEX-only → projects as flat know.md)
+	knowDir := filepath.Join(sharedMenaDir, "know")
+	require.NoError(t, os.MkdirAll(knowDir, 0755))
+	require.NoError(t, os.WriteFile(
+		filepath.Join(knowDir, "INDEX.dro.md"),
+		[]byte("---\nname: know\ndescription: Generate codebase knowledge\n---\n# Know\n"),
+		0644,
+	))
+
+	// Legomenon: simulates shared skill (INDEX-only → projects as flat shared-ref.md)
+	skillDir := filepath.Join(sharedMenaDir, "shared-ref")
+	require.NoError(t, os.MkdirAll(skillDir, 0755))
+	require.NoError(t, os.WriteFile(
+		filepath.Join(skillDir, "INDEX.lego.md"),
+		[]byte("---\nname: shared-ref\ndescription: Shared reference\n---\n# Ref\n"),
+		0644,
+	))
+
+	resolver := paths.NewResolver(projectDir)
+	m := NewMaterializer(resolver)
+
+	// No ACTIVE_RITE → triggers MaterializeMinimal path
+	result, err := m.MaterializeMinimal(Options{})
+	require.NoError(t, err)
+	assert.Equal(t, "minimal", result.Status)
+
+	// Platform mena should be projected (INDEX-only dromena become flat files)
+	assert.FileExists(t, filepath.Join(claudeDir, "commands", "nav-cmd.md"),
+		"platform mena dromenon should be projected in minimal mode")
+
+	// Shared rite mena should ALSO be projected (the fix)
+	assert.FileExists(t, filepath.Join(claudeDir, "commands", "know.md"),
+		"shared rite dromenon (/know) should be projected in minimal mode")
+	// Legomena keep directory structure; INDEX.lego.md projects as SKILL.md
+	assert.FileExists(t, filepath.Join(claudeDir, "skills", "shared-ref", "SKILL.md"),
+		"shared rite legomenon should be projected in minimal mode")
+}

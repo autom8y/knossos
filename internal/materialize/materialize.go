@@ -271,6 +271,13 @@ func (m *Materializer) MaterializeMinimal(opts Options) (*Result, error) {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize settings", err)
 	}
 
+	// Project platform mena + shared rite mena so cross-cutting mode still
+	// has core features (/know, /radar, /research, etc.).
+	if err := m.materializeMinimalMena(claudeDir, collector, opts.OverwriteDiverged); err != nil {
+		slog.Warn("failed to materialize mena in minimal mode", "error", err)
+		// Non-fatal: mena is a best-effort enhancement in minimal mode
+	}
+
 	// Remove rite-specific state files (cross-cutting mode has no rite)
 	_ = os.Remove(filepath.Join(claudeDir, "ACTIVE_RITE"))
 	_ = os.Remove(filepath.Join(claudeDir, "ACTIVE_WORKFLOW.yaml"))
