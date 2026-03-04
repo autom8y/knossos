@@ -195,7 +195,7 @@ The distinction between hero and theoros is architectural and inviolable. Heroes
 
 **Callimachus**, the great librarian of Alexandria, compiled the **Pinakes** -- the first systematic catalog of the ancient world's largest library. The Pinakes did not contain the knowledge of the Library. It described what knowledge existed, where it could be found, and how it was classified. It was the map of the Library, not the Library itself.
 
-In Knossos, the Pinakes is the **domain registry** -- the reference knowledge that catalogs audit targets, evaluation criteria per domain, grading rubrics, and report schemas. Stored at `rites/shared/mena/pinakes/`, it tells the theoria what domains exist and how to assess each one.
+In Knossos, the Pinakes is the **domain registry** -- the reference knowledge that catalogs audit targets, evaluation criteria per domain, grading rubrics, and report schemas. Stored at `mena/pinakes/`, it tells the theoria what domains exist and how to assess each one.
 
 The Pinakes is a legomenon: persistent reference knowledge, progressively disclosed, consulted but never consumed. It is the bridge between wanting to audit and knowing how. Without the Pinakes, theoroi would wander without criteria. With it, they arrive at their domain knowing exactly what to observe and how to grade what they find.
 
@@ -522,8 +522,8 @@ This is not bureaucracy—it is the only way to guarantee validity, consistency,
 | **Athens** | The main branch | Home—where you return by merging |
 | **Naxos** | Orphaned sessions, stale gray sails | The shore of abandonment |
 | **Theoria** | Audit operation (`/theoria`) | The sacred delegation -- structured observation of the labyrinth |
-| **Theoroi** | Domain evaluator agents (`rites/shared/agents/theoros.md`) | Sacred observers dispatched to witness and report |
-| **Pinakes** | Domain registry (`rites/shared/mena/pinakes/`) | Callimachus's catalog -- what to observe and how to assess it |
+| **Theoroi** | Domain evaluator agents (`agents/theoros.md`) | Sacred observers dispatched to witness and report |
+| **Pinakes** | Domain registry (`mena/pinakes/`) | Callimachus's catalog -- what to observe and how to assess it |
 | **Synkrisis** | Synthesis step | Plutarch's comparison -- truth that emerges between reports |
 | **Argus Pattern** | N-agent parallel dispatch | The hundred-eyed watcher -- total vision through distributed observation |
 | **White Sails** | Confidence signal | The honest signal of safe return |

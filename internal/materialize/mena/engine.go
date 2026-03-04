@@ -18,8 +18,8 @@ import (
 // both filesystem and embedded FS sources.
 //
 // Sources are processed in priority order (later overrides earlier):
-//  1. Distribution-level mena/ (from knossosHome or projectRoot)
-//  2. rites/shared/mena/
+//  1. Platform mena/ (core features: commands, skills, knowledge tools)
+//  2. rites/shared/mena/ (cross-rite overlay: interview, smell-detection, etc.)
 //  3. rites/{dependency}/mena/ (in manifest dependency order)
 //  4. rites/{active}/mena/ (highest priority)
 //

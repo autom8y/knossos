@@ -16,7 +16,7 @@ Agents need a discovery mechanism for feature knowledge files in `.know/feat/`. 
 
 ### Decision
 
-Create a single shared legomenon at `rites/shared/mena/feat-knowledge/INDEX.lego.md` that serves as a discovery index and usage guide for `.know/feat/` files.
+Create a single shared legomenon at `mena/feat-knowledge/INDEX.lego.md` that serves as a discovery index and usage guide for `.know/feat/` files.
 
 ### Rationale
 
@@ -38,7 +38,7 @@ Create a single shared legomenon at `rites/shared/mena/feat-knowledge/INDEX.lego
 
 | File | Purpose |
 |------|---------|
-| `rites/shared/mena/feat-knowledge/INDEX.lego.md` | Shared legomenon -- feature knowledge discovery index |
+| `mena/feat-knowledge/INDEX.lego.md` | Shared legomenon -- feature knowledge discovery index |
 
 ### Existing Files: No Modifications
 
@@ -96,5 +96,5 @@ None required. The skill is new and optional. Agents that do not encounter featu
 
 | Artifact | Absolute Path | Status |
 |----------|---------------|--------|
-| Legomenon | `/Users/tomtenuta/Code/knossos/rites/shared/mena/feat-knowledge/INDEX.lego.md` | Created, verified via Read |
+| Legomenon | `/Users/tomtenuta/Code/knossos/mena/feat-knowledge/INDEX.lego.md` | Created, verified via Read |
 | Context Design | `/Users/tomtenuta/Code/knossos/docs/ecosystem/DESIGN-feat-knowledge-skill-wiring.md` | This file |

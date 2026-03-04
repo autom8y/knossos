@@ -10,8 +10,8 @@ import (
 
 // materializeMena copies mena files to .claude/commands/ or .claude/skills/
 // based on the filename convention (.dro.md for dromena, .lego.md for legomena).
-// Sources: mena/, rites/{rite}/mena/, rites/shared/mena/
-// Priority order (later sources override earlier): mena < shared < dependencies < current rite
+// Sources: mena/ (platform), rites/shared/mena/ (cross-rite overlay), rites/{rite}/mena/
+// Priority order (later sources override earlier): platform < shared < dependencies < current rite
 //
 // This method builds the source list and delegates to SyncMena() for the
 // actual collection, routing, extension stripping, and file copying.

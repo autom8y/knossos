@@ -35,9 +35,9 @@ This concordance maps Greek mythology to the **SOURCE implementation** of Knosso
 | **Dionysus** | Code review process | Review workflows, QA upgrade in White Sails | Transforms isolation into merged canon. |
 | **Minos** | Stakeholders | `internal/tribute/` | Demands tribute (status reports and demos). |
 | **Minotaur** | The initiative/task | Defined in `SESSION_CONTEXT.md` | The challenge — reason for the journey. |
-| **Theoria** | Audit operation (`/theoria`) | `/theoria` dromena, `rites/shared/mena/pinakes/`, `rites/shared/agents/theoros.md` | Structured observation. Uses Argus Pattern for parallel dispatch. |
-| **Theoroi** | Domain evaluator agents | `rites/shared/agents/theoros.md` | Sacred observers — read-only witnesses. Singular: theoros. |
-| **Pinakes** | Domain registry legomena | `rites/shared/mena/pinakes/` | Callimachus's catalog — what to observe and how to assess. |
+| **Theoria** | Audit operation (`/theoria`) | `/theoria` dromena, `mena/pinakes/`, `agents/theoros.md` | Structured observation. Uses Argus Pattern for parallel dispatch. |
+| **Theoroi** | Domain evaluator agents | `agents/theoros.md` | Sacred observers — read-only witnesses. Singular: theoros. |
+| **Pinakes** | Domain registry legomena | `mena/pinakes/` | Callimachus's catalog — what to observe and how to assess. |
 | **Synkrisis** | Synthesis step | Part of `/theoria` dromena | Plutarch's comparison — cross-domain patterns from individual reports. |
 | **Argus Pattern** | N-agent parallel dispatch | Pattern (no single file) | One body (main thread), many eyes (agents). Reusable technique. |
 

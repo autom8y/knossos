@@ -111,8 +111,8 @@ See [reference/agent-capabilities.md](../reference/agent-capabilities.md) for de
 
 ### Theoria Audit Infrastructure
 
-- **Pinakes**: Domain registry at `rites/shared/mena/pinakes/` with per-domain criteria
-- **Theoros**: Domain evaluator agent at `rites/shared/agents/theoros.md`
+- **Pinakes**: Domain registry at `mena/pinakes/` with per-domain criteria
+- **Theoros**: Domain evaluator agent at `agents/theoros.md`
 - **Synkrisis**: Cross-domain synthesis producing "State of the {X}" reports
 - **Argus Pattern**: N-agent parallel dispatch for distributed observation
 

@@ -103,7 +103,7 @@ Shore of abandonment—orphaned sessions created but never wrapped. Detected for
 ### Pinakes
 The domain registry legomena for audit operations. Catalogs audit targets, evaluation criteria, grading rubrics, and report schemas. Named for Callimachus's catalog of the Library of Alexandria. Always qualified as "the Pinakes" to distinguish from manifest files.
 - **Related**: Theoria, Theoroi, Legomena, Domain Registry
-- **Source**: Planned: `rites/shared/mena/pinakes/`
+- **Source**: `mena/pinakes/`
 
 ### Pythia
 The Oracle—rite entry agents providing work breakdown, specialist routing, and checkpoint guidance. Speaks clearly, not cryptically. Each rite has its own Pythia.
@@ -118,7 +118,7 @@ Comparative synthesis step following parallel domain evaluations. Weaves individ
 ### Theoria
 The audit operation—a structured delegation of observers dispatched to assess domain health. Composite primitive: dromena (`/theoria`) + legomena (Pinakes) + agents (theoroi). Uses the Argus Pattern for parallel dispatch. Named for the Greek sacred state delegation.
 - **Related**: Theoroi, Pinakes, Synkrisis, Argus Pattern
-- **Source**: Planned: `/theoria` dromena + `rites/shared/mena/pinakes/` legomena
+- **Source**: `/theoria` dromena + `mena/pinakes/` legomena
 
 ### Theoroi
 Domain evaluator agents dispatched by a theoria. Each theoros observes a single domain using criteria from the Pinakes and produces a structured report. Read-only witnesses, not actors. Singular: theoros.

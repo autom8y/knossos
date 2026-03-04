@@ -60,8 +60,8 @@ func (s *syncer) syncUserMena(
 	// Call CollectMena to get flattened, type-resolved entries.
 	// Empty target dirs: user-scope provenance handles user-collision protection.
 	// Sources: platform mena (lowest priority) + shared rite mena (higher priority).
-	// Shared rite mena provides cross-rite features (/know, /radar, /research, etc.)
-	// that should be available globally, not just within a rite.
+	// Platform mena provides core features (commands, skills, knowledge tools).
+	// Shared rite mena provides cross-rite overlay (interview, smell-detection, etc.).
 	sources := []mena.MenaSource{{Path: sourceDir}}
 	sharedMenaDir := filepath.Join(knossosHome, "rites", "shared", "mena")
 	if _, err := os.Stat(sharedMenaDir); err == nil {
