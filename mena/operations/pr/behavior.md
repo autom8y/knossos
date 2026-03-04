@@ -6,7 +6,7 @@
 
 ### 1. Validate Git State
 
-Apply [Git Validation Pattern](../shared/git-validation.md):
+Apply Git Validation Pattern:
 - Requirement: On feature branch (not main/master)
 - Verb: "create PR"
 

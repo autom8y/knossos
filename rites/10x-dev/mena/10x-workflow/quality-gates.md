@@ -37,7 +37,7 @@ The impact assessment determines workflow routing:
 
 ### Detailed Template
 
-For complete PRD structure and expanded quality checklist, see [documentation/templates/prd.md](../documentation/templates/prd.md).
+For complete PRD structure and expanded quality checklist, see [prd-template](../doc-artifacts/prd-template.lego.md).
 
 ---
 
@@ -55,7 +55,7 @@ For complete PRD structure and expanded quality checklist, see [documentation/te
 
 ### Detailed Template
 
-For complete TDD structure and expanded quality checklist, see [documentation/templates/tdd.md](../documentation/templates/tdd.md).
+For complete TDD structure and expanded quality checklist, see [tdd-template](../doc-artifacts/tdd-template.lego.md).
 
 ---
 
@@ -86,7 +86,7 @@ For complete TDD structure and expanded quality checklist, see [documentation/te
 
 ### Detailed Template
 
-For complete Test Plan structure and expanded quality checklist, see [documentation/templates/test-plan.md](../documentation/templates/test-plan.md).
+For complete Test Plan structure and expanded quality checklist, see [test-templates](../doc-artifacts/test-templates.lego.md).
 
 ---
 

@@ -44,7 +44,7 @@ For hotfixes, **PRD is skipped** because:
 
 ### 4. Diagnose → Fix Workflow
 
-Apply [Agent Invocation Pattern](../shared/agent-invocation.md):
+Apply Agent Invocation Pattern:
 - Agent: Principal Engineer
 - Mode: "HOTFIX MODE (Rapid fix required)"
 
@@ -221,7 +221,7 @@ These can be created in follow-up `/task` if needed.
 
 ### Time Budget Philosophy
 
-Apply [Time-Boxing Pattern](../shared/time-boxing.md):
+Apply Time-Boxing Pattern:
 - Severity-based time limits
 - Checkpoints at intervals
 - Hard stop at max time
