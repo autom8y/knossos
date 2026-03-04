@@ -128,17 +128,16 @@ func (s *syncer) syncUserMena(
 			manifestKey := manifestPrefix + filepath.Join(entry.FlatName, strippedRel)
 			targetPath := filepath.Join(targetBaseDir, entry.FlatName, strippedRel)
 
-			// Dromena INDEX.md promotion: top-level INDEX.md → parent-level {flatName}.md
-			if entry.MenaType == "dro" && strippedName == "INDEX.md" && fileDir == "." {
+			// Apply INDEX.md promotion (dromena) or SKILL.md rename (legomena).
+			isDro := entry.MenaType == "dro"
+			newBase, promoted := mena.TransformMenaFilePath(strippedName, fileDir, isDro)
+			if promoted {
 				manifestKey = manifestPrefix + entry.FlatName + ".md"
 				targetPath = filepath.Join(targetBaseDir, entry.FlatName+".md")
-			}
-
-			// Legomena INDEX.md → SKILL.md rename (CC entrypoint convention)
-			if entry.MenaType == "lego" && strippedName == "INDEX.md" && fileDir == "." {
-				strippedName = "SKILL.md"
-				manifestKey = manifestPrefix + filepath.Join(entry.FlatName, "SKILL.md")
-				targetPath = filepath.Join(targetBaseDir, entry.FlatName, "SKILL.md")
+			} else if newBase != strippedName {
+				strippedName = newBase
+				manifestKey = manifestPrefix + filepath.Join(entry.FlatName, newBase)
+				targetPath = filepath.Join(targetBaseDir, entry.FlatName, newBase)
 			}
 
 			// Read source content
@@ -148,7 +147,7 @@ func (s *syncer) syncUserMena(
 			}
 
 			// Apply companion hiding for dro non-INDEX markdown files
-			if entry.MenaType == "dro" && strippedName != "INDEX.md" && strings.HasSuffix(strippedName, ".md") {
+			if isDro && strippedName != "INDEX.md" && strings.HasSuffix(strippedName, ".md") {
 				content = mena.InjectCompanionHideFrontmatter(content)
 			}
 
@@ -303,17 +302,16 @@ func (s *syncer) syncUserMenaFromEmbedded(
 			manifestKey := manifestPrefix + filepath.Join(entry.FlatName, strippedRel)
 			targetPath := filepath.Join(targetBaseDir, entry.FlatName, strippedRel)
 
-			// Dromena INDEX.md promotion: top-level INDEX.md → parent-level {flatName}.md
-			if entry.MenaType == "dro" && strippedName == "INDEX.md" && fileDir == "." {
+			// Apply INDEX.md promotion (dromena) or SKILL.md rename (legomena).
+			isDro := entry.MenaType == "dro"
+			newBase, promoted := mena.TransformMenaFilePath(strippedName, fileDir, isDro)
+			if promoted {
 				manifestKey = manifestPrefix + entry.FlatName + ".md"
 				targetPath = filepath.Join(targetBaseDir, entry.FlatName+".md")
-			}
-
-			// Legomena INDEX.md → SKILL.md rename (CC entrypoint convention)
-			if entry.MenaType == "lego" && strippedName == "INDEX.md" && fileDir == "." {
-				strippedName = "SKILL.md"
-				manifestKey = manifestPrefix + filepath.Join(entry.FlatName, "SKILL.md")
-				targetPath = filepath.Join(targetBaseDir, entry.FlatName, "SKILL.md")
+			} else if newBase != strippedName {
+				strippedName = newBase
+				manifestKey = manifestPrefix + filepath.Join(entry.FlatName, newBase)
+				targetPath = filepath.Join(targetBaseDir, entry.FlatName, newBase)
 			}
 
 			// Read embedded content
@@ -323,7 +321,7 @@ func (s *syncer) syncUserMenaFromEmbedded(
 			}
 
 			// Apply companion hiding for dro non-INDEX markdown files
-			if entry.MenaType == "dro" && strippedName != "INDEX.md" && strings.HasSuffix(strippedName, ".md") {
+			if isDro && strippedName != "INDEX.md" && strings.HasSuffix(strippedName, ".md") {
 				content = mena.InjectCompanionHideFrontmatter(content)
 			}
 

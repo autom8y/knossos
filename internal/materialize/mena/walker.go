@@ -63,16 +63,13 @@ func copyDirFS(fsys fs.FS, root, dst string, hideCompanions bool) error {
 			return err
 		}
 
-		// For dromena: promote top-level INDEX.md to parent level (dst.md).
-		if hideCompanions && base == "INDEX.md" && dir == "." {
+		// Apply INDEX.md promotion (dromena) or SKILL.md rename (legomena).
+		newBase, promoted := TransformMenaFilePath(base, dir, hideCompanions)
+		if promoted {
 			destPath = dst + ".md"
-		}
-
-		// For legomena: rename top-level INDEX.md → SKILL.md (CC entrypoint convention).
-		// CC reads SKILL.md as the skill entrypoint; INDEX.md is not recognised.
-		if !hideCompanions && base == "INDEX.md" && dir == "." {
-			base = "SKILL.md"
-			destPath = filepath.Join(dst, "SKILL.md")
+		} else if newBase != base {
+			base = newBase
+			destPath = filepath.Join(dst, newBase)
 		}
 
 		// Apply companion hiding for dromena non-INDEX markdown files.
@@ -102,10 +99,9 @@ func collectFSFileNames(fsys fs.FS, hideCompanions bool) map[string]bool {
 		}
 		dir := filepath.Dir(path)
 		base := StripMenaExtension(filepath.Base(path))
-		// Mirror legomena promotion: INDEX.md → SKILL.md at root level.
-		if !hideCompanions && base == "INDEX.md" && dir == "." {
-			base = "SKILL.md"
-		}
+		// Mirror INDEX.md promotion (dromena) or SKILL.md rename (legomena).
+		newBase, _ := TransformMenaFilePath(base, dir, hideCompanions)
+		base = newBase
 		names[filepath.Join(dir, base)] = true
 		return nil
 	})
