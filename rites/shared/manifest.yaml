@@ -15,21 +15,13 @@ phases: []
 # (theoros, moirai, consultant, context-engineer)
 agents: []
 
-dromena:
-  - frame
-  - know
-  - radar
-  - research
+dromena: []
 
 legomena:
-  - codebase-archaeology
   - conventions
   - cross-rite-handoff
-  - ephemeral-artifacts
   - interview
-  - literature-review
   - orchestrator-templates
-  - pinakes
   - shared-templates
   - smell-detection
 

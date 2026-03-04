@@ -68,7 +68,7 @@ func TestIsFromRite(t *testing.T) {
 	}{
 		{"relative match", "rites/10x-dev/mena/commit/", "10x-dev", true},
 		{"absolute match", "../../Code/knossos/rites/ecosystem/mena/spike/", "ecosystem", true},
-		{"shared rite", "rites/shared/mena/know/", "10x-dev", false},
+		{"shared rite", "rites/shared/mena/smell-detection/", "10x-dev", false},
 		{"different rite", "rites/forge/mena/build-ref/", "10x-dev", false},
 		{"platform mena", "mena/operations/commit/", "10x-dev", false},
 		{"empty source path", "", "10x-dev", false},

@@ -82,6 +82,7 @@ dromena:
 
 legomena:
   - agent-prompt-engineering
+  - codebase-archaeology
   - forge-ref
   - prompt-fuel-reference
   - rite-development

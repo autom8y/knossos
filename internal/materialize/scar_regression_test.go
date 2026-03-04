@@ -453,9 +453,10 @@ func TestSCAR018_KnowDromenon_NoContextFork(t *testing.T) {
 	repoRoot := repoRootFromThisFile(t)
 
 	// Primary assertion: the specific /know dromenon that triggered SCAR-018.
-	knowPath := filepath.Join(repoRoot, "rites", "shared", "mena", "know", "INDEX.dro.md")
+	// /know was relocated from rites/shared/mena/ to platform mena/ (mena placement remediation).
+	knowPath := filepath.Join(repoRoot, "mena", "know", "INDEX.dro.md")
 	data, err := os.ReadFile(knowPath)
-	require.NoError(t, err, "/know dromenon must exist at rites/shared/mena/know/INDEX.dro.md")
+	require.NoError(t, err, "/know dromenon must exist at mena/know/INDEX.dro.md")
 
 	content := string(data)
 	parts := strings.SplitN(content, "---", 3)
@@ -473,12 +474,15 @@ func TestSCAR018_KnowDromenon_NoContextFork(t *testing.T) {
 		}
 	}
 
-	// Secondary assertion: check all shared rites dromena for the anti-pattern.
-	// Shared dromena are the highest-risk location because they apply to all rites.
-	sharedMenaDir := filepath.Join(repoRoot, "rites", "shared", "mena")
+	// Secondary assertion: check all platform and shared dromena for the anti-pattern.
+	// Platform dromena are the highest-risk location because they apply to all scopes.
 	var violations []string
-
-	_ = filepath.WalkDir(sharedMenaDir, func(path string, d os.DirEntry, walkErr error) error {
+	menaDirs := []string{
+		filepath.Join(repoRoot, "mena"),
+		filepath.Join(repoRoot, "rites", "shared", "mena"),
+	}
+	for _, menaDir := range menaDirs {
+		_ = filepath.WalkDir(menaDir, func(path string, d os.DirEntry, walkErr error) error {
 		if walkErr != nil || d.IsDir() || d.Name() != "INDEX.dro.md" {
 			return nil
 		}
@@ -495,6 +499,7 @@ func TestSCAR018_KnowDromenon_NoContextFork(t *testing.T) {
 
 		hasTask := false
 		hasContextFork := false
+		hasDisableModelInvocation := false
 		for _, fmLine := range strings.Split(fm, "\n") {
 			trimmedLine := strings.TrimSpace(fmLine)
 			if strings.HasPrefix(trimmedLine, "allowed-tools:") && strings.Contains(trimmedLine, "Task") {
@@ -506,16 +511,22 @@ func TestSCAR018_KnowDromenon_NoContextFork(t *testing.T) {
 					hasContextFork = true
 				}
 			}
+			if strings.HasPrefix(trimmedLine, "disable-model-invocation:") && strings.Contains(trimmedLine, "true") {
+				hasDisableModelInvocation = true
+			}
 		}
-		if hasTask && hasContextFork {
+		// Dromena with disable-model-invocation: true intentionally fork
+		// without needing Task for agent dispatch (e.g., /spike).
+		if hasTask && hasContextFork && !hasDisableModelInvocation {
 			relPath, _ := filepath.Rel(repoRoot, path)
 			violations = append(violations, relPath)
 		}
 		return nil
 	})
+	}
 
 	assert.Empty(t, violations,
-		"SCAR-018 regression: shared dromena with Task in allowed-tools must not have context: fork")
+		"SCAR-018 regression: platform/shared dromena with Task in allowed-tools must not have context: fork")
 }
 
 // TestSCAR020_SessionDromena_ExplicitSessionIDPassing is a regression test for SCAR-020.
@@ -585,17 +596,11 @@ func TestSCAR020_SessionDromena_ExplicitSessionIDPassing(t *testing.T) {
 // a lint rule (session-artifact-in-shared-mena) was added.
 //
 // This test checks that INDEX files (entry points) and non-template files in
-// rites/shared/mena/ do not contain session-specific frontmatter markers.
-// Template/schema/example files are excluded because they legitimately reference
-// session_id as a field definition (not as actual session data).
+// platform mena/ and rites/shared/mena/ do not contain session-specific
+// frontmatter markers. Template/schema/example files are excluded because
+// they legitimately reference session_id as a field definition.
 func TestSCAR027_SharedMena_NoSessionArtifacts(t *testing.T) {
 	repoRoot := repoRootFromThisFile(t)
-	sharedMenaDir := filepath.Join(repoRoot, "rites", "shared", "mena")
-
-	if _, err := os.Stat(sharedMenaDir); os.IsNotExist(err) {
-		t.Skip("rites/shared/mena/ not found")
-		return
-	}
 
 	// Session artifact frontmatter markers.
 	sessionMarkers := []*regexp.Regexp{
@@ -617,49 +622,59 @@ func TestSCAR027_SharedMena_NoSessionArtifacts(t *testing.T) {
 
 	var violations []string
 
-	err := filepath.WalkDir(sharedMenaDir, func(path string, d os.DirEntry, err error) error {
-		if err != nil {
-			return nil
+	// Walk both platform mena and shared rite mena.
+	menaDirs := []string{
+		filepath.Join(repoRoot, "mena"),
+		filepath.Join(repoRoot, "rites", "shared", "mena"),
+	}
+	for _, menaDir := range menaDirs {
+		if _, statErr := os.Stat(menaDir); os.IsNotExist(statErr) {
+			continue
 		}
-		if d.IsDir() {
-			if excludeDirs[d.Name()] {
-				return filepath.SkipDir
+		err := filepath.WalkDir(menaDir, func(path string, d os.DirEntry, err error) error {
+			if err != nil {
+				return nil
 			}
-			return nil
-		}
-		if !strings.HasSuffix(path, ".md") {
-			return nil
-		}
+			if d.IsDir() {
+				if excludeDirs[d.Name()] {
+					return filepath.SkipDir
+				}
+				return nil
+			}
+			if !strings.HasSuffix(path, ".md") {
+				return nil
+			}
 
-		data, readErr := os.ReadFile(path)
-		if readErr != nil {
-			return nil
-		}
+			data, readErr := os.ReadFile(path)
+			if readErr != nil {
+				return nil
+			}
 
-		relPath, _ := filepath.Rel(repoRoot, path)
-		content := string(data)
+			relPath, _ := filepath.Rel(repoRoot, path)
+			content := string(data)
 
-		// Only check frontmatter (between --- delimiters)
-		parts := strings.SplitN(content, "---", 3)
-		if len(parts) < 3 {
-			return nil
-		}
-		frontmatter := parts[1]
+			// Only check frontmatter (between --- delimiters)
+			parts := strings.SplitN(content, "---", 3)
+			if len(parts) < 3 {
+				return nil
+			}
+			frontmatter := parts[1]
 
-		for _, line := range strings.Split(frontmatter, "\n") {
-			trimmed := strings.TrimSpace(line)
-			for _, pat := range sessionMarkers {
-				if pat.MatchString(trimmed) {
-					violations = append(violations, relPath+": "+trimmed)
+			for _, line := range strings.Split(frontmatter, "\n") {
+				trimmed := strings.TrimSpace(line)
+				for _, pat := range sessionMarkers {
+					if pat.MatchString(trimmed) {
+						violations = append(violations, relPath+": "+trimmed)
+					}
 				}
 			}
-		}
-		return nil
-	})
-	require.NoError(t, err, "failed to walk shared mena directory")
+			return nil
+		})
+		require.NoError(t, err, "failed to walk mena directory: "+menaDir)
+	}
 
 	assert.Empty(t, violations,
-		"SCAR-027 regression: rites/shared/mena/ entry files must not contain session artifacts. "+
-			"Shared mena is permanent platform knowledge. Session artifacts belong in .sos/wip/. "+
+		"SCAR-027 regression: mena entry files must not contain session artifacts. "+
+			"Mena is permanent platform knowledge. Session artifacts belong in .sos/wip/. "+
 			"See MEMORY.md Golden Rule and commit f0971e4.")
 }
