@@ -28,7 +28,7 @@ This directory contains reference documentation for session state management. Th
 
 ## Usage Pattern
 
-Reference schemas from INDEX.lego.md or behavior.md files:
+Reference schemas from `SKILL.md` or behavior.md files:
 
 ```markdown
 See [session-context-schema](../../session-common/session-context-schema.md) for field definitions.

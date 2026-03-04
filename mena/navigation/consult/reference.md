@@ -704,6 +704,6 @@ This skill is kept in sync with:
 - Intent patterns (improved routing heuristics)
 
 When ecosystem changes, update:
-1. This skill reference (INDEX.lego.md)
+1. This skill reference (`SKILL.md`)
 2. Rite mena directories and shared skills (source of truth)
 3. Consultant agent prompt (in agents directory)

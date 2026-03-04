@@ -157,7 +157,7 @@ Git history, commit messages, branch structure. Evaluate via `git log`, branch n
 | Using +/- grade modifiers | Use simple A-F only |
 | Criteria too vague to grade | Add specific thresholds and evidence requirements |
 | No glob patterns in scope | Specify exact file patterns the theoros should search |
-| Missing INDEX registration | Add row to the Domain Registry table in INDEX.lego.md |
+| Missing INDEX registration | Add row to the Domain Registry table in `SKILL.md` |
 
 ## Related
 

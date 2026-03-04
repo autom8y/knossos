@@ -17,11 +17,17 @@ description: "Evaluation criteria for mena directory structure audits. Use when:
 
 ### Criterion 1: File Naming Convention (weight: 30%)
 
-**What to evaluate**: All mena files must use the correct extension for their type (dromena use `.dro.md`, legomena use `.lego.md`). No bare `.md` files in mena directories (except companion files in subdirectories). Mixed dro/lego files in the same directory are a critical anti-pattern.
+**What to evaluate**: All mena files must use the correct extension for their type:
+
+```
+dromena use .dro.md, legomena use .lego.md
+```
+
+No bare `.md` files in mena directories (except companion files in subdirectories). Mixed dro/lego files in the same directory are a critical anti-pattern.
 
 | Grade | Threshold | Evidence Required |
 |-------|-----------|-------------------|
-| A | 90-100% | All top-level mena files use `.dro.md` or `.lego.md` extensions. No mixed dro/lego directories. Companion files in subdirectories use plain `.md`. Zero naming violations. |
+| A | 90-100% | All top-level mena files use .dro.md or .lego.md extensions. No mixed dro/lego directories. Companion files in subdirectories use plain .md. Zero naming violations. |
 | B | 80-89% | 95%+ of mena files use correct extensions. No mixed directories. 1-2 files with bare `.md` at top level. |
 | C | 70-79% | 85-94% use correct extensions. 1 mixed dro/lego directory. Some bare `.md` files at top level. |
 | D | 60-69% | 75-84% use correct extensions. 2+ mixed directories. Extension conventions inconsistent. |
