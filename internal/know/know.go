@@ -370,6 +370,112 @@ func buildDomainStatus(meta Meta, now time.Time, currentHash string) DomainStatu
 	return status
 }
 
+// FindKnowDirs walks from startDir up to repoRoot (inclusive), returning all
+// directories that contain a .know/ subdirectory. Results are ordered nearest-first
+// (startDir's .know/ before parent's .know/). This enables hierarchical knowledge
+// discovery for monorepo-style layouts where services have their own .know/ dirs.
+//
+// Example: FindKnowDirs("/repo/services/payments", "/repo") might return:
+//
+//	["/repo/services/payments/.know", "/repo/.know"]
+func FindKnowDirs(startDir, repoRoot string) []string {
+	// Normalize to absolute paths to avoid relative path edge cases.
+	startAbs, err := filepath.Abs(startDir)
+	if err != nil {
+		return nil
+	}
+	rootAbs, err := filepath.Abs(repoRoot)
+	if err != nil {
+		return nil
+	}
+
+	var dirs []string
+	current := startAbs
+	for {
+		candidate := filepath.Join(current, ".know")
+		if info, err := os.Stat(candidate); err == nil && info.IsDir() {
+			dirs = append(dirs, candidate)
+		}
+
+		// Stop after processing the repo root.
+		if current == rootAbs {
+			break
+		}
+
+		// Walk up one level.
+		parent := filepath.Dir(current)
+		if parent == current {
+			// Filesystem root reached without hitting repoRoot.
+			break
+		}
+		current = parent
+	}
+
+	return dirs
+}
+
+// ReadMetaHierarchical discovers .know/ directories from startDir up to repoRoot
+// and merges their domain statuses. When the same domain name appears at multiple
+// levels, the nearest (most specific) .know/ directory wins. This enables monorepo
+// layouts where a service-level .know/architecture.md overrides the repo-wide one.
+//
+// Domain names from non-root .know/ dirs are prefixed with their relative path to
+// distinguish them in status output. For example, a domain "architecture" found in
+// /repo/services/payments/.know/ is reported as "services/payments::architecture".
+// The root .know/ domains are reported unprefixed (backward compatible).
+func ReadMetaHierarchical(startDir, repoRoot string) ([]DomainStatus, error) {
+	knowDirs := FindKnowDirs(startDir, repoRoot)
+	if len(knowDirs) == 0 {
+		return nil, nil
+	}
+
+	// Track seen domain names — nearest wins.
+	seen := make(map[string]bool)
+	var merged []DomainStatus
+
+	rootAbs, err := filepath.Abs(repoRoot)
+	if err != nil {
+		return nil, fmt.Errorf("resolve repo root: %w", err)
+	}
+	rootKnowDir := filepath.Join(rootAbs, ".know")
+
+	for _, knowDir := range knowDirs {
+		statuses, err := ReadMeta(knowDir)
+		if err != nil {
+			return nil, fmt.Errorf("read %s: %w", knowDir, err)
+		}
+
+		// Compute a prefix for non-root .know/ dirs.
+		// e.g., /repo/services/payments/.know -> "services/payments"
+		var prefix string
+		if knowDir != rootKnowDir {
+			rel, err := filepath.Rel(rootAbs, filepath.Dir(knowDir))
+			if err == nil && rel != "." {
+				prefix = rel
+			}
+		}
+
+		for _, s := range statuses {
+			// Build the qualified domain name.
+			qualifiedDomain := s.Domain
+			if prefix != "" {
+				qualifiedDomain = prefix + "::" + s.Domain
+			}
+
+			if seen[s.Domain] {
+				// A nearer .know/ already provided this domain. Skip.
+				continue
+			}
+			seen[s.Domain] = true
+
+			s.Domain = qualifiedDomain
+			merged = append(merged, s)
+		}
+	}
+
+	return merged, nil
+}
+
 // ReadSingleMeta reads and parses the frontmatter of a single .know/ domain file.
 // domain may be a plain name ("architecture") or a feat namespace ("feat/materialization").
 // Returns the parsed Meta or an error if the file doesn't exist or is unparseable.

@@ -1066,6 +1066,260 @@ func TestBuildDomainStatus_ForceFull_BelowThreshold(t *testing.T) {
 	}
 }
 
+// --- FindKnowDirs and ReadMetaHierarchical tests ---
+
+// TestFindKnowDirs_SingleLevel verifies discovery of a single .know/ at repo root.
+func TestFindKnowDirs_SingleLevel(t *testing.T) {
+	root := t.TempDir()
+	knowDir := filepath.Join(root, ".know")
+	if err := os.MkdirAll(knowDir, 0755); err != nil {
+		t.Fatalf("mkdir .know: %v", err)
+	}
+
+	dirs := FindKnowDirs(root, root)
+	if len(dirs) != 1 {
+		t.Fatalf("want 1 dir, got %d: %v", len(dirs), dirs)
+	}
+	if dirs[0] != knowDir {
+		t.Errorf("dir = %q, want %q", dirs[0], knowDir)
+	}
+}
+
+// TestFindKnowDirs_Hierarchical verifies discovery walks up from subdir to root.
+func TestFindKnowDirs_Hierarchical(t *testing.T) {
+	root := t.TempDir()
+	rootKnow := filepath.Join(root, ".know")
+	serviceDir := filepath.Join(root, "services", "payments")
+	serviceKnow := filepath.Join(serviceDir, ".know")
+
+	if err := os.MkdirAll(rootKnow, 0755); err != nil {
+		t.Fatalf("mkdir root .know: %v", err)
+	}
+	if err := os.MkdirAll(serviceKnow, 0755); err != nil {
+		t.Fatalf("mkdir service .know: %v", err)
+	}
+
+	dirs := FindKnowDirs(serviceDir, root)
+	if len(dirs) != 2 {
+		t.Fatalf("want 2 dirs, got %d: %v", len(dirs), dirs)
+	}
+	// Nearest first.
+	if dirs[0] != serviceKnow {
+		t.Errorf("dirs[0] = %q, want %q (nearest)", dirs[0], serviceKnow)
+	}
+	if dirs[1] != rootKnow {
+		t.Errorf("dirs[1] = %q, want %q (root)", dirs[1], rootKnow)
+	}
+}
+
+// TestFindKnowDirs_NoKnowDirs verifies empty result when no .know/ exists.
+func TestFindKnowDirs_NoKnowDirs(t *testing.T) {
+	root := t.TempDir()
+	subdir := filepath.Join(root, "services", "payments")
+	if err := os.MkdirAll(subdir, 0755); err != nil {
+		t.Fatalf("mkdir: %v", err)
+	}
+
+	dirs := FindKnowDirs(subdir, root)
+	if len(dirs) != 0 {
+		t.Errorf("want 0 dirs, got %d: %v", len(dirs), dirs)
+	}
+}
+
+// TestFindKnowDirs_SkipsIntermediateWithout verifies it only returns dirs with .know/.
+func TestFindKnowDirs_SkipsIntermediateWithout(t *testing.T) {
+	root := t.TempDir()
+	rootKnow := filepath.Join(root, ".know")
+	// services/ has no .know, but services/payments/ does.
+	serviceDir := filepath.Join(root, "services", "payments")
+	serviceKnow := filepath.Join(serviceDir, ".know")
+
+	if err := os.MkdirAll(rootKnow, 0755); err != nil {
+		t.Fatalf("mkdir root .know: %v", err)
+	}
+	if err := os.MkdirAll(serviceKnow, 0755); err != nil {
+		t.Fatalf("mkdir service .know: %v", err)
+	}
+	// services/ itself has no .know — should be skipped.
+	dirs := FindKnowDirs(serviceDir, root)
+	if len(dirs) != 2 {
+		t.Fatalf("want 2 dirs (service + root), got %d: %v", len(dirs), dirs)
+	}
+}
+
+// TestReadMetaHierarchical_NearestWins verifies that the closest .know/ domain
+// overrides the same domain from a parent .know/.
+func TestReadMetaHierarchical_NearestWins(t *testing.T) {
+	root := t.TempDir()
+	rootKnow := filepath.Join(root, ".know")
+	serviceDir := filepath.Join(root, "services", "payments")
+	serviceKnow := filepath.Join(serviceDir, ".know")
+
+	if err := os.MkdirAll(rootKnow, 0755); err != nil {
+		t.Fatalf("mkdir root .know: %v", err)
+	}
+	if err := os.MkdirAll(serviceKnow, 0755); err != nil {
+		t.Fatalf("mkdir service .know: %v", err)
+	}
+
+	recentAt := time.Now().UTC().Add(-1 * time.Hour).Format(time.RFC3339)
+
+	// Root has architecture with confidence 0.70
+	writeFrontmatter(t, rootKnow, "architecture.md", fmt.Sprintf(`domain: architecture
+generated_at: "%s"
+expires_after: "7d"
+source_hash: "root1"
+confidence: 0.70
+format_version: "1.0"
+`, recentAt))
+
+	// Service has architecture with confidence 0.95 — should win.
+	writeFrontmatter(t, serviceKnow, "architecture.md", fmt.Sprintf(`domain: architecture
+generated_at: "%s"
+expires_after: "7d"
+source_hash: "svc1"
+confidence: 0.95
+format_version: "1.0"
+`, recentAt))
+
+	results, err := ReadMetaHierarchical(serviceDir, root)
+	if err != nil {
+		t.Fatalf("ReadMetaHierarchical: %v", err)
+	}
+
+	// Should have exactly 1 architecture domain (nearest wins, root skipped).
+	archCount := 0
+	for _, r := range results {
+		if r.Domain == "services/payments::architecture" {
+			archCount++
+			if r.Confidence != 0.95 {
+				t.Errorf("architecture confidence = %f, want 0.95 (service-level)", r.Confidence)
+			}
+		}
+	}
+	if archCount != 1 {
+		t.Errorf("want 1 architecture domain, got %d; domains: %v", archCount, domainNames(results))
+	}
+}
+
+// TestReadMetaHierarchical_MergesDistinctDomains verifies that distinct domains
+// from different levels are all included.
+func TestReadMetaHierarchical_MergesDistinctDomains(t *testing.T) {
+	root := t.TempDir()
+	rootKnow := filepath.Join(root, ".know")
+	serviceDir := filepath.Join(root, "services", "payments")
+	serviceKnow := filepath.Join(serviceDir, ".know")
+
+	if err := os.MkdirAll(rootKnow, 0755); err != nil {
+		t.Fatalf("mkdir root .know: %v", err)
+	}
+	if err := os.MkdirAll(serviceKnow, 0755); err != nil {
+		t.Fatalf("mkdir service .know: %v", err)
+	}
+
+	recentAt := time.Now().UTC().Add(-1 * time.Hour).Format(time.RFC3339)
+
+	// Root has conventions (not in service).
+	writeFrontmatter(t, rootKnow, "conventions.md", fmt.Sprintf(`domain: conventions
+generated_at: "%s"
+expires_after: "7d"
+source_hash: "root1"
+confidence: 0.80
+format_version: "1.0"
+`, recentAt))
+
+	// Service has architecture (not in root).
+	writeFrontmatter(t, serviceKnow, "architecture.md", fmt.Sprintf(`domain: architecture
+generated_at: "%s"
+expires_after: "7d"
+source_hash: "svc1"
+confidence: 0.90
+format_version: "1.0"
+`, recentAt))
+
+	results, err := ReadMetaHierarchical(serviceDir, root)
+	if err != nil {
+		t.Fatalf("ReadMetaHierarchical: %v", err)
+	}
+
+	if len(results) != 2 {
+		t.Fatalf("want 2 results (1 from service + 1 from root), got %d: %v", len(results), domainNames(results))
+	}
+
+	byDomain := make(map[string]DomainStatus)
+	for _, r := range results {
+		byDomain[r.Domain] = r
+	}
+
+	if _, ok := byDomain["services/payments::architecture"]; !ok {
+		t.Errorf("missing service-scoped architecture, got: %v", domainNames(results))
+	}
+	if _, ok := byDomain["conventions"]; !ok {
+		t.Errorf("missing root-level conventions, got: %v", domainNames(results))
+	}
+}
+
+// TestReadMetaHierarchical_NoKnowDirs verifies nil result when no .know/ exists.
+func TestReadMetaHierarchical_NoKnowDirs(t *testing.T) {
+	root := t.TempDir()
+	subdir := filepath.Join(root, "services", "payments")
+	if err := os.MkdirAll(subdir, 0755); err != nil {
+		t.Fatalf("mkdir: %v", err)
+	}
+
+	results, err := ReadMetaHierarchical(subdir, root)
+	if err != nil {
+		t.Fatalf("ReadMetaHierarchical: %v", err)
+	}
+	if results != nil {
+		t.Errorf("want nil, got %v", results)
+	}
+}
+
+// TestReadMetaHierarchical_RootOnly verifies backward compat when only root .know/ exists.
+func TestReadMetaHierarchical_RootOnly(t *testing.T) {
+	root := t.TempDir()
+	rootKnow := filepath.Join(root, ".know")
+	serviceDir := filepath.Join(root, "services", "payments")
+
+	if err := os.MkdirAll(rootKnow, 0755); err != nil {
+		t.Fatalf("mkdir: %v", err)
+	}
+	if err := os.MkdirAll(serviceDir, 0755); err != nil {
+		t.Fatalf("mkdir: %v", err)
+	}
+
+	recentAt := time.Now().UTC().Add(-1 * time.Hour).Format(time.RFC3339)
+	writeFrontmatter(t, rootKnow, "architecture.md", fmt.Sprintf(`domain: architecture
+generated_at: "%s"
+expires_after: "7d"
+source_hash: "abc1"
+confidence: 0.90
+format_version: "1.0"
+`, recentAt))
+
+	results, err := ReadMetaHierarchical(serviceDir, root)
+	if err != nil {
+		t.Fatalf("ReadMetaHierarchical: %v", err)
+	}
+	if len(results) != 1 {
+		t.Fatalf("want 1 result, got %d", len(results))
+	}
+	// Root-level domains should be unprefixed.
+	if results[0].Domain != "architecture" {
+		t.Errorf("domain = %q, want %q (unprefixed for root)", results[0].Domain, "architecture")
+	}
+}
+
+// domainNames returns domain names from a slice of DomainStatus for error messages.
+func domainNames(statuses []DomainStatus) []string {
+	names := make([]string, len(statuses))
+	for i, s := range statuses {
+		names[i] = s.Domain
+	}
+	return names
+}
+
 // TestBuildDomainStatus_ForceFull_ZeroMax verifies ForceFull=false when
 // MaxIncrementalCycles=0 (no limit), even with a high cycle count.
 func TestBuildDomainStatus_ForceFull_ZeroMax(t *testing.T) {
