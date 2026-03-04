@@ -8,6 +8,7 @@ import (
 
 func TestSyncOrgScope_NoOrg(t *testing.T) {
 	t.Setenv("KNOSSOS_ORG", "")
+	t.Setenv("XDG_CONFIG_HOME", t.TempDir()) // Prevent ActiveOrg() from reading active-org file
 	result, err := SyncOrgScope(SyncOrgScopeParams{})
 	if err != nil {
 		t.Fatalf("SyncOrgScope failed: %v", err)

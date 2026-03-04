@@ -127,6 +127,7 @@ func TestSourceResolver_ListIncludesEmbedded(t *testing.T) {
 
 	config.ResetKnossosHome()
 	t.Setenv("KNOSSOS_HOME", "/nonexistent-knossos-home")
+	t.Setenv("XDG_CONFIG_HOME", t.TempDir()) // Prevent ActiveOrg() from reading active-org file
 	t.Cleanup(config.ResetKnossosHome)
 
 	resolver := NewSourceResolver("/nonexistent-project")
@@ -165,6 +166,7 @@ func TestSourceResolver_ListShadowsEmbedded(t *testing.T) {
 
 	config.ResetKnossosHome()
 	t.Setenv("KNOSSOS_HOME", "/nonexistent-knossos-home")
+	t.Setenv("XDG_CONFIG_HOME", t.TempDir()) // Prevent ActiveOrg() from reading active-org file
 	t.Cleanup(config.ResetKnossosHome)
 
 	resolver := NewSourceResolver(tmpDir)
@@ -596,6 +598,7 @@ func TestSourceResolver_ExplicitOrgAlias(t *testing.T) {
 
 func TestSourceResolver_ExplicitOrgNoOrg(t *testing.T) {
 	t.Setenv("KNOSSOS_ORG", "")
+	t.Setenv("XDG_CONFIG_HOME", t.TempDir()) // Prevent ActiveOrg() from reading active-org file
 
 	resolver := &SourceResolver{
 		resolved: make(map[string]*ResolvedRite),
