@@ -9,7 +9,13 @@ description: "Evaluation criteria for dromena (slash command) audits. Use when: 
 
 ## Scope
 
-**Target files**: `.claude/commands/**/*.md` (projected from `rites/*/mena/**/*.dro.md`)
+**Target files**: `.claude/commands/**/*.md`
+
+Projected from:
+
+```
+rites/*/mena/**/*.dro.md
+```
 
 **Evaluation focus**: Slash commands that users invoke directly via `/command-name` syntax.
 

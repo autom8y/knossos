@@ -9,7 +9,13 @@ description: "Evaluation criteria for legomena (skill) audits. Use when: theoros
 
 ## Scope
 
-**Target files**: `.claude/skills/**/*.md` (projected from `rites/*/mena/**/*.lego.md`)
+**Target files**: `.claude/skills/**/*.md`
+
+Projected from:
+
+```
+rites/*/mena/**/*.lego.md
+```
 
 **Evaluation focus**: Skills that Claude Code loads autonomously based on description triggers. Quality here determines whether skills are discovered and used.
 

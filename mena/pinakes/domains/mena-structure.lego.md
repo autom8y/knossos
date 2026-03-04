@@ -17,7 +17,7 @@ description: "Evaluation criteria for mena directory structure audits. Use when:
 
 ### Criterion 1: File Naming Convention (weight: 30%)
 
-**What to evaluate**: All mena files must use the correct extension: `.dro.md` for dromena (commands) or `.lego.md` for legomena (skills). No bare `.md` files in mena directories (except companion files in subdirectories). Mixed dro/lego files in the same directory are a critical anti-pattern.
+**What to evaluate**: All mena files must use the correct extension for their type (dromena use `.dro.md`, legomena use `.lego.md`). No bare `.md` files in mena directories (except companion files in subdirectories). Mixed dro/lego files in the same directory are a critical anti-pattern.
 
 | Grade | Threshold | Evidence Required |
 |-------|-----------|-------------------|

@@ -77,6 +77,9 @@ func copyDirFS(fsys fs.FS, root, dst string, hideCompanions bool) error {
 			content = InjectCompanionHideFrontmatter(content)
 		}
 
+		// Rewrite stale .lego.md/.dro.md content references to materialized forms.
+		content = rewriteMenaContentPaths(content)
+
 		if err := os.MkdirAll(filepath.Dir(destPath), 0755); err != nil {
 			return err
 		}
