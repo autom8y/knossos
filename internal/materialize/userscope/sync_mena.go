@@ -13,9 +13,9 @@ import (
 	"github.com/autom8y/knossos/internal/provenance"
 )
 
-// syncUserMena syncs mena files from KNOSSOS_HOME/mena to ~/.claude/{commands,skills}
-// using the CollectMena pipeline for namespace flattening and companion hiding parity
-// with the rite-scope pipeline (SyncMena).
+// syncUserMena syncs mena files from KNOSSOS_HOME/mena and rites/shared/mena to
+// ~/.claude/{commands,skills} using the CollectMena pipeline for namespace flattening
+// and companion hiding parity with the rite-scope pipeline (SyncMena).
 func (s *syncer) syncUserMena(
 	knossosHome string,
 	userClaudeDir string,
@@ -59,7 +59,14 @@ func (s *syncer) syncUserMena(
 
 	// Call CollectMena to get flattened, type-resolved entries.
 	// Empty target dirs: user-scope provenance handles user-collision protection.
+	// Sources: platform mena (lowest priority) + shared rite mena (higher priority).
+	// Shared rite mena provides cross-rite features (/know, /radar, /research, etc.)
+	// that should be available globally, not just within a rite.
 	sources := []mena.MenaSource{{Path: sourceDir}}
+	sharedMenaDir := filepath.Join(knossosHome, "rites", "shared", "mena")
+	if _, err := os.Stat(sharedMenaDir); err == nil {
+		sources = append(sources, mena.MenaSource{Path: sharedMenaDir})
+	}
 	collectOpts := mena.MenaProjectionOptions{
 		Filter: mena.ProjectAll,
 	}

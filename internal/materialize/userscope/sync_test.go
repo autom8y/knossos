@@ -491,6 +491,65 @@ func keysOfStandalone(m map[string]mena.MenaResolvedStandalone) []string {
 	return keys
 }
 
+// TestSyncUserMena_IncludesSharedRiteMena verifies that syncUserMena includes
+// rites/shared/mena/ as a source so cross-rite features (/know, /radar, etc.)
+// are available in user scope (~/.claude/commands/).
+// Regression test for: shared mena missing from user-scope sync.
+func TestSyncUserMena_IncludesSharedRiteMena(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	// Create platform mena (KNOSSOS_HOME/mena/)
+	platformDir := filepath.Join(tmpDir, "mena", "nav-cmd")
+	os.MkdirAll(platformDir, 0755)
+	os.WriteFile(filepath.Join(platformDir, "INDEX.dro.md"),
+		[]byte("---\nname: nav-cmd\ndescription: test\n---\n# Nav\n"), 0644)
+
+	// Create shared rite mena (KNOSSOS_HOME/rites/shared/mena/)
+	sharedKnowDir := filepath.Join(tmpDir, "rites", "shared", "mena", "know")
+	os.MkdirAll(sharedKnowDir, 0755)
+	os.WriteFile(filepath.Join(sharedKnowDir, "INDEX.dro.md"),
+		[]byte("---\nname: know\ndescription: Generate knowledge\n---\n# Know\n"), 0644)
+
+	sharedSkillDir := filepath.Join(tmpDir, "rites", "shared", "mena", "shared-ref")
+	os.MkdirAll(sharedSkillDir, 0755)
+	os.WriteFile(filepath.Join(sharedSkillDir, "INDEX.lego.md"),
+		[]byte("---\nname: shared-ref\ndescription: Shared reference\n---\n# Ref\n"), 0644)
+
+	userClaudeDir := filepath.Join(t.TempDir(), ".claude")
+	manifest := &provenance.ProvenanceManifest{
+		Entries: map[string]*provenance.ProvenanceEntry{},
+	}
+	checker := NewCollisionChecker(t.TempDir()) // no rite manifest → not effective → no collisions
+
+	s := &syncer{}
+	result, err := s.syncUserMena(tmpDir, userClaudeDir, manifest, checker, SyncOptions{})
+	if err != nil {
+		t.Fatalf("syncUserMena failed: %v", err)
+	}
+
+	// Platform mena should be projected (user-scope keeps directory structure)
+	navCmd := filepath.Join(userClaudeDir, "commands", "nav-cmd", "INDEX.md")
+	if _, err := os.Stat(navCmd); os.IsNotExist(err) {
+		t.Errorf("Expected platform dromenon at %s", navCmd)
+	}
+
+	// Shared rite mena should ALSO be projected
+	knowCmd := filepath.Join(userClaudeDir, "commands", "know", "INDEX.md")
+	if _, err := os.Stat(knowCmd); os.IsNotExist(err) {
+		t.Errorf("Expected shared dromenon /know at %s", knowCmd)
+	}
+
+	sharedSkill := filepath.Join(userClaudeDir, "skills", "shared-ref", "INDEX.md")
+	if _, err := os.Stat(sharedSkill); os.IsNotExist(err) {
+		t.Errorf("Expected shared legomenon at %s", sharedSkill)
+	}
+
+	// Verify added count includes shared mena entries
+	if result.Summary.Added < 3 {
+		t.Errorf("Expected at least 3 added entries (platform + shared dro + shared lego), got %d", result.Summary.Added)
+	}
+}
+
 // Helper: check if byte slice contains a string
 func containsBytes(data []byte, substr string) bool {
 	return len(data) > 0 && len(substr) > 0 && bytesContains(data, []byte(substr))
