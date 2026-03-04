@@ -22,7 +22,7 @@ Defines the canonical format for adding audit domains to the Pinakes. A domain i
 
 ### Step 2: Write Criteria File
 
-Create `rites/shared/mena/pinakes/domains/{domain}.lego.md`:
+Create `mena/pinakes/domains/{domain}.lego.md`:
 
 ```markdown
 ---

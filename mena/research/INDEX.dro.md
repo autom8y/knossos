@@ -31,7 +31,7 @@ This command operates in forked context (transient session). It generates `.know
    ```
    Skill("literature-review")
    ```
-   This loads the evidence grading scale, source taxonomy, review protocol, and schemas into context. Source: `rites/shared/mena/literature-review/`.
+   This loads the evidence grading scale, source taxonomy, review protocol, and schemas into context. Source: `mena/literature-review/`.
 
 4. **Check for existing output**:
    - If `.know/literature-{domain}.md` exists:

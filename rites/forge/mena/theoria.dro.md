@@ -64,7 +64,7 @@ Parse `$ARGUMENTS` to determine audit scope:
 For each domain in the audit list:
 
 1. Read the domain criteria file from the path extracted in Phase 1
-   - Example: `rites/shared/mena/pinakes/domains/dromena.lego.md`
+   - Example: `mena/pinakes/domains/dromena.lego.md`
 
 2. Extract from criteria file:
    - **Scope**: Target files glob pattern (e.g., `.claude/commands/**/*.md`)
@@ -318,7 +318,7 @@ Same as `/theoria all` — audits all registered domains.
 
 **Consumes:**
 - `pinakes` legomena (Skill tool) — domain registry and grading schemas
-- `rites/shared/mena/pinakes/domains/*.lego.md` — domain criteria files
+- `mena/pinakes/domains/*.lego.md` — domain criteria files
 - `theoros` agent (Task tool) — domain evaluator
 
 **Produces:**
@@ -355,5 +355,5 @@ Same as `/theoria all` — audits all registered domains.
 
 - `pinakes` legomena — Domain registry and grading schemas
 - `theoros.md` agent — Domain evaluator
-- `rites/shared/mena/pinakes/schemas/report-format.lego.md` — Report format specification
-- `rites/shared/mena/pinakes/schemas/grading.lego.md` — Grading calculation rules
+- `mena/pinakes/schemas/report-format.lego.md` — Report format specification
+- `mena/pinakes/schemas/grading.lego.md` — Grading calculation rules
