@@ -87,110 +87,25 @@ func (s *syncer) syncUserMena(
 
 	// Phase 2a: Sync resolved directory entries
 	for _, entry := range resolution.Entries {
-		var targetBaseDir string
-		var manifestPrefix string
-		if entry.MenaType == "dro" {
-			targetBaseDir = commandsDir
-			manifestPrefix = "commands/"
-		} else {
-			targetBaseDir = skillsDir
-			manifestPrefix = "skills/"
-		}
-
 		// Only filesystem sources in user-scope (no embedded)
 		if entry.Source.Path == "" {
 			continue
 		}
-
-		// Walk source directory files
-		walkErr := filepath.WalkDir(entry.Source.Path, func(path string, d os.DirEntry, wErr error) error {
-			if wErr != nil {
-				return wErr
-			}
-			if d.IsDir() {
-				return nil
-			}
-
-			relPath, err := filepath.Rel(entry.Source.Path, path)
-			if err != nil {
-				return err
-			}
-
-			// Strip mena extension
-			strippedName := mena.StripMenaExtension(filepath.Base(relPath))
-			fileDir := filepath.Dir(relPath)
-			strippedRel := filepath.Join(fileDir, strippedName)
-
-			// Preserve original stripped path for provenance source tracking
-			sourceStrippedRel := strippedRel
-
-			// Manifest key uses flat name
-			manifestKey := manifestPrefix + filepath.Join(entry.FlatName, strippedRel)
-			targetPath := filepath.Join(targetBaseDir, entry.FlatName, strippedRel)
-
-			// Apply INDEX.md promotion (dromena) or SKILL.md rename (legomena).
-			isDro := entry.MenaType == "dro"
-			newBase, promoted := mena.TransformMenaFilePath(strippedName, fileDir, isDro)
-			if promoted {
-				manifestKey = manifestPrefix + entry.FlatName + ".md"
-				targetPath = filepath.Join(targetBaseDir, entry.FlatName+".md")
-			} else if newBase != strippedName {
-				strippedName = newBase
-				manifestKey = manifestPrefix + filepath.Join(entry.FlatName, newBase)
-				targetPath = filepath.Join(targetBaseDir, entry.FlatName, newBase)
-			}
-
-			// Read source content
-			content, err := os.ReadFile(path)
-			if err != nil {
-				return err
-			}
-
-			// Apply companion hiding for dro non-INDEX markdown files
-			if isDro && strippedName != "INDEX.md" && strings.HasSuffix(strippedName, ".md") {
-				content = mena.InjectCompanionHideFrontmatter(content)
-			}
-
-			// Checksum of transformed content (what we'll write)
-			sourceChecksum := checksum.Bytes(content)
-
-			return syncUserMenaFile(
-				manifestKey, targetPath, content, sourceChecksum,
-				filepath.Join("mena", entry.FlatName, sourceStrippedRel),
-				manifest, collisionChecker, snapshot, result, opts,
-			)
-		})
+		walkErr := walkMenaEntryFS(
+			os.DirFS(entry.Source.Path), entry, commandsDir, skillsDir,
+			"mena", manifest, collisionChecker, snapshot, result, opts,
+		)
 		if walkErr != nil {
 			return nil, walkErr
 		}
 	}
 
 	// Phase 2b: Sync resolved standalone files
+	readFile := func(path string) ([]byte, error) { return os.ReadFile(path) }
 	for _, sf := range resolution.Standalones {
-		var targetBaseDir string
-		var manifestPrefix string
-		if sf.MenaType == "dro" {
-			targetBaseDir = commandsDir
-			manifestPrefix = "commands/"
-		} else {
-			targetBaseDir = skillsDir
-			manifestPrefix = "skills/"
-		}
-
-		manifestKey := manifestPrefix + sf.FlatName
-		targetPath := filepath.Join(targetBaseDir, sf.FlatName)
-
-		content, err := os.ReadFile(sf.SrcPath)
-		if err != nil {
-			return nil, err
-		}
-
-		sourceChecksum := checksum.Bytes(content)
-		sourceRelPath := filepath.Join("mena", sf.RelPath)
-
-		if err := syncUserMenaFile(
-			manifestKey, targetPath, content, sourceChecksum,
-			sourceRelPath,
+		if err := syncMenaStandalone(
+			sf, commandsDir, skillsDir, "mena",
+			readFile, sf.SrcPath,
 			manifest, collisionChecker, snapshot, result, opts,
 		); err != nil {
 			return nil, err
@@ -263,107 +178,31 @@ func (s *syncer) syncUserMenaFromEmbedded(
 
 	// Process resolved entries — read content from embedded FS
 	for _, entry := range resolution.Entries {
-		var targetBaseDir string
-		var manifestPrefix string
-		if entry.MenaType == "dro" {
-			targetBaseDir = commandsDir
-			manifestPrefix = "commands/"
-		} else {
-			targetBaseDir = skillsDir
-			manifestPrefix = "skills/"
-		}
-
-		// Walk embedded source directory
 		if entry.Source.Fsys == nil {
 			continue
 		}
-		walkErr := fs.WalkDir(entry.Source.Fsys, entry.Source.FsysPath, func(path string, d fs.DirEntry, wErr error) error {
-			if wErr != nil {
-				return wErr
-			}
-			if d.IsDir() {
-				return nil
-			}
-
-			relPath, err := filepath.Rel(entry.Source.FsysPath, path)
-			if err != nil {
-				return err
-			}
-
-			// Strip mena extension
-			strippedName := mena.StripMenaExtension(filepath.Base(relPath))
-			fileDir := filepath.Dir(relPath)
-			strippedRel := filepath.Join(fileDir, strippedName)
-
-			// Preserve original stripped path for provenance source tracking
-			sourceStrippedRel := strippedRel
-
-			// Manifest key uses flat name
-			manifestKey := manifestPrefix + filepath.Join(entry.FlatName, strippedRel)
-			targetPath := filepath.Join(targetBaseDir, entry.FlatName, strippedRel)
-
-			// Apply INDEX.md promotion (dromena) or SKILL.md rename (legomena).
-			isDro := entry.MenaType == "dro"
-			newBase, promoted := mena.TransformMenaFilePath(strippedName, fileDir, isDro)
-			if promoted {
-				manifestKey = manifestPrefix + entry.FlatName + ".md"
-				targetPath = filepath.Join(targetBaseDir, entry.FlatName+".md")
-			} else if newBase != strippedName {
-				strippedName = newBase
-				manifestKey = manifestPrefix + filepath.Join(entry.FlatName, newBase)
-				targetPath = filepath.Join(targetBaseDir, entry.FlatName, newBase)
-			}
-
-			// Read embedded content
-			content, err := fs.ReadFile(entry.Source.Fsys, path)
-			if err != nil {
-				return err
-			}
-
-			// Apply companion hiding for dro non-INDEX markdown files
-			if isDro && strippedName != "INDEX.md" && strings.HasSuffix(strippedName, ".md") {
-				content = mena.InjectCompanionHideFrontmatter(content)
-			}
-
-			sourceChecksum := checksum.Bytes(content)
-
-			return syncUserMenaFile(
-				manifestKey, targetPath, content, sourceChecksum,
-				"embedded:mena/"+filepath.Join(entry.FlatName, sourceStrippedRel),
-				manifest, collisionChecker, nil, result, opts,
-			)
-		})
+		// Use fs.Sub to normalize the walk root to ".", matching the os.DirFS
+		// convention used by the filesystem code path in syncUserMena.
+		sub, subErr := fs.Sub(entry.Source.Fsys, entry.Source.FsysPath)
+		if subErr != nil {
+			return nil, subErr
+		}
+		walkErr := walkMenaEntryFS(
+			sub, entry, commandsDir, skillsDir,
+			"embedded:mena", manifest, collisionChecker, nil, result, opts,
+		)
 		if walkErr != nil {
 			return nil, walkErr
 		}
 	}
 
 	// Process standalone files
+	embeddedFS := s.embeddedMena
+	readFile := func(path string) ([]byte, error) { return fs.ReadFile(embeddedFS, path) }
 	for _, sf := range resolution.Standalones {
-		var targetBaseDir string
-		var manifestPrefix string
-		if sf.MenaType == "dro" {
-			targetBaseDir = commandsDir
-			manifestPrefix = "commands/"
-		} else {
-			targetBaseDir = skillsDir
-			manifestPrefix = "skills/"
-		}
-
-		manifestKey := manifestPrefix + sf.FlatName
-		targetPath := filepath.Join(targetBaseDir, sf.FlatName)
-
-		// Read from embedded FS
-		content, err := fs.ReadFile(s.embeddedMena, sf.SrcPath)
-		if err != nil {
-			return nil, err
-		}
-
-		sourceChecksum := checksum.Bytes(content)
-
-		if err := syncUserMenaFile(
-			manifestKey, targetPath, content, sourceChecksum,
-			"embedded:mena/"+sf.RelPath,
+		if err := syncMenaStandalone(
+			sf, commandsDir, skillsDir, "embedded:mena",
+			readFile, sf.SrcPath,
 			manifest, collisionChecker, nil, result, opts,
 		); err != nil {
 			return nil, err
@@ -379,6 +218,134 @@ func (s *syncer) syncUserMenaFromEmbedded(
 	}
 
 	return result, nil
+}
+
+// walkMenaEntryFS walks a resolved mena directory entry using fs.WalkDir,
+// reading files via fs.ReadFile. Both filesystem sources (via os.DirFS) and
+// embedded sources (via fs.Sub) are unified through the fs.FS interface.
+// The provenancePrefix is prepended to provenance source paths ("mena" for
+// filesystem, "embedded:mena" for embedded).
+func walkMenaEntryFS(
+	fsys fs.FS,
+	entry mena.MenaResolvedEntry,
+	commandsDir string,
+	skillsDir string,
+	provenancePrefix string,
+	manifest *provenance.ProvenanceManifest,
+	collisionChecker *CollisionChecker,
+	snapshot map[string]bool,
+	result *UserResourceResult,
+	opts SyncOptions,
+) error {
+	var targetBaseDir string
+	var manifestPrefix string
+	if entry.MenaType == "dro" {
+		targetBaseDir = commandsDir
+		manifestPrefix = "commands/"
+	} else {
+		targetBaseDir = skillsDir
+		manifestPrefix = "skills/"
+	}
+
+	return fs.WalkDir(fsys, ".", func(path string, d fs.DirEntry, wErr error) error {
+		if wErr != nil {
+			return wErr
+		}
+		if d.IsDir() {
+			return nil
+		}
+
+		// When the walk root is ".", paths are already relative (e.g., "INDEX.dro.md").
+		relPath := path
+
+		// Strip mena extension
+		strippedName := mena.StripMenaExtension(filepath.Base(relPath))
+		fileDir := filepath.Dir(relPath)
+		strippedRel := filepath.Join(fileDir, strippedName)
+
+		// Preserve original stripped path for provenance source tracking
+		sourceStrippedRel := strippedRel
+
+		// Manifest key uses flat name
+		manifestKey := manifestPrefix + filepath.Join(entry.FlatName, strippedRel)
+		targetPath := filepath.Join(targetBaseDir, entry.FlatName, strippedRel)
+
+		// Apply INDEX.md promotion (dromena) or SKILL.md rename (legomena).
+		isDro := entry.MenaType == "dro"
+		newBase, promoted := mena.TransformMenaFilePath(strippedName, fileDir, isDro)
+		if promoted {
+			manifestKey = manifestPrefix + entry.FlatName + ".md"
+			targetPath = filepath.Join(targetBaseDir, entry.FlatName+".md")
+		} else if newBase != strippedName {
+			strippedName = newBase
+			manifestKey = manifestPrefix + filepath.Join(entry.FlatName, newBase)
+			targetPath = filepath.Join(targetBaseDir, entry.FlatName, newBase)
+		}
+
+		// Read content via fs.FS interface
+		content, err := fs.ReadFile(fsys, path)
+		if err != nil {
+			return err
+		}
+
+		// Apply companion hiding for dro non-INDEX markdown files
+		if isDro && strippedName != "INDEX.md" && strings.HasSuffix(strippedName, ".md") {
+			content = mena.InjectCompanionHideFrontmatter(content)
+		}
+
+		// Checksum of transformed content (what we'll write)
+		sourceChecksum := checksum.Bytes(content)
+
+		return syncUserMenaFile(
+			manifestKey, targetPath, content, sourceChecksum,
+			provenancePrefix+"/"+filepath.Join(entry.FlatName, sourceStrippedRel),
+			manifest, collisionChecker, snapshot, result, opts,
+		)
+	})
+}
+
+// syncMenaStandalone syncs a single resolved standalone mena file.
+// The readFile callback abstracts os.ReadFile vs fs.ReadFile for the
+// filesystem and embedded code paths respectively.
+func syncMenaStandalone(
+	sf mena.MenaResolvedStandalone,
+	commandsDir string,
+	skillsDir string,
+	provenancePrefix string,
+	readFile func(string) ([]byte, error),
+	readPath string,
+	manifest *provenance.ProvenanceManifest,
+	collisionChecker *CollisionChecker,
+	snapshot map[string]bool,
+	result *UserResourceResult,
+	opts SyncOptions,
+) error {
+	var targetBaseDir string
+	var manifestPrefix string
+	if sf.MenaType == "dro" {
+		targetBaseDir = commandsDir
+		manifestPrefix = "commands/"
+	} else {
+		targetBaseDir = skillsDir
+		manifestPrefix = "skills/"
+	}
+
+	manifestKey := manifestPrefix + sf.FlatName
+	targetPath := filepath.Join(targetBaseDir, sf.FlatName)
+
+	content, err := readFile(readPath)
+	if err != nil {
+		return err
+	}
+
+	sourceChecksum := checksum.Bytes(content)
+	sourceRelPath := provenancePrefix + "/" + sf.RelPath
+
+	return syncUserMenaFile(
+		manifestKey, targetPath, content, sourceChecksum,
+		sourceRelPath,
+		manifest, collisionChecker, snapshot, result, opts,
+	)
 }
 
 // syncUserMenaFile handles provenance-tracked sync of a single mena file.
