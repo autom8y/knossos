@@ -266,7 +266,7 @@ Handoff Context:
 {handoff-specific-instruction}")
 ```
 
-See: [Handoff Notes](../handoff-ref/handoff-notes.md) for transition-specific templates.
+See: [Handoff Notes](../handoff/handoff-notes.md) for transition-specific templates.
 
 ## Complexity-Aware Invocation
 
@@ -335,4 +335,4 @@ If agent invocation times out (rare):
 - [Session Context Schema](session-context-schema.md) - Field definitions for context passing
 - [Session Phases](session-phases.md) - Agent-to-phase mapping
 - [Moirai Invocation](../shared/moirai-invocation.md) - State mutation pattern
-- [Handoff Notes](../handoff-ref/handoff-notes.md) - Transition-specific context
+- [Handoff Notes](../handoff/handoff-notes.md) - Transition-specific context

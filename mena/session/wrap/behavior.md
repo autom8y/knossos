@@ -11,7 +11,7 @@ Apply [Session Resolution Pattern](../shared/session-resolution.md):
 - Verb: "wrap"
 - Auto-resume offer: Yes (offer to resume if parked)
 
-See [session-validation](../../session-common/session-validation.md) for patterns.
+See [session-validation](../common/session-validation.md) for patterns.
 
 ### 2. Run Quality Gates (unless --skip-checks)
 

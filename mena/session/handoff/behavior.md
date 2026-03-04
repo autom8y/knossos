@@ -18,7 +18,7 @@ Apply [Workflow Resolution Pattern](../shared/workflow-resolution.md):
 - **Check for same agent handoff**: Compare to `last_agent` field
   - If same → Warning: "Already working with {agent}. Continuing without handoff..."
 
-See [session-validation](../../session-common/session-validation.md) for validation patterns.
+See [session-validation](../common/session-validation.md) for validation patterns.
 
 ### 2. Generate Handoff Note
 
@@ -61,7 +61,7 @@ Moirai will:
 | principal-engineer | implementation |
 | qa-adversary | validation |
 
-See [session-context-schema](../../session-common/session-context-schema.md) for field definitions.
+See [session-context-schema](../common/session-context-schema.md) for field definitions.
 
 ### 4. Invoke Target Agent
 

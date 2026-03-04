@@ -281,4 +281,4 @@ completed_at: "2026-01-01T18:45:22Z"
 
 - [Session Context Schema](session-context-schema.md) - Field definitions
 - [Session State Machine](session-state-machine.md) - Lifecycle states
-- [Handoff Notes](../handoff-ref/handoff-notes.md) - Transition-specific templates
+- [Handoff Notes](../handoff/handoff-notes.md) - Transition-specific templates

@@ -55,5 +55,5 @@ All session-lifecycle commands that require an existing session:
 
 ## Cross-Reference
 
-- Schema: [session-context-schema](../../session-common/session-context-schema.md)
-- State machine: [session-phases](../../session-common/session-phases.md)
+- Schema: [session-context-schema](../common/session-context-schema.md)
+- State machine: [session-phases](../common/session-phases.md)

@@ -10,7 +10,7 @@ Apply [Session Resolution Pattern](../shared/session-resolution.md):
 - Requires: Parked session
 - Verb: "resume"
 
-See [session-validation](../../session-common/session-validation.md) for validation patterns.
+See [session-validation](../common/session-validation.md) for validation patterns.
 
 ### 2. Load and Display Session Summary
 

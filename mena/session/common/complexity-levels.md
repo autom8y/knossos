@@ -354,4 +354,4 @@ Some rites specialize in complexity levels:
 
 - [Session Context Schema](session-context-schema.md) - complexity field definition
 - [Session Phases](session-phases.md) - Phase requirements per complexity
-- [Start Examples](../start-ref/examples.md) - Classification examples
+- [Start Examples](../start/examples.md) - Classification examples

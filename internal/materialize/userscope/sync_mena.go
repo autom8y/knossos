@@ -298,6 +298,11 @@ func walkMenaEntryFS(
 			content = mena.InjectCompanionHideFrontmatter(content)
 		}
 
+		// Rewrite stale .lego.md/.dro.md content references to materialized forms.
+		if strings.HasSuffix(strippedName, ".md") {
+			content = mena.RewriteMenaContentPaths(content)
+		}
+
 		// Checksum of transformed content (what we'll write)
 		sourceChecksum := checksum.Bytes(content)
 
@@ -341,6 +346,11 @@ func syncMenaStandalone(
 	content, err := readFile(readPath)
 	if err != nil {
 		return err
+	}
+
+	// Rewrite stale .lego.md/.dro.md content references to materialized forms.
+	if strings.HasSuffix(sf.FlatName, ".md") {
+		content = mena.RewriteMenaContentPaths(content)
 	}
 
 	sourceChecksum := checksum.Bytes(content)
