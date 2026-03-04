@@ -260,6 +260,7 @@ func NewKnowsCmd(outputFlag *string, verboseFlag *bool, projectDir *string) *cob
 	var validateFlag bool
 	var deltaFlag bool
 	var semanticDiffFlag bool
+	var discoverFlag bool
 	var scopeDir string
 
 	cmd := &cobra.Command{
@@ -280,10 +281,11 @@ Examples:
   ari knows --delta architecture              # Show change manifest for one domain
   ari knows --semantic-diff arch              # AST-based semantic diff for Go files
   ari knows --scope-dir services/payments/    # Hierarchical view from service dir
+  ari knows --discover                        # Discover service boundaries
   ari knows -o json                           # JSON output for scripting`,
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runKnows(ctx, args, scopeDir, checkFlag, validateFlag, deltaFlag, semanticDiffFlag)
+			return runKnows(ctx, args, scopeDir, checkFlag, validateFlag, deltaFlag, semanticDiffFlag, discoverFlag)
 		},
 	}
 
@@ -291,6 +293,7 @@ Examples:
 	cmd.Flags().BoolVar(&validateFlag, "validate", false, "Validate references in .know/ files against codebase")
 	cmd.Flags().BoolVar(&deltaFlag, "delta", false, "Show change manifest and recommended update mode")
 	cmd.Flags().BoolVar(&semanticDiffFlag, "semantic-diff", false, "Show AST-based semantic diff for Go files (compressed change context)")
+	cmd.Flags().BoolVar(&discoverFlag, "discover", false, "Discover service boundaries with .know/ candidates")
 	cmd.Flags().StringVar(&scopeDir, "scope-dir", "", "Starting directory for hierarchical .know/ discovery (defaults to project root)")
 
 	common.SetNeedsProject(cmd, true, true)
@@ -298,10 +301,15 @@ Examples:
 	return cmd
 }
 
-func runKnows(ctx *cmdContext, args []string, scopeDir string, checkFlag, validateFlag, deltaFlag, semanticDiffFlag bool) error {
+func runKnows(ctx *cmdContext, args []string, scopeDir string, checkFlag, validateFlag, deltaFlag, semanticDiffFlag, discoverFlag bool) error {
 	printer := ctx.GetPrinter(output.FormatText)
 	resolver := ctx.GetResolver()
 	projectDir := resolver.ProjectRoot()
+
+	// --discover mode: find service boundaries in the repo.
+	if discoverFlag {
+		return runDiscover(printer, projectDir)
+	}
 
 	// Resolve scope directory for hierarchical discovery
 	startDir := projectDir
@@ -679,4 +687,47 @@ func runSemanticDiff(printer interface {
 	}
 
 	return nil
+}
+
+// DiscoverOutput is the structured output for the --discover flag.
+type DiscoverOutput struct {
+	Boundaries []know.ServiceBoundary `json:"boundaries"`
+	Total      int                    `json:"total"`
+	WithKnow   int                   `json:"with_know"`
+}
+
+// Text implements output.Textable for human-readable discover output.
+func (d DiscoverOutput) Text() string {
+	var b strings.Builder
+	b.WriteString(fmt.Sprintf("%-40s %-15s %-10s %s\n", "Path", "Marker", "Type", ".know/"))
+	b.WriteString(strings.Repeat("-", 72) + "\n")
+	for _, sb := range d.Boundaries {
+		knowLabel := "no"
+		if sb.HasKnow {
+			knowLabel = "yes"
+		}
+		b.WriteString(fmt.Sprintf("%-40s %-15s %-10s %s\n", sb.Path, sb.MarkerFile, sb.MarkerType, knowLabel))
+	}
+	b.WriteString(fmt.Sprintf("\n%d service boundaries found (%d with .know/)\n", d.Total, d.WithKnow))
+	return b.String()
+}
+
+func runDiscover(printer interface {
+	Print(data any) error
+}, projectDir string) error {
+	boundaries, err := know.DiscoverServiceBoundaries(projectDir)
+	if err != nil {
+		return errors.Wrap(errors.CodeGeneralError, "discovering service boundaries", err)
+	}
+	withKnow := 0
+	for _, b := range boundaries {
+		if b.HasKnow {
+			withKnow++
+		}
+	}
+	return printer.Print(DiscoverOutput{
+		Boundaries: boundaries,
+		Total:      len(boundaries),
+		WithKnow:   withKnow,
+	})
 }
