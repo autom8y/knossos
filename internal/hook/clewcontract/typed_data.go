@@ -243,6 +243,15 @@ type HandoffExecutedData struct {
 	Artifacts []string `json:"artifacts"`  // required (may be empty array)
 }
 
+// ArtifactPromotedData is the data payload for the "artifact.promoted" event.
+// Emitted by `ari session wrap --auto-promote` when an artifact is promoted to shelf.
+type ArtifactPromotedData struct {
+	SessionID  string `json:"session_id"`  // required
+	SourcePath string `json:"source_path"` // required, relative: .ledge/{category}/{file}
+	ShelfPath  string `json:"shelf_path"`  // required, relative: .ledge/shelf/{category}/{file}
+	Category   string `json:"category"`    // required: decisions, specs, reviews
+}
+
 // --- Future types (no current producers) ---
 
 // FieldUpdatedData is the data payload for the "field.updated" event.

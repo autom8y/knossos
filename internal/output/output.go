@@ -400,6 +400,7 @@ type TransitionOutput struct {
 	SailsReasons   []string `json:"sails_reasons,omitempty"`
 	SailsPath      string   `json:"sails_path,omitempty"`
 	GraduatedCount int      `json:"graduated_count,omitempty"`
+	PromotedCount  int      `json:"promoted_count,omitempty"`
 }
 
 // Text implements Textable for TransitionOutput.

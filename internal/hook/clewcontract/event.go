@@ -36,6 +36,7 @@ const (
 	EventTypeSchemaMigrated    EventType = "session.schema_migrated"
 	EventTypeLockAcquired      EventType = "lock.acquired"
 	EventTypeLockReleased      EventType = "lock.released"
+	EventTypeArtifactPromoted  EventType = "artifact.promoted"
 )
 
 // ArtifactType represents the type of artifact created during a session.
