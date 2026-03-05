@@ -10,27 +10,27 @@ import (
 
 // TestCollisionChecker_InWorktree_FallsBackToMainProvenance is a P1 test
 // verifying that the collision checker falls back to the main worktree's
-// PROVENANCE_MANIFEST.yaml when the local (worktree) .claude/ has none.
+// PROVENANCE_MANIFEST.yaml when the local (worktree) .knossos/ has none.
 //
 // The fixture sets up main with ACTIVE_RITE and a valid provenance manifest.
-// The worktree has no .claude/ at all. worktreeMainDir() should resolve to
-// the main worktree, and NewCollisionChecker(mainClaudeDir) should succeed.
+// The worktree has no .knossos/ at all. worktreeMainDir() should resolve to
+// the main worktree, and NewCollisionChecker(mainKnossosDir) should succeed.
 func TestCollisionChecker_InWorktree_FallsBackToMainProvenance(t *testing.T) {
 	fix := worktreefixture.SetupWorktreeTestFixture(t)
 
-	// Worktree has no .claude/ — the directory does not exist yet.
+	// Worktree has no .knossos/ — the directory does not exist yet.
 	// Verify that attempting to create a checker directly from the worktree's
-	// (non-existent) claude dir reports IsEffective() = false.
-	worktreeClaudeDir := filepath.Join(fix.WorktreeDir, ".claude")
-	localChecker := NewCollisionChecker(worktreeClaudeDir)
+	// (non-existent) knossos dir reports IsEffective() = false.
+	worktreeKnossosDir := filepath.Join(fix.WorktreeDir, ".knossos")
+	localChecker := NewCollisionChecker(worktreeKnossosDir)
 	if localChecker.IsEffective() {
-		t.Fatal("expected local collision checker to be ineffective (no .claude/ in worktree)")
+		t.Fatal("expected local collision checker to be ineffective (no .knossos/ in worktree)")
 	}
 
 	// Simulate the fallback logic in sync.go:
 	//   if !collisionChecker.IsEffective() {
 	//       if mainDir, err := worktreeMainDir(...); err == nil {
-	//           mainChecker := NewCollisionChecker(mainClaudeDir)
+	//           mainChecker := NewCollisionChecker(mainKnossosDir)
 	//           if mainChecker.IsEffective() { use it }
 	//       }
 	//   }
@@ -39,8 +39,8 @@ func TestCollisionChecker_InWorktree_FallsBackToMainProvenance(t *testing.T) {
 		t.Fatalf("worktreeMainDir(%s) error = %v", fix.WorktreeDir, err)
 	}
 
-	mainClaudeDir := filepath.Join(mainDir, ".claude")
-	mainChecker := NewCollisionChecker(mainClaudeDir)
+	mainKnossosDir := filepath.Join(mainDir, ".knossos")
+	mainChecker := NewCollisionChecker(mainKnossosDir)
 	if !mainChecker.IsEffective() {
 		t.Error("main worktree collision checker should be effective (has PROVENANCE_MANIFEST.yaml from fixture)")
 	}
@@ -63,16 +63,16 @@ func TestCollisionChecker_InWorktree_NoMainProvenance_FailsClosed(t *testing.T) 
 
 	// Remove the provenance manifest from the main worktree to simulate a
 	// scenario where the main was never synced with a rite.
-	mainManifest := filepath.Join(fix.MainDir, ".claude", "PROVENANCE_MANIFEST.yaml")
+	mainManifest := filepath.Join(fix.MainDir, ".knossos", "PROVENANCE_MANIFEST.yaml")
 	if err := os.Remove(mainManifest); err != nil {
 		t.Fatalf("failed to remove main provenance manifest: %v", err)
 	}
 
-	// Local checker for the worktree (no .claude/ at all).
-	worktreeClaudeDir := filepath.Join(fix.WorktreeDir, ".claude")
-	localChecker := NewCollisionChecker(worktreeClaudeDir)
+	// Local checker for the worktree (no .knossos/ at all).
+	worktreeKnossosDir := filepath.Join(fix.WorktreeDir, ".knossos")
+	localChecker := NewCollisionChecker(worktreeKnossosDir)
 	if localChecker.IsEffective() {
-		t.Fatal("expected local collision checker to be ineffective (no .claude/ in worktree)")
+		t.Fatal("expected local collision checker to be ineffective (no .knossos/ in worktree)")
 	}
 
 	// Fallback to main — main also has no manifest.
@@ -81,8 +81,8 @@ func TestCollisionChecker_InWorktree_NoMainProvenance_FailsClosed(t *testing.T) 
 		t.Fatalf("worktreeMainDir(%s) error = %v", fix.WorktreeDir, err)
 	}
 
-	mainClaudeDir := filepath.Join(mainDir, ".claude")
-	mainChecker := NewCollisionChecker(mainClaudeDir)
+	mainKnossosDir := filepath.Join(mainDir, ".knossos")
+	mainChecker := NewCollisionChecker(mainKnossosDir)
 
 	// Both checkers are ineffective — fail-closed.
 	if mainChecker.IsEffective() {

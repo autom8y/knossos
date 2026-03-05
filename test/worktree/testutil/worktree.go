@@ -54,9 +54,11 @@ func SetupWorktreeTestFixture(t *testing.T) WorktreeFixture {
 	writeFile(t, filepath.Join(claudeDir, "ACTIVE_RITE"), "test-rite\n")
 
 	// 4. Write a minimal PROVENANCE_MANIFEST.yaml so the collision checker has
-	//    a valid manifest to load from the main worktree's .claude/.
+	//    a valid manifest to load from the main worktree's .knossos/.
 	//    Validation rules: knossos owner requires non-empty SourcePath and SourceType;
 	//    Checksum must match sha256:[0-9a-f]{64}.
+	knossosDir := filepath.Join(mainDir, ".knossos")
+	mkdirAll(t, knossosDir)
 	manifest := &provenance.ProvenanceManifest{
 		SchemaVersion: provenance.CurrentSchemaVersion,
 		LastSync:      time.Now().UTC(),
@@ -72,14 +74,13 @@ func SetupWorktreeTestFixture(t *testing.T) WorktreeFixture {
 			},
 		},
 	}
-	manifestPath := provenance.ManifestPath(claudeDir)
+	manifestPath := provenance.ManifestPath(knossosDir)
 	if err := provenance.Save(manifestPath, manifest); err != nil {
 		t.Fatalf("SetupWorktreeTestFixture: failed to write provenance manifest: %v", err)
 	}
 
-	// 5. Create .sos/sessions/ and .knossos/ in main.
+	// 5. Create .sos/sessions/ in main (.knossos/ already created above).
 	mkdirAll(t, filepath.Join(mainDir, ".sos", "sessions"))
-	mkdirAll(t, filepath.Join(mainDir, ".knossos"))
 
 	// 6. Create the linked worktree in a sibling directory.
 	//    The worktree directory itself is inside a parent temp dir so it is

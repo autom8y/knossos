@@ -120,7 +120,7 @@ func TestCollisionChecker_EmptyEntries(t *testing.T) {
 // returns false so callers can fail-closed and skip user-scope writes.
 func TestCollisionChecker_MissingManifest_ReportsIneffective(t *testing.T) {
 	tmpDir := t.TempDir()
-	// No manifest file written — .claude/ is empty.
+	// No manifest file written — .knossos/ is empty.
 	c := NewCollisionChecker(tmpDir)
 
 	if c.IsEffective() {

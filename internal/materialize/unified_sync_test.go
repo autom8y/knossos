@@ -561,8 +561,9 @@ func TestUnifiedSync_Idempotency(t *testing.T) {
 	content1, err := os.ReadFile(claudeMdPath)
 	require.NoError(t, err)
 
-	// Read provenance manifest after first sync
-	manifestPath := provenance.ManifestPath(claudeDir)
+	// Read provenance manifest after first sync (now in .knossos/)
+	knossosDir := filepath.Join(projectDir, ".knossos")
+	manifestPath := provenance.ManifestPath(knossosDir)
 	manifest1, err := provenance.Load(manifestPath)
 	require.NoError(t, err)
 	agentEntry1 := manifest1.Entries["agents/test-agent.md"]

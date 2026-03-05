@@ -97,7 +97,7 @@ func TestSCAR002_MaterializeWithOptions_NoClaudeRename(t *testing.T) {
 // silently bootstrapping. The test fails if error handling is reverted to silent discard.
 func TestSCAR004_CorruptProvenanceManifest_PropagatesError(t *testing.T) {
 	projectDir := t.TempDir()
-	claudeDir := filepath.Join(projectDir, ".claude")
+	knossosDir := filepath.Join(projectDir, ".knossos")
 	ritesDir := filepath.Join(projectDir, ".knossos", "rites")
 	templatesDir := filepath.Join(projectDir, "templates")
 
@@ -109,12 +109,12 @@ func TestSCAR004_CorruptProvenanceManifest_PropagatesError(t *testing.T) {
 		"name: test-workflow\nphases:\n  - build\n",
 		[]Agent{{Name: "builder", Role: "builds things"}})
 
-	// Pre-create .claude/ with a corrupt provenance manifest.
+	// Pre-create .knossos/ with a corrupt provenance manifest.
 	// The content is valid UTF-8 but is invalid YAML (unclosed mapping key),
 	// so yaml.Unmarshal will return a parse error. This simulates a truncated
 	// or otherwise corrupted manifest file on disk.
-	require.NoError(t, os.MkdirAll(claudeDir, 0755))
-	manifestPath := filepath.Join(claudeDir, provenance.ManifestFileName)
+	require.NoError(t, os.MkdirAll(knossosDir, 0755))
+	manifestPath := filepath.Join(knossosDir, provenance.ManifestFileName)
 	corruptYAML := []byte("schema_version: \"1.0\"\nlast_sync: !!invalid-tag \"not-a-timestamp\"\n")
 	require.NoError(t, os.WriteFile(manifestPath, corruptYAML, 0644))
 
@@ -247,7 +247,7 @@ func TestSCAR021_CrossRiteAgents_ProjectScopeExclusion(t *testing.T) {
 // covers the second path to ensure neither can be silently swallowed independently.
 func TestSCAR004_InvalidSchemaProvenanceManifest_PropagatesError(t *testing.T) {
 	projectDir := t.TempDir()
-	claudeDir := filepath.Join(projectDir, ".claude")
+	knossosDir := filepath.Join(projectDir, ".knossos")
 	ritesDir := filepath.Join(projectDir, ".knossos", "rites")
 	templatesDir := filepath.Join(projectDir, "templates")
 
@@ -258,11 +258,11 @@ func TestSCAR004_InvalidSchemaProvenanceManifest_PropagatesError(t *testing.T) {
 		"name: test-workflow\nphases:\n  - build\n",
 		[]Agent{{Name: "builder", Role: "builds things"}})
 
-	// Pre-create .claude/ with a provenance manifest that parses as valid YAML
+	// Pre-create .knossos/ with a provenance manifest that parses as valid YAML
 	// but fails schema validation: schema_version has an invalid format ("bad-format"
 	// does not match the required ^[0-9]+\.[0-9]+$ pattern) and last_sync is zero.
-	require.NoError(t, os.MkdirAll(claudeDir, 0755))
-	manifestPath := filepath.Join(claudeDir, provenance.ManifestFileName)
+	require.NoError(t, os.MkdirAll(knossosDir, 0755))
+	manifestPath := filepath.Join(knossosDir, provenance.ManifestFileName)
 	invalidSchemaYAML := []byte("schema_version: \"bad-format\"\nentries: {}\n")
 	require.NoError(t, os.WriteFile(manifestPath, invalidSchemaYAML, 0644))
 

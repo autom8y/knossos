@@ -16,7 +16,7 @@ import (
 // is created with expected entries after a basic materialization.
 func TestProvenanceIntegration_BasicMaterialization(t *testing.T) {
 	projectDir := t.TempDir()
-	claudeDir := filepath.Join(projectDir, ".claude")
+	knossosDir := filepath.Join(projectDir, ".knossos")
 	ritesDir := filepath.Join(projectDir, ".knossos", "rites")
 	templatesDir := filepath.Join(projectDir, "templates")
 
@@ -41,8 +41,8 @@ func TestProvenanceIntegration_BasicMaterialization(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "success", result.Status)
 
-	// Verify PROVENANCE_MANIFEST.yaml was created
-	manifestPath := filepath.Join(claudeDir, "PROVENANCE_MANIFEST.yaml")
+	// Verify PROVENANCE_MANIFEST.yaml was created in .knossos/
+	manifestPath := filepath.Join(knossosDir, "PROVENANCE_MANIFEST.yaml")
 	require.FileExists(t, manifestPath)
 
 	// Load and validate manifest
@@ -84,6 +84,7 @@ func TestProvenanceIntegration_BasicMaterialization(t *testing.T) {
 func TestProvenanceIntegration_DivergenceDetection(t *testing.T) {
 	projectDir := t.TempDir()
 	claudeDir := filepath.Join(projectDir, ".claude")
+	knossosDir := filepath.Join(projectDir, ".knossos")
 	ritesDir := filepath.Join(projectDir, ".knossos", "rites")
 	templatesDir := filepath.Join(projectDir, "templates")
 
@@ -109,7 +110,7 @@ func TestProvenanceIntegration_DivergenceDetection(t *testing.T) {
 	assert.Equal(t, "success", result.Status)
 
 	// Load manifest after first sync
-	manifestPath := filepath.Join(claudeDir, "PROVENANCE_MANIFEST.yaml")
+	manifestPath := filepath.Join(knossosDir, "PROVENANCE_MANIFEST.yaml")
 	manifest1, err := provenance.Load(manifestPath)
 	require.NoError(t, err)
 	require.NotNil(t, manifest1.Entries["rules/test-rule.md"])
@@ -143,7 +144,7 @@ func TestProvenanceIntegration_DivergenceDetection(t *testing.T) {
 // identical manifests (no spurious divergence).
 func TestProvenanceIntegration_Idempotency(t *testing.T) {
 	projectDir := t.TempDir()
-	claudeDir := filepath.Join(projectDir, ".claude")
+	knossosDir := filepath.Join(projectDir, ".knossos")
 	ritesDir := filepath.Join(projectDir, ".knossos", "rites")
 	templatesDir := filepath.Join(projectDir, "templates")
 
@@ -165,7 +166,7 @@ func TestProvenanceIntegration_Idempotency(t *testing.T) {
 	assert.Equal(t, "success", result.Status)
 
 	// Load first manifest
-	manifestPath := filepath.Join(claudeDir, "PROVENANCE_MANIFEST.yaml")
+	manifestPath := filepath.Join(knossosDir, "PROVENANCE_MANIFEST.yaml")
 	manifest1, err := provenance.Load(manifestPath)
 	require.NoError(t, err)
 
@@ -197,7 +198,7 @@ func TestProvenanceIntegration_Idempotency(t *testing.T) {
 // TestProvenanceIntegration_DryRun verifies that dry-run mode does not write manifest.
 func TestProvenanceIntegration_DryRun(t *testing.T) {
 	projectDir := t.TempDir()
-	claudeDir := filepath.Join(projectDir, ".claude")
+	knossosDir := filepath.Join(projectDir, ".knossos")
 	ritesDir := filepath.Join(projectDir, ".knossos", "rites")
 	templatesDir := filepath.Join(projectDir, "templates")
 
@@ -219,7 +220,7 @@ func TestProvenanceIntegration_DryRun(t *testing.T) {
 	assert.Equal(t, "success", result.Status)
 
 	// Verify PROVENANCE_MANIFEST.yaml was NOT created
-	manifestPath := filepath.Join(claudeDir, "PROVENANCE_MANIFEST.yaml")
+	manifestPath := filepath.Join(knossosDir, "PROVENANCE_MANIFEST.yaml")
 	_, err = os.Stat(manifestPath)
 	assert.True(t, os.IsNotExist(err), "manifest should not exist in dry-run mode")
 }
@@ -229,6 +230,7 @@ func TestProvenanceIntegration_DryRun(t *testing.T) {
 func TestProvenanceIntegration_MenaDirectories(t *testing.T) {
 	projectDir := t.TempDir()
 	claudeDir := filepath.Join(projectDir, ".claude")
+	knossosDir := filepath.Join(projectDir, ".knossos")
 	ritesDir := filepath.Join(projectDir, ".knossos", "rites")
 	templatesDir := filepath.Join(projectDir, "templates")
 	menaDir := filepath.Join(projectDir, ".knossos", "mena")
@@ -264,7 +266,7 @@ func TestProvenanceIntegration_MenaDirectories(t *testing.T) {
 	assert.Equal(t, "success", result.Status)
 
 	// Load manifest
-	manifestPath := filepath.Join(claudeDir, "PROVENANCE_MANIFEST.yaml")
+	manifestPath := filepath.Join(knossosDir, "PROVENANCE_MANIFEST.yaml")
 	manifest, err := provenance.Load(manifestPath)
 	require.NoError(t, err)
 

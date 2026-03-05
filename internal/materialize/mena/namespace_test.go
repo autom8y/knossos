@@ -76,7 +76,12 @@ func TestResolveNamespace_DirAndFileDeduplicated(t *testing.T) {
 func TestResolveNamespace_DirAndFileDeduplicated_KnossosOwned(t *testing.T) {
 	tmpDir := t.TempDir()
 	claudeDir := tmpDir
+	knossosDir := filepath.Join(tmpDir, ".knossos")
 	commandsDir := filepath.Join(claudeDir, "commands")
+
+	if err := os.MkdirAll(knossosDir, 0755); err != nil {
+		t.Fatalf("mkdir knossos: %v", err)
+	}
 
 	// Create both forms on disk
 	if err := os.MkdirAll(filepath.Join(commandsDir, "my-cmd"), 0755); err != nil {
@@ -100,7 +105,7 @@ func TestResolveNamespace_DirAndFileDeduplicated_KnossosOwned(t *testing.T) {
 			),
 		},
 	}
-	if err := provenance.Save(filepath.Join(claudeDir, provenance.ManifestFileName), manifest); err != nil {
+	if err := provenance.Save(filepath.Join(knossosDir, provenance.ManifestFileName), manifest); err != nil {
 		t.Fatalf("save provenance: %v", err)
 	}
 
@@ -123,6 +128,7 @@ func TestResolveNamespace_DirAndFileDeduplicated_KnossosOwned(t *testing.T) {
 
 	opts := MenaProjectionOptions{
 		TargetCommandsDir: commandsDir,
+		KnossosDir:        knossosDir,
 		OverwriteDiverged: false,
 	}
 

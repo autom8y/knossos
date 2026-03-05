@@ -90,6 +90,10 @@ func TestIsFromRite(t *testing.T) {
 func TestCleanStaleMena_CrossRitePreserved(t *testing.T) {
 	tmpDir := t.TempDir()
 	claudeDir := tmpDir
+	knossosDir := filepath.Join(tmpDir, ".knossos")
+	if err := os.MkdirAll(knossosDir, 0755); err != nil {
+		t.Fatalf("mkdir knossos: %v", err)
+	}
 	commandsDir := filepath.Join(claudeDir, "commands")
 	skillsDir := filepath.Join(claudeDir, "skills")
 
@@ -148,7 +152,7 @@ func TestCleanStaleMena_CrossRitePreserved(t *testing.T) {
 			),
 		},
 	}
-	if err := provenance.Save(filepath.Join(claudeDir, provenance.ManifestFileName), manifest); err != nil {
+	if err := provenance.Save(filepath.Join(knossosDir, provenance.ManifestFileName), manifest); err != nil {
 		t.Fatalf("save provenance: %v", err)
 	}
 
@@ -160,6 +164,7 @@ func TestCleanStaleMena_CrossRitePreserved(t *testing.T) {
 		Mode:              MenaProjectionDestructive,
 		TargetCommandsDir: commandsDir,
 		TargetSkillsDir:   skillsDir,
+		KnossosDir:        knossosDir,
 		RiteName:          "forge",
 	}
 
@@ -184,6 +189,10 @@ func TestCleanStaleMena_CrossRitePreserved(t *testing.T) {
 func TestCleanStaleMena_SameRiteStaleRemoved(t *testing.T) {
 	tmpDir := t.TempDir()
 	claudeDir := tmpDir
+	knossosDir := filepath.Join(tmpDir, ".knossos")
+	if err := os.MkdirAll(knossosDir, 0755); err != nil {
+		t.Fatalf("mkdir knossos: %v", err)
+	}
 	commandsDir := filepath.Join(claudeDir, "commands")
 	skillsDir := filepath.Join(claudeDir, "skills")
 
@@ -213,7 +222,7 @@ func TestCleanStaleMena_SameRiteStaleRemoved(t *testing.T) {
 			),
 		},
 	}
-	if err := provenance.Save(filepath.Join(claudeDir, provenance.ManifestFileName), manifest); err != nil {
+	if err := provenance.Save(filepath.Join(knossosDir, provenance.ManifestFileName), manifest); err != nil {
 		t.Fatalf("save provenance: %v", err)
 	}
 
@@ -223,6 +232,7 @@ func TestCleanStaleMena_SameRiteStaleRemoved(t *testing.T) {
 		Mode:              MenaProjectionDestructive,
 		TargetCommandsDir: commandsDir,
 		TargetSkillsDir:   skillsDir,
+		KnossosDir:        knossosDir,
 		RiteName:          "ecosystem",
 	}
 
