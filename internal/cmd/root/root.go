@@ -19,6 +19,8 @@ import (
 	initcmd "github.com/autom8y/knossos/internal/cmd/initialize"
 	"github.com/autom8y/knossos/internal/cmd/inscription"
 	"github.com/autom8y/knossos/internal/cmd/knows"
+	"github.com/autom8y/knossos/internal/cmd/land"
+	ledgecmd "github.com/autom8y/knossos/internal/cmd/ledge"
 	"github.com/autom8y/knossos/internal/cmd/lint"
 	"github.com/autom8y/knossos/internal/cmd/manifest"
 	"github.com/autom8y/knossos/internal/cmd/naxos"
@@ -142,6 +144,8 @@ func init() {
 	rootCmd.AddCommand(initcmd.NewInitCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
 	rootCmd.AddCommand(provenance.NewProvenanceCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
 	rootCmd.AddCommand(org.NewOrgCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
+	rootCmd.AddCommand(land.NewLandCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
+	rootCmd.AddCommand(ledgecmd.NewLedgeCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
 	rootCmd.AddCommand(lint.NewLintCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
 	rootCmd.AddCommand(status.NewStatusCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
 	rootCmd.AddCommand(explain.NewExplainCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
