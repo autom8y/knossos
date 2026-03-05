@@ -27,7 +27,7 @@ func TestIsProtectedFile(t *testing.T) {
 		},
 		{
 			name:      "SPRINT_CONTEXT.md is protected",
-			filePath:  ".claude/sprints/sprint-1/SPRINT_CONTEXT.md",
+			filePath:  ".sos/sessions/session-123/sprints/sprint-1/SPRINT_CONTEXT.md",
 			protected: true,
 		},
 		{
@@ -306,7 +306,7 @@ func TestRunWriteguard_BlockSprintContext(t *testing.T) {
 	testutil.SetupEnv(t, &testutil.HookEnv{
 		Event:       "PreToolUse",
 		ToolName:    "Edit",
-		ToolInput:   `{"file_path": ".claude/sprints/current/SPRINT_CONTEXT.md", "old_string": "x", "new_string": "y"}`,
+		ToolInput:   `{"file_path": ".sos/sessions/session-abc/sprints/current/SPRINT_CONTEXT.md", "old_string": "x", "new_string": "y"}`,
 	})
 
 	var stdout, stderr bytes.Buffer
@@ -1668,7 +1668,7 @@ func TestWriteguard_SprintContextEdit_NoLock_Deny(t *testing.T) {
 	result := runWipTest(t, &testutil.HookEnv{
 		Event:     "PreToolUse",
 		ToolName:  "Edit",
-		ToolInput: `{"file_path":".claude/sprints/current/SPRINT_CONTEXT.md","old_string":"status: ACTIVE","new_string":"status: DONE"}`,
+		ToolInput: `{"file_path":".sos/sessions/session-abc/sprints/current/SPRINT_CONTEXT.md","old_string":"status: ACTIVE","new_string":"status: DONE"}`,
 	})
 	if result.HookSpecificOutput.PermissionDecision != "deny" {
 		t.Errorf("WG-P1: PermissionDecision = %q, want deny (SPRINT_CONTEXT no lock)", result.HookSpecificOutput.PermissionDecision)

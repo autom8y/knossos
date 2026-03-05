@@ -462,7 +462,7 @@ func TestIntegration_WriteguardHook_Chain(t *testing.T) {
 	}{
 		{"src/main.go", "allow"},
 		{".sos/sessions/test/SESSION_CONTEXT.md", "deny"},
-		{".claude/sprints/s1/SPRINT_CONTEXT.md", "deny"},
+		{".sos/sessions/session-abc/sprints/s1/SPRINT_CONTEXT.md", "deny"},
 		{"docs/README.md", "allow"},
 		{"config.yaml", "allow"},
 	}
