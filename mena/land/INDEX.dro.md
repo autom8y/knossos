@@ -141,6 +141,7 @@ Land files written to .sos/land/
 
 Next steps:
   - Review land files: Read(".sos/land/{domain}.md")
+  - Archive stale sessions first: ari session gc --dry-run
   - Regenerate .know/ with land integration: /know --all --force
   - Run a single domain: /dion --domain=scar-tissue
 ```
@@ -150,6 +151,7 @@ Next steps:
 | Scenario | Action |
 |----------|--------|
 | `ari land synthesize` not found or fails | ERROR: "ari land synthesize failed. Ensure ari is built and on PATH. Run: CGO_ENABLED=0 go build ./cmd/ari" STOP. |
+| `ari land synthesize` returns "stub" status | The installed ari binary is stale. Run: `CGO_ENABLED=0 go build -o ./ari ./cmd/ari && cp ./ari $(which ari)` |
 | JSON parse failure | ERROR: "Could not parse inventory JSON. Run `ari land synthesize` manually to diagnose." STOP. |
 | Dionysus Task fails | Report the error message. Suggest running with a single domain to isolate the issue. |
 | Zero archives | Handled in Pre-flight step 3. |
