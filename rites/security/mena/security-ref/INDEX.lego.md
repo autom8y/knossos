@@ -12,7 +12,7 @@ description: "Security rite reference. Use when: activating the security rite, i
 | Component | Location | Purpose |
 |-----------|----------|---------|
 | Agents | `.claude/agents/` | Agent prompts |
-| Workflow | `.claude/ACTIVE_RITE` | Phase configuration |
+| Workflow | `.knossos/ACTIVE_WORKFLOW.yaml` | Phase configuration |
 | Switch | `/security` | Activate this rite |
 
 ## Pantheon

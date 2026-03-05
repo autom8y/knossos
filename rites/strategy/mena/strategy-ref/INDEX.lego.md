@@ -12,7 +12,7 @@ description: "Strategy rite reference. Use when: activating the strategy rite, i
 | Component | Location | Purpose |
 |-----------|----------|---------|
 | Agents | `.claude/agents/` | Agent prompts |
-| Workflow | `.claude/ACTIVE_RITE` | Phase configuration |
+| Workflow | `.knossos/ACTIVE_WORKFLOW.yaml` | Phase configuration |
 | Switch | `/strategy` | Activate this rite |
 
 ## Pantheon
