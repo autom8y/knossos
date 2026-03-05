@@ -56,7 +56,7 @@ SOURCE (versioned, canonical) generates PROJECTION (gitignored, ephemeral):
 | `rites/*/mena/` | `.claude/skills/` + `.claude/commands/` |
 | `internal/hook/` (Go) + `rites/*/hooks/` | `.claude/hooks/` |
 | `knossos/templates/` | `.claude/CLAUDE.md` (rendered) |
-| `rites/*/manifest.yaml` | `.claude/ACTIVE_RITE` |
+| `rites/*/manifest.yaml` | `.knossos/ACTIVE_RITE` |
 
 **Command:** `ari sync materialize` reads SOURCE and writes PROJECTION. The labyrinth creates the rooms; the rooms are not the labyrinth.
 

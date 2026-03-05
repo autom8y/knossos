@@ -282,7 +282,7 @@ fi
 INITIATIVE=$(echo "$INITIATIVE" | sed 's/^"//;s/"$//' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
 
 # Get active rite
-ACTIVE_RITE=$(cat ".claude/ACTIVE_RITE" 2>/dev/null || echo "none")
+ACTIVE_RITE=$(cat ".knossos/ACTIVE_RITE" 2>/dev/null || echo "none")
 
 # Check for existing session
 SESSION_ID=$(get_session_id 2>/dev/null || echo "")
@@ -519,7 +519,7 @@ load '../test_helper'
 
 setup() {
     setup_test_project
-    echo "ecosystem" > ".claude/ACTIVE_RITE"
+    echo "ecosystem" > ".knossos/ACTIVE_RITE"
     mkdir -p ".claude/agents"
     echo "# Orchestrator" > ".claude/agents/orchestrator.md"
 }

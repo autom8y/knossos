@@ -234,7 +234,7 @@ has_active_rite() {
     [[ "$status" != "ACTIVE" ]] && return 1
 
     local active_rite
-    active_rite=$(cat ".claude/ACTIVE_RITE" 2>/dev/null || echo "none")
+    active_rite=$(cat ".knossos/ACTIVE_RITE" 2>/dev/null || echo "none")
     [[ -z "$active_rite" || "$active_rite" == "none" || "$active_rite" == "null" ]] && return 1
 
     local rite_dir="${ROSTER_HOME:-$HOME/.config/roster}/rites/$active_rite"

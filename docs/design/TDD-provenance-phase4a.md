@@ -635,7 +635,7 @@ Callers that do not have a `claudeDir` (user-level sync without a project contex
 
 ### Limitation
 
-The collision checker cannot load the rite manifest when run outside a project directory (no `.claude/PROVENANCE_MANIFEST.yaml`). In this case, the existing directory scan fallback handles collision detection. This is acceptable because collision detection is a best-effort optimization -- the worst case is a false negative (user resource shadows a rite resource), which the user can diagnose via `ari provenance show`.
+The collision checker cannot load the rite manifest when run outside a project directory (no `.knossos/PROVENANCE_MANIFEST.yaml`). In this case, the existing directory scan fallback handles collision detection. This is acceptable because collision detection is a best-effort optimization -- the worst case is a false negative (user resource shadows a rite resource), which the user can diagnose via `ari provenance show`.
 
 ---
 

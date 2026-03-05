@@ -184,7 +184,7 @@ execution_mode() {
 
     # Session is ACTIVE - check team configuration
     local active_rite
-    active_rite=$(cat ".claude/ACTIVE_RITE" 2>/dev/null || echo "none")
+    active_rite=$(cat ".knossos/ACTIVE_RITE" 2>/dev/null || echo "none")
 
     # Also check team field in session context for cross-cutting sessions
     if [[ "$active_rite" == "none" || -z "$active_rite" ]]; then
@@ -350,7 +350,7 @@ if echo "$FILE_PATH" | grep -qE "$ALLOWED_PATHS"; then
 fi
 
 # Get workflow name for context (optional enhancement)
-WORKFLOW_NAME=$(cat ".claude/ACTIVE_WORKFLOW.yaml" 2>/dev/null | grep "^name:" | awk '{print $2}' || echo "active")
+WORKFLOW_NAME=$(cat ".knossos/ACTIVE_WORKFLOW.yaml" 2>/dev/null | grep "^name:" | awk '{print $2}' || echo "active")
 
 # Emit condensed warning
 cat >&2 <<EOF
@@ -458,7 +458,7 @@ cmd_create() {
 
     # If team not specified, check ACTIVE_RITE file
     if [[ -z "$team" ]]; then
-        team=$(cat ".claude/ACTIVE_RITE" 2>/dev/null || echo "")
+        team=$(cat ".knossos/ACTIVE_RITE" 2>/dev/null || echo "")
     fi
 
     # Normalize empty/none to explicit null for cross-cutting

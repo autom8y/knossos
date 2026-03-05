@@ -98,7 +98,7 @@ ariadne/
          │
          v
 ┌─────────────────────────────────────────────────────────────────┐
-│  Filesystem: rites/, .claude/agents/, .claude/ACTIVE_RITE,      │
+│  Filesystem: rites/, .claude/agents/, .knossos/ACTIVE_RITE,      │
 │  .claude/AGENT_MANIFEST.json, .claude/CLAUDE.md                 │
 └─────────────────────────────────────────────────────────────────┘
 ```

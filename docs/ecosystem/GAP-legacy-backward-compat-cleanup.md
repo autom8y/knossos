@@ -163,8 +163,8 @@ These constants ARE still actively used:
 > Three locations store the active rite name: `internal/sync/state.go` (`state.json`), `ACTIVE_RITE` file, `PROVENANCE_MANIFEST.yaml`.
 
 The `state.json` stores `active_rite` redundantly with:
-1. `.claude/ACTIVE_RITE` -- authoritative, read by `syncRiteScope()` at `materialize.go:556`
-2. `.claude/PROVENANCE_MANIFEST.yaml` field `active_rite` -- set during provenance save
+1. `.knossos/ACTIVE_RITE` -- authoritative, read by `syncRiteScope()` at `materialize.go:556`
+2. `.knossos/PROVENANCE_MANIFEST.yaml` field `active_rite` -- set during provenance save
 
 This triple redundancy is a latent source of divergence bugs. While NOT a backward-compat cleanup item, it should be tracked as related structural debt. The `state.json` module (`internal/sync/state.go`) has 7 callers in the materialize pipeline and tests, so it is not dead code, but its `ActiveRite` field may be a zombie.
 

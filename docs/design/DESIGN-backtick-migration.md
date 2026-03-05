@@ -70,7 +70,7 @@ Six dromena files use `!` backtick injections to execute shell commands at comma
 
 | Injection | Command | Purpose |
 |-----------|---------|---------|
-| Active rite | `cat .claude/ACTIVE_RITE 2>/dev/null \|\| echo "none"` | Read current rite |
+| Active rite | `cat .knossos/ACTIVE_RITE 2>/dev/null \|\| echo "none"` | Read current rite |
 | Available rites | `ls ${KNOSSOS_HOME:-~/Code/knossos}/rites/ 2>/dev/null \| tr '\n' ' '` | List rite names |
 
 **Injection count**: 2
@@ -132,7 +132,7 @@ Ordered by ease of migration (simplest first):
 
 ### Tier 1: Direct file reads (trivial)
 
-1. **consult -- Active rite**: Replace `!cat .claude/ACTIVE_RITE` with SessionStart hook output (already provides `rite` field)
+1. **consult -- Active rite**: Replace `!cat .knossos/ACTIVE_RITE` with SessionStart hook output (already provides `rite` field)
 2. **handoff -- Available agents**: Replace `!ls .claude/agents/` with Behavior step: "List available agents with `ls .claude/agents/`"
 3. **rite -- Available rites**: Replace `!ls .../rites/` with `ari rite list` call in Behavior section
 

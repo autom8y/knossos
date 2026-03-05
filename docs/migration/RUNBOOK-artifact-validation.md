@@ -323,7 +323,7 @@ ls -la .claude/agents.orphan-backup/
 
 ```bash
 # 1. Check swap completed
-cat .claude/ACTIVE_RITE
+cat .knossos/ACTIVE_RITE
 # Expected: <team-name>
 
 # 2. Verify agents loaded

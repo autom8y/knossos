@@ -96,7 +96,7 @@ The pattern `cat ACTIVE_RITE 2>/dev/null || cat ACTIVE_RITE` exists for backward
 
 | File | Line(s) | Pattern | Removal Risk |
 |------|---------|---------|--------------|
-| `user-hooks/validation/orchestrator-router.sh` | 54 | `cat ".claude/ACTIVE_RITE" 2>/dev/null \|\| cat ".claude/ACTIVE_RITE"` | LOW |
+| `user-hooks/validation/orchestrator-router.sh` | 54 | `cat ".knossos/ACTIVE_RITE" 2>/dev/null \|\| cat ".knossos/ACTIVE_RITE"` | LOW |
 | `user-hooks/lib/session-manager.sh` | 89, 243, 294 | Same pattern | LOW |
 | `user-hooks/lib/rite-context-loader.sh` | 45-46 | Same pattern | LOW |
 | `user-hooks/lib/worktree-manager.sh` | 207 | Same pattern | LOW |
@@ -106,7 +106,7 @@ The pattern `cat ACTIVE_RITE 2>/dev/null || cat ACTIVE_RITE` exists for backward
 
 | File | Line(s) | Operation | Notes |
 |------|---------|-----------|-------|
-| `roster-sync` | 538 | `echo "$rite_name" > .claude/ACTIVE_RITE` | CRITICAL - still writes ACTIVE_RITE |
+| `roster-sync` | 538 | `echo "$rite_name" > .knossos/ACTIVE_RITE` | CRITICAL - still writes ACTIVE_RITE |
 | `lib/rite/rite-transaction.sh` | 582-588 | Backup to `ACTIVE_RITE` | Internal backup name |
 | `swap-rite.sh` | 169-176 | Restore from `ACTIVE_RITE` backup | Internal backup name |
 

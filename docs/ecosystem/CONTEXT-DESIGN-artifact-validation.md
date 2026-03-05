@@ -494,7 +494,7 @@ Hook location: `user-hooks/security-consultation-check.sh`
 Trigger: `PreToolUse` for `Write` and `Edit` tools targeting implementation files
 
 Logic:
-- Read active workflow from `.claude/ACTIVE_WORKFLOW.yaml`
+- Read active workflow from `.knossos/ACTIVE_WORKFLOW.yaml`
 - If `security_consultation.enforcement.mode` is `off`, exit 0
 - Check session context for initiative/complexity
 - If complexity + domain matches `policy.required`:

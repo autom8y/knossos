@@ -41,7 +41,7 @@ This refactoring plan addresses systematic terminology drift from Knossos doctri
 - CLI command: `ari rite` (canonical, already exists)
 - JSON output field: `active_rite` (manifest schema, external consumers)
 - YAML field: `rite_name` in context.yaml (external schema)
-- File: `.claude/ACTIVE_RITE` (already canonical)
+- File: `.knossos/ACTIVE_RITE` (already canonical)
 - File: `.claude/AGENT_MANIFEST.json` with `active_rite` field
 
 **MAY Change (Internal):**

@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-The `state.json` `active_rite` field is a **zombie**. No code path reads `state.json` to determine which rite is active. All runtime consumers read from `.claude/ACTIVE_RITE` (the plain text file). The `state.json` `active_rite` field is written by the materialization pipeline but never read for any purpose -- not even diagnostics.
+The `state.json` `active_rite` field is a **zombie**. No code path reads `state.json` to determine which rite is active. All runtime consumers read from `.knossos/ACTIVE_RITE` (the plain text file). The `state.json` `active_rite` field is written by the materialization pipeline but never read for any purpose -- not even diagnostics.
 
 The `state.json` file itself is NOT a zombie: it carries `last_sync` which has no other home (PROVENANCE_MANIFEST.yaml's `last_sync` exists but is independently managed and semantically different -- it tracks provenance writes, not sync pipeline completion). However, the `active_rite` field within `state.json` provides zero unique value.
 
@@ -17,7 +17,7 @@ The `state.json` file itself is NOT a zombie: it carries `last_sync` which has n
 
 ## Consumer Enumeration
 
-### 1. ACTIVE_RITE File Consumers (.claude/ACTIVE_RITE)
+### 1. ACTIVE_RITE File Consumers (.knossos/ACTIVE_RITE)
 
 This is the **primary authoritative store**. All runtime rite resolution flows through here.
 
@@ -93,9 +93,9 @@ This is the **primary authoritative store**. All runtime rite resolution flows t
 
 | Store | Path | Written by | Read by (runtime) | Unique data |
 |-------|------|-----------|-------------------|-------------|
-| **ACTIVE_RITE** (file) | `.claude/ACTIVE_RITE` | `materialize.writeActiveRite()` (step 10) | 18 consumers (see A1-A18) | None -- this is the primary |
+| **ACTIVE_RITE** (file) | `.knossos/ACTIVE_RITE` | `materialize.writeActiveRite()` (step 10) | 18 consumers (see A1-A18) | None -- this is the primary |
 | **state.json** | `.knossos/sync/state.json` | `materialize.trackState()` (step 9) | **ZERO runtime readers** | `last_sync` timestamp |
-| **PROVENANCE_MANIFEST.yaml** | `.claude/PROVENANCE_MANIFEST.yaml` | `materialize.saveProvenanceManifest()` (step 11) | 0 for rite selection | Audit trail; file-level provenance entries |
+| **PROVENANCE_MANIFEST.yaml** | `.knossos/PROVENANCE_MANIFEST.yaml` | `materialize.saveProvenanceManifest()` (step 11) | 0 for rite selection | Audit trail; file-level provenance entries |
 | **KNOSSOS_MANIFEST.yaml** | `.knossos/KNOSSOS_MANIFEST.yaml` | `inscription.SyncCLAUDEmd()` | 2 (K3 template rendering, K6 validation) | Region ownership, inscription version |
 
 ### Write Order Within One Sync Pipeline Run

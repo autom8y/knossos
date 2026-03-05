@@ -324,7 +324,7 @@ func (g *Generator) templateFuncs() template.FuncMap {
 │    4. Materialize skills from rites/{selected}/skills/ + rites/shared/      │
 │    5. Generate CLAUDE.md from templates/CLAUDE.md.tpl                       │
 │    6. Write .knossos/sync/state.json with checksums                          │
-│    7. Write .claude/ACTIVE_RITE file                                        │
+│    7. Write .knossos/ACTIVE_RITE file                                        │
 │                                                                             │
 │  Output:                                                                    │
 │    "Knossos initialized with '10x-dev' rite"                                │
@@ -451,7 +451,7 @@ func (g *Generator) templateFuncs() template.FuncMap {
 │    5. Materialize rites/rnd/skills/ -> .claude/skills/                      │
 │    6. Sync shared skills from rites/shared/skills/                          │
 │    7. Regenerate CLAUDE.md with new rite context                            │
-│    8. Update .claude/ACTIVE_RITE                                            │
+│    8. Update .knossos/ACTIVE_RITE                                            │
 │    9. Update .knossos/sync/state.json                                        │
 │                                                                             │
 │  Output:                                                                    │

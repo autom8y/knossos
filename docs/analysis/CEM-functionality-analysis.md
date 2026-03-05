@@ -235,7 +235,7 @@ Else:
 
 **Algorithm**:
 ```
-1. Read rite name from arg or .claude/ACTIVE_RITE
+1. Read rite name from arg or .knossos/ACTIVE_RITE
 2. Check workflow.yaml exists at $ROSTER_HOME/rites/$name/
 3. Validate YAML syntax via yq
 4. Check required fields: name, workflow_type, description, entry_point, phases, complexity_levels

@@ -767,7 +767,7 @@ conditionals:
 
   # Include orchestration only with active rite
   orchestrated-content:
-    when: "file_exists('.claude/ACTIVE_RITE')"
+    when: "file_exists('.knossos/ACTIVE_RITE')"
     include: [agent-routing, skills]
     exclude: []
 ```

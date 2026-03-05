@@ -280,7 +280,7 @@ if [[ "$command" == "start" ]] && ! has_session; then
 
     # Get active rite
     local team
-    team=$(cat "$PROJECT_DIR/.claude/ACTIVE_RITE" 2>/dev/null || echo "10x-dev")
+    team=$(cat "$PROJECT_DIR/.knossos/ACTIVE_RITE" 2>/dev/null || echo "10x-dev")
 
     # Create session via session-manager (uses FSM for schema-validated write)
     local result

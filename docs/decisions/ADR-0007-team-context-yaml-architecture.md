@@ -17,7 +17,7 @@ The current rite context injection system uses bash-based sourcing via `rite-con
 ```bash
 # .claude/hooks/lib/rite-context-loader.sh
 load_rite_context() {
-    active_rite=$(cat ".claude/ACTIVE_RITE" 2>/dev/null || echo "")
+    active_rite=$(cat ".knossos/ACTIVE_RITE" 2>/dev/null || echo "")
     rite_script="$roster_home/rites/$active_rite/$RITE_CONTEXT_SCRIPT_NAME"
 
     # Source in subshell to isolate side effects

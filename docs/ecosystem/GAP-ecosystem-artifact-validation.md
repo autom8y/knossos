@@ -86,7 +86,7 @@ fi
 # Copy workflow.yaml if exists
 local workflow_file="$ROSTER_HOME/rites/$rite_name/workflow.yaml"
     log_debug "Copying workflow.yaml"
-    cp "$workflow_file" .claude/ACTIVE_WORKFLOW.yaml || {
+    cp "$workflow_file" .knossos/ACTIVE_WORKFLOW.yaml || {
         log_warning "Failed to copy workflow.yaml (agents swapped successfully)"
 ```
 

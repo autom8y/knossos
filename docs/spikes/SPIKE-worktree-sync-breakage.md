@@ -24,7 +24,7 @@ Why does `ari sync` on a worktree (a) fail to materialize the rite and (b) poten
 | 3 | `internal/paths/paths.go` | `NewResolver(projectDir)` | 20 | Resolver points at worktree path |
 | 4 | `internal/paths/paths.go` | `ClaudeDir()` | 59 | Returns `worktree/.claude/` (does not exist) |
 | 5 | `internal/paths/paths.go` | `ReadActiveRite()` | 120-126 | Returns `""` (file not found, no error) |
-| 6 | `internal/paths/paths.go` | `ActiveRiteFile()` | 114 | Returns `worktree/.claude/ACTIVE_RITE` (absent) |
+| 6 | `internal/paths/paths.go` | `ActiveRiteFile()` | 114 | Returns `worktree/.knossos/ACTIVE_RITE` (absent) |
 
 **All files involved:**
 - `.gitignore` -- the root cause
@@ -70,7 +70,7 @@ Why does `ari sync` on a worktree (a) fail to materialize the rite and (b) poten
 | 2 | `internal/cmd/sync/sync.go` | `runSync()` | 137 | `resolver := paths.NewResolver(projectDir)` |
 | 3 | `internal/cmd/sync/sync.go` | `runSync()` | 159 | `m.Sync(opts)` |
 | 4 | `internal/materialize/materialize.go` | `Sync()` | 486-487 | `m.syncRiteScope(opts)` |
-| 5 | `internal/materialize/materialize.go` | `syncRiteScope()` | 525-528 | Reads `ACTIVE_RITE` from `worktree/.claude/ACTIVE_RITE` -- empty |
+| 5 | `internal/materialize/materialize.go` | `syncRiteScope()` | 525-528 | Reads `ACTIVE_RITE` from `worktree/.knossos/ACTIVE_RITE` -- empty |
 | 6 | `internal/materialize/materialize.go` | `syncRiteScope()` | 530-531 | `riteName == ""` and `previousRite == ""` |
 | 7 | `internal/materialize/materialize.go` | `syncRiteScope()` | 536 | Falls to `syncRiteScopeMinimal(opts)` |
 | 8 | `internal/materialize/materialize.go` | `syncRiteScopeMinimal()` | 578-580 | `legacyOpts := Options{Minimal: true}` |
@@ -157,7 +157,7 @@ Why does `ari sync` on a worktree (a) fail to materialize the rite and (b) poten
 Logic:
 1. Read stdin JSON for CC hook payload (contains worktree path)
 2. Use `git rev-parse --git-common-dir` or `git worktree list --porcelain` to find main worktree
-3. Read `mainWorktree/.claude/ACTIVE_RITE`
+3. Read `mainWorktree/.knossos/ACTIVE_RITE`
 4. Call `materialize.NewMaterializer(paths.NewResolver(worktreePath)).Sync(SyncOptions{RiteName: rite, Scope: ScopeRite})`
 5. Scaffold `.sos/`, `.knossos/`, `.know/` symlinks or copies
 
@@ -407,7 +407,7 @@ This is idempotent, zero-cost when dirs exist, and ensures sync always has the m
 func SetupWorktreeTestFixture(t *testing.T) (mainDir, worktreeDir string, cleanup func()) {
     // 1. Create temp dir with git init
     // 2. Create initial commit
-    // 3. Set up .claude/ACTIVE_RITE in main
+    // 3. Set up .knossos/ACTIVE_RITE in main
     // 4. Run ari sync in main (creates provenance)
     // 5. git worktree add to create linked worktree
     // 6. Return both paths

@@ -174,7 +174,7 @@ When `ari sync --rite <name>` is called from within a CC session (via Bash tool)
 | Step 5: `materializeMena()` (line 355) | `.claude/commands/`, `.claude/skills/` | Cached at startup -- **need restart** |
 | Step 7: `materializeCLAUDEmd()` (line 365) | `.claude/CLAUDE.md` | Re-read mid-session -- **safe but triggers watcher** |
 | Step 8: `materializeSettingsWithManifest()` (line 372) | `.claude/settings.local.json` | **Hooks snapshotted at startup** -- changes are no-ops |
-| Step 10: `writeActiveRite()` (line 387) | `.claude/ACTIVE_RITE` | Not watched by CC |
+| Step 10: `writeActiveRite()` (line 387) | `.knossos/ACTIVE_RITE` | Not watched by CC |
 
 The `writeIfChanged()` function at `internal/fileutil/fileutil.go:66-72` prevents writes when content is identical, but a genuine rite switch changes content for almost every file. The atomic write pattern (temp file + rename at `fileutil.go:60`) minimizes partial-read risk but does not prevent the CC file watcher from detecting the changes.
 

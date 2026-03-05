@@ -54,9 +54,9 @@ When step 7 (`materializeCLAUDEmd`) fails, the following files are in an **incon
 - `.claude/CLAUDE.md` -- still references the OLD rite
 - `.knossos/KNOSSOS_MANIFEST.yaml` -- still says the OLD rite is active
 - `.knossos/sync/state.json` -- still records the OLD rite
-- `.claude/ACTIVE_WORKFLOW.yaml` -- still has the OLD rite's workflow
-- `.claude/ACTIVE_RITE` -- still says the OLD rite (or does not exist)
-- `.claude/PROVENANCE_MANIFEST.yaml` -- never updated
+- `.knossos/ACTIVE_WORKFLOW.yaml` -- still has the OLD rite's workflow
+- `.knossos/ACTIVE_RITE` -- still says the OLD rite (or does not exist)
+- `.knossos/PROVENANCE_MANIFEST.yaml` -- never updated
 - `.claude/settings.local.json` -- never updated with new MCP servers
 
 **Destroyed and unrecoverable (without backup):**
@@ -324,9 +324,9 @@ Complete list of files that must be mutually consistent after a successful sync:
 | `.knossos/KNOSSOS_MANIFEST.yaml` | 7 (via SyncCLAUDEmd) | Active rite, section hashes, inscription version |
 | `.claude/settings.local.json` | 8 | MCP servers from manifest + hooks.yaml |
 | `.knossos/sync/state.json` | 9 | Active rite name + last sync timestamp |
-| `.claude/ACTIVE_WORKFLOW.yaml` | 9.5 | Workflow definition from rite |
-| `.claude/ACTIVE_RITE` | 10 | Rite name marker |
-| `.claude/PROVENANCE_MANIFEST.yaml` | last | All file checksums + ownership + source info |
+| `.knossos/ACTIVE_WORKFLOW.yaml` | 9.5 | Workflow definition from rite |
+| `.knossos/ACTIVE_RITE` | 10 | Rite name marker |
+| `.knossos/PROVENANCE_MANIFEST.yaml` | last | All file checksums + ownership + source info |
 
 **11 distinct state files** that must all reflect the same rite. Currently, the pipeline writes them one at a time with no atomicity guarantee.
 

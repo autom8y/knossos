@@ -27,13 +27,13 @@ Why do hygiene-rite references persist in `.claude/CLAUDE.md` after syncing the 
 
 | File | Expected (ecosystem) | Actual |
 |------|---------------------|--------|
-| `.claude/ACTIVE_RITE` | `ecosystem` | `ecosystem` (correct) |
+| `.knossos/ACTIVE_RITE` | `ecosystem` | `ecosystem` (correct) |
 | `.claude/agents/` | ecosystem agents | ecosystem agents (correct) |
 | `.claude/CLAUDE.md` | ecosystem content | **hygiene content** (stale) |
 | `.knossos/KNOSSOS_MANIFEST.yaml` active_rite | `ecosystem` | **`hygiene`** (stale) |
 | `.knossos/sync/state.json` active_rite | `ecosystem` | **`hygiene`** (stale) |
-| `.claude/ACTIVE_WORKFLOW.yaml` | ecosystem workflow | **hygiene workflow** (stale) |
-| `.claude/PROVENANCE_MANIFEST.yaml` active_rite | `ecosystem` | **`hygiene`** (stale) |
+| `.knossos/ACTIVE_WORKFLOW.yaml` | ecosystem workflow | **hygiene workflow** (stale) |
+| `.knossos/PROVENANCE_MANIFEST.yaml` active_rite | `ecosystem` | **`hygiene`** (stale) |
 
 ### Timestamp Analysis
 

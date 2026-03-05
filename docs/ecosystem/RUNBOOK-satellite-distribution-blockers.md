@@ -373,7 +373,7 @@ The updated `ari` binary is backward compatible. Restoring old `settings.local.j
 
 **Check**: Is there an active rite configured?
 ```bash
-cat ~/Code/<satellite>/.claude/ACTIVE_RITE
+cat ~/Code/<satellite>/.knossos/ACTIVE_RITE
 ```
 
 If the file is empty or references a rite that does not exist in knossos, specify the rite explicitly:

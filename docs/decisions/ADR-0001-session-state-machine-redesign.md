@@ -435,6 +435,6 @@ Formal verification uses a hybrid approach to balance rigor with developer exper
 - Migration engine: `user-hooks/lib/session-migrate.sh`
 - CLI interface: `user-hooks/lib/session-manager.sh`
 - Schema definition: `schemas/artifacts/session-context.schema.json`
-- Workflow definition: `.claude/ACTIVE_WORKFLOW.yaml`
+- Workflow definition: `.knossos/ACTIVE_WORKFLOW.yaml`
 - Architecture documentation: `docs/session-fsm/ARCHITECTURE.md`
 - Operations guide: `docs/session-fsm/OPERATIONS.md`

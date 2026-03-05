@@ -72,7 +72,7 @@ Manual worktree creation produces an unseeded state. The worktree has no `.claud
 
 Linked worktrees **inherit their active rite from the main worktree** when no explicit `--rite` flag is passed and no local ACTIVE_RITE exists.
 
-**Implementation**: `syncRiteScope()` in `internal/materialize/materialize.go` calls `isGitWorktree()` and `getMainWorktreeDir()` before falling through to minimal mode. If the main worktree's `.claude/ACTIVE_RITE` contains a rite name, it is used for the current sync and written into the worktree's `.claude/ACTIVE_RITE`.
+**Implementation**: `syncRiteScope()` in `internal/materialize/materialize.go` calls `isGitWorktree()` and `getMainWorktreeDir()` before falling through to minimal mode. If the main worktree's `.knossos/ACTIVE_RITE` contains a rite name, it is used for the current sync and written into the worktree's `.knossos/ACTIVE_RITE`.
 
 **Rationale**: Worktrees are created for parallel work on the same project, typically under the same rite context. Inheriting the rite is the lowest-friction default. Users who want a different rite can pass `--rite` explicitly or edit ACTIVE_RITE after sync.
 
@@ -82,7 +82,7 @@ Linked worktrees **inherit their active rite from the main worktree** when no ex
 
 The user-scope sync uses a `CollisionChecker` that reads from the project's `PROVENANCE_MANIFEST.yaml` to detect which resources are rite-owned and must not be overwritten by user-scope writes.
 
-In a fresh linked worktree, the project `.claude/PROVENANCE_MANIFEST.yaml` does not exist (`.claude/` is absent). The checker falls back in two stages:
+In a fresh linked worktree, the project `.knossos/PROVENANCE_MANIFEST.yaml` does not exist (`.claude/` is absent). The checker falls back in two stages:
 
 1. **Main worktree fallback**: If the checker is ineffective (manifest absent), and `worktreeMainDir()` succeeds, a new checker is constructed from the main worktree's `.claude/`. This provides accurate collision detection using the main worktree's rite provenance.
 
@@ -183,7 +183,7 @@ Document that `git worktree add` is unsupported; require all worktrees to be cre
 
 Use git attributes or worktree-config to store ACTIVE_RITE per-worktree in a tracked file.
 
-**Rejected**: ACTIVE_RITE is runtime state, not repository state. Different developers on different machines may run different rites on the same branch. Storing ACTIVE_RITE in git would impose one rite choice on all developers. The gitignored `.claude/ACTIVE_RITE` pattern is intentional.
+**Rejected**: ACTIVE_RITE is runtime state, not repository state. Different developers on different machines may run different rites on the same branch. Storing ACTIVE_RITE in git would impose one rite choice on all developers. The gitignored `.knossos/ACTIVE_RITE` pattern is intentional.
 
 ---
 

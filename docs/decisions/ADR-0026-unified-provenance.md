@@ -200,7 +200,7 @@ The manifest enables direct answers to operational questions:
 
 ### Storage Location
 
-`{project}/.claude/PROVENANCE_MANIFEST.yaml` -- stored inside the `.claude/` directory it describes, alongside `KNOSSOS_MANIFEST.yaml`. This keeps provenance data co-located with the files it tracks and ensures it is available to any tool reading the `.claude/` directory.
+`{project}/.knossos/PROVENANCE_MANIFEST.yaml` -- stored inside the `.claude/` directory it describes, alongside `KNOSSOS_MANIFEST.yaml`. This keeps provenance data co-located with the files it tracks and ensures it is available to any tool reading the `.claude/` directory.
 
 The manifest itself is owned by Knossos and is always overwritten on sync (it is a derived artifact, not user content).
 

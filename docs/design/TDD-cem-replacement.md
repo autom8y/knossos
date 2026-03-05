@@ -1265,9 +1265,9 @@ migrate_v2_to_v3() {
 
 ```bash
 # Support for --refresh flag to update team resources
-if [[ "$REFRESH_FLAG" == "1" ]] && [[ -f ".claude/ACTIVE_RITE" ]]; then
+if [[ "$REFRESH_FLAG" == "1" ]] && [[ -f ".knossos/ACTIVE_RITE" ]]; then
     local rite_name
-    rite_name=$(cat ".claude/ACTIVE_RITE")
+    rite_name=$(cat ".knossos/ACTIVE_RITE")
     log "Refreshing team: $rite_name"
     "$ROSTER_HOME/swap-rite.sh" "$rite_name" --update
 fi

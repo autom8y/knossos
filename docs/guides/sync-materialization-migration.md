@@ -113,7 +113,7 @@ Running `ari sync materialize` multiple times is safe:
 
 4. **Confirm** ACTIVE_RITE is correct:
    ```bash
-   cat .claude/ACTIVE_RITE
+   cat .knossos/ACTIVE_RITE
    ```
 
 ### Git Configuration

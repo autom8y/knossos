@@ -283,7 +283,7 @@ Session: ACTIVE - "Add authentication" (MODULE complexity)
 **Old text**:
 ```
 1. **Summarize Current State**
-   - Active rite (from `.claude/ACTIVE_RITE`)
+   - Active rite (from `.knossos/ACTIVE_RITE`)
    - Active session (from `.sos/sessions/`)
    - Git branch and status
    - Current complexity level (if in session)
@@ -292,7 +292,7 @@ Session: ACTIVE - "Add authentication" (MODULE complexity)
 **New text**:
 ```
 1. **Summarize Current State**
-   - Active rite (from `.claude/ACTIVE_RITE`)
+   - Active rite (from `.knossos/ACTIVE_RITE`)
    - Active session (from `.sos/sessions/`)
    - Current complexity level (if in session)
 ```

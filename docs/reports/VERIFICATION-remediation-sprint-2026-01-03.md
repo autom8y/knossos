@@ -187,7 +187,7 @@ artifact-tracker.sh, auto-park.sh, coach-mode.sh, command-validator.sh, commit-t
 
 **Status**: PASS
 
-### .claude/ACTIVE_RITE
+### .knossos/ACTIVE_RITE
 ```
 10x-dev
 ```

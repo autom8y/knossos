@@ -154,7 +154,7 @@ readonly TEAM_CONTEXT_FUNCTION_NAME="inject_team_context"
 # Returns: 0 always (errors logged, not propagated)
 #
 # Contract:
-#   - Reads ACTIVE_RITE from .claude/ACTIVE_RITE
+#   - Reads ACTIVE_RITE from .knossos/ACTIVE_RITE
 #   - Looks for $ROSTER_HOME/rites/$ACTIVE_RITE/context-injection.sh
 #   - Sources script and calls inject_team_context()
 #   - Returns function output on stdout
@@ -166,7 +166,7 @@ load_team_context() {
     local output=""
 
     # Read active rite
-    active_rite=$(cat ".claude/ACTIVE_RITE" 2>/dev/null || echo "")
+    active_rite=$(cat ".knossos/ACTIVE_RITE" 2>/dev/null || echo "")
     if [[ -z "$active_rite" || "$active_rite" == "none" ]]; then
         # No team active - nothing to inject
         return 0
@@ -267,7 +267,7 @@ The library:
 ```bash
 # Team routing context (if team is active)
 # Note: ROSTER_HOME is defined in config.sh (sourced via session-utils.sh)
-if [[ -f ".claude/ACTIVE_RITE" ]]; then
+if [[ -f ".knossos/ACTIVE_RITE" ]]; then
     local TEAM_CONTEXT=$("$ROSTER_HOME/generate-rite-context.sh" 2>/dev/null || echo "")
     if [[ -n "$TEAM_CONTEXT" ]]; then
         echo ""
@@ -312,7 +312,7 @@ if [[ -n "$TEAM_CONTEXT" ]]; then
 fi
 
 # Team routing context (workflow phases) - keep existing
-if [[ -f ".claude/ACTIVE_RITE" ]]; then
+if [[ -f ".knossos/ACTIVE_RITE" ]]; then
     local ROUTING_CONTEXT=$("$ROSTER_HOME/generate-rite-context.sh" 2>/dev/null || echo "")
     if [[ -n "$ROUTING_CONTEXT" ]]; then
         echo ""

@@ -48,7 +48,7 @@ const ManifestFileName = "PROVENANCE_MANIFEST.yaml"
 const SchemaVersion = "1.0"
 
 // ProvenanceManifest is the unified file-level provenance tracker for .claude/.
-// Stored at .claude/PROVENANCE_MANIFEST.yaml.
+// Stored at .knossos/PROVENANCE_MANIFEST.yaml.
 type ProvenanceManifest struct {
     // SchemaVersion is the manifest format version. Currently "1.0".
     SchemaVersion string `yaml:"schema_version"`
@@ -211,7 +211,7 @@ The SourceType is determined by the pipeline stage that writes the file:
 
 ## Section 4: On-Disk YAML Schema
 
-File path: `.claude/PROVENANCE_MANIFEST.yaml`
+File path: `.knossos/PROVENANCE_MANIFEST.yaml`
 
 ```yaml
 schema_version: "1.0"

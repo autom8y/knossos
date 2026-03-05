@@ -869,7 +869,7 @@ func TestInit_WithRite(t *testing.T) {
     dir := t.TempDir()
     // Run init --rite 10x-dev targeting dir (with embedded FS)
     // Verify .claude/agents/ contains expected agents
-    // Verify .claude/ACTIVE_RITE contains "10x-dev"
+    // Verify .knossos/ACTIVE_RITE contains "10x-dev"
 }
 
 func TestInit_Idempotent(t *testing.T) {

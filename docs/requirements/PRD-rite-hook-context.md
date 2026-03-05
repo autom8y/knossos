@@ -69,7 +69,7 @@ Gap Analysis (task-001) identified:
 
 - **FR-1.1**: Create `rite-context-loader.sh` in `.claude/hooks/lib/` that provides `load_rite_context()` function.
 
-- **FR-1.2**: `load_rite_context()` MUST read active rite from `.claude/ACTIVE_RITE` file.
+- **FR-1.2**: `load_rite_context()` MUST read active rite from `.knossos/ACTIVE_RITE` file.
 
 - **FR-1.3**: `load_rite_context()` MUST look for context script at `$ROSTER_HOME/rites/$ACTIVE_RITE/context-injection.sh`.
 
