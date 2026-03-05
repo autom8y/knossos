@@ -290,7 +290,7 @@ func (m *Materializer) MaterializeMinimal(opts Options) (*Result, error) {
 
 	// Remove rite-specific state files (cross-cutting mode has no rite)
 	_ = os.Remove(filepath.Join(claudeDir, "ACTIVE_RITE"))
-	_ = os.Remove(filepath.Join(claudeDir, "ACTIVE_WORKFLOW.yaml"))
+	_ = os.Remove(filepath.Join(knossosDir, "ACTIVE_WORKFLOW.yaml"))
 	_ = os.Remove(filepath.Join(claudeDir, "INVOCATION_STATE.yaml"))
 
 	// Provenance: merge and save manifest
@@ -492,7 +492,7 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 
 	// 9.5. Copy workflow.yaml to ACTIVE_WORKFLOW.yaml
 	if !opts.Soft {
-		if err := m.materializeWorkflow(claudeDir, resolved, collector); err != nil {
+		if err := m.materializeWorkflow(knossosDir, resolved, collector); err != nil {
 			return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize workflow", err)
 		}
 	}

@@ -10,6 +10,10 @@ import (
 // Merge combines collector entries, divergence report, and previous manifest into a final manifest.
 // This is the 4-step merge algorithm that determines provenance ownership in .claude/.
 //
+// knossosDir is the .knossos/ sibling directory — some tracked files (e.g. ACTIVE_WORKFLOW.yaml)
+// live there rather than in claudeDir. When checking file existence in Step 0, both directories
+// are searched.
+//
 // Steps:
 //
 //  0. Carry forward knossos entries from prev that still exist on disk (idempotency)
@@ -18,6 +22,7 @@ import (
 //  3. Promote prev untracked entries not written this sync → user
 func Merge(
 	claudeDir string,
+	knossosDir string,
 	activeRite string,
 	collector Collector,
 	divergenceReport *DivergenceReport,
@@ -26,18 +31,28 @@ func Merge(
 ) *ProvenanceManifest {
 	finalEntries := make(map[string]*ProvenanceEntry)
 
+	// fileExists checks whether a manifest entry path exists on disk.
+	// Files may live in claudeDir (most entries) or knossosDir (e.g. ACTIVE_WORKFLOW.yaml).
+	fileExists := func(path string) bool {
+		// Normalise directory entries (strip trailing slash before stat)
+		cleanPath := strings.TrimSuffix(path, "/")
+		if _, err := os.Stat(filepath.Join(claudeDir, cleanPath)); err == nil {
+			return true
+		}
+		if knossosDir != "" {
+			if _, err := os.Stat(filepath.Join(knossosDir, cleanPath)); err == nil {
+				return true
+			}
+		}
+		return false
+	}
+
 	// Step 0: Carry forward knossos entries from previous manifest that still exist on disk
 	// but weren't re-written this sync (idempotency - files that didn't change)
 	if prevManifest != nil {
 		for path, entry := range prevManifest.Entries {
 			if entry.Owner == OwnerKnossos {
-				// Check if file/directory still exists on disk (not removed)
-				fullPath := filepath.Join(claudeDir, path)
-				// For directory entries (mena), remove trailing slash before stat
-				if strings.HasSuffix(path, "/") {
-					fullPath = strings.TrimSuffix(fullPath, "/")
-				}
-				if _, err := os.Stat(fullPath); err == nil {
+				if fileExists(path) {
 					// File/directory exists, carry forward entry (will be overwritten if rewritten in Step 2)
 					finalEntries[path] = entry
 				}

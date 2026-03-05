@@ -191,11 +191,11 @@ func (m *Materializer) cleanupThroughlineIDs() int {
 	return cleaned
 }
 
-// materializeWorkflow copies workflow.yaml from the rite to .claude/ACTIVE_WORKFLOW.yaml.
+// materializeWorkflow copies workflow.yaml from the rite to .knossos/ACTIVE_WORKFLOW.yaml.
 // If the rite has no workflow.yaml, any existing ACTIVE_WORKFLOW.yaml is removed to
 // prevent stale workflow data from a previous rite persisting after switch.
-func (m *Materializer) materializeWorkflow(claudeDir string, resolved *ResolvedRite, collector provenance.Collector) error {
-	dstPath := filepath.Join(claudeDir, "ACTIVE_WORKFLOW.yaml")
+func (m *Materializer) materializeWorkflow(knossosDir string, resolved *ResolvedRite, collector provenance.Collector) error {
+	dstPath := filepath.Join(knossosDir, "ACTIVE_WORKFLOW.yaml")
 	rFS := m.riteFS(resolved)
 	content, err := fs.ReadFile(rFS, "workflow.yaml")
 	if err != nil {
@@ -380,7 +380,8 @@ func matchesStaleSettingsFingerprint(parsed map[string]any) bool {
 // then writes the final manifest to disk. Delegates to provenance.Merge() for the algorithm.
 //
 // claudeDir is passed explicitly because Merge uses it to check whether files still exist
-// on disk (entries live in .claude/, but the manifest is now stored in .knossos/).
+// on disk. knossosDir is the sibling .knossos/ directory — some tracked files (e.g.
+// ACTIVE_WORKFLOW.yaml) live there and Merge checks both directories.
 func (m *Materializer) saveProvenanceManifest(
 	manifestPath string,
 	claudeDir string,
@@ -390,6 +391,7 @@ func (m *Materializer) saveProvenanceManifest(
 	prevManifest *provenance.ProvenanceManifest,
 	overwriteDiverged bool,
 ) error {
-	finalManifest := provenance.Merge(claudeDir, activeRite, collector, divergenceReport, prevManifest, overwriteDiverged)
+	knossosDir := m.resolver.KnossosDir()
+	finalManifest := provenance.Merge(claudeDir, knossosDir, activeRite, collector, divergenceReport, prevManifest, overwriteDiverged)
 	return provenance.Save(manifestPath, finalManifest)
 }

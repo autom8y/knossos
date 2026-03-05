@@ -66,10 +66,14 @@ type SectionTokenCount struct {
 }
 
 // CalculateBudget walks a .claude/ directory and counts tokens for all context files.
+// knossosDir is the sibling .knossos/ directory used for workflow state.
 func (c *Counter) CalculateBudget(claudeDir string) (*BudgetReport, error) {
 	report := &BudgetReport{
 		Categories: make(map[string]int),
 	}
+
+	// ACTIVE_WORKFLOW.yaml lives in .knossos/ (knossos platform state, not CC namespace)
+	knossosDir := filepath.Join(filepath.Dir(claudeDir), ".knossos")
 
 	// Walk relevant subdirectories and files
 	entries := []struct {
@@ -83,7 +87,7 @@ func (c *Counter) CalculateBudget(claudeDir string) (*BudgetReport, error) {
 		{"skills", filepath.Join(claudeDir, "skills"), true},
 		{"rules", filepath.Join(claudeDir, "rules"), true},
 		{"settings", filepath.Join(claudeDir, "settings.local.json"), false},
-		{"workflow", filepath.Join(claudeDir, "ACTIVE_WORKFLOW.yaml"), false},
+		{"workflow", filepath.Join(knossosDir, "ACTIVE_WORKFLOW.yaml"), false},
 	}
 
 	for _, entry := range entries {
