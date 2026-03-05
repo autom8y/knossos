@@ -128,9 +128,9 @@ func LoadOrBootstrap(path string) (*ProvenanceManifest, error) {
 	return manifest, nil
 }
 
-// ManifestPath returns the full path to PROVENANCE_MANIFEST.yaml within the .claude directory.
-func ManifestPath(claudeDir string) string {
-	return filepath.Join(claudeDir, ManifestFileName)
+// ManifestPath returns the full path to PROVENANCE_MANIFEST.yaml within the .knossos directory.
+func ManifestPath(knossosDir string) string {
+	return filepath.Join(knossosDir, ManifestFileName)
 }
 
 // validateManifest validates the manifest structure and content per TDD Section 1.

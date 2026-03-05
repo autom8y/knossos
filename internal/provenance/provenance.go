@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-// ManifestFileName is the provenance manifest filename within .claude/.
+// ManifestFileName is the provenance manifest filename within .knossos/.
 const ManifestFileName = "PROVENANCE_MANIFEST.yaml"
 
 // UserManifestFileName is the user-level provenance manifest filename.
@@ -23,7 +23,7 @@ const OrgManifestFileName = "ORG_PROVENANCE_MANIFEST.yaml"
 const CurrentSchemaVersion = "2.0"
 
 // ProvenanceManifest is the unified file-level provenance tracker for .claude/.
-// Stored at .claude/PROVENANCE_MANIFEST.yaml.
+// Stored at .knossos/PROVENANCE_MANIFEST.yaml.
 type ProvenanceManifest struct {
 	// SchemaVersion is the manifest format version. Currently "1.0".
 	SchemaVersion string `yaml:"schema_version"`
