@@ -359,7 +359,7 @@ categories:
         severity: BLOCKER
         status: IMPLEMENTED
         files:
-          - .claude/ACTIVE_RITE
+          - .knossos/ACTIVE_RITE
           - ariadne/internal/paths/paths.go
         validation_criteria: "File exists and contains current rite name; CLI reads/writes it"
 
@@ -540,7 +540,7 @@ categories:
         severity: BLOCKER
         status: IMPLEMENTED
         files:
-          - .claude/ACTIVE_RITE
+          - .knossos/ACTIVE_RITE
         validation_criteria: "File named ACTIVE_RITE, not ACTIVE_TEAM"
         notes: "Migration complete for file naming"
 

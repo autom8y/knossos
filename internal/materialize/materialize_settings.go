@@ -140,7 +140,7 @@ func (m *Materializer) trackState(manifest *RiteManifest, activeRiteName string)
 	}
 
 	// Update last sync time. active_rite was removed from state.json (PKG-008):
-	// all 18 runtime consumers read from .claude/ACTIVE_RITE file instead.
+	// all 18 runtime consumers read from .knossos/ACTIVE_RITE file instead.
 	state.LastSync = time.Now().UTC()
 	err = stateManager.Save(state)
 	if err != nil {
@@ -227,7 +227,7 @@ func (m *Materializer) materializeWorkflow(knossosDir string, resolved *Resolved
 }
 
 // writeActiveRite writes the ACTIVE_RITE marker file.
-func (m *Materializer) writeActiveRite(riteName, claudeDir string) error {
+func (m *Materializer) writeActiveRite(riteName string) error {
 	activeRitePath := m.resolver.ActiveRiteFile()
 	content := []byte(riteName + "\n")
 	_, err := fileutil.WriteIfChanged(activeRitePath, content, 0644)

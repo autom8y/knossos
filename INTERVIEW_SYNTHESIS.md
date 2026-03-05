@@ -172,7 +172,7 @@ The **rite + workflow/task type** together determine session shape. 10x-dev init
 | Key entry point | `cmd/ari/main.go` → `internal/cmd/root.go` |
 | Materialize | `ari sync materialize --rite <name>` |
 | Rite swap | `ari rite swap <name>` |
-| Active rite | `.claude/ACTIVE_RITE` |
+| Active rite | `.knossos/ACTIVE_RITE` |
 | ADRs | `docs/decisions/` (22 documents) |
 | Templates | `knossos/templates/sections/*.md.tpl` |
 | Agent schema | `internal/validation/schemas/agent.schema.json` |

@@ -508,7 +508,7 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 	}
 
 	// 10. Write ACTIVE_RITE marker
-	if err := m.writeActiveRite(activeRiteName, claudeDir); err != nil {
+	if err := m.writeActiveRite(activeRiteName); err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to write ACTIVE_RITE", err)
 	}
 
