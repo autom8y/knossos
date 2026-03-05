@@ -110,7 +110,7 @@ Copy all files to correct locations.
 Verify ari sync --rite can load the rite.
 1. Run: `ari sync --rite {rite-name}`
 2. Check exit code is 0
-3. Verify .claude/ACTIVE_RITE contains rite name
+3. Verify .knossos/ACTIVE_RITE contains rite name
 4. Verify .claude/agents/ has correct files
 5. Verify .claude/ACTIVE_WORKFLOW.yaml exists
 
@@ -139,7 +139,7 @@ Ready for Eval Specialist when:
 - [ ] workflow.yaml exists in rite root
 - [ ] File count matches expected (from RITE-SPEC)
 - [ ] ari sync --rite loads rite without errors
-- [ ] .claude/ACTIVE_RITE shows correct rite name
+- [ ] .knossos/ACTIVE_RITE shows correct rite name
 - [ ] .claude/agents/ contains copied agent files
 - [ ] .claude/ACTIVE_WORKFLOW.yaml exists and is valid
 

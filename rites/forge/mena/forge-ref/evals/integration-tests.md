@@ -16,7 +16,7 @@
 
 ```bash
 # Save current state
-ORIGINAL_TEAM=$(cat .claude/ACTIVE_RITE 2>/dev/null || echo "none")
+ORIGINAL_TEAM=$(cat .knossos/ACTIVE_RITE 2>/dev/null || echo "none")
 
 # Attempt swap
 $KNOSSOS_HOME/ari sync --rite {rite-name}
@@ -24,7 +24,7 @@ EXIT_CODE=$?
 
 # Verify
 echo "Exit code: $EXIT_CODE"
-cat .claude/ACTIVE_RITE
+cat .knossos/ACTIVE_RITE
 ls .claude/agents/
 cat .claude/ACTIVE_WORKFLOW.yaml
 

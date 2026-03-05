@@ -34,7 +34,7 @@ cat $KNOSSOS_HOME/rites/{rite-name}/workflow.yaml
 ari sync --rite {rite-name}
 
 # Verify sync worked
-cat .claude/ACTIVE_RITE
+cat .knossos/ACTIVE_RITE
 ls .claude/agents/
 ```
 
@@ -57,7 +57,7 @@ Key behaviors to understand:
 - Preserves global agents from ~/.claude/agents/
 
 ### State Update
-- Writes rite name to .claude/ACTIVE_RITE
+- Writes rite name to .knossos/ACTIVE_RITE
 - Updates timestamps
 
 ### Exit Codes

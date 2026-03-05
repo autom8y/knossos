@@ -30,7 +30,7 @@ ari session status --output json 2>/dev/null
 ari session list --output json 2>/dev/null
 
 # 3. Active rite
-cat .claude/ACTIVE_RITE 2>/dev/null || echo "none"
+cat .knossos/ACTIVE_RITE 2>/dev/null || echo "none"
 
 # 4. WIP artifacts
 ls .sos/wip/ 2>/dev/null

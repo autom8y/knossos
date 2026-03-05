@@ -20,7 +20,7 @@ Manage rites. $ARGUMENTS
 ## Behavior
 
 **If no arguments or querying current rite:**
-1. Read `.claude/ACTIVE_RITE` and display current rite
+1. Read `.knossos/ACTIVE_RITE` and display current rite
 2. Show: "Active rite: {name}" or "No rite active"
 
 **If `--list` or `-l`:**

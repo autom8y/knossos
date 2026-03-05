@@ -27,7 +27,7 @@ Prompt user for any missing parameters:
   - `SYSTEM` - Multiple modules, APIs, data persistence
   - `INITIATIVE` - Multiple services, infrastructure, complex integration
   - `MIGRATION` - Cross-cutting migrations, large-scale refactors
-- **Target rite**: Defaults to current ACTIVE_RITE (read from `.claude/ACTIVE_RITE`)
+- **Target rite**: Defaults to current ACTIVE_RITE (read from `.knossos/ACTIVE_RITE`)
 
 ### 3. Rite Context Setup
 

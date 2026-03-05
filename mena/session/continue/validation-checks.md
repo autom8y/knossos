@@ -11,7 +11,7 @@ Rites contain different pantheons. If session started with `10x-dev` but current
 ### Check Logic
 
 ```
-Read current .claude/ACTIVE_RITE
+Read current .knossos/ACTIVE_RITE
 Compare to SESSION_CONTEXT.active_rite
 If different → Surface mismatch warning
 ```

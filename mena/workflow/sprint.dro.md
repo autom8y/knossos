@@ -17,7 +17,7 @@ Auto-injected by SessionStart hook (project, rite, session, git).
    - If missing: ERROR "No active workflow. Use /rite to select a rite first."
 
 2. **Rite context**:
-   - Verify `.claude/ACTIVE_RITE` exists
+   - Verify `.knossos/ACTIVE_RITE` exists
    - If missing: ERROR "No rite active. Use /rite <rite-name> to select a rite."
 
 ## Your Task

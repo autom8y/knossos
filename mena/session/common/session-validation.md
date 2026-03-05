@@ -148,7 +148,7 @@ Use /rite to switch or check KNOSSOS_HOME.
 
 **Implementation**:
 ```bash
-active_rite=$(cat .claude/ACTIVE_RITE)
+active_rite=$(cat .knossos/ACTIVE_RITE)
 session_rite=$(yq e '.active_rite' SESSION_CONTEXT.md)
 
 if [[ "$active_rite" != "$session_rite" ]]; then

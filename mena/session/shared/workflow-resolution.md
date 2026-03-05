@@ -21,7 +21,7 @@ Commands that invoke agents or switch rites:
 
 ```
 1. Read ACTIVE_RITE file
-   - Path: .claude/ACTIVE_RITE
+   - Path: .knossos/ACTIVE_RITE
    - Returns: Current rite name
 
 2. If command specifies rite change:

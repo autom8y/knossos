@@ -102,7 +102,7 @@ In orchestrated mode, `/consult` provides full rite/workflow routing as describe
 When invoked without arguments, `/consult` provides ecosystem overview:
 
 1. **Summarize Current State**
-   - Active rite (from `.claude/ACTIVE_RITE`)
+   - Active rite (from `.knossos/ACTIVE_RITE`)
    - Active session (from `.sos/sessions/`)
    - Current complexity level (if in session)
 
