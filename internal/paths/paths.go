@@ -95,6 +95,11 @@ func (r *Resolver) ArchiveDir() string {
 	return filepath.Join(r.SOSDir(), "archive")
 }
 
+// LandDir returns the path to the .sos/land/ directory (tracked cross-session synthesis).
+func (r *Resolver) LandDir() string {
+	return filepath.Join(r.SOSDir(), "land")
+}
+
 // SessionDir returns the path to a specific session directory.
 func (r *Resolver) SessionDir(sessionID string) string {
 	return filepath.Join(r.SessionsDir(), sessionID)
@@ -198,6 +203,21 @@ func (r *Resolver) LedgeSpikesDir() string {
 // LedgeShelfDir returns the path to the .ledge/shelf/ directory.
 func (r *Resolver) LedgeShelfDir() string {
 	return filepath.Join(r.LedgeDir(), "shelf")
+}
+
+// LedgeShelfDecisionsDir returns the path to the .ledge/shelf/decisions/ directory.
+func (r *Resolver) LedgeShelfDecisionsDir() string {
+	return filepath.Join(r.LedgeShelfDir(), "decisions")
+}
+
+// LedgeShelfSpecsDir returns the path to the .ledge/shelf/specs/ directory.
+func (r *Resolver) LedgeShelfSpecsDir() string {
+	return filepath.Join(r.LedgeShelfDir(), "specs")
+}
+
+// LedgeShelfReviewsDir returns the path to the .ledge/shelf/reviews/ directory.
+func (r *Resolver) LedgeShelfReviewsDir() string {
+	return filepath.Join(r.LedgeShelfDir(), "reviews")
 }
 
 

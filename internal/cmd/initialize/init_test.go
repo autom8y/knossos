@@ -567,7 +567,7 @@ func TestWriteProjectGitignore_NewFile(t *testing.T) {
 	}
 	content := string(data)
 
-	for _, pattern := range []string{"# Knossos", "# End Knossos", ".knossos/", ".claude/CLAUDE.md", "**/.sos/*", "!**/.sos/archive/", "**/.ledge/*", "!**/.ledge/shelf/"} {
+	for _, pattern := range []string{"# Knossos", "# End Knossos", ".knossos/", ".claude/CLAUDE.md", "**/.sos/*", "!**/.sos/land/", "**/.ledge/*", "!**/.ledge/shelf/"} {
 		if !strings.Contains(content, pattern) {
 			t.Errorf(".gitignore missing pattern %q", pattern)
 		}
@@ -674,7 +674,7 @@ func verifyLedgeSubdirs(t *testing.T, projectDir string) {
 	ledgeDir := filepath.Join(projectDir, ".ledge")
 
 	// Verify subdirectories exist with .gitkeep.
-	for _, sub := range []string{"decisions", "specs", "reviews", "spikes", "shelf"} {
+	for _, sub := range []string{"decisions", "specs", "reviews", "spikes"} {
 		subDir := filepath.Join(ledgeDir, sub)
 		if _, err := os.Stat(subDir); os.IsNotExist(err) {
 			t.Errorf(".ledge/%s/ directory was not created", sub)
@@ -711,14 +711,27 @@ func verifyLedgeSubdirs(t *testing.T, projectDir string) {
 		}
 	}
 
-	// Verify .sos/archive/ exists with .gitkeep.
-	archiveDir := filepath.Join(projectDir, ".sos", "archive")
-	if _, err := os.Stat(archiveDir); os.IsNotExist(err) {
-		t.Error(".sos/archive/ directory was not created")
+	// Verify .sos/land/ exists with .gitkeep.
+	landDir := filepath.Join(projectDir, ".sos", "land")
+	if _, err := os.Stat(landDir); os.IsNotExist(err) {
+		t.Error(".sos/land/ directory was not created")
 	}
-	archiveGitkeep := filepath.Join(archiveDir, ".gitkeep")
-	if _, err := os.Stat(archiveGitkeep); os.IsNotExist(err) {
-		t.Error(".sos/archive/.gitkeep was not created")
+	landGitkeep := filepath.Join(landDir, ".gitkeep")
+	if _, err := os.Stat(landGitkeep); os.IsNotExist(err) {
+		t.Error(".sos/land/.gitkeep was not created")
+	}
+
+	// Verify .ledge/shelf/ has mirrored category subdirectories.
+	shelfDir := filepath.Join(ledgeDir, "shelf")
+	for _, sub := range []string{"decisions", "specs", "reviews"} {
+		subDir := filepath.Join(shelfDir, sub)
+		if _, err := os.Stat(subDir); os.IsNotExist(err) {
+			t.Errorf(".ledge/shelf/%s/ directory was not created", sub)
+		}
+		gitkeep := filepath.Join(subDir, ".gitkeep")
+		if _, err := os.Stat(gitkeep); os.IsNotExist(err) {
+			t.Errorf(".ledge/shelf/%s/.gitkeep was not created", sub)
+		}
 	}
 
 	// Verify root .gitignore has Knossos block.

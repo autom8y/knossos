@@ -350,7 +350,7 @@ func scaffoldProjectDirs(projectDir string) {
 	}
 
 	ledgeDir := filepath.Join(projectDir, ".ledge")
-	ledgeSubdirs := []string{"decisions", "specs", "reviews", "spikes", "shelf"}
+	ledgeSubdirs := []string{"decisions", "specs", "reviews", "spikes"}
 	for _, sub := range ledgeSubdirs {
 		subDir := filepath.Join(ledgeDir, sub)
 		_ = os.MkdirAll(subDir, 0755)
@@ -361,12 +361,29 @@ func scaffoldProjectDirs(projectDir string) {
 		}
 	}
 
-	// .sos/archive/ — tracked archive survives gitignore negation.
-	archiveDir := filepath.Join(projectDir, ".sos", "archive")
-	_ = os.MkdirAll(archiveDir, 0755)
-	archiveGitkeep := filepath.Join(archiveDir, ".gitkeep")
-	if _, err := os.Stat(archiveGitkeep); os.IsNotExist(err) {
-		_ = os.WriteFile(archiveGitkeep, []byte(""), 0644)
+	// .ledge/shelf/ — tracked production-quality work products (mirrored categories).
+	shelfDir := filepath.Join(ledgeDir, "shelf")
+	shelfSubdirs := []string{"decisions", "specs", "reviews"}
+	for _, sub := range shelfSubdirs {
+		subDir := filepath.Join(shelfDir, sub)
+		_ = os.MkdirAll(subDir, 0755)
+		gitkeep := filepath.Join(subDir, ".gitkeep")
+		if _, err := os.Stat(gitkeep); os.IsNotExist(err) {
+			_ = os.WriteFile(gitkeep, []byte(""), 0644)
+		}
+	}
+	// Root shelf .gitkeep (in case no subdirs have content yet).
+	shelfGitkeep := filepath.Join(shelfDir, ".gitkeep")
+	if _, err := os.Stat(shelfGitkeep); os.IsNotExist(err) {
+		_ = os.WriteFile(shelfGitkeep, []byte(""), 0644)
+	}
+
+	// .sos/land/ — tracked cross-session synthesis (survives gitignore negation).
+	landDir := filepath.Join(projectDir, ".sos", "land")
+	_ = os.MkdirAll(landDir, 0755)
+	landGitkeep := filepath.Join(landDir, ".gitkeep")
+	if _, err := os.Stat(landGitkeep); os.IsNotExist(err) {
+		_ = os.WriteFile(landGitkeep, []byte(""), 0644)
 	}
 
 	// Root .ledge/.gitignore: preserve decisions and specs, ignore session scratch.
@@ -405,8 +422,8 @@ const knossosGitignoreBlock = `# Knossos
 .knossos/
 .claude/CLAUDE.md
 **/.sos/*
-!**/.sos/archive/
-!**/.sos/archive/**
+!**/.sos/land/
+!**/.sos/land/**
 **/.ledge/*
 !**/.ledge/shelf/
 !**/.ledge/shelf/**
