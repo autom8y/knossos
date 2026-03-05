@@ -85,7 +85,8 @@ func (m *Manager) Switch(idOrName string, opts WorktreeSwitchOptions) (*Worktree
 	// Update rite if requested
 	if opts.UpdateRite && wt.Rite != "" {
 		// Write ACTIVE_RITE file directly (always, as baseline)
-		activeRitePath := filepath.Join(wt.Path, ".claude", "ACTIVE_RITE")
+		wtResolver := paths.NewResolver(wt.Path)
+		activeRitePath := wtResolver.ActiveRiteFile()
 		if err := os.MkdirAll(filepath.Dir(activeRitePath), 0755); err == nil {
 			_ = os.WriteFile(activeRitePath, []byte(wt.Rite+"\n"), 0644)
 		}

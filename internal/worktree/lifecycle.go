@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/autom8y/knossos/internal/errors"
+	"github.com/autom8y/knossos/internal/paths"
 )
 
 // Manager handles worktree lifecycle operations.
@@ -92,11 +93,7 @@ func (m *Manager) Create(opts CreateOptions) (*Worktree, error) {
 	// Get rite from flag or detect from ACTIVE_RITE
 	rite := opts.Rite
 	if rite == "" {
-		activeRitePath := filepath.Join(m.rootDir, ".claude", "ACTIVE_RITE")
-		data, err := os.ReadFile(activeRitePath)
-		if err == nil {
-			rite = strings.TrimSpace(string(data))
-		}
+		rite = paths.NewResolver(m.rootDir).ReadActiveRite()
 	}
 
 	// Determine base branch

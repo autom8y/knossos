@@ -228,7 +228,7 @@ func (m *Materializer) materializeWorkflow(knossosDir string, resolved *Resolved
 
 // writeActiveRite writes the ACTIVE_RITE marker file.
 func (m *Materializer) writeActiveRite(riteName, claudeDir string) error {
-	activeRitePath := filepath.Join(claudeDir, "ACTIVE_RITE")
+	activeRitePath := m.resolver.ActiveRiteFile()
 	content := []byte(riteName + "\n")
 	_, err := fileutil.WriteIfChanged(activeRitePath, content, 0644)
 	if err != nil {

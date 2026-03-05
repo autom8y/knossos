@@ -6,6 +6,8 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+
+	"github.com/autom8y/knossos/internal/paths"
 )
 
 // isGitWorktree reports whether projectDir is a linked git worktree (not the main worktree).
@@ -67,13 +69,8 @@ func getMainWorktreeDir(projectDir string) (string, error) {
 	return filepath.Dir(commonDir), nil
 }
 
-// inheritRiteFromMainWorktree reads the ACTIVE_RITE file from the main worktree's .claude/
+// inheritRiteFromMainWorktree reads the ACTIVE_RITE file from the main worktree's .knossos/
 // directory. Returns empty string if no ACTIVE_RITE file exists or it is unreadable.
 func inheritRiteFromMainWorktree(mainDir string) string {
-	activeRitePath := filepath.Join(mainDir, ".claude", "ACTIVE_RITE")
-	data, err := os.ReadFile(activeRitePath)
-	if err != nil {
-		return ""
-	}
-	return strings.TrimSpace(string(data))
+	return paths.NewResolver(mainDir).ReadActiveRite()
 }

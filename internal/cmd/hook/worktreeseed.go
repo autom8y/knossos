@@ -120,11 +120,7 @@ func runWorktreeSeed(ctx *cmdContext) error {
 	}
 
 	// Step 6: Read ACTIVE_RITE from the main worktree (best-effort).
-	activeRitePath := filepath.Join(projectRoot, ".claude", "ACTIVE_RITE")
-	riteName := ""
-	if data, err := os.ReadFile(activeRitePath); err == nil {
-		riteName = strings.TrimSpace(string(data))
-	}
+	riteName := paths.NewResolver(projectRoot).ReadActiveRite()
 
 	// Step 7: If a rite is active, run ari sync in the new worktree to seed .claude/.
 	if riteName != "" {

@@ -9,6 +9,7 @@ import (
 
 	"github.com/autom8y/knossos/internal/errors"
 	"github.com/autom8y/knossos/internal/frontmatter"
+	"github.com/autom8y/knossos/internal/paths"
 	"gopkg.in/yaml.v3"
 )
 
@@ -531,10 +532,7 @@ func (p *Pipeline) buildRenderContext(manifest *Manifest) (*RenderContext, error
 
 	// Try to load active rite if not set
 	if ctx.ActiveRite == "" {
-		activeRitePath := filepath.Join(p.ProjectRoot, ".claude", "ACTIVE_RITE")
-		if data, err := os.ReadFile(activeRitePath); err == nil {
-			ctx.ActiveRite = strings.TrimSpace(string(data))
-		}
+		ctx.ActiveRite = paths.NewResolver(p.ProjectRoot).ReadActiveRite()
 	}
 
 	// Load agent information from .claude/agents/

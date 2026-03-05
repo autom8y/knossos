@@ -7,7 +7,6 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"gopkg.in/yaml.v3"
 
@@ -289,7 +288,7 @@ func (m *Materializer) MaterializeMinimal(opts Options) (*Result, error) {
 	}
 
 	// Remove rite-specific state files (cross-cutting mode has no rite)
-	_ = os.Remove(filepath.Join(claudeDir, "ACTIVE_RITE"))
+	_ = os.Remove(filepath.Join(knossosDir, "ACTIVE_RITE"))
 	_ = os.Remove(filepath.Join(knossosDir, "ACTIVE_WORKFLOW.yaml"))
 	_ = os.Remove(filepath.Join(claudeDir, "INVOCATION_STATE.yaml"))
 
@@ -616,11 +615,7 @@ func (m *Materializer) syncRiteScope(opts SyncOptions) (*RiteScopeResult, error)
 	riteName := opts.RiteName
 
 	// Always read previous ACTIVE_RITE for rite-switch detection
-	var previousRite string
-	activeRitePath := filepath.Join(m.resolver.ClaudeDir(), "ACTIVE_RITE")
-	if data, err := os.ReadFile(activeRitePath); err == nil {
-		previousRite = strings.TrimSpace(string(data))
-	}
+	previousRite := m.resolver.ReadActiveRite()
 
 	if riteName == "" {
 		if previousRite == "" {
