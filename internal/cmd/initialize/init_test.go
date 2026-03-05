@@ -154,7 +154,8 @@ dependencies:
 	}
 
 	// Verify ACTIVE_RITE was written.
-	activeRitePath := filepath.Join(claudeDir, "ACTIVE_RITE")
+	knossosDir := filepath.Join(dir, ".knossos")
+	activeRitePath := filepath.Join(knossosDir, "ACTIVE_RITE")
 	data, err := os.ReadFile(activeRitePath)
 	if err != nil {
 		t.Fatalf("failed to read ACTIVE_RITE: %v", err)

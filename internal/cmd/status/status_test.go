@@ -16,6 +16,7 @@ func setupProject(t *testing.T) string {
 	t.Helper()
 	dir := t.TempDir()
 	os.MkdirAll(filepath.Join(dir, ".claude", "agents"), 0755)
+	os.MkdirAll(filepath.Join(dir, ".knossos"), 0755)
 	return dir
 }
 
@@ -24,7 +25,7 @@ func TestCollectClaude_Exists(t *testing.T) {
 	resolver := paths.NewResolver(root)
 
 	// Write ACTIVE_RITE
-	os.WriteFile(filepath.Join(root, ".claude", "ACTIVE_RITE"), []byte("10x-dev\n"), 0644)
+	os.WriteFile(filepath.Join(root, ".knossos", "ACTIVE_RITE"), []byte("10x-dev\n"), 0644)
 
 	// Write some agent files
 	os.WriteFile(filepath.Join(root, ".claude", "agents", "pythia.md"), []byte("# agent"), 0644)

@@ -251,12 +251,12 @@ current_phase: "implementation"
 		t.Fatalf("Failed to write session context: %v", err)
 	}
 
-	// Write ACTIVE_RITE (requires .claude/ dir for CC runtime state)
-	claudeDir := filepath.Join(tmpDir, ".claude")
-	if err := os.MkdirAll(claudeDir, 0755); err != nil {
-		t.Fatalf("Failed to create .claude dir: %v", err)
+	// Write ACTIVE_RITE (.knossos/ holds framework state)
+	knossosDir := filepath.Join(tmpDir, ".knossos")
+	if err := os.MkdirAll(knossosDir, 0755); err != nil {
+		t.Fatalf("Failed to create .knossos dir: %v", err)
 	}
-	activeRiteFile := filepath.Join(claudeDir, "ACTIVE_RITE")
+	activeRiteFile := filepath.Join(knossosDir, "ACTIVE_RITE")
 	if err := os.WriteFile(activeRiteFile, []byte("10x-dev"), 0644); err != nil {
 		t.Fatalf("Failed to write ACTIVE_RITE: %v", err)
 	}
@@ -377,7 +377,8 @@ current_phase: "implementation"
 ---
 `
 	os.WriteFile(filepath.Join(sessionDir, "SESSION_CONTEXT.md"), []byte(sessionContext), 0644)
-	os.WriteFile(filepath.Join(tmpDir, ".claude", "ACTIVE_RITE"), []byte("ecosystem"), 0644)
+	os.MkdirAll(filepath.Join(tmpDir, ".knossos"), 0755)
+	os.WriteFile(filepath.Join(tmpDir, ".knossos", "ACTIVE_RITE"), []byte("ecosystem"), 0644)
 
 	// Write COMPACT_STATE.md (simulating PreCompact wrote it)
 	checkpointContent := "# Compact State Checkpoint\n\n| Field | Value |\n|-------|-------|\n| session_id | session-20260208-100000-rehydrate |\n| initiative | Rehydration Test |\n"
@@ -456,7 +457,8 @@ current_phase: "requirements"
 ---
 `
 	os.WriteFile(filepath.Join(sessionDir, "SESSION_CONTEXT.md"), []byte(sessionContext), 0644)
-	os.WriteFile(filepath.Join(tmpDir, ".claude", "ACTIVE_RITE"), []byte("forge"), 0644)
+	os.MkdirAll(filepath.Join(tmpDir, ".knossos"), 0755)
+	os.WriteFile(filepath.Join(tmpDir, ".knossos", "ACTIVE_RITE"), []byte("forge"), 0644)
 
 	testutil.SetupEnv(t, &testutil.HookEnv{
 		Event:      "SessionStart",
@@ -633,10 +635,9 @@ current_phase: "implementation"
 `
 	os.WriteFile(filepath.Join(sessionDir, "SESSION_CONTEXT.md"), []byte(sessionContext), 0644)
 
-	// Create .claude/ for CC runtime state (ACTIVE_RITE, agents, etc.)
-	claudeDir := filepath.Join(tmpDir, ".claude")
-	os.MkdirAll(claudeDir, 0755)
-	os.WriteFile(filepath.Join(claudeDir, "ACTIVE_RITE"), []byte("alpha"), 0644)
+	// Create .knossos/ for framework state (ACTIVE_RITE)
+	os.MkdirAll(filepath.Join(tmpDir, ".knossos"), 0755)
+	os.WriteFile(filepath.Join(tmpDir, ".knossos", "ACTIVE_RITE"), []byte("alpha"), 0644)
 
 	// Create rites in .knossos/rites/ (project-local satellite rites).
 	// SourceResolver checks project-local rites first, so these appear in
@@ -775,7 +776,8 @@ current_phase: "implementation"
 ---
 `
 	os.WriteFile(filepath.Join(sessionDir, "SESSION_CONTEXT.md"), []byte(sessionContext), 0644)
-	os.WriteFile(filepath.Join(tmpDir, ".claude", "ACTIVE_RITE"), []byte("test"), 0644)
+	os.MkdirAll(filepath.Join(tmpDir, ".knossos"), 0755)
+	os.WriteFile(filepath.Join(tmpDir, ".knossos", "ACTIVE_RITE"), []byte("test"), 0644)
 
 	os.Setenv("CLAUDE_HOOK_EVENT", "SessionStart")
 	os.Setenv("CLAUDE_PROJECT_DIR", tmpDir)
@@ -871,7 +873,8 @@ current_phase: "implementation"
 ---
 `
 	os.WriteFile(filepath.Join(sessionDir, "SESSION_CONTEXT.md"), []byte(sessionContext), 0644)
-	os.WriteFile(filepath.Join(tmpDir, ".claude", "ACTIVE_RITE"), []byte("ecosystem"), 0644)
+	os.MkdirAll(filepath.Join(tmpDir, ".knossos"), 0755)
+	os.WriteFile(filepath.Join(tmpDir, ".knossos", "ACTIVE_RITE"), []byte("ecosystem"), 0644)
 
 	// Write .throughline-ids.json as if SubagentStart had fired
 	idData := `{"pythia":"agent-pythia-xyz","moirai":"agent-moirai-uvw"}`
@@ -948,7 +951,8 @@ current_phase: "requirements"
 ---
 `
 	os.WriteFile(filepath.Join(sessionDir, "SESSION_CONTEXT.md"), []byte(sessionContext), 0644)
-	os.WriteFile(filepath.Join(tmpDir, ".claude", "ACTIVE_RITE"), []byte("forge"), 0644)
+	os.MkdirAll(filepath.Join(tmpDir, ".knossos"), 0755)
+	os.WriteFile(filepath.Join(tmpDir, ".knossos", "ACTIVE_RITE"), []byte("forge"), 0644)
 
 	testutil.SetupEnv(t, &testutil.HookEnv{
 		Event:      "SessionStart",

@@ -85,11 +85,12 @@ func setupKnossosHome(t *testing.T, knossosHome string) {
 	))
 }
 
-func writeActiveRite(t *testing.T, claudeDir, riteName string) {
+func writeActiveRite(t *testing.T, projectDir, riteName string) {
 	t.Helper()
-	require.NoError(t, os.MkdirAll(claudeDir, 0755))
+	knossosDir := filepath.Join(projectDir, ".knossos")
+	require.NoError(t, os.MkdirAll(knossosDir, 0755))
 	require.NoError(t, os.WriteFile(
-		filepath.Join(claudeDir, "ACTIVE_RITE"),
+		filepath.Join(knossosDir, "ACTIVE_RITE"),
 		[]byte(riteName+"\n"),
 		0644,
 	))
@@ -102,7 +103,7 @@ func TestUnifiedSync_RiteOnly(t *testing.T) {
 	riteDir := filepath.Join(projectDir, ".knossos", "rites", "test-rite")
 
 	setupTestRite(t, riteDir)
-	writeActiveRite(t, claudeDir, "test-rite")
+	writeActiveRite(t, projectDir, "test-rite")
 
 	resolver := paths.NewResolver(projectDir)
 	m := NewMaterializer(resolver)
@@ -120,7 +121,7 @@ func TestUnifiedSync_RiteOnly(t *testing.T) {
 	// Verify .claude/ populated
 	assert.FileExists(t, filepath.Join(claudeDir, "agents", "test-agent.md"))
 	assert.FileExists(t, filepath.Join(claudeDir, "CLAUDE.md"))
-	assert.FileExists(t, filepath.Join(claudeDir, "ACTIVE_RITE"))
+	assert.FileExists(t, filepath.Join(projectDir, ".knossos", "ACTIVE_RITE"))
 }
 
 // TestUnifiedSync_UserOnly tests scope=user without project context
@@ -174,7 +175,7 @@ func TestUnifiedSync_ScopeAll(t *testing.T) {
 
 	setupTestRite(t, riteDir)
 	setupKnossosHome(t, knossosHome)
-	writeActiveRite(t, claudeDir, "test-rite")
+	writeActiveRite(t, projectDir, "test-rite")
 
 	resolver := paths.NewResolver(projectDir)
 	m := NewMaterializer(resolver)
@@ -247,7 +248,6 @@ func TestUnifiedSync_NoActiveRite_ScopeRite(t *testing.T) {
 // TestUnifiedSync_CollisionDetection tests user file shadowing rite
 func TestUnifiedSync_CollisionDetection(t *testing.T) {
 	projectDir := t.TempDir()
-	claudeDir := filepath.Join(projectDir, ".claude")
 	riteDir := filepath.Join(projectDir, ".knossos", "rites", "test-rite")
 
 	knossosHome := t.TempDir()
@@ -260,7 +260,7 @@ func TestUnifiedSync_CollisionDetection(t *testing.T) {
 
 	// Setup rite with test-agent
 	setupTestRite(t, riteDir)
-	writeActiveRite(t, claudeDir, "test-rite")
+	writeActiveRite(t, projectDir, "test-rite")
 
 	// Setup KNOSSOS_HOME with SAME agent name (collision)
 	agentsDir := filepath.Join(knossosHome, "agents")
@@ -512,7 +512,7 @@ func TestUnifiedSync_DryRun(t *testing.T) {
 
 	setupTestRite(t, riteDir)
 	setupKnossosHome(t, knossosHome)
-	writeActiveRite(t, claudeDir, "test-rite")
+	writeActiveRite(t, projectDir, "test-rite")
 
 	resolver := paths.NewResolver(projectDir)
 	m := NewMaterializer(resolver)
@@ -542,7 +542,7 @@ func TestUnifiedSync_Idempotency(t *testing.T) {
 	riteDir := filepath.Join(projectDir, ".knossos", "rites", "test-rite")
 
 	setupTestRite(t, riteDir)
-	writeActiveRite(t, claudeDir, "test-rite")
+	writeActiveRite(t, projectDir, "test-rite")
 
 	resolver := paths.NewResolver(projectDir)
 	m := NewMaterializer(resolver)
@@ -603,10 +603,9 @@ func TestUnifiedSync_Idempotency(t *testing.T) {
 // Regression test for R1: error surfacing in Sync().
 func TestSync_ScopeAll_RiteError_SurfacesError(t *testing.T) {
 	projectDir := t.TempDir()
-	claudeDir := filepath.Join(projectDir, ".claude")
 
 	// Write ACTIVE_RITE pointing to a non-existent rite
-	writeActiveRite(t, claudeDir, "nonexistent-rite")
+	writeActiveRite(t, projectDir, "nonexistent-rite")
 
 	resolver := paths.NewResolver(projectDir)
 	m := NewMaterializer(resolver)
@@ -630,10 +629,9 @@ func TestSync_ScopeAll_RiteError_SurfacesError(t *testing.T) {
 // are still returned as top-level errors (unchanged behavior).
 func TestSync_ScopeRite_Error_StillFails(t *testing.T) {
 	projectDir := t.TempDir()
-	claudeDir := filepath.Join(projectDir, ".claude")
 
 	// Write ACTIVE_RITE pointing to a non-existent rite
-	writeActiveRite(t, claudeDir, "nonexistent-rite")
+	writeActiveRite(t, projectDir, "nonexistent-rite")
 
 	resolver := paths.NewResolver(projectDir)
 	m := NewMaterializer(resolver)

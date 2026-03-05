@@ -75,7 +75,7 @@ func TestRiteSwitchIntegration_StateConsistency(t *testing.T) {
 	assert.Equal(t, "project", result.Source)
 
 	// Verify ACTIVE_RITE
-	activeRite, err := os.ReadFile(filepath.Join(claudeDir, "ACTIVE_RITE"))
+	activeRite, err := os.ReadFile(filepath.Join(knossosDir, "ACTIVE_RITE"))
 	require.NoError(t, err)
 	assert.Equal(t, "rite-a\n", string(activeRite))
 
@@ -114,7 +114,7 @@ func TestRiteSwitchIntegration_StateConsistency(t *testing.T) {
 	require.NoError(t, err)
 
 	// Verify ACTIVE_RITE = rite-b
-	activeRite, err = os.ReadFile(filepath.Join(claudeDir, "ACTIVE_RITE"))
+	activeRite, err = os.ReadFile(filepath.Join(knossosDir, "ACTIVE_RITE"))
 	require.NoError(t, err)
 	assert.Equal(t, "rite-b\n", string(activeRite))
 
@@ -151,7 +151,7 @@ func TestRiteSwitchIntegration_StateConsistency(t *testing.T) {
 	assert.Equal(t, "project", result2.Source)
 
 	// Everything should be identical
-	activeRite2, err := os.ReadFile(filepath.Join(claudeDir, "ACTIVE_RITE"))
+	activeRite2, err := os.ReadFile(filepath.Join(knossosDir, "ACTIVE_RITE"))
 	require.NoError(t, err)
 	assert.Equal(t, "rite-b\n", string(activeRite2))
 
@@ -162,7 +162,6 @@ func TestRiteSwitchIntegration_StateConsistency(t *testing.T) {
 
 func TestRiteSwitchIntegration_NoWorkflow(t *testing.T) {
 	projectDir := t.TempDir()
-	claudeDir := filepath.Join(projectDir, ".claude")
 	knossosDir := filepath.Join(projectDir, ".knossos")
 	ritesDir := filepath.Join(knossosDir, "rites")
 
@@ -200,7 +199,7 @@ func TestRiteSwitchIntegration_NoWorkflow(t *testing.T) {
 	assert.True(t, os.IsNotExist(err), "stale ACTIVE_WORKFLOW.yaml must be removed when switching to no-workflow rite")
 
 	// ACTIVE_RITE should exist
-	activeRite, err := os.ReadFile(filepath.Join(claudeDir, "ACTIVE_RITE"))
+	activeRite, err := os.ReadFile(filepath.Join(knossosDir, "ACTIVE_RITE"))
 	require.NoError(t, err)
 	assert.Equal(t, "no-workflow\n", string(activeRite))
 }

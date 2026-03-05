@@ -17,18 +17,18 @@ import (
 // WorktreeFixture holds paths created by SetupWorktreeTestFixture.
 type WorktreeFixture struct {
 	// MainDir is the main (primary) worktree directory. It contains a real
-	// .git/ directory and a populated .claude/ with ACTIVE_RITE.
+	// .git/ directory and a populated .knossos/ with ACTIVE_RITE.
 	MainDir string
 
 	// WorktreeDir is the linked worktree directory. It contains a .git file
-	// (pointer) but no .claude/ — matching the state after `git worktree add`.
+	// (pointer) but no .knossos/ — matching the state after `git worktree add`.
 	WorktreeDir string
 }
 
 // SetupWorktreeTestFixture creates a git repository with a linked worktree and
 // returns a WorktreeFixture. The fixture simulates the real-world state where:
 //
-//   - The main worktree has .claude/ACTIVE_RITE and a valid PROVENANCE_MANIFEST.yaml
+//   - The main worktree has .knossos/ACTIVE_RITE and a valid PROVENANCE_MANIFEST.yaml
 //   - The linked worktree has none of these (gitignored directories are absent)
 //
 // Cleanup is registered via t.Cleanup and handles both worktree removal and
@@ -48,17 +48,15 @@ func SetupWorktreeTestFixture(t *testing.T) WorktreeFixture {
 	gitRun(t, mainDir, "add", "README.md")
 	gitRun(t, mainDir, "commit", "-m", "initial commit")
 
-	// 3. Set up .claude/ACTIVE_RITE in main (simulates a post-sync main worktree).
-	claudeDir := filepath.Join(mainDir, ".claude")
-	mkdirAll(t, claudeDir)
-	writeFile(t, filepath.Join(claudeDir, "ACTIVE_RITE"), "test-rite\n")
+	// 3. Set up .knossos/ACTIVE_RITE in main (simulates a post-sync main worktree).
+	knossosDir := filepath.Join(mainDir, ".knossos")
+	mkdirAll(t, knossosDir)
+	writeFile(t, filepath.Join(knossosDir, "ACTIVE_RITE"), "test-rite\n")
 
 	// 4. Write a minimal PROVENANCE_MANIFEST.yaml so the collision checker has
 	//    a valid manifest to load from the main worktree's .knossos/.
 	//    Validation rules: knossos owner requires non-empty SourcePath and SourceType;
 	//    Checksum must match sha256:[0-9a-f]{64}.
-	knossosDir := filepath.Join(mainDir, ".knossos")
-	mkdirAll(t, knossosDir)
 	manifest := &provenance.ProvenanceManifest{
 		SchemaVersion: provenance.CurrentSchemaVersion,
 		LastSync:      time.Now().UTC(),

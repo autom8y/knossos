@@ -305,7 +305,7 @@ agents:
 	}
 
 	// Verify ACTIVE_RITE was updated
-	activeRitePath := filepath.Join(claudeDir, "ACTIVE_RITE")
+	activeRitePath := filepath.Join(tmpDir, ".knossos", "ACTIVE_RITE")
 	content, err := os.ReadFile(activeRitePath)
 	if err != nil {
 		t.Fatalf("ACTIVE_RITE file not created: %v", err)

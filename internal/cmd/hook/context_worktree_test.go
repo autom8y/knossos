@@ -69,13 +69,12 @@ current_phase: "implementation"
 		t.Fatalf("failed to write session context: %v", err)
 	}
 
-	// Create .claude/ in worktree (ensureProjectDirs creates it during sync,
-	// but the hook needs it for ACTIVE_RITE resolution).
-	worktreeClaudeDir := filepath.Join(worktreeDir, ".claude")
-	if err := os.MkdirAll(worktreeClaudeDir, 0755); err != nil {
-		t.Fatalf("failed to create worktree .claude dir: %v", err)
+	// Create .knossos/ in worktree (framework state including ACTIVE_RITE).
+	worktreeKnossosDir := filepath.Join(worktreeDir, ".knossos")
+	if err := os.MkdirAll(worktreeKnossosDir, 0755); err != nil {
+		t.Fatalf("failed to create worktree .knossos dir: %v", err)
 	}
-	if err := os.WriteFile(filepath.Join(worktreeClaudeDir, "ACTIVE_RITE"), []byte("test-rite\n"), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(worktreeKnossosDir, "ACTIVE_RITE"), []byte("test-rite\n"), 0644); err != nil {
 		t.Fatalf("failed to write worktree ACTIVE_RITE: %v", err)
 	}
 

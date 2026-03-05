@@ -80,7 +80,7 @@ func TestCollectTourFullProject(t *testing.T) {
 	// Add settings.json and CLAUDE.md
 	writeFile(t, filepath.Join(root, ".claude", "settings.json"), "{}")
 	writeFile(t, filepath.Join(root, ".claude", "CLAUDE.md"), "# Claude")
-	writeFile(t, filepath.Join(root, ".claude", "ACTIVE_RITE"), "10x-dev")
+	writeFile(t, filepath.Join(root, ".knossos", "ACTIVE_RITE"), "10x-dev")
 
 	// Add rites with manifests
 	riteDir := filepath.Join(root, ".knossos", "rites", "10x-dev")
@@ -246,7 +246,7 @@ func TestClaudeMDPresent(t *testing.T) {
 func TestClaudeActiveRiteValue(t *testing.T) {
 	// TC-T11: ACTIVE_RITE value
 	root := createTestProject(t)
-	writeFile(t, filepath.Join(root, ".claude", "ACTIVE_RITE"), "10x-dev")
+	writeFile(t, filepath.Join(root, ".knossos", "ACTIVE_RITE"), "10x-dev")
 
 	resolver := paths.NewResolver(root)
 	section := collectClaude(resolver)

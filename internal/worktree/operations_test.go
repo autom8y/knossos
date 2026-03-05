@@ -114,7 +114,7 @@ func TestSwitchWithRiteUpdate(t *testing.T) {
 	}
 
 	// Verify ACTIVE_RITE file was updated
-	activeRitePath := filepath.Join(wt.Path, ".claude", "ACTIVE_RITE")
+	activeRitePath := filepath.Join(wt.Path, ".knossos", "ACTIVE_RITE")
 	data, err := os.ReadFile(activeRitePath)
 	if err != nil {
 		t.Fatalf("Failed to read ACTIVE_RITE: %v", err)

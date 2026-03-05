@@ -35,7 +35,11 @@ Produces: Test reports
 	}
 
 	// Create ACTIVE_RITE file
-	if err := os.WriteFile(filepath.Join(claudeDir, "ACTIVE_RITE"), []byte("test-rite"), 0644); err != nil {
+	knossosDir := filepath.Join(tmpDir, ".knossos")
+	if err := os.MkdirAll(knossosDir, 0755); err != nil {
+		t.Fatalf("Failed to create .knossos dir: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(knossosDir, "ACTIVE_RITE"), []byte("test-rite"), 0644); err != nil {
 		t.Fatalf("Failed to create ACTIVE_RITE file: %v", err)
 	}
 

@@ -77,7 +77,7 @@ func TestGetMainWorktreeDir_FromMainWorktree(t *testing.T) {
 
 // TestSyncRiteScope_InWorktree_InheritsRite is a P0 test verifying that when
 // `ari sync` is run from a linked worktree (no ACTIVE_RITE present), it
-// inherits the rite from the main worktree's .claude/ACTIVE_RITE.
+// inherits the rite from the main worktree's .knossos/ACTIVE_RITE.
 func TestSyncRiteScope_InWorktree_InheritsRite(t *testing.T) {
 	// Isolate KNOSSOS_HOME to prevent rite resolution from picking up the
 	// developer's actual knossos installation.
@@ -88,7 +88,7 @@ func TestSyncRiteScope_InWorktree_InheritsRite(t *testing.T) {
 
 	fix := worktreefixture.SetupWorktreeTestFixture(t)
 
-	// The main worktree already has .claude/ACTIVE_RITE = "test-rite" (set by fixture).
+	// The main worktree already has .knossos/ACTIVE_RITE = "test-rite" (set by fixture).
 	// Create a minimal rite in KNOSSOS_HOME/rites/ so the SourceResolver (which
 	// uses the worktree as projectRoot) can find it via the knossos tier.
 	// Putting it in mainDir/.knossos/rites/ would not be found because the
@@ -134,9 +134,9 @@ hooks: []
 		t.Errorf("RiteResult.Status = %q, want %q", result.RiteResult.Status, "success")
 	}
 
-	// ACTIVE_RITE must be written into the worktree's .claude/ so subsequent
+	// ACTIVE_RITE must be written into the worktree's .knossos/ so subsequent
 	// hook calls can find the rite without re-inheriting.
-	worktreeActiveRite := filepath.Join(fix.WorktreeDir, ".claude", "ACTIVE_RITE")
+	worktreeActiveRite := filepath.Join(fix.WorktreeDir, ".knossos", "ACTIVE_RITE")
 	data, err := os.ReadFile(worktreeActiveRite)
 	if err != nil {
 		t.Fatalf("ACTIVE_RITE not created in worktree: %v", err)
@@ -160,11 +160,11 @@ func TestSyncRiteScope_InWorktree_NoMainRite_FallsToMinimal(t *testing.T) {
 
 	// Remove ACTIVE_RITE from the main worktree to simulate a fresh main repo
 	// that has never been synced with a rite.
-	if err := os.Remove(filepath.Join(fix.MainDir, ".claude", "ACTIVE_RITE")); err != nil {
+	if err := os.Remove(filepath.Join(fix.MainDir, ".knossos", "ACTIVE_RITE")); err != nil {
 		t.Fatalf("failed to remove main ACTIVE_RITE: %v", err)
 	}
 
-	// The worktree has no .claude/ and the main has no ACTIVE_RITE.
+	// The worktree has no .knossos/ and the main has no ACTIVE_RITE.
 	worktreeResolver := paths.NewResolver(fix.WorktreeDir)
 	m := NewMaterializer(worktreeResolver)
 

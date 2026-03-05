@@ -12,10 +12,10 @@ func setupTestRites(t *testing.T) (string, func()) {
 	tempDir := t.TempDir()
 
 	// Create project structure
-	claudeDir := filepath.Join(tempDir, ".claude")
+	knossosDir := filepath.Join(tempDir, ".knossos")
 	ritesDir := filepath.Join(tempDir, "rites")
 
-	for _, dir := range []string{claudeDir, ritesDir} {
+	for _, dir := range []string{knossosDir, ritesDir} {
 		if err := os.MkdirAll(dir, 0755); err != nil {
 			t.Fatalf("Failed to create directory %s: %v", dir, err)
 		}
@@ -63,7 +63,7 @@ skills:
 	}
 
 	// Set active rite
-	if err := os.WriteFile(filepath.Join(claudeDir, "ACTIVE_RITE"), []byte("test-rite"), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(knossosDir, "ACTIVE_RITE"), []byte("test-rite"), 0644); err != nil {
 		t.Fatalf("Failed to write active rite: %v", err)
 	}
 

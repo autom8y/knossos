@@ -31,14 +31,12 @@ func TestCreateSeedMode(t *testing.T) {
 		t.Fatalf("Failed to init git repo: %v", err)
 	}
 
-	// Create .claude directory
-	claudeDir := filepath.Join(projectDir, ".claude")
-	if err := os.MkdirAll(claudeDir, 0755); err != nil {
-		t.Fatalf("Failed to create .claude dir: %v", err)
+	// Create .knossos directory and ACTIVE_RITE
+	knossosDir := filepath.Join(projectDir, ".knossos")
+	if err := os.MkdirAll(knossosDir, 0755); err != nil {
+		t.Fatalf("Failed to create .knossos dir: %v", err)
 	}
-
-	// Create ACTIVE_RITE file
-	if err := os.WriteFile(filepath.Join(claudeDir, "ACTIVE_RITE"), []byte("10x-dev"), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(knossosDir, "ACTIVE_RITE"), []byte("10x-dev"), 0644); err != nil {
 		t.Fatalf("Failed to write ACTIVE_RITE: %v", err)
 	}
 
@@ -137,14 +135,12 @@ func TestCreateSeedMultiple(t *testing.T) {
 		t.Fatalf("Failed to init git repo: %v", err)
 	}
 
-	// Create .claude directory
-	claudeDir := filepath.Join(projectDir, ".claude")
-	if err := os.MkdirAll(claudeDir, 0755); err != nil {
-		t.Fatalf("Failed to create .claude dir: %v", err)
+	// Create .knossos directory and ACTIVE_RITE
+	knossosDir := filepath.Join(projectDir, ".knossos")
+	if err := os.MkdirAll(knossosDir, 0755); err != nil {
+		t.Fatalf("Failed to create .knossos dir: %v", err)
 	}
-
-	// Create ACTIVE_RITE file
-	if err := os.WriteFile(filepath.Join(claudeDir, "ACTIVE_RITE"), []byte("10x-dev"), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(knossosDir, "ACTIVE_RITE"), []byte("10x-dev"), 0644); err != nil {
 		t.Fatalf("Failed to write ACTIVE_RITE: %v", err)
 	}
 
@@ -231,15 +227,13 @@ func TestCreateSeedCleanup(t *testing.T) {
 		t.Fatalf("Failed to init git repo: %v", err)
 	}
 
-	// Create .claude directory but NOT .sos/sessions directory
+	// Create .knossos directory but NOT .sos/sessions directory
 	// This will cause session creation to succeed but demonstrates cleanup
-	claudeDir := filepath.Join(projectDir, ".claude")
-	if err := os.MkdirAll(claudeDir, 0755); err != nil {
-		t.Fatalf("Failed to create .claude dir: %v", err)
+	knossosDir := filepath.Join(projectDir, ".knossos")
+	if err := os.MkdirAll(knossosDir, 0755); err != nil {
+		t.Fatalf("Failed to create .knossos dir: %v", err)
 	}
-
-	// Create ACTIVE_RITE file
-	if err := os.WriteFile(filepath.Join(claudeDir, "ACTIVE_RITE"), []byte("10x-dev"), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(knossosDir, "ACTIVE_RITE"), []byte("10x-dev"), 0644); err != nil {
 		t.Fatalf("Failed to write ACTIVE_RITE: %v", err)
 	}
 
@@ -299,14 +293,12 @@ func TestCreateSeedJSONOutput(t *testing.T) {
 		t.Fatalf("Failed to init git repo: %v", err)
 	}
 
-	// Create .claude directory
-	claudeDir := filepath.Join(projectDir, ".claude")
-	if err := os.MkdirAll(claudeDir, 0755); err != nil {
-		t.Fatalf("Failed to create .claude dir: %v", err)
+	// Create .knossos directory and ACTIVE_RITE
+	knossosDir := filepath.Join(projectDir, ".knossos")
+	if err := os.MkdirAll(knossosDir, 0755); err != nil {
+		t.Fatalf("Failed to create .knossos dir: %v", err)
 	}
-
-	// Create ACTIVE_RITE file
-	if err := os.WriteFile(filepath.Join(claudeDir, "ACTIVE_RITE"), []byte("10x-dev"), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(knossosDir, "ACTIVE_RITE"), []byte("10x-dev"), 0644); err != nil {
 		t.Fatalf("Failed to write ACTIVE_RITE: %v", err)
 	}
 

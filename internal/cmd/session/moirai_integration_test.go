@@ -61,6 +61,7 @@ func setupProjectDir(t *testing.T) string {
 
 	dirs := []string{
 		filepath.Join(tmpDir, ".claude"),
+		filepath.Join(tmpDir, ".knossos"),
 		filepath.Join(tmpDir, ".sos", "sessions"),
 		filepath.Join(tmpDir, ".sos", "sessions", ".locks"),
 		filepath.Join(tmpDir, ".sos", "sessions", ".audit"),
@@ -72,7 +73,7 @@ func setupProjectDir(t *testing.T) string {
 	}
 
 	// Write ACTIVE_RITE so create picks it up
-	if err := os.WriteFile(filepath.Join(tmpDir, ".claude", "ACTIVE_RITE"), []byte("test-rite"), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(tmpDir, ".knossos", "ACTIVE_RITE"), []byte("test-rite"), 0644); err != nil {
 		t.Fatalf("Failed to write ACTIVE_RITE: %v", err)
 	}
 
