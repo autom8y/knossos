@@ -26,20 +26,20 @@ Commands read from `ACTIVE_WORKFLOW.yaml` to find the right agent.
 ```bash
 # Finds agent that produces design artifacts
 grep -B1 "produces: tdd\|produces: doc-structure\|produces: refactor-plan\|produces: reliability-plan" \
-  .claude/ACTIVE_WORKFLOW.yaml | grep "agent:" | head -1
+  .knossos/ACTIVE_WORKFLOW.yaml | grep "agent:" | head -1
 ```
 
 ### /build → Implementation Agent
 ```bash
 # Finds agent that produces implementation artifacts
 grep -B1 "produces: code\|produces: commits\|produces: documentation\|produces: infrastructure-changes" \
-  .claude/ACTIVE_WORKFLOW.yaml | grep "agent:"
+  .knossos/ACTIVE_WORKFLOW.yaml | grep "agent:"
 ```
 
 ### /qa → Validation Agent
 ```bash
 # Finds terminal phase agent (next: null)
-grep -B1 "next: null" .claude/ACTIVE_WORKFLOW.yaml | grep "agent:"
+grep -B1 "next: null" .knossos/ACTIVE_WORKFLOW.yaml | grep "agent:"
 ```
 
 ---
@@ -134,7 +134,7 @@ These commands use the workflow's entry point:
 ### Entry Point Resolution
 ```bash
 # Get entry agent from workflow
-ENTRY_AGENT=$(grep -A2 "^entry_point:" .claude/ACTIVE_WORKFLOW.yaml | grep "agent:" | awk '{print $2}')
+ENTRY_AGENT=$(grep -A2 "^entry_point:" .knossos/ACTIVE_WORKFLOW.yaml | grep "agent:" | awk '{print $2}')
 ```
 
 ---
@@ -220,10 +220,10 @@ quick-switch command is discoverable.
 $KNOSSOS_HOME/ari sync --rite {rite-name}
 
 # Test /architect routing
-grep -B1 "produces: tdd" .claude/ACTIVE_WORKFLOW.yaml
+grep -B1 "produces: tdd" .knossos/ACTIVE_WORKFLOW.yaml
 
 # Test /qa routing
-grep -B1 "next: null" .claude/ACTIVE_WORKFLOW.yaml
+grep -B1 "next: null" .knossos/ACTIVE_WORKFLOW.yaml
 ```
 
 ### Common Issues

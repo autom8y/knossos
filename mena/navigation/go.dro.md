@@ -65,7 +65,7 @@ Session: {session_id}
 next: {hint}
 ```
 
-Resolve the `next:` hint: read `.claude/ACTIVE_WORKFLOW.yaml`, find the phase matching `current_phase`, check its `next` field. If `next` names a phase → `/handoff {that_phase_agent}`. If `next: null` (terminal) → `/wrap` or `/commit && /pr`. If the user provided `$ARGUMENTS`, use their intent as the hint instead.
+Resolve the `next:` hint: read `.knossos/ACTIVE_WORKFLOW.yaml`, find the phase matching `current_phase`, check its `next` field. If `next` names a phase → `/handoff {that_phase_agent}`. If `next: null` (terminal) → `/wrap` or `/commit && /pr`. If the user provided `$ARGUMENTS`, use their intent as the hint instead.
 
 **RESUME_PARKED** (single parked session):
 ```

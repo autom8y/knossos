@@ -13,7 +13,7 @@ Auto-injected by SessionStart hook (project, rite, session, git).
 ## Pre-flight
 
 1. **Workflow required**:
-   - Verify `.claude/ACTIVE_WORKFLOW.yaml` exists
+   - Verify `.knossos/ACTIVE_WORKFLOW.yaml` exists
    - If missing: ERROR "No active workflow. Use /rite to select a rite first."
 
 2. **Rite context**:

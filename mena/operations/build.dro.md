@@ -33,7 +33,7 @@ Read the implementation agent from workflow:
 ```bash
 # Find the "implementation" or "execution" or "writing" phase agent
 # This varies by rite - 10x uses "implementation", hygiene uses "execution", etc.
-IMPL_AGENT=$(grep -B1 "produces: code\|produces: commits\|produces: documentation" .claude/ACTIVE_WORKFLOW.yaml | grep "agent:" | awk '{print $2}')
+IMPL_AGENT=$(grep -B1 "produces: code\|produces: commits\|produces: documentation" .knossos/ACTIVE_WORKFLOW.yaml | grep "agent:" | awk '{print $2}')
 ```
 
 ## Behavior

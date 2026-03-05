@@ -33,7 +33,7 @@ Read the design agent from workflow:
 ```bash
 # Find the design/architecture phase agent
 # This varies by rite - 10x uses "design", doc-rite uses "architecture", etc.
-DESIGN_AGENT=$(grep -B1 "produces: tdd\|produces: doc-structure\|produces: refactor-plan\|produces: risk-report" .claude/ACTIVE_WORKFLOW.yaml | grep "agent:" | head -1 | awk '{print $2}')
+DESIGN_AGENT=$(grep -B1 "produces: tdd\|produces: doc-structure\|produces: refactor-plan\|produces: risk-report" .knossos/ACTIVE_WORKFLOW.yaml | grep "agent:" | head -1 | awk '{print $2}')
 ```
 
 ## Behavior

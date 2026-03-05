@@ -112,7 +112,7 @@ Verify ari sync --rite can load the rite.
 2. Check exit code is 0
 3. Verify .knossos/ACTIVE_RITE contains rite name
 4. Verify .claude/agents/ has correct files
-5. Verify .claude/ACTIVE_WORKFLOW.yaml exists
+5. Verify .knossos/ACTIVE_WORKFLOW.yaml exists
 
 ### Phase 5: Rollback Preparation
 Document recovery path.
@@ -141,7 +141,7 @@ Ready for Eval Specialist when:
 - [ ] ari sync --rite loads rite without errors
 - [ ] .knossos/ACTIVE_RITE shows correct rite name
 - [ ] .claude/agents/ contains copied agent files
-- [ ] .claude/ACTIVE_WORKFLOW.yaml exists and is valid
+- [ ] .knossos/ACTIVE_WORKFLOW.yaml exists and is valid
 
 ## Session Checkpoints
 

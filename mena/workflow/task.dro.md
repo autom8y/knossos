@@ -13,7 +13,7 @@ Auto-injected by SessionStart hook (project, rite, session, git, workflow).
 ## Pre-flight
 
 1. **Workflow required**:
-   - Verify `.claude/ACTIVE_WORKFLOW.yaml` exists
+   - Verify `.knossos/ACTIVE_WORKFLOW.yaml` exists
    - If missing: ERROR "No active workflow. Use /rite to select a rite first."
 
 2. **Rite context**:
@@ -26,14 +26,14 @@ Execute a single task through the complete workflow lifecycle for the active rit
 
 ## Workflow Resolution
 
-Read the active workflow from `.claude/ACTIVE_WORKFLOW.yaml`:
+Read the active workflow from `.knossos/ACTIVE_WORKFLOW.yaml`:
 
 ```bash
 # Get workflow phases
-PHASES=$(grep -A20 "^phases:" .claude/ACTIVE_WORKFLOW.yaml)
+PHASES=$(grep -A20 "^phases:" .knossos/ACTIVE_WORKFLOW.yaml)
 
 # Get complexity levels
-COMPLEXITY_LEVELS=$(grep -A20 "^complexity_levels:" .claude/ACTIVE_WORKFLOW.yaml)
+COMPLEXITY_LEVELS=$(grep -A20 "^complexity_levels:" .knossos/ACTIVE_WORKFLOW.yaml)
 ```
 
 ## Behavior

@@ -124,7 +124,7 @@ End your response with:
 
 Resolve the hint dynamically:
 1. Read `current_phase` from Session Context (injected above).
-2. In `.claude/ACTIVE_WORKFLOW.yaml`, find the phase matching `current_phase` and check its `next` field.
+2. In `.knossos/ACTIVE_WORKFLOW.yaml`, find the phase matching `current_phase` and check its `next` field.
 3. If `next` names a phase → `next: /handoff {that_phase_agent}`.
    If `next: null` (terminal) → `next: /wrap` (or `/commit && /pr` if uncommitted changes).
 4. If the entry agent was already invoked within this `/start` execution, hint the *next* phase agent instead.

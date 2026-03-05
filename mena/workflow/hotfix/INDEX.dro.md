@@ -13,7 +13,7 @@ Auto-injected by SessionStart hook (project, rite, session, git, workflow).
 ## Pre-flight
 
 1. **Workflow required**:
-   - Verify `.claude/ACTIVE_WORKFLOW.yaml` exists
+   - Verify `.knossos/ACTIVE_WORKFLOW.yaml` exists
    - If missing: ERROR "No active workflow. Use /rite to select a rite first."
 
 2. **Rite context**:
@@ -30,7 +30,7 @@ For hotfix, use the implementation agent with fast-path workflow:
 
 ```bash
 # Get implementation agent from workflow
-IMPL_AGENT=$(grep -B1 "produces: code\|produces: commits\|produces: documentation" .claude/ACTIVE_WORKFLOW.yaml | grep "agent:" | awk '{print $2}')
+IMPL_AGENT=$(grep -B1 "produces: code\|produces: commits\|produces: documentation" .knossos/ACTIVE_WORKFLOW.yaml | grep "agent:" | awk '{print $2}')
 ```
 
 ## Behavior

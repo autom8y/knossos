@@ -26,7 +26,7 @@ EXIT_CODE=$?
 echo "Exit code: $EXIT_CODE"
 cat .knossos/ACTIVE_RITE
 ls .claude/agents/
-cat .claude/ACTIVE_WORKFLOW.yaml
+cat .knossos/ACTIVE_WORKFLOW.yaml
 
 # Restore
 if [ "$ORIGINAL_TEAM" != "none" ]; then

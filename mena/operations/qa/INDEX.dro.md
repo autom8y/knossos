@@ -33,7 +33,7 @@ Read the validation agent from workflow:
 ```bash
 # Find the final phase agent (validation, review, audit, etc.)
 # This is typically the last phase in the workflow
-VALIDATION_AGENT=$(grep -B1 "next: null" .claude/ACTIVE_WORKFLOW.yaml | grep "agent:" | awk '{print $2}')
+VALIDATION_AGENT=$(grep -B1 "next: null" .knossos/ACTIVE_WORKFLOW.yaml | grep "agent:" | awk '{print $2}')
 ```
 
 ## Behavior

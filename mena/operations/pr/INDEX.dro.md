@@ -74,7 +74,7 @@ End your response with:
 
 **Fork-context note**: This command may run without conversation history. To resolve the hint, read session state from disk:
 - Find active session: look for `status: "ACTIVE"` in `.sos/sessions/*/SESSION_CONTEXT.md`
-- Read `current_phase` from its frontmatter and check `.claude/ACTIVE_WORKFLOW.yaml` for phase ordering
+- Read `current_phase` from its frontmatter and check `.knossos/ACTIVE_WORKFLOW.yaml` for phase ordering
 - No active session found → output `📬 opened` without hint.
 
 Natural follow-on: `next: /code-review {pr_number}` or `next: merge when green`.

@@ -53,7 +53,7 @@ Key behaviors to understand:
 ### Sync Phase
 - Clears .claude/agents/
 - Copies new agents from knossos
-- Copies workflow.yaml to .claude/ACTIVE_WORKFLOW.yaml
+- Copies workflow.yaml to .knossos/ACTIVE_WORKFLOW.yaml
 - Preserves global agents from ~/.claude/agents/
 
 ### State Update

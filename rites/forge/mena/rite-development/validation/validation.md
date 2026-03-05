@@ -45,7 +45,7 @@
 $KNOSSOS_HOME/ari sync --rite {rite-name}
 
 # Verify workflow and agents copied
-cat .claude/ACTIVE_WORKFLOW.yaml
+cat .knossos/ACTIVE_WORKFLOW.yaml
 ls .claude/agents/
 
 # Verify terminal phase
@@ -107,7 +107,7 @@ ari rite list
 # Full rite validation
 $KNOSSOS_HOME/ari sync --rite {rite-name} && \
 ls .claude/agents/ && \
-cat .claude/ACTIVE_WORKFLOW.yaml
+cat .knossos/ACTIVE_WORKFLOW.yaml
 
 # Check YAML syntax
 python3 -c "import yaml; yaml.safe_load(open('workflow.yaml'))"
