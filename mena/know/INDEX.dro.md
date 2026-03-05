@@ -59,6 +59,27 @@ Some code paths already read the file for other reasons (Phase 0 time-only, Phas
    - If not found: ERROR "Domain '{domain}' not registered in pinakes or not codebase-scoped. Available codebase domains: {list}"
    - **Scan for satellite-authored criteria**: Check if `{knowDir}/criteria/` exists and contains any `*.md` files (where `{knowDir}` is `{root}/.know/` when `--root` is set, otherwise `.know/`). If it does, read each file and merge its domain entry into the registry alongside the pinakes domains. Each criteria file follows the same format as pinakes domain files. If `{knowDir}/criteria/` does not exist, fall back to `.know/criteria/` (project root) when `--root` is set. If neither exists or both are empty, continue normally with only pinakes domains.
 
+2.5. **Discover land files**:
+   - For each domain in the generation set (from step 2), check if `.sos/land/{domain}.md` exists:
+     ```
+     Bash("test -f .sos/land/{domain}.md && echo 'exists' || echo 'missing'")
+     ```
+   - Store the results in a `land_files` map: `{ "architecture": ".sos/land/architecture.md", ... }`.
+   - Domains with no land file have no entry in the map (absence = no land input).
+   - For each domain that has a land file, read its content:
+     ```
+     Read(".sos/land/{domain}.md")
+     ```
+   - If land file content exceeds 20,000 characters, truncate to the first 20,000 characters and append:
+     `\n\n[Land content truncated at 20,000 characters. Full file: .sos/land/{domain}.md]`
+   - If land file content is empty after reading, treat as absent (no entry in map).
+   - For each domain with a non-empty land file, compute its SHA-256 hash:
+     ```
+     Bash("shasum -a 256 .sos/land/{domain}.md | cut -d' ' -f1")
+     ```
+   - Store the (possibly truncated) content as `land_file_content` and the hash as `land_hash` per domain.
+   - Report: "Land files found: {list of domains with land files}" or "No land files found."
+
 3. **Build generation queue** (uses `ari knows --delta` for change analysis):
    - First, check each domain for non-delta conditions:
      - If `{knowDir}/{domain}.md` does not exist: ADD to **full** queue (skip delta for this domain)
@@ -175,6 +196,19 @@ The existing .know/{domain}.md content (this is what you are updating):
 
 {full_criteria_file_content}
 
+### Experiential Knowledge (from .sos/land/)
+
+**If a land file exists for this domain** (from pre-flight step 2.5 `land_files` map), inject:
+
+The following synthesized knowledge was produced from cross-session experience.
+When updating sections, integrate any relevant experiential observations that
+were not present in the previous knowledge version. Verify factual claims
+against the current codebase. Prefer codebase state for contradictions.
+
+{land_file_content}
+
+**If no land file exists for this domain**, omit this entire section. Do not inject an empty placeholder.
+
 ### Your Task
 
 1. READ the existing knowledge document thoroughly
@@ -272,6 +306,25 @@ Your audit protocol still applies, but reframed:
 
 {full_criteria_file_content}
 
+### Experiential Knowledge (from .sos/land/)
+
+**If a land file exists for this domain** (from pre-flight step 2.5 `land_files` map), inject:
+
+The following synthesized knowledge was produced from cross-session experience.
+Integrate relevant observations into the knowledge reference. Experiential
+claims should be verified against the current codebase before inclusion.
+Where experiential knowledge contradicts what you observe in code, note the
+discrepancy and prefer the current codebase state.
+
+Experiential insights about failure modes, design rationale, or operational
+patterns should be integrated into relevant sections (e.g., "Boundaries and
+Failure Modes", "Knowledge Gaps"). Attribute these as experiential observations
+where the source is not directly verifiable from code.
+
+{land_file_content}
+
+**If no land file exists for this domain**, omit this entire section. Do not inject an empty placeholder.
+
 ### Output Format
 
 Produce your output in TWO parts:
@@ -360,8 +413,13 @@ For EACH domain's theoros output (both incremental and full), perform the follow
    update_mode: "{full or incremental}"
    incremental_cycle: {0 for full, previous+1 for incremental}
    max_incremental_cycles: 3
+   land_sources:                              # ONLY if land file was injected for this domain
+     - ".sos/land/{domain}.md"
+   land_hash: "{sha256 hex from pre-flight step 2.5}"  # ONLY if land file was injected
    ---
    ```
+   If no land file was injected for this domain, omit `land_sources` and `land_hash` entirely (omitempty).
+   The `land_hash` value comes from the SHA-256 computed during pre-flight step 2.5.
    Combine frontmatter + theoros knowledge body (Part 1 only, not the metadata fence).
 
 3. **Read before write** (platform constraint):

@@ -205,6 +205,8 @@ func stalenessLabel(d know.DomainStatus) string {
 		return "stale (expired)"
 	case d.CodeChanged:
 		return "stale (code changed)"
+	case d.LandChanged:
+		return "stale (land updated)"
 	default:
 		// Stale due to unparseable timestamp or duration
 		return "stale"

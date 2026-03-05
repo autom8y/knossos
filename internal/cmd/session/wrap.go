@@ -10,6 +10,7 @@ import (
 	"github.com/autom8y/knossos/internal/artifact"
 	"github.com/autom8y/knossos/internal/errors"
 	"github.com/autom8y/knossos/internal/hook/clewcontract"
+	"github.com/autom8y/knossos/internal/ledge"
 	"github.com/autom8y/knossos/internal/lock"
 	"github.com/autom8y/knossos/internal/naxos"
 	"github.com/autom8y/knossos/internal/output"
@@ -19,9 +20,10 @@ import (
 )
 
 type wrapOptions struct {
-	noArchive  bool
-	noGraduate bool
-	force      bool
+	noArchive   bool
+	noGraduate  bool
+	force       bool
+	autoPromote bool
 }
 
 func newWrapCmd(ctx *cmdContext) *cobra.Command {
@@ -59,6 +61,7 @@ Context:
 	cmd.Flags().BoolVar(&opts.noArchive, "no-archive", false, "Don't move to archive directory")
 	cmd.Flags().BoolVar(&opts.noGraduate, "no-graduate", false, "Skip artifact graduation to .ledge/")
 	cmd.Flags().BoolVar(&opts.force, "force", false, "Force wrap even with BLACK sails")
+	cmd.Flags().BoolVar(&opts.autoPromote, "auto-promote", false, "Promote WHITE-sails artifacts to shelf after graduation")
 
 	return cmd
 }
@@ -231,14 +234,40 @@ func runWrap(ctx *cmdContext, opts wrapOptions) error {
 
 	// Graduate artifacts to .ledge/ (non-fatal)
 	var graduatedCount int
+	var gradResult *artifact.GraduationResult
 	if !opts.noGraduate {
-		gradResult, gradErr := artifact.GraduateSession(resolver, sessionID)
+		var gradErr error
+		gradResult, gradErr = artifact.GraduateSession(resolver, sessionID)
 		if gradErr != nil {
 			printer.VerboseLog("warn", "artifact graduation failed", map[string]any{"error": gradErr.Error()})
 		} else {
 			graduatedCount = len(gradResult.Graduated)
 			for _, w := range gradResult.Warnings {
 				printer.VerboseLog("warn", "artifact graduation warning", map[string]any{"warning": w})
+			}
+		}
+	}
+
+	// Auto-promote graduated artifacts to shelf (non-fatal, opt-in)
+	var promotedCount int
+	if opts.autoPromote && gradResult != nil && len(gradResult.Graduated) > 0 {
+		if sailsResult != nil && sailsResult.Color == sails.ColorWhite {
+			promoResult, promoErr := ledge.AutoPromoteSession(resolver, gradResult.Graduated)
+			if promoErr != nil {
+				printer.VerboseLog("warn", "auto-promotion failed", map[string]any{"error": promoErr.Error()})
+			} else {
+				promotedCount = len(promoResult.Promoted)
+				for _, w := range promoResult.Warnings {
+					printer.VerboseLog("warn", "auto-promotion warning", map[string]any{"warning": w})
+				}
+				// Emit per-artifact events
+				for _, p := range promoResult.Promoted {
+					endWriter.WriteTyped(
+						clewcontract.NewTypedArtifactPromotedEvent(
+							sessionID, p.SourcePath, p.ShelfPath, p.Category,
+						),
+					)
+				}
 			}
 		}
 	}
@@ -320,6 +349,7 @@ func runWrap(ctx *cmdContext, opts wrapOptions) error {
 	}
 
 	result.GraduatedCount = graduatedCount
+	result.PromotedCount = promotedCount
 
 	// Add sails information to output if generation succeeded
 	if sailsResult != nil {

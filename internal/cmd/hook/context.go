@@ -371,6 +371,8 @@ func knowStatus(projectDir, cwd string) string {
 		if !d.Fresh {
 			if d.DependencyStale {
 				status = "STALE (dep)"
+			} else if d.LandChanged {
+				status = "STALE (land)"
 			} else {
 				status = "STALE"
 			}

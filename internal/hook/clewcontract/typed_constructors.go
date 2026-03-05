@@ -302,6 +302,17 @@ func NewTypedHandoffExecutedEvent(fromAgent, toAgent, sessionID string, artifact
 	})
 }
 
+// NewTypedArtifactPromotedEvent creates a v3 "artifact.promoted" TypedEvent.
+// Source: cli (emitted by `ari session wrap --auto-promote`).
+func NewTypedArtifactPromotedEvent(sessionID, sourcePath, shelfPath, category string) TypedEvent {
+	return newTypedEvent(EventTypeArtifactPromoted, SourceCLI, ArtifactPromotedData{
+		SessionID:  sessionID,
+		SourcePath: sourcePath,
+		ShelfPath:  shelfPath,
+		Category:   category,
+	})
+}
+
 // --- Future event constructors (no current producers) ---
 
 // NewTypedFieldUpdatedEvent creates a v3 "field.updated" TypedEvent.
