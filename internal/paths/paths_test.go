@@ -39,7 +39,7 @@ func TestResolver_PathMethods(t *testing.T) {
 		{"SessionEventsFile", r.SessionEventsFile("s1"), "/tmp/testroot/.sos/sessions/s1/events.jsonl"},
 		{"LockFile", r.LockFile("s1"), "/tmp/testroot/.sos/sessions/.locks/s1.lock"},
 		{"CurrentSessionFile", r.CurrentSessionFile(), "/tmp/testroot/.sos/sessions/.current-session"},
-		{"ActiveRiteFile", r.ActiveRiteFile(), "/tmp/testroot/.claude/ACTIVE_RITE"},
+		{"ActiveRiteFile", r.ActiveRiteFile(), "/tmp/testroot/.knossos/ACTIVE_RITE"},
 		{"ActiveWorkflowFile", r.ActiveWorkflowFile(), "/tmp/testroot/.knossos/ACTIVE_WORKFLOW.yaml"},
 		{"KnossosManifestFile", r.KnossosManifestFile(), "/tmp/testroot/.knossos/KNOSSOS_MANIFEST.yaml"},
 		{"AgentsDir", r.AgentsDir(), "/tmp/testroot/.claude/agents"},
@@ -337,8 +337,8 @@ func TestReadActiveRite(t *testing.T) {
 		root := t.TempDir()
 		r := NewResolver(root)
 
-		claudeDir := filepath.Join(root, ".claude")
-		if err := os.MkdirAll(claudeDir, 0755); err != nil {
+		knossosDir := filepath.Join(root, ".knossos")
+		if err := os.MkdirAll(knossosDir, 0755); err != nil {
 			t.Fatalf("MkdirAll: %v", err)
 		}
 		if err := os.WriteFile(r.ActiveRiteFile(), []byte("  10x-dev\n"), 0644); err != nil {
@@ -365,8 +365,8 @@ func TestReadActiveRite(t *testing.T) {
 		root := t.TempDir()
 		r := NewResolver(root)
 
-		claudeDir := filepath.Join(root, ".claude")
-		if err := os.MkdirAll(claudeDir, 0755); err != nil {
+		knossosDir := filepath.Join(root, ".knossos")
+		if err := os.MkdirAll(knossosDir, 0755); err != nil {
 			t.Fatalf("MkdirAll: %v", err)
 		}
 		if err := os.WriteFile(r.ActiveRiteFile(), []byte(""), 0644); err != nil {

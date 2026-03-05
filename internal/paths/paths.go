@@ -122,7 +122,7 @@ func (r *Resolver) CurrentSessionFile() string {
 
 // ActiveRiteFile returns the path to the ACTIVE_RITE file.
 func (r *Resolver) ActiveRiteFile() string {
-	return filepath.Join(r.ClaudeDir(), "ACTIVE_RITE")
+	return filepath.Join(r.KnossosDir(), "ACTIVE_RITE")
 }
 
 // ReadActiveRite reads the ACTIVE_RITE file and returns its content.
