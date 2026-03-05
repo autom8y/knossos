@@ -40,7 +40,7 @@ func TestResolver_PathMethods(t *testing.T) {
 		{"LockFile", r.LockFile("s1"), "/tmp/testroot/.sos/sessions/.locks/s1.lock"},
 		{"CurrentSessionFile", r.CurrentSessionFile(), "/tmp/testroot/.sos/sessions/.current-session"},
 		{"ActiveRiteFile", r.ActiveRiteFile(), "/tmp/testroot/.claude/ACTIVE_RITE"},
-		{"ActiveWorkflowFile", r.ActiveWorkflowFile(), "/tmp/testroot/.claude/ACTIVE_WORKFLOW.yaml"},
+		{"ActiveWorkflowFile", r.ActiveWorkflowFile(), "/tmp/testroot/.knossos/ACTIVE_WORKFLOW.yaml"},
 		{"KnossosManifestFile", r.KnossosManifestFile(), "/tmp/testroot/.knossos/KNOSSOS_MANIFEST.yaml"},
 		{"AgentsDir", r.AgentsDir(), "/tmp/testroot/.claude/agents"},
 		{"AgentFile", r.AgentFile("pythia.md"), "/tmp/testroot/.claude/agents/pythia.md"},

@@ -137,7 +137,7 @@ func (r *Resolver) ReadActiveRite() string {
 
 // ActiveWorkflowFile returns the path to the ACTIVE_WORKFLOW.yaml file.
 func (r *Resolver) ActiveWorkflowFile() string {
-	return filepath.Join(r.ClaudeDir(), "ACTIVE_WORKFLOW.yaml")
+	return filepath.Join(r.KnossosDir(), "ACTIVE_WORKFLOW.yaml")
 }
 
 // KnossosManifestFile returns the path to the KNOSSOS_MANIFEST.yaml file.
