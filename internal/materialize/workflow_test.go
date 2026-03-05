@@ -14,11 +14,11 @@ import (
 
 func TestMaterializeWorkflow_WritesFile(t *testing.T) {
 	projectDir := t.TempDir()
-	claudeDir := filepath.Join(projectDir, ".claude")
-	require.NoError(t, os.MkdirAll(claudeDir, 0755))
+	knossosDir := filepath.Join(projectDir, ".knossos")
+	require.NoError(t, os.MkdirAll(knossosDir, 0755))
 
 	// Create a rite with workflow.yaml
-	riteDir := filepath.Join(projectDir, ".knossos", "rites", "test-rite")
+	riteDir := filepath.Join(knossosDir, "rites", "test-rite")
 	require.NoError(t, os.MkdirAll(riteDir, 0755))
 	workflowContent := []byte("name: test-workflow\nphases:\n  - build\n")
 	require.NoError(t, os.WriteFile(filepath.Join(riteDir, "workflow.yaml"), workflowContent, 0644))
@@ -31,21 +31,21 @@ func TestMaterializeWorkflow_WritesFile(t *testing.T) {
 		Source:   RiteSource{Type: SourceProject, Path: riteDir},
 	}
 
-	err := m.materializeWorkflow(claudeDir, resolved, provenance.NullCollector{})
+	err := m.materializeWorkflow(knossosDir, resolved, provenance.NullCollector{})
 	require.NoError(t, err)
 
-	got, err := os.ReadFile(filepath.Join(claudeDir, "ACTIVE_WORKFLOW.yaml"))
+	got, err := os.ReadFile(filepath.Join(knossosDir, "ACTIVE_WORKFLOW.yaml"))
 	require.NoError(t, err)
 	assert.Equal(t, string(workflowContent), string(got))
 }
 
 func TestMaterializeWorkflow_NoWorkflowFile(t *testing.T) {
 	projectDir := t.TempDir()
-	claudeDir := filepath.Join(projectDir, ".claude")
-	require.NoError(t, os.MkdirAll(claudeDir, 0755))
+	knossosDir := filepath.Join(projectDir, ".knossos")
+	require.NoError(t, os.MkdirAll(knossosDir, 0755))
 
 	// Create a rite without workflow.yaml
-	riteDir := filepath.Join(projectDir, ".knossos", "rites", "no-workflow")
+	riteDir := filepath.Join(knossosDir, "rites", "no-workflow")
 	require.NoError(t, os.MkdirAll(riteDir, 0755))
 
 	resolver := paths.NewResolver(projectDir)
@@ -56,26 +56,26 @@ func TestMaterializeWorkflow_NoWorkflowFile(t *testing.T) {
 		Source:   RiteSource{Type: SourceProject, Path: riteDir},
 	}
 
-	err := m.materializeWorkflow(claudeDir, resolved, provenance.NullCollector{})
+	err := m.materializeWorkflow(knossosDir, resolved, provenance.NullCollector{})
 	require.NoError(t, err)
 
 	// ACTIVE_WORKFLOW.yaml should not exist
-	_, err = os.Stat(filepath.Join(claudeDir, "ACTIVE_WORKFLOW.yaml"))
+	_, err = os.Stat(filepath.Join(knossosDir, "ACTIVE_WORKFLOW.yaml"))
 	assert.True(t, os.IsNotExist(err))
 }
 
 func TestMaterializeWorkflow_RemovesStaleOnNoWorkflow(t *testing.T) {
 	projectDir := t.TempDir()
-	claudeDir := filepath.Join(projectDir, ".claude")
-	require.NoError(t, os.MkdirAll(claudeDir, 0755))
+	knossosDir := filepath.Join(projectDir, ".knossos")
+	require.NoError(t, os.MkdirAll(knossosDir, 0755))
 
 	// Pre-existing ACTIVE_WORKFLOW.yaml from a previous rite
 	staleContent := []byte("name: old-rite-workflow\nphases:\n  - stale\n")
 	require.NoError(t, os.WriteFile(
-		filepath.Join(claudeDir, "ACTIVE_WORKFLOW.yaml"), staleContent, 0644))
+		filepath.Join(knossosDir, "ACTIVE_WORKFLOW.yaml"), staleContent, 0644))
 
 	// New rite has no workflow.yaml
-	riteDir := filepath.Join(projectDir, ".knossos", "rites", "no-workflow")
+	riteDir := filepath.Join(knossosDir, "rites", "no-workflow")
 	require.NoError(t, os.MkdirAll(riteDir, 0755))
 
 	resolver := paths.NewResolver(projectDir)
@@ -86,20 +86,20 @@ func TestMaterializeWorkflow_RemovesStaleOnNoWorkflow(t *testing.T) {
 		Source:   RiteSource{Type: SourceProject, Path: riteDir},
 	}
 
-	err := m.materializeWorkflow(claudeDir, resolved, provenance.NullCollector{})
+	err := m.materializeWorkflow(knossosDir, resolved, provenance.NullCollector{})
 	require.NoError(t, err)
 
 	// Stale file must be removed
-	_, err = os.Stat(filepath.Join(claudeDir, "ACTIVE_WORKFLOW.yaml"))
+	_, err = os.Stat(filepath.Join(knossosDir, "ACTIVE_WORKFLOW.yaml"))
 	assert.True(t, os.IsNotExist(err), "stale ACTIVE_WORKFLOW.yaml should be removed when new rite has no workflow")
 }
 
 func TestMaterializeWorkflow_Idempotent(t *testing.T) {
 	projectDir := t.TempDir()
-	claudeDir := filepath.Join(projectDir, ".claude")
-	require.NoError(t, os.MkdirAll(claudeDir, 0755))
+	knossosDir := filepath.Join(projectDir, ".knossos")
+	require.NoError(t, os.MkdirAll(knossosDir, 0755))
 
-	riteDir := filepath.Join(projectDir, ".knossos", "rites", "test-rite")
+	riteDir := filepath.Join(knossosDir, "rites", "test-rite")
 	require.NoError(t, os.MkdirAll(riteDir, 0755))
 	workflowContent := []byte("name: test-workflow\n")
 	require.NoError(t, os.WriteFile(filepath.Join(riteDir, "workflow.yaml"), workflowContent, 0644))
@@ -113,19 +113,19 @@ func TestMaterializeWorkflow_Idempotent(t *testing.T) {
 	}
 
 	// First write
-	require.NoError(t, m.materializeWorkflow(claudeDir, resolved, provenance.NullCollector{}))
+	require.NoError(t, m.materializeWorkflow(knossosDir, resolved, provenance.NullCollector{}))
 	// Second write should be a no-op (writeIfChanged returns false)
-	require.NoError(t, m.materializeWorkflow(claudeDir, resolved, provenance.NullCollector{}))
+	require.NoError(t, m.materializeWorkflow(knossosDir, resolved, provenance.NullCollector{}))
 
-	got, err := os.ReadFile(filepath.Join(claudeDir, "ACTIVE_WORKFLOW.yaml"))
+	got, err := os.ReadFile(filepath.Join(knossosDir, "ACTIVE_WORKFLOW.yaml"))
 	require.NoError(t, err)
 	assert.Equal(t, string(workflowContent), string(got))
 }
 
 func TestMaterializeWorkflow_EmbeddedSource(t *testing.T) {
 	projectDir := t.TempDir()
-	claudeDir := filepath.Join(projectDir, ".claude")
-	require.NoError(t, os.MkdirAll(claudeDir, 0755))
+	knossosDir := filepath.Join(projectDir, ".knossos")
+	require.NoError(t, os.MkdirAll(knossosDir, 0755))
 
 	workflowContent := []byte("name: embedded-workflow\n")
 	embeddedFS := fstest.MapFS{
@@ -140,26 +140,26 @@ func TestMaterializeWorkflow_EmbeddedSource(t *testing.T) {
 		Source:   RiteSource{Type: SourceEmbedded, Path: "embedded"},
 	}
 
-	err := m.materializeWorkflow(claudeDir, resolved, provenance.NullCollector{})
+	err := m.materializeWorkflow(knossosDir, resolved, provenance.NullCollector{})
 	require.NoError(t, err)
 
-	got, err := os.ReadFile(filepath.Join(claudeDir, "ACTIVE_WORKFLOW.yaml"))
+	got, err := os.ReadFile(filepath.Join(knossosDir, "ACTIVE_WORKFLOW.yaml"))
 	require.NoError(t, err)
 	assert.Equal(t, string(workflowContent), string(got))
 }
 
 func TestMaterializeWorkflow_OverwritesOld(t *testing.T) {
 	projectDir := t.TempDir()
-	claudeDir := filepath.Join(projectDir, ".claude")
-	require.NoError(t, os.MkdirAll(claudeDir, 0755))
+	knossosDir := filepath.Join(projectDir, ".knossos")
+	require.NoError(t, os.MkdirAll(knossosDir, 0755))
 
 	// Pre-existing stale workflow
 	require.NoError(t, os.WriteFile(
-		filepath.Join(claudeDir, "ACTIVE_WORKFLOW.yaml"),
+		filepath.Join(knossosDir, "ACTIVE_WORKFLOW.yaml"),
 		[]byte("name: old-workflow\n"), 0644))
 
 	// New rite with different workflow
-	riteDir := filepath.Join(projectDir, ".knossos", "rites", "new-rite")
+	riteDir := filepath.Join(knossosDir, "rites", "new-rite")
 	require.NoError(t, os.MkdirAll(riteDir, 0755))
 	newContent := []byte("name: new-workflow\nphases:\n  - deploy\n")
 	require.NoError(t, os.WriteFile(filepath.Join(riteDir, "workflow.yaml"), newContent, 0644))
@@ -172,10 +172,10 @@ func TestMaterializeWorkflow_OverwritesOld(t *testing.T) {
 		Source:   RiteSource{Type: SourceProject, Path: riteDir},
 	}
 
-	err := m.materializeWorkflow(claudeDir, resolved, provenance.NullCollector{})
+	err := m.materializeWorkflow(knossosDir, resolved, provenance.NullCollector{})
 	require.NoError(t, err)
 
-	got, err := os.ReadFile(filepath.Join(claudeDir, "ACTIVE_WORKFLOW.yaml"))
+	got, err := os.ReadFile(filepath.Join(knossosDir, "ACTIVE_WORKFLOW.yaml"))
 	require.NoError(t, err)
 	assert.Equal(t, string(newContent), string(got))
 }

@@ -39,7 +39,7 @@ func TestMerge_EmptyInputs(t *testing.T) {
 	entry := validKnossosEntry("rites/eco/agents/foo.md")
 	collector.Record("agents/foo.md", entry)
 
-	result := Merge(claudeDir, "eco", collector, nil, nil, false)
+	result := Merge(claudeDir, "", "eco", collector, nil, nil, false)
 
 	if result == nil {
 		t.Fatal("expected non-nil manifest")
@@ -93,7 +93,7 @@ func TestMerge_Step0_CarryForwardKnossos(t *testing.T) {
 	// Empty collector — nothing written this sync
 	collector := NewCollector()
 
-	result := Merge(claudeDir, "eco", collector, nil, prevManifest, false)
+	result := Merge(claudeDir, "", "eco", collector, nil, prevManifest, false)
 
 	// Only the on-disk entry should carry forward
 	if len(result.Entries) != 1 {
@@ -132,7 +132,7 @@ func TestMerge_Step0_CarryForwardKnossosDirEntry(t *testing.T) {
 	}
 
 	collector := NewCollector()
-	result := Merge(claudeDir, "eco", collector, nil, prevManifest, false)
+	result := Merge(claudeDir, "", "eco", collector, nil, prevManifest, false)
 
 	if _, ok := result.Entries["commands/commit/"]; !ok {
 		t.Error("expected commands/commit/ directory entry to be carried forward")
@@ -172,7 +172,7 @@ func TestMerge_Step1_DivergencePromoted(t *testing.T) {
 	}
 
 	collector := NewCollector()
-	result := Merge(claudeDir, "eco", collector, divergenceReport, nil, false)
+	result := Merge(claudeDir, "", "eco", collector, divergenceReport, nil, false)
 
 	// promoted with checksum should be included
 	if _, ok := result.Entries["agents/modified.md"]; !ok {
@@ -255,7 +255,7 @@ func TestMerge_Step2_CollectorLayering(t *testing.T) {
 	collector.Record("agents/overwritable.md", newCollectorEntry)
 	collector.Record("agents/user-protected.md", collectorProtectedEntry)
 
-	result := Merge(claudeDir, "eco", collector, divergenceReport, prevManifest, false)
+	result := Merge(claudeDir, "", "eco", collector, divergenceReport, prevManifest, false)
 
 	// "agents/overwritable.md": collector should overwrite Step 0 entry
 	overwritable, ok := result.Entries["agents/overwritable.md"]
@@ -313,7 +313,7 @@ func TestMerge_Step3_UntrackedPromotion(t *testing.T) {
 	}
 	collector.Record("pipeline-owned.md", collectorEntry)
 
-	result := Merge(claudeDir, "eco", collector, nil, prevManifest, false)
+	result := Merge(claudeDir, "", "eco", collector, nil, prevManifest, false)
 
 	// "legacy-file.md" was untracked and NOT written this sync → must be promoted to user
 	legacy, ok := result.Entries["legacy-file.md"]
@@ -376,7 +376,7 @@ func TestMerge_Step3_UntrackedAlreadyInFinal(t *testing.T) {
 
 	collector := NewCollector() // nothing written this sync
 
-	result := Merge(claudeDir, "eco", collector, divergenceReport, prevManifest, false)
+	result := Merge(claudeDir, "", "eco", collector, divergenceReport, prevManifest, false)
 
 	legacy, ok := result.Entries["legacy-file.md"]
 	if !ok {
@@ -427,7 +427,7 @@ func TestMerge_Step2_OverwriteDivergedReclaims(t *testing.T) {
 	})
 
 	// Without overwriteDiverged: user entry wins
-	resultDefault := Merge(claudeDir, "eco", collector, divergenceReport, nil, false)
+	resultDefault := Merge(claudeDir, "", "eco", collector, divergenceReport, nil, false)
 	entry := resultDefault.Entries["commands/commit/"]
 	if entry == nil {
 		t.Fatal("expected commands/commit/ in default merge result")
@@ -437,7 +437,7 @@ func TestMerge_Step2_OverwriteDivergedReclaims(t *testing.T) {
 	}
 
 	// With overwriteDiverged: collector reclaims ownership
-	resultOverwrite := Merge(claudeDir, "eco", collector, divergenceReport, nil, true)
+	resultOverwrite := Merge(claudeDir, "", "eco", collector, divergenceReport, nil, true)
 	entry = resultOverwrite.Entries["commands/commit/"]
 	if entry == nil {
 		t.Fatal("expected commands/commit/ in overwrite merge result")

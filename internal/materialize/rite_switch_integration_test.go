@@ -42,7 +42,8 @@ func setupRite(t *testing.T, ritesDir, riteName, workflowContent string, agents 
 func TestRiteSwitchIntegration_StateConsistency(t *testing.T) {
 	projectDir := t.TempDir()
 	claudeDir := filepath.Join(projectDir, ".claude")
-	ritesDir := filepath.Join(projectDir, ".knossos", "rites")
+	knossosDir := filepath.Join(projectDir, ".knossos")
+	ritesDir := filepath.Join(knossosDir, "rites")
 
 	// Create templates/rules with a known template rule
 	templatesDir := filepath.Join(projectDir, "templates")
@@ -79,7 +80,7 @@ func TestRiteSwitchIntegration_StateConsistency(t *testing.T) {
 	assert.Equal(t, "rite-a\n", string(activeRite))
 
 	// Verify ACTIVE_WORKFLOW.yaml
-	workflow, err := os.ReadFile(filepath.Join(claudeDir, "ACTIVE_WORKFLOW.yaml"))
+	workflow, err := os.ReadFile(filepath.Join(knossosDir, "ACTIVE_WORKFLOW.yaml"))
 	require.NoError(t, err)
 	assert.Contains(t, string(workflow), "rite-a-workflow")
 
@@ -97,7 +98,6 @@ func TestRiteSwitchIntegration_StateConsistency(t *testing.T) {
 
 	// Simulate actions between rite switches:
 	// 1. Create INVOCATION_STATE.yaml in .knossos/ (simulating `ari rite invoke`)
-	knossosDir := filepath.Join(projectDir, ".knossos")
 	require.NoError(t, os.MkdirAll(knossosDir, 0755))
 	require.NoError(t, os.WriteFile(
 		filepath.Join(knossosDir, "INVOCATION_STATE.yaml"),
@@ -119,7 +119,7 @@ func TestRiteSwitchIntegration_StateConsistency(t *testing.T) {
 	assert.Equal(t, "rite-b\n", string(activeRite))
 
 	// Verify ACTIVE_WORKFLOW.yaml matches rite-b
-	workflow, err = os.ReadFile(filepath.Join(claudeDir, "ACTIVE_WORKFLOW.yaml"))
+	workflow, err = os.ReadFile(filepath.Join(knossosDir, "ACTIVE_WORKFLOW.yaml"))
 	require.NoError(t, err)
 	assert.Contains(t, string(workflow), "rite-b-workflow")
 
@@ -155,7 +155,7 @@ func TestRiteSwitchIntegration_StateConsistency(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "rite-b\n", string(activeRite2))
 
-	workflow2, err := os.ReadFile(filepath.Join(claudeDir, "ACTIVE_WORKFLOW.yaml"))
+	workflow2, err := os.ReadFile(filepath.Join(knossosDir, "ACTIVE_WORKFLOW.yaml"))
 	require.NoError(t, err)
 	assert.Equal(t, string(workflow), string(workflow2))
 }
@@ -163,7 +163,8 @@ func TestRiteSwitchIntegration_StateConsistency(t *testing.T) {
 func TestRiteSwitchIntegration_NoWorkflow(t *testing.T) {
 	projectDir := t.TempDir()
 	claudeDir := filepath.Join(projectDir, ".claude")
-	ritesDir := filepath.Join(projectDir, ".knossos", "rites")
+	knossosDir := filepath.Join(projectDir, ".knossos")
+	ritesDir := filepath.Join(knossosDir, "rites")
 
 	// Create templates dir
 	templatesDir := filepath.Join(projectDir, "templates")
@@ -185,7 +186,7 @@ func TestRiteSwitchIntegration_NoWorkflow(t *testing.T) {
 	require.NoError(t, err)
 
 	// Verify ACTIVE_WORKFLOW.yaml exists from rite with workflow
-	_, err = os.Stat(filepath.Join(claudeDir, "ACTIVE_WORKFLOW.yaml"))
+	_, err = os.Stat(filepath.Join(knossosDir, "ACTIVE_WORKFLOW.yaml"))
 	require.NoError(t, err, "ACTIVE_WORKFLOW.yaml should exist after materializing rite with workflow")
 
 	// Phase 2: Switch to rite without workflow
@@ -195,7 +196,7 @@ func TestRiteSwitchIntegration_NoWorkflow(t *testing.T) {
 	require.NoError(t, err)
 
 	// ACTIVE_WORKFLOW.yaml must be REMOVED (not stale from previous rite)
-	_, err = os.Stat(filepath.Join(claudeDir, "ACTIVE_WORKFLOW.yaml"))
+	_, err = os.Stat(filepath.Join(knossosDir, "ACTIVE_WORKFLOW.yaml"))
 	assert.True(t, os.IsNotExist(err), "stale ACTIVE_WORKFLOW.yaml must be removed when switching to no-workflow rite")
 
 	// ACTIVE_RITE should exist
@@ -207,6 +208,7 @@ func TestRiteSwitchIntegration_NoWorkflow(t *testing.T) {
 func TestRiteSwitchIntegration_EmbeddedSource(t *testing.T) {
 	projectDir := t.TempDir()
 	claudeDir := filepath.Join(projectDir, ".claude")
+	knossosDir := filepath.Join(projectDir, ".knossos")
 
 	workflowContent := []byte("name: embedded-wf\nphases:\n  - test\n")
 	agentContent := []byte("# tester\n\nRole: tests\n")
@@ -241,11 +243,12 @@ func TestRiteSwitchIntegration_EmbeddedSource(t *testing.T) {
 	// Directly test the sub-methods since MaterializeWithOptions goes through
 	// source resolution which needs filesystem rites.
 	require.NoError(t, os.MkdirAll(claudeDir, 0755))
+	require.NoError(t, os.MkdirAll(knossosDir, 0755))
 
 	// Test workflow materialization from embedded
-	err := m.materializeWorkflow(claudeDir, resolved, provenance.NullCollector{})
+	err := m.materializeWorkflow(knossosDir, resolved, provenance.NullCollector{})
 	require.NoError(t, err)
-	got, err := os.ReadFile(filepath.Join(claudeDir, "ACTIVE_WORKFLOW.yaml"))
+	got, err := os.ReadFile(filepath.Join(knossosDir, "ACTIVE_WORKFLOW.yaml"))
 	require.NoError(t, err)
 	assert.Equal(t, string(workflowContent), string(got))
 
