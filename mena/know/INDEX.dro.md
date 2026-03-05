@@ -14,6 +14,17 @@ Dispatches theoros to observe and document codebase architecture, producing pers
 
 This command runs in the main thread (requires Task tool for theoros dispatch). It generates `.know/` files at the project root. The Argus Pattern requires main-thread execution because agents cannot spawn agents — only the main thread has Task tool access.
 
+## Platform Constraint: Read Before Write
+
+**The Claude Code Write tool WILL FAIL if you attempt to write to an existing file without first reading it via the Read tool in the current conversation.** This is a hard platform constraint, not optional.
+
+Before EVERY `Write()` call in this dromenon, you MUST check whether the target file already exists and, if so, `Read()` it first. This applies even when `--force` is set -- force controls whether to skip expiry checks, it does NOT exempt you from the read-before-write requirement. The three write points where this matters:
+1. Phase 3 step 3: `Write(".know/{domain}.md", ...)` -- read existing file if it exists
+2. Census step 3: `Write(".know/feat/INDEX.md", ...)` -- read existing file if it exists
+3. Per-feature step 4: `Write(".know/feat/{slug}.md", ...)` -- read existing file if it exists
+
+Some code paths already read the file for other reasons (Phase 0 time-only, Phase 2a incremental). The critical gap is the **full queue path** (Phase 2b), where `--force` regenerates an existing file from scratch -- you still must `Read()` it before `Write()`.
+
 ## Scope Routing
 
 **If `--scope=feature` is present**: Skip to [Feature Knowledge Flow](#feature-knowledge-flow---scope-feature). The entire codebase domain pipeline below does NOT apply.
@@ -353,7 +364,14 @@ For EACH domain's theoros output (both incremental and full), perform the follow
    ```
    Combine frontmatter + theoros knowledge body (Part 1 only, not the metadata fence).
 
-3. **Write the file**:
+3. **Read before write** (platform constraint):
+   If the target file already exists (e.g., `--force` regeneration), you MUST read it before writing. The Write tool will fail otherwise.
+   ```
+   # Only needed if file exists and was not already read in this conversation
+   Read("{knowDir}/{domain}.md")
+   ```
+
+4. **Write the file**:
    If `--root` is set:
    ```
    Write("{root}/.know/{domain}.md", frontmatter + body)
@@ -363,7 +381,7 @@ For EACH domain's theoros output (both incremental and full), perform the follow
    Write(".know/{domain}.md", frontmatter + body)
    ```
 
-4. **Verify the file**:
+5. **Verify the file**:
    ```
    Read("{knowDir}/{domain}.md", limit=20)
    ```
@@ -636,18 +654,25 @@ After the census theoros returns:
    ```
    Combine frontmatter + census body (Part 1 only).
 
-3. **Write the file**:
+3. **Read before write** (platform constraint):
+   If `.know/feat/INDEX.md` already exists, you MUST read it before writing. The Write tool will fail otherwise.
+   ```
+   # Only needed if file exists and was not already read in this conversation
+   Read(".know/feat/INDEX.md")
+   ```
+
+4. **Write the file**:
    ```
    Write(".know/feat/INDEX.md", frontmatter + body)
    ```
 
-4. **Verify the file**:
+5. **Verify the file**:
    ```
    Read(".know/feat/INDEX.md", limit=30)
    ```
    Confirm frontmatter is valid. Confirm feature sections exist with structured entries.
 
-5. **Report census result**:
+6. **Report census result**:
    ```
    ## Feature Census Complete: .know/feat/INDEX.md
 
@@ -662,7 +687,7 @@ After the census theoros returns:
    | Expires | {expiry_date} |
    ```
 
-6. **If `--census` flag was set**: STOP here. Report is complete.
+7. **If `--census` flag was set**: STOP here. Report is complete.
 
 ### Feature Human Gate
 
@@ -862,12 +887,19 @@ For EACH feature's theoros output, perform the following assembly:
    ```
    Combine frontmatter + feature knowledge body (Part 1 only).
 
-4. **Write the file**:
+4. **Read before write** (platform constraint):
+   If `.know/feat/{slug}.md` already exists, you MUST read it before writing. The Write tool will fail otherwise.
+   ```
+   # Only needed if file exists and was not already read in this conversation
+   Read(".know/feat/{slug}.md")
+   ```
+
+5. **Write the file**:
    ```
    Write(".know/feat/{slug}.md", frontmatter + body)
    ```
 
-5. **Verify the file**:
+6. **Verify the file**:
    ```
    Read(".know/feat/{slug}.md", limit=20)
    ```
