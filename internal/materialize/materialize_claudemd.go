@@ -134,8 +134,8 @@ func (m *Materializer) prevalidateCLAUDEmd(manifest *RiteManifest, claudeDir str
 	}
 
 	// Load or create manifest (read-only validation)
-	knossosManifestPath := filepath.Join(claudeDir, "KNOSSOS_MANIFEST.yaml")
-	loader := inscription.NewManifestLoader(filepath.Dir(claudeDir))
+	knossosManifestPath := filepath.Join(projectRoot, ".knossos", "KNOSSOS_MANIFEST.yaml")
+	loader := inscription.NewManifestLoader(projectRoot)
 	loader.ManifestPath = knossosManifestPath
 	insManifest, err := loader.LoadOrCreate()
 	if err != nil {
