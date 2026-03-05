@@ -37,6 +37,7 @@ agent compliance with the agent schema.`,
 	cmd.AddCommand(newListCmd(ctx))
 	cmd.AddCommand(newNewCmd(ctx))
 	cmd.AddCommand(newUpdateCmd(ctx))
+	cmd.AddCommand(newEmbodyCmd(ctx))
 
 	// Agent commands require project context
 	common.SetNeedsProject(cmd, true, true)
