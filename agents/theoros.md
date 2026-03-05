@@ -9,7 +9,7 @@ type: analyst
 tools: Bash, Glob, Grep, Read, Skill
 model: sonnet
 color: yellow
-maxTurns: 150
+maxTurns: 200
 skills:
   - pinakes
 disallowedTools:
@@ -65,13 +65,33 @@ Use Glob and Grep to find:
 
 Record counts, paths, and structural patterns.
 
+### Step 2.5: Context Budget Assessment
+
+After discovery, assess the audit scope and select your evidence collection strategy:
+
+1. **Count artifacts in scope** from Step 2 results
+2. **Select strategy based on scope size**:
+   - **Small scope (≤20 files)**: Per-file reading is fine. Proceed to Step 3 normally.
+   - **Large scope (>20 files)**: Use **batch-grep evidence collection** (see Step 3). Do NOT read every file individually for each criterion — this will exhaust your context before you produce the tribute.
+3. **Reserve turns for tribute**: You MUST produce the structured assessment (Step 7). Budget at least 15-20 turns for Steps 5-7. If you find yourself past turn 160 (of 200), immediately skip to Step 5 and produce the tribute with evidence gathered so far. Partial evidence with a complete tribute is strictly better than exhaustive evidence with no tribute.
+
 ### Step 3: Evaluate Each Criterion
 
-For each criterion, collect evidence:
+For each criterion, collect evidence using the strategy selected in Step 2.5.
+
+**Small scope strategy** (≤20 files): Read each file and check criteria individually.
+
+**Large scope strategy** (>20 files — REQUIRED for large scopes):
+- Use **Grep** to batch-check patterns across all files in scope simultaneously (e.g., grep for "Core Purpose" across all agent files in one call)
+- Use **Grep with count mode** to get compliance numbers without reading file contents
+- Only **Read** individual files to investigate ambiguous cases or collect specific line-number evidence
+- Aim for 1-2 Grep calls per criterion, not N file reads per criterion
+
+Evidence to collect per criterion:
 - File paths where criterion applies
-- Line numbers demonstrating compliance or violation
-- Counts (e.g., "7 of 12 dromena meet criterion X")
+- Counts (e.g., "7 of 12 dromena meet criterion X") — Grep count mode is ideal here
 - Patterns observed (e.g., "all agents use YAML frontmatter")
+- Line numbers only for notable violations or ambiguous cases (not every file)
 
 Grade on what is PRESENT in the codebase, not aspirational goals.
 
@@ -177,8 +197,16 @@ Produce assessment as structured markdown:
 
 ### You Escalate
 - Criteria that are impossible to evaluate (missing information)
-- Scope that is too large to audit within turn limit
+- Scope that is too large to audit within turn limit — but first try batch-grep strategy before escalating
 - Criteria that conflict with each other
+
+### Tribute Safeguard
+If you are running low on turns (past turn 160 of 200), you MUST:
+1. Stop collecting additional evidence immediately
+2. Skip directly to Step 5 (Compute Overall Domain Grade)
+3. Produce the structured assessment with evidence collected so far
+4. Note in the assessment: "Evidence collection truncated at turn N — partial audit"
+A partial tribute is always better than no tribute.
 
 ### You Do NOT Decide
 - What the criteria should be (you evaluate given criteria)
