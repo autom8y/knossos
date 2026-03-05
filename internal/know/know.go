@@ -4,6 +4,8 @@
 package know
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"os"
 	"os/exec"
@@ -50,6 +52,10 @@ type Meta struct {
 	// Knowledge graph edges: qualified domain names of dependencies.
 	// When any dependency is stale, this domain is transitively stale.
 	DependsOn []string `yaml:"depends_on,omitempty"`
+	// Land integration: tracks experiential knowledge sources from .sos/land/.
+	// When any land source content changes, this domain is stale.
+	LandSources []string `yaml:"land_sources,omitempty"`
+	LandHash    string   `yaml:"land_hash,omitempty"`
 }
 
 // DomainStatus reports freshness for a single .know/ domain.
@@ -66,6 +72,8 @@ type DomainStatus struct {
 	ForceFull       bool     `json:"force_full"`
 	DependencyStale bool     `json:"dependency_stale"`          // true if any depends_on domain is stale
 	StaleDeps       []string `json:"stale_deps,omitempty"`      // which dependencies are stale
+	LandChanged     bool     `json:"land_changed"`              // true if land source content changed since last generation
+	LandReason      string   `json:"land_reason,omitempty"`     // human-readable land staleness reason
 }
 
 // domainResult pairs a DomainStatus with its parsed Meta for dependency resolution.
@@ -193,6 +201,7 @@ func readMetaFromDirFull(knowDir, repoRoot string) ([]domainResult, error) {
 			return nil, fmt.Errorf("read .know/release/ directory: %w", err)
 		}
 		// release/ doesn't exist: not an error.
+		checkLandStaleness(results, repoRoot)
 		return results, nil
 	}
 
@@ -227,6 +236,9 @@ func readMetaFromDirFull(knowDir, repoRoot string) ([]domainResult, error) {
 		status := buildDomainStatus(meta, now, currentHash)
 		results = append(results, domainResult{Status: status, Meta: meta})
 	}
+
+	// Check land source staleness across all scanned domains.
+	checkLandStaleness(results, repoRoot)
 
 	return results, nil
 }
@@ -446,6 +458,57 @@ func findStaleDeps(deps []string, freshMap map[string]bool, metaByDomain map[str
 		}
 	}
 	return stale
+}
+
+// computeLandHash reads the files listed in landSources relative to projectRoot
+// and returns a SHA-256 hex digest of their concatenated contents.
+// Returns "" if landSources is empty or all files are missing.
+// Missing individual files contribute an empty byte sequence (not an error).
+func computeLandHash(projectRoot string, landSources []string) string {
+	if len(landSources) == 0 {
+		return ""
+	}
+	h := sha256.New()
+	for _, src := range landSources {
+		data, err := os.ReadFile(filepath.Join(projectRoot, src))
+		if err != nil {
+			// Missing or unreadable file: contribute nothing (graceful degradation).
+			continue
+		}
+		h.Write(data)
+	}
+	return hex.EncodeToString(h.Sum(nil))
+}
+
+// checkLandStaleness checks each domain result for land source changes.
+// Updates DomainStatus.LandChanged, LandReason, and Fresh fields in place.
+// projectRoot is needed to resolve land file paths.
+func checkLandStaleness(results []domainResult, projectRoot string) {
+	for i := range results {
+		meta := results[i].Meta
+		if len(meta.LandSources) == 0 {
+			continue
+		}
+		currentLandHash := computeLandHash(projectRoot, meta.LandSources)
+		if currentLandHash == meta.LandHash {
+			continue
+		}
+		results[i].Status.LandChanged = true
+		results[i].Status.Fresh = false
+		// Determine whether land files are missing or updated.
+		anyMissing := false
+		for _, src := range meta.LandSources {
+			if _, err := os.Stat(filepath.Join(projectRoot, src)); os.IsNotExist(err) {
+				anyMissing = true
+				break
+			}
+		}
+		if anyMissing {
+			results[i].Status.LandReason = "land file removed"
+		} else {
+			results[i].Status.LandReason = "land file updated"
+		}
+	}
 }
 
 // buildDomainStatus computes freshness for a single domain.
