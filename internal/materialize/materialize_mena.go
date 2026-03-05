@@ -107,6 +107,7 @@ func (m *Materializer) materializeMena(manifest *RiteManifest, claudeDir string,
 		TargetSkillsDir:   skillsDir,
 		Collector:         collector,
 		ProjectRoot:       m.resolver.ProjectRoot(),
+		KnossosDir:        m.resolver.KnossosDir(),
 		OverwriteDiverged: overwriteDiverged,
 		RiteName:          manifest.Name,
 	}
@@ -151,6 +152,7 @@ func (m *Materializer) materializeMinimalMena(claudeDir string, collector proven
 		TargetSkillsDir:   skillsDir,
 		Collector:         collector,
 		ProjectRoot:       m.resolver.ProjectRoot(),
+		KnossosDir:        m.resolver.KnossosDir(),
 		OverwriteDiverged: overwriteDiverged,
 	}
 

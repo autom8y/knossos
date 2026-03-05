@@ -125,9 +125,15 @@ func resolveNamespace(collected map[string]menaCollectedEntry, standalones map[s
 	// If a flat name collides with an existing user-owned entry, knossos yields.
 	// Uses provenance manifest to distinguish knossos-owned (safe to overwrite) from user-owned.
 	if opts.TargetCommandsDir != "" {
-		// Load existing provenance manifest to identify ownership
-		claudeDir := filepath.Dir(opts.TargetCommandsDir)
-		manifestPath := filepath.Join(claudeDir, provenance.ManifestFileName)
+		// Load existing provenance manifest to identify ownership.
+		// Manifest lives in .knossos/ (migrated from .claude/).
+		knossosDir := opts.KnossosDir
+		if knossosDir == "" {
+			// Fallback: derive from TargetCommandsDir (.claude/commands/ -> parent -> sibling .knossos/)
+			claudeDir := filepath.Dir(opts.TargetCommandsDir)
+			knossosDir = filepath.Join(filepath.Dir(claudeDir), ".knossos")
+		}
+		manifestPath := filepath.Join(knossosDir, provenance.ManifestFileName)
 		oldManifest, loadErr := provenance.Load(manifestPath)
 		if loadErr != nil && !errors.IsNotFound(loadErr) {
 			slog.Warn("failed to load provenance manifest for collision check", "error", loadErr)

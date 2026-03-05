@@ -71,24 +71,24 @@ func (s *syncer) syncUserScope(opts SyncOptions) (*UserScopeResult, error) {
 		wipeKnossosOwnedMenaEntries(knossosHome, userClaudeDir, manifest, opts.DryRun)
 	}
 
-	// Initialize collision checker with project .claude/ directory.
+	// Initialize collision checker with project .knossos/ directory.
 	// The checker requires a rite PROVENANCE_MANIFEST.yaml to detect collisions.
 	// When the manifest is missing, try to fall back to the main worktree's
 	// provenance (for linked git worktrees). If that also fails and an ACTIVE_RITE
 	// is present, fail-closed: skip all user-scope writes to prevent cross-project
 	// contamination via USER_PROVENANCE_MANIFEST.yaml.
 	// When no ACTIVE_RITE exists, there is no rite to protect against; proceed.
-	projectClaudeDir := s.resolver.ClaudeDir()
-	collisionChecker := NewCollisionChecker(projectClaudeDir)
+	projectKnossosDir := s.resolver.KnossosDir()
+	collisionChecker := NewCollisionChecker(projectKnossosDir)
 	if !collisionChecker.IsEffective() {
 		// Attempt to use the main worktree's provenance manifest when we are
 		// running inside a linked git worktree. This avoids the blanket "skip all"
 		// behaviour when the main worktree has a valid rite provenance.
 		if mainDir, err := worktreeMainDir(s.resolver.ProjectRoot()); err == nil {
-			mainClaudeDir := filepath.Join(mainDir, ".claude")
-			mainChecker := NewCollisionChecker(mainClaudeDir)
+			mainKnossosDir := filepath.Join(mainDir, ".knossos")
+			mainChecker := NewCollisionChecker(mainKnossosDir)
 			if mainChecker.IsEffective() {
-				slog.Info("userscope: collision checker fell back to main worktree provenance", "path", mainClaudeDir)
+				slog.Info("userscope: collision checker fell back to main worktree provenance", "path", mainKnossosDir)
 				collisionChecker = mainChecker
 			}
 		}
@@ -97,7 +97,7 @@ func (s *syncer) syncUserScope(opts SyncOptions) (*UserScopeResult, error) {
 		if !collisionChecker.IsEffective() {
 			activeRite := s.resolver.ReadActiveRite()
 			if activeRite != "" {
-				slog.Warn("userscope: collision checker not effective, skipping user-scope writes to prevent contamination", "path", projectClaudeDir, "active_rite", activeRite)
+				slog.Warn("userscope: collision checker not effective, skipping user-scope writes to prevent contamination", "path", projectKnossosDir, "active_rite", activeRite)
 				return result, nil
 			}
 			// No ACTIVE_RITE: no rite to protect. Proceed without collision checking.

@@ -52,6 +52,11 @@ type MenaProjectionOptions struct {
 	// Required when Collector is non-nil.
 	ProjectRoot string
 
+	// KnossosDir is the .knossos/ directory for the project.
+	// Used to locate PROVENANCE_MANIFEST.yaml (now at .knossos/PROVENANCE_MANIFEST.yaml).
+	// When empty, falls back to filepath.Join(filepath.Dir(filepath.Dir(TargetCommandsDir)), ".knossos").
+	KnossosDir string
+
 	// OverwriteDiverged allows overwriting user-owned/untracked entries
 	// that collide with flat-name projection. When false (default),
 	// knossos yields and falls back to source-path routing.

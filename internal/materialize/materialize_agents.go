@@ -237,7 +237,7 @@ func (m *Materializer) detectOrphans(manifest *RiteManifest, claudeDir string, r
 	}
 
 	// Try loading provenance manifest for manifest-based detection
-	manifestPath := provenance.ManifestPath(claudeDir)
+	manifestPath := provenance.ManifestPath(m.getKnossosDir())
 	provenanceManifest, err := provenance.Load(manifestPath)
 
 	// If provenance manifest exists, use manifest-based orphan detection

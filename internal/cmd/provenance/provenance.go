@@ -94,10 +94,11 @@ func runShow(ctx *cmdContext, scopeFilter string) error {
 	var allEntries []*ShowEntry
 	var combinedOutput CombinedOutput
 
-	// Load rite-scope manifest (from project .claude/)
+	// Load rite-scope manifest (from project .knossos/)
 	if scopeFilter == "" || scopeFilter == "rite" {
+		knossosDir := filepath.Join(resolver.ProjectRoot(), ".knossos")
 		claudeDir := filepath.Join(resolver.ProjectRoot(), ".claude")
-		manifestPath := provenance.ManifestPath(claudeDir)
+		manifestPath := provenance.ManifestPath(knossosDir)
 		manifest, err := provenance.LoadOrBootstrap(manifestPath)
 		if err == nil && len(manifest.Entries) > 0 {
 			combinedOutput.Rite = manifest

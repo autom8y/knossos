@@ -235,9 +235,15 @@ func cleanStaleMenaEntries(opts MenaProjectionOptions, result *MenaProjectionRes
 		projected["skills/"+name] = true
 	}
 
-	// Load existing provenance manifest to identify knossos-owned entries
+	// Load existing provenance manifest to identify knossos-owned entries.
+	// Manifest lives in .knossos/ (migrated from .claude/).
 	claudeDir := filepath.Dir(opts.TargetCommandsDir)
-	manifestPath := filepath.Join(claudeDir, provenance.ManifestFileName)
+	knossosDir := opts.KnossosDir
+	if knossosDir == "" {
+		// Fallback: derive from TargetCommandsDir (.claude/commands/ -> parent -> sibling .knossos/)
+		knossosDir = filepath.Join(filepath.Dir(claudeDir), ".knossos")
+	}
+	manifestPath := filepath.Join(knossosDir, provenance.ManifestFileName)
 	manifest, err := provenance.Load(manifestPath)
 	if err != nil {
 		return // No manifest = no stale entries to clean

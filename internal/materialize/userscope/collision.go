@@ -14,18 +14,18 @@ type CollisionChecker struct {
 }
 
 // NewCollisionChecker creates a checker from rite manifest.
-// claudeDir is the project .claude/. Empty string = no collision checking.
-func NewCollisionChecker(claudeDir string) *CollisionChecker {
+// knossosDir is the project .knossos/ directory. Empty string = no collision checking.
+func NewCollisionChecker(knossosDir string) *CollisionChecker {
 	c := &CollisionChecker{}
-	if claudeDir != "" {
-		c.loadRiteManifest(claudeDir)
+	if knossosDir != "" {
+		c.loadRiteManifest(knossosDir)
 	}
 	return c
 }
 
-func (c *CollisionChecker) loadRiteManifest(claudeDir string) {
+func (c *CollisionChecker) loadRiteManifest(knossosDir string) {
 	c.riteEntries = make(map[string]bool)
-	manifestPath := provenance.ManifestPath(claudeDir)
+	manifestPath := provenance.ManifestPath(knossosDir)
 	manifest, err := provenance.Load(manifestPath)
 	if err != nil {
 		// manifestLoaded stays false: no manifest file means checker is not effective.

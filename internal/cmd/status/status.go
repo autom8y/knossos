@@ -259,8 +259,8 @@ func collectClaude(resolver *paths.Resolver) ClaudeHealth {
 		}
 	}
 
-	// Last sync from provenance manifest
-	manifestPath := provenance.ManifestPath(claudeDir)
+	// Last sync from provenance manifest (now in .knossos/)
+	manifestPath := provenance.ManifestPath(resolver.KnossosDir())
 	if manifest, err := provenance.Load(manifestPath); err == nil {
 		if !manifest.LastSync.IsZero() {
 			health.LastSync = manifest.LastSync.UTC().Format(time.RFC3339)

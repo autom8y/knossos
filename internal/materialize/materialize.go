@@ -160,6 +160,12 @@ func (m *Materializer) getClaudeDir() string {
 	return m.resolver.ClaudeDir()
 }
 
+// getKnossosDir returns the .knossos/ directory for the project.
+// The provenance manifest lives here (PROVENANCE_MANIFEST.yaml).
+func (m *Materializer) getKnossosDir() string {
+	return m.resolver.KnossosDir()
+}
+
 // riteFS returns a filesystem rooted at the rite's directory.
 // For embedded sources, returns a sub-FS of the embedded rites.
 // For filesystem sources, returns os.DirFS rooted at the rite path.
@@ -238,7 +244,11 @@ func (m *Materializer) MaterializeMinimal(opts Options) (*Result, error) {
 	// (parse failure, schema validation) propagate and abort the pipeline. A corrupted
 	// provenance manifest must be fixed or removed manually -- silent bootstrapping would
 	// mask data corruption and defeat the purpose of the manifest.
-	manifestPath := provenance.ManifestPath(claudeDir)
+	knossosDir := m.getKnossosDir()
+	if err := paths.EnsureDir(knossosDir); err != nil {
+		return nil, errors.Wrap(errors.CodeGeneralError, "failed to create .knossos directory", err)
+	}
+	manifestPath := provenance.ManifestPath(knossosDir)
 	prevManifest, err := provenance.LoadOrBootstrap(manifestPath)
 	if err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to load provenance manifest", err)
@@ -284,7 +294,7 @@ func (m *Materializer) MaterializeMinimal(opts Options) (*Result, error) {
 	_ = os.Remove(filepath.Join(claudeDir, "INVOCATION_STATE.yaml"))
 
 	// Provenance: merge and save manifest
-	if err := m.saveProvenanceManifest(manifestPath, "", collector, divergenceReport, prevManifest, opts.OverwriteDiverged); err != nil {
+	if err := m.saveProvenanceManifest(manifestPath, claudeDir, "", collector, divergenceReport, prevManifest, opts.OverwriteDiverged); err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to save provenance manifest", err)
 	}
 
@@ -366,9 +376,13 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 		return nil, errors.Wrap(errors.CodeGeneralError, "CLAUDE.md pre-validation failed (no files written)", err)
 	}
 
-	// 2. Ensure .claude/ directory exists
+	// 2. Ensure .claude/ and .knossos/ directories exist
 	if err := paths.EnsureDir(claudeDir); err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to create .claude directory", err)
+	}
+	knossosDir := m.getKnossosDir()
+	if err := paths.EnsureDir(knossosDir); err != nil {
+		return nil, errors.Wrap(errors.CodeGeneralError, "failed to create .knossos directory", err)
 	}
 
 	// Provenance: load previous manifest and detect divergence.
@@ -376,7 +390,7 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 	// (parse failure, schema validation) propagate and abort the pipeline. A corrupted
 	// provenance manifest must be fixed or removed manually -- silent bootstrapping would
 	// mask data corruption and defeat the purpose of the manifest.
-	manifestPath := provenance.ManifestPath(claudeDir)
+	manifestPath := provenance.ManifestPath(knossosDir)
 	prevManifest, err := provenance.LoadOrBootstrap(manifestPath)
 	if err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to load provenance manifest", err)
@@ -500,7 +514,7 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 	}
 
 	// Provenance: merge and save manifest
-	if err := m.saveProvenanceManifest(manifestPath, activeRiteName, collector, divergenceReport, prevManifest, opts.OverwriteDiverged); err != nil {
+	if err := m.saveProvenanceManifest(manifestPath, claudeDir, activeRiteName, collector, divergenceReport, prevManifest, opts.OverwriteDiverged); err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to save provenance manifest", err)
 	}
 

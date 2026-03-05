@@ -378,15 +378,18 @@ func matchesStaleSettingsFingerprint(parsed map[string]any) bool {
 
 // saveProvenanceManifest merges collector entries with divergence report and previous manifest,
 // then writes the final manifest to disk. Delegates to provenance.Merge() for the algorithm.
+//
+// claudeDir is passed explicitly because Merge uses it to check whether files still exist
+// on disk (entries live in .claude/, but the manifest is now stored in .knossos/).
 func (m *Materializer) saveProvenanceManifest(
 	manifestPath string,
+	claudeDir string,
 	activeRite string,
 	collector provenance.Collector,
 	divergenceReport *provenance.DivergenceReport,
 	prevManifest *provenance.ProvenanceManifest,
 	overwriteDiverged bool,
 ) error {
-	claudeDir := filepath.Dir(manifestPath)
 	finalManifest := provenance.Merge(claudeDir, activeRite, collector, divergenceReport, prevManifest, overwriteDiverged)
 	return provenance.Save(manifestPath, finalManifest)
 }
