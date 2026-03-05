@@ -555,6 +555,118 @@ func TestExtractEmbeddedMenaToXDG_DirectoryExistsNoSentinel(t *testing.T) {
 	}
 }
 
+func TestWriteProjectGitignore_NewFile(t *testing.T) {
+	dir := t.TempDir()
+
+	writeProjectGitignore(dir)
+
+	gitignorePath := filepath.Join(dir, ".gitignore")
+	data, err := os.ReadFile(gitignorePath)
+	if err != nil {
+		t.Fatalf("failed to read .gitignore: %v", err)
+	}
+	content := string(data)
+
+	for _, pattern := range []string{"# Knossos", "# End Knossos", ".knossos/", ".claude/CLAUDE.md", "**/.sos/*", "!**/.sos/archive/", "**/.ledge/*", "!**/.ledge/shelf/"} {
+		if !strings.Contains(content, pattern) {
+			t.Errorf(".gitignore missing pattern %q", pattern)
+		}
+	}
+}
+
+func TestWriteProjectGitignore_AppendToExisting(t *testing.T) {
+	dir := t.TempDir()
+
+	// Pre-create .gitignore with user content.
+	gitignorePath := filepath.Join(dir, ".gitignore")
+	userContent := "# My project\nnode_modules/\n*.log\n"
+	if err := os.WriteFile(gitignorePath, []byte(userContent), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	writeProjectGitignore(dir)
+
+	data, err := os.ReadFile(gitignorePath)
+	if err != nil {
+		t.Fatalf("failed to read .gitignore: %v", err)
+	}
+	content := string(data)
+
+	// User content preserved.
+	if !strings.Contains(content, "node_modules/") {
+		t.Error("user content was not preserved")
+	}
+	// Knossos block appended.
+	if !strings.Contains(content, "# Knossos") {
+		t.Error("Knossos block was not appended")
+	}
+	// Blank line separator between user content and block.
+	if !strings.Contains(content, "*.log\n\n# Knossos") {
+		t.Error("missing blank line separator before Knossos block")
+	}
+}
+
+func TestWriteProjectGitignore_ReplaceExistingBlock(t *testing.T) {
+	dir := t.TempDir()
+
+	// Pre-create .gitignore with stale Knossos block surrounded by user content.
+	gitignorePath := filepath.Join(dir, ".gitignore")
+	staleContent := "# My project\nnode_modules/\n\n# Knossos\n.knossos/\n.claude/CLAUDE.md\n# End Knossos\n\n# Custom rules\n*.log\n"
+	if err := os.WriteFile(gitignorePath, []byte(staleContent), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	writeProjectGitignore(dir)
+
+	data, err := os.ReadFile(gitignorePath)
+	if err != nil {
+		t.Fatalf("failed to read .gitignore: %v", err)
+	}
+	content := string(data)
+
+	// User content before and after preserved.
+	if !strings.Contains(content, "node_modules/") {
+		t.Error("user content before block was not preserved")
+	}
+	if !strings.Contains(content, "*.log") {
+		t.Error("user content after block was not preserved")
+	}
+	// New patterns present (were missing in stale block).
+	if !strings.Contains(content, "**/.ledge/*") {
+		t.Error("updated patterns not present after replacement")
+	}
+	if !strings.Contains(content, "!**/.ledge/shelf/") {
+		t.Error("shelf negation pattern not present after replacement")
+	}
+	// Only one Knossos block.
+	if strings.Count(content, "# Knossos\n") != 1 {
+		t.Errorf("expected exactly 1 Knossos block, got %d", strings.Count(content, "# Knossos\n"))
+	}
+}
+
+func TestWriteProjectGitignore_Idempotent(t *testing.T) {
+	dir := t.TempDir()
+
+	writeProjectGitignore(dir)
+
+	gitignorePath := filepath.Join(dir, ".gitignore")
+	first, err := os.ReadFile(gitignorePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	writeProjectGitignore(dir)
+
+	second, err := os.ReadFile(gitignorePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if string(first) != string(second) {
+		t.Errorf("content changed on second run:\nfirst:  %q\nsecond: %q", string(first), string(second))
+	}
+}
+
 // verifyLedgeSubdirs checks that .ledge subdirectories, .gitkeep files,
 // and .gitignore policies were created correctly.
 func verifyLedgeSubdirs(t *testing.T, projectDir string) {
@@ -562,7 +674,7 @@ func verifyLedgeSubdirs(t *testing.T, projectDir string) {
 	ledgeDir := filepath.Join(projectDir, ".ledge")
 
 	// Verify subdirectories exist with .gitkeep.
-	for _, sub := range []string{"decisions", "specs", "reviews", "spikes"} {
+	for _, sub := range []string{"decisions", "specs", "reviews", "spikes", "shelf"} {
 		subDir := filepath.Join(ledgeDir, sub)
 		if _, err := os.Stat(subDir); os.IsNotExist(err) {
 			t.Errorf(".ledge/%s/ directory was not created", sub)
@@ -597,5 +709,26 @@ func verifyLedgeSubdirs(t *testing.T, projectDir string) {
 		if !strings.Contains(spikesContent, pattern) {
 			t.Errorf(".ledge/spikes/.gitignore missing pattern %q", pattern)
 		}
+	}
+
+	// Verify .sos/archive/ exists with .gitkeep.
+	archiveDir := filepath.Join(projectDir, ".sos", "archive")
+	if _, err := os.Stat(archiveDir); os.IsNotExist(err) {
+		t.Error(".sos/archive/ directory was not created")
+	}
+	archiveGitkeep := filepath.Join(archiveDir, ".gitkeep")
+	if _, err := os.Stat(archiveGitkeep); os.IsNotExist(err) {
+		t.Error(".sos/archive/.gitkeep was not created")
+	}
+
+	// Verify root .gitignore has Knossos block.
+	rootGitignore2 := filepath.Join(projectDir, ".gitignore")
+	data, err = os.ReadFile(rootGitignore2)
+	if err != nil {
+		t.Fatalf("failed to read root .gitignore: %v", err)
+	}
+	rootContent2 := string(data)
+	if !strings.Contains(rootContent2, "# Knossos") {
+		t.Error("root .gitignore missing Knossos block")
 	}
 }

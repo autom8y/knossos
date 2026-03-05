@@ -9,6 +9,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -55,6 +56,7 @@ What was created:
     specs/            PRDs and technical specs
     reviews/          Audit reports and code reviews
     spikes/           Exploration and research (git-ignored by default)
+    shelf/            Tracked work products (survives .gitignore)
 
 Next steps:
   1. Open this project in Claude Code
@@ -72,6 +74,7 @@ What was created:
     specs/            PRDs and technical specs
     reviews/          Audit reports and code reviews
     spikes/           Exploration and research (git-ignored by default)
+    shelf/            Tracked work products (survives .gitignore)
 
 Next steps:
   1. Open this project in Claude Code
@@ -347,7 +350,7 @@ func scaffoldProjectDirs(projectDir string) {
 	}
 
 	ledgeDir := filepath.Join(projectDir, ".ledge")
-	ledgeSubdirs := []string{"decisions", "specs", "reviews", "spikes"}
+	ledgeSubdirs := []string{"decisions", "specs", "reviews", "spikes", "shelf"}
 	for _, sub := range ledgeSubdirs {
 		subDir := filepath.Join(ledgeDir, sub)
 		_ = os.MkdirAll(subDir, 0755)
@@ -358,11 +361,22 @@ func scaffoldProjectDirs(projectDir string) {
 		}
 	}
 
+	// .sos/archive/ — tracked archive survives gitignore negation.
+	archiveDir := filepath.Join(projectDir, ".sos", "archive")
+	_ = os.MkdirAll(archiveDir, 0755)
+	archiveGitkeep := filepath.Join(archiveDir, ".gitkeep")
+	if _, err := os.Stat(archiveGitkeep); os.IsNotExist(err) {
+		_ = os.WriteFile(archiveGitkeep, []byte(""), 0644)
+	}
+
 	// Root .ledge/.gitignore: preserve decisions and specs, ignore session scratch.
 	writeLedgeGitignore(ledgeDir)
 
 	// .ledge/spikes/.gitignore: spike artifacts may be large, opt-in tracking.
 	writeSpikesGitignore(filepath.Join(ledgeDir, "spikes"))
+
+	// Root .gitignore: standardized Knossos ephemeral artifact patterns.
+	writeProjectGitignore(projectDir)
 }
 
 // writeLedgeGitignore writes the root .ledge/.gitignore that ignores session-scratch
@@ -383,6 +397,60 @@ func writeLedgeGitignore(ledgeDir string) {
 # spikes/ has its own .gitignore (opt-in)
 `)
 	_ = os.WriteFile(gitignorePath, content, 0644)
+}
+
+// knossosGitignoreBlock is the canonical gitignore block for Knossos-managed projects.
+// Delimited by marker comments for idempotent detection and update.
+const knossosGitignoreBlock = `# Knossos
+.knossos/
+.claude/CLAUDE.md
+**/.sos/*
+!**/.sos/archive/
+!**/.sos/archive/**
+**/.ledge/*
+!**/.ledge/shelf/
+!**/.ledge/shelf/**
+# End Knossos
+`
+
+// writeProjectGitignore writes or updates the Knossos block in the project root
+// .gitignore. Uses marker comments (# Knossos / # End Knossos) for idempotent
+// block detection: creates the file if absent, appends the block if no markers
+// are found, or replaces the existing marker-delimited region.
+func writeProjectGitignore(projectDir string) {
+	gitignorePath := filepath.Join(projectDir, ".gitignore")
+
+	existing, err := os.ReadFile(gitignorePath)
+	if err != nil {
+		// No existing file — write the block as the entire file.
+		_ = os.WriteFile(gitignorePath, []byte(knossosGitignoreBlock), 0644)
+		return
+	}
+
+	content := string(existing)
+
+	startIdx := strings.Index(content, "# Knossos\n")
+	endMarker := "# End Knossos\n"
+	endIdx := strings.Index(content, endMarker)
+
+	if startIdx >= 0 && endIdx >= 0 && endIdx > startIdx {
+		// Replace existing block (including markers).
+		before := content[:startIdx]
+		after := content[endIdx+len(endMarker):]
+		newContent := before + knossosGitignoreBlock + after
+		_ = os.WriteFile(gitignorePath, []byte(newContent), 0644)
+		return
+	}
+
+	// No existing block — append with blank line separator.
+	if len(content) > 0 && !strings.HasSuffix(content, "\n") {
+		content += "\n"
+	}
+	if len(content) > 0 {
+		content += "\n"
+	}
+	content += knossosGitignoreBlock
+	_ = os.WriteFile(gitignorePath, []byte(content), 0644)
 }
 
 // writeSpikesGitignore writes .ledge/spikes/.gitignore with an opt-in policy.

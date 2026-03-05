@@ -195,6 +195,11 @@ func (r *Resolver) LedgeSpikesDir() string {
 	return filepath.Join(r.LedgeDir(), "spikes")
 }
 
+// LedgeShelfDir returns the path to the .ledge/shelf/ directory.
+func (r *Resolver) LedgeShelfDir() string {
+	return filepath.Join(r.LedgeDir(), "shelf")
+}
+
 
 // --- Rite Path Methods ---
 
