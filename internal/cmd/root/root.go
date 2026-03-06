@@ -153,6 +153,21 @@ func init() {
 	rootCmd.AddCommand(versionCmd)
 }
 
+// versionOutput is the structured output for ari version.
+type versionOutput struct {
+	Version string `json:"version"`
+	Commit  string `json:"commit"`
+	Date    string `json:"date"`
+	Go      string `json:"go"`
+	OS      string `json:"os"`
+	Arch    string `json:"arch"`
+}
+
+// Text implements output.Textable.
+func (v versionOutput) Text() string {
+	return fmt.Sprintf("ari %s (%s, %s)\n%s %s/%s\n", v.Version, v.Commit, v.Date, v.Go, v.OS, v.Arch)
+}
+
 var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Show version information",
@@ -165,20 +180,14 @@ Examples:
 	Run: func(cmd *cobra.Command, args []string) {
 		format := output.ParseFormat(globalOpts.Output)
 		printer := output.NewPrinter(format, os.Stdout, os.Stderr, globalOpts.Verbose)
-
-		if format == output.FormatJSON {
-			_ = printer.Print(map[string]string{
-				"version": version,
-				"commit":  commit,
-				"date":    date,
-				"go":      runtime.Version(),
-				"os":      runtime.GOOS,
-				"arch":    runtime.GOARCH,
-			})
-		} else {
-			fmt.Printf("ari %s (%s, %s)\n", version, commit, date)
-			fmt.Printf("%s %s/%s\n", runtime.Version(), runtime.GOOS, runtime.GOARCH)
-		}
+		_ = printer.Print(versionOutput{
+			Version: version,
+			Commit:  commit,
+			Date:    date,
+			Go:      runtime.Version(),
+			OS:      runtime.GOOS,
+			Arch:    runtime.GOARCH,
+		})
 	},
 }
 
