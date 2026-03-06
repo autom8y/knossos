@@ -158,7 +158,11 @@ Your CONSULTATION_RESPONSE should answer all of these.
 
 ## Cross-Rite Protocol
 
-<!-- TODO: Define how cross-rite concerns are routed and resolved -->
+When work crosses rite boundaries:
+1. Surface the cross-rite concern in `state_update.blockers` or `information_needed`
+2. Recommend the user invoke `Skill("cross-rite-handoff")` for formal transfer schema
+3. Include `handoff_type` (execution | validation | assessment | implementation) in your recommendation
+4. Do NOT attempt cross-rite routing yourself — surface to the main agent for `/consult` or direct handoff
 
 ## Skills Reference
 

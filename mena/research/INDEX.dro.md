@@ -73,7 +73,7 @@ For each search result:
 2. Fetch the source via WebFetch if URL is accessible
 3. Extract metadata: title, author(s), year, type, URL
 4. Record a 2-4 sentence summary of what the source contributes
-5. Catalog using the [review-entry schema](../literature-review/schemas/review-entry.md)
+5. Catalog using the [review-entry schema](../skills/literature-review/schemas/review-entry.md)
 
 ### Source Targets
 

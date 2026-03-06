@@ -462,8 +462,8 @@ Defects are documented and handed back to Engineer for fixes.
 
 ## Related Skills
 
-- [documentation](../../templates/documentation/INDEX.lego.md) - Test Plan templates
-- [standards](../../guidance/standards/INDEX.lego.md) - Testing conventions
+- [documentation](../../skills/templates/documentation/SKILL.md) - Test Plan templates
+- [standards](../../skills/guidance/standards/SKILL.md) - Testing conventions
 
 ---
 

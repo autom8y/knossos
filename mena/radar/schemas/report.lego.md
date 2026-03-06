@@ -283,5 +283,5 @@ signal=`radar-unguarded-scars, radar-convention-drift`.
 ## Related
 
 - [opportunity.lego.md](opportunity.lego.md) — OPP-NNN entry format
-- [../INDEX.dro.md](../INDEX.dro.md) — /radar dromenon
-- [../../pinakes/schemas/report-format.lego.md](../../pinakes/schemas/report-format.lego.md) — Theoria report format (parallel system)
+- [/radar command](../../../commands/radar.md) — /radar dromenon
+- [report-format](../../pinakes/schemas/report-format.md) — Theoria report format (parallel system)

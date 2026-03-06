@@ -6,11 +6,11 @@
 
 ### 1. Pre-flight Validation
 
-Apply [Session Resolution Pattern](../shared/session-resolution.md):
+Apply [Session Resolution Pattern](../../skills/session/shared/session-resolution.md):
 - Requires: Active session (not parked)
 - Verb: "hand off"
 
-Apply [Workflow Resolution Pattern](../shared/workflow-resolution.md):
+Apply [Workflow Resolution Pattern](../../skills/session/shared/workflow-resolution.md):
 - Target agent: User-specified agent name
 - Validate agent exists in current rite
 
@@ -18,7 +18,7 @@ Apply [Workflow Resolution Pattern](../shared/workflow-resolution.md):
 - **Check for same agent handoff**: Compare to `last_agent` field
   - If same → Warning: "Already working with {agent}. Continuing without handoff..."
 
-See [session-validation](../common/session-validation.md) for validation patterns.
+See [session-validation](../../skills/session/common/session-validation.md) for validation patterns.
 
 ### 2. Generate Handoff Note
 
@@ -61,7 +61,7 @@ Moirai will:
 | principal-engineer | implementation |
 | qa-adversary | validation |
 
-See [session-context-schema](../common/session-context-schema.md) for field definitions.
+See [session-context-schema](../../skills/session/common/session-context-schema.md) for field definitions.
 
 ### 4. Invoke Target Agent
 

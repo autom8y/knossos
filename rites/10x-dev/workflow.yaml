@@ -175,9 +175,9 @@ back_routes:
 #
 # Usage Patterns:
 #
-# 1. Via work_type in /task or /start:
+# 1. Via work_type in /task or /sos start:
 #    /task --work-type=bug_fix "Fix login timeout issue"
-#    /start --work-type=technical_refactoring "Migrate to new auth library"
+#    /sos start --work-type=technical_refactoring "Migrate to new auth library"
 #
 # 2. Via explicit --entry flag:
 #    /task --entry=architect "Redesign caching layer"

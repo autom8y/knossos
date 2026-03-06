@@ -134,7 +134,7 @@ Spec written to: {path}
 Next steps:
   /build "{topic}"     — Execute from this spec
   /architect "{topic}" — Expand into full TDD + ADRs first
-  /start "{topic}"     — Start a tracked session
+  /sos start "{topic}" — Start a tracked session
 ```
 
 ## AskUserQuestion Patterns
