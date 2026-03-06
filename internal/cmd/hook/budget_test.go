@@ -145,11 +145,19 @@ func TestResolveStateFile(t *testing.T) {
 		}
 	})
 
-	t.Run("falls back to CLAUDE_SESSION_ID", func(t *testing.T) {
+	t.Run("falls back to session ID from stdin", func(t *testing.T) {
 		t.Setenv(envSessionKey, "")
 		os.Unsetenv(envSessionKey)
-		t.Setenv("CLAUDE_HOOK_EVENT", "PostToolUse")
-		t.Setenv("CLAUDE_SESSION_ID", "sess-abc-123")
+
+		// Pipe session ID via stdin JSON (CC's actual transport)
+		oldStdin := os.Stdin
+		r, w, _ := os.Pipe()
+		go func() {
+			w.Write([]byte(`{"hook_event_name":"PostToolUse","session_id":"sess-abc-123"}`))
+			w.Close()
+		}()
+		os.Stdin = r
+		t.Cleanup(func() { os.Stdin = oldStdin })
 
 		result := resolveStateFile(ctx)
 		expected := filepath.Join(os.TempDir(), "ari-msg-count-sess-abc-123")

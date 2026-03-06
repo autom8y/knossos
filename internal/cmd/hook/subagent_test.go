@@ -14,6 +14,33 @@ import (
 	"github.com/autom8y/knossos/internal/output"
 )
 
+// pipeHookStdin sets up os.Stdin with a JSON payload for hook testing.
+// Returns a cleanup function. Caller must defer cleanup().
+func pipeHookStdin(t *testing.T, event string, projectDir string, toolInput string) {
+	t.Helper()
+	oldStdin := os.Stdin
+	payload := map[string]any{
+		"hook_event_name": event,
+		"cwd":             projectDir,
+		"session_id":      "",
+	}
+	if toolInput != "" {
+		payload["tool_input"] = json.RawMessage(toolInput)
+	}
+	data, _ := json.Marshal(payload)
+	r, w, _ := os.Pipe()
+	go func() {
+		w.Write(data)
+		w.Close()
+	}()
+	os.Stdin = r
+	os.Setenv("CLAUDE_PROJECT_DIR", projectDir)
+	t.Cleanup(func() {
+		os.Stdin = oldStdin
+		os.Unsetenv("CLAUDE_PROJECT_DIR")
+	})
+}
+
 func TestSubagentStart_NoSession(t *testing.T) {
 	ctx := &cmdContext{}
 	var stdout, stderr bytes.Buffer
@@ -56,8 +83,7 @@ func TestSubagentStop_NoSession(t *testing.T) {
 }
 
 func TestSubagentStart_WrongEvent(t *testing.T) {
-	os.Setenv("CLAUDE_HOOK_EVENT", "PostToolUse")
-	defer os.Unsetenv("CLAUDE_HOOK_EVENT")
+	pipeHookStdin(t, "PostToolUse", "", "")
 
 	ctx := &cmdContext{}
 	var stdout, stderr bytes.Buffer
@@ -81,8 +107,7 @@ func TestSubagentStart_WrongEvent(t *testing.T) {
 }
 
 func TestSubagentStop_WrongEvent(t *testing.T) {
-	os.Setenv("CLAUDE_HOOK_EVENT", "PreToolUse")
-	defer os.Unsetenv("CLAUDE_HOOK_EVENT")
+	pipeHookStdin(t, "PreToolUse", "", "")
 
 	ctx := &cmdContext{}
 	var stdout, stderr bytes.Buffer
@@ -112,14 +137,8 @@ func TestSubagentStart_LogsToClew(t *testing.T) {
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	os.MkdirAll(sessionDir, 0755)
 
-	os.Setenv("CLAUDE_HOOK_EVENT", string(hook.EventSubagentStart))
-	os.Setenv("CLAUDE_PROJECT_DIR", tmpDir)
-	os.Setenv("CLAUDE_TOOL_INPUT", `{"agent_name":"integration-engineer","agent_type":"specialist","task_id":"task-016","agent_id":"agent-abc123"}`)
-	defer func() {
-		os.Unsetenv("CLAUDE_HOOK_EVENT")
-		os.Unsetenv("CLAUDE_PROJECT_DIR")
-		os.Unsetenv("CLAUDE_TOOL_INPUT")
-	}()
+	pipeHookStdin(t, string(hook.EventSubagentStart), tmpDir,
+		`{"agent_name":"integration-engineer","agent_type":"specialist","task_id":"task-016","agent_id":"agent-abc123"}`)
 
 	outputFlag := "json"
 	verboseFlag := false
@@ -174,14 +193,8 @@ func TestSubagentStop_LogsToClew(t *testing.T) {
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	os.MkdirAll(sessionDir, 0755)
 
-	os.Setenv("CLAUDE_HOOK_EVENT", string(hook.EventSubagentStop))
-	os.Setenv("CLAUDE_PROJECT_DIR", tmpDir)
-	os.Setenv("CLAUDE_TOOL_INPUT", `{"agent_name":"context-architect","type":"specialist","agent_id":"agent-def456"}`)
-	defer func() {
-		os.Unsetenv("CLAUDE_HOOK_EVENT")
-		os.Unsetenv("CLAUDE_PROJECT_DIR")
-		os.Unsetenv("CLAUDE_TOOL_INPUT")
-	}()
+	pipeHookStdin(t, string(hook.EventSubagentStop), tmpDir,
+		`{"agent_name":"context-architect","type":"specialist","agent_id":"agent-def456"}`)
 
 	outputFlag := "json"
 	verboseFlag := false
@@ -246,7 +259,6 @@ func TestParseSubagentInfo_ValidJSON(t *testing.T) {
 }
 
 func TestParseSubagentInfo_AgentIDFallback(t *testing.T) {
-	// Falls back to "id" field if "agent_id" is not present
 	info := parseSubagentInfo(`{"agent_name":"pythia","id":"agent-fallback-id"}`)
 	if info.AgentID != "agent-fallback-id" {
 		t.Errorf("AgentID = %q, want %q", info.AgentID, "agent-fallback-id")
@@ -254,7 +266,6 @@ func TestParseSubagentInfo_AgentIDFallback(t *testing.T) {
 }
 
 func TestParseSubagentInfo_AgentIDMissing(t *testing.T) {
-	// No agent_id field — AgentID should be empty string
 	info := parseSubagentInfo(`{"agent_name":"integration-engineer","agent_type":"specialist"}`)
 	if info.AgentID != "" {
 		t.Errorf("AgentID = %q, want empty string", info.AgentID)
@@ -268,15 +279,8 @@ func TestSubagentStart_PersistsThroughlineID(t *testing.T) {
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	os.MkdirAll(sessionDir, 0755)
 
-	os.Setenv("CLAUDE_HOOK_EVENT", string(hook.EventSubagentStart))
-	os.Setenv("CLAUDE_PROJECT_DIR", tmpDir)
-	// pythia is a throughline agent — its ID should be persisted
-	os.Setenv("CLAUDE_TOOL_INPUT", `{"agent_name":"pythia","agent_type":"orchestrator","task_id":"task-001","agent_id":"agent-pythia-xyz"}`)
-	defer func() {
-		os.Unsetenv("CLAUDE_HOOK_EVENT")
-		os.Unsetenv("CLAUDE_PROJECT_DIR")
-		os.Unsetenv("CLAUDE_TOOL_INPUT")
-	}()
+	pipeHookStdin(t, string(hook.EventSubagentStart), tmpDir,
+		`{"agent_name":"pythia","agent_type":"orchestrator","task_id":"task-001","agent_id":"agent-pythia-xyz"}`)
 
 	outputFlag := "json"
 	verboseFlag := false
@@ -330,15 +334,8 @@ func TestSubagentStart_NonThroughlineAgentNotPersisted(t *testing.T) {
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	os.MkdirAll(sessionDir, 0755)
 
-	os.Setenv("CLAUDE_HOOK_EVENT", string(hook.EventSubagentStart))
-	os.Setenv("CLAUDE_PROJECT_DIR", tmpDir)
-	// integration-engineer is NOT a throughline agent
-	os.Setenv("CLAUDE_TOOL_INPUT", `{"agent_name":"integration-engineer","agent_type":"specialist","agent_id":"agent-ie-xyz"}`)
-	defer func() {
-		os.Unsetenv("CLAUDE_HOOK_EVENT")
-		os.Unsetenv("CLAUDE_PROJECT_DIR")
-		os.Unsetenv("CLAUDE_TOOL_INPUT")
-	}()
+	pipeHookStdin(t, string(hook.EventSubagentStart), tmpDir,
+		`{"agent_name":"integration-engineer","agent_type":"specialist","agent_id":"agent-ie-xyz"}`)
 
 	outputFlag := "json"
 	verboseFlag := false
@@ -369,7 +366,6 @@ func TestSubagentStart_NonThroughlineAgentNotPersisted(t *testing.T) {
 }
 
 func TestSubagentStart_ThroughlineIDUpsert(t *testing.T) {
-	// Verify that a second call updates the entry rather than overwriting others
 	tmpDir := t.TempDir()
 	sessionID := "session-throughline-upsert"
 	sessionsDir := filepath.Join(tmpDir, ".sos", "sessions")
@@ -407,22 +403,14 @@ func TestReadThroughlineIDs_NoFile(t *testing.T) {
 }
 
 func TestSubagentStart_NoAgentIDSkipsPersistence(t *testing.T) {
-	// When agent_id is missing, hook must still succeed and NOT write the IDs file
 	tmpDir := t.TempDir()
 	sessionID := "session-no-agent-id"
 	sessionsDir := filepath.Join(tmpDir, ".sos", "sessions")
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	os.MkdirAll(sessionDir, 0755)
 
-	os.Setenv("CLAUDE_HOOK_EVENT", string(hook.EventSubagentStart))
-	os.Setenv("CLAUDE_PROJECT_DIR", tmpDir)
-	// pythia with no agent_id
-	os.Setenv("CLAUDE_TOOL_INPUT", `{"agent_name":"pythia","agent_type":"orchestrator"}`)
-	defer func() {
-		os.Unsetenv("CLAUDE_HOOK_EVENT")
-		os.Unsetenv("CLAUDE_PROJECT_DIR")
-		os.Unsetenv("CLAUDE_TOOL_INPUT")
-	}()
+	pipeHookStdin(t, string(hook.EventSubagentStart), tmpDir,
+		`{"agent_name":"pythia","agent_type":"orchestrator"}`)
 
 	outputFlag := "json"
 	verboseFlag := false
@@ -461,7 +449,6 @@ func TestSubagentStart_NoAgentIDSkipsPersistence(t *testing.T) {
 }
 
 func TestParseSubagentInfo_NameFallback(t *testing.T) {
-	// Falls back to "name" field if "agent_name" is not present
 	info := parseSubagentInfo(`{"name":"my-agent"}`)
 	if info.AgentName != "my-agent" {
 		t.Errorf("AgentName = %q, want %q", info.AgentName, "my-agent")

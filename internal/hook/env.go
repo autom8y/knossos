@@ -8,21 +8,9 @@ import (
 	"os"
 )
 
-// Claude Code hook environment variable names.
-//
-// Deprecated: CC sends these via stdin JSON, not env vars.
-// Kept for backwards compatibility with direct CLI invocation.
-const (
-	EnvHookEvent     = "CLAUDE_HOOK_EVENT"       // Hook event type (PreToolUse, PostToolUse, etc.)
-	EnvToolName      = "CLAUDE_TOOL_NAME"        // Name of the tool being used
-	EnvToolInput     = "CLAUDE_TOOL_INPUT"       // JSON input to the tool
-	EnvToolResult    = "CLAUDE_HOOK_TOOL_RESULT" // Tool result/output (PostToolUse only)
-	EnvSessionID     = "CLAUDE_SESSION_ID"       // Claude session identifier
-	EnvProjectDir    = "CLAUDE_PROJECT_DIR"      // Project root directory
-	EnvConversation  = "CLAUDE_CONVERSATION_ID"  // Conversation identifier
-	EnvUserMessage   = "CLAUDE_USER_MESSAGE"     // User message that triggered the action
-	EnvAssistantText = "CLAUDE_ASSISTANT_TEXT"   // Assistant response text
-)
+// EnvProjectDir is the only hook environment variable still set by Claude Code.
+// All other hook data arrives via stdin JSON (see StdinPayload).
+const EnvProjectDir = "CLAUDE_PROJECT_DIR"
 
 // HookEvent represents the type of hook event.
 type HookEvent string
@@ -49,6 +37,7 @@ const (
 // StdinPayload represents the JSON data Claude Code sends to hooks via stdin.
 type StdinPayload struct {
 	SessionID      string          `json:"session_id"`
+	ConversationID string          `json:"conversation_id"`
 	TranscriptPath string          `json:"transcript_path"`
 	CWD            string          `json:"cwd"`
 	PermissionMode string          `json:"permission_mode"`
@@ -80,8 +69,7 @@ type Env struct {
 	ConversationID string
 
 	// Message context
-	UserMessage   string
-	AssistantText string
+	UserMessage string
 }
 
 // parseStdin reads and parses the JSON payload from stdin.
@@ -106,70 +94,52 @@ func parseStdin() *StdinPayload {
 	return &payload
 }
 
-// ParseEnv reads hook-related environment variables and returns an Env.
+// ParseEnv reads hook data from stdin JSON and returns an Env.
+// CLAUDE_PROJECT_DIR is the only value still read from environment.
 func ParseEnv() *Env {
-	// Read stdin first (primary source from CC)
 	stdin := parseStdin()
 
-	// Start with env var values (existing behavior)
-	event := HookEvent(os.Getenv(EnvHookEvent))
-	toolName := os.Getenv(EnvToolName)
-	toolInput := os.Getenv(EnvToolInput)
-	toolResult := os.Getenv(EnvToolResult)
-	sessionID := os.Getenv(EnvSessionID)
 	projectDir := os.Getenv(EnvProjectDir)
-	userMessage := os.Getenv(EnvUserMessage)
-	assistantText := os.Getenv(EnvAssistantText)
-	conversationID := os.Getenv(EnvConversation)
 
-	// Override with stdin values if available (CC's actual data)
-	var cwd string
-	if stdin != nil {
-		if stdin.HookEventName != "" {
-			event = HookEvent(stdin.HookEventName)
-		}
-		if stdin.ToolName != "" {
-			toolName = stdin.ToolName
-		}
-		if len(stdin.ToolInput) > 0 && string(stdin.ToolInput) != "null" {
-			toolInput = string(stdin.ToolInput)
-		}
-		if len(stdin.ToolResponse) > 0 && string(stdin.ToolResponse) != "null" {
-			toolResult = string(stdin.ToolResponse)
-		}
-		if stdin.SessionID != "" {
-			sessionID = stdin.SessionID
-		}
-		// Always capture CWD separately for spatial-aware consumers (e.g., .know/ hierarchy)
-		if stdin.CWD != "" {
-			cwd = stdin.CWD
-			if projectDir == "" {
-				projectDir = stdin.CWD
-			}
-		}
-		if stdin.Prompt != "" {
-			userMessage = stdin.Prompt
+	if stdin == nil {
+		return &Env{
+			ProjectDir: projectDir,
 		}
 	}
 
-	// Validate the event type if non-empty
+	event := HookEvent(stdin.HookEventName)
 	if event != "" && !isValidHookEvent(event) {
-		// Log warning for invalid event type but don't fail
-		// Empty event is valid (used for testing/direct invocation)
 		event = ""
+	}
+
+	var cwd string
+	if stdin.CWD != "" {
+		cwd = stdin.CWD
+		if projectDir == "" {
+			projectDir = stdin.CWD
+		}
+	}
+
+	var toolInput string
+	if len(stdin.ToolInput) > 0 && string(stdin.ToolInput) != "null" {
+		toolInput = unwrapJSONValue(stdin.ToolInput)
+	}
+
+	var toolResult string
+	if len(stdin.ToolResponse) > 0 && string(stdin.ToolResponse) != "null" {
+		toolResult = unwrapJSONValue(stdin.ToolResponse)
 	}
 
 	return &Env{
 		Event:          event,
-		ToolName:       toolName,
+		ToolName:       stdin.ToolName,
 		ToolInput:      toolInput,
 		ToolResult:     toolResult,
-		SessionID:      sessionID,
+		SessionID:      stdin.SessionID,
 		ProjectDir:     projectDir,
 		CWD:            cwd,
-		ConversationID: conversationID,
-		UserMessage:    userMessage,
-		AssistantText:  assistantText,
+		ConversationID: stdin.ConversationID,
+		UserMessage:    stdin.Prompt,
 	}
 }
 
@@ -184,6 +154,17 @@ func isValidHookEvent(event HookEvent) bool {
 	default:
 		return false
 	}
+}
+
+// unwrapJSONValue converts a json.RawMessage to a string.
+// If the value is a JSON string, it is unwrapped (unquoted).
+// If it's an object or array, it is returned as raw JSON text.
+func unwrapJSONValue(raw json.RawMessage) string {
+	var s string
+	if json.Unmarshal(raw, &s) == nil {
+		return s
+	}
+	return string(raw)
 }
 
 // IsPreToolUse returns true if this is a PreToolUse event.

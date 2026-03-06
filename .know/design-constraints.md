@@ -267,7 +267,7 @@ Called by session wrap, sails check, and naxos scanner. Determines if a session'
 | `internal/inscription/` | **COORDINATED** | `DefaultSectionOrder()` and `DeprecatedRegions()` govern CLAUDE.md for all satellites. |
 | `internal/provenance/` | **MIGRATION** | Schema version `2.0` with migration shim. Bump requires manifest migration in all projects. |
 | `internal/materialize/materialize.go` | **COORDINATED** | Pipeline stage reordering requires checking all `opts.Soft` guards. |
-| `internal/hook/env.go` env var constants | **FROZEN** | Deprecated but kept for backward compat. Do not remove without confirming zero consumers. |
+| `internal/hook/env.go` stdin-only transport | **SETTLED** | Env var fallback removed. Only `CLAUDE_PROJECT_DIR` read from env. All other hook data via stdin JSON. |
 | `internal/config/home.go` | **COORDINATED** | `sync.Once` cache is test-hazardous. Reset required in tests setting `KNOSSOS_HOME`. |
 | `internal/sails/color.go` | **COORDINATED** | Color enum is contractual across gate, generator, naxos scanner, tribute, and wrap. |
 | `internal/hook/clewcontract/` | **COORDINATED** | Canonical event write path. Schema changes require updating `events_read.go` bridge and `tribute.EventData`. |

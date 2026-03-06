@@ -1,68 +1,94 @@
 // Package testutil provides test utilities for hook testing.
-// It enables testing hooks without running Claude Code.
+// It enables testing hooks without running Claude Code by piping
+// JSON payloads to stdin (matching CC's actual transport).
 package testutil
 
 import (
+	"encoding/json"
 	"os"
 	"testing"
 )
 
-// EnvSetup holds original environment values for restoration.
+// EnvSetup holds original state for restoration.
 type EnvSetup struct {
-	original map[string]string
-	t        *testing.T
+	originalStdin *os.File
+	originalPD    string
+	hadPD         bool
+	t             *testing.T
 }
 
-// HookEnv represents the standard Claude Code hook environment variables.
+// HookEnv represents the hook data to inject for testing.
 type HookEnv struct {
 	Event          string
 	ToolName       string
 	ToolInput      string
-	ToolResult     string // Tool result/output (PostToolUse only)
+	ToolResult     string
 	SessionID      string
 	ProjectDir     string
 	ConversationID string
 	UserMessage    string
-	AssistantText  string
 }
 
-// SetupEnv creates a test environment with Claude Code hook variables.
-// It automatically cleans up when the test completes.
+// SetupEnv creates a test environment by piping hook data as JSON to stdin.
+// CLAUDE_PROJECT_DIR is set as an env var (matching CC's actual behavior).
+// All other hook data goes through stdin JSON.
+//
+// ToolInput and ToolResult are embedded as-is if they are valid JSON,
+// or escaped as JSON strings if they are not (for testing graceful degradation).
 func SetupEnv(t *testing.T, env *HookEnv) *EnvSetup {
 	t.Helper()
 
 	setup := &EnvSetup{
-		original: make(map[string]string),
-		t:        t,
+		originalStdin: os.Stdin,
+		originalPD:    os.Getenv("CLAUDE_PROJECT_DIR"),
+		hadPD:         os.Getenv("CLAUDE_PROJECT_DIR") != "",
+		t:             t,
 	}
 
-	// Capture and set each environment variable
-	vars := map[string]string{
-		"CLAUDE_HOOK_EVENT":       env.Event,
-		"CLAUDE_TOOL_NAME":        env.ToolName,
-		"CLAUDE_TOOL_INPUT":       env.ToolInput,
-		"CLAUDE_HOOK_TOOL_RESULT": env.ToolResult,
-		"CLAUDE_SESSION_ID":       env.SessionID,
-		"CLAUDE_PROJECT_DIR":      env.ProjectDir,
-		"CLAUDE_CONVERSATION_ID":  env.ConversationID,
-		"CLAUDE_USER_MESSAGE":     env.UserMessage,
-		"CLAUDE_ASSISTANT_TEXT":   env.AssistantText,
+	// Set CLAUDE_PROJECT_DIR (the one env var CC still sends)
+	if env.ProjectDir != "" {
+		os.Setenv("CLAUDE_PROJECT_DIR", env.ProjectDir)
 	}
 
-	for key, value := range vars {
-		setup.original[key] = os.Getenv(key)
-		if value != "" {
-			if err := os.Setenv(key, value); err != nil {
-				t.Fatalf("SetupEnv: os.Setenv(%q): %v", key, err)
-			}
+	// Build payload as a map so we can handle non-JSON ToolInput/ToolResult
+	payload := map[string]any{
+		"hook_event_name": env.Event,
+		"tool_name":       env.ToolName,
+		"session_id":      env.SessionID,
+		"conversation_id": env.ConversationID,
+		"cwd":             env.ProjectDir,
+		"prompt":          env.UserMessage,
+	}
+	if env.ToolInput != "" {
+		if json.Valid([]byte(env.ToolInput)) {
+			payload["tool_input"] = json.RawMessage(env.ToolInput)
 		} else {
-			if err := os.Unsetenv(key); err != nil {
-				t.Fatalf("SetupEnv: os.Unsetenv(%q): %v", key, err)
-			}
+			payload["tool_input"] = env.ToolInput // marshals as JSON string
+		}
+	}
+	if env.ToolResult != "" {
+		if json.Valid([]byte(env.ToolResult)) {
+			payload["tool_response"] = json.RawMessage(env.ToolResult)
+		} else {
+			payload["tool_response"] = env.ToolResult // marshals as JSON string
 		}
 	}
 
-	// Register cleanup
+	data, err := json.Marshal(payload)
+	if err != nil {
+		t.Fatalf("SetupEnv: json.Marshal: %v", err)
+	}
+
+	r, w, err := os.Pipe()
+	if err != nil {
+		t.Fatalf("SetupEnv: os.Pipe: %v", err)
+	}
+	go func() {
+		w.Write(data)
+		w.Close()
+	}()
+	os.Stdin = r
+
 	t.Cleanup(func() {
 		setup.Restore()
 	})
@@ -70,36 +96,28 @@ func SetupEnv(t *testing.T, env *HookEnv) *EnvSetup {
 	return setup
 }
 
-// Restore restores the original environment.
+// Restore restores the original stdin and environment.
 func (s *EnvSetup) Restore() {
-	for key, value := range s.original {
-		if value == "" {
-			if err := os.Unsetenv(key); err != nil {
-				s.t.Logf("Restore: os.Unsetenv(%q): %v", key, err)
-			}
-		} else {
-			if err := os.Setenv(key, value); err != nil {
-				s.t.Logf("Restore: os.Setenv(%q): %v", key, err)
-			}
-		}
+	os.Stdin = s.originalStdin
+	if s.hadPD {
+		os.Setenv("CLAUDE_PROJECT_DIR", s.originalPD)
+	} else {
+		os.Unsetenv("CLAUDE_PROJECT_DIR")
 	}
 }
 
 // SetVar sets an additional environment variable (captured for restoration).
 func (s *EnvSetup) SetVar(key, value string) {
-	if _, exists := s.original[key]; !exists {
-		s.original[key] = os.Getenv(key)
-	}
 	if err := os.Setenv(key, value); err != nil {
 		s.t.Fatalf("SetVar: os.Setenv(%q): %v", key, err)
 	}
+	s.t.Cleanup(func() {
+		os.Unsetenv(key)
+	})
 }
 
-// UnsetVar unsets an environment variable (captured for restoration).
+// UnsetVar unsets an environment variable.
 func (s *EnvSetup) UnsetVar(key string) {
-	if _, exists := s.original[key]; !exists {
-		s.original[key] = os.Getenv(key)
-	}
 	if err := os.Unsetenv(key); err != nil {
 		s.t.Fatalf("UnsetVar: os.Unsetenv(%q): %v", key, err)
 	}
@@ -107,18 +125,12 @@ func (s *EnvSetup) UnsetVar(key string) {
 
 // PresetEnvs provides common hook environment configurations for testing.
 var PresetEnvs = struct {
-	// PreToolUseBash simulates a PreToolUse event for Bash tool
-	PreToolUseBash HookEnv
-	// PreToolUseWrite simulates a PreToolUse event for Write tool
+	PreToolUseBash  HookEnv
 	PreToolUseWrite HookEnv
-	// PreToolUseEdit simulates a PreToolUse event for Edit tool
-	PreToolUseEdit HookEnv
-	// PostToolUseBash simulates a PostToolUse event for Bash tool
+	PreToolUseEdit  HookEnv
 	PostToolUseBash HookEnv
-	// SessionStart simulates a SessionStart event
-	SessionStart HookEnv
-	// Stop simulates a Stop event
-	Stop HookEnv
+	SessionStart    HookEnv
+	Stop            HookEnv
 }{
 	PreToolUseBash: HookEnv{
 		Event:     "PreToolUse",
