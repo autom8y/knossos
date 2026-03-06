@@ -145,7 +145,7 @@ func runGc(ctx *cmdContext, opts gcOptions) error {
 
 	// Confirm unless --force
 	if !opts.force {
-		fmt.Fprintf(os.Stdout, "\nArchive %d session(s)? [y/N] ", len(staleSessions))
+		printer.PrintText(fmt.Sprintf("\nArchive %d session(s)? [y/N] ", len(staleSessions)))
 		scanner := bufio.NewScanner(os.Stdin)
 		if !scanner.Scan() {
 			return printer.Print(gcOutput{
@@ -172,7 +172,6 @@ func runGc(ctx *cmdContext, opts gcOptions) error {
 		wrapCtx := newGcWrapContext(ctx, s.ID)
 		if err := runWrap(wrapCtx, wrapOptions{noArchive: false, force: true}); err != nil {
 			printer.VerboseLog("warn", fmt.Sprintf("failed to archive %s", s.ID), map[string]any{"error": err.Error()})
-			fmt.Fprintf(os.Stderr, "  warn: failed to archive %s: %v\n", s.ID, err)
 			continue
 		}
 		archived++
