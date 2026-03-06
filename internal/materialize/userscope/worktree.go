@@ -1,10 +1,12 @@
 package userscope
 
 import (
+	"context"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 // worktreeMainDir returns the main worktree directory for a linked git worktree.
@@ -15,7 +17,9 @@ import (
 // This is a local copy of the detection logic from internal/materialize/worktree.go
 // to avoid a circular import (userscope → materialize → userscope).
 func worktreeMainDir(projectDir string) (string, error) {
-	out, err := exec.Command("git", "-C", projectDir, "rev-parse", "--git-common-dir").Output()
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	out, err := exec.CommandContext(ctx, "git", "-C", projectDir, "rev-parse", "--git-common-dir").Output()
 	if err != nil {
 		return "", err
 	}

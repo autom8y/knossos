@@ -2,10 +2,12 @@
 package materialize
 
 import (
+	"context"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/autom8y/knossos/internal/paths"
 )
@@ -19,7 +21,9 @@ import (
 // When --git-common-dir returns ".git" (relative), we are in the main worktree.
 // When it returns an absolute path that does not end in "/.git", we are in a linked worktree.
 func isGitWorktree(projectDir string) bool {
-	out, err := exec.Command("git", "-C", projectDir, "rev-parse", "--git-common-dir").Output()
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	out, err := exec.CommandContext(ctx, "git", "-C", projectDir, "rev-parse", "--git-common-dir").Output()
 	if err != nil {
 		return false
 	}
@@ -52,7 +56,9 @@ func isGitWorktree(projectDir string) bool {
 //
 // Returns an error if the command fails or we are not in a linked worktree.
 func getMainWorktreeDir(projectDir string) (string, error) {
-	out, err := exec.Command("git", "-C", projectDir, "rev-parse", "--git-common-dir").Output()
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	out, err := exec.CommandContext(ctx, "git", "-C", projectDir, "rev-parse", "--git-common-dir").Output()
 	if err != nil {
 		return "", err
 	}

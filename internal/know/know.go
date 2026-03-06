@@ -4,6 +4,7 @@
 package know
 
 import (
+	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
@@ -24,7 +25,9 @@ import (
 var gitDiffNameOnly = defaultGitDiffNameOnly
 
 func defaultGitDiffNameOnly(fromHash, toHash string) ([]string, error) {
-	out, err := exec.Command("git", "diff", "--name-only", fromHash+".."+toHash).Output()
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	out, err := exec.CommandContext(ctx, "git", "diff", "--name-only", fromHash+".."+toHash).Output()
 	if err != nil {
 		return nil, err
 	}
@@ -263,7 +266,9 @@ func readMetaFromDir(knowDir, repoRoot string) ([]DomainStatus, error) {
 // resolveGitHead returns the short git SHA of HEAD in the current working directory.
 // Returns an empty string if git is unavailable or the directory is not a git repo.
 func resolveGitHead() string {
-	out, err := exec.Command("git", "rev-parse", "--short", "HEAD").Output()
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	out, err := exec.CommandContext(ctx, "git", "rev-parse", "--short", "HEAD").Output()
 	if err != nil {
 		return ""
 	}

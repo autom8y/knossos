@@ -1,10 +1,12 @@
 package session
 
 import (
+	"context"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
@@ -165,8 +167,11 @@ func deriveExecutionMode(ctx *session.Context, activeRite string) string {
 
 // getGitInfo returns the current git branch and number of changes.
 func getGitInfo() (string, int) {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
 	// Get branch
-	branchCmd := exec.Command("git", "branch", "--show-current")
+	branchCmd := exec.CommandContext(ctx, "git", "branch", "--show-current")
 	branchOut, err := branchCmd.Output()
 	if err != nil {
 		return "not a git repo", 0
@@ -174,7 +179,7 @@ func getGitInfo() (string, int) {
 	branch := strings.TrimSpace(string(branchOut))
 
 	// Get change count
-	statusCmd := exec.Command("git", "status", "--short")
+	statusCmd := exec.CommandContext(ctx, "git", "status", "--short")
 	statusOut, err := statusCmd.Output()
 	if err != nil {
 		return branch, 0

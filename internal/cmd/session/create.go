@@ -1,6 +1,7 @@
 package session
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"os/exec"
@@ -48,7 +49,7 @@ Examples:
   ari session create "parallel work" --seed
 
 Context:
-  Used by Moirai during /start. Returns session_id in output.
+  Used by Moirai during /sos start. Returns session_id in output.
   Fails if an active or parked session exists (use 'wrap' or 'park' first).
   Agents should never call this directly -- Moirai owns session creation.
   Use --seed for parallel session preparation in CI or batch workflows.`,
@@ -332,18 +333,22 @@ func runCreateSeeded(ctx *cmdContext, initiative string, opts createOptions) err
 
 // createWorktree creates an ephemeral git worktree at the given path.
 func createWorktree(path string) error {
-	cmd := exec.Command("git", "worktree", "add", path, "--detach", "HEAD")
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	cmd := exec.CommandContext(ctx, "git", "worktree", "add", path, "--detach", "HEAD")
 	cmd.Stderr = os.Stderr
 	return cmd.Run()
 }
 
 // removeWorktree removes a git worktree.
 func removeWorktree(path string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
 	// First try normal remove
-	cmd := exec.Command("git", "worktree", "remove", path)
+	cmd := exec.CommandContext(ctx, "git", "worktree", "remove", path)
 	if err := cmd.Run(); err != nil {
 		// If normal remove fails, try force remove
-		cmd = exec.Command("git", "worktree", "remove", path, "--force")
+		cmd = exec.CommandContext(ctx, "git", "worktree", "remove", path, "--force")
 		return cmd.Run()
 	}
 	return nil

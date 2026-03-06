@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"io"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 	"time"
@@ -581,21 +580,24 @@ func (m *Manager) resolveWorktree(idOrName string) (*Worktree, error) {
 
 // gitFetch runs git fetch in the specified directory.
 func (m *Manager) gitFetch(path string) error {
-	cmd := exec.Command("git", "fetch", "--all", "--prune")
+	cmd, cancel := gitCmdCtx("fetch", "--all", "--prune")
+	defer cancel()
 	cmd.Dir = path
 	return cmd.Run()
 }
 
 // gitPull runs git pull in the specified directory.
 func (m *Manager) gitPull(path string) error {
-	cmd := exec.Command("git", "pull", "--ff-only")
+	cmd, cancel := gitCmdCtx("pull", "--ff-only")
+	defer cancel()
 	cmd.Dir = path
 	return cmd.Run()
 }
 
 // detectConflicts checks for merge conflicts in the working directory.
 func (m *Manager) detectConflicts(path string) []string {
-	cmd := exec.Command("git", "diff", "--name-only", "--diff-filter=U")
+	cmd, cancel := gitCmdCtx("diff", "--name-only", "--diff-filter=U")
+	defer cancel()
 	cmd.Dir = path
 	out, err := cmd.Output()
 	if err != nil {

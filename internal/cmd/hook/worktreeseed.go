@@ -2,12 +2,14 @@
 package hook
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"time"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -112,7 +114,9 @@ func runWorktreeSeed(ctx *cmdContext) error {
 
 	// Step 5: Create the git worktree.
 	fmt.Fprintf(stderr, "worktree-seed: creating git worktree at %s\n", worktreePath)
-	gitCmd := exec.Command("git", "-C", projectRoot, "worktree", "add", worktreePath, "HEAD")
+	timeoutCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	gitCmd := exec.CommandContext(timeoutCtx, "git", "-C", projectRoot, "worktree", "add", worktreePath, "HEAD")
 	gitCmd.Stderr = stderr
 	if err := gitCmd.Run(); err != nil {
 		fmt.Fprintf(stderr, "worktree-seed: git worktree add failed: %v\n", err)

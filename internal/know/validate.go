@@ -2,6 +2,7 @@
 package know
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -9,6 +10,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"time"
 
 	"gopkg.in/yaml.v3"
 
@@ -312,7 +314,9 @@ func verifyFuncRef(rootDir string, r extractedRef) *BrokenRef {
 	// git grep -l searches for the identifier as a func, const, type, or var declaration.
 	// This covers exported functions, constants, types, and package-level variables.
 	pattern := "(func|const|type|var).*" + funcName
-	cmd := exec.Command("git", "grep", "-l", "-E", pattern, "--", "*.go")
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	cmd := exec.CommandContext(ctx, "git", "grep", "-l", "-E", pattern, "--", "*.go")
 	cmd.Dir = rootDir
 	out, err := cmd.Output()
 	if err != nil {
@@ -356,7 +360,9 @@ func isGitGrepNoMatch(err error) bool {
 // verifyCommitRef checks that a commit hash is a known git object.
 // Falls back to "skip" if git is unavailable (best-effort validation).
 func verifyCommitRef(rootDir string, r extractedRef) *BrokenRef {
-	cmd := exec.Command("git", "cat-file", "-t", r.ref)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	cmd := exec.CommandContext(ctx, "git", "cat-file", "-t", r.ref)
 	cmd.Dir = rootDir
 	err := cmd.Run()
 	if err != nil {

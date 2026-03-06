@@ -2,12 +2,14 @@
 package hook
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"os"
 	"os/exec"
 	"strings"
+	"time"
 
 	"github.com/spf13/cobra"
 )
@@ -78,7 +80,9 @@ func runWorktreeRemove(ctx *cmdContext) error {
 
 	// Step 4: Remove the git worktree.
 	fmt.Fprintf(stderr, "worktree-remove: removing git worktree at %s\n", worktreePath)
-	gitCmd := exec.Command("git", "worktree", "remove", worktreePath)
+	timeoutCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	gitCmd := exec.CommandContext(timeoutCtx, "git", "worktree", "remove", worktreePath)
 	gitCmd.Stderr = stderr
 	if err := gitCmd.Run(); err != nil {
 		fmt.Fprintf(stderr, "worktree-remove: git worktree remove failed: %v\n", err)

@@ -2,6 +2,7 @@ package know
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"go/ast"
 	"go/parser"
@@ -10,6 +11,7 @@ import (
 	"os/exec"
 	"sort"
 	"strings"
+	"time"
 )
 
 // DeclKind identifies the kind of top-level Go declaration.
@@ -69,7 +71,9 @@ func GitShowFileFunc() func(string, string) ([]byte, error) {
 }
 
 func defaultGitShowFile(commitHash, filePath string) ([]byte, error) {
-	out, err := exec.Command("git", "show", commitHash+":"+filePath).Output()
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	out, err := exec.CommandContext(ctx, "git", "show", commitHash+":"+filePath).Output()
 	if err != nil {
 		return nil, fmt.Errorf("git show %s:%s: %w", commitHash, filePath, err)
 	}

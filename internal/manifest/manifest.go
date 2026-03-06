@@ -3,6 +3,7 @@
 package manifest
 
 import (
+	"context"
 	"encoding/json"
 	stderrors "errors"
 	"fmt"
@@ -11,6 +12,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/autom8y/knossos/internal/errors"
 	"github.com/autom8y/knossos/internal/fileutil"
@@ -99,7 +101,9 @@ func LoadFromGitRef(ref string) (*Manifest, error) {
 	commit, path := parts[0], parts[1]
 
 	// Execute git show
-	cmd := exec.Command("git", "show", commit+":"+path)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	cmd := exec.CommandContext(ctx, "git", "show", commit+":"+path)
 	data, err := cmd.Output()
 	if err != nil {
 		var exitErr *exec.ExitError

@@ -2,13 +2,24 @@ package worktree
 
 import (
 	"bytes"
+	"context"
 	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/autom8y/knossos/internal/errors"
 )
+
+const gitTimeout = 30 * time.Second
+
+// gitCmdCtx creates a git command with a timeout context.
+// Callers must defer the returned cancel function.
+func gitCmdCtx(args ...string) (*exec.Cmd, context.CancelFunc) {
+	ctx, cancel := context.WithTimeout(context.Background(), gitTimeout)
+	return exec.CommandContext(ctx, "git", args...), cancel
+}
 
 // GitOperations provides git worktree operations.
 type GitOperations struct {
@@ -22,14 +33,16 @@ func NewGitOperations(workDir string) *GitOperations {
 
 // IsGitRepo checks if the working directory is a git repository.
 func (g *GitOperations) IsGitRepo() bool {
-	cmd := exec.Command("git", "rev-parse", "--git-dir")
+	cmd, cancel := gitCmdCtx("rev-parse", "--git-dir")
+	defer cancel()
 	cmd.Dir = g.workDir
 	return cmd.Run() == nil
 }
 
 // IsWorktree checks if the working directory is a git worktree (not main repo).
 func (g *GitOperations) IsWorktree() bool {
-	cmd := exec.Command("git", "rev-parse", "--git-dir")
+	cmd, cancel := gitCmdCtx("rev-parse", "--git-dir")
+	defer cancel()
 	cmd.Dir = g.workDir
 	out, err := cmd.Output()
 	if err != nil {
@@ -42,7 +55,8 @@ func (g *GitOperations) IsWorktree() bool {
 
 // GetProjectRoot returns the git repository root directory.
 func (g *GitOperations) GetProjectRoot() (string, error) {
-	cmd := exec.Command("git", "rev-parse", "--show-toplevel")
+	cmd, cancel := gitCmdCtx("rev-parse", "--show-toplevel")
+	defer cancel()
 	cmd.Dir = g.workDir
 	out, err := cmd.Output()
 	if err != nil {
@@ -53,7 +67,8 @@ func (g *GitOperations) GetProjectRoot() (string, error) {
 
 // GetMainWorktree returns the path to the main worktree (not a linked worktree).
 func (g *GitOperations) GetMainWorktree() (string, error) {
-	cmd := exec.Command("git", "worktree", "list", "--porcelain")
+	cmd, cancel := gitCmdCtx("worktree", "list", "--porcelain")
+	defer cancel()
 	cmd.Dir = g.workDir
 	out, err := cmd.Output()
 	if err != nil {
@@ -71,14 +86,16 @@ func (g *GitOperations) GetMainWorktree() (string, error) {
 
 // RefExists checks if a git ref (branch, tag, commit) exists.
 func (g *GitOperations) RefExists(ref string) bool {
-	cmd := exec.Command("git", "rev-parse", "--verify", ref)
+	cmd, cancel := gitCmdCtx("rev-parse", "--verify", ref)
+	defer cancel()
 	cmd.Dir = g.workDir
 	return cmd.Run() == nil
 }
 
 // GetCurrentBranch returns the current branch name, or empty string if detached.
 func (g *GitOperations) GetCurrentBranch() string {
-	cmd := exec.Command("git", "branch", "--show-current")
+	cmd, cancel := gitCmdCtx("branch", "--show-current")
+	defer cancel()
 	cmd.Dir = g.workDir
 	out, err := cmd.Output()
 	if err != nil {
@@ -107,7 +124,8 @@ func (g *GitOperations) WorktreeAdd(path, ref string, detach bool) error {
 	}
 	args = append(args, path, ref)
 
-	cmd := exec.Command("git", args...)
+	cmd, cancel := gitCmdCtx(args...)
+	defer cancel()
 	cmd.Dir = g.workDir
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
@@ -132,7 +150,8 @@ func (g *GitOperations) WorktreeRemove(path string, force bool) error {
 	}
 	args = append(args, path)
 
-	cmd := exec.Command("git", args...)
+	cmd, cancel := gitCmdCtx(args...)
+	defer cancel()
 	cmd.Dir = g.workDir
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
@@ -150,7 +169,8 @@ func (g *GitOperations) WorktreeRemove(path string, force bool) error {
 
 // WorktreePrune removes stale worktree references.
 func (g *GitOperations) WorktreePrune() error {
-	cmd := exec.Command("git", "worktree", "prune")
+	cmd, cancel := gitCmdCtx("worktree", "prune")
+	defer cancel()
 	cmd.Dir = g.workDir
 	return cmd.Run()
 }
@@ -165,7 +185,8 @@ type GitWorktreeEntry struct {
 
 // WorktreeList returns all git worktrees.
 func (g *GitOperations) WorktreeList() ([]GitWorktreeEntry, error) {
-	cmd := exec.Command("git", "worktree", "list", "--porcelain")
+	cmd, cancel := gitCmdCtx("worktree", "list", "--porcelain")
+	defer cancel()
 	cmd.Dir = g.workDir
 	out, err := cmd.Output()
 	if err != nil {
@@ -223,7 +244,8 @@ type GitStatus struct {
 
 // Status returns the git status for a directory.
 func (g *GitOperations) Status(path string) (*GitStatus, error) {
-	cmd := exec.Command("git", "status", "--porcelain")
+	cmd, cancel := gitCmdCtx("status", "--porcelain")
+	defer cancel()
 	cmd.Dir = path
 	out, err := cmd.Output()
 	if err != nil {
@@ -249,8 +271,11 @@ func (g *GitOperations) Status(path string) (*GitStatus, error) {
 
 // GetCommitDiff returns commits ahead/behind compared to a ref.
 func (g *GitOperations) GetCommitDiff(path, baseRef string) (ahead, behind int, err error) {
+	ctx, cancel := context.WithTimeout(context.Background(), gitTimeout)
+	defer cancel()
+
 	// Get current HEAD
-	cmd := exec.Command("git", "rev-parse", "HEAD")
+	cmd := exec.CommandContext(ctx, "git", "rev-parse", "HEAD")
 	cmd.Dir = path
 	headOut, err := cmd.Output()
 	if err != nil {
@@ -259,7 +284,7 @@ func (g *GitOperations) GetCommitDiff(path, baseRef string) (ahead, behind int, 
 	head := strings.TrimSpace(string(headOut))
 
 	// Get merge base
-	cmd = exec.Command("git", "merge-base", head, baseRef)
+	cmd = exec.CommandContext(ctx, "git", "merge-base", head, baseRef)
 	cmd.Dir = path
 	_, err = cmd.Output()
 	if err != nil {
@@ -268,7 +293,7 @@ func (g *GitOperations) GetCommitDiff(path, baseRef string) (ahead, behind int, 
 	}
 
 	// Count ahead
-	cmd = exec.Command("git", "rev-list", "--count", baseRef+"..HEAD")
+	cmd = exec.CommandContext(ctx, "git", "rev-list", "--count", baseRef+"..HEAD")
 	cmd.Dir = path
 	aheadOut, err := cmd.Output()
 	if err == nil {
@@ -276,7 +301,7 @@ func (g *GitOperations) GetCommitDiff(path, baseRef string) (ahead, behind int, 
 	}
 
 	// Count behind
-	cmd = exec.Command("git", "rev-list", "--count", "HEAD.."+baseRef)
+	cmd = exec.CommandContext(ctx, "git", "rev-list", "--count", "HEAD.."+baseRef)
 	cmd.Dir = path
 	behindOut, err := cmd.Output()
 	if err == nil {
@@ -297,7 +322,8 @@ func (g *GitOperations) GetWorktreesDir() (string, error) {
 
 // GetHead returns the HEAD commit for a path.
 func (g *GitOperations) GetHead(path string) (string, error) {
-	cmd := exec.Command("git", "rev-parse", "HEAD")
+	cmd, cancel := gitCmdCtx("rev-parse", "HEAD")
+	defer cancel()
 	cmd.Dir = path
 	out, err := cmd.Output()
 	if err != nil {
@@ -308,7 +334,8 @@ func (g *GitOperations) GetHead(path string) (string, error) {
 
 // GetBranchForPath returns the branch name for a worktree path.
 func (g *GitOperations) GetBranchForPath(path string) string {
-	cmd := exec.Command("git", "branch", "--show-current")
+	cmd, cancel := gitCmdCtx("branch", "--show-current")
+	defer cancel()
 	cmd.Dir = path
 	out, err := cmd.Output()
 	if err != nil {

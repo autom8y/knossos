@@ -1,10 +1,12 @@
 package know
 
 import (
+	"context"
 	"fmt"
 	"os/exec"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // ChangeManifest describes what changed between two git states within source scope.
@@ -49,7 +51,9 @@ var gitLsFiles = defaultGitLsFiles
 var gitDiffNameStatus = defaultGitDiffNameStatus
 
 func defaultGitDiffFiltered(fromHash, toHash, filter string) ([]string, error) {
-	out, err := exec.Command("git", "diff", "--name-only", "--diff-filter="+filter, fromHash+".."+toHash).Output()
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	out, err := exec.CommandContext(ctx, "git", "diff", "--name-only", "--diff-filter="+filter, fromHash+".."+toHash).Output()
 	if err != nil {
 		return nil, err
 	}
@@ -61,7 +65,9 @@ func defaultGitDiffFiltered(fromHash, toHash, filter string) ([]string, error) {
 }
 
 func defaultGitDiffNumstat(fromHash, toHash string) (added int, deleted int, err error) {
-	out, execErr := exec.Command("git", "diff", "--numstat", fromHash+".."+toHash).Output()
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	out, execErr := exec.CommandContext(ctx, "git", "diff", "--numstat", fromHash+".."+toHash).Output()
 	if execErr != nil {
 		return 0, 0, execErr
 	}
@@ -88,7 +94,9 @@ func defaultGitDiffNumstat(fromHash, toHash string) (added int, deleted int, err
 }
 
 func defaultGitLogOneline(fromHash, toHash string) (string, error) {
-	out, err := exec.Command("git", "log", "--oneline", fromHash+".."+toHash).Output()
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	out, err := exec.CommandContext(ctx, "git", "log", "--oneline", fromHash+".."+toHash).Output()
 	if err != nil {
 		return "", err
 	}
@@ -96,7 +104,9 @@ func defaultGitLogOneline(fromHash, toHash string) (string, error) {
 }
 
 func defaultGitLsFiles(patterns []string) (int, error) {
-	out, err := exec.Command("git", "ls-files").Output()
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	out, err := exec.CommandContext(ctx, "git", "ls-files").Output()
 	if err != nil {
 		return 0, err
 	}
@@ -128,7 +138,9 @@ func defaultGitLsFiles(patterns []string) (int, error) {
 }
 
 func defaultGitDiffNameStatus(fromHash, toHash string) ([]string, error) {
-	out, err := exec.Command("git", "diff", "--name-status", "--diff-filter=R", fromHash+".."+toHash).Output()
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	out, err := exec.CommandContext(ctx, "git", "diff", "--name-status", "--diff-filter=R", fromHash+".."+toHash).Output()
 	if err != nil {
 		return nil, err
 	}
