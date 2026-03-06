@@ -24,9 +24,25 @@ import (
 // gitCommandTimeout is the maximum time allowed for git subprocesses.
 const gitCommandTimeout = 50 * time.Millisecond
 
+// StrandOutput represents a child session strand in hook output.
+// Mirrors session.Strand but with independent JSON/YAML tags for output coupling.
+type StrandOutput struct {
+	SessionID string `json:"session_id"`
+	Status    string `json:"status"`
+	FrameRef  string `json:"frame_ref,omitempty"`
+	LandedAt  string `json:"landed_at,omitempty"`
+}
+
 // ContextOutput represents the output of the context hook.
 type ContextOutput struct {
 	SessionID       string            `json:"session_id,omitempty"`
+	CCSessionID     string            `json:"cc_session_id,omitempty"` // CC's own session ID (for claim)
+	FrayedFrom      string            `json:"frayed_from,omitempty"`
+	FrameRef        string            `json:"frame_ref,omitempty"`
+	ParkSource      string            `json:"park_source,omitempty"`
+	Complexity      string            `json:"complexity,omitempty"`   // S2 field widening
+	Strands         []StrandOutput    `json:"strands,omitempty"`      // S2 field widening
+	ClaimedBy       string            `json:"claimed_by,omitempty"`   // S2 field widening
 	Status          string            `json:"status,omitempty"`
 	Initiative      string            `json:"initiative,omitempty"`
 	Rite            string            `json:"rite,omitempty"`
@@ -42,29 +58,101 @@ type ContextOutput struct {
 	KnowStatus      string            `json:"know_status,omitempty"` // .know/ freshness summary line
 }
 
-// Text implements output.Textable for markdown output.
+// Text implements output.Textable for YAML frontmatter output.
+// The output is delimited by --- markers and followed by optional post-frontmatter
+// markdown sections (Throughline Agents, Recovered State).
 func (c ContextOutput) Text() string {
+	var b strings.Builder
+
+	// Opening delimiter and comment
+	b.WriteString("---\n")
+	b.WriteString("# Session Context (injected by ari hook context)\n")
+
 	if !c.HasSession {
-		return "No active session"
+		// No-session path: emit minimal frontmatter
+		b.WriteString("has_session: false\n")
+		if c.CCSessionID != "" {
+			b.WriteString(fmt.Sprintf("cc_session_id: %q\n", c.CCSessionID))
+		}
+		b.WriteString("---\n")
+		return b.String()
 	}
 
-	var b strings.Builder
-	b.WriteString("## Session Context\n")
-	b.WriteString("| Field | Value |\n")
-	b.WriteString("|-------|-------|\n")
-	b.WriteString(fmt.Sprintf("| Session | %s |\n", c.SessionID))
-	b.WriteString(fmt.Sprintf("| Status | %s |\n", c.Status))
-	b.WriteString(fmt.Sprintf("| Initiative | %s |\n", c.Initiative))
-	b.WriteString(fmt.Sprintf("| Rite | %s |\n", c.Rite))
-	b.WriteString(fmt.Sprintf("| Mode | %s |\n", c.ExecutionMode))
+	// Required fields (always present when has_session=true)
+	b.WriteString(fmt.Sprintf("session_id: %s\n", c.SessionID))
+	if c.CCSessionID != "" {
+		b.WriteString(fmt.Sprintf("cc_session_id: %q\n", c.CCSessionID))
+	}
+	b.WriteString(fmt.Sprintf("status: %s\n", c.Status))
+	b.WriteString(fmt.Sprintf("initiative: %q\n", c.Initiative))
+	b.WriteString(fmt.Sprintf("active_rite: %s\n", c.Rite))
+	b.WriteString(fmt.Sprintf("execution_mode: %s\n", c.ExecutionMode))
+
+	// Optional scalar fields (omitempty)
+	if c.CurrentPhase != "" {
+		b.WriteString(fmt.Sprintf("current_phase: %s\n", c.CurrentPhase))
+	}
+	if c.GitBranch != "" {
+		b.WriteString(fmt.Sprintf("git_branch: %s\n", c.GitBranch))
+	}
+	if c.BaseBranch != "" {
+		b.WriteString(fmt.Sprintf("base_branch: %s\n", c.BaseBranch))
+	}
+	if c.FrayedFrom != "" {
+		b.WriteString(fmt.Sprintf("frayed_from: %s\n", c.FrayedFrom))
+	}
+	if c.FrameRef != "" {
+		b.WriteString(fmt.Sprintf("frame_ref: %s\n", c.FrameRef))
+	}
+	if c.ParkSource != "" {
+		b.WriteString(fmt.Sprintf("park_source: %s\n", c.ParkSource))
+	}
+
+	// S2 fields: complexity, claimed_by, strands
+	if c.Complexity != "" {
+		b.WriteString(fmt.Sprintf("complexity: %s\n", c.Complexity))
+	}
+	if c.ClaimedBy != "" {
+		b.WriteString(fmt.Sprintf("claimed_by: %s\n", c.ClaimedBy))
+	}
+	if len(c.Strands) > 0 {
+		b.WriteString("strands:\n")
+		for _, s := range c.Strands {
+			b.WriteString(fmt.Sprintf("  - session_id: %s\n", s.SessionID))
+			b.WriteString(fmt.Sprintf("    status: %s\n", s.Status))
+			if s.FrameRef != "" {
+				b.WriteString(fmt.Sprintf("    frame_ref: %s\n", s.FrameRef))
+			}
+			if s.LandedAt != "" {
+				b.WriteString(fmt.Sprintf("    landed_at: %q\n", s.LandedAt))
+			}
+		}
+	}
+
+	// Array fields rendered as YAML lists (omitempty)
 	if len(c.AvailableRites) > 0 {
-		b.WriteString(fmt.Sprintf("| Available Rites | %s |\n", strings.Join(c.AvailableRites, ", ")))
+		b.WriteString("available_rites:\n")
+		for _, r := range c.AvailableRites {
+			b.WriteString(fmt.Sprintf("  - %s\n", r))
+		}
 	}
 	if len(c.AvailableAgents) > 0 {
-		b.WriteString(fmt.Sprintf("| Available Agents | %s |\n", strings.Join(c.AvailableAgents, ", ")))
+		b.WriteString("available_agents:\n")
+		for _, a := range c.AvailableAgents {
+			b.WriteString(fmt.Sprintf("  - %s\n", a))
+		}
 	}
-	// Throughline agent IDs are shown unconditionally when present.
-	// Omit the section entirely when no IDs are tracked.
+
+	// know_status moves into frontmatter (single-line, no escaping needed)
+	if c.KnowStatus != "" {
+		b.WriteString(fmt.Sprintf("know_status: %q\n", c.KnowStatus))
+	}
+
+	// Closing delimiter
+	b.WriteString("---\n")
+
+	// Post-frontmatter sections: Throughline Agents and CompactState live
+	// outside the YAML block because they contain dynamic/multi-line content.
 	if len(c.ThroughlineIDs) > 0 {
 		b.WriteString("\nThroughline Agents:\n")
 		// Use sorted keys for deterministic output.
@@ -77,13 +165,11 @@ func (c ContextOutput) Text() string {
 			b.WriteString(fmt.Sprintf("  %s: %s\n", k, c.ThroughlineIDs[k]))
 		}
 	}
-	if c.KnowStatus != "" {
-		b.WriteString(fmt.Sprintf("\n%s\n", c.KnowStatus))
-	}
 	if c.CompactState != "" {
 		b.WriteString("\n## Recovered State (from PreCompact checkpoint)\n")
 		b.WriteString(c.CompactState)
 	}
+
 	return b.String()
 }
 
@@ -97,6 +183,24 @@ func sortStrings(s []string) {
 	}
 }
 
+// convertStrands converts session.Strand slice to StrandOutput slice for hook output.
+// Returns nil when input is nil or empty (omitempty will suppress the field).
+func convertStrands(strands []session.Strand) []StrandOutput {
+	if len(strands) == 0 {
+		return nil
+	}
+	out := make([]StrandOutput, len(strands))
+	for i, s := range strands {
+		out[i] = StrandOutput{
+			SessionID: s.SessionID,
+			Status:    s.Status,
+			FrameRef:  s.FrameRef,
+			LandedAt:  s.LandedAt,
+		}
+	}
+	return out
+}
+
 // newContextCmd creates the context hook subcommand.
 func newContextCmd(ctx *cmdContext) *cobra.Command {
 	cmd := &cobra.Command{
@@ -108,7 +212,7 @@ This hook is triggered on SessionStart events. It reads:
 - SESSION_CONTEXT.md if a session exists
 - ACTIVE_RITE file for rite context
 
-Output is formatted as a markdown table suitable for Claude context.
+Output is formatted as YAML frontmatter suitable for Claude context.
 
 Performance: <100ms target execution time.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -135,18 +239,18 @@ func runContextCore(ctx *cmdContext, printer *output.Printer) error {
 	if hookEnv.Event != "" && hookEnv.Event != hook.EventSessionStart {
 		printer.VerboseLog("debug", "skipping context hook for non-SessionStart event",
 			map[string]any{"event": string(hookEnv.Event)})
-		return outputNoSession(printer)
+		return outputNoSession(printer, hookEnv.SessionID)
 	}
 
 	// Resolve session context
 	resolver, sessionID, err := ctx.resolveSession(hookEnv)
 	if err != nil {
 		printer.VerboseLog("warn", "failed to read current session", map[string]any{"error": err.Error()})
-		return outputNoSession(printer)
+		return outputNoSession(printer, hookEnv.SessionID)
 	}
 
 	if resolver.ProjectRoot() == "" || sessionID == "" {
-		return outputNoSession(printer)
+		return outputNoSession(printer, hookEnv.SessionID)
 	}
 
 	// Load session context
@@ -155,7 +259,7 @@ func runContextCore(ctx *cmdContext, printer *output.Printer) error {
 	if err != nil {
 		printer.VerboseLog("warn", "failed to load session context",
 			map[string]any{"session_id": sessionID, "error": err.Error()})
-		return outputNoSession(printer)
+		return outputNoSession(printer, hookEnv.SessionID)
 	}
 
 	// Read active rite with backward compatibility
@@ -190,6 +294,13 @@ func runContextCore(ctx *cmdContext, printer *output.Printer) error {
 	// Build output
 	result := ContextOutput{
 		SessionID:       sessCtx.SessionID,
+		CCSessionID:     hookEnv.SessionID,
+		FrayedFrom:      sessCtx.FrayedFrom,
+		FrameRef:        sessCtx.FrameRef,
+		ParkSource:      sessCtx.ParkSource,
+		Complexity:      sessCtx.Complexity,
+		Strands:         convertStrands(sessCtx.Strands),
+		ClaimedBy:       sessCtx.ClaimedBy,
 		Status:          string(sessCtx.Status),
 		Initiative:      sessCtx.Initiative,
 		Rite:            activeRite,
@@ -227,8 +338,9 @@ func runContextCore(ctx *cmdContext, printer *output.Printer) error {
 }
 
 // outputNoSession outputs the no-session response.
-func outputNoSession(printer *output.Printer) error {
-	result := ContextOutput{HasSession: false}
+// ccSessionID is forwarded so models can still use claim even without an active session.
+func outputNoSession(printer *output.Printer, ccSessionID string) error {
+	result := ContextOutput{HasSession: false, CCSessionID: ccSessionID}
 	return printer.Print(result)
 }
 

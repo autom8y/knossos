@@ -21,6 +21,7 @@ func TestContextOutput_Text(t *testing.T) {
 		name     string
 		output   ContextOutput
 		contains []string
+		absent   []string
 	}{
 		{
 			name: "with session",
@@ -34,18 +35,48 @@ func TestContextOutput_Text(t *testing.T) {
 				HasSession:    true,
 			},
 			contains: []string{
+				"---\n",
+				"# Session Context (injected by ari hook context)\n",
+				"session_id: session-20260104-222613-05a12c6b\n",
+				"status: ACTIVE\n",
+				"initiative: \"Test Initiative\"\n",
+				"active_rite: 10x-dev\n",
+				"execution_mode: orchestrated\n",
+				"current_phase: design\n",
+			},
+			absent: []string{
 				"## Session Context",
-				"| Session | session-20260104-222613-05a12c6b |",
-				"| Status | ACTIVE |",
-				"| Initiative | Test Initiative |",
-				"| Rite | 10x-dev |",
-				"| Mode | orchestrated |",
+				"| Session |",
+				"| Status |",
+				"| Rite |",
+				"| Mode |",
+				"No active session",
 			},
 		},
 		{
-			name:     "no session",
-			output:   ContextOutput{HasSession: false},
-			contains: []string{"No active session"},
+			name:   "no session",
+			output: ContextOutput{HasSession: false},
+			contains: []string{
+				"---\n",
+				"# Session Context (injected by ari hook context)\n",
+				"has_session: false\n",
+			},
+			absent: []string{
+				"No active session",
+				"session_id:",
+				"status:",
+			},
+		},
+		{
+			name: "no session with cc_session_id",
+			output: ContextOutput{
+				HasSession:  false,
+				CCSessionID: "cc-abc123",
+			},
+			contains: []string{
+				"has_session: false\n",
+				"cc_session_id: \"cc-abc123\"\n",
+			},
 		},
 		{
 			name: "with git and ecosystem fields",
@@ -60,12 +91,23 @@ func TestContextOutput_Text(t *testing.T) {
 				AvailableAgents: []string{"orchestrator", "context-architect"},
 			},
 			contains: []string{
-				"| Available Rites | 10x-dev, hygiene, ecosystem |",
-				"| Available Agents | orchestrator, context-architect |",
+				"git_branch: feat/backtick-migration\n",
+				"base_branch: main\n",
+				"available_rites:\n",
+				"  - 10x-dev\n",
+				"  - hygiene\n",
+				"  - ecosystem\n",
+				"available_agents:\n",
+				"  - orchestrator\n",
+				"  - context-architect\n",
+			},
+			absent: []string{
+				"| Available Rites |",
+				"| Available Agents |",
 			},
 		},
 		{
-			name: "omits empty git fields",
+			name: "omits empty optional fields",
 			output: ContextOutput{
 				SessionID:     "session-002",
 				Status:        "ACTIVE",
@@ -73,7 +115,18 @@ func TestContextOutput_Text(t *testing.T) {
 				HasSession:    true,
 			},
 			contains: []string{
-				"## Session Context",
+				"---\n",
+				"session_id: session-002\n",
+			},
+			absent: []string{
+				"git_branch:",
+				"base_branch:",
+				"available_rites:",
+				"available_agents:",
+				"frayed_from:",
+				"frame_ref:",
+				"park_source:",
+				"current_phase:",
 			},
 		},
 	}
@@ -86,12 +139,17 @@ func TestContextOutput_Text(t *testing.T) {
 					t.Errorf("Text() missing expected content: %q\nGot: %s", want, result)
 				}
 			}
+			for _, notWant := range tt.absent {
+				if strings.Contains(result, notWant) {
+					t.Errorf("Text() contains unexpected content: %q\nGot: %s", notWant, result)
+				}
+			}
 		})
 	}
 }
 
 func TestContextOutput_Text_OmitsEmptyFields(t *testing.T) {
-	// Verify that empty git/ecosystem fields do not appear in output
+	// Verify that empty optional fields do not appear in YAML output
 	out := ContextOutput{
 		SessionID:     "session-003",
 		Status:        "ACTIVE",
@@ -101,21 +159,20 @@ func TestContextOutput_Text_OmitsEmptyFields(t *testing.T) {
 		BaseBranch:    "",
 	}
 	text := out.Text()
-	if strings.Contains(text, "Git Branch") {
-		t.Error("Text() should not contain Git Branch when empty")
+	if strings.Contains(text, "git_branch:") {
+		t.Error("Text() should not contain git_branch when empty")
 	}
-	if strings.Contains(text, "Base Branch") {
-		t.Error("Text() should not contain Base Branch when empty")
+	if strings.Contains(text, "base_branch:") {
+		t.Error("Text() should not contain base_branch when empty")
 	}
-	if strings.Contains(text, "Available Rites") {
-		t.Error("Text() should not contain Available Rites when nil")
+	if strings.Contains(text, "available_rites:") {
+		t.Error("Text() should not contain available_rites when nil")
 	}
-	if strings.Contains(text, "Available Agents") {
-		t.Error("Text() should not contain Available Agents when nil")
+	if strings.Contains(text, "available_agents:") {
+		t.Error("Text() should not contain available_agents when nil")
 	}
 
-	// Verify that populated git fields are also excluded from Text()
-	// (git fields are only in JSON, never in Text() output)
+	// Verify that populated git fields ARE included in Text() (new YAML format)
 	out2 := ContextOutput{
 		SessionID:     "session-004",
 		Status:        "ACTIVE",
@@ -125,11 +182,11 @@ func TestContextOutput_Text_OmitsEmptyFields(t *testing.T) {
 		BaseBranch:    "main",
 	}
 	text2 := out2.Text()
-	if strings.Contains(text2, "Git Branch") {
-		t.Error("Text() should never contain Git Branch (removed from text output)")
+	if !strings.Contains(text2, "git_branch: feature/something") {
+		t.Error("Text() should contain git_branch when populated (now in YAML frontmatter)")
 	}
-	if strings.Contains(text2, "Base Branch") {
-		t.Error("Text() should never contain Base Branch (removed from text output)")
+	if !strings.Contains(text2, "base_branch: main") {
+		t.Error("Text() should contain base_branch when populated (now in YAML frontmatter)")
 	}
 }
 
@@ -828,8 +885,9 @@ func TestContextOutput_Text_ShowsThroughlineIDs(t *testing.T) {
 		},
 	}
 	text := out.Text()
-	if !strings.Contains(text, "Throughline Agents:") {
-		t.Errorf("Text() should contain 'Throughline Agents:' section\nGot: %s", text)
+	// Throughline section appears after closing --- delimiter
+	if !strings.Contains(text, "---\n\nThroughline Agents:") {
+		t.Errorf("Text() should contain 'Throughline Agents:' section after closing ---\nGot: %s", text)
 	}
 	if !strings.Contains(text, "pythia: agent-pythia-abc") {
 		t.Errorf("Text() should contain pythia ID\nGot: %s", text)
@@ -923,7 +981,7 @@ current_phase: "implementation"
 		t.Errorf("moirai ID = %q, want %q", result.ThroughlineIDs["moirai"], "agent-moirai-uvw")
 	}
 
-	// Verify Text() output includes the IDs
+	// Verify Text() output includes the IDs (post-frontmatter section)
 	text := result.Text()
 	if !strings.Contains(text, "Throughline Agents:") {
 		t.Errorf("Text() missing Throughline Agents section\nGot: %s", text)
@@ -992,6 +1050,391 @@ current_phase: "requirements"
 	text := result.Text()
 	if strings.Contains(text, "Throughline Agents") {
 		t.Errorf("Text() should not include Throughline Agents section when none tracked\nGot: %s", text)
+	}
+}
+
+// --- S2 Field Widening Tests ---
+
+func TestContextOutput_Text_WithComplexity(t *testing.T) {
+	// Verify complexity appears in YAML frontmatter when set, and is absent when empty.
+	t.Run("complexity set", func(t *testing.T) {
+		out := ContextOutput{
+			SessionID:     "session-20260306-000001-aaaabbbb",
+			Status:        "ACTIVE",
+			ExecutionMode: "orchestrated",
+			HasSession:    true,
+			Complexity:    "MODULE",
+		}
+		text := out.Text()
+		if !strings.Contains(text, "complexity: MODULE\n") {
+			t.Errorf("Text() missing 'complexity: MODULE'\nGot: %s", text)
+		}
+	})
+
+	t.Run("complexity empty is absent", func(t *testing.T) {
+		out := ContextOutput{
+			SessionID:     "session-20260306-000002-aaaabbbb",
+			Status:        "ACTIVE",
+			ExecutionMode: "orchestrated",
+			HasSession:    true,
+			Complexity:    "",
+		}
+		text := out.Text()
+		if strings.Contains(text, "complexity:") {
+			t.Errorf("Text() should not contain 'complexity:' when empty\nGot: %s", text)
+		}
+	})
+}
+
+func TestContextOutput_Text_WithStrands(t *testing.T) {
+	t.Run("zero strands omits key", func(t *testing.T) {
+		out := ContextOutput{
+			SessionID:     "session-20260306-000003-aaaabbbb",
+			Status:        "ACTIVE",
+			ExecutionMode: "orchestrated",
+			HasSession:    true,
+			Strands:       nil,
+		}
+		text := out.Text()
+		if strings.Contains(text, "strands:") {
+			t.Errorf("Text() should not contain 'strands:' when nil\nGot: %s", text)
+		}
+	})
+
+	t.Run("single strand minimal", func(t *testing.T) {
+		out := ContextOutput{
+			SessionID:     "session-20260306-000004-aaaabbbb",
+			Status:        "ACTIVE",
+			ExecutionMode: "orchestrated",
+			HasSession:    true,
+			Strands: []StrandOutput{
+				{SessionID: "session-xxx", Status: "ACTIVE"},
+			},
+		}
+		text := out.Text()
+		wantParts := []string{
+			"strands:\n",
+			"  - session_id: session-xxx\n",
+			"    status: ACTIVE\n",
+		}
+		for _, want := range wantParts {
+			if !strings.Contains(text, want) {
+				t.Errorf("Text() missing %q\nGot: %s", want, text)
+			}
+		}
+		if strings.Contains(text, "frame_ref:") {
+			t.Errorf("Text() should not contain 'frame_ref:' when empty\nGot: %s", text)
+		}
+		if strings.Contains(text, "landed_at:") {
+			t.Errorf("Text() should not contain 'landed_at:' when empty\nGot: %s", text)
+		}
+	})
+
+	t.Run("multiple strands with optional fields", func(t *testing.T) {
+		out := ContextOutput{
+			SessionID:     "session-20260306-000005-aaaabbbb",
+			Status:        "ACTIVE",
+			ExecutionMode: "orchestrated",
+			HasSession:    true,
+			Strands: []StrandOutput{
+				{SessionID: "session-aaa", Status: "ACTIVE"},
+				{
+					SessionID: "session-bbb",
+					Status:    "LANDED",
+					FrameRef:  ".sos/wip/frames/test.md",
+					LandedAt:  "2026-03-06T18:30:00Z",
+				},
+			},
+		}
+		text := out.Text()
+		wantParts := []string{
+			"strands:\n",
+			"  - session_id: session-aaa\n",
+			"    status: ACTIVE\n",
+			"  - session_id: session-bbb\n",
+			"    status: LANDED\n",
+			"    frame_ref: .sos/wip/frames/test.md\n",
+			"    landed_at: \"2026-03-06T18:30:00Z\"\n",
+		}
+		for _, want := range wantParts {
+			if !strings.Contains(text, want) {
+				t.Errorf("Text() missing %q\nGot: %s", want, text)
+			}
+		}
+	})
+}
+
+func TestContextOutput_Text_WithClaimedBy(t *testing.T) {
+	t.Run("claimed_by set", func(t *testing.T) {
+		out := ContextOutput{
+			SessionID:     "session-20260306-000006-aaaabbbb",
+			Status:        "ACTIVE",
+			ExecutionMode: "orchestrated",
+			HasSession:    true,
+			ClaimedBy:     "cc-session-abc123",
+		}
+		text := out.Text()
+		if !strings.Contains(text, "claimed_by: cc-session-abc123\n") {
+			t.Errorf("Text() missing 'claimed_by: cc-session-abc123'\nGot: %s", text)
+		}
+	})
+
+	t.Run("claimed_by empty is absent", func(t *testing.T) {
+		out := ContextOutput{
+			SessionID:     "session-20260306-000007-aaaabbbb",
+			Status:        "ACTIVE",
+			ExecutionMode: "orchestrated",
+			HasSession:    true,
+			ClaimedBy:     "",
+		}
+		text := out.Text()
+		if strings.Contains(text, "claimed_by:") {
+			t.Errorf("Text() should not contain 'claimed_by:' when empty\nGot: %s", text)
+		}
+	})
+}
+
+func TestConvertStrands(t *testing.T) {
+	t.Run("nil input returns nil", func(t *testing.T) {
+		result := convertStrands(nil)
+		if result != nil {
+			t.Errorf("convertStrands(nil) = %v, want nil", result)
+		}
+	})
+
+	t.Run("empty slice returns nil", func(t *testing.T) {
+		result := convertStrands([]session.Strand{})
+		if result != nil {
+			t.Errorf("convertStrands([]) = %v, want nil", result)
+		}
+	})
+
+	t.Run("populated slice converts correctly", func(t *testing.T) {
+		input := []session.Strand{
+			{
+				SessionID: "s1",
+				Status:    "ACTIVE",
+				FrameRef:  "f1",
+				LandedAt:  "t1",
+			},
+		}
+		result := convertStrands(input)
+		if len(result) != 1 {
+			t.Fatalf("convertStrands() len = %d, want 1", len(result))
+		}
+		if result[0].SessionID != "s1" {
+			t.Errorf("SessionID = %q, want %q", result[0].SessionID, "s1")
+		}
+		if result[0].Status != "ACTIVE" {
+			t.Errorf("Status = %q, want %q", result[0].Status, "ACTIVE")
+		}
+		if result[0].FrameRef != "f1" {
+			t.Errorf("FrameRef = %q, want %q", result[0].FrameRef, "f1")
+		}
+		if result[0].LandedAt != "t1" {
+			t.Errorf("LandedAt = %q, want %q", result[0].LandedAt, "t1")
+		}
+	})
+}
+
+func TestRunContext_WithActiveSession_IncludesComplexity(t *testing.T) {
+	// TestRunContext_WithActiveSession already uses complexity:"MODULE" in its fixture.
+	// This test verifies that Complexity is populated end-to-end after S2 wiring.
+	tmpDir := t.TempDir()
+	sessionID := "session-20260104-222613-05a12c6b"
+
+	sessionsDir := filepath.Join(tmpDir, ".sos", "sessions")
+	sessionDir := filepath.Join(sessionsDir, sessionID)
+	os.MkdirAll(sessionDir, 0755)
+
+	sessionContext := `---
+schema_version: "2.1"
+session_id: "session-20260104-222613-05a12c6b"
+status: ACTIVE
+created_at: "2026-01-04T22:26:13Z"
+initiative: "Hooks Migration"
+complexity: "MODULE"
+active_rite: "10x-dev"
+current_phase: "implementation"
+---
+
+# Session: Hooks Migration
+`
+	os.WriteFile(filepath.Join(sessionsDir, sessionID, "SESSION_CONTEXT.md"), []byte(sessionContext), 0644)
+	os.MkdirAll(filepath.Join(tmpDir, ".knossos"), 0755)
+	os.WriteFile(filepath.Join(tmpDir, ".knossos", "ACTIVE_RITE"), []byte("10x-dev"), 0644)
+
+	testutil.SetupEnv(t, &testutil.HookEnv{
+		Event:      "SessionStart",
+		ProjectDir: tmpDir,
+	})
+
+	var stdout, stderr bytes.Buffer
+	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
+
+	outputFlag := "json"
+	verboseFlag := false
+	ctx := &cmdContext{
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &tmpDir,
+			},
+			SessionID: nil,
+		},
+	}
+
+	if err := runContextCore(ctx, printer); err != nil {
+		t.Fatalf("runContextCore() error = %v", err)
+	}
+
+	var result ContextOutput
+	if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
+		t.Fatalf("Failed to parse output: %v\nOutput: %s", err, stdout.String())
+	}
+
+	if result.Complexity != "MODULE" {
+		t.Errorf("Complexity = %q, want %q", result.Complexity, "MODULE")
+	}
+}
+
+func TestRunContext_WithStrands(t *testing.T) {
+	tmpDir := t.TempDir()
+	sessionID := "session-20260306-100000-stranded0"
+
+	sessionsDir := filepath.Join(tmpDir, ".sos", "sessions")
+	sessionDir := filepath.Join(sessionsDir, sessionID)
+	os.MkdirAll(sessionDir, 0755)
+
+	sessionContext := `---
+schema_version: "2.3"
+session_id: "session-20260306-100000-stranded0"
+status: ACTIVE
+created_at: "2026-03-06T10:00:00Z"
+initiative: "Strand Test"
+complexity: "SYSTEM"
+active_rite: "ecosystem"
+current_phase: "implementation"
+strands:
+  - session_id: session-20260306-110000-child001
+    status: ACTIVE
+  - session_id: session-20260306-120000-child002
+    status: LANDED
+    frame_ref: ".sos/wip/frames/child2.md"
+    landed_at: "2026-03-06T14:00:00Z"
+---
+`
+	os.WriteFile(filepath.Join(sessionDir, "SESSION_CONTEXT.md"), []byte(sessionContext), 0644)
+	os.MkdirAll(filepath.Join(tmpDir, ".knossos"), 0755)
+	os.WriteFile(filepath.Join(tmpDir, ".knossos", "ACTIVE_RITE"), []byte("ecosystem"), 0644)
+
+	testutil.SetupEnv(t, &testutil.HookEnv{
+		Event:      "SessionStart",
+		ProjectDir: tmpDir,
+	})
+
+	var stdout, stderr bytes.Buffer
+	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
+
+	outputFlag := "json"
+	verboseFlag := false
+	ctx := &cmdContext{
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &tmpDir,
+			},
+			SessionID: nil,
+		},
+	}
+
+	if err := runContextCore(ctx, printer); err != nil {
+		t.Fatalf("runContextCore() error = %v", err)
+	}
+
+	var result ContextOutput
+	if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
+		t.Fatalf("Failed to parse output: %v\nOutput: %s", err, stdout.String())
+	}
+
+	if len(result.Strands) != 2 {
+		t.Fatalf("Strands length = %d, want 2: %v", len(result.Strands), result.Strands)
+	}
+	if result.Strands[0].SessionID != "session-20260306-110000-child001" {
+		t.Errorf("Strands[0].SessionID = %q, want %q", result.Strands[0].SessionID, "session-20260306-110000-child001")
+	}
+	if result.Strands[0].Status != "ACTIVE" {
+		t.Errorf("Strands[0].Status = %q, want %q", result.Strands[0].Status, "ACTIVE")
+	}
+	if result.Strands[1].Status != "LANDED" {
+		t.Errorf("Strands[1].Status = %q, want %q", result.Strands[1].Status, "LANDED")
+	}
+	if result.Strands[1].FrameRef != ".sos/wip/frames/child2.md" {
+		t.Errorf("Strands[1].FrameRef = %q, want %q", result.Strands[1].FrameRef, ".sos/wip/frames/child2.md")
+	}
+	if result.Strands[1].LandedAt != "2026-03-06T14:00:00Z" {
+		t.Errorf("Strands[1].LandedAt = %q, want %q", result.Strands[1].LandedAt, "2026-03-06T14:00:00Z")
+	}
+}
+
+func TestRunContext_WithClaimedBy(t *testing.T) {
+	tmpDir := t.TempDir()
+	sessionID := "session-20260306-143052-claimedc"
+
+	sessionsDir := filepath.Join(tmpDir, ".sos", "sessions")
+	sessionDir := filepath.Join(sessionsDir, sessionID)
+	os.MkdirAll(sessionDir, 0755)
+
+	sessionContext := `---
+schema_version: "2.3"
+session_id: "session-20260306-143052-claimedc"
+status: ACTIVE
+created_at: "2026-03-06T14:30:52Z"
+initiative: "Fix login bug"
+complexity: "PATCH"
+active_rite: "10x-dev"
+current_phase: "implementation"
+claimed_by: "cc-session-xyz"
+---
+`
+	os.WriteFile(filepath.Join(sessionDir, "SESSION_CONTEXT.md"), []byte(sessionContext), 0644)
+	os.MkdirAll(filepath.Join(tmpDir, ".knossos"), 0755)
+	os.WriteFile(filepath.Join(tmpDir, ".knossos", "ACTIVE_RITE"), []byte("10x-dev"), 0644)
+
+	testutil.SetupEnv(t, &testutil.HookEnv{
+		Event:      "SessionStart",
+		ProjectDir: tmpDir,
+	})
+
+	var stdout, stderr bytes.Buffer
+	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
+
+	outputFlag := "json"
+	verboseFlag := false
+	ctx := &cmdContext{
+		SessionContext: common.SessionContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFlag,
+				Verbose:    &verboseFlag,
+				ProjectDir: &tmpDir,
+			},
+			SessionID: nil,
+		},
+	}
+
+	if err := runContextCore(ctx, printer); err != nil {
+		t.Fatalf("runContextCore() error = %v", err)
+	}
+
+	var result ContextOutput
+	if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
+		t.Fatalf("Failed to parse output: %v\nOutput: %s", err, stdout.String())
+	}
+
+	if result.ClaimedBy != "cc-session-xyz" {
+		t.Errorf("ClaimedBy = %q, want %q", result.ClaimedBy, "cc-session-xyz")
 	}
 }
 

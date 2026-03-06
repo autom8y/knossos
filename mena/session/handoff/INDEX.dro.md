@@ -18,7 +18,7 @@ Hand off work to a different agent with full context transfer. $ARGUMENTS
 
 ## Pre-flight
 
-1. Verify active session exists (check Session Status in context above)
+1. Verify active session exists (check `status` in YAML frontmatter above)
 2. **CRITICAL: Validate target agent exists BEFORE any state changes**:
    ```bash
    [ -f ".claude/agents/$AGENT_NAME.md" ] || { echo "Agent not found: $AGENT_NAME"; exit 1; }

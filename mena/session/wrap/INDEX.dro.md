@@ -16,8 +16,8 @@ Complete the current work session with quality validation and archival. $ARGUMEN
 
 ## Session Resolution
 
-Session state is pre-computed by the SessionStart hook (injected above).
-Read Has Session, Session State from the context table — do not call `ari session status`.
+Session state is pre-computed by the SessionStart hook as YAML frontmatter (injected above).
+Read `status` from the frontmatter — do not call `ari session status`.
 
 ## Pre-flight
 
@@ -27,7 +27,7 @@ Read Has Session, Session State from the context table — do not call `ari sess
 ## Behavior
 
 1. **Extract Session ID**:
-   Read the Session Context table injected above. Extract the session ID from: `| Session | <session-id> |`
+   Read `session_id` from the YAML frontmatter injected above.
    You MUST pass this to Moirai — the CLI cannot discover it from a Bash subprocess.
 
 2. **Run quality gates** (unless `--skip-checks`):

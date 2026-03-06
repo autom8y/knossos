@@ -59,26 +59,39 @@ Some code paths already read the file for other reasons (Phase 0 time-only, Phas
    - If not found: ERROR "Domain '{domain}' not registered in pinakes or not codebase-scoped. Available codebase domains: {list}"
    - **Scan for satellite-authored criteria**: Check if `{knowDir}/criteria/` exists and contains any `*.md` files (where `{knowDir}` is `{root}/.know/` when `--root` is set, otherwise `.know/`). If it does, read each file and merge its domain entry into the registry alongside the pinakes domains. Each criteria file follows the same format as pinakes domain files. If `{knowDir}/criteria/` does not exist, fall back to `.know/criteria/` (project root) when `--root` is set. If neither exists or both are empty, continue normally with only pinakes domains.
 
-2.5. **Discover land files**:
-   - For each domain in the generation set (from step 2), check if `.sos/land/{domain}.md` exists:
+2.5. **Discover land files** (mapping-based):
+   - Define the land-to-know mapping (hardcoded -- these are design decisions, not discovery):
      ```
-     Bash("test -f .sos/land/{domain}.md && echo 'exists' || echo 'missing'")
+     LAND_MAP = {
+       "architecture":       [".sos/land/initiative-history.md"],
+       "conventions":        [".sos/land/workflow-patterns.md"],
+       "design-constraints": [".sos/land/initiative-history.md"],
+       "scar-tissue":        [".sos/land/scar-tissue.md"],
+       "test-coverage":      [".sos/land/workflow-patterns.md"],
+     }
      ```
-   - Store the results in a `land_files` map: `{ "architecture": ".sos/land/architecture.md", ... }`.
-   - Domains with no land file have no entry in the map (absence = no land input).
-   - For each domain that has a land file, read its content:
-     ```
-     Read(".sos/land/{domain}.md")
-     ```
-   - If land file content exceeds 20,000 characters, truncate to the first 20,000 characters and append:
-     `\n\n[Land content truncated at 20,000 characters. Full file: .sos/land/{domain}.md]`
-   - If land file content is empty after reading, treat as absent (no entry in map).
-   - For each domain with a non-empty land file, compute its SHA-256 hash:
-     ```
-     Bash("shasum -a 256 .sos/land/{domain}.md | cut -d' ' -f1")
-     ```
-   - Store the (possibly truncated) content as `land_file_content` and the hash as `land_hash` per domain.
-   - Report: "Land files found: {list of domains with land files}" or "No land files found."
+   - For each domain in the generation set (from step 2):
+     - Look up `LAND_MAP[domain]`. If no entry exists, this domain has no land input. Skip.
+     - For each land file path listed in the mapping, check if it exists:
+       ```
+       Bash("test -f {land_path} && echo 'exists' || echo 'missing'")
+       ```
+     - For each existing land file, read its content:
+       ```
+       Read("{land_path}")
+       ```
+     - If land file content exceeds 20,000 characters, truncate to the first 20,000 characters and append:
+       `\n\n[Land content truncated at 20,000 characters. Full file: {land_path}]`
+     - If land file content is empty after reading, treat as absent (skip this file).
+     - Concatenate all non-empty land file contents for this domain, separated by:
+       `\n\n---\n\n### Land Source: {land_path}\n\n`
+     - Compute SHA-256 hash of the concatenated raw (untruncated) content of all existing land files:
+       ```
+       Bash("cat {space-separated existing land_paths} | shasum -a 256 | cut -d' ' -f1")
+       ```
+     - Store per domain: `land_file_content` (possibly truncated concatenation), `land_hash` (hash of raw content), `land_sources` (list of paths that exist).
+   - Store the per-domain results in a `land_files` map keyed by domain name. Domains with no existing land files have no entry in the map.
+   - Report: "Land files found: {domain}: {list of existing land paths}" for each matched domain, or "No land files found for any domain."
 
 3. **Build generation queue** (uses `ari knows --delta` for change analysis):
    - First, check each domain for non-delta conditions:
@@ -413,13 +426,14 @@ For EACH domain's theoros output (both incremental and full), perform the follow
    update_mode: "{full or incremental}"
    incremental_cycle: {0 for full, previous+1 for incremental}
    max_incremental_cycles: 3
-   land_sources:                              # ONLY if land file was injected for this domain
-     - ".sos/land/{domain}.md"
-   land_hash: "{sha256 hex from pre-flight step 2.5}"  # ONLY if land file was injected
+   land_sources:                              # ONLY if land file(s) were injected for this domain
+     - ".sos/land/initiative-history.md"      # actual paths from LAND_MAP that existed (example)
+   land_hash: "{sha256 hex from pre-flight step 2.5}"  # ONLY if land file(s) were injected
    ---
    ```
    If no land file was injected for this domain, omit `land_sources` and `land_hash` entirely (omitempty).
    The `land_hash` value comes from the SHA-256 computed during pre-flight step 2.5.
+   The `land_sources` list contains the actual file paths from LAND_MAP that existed at generation time (not the domain name). For example, the `architecture` domain would list `.sos/land/initiative-history.md`, not `.sos/land/architecture.md`.
    Combine frontmatter + theoros knowledge body (Part 1 only, not the metadata fence).
 
 3. **Read before write** (platform constraint):

@@ -17,7 +17,7 @@ Fork the current session into a parallel strand. $ARGUMENTS
 ## Pre-flight
 
 1. **Active session required**:
-   - Read session state from hook-injected context above
+   - Read `status` from hook-injected YAML frontmatter above
    - If no active session: ERROR "No active session to fray. Use `/start` to begin."
    - If session is PARKED: ERROR "Cannot fray a parked session. Use `/continue` first."
 
@@ -30,9 +30,7 @@ Fork the current session into a parallel strand. $ARGUMENTS
 ### 1. Extract Session ID
 
 **CRITICAL**: The CLI cannot discover the session automatically from a Bash subprocess.
-You MUST extract the session ID from the hook-injected Session Context table above.
-
-Look for the row: `| Session | session-YYYYMMDD-HHMMSS-XXXXXXXX |`
+You MUST extract `session_id` from the hook-injected YAML frontmatter above.
 
 Store this value — you will pass it via `--from` to the CLI.
 
@@ -47,7 +45,7 @@ ari session fray --from <session-id> [--no-worktree]
 | `/fray` | `ari session fray --from <session-id>` |
 | `/fray --no-worktree` | `ari session fray --from <session-id> --no-worktree` |
 
-Always pass `--from` with the session ID extracted from the context table.
+Always pass `--from` with the session ID extracted from the YAML frontmatter.
 
 ### 3. Execute
 

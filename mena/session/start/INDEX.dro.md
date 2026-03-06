@@ -10,11 +10,11 @@ disable-model-invocation: true
 
 ## Pre-computed Context
 
-The SessionStart hook has already injected all session state above. Check:
-- **Session Context** table → whether a session exists
-- **Status** field → ACTIVE, PARKED, or ARCHIVED (empty if no session)
-- **Available Rites** → list of rites in this project
-- **Available Agents** → list of agents in the active rite
+The SessionStart hook has already injected session state as YAML frontmatter above. Check:
+- `has_session: false` → no session exists
+- `status:` field → ACTIVE, PARKED, or ARCHIVED (absent if no session)
+- `available_rites:` → list of rites in this project
+- `available_agents:` → list of agents in the active rite
 
 ## Your Task
 
@@ -26,9 +26,9 @@ $ARGUMENTS
 
 | If Hook Output Shows | Action |
 |------------------------|--------|
-| "No active session" | Proceed with session creation |
-| Session Context table with Status=PARKED | Offer options (see below) |
-| Session Context table with Status=ACTIVE | Offer options (see below) |
+| `has_session: false` | Proceed with session creation |
+| `status: PARKED` | Offer options (see below) |
+| `status: ACTIVE` | Offer options (see below) |
 
 **When session already exists, offer these options:**
 
@@ -75,7 +75,7 @@ ari sync --rite <rite-name>
 
 ### 5. Invoke Entry Point Agent
 
-Read **Available Agents** from the Session Context table (injected by SessionStart hook).
+Read `available_agents` from the YAML frontmatter (injected by SessionStart hook).
 Select the appropriate entry agent based on the active rite:
 - For rites with an orchestrator: Use the orchestrator as entry point
 - Otherwise: Use the first agent listed in Available Agents

@@ -793,3 +793,93 @@ type SnapshotOutput struct {
 func (s SnapshotOutput) Text() string {
 	return s.Markdown
 }
+
+// QueryStrand represents a child session strand in query output.
+// Mirrors hook.StrandOutput but lives in the output package for coupling independence.
+type QueryStrand struct {
+	SessionID string `json:"session_id"`
+	Status    string `json:"status"`
+	FrameRef  string `json:"frame_ref,omitempty"`
+	LandedAt  string `json:"landed_at,omitempty"`
+}
+
+// QueryOutput represents the output of the `ari session query` command.
+// The text format mirrors the hook context YAML frontmatter so agents receive
+// the same field layout regardless of whether they read from hook injection or
+// an on-demand pull.
+type QueryOutput struct {
+	SessionID     string       `json:"session_id,omitempty"`
+	Status        string       `json:"status,omitempty"`
+	Initiative    string       `json:"initiative,omitempty"`
+	Complexity    string       `json:"complexity,omitempty"`
+	ActiveRite    string       `json:"active_rite,omitempty"`
+	ExecutionMode string       `json:"execution_mode,omitempty"`
+	CurrentPhase  string       `json:"current_phase,omitempty"`
+	FrayedFrom    string       `json:"frayed_from,omitempty"`
+	FrameRef      string       `json:"frame_ref,omitempty"`
+	ParkSource    string       `json:"park_source,omitempty"`
+	ClaimedBy     string       `json:"claimed_by,omitempty"`
+	Strands       []QueryStrand `json:"strands,omitempty"`
+	HasSession    bool         `json:"has_session"`
+}
+
+// Text implements Textable for QueryOutput.
+// Produces YAML frontmatter matching the hook context format so agents can
+// parse query output the same way they parse hook-injected context.
+func (q QueryOutput) Text() string {
+	var b strings.Builder
+
+	b.WriteString("---\n")
+	b.WriteString("# Session Context (ari session query)\n")
+
+	if !q.HasSession {
+		b.WriteString("has_session: false\n")
+		b.WriteString("---\n")
+		return b.String()
+	}
+
+	// Required fields
+	b.WriteString(fmt.Sprintf("session_id: %s\n", q.SessionID))
+	b.WriteString(fmt.Sprintf("status: %s\n", q.Status))
+	b.WriteString(fmt.Sprintf("initiative: %q\n", q.Initiative))
+	b.WriteString(fmt.Sprintf("active_rite: %s\n", q.ActiveRite))
+	b.WriteString(fmt.Sprintf("execution_mode: %s\n", q.ExecutionMode))
+
+	// Optional scalar fields (omitempty)
+	if q.CurrentPhase != "" {
+		b.WriteString(fmt.Sprintf("current_phase: %s\n", q.CurrentPhase))
+	}
+	if q.Complexity != "" {
+		b.WriteString(fmt.Sprintf("complexity: %s\n", q.Complexity))
+	}
+	if q.FrayedFrom != "" {
+		b.WriteString(fmt.Sprintf("frayed_from: %s\n", q.FrayedFrom))
+	}
+	if q.FrameRef != "" {
+		b.WriteString(fmt.Sprintf("frame_ref: %s\n", q.FrameRef))
+	}
+	if q.ParkSource != "" {
+		b.WriteString(fmt.Sprintf("park_source: %s\n", q.ParkSource))
+	}
+	if q.ClaimedBy != "" {
+		b.WriteString(fmt.Sprintf("claimed_by: %s\n", q.ClaimedBy))
+	}
+
+	// Strands rendered as YAML list (omitempty)
+	if len(q.Strands) > 0 {
+		b.WriteString("strands:\n")
+		for _, s := range q.Strands {
+			b.WriteString(fmt.Sprintf("  - session_id: %s\n", s.SessionID))
+			b.WriteString(fmt.Sprintf("    status: %s\n", s.Status))
+			if s.FrameRef != "" {
+				b.WriteString(fmt.Sprintf("    frame_ref: %s\n", s.FrameRef))
+			}
+			if s.LandedAt != "" {
+				b.WriteString(fmt.Sprintf("    landed_at: %q\n", s.LandedAt))
+			}
+		}
+	}
+
+	b.WriteString("---\n")
+	return b.String()
+}

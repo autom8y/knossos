@@ -13,7 +13,7 @@
 
 ## Invocation Format
 
-Short form is canonical. Pass the session ID from the hook-injected Session Context table when available.
+Short form is canonical. Pass the session ID from the hook-injected YAML frontmatter when available.
 
 ```
 Task(moirai, "{operation} {parameters}")
@@ -33,7 +33,8 @@ Task(moirai, "mark_complete task_id='task-1'")
 Task(moirai, "handoff from=architect to=principal-engineer with notes: 'Design approved'")
 ```
 
-**Note**: For `park_session`, `resume_session`, and `wrap_session`, extract the session ID from the hook-injected `| Session | session-xxx |` context table and pass it as `session_id=`. The CLI cannot discover sessions from Bash subprocesses without this.
+**Note**: For `park_session`, `resume_session`, and `wrap_session`, extract `session_id`
+from the hook-injected YAML frontmatter and pass it as `session_id=`. The CLI cannot discover sessions from Bash subprocesses without this.
 
 ## Expected Response
 

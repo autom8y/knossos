@@ -16,16 +16,16 @@ Resume a parked work session with full context restoration. $ARGUMENTS
 
 ## Session Resolution
 
-**CRITICAL**: Extract the session ID from the hook-injected Session Context table above.
-Look for: `| Session | <session-id> |`. The CLI cannot discover the session automatically
-from a Bash subprocess — you MUST pass the session ID explicitly to Moirai.
+**CRITICAL**: Extract `session_id` from the hook-injected YAML frontmatter above.
+The CLI cannot discover the session automatically from a Bash subprocess — you MUST pass
+the session ID explicitly to Moirai.
 
-If no Session Context table is present (no hook output), fall back to scan:
+If `has_session: false` or no YAML frontmatter is present (no hook output), fall back to scan:
 `ari session status` to find PARKED sessions.
 
 ## Pre-flight
 
-1. Verify a parked session exists (check Session Context table or `ari session status`)
+1. Verify a parked session exists (check `status` in YAML frontmatter or `ari session status`)
 2. Load session context from `SESSION_CONTEXT.md`
 
 ## Behavior
