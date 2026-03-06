@@ -16,6 +16,7 @@ import (
 	"github.com/autom8y/knossos/internal/config"
 
 	"github.com/autom8y/knossos/internal/cmd/common"
+	"github.com/autom8y/knossos/internal/errors"
 	"github.com/autom8y/knossos/internal/materialize"
 	"github.com/autom8y/knossos/internal/output"
 	"github.com/autom8y/knossos/internal/paths"
@@ -160,7 +161,7 @@ func runInit(ctx *cmdContext, riteName, source string, force bool, cmd *cobra.Co
 	claudeDir := filepath.Join(projectDir, ".claude")
 	if _, err := os.Stat(claudeDir); err == nil && !force {
 		// .claude/ exists but no KNOSSOS_MANIFEST.yaml in .knossos/ -- not Knossos-managed.
-		errMsg := fmt.Errorf(".claude/ exists but is not Knossos-managed; use --force to initialize")
+		errMsg := errors.New(errors.CodeUsageError, ".claude/ exists but is not Knossos-managed; use --force to initialize")
 		printer.PrintError(errMsg)
 		return errMsg
 	}
