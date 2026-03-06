@@ -102,7 +102,7 @@ Create a git commit with an AI-generated message. $ARGUMENTS
 
 ## Reference
 
-Full documentation: `.claude/commands/operations/commit/INDEX.md`
+Full documentation: `.claude/commands/commit.md`
 
 ## Attribution Policy
 

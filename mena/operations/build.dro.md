@@ -79,4 +79,4 @@ Pairs with: `/architect` (design) and `/qa` (validation)
 
 ## Reference
 
-Full documentation: `.claude/skills/build-ref/INDEX.md`
+Full documentation: `.claude/skills/build-ref/SKILL.md`

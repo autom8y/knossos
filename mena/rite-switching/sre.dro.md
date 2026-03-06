@@ -39,4 +39,4 @@ Switch to the SRE rite and display the pantheon. $ARGUMENTS
 
 ## Reference
 
-Full documentation: `.claude/skills/sre-ref/INDEX.md`
+Full documentation: `.claude/skills/sre-ref/SKILL.md`

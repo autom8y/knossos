@@ -85,7 +85,7 @@ REVIEW_AGENT=$(grep -B1 "next: null" .knossos/ACTIVE_WORKFLOW.yaml | grep "agent
 
 ## Reference
 
-Full documentation: `.claude/commands/operations/code-review/INDEX.md`
+Full documentation: `.claude/commands/code-review.md`
 
 ## Sigil
 

@@ -81,4 +81,4 @@ Pairs with: `/build` (implementation from approved design)
 
 ## Reference
 
-Full documentation: `.claude/skills/architect-ref/INDEX.md`
+Full documentation: `.claude/skills/architect-ref/SKILL.md`

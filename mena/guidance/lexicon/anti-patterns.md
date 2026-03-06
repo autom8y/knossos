@@ -10,7 +10,7 @@ Common mistakes in agent prompts and how to fix them.
 | `` `skill-name` `` as invocation | Plain skill name or `Skill("name")` | Backticks are formatting, not invocation |
 | `doc-artifacts#tdd-template` | `doc-artifacts` skill, TDD section | CC cannot resolve `#fragment` references |
 | `~/.claude/skills/...` or `.claude/knowledge/...` | Skill name only | CC resolves paths from skill name |
-| `Read(~/.claude/skills/moirai/INDEX.md)` | `Skill("moirai")` or load by name | Hardcoded paths break on restructure |
+| `Read(~/.claude/skills/moirai/SKILL.md)` | `Skill("moirai")` or load by name | Hardcoded paths break on restructure |
 
 ## Invocation Confusion
 

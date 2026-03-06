@@ -123,7 +123,7 @@ ari worktree cleanup --older-than=7d
 
 ## Reference
 
-Full documentation: `.claude/commands/navigation/worktree/INDEX.md`
+Full documentation: `.claude/commands/worktree.md`
 
 ## Sigil
 

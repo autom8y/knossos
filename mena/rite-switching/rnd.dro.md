@@ -44,4 +44,4 @@ scouting -> integration-analysis -> prototyping -> future-architecture
 
 ## Reference
 
-Full documentation: `.claude/skills/rnd-ref/INDEX.md`
+Full documentation: `.claude/skills/rnd-ref/SKILL.md`

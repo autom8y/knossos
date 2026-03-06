@@ -68,5 +68,5 @@ Moirai returns structured JSON:
 ## Cross-References
 
 - `agents/moirai.md` — Full Moirai agent specification
-- `.claude/skills/session/moirai/` — Fate skills (INDEX.md, clotho.md, lachesis.md, atropos.md)
+- `.claude/skills/session/moirai/` — Fate skills (SKILL.md, clotho.md, lachesis.md, atropos.md)
 - `ari hook writeguard` — Direct write prevention

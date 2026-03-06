@@ -427,6 +427,42 @@ Typed string constants use ALL_CAPS values for domain states and SCREAMING_SNAKE
 2. `RefCategory` uses `iota` (`internal/registry/registry.go`) — appropriate for int-keyed enum, but string-typed enums are more common.
 3. Inline `map[string]any` is used in VerboseLog calls and some error details — not a struct pattern, intentional for flexibility.
 
+## Mena Materialization Path Conventions
+
+### Materialized Filename Rules
+
+The mena materialization pipeline applies three path transformations. Source content MUST reference the **post-transformation** (materialized) paths, not the pre-transformation source paths.
+
+| Source Pattern | Materialized Output | Rule |
+|---|---|---|
+| `INDEX.lego.md` | `SKILL.md` | Legomena entry points rename to `SKILL.md` |
+| `INDEX.dro.md` | `{name}.md` (promoted to parent) | Dromena entry points promote one level |
+| `{name}.lego.md` | `{name}.md` | Extension stripping only |
+| `{name}.dro.md` | `{name}.md` | Extension stripping only |
+
+### Namespace Flattening
+
+Source path `mena/{category}/{name}/` flattens to `.claude/{commands|skills}/{name}/` — the `{category}` level is stripped during materialization.
+
+| Source | Materialized |
+|---|---|
+| `mena/operations/commit/INDEX.dro.md` | `.claude/commands/commit.md` |
+| `mena/rite-switching/10x-ref/INDEX.lego.md` | `.claude/skills/10x-ref/SKILL.md` |
+| `mena/session/moirai/clotho.lego.md` | `.claude/skills/moirai/clotho.md` |
+
+### Content Reference Rules
+
+When referencing materialized paths in source files:
+- **Legomena entry points**: Always use `SKILL.md`, never `INDEX.md`
+- **Dromena entry points**: Always use `{name}.md` at parent level, never `INDEX.md` in a subdirectory
+- **No namespace prefix**: Never include the `{category}/` level in `.claude/` paths
+
+The content rewrite pipeline (`RewriteMenaContentPaths`) handles `.lego.md`/`.dro.md` extension patterns automatically. It does NOT handle bare `INDEX.md` → `SKILL.md` renames or namespace flattening — these must be correct in source.
+
+### Agent Prompt Paths
+
+Agent files in `agents/` are copied directly to `.claude/agents/` without content rewriting. Any `.claude/skills/` or `.claude/commands/` path references in agent prompts must use fully materialized paths.
+
 ## Knowledge Gaps
 
 1. **`internal/mena/` package** — not deeply examined. The mena source resolution logic (SourceChain, MenaProjection) was seen in types but not traced in detail.

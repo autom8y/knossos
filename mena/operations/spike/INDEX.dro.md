@@ -65,7 +65,7 @@ Spike report at `.sos/wip/SPIKE-{slug}.md`:
 
 ## Reference
 
-Full documentation: `.claude/commands/operations/spike/INDEX.md`
+Full documentation: `.claude/commands/spike.md`
 
 ## Sigil
 
