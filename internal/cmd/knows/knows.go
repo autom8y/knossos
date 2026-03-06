@@ -386,10 +386,7 @@ func runKnows(ctx *cmdContext, args []string, scopeDir string, checkFlag, valida
 // With a domain arg: validates that single domain and prints its report.
 // Without a domain arg: validates all domains and prints a summary table.
 // Exits with code 1 if any broken references are found.
-func runValidate(printer interface {
-	Print(data any) error
-	PrintLine(text string)
-}, projectDir string, args []string) error {
+func runValidate(printer *output.Printer, projectDir string, args []string) error {
 	var validateOut ValidateOutput
 
 	if len(args) == 1 {
@@ -431,10 +428,7 @@ func runValidate(printer interface {
 // runDelta executes the --delta flag logic.
 // With a domain arg: computes the change manifest for that single domain.
 // Without a domain arg: computes manifests for all domains and prints a summary table.
-func runDelta(printer interface {
-	Print(data any) error
-	PrintLine(text string)
-}, startDir, projectDir string, args []string) error {
+func runDelta(printer *output.Printer, startDir, projectDir string, args []string) error {
 	knowDir := filepath.Join(startDir, ".know")
 	// Read all domain statuses first to get the list of known domains.
 	allStatuses, err := know.ReadMeta(startDir, projectDir)
@@ -498,7 +492,7 @@ func runDelta(printer interface {
 		meta, err := know.ReadSingleMeta(knowDir, status.Domain)
 		if err != nil {
 			// Graceful degradation: report full mode if we cannot read the meta.
-			fmt.Fprintf(os.Stderr, "warn: cannot read meta for %q: %v\n", status.Domain, err)
+			printer.VerboseLog("warn", "cannot read meta", map[string]any{"domain": status.Domain, "error": err.Error()})
 			out.Mode = "full"
 			results = append(results, out)
 			continue
@@ -511,7 +505,7 @@ func runDelta(printer interface {
 			raw, err = know.ComputeChangeManifest(status.SourceHash, status.CurrentHash, nil)
 			if err != nil {
 				// Graceful degradation: git may be unavailable.
-				fmt.Fprintf(os.Stderr, "warn: cannot compute manifest for %q: %v\n", status.Domain, err)
+				printer.VerboseLog("warn", "cannot compute manifest", map[string]any{"domain": status.Domain, "error": err.Error()})
 				out.Mode = "full"
 				results = append(results, out)
 				continue
@@ -553,10 +547,7 @@ func readSingleDomain(printer *output.Printer, knowDir, domain string) error {
 }
 
 // runSemanticDiff computes AST-based semantic diffs for a domain's changed Go files.
-func runSemanticDiff(printer interface {
-	Print(data any) error
-	PrintLine(text string)
-}, startDir, projectDir string, args []string) error {
+func runSemanticDiff(printer *output.Printer, startDir, projectDir string, args []string) error {
 	knowDir := filepath.Join(startDir, ".know")
 	allStatuses, err := know.ReadMeta(startDir, projectDir)
 	if err != nil {
@@ -597,7 +588,7 @@ func runSemanticDiff(printer interface {
 
 		meta, err := know.ReadSingleMeta(knowDir, status.Domain)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "warn: cannot read meta for %q: %v\n", status.Domain, err)
+			printer.VerboseLog("warn", "cannot read meta", map[string]any{"domain": status.Domain, "error": err.Error()})
 			continue
 		}
 
@@ -606,7 +597,7 @@ func runSemanticDiff(printer interface {
 		if !ok {
 			raw, err = know.ComputeChangeManifest(status.SourceHash, status.CurrentHash, nil)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "warn: cannot compute manifest for %q: %v\n", status.Domain, err)
+				printer.VerboseLog("warn", "cannot compute manifest", map[string]any{"domain": status.Domain, "error": err.Error()})
 				continue
 			}
 			manifestCache[cacheKey] = raw
@@ -714,9 +705,7 @@ func (d DiscoverOutput) Text() string {
 	return b.String()
 }
 
-func runDiscover(printer interface {
-	Print(data any) error
-}, projectDir string) error {
+func runDiscover(printer *output.Printer, projectDir string) error {
 	boundaries, err := know.DiscoverServiceBoundaries(projectDir)
 	if err != nil {
 		return errors.Wrap(errors.CodeGeneralError, "discovering service boundaries", err)
