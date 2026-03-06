@@ -127,7 +127,7 @@ func countLines(s string) int {
 func splitFrontmatterAndBody(content string) (frontmatter string, body string, err error) {
 	// Must start with ---
 	if !strings.HasPrefix(content, "---\n") && !strings.HasPrefix(content, "---\r\n") {
-		return "", "", fmt.Errorf("no YAML frontmatter found")
+		return "", "", errors.New(errors.CodeParseError, "no YAML frontmatter found")
 	}
 
 	// Find closing delimiter
@@ -136,7 +136,7 @@ func splitFrontmatterAndBody(content string) (frontmatter string, body string, e
 		endIdx = strings.Index(content[4:], "\r\n---")
 	}
 	if endIdx == -1 {
-		return "", "", fmt.Errorf("unclosed YAML frontmatter")
+		return "", "", errors.New(errors.CodeParseError, "unclosed YAML frontmatter")
 	}
 
 	// frontmatter includes --- delimiters and the newline after closing ---
