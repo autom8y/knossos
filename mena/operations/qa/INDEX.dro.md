@@ -14,7 +14,7 @@ Auto-injected by SessionStart hook (project, rite, session, git, workflow).
 
 1. **Session context** (recommended):
    - Check Session Status in context above
-   - If no session: WARN "No active session. Consider /start for tracked workflow."
+   - If no session: WARN "No active session. Consider /sos start for tracked workflow."
 
 2. **Prerequisites check**:
    - Verify implementation exists to validate
@@ -93,7 +93,7 @@ End your response with:
 ✅ validated · next: {hint}
 
 Resolve the hint based on your validation outcome:
-- APPROVED → `next: /commit && /pr` (or `/wrap` if already committed).
+- APPROVED → `next: /commit && /pr` (or `/sos wrap` if already committed).
 - REJECTED → `next: fix issues, then /qa`.
 - CONDITIONAL → `next: /commit && /pr` (document caveats in PR).
 No active session → output `✅ validated` without hint.

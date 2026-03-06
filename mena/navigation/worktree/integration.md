@@ -33,24 +33,24 @@
 
 ## Session Lifecycle Integration
 
-### /start Interaction
+### /sos start Interaction
 
-When `/start` detects an existing session, it offers these options and references worktree:
+When `/sos start` detects an existing session, it offers these options and references worktree:
 
 ```
 A session already exists in this terminal.
 
 Options:
-1. /continue - Resume the parked session
-2. /park + /start - Park current, then start new
-3. /wrap - Complete current session first
+1. /sos resume - Resume the parked session
+2. /sos park + /sos start - Park current, then start new
+3. /sos wrap - Complete current session first
 
 See also: /worktree for parallel work in isolated worktrees
 ```
 
-### /wrap Interaction
+### /sos wrap Interaction
 
-When completing a session in a worktree, `/wrap` offers cleanup:
+When completing a session in a worktree, `/sos wrap` offers cleanup:
 
 ```
 Session Complete: billing-sprint

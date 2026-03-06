@@ -101,7 +101,7 @@ Resolution:
 1. Commit all changes
 2. Fix failing tests
 3. Address type safety issues
-4. Re-run /wrap
+4. Re-run /sos wrap
 ```
 
 ---
@@ -138,7 +138,7 @@ Resolution:
 
 When any gate fails, user has options:
 
-1. **Fix and retry**: Address issues, re-run `/wrap`
+1. **Fix and retry**: Address issues, re-run `/sos wrap`
 2. **Skip checks**: Use `--skip-checks` (not recommended)
 3. **Get help**: Use `/handoff` to appropriate agent
 
@@ -197,7 +197,7 @@ Reasons:
 
 Resolution:
 1. Fix critical failures listed above
-2. Re-run /wrap (Atropos will regenerate sails)
+2. Re-run /sos wrap (Atropos will regenerate sails)
 3. Use --force override ONLY for hotfixes:
    Task(moirai, "wrap_session --force")
 
@@ -226,7 +226,7 @@ Confidence: Session work may need manual review before production.
 
 ## Quality Gate Sequence
 
-When `/wrap` is invoked, gates run in this order:
+When `/sos wrap` is invoked, gates run in this order:
 
 1. **Skill-level gates** (this file) - can be skipped with `--skip-checks`
    - PRD Quality Gate

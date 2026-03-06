@@ -14,7 +14,7 @@ Auto-injected by SessionStart hook (project, rite, session, git, workflow).
 
 1. **Session context** (recommended):
    - Check Session Status in context above
-   - If no session: WARN "No active session. Consider /start for tracked workflow."
+   - If no session: WARN "No active session. Consider /sos start for tracked workflow."
 
 2. **Prerequisites check**:
    - Verify design artifact exists (TDD, refactor-plan, doc-structure, etc.)

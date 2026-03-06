@@ -4,7 +4,7 @@
 
 ## Overview
 
-The `handoff-validate` hook checks that required artifacts exist and are complete before cross-rite handoff. It integrates with `/wrap` to catch missing handoffs for SERVICE+ complexity work.
+The `handoff-validate` hook checks that required artifacts exist and are complete before cross-rite handoff. It integrates with `/sos wrap` to catch missing handoffs for SERVICE+ complexity work.
 
 ## Command Usage
 
@@ -156,12 +156,12 @@ Validating handoff: 10x-to-doc
 Result: READY FOR HANDOFF (1 warning)
 ```
 
-## Integration with /wrap
+## Integration with /sos wrap
 
-The `/wrap` command integrates handoff validation:
+The `/sos wrap` command integrates handoff validation:
 
 ```
-/wrap flow:
+/sos wrap flow:
 1. Run quality gates
 2. Check complexity level
 3. If SERVICE+ complexity:
@@ -178,7 +178,7 @@ The `/wrap` command integrates handoff validation:
 
 ```bash
 # Skip handoff checks during wrap (not recommended)
-/wrap --skip-handoff
+/sos wrap --skip-handoff
 
 # Skip artifact existence checks in validation
 ari hook handoff-validate --route=sre --skip-artifacts
@@ -235,6 +235,6 @@ The `handoff-validate` hook is implemented as an Ariadne CLI command. Implementa
 1. **Route configuration**: Each route defines required and optional checks
 2. **Path resolution**: Uses project-relative paths, respects `.claude/` conventions
 3. **Artifact parsing**: Reads HANDOFF artifacts from session directory
-4. **Integration**: Called by `/wrap` quality gate phase
+4. **Integration**: Called by `/sos wrap` quality gate phase
 
 For hook implementation details, see `.claude/hooks/` and Ariadne CLI source.

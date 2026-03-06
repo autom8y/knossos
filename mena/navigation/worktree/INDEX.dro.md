@@ -118,7 +118,7 @@ ari worktree cleanup --older-than=7d
 
 4. When done:
    ```
-   /wrap  # Will offer to remove worktree
+   /sos wrap  # Will offer to remove worktree
    ```
 
 ## Reference

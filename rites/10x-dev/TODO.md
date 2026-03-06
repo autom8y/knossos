@@ -53,7 +53,7 @@ The 10x-dev is a **production-ready, well-documented rite** implementing a 5-age
 - [ ] Update `agents/pythia.md`: Add guidance for selecting entry agent based on work type
 - [ ] Update `workflow.yaml`: Remove hard-coded `entry_point: requirements-analyst`, make dynamic
 - [ ] Update `skills/10x-workflow/SKILL.md`: Document entry point flexibility
-- [ ] Consider: Add `--entry` flag to `/start` for explicit override when user knows best entry
+- [ ] Consider: Add `--entry` flag to `/sos start` for explicit override when user knows best entry
 
 **Entry point heuristics for Pythia:**
 | Work Type | Recommended Entry | Rationale |

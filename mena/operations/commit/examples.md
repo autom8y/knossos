@@ -437,7 +437,7 @@ cat .sos/sessions/.tty-map/$(tty | md5)
 No active session found for this TTY.
 
 Start a session to enable commit tracking:
-  /start "feature development"
+  /sos start "feature development"
 ```
 
 ---

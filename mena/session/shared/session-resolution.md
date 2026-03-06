@@ -5,12 +5,12 @@
 ## When to Apply
 
 All session-lifecycle commands that require an existing session:
-- /park - requires active session
-- /resume - requires parked session
-- /wrap - requires active session
+- /sos park - requires active session
+- /sos resume - requires parked session
+- /sos wrap - requires active session
 - /handoff - requires active session
 
-/start is the exception: it requires NO existing session.
+/sos start is the exception: it requires NO existing session.
 
 ## Validation Checks
 
@@ -31,9 +31,9 @@ All session-lifecycle commands that require an existing session:
    - Extract parked_at field
 
 3. Validate state against command requirements:
-   - /park requires: parked_at NOT set
-   - /resume requires: parked_at IS set
-   - /wrap requires: parked_at NOT set (or offer auto-resume)
+   - /sos park requires: parked_at NOT set
+   - /sos resume requires: parked_at IS set
+   - /sos wrap requires: parked_at NOT set (or offer auto-resume)
    - /handoff requires: parked_at NOT set
 ```
 
@@ -41,8 +41,8 @@ All session-lifecycle commands that require an existing session:
 
 | Condition | Message Template |
 |-----------|------------------|
-| No session | "No active session to {verb}. Use `/start` to begin." |
-| Already parked | "Session parked at {timestamp}. Use `/resume` first." |
+| No session | "No active session to {verb}. Use `/sos start` to begin." |
+| Already parked | "Session parked at {timestamp}. Use `/sos resume` first." |
 | Not parked | "Session is already active (not parked). Continue working." |
 
 ## Customization Points

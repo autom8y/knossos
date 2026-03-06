@@ -80,10 +80,10 @@ back_route_handling:
     action: "Confirm with user before routing to triage-nurse. User may prefer second investigation."
     frequency: "Rare. Indicates the original scope was too narrow."
 
-# Session resume protocol for park/continue.
+# Session resume protocol for park/resume.
 # See workflow.yaml session_resume section for full logic.
 resume_protocol: |
-  On /continue, Pythia reads index.yaml status field to determine current phase.
+  On /sos resume, Pythia reads index.yaml status field to determine current phase.
   Resume dispatches to the agent owning the current phase. The agent reads
   index.yaml and its own prior artifacts to reconstruct context.
 

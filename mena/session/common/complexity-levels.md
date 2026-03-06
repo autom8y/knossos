@@ -50,11 +50,11 @@ Multiple services, infrastructure, complex integration?
 ### Workflow
 
 ```
-/start → Requirements Analyst → PRD
+/sos start → Requirements Analyst → PRD
   ↓
 /handoff engineer → Implementation
   ↓
-/wrap (optional: /handoff qa for validation)
+/sos wrap (optional: /handoff qa for validation)
 ```
 
 **Design Phase**: SKIPPED (no TDD or ADRs)
@@ -103,7 +103,7 @@ If during implementation you discover:
 ### Workflow
 
 ```
-/start → Requirements Analyst → PRD
+/sos start → Requirements Analyst → PRD
   ↓
 /handoff architect → TDD + ADRs
   ↓
@@ -111,7 +111,7 @@ If during implementation you discover:
   ↓
 /handoff qa → Validation
   ↓
-/wrap
+/sos wrap
 ```
 
 **Design Phase**: REQUIRED
@@ -160,7 +160,7 @@ If during design you discover:
 ### Workflow
 
 ```
-/start → Requirements Analyst → PRD
+/sos start → Requirements Analyst → PRD
   ↓
 /handoff architect → TDD + ADRs (extended design)
   ↓
@@ -168,7 +168,7 @@ If during design you discover:
   ↓
 /handoff qa → Validation + Integration Tests
   ↓
-/wrap
+/sos wrap
 ```
 
 **Design Phase**: EXTENDED (may require architect handoff multiple times)
@@ -218,19 +218,19 @@ If during design you discover:
 ### Workflow
 
 ```
-/start → Requirements Analyst → PRD (initiative-level)
+/sos start → Requirements Analyst → PRD (initiative-level)
   ↓
 /handoff architect → TDD (high-level architecture + phase breakdown)
   ↓
-/park (session too large, break into phases)
+/sos park (session too large, break into phases)
 
 For each phase:
-  /start → MODULE or SERVICE session
-  /wrap
+  /sos start → MODULE or SERVICE session
+  /sos wrap
 
 After all phases:
-  /start validation-session → Integration validation
-  /wrap
+  /sos start validation-session → Integration validation
+  /sos wrap
 ```
 
 **Design Phase**: CRITICAL (architecture decisions guide all phases)
@@ -251,7 +251,7 @@ After all phases:
 **Initial Session**:
 1. Create initiative-level PRD and TDD
 2. Break work into MODULE/SERVICE-sized phases
-3. /wrap initial planning session
+3. /sos wrap initial planning session
 
 **Subsequent Sessions**:
 - Each phase gets its own session (MODULE or SERVICE complexity)
@@ -348,7 +348,7 @@ Some rites specialize in complexity levels:
 
 **Problem**: Session scope exceeds manageable size
 
-**Fix**: /park, break into phases, create MODULE/SERVICE sessions
+**Fix**: /sos park, break into phases, create MODULE/SERVICE sessions
 
 ## Cross-References
 

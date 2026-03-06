@@ -55,10 +55,10 @@ This document catalogs anti-patterns observed across all session-lifecycle comma
 - Lost work context
 
 **Fix**:
-- Always /wrap before /start
-- Or /park if work isn't complete
+- Always /sos wrap before /sos start
+- Or /sos park if work isn't complete
 
-**Prevention**: /start validates no existing session
+**Prevention**: /sos start validates no existing session
 
 **Why Bad**: Creates orphaned sessions, loses session history
 
@@ -76,7 +76,7 @@ This document catalogs anti-patterns observed across all session-lifecycle comma
 **Fix**:
 - Re-scope initiative (likely too complex)
 - Break into multiple sessions
-- /wrap current session, /start smaller sessions
+- /sos wrap current session, /sos start smaller sessions
 
 **Prevention**: Track `handoff_count` in SESSION_CONTEXT
 
@@ -84,7 +84,7 @@ This document catalogs anti-patterns observed across all session-lifecycle comma
 
 ---
 
-## /start Anti-Patterns
+## /sos start Anti-Patterns
 
 ### Under-classifying Complexity
 
@@ -97,7 +97,7 @@ This document catalogs anti-patterns observed across all session-lifecycle comma
 
 **Fix**:
 - /handoff architect to add design phase
-- Or /wrap, /start new session with correct complexity
+- Or /sos wrap, /sos start new session with correct complexity
 
 **Prevention**: When uncertain, classify one level higher
 
@@ -115,11 +115,11 @@ This document catalogs anti-patterns observed across all session-lifecycle comma
 - Context overflow, confusion
 
 **Fix**:
-- /wrap planning session (PRD + high-level TDD)
+- /sos wrap planning session (PRD + high-level TDD)
 - Break into MODULE/SERVICE sessions
 - Each phase gets separate session
 
-**Prevention**: PLATFORM warning during /start
+**Prevention**: PLATFORM warning during /sos start
 
 **Why Bad**: Session scope exceeds manageable size, guaranteed context drift
 
@@ -135,16 +135,16 @@ This document catalogs anti-patterns observed across all session-lifecycle comma
 - Handoff to agent that doesn't exist
 
 **Fix**:
-- Check ACTIVE_RITE before /start
+- Check ACTIVE_RITE before /sos start
 - Use --rite flag to switch explicitly
 
-**Prevention**: /start displays rite confirmation
+**Prevention**: /sos start displays rite confirmation
 
 **Why Bad**: Wrong agents mean wrong deliverables
 
 ---
 
-## /park Anti-Patterns
+## /sos park Anti-Patterns
 
 ### Parking with Uncommitted Changes Indefinitely
 
@@ -158,7 +158,7 @@ This document catalogs anti-patterns observed across all session-lifecycle comma
 **Fix**:
 - Commit or stash before extended park
 - Add park reason noting git state
-- Consider /wrap if work is abandoned
+- Consider /sos wrap if work is abandoned
 
 **Prevention**: Park captures `parked_git_status` and warns
 
@@ -168,7 +168,7 @@ This document catalogs anti-patterns observed across all session-lifecycle comma
 
 ### Parking Without Reason
 
-**Pattern**: Using /park with no reason or generic "break"
+**Pattern**: Using /sos park with no reason or generic "break"
 
 **Symptoms**:
 - Context loss on resume
@@ -197,7 +197,7 @@ This document catalogs anti-patterns observed across all session-lifecycle comma
 **Fix**:
 - Identify blockers and resolve
 - Re-scope session if too large
-- Consider /wrap and fresh /start
+- Consider /sos wrap and fresh /sos start
 
 **Prevention**: Track `resume_count`, warn if > 5
 
@@ -216,16 +216,16 @@ This document catalogs anti-patterns observed across all session-lifecycle comma
 
 **Fix**:
 - Face quality gates head-on
-- Fix issues, then /wrap
-- Or use /wrap --skip-checks if truly spike work
+- Fix issues, then /sos wrap
+- Or use /sos wrap --skip-checks if truly spike work
 
-**Prevention**: Quality gates run on /wrap, not /park
+**Prevention**: Quality gates run on /sos wrap, not /sos park
 
 **Why Bad**: Defeats workflow purpose, technical debt accumulates
 
 ---
 
-## /resume Anti-Patterns
+## /sos resume Anti-Patterns
 
 ### Resuming After Major Code Changes
 
@@ -239,7 +239,7 @@ This document catalogs anti-patterns observed across all session-lifecycle comma
 **Fix**:
 - Review changes with agent
 - Update artifacts if needed
-- Consider /wrap stale session, /start fresh
+- Consider /sos wrap stale session, /sos start fresh
 
 **Prevention**: Resume displays git status changes since park
 
@@ -277,8 +277,8 @@ This document catalogs anti-patterns observed across all session-lifecycle comma
 
 **Fix**:
 - Review PRD/TDD freshness
-- Consider /wrap old session
-- /start fresh session with updated context
+- Consider /sos wrap old session
+- /sos start fresh session with updated context
 
 **Prevention**: Resume displays park duration, warns if > 2 weeks
 
@@ -306,7 +306,7 @@ This document catalogs anti-patterns observed across all session-lifecycle comma
 
 ---
 
-## /wrap Anti-Patterns
+## /sos wrap Anti-Patterns
 
 ### Habitual --skip-checks
 
@@ -338,8 +338,8 @@ This document catalogs anti-patterns observed across all session-lifecycle comma
 - Unclear session outcome
 
 **Fix**:
-- /park instead if pausing
-- Complete implementation before /wrap
+- /sos park instead if pausing
+- Complete implementation before /sos wrap
 - Or use --skip-checks if truly abandoning
 
 **Prevention**: Quality gates check completeness
@@ -370,7 +370,7 @@ This document catalogs anti-patterns observed across all session-lifecycle comma
 
 ### Wrapping Parked Session Without Review
 
-**Pattern**: /wrap on parked session (auto-resume) without checking state
+**Pattern**: /sos wrap on parked session (auto-resume) without checking state
 
 **Symptoms**:
 - Resume context missed
@@ -378,11 +378,11 @@ This document catalogs anti-patterns observed across all session-lifecycle comma
 - Premature completion
 
 **Fix**:
-- Explicit /resume first
+- Explicit /sos resume first
 - Review session state
-- Then /wrap after verification
+- Then /sos wrap after verification
 
-**Prevention**: /wrap auto-resumes but surfaces warnings
+**Prevention**: /sos wrap auto-resumes but surfaces warnings
 
 **Why Bad**: Misses validation checks from resume
 
@@ -438,7 +438,7 @@ This document catalogs anti-patterns observed across all session-lifecycle comma
 - Handoff blocked
 
 **Fix**:
-- /resume first
+- /sos resume first
 - Then /handoff
 
 **Prevention**: Handoff validates session state (active required)
@@ -483,9 +483,9 @@ This document catalogs anti-patterns observed across all session-lifecycle comma
 **Fix**:
 - One session per initiative
 - Break large work into multiple sessions
-- Use /wrap and /start for separate concerns
+- Use /sos wrap and /sos start for separate concerns
 
-**Prevention**: Initiative scoping during /start
+**Prevention**: Initiative scoping during /sos start
 
 **Why Bad**: Loses focused context, becomes unmaintainable
 
@@ -546,7 +546,7 @@ When you've fallen into an anti-pattern:
 | Anti-Pattern | Prevention Mechanism |
 |--------------|----------------------|
 | Direct edits | PreToolUse hook blocks |
-| Abandoned sessions | /start validates no existing session |
+| Abandoned sessions | /sos start validates no existing session |
 | Excessive handoffs | Track handoff_count, warn at 6+ |
 | Wrong complexity | Upgrade prompt during session |
 | Uncommitted parks | Capture git status, warn |

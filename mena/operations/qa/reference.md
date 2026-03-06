@@ -548,13 +548,13 @@ Works with or without sessions:
 
 **Phased workflow with sessions**:
 ```bash
-/start "Auth system"
+/sos start "Auth system"
 /architect "authentication service"
 /build "authentication service"
 /qa "authentication service"
 # If SHIP:
 /pr "Add authentication service"
-/wrap
+/sos wrap
 ```
 
 **Ad-hoc validation**:

@@ -81,5 +81,5 @@ The handoff itself IS the phase transition — the target agent is now active. S
 
 ❌ handoff failed: {brief reason} · fix: {recovery}
 
-Infer recovery: agent not found → check name against `ls .claude/agents/`; no active session → `/start`; state conflict → `/go` to check status; uncertain → `/consult`.
+Infer recovery: agent not found → check name against `ls .claude/agents/`; no active session → `/sos start`; state conflict → `/go` to check status; uncertain → `/consult`.
 

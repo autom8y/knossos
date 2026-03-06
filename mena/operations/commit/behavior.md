@@ -226,7 +226,7 @@ graph TD
 
 ### Session Integration
 
-When a session is active (started via `/start`):
+When a session is active (started via `/sos start`):
 
 1. **Commit Logged**: Entry added to `$SESSION_DIR/commits.log`
 2. **Context Updated**: `## Commits` table in SESSION_CONTEXT.md updated

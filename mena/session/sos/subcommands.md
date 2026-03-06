@@ -14,29 +14,6 @@
 **Delegation**: `Task(moirai, "resume_session session_id=\"{id}\"")`
 **Output**: Resumed status, current phase, next action hint
 
-## handoff
-
-**Preconditions**: Session exists, status ACTIVE. Target agent file exists at `.claude/agents/{agent}.md`
-**Parameters**: agent (required), notes (optional)
-**Validation**: Verify agent file exists BEFORE state changes: `[ -f ".claude/agents/{agent}.md" ]`
-**Delegation**: `Task(moirai, "handoff from {from} to {to} with notes: {notes}")`
-**Post-delegation**: Invoke target agent via `Task({agent}, "...")` with full session context
-**Output**: Handoff confirmation, target agent invoked
-
-## fray
-
-**Preconditions**: Session exists, status ACTIVE. In git repository (unless --no-worktree).
-**Parameters**: --no-worktree (optional)
-**Execution**: Direct CLI — `ari session fray --from {session-id} [--no-worktree]`
-**Output**: Parent/child IDs, worktree path, claim instructions for child
-
-## claim
-
-**Preconditions**: Target session exists, not ARCHIVED. CC session ID from hook context (`cc_session_id` field).
-**Parameters**: session-id (required)
-**Execution**: Direct CLI — `ari session claim {session-id} --cc-session-id {cc-id}`
-**Output**: Binding confirmation
-
 ## start
 
 **Preconditions**: No active session (or offer to park existing)
@@ -54,13 +31,13 @@ When complexity is PATCH:
 When complexity is MODULE or higher:
 1. Create session via Moirai (Clotho)
 2. Optionally switch rite if --rite specified
-3. Invoke entry agent per /start behavior
-4. Output: Standard /start output
+3. Invoke entry agent via workflow entry point
+4. Output: Standard session-start output
 
 ### Existing-Session Handling
 
 If a session exists when `/sos start` is invoked:
-- ACTIVE: "Session already active. `/sos park` first, or `/sos fray` for parallel work."
+- ACTIVE: "Session already active. `/sos park` first, or `/fray` for parallel work."
 - PARKED: "Session parked ({reason}). Options: `/sos resume`, `/sos wrap`, or park + start."
 
 ## wrap

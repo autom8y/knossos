@@ -103,8 +103,8 @@ Display confirmation message with:
 
 | Error | Condition | Resolution |
 |-------|-----------|------------|
-| No active session | No session for current project | Use `/start` to begin a session |
-| Session parked | `parked_at` field set | Use `/resume` first, then `/handoff` |
+| No active session | No session for current project | Use `/sos start` to begin a session |
+| Session parked | `parked_at` field set | Use `/sos resume` first, then `/handoff` |
 | Invalid agent | Agent not in this rite | Use valid agent name or `/rite` to list |
 | Agent not in rite | Agent file missing | Check active rite, switch if needed |
 | Missing parameter | No agent specified | Provide: `/handoff <agent-name>` |

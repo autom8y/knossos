@@ -31,7 +31,7 @@ All error messages follow this structure:
 
 ### No Active Session
 
-**When**: Any command requiring session (park, resume, wrap, handoff) but none exists
+**When**: Any command requiring session (sos park, sos resume, sos wrap, handoff) but none exists
 
 ```
 ✗ No Active Session
@@ -39,10 +39,10 @@ All error messages follow this structure:
 No session found for current project.
 
 Resolution:
-- Use /start to begin a new session
+- Use /sos start to begin a new session
 - Check if you're in the correct directory
 
-Related: /start, /status
+Related: /sos start, /status
 ```
 
 **Variables**: `{command}` - the verb being attempted
@@ -53,7 +53,7 @@ Related: /start, /status
 
 ### Session Already Exists
 
-**When**: /start when session already active
+**When**: /sos start when session already active
 
 ```
 ✗ Session Already Active
@@ -64,11 +64,11 @@ Phase: {current_phase}
 Rite: {active_rite}
 
 Resolution:
-- Use /resume to continue this session
-- Use /wrap to complete it before starting new session
+- Use /sos resume to continue this session
+- Use /sos wrap to complete it before starting new session
 - Use /status to check session details
 
-Related: /resume, /wrap, /status
+Related: /sos resume, /sos wrap, /status
 ```
 
 **Variables**: `{initiative}`, `{created_at}`, `{current_phase}`, `{active_rite}`
@@ -81,7 +81,7 @@ Related: /resume, /wrap, /status
 
 ### Session Already Parked
 
-**When**: /park on already-parked session
+**When**: /sos park on already-parked session
 
 ```
 ✗ Session Already Parked
@@ -93,10 +93,10 @@ Duration: {park_duration}
 This session is already paused.
 
 Resolution:
-- Use /resume to continue working
+- Use /sos resume to continue working
 - Use /status to check session state
 
-Related: /resume, /status
+Related: /sos resume, /status
 ```
 
 **Variables**: `{parked_at}`, `{parked_reason}`, `{park_duration}`
@@ -107,7 +107,7 @@ Related: /resume, /status
 
 ### Session Not Parked
 
-**When**: /resume on active (not parked) session
+**When**: /sos resume on active (not parked) session
 
 ```
 ℹ Session Not Parked
@@ -118,9 +118,9 @@ Current state:
 - Phase: {current_phase}
 - Agent: {last_agent}
 
-Continue working or use /park to pause.
+Continue working or use /sos park to pause.
 
-Related: /park, /handoff, /status
+Related: /sos park, /handoff, /status
 ```
 
 **Variables**: `{current_phase}`, `{last_agent}`
@@ -131,7 +131,7 @@ Related: /park, /handoff, /status
 
 ### Session Must Be Active
 
-**When**: /park, /wrap, /handoff on parked session
+**When**: /sos park, /sos wrap, /handoff on parked session
 
 ```
 ✗ Session Is Parked
@@ -142,10 +142,10 @@ Reason: {parked_reason}
 This command requires an active (not parked) session.
 
 Resolution:
-- Use /resume to continue first
+- Use /sos resume to continue first
 - Then retry this command
 
-Related: /resume
+Related: /sos resume
 ```
 
 **Variables**: `{parked_at}`, `{parked_reason}`
@@ -266,7 +266,7 @@ Related: /status, /rite
 
 ### Quality Gate Failure: PRD
 
-**When**: /wrap but PRD missing or incomplete
+**When**: /sos wrap but PRD missing or incomplete
 
 ```
 ⚠ Quality Gate Failure: PRD
@@ -282,9 +282,9 @@ Examples:
 Resolution:
 1. Complete PRD before wrapping
 2. Use /handoff requirements-analyst to fix PRD
-3. Use /wrap --skip-checks to skip validation (not recommended)
+3. Use /sos wrap --skip-checks to skip validation (not recommended)
 
-Related: /handoff, /wrap --skip-checks
+Related: /handoff, /sos wrap --skip-checks
 ```
 
 **Variables**: `{issue_list}`, `{expected_path}`
@@ -295,7 +295,7 @@ Related: /handoff, /wrap --skip-checks
 
 ### Quality Gate Failure: TDD/ADRs
 
-**When**: /wrap but TDD or ADRs missing (MODULE+)
+**When**: /sos wrap but TDD or ADRs missing (MODULE+)
 
 ```
 ⚠ Quality Gate Failure: TDD/ADRs
@@ -311,9 +311,9 @@ Examples:
 Resolution:
 1. Complete TDD and ADRs before wrapping
 2. Use /handoff architect to address issues
-3. Use /wrap --skip-checks to skip validation (not recommended)
+3. Use /sos wrap --skip-checks to skip validation (not recommended)
 
-Related: /handoff, /wrap --skip-checks
+Related: /handoff, /sos wrap --skip-checks
 ```
 
 **Variables**: `{issue_list}`, `{expected_path}`
@@ -324,7 +324,7 @@ Related: /handoff, /wrap --skip-checks
 
 ### Quality Gate Failure: Implementation
 
-**When**: /wrap but code quality issues
+**When**: /sos wrap but code quality issues
 
 ```
 ⚠ Quality Gate Failure: Implementation
@@ -344,11 +344,11 @@ Resolution:
 1. Commit all changes
 2. Fix failing tests
 3. Address type safety and lint issues
-4. Re-run /wrap
+4. Re-run /sos wrap
 
-Or use /wrap --skip-checks (not recommended)
+Or use /sos wrap --skip-checks (not recommended)
 
-Related: /handoff, /wrap --skip-checks
+Related: /handoff, /sos wrap --skip-checks
 ```
 
 **Variables**: `{issue_list}`, `{git_status}`
@@ -359,7 +359,7 @@ Related: /handoff, /wrap --skip-checks
 
 ### Quality Gate Failure: Validation
 
-**When**: /wrap but QA validation incomplete
+**When**: /sos wrap but QA validation incomplete
 
 ```
 ⚠ Quality Gate Failure: Validation
@@ -379,11 +379,11 @@ Resolution:
 1. Address critical defects
 2. Document medium/low as known issues
 3. Complete validation of all criteria
-4. Re-run /wrap
+4. Re-run /sos wrap
 
-Or use /wrap --skip-checks (not recommended)
+Or use /sos wrap --skip-checks (not recommended)
 
-Related: /handoff, /wrap --skip-checks
+Related: /handoff, /sos wrap --skip-checks
 ```
 
 **Variables**: `{issue_list}`, `{defect_list}`
@@ -396,7 +396,7 @@ Related: /handoff, /wrap --skip-checks
 
 ### Rite Mismatch
 
-**When**: /resume but ACTIVE_RITE differs from session rite
+**When**: /sos resume but ACTIVE_RITE differs from session rite
 
 ```
 ⚠ Rite Mismatch
@@ -422,7 +422,7 @@ Continue? [1/2/cancel]:
 
 ### Git Status Changed
 
-**When**: /resume and git status differs from park time
+**When**: /sos resume and git status differs from park time
 
 ```
 ⚠ Git Status Changed Since Park
@@ -444,7 +444,7 @@ Review changes before continuing? [y/n]:
 
 ### Uncommitted Changes
 
-**When**: /park or /wrap with dirty git status
+**When**: /sos park or /sos wrap with dirty git status
 
 ```
 ⚠ Uncommitted Changes Detected
@@ -469,7 +469,7 @@ Continue anyway? [y/n]:
 
 ### Stale Session
 
-**When**: /resume session parked > 2 weeks ago
+**When**: /sos resume session parked > 2 weeks ago
 
 ```
 ⚠ Stale Session
@@ -483,7 +483,7 @@ Context may be outdated.
 Recommendations:
 - Review PRD and TDD for relevance
 - Check if requirements changed
-- Consider /wrap and /start fresh
+- Consider /sos wrap and /sos start fresh
 
 Continue resuming? [y/n]:
 ```
@@ -511,7 +511,7 @@ High handoff counts may indicate:
 Recommendations:
 - Review session scope with requirements-analyst
 - Consider breaking into multiple sessions
-- Use /wrap to complete current session
+- Use /sos wrap to complete current session
 
 Continue with handoff? [y/n]:
 ```
@@ -633,25 +633,25 @@ Continue wrap without validation? [y/n]:
 
 | Code | Blocking | Commands |
 |------|----------|----------|
-| NO_SESSION | Yes | park, resume, wrap, handoff |
-| SESSION_EXISTS | Yes | start |
-| ALREADY_PARKED | Yes | park |
-| NOT_PARKED | No | resume |
-| SESSION_PARKED | Yes | park, wrap, handoff |
-| RITE_NOT_FOUND | Yes | start, resume, handoff |
-| KNOSSOS_UNAVAILABLE | Yes | start, resume, handoff |
-| AGENT_NOT_FOUND | Yes | handoff, resume |
+| NO_SESSION | Yes | sos park, sos resume, sos wrap, handoff |
+| SESSION_EXISTS | Yes | sos start |
+| ALREADY_PARKED | Yes | sos park |
+| NOT_PARKED | No | sos resume |
+| SESSION_PARKED | Yes | sos park, sos wrap, handoff |
+| RITE_NOT_FOUND | Yes | sos start, sos resume, handoff |
+| KNOSSOS_UNAVAILABLE | Yes | sos start, sos resume, handoff |
+| AGENT_NOT_FOUND | Yes | handoff, sos resume |
 | SAME_AGENT | No | handoff |
-| QUALITY_GATE_* | Yes* | wrap |
-| RITE_MISMATCH | No | resume |
-| GIT_STATUS_CHANGED | No | resume |
-| UNCOMMITTED_CHANGES | No | park, wrap |
-| STALE_SESSION | No | resume |
+| QUALITY_GATE_* | Yes* | sos wrap |
+| RITE_MISMATCH | No | sos resume |
+| GIT_STATUS_CHANGED | No | sos resume |
+| UNCOMMITTED_CHANGES | No | sos park, sos wrap |
+| STALE_SESSION | No | sos resume |
 | HIGH_HANDOFF_COUNT | No | handoff |
 | LIFECYCLE_VIOLATION | Yes | Any (via moirai) |
 | VALIDATION_ERROR | Yes | Any (via moirai) |
-| MOIRAI_UNAVAILABLE | Yes | park, resume, wrap |
-| SKIP_CHECKS | No | wrap |
+| MOIRAI_UNAVAILABLE | Yes | sos park, sos resume, sos wrap |
+| SKIP_CHECKS | No | sos wrap |
 
 *Unless --skip-checks used
 
@@ -669,10 +669,10 @@ error_no_session() {
 No session found for current project.
 
 Resolution:
-- Use /start to begin a new session
+- Use /sos start to begin a new session
 - Check if you're in the correct directory
 
-Related: /start, /status
+Related: /sos start, /status
 EOF
   return 1
 }

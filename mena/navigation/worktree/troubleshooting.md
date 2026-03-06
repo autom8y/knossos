@@ -78,9 +78,9 @@ cd worktrees/wt-{id}
 ari session status
 
 # Wrap or park the session
-/wrap
+/sos wrap
 # or
-/park
+/sos park
 ```
 
 ### Git worktree prune warnings

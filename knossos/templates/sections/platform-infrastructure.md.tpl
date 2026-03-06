@@ -5,7 +5,7 @@
 {{ if .IsKnossosProject }}
 **Entry**: `/go` — detects session state, resumes parked work, or routes new tasks.
 
-**Sessions**: `/start`, `/park`, `/continue`, `/wrap`. Mutate `*_CONTEXT.md` only via `Task(moirai, "...")`.
+**Sessions**: `/sos` (start, park, resume, wrap), `/handoff`, `/fray`. Mutate `*_CONTEXT.md` only via `Task(moirai, "...")`.
 
 **Hooks**: Auto-inject session context on start; autopark on stop. CLI reference: `ari --help`.
 {{ else }}

@@ -44,7 +44,7 @@ Sessions progress through phases that correspond to the software development lif
 - PRD (Product Requirements Document)
 
 **Entry Conditions**:
-- Session just created via /start
+- Session just created via /sos start
 - Or returning from validation phase (iteration)
 
 **Exit Conditions**:
@@ -140,10 +140,10 @@ Sessions progress through phases that correspond to the software development lif
 - All acceptance criteria validated
 - Defects resolved or documented
 - Quality gates passing
-- User invokes /wrap
+- User invokes /sos wrap
 
 **Valid Transitions**:
-- → Complete (all criteria met, /wrap)
+- → Complete (all criteria met, /sos wrap)
 - → `implementation` (defects found, need fixes)
 - → `requirements` (acceptance criteria unclear)
 - → `validation` (re-test after fixes)
@@ -218,11 +218,11 @@ implementation → implementation  (bug fixes, refactoring)
 
 | Command | Phase Impact |
 |---------|--------------|
-| `/start` | Sets initial phase (`requirements`) |
+| `/sos start` | Sets initial phase (`requirements`) |
 | `/handoff <agent>` | May change phase based on target agent |
-| `/park` | Preserves current phase in `parked_phase` |
-| `/resume` | Restores to phase at park time |
-| `/wrap` | Exits all phases (completion) |
+| `/sos park` | Preserves current phase in `parked_phase` |
+| `/sos resume` | Restores to phase at park time |
+| `/sos wrap` | Exits all phases (completion) |
 
 ## Agent-to-Phase Mapping
 
@@ -257,7 +257,7 @@ Phases are **advisory**, not enforced by state machine. However:
 **SESSION_CONTEXT evolution across phases:**
 
 ```yaml
-# After /start
+# After /sos start
 current_phase: "requirements"
 last_agent: "requirements-analyst"
 
@@ -273,7 +273,7 @@ last_agent: "principal-engineer"
 current_phase: "validation"
 last_agent: "qa-adversary"
 
-# After /wrap
+# After /sos wrap
 completed_at: "2026-01-01T18:45:22Z"
 ```
 

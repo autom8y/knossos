@@ -81,7 +81,7 @@ Display all rites dynamically (use `rite-discovery` skill):
 ### `--commands` flag
 Display all commands by category:
 ```
-Session (5): /start, /park, /continue, /handoff, /wrap
+Session (5): /sos start, /sos park, /sos resume, /handoff, /sos wrap
 Rite (14): /rite, /10x, /arch, /docs, /hygiene, /debt, /releaser, /review, /sre, /security, /intelligence, /rnd, /strategy, /slop-chop
 Workflow (4): /task, /sprint, /hotfix, /spike
 Operations (5): /architect, /build, /qa, /pr, /code-review
@@ -163,7 +163,7 @@ End your response with:
 
 🧭 guided · next: {primary recommended command from your consultation}
 
-The hint should be the primary command you recommended (e.g., `next: /start "the initiative"` or `next: /rite 10x-dev`). If you recommended multiple options, use the first/primary one.
+The hint should be the primary command you recommended (e.g., `next: /sos start "the initiative"` or `next: /rite 10x-dev`). If you recommended multiple options, use the first/primary one.
 
 ### On Failure
 

@@ -302,10 +302,10 @@ Works with or without sessions:
 
 **With session**:
 ```bash
-/start "Feature development"
+/sos start "Feature development"
 /task "implement feature"
 /pr "Add feature"
-/wrap
+/sos wrap
 ```
 
 **Without session**:

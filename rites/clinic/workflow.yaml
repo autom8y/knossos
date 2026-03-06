@@ -206,10 +206,10 @@ evidence_architecture:
 # =============================================================================
 # SESSION RESUME PROTOCOL
 # =============================================================================
-# How investigation state survives park/continue cycles.
+# How investigation state survives park/resume cycles.
 #
 # Evidence files persist on disk naturally. The index.yaml status field provides
-# the recovery signal. On /continue, Pythia reads index.yaml to determine where
+# the recovery signal. On /sos resume, Pythia reads index.yaml to determine where
 # the investigation left off, then dispatches to the appropriate agent.
 #
 # Resume logic:

@@ -9,23 +9,23 @@ Sessions move through a simple state machine with three primary states: **Active
 ## State Diagram
 
 ```
-    /start
+    /sos start
        │
        ▼
 ┌──────────────┐
 │    ACTIVE    │◄─────┐
 │              │      │
 │ parked_at:   │      │
-│   not set    │      │ /resume
+│   not set    │      │ /sos resume
 └───┬──────┬───┘      │
     │      │          │
     │      │      ┌───┴──────┐
     │      └─────►│  PARKED  │
-    │  /park      │          │
+    │  /sos park  │          │
     │             │parked_at:│
     │             │   set    │
     │             └──────────┘
-    │ /wrap
+    │ /sos wrap
     │
     ▼
 ┌──────────────┐
@@ -49,13 +49,13 @@ Sessions move through a simple state machine with three primary states: **Active
 - SESSION_CONTEXT file exists in `.sos/sessions/{session_id}/`
 
 **Valid Commands**:
-- /park - Pause work
-- /wrap - Complete session
+- /sos park - Pause work
+- /sos wrap - Complete session
 - /handoff - Switch agents
 
 **Invalid Commands**:
-- /start - Session already active
-- /resume - Session not parked
+- /sos start - Session already active
+- /sos resume - Session not parked
 
 ---
 
@@ -70,12 +70,12 @@ Sessions move through a simple state machine with three primary states: **Active
 - SESSION_CONTEXT file exists in `.sos/sessions/{session_id}/`
 
 **Valid Commands**:
-- /resume - Continue work
+- /sos resume - Continue work
 
 **Invalid Commands**:
-- /start - Session already exists
-- /park - Already parked
-- /wrap - Must resume first (or wrap auto-resumes)
+- /sos start - Session already exists
+- /sos park - Already parked
+- /sos wrap - Must resume first (or wrap auto-resumes)
 - /handoff - Must resume first
 
 ---
@@ -103,7 +103,7 @@ Sessions move through a simple state machine with three primary states: **Active
 
 ### ACTIVE → PARKED
 
-**Command**: `/park [reason]`
+**Command**: `/sos park [reason]`
 
 **Trigger**: User needs to pause work
 
@@ -128,7 +128,7 @@ Sessions move through a simple state machine with three primary states: **Active
 
 ### PARKED → ACTIVE
 
-**Command**: `/resume [--agent=NAME]`
+**Command**: `/sos resume [--agent=NAME]`
 
 **Trigger**: User ready to continue work
 
@@ -155,7 +155,7 @@ Sessions move through a simple state machine with three primary states: **Active
 
 ### ACTIVE → ARCHIVED
 
-**Command**: `/wrap [--skip-checks] [--archive]`
+**Command**: `/sos wrap [--skip-checks] [--archive]`
 
 **Trigger**: Session work complete
 
@@ -184,15 +184,15 @@ Sessions move through a simple state machine with three primary states: **Active
 
 ### Special Case: PARKED → ARCHIVED
 
-**Command**: `/wrap` (auto-resume)
+**Command**: `/sos wrap` (auto-resume)
 
 **Trigger**: User wraps a parked session
 
 **Implementation**: Two-phase transition
-1. Implicit `/resume` (PARKED → ACTIVE)
-2. Immediate `/wrap` (ACTIVE → ARCHIVED)
+1. Implicit `/sos resume` (PARKED → ACTIVE)
+2. Immediate `/sos wrap` (ACTIVE → ARCHIVED)
 
-**Note**: This is a convenience to avoid requiring explicit `/resume` before `/wrap`.
+**Note**: This is a convenience to avoid requiring explicit `/sos resume` before `/sos wrap`.
 
 ---
 
@@ -227,7 +227,7 @@ These transitions are **not allowed**:
 
 | From | To | Why |
 |------|----|----|
-| ACTIVE | ARCHIVED | Must run quality gates (/wrap) |
+| ACTIVE | ARCHIVED | Must run quality gates (/sos wrap) |
 | PARKED | PARKED | Already parked (idempotency issue) |
 | ARCHIVED | Any | Terminal state, immutable |
 | None | PARKED | Can't park non-existent session |
@@ -312,7 +312,7 @@ Example error:
   "success": false,
   "error_type": "LIFECYCLE_VIOLATION",
   "message": "Cannot park: session already parked",
-  "hint": "Use /resume to continue or check /status"
+  "hint": "Use /sos resume to continue or check /status"
 }
 ```
 

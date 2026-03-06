@@ -60,8 +60,8 @@ Current Mode: Native
 
 No session is active. Options:
 1. Execute directly - For quick tasks, just do it
-2. Start a tracked session: /start "<initiative>"
-3. Start with a rite: /start "<initiative>" --rite <pack>
+2. Start a tracked session: /sos start "<initiative>"
+3. Start with a rite: /sos start "<initiative>" --rite <pack>
 ```
 
 ### Orchestrated Mode Response
@@ -113,7 +113,7 @@ When invoked without arguments, `/consult` provides ecosystem overview:
 
 3. **List Common Starting Points**
    Based on typical user goals:
-   - Feature development → `/10x` + `/start`
+   - Feature development → `/10x` + `/sos start`
    - Architecture analysis → `/arch` + `/task`
    - Documentation → `/docs` + `/task`
    - Code quality → `/hygiene` + `/task`
@@ -146,7 +146,7 @@ Session: ACTIVE - "Add authentication" (MODULE complexity)
   slop-chop     /slop-chop    AI code quality gate
 
 === Common Starting Points ===
-  Build a feature:     /10x && /start "Feature name"
+  Build a feature:     /10x && /sos start "Feature name"
   Analyze architecture:/arch && /task "Architecture scope"
   Fix a bug:           /hotfix
   Improve quality:     /hygiene && /task "Audit scope"
@@ -222,7 +222,7 @@ requirements, design, implementation, and security validation.
    /10x
 
 2. Start session with appropriate complexity:
-   /start "Add user authentication" --complexity=MODULE
+   /sos start "Add user authentication" --complexity=MODULE
 
 3. Requirements phase (auto-starts):
    Requirements Analyst will create PRD covering:
@@ -252,7 +252,7 @@ requirements, design, implementation, and security validation.
    - Token expiry, logout, etc.
 
 7. Finalize:
-   /wrap
+   /sos wrap
    Creates summary and runs quality gates
 
 8. Create PR:
@@ -317,7 +317,7 @@ Current Context:
   Session: none (will start new)
 
 --- Phase 1: Requirements ---
-Command: /10x && /start "Feature name" --complexity=MODULE
+Command: /10x && /sos start "Feature name" --complexity=MODULE
 Agent: Requirements Analyst
 Output: PRD.md with acceptance criteria
 
@@ -337,14 +337,14 @@ Agent: QA/Adversary
 Output: Test results, edge case validation
 
 --- Phase 5: Finalize ---
-Command: /wrap
+Command: /sos wrap
 Output: Session summary
 
 --- Phase 6: Deploy ---
 Command: /pr
 Output: Pull request with full context
 
-Next step: /10x && /start "Your feature name"
+Next step: /10x && /sos start "Your feature name"
 ```
 
 ---
@@ -387,11 +387,11 @@ Display all commands categorized by domain:
 === Command Registry (33 Total) ===
 
 --- Session Lifecycle (6) ---
-/start              Initialize new work session
-/park               Pause session, preserve state
-/continue           Resume parked session
+/sos start          Initialize new work session
+/sos park           Pause session, preserve state
+/sos resume         Resume parked session
 /handoff            Transfer work between agents
-/wrap               Finalize session, run quality gates
+/sos wrap           Finalize session, run quality gates
 /worktree           Manage isolated worktrees
 
 --- Rite Management (14) ---
@@ -504,7 +504,7 @@ When providing invocation patterns, `/consult` retrieves patterns from:
 **Pattern**: Instead of generating ad-hoc commands, extract from `prompting` skill.
 
 Example transformation:
-- WITHOUT skill reference: "Start a session with `/start 'Add auth'`"
+- WITHOUT skill reference: "Start a session with `/sos start 'Add auth'`"
 - WITH skill reference: "Per `prompting` skill, invoke: `Act as Requirements Analyst. Create PRD for: Add auth`"
 
 ### Referencing 10x-workflow Skill
@@ -561,7 +561,7 @@ When recommending rites, `/consult` retrieves current rite inventory from:
 **Response:**
 - Assessment: New feature, ecommerce domain, MODULE/SERVICE complexity
 - Recommendation: 10x-dev, /task workflow, MODULE complexity
-- Command-Flow: `/10x` → `/start "Shopping cart" --complexity=MODULE` → agent handoffs
+- Command-Flow: `/10x` → `/sos start "Shopping cart" --complexity=MODULE` → agent handoffs
 - Alternatives: Consider `/intelligence` rite if A/B testing cart UX needed
 
 ---
@@ -649,7 +649,7 @@ A good `/consult` response:
 | Command | Relationship |
 |---------|--------------|
 | `/rite` | Executes rite syncs recommended by /consult |
-| `/start` | Begins sessions recommended by /consult |
+| `/sos start` | Begins sessions recommended by /consult |
 | `/task`, `/sprint`, `/hotfix`, `/spike` | Executes workflows recommended by /consult |
 | `/forge` | Meta-level rite creation (vs /consult for navigation) |
 

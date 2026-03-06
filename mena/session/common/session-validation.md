@@ -30,18 +30,18 @@ fi
 
 **Success**: Session directory exists and is readable
 
-**Failure**: Error with suggestion to /start
+**Failure**: Error with suggestion to /sos start
 
 **Error Message**:
 ```
 No active session to {verb}.
 
-Use /start to begin a new session.
+Use /sos start to begin a new session.
 ```
 
 ### Check: Session Does NOT Exist
 
-**Used By**: start
+**Used By**: sos start
 
 **Implementation**:
 ```bash
@@ -53,13 +53,13 @@ fi
 
 **Success**: No session directory exists
 
-**Failure**: Error with suggestion to /wrap or /resume
+**Failure**: Error with suggestion to /sos wrap or /sos resume
 
 **Error Message**:
 ```
 Session already active: {initiative}
 
-Use /wrap to complete it, or /resume to continue working.
+Use /sos wrap to complete it, or /sos resume to continue working.
 ```
 
 ## Session State Validation
@@ -78,18 +78,18 @@ fi
 
 **Success**: `parked_at` field not set in SESSION_CONTEXT
 
-**Failure**: Error with suggestion to /resume
+**Failure**: Error with suggestion to /sos resume
 
 **Error Message**:
 ```
 Session parked at {timestamp}.
 
-Use /resume to continue before {verb}.
+Use /sos resume to continue before {verb}.
 ```
 
 ### Check: Session Parked
 
-**Used By**: resume
+**Used By**: sos resume
 
 **Implementation**:
 ```bash
@@ -107,14 +107,14 @@ fi
 ```
 Session is not parked. It's already active.
 
-Continue working or use /park to pause.
+Continue working or use /sos park to pause.
 ```
 
 ## Rite Context Validation
 
 ### Check: Rite Exists
 
-**Used By**: start, resume, handoff
+**Used By**: sos start, sos resume, handoff
 
 **Implementation**:
 ```bash
@@ -144,7 +144,7 @@ Use /rite to switch or check KNOSSOS_HOME.
 
 ### Check: Rite Consistency
 
-**Used By**: resume
+**Used By**: sos resume
 
 **Implementation**:
 ```bash
@@ -178,7 +178,7 @@ Continue? [1/2/cancel]:
 
 ### Check: Agent Exists
 
-**Used By**: handoff, resume (if --agent specified)
+**Used By**: handoff, sos resume (if --agent specified)
 
 **Implementation**:
 ```bash
@@ -229,7 +229,7 @@ Continue with current agent or specify a different one.
 
 ### Check: Git Status
 
-**Used By**: resume (informational), wrap (blocking)
+**Used By**: sos resume (informational), sos wrap (blocking)
 
 **Implementation**:
 ```bash
@@ -243,13 +243,13 @@ if [[ -n "$git_status" ]]; then
 fi
 ```
 
-**Success (wrap)**: `git status --porcelain` returns empty
+**Success (sos wrap)**: `git status --porcelain` returns empty
 
-**Failure (wrap)**: Error requiring clean state
+**Failure (sos wrap)**: Error requiring clean state
 
-**Warning (resume)**: Informational, allow to continue
+**Warning (sos resume)**: Informational, allow to continue
 
-**Error Message (wrap)**:
+**Error Message (sos wrap)**:
 ```
 ⚠ Uncommitted changes detected:
 
@@ -258,7 +258,7 @@ fi
 Commit changes before wrapping or use --skip-checks.
 ```
 
-**Warning Message (resume)**:
+**Warning Message (sos resume)**:
 ```
 ⚠ Uncommitted changes detected since park:
 
@@ -296,10 +296,10 @@ yq e 'has("{field}")' SESSION_CONTEXT.md
 
 | Command | Validation Stage | Abort on Failure? |
 |---------|------------------|-------------------|
-| /start | Before any action | Yes |
-| /park | Before state capture | Yes |
-| /resume | Before agent invocation | Yes (errors), No (warnings) |
-| /wrap | Before quality gates | Yes (unless --skip-checks) |
+| /sos start | Before any action | Yes |
+| /sos park | Before state capture | Yes |
+| /sos resume | Before agent invocation | Yes (errors), No (warnings) |
+| /sos wrap | Before quality gates | Yes (unless --skip-checks) |
 | /handoff | Before moirai call | Yes |
 
 ## Error Handling Philosophy
@@ -312,11 +312,11 @@ yq e 'has("{field}")' SESSION_CONTEXT.md
 ## Example: Multi-Check Validation
 
 ```bash
-# Full pre-flight for /park command
+# Full pre-flight for /sos park command
 
 # 1. Session exists
 session_dir=$(ari session status | jq -r '.session_dir')
-[[ -z "$session_dir" ]] && error "No active session to park. Use /start."
+[[ -z "$session_dir" ]] && error "No active session to park. Use /sos start."
 
 # 2. Session not already parked
 parked_at=$(yq e '.parked_at' "$session_dir/SESSION_CONTEXT.md")
@@ -335,10 +335,10 @@ fi
 
 | Command | Session Exists | Session State | Rite Valid | Agent Valid | Git Clean |
 |---------|----------------|---------------|------------|-------------|-----------|
-| /start | ❌ Must NOT | N/A | ✓ Check | N/A | - |
-| /park | ✓ Must | Active | - | - | ⚠ Warn |
-| /resume | ✓ Must | Parked | ⚠ Warn | ✓ (if --agent) | ⚠ Warn |
-| /wrap | ✓ Must | Active | - | - | ✓ Block* |
+| /sos start | ❌ Must NOT | N/A | ✓ Check | N/A | - |
+| /sos park | ✓ Must | Active | - | - | ⚠ Warn |
+| /sos resume | ✓ Must | Parked | ⚠ Warn | ✓ (if --agent) | ⚠ Warn |
+| /sos wrap | ✓ Must | Active | - | - | ✓ Block* |
 | /handoff | ✓ Must | Active | - | ✓ Check | - |
 
 *Unless --skip-checks

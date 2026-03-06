@@ -127,7 +127,7 @@ These commands use the workflow's entry point:
 
 | Command | Behavior |
 |---------|----------|
-| `/start` | Invoke entry point agent, create session |
+| `/sos start` | Invoke entry point agent, create session |
 | `/task` | Run full workflow through all phases |
 | `/sprint` | Run multiple `/task` invocations |
 

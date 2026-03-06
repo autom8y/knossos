@@ -31,9 +31,6 @@ Parse $ARGUMENTS to determine the operation. If empty, default to **status** mod
 | (empty) | Status + triage | No |
 | `park "reason"` | Park session | Yes (ACTIVE) |
 | `resume` | Resume parked session | Yes (PARKED) |
-| `handoff <agent> [notes]` | Hand off to agent | Yes (ACTIVE) |
-| `fray [--no-worktree]` | Fork to strand | Yes (ACTIVE) |
-| `claim <session-id>` | Bind CC to session | No |
 | `start "initiative" [--complexity=X]` | Lightweight start | No |
 | `wrap [--force]` | Archive session | Yes |
 | Any other text | Natural language routing | Varies |
@@ -41,7 +38,7 @@ Parse $ARGUMENTS to determine the operation. If empty, default to **status** mod
 ### Decision Flow
 
 1. **Extract first word** from $ARGUMENTS
-2. **If it matches a subcommand** (park, resume, handoff, fray, claim, start, wrap): route directly
+2. **If it matches a subcommand** (park, resume, start, wrap): route directly
 3. **If no match**: treat entire input as natural language. Load routing spec:
    `Read("mena/session/sos/behavior.md")`
 4. **If empty**: run status + triage mode (see below)
@@ -52,7 +49,6 @@ Parse $ARGUMENTS to determine the operation. If empty, default to **status** mod
 You MUST pass this to Moirai — the CLI cannot discover the session from a Bash subprocess.
 
 For operations that do NOT require an existing session:
-- claim: uses the target session-id from arguments
 - start: creates a new session
 - status: reads from context, gracefully handles `has_session: false`
 
@@ -61,7 +57,7 @@ For operations that do NOT require an existing session:
 When /sos is invoked with no arguments:
 
 1. If `has_session: false`: display "No active session" and run `ari session query` for recent sessions
-2. If `status: ACTIVE`: show initiative, phase, complexity. Suggest: `/sos park` or `/sos handoff`
+2. If `status: ACTIVE`: show initiative, phase, complexity. Suggest: `/sos park`, `/handoff`, or `/fray`
 3. If `status: PARKED`: show initiative, park reason. Suggest: `/sos resume` or `/sos wrap`
 
 ### Operation Dispatch
@@ -78,11 +74,8 @@ Then execute using the operation's dispatch pattern.
 - resume: `Task(moirai, "resume_session session_id=\"{id}\"")`
 - start: `Task(moirai, "create_session initiative='{initiative}' complexity={complexity}")`
 - wrap: `Task(moirai, "wrap_session session_id=\"{id}\"")`
-- handoff: `Task(moirai, "handoff from {from} to {to} with notes: {notes}")`
 
 **Via Bash** — direct CLI operations:
-- fray: `ari session fray --from {session-id}`
-- claim: `ari session claim {session-id} --cc-session-id {cc-id}`
 - status: `ari session query`
 
 ## Sigils
@@ -94,9 +87,6 @@ Then execute using the operation's dispatch pattern.
 | status | (no sigil — informational) |
 | park | `(parked) next: /sos resume (when ready)` |
 | resume | `(resumed) next: /go` |
-| handoff | `(handed off) next: /go` |
-| fray | `(frayed) next: cd {worktree_path} && claude` |
-| claim | `(claimed) next: /go` |
 | start | `(started) next: start working` |
 | wrap | `(wrapped) next: /land (for synthesis) or /sos start (new work)` |
 

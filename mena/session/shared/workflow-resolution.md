@@ -5,8 +5,8 @@
 ## When to Apply
 
 Commands that invoke agents or switch rites:
-- /start - validates target rite, may switch
-- /resume - validates session rite matches active rite
+- /sos start - validates target rite, may switch
+- /sos resume - validates session rite matches active rite
 - /handoff - validates target agent exists in rite
 
 ## Validation Checks
@@ -52,6 +52,6 @@ Commands that invoke agents or switch rites:
 
 | Parameter | Description | Commands Using |
 |-----------|-------------|----------------|
-| `target_rite` | Rite to validate/switch to | start |
+| `target_rite` | Rite to validate/switch to | sos start |
 | `target_agent` | Agent to validate | handoff |
-| `allow_override` | Allow continuing despite mismatch | resume |
+| `allow_override` | Allow continuing despite mismatch | sos resume |

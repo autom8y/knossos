@@ -32,7 +32,7 @@ All investigation artifacts live under `.sos/wip/ERRORS/{investigation-slug}/`.
 
 ## Session Resume
 
-On `/continue`, Pythia reads `index.yaml` status field:
+On `/sos resume`, Pythia reads `index.yaml` status field:
 
 | Status Field | Dispatch To |
 |--------------|-------------|

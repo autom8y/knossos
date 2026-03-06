@@ -36,7 +36,7 @@ Now you're in a completely isolated environment:
 When done with the isolated work:
 
 ```bash
-/wrap
+/sos wrap
 # "This session ran in an isolated worktree: wt-20251224-150000-xyz"
 # "Remove worktree? (y/n)"
 ```
@@ -49,24 +49,24 @@ git worktree remove --force worktrees/wt-20251224-150000-xyz
 
 ## Integration Points
 
-### With /start
+### With /sos start
 
-When `/start` detects an existing session, it offers these options and references worktree:
+When `/sos start` detects an existing session, it offers these options and references worktree:
 
 ```
 A session already exists in this terminal.
 
 Options:
-1. /continue - Resume the parked session
-2. /park + /start - Park current, then start new
-3. /wrap - Complete current session first
+1. /sos resume - Resume the parked session
+2. /sos park + /sos start - Park current, then start new
+3. /sos wrap - Complete current session first
 
 See also: /worktree for parallel work in isolated worktrees
 ```
 
-### With /wrap
+### With /sos wrap
 
-When completing a session in a worktree, `/wrap` offers cleanup:
+When completing a session in a worktree, `/sos wrap` offers cleanup:
 
 ```
 Session Complete: billing-sprint

@@ -26,7 +26,7 @@ Use these routes when work in one rite is complete and requires handoff to a spe
 
 ```
 Feature implementation complete?
-+-- No -> Continue development, use /park if pausing
++-- No -> Continue development, use /sos park if pausing
 +-- Yes -> Continue below
 
 Does it need production deployment?
@@ -41,7 +41,7 @@ Does it have security implications?
 Does it need user-facing documentation?
 +-- New feature, API changes, config changes?
 +-- Yes -> 10x-to-doc route
-+-- No -> Proceed to /wrap
++-- No -> Proceed to /sos wrap
 ```
 
 ### From clinic (investigation complete)
@@ -75,9 +75,9 @@ Note: A single clinic investigation may produce multiple outbound handoffs. Fix 
 | [clinic-to-sre](routes/clinic-to-sre.md) | clinic | sre | Monitoring or observability gaps |
 | [clinic-to-debt-triage](routes/clinic-to-debt-triage.md) | clinic | debt-triage | Systemic pattern across codebase |
 
-## Integration with /wrap
+## Integration with /sos wrap
 
-The `/wrap` command integrates with these routes:
+The `/sos wrap` command integrates with these routes:
 
 1. During wrap, quality gates check if cross-rite handoff is required
 2. If complexity >= SERVICE with production deployment, SRE handoff is flagged
@@ -122,5 +122,5 @@ assessment. Suggest next step: Create hygiene ticket for DRY violation review."
 | Skill | When to Use |
 |-------|-------------|
 | `cross-rite-handoff` skill | HANDOFF artifact schema for formal transfers |
-| `/wrap` command | Session completion with quality gates |
+| `/sos wrap` command | Session completion with quality gates |
 | `/handoff` command | Within-rite agent transitions |

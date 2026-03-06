@@ -79,7 +79,7 @@ End your response with:
 - Find active session: look for `status: "ACTIVE"` in `.sos/sessions/*/SESSION_CONTEXT.md`
 - No active session found → output `🔭 explored` without hint.
 
-Natural follow-on: `next: /consult` (to plan next steps based on findings) or `next: /start` (if the spike informed a new initiative).
+Natural follow-on: `next: /consult` (to plan next steps based on findings) or `next: /sos start` (if the spike informed a new initiative).
 
 ### On Failure
 

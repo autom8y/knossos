@@ -77,7 +77,7 @@ handoff-debt-triage.md <- attending (if systemic pattern found)
 
 ## Session Resume
 
-Park and continue investigations naturally. On `/continue`, Pythia reads `index.yaml` status field to resume at the correct phase.
+Park and continue investigations naturally. On `/sos resume`, Pythia reads `index.yaml` status field to resume at the correct phase.
 
 ## Cross-Rite Handoffs (Outbound)
 
@@ -107,7 +107,7 @@ The clinic accepts structured escalation from SRE incident-commander. Expected f
 | Command | Purpose |
 |---------|---------|
 | `/clinic` | Switch to clinic rite |
-| `/continue` | Resume parked investigation |
+| `/sos resume` | Resume parked investigation |
 
 ## Best For
 

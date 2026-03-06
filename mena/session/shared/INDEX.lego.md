@@ -1,6 +1,6 @@
 ---
 name: session-shared
-description: "Session and workflow resolution patterns. Use when: validating session state before operations, resolving rite and agent context, delegating to Moirai. Triggers: session resolution, moirai invocation, session pre-flight, workflow resolution."
+description: "Session and workflow resolution patterns plus shared companion content. Use when: validating session state before operations, resolving rite and agent context, delegating to Moirai, accessing quality gates, summary templates, validation checks. Triggers: session resolution, moirai invocation, session pre-flight, workflow resolution, quality gates, session summary."
 ---
 
 # Session-Lifecycle Shared Sections
@@ -11,9 +11,14 @@ description: "Session and workflow resolution patterns. Use when: validating ses
 
 | Partial | Purpose | Used By |
 |---------|---------|---------|
-| [session-resolution](session-resolution.md) | Session existence and state validation | All 5 commands |
-| [workflow-resolution](workflow-resolution.md) | Rite and agent validation | start, resume, handoff |
-| [moirai-invocation](moirai-invocation.md) | Moirai delegation pattern | park, resume, wrap |
+| [session-resolution](session-resolution.md) | Session existence and state validation | /sos park, /sos resume, /sos wrap, /sos start, /handoff |
+| [workflow-resolution](workflow-resolution.md) | Rite and agent validation | /sos start, /sos resume, /handoff |
+| [moirai-invocation](moirai-invocation.md) | Moirai delegation pattern | /sos park, /sos resume, /sos wrap |
+| [quality-gates](quality-gates.md) | Quality validation gates and WHITE_SAILS | /sos wrap |
+| [session-summary](session-summary.md) | Session summary template and field sources | /sos wrap |
+| [validation-checks](validation-checks.md) | Rite, git, and agent pre-resume checks | /sos resume |
+| [parking-summary](parking-summary.md) | Parking summary template and field values | /sos park |
+| [integration](integration.md) | Agent delegation templates (Analyst, Architect) | /sos start |
 
 ## Usage Pattern
 

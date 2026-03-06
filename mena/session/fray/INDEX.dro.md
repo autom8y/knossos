@@ -1,7 +1,7 @@
 ---
 name: fray
 description: Fork current session into a parallel strand with optional worktree isolation
-argument-hint: "[--no-worktree] [--from=SESSION_ID]"
+argument-hint: "[--no-worktree] [--from=SESSION_ID] [--claim=SESSION_ID]"
 allowed-tools: Bash, Read
 disallowed-tools: Write, Edit, NotebookEdit
 disable-model-invocation: true
@@ -14,12 +14,21 @@ Auto-injected by SessionStart hook (project, rite, session, git).
 
 Fork the current session into a parallel strand. $ARGUMENTS
 
+### --claim Mode (Bind Only)
+
+If `--claim` is present:
+1. Extract `cc_session_id` from hook-injected YAML frontmatter
+2. Execute: `ari session claim {claim-session-id} --cc-session-id {cc-id}`
+3. Display: `Claimed: bound to {session-id}`
+4. Sigil: `claimed -- next: /go`
+5. STOP (do not proceed to fray logic)
+
 ## Pre-flight
 
 1. **Active session required**:
    - Read `status` from hook-injected YAML frontmatter above
-   - If no active session: ERROR "No active session to fray. Use `/start` to begin."
-   - If session is PARKED: ERROR "Cannot fray a parked session. Use `/continue` first."
+   - If no active session: ERROR "No active session to fray. Use `/sos start` to begin."
+   - If session is PARKED: ERROR "Cannot fray a parked session. Use `/sos resume` first."
 
 2. **Git repository required** (if worktree mode):
    - Verify in git repository: `git rev-parse --git-dir`
@@ -90,11 +99,11 @@ Worktree: {worktree_path}
 
 Next steps:
   cd {worktree_path} && claude
-  /sos claim {child_id}       # bind the new CC instance to the child session
+  /fray --claim {child_id}    # bind the new CC instance to the child session
   # Start working in the parallel strand
 
 To return to parent:
-  /continue   (from original directory)
+  /sos resume   (from original directory)
 ```
 
 **Without worktree** (`--no-worktree`):
@@ -106,11 +115,11 @@ The child session shares this working tree.
 Parent is parked. You are now on the child strand.
 
 Claim this strand:
-  /sos claim {child_id}       # bind this CC instance to the child session
+  /fray --claim {child_id}    # bind this CC instance to the child session
 
 To return to parent:
-  /park       (park child)
-  /continue   (resume parent)
+  /sos park      (park child)
+  /sos resume    (resume parent)
 ```
 
 ### 5. Known Limitation
@@ -129,7 +138,7 @@ git worktree remove {worktree_path}
 | Explore alternative approach mid-session | `/fray` |
 | Start independent parallel work | `/worktree create` |
 | Quick spike that might be discarded | `/fray --no-worktree` |
-| Long-running parallel sprint | `/worktree create` + `/start` |
+| Long-running parallel sprint | `/worktree create` + `/sos start` |
 
 Fray preserves session lineage (parent/child). Worktrees are independent.
 
@@ -151,4 +160,4 @@ If `--no-worktree` was used, end with:
 
 ❌ fray failed: {brief reason} · fix: {recovery}
 
-Infer recovery: no active session → `/start`; session is PARKED → `/continue` first; not in git repo → initialize git; uncertain → `/consult`.
+Infer recovery: no active session → `/sos start`; session is PARKED → `/sos resume` first; not in git repo → initialize git; uncertain → `/consult`.

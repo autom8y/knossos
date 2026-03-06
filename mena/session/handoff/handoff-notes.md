@@ -86,7 +86,7 @@ QA validation identified {count} issues. Focus on:
 
 ```markdown
 QA validation complete, all tests passing. Focus on:
-- Final review before /wrap
+- Final review before /sos wrap
 - Documentation completeness check
 - Deployment readiness confirmation
 ```

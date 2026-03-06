@@ -65,14 +65,14 @@ Session: {session_id}
 next: {hint}
 ```
 
-Resolve the `next:` hint: read `.knossos/ACTIVE_WORKFLOW.yaml`, find the phase matching `current_phase`, check its `next` field. If `next` names a phase → `/handoff {that_phase_agent}`. If `next: null` (terminal) → `/wrap` or `/commit && /pr`. If the user provided `$ARGUMENTS`, use their intent as the hint instead.
+Resolve the `next:` hint: read `.knossos/ACTIVE_WORKFLOW.yaml`, find the phase matching `current_phase`, check its `next` field. If `next` names a phase → `/handoff {that_phase_agent}`. If `next: null` (terminal) → `/sos wrap` or `/commit && /pr`. If the user provided `$ARGUMENTS`, use their intent as the hint instead.
 
 **RESUME_PARKED** (single parked session):
 ```
 Parked:  {session_id} ({relative_time} ago)
 Rite:    {active_rite}
 
-next: /continue
+next: /sos resume
 ```
 
 **RESUME_PARKED** (multiple parked sessions):
@@ -81,7 +81,7 @@ Parked sessions:
 1. {id_1} — {initiative_1} ({time})
 2. {id_2} — {initiative_2} ({time})
 
-next: /continue
+next: /sos resume
 ```
 
 **NEW_WORK** ($ARGUMENTS provided, no active/parked sessions):
@@ -136,7 +136,7 @@ If the user provided `$ARGUMENTS`, acknowledge the active session AND relay thei
 Parked session found: {session_id}
 Initiative: {initiative} (parked {relative_time})
 
-Resume with: /continue
+Resume with: /sos resume
 ```
 
 *Multiple parked sessions*:
@@ -146,8 +146,8 @@ Found {n} parked sessions:
 1. {session_id_1} — {initiative_1} (parked {relative_time})
 2. {session_id_2} — {initiative_2} (parked {relative_time})
 
-Resume one with: /continue
-Start fresh with: /start "<initiative>"
+Resume one with: /sos resume
+Start fresh with: /sos start "<initiative>"
 ```
 
 **NEW_WORK** ($ARGUMENTS provided, no active/parked sessions):
@@ -159,7 +159,7 @@ Your intent: {$ARGUMENTS}
 
 Get started:
   /consult "{$ARGUMENTS}"  — Get rite recommendation and workflow routing
-  /start "{$ARGUMENTS}"    — Start directly with current rite ({active_rite})
+  /sos start "{$ARGUMENTS}"    — Start directly with current rite ({active_rite})
 ```
 
 **ORIENTATION** (nothing active, no arguments):
@@ -169,9 +169,9 @@ Rite: {active_rite or "none"}
 Sessions: {count active} active, {count parked} parked
 
 Options:
-  /go <task>     — Show dashboard with intent
-  /consult       — Get guidance on what to do
-  /start <task>  — Start a new session
+  /go <task>         — Show dashboard with intent
+  /consult           — Get guidance on what to do
+  /sos start <task>  — Start a new session
   /sessions      — Browse all sessions
   /rite --list   — See available rites
 ```
@@ -185,7 +185,7 @@ Review with: ls .sos/wip/
 
 ## Behavioral Rules
 
-1. **Present, don't dispatch.** `/go` shows status and suggests commands. It does NOT invoke `/start`, `/continue`, `/consult`, or any other command. The user decides what to do next.
+1. **Present, don't dispatch.** `/go` shows status and suggests commands. It does NOT invoke `/sos start`, `/sos resume`, `/consult`, or any other command. The user decides what to do next.
 
 2. **Read everything, ask almost nothing.** Collect all state in parallel, then present. Never ask "do you have an active session?" — check it yourself.
 

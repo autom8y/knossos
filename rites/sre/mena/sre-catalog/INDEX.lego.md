@@ -50,7 +50,7 @@ When sre is active, commands route to these agents:
 
 | Command | Routes To | Purpose |
 |---------|-----------|---------|
-| `/start` | observability-engineer | Begin with observability assessment |
+| `/sos start` | observability-engineer | Begin with observability assessment |
 | `/architect` | platform-engineer | Design infrastructure changes |
 | `/build` | platform-engineer | Implement infrastructure changes |
 | `/qa` | chaos-engineer | Validate resilience via chaos testing |

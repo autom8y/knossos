@@ -19,7 +19,7 @@ description: |
 
   <example>
   Context: Resuming a parked investigation.
-  user: "User ran /continue. index.yaml shows status: examination:evidence_gap_round_2."
+  user: "User ran /sos resume. index.yaml shows status: examination:evidence_gap_round_2."
   assistant: "Investigation is mid-back-route: pathologist is in second evidence collection round. Dispatch to pathologist with the targeted evidence request from the diagnostician's last output. Pass the back-route round context so pathologist knows this is follow-up, not fresh collection."
   </example>
 
@@ -121,7 +121,7 @@ Back-routes are expected workflow patterns, not failure modes.
 
 ## Session Resume Protocol
 
-On /continue, read `.sos/wip/ERRORS/{slug}/index.yaml` to determine current phase.
+On /sos resume, read `.sos/wip/ERRORS/{slug}/index.yaml` to determine current phase.
 
 | Status Field | Dispatch To |
 |--------------|-------------|

@@ -15,14 +15,14 @@ This directory contains reference documentation for session state management. Th
 
 | Reference | Purpose | Used By |
 |-----------|---------|---------|
-| [session-context-schema](session-context-schema.md) | SESSION_CONTEXT.md field definitions | All 5 commands |
-| [session-phases](session-phases.md) | Workflow phase transitions and rules | start, handoff, wrap |
-| [session-validation](session-validation.md) | Pre-flight validation patterns | All 5 commands |
-| [session-state-machine](session-state-machine.md) | Lifecycle state transitions | park, resume, wrap |
-| [complexity-levels](complexity-levels.md) | Complexity classification guide | start |
+| [session-context-schema](session-context-schema.md) | SESSION_CONTEXT.md field definitions | All /sos subcommands |
+| [session-phases](session-phases.md) | Workflow phase transitions and rules | /sos start, /handoff, /sos wrap |
+| [session-validation](session-validation.md) | Pre-flight validation patterns | All /sos subcommands |
+| [session-state-machine](session-state-machine.md) | Lifecycle state transitions | /sos park, /sos resume, /sos wrap |
+| [complexity-levels](complexity-levels.md) | Complexity classification guide | /sos start |
 | [anti-patterns](anti-patterns.md) | Common session lifecycle mistakes | All commands |
 | [error-messages](error-messages.md) | Standard error message templates | All commands |
-| [agent-delegation](agent-delegation.md) | Task tool invocation patterns | start, handoff, wrap |
+| [agent-delegation](agent-delegation.md) | Task tool invocation patterns | /sos start, /handoff, /sos wrap |
 
 **Status**: ✓ All referenced files created and validated
 
