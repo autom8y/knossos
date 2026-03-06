@@ -522,8 +522,9 @@ func (p *Pipeline) GetDiff(regionName string) (string, error) {
 // If manifest is nil, rite name is loaded from ACTIVE_RITE file.
 func (p *Pipeline) buildRenderContext(manifest *Manifest) (*RenderContext, error) {
 	ctx := &RenderContext{
-		ProjectRoot: p.ProjectRoot,
-		KnossosVars: make(map[string]string),
+		ProjectRoot:      p.ProjectRoot,
+		IsKnossosProject: p.TemplateDir != "" && strings.HasPrefix(p.TemplateDir, p.ProjectRoot),
+		KnossosVars:      make(map[string]string),
 	}
 
 	if manifest != nil {

@@ -763,3 +763,58 @@ Produces: artifacts`
 		t.Error("legacy.Role should not be '---'")
 	}
 }
+
+func TestBuildRenderContext_IsKnossosProject(t *testing.T) {
+	tests := []struct {
+		name        string
+		templateDir string // relative to project root; "" means external
+		wantKnossos bool
+	}{
+		{
+			name:        "knossos project (templates inside project root)",
+			templateDir: "knossos/templates",
+			wantKnossos: true,
+		},
+		{
+			name:        "satellite project (templates outside project root)",
+			templateDir: "", // will be set to an external path
+			wantKnossos: false,
+		},
+		{
+			name:        "empty template dir",
+			templateDir: "",
+			wantKnossos: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tmpDir := t.TempDir()
+
+			// Create minimal structure needed for buildRenderContext
+			claudeDir := filepath.Join(tmpDir, ".claude")
+			os.MkdirAll(claudeDir, 0755)
+
+			pipeline := NewPipeline(tmpDir)
+
+			if tt.name == "satellite project (templates outside project root)" {
+				// Set template dir to an external location
+				extDir := t.TempDir()
+				pipeline.TemplateDir = filepath.Join(extDir, "templates")
+			} else if tt.templateDir != "" {
+				pipeline.TemplateDir = filepath.Join(tmpDir, tt.templateDir)
+			} else {
+				pipeline.TemplateDir = ""
+			}
+
+			ctx, err := pipeline.buildRenderContext(nil)
+			if err != nil {
+				t.Fatalf("buildRenderContext() error = %v", err)
+			}
+
+			if ctx.IsKnossosProject != tt.wantKnossos {
+				t.Errorf("IsKnossosProject = %v, want %v", ctx.IsKnossosProject, tt.wantKnossos)
+			}
+		})
+	}
+}
