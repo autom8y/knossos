@@ -1,437 +1,271 @@
 ---
 domain: conventions
-generated_at: "2026-03-03T19:45:00Z"
+generated_at: "2026-03-06T12:00:00Z"
 expires_after: "7d"
 source_scope:
   - "./cmd/**/*.go"
   - "./internal/**/*.go"
   - "./go.mod"
 generator: theoros
-source_hash: "1599813"
-confidence: 0.88
+source_hash: "3847e28"
+confidence: 0.90
 format_version: "1.0"
 update_mode: "full"
 incremental_cycle: 0
 max_incremental_cycles: 3
+land_sources:
+  - ".sos/land/workflow-patterns.md"
+land_hash: "f6d34ca03d89c8f6e949f8b89f44463c9ce80aa2cb884aa1d31c8abbd3f054ba"
 ---
 
 # Codebase Conventions
 
 ## Error Handling Style
 
-The project uses a **custom structured error type** in `internal/errors/errors.go` as the primary error infrastructure. Standard library `fmt.Errorf("%w", ...)` is used only in packages that do not import the internal errors package (mainly `internal/know/know.go` and similar peripheral packages). The custom error system is dominant across 70+ files.
-
 ### Error Creation
 
-Three constructors at `internal/errors/errors.go`:
+The project uses a **custom domain error type** defined in `internal/errors/errors.go`, not raw `errors.New` or bare `fmt.Errorf`. The `errors.Error` struct carries:
+
+- `Code string` — a SCREAMING_SNAKE_CASE string constant (e.g., `"SESSION_NOT_FOUND"`, `"LIFECYCLE_VIOLATION"`)
+- `Message string` — human-readable text
+- `Details map[string]any` — structured context (JSON-serializable)
+- `ExitCode int` — process exit code (automatically derived from Code via `exitCodeForCode`)
+- `cause error` (unexported) — supports Go error chain traversal via `Unwrap`
+
+Three constructors exist:
 
 ```go
-errors.New(code string, message string) *Error
-errors.NewWithDetails(code string, message string, details map[string]interface{}) *Error
-errors.Wrap(code string, message string, cause error) *Error
+errors.New(code, message)                      // plain error
+errors.NewWithDetails(code, message, details)   // with structured context
+errors.Wrap(code, message, cause)               // wraps an underlying error
 ```
 
-`Wrap` stores the underlying error as `details["cause"] = cause.Error()` (string, not error chain). This means stdlib `errors.Is/As` does NOT work through a wrapped `*errors.Error`. The cause is for human-readable logging, not programmatic unwrapping.
-
-### Error Structure
-
-`internal/errors/errors.go`, line 66-71:
+Domain-specific convenience constructors are the normal usage, not the raw constructors:
 
 ```go
-type Error struct {
-    Code     string                 `json:"code"`
-    Message  string                 `json:"message"`
-    Details  map[string]interface{} `json:"details,omitempty"`
-    ExitCode int                    `json:"-"`
-}
+errors.ErrSessionNotFound(sessionID)
+errors.ErrLifecycleViolation(from, to, reason)
+errors.ErrLockTimeout(lockPath, lockMeta)
+errors.ErrRiteNotFound(riteName)
+// ... ~20 total domain constructors
 ```
 
-The `Code` is a SCREAMING_SNAKE_CASE string constant (e.g., `"GENERAL_ERROR"`, `"FILE_NOT_FOUND"`). `ExitCode` is derived automatically from `Code` via `exitCodeForCode()`. Codes and exit codes are co-located in `internal/errors/errors.go`.
+`fmt.Errorf` with `%w` is used (70 occurrences across 23 files) for lightweight wrapping within internal package logic, especially when adding context while threading errors back to a boundary. The custom `errors.Wrap` is preferred at any boundary that needs a structured code.
 
-### Domain-Grouped Error Constructors
+### Error Checking and Predicate Functions
 
-Errors are grouped by domain with comment-delimited sections. Each domain has:
-- String constants for error codes (e.g., `CodeRiteNotFound = "RITE_NOT_FOUND"`)
-- Integer constants for exit codes (e.g., `ExitRiteNotFound = 19`)
-- Constructor functions named `Err{Noun}{Condition}` (e.g., `ErrRiteNotFound`, `ErrSessionExists`, `ErrLifecycleViolation`)
-- `Is{Condition}` predicate functions (e.g., `IsRiteNotFound(err error) bool`)
-
-### Domains defined in errors.go
-- Session domain (line 1-63): CodeGeneralError, CodeUsageError, etc.
-- Rite domain (line 267-303): CodeOrphanConflict, CodeValidationFailed, etc.
-- Manifest domain (line 305-353)
-- Sync domain (line 363-452)
-- Rite errors (line 454-549): CodeRiteNotFound, CodeBorrowConflict, CodeBudgetExceeded, etc.
-
-### Error Propagation Pattern
-
-The dominant propagation pattern in cmd layer (e.g., `internal/cmd/session/create.go`):
+The `errors` package provides typed predicate functions for all domain error categories:
 
 ```go
-if err != nil {
-    err := errors.Wrap(errors.CodeGeneralError, "human readable message", err)
-    printer.PrintError(err)
-    return err
-}
+errors.IsNotFound(err)        // CodeFileNotFound, CodeSessionNotFound, CodeProjectNotFound
+errors.IsLifecycleError(err)  // CodeLifecycleViolation
+errors.IsMergeConflict(err)   // CodeMergeConflict
+errors.IsRiteNotFound(err)    // CodeRiteNotFound
+errors.IsBudgetExceeded(err)  // CodeBudgetExceeded
+// ... ~15 total predicate functions
 ```
 
-Note: **the same variable `err` is re-declared** with `:=` to replace the stdlib error with a `*errors.Error`. This is intentional—both the printer output AND the return value are the structured error.
+These use `errors.As` internally and work through `fmt.Errorf("%w", ...)` chains.
 
-### Boundary Handling (CLI output)
+When stdlib `errors.As/Is` is needed in non-`errors` package code, the import alias is always `stderrors "errors"` (8 files use this pattern) to avoid shadowing the internal `errors` package.
 
-At CLI boundaries, the `output.Printer.PrintError(err error)` method is always called BEFORE returning. If the error implements `JSON() string` (as `*errors.Error` does), JSON format outputs via that method. Text format outputs `"Error: {message}\n"`.
+### Error Propagation
 
-The main entry point (`cmd/ari/main.go`) calls `errors.GetExitCode(err)` to extract the numeric exit code for `os.Exit`.
+The dominant pattern is **immediate return** — 1,023 occurrences of `return err` or `return nil, err` across 188 files. No error aggregation patterns (multi-error) are used — each function returns after the first failure.
 
-Hook commands always force JSON output (see `internal/cmd/hook/hook.go`, line 112: `return output.NewPrinter(output.FormatJSON, ...)`).
+### Error Handling at CLI Boundaries
 
-### Non-critical Error Logging
-
-For non-fatal errors in pipeline stages (e.g., `internal/materialize/materialize.go`):
+The `output.Printer` handles all user-facing error display:
 
 ```go
-log.Printf("Warning: failed to detect provenance divergence: %v", err)
+printer.PrintError(err)  // to stderr, format-aware
 ```
 
-Standard `log.Printf` is used for warnings that should not abort the operation.
+- **Text mode**: `"Error: <message>\n"` to stderr
+- **JSON mode**: Calls `err.(interface{JSON() string}).JSON()` if available (the `errors.Error` type implements this), producing `{"error": {"code": "...", "message": "...", "details": {...}}}`
 
-### Mixed stdlib fmt.Errorf Usage
-
-Packages in `internal/know/`, `internal/materialize/` (non-cmd parts), and `internal/inscription/` occasionally use `fmt.Errorf("%w", err)` for wrapping where they do not need structured exit codes. Example from `internal/know/know.go`:
+The main entry point (`cmd/ari/main.go`) extracts the exit code:
 
 ```go
-return nil, fmt.Errorf("read .know/ directory: %w", err)
+os.Exit(errors.GetExitCode(err))  // walks chain via errors.As
 ```
 
-This coexists with the custom error system but is more common in infrastructure-layer packages that are not at CLI boundaries.
+Exit codes are defined as numeric constants in the 0-21 range (defined in `errors.go`).
+
+### Logging
+
+`log/slog` is used for structured diagnostic logging within materialization logic (16 files, 45 calls concentrated in `internal/materialize/`). It is NOT used for user-visible output — that goes through `output.Printer`. The rest of the codebase uses `printer.VerboseLog(level, msg, fields)`. Do not add `slog` to other packages.
 
 ## File Organization
 
-### Top-Level Structure
+### cmd/ vs internal/ Separation
+
+- `cmd/ari/main.go` — minimal entry point: sets version, calls `root.Execute()`, converts exit code. Zero domain logic.
+- `internal/cmd/` — Cobra command implementations, one sub-package per command group
+- `internal/` (non-cmd) — domain logic packages, no Cobra dependency
+
+**Rule**: Business logic never lives in `internal/cmd/`. Commands call into `internal/` domain packages.
+
+### internal/cmd/ Package Pattern
+
+Each command group has:
+- `{group}.go` — `New{Group}Cmd` (exported) that builds the parent Cobra command and adds subcommands
+- One file per subcommand — `{verb}.go`, containing an unexported `new{Verb}Cmd` constructor
+- Command file naming follows the verb: `create.go`, `park.go`, `resume.go`, `wrap.go`, `status.go`
+
+The `{group}.go` file defines the shared `cmdContext` struct that embeds `common.BaseContext` or `common.SessionContext`, plus a package-level `getPrinter()` helper.
+
+### internal/cmd/common/ Pattern
+
+Shared context inheritance via struct embedding:
 
 ```
-cmd/ari/main.go          — entry point, minimal logic only
-embed.go                 — module-root embed.FS declarations (package knossos)
-internal/                — all implementation packages
+common.BaseContext          — Output, Verbose, ProjectDir pointers
+  └── common.SessionContext — + SessionID pointer
+        └── cmdContext      — package-local, may add more fields
 ```
 
-`cmd/ari/main.go` is explicitly minimal: "It contains minimal logic - all command implementations are in `internal/cmd/`."
+Methods on `BaseContext` (`GetPrinter`, `GetResolver`, `GetActiveRite`) and `SessionContext` (`GetSessionID`, `GetLockManager`) are inherited by all command packages via embedding.
 
-### The cmd/internal Split
+### Domain Package File Organization
 
-- `cmd/ari/main.go` — only wires version, embedded assets, and calls `root.Execute()`
-- `internal/cmd/root/root.go` — root cobra command, global flags, subcommand registration
-- `internal/cmd/{domain}/` — one directory per command group (session, hook, rite, sync, etc.)
+Each domain package uses a consistent layout:
 
-Each command group directory has:
-- `{domain}.go` — top-level `New{Domain}Cmd()` constructor, shared `cmdContext`, helper functions
-- One `.go` file per subcommand (e.g., `create.go`, `park.go`, `resume.go`)
-- `_test.go` files co-located
-
-### internal Package Conventions
-
-Packages in `internal/` are organized by **domain concern**, not by layer. Each package has a clear single responsibility stated in the package-level doc comment.
-
-Common patterns:
-
-| Filename convention | Contents |
+| File name | Contents |
 |---|---|
-| `{package}.go` or the primary domain file | Main types and constructors |
-| `types.go` | Types-only files when type count is large (e.g., `internal/naxos/types.go`, `internal/sails/color.go`) |
-| `errors.go` | Domain-local error constants when package has its own — though most errors live centrally in `internal/errors/` |
-| `context.go` | Context/state types (session, materialize) |
-| `status.go` | Status/enum types and normalization |
-| `id.go` | ID generation and validation |
-| `fsm.go` | Finite state machine logic |
+| `types.go` | Type definitions, constants, interfaces for the domain |
+| `{noun}.go` | Primary package file, often houses the main type and its constructor |
+| `{verb}.go` or `{noun}_{verb}.go` | Operations on the primary type |
 
-Large packages are split by concern into named files. The `internal/materialize/` package demonstrates this:
-- `materialize.go` — main orchestration
-- `source.go` — source resolution re-export (aliases to sub-package)
-- `sync_types.go` — sync pipeline types
-- `mena.go`, `hooks.go` — re-export from sub-packages
-- `collision.go`, `org_scope.go`, `user_scope.go` — scope-specific logic
+The `materialize` package uses `materialize_{noun}.go` naming for each concern:
+- `materialize.go` — core `Materializer` type, `Options`, `Result`
+- `materialize_agents.go` — agent file generation
+- `materialize_mena.go` — mena (skills/commands) file generation
+- `materialize_claudemd.go` — CLAUDE.md section generation
+- `materialize_settings.go` — settings.json generation
+- `materialize_rules.go` — rules processing
 
-### Sub-packages
+Sub-domains with meaningful complexity get their own sub-package: `materialize/mena/`, `materialize/hooks/`, `materialize/userscope/`, `materialize/orgscope/`, `materialize/source/`.
 
-When a package grows large or needs to be independently testable, it is factored into sub-packages under the main package directory. Examples:
+### Constants and Variables
 
-- `internal/materialize/source/` — rite source resolution
-- `internal/materialize/mena/` — mena projection types
-- `internal/materialize/userscope/` — user scope sync
-- `internal/materialize/orgscope/` — org scope sync
-- `internal/hook/clewcontract/` — Clew Contract event types
+Constants live in the same file as the type they describe, not in a separate `constants.go`. Enum-like constants always use a typed string (`type Status string`) with a `const (...)` block.
 
-The parent package re-exports types from sub-packages via type aliases and `var` re-exports for backward compatibility (`source.go`, `mena.go`, `hooks.go` files use `type X = subpkg.X` pattern).
+### `init()` Functions
 
-### internal/ Boundary Philosophy
+`init()` functions appear only in `cmd/root/root.go` to register Cobra flags and subcommands. No `init()` functions in domain packages.
 
-- `internal/cmd/` — CLI concerns only, imports all other internal packages
-- `internal/errors/` — NO internal imports (base package imported by all others)
-- `internal/fileutil/` — minimal stdlib-only utilities
-- `internal/registry/` — explicitly declared LEAF: "This is a LEAF package — it imports only stdlib. No internal/ imports."
-- `internal/mena/source.go` — also declared LEAF
+### Internal Package Boundary
 
-The LEAF package comment convention is: `// This is a LEAF package — it imports only stdlib...`
-
-### Generated Code
-
-`embed.go` at the module root uses `//go:embed` directives. This file is part of package `knossos` (not `main`), enabling embedded assets to be imported by `cmd/ari/main.go`. The package name matches the Go module name `github.com/autom8y/knossos`.
+`internal/` is used at the project level (the entire `internal/` tree). No `internal/` sub-packages within packages. The LEAF package comment convention is: `// This is a LEAF package — it imports only stdlib...`
 
 ## Domain-Specific Idioms
 
-### Typed String Enums (Universal Pattern)
+### The `Resolver` Pattern
 
-Every domain has typed string constants. The pattern is `type X string` + constant block + `IsValid()` + `String()` methods:
+`internal/paths.Resolver` is a value type that holds `projectRoot string` and provides all path computations as methods. It is created early in command execution via `common.BaseContext.GetResolver()` and threaded explicitly to functions.
+
+### Typed String Enums with IsValid/IsTerminal Methods
+
+All domain states are typed strings with const blocks and behavior methods:
 
 ```go
 type Status string
-const (
-    StatusNone     Status = "NONE"
-    StatusActive   Status = "ACTIVE"
-    StatusParked   Status = "PARKED"
-    StatusArchived Status = "ARCHIVED"
-)
-func (s Status) String() string { return string(s) }
+const (StatusNone Status = "NONE"; StatusActive Status = "ACTIVE"; ...)
+
 func (s Status) IsValid() bool { switch s { ... } }
+func (s Status) IsTerminal() bool { return s == StatusArchived }
+func (s Status) String() string { return string(s) }
 ```
 
-This pattern appears across: `Status` (session), `Color` (sails), `Phase` (session/fsm), `OwnerType` (inscription/provenance), `Format` (output), `SyncScope` (materialize), `HookEvent` (hook), `EventType` (clewcontract), `RiteForm` (rite), and many others.
+This pattern appears across: `session.Status`, `sails.Color`, `sails.ModifierType`, `sails.ProofStatus`, `inscription.OwnerType`, `inscription.MarkerDirective`, `session.Phase`.
 
-The ALL_CAPS string values are idiomatic across session, sails, and rite domains. Lowercase is used for output-facing strings (e.g., `"text"`, `"json"`, `"rite"`, `"user"`).
+### The `Options` + `Result` Pair
 
-### Finite State Machine (FSM) Pattern
+Functions with multiple tunable behaviors use an `Options` struct as input and a `Result` struct for output. These are NOT functional options — they are plain structs.
 
-The session domain uses an explicit FSM with a transition map. The FSM validates transitions rather than allowing arbitrary state changes:
+### The `output.Tabular` / `output.Textable` Interfaces
 
-```go
-type FSM struct {
-    transitions map[Status][]Status
-}
-func NewFSM() *FSM { ... }
-func (f *FSM) CanTransition(from, to Status) bool { ... }
-func (f *FSM) ValidateTransition(from, to Status) error { ... }
-```
+All CLI output types implement either:
+- `Tabular`: `Headers() []string` + `Rows() [][]string` — for table output
+- `Textable`: `Text() string` — for custom text formatting
 
-Location: `internal/session/fsm.go`.
+### KNOSSOS Marker System (Inscription Domain)
 
-### Options Struct + Result Struct Pattern
+CLAUDE.md files use a structured marker syntax: `<!-- KNOSSOS:START {region-name} [options] -->`. Ownership types (`OwnerKnossos`, `OwnerSatellite`, `OwnerRegenerate`) determine sync behavior.
 
-Operations that have many configuration parameters use `Options` structs. Operations that return complex outcomes use `Result` structs. These are never merged into one type.
+### FSM Pattern for Lifecycle State
 
-```go
-type Options struct {
-    Force             bool
-    DryRun            bool
-    RemoveAll         bool
-    ...
-}
-type Result struct {
-    Status          string
-    OrphansDetected []string
-    ...
-}
-func (m *Materializer) MaterializeWithOptions(riteName string, opts Options) (*Result, error)
-```
+The session lifecycle is implemented as an explicit finite state machine in `internal/session/fsm.go` with `CanTransition`, `ValidateTransition`, and `ValidTransitions` methods.
 
-`internal/materialize/materialize.go` lines 22-46.
+### Event/Hook Contract (`clewcontract` Sub-Package)
 
-### With* Fluent Builder Methods
+The `internal/hook/clewcontract/` sub-package defines typed event records for the session event log with typed constructors and a `BufferedEventWriter`.
 
-The `Materializer` struct uses `With*` methods that return the receiver for chaining embedded filesystem injection:
+### Polymorphic YAML via `json.RawMessage`
 
-```go
-func (m *Materializer) WithEmbeddedFS(fsys fs.FS) *Materializer { ... }
-func (m *Materializer) WithEmbeddedTemplates(fsys fs.FS) *Materializer { ... }
-func (m *Materializer) WithEmbeddedAgents(fsys fs.FS) *Materializer { ... }
-func (m *Materializer) WithEmbeddedMena(fsys fs.FS) *Materializer { ... }
-```
+Hook stdin payloads use `json.RawMessage` for `ToolInput` and `ToolResponse` fields in `hook.StdinPayload`.
 
-This pattern is used only for the Materializer (not universal).
+### `slog` Scope
 
-### Type Alias Re-export Pattern
-
-When a sub-package is created from a larger package, the parent re-exports types for backward compatibility:
-
-```go
-// internal/materialize/source.go
-type (
-    SourceType     = source.SourceType
-    RiteSource     = source.RiteSource
-    ResolvedRite   = source.ResolvedRite
-    SourceResolver = source.SourceResolver
-)
-const (
-    SourceProject  = source.SourceProject
-    ...
-)
-var NewSourceResolver = source.NewSourceResolver
-```
-
-This pattern keeps imports stable when internal refactoring occurs.
-
-### Materializer Pipeline Steps
-
-The `MaterializeWithOptions` function uses numbered comment steps (1-10) to document the pipeline stages inline. This is a code documentation idiom unique to the materialize package:
-
-```go
-// 1. Resolve rite source using 4-tier resolution
-// 2. Ensure .claude/ directory exists
-// 3. Handle orphans before materializing agents
-// 4. Generate agents/ directory from rite
-...
-```
-
-### Atomic File Writes
-
-All file writes use `fileutil.AtomicWriteFile` (temp + rename) or `fileutil.WriteIfChanged` (idempotent). Direct `os.WriteFile` is never used for production state files. Location: `internal/fileutil/fileutil.go`.
-
-### Receiver Naming
-
-Single-letter receivers matching the first letter of the type are used consistently:
-- `(p *Printer)` for Printer
-- `(m *Manager)` for Manager types (lock, materialize, worktree)
-- `(r *Resolver)` for Resolver
-- `(c *Context)` for Context
-- `(f *FSM)` for FSM
-
-### Knossos Mythology Naming
-
-Package and type names are drawn from Greek mythology, specific to the Knossos platform:
-- **rite** — a practice bundle (workflow configuration)
-- **mena** — combined dromena + legomena (slash commands + skills)
-- **dromena** — executable slash commands (`.dro.md`)
-- **legomena** — reference skills (`.lego.md`)
-- **sails** — confidence signal (WHITE/GRAY/BLACK)
-- **clew** — event logging contract (from Ariadne's thread)
-- **naxos** — orphan cleanup (from Theseus abandoning Ariadne at Naxos)
-- **inscription** — CLAUDE.md region management system
-- **theoros** — audit/observation agent
-- **satellite** — user-owned project (as opposed to knossos-platform-owned)
-
-### Status/Color ALLCAPS Convention
-
-Session statuses (`ACTIVE`, `PARKED`, `ARCHIVED`), sails colors (`WHITE`, `GRAY`, `BLACK`), and complexity tiers (`PATCH`, `MODULE`, `SYSTEM`, `INITIATIVE`, `MIGRATION`) are ALL_CAPS strings. These are domain-specific semantic states, not Go identifiers.
-
-### Provenance Tracking
-
-The materialization pipeline uses a `Collector` interface for accumulating file provenance during pipeline execution, then saves it at pipeline completion. This is an observer pattern specific to the sync pipeline:
-
-```go
-// internal/provenance/collector.go
-type Collector interface {
-    Record(relativePath string, entry *ProvenanceEntry)
-    Entries() map[string]*ProvenanceEntry
-}
-```
-
-`NullCollector` is provided for dry-run and minimal modes. Location: `internal/provenance/collector.go`.
-
-### Testable Function Variables
-
-The `know` package uses a package-level `var` to allow dependency injection in tests:
-
-```go
-// internal/know/know.go
-var gitDiffNameOnly = defaultGitDiffNameOnly
-func defaultGitDiffNameOnly(fromHash, toHash string) ([]string, error) { ... }
-```
-
-Tests replace `gitDiffNameOnly` with a stub. This is a targeted pattern, not universal.
+`log/slog` is used ONLY in the `materialize` package tree and `cmd/initialize/init.go`. Do not add `slog` to other packages; use `printer.VerboseLog` instead.
 
 ## Naming Patterns
 
-### Constructors
+### Package Names
 
-All constructors follow `New{TypeName}(...)` convention:
-- `NewFSM() *FSM`
-- `NewContext(initiative, complexity, rite string) *Context`
-- `NewManager(locksDir string) *Manager`
-- `NewPrinter(format Format, out, errOut io.Writer, verbose bool) *Printer`
-- `NewResolver(projectRoot string) *Resolver`
-- `NewMaterializer(resolver *paths.Resolver) *Materializer`
-
-When a constructor takes an explicit source variant, it is `New{TypeName}With{Qualifier}`:
-- `NewMaterializerWithSource`
-- `NewGeneratorWithValidator`
-- `NewGeneratorWithFS`
-- `NewPipelineWithPaths`
-- `NewBackupManagerWithTarget`
-
-### Default* Functions
-
-Functions returning default configuration or state objects:
-- `DefaultConfig() ScanConfig` (naxos)
-- `DefaultTimeout = 10 * time.Second` (lock, as const)
-
-### Err* Constructors
-
-Error constructor functions are prefixed with `Err` + domain noun + condition:
-- `ErrProjectNotFound() *Error`
-- `ErrSessionNotFound(sessionID string) *Error`
-- `ErrSessionExists(existingID string, status string) *Error`
-- `ErrLifecycleViolation(from, to string, reason string) *Error`
-- `ErrRiteNotFound(riteName string) *Error`
-
-All live in `internal/errors/errors.go`.
-
-### Is* Predicates
-
-Error predicate functions are prefixed with `Is`:
-- `IsNotFound(err error) bool`
-- `IsLifecycleError(err error) bool`
-- `IsRiteNotFound(err error) bool`
-- `IsMergeConflict(err error) bool`
-
-### Package Naming
-
-All packages use singular nouns or short nouns (Go convention). No plural package names observed. Packages use lowercase, no underscores:
-- `session`, `hook`, `lock`, `paths`, `output`, `errors`, `registry`
-- `materialize` (verb as noun), `inscription`, `provenance`, `fileutil`
-
-`fileutil` is the only exception using compound without separator. The `cmd` sub-directories also use short nouns: `session`, `hook`, `rite`, `sync`.
-
-### File Naming
-
-Files within a package are named by concern, not type:
-- Core logic: `{packagename}.go` or descriptive noun (e.g., `context.go`, `status.go`, `fsm.go`)
-- CLI wrapper: `{subcommand}.go` (e.g., `create.go`, `park.go`, `resume.go`)
-- Tests: `{file}_test.go` always co-located with the file under test
-- Integration tests: `{concept}_integration_test.go` or `integration_test.go`
+Packages use single-word, lowercase names matching their directory: `session`, `inscription`, `materialize`, `provenance`, `perspective`. The collision between the project's custom `errors` package and stdlib `errors` is resolved by importing stdlib with the alias `stderrors`.
 
 ### Type Naming
 
-- Typed string enums: `{Noun}` (e.g., `Status`, `Phase`, `Color`, `Format`)
-- Configuration/input structs: `{Noun}Options` or `{Verb}Options` (e.g., `MaterializeOptions`, `SyncOptions`, `CreateOptions`)
-- Output/result structs: `{Noun}Result` or `{Noun}Output` (e.g., `SyncResult`, `CreateOutput`, `RiteScopeResult`)
-- Interface types: plain nouns (e.g., `Collector`, `Tabular`, `Textable`)
-- Constant groups: named by domain prefix (e.g., `StatusActive`, `ColorWhite`, `ScopeAll`, `ResourceAgents`)
+Exported types follow these suffixes:
+- `*Manager` — stateful coordinator: `StateManager`, `BackupManager`, `MetadataManager`
+- `*Resolver` — path or source resolution: `Resolver`, `SourceResolver`
+- `*Validator` — schema/contract validation: `AgentValidator`, `HandoffValidator`
+- `*Writer` — output writing: `EventWriter`, `BufferedEventWriter`
+- `*Options` — configuration input struct
+- `*Result` — operation outcome struct
+- `*Output` — CLI display struct (lives in `output` package)
 
-### Acronym Conventions
+### Function Naming
 
-- `ID` (not `Id`) — e.g., `SessionID`, `session_id`
-- `URL` (not `Url`) — not observed in exported names but aligns with Go stdlib
-- `CC` (not `Cc`) for Claude Code abbreviation — e.g., `CCMapDir()`, `CCMapOrphans`
-- `YAML` (not `Yaml`) as `yaml` in package names (from dep `gopkg.in/yaml.v3`)
-- `JSON` (not `Json`) — e.g., `FormatJSON`, `printJSON`
+- Constructors: `New{TypeName}` (exported) for types used across packages; `new{TypeName}` (unexported) for cobra subcommand constructors within `cmd` packages
+- Predicate helpers: `Is{Condition}` for error predicates; `Is{State}()` method for type predicates
+- Normalize helpers: `Normalize{Field}` — e.g., `NormalizeStatus`
 
-### Constants Naming
+### Cobra Command Constructor Convention
 
-String constants for error codes: `Code{Domain}{Condition}` (e.g., `CodeRiteNotFound`, `CodeSessionExists`)
-Integer constants for exit codes: `Exit{Condition}` (e.g., `ExitFileNotFound`, `ExitBudgetExceeded`)
+`New{Group}Cmd(...)` is exported (called from `root.go`). `new{Verb}Cmd(ctx)` is unexported (called from `New{Group}Cmd`). Only the parent group constructor is the public API.
 
-Typed string constants use ALL_CAPS values for domain states and SCREAMING_SNAKE_CASE for error codes. Lowercase string values are used for non-critical config strings (e.g., `"success"`, `"skipped"`, `"kept"`).
+### Constants: SCREAMING_SNAKE_CASE
 
-### Anti-Patterns to Avoid Spreading
+All constants using string values use SCREAMING_SNAKE_CASE for the constant name AND for the string value itself:
 
-1. `ValidationMode` uses `iota` (`internal/agent/validate.go`) — only one instance; prefer typed string constants.
-2. `RefCategory` uses `iota` (`internal/registry/registry.go`) — appropriate for int-keyed enum, but string-typed enums are more common.
-3. Inline `map[string]any` is used in VerboseLog calls and some error details — not a struct pattern, intentional for flexibility.
+```go
+const StatusActive Status = "ACTIVE"
+const CodeSessionNotFound = "SESSION_NOT_FOUND"
+const ColorBlack Color = "BLACK"
+```
+
+### Acronyms in Identifiers
+
+Acronyms follow Go conventions (capitalize entirely or lowercase entirely):
+- `MCP` → `MCPServer`, `mcpServerNames`
+- `FSM` → `FSM`, `NewFSM`
+- `JSON` → `JSON()` method, `printJSON`
+- `CC` → prefix for Claude Code context (e.g., `CCSessionID`, `CCMapOrphans`)
+- `ID` → always `ID` not `Id` (`SessionID`, `ToolUseID`)
+
+### File Naming
+
+- Primary type file: matches type name lowercased (`fsm.go`, `color.go`, `lock.go`)
+- Operations on a type: `{noun}_{verb}.go` in large packages (`materialize_agents.go`)
+- Sub-command files: `{verb}.go` in `cmd/` packages (`create.go`, `park.go`)
+- Test files: `{source_file}_test.go` always co-located
 
 ## Mena Materialization Path Conventions
 
 ### Materialized Filename Rules
-
-The mena materialization pipeline applies three path transformations. Source content MUST reference the **post-transformation** (materialized) paths, not the pre-transformation source paths.
 
 | Source Pattern | Materialized Output | Rule |
 |---|---|---|
@@ -444,12 +278,6 @@ The mena materialization pipeline applies three path transformations. Source con
 
 Source path `mena/{category}/{name}/` flattens to `.claude/{commands|skills}/{name}/` — the `{category}` level is stripped during materialization.
 
-| Source | Materialized |
-|---|---|
-| `mena/operations/commit/INDEX.dro.md` | `.claude/commands/commit.md` |
-| `mena/rite-switching/10x-ref/INDEX.lego.md` | `.claude/skills/10x-ref/SKILL.md` |
-| `mena/session/moirai/clotho.lego.md` | `.claude/skills/moirai/clotho.md` |
-
 ### Content Reference Rules
 
 When referencing materialized paths in source files:
@@ -457,18 +285,9 @@ When referencing materialized paths in source files:
 - **Dromena entry points**: Always use `{name}.md` at parent level, never `INDEX.md` in a subdirectory
 - **No namespace prefix**: Never include the `{category}/` level in `.claude/` paths
 
-The content rewrite pipeline (`RewriteMenaContentPaths`) handles `.lego.md`/`.dro.md` extension patterns automatically. It does NOT handle bare `INDEX.md` → `SKILL.md` renames or namespace flattening — these must be correct in source.
-
-### Agent Prompt Paths
-
-Agent files in `agents/` are copied directly to `.claude/agents/` without content rewriting. Any `.claude/skills/` or `.claude/commands/` path references in agent prompts must use fully materialized paths.
-
 ## Knowledge Gaps
 
-1. **`internal/mena/` package** — not deeply examined. The mena source resolution logic (SourceChain, MenaProjection) was seen in types but not traced in detail.
-2. **`internal/cmd/hook/writeguard.go`** and `SectionClass` iota usage — not read; mentioned in search results only.
-3. **`internal/tribute/`** (TRIBUTE.md generation) — types seen in `ls`, not read in detail.
-4. **`internal/agent/`** package internals — types.go referenced but not deeply explored.
-5. **Test fixture patterns** — test file naming is documented but specific fixture conventions (table-driven tests, testdata/ directories) not examined. Test conventions are scoped to the `test-coverage` domain.
-6. **`internal/sync/state.go`** — the sync state file format not examined.
-7. **`internal/config/home.go`** — config loading patterns not explored beyond viper usage in root.go.
+1. **`internal/perspective/` package** — reviewed type definitions but not the full assembly logic.
+2. **`internal/provenance/` divergence logic** — `divergence.go` and `merge.go` not inspected.
+3. **`internal/mena/` walk semantics** — the `walk.go` file and mena resolution rules for mixed dro/lego directories were not read directly.
+4. **Goroutine usage** — no concurrency patterns were checked beyond `sync.Once`.

@@ -1,0 +1,126 @@
+---
+domain: release/history
+generated_at: "2026-03-06T08:42:30Z"
+source_scope:
+  - "./.know/release/"
+generator: pipeline-monitor
+source_hash: "94dc82f"
+confidence: 0.90
+format_version: "1.0"
+update_mode: "full"
+incremental_cycle: 0
+max_incremental_cycles: 0
+---
+
+## Release Log
+
+### v0.3.0 — 2026-03-03
+
+| Field | Value |
+|-------|-------|
+| Date | 2026-03-03 |
+| Version | v0.2.0 -> v0.3.0 (minor) |
+| Commits | 79 (78 existing + 1 prep) |
+| Complexity | PATCH |
+| Tag SHA | 4ca5cc0ae387c4f6129a60bf976a1e35458d8e50 |
+| Commit SHA | 3e2457da89f35322948d2d55bc95dd0912f2d43c |
+| release.yml | GREEN (138s, run 22629614142) |
+| e2e-distribution.yml | DISPATCH_NOT_RECEIVED (skipped by user) |
+| Assets | 5/5 (4 platform binaries + checksums.txt) |
+| Homebrew tap | Updated (commit 038d885c) |
+| Verdict | PARTIAL |
+| Duration | ~5 min (execution) + ~5 min (monitoring) |
+
+**Notes:**
+- 4 `.know/` files committed as prep (`chore(know): refresh knowledge files`)
+- e2e-distribution.yml `release: published` trigger did not fire (same as v0.2.0)
+- Dependabot flagged 4 vulnerabilities on push (1 critical, 1 high, 2 moderate) — informational only
+
+### v0.3.1 — 2026-03-03
+
+| Field | Value |
+|-------|-------|
+| Date | 2026-03-03 |
+| Version | v0.3.0 -> v0.3.1 (patch) |
+| Commits | 1 (fix(ci): use PAT for GoReleaser) |
+| Complexity | PATCH |
+| Tag SHA | f7a4befa737e228912867a9d2d51c013755b2700 |
+| Commit SHA | d65bd4c |
+| release.yml | GREEN (109s, run 22631036118) |
+| e2e-distribution.yml | RED (52s, run 22631109399) — first-ever auto-trigger! |
+| Assets | 5/5 (4 platform binaries + checksums.txt) |
+| Homebrew tap | Updated (commit c4402d2) |
+| Verdict | PARTIAL |
+| Duration | ~1 min (execution) + ~4 min (monitoring) |
+
+**Notes:**
+- Primary goal achieved: e2e-distribution.yml auto-triggered for the first time (2s after release published)
+- Dispatch chain fix validated: GITHUB_TOKEN -> HOMEBREW_TAP_TOKEN in release.yml
+- E2E failure: Assertion 7 — `ari init` does not produce `.claude/settings.json` (pre-existing, unrelated to v0.3.1)
+- Both macOS and Linux passed Assertions 1-6, failed identically at Assertion 7
+- Follow-up needed: fix `ari init` or update `scripts/e2e-validate.sh` Assertion 7
+
+## Historical Summary (v0.3.2 — v0.3.12)
+
+| Version | Date | Commits | Verdict | Chain Time | Notes |
+|---------|------|---------|---------|------------|-------|
+| v0.3.2 | 2026-03-03 | 1 | PASS | ~161s | First full PASS verdict |
+| v0.3.3 | 2026-03-03 | 2 | PASS | ~174s | Agent-guard write-guard fix |
+| v0.3.4 | 2026-03-04 | 31 | PASS | ~162s | Largest batch (service boundary, --root flag) |
+| v0.3.5 | 2026-03-04 | 1 | PASS | ~162s | First cache-only PATCH |
+| v0.3.6 | 2026-03-04 | 1 | PASS | ~157s | Second cache-only PATCH |
+| v0.3.7 | 2026-03-04 | 7 | PASS | ~184s | Mena relocation + materialize fixes |
+| v0.3.9 | 2026-03-05 | 5 | PASS | ~192s | Attribution-guard precommit hook |
+| v0.3.10 | 2026-03-05 | 17 | PASS | ~168s | .claude/ -> .knossos/ boundary migration |
+| v0.3.11 | 2026-03-05 | 1 | PASS | ~191s | Theoros context budget + maxTurns |
+| v0.3.12 | 2026-03-05 | 1 | PASS | ~169s | Standardized .gitignore management |
+
+### v0.4.0 — 2026-03-05
+
+| Field | Value |
+|-------|-------|
+| Date | 2026-03-05 |
+| Version | v0.3.12 -> v0.4.0 (minor) |
+| Commits | 12 (7 feat, 2 fix, 1 refactor, 2 merge) |
+| Complexity | PATCH (user-invoked), semver-escalated to MINOR |
+| Tag SHA | c80d3658c54b58225476cfef3a3a6961d761fbd7 |
+| Commit SHA | 1bf2630 |
+| release.yml | GREEN (101s, run 22731888201) |
+| e2e-distribution.yml | GREEN (49s, run 22731961407) |
+| Assets | 5/5 (4 platform binaries + checksums.txt) |
+| Homebrew tap | Updated (v0.4.0, commit 37807e8, 1s dispatch lag) |
+| Verdict | PASS |
+| Duration | ~1 min (execution) + ~2 min (monitoring) |
+
+**Notes:**
+- Eleventh consecutive PASS verdict (v0.3.2 -> ... -> v0.3.12 -> v0.4.0)
+- First MINOR release since v0.3.0; semver escalation flagged by cartographer (feat commits)
+- Dispatch latency: ~22s (release published 18:57:22Z, E2E triggered ~18:57:50Z)
+- macOS E2E: GREEN (22s), Linux E2E: GREEN (49s)
+- Total chain: ~150s — fastest in recent history
+- Headline features: ari agent embody command, Dionysus knowledge synthesis agent, /dion dromenon, land-to-know pipeline, shelf promotion, knowledge maturation pipeline
+- 3 pre-existing informational workflow failures (non-blocking): ariadne-tests, verify-doctrine, verify-formal-specs
+
+### v0.5.0 — 2026-03-06
+
+| Field | Value |
+|-------|-------|
+| Date | 2026-03-06 |
+| Version | v0.4.0 -> v0.5.0 (minor) |
+| Commits | 3 (2 feat, 1 chore) |
+| Complexity | PATCH (user-invoked), semver-escalated to MINOR |
+| Tag SHA | 7ab501b73b05297f9e43312b8b4adc533f81ec49 |
+| Commit SHA | 94dc82f |
+| release.yml | GREEN (111s, run 22755776615) |
+| e2e-distribution.yml | GREEN (55s, run 22755831193) |
+| Assets | 5/5 (4 platform binaries + checksums.txt) |
+| Homebrew tap | Updated (v0.5.0, commit f7ba647) |
+| Verdict | PASS |
+| Duration | ~1 min (execution) + ~3 min (monitoring) |
+
+**Notes:**
+- Twelfth consecutive PASS verdict (v0.3.2 → ... → v0.4.0 → v0.5.0)
+- Dispatch latency: ~2s (consistent with historical avg)
+- Total chain: ~166s — consistent with historical avg (~150-190s)
+- Cached release knowledge skipped cartographer reconnaissance entirely
+- Headline features: L2 Perception, L6 Position, L7 Surface, L8 Horizon perspective layers + full simulate mode
