@@ -37,6 +37,7 @@ Hand off work to a different agent with full context transfer. $ARGUMENTS
    - Key decisions made
    - Open questions and blockers
    - Artifacts produced with locations
+   - **Session complexity** (`complexity` from hook frontmatter) — tells the receiving agent the expected ceremony level
    - Determine FROM agent (from SESSION_CONTEXT last_agent or infer from current phase)
 
 3. **Execute atomic handoff** via Moirai agent:

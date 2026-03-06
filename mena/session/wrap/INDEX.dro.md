@@ -101,6 +101,16 @@ Read `status` from the frontmatter — do not call `ari session status`.
 
 ## Quality Gates
 
+Read `complexity` from the YAML frontmatter to calibrate gate depth:
+
+| Complexity | Quality Gates |
+|------------|---------------|
+| PATCH | Tests pass (skip PRD/TDD checks) |
+| MODULE | PRD exists, TDD exists, tests pass |
+| SYSTEM+ | Full gate suite (PRD, TDD, implementation review, tests) |
+
+If complexity is not present in frontmatter, default to MODULE gates.
+
 | Gate | Check |
 |------|-------|
 | PRD | File exists at expected path |

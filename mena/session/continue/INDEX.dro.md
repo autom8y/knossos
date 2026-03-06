@@ -52,6 +52,24 @@ If `has_session: false` or no YAML frontmatter is present (no hook output), fall
    }
    ```
 
+## Park Source Context
+
+Read `park_source` from the YAML frontmatter to inform resumption context:
+
+| park_source | Context |
+|-------------|---------|
+| `manual` | User parked this session intentionally |
+| `auto` | Session was auto-parked (CC window closed) |
+| `fray` | Session was parked for a parallel strand — check `strands:` for child status |
+
+Include in the resumption summary. If park_source is absent, omit (older sessions).
+
+If `park_source` is `fray` and `strands:` is present in frontmatter, display strand status so the user knows whether child sessions have landed:
+```
+Strand Status:
+  {strand.session_id}: {strand.status} (frame: {strand.frame_ref})
+```
+
 ## Error Conditions
 
 - **No parked session**: Fails if no session in PARKED status found

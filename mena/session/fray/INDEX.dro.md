@@ -25,6 +25,17 @@ Fork the current session into a parallel strand. $ARGUMENTS
    - Verify in git repository: `git rev-parse --git-dir`
    - If not in git repo and no `--no-worktree`: WARN and add `--no-worktree`
 
+## Existing Strands
+
+Before fraying, check if `strands:` is present in the hook-injected YAML frontmatter. If present, display existing strands so the user sees prior children and their status:
+
+```
+Existing strands:
+  {strand.session_id}: {strand.status} (landed: {strand.landed_at | "pending"})
+```
+
+If no strands exist, skip this section silently.
+
 ## Behavior
 
 ### 1. Extract Session ID
@@ -79,6 +90,7 @@ Worktree: {worktree_path}
 
 Next steps:
   cd {worktree_path} && claude
+  /sos claim {child_id}       # bind the new CC instance to the child session
   # Start working in the parallel strand
 
 To return to parent:
@@ -92,6 +104,9 @@ Phase: {fray_point}
 
 The child session shares this working tree.
 Parent is parked. You are now on the child strand.
+
+Claim this strand:
+  /sos claim {child_id}       # bind this CC instance to the child session
 
 To return to parent:
   /park       (park child)
