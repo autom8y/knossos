@@ -1,6 +1,7 @@
 package knows
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -9,6 +10,7 @@ import (
 	"time"
 
 	"github.com/autom8y/knossos/internal/know"
+	"github.com/autom8y/knossos/internal/output"
 )
 
 // writeFrontmatter creates a .know/*.md file with the given YAML frontmatter.
@@ -159,7 +161,9 @@ func TestStalenessLabel_Default(t *testing.T) {
 
 func TestReadSingleDomain_Missing(t *testing.T) {
 	dir := t.TempDir()
-	err := readSingleDomain(dir, "nonexistent")
+	var buf bytes.Buffer
+	printer := output.NewPrinter(output.FormatText, &buf, &buf, false)
+	err := readSingleDomain(printer, dir, "nonexistent")
 	if err == nil {
 		t.Error("readSingleDomain with missing file: want error, got nil")
 	}
@@ -175,23 +179,15 @@ func TestReadSingleDomain_Exists(t *testing.T) {
 		t.Fatalf("write test file: %v", err)
 	}
 
-	// Redirect stdout to capture output
-	old := os.Stdout
-	r, w, _ := os.Pipe()
-	os.Stdout = w
+	var buf bytes.Buffer
+	printer := output.NewPrinter(output.FormatText, &buf, &buf, false)
 
-	err := readSingleDomain(dir, "architecture")
-
-	w.Close()
-	os.Stdout = old
-
-	buf := make([]byte, 4096)
-	n, _ := r.Read(buf)
-	captured := string(buf[:n])
+	err := readSingleDomain(printer, dir, "architecture")
 
 	if err != nil {
 		t.Errorf("readSingleDomain: unexpected error: %v", err)
 	}
+	captured := buf.String()
 	if !strings.Contains(captured, "Architecture") {
 		t.Errorf("readSingleDomain output should contain file content, got: %q", captured)
 	}

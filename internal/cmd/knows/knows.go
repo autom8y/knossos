@@ -337,7 +337,7 @@ func runKnows(ctx *cmdContext, args []string, scopeDir string, checkFlag, valida
 
 	// Single domain read: just cat the file to stdout
 	if len(args) == 1 {
-		return readSingleDomain(knowDir, args[0])
+		return readSingleDomain(printer, knowDir, args[0])
 	}
 
 	// Read all domain metadata
@@ -536,10 +536,10 @@ func runDelta(printer interface {
 	return printer.Print(DeltaAllOutput{Domains: results})
 }
 
-// readSingleDomain reads and prints a single domain file to stdout.
+// readSingleDomain reads and prints a single domain file via the Printer.
 // domain may be a plain name ("architecture") or a feat namespace ("feat/materialization").
 // The feat namespace resolves to .know/feat/{slug}.md.
-func readSingleDomain(knowDir, domain string) error {
+func readSingleDomain(printer *output.Printer, knowDir, domain string) error {
 	path := know.DomainFilePath(knowDir, domain)
 	data, err := os.ReadFile(path)
 	if err != nil {
@@ -548,8 +548,8 @@ func readSingleDomain(knowDir, domain string) error {
 		}
 		return errors.Wrap(errors.CodeFileNotFound, fmt.Sprintf("reading .know/%s.md", domain), err)
 	}
-	_, err = os.Stdout.Write(data)
-	return err
+	printer.PrintText(string(data))
+	return nil
 }
 
 // runSemanticDiff computes AST-based semantic diffs for a domain's changed Go files.
