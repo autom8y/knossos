@@ -6,7 +6,6 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
-	"time"
 
 	"github.com/autom8y/knossos/internal/output"
 	"github.com/autom8y/knossos/test/hooks/testutil"
@@ -14,25 +13,35 @@ import (
 	"github.com/autom8y/knossos/internal/cmd/common"
 )
 
-func TestAutoparkOutput_Text(t *testing.T) {
+func TestSessionEndOutput_Text(t *testing.T) {
 	tests := []struct {
 		name     string
-		output   AutoparkOutput
+		output   SessionEndOutput
 		contains string
 	}{
 		{
-			name: "was parked",
-			output: AutoparkOutput{
+			name: "ended with auto-park",
+			output: SessionEndOutput{
 				SessionID: "session-test",
+				WasEnded:  true,
 				WasParked: true,
 			},
-			contains: "Session auto-parked: session-test",
+			contains: "Session ended: session-test (auto-parked)",
 		},
 		{
-			name: "not parked",
-			output: AutoparkOutput{
+			name: "ended without park",
+			output: SessionEndOutput{
+				SessionID: "session-test",
+				WasEnded:  true,
 				WasParked: false,
-				Message:   "no active session",
+			},
+			contains: "Session ended: session-test",
+		},
+		{
+			name: "not ended",
+			output: SessionEndOutput{
+				WasEnded: false,
+				Message:  "no active session",
 			},
 			contains: "no active session",
 		},
@@ -48,8 +57,9 @@ func TestAutoparkOutput_Text(t *testing.T) {
 	}
 }
 
-func TestRunAutopark_EarlyExit_HooksDisabled(t *testing.T) {
+func TestRunSessionEnd_WrongEvent(t *testing.T) {
 	testutil.SetupEnv(t, &testutil.HookEnv{
+		Event: "Stop", // Not a SessionEnd event
 	})
 
 	var stdout, stderr bytes.Buffer
@@ -70,108 +80,25 @@ func TestRunAutopark_EarlyExit_HooksDisabled(t *testing.T) {
 		},
 	}
 
-	err := runAutoparkCore(ctx, printer)
+	err := runSessionEndCore(ctx, printer)
 	if err != nil {
-		t.Fatalf("runAutopark() error = %v", err)
+		t.Fatalf("runSessionEnd() error = %v", err)
 	}
 
-	var result AutoparkOutput
-	if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
-		t.Fatalf("Failed to parse output: %v\nOutput: %s", err, stdout.String())
-	}
-
-	if result.WasParked {
-		t.Error("Expected WasParked=false when no context")
-	}
-}
-
-func TestRunAutopark_WrongEvent(t *testing.T) {
-	testutil.SetupEnv(t, &testutil.HookEnv{
-		Event:       "SessionStart", // Not a Stop event
-	})
-
-	var stdout, stderr bytes.Buffer
-	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
-
-	outputFlag := "json"
-	verboseFlag := false
-	projectDir := ""
-	sessionID := ""
-	ctx := &cmdContext{
-		SessionContext: common.SessionContext{
-			BaseContext: common.BaseContext{
-				Output:     &outputFlag,
-				Verbose:    &verboseFlag,
-				ProjectDir: &projectDir,
-			},
-			SessionID: &sessionID,
-		},
-	}
-
-	err := runAutoparkCore(ctx, printer)
-	if err != nil {
-		t.Fatalf("runAutopark() error = %v", err)
-	}
-
-	var result AutoparkOutput
+	var result SessionEndOutput
 	if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
 		t.Fatalf("Failed to parse output: %v", err)
 	}
 
-	if result.WasParked {
-		t.Error("Expected WasParked=false for non-Stop event")
+	if result.WasEnded {
+		t.Error("Expected WasEnded=false for non-SessionEnd event")
 	}
-	if result.Message != "not a Stop event" {
-		t.Errorf("Message = %q, want %q", result.Message, "not a Stop event")
-	}
-}
-
-func TestRunAutopark_NoSession(t *testing.T) {
-	tmpDir := t.TempDir()
-
-	// Create minimal .sos structure (no session)
-	sessionsDir := filepath.Join(tmpDir, ".sos", "sessions")
-	if err := os.MkdirAll(sessionsDir, 0755); err != nil {
-		t.Fatalf("Failed to create sessions dir: %v", err)
-	}
-
-	testutil.SetupEnv(t, &testutil.HookEnv{
-		Event:       "Stop",
-		ProjectDir:  tmpDir,
-	})
-
-	var stdout, stderr bytes.Buffer
-	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
-
-	outputFlag := "json"
-	verboseFlag := false
-	ctx := &cmdContext{
-		SessionContext: common.SessionContext{
-			BaseContext: common.BaseContext{
-				Output:     &outputFlag,
-				Verbose:    &verboseFlag,
-				ProjectDir: &tmpDir,
-			},
-			SessionID: nil,
-		},
-	}
-
-	err := runAutoparkCore(ctx, printer)
-	if err != nil {
-		t.Fatalf("runAutopark() error = %v", err)
-	}
-
-	var result AutoparkOutput
-	if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
-		t.Fatalf("Failed to parse output: %v", err)
-	}
-
-	if result.WasParked {
-		t.Error("Expected WasParked=false when no session")
+	if result.Message != "not a SessionEnd event" {
+		t.Errorf("Message = %q, want %q", result.Message, "not a SessionEnd event")
 	}
 }
 
-func TestRunAutopark_ActiveSession(t *testing.T) {
+func TestRunSessionEnd_ActiveSession_SetsParkSourceAuto(t *testing.T) {
 	tmpDir := t.TempDir()
 	sessionID := "session-20260104-222613-05a12c6b"
 
@@ -182,7 +109,7 @@ func TestRunAutopark_ActiveSession(t *testing.T) {
 		t.Fatalf("Failed to create session dir: %v", err)
 	}
 
-	// Write SESSION_CONTEXT.md with ACTIVE status (unquoted for scan-based discovery)
+	// Write SESSION_CONTEXT.md with ACTIVE status
 	sessionContext := `---
 schema_version: "2.1"
 session_id: "session-20260104-222613-05a12c6b"
@@ -200,8 +127,8 @@ current_phase: "implementation"
 	}
 
 	testutil.SetupEnv(t, &testutil.HookEnv{
-		Event:       "Stop",
-		ProjectDir:  tmpDir,
+		Event:      "SessionEnd",
+		ProjectDir: tmpDir,
 	})
 
 	var stdout, stderr bytes.Buffer
@@ -220,18 +147,21 @@ current_phase: "implementation"
 		},
 	}
 
-	err := runAutoparkCore(ctx, printer)
+	err := runSessionEndCore(ctx, printer)
 	if err != nil {
-		t.Fatalf("runAutopark() error = %v", err)
+		t.Fatalf("runSessionEnd() error = %v", err)
 	}
 
-	var result AutoparkOutput
+	var result SessionEndOutput
 	if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
 		t.Fatalf("Failed to parse output: %v\nOutput: %s", err, stdout.String())
 	}
 
+	if !result.WasEnded {
+		t.Error("Expected WasEnded=true")
+	}
 	if !result.WasParked {
-		t.Error("Expected WasParked=true")
+		t.Error("Expected WasParked=true for active session")
 	}
 	if result.SessionID != sessionID {
 		t.Errorf("SessionID = %q, want %q", result.SessionID, sessionID)
@@ -239,14 +169,8 @@ current_phase: "implementation"
 	if result.Status != "PARKED" {
 		t.Errorf("Status = %q, want %q", result.Status, "PARKED")
 	}
-	if result.PreviousStatus != "ACTIVE" {
-		t.Errorf("PreviousStatus = %q, want %q", result.PreviousStatus, "ACTIVE")
-	}
-	if result.AutoParkedAt == "" {
-		t.Error("AutoParkedAt should not be empty")
-	}
 
-	// Verify the file was actually updated
+	// Verify the file was updated with park_source: auto
 	updatedContent, err := os.ReadFile(contextFile)
 	if err != nil {
 		t.Fatalf("Failed to read updated context: %v", err)
@@ -259,7 +183,7 @@ current_phase: "implementation"
 	}
 }
 
-func TestRunAutopark_AlreadyParked(t *testing.T) {
+func TestRunSessionEnd_AlreadyParked_NoParkSourceOverwrite(t *testing.T) {
 	tmpDir := t.TempDir()
 	sessionID := "session-20260104-222613-05a12c6b"
 
@@ -267,7 +191,7 @@ func TestRunAutopark_AlreadyParked(t *testing.T) {
 	sessionDir := filepath.Join(sessionsDir, sessionID)
 	os.MkdirAll(sessionDir, 0755)
 
-	// Write SESSION_CONTEXT.md with PARKED status
+	// Write SESSION_CONTEXT.md with PARKED status and manual park_source
 	sessionContext := `---
 schema_version: "2.1"
 session_id: "session-20260104-222613-05a12c6b"
@@ -278,15 +202,16 @@ complexity: "MODULE"
 active_rite: "test"
 current_phase: "implementation"
 parked_at: "2026-01-04T23:00:00Z"
-parked_reason: "manual"
+parked_reason: "Manual park"
+park_source: manual
 ---
 `
 	contextFile := filepath.Join(sessionDir, "SESSION_CONTEXT.md")
 	os.WriteFile(contextFile, []byte(sessionContext), 0644)
 
 	testutil.SetupEnv(t, &testutil.HookEnv{
-		Event:       "Stop",
-		ProjectDir:  tmpDir,
+		Event:      "SessionEnd",
+		ProjectDir: tmpDir,
 	})
 
 	var stdout, stderr bytes.Buffer
@@ -306,55 +231,29 @@ parked_reason: "manual"
 		},
 	}
 
-	err := runAutoparkCore(ctx, printer)
+	err := runSessionEndCore(ctx, printer)
 	if err != nil {
-		t.Fatalf("runAutopark() error = %v", err)
+		t.Fatalf("runSessionEnd() error = %v", err)
 	}
 
-	var result AutoparkOutput
+	var result SessionEndOutput
 	if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
 		t.Fatalf("Failed to parse output: %v", err)
 	}
 
+	if !result.WasEnded {
+		t.Error("Expected WasEnded=true (session ended even if already parked)")
+	}
 	if result.WasParked {
 		t.Error("Expected WasParked=false when already parked")
 	}
-	if !bytes.Contains([]byte(result.Message), []byte("not active")) {
-		t.Errorf("Message should indicate session not active, got: %q", result.Message)
+
+	// Verify park_source was NOT overwritten (still "manual")
+	updatedContent, err := os.ReadFile(contextFile)
+	if err != nil {
+		t.Fatalf("Failed to read context: %v", err)
+	}
+	if !bytes.Contains(updatedContent, []byte("park_source: manual")) {
+		t.Errorf("Context file should still contain 'park_source: manual', got:\n%s", string(updatedContent))
 	}
 }
-
-// BenchmarkAutoparkHook_EarlyExit benchmarks the early exit path.
-func BenchmarkAutoparkHook_EarlyExit(b *testing.B) {
-	outputFlag := "json"
-	verboseFlag := false
-	projectDir := ""
-	sessionID := ""
-
-	ctx := &cmdContext{
-		SessionContext: common.SessionContext{
-			BaseContext: common.BaseContext{
-				Output:     &outputFlag,
-				Verbose:    &verboseFlag,
-				ProjectDir: &projectDir,
-			},
-			SessionID: &sessionID,
-		},
-	}
-
-	var stdout, stderr bytes.Buffer
-	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		stdout.Reset()
-		runAutoparkCore(ctx, printer)
-	}
-
-	elapsed := b.Elapsed()
-	nsPerOp := float64(elapsed.Nanoseconds()) / float64(b.N)
-	if nsPerOp > float64(5*time.Millisecond) {
-		b.Errorf("Early exit took %.2f ms, target is <5ms", nsPerOp/1e6)
-	}
-}
-

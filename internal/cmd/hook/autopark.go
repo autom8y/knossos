@@ -112,6 +112,7 @@ func runAutoparkCore(ctx *cmdContext, printer *output.Printer) error {
 	sessCtx.Status = session.StatusParked
 	sessCtx.ParkedAt = &now
 	sessCtx.ParkedReason = "auto-parked on Stop"
+	sessCtx.ParkSource = "auto"
 
 	// Save session context
 	if err := sessCtx.Save(ctxPath); err != nil {

@@ -110,6 +110,7 @@ func runSessionEndCore(ctx *cmdContext, printer *output.Printer) error {
 			sessCtx.Status = session.StatusParked
 			sessCtx.ParkedAt = &now
 			sessCtx.ParkedReason = "auto-parked on SessionEnd"
+			sessCtx.ParkSource = "auto"
 
 			if err := sessCtx.Save(ctxPath); err != nil {
 				printer.VerboseLog("error", "failed to save session context",
