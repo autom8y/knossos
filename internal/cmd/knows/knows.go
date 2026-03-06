@@ -18,7 +18,7 @@ import (
 // DeltaOutput is the structured output for the --delta flag.
 type DeltaOutput struct {
 	Domain    string               `json:"domain"`
-	Manifest  *know.ChangeManifest `json:"manifest"`
+	Manifest  *know.ChangeManifest `json:"manifest,omitempty"`
 	Mode      string               `json:"mode"`
 	ForceFull bool                 `json:"force_full"`
 }
