@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/autom8y/knossos/internal/errors"
 	"github.com/autom8y/knossos/internal/paths"
 )
 
@@ -51,7 +52,7 @@ func Promote(resolver *paths.Resolver, sourcePath string) (*PromoteResult, error
 
 	parts := strings.SplitN(relToLedge, string(filepath.Separator), 2)
 	if len(parts) < 2 {
-		return nil, fmt.Errorf("source must be inside a category directory (e.g., .ledge/reviews/file.md)")
+		return nil, errors.New(errors.CodeUsageError, "source must be inside a category directory (e.g., .ledge/reviews/file.md)")
 	}
 
 	category := parts[0]

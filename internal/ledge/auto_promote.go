@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/autom8y/knossos/internal/artifact"
+	"github.com/autom8y/knossos/internal/errors"
 	"github.com/autom8y/knossos/internal/paths"
 )
 
@@ -28,7 +29,7 @@ type AutoPromoteResult struct {
 // The caller is responsible for gating on sails color before calling this.
 func AutoPromoteSession(resolver *paths.Resolver, graduated []artifact.GraduatedEntry) (*AutoPromoteResult, error) {
 	if resolver == nil {
-		return nil, fmt.Errorf("resolver is required")
+		return nil, errors.New(errors.CodeUsageError, "resolver is required")
 	}
 
 	result := &AutoPromoteResult{}
