@@ -1,8 +1,6 @@
 package explain
 
 import (
-	"os"
-
 	"github.com/spf13/cobra"
 
 	"github.com/autom8y/knossos/internal/cmd/common"
@@ -10,8 +8,20 @@ import (
 	"github.com/autom8y/knossos/internal/paths"
 )
 
+type cmdContext struct {
+	common.BaseContext
+}
+
 // NewExplainCmd creates the ari explain command.
 func NewExplainCmd(outputFlag *string, verboseFlag *bool, projectDir *string) *cobra.Command {
+	ctx := &cmdContext{
+		BaseContext: common.BaseContext{
+			Output:     outputFlag,
+			Verbose:    verboseFlag,
+			ProjectDir: projectDir,
+		},
+	}
+
 	cmd := &cobra.Command{
 		Use:   "explain [concept]",
 		Short: "Explain a knossos concept",
@@ -28,14 +38,11 @@ Examples:
   ari explain rite -o json # Single concept as JSON`,
 		Args: cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			format := output.ParseFormat(*outputFlag)
-			printer := output.NewPrinter(format, os.Stdout, os.Stderr, *verboseFlag)
+			printer := ctx.GetPrinter(output.FormatText)
 
-			// Build resolver (may be nil if no project)
-			var resolver *paths.Resolver
-			if *projectDir != "" {
-				resolver = paths.NewResolver(*projectDir)
-			}
+			// Build resolver -- GetContext checks resolver.ProjectRoot() == "" and
+			// returns empty string when no project context is available.
+			resolver := ctx.GetResolver()
 
 			if len(args) == 0 {
 				// List all concepts

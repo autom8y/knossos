@@ -173,8 +173,20 @@ func (h HealthDashboard) Text() string {
 	return b.String()
 }
 
+type cmdContext struct {
+	common.BaseContext
+}
+
 // NewStatusCmd creates the ari status command.
 func NewStatusCmd(outputFlag *string, verboseFlag *bool, projectDir *string) *cobra.Command {
+	ctx := &cmdContext{
+		BaseContext: common.BaseContext{
+			Output:     outputFlag,
+			Verbose:    verboseFlag,
+			ProjectDir: projectDir,
+		},
+	}
+
 	cmd := &cobra.Command{
 		Use:   "status",
 		Short: "Show unified project health dashboard",
@@ -190,11 +202,11 @@ Examples:
   ari status              # Human-readable dashboard
   ari status -o json      # Machine-readable JSON output`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			format := output.ParseFormat(*outputFlag)
-			printer := output.NewPrinter(format, os.Stdout, os.Stderr, *verboseFlag)
-			resolver := paths.NewResolver(*projectDir)
+			printer := ctx.GetPrinter(output.FormatText)
+			resolver := ctx.GetResolver()
+			projectDir := resolver.ProjectRoot()
 
-			dashboard := collect(resolver, *projectDir)
+			dashboard := collect(resolver, projectDir)
 			if err := printer.Print(dashboard); err != nil {
 				return err
 			}
