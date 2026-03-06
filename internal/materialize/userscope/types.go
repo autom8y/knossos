@@ -3,9 +3,9 @@
 package userscope
 
 import (
-	"fmt"
 	"io/fs"
 
+	"github.com/autom8y/knossos/internal/errors"
 	"github.com/autom8y/knossos/internal/paths"
 )
 
@@ -110,5 +110,5 @@ func ErrKnossosHomeNotSet() error {
 
 // ErrInvalidResourceType returns an error for unrecognized resource types.
 func ErrInvalidResourceType() error {
-	return fmt.Errorf("invalid resource type")
+	return errors.New(errors.CodeUsageError, "invalid resource type")
 }
