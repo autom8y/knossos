@@ -67,12 +67,12 @@ func (ts *testSetup) createSession(id, status string, createdAt time.Time, opts 
 		ts.t.Fatalf("Failed to write session context: %v", err)
 	}
 
-	// Create sails.yaml if specified
+	// Create WHITE_SAILS.yaml if specified
 	if so.sailsColor != "" {
 		sailsContent := "color: " + so.sailsColor + "\n"
-		sailsPath := filepath.Join(sessionDir, "sails.yaml")
+		sailsPath := filepath.Join(sessionDir, "WHITE_SAILS.yaml")
 		if err := os.WriteFile(sailsPath, []byte(sailsContent), 0644); err != nil {
-			ts.t.Fatalf("Failed to write sails.yaml: %v", err)
+			ts.t.Fatalf("Failed to write WHITE_SAILS.yaml: %v", err)
 		}
 	}
 }

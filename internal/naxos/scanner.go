@@ -205,9 +205,9 @@ func (s *Scanner) isIncompleteWrap(ctx *session.Context) bool {
 	return false
 }
 
-// checkSailsColor reads the sails color from a session's sails.yaml if present.
+// checkSailsColor reads the sails color from a session's WHITE_SAILS.yaml if present.
 func (s *Scanner) checkSailsColor(sessionDir string) string {
-	sailsPath := filepath.Join(sessionDir, "sails.yaml")
+	sailsPath := filepath.Join(sessionDir, "WHITE_SAILS.yaml")
 	data, err := os.ReadFile(sailsPath)
 	if err != nil {
 		return "" // No sails file or unreadable = unknown
