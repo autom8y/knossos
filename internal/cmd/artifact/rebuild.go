@@ -2,10 +2,29 @@ package artifact
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
 )
+
+// rebuildOutput is the structured output for ari artifact rebuild.
+type rebuildOutput struct {
+	SessionsScanned  int   `json:"sessions_scanned"`
+	ArtifactsIndexed int   `json:"artifacts_indexed"`
+	RebuildTimeMs    int64 `json:"rebuild_time_ms"`
+	DryRun           bool  `json:"dry_run"`
+}
+
+// Text implements output.Textable.
+func (r rebuildOutput) Text() string {
+	var b strings.Builder
+	b.WriteString("\nRebuilt project registry:\n")
+	b.WriteString(fmt.Sprintf("  Sessions scanned: %d\n", r.SessionsScanned))
+	b.WriteString(fmt.Sprintf("  Artifacts indexed: %d\n", r.ArtifactsIndexed))
+	b.WriteString(fmt.Sprintf("  Time: %dms\n", r.RebuildTimeMs))
+	return b.String()
+}
 
 func newRebuildCmd(ctx *cmdContext) *cobra.Command {
 	var dryRun bool
@@ -32,13 +51,12 @@ into the project-level registry. Use this for recovery or initial index build.`,
 					return err
 				}
 
-				result := map[string]any{
-					"sessions_scanned":  projectReg.SessionsIndexed,
-					"artifacts_indexed": projectReg.ArtifactCount,
-					"rebuild_time_ms":   0,
-					"dry_run":           true,
-				}
-				return printer.Print(result)
+				return printer.Print(rebuildOutput{
+					SessionsScanned:  projectReg.SessionsIndexed,
+					ArtifactsIndexed: projectReg.ArtifactCount,
+					RebuildTimeMs:    0,
+					DryRun:           true,
+				})
 			}
 
 			// Perform rebuild
@@ -56,25 +74,12 @@ into the project-level registry. Use this for recovery or initial index build.`,
 				return err
 			}
 
-			result := map[string]any{
-				"sessions_scanned":  projectReg.SessionsIndexed,
-				"artifacts_indexed": projectReg.ArtifactCount,
-				"rebuild_time_ms":   elapsed.Milliseconds(),
-				"dry_run":           false,
-			}
-			if err := printer.Print(result); err != nil {
-				return err
-			}
-
-			// Print summary in text mode
-			if *ctx.Output == "text" {
-				fmt.Printf("\nRebuilt project registry:\n")
-				fmt.Printf("  Sessions scanned: %d\n", projectReg.SessionsIndexed)
-				fmt.Printf("  Artifacts indexed: %d\n", projectReg.ArtifactCount)
-				fmt.Printf("  Time: %dms\n", elapsed.Milliseconds())
-			}
-
-			return nil
+			return printer.Print(rebuildOutput{
+				SessionsScanned:  projectReg.SessionsIndexed,
+				ArtifactsIndexed: projectReg.ArtifactCount,
+				RebuildTimeMs:    elapsed.Milliseconds(),
+				DryRun:           false,
+			})
 		},
 	}
 
