@@ -6,6 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/autom8y/knossos/internal/errors"
 	"github.com/autom8y/knossos/internal/worktree"
 )
 
@@ -109,7 +110,7 @@ func runSync(ctx *cmdContext, idOrName string, opts syncOptions) error {
 		currentWT, err := mgr.CurrentWorktree()
 		if err != nil || currentWT == nil {
 			printer.PrintLine("Not in a worktree. Specify a worktree ID or name.")
-			return fmt.Errorf("not in a worktree")
+			return errors.New(errors.CodeUsageError, "not in a worktree")
 		}
 		idOrName = currentWT.ID
 	}
