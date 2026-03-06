@@ -325,13 +325,13 @@ func (m *Materializer) detectOrphansLegacy(expectedAgents map[string]bool, agent
 }
 
 // backupAndRemoveOrphans creates a backup of orphan agents then removes them.
-func (m *Materializer) backupAndRemoveOrphans(orphans []string, claudeDir string) (string, error) {
+func (m *Materializer) backupAndRemoveOrphans(orphans []string, claudeDir string, knossosDir string) (string, error) {
 	if len(orphans) == 0 {
 		return "", nil
 	}
 
 	agentsDir := filepath.Join(claudeDir, "agents")
-	backupDir := filepath.Join(claudeDir, ".orphan-backup", time.Now().Format("20060102-150405"))
+	backupDir := filepath.Join(knossosDir, ".orphan-backup", time.Now().Format("20060102-150405"))
 
 	if err := paths.EnsureDir(backupDir); err != nil {
 		return "", err

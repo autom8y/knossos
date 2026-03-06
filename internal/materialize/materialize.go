@@ -421,7 +421,7 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 
 	if len(orphans) > 0 {
 		if opts.RemoveAll {
-			backupPath, err := m.backupAndRemoveOrphans(orphans, claudeDir)
+			backupPath, err := m.backupAndRemoveOrphans(orphans, claudeDir, knossosDir)
 			if err != nil {
 				return nil, errors.Wrap(errors.CodeGeneralError, "failed to remove orphans", err)
 			}
