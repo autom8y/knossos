@@ -10,12 +10,19 @@ import (
 func RunAudit(doc *PerspectiveDocument, ctx *ParseContext) *AuditOverlay {
 	var findings []AuditFinding
 
+	// Phase 1 checks (AUDIT-001 through AUDIT-006)
 	findings = append(findings, checkMissingContract(doc)...)
 	findings = append(findings, checkToolConflict(doc)...)
 	findings = append(findings, checkMemoryNoSeed(doc)...)
 	findings = append(findings, checkMCPNotWired(doc)...)
 	findings = append(findings, checkModelInherit(doc, ctx)...)
 	findings = append(findings, checkWriteGuardNoExtraPaths(doc)...)
+
+	// Phase 2 checks (AUDIT-007 through AUDIT-010)
+	findings = append(findings, checkSkillsWithoutSkillTool(doc)...)
+	findings = append(findings, checkOrphanAgent(doc)...)
+	findings = append(findings, checkMustProduceNotInArtifacts(doc)...)
+	findings = append(findings, checkUpstreamDownstreamNotInRite(doc, ctx)...)
 
 	summary := SeveritySummary{}
 	for _, f := range findings {
@@ -183,6 +190,135 @@ func checkWriteGuardNoExtraPaths(doc *PerspectiveDocument) []AuditFinding {
 			Title:          "Write-guard enabled but no agent extra paths",
 			Description:    "Agent relies only on shared and rite base paths for write-guard enforcement",
 			Recommendation: "Consider adding agent-specific write-guard extra-paths if the agent needs to write to additional locations",
+		}}
+	}
+	return nil
+}
+
+// --- Phase 2 audit checks ---
+
+// checkSkillsWithoutSkillTool checks if skills are preloaded but Skill tool is disallowed (L2+L4).
+func checkSkillsWithoutSkillTool(doc *PerspectiveDocument) []AuditFinding {
+	l2 := getLayerData[*PerceptionData](doc, "L2")
+	if l2 == nil {
+		return nil
+	}
+
+	hasPreloaded := len(l2.ExplicitSkills) > 0 || len(l2.PolicyInjectedSkills) > 0
+	if hasPreloaded && !l2.SkillToolAvailable {
+		var skillNames []string
+		skillNames = append(skillNames, l2.ExplicitSkills...)
+		skillNames = append(skillNames, l2.PolicyInjectedSkills...)
+		return []AuditFinding{{
+			ID:             "AUDIT-007",
+			Severity:       SeverityCritical,
+			Category:       CategoryInconsistency,
+			LayersAffected: []string{"L2", "L4"},
+			Title:          "Skills preloaded but Skill tool disallowed",
+			Description:    "Agent has preloaded skills but Skill is in disallowedTools, making on-demand skill invocation impossible",
+			Evidence:       strings.Join(skillNames, ", "),
+			Recommendation: "Remove Skill from disallowedTools or remove explicit skills from agent frontmatter",
+		}}
+	}
+	return nil
+}
+
+// checkOrphanAgent checks if the agent is not in any workflow phase (L6).
+func checkOrphanAgent(doc *PerspectiveDocument) []AuditFinding {
+	l6 := getLayerData[*PositionData](doc, "L6")
+	if l6 == nil {
+		return nil
+	}
+
+	if !l6.InWorkflow {
+		return []AuditFinding{{
+			ID:             "AUDIT-008",
+			Severity:       SeverityWarning,
+			Category:       CategoryGap,
+			LayersAffected: []string{"L6"},
+			Title:          "Agent not in any workflow phase",
+			Description:    "Agent does not appear in any workflow.yaml phase. This may be intentional (e.g., orchestrator agents)",
+			Recommendation: "Verify this agent is intentionally out-of-workflow, or add it to a workflow phase",
+		}}
+	}
+	return nil
+}
+
+// checkMustProduceNotInArtifacts checks if contract.must_produce items are not in artifact types (L4+L7).
+func checkMustProduceNotInArtifacts(doc *PerspectiveDocument) []AuditFinding {
+	l4 := getLayerData[*ConstraintData](doc, "L4")
+	l7 := getLayerData[*SurfaceData](doc, "L7")
+	if l4 == nil || l7 == nil || l4.BehavioralContract == nil {
+		return nil
+	}
+
+	artifactSet := make(map[string]bool, len(l7.ArtifactTypes))
+	for _, a := range l7.ArtifactTypes {
+		artifactSet[a] = true
+	}
+
+	var missing []string
+	for _, mp := range l4.BehavioralContract.MustProduce {
+		if !artifactSet[mp] {
+			missing = append(missing, mp)
+		}
+	}
+
+	if len(missing) > 0 {
+		return []AuditFinding{{
+			ID:             "AUDIT-009",
+			Severity:       SeverityWarning,
+			Category:       CategoryInconsistency,
+			LayersAffected: []string{"L4", "L7"},
+			Title:          "contract.must_produce not in workflow artifact types",
+			Description:    "Behavioral contract requires producing artifacts not declared in workflow phase produces",
+			Evidence:       strings.Join(missing, ", "),
+			Recommendation: "Add the missing artifact types to the workflow phase produces field, or update the contract",
+		}}
+	}
+	return nil
+}
+
+// checkUpstreamDownstreamNotInRite checks if upstream/downstream references agents not in the rite (L6).
+func checkUpstreamDownstreamNotInRite(doc *PerspectiveDocument, ctx *ParseContext) []AuditFinding {
+	l6 := getLayerData[*PositionData](doc, "L6")
+	if l6 == nil {
+		return nil
+	}
+
+	// Build set of valid agent names from rite manifest
+	riteAgents := make(map[string]bool)
+	if agents, ok := ctx.RiteManifest["agents"].([]any); ok {
+		for _, a := range agents {
+			if m, ok := a.(map[string]any); ok {
+				if name, ok := m["name"].(string); ok {
+					riteAgents[name] = true
+				}
+			}
+		}
+	}
+
+	// Check upstream/downstream from raw frontmatter (knossos-only fields)
+	var invalid []string
+	for _, field := range []string{"upstream", "downstream"} {
+		edges := stringSliceFromMap(ctx.AgentFrontmatterRaw, field)
+		for _, agentRef := range edges {
+			if !riteAgents[agentRef] {
+				invalid = append(invalid, field+":"+agentRef)
+			}
+		}
+	}
+
+	if len(invalid) > 0 {
+		return []AuditFinding{{
+			ID:             "AUDIT-010",
+			Severity:       SeverityCritical,
+			Category:       CategoryInconsistency,
+			LayersAffected: []string{"L6"},
+			Title:          "upstream/downstream references agent not in rite",
+			Description:    "Agent frontmatter references agents not found in the rite manifest agents list",
+			Evidence:       strings.Join(invalid, ", "),
+			Recommendation: "Fix the agent references or add the missing agents to the rite manifest",
 		}}
 	}
 	return nil

@@ -35,6 +35,13 @@ type ParseContext struct {
 	// Provenance
 	Provenance *provenance.ProvenanceManifest
 
+	// Workflow and orchestrator data (generic YAML for phase/routing fields)
+	Workflow    map[string]any // parsed workflow.yaml
+	Orchestrator map[string]any // parsed orchestrator.yaml
+
+	// Materialized skills directories (dir names under .claude/skills/)
+	MaterializedSkillsDirs []string
+
 	// Resolved paths
 	RiteSourcePath  string // absolute path to rite source directory
 	AgentSourcePath string // absolute path to agent source file
@@ -111,7 +118,18 @@ func NewParseContext(opts PerspectiveOptions) (*ParseContext, error) {
 	riteManifestPath := filepath.Join(riteSourcePath, "manifest.yaml")
 	ctx.RiteManifest = loadManifestAsMap(riteManifestPath)
 
-	// 8. Load provenance manifest
+	// 8. Parse workflow
+	workflowPath := filepath.Join(riteSourcePath, "workflow.yaml")
+	ctx.Workflow = loadManifestAsMap(workflowPath)
+
+	// 9. Parse orchestrator
+	orchestratorPath := filepath.Join(riteSourcePath, "orchestrator.yaml")
+	ctx.Orchestrator = loadManifestAsMap(orchestratorPath)
+
+	// 10. List materialized skills directories
+	ctx.MaterializedSkillsDirs = listSkillsDirs(filepath.Join(ctx.ClaudeDir, "skills"))
+
+	// 11. Load provenance manifest
 	provPath := provenance.ManifestPath(ctx.KnossosDir)
 	prov, err := provenance.LoadOrBootstrap(provPath)
 	if err != nil {
@@ -147,6 +165,22 @@ func resolveRiteSourcePath(projectRoot, riteName string) string {
 func hasManifest(dir string) bool {
 	_, err := os.Stat(filepath.Join(dir, "manifest.yaml"))
 	return err == nil
+}
+
+// listSkillsDirs returns the names of subdirectories under a skills directory.
+// Returns nil if the directory cannot be read.
+func listSkillsDirs(dir string) []string {
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return nil
+	}
+	var dirs []string
+	for _, e := range entries {
+		if e.IsDir() {
+			dirs = append(dirs, e.Name())
+		}
+	}
+	return dirs
 }
 
 // loadManifestAsMap reads a YAML manifest file into a generic map.

@@ -109,6 +109,48 @@ func withSeedFile(content string) testContextOpt {
 	}
 }
 
+// withWorkflow writes a workflow.yaml file in the rite source dir.
+func withWorkflow(content string) testContextOpt {
+	return func(cfg *testContextConfig) {
+		path := filepath.Join(cfg.dir, "rites", cfg.riteName, "workflow.yaml")
+		if err := os.WriteFile(path, []byte(content), 0644); err != nil {
+			panic(err)
+		}
+	}
+}
+
+// withOrchestrator writes an orchestrator.yaml file in the rite source dir.
+func withOrchestrator(content string) testContextOpt {
+	return func(cfg *testContextConfig) {
+		path := filepath.Join(cfg.dir, "rites", cfg.riteName, "orchestrator.yaml")
+		if err := os.WriteFile(path, []byte(content), 0644); err != nil {
+			panic(err)
+		}
+	}
+}
+
+// withRiteManifest overwrites the rite manifest.yaml with custom content.
+func withRiteManifest(content string) testContextOpt {
+	return func(cfg *testContextConfig) {
+		path := filepath.Join(cfg.dir, "rites", cfg.riteName, "manifest.yaml")
+		if err := os.WriteFile(path, []byte(content), 0644); err != nil {
+			panic(err)
+		}
+	}
+}
+
+// withSkillsDirs creates skill directories under .claude/skills/.
+func withSkillsDirs(names []string) testContextOpt {
+	return func(cfg *testContextConfig) {
+		for _, name := range names {
+			dir := filepath.Join(cfg.dir, ".claude", "skills", name)
+			if err := os.MkdirAll(dir, 0755); err != nil {
+				panic(err)
+			}
+		}
+	}
+}
+
 // --- Test: Identity Resolver ---
 
 func TestResolveIdentity(t *testing.T) {
@@ -641,8 +683,8 @@ model: opus`, "# System Prompt\nYou do things.\n")
 		t.Errorf("rite = %q, want test-rite", doc.Rite)
 	}
 
-	// Should have all 5 MVP layers
-	expectedLayers := []string{"L1", "L3", "L4", "L5", "L9"}
+	// Should have all 8 layers (L1-L7 + L9)
+	expectedLayers := []string{"L1", "L2", "L3", "L4", "L5", "L6", "L7", "L9"}
 	for _, key := range expectedLayers {
 		if _, ok := doc.Layers[key]; !ok {
 			t.Errorf("missing layer %s", key)
@@ -651,9 +693,438 @@ model: opus`, "# System Prompt\nYou do things.\n")
 
 	// Assembly metadata should have counts
 	total := doc.AssemblyMetadata.LayersResolved + doc.AssemblyMetadata.LayersDegraded + doc.AssemblyMetadata.LayersFailed
-	if total != 5 {
-		t.Errorf("total layers = %d, want 5", total)
+	if total != 8 {
+		t.Errorf("total layers = %d, want 8", total)
 	}
+}
+
+// --- Test: Position Resolver ---
+
+func TestResolvePosition(t *testing.T) {
+	workflowContent := `
+name: test-rite
+phases:
+  - name: analysis
+    agent: analyst
+    produces: gap-analysis
+    next: implementation
+  - name: implementation
+    agent: test-agent
+    produces: code
+    next: validation
+    condition: "complexity >= MODULE"
+  - name: validation
+    agent: validator
+    produces: report
+    next: null
+entry_point:
+  agent: analyst
+complexity_levels:
+  - name: PATCH
+    phases: [analysis, validation]
+  - name: MODULE
+    phases: [analysis, implementation, validation]
+back_routes:
+  - source_phase: validation
+    trigger: "fail(implementation)"
+    target_phase: implementation
+    target_agent: test-agent
+    requires_user_confirmation: false
+    condition: "Implementation bug"
+commands:
+  - name: build
+    file: build.md
+    description: "Build something"
+    primary_agent: test-agent
+`
+
+	orchestratorContent := `
+handoff_criteria:
+  implementation:
+    - "All tests pass"
+    - "Code reviewed"
+`
+
+	t.Run("agent in workflow", func(t *testing.T) {
+		ctx := newTestParseContext(t, `name: test-agent
+description: Test agent
+tools: Bash, Read`, "body",
+			withWorkflow(workflowContent),
+			withOrchestrator(orchestratorContent))
+
+		env := resolvePosition(ctx)
+		if env.Status != StatusResolved {
+			t.Errorf("status = %s, want RESOLVED", env.Status)
+		}
+		pos, ok := env.Data.(*PositionData)
+		if !ok {
+			t.Fatal("data is not *PositionData")
+		}
+		if !pos.InWorkflow {
+			t.Error("InWorkflow = false, want true")
+		}
+		if pos.PhaseIndex != 1 {
+			t.Errorf("PhaseIndex = %d, want 1", pos.PhaseIndex)
+		}
+		if pos.TotalPhases != 3 {
+			t.Errorf("TotalPhases = %d, want 3", pos.TotalPhases)
+		}
+		if pos.PhasePredecessor != "analyst" {
+			t.Errorf("PhasePredecessor = %q, want analyst", pos.PhasePredecessor)
+		}
+		if pos.PhaseSuccessor != "validator" {
+			t.Errorf("PhaseSuccessor = %q, want validator", pos.PhaseSuccessor)
+		}
+		if pos.PhaseCondition != "complexity >= MODULE" {
+			t.Errorf("PhaseCondition = %q, want 'complexity >= MODULE'", pos.PhaseCondition)
+		}
+		if pos.PhaseProduces != "code" {
+			t.Errorf("PhaseProduces = %q, want code", pos.PhaseProduces)
+		}
+		if len(pos.BackRoutes) != 1 {
+			t.Fatalf("BackRoutes count = %d, want 1", len(pos.BackRoutes))
+		}
+		if pos.BackRoutes[0].SourcePhase != "validation" {
+			t.Errorf("BackRoute source = %q, want validation", pos.BackRoutes[0].SourcePhase)
+		}
+		if len(pos.HandoffCriteria) != 2 {
+			t.Errorf("HandoffCriteria count = %d, want 2", len(pos.HandoffCriteria))
+		}
+		// MODULE includes implementation phase
+		found := false
+		for _, g := range pos.ComplexityGates {
+			if g == "MODULE" {
+				found = true
+			}
+		}
+		if !found {
+			t.Errorf("ComplexityGates %v does not contain MODULE", pos.ComplexityGates)
+		}
+	})
+
+	t.Run("agent not in workflow", func(t *testing.T) {
+		wf := `
+name: test-rite
+phases:
+  - name: analysis
+    agent: other-agent
+    produces: report
+    next: null
+`
+		ctx := newTestParseContext(t, `name: test-agent
+description: Test agent`, "body", withWorkflow(wf))
+
+		env := resolvePosition(ctx)
+		if env.Status != StatusPartial {
+			t.Errorf("status = %s, want PARTIAL", env.Status)
+		}
+		pos := env.Data.(*PositionData)
+		if pos.InWorkflow {
+			t.Error("InWorkflow = true, want false")
+		}
+		if len(env.Gaps) == 0 {
+			t.Error("expected gap for agent not in workflow")
+		}
+	})
+
+	t.Run("entry point agent", func(t *testing.T) {
+		wf := `
+name: test-rite
+entry_point:
+  agent: test-agent
+phases:
+  - name: analysis
+    agent: test-agent
+    produces: report
+    next: null
+`
+		manifest := `name: test-rite
+version: "1.0"
+entry_agent: test-agent
+agents:
+  - name: test-agent
+    role: test
+`
+		ctx := newTestParseContext(t, `name: test-agent
+description: Test agent`, "body",
+			withWorkflow(wf), withRiteManifest(manifest))
+
+		env := resolvePosition(ctx)
+		pos := env.Data.(*PositionData)
+		if !pos.IsEntryPoint {
+			t.Error("IsEntryPoint = false, want true")
+		}
+		if !pos.IsEntryAgent {
+			t.Error("IsEntryAgent = false, want true")
+		}
+	})
+}
+
+// --- Test: Surface Resolver ---
+
+func TestResolveSurface(t *testing.T) {
+	t.Run("full surface", func(t *testing.T) {
+		manifest := `name: test-rite
+version: "1.0"
+entry_agent: test-agent
+agents:
+  - name: test-agent
+    role: test
+dromena:
+  - sync-debug
+legomena:
+  - ecosystem-ref
+  - doc-ecosystem
+`
+		wf := `
+name: test-rite
+phases:
+  - name: implementation
+    agent: test-agent
+    produces: code
+    next: null
+commands:
+  - name: build
+    file: build.md
+    description: "Build something"
+    primary_agent: test-agent
+  - name: deploy
+    file: deploy.md
+    primary_agent: other-agent
+`
+		ctx := newTestParseContext(t, `name: test-agent
+description: Test agent
+contract:
+  must_produce: [code, docs]`, "body",
+			withRiteManifest(manifest), withWorkflow(wf))
+
+		env := resolveSurface(ctx)
+		if env.Status != StatusResolved {
+			t.Errorf("status = %s, want RESOLVED", env.Status)
+		}
+		surf := env.Data.(*SurfaceData)
+		if len(surf.DromenaOwned) != 1 || surf.DromenaOwned[0] != "sync-debug" {
+			t.Errorf("DromenaOwned = %v, want [sync-debug]", surf.DromenaOwned)
+		}
+		if len(surf.LegomenaAvailable) != 2 {
+			t.Errorf("LegomenaAvailable count = %d, want 2", len(surf.LegomenaAvailable))
+		}
+		if len(surf.ArtifactTypes) != 1 || surf.ArtifactTypes[0] != "code" {
+			t.Errorf("ArtifactTypes = %v, want [code]", surf.ArtifactTypes)
+		}
+		if len(surf.Commands) != 1 || surf.Commands[0].Name != "build" {
+			t.Errorf("Commands = %v, want [build]", surf.Commands)
+		}
+		if len(surf.ContractMustProduce) != 2 {
+			t.Errorf("ContractMustProduce count = %d, want 2", len(surf.ContractMustProduce))
+		}
+	})
+
+	t.Run("minimal surface", func(t *testing.T) {
+		ctx := newTestParseContext(t, `name: test-agent
+description: Test agent`, "body")
+
+		env := resolveSurface(ctx)
+		if env.Status != StatusResolved {
+			t.Errorf("status = %s, want RESOLVED", env.Status)
+		}
+		surf := env.Data.(*SurfaceData)
+		if len(surf.DromenaOwned) != 0 {
+			t.Errorf("DromenaOwned = %v, want empty", surf.DromenaOwned)
+		}
+	})
+}
+
+// --- Test: Perception Resolver ---
+
+func TestResolvePerception(t *testing.T) {
+	t.Run("explicit skills only", func(t *testing.T) {
+		ctx := newTestParseContext(t, `name: test-agent
+description: Test agent
+skills:
+  - ecosystem-ref
+  - doc-ecosystem`, "body",
+			withSkillsDirs([]string{"ecosystem-ref", "doc-ecosystem", "forge-ref", "conventions"}))
+
+		capData := &CapabilityData{Tools: []string{"Read", "Bash", "Skill"}}
+		conData := &ConstraintData{DisallowedTools: []string{}}
+
+		env := resolvePerception(ctx, capData, conData)
+		if env.Status != StatusResolved {
+			t.Errorf("status = %s, want RESOLVED", env.Status)
+		}
+		perc := env.Data.(*PerceptionData)
+		if len(perc.ExplicitSkills) != 2 {
+			t.Errorf("ExplicitSkills count = %d, want 2", len(perc.ExplicitSkills))
+		}
+		if !perc.SkillToolAvailable {
+			t.Error("SkillToolAvailable = false, want true")
+		}
+		if perc.TotalPreloaded != 2 {
+			t.Errorf("TotalPreloaded = %d, want 2", perc.TotalPreloaded)
+		}
+		// On-demand should include forge-ref and conventions (not already preloaded)
+		if len(perc.OnDemandSkills) != 2 {
+			t.Errorf("OnDemandSkills count = %d, want 2: %v", len(perc.OnDemandSkills), perc.OnDemandSkills)
+		}
+	})
+
+	t.Run("skill policy inject", func(t *testing.T) {
+		manifest := `name: test-rite
+version: "1.0"
+entry_agent: test-agent
+agents:
+  - name: test-agent
+    role: test
+skill_policies:
+  - skill: clinic-ref
+    mode: inject
+    requires_tools: [Read]
+`
+		ctx := newTestParseContext(t, `name: test-agent
+description: Test agent`, "body", withRiteManifest(manifest))
+
+		capData := &CapabilityData{Tools: []string{"Read", "Bash"}}
+		conData := &ConstraintData{DisallowedTools: []string{}}
+
+		env := resolvePerception(ctx, capData, conData)
+		perc := env.Data.(*PerceptionData)
+		if len(perc.PolicyInjectedSkills) != 1 || perc.PolicyInjectedSkills[0] != "clinic-ref" {
+			t.Errorf("PolicyInjectedSkills = %v, want [clinic-ref]", perc.PolicyInjectedSkills)
+		}
+		if len(perc.EffectivePolicies) != 1 {
+			t.Fatalf("EffectivePolicies count = %d, want 1", len(perc.EffectivePolicies))
+		}
+		if !perc.EffectivePolicies[0].Applied {
+			t.Errorf("policy Applied = false, want true")
+		}
+	})
+
+	t.Run("skill tool disallowed", func(t *testing.T) {
+		ctx := newTestParseContext(t, `name: test-agent
+description: Test agent
+skills:
+  - ecosystem-ref`, "body",
+			withSkillsDirs([]string{"ecosystem-ref", "forge-ref"}))
+
+		capData := &CapabilityData{Tools: []string{"Read"}}
+		conData := &ConstraintData{DisallowedTools: []string{"Skill"}}
+
+		env := resolvePerception(ctx, capData, conData)
+		perc := env.Data.(*PerceptionData)
+		if perc.SkillToolAvailable {
+			t.Error("SkillToolAvailable = true, want false")
+		}
+		if len(perc.OnDemandSkills) != 0 {
+			t.Errorf("OnDemandSkills = %v, want empty (Skill disallowed)", perc.OnDemandSkills)
+		}
+	})
+
+	t.Run("policy requires_tools not met", func(t *testing.T) {
+		manifest := `name: test-rite
+version: "1.0"
+entry_agent: test-agent
+agents:
+  - name: test-agent
+    role: test
+skill_policies:
+  - skill: clinic-ref
+    mode: inject
+    requires_tools: [Bash]
+`
+		ctx := newTestParseContext(t, `name: test-agent
+description: Test agent`, "body", withRiteManifest(manifest))
+
+		capData := &CapabilityData{Tools: []string{"Read"}} // no Bash
+		conData := &ConstraintData{DisallowedTools: []string{}}
+
+		env := resolvePerception(ctx, capData, conData)
+		perc := env.Data.(*PerceptionData)
+		if len(perc.PolicyInjectedSkills) != 0 {
+			t.Errorf("PolicyInjectedSkills = %v, want empty (requires_tools not met)", perc.PolicyInjectedSkills)
+		}
+		if len(perc.EffectivePolicies) != 1 || perc.EffectivePolicies[0].Applied {
+			t.Error("policy should not be applied when requires_tools not met")
+		}
+	})
+}
+
+// --- Test: Phase 2 Audit Checks ---
+
+func TestPhase2AuditChecks(t *testing.T) {
+	t.Run("AUDIT-007 skills without skill tool", func(t *testing.T) {
+		doc := &PerspectiveDocument{
+			Layers: map[string]*LayerEnvelope{
+				"L2": {Data: &PerceptionData{
+					ExplicitSkills:     []string{"ecosystem-ref"},
+					PolicyInjectedSkills: []string{},
+					SkillToolAvailable: false,
+				}},
+				"L4": {Data: &ConstraintData{DisallowedTools: []string{"Skill"}}},
+			},
+		}
+		findings := checkSkillsWithoutSkillTool(doc)
+		if len(findings) != 1 {
+			t.Fatalf("expected 1 finding, got %d", len(findings))
+		}
+		if findings[0].ID != "AUDIT-007" {
+			t.Errorf("ID = %s, want AUDIT-007", findings[0].ID)
+		}
+		if findings[0].Severity != SeverityCritical {
+			t.Errorf("Severity = %s, want CRITICAL", findings[0].Severity)
+		}
+	})
+
+	t.Run("AUDIT-008 orphan agent", func(t *testing.T) {
+		doc := &PerspectiveDocument{
+			Layers: map[string]*LayerEnvelope{
+				"L6": {Data: &PositionData{InWorkflow: false}},
+			},
+		}
+		findings := checkOrphanAgent(doc)
+		if len(findings) != 1 {
+			t.Fatalf("expected 1 finding, got %d", len(findings))
+		}
+		if findings[0].ID != "AUDIT-008" {
+			t.Errorf("ID = %s, want AUDIT-008", findings[0].ID)
+		}
+	})
+
+	t.Run("AUDIT-009 must_produce not in artifacts", func(t *testing.T) {
+		doc := &PerspectiveDocument{
+			Layers: map[string]*LayerEnvelope{
+				"L4": {Data: &ConstraintData{
+					DisallowedTools: []string{},
+					BehavioralContract: &BehavioralContractData{
+						MustProduce: []string{"code", "docs"},
+					},
+				}},
+				"L7": {Data: &SurfaceData{ArtifactTypes: []string{"code"}}},
+			},
+		}
+		findings := checkMustProduceNotInArtifacts(doc)
+		if len(findings) != 1 {
+			t.Fatalf("expected 1 finding, got %d", len(findings))
+		}
+		if findings[0].ID != "AUDIT-009" {
+			t.Errorf("ID = %s, want AUDIT-009", findings[0].ID)
+		}
+		if findings[0].Evidence != "docs" {
+			t.Errorf("Evidence = %q, want docs", findings[0].Evidence)
+		}
+	})
+
+	t.Run("AUDIT-008 no finding for in-workflow agent", func(t *testing.T) {
+		doc := &PerspectiveDocument{
+			Layers: map[string]*LayerEnvelope{
+				"L6": {Data: &PositionData{InWorkflow: true}},
+			},
+		}
+		findings := checkOrphanAgent(doc)
+		if len(findings) != 0 {
+			t.Errorf("expected 0 findings for in-workflow agent, got %d", len(findings))
+		}
+	})
 }
 
 // --- Test: Helper functions ---

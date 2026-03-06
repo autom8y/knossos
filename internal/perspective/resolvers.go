@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"github.com/autom8y/knossos/internal/checksum"
@@ -378,6 +379,340 @@ func resolveProvenance(ctx *ParseContext) *LayerEnvelope {
 	}
 }
 
+// resolvePerception resolves the L2 Perception layer from the parse context.
+// It replays skill policy evaluation in read-only mode, replicating the semantics
+// of internal/materialize/skill_policies.go without importing that package.
+func resolvePerception(ctx *ParseContext, capData *CapabilityData, conData *ConstraintData) *LayerEnvelope {
+	raw := ctx.AgentFrontmatterRaw
+
+	// --- Step 1: Extract agent's explicit skills from frontmatter ---
+	explicitSkills := stringSliceFromMap(raw, "skills")
+	if explicitSkills == nil {
+		explicitSkills = []string{}
+	}
+
+	// --- Step 2: Parse skill policies from shared and rite manifests ---
+	sharedPolicies := perceptionParseSkillPolicies(ctx.SharedManifest)
+	ritePolicies := perceptionParseSkillPolicies(ctx.RiteManifest)
+	mergedPolicies := perceptionMergeSkillPolicies(sharedPolicies, ritePolicies)
+
+	// --- Step 3: Parse agent overrides and excludes ---
+	excludeAll, excludeSet := perceptionParseSkillPolicyExclude(raw)
+	overrideMap := perceptionParseSkillPolicyOverride(raw)
+
+	// --- Step 4: Build lookup sets for predicate evaluation ---
+	// Tools set: O(1) lookup for requires_tools predicate
+	toolsSet := perceptionBuildSet(capData.Tools)
+	// Disallowed set: O(1) lookup for requires_none predicate and dead reference guard
+	disallowedSet := perceptionBuildSet(conData.DisallowedTools)
+
+	// --- Step 5: Evaluate each merged policy ---
+	var policyInjected []string
+	var policyReferenced []string
+	var effectivePolicies []SkillPolicyResult
+
+	for _, policy := range mergedPolicies {
+		result := SkillPolicyResult{
+			Skill:         policy.skill,
+			Mode:          policy.mode,
+			EffectiveMode: policy.mode, // default to original mode
+		}
+
+		// Step 5a: Exclude check — exclude wins over everything
+		if excludeAll || excludeSet[policy.skill] {
+			result.Applied = false
+			result.Reason = "excluded by skill_policy_exclude"
+			effectivePolicies = append(effectivePolicies, result)
+			continue
+		}
+
+		// Step 5b: Determine effective mode (agent override wins)
+		if override, hasOverride := overrideMap[policy.skill]; hasOverride {
+			result.EffectiveMode = override
+		}
+
+		// Step 5c: requires_tools predicate — skip if agent lacks ANY required tool
+		skipped := false
+		for _, req := range policy.requiresTools {
+			if !toolsSet[req] {
+				result.Applied = false
+				result.Reason = "missing required tool: " + req
+				effectivePolicies = append(effectivePolicies, result)
+				skipped = true
+				break
+			}
+		}
+		if skipped {
+			continue
+		}
+
+		// Step 5d: requires_none predicate — skip if agent HAS any of these in disallowedTools
+		for _, none := range policy.requiresNone {
+			if disallowedSet[none] {
+				result.Applied = false
+				result.Reason = "blocked by requires_none: " + none + " in disallowedTools"
+				effectivePolicies = append(effectivePolicies, result)
+				skipped = true
+				break
+			}
+		}
+		if skipped {
+			continue
+		}
+
+		// Step 5e: Mode application
+		switch result.EffectiveMode {
+		case "inject":
+			result.Applied = true
+			policyInjected = append(policyInjected, policy.skill)
+		case "reference":
+			// Dead reference guard: if Skill tool is disallowed, skip
+			if disallowedSet["Skill"] {
+				result.Applied = false
+				result.Reason = "dead reference: Skill tool disallowed"
+			} else {
+				result.Applied = true
+				policyReferenced = append(policyReferenced, policy.skill)
+			}
+		default:
+			// Unknown mode: record as not applied
+			result.Applied = false
+			result.Reason = "unknown mode: " + result.EffectiveMode
+		}
+
+		effectivePolicies = append(effectivePolicies, result)
+	}
+
+	// Normalise nil slices to empty slices for consistent output
+	if policyInjected == nil {
+		policyInjected = []string{}
+	}
+	if policyReferenced == nil {
+		policyReferenced = []string{}
+	}
+
+	// --- Step 6: Determine SkillToolAvailable ---
+	skillToolAvailable := !disallowedSet["Skill"]
+
+	// --- Step 7: Compute on-demand skills ---
+	// On-demand = materialized skills NOT already in explicit, injected, or referenced sets.
+	// Only meaningful if the agent can invoke the Skill tool.
+	var onDemandSkills []string
+	if skillToolAvailable {
+		preloadedSet := make(map[string]bool, len(explicitSkills)+len(policyInjected)+len(policyReferenced))
+		for _, s := range explicitSkills {
+			preloadedSet[s] = true
+		}
+		for _, s := range policyInjected {
+			preloadedSet[s] = true
+		}
+		for _, s := range policyReferenced {
+			preloadedSet[s] = true
+		}
+		for _, dir := range ctx.MaterializedSkillsDirs {
+			if !preloadedSet[dir] {
+				onDemandSkills = append(onDemandSkills, dir)
+			}
+		}
+	}
+	if onDemandSkills == nil {
+		onDemandSkills = []string{}
+	}
+
+	// --- Step 8: Compute totals ---
+	totalPreloaded := len(explicitSkills) + len(policyInjected)
+	totalReachable := totalPreloaded + len(policyReferenced)
+	if skillToolAvailable {
+		totalReachable += len(onDemandSkills)
+	}
+
+	// --- Step 9: Record source refs ---
+	sources := []SourceRef{
+		{
+			Path:            ctx.AgentSourcePath,
+			FieldsExtracted: []string{"skills", "skill_policy_exclude", "skill_policy_override"},
+			ReadFrom:        "source",
+		},
+		{
+			Path:            filepath.Join(ctx.ProjectRoot, "rites", "shared", "manifest.yaml"),
+			FieldsExtracted: []string{"skill_policies"},
+			ReadFrom:        "manifest",
+		},
+		{
+			Path:            filepath.Join(ctx.RiteSourcePath, "manifest.yaml"),
+			FieldsExtracted: []string{"skill_policies"},
+			ReadFrom:        "manifest",
+		},
+		{
+			Path:            filepath.Join(ctx.ClaudeDir, "skills"),
+			FieldsExtracted: []string{"materialized_skill_dirs"},
+			ReadFrom:        "materialized",
+		},
+	}
+
+	data := &PerceptionData{
+		ExplicitSkills:         explicitSkills,
+		PolicyInjectedSkills:   policyInjected,
+		PolicyReferencedSkills: policyReferenced,
+		OnDemandSkills:         onDemandSkills,
+		SkillToolAvailable:     skillToolAvailable,
+		TotalPreloaded:         totalPreloaded,
+		TotalReachable:         totalReachable,
+		EffectivePolicies:      effectivePolicies,
+	}
+
+	return &LayerEnvelope{
+		Status:           StatusResolved,
+		SourceFiles:      sources,
+		ResolutionMethod: "Replayed skill policy evaluation against L3 tools and L4 disallowedTools; enumerated materialized skills directory",
+		Data:             data,
+	}
+}
+
+// --- Perception resolver helpers (private) ---
+
+// perceptionSkillPolicy is a local representation of a skill policy entry,
+// avoiding any import of internal/materialize.
+type perceptionSkillPolicy struct {
+	skill         string
+	mode          string
+	requiresTools []string
+	requiresNone  []string
+}
+
+// perceptionParseSkillPolicies extracts skill_policies from a manifest map.
+// Returns nil if the key is absent or the value cannot be parsed.
+func perceptionParseSkillPolicies(manifest map[string]any) []perceptionSkillPolicy {
+	raw, ok := manifest["skill_policies"]
+	if !ok || raw == nil {
+		return nil
+	}
+	items, ok := raw.([]any)
+	if !ok {
+		return nil
+	}
+	policies := make([]perceptionSkillPolicy, 0, len(items))
+	for _, item := range items {
+		m, ok := item.(map[string]any)
+		if !ok {
+			continue
+		}
+		skillName, _ := m["skill"].(string)
+		mode, _ := m["mode"].(string)
+		if skillName == "" || mode == "" {
+			continue
+		}
+		p := perceptionSkillPolicy{
+			skill:         skillName,
+			mode:          mode,
+			requiresTools: stringSliceFromMapAny(m, "requires_tools"),
+			requiresNone:  stringSliceFromMapAny(m, "requires_none"),
+		}
+		policies = append(policies, p)
+	}
+	return policies
+}
+
+// perceptionMergeSkillPolicies merges shared and rite-level policies.
+// Rite policies override shared policies for the same skill name.
+// Preserves order: shared-first, rite-appended for non-overridden rite policies.
+// This replicates MergeSkillPolicies from internal/materialize/skill_policies.go.
+func perceptionMergeSkillPolicies(shared, rite []perceptionSkillPolicy) []perceptionSkillPolicy {
+	if len(shared) == 0 && len(rite) == 0 {
+		return nil
+	}
+
+	// Track shared policy positions for in-place override
+	sharedBySkill := make(map[string]int, len(shared))
+	result := make([]perceptionSkillPolicy, 0, len(shared)+len(rite))
+
+	for i, p := range shared {
+		result = append(result, p)
+		sharedBySkill[p.skill] = i
+	}
+
+	for _, p := range rite {
+		if idx, exists := sharedBySkill[p.skill]; exists {
+			// Rite wins: replace in-place to preserve shared ordering
+			result[idx] = p
+		} else {
+			result = append(result, p)
+		}
+	}
+
+	return result
+}
+
+// perceptionParseSkillPolicyExclude reads the skill_policy_exclude field.
+// Replicates parseSkillPolicyExclude from internal/materialize/skill_policies.go.
+func perceptionParseSkillPolicyExclude(fmMap map[string]any) (excludeAll bool, excludeSet map[string]bool) {
+	val, ok := fmMap["skill_policy_exclude"]
+	if !ok {
+		return false, nil
+	}
+
+	// String "all" means exclude all policies
+	if s, ok := val.(string); ok {
+		if s == "all" {
+			return true, nil
+		}
+		// Single string (not "all"): treat as single-item exclusion set
+		return false, map[string]bool{s: true}
+	}
+
+	// String slice: build exclusion set
+	items := toStringSlice(val)
+	if len(items) == 0 {
+		return false, nil
+	}
+	set := make(map[string]bool, len(items))
+	for _, item := range items {
+		set[item] = true
+	}
+	return false, set
+}
+
+// perceptionParseSkillPolicyOverride reads the skill_policy_override field.
+// Replicates parseSkillPolicyOverride from internal/materialize/skill_policies.go.
+func perceptionParseSkillPolicyOverride(fmMap map[string]any) map[string]string {
+	val, ok := fmMap["skill_policy_override"]
+	if !ok {
+		return nil
+	}
+	items, ok := val.([]any)
+	if !ok {
+		return nil
+	}
+	overrides := make(map[string]string, len(items))
+	for _, item := range items {
+		entry, ok := item.(map[string]any)
+		if !ok {
+			continue
+		}
+		skillName, ok1 := entry["skill"].(string)
+		modeName, ok2 := entry["mode"].(string)
+		if ok1 && ok2 && skillName != "" && modeName != "" {
+			overrides[skillName] = modeName
+		}
+	}
+	if len(overrides) == 0 {
+		return nil
+	}
+	return overrides
+}
+
+// perceptionBuildSet constructs a boolean set from a string slice for O(1) lookup.
+func perceptionBuildSet(items []string) map[string]bool {
+	if len(items) == 0 {
+		return nil
+	}
+	set := make(map[string]bool, len(items))
+	for _, item := range items {
+		set[item] = true
+	}
+	return set
+}
+
 // --- Helper functions ---
 
 // stringFromMap extracts a string value from a map, returning "" if not found.
@@ -692,6 +1027,268 @@ func parseContractFromRaw(v any) *BehavioralContractData {
 	}
 
 	return contract
+}
+
+// resolvePosition resolves the L6 Position layer from the parse context.
+// It cross-references workflow.yaml, orchestrator.yaml, and the rite manifest to
+// determine where this agent sits in the workflow graph.
+func resolvePosition(ctx *ParseContext) *LayerEnvelope {
+	// Determine agent name for matching
+	agentName := ctx.AgentFrontmatter.Name
+	if agentName == "" {
+		agentName = filepath.Base(strings.TrimSuffix(ctx.AgentSourcePath, ".md"))
+	}
+
+	sources := []SourceRef{
+		{Path: ctx.AgentSourcePath, FieldsExtracted: []string{"upstream", "downstream"}, ReadFrom: "source"},
+		{Path: filepath.Join(ctx.RiteSourcePath, "workflow.yaml"), FieldsExtracted: []string{"phases", "entry_point", "back_routes", "complexity_levels"}, ReadFrom: "manifest"},
+		{Path: filepath.Join(ctx.RiteSourcePath, "orchestrator.yaml"), FieldsExtracted: []string{"handoff_criteria"}, ReadFrom: "manifest"},
+		{Path: filepath.Join(ctx.RiteSourcePath, "manifest.yaml"), FieldsExtracted: []string{"entry_agent", "complexity_levels"}, ReadFrom: "manifest"},
+	}
+
+	data := &PositionData{}
+
+	// Extract phases list from workflow
+	phases := extractPhasesList(ctx.Workflow)
+	data.TotalPhases = len(phases)
+
+	// Find this agent's phase by matching the agent field
+	matchedPhaseIdx := -1
+	matchedPhaseName := ""
+	for i, phase := range phases {
+		if agentField, ok := phase["agent"].(string); ok && agentField == agentName {
+			matchedPhaseIdx = i
+			matchedPhaseName = stringFromMap(phase, "name")
+			data.WorkflowPhase = matchedPhaseName
+			data.PhaseIndex = i
+			data.PhaseProduces = stringFromMap(phase, "produces")
+			data.PhaseCondition = stringFromMap(phase, "condition")
+			data.InWorkflow = true
+			break
+		}
+	}
+
+	// Determine predecessor and successor if the agent was found in the workflow
+	if matchedPhaseIdx >= 0 {
+		// Predecessor: the agent from the previous phase (if any)
+		if matchedPhaseIdx > 0 {
+			if prevAgent, ok := phases[matchedPhaseIdx-1]["agent"].(string); ok {
+				data.PhasePredecessor = prevAgent
+			}
+		}
+
+		// Successor: resolve from the next field (phase name), then look up that phase's agent
+		nextPhaseName := stringFromMap(phases[matchedPhaseIdx], "next")
+		if nextPhaseName != "" && nextPhaseName != "null" {
+			for _, phase := range phases {
+				if stringFromMap(phase, "name") == nextPhaseName {
+					if nextAgent, ok := phase["agent"].(string); ok {
+						data.PhaseSuccessor = nextAgent
+					}
+					break
+				}
+			}
+		}
+	}
+
+	// Check if this agent is the workflow entry_point
+	if ep, ok := ctx.Workflow["entry_point"].(map[string]any); ok {
+		if epAgent, ok := ep["agent"].(string); ok && epAgent == agentName {
+			data.IsEntryPoint = true
+		}
+	}
+
+	// Check if this agent is the rite manifest entry_agent
+	if entryAgent, ok := ctx.RiteManifest["entry_agent"].(string); ok && entryAgent == agentName {
+		data.IsEntryAgent = true
+	}
+
+	// Collect back_routes targeting this agent
+	if backRoutes, ok := ctx.Workflow["back_routes"].([]any); ok {
+		for _, br := range backRoutes {
+			brMap, ok := br.(map[string]any)
+			if !ok {
+				continue
+			}
+			targetAgent, _ := brMap["target_agent"].(string)
+			if targetAgent != agentName {
+				continue
+			}
+			route := BackRoute{
+				SourcePhase: stringFromMap(brMap, "source_phase"),
+				Trigger:     stringFromMap(brMap, "trigger"),
+				Condition:   stringFromMap(brMap, "condition"),
+			}
+			// requires_user_confirmation can be bool
+			if ruc, ok := brMap["requires_user_confirmation"].(bool); ok {
+				route.RequiresUserConfirmation = ruc
+			}
+			data.BackRoutes = append(data.BackRoutes, route)
+		}
+	}
+
+	// Collect complexity gates: levels where this agent's phase is included
+	complexityLevels := extractComplexityLevels(ctx.Workflow, ctx.RiteManifest)
+	if matchedPhaseName != "" {
+		for levelName, phasesInLevel := range complexityLevels {
+			if slices.Contains(phasesInLevel, matchedPhaseName) {
+				data.ComplexityGates = append(data.ComplexityGates, levelName)
+			}
+		}
+	}
+
+	// Collect handoff criteria from orchestrator for this agent's phase
+	if matchedPhaseName != "" {
+		if criteria, ok := ctx.Orchestrator["handoff_criteria"].(map[string]any); ok {
+			if phaseItems, ok := criteria[matchedPhaseName]; ok {
+				data.HandoffCriteria = toStringSlice(phaseItems)
+			}
+		}
+	}
+
+	// Determine status
+	var gaps []Gap
+	status := StatusResolved
+	if !data.InWorkflow {
+		status = StatusPartial
+		gaps = append(gaps, Gap{
+			Field:    "workflow_phase",
+			Reason:   "Agent " + agentName + " not found in any workflow phase",
+			Severity: SeverityMissing,
+		})
+	}
+
+	return &LayerEnvelope{
+		Status:           status,
+		SourceFiles:      sources,
+		ResolutionMethod: "Cross-referenced workflow.yaml phases, orchestrator.yaml handoff_criteria, and rite manifest entry_agent",
+		Gaps:             gaps,
+		Data:             data,
+	}
+}
+
+// resolveSurface resolves the L7 Surface layer from the parse context.
+// It captures the agent's I/O surface: dromena, legomena, artifact types, and commands.
+func resolveSurface(ctx *ParseContext) *LayerEnvelope {
+	// Determine agent name for command matching
+	agentName := ctx.AgentFrontmatter.Name
+	if agentName == "" {
+		agentName = filepath.Base(strings.TrimSuffix(ctx.AgentSourcePath, ".md"))
+	}
+
+	sources := []SourceRef{
+		{Path: filepath.Join(ctx.RiteSourcePath, "manifest.yaml"), FieldsExtracted: []string{"dromena", "legomena"}, ReadFrom: "manifest"},
+		{Path: filepath.Join(ctx.RiteSourcePath, "workflow.yaml"), FieldsExtracted: []string{"phases[agent].produces", "commands"}, ReadFrom: "manifest"},
+		{Path: ctx.AgentSourcePath, FieldsExtracted: []string{"contract.must_produce"}, ReadFrom: "source"},
+	}
+
+	data := &SurfaceData{}
+
+	// Dromena from rite manifest
+	data.DromenaOwned = stringSliceFromMap(ctx.RiteManifest, "dromena")
+
+	// Legomena from rite manifest
+	data.LegomenaAvailable = stringSliceFromMap(ctx.RiteManifest, "legomena")
+
+	// Artifact types: extract from the workflow phase this agent owns
+	phases := extractPhasesList(ctx.Workflow)
+	for _, phase := range phases {
+		if agentField, ok := phase["agent"].(string); ok && agentField == agentName {
+			if produces := stringFromMap(phase, "produces"); produces != "" {
+				data.ArtifactTypes = []string{produces}
+			}
+			break
+		}
+	}
+
+	// Contract must_produce from agent frontmatter
+	if contractRaw, ok := ctx.AgentFrontmatterRaw["contract"]; ok && contractRaw != nil {
+		if contractMap, ok := contractRaw.(map[string]any); ok {
+			data.ContractMustProduce = stringSliceFromMapAny(contractMap, "must_produce")
+		}
+	}
+
+	// Commands from workflow.yaml where primary_agent matches
+	if commands, ok := ctx.Workflow["commands"].([]any); ok {
+		for _, cmd := range commands {
+			cmdMap, ok := cmd.(map[string]any)
+			if !ok {
+				continue
+			}
+			primaryAgent, _ := cmdMap["primary_agent"].(string)
+			if primaryAgent != agentName {
+				continue
+			}
+			ref := CommandRef{
+				Name:        stringFromMap(cmdMap, "name"),
+				File:        stringFromMap(cmdMap, "file"),
+				Description: stringFromMap(cmdMap, "description"),
+			}
+			data.Commands = append(data.Commands, ref)
+		}
+	}
+
+	return &LayerEnvelope{
+		Status:           StatusResolved,
+		SourceFiles:      sources,
+		ResolutionMethod: "Extracted dromena/legomena from manifest, artifact types from workflow phase, commands from workflow commands",
+		Data:             data,
+	}
+}
+
+// extractPhasesList returns the phases array from a workflow map as []map[string]any.
+func extractPhasesList(workflow map[string]any) []map[string]any {
+	phasesRaw, ok := workflow["phases"]
+	if !ok {
+		return nil
+	}
+	phasesSlice, ok := phasesRaw.([]any)
+	if !ok {
+		return nil
+	}
+	result := make([]map[string]any, 0, len(phasesSlice))
+	for _, p := range phasesSlice {
+		if m, ok := p.(map[string]any); ok {
+			result = append(result, m)
+		}
+	}
+	return result
+}
+
+// extractComplexityLevels returns a map of level name → []phase names from
+// workflow complexity_levels or rite manifest complexity_levels.
+func extractComplexityLevels(workflow, riteManifest map[string]any) map[string][]string {
+	result := make(map[string][]string)
+
+	// Try workflow first, then rite manifest
+	sources := []map[string]any{workflow, riteManifest}
+	for _, src := range sources {
+		levelsRaw, ok := src["complexity_levels"]
+		if !ok {
+			continue
+		}
+		levelsSlice, ok := levelsRaw.([]any)
+		if !ok {
+			continue
+		}
+		for _, lvl := range levelsSlice {
+			lvlMap, ok := lvl.(map[string]any)
+			if !ok {
+				continue
+			}
+			name := stringFromMap(lvlMap, "name")
+			if name == "" {
+				continue
+			}
+			phases := toStringSlice(lvlMap["phases"])
+			result[name] = phases
+		}
+		// Only read from first source that has the field
+		if len(result) > 0 {
+			break
+		}
+	}
+	return result
 }
 
 // --- File utilities ---

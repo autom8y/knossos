@@ -17,6 +17,7 @@ type PerspectiveDocument struct {
 	Layers           map[string]*LayerEnvelope `json:"layers" yaml:"layers"`
 	AssemblyMetadata AssemblyMetadata          `json:"assembly_metadata" yaml:"assembly_metadata"`
 	AuditOverlay     *AuditOverlay             `json:"audit,omitempty" yaml:"audit,omitempty"`
+	SimulateOverlay  *SimulateOverlay          `json:"simulate,omitempty" yaml:"simulate,omitempty"`
 }
 
 // LayerEnvelope is the uniform wrapper for every resolved layer.
@@ -185,6 +186,74 @@ type ProvenanceData struct {
 	LastSynced   time.Time `json:"last_synced" yaml:"last_synced"`
 	Diverged     bool      `json:"diverged" yaml:"diverged"`
 	ManifestPath string    `json:"manifest_path" yaml:"manifest_path"`
+}
+
+// PerceptionData contains the agent's skill awareness configuration (L2).
+type PerceptionData struct {
+	ExplicitSkills         []string            `json:"explicit_skills" yaml:"explicit_skills"`
+	PolicyInjectedSkills   []string            `json:"policy_injected_skills" yaml:"policy_injected_skills"`
+	PolicyReferencedSkills []string            `json:"policy_referenced_skills" yaml:"policy_referenced_skills"`
+	OnDemandSkills         []string            `json:"on_demand_skills" yaml:"on_demand_skills"`
+	SkillToolAvailable     bool                `json:"skill_tool_available" yaml:"skill_tool_available"`
+	TotalPreloaded         int                 `json:"total_preloaded" yaml:"total_preloaded"`
+	TotalReachable         int                 `json:"total_reachable" yaml:"total_reachable"`
+	EffectivePolicies      []SkillPolicyResult `json:"effective_policies,omitempty" yaml:"effective_policies,omitempty"`
+}
+
+// SkillPolicyResult describes the resolved skill policy for a single skill.
+type SkillPolicyResult struct {
+	Skill         string `json:"skill" yaml:"skill"`
+	Mode          string `json:"mode" yaml:"mode"`
+	EffectiveMode string `json:"effective_mode" yaml:"effective_mode"`
+	Applied       bool   `json:"applied" yaml:"applied"`
+	Reason        string `json:"reason" yaml:"reason"`
+}
+
+// PositionData contains the agent's position in the workflow (L6).
+type PositionData struct {
+	WorkflowPhase    string      `json:"workflow_phase" yaml:"workflow_phase"`
+	PhaseIndex       int         `json:"phase_index" yaml:"phase_index"`
+	TotalPhases      int         `json:"total_phases" yaml:"total_phases"`
+	IsEntryPoint     bool        `json:"is_entry_point" yaml:"is_entry_point"`
+	IsEntryAgent     bool        `json:"is_entry_agent" yaml:"is_entry_agent"`
+	InWorkflow       bool        `json:"in_workflow" yaml:"in_workflow"`
+	PhasePredecessor string      `json:"phase_predecessor,omitempty" yaml:"phase_predecessor,omitempty"`
+	PhaseSuccessor   string      `json:"phase_successor,omitempty" yaml:"phase_successor,omitempty"`
+	PhaseCondition   string      `json:"phase_condition,omitempty" yaml:"phase_condition,omitempty"`
+	PhaseProduces    string      `json:"phase_produces,omitempty" yaml:"phase_produces,omitempty"`
+	BackRoutes       []BackRoute `json:"back_routes,omitempty" yaml:"back_routes,omitempty"`
+	ComplexityGates  []string    `json:"complexity_gates,omitempty" yaml:"complexity_gates,omitempty"`
+	HandoffCriteria  []string    `json:"handoff_criteria,omitempty" yaml:"handoff_criteria,omitempty"`
+}
+
+// BackRoute describes a reverse workflow routing path targeting this agent.
+type BackRoute struct {
+	SourcePhase              string `json:"source_phase" yaml:"source_phase"`
+	Trigger                  string `json:"trigger" yaml:"trigger"`
+	Condition                string `json:"condition,omitempty" yaml:"condition,omitempty"`
+	RequiresUserConfirmation bool   `json:"requires_user_confirmation" yaml:"requires_user_confirmation"`
+}
+
+// SurfaceData contains the agent's I/O surface (L7).
+type SurfaceData struct {
+	DromenaOwned        []string     `json:"dromena_owned" yaml:"dromena_owned"`
+	LegomenaAvailable   []string     `json:"legomena_available" yaml:"legomena_available"`
+	ArtifactTypes       []string     `json:"artifact_types" yaml:"artifact_types"`
+	ContractMustProduce []string     `json:"contract_must_produce,omitempty" yaml:"contract_must_produce,omitempty"`
+	Commands            []CommandRef `json:"commands,omitempty" yaml:"commands,omitempty"`
+}
+
+// CommandRef describes a rite command associated with this agent.
+type CommandRef struct {
+	Name        string `json:"name" yaml:"name"`
+	File        string `json:"file,omitempty" yaml:"file,omitempty"`
+	Description string `json:"description,omitempty" yaml:"description,omitempty"`
+}
+
+// SimulateOverlay holds configuration for simulate mode (Phase 3).
+type SimulateOverlay struct {
+	Prompt string `json:"prompt" yaml:"prompt"`
+	// Phase 3: keyword matching, capability mapping
 }
 
 // --- Audit types ---

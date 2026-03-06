@@ -16,6 +16,7 @@ import (
 type embodyOptions struct {
 	riteName string
 	audit    bool
+	simulate bool
 }
 
 func newEmbodyCmd(ctx *cmdContext) *cobra.Command {
@@ -26,9 +27,10 @@ func newEmbodyCmd(ctx *cmdContext) *cobra.Command {
 		Short: "Show an agent's full experiential context",
 		Long: `Reconstructs an agent's full context as a first-person perspective view.
 
-Resolves identity, capability, constraint, memory, and provenance layers
-from source files (not materialized output) to capture all metadata
-including knossos-only fields stripped during materialization.
+Resolves identity, perception, capability, constraint, memory, position,
+surface, and provenance layers from source files (not materialized output)
+to capture all metadata including knossos-only fields stripped during
+materialization.
 
 Examples:
   ari agent embody pythia                          # Default perspective
@@ -43,6 +45,7 @@ Examples:
 
 	cmd.Flags().StringVarP(&opts.riteName, "rite", "r", "", "Rite to resolve agent from (default: active rite)")
 	cmd.Flags().BoolVar(&opts.audit, "audit", false, "Enable audit overlay with consistency checks")
+	cmd.Flags().BoolVar(&opts.simulate, "simulate", false, "Enable simulate mode (capability mapping — Phase 3)")
 
 	return cmd
 }
@@ -54,6 +57,9 @@ func runEmbody(ctx *cmdContext, opts embodyOptions, agentName string) error {
 	mode := "default"
 	if opts.audit {
 		mode = "audit"
+	}
+	if opts.simulate {
+		mode = "simulate"
 	}
 
 	perspOpts := perspective.PerspectiveOptions{
@@ -79,6 +85,13 @@ func runEmbody(ctx *cmdContext, opts embodyOptions, agentName string) error {
 	// Run audit if requested
 	if opts.audit {
 		doc.AuditOverlay = perspective.RunAudit(doc, parseCtx)
+	}
+
+	// Simulate mode skeleton (Phase 3 — not yet implemented)
+	if opts.simulate {
+		doc.SimulateOverlay = &perspective.SimulateOverlay{
+			Prompt: "(simulate mode not yet implemented — Phase 3)",
+		}
 	}
 
 	// Output
@@ -116,6 +129,27 @@ func (o embodyOutput) Text() string {
 				b.WriteString(fmt.Sprintf("  Model: %s\n", id.Model))
 			}
 			b.WriteString(fmt.Sprintf("  System Prompt: %d lines\n", id.SystemPromptLines))
+		}
+		writeStatusLine(&b, env)
+	}
+
+	// L2 Perception
+	if env, ok := doc.Layers["L2"]; ok {
+		b.WriteString("\n> Perception\n")
+		if perc, ok := env.Data.(*perspective.PerceptionData); ok {
+			b.WriteString(fmt.Sprintf("  Explicit Skills: %d\n", len(perc.ExplicitSkills)))
+			if len(perc.ExplicitSkills) > 0 {
+				b.WriteString(fmt.Sprintf("    %s\n", truncateList(perc.ExplicitSkills, 5)))
+			}
+			b.WriteString(fmt.Sprintf("  Policy Injected: %d\n", len(perc.PolicyInjectedSkills)))
+			b.WriteString(fmt.Sprintf("  Policy Referenced: %d\n", len(perc.PolicyReferencedSkills)))
+			b.WriteString(fmt.Sprintf("  On-Demand: %d\n", len(perc.OnDemandSkills)))
+			skillTool := "available"
+			if !perc.SkillToolAvailable {
+				skillTool = "DISALLOWED"
+			}
+			b.WriteString(fmt.Sprintf("  Skill Tool: %s\n", skillTool))
+			b.WriteString(fmt.Sprintf("  Totals: %d preloaded, %d reachable\n", perc.TotalPreloaded, perc.TotalReachable))
 		}
 		writeStatusLine(&b, env)
 	}
@@ -217,6 +251,77 @@ func (o embodyOutput) Text() string {
 				} else {
 					b.WriteString("  Runtime: OPAQUE (CC path hash)\n")
 				}
+			}
+		}
+		writeStatusLine(&b, env)
+	}
+
+	// L6 Position
+	if env, ok := doc.Layers["L6"]; ok {
+		b.WriteString("\n> Position\n")
+		if pos, ok := env.Data.(*perspective.PositionData); ok {
+			if pos.InWorkflow {
+				b.WriteString(fmt.Sprintf("  Phase: %s (%d/%d)\n", pos.WorkflowPhase, pos.PhaseIndex+1, pos.TotalPhases))
+				if pos.PhasePredecessor != "" {
+					b.WriteString(fmt.Sprintf("  Predecessor: %s\n", pos.PhasePredecessor))
+				}
+				if pos.PhaseSuccessor != "" {
+					b.WriteString(fmt.Sprintf("  Successor: %s\n", pos.PhaseSuccessor))
+				}
+				if pos.PhaseCondition != "" {
+					b.WriteString(fmt.Sprintf("  Condition: %s\n", pos.PhaseCondition))
+				}
+				if pos.PhaseProduces != "" {
+					b.WriteString(fmt.Sprintf("  Produces: %s\n", pos.PhaseProduces))
+				}
+			} else {
+				b.WriteString("  Phase: not in workflow\n")
+			}
+			if pos.IsEntryPoint {
+				b.WriteString("  Entry Point: yes (workflow)\n")
+			}
+			if pos.IsEntryAgent {
+				b.WriteString("  Entry Agent: yes (manifest)\n")
+			}
+			if len(pos.BackRoutes) > 0 {
+				b.WriteString(fmt.Sprintf("  Back Routes: %d targeting this agent\n", len(pos.BackRoutes)))
+			}
+			if len(pos.ComplexityGates) > 0 {
+				b.WriteString(fmt.Sprintf("  Complexity Gates: %s\n", strings.Join(pos.ComplexityGates, ", ")))
+			}
+			if len(pos.HandoffCriteria) > 0 {
+				b.WriteString(fmt.Sprintf("  Handoff Criteria: %d items\n", len(pos.HandoffCriteria)))
+			}
+		}
+		writeStatusLine(&b, env)
+	}
+
+	// L7 Surface
+	if env, ok := doc.Layers["L7"]; ok {
+		b.WriteString("\n> Surface\n")
+		if surf, ok := env.Data.(*perspective.SurfaceData); ok {
+			if len(surf.DromenaOwned) > 0 {
+				b.WriteString(fmt.Sprintf("  Dromena: %s\n", strings.Join(surf.DromenaOwned, ", ")))
+			} else {
+				b.WriteString("  Dromena: none\n")
+			}
+			if len(surf.LegomenaAvailable) > 0 {
+				b.WriteString(fmt.Sprintf("  Legomena: %s\n", truncateList(surf.LegomenaAvailable, 5)))
+			} else {
+				b.WriteString("  Legomena: none\n")
+			}
+			if len(surf.ArtifactTypes) > 0 {
+				b.WriteString(fmt.Sprintf("  Artifacts: %s\n", strings.Join(surf.ArtifactTypes, ", ")))
+			}
+			if len(surf.Commands) > 0 {
+				var cmdNames []string
+				for _, c := range surf.Commands {
+					cmdNames = append(cmdNames, c.Name)
+				}
+				b.WriteString(fmt.Sprintf("  Commands: %s\n", strings.Join(cmdNames, ", ")))
+			}
+			if len(surf.ContractMustProduce) > 0 {
+				b.WriteString(fmt.Sprintf("  Must Produce: %s\n", strings.Join(surf.ContractMustProduce, ", ")))
 			}
 		}
 		writeStatusLine(&b, env)

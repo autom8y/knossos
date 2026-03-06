@@ -2,8 +2,8 @@ package perspective
 
 import "time"
 
-// Assemble builds a PerspectiveDocument by running all MVP layer resolvers
-// against the shared parse context.
+// Assemble builds a PerspectiveDocument by running all layer resolvers
+// against the shared parse context in topological dependency order.
 func Assemble(ctx *ParseContext, opts PerspectiveOptions, start time.Time) *PerspectiveDocument {
 	doc := &PerspectiveDocument{
 		Version:     "1.0",
@@ -15,12 +15,27 @@ func Assemble(ctx *ParseContext, opts PerspectiveOptions, start time.Time) *Pers
 		Layers:      make(map[string]*LayerEnvelope),
 	}
 
-	// Resolve MVP layers: L1, L3, L4, L5, L9
+	// Step 1: Independent layers (no cross-layer dependencies)
 	doc.Layers["L1"] = resolveIdentity(ctx)
 	doc.Layers["L3"] = resolveCapability(ctx)
 	doc.Layers["L4"] = resolveConstraint(ctx)
 	doc.Layers["L5"] = resolveMemory(ctx)
+	doc.Layers["L6"] = resolvePosition(ctx)
+	doc.Layers["L7"] = resolveSurface(ctx)
 	doc.Layers["L9"] = resolveProvenance(ctx)
+
+	// Step 2: L2 depends on L3 (tools) and L4 (disallowedTools)
+	capData := getLayerData[*CapabilityData](doc, "L3")
+	conData := getLayerData[*ConstraintData](doc, "L4")
+	if capData != nil && conData != nil {
+		doc.Layers["L2"] = resolvePerception(ctx, capData, conData)
+	} else {
+		doc.Layers["L2"] = &LayerEnvelope{
+			Status:           StatusFailed,
+			ResolutionMethod: "L2 depends on L3 and L4 which failed to resolve",
+			Data:             &PerceptionData{},
+		}
+	}
 
 	// Compute assembly metadata
 	var resolved, degraded, failed int
