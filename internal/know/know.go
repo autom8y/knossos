@@ -17,6 +17,7 @@ import (
 
 	"gopkg.in/yaml.v3"
 
+	"github.com/autom8y/knossos/internal/errors"
 	"github.com/autom8y/knossos/internal/frontmatter"
 )
 
@@ -724,7 +725,7 @@ func ReadSingleMeta(knowDir, domain string) (*Meta, error) {
 // standard Go duration units (h, m, s). Examples: "7d", "14d", "2h", "30m".
 func ParseDuration(s string) (time.Duration, error) {
 	if s == "" {
-		return 0, fmt.Errorf("empty duration string")
+		return 0, errors.New(errors.CodeUsageError, "empty duration string")
 	}
 
 	// Handle "Nd" form (days)
