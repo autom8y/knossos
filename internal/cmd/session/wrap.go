@@ -413,15 +413,12 @@ func collectCognitiveBudget(sessionDir string) map[string]any {
 	}
 	defer func() { _ = file.Close() }()
 
-	toolCounts := make(map[string]int)
 	totalEvents := 0
 
 	// Simple line-by-line count (NDJSON format)
-	// Future: Parse JSON to get more detailed metrics
-	scanner := os.NewFile(file.Fd(), recordPath)
 	buffer := make([]byte, 4096)
 	for {
-		n, err := scanner.Read(buffer)
+		n, err := file.Read(buffer)
 		if err != nil {
 			break
 		}
@@ -432,13 +429,7 @@ func collectCognitiveBudget(sessionDir string) map[string]any {
 		}
 	}
 
-	// Return basic budget data
-	// Future enhancements:
-	// - Parse individual events to categorize by tool type
-	// - Track message count vs thresholds (ARI_MSG_WARN)
-	// - Include park suggestions if threshold exceeded
 	return map[string]any{
 		"total_tool_calls": totalEvents,
-		"tool_counts":      toolCounts, // Placeholder for future detailed counts
 	}
 }

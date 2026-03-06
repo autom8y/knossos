@@ -189,7 +189,7 @@ func runInit(ctx *cmdContext, riteName, source string, force bool, cmd *cobra.Co
 	if embMena := common.EmbeddedMena(); embMena != nil {
 		mat.WithEmbeddedMena(embMena)
 		// Extract embedded platform mena to XDG data dir if not already present.
-		// This provides /commit, /start, /go, guidance skills, etc. to all users
+		// This provides /commit, /sos start, /go, guidance skills, etc. to all users
 		// regardless of whether KNOSSOS_HOME is set or the source tree exists.
 		extractEmbeddedMenaToXDG(embMena)
 	}

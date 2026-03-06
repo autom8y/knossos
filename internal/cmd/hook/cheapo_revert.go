@@ -1,7 +1,6 @@
 package hook
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -82,14 +81,11 @@ func runCheapoRevert(ctx *cmdContext) error {
 	}
 	_, err := m.Sync(opts)
 	if err != nil {
-		// Output error as JSON for CC hook consumption
-		errOut := map[string]string{
-			"status":  "error",
-			"message": fmt.Sprintf("revert sync failed: %v", err),
-		}
-		data, _ := json.Marshal(errOut)
-		fmt.Println(string(data))
-		return nil // Don't fail the hook — graceful degradation
+		// Graceful degradation — don't fail the hook
+		return printer.Print(CheapoRevertOutput{
+			Status:  "error",
+			Message: fmt.Sprintf("revert sync failed: %v", err),
+		})
 	}
 
 	return printer.Print(CheapoRevertOutput{

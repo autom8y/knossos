@@ -10,6 +10,7 @@ import (
 
 	"github.com/autom8y/knossos/internal/checksum"
 	"github.com/autom8y/knossos/internal/errors"
+	"github.com/autom8y/knossos/internal/fileutil"
 	"github.com/autom8y/knossos/internal/paths"
 )
 
@@ -96,7 +97,7 @@ func (m *StateManager) Save(state *State) error {
 	}
 
 	statePath := m.StatePath()
-	if err := os.WriteFile(statePath, data, 0644); err != nil {
+	if err := fileutil.AtomicWriteFile(statePath, data, 0644); err != nil {
 		return errors.Wrap(errors.CodeGeneralError, "failed to write sync state", err)
 	}
 

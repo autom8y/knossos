@@ -181,9 +181,9 @@ func determineSource(agentPath string, resolver *paths.Resolver) string {
 	// Check if it's a rite agent
 	if strings.HasPrefix(agentPath, ritesDir) {
 		relPath, _ := filepath.Rel(ritesDir, agentPath)
-		parts := filepath.SplitList(relPath)
+		parts := strings.Split(relPath, string(filepath.Separator))
 		if len(parts) > 0 {
-			return "rite:" + filepath.Base(filepath.Dir(filepath.Dir(agentPath)))
+			return "rite:" + parts[0]
 		}
 	}
 
@@ -196,5 +196,3 @@ func determineSource(agentPath string, resolver *paths.Resolver) string {
 	return "unknown"
 }
 
-// printAgentList is retained for backward compatibility but unused.
-// Output is now routed through the Printer infrastructure.

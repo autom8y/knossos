@@ -172,23 +172,6 @@ func CheckGateForSession(projectRoot string, sessionID string) (*GateResult, err
 	return CheckGate(sessionDir)
 }
 
-// trimWhitespace removes leading and trailing whitespace from a string.
-func trimWhitespace(s string) string {
-	start := 0
-	end := len(s)
-	for start < end && isWhitespace(s[start]) {
-		start++
-	}
-	for end > start && isWhitespace(s[end-1]) {
-		end--
-	}
-	return s[start:end]
-}
-
-// isWhitespace returns true if the byte is a whitespace character.
-func isWhitespace(b byte) bool {
-	return b == ' ' || b == '\t' || b == '\n' || b == '\r'
-}
 
 // GateExitCode returns the appropriate exit code for a gate result.
 // Exit code 0 for WHITE (pass), non-zero for GRAY/BLACK (fail).

@@ -109,6 +109,6 @@ func CanTransitionPhase(from, to Phase) bool {
 	if fromOrder < 0 || toOrder < 0 {
 		return false
 	}
-	// Can only move forward or stay in place
+	// Can only move strictly forward
 	return toOrder > fromOrder
 }

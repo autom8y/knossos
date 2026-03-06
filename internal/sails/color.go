@@ -6,6 +6,7 @@
 package sails
 
 import (
+	"strconv"
 	"strings"
 	"time"
 )
@@ -433,13 +434,13 @@ func ValidateColorInput(input ColorInput) []string {
 	// Validate modifiers
 	for i, mod := range input.Modifiers {
 		if !mod.Type.IsValid() {
-			errors = append(errors, "modifier["+string(rune('0'+i))+"] has invalid type: "+string(mod.Type))
+			errors = append(errors, "modifier["+strconv.Itoa(i)+"] has invalid type: "+string(mod.Type))
 		}
 		if mod.Justification == "" {
-			errors = append(errors, "modifier["+string(rune('0'+i))+"] missing justification")
+			errors = append(errors, "modifier["+strconv.Itoa(i)+"] missing justification")
 		}
 		if mod.AppliedBy != "agent" && mod.AppliedBy != "human" {
-			errors = append(errors, "modifier["+string(rune('0'+i))+"] has invalid applied_by: "+mod.AppliedBy)
+			errors = append(errors, "modifier["+strconv.Itoa(i)+"] has invalid applied_by: "+mod.AppliedBy)
 		}
 	}
 

@@ -472,25 +472,4 @@ modifiers:
 	}
 }
 
-func TestTrimWhitespace(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected string
-	}{
-		{"hello", "hello"},
-		{"  hello  ", "hello"},
-		{"\n\thello\n\t", "hello"},
-		{"", ""},
-		{"   ", ""},
-		{"\n\n", ""},
-		{"hello world", "hello world"},
-		{"  hello world  ", "hello world"},
-	}
 
-	for _, tc := range tests {
-		result := trimWhitespace(tc.input)
-		if result != tc.expected {
-			t.Errorf("trimWhitespace(%q) = %q, expected %q", tc.input, result, tc.expected)
-		}
-	}
-}
