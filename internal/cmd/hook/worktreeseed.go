@@ -14,6 +14,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/autom8y/knossos/internal/errors"
 	"github.com/autom8y/knossos/internal/materialize"
 	"github.com/autom8y/knossos/internal/paths"
 )
@@ -101,7 +102,7 @@ func runWorktreeSeed(ctx *cmdContext) error {
 	slug := strings.TrimSpace(payload.Name)
 	if slug == "" {
 		fmt.Fprintf(stderr, "worktree-seed: stdin JSON missing 'name' field\n")
-		return fmt.Errorf("worktree-seed: missing worktree name")
+		return errors.New(errors.CodeUsageError, "worktree-seed: missing worktree name")
 	}
 
 	// Step 4: Determine worktree path: projectRoot/.knossos/worktrees/{slug}

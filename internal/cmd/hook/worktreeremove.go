@@ -12,6 +12,8 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
+
+	"github.com/autom8y/knossos/internal/errors"
 )
 
 // worktreeRemovePayload is the stdin JSON payload CC sends for WorktreeRemove events.
@@ -75,7 +77,7 @@ func runWorktreeRemove(ctx *cmdContext) error {
 	worktreePath := strings.TrimSpace(payload.WorktreePath)
 	if worktreePath == "" {
 		fmt.Fprintf(stderr, "worktree-remove: stdin JSON missing 'worktree_path' field\n")
-		return fmt.Errorf("worktree-remove: missing worktree_path")
+		return errors.New(errors.CodeUsageError, "worktree-remove: missing worktree_path")
 	}
 
 	// Step 4: Remove the git worktree.
