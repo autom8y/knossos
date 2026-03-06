@@ -533,21 +533,20 @@ func TestSCAR018_KnowDromenon_NoContextFork(t *testing.T) {
 //
 // Background: All session lifecycle dromena failed to pass session ID to CLI subprocess
 // commands. The SessionStart hook injects session ID into LLM context, but bash
-// subprocesses cannot access LLM context. Fix: all 4 session dromena updated to
+// subprocesses cannot access LLM context. Fix: session dromena updated to
 // explicitly instruct the LLM to extract session ID and pass it via -s flag
 // (commit 6f35325).
 //
-// This test reads the session dromena (/continue, /fray, /park, /wrap) and verifies
-// each contains explicit instructions for session ID extraction and passing.
+// This test reads the session dromena (/fray, /sos) and verifies each contains
+// explicit instructions for session ID extraction and passing.
+// Updated post-3cf6c15: legacy dromena (continue, park, wrap) removed; sos added.
 func TestSCAR020_SessionDromena_ExplicitSessionIDPassing(t *testing.T) {
 	repoRoot := repoRootFromThisFile(t)
 
 	// Session dromena that must explicitly instruct session ID passing.
 	sessionDromena := []string{
-		"mena/session/continue/INDEX.dro.md",
 		"mena/session/fray/INDEX.dro.md",
-		"mena/session/park/INDEX.dro.md",
-		"mena/session/wrap/INDEX.dro.md",
+		"mena/session/sos/INDEX.dro.md",
 	}
 
 	// Patterns indicating explicit session ID extraction instruction.
