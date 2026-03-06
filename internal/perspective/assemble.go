@@ -37,6 +37,9 @@ func Assemble(ctx *ParseContext, opts PerspectiveOptions, start time.Time) *Pers
 		}
 	}
 
+	// Step 3: L8 depends on all other layers (inverse computation)
+	doc.Layers["L8"] = resolveHorizon(ctx, doc)
+
 	// Compute assembly metadata
 	var resolved, degraded, failed int
 	for _, env := range doc.Layers {

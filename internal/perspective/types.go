@@ -250,10 +250,32 @@ type CommandRef struct {
 	Description string `json:"description,omitempty" yaml:"description,omitempty"`
 }
 
-// SimulateOverlay holds configuration for simulate mode (Phase 3).
+// HorizonData contains the agent's negative space — what it cannot do (L8).
+type HorizonData struct {
+	ToolsNotAvailable []string `json:"tools_not_available" yaml:"tools_not_available"`
+	DisallowedOverlap []string `json:"disallowed_overlap" yaml:"disallowed_overlap"`
+	SkillsUnreachable []string `json:"skills_unreachable" yaml:"skills_unreachable"`
+	PhasesNotIn       []string `json:"phases_not_in" yaml:"phases_not_in"`
+	MemoryBlindSpots  []string `json:"memory_blind_spots" yaml:"memory_blind_spots"`
+	SurfaceGaps       []string `json:"surface_gaps" yaml:"surface_gaps"`
+}
+
+// SimulateOverlay holds the results of simulate mode analysis.
 type SimulateOverlay struct {
-	Prompt string `json:"prompt" yaml:"prompt"`
-	// Phase 3: keyword matching, capability mapping
+	Prompt         string          `json:"prompt" yaml:"prompt"`
+	ToolMatches    []SimulateMatch `json:"tool_matches" yaml:"tool_matches"`
+	SkillMatches   []SimulateMatch `json:"skill_matches" yaml:"skill_matches"`
+	ConstraintHits []SimulateMatch `json:"constraint_hits" yaml:"constraint_hits"`
+	CanAttempt     []string        `json:"can_attempt" yaml:"can_attempt"`
+	CannotAttempt  []string        `json:"cannot_attempt" yaml:"cannot_attempt"`
+	HandoffNeeded  []string        `json:"handoff_needed" yaml:"handoff_needed"`
+}
+
+// SimulateMatch describes a keyword match in simulation analysis.
+type SimulateMatch struct {
+	Name      string `json:"name" yaml:"name"`
+	MatchType string `json:"match_type" yaml:"match_type"` // "exact", "keyword", "partial"
+	Relevance string `json:"relevance" yaml:"relevance"`   // "high", "medium", "low"
 }
 
 // --- Audit types ---

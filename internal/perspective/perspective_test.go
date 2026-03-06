@@ -3,6 +3,7 @@ package perspective
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -683,8 +684,8 @@ model: opus`, "# System Prompt\nYou do things.\n")
 		t.Errorf("rite = %q, want test-rite", doc.Rite)
 	}
 
-	// Should have all 8 layers (L1-L7 + L9)
-	expectedLayers := []string{"L1", "L2", "L3", "L4", "L5", "L6", "L7", "L9"}
+	// Should have all 9 layers (L1-L9)
+	expectedLayers := []string{"L1", "L2", "L3", "L4", "L5", "L6", "L7", "L8", "L9"}
 	for _, key := range expectedLayers {
 		if _, ok := doc.Layers[key]; !ok {
 			t.Errorf("missing layer %s", key)
@@ -693,8 +694,8 @@ model: opus`, "# System Prompt\nYou do things.\n")
 
 	// Assembly metadata should have counts
 	total := doc.AssemblyMetadata.LayersResolved + doc.AssemblyMetadata.LayersDegraded + doc.AssemblyMetadata.LayersFailed
-	if total != 8 {
-		t.Errorf("total layers = %d, want 8", total)
+	if total != 9 {
+		t.Errorf("total layers = %d, want 9", total)
 	}
 }
 
@@ -1144,6 +1145,257 @@ func TestDedupStrings(t *testing.T) {
 		result := dedupStrings(tt.input)
 		if len(result) != len(tt.expected) {
 			t.Errorf("dedupStrings(%v) = %v, want %v", tt.input, result, tt.expected)
+		}
+	}
+}
+
+// --- Test: Horizon Resolver ---
+
+func TestResolveHorizon(t *testing.T) {
+	t.Run("tools not available computed", func(t *testing.T) {
+		ctx := newTestParseContext(t, `name: test-agent
+description: Test agent
+tools: Read, Bash`, "body",
+			withSkillsDirs([]string{"ecosystem-ref", "forge-ref", "conventions"}))
+
+		doc := Assemble(ctx, PerspectiveOptions{AgentName: "test-agent", Mode: "default"}, time.Now())
+
+		hor := getLayerData[*HorizonData](doc, "L8")
+		if hor == nil {
+			t.Fatal("L8 data is nil")
+		}
+		if hor.ToolsNotAvailable == nil {
+			t.Fatal("ToolsNotAvailable is nil")
+		}
+		// Agent has Read and Bash; all other CC tools should be not available
+		// knownCCTools has 14 tools total, agent has 2
+		if len(hor.ToolsNotAvailable) != 12 {
+			t.Errorf("ToolsNotAvailable count = %d, want 12 (14 total - 2 agent tools)", len(hor.ToolsNotAvailable))
+		}
+		// Verify sorted (deterministic output)
+		for i := 1; i < len(hor.ToolsNotAvailable); i++ {
+			if hor.ToolsNotAvailable[i] < hor.ToolsNotAvailable[i-1] {
+				t.Errorf("ToolsNotAvailable not sorted: %v", hor.ToolsNotAvailable)
+				break
+			}
+		}
+	})
+
+	t.Run("phases not in computed", func(t *testing.T) {
+		wf := `
+name: test-rite
+phases:
+  - name: analysis
+    agent: analyst
+    next: implementation
+  - name: implementation
+    agent: test-agent
+    next: validation
+  - name: validation
+    agent: validator
+    next: null
+`
+		ctx := newTestParseContext(t, `name: test-agent
+description: Test agent
+tools: Read`, "body", withWorkflow(wf))
+
+		doc := Assemble(ctx, PerspectiveOptions{AgentName: "test-agent", Mode: "default"}, time.Now())
+
+		hor := getLayerData[*HorizonData](doc, "L8")
+		if hor == nil {
+			t.Fatal("L8 data is nil")
+		}
+		// Agent is in "implementation", should NOT be in "analysis" and "validation"
+		if len(hor.PhasesNotIn) != 2 {
+			t.Errorf("PhasesNotIn count = %d, want 2: %v", len(hor.PhasesNotIn), hor.PhasesNotIn)
+		}
+	})
+
+	t.Run("memory blind spots", func(t *testing.T) {
+		ctx := newTestParseContext(t, `name: test-agent
+description: Test agent
+memory: project`, "body")
+
+		doc := Assemble(ctx, PerspectiveOptions{AgentName: "test-agent", Mode: "default"}, time.Now())
+
+		hor := getLayerData[*HorizonData](doc, "L8")
+		if hor == nil {
+			t.Fatal("L8 data is nil")
+		}
+		// project scope → blind spots for user and local
+		if len(hor.MemoryBlindSpots) != 2 {
+			t.Errorf("MemoryBlindSpots count = %d, want 2: %v", len(hor.MemoryBlindSpots), hor.MemoryBlindSpots)
+		}
+	})
+
+	t.Run("memory disabled all blind", func(t *testing.T) {
+		ctx := newTestParseContext(t, `name: test-agent
+description: Test agent`, "body")
+
+		doc := Assemble(ctx, PerspectiveOptions{AgentName: "test-agent", Mode: "default"}, time.Now())
+
+		hor := getLayerData[*HorizonData](doc, "L8")
+		if hor == nil {
+			t.Fatal("L8 data is nil")
+		}
+		if len(hor.MemoryBlindSpots) != 1 {
+			t.Errorf("MemoryBlindSpots count = %d, want 1 (all blind): %v", len(hor.MemoryBlindSpots), hor.MemoryBlindSpots)
+		}
+	})
+}
+
+// --- Test: Simulate ---
+
+func TestRunSimulate(t *testing.T) {
+	t.Run("tool match via keyword", func(t *testing.T) {
+		doc := &PerspectiveDocument{
+			Layers: map[string]*LayerEnvelope{
+				"L2": {Data: &PerceptionData{
+					ExplicitSkills: []string{},
+					OnDemandSkills: []string{},
+				}},
+				"L3": {Data: &CapabilityData{Tools: []string{"Read", "Bash", "Grep"}}},
+				"L4": {Data: &ConstraintData{DisallowedTools: []string{}}},
+				"L6": {Data: &PositionData{}},
+			},
+		}
+		sim := RunSimulate(doc, "read a file and search for patterns")
+
+		if len(sim.ToolMatches) == 0 {
+			t.Fatal("expected tool matches")
+		}
+		if len(sim.CanAttempt) == 0 {
+			t.Error("expected can_attempt entries for matched tools")
+		}
+		// "read" should match Read tool, "search" should match Grep/Glob/WebSearch, "file" should match Read/Write/Edit/Glob
+		foundRead := false
+		for _, m := range sim.ToolMatches {
+			if m.Name == "Read" {
+				foundRead = true
+			}
+		}
+		if !foundRead {
+			t.Errorf("expected Read in tool matches, got: %v", sim.ToolMatches)
+		}
+	})
+
+	t.Run("constraint hit", func(t *testing.T) {
+		doc := &PerspectiveDocument{
+			Layers: map[string]*LayerEnvelope{
+				"L2": {Data: &PerceptionData{}},
+				"L3": {Data: &CapabilityData{Tools: []string{"Read"}}},
+				"L4": {Data: &ConstraintData{
+					DisallowedTools: []string{},
+					BehavioralContract: &BehavioralContractData{
+						MustNot: []string{"never edit CLAUDE.md directly"},
+					},
+				}},
+				"L6": {Data: &PositionData{}},
+			},
+		}
+		sim := RunSimulate(doc, "edit the CLAUDE.md file")
+
+		if len(sim.ConstraintHits) == 0 {
+			t.Error("expected constraint hit for 'edit' matching must_not rule")
+		}
+	})
+
+	t.Run("disallowed tool in cannot_attempt", func(t *testing.T) {
+		doc := &PerspectiveDocument{
+			Layers: map[string]*LayerEnvelope{
+				"L2": {Data: &PerceptionData{}},
+				"L3": {Data: &CapabilityData{Tools: []string{"Read"}}},
+				"L4": {Data: &ConstraintData{DisallowedTools: []string{"Write"}}},
+				"L6": {Data: &PositionData{}},
+			},
+		}
+		sim := RunSimulate(doc, "write a file")
+
+		foundDisallowed := false
+		for _, c := range sim.CannotAttempt {
+			if c == "Write (disallowed)" {
+				foundDisallowed = true
+			}
+		}
+		if !foundDisallowed {
+			t.Errorf("expected 'Write (disallowed)' in CannotAttempt, got: %v", sim.CannotAttempt)
+		}
+	})
+}
+
+// --- Test: Phase 3 Audit Checks ---
+
+func TestPhase3AuditChecks(t *testing.T) {
+	t.Run("AUDIT-011 zero reachable skills", func(t *testing.T) {
+		doc := &PerspectiveDocument{
+			Layers: map[string]*LayerEnvelope{
+				"L2": {Data: &PerceptionData{
+					SkillToolAvailable: true,
+					TotalReachable:     0,
+				}},
+			},
+		}
+		findings := checkZeroReachableSkills(doc)
+		if len(findings) != 1 {
+			t.Fatalf("expected 1 finding, got %d", len(findings))
+		}
+		if findings[0].ID != "AUDIT-011" {
+			t.Errorf("ID = %s, want AUDIT-011", findings[0].ID)
+		}
+		if findings[0].Severity != SeverityWarning {
+			t.Errorf("Severity = %s, want WARNING", findings[0].Severity)
+		}
+	})
+
+	t.Run("AUDIT-011 no finding when skills reachable", func(t *testing.T) {
+		doc := &PerspectiveDocument{
+			Layers: map[string]*LayerEnvelope{
+				"L2": {Data: &PerceptionData{
+					SkillToolAvailable: true,
+					TotalReachable:     5,
+				}},
+			},
+		}
+		findings := checkZeroReachableSkills(doc)
+		if len(findings) != 0 {
+			t.Errorf("expected 0 findings, got %d", len(findings))
+		}
+	})
+
+	t.Run("AUDIT-011 no finding when skill tool not available", func(t *testing.T) {
+		doc := &PerspectiveDocument{
+			Layers: map[string]*LayerEnvelope{
+				"L2": {Data: &PerceptionData{
+					SkillToolAvailable: false,
+					TotalReachable:     0,
+				}},
+			},
+		}
+		findings := checkZeroReachableSkills(doc)
+		if len(findings) != 0 {
+			t.Errorf("expected 0 findings when Skill tool unavailable, got %d", len(findings))
+		}
+	})
+}
+
+// --- Test: Tokenizer ---
+
+func TestTokenize(t *testing.T) {
+	tokens := tokenize("Read a file and search for patterns!")
+	if len(tokens) == 0 {
+		t.Fatal("expected tokens")
+	}
+	// Single-char tokens should be filtered
+	for _, tok := range tokens {
+		if len(tok) <= 1 {
+			t.Errorf("single-char token not filtered: %q", tok)
+		}
+	}
+	// Should be lowercase
+	for _, tok := range tokens {
+		lower := strings.ToLower(tok)
+		if tok != lower {
+			t.Errorf("token not lowercase: %q", tok)
 		}
 	}
 }

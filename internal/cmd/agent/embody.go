@@ -14,9 +14,10 @@ import (
 )
 
 type embodyOptions struct {
-	riteName string
-	audit    bool
-	simulate bool
+	riteName       string
+	audit          bool
+	simulate       bool
+	simulatePrompt string
 }
 
 func newEmbodyCmd(ctx *cmdContext) *cobra.Command {
@@ -28,14 +29,15 @@ func newEmbodyCmd(ctx *cmdContext) *cobra.Command {
 		Long: `Reconstructs an agent's full context as a first-person perspective view.
 
 Resolves identity, perception, capability, constraint, memory, position,
-surface, and provenance layers from source files (not materialized output)
-to capture all metadata including knossos-only fields stripped during
-materialization.
+surface, horizon, and provenance layers from source files (not materialized
+output) to capture all metadata including knossos-only fields stripped
+during materialization.
 
 Examples:
   ari agent embody pythia                          # Default perspective
   ari agent embody principal-engineer --rite 10x-dev  # Specific rite
   ari agent embody qa-adversary --audit            # With audit overlay
+  ari agent embody pythia --simulate --simulate-prompt "read a file"
   ari agent embody pythia -o json                  # JSON output`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -45,7 +47,8 @@ Examples:
 
 	cmd.Flags().StringVarP(&opts.riteName, "rite", "r", "", "Rite to resolve agent from (default: active rite)")
 	cmd.Flags().BoolVar(&opts.audit, "audit", false, "Enable audit overlay with consistency checks")
-	cmd.Flags().BoolVar(&opts.simulate, "simulate", false, "Enable simulate mode (capability mapping — Phase 3)")
+	cmd.Flags().BoolVar(&opts.simulate, "simulate", false, "Enable simulate mode with capability mapping")
+	cmd.Flags().StringVar(&opts.simulatePrompt, "simulate-prompt", "", "Natural language prompt for simulate mode (requires --simulate)")
 
 	return cmd
 }
@@ -87,11 +90,9 @@ func runEmbody(ctx *cmdContext, opts embodyOptions, agentName string) error {
 		doc.AuditOverlay = perspective.RunAudit(doc, parseCtx)
 	}
 
-	// Simulate mode skeleton (Phase 3 — not yet implemented)
-	if opts.simulate {
-		doc.SimulateOverlay = &perspective.SimulateOverlay{
-			Prompt: "(simulate mode not yet implemented — Phase 3)",
-		}
+	// Simulate mode
+	if opts.simulate && opts.simulatePrompt != "" {
+		doc.SimulateOverlay = perspective.RunSimulate(doc, opts.simulatePrompt)
 	}
 
 	// Output
@@ -327,6 +328,40 @@ func (o embodyOutput) Text() string {
 		writeStatusLine(&b, env)
 	}
 
+	// L8 Horizon
+	if env, ok := doc.Layers["L8"]; ok {
+		b.WriteString("\n> Horizon (negative space)\n")
+		if hor, ok := env.Data.(*perspective.HorizonData); ok {
+			if len(hor.ToolsNotAvailable) > 0 {
+				b.WriteString(fmt.Sprintf("  Tools Not Available: %s (%d tools)\n",
+					truncateList(hor.ToolsNotAvailable, 5), len(hor.ToolsNotAvailable)))
+			}
+			if len(hor.DisallowedOverlap) > 0 {
+				b.WriteString(fmt.Sprintf("  Disallowed Overlap: %s\n", strings.Join(hor.DisallowedOverlap, ", ")))
+			}
+			if len(hor.SkillsUnreachable) > 0 {
+				b.WriteString(fmt.Sprintf("  Skills Unreachable: %s (%d skills)\n",
+					truncateList(hor.SkillsUnreachable, 5), len(hor.SkillsUnreachable)))
+			}
+			if len(hor.PhasesNotIn) > 0 {
+				b.WriteString(fmt.Sprintf("  Phases Not In: %s (%d phases)\n",
+					truncateList(hor.PhasesNotIn, 5), len(hor.PhasesNotIn)))
+			}
+			if len(hor.MemoryBlindSpots) > 0 {
+				b.WriteString(fmt.Sprintf("  Memory Blind Spots: %s\n", strings.Join(hor.MemoryBlindSpots, ", ")))
+			}
+			if len(hor.SurfaceGaps) > 0 {
+				b.WriteString(fmt.Sprintf("  Surface Gaps: %s\n", strings.Join(hor.SurfaceGaps, ", ")))
+			}
+			// If everything is empty, note it
+			if len(hor.ToolsNotAvailable) == 0 && len(hor.SkillsUnreachable) == 0 &&
+				len(hor.PhasesNotIn) == 0 && len(hor.MemoryBlindSpots) == 0 {
+				b.WriteString("  No significant gaps detected\n")
+			}
+		}
+		writeStatusLine(&b, env)
+	}
+
 	// L9 Provenance
 	if env, ok := doc.Layers["L9"]; ok {
 		b.WriteString("\n> Provenance\n")
@@ -380,6 +415,40 @@ func (o embodyOutput) Text() string {
 		s := doc.AuditOverlay.SeveritySummary
 		b.WriteString(fmt.Sprintf("\nSummary: %d CRITICAL, %d WARNING, %d INFO\n",
 			s.Critical, s.Warning, s.Info))
+	}
+
+	// Simulate overlay
+	if doc.SimulateOverlay != nil {
+		b.WriteString("\n=== Simulate ===\n")
+		sim := doc.SimulateOverlay
+		b.WriteString(fmt.Sprintf("Prompt: %q\n", sim.Prompt))
+		if len(sim.ToolMatches) > 0 {
+			b.WriteString(fmt.Sprintf("\nTool Matches: %d\n", len(sim.ToolMatches)))
+			for _, m := range sim.ToolMatches {
+				b.WriteString(fmt.Sprintf("  %s (%s, %s relevance)\n", m.Name, m.MatchType, m.Relevance))
+			}
+		}
+		if len(sim.SkillMatches) > 0 {
+			b.WriteString(fmt.Sprintf("\nSkill Matches: %d\n", len(sim.SkillMatches)))
+			for _, m := range sim.SkillMatches {
+				b.WriteString(fmt.Sprintf("  %s (%s, %s relevance)\n", m.Name, m.MatchType, m.Relevance))
+			}
+		}
+		if len(sim.ConstraintHits) > 0 {
+			b.WriteString(fmt.Sprintf("\nConstraint Hits: %d\n", len(sim.ConstraintHits)))
+			for _, m := range sim.ConstraintHits {
+				b.WriteString(fmt.Sprintf("  %s (%s relevance)\n", m.Name, m.Relevance))
+			}
+		}
+		if len(sim.CanAttempt) > 0 {
+			b.WriteString(fmt.Sprintf("\nCan Attempt: %s\n", strings.Join(sim.CanAttempt, ", ")))
+		}
+		if len(sim.CannotAttempt) > 0 {
+			b.WriteString(fmt.Sprintf("Cannot Attempt: %s\n", strings.Join(sim.CannotAttempt, ", ")))
+		}
+		if len(sim.HandoffNeeded) > 0 {
+			b.WriteString(fmt.Sprintf("Handoff Needed: %s\n", strings.Join(sim.HandoffNeeded, ", ")))
+		}
 	}
 
 	return b.String()

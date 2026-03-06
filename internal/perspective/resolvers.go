@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"sort"
 	"strings"
 
 	"github.com/autom8y/knossos/internal/checksum"
@@ -1232,6 +1233,123 @@ func resolveSurface(ctx *ParseContext) *LayerEnvelope {
 		Status:           StatusResolved,
 		SourceFiles:      sources,
 		ResolutionMethod: "Extracted dromena/legomena from manifest, artifact types from workflow phase, commands from workflow commands",
+		Data:             data,
+	}
+}
+
+// resolveHorizon resolves the L8 Horizon layer by computing the inverse/negative
+// space across all resolved layers. It answers: "What can this agent NOT do?"
+func resolveHorizon(ctx *ParseContext, doc *PerspectiveDocument) *LayerEnvelope {
+	agentName := ctx.AgentFrontmatter.Name
+	if agentName == "" {
+		agentName = filepath.Base(strings.TrimSuffix(ctx.AgentSourcePath, ".md"))
+	}
+
+	data := &HorizonData{}
+
+	// Tools not available: all CC-native tools NOT in agent's tools list
+	l3 := getLayerData[*CapabilityData](doc, "L3")
+	if l3 != nil {
+		agentTools := perceptionBuildSet(l3.Tools)
+		for tool := range knownCCTools {
+			if !agentTools[tool] {
+				data.ToolsNotAvailable = append(data.ToolsNotAvailable, tool)
+			}
+		}
+		sort.Strings(data.ToolsNotAvailable)
+	}
+
+	// Disallowed overlap: tools in BOTH L3.Tools AND L4.DisallowedTools
+	l4 := getLayerData[*ConstraintData](doc, "L4")
+	if l3 != nil && l4 != nil {
+		disallowed := perceptionBuildSet(l4.DisallowedTools)
+		for _, tool := range l3.Tools {
+			if disallowed[tool] {
+				data.DisallowedOverlap = append(data.DisallowedOverlap, tool)
+			}
+		}
+	}
+
+	// Skills unreachable: skills in MaterializedSkillsDirs but NOT reachable by agent
+	l2 := getLayerData[*PerceptionData](doc, "L2")
+	if l2 != nil {
+		reachableSet := make(map[string]bool)
+		for _, s := range l2.ExplicitSkills {
+			reachableSet[s] = true
+		}
+		for _, s := range l2.PolicyInjectedSkills {
+			reachableSet[s] = true
+		}
+		for _, s := range l2.PolicyReferencedSkills {
+			reachableSet[s] = true
+		}
+		for _, s := range l2.OnDemandSkills {
+			reachableSet[s] = true
+		}
+		for _, dir := range ctx.MaterializedSkillsDirs {
+			if !reachableSet[dir] {
+				data.SkillsUnreachable = append(data.SkillsUnreachable, dir)
+			}
+		}
+	}
+
+	// Phases not in: workflow phases where agent != this agent
+	l6 := getLayerData[*PositionData](doc, "L6")
+	phases := extractPhasesList(ctx.Workflow)
+	if l6 != nil {
+		for _, phase := range phases {
+			phaseAgent, _ := phase["agent"].(string)
+			phaseName := stringFromMap(phase, "name")
+			if phaseAgent != agentName && phaseName != "" {
+				data.PhasesNotIn = append(data.PhasesNotIn, phaseName)
+			}
+		}
+	}
+
+	// Memory blind spots
+	l5 := getLayerData[*MemoryData](doc, "L5")
+	if l5 != nil {
+		allScopes := []string{"user", "project", "local"}
+		if !l5.Enabled {
+			data.MemoryBlindSpots = append(data.MemoryBlindSpots, "memory disabled — all scopes blind")
+		} else {
+			for _, scope := range allScopes {
+				if l5.Scope != scope {
+					data.MemoryBlindSpots = append(data.MemoryBlindSpots, scope+" scope not configured")
+				}
+			}
+		}
+	}
+
+	// Surface gaps: dromena/legomena in rite that agent doesn't own
+	// For now, surface gaps = rite-level dromena/legomena not in agent's surface
+	// (agent-level ownership is hard to determine without per-agent dromena assignment)
+	// Skip surface gaps for MVP — the data model doesn't assign dromena per-agent
+
+	// Normalize nil slices
+	if data.ToolsNotAvailable == nil {
+		data.ToolsNotAvailable = []string{}
+	}
+	if data.DisallowedOverlap == nil {
+		data.DisallowedOverlap = []string{}
+	}
+	if data.SkillsUnreachable == nil {
+		data.SkillsUnreachable = []string{}
+	}
+	if data.PhasesNotIn == nil {
+		data.PhasesNotIn = []string{}
+	}
+	if data.MemoryBlindSpots == nil {
+		data.MemoryBlindSpots = []string{}
+	}
+	if data.SurfaceGaps == nil {
+		data.SurfaceGaps = []string{}
+	}
+
+	return &LayerEnvelope{
+		Status:           StatusResolved,
+		SourceFiles:      []SourceRef{{Path: "computed", FieldsExtracted: []string{"inverse of L2-L7"}, ReadFrom: "computed"}},
+		ResolutionMethod: "Computed inverse/negative space across L2-L7 resolved data",
 		Data:             data,
 	}
 }

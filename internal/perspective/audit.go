@@ -24,6 +24,9 @@ func RunAudit(doc *PerspectiveDocument, ctx *ParseContext) *AuditOverlay {
 	findings = append(findings, checkMustProduceNotInArtifacts(doc)...)
 	findings = append(findings, checkUpstreamDownstreamNotInRite(doc, ctx)...)
 
+	// Phase 3 checks (AUDIT-011)
+	findings = append(findings, checkZeroReachableSkills(doc)...)
+
 	summary := SeveritySummary{}
 	for _, f := range findings {
 		switch f.Severity {
@@ -319,6 +322,29 @@ func checkUpstreamDownstreamNotInRite(doc *PerspectiveDocument, ctx *ParseContex
 			Description:    "Agent frontmatter references agents not found in the rite manifest agents list",
 			Evidence:       strings.Join(invalid, ", "),
 			Recommendation: "Fix the agent references or add the missing agents to the rite manifest",
+		}}
+	}
+	return nil
+}
+
+// --- Phase 3 audit checks ---
+
+// checkZeroReachableSkills checks if the agent has zero reachable skills despite Skill tool being available (L2).
+func checkZeroReachableSkills(doc *PerspectiveDocument) []AuditFinding {
+	l2 := getLayerData[*PerceptionData](doc, "L2")
+	if l2 == nil {
+		return nil
+	}
+
+	if l2.SkillToolAvailable && l2.TotalReachable == 0 {
+		return []AuditFinding{{
+			ID:             "AUDIT-011",
+			Severity:       SeverityWarning,
+			Category:       CategoryGap,
+			LayersAffected: []string{"L2"},
+			Title:          "Zero reachable skills with Skill tool available",
+			Description:    "Agent has Skill tool available but cannot reach any skills (no explicit, injected, referenced, or on-demand skills)",
+			Recommendation: "Add skills to agent frontmatter, configure skill policies, or remove Skill from tools if not needed",
 		}}
 	}
 	return nil
