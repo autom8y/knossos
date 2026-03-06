@@ -229,7 +229,7 @@ func (m *Manager) getLockMetadata(lockPath string) (*LockMetadata, error) {
 
 	content := strings.TrimSpace(string(data))
 	if content == "" {
-		return nil, fmt.Errorf("empty lock file")
+		return nil, errors.New(errors.CodeParseError, "empty lock file")
 	}
 
 	// Try JSON format first (v2)
@@ -241,7 +241,7 @@ func (m *Manager) getLockMetadata(lockPath string) (*LockMetadata, error) {
 	// Try legacy PID format — synthesize metadata
 	pid, err := strconv.Atoi(content)
 	if err != nil {
-		return nil, fmt.Errorf("unparseable lock file")
+		return nil, errors.New(errors.CodeParseError, "unparseable lock file")
 	}
 
 	// Get file mod time as approximate acquired time
