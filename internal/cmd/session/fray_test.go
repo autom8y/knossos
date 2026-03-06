@@ -60,8 +60,11 @@ func TestFray_ParkParent(t *testing.T) {
 	if len(reloadedParent.Strands) != 1 {
 		t.Fatalf("parent strands = %d, want 1", len(reloadedParent.Strands))
 	}
-	if reloadedParent.Strands[0] != result.ChildID {
-		t.Errorf("parent strand = %q, want %q", reloadedParent.Strands[0], result.ChildID)
+	if reloadedParent.Strands[0].SessionID != result.ChildID {
+		t.Errorf("parent strand SessionID = %q, want %q", reloadedParent.Strands[0].SessionID, result.ChildID)
+	}
+	if reloadedParent.Strands[0].Status != "ACTIVE" {
+		t.Errorf("parent strand Status = %q, want %q", reloadedParent.Strands[0].Status, "ACTIVE")
 	}
 }
 
@@ -105,8 +108,8 @@ func TestFray_CreateChild(t *testing.T) {
 	if child.FrayPoint != "design" {
 		t.Errorf("child FrayPoint = %q, want %q", child.FrayPoint, "design")
 	}
-	if child.SchemaVersion != "2.2" {
-		t.Errorf("child SchemaVersion = %q, want %q", child.SchemaVersion, "2.2")
+	if child.SchemaVersion != "2.3" {
+		t.Errorf("child SchemaVersion = %q, want %q", child.SchemaVersion, "2.3")
 	}
 	if child.Initiative != parent.Initiative {
 		t.Errorf("child Initiative = %q, want %q", child.Initiative, parent.Initiative)

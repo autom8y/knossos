@@ -12,6 +12,14 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// Strand tracks a child session created via fray.
+type Strand struct {
+	SessionID string `yaml:"session_id" json:"session_id"`
+	Status    string `yaml:"status" json:"status"`
+	FrameRef  string `yaml:"frame_ref,omitempty" json:"frame_ref,omitempty"`
+	LandedAt  string `yaml:"landed_at,omitempty" json:"landed_at,omitempty"`
+}
+
 // Context represents parsed SESSION_CONTEXT.md.
 type Context struct {
 	SchemaVersion string    `yaml:"schema_version" json:"schema_version"`
@@ -33,30 +41,75 @@ type Context struct {
 	// Fray fields (session forking)
 	FrayedFrom string   `yaml:"frayed_from,omitempty" json:"frayed_from,omitempty"`
 	FrayPoint  string   `yaml:"fray_point,omitempty" json:"fray_point,omitempty"` // Phase at fork
-	Strands    []string `yaml:"strands,omitempty" json:"strands,omitempty"`       // Child session IDs
+	Strands    []Strand `yaml:"strands,omitempty" json:"strands,omitempty"`       // Child sessions
+
+	// v2.3 fields
+	FrameRef   string `yaml:"frame_ref,omitempty" json:"frame_ref,omitempty"`
+	ClaimedBy  string `yaml:"claimed_by,omitempty" json:"claimed_by,omitempty"`
+	ParkSource string `yaml:"park_source,omitempty" json:"park_source,omitempty"`
 
 	// Raw markdown body (after frontmatter)
 	Body string `yaml:"-" json:"-"`
 }
 
+// FindStrand returns a mutable pointer to the strand with the given session ID,
+// or nil if not found.
+func (c *Context) FindStrand(id string) *Strand {
+	for i := range c.Strands {
+		if c.Strands[i].SessionID == id {
+			return &c.Strands[i]
+		}
+	}
+	return nil
+}
+
+// strandList handles polymorphic YAML deserialization for Strands.
+// Accepts either []string (v2.1/2.2) or []Strand (v2.3+).
+type strandList []Strand
+
+func (s *strandList) UnmarshalYAML(value *yaml.Node) error {
+	// Try []Strand first (new format)
+	var strands []Strand
+	if err := value.Decode(&strands); err == nil {
+		if len(strands) == 0 || strands[0].SessionID != "" {
+			*s = strands
+			return nil
+		}
+	}
+	// Fall back to []string (old format)
+	var ids []string
+	if err := value.Decode(&ids); err != nil {
+		return err
+	}
+	result := make([]Strand, len(ids))
+	for i, id := range ids {
+		result[i] = Strand{SessionID: id, Status: "ACTIVE"}
+	}
+	*s = result
+	return nil
+}
+
 // contextYAML is the YAML representation with string timestamps.
 type contextYAML struct {
-	SchemaVersion string   `yaml:"schema_version"`
-	SessionID     string   `yaml:"session_id"`
-	Status        string   `yaml:"status"`
-	CreatedAt     string   `yaml:"created_at"`
-	Initiative    string   `yaml:"initiative"`
-	Complexity    string   `yaml:"complexity"`
-	ActiveRite    string   `yaml:"active_rite"`
-	Rite          *string  `yaml:"rite,omitempty"`
-	CurrentPhase  string   `yaml:"current_phase"`
-	ParkedAt      string   `yaml:"parked_at,omitempty"`
-	ParkedReason  string   `yaml:"parked_reason,omitempty"`
-	ArchivedAt    string   `yaml:"archived_at,omitempty"`
-	ResumedAt     string   `yaml:"resumed_at,omitempty"`
-	FrayedFrom    string   `yaml:"frayed_from,omitempty"`
-	FrayPoint     string   `yaml:"fray_point,omitempty"`
-	Strands       []string `yaml:"strands,omitempty"`
+	SchemaVersion string     `yaml:"schema_version"`
+	SessionID     string     `yaml:"session_id"`
+	Status        string     `yaml:"status"`
+	CreatedAt     string     `yaml:"created_at"`
+	Initiative    string     `yaml:"initiative"`
+	Complexity    string     `yaml:"complexity"`
+	ActiveRite    string     `yaml:"active_rite"`
+	Rite          *string    `yaml:"rite,omitempty"`
+	CurrentPhase  string     `yaml:"current_phase"`
+	ParkedAt      string     `yaml:"parked_at,omitempty"`
+	ParkedReason  string     `yaml:"parked_reason,omitempty"`
+	ArchivedAt    string     `yaml:"archived_at,omitempty"`
+	ResumedAt     string     `yaml:"resumed_at,omitempty"`
+	FrayedFrom    string     `yaml:"frayed_from,omitempty"`
+	FrayPoint     string     `yaml:"fray_point,omitempty"`
+	Strands       strandList `yaml:"strands,omitempty"`
+	FrameRef      string     `yaml:"frame_ref,omitempty"`
+	ClaimedBy     string     `yaml:"claimed_by,omitempty"`
+	ParkSource    string     `yaml:"park_source,omitempty"`
 }
 
 // ParseContext parses SESSION_CONTEXT.md content.
@@ -139,7 +192,10 @@ func ParseContext(content []byte) (*Context, error) {
 
 	ctx.FrayedFrom = yamlData.FrayedFrom
 	ctx.FrayPoint = yamlData.FrayPoint
-	ctx.Strands = yamlData.Strands
+	ctx.Strands = []Strand(yamlData.Strands)
+	ctx.FrameRef = yamlData.FrameRef
+	ctx.ClaimedBy = yamlData.ClaimedBy
+	ctx.ParkSource = yamlData.ParkSource
 
 	return ctx, nil
 }
@@ -184,7 +240,10 @@ func (c *Context) Serialize() ([]byte, error) {
 
 	yamlData.FrayedFrom = c.FrayedFrom
 	yamlData.FrayPoint = c.FrayPoint
-	yamlData.Strands = c.Strands
+	yamlData.Strands = strandList(c.Strands)
+	yamlData.FrameRef = c.FrameRef
+	yamlData.ClaimedBy = c.ClaimedBy
+	yamlData.ParkSource = c.ParkSource
 
 	// Marshal YAML
 	yamlBytes, err := yaml.Marshal(yamlData)
@@ -239,7 +298,7 @@ func NewContext(initiative, complexity, rite string) *Context {
 	now := time.Now().UTC()
 
 	ctx := &Context{
-		SchemaVersion: "2.1",
+		SchemaVersion: "2.3",
 		SessionID:     sessionID,
 		Status:        StatusActive,
 		CreatedAt:     now,

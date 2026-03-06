@@ -122,7 +122,7 @@ func fraySession(projectDir, parentID string, opts frayOptions) (*output.FrayOut
 
 	// Create child session inheriting parent's attributes
 	childCtx := session.NewContext(parentCtx.Initiative, parentCtx.Complexity, parentCtx.ActiveRite)
-	childCtx.SchemaVersion = "2.2"
+	childCtx.SchemaVersion = "2.3"
 	childCtx.CurrentPhase = parentCtx.CurrentPhase
 	childCtx.FrayedFrom = parentID
 	childCtx.FrayPoint = parentCtx.CurrentPhase
@@ -155,7 +155,11 @@ func fraySession(projectDir, parentID string, opts frayOptions) (*output.FrayOut
 	parentCtx.Status = session.StatusParked
 	parentCtx.ParkedAt = &now
 	parentCtx.ParkedReason = fmt.Sprintf("Frayed to %s", childCtx.SessionID)
-	parentCtx.Strands = append(parentCtx.Strands, childCtx.SessionID)
+	parentCtx.ParkSource = "fray"
+	parentCtx.Strands = append(parentCtx.Strands, session.Strand{
+		SessionID: childCtx.SessionID,
+		Status:    "ACTIVE",
+	})
 
 	if err := parentCtx.Save(parentCtxPath); err != nil {
 		_ = os.RemoveAll(childDir)

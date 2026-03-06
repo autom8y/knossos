@@ -269,9 +269,9 @@ func TestNewContext_Defaults(t *testing.T) {
 		t.Errorf("Status = %v, want %v", ctx.Status, StatusActive)
 	}
 
-	// Schema version must be 2.1
-	if ctx.SchemaVersion != "2.1" {
-		t.Errorf("SchemaVersion = %q, want %q", ctx.SchemaVersion, "2.1")
+	// Schema version must be 2.3
+	if ctx.SchemaVersion != "2.3" {
+		t.Errorf("SchemaVersion = %q, want %q", ctx.SchemaVersion, "2.3")
 	}
 
 	// Current phase must be "requirements"

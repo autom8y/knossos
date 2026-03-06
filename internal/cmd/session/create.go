@@ -89,7 +89,7 @@ func runCreate(ctx *cmdContext, initiative string, opts createOptions) error {
 	}
 
 	// Validate complexity
-	if !isValidComplexity(opts.complexity) {
+	if !session.IsValidComplexity(opts.complexity) {
 		err := errors.New(errors.CodeUsageError, "invalid complexity: must be PATCH, MODULE, SYSTEM, INITIATIVE, or MIGRATION")
 		printer.PrintError(err)
 		return err
@@ -196,7 +196,7 @@ func runCreateSeeded(ctx *cmdContext, initiative string, opts createOptions) err
 	}
 
 	// Validate complexity
-	if !isValidComplexity(opts.complexity) {
+	if !session.IsValidComplexity(opts.complexity) {
 		err := errors.New(errors.CodeUsageError, "invalid complexity: must be PATCH, MODULE, SYSTEM, INITIATIVE, or MIGRATION")
 		printer.PrintError(err)
 		return err
@@ -401,11 +401,3 @@ func copyFile(src, dst string) error {
 	return os.WriteFile(dst, content, srcInfo.Mode())
 }
 
-func isValidComplexity(c string) bool {
-	switch c {
-	case "PATCH", "MODULE", "SYSTEM", "INITIATIVE", "MIGRATION":
-		return true
-	default:
-		return false
-	}
-}

@@ -345,7 +345,7 @@ func getFieldOk(ctx *sess.Context, key string) (string, bool) {
 // validateComplexity checks that the value is a recognized complexity level.
 // Complexity values are case-sensitive and must be uppercase.
 func validateComplexity(value string) error {
-	if !isValidComplexity(value) {
+	if !sess.IsValidComplexity(value) {
 		return errors.New(errors.CodeUsageError,
 			"invalid complexity: must be PATCH, MODULE, SYSTEM, INITIATIVE, or MIGRATION")
 	}

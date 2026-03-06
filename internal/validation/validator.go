@@ -185,7 +185,7 @@ func ValidateSessionFields(data map[string]any) []string {
 	// Validate schema_version if present
 	if version, ok := data["schema_version"].(string); ok {
 		switch version {
-		case "1.0", "2.0", "2.1", "2.2":
+		case "1.0", "2.0", "2.1", "2.2", "2.3":
 			// Valid
 		default:
 			issues = append(issues, fmt.Sprintf("unsupported schema_version: %s", version))

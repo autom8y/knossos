@@ -572,6 +572,18 @@ func (f FrayOutput) Text() string {
 	return b.String()
 }
 
+// ClaimOutput represents session claim (CC binding) result.
+type ClaimOutput struct {
+	SessionID   string `json:"session_id"`
+	CCSessionID string `json:"cc_session_id"`
+	Status      string `json:"status"`
+}
+
+// Text implements Textable for ClaimOutput.
+func (c ClaimOutput) Text() string {
+	return fmt.Sprintf("Claimed session %s (status: %s)", c.SessionID, c.Status)
+}
+
 // --- Sync Output Structures ---
 
 // SyncResultOutput represents the result of a sync operation.

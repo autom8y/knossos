@@ -272,7 +272,7 @@ func runWrap(ctx *cmdContext, opts wrapOptions) error {
 		}
 	}
 
-	// If this was a frayed session, emit strand_resolved on parent
+	// If this was a frayed session, emit strand_resolved on parent and update parent strand status
 	if sessCtx.FrayedFrom != "" {
 		parentDir := resolver.SessionDir(sessCtx.FrayedFrom)
 		strandWriter := clewcontract.NewBufferedEventWriter(parentDir, clewcontract.DefaultFlushInterval)
@@ -281,6 +281,16 @@ func runWrap(ctx *cmdContext, opts wrapOptions) error {
 		strandWriter.Write(event)
 		if flushErr := strandWriter.Flush(); flushErr != nil {
 			printer.VerboseLog("warn", "failed to emit strand_resolved event", map[string]any{"error": flushErr.Error()})
+		}
+
+		// Update parent's strand status to LANDED
+		parentCtxPath := resolver.SessionContextFile(sessCtx.FrayedFrom)
+		if parentCtx, loadErr := session.LoadContext(parentCtxPath); loadErr == nil {
+			if strand := parentCtx.FindStrand(sessionID); strand != nil {
+				strand.Status = "LANDED"
+				strand.LandedAt = time.Now().UTC().Format(time.RFC3339)
+				_ = parentCtx.Save(parentCtxPath)
+			}
 		}
 	}
 

@@ -99,6 +99,7 @@ func runPark(ctx *cmdContext, opts parkOptions) error {
 	sessCtx.Status = session.StatusParked
 	sessCtx.ParkedAt = &now
 	sessCtx.ParkedReason = opts.reason
+	sessCtx.ParkSource = "manual"
 
 	// Rotate SESSION_CONTEXT before parking to compact state for later resumption
 	sessionDir := resolver.SessionDir(sessionID)

@@ -240,8 +240,8 @@ func TestSessionCreate(t *testing.T) {
 			if ctx.Status != StatusActive {
 				t.Errorf("Status = %v, want %v", ctx.Status, StatusActive)
 			}
-			if ctx.SchemaVersion != "2.1" {
-				t.Errorf("SchemaVersion = %q, want %q", ctx.SchemaVersion, "2.1")
+			if ctx.SchemaVersion != "2.3" {
+				t.Errorf("SchemaVersion = %q, want %q", ctx.SchemaVersion, "2.3")
 			}
 			if ctx.CurrentPhase != "requirements" {
 				t.Errorf("CurrentPhase = %q, want %q", ctx.CurrentPhase, "requirements")
