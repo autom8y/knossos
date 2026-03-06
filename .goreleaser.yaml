@@ -37,7 +37,6 @@ archives:
     files:
       - README.md
       - LICENSE*
-      - docs/guides/ariadne-cli.md
 
 checksum:
   name_template: "checksums.txt"
@@ -100,7 +99,7 @@ release:
 
     **Full Changelog**: https://github.com/autom8y/knossos/compare/{{ .PreviousTag }}...{{ .Tag }}
 
-    For documentation, see [docs/guides/ariadne-cli.md](https://github.com/autom8y/knossos/blob/main/docs/guides/ariadne-cli.md)
+    For documentation, see [README.md](https://github.com/autom8y/knossos/blob/main/README.md)
 
 brews:
   - name: ari
