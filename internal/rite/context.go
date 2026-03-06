@@ -5,6 +5,8 @@ package rite
 import (
 	"fmt"
 	"strings"
+
+	"github.com/autom8y/knossos/internal/errors"
 )
 
 // RiteContext represents the context injection configuration for a rite.
@@ -83,10 +85,10 @@ func (rc *RiteContext) HasRows() bool {
 // Validate checks that the RiteContext has required fields.
 func (rc *RiteContext) Validate() error {
 	if rc.RiteName == "" {
-		return fmt.Errorf("rite_name is required")
+		return errors.New(errors.CodeUsageError, "rite_name is required")
 	}
 	if rc.SchemaVersion == "" {
-		return fmt.Errorf("schema_version is required")
+		return errors.New(errors.CodeUsageError, "schema_version is required")
 	}
 	return nil
 }
