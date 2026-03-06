@@ -7,8 +7,37 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/autom8y/knossos/internal/errors"
-	"github.com/autom8y/knossos/internal/output"
 )
+
+// listOutput is the structured output for ari artifact list.
+type listOutput struct {
+	Dimension string         `json:"dimension"`
+	Counts    map[string]int `json:"counts"`
+	Total     int            `json:"total"`
+}
+
+// Text implements output.Textable for human-readable table output.
+func (l listOutput) Text() string {
+	if len(l.Counts) == 0 {
+		return "No artifacts found.\n"
+	}
+
+	var b strings.Builder
+
+	// Header
+	header := strings.ToUpper(l.Dimension)
+	b.WriteString(fmt.Sprintf("%-30s %s\n", header, "COUNT"))
+	b.WriteString(strings.Repeat("-", 40) + "\n")
+
+	// Rows
+	for key, count := range l.Counts {
+		b.WriteString(fmt.Sprintf("%-30s %d\n", key, count))
+	}
+
+	b.WriteString(fmt.Sprintf("\nTotal: %d artifacts\n", l.Total))
+
+	return b.String()
+}
 
 func newListCmd(ctx *cmdContext) *cobra.Command {
 	var by string
@@ -84,43 +113,15 @@ Dimensions:
 				return e
 			}
 
-			// Format output
-			format := output.ParseFormat(*ctx.Output)
-			if format == output.FormatText {
-				printCountsTable(by, counts, total)
-			} else {
-				out := map[string]any{
-					"dimension": by,
-					"counts":    counts,
-					"total":     total,
-				}
-				return printer.Print(out)
-			}
-
-			return nil
+			return printer.Print(listOutput{
+				Dimension: by,
+				Counts:    counts,
+				Total:     total,
+			})
 		},
 	}
 
 	cmd.Flags().StringVar(&by, "by", "phase", "Dimension to group by (phase, type, specialist, session)")
 
 	return cmd
-}
-
-func printCountsTable(dimension string, counts map[string]int, total int) {
-	if len(counts) == 0 {
-		fmt.Println("No artifacts found.")
-		return
-	}
-
-	// Header
-	header := strings.ToUpper(dimension)
-	fmt.Printf("%-30s %s\n", header, "COUNT")
-	fmt.Println(strings.Repeat("-", 40))
-
-	// Rows
-	for key, count := range counts {
-		fmt.Printf("%-30s %d\n", key, count)
-	}
-
-	fmt.Printf("\nTotal: %d artifacts\n", total)
 }
