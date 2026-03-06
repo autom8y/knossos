@@ -8,6 +8,8 @@ import (
 	"strings"
 
 	"gopkg.in/yaml.v3"
+
+	"github.com/autom8y/knossos/internal/errors"
 )
 
 //go:embed concepts/*.md
@@ -83,7 +85,7 @@ func parseConcept(name string, data []byte) (*ConceptEntry, error) {
 
 	// Validate frontmatter delimiters
 	if !strings.HasPrefix(content, "---\n") {
-		return nil, fmt.Errorf("missing opening frontmatter delimiter")
+		return nil, errors.New(errors.CodeParseError, "missing opening frontmatter delimiter")
 	}
 
 	// Find closing delimiter
@@ -93,7 +95,7 @@ func parseConcept(name string, data []byte) (*ConceptEntry, error) {
 		// Try trailing "---" at end of file (edge case)
 		idx = strings.Index(rest, "\n---")
 		if idx < 0 {
-			return nil, fmt.Errorf("missing closing frontmatter delimiter")
+			return nil, errors.New(errors.CodeParseError, "missing closing frontmatter delimiter")
 		}
 	}
 
@@ -107,7 +109,7 @@ func parseConcept(name string, data []byte) (*ConceptEntry, error) {
 	}
 
 	if fm.Summary == "" {
-		return nil, fmt.Errorf("missing required field: summary")
+		return nil, errors.New(errors.CodeParseError, "missing required field: summary")
 	}
 
 	// Ensure SeeAlso is non-nil
