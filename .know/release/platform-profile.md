@@ -1,11 +1,11 @@
 ---
 domain: release/platform-profile
-generated_at: "2026-03-06T22:00:26Z"
+generated_at: "2026-03-07T11:18:30Z"
 expires_after: "30d"
 source_scope:
   - "./.know/release/"
 generator: cartographer
-source_hash: "c6d04eb"
+source_hash: "2b4a43c"
 confidence: 0.85
 format_version: "1.0"
 update_mode: "full"
@@ -39,7 +39,7 @@ max_incremental_cycles: 3
 - Brew tap: `autom8y/homebrew-tap` (via `HOMEBREW_TAP_TOKEN`)
 - Release repo: `autom8y/knossos`
 - Asset pattern: `ari_{version}_{os}_{arch}.tar.gz` + `checksums.txt`
-- Archive extra files: README.md, LICENSE* (docs/guides/ariadne-cli.md removed in v0.6.0)
+- Archive extra files: README.md, LICENSE*
 
 ### Build & Test Tooling
 
@@ -76,8 +76,5 @@ Terminal stage: e2e-distribution.yml (has health check)
 
 ## Known Issues
 
-- None. Full pipeline chain verified green as of v0.6.0 (2026-03-06).
-- GoReleaser archive fix: `docs/guides/ariadne-cli.md` removed from archives.files in v0.6.0 (file never existed).
-- Dispatch chain: fixed in v0.3.1 (PAT token swap), confirmed working v0.3.1+.
-- E2E Assertion 7: fixed in v0.3.2 (settings.json -> settings.local.json).
+- None. Full pipeline chain verified green as of v0.6.1 (2026-03-07).
 - 3 pre-existing informational workflow failures (non-blocking): ariadne-tests (golangci-lint schema), verify-doctrine (missing ariadne/ dir), verify-formal-specs (logs unavailable).
